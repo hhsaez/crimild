@@ -7,3 +7,4 @@ Makefile
 Testing
 Testing/**/*
 cmake_install.cmake
+gtest-1.6.0
