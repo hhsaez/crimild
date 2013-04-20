@@ -14,3 +14,6 @@ CTestTestfile.cmake
 Makefile
 cmake_install.cmake
 gtest-1.6.0
+
+CrimildTest
+
