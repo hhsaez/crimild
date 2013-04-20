@@ -22,41 +22,38 @@
  *
  */
 
-#ifndef CRIMILD_
-#define CRIMILD_
+#ifndef CRIMILD_SCENE_GRAPH_GROUP_NODE_
+#define CRIMILD_SCENE_GRAPH_GROUP_NODE_
 
-#include "Mathematics/Distance.hpp"
-#include "Mathematics/Frustum.hpp"
-#include "Mathematics/Interpolation.hpp"
-#include "Mathematics/Intersection.hpp"
-#include "Mathematics/Matrix.hpp"
-#include "Mathematics/Numeric.hpp"
-#include "Mathematics/Plane.hpp"
-#include "Mathematics/Quaternion.hpp"
-#include "Mathematics/Ray.hpp"
-#include "Mathematics/Rect.hpp"
-#include "Mathematics/Root.hpp"
-#include "Mathematics/Sphere.hpp"
-#include "Mathematics/Vector.hpp"
+#include "Node.hpp"
 
-#include "Foundation/NamedObject.hpp"
+#include <list>
+#include <functional>
 
-#include "Exceptions/Exception.hpp"
-#include "Exceptions/HasParentException.hpp"
+namespace Crimild {
 
-#include "SceneGraph/GeometryNode.hpp"
-#include "SceneGraph/GroupNode.hpp"
-#include "SceneGraph/Node.hpp"
+	class GroupNode : public Node {
+	public:
+		explicit GroupNode( std::string name = "" );
+		virtual ~GroupNode( void );
 
-#include "Components/NodeComponent.hpp"
+		bool hasNodes( void ) const { return ( _nodes.size() > 0 ); }
+		void attachNode( NodePtr node );
+		void detachNode( NodePtr node );
+		void detachAllNodes( void );
+		void foreachNode( std::function< void( NodePtr & ) > callback );
 
-#include "Visitors/NodeVisitor.hpp"
+	private:
+		std::list< NodePtr > _nodes;
 
-#include "Primitives/Primitive.hpp"
+	public:
+		virtual void accept( NodeVisitor &visitor ) override;
 
-#include "Simulation/Simulation.hpp"
-#include "Simulation/RunLoop.hpp"
-#include "Simulation/Task.hpp"
+	};
+
+	typedef std::shared_ptr< GroupNode > GroupNodePtr;
+
+}
 
 #endif
 

@@ -22,41 +22,38 @@
  *
  */
 
-#ifndef CRIMILD_
-#define CRIMILD_
+#include "GeometryNode.hpp"
 
-#include "Mathematics/Distance.hpp"
-#include "Mathematics/Frustum.hpp"
-#include "Mathematics/Interpolation.hpp"
-#include "Mathematics/Intersection.hpp"
-#include "Mathematics/Matrix.hpp"
-#include "Mathematics/Numeric.hpp"
-#include "Mathematics/Plane.hpp"
-#include "Mathematics/Quaternion.hpp"
-#include "Mathematics/Ray.hpp"
-#include "Mathematics/Rect.hpp"
-#include "Mathematics/Root.hpp"
-#include "Mathematics/Sphere.hpp"
-#include "Mathematics/Vector.hpp"
+using namespace Crimild;
 
-#include "Foundation/NamedObject.hpp"
+GeometryNode::GeometryNode( std::string name )
+	: Node( name )
+{
 
-#include "Exceptions/Exception.hpp"
-#include "Exceptions/HasParentException.hpp"
+}
 
-#include "SceneGraph/GeometryNode.hpp"
-#include "SceneGraph/GroupNode.hpp"
-#include "SceneGraph/Node.hpp"
+GeometryNode::~GeometryNode( void )
+{
+	detachAllPrimitives();
+}
 
-#include "Components/NodeComponent.hpp"
+void GeometryNode::attachPrimitive( PrimitivePtr primitive )
+{
+	_primitives.push_back( primitive );
+}
 
-#include "Visitors/NodeVisitor.hpp"
+void GeometryNode::detachPrimitive( PrimitivePtr primitive )
+{
+	_primitives.remove( primitive );
+}
 
-#include "Primitives/Primitive.hpp"
+void GeometryNode::foreachPrimitive( std::function< void( PrimitivePtr & ) > callback )
+{
+	std::for_each( std::begin( _primitives ), std::end( _primitives ), callback );
+}
 
-#include "Simulation/Simulation.hpp"
-#include "Simulation/RunLoop.hpp"
-#include "Simulation/Task.hpp"
-
-#endif
+void GeometryNode::detachAllPrimitives( void )
+{
+	_primitives.clear();
+}
 

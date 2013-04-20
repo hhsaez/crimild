@@ -86,7 +86,7 @@ namespace Crimild {
 			}
 		}
 
-		Vector( const PRECISION *data )
+		explicit Vector( const PRECISION *data )
 		{
 			memcpy( _data, data, sizeof( PRECISION ) * SIZE );
 		}

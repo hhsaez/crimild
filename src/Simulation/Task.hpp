@@ -22,41 +22,36 @@
  *
  */
 
-#ifndef CRIMILD_
-#define CRIMILD_
+#ifndef CRIMILD_SIMULATION_TASK_
+#define CRIMILD_SIMULATION_TASK_
 
-#include "Mathematics/Distance.hpp"
-#include "Mathematics/Frustum.hpp"
-#include "Mathematics/Interpolation.hpp"
-#include "Mathematics/Intersection.hpp"
-#include "Mathematics/Matrix.hpp"
-#include "Mathematics/Numeric.hpp"
-#include "Mathematics/Plane.hpp"
-#include "Mathematics/Quaternion.hpp"
-#include "Mathematics/Ray.hpp"
-#include "Mathematics/Rect.hpp"
-#include "Mathematics/Root.hpp"
-#include "Mathematics/Sphere.hpp"
-#include "Mathematics/Vector.hpp"
+#include <memory>
 
-#include "Foundation/NamedObject.hpp"
+namespace Crimild {
 
-#include "Exceptions/Exception.hpp"
-#include "Exceptions/HasParentException.hpp"
+	class Task {
+	protected:
+		Task( int priority = 0 );
 
-#include "SceneGraph/GeometryNode.hpp"
-#include "SceneGraph/GroupNode.hpp"
-#include "SceneGraph/Node.hpp"
+	public:
+		virtual ~Task( void );
 
-#include "Components/NodeComponent.hpp"
+		int getPriority( void ) const { return _priority; }
 
-#include "Visitors/NodeVisitor.hpp"
+	private:
+		int _priority;
 
-#include "Primitives/Primitive.hpp"
+	public:
+		virtual void start( void ) { }
+		virtual void stop( void ) { }
+		virtual void suspend( void ) { }
+		virtual void resume( void ) { }
+		virtual void update( void ) { }
+	};
 
-#include "Simulation/Simulation.hpp"
-#include "Simulation/RunLoop.hpp"
-#include "Simulation/Task.hpp"
+	typedef std::shared_ptr< Task > TaskPtr;
+
+}
 
 #endif
 

@@ -1,0 +1,8 @@
+# This macro is used to collect source files for a library (see ModuleBuildLibrary.cmake)
+SET ( CRIMILD_LIBRARY_SOURCE_FILES )
+MACRO( ADD_SOURCES baseDir filePattern )
+	FILE( GLOB_RECURSE SOURCE_FILES "${baseDir}/${filePattern}" ) 
+	SET( CRIMILD_LIBRARY_SOURCE_FILES ${CRIMILD_LIBRARY_SOURCE_FILES} ${SOURCE_FILES} )
+	SET( CRIMILD_INCLUDE_DIRECTORIES ${CRIMILD_INCLUDE_DIRECTORIES} ${baseDir} )
+ENDMACRO( ADD_SOURCES )
+

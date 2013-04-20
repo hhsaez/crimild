@@ -22,41 +22,39 @@
  *
  */
 
-#ifndef CRIMILD_
-#define CRIMILD_
+#include "Simulation.hpp"
 
-#include "Mathematics/Distance.hpp"
-#include "Mathematics/Frustum.hpp"
-#include "Mathematics/Interpolation.hpp"
-#include "Mathematics/Intersection.hpp"
-#include "Mathematics/Matrix.hpp"
-#include "Mathematics/Numeric.hpp"
-#include "Mathematics/Plane.hpp"
-#include "Mathematics/Quaternion.hpp"
-#include "Mathematics/Ray.hpp"
-#include "Mathematics/Rect.hpp"
-#include "Mathematics/Root.hpp"
-#include "Mathematics/Sphere.hpp"
-#include "Mathematics/Vector.hpp"
+using namespace Crimild;
 
-#include "Foundation/NamedObject.hpp"
+Simulation *Simulation::_currentSimulation = nullptr;
 
-#include "Exceptions/Exception.hpp"
-#include "Exceptions/HasParentException.hpp"
+Simulation::Simulation( std::string name )
+	: NamedObject( name ),
+	  _mainLoop( new RunLoop() )
+{
+	_currentSimulation = this;
+}
 
-#include "SceneGraph/GeometryNode.hpp"
-#include "SceneGraph/GroupNode.hpp"
-#include "SceneGraph/Node.hpp"
+Simulation::~Simulation( void )
+{
+	stop();
 
-#include "Components/NodeComponent.hpp"
+	_currentSimulation = nullptr;
+}
 
-#include "Visitors/NodeVisitor.hpp"
+bool Simulation::update( void )
+{
+	return _mainLoop->update();
+}
 
-#include "Primitives/Primitive.hpp"
+void Simulation::stop( void )
+{
+	_mainLoop->stop();
+}
 
-#include "Simulation/Simulation.hpp"
-#include "Simulation/RunLoop.hpp"
-#include "Simulation/Task.hpp"
-
-#endif
+int Simulation::run( void )
+{
+	while( _mainLoop->update() );
+	return 0;
+}
 

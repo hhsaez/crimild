@@ -22,41 +22,38 @@
  *
  */
 
-#ifndef CRIMILD_
-#define CRIMILD_
-
-#include "Mathematics/Distance.hpp"
-#include "Mathematics/Frustum.hpp"
-#include "Mathematics/Interpolation.hpp"
-#include "Mathematics/Intersection.hpp"
-#include "Mathematics/Matrix.hpp"
-#include "Mathematics/Numeric.hpp"
-#include "Mathematics/Plane.hpp"
-#include "Mathematics/Quaternion.hpp"
-#include "Mathematics/Ray.hpp"
-#include "Mathematics/Rect.hpp"
-#include "Mathematics/Root.hpp"
-#include "Mathematics/Sphere.hpp"
-#include "Mathematics/Vector.hpp"
+#ifndef CRIMILD_COMPONENTS_NODE_COMPONENT_
+#define CRIMILD_COMPONENTS_NODE_COMPONENT_
 
 #include "Foundation/NamedObject.hpp"
 
-#include "Exceptions/Exception.hpp"
-#include "Exceptions/HasParentException.hpp"
+namespace Crimild {
 
-#include "SceneGraph/GeometryNode.hpp"
-#include "SceneGraph/GroupNode.hpp"
-#include "SceneGraph/Node.hpp"
+	class Node;
 
-#include "Components/NodeComponent.hpp"
+	class NodeComponent : public NamedObject {
+	protected:
+		NodeComponent( std::string name = "update" );
 
-#include "Visitors/NodeVisitor.hpp"
+	public:
+		virtual ~NodeComponent( void );
 
-#include "Primitives/Primitive.hpp"
+		Node *getNode( void ) { return _node; }
+		void setNode( Node *node ) { _node = node; }
 
-#include "Simulation/Simulation.hpp"
-#include "Simulation/RunLoop.hpp"
-#include "Simulation/Task.hpp"
+	private:
+		Node *_node;
+
+	public:
+		virtual void onAttach( void );
+		virtual void update( void );
+		virtual void onDetach( void );
+
+	};
+
+	typedef std::shared_ptr< NodeComponent > NodeComponentPtr;
+
+}
 
 #endif
 

@@ -22,41 +22,34 @@
  *
  */
 
-#ifndef CRIMILD_
-#define CRIMILD_
+#include "NodeComponent.hpp"
 
-#include "Mathematics/Distance.hpp"
-#include "Mathematics/Frustum.hpp"
-#include "Mathematics/Interpolation.hpp"
-#include "Mathematics/Intersection.hpp"
-#include "Mathematics/Matrix.hpp"
-#include "Mathematics/Numeric.hpp"
-#include "Mathematics/Plane.hpp"
-#include "Mathematics/Quaternion.hpp"
-#include "Mathematics/Ray.hpp"
-#include "Mathematics/Rect.hpp"
-#include "Mathematics/Root.hpp"
-#include "Mathematics/Sphere.hpp"
-#include "Mathematics/Vector.hpp"
+using namespace Crimild;
 
-#include "Foundation/NamedObject.hpp"
+NodeComponent::NodeComponent( std::string name )
+	: NamedObject( name ),
+	  _node( nullptr )
+{
 
-#include "Exceptions/Exception.hpp"
-#include "Exceptions/HasParentException.hpp"
+}
 
-#include "SceneGraph/GeometryNode.hpp"
-#include "SceneGraph/GroupNode.hpp"
-#include "SceneGraph/Node.hpp"
+NodeComponent::~NodeComponent( void )
+{
 
-#include "Components/NodeComponent.hpp"
+}
 
-#include "Visitors/NodeVisitor.hpp"
+void NodeComponent::onAttach( void )
+{
 
-#include "Primitives/Primitive.hpp"
+}
 
-#include "Simulation/Simulation.hpp"
-#include "Simulation/RunLoop.hpp"
-#include "Simulation/Task.hpp"
+void NodeComponent::onDetach( void )
+{
+	
+}
 
-#endif
+void NodeComponent::update( void )
+{
+
+}
 

@@ -22,41 +22,20 @@
  *
  */
 
-#ifndef CRIMILD_
-#define CRIMILD_
+#include <Crimild.hpp>
 
-#include "Mathematics/Distance.hpp"
-#include "Mathematics/Frustum.hpp"
-#include "Mathematics/Interpolation.hpp"
-#include "Mathematics/Intersection.hpp"
-#include "Mathematics/Matrix.hpp"
-#include "Mathematics/Numeric.hpp"
-#include "Mathematics/Plane.hpp"
-#include "Mathematics/Quaternion.hpp"
-#include "Mathematics/Ray.hpp"
-#include "Mathematics/Rect.hpp"
-#include "Mathematics/Root.hpp"
-#include "Mathematics/Sphere.hpp"
-#include "Mathematics/Vector.hpp"
+#include "gtest/gtest.h"
 
-#include "Foundation/NamedObject.hpp"
+using namespace Crimild;
 
-#include "Exceptions/Exception.hpp"
-#include "Exceptions/HasParentException.hpp"
+TEST( NamedObjectTest, construction )
+{
+	NamedObjectPtr obj( new NamedObject( "a name" ) );
 
-#include "SceneGraph/GeometryNode.hpp"
-#include "SceneGraph/GroupNode.hpp"
-#include "SceneGraph/Node.hpp"
+	EXPECT_EQ( obj->getName(), "a name" );
 
-#include "Components/NodeComponent.hpp"
+	obj->setName( "a different name" );
 
-#include "Visitors/NodeVisitor.hpp"
-
-#include "Primitives/Primitive.hpp"
-
-#include "Simulation/Simulation.hpp"
-#include "Simulation/RunLoop.hpp"
-#include "Simulation/Task.hpp"
-
-#endif
+	EXPECT_EQ( obj->getName(), "a different name" );
+}
 

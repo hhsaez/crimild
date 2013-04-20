@@ -22,41 +22,41 @@
  *
  */
 
-#ifndef CRIMILD_
-#define CRIMILD_
-
-#include "Mathematics/Distance.hpp"
-#include "Mathematics/Frustum.hpp"
-#include "Mathematics/Interpolation.hpp"
-#include "Mathematics/Intersection.hpp"
-#include "Mathematics/Matrix.hpp"
-#include "Mathematics/Numeric.hpp"
-#include "Mathematics/Plane.hpp"
-#include "Mathematics/Quaternion.hpp"
-#include "Mathematics/Ray.hpp"
-#include "Mathematics/Rect.hpp"
-#include "Mathematics/Root.hpp"
-#include "Mathematics/Sphere.hpp"
-#include "Mathematics/Vector.hpp"
-
-#include "Foundation/NamedObject.hpp"
-
-#include "Exceptions/Exception.hpp"
-#include "Exceptions/HasParentException.hpp"
-
-#include "SceneGraph/GeometryNode.hpp"
-#include "SceneGraph/GroupNode.hpp"
+#include "NodeVisitor.hpp"
 #include "SceneGraph/Node.hpp"
+#include "SceneGraph/GroupNode.hpp"
 
-#include "Components/NodeComponent.hpp"
+using namespace Crimild;
 
-#include "Visitors/NodeVisitor.hpp"
+NodeVisitor::NodeVisitor( void )
+{
 
-#include "Primitives/Primitive.hpp"
+}
 
-#include "Simulation/Simulation.hpp"
-#include "Simulation/RunLoop.hpp"
-#include "Simulation/Task.hpp"
+NodeVisitor::~NodeVisitor( void )
+{
 
-#endif
+}
+
+void NodeVisitor::reset( void )
+{
+
+}
+
+void NodeVisitor::traverse( Node *node )
+{
+	reset();
+	node->accept( *this );
+}
+
+void NodeVisitor::visitNode( Node *node )
+{
+	// do nothing
+}
+
+void NodeVisitor::visitGroupNode( GroupNode *group )
+{
+	// by default, just traverse to child nodes
+	group->foreachNode( [&]( NodePtr &node ) { node->accept( *this ); } );
+}
 

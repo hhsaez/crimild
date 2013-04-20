@@ -122,7 +122,7 @@ namespace Crimild {
 		{
 		}
 
-		Quaternion( const Vector4Impl &data )
+		explicit Quaternion( const Vector4Impl &data )
 			: _data( data )
 		{
 

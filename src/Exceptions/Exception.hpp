@@ -22,41 +22,31 @@
  *
  */
 
-#ifndef CRIMILD_
-#define CRIMILD_
+#ifndef CRIMILD_EXCEPTIONS_CRIMILD_
+#define CRIMILD_EXCEPTIONS_CRIMILD_
 
-#include "Mathematics/Distance.hpp"
-#include "Mathematics/Frustum.hpp"
-#include "Mathematics/Interpolation.hpp"
-#include "Mathematics/Intersection.hpp"
-#include "Mathematics/Matrix.hpp"
-#include "Mathematics/Numeric.hpp"
-#include "Mathematics/Plane.hpp"
-#include "Mathematics/Quaternion.hpp"
-#include "Mathematics/Ray.hpp"
-#include "Mathematics/Rect.hpp"
-#include "Mathematics/Root.hpp"
-#include "Mathematics/Sphere.hpp"
-#include "Mathematics/Vector.hpp"
+#include <stdexcept>
+#include <string>
 
-#include "Foundation/NamedObject.hpp"
+namespace Crimild {
 
-#include "Exceptions/Exception.hpp"
-#include "Exceptions/HasParentException.hpp"
+	/**
+		\brief Base class for all exceptions
+	 */
+	class Exception : public std::runtime_error {
+	public:
+		/**
+			\brief Explicit constructor
 
-#include "SceneGraph/GeometryNode.hpp"
-#include "SceneGraph/GroupNode.hpp"
-#include "SceneGraph/Node.hpp"
+			This constructor takes a single argument which is the message
+			that will be shown as part of the error
+		 */
+		Exception( std::string message )
+			: std::runtime_error( message.c_str() )
+		{ }
+	};
 
-#include "Components/NodeComponent.hpp"
-
-#include "Visitors/NodeVisitor.hpp"
-
-#include "Primitives/Primitive.hpp"
-
-#include "Simulation/Simulation.hpp"
-#include "Simulation/RunLoop.hpp"
-#include "Simulation/Task.hpp"
+}
 
 #endif
 

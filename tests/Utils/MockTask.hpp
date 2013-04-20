@@ -22,41 +22,30 @@
  *
  */
 
-#ifndef CRIMILD_
-#define CRIMILD_
+#ifndef CRIMILD_TESTS_UTILS_MOCK_TASK_
+#define CRIMILD_TESTS_UTILS_MOCK_TASK_
 
-#include "Mathematics/Distance.hpp"
-#include "Mathematics/Frustum.hpp"
-#include "Mathematics/Interpolation.hpp"
-#include "Mathematics/Intersection.hpp"
-#include "Mathematics/Matrix.hpp"
-#include "Mathematics/Numeric.hpp"
-#include "Mathematics/Plane.hpp"
-#include "Mathematics/Quaternion.hpp"
-#include "Mathematics/Ray.hpp"
-#include "Mathematics/Rect.hpp"
-#include "Mathematics/Root.hpp"
-#include "Mathematics/Sphere.hpp"
-#include "Mathematics/Vector.hpp"
+#include <Crimild.hpp>
 
-#include "Foundation/NamedObject.hpp"
+#include "gmock/gmock.h"
 
-#include "Exceptions/Exception.hpp"
-#include "Exceptions/HasParentException.hpp"
+namespace Crimild {
 
-#include "SceneGraph/GeometryNode.hpp"
-#include "SceneGraph/GroupNode.hpp"
-#include "SceneGraph/Node.hpp"
+	class MockTask : public Task {
+	public:
+		MockTask( int priority = 0 ) : Task( priority ) { }
+		virtual ~MockTask( void ) { }
 
-#include "Components/NodeComponent.hpp"
+		MOCK_METHOD0( start, void( void ) );
+		MOCK_METHOD0( stop, void( void ) );
+		MOCK_METHOD0( suspend, void( void ) );
+		MOCK_METHOD0( resume, void( void ) );
+		MOCK_METHOD0( update, void( void ) );
+	};
 
-#include "Visitors/NodeVisitor.hpp"
+	typedef std::shared_ptr< MockTask > MockTaskPtr;
 
-#include "Primitives/Primitive.hpp"
-
-#include "Simulation/Simulation.hpp"
-#include "Simulation/RunLoop.hpp"
-#include "Simulation/Task.hpp"
+}
 
 #endif
 

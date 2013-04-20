@@ -22,41 +22,27 @@
  *
  */
 
-#ifndef CRIMILD_
-#define CRIMILD_
+#ifndef CRIMILD_UTILS_MOCK_VISITOR_
+#define CRIMILD_UTILS_MOCK_VISITOR_
 
-#include "Mathematics/Distance.hpp"
-#include "Mathematics/Frustum.hpp"
-#include "Mathematics/Interpolation.hpp"
-#include "Mathematics/Intersection.hpp"
-#include "Mathematics/Matrix.hpp"
-#include "Mathematics/Numeric.hpp"
-#include "Mathematics/Plane.hpp"
-#include "Mathematics/Quaternion.hpp"
-#include "Mathematics/Ray.hpp"
-#include "Mathematics/Rect.hpp"
-#include "Mathematics/Root.hpp"
-#include "Mathematics/Sphere.hpp"
-#include "Mathematics/Vector.hpp"
+#include <Crimild.hpp>
 
-#include "Foundation/NamedObject.hpp"
+#include "gmock/gmock.h"
 
-#include "Exceptions/Exception.hpp"
-#include "Exceptions/HasParentException.hpp"
+namespace Crimild {
 
-#include "SceneGraph/GeometryNode.hpp"
-#include "SceneGraph/GroupNode.hpp"
-#include "SceneGraph/Node.hpp"
+	class MockVisitor : public NodeVisitor {
+	public:
+		MOCK_METHOD0( reset, void( void ) );
+		MOCK_METHOD1( visitNode, void( Node * ) );
+		MOCK_METHOD1( visitGroupNode, void( GroupNode * ) );
 
-#include "Components/NodeComponent.hpp"
+		void NodeVisitor_visitGroupNode( GroupNode *group ) { NodeVisitor::visitGroupNode( group ); }
+	};
 
-#include "Visitors/NodeVisitor.hpp"
+	typedef std::shared_ptr< MockVisitor > MockVisitorPtr;
 
-#include "Primitives/Primitive.hpp"
-
-#include "Simulation/Simulation.hpp"
-#include "Simulation/RunLoop.hpp"
-#include "Simulation/Task.hpp"
+}
 
 #endif
 

@@ -22,41 +22,24 @@
  *
  */
 
-#ifndef CRIMILD_
-#define CRIMILD_
+#ifndef CRIMILD_EXCEPTIONS_HAS_PARENT_
+#define CRIMILD_EXCEPTIONS_HAS_PARENT_
 
-#include "Mathematics/Distance.hpp"
-#include "Mathematics/Frustum.hpp"
-#include "Mathematics/Interpolation.hpp"
-#include "Mathematics/Intersection.hpp"
-#include "Mathematics/Matrix.hpp"
-#include "Mathematics/Numeric.hpp"
-#include "Mathematics/Plane.hpp"
-#include "Mathematics/Quaternion.hpp"
-#include "Mathematics/Ray.hpp"
-#include "Mathematics/Rect.hpp"
-#include "Mathematics/Root.hpp"
-#include "Mathematics/Sphere.hpp"
-#include "Mathematics/Vector.hpp"
+#include "Exception.hpp"
 
-#include "Foundation/NamedObject.hpp"
+namespace Crimild {
 
-#include "Exceptions/Exception.hpp"
-#include "Exceptions/HasParentException.hpp"
+	class HasParentException : public Exception {
+	public:
+		HasParentException( std::string childName, std::string parentName, std::string targetName )
+			: Exception( "Cannot attach node (\"" + childName + 
+				"\") to (\"" + targetName + 
+				"\") because it already has a parent (\"" + 
+				parentName + "\")" )
+		{ }
+	};
 
-#include "SceneGraph/GeometryNode.hpp"
-#include "SceneGraph/GroupNode.hpp"
-#include "SceneGraph/Node.hpp"
-
-#include "Components/NodeComponent.hpp"
-
-#include "Visitors/NodeVisitor.hpp"
-
-#include "Primitives/Primitive.hpp"
-
-#include "Simulation/Simulation.hpp"
-#include "Simulation/RunLoop.hpp"
-#include "Simulation/Task.hpp"
+}
 
 #endif
 

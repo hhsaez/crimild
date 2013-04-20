@@ -22,41 +22,35 @@
  *
  */
 
-#ifndef CRIMILD_
-#define CRIMILD_
+#ifndef CRIMILD_VISITORS_NODE_VISITOR_
+#define CRIMILD_VISITORS_NODE_VISITOR_
 
-#include "Mathematics/Distance.hpp"
-#include "Mathematics/Frustum.hpp"
-#include "Mathematics/Interpolation.hpp"
-#include "Mathematics/Intersection.hpp"
-#include "Mathematics/Matrix.hpp"
-#include "Mathematics/Numeric.hpp"
-#include "Mathematics/Plane.hpp"
-#include "Mathematics/Quaternion.hpp"
-#include "Mathematics/Ray.hpp"
-#include "Mathematics/Rect.hpp"
-#include "Mathematics/Root.hpp"
-#include "Mathematics/Sphere.hpp"
-#include "Mathematics/Vector.hpp"
+namespace Crimild {
 
-#include "Foundation/NamedObject.hpp"
+	class Node;
+	class GroupNode;
 
-#include "Exceptions/Exception.hpp"
-#include "Exceptions/HasParentException.hpp"
+	class NodeVisitor {
+	protected:
+		NodeVisitor( void );
 
-#include "SceneGraph/GeometryNode.hpp"
-#include "SceneGraph/GroupNode.hpp"
-#include "SceneGraph/Node.hpp"
+	public:
+		virtual ~NodeVisitor( void );
 
-#include "Components/NodeComponent.hpp"
+		virtual void reset( void );
 
-#include "Visitors/NodeVisitor.hpp"
+		virtual void traverse( Node *node );
 
-#include "Primitives/Primitive.hpp"
+		virtual void visitNode( Node *node );
+		virtual void visitGroupNode( GroupNode *group );
 
-#include "Simulation/Simulation.hpp"
-#include "Simulation/RunLoop.hpp"
-#include "Simulation/Task.hpp"
+	private:
+		NodeVisitor( const NodeVisitor & ) { }
+		NodeVisitor &operator=( const NodeVisitor & ) { return *this; }
+	};
+
+}
 
 #endif
+
 

@@ -22,41 +22,18 @@
  *
  */
 
-#ifndef CRIMILD_
-#define CRIMILD_
+#include <Crimild.hpp>
 
-#include "Mathematics/Distance.hpp"
-#include "Mathematics/Frustum.hpp"
-#include "Mathematics/Interpolation.hpp"
-#include "Mathematics/Intersection.hpp"
-#include "Mathematics/Matrix.hpp"
-#include "Mathematics/Numeric.hpp"
-#include "Mathematics/Plane.hpp"
-#include "Mathematics/Quaternion.hpp"
-#include "Mathematics/Ray.hpp"
-#include "Mathematics/Rect.hpp"
-#include "Mathematics/Root.hpp"
-#include "Mathematics/Sphere.hpp"
-#include "Mathematics/Vector.hpp"
+#include "gtest/gtest.h"
 
-#include "Foundation/NamedObject.hpp"
+#include "Utils/MockTask.hpp"
 
-#include "Exceptions/Exception.hpp"
-#include "Exceptions/HasParentException.hpp"
+using namespace Crimild;
 
-#include "SceneGraph/GeometryNode.hpp"
-#include "SceneGraph/GroupNode.hpp"
-#include "SceneGraph/Node.hpp"
+TEST( TaskTest, construction )
+{
+	TaskPtr task( new MockTask( 1000 ) );
 
-#include "Components/NodeComponent.hpp"
-
-#include "Visitors/NodeVisitor.hpp"
-
-#include "Primitives/Primitive.hpp"
-
-#include "Simulation/Simulation.hpp"
-#include "Simulation/RunLoop.hpp"
-#include "Simulation/Task.hpp"
-
-#endif
+	EXPECT_EQ( task->getPriority(), 1000 );
+}
 

@@ -22,41 +22,31 @@
  *
  */
 
-#ifndef CRIMILD_
-#define CRIMILD_
+#ifndef CRIMILD_TESTS_UTILS_MOCK_COMPONENT_
+#define CRIMILD_TESTS_UTILS_MOCK_COMPONENT_
 
-#include "Mathematics/Distance.hpp"
-#include "Mathematics/Frustum.hpp"
-#include "Mathematics/Interpolation.hpp"
-#include "Mathematics/Intersection.hpp"
-#include "Mathematics/Matrix.hpp"
-#include "Mathematics/Numeric.hpp"
-#include "Mathematics/Plane.hpp"
-#include "Mathematics/Quaternion.hpp"
-#include "Mathematics/Ray.hpp"
-#include "Mathematics/Rect.hpp"
-#include "Mathematics/Root.hpp"
-#include "Mathematics/Sphere.hpp"
-#include "Mathematics/Vector.hpp"
+#include <Crimild.hpp>
 
-#include "Foundation/NamedObject.hpp"
+#include "gmock/gmock.h"
 
-#include "Exceptions/Exception.hpp"
-#include "Exceptions/HasParentException.hpp"
+namespace Crimild {
 
-#include "SceneGraph/GeometryNode.hpp"
-#include "SceneGraph/GroupNode.hpp"
-#include "SceneGraph/Node.hpp"
+	class MockComponent : public NodeComponent {
+	public:
+		static const char *NAME;
 
-#include "Components/NodeComponent.hpp"
+	public:
+		MockComponent( std::string name = NAME );
+		virtual ~MockComponent( void );
 
-#include "Visitors/NodeVisitor.hpp"
+		MOCK_METHOD0( onDetach, void( void ) );
+		MOCK_METHOD0( onAttach, void( void ) );
+		MOCK_METHOD0( update, void( void ) );
+	};
 
-#include "Primitives/Primitive.hpp"
+	typedef std::shared_ptr< MockComponent > MockComponentPtr;
 
-#include "Simulation/Simulation.hpp"
-#include "Simulation/RunLoop.hpp"
-#include "Simulation/Task.hpp"
+}
 
 #endif
 

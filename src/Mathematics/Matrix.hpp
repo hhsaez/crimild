@@ -40,7 +40,7 @@ namespace Crimild {
 		{
 		}
 
-		Matrix( const PRECISION *data )
+		explicit Matrix( const PRECISION *data )
 		{
 			memcpy( _data, data, sizeof( PRECISION ) * SIZE * SIZE );
 		}
