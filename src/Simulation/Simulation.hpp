@@ -49,7 +49,7 @@ namespace Crimild {
 		bool update( void );
 		void stop( void );
 
-		int run( void );
+		virtual int run( void );
 
 	private:
 		RunLoopPtr _mainLoop;

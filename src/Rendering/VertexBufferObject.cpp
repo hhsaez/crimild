@@ -25,17 +25,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Primitive.hpp"
+#include "VertexBufferObject.hpp"
 
 using namespace Crimild;
 
-Primitive::Primitive( Primitive::Types type )
+VertexBufferObject::VertexBufferObject( const VertexFormat &vf, unsigned int vertexCount, const float *vertexData )
+	: BufferObject( vertexCount * vf.getVertexSize(), vertexData ),
+	  _vertexFormat( vf ),
+	  _vertexCount( vertexCount )
 {
-	_type = type;
 }
 
-Primitive::~Primitive( void )
+VertexBufferObject::~VertexBufferObject( void )
 {
-
 }
 

@@ -25,17 +25,47 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Primitive.hpp"
+#include <Crimild.hpp>
+
+#include "gtest/gtest.h"
 
 using namespace Crimild;
 
-Primitive::Primitive( Primitive::Types type )
+TEST( VertexFormatTest, construction )
 {
-	_type = type;
-}
+	VertexFormat vf( 3, 0, 0 );
+	
+	EXPECT_TRUE( vf.hasPositions() );
+	EXPECT_EQ( 3, vf.getPositionComponents() );
+	EXPECT_EQ( 0, vf.getPositionsOffset() );
 
-Primitive::~Primitive( void )
-{
+	EXPECT_FALSE( vf.hasNormals() );
+	EXPECT_EQ( 0, vf.getNormalComponents() );
+	EXPECT_EQ( 3, vf.getNormalsOffset() );
+	
+	EXPECT_FALSE( vf.hasTextureCoords() );
+	EXPECT_EQ( 0, vf.getTextureCoordComponents() );
+	EXPECT_EQ( 3, vf.getTextureCoordsOffset() );
 
+	EXPECT_EQ( 3, vf.getVertexSize() );
+	EXPECT_EQ( 3 * sizeof( float ), vf.getVertexSizeInBytes() );
+	
+	vf = VertexFormat( 3, 3, 2 );
+	
+	EXPECT_TRUE( vf.hasPositions() );
+	EXPECT_EQ( 3, vf.getPositionComponents() );
+	EXPECT_EQ( 0, vf.getPositionsOffset() );
+
+	EXPECT_TRUE( vf.hasNormals() );
+	EXPECT_EQ( 3, vf.getNormalComponents() );
+	EXPECT_EQ( 3, vf.getNormalsOffset() );
+	
+	EXPECT_TRUE( vf.hasTextureCoords() );
+	EXPECT_EQ( 2, vf.getTextureCoordComponents() );
+	EXPECT_EQ( 6, vf.getTextureCoordsOffset() );
+
+	EXPECT_EQ( 8, vf.getVertexSize() );
+	EXPECT_EQ( 8 * sizeof( float ), vf.getVertexSizeInBytes() );
+	
 }
 

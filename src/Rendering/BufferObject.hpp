@@ -25,17 +25,55 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Primitive.hpp"
+#ifndef CRIMILD_RENDERING_BUFFER_OBJECT_
+#define CRIMILD_RENDERING_BUFFER_OBJECT_
 
-using namespace Crimild;
+#include <memory>
 
-Primitive::Primitive( Primitive::Types type )
-{
-	_type = type;
+namespace Crimild {
+
+	template< typename T >
+	class BufferObject {
+	protected:
+		BufferObject( size_t size, const T *data )
+			: _size( size ),
+			  _data( nullptr )
+		{
+			if ( _size > 0 ) {
+				_data = new T[ _size ];
+				if ( data ) {
+					memcpy( _data, data, sizeof( T ) * _size );
+				}
+				else {
+					memset( _data, 0, sizeof( T ) * _size );					
+				}
+			}
+		}
+
+	public:
+		virtual ~BufferObject( void )
+		{
+			if ( _data ) {
+				delete [] _data;
+				_data = nullptr;
+			}
+		}
+
+		size_t getSize( void ) const { return _size; }
+		T *getData( void ) { return _data; }
+		const T *getData( void ) const { return _data; }
+
+	private:
+		T *_data;
+		size_t _size;
+
+	private:
+		BufferObject( void ) { }
+		BufferObject( const BufferObject & ) { }
+		BufferObject &operator=( const BufferObject & ) { return *this; }
+	};
+
 }
 
-Primitive::~Primitive( void )
-{
-
-}
+#endif
 

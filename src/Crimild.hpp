@@ -45,6 +45,7 @@
 #include "Foundation/NamedObject.hpp"
 
 #include "Exceptions/Exception.hpp"
+#include "Exceptions/RuntimeException.hpp"
 #include "Exceptions/HasParentException.hpp"
 
 #include "SceneGraph/GeometryNode.hpp"
@@ -56,6 +57,11 @@
 #include "Visitors/NodeVisitor.hpp"
 
 #include "Primitives/Primitive.hpp"
+
+#include "Rendering/BufferObject.hpp"
+#include "Rendering/IndexBufferObject.hpp"
+#include "Rendering/VertexBufferObject.hpp"
+#include "Rendering/VertexFormat.hpp"
 
 #include "Simulation/Simulation.hpp"
 #include "Simulation/RunLoop.hpp"

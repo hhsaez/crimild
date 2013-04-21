@@ -25,17 +25,30 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Primitive.hpp"
+#ifndef CRIMILD_RENDERING_VERTEX_BUFFER_OBJECT_
+#define CRIMILD_RENDERING_VERTEX_BUFFER_OBJECT_
 
-using namespace Crimild;
+#include "BufferObject.hpp"
+#include "VertexFormat.hpp"
 
-Primitive::Primitive( Primitive::Types type )
-{
-	_type = type;
+namespace Crimild {
+
+	class VertexBufferObject : public BufferObject< float > {
+	public:
+		VertexBufferObject( const VertexFormat &vf, unsigned int vertexCount, const float *vertexData );
+		virtual ~VertexBufferObject( void );
+
+		const VertexFormat &getVertexFormat( void ) const { return _vertexFormat; }
+		unsigned int getVertexCount( void ) const { return _vertexCount; }
+
+	private:
+		VertexFormat _vertexFormat;
+		unsigned int _vertexCount;
+	};
+
+	typedef std::shared_ptr< VertexBufferObject > VertexBufferObjectPtr;
+
 }
 
-Primitive::~Primitive( void )
-{
-
-}
+#endif
 

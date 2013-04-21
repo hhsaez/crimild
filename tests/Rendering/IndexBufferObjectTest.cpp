@@ -25,17 +25,19 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Primitive.hpp"
+#include <Crimild.hpp>
+
+#include "gtest/gtest.h"
 
 using namespace Crimild;
 
-Primitive::Primitive( Primitive::Types type )
+TEST( IndexBufferObject, construction )
 {
-	_type = type;
-}
+	unsigned short indices[] = { 0, 1, 2 };
 
-Primitive::~Primitive( void )
-{
+	IndexBufferObjectPtr ibo( new IndexBufferObject( 3, indices ) );
 
+	EXPECT_EQ( 3, ibo->getIndexCount() );
+	EXPECT_EQ( 0, memcmp( indices, ibo->getData(), sizeof( unsigned short ) * ibo->getSize() ) );
 }
 

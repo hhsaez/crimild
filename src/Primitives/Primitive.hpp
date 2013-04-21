@@ -28,15 +28,42 @@
 #ifndef CRIMILD_PRIMITIVES_PRIMITIVE_
 #define CRIMILD_PRIMITIVES_PRIMITIVE_
 
+#include "Rendering/VertexBufferObject.hpp"
+#include "Rendering/IndexBufferObject.hpp"
+
 #include <functional>
 
 namespace Crimild {
 
 	class Primitive {
 	public:
-		Primitive( void );
+		enum class Types {
+			POINTS,
+			LINES,
+			LINE_LOOP,
+			LINE_STRIP,
+			TRIANGLES,
+			TRIANGLE_STRIP,
+			TRIANGLE_FAN,
+			MAX
+		};
+
+	public:
+		explicit Primitive( Primitive::Types type = Primitive::Types::TRIANGLES );
 		virtual ~Primitive( void );
 
+		Primitive::Types getType( void ) const { return _type; }
+
+		void setVertexBuffer( VertexBufferObjectPtr vbo ) { _vertexBuffer = vbo; }
+		VertexBufferObject *getVertexBuffer( void ) { return _vertexBuffer.get(); }
+
+		void setIndexBuffer( IndexBufferObjectPtr ibo ) { _indexBuffer = ibo; }
+		IndexBufferObject *getIndexBuffer( void ) { return _indexBuffer.get(); }
+
+	private:
+		Primitive::Types _type;
+		VertexBufferObjectPtr _vertexBuffer;
+		IndexBufferObjectPtr _indexBuffer;
 	};
 
 	typedef std::shared_ptr< Primitive > PrimitivePtr;

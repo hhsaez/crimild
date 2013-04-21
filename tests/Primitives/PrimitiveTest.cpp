@@ -25,17 +25,47 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Primitive.hpp"
+#include <Crimild.hpp>
+
+#include "gtest/gtest.h"
 
 using namespace Crimild;
 
-Primitive::Primitive( Primitive::Types type )
+TEST( PrimitiveTest, construction )
 {
-	_type = type;
+	PrimitivePtr p1( new Primitive() );
+	EXPECT_EQ( p1->getType(), Primitive::Types::TRIANGLES );
+
+	PrimitivePtr p2( new Primitive( Primitive::Types::LINES ) );
+	EXPECT_EQ( p2->getType(), Primitive::Types::LINES );
 }
 
-Primitive::~Primitive( void )
+TEST( PrimitiveTest, destruction )
 {
 
+}
+
+TEST( PrimitiveTest, setVertexBuffer )
+{
+	PrimitivePtr p( new Primitive() );
+
+	EXPECT_EQ( p->getVertexBuffer(), nullptr );
+
+	VertexBufferObjectPtr vbo( new VertexBufferObject( VertexFormat::VF_P3, 0, nullptr ) );
+	p->setVertexBuffer( vbo );
+
+	EXPECT_EQ( p->getVertexBuffer(), vbo.get() );
+}
+
+TEST( PrimitiveTest, setIndexBuffer )
+{
+	PrimitivePtr p( new Primitive() );
+
+	EXPECT_EQ( p->getIndexBuffer(), nullptr );
+
+	IndexBufferObjectPtr ibo( new IndexBufferObject(0, nullptr ) );
+	p->setIndexBuffer( ibo );
+
+	EXPECT_EQ( p->getIndexBuffer(), ibo.get() );
 }
 

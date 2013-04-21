@@ -25,17 +25,25 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Primitive.hpp"
+#ifndef CRIMILD_RENDERING_INDEX_BUFFER_OBJECT_
+#define CRIMILD_RENDERING_INDEX_BUFFER_OBJECT_
 
-using namespace Crimild;
+#include "BufferObject.hpp"
 
-Primitive::Primitive( Primitive::Types type )
-{
-	_type = type;
+namespace Crimild {
+
+	class IndexBufferObject : public BufferObject< unsigned short > {
+	public:
+		IndexBufferObject( unsigned int indexCount, const unsigned short *indexData );
+		virtual ~IndexBufferObject( void );
+
+		unsigned int getIndexCount( void ) const { return getSize(); }
+
+	};
+
+	typedef std::shared_ptr< IndexBufferObject > IndexBufferObjectPtr;
+
 }
 
-Primitive::~Primitive( void )
-{
-
-}
+#endif
 

@@ -25,17 +25,21 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Primitive.hpp"
+#ifndef CRIMILD_EXCEPTIONS_RUNTIME_
+#define CRIMILD_EXCEPTIONS_RUNTIME_
 
-using namespace Crimild;
+#include "Exception.hpp"
 
-Primitive::Primitive( Primitive::Types type )
-{
-	_type = type;
+namespace Crimild {
+
+	class RuntimeException : public Exception {
+	public:
+		RuntimeException( std::string message )
+			: Exception( "PROGRAM TERMINATED BECAUSE OF AN ERROR: " + message )
+		{ }
+	};
+
 }
 
-Primitive::~Primitive( void )
-{
-
-}
+#endif
 

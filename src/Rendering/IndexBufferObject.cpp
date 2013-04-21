@@ -25,16 +25,17 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Primitive.hpp"
+#include "IndexBufferObject.hpp"
 
 using namespace Crimild;
 
-Primitive::Primitive( Primitive::Types type )
+IndexBufferObject::IndexBufferObject( unsigned int indexCount, const unsigned short *indexData )
+	: BufferObject( indexCount, indexData )
 {
-	_type = type;
+
 }
 
-Primitive::~Primitive( void )
+IndexBufferObject::~IndexBufferObject( void )
 {
 
 }

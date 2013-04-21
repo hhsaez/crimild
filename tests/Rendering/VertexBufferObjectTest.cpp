@@ -25,17 +25,41 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Primitive.hpp"
+#include <Crimild.hpp>
+
+#include "gtest/gtest.h"
 
 using namespace Crimild;
 
-Primitive::Primitive( Primitive::Types type )
+TEST( VertexBufferObject, construction )
 {
-	_type = type;
+	float vertices[] = {
+		1.0f, 0.0f, 0.0f,
+		-1.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f,
+	};
+
+	VertexBufferObjectPtr vbo( new VertexBufferObject( VertexFormat::VF_P3, 3, vertices ) );
+
+	EXPECT_EQ( VertexFormat::VF_P3, vbo->getVertexFormat() );
+	EXPECT_EQ( 3, vbo->getVertexCount() );
+	EXPECT_EQ( 3 * vbo->getVertexFormat().getVertexSize(), vbo->getSize() );
+	EXPECT_EQ( 0, memcmp( vertices, vbo->getData(), sizeof( float ) * vbo->getSize() ) );
 }
 
-Primitive::~Primitive( void )
+TEST( VertexBufferObject, complexConstruction )
 {
+	float vertices[] = {
+		+1.0f, 0.0f, 0.0f,	0.0f, 0.0f, 1.0f,	0.0f, 1.0,
+		-1.0f, 0.0f, 0.0f,	0.0f, 0.0f, 1.0f,	1.0f, 0.0f,
+		+0.0f, 1.0f, 0.0f,	0.0f, 0.0f, 1.0f,	0.5f, 0.0f
+	};
 
+	VertexBufferObjectPtr vbo( new VertexBufferObject( VertexFormat::VF_P3_N3_UV2, 3, vertices ) );
+
+	EXPECT_EQ( VertexFormat::VF_P3_N3_UV2, vbo->getVertexFormat() );
+	EXPECT_EQ( 3, vbo->getVertexCount() );
+	EXPECT_EQ( 3 * vbo->getVertexFormat().getVertexSize(), vbo->getSize() );
+	EXPECT_EQ( 0, memcmp( vertices, vbo->getData(), sizeof( float ) * vbo->getSize() ) );
 }
 
