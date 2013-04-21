@@ -25,16 +25,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Primitive.hpp"
+#include "Texture.hpp"
 
 using namespace Crimild;
 
-Primitive::Primitive( Primitive::Type type )
+Texture::Texture( ImagePtr image, std::string name )
+	: NamedObject( name ),
+	  _image( image )
 {
-	_type = type;
+
 }
 
-Primitive::~Primitive( void )
+Texture::~Texture( void )
 {
 
 }

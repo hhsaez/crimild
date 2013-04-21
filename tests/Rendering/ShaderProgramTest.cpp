@@ -25,17 +25,53 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Primitive.hpp"
+#include <Crimild.hpp>
+
+#include "gtest/gtest.h"
 
 using namespace Crimild;
 
-Primitive::Primitive( Primitive::Type type )
+TEST( ShaderProgramTest, construction )
 {
-	_type = type;
+	VertexShaderPtr vs( new VertexShader( "vs code" ) );
+	FragmentShaderPtr fs( new FragmentShader( "fs code" ) );
+	ShaderProgramPtr program( new ShaderProgram( vs, fs ) );
+
+	EXPECT_EQ( vs.get(), program->getVertexShader() );
+	EXPECT_EQ( fs.get(), program->getFragmentShader() );
 }
 
-Primitive::~Primitive( void )
+TEST( ShaderProgramTest, locations )
 {
+	VertexShaderPtr vs( new VertexShader( "vs code" ) );
+	FragmentShaderPtr fs( new FragmentShader( "fs code" ) );
+	ShaderProgramPtr program( new ShaderProgram( vs, fs ) );
 
+	ShaderLocationPtr vertexWeightLocation( new ShaderLocation( ShaderLocation::Type::ATTRIBUTE, "vertexWeight" ) );
+	program->registerLocation( vertexWeightLocation );
+	ASSERT_EQ( vertexWeightLocation.get(), program->getLocation( vertexWeightLocation->getName() ) );
+	EXPECT_FALSE( vertexWeightLocation->isValid() );
+
+	ShaderLocationPtr timeLocation( new ShaderLocation( ShaderLocation::Type::UNIFORM, "time" ) );
+	program->registerLocation( timeLocation );
+	ASSERT_EQ( timeLocation.get(), program->getLocation( timeLocation->getName() ) );
+	EXPECT_FALSE( timeLocation->isValid() );
+
+	int i = 0; 
+	program->foreachLocation( [&]( ShaderLocationPtr &loc ) mutable {
+		i++;
+	});
+	EXPECT_EQ( 2, i );
+
+	vertexWeightLocation->setLocation( 2 );
+	timeLocation->setLocation( 2 );
+
+	EXPECT_TRUE( vertexWeightLocation->isValid() );
+	EXPECT_TRUE( vertexWeightLocation->isValid() );
+
+	program->resetLocations();
+
+	EXPECT_FALSE( vertexWeightLocation->isValid() );
+	EXPECT_FALSE( vertexWeightLocation->isValid() );
 }
 

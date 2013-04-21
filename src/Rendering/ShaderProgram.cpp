@@ -25,17 +25,42 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Primitive.hpp"
+#include "ShaderProgram.hpp"
 
 using namespace Crimild;
 
-Primitive::Primitive( Primitive::Type type )
+ShaderProgram::ShaderProgram( VertexShaderPtr vs, FragmentShaderPtr fs )
+	: _vertexShader( vs ),
+	  _fragmentShader( fs )
 {
-	_type = type;
+
 }
 
-Primitive::~Primitive( void )
+ShaderProgram::~ShaderProgram( void )
 {
+	resetLocations();
+}
 
+void ShaderProgram::registerLocation( ShaderLocationPtr location )
+{
+	_locations[ location->getName() ] = location;
+}
+
+void ShaderProgram::resetLocations( void )
+{
+	for (auto it : _locations) {
+		if ( it.second ) {
+			it.second->reset();
+		}
+	}
+}
+
+void ShaderProgram::foreachLocation( std::function< void( ShaderLocationPtr & ) > callback )
+{
+	for (auto it : _locations) {
+		if ( it.second ) {
+			callback( it.second );
+		}
+	}
 }
 

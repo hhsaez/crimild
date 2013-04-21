@@ -25,17 +25,37 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Primitive.hpp"
+#ifndef CRIMILD_RENDERING_IMAGE_
+#define CRIMILD_RENDERING_IMAGE_
 
-using namespace Crimild;
+#include <memory>
 
-Primitive::Primitive( Primitive::Type type )
-{
-	_type = type;
+namespace Crimild {
+
+	class Image {
+	public:
+		Image( int width, int height, int bpp, const unsigned char *data );
+		virtual ~Image( void );
+
+		int getWidth( void ) const { return _width; }
+		int getHeight( void ) const { return _height; }
+		int getBpp( void ) const { return _bpp; }
+		unsigned char *getData( void ) { return _data; }
+		const unsigned char *getData( void ) const { return _data; }
+
+	private:
+		int _width;
+		int _height;
+		int _bpp;
+		unsigned char *_data;
+
+	private:
+		Image( const Image & ) { }
+		Image &operator=( const Image & ) { return *this; }
+	};
+
+	typedef std::shared_ptr< Image > ImagePtr;
 }
 
-Primitive::~Primitive( void )
-{
-
-}
+#endif
 

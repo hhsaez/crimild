@@ -34,10 +34,10 @@ using namespace Crimild;
 TEST( PrimitiveTest, construction )
 {
 	PrimitivePtr p1( new Primitive() );
-	EXPECT_EQ( p1->getType(), Primitive::Types::TRIANGLES );
+	EXPECT_EQ( p1->getType(), Primitive::Type::TRIANGLES );
 
-	PrimitivePtr p2( new Primitive( Primitive::Types::LINES ) );
-	EXPECT_EQ( p2->getType(), Primitive::Types::LINES );
+	PrimitivePtr p2( new Primitive( Primitive::Type::LINES ) );
+	EXPECT_EQ( p2->getType(), Primitive::Type::LINES );
 }
 
 TEST( PrimitiveTest, destruction )

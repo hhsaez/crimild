@@ -25,17 +25,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Primitive.hpp"
+#include "ShaderLocation.hpp"
 
 using namespace Crimild;
 
-Primitive::Primitive( Primitive::Type type )
+ShaderLocation::ShaderLocation( ShaderLocation::Type type, std::string name )
+	: NamedObject( name ),
+	  _type( type )
 {
-	_type = type;
+	reset();
 }
 
-Primitive::~Primitive( void )
+ShaderLocation::~ShaderLocation( void )
 {
-
 }
 

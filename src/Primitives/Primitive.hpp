@@ -37,7 +37,7 @@ namespace Crimild {
 
 	class Primitive {
 	public:
-		enum class Types {
+		enum class Type {
 			POINTS,
 			LINES,
 			LINE_LOOP,
@@ -49,10 +49,10 @@ namespace Crimild {
 		};
 
 	public:
-		explicit Primitive( Primitive::Types type = Primitive::Types::TRIANGLES );
+		explicit Primitive( Primitive::Type type = Primitive::Type::TRIANGLES );
 		virtual ~Primitive( void );
 
-		Primitive::Types getType( void ) const { return _type; }
+		Primitive::Type getType( void ) const { return _type; }
 
 		void setVertexBuffer( VertexBufferObjectPtr vbo ) { _vertexBuffer = vbo; }
 		VertexBufferObject *getVertexBuffer( void ) { return _vertexBuffer.get(); }
@@ -61,7 +61,7 @@ namespace Crimild {
 		IndexBufferObject *getIndexBuffer( void ) { return _indexBuffer.get(); }
 
 	private:
-		Primitive::Types _type;
+		Primitive::Type _type;
 		VertexBufferObjectPtr _vertexBuffer;
 		IndexBufferObjectPtr _indexBuffer;
 	};

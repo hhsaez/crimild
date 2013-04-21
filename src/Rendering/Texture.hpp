@@ -25,17 +25,28 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Primitive.hpp"
+#ifndef CRIMILD_RENDERING_TEXTURE_
+#define CRIMILD_RENDERING_TEXTURE_
 
-using namespace Crimild;
+#include "Image.hpp"
+#include "Foundation/NamedObject.hpp"
 
-Primitive::Primitive( Primitive::Type type )
-{
-	_type = type;
+namespace Crimild {
+
+	class Texture : public NamedObject {
+	public:
+		Texture( ImagePtr image, std::string name = "ColorMap" );
+		virtual ~Texture( void );
+
+		Image *getImage( void ) { return _image.get(); }
+
+	private:
+		ImagePtr _image;
+	};
+
+	typedef std::shared_ptr< Texture > TexturePtr;
+	
 }
 
-Primitive::~Primitive( void )
-{
-
-}
+#endif
 

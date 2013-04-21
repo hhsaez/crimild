@@ -25,17 +25,35 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Primitive.hpp"
+#include "Image.hpp"
 
 using namespace Crimild;
 
-Primitive::Primitive( Primitive::Type type )
+Image::Image( int width, int height, int bpp, const unsigned char *data )
+	: _data( nullptr )
 {
-	_type = type;
+	_width = width;
+	_height = height;
+	_bpp = bpp;
+
+	int size = _width * _height * _bpp;
+	if ( size > 0 ) {
+		_data = new unsigned char[ size ];
+
+		if ( data ) {
+			memcpy( _data, data, size * sizeof( unsigned char ) );
+		}
+		else {
+			memset( _data, 0, size * sizeof( unsigned char ) );
+		}
+	}
 }
 
-Primitive::~Primitive( void )
+Image::~Image( void )
 {
-
+	if ( _data ) {
+		delete [] _data;
+		_data = nullptr;
+	}
 }
 

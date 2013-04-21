@@ -25,16 +25,17 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Primitive.hpp"
+#include "Shader.hpp"
 
 using namespace Crimild;
 
-Primitive::Primitive( Primitive::Type type )
+Shader::Shader( std::string source )
+	: _source( source )
 {
-	_type = type;
+
 }
 
-Primitive::~Primitive( void )
+Shader::~Shader( void )
 {
 
 }

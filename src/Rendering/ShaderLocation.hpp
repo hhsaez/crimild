@@ -25,17 +25,40 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Primitive.hpp"
+#ifndef CRIMILD_RENDERING_SHADER_LOCATION_
+#define CRIMILD_RENDERING_SHADER_LOCATION_
 
-using namespace Crimild;
+#include "Foundation/NamedObject.hpp"
 
-Primitive::Primitive( Primitive::Type type )
-{
-	_type = type;
+namespace Crimild {
+
+	class ShaderLocation : public NamedObject {
+	public:
+		enum class Type {
+			ATTRIBUTE,
+			UNIFORM,
+			MAX
+		};
+
+	public:
+		explicit ShaderLocation( Type type, std::string name );
+		virtual ~ShaderLocation( void );
+
+		Type getType( void ) const { return _type; }
+
+		void reset( void ) { _location = -1; }
+		bool isValid( void ) const { return _location >= 0; }
+		int getLocation( void ) const { return _location; }
+		void setLocation( int location ) { _location = location; }
+
+	private:
+		Type _type;
+		int _location;
+	};
+
+	typedef std::shared_ptr< ShaderLocation > ShaderLocationPtr;
+
 }
 
-Primitive::~Primitive( void )
-{
-
-}
+#endif
 

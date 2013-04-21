@@ -25,17 +25,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Primitive.hpp"
+#include <Crimild.hpp>
+
+#include "gtest/gtest.h"
 
 using namespace Crimild;
 
-Primitive::Primitive( Primitive::Type type )
+TEST( TextureTest, construction )
 {
-	_type = type;
-}
+	ImagePtr image( new Image( 0, 0, 0, nullptr ) );
+	TexturePtr texture( new Texture( image ) );
 
-Primitive::~Primitive( void )
-{
-
+	EXPECT_EQ( image.get(), texture->getImage() );
+	EXPECT_EQ( "ColorMap", texture->getName() );
 }
 

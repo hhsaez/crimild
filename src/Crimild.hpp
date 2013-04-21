@@ -59,7 +59,12 @@
 #include "Primitives/Primitive.hpp"
 
 #include "Rendering/BufferObject.hpp"
+#include "Rendering/Image.hpp"
 #include "Rendering/IndexBufferObject.hpp"
+#include "Rendering/Shader.hpp"
+#include "Rendering/ShaderLocation.hpp"
+#include "Rendering/ShaderProgram.hpp"
+#include "Rendering/Texture.hpp"
 #include "Rendering/VertexBufferObject.hpp"
 #include "Rendering/VertexFormat.hpp"
 

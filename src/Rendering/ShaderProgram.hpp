@@ -25,17 +25,44 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Primitive.hpp"
+#ifndef CRIMILD_RENDERING_SHADER_PROGRAM_
+#define CRIMILD_RENDERING_SHADER_PROGRAM_
 
-using namespace Crimild;
+#include "Shader.hpp"
+#include "ShaderLocation.hpp"
 
-Primitive::Primitive( Primitive::Type type )
-{
-	_type = type;
+#include <functional>
+#include <map>
+#include <string>
+
+namespace Crimild {
+
+	class ShaderProgram {
+	public:
+		ShaderProgram( VertexShaderPtr vs, FragmentShaderPtr fs );
+		virtual ~ShaderProgram( void );
+
+		VertexShader *getVertexShader( void ) { return _vertexShader.get(); }
+		FragmentShader *getFragmentShader( void ) { return _fragmentShader.get(); }
+
+	private:
+		VertexShaderPtr _vertexShader;
+		FragmentShaderPtr _fragmentShader;
+
+	public:
+		void registerLocation( ShaderLocationPtr location );
+		ShaderLocation *getLocation( std::string name ) { return _locations[ name ].get(); }
+		void resetLocations( void );
+		void foreachLocation( std::function< void( ShaderLocationPtr & ) > callback );
+
+	private:
+		std::map< std::string, ShaderLocationPtr > _locations;
+
+	};
+
+	typedef std::shared_ptr< ShaderProgram > ShaderProgramPtr;
+
 }
 
-Primitive::~Primitive( void )
-{
-
-}
+#endif
 

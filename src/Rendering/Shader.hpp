@@ -25,17 +25,32 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Primitive.hpp"
+#ifndef CRIMILD_RENDERING_SHADER_
+#define CRIMILD_RENDERING_SHADER_
 
-using namespace Crimild;
+#include <memory>
+#include <string>
 
-Primitive::Primitive( Primitive::Type type )
-{
-	_type = type;
+namespace Crimild {
+
+	class Shader {
+	public:
+		explicit Shader( std::string source );
+		virtual ~Shader( void );
+
+		const char *getSource( void ) const { return _source.c_str(); }
+
+	private:
+		std::string _source;
+	};
+
+	typedef Shader VertexShader;
+	typedef std::shared_ptr< VertexShader > VertexShaderPtr;
+
+	typedef Shader FragmentShader;
+	typedef std::shared_ptr< FragmentShader > FragmentShaderPtr;
+
 }
 
-Primitive::~Primitive( void )
-{
-
-}
+#endif
 
