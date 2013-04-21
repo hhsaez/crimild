@@ -107,3 +107,16 @@ TEST( SimulationTest, run )
 	EXPECT_EQ( 10, loopCount );
 }
 
+TEST( SimulationTest, attachScene )
+{
+	SimulationPtr simulation( new Simulation() );
+
+	EXPECT_FALSE( simulation->getMainLoop()->hasActiveTasks() );
+
+	NodePtr simpleScene( new Node() );
+
+	simulation->attachScene( simpleScene );
+
+	EXPECT_TRUE( simulation->getMainLoop()->hasActiveTasks() );
+}
+

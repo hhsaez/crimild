@@ -25,42 +25,28 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SIMULATION_
-#define CRIMILD_SIMULATION_
+#ifndef CRIMILD_SIMULATION_TASKS_UPDATE_SCENE_
+#define CRIMILD_SIMULATION_TASKS_UPDATE_SCENE_
 
-#include "RunLoop.hpp"
-#include "Foundation/NamedObject.hpp"
-#include "SceneGraph/Node.hpp" 
+#include "Simulation/Task.hpp"
+#include "SceneGraph/Node.hpp"
 
 namespace Crimild {
 
-	class Simulation : public NamedObject {
-	private:
-		static Simulation *_currentSimulation;
-
+	class UpdateSceneTask : public Task {
 	public:
-		static Simulation *getCurrent( void ) { return _currentSimulation; }
+		UpdateSceneTask( int priority, NodePtr scene );
+		virtual ~UpdateSceneTask( void );
 
-	public:
-		Simulation( std::string name = "" );
-		virtual ~Simulation( void );
-
-		RunLoop *getMainLoop( void ) { return _mainLoop.get(); }
-
-		bool update( void );
-		void stop( void );
-
-		virtual int run( void );
+		virtual void start( void ) override;
+		virtual void update( void ) override;
+		virtual void stop( void ) override;
 
 	private:
-		RunLoopPtr _mainLoop;
-
-	public:
-		void attachScene( NodePtr scene );
-
+		NodePtr _scene;
 	};
 
-	typedef std::shared_ptr< Simulation > SimulationPtr;
+	typedef std::shared_ptr< UpdateSceneTask > UpdateSceneTaskPtr;
 
 }
 

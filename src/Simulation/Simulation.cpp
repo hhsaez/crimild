@@ -27,6 +27,9 @@
 
 #include "Simulation.hpp"
 
+#include "Tasks/UpdateSceneTask.hpp"
+#include "Tasks/RenderSceneTask.hpp"
+
 using namespace Crimild;
 
 Simulation *Simulation::_currentSimulation = nullptr;
@@ -59,5 +62,14 @@ int Simulation::run( void )
 {
 	while( _mainLoop->update() );
 	return 0;
+}
+
+void Simulation::attachScene( NodePtr scene )
+{
+	UpdateSceneTaskPtr updateScene( new UpdateSceneTask( 1000, scene ) );
+	getMainLoop()->startTask( updateScene );
+
+	RenderSceneTaskPtr renderScene( new RenderSceneTask( 2000, scene ) );
+	getMainLoop()->startTask( renderScene );
 }
 

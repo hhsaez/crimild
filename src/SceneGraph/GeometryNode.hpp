@@ -38,7 +38,7 @@ namespace Crimild {
 
 	class GeometryNode : public Node {
 	public:
-		GeometryNode( std::string name );
+		GeometryNode( std::string name = "" );
 		virtual ~GeometryNode( void );
 
 		bool hasPrimitives( void ) const { return _primitives.size(); }

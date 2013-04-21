@@ -25,44 +25,33 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SIMULATION_
-#define CRIMILD_SIMULATION_
+#include "BeginRenderTask.hpp"
 
-#include "RunLoop.hpp"
-#include "Foundation/NamedObject.hpp"
-#include "SceneGraph/Node.hpp" 
+using namespace Crimild;
 
-namespace Crimild {
-
-	class Simulation : public NamedObject {
-	private:
-		static Simulation *_currentSimulation;
-
-	public:
-		static Simulation *getCurrent( void ) { return _currentSimulation; }
-
-	public:
-		Simulation( std::string name = "" );
-		virtual ~Simulation( void );
-
-		RunLoop *getMainLoop( void ) { return _mainLoop.get(); }
-
-		bool update( void );
-		void stop( void );
-
-		virtual int run( void );
-
-	private:
-		RunLoopPtr _mainLoop;
-
-	public:
-		void attachScene( NodePtr scene );
-
-	};
-
-	typedef std::shared_ptr< Simulation > SimulationPtr;
+BeginRenderTask::BeginRenderTask( int priority )
+	: Task( priority )
+{
 
 }
 
-#endif
+BeginRenderTask::~BeginRenderTask( void )
+{
+
+}
+
+void BeginRenderTask::start( void )
+{
+
+}
+
+void BeginRenderTask::update( void )
+{
+
+}
+
+void BeginRenderTask::stop( void )
+{
+
+}
 

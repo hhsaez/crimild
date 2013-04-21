@@ -73,6 +73,10 @@
 #include "Simulation/Simulation.hpp"
 #include "Simulation/RunLoop.hpp"
 #include "Simulation/Task.hpp"
+#include "Simulation/Tasks/BeginRenderTask.hpp"
+#include "Simulation/Tasks/EndRenderTask.hpp"
+#include "Simulation/Tasks/RenderSceneTask.hpp"
+#include "Simulation/Tasks/UpdateSceneTask.hpp"
 
 #endif
 
