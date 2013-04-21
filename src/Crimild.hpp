@@ -60,9 +60,11 @@
 #include "Primitives/Primitive.hpp"
 
 #include "Rendering/BufferObject.hpp"
+#include "Rendering/FrameBufferObject.hpp"
 #include "Rendering/Image.hpp"
 #include "Rendering/IndexBufferObject.hpp"
 #include "Rendering/Material.hpp"
+#include "Rendering/Renderer.hpp"
 #include "Rendering/Shader.hpp"
 #include "Rendering/ShaderLocation.hpp"
 #include "Rendering/ShaderProgram.hpp"

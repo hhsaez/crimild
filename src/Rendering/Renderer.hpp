@@ -25,68 +25,44 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Simulation.hpp"
+#ifndef CRIMILD_RENDERER_RENDERER_
+#define CRIMILD_RENDERER_RENDERER_
 
-#include "Tasks/BeginRenderTask.hpp"
-#include "Tasks/EndRenderTask.hpp"
-#include "Tasks/UpdateSceneTask.hpp"
-#include "Tasks/RenderSceneTask.hpp"
+#include "FrameBufferObject.hpp"
 
-#define UPDATE_SCENE_PRIORITY 100
-#define BEGIN_RENDER_PRIORITY 1000
-#define RENDER_SCENE_PRIORITY 2000
-#define END_RENDER_PRIORITY 99999
+namespace Crimild {
 
-using namespace Crimild;
+	class Renderer {
+	protected:
+		Renderer( void );
 
-Simulation *Simulation::_currentSimulation = nullptr;
+	public:
+		virtual ~Renderer( void );
 
-Simulation::Simulation( std::string name )
-	: NamedObject( name ),
-	  _mainLoop( new RunLoop() )
-{
-	_currentSimulation = this;
+	public:
+		virtual void configure( void ) = 0;
+
+		void setScreenBuffer( FrameBufferObjectPtr screenBuffer ) { _screenBuffer = screenBuffer; }
+		FrameBufferObject *getScreenBuffer( void ) { return _screenBuffer.get(); }
+
+	private:
+		FrameBufferObjectPtr _screenBuffer;
+
+	public:
+		virtual void beginRender( void ) = 0;
+		
+		virtual void endRender( void ) = 0;
+
+		virtual void clearBuffers( void ) = 0;
+
+	private:
+		Renderer( const Renderer &renderer ) { }
+		Renderer &operator=( const Renderer & ) { return *this; }
+	};
+
+	typedef std::shared_ptr< Renderer > RendererPtr;
+
 }
 
-Simulation::~Simulation( void )
-{
-	stop();
-
-	_currentSimulation = nullptr;
-}
-
-void Simulation::start( void )
-{
-	BeginRenderTaskPtr beginRender( new BeginRenderTask( BEGIN_RENDER_PRIORITY ) );
-	getMainLoop()->startTask( beginRender );
-
-	EndRenderTaskPtr endRender( new EndRenderTask( END_RENDER_PRIORITY ) );
-	getMainLoop()->startTask( endRender );
-}
-
-bool Simulation::step( void )
-{
-	return _mainLoop->update();
-}
-
-void Simulation::stop( void )
-{
-	_mainLoop->stop();
-}
-
-int Simulation::run( void )
-{
-	start();
-	while( step() );
-	return 0;
-}
-
-void Simulation::attachScene( NodePtr scene )
-{
-	UpdateSceneTaskPtr updateScene( new UpdateSceneTask( UPDATE_SCENE_PRIORITY, scene ) );
-	getMainLoop()->startTask( updateScene );
-
-	RenderSceneTaskPtr renderScene( new RenderSceneTask( RENDER_SCENE_PRIORITY, scene ) );
-	getMainLoop()->startTask( renderScene );
-}
+#endif
 

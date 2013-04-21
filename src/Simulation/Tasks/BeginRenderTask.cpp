@@ -26,6 +26,7 @@
  */
 
 #include "BeginRenderTask.hpp"
+#include "Simulation/Simulation.hpp"
 
 using namespace Crimild;
 
@@ -42,12 +43,13 @@ BeginRenderTask::~BeginRenderTask( void )
 
 void BeginRenderTask::start( void )
 {
-
+	Simulation::getCurrent()->getRenderer()->configure();
 }
 
 void BeginRenderTask::update( void )
 {
-
+	Simulation::getCurrent()->getRenderer()->beginRender();
+	Simulation::getCurrent()->getRenderer()->clearBuffers();
 }
 
 void BeginRenderTask::stop( void )

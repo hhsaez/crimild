@@ -25,68 +25,35 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Simulation.hpp"
+#ifndef CRIMILD_RENDERING_FRAME_BUFFER_OBJECT_
+#define CRIMILD_RENDERING_FRAME_BUFFER_OBJECT_
 
-#include "Tasks/BeginRenderTask.hpp"
-#include "Tasks/EndRenderTask.hpp"
-#include "Tasks/UpdateSceneTask.hpp"
-#include "Tasks/RenderSceneTask.hpp"
+#include "Mathematics/Vector.hpp"
 
-#define UPDATE_SCENE_PRIORITY 100
-#define BEGIN_RENDER_PRIORITY 1000
-#define RENDER_SCENE_PRIORITY 2000
-#define END_RENDER_PRIORITY 99999
+#include <memory>
 
-using namespace Crimild;
+namespace Crimild {
 
-Simulation *Simulation::_currentSimulation = nullptr;
+	class FrameBufferObject {
+	public:
+		FrameBufferObject( int width, int height );
+		virtual ~FrameBufferObject( void );
 
-Simulation::Simulation( std::string name )
-	: NamedObject( name ),
-	  _mainLoop( new RunLoop() )
-{
-	_currentSimulation = this;
+		int getWidth( void ) const { return _width; }
+		int getHeight( void ) const { return _height; }
+
+		void setClearColor( const RGBAColorf &color ) { _clearColor = color; }
+		const RGBAColorf &getClearColor( void ) const { return _clearColor; }
+
+	private:
+		int _width;
+		int _height;
+		RGBAColorf _clearColor;
+	};
+
+	typedef std::shared_ptr< FrameBufferObject > FrameBufferObjectPtr;
+
 }
 
-Simulation::~Simulation( void )
-{
-	stop();
-
-	_currentSimulation = nullptr;
-}
-
-void Simulation::start( void )
-{
-	BeginRenderTaskPtr beginRender( new BeginRenderTask( BEGIN_RENDER_PRIORITY ) );
-	getMainLoop()->startTask( beginRender );
-
-	EndRenderTaskPtr endRender( new EndRenderTask( END_RENDER_PRIORITY ) );
-	getMainLoop()->startTask( endRender );
-}
-
-bool Simulation::step( void )
-{
-	return _mainLoop->update();
-}
-
-void Simulation::stop( void )
-{
-	_mainLoop->stop();
-}
-
-int Simulation::run( void )
-{
-	start();
-	while( step() );
-	return 0;
-}
-
-void Simulation::attachScene( NodePtr scene )
-{
-	UpdateSceneTaskPtr updateScene( new UpdateSceneTask( UPDATE_SCENE_PRIORITY, scene ) );
-	getMainLoop()->startTask( updateScene );
-
-	RenderSceneTaskPtr renderScene( new RenderSceneTask( RENDER_SCENE_PRIORITY, scene ) );
-	getMainLoop()->startTask( renderScene );
-}
+#endif
 

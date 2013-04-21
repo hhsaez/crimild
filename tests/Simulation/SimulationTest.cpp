@@ -59,7 +59,7 @@ TEST( SimulationTest, destruction )
 	EXPECT_EQ( Simulation::getCurrent(), nullptr );
 }
 
-TEST( SimulationTest, update )
+TEST( SimulationTest, step )
 {
 	SimulationPtr simulation( new Simulation() );
 
@@ -72,13 +72,13 @@ TEST( SimulationTest, update )
 		.Times( ::testing::Exactly( 1 ) );
 	simulation->getMainLoop()->startTask( task );
 
-	EXPECT_TRUE( simulation->update() );
-	EXPECT_TRUE( simulation->update() );
-	EXPECT_TRUE( simulation->update() );
+	EXPECT_TRUE( simulation->step() );
+	EXPECT_TRUE( simulation->step() );
+	EXPECT_TRUE( simulation->step() );
 
 	simulation->stop();
 
-	EXPECT_FALSE( simulation->update() );
+	EXPECT_FALSE( simulation->step() );
 }
 
 TEST( SimulationTest, run )

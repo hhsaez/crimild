@@ -26,6 +26,7 @@
  */
 
 #include "EndRenderTask.hpp"
+#include "Simulation/Simulation.hpp"
 
 using namespace Crimild;
 
@@ -47,7 +48,7 @@ void EndRenderTask::start( void )
 
 void EndRenderTask::update( void )
 {
-
+	Simulation::getCurrent()->getRenderer()->endRender();
 }
 
 void EndRenderTask::stop( void )

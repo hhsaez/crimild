@@ -31,6 +31,7 @@
 #include "RunLoop.hpp"
 #include "Foundation/NamedObject.hpp"
 #include "SceneGraph/Node.hpp" 
+#include "Rendering/Renderer.hpp"
 
 namespace Crimild {
 
@@ -47,8 +48,11 @@ namespace Crimild {
 
 		RunLoop *getMainLoop( void ) { return _mainLoop.get(); }
 
-		bool update( void );
-		void stop( void );
+		virtual void start( void );
+
+		virtual bool step( void );
+		
+		virtual void stop( void );
 
 		virtual int run( void );
 
@@ -56,8 +60,14 @@ namespace Crimild {
 		RunLoopPtr _mainLoop;
 
 	public:
-		void attachScene( NodePtr scene );
+		void setRenderer( RendererPtr renderer ) { _renderer = renderer; }
+		Renderer *getRenderer( void ) { return _renderer.get(); }
 
+	private:
+		RendererPtr _renderer;
+
+	public:
+		void attachScene( NodePtr scene );
 	};
 
 	typedef std::shared_ptr< Simulation > SimulationPtr;
