@@ -25,54 +25,37 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_
-#define CRIMILD_
+#ifndef CRIMILD_RENDERING_MATERIAL_
+#define CRIMILD_RENDERING_MATERIAL_
 
-#include "Mathematics/Distance.hpp"
-#include "Mathematics/Frustum.hpp"
-#include "Mathematics/Interpolation.hpp"
-#include "Mathematics/Intersection.hpp"
-#include "Mathematics/Matrix.hpp"
-#include "Mathematics/Numeric.hpp"
-#include "Mathematics/Plane.hpp"
-#include "Mathematics/Quaternion.hpp"
-#include "Mathematics/Ray.hpp"
-#include "Mathematics/Rect.hpp"
-#include "Mathematics/Root.hpp"
-#include "Mathematics/Sphere.hpp"
-#include "Mathematics/Vector.hpp"
+#include "Texture.hpp"
+#include "ShaderProgram.hpp"
 
-#include "Foundation/NamedObject.hpp"
+namespace Crimild {
 
-#include "Exceptions/Exception.hpp"
-#include "Exceptions/RuntimeException.hpp"
-#include "Exceptions/HasParentException.hpp"
+	class Material {
+	public:
+		Material( void );
+		virtual ~Material( void );
 
-#include "SceneGraph/GeometryNode.hpp"
-#include "SceneGraph/GroupNode.hpp"
-#include "SceneGraph/Node.hpp"
+		void setProgram( ShaderProgramPtr program ) { _program = program; }
+		ShaderProgram *getProgram( void ) { return _program.get(); }
 
-#include "Components/MaterialComponent.hpp"
-#include "Components/NodeComponent.hpp"
+		void setColorMap( TexturePtr texture ) { _colorMap = texture; }
+		Texture *getColorMap( void ) { return _colorMap.get(); }
 
-#include "Visitors/NodeVisitor.hpp"
+	private:
+		ShaderProgramPtr _program;
+		TexturePtr _colorMap;
 
-#include "Primitives/Primitive.hpp"
+	private:
+		Material( const Material & ) { }
+		Material &operator=( const Material & ) { return *this; }
+	};
 
-#include "Rendering/BufferObject.hpp"
-#include "Rendering/Image.hpp"
-#include "Rendering/IndexBufferObject.hpp"
-#include "Rendering/Material.hpp"
-#include "Rendering/Shader.hpp"
-#include "Rendering/ShaderLocation.hpp"
-#include "Rendering/ShaderProgram.hpp"
-#include "Rendering/Texture.hpp"
-#include "Rendering/VertexBufferObject.hpp"
-#include "Rendering/VertexFormat.hpp"
-
-#include "Simulation/Simulation.hpp"
-#include "Simulation/RunLoop.hpp"
-#include "Simulation/Task.hpp"
+	typedef std::shared_ptr< Material > MaterialPtr;
+}
 
 #endif
 
+	

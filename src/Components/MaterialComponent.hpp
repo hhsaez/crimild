@@ -25,54 +25,37 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_
-#define CRIMILD_
+#ifndef CRIMILD_COMPONENTS_MATERIAL_
+#define CRIMILD_COMPONENTS_MATERIAL_
 
-#include "Mathematics/Distance.hpp"
-#include "Mathematics/Frustum.hpp"
-#include "Mathematics/Interpolation.hpp"
-#include "Mathematics/Intersection.hpp"
-#include "Mathematics/Matrix.hpp"
-#include "Mathematics/Numeric.hpp"
-#include "Mathematics/Plane.hpp"
-#include "Mathematics/Quaternion.hpp"
-#include "Mathematics/Ray.hpp"
-#include "Mathematics/Rect.hpp"
-#include "Mathematics/Root.hpp"
-#include "Mathematics/Sphere.hpp"
-#include "Mathematics/Vector.hpp"
+#include "NodeComponent.hpp"
 
-#include "Foundation/NamedObject.hpp"
-
-#include "Exceptions/Exception.hpp"
-#include "Exceptions/RuntimeException.hpp"
-#include "Exceptions/HasParentException.hpp"
-
-#include "SceneGraph/GeometryNode.hpp"
-#include "SceneGraph/GroupNode.hpp"
-#include "SceneGraph/Node.hpp"
-
-#include "Components/MaterialComponent.hpp"
-#include "Components/NodeComponent.hpp"
-
-#include "Visitors/NodeVisitor.hpp"
-
-#include "Primitives/Primitive.hpp"
-
-#include "Rendering/BufferObject.hpp"
-#include "Rendering/Image.hpp"
-#include "Rendering/IndexBufferObject.hpp"
 #include "Rendering/Material.hpp"
-#include "Rendering/Shader.hpp"
-#include "Rendering/ShaderLocation.hpp"
-#include "Rendering/ShaderProgram.hpp"
-#include "Rendering/Texture.hpp"
-#include "Rendering/VertexBufferObject.hpp"
-#include "Rendering/VertexFormat.hpp"
 
-#include "Simulation/Simulation.hpp"
-#include "Simulation/RunLoop.hpp"
-#include "Simulation/Task.hpp"
+#include <functional>
+#include <list>
+
+namespace Crimild {
+
+	class MaterialComponent : public NodeComponent {
+	public:
+		static const char *NAME;
+
+	public:
+		MaterialComponent( void );
+		virtual ~MaterialComponent( void );
+
+		bool hasMaterials( void ) const { return _materials.size() > 0; }
+		void attachMaterial( MaterialPtr material );
+		void foreachMaterial( std::function< void( MaterialPtr & ) > callback );
+
+	private:
+		std::list< MaterialPtr > _materials;
+	};
+
+	typedef std::shared_ptr< MaterialComponent > MaterialComponentPtr;
+
+}
 
 #endif
 

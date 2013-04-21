@@ -25,54 +25,31 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_
-#define CRIMILD_
+#include "MaterialComponent.hpp"
 
-#include "Mathematics/Distance.hpp"
-#include "Mathematics/Frustum.hpp"
-#include "Mathematics/Interpolation.hpp"
-#include "Mathematics/Intersection.hpp"
-#include "Mathematics/Matrix.hpp"
-#include "Mathematics/Numeric.hpp"
-#include "Mathematics/Plane.hpp"
-#include "Mathematics/Quaternion.hpp"
-#include "Mathematics/Ray.hpp"
-#include "Mathematics/Rect.hpp"
-#include "Mathematics/Root.hpp"
-#include "Mathematics/Sphere.hpp"
-#include "Mathematics/Vector.hpp"
+using namespace Crimild;
 
-#include "Foundation/NamedObject.hpp"
+const char *MaterialComponent::NAME = "materials";
 
-#include "Exceptions/Exception.hpp"
-#include "Exceptions/RuntimeException.hpp"
-#include "Exceptions/HasParentException.hpp"
+MaterialComponent::MaterialComponent( void )
+	: NodeComponent( NAME )
+{
+}
 
-#include "SceneGraph/GeometryNode.hpp"
-#include "SceneGraph/GroupNode.hpp"
-#include "SceneGraph/Node.hpp"
+MaterialComponent::~MaterialComponent( void )
+{
 
-#include "Components/MaterialComponent.hpp"
-#include "Components/NodeComponent.hpp"
+}
 
-#include "Visitors/NodeVisitor.hpp"
+void MaterialComponent::attachMaterial( MaterialPtr material )
+{
+	_materials.push_back( material );
+}
 
-#include "Primitives/Primitive.hpp"
-
-#include "Rendering/BufferObject.hpp"
-#include "Rendering/Image.hpp"
-#include "Rendering/IndexBufferObject.hpp"
-#include "Rendering/Material.hpp"
-#include "Rendering/Shader.hpp"
-#include "Rendering/ShaderLocation.hpp"
-#include "Rendering/ShaderProgram.hpp"
-#include "Rendering/Texture.hpp"
-#include "Rendering/VertexBufferObject.hpp"
-#include "Rendering/VertexFormat.hpp"
-
-#include "Simulation/Simulation.hpp"
-#include "Simulation/RunLoop.hpp"
-#include "Simulation/Task.hpp"
-
-#endif
+void MaterialComponent::foreachMaterial( std::function< void( MaterialPtr & ) > callback )
+{
+	for (auto material : _materials) {
+		callback( material );
+	}
+}
 

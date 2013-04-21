@@ -25,54 +25,40 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_
-#define CRIMILD_
+#include <Crimild.hpp>
 
-#include "Mathematics/Distance.hpp"
-#include "Mathematics/Frustum.hpp"
-#include "Mathematics/Interpolation.hpp"
-#include "Mathematics/Intersection.hpp"
-#include "Mathematics/Matrix.hpp"
-#include "Mathematics/Numeric.hpp"
-#include "Mathematics/Plane.hpp"
-#include "Mathematics/Quaternion.hpp"
-#include "Mathematics/Ray.hpp"
-#include "Mathematics/Rect.hpp"
-#include "Mathematics/Root.hpp"
-#include "Mathematics/Sphere.hpp"
-#include "Mathematics/Vector.hpp"
+#include "gtest/gtest.h"
 
-#include "Foundation/NamedObject.hpp"
+using namespace Crimild;
 
-#include "Exceptions/Exception.hpp"
-#include "Exceptions/RuntimeException.hpp"
-#include "Exceptions/HasParentException.hpp"
+TEST( MaterialTest, construction )
+{
+	MaterialPtr material( new Material() );
 
-#include "SceneGraph/GeometryNode.hpp"
-#include "SceneGraph/GroupNode.hpp"
-#include "SceneGraph/Node.hpp"
+	EXPECT_EQ( nullptr, material->getColorMap() );
+	EXPECT_EQ( nullptr, material->getProgram() );
+}
 
-#include "Components/MaterialComponent.hpp"
-#include "Components/NodeComponent.hpp"
+TEST( MaterialTest, setProgram )
+{
+	MaterialPtr material( new Material() );
 
-#include "Visitors/NodeVisitor.hpp"
+	VertexShaderPtr vs( new VertexShader( "vs code" ) );
+	FragmentShaderPtr fs( new FragmentShader( "fs code" ) );
+	ShaderProgramPtr program( new ShaderProgram( vs, fs ) );
+	material->setProgram( program );
 
-#include "Primitives/Primitive.hpp"
+	ASSERT_EQ( program.get(), material->getProgram() );
+}
 
-#include "Rendering/BufferObject.hpp"
-#include "Rendering/Image.hpp"
-#include "Rendering/IndexBufferObject.hpp"
-#include "Rendering/Material.hpp"
-#include "Rendering/Shader.hpp"
-#include "Rendering/ShaderLocation.hpp"
-#include "Rendering/ShaderProgram.hpp"
-#include "Rendering/Texture.hpp"
-#include "Rendering/VertexBufferObject.hpp"
-#include "Rendering/VertexFormat.hpp"
+TEST( MaterialTest, setColorMap )
+{
+	MaterialPtr material( new Material() );
 
-#include "Simulation/Simulation.hpp"
-#include "Simulation/RunLoop.hpp"
-#include "Simulation/Task.hpp"
+	ImagePtr image( new Image( 0, 0, 0, nullptr ) );
+	TexturePtr texture( new Texture( image ) );
+	material->setColorMap( texture );
 
-#endif
+	ASSERT_EQ( texture.get(), material->getColorMap() );
+}
 

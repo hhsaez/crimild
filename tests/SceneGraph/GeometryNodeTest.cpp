@@ -36,6 +36,10 @@ TEST( GeometryNodeTest, construction )
 	GeometryNodePtr geometry( new GeometryNode( "a geometry" ) );
 
 	EXPECT_EQ( geometry->getName(), "a geometry" );
+
+	MaterialComponent *materials = geometry->getComponent< MaterialComponent >();
+	ASSERT_NE( nullptr, materials );
+	EXPECT_FALSE( materials->hasMaterials() );
 }
 
 TEST( GeometryNodeTest, attachPrimitive )

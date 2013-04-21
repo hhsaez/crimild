@@ -27,12 +27,15 @@
 
 #include "GeometryNode.hpp"
 
+#include "Components/MaterialComponent.hpp"
+
 using namespace Crimild;
 
 GeometryNode::GeometryNode( std::string name )
 	: Node( name )
 {
-
+	MaterialComponentPtr materials( new MaterialComponent() );
+	attachComponent( materials );
 }
 
 GeometryNode::~GeometryNode( void )
