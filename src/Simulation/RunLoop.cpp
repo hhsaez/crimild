@@ -27,6 +27,8 @@
 
 #include "RunLoop.hpp"
 
+#include <iostream>
+
 using namespace Crimild;
 
 RunLoop::RunLoop( void )
@@ -39,6 +41,8 @@ RunLoop::~RunLoop( void )
 	if ( hasActiveTasks() ) {
 		stop();
 	}
+
+	cleanup();
 }
 
 void RunLoop::startTask( TaskPtr task )
@@ -71,8 +75,6 @@ void RunLoop::stopTask( TaskPtr task )
 	else {
 		_suspendedTasks.remove( task );
 	}
-
-	task->stop();
 }
 
 void RunLoop::suspendTask( TaskPtr task )
@@ -141,11 +143,13 @@ void RunLoop::foreachSuspendedTask( std::function< void ( TaskPtr &task ) > call
 bool RunLoop::update( void )
 {
 	auto it = _activeTasks.begin();
-	while ( it != _activeTasks.end() ) {
-		Task *task = ( *it ).get();
+	while ( hasActiveTasks() && it != _activeTasks.end() ) {
+		TaskPtr task = *it;
 		++it;
 		task->update();
 	}
+
+	cleanup();
 
 	return hasActiveTasks();
 }
@@ -154,9 +158,19 @@ void RunLoop::stop( void )
 {
 	for ( auto task : _activeTasks ) {
 		_killedTasks.push_back( task );
-		task->stop();
 	}
 
 	_activeTasks.clear();
+}
+
+void RunLoop::cleanup( void )
+{
+	auto it = _killedTasks.begin();
+	while ( it != _killedTasks.end() ) {
+		TaskPtr task = *it;
+		++it;
+		task->stop();
+	}
+	_killedTasks.clear();
 }
 

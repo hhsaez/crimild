@@ -27,6 +27,13 @@
 
 #include "RenderSceneTask.hpp"
 
+#include "Simulation/Simulation.hpp"
+#include "Rendering/Renderer.hpp"
+#include "Rendering/VisibilitySet.hpp"
+#include "Visitors/ComputeVisibilitySet.hpp"
+
+#include <iostream>
+
 using namespace Crimild;
 
 RenderSceneTask::RenderSceneTask( int priority, NodePtr scene )
@@ -48,6 +55,14 @@ void RenderSceneTask::start( void )
 
 void RenderSceneTask::update( void )
 {
+	Renderer *renderer = Simulation::getCurrent()->getRenderer();
+	if ( renderer ) {
+		VisibilitySet result;
+		_scene->perform( ComputeVisibilitySet( &result ) );
+		if ( result.hasGeometries() ) {
+			renderer->render( &result );
+		}
+	}
 
 }
 

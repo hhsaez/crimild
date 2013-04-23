@@ -29,11 +29,12 @@
 #define CRIMILD_RENDERING_TEXTURE_
 
 #include "Image.hpp"
+#include "Catalog.hpp"
 #include "Foundation/NamedObject.hpp"
 
 namespace Crimild {
 
-	class Texture : public NamedObject {
+	class Texture : public NamedObject, public Catalog< Texture >::Resource {
 	public:
 		Texture( ImagePtr image, std::string name = "ColorMap" );
 		virtual ~Texture( void );

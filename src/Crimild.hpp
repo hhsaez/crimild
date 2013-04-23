@@ -56,10 +56,12 @@
 #include "Components/NodeComponent.hpp"
 
 #include "Visitors/NodeVisitor.hpp"
+#include "Visitors/ComputeVisibilitySet.hpp"
 
 #include "Primitives/Primitive.hpp"
 
 #include "Rendering/BufferObject.hpp"
+#include "Rendering/Catalog.hpp"
 #include "Rendering/FrameBufferObject.hpp"
 #include "Rendering/Image.hpp"
 #include "Rendering/IndexBufferObject.hpp"
@@ -71,6 +73,7 @@
 #include "Rendering/Texture.hpp"
 #include "Rendering/VertexBufferObject.hpp"
 #include "Rendering/VertexFormat.hpp"
+#include "Rendering/VisibilitySet.hpp"
 
 #include "Simulation/Simulation.hpp"
 #include "Simulation/RunLoop.hpp"

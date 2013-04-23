@@ -63,3 +63,8 @@ void GeometryNode::detachAllPrimitives( void )
 	_primitives.clear();
 }
 
+void GeometryNode::accept( NodeVisitor &visitor )
+{
+	visitor.visitGeometryNode( this );
+}
+

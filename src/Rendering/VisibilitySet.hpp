@@ -25,37 +25,34 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "EndRenderTask.hpp"
-#include "Simulation/Simulation.hpp"
+#ifndef CRIMILD_RENDERING_VISIBILITY_SET_
+#define CRIMILD_RENDERING_VISIBILITY_SET_
 
-using namespace Crimild;
+#include <functional>
+#include <list>
 
-EndRenderTask::EndRenderTask( int priority )
-	: Task( priority )
-{
+namespace Crimild {
 
-}
+	class GeometryNode;
 
-EndRenderTask::~EndRenderTask( void )
-{
+	class VisibilitySet {
+	public:
+		VisibilitySet( void );
+		virtual ~VisibilitySet( void );
 
-}
+		void reset( void );
 
-void EndRenderTask::start( void )
-{
+		bool hasGeometries( void ) const { return _geometries.size() > 0; }
 
-}
+		void addGeometry( GeometryNode * geometry );
 
-void EndRenderTask::update( void )
-{
-	Renderer *renderer = Simulation::getCurrent()->getRenderer();
-	if ( renderer ) {
-		renderer->endRender();
-	}
-}
+		void foreachGeometry( std::function< void( GeometryNode * ) > callback );
 
-void EndRenderTask::stop( void )
-{
+	private:
+		std::list< GeometryNode * > _geometries;
+	};
 
 }
+
+#endif
 

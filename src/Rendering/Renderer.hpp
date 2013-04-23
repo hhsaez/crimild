@@ -29,8 +29,15 @@
 #define CRIMILD_RENDERER_RENDERER_
 
 #include "FrameBufferObject.hpp"
+#include "Material.hpp"
 
 namespace Crimild {
+
+	class VisibilitySet;
+	class GeometryNode;
+	class Primitive;
+	class VertexBufferObject;
+	class IndexBufferObject;
 
 	class Renderer {
 	protected:
@@ -54,6 +61,41 @@ namespace Crimild {
 		virtual void endRender( void ) = 0;
 
 		virtual void clearBuffers( void ) = 0;
+
+		virtual void render( VisibilitySet *vs );
+
+		virtual void render( GeometryNode *geometry );
+
+		virtual void applyMaterial( GeometryNode *geometry, Primitive *primitive, Material *material );
+
+		virtual void enableShaderProgram( ShaderProgram *program );
+
+		virtual void enableTextures( ShaderProgram *program, Material *material );
+
+		virtual void enableVertexBuffer( ShaderProgram *program, VertexBufferObject *vbo );
+
+		virtual void enableIndexBuffer( ShaderProgram *program, IndexBufferObject *ibo );
+
+		virtual void applyTransformations( ShaderProgram *program, GeometryNode *geometry );
+
+		virtual void drawPrimitive( ShaderProgram *program, Primitive *primitive );
+
+		virtual void restoreTransformations( ShaderProgram *program, GeometryNode *geometry );
+
+		virtual void disableIndexBuffer( ShaderProgram *program, IndexBufferObject *ibo );
+
+		virtual void disableVertexBuffer( ShaderProgram *program, VertexBufferObject *vbo );
+
+		virtual void disableTextures( ShaderProgram *program, Material *material );
+
+		virtual void disableShaderProgram( ShaderProgram *program );
+
+	public:
+		Material *getDefaultMaterial( void ) { return _defaultMaterial.get(); }
+		void setDefaultMaterial( MaterialPtr material ) { _defaultMaterial = material; }
+
+	public:
+		MaterialPtr _defaultMaterial;
 
 	private:
 		Renderer( const Renderer &renderer ) { }

@@ -25,37 +25,32 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "EndRenderTask.hpp"
-#include "Simulation/Simulation.hpp"
+#ifndef CRIMILD_VISITORS_COMPUTE_VISIBILITY_SET_
+#define CRIMILD_VISITORS_COMPUTE_VISIBILITY_SET_
 
-using namespace Crimild;
+#include "NodeVisitor.hpp"
 
-EndRenderTask::EndRenderTask( int priority )
-	: Task( priority )
-{
+namespace Crimild {
 
-}
+	class VisibilitySet;
 
-EndRenderTask::~EndRenderTask( void )
-{
+	class ComputeVisibilitySet : public NodeVisitor {
+	public:
+		ComputeVisibilitySet( VisibilitySet *result );
 
-}
+		virtual ~ComputeVisibilitySet( void );
 
-void EndRenderTask::start( void )
-{
+		VisibilitySet *getResult( void ) { return _result; }
 
-}
+		virtual void traverse( Node *node ) override;
 
-void EndRenderTask::update( void )
-{
-	Renderer *renderer = Simulation::getCurrent()->getRenderer();
-	if ( renderer ) {
-		renderer->endRender();
-	}
-}
+		virtual void visitGeometryNode( GeometryNode *geometry ) override;
 
-void EndRenderTask::stop( void )
-{
+	private:
+		VisibilitySet *_result;
+	};
 
 }
+
+#endif
 

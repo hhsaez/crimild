@@ -60,6 +60,9 @@ namespace Crimild {
 		bool isTaskSuspended( TaskPtr task ) const;
 		void foreachSuspendedTask( std::function< void ( TaskPtr &task ) > callback );
 
+	protected:
+		void cleanup( void );
+
 	private:
 		std::list< TaskPtr > _activeTasks;
 		std::list< TaskPtr > _killedTasks;

@@ -26,6 +26,10 @@
  */
 
 #include "Renderer.hpp"
+#include "VisibilitySet.hpp"
+
+#include "SceneGraph/GeometryNode.hpp"
+#include "Components/MaterialComponent.hpp"
 
 using namespace Crimild;
 
@@ -37,5 +41,110 @@ Renderer::Renderer( void )
 Renderer::~Renderer( void )
 {
 
+}
+
+void Renderer::render( VisibilitySet *vs )
+{
+	vs->foreachGeometry( [&]( GeometryNode *geometry ) mutable {
+		render( geometry );
+	});
+}
+
+void Renderer::render( GeometryNode *geometry )
+{
+	MaterialComponent *materials = geometry->getComponent< MaterialComponent >();
+	if ( materials->hasMaterials() ) {
+		geometry->foreachPrimitive( [&]( PrimitivePtr &primitive ) mutable {
+			materials->foreachMaterial( [&]( MaterialPtr &material ) mutable {
+				applyMaterial( geometry, primitive.get(), material.get() );
+			});
+		});
+	}
+	else {
+		geometry->foreachPrimitive( [&]( PrimitivePtr &primitive ) mutable {
+			applyMaterial( geometry, primitive.get(), getDefaultMaterial() );
+		});
+	}
+}
+
+void Renderer::applyMaterial( GeometryNode *geometry, Primitive *primitive, Material *material )
+{
+	if ( !material || !primitive ) {
+		return;
+	}
+
+	ShaderProgram *program = material->getProgram() ? material->getProgram() : getDefaultMaterial()->getProgram();
+	if ( !program ) {
+		return;
+	}
+
+	enableShaderProgram( program );
+	enableTextures( program, material );
+	enableVertexBuffer( program, primitive->getVertexBuffer() );
+	enableIndexBuffer( program, primitive->getIndexBuffer() );
+	applyTransformations( program, geometry );
+
+	drawPrimitive( program, primitive );
+
+	restoreTransformations( program, geometry );
+	disableIndexBuffer( program, primitive->getIndexBuffer() );
+	disableVertexBuffer( program, primitive->getVertexBuffer() );
+	disableTextures( program, material );
+	disableShaderProgram( program );
+}
+
+void Renderer::enableShaderProgram( ShaderProgram *program )
+{
+
+}
+
+void Renderer::enableTextures( ShaderProgram *program, Material *material )
+{
+
+}
+
+void Renderer::enableVertexBuffer( ShaderProgram *program, VertexBufferObject *vbo )
+{
+
+}
+
+void Renderer::enableIndexBuffer( ShaderProgram *program, IndexBufferObject *ibo )
+{
+
+}
+
+void Renderer::applyTransformations( ShaderProgram *program, GeometryNode *geometry )
+{
+
+}
+
+void Renderer::drawPrimitive( ShaderProgram *program, Primitive *primitive )
+{
+
+}
+
+void Renderer::restoreTransformations( ShaderProgram *program, GeometryNode *geometry )
+{
+
+}
+
+void Renderer::disableIndexBuffer( ShaderProgram *program, IndexBufferObject *ibo )
+{
+
+}
+
+void Renderer::disableVertexBuffer( ShaderProgram *program, VertexBufferObject *vbo )
+{
+
+}
+
+void Renderer::disableTextures( ShaderProgram *program, Material *material )
+{
+
+}
+
+void Renderer::disableShaderProgram( ShaderProgram *program )
+{
+	
 }
 

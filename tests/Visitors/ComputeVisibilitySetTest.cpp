@@ -25,37 +25,46 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "EndRenderTask.hpp"
-#include "Simulation/Simulation.hpp"
+#include <Crimild.hpp>
+
+#include "Utils/MockVisitor.hpp"
+
+#include "gtest/gtest.h"
 
 using namespace Crimild;
 
-EndRenderTask::EndRenderTask( int priority )
-	: Task( priority )
+TEST( ComputeVisibilitySetTest, traversal )
 {
+	GroupNodePtr group1( new GroupNode() );
+	GroupNodePtr group2( new GroupNode() );
+	GeometryNodePtr geometry1( new GeometryNode() );
+	GeometryNodePtr geometry2( new GeometryNode() );
+	GeometryNodePtr geometry3( new GeometryNode() );
 
-}
+	group1->attachNode( group2 );
+	group1->attachNode( geometry1 );
 
-EndRenderTask::~EndRenderTask( void )
-{
+	group2->attachNode( geometry2 );
+	group2->attachNode( geometry3 );
 
-}
+	VisibilitySet result;
+	group1->perform( ComputeVisibilitySet( &result ) );
 
-void EndRenderTask::start( void )
-{
+	EXPECT_TRUE( result.hasGeometries() );
 
-}
-
-void EndRenderTask::update( void )
-{
-	Renderer *renderer = Simulation::getCurrent()->getRenderer();
-	if ( renderer ) {
-		renderer->endRender();
-	}
-}
-
-void EndRenderTask::stop( void )
-{
-
+	int i = 0;
+	result.foreachGeometry( [&]( GeometryNode * geo ) mutable {
+		if ( i == 0 ) {
+			EXPECT_EQ( geo, geometry2.get() );
+		}
+		else if ( i == 1 ) {
+			EXPECT_EQ( geo, geometry3.get() );
+		}
+		else if ( i == 2 ) {
+			EXPECT_EQ( geo, geometry1.get() );
+		}
+		i++;
+	});
+	EXPECT_EQ( 3, i );
 }
 

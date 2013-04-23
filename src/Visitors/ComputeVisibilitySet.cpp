@@ -25,37 +25,33 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "EndRenderTask.hpp"
-#include "Simulation/Simulation.hpp"
+#include "ComputeVisibilitySet.hpp"
+#include "Rendering/VisibilitySet.hpp"
+
+#include <iostream>
 
 using namespace Crimild;
 
-EndRenderTask::EndRenderTask( int priority )
-	: Task( priority )
+ComputeVisibilitySet::ComputeVisibilitySet( VisibilitySet *result )
+	: _result( result )
 {
 
 }
 
-EndRenderTask::~EndRenderTask( void )
+ComputeVisibilitySet::~ComputeVisibilitySet( void )
 {
 
 }
 
-void EndRenderTask::start( void )
+void ComputeVisibilitySet::traverse( Node *node )
 {
+	_result->reset();
 
+	NodeVisitor::traverse( node );
 }
 
-void EndRenderTask::update( void )
+void ComputeVisibilitySet::visitGeometryNode( GeometryNode *geometry )
 {
-	Renderer *renderer = Simulation::getCurrent()->getRenderer();
-	if ( renderer ) {
-		renderer->endRender();
-	}
-}
-
-void EndRenderTask::stop( void )
-{
-
+	_result->addGeometry( geometry );
 }
 

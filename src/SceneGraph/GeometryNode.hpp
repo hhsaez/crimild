@@ -49,6 +49,10 @@ namespace Crimild {
 
 	private:
 		std::list< PrimitivePtr > _primitives;
+
+	public:
+		virtual void accept( NodeVisitor &visitor ) override;
+		
 	};
 
 	typedef std::shared_ptr< GeometryNode > GeometryNodePtr;
