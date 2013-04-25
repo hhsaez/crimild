@@ -25,77 +25,28 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Simulation.hpp"
+#include "CameraNode.hpp"
 
-#include "Tasks/BeginRenderTask.hpp"
-#include "Tasks/EndRenderTask.hpp"
-#include "Tasks/UpdateSceneTask.hpp"
-#include "Tasks/RenderSceneTask.hpp"
-
-#include "Rendering/Camera.hpp"
-
-#include "Visitors/FetchCameras.hpp"
-
-#define UPDATE_SCENE_PRIORITY 100
-#define BEGIN_RENDER_PRIORITY 1000
-#define RENDER_SCENE_PRIORITY 2000
-#define END_RENDER_PRIORITY 9000
+#include "Components/CameraComponent.hpp"
 
 using namespace Crimild;
 
-Simulation *Simulation::_currentSimulation = nullptr;
-
-Simulation::Simulation( std::string name )
-	: NamedObject( name ),
-	  _mainLoop( new RunLoop() )
+CameraNode::CameraNode( std::string name )
+	: Node( name )
 {
-	_currentSimulation = this;
+	CameraComponentPtr cameraCmp( new CameraComponent( 45.0f, 4.0f / 3.0f, 0.01f, 1024.0f ) );
+	attachComponent( cameraCmp );
 }
 
-Simulation::~Simulation( void )
+CameraNode::CameraNode( float fov, float aspect, float near, float far, std::string name )
+	: Node( name )
 {
-	stop();
-
-	_currentSimulation = nullptr;
+	CameraComponentPtr cameraCmp( new CameraComponent( fov, aspect, near, far ) );
+	attachComponent( cameraCmp );
 }
 
-void Simulation::start( void )
+CameraNode::~CameraNode( void )
 {
-	BeginRenderTaskPtr beginRender( new BeginRenderTask( BEGIN_RENDER_PRIORITY ) );
-	getMainLoop()->startTask( beginRender );
-
-	EndRenderTaskPtr endRender( new EndRenderTask( END_RENDER_PRIORITY ) );
-	getMainLoop()->startTask( endRender );
-}
-
-bool Simulation::step( void )
-{
-	return _mainLoop->update();
-}
-
-void Simulation::stop( void )
-{
-	_mainLoop->stop();
-}
-
-int Simulation::run( void )
-{
-	start();
-	while( step() );
-	return 0;
-}
-
-void Simulation::attachScene( NodePtr scene )
-{
-	FetchCameras fetchCameras;
-	scene->perform( fetchCameras );
-	fetchCameras.foreachCamera( [&]( Camera *camera ) mutable {
-		UpdateSceneTaskPtr updateScene( new UpdateSceneTask( UPDATE_SCENE_PRIORITY, scene ) );
-		getMainLoop()->startTask( updateScene );
-
-		RenderSceneTaskPtr renderScene( new RenderSceneTask( RENDER_SCENE_PRIORITY, scene, camera ) );
-		getMainLoop()->startTask( renderScene );
-	});
 
 }
 

@@ -25,35 +25,49 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_VISITORS_COMPUTE_VISIBILITY_SET_
-#define CRIMILD_VISITORS_COMPUTE_VISIBILITY_SET_
+#ifndef CRIMILD_PRIMITIVES_PARAMETRIC_
+#define CRIMILD_PRIMITIVES_PARAMETRIC_
 
-#include "NodeVisitor.hpp"
+#include "Primitive.hpp"
+
+#include "Mathematics/Vector.hpp"
 
 namespace Crimild {
-
-	class VisibilitySet;
-	class Camera;
-
-	class ComputeVisibilitySet : public NodeVisitor {
-	public:
-		ComputeVisibilitySet( VisibilitySet *result, Camera *camera );
-
-		virtual ~ComputeVisibilitySet( void );
-
-		VisibilitySet *getResult( void ) { return _result; }
-
-		Camera *getCamera( void ) { return _camera; }
-
-		virtual void traverse( Node *node ) override;
-
-		virtual void visitGeometryNode( GeometryNode *geometry ) override;
-
-	private:
-		VisibilitySet *_result;
-		Camera *_camera;
-	};
-
+    
+    class ParametricInterval {
+    public:
+        Vector2i divisions;
+        Vector2f upperBound;
+        Vector2f textureCount;
+    };
+    
+    class ParametricPrimitive : public Primitive {
+    public:
+        ParametricPrimitive( Primitive::Type type, const VertexFormat &format );
+        virtual ~ParametricPrimitive( void );
+        
+    protected:
+        void setInterval( const ParametricInterval &interval );
+        void generate( void );
+        virtual Vector3f evaluate( const Vector2f &domain ) const = 0;
+        virtual bool invertNormal( const Vector2f &domain ) const { return false; }
+        
+    private:
+        int getVertexCount( void ) const;
+        int getLineIndexCount( void ) const;
+        int getTriangleIndexCount( void ) const;
+        Vector2f computeDomain( float i, float j ) const;
+        void generateVertexBuffer( void );
+        void generateLineIndexBuffer( void );
+        void generateTriangleIndexBuffer( void );
+        
+        VertexFormat _format;
+        Vector2f _upperBound;
+        Vector2i _slices;
+        Vector2i _divisions;
+        Vector2i _textureCount;
+    };
+        
 }
 
 #endif

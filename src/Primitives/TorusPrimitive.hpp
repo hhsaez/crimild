@@ -25,35 +25,33 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_VISITORS_COMPUTE_VISIBILITY_SET_
-#define CRIMILD_VISITORS_COMPUTE_VISIBILITY_SET_
+#ifndef CRIMILD_PRIMITIVES_TORUS_
+#define CRIMILD_PRIMITIVES_TORUS_
 
-#include "NodeVisitor.hpp"
+#include "ParametricPrimitive.hpp"
 
 namespace Crimild {
+    
+    /**
+     */
+    class TorusPrimitive : public ParametricPrimitive {
+    public:
+        TorusPrimitive( Primitive::Type type, 
+            float majorRadius, 
+            float minorRadius, 
+            const VertexFormat &format = VertexFormat::VF_P3_N3, 
+            Vector2i divisions = Vector2i( 20, 20 ) );
 
-	class VisibilitySet;
-	class Camera;
-
-	class ComputeVisibilitySet : public NodeVisitor {
-	public:
-		ComputeVisibilitySet( VisibilitySet *result, Camera *camera );
-
-		virtual ~ComputeVisibilitySet( void );
-
-		VisibilitySet *getResult( void ) { return _result; }
-
-		Camera *getCamera( void ) { return _camera; }
-
-		virtual void traverse( Node *node ) override;
-
-		virtual void visitGeometryNode( GeometryNode *geometry ) override;
-
-	private:
-		VisibilitySet *_result;
-		Camera *_camera;
-	};
-
+        virtual ~TorusPrimitive( void );
+        
+    protected:
+        virtual Vector3f evaluate( const Vector2f &domain ) const;
+        
+    private:
+        float _majorRadius;
+        float _minorRadius;
+    };
+        
 }
 
 #endif

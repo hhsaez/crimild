@@ -33,7 +33,28 @@
 
 using namespace Crimild;
 
-TEST( ComputeVisibilitySetTest, traversal )
+TEST( UpdateWorldStateTest, singleNode )
+{
+	NodePtr node( new Node() );
+
+	EXPECT_TRUE( node->getLocal().isIdentity() );
+	EXPECT_TRUE( node->getWorld().isIdentity() );
+
+	node->local().setTranslate( 0, 0, -5 );
+
+	EXPECT_FALSE( node->getLocal().isIdentity() );
+	EXPECT_EQ( Vector3f( 0, 0, -5 ), node->getLocal().getTranslate() );
+	EXPECT_TRUE( node->getWorld().isIdentity() );
+
+	node->perform( UpdateWorldState() );
+
+	EXPECT_FALSE( node->getLocal().isIdentity() );
+	EXPECT_EQ( Vector3f( 0, 0, -5 ), node->getLocal().getTranslate() );
+	EXPECT_FALSE( node->getWorld().isIdentity() );
+	EXPECT_EQ( Vector3f( 0, 0, -5 ), node->getWorld().getTranslate() );
+}
+
+TEST( UpdateWorldStateTest, hierarchy )
 {
 	GroupNodePtr group1( new GroupNode() );
 	GroupNodePtr group2( new GroupNode() );
@@ -41,32 +62,37 @@ TEST( ComputeVisibilitySetTest, traversal )
 	GeometryNodePtr geometry2( new GeometryNode() );
 	GeometryNodePtr geometry3( new GeometryNode() );
 
-	CameraPtr camera( new Camera );
-
 	group1->attachNode( group2 );
 	group1->attachNode( geometry1 );
 
 	group2->attachNode( geometry2 );
 	group2->attachNode( geometry3 );
 
-	VisibilitySet result;
-	group1->perform( ComputeVisibilitySet( &result, camera.get() ) );
+	EXPECT_TRUE( geometry3->getLocal().isIdentity() );
+	EXPECT_TRUE( geometry3->getWorld().isIdentity() );
 
-	EXPECT_TRUE( result.hasGeometries() );
+	group1->local().setTranslate( 0, 0, -5 );
+	group1->perform( UpdateWorldState() );
 
-	int i = 0;
-	result.foreachGeometry( [&]( GeometryNode * geo ) mutable {
-		if ( i == 0 ) {
-			EXPECT_EQ( geo, geometry2.get() );
-		}
-		else if ( i == 1 ) {
-			EXPECT_EQ( geo, geometry3.get() );
-		}
-		else if ( i == 2 ) {
-			EXPECT_EQ( geo, geometry1.get() );
-		}
-		i++;
-	});
-	EXPECT_EQ( 3, i );
+	EXPECT_FALSE( group1->getLocal().isIdentity() );
+	EXPECT_FALSE( group1->getWorld().isIdentity() );
+	EXPECT_EQ( Vector3f( 0, 0, -5 ), group1->getWorld().getTranslate() );
+
+	EXPECT_TRUE( group2->getLocal().isIdentity() );
+	EXPECT_FALSE( group2->getWorld().isIdentity() );
+	EXPECT_EQ( Vector3f( 0, 0, -5 ), group2->getWorld().getTranslate() );
+
+	EXPECT_TRUE( geometry1->getLocal().isIdentity() );
+	EXPECT_FALSE( geometry1->getWorld().isIdentity() );
+	EXPECT_EQ( Vector3f( 0, 0, -5 ), geometry1->getWorld().getTranslate() );
+
+	EXPECT_TRUE( geometry2->getLocal().isIdentity() );
+	EXPECT_FALSE( geometry2->getWorld().isIdentity() );
+	EXPECT_EQ( Vector3f( 0, 0, -5 ), geometry2->getWorld().getTranslate() );
+
+	EXPECT_TRUE( geometry3->getLocal().isIdentity() );
+	EXPECT_FALSE( geometry3->getWorld().isIdentity() );
+	EXPECT_EQ( Vector3f( 0, 0, -5 ), geometry3->getWorld().getTranslate() );
+
 }
 

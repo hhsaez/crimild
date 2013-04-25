@@ -30,10 +30,11 @@
 
 #include "BufferObject.hpp"
 #include "VertexFormat.hpp"
+#include "Catalog.hpp"
 
 namespace Crimild {
 
-	class VertexBufferObject : public BufferObject< float > {
+	class VertexBufferObject : public BufferObject< float >, public Catalog< VertexBufferObject >::Resource {
 	public:
 		VertexBufferObject( const VertexFormat &vf, unsigned int vertexCount, const float *vertexData );
 		virtual ~VertexBufferObject( void );
@@ -47,6 +48,8 @@ namespace Crimild {
 	};
 
 	typedef std::shared_ptr< VertexBufferObject > VertexBufferObjectPtr;
+	typedef Catalog< VertexBufferObject > VertexBufferObjectCatalog;
+	typedef std::shared_ptr< VertexBufferObjectCatalog > VertexBufferObjectCatalogPtr;
 
 }
 

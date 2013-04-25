@@ -29,10 +29,11 @@
 #define CRIMILD_RENDERING_INDEX_BUFFER_OBJECT_
 
 #include "BufferObject.hpp"
+#include "Catalog.hpp"
 
 namespace Crimild {
 
-	class IndexBufferObject : public BufferObject< unsigned short > {
+	class IndexBufferObject : public BufferObject< unsigned short >, public Catalog< IndexBufferObject >::Resource {
 	public:
 		IndexBufferObject( unsigned int indexCount, const unsigned short *indexData );
 		virtual ~IndexBufferObject( void );
@@ -42,6 +43,8 @@ namespace Crimild {
 	};
 
 	typedef std::shared_ptr< IndexBufferObject > IndexBufferObjectPtr;
+	typedef Catalog< IndexBufferObject > IndexBufferObjectCatalog;
+	typedef std::shared_ptr< IndexBufferObjectCatalog > IndexBufferObjectCatalogPtr;
 
 }
 

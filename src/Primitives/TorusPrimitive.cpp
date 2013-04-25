@@ -25,77 +25,35 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Simulation.hpp"
-
-#include "Tasks/BeginRenderTask.hpp"
-#include "Tasks/EndRenderTask.hpp"
-#include "Tasks/UpdateSceneTask.hpp"
-#include "Tasks/RenderSceneTask.hpp"
-
-#include "Rendering/Camera.hpp"
-
-#include "Visitors/FetchCameras.hpp"
-
-#define UPDATE_SCENE_PRIORITY 100
-#define BEGIN_RENDER_PRIORITY 1000
-#define RENDER_SCENE_PRIORITY 2000
-#define END_RENDER_PRIORITY 9000
+#include "TorusPrimitive.hpp"
 
 using namespace Crimild;
 
-Simulation *Simulation::_currentSimulation = nullptr;
-
-Simulation::Simulation( std::string name )
-	: NamedObject( name ),
-	  _mainLoop( new RunLoop() )
+TorusPrimitive::TorusPrimitive( Primitive::Type type, float majorRadius, float minorRadius, const VertexFormat &format, Vector2i divisions )
+    : ParametricPrimitive( type, format )
 {
-	_currentSimulation = this;
+    _majorRadius = majorRadius;
+    _minorRadius = minorRadius;
+    
+    ParametricInterval interval = { divisions, Vector2f( Numericf::TWO_PI, Numericf::TWO_PI ), Vector2f( 40, 10 ) };
+    setInterval( interval );
+    generate();
 }
 
-Simulation::~Simulation( void )
+TorusPrimitive::~TorusPrimitive( void )
 {
-	stop();
-
-	_currentSimulation = nullptr;
+    
 }
 
-void Simulation::start( void )
+Vector3f TorusPrimitive::evaluate( const Vector2f &domain ) const
 {
-	BeginRenderTaskPtr beginRender( new BeginRenderTask( BEGIN_RENDER_PRIORITY ) );
-	getMainLoop()->startTask( beginRender );
-
-	EndRenderTaskPtr endRender( new EndRenderTask( END_RENDER_PRIORITY ) );
-	getMainLoop()->startTask( endRender );
-}
-
-bool Simulation::step( void )
-{
-	return _mainLoop->update();
-}
-
-void Simulation::stop( void )
-{
-	_mainLoop->stop();
-}
-
-int Simulation::run( void )
-{
-	start();
-	while( step() );
-	return 0;
-}
-
-void Simulation::attachScene( NodePtr scene )
-{
-	FetchCameras fetchCameras;
-	scene->perform( fetchCameras );
-	fetchCameras.foreachCamera( [&]( Camera *camera ) mutable {
-		UpdateSceneTaskPtr updateScene( new UpdateSceneTask( UPDATE_SCENE_PRIORITY, scene ) );
-		getMainLoop()->startTask( updateScene );
-
-		RenderSceneTaskPtr renderScene( new RenderSceneTask( RENDER_SCENE_PRIORITY, scene, camera ) );
-		getMainLoop()->startTask( renderScene );
-	});
-
+    const float major = _majorRadius;
+    const float minor = _minorRadius;
+    float u = domain[ 0 ];
+    float v = domain[ 1 ];
+    float x = ( major + minor * cos( v ) ) * cos( u );
+    float y = ( major + minor * cos( v ) ) * sin( u );
+    float z = minor * sin( v );
+    return Vector3f( x, y, z );
 }
 

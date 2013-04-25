@@ -31,7 +31,8 @@ using namespace Crimild;
 
 Node::Node( std::string name )
 	: NamedObject( name ),
-	  _parent( nullptr )
+	  _parent( nullptr ),
+	  _worldIsCurrent( false )
 {
 }
 

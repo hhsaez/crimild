@@ -25,77 +25,41 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Simulation.hpp"
+#ifndef CRIMILD_RENDERING_CAMERA_
+#define CRIMILD_RENDERING_CAMERA_
 
-#include "Tasks/BeginRenderTask.hpp"
-#include "Tasks/EndRenderTask.hpp"
-#include "Tasks/UpdateSceneTask.hpp"
-#include "Tasks/RenderSceneTask.hpp"
+#include "Mathematics/Matrix.hpp"
+#include "Mathematics/Frustum.hpp"
 
-#include "Rendering/Camera.hpp"
+#include <memory>
 
-#include "Visitors/FetchCameras.hpp"
+namespace Crimild {
 
-#define UPDATE_SCENE_PRIORITY 100
-#define BEGIN_RENDER_PRIORITY 1000
-#define RENDER_SCENE_PRIORITY 2000
-#define END_RENDER_PRIORITY 9000
+	class Camera {
+	public:
+		Camera( void );
+		Camera( float fov, float aspect, float near, float far );
+		virtual ~Camera( void );
 
-using namespace Crimild;
+		void setProjectionMatrix( const Matrix4f &projection ) { _projectionMatrix = projection; }
+		const Matrix4f &getProjectionMatrix( void ) const { return _projectionMatrix; }
 
-Simulation *Simulation::_currentSimulation = nullptr;
+		void setViewMatrix( const Matrix4f &view ) { _viewMatrix = view; }
+		const Matrix4f &getViewMatrix( void ) const { return _viewMatrix; }
 
-Simulation::Simulation( std::string name )
-	: NamedObject( name ),
-	  _mainLoop( new RunLoop() )
-{
-	_currentSimulation = this;
-}
+	private:
+		Matrix4f _projectionMatrix;
+		Matrix4f _viewMatrix;
+		Frustumf _frustum;
 
-Simulation::~Simulation( void )
-{
-	stop();
+	private:
+		Camera( const Camera & ) { }
+		Camera &operator=( const Camera & ) { return *this; }
+	};
 
-	_currentSimulation = nullptr;
-}
-
-void Simulation::start( void )
-{
-	BeginRenderTaskPtr beginRender( new BeginRenderTask( BEGIN_RENDER_PRIORITY ) );
-	getMainLoop()->startTask( beginRender );
-
-	EndRenderTaskPtr endRender( new EndRenderTask( END_RENDER_PRIORITY ) );
-	getMainLoop()->startTask( endRender );
-}
-
-bool Simulation::step( void )
-{
-	return _mainLoop->update();
-}
-
-void Simulation::stop( void )
-{
-	_mainLoop->stop();
-}
-
-int Simulation::run( void )
-{
-	start();
-	while( step() );
-	return 0;
-}
-
-void Simulation::attachScene( NodePtr scene )
-{
-	FetchCameras fetchCameras;
-	scene->perform( fetchCameras );
-	fetchCameras.foreachCamera( [&]( Camera *camera ) mutable {
-		UpdateSceneTaskPtr updateScene( new UpdateSceneTask( UPDATE_SCENE_PRIORITY, scene ) );
-		getMainLoop()->startTask( updateScene );
-
-		RenderSceneTaskPtr renderScene( new RenderSceneTask( RENDER_SCENE_PRIORITY, scene, camera ) );
-		getMainLoop()->startTask( renderScene );
-	});
+	typedef std::shared_ptr< Camera > CameraPtr;
 
 }
+
+#endif
 

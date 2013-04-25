@@ -31,11 +31,15 @@
 #include "Simulation/Task.hpp"
 #include "SceneGraph/Node.hpp"
 
+#include <list>
+
 namespace Crimild {
+
+	class Camera;
 
 	class RenderSceneTask : public Task {
 	public:
-		RenderSceneTask( int priority, NodePtr scene );
+		RenderSceneTask( int priority, NodePtr scene, Camera *camera );
 		virtual ~RenderSceneTask( void );
 
 		virtual void start( void ) override;
@@ -44,6 +48,7 @@ namespace Crimild {
 
 	private:
 		NodePtr _scene;
+		Camera *_camera;
 	};
 
 	typedef std::shared_ptr< RenderSceneTask > RenderSceneTaskPtr;

@@ -33,7 +33,12 @@ ShaderProgram::ShaderProgram( VertexShaderPtr vs, FragmentShaderPtr fs )
 	: _vertexShader( vs ),
 	  _fragmentShader( fs )
 {
+	registerLocation( ShaderLocationPtr( new ShaderLocation( ShaderLocation::Type::ATTRIBUTE, ShaderLocation::DefaultLocations::POSITION_ATTRIBUTE_NAME ) ) );
+	registerLocation( ShaderLocationPtr( new ShaderLocation( ShaderLocation::Type::ATTRIBUTE, ShaderLocation::DefaultLocations::TEXTURE_COORDS_ATTRIBUTE_NAME ) ) );
 
+	registerLocation( ShaderLocationPtr( new ShaderLocation( ShaderLocation::Type::UNIFORM, ShaderLocation::DefaultLocations::PROJECTION_MATRIX_UNIFORM_NAME ) ) );
+	registerLocation( ShaderLocationPtr( new ShaderLocation( ShaderLocation::Type::UNIFORM, ShaderLocation::DefaultLocations::VIEW_MATRIX_UNIFORM_NAME ) ) );
+	registerLocation( ShaderLocationPtr( new ShaderLocation( ShaderLocation::Type::UNIFORM, ShaderLocation::DefaultLocations::MODEL_MATRIX_UNIFORM_NAME ) ) );
 }
 
 ShaderProgram::~ShaderProgram( void )

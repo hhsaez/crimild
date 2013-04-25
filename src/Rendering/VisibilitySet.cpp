@@ -30,6 +30,7 @@
 using namespace Crimild;
 
 VisibilitySet::VisibilitySet( void )
+	: _camera( nullptr )
 {
 
 }

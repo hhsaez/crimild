@@ -34,40 +34,42 @@
 using namespace Crimild;
 
 Renderer::Renderer( void )
+	: _shaderProgramCatalog( new Catalog< ShaderProgram >() ),
+	  _textureCatalog( new Catalog< Texture >() ),
+	  _vertexBufferObjectCatalog( new Catalog< VertexBufferObject >() ),
+	  _indexBufferObjectCatalog( new Catalog< IndexBufferObject >() )
 {
-
 }
 
 Renderer::~Renderer( void )
 {
-
 }
 
 void Renderer::render( VisibilitySet *vs )
 {
 	vs->foreachGeometry( [&]( GeometryNode *geometry ) mutable {
-		render( geometry );
+		render( geometry, vs->getCamera() );
 	});
 }
 
-void Renderer::render( GeometryNode *geometry )
+void Renderer::render( GeometryNode *geometry, Camera *camera )
 {
 	MaterialComponent *materials = geometry->getComponent< MaterialComponent >();
 	if ( materials->hasMaterials() ) {
 		geometry->foreachPrimitive( [&]( PrimitivePtr &primitive ) mutable {
 			materials->foreachMaterial( [&]( MaterialPtr &material ) mutable {
-				applyMaterial( geometry, primitive.get(), material.get() );
+				applyMaterial( geometry, primitive.get(), material.get(), camera );
 			});
 		});
 	}
 	else {
 		geometry->foreachPrimitive( [&]( PrimitivePtr &primitive ) mutable {
-			applyMaterial( geometry, primitive.get(), getDefaultMaterial() );
+			applyMaterial( geometry, primitive.get(), getDefaultMaterial(), camera );
 		});
 	}
 }
 
-void Renderer::applyMaterial( GeometryNode *geometry, Primitive *primitive, Material *material )
+void Renderer::applyMaterial( GeometryNode *geometry, Primitive *primitive, Material *material, Camera *camera )
 {
 	if ( !material || !primitive ) {
 		return;
@@ -78,73 +80,26 @@ void Renderer::applyMaterial( GeometryNode *geometry, Primitive *primitive, Mate
 		return;
 	}
 
-	enableShaderProgram( program );
-	enableTextures( program, material );
-	enableVertexBuffer( program, primitive->getVertexBuffer() );
-	enableIndexBuffer( program, primitive->getIndexBuffer() );
-	applyTransformations( program, geometry );
-
+	bindResources( program, primitive, material );
+	applyTransformations( program, geometry, camera );
 	drawPrimitive( program, primitive );
-
-	restoreTransformations( program, geometry );
-	disableIndexBuffer( program, primitive->getIndexBuffer() );
-	disableVertexBuffer( program, primitive->getVertexBuffer() );
-	disableTextures( program, material );
-	disableShaderProgram( program );
+	restoreTransformations( program, geometry, camera );
+	unbindResources( program, primitive, material );
 }
 
-void Renderer::enableShaderProgram( ShaderProgram *program )
+void Renderer::bindResources( ShaderProgram *program, Primitive *primitive, Material *material )
 {
-
+	getShaderProgramCatalog()->bind( program );
+	//getTextureCatalog()->bind( program, material->getColorMap() );
+	getVertexBufferObjectCatalog()->bind( program, primitive->getVertexBuffer() );
+	getIndexBufferObjectCatalog()->bind( program, primitive->getIndexBuffer() );
 }
 
-void Renderer::enableTextures( ShaderProgram *program, Material *material )
+void Renderer::unbindResources( ShaderProgram *program, Primitive *primitive, Material *material )
 {
-
-}
-
-void Renderer::enableVertexBuffer( ShaderProgram *program, VertexBufferObject *vbo )
-{
-
-}
-
-void Renderer::enableIndexBuffer( ShaderProgram *program, IndexBufferObject *ibo )
-{
-
-}
-
-void Renderer::applyTransformations( ShaderProgram *program, GeometryNode *geometry )
-{
-
-}
-
-void Renderer::drawPrimitive( ShaderProgram *program, Primitive *primitive )
-{
-
-}
-
-void Renderer::restoreTransformations( ShaderProgram *program, GeometryNode *geometry )
-{
-
-}
-
-void Renderer::disableIndexBuffer( ShaderProgram *program, IndexBufferObject *ibo )
-{
-
-}
-
-void Renderer::disableVertexBuffer( ShaderProgram *program, VertexBufferObject *vbo )
-{
-
-}
-
-void Renderer::disableTextures( ShaderProgram *program, Material *material )
-{
-
-}
-
-void Renderer::disableShaderProgram( ShaderProgram *program )
-{
-	
+	getIndexBufferObjectCatalog()->unbind( program, primitive->getIndexBuffer() );
+	getVertexBufferObjectCatalog()->unbind( program, primitive->getVertexBuffer() );
+	//getTextureCatalog()->unbind( program, material->getColorMap() );
+	getShaderProgramCatalog()->unbind( program );
 }
 

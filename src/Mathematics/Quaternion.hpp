@@ -196,6 +196,12 @@ namespace Crimild {
 		template< typename U >
 		friend Quaternion< U > operator*( const Quaternion< U > &q, const Quaternion< U > &r );
 
+		template< typename U >
+		friend Vector< 3, U > operator*( const Quaternion< U > &q, const Vector< 3, U > &v );
+
+		template< typename U >
+		friend Vector< 3, U > operator*( const Vector< 3, U > &v, const Quaternion< U > &q );
+
 		template< typename U, typename V >
 		friend Quaternion< U > operator*( const Quaternion< U > &q, V s );
 
@@ -351,6 +357,35 @@ namespace Crimild {
 		// TODO: this should be replaced by a faster method
 		return Quaternion< U >( qReal * rReal - qImaginary * rImaginary,
 								( qReal * rImaginary ) + ( qImaginary * rReal ) + ( qImaginary ^ rImaginary ) );
+	}
+
+	template< typename U >
+	Vector< 3, U > operator*( const Quaternion< U > &q, const Vector< 3, U > &v )
+	{
+        U x = v[ 0 ];
+        U y = v[ 1 ];
+        U z = v[ 2 ];
+        U qx = q.getImaginary()[ 0 ];
+        U qy = q.getImaginary()[ 1 ];
+        U qz = q.getImaginary()[ 2 ];
+        U qw = q.getReal();
+
+        U ix = qw * x + qy * z - qz * y;
+        U iy = qw * y + qz * x - qx * z;
+        U iz = qw * z + qx * y - qy * x;
+        U iw = -qx * x - qy * y - qz * z;
+
+        Vector< 3, U > result;
+        result[ 0 ] = ix * qw + iw * -qx + iy * -qz - iz * -qy;
+        result[ 1 ] = iy * qw + iw * -qy + iz * -qx - ix * -qz;
+        result[ 2 ] = iz * qw + iw * -qz + ix * -qy - iy * -qx;
+        return result;
+	}
+
+	template< typename U >
+	Vector< 3, U > operator*( const Vector< 3, U > &v, const Quaternion< U > &q )
+	{
+		return q * v;
 	}
 
 	template< typename U, typename V >

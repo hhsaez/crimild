@@ -30,6 +30,7 @@
 
 #include "Shader.hpp"
 #include "ShaderLocation.hpp"
+#include "Catalog.hpp"
 
 #include <functional>
 #include <map>
@@ -37,7 +38,7 @@
 
 namespace Crimild {
 
-	class ShaderProgram {
+	class ShaderProgram : public Catalog< ShaderProgram >::Resource {
 	public:
 		ShaderProgram( VertexShaderPtr vs, FragmentShaderPtr fs );
 		virtual ~ShaderProgram( void );
@@ -61,6 +62,8 @@ namespace Crimild {
 	};
 
 	typedef std::shared_ptr< ShaderProgram > ShaderProgramPtr;
+	typedef Catalog< ShaderProgram > ShaderProgramCatalog;
+	typedef std::shared_ptr< ShaderProgramCatalog > ShaderProgramCatalogPtr;
 
 }
 

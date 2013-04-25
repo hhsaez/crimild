@@ -25,77 +25,49 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Simulation.hpp"
+#include "FetchCameras.hpp"
 
-#include "Tasks/BeginRenderTask.hpp"
-#include "Tasks/EndRenderTask.hpp"
-#include "Tasks/UpdateSceneTask.hpp"
-#include "Tasks/RenderSceneTask.hpp"
-
-#include "Rendering/Camera.hpp"
-
-#include "Visitors/FetchCameras.hpp"
-
-#define UPDATE_SCENE_PRIORITY 100
-#define BEGIN_RENDER_PRIORITY 1000
-#define RENDER_SCENE_PRIORITY 2000
-#define END_RENDER_PRIORITY 9000
+#include "SceneGraph/Node.hpp"
+#include "SceneGraph/GroupNode.hpp"
+#include "Components/CameraComponent.hpp"
 
 using namespace Crimild;
 
-Simulation *Simulation::_currentSimulation = nullptr;
-
-Simulation::Simulation( std::string name )
-	: NamedObject( name ),
-	  _mainLoop( new RunLoop() )
+FetchCameras::FetchCameras( void )
 {
-	_currentSimulation = this;
+
 }
 
-Simulation::~Simulation( void )
+FetchCameras::~FetchCameras( void )
 {
-	stop();
 
-	_currentSimulation = nullptr;
 }
 
-void Simulation::start( void )
+void FetchCameras::reset( void )
 {
-	BeginRenderTaskPtr beginRender( new BeginRenderTask( BEGIN_RENDER_PRIORITY ) );
-	getMainLoop()->startTask( beginRender );
-
-	EndRenderTaskPtr endRender( new EndRenderTask( END_RENDER_PRIORITY ) );
-	getMainLoop()->startTask( endRender );
+	_cameras.clear();
+	NodeVisitor::reset();
 }
 
-bool Simulation::step( void )
+void FetchCameras::visitNode( Node *node )
 {
-	return _mainLoop->update();
+	CameraComponent *cameraComponent = node->getComponent< CameraComponent >();
+	if ( cameraComponent ) {
+		_cameras.push_back( cameraComponent->getCamera() );
+	}
 }
 
-void Simulation::stop( void )
+void FetchCameras::visitGroupNode( GroupNode *group )
 {
-	_mainLoop->stop();
+	visitNode( group );
+	NodeVisitor::visitGroupNode( group );
 }
 
-int Simulation::run( void )
+void FetchCameras::foreachCamera( std::function< void( Camera *camera ) > callback )
 {
-	start();
-	while( step() );
-	return 0;
-}
-
-void Simulation::attachScene( NodePtr scene )
-{
-	FetchCameras fetchCameras;
-	scene->perform( fetchCameras );
-	fetchCameras.foreachCamera( [&]( Camera *camera ) mutable {
-		UpdateSceneTaskPtr updateScene( new UpdateSceneTask( UPDATE_SCENE_PRIORITY, scene ) );
-		getMainLoop()->startTask( updateScene );
-
-		RenderSceneTaskPtr renderScene( new RenderSceneTask( RENDER_SCENE_PRIORITY, scene, camera ) );
-		getMainLoop()->startTask( renderScene );
-	});
-
+	for ( auto camera : _cameras ) {
+		callback( camera );
+	}
+	_cameras.clear();
 }
 

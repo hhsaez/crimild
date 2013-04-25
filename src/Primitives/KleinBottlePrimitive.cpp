@@ -25,77 +25,43 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Simulation.hpp"
-
-#include "Tasks/BeginRenderTask.hpp"
-#include "Tasks/EndRenderTask.hpp"
-#include "Tasks/UpdateSceneTask.hpp"
-#include "Tasks/RenderSceneTask.hpp"
-
-#include "Rendering/Camera.hpp"
-
-#include "Visitors/FetchCameras.hpp"
-
-#define UPDATE_SCENE_PRIORITY 100
-#define BEGIN_RENDER_PRIORITY 1000
-#define RENDER_SCENE_PRIORITY 2000
-#define END_RENDER_PRIORITY 9000
+#include "KleinBottlePrimitive.hpp"
 
 using namespace Crimild;
 
-Simulation *Simulation::_currentSimulation = nullptr;
-
-Simulation::Simulation( std::string name )
-	: NamedObject( name ),
-	  _mainLoop( new RunLoop() )
+KleinBottlePrimitive::KleinBottlePrimitive( Primitive::Type type, float scale, const VertexFormat &format, Vector2i divisions )
+    : ParametricPrimitive( type, format )
 {
-	_currentSimulation = this;
+    _scale = scale;
+    
+    ParametricInterval interval = { divisions, Vector2f( Numericf::TWO_PI, Numericf::TWO_PI ), Vector2f( 15, 50 ) };
+    setInterval( interval );
+    generate();
 }
 
-Simulation::~Simulation( void )
+KleinBottlePrimitive::~KleinBottlePrimitive( void )
 {
-	stop();
-
-	_currentSimulation = nullptr;
+    
 }
 
-void Simulation::start( void )
+Vector3f KleinBottlePrimitive::evaluate( const Vector2f &domain ) const
 {
-	BeginRenderTaskPtr beginRender( new BeginRenderTask( BEGIN_RENDER_PRIORITY ) );
-	getMainLoop()->startTask( beginRender );
-
-	EndRenderTaskPtr endRender( new EndRenderTask( END_RENDER_PRIORITY ) );
-	getMainLoop()->startTask( endRender );
+    float v = 1.0f - domain[ 0 ];
+    float u = domain[ 1 ];
+    float x0 = 3 * cos( u ) * ( 1 + sin( u ) ) + ( 2 * ( 1 - cos( u ) / 2 ) ) * cos( u ) * cos( v );
+    float y0 = 8 * sin( u ) + ( 2 * ( 1 - cos( u ) / 2 ) ) * sin( u ) * cos( v );
+    float x1 = 3 * cos( u ) * ( 1 + sin( u ) ) + ( 2 * ( 1 - cos( u ) / 2 ) ) * cos( v + Numericf::PI );
+    float y1 = 8 * sin( u );
+    
+    Vector3f range;
+    range[ 0 ] = u < Numericf::PI ? x0 : x1;
+    range[ 1 ] = u < Numericf::PI ? -y0 : -y1;
+    range[ 2 ] = ( -2 * ( 1 - cos( u ) / 2 ) ) * sin( v );
+    return range * _scale;
 }
 
-bool Simulation::step( void )
+bool KleinBottlePrimitive::InvertNormal( const Vector2f &domain ) const
 {
-	return _mainLoop->update();
-}
-
-void Simulation::stop( void )
-{
-	_mainLoop->stop();
-}
-
-int Simulation::run( void )
-{
-	start();
-	while( step() );
-	return 0;
-}
-
-void Simulation::attachScene( NodePtr scene )
-{
-	FetchCameras fetchCameras;
-	scene->perform( fetchCameras );
-	fetchCameras.foreachCamera( [&]( Camera *camera ) mutable {
-		UpdateSceneTaskPtr updateScene( new UpdateSceneTask( UPDATE_SCENE_PRIORITY, scene ) );
-		getMainLoop()->startTask( updateScene );
-
-		RenderSceneTaskPtr renderScene( new RenderSceneTask( RENDER_SCENE_PRIORITY, scene, camera ) );
-		getMainLoop()->startTask( renderScene );
-	});
-
+    return domain[ 1 ] > 3 * Numericf::PI / 2;
 }
 

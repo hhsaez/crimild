@@ -29,6 +29,7 @@
 #define CRIMILD_MATHEMATICS_FRUSTUM_
 
 #include "Numeric.hpp"
+#include "Matrix.hpp"
 
 namespace Crimild {
 
@@ -87,6 +88,38 @@ namespace Crimild {
 		PRECISION getUMax( void ) const { return _data[ 3 ]; }
 		PRECISION getDMin( void ) const { return _data[ 4 ]; }
 		PRECISION getDMax( void ) const { return _data[ 5 ]; }
+
+		Matrix< 4, PRECISION > computeProjectionMatrix( void )
+		{
+            float n = getDMin();
+            float f = getDMax();
+            float r = getRMax();
+            float l = getRMin();
+            float t = getUMax();
+            float b = getUMin();
+
+            Matrix< 4, PRECISION > projectionMatrix;
+            projectionMatrix[ 0 ] = 2 * n / ( r - l );
+            projectionMatrix[ 1 ] = 0;
+            projectionMatrix[ 2 ] = 0;
+            projectionMatrix[ 3 ] = 0;
+
+            projectionMatrix[ 4 ] = 0;
+            projectionMatrix[ 5 ] = 2 * n / ( t - b );
+            projectionMatrix[ 6 ] = 0;
+            projectionMatrix[ 7 ] = 0;
+
+            projectionMatrix[ 8 ] = ( r + l ) / ( r - l );
+            projectionMatrix[ 9 ] = ( t + b ) / ( t - b );
+            projectionMatrix[ 10 ] = -( f + n ) / ( f - n );
+            projectionMatrix[ 11 ] = -1.0f;
+
+            projectionMatrix[ 12 ] = 0;
+            projectionMatrix[ 13 ] = 0;
+            projectionMatrix[ 14 ] = -2.0f * f * n / ( f - n );
+            projectionMatrix[ 15 ] = 1.0f;
+            return projectionMatrix;
+		}
 
 	private:
 		PRECISION _data[ 6 ];

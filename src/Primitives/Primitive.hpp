@@ -44,8 +44,7 @@ namespace Crimild {
 			LINE_STRIP,
 			TRIANGLES,
 			TRIANGLE_STRIP,
-			TRIANGLE_FAN,
-			MAX
+			TRIANGLE_FAN
 		};
 
 	public:

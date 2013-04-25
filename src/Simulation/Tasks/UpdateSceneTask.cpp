@@ -26,6 +26,8 @@
  */
 
 #include "UpdateSceneTask.hpp"
+#include "Visitors/UpdateComponents.hpp"
+#include "Visitors/UpdateWorldState.hpp"
 
 using namespace Crimild;
 
@@ -43,12 +45,13 @@ UpdateSceneTask::~UpdateSceneTask( void )
 
 void UpdateSceneTask::start( void )
 {
-
+	_scene->perform( UpdateWorldState() );
 }
 
 void UpdateSceneTask::update( void )
 {
-
+	_scene->perform( UpdateComponents() );
+	_scene->perform( UpdateWorldState() );
 }
 
 void UpdateSceneTask::stop( void )

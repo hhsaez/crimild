@@ -25,35 +25,38 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_VISITORS_COMPUTE_VISIBILITY_SET_
-#define CRIMILD_VISITORS_COMPUTE_VISIBILITY_SET_
+#ifndef CRIMILD_PRIMITIVES_CONE_
+#define CRIMILD_PRIMITIVES_CONE_
 
-#include "NodeVisitor.hpp"
+#include "ParametricPrimitive.hpp"
 
 namespace Crimild {
+    
+    /**
+        Cone parametrization
+        x = r * ( 1 - v ) * sin(u)
+        y = h * ( v - 0.5)
+        z = r * ( 1 - v ) * -sin(u)
+        for 0 <= u <= 2 * PI, 0 <= v <= 1
+     */
+    class ConePrimitive : public ParametricPrimitive {
+    public:
+        ConePrimitive( Primitive::Type type, 
+            float height, 
+            float radius, 
+            const VertexFormat &format = VertexFormat::VF_P3_N3, 
+            Vector2i divisions = Vector2i( 20, 20 ) );
 
-	class VisibilitySet;
-	class Camera;
-
-	class ComputeVisibilitySet : public NodeVisitor {
-	public:
-		ComputeVisibilitySet( VisibilitySet *result, Camera *camera );
-
-		virtual ~ComputeVisibilitySet( void );
-
-		VisibilitySet *getResult( void ) { return _result; }
-
-		Camera *getCamera( void ) { return _camera; }
-
-		virtual void traverse( Node *node ) override;
-
-		virtual void visitGeometryNode( GeometryNode *geometry ) override;
-
-	private:
-		VisibilitySet *_result;
-		Camera *_camera;
-	};
-
+        virtual ~ConePrimitive( void );
+        
+    protected:
+        virtual Vector3f evaluate( const Vector2f &domain ) const;
+        
+    private:
+        float _height;
+        float _radius;
+    };
+        
 }
 
 #endif

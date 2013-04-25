@@ -34,6 +34,7 @@
 namespace Crimild {
 
 	class GeometryNode;
+	class Camera;
 
 	class VisibilitySet {
 	public:
@@ -41,6 +42,9 @@ namespace Crimild {
 		virtual ~VisibilitySet( void );
 
 		void reset( void );
+
+		void setCamera( Camera *camera ) { _camera = camera; }
+		Camera *getCamera( void ) { return _camera; }
 
 		bool hasGeometries( void ) const { return _geometries.size() > 0; }
 
@@ -50,6 +54,7 @@ namespace Crimild {
 
 	private:
 		std::list< GeometryNode * > _geometries;
+		Camera *_camera;
 	};
 
 }

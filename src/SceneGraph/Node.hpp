@@ -31,6 +31,7 @@
 #include "Foundation/NamedObject.hpp"
 #include "Visitors/NodeVisitor.hpp"
 #include "Components/NodeComponent.hpp"
+#include "Mathematics/Transformation.hpp"
 
 #include <map>
 
@@ -86,6 +87,32 @@ namespace Crimild {
 
 	private:
 		std::map< std::string, NodeComponentPtr > _components;
+
+	public:
+		void setLocal( const TransformationImpl &t ) { _local = t; }
+		const TransformationImpl &getLocal( void ) const { return _local; }
+		TransformationImpl &local( void ) { return _local; }
+
+		void setWorld( const TransformationImpl &t ) { _world = t; }
+		const TransformationImpl &getWorld( void ) const { return _world; }
+		TransformationImpl &world( void ) { return _world; }
+
+		bool worldIsCurrent( void ) const { return _worldIsCurrent; }
+		void setWorldIsCurrent( bool isCurrent ) { _worldIsCurrent = isCurrent; }
+
+	private:
+		TransformationImpl _local;
+		TransformationImpl _world;
+
+		/**
+			\brief Indicates if the world transformation needs to be updated automatically
+
+			This flag can be used to avoid the automatic update of world transformations. 
+			By default, the engine will compute the world transformation for a node as 
+			a function of its parent's one. If this flag is set to 'true' (default is 'false'),
+			you need to provide a valid world matrix manually
+		*/
+		bool _worldIsCurrent;
 	};
 
 	typedef std::shared_ptr< Node > NodePtr;

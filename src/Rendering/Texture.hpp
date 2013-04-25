@@ -46,6 +46,8 @@ namespace Crimild {
 	};
 
 	typedef std::shared_ptr< Texture > TexturePtr;
+	typedef Catalog< Texture > TextureCatalog;
+	typedef std::shared_ptr< TextureCatalog > TextureCatalogPtr;
 	
 }
 

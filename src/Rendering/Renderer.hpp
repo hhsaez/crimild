@@ -30,14 +30,18 @@
 
 #include "FrameBufferObject.hpp"
 #include "Material.hpp"
+#include "Catalog.hpp"
+#include "ShaderProgram.hpp"
+#include "Texture.hpp"
+#include "VertexBufferObject.hpp"
+#include "IndexBufferObject.hpp"
 
 namespace Crimild {
 
 	class VisibilitySet;
 	class GeometryNode;
 	class Primitive;
-	class VertexBufferObject;
-	class IndexBufferObject;
+	class Camera;
 
 	class Renderer {
 	protected:
@@ -58,37 +62,25 @@ namespace Crimild {
 	public:
 		virtual void beginRender( void ) = 0;
 		
-		virtual void endRender( void ) = 0;
-
 		virtual void clearBuffers( void ) = 0;
 
 		virtual void render( VisibilitySet *vs );
 
-		virtual void render( GeometryNode *geometry );
+		virtual void render( GeometryNode *geometry, Camera *camera );
 
-		virtual void applyMaterial( GeometryNode *geometry, Primitive *primitive, Material *material );
+		virtual void applyMaterial( GeometryNode *geometry, Primitive *primitive, Material *material, Camera *camera );
 
-		virtual void enableShaderProgram( ShaderProgram *program );
+		virtual void bindResources( ShaderProgram *program, Primitive *primitive, Material *material );
 
-		virtual void enableTextures( ShaderProgram *program, Material *material );
+		virtual void applyTransformations( ShaderProgram *program, GeometryNode *geometry, Camera *camera ) = 0;
 
-		virtual void enableVertexBuffer( ShaderProgram *program, VertexBufferObject *vbo );
+		virtual void drawPrimitive( ShaderProgram *program, Primitive *primitive ) = 0;
 
-		virtual void enableIndexBuffer( ShaderProgram *program, IndexBufferObject *ibo );
+		virtual void restoreTransformations( ShaderProgram *program, GeometryNode *geometry, Camera *camera ) = 0;
 
-		virtual void applyTransformations( ShaderProgram *program, GeometryNode *geometry );
+		virtual void unbindResources( ShaderProgram *program, Primitive *primitive, Material *material );
 
-		virtual void drawPrimitive( ShaderProgram *program, Primitive *primitive );
-
-		virtual void restoreTransformations( ShaderProgram *program, GeometryNode *geometry );
-
-		virtual void disableIndexBuffer( ShaderProgram *program, IndexBufferObject *ibo );
-
-		virtual void disableVertexBuffer( ShaderProgram *program, VertexBufferObject *vbo );
-
-		virtual void disableTextures( ShaderProgram *program, Material *material );
-
-		virtual void disableShaderProgram( ShaderProgram *program );
+		virtual void endRender( void ) = 0;
 
 	public:
 		Material *getDefaultMaterial( void ) { return _defaultMaterial.get(); }
@@ -96,6 +88,25 @@ namespace Crimild {
 
 	public:
 		MaterialPtr _defaultMaterial;
+
+	public:
+		ShaderProgramCatalog *getShaderProgramCatalog( void ) { return _shaderProgramCatalog.get(); }
+		void setShaderProgramCatalog( ShaderProgramCatalogPtr catalog ) { _shaderProgramCatalog = catalog; }
+
+		TextureCatalog *getTextureCatalog( void ) { return _textureCatalog.get(); }
+		void setTextureCatalog( TextureCatalogPtr catalog ) { _textureCatalog = catalog; }
+
+		VertexBufferObjectCatalog *getVertexBufferObjectCatalog( void ) { return _vertexBufferObjectCatalog.get(); }
+		void setVertexBufferObjectCatalog( VertexBufferObjectCatalogPtr catalog ) { _vertexBufferObjectCatalog = catalog; }
+
+		IndexBufferObjectCatalog *getIndexBufferObjectCatalog( void ) { return _indexBufferObjectCatalog.get(); }
+		void setIndexBufferObjectCatalog( IndexBufferObjectCatalogPtr catalog ) { _indexBufferObjectCatalog = catalog; }
+
+	private:
+		ShaderProgramCatalogPtr _shaderProgramCatalog;
+		TextureCatalogPtr _textureCatalog;
+		VertexBufferObjectCatalogPtr _vertexBufferObjectCatalog;
+		IndexBufferObjectCatalogPtr _indexBufferObjectCatalog;
 
 	private:
 		Renderer( const Renderer &renderer ) { }

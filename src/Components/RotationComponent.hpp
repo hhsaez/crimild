@@ -25,77 +25,33 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Simulation.hpp"
+#ifndef CRIMILD_COMPONENTS_ROTATION_
+#define CRIMILD_COMPONENTS_ROTATION_
 
-#include "Tasks/BeginRenderTask.hpp"
-#include "Tasks/EndRenderTask.hpp"
-#include "Tasks/UpdateSceneTask.hpp"
-#include "Tasks/RenderSceneTask.hpp"
+#include "NodeComponent.hpp"
+#include "Mathematics/Vector.hpp"
 
-#include "Rendering/Camera.hpp"
+namespace Crimild {
 
-#include "Visitors/FetchCameras.hpp"
+	class RotationComponent : public NodeComponent {
+	public:
+		static const char *NAME;
 
-#define UPDATE_SCENE_PRIORITY 100
-#define BEGIN_RENDER_PRIORITY 1000
-#define RENDER_SCENE_PRIORITY 2000
-#define END_RENDER_PRIORITY 9000
+	public:
+		RotationComponent( const Vector3f &axis, float speed );
+		virtual ~RotationComponent( void );
 
-using namespace Crimild;
+		virtual void update( void ) override;
 
-Simulation *Simulation::_currentSimulation = nullptr;
+	private:
+		Vector3f _axis;
+		float _speed;
+		float _time;
+	};
 
-Simulation::Simulation( std::string name )
-	: NamedObject( name ),
-	  _mainLoop( new RunLoop() )
-{
-	_currentSimulation = this;
-}
-
-Simulation::~Simulation( void )
-{
-	stop();
-
-	_currentSimulation = nullptr;
-}
-
-void Simulation::start( void )
-{
-	BeginRenderTaskPtr beginRender( new BeginRenderTask( BEGIN_RENDER_PRIORITY ) );
-	getMainLoop()->startTask( beginRender );
-
-	EndRenderTaskPtr endRender( new EndRenderTask( END_RENDER_PRIORITY ) );
-	getMainLoop()->startTask( endRender );
-}
-
-bool Simulation::step( void )
-{
-	return _mainLoop->update();
-}
-
-void Simulation::stop( void )
-{
-	_mainLoop->stop();
-}
-
-int Simulation::run( void )
-{
-	start();
-	while( step() );
-	return 0;
-}
-
-void Simulation::attachScene( NodePtr scene )
-{
-	FetchCameras fetchCameras;
-	scene->perform( fetchCameras );
-	fetchCameras.foreachCamera( [&]( Camera *camera ) mutable {
-		UpdateSceneTaskPtr updateScene( new UpdateSceneTask( UPDATE_SCENE_PRIORITY, scene ) );
-		getMainLoop()->startTask( updateScene );
-
-		RenderSceneTaskPtr renderScene( new RenderSceneTask( RENDER_SCENE_PRIORITY, scene, camera ) );
-		getMainLoop()->startTask( renderScene );
-	});
+	typedef std::shared_ptr< RotationComponent > RotationComponentPtr;
 
 }
+
+#endif
 

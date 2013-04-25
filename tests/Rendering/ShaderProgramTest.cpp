@@ -61,7 +61,7 @@ TEST( ShaderProgramTest, locations )
 	program->foreachLocation( [&]( ShaderLocationPtr &loc ) mutable {
 		i++;
 	});
-	EXPECT_EQ( 2, i );
+	EXPECT_EQ( 7, i );
 
 	vertexWeightLocation->setLocation( 2 );
 	timeLocation->setLocation( 2 );

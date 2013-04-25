@@ -25,77 +25,23 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Simulation.hpp"
+#ifndef CRIMILD_VISITORS_UPDATE_WORLD_STATE_
+#define CRIMILD_VISITORS_UPDATE_WORLD_STATE_
 
-#include "Tasks/BeginRenderTask.hpp"
-#include "Tasks/EndRenderTask.hpp"
-#include "Tasks/UpdateSceneTask.hpp"
-#include "Tasks/RenderSceneTask.hpp"
+#include "NodeVisitor.hpp"
 
-#include "Rendering/Camera.hpp"
+namespace Crimild {
 
-#include "Visitors/FetchCameras.hpp"
+	class UpdateWorldState : public NodeVisitor {
+	public:
+		UpdateWorldState( void );
+		virtual ~UpdateWorldState( void );
 
-#define UPDATE_SCENE_PRIORITY 100
-#define BEGIN_RENDER_PRIORITY 1000
-#define RENDER_SCENE_PRIORITY 2000
-#define END_RENDER_PRIORITY 9000
-
-using namespace Crimild;
-
-Simulation *Simulation::_currentSimulation = nullptr;
-
-Simulation::Simulation( std::string name )
-	: NamedObject( name ),
-	  _mainLoop( new RunLoop() )
-{
-	_currentSimulation = this;
-}
-
-Simulation::~Simulation( void )
-{
-	stop();
-
-	_currentSimulation = nullptr;
-}
-
-void Simulation::start( void )
-{
-	BeginRenderTaskPtr beginRender( new BeginRenderTask( BEGIN_RENDER_PRIORITY ) );
-	getMainLoop()->startTask( beginRender );
-
-	EndRenderTaskPtr endRender( new EndRenderTask( END_RENDER_PRIORITY ) );
-	getMainLoop()->startTask( endRender );
-}
-
-bool Simulation::step( void )
-{
-	return _mainLoop->update();
-}
-
-void Simulation::stop( void )
-{
-	_mainLoop->stop();
-}
-
-int Simulation::run( void )
-{
-	start();
-	while( step() );
-	return 0;
-}
-
-void Simulation::attachScene( NodePtr scene )
-{
-	FetchCameras fetchCameras;
-	scene->perform( fetchCameras );
-	fetchCameras.foreachCamera( [&]( Camera *camera ) mutable {
-		UpdateSceneTaskPtr updateScene( new UpdateSceneTask( UPDATE_SCENE_PRIORITY, scene ) );
-		getMainLoop()->startTask( updateScene );
-
-		RenderSceneTaskPtr renderScene( new RenderSceneTask( RENDER_SCENE_PRIORITY, scene, camera ) );
-		getMainLoop()->startTask( renderScene );
-	});
+		virtual void visitNode( Node *node ) override;
+		virtual void visitGroupNode( GroupNode *node ) override;
+	};
 
 }
+
+#endif
 
