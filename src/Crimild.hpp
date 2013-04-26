@@ -45,8 +45,10 @@
 
 #include "Foundation/Macros.hpp"
 #include "Foundation/NamedObject.hpp"
+#include "Foundation/Log.hpp"
 
 #include "Exceptions/Exception.hpp"
+#include "Exceptions/FileNotFoundException.hpp"
 #include "Exceptions/RuntimeException.hpp"
 #include "Exceptions/HasParentException.hpp"
 
@@ -82,6 +84,7 @@
 #include "Rendering/Catalog.hpp"
 #include "Rendering/FrameBufferObject.hpp"
 #include "Rendering/Image.hpp"
+#include "Rendering/ImageTGA.hpp"
 #include "Rendering/IndexBufferObject.hpp"
 #include "Rendering/Material.hpp"
 #include "Rendering/Renderer.hpp"
@@ -94,6 +97,7 @@
 #include "Rendering/VisibilitySet.hpp"
 
 #include "Simulation/Simulation.hpp"
+#include "Simulation/FileSystem.hpp"
 #include "Simulation/RunLoop.hpp"
 #include "Simulation/Task.hpp"
 #include "Simulation/Tasks/BeginRenderTask.hpp"

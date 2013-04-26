@@ -25,62 +25,28 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef CRIMILD_RENDERING_IMAGE_TGA_
+#define CRIMILD_RENDERING_IMAGE_TGA_
+
 #include "Image.hpp"
 
-using namespace Crimild;
+#include <string>
 
-Image::Image( void )
-	: _data( nullptr )
-{
-	_width = 0;
-	_height = 0;
-	_bpp = 0;
+namespace Crimild {
+
+	class ImageTGA : public Image {
+	public:
+		explicit ImageTGA( std::string filePath );
+		virtual ~ImageTGA( void );
+
+		virtual void load( void ) override;
+
+	private:
+		std::string _filePath;
+	};
+
+	typedef std::shared_ptr< ImageTGA > ImageTGAPtr;
 }
 
-Image::Image( int width, int height, int bpp, const unsigned char *data )
-	: _data( nullptr )
-{
-	setData( width, height, bpp, data );
-}
-
-Image::~Image( void )
-{
-	unload();
-}
-
-void Image::setData( int width, int height, int bpp, const unsigned char *data )
-{
-	_width = width;
-	_height = height;
-	_bpp = bpp;
-
-	int size = _width * _height * _bpp;
-	if ( size > 0 ) {
-		_data = new unsigned char[ size ];
-
-		if ( data ) {
-			memcpy( _data, data, size * sizeof( unsigned char ) );
-		}
-		else {
-			memset( _data, 0, size * sizeof( unsigned char ) );
-		}
-	}
-}
-
-void Image::load( void )
-{
-
-}
-
-void Image::unload( void )
-{
-	_width = 0;
-	_height = 0;
-	_bpp = 0;
-	
-	if ( _data ) {
-		delete [] _data;
-		_data = nullptr;
-	}
-}
+#endif
 

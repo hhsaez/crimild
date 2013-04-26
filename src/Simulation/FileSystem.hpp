@@ -25,62 +25,37 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Image.hpp"
+#ifndef CRIMILD_SIMULATION_FILE_SYSTEM_
+#define CRIMILD_SIMULATION_FILE_SYSTEM_
 
-using namespace Crimild;
+#include <string>
 
-Image::Image( void )
-	: _data( nullptr )
-{
-	_width = 0;
-	_height = 0;
-	_bpp = 0;
-}
+namespace Crimild {
 
-Image::Image( int width, int height, int bpp, const unsigned char *data )
-	: _data( nullptr )
-{
-	setData( width, height, bpp, data );
-}
+	class FileSystem {
+	public:
+		static FileSystem &getInstance( void );
 
-Image::~Image( void )
-{
-	unload();
-}
+	private:
+		FileSystem( void );
+		~FileSystem( void );
 
-void Image::setData( int width, int height, int bpp, const unsigned char *data )
-{
-	_width = width;
-	_height = height;
-	_bpp = bpp;
+	public:
+		void init( int argc, char **argv );
 
-	int size = _width * _height * _bpp;
-	if ( size > 0 ) {
-		_data = new unsigned char[ size ];
+		void setBaseDirectory( std::string baseDirectory ) { _baseDirectory = baseDirectory; }
+		std::string getBaseDirectory( void ) const { return _baseDirectory; }
 
-		if ( data ) {
-			memcpy( _data, data, size * sizeof( unsigned char ) );
-		}
-		else {
-			memset( _data, 0, size * sizeof( unsigned char ) );
-		}
-	}
-}
+		std::string extractDirectory( std::string input );
 
-void Image::load( void )
-{
+		std::string pathForResource( std::string relativePath );
+
+	private:
+		std::string _baseDirectory;
+
+	};
 
 }
 
-void Image::unload( void )
-{
-	_width = 0;
-	_height = 0;
-	_bpp = 0;
-	
-	if ( _data ) {
-		delete [] _data;
-		_data = nullptr;
-	}
-}
+#endif
 

@@ -25,62 +25,21 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Image.hpp"
+#ifndef CRIMILD_EXCEPTIONS_INVALID_FILE_FORMAT_
+#define CRIMILD_EXCEPTIONS_INVALID_FILE_FORMAT_
 
-using namespace Crimild;
+#include "Exception.hpp"
 
-Image::Image( void )
-	: _data( nullptr )
-{
-	_width = 0;
-	_height = 0;
-	_bpp = 0;
-}
+namespace Crimild {
 
-Image::Image( int width, int height, int bpp, const unsigned char *data )
-	: _data( nullptr )
-{
-	setData( width, height, bpp, data );
-}
-
-Image::~Image( void )
-{
-	unload();
-}
-
-void Image::setData( int width, int height, int bpp, const unsigned char *data )
-{
-	_width = width;
-	_height = height;
-	_bpp = bpp;
-
-	int size = _width * _height * _bpp;
-	if ( size > 0 ) {
-		_data = new unsigned char[ size ];
-
-		if ( data ) {
-			memcpy( _data, data, size * sizeof( unsigned char ) );
-		}
-		else {
-			memset( _data, 0, size * sizeof( unsigned char ) );
-		}
-	}
-}
-
-void Image::load( void )
-{
+	class InvalidFileFormatException : public Exception {
+	public:
+		InvalidFileFormatException( std::string filePath )
+			: Exception( "Format is not valid for file " + filePath )
+		{ }
+	};
 
 }
 
-void Image::unload( void )
-{
-	_width = 0;
-	_height = 0;
-	_bpp = 0;
-	
-	if ( _data ) {
-		delete [] _data;
-		_data = nullptr;
-	}
-}
+#endif
 

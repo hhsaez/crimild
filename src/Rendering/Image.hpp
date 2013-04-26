@@ -34,6 +34,7 @@ namespace Crimild {
 
 	class Image {
 	public:
+		Image( void );
 		Image( int width, int height, int bpp, const unsigned char *data );
 		virtual ~Image( void );
 
@@ -42,6 +43,12 @@ namespace Crimild {
 		int getBpp( void ) const { return _bpp; }
 		unsigned char *getData( void ) { return _data; }
 		const unsigned char *getData( void ) const { return _data; }
+
+		void setData( int width, int height, int bpp, const unsigned char *data );
+
+		bool isLoaded( void ) const { return _data != nullptr; }
+		virtual void load( void );
+		virtual void unload( void );
 
 	private:
 		int _width;

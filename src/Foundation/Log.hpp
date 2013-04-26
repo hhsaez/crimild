@@ -25,62 +25,75 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Image.hpp"
+#ifndef CRIMILD_FOUNDATION_LOG_
+#define CRIMILD_FOUNDATION_LOG_
 
-using namespace Crimild;
+#include "NamedObject.hpp"
 
-Image::Image( void )
-	: _data( nullptr )
-{
-	_width = 0;
-	_height = 0;
-	_bpp = 0;
-}
+#include <string>
+#include <iostream>
+#include <sstream>
 
-Image::Image( int width, int height, int bpp, const unsigned char *data )
-	: _data( nullptr )
-{
-	setData( width, height, bpp, data );
-}
+namespace Crimild {
 
-Image::~Image( void )
-{
-	unload();
-}
+	class Log : public NamedObject {
+	public:
+		class LogOutputHandler {
+		public:
+			virtual ~LogOutputHandler( void );
 
-void Image::setData( int width, int height, int bpp, const unsigned char *data )
-{
-	_width = width;
-	_height = height;
-	_bpp = bpp;
+			virtual void write( Log *log, std::string message ) = 0;
+		};
 
-	int size = _width * _height * _bpp;
-	if ( size > 0 ) {
-		_data = new unsigned char[ size ];
+		typedef std::shared_ptr< LogOutputHandler > LogOutputHandlerPtr;
 
-		if ( data ) {
-			memcpy( _data, data, size * sizeof( unsigned char ) );
+		class ConsoleOutputHandler : public LogOutputHandler {
+		public:
+			virtual ~ConsoleOutputHandler( void );
+			virtual void write( Log *log, std::string message ) override;
+		};
+
+	public:
+		static Log Debug;
+		static Log Error;
+		static Log Fatal;
+		static Log Info;
+
+		class EndLine {
+		public:
+		};
+
+		static EndLine End;
+
+		static void setDefaultOutputHandler( LogOutputHandlerPtr handler );
+
+	public:
+		Log( std::string name );
+		virtual ~Log( void );
+
+		void setOutputHandler( LogOutputHandlerPtr handler ) { _outputHandler = handler; }
+		LogOutputHandler *getOutputHandler( void ) { return _outputHandler.get(); }
+
+		template< typename T >
+		Log &operator<<( T in )
+		{
+			_str << in;
+			return *this;
 		}
-		else {
-			memset( _data, 0, size * sizeof( unsigned char ) );
+
+		Log &operator<<( EndLine & )
+		{
+			_outputHandler->write( this, _str.str() );
+			_str.str( "" );
+			return *this;
 		}
-	}
+
+	private:
+		std::stringstream _str;
+		LogOutputHandlerPtr _outputHandler;
+	};
+
 }
 
-void Image::load( void )
-{
-
-}
-
-void Image::unload( void )
-{
-	_width = 0;
-	_height = 0;
-	_bpp = 0;
-	
-	if ( _data ) {
-		delete [] _data;
-		_data = nullptr;
-	}
-}
+#endif
 

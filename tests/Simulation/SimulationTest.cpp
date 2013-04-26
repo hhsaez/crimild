@@ -107,7 +107,7 @@ TEST( SimulationTest, run )
 	EXPECT_EQ( 10, loopCount );
 }
 
-TEST( SimulationTest, attachScene )
+TEST( SimulationTest, attachSceneWithoutCamera )
 {
 	SimulationPtr simulation( new Simulation() );
 
@@ -116,6 +116,21 @@ TEST( SimulationTest, attachScene )
 	NodePtr simpleScene( new Node() );
 
 	simulation->attachScene( simpleScene );
+
+	EXPECT_FALSE( simulation->getMainLoop()->hasActiveTasks() );
+}
+
+TEST( SimulationTest, attachSceneWithCamera )
+{
+	SimulationPtr simulation( new Simulation() );
+
+	EXPECT_FALSE( simulation->getMainLoop()->hasActiveTasks() );
+
+	GroupNodePtr scene( new GroupNode() );
+	CameraNodePtr camera( new CameraNode() );
+	scene->attachNode( camera );
+
+	simulation->attachScene( scene );
 
 	EXPECT_TRUE( simulation->getMainLoop()->hasActiveTasks() );
 }

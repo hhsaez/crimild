@@ -25,78 +25,47 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Simulation.hpp"
+#include "FileSystem.hpp"
 
 #include "Foundation/Log.hpp"
-#include "Tasks/BeginRenderTask.hpp"
-#include "Tasks/EndRenderTask.hpp"
-#include "Tasks/UpdateSceneTask.hpp"
-#include "Tasks/RenderSceneTask.hpp"
-#include "Rendering/Camera.hpp"
-#include "Visitors/FetchCameras.hpp"
-
-#define UPDATE_SCENE_PRIORITY 100
-#define BEGIN_RENDER_PRIORITY 1000
-#define RENDER_SCENE_PRIORITY 2000
-#define END_RENDER_PRIORITY 9000
 
 using namespace Crimild;
 
-Simulation *Simulation::_currentSimulation = nullptr;
-
-Simulation::Simulation( std::string name )
-	: NamedObject( name ),
-	  _mainLoop( new RunLoop() )
+FileSystem &FileSystem::getInstance( void )
 {
-	_currentSimulation = this;
+	static FileSystem fs;
+	return fs;
 }
 
-Simulation::~Simulation( void )
+FileSystem::FileSystem( void )
 {
-	_currentSimulation = nullptr;
+
 }
 
-void Simulation::start( void )
+FileSystem::~FileSystem( void )
 {
-	Log::Info << "Starting simulation \"" << getName() << "\"" << Log::End;
 
-	BeginRenderTaskPtr beginRender( new BeginRenderTask( BEGIN_RENDER_PRIORITY ) );
-	getMainLoop()->startTask( beginRender );
-
-	EndRenderTaskPtr endRender( new EndRenderTask( END_RENDER_PRIORITY ) );
-	getMainLoop()->startTask( endRender );
 }
 
-bool Simulation::step( void )
+void FileSystem::init( int argc, char **argv )
 {
-	return _mainLoop->update();
-}
+	std::string base = extractDirectory( argv[ 0 ] ); 
+	if ( base.length() == 0 ) {
+		base = ".";
+	}
 
-void Simulation::stop( void )
-{
-	_mainLoop->stop();
+	setBaseDirectory( base );
 	
-	Log::Info << "Simulation completed" << Log::End;
+	Log::Debug << "Base directory: " << getBaseDirectory() << Log::End;
 }
 
-int Simulation::run( void )
+std::string FileSystem::extractDirectory( std::string path )
 {
-	start();
-	while( step() );
-	return 0;
+	return path.substr( 0, path.find_last_of( '/' ) );
 }
 
-void Simulation::attachScene( NodePtr scene )
+std::string FileSystem::pathForResource( std::string filePath )
 {
-	FetchCameras fetchCameras;
-	scene->perform( fetchCameras );
-	fetchCameras.foreachCamera( [&]( Camera *camera ) mutable {
-		UpdateSceneTaskPtr updateScene( new UpdateSceneTask( UPDATE_SCENE_PRIORITY, scene ) );
-		getMainLoop()->startTask( updateScene );
-
-		RenderSceneTaskPtr renderScene( new RenderSceneTask( RENDER_SCENE_PRIORITY, scene, camera ) );
-		getMainLoop()->startTask( renderScene );
-	});
-
+	return getBaseDirectory() + "/" + filePath;
 }
 

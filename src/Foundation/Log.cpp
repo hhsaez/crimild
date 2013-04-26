@@ -25,62 +25,48 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Image.hpp"
+#include "Log.hpp"
 
 using namespace Crimild;
 
-Image::Image( void )
-	: _data( nullptr )
-{
-	_width = 0;
-	_height = 0;
-	_bpp = 0;
-}
+Log Log::Debug( "DEBUG" );
+Log Log::Error( "ERROR" );
+Log Log::Fatal( "FATAL" );
+Log Log::Info( "INFO" );
+Log::EndLine Log::End;
 
-Image::Image( int width, int height, int bpp, const unsigned char *data )
-	: _data( nullptr )
-{
-	setData( width, height, bpp, data );
-}
-
-Image::~Image( void )
-{
-	unload();
-}
-
-void Image::setData( int width, int height, int bpp, const unsigned char *data )
-{
-	_width = width;
-	_height = height;
-	_bpp = bpp;
-
-	int size = _width * _height * _bpp;
-	if ( size > 0 ) {
-		_data = new unsigned char[ size ];
-
-		if ( data ) {
-			memcpy( _data, data, size * sizeof( unsigned char ) );
-		}
-		else {
-			memset( _data, 0, size * sizeof( unsigned char ) );
-		}
-	}
-}
-
-void Image::load( void )
+Log::LogOutputHandler::~LogOutputHandler( void )
 {
 
 }
 
-void Image::unload( void )
+Log::ConsoleOutputHandler::~ConsoleOutputHandler( void )
 {
-	_width = 0;
-	_height = 0;
-	_bpp = 0;
-	
-	if ( _data ) {
-		delete [] _data;
-		_data = nullptr;
-	}
+
+}
+
+void Log::ConsoleOutputHandler::write( Log *log, std::string message )
+{
+	std::cout << log->getName() << " - " << message << std::endl;
+}
+
+void Log::setDefaultOutputHandler( LogOutputHandlerPtr handler )
+{
+	Debug.setOutputHandler( handler );
+	Error.setOutputHandler( handler );
+	Fatal.setOutputHandler( handler );
+	Info.setOutputHandler( handler );
+}
+
+Log::Log( std::string name )
+	: NamedObject( name )
+{
+	LogOutputHandlerPtr handler( new ConsoleOutputHandler() );
+	setOutputHandler( handler );
+}
+
+Log::~Log( void )
+{
+
 }
 

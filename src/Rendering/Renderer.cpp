@@ -75,7 +75,7 @@ void Renderer::applyMaterial( GeometryNode *geometry, Primitive *primitive, Mate
 		return;
 	}
 
-	ShaderProgram *program = material->getProgram() ? material->getProgram() : getDefaultMaterial()->getProgram();
+	ShaderProgram *program = material->getProgram() ? material->getProgram() : getFallbackProgram( material );
 	if ( !program ) {
 		return;
 	}
@@ -90,7 +90,11 @@ void Renderer::applyMaterial( GeometryNode *geometry, Primitive *primitive, Mate
 void Renderer::bindResources( ShaderProgram *program, Primitive *primitive, Material *material )
 {
 	getShaderProgramCatalog()->bind( program );
-	//getTextureCatalog()->bind( program, material->getColorMap() );
+	
+	if ( material->getColorMap() ) {
+		getTextureCatalog()->bind( program, material->getColorMap() );
+	}
+	
 	getVertexBufferObjectCatalog()->bind( program, primitive->getVertexBuffer() );
 	getIndexBufferObjectCatalog()->bind( program, primitive->getIndexBuffer() );
 }
@@ -99,7 +103,11 @@ void Renderer::unbindResources( ShaderProgram *program, Primitive *primitive, Ma
 {
 	getIndexBufferObjectCatalog()->unbind( program, primitive->getIndexBuffer() );
 	getVertexBufferObjectCatalog()->unbind( program, primitive->getVertexBuffer() );
-	//getTextureCatalog()->unbind( program, material->getColorMap() );
+
+	if ( material->getColorMap() ) {
+		getTextureCatalog()->unbind( program, material->getColorMap() );
+	}
+	
 	getShaderProgramCatalog()->unbind( program );
 }
 

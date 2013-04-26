@@ -86,6 +86,8 @@ namespace Crimild {
 		Material *getDefaultMaterial( void ) { return _defaultMaterial.get(); }
 		void setDefaultMaterial( MaterialPtr material ) { _defaultMaterial = material; }
 
+		virtual ShaderProgram *getFallbackProgram( Material *material ) { return getDefaultMaterial()->getProgram(); }
+
 	public:
 		MaterialPtr _defaultMaterial;
 

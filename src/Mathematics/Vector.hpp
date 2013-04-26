@@ -28,7 +28,7 @@
 #ifndef CRIMILD_CORE_MATHEMATICS_VECTOR_
 #define CRIMILD_CORE_MATHEMATICS_VECTOR_
 
-#include <memory.h>
+#include <memory>
 #include <cmath>
 #include <cassert>
 #include <iostream>
