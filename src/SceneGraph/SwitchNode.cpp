@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,38 +25,44 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SCENE_GRAPH_GROUP_NODE_
-#define CRIMILD_SCENE_GRAPH_GROUP_NODE_
+#include "SwitchNode.hpp"
 
-#include "Node.hpp"
+using namespace Crimild;
 
-#include <list>
-#include <functional>
-
-namespace Crimild {
-
-	class GroupNode : public Node {
-	public:
-		explicit GroupNode( std::string name = "" );
-		virtual ~GroupNode( void );
-
-		bool hasNodes( void ) const { return ( _nodes.size() > 0 ); }
-		void attachNode( NodePtr node );
-		void detachNode( NodePtr node );
-		void detachAllNodes( void );
-		virtual void foreachNode( std::function< void( NodePtr & ) > callback );
-
-	protected:
-		std::list< NodePtr > _nodes;
-
-	public:
-		virtual void accept( NodeVisitor &visitor ) override;
-
-	};
-
-	typedef std::shared_ptr< GroupNode > GroupNodePtr;
-
+SwitchNode::SwitchNode( std::string name )
+    : GroupNode( name )
+{
+    _current = std::end( _nodes );
 }
 
-#endif
+SwitchNode::~SwitchNode( void )
+{
+}
+
+void SwitchNode::foreachNode( std::function< void( NodePtr & ) > callback )
+{
+    if ( hasNodes() && _current != std::end( _nodes ) ) {
+        callback( *_current );
+    }
+}
+
+void SwitchNode::selectNextNode( void )
+{
+    if ( hasNodes() && _current != std::end( _nodes ) ) {
+        ++_current;
+    }
+    
+    if ( _current == std::end( _nodes ) ) {
+        _current = std::begin( _nodes );
+    }
+}
+
+Node *SwitchNode::getCurrentNode( void )
+{
+    if ( hasNodes() && _current != std::end( _nodes ) ) {
+        return ( *_current ).get();
+    }
+    
+    return nullptr;
+}
 

@@ -56,6 +56,7 @@
 #include "SceneGraph/GeometryNode.hpp"
 #include "SceneGraph/GroupNode.hpp"
 #include "SceneGraph/Node.hpp"
+#include "SceneGraph/SwitchNode.hpp"
 
 #include "Components/CameraComponent.hpp"
 #include "Components/MaterialComponent.hpp"
