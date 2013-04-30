@@ -36,12 +36,13 @@ namespace Crimild {
 	class VertexFormat {
 	public:
 		static const VertexFormat VF_P3;
+		static const VertexFormat VF_P3_C4;
 		static const VertexFormat VF_P3_UV2;
 		static const VertexFormat VF_P3_N3;
 		static const VertexFormat VF_P3_N3_UV2;
 
 	public:
-		VertexFormat( unsigned int positions, unsigned int normals, unsigned int textureCoords );
+		VertexFormat( unsigned int positions, unsigned int colors, unsigned int normals, unsigned int textureCoords );
 		VertexFormat( const VertexFormat &vf );
 		~VertexFormat( void );
 
@@ -53,6 +54,10 @@ namespace Crimild {
 		bool hasPositions( void ) const { return _positions > 0; }
 		unsigned int getPositionComponents( void ) const { return _positions; }
 		unsigned int getPositionsOffset( void ) const { return _positionsOffset; }
+
+		bool hasColors( void ) const { return _colors > 0; }
+		unsigned int getColorComponents( void ) const { return _colors; }
+		unsigned int getColorsOffset( void ) const { return _colorsOffset; }
 
 		bool hasNormals( void ) const { return _normals > 0; }
 		unsigned int getNormalComponents( void ) const { return _normals; }
@@ -71,6 +76,8 @@ namespace Crimild {
 	private:
 		unsigned int _positions;
 		unsigned int _positionsOffset;
+		unsigned int _colors;
+		unsigned int _colorsOffset;
 		unsigned int _normals;
 		unsigned int _normalsOffset;
 		unsigned int _textureCoords;

@@ -30,14 +30,16 @@
 using namespace Crimild;
 
 Camera::Camera( void )
-	: _frustum( 45.0, 4.0f / 3.0f, 0.01f, 1024.0f )
+	: _frustum( 45.0, 4.0f / 3.0f, 0.01f, 1024.0f ),
+	  _viewport( 0.0f, 0.0f, 1.0f, 1.0f )
 {
 	_projectionMatrix = _frustum.computeProjectionMatrix();
 	_viewMatrix.makeIdentity();
 }
 
 Camera::Camera( float fov, float aspect, float near, float far )
-	: _frustum( fov, aspect, near, far )
+	: _frustum( fov, aspect, near, far ),
+	  _viewport( 0.0f, 0.0f, 1.0f, 1.0f )	
 {
 	_projectionMatrix = _frustum.computeProjectionMatrix();
 	_viewMatrix.makeIdentity();
@@ -46,5 +48,36 @@ Camera::Camera( float fov, float aspect, float near, float far )
 Camera::~Camera( void )
 {
 
+}
+
+bool Camera::getPickRay( float portX, float portY, Ray3f &result ) const
+{
+	if ( portX < _viewport.getX() || portX > _viewport.getWidth() ) {
+		return false;
+	}
+	
+	if ( portY < _viewport.getY() || portY > _viewport.getHeight() ) {
+		return false;
+	}
+	
+	float xWeight = ( portX - _viewport.getX() ) / ( _viewport.getWidth() - _viewport.getX() );
+	float viewX = ( 1.0f - xWeight ) * _frustum.getRMin() + xWeight * _frustum.getRMax();
+	
+	float yWeight = ( ( 1.0f - portY ) - _viewport.getY() ) / ( _viewport.getHeight() - _viewport.getY() );
+	float viewY = ( 1.0f - yWeight ) * _frustum.getUMin() + yWeight * _frustum.getUMax();
+	
+	Matrix3f rotation( _viewMatrix[ 0 ], _viewMatrix[ 1 ], _viewMatrix[ 2 ],
+					   _viewMatrix[ 4 ], _viewMatrix[ 5 ], _viewMatrix[ 6 ],
+					   _viewMatrix[ 8 ], _viewMatrix[ 9 ], _viewMatrix[ 10 ] );
+	
+	Vector3f direction = rotation * Vector3f( 0.0f, 0.0f, -1.0f );
+	Vector3f up = rotation * Vector3f( 0.0f, 1.0f, 0.0f );
+	Vector3f right = rotation * Vector3f( 1.0f, 0.0f, 0.0f );
+	Vector3f origin( _viewMatrix[ 3 ], _viewMatrix[ 7 ], _viewMatrix[ 11 ] );
+
+	result.setOrigin( origin );
+	result.setDirection( ( _frustum.getDMin() * direction + viewX * right + viewY * up ).getNormalized() );
+
+	return true;
 }
 

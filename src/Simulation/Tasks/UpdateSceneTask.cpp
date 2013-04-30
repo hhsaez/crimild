@@ -26,6 +26,7 @@
  */
 
 #include "UpdateSceneTask.hpp"
+#include "Simulation/Simulation.hpp"
 #include "Visitors/UpdateComponents.hpp"
 #include "Visitors/UpdateWorldState.hpp"
 
@@ -50,7 +51,9 @@ void UpdateSceneTask::start( void )
 
 void UpdateSceneTask::update( void )
 {
-	_scene->perform( UpdateComponents() );
+	const Time &t = Simulation::getCurrent()->getSimulationTime();
+
+	_scene->perform( UpdateComponents( t ) );
 	_scene->perform( UpdateWorldState() );
 }
 

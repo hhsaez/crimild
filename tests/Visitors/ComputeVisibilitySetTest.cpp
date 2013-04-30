@@ -25,7 +25,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Crimild.hpp>
+#include "Visitors/ComputeVisibilitySet.hpp"
+#include "Rendering/VisibilitySet.hpp"
+#include "Rendering/Camera.hpp"
+#include "SceneGraph/GeometryNode.hpp"
+#include "SceneGraph/GroupNode.hpp"
 
 #include "Utils/MockVisitor.hpp"
 

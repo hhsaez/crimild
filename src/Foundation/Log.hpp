@@ -55,6 +55,7 @@ namespace Crimild {
 
 	public:
 		static Log Debug;
+		static Log Warning;
 		static Log Error;
 		static Log Fatal;
 		static Log Info;

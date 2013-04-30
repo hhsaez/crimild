@@ -25,7 +25,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Crimild.hpp>
+#include "Simulation/Simulation.hpp"
+#include "SceneGraph/Node.hpp"
+#include "SceneGraph/GroupNode.hpp"
+#include "SceneGraph/CameraNode.hpp"
 
 #include "Utils/MockTask.hpp"
 

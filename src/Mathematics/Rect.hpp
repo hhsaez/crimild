@@ -28,6 +28,8 @@
 #ifndef CRIMILD_MATHEMATICS_RECT_
 #define CRIMILD_MATHEMATICS_RECT_
 
+#include <memory>
+
 namespace Crimild {
 
 	template< typename PRECISION >

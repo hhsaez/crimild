@@ -72,11 +72,15 @@ namespace Crimild {
 
 		virtual void bindResources( ShaderProgram *program, Primitive *primitive, Material *material );
 
+		virtual void enableMaterialProperties( ShaderProgram *program, Material *material ) = 0;
+
 		virtual void applyTransformations( ShaderProgram *program, GeometryNode *geometry, Camera *camera ) = 0;
 
 		virtual void drawPrimitive( ShaderProgram *program, Primitive *primitive ) = 0;
 
 		virtual void restoreTransformations( ShaderProgram *program, GeometryNode *geometry, Camera *camera ) = 0;
+
+		virtual void disableMaterialProperties( ShaderProgram *program, Material *material ) = 0;
 
 		virtual void unbindResources( ShaderProgram *program, Primitive *primitive, Material *material );
 
@@ -86,7 +90,7 @@ namespace Crimild {
 		Material *getDefaultMaterial( void ) { return _defaultMaterial.get(); }
 		void setDefaultMaterial( MaterialPtr material ) { _defaultMaterial = material; }
 
-		virtual ShaderProgram *getFallbackProgram( Material *material ) { return getDefaultMaterial()->getProgram(); }
+		virtual ShaderProgram *getFallbackProgram( Material *, Primitive * ) { return getDefaultMaterial()->getProgram(); }
 
 	public:
 		MaterialPtr _defaultMaterial;

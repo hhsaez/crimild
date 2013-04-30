@@ -29,6 +29,7 @@
 #define CRIMILD_COMPONENTS_NODE_COMPONENT_
 
 #include "Foundation/NamedObject.hpp"
+#include "Mathematics/Time.hpp"
 
 namespace Crimild {
 
@@ -49,7 +50,7 @@ namespace Crimild {
 
 	public:
 		virtual void onAttach( void );
-		virtual void update( void );
+		virtual void update( const Time &t );
 		virtual void onDetach( void );
 
 	};

@@ -29,16 +29,20 @@
 #define CRIMILD_VISITORS_UPDATE_COMPONENTS_
 
 #include "NodeVisitor.hpp"
+#include "Mathematics/Time.hpp"
 
 namespace Crimild {
 
 	class UpdateComponents : public NodeVisitor {
 	public:
-		UpdateComponents( void );
+		UpdateComponents( const Time &t );
 		virtual ~UpdateComponents( void );
 
 		virtual void visitNode( Node *node ) override;
 		virtual void visitGroupNode( GroupNode *node ) override;
+
+	private:
+		const Time &_time;
 	};
 
 }

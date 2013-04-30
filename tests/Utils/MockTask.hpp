@@ -28,7 +28,7 @@
 #ifndef CRIMILD_TESTS_UTILS_MOCK_TASK_
 #define CRIMILD_TESTS_UTILS_MOCK_TASK_
 
-#include <Crimild.hpp>
+#include "Simulation/Task.hpp"
 
 #include "gmock/gmock.h"
 

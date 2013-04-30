@@ -31,6 +31,8 @@
 #include "Texture.hpp"
 #include "ShaderProgram.hpp"
 
+#include "Mathematics/Vector.hpp"
+
 namespace Crimild {
 
 	class Material {
@@ -41,12 +43,16 @@ namespace Crimild {
 		void setProgram( ShaderProgramPtr program ) { _program = program; }
 		ShaderProgram *getProgram( void ) { return _program.get(); }
 
+		void setDiffuse( const RGBAColorf &color ) { _diffuse = color; }
+		const RGBAColorf &getDiffuse( void ) const { return _diffuse; }
+
 		void setColorMap( TexturePtr texture ) { _colorMap = texture; }
 		Texture *getColorMap( void ) { return _colorMap.get(); }
 
 	private:
 		ShaderProgramPtr _program;
 		TexturePtr _colorMap;
+		RGBAColorf _diffuse;
 
 	private:
 		Material( const Material & ) { }

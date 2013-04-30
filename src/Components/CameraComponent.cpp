@@ -50,7 +50,7 @@ CameraComponent::~CameraComponent( void )
 
 }
 
-void CameraComponent::update( void ) 
+void CameraComponent::update( const Time &t ) 
 {
 
 }

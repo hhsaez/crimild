@@ -75,15 +75,17 @@ void Renderer::applyMaterial( GeometryNode *geometry, Primitive *primitive, Mate
 		return;
 	}
 
-	ShaderProgram *program = material->getProgram() ? material->getProgram() : getFallbackProgram( material );
+	ShaderProgram *program = material->getProgram() ? material->getProgram() : getFallbackProgram( material, primitive );
 	if ( !program ) {
 		return;
 	}
 
 	bindResources( program, primitive, material );
+	enableMaterialProperties( program, material );
 	applyTransformations( program, geometry, camera );
 	drawPrimitive( program, primitive );
 	restoreTransformations( program, geometry, camera );
+	disableMaterialProperties( program, material );
 	unbindResources( program, primitive, material );
 }
 

@@ -29,23 +29,27 @@
 
 using namespace Crimild;
 
-const VertexFormat VertexFormat::VF_P3( 3, 0, 0 );
-const VertexFormat VertexFormat::VF_P3_UV2( 3, 0, 2 );
-const VertexFormat VertexFormat::VF_P3_N3( 3, 3, 0 );
-const VertexFormat VertexFormat::VF_P3_N3_UV2( 3, 3, 2 );
+const VertexFormat VertexFormat::VF_P3( 3, 0, 0, 0 );
+const VertexFormat VertexFormat::VF_P3_C4( 3, 4, 0, 0 );
+const VertexFormat VertexFormat::VF_P3_UV2( 3, 0, 0, 2 );
+const VertexFormat VertexFormat::VF_P3_N3( 3, 0, 3, 0 );
+const VertexFormat VertexFormat::VF_P3_N3_UV2( 3, 0, 3, 2 );
 
-VertexFormat::VertexFormat( unsigned int positions, unsigned int normals, unsigned int textureCoords )
+VertexFormat::VertexFormat( unsigned int positions, unsigned int colors, unsigned int normals, unsigned int textureCoords )
 {
 	_positions = positions;
 	_positionsOffset = 0;
 
+	_colors = colors;
+	_colorsOffset = _positionsOffset + _positions;
+
 	_normals = normals;
-	_normalsOffset = _positionsOffset + _positions;
+	_normalsOffset = _colorsOffset + _colors;
 
 	_textureCoords = textureCoords;
 	_textureCoordsOffset = _normalsOffset + _normals;
 
-	_vertexSize = _positions + _normals + _textureCoords;
+	_vertexSize = _positions + _colors + _normals + _textureCoords;
 	_vertexSizeInBytes = sizeof( float ) * _vertexSize;
 }
 
@@ -53,6 +57,9 @@ VertexFormat::VertexFormat( const VertexFormat &vf )
 {
 	_positions = vf._positions;
 	_positionsOffset = vf._positionsOffset;
+
+	_colors = vf._colors;
+	_colorsOffset = vf._colorsOffset;
 
 	_normals = vf._normals;
 	_normalsOffset = vf._normalsOffset;
@@ -74,6 +81,9 @@ VertexFormat &VertexFormat::operator=( const VertexFormat &vf )
 	_positions = vf._positions;
 	_positionsOffset = vf._positionsOffset;
 
+	_colors = vf._colors;
+	_colorsOffset = vf._colorsOffset;
+
 	_normals = vf._normals;
 	_normalsOffset = vf._normalsOffset;
 
@@ -90,6 +100,8 @@ bool VertexFormat::operator==( const VertexFormat &vf ) const
 {
 	return ( _positions == vf._positions ) &&
 		   ( _positionsOffset == vf._positionsOffset ) &&
+		   ( _colors == vf._colors ) && 
+		   ( _colorsOffset == vf._colorsOffset ) &&
 		   ( _normals == vf._normals ) && 
 		   ( _normalsOffset == vf._normalsOffset ) &&
 		   ( _textureCoords == vf._textureCoords ) &&
@@ -107,6 +119,7 @@ bool VertexFormat::operator!=( const VertexFormat &vf ) const
 std::ostream &VertexFormat::operator<<( std::ostream &out )
 {
 	out << "{p: " << getPositionComponents() 
+		<< ", c: " << getColorComponents() 
 		<< ", n: " << getNormalComponents() 
 		<< ", tc: " << getTextureCoordComponents();
 	return out;

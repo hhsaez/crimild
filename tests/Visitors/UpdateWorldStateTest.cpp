@@ -25,7 +25,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Crimild.hpp>
+#include "Visitors/UpdateWorldState.hpp"
+#include "SceneGraph/GroupNode.hpp"
+#include "SceneGraph/GeometryNode.hpp"
 
 #include "Utils/MockVisitor.hpp"
 

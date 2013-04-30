@@ -36,11 +36,19 @@ namespace Crimild {
 
 	class FrameBufferObject {
 	public:
-		FrameBufferObject( int width, int height );
+		FrameBufferObject( int width, int height,
+						   int redBits = 8, int greenBits = 8, int blueBits = 8, int alphaBits = 8,
+						   int depthBits = 16, int stencilBits = 0 );
 		virtual ~FrameBufferObject( void );
 
 		int getWidth( void ) const { return _width; }
 		int getHeight( void ) const { return _height; }
+		int getRedBits( void ) const { return _redBits; }
+		int getGreenBits( void ) const { return _greenBits; }
+		int getBlueBits( void ) const { return _blueBits; }
+		int getAlphaBits( void ) const { return _alphaBits; }
+		int getDepthBits( void ) const { return _depthBits; }
+		int getStencilBits( void ) const { return _stencilBits; }
 
 		void setClearColor( const RGBAColorf &color ) { _clearColor = color; }
 		const RGBAColorf &getClearColor( void ) const { return _clearColor; }
@@ -48,6 +56,12 @@ namespace Crimild {
 	private:
 		int _width;
 		int _height;
+		int _redBits;
+		int _greenBits;
+		int _blueBits;
+		int _alphaBits;
+		int _depthBits;
+		int _stencilBits;
 		RGBAColorf _clearColor;
 	};
 

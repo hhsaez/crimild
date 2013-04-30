@@ -28,6 +28,8 @@
 #ifndef CRIMILD_SIMULATION_TASK_
 #define CRIMILD_SIMULATION_TASK_
 
+#include "Mathematics/Time.hpp"
+
 #include <memory>
 
 namespace Crimild {

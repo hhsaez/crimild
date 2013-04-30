@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Crimild.hpp>
+#include "Rendering/VertexBufferObject.hpp"
 
 #include "gtest/gtest.h"
 

@@ -28,6 +28,12 @@
 #ifndef CRIMILD_MACROS_
 #define CRIMILD_MACROS_
 
+#ifdef __GNUC__
+	#define CRIMILD_CURRENT_FUNCTION __PRETTY_FUNCTION__
+#else
+	#define CRIMILD_CURRENT_FUNCTION __FUNCTION__
+#endif
+
 #define CRIMILD_TO_STRING( A ) #A
 
 #endif

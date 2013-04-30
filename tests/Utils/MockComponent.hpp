@@ -28,7 +28,7 @@
 #ifndef CRIMILD_TESTS_UTILS_MOCK_COMPONENT_
 #define CRIMILD_TESTS_UTILS_MOCK_COMPONENT_
 
-#include <Crimild.hpp>
+#include "Components/NodeComponent.hpp"
 
 #include "gmock/gmock.h"
 
@@ -44,7 +44,7 @@ namespace Crimild {
 
 		MOCK_METHOD0( onDetach, void( void ) );
 		MOCK_METHOD0( onAttach, void( void ) );
-		MOCK_METHOD0( update, void( void ) );
+		MOCK_METHOD1( update, void( const Time & ) );
 	};
 
 	typedef std::shared_ptr< MockComponent > MockComponentPtr;

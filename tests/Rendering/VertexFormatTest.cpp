@@ -25,20 +25,24 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Crimild.hpp>
+#include "Rendering/VertexFormat.hpp"
 
 #include "gtest/gtest.h"
 
 using namespace Crimild;
 
-TEST( VertexFormatTest, construction )
+TEST( VertexFormatTest, P3 )
 {
-	VertexFormat vf( 3, 0, 0 );
+	VertexFormat vf( 3, 0, 0, 0 );
 	
 	EXPECT_TRUE( vf.hasPositions() );
 	EXPECT_EQ( 3, vf.getPositionComponents() );
 	EXPECT_EQ( 0, vf.getPositionsOffset() );
 
+	EXPECT_FALSE( vf.hasColors() );
+	EXPECT_EQ( 0, vf.getColorComponents() );
+	EXPECT_EQ( 3, vf.getColorsOffset() );
+	
 	EXPECT_FALSE( vf.hasNormals() );
 	EXPECT_EQ( 0, vf.getNormalComponents() );
 	EXPECT_EQ( 3, vf.getNormalsOffset() );
@@ -49,23 +53,77 @@ TEST( VertexFormatTest, construction )
 
 	EXPECT_EQ( 3, vf.getVertexSize() );
 	EXPECT_EQ( 3 * sizeof( float ), vf.getVertexSizeInBytes() );
-	
-	vf = VertexFormat( 3, 3, 2 );
+}
+
+TEST( VertexFormatTest, P3_C4 )
+{
+	VertexFormat vf( 3, 4, 0, 0 );
 	
 	EXPECT_TRUE( vf.hasPositions() );
 	EXPECT_EQ( 3, vf.getPositionComponents() );
 	EXPECT_EQ( 0, vf.getPositionsOffset() );
 
+	EXPECT_TRUE( vf.hasColors() );
+	EXPECT_EQ( 4, vf.getColorComponents() );
+	EXPECT_EQ( 3, vf.getColorsOffset() );
+
+	EXPECT_FALSE( vf.hasNormals() );
+	EXPECT_EQ( 0, vf.getNormalComponents() );
+	EXPECT_EQ( 7, vf.getNormalsOffset() );
+	
+	EXPECT_FALSE( vf.hasTextureCoords() );
+	EXPECT_EQ( 0, vf.getTextureCoordComponents() );
+	EXPECT_EQ( 7, vf.getTextureCoordsOffset() );
+
+	EXPECT_EQ( 7, vf.getVertexSize() );
+	EXPECT_EQ( 7 * sizeof( float ), vf.getVertexSizeInBytes() );
+}
+
+TEST( VertexFormatTest, P3_N3 )
+{
+	VertexFormat vf( 3, 0, 3, 0 );
+	
+	EXPECT_TRUE( vf.hasPositions() );
+	EXPECT_EQ( 3, vf.getPositionComponents() );
+	EXPECT_EQ( 0, vf.getPositionsOffset() );
+
+	EXPECT_FALSE( vf.hasColors() );
+	EXPECT_EQ( 0, vf.getColorComponents() );
+	EXPECT_EQ( 3, vf.getColorsOffset() );
+	
 	EXPECT_TRUE( vf.hasNormals() );
 	EXPECT_EQ( 3, vf.getNormalComponents() );
 	EXPECT_EQ( 3, vf.getNormalsOffset() );
 	
-	EXPECT_TRUE( vf.hasTextureCoords() );
-	EXPECT_EQ( 2, vf.getTextureCoordComponents() );
+	EXPECT_FALSE( vf.hasTextureCoords() );
+	EXPECT_EQ( 0, vf.getTextureCoordComponents() );
 	EXPECT_EQ( 6, vf.getTextureCoordsOffset() );
 
-	EXPECT_EQ( 8, vf.getVertexSize() );
-	EXPECT_EQ( 8 * sizeof( float ), vf.getVertexSizeInBytes() );
+	EXPECT_EQ( 6, vf.getVertexSize() );
+	EXPECT_EQ( 6 * sizeof( float ), vf.getVertexSizeInBytes() );
+}
+
+TEST( VertexFormatTest, P3_UV2 )
+{
+	VertexFormat vf( 3, 0, 0, 2 );
 	
+	EXPECT_TRUE( vf.hasPositions() );
+	EXPECT_EQ( 3, vf.getPositionComponents() );
+	EXPECT_EQ( 0, vf.getPositionsOffset() );
+
+	EXPECT_FALSE( vf.hasColors() );
+	EXPECT_EQ( 0, vf.getColorComponents() );
+	EXPECT_EQ( 3, vf.getColorsOffset() );
+	
+	EXPECT_FALSE( vf.hasNormals() );
+	EXPECT_EQ( 0, vf.getNormalComponents() );
+	EXPECT_EQ( 3, vf.getNormalsOffset() );
+	
+	EXPECT_TRUE( vf.hasTextureCoords() );
+	EXPECT_EQ( 2, vf.getTextureCoordComponents() );
+	EXPECT_EQ( 3, vf.getTextureCoordsOffset() );
+
+	EXPECT_EQ( 5, vf.getVertexSize() );
+	EXPECT_EQ( 5 * sizeof( float ), vf.getVertexSizeInBytes() );
 }
 

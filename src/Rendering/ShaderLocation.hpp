@@ -40,16 +40,6 @@ namespace Crimild {
 			MAX
 		};
 
-		class DefaultLocations {
-		public:
-			static const char *POSITION_ATTRIBUTE_NAME;
-			static const char *TEXTURE_COORDS_ATTRIBUTE_NAME;
-
-			static const char *PROJECTION_MATRIX_UNIFORM_NAME;
-			static const char *VIEW_MATRIX_UNIFORM_NAME;
-			static const char *MODEL_MATRIX_UNIFORM_NAME;
-		};
-
 	public:
 		explicit ShaderLocation( Type type, std::string name );
 		virtual ~ShaderLocation( void );

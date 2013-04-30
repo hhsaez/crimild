@@ -25,7 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Crimild.hpp>
+#include "Rendering/Catalog.hpp"
+#include "Rendering/Texture.hpp"
 
 #include "gtest/gtest.h"
 

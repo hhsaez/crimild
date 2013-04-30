@@ -29,13 +29,6 @@
 
 using namespace Crimild;
 
-const char *ShaderLocation::DefaultLocations::POSITION_ATTRIBUTE_NAME = "position";
-const char *ShaderLocation::DefaultLocations::TEXTURE_COORDS_ATTRIBUTE_NAME = "textureCoords";
-
-const char *ShaderLocation::DefaultLocations::PROJECTION_MATRIX_UNIFORM_NAME = "projMatrix";
-const char *ShaderLocation::DefaultLocations::VIEW_MATRIX_UNIFORM_NAME = "viewMatrix";
-const char *ShaderLocation::DefaultLocations::MODEL_MATRIX_UNIFORM_NAME = "modelMatrix";
-
 ShaderLocation::ShaderLocation( ShaderLocation::Type type, std::string name )
 	: NamedObject( name ),
 	  _type( type )

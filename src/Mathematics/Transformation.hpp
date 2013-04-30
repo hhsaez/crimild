@@ -306,9 +306,9 @@ namespace Crimild {
 		        float wy = w * y2;
 		        float wz = w * z2;
 
-		    	result[0] = s * ( 1 - (yy + zz) );
-		    	result[1] = s * ( xy + wz );
-		    	result[2] = s * ( xz - wy );
+		    	result[0] = _scale * ( s * ( 1 - (yy + zz) ) );
+		    	result[1] = _scale * ( s * ( xy + wz ) );
+		    	result[2] = _scale * ( s * ( xz - wy ) );
 		    	result[3] = 0;
 
 			    result[4] = s * ( xy - wz );

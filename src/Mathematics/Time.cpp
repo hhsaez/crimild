@@ -25,18 +25,34 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Material.hpp"
+#include "Time.hpp"
 
 using namespace Crimild;
 
-Material::Material( void )
-	: _diffuse( 1.0f, 1.0f, 1.0f, 1.0f )
+Time::Time( void )
+{
+	_currentTime = 0.0;
+	_lastTime = 0.0;
+	_deltaTime = 0.0;
+}
+
+Time::Time( const Time &t )
+{
+	_currentTime = t._currentTime;
+	_lastTime = t._lastTime;
+	_deltaTime = t._deltaTime;
+}
+
+Time::~Time( void )
 {
 
 }
 
-Material::~Material( void )
+Time &Time::operator=( const Time &t )
 {
-
+	_currentTime = t._currentTime;
+	_lastTime = t._lastTime;
+	_deltaTime = t._deltaTime;
+	return *this;
 }
 

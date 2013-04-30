@@ -31,7 +31,8 @@
 
 using namespace Crimild;
 
-UpdateComponents::UpdateComponents( void )
+UpdateComponents::UpdateComponents( const Time &t )
+	: _time( t )
 {
 
 }
@@ -43,7 +44,7 @@ UpdateComponents::~UpdateComponents( void )
 
 void UpdateComponents::visitNode( Node *node )
 {
-	node->updateComponents();
+	node->updateComponents( _time );
 }
 
 void UpdateComponents::visitGroupNode( GroupNode *group )

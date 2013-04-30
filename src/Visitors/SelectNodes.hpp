@@ -25,18 +25,37 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Material.hpp"
+#ifndef CRIMILD_VISITORS_SELECT_NODES_
+#define CRIMILD_VISITORS_SELECT_NODES_
 
-using namespace Crimild;
+#include "NodeVisitor.hpp"
 
-Material::Material( void )
-	: _diffuse( 1.0f, 1.0f, 1.0f, 1.0f )
-{
+#include <list>
+#include <functional>
+
+namespace Crimild {
+
+	class SelectNodes : public NodeVisitor {
+	public:
+		typedef std::function< bool( Node * ) > SelectorOp;
+
+	public:
+		SelectNodes( SelectorOp selector );
+		virtual ~SelectNodes( void );
+
+		virtual void reset( void ) override;
+
+		virtual void visitNode( Node *node ) override;
+		virtual void visitGroupNode( GroupNode *node ) override;
+
+		virtual void foreachMatch( std::function< void( Node *node ) > callback );
+
+	private:
+		SelectorOp _selector;
+		std::list< Node * > _matches;
+	};
 
 }
 
-Material::~Material( void )
-{
-
-}
+#endif
 

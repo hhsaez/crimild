@@ -32,6 +32,7 @@
 #include "Visitors/NodeVisitor.hpp"
 #include "Components/NodeComponent.hpp"
 #include "Mathematics/Transformation.hpp"
+#include "Mathematics/Time.hpp"
 
 #include <map>
 
@@ -83,7 +84,7 @@ namespace Crimild {
 			return static_cast< T * >( _components[ T::NAME ].get() );
 		}
 
-		void updateComponents( void );
+		void updateComponents( const Time &t );
 
 	private:
 		std::map< std::string, NodeComponentPtr > _components;

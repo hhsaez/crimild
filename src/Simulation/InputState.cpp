@@ -25,92 +25,79 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Node.hpp"
+#include "InputState.hpp"
 
 using namespace Crimild;
 
-Node::Node( std::string name )
-	: NamedObject( name ),
-	  _parent( nullptr ),
-	  _worldIsCurrent( false )
+InputState::InputState( void )
 {
+	reset( 256, 8 );
 }
 
-Node::~Node( void )
+InputState::~InputState( void )
 {
-	detachAllComponents();
+
 }
 
-void Node::perform( NodeVisitor &visitor )
+void InputState::reset( int keyCount, int mouseButtonCount )
 {
-	visitor.traverse( this );
-}
+	_currentKeys.resize( keyCount );
+	_previousKeys.resize( keyCount );
 
-void Node::perform( const NodeVisitor &visitor )
-{
-	const_cast< NodeVisitor & >( visitor ).traverse( this );
-}
-
-void Node::accept( NodeVisitor &visitor )
-{
-	visitor.visitNode( this );
-}
-
-void Node::attachComponent( NodeComponentPtr component )
-{
-	if ( component->getNode() == this ) {
-		// the component is already attached to this node
-		return;
+	for ( int i = 0; i < keyCount; i++ ) {
+		_currentKeys[ i ] = KeyState::RELEASED;
+		_previousKeys[ i ] = KeyState::RELEASED;
 	}
 
-	detachComponentWithName( component->getName() );
-	component->setNode( this );
-	_components[ component->getName() ] = component;
-	component->onAttach();
-}
+	setMouseStartingPosition( Vector2i( 0, 0 ) );
+	setNormalizedMouseStartingPosition( Vector2f( 0.0f, 0.0f ) );
 
-void Node::detachComponent( NodeComponentPtr component )
-{
-	if ( component->getNode() != this ) {
-		// the component is not attached to this node
-		return;
-	}
+	_currentMouseButtons.resize( mouseButtonCount );
+	_previousMouseButtons.resize( mouseButtonCount );
 
-	detachComponentWithName( component->getName() );
-}
-
-void Node::detachComponentWithName( std::string name )
-{
-	if ( _components.find( name ) != _components.end() ) {
-		_components[ name ]->onDetach();
-		_components[ name ]->setNode( nullptr );
-		_components.erase( name );
+	for ( int i = 0; i < mouseButtonCount; i++ ) {
+		_currentMouseButtons[ i ] = MouseButtonState::RELEASED;
+		_previousMouseButtons[ i ] = MouseButtonState::RELEASED;
 	}
 }
 
-NodeComponent *Node::getComponentWithName( std::string name )
+void InputState::setKeyState( int key, KeyState state )
 {
-	return _components[ name ].get();
-}
-
-void Node::detachAllComponents( void )
-{
-	for ( auto cmp : _components ) {
-		if ( cmp.second != nullptr ) {
-			cmp.second->onDetach();
-			cmp.second->setNode( nullptr );
-		}
+	if ( key < _currentKeys.size() ) {
+		_previousKeys[ key ] = _currentKeys[ key ];
+		_currentKeys[ key ] = state;
 	}
-
-	_components.clear();
 }
 
-void Node::updateComponents( const Time &t )
+void InputState::setMouseStartingPosition( const Vector2i &pos )
 {
-	for ( auto cmp : _components ) {
-		if ( cmp.second != nullptr ) {
-			cmp.second->update( t );
-		}
+	_mousePos = pos;
+	_mouseDelta = Vector2i( 0, 0 );
+}
+
+void InputState::setMousePosition( const Vector2i &pos )
+{
+	_mouseDelta = pos - _mousePos;
+	_mousePos = pos;
+}
+
+void InputState::setNormalizedMouseStartingPosition( const Vector2f &pos )
+{
+	_mousePos = pos;
+	_mouseDelta = Vector2f( 0.0f, 0.0f );
+}
+
+void InputState::setNormalizedMousePosition( const Vector2f &pos )
+{
+	_normalizedMouseDelta = pos - _normalizedMousePos;
+	_normalizedMousePos = pos;
+}
+
+void InputState::setMouseButtonState( int button, MouseButtonState state )
+{
+	if ( button < _currentMouseButtons.size() ) {
+		_previousMouseButtons[ button ] = _currentMouseButtons[ button ];
+		_currentMouseButtons[ button ] = state;
 	}
 }
 

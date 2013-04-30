@@ -30,6 +30,7 @@
 using namespace Crimild;
 
 Log Log::Debug( "DEBUG" );
+Log Log::Warning( "WARNING" );
 Log Log::Error( "ERROR" );
 Log Log::Fatal( "FATAL" );
 Log Log::Info( "INFO" );

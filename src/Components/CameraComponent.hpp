@@ -44,7 +44,7 @@ namespace Crimild {
 
 		Camera *getCamera( void ) { return _camera.get(); }
 
-		virtual void update( void ) override;
+		virtual void update( const Time &t ) override;
 
 	private:
 		CameraPtr _camera;

@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Crimild.hpp>
+#include "SceneGraph/Node.hpp"
 
 #include "Utils/MockComponent.hpp"
 
@@ -278,23 +278,25 @@ TEST( NodeTest, detachAllComponents )
 TEST( NodeTest, updateComponents )
 {
 	NodePtr node( new Node() );
+
+	Time t;
 	
 	MockComponentPtr cmp1( new MockComponent( "cmp1" ) );
-	EXPECT_CALL( *cmp1, update() )
+	EXPECT_CALL( *cmp1, update( testing::_ ) )
 		.Times( ::testing::Exactly( 3 ) );
 	
 	MockComponentPtr cmp2( new MockComponent( "cmp2" ) );
-	EXPECT_CALL( *cmp2, update() )
+	EXPECT_CALL( *cmp2, update( testing::_ ) )
 		.Times( ::testing::Exactly( 2 ) );
 
 	node->attachComponent( cmp1 );
 	node->attachComponent( cmp2 );
 
-	node->updateComponents();
-	node->updateComponents();
+	node->updateComponents( t );
+	node->updateComponents( t );
 
 	node->detachComponent( cmp2 );
 
-	node->updateComponents();
+	node->updateComponents( t );
 }
 

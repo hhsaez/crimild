@@ -40,6 +40,7 @@
 #include "Mathematics/Rect.hpp"
 #include "Mathematics/Root.hpp"
 #include "Mathematics/Sphere.hpp"
+#include "Mathematics/Time.hpp"
 #include "Mathematics/Transformation.hpp"
 #include "Mathematics/Vector.hpp"
 
@@ -66,6 +67,7 @@
 #include "Visitors/FetchCameras.hpp"
 #include "Visitors/NodeVisitor.hpp"
 #include "Visitors/ComputeVisibilitySet.hpp"
+#include "Visitors/SelectNodes.hpp"
 #include "Visitors/UpdateComponents.hpp"
 #include "Visitors/UpdateWorldState.hpp"
 
@@ -97,6 +99,7 @@
 #include "Rendering/VertexFormat.hpp"
 #include "Rendering/VisibilitySet.hpp"
 
+#include "Simulation/InputState.hpp"
 #include "Simulation/Simulation.hpp"
 #include "Simulation/FileSystem.hpp"
 #include "Simulation/RunLoop.hpp"

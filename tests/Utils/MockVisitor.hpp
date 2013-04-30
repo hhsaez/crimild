@@ -28,7 +28,7 @@
 #ifndef CRIMILD_UTILS_MOCK_VISITOR_
 #define CRIMILD_UTILS_MOCK_VISITOR_
 
-#include <Crimild.hpp>
+#include "Visitors/NodeVisitor.hpp"
 
 #include "gmock/gmock.h"
 

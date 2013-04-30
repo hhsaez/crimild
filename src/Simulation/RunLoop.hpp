@@ -29,6 +29,7 @@
 #define CRIMILD_SIMULATION_RUN_LOOP_
 
 #include "Task.hpp"
+#include "Mathematics/Time.hpp"
 
 #include <functional>
 #include <list>

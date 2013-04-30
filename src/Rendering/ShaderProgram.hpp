@@ -56,9 +56,40 @@ namespace Crimild {
 		void resetLocations( void );
 		void foreachLocation( std::function< void( ShaderLocationPtr & ) > callback );
 
+		void registerPositionAttributeLocation( std::string name );
+		ShaderLocation *getPositionAttributeLocation( void ) { return _positionAttributeLocation.get(); }
+
+		void registerColorAttributeLocation( std::string name );
+		ShaderLocation *getColorAttributeLocation( void ) { return _colorAttributeLocation.get(); }
+
+		void registerTextureCoordAttributeLocation( std::string name );
+		ShaderLocation *getTextureCoordAttributeLocation( void ) { return _textureCoordAttributeLocation.get(); }
+
+		void registerProjectionMatrixUniformLocation( std::string name );
+		ShaderLocation *getProjectionMatrixUniformLocation( void ) { return _projectionMatrixUniformLocation.get(); }
+
+		void registerViewMatrixUniformLocation( std::string name );
+		ShaderLocation *getViewMatrixUniformLocation( void ) { return _viewMatrixUniformLocation.get(); }
+
+		void registerModelMatrixUniformLocation( std::string name );
+		ShaderLocation *getModelMatrixUniformLocation( void ) { return _modelMatrixUniformLocation.get(); }
+
+		void registerMaterialDiffuseUniformLocation( std::string name );
+		ShaderLocation *getMaterialDiffuseUniformLocation( void ) { return _materialDiffuseUniformLocation.get(); }
+
+		void registerMaterialColorMapUniformLocation( std::string name );
+		ShaderLocation *getMaterialColorMapUniformLocation( void ) { return _materialColorMapUniformLocation.get(); }
+
 	private:
 		std::map< std::string, ShaderLocationPtr > _locations;
-
+		ShaderLocationPtr _positionAttributeLocation;
+		ShaderLocationPtr _colorAttributeLocation;
+		ShaderLocationPtr _textureCoordAttributeLocation;
+		ShaderLocationPtr _projectionMatrixUniformLocation;
+		ShaderLocationPtr _viewMatrixUniformLocation;
+		ShaderLocationPtr _modelMatrixUniformLocation;
+		ShaderLocationPtr _materialDiffuseUniformLocation;
+		ShaderLocationPtr _materialColorMapUniformLocation;
 	};
 
 	typedef std::shared_ptr< ShaderProgram > ShaderProgramPtr;

@@ -25,7 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Crimild.hpp>
+#include "SceneGraph/GroupNode.hpp"
+#include "Exceptions/HasParentException.hpp"
 
 #include "gtest/gtest.h"
 

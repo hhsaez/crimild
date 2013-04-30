@@ -30,6 +30,7 @@
 
 #include "RunLoop.hpp"
 #include "Foundation/NamedObject.hpp"
+#include "Mathematics/Time.hpp"
 #include "SceneGraph/Node.hpp" 
 #include "Rendering/Renderer.hpp"
 
@@ -48,6 +49,9 @@ namespace Crimild {
 
 		RunLoop *getMainLoop( void ) { return _mainLoop.get(); }
 
+		Time &getSimulationTime( void ) { return _simulationTime; }
+		const Time &getSimulationTime( void ) const { return _simulationTime; }
+
 		virtual void start( void );
 
 		virtual bool step( void );
@@ -58,6 +62,7 @@ namespace Crimild {
 
 	private:
 		RunLoopPtr _mainLoop;
+		Time _simulationTime;
 
 	public:
 		void setRenderer( RendererPtr renderer ) { _renderer = renderer; }

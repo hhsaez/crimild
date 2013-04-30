@@ -25,18 +25,44 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Material.hpp"
+#include "SelectNodes.hpp"
+#include "SceneGraph/Node.hpp"
+#include "SceneGraph/GroupNode.hpp"
 
 using namespace Crimild;
 
-Material::Material( void )
-	: _diffuse( 1.0f, 1.0f, 1.0f, 1.0f )
+SelectNodes::SelectNodes( SelectNodes::SelectorOp selector )
+	: _selector( selector )
 {
 
 }
 
-Material::~Material( void )
+SelectNodes::~SelectNodes( void )
 {
 
+}
+
+void SelectNodes::reset( void )
+{
+	_matches.clear();
+	NodeVisitor::reset();
+}
+
+void SelectNodes::visitNode( Node *node )
+{
+	if ( _selector( node ) ) {
+		_matches.push_back( node );
+	}
+}
+
+void SelectNodes::visitGroupNode( GroupNode *group )
+{
+	visitNode( group );
+	NodeVisitor::visitGroupNode( group );
+}
+
+void SelectNodes::foreachMatch( std::function< void( Node * ) > callback )
+{
+	std::for_each( std::begin( _matches ), std::end( _matches ), callback );
 }
 

@@ -29,9 +29,17 @@
 
 using namespace Crimild;
 
-FrameBufferObject::FrameBufferObject( int width, int height )
+FrameBufferObject::FrameBufferObject( int width, int height,
+									  int redBits, int greenBits, int blueBits, int alphaBits,
+						   			  int depthBits, int stencilBits )
 	: _width( width ),
 	  _height( height ),
+	  _redBits( redBits ),
+	  _greenBits( greenBits ),
+	  _blueBits( blueBits ),
+	  _alphaBits( alphaBits ),
+	  _depthBits( depthBits ),
+	  _stencilBits( stencilBits ),
 	  _clearColor( 0.0f, 0.0f, 0.0f, 1.0f )
 {
 

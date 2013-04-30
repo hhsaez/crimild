@@ -48,10 +48,9 @@ RotationComponent::~RotationComponent( void )
 
 }
 
-void RotationComponent::update( void )
+void RotationComponent::update( const Time &t )
 {
-	static const float DELTA_TIME = 1.0f / 60.0f;
 	getNode()->local().rotate().fromAxisAngle( _axis, _time * 2.0f * Numericf::PI );
-	_time += _speed * DELTA_TIME;
+	_time += _speed * t.getDeltaTime();
 }
 

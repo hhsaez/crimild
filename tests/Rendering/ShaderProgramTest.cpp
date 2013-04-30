@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Crimild.hpp>
+#include "Rendering/ShaderProgram.hpp"
 
 #include "gtest/gtest.h"
 
@@ -61,7 +61,7 @@ TEST( ShaderProgramTest, locations )
 	program->foreachLocation( [&]( ShaderLocationPtr &loc ) mutable {
 		i++;
 	});
-	EXPECT_EQ( 7, i );
+	EXPECT_EQ( 2, i );
 
 	vertexWeightLocation->setLocation( 2 );
 	timeLocation->setLocation( 2 );

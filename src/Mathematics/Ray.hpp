@@ -114,6 +114,15 @@ namespace Crimild {
 		VectorImpl _direction;
 	};
 
+	template< unsigned int SIZE, typename PRECISION >
+	std::ostream &operator<<( std::ostream &out, const Ray< SIZE, PRECISION > &r )
+	{
+		out << std::setiosflags( std::ios::fixed | std::ios::showpoint  )
+			<< std::setprecision( 10 );
+		out << "[" << r.getOrigin() << ", " << r.getDirection() << "]";
+		return out;
+	}
+
 	typedef Ray< 3, int > Ray3i;
 	typedef Ray< 3, float > Ray3f;
 	typedef Ray< 3, double > Ray3d;

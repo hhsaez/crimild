@@ -30,6 +30,8 @@
 
 #include "Mathematics/Matrix.hpp"
 #include "Mathematics/Frustum.hpp"
+#include "Mathematics/Ray.hpp"
+#include "Mathematics/Rect.hpp"
 
 #include <memory>
 
@@ -47,10 +49,16 @@ namespace Crimild {
 		void setViewMatrix( const Matrix4f &view ) { _viewMatrix = view; }
 		const Matrix4f &getViewMatrix( void ) const { return _viewMatrix; }
 
+		void setViewport( const Rectf &rect ) { _viewport = rect; }
+		const Rectf &getViewport( void ) const { return _viewport; }
+
+		bool getPickRay( float normalizedX, float normalizedY, Ray3f &result ) const;
+
 	private:
 		Matrix4f _projectionMatrix;
 		Matrix4f _viewMatrix;
 		Frustumf _frustum;
+		Rectf _viewport;
 
 	private:
 		Camera( const Camera & ) { }

@@ -25,7 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Crimild.hpp>
+#include "Mathematics/Quaternion.hpp"
+#include "Mathematics/Interpolation.hpp"
 
 #include "gtest/gtest.h"
 

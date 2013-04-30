@@ -25,18 +25,35 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Material.hpp"
+#ifndef CRIMILD_MATHEMATICS_TIME_
+#define CRIMILD_MATHEMATICS_TIME_
 
-using namespace Crimild;
+namespace Crimild {
 
-Material::Material( void )
-	: _diffuse( 1.0f, 1.0f, 1.0f, 1.0f )
-{
+	class Time {
+	public:
+		Time( void );
+		Time( const Time &t );
+		~Time( void );
+
+		Time &operator=( const Time &t );
+
+		double getCurrentTime( void ) const { return _currentTime; }
+		void setCurrentTime( float value ) { _currentTime = value; }
+
+		float getLastTime( void ) const { return _lastTime; }
+		void setLastTime( float value ) { _lastTime = value; }
+
+		float getDeltaTime( void ) const { return _deltaTime; }
+		void setDeltaTime( float value ) { _deltaTime = value; }
+
+	private:
+		double _currentTime;
+		double _lastTime;
+		double _deltaTime;
+	};
 
 }
 
-Material::~Material( void )
-{
-
-}
+#endif
 
