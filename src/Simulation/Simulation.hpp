@@ -44,7 +44,7 @@ namespace Crimild {
 		static Simulation *getCurrent( void ) { return _currentSimulation; }
 
 	public:
-		Simulation( std::string name = "" );
+		Simulation( std::string name, int argc, char **argv );
 		virtual ~Simulation( void );
 
 		RunLoop *getMainLoop( void ) { return _mainLoop.get(); }

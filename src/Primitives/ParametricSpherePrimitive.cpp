@@ -25,51 +25,32 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "FileSystem.hpp"
-
-#include "Foundation/Log.hpp"
+#include "ParametricSpherePrimitive.hpp"
 
 using namespace Crimild;
 
-FileSystem &FileSystem::getInstance( void )
+ParametricSpherePrimitive::ParametricSpherePrimitive( Primitive::Type type, float radius, const VertexFormat &format, Vector2i divisions )
+    : ParametricPrimitive( type, format )
 {
-	static FileSystem fs;
-	return fs;
+    _radius = radius;
+    
+    ParametricInterval interval = { divisions, Vector2f( Numericf::PI, Numericf::TWO_PI ), Vector2f( 20, 35 ) };
+    setInterval( interval );
+    generate();
 }
 
-FileSystem::FileSystem( void )
+ParametricSpherePrimitive::~ParametricSpherePrimitive( void )
 {
-
+    
 }
 
-FileSystem::~FileSystem( void )
+Vector3f ParametricSpherePrimitive::evaluate( const Vector2f &domain ) const
 {
-
-}
-
-void FileSystem::init( int argc, char **argv )
-{
-	std::string base = "";
-	if ( argc > 0 ) {
-		base = extractDirectory( argv[ 0 ] ); 
-	}
-	
-	if ( base.length() == 0 ) {
-		base = ".";
-	}
-
-	setBaseDirectory( base );
-	
-	Log::Debug << "Base directory: " << getBaseDirectory() << Log::End;
-}
-
-std::string FileSystem::extractDirectory( std::string path )
-{
-	return path.substr( 0, path.find_last_of( '/' ) );
-}
-
-std::string FileSystem::pathForResource( std::string filePath )
-{
-	return getBaseDirectory() + "/" + filePath;
+    float u = domain[ 0 ];
+    float v = domain[ 1 ];
+    float x = _radius * std::sin( u ) * std::cos( v );
+    float y = _radius * std::cos( u );
+    float z = _radius * -std::sin( u ) * std::sin( v );
+    return Vector3f( x, y, z );
 }
 

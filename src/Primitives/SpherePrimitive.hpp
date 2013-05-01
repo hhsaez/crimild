@@ -28,32 +28,22 @@
 #ifndef CRIMILD_PRIMITIVES_SPHERE_
 #define CRIMILD_PRIMITIVES_SPHERE_
 
-#include "ParametricPrimitive.hpp"
+#include "Primitive.hpp"
+
+#include "Mathematics/Vector.hpp"
 
 namespace Crimild {
     
-    /**
-        Sphere parametrization
-        x = r * sin(u) * cos(v)
-        y = r * cos(u)
-        z = r * -sin(u) * cos(v)
-        for 0 <= u <= PI, 0 <= v <= 2 * PI
-     */
-    class SpherePrimitive : public ParametricPrimitive {
+    class SpherePrimitive : public Primitive {
     public:
-        SpherePrimitive( Primitive::Type type, 
-            float radius, 
+        SpherePrimitive( float radius, 
             const VertexFormat &format = VertexFormat::VF_P3_N3, 
-            Vector2i divisions = Vector2i( 20, 20 ) );
+            Vector2i divisions = Vector2i( 30, 30 ) );
 
         virtual ~SpherePrimitive( void );
-        
-    protected:
-        virtual Vector3f evaluate( const Vector2f &domain ) const;
-        
-    private:
-        float _radius;
     };
+
+    typedef std::shared_ptr< SpherePrimitive > SpherePrimitivePtr;
         
 }
 

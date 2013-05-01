@@ -27,30 +27,73 @@
 
 #include "SpherePrimitive.hpp"
 
+#include <vector>
+
 using namespace Crimild;
 
-SpherePrimitive::SpherePrimitive( Primitive::Type type, float radius, const VertexFormat &format, Vector2i divisions )
-    : ParametricPrimitive( type, format )
+SpherePrimitive::SpherePrimitive( float radius, const VertexFormat &format, Vector2i divisions )
+    : Primitive( Primitive::Type::TRIANGLES )
 {
-    _radius = radius;
-    
-    ParametricInterval interval = { divisions, Vector2f( Numericf::PI, Numericf::TWO_PI ), Vector2f( 20, 35 ) };
-    setInterval( interval );
-    generate();
+    std::vector< float > vertices;
+    for ( float latitude = 0; latitude <= divisions[ 1 ]; latitude++ ) {
+        float theta = latitude * Numericf::PI / divisions[ 1 ];
+        float sinTheta = std::sin( theta );
+        float cosTheta = std::cos( theta );
+
+        for ( float longitude = 0; longitude <= divisions[ 0 ]; longitude++ ) {
+            float phi = longitude * Numericf::TWO_PI / divisions[ 0 ];
+            float sinPhi = std::sin( phi );
+            float cosPhi = std::cos( phi );
+
+            float x = cosPhi * sinTheta;
+            float y = cosTheta;
+            float z = sinPhi * sinTheta;
+
+            vertices.push_back( x );
+            vertices.push_back( y );
+            vertices.push_back( z );
+
+            if ( format.hasNormals() ) {
+                vertices.push_back( x );
+                vertices.push_back( y );
+                vertices.push_back( z );
+            }
+
+            if ( format.hasTextureCoords() ) {
+                float u = 1.0f - ( longitude / divisions[ 0 ] );
+                float v = ( latitude / divisions[ 1 ] );
+
+                vertices.push_back( u );
+                vertices.push_back( v );
+            }
+        }
+    }
+
+    VertexBufferObjectPtr vbo( new VertexBufferObject( format, vertices.size() / format.getVertexSize(), &vertices[ 0 ] ) );
+    setVertexBuffer( vbo );
+
+    std::vector< unsigned short > indices;
+    for ( unsigned short latitude = 0; latitude < divisions[ 1 ]; latitude++ ) {
+        for ( unsigned short longitude = 0; longitude < divisions[ 0 ]; longitude++ ) {
+            unsigned short first = ( latitude * ( divisions[ 1 ] + 1 ) ) + longitude;
+            unsigned short second = first + divisions[ 0 ] + 1;
+
+            indices.push_back( first );
+            indices.push_back( first + 1 );
+            indices.push_back( second );
+
+            indices.push_back( second );
+            indices.push_back( first + 1 );
+            indices.push_back( second + 1 );
+        }
+    }
+
+    IndexBufferObjectPtr ibo( new IndexBufferObject( indices.size(), &indices[ 0 ] ) );
+    setIndexBuffer( ibo );
 }
 
 SpherePrimitive::~SpherePrimitive( void )
 {
     
-}
-
-Vector3f SpherePrimitive::evaluate( const Vector2f &domain ) const
-{
-    float u = domain[ 0 ];
-    float v = domain[ 1 ];
-    float x = _radius * std::sin( u ) * std::cos( v );
-    float y = _radius * std::cos( u );
-    float z = _radius * -std::sin( u ) * std::sin( v );
-    return Vector3f( x, y, z );
 }
 

@@ -40,7 +40,7 @@ TEST( SimulationTest, construction )
 {
 	EXPECT_EQ( Simulation::getCurrent(), nullptr );
 
-	SimulationPtr simulation( new Simulation( "a simulation" ) );
+	SimulationPtr simulation( new Simulation( "a simulation", 0, nullptr ) );
 
 	EXPECT_EQ( simulation->getName(), "a simulation" );
 	EXPECT_EQ( Simulation::getCurrent(), simulation.get() );
@@ -54,7 +54,7 @@ TEST( SimulationTest, destruction )
 		.Times( ::testing::Exactly( 1 ) );
 
 	{
-		SimulationPtr simulation( new Simulation( "a simulation" ) );		
+		SimulationPtr simulation( new Simulation( "a simulation", 0, nullptr ) );		
 		EXPECT_EQ( Simulation::getCurrent(), simulation.get() );
 		simulation->getMainLoop()->startTask( task );
 	}
@@ -64,7 +64,7 @@ TEST( SimulationTest, destruction )
 
 TEST( SimulationTest, step )
 {
-	SimulationPtr simulation( new Simulation() );
+	SimulationPtr simulation( new Simulation( "a simulation", 0, nullptr ) );		
 
 	MockTaskPtr task( new MockTask( 0 ) );
 	EXPECT_CALL( *task, start() )
@@ -88,7 +88,7 @@ TEST( SimulationTest, run )
 {
 	int loopCount = 0;
 
-	SimulationPtr simulation( new Simulation() );
+	SimulationPtr simulation( new Simulation( "a simulation", 0, nullptr ) );
 
 	MockTaskPtr task( new MockTask( 0 ) );
 	EXPECT_CALL( *task, start() )
@@ -112,7 +112,7 @@ TEST( SimulationTest, run )
 
 TEST( SimulationTest, attachSceneWithoutCamera )
 {
-	SimulationPtr simulation( new Simulation() );
+	SimulationPtr simulation( new Simulation( "a simulation", 0, nullptr ) );
 
 	EXPECT_FALSE( simulation->getMainLoop()->hasActiveTasks() );
 
@@ -125,7 +125,7 @@ TEST( SimulationTest, attachSceneWithoutCamera )
 
 TEST( SimulationTest, attachSceneWithCamera )
 {
-	SimulationPtr simulation( new Simulation() );
+	SimulationPtr simulation( new Simulation( "a simulation", 0, nullptr ) );
 
 	EXPECT_FALSE( simulation->getMainLoop()->hasActiveTasks() );
 

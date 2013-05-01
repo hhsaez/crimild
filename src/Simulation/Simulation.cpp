@@ -26,7 +26,8 @@
  */
 
 #include "Simulation.hpp"
-
+#include "FileSystem.hpp"
+ 
 #include "Foundation/Log.hpp"
 #include "Tasks/BeginRenderTask.hpp"
 #include "Tasks/EndRenderTask.hpp"
@@ -44,11 +45,13 @@ using namespace Crimild;
 
 Simulation *Simulation::_currentSimulation = nullptr;
 
-Simulation::Simulation( std::string name )
+Simulation::Simulation( std::string name, int argc, char **argv )
 	: NamedObject( name ),
 	  _mainLoop( new RunLoop() )
 {
 	_currentSimulation = this;
+
+	FileSystem::getInstance().init( argc, argv );
 }
 
 Simulation::~Simulation( void )

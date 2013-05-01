@@ -25,51 +25,38 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "FileSystem.hpp"
+#ifndef CRIMILD_PRIMITIVES_PARAMETRIC_SPHERE_
+#define CRIMILD_PRIMITIVES_PARAMETRIC_SPHERE_
 
-#include "Foundation/Log.hpp"
+#include "ParametricPrimitive.hpp"
 
-using namespace Crimild;
+namespace Crimild {
+    
+    /**
+        Sphere parametrization
+        x = r * sin(u) * cos(v)
+        y = r * cos(u)
+        z = r * -sin(u) * cos(v)
+        for 0 <= u <= PI, 0 <= v <= 2 * PI
+     */
+    class ParametricSpherePrimitive : public ParametricPrimitive {
+    public:
+        ParametricSpherePrimitive( Primitive::Type type, 
+            float radius, 
+            const VertexFormat &format = VertexFormat::VF_P3_N3, 
+            Vector2i divisions = Vector2i( 20, 20 ) );
 
-FileSystem &FileSystem::getInstance( void )
-{
-	static FileSystem fs;
-	return fs;
+        virtual ~ParametricSpherePrimitive( void );
+        
+    protected:
+        virtual Vector3f evaluate( const Vector2f &domain ) const;
+        
+    private:
+        float _radius;
+    };
+
+    typedef std::shared_ptr< ParametricSpherePrimitive > ParametricSpherePrimitivePtr;
+        
 }
 
-FileSystem::FileSystem( void )
-{
-
-}
-
-FileSystem::~FileSystem( void )
-{
-
-}
-
-void FileSystem::init( int argc, char **argv )
-{
-	std::string base = "";
-	if ( argc > 0 ) {
-		base = extractDirectory( argv[ 0 ] ); 
-	}
-	
-	if ( base.length() == 0 ) {
-		base = ".";
-	}
-
-	setBaseDirectory( base );
-	
-	Log::Debug << "Base directory: " << getBaseDirectory() << Log::End;
-}
-
-std::string FileSystem::extractDirectory( std::string path )
-{
-	return path.substr( 0, path.find_last_of( '/' ) );
-}
-
-std::string FileSystem::pathForResource( std::string filePath )
-{
-	return getBaseDirectory() + "/" + filePath;
-}
-
+#endif

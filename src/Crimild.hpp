@@ -73,6 +73,7 @@
 
 #include "Primitives/Primitive.hpp"
 #include "Primitives/ParametricPrimitive.hpp"
+#include "Primitives/ParametricSpherePrimitive.hpp"
 #include "Primitives/ConePrimitive.hpp"
 #include "Primitives/KleinBottlePrimitive.hpp"
 #include "Primitives/MobiusStripPrimitive.hpp"
