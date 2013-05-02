@@ -38,7 +38,7 @@ namespace Crimild {
 		virtual ~UpdateWorldState( void );
 
 		virtual void visitNode( Node *node ) override;
-		virtual void visitGroupNode( GroupNode *node ) override;
+		virtual void visitGroup( Group *node ) override;
 	};
 
 }

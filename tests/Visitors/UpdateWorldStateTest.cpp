@@ -26,8 +26,8 @@
  */
 
 #include "Visitors/UpdateWorldState.hpp"
-#include "SceneGraph/GroupNode.hpp"
-#include "SceneGraph/GeometryNode.hpp"
+#include "SceneGraph/Group.hpp"
+#include "SceneGraph/Geometry.hpp"
 
 #include "Utils/MockVisitor.hpp"
 
@@ -58,11 +58,11 @@ TEST( UpdateWorldStateTest, singleNode )
 
 TEST( UpdateWorldStateTest, hierarchy )
 {
-	GroupNodePtr group1( new GroupNode() );
-	GroupNodePtr group2( new GroupNode() );
-	GeometryNodePtr geometry1( new GeometryNode() );
-	GeometryNodePtr geometry2( new GeometryNode() );
-	GeometryNodePtr geometry3( new GeometryNode() );
+	GroupPtr group1( new Group() );
+	GroupPtr group2( new Group() );
+	GeometryPtr geometry1( new Geometry() );
+	GeometryPtr geometry2( new Geometry() );
+	GeometryPtr geometry3( new Geometry() );
 
 	group1->attachNode( group2 );
 	group1->attachNode( geometry1 );

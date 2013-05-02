@@ -46,7 +46,7 @@ namespace Crimild {
 		virtual void reset( void ) override;
 
 		virtual void visitNode( Node *node ) override;
-		virtual void visitGroupNode( GroupNode *node ) override;
+		virtual void visitGroup( Group *node ) override;
 
 		virtual void foreachMatch( std::function< void( Node *node ) > callback );
 

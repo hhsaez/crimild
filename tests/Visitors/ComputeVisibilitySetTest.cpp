@@ -28,8 +28,8 @@
 #include "Visitors/ComputeVisibilitySet.hpp"
 #include "Rendering/VisibilitySet.hpp"
 #include "SceneGraph/Camera.hpp"
-#include "SceneGraph/GeometryNode.hpp"
-#include "SceneGraph/GroupNode.hpp"
+#include "SceneGraph/Geometry.hpp"
+#include "SceneGraph/Group.hpp"
 
 #include "Utils/MockVisitor.hpp"
 
@@ -39,11 +39,11 @@ using namespace Crimild;
 
 TEST( ComputeVisibilitySetTest, traversal )
 {
-	GroupNodePtr group1( new GroupNode() );
-	GroupNodePtr group2( new GroupNode() );
-	GeometryNodePtr geometry1( new GeometryNode() );
-	GeometryNodePtr geometry2( new GeometryNode() );
-	GeometryNodePtr geometry3( new GeometryNode() );
+	GroupPtr group1( new Group() );
+	GroupPtr group2( new Group() );
+	GeometryPtr geometry1( new Geometry() );
+	GeometryPtr geometry2( new Geometry() );
+	GeometryPtr geometry3( new Geometry() );
 
 	CameraPtr camera( new Camera );
 
@@ -59,7 +59,7 @@ TEST( ComputeVisibilitySetTest, traversal )
 	EXPECT_TRUE( result.hasGeometries() );
 
 	int i = 0;
-	result.foreachGeometry( [&]( GeometryNode * geo ) mutable {
+	result.foreachGeometry( [&]( Geometry * geo ) mutable {
 		if ( i == 0 ) {
 			EXPECT_EQ( geo, geometry2.get() );
 		}

@@ -26,7 +26,7 @@
  */
 
 #include "Visitors/NodeVisitor.hpp"
-#include "SceneGraph/GroupNode.hpp"
+#include "SceneGraph/Group.hpp"
 
 #include "Utils/MockVisitor.hpp"
 
@@ -42,8 +42,8 @@ TEST( NodeVisitorTest, traversal )
 	//			/	\
 	//		node3	node4
 
-	GroupNodePtr node0( new GroupNode( "node0" ) );
-	GroupNodePtr node2( new GroupNode( "node2" ) );
+	GroupPtr node0( new Group( "node0" ) );
+	GroupPtr node2( new Group( "node2" ) );
 	NodePtr node1( new Node( "node1" ) );
 	NodePtr node3( new Node( "node3" ) );
 	NodePtr node4( new Node( "node4" ) );
@@ -59,18 +59,18 @@ TEST( NodeVisitorTest, traversal )
 		.Times( ::testing::Exactly( 1 ) );
 	EXPECT_CALL( visitor, visitNode( ::testing::_ ) )
 		.Times( ::testing::Exactly( 3 ) );
-	EXPECT_CALL( visitor, visitGroupNode( ::testing::_ ) )
+	EXPECT_CALL( visitor, visitGroup( ::testing::_ ) )
 		.Times( ::testing::Exactly( 2 ) )
-		.WillRepeatedly( ::testing::Invoke( &visitor, &MockVisitor::NodeVisitor_visitGroupNode ) );
+		.WillRepeatedly( ::testing::Invoke( &visitor, &MockVisitor::NodeVisitor_visitGroup ) );
 	node0->perform( visitor );
 
 	EXPECT_CALL( visitor, reset() )
 		.Times( ::testing::Exactly( 1 ) );
 	EXPECT_CALL( visitor, visitNode( ::testing::_ ) )
 		.Times( ::testing::Exactly( 2 ) );
-	EXPECT_CALL( visitor, visitGroupNode( ::testing::_ ) )
+	EXPECT_CALL( visitor, visitGroup( ::testing::_ ) )
 		.Times( ::testing::Exactly( 1 ) )
-		.WillRepeatedly( ::testing::Invoke( &visitor, &MockVisitor::NodeVisitor_visitGroupNode ) );
+		.WillRepeatedly( ::testing::Invoke( &visitor, &MockVisitor::NodeVisitor_visitGroup ) );
 	node2->perform( visitor );
 }
 
@@ -83,10 +83,10 @@ public:
 		}
 	}
 
-	virtual void visitGroupNode( GroupNode *group ) override
+	virtual void visitGroup( Group *group ) override
 	{
 		visitNode( group );
-		NodeVisitor::visitGroupNode( group );
+		NodeVisitor::visitGroup( group );
 	}
 };
 
@@ -98,8 +98,8 @@ TEST( NodeVisitorTest, prependParentName )
 	//			/	\
 	//		node3	node4
 
-	GroupNodePtr node0( new GroupNode( "node0" ) );
-	GroupNodePtr node2( new GroupNode( "node2" ) );
+	GroupPtr node0( new Group( "node0" ) );
+	GroupPtr node2( new Group( "node2" ) );
 	NodePtr node1( new Node( "node1" ) );
 	NodePtr node3( new Node( "node3" ) );
 	NodePtr node4( new Node( "node4" ) );

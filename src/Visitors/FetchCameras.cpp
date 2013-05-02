@@ -28,7 +28,6 @@
 #include "FetchCameras.hpp"
 
 #include "SceneGraph/Node.hpp"
-#include "SceneGraph/GroupNode.hpp"
 
 using namespace Crimild;
 

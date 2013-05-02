@@ -27,7 +27,7 @@
 
 #include "SelectNodes.hpp"
 #include "SceneGraph/Node.hpp"
-#include "SceneGraph/GroupNode.hpp"
+#include "SceneGraph/Group.hpp"
 
 using namespace Crimild;
 
@@ -55,10 +55,10 @@ void SelectNodes::visitNode( Node *node )
 	}
 }
 
-void SelectNodes::visitGroupNode( GroupNode *group )
+void SelectNodes::visitGroup( Group *group )
 {
 	visitNode( group );
-	NodeVisitor::visitGroupNode( group );
+	NodeVisitor::visitGroup( group );
 }
 
 void SelectNodes::foreachMatch( std::function< void( Node * ) > callback )

@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "SceneGraph/GroupNode.hpp"
+#include "SceneGraph/Group.hpp"
 #include "Exceptions/HasParentException.hpp"
 
 #include "gtest/gtest.h"
@@ -34,7 +34,7 @@ using namespace Crimild;
 
 TEST( GroupNodeTest, construction)
 {
-	GroupNodePtr group( new GroupNode( "a group" ) );
+	GroupPtr group( new Group( "a group" ) );
 
 	EXPECT_EQ( group->getName(), "a group" );
 	EXPECT_FALSE( group->hasNodes() );
@@ -46,7 +46,7 @@ TEST( GroupNodeTest, destruction )
 	NodePtr child2( new Node( "child 2" ) );
 
 	{
-		GroupNodePtr parent( new GroupNode( "parent" ) );
+		GroupPtr parent( new Group( "parent" ) );
 
 		parent->attachNode( child1 );
 		EXPECT_TRUE( child1->hasParent() );
@@ -65,7 +65,7 @@ TEST( GroupNodeTest, destruction )
 
 TEST( GroupNodeTest, attachNode )
 {
-	GroupNodePtr parent( new GroupNode( "parent" ) );
+	GroupPtr parent( new Group( "parent" ) );
 
 	EXPECT_FALSE( parent->hasNodes() );
 
@@ -94,7 +94,7 @@ TEST( GroupNodeTest, attachNode )
 
 TEST( GroupNodeTest, attachMultipleNodes )
 {
-	GroupNodePtr parent( new GroupNode( "parent" ) );
+	GroupPtr parent( new Group( "parent" ) );
 	
 	NodePtr child1( new Node( "child 1" ) );
 	NodePtr child2( new Node( "child 2" ) );
@@ -115,7 +115,7 @@ TEST( GroupNodeTest, attachMultipleNodes )
 
 TEST( GroupNodeTest, reattachNodeToSameParent )
 {
-	GroupNodePtr parent( new GroupNode( "parent" ) );
+	GroupPtr parent( new Group( "parent" ) );
 	NodePtr child( new Node( "child" ) );
 
 	parent->attachNode( child );
@@ -137,8 +137,8 @@ TEST( GroupNodeTest, reattachNodeToSameParent )
 
 TEST( GroupNodeTest, reattachNodeToDifferentParent )
 {
-	GroupNodePtr parent1( new GroupNode( "parent" ) );
-	GroupNodePtr parent2( new GroupNode( "another parent" ) );
+	GroupPtr parent1( new Group( "parent" ) );
+	GroupPtr parent2( new Group( "another parent" ) );
 	NodePtr child( new Node( "child" ) );
 
 	parent1->attachNode( child );
@@ -148,7 +148,7 @@ TEST( GroupNodeTest, reattachNodeToDifferentParent )
 
 TEST( GroupNodeTest, detachNode )
 {
-	GroupNodePtr parent( new GroupNode( "parent" ) );
+	GroupPtr parent( new Group( "parent" ) );
 	NodePtr child( new Node( "child" ) );
 
 	parent->attachNode( child );
@@ -161,7 +161,7 @@ TEST( GroupNodeTest, detachNode )
 
 TEST( GroupNodeTest, detachMultipleNodes )
 {
-	GroupNodePtr parent( new GroupNode( "parent" ) );
+	GroupPtr parent( new Group( "parent" ) );
 	
 	NodePtr child1( new Node( "child 1" ) );
 	NodePtr child2( new Node( "child 2" ) );
@@ -186,8 +186,8 @@ TEST( GroupNodeTest, detachMultipleNodes )
 
 TEST( GroupNodeTest, detachNodeFromDifferentParent )
 {
-	GroupNodePtr parent1( new GroupNode( "parent" ) );
-	GroupNodePtr parent2( new GroupNode( "another parent" ) );
+	GroupPtr parent1( new Group( "parent" ) );
+	GroupPtr parent2( new Group( "another parent" ) );
 	NodePtr child( new Node( "child" ) );
 
 	parent1->attachNode( child );
@@ -201,7 +201,7 @@ TEST( GroupNodeTest, detachNodeFromDifferentParent )
 
 TEST( GroupNodeTest, detachAllNodes )
 {
-	GroupNodePtr parent( new GroupNode( "parent" ) );
+	GroupPtr parent( new Group( "parent" ) );
 	
 	NodePtr child1( new Node( "child 1" ) );
 	NodePtr child2( new Node( "child 2" ) );
@@ -238,8 +238,8 @@ TEST( GroupNodeTest, buildHierarchy )
 	//			/	\
 	//		node3	node4
 
-	GroupNodePtr node0( new GroupNode( "node0" ) );
-	GroupNodePtr node2( new GroupNode( "node2" ) );
+	GroupPtr node0( new Group( "node0" ) );
+	GroupPtr node2( new Group( "node2" ) );
 	NodePtr node1( new Node( "node1" ) );
 	NodePtr node3( new Node( "node3" ) );
 	NodePtr node4( new Node( "node4" ) );

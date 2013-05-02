@@ -39,7 +39,7 @@
 namespace Crimild {
 
 	class VisibilitySet;
-	class GeometryNode;
+	class Geometry;
 	class Primitive;
 	class Camera;
 
@@ -66,19 +66,19 @@ namespace Crimild {
 
 		virtual void render( VisibilitySet *vs );
 
-		virtual void render( GeometryNode *geometry, Camera *camera );
+		virtual void render( Geometry *geometry, Camera *camera );
 
-		virtual void applyMaterial( GeometryNode *geometry, Primitive *primitive, Material *material, Camera *camera );
+		virtual void applyMaterial( Geometry *geometry, Primitive *primitive, Material *material, Camera *camera );
 
 		virtual void bindResources( ShaderProgram *program, Primitive *primitive, Material *material );
 
 		virtual void enableMaterialProperties( ShaderProgram *program, Material *material ) = 0;
 
-		virtual void applyTransformations( ShaderProgram *program, GeometryNode *geometry, Camera *camera ) = 0;
+		virtual void applyTransformations( ShaderProgram *program, Geometry *geometry, Camera *camera ) = 0;
 
 		virtual void drawPrimitive( ShaderProgram *program, Primitive *primitive ) = 0;
 
-		virtual void restoreTransformations( ShaderProgram *program, GeometryNode *geometry, Camera *camera ) = 0;
+		virtual void restoreTransformations( ShaderProgram *program, Geometry *geometry, Camera *camera ) = 0;
 
 		virtual void disableMaterialProperties( ShaderProgram *program, Material *material ) = 0;
 

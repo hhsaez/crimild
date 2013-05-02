@@ -27,8 +27,8 @@
 
 #include "NodeVisitor.hpp"
 #include "SceneGraph/Node.hpp"
-#include "SceneGraph/GroupNode.hpp"
-#include "SceneGraph/GeometryNode.hpp"
+#include "SceneGraph/Group.hpp"
+#include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Camera.hpp"
 
 using namespace Crimild;
@@ -59,13 +59,13 @@ void NodeVisitor::visitNode( Node *node )
 	// do nothing
 }
 
-void NodeVisitor::visitGroupNode( GroupNode *group )
+void NodeVisitor::visitGroup( Group *group )
 {
 	// by default, just traverse to child nodes
 	group->foreachNode( [&]( NodePtr &node ) { node->accept( *this ); } );
 }
 
-void NodeVisitor::visitGeometryNode( GeometryNode *geometry )
+void NodeVisitor::visitGeometry( Geometry *geometry )
 {
 	// by default, do the same as with any other node
 	visitNode( geometry );

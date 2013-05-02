@@ -54,10 +54,10 @@
 #include "Exceptions/HasParentException.hpp"
 
 #include "SceneGraph/Camera.hpp"
-#include "SceneGraph/GeometryNode.hpp"
-#include "SceneGraph/GroupNode.hpp"
+#include "SceneGraph/Geometry.hpp"
+#include "SceneGraph/Group.hpp"
 #include "SceneGraph/Node.hpp"
-#include "SceneGraph/SwitchNode.hpp"
+#include "SceneGraph/Switch.hpp"
 
 #include "Components/MaterialComponent.hpp"
 #include "Components/NodeComponent.hpp"

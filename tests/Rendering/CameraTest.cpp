@@ -26,7 +26,7 @@
  */
 
 #include "SceneGraph/Camera.hpp"
-#include "SceneGraph/GroupNode.hpp"
+#include "SceneGraph/Group.hpp"
 #include "Visitors/FetchCameras.hpp"
 #include "Visitors/SelectNodes.hpp"
 #include "Visitors/UpdateWorldState.hpp"
@@ -55,7 +55,7 @@ TEST( CameraTest, viewMatrix )
 
 TEST( CameraTest, fetchCameras )
 {
-	GroupNodePtr scene( new GroupNode() );
+	GroupPtr scene( new Group() );
 	CameraPtr camera( new Camera() );
 	scene->attachNode( camera );
 

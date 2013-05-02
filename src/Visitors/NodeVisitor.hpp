@@ -31,8 +31,8 @@
 namespace Crimild {
 
 	class Node;
-	class GroupNode;
-	class GeometryNode;
+	class Group;
+	class Geometry;
 	class Camera;
 
 	class NodeVisitor {
@@ -47,8 +47,8 @@ namespace Crimild {
 		virtual void traverse( Node *node );
 
 		virtual void visitNode( Node *node );
-		virtual void visitGroupNode( GroupNode *group );
-		virtual void visitGeometryNode( GeometryNode *geometry );
+		virtual void visitGroup( Group *group );
+		virtual void visitGeometry( Geometry *geometry );
 		virtual void visitCamera( Camera *camera );
 
 	private:

@@ -28,14 +28,14 @@
 #ifndef CRIMILD_SCENE_GRAPH_SWITCH_NODE_
 #define CRIMILD_SCENE_GRAPH_SWITCH_NODE_
 
-#include "GroupNode.hpp"
+#include "Group.hpp"
 
 namespace Crimild {
     
-	class SwitchNode : public GroupNode {
+	class Switch : public Group {
 	public:
-		explicit SwitchNode( std::string name = "" );
-		virtual ~SwitchNode( void );
+		explicit Switch( std::string name = "" );
+		virtual ~Switch( void );
         
 		virtual void foreachNode( std::function< void( NodePtr & ) > callback ) override;
         
@@ -46,7 +46,7 @@ namespace Crimild {
         std::list< NodePtr >::iterator _current;
 	};
     
-	typedef std::shared_ptr< SwitchNode > SwitchNodePtr;
+	typedef std::shared_ptr< Switch > SwitchPtr;
     
 }
 

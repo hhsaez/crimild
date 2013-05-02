@@ -27,7 +27,7 @@
 
 #include "UpdateComponents.hpp"
 #include "SceneGraph/Node.hpp"
-#include "SceneGraph/GroupNode.hpp"
+#include "SceneGraph/Group.hpp"
 
 using namespace Crimild;
 
@@ -47,9 +47,9 @@ void UpdateComponents::visitNode( Node *node )
 	node->updateComponents( _time );
 }
 
-void UpdateComponents::visitGroupNode( GroupNode *group )
+void UpdateComponents::visitGroup( Group *group )
 {
 	visitNode( group );
-	NodeVisitor::visitGroupNode( group );
+	NodeVisitor::visitGroup( group );
 }
 

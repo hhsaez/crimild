@@ -39,7 +39,7 @@ namespace Crimild {
 		virtual ~UpdateComponents( void );
 
 		virtual void visitNode( Node *node ) override;
-		virtual void visitGroupNode( GroupNode *node ) override;
+		virtual void visitGroup( Group *node ) override;
 
 	private:
 		const Time &_time;

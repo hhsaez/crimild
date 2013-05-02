@@ -28,7 +28,7 @@
 #include "Renderer.hpp"
 #include "VisibilitySet.hpp"
 
-#include "SceneGraph/GeometryNode.hpp"
+#include "SceneGraph/Geometry.hpp"
 #include "Components/MaterialComponent.hpp"
 
 using namespace Crimild;
@@ -47,12 +47,12 @@ Renderer::~Renderer( void )
 
 void Renderer::render( VisibilitySet *vs )
 {
-	vs->foreachGeometry( [&]( GeometryNode *geometry ) mutable {
+	vs->foreachGeometry( [&]( Geometry *geometry ) mutable {
 		render( geometry, vs->getCamera() );
 	});
 }
 
-void Renderer::render( GeometryNode *geometry, Camera *camera )
+void Renderer::render( Geometry *geometry, Camera *camera )
 {
 	MaterialComponent *materials = geometry->getComponent< MaterialComponent >();
 	if ( materials->hasMaterials() ) {
@@ -69,7 +69,7 @@ void Renderer::render( GeometryNode *geometry, Camera *camera )
 	}
 }
 
-void Renderer::applyMaterial( GeometryNode *geometry, Primitive *primitive, Material *material, Camera *camera )
+void Renderer::applyMaterial( Geometry *geometry, Primitive *primitive, Material *material, Camera *camera )
 {
 	if ( !material || !primitive ) {
 		return;

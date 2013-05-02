@@ -25,8 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SCENE_GRAPH_GROUP_NODE_
-#define CRIMILD_SCENE_GRAPH_GROUP_NODE_
+#ifndef CRIMILD_SCENE_GRAPH_GROUP_
+#define CRIMILD_SCENE_GRAPH_GROUP_
 
 #include "Node.hpp"
 
@@ -35,10 +35,10 @@
 
 namespace Crimild {
 
-	class GroupNode : public Node {
+	class Group : public Node {
 	public:
-		explicit GroupNode( std::string name = "" );
-		virtual ~GroupNode( void );
+		explicit Group( std::string name = "" );
+		virtual ~Group( void );
 
 		bool hasNodes( void ) const { return ( _nodes.size() > 0 ); }
 		void attachNode( NodePtr node );
@@ -54,7 +54,7 @@ namespace Crimild {
 
 	};
 
-	typedef std::shared_ptr< GroupNode > GroupNodePtr;
+	typedef std::shared_ptr< Group > GroupPtr;
 
 }
 

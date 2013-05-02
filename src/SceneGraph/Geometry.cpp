@@ -25,39 +25,46 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SCENE_GRAPH_GEOMETRY_
-#define CRIMILD_SCENE_GRAPH_GEOMETRY_
+#include "Geometry.hpp"
 
-#include "Node.hpp"
-#include "Primitives/Primitive.hpp"
+#include "Components/MaterialComponent.hpp"
 
-#include <list>
-#include <functional>
+using namespace Crimild;
 
-namespace Crimild {
-
-	class GeometryNode : public Node {
-	public:
-		GeometryNode( std::string name = "" );
-		virtual ~GeometryNode( void );
-
-		bool hasPrimitives( void ) const { return _primitives.size(); }
-		void attachPrimitive( PrimitivePtr primitive );
-		void detachPrimitive( PrimitivePtr primitive );
-		void detachAllPrimitives( void );
-		void foreachPrimitive( std::function< void( PrimitivePtr & ) > callback );
-
-	private:
-		std::list< PrimitivePtr > _primitives;
-
-	public:
-		virtual void accept( NodeVisitor &visitor ) override;
-		
-	};
-
-	typedef std::shared_ptr< GeometryNode > GeometryNodePtr;
-
+Geometry::Geometry( std::string name )
+	: Node( name )
+{
+	MaterialComponentPtr materials( new MaterialComponent() );
+	attachComponent( materials );
 }
 
-#endif
+Geometry::~Geometry( void )
+{
+	detachAllPrimitives();
+}
+
+void Geometry::attachPrimitive( PrimitivePtr primitive )
+{
+	_primitives.push_back( primitive );
+}
+
+void Geometry::detachPrimitive( PrimitivePtr primitive )
+{
+	_primitives.remove( primitive );
+}
+
+void Geometry::foreachPrimitive( std::function< void( PrimitivePtr & ) > callback )
+{
+	std::for_each( std::begin( _primitives ), std::end( _primitives ), callback );
+}
+
+void Geometry::detachAllPrimitives( void )
+{
+	_primitives.clear();
+}
+
+void Geometry::accept( NodeVisitor &visitor )
+{
+	visitor.visitGeometry( this );
+}
 

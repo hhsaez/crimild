@@ -27,7 +27,7 @@
 
 #include "UpdateWorldState.hpp"
 #include "SceneGraph/Node.hpp"
-#include "SceneGraph/GroupNode.hpp"
+#include "SceneGraph/Group.hpp"
 
 using namespace Crimild;
 
@@ -55,9 +55,9 @@ void UpdateWorldState::visitNode( Node *node )
 	}
 }
 
-void UpdateWorldState::visitGroupNode( GroupNode *group )
+void UpdateWorldState::visitGroup( Group *group )
 {
 	visitNode( group );
-	NodeVisitor::visitGroupNode( group );
+	NodeVisitor::visitGroup( group );
 }
 

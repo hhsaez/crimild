@@ -27,7 +27,7 @@
 
 #include "Simulation/Simulation.hpp"
 #include "SceneGraph/Node.hpp"
-#include "SceneGraph/GroupNode.hpp"
+#include "SceneGraph/Group.hpp"
 #include "SceneGraph/Camera.hpp"
 
 #include "Utils/MockTask.hpp"
@@ -129,7 +129,7 @@ TEST( SimulationTest, attachSceneWithCamera )
 
 	EXPECT_FALSE( simulation->getMainLoop()->hasActiveTasks() );
 
-	GroupNodePtr scene( new GroupNode() );
+	GroupPtr scene( new Group() );
 	CameraPtr camera( new Camera() );
 	scene->attachNode( camera );
 

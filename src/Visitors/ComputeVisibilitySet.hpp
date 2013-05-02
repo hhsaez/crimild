@@ -47,7 +47,7 @@ namespace Crimild {
 
 		virtual void traverse( Node *node ) override;
 
-		virtual void visitGeometryNode( GeometryNode *geometry ) override;
+		virtual void visitGeometry( Geometry *geometry ) override;
 
 	private:
 		VisibilitySet *_result;

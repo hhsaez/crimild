@@ -25,25 +25,25 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "GroupNode.hpp"
+#include "Group.hpp"
 #include "Exceptions/HasParentException.hpp"
 
 #include <cassert>
 
 using namespace Crimild;
 
-GroupNode::GroupNode( std::string name )
+Group::Group( std::string name )
 	: Node( name )
 {
 
 }
 
-GroupNode::~GroupNode( void )
+Group::~Group( void )
 {
 	detachAllNodes();
 }
 
-void GroupNode::attachNode( NodePtr node )
+void Group::attachNode( NodePtr node )
 {
 	if ( node->getParent() == this ) {
 		// the node is already attach to this group
@@ -58,7 +58,7 @@ void GroupNode::attachNode( NodePtr node )
 	_nodes.push_back( node );
 }
 
-void GroupNode::detachNode( NodePtr node )
+void Group::detachNode( NodePtr node )
 {
 	if ( node->getParent() == this ) {
 		_nodes.remove( node );
@@ -66,7 +66,7 @@ void GroupNode::detachNode( NodePtr node )
 	}
 }
 
-void GroupNode::detachAllNodes( void )
+void Group::detachAllNodes( void )
 {
 	for ( NodePtr &node : _nodes ) {
 		node->setParent( nullptr );
@@ -74,13 +74,13 @@ void GroupNode::detachAllNodes( void )
 	_nodes.clear();
 }
 
-void GroupNode::foreachNode( std::function< void( NodePtr & ) > callback )
+void Group::foreachNode( std::function< void( NodePtr & ) > callback )
 {
 	std::for_each( std::begin( _nodes ), std::end( _nodes ), callback );
 }
 
-void GroupNode::accept( NodeVisitor &visitor )
+void Group::accept( NodeVisitor &visitor )
 {
-	visitor.visitGroupNode( this );
+	visitor.visitGroup( this );
 }
 

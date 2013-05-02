@@ -25,28 +25,28 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "SwitchNode.hpp"
+#include "Switch.hpp"
 
 using namespace Crimild;
 
-SwitchNode::SwitchNode( std::string name )
-    : GroupNode( name )
+Switch::Switch( std::string name )
+    : Group( name )
 {
     _current = std::end( _nodes );
 }
 
-SwitchNode::~SwitchNode( void )
+Switch::~Switch( void )
 {
 }
 
-void SwitchNode::foreachNode( std::function< void( NodePtr & ) > callback )
+void Switch::foreachNode( std::function< void( NodePtr & ) > callback )
 {
     if ( hasNodes() && _current != std::end( _nodes ) ) {
         callback( *_current );
     }
 }
 
-void SwitchNode::selectNextNode( void )
+void Switch::selectNextNode( void )
 {
     if ( hasNodes() && _current != std::end( _nodes ) ) {
         ++_current;
@@ -57,7 +57,7 @@ void SwitchNode::selectNextNode( void )
     }
 }
 
-Node *SwitchNode::getCurrentNode( void )
+Node *Switch::getCurrentNode( void )
 {
     if ( hasNodes() && _current != std::end( _nodes ) ) {
         return ( *_current ).get();

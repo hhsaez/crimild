@@ -38,9 +38,9 @@ namespace Crimild {
 	public:
 		MOCK_METHOD0( reset, void( void ) );
 		MOCK_METHOD1( visitNode, void( Node * ) );
-		MOCK_METHOD1( visitGroupNode, void( GroupNode * ) );
+		MOCK_METHOD1( visitGroup, void( Group * ) );
 
-		void NodeVisitor_visitGroupNode( GroupNode *group ) { NodeVisitor::visitGroupNode( group ); }
+		void NodeVisitor_visitGroup( Group *group ) { NodeVisitor::visitGroup( group ); }
 	};
 
 	typedef std::shared_ptr< MockVisitor > MockVisitorPtr;

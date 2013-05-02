@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "SceneGraph/GeometryNode.hpp"
+#include "SceneGraph/Geometry.hpp"
 #include "Components/MaterialComponent.hpp"
 
 #include "gtest/gtest.h"
@@ -34,7 +34,7 @@ using namespace Crimild;
 
 TEST( GeometryNodeTest, construction )
 {
-	GeometryNodePtr geometry( new GeometryNode( "a geometry" ) );
+	GeometryPtr geometry( new Geometry( "a geometry" ) );
 
 	EXPECT_EQ( geometry->getName(), "a geometry" );
 
@@ -45,7 +45,7 @@ TEST( GeometryNodeTest, construction )
 
 TEST( GeometryNodeTest, attachPrimitive )
 {
-	GeometryNodePtr geometry( new GeometryNode( "a geometry" ) );
+	GeometryPtr geometry( new Geometry( "a geometry" ) );
 	PrimitivePtr primitive( new Primitive() );
 
 	EXPECT_FALSE( geometry->hasPrimitives() );	
@@ -69,7 +69,7 @@ TEST( GeometryNodeTest, attachPrimitive )
 
 TEST( GeometryNodeTest, detachPrimitive )
 {
-	GeometryNodePtr geometry( new GeometryNode( "a geometry" ) );
+	GeometryPtr geometry( new Geometry( "a geometry" ) );
 	PrimitivePtr primitive( new Primitive() );
 
 	EXPECT_FALSE( geometry->hasPrimitives() );	
@@ -92,7 +92,7 @@ TEST( GeometryNodeTest, detachPrimitive )
 
 TEST( GeometryNodeTest, detachAllPrimitives )
 {
-	GeometryNodePtr geometry( new GeometryNode( "a geometry" ) );
+	GeometryPtr geometry( new Geometry( "a geometry" ) );
 	PrimitivePtr primitive1( new Primitive() );
 	PrimitivePtr primitive2( new Primitive() );
 

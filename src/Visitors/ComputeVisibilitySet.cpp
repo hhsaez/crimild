@@ -52,7 +52,7 @@ void ComputeVisibilitySet::traverse( Node *node )
 	NodeVisitor::traverse( node );
 }
 
-void ComputeVisibilitySet::visitGeometryNode( GeometryNode *geometry )
+void ComputeVisibilitySet::visitGeometry( Geometry *geometry )
 {
 	_result->addGeometry( geometry );
 }
