@@ -31,7 +31,8 @@ using namespace Crimild;
 
 Camera::Camera( void )
 	: _frustum( 45.0, 4.0f / 3.0f, 0.01f, 1024.0f ),
-	  _viewport( 0.0f, 0.0f, 1.0f, 1.0f )
+	  _viewport( 0.0f, 0.0f, 1.0f, 1.0f ),
+      _viewMatrixIsCurrent( false )
 {
 	_projectionMatrix = _frustum.computeProjectionMatrix();
 	_viewMatrix.makeIdentity();
@@ -39,7 +40,8 @@ Camera::Camera( void )
 
 Camera::Camera( float fov, float aspect, float near, float far )
 	: _frustum( fov, aspect, near, far ),
-	  _viewport( 0.0f, 0.0f, 1.0f, 1.0f )	
+	  _viewport( 0.0f, 0.0f, 1.0f, 1.0f ),
+      _viewMatrixIsCurrent( false )
 {
 	_projectionMatrix = _frustum.computeProjectionMatrix();
 	_viewMatrix.makeIdentity();
@@ -57,14 +59,19 @@ void Camera::accept( NodeVisitor &visitor )
 
 void Camera::setViewMatrix( const Matrix4f &view ) 
 { 
-	_viewMatrix = view; 
+	_viewMatrix = view;
+    world().fromMatrix( view.getInverse() );
+    setWorldIsCurrent( true );
 }
 
-const Matrix4f &Camera::getViewMatrix( void ) 
+const Matrix4f &Camera::getViewMatrix( void )
 {
-	_viewMatrix = getWorld().computeModelMatrix();
-	_viewMatrix.makeInverse();
-	return _viewMatrix; 
+    if ( !_viewMatrixIsCurrent ) {
+        _viewMatrix = getWorld().computeModelMatrix();
+        _viewMatrix.makeInverse();
+    }
+    
+	return _viewMatrix;
 }
 
 bool Camera::getPickRay( float portX, float portY, Ray3f &result ) const
