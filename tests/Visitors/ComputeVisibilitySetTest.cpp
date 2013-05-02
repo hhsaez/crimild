@@ -27,7 +27,7 @@
 
 #include "Visitors/ComputeVisibilitySet.hpp"
 #include "Rendering/VisibilitySet.hpp"
-#include "Rendering/Camera.hpp"
+#include "SceneGraph/Camera.hpp"
 #include "SceneGraph/GeometryNode.hpp"
 #include "SceneGraph/GroupNode.hpp"
 

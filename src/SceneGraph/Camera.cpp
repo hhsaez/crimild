@@ -50,6 +50,23 @@ Camera::~Camera( void )
 
 }
 
+void Camera::accept( NodeVisitor &visitor )
+{
+	visitor.visitCamera( this );
+}
+
+void Camera::setViewMatrix( const Matrix4f &view ) 
+{ 
+	_viewMatrix = view; 
+}
+
+const Matrix4f &Camera::getViewMatrix( void ) 
+{
+	_viewMatrix = getWorld().computeModelMatrix();
+	_viewMatrix.makeInverse();
+	return _viewMatrix; 
+}
+
 bool Camera::getPickRay( float portX, float portY, Ray3f &result ) const
 {
 	if ( portX < _viewport.getX() || portX > _viewport.getWidth() ) {
@@ -66,14 +83,10 @@ bool Camera::getPickRay( float portX, float portY, Ray3f &result ) const
 	float yWeight = ( ( 1.0f - portY ) - _viewport.getY() ) / ( _viewport.getHeight() - _viewport.getY() );
 	float viewY = ( 1.0f - yWeight ) * _frustum.getUMin() + yWeight * _frustum.getUMax();
 	
-	Matrix3f rotation( _viewMatrix[ 0 ], _viewMatrix[ 1 ], _viewMatrix[ 2 ],
-					   _viewMatrix[ 4 ], _viewMatrix[ 5 ], _viewMatrix[ 6 ],
-					   _viewMatrix[ 8 ], _viewMatrix[ 9 ], _viewMatrix[ 10 ] );
-	
-	Vector3f direction = rotation * Vector3f( 0.0f, 0.0f, -1.0f );
-	Vector3f up = rotation * Vector3f( 0.0f, 1.0f, 0.0f );
-	Vector3f right = rotation * Vector3f( 1.0f, 0.0f, 0.0f );
-	Vector3f origin( _viewMatrix[ 3 ], _viewMatrix[ 7 ], _viewMatrix[ 11 ] );
+	Vector3f direction = getWorld().computeDirection();
+	Vector3f up = getWorld().computeUp();
+	Vector3f right = getWorld().computeRight();
+	Vector3f origin = getWorld().getTranslate();
 
 	result.setOrigin( origin );
 	result.setDirection( ( _frustum.getDMin() * direction + viewX * right + viewY * up ).getNormalized() );

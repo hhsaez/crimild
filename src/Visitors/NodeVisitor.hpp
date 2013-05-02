@@ -33,6 +33,7 @@ namespace Crimild {
 	class Node;
 	class GroupNode;
 	class GeometryNode;
+	class Camera;
 
 	class NodeVisitor {
 	protected:
@@ -48,6 +49,7 @@ namespace Crimild {
 		virtual void visitNode( Node *node );
 		virtual void visitGroupNode( GroupNode *group );
 		virtual void visitGeometryNode( GeometryNode *geometry );
+		virtual void visitCamera( Camera *camera );
 
 	private:
 		NodeVisitor( const NodeVisitor & ) { }

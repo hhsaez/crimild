@@ -29,7 +29,6 @@
 
 #include "SceneGraph/Node.hpp"
 #include "SceneGraph/GroupNode.hpp"
-#include "Components/CameraComponent.hpp"
 
 using namespace Crimild;
 
@@ -49,18 +48,9 @@ void FetchCameras::reset( void )
 	NodeVisitor::reset();
 }
 
-void FetchCameras::visitNode( Node *node )
+void FetchCameras::visitCamera( Camera *camera )
 {
-	CameraComponent *cameraComponent = node->getComponent< CameraComponent >();
-	if ( cameraComponent ) {
-		_cameras.push_back( cameraComponent->getCamera() );
-	}
-}
-
-void FetchCameras::visitGroupNode( GroupNode *group )
-{
-	visitNode( group );
-	NodeVisitor::visitGroupNode( group );
+	_cameras.push_back( camera );
 }
 
 void FetchCameras::foreachCamera( std::function< void( Camera *camera ) > callback )

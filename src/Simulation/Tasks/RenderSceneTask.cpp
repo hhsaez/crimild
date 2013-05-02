@@ -30,7 +30,7 @@
 #include "Simulation/Simulation.hpp"
 #include "Rendering/Renderer.hpp"
 #include "Rendering/VisibilitySet.hpp"
-#include "Rendering/Camera.hpp"
+#include "SceneGraph/Camera.hpp"
 #include "Visitors/ComputeVisibilitySet.hpp"
 
 #include <iostream>

@@ -44,8 +44,9 @@ namespace Crimild {
 
 		virtual void reset( void ) override;
 
-		virtual void visitNode( Node *node ) override;
-		virtual void visitGroupNode( GroupNode *node ) override;
+		virtual void visitCamera( Camera *camera ) override;
+
+		bool hasCameras( void ) const { return _cameras.size() > 0; }
 
 		void foreachCamera( std::function< void( Camera * ) > callback );
 

@@ -53,13 +53,12 @@
 #include "Exceptions/RuntimeException.hpp"
 #include "Exceptions/HasParentException.hpp"
 
-#include "SceneGraph/CameraNode.hpp"
+#include "SceneGraph/Camera.hpp"
 #include "SceneGraph/GeometryNode.hpp"
 #include "SceneGraph/GroupNode.hpp"
 #include "SceneGraph/Node.hpp"
 #include "SceneGraph/SwitchNode.hpp"
 
-#include "Components/CameraComponent.hpp"
 #include "Components/MaterialComponent.hpp"
 #include "Components/NodeComponent.hpp"
 #include "Components/RotationComponent.hpp"
@@ -84,7 +83,6 @@
 #include "Primitives/TrefoilKnotPrimitive.hpp"
 
 #include "Rendering/BufferObject.hpp"
-#include "Rendering/Camera.hpp"
 #include "Rendering/Catalog.hpp"
 #include "Rendering/FrameBufferObject.hpp"
 #include "Rendering/Image.hpp"

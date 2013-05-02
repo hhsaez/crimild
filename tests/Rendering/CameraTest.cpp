@@ -25,34 +25,47 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_COMPONENTS_CAMERA_COMPONENT_
-#define CRIMILD_COMPONENTS_CAMERA_COMPONENT_
+#include "SceneGraph/Camera.hpp"
+#include "SceneGraph/GroupNode.hpp"
+#include "Visitors/FetchCameras.hpp"
+#include "Visitors/SelectNodes.hpp"
+#include "Visitors/UpdateWorldState.hpp"
 
-#include "NodeComponent.hpp"
-#include "Rendering/Camera.hpp"
+#include "gtest/gtest.h"
 
-namespace Crimild {
+using namespace Crimild;
 
-	class CameraComponent : public NodeComponent {
-	public:
-		static const char *NAME;
-
-	public:
-		CameraComponent( float fov, float aspect, float near, float far );
-		explicit CameraComponent( CameraPtr camera );
-		virtual ~CameraComponent( void );
-
-		Camera *getCamera( void ) { return _camera.get(); }
-
-		virtual void update( const Time &t ) override;
-
-	private:
-		CameraPtr _camera;
-	};
-
-	typedef std::shared_ptr< CameraComponent > CameraComponentPtr;
-
+TEST( CameraTest, construction )
+{
+	CameraPtr camera( new Camera() );
 }
 
-#endif
+TEST( CameraTest, viewMatrix )
+{
+	CameraPtr camera( new Camera() );
+	camera->local().setTranslate( 0.0f, 1.0f, 5.0f );
+	camera->perform( UpdateWorldState() );
+
+	Matrix4f view = camera->getViewMatrix();
+
+	EXPECT_EQ( 0.0f, view[ 12 ] );
+	EXPECT_EQ( -1.0f, view[ 13 ] );
+	EXPECT_EQ( -5.0f, view[ 14 ] );
+}
+
+TEST( CameraTest, fetchCameras )
+{
+	GroupNodePtr scene( new GroupNode() );
+	CameraPtr camera( new Camera() );
+	scene->attachNode( camera );
+
+	FetchCameras fetchCameras;
+	scene->perform( fetchCameras );
+	int i = 0;
+	fetchCameras.foreachCamera( [&]( Camera *c ) mutable {
+		EXPECT_EQ( camera.get(), c );
+		i++;
+	});
+	EXPECT_EQ( 1, i );
+}
 

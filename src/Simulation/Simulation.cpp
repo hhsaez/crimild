@@ -33,7 +33,7 @@
 #include "Tasks/EndRenderTask.hpp"
 #include "Tasks/UpdateSceneTask.hpp"
 #include "Tasks/RenderSceneTask.hpp"
-#include "Rendering/Camera.hpp"
+#include "SceneGraph/Camera.hpp"
 #include "Visitors/FetchCameras.hpp"
 
 #define UPDATE_SCENE_PRIORITY 100
@@ -93,13 +93,18 @@ void Simulation::attachScene( NodePtr scene )
 {
 	FetchCameras fetchCameras;
 	scene->perform( fetchCameras );
-	fetchCameras.foreachCamera( [&]( Camera *camera ) mutable {
-		UpdateSceneTaskPtr updateScene( new UpdateSceneTask( UPDATE_SCENE_PRIORITY, scene ) );
-		getMainLoop()->startTask( updateScene );
+	if ( fetchCameras.hasCameras() ) {
+		fetchCameras.foreachCamera( [&]( Camera *camera ) mutable {
+			UpdateSceneTaskPtr updateScene( new UpdateSceneTask( UPDATE_SCENE_PRIORITY, scene ) );
+			getMainLoop()->startTask( updateScene );
 
-		RenderSceneTaskPtr renderScene( new RenderSceneTask( RENDER_SCENE_PRIORITY, scene, camera ) );
-		getMainLoop()->startTask( renderScene );
-	});
+			RenderSceneTaskPtr renderScene( new RenderSceneTask( RENDER_SCENE_PRIORITY, scene, camera ) );
+			getMainLoop()->startTask( renderScene );
+		});
+	}
+	else {
+		Log::Error << "Cannot find cameras for scene with name " << ( scene->getName().length() > 0 ? scene->getName() : "<unknown>" ) << Log::End;
+	}
 
 }
 

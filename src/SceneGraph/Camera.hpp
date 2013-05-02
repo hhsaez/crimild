@@ -25,21 +25,52 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SCENE_GRAPH_CAMERA_NODE_
-#define CRIMILD_SCENE_GRAPH_CAMERA_NODE_
+#ifndef CRIMILD_SCENEGRAPH_CAMERA_
+#define CRIMILD_SCENEGRAPH_CAMERA_
 
 #include "Node.hpp"
 
+#include "Mathematics/Matrix.hpp"
+#include "Mathematics/Frustum.hpp"
+#include "Mathematics/Ray.hpp"
+#include "Mathematics/Rect.hpp"
+
+#include <memory>
+
 namespace Crimild {
 
-	class CameraNode : public Node {
+	class Camera : public Node {
 	public:
-		explicit CameraNode( std::string name = "mainCamera" );
-		CameraNode( float fov, float aspect, float near, float far, std::string name = "mainCamera" );
-		virtual ~CameraNode( void );
+		explicit Camera( void );
+		Camera( float fov, float aspect, float near, float far );
+		virtual ~Camera( void );
+
+		void setProjectionMatrix( const Matrix4f &projection ) { _projectionMatrix = projection; }
+		const Matrix4f &getProjectionMatrix( void ) const { return _projectionMatrix; }
+
+		void setViewMatrix( const Matrix4f &view );
+		const Matrix4f &getViewMatrix( void );
+
+		void setViewport( const Rectf &rect ) { _viewport = rect; }
+		const Rectf &getViewport( void ) const { return _viewport; }
+
+		bool getPickRay( float normalizedX, float normalizedY, Ray3f &result ) const;
+
+	private:
+		Matrix4f _projectionMatrix;
+		Matrix4f _viewMatrix;
+		Frustumf _frustum;
+		Rectf _viewport;
+
+	public:
+		virtual void accept( NodeVisitor &visitor ) override;
+
+	private:
+		Camera( const Camera & ) { }
+		Camera &operator=( const Camera & ) { return *this; }
 	};
 
-	typedef std::shared_ptr< CameraNode > CameraNodePtr;
+	typedef std::shared_ptr< Camera > CameraPtr;
 
 }
 
