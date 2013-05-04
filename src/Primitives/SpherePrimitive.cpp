@@ -49,9 +49,9 @@ SpherePrimitive::SpherePrimitive( float radius, const VertexFormat &format, Vect
             float y = cosTheta;
             float z = sinPhi * sinTheta;
 
-            vertices.push_back( x );
-            vertices.push_back( y );
-            vertices.push_back( z );
+            vertices.push_back( radius * x );
+            vertices.push_back( radius * y );
+            vertices.push_back( radius * z );
 
             if ( format.hasNormals() ) {
                 vertices.push_back( x );
