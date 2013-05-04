@@ -50,6 +50,9 @@ namespace Crimild {
 
 		void setViewMatrix( const Matrix4f &view );
 		const Matrix4f &getViewMatrix( void );
+        
+        void setViewMatrixIsCurrent( bool value ) { _viewMatrixIsCurrent = value; }
+        bool viewMatrixIsCurrent( void ) const { return _viewMatrixIsCurrent; }
 
 		void setViewport( const Rectf &rect ) { _viewport = rect; }
 		const Rectf &getViewport( void ) const { return _viewport; }
@@ -59,6 +62,7 @@ namespace Crimild {
 	private:
 		Matrix4f _projectionMatrix;
 		Matrix4f _viewMatrix;
+        bool _viewMatrixIsCurrent;
 		Frustumf _frustum;
 		Rectf _viewport;
 

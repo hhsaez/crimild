@@ -278,6 +278,25 @@ namespace Crimild {
 		void lookAt( const Vector3Impl &targetPosition, const Vector3Impl &upReference )
 		{
 		}
+        
+        Transformation &fromMatrix( const Matrix4Impl &m )
+        {
+            Matrix3f viewRotation;
+            viewRotation[ 0 ] = m[ 0 ];
+            viewRotation[ 1 ] = m[ 1 ];
+            viewRotation[ 2 ] = m[ 2 ];
+            viewRotation[ 3 ] = m[ 4 ];
+            viewRotation[ 4 ] = m[ 5 ];
+            viewRotation[ 5 ] = m[ 6 ];
+            viewRotation[ 6 ] = m[ 8 ];
+            viewRotation[ 7 ] = m[ 9 ];
+            viewRotation[ 8 ] = m[ 10 ];
+            
+            rotate().fromRotationMatrix( viewRotation );
+            setTranslate( m[ 12 ], m[ 13 ], m[ 14 ] );
+
+            return *this;
+        }
 
 		Matrix< 4, float > computeModelMatrix( void ) const
 		{

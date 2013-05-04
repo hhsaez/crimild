@@ -328,6 +328,58 @@ namespace Crimild {
 			output[ 7 ] = twoYZ + twoXW;
 			output[ 8 ] = 1 - twoXX - twoYY;
 		}
+        
+        /**
+            \brief Computes a quaterion from a rotation matrix
+         
+            Algorithm in Ken Shoemake's article in 1987 SIGGRAPH course notes
+            article "Quaternion Calculus and Fast Animation".
+         */
+        Quaternion fromRotationMatrix( const Matrix< 3, PRECISION > &m )
+        {
+            float trace = 1.0f + m[ 0 ] + m[ 4 ] + m[ 8 ];
+            float x, y, z, w;
+            
+            if ( trace > 0.0 ) {
+                float root = 2.0f * std::sqrt( trace );
+                float invRoot = 1.0f / root;
+                x = ( m[ 5 ] - m[ 7 ] ) * invRoot;
+                y = ( m[ 6 ] - m[ 2 ] ) * invRoot;
+                z = ( m[ 1 ] - m[ 3 ] ) * invRoot;
+                w = 0.25f * root;
+            }
+            else if ( m[ 0 ] > m[ 4 ] && m[ 0 ] > m[ 8 ] ) {
+                float root = 2.0f * std::sqrt( 1.0f + m[ 0 ] - m[ 4 ] - m[ 8 ] );
+                float invRoot = 1.0f / root;
+                x = 0.25f * root;
+                y = ( m[ 1 ] + m[ 3 ] ) * invRoot;
+                z = ( m[ 6 ] + m[ 2 ] ) * invRoot;
+                w = ( m[ 5 ] + m[ 7 ] ) * invRoot;
+            }
+            else if ( m[ 4 ] > m[ 8 ] ) {
+                float root = 2.0f * std::sqrt( 1.0f + m[ 4 ] - m[ 0 ] - m[ 8 ] );
+                float invRoot = 1.0f / root;
+                x = ( m[ 1 ] + m[ 3 ] ) * invRoot;
+                y = 0.25f * root;
+                z = ( m[ 5 ] + m[ 7 ] ) * invRoot;
+                w = ( m[ 6 ] + m[ 2 ] ) * invRoot;
+            }
+            else {
+                float root = 2.0f * std::sqrt( 1.0f + m[ 8 ] - m[ 0 ] - m[ 4 ] );
+                float invRoot = 1.0f / root;
+                x = ( m[ 6 ] + m[ 2 ] ) * invRoot;
+                y = ( m[ 5 ] + m[ 7 ] ) * invRoot;
+                z = 0.25f * root;
+                w = ( m[ 1 ] + m[ 3 ] ) * invRoot;
+            }
+            
+            _data[ 0 ] = x;
+            _data[ 1 ] = y;
+            _data[ 2 ] = z;
+            _data[ 3 ] = w;
+            
+            return *this;
+        }
 
 	private:
 		Vector4Impl _data;

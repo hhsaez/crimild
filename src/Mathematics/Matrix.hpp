@@ -242,7 +242,7 @@ namespace Crimild {
 
 		double getDeterminant( void ) const
 		{
-			double result;
+			double result = 1.0;
 
 			if ( SIZE == 3 ) {
 				result = _data[ 0 ] * ( _data[ 4 ] * _data[ 8 ] - _data[ 5 ] * _data[ 7 ] )
