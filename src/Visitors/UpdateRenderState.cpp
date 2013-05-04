@@ -25,36 +25,65 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "MaterialComponent.hpp"
+#include "UpdateRenderState.hpp"
+#include "FetchLights.hpp"
+#include "SceneGraph/Light.hpp"
+#include "SceneGraph/Geometry.hpp"
+#include "Rendering/Material.hpp"
+#include "Components/RenderStateComponent.hpp"
+#include "Components/MaterialComponent.hpp"
 
 using namespace Crimild;
 
-const char *MaterialComponent::NAME = "materials";
+std::shared_ptr< Material > UpdateRenderState::defaultMaterial( new Material() );
 
-MaterialComponent::MaterialComponent( void )
-	: NodeComponent( NAME )
+UpdateRenderState::UpdateRenderState( void )
 {
+
 }
 
-MaterialComponent::~MaterialComponent( void )
+UpdateRenderState::~UpdateRenderState( void )
 {
-	detachAllMaterials();
+
 }
 
-void MaterialComponent::attachMaterial( MaterialPtr material )
+void UpdateRenderState::traverse( Node *node )
 {
-	_materials.push_back( material );
+	_lights.clear();
+	
+	FetchLights fetchLights;
+	if ( node->hasParent() ) {
+		node->getRootParent()->perform( fetchLights );
+	}
+	else {
+		node->perform( fetchLights );
+	}
+
+	fetchLights.foreachLight( [&]( Light *light ) mutable {
+		_lights.push_back( light );
+	});
+
+	NodeVisitor::traverse( node );
 }
 
-void MaterialComponent::detachAllMaterials( void )
+void UpdateRenderState::visitGeometry( Geometry *geometry )
 {
-	_materials.clear();
-}
+	RenderStateComponent *rs = geometry->getComponent< RenderStateComponent >();
 
-void MaterialComponent::foreachMaterial( std::function< void( MaterialPtr & ) > callback )
-{
-	for (auto material : _materials) {
-		callback( material );
+	rs->detachAllMaterials();
+	MaterialComponent *materials = geometry->getComponent< MaterialComponent >();
+	if ( materials->hasMaterials() ) {
+		materials->foreachMaterial( [&]( MaterialPtr &material ) mutable {
+			rs->attachMaterial( material.get() );
+		});
+	}
+	else {
+		rs->attachMaterial( defaultMaterial.get() );
+	}
+
+	rs->detachAllLights();
+	for ( auto light : _lights ) {
+		rs->attachLight( light );
 	}
 }
 

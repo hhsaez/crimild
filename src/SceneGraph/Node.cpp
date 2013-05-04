@@ -41,6 +41,20 @@ Node::~Node( void )
 	detachAllComponents();
 }
 
+Node *Node::getRootParent( void )
+{
+	if ( !hasParent() ) {
+		return nullptr;
+	}
+
+	Node *root = getParent();
+	while ( root->getParent() ) {
+		root = root->getParent();
+	}
+	
+	return root;
+}
+
 void Node::perform( NodeVisitor &visitor )
 {
 	visitor.traverse( this );

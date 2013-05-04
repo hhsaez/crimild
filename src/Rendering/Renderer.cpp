@@ -30,6 +30,7 @@
 
 #include "SceneGraph/Geometry.hpp"
 #include "Components/MaterialComponent.hpp"
+#include "Components/RenderStateComponent.hpp"
 
 using namespace Crimild;
 
@@ -54,17 +55,12 @@ void Renderer::render( VisibilitySet *vs )
 
 void Renderer::render( Geometry *geometry, Camera *camera )
 {
-	MaterialComponent *materials = geometry->getComponent< MaterialComponent >();
-	if ( materials->hasMaterials() ) {
+	RenderStateComponent *renderState = geometry->getComponent< RenderStateComponent >();
+	if ( renderState->hasMaterials() ) {
 		geometry->foreachPrimitive( [&]( PrimitivePtr &primitive ) mutable {
-			materials->foreachMaterial( [&]( MaterialPtr &material ) mutable {
-				applyMaterial( geometry, primitive.get(), material.get(), camera );
+			renderState->foreachMaterial( [&]( Material *material ) mutable {
+				applyMaterial( geometry, primitive.get(), material, camera );
 			});
-		});
-	}
-	else {
-		geometry->foreachPrimitive( [&]( PrimitivePtr &primitive ) mutable {
-			applyMaterial( geometry, primitive.get(), getDefaultMaterial(), camera );
 		});
 	}
 }
@@ -75,17 +71,21 @@ void Renderer::applyMaterial( Geometry *geometry, Primitive *primitive, Material
 		return;
 	}
 
-	ShaderProgram *program = material->getProgram() ? material->getProgram() : getFallbackProgram( material, primitive );
+	ShaderProgram *program = material->getProgram() ? material->getProgram() : getFallbackProgram( material, geometry, primitive );
 	if ( !program ) {
 		return;
 	}
 
+	RenderStateComponent *renderState = geometry->getComponent< RenderStateComponent >();
+
 	bindResources( program, primitive, material );
+	enableLights( program, renderState );
 	enableMaterialProperties( program, material );
 	applyTransformations( program, geometry, camera );
 	drawPrimitive( program, primitive );
 	restoreTransformations( program, geometry, camera );
 	disableMaterialProperties( program, material );
+	disableLights( program, renderState );
 	unbindResources( program, primitive, material );
 }
 

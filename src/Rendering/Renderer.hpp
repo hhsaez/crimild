@@ -42,6 +42,7 @@ namespace Crimild {
 	class Geometry;
 	class Primitive;
 	class Camera;
+	class RenderStateComponent;
 
 	class Renderer {
 	protected:
@@ -72,6 +73,8 @@ namespace Crimild {
 
 		virtual void bindResources( ShaderProgram *program, Primitive *primitive, Material *material );
 
+		virtual void enableLights( ShaderProgram *program, RenderStateComponent *renderState ) = 0;
+
 		virtual void enableMaterialProperties( ShaderProgram *program, Material *material ) = 0;
 
 		virtual void applyTransformations( ShaderProgram *program, Geometry *geometry, Camera *camera ) = 0;
@@ -82,15 +85,14 @@ namespace Crimild {
 
 		virtual void disableMaterialProperties( ShaderProgram *program, Material *material ) = 0;
 
+		virtual void disableLights( ShaderProgram *program, RenderStateComponent *renderState ) = 0;
+
 		virtual void unbindResources( ShaderProgram *program, Primitive *primitive, Material *material );
 
 		virtual void endRender( void ) = 0;
 
 	public:
-		Material *getDefaultMaterial( void ) { return _defaultMaterial.get(); }
-		void setDefaultMaterial( MaterialPtr material ) { _defaultMaterial = material; }
-
-		virtual ShaderProgram *getFallbackProgram( Material *, Primitive * ) { return getDefaultMaterial()->getProgram(); }
+		virtual ShaderProgram *getFallbackProgram( Material *, Geometry *, Primitive * ) { return nullptr; }
 
 	public:
 		MaterialPtr _defaultMaterial;

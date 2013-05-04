@@ -52,6 +52,8 @@ namespace Crimild {
 		Node *getParent( void ) { return _parent; }
 		void setParent( Node *parent ) { _parent = parent; }
 
+		Node *getRootParent( void );
+
 	private:
 		/**
 			\brief A node's parent

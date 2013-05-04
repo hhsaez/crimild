@@ -26,6 +26,7 @@
  */
 
 #include "SceneGraph/Node.hpp"
+#include "SceneGraph/Group.hpp"
 
 #include "Utils/MockComponent.hpp"
 
@@ -298,5 +299,17 @@ TEST( NodeTest, updateComponents )
 	node->detachComponent( cmp2 );
 
 	node->updateComponents( t );
+}
+
+TEST( NodeTest, getRootParent )
+{
+	GroupPtr g1( new Group() );
+	GroupPtr g2( new Group() );
+	GroupPtr g3( new Group() );
+
+	g1->attachNode( g2 );
+	g2->attachNode( g3 );
+
+	EXPECT_EQ( g1.get(), g3->getRootParent() );
 }
 

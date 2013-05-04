@@ -25,36 +25,35 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "MaterialComponent.hpp"
+#ifndef CRIMILD_VISITORS_UPDATE_RENDER_STATE_
+#define CRIMILD_VISITORS_UPDATE_RENDER_STATE_
 
-using namespace Crimild;
+#include "NodeVisitor.hpp"
 
-const char *MaterialComponent::NAME = "materials";
+#include <list>
+#include <functional>
 
-MaterialComponent::MaterialComponent( void )
-	: NodeComponent( NAME )
-{
+namespace Crimild {
+
+	class Material;
+
+	class UpdateRenderState : public NodeVisitor {
+	public:
+		static std::shared_ptr< Material > defaultMaterial;
+		
+	public:
+		UpdateRenderState( void );
+		virtual ~UpdateRenderState( void );
+
+		virtual void traverse( Node *node ) override;
+
+		virtual void visitGeometry( Geometry *geometry ) override;
+
+	private:
+		std::list< Light * > _lights;
+	};
+
 }
 
-MaterialComponent::~MaterialComponent( void )
-{
-	detachAllMaterials();
-}
-
-void MaterialComponent::attachMaterial( MaterialPtr material )
-{
-	_materials.push_back( material );
-}
-
-void MaterialComponent::detachAllMaterials( void )
-{
-	_materials.clear();
-}
-
-void MaterialComponent::foreachMaterial( std::function< void( MaterialPtr & ) > callback )
-{
-	for (auto material : _materials) {
-		callback( material );
-	}
-}
+#endif
 

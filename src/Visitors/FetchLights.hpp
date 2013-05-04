@@ -25,36 +25,34 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "MaterialComponent.hpp"
+#ifndef CRIMILD_VISITORS_UPDATE_FETCH_LIGHTS_
+#define CRIMILD_VISITORS_UPDATE_FETCH_LIGHTS_
 
-using namespace Crimild;
+#include "NodeVisitor.hpp"
 
-const char *MaterialComponent::NAME = "materials";
+#include <list>
+#include <functional>
 
-MaterialComponent::MaterialComponent( void )
-	: NodeComponent( NAME )
-{
+namespace Crimild {
+
+	class FetchLights : public NodeVisitor {
+	public:
+		FetchLights( void );
+		virtual ~FetchLights( void );
+
+		virtual void reset( void ) override;
+
+		virtual void visitLight( Light *light ) override;
+
+		bool hasLights( void ) const { return _lights.size() > 0; }
+
+		void foreachLight( std::function< void( Light * ) > callback );
+
+	private:
+		std::list< Light * > _lights;
+	};
+
 }
 
-MaterialComponent::~MaterialComponent( void )
-{
-	detachAllMaterials();
-}
-
-void MaterialComponent::attachMaterial( MaterialPtr material )
-{
-	_materials.push_back( material );
-}
-
-void MaterialComponent::detachAllMaterials( void )
-{
-	_materials.clear();
-}
-
-void MaterialComponent::foreachMaterial( std::function< void( MaterialPtr & ) > callback )
-{
-	for (auto material : _materials) {
-		callback( material );
-	}
-}
+#endif
 

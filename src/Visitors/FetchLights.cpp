@@ -25,36 +25,38 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "MaterialComponent.hpp"
+#include "FetchLights.hpp"
+
+#include "SceneGraph/Light.hpp"
 
 using namespace Crimild;
 
-const char *MaterialComponent::NAME = "materials";
-
-MaterialComponent::MaterialComponent( void )
-	: NodeComponent( NAME )
+FetchLights::FetchLights( void )
 {
+
 }
 
-MaterialComponent::~MaterialComponent( void )
+FetchLights::~FetchLights( void )
 {
-	detachAllMaterials();
+
 }
 
-void MaterialComponent::attachMaterial( MaterialPtr material )
+void FetchLights::reset( void )
 {
-	_materials.push_back( material );
+	_lights.clear();
+	NodeVisitor::reset();
 }
 
-void MaterialComponent::detachAllMaterials( void )
+void FetchLights::visitLight( Light *light )
 {
-	_materials.clear();
+	_lights.push_back( light );
 }
 
-void MaterialComponent::foreachMaterial( std::function< void( MaterialPtr & ) > callback )
+void FetchLights::foreachLight( std::function< void( Light *light ) > callback )
 {
-	for (auto material : _materials) {
-		callback( material );
+	for ( auto light : _lights ) {
+		callback( light );
 	}
+	_lights.clear();
 }
 

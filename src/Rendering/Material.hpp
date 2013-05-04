@@ -35,6 +35,8 @@
 
 namespace Crimild {
 
+	class Light;
+
 	class Material {
 	public:
 		Material( void );
@@ -43,16 +45,30 @@ namespace Crimild {
 		void setProgram( ShaderProgramPtr program ) { _program = program; }
 		ShaderProgram *getProgram( void ) { return _program.get(); }
 
+		void setAmbient( const RGBAColorf &ambient ) { _ambient = ambient; }
+		const RGBAColorf &getAmbient( void ) const { return _ambient; }
+
 		void setDiffuse( const RGBAColorf &color ) { _diffuse = color; }
 		const RGBAColorf &getDiffuse( void ) const { return _diffuse; }
+
+		void setSpecular( const RGBAColorf &color ) { _specular = color; }
+		const RGBAColorf &getSpecular( void ) const { return _specular; }
+
+		void setShininess( float value ) { _shininess = value; }
+		float getShininess( void ) const { return _shininess; }
 
 		void setColorMap( TexturePtr texture ) { _colorMap = texture; }
 		Texture *getColorMap( void ) { return _colorMap.get(); }
 
 	private:
 		ShaderProgramPtr _program;
-		TexturePtr _colorMap;
+
+		RGBAColorf _ambient;
 		RGBAColorf _diffuse;
+		RGBAColorf _specular;
+		float _shininess;
+
+		TexturePtr _colorMap;
 
 	private:
 		Material( const Material & ) { }

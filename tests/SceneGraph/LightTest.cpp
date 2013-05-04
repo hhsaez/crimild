@@ -25,36 +25,51 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "MaterialComponent.hpp"
+#include "SceneGraph/Light.hpp"
+#include "SceneGraph/Group.hpp"
+#include "Visitors/FetchLights.hpp"
+
+#include "gtest/gtest.h"
 
 using namespace Crimild;
 
-const char *MaterialComponent::NAME = "materials";
-
-MaterialComponent::MaterialComponent( void )
-	: NodeComponent( NAME )
+TEST( LightTest, construction )
 {
+	LightPtr light( new Light() );
+
+	EXPECT_EQ( Vector3f( 0.0f, 0.0f, 0.0f ), light->getPosition() );
+	EXPECT_EQ( Vector3f( 1.0f, 0.0f, 0.01f ), light->getAttenuation() );
+	EXPECT_EQ( Vector3f( 0.0f, 0.0f, -1.0f ), light->getDirection() );
+	EXPECT_EQ( RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ), light->getColor() );
+	EXPECT_EQ( 0.0f, light->getOuterCutoff() );
+	EXPECT_EQ( 0.0f, light->getInnerCutoff() );
+	EXPECT_EQ( 0.0f, light->getExponent() );
 }
 
-MaterialComponent::~MaterialComponent( void )
+TEST( LightTest, fetchLights )
 {
-	detachAllMaterials();
-}
+	GroupPtr group( new Group() );
+	LightPtr light1( new Light() );
+	LightPtr light2( new Light() );
 
-void MaterialComponent::attachMaterial( MaterialPtr material )
-{
-	_materials.push_back( material );
-}
+	group->attachNode( light1 );
+	group->attachNode( light2 );
 
-void MaterialComponent::detachAllMaterials( void )
-{
-	_materials.clear();
-}
+	FetchLights fetchLights;
+	group->perform( fetchLights );
+	
+	EXPECT_TRUE( fetchLights.hasLights() );
 
-void MaterialComponent::foreachMaterial( std::function< void( MaterialPtr & ) > callback )
-{
-	for (auto material : _materials) {
-		callback( material );
-	}
+	int i = 0; 
+	fetchLights.foreachLight( [&]( Light *light ) {
+		if ( i == 0 ) {
+			EXPECT_EQ( light1.get(), light );
+		}
+		else if ( i == 1 ) {
+			EXPECT_EQ( light2.get(), light );
+		}
+		i++;
+	});
+	EXPECT_EQ( 2, i );
 }
 

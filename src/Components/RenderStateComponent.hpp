@@ -25,36 +25,47 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "MaterialComponent.hpp"
+#ifndef CRIMILD_COMPONENTS_RENDER_STATE_
+#define CRIMILD_COMPONENTS_RENDER_STATE_
 
-using namespace Crimild;
+#include "NodeComponent.hpp"
 
-const char *MaterialComponent::NAME = "materials";
+#include <functional>
+#include <list>
 
-MaterialComponent::MaterialComponent( void )
-	: NodeComponent( NAME )
-{
+namespace Crimild {
+
+	class Material;
+	class Light;
+
+	class RenderStateComponent : public NodeComponent {
+	public:
+		static const char *NAME;
+
+	public:
+		RenderStateComponent( void );
+		virtual ~RenderStateComponent( void );
+
+		void reset( void );
+
+		bool hasMaterials( void ) const { return _materials.size() > 0; }
+		void attachMaterial( Material *material );
+		void detachAllMaterials( void );
+		void foreachMaterial( std::function< void( Material * ) > callback );
+
+		bool hasLights( void ) const { return _lights.size() > 0; }
+		void attachLight( Light *light );
+		void detachAllLights( void );
+		void foreachLight( std::function< void( Light * ) > callback );
+
+	private:
+		std::list< Material * > _materials;
+		std::list< Light * > _lights;
+	};
+
+	typedef std::shared_ptr< RenderStateComponent > RenderStateComponentPtr;
+
 }
 
-MaterialComponent::~MaterialComponent( void )
-{
-	detachAllMaterials();
-}
-
-void MaterialComponent::attachMaterial( MaterialPtr material )
-{
-	_materials.push_back( material );
-}
-
-void MaterialComponent::detachAllMaterials( void )
-{
-	_materials.clear();
-}
-
-void MaterialComponent::foreachMaterial( std::function< void( MaterialPtr & ) > callback )
-{
-	for (auto material : _materials) {
-		callback( material );
-	}
-}
+#endif
 

@@ -25,36 +25,32 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "MaterialComponent.hpp"
+#ifndef CRIMILD_COMPONENTS_LAMBDA_
+#define CRIMILD_COMPONENTS_LAMBDA_
 
-using namespace Crimild;
+#include "NodeComponent.hpp"
 
-const char *MaterialComponent::NAME = "materials";
+#include <functional>
 
-MaterialComponent::MaterialComponent( void )
-	: NodeComponent( NAME )
-{
+namespace Crimild {
+
+	class LambdaComponent : public NodeComponent {
+	public:
+		static const char *NAME;
+
+	public:
+		LambdaComponent( std::function< void( Node *, const Time & ) > callback );
+		virtual ~LambdaComponent( void );
+
+		virtual void update( const Time &t ) override;
+
+	private:
+		std::function< void( Node *, const Time & ) > _callback;
+	};
+
+	typedef std::shared_ptr< LambdaComponent > LambdaComponentPtr;
+
 }
 
-MaterialComponent::~MaterialComponent( void )
-{
-	detachAllMaterials();
-}
-
-void MaterialComponent::attachMaterial( MaterialPtr material )
-{
-	_materials.push_back( material );
-}
-
-void MaterialComponent::detachAllMaterials( void )
-{
-	_materials.clear();
-}
-
-void MaterialComponent::foreachMaterial( std::function< void( MaterialPtr & ) > callback )
-{
-	for (auto material : _materials) {
-		callback( material );
-	}
-}
+#endif
 
