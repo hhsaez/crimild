@@ -32,6 +32,7 @@
 #include "Rendering/VisibilitySet.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "Visitors/ComputeVisibilitySet.hpp"
+#include "Visitors/UpdateRenderState.hpp"
 
 #include <iostream>
 
@@ -52,6 +53,7 @@ RenderSceneTask::~RenderSceneTask( void )
 
 void RenderSceneTask::start( void )
 {
+	_scene->perform( UpdateRenderState() );
 }
 
 void RenderSceneTask::update( void )

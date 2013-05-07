@@ -25,36 +25,26 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "MaterialComponent.hpp"
+#include "LambdaComponent.hpp"
 
 using namespace Crimild;
 
-const char *MaterialComponent::NAME = "materials";
+const char *LambdaComponent::NAME = "lambda";
 
-MaterialComponent::MaterialComponent( void )
-	: NodeComponent( NAME )
+LambdaComponent::LambdaComponent( std::function< void( Node *, const Time & ) > callback )
+	: NodeComponent( NAME ),
+	  _callback( callback )
 {
+
 }
 
-MaterialComponent::~MaterialComponent( void )
+LambdaComponent::~LambdaComponent( void )
 {
-	detachAllMaterials();
+
 }
 
-void MaterialComponent::attachMaterial( MaterialPtr material )
+void LambdaComponent::update( const Time &t )
 {
-	_materials.push_back( material );
-}
-
-void MaterialComponent::detachAllMaterials( void )
-{
-	_materials.clear();
-}
-
-void MaterialComponent::foreachMaterial( std::function< void( MaterialPtr & ) > callback )
-{
-	for (auto material : _materials) {
-		callback( material );
-	}
+	_callback( getNode(), t );
 }
 

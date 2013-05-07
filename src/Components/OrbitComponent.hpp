@@ -25,36 +25,38 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "MaterialComponent.hpp"
+#ifndef CRIMILD_COMPONENTS_ORBIT_
+#define CRIMILD_COMPONENTS_ORBIT_
 
-using namespace Crimild;
+#include "NodeComponent.hpp"
 
-const char *MaterialComponent::NAME = "materials";
+#include "Mathematics/Vector.hpp"
 
-MaterialComponent::MaterialComponent( void )
-	: NodeComponent( NAME )
-{
+namespace Crimild {
+
+	class OrbitComponent : public NodeComponent {
+	public:
+		static const char *NAME;
+
+	public:
+		OrbitComponent( float x0 = 0.0f, float y0 = 0.0f, float major = 1.0f, float minor = 1.0f, float speed = 1.0f, float gamma = 0.0f );
+		virtual ~OrbitComponent( void );
+
+		virtual void update( const Time &t ) override;
+
+	private:
+		float _x0;
+		float _y0;
+		float _major;
+		float _minor;
+		float _t;
+		float _speed;
+		float _gamma;
+	};
+
+	typedef std::shared_ptr< OrbitComponent > OrbitComponentPtr;
+
 }
 
-MaterialComponent::~MaterialComponent( void )
-{
-	detachAllMaterials();
-}
-
-void MaterialComponent::attachMaterial( MaterialPtr material )
-{
-	_materials.push_back( material );
-}
-
-void MaterialComponent::detachAllMaterials( void )
-{
-	_materials.clear();
-}
-
-void MaterialComponent::foreachMaterial( std::function< void( MaterialPtr & ) > callback )
-{
-	for (auto material : _materials) {
-		callback( material );
-	}
-}
+#endif
 

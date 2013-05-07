@@ -63,59 +63,15 @@ void ShaderProgram::foreachLocation( std::function< void( ShaderLocationPtr & ) 
 	}
 }
 
-void ShaderProgram::registerPositionAttributeLocation( std::string name )
-{	
-	ShaderLocationPtr location( new ShaderLocation( ShaderLocation::Type::ATTRIBUTE, name ) );
-	_positionAttributeLocation = location;
-	registerLocation( _positionAttributeLocation );
-}
-
-void ShaderProgram::registerColorAttributeLocation( std::string name )
-{	
-	ShaderLocationPtr location( new ShaderLocation( ShaderLocation::Type::ATTRIBUTE, name ) );
-	_colorAttributeLocation = location;
-	registerLocation( _colorAttributeLocation );
-}
-
-void ShaderProgram::registerTextureCoordAttributeLocation( std::string name )
+void ShaderProgram::registerStandardLocation( ShaderLocation::Type locationType, unsigned int standardLocationId, std::string name )
 {
-	ShaderLocationPtr location( new ShaderLocation( ShaderLocation::Type::ATTRIBUTE, name ) );
-	_textureCoordAttributeLocation = location;
-	registerLocation( _textureCoordAttributeLocation );
+	_standardLocations[ standardLocationId ] = name;
+	ShaderLocationPtr location( new ShaderLocation( locationType, name ) );
+	registerLocation( location );
 }
 
-void ShaderProgram::registerProjectionMatrixUniformLocation( std::string name )
+ShaderLocation *ShaderProgram::getStandardLocation( unsigned int standardLocationId )
 {
-	ShaderLocationPtr location( new ShaderLocation( ShaderLocation::Type::UNIFORM, name ) );
-	_projectionMatrixUniformLocation = location;
-	registerLocation( _projectionMatrixUniformLocation );
-}
-
-void ShaderProgram::registerViewMatrixUniformLocation( std::string name )
-{
-	ShaderLocationPtr location( new ShaderLocation( ShaderLocation::Type::UNIFORM, name ) );
-	_viewMatrixUniformLocation = location;
-	registerLocation( _viewMatrixUniformLocation );
-}
-
-void ShaderProgram::registerModelMatrixUniformLocation( std::string name )
-{
-	ShaderLocationPtr location( new ShaderLocation( ShaderLocation::Type::UNIFORM, name ) );
-	_modelMatrixUniformLocation = location;
-	registerLocation( _modelMatrixUniformLocation );
-}
-
-void ShaderProgram::registerMaterialDiffuseUniformLocation( std::string name )
-{
-	ShaderLocationPtr location( new ShaderLocation( ShaderLocation::Type::UNIFORM, name ) );
-	_materialDiffuseUniformLocation = location;
-	registerLocation( _materialDiffuseUniformLocation );
-}
-
-void ShaderProgram::registerMaterialColorMapUniformLocation( std::string name )
-{
-	ShaderLocationPtr location( new ShaderLocation( ShaderLocation::Type::UNIFORM, name ) );
-	_materialColorMapUniformLocation = location;
-	registerLocation( _materialColorMapUniformLocation );
+	return _locations[ _standardLocations[ standardLocationId ] ].get();
 }
 

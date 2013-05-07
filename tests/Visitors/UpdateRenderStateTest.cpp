@@ -25,36 +25,67 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "MaterialComponent.hpp"
+#include "Visitors/UpdateRenderState.hpp"
+#include "SceneGraph/Group.hpp"
+#include "SceneGraph/Geometry.hpp"
+#include "SceneGraph/Light.hpp"
+#include "Components/RenderStateComponent.hpp"
+#include "Components/MaterialComponent.hpp"
+#include "Rendering/Material.hpp"
+
+#include "Utils/MockVisitor.hpp"
+
+#include "gtest/gtest.h"
 
 using namespace Crimild;
 
-const char *MaterialComponent::NAME = "materials";
-
-MaterialComponent::MaterialComponent( void )
-	: NodeComponent( NAME )
+TEST( UpdateRenderStateTest, lights )
 {
+	GroupPtr scene( new Group() );
+	GeometryPtr geometry( new Geometry() );
+
+	LightPtr light( new Light() );
+
+	scene->attachNode( geometry );
+	scene->attachNode( light );
+
+	RenderStateComponent *rs = geometry->getComponent< RenderStateComponent >();
+	ASSERT_NE( nullptr, rs );
+
+	EXPECT_FALSE( rs->hasMaterials() );
+	EXPECT_FALSE( rs->hasLights() );
+
+	scene->perform( UpdateRenderState() );
+
+	EXPECT_TRUE( rs->hasLights() );
+	EXPECT_TRUE( rs->hasMaterials() );
+
+	int i = 0;
+	rs->foreachLight( [&]( Light *l ) {
+		EXPECT_EQ( light.get(), l );
+		i++;
+	});
+	EXPECT_EQ( 1, i );
 }
 
-MaterialComponent::~MaterialComponent( void )
+TEST( UpdateRenderStateTest, materials )
 {
-	detachAllMaterials();
-}
+	GroupPtr scene( new Group() );
 
-void MaterialComponent::attachMaterial( MaterialPtr material )
-{
-	_materials.push_back( material );
-}
+	GeometryPtr geometry( new Geometry() );
+	MaterialPtr material( new Material() );
+	geometry->getComponent< MaterialComponent >()->attachMaterial( material );
+	scene->attachNode( geometry );
 
-void MaterialComponent::detachAllMaterials( void )
-{
-	_materials.clear();
-}
+	RenderStateComponent *rs = geometry->getComponent< RenderStateComponent >();
+	ASSERT_NE( nullptr, rs );
 
-void MaterialComponent::foreachMaterial( std::function< void( MaterialPtr & ) > callback )
-{
-	for (auto material : _materials) {
-		callback( material );
-	}
+	EXPECT_FALSE( rs->hasMaterials() );
+	EXPECT_FALSE( rs->hasLights() );
+
+	scene->perform( UpdateRenderState() );
+
+	EXPECT_FALSE( rs->hasLights() );
+	EXPECT_TRUE( rs->hasMaterials() );
 }
 

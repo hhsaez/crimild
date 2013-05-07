@@ -75,3 +75,30 @@ TEST( ShaderProgramTest, locations )
 	EXPECT_FALSE( vertexWeightLocation->isValid() );
 }
 
+TEST( ShaderProgramTest, multipleLightLocations )
+{
+	ShaderProgramPtr program( new ShaderProgram( nullptr, nullptr ) );
+
+	program->registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_POSITION_UNIFORM + 0, "uLights[0].position" );
+	program->registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_ATTENUATION_UNIFORM + 0, "uLights[0].attenuation" );
+
+	program->registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_POSITION_UNIFORM + 1, "uLights[1].position" );
+	program->registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_ATTENUATION_UNIFORM + 1, "uLights[1].attenuation" );
+
+	program->registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_POSITION_UNIFORM + 2, "uLights[2].position" );
+	program->registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_ATTENUATION_UNIFORM + 2, "uLights[2].attenuation" );
+
+	program->registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_POSITION_UNIFORM + 50, "uLights[50].position" );
+	program->registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_ATTENUATION_UNIFORM + 50, "uLights[50].attenuation" );
+
+	int i = 0;
+	program->foreachLocation( [&]( ShaderLocationPtr &location ) mutable {
+		location->setLocation( i++ );
+	});
+
+	EXPECT_EQ( 1, program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_POSITION_UNIFORM + 0 )->getLocation() );
+	EXPECT_EQ( 3, program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_POSITION_UNIFORM + 1 )->getLocation() );
+	EXPECT_EQ( 5, program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_POSITION_UNIFORM + 2 )->getLocation() );
+	EXPECT_EQ( 7, program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_POSITION_UNIFORM + 50 )->getLocation() );
+}
+

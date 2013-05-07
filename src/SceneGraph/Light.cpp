@@ -25,36 +25,27 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "MaterialComponent.hpp"
+#include "Light.hpp"
 
 using namespace Crimild;
 
-const char *MaterialComponent::NAME = "materials";
-
-MaterialComponent::MaterialComponent( void )
-	: NodeComponent( NAME )
+Light::Light( Type type )
+	: _type( type ),
+	  _attenuation( 1.0f, 0.0f, 0.01f ),
+	  _color( 1.0f, 1.0f, 1.0f, 1.0f ),
+	  _outerCutoff( 0.0f ),
+	  _innerCutoff( 0.0f ),
+	  _exponent( 0.0f )
 {
 }
 
-MaterialComponent::~MaterialComponent( void )
+Light::~Light( void )
 {
-	detachAllMaterials();
+
 }
 
-void MaterialComponent::attachMaterial( MaterialPtr material )
+void Light::accept( NodeVisitor &visitor )
 {
-	_materials.push_back( material );
-}
-
-void MaterialComponent::detachAllMaterials( void )
-{
-	_materials.clear();
-}
-
-void MaterialComponent::foreachMaterial( std::function< void( MaterialPtr & ) > callback )
-{
-	for (auto material : _materials) {
-		callback( material );
-	}
+	visitor.visitLight( this );
 }
 

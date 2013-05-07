@@ -30,7 +30,10 @@
 using namespace Crimild;
 
 Material::Material( void )
-	: _diffuse( 1.0f, 1.0f, 1.0f, 1.0f )
+	: _ambient( 0.2f, 0.2f, 0.2f, 1.0f ),
+	  _diffuse( 0.8f, 0.8f, 0.8f, 1.0f ),
+	  _specular( 1.0f, 1.0f, 1.0f, 1.0f ),
+	  _shininess( 50.0f )
 {
 
 }

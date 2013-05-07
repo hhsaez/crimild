@@ -28,6 +28,7 @@
 #include "Geometry.hpp"
 
 #include "Components/MaterialComponent.hpp"
+#include "Components/RenderStateComponent.hpp"
 
 using namespace Crimild;
 
@@ -36,6 +37,9 @@ Geometry::Geometry( std::string name )
 {
 	MaterialComponentPtr materials( new MaterialComponent() );
 	attachComponent( materials );
+
+	RenderStateComponentPtr renderState( new RenderStateComponent() );
+	attachComponent( renderState );
 }
 
 Geometry::~Geometry( void )

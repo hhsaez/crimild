@@ -25,36 +25,51 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "MaterialComponent.hpp"
+#include "RenderStateComponent.hpp"
+#include "Rendering/Material.hpp"
 
 using namespace Crimild;
 
-const char *MaterialComponent::NAME = "materials";
+const char *RenderStateComponent::NAME = "renderState";
 
-MaterialComponent::MaterialComponent( void )
+RenderStateComponent::RenderStateComponent( void )
 	: NodeComponent( NAME )
 {
 }
 
-MaterialComponent::~MaterialComponent( void )
+RenderStateComponent::~RenderStateComponent( void )
 {
 	detachAllMaterials();
+	detachAllLights();
 }
 
-void MaterialComponent::attachMaterial( MaterialPtr material )
+void RenderStateComponent::attachMaterial( Material *material )
 {
 	_materials.push_back( material );
 }
 
-void MaterialComponent::detachAllMaterials( void )
+void RenderStateComponent::detachAllMaterials( void )
 {
 	_materials.clear();
 }
 
-void MaterialComponent::foreachMaterial( std::function< void( MaterialPtr & ) > callback )
+void RenderStateComponent::foreachMaterial( std::function< void( Material * ) > callback )
 {
-	for (auto material : _materials) {
-		callback( material );
-	}
+	std::for_each( std::begin( _materials ), std::end( _materials ), callback );
+}
+
+void RenderStateComponent::attachLight( Light *light )
+{
+	_lights.push_back( light );
+}
+
+void RenderStateComponent::detachAllLights( void )
+{
+	_lights.clear();
+}
+
+void RenderStateComponent::foreachLight( std::function< void( Light * ) > callback )
+{
+	std::for_each( std::begin( _lights ), std::end( _lights ), callback );
 }
 

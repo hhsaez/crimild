@@ -25,36 +25,64 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "MaterialComponent.hpp"
+#ifndef CRIMILD_SCENEGRAPH_LIGHT_
+#define CRIMILD_SCENEGRAPH_LIGHT_
 
-using namespace Crimild;
+#include "Node.hpp"
 
-const char *MaterialComponent::NAME = "materials";
+namespace Crimild {
 
-MaterialComponent::MaterialComponent( void )
-	: NodeComponent( NAME )
-{
+	class Light : public Node {
+	public:
+		enum class Type {
+			POINT,
+			DIRECTIONAL,
+			SPOT,
+		};
+
+	public:
+		Light( Type type = Type::POINT );
+		virtual ~Light( void );
+
+		const Type &getType( void ) { return _type; }
+
+		Vector3f getPosition( void ) const { return getWorld().getTranslate(); }
+		Vector3f getDirection( void ) const { return ( _type == Type::POINT ? Vector3f( 0.0f, 0.0f, 0.0f ) : getWorld().computeDirection() ); }
+
+		void setAttenuation( const Vector3f &attenuation ) { _attenuation = attenuation; }
+		const Vector3f &getAttenuation( void ) const { return _attenuation; }
+
+		void setColor( const RGBAColorf &color ) { _color = color; }
+		const RGBAColorf &getColor( void ) const { return _color; }
+
+		void setOuterCutoff( float value ) { _outerCutoff = value; }
+		float getOuterCutoff( void ) const { return _outerCutoff; }
+
+		void setInnerCutoff( float value ) { _innerCutoff = value; }
+		float getInnerCutoff( void ) const { return _innerCutoff; }
+
+		void setExponent( float value ) { _exponent = value; }
+		float getExponent( void ) const { return _exponent; }
+
+	private:
+		Type _type;
+		Vector3f _attenuation;
+		RGBAColorf _color;
+		float _outerCutoff;
+		float _innerCutoff;
+		float _exponent;
+
+	public:
+		virtual void accept( NodeVisitor &visitor ) override;
+
+	private:
+		Light( const Light & ) { }
+		Light &operator=( const Light & ) { return *this; }
+	};
+
+	typedef std::shared_ptr< Light > LightPtr;
+
 }
 
-MaterialComponent::~MaterialComponent( void )
-{
-	detachAllMaterials();
-}
-
-void MaterialComponent::attachMaterial( MaterialPtr material )
-{
-	_materials.push_back( material );
-}
-
-void MaterialComponent::detachAllMaterials( void )
-{
-	_materials.clear();
-}
-
-void MaterialComponent::foreachMaterial( std::function< void( MaterialPtr & ) > callback )
-{
-	for (auto material : _materials) {
-		callback( material );
-	}
-}
+#endif
 

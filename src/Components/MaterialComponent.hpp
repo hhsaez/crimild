@@ -47,6 +47,7 @@ namespace Crimild {
 
 		bool hasMaterials( void ) const { return _materials.size() > 0; }
 		void attachMaterial( MaterialPtr material );
+		void detachAllMaterials( void );
 		void foreachMaterial( std::function< void( MaterialPtr & ) > callback );
 
 	private:

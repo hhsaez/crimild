@@ -25,36 +25,37 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "MaterialComponent.hpp"
+#include "OrbitComponent.hpp"
+
+#include "Mathematics/Numeric.hpp"
+#include "SceneGraph/Node.hpp"
 
 using namespace Crimild;
 
-const char *MaterialComponent::NAME = "materials";
+const char *OrbitComponent::NAME = "orbit";
 
-MaterialComponent::MaterialComponent( void )
+OrbitComponent::OrbitComponent( float x0, float y0, float major, float minor, float speed, float gamma )
 	: NodeComponent( NAME )
 {
+	_t = 0.0f;
+	_x0 = x0;
+	_y0 = y0;
+	_major = major;
+	_minor = minor;
+	_speed = speed;
+	_gamma = gamma;
 }
 
-MaterialComponent::~MaterialComponent( void )
+OrbitComponent::~OrbitComponent( void )
 {
-	detachAllMaterials();
+
 }
 
-void MaterialComponent::attachMaterial( MaterialPtr material )
+void OrbitComponent::update( const Time &t )
 {
-	_materials.push_back( material );
-}
-
-void MaterialComponent::detachAllMaterials( void )
-{
-	_materials.clear();
-}
-
-void MaterialComponent::foreachMaterial( std::function< void( MaterialPtr & ) > callback )
-{
-	for (auto material : _materials) {
-		callback( material );
-	}
+    getNode()->local().translate()[0] = _x0 + _major * std::cos( _t ) * std::cos( _gamma ) - _minor * std::sin( _t ) * std::sin( _gamma );
+    getNode()->local().translate()[1] = _y0 + _major * std::cos( _t ) * std::sin( _gamma ) + _minor * std::sin( _t ) * std::cos( _gamma );
+	
+	_t += _speed * t.getDeltaTime();
 }
 

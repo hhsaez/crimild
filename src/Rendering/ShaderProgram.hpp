@@ -35,10 +35,44 @@
 #include <functional>
 #include <map>
 #include <string>
+#include <vector>
 
 namespace Crimild {
 
 	class ShaderProgram : public Catalog< ShaderProgram >::Resource {
+	public:
+		class StandardLocation {
+		public:
+			enum {
+				POSITION_ATTRIBUTE = 0,
+				NORMAL_ATTRIBUTE,
+				TEXTURE_COORD_ATTRIBUTE,
+				COLOR_ATTRIBUTE,
+
+				PROJECTION_MATRIX_UNIFORM = 100,
+				VIEW_MATRIX_UNIFORM,
+				MODEL_MATRIX_UNIFORM,
+
+				MATERIAL_AMBIENT_UNIFORM = 1000,
+				MATERIAL_DIFFUSE_UNIFORM,
+				MATERIAL_SPECULAR_UNIFORM,
+				MATERIAL_SHININESS_UNIFORM,
+
+				MATERIAL_COLOR_MAP_UNIFORM = 1500,
+				MATERIAL_SPECULAR_MAP_UNIFORM,
+				MATERIAL_NORMAL_MAP_UNIFORM,
+
+				LIGHT_COUNT_UNIFORM = 5000,
+				LIGHT_POSITION_UNIFORM = 5100,
+				LIGHT_ATTENUATION_UNIFORM = 5200,
+				LIGHT_DIRECTION_UNIFORM = 5300,
+				LIGHT_COLOR_UNIFORM = 5400,
+				LIGHT_OUTER_CUTOFF_UNIFORM = 5500,
+				LIGHT_INNER_CUTOFF_UNIFORM = 5600,
+				LIGHT_EXPONENT_UNIFORM = 5700,
+			};
+		};
+
 	public:
 		ShaderProgram( VertexShaderPtr vs, FragmentShaderPtr fs );
 		virtual ~ShaderProgram( void );
@@ -56,40 +90,12 @@ namespace Crimild {
 		void resetLocations( void );
 		void foreachLocation( std::function< void( ShaderLocationPtr & ) > callback );
 
-		void registerPositionAttributeLocation( std::string name );
-		ShaderLocation *getPositionAttributeLocation( void ) { return _positionAttributeLocation.get(); }
-
-		void registerColorAttributeLocation( std::string name );
-		ShaderLocation *getColorAttributeLocation( void ) { return _colorAttributeLocation.get(); }
-
-		void registerTextureCoordAttributeLocation( std::string name );
-		ShaderLocation *getTextureCoordAttributeLocation( void ) { return _textureCoordAttributeLocation.get(); }
-
-		void registerProjectionMatrixUniformLocation( std::string name );
-		ShaderLocation *getProjectionMatrixUniformLocation( void ) { return _projectionMatrixUniformLocation.get(); }
-
-		void registerViewMatrixUniformLocation( std::string name );
-		ShaderLocation *getViewMatrixUniformLocation( void ) { return _viewMatrixUniformLocation.get(); }
-
-		void registerModelMatrixUniformLocation( std::string name );
-		ShaderLocation *getModelMatrixUniformLocation( void ) { return _modelMatrixUniformLocation.get(); }
-
-		void registerMaterialDiffuseUniformLocation( std::string name );
-		ShaderLocation *getMaterialDiffuseUniformLocation( void ) { return _materialDiffuseUniformLocation.get(); }
-
-		void registerMaterialColorMapUniformLocation( std::string name );
-		ShaderLocation *getMaterialColorMapUniformLocation( void ) { return _materialColorMapUniformLocation.get(); }
+		void registerStandardLocation( ShaderLocation::Type locationType, unsigned int standardLocationId, std::string name );
+		ShaderLocation *getStandardLocation( unsigned int standardLocationId );
 
 	private:
 		std::map< std::string, ShaderLocationPtr > _locations;
-		ShaderLocationPtr _positionAttributeLocation;
-		ShaderLocationPtr _colorAttributeLocation;
-		ShaderLocationPtr _textureCoordAttributeLocation;
-		ShaderLocationPtr _projectionMatrixUniformLocation;
-		ShaderLocationPtr _viewMatrixUniformLocation;
-		ShaderLocationPtr _modelMatrixUniformLocation;
-		ShaderLocationPtr _materialDiffuseUniformLocation;
-		ShaderLocationPtr _materialColorMapUniformLocation;
+		std::map< unsigned int, std::string > _standardLocations;
 	};
 
 	typedef std::shared_ptr< ShaderProgram > ShaderProgramPtr;

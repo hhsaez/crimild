@@ -30,6 +30,7 @@
 #include "SceneGraph/Group.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Camera.hpp"
+#include "SceneGraph/Light.hpp"
 
 using namespace Crimild;
 
@@ -74,5 +75,10 @@ void NodeVisitor::visitGeometry( Geometry *geometry )
 void NodeVisitor::visitCamera( Camera *camera )
 {
 	visitNode( camera );
+}
+
+void NodeVisitor::visitLight( Light *light )
+{
+	visitNode( light );
 }
 
