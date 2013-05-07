@@ -44,6 +44,9 @@ namespace Crimild {
 		explicit Camera( void );
 		Camera( float fov, float aspect, float near, float far );
 		virtual ~Camera( void );
+        
+        void setFrustum( const Frustumf &f );
+        const Frustumf &getFrustum( void ) const { return _frustum; }
 
 		void setProjectionMatrix( const Matrix4f &projection ) { _projectionMatrix = projection; }
 		const Matrix4f &getProjectionMatrix( void ) const { return _projectionMatrix; }

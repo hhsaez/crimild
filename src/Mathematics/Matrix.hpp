@@ -661,11 +661,74 @@ namespace Crimild {
 	}
 
 	template< typename U >
-	Vector< 4, U > operator*( const Matrix< 4, U > &a, const Vector< 4, U > &u )
+	Vector< 4, U > operator*( const Matrix< 4, U > &m, const Vector< 4, U > &v )
 	{
-		return Vector< 4, U >( u[ 0 ], u[ 1 ], u[ 2 ], 1 );
+		Vector< 4, U > result;
+        result[ 0 ] = m[ 0 ] * v[ 0 ] +
+                      m[ 1 ] * v[ 1 ] +
+                      m[ 2 ] * v[ 2 ] +
+                      m[ 3 ] * v[ 3 ];
+        result[ 1 ] = m[ 4 ] * v[ 0 ] +
+                      m[ 5 ] * v[ 1 ] +
+                      m[ 6 ] * v[ 2 ] +
+                      m[ 7 ] * v[ 3 ];
+        result[ 2 ] = m[ 8 ] * v[ 0 ] +
+                      m[ 9 ] * v[ 1 ] +
+                      m[ 10 ] * v[ 2 ] +
+                      m[ 11 ] * v[ 3 ];
+        result[ 3 ] = m[ 12 ] * v[ 0 ] +
+                      m[ 13 ] * v[ 1 ] +
+                      m[ 14 ] * v[ 2 ] +
+                      m[ 15 ] * v[ 3 ];
+        
+		return result;
 	}
 
+	template< typename U >
+	Vector< 4, U > operator*( const Vector< 4, U > &v, const Matrix< 4, U > &m )
+	{
+		Vector< 4, U > result;
+        result[ 0 ] = m[ 0 ] * v[ 0 ] +
+                      m[ 1 ] * v[ 1 ] +
+                      m[ 2 ] * v[ 2 ] +
+                      m[ 3 ] * v[ 3 ];
+        result[ 1 ] = m[ 4 ] * v[ 0 ] +
+                      m[ 5 ] * v[ 1 ] +
+                      m[ 6 ] * v[ 2 ] +
+                      m[ 7 ] * v[ 3 ];
+        result[ 2 ] = m[ 8 ] * v[ 0 ] +
+                      m[ 9 ] * v[ 1 ] +
+                      m[ 10 ] * v[ 2 ] +
+                      m[ 11 ] * v[ 3 ];
+        result[ 3 ] = m[ 12 ] * v[ 0 ] +
+                      m[ 13 ] * v[ 1 ] +
+                      m[ 14 ] * v[ 2 ] +
+                      m[ 15 ] * v[ 3 ];
+        
+		return result;
+	}
+    
+	template< unsigned int SIZE, typename PRECISION >
+	std::ostream &operator<<( std::ostream &out, const Matrix< SIZE, PRECISION > &m )
+	{
+		out << std::setiosflags( std::ios::fixed | std::ios::showpoint  )
+        << std::setprecision( 10 );
+		out << "(";
+		for ( unsigned int i = 0; i < SIZE; i++ ) {
+            for ( unsigned int j = 0; j < SIZE; j++ ) {
+                out << m[ i * SIZE + j ];
+                if ( j < SIZE - 1 || i < SIZE - 1 ) {
+                    out << ", ";
+                }
+            }
+            if ( i < SIZE - 1 ) {
+                out << "\n";
+            }
+		}
+		out << ")";
+		return out;
+	}
+    
 	typedef Matrix< 3, int > Matrix3i;
 	typedef Matrix< 3, float > Matrix3f;
 	typedef Matrix< 3, double > Matrix3d;

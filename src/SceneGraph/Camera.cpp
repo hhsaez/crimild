@@ -52,6 +52,12 @@ Camera::~Camera( void )
 
 }
 
+void Camera::setFrustum( const Frustumf &f )
+{
+    _frustum = f;
+	_projectionMatrix = _frustum.computeProjectionMatrix();
+}
+
 void Camera::accept( NodeVisitor &visitor )
 {
 	visitor.visitCamera( this );
