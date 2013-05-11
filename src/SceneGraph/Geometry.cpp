@@ -30,6 +30,8 @@
 #include "Components/MaterialComponent.hpp"
 #include "Components/RenderStateComponent.hpp"
 
+#include <algorithm>
+
 using namespace Crimild;
 
 Geometry::Geometry( std::string name )

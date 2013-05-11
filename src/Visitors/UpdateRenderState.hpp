@@ -32,6 +32,7 @@
 
 #include <list>
 #include <functional>
+#include <memory>
 
 namespace Crimild {
 

@@ -29,6 +29,7 @@
 #include "Exceptions/HasParentException.hpp"
 
 #include <cassert>
+#include <algorithm>
 
 using namespace Crimild;
 

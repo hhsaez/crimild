@@ -29,6 +29,7 @@
 #define CRIMILD_FOUNDATION_NAMED_OBJECT_
 
 #include <string>
+#include <memory>
 
 namespace Crimild {
 	

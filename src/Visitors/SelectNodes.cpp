@@ -29,6 +29,8 @@
 #include "SceneGraph/Node.hpp"
 #include "SceneGraph/Group.hpp"
 
+#include <algorithm>
+
 using namespace Crimild;
 
 SelectNodes::SelectNodes( SelectNodes::SelectorOp selector )

@@ -28,6 +28,8 @@
 #include "RenderStateComponent.hpp"
 #include "Rendering/Material.hpp"
 
+#include <algorithm>
+
 using namespace Crimild;
 
 const char *RenderStateComponent::NAME = "renderState";
