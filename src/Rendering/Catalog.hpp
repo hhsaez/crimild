@@ -49,10 +49,7 @@ namespace Crimild {
 
 			virtual ~Resource( void )
 			{
-				if ( _catalog ) {
-					_catalog->unload( static_cast< RESOURCE_TYPE * >( this ) );
-					_catalog = nullptr;
-				}
+                unload();
 			}
 
 			Catalog< RESOURCE_TYPE > *getCatalog( void ) { return _catalog; }
@@ -64,6 +61,14 @@ namespace Crimild {
 				_catalog = catalog;
 				_catalogId = id;
 			}
+            
+            void unload( void )
+            {
+				if ( _catalog ) {
+					_catalog->unload( static_cast< RESOURCE_TYPE * >( this ) );
+					_catalog = nullptr;
+				}
+            }
 
 		private:
 			Catalog< RESOURCE_TYPE > *_catalog;

@@ -29,24 +29,34 @@
 #define CRIMILD_RENDERING_IMAGE_
 
 #include <memory>
+#include <vector>
 
 namespace Crimild {
 
 	class Image {
+    public:
+        enum class PixelFormat {
+            RGB,
+            RGBA,
+            BGR,
+            BGRA
+        };
+        
 	public:
 		Image( void );
-		Image( int width, int height, int bpp, const unsigned char *data );
+		Image( int width, int height, int bpp, const unsigned char *data, PixelFormat format = PixelFormat::RGBA );
 		virtual ~Image( void );
 
 		int getWidth( void ) const { return _width; }
 		int getHeight( void ) const { return _height; }
 		int getBpp( void ) const { return _bpp; }
-		unsigned char *getData( void ) { return _data; }
-		const unsigned char *getData( void ) const { return _data; }
+        PixelFormat getPixelFormat( void ) const { return _pixelFormat; }
+		unsigned char *getData( void ) { return &_data[ 0 ]; }
+		const unsigned char *getData( void ) const { return &_data[ 0 ]; }
 
-		void setData( int width, int height, int bpp, const unsigned char *data );
+		void setData( int width, int height, int bpp, const unsigned char *data, PixelFormat format = PixelFormat::RGBA );
 
-		bool isLoaded( void ) const { return _data != nullptr; }
+		bool isLoaded( void ) const { return _data.size() > 0; }
 		virtual void load( void );
 		virtual void unload( void );
 
@@ -54,7 +64,8 @@ namespace Crimild {
 		int _width;
 		int _height;
 		int _bpp;
-		unsigned char *_data;
+        PixelFormat _pixelFormat;
+        std::vector< unsigned char > _data;
 
 	private:
 		Image( const Image & ) { }

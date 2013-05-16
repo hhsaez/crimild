@@ -30,17 +30,15 @@
 using namespace Crimild;
 
 Image::Image( void )
-	: _data( nullptr )
 {
 	_width = 0;
 	_height = 0;
 	_bpp = 0;
 }
 
-Image::Image( int width, int height, int bpp, const unsigned char *data )
-	: _data( nullptr )
+Image::Image( int width, int height, int bpp, const unsigned char *data, PixelFormat format )
 {
-	setData( width, height, bpp, data );
+	setData( width, height, bpp, data, format );
 }
 
 Image::~Image( void )
@@ -48,23 +46,27 @@ Image::~Image( void )
 	unload();
 }
 
-void Image::setData( int width, int height, int bpp, const unsigned char *data )
+void Image::setData( int width, int height, int bpp, const unsigned char *data, PixelFormat format )
 {
 	_width = width;
 	_height = height;
 	_bpp = bpp;
+    _pixelFormat = format;
 
 	int size = _width * _height * _bpp;
 	if ( size > 0 ) {
-		_data = new unsigned char[ size ];
+        if ( _data.size() != size ) _data.resize( size );
 
 		if ( data ) {
-			memcpy( _data, data, size * sizeof( unsigned char ) );
+			memcpy( &_data[ 0 ], data, size * sizeof( unsigned char ) );
 		}
 		else {
-			memset( _data, 0, size * sizeof( unsigned char ) );
+			memset( &_data[ 0 ], 0, size * sizeof( unsigned char ) );
 		}
 	}
+    else {
+        _data.resize( 0 );
+    }
 }
 
 void Image::load( void )
@@ -77,10 +79,6 @@ void Image::unload( void )
 	_width = 0;
 	_height = 0;
 	_bpp = 0;
-	
-	if ( _data ) {
-		delete [] _data;
-		_data = nullptr;
-	}
+    _data.resize( 0 );
 }
 
