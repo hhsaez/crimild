@@ -29,6 +29,7 @@
 #define CRIMILD_PRIMITIVES_QUAD_
 
 #include "Primitive.hpp"
+#include "Mathematics/Vector.hpp"
 
 namespace Crimild {
     
@@ -37,7 +38,7 @@ namespace Crimild {
      */
     class QuadPrimitive : public Primitive {
     public:
-        QuadPrimitive( float width, float height, const VertexFormat &format = VertexFormat::VF_P3_N3, bool wireframe = false );
+        QuadPrimitive( float width, float height, const VertexFormat &format = VertexFormat::VF_P3_N3, const Vector2f &textureOffset = Vector2f( 0.0f, 0.0f ), const Vector2f &textureScale = Vector2f( 1.0f, 1.0f ), bool wireframe = false );
         
         virtual ~QuadPrimitive( void );
     };

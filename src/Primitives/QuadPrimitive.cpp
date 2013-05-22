@@ -29,7 +29,7 @@
 
 using namespace Crimild;
 
-QuadPrimitive::QuadPrimitive( float width, float height, const VertexFormat &format, bool wireframe )
+QuadPrimitive::QuadPrimitive( float width, float height, const VertexFormat &format, const Vector2f &textureOffset, const Vector2f &textureScale, bool wireframe )
     : Primitive( wireframe ? Primitive::Type::LINE_LOOP : Primitive::Type::TRIANGLE_STRIP )
 {
     float halfWidth = 0.5f * width;
@@ -50,8 +50,8 @@ QuadPrimitive::QuadPrimitive( float width, float height, const VertexFormat &for
     }
     
     if ( format.hasTextureCoords() ) {
-        vertex[ format.getTextureCoordsOffset() + 0 ] = 0.0f;
-        vertex[ format.getTextureCoordsOffset() + 1 ] = 1.0f;
+        vertex[ format.getTextureCoordsOffset() + 0 ] = textureOffset[ 0 ] + textureScale[ 0 ] * 0.0f;
+        vertex[ format.getTextureCoordsOffset() + 1 ] = textureOffset[ 1 ] + textureScale[ 1 ] * 1.0f;
     }
     
     vertex += format.getVertexSize();
@@ -68,8 +68,8 @@ QuadPrimitive::QuadPrimitive( float width, float height, const VertexFormat &for
     }
     
     if ( format.hasTextureCoords() ) {
-        vertex[ format.getTextureCoordsOffset() + 0 ] = 1.0f;
-        vertex[ format.getTextureCoordsOffset() + 1 ] = 1.0f;
+        vertex[ format.getTextureCoordsOffset() + 0 ] = textureOffset[ 0 ] + textureScale[ 0 ] * 1.0f;
+        vertex[ format.getTextureCoordsOffset() + 1 ] = textureOffset[ 1 ] + textureScale[ 1 ] * 1.0f;
     }
     
     vertex += format.getVertexSize();
@@ -86,8 +86,8 @@ QuadPrimitive::QuadPrimitive( float width, float height, const VertexFormat &for
     }
     
     if ( format.hasTextureCoords() ) {
-        vertex[ format.getTextureCoordsOffset() + 0 ] = 0.0f;
-        vertex[ format.getTextureCoordsOffset() + 1 ] = 0.0f;
+        vertex[ format.getTextureCoordsOffset() + 0 ] = textureOffset[ 0 ] + textureScale[ 0 ] * 0.0f;
+        vertex[ format.getTextureCoordsOffset() + 1 ] = textureOffset[ 1 ] + textureScale[ 1 ] * 0.0f;
     }
     
     vertex += format.getVertexSize();
@@ -104,8 +104,8 @@ QuadPrimitive::QuadPrimitive( float width, float height, const VertexFormat &for
     }
     
     if ( format.hasTextureCoords() ) {
-        vertex[ format.getTextureCoordsOffset() + 0 ] = 1.0f;
-        vertex[ format.getTextureCoordsOffset() + 1 ] = 0.0f;
+        vertex[ format.getTextureCoordsOffset() + 0 ] = textureOffset[ 0 ] + textureScale[ 0 ] * 1.0f;
+        vertex[ format.getTextureCoordsOffset() + 1 ] = textureOffset[ 1 ] + textureScale[ 1 ] * 0.0f;
     }
     
     vertex += format.getVertexSize();
