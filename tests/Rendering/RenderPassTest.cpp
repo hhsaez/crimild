@@ -25,52 +25,24 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "SceneGraph/Light.hpp"
-#include "SceneGraph/Group.hpp"
-#include "Visitors/FetchLights.hpp"
+#include "SceneGraph/Camera.hpp"
+#include "Rendering/Renderer.hpp"
+#include "Rendering/RenderPass.hpp"
 
 #include "gtest/gtest.h"
 
 using namespace Crimild;
 
-TEST( LightTest, construction )
+TEST( RenderPassTest, construction )
 {
-	LightPtr light( new Light() );
+	RenderPassPtr renderPass( new RenderPass() );
 
-	EXPECT_EQ( Light::Type::POINT, light->getType() );
-	EXPECT_EQ( Vector3f( 0.0f, 0.0f, 0.0f ), light->getPosition() );
-	EXPECT_EQ( Vector3f( 1.0f, 0.0f, 0.01f ), light->getAttenuation() );
-	EXPECT_EQ( Vector3f( 0.0f, 0.0f, 0.0f ), light->getDirection() );
-	EXPECT_EQ( RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ), light->getColor() );
-	EXPECT_EQ( 0.0f, light->getOuterCutoff() );
-	EXPECT_EQ( 0.0f, light->getInnerCutoff() );
-	EXPECT_EQ( 0.0f, light->getExponent() );
-}
+	CameraPtr camera( new Camera() );
 
-TEST( LightTest, fetchLights )
-{
-	GroupPtr group( new Group() );
-	LightPtr light1( new Light() );
-	LightPtr light2( new Light() );
+	ASSERT_NE( nullptr, camera->getRenderPass() );
 
-	group->attachNode( light1 );
-	group->attachNode( light2 );
+	camera->setRenderPass( renderPass );
 
-	FetchLights fetchLights;
-	group->perform( fetchLights );
-	
-	EXPECT_TRUE( fetchLights.hasLights() );
-
-	int i = 0; 
-	fetchLights.foreachLight( [&]( Light *light ) {
-		if ( i == 0 ) {
-			EXPECT_EQ( light1.get(), light );
-		}
-		else if ( i == 1 ) {
-			EXPECT_EQ( light2.get(), light );
-		}
-		i++;
-	});
-	EXPECT_EQ( 2, i );
+	ASSERT_EQ( renderPass.get(), camera->getRenderPass() );
 }
 

@@ -34,6 +34,7 @@
 #include "Mathematics/Frustum.hpp"
 #include "Mathematics/Ray.hpp"
 #include "Mathematics/Rect.hpp"
+#include "Rendering/RenderPass.hpp"
 
 #include <memory>
 
@@ -71,6 +72,13 @@ namespace Crimild {
 
 	public:
 		virtual void accept( NodeVisitor &visitor ) override;
+
+	public:
+		void setRenderPass( RenderPassPtr renderPass ) { _renderPass = renderPass; }
+		RenderPass *getRenderPass( void ) { return _renderPass.get(); }
+
+	private:
+		RenderPassPtr _renderPass;
 
 	private:
 		Camera( const Camera & ) { }

@@ -125,15 +125,8 @@ namespace Crimild {
 			return _data[ i ];
 		}
 
-		operator PRECISION*( void )
-		{
-			return _data;
-		}
-
-		operator const PRECISION*( void ) const
-		{
-			return _data;
-		}
+		PRECISION *data( void ) { return _data; }
+		const PRECISION *getData( void ) const { return _data; }
 
 		bool operator==( const Matrix &u )
 		{

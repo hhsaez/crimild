@@ -25,52 +25,33 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "SceneGraph/Light.hpp"
-#include "SceneGraph/Group.hpp"
-#include "Visitors/FetchLights.hpp"
+#ifndef CRIMILD_RENDERER_RENDER_PASS_
+#define CRIMILD_RENDERER_RENDER_PASS_
 
-#include "gtest/gtest.h"
+#include <memory>
 
-using namespace Crimild;
+namespace Crimild {
 
-TEST( LightTest, construction )
-{
-	LightPtr light( new Light() );
+	class Renderer;
+	class VisibilitySet;
+	class Geometry;
+	class Primitive;
+	class Material;
+	class Camera;
 
-	EXPECT_EQ( Light::Type::POINT, light->getType() );
-	EXPECT_EQ( Vector3f( 0.0f, 0.0f, 0.0f ), light->getPosition() );
-	EXPECT_EQ( Vector3f( 1.0f, 0.0f, 0.01f ), light->getAttenuation() );
-	EXPECT_EQ( Vector3f( 0.0f, 0.0f, 0.0f ), light->getDirection() );
-	EXPECT_EQ( RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ), light->getColor() );
-	EXPECT_EQ( 0.0f, light->getOuterCutoff() );
-	EXPECT_EQ( 0.0f, light->getInnerCutoff() );
-	EXPECT_EQ( 0.0f, light->getExponent() );
+	class RenderPass {
+	public:
+		RenderPass( void );
+		virtual ~RenderPass( void );
+
+		virtual void render( Renderer *renderer, VisibilitySet *vs, Camera *camera );
+		virtual void render( Renderer *renderer, Geometry *geometry, Camera *camera );
+		virtual void render( Renderer *renderer, Geometry *geometry, Primitive *primitive, Material *material, Camera *camera );
+	};
+
+	typedef std::shared_ptr< RenderPass > RenderPassPtr;
+
 }
 
-TEST( LightTest, fetchLights )
-{
-	GroupPtr group( new Group() );
-	LightPtr light1( new Light() );
-	LightPtr light2( new Light() );
-
-	group->attachNode( light1 );
-	group->attachNode( light2 );
-
-	FetchLights fetchLights;
-	group->perform( fetchLights );
-	
-	EXPECT_TRUE( fetchLights.hasLights() );
-
-	int i = 0; 
-	fetchLights.foreachLight( [&]( Light *light ) {
-		if ( i == 0 ) {
-			EXPECT_EQ( light1.get(), light );
-		}
-		else if ( i == 1 ) {
-			EXPECT_EQ( light2.get(), light );
-		}
-		i++;
-	});
-	EXPECT_EQ( 2, i );
-}
+#endif
 

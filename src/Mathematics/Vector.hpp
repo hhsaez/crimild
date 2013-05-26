@@ -165,8 +165,8 @@ namespace Crimild {
 		PRECISION operator[]( int i ) const { return _data[ i ]; }
 		PRECISION &operator[]( int i ) { return _data[ i ]; }
 
-		operator PRECISION*( void ) { return _data; }
-		operator const PRECISION*( void ) const { return _data; }
+		PRECISION *data( void ) { return _data; }
+		const PRECISION *getData( void ) const { return _data; }
 
 		bool operator==( const Vector &u ) const
 		{ 

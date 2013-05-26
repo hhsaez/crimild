@@ -35,6 +35,7 @@
 namespace Crimild {
 
 	class ShaderProgram;
+	class ShaderLocation;
 
 	template< class RESOURCE_TYPE >
 	class Catalog {
@@ -113,11 +114,21 @@ namespace Crimild {
 			bind( resource );
 		}
 
+		virtual void bind( ShaderLocation *location, RESOURCE_TYPE *resource )
+		{
+			bind( resource );
+		}
+
 		virtual void unbind( RESOURCE_TYPE *resource )
 		{
 		}
 
 		virtual void unbind( ShaderProgram *program, RESOURCE_TYPE *resource )
+		{
+			unbind( resource );
+		}
+
+		virtual void unbind( ShaderLocation *location, RESOURCE_TYPE *resource )
 		{
 			unbind( resource );
 		}

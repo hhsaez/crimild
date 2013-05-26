@@ -27,8 +27,11 @@
 
 #include "Renderer.hpp"
 #include "VisibilitySet.hpp"
+#include "Material.hpp"
 
 #include "SceneGraph/Geometry.hpp"
+#include "SceneGraph/Camera.hpp"
+#include "SceneGraph/Light.hpp"
 #include "Components/MaterialComponent.hpp"
 #include "Components/RenderStateComponent.hpp"
 
@@ -38,7 +41,8 @@ Renderer::Renderer( void )
 	: _shaderProgramCatalog( new Catalog< ShaderProgram >() ),
 	  _textureCatalog( new Catalog< Texture >() ),
 	  _vertexBufferObjectCatalog( new Catalog< VertexBufferObject >() ),
-	  _indexBufferObjectCatalog( new Catalog< IndexBufferObject >() )
+	  _indexBufferObjectCatalog( new Catalog< IndexBufferObject >() ),
+	  _lightCount( 0 )
 {
 }
 
@@ -48,68 +52,100 @@ Renderer::~Renderer( void )
 
 void Renderer::render( VisibilitySet *vs )
 {
-	vs->foreachGeometry( [&]( Geometry *geometry ) mutable {
-		render( geometry, vs->getCamera() );
-	});
+	Camera *camera = vs->getCamera();
+	RenderPass *renderPass = camera->getRenderPass();
+	renderPass->render( this, vs, camera );
 }
 
 void Renderer::render( Geometry *geometry, Camera *camera )
 {
-	RenderStateComponent *renderState = geometry->getComponent< RenderStateComponent >();
-	if ( renderState->hasMaterials() ) {
-		geometry->foreachPrimitive( [&]( PrimitivePtr &primitive ) mutable {
-			renderState->foreachMaterial( [&]( Material *material ) mutable {
-				applyMaterial( geometry, primitive.get(), material, camera );
-			});
-		});
-	}
+	RenderPass *renderPass = camera->getRenderPass();
+	renderPass->render( this, geometry, camera );
 }
 
-void Renderer::applyMaterial( Geometry *geometry, Primitive *primitive, Material *material, Camera *camera )
-{
-	if ( !material || !primitive ) {
-		return;
-	}
-
-	ShaderProgram *program = material->getProgram() ? material->getProgram() : getFallbackProgram( material, geometry, primitive );
-	if ( !program ) {
-		return;
-	}
-
-	RenderStateComponent *renderState = geometry->getComponent< RenderStateComponent >();
-
-	bindResources( program, primitive, material );
-	enableLights( program, renderState );
-	enableMaterialProperties( program, material );
-	applyTransformations( program, geometry, camera );
-	drawPrimitive( program, primitive );
-	restoreTransformations( program, geometry, camera );
-	disableMaterialProperties( program, material );
-	disableLights( program, renderState );
-	unbindResources( program, primitive, material );
-}
-
-void Renderer::bindResources( ShaderProgram *program, Primitive *primitive, Material *material )
+void Renderer::bindProgram( ShaderProgram *program )
 {
 	getShaderProgramCatalog()->bind( program );
-	
-	if ( material->getColorMap() ) {
-		getTextureCatalog()->bind( program, material->getColorMap() );
-	}
-	
-	getVertexBufferObjectCatalog()->bind( program, primitive->getVertexBuffer() );
-	getIndexBufferObjectCatalog()->bind( program, primitive->getIndexBuffer() );
 }
 
-void Renderer::unbindResources( ShaderProgram *program, Primitive *primitive, Material *material )
-{
-	getIndexBufferObjectCatalog()->unbind( program, primitive->getIndexBuffer() );
-	getVertexBufferObjectCatalog()->unbind( program, primitive->getVertexBuffer() );
-
-	if ( material->getColorMap() ) {
-		getTextureCatalog()->unbind( program, material->getColorMap() );
-	}
-	
+void Renderer::unbindProgram( ShaderProgram *program )
+{	
 	getShaderProgramCatalog()->unbind( program );
+}
+
+void Renderer::bindMaterial( ShaderProgram *program, Material *material )
+{
+	bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM ), material->getColorMap() );
+	
+	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_AMBIENT_UNIFORM ), material->getAmbient() );
+	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_DIFFUSE_UNIFORM ), material->getDiffuse() );
+	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_SPECULAR_UNIFORM ), material->getSpecular() );
+	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_SHININESS_UNIFORM ), material->getShininess() );
+}
+
+void Renderer::unbindMaterial( ShaderProgram *program, Material *material )
+{
+	unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM ), material->getColorMap() );
+}
+
+void Renderer::bindTexture( ShaderLocation *location, Texture *texture )
+{
+	getTextureCatalog()->bind( location, texture );
+}
+
+void Renderer::unbindTexture( ShaderLocation *location, Texture *texture )
+{
+	getTextureCatalog()->unbind( location, texture );
+}
+
+void Renderer::bindLight( ShaderProgram *program, Light *light )
+{
+	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_POSITION_UNIFORM + _lightCount ), light->getPosition() );
+	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_ATTENUATION_UNIFORM + _lightCount ), light->getAttenuation() );
+	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_DIRECTION_UNIFORM + _lightCount ), light->getDirection() );
+	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_COLOR_UNIFORM + _lightCount ), light->getColor() );
+	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_OUTER_CUTOFF_UNIFORM + _lightCount ), light->getOuterCutoff() );
+	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_INNER_CUTOFF_UNIFORM + _lightCount ), light->getInnerCutoff() );
+	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_EXPONENT_UNIFORM + _lightCount ), light->getExponent() );
+
+	++_lightCount;
+	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_COUNT_UNIFORM ), _lightCount );
+}
+
+void Renderer::unbindLight( ShaderProgram *program, Light *light )
+{
+	--_lightCount;
+}
+
+void Renderer::bindVertexBuffer( ShaderProgram *program, VertexBufferObject *vbo )
+{
+	getVertexBufferObjectCatalog()->bind( program, vbo );
+}
+
+void Renderer::unbindVertexBuffer( ShaderProgram *program, VertexBufferObject *vbo )
+{
+	getVertexBufferObjectCatalog()->unbind( program, vbo );
+}
+
+void Renderer::bindIndexBuffer( ShaderProgram *program, IndexBufferObject *ibo )
+{
+	getIndexBufferObjectCatalog()->bind( program, ibo );
+}
+
+void Renderer::unbindIndexBuffer( ShaderProgram *program, IndexBufferObject *ibo )
+{
+	getIndexBufferObjectCatalog()->unbind( program, ibo );
+}
+
+void Renderer::applyTransformations( ShaderProgram *program, Geometry *geometry, Camera *camera )
+{
+	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::PROJECTION_MATRIX_UNIFORM ), camera->getProjectionMatrix() );
+	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM ), camera->getViewMatrix() );
+	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM ), geometry->getWorld().computeModelMatrix() );
+}
+
+void Renderer::restoreTransformations( ShaderProgram *program, Geometry *geometry, Camera *camera )
+{
+
 }
 

@@ -32,7 +32,8 @@ using namespace Crimild;
 Camera::Camera( void )
 	: _frustum( 45.0, 4.0f / 3.0f, 0.01f, 1024.0f ),
 	  _viewport( 0.0f, 0.0f, 1.0f, 1.0f ),
-      _viewMatrixIsCurrent( false )
+      _viewMatrixIsCurrent( false ),
+      _renderPass( new RenderPass() )
 {
 	_projectionMatrix = _frustum.computeProjectionMatrix();
 	_viewMatrix.makeIdentity();

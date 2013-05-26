@@ -36,6 +36,9 @@
 #include "VertexBufferObject.hpp"
 #include "IndexBufferObject.hpp"
 
+#include "Mathematics/Vector.hpp"
+#include "Mathematics/Matrix.hpp"
+
 namespace Crimild {
 
 	class VisibilitySet;
@@ -69,27 +72,45 @@ namespace Crimild {
 
 		virtual void render( Geometry *geometry, Camera *camera );
 
-		virtual void applyMaterial( Geometry *geometry, Primitive *primitive, Material *material, Camera *camera );
-
-		virtual void bindResources( ShaderProgram *program, Primitive *primitive, Material *material );
-
-		virtual void enableLights( ShaderProgram *program, RenderStateComponent *renderState ) = 0;
-
-		virtual void enableMaterialProperties( ShaderProgram *program, Material *material ) = 0;
-
-		virtual void applyTransformations( ShaderProgram *program, Geometry *geometry, Camera *camera ) = 0;
-
-		virtual void drawPrimitive( ShaderProgram *program, Primitive *primitive ) = 0;
-
-		virtual void restoreTransformations( ShaderProgram *program, Geometry *geometry, Camera *camera ) = 0;
-
-		virtual void disableMaterialProperties( ShaderProgram *program, Material *material ) = 0;
-
-		virtual void disableLights( ShaderProgram *program, RenderStateComponent *renderState ) = 0;
-
-		virtual void unbindResources( ShaderProgram *program, Primitive *primitive, Material *material );
-
 		virtual void endRender( void ) = 0;
+
+	public:
+		virtual void bindProgram( ShaderProgram *program );
+		virtual void unbindProgram( ShaderProgram *program );
+
+		virtual void bindUniform( ShaderLocation *location, int value ) = 0;
+		virtual void bindUniform( ShaderLocation *location, float value ) = 0;
+		virtual void bindUniform( ShaderLocation *location, const Vector3f &vector ) = 0;
+		virtual void bindUniform( ShaderLocation *location, const RGBAColorf &color ) = 0;
+		virtual void bindUniform( ShaderLocation *location, const Matrix4f &matrix ) = 0;
+
+	public:
+		virtual void bindMaterial( ShaderProgram *program, Material *material );
+		virtual void unbindMaterial( ShaderProgram *program, Material *material );
+
+	public:
+		virtual void bindTexture( ShaderLocation *location, Texture *texture );
+		virtual void unbindTexture( ShaderLocation *location, Texture *texture );
+
+	public:
+		virtual void bindLight( ShaderProgram *program, Light *light );
+		virtual void unbindLight( ShaderProgram *program, Light *light );
+
+	private:
+		int _lightCount;
+
+	public:
+		virtual void bindVertexBuffer( ShaderProgram *program, VertexBufferObject *vbo );
+		virtual void unbindVertexBuffer( ShaderProgram *program, VertexBufferObject *vbo );
+		virtual void bindIndexBuffer( ShaderProgram *program, IndexBufferObject *ibo );
+		virtual void unbindIndexBuffer( ShaderProgram *program, IndexBufferObject *ibo );
+
+	public:
+		virtual void applyTransformations( ShaderProgram *program, Geometry *geometry, Camera *camera );
+		virtual void restoreTransformations( ShaderProgram *program, Geometry *geometry, Camera *camera );
+
+	public:
+		virtual void drawPrimitive( ShaderProgram *program, Primitive *primitive ) = 0;
 
 	public:
 		virtual ShaderProgram *getFallbackProgram( Material *, Geometry *, Primitive * ) { return nullptr; }
