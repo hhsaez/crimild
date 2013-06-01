@@ -28,17 +28,21 @@
 #ifndef CRIMILD_RENDERING_FRAME_BUFFER_OBJECT_
 #define CRIMILD_RENDERING_FRAME_BUFFER_OBJECT_
 
+#include "Catalog.hpp"
+#include "Texture.hpp"
+
 #include "Mathematics/Vector.hpp"
 
 #include <memory>
 
 namespace Crimild {
 
-	class FrameBufferObject {
+	class FrameBufferObject : public Catalog< FrameBufferObject >::Resource {
 	public:
 		FrameBufferObject( int width, int height,
 						   int redBits = 8, int greenBits = 8, int blueBits = 8, int alphaBits = 8,
 						   int depthBits = 16, int stencilBits = 0 );
+		FrameBufferObject( FrameBufferObject *fb );
 		virtual ~FrameBufferObject( void );
 
 		int getWidth( void ) const { return _width; }
@@ -49,6 +53,8 @@ namespace Crimild {
 		int getAlphaBits( void ) const { return _alphaBits; }
 		int getDepthBits( void ) const { return _depthBits; }
 		int getStencilBits( void ) const { return _stencilBits; }
+
+		Texture *getTexture( void ) { return _texture.get(); }
 
 		void setClearColor( const RGBAColorf &color ) { _clearColor = color; }
 		const RGBAColorf &getClearColor( void ) const { return _clearColor; }
@@ -63,10 +69,12 @@ namespace Crimild {
 		int _depthBits;
 		int _stencilBits;
 		RGBAColorf _clearColor;
+		TexturePtr _texture;
 	};
 
 	typedef std::shared_ptr< FrameBufferObject > FrameBufferObjectPtr;
-
+	typedef Catalog< FrameBufferObject > FrameBufferObjectCatalog;
+	typedef std::shared_ptr< FrameBufferObjectCatalog > FrameBufferObjectCatalogPtr;
 }
 
 #endif

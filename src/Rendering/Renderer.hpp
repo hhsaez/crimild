@@ -75,6 +75,10 @@ namespace Crimild {
 		virtual void endRender( void ) = 0;
 
 	public:
+		virtual void bindFrameBuffer( FrameBufferObject *fbo );
+		virtual void unbindFrameBuffer( FrameBufferObject *fbo );
+
+	public:
 		virtual void bindProgram( ShaderProgram *program );
 		virtual void unbindProgram( ShaderProgram *program );
 
@@ -131,11 +135,15 @@ namespace Crimild {
 		IndexBufferObjectCatalog *getIndexBufferObjectCatalog( void ) { return _indexBufferObjectCatalog.get(); }
 		void setIndexBufferObjectCatalog( IndexBufferObjectCatalogPtr catalog ) { _indexBufferObjectCatalog = catalog; }
 
+		FrameBufferObjectCatalog *getFrameBufferObjectCatalog( void ) { return _frameBufferObjectCatalog.get(); }
+		void setFrameBufferObjectCatalog( FrameBufferObjectCatalogPtr catalog ) { _frameBufferObjectCatalog = catalog; }
+
 	private:
 		ShaderProgramCatalogPtr _shaderProgramCatalog;
 		TextureCatalogPtr _textureCatalog;
 		VertexBufferObjectCatalogPtr _vertexBufferObjectCatalog;
 		IndexBufferObjectCatalogPtr _indexBufferObjectCatalog;
+		FrameBufferObjectCatalogPtr _frameBufferObjectCatalog;
 
 	private:
 		Renderer( const Renderer &renderer ) { }

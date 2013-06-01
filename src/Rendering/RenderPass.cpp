@@ -28,13 +28,16 @@
 #include "RenderPass.hpp"
 #include "Renderer.hpp"
 #include "VisibilitySet.hpp"
+#include "FrameBufferObject.hpp"
 
 #include "SceneGraph/Geometry.hpp"
 #include "Components/RenderStateComponent.hpp"
+#include "Primitives/QuadPrimitive.hpp"
 
 using namespace Crimild;
 
 RenderPass::RenderPass( void )
+	: _screen( new QuadPrimitive( 2.0f, 2.0f, VertexFormat::VF_P3_UV2, Vector2f( 0.0f, 1.0f ), Vector2f( 1.0f, -1.0f ) ) )
 {
 
 }
@@ -115,6 +118,39 @@ void RenderPass::render( Renderer *renderer, Geometry *geometry, Primitive *prim
 
 	// unbind material properties
 	renderer->unbindMaterial( program, material );
+
+	// lastly, unbind the shader program
+	renderer->unbindProgram( program );
+}
+
+void RenderPass::render( Renderer *renderer, FrameBufferObject *fbo, ShaderProgram *program )
+{
+	if ( program == nullptr ) {
+		program = renderer->getFallbackProgram( nullptr, nullptr, nullptr );
+		if ( program == nullptr ) {
+			return ;
+		}
+	}
+
+	// bind shader program first
+	renderer->bindProgram( program );
+
+	// bind framebuffer texture
+	renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM ), fbo->getTexture() );
+
+	// bind vertex and index buffers
+	renderer->bindVertexBuffer( program, _screen->getVertexBuffer() );
+	renderer->bindIndexBuffer( program, _screen->getIndexBuffer() );
+
+	// draw primitive
+	renderer->drawPrimitive( program, _screen.get() );
+
+	// unbind primitive buffers
+	renderer->unbindVertexBuffer( program, _screen->getVertexBuffer() );
+	renderer->unbindIndexBuffer( program, _screen->getIndexBuffer() );
+
+	// unbind framebuffer texture
+	renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM ), fbo->getTexture() );
 
 	// lastly, unbind the shader program
 	renderer->unbindProgram( program );

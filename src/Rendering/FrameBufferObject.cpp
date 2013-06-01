@@ -40,7 +40,22 @@ FrameBufferObject::FrameBufferObject( int width, int height,
 	  _alphaBits( alphaBits ),
 	  _depthBits( depthBits ),
 	  _stencilBits( stencilBits ),
-	  _clearColor( 0.0f, 0.0f, 0.0f, 1.0f )
+	  _clearColor( 0.0f, 0.0f, 0.0f, 1.0f ),
+	  _texture( new Texture( nullptr ) )
+{
+
+}
+FrameBufferObject::FrameBufferObject( FrameBufferObject *fb )
+	: _width( fb->_width ),
+	  _height( fb->_height ),
+	  _redBits( fb->_redBits ),
+	  _greenBits( fb->_greenBits ),
+	  _blueBits( fb->_blueBits ),
+	  _alphaBits( fb->_alphaBits ),
+	  _depthBits( fb->_depthBits ),
+	  _stencilBits( fb->_stencilBits ),
+	  _clearColor( fb->_clearColor ),
+	  _texture( new Texture( nullptr ) )
 {
 
 }

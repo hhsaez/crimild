@@ -30,14 +30,17 @@
 
 #include <memory>
 
+#include "../Primitives/Primitive.hpp"
+
 namespace Crimild {
 
 	class Renderer;
 	class VisibilitySet;
 	class Geometry;
-	class Primitive;
 	class Material;
 	class Camera;
+	class FrameBufferObject;
+	class ShaderProgram;
 
 	class RenderPass {
 	public:
@@ -47,6 +50,10 @@ namespace Crimild {
 		virtual void render( Renderer *renderer, VisibilitySet *vs, Camera *camera );
 		virtual void render( Renderer *renderer, Geometry *geometry, Camera *camera );
 		virtual void render( Renderer *renderer, Geometry *geometry, Primitive *primitive, Material *material, Camera *camera );
+		virtual void render( Renderer *renderer, FrameBufferObject *fbo, ShaderProgram *program );
+
+	private:
+		PrimitivePtr _screen;
 	};
 
 	typedef std::shared_ptr< RenderPass > RenderPassPtr;

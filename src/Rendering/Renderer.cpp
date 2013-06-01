@@ -42,6 +42,7 @@ Renderer::Renderer( void )
 	  _textureCatalog( new Catalog< Texture >() ),
 	  _vertexBufferObjectCatalog( new Catalog< VertexBufferObject >() ),
 	  _indexBufferObjectCatalog( new Catalog< IndexBufferObject >() ),
+	  _frameBufferObjectCatalog( new Catalog< FrameBufferObject >() ),
 	  _lightCount( 0 )
 {
 }
@@ -61,6 +62,16 @@ void Renderer::render( Geometry *geometry, Camera *camera )
 {
 	RenderPass *renderPass = camera->getRenderPass();
 	renderPass->render( this, geometry, camera );
+}
+
+void Renderer::bindFrameBuffer( FrameBufferObject *fbo )
+{
+	getFrameBufferObjectCatalog()->bind( fbo );
+}
+
+void Renderer::unbindFrameBuffer( FrameBufferObject *fbo )
+{
+	getFrameBufferObjectCatalog()->unbind( fbo );
 }
 
 void Renderer::bindProgram( ShaderProgram *program )
