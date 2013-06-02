@@ -104,6 +104,8 @@
 #include "Rendering/VertexFormat.hpp"
 #include "Rendering/VisibilitySet.hpp"
 
+#include "Messaging/MessageQueue.hpp"
+
 #include "Simulation/InputState.hpp"
 #include "Simulation/Simulation.hpp"
 #include "Simulation/FileSystem.hpp"
