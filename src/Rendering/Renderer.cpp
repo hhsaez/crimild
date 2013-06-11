@@ -92,6 +92,9 @@ void Renderer::bindMaterial( ShaderProgram *program, Material *material )
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_DIFFUSE_UNIFORM ), material->getDiffuse() );
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_SPECULAR_UNIFORM ), material->getSpecular() );
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_SHININESS_UNIFORM ), material->getShininess() );
+
+	setDepthState( material->getDepthState() );
+	setAlphaState( material->getAlphaState() );
 }
 
 void Renderer::unbindMaterial( ShaderProgram *program, Material *material )

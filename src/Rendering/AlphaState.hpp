@@ -25,23 +25,61 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Material.hpp"
+#ifndef CRIMILD_RENDERING_ALPHA_STATE_
+#define CRIMILD_RENDERING_ALPHA_STATE_
 
-using namespace Crimild;
+#include "RenderState.hpp"
 
-Material::Material( void )
-	: _ambient( 0.2f, 0.2f, 0.2f, 1.0f ),
-	  _diffuse( 0.8f, 0.8f, 0.8f, 1.0f ),
-	  _specular( 1.0f, 1.0f, 1.0f, 1.0f ),
-	  _shininess( 50.0f ),
-	  _depthState( new DepthState( true ) ),
-	  _alphaState( new AlphaState( false ) )
-{
+namespace Crimild {
+
+	class AlphaState : public RenderState {
+	public:
+		enum class SrcBlendFunc {
+			ZERO,
+			ONE,
+			SRC_COLOR,
+			ONE_MINUS_SRC_COLOR,
+			DST_COLOR,
+			ONE_MINUS_DST_COLOR,
+			SRC_ALPHA,
+			ONE_MINUS_SRC_ALPHA,
+			DST_ALPHA,
+			ONE_MINUS_DST_ALPHA,
+			SRC_ALPHA_SATURATE
+		};
+
+		enum class DstBlendFunc {
+			ZERO,
+			ONE,
+			SRC_COLOR,
+			ONE_MINUS_SRC_COLOR,
+			SRC_ALPHA,
+			ONE_MINUS_SRC_ALPHA,
+			DST_ALPHA,
+			ONE_MINUS_DST_ALPHA
+		};
+
+	public:
+		AlphaState( bool enabled = false, 
+					SrcBlendFunc srcBlendFunc = SrcBlendFunc::SRC_ALPHA, 
+					DstBlendFunc dstBlendFunct = DstBlendFunc::ONE_MINUS_SRC_ALPHA );
+
+		virtual ~AlphaState( void );
+
+		SrcBlendFunc getSrcBlendFunc( void ) const { return _srcBlendFunc; }
+		void setSrcBlendFunc( SrcBlendFunc value ) { _srcBlendFunc = value; }
+
+		DstBlendFunc getDstBlendFunc( void ) const { return _dstBlendFunc; }
+		void setDstBlendFunc( DstBlendFunc value ) { _dstBlendFunc = value; }
+
+	private:
+		SrcBlendFunc _srcBlendFunc;
+		DstBlendFunc _dstBlendFunc;
+	};
+
+	typedef std::shared_ptr< AlphaState > AlphaStatePtr;
 
 }
 
-Material::~Material( void )
-{
-
-}
+#endif
 

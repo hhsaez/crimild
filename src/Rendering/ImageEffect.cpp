@@ -25,22 +25,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Material.hpp"
+#include "ImageEffect.hpp"
 
 using namespace Crimild;
 
-Material::Material( void )
-	: _ambient( 0.2f, 0.2f, 0.2f, 1.0f ),
-	  _diffuse( 0.8f, 0.8f, 0.8f, 1.0f ),
-	  _specular( 1.0f, 1.0f, 1.0f, 1.0f ),
-	  _shininess( 50.0f ),
-	  _depthState( new DepthState( true ) ),
-	  _alphaState( new AlphaState( false ) )
+ImageEffect::ImageEffect( void )
 {
 
 }
 
-Material::~Material( void )
+ImageEffect::~ImageEffect( void )
 {
 
 }

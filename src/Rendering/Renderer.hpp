@@ -93,6 +93,10 @@ namespace Crimild {
 		virtual void unbindMaterial( ShaderProgram *program, Material *material );
 
 	public:
+		virtual void setDepthState( DepthState *state ) = 0;
+		virtual void setAlphaState( AlphaState *state ) = 0;
+
+	public:
 		virtual void bindTexture( ShaderLocation *location, Texture *texture );
 		virtual void unbindTexture( ShaderLocation *location, Texture *texture );
 

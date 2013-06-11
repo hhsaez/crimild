@@ -25,23 +25,34 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Material.hpp"
+#ifndef CRIMILD_RENDER_PASS_OFFSCREEN_
+#define CRIMILD_RENDER_PASS_OFFSCREEN_
 
-using namespace Crimild;
+#include "RenderPass.hpp"
+#include "FrameBufferObject.hpp"
+#include "ImageEffect.hpp"
 
-Material::Material( void )
-	: _ambient( 0.2f, 0.2f, 0.2f, 1.0f ),
-	  _diffuse( 0.8f, 0.8f, 0.8f, 1.0f ),
-	  _specular( 1.0f, 1.0f, 1.0f, 1.0f ),
-	  _shininess( 50.0f ),
-	  _depthState( new DepthState( true ) ),
-	  _alphaState( new AlphaState( false ) )
-{
+#include <list>
+
+namespace Crimild {
+
+	class OffscreenRenderPass : public RenderPass {
+	public:
+		OffscreenRenderPass( void );
+		virtual ~OffscreenRenderPass( void );
+
+		virtual void render( Renderer *renderer, VisibilitySet *vs, Camera *camera ) override;
+
+		void attachImageEffect( ImageEffectPtr imageEffect );
+
+	private:
+		FrameBufferObjectPtr _offscreenBuffer;
+		std::list< ImageEffectPtr > _imageEffects;
+	};
+
+	typedef std::shared_ptr< OffscreenRenderPass > OffscreenRenderPassPtr;
 
 }
 
-Material::~Material( void )
-{
-
-}
+#endif
 

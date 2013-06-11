@@ -28,6 +28,8 @@
 #ifndef CRIMILD_RENDERING_MATERIAL_
 #define CRIMILD_RENDERING_MATERIAL_
 
+#include "AlphaState.hpp"
+#include "DepthState.hpp"
 #include "Texture.hpp"
 #include "ShaderProgram.hpp"
 
@@ -60,6 +62,12 @@ namespace Crimild {
 		void setColorMap( TexturePtr texture ) { _colorMap = texture; }
 		Texture *getColorMap( void ) { return _colorMap.get(); }
 
+		void setDepthState( DepthStatePtr state ) { _depthState = state; }
+		DepthState *getDepthState( void ) { return _depthState.get(); }
+
+		void setAlphaState( AlphaStatePtr alphaState ) { _alphaState = alphaState; }
+		AlphaState *getAlphaState( void ) { return _alphaState.get(); }
+
 	private:
 		ShaderProgramPtr _program;
 
@@ -69,6 +77,9 @@ namespace Crimild {
 		float _shininess;
 
 		TexturePtr _colorMap;
+
+		AlphaStatePtr _alphaState;
+		DepthStatePtr _depthState;
 
 	private:
 		Material( const Material & ) { }
