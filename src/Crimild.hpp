@@ -110,6 +110,8 @@
 
 #include "Messaging/MessageQueue.hpp"
 
+#include "Loaders/OBJLoader.hpp"
+
 #include "Simulation/InputState.hpp"
 #include "Simulation/Simulation.hpp"
 #include "Simulation/FileSystem.hpp"
