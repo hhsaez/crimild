@@ -4,11 +4,10 @@ SET( CRIMILD_INCLUDE_DIRECTORIES
 	${CRIMILD_SOURCE_DIR}/third-party/glew-1.9.0/include )
 
 SET( CRIMILD_LIBRARY_LINK_LIBRARIES 
-	core
+	crimild_core
 	glfw )
 
-IF ( APPLE )
-	SET( CRIMILD_LIBRARY_SOURCE_FILES ${CRIMILD_SOURCE_DIR}/third-party/glew-1.9.0/src/glew.c )
-ENDIF ( APPLE )
+# Add GLEW sources as part of the library
+SET( CRIMILD_LIBRARY_ADDITIONAL_SOURCE_FILES ${CRIMILD_SOURCE_DIR}/third-party/glew-1.9.0/src/glew.c )
 
 INCLUDE( ModuleBuildLibrary )

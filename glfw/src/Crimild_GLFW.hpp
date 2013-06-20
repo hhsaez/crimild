@@ -25,8 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_GL_
-#define CRIMILD_GL_
+#ifndef CRIMILD_GLFW_
+#define CRIMILD_GLFW_
 
 #include "Rendering/GL3/IndexBufferObjectCatalog.hpp"
 #include "Rendering/GL3/Renderer.hpp"

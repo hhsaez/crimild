@@ -2,6 +2,7 @@
 # The following arguments are valid:
 # 	CRIMILD_LIBRARY_NAME: (Required) Name of the library
 #	CRIMILD_LIBRARY_SOURCE_FILES: (Optional) Collection of files that need to be included as part of the library
+#   CRIMILD_LIBRARY_ADDITIONAL_SOURCE_FILES: (Optional) Any external source files that need to be built as part of the library
 #	CRIMILD_LIBRARY_LINK_LIBRARIES: (Optional) External libraries that need to be linked with this one
 #	CRIMILD_LIBRARY_DEPENDENCIES: (Optional) Any dependencies that are required in order to build the library
 #	CRIMILD_INCLUDE_DIRECTORIES: (Optional) Additional include directories for dependencies
@@ -29,7 +30,8 @@ SET( CRIMILD_LIBRARY_DISTRIBUTION STATIC )
 # Add a library subproject for Crimild
 ADD_LIBRARY( crimild_${CRIMILD_LIBRARY_NAME} 
 			 ${CRIMILD_LIBRARY_DISTRIBUTION} 
-			 ${CRIMILD_LIBRARY_SOURCE_FILES} )
+			 ${CRIMILD_LIBRARY_SOURCE_FILES}
+			 ${CRIMILD_LIBRARY_ADDITIONAL_SOURCE_FILES} )
 			 
 # Link any dependencies for the project
 IF ( CRIMILD_LIBRARY_LINK_LIBRARIES )
