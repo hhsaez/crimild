@@ -26,6 +26,24 @@ ENDIF ( CRIMILD_ENABLE_TESTS )
 # Add sources
 ADD_SUBDIRECTORY( core )
 
-#ADD_SUBDIRECTORY( examples )
-#ADD_SUBDIRECTORY( tests )
+OPTION( CRIMILD_ENABLE_GLFW "Would you like to build the crimild-glfw?" OFF )
+IF ( CRIMILD_ENABLE_GLFW )
+	IF ( NOT EXISTS ${CRIMILD_SOURCE_DIR}/third-party/glfw-2.7.8 )
+		EXTRACT_ARCHIVE( glfw-2.7.8.zip glfw-2.7.8 ${CRIMILD_SOURCE_DIR}/third-party )
+
+		IF ( APPLE )
+			MESSAGE( "   Building GLFW v2.7.8 for Cocoa" )
+			EXECUTE_PROCESS( COMMAND make -s cocoa WORKING_DIRECTORY ${CRIMILD_SOURCE_DIR}/third-party/glfw-2.7.8 )
+			EXECUTE_PROCESS( COMMAND ${CMAKE_COMMAND} -E copy 
+				${CRIMILD_SOURCE_DIR}/third-party/glfw-2.7.8/lib/cocoa/libglfw.a
+				${CRIMILD_SOURCE_DIR}/lib/libglfw.a )
+		ENDIF ( APPLE )
+	ENDIF ( NOT EXISTS ${CRIMILD_SOURCE_DIR}/third-party/glfw-2.7.8 )
+
+	IF ( NOT EXISTS ${CRIMILD_SOURCE_DIR}/third-party/glew-1.9.0 )
+		EXTRACT_ARCHIVE( glew-1.9.0.tgz glew-1.9.0 ${CRIMILD_SOURCE_DIR}/third-party )
+	ENDIF ( NOT EXISTS ${CRIMILD_SOURCE_DIR}/third-party/glew-1.9.0 )
+
+	ADD_SUBDIRECTORY( glfw )
+ENDIF ( CRIMILD_ENABLE_GLFW )
 

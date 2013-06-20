@@ -8,6 +8,10 @@ lib
 lib/**/*
 gmock-1.6.0
 gmock-1.6.0/**/*
+glfw-2.7.8
+glfw-2.7.8/**/*
+glew-1.9.0
+glew-1.9.0/**/*
 
 CMakeCache.txt
 CTestTestfile.cmake
