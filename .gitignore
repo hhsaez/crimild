@@ -19,5 +19,5 @@ Makefile
 cmake_install.cmake
 gtest-1.6.0
 
-CrimildTests
+crimild_core_test
 
