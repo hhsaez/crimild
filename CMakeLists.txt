@@ -8,14 +8,24 @@ PROJECT( CRIMILD )
 # Register custom modules
 SET ( CMAKE_MODULE_PATH "${CRIMILD_SOURCE_DIR}/CMakeTools;${CMAKE_MODULE_PATH}" )
 
+INCLUDE( MacroExtractArchive )
+
 # Configuration options
 OPTION( CRIMILD_ENABLE_TESTS "Would you like to enable unit tests?" OFF )
+IF ( CRIMILD_ENABLE_TESTS )
+	ENABLE_TESTING()
 
-# Enable unit testing 
-ENABLE_TESTING()
+	ADD_DEFINITIONS( -DGTEST_LANG_CXX11=1 )
+	ADD_DEFINITIONS( -DGTEST_USE_OWN_TR1_TUPLE=1 )
+
+	EXTRACT_ARCHIVE( gmock-1.6.0.zip gmock-1.6.0 ${CRIMILD_SOURCE_DIR}/third-party )
+
+	ADD_SUBDIRECTORY( ${CRIMILD_SOURCE_DIR}/third-party/gmock-1.6.0 "${CMAKE_CURRENT_BINARY_DIR}/third-party/gmock-1.6.0" )
+ENDIF ( CRIMILD_ENABLE_TESTS )
 
 # Add sources
-ADD_SUBDIRECTORY( src )
-ADD_SUBDIRECTORY( examples )
-ADD_SUBDIRECTORY( tests )
+ADD_SUBDIRECTORY( core )
+
+#ADD_SUBDIRECTORY( examples )
+#ADD_SUBDIRECTORY( tests )
 

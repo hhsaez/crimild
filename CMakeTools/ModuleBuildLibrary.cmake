@@ -1,13 +1,18 @@
 # This module configures how to build a library
 # The following arguments are valid:
 # 	CRIMILD_LIBRARY_NAME: (Required) Name of the library
-#	CRIMILD_LIBRARY_SOURCE_FILES: (Required) Collection of files that need to be included as part of the library
+#	CRIMILD_LIBRARY_SOURCE_FILES: (Optional) Collection of files that need to be included as part of the library
 #	CRIMILD_LIBRARY_LINK_LIBRARIES: (Optional) External libraries that need to be linked with this one
 #	CRIMILD_LIBRARY_DEPENDENCIES: (Optional) Any dependencies that are required in order to build the library
 #	CRIMILD_INCLUDE_DIRECTORIES: (Optional) Additional include directories for dependencies
 #	CRIMILD_LINK_DIRECTORIES: (Optional) Additional link directories for dependencies
 
-MESSAGE( "-- Configuring library " ${CRIMILD_LIBRARY_NAME} )
+INCLUDE( MacroAddSources )
+
+MESSAGE( "   Adding sources" )
+
+ADD_SOURCES( ${CRIMILD_SOURCE_DIR}/${CRIMILD_LIBRARY_NAME}/src *.hpp )
+ADD_SOURCES( ${CRIMILD_SOURCE_DIR}/${CRIMILD_LIBRARY_NAME}/src *.cpp )
 
 # Set library output path
 SET ( LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib )
@@ -22,7 +27,7 @@ LINK_DIRECTORIES( ${PROJECT_SOURCE_DIR}/lib ${CRIMILD_LINK_DIRECTORIES} )
 SET( CRIMILD_LIBRARY_DISTRIBUTION STATIC )
 
 # Add a library subproject for Crimild
-ADD_LIBRARY( ${CRIMILD_LIBRARY_NAME} 
+ADD_LIBRARY( crimild_${CRIMILD_LIBRARY_NAME} 
 			 ${CRIMILD_LIBRARY_DISTRIBUTION} 
 			 ${CRIMILD_LIBRARY_SOURCE_FILES} )
 			 

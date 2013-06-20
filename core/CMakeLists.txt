@@ -1,0 +1,10 @@
+MESSAGE( "-- Configuring core library" )
+
+SET( CRIMILD_LIBRARY_NAME core )
+
+ADD_SUBDIRECTORY( src )
+
+IF ( CRIMILD_ENABLE_TESTS )
+	ADD_SUBDIRECTORY( test )
+ENDIF ( CRIMILD_ENABLE_TESTS )
+
