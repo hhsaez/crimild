@@ -47,6 +47,7 @@
 #include "Foundation/Macros.hpp"
 #include "Foundation/NamedObject.hpp"
 #include "Foundation/Log.hpp"
+#include "Foundation/StringUtils.hpp"
 
 #include "Exceptions/Exception.hpp"
 #include "Exceptions/FileNotFoundException.hpp"
