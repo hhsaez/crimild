@@ -35,6 +35,11 @@
 #include <GLES2/gl2ext.h>
 #endif
 
+// workaround for unsupported color spaces
+#ifndef GL_BGRA
+	#define GL_BGRA GL_RGBA
+#endif
+
 using namespace crimild;
 
 gles::TextureCatalog::TextureCatalog( void )
