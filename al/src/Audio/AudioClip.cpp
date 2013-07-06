@@ -25,21 +25,50 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MACROS_
-#define CRIMILD_MACROS_
+#include "AudioClip.hpp"
 
-#ifdef __GNUC__
-	#define CRIMILD_CURRENT_FUNCTION __PRETTY_FUNCTION__
-#else
-	#define CRIMILD_CURRENT_FUNCTION __FUNCTION__
-#endif
+#include <al.h>
+#include <alc.h>
 
-#define CRIMILD_TO_STRING( A ) #A
+using namespace crimild;
+using namespace crimild::al;
 
-#define CRIMILD_DISALLOW_COPY_AND_ASSIGN( TypeName ) \
- 	private: \
-		TypeName( const TypeName & );               \
-		void operator=( const TypeName & );
+AudioClip::AudioClip( void )
+{
 
-#endif
+}
+
+AudioClip::~AudioClip( void )
+{
+	if ( _bufferId > 0 ) {
+		alDeleteBuffers( 1, &_bufferId );
+	}
+}
+
+void AudioClip::load( unsigned int numChannels, unsigned int bitsPerSample, unsigned int frequency, unsigned int size, const unsigned char *data )
+{
+	ALenum format;
+
+	//The format is worked out by looking at the number of
+	//channels and the bits per sample.
+	if ( numChannels == 1 ) {
+    	if ( bitsPerSample == 8 ) {
+        	format = AL_FORMAT_MONO8;
+        }
+    	else if ( bitsPerSample == 16 ) {
+        	format = AL_FORMAT_MONO16;
+        }
+	} else if ( numChannels == 2 ) {
+    	if ( bitsPerSample == 8 ) {
+        	format = AL_FORMAT_STEREO8;
+        }
+    	else if ( bitsPerSample == 16 ) {
+        	format = AL_FORMAT_STEREO16;
+        }
+	}
+
+    //create our openAL buffer and check for success
+    alGenBuffers( 1, &_bufferId );
+    alBufferData( _bufferId, format, ( void * ) &data[ 0 ], size, frequency );
+}
 

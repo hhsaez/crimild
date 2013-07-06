@@ -25,21 +25,26 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MACROS_
-#define CRIMILD_MACROS_
+#ifndef CRIMILD_AL_AUDIO_CLIP_WAV_
+#define CRIMILD_AL_AUDIO_CLIP_WAV_
 
-#ifdef __GNUC__
-	#define CRIMILD_CURRENT_FUNCTION __PRETTY_FUNCTION__
-#else
-	#define CRIMILD_CURRENT_FUNCTION __FUNCTION__
-#endif
+#include "AudioClip.hpp"
 
-#define CRIMILD_TO_STRING( A ) #A
+namespace crimild {
 
-#define CRIMILD_DISALLOW_COPY_AND_ASSIGN( TypeName ) \
- 	private: \
-		TypeName( const TypeName & );               \
-		void operator=( const TypeName & );
+	namespace al {
+
+		class WavAudioClip : public AudioClip {
+		public:
+			explicit WavAudioClip( std::string filename );
+			virtual ~WavAudioClip( void );
+		};
+
+		typedef std::shared_ptr< WavAudioClip > WavAudioClipPtr;
+
+	}
+
+}
 
 #endif
 

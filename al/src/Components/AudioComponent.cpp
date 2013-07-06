@@ -25,21 +25,60 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MACROS_
-#define CRIMILD_MACROS_
+#include "AudioComponent.hpp"
+#include "Audio/AudioManager.hpp"
 
-#ifdef __GNUC__
-	#define CRIMILD_CURRENT_FUNCTION __PRETTY_FUNCTION__
-#else
-	#define CRIMILD_CURRENT_FUNCTION __FUNCTION__
-#endif
+#include <al.h>
+#include <alc.h>
 
-#define CRIMILD_TO_STRING( A ) #A
+using namespace crimild;
+using namespace crimild::al;
 
-#define CRIMILD_DISALLOW_COPY_AND_ASSIGN( TypeName ) \
- 	private: \
-		TypeName( const TypeName & );               \
-		void operator=( const TypeName & );
+const char *AudioComponent::NAME = "audio";
 
-#endif
+AudioComponent::AudioComponent( AudioClipPtr audioClip )
+	: NodeComponent( NAME ),
+	  _audioClip( audioClip ),
+	  _gain( 1.0f )
+{
+	AudioManager::getInstance();
+
+	alGenSources( 1, &_sourceId );
+	alSourcei( _sourceId, AL_BUFFER, audioClip->getBufferId() );
+}
+
+AudioComponent::~AudioComponent( void )
+{
+	if ( _sourceId > 0 ) {
+		alDeleteSources( 1, &_sourceId );
+	}
+}
+
+void AudioComponent::onAttach( void )
+{
+	const Vector3f &translate = getNode()->getWorld().getTranslate();
+	alSource3f( _sourceId, AL_POSITION, translate[ 0 ], translate[ 1 ], translate[ 2 ] );
+}
+
+void AudioComponent::update( const Time & )
+{
+	const Vector3f &translate = getNode()->getWorld().getTranslate();
+	alSource3f( _sourceId, AL_POSITION, translate[ 0 ], translate[ 1 ], translate[ 2 ] );
+}
+
+void AudioComponent::setGain( float value )
+{
+	_gain = value;
+	alSourcef( _sourceId, AL_GAIN, _gain );
+}
+
+void AudioComponent::play( bool loop )
+{
+	getNode()->perform( UpdateWorldState() );
+
+	alSourcei( _sourceId, AL_LOOPING, loop ? AL_TRUE : AL_FALSE );
+	const Vector3f &translate = getNode()->getWorld().getTranslate();
+	alSource3f( _sourceId, AL_POSITION, translate[ 0 ], translate[ 1 ], translate[ 2 ] );
+	alSourcePlay( _sourceId );
+}
 

@@ -25,21 +25,39 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MACROS_
-#define CRIMILD_MACROS_
+#ifndef CRIMILD_AL_AUDIO_MANAGER_
+#define CRIMILD_AL_AUDIO_MANAGER_
 
-#ifdef __GNUC__
-	#define CRIMILD_CURRENT_FUNCTION __PRETTY_FUNCTION__
-#else
-	#define CRIMILD_CURRENT_FUNCTION __FUNCTION__
-#endif
+#include <Crimild.hpp>
 
-#define CRIMILD_TO_STRING( A ) #A
+// forward declaration
+struct ALCdevice_struct;
+struct ALCcontext_struct;
 
-#define CRIMILD_DISALLOW_COPY_AND_ASSIGN( TypeName ) \
- 	private: \
-		TypeName( const TypeName & );               \
-		void operator=( const TypeName & );
+namespace crimild {
+
+	namespace al {
+
+		class AudioManager {
+		public:
+			static AudioManager &getInstance( void );
+
+			void setGeneralGain( float value );
+			float getGeneralGain( void ) const { return _gain; }
+
+		private:
+			AudioManager( void );
+			~AudioManager( void );
+
+		private:
+			ALCdevice_struct *_device;
+			ALCcontext_struct *_context;
+			float _gain;
+		};
+
+	}
+
+}
 
 #endif
 

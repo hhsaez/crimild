@@ -25,21 +25,43 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MACROS_
-#define CRIMILD_MACROS_
+#ifndef CRIMILD_AL_COMPONENTS_AUDIO_
+#define CRIMILD_AL_COMPONENTS_AUDIO_
 
-#ifdef __GNUC__
-	#define CRIMILD_CURRENT_FUNCTION __PRETTY_FUNCTION__
-#else
-	#define CRIMILD_CURRENT_FUNCTION __FUNCTION__
-#endif
+#include "Audio/AudioClip.hpp"
 
-#define CRIMILD_TO_STRING( A ) #A
+namespace crimild {
 
-#define CRIMILD_DISALLOW_COPY_AND_ASSIGN( TypeName ) \
- 	private: \
-		TypeName( const TypeName & );               \
-		void operator=( const TypeName & );
+	namespace al {
+
+		class AudioComponent : public NodeComponent {
+		public:
+			static const char *NAME;
+
+		public:
+			explicit AudioComponent( AudioClipPtr audioClip );
+			
+			virtual ~AudioComponent( void );
+
+			virtual void onAttach( void ) override;
+			virtual void update( const Time & ) override;
+
+			void setGain( float value );
+			float getGain( void ) const { return _gain; }
+
+			void play( bool loop = false );
+
+		private:
+			AudioClipPtr _audioClip;
+			unsigned int _sourceId;
+			float _gain;
+		};
+
+		typedef std::shared_ptr< AudioComponent > AudioComponentPtr;
+
+	}
+
+}
 
 #endif
 

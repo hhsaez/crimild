@@ -25,21 +25,52 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MACROS_
-#define CRIMILD_MACROS_
+#include "AudioManager.hpp"
 
-#ifdef __GNUC__
-	#define CRIMILD_CURRENT_FUNCTION __PRETTY_FUNCTION__
-#else
-	#define CRIMILD_CURRENT_FUNCTION __FUNCTION__
-#endif
+#include <al.h>
+#include <alc.h>
 
-#define CRIMILD_TO_STRING( A ) #A
+using namespace crimild;
+using namespace crimild::al;
 
-#define CRIMILD_DISALLOW_COPY_AND_ASSIGN( TypeName ) \
- 	private: \
-		TypeName( const TypeName & );               \
-		void operator=( const TypeName & );
+AudioManager &AudioManager::getInstance( void )
+{
+    static AudioManager instance;
+    return instance;
+}
 
-#endif
+AudioManager::AudioManager( void )
+{
+    _device = alcOpenDevice( NULL );
+    if ( !_device ) {
+        Log::Error << "Cannot open sound device" << Log::End;
+        return;
+    }
+
+    _context = alcCreateContext( _device, NULL );
+    if ( !_context ) {
+        Log::Error << "Cannot open sound context" << Log::End;
+    }
+
+    alcMakeContextCurrent( _context );
+
+    float orientation[] = {
+        -1, 0, 0,
+        0, 1, 0
+    };
+    
+    setGeneralGain( 1.0f );
+}
+
+AudioManager::~AudioManager( void )
+{
+    alcDestroyContext( _context );
+    alcCloseDevice( _device );
+}
+
+void AudioManager::setGeneralGain( float value )
+{
+    _gain = value;
+    alListenerf( AL_GAIN, _gain );
+}
 
