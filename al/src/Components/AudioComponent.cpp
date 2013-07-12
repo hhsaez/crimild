@@ -27,6 +27,7 @@
 
 #include "AudioComponent.hpp"
 #include "Audio/AudioManager.hpp"
+#include "Audio/Utils.hpp"
 
 #include <al.h>
 #include <alc.h>
@@ -41,23 +42,35 @@ AudioComponent::AudioComponent( AudioClipPtr audioClip )
 	  _audioClip( audioClip ),
 	  _gain( 1.0f )
 {
+	CRIMILD_CHECK_AL_ERRORS_BEFORE_CURRENT_FUNCTION;
+
 	AudioManager::getInstance();
 
 	alGenSources( 1, &_sourceId );
 	alSourcei( _sourceId, AL_BUFFER, audioClip->getBufferId() );
+
+	CRIMILD_CHECK_AL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
 AudioComponent::~AudioComponent( void )
 {
+	CRIMILD_CHECK_AL_ERRORS_BEFORE_CURRENT_FUNCTION;
+
 	if ( _sourceId > 0 ) {
 		alDeleteSources( 1, &_sourceId );
 	}
+
+	CRIMILD_CHECK_AL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
 void AudioComponent::onAttach( void )
 {
+	CRIMILD_CHECK_AL_ERRORS_BEFORE_CURRENT_FUNCTION;
+
 	const Vector3f &translate = getNode()->getWorld().getTranslate();
 	alSource3f( _sourceId, AL_POSITION, translate[ 0 ], translate[ 1 ], translate[ 2 ] );
+
+	CRIMILD_CHECK_AL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
 void AudioComponent::update( const Time & )
@@ -68,17 +81,60 @@ void AudioComponent::update( const Time & )
 
 void AudioComponent::setGain( float value )
 {
+	CRIMILD_CHECK_AL_ERRORS_BEFORE_CURRENT_FUNCTION;
+
 	_gain = value;
 	alSourcef( _sourceId, AL_GAIN, _gain );
+
+	CRIMILD_CHECK_AL_ERRORS_AFTER_CURRENT_FUNCTION;
+}
+
+bool AudioComponent::isPlaying( void ) const
+{
+	int state;
+	alGetSourcei( _sourceId, AL_SOURCE_STATE, &state );
+	return state == AL_PLAYING;
+}
+
+bool AudioComponent::isPaused( void ) const
+{
+	int state;
+	alGetSourcei( _sourceId, AL_SOURCE_STATE, &state );
+	return state == AL_PAUSED;
 }
 
 void AudioComponent::play( bool loop )
 {
+	CRIMILD_CHECK_AL_ERRORS_BEFORE_CURRENT_FUNCTION;
+
 	getNode()->perform( UpdateWorldState() );
 
 	alSourcei( _sourceId, AL_LOOPING, loop ? AL_TRUE : AL_FALSE );
 	const Vector3f &translate = getNode()->getWorld().getTranslate();
 	alSource3f( _sourceId, AL_POSITION, translate[ 0 ], translate[ 1 ], translate[ 2 ] );
 	alSourcePlay( _sourceId );
+
+	CRIMILD_CHECK_AL_ERRORS_AFTER_CURRENT_FUNCTION;
+}
+
+void AudioComponent::stop( void )
+{
+	if ( isPlaying() ) {
+		alSourceStop( _sourceId );
+	}
+}
+
+void AudioComponent::pause( void )
+{
+	if ( isPlaying() ) {
+		alSourcePause( _sourceId );
+	}
+}
+
+void AudioComponent::resume( void )
+{
+	if ( isPaused() || !isPlaying() ) {
+		alSourcePlay( _sourceId );
+	}
 }
 

@@ -49,7 +49,13 @@ namespace crimild {
 			void setGain( float value );
 			float getGain( void ) const { return _gain; }
 
+			bool isPlaying( void ) const;
+			bool isPaused( void ) const;
+
 			void play( bool loop = false );
+			void stop( void );
+			void pause( void );
+			void resume( void );
 
 		private:
 			AudioClipPtr _audioClip;

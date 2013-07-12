@@ -31,6 +31,7 @@
 #include "Audio/AudioClip.hpp"
 #include "Audio/AudioManager.hpp"
 #include "Audio/WavAudioClip.hpp"
+#include "Audio/Utils.hpp"
 
 #include "Components/AudioComponent.hpp"
 

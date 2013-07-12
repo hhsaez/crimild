@@ -26,6 +26,7 @@
  */
 
 #include "AudioManager.hpp"
+#include "Utils.hpp"
 
 #include <al.h>
 #include <alc.h>
@@ -41,7 +42,11 @@ AudioManager &AudioManager::getInstance( void )
 
 AudioManager::AudioManager( void )
 {
-    _device = alcOpenDevice( NULL );
+	Log::Info << "Initializing audio sub-system" << Log::End;
+
+	CRIMILD_CHECK_AL_ERRORS_BEFORE_CURRENT_FUNCTION;
+
+	_device = alcOpenDevice( NULL );
     if ( !_device ) {
         Log::Error << "Cannot open sound device" << Log::End;
         return;
@@ -60,17 +65,27 @@ AudioManager::AudioManager( void )
     };
     
     setGeneralGain( 1.0f );
+
+	CRIMILD_CHECK_AL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
 AudioManager::~AudioManager( void )
 {
+	CRIMILD_CHECK_AL_ERRORS_BEFORE_CURRENT_FUNCTION;
+
     alcDestroyContext( _context );
     alcCloseDevice( _device );
+
+	CRIMILD_CHECK_AL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
 void AudioManager::setGeneralGain( float value )
 {
-    _gain = value;
+	CRIMILD_CHECK_AL_ERRORS_BEFORE_CURRENT_FUNCTION;
+
+	_gain = value;
     alListenerf( AL_GAIN, _gain );
+
+	CRIMILD_CHECK_AL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 

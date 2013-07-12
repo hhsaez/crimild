@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,55 +25,43 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "AudioClip.hpp"
 #include "Utils.hpp"
 
 #include <al.h>
 #include <alc.h>
 
 using namespace crimild;
-using namespace crimild::al;
 
-AudioClip::AudioClip( void )
+void al::Utils::checkErrors( std::string prefix )
 {
+	int error = alGetError();
+	if (error != AL_NO_ERROR) {
+		std::string errorDescription = "";
+		switch (error) {
+			case ALC_NO_ERROR:
+				errorDescription = "AL_NO_ERROR";
+				break;
+			case ALC_INVALID_DEVICE:
+				errorDescription = "ALC_INVALID_DEVICE";
+				break;
+			case ALC_INVALID_CONTEXT:
+				errorDescription = "ALC_INVALID_CONTEXT";
+				break;
+			case ALC_INVALID_ENUM:
+				errorDescription = "ALC_INVALID_ENUM";
+				break;
+			case ALC_INVALID_VALUE:
+				errorDescription = "ALC_INVALID_VALUE";
+				break;
+			case ALC_OUT_OF_MEMORY:
+				errorDescription = "ALC_OUT_OF_MEMORY";
+				break;
+			default:
+				errorDescription = "Invalid error code";
+				break;
+		}
 
-}
-
-AudioClip::~AudioClip( void )
-{
-	if ( _bufferId > 0 ) {
-		alDeleteBuffers( 1, &_bufferId );
-	}
-}
-
-void AudioClip::load( unsigned int numChannels, unsigned int bitsPerSample, unsigned int frequency, unsigned int size, const unsigned char *data )
-{
-	CRIMILD_CHECK_AL_ERRORS_BEFORE_CURRENT_FUNCTION;
-
-	ALenum format;
-
-	//The format is worked out by looking at the number of
-	//channels and the bits per sample.
-	if ( numChannels == 1 ) {
-    	if ( bitsPerSample == 8 ) {
-        	format = AL_FORMAT_MONO8;
-        }
-    	else if ( bitsPerSample == 16 ) {
-        	format = AL_FORMAT_MONO16;
-        }
-	} else if ( numChannels == 2 ) {
-    	if ( bitsPerSample == 8 ) {
-        	format = AL_FORMAT_STEREO8;
-        }
-    	else if ( bitsPerSample == 16 ) {
-        	format = AL_FORMAT_STEREO16;
-        }
-	}
-
-    //create our openAL buffer and check for success
-    alGenBuffers( 1, &_bufferId );
-    alBufferData( _bufferId, format, ( void * ) &data[ 0 ], size, frequency );
-
-	CRIMILD_CHECK_AL_ERRORS_AFTER_CURRENT_FUNCTION;
+    	Log::Error << prefix << ": " << "(0x" << error << ") " << errorDescription << Log::End;
+    }
 }
 

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,55 +25,26 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "AudioClip.hpp"
-#include "Utils.hpp"
+#ifndef CRIMILD_AL_AUDIO_UTILS_
+#define CRIMILD_AL_AUDIO_UTILS_
 
-#include <al.h>
-#include <alc.h>
+#include <Crimild.hpp>
 
-using namespace crimild;
-using namespace crimild::al;
+namespace crimild {
 
-AudioClip::AudioClip( void )
-{
+	namespace al {
 
-}
+		class Utils {
+		public:
+			static void checkErrors( std::string prefix );
+		};
 
-AudioClip::~AudioClip( void )
-{
-	if ( _bufferId > 0 ) {
-		alDeleteBuffers( 1, &_bufferId );
-	}
-}
-
-void AudioClip::load( unsigned int numChannels, unsigned int bitsPerSample, unsigned int frequency, unsigned int size, const unsigned char *data )
-{
-	CRIMILD_CHECK_AL_ERRORS_BEFORE_CURRENT_FUNCTION;
-
-	ALenum format;
-
-	//The format is worked out by looking at the number of
-	//channels and the bits per sample.
-	if ( numChannels == 1 ) {
-    	if ( bitsPerSample == 8 ) {
-        	format = AL_FORMAT_MONO8;
-        }
-    	else if ( bitsPerSample == 16 ) {
-        	format = AL_FORMAT_MONO16;
-        }
-	} else if ( numChannels == 2 ) {
-    	if ( bitsPerSample == 8 ) {
-        	format = AL_FORMAT_STEREO8;
-        }
-    	else if ( bitsPerSample == 16 ) {
-        	format = AL_FORMAT_STEREO16;
-        }
 	}
 
-    //create our openAL buffer and check for success
-    alGenBuffers( 1, &_bufferId );
-    alBufferData( _bufferId, format, ( void * ) &data[ 0 ], size, frequency );
-
-	CRIMILD_CHECK_AL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
+
+#define CRIMILD_CHECK_AL_ERRORS_BEFORE_CURRENT_FUNCTION crimild::al::Utils::checkErrors( std::string( "Before " ) + CRIMILD_CURRENT_FUNCTION );
+#define CRIMILD_CHECK_AL_ERRORS_AFTER_CURRENT_FUNCTION crimild::al::Utils::checkErrors( std::string( "After " ) + CRIMILD_CURRENT_FUNCTION );
+
+#endif
 
