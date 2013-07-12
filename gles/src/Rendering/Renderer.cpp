@@ -135,12 +135,90 @@ void gles::Renderer::bindUniform( ShaderLocation *location, const Matrix4f &matr
 
 void gles::Renderer::setDepthState( DepthState *state )
 {
-    
+	if ( state->isEnabled() ) {
+		glEnable( GL_DEPTH_TEST );
+	}
+	else {
+		glDisable( GL_DEPTH_TEST );
+	}
 }
 
 void gles::Renderer::setAlphaState( AlphaState *state )
 {
-    
+	if ( state->isEnabled() ) {
+		glEnable( GL_BLEND );
+
+		GLenum srcBlendFunc = GL_SRC_ALPHA;
+		switch ( state->getSrcBlendFunc() ) {
+			case AlphaState::SrcBlendFunc::ZERO:
+				srcBlendFunc = GL_ZERO;
+				break;
+			case AlphaState::SrcBlendFunc::ONE:
+				srcBlendFunc = GL_ONE;
+				break;
+			case AlphaState::SrcBlendFunc::SRC_COLOR:
+				srcBlendFunc = GL_SRC_COLOR;
+				break;
+			case AlphaState::SrcBlendFunc::ONE_MINUS_SRC_COLOR:
+				srcBlendFunc = GL_ONE_MINUS_SRC_COLOR;
+				break;
+			case AlphaState::SrcBlendFunc::DST_COLOR:
+				srcBlendFunc = GL_DST_COLOR;
+				break;
+			case AlphaState::SrcBlendFunc::ONE_MINUS_DST_COLOR:
+				srcBlendFunc = GL_ONE_MINUS_DST_COLOR;
+				break;
+			case AlphaState::SrcBlendFunc::SRC_ALPHA:
+				srcBlendFunc = GL_SRC_ALPHA;
+				break;
+			case AlphaState::SrcBlendFunc::ONE_MINUS_SRC_ALPHA:
+				srcBlendFunc = GL_ONE_MINUS_SRC_ALPHA;
+				break;
+			case AlphaState::SrcBlendFunc::DST_ALPHA:
+				srcBlendFunc = GL_DST_ALPHA;
+				break;
+			case AlphaState::SrcBlendFunc::ONE_MINUS_DST_ALPHA:
+				srcBlendFunc = GL_ONE_MINUS_DST_ALPHA;
+				break;
+			default:
+				break;
+		}
+
+		GLenum dstBlendFunc = GL_ONE_MINUS_SRC_ALPHA;
+		switch ( state->getDstBlendFunc() ) {
+			case AlphaState::DstBlendFunc::ZERO:
+				dstBlendFunc = GL_ZERO;
+				break;
+			case AlphaState::DstBlendFunc::ONE:
+				dstBlendFunc = GL_ONE;
+				break;
+			case AlphaState::DstBlendFunc::SRC_COLOR:
+				dstBlendFunc = GL_SRC_COLOR;
+				break;
+			case AlphaState::DstBlendFunc::ONE_MINUS_SRC_COLOR:
+				dstBlendFunc = GL_ONE_MINUS_SRC_COLOR;
+				break;
+			case AlphaState::DstBlendFunc::SRC_ALPHA:
+				dstBlendFunc = GL_SRC_ALPHA;
+				break;
+			case AlphaState::DstBlendFunc::ONE_MINUS_SRC_ALPHA:
+				dstBlendFunc = GL_ONE_MINUS_SRC_ALPHA;
+				break;
+			case AlphaState::DstBlendFunc::DST_ALPHA:
+				dstBlendFunc = GL_DST_ALPHA;
+				break;
+			case AlphaState::DstBlendFunc::ONE_MINUS_DST_ALPHA:
+				dstBlendFunc = GL_ONE_MINUS_DST_ALPHA;
+				break;
+			default:
+				break;
+		}
+
+		glBlendFunc( srcBlendFunc, dstBlendFunc );
+	}
+	else {
+		glDisable( GL_BLEND );
+	}
 }
 
 void gles::Renderer::drawPrimitive( ShaderProgram *program, Primitive *primitive )
