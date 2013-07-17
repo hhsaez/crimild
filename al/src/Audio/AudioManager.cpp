@@ -28,8 +28,13 @@
 #include "AudioManager.hpp"
 #include "Utils.hpp"
 
-#include <al.h>
-#include <alc.h>
+#ifdef __APPLE__
+    #import <OpenAL/al.h>
+    #import <OpenAL/alc.h>
+#else
+    #include <al.h>
+    #include <alc.h>
+#endif
 
 using namespace crimild;
 using namespace crimild::al;
@@ -59,11 +64,6 @@ AudioManager::AudioManager( void )
 
     alcMakeContextCurrent( _context );
 
-    float orientation[] = {
-        -1, 0, 0,
-        0, 1, 0
-    };
-    
     setGeneralGain( 1.0f );
 
 	CRIMILD_CHECK_AL_ERRORS_AFTER_CURRENT_FUNCTION;

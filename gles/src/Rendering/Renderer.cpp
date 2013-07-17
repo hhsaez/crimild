@@ -83,7 +83,8 @@ void gles::Renderer::configure( void )
 
 void gles::Renderer::beginRender( void )
 {
-    
+    glEnable( GL_DEPTH_TEST );
+    glDisable( GL_BLEND );
 }
 
 void gles::Renderer::endRender( void )

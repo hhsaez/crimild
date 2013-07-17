@@ -28,8 +28,13 @@
 #include "AudioClip.hpp"
 #include "Utils.hpp"
 
-#include <al.h>
-#include <alc.h>
+#ifdef __APPLE__
+    #import <OpenAL/al.h>
+    #import <OpenAL/alc.h>
+#else
+    #include <al.h>
+    #include <alc.h>
+#endif
 
 using namespace crimild;
 using namespace crimild::al;
@@ -50,7 +55,7 @@ void AudioClip::load( unsigned int numChannels, unsigned int bitsPerSample, unsi
 {
 	CRIMILD_CHECK_AL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
-	ALenum format;
+	ALenum format = AL_FORMAT_MONO8;
 
 	//The format is worked out by looking at the number of
 	//channels and the bits per sample.

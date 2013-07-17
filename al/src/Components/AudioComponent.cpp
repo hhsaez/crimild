@@ -29,8 +29,13 @@
 #include "Audio/AudioManager.hpp"
 #include "Audio/Utils.hpp"
 
-#include <al.h>
-#include <alc.h>
+#ifdef __APPLE__
+    #import <OpenAL/al.h>
+    #import <OpenAL/alc.h>
+#else
+    #include <al.h>
+    #include <alc.h>
+#endif
 
 using namespace crimild;
 using namespace crimild::al;
