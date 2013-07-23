@@ -89,15 +89,46 @@ namespace crimild {
 
 		class GroupDef {
 		public:
-			std::string name;
-			std::string materialName;
-			std::vector< std::string > faces;
-
 			GroupDef( std::string name, std::string materialName )
 			{
 				this->name = name;
 				this->materialName = materialName;
 			}
+
+			std::string name;
+			std::string materialName;
+			//std::vector< std::string > faces;
+
+			class Face {
+			public:
+				Face( std::string v0, std::string v1, std::string v2 )
+				{
+					this->v0 = v0;
+					this->v1 = v1;
+					this->v2 = v2;
+				}
+
+				Face( const Face &f ) 
+				{ 
+					v0 = f.v0;
+					v1 = f.v1;
+					v2 = f.v2;
+				}
+
+				Face &operator=( const Face &f )
+				{ 
+					v0 = f.v0;
+					v1 = f.v1;
+					v2 = f.v2;
+					return *this;
+				}
+
+				std::string v0;
+				std::string v1;
+				std::string v2;
+			};
+
+			std::vector< Face > faces;
 		};
 
 		std::vector< std::shared_ptr< GroupDef >> _groups;
@@ -108,6 +139,11 @@ namespace crimild {
 			std::string name;
 
 			TexturePtr diffuseMap;
+			TexturePtr normalMap;
+			TexturePtr specularMap;
+			RGBAColorf diffuseColor;
+			RGBAColorf ambientColor;
+			RGBAColorf specularColor;
 
 			MaterialDef( std::string name )
 			{

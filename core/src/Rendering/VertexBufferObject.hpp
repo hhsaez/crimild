@@ -31,6 +31,7 @@
 #include "BufferObject.hpp"
 #include "VertexFormat.hpp"
 #include "Catalog.hpp"
+#include "Mathematics/Vector.hpp"
 
 namespace crimild {
 
@@ -41,6 +42,13 @@ namespace crimild {
 
 		const VertexFormat &getVertexFormat( void ) const { return _vertexFormat; }
 		unsigned int getVertexCount( void ) const { return _vertexCount; }
+
+		Vector3f getPositionAt( unsigned int index );
+		RGBAColorf getRGBAColorAt( unsigned int index );
+		RGBColorf getRGBColorAt( unsigned int index );
+		Vector3f getNormalAt( unsigned int index );
+		Vector3f getTangentAt( unsigned int index );
+		Vector2f getTextureCoordAt( unsigned int index );
 
 	private:
 		VertexFormat _vertexFormat;

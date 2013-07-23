@@ -33,7 +33,7 @@ using namespace crimild;
 
 TEST( VertexFormatTest, P3 )
 {
-	VertexFormat vf( 3, 0, 0, 0 );
+	VertexFormat vf( 3, 0, 0, 0, 0 );
 	
 	EXPECT_TRUE( vf.hasPositions() );
 	EXPECT_EQ( 3, vf.getPositionComponents() );
@@ -47,6 +47,10 @@ TEST( VertexFormatTest, P3 )
 	EXPECT_EQ( 0, vf.getNormalComponents() );
 	EXPECT_EQ( 3, vf.getNormalsOffset() );
 	
+	EXPECT_FALSE( vf.hasTangents() );
+	EXPECT_EQ( 0, vf.getTangentComponents() );
+	EXPECT_EQ( 3, vf.getTangentsOffset() );
+	
 	EXPECT_FALSE( vf.hasTextureCoords() );
 	EXPECT_EQ( 0, vf.getTextureCoordComponents() );
 	EXPECT_EQ( 3, vf.getTextureCoordsOffset() );
@@ -57,7 +61,7 @@ TEST( VertexFormatTest, P3 )
 
 TEST( VertexFormatTest, P3_C4 )
 {
-	VertexFormat vf( 3, 4, 0, 0 );
+	VertexFormat vf( 3, 4, 0, 0, 0 );
 	
 	EXPECT_TRUE( vf.hasPositions() );
 	EXPECT_EQ( 3, vf.getPositionComponents() );
@@ -71,6 +75,10 @@ TEST( VertexFormatTest, P3_C4 )
 	EXPECT_EQ( 0, vf.getNormalComponents() );
 	EXPECT_EQ( 7, vf.getNormalsOffset() );
 	
+	EXPECT_FALSE( vf.hasTangents() );
+	EXPECT_EQ( 0, vf.getTangentComponents() );
+	EXPECT_EQ( 7, vf.getTangentsOffset() );
+	
 	EXPECT_FALSE( vf.hasTextureCoords() );
 	EXPECT_EQ( 0, vf.getTextureCoordComponents() );
 	EXPECT_EQ( 7, vf.getTextureCoordsOffset() );
@@ -81,7 +89,7 @@ TEST( VertexFormatTest, P3_C4 )
 
 TEST( VertexFormatTest, P3_N3 )
 {
-	VertexFormat vf( 3, 0, 3, 0 );
+	VertexFormat vf( 3, 0, 3, 0, 0 );
 	
 	EXPECT_TRUE( vf.hasPositions() );
 	EXPECT_EQ( 3, vf.getPositionComponents() );
@@ -95,6 +103,10 @@ TEST( VertexFormatTest, P3_N3 )
 	EXPECT_EQ( 3, vf.getNormalComponents() );
 	EXPECT_EQ( 3, vf.getNormalsOffset() );
 	
+	EXPECT_FALSE( vf.hasTangents() );
+	EXPECT_EQ( 0, vf.getTangentComponents() );
+	EXPECT_EQ( 6, vf.getTangentsOffset() );
+	
 	EXPECT_FALSE( vf.hasTextureCoords() );
 	EXPECT_EQ( 0, vf.getTextureCoordComponents() );
 	EXPECT_EQ( 6, vf.getTextureCoordsOffset() );
@@ -105,7 +117,7 @@ TEST( VertexFormatTest, P3_N3 )
 
 TEST( VertexFormatTest, P3_UV2 )
 {
-	VertexFormat vf( 3, 0, 0, 2 );
+	VertexFormat vf( 3, 0, 0, 0, 2 );
 	
 	EXPECT_TRUE( vf.hasPositions() );
 	EXPECT_EQ( 3, vf.getPositionComponents() );
@@ -118,6 +130,10 @@ TEST( VertexFormatTest, P3_UV2 )
 	EXPECT_FALSE( vf.hasNormals() );
 	EXPECT_EQ( 0, vf.getNormalComponents() );
 	EXPECT_EQ( 3, vf.getNormalsOffset() );
+	
+	EXPECT_FALSE( vf.hasTangents() );
+	EXPECT_EQ( 0, vf.getTangentComponents() );
+	EXPECT_EQ( 3, vf.getTangentsOffset() );
 	
 	EXPECT_TRUE( vf.hasTextureCoords() );
 	EXPECT_EQ( 2, vf.getTextureCoordComponents() );

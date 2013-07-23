@@ -114,6 +114,19 @@ void gl3::VertexBufferObjectCatalog::bind( ShaderProgram *program, VertexBufferO
 	        }
 	    }
 
+	    ShaderLocation *tangentLocation = program->getStandardLocation( ShaderProgram::StandardLocation::TANGENT_ATTRIBUTE );
+	    if ( tangentLocation && tangentLocation->isValid() ) {
+	        if ( format.hasTangents() ) {
+	            glEnableVertexAttribArray( tangentLocation->getLocation() );
+	            glVertexAttribPointer( tangentLocation->getLocation(),
+	                                   format.getTangentComponents(),
+	                                   GL_FLOAT,
+	                                   GL_FALSE,
+	                                   format.getVertexSizeInBytes(),
+	                                   ( const GLvoid * )( baseOffset + format.getTangentsOffset() ) );
+	        }
+	    }
+
 	    ShaderLocation *colorLocation = program->getStandardLocation( ShaderProgram::StandardLocation::COLOR_ATTRIBUTE );
 	    if ( colorLocation && colorLocation->isValid() ) {
 	        if ( format.hasColors() ) {

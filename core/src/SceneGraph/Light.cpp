@@ -31,7 +31,7 @@ using namespace crimild;
 
 Light::Light( Type type )
 	: _type( type ),
-	  _attenuation( 1.0f, 0.0f, 0.01f ),
+	  _attenuation( 1.0f, 0.0f, 0.0f ),
 	  _color( 1.0f, 1.0f, 1.0f, 1.0f ),
 	  _outerCutoff( 0.0f ),
 	  _innerCutoff( 0.0f ),

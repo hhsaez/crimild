@@ -25,23 +25,26 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Material.hpp"
+#ifndef CRIMILD_GL3_SHADER_PROGRAMS_GLOW_
+#define CRIMILD_GL3_SHADER_PROGRAMS_GLOW_
 
-using namespace crimild;
+#include <Crimild.hpp>
 
-Material::Material( void )
-	: _ambient( 0.0f, 0.0f, 0.0f, 1.0f ),
-	  _diffuse( 1.0f, 1.0f, 1.0f, 1.0f ),
-	  _specular( 1.0f, 1.0f, 1.0f, 1.0f ),
-	  _shininess( 50.0f ),
-	  _depthState( new DepthState( true ) ),
-	  _alphaState( new AlphaState( false ) )
-{
+namespace crimild {
+
+	namespace gl3 {
+
+		class GlowShaderProgram : public ShaderProgram {
+		public:
+			GlowShaderProgram( void );
+			virtual ~GlowShaderProgram( void );
+		};
+
+		typedef std::shared_ptr< GlowShaderProgram > GlowShaderProgramPtr;
+
+	}
 
 }
 
-Material::~Material( void )
-{
-
-}
+#endif
 

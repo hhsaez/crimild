@@ -37,6 +37,7 @@
 #include "Rendering/GL3/VertexBufferObjectCatalog.hpp"
 
 #include "Rendering/GL3/Library/SepiaToneShaderProgram.hpp"
+#include "Rendering/GL3/Library/GlowShaderProgram.hpp"
 
 #include "Rendering/GL3/Library/FlatMaterial.hpp"
 #include "Rendering/GL3/Library/FlatShaderProgram.hpp"

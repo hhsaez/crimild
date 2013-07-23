@@ -39,10 +39,12 @@ namespace crimild {
 		static const VertexFormat VF_P3_C4;
 		static const VertexFormat VF_P3_UV2;
 		static const VertexFormat VF_P3_N3;
+		static const VertexFormat VF_P3_N3_TG3;
 		static const VertexFormat VF_P3_N3_UV2;
+		static const VertexFormat VF_P3_N3_TG3_UV2;
 
 	public:
-		VertexFormat( unsigned int positions, unsigned int colors, unsigned int normals, unsigned int textureCoords );
+		VertexFormat( unsigned int positions, unsigned int colors, unsigned int normals, unsigned int tangents, unsigned int textureCoords );
 		VertexFormat( const VertexFormat &vf );
 		~VertexFormat( void );
 
@@ -63,6 +65,10 @@ namespace crimild {
 		unsigned int getNormalComponents( void ) const { return _normals; }
 		unsigned int getNormalsOffset( void ) const { return _normalsOffset; }
 
+		bool hasTangents( void ) const { return _tangents > 0; }
+		unsigned int getTangentComponents( void ) const { return _tangents; }
+		unsigned int getTangentsOffset( void ) const { return _tangentsOffset; }
+
 		bool hasTextureCoords( void ) const { return _textureCoords > 0; }
 		unsigned int getTextureCoordComponents( void ) const { return _textureCoords; }
 		unsigned int getTextureCoordsOffset( void ) const { return _textureCoordsOffset; }
@@ -80,6 +86,8 @@ namespace crimild {
 		unsigned int _colorsOffset;
 		unsigned int _normals;
 		unsigned int _normalsOffset;
+		unsigned int _tangents;
+		unsigned int _tangentsOffset;
 		unsigned int _textureCoords;
 		unsigned int _textureCoordsOffset;
 		unsigned int _vertexSize;

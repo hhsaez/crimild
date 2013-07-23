@@ -62,6 +62,12 @@ namespace crimild {
 		void setColorMap( TexturePtr texture ) { _colorMap = texture; }
 		Texture *getColorMap( void ) { return _colorMap.get(); }
 
+		void setNormalMap( TexturePtr texture ) { _normalMap = texture; }
+		Texture *getNormalMap( void ) { return _normalMap.get(); }
+
+		void setSpecularMap( TexturePtr texture ) { _specularMap = texture; }
+		Texture *getSpecularMap( void ) { return _specularMap.get(); }
+
 		void setDepthState( DepthStatePtr state ) { _depthState = state; }
 		DepthState *getDepthState( void ) { return _depthState.get(); }
 
@@ -77,6 +83,8 @@ namespace crimild {
 		float _shininess;
 
 		TexturePtr _colorMap;
+		TexturePtr _normalMap;
+		TexturePtr _specularMap;
 
 		AlphaStatePtr _alphaState;
 		DepthStatePtr _depthState;

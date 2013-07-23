@@ -219,12 +219,12 @@ ShaderProgram *gl3::Renderer::getFallbackProgram( Material *material, Geometry *
 		return _fallbackPrograms[ "screen" ].get();
 	}
 
-	if ( material->getColorMap() ) {
-		return _fallbackPrograms[ "texture" ].get();
+	if ( geometry->getComponent< RenderStateComponent >()->hasLights() && primitive->getVertexBuffer()->getVertexFormat().hasNormals() ) {
+		return _fallbackPrograms[ "phong" ].get();
 	}
 
-	if ( geometry->getComponent< RenderStateComponent >()->hasLights() ) {
-		return _fallbackPrograms[ "phong" ].get();
+	if ( material->getColorMap() && primitive->getVertexBuffer()->getVertexFormat().hasTextureCoords() ) {
+		return _fallbackPrograms[ "texture" ].get();
 	}
 
 	if ( primitive->getVertexBuffer()->getVertexFormat().hasColors() ) {

@@ -82,6 +82,7 @@ namespace crimild {
 		virtual void bindProgram( ShaderProgram *program );
 		virtual void unbindProgram( ShaderProgram *program );
 
+		virtual void bindUniform( ShaderLocation *location, bool value ) { bindUniform( location, value ? 1 : 0 ); }
 		virtual void bindUniform( ShaderLocation *location, int value ) = 0;
 		virtual void bindUniform( ShaderLocation *location, float value ) = 0;
 		virtual void bindUniform( ShaderLocation *location, const Vector3f &vector ) = 0;

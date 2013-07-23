@@ -86,7 +86,20 @@ void Renderer::unbindProgram( ShaderProgram *program )
 
 void Renderer::bindMaterial( ShaderProgram *program, Material *material )
 {
-	bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM ), material->getColorMap() );
+	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_USE_COLOR_MAP_UNIFORM ), material->getColorMap() != nullptr );
+	if ( material->getColorMap() ) {
+		bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM ), material->getColorMap() );
+	}
+	
+	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_USE_NORMAL_MAP_UNIFORM ), material->getNormalMap() != nullptr );
+	if ( material->getNormalMap() ) {
+		bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_NORMAL_MAP_UNIFORM ), material->getNormalMap() );
+	}
+	
+	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_USE_SPECULAR_MAP_UNIFORM ), material->getSpecularMap() != nullptr );
+	if ( material->getSpecularMap() ) {
+		bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_SPECULAR_MAP_UNIFORM ), material->getSpecularMap() );
+	}
 	
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_AMBIENT_UNIFORM ), material->getAmbient() );
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_DIFFUSE_UNIFORM ), material->getDiffuse() );
@@ -100,6 +113,8 @@ void Renderer::bindMaterial( ShaderProgram *program, Material *material )
 void Renderer::unbindMaterial( ShaderProgram *program, Material *material )
 {
 	unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM ), material->getColorMap() );
+	unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_NORMAL_MAP_UNIFORM ), material->getNormalMap() );
+	unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_SPECULAR_MAP_UNIFORM ), material->getSpecularMap() );
 }
 
 void Renderer::bindTexture( ShaderLocation *location, Texture *texture )
@@ -155,7 +170,14 @@ void Renderer::applyTransformations( ShaderProgram *program, Geometry *geometry,
 {
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::PROJECTION_MATRIX_UNIFORM ), camera->getProjectionMatrix() );
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM ), camera->getViewMatrix() );
-	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM ), geometry->getWorld().computeModelMatrix() );
+
+	Matrix4f modelMatrix( geometry->getWorld().computeModelMatrix() );
+	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM ), modelMatrix );
+
+	modelMatrix[ 12 ] = 0.0f;
+	modelMatrix[ 13 ] = 0.0f;
+	modelMatrix[ 14 ] = 0.0f;
+	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::NORMAL_MATRIX_UNIFORM ), modelMatrix );
 }
 
 void Renderer::restoreTransformations( ShaderProgram *program, Geometry *geometry, Camera *camera )

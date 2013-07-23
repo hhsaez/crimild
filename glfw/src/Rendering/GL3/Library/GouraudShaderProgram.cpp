@@ -51,6 +51,7 @@ const char *gouraud_vs = { CRIMILD_TO_STRING(
 
 	in vec3 aPosition;
 	in vec3 aNormal;
+	in vec2 aTextureCoord;
 
 	uniform mat4 uPMatrix;
 	uniform mat4 uVMatrix;
@@ -61,6 +62,7 @@ const char *gouraud_vs = { CRIMILD_TO_STRING(
 	uniform Material uMaterial;
 
 	out vec4 vColor;
+	out vec2 vTextureCoord;
 
 	void main ()
 	{
@@ -99,17 +101,25 @@ const char *gouraud_vs = { CRIMILD_TO_STRING(
         }
         
         vColor.w = uMaterial.diffuse.w;
+        vTextureCoord = aTextureCoord;
 	}
 )};
 
 const char *gouraud_fs = { CRIMILD_TO_STRING( 
 	in vec4 vColor;
+	in vec2 vTextureCoord;
+
+	uniform sampler2D uColorMap;
+	uniform bool uUseColorMap;
 
 	out vec4 vFragColor;
 
 	void main( void ) 
 	{ 
 		vFragColor = vColor;
+		if ( uUseColorMap ) {
+			vFragColor *= texture( uColorMap, vTextureCoord );
+		}
 	}
 )};
 
@@ -118,6 +128,7 @@ GouraudShaderProgram::GouraudShaderProgram( void )
 { 
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::NORMAL_ATTRIBUTE, "aNormal" );
+	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
 
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::PROJECTION_MATRIX_UNIFORM, "uPMatrix" );
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM, "uVMatrix" );
@@ -127,6 +138,9 @@ GouraudShaderProgram::GouraudShaderProgram( void )
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_DIFFUSE_UNIFORM, "uMaterial.diffuse" );
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_SPECULAR_UNIFORM, "uMaterial.specular" );
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_SHININESS_UNIFORM, "uMaterial.shininess" );
+
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM, "uColorMap" );
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_USE_COLOR_MAP_UNIFORM, "uUseColorMap" );
 
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_COUNT_UNIFORM, "uLightCount" );
 	for ( int i = 0; i < 4; i++ ) {

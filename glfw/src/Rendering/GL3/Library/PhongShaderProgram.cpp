@@ -34,13 +34,21 @@ using namespace crimild::gl3;
 const char *phong_vs = { CRIMILD_TO_STRING(
 	in vec3 aPosition;
 	in vec3 aNormal;
+	in vec3 aTangent;
+	in vec2 aTextureCoord;
 
 	uniform mat4 uPMatrix;
 	uniform mat4 uVMatrix;
 	uniform mat4 uMMatrix;
+	uniform mat4 uNMatrix;
+
+	uniform bool uUseNormalMap;
 
 	out vec4 vWorldVertex;
 	out vec3 vWorldNormal;
+	out vec3 vWorldTangent;
+	out vec3 vWorldBiTangent;
+	out vec2 vTextureCoord;
 	out vec3 vViewVec;
 
 	void main ()
@@ -48,8 +56,14 @@ const char *phong_vs = { CRIMILD_TO_STRING(
 	    vWorldVertex = uMMatrix * vec4( aPosition, 1.0 );
 	    vec4 viewVertex = uVMatrix * vWorldVertex;
 	    gl_Position = uPMatrix * viewVertex;
-	    vWorldNormal = normalize( mat3( uMMatrix ) * aNormal );
+	    vWorldNormal = normalize( mat3( uNMatrix ) * aNormal );
+	    if ( uUseNormalMap ) {
+	    	vWorldTangent = normalize( mat3( uNMatrix ) * aTangent );
+	    	vWorldBiTangent = cross( vWorldNormal, vWorldTangent );
+	    }
+
 	    vViewVec = normalize( -viewVertex.xyz );
+	    vTextureCoord = aTextureCoord;
 	}
 )};
 
@@ -73,24 +87,62 @@ const char *phong_fs = { CRIMILD_TO_STRING(
 
 	in vec4 vWorldVertex;
 	in vec3 vWorldNormal;
+	in vec3 vWorldTangent;
+	in vec3 vWorldBiTangent;
+	in vec2 vTextureCoord;
 	in vec3 vViewVec;
 
 	uniform int uLightCount;
 	uniform Light uLights[ 4 ];
 	uniform Material uMaterial;
 
+	uniform sampler2D uColorMap;
+	uniform bool uUseColorMap;
+	uniform sampler2D uNormalMap;
+	uniform bool uUseNormalMap;
+	uniform sampler2D uSpecularMap;
+	uniform bool uUseSpecularMap;
+
 	out vec4 vFragColor;
 
 	void main( void ) 
 	{ 
-        vFragColor = uMaterial.ambient;
+    	vec4 color = uUseColorMap ? texture( uColorMap, vTextureCoord ) : vec4( 1.0, 1.0, 1.0, 1.0 );
+    	color *= uMaterial.diffuse;
+    	if ( color.a == 0.0 ) {
+    		discard;
+    	}
+
+    	vec4 specularColor = uUseSpecularMap ? texture( uSpecularMap, vTextureCoord ) : vec4( 1.0, 1.0, 1.0, 1.0 );
+    	specularColor *= uMaterial.specular;
+
+    	vFragColor.rgb = uMaterial.ambient.rgb;
+    	vFragColor.a = color.a;
+
         for ( int i = 0; i < 4; i++ ) {
             if ( i >= uLightCount ) {
                 break;
             }
             
             vec3 lightVec = normalize( uLights[ i ].position - vWorldVertex.xyz );
-            float l = dot( vWorldNormal, lightVec );
+            vec3 halfVector = -normalize( reflect( lightVec, vWorldNormal ) );
+            vec3 eyeVec = vViewVec;
+            vec3 normal = vWorldNormal;
+
+            if ( uUseNormalMap ) {
+            	vec3 temp;
+            	vec3 lightDir = lightVec;
+
+                temp.x = dot( lightVec, vWorldTangent );
+                temp.y = dot( lightVec, vWorldBiTangent );
+                temp.z = dot( lightVec, vWorldNormal );
+                lightVec = normalize( temp );
+
+                normal = 2.0 * texture( uNormalMap, vTextureCoord ).xyz - 1.0;
+                normal = normalize( normal );
+            }
+
+            float l = dot( normal, lightVec );
             if ( l > 0.0 ) {
                 float spotlight = 1.0;
                 if ( ( uLights[ i ].direction.x != 0.0 ) || ( uLights[ i ].direction.y != 0.0 ) || ( uLights[ i ].direction.z != 0.0 ) ) {
@@ -98,18 +150,14 @@ const char *phong_fs = { CRIMILD_TO_STRING(
                     float spotlightFade = clamp( ( uLights[ i ].outerCutoff - spotlight ) / ( uLights[ i ].outerCutoff - uLights[ i ].innerCutoff ), 0.0, 1.0 );
                     spotlight = pow( spotlight * spotlightFade, uLights[ i ].exponent );
                 }
-                
-                vec3 r = -normalize( reflect( lightVec, vWorldNormal ) );
-                float s = pow( max( dot( r, vViewVec ), 0.0 ), uMaterial.shininess );
-                
+
+                float s = pow( max( dot( halfVector, eyeVec ), 0.0 ), uMaterial.shininess );
                 float d = distance( vWorldVertex.xyz, uLights[ i ].position );
                 float a = 1.0 / ( uLights[ i ].attenuation.x + ( uLights[ i ].attenuation.y * d ) + ( uLights[ i ].attenuation.z * d * d ) );
                 
-                vFragColor.xyz += ( ( uMaterial.diffuse.xyz * l ) + ( uMaterial.specular.xyz * s ) ) * uLights[ i ].color.xyz * a * spotlight;
+                vFragColor.rgb += ( ( color.rgb * l ) + ( specularColor.rgb * s ) ) * uLights[ i ].color.rgb * a * spotlight;
             }
         }
-        
-        vFragColor.w = uMaterial.diffuse.w;
 	}
 )};
 
@@ -118,18 +166,27 @@ PhongShaderProgram::PhongShaderProgram( void )
 { 
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::NORMAL_ATTRIBUTE, "aNormal" );
+	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TANGENT_ATTRIBUTE, "aTangent" );
+	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
 
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::PROJECTION_MATRIX_UNIFORM, "uPMatrix" );
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM, "uVMatrix" );
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM, "uMMatrix" );
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::NORMAL_MATRIX_UNIFORM, "uNMatrix" );
 
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_AMBIENT_UNIFORM, "uMaterial.ambient" );
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_DIFFUSE_UNIFORM, "uMaterial.diffuse" );
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_SPECULAR_UNIFORM, "uMaterial.specular" );
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_SHININESS_UNIFORM, "uMaterial.shininess" );
 
-	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_COUNT_UNIFORM, "uLightCount" );
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM, "uColorMap" );
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_USE_COLOR_MAP_UNIFORM, "uUseColorMap" );
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_NORMAL_MAP_UNIFORM, "uNormalMap" );
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_USE_NORMAL_MAP_UNIFORM, "uUseNormalMap" );
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_SPECULAR_MAP_UNIFORM, "uSpecularMap" );
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_USE_SPECULAR_MAP_UNIFORM, "uUseSpecularMap" );
 
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_COUNT_UNIFORM, "uLightCount" );
 	for ( int i = 0; i < 4; i++ ) {
 		registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_POSITION_UNIFORM + i, Utils::buildArrayShaderLocationName( "uLights", i, "position" ) );
 		registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_ATTENUATION_UNIFORM + i, Utils::buildArrayShaderLocationName( "uLights", i, "attenuation" ) );
