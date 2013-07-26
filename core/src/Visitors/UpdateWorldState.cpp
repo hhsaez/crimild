@@ -53,11 +53,19 @@ void UpdateWorldState::visitNode( Node *node )
 	else {
 		node->setWorld( node->getLocal() );
 	}
+
+	node->worldBound()->computeFrom( node->getLocalBound(), node->getWorld() );
 }
 
 void UpdateWorldState::visitGroup( Group *group )
 {
 	visitNode( group );
 	NodeVisitor::visitGroup( group );
+
+	group->worldBound()->computeFrom( group->getLocalBound(), group->getWorld() );
+	bool firstChild = true;
+	group->foreachNode( [&]( NodePtr node ) {
+		group->worldBound()->expandToContain( node->getWorldBound() );
+	});
 }
 

@@ -31,7 +31,7 @@
 
 using namespace crimild;
 
-SpherePrimitive::SpherePrimitive( float radius, const VertexFormat &format, Vector2i divisions )
+SpherePrimitive::SpherePrimitive( float radius, const VertexFormat &format, Vector2i divisions, Vector3f center )
     : Primitive( Primitive::Type::TRIANGLES )
 {
     std::vector< float > vertices;
@@ -49,9 +49,9 @@ SpherePrimitive::SpherePrimitive( float radius, const VertexFormat &format, Vect
             float y = cosTheta;
             float z = sinPhi * sinTheta;
 
-            vertices.push_back( radius * x );
-            vertices.push_back( radius * y );
-            vertices.push_back( radius * z );
+            vertices.push_back( center[ 0 ] + radius * x );
+            vertices.push_back( center[ 1 ] + radius * y );
+            vertices.push_back( center[ 2 ] + radius * z );
 
             if ( format.hasNormals() ) {
                 vertices.push_back( x );

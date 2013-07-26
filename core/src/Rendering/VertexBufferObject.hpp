@@ -43,12 +43,12 @@ namespace crimild {
 		const VertexFormat &getVertexFormat( void ) const { return _vertexFormat; }
 		unsigned int getVertexCount( void ) const { return _vertexCount; }
 
-		Vector3f getPositionAt( unsigned int index );
-		RGBAColorf getRGBAColorAt( unsigned int index );
-		RGBColorf getRGBColorAt( unsigned int index );
-		Vector3f getNormalAt( unsigned int index );
-		Vector3f getTangentAt( unsigned int index );
-		Vector2f getTextureCoordAt( unsigned int index );
+		Vector3f getPositionAt( unsigned int index ) const;
+		RGBAColorf getRGBAColorAt( unsigned int index ) const;
+		RGBColorf getRGBColorAt( unsigned int index ) const;
+		Vector3f getNormalAt( unsigned int index ) const;
+		Vector3f getTangentAt( unsigned int index ) const; 
+		Vector2f getTextureCoordAt( unsigned int index ) const;
 
 	private:
 		VertexFormat _vertexFormat;

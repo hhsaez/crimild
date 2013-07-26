@@ -33,6 +33,7 @@
 #include "Components/NodeComponent.hpp"
 #include "Mathematics/Transformation.hpp"
 #include "Mathematics/Time.hpp"
+#include "Boundings/BoundingVolume.hpp"
 
 #include <map>
 
@@ -116,6 +117,19 @@ namespace crimild {
 			you need to provide a valid world matrix manually
 		*/
 		bool _worldIsCurrent;
+
+	public:
+		BoundingVolume *localBound( void ) { return _localBound.get(); }
+		const BoundingVolume *getLocalBound( void ) const { return _localBound.get(); }
+		void setLocalBound( BoundingVolumePtr bound ) { _localBound = bound; }
+
+		BoundingVolume *worldBound( void ) { return _worldBound.get(); }
+		const BoundingVolume *getWorldBound( void ) const { return _worldBound.get(); }
+		void setWorldBound( BoundingVolumePtr bound ) { _worldBound = bound; }
+
+	private:
+		BoundingVolumePtr _localBound;
+		BoundingVolumePtr _worldBound;
 	};
 
 	typedef std::shared_ptr< Node > NodePtr;

@@ -51,7 +51,8 @@ Geometry::~Geometry( void )
 
 void Geometry::attachPrimitive( PrimitivePtr primitive )
 {
-	_primitives.push_back( primitive );
+	_primitives.push_back( primitive );	
+	updateModelBounds();
 }
 
 void Geometry::detachPrimitive( PrimitivePtr primitive )
@@ -72,5 +73,19 @@ void Geometry::detachAllPrimitives( void )
 void Geometry::accept( NodeVisitor &visitor )
 {
 	visitor.visitGeometry( this );
+}
+
+void Geometry::updateModelBounds( void )
+{
+	bool firstChild = true;
+	foreachPrimitive( [&]( PrimitivePtr primitive ) {
+		if ( firstChild ) {
+			localBound()->computeFrom( primitive->getVertexBuffer() );
+			firstChild = false;
+		}
+		else {
+			localBound()->expandToContain( primitive->getVertexBuffer() );
+		}
+	});	
 }
 

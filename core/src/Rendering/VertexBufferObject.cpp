@@ -40,37 +40,37 @@ VertexBufferObject::~VertexBufferObject( void )
 {
 }
 
-Vector3f VertexBufferObject::getPositionAt( unsigned int index ) 
+Vector3f VertexBufferObject::getPositionAt( unsigned int index ) const
 {
 	const float *data = &( getData()[ index * _vertexFormat.getVertexSize() + _vertexFormat.getPositionsOffset() ] );
 	return Vector3f( data[ 0 ], data[ 1 ], data[ 2 ] );
 }
 
-RGBAColorf VertexBufferObject::getRGBAColorAt( unsigned int index ) 
+RGBAColorf VertexBufferObject::getRGBAColorAt( unsigned int index ) const
 {
 	const float *data = &( getData()[ index * _vertexFormat.getVertexSize() + _vertexFormat.getColorsOffset() ] );
 	return RGBAColorf( data[ 0 ], data[ 1 ], data[ 2 ], data[ 3 ] );
 }
 
-RGBColorf VertexBufferObject::getRGBColorAt( unsigned int index ) 
+RGBColorf VertexBufferObject::getRGBColorAt( unsigned int index ) const
 {
 	const float *data = &( getData()[ index * _vertexFormat.getVertexSize() + _vertexFormat.getColorsOffset() ] );
 	return RGBColorf( data[ 0 ], data[ 1 ], data[ 2 ] );
 }
 
-Vector3f VertexBufferObject::getNormalAt( unsigned int index ) 
+Vector3f VertexBufferObject::getNormalAt( unsigned int index ) const
 {
 	const float *data = &( getData()[ index * _vertexFormat.getVertexSize() + _vertexFormat.getNormalsOffset() ] );
 	return Vector3f( data[ 0 ], data[ 1 ], data[ 2 ] );
 }
 
-Vector3f VertexBufferObject::getTangentAt( unsigned int index ) 
+Vector3f VertexBufferObject::getTangentAt( unsigned int index ) const
 {
 	const float *data = &( getData()[ index * _vertexFormat.getVertexSize() + _vertexFormat.getTangentsOffset() ] );
 	return Vector3f( data[ 0 ], data[ 1 ], data[ 2 ] );
 }
 
-Vector2f VertexBufferObject::getTextureCoordAt( unsigned int index ) 
+Vector2f VertexBufferObject::getTextureCoordAt( unsigned int index ) const
 {
 	const float *data = &( getData()[ index * _vertexFormat.getVertexSize() + _vertexFormat.getTextureCoordsOffset() ] );
 	return Vector2f( data[ 0 ], data[ 1 ] );

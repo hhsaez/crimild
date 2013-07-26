@@ -49,6 +49,9 @@
 #include "Foundation/Log.hpp"
 #include "Foundation/StringUtils.hpp"
 
+#include "Boundings/BoundingVolume.hpp"
+#include "Boundings/SphereBoundingVolume.hpp"
+
 #include "Exceptions/Exception.hpp"
 #include "Exceptions/FileNotFoundException.hpp"
 #include "Exceptions/RuntimeException.hpp"
@@ -122,6 +125,8 @@
 #include "Simulation/Tasks/EndRenderTask.hpp"
 #include "Simulation/Tasks/RenderSceneTask.hpp"
 #include "Simulation/Tasks/UpdateSceneTask.hpp"
+
+#include "Debug/DebugRenderPass.hpp"
 
 #endif
 

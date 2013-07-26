@@ -25,27 +25,17 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_PRIMITIVES_SPHERE_
-#define CRIMILD_PRIMITIVES_SPHERE_
+#include "BoundingVolume.hpp"
 
-#include "Primitive.hpp"
+using namespace crimild;
 
-#include "Mathematics/Vector.hpp"
+BoundingVolume::BoundingVolume( void )
+{
 
-namespace crimild {
-    
-    class SpherePrimitive : public Primitive {
-    public:
-        SpherePrimitive( float radius, 
-            const VertexFormat &format = VertexFormat::VF_P3_N3, 
-            Vector2i divisions = Vector2i( 30, 30 ),
-            Vector3f center = Vector3f( 0.0f, 0.0f, 0.0f ) );
-
-        virtual ~SpherePrimitive( void );
-    };
-
-    typedef std::shared_ptr< SpherePrimitive > SpherePrimitivePtr;
-        
 }
 
-#endif
+BoundingVolume::~BoundingVolume( void )
+{
+
+}
+

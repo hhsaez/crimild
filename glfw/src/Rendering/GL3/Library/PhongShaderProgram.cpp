@@ -126,7 +126,6 @@ const char *phong_fs = { CRIMILD_TO_STRING(
             
             vec3 lightVec = normalize( uLights[ i ].position - vWorldVertex.xyz );
             vec3 halfVector = -normalize( reflect( lightVec, vWorldNormal ) );
-            vec3 eyeVec = vViewVec;
             vec3 normal = vWorldNormal;
 
             if ( uUseNormalMap ) {
@@ -137,6 +136,11 @@ const char *phong_fs = { CRIMILD_TO_STRING(
                 temp.y = dot( lightVec, vWorldBiTangent );
                 temp.z = dot( lightVec, vWorldNormal );
                 lightVec = normalize( temp );
+
+                temp.x = dot( halfVector, vWorldTangent );
+                temp.y = dot( halfVector, vWorldBiTangent );
+                temp.z = dot( halfVector, vWorldNormal );
+                halfVector = normalize( temp );
 
                 normal = 2.0 * texture( uNormalMap, vTextureCoord ).xyz - 1.0;
                 normal = normalize( normal );
@@ -151,7 +155,7 @@ const char *phong_fs = { CRIMILD_TO_STRING(
                     spotlight = pow( spotlight * spotlightFade, uLights[ i ].exponent );
                 }
 
-                float s = pow( max( dot( halfVector, eyeVec ), 0.0 ), uMaterial.shininess );
+                float s = pow( max( dot( halfVector, uUseNormalMap ? normal : vViewVec ), 0.0 ), uMaterial.shininess );
                 float d = distance( vWorldVertex.xyz, uLights[ i ].position );
                 float a = 1.0 / ( uLights[ i ].attenuation.x + ( uLights[ i ].attenuation.y * d ) + ( uLights[ i ].attenuation.z * d * d ) );
                 

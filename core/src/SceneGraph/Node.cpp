@@ -26,13 +26,16 @@
  */
 
 #include "Node.hpp"
+#include "Boundings/SphereBoundingVolume.hpp"
 
 using namespace crimild;
 
 Node::Node( std::string name )
 	: NamedObject( name ),
 	  _parent( nullptr ),
-	  _worldIsCurrent( false )
+	  _worldIsCurrent( false ),
+	  _localBound( new SphereBoundingVolume( Vector3f( 0.0f, 0.0f, 0.0f ), 1.0f ) ),
+	  _worldBound( new SphereBoundingVolume( Vector3f( 0.0f, 0.0f, 0.0f ), 1.0f ) )
 {
 }
 

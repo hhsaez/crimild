@@ -47,6 +47,8 @@ namespace crimild {
 		void detachAllPrimitives( void );
 		void foreachPrimitive( std::function< void( PrimitivePtr & ) > callback );
 
+		void updateModelBounds( void );
+
 	private:
 		std::list< PrimitivePtr > _primitives;
 

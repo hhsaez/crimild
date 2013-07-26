@@ -25,27 +25,40 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_PRIMITIVES_SPHERE_
-#define CRIMILD_PRIMITIVES_SPHERE_
+#ifndef CRIMILD_CORE_DEBUG_RENDER_PASS_
+#define CRIMILD_CORE_DEBUG_RENDER_PASS_
 
-#include "Primitive.hpp"
-
-#include "Mathematics/Vector.hpp"
+#include "Rendering/RenderPass.hpp"
+#include "Rendering/Material.hpp"
 
 namespace crimild {
-    
-    class SpherePrimitive : public Primitive {
-    public:
-        SpherePrimitive( float radius, 
-            const VertexFormat &format = VertexFormat::VF_P3_N3, 
-            Vector2i divisions = Vector2i( 30, 30 ),
-            Vector3f center = Vector3f( 0.0f, 0.0f, 0.0f ) );
 
-        virtual ~SpherePrimitive( void );
-    };
+	class DebugRenderPass : public RenderPass {
+	public:
+		DebugRenderPass( RenderPassPtr actualRenderPass );
+		virtual ~DebugRenderPass( void );
 
-    typedef std::shared_ptr< SpherePrimitive > SpherePrimitivePtr;
-        
+		void setRenderBoundings( bool value ) { _renderBoundings = value; }
+		bool shouldRenderBoundings( void ) const { return _renderBoundings; }
+
+		void setRenderNormals( bool value ) { _renderNormals = value; }
+		bool shouldRenderNormals( void ) const { return _renderNormals; }
+
+		virtual void render( Renderer *renderer, VisibilitySet *vs, Camera *camera );
+
+	private:
+		void renderNormalsAndTangents( Renderer *renderer, Geometry *geometry, Material *material, Camera *camera );
+		void renderBoundings( Renderer *renderer, Geometry *geometry, Material *material, Camera *camera );
+
+		bool _renderNormals;
+		bool _renderBoundings;
+		RenderPassPtr _actualRenderPass;
+		MaterialPtr _debugMaterial;
+	};
+
+	typedef std::shared_ptr< DebugRenderPass > DebugRenderPassPtr;
+
 }
 
 #endif
+
