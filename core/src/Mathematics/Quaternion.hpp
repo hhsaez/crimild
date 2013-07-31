@@ -212,6 +212,21 @@ namespace crimild {
 		friend Quaternion< U > operator/( const Quaternion< U > &q, V s );
 
 		template< typename U >
+		friend Quaternion< U > &operator+=( Quaternion< U > &q, const Quaternion< U > &r );
+
+		template< typename U >
+		friend Quaternion< U > &operator-=( Quaternion< U > &q, const Quaternion< U > &r );
+
+		template< typename U >
+		friend Quaternion< U > &operator*=( Quaternion< U > &q, const Quaternion< U > &r );
+
+		template< typename U, typename V >
+		friend Quaternion< U > &operator*=( Quaternion< U > &q, V s );
+
+		template< typename U, typename V >
+		friend Quaternion< U > &operator/=( Quaternion< U > &q, V s );
+
+		template< typename U >
 		friend std::ostream &operator<<( std::ostream &output, const Quaternion &input );
 
 		/**
@@ -460,6 +475,41 @@ namespace crimild {
 		}
 		
 		return Quaternion< U >( q._data / s );
+	}
+
+	template< typename U >
+	Quaternion< U > &operator+=( Quaternion< U > &q, const Quaternion< U > &r )
+	{
+		q = q + r;
+		return q;
+	}
+
+	template< typename U >
+	Quaternion< U > &operator-=( Quaternion< U > &q, const Quaternion< U > &r )
+	{
+		q = q - r;
+		return q;
+	}
+
+	template< typename U >
+	Quaternion< U > &operator*=( Quaternion< U > &q, const Quaternion< U > &r )
+	{
+		q = q * r;
+		return q;
+	}
+
+	template< typename U, typename V >
+	Quaternion< U > &operator*=( Quaternion< U > &q, V s )
+	{
+		q = q * s;
+		return q;
+	}
+
+	template< typename U, typename V >
+	Quaternion< U > *operator/=( Quaternion< U > &q, V s )
+	{
+		q = q / s;
+		return q;
 	}
 
 	template< typename U >

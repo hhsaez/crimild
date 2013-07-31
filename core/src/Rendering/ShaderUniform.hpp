@@ -25,41 +25,32 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_RENDERING_SHADER_LOCATION_
-#define CRIMILD_RENDERING_SHADER_LOCATION_
+#ifndef CRIMILD_RENDERING_SHADER_UNIFORM_
+#define CRIMILD_RENDERING_SHADER_UNIFORM_
 
-#include "Foundation/Macros.hpp"
-#include "Foundation/NamedObject.hpp"
+#include "ShaderLocation.hpp"
 
 namespace crimild {
 
-	class ShaderLocation : public NamedObject {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( ShaderLocation );
-		
-	public:
-		enum class Type {
-			ATTRIBUTE,
-			UNIFORM,
-			MAX
-		};
+	class Renderer;
+
+	class ShaderUniform : public NamedObject {
+		CRIMILD_DISALLOW_COPY_AND_ASSIGN( ShaderUniform );
 
 	public:
-		explicit ShaderLocation( Type type, std::string name );
-		virtual ~ShaderLocation( void );
+		ShaderUniform( std::string name );
+		virtual ~ShaderUniform( void );
 
-		Type getType( void ) const { return _type; }
+		void setLocation( ShaderLocationPtr location ) { _location = location; }
+		ShaderLocation *getLocation( void ) { return _location.get(); }
 
-		void reset( void ) { _location = -1; }
-		bool isValid( void ) const { return _location >= 0; }
-		int getLocation( void ) const { return _location; }
-		void setLocation( int location ) { _location = location; }
+		virtual void onBind( Renderer *renderer ) = 0;
 
 	private:
-		Type _type;
-		int _location;
+		ShaderLocationPtr _location;
 	};
 
-	typedef std::shared_ptr< ShaderLocation > ShaderLocationPtr;
+	typedef std::shared_ptr< ShaderUniform > ShaderUniformPtr;
 
 }
 

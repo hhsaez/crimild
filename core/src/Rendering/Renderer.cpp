@@ -77,6 +77,12 @@ void Renderer::unbindFrameBuffer( FrameBufferObject *fbo )
 void Renderer::bindProgram( ShaderProgram *program )
 {
 	getShaderProgramCatalog()->bind( program );
+
+	program->foreachUniform( [&]( ShaderUniformPtr &uniform ) {
+		if ( uniform->getLocation() != nullptr ) {
+			uniform->onBind( this );
+		}
+	});
 }
 
 void Renderer::unbindProgram( ShaderProgram *program )

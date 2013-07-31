@@ -25,41 +25,57 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_RENDERING_SHADER_LOCATION_
-#define CRIMILD_RENDERING_SHADER_LOCATION_
+#ifndef CRIMILD_RENDERING_SHADER_UNIFORM_IMPL_
+#define CRIMILD_RENDERING_SHADER_UNIFORM_IMPL_
 
-#include "Foundation/Macros.hpp"
-#include "Foundation/NamedObject.hpp"
+#include "ShaderUniform.hpp"
+#include "Renderer.hpp"
+#include "Mathematics/Matrix.hpp"
+#include "Mathematics/Vector.hpp"
 
 namespace crimild {
 
-	class ShaderLocation : public NamedObject {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( ShaderLocation );
+	template< typename T >
+	class ShaderUniformImpl : public ShaderUniform {
+		CRIMILD_DISALLOW_COPY_AND_ASSIGN( ShaderUniformImpl< T > );
 		
 	public:
-		enum class Type {
-			ATTRIBUTE,
-			UNIFORM,
-			MAX
-		};
+		ShaderUniformImpl( std::string name, const T &value ) 
+			: ShaderUniform( name ) 
+		{
+			setValue( value );
+		}
 
-	public:
-		explicit ShaderLocation( Type type, std::string name );
-		virtual ~ShaderLocation( void );
+		virtual ~ShaderUniformImpl( void ) 
+		{ 
+		}
 
-		Type getType( void ) const { return _type; }
+		void setValue( const T &value ) { _value = value; }
+		const T &getValue( void ) const { return _value; }
 
-		void reset( void ) { _location = -1; }
-		bool isValid( void ) const { return _location >= 0; }
-		int getLocation( void ) const { return _location; }
-		void setLocation( int location ) { _location = location; }
+		virtual void onBind( Renderer *renderer ) override 
+		{
+			renderer->bindUniform( getLocation(), getValue() );
+		}
 
 	private:
-		Type _type;
-		int _location;
+		T _value;
 	};
 
-	typedef std::shared_ptr< ShaderLocation > ShaderLocationPtr;
+	typedef ShaderUniformImpl< bool > BoolUniform;
+	typedef std::shared_ptr< BoolUniform > BoolUniformPtr;
+
+	typedef ShaderUniformImpl< int > IntUniform;
+	typedef std::shared_ptr< IntUniform > IntUniformPtr;
+
+	typedef ShaderUniformImpl< float > FloatUniform;
+	typedef std::shared_ptr< FloatUniform > FloatUniformPtr;
+
+	typedef ShaderUniformImpl< Vector3f > Vector3fUniform;
+	typedef std::shared_ptr< Vector3fUniform > Vector3fUniformPtr;
+
+	typedef ShaderUniformImpl< Matrix3f > Matrix3fUniform;
+	typedef std::shared_ptr< Matrix3fUniform > Matrix3fPtr;
 
 }
 

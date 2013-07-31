@@ -38,6 +38,7 @@ ShaderProgram::ShaderProgram( VertexShaderPtr vs, FragmentShaderPtr fs )
 ShaderProgram::~ShaderProgram( void )
 {
 	resetLocations();
+	detachAllUniforms();
 }
 
 void ShaderProgram::registerLocation( ShaderLocationPtr location )
@@ -73,5 +74,33 @@ void ShaderProgram::registerStandardLocation( ShaderLocation::Type locationType,
 ShaderLocation *ShaderProgram::getStandardLocation( unsigned int standardLocationId )
 {
 	return _locations[ _standardLocations[ standardLocationId ] ].get();
+}
+
+void ShaderProgram::attachUniform( ShaderUniformPtr uniform )
+{
+	_uniforms.push_back( uniform );
+	ShaderLocationPtr location( new ShaderLocation( ShaderLocation::Type::UNIFORM, uniform->getName() ) );
+	uniform->setLocation( location );
+	registerLocation( location );
+}
+
+void ShaderProgram::foreachUniform( std::function< void( ShaderUniformPtr & ) > callback )
+{
+	for ( auto it : _uniforms ) {
+		callback( it );
+	}
+}
+
+void ShaderProgram::detachAllUniforms( void )
+{
+	for ( auto it : _uniforms ) {
+		ShaderLocation *location = getLocation( it->getName() );
+		if ( location != nullptr ) {
+			location->reset();
+			it->setLocation( nullptr );
+		}
+	}
+
+	_uniforms.clear();
 }
 

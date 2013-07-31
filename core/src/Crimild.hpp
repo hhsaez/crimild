@@ -107,6 +107,8 @@
 #include "Rendering/Shader.hpp"
 #include "Rendering/ShaderLocation.hpp"
 #include "Rendering/ShaderProgram.hpp"
+#include "Rendering/ShaderUniform.hpp"
+#include "Rendering/ShaderUniformImpl.hpp"
 #include "Rendering/Texture.hpp"
 #include "Rendering/VertexBufferObject.hpp"
 #include "Rendering/VertexFormat.hpp"

@@ -30,12 +30,14 @@
 
 #include "Shader.hpp"
 #include "ShaderLocation.hpp"
+#include "ShaderUniform.hpp"
 #include "Catalog.hpp"
 
 #include <functional>
 #include <map>
 #include <string>
 #include <vector>
+#include <list>
 
 namespace crimild {
 
@@ -101,6 +103,14 @@ namespace crimild {
 	private:
 		std::map< std::string, ShaderLocationPtr > _locations;
 		std::map< unsigned int, std::string > _standardLocations;
+
+	public:
+		void attachUniform( ShaderUniformPtr uniform );
+		void detachAllUniforms( void );
+		void foreachUniform( std::function< void( ShaderUniformPtr & ) > callback );
+
+	private:
+		std::list< ShaderUniformPtr > _uniforms;
 	};
 
 	typedef std::shared_ptr< ShaderProgram > ShaderProgramPtr;

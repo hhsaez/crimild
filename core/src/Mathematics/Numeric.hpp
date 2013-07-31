@@ -118,6 +118,24 @@ namespace crimild {
 			return input < 0 ? -1 : 1;
 		}
 
+		static double random( void )
+		{
+			double result = 0.01 * ( rand() % 100 );
+			return result;
+		}
+
+		static PRECISION random( PRECISION max ) 
+		{
+			PRECISION result = max * random();
+			return result;
+		}
+
+		static PRECISION random( PRECISION min, PRECISION max )
+		{
+			PRECISION result = min + random() * ( max - min );;
+			return result;
+		}
+
 	};
 
 	template< typename T > const T Numeric< T >::ZERO_TOLERANCE = static_cast< T >( 1e-06 );
