@@ -68,6 +68,7 @@
 #include "Components/MaterialComponent.hpp"
 #include "Components/NodeComponent.hpp"
 #include "Components/OrbitComponent.hpp"
+#include "Components/ParticleSystemComponent.hpp"
 #include "Components/RotationComponent.hpp"
 #include "Components/RenderStateComponent.hpp"
 

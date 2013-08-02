@@ -25,32 +25,28 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_GLFW_
-#define CRIMILD_GLFW_
+#ifndef CRIMILD_GLFW_SCENE_GRAPH_PARTICLE_SYSTEM_
+#define CRIMILD_GLFW_SCENE_GRAPH_PARTICLE_SYSTEM_
 
-#include "Rendering/GL3/IndexBufferObjectCatalog.hpp"
-#include "Rendering/GL3/Renderer.hpp"
-#include "Rendering/GL3/OffscreenRenderPass.hpp"
-#include "Rendering/GL3/ShaderProgramCatalog.hpp"
-#include "Rendering/GL3/TextureCatalog.hpp"
-#include "Rendering/GL3/Utils.hpp"
-#include "Rendering/GL3/VertexBufferObjectCatalog.hpp"
+#include <Crimild.hpp>
 
-#include "Rendering/GL3/Library/SepiaToneShaderProgram.hpp"
-#include "Rendering/GL3/Library/GlowShaderProgram.hpp"
+namespace crimild {
 
-#include "Rendering/GL3/Programs/ParticleSystemShaderProgram.hpp"
+	namespace gl3 {
 
-#include "Rendering/GL3/Library/FlatMaterial.hpp"
-#include "Rendering/GL3/Library/FlatShaderProgram.hpp"
-#include "Rendering/GL3/Library/GouraudMaterial.hpp"
-#include "Rendering/GL3/Library/GouraudShaderProgram.hpp"
-#include "Rendering/GL3/Library/PhongMaterial.hpp"
-#include "Rendering/GL3/Library/PhongShaderProgram.hpp"
+		class ParticleSystem : public Geometry {
+			CRIMILD_DISALLOW_COPY_AND_ASSIGN( ParticleSystem );
 
-#include "SceneGraph/ParticleSystem.hpp"
+		public:
+			explicit ParticleSystem( std::string name = "" );
+			virtual ~ParticleSystem( void );
+		};
 
-#include "Simulation/GLSimulation.hpp"
+		typedef std::shared_ptr< ParticleSystem > ParticleSystemPtr;
+
+	}
+
+}
 
 #endif
 

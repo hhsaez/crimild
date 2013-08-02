@@ -25,32 +25,26 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_GLFW_
-#define CRIMILD_GLFW_
-
-#include "Rendering/GL3/IndexBufferObjectCatalog.hpp"
-#include "Rendering/GL3/Renderer.hpp"
-#include "Rendering/GL3/OffscreenRenderPass.hpp"
-#include "Rendering/GL3/ShaderProgramCatalog.hpp"
-#include "Rendering/GL3/TextureCatalog.hpp"
-#include "Rendering/GL3/Utils.hpp"
-#include "Rendering/GL3/VertexBufferObjectCatalog.hpp"
-
-#include "Rendering/GL3/Library/SepiaToneShaderProgram.hpp"
-#include "Rendering/GL3/Library/GlowShaderProgram.hpp"
+#include "ParticleSystem.hpp"
 
 #include "Rendering/GL3/Programs/ParticleSystemShaderProgram.hpp"
 
-#include "Rendering/GL3/Library/FlatMaterial.hpp"
-#include "Rendering/GL3/Library/FlatShaderProgram.hpp"
-#include "Rendering/GL3/Library/GouraudMaterial.hpp"
-#include "Rendering/GL3/Library/GouraudShaderProgram.hpp"
-#include "Rendering/GL3/Library/PhongMaterial.hpp"
-#include "Rendering/GL3/Library/PhongShaderProgram.hpp"
+using namespace crimild;
+using namespace crimild::gl3;
 
-#include "SceneGraph/ParticleSystem.hpp"
+ParticleSystem::ParticleSystem( std::string name )
+	: Geometry( name )
+{
+	ParticleSystemComponentPtr particleSystemComponent( new ParticleSystemComponent() );
 
-#include "Simulation/GLSimulation.hpp"
+	ParticleSystemShaderProgramPtr program( new ParticleSystemShaderProgram() );
+	particleSystemComponent->getParticleMaterial()->setProgram( program );
 
-#endif
+	attachComponent( particleSystemComponent );
+}
+
+ParticleSystem::~ParticleSystem( void )
+{
+
+}
 
