@@ -360,5 +360,27 @@ namespace crimild {
 
 }
 
+template< typename U >
+crimild::Transformation< U > operator+( const crimild::Transformation< U > &t0, const crimild::Transformation< U > &t1 )
+{
+	crimild::Transformation< U > r;
+	r.computeFrom( t0, t1 );
+	return r;
+}
+
+template< typename U, typename V >
+crimild::Transformation< U > operator*( const crimild::Transformation< U > &t, V scalar )
+{
+	t.setScalar( scalar );
+	return t;
+}
+
+template< typename U, typename V >
+crimild::Transformation< U > operator*( V scalar, const crimild::Transformation< U > &t )
+{
+	t.setScalar( scalar );
+	return t;
+}
+
 #endif
 
