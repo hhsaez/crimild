@@ -25,70 +25,28 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Geometry.hpp"
+#ifndef CRIMILD_GLFW_RENDERING_PROGRAMS_SIGNED_DISTANCE_FIELD_
+#define CRIMILD_GLFW_RENDERING_PROGRAMS_SIGNED_DISTANCE_FIELD_
 
-#include "Components/MaterialComponent.hpp"
-#include "Components/RenderStateComponent.hpp"
+#include <Crimild.hpp>
 
-#include <algorithm>
+namespace crimild {
 
-using namespace crimild;
+	namespace gl3 {
 
-Geometry::Geometry( std::string name )
-	: Node( name )
-{
-	MaterialComponentPtr materials( new MaterialComponent() );
-	attachComponent( materials );
+		class SignedDistanceFieldShaderProgram : public ShaderProgram {
+			CRIMILD_DISALLOW_COPY_AND_ASSIGN( SignedDistanceFieldShaderProgram );
 
-	RenderStateComponentPtr renderState( new RenderStateComponent() );
-	attachComponent( renderState );
+		public:
+			SignedDistanceFieldShaderProgram( void );
+			virtual ~SignedDistanceFieldShaderProgram( void );
+		};
+
+		typedef std::shared_ptr< SignedDistanceFieldShaderProgram > SignedDistanceFieldShaderProgramPtr;
+
+	}
+
 }
 
-Geometry::~Geometry( void )
-{
-	detachAllPrimitives();
-}
-
-void Geometry::attachPrimitive( PrimitivePtr primitive )
-{
-	_primitives.push_back( primitive );	
-	updateModelBounds();
-}
-
-void Geometry::detachPrimitive( PrimitivePtr primitive )
-{
-	_primitives.remove( primitive );
-}
-
-void Geometry::foreachPrimitive( std::function< void( PrimitivePtr & ) > callback )
-{
-	std::for_each( std::begin( _primitives ), std::end( _primitives ), callback );
-}
-
-void Geometry::detachAllPrimitives( void )
-{
-	_primitives.clear();
-}
-
-void Geometry::accept( NodeVisitor &visitor )
-{
-	visitor.visitGeometry( this );
-}
-
-void Geometry::updateModelBounds( void )
-{
-	bool firstChild = true;
-	foreachPrimitive( [&]( PrimitivePtr primitive ) {
-		VertexBufferObject *vbo = primitive->getVertexBuffer();
-		if ( vbo != nullptr ) {
-			if ( firstChild ) {
-				localBound()->computeFrom( vbo);
-				firstChild = false;
-			}
-			else {
-				localBound()->expandToContain( vbo );
-			}
-		}
-	});	
-}
+#endif
 

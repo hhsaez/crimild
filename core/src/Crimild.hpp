@@ -63,6 +63,7 @@
 #include "SceneGraph/Light.hpp"
 #include "SceneGraph/Node.hpp"
 #include "SceneGraph/Switch.hpp"
+#include "SceneGraph/Text.hpp"
 
 #include "Components/LambdaComponent.hpp"
 #include "Components/MaterialComponent.hpp"

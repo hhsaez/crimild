@@ -39,7 +39,7 @@ TEST( LightTest, construction )
 
 	EXPECT_EQ( Light::Type::POINT, light->getType() );
 	EXPECT_EQ( Vector3f( 0.0f, 0.0f, 0.0f ), light->getPosition() );
-	EXPECT_EQ( Vector3f( 1.0f, 0.0f, 0.01f ), light->getAttenuation() );
+	EXPECT_EQ( Vector3f( 1.0f, 0.0f, 0.0f ), light->getAttenuation() );
 	EXPECT_EQ( Vector3f( 0.0f, 0.0f, 0.0f ), light->getDirection() );
 	EXPECT_EQ( RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ), light->getColor() );
 	EXPECT_EQ( 0.0f, light->getOuterCutoff() );

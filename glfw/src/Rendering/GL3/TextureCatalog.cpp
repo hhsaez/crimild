@@ -98,9 +98,35 @@ void gl3::TextureCatalog::load( Texture *texture )
     glBindTexture( GL_TEXTURE_2D, textureId );
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, 
+
+	GLint internalFormat;
+	GLint format;
+	if ( texture->getImage()->getBpp() == 4 ) {
+		internalFormat = GL_RGBA;
+		if ( texture->getImage()->getPixelFormat() == Image::PixelFormat::BGRA ) {
+			format = GL_BGRA;
+		}
+		else {
+			format = GL_RGBA;
+		}
+	}
+	else if ( texture->getImage()->getBpp() == 3 ) {
+		internalFormat = GL_RGB;
+		if ( texture->getImage()->getPixelFormat() == Image::PixelFormat::BGR ) {
+			format = GL_BGR;
+		}
+		else {
+			format = GL_RGB;
+		}
+	}
+	else if ( texture->getImage()->getBpp() == 1 ) {
+		internalFormat = GL_RED;
+		format = GL_RED;
+	}
+
+    glTexImage2D( GL_TEXTURE_2D, 0, internalFormat, 
     	texture->getImage()->getWidth(), texture->getImage()->getHeight(), 0, 
-    	( texture->getImage()->getBpp() == 3 ? GL_RGB : GL_RGBA ), 
+    	format, 
     	GL_UNSIGNED_BYTE,
         ( GLvoid * ) texture->getImage()->getData() );
 }

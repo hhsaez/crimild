@@ -25,70 +25,75 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef CRIMILD_CORE_SCENE_GRAPH_TEXT_
+#define CRIMILD_CORE_SCENE_GRAPH_TEXT_
+
 #include "Geometry.hpp"
+#include "Rendering/Image.hpp"
+#include "Rendering/Material.hpp"
 
-#include "Components/MaterialComponent.hpp"
-#include "Components/RenderStateComponent.hpp"
+namespace crimild {
 
-#include <algorithm>
+	class Font {
+	public:
+		struct Glyph {
+			char symbol;
+			float width;
+			float height;
+			float bearingX;
+			float bearingY;
+			float advance;
+			float uOffset;
+			float vOffset;
+			float u;		
+			float v;
+		};
 
-using namespace crimild;
+	public:
+		Font( std::string faceFilePath, std::string glyphFilePath );
+		virtual ~Font( void );
 
-Geometry::Geometry( std::string name )
-	: Node( name )
-{
-	MaterialComponentPtr materials( new MaterialComponent() );
-	attachComponent( materials );
+		ImagePtr getFace( void ) { return _face; }
+		Glyph getGlyph( char c ) { return _glyphs[ c ]; }
 
-	RenderStateComponentPtr renderState( new RenderStateComponent() );
-	attachComponent( renderState );
+	private:
+		void loadGlyphs( std::string file );
+
+		ImagePtr _face;
+		std::map< char, Glyph > _glyphs;
+	};
+
+	typedef std::shared_ptr< Font > FontPtr;
+
+	class Text : public Geometry {
+	public:
+		Text( void );
+		virtual ~Text( void );
+
+		std::string getText( void ) const { return _text; }
+		void setText( std::string text );
+
+		float getSize( void ) const { return _size; }
+		void setSize( float size );
+
+		Font *getFont( void ) { return _font.get(); }
+		void setFont( FontPtr font );
+
+		Material *getMaterial( void ) { return _material.get(); }
+
+	private:
+		void updatePrimitive( void );
+
+		std::string _text;
+		float _size;
+		FontPtr _font;
+		PrimitivePtr _primitive;
+		MaterialPtr _material;
+	};
+
+	typedef std::shared_ptr< Text > TextPtr;
+
 }
 
-Geometry::~Geometry( void )
-{
-	detachAllPrimitives();
-}
-
-void Geometry::attachPrimitive( PrimitivePtr primitive )
-{
-	_primitives.push_back( primitive );	
-	updateModelBounds();
-}
-
-void Geometry::detachPrimitive( PrimitivePtr primitive )
-{
-	_primitives.remove( primitive );
-}
-
-void Geometry::foreachPrimitive( std::function< void( PrimitivePtr & ) > callback )
-{
-	std::for_each( std::begin( _primitives ), std::end( _primitives ), callback );
-}
-
-void Geometry::detachAllPrimitives( void )
-{
-	_primitives.clear();
-}
-
-void Geometry::accept( NodeVisitor &visitor )
-{
-	visitor.visitGeometry( this );
-}
-
-void Geometry::updateModelBounds( void )
-{
-	bool firstChild = true;
-	foreachPrimitive( [&]( PrimitivePtr primitive ) {
-		VertexBufferObject *vbo = primitive->getVertexBuffer();
-		if ( vbo != nullptr ) {
-			if ( firstChild ) {
-				localBound()->computeFrom( vbo);
-				firstChild = false;
-			}
-			else {
-				localBound()->expandToContain( vbo );
-			}
-		}
-	});	
-}
+#endif
 

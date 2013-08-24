@@ -353,7 +353,8 @@ namespace crimild {
 			if ( dot > DOT_THRESHOLD ) {
 				// if the inputs are too close for comfort, use linear interpolation
 				// and normalize the result.
-				Quaternion< T > result = linear( q0, q1, t );
+				Quaternion< T > result;
+				linear( q0, q1, t, result );
 				return result.normalize();
 			}
 

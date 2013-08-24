@@ -112,6 +112,5 @@ TEST( GeometryNodeTest, detachAllPrimitives )
 		++count;
 	});
 	EXPECT_EQ( count, 0 );
-
 }
 

@@ -35,8 +35,8 @@ TEST( MaterialTest, construction )
 {
 	MaterialPtr material( new Material() );
 
-	EXPECT_EQ( RGBAColorf( 0.2f, 0.2f, 0.2f, 1.0f ), material->getAmbient() );
-	EXPECT_EQ( RGBAColorf( 0.8f, 0.8f, 0.8f, 1.0f ), material->getDiffuse() );
+	EXPECT_EQ( RGBAColorf( 0.0f, 0.0f, 0.0f, 1.0f ), material->getAmbient() );
+	EXPECT_EQ( RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ), material->getDiffuse() );
 	EXPECT_EQ( RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ), material->getSpecular() );
 	EXPECT_EQ( 50.0f, material->getShininess() );
 
