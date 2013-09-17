@@ -221,13 +221,40 @@ bool SphereBoundingVolume::contains( const Vector3f &point ) const
 	return ( centerDiffSqr < radiusSqr );
 }
 
-bool SphereBoundingVolume::intersects( const Ray3f &ray ) const
+bool SphereBoundingVolume::testIntersection( const Ray3f &ray ) const
 {
 	return Intersection::test( _sphere, ray );
 }
 
-bool SphereBoundingVolume::intersects( const BoundingVolume *input ) const
+bool SphereBoundingVolume::testIntersection( const BoundingVolume *other ) const
 {
-	return Intersection::test( _sphere, Sphere3f( input->getCenter(), input->getRadius() ) );
+	return other->testIntersection( _sphere );
+}
+
+bool SphereBoundingVolume::testIntersection( const Sphere3f &sphere ) const
+{
+	return Intersection::test( _sphere, sphere );
+}
+
+bool SphereBoundingVolume::testIntersection( const Plane3f &plane ) const
+{
+	return whichSide( plane ) == 0;
+}
+
+void SphereBoundingVolume::resolveIntersection( const BoundingVolume *other, TransformationImpl &result ) const
+{
+	other->resolveIntersection( _sphere, result );
+}
+
+void SphereBoundingVolume::resolveIntersection( const Sphere3f &other, TransformationImpl &result ) const
+{
+	Vector3f direction = other.getCenter() - _sphere.getCenter();
+	float d = direction.getMagnitude();
+	float diff = ( _sphere.getRadius() + other.getRadius() ) - d;
+	result.setTranslate( direction.normalize() * diff );
+}
+
+void SphereBoundingVolume::resolveIntersection( const Plane3f &plane, TransformationImpl &result ) const
+{
 }
 

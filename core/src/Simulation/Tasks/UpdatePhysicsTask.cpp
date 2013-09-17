@@ -25,39 +25,37 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_DISTANCE_
-#define CRIMILD_MATHEMATICS_DISTANCE_
+#include "UpdatePhysicsTask.hpp"
+#include "Components/NodeComponentCatalog.hpp"
+#include "Components/RigidBodyComponent.hpp"
+#include "Components/ColliderComponent.hpp"
 
-#include "Ray.hpp"
-#include "Vector.hpp"
-#include "Plane.hpp"
+using namespace crimild;
 
-namespace crimild {
-
-	class Distance {
-	public:
-		template< unsigned int SIZE, typename PRECISION >
-		static double compute( const Ray< SIZE, PRECISION > &ray, const Vector< SIZE, PRECISION > &point )
-		{
-			return std::sqrt( computeSquared( ray, point ) );
-		}
-
-		template< unsigned int SIZE, typename PRECISION >
-		static double computeSquared( const Ray< SIZE, PRECISION > &ray, const Vector< SIZE, PRECISION > &point )
-		{
-			Vector< SIZE, PRECISION > v0 = point - ray.getOrigin();
-			double v1 = v0 * ray.getDirection();
-			return ( v0 * v0 - v1 * v1 / ( ray.getDirection().getSquaredMagnitude() ) );
-		}
-
-		template< unsigned int SIZE, typename PRECISION >
-		static double compute( const Plane< SIZE, PRECISION > &plane, const Vector< SIZE, PRECISION > &point )
-		{
-			return ( plane.getNormal() * point ) + plane.getConstant();
-		}
-	};
+UpdatePhysicsTask::UpdatePhysicsTask( unsigned int priority, NodePtr scene )
+	: Task( priority ),
+	  _scene( scene )
+{
 
 }
 
-#endif
+UpdatePhysicsTask::~UpdatePhysicsTask( void )
+{
+
+}
+
+void UpdatePhysicsTask::update( void ) 
+{
+	NodeComponentCatalog< RigidBodyComponent >::getInstance().forEach( []( RigidBodyComponent *rigidBody ) {
+		NodeComponentCatalog< ColliderComponent >::getInstance().forEach( [&]( ColliderComponent *collider ) {
+			if ( rigidBody->testCollision( collider ) ) {
+				rigidBody->resolveCollision( collider );
+				ColliderComponent *rbCollider = rigidBody->getNode()->getComponent< ColliderComponent >();
+				if ( rbCollider ) {
+					collider->onCollision( rbCollider );
+				}
+			}
+		});
+	});
+}
 

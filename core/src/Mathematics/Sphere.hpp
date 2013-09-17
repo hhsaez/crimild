@@ -128,17 +128,8 @@ namespace crimild {
 
 		int whichSide( const PlaneImpl &plane ) const
 		{
-			T d = Distance::compute( plane, _center );
-
-			if ( d < -_radius ) {
-				return -1;
-			}
-			else if ( d > +_radius ) {
-				return +1;
-			}
-			else {
-				return 0;
-			}
+			double d = Distance::compute( plane, _center );
+			return ( d < -_radius ? -1 : d > +_radius ? 1 : 0 );
 		}
 
 	private:

@@ -25,39 +25,28 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_DISTANCE_
-#define CRIMILD_MATHEMATICS_DISTANCE_
+#ifndef CRIMILD_CORE_SIMULATION_TASKS_UPDATE_PHYSICS_
+#define CRIMILD_CORE_SIMULATION_TASKS_UPDATE_PHYSICS_
 
-#include "Ray.hpp"
-#include "Vector.hpp"
-#include "Plane.hpp"
+#include "../Task.hpp"
+#include "SceneGraph/Node.hpp"
 
 namespace crimild {
 
-	class Distance {
+	class UpdatePhysicsTask : public Task {
 	public:
-		template< unsigned int SIZE, typename PRECISION >
-		static double compute( const Ray< SIZE, PRECISION > &ray, const Vector< SIZE, PRECISION > &point )
-		{
-			return std::sqrt( computeSquared( ray, point ) );
-		}
+		UpdatePhysicsTask( unsigned int priority, NodePtr scene );
+		virtual ~UpdatePhysicsTask( void );
 
-		template< unsigned int SIZE, typename PRECISION >
-		static double computeSquared( const Ray< SIZE, PRECISION > &ray, const Vector< SIZE, PRECISION > &point )
-		{
-			Vector< SIZE, PRECISION > v0 = point - ray.getOrigin();
-			double v1 = v0 * ray.getDirection();
-			return ( v0 * v0 - v1 * v1 / ( ray.getDirection().getSquaredMagnitude() ) );
-		}
+		virtual void update( void ) override;
 
-		template< unsigned int SIZE, typename PRECISION >
-		static double compute( const Plane< SIZE, PRECISION > &plane, const Vector< SIZE, PRECISION > &point )
-		{
-			return ( plane.getNormal() * point ) + plane.getConstant();
-		}
+	private:
+		NodePtr _scene;
 	};
 
-}
+	typedef std::shared_ptr< UpdatePhysicsTask > UpdatePhysicsTaskPtr;
+
+	}
 
 #endif
 

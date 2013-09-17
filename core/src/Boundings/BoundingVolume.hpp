@@ -32,6 +32,8 @@
 #include "Mathematics/Vector.hpp"
 #include "Mathematics/Transformation.hpp"
 #include "Mathematics/Ray.hpp"
+#include "Mathematics/Sphere.hpp"
+#include "Mathematics/Plane.hpp"
 #include "Rendering/VertexBufferObject.hpp"
 
 namespace crimild {
@@ -62,15 +64,21 @@ namespace crimild {
 		virtual void expandToContain( const Vector3f &point ) = 0;
 		virtual void expandToContain( const Vector3f *positions, unsigned int positionCount ) = 0;
 		virtual void expandToContain( const VertexBufferObject *vbo ) = 0;
-		virtual void expandToContain( const BoundingVolume *input ) = 0;
+		virtual void expandToContain( const BoundingVolume *other ) = 0;
 
 	public:
 		virtual int whichSide( const Plane3f &plane ) const = 0;
 		virtual bool contains( const Vector3f &point ) const = 0;
 
 	public:
-		virtual bool intersects( const Ray3f &ray ) const = 0;
-		virtual bool intersects( const BoundingVolume *input ) const = 0;
+		virtual bool testIntersection( const Ray3f &ray ) const = 0;
+		virtual bool testIntersection( const BoundingVolume *other ) const = 0;
+		virtual bool testIntersection( const Sphere3f &sphere ) const = 0;
+		virtual bool testIntersection( const Plane3f &plane ) const = 0;
+
+		virtual void resolveIntersection( const BoundingVolume *other, TransformationImpl &result ) const = 0;
+		virtual void resolveIntersection( const Sphere3f &sphere, TransformationImpl &result ) const = 0;
+		virtual void resolveIntersection( const Plane3f &plane, TransformationImpl &result ) const = 0;
 	};
 
 	typedef std::shared_ptr< BoundingVolume > BoundingVolumePtr;

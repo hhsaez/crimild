@@ -25,36 +25,46 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_DISTANCE_
-#define CRIMILD_MATHEMATICS_DISTANCE_
+#ifndef CRIMILD_CORE_COMPONENTS_CATALOG_
+#define CRIMILD_CORE_COMPONENTS_CATALOG_
 
-#include "Ray.hpp"
-#include "Vector.hpp"
-#include "Plane.hpp"
+#include <list>
 
 namespace crimild {
 
-	class Distance {
+	template< class NODE_COMPONENT_TYPE >
+	class NodeComponentCatalog {
+	private:
+		NodeComponentCatalog( void ) { };
+		virtual ~NodeComponentCatalog( void ) { };
+
 	public:
-		template< unsigned int SIZE, typename PRECISION >
-		static double compute( const Ray< SIZE, PRECISION > &ray, const Vector< SIZE, PRECISION > &point )
+		static NodeComponentCatalog &getInstance( void )
 		{
-			return std::sqrt( computeSquared( ray, point ) );
+			static NodeComponentCatalog instance;
+			return instance;
 		}
 
-		template< unsigned int SIZE, typename PRECISION >
-		static double computeSquared( const Ray< SIZE, PRECISION > &ray, const Vector< SIZE, PRECISION > &point )
+	public:
+		void registerComponent( NODE_COMPONENT_TYPE *component ) 
 		{
-			Vector< SIZE, PRECISION > v0 = point - ray.getOrigin();
-			double v1 = v0 * ray.getDirection();
-			return ( v0 * v0 - v1 * v1 / ( ray.getDirection().getSquaredMagnitude() ) );
+			_components.push_back( component );
 		}
 
-		template< unsigned int SIZE, typename PRECISION >
-		static double compute( const Plane< SIZE, PRECISION > &plane, const Vector< SIZE, PRECISION > &point )
+		void unregisterComponent( NODE_COMPONENT_TYPE *component )
 		{
-			return ( plane.getNormal() * point ) + plane.getConstant();
+			_components.remove( component );
 		}
+
+		void forEach( std::function< void( NODE_COMPONENT_TYPE * ) > callback )
+		{
+			for ( NODE_COMPONENT_TYPE *component : _components ) {
+				callback( component );
+			}
+		}
+
+	private:
+		std::list< NODE_COMPONENT_TYPE * > _components;
 	};
 
 }

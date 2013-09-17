@@ -25,37 +25,33 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_DISTANCE_
-#define CRIMILD_MATHEMATICS_DISTANCE_
+#ifndef CRIMILD_CORE_COMPONENTS_COLLIDER_
+#define CRIMILD_CORE_COMPONENTS_COLLIDER_
 
-#include "Ray.hpp"
-#include "Vector.hpp"
-#include "Plane.hpp"
+#include "NodeComponent.hpp"
+#include "Boundings/BoundingVolume.hpp"
 
 namespace crimild {
 
-	class Distance {
+	class ColliderComponent : public NodeComponent {
 	public:
-		template< unsigned int SIZE, typename PRECISION >
-		static double compute( const Ray< SIZE, PRECISION > &ray, const Vector< SIZE, PRECISION > &point )
-		{
-			return std::sqrt( computeSquared( ray, point ) );
-		}
+		static const char *NAME;
 
-		template< unsigned int SIZE, typename PRECISION >
-		static double computeSquared( const Ray< SIZE, PRECISION > &ray, const Vector< SIZE, PRECISION > &point )
-		{
-			Vector< SIZE, PRECISION > v0 = point - ray.getOrigin();
-			double v1 = v0 * ray.getDirection();
-			return ( v0 * v0 - v1 * v1 / ( ray.getDirection().getSquaredMagnitude() ) );
-		}
+	public:
+		ColliderComponent( void );
+		explicit ColliderComponent( BoundingVolumePtr boundingVolume );
+		virtual ~ColliderComponent( void );
 
-		template< unsigned int SIZE, typename PRECISION >
-		static double compute( const Plane< SIZE, PRECISION > &plane, const Vector< SIZE, PRECISION > &point )
-		{
-			return ( plane.getNormal() * point ) + plane.getConstant();
-		}
+		virtual const BoundingVolume *getBoundingVolume( void );
+
+		virtual bool testCollision( ColliderComponent *other );
+		virtual void onCollision( ColliderComponent *collider );
+
+	private:
+		BoundingVolumePtr _boundingVolume;
 	};
+
+	typedef std::shared_ptr< ColliderComponent > ColliderComponentPtr;
 
 }
 

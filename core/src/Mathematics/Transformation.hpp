@@ -275,8 +275,19 @@ namespace crimild {
 			return result;
 		}
 
-		void lookAt( const Vector3Impl &targetPosition, const Vector3Impl &upReference )
+		void lookAt( const Vector3Impl &target, const Vector3Impl &up )
 		{
+			Vector3f currentDirection;
+			computeDirection( currentDirection );
+			currentDirection.normalize();
+
+			Vector3f newDirection = target - getTranslate();
+			newDirection.normalize();
+
+			Vector3f axis = currentDirection ^ newDirection;
+			float angle = std::acos( currentDirection * newDirection );
+
+			_rotate.fromAxisAngle( axis, angle );
 		}
         
         Transformation &fromMatrix( const Matrix4Impl &m )

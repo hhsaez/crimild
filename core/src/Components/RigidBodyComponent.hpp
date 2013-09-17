@@ -25,37 +25,42 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_DISTANCE_
-#define CRIMILD_MATHEMATICS_DISTANCE_
+#ifndef CRIMILD_CORE_COMPONENTS_RIGID_BODY_
+#define CRIMILD_CORE_COMPONENTS_RIGID_BODY_
 
-#include "Ray.hpp"
-#include "Vector.hpp"
-#include "Plane.hpp"
+#include "NodeComponent.hpp"
+#include "Mathematics/Vector.hpp"
 
 namespace crimild {
 
-	class Distance {
+	class ColliderComponent;
+
+	class RigidBodyComponent : public NodeComponent {
 	public:
-		template< unsigned int SIZE, typename PRECISION >
-		static double compute( const Ray< SIZE, PRECISION > &ray, const Vector< SIZE, PRECISION > &point )
-		{
-			return std::sqrt( computeSquared( ray, point ) );
-		}
+		static const char *NAME;
 
-		template< unsigned int SIZE, typename PRECISION >
-		static double computeSquared( const Ray< SIZE, PRECISION > &ray, const Vector< SIZE, PRECISION > &point )
-		{
-			Vector< SIZE, PRECISION > v0 = point - ray.getOrigin();
-			double v1 = v0 * ray.getDirection();
-			return ( v0 * v0 - v1 * v1 / ( ray.getDirection().getSquaredMagnitude() ) );
-		}
+	public:
+		RigidBodyComponent( void );
+		virtual ~RigidBodyComponent( void );
 
-		template< unsigned int SIZE, typename PRECISION >
-		static double compute( const Plane< SIZE, PRECISION > &plane, const Vector< SIZE, PRECISION > &point )
-		{
-			return ( plane.getNormal() * point ) + plane.getConstant();
-		}
+		void setGravity( const Vector3f &gravity ) { _gravity = gravity; }
+		const Vector3f &getGravity( void ) const { return _gravity; }
+
+		void setForce( const Vector3f &force ) { _force = force; }
+		const Vector3f &getForce( void ) const { return _force; }
+
+		virtual void update( const Time &t ) override;
+
+		virtual bool testCollision( ColliderComponent *other );
+		virtual void resolveCollision( ColliderComponent *other );
+
+	private:
+		Vector3f _gravity;
+		Vector3f _force;
+		Vector3f _previousPosition;
 	};
+
+	typedef std::shared_ptr< RigidBodyComponent > RigidBodyComponentPtr;
 
 }
 

@@ -50,6 +50,7 @@
 #include "Foundation/StringUtils.hpp"
 
 #include "Boundings/BoundingVolume.hpp"
+#include "Boundings/PlaneBoundingVolume.hpp"
 #include "Boundings/SphereBoundingVolume.hpp"
 
 #include "Exceptions/Exception.hpp"
@@ -68,10 +69,13 @@
 #include "Components/LambdaComponent.hpp"
 #include "Components/MaterialComponent.hpp"
 #include "Components/NodeComponent.hpp"
+#include "Components/NodeComponentCatalog.hpp"
 #include "Components/OrbitComponent.hpp"
 #include "Components/ParticleSystemComponent.hpp"
 #include "Components/RotationComponent.hpp"
 #include "Components/RenderStateComponent.hpp"
+#include "Components/ColliderComponent.hpp"
+#include "Components/RigidBodyComponent.hpp"
 
 #include "Visitors/FetchCameras.hpp"
 #include "Visitors/FetchLights.hpp"
@@ -129,6 +133,7 @@
 #include "Simulation/Tasks/EndRenderTask.hpp"
 #include "Simulation/Tasks/RenderSceneTask.hpp"
 #include "Simulation/Tasks/UpdateSceneTask.hpp"
+#include "Simulation/Tasks/UpdatePhysicsTask.hpp"
 
 #include "Debug/DebugRenderPass.hpp"
 

@@ -32,11 +32,13 @@
 #include "Tasks/BeginRenderTask.hpp"
 #include "Tasks/EndRenderTask.hpp"
 #include "Tasks/UpdateSceneTask.hpp"
+#include "Tasks/UpdatePhysicsTask.hpp"
 #include "Tasks/RenderSceneTask.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "Visitors/FetchCameras.hpp"
 
 #define UPDATE_SCENE_PRIORITY 100
+#define UPDATE_PHYSICS_PRIORITY 200
 #define BEGIN_RENDER_PRIORITY 1000
 #define RENDER_SCENE_PRIORITY 2000
 #define END_RENDER_PRIORITY 3000
@@ -97,6 +99,9 @@ void Simulation::attachScene( NodePtr scene )
 		fetchCameras.foreachCamera( [&]( Camera *camera ) mutable {
 			UpdateSceneTaskPtr updateScene( new UpdateSceneTask( UPDATE_SCENE_PRIORITY, scene ) );
 			getMainLoop()->startTask( updateScene );
+
+			UpdatePhysicsTaskPtr updatePhysics( new UpdatePhysicsTask( UPDATE_PHYSICS_PRIORITY, scene ) );
+			getMainLoop()->startTask( updatePhysics );
 
 			RenderSceneTaskPtr renderScene( new RenderSceneTask( RENDER_SCENE_PRIORITY, scene, camera ) );
 			getMainLoop()->startTask( renderScene );

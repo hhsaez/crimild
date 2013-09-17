@@ -25,39 +25,44 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_DISTANCE_
-#define CRIMILD_MATHEMATICS_DISTANCE_
+#include "ColliderComponent.hpp"
+#include "NodeComponentCatalog.hpp"
+#include "SceneGraph/Node.hpp"
 
-#include "Ray.hpp"
-#include "Vector.hpp"
-#include "Plane.hpp"
+using namespace crimild;
 
-namespace crimild {
+const char *ColliderComponent::NAME = "collider";
 
-	class Distance {
-	public:
-		template< unsigned int SIZE, typename PRECISION >
-		static double compute( const Ray< SIZE, PRECISION > &ray, const Vector< SIZE, PRECISION > &point )
-		{
-			return std::sqrt( computeSquared( ray, point ) );
-		}
+ColliderComponent::ColliderComponent( void ) 
+	: NodeComponent( NAME )
+{
+	NodeComponentCatalog< ColliderComponent >::getInstance().registerComponent( this );
+}
 
-		template< unsigned int SIZE, typename PRECISION >
-		static double computeSquared( const Ray< SIZE, PRECISION > &ray, const Vector< SIZE, PRECISION > &point )
-		{
-			Vector< SIZE, PRECISION > v0 = point - ray.getOrigin();
-			double v1 = v0 * ray.getDirection();
-			return ( v0 * v0 - v1 * v1 / ( ray.getDirection().getSquaredMagnitude() ) );
-		}
+ColliderComponent::ColliderComponent( BoundingVolumePtr boundingVolume ) 
+	: NodeComponent( NAME ),
+	  _boundingVolume( boundingVolume)
+{
+	NodeComponentCatalog< ColliderComponent >::getInstance().registerComponent( this );
+}
 
-		template< unsigned int SIZE, typename PRECISION >
-		static double compute( const Plane< SIZE, PRECISION > &plane, const Vector< SIZE, PRECISION > &point )
-		{
-			return ( plane.getNormal() * point ) + plane.getConstant();
-		}
-	};
+ColliderComponent::~ColliderComponent( void )
+{
+	NodeComponentCatalog< ColliderComponent >::getInstance().unregisterComponent( this );
+}
+
+void ColliderComponent::onCollision( ColliderComponent *collider )
+{
 
 }
 
-#endif
+const BoundingVolume *ColliderComponent::getBoundingVolume( void )
+{
+	return _boundingVolume != nullptr ? _boundingVolume.get() : getNode()->getWorldBound();
+}
+
+bool ColliderComponent::testCollision( ColliderComponent *other ) 
+{
+	return getBoundingVolume()->testIntersection( other->getBoundingVolume() );
+}
 
