@@ -25,45 +25,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "UpdateTimeTask.hpp"
+#ifndef CRIMILD_COLLADA_
+#define CRIMILD_COLLADA_
 
-#include <GL/glfw.h>
+#include "COLLADALoader.hpp"
 
-using namespace crimild;
-
-UpdateTimeTask::UpdateTimeTask( int priority )
-	: Task( priority )
-{
-}
-
-UpdateTimeTask::~UpdateTimeTask( void )
-{
-
-}
-
-void UpdateTimeTask::start( void )
-{
-	Time &t = Simulation::getCurrent()->getSimulationTime();
-
-	double currentTime = glfwGetTime();
-	t.setCurrentTime( currentTime );
-	t.setLastTime( currentTime );
-	t.setDeltaTime( 0.0f );
-}
-
-void UpdateTimeTask::stop( void )
-{
-}
-
-void UpdateTimeTask::update( void )
-{
-	Time &t = Simulation::getCurrent()->getSimulationTime();
-
-	double lastTime = t.getCurrentTime();
-	double currentTime = glfwGetTime();
-
-	t.setCurrentTime( currentTime );
-	t.setLastTime( lastTime );
-	t.setDeltaTime( Numericf::min( 1.0f / 60.0f, currentTime - lastTime ) );
-}
+#endif
 

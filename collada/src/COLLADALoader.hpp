@@ -25,45 +25,63 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "UpdateTimeTask.hpp"
+#ifndef CRIMILD_COLLADA_LOADER_
+#define CRIMILD_COLLADA_LOADER_
 
-#include <GL/glfw.h>
+#include <Crimild.hpp>
 
-using namespace crimild;
+#include "VisualScene.hpp"
+#include "Geometry.hpp"
+#include "Animation.hpp"
+#include "Controller.hpp"
 
-UpdateTimeTask::UpdateTimeTask( int priority )
-	: Task( priority )
-{
+#include <libxml/parser.h>
+#include <libxml/tree.h>
+
+namespace crimild {
+
+	namespace collada {
+
+		class Node;
+		class Controller;
+		class Skin;
+
+		class COLLADALoader {
+		public:
+			COLLADALoader( std::string filePath );
+			virtual ~COLLADALoader( void );
+
+			crimild::NodePtr load( void );
+
+		private:
+			void loadGeometries( void );
+			void loadControllers( void );
+			void loadAnimations( void );
+			void loadVisualScenes( void );
+
+			void parseVisualScenes( void );
+			void parseNode( Group *parent, collada::Node *node );
+			void parseController( Group *parent, Controller *controller );
+			void parseSkin( Group *parent, Skin *skin );
+			void parseAnimations( void );
+
+		private:
+			std::string _filePath;
+
+			xmlDocPtr _document;
+			xmlNode *_rootElement;
+
+			GroupPtr _result;
+
+			collada::VisualSceneLibrary _visualSceneLibrary;
+			collada::GeometryLibrary _geometryLibrary;
+			collada::AnimationLibrary _animationLibrary;
+			collada::ControllerLibrary _controllerLibrary;
+		};
+
+	}
+
 }
 
-UpdateTimeTask::~UpdateTimeTask( void )
-{
-
-}
-
-void UpdateTimeTask::start( void )
-{
-	Time &t = Simulation::getCurrent()->getSimulationTime();
-
-	double currentTime = glfwGetTime();
-	t.setCurrentTime( currentTime );
-	t.setLastTime( currentTime );
-	t.setDeltaTime( 0.0f );
-}
-
-void UpdateTimeTask::stop( void )
-{
-}
-
-void UpdateTimeTask::update( void )
-{
-	Time &t = Simulation::getCurrent()->getSimulationTime();
-
-	double lastTime = t.getCurrentTime();
-	double currentTime = glfwGetTime();
-
-	t.setCurrentTime( currentTime );
-	t.setLastTime( lastTime );
-	t.setDeltaTime( Numericf::min( 1.0f / 60.0f, currentTime - lastTime ) );
-}
+#endif
 

@@ -55,6 +55,7 @@ void Log::setDefaultOutputHandler( LogOutputHandlerPtr handler )
 {
 	Debug.setOutputHandler( handler );
 	Error.setOutputHandler( handler );
+	Warning.setOutputHandler( handler );
 	Fatal.setOutputHandler( handler );
 	Info.setOutputHandler( handler );
 }

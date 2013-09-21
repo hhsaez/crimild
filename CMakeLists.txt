@@ -26,7 +26,7 @@ ENDIF ( CRIMILD_ENABLE_TESTS )
 # Add sources
 ADD_SUBDIRECTORY( core )
 
-OPTION( CRIMILD_ENABLE_GLFW "Would you like to build the crimild-glfw?" OFF )
+OPTION( CRIMILD_ENABLE_GLFW "Would you like to build the crimild-glfw extension?" OFF )
 IF ( CRIMILD_ENABLE_GLFW )
 	IF ( NOT EXISTS ${CRIMILD_SOURCE_DIR}/third-party/glfw-2.7.8 )
 		EXTRACT_ARCHIVE( glfw-2.7.8.zip glfw-2.7.8 ${CRIMILD_SOURCE_DIR}/third-party )
@@ -47,8 +47,13 @@ IF ( CRIMILD_ENABLE_GLFW )
 	ADD_SUBDIRECTORY( glfw )
 ENDIF ( CRIMILD_ENABLE_GLFW )
 
-OPTION( CRIMILD_ENABLE_AL "Would you like to build the crimild-al library?" OFF )
+OPTION( CRIMILD_ENABLE_AL "Would you like to build the crimild-al extension?" OFF )
 IF ( CRIMILD_ENABLE_AL )
 	ADD_SUBDIRECTORY( al )
 ENDIF ( CRIMILD_ENABLE_AL )
+
+OPTION( CRIMILD_ENABLE_COLLADA "Would you like to build the crimild-collada extension?" OFF )
+IF ( CRIMILD_ENABLE_COLLADA )
+	ADD_SUBDIRECTORY( collada )
+ENDIF ( CRIMILD_ENABLE_COLLADA )
 
