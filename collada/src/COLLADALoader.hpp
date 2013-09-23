@@ -63,6 +63,7 @@ namespace crimild {
 			void parseNode( Group *parent, collada::Node *node );
 			void parseController( Group *parent, Controller *controller );
 			void parseSkin( Group *parent, Skin *skin );
+			void parseTriangles( crimild::Geometry *geometry, Mesh *mesh, Vertices *vertices, Triangles *triangles );
 			void parseAnimations( void );
 
 		private:

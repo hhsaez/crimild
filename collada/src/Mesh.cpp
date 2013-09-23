@@ -31,17 +31,7 @@ bool Mesh::parseXML( xmlNode *input )
 		return false;
 	}
 
-	xmlNode *trianglesXML = XMLUtils::getChildXMLNodeWithName( input, COLLADA_TRIANGLES );
-	if ( trianglesXML ) {
-		TrianglesPtr triangles( new Triangles() );
-		if ( triangles->parseXML( trianglesXML ) ) {
-			_triangles = triangles;
-		}
-	}
-	else {
-		Log::Error << "No triangle information provided for mesh" << Log::End;
-		return false;
-	}
+	_trianglesLibrary.parseXML( input );
 
 	return true;
 }

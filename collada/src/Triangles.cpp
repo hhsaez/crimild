@@ -19,6 +19,7 @@ bool Triangles::parseXML( xmlNode *input )
 
 	_inputLibrary.parseXML( input );
 
+	_count = 0;
 	xmlChar *triangleCountXML = xmlGetProp( input, ( const xmlChar * ) COLLADA_COUNT );
 	if ( triangleCountXML ) {
 		_count = xmlStringToValue< unsigned int >( triangleCountXML );

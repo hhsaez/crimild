@@ -214,14 +214,6 @@ void COLLADALoader::parseSkin( Group *parent, Skin *skin )
 
 	Log::Debug << "Found mesh object in geometry" << Log::End;
 
-	collada::Triangles *triangles = mesh->getTriangles();
-	if ( triangles == NULL ) {
-		Log::Debug << "Cannot find valid triangles object in mesh" << Log::End;
-		return;
-	}
-
-	Log::Debug << "Found triangles element" << Log::End;
-
 	collada::Vertices *vertices = mesh->getVertices();
 	if ( vertices == NULL ) {
 		Log::Error << "Cannot find vertices object in mesh" << Log::End;
@@ -230,14 +222,28 @@ void COLLADALoader::parseSkin( Group *parent, Skin *skin )
 
 	Log::Debug << "Found vertices information for mesh" << Log::End;
 
+	crimild::GeometryPtr child( new crimild::Geometry() );
+
+	mesh->getTrianglesLibrary()->foreachEntity( [&]( collada::TrianglesPtr triangles ) {
+		parseTriangles( child.get(), mesh, vertices, triangles.get() );
+	});
+
+	parent->attachNode( child );
+}
+
+void COLLADALoader::parseTriangles( crimild::Geometry *geometry, Mesh *mesh, Vertices *vertices, Triangles *triangles ) 
+{
 	unsigned int vertexComponentCount = 0;
 	unsigned int vertexCount = 0;
 	unsigned int positionComponents = 0;
 	unsigned int textureCoordinateComponents = 0;
 	unsigned int normalComponents = 0;
 	const float *positions = NULL;
-	const float *textureCoords = NULL;
+	unsigned int positionIndexOffset = 0;
 	const float *normals = NULL;
+	unsigned int normalIndexOffset = 0;
+	const float *textureCoords = NULL;
+	unsigned int textureCoordsIndexOffset = 0;
 
 	Log::Debug << "Reading input information from triangle" << Log::End;
 	triangles->getInputLibrary()->foreachEntity( [&]( collada::InputPtr input ) {
@@ -305,6 +311,7 @@ void COLLADALoader::parseSkin( Group *parent, Skin *skin )
 
 			normals = source->getFloatArray();
 			normalComponents = 3;
+			normalIndexOffset = positionIndexOffset + 1;
 			++vertexComponentCount;
 		}
 		else if ( semantic == COLLADA_SEMANTIC_TEXCOORD ) {
@@ -316,7 +323,8 @@ void COLLADALoader::parseSkin( Group *parent, Skin *skin )
 			}
 
 			textureCoords = source->getFloatArray();
-			textureCoordinateComponents = 2;
+			textureCoordinateComponents = 3;
+			textureCoordsIndexOffset = normalIndexOffset + 1;
 			++vertexComponentCount;
 		}
 		else {
@@ -329,16 +337,12 @@ void COLLADALoader::parseSkin( Group *parent, Skin *skin )
 		return;
 	}
 
-	Log::Debug << "Setting vertex format to p=" << positionComponents 
-			   << ", n=" << normalComponents 
-			   << ", uv=" << textureCoordinateComponents
-			   << Log::End;
-
 	VertexFormat format( positionComponents,
 						 0,
 						 normalComponents,
 						 0,
-						 0 );//textureCoordinateComponents );
+						 0);//textureCoordinateComponents );
+	Log::Debug << "Vertex format = " << format << Log::End;
 
 	Log::Debug << "Allocating vertex buffer with size " << vertexCount << Log::End;
 	VertexBufferObjectPtr vbo( new VertexBufferObject( format, vertexCount, NULL ) );
@@ -364,80 +368,47 @@ void COLLADALoader::parseSkin( Group *parent, Skin *skin )
 	unsigned short *indexData = ibo->getData();
 	unsigned int indexCount = 0;
 
-	vertexComponentCount = 1;
+	unsigned int vertexIndexOffset = Numerici::max( 1, positionIndexOffset + normalIndexOffset + textureCoordsIndexOffset );
 
-	Log::Debug << "Processing triangles" << Log::End;
-	for ( unsigned int i = 0; i < triangleCount; i++ ) {
-		unsigned int triangleOffset = i * 3 * vertexComponentCount;
-		for ( unsigned int j = 0; j < 3; j++ ) {
-			unsigned int indexOffset = j * vertexComponentCount;
-			unsigned int inputOffset = 0;
+	Log::Debug << "Triangle count: " << triangleCount
+			   << "\nIndex count: " << triangleCount * 3
+			   << "\nPosition Offset: " << positionIndexOffset
+			   << "\nNormal offset " << normalIndexOffset
+			   << "\nTC offset: " << textureCoordsIndexOffset
+			   << "\nVertex components: " << vertexComponentCount
+			   << "\nVertex index offset: " << vertexIndexOffset
+			   << Log::End;
 
-			unsigned int vertexIndex = indices[ triangleOffset + indexOffset ];// + inputOffset++ ];
-			indexData[ indexCount++ ] = vertexIndex;
+	for ( unsigned int triangleIdx = 0; triangleIdx < triangleCount; triangleIdx++ ) {
+		unsigned int triangleIdxOffset = triangleIdx * 3 * vertexIndexOffset;
+
+		for ( unsigned int vertexIdx = 0; vertexIdx < 3; vertexIdx++ ) {
+			unsigned int currentVertexIdx = indices[ triangleIdxOffset + vertexIdx * vertexIndexOffset + positionIndexOffset ];
+
+			indexData[ triangleIdx * 3 + vertexIdx ] = currentVertexIdx;
 
 			if ( format.hasPositions() ) {
-				unsigned int positionIndex = vertexIndex;
 				for ( unsigned int k = 0; k < format.getPositionComponents(); k++ ) {
-					vertexData[ vertexIndex * format.getVertexSize() + format.getPositionsOffset() + k ] = positions[ positionIndex * format.getPositionComponents() + k ];
+					vertexData[ currentVertexIdx * format.getVertexSize() + format.getPositionsOffset() + k ] = positions[ currentVertexIdx * format.getPositionComponents() + k ];
 				}
 			}
 
 			if ( format.hasNormals() ) {
 				// for normal data, we add whatever value is in the input array
 				// to what is already stored (that's why we need to initialize the
-				// vertex buffer to zero). Normalization will take place after all
-				// vertex data has been processed
-				unsigned int normalIndex = indices[ triangleOffset + indexOffset ];//+ inputOffset++ ];
+				// vertex buffer to zero). Normalization is performed in the rendering
+				// step, so it shouldn't be required.
+				unsigned int normalIdx = indices[ triangleIdxOffset + vertexIdx * vertexIndexOffset + normalIndexOffset ];
 				for ( unsigned int k = 0; k < format.getNormalComponents(); k++ ) {
-					vertexData[ vertexIndex * format.getVertexSize() + format.getNormalsOffset() + k ] += normals[ normalIndex * format.getNormalComponents() + k ];
+					vertexData[ currentVertexIdx * format.getVertexSize() + format.getNormalsOffset() + k ] += normals[ normalIdx * format.getNormalComponents() + k ];
 				}
 			}
 
 			if ( format.hasTextureCoords() ) {
-				unsigned int texCoordIndex = indices[ triangleOffset + indexOffset + inputOffset++ ];
+				unsigned int textureCoordsIdx = indices[ triangleIdxOffset + vertexIdx * vertexIndexOffset + textureCoordsIndexOffset ];
 				for ( unsigned int k = 0; k < format.getTextureCoordComponents(); k++ ) {
-					vertexData[ vertexIndex * format.getVertexSize() + format.getTextureCoordsOffset() + k ] = textureCoords[ texCoordIndex * format.getTextureCoordComponents() + k ];
+					vertexData[ currentVertexIdx * format.getVertexSize() + format.getTextureCoordsOffset() + k ] += textureCoords[ textureCoordsIdx * format.getTextureCoordComponents() + k ];
 				}
-			}
-
-			// if ( format.hasWeightComponents() ) {
-   //              int jointCount = _joints.size();
-			// 	if ( weights != NULL ) {
-			// 		int jointID = weights[ vertexIndex * 2 + 0 ];
-			// 		if ( jointID > 0 && jointID <= ( int ) _joints.size() ) {
-			// 			std::cout << "joint " << jointID << " weight 1\n";
-			// 			vertexData[ vertexIndex * format.getVertexSize() + format.getWeightOffset() + 0 ] = jointID;
-			// 			vertexData[ vertexIndex * format.getVertexSize() + format.getWeightOffset() + 1 ] = 1.0f;
-			// 		}
-			// 		else {
-			// 			std::cout << "invalid joint " << jointID << " (" << vertexIndex << ")\n";
-			// 		}
-			// 	}
-			// 	else {
-			// 		vertexData[ vertexIndex * format.getVertexSize() + format.getWeightOffset() + 0 ] = 1.0f;
-			// 		vertexData[ vertexIndex * format.getVertexSize() + format.getWeightOffset() + 1 ] = 0.0f;
-			// 	}
-			// }
-		}
-	}
-
-	// make sure all normal data is normalized
-	if ( format.hasNormals() ) {
-		for ( unsigned int i = 0; i < vbo->getVertexCount(); i++ ) {
-			unsigned int offset = i * format.getVertexSize() + format.getNormalsOffset();
-			Vector3f n( vertexData[ offset + 0 ], vertexData[ offset + 1 ], vertexData[ offset + 2 ] );
-			float m = n.getMagnitude();
-			if ( m == 0 ) {
-				vertexData[ offset + 0 ] = 0;
-				vertexData[ offset + 1 ] = 0;
-				vertexData[ offset + 2 ] = 0;
-			}
-			else {
-				n.normalize();
-				vertexData[ offset + 0 ] = n[ 0 ];
-				vertexData[ offset + 1 ] = n[ 1 ];
-				vertexData[ offset + 2 ] = n[ 2 ];
 			}
 		}
 	}
@@ -445,38 +416,7 @@ void COLLADALoader::parseSkin( Group *parent, Skin *skin )
 	PrimitivePtr primitive( new Primitive( Primitive::Type::TRIANGLES ) );
 	primitive->setVertexBuffer( vbo );
 	primitive->setIndexBuffer( ibo );
-	crimild::GeometryPtr child( new crimild::Geometry() );
-	child->attachPrimitive( primitive );
-
-	// if ( _joints.size() > 0 ) {
-	// 	for ( unsigned int i = 0; i < skin->getJoints()->getInputLibrary()->getEntityCount(); i++ ) {
-	// 		COLLADA::Input *input = skin->getJoints()->getInputLibrary()->getEntityAtIndex( i );
-	// 		if ( std::string( input->getSemantic() ) == COLLADA_SEMANTIC_JOINT ) {
-	// 			COLLADA::Source *source = skin->getSourceCatalog()->getEntityWithID( input->getSourceID() );
-	// 			if ( source != NULL ) {
-	// 				SkinningComponentPtr skinning = new SkinningComponent();
-	// 				unsigned int count = source->getCount();
-	// 				const std::string *names = source->getNameArray();
-	// 				for ( unsigned int j = 0; j < count; j++ ) {
-	// 					std::string name = names[ j ];
-	// 					Node *joint = _joints[ name ];
-	// 					if ( joint != NULL ) {
-	// 						skinning->addJoint( joint );
-	// 					}
-	// 					else {
-	// 						_logger->logWarning( "Unknown joint name %s", name.c_str() );
-	// 					}
-	// 				}
-	// 				child->attachComponent( skinning );
-	// 			}
-	// 			else {
-	// 				_logger->logError( "Cannot find source with ID %s in skin object", input->getSourceID() );
-	// 			}
-	// 		}
-	// 	}
-	// }
-
-	parent->attachNode( child );
+	geometry->attachPrimitive( primitive );
 }
 
 void COLLADALoader::parseAnimations( void )

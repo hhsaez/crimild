@@ -29,6 +29,12 @@ namespace crimild {
 
 		typedef std::shared_ptr< Triangles > TrianglesPtr;
 
+		class TrianglesLibrary : public EntityLibrary< Triangles > {
+		public:
+			TrianglesLibrary( void ) : EntityLibrary< Triangles >( COLLADA_TRIANGLES ) { }
+			virtual ~TrianglesLibrary( void ) { }
+		};
+
 	}
 
 }

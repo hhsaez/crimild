@@ -129,13 +129,14 @@ bool VertexFormat::operator!=( const VertexFormat &vf ) const
 	return !( *this == vf );
 }
 
-std::ostream &VertexFormat::operator<<( std::ostream &out )
+std::ostream &crimild::operator<<( std::ostream &out, const VertexFormat &vf )
 {
-	out << "{p: " << getPositionComponents() 
-		<< ", c: " << getColorComponents() 
-		<< ", n: " << getNormalComponents()
-		<< ", tg: " << getTangentComponents() 
-		<< ", tc: " << getTextureCoordComponents();
+	out << "{p: " << vf.getPositionComponents() 
+		<< ", c: " << vf.getColorComponents() 
+		<< ", n: " << vf.getNormalComponents()
+		<< ", tg: " << vf.getTangentComponents() 
+		<< ", tc: " << vf.getTextureCoordComponents()
+		<< "}";
 	return out;
 }
 

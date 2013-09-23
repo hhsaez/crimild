@@ -19,14 +19,14 @@ namespace crimild {
 
 			bool parseXML( xmlNode *input );
 
-			inline SourceCatalog *getSourceCatalog( void ) { return &_sources; }
-			inline Vertices *getVertices( void ) { return _vertices.get(); }
-			inline Triangles *getTriangles( void ) { return _triangles.get(); }
+			SourceCatalog *getSourceCatalog( void ) { return &_sources; }
+			Vertices *getVertices( void ) { return _vertices.get(); }
+			TrianglesLibrary *getTrianglesLibrary( void ) { return &_trianglesLibrary; }
 
 		private:
 			SourceCatalog _sources;
 			VerticesPtr _vertices;
-			TrianglesPtr _triangles;
+			TrianglesLibrary _trianglesLibrary;
 		};
 
 		typedef std::shared_ptr< Mesh > MeshPtr;
