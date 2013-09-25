@@ -174,12 +174,6 @@ void COLLADALoader::parseNode( Group *parent, collada::Node *node )
 		group->local().rotate().fromRotationMatrix( Matrix3f( rotate ) );
 	}
 
-	if ( std::string( node->getType() ) == COLLADA_TYPE_JOINT ) {
-		// _logger->logDebug( "Found joint with name %s", group->getName().c_str() );
-		// _joints[ group->getName() ] = group;
-		// _rawJoints[ node->getID() ] = node;
-	}
-
 	node->getNodes()->foreach( [&]( collada::NodePtr child ) {
 		parseNode( group.get(), child.get() );
 	});
@@ -258,14 +252,15 @@ void COLLADALoader::parseTriangles( crimild::Geometry *geometry, Mesh *mesh, Ver
 				Log::Debug << "Processing vertex input semantic: " << semantic << Log::End;
 
 				if ( semantic == COLLADA_SEMANTIC_POSITION ) {
-					positionComponents = 3;
 					collada::Source *source = mesh->getSources()->get( vertexInput->getSourceID() );
 					if ( source == NULL ) {
 						Log::Error << "Cannot find source for VERTEX input" << Log::End;
 						return;
 					}
 
-					vertexCount = source->getCount() / positionComponents;
+					positionComponents = source->getTechniqueCommon()->getAccessor()->getParams()->getCount();
+
+					vertexCount = source->getTechniqueCommon()->getAccessor()->getCount();
 					if ( vertexCount > 0 ) {
 						positions = source->getFloatArray();
 					}
@@ -285,7 +280,7 @@ void COLLADALoader::parseTriangles( crimild::Geometry *geometry, Mesh *mesh, Ver
 					}
 
 					normals = source->getFloatArray();
-					normalComponents = 3;
+					normalComponents = source->getTechniqueCommon()->getAccessor()->getParams()->getCount();
 					++vertexComponentCount;
 				}
 				else if ( semantic == COLLADA_SEMANTIC_TEXCOORD ) {
@@ -296,7 +291,7 @@ void COLLADALoader::parseTriangles( crimild::Geometry *geometry, Mesh *mesh, Ver
 					}
 
 					textureCoords = source->getFloatArray();
-					textureCoordinateComponents = 2;
+					textureCoordinateComponents = source->getTechniqueCommon()->getAccessor()->getParams()->getCount();
 					++vertexComponentCount;
 				}
 			});
@@ -310,7 +305,7 @@ void COLLADALoader::parseTriangles( crimild::Geometry *geometry, Mesh *mesh, Ver
 			}
 
 			normals = source->getFloatArray();
-			normalComponents = 3;
+			normalComponents = source->getTechniqueCommon()->getAccessor()->getParams()->getCount();
 			normalIndexOffset = positionIndexOffset + 1;
 			++vertexComponentCount;
 		}
@@ -323,7 +318,7 @@ void COLLADALoader::parseTriangles( crimild::Geometry *geometry, Mesh *mesh, Ver
 			}
 
 			textureCoords = source->getFloatArray();
-			textureCoordinateComponents = 3;
+			textureCoordinateComponents = source->getTechniqueCommon()->getAccessor()->getParams()->getCount();
 			textureCoordsIndexOffset = normalIndexOffset + 1;
 			++vertexComponentCount;
 		}
@@ -341,7 +336,7 @@ void COLLADALoader::parseTriangles( crimild::Geometry *geometry, Mesh *mesh, Ver
 						 0,
 						 normalComponents,
 						 0,
-						 0);//textureCoordinateComponents );
+						 textureCoordinateComponents );
 	Log::Debug << "Vertex format = " << format << Log::End;
 
 	Log::Debug << "Allocating vertex buffer with size " << vertexCount << Log::End;
@@ -360,8 +355,6 @@ void COLLADALoader::parseTriangles( crimild::Geometry *geometry, Mesh *mesh, Ver
 		Log::Error << "No index data found in triangles object" << Log::End;
 		return;
 	}
-
-	// const int *weights = skin->getVertexWeights()->getIndices();
 
 	Log::Debug << "Allocating index buffer with size " << triangleCount * 3 << Log::End;
 	IndexBufferObjectPtr ibo( new IndexBufferObject( triangleCount * 3, NULL ) );

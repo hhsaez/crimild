@@ -13,6 +13,7 @@ Source::~Source( void )
 
 }
 
+// TODO: loading arrays should be done on-demand
 bool Source::parseXML( xmlNode *input )
 {
 	xmlChar *idProp = xmlGetProp( input, ( xmlChar * ) COLLADA_ID );
@@ -83,6 +84,8 @@ bool Source::parseXML( xmlNode *input )
 		}
 		xmlFree( arrayCount );
 	}
+
+	XMLUtils::parseChild( input, COLLADA_TECHNIQUE_COMMON, _techniqueCommon );
 
 	return true;
 }

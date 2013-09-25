@@ -32,6 +32,7 @@
 #define COLLADA_NODE "node"
 #define COLLADA_OFFSET "offset"
 #define COLLADA_P "p"
+#define COLLADA_PARAM "param"
 #define COLLADA_PHONG "phong"
 #define COLLADA_PROFILE_COMMON "profile_COMMON"
 #define COLLADA_ROTATE "rotate"
@@ -106,6 +107,60 @@ namespace crimild {
 			static bool compareXMLString( const xmlChar *str1, const char *str2 )
 			{
 				return std::string( ( const char * ) str1 ) == str2;
+			}
+
+			template< typename T >
+			static bool parseChild( xmlNode *input, const char *name, std::shared_ptr< T > &result, bool warnOnNull = true ) 
+			{
+				xmlNode *childXML = XMLUtils::getChildXMLNodeWithName( input, name );
+				if ( childXML == nullptr ) {
+					if ( warnOnNull ) {
+						Log::Warning << "No '" << name << "' child found" << Log::End;
+					}
+					return false;
+				}
+
+				std::shared_ptr< T > child( new T() );
+				if ( !child->parseXML( childXML ) ) {
+					Log::Warning << "Cannot parse " << name << " element" << Log::End;
+					return false;
+				}
+
+				result = child;
+				return true;
+			}
+
+			static bool getAttribute( xmlNode *input, const char *name, std::string &output, bool warnOnNull = true )
+			{
+				xmlChar *propStr = xmlGetProp( input, ( const xmlChar * ) name );
+				if ( propStr == nullptr ) {
+					if ( warnOnNull ) {
+						Log::Warning << "No '" << name << "' attribute found" << Log::End;
+					}
+
+					return false;
+				}
+
+				output = ( const char * ) propStr;
+				xmlFree( propStr );
+				return true;
+			}
+
+			template< typename T >
+			static bool getAttribute( xmlNode *input, const char *name, T &output, bool warnOnNull = true )
+			{
+				xmlChar *propStr = xmlGetProp( input, ( const xmlChar * ) name );
+				if ( propStr == nullptr ) {
+					if ( warnOnNull ) {
+						Log::Warning << "No '" << name << "' attribute found" << Log::End;
+					}
+
+					return false;
+				}
+
+				output = xmlStringToValue< T >( propStr );
+				xmlFree( propStr );
+				return true;
 			}
 
 		};

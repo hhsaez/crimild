@@ -15,6 +15,7 @@ TechniqueCommon::~TechniqueCommon( void )
 
 bool TechniqueCommon::parseXML( xmlNode *input )
 {
-	return true;
+	Log::Debug << "Parsing <technique_common> element" << Log::End;
+	return XMLUtils::parseChild( input, COLLADA_ACCESSOR, _accessor );
 }
 
