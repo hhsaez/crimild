@@ -8,31 +8,31 @@ namespace crimild {
 	namespace collada {
 
 		template< class ENTITY_TYPE >
-		class EntityLibrary {
+		class EntityList {
 		private:
 			typedef std::shared_ptr< ENTITY_TYPE > EntityPtr;
 
 		public:
-			virtual ~EntityLibrary( void )
+			virtual ~EntityList( void )
 			{
 				_entities.clear();
 			}
 
-			void attachEntity( EntityPtr entity )
+			void attach( EntityPtr entity )
 			{
 				_entities.push_back( entity );
 			}
 
-			unsigned int getEntityCount( void ) const { return _entities.size(); }
+			unsigned int getCount( void ) const { return _entities.size(); }
 
-			void foreachEntity( std::function< void( EntityPtr ) > callback )
+			void foreach( std::function< void( EntityPtr ) > callback )
 			{
 				for ( auto entity : _entities ) {
 					callback( entity );
 				}
 			}
 
-			ENTITY_TYPE *getEntityWithID( std::string id )
+			ENTITY_TYPE *get( std::string id )
 			{
 				for ( auto entity : _entities ) {
 					if ( id == entity->getID() ) {
@@ -51,7 +51,7 @@ namespace crimild {
 						if ( XMLUtils::compareXMLNodeName( childXML, _entityName ) ) {
 							EntityPtr entity( new ENTITY_TYPE() );
 							if ( entity->parseXML( childXML) ) {
-								attachEntity( entity );
+								attach( entity );
 							}
 						}
 					}
@@ -61,7 +61,7 @@ namespace crimild {
 			}
 
 		protected:
-			explicit EntityLibrary( const char *entityName )
+			explicit EntityList( const char *entityName )
 				: _entityName( entityName )
 			{ 
 			}

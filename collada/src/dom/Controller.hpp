@@ -2,7 +2,7 @@
 #define CRIMILD_COLLADA_CONTROLLER_
 
 #include "Entity.hpp"
-#include "EntityLibrary.hpp"
+#include "EntityList.hpp"
 #include "Input.hpp"
 #include "Skin.hpp"
 
@@ -26,10 +26,10 @@ namespace crimild {
 
 		typedef std::shared_ptr< Controller > ControllerPtr;
 
-		class ControllerLibrary : public EntityLibrary< Controller > {
+		class ControllerList : public EntityList< Controller > {
 		public:
-			ControllerLibrary( void ) : EntityLibrary< Controller >( COLLADA_CONTROLLER ) { }
-			virtual ~ControllerLibrary( void ) { }
+			ControllerList( void ) : EntityList< Controller >( COLLADA_CONTROLLER ) { }
+			virtual ~ControllerList( void ) { }
 		};
 
 	}

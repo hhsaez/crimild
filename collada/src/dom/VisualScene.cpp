@@ -26,7 +26,7 @@ bool VisualScene::parseXML( xmlNode *input )
 	setID( ( const char * ) idProp );
 	xmlFree( idProp );
 
-	_nodeLibrary.parseXML( input );
+	_nodes.parseXML( input );
 
 	return true;
 }

@@ -10,19 +10,19 @@ namespace crimild {
 	namespace collada {
 
 		template< class ENTITY_TYPE >
-		class EntityCatalog {
+		class EntityMap {
 		public:
-			virtual ~EntityCatalog( void )
+			virtual ~EntityMap( void )
 			{
 				_entities.clear();
 			}
 
-			void attachEntity( std::shared_ptr< ENTITY_TYPE > entity )
+			void attach( std::shared_ptr< ENTITY_TYPE > entity )
 			{
 				_entities[ entity->getID() ] = entity;
 			}
 
-			ENTITY_TYPE *getEntityWithID( std::string id )
+			ENTITY_TYPE *get( std::string id )
 			{
 				return _entities[ id ].get();
 			}
@@ -35,7 +35,7 @@ namespace crimild {
 						if ( XMLUtils::compareXMLNodeName( childXML, _entityName ) ) {
 							std::shared_ptr< ENTITY_TYPE > entity( new ENTITY_TYPE() );
 							if ( entity->parseXML( childXML ) ) {
-								attachEntity( entity );
+								attach( entity );
 							}
 						}
 					}
@@ -45,7 +45,7 @@ namespace crimild {
 			}
 
 		protected:
-			explicit EntityCatalog( const char *entityName )
+			explicit EntityMap( const char *entityName )
 				: _entityName( entityName )
 			{
 			}

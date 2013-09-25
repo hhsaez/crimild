@@ -17,7 +17,7 @@ bool Joints::parseXML( xmlNode *input )
 {
 	Log::Debug << "Parsing <joints> object" << Log::End;
 
-	_inputLibrary.parseXML( input );
+	_inputs.parseXML( input );
 
 	return true;
 }

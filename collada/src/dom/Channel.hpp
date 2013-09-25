@@ -2,7 +2,7 @@
 #define CRIMILD_COLLADA_CHANNEL_
 
 #include "Entity.hpp"
-#include "EntityLibrary.hpp"
+#include "EntityList.hpp"
 #include "Sampler.hpp"
 
 namespace crimild {
@@ -33,10 +33,10 @@ namespace crimild {
 
 		typedef std::shared_ptr< Channel > ChannelPtr;
 
-		class ChannelLibrary : public EntityLibrary< Channel > {
+		class ChannelList : public EntityList< Channel > {
 		public:
-			ChannelLibrary( void ) : EntityLibrary< Channel >( COLLADA_CHANNEL ) { }
-			virtual ~ChannelLibrary( void ) { }
+			ChannelList( void ) : EntityList< Channel >( COLLADA_CHANNEL ) { }
+			virtual ~ChannelList( void ) { }
 		};
 
 	}

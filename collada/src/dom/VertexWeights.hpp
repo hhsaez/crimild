@@ -2,7 +2,6 @@
 #define CRIMILD_COLLADA_VERTEX_WEIGHTS_
 
 #include "Entity.hpp"
-#include "EntityLibrary.hpp"
 #include "Input.hpp"
 
 namespace crimild {

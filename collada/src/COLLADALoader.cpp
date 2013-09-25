@@ -73,7 +73,7 @@ void COLLADALoader::loadGeometries( void )
 	Log::Debug << "Loading Geometries" << Log::End;
 	xmlNode *geometries = XMLUtils::getChildXMLNodeWithName( _rootElement, COLLADA_LIBRARY_GEOMETRIES );
 	if ( geometries != NULL ) {
-		_geometryLibrary.parseXML( geometries );
+		_geometries.parseXML( geometries );
 	}
 	else {
 		Log::Warning << "No geometry information found" << Log::End;
@@ -85,7 +85,7 @@ void COLLADALoader::loadControllers( void )
 	Log::Debug << "Loading Controllers" << Log::End;
 	xmlNode *controllers = XMLUtils::getChildXMLNodeWithName( _rootElement, COLLADA_LIBRARY_CONTROLLERS );
 	if ( controllers != NULL ) {
-		_controllerLibrary.parseXML( controllers );
+		_controllers.parseXML( controllers );
 	}
 	else {
 		Log::Debug << "No controller information found" << Log::End;
@@ -97,7 +97,7 @@ void COLLADALoader::loadAnimations( void )
 	Log::Debug << "Loading Animations" << Log::End;
 	xmlNode *animations = XMLUtils::getChildXMLNodeWithName( _rootElement, COLLADA_LIBRARY_ANIMATIONS );
 	if ( animations != NULL ) {
-		_animationLibrary.parseXML( animations );
+		_animations.parseXML( animations );
 	}
 	else {
 		Log::Debug << "No animation information found" << Log::End;
@@ -109,7 +109,7 @@ void COLLADALoader::loadVisualScenes( void )
 	Log::Debug << "Loading Visual Scenes" << Log::End;
 	xmlNode *visualScenes = XMLUtils::getChildXMLNodeWithName( _rootElement, COLLADA_LIBRARY_VISUAL_SCENES );
 	if ( visualScenes != NULL ) {
-		_visualSceneLibrary.parseXML( visualScenes );
+		_visualScenes.parseXML( visualScenes );
 	}
 	else {
 		Log::Debug << "No visual scene information found" << Log::End;
@@ -118,15 +118,15 @@ void COLLADALoader::loadVisualScenes( void )
 
 void COLLADALoader::parseVisualScenes( void )
 {
-	_visualSceneLibrary.foreachEntity( [&]( VisualScenePtr visualScene ) {
+	_visualScenes.foreach( [&]( VisualScenePtr visualScene ) {
 		GroupPtr scene( new Group( visualScene->getID() ) );
 
-		visualScene->getNodeLibrary()->foreachEntity( [&]( collada::NodePtr node ) {
+		visualScene->getNodes()->foreach( [&]( collada::NodePtr node ) {
 			parseNode( scene.get(), node.get() );
 
 			InstanceController *instanceController = node->getInstanceController();
 			if ( instanceController != NULL ) {
-				Controller *controller = _controllerLibrary.getEntityWithID( instanceController->getControllerID() );
+				Controller *controller = _controllers.get( instanceController->getControllerID() );
 				if ( controller ) {
 					parseController( scene.get(), controller );
 				}
@@ -180,7 +180,7 @@ void COLLADALoader::parseNode( Group *parent, collada::Node *node )
 		// _rawJoints[ node->getID() ] = node;
 	}
 
-	node->getNodeLibrary()->foreachEntity( [&]( collada::NodePtr child ) {
+	node->getNodes()->foreach( [&]( collada::NodePtr child ) {
 		parseNode( group.get(), child.get() );
 	});
 }
@@ -198,7 +198,7 @@ void COLLADALoader::parseSkin( Group *parent, Skin *skin )
 {
 	Log::Debug << "Creating geometry nodes from skin" << Log::End;
 
-	collada::Geometry *geometry = _geometryLibrary.getEntityWithID( skin->getSourceID() );
+	collada::Geometry *geometry = _geometries.get( skin->getSourceID() );
 	if ( geometry == NULL ) {
 		Log::Error << "Cannot find geometry matching with " << skin->getSourceID() << Log::End;
 		return;
@@ -224,7 +224,7 @@ void COLLADALoader::parseSkin( Group *parent, Skin *skin )
 
 	crimild::GeometryPtr child( new crimild::Geometry() );
 
-	mesh->getTrianglesLibrary()->foreachEntity( [&]( collada::TrianglesPtr triangles ) {
+	mesh->getTriangles()->foreach( [&]( collada::TrianglesPtr triangles ) {
 		parseTriangles( child.get(), mesh, vertices, triangles.get() );
 	});
 
@@ -246,20 +246,20 @@ void COLLADALoader::parseTriangles( crimild::Geometry *geometry, Mesh *mesh, Ver
 	unsigned int textureCoordsIndexOffset = 0;
 
 	Log::Debug << "Reading input information from triangle" << Log::End;
-	triangles->getInputLibrary()->foreachEntity( [&]( collada::InputPtr input ) {
+	triangles->getInputs()->foreach( [&]( collada::InputPtr input ) {
 		std::string semantic = input->getSemantic();
 
-		if ( semantic == COLLADA_SEMANTIC_VERTEX && vertices->getInputLibrary()->getEntityCount() > 0 ) {
+		if ( semantic == COLLADA_SEMANTIC_VERTEX && vertices->getInputs()->getCount() > 0 ) {
 			Log::Debug << "Reading input information for " << semantic.c_str() << Log::End;
 
 			bool vertexInputFound = false;
-			vertices->getInputLibrary()->foreachEntity( [&]( collada::InputPtr vertexInput ) {
+			vertices->getInputs()->foreach( [&]( collada::InputPtr vertexInput ) {
 				std::string semantic = vertexInput->getSemantic();
 				Log::Debug << "Processing vertex input semantic: " << semantic << Log::End;
 
 				if ( semantic == COLLADA_SEMANTIC_POSITION ) {
 					positionComponents = 3;
-					collada::Source *source = mesh->getSourceCatalog()->getEntityWithID( vertexInput->getSourceID() );
+					collada::Source *source = mesh->getSources()->get( vertexInput->getSourceID() );
 					if ( source == NULL ) {
 						Log::Error << "Cannot find source for VERTEX input" << Log::End;
 						return;
@@ -278,7 +278,7 @@ void COLLADALoader::parseTriangles( crimild::Geometry *geometry, Mesh *mesh, Ver
 					vertexInputFound = true;
 				}
 				else if ( semantic == COLLADA_SEMANTIC_NORMAL ) {
-					collada::Source *source = mesh->getSourceCatalog()->getEntityWithID( vertexInput->getSourceID() );
+					collada::Source *source = mesh->getSources()->get( vertexInput->getSourceID() );
 					if ( source == NULL ) {
 						Log::Error << "Cannot find source for NORMAL input" << Log::End;
 						return;
@@ -289,7 +289,7 @@ void COLLADALoader::parseTriangles( crimild::Geometry *geometry, Mesh *mesh, Ver
 					++vertexComponentCount;
 				}
 				else if ( semantic == COLLADA_SEMANTIC_TEXCOORD ) {
-					collada::Source *source = mesh->getSourceCatalog()->getEntityWithID( vertexInput->getSourceID() );
+					collada::Source *source = mesh->getSources()->get( vertexInput->getSourceID() );
 					if ( source == NULL ) {
 						Log::Error << "Cannot find source for TEXCOORD input" << Log::End;
 						return;
@@ -303,7 +303,7 @@ void COLLADALoader::parseTriangles( crimild::Geometry *geometry, Mesh *mesh, Ver
 		}
 		else if ( semantic == COLLADA_SEMANTIC_NORMAL ) {
 			Log::Debug << "Reading input information for " << semantic.c_str() << Log::End;
-			collada::Source *source = mesh->getSourceCatalog()->getEntityWithID( input->getSourceID() );
+			collada::Source *source = mesh->getSources()->get( input->getSourceID() );
 			if ( source == NULL ) {
 				Log::Error << "Cannot find source for NORMAL input" << Log::End;
 				return;
@@ -316,7 +316,7 @@ void COLLADALoader::parseTriangles( crimild::Geometry *geometry, Mesh *mesh, Ver
 		}
 		else if ( semantic == COLLADA_SEMANTIC_TEXCOORD ) {
 			Log::Debug << "Reading input information for " << semantic.c_str() << Log::End;
-			collada::Source *source = mesh->getSourceCatalog()->getEntityWithID( input->getSourceID() );
+			collada::Source *source = mesh->getSources()->get( input->getSourceID() );
 			if ( source == NULL ) {
 				Log::Error << "Cannot find source for TEXCOORD input" << Log::End;
 				return;

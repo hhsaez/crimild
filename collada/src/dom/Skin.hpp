@@ -1,8 +1,6 @@
 #ifndef CRIMILD_COLLADA_SKIN_
 #define CRIMILD_COLLADA_SKIN_
 
-#include "Entity.hpp"
-#include "EntityLibrary.hpp"
 #include "Input.hpp"
 #include "Source.hpp"
 #include "Joints.hpp"
@@ -23,11 +21,11 @@ namespace crimild {
 			inline const char *getSourceID( void ) const { return _sourceID.c_str(); }
 			inline Joints *getJoints( void ) { return _joints.get(); }
 			inline VertexWeights *getVertexWeights( void ) { return _vertexWeights.get(); }
-			inline SourceCatalog *getSourceCatalog( void ) { return &_sources; }
+			inline SourceMap *getSources( void ) { return &_sources; }
 
 		public:
 			std::string _sourceID;
-			SourceCatalog _sources;
+			SourceMap _sources;
 			JointsPtr _joints;
 			VertexWeightsPtr _vertexWeights;
 		};

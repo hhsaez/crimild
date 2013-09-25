@@ -2,7 +2,7 @@
 #define CRIMILD_COLLADA_NODE_
 
 #include "Entity.hpp"
-#include "EntityLibrary.hpp"
+#include "EntityList.hpp"
 #include "Matrix.hpp"
 #include "InstanceController.hpp"
 
@@ -10,7 +10,7 @@ namespace crimild {
 
 	namespace collada {
 
-		class NodeLibrary;
+		class NodeList;
 
 		class Node : public Entity {
 		public:
@@ -26,7 +26,7 @@ namespace crimild {
 
 			inline collada::Matrix *getMatrix( void ) const { return _matrix.get(); }
 			inline collada::InstanceController *getInstanceController( void ) { return _instanceController.get(); }
-			inline collada::NodeLibrary *getNodeLibrary( void ) const { return _nodeLibrary; }
+			inline collada::NodeList *getNodes( void ) const { return _nodes; }
 
 		private:
 			std::string _name;
@@ -35,16 +35,15 @@ namespace crimild {
 
 			collada::MatrixPtr _matrix;
 			collada::InstanceControllerPtr _instanceController;
-
-			NodeLibrary *_nodeLibrary;
+			NodeList *_nodes;
 		};
 
 		typedef std::shared_ptr< Node > NodePtr;
 
-		class NodeLibrary : public EntityLibrary< collada::Node > {
+		class NodeList : public EntityList< collada::Node > {
 		public:
-			NodeLibrary( void ) : EntityLibrary< collada::Node >( COLLADA_NODE ) { }
-			virtual ~NodeLibrary( void ) { }
+			NodeList( void ) : EntityList< collada::Node >( COLLADA_NODE ) { }
+			virtual ~NodeList( void ) { }
 		};
 
 	}

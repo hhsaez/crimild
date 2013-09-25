@@ -5,12 +5,12 @@ using namespace crimild::collada;
 
 collada::Node::Node( void )
 {
-	_nodeLibrary = new NodeLibrary();
+	_nodes = new NodeList();
 }
 
 collada::Node::~Node( void )
 {
-	delete _nodeLibrary;
+	delete _nodes;
 }
 
 bool collada::Node::parseXML( xmlNode *input )
@@ -63,7 +63,7 @@ bool collada::Node::parseXML( xmlNode *input )
 		}
 	}
 
-	_nodeLibrary->parseXML( input );
+	_nodes->parseXML( input );
 
 	return true;
 }

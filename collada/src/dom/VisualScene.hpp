@@ -2,7 +2,7 @@
 #define CRIMILD_COLLADA_VISUAL_SCENE_
 
 #include "Entity.hpp"
-#include "EntityLibrary.hpp"
+#include "EntityList.hpp"
 #include "Input.hpp"
 #include "Node.hpp"
 
@@ -18,18 +18,18 @@ namespace crimild {
 
 			bool parseXML( xmlNode *input );
 
-			inline collada::NodeLibrary *getNodeLibrary( void ) { return &_nodeLibrary; }
+			inline collada::NodeList *getNodes( void ) { return &_nodes; }
 
 		private:
-			collada::NodeLibrary _nodeLibrary;
+			collada::NodeList _nodes;
 		};
 
 		typedef std::shared_ptr< VisualScene > VisualScenePtr;
 
-		class VisualSceneLibrary : public EntityLibrary< VisualScene > {
+		class VisualSceneList : public EntityList< VisualScene > {
 		public:
-			VisualSceneLibrary( void ) : EntityLibrary< VisualScene >( COLLADA_VISUAL_SCENE ) { }
-			virtual ~VisualSceneLibrary( void ) { }
+			VisualSceneList( void ) : EntityList< VisualScene >( COLLADA_VISUAL_SCENE ) { }
+			virtual ~VisualSceneList( void ) { }
 		};
 
 	}

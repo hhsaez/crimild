@@ -31,7 +31,7 @@ bool Mesh::parseXML( xmlNode *input )
 		return false;
 	}
 
-	_trianglesLibrary.parseXML( input );
+	_triangles.parseXML( input );
 
 	return true;
 }

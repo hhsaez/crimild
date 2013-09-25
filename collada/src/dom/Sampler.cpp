@@ -26,7 +26,7 @@ bool Sampler::parseXML( xmlNode *input )
 	setID( ( const char * ) idProp );
 	xmlFree( idProp );
 
-	_inputLibrary.parseXML( input );
+	_inputs.parseXML( input );
 
 	return true;
 }

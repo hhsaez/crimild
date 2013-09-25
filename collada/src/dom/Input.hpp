@@ -2,7 +2,7 @@
 #define CRIMILD_COLLADA_INPUT_
 
 #include "Entity.hpp"
-#include "EntityLibrary.hpp"
+#include "EntityList.hpp"
 
 namespace crimild {
 
@@ -32,10 +32,10 @@ namespace crimild {
 
 		typedef std::shared_ptr< Input > InputPtr;
 
-		class InputLibrary : public EntityLibrary< Input > {
+		class InputList : public EntityList< Input > {
 		public:
-			InputLibrary( void ) : EntityLibrary< Input >( COLLADA_INPUT ) { }
-			virtual ~InputLibrary( void ) { }
+			InputList( void ) : EntityList< Input >( COLLADA_INPUT ) { }
+			virtual ~InputList( void ) { }
 		};
 
 	}

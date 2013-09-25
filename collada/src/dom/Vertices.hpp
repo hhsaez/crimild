@@ -2,7 +2,6 @@
 #define CRIMILD_COLLADA_VERTICES_
 
 #include "Entity.hpp"
-#include "EntityLibrary.hpp"
 #include "Input.hpp"
 
 namespace crimild {
@@ -17,10 +16,10 @@ namespace crimild {
 
 			bool parseXML( xmlNode *input );
 
-			inline InputLibrary *getInputLibrary( void ) { return &_inputLibrary; }
+			inline InputList *getInputs( void ) { return &_inputs; }
 
 		private:
-			InputLibrary _inputLibrary;
+			InputList _inputs;
 		};
 
 		typedef std::shared_ptr< Vertices > VerticesPtr;

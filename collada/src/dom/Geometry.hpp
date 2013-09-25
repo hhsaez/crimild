@@ -2,7 +2,7 @@
 #define CRIMILD_COLLADA_GEOMETRY_
 
 #include "Entity.hpp"
-#include "EntityLibrary.hpp"
+#include "EntityList.hpp"
 #include "Mesh.hpp"
 
 namespace crimild {
@@ -27,10 +27,10 @@ namespace crimild {
 
 		typedef std::shared_ptr< Geometry > GeometryPtr;
 
-		class GeometryLibrary : public EntityLibrary< Geometry > {
+		class GeometryList : public EntityList< Geometry > {
 		public:
-			GeometryLibrary( void ) : EntityLibrary< Geometry >( COLLADA_GEOMETRY ) { }
-			virtual ~GeometryLibrary( void ) { }
+			GeometryList( void ) : EntityList< Geometry >( COLLADA_GEOMETRY ) { }
+			virtual ~GeometryList( void ) { }
 		};
 
 	}

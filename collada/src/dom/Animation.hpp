@@ -25,59 +25,41 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_COLLADA_LOADER_
-#define CRIMILD_COLLADA_LOADER_
+#ifndef CRIMILD_COLLADA_ANIMATION_
+#define CRIMILD_COLLADA_ANIMATION_
 
-#include <Crimild.hpp>
-
-#include "dom/VisualScene.hpp"
-#include "dom/Geometry.hpp"
-#include "dom/Animation.hpp"
-#include "dom/Controller.hpp"
-
-#include <libxml/parser.h>
-#include <libxml/tree.h>
+#include "Entity.hpp"
+#include "EntityList.hpp"
+#include "Source.hpp"
+#include "Sampler.hpp"
+#include "Channel.hpp"
 
 namespace crimild {
 
 	namespace collada {
 
-		class Node;
-		class Controller;
-		class Skin;
-
-		class COLLADALoader {
+		class Animation : public Entity {
 		public:
-			COLLADALoader( std::string filePath );
-			virtual ~COLLADALoader( void );
+			Animation( void );
 
-			crimild::NodePtr load( void );
+			virtual ~Animation( void );
 
-		private:
-			void loadGeometries( void );
-			void loadControllers( void );
-			void loadAnimations( void );
-			void loadVisualScenes( void );
+			bool parseXML( xmlNode *input );
 
-			void parseVisualScenes( void );
-			void parseNode( Group *parent, collada::Node *node );
-			void parseController( Group *parent, Controller *controller );
-			void parseSkin( Group *parent, Skin *skin );
-			void parseTriangles( crimild::Geometry *geometry, Mesh *mesh, Vertices *vertices, Triangles *triangles );
-			void parseAnimations( void );
+			inline ChannelList *getChannels( void ) { return &_channels; }
 
 		private:
-			std::string _filePath;
+			SourceMap _sources;
+			SamplerMap _samplers;
+			ChannelList _channels;
+		};
 
-			xmlDocPtr _document;
-			xmlNode *_rootElement;
+		typedef std::shared_ptr< Animation > AnimationPtr;
 
-			GroupPtr _result;
-
-			collada::VisualSceneList _visualScenes;
-			collada::GeometryList _geometries;
-			collada::AnimationList _animations;
-			collada::ControllerList _controllers;
+		class AnimationList : public EntityList< Animation > {
+		public:
+			AnimationList( void ) : EntityList< Animation >( COLLADA_ANIMATION ) { }
+			virtual ~AnimationList( void ) { }
 		};
 
 	}

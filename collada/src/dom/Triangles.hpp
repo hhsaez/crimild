@@ -2,7 +2,7 @@
 #define CRIMILD_COLLADA_TRIANGLES_
 
 #include "Entity.hpp"
-#include "EntityLibrary.hpp"
+#include "EntityList.hpp"
 #include "Input.hpp"
 
 namespace crimild {
@@ -17,22 +17,22 @@ namespace crimild {
 
 			bool parseXML( xmlNode *input );
 
-			inline InputLibrary *getInputLibrary( void ) { return &_inputLibrary; }
+			inline InputList *getInputs( void ) { return &_inputs; }
 			inline unsigned int getCount( void ) const { return _count; }
 			inline const unsigned int *getIndices( void ) const { return &_indices[ 0 ]; }
 
 		private:
 			unsigned int _count;
-			InputLibrary _inputLibrary;
+			InputList _inputs;
 			std::vector< unsigned int > _indices;
 		};
 
 		typedef std::shared_ptr< Triangles > TrianglesPtr;
 
-		class TrianglesLibrary : public EntityLibrary< Triangles > {
+		class TrianglesList : public EntityList< Triangles > {
 		public:
-			TrianglesLibrary( void ) : EntityLibrary< Triangles >( COLLADA_TRIANGLES ) { }
-			virtual ~TrianglesLibrary( void ) { }
+			TrianglesList( void ) : EntityList< Triangles >( COLLADA_TRIANGLES ) { }
+			virtual ~TrianglesList( void ) { }
 		};
 
 	}

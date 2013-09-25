@@ -2,7 +2,6 @@
 #define CRIMILD_COLLADA_MATRIX_
 
 #include "Entity.hpp"
-#include "EntityLibrary.hpp"
 
 namespace crimild {
 

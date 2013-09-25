@@ -2,7 +2,7 @@
 #define CRIMILD_COLLADA_SAMPLER_
 
 #include "Entity.hpp"
-#include "EntityCatalog.hpp"
+#include "EntityMap.hpp"
 #include "Input.hpp"
 
 namespace crimild {
@@ -17,18 +17,18 @@ namespace crimild {
 
 			bool parseXML( xmlNode *input );
 
-			inline InputLibrary *getInputLibrary( void ) { return &_inputLibrary; }
+			inline InputList *getInputs( void ) { return &_inputs; }
 
 		private:
-			InputLibrary _inputLibrary;
+			InputList _inputs;
 		};
 
 		typedef std::shared_ptr< Sampler > SamplerPtr;
 
-		class SamplerCatalog : public EntityCatalog< Sampler > {
+		class SamplerMap : public EntityMap< Sampler > {
 		public:
-			SamplerCatalog( void ) : EntityCatalog< Sampler >( COLLADA_SAMPLER ) { }
-			virtual ~SamplerCatalog( void ) { }
+			SamplerMap( void ) : EntityMap< Sampler >( COLLADA_SAMPLER ) { }
+			virtual ~SamplerMap( void ) { }
 		};
 
 	}

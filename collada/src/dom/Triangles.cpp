@@ -17,7 +17,7 @@ bool Triangles::parseXML( xmlNode *input )
 {
 	Log::Debug << "Parsing <triangles> object" << Log::End;
 
-	_inputLibrary.parseXML( input );
+	_inputs.parseXML( input );
 
 	_count = 0;
 	xmlChar *triangleCountXML = xmlGetProp( input, ( const xmlChar * ) COLLADA_COUNT );
@@ -34,7 +34,7 @@ bool Triangles::parseXML( xmlNode *input )
 	if ( pArray ) {
 		xmlChar *pContent = xmlNodeGetContent( pArray );
 		if ( pContent ) {
-			_indices.resize( _count * 3 * _inputLibrary.getEntityCount() );
+			_indices.resize( _count * 3 * _inputs.getCount() );
 			std::stringstream str;
 			str << pContent;
 			for ( unsigned int i = 0; i < _indices.size(); i++ ) {
