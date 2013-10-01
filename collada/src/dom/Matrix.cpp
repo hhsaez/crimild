@@ -15,8 +15,6 @@ collada::Matrix::~Matrix( void )
 
 bool collada::Matrix::parseXML( xmlNode *input )
 {
-	Log::Debug << "Parsing <matrix> object" << Log::End;
-
 	xmlChar *content = xmlNodeGetContent( input );
 	if ( content != NULL ) {
 		std::stringstream str;

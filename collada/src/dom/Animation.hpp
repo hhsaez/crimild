@@ -44,7 +44,7 @@ namespace crimild {
 
 			virtual ~Animation( void );
 
-			bool parseXML( xmlNode *input );
+			virtual bool parseXML( xmlNode *input ) override;
 
 			inline ChannelList *getChannels( void ) { return &_channels; }
 

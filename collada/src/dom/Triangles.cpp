@@ -5,7 +5,7 @@ using namespace crimild::collada;
 
 Triangles::Triangles( void )
 {
-
+	_count = 0;
 }
 
 Triangles::~Triangles( void )
@@ -15,20 +15,13 @@ Triangles::~Triangles( void )
 
 bool Triangles::parseXML( xmlNode *input )
 {
-	Log::Debug << "Parsing <triangles> object" << Log::End;
-
 	_inputs.parseXML( input );
 
-	_count = 0;
-	xmlChar *triangleCountXML = xmlGetProp( input, ( const xmlChar * ) COLLADA_COUNT );
-	if ( triangleCountXML ) {
-		_count = xmlStringToValue< unsigned int >( triangleCountXML );
-		xmlFree( triangleCountXML );
-	}
-	else {
-		Log::Error << "No count attribute found in triangle element" << Log::End;
+	if ( !XMLUtils::getAttribute( input, COLLADA_COUNT, _count ) ) {
 		return false;
 	}
+
+	XMLUtils::getAttribute( input, COLLADA_MATERIAL, _material, false );
 
 	xmlNode *pArray = XMLUtils::getChildXMLNodeWithName( input, COLLADA_P );
 	if ( pArray ) {

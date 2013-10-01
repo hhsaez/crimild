@@ -15,19 +15,10 @@ Sampler::~Sampler( void )
 
 bool Sampler::parseXML( xmlNode *input )
 {
-	Log::Debug << "Parsing sampler" << Log::End;
-
-	xmlChar *idProp = xmlGetProp( input, ( xmlChar * ) COLLADA_ID );
-	if ( !idProp ) {
-		Log::Debug << "No id attribute provided for sampler object" << Log::End;
+	if ( !Entity::parseXML( input ) ) {
 		return false;
 	}
 
-	setID( ( const char * ) idProp );
-	xmlFree( idProp );
-
-	_inputs.parseXML( input );
-
-	return true;
+	return _inputs.parseXML( input );
 }
 

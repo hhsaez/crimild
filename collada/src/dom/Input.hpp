@@ -16,7 +16,7 @@ namespace crimild {
 
 			virtual ~Input( void );
 
-			bool parseXML( xmlNode *input );
+			virtual bool parseXML( xmlNode *input ) override;
 
 			inline const char *getSemantic( void ) const { return _semantic.c_str(); }
 			inline const char *getSourceID( void ) const { return _sourceID.c_str(); }

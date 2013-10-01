@@ -19,17 +19,7 @@ bool Mesh::parseXML( xmlNode *input )
 
 	_sources.parseXML( input );
 
-	xmlNode *verticesXML = XMLUtils::getChildXMLNodeWithName( input, COLLADA_VERTICES );
-	if ( verticesXML ) {
-		VerticesPtr vertices( new Vertices() );
-		if ( vertices->parseXML( verticesXML ) ) {
-			_vertices = vertices;
-		}
-	}
-	else {
-		Log::Error << "No vertices information provided for mesh" << Log::End;
-		return false;
-	}
+	XMLUtils::parseChild( input, COLLADA_VERTICES, _vertices );
 
 	_triangles.parseXML( input );
 

@@ -16,7 +16,7 @@ namespace crimild {
 
 			virtual ~VisualScene( void );
 
-			bool parseXML( xmlNode *input );
+			virtual bool parseXML( xmlNode *input ) override;
 
 			inline collada::NodeList *getNodes( void ) { return &_nodes; }
 

@@ -14,7 +14,7 @@ namespace crimild {
 
 			virtual ~TechniqueCommon( void );
 
-			bool parseXML( xmlNode *input );
+			virtual bool parseXML( xmlNode *input ) override;
 
 			Accessor *getAccessor( void ) { return _accessor.get(); }
 

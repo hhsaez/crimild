@@ -13,7 +13,7 @@ namespace crimild {
 
 			virtual ~Joints( void );
 
-			bool parseXML( xmlNode *input );
+			virtual bool parseXML( xmlNode *input ) override;
 
 			inline InputList *getInputs( void ) { return &_inputs; }
 

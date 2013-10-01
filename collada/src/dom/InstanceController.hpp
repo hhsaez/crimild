@@ -12,7 +12,7 @@ namespace crimild {
 			InstanceController( void );
 			virtual ~InstanceController( void );
 
-			bool parseXML( xmlNode *input );
+			virtual bool parseXML( xmlNode *input ) override;
 
 			inline const char *getControllerID( void ) const { return _controllerID.c_str(); }
 

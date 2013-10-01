@@ -17,7 +17,7 @@ namespace crimild {
 
 			virtual ~Channel( void );
 
-			bool parseXML( xmlNode *node );
+			virtual bool parseXML( xmlNode *node ) override;
 
 			inline const char *getSource( void ) const { return _source.c_str(); }
 			inline const char *getTarget( void ) const { return _target.c_str(); }

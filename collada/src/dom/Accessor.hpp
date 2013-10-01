@@ -14,7 +14,7 @@ namespace crimild {
 
 			virtual ~Accessor( void );
 
-			bool parseXML( xmlNode *input );
+			virtual bool parseXML( xmlNode *input ) override;
 
 			unsigned int getCount( void ) const { return _count; }
 			unsigned int getStride( void ) const { return _stride; }

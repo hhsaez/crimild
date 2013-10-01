@@ -15,56 +15,15 @@ collada::Node::~Node( void )
 
 bool collada::Node::parseXML( xmlNode *input )
 {
-	Log::Debug << "Parsing <node> object" << Log::End;
+	Entity::parseXML( input );
 
-	xmlChar *idProp = xmlGetProp( input, ( xmlChar * ) COLLADA_ID );
-	if ( idProp != NULL ) {
-		setID( ( const char * ) idProp );
-		xmlFree( idProp );
-	}
-	else {
-		Log::Warning << "No id attribute provided for node object" << Log::End;
-	}
+	XMLUtils::getAttribute( input, COLLADA_NAME, _name );
+	XMLUtils::getAttribute( input, COLLADA_TYPE, _type );
+	XMLUtils::getAttribute( input, COLLADA_SID, _sid, false );
 
-	xmlChar *nameProp = xmlGetProp( input, ( xmlChar * ) COLLADA_NAME );
-	if ( nameProp != NULL ) {
-		_name = ( const char * ) nameProp;
-		xmlFree( nameProp );
-	}
-	else {
-		Log::Warning << "No id attribute provided for sampler object" << Log::End;
-	}
+	XMLUtils::parseChild( input, COLLADA_MATRIX, _matrix, false );
+	XMLUtils::parseChild( input, COLLADA_INSTANCE_CONTROLLER, _instanceController, false );
 
-	xmlChar *sidProp = xmlGetProp( input, ( xmlChar * ) COLLADA_SID );
-	if ( sidProp != NULL ) {
-		_sid = ( const char * ) sidProp;
-		xmlFree( sidProp );
-	}
-
-	xmlChar *typeProp = xmlGetProp( input, ( xmlChar * ) COLLADA_TYPE );
-	if ( typeProp != NULL ) {
-		_type = ( const char * ) typeProp;
-		xmlFree( typeProp );
-	}
-
-	xmlNode *matrixXML = XMLUtils::getChildXMLNodeWithName( input, COLLADA_MATRIX );
-	if ( matrixXML ) {
-		collada::MatrixPtr matrix( new collada::Matrix() );
-		if ( matrix->parseXML( matrixXML ) ) {
-			_matrix = matrix;
-		}
-	}
-
-	xmlNode *instanceControllerXML = XMLUtils::getChildXMLNodeWithName( input, COLLADA_INSTANCE_CONTROLLER );
-	if ( instanceControllerXML ) {
-		InstanceControllerPtr instanceController( new InstanceController() );
-		if ( instanceController->parseXML( instanceControllerXML ) ) {
-			_instanceController = instanceController;
-		}
-	}
-
-	_nodes->parseXML( input );
-
-	return true;
+	return _nodes->parseXML( input );
 }
 

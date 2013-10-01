@@ -17,14 +17,10 @@ bool Controller::parseXML( xmlNode *input )
 {
 	Log::Debug << "Parsing <controller> object" << Log::End;
 
-	xmlChar *idProp = xmlGetProp( input, ( xmlChar * ) COLLADA_ID );
-	if ( !idProp ) {
+	if ( !Entity::parseXML( input ) ) {
 		Log::Error << "No id attribute provided for controller object" << Log::End;
 		return false;
 	}
-
-	setID( ( const char * ) idProp );
-	xmlFree( idProp );
 
 	xmlNode *skinXML = XMLUtils::getChildXMLNodeWithName( input, COLLADA_SKIN );
 	if ( skinXML ) {

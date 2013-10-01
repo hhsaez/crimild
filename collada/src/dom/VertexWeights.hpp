@@ -14,7 +14,7 @@ namespace crimild {
 
 			virtual ~VertexWeights( void );
 
-			bool parseXML( xmlNode *input );
+			virtual bool parseXML( xmlNode *input ) override;
 
 			inline unsigned int getIndexCount( void ) const { return _indices.size(); }
 			inline const int *getIndices( void ) const { return ( _indices.size() > 0 ? &_indices[ 0 ] : NULL ); }

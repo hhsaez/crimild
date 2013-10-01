@@ -13,7 +13,7 @@ namespace crimild {
 
 			virtual ~Matrix( void );
 
-			bool parseXML( xmlNode *input );
+			virtual bool parseXML( xmlNode *input ) override;
 
 			inline const float *getData( void ) const { return _data; }
 

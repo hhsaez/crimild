@@ -15,16 +15,18 @@ namespace crimild {
 
 			virtual ~Triangles( void );
 
-			bool parseXML( xmlNode *input );
+			virtual bool parseXML( xmlNode *input ) override;
 
-			inline InputList *getInputs( void ) { return &_inputs; }
-			inline unsigned int getCount( void ) const { return _count; }
-			inline const unsigned int *getIndices( void ) const { return &_indices[ 0 ]; }
+			InputList *getInputs( void ) { return &_inputs; }
+			unsigned int getCount( void ) const { return _count; }
+			const unsigned int *getIndices( void ) const { return &_indices[ 0 ]; }
+			std::string getMaterial( void ) const { return _material; }
 
 		private:
 			unsigned int _count;
 			InputList _inputs;
 			std::vector< unsigned int > _indices;
+			std::string _material;
 		};
 
 		typedef std::shared_ptr< Triangles > TrianglesPtr;

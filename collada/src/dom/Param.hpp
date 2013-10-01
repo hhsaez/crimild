@@ -14,7 +14,7 @@ namespace crimild {
 
 			virtual ~Param( void );
 
-			bool parseXML( xmlNode *input );
+			virtual bool parseXML( xmlNode *input ) override;
 
 			std::string getName( void ) const { return _name; }
 			std::string getType( void ) const { return _type; }

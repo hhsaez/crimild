@@ -34,6 +34,9 @@
 #include "dom/Geometry.hpp"
 #include "dom/Animation.hpp"
 #include "dom/Controller.hpp"
+#include "dom/Image.hpp"
+#include "dom/Material.hpp"
+#include "dom/Effect.hpp"
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
@@ -54,20 +57,16 @@ namespace crimild {
 			crimild::NodePtr load( void );
 
 		private:
-			void loadGeometries( void );
-			void loadControllers( void );
-			void loadAnimations( void );
-			void loadVisualScenes( void );
-
 			void parseVisualScenes( void );
 			void parseNode( Group *parent, collada::Node *node );
 			void parseController( Group *parent, Controller *controller );
 			void parseSkin( Group *parent, Skin *skin );
-			void parseTriangles( crimild::Geometry *geometry, Mesh *mesh, Vertices *vertices, Triangles *triangles );
+			void parseTriangles( crimild::Group *parent, Mesh *mesh, Vertices *vertices, Triangles *triangles );
 			void parseAnimations( void );
 
 		private:
 			std::string _filePath;
+			std::string _assetsDirectory;
 
 			xmlDocPtr _document;
 			xmlNode *_rootElement;
@@ -78,6 +77,9 @@ namespace crimild {
 			collada::GeometryList _geometries;
 			collada::AnimationList _animations;
 			collada::ControllerList _controllers;
+			collada::ImageMap _images;
+			collada::MaterialMap _materials;
+			collada::EffectMap _effects;
 		};
 
 	}

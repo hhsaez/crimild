@@ -15,7 +15,7 @@ namespace crimild {
 
 			virtual ~Mesh( void );
 
-			bool parseXML( xmlNode *input );
+			virtual bool parseXML( xmlNode *input ) override;
 
 			SourceMap *getSources( void ) { return &_sources; }
 			Vertices *getVertices( void ) { return _vertices.get(); }

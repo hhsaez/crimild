@@ -15,7 +15,7 @@ namespace crimild {
 
 			virtual ~Geometry( void );
 
-			bool parseXML( xmlNode *input );
+			virtual bool parseXML( xmlNode *input ) override;
 
 			inline const char *getName( void ) const { return _name.c_str(); }
 			inline Mesh *getMesh( void ) { return _mesh.get(); }

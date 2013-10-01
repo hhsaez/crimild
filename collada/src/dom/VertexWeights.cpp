@@ -15,16 +15,8 @@ VertexWeights::~VertexWeights( void )
 
 bool VertexWeights::parseXML( xmlNode *input )
 {
-	Log::Debug << "Parsing <vertex_weigths> element" << Log::End;
-
-	xmlChar *countProp = xmlGetProp( input, ( xmlChar * ) COLLADA_COUNT );
-	if ( !countProp ) {
-		Log::Error << "No count attribute provided for vertex_weights object" << Log::End;
-		return false;
-	}
-
-	unsigned int count = xmlStringToValue< int >( countProp );
-	xmlFree( countProp );
+	int count = 0;
+	XMLUtils::getAttribute( input, COLLADA_COUNT, count );
 
 	if ( count > 0 ) {
 		xmlNode *indexArray = XMLUtils::getChildXMLNodeWithName( input, COLLADA_V );

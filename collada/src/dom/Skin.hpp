@@ -16,7 +16,7 @@ namespace crimild {
 
 			virtual ~Skin( void );
 
-			bool parseXML( xmlNode *input );
+			virtual bool parseXML( xmlNode *input ) override;
 
 			inline const char *getSourceID( void ) const { return _sourceID.c_str(); }
 			inline Joints *getJoints( void ) { return _joints.get(); }

@@ -33,7 +33,7 @@ using namespace crimild::collada;
 COLLADALoader::COLLADALoader( std::string filePath )
 	: _filePath( filePath )
 {
-
+	_assetsDirectory = FileSystem::getInstance().extractDirectory( _filePath ) + "/";
 }
 
 COLLADALoader::~COLLADALoader( void )
@@ -53,10 +53,13 @@ crimild::NodePtr COLLADALoader::load( void )
 	_result = GroupPtr( new Group( _filePath ) );
 	_rootElement = xmlDocGetRootElement( _document );
 
-	loadGeometries();
-	loadControllers();
-	loadAnimations();
-	loadVisualScenes();
+	XMLUtils::loadLibrary( _rootElement, COLLADA_LIBRARY_IMAGES, _images );
+	XMLUtils::loadLibrary( _rootElement, COLLADA_LIBRARY_EFFECTS, _effects );
+	XMLUtils::loadLibrary( _rootElement, COLLADA_LIBRARY_MATERIALS, _materials );
+	XMLUtils::loadLibrary( _rootElement, COLLADA_LIBRARY_GEOMETRIES, _geometries );
+	XMLUtils::loadLibrary( _rootElement, COLLADA_LIBRARY_CONTROLLERS, _controllers );
+	XMLUtils::loadLibrary( _rootElement, COLLADA_LIBRARY_ANIMATIONS, _animations );
+	XMLUtils::loadLibrary( _rootElement, COLLADA_LIBRARY_VISUAL_SCENES, _visualScenes );
 
 	parseVisualScenes();
 	parseAnimations();
@@ -66,54 +69,6 @@ crimild::NodePtr COLLADALoader::load( void )
 	xmlMemoryDump();
 
 	return _result;
-}
-
-void COLLADALoader::loadGeometries( void )
-{
-	Log::Debug << "Loading Geometries" << Log::End;
-	xmlNode *geometries = XMLUtils::getChildXMLNodeWithName( _rootElement, COLLADA_LIBRARY_GEOMETRIES );
-	if ( geometries != NULL ) {
-		_geometries.parseXML( geometries );
-	}
-	else {
-		Log::Warning << "No geometry information found" << Log::End;
-	}
-}
-
-void COLLADALoader::loadControllers( void )
-{
-	Log::Debug << "Loading Controllers" << Log::End;
-	xmlNode *controllers = XMLUtils::getChildXMLNodeWithName( _rootElement, COLLADA_LIBRARY_CONTROLLERS );
-	if ( controllers != NULL ) {
-		_controllers.parseXML( controllers );
-	}
-	else {
-		Log::Debug << "No controller information found" << Log::End;
-	}
-}
-
-void COLLADALoader::loadAnimations( void )
-{
-	Log::Debug << "Loading Animations" << Log::End;
-	xmlNode *animations = XMLUtils::getChildXMLNodeWithName( _rootElement, COLLADA_LIBRARY_ANIMATIONS );
-	if ( animations != NULL ) {
-		_animations.parseXML( animations );
-	}
-	else {
-		Log::Debug << "No animation information found" << Log::End;
-	}
-}
-
-void COLLADALoader::loadVisualScenes( void )
-{
-	Log::Debug << "Loading Visual Scenes" << Log::End;
-	xmlNode *visualScenes = XMLUtils::getChildXMLNodeWithName( _rootElement, COLLADA_LIBRARY_VISUAL_SCENES );
-	if ( visualScenes != NULL ) {
-		_visualScenes.parseXML( visualScenes );
-	}
-	else {
-		Log::Debug << "No visual scene information found" << Log::End;
-	}
 }
 
 void COLLADALoader::parseVisualScenes( void )
@@ -142,8 +97,6 @@ void COLLADALoader::parseVisualScenes( void )
 
 void COLLADALoader::parseNode( Group *parent, collada::Node *node )
 {
-	Log::Debug << "Parsing node" << Log::End;
-
 	GroupPtr group( new Group() );
 	if ( node->getSID() != NULL ) {
 		group->setName( node->getSID() );
@@ -181,7 +134,6 @@ void COLLADALoader::parseNode( Group *parent, collada::Node *node )
 
 void COLLADALoader::parseController( Group *parent, Controller *controller )
 {
-	Log::Debug << "Parsing controller" << Log::End;
 	collada::Skin *skin = controller->getSkin();
 	if ( skin != NULL ) {
 		parseSkin( parent, skin );
@@ -216,16 +168,12 @@ void COLLADALoader::parseSkin( Group *parent, Skin *skin )
 
 	Log::Debug << "Found vertices information for mesh" << Log::End;
 
-	crimild::GeometryPtr child( new crimild::Geometry() );
-
 	mesh->getTriangles()->foreach( [&]( collada::TrianglesPtr triangles ) {
-		parseTriangles( child.get(), mesh, vertices, triangles.get() );
+		parseTriangles( parent, mesh, vertices, triangles.get() );
 	});
-
-	parent->attachNode( child );
 }
 
-void COLLADALoader::parseTriangles( crimild::Geometry *geometry, Mesh *mesh, Vertices *vertices, Triangles *triangles ) 
+void COLLADALoader::parseTriangles( crimild::Group *parent, Mesh *mesh, Vertices *vertices, Triangles *triangles ) 
 {
 	unsigned int vertexComponentCount = 0;
 	unsigned int vertexCount = 0;
@@ -409,7 +357,73 @@ void COLLADALoader::parseTriangles( crimild::Geometry *geometry, Mesh *mesh, Ver
 	PrimitivePtr primitive( new Primitive( Primitive::Type::TRIANGLES ) );
 	primitive->setVertexBuffer( vbo );
 	primitive->setIndexBuffer( ibo );
+
+	crimild::GeometryPtr geometry( new crimild::Geometry() );
 	geometry->attachPrimitive( primitive );
+	parent->attachNode( geometry );
+
+	if ( triangles->getMaterial().length() > 0 ) {
+		collada::Material *m = _materials.get( triangles->getMaterial() );		
+		if ( m != nullptr ) {
+			crimild::MaterialPtr material( new crimild::Material() );
+			geometry->getComponent< MaterialComponent >()->attachMaterial( material );
+
+			collada::Effect *e = _effects.get( m->getInstanceEffect()->getUrl() );
+			if ( e != nullptr ) {
+				ProfileCommon *profileCommon = e->getProfileCommon();
+				if ( profileCommon != nullptr ) {
+					Technique *technique = profileCommon->getTechnique();
+					if ( technique != nullptr ) {
+						Phong *phong = technique->getPhong();
+						if ( phong != nullptr ) {
+							Diffuse *diffuse = phong->getDiffuse();
+							if ( diffuse != nullptr ) {
+								collada::Texture *texture = diffuse->getTexture();
+								if ( texture != nullptr ) {
+									std::string samplerId = texture->getTexture();
+									NewParam *samplerParam = profileCommon->getNewParams()->get( samplerId );
+									if ( samplerParam != nullptr ) {
+										std::string surfaceName = samplerParam->getSampler2D()->getSourceName();
+										NewParam *surfaceParam = profileCommon->getNewParams()->get( surfaceName );
+										if ( surfaceParam != nullptr ) {
+											collada::Image *i = _images.get( surfaceParam->getSurface()->getImageID() );
+											if ( i != nullptr ) {
+												try {
+													std::string imagePath = _assetsDirectory + i->getFileName();
+													imagePath = FileSystem::getInstance().pathForResource( imagePath );
+													crimild::ImagePtr image( new ImageTGA( imagePath ) );
+													crimild::TexturePtr diffuseTexture( new crimild::Texture( image ) );
+													material->setColorMap( diffuseTexture );
+												}
+												catch ( ... ) {
+													Log::Error << "Cannot load image for diffuse texture" << Log::End;
+												}
+											}
+											else {
+												Log::Warning << "No image found " << surfaceParam->getSurface()->getImageID() << Log::End;
+											}
+										}
+										else {
+											Log::Warning << "No surface param for " << surfaceName << Log::End;
+										}
+									}
+									else {
+										Log::Warning << "No sampler param for " << samplerId << Log::End;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			else {
+				Log::Warning << "No effect found for url " << m->getInstanceEffect()->getUrl() << Log::End;
+			}
+		}
+		else {
+			Log::Warning << "No material found with id " << triangles->getMaterial() << Log::End;
+		}
+	}
 }
 
 void COLLADALoader::parseAnimations( void )

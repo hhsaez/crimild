@@ -16,7 +16,7 @@ namespace crimild {
 
 			virtual ~Controller( void );
 
-			bool parseXML( xmlNode *input );
+			virtual bool parseXML( xmlNode *input ) override;
 
 			inline Skin *getSkin( void ) { return _skin.get(); }
 

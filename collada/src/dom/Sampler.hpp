@@ -15,7 +15,7 @@ namespace crimild {
 
 			virtual ~Sampler( void );
 
-			bool parseXML( xmlNode *input );
+			virtual bool parseXML( xmlNode *input ) override;
 
 			inline InputList *getInputs( void ) { return &_inputs; }
 

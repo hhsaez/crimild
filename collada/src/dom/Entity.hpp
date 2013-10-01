@@ -9,14 +9,15 @@ namespace crimild {
 
 		class Entity {
 		public:
-			virtual ~Entity( void ) { }
+			virtual ~Entity( void );
 
 			inline void setID( std::string id ) { _id = id; }
-
 			inline const char *getID( void ) const { return _id.c_str(); }
 
+			virtual bool parseXML( xmlNode *input );
+
 		protected:
-			Entity( void ) { }
+			Entity( void );
 
 		private:
 			std::string _id;
