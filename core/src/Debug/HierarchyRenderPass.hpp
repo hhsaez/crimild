@@ -25,34 +25,41 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_GL3_RENDERING_UTILS_
-#define CRIMILD_GL3_RENDERING_UTILS_
+#ifndef CRIMILD_CORE_HIERARCHY_RENDER_PASS_
+#define CRIMILD_CORE_HIERARCHY_RENDER_PASS_
 
-#include <Crimild.hpp>
+#include "Rendering/RenderPass.hpp"
+#include "Rendering/Material.hpp"
+#include "SceneGraph/Node.hpp"
 
 namespace crimild {
 
-	namespace gl3 {
+	class HierarchyRenderPass : public RenderPass {
+	public:
+		HierarchyRenderPass( void );
+		explicit HierarchyRenderPass( RenderPassPtr actualRenderPass );
+		virtual ~HierarchyRenderPass( void );
 
-		class Utils {
-		public:
-			static void checkErrors( std::string prefix );
+		void setTargetScene( NodePtr scene ) { _targetScene = scene; }
+		Node *getTargetScene( void ) { return _targetScene.get(); }
 
-			static VertexShaderPtr getVertexShaderInstance( std::string source );
-			
-			static FragmentShaderPtr getFragmentShaderInstance( std::string source );
+		void setRenderBoundings( bool value ) { _renderBoundings = value; }
+		bool shouldRenderBoundings( void ) const { return _renderBoundings; }
 
-			static std::string buildArrayShaderLocationName( std::string variable, int index );
+		virtual void render( Renderer *renderer, VisibilitySet *vs, Camera *camera );
 
-			static std::string buildArrayShaderLocationName( std::string variable, int index, std::string member );
-		};
+	private:
+		void renderBoundings( Renderer *renderer, Geometry *geometry, Material *material, Camera *camera );
 
-	}
+		bool _renderBoundings;
+		RenderPassPtr _actualRenderPass;
+		MaterialPtr _debugMaterial;
+		NodePtr _targetScene;
+	};
+
+	typedef std::shared_ptr< HierarchyRenderPass > HierarchyRenderPassPtr;
 
 }
-
-#define CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION crimild::gl3::Utils::checkErrors( std::string( "Before " ) + CRIMILD_CURRENT_FUNCTION );
-#define CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION crimild::gl3::Utils::checkErrors( std::string( "After " ) + CRIMILD_CURRENT_FUNCTION );
 
 #endif
 

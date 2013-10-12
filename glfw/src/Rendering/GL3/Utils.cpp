@@ -85,6 +85,13 @@ FragmentShaderPtr gl3::Utils::getFragmentShaderInstance( std::string source )
 	return shader;
 }
 
+std::string gl3::Utils::buildArrayShaderLocationName( std::string variable, int index )
+{
+	std::stringstream str;
+	str << variable << "[" << index << "]";
+	return str.str();
+}
+
 std::string gl3::Utils::buildArrayShaderLocationName( std::string variable, int index, std::string member )
 {
 	std::stringstream str;

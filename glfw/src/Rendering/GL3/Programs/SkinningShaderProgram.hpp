@@ -25,8 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_GL3_RENDERING_UTILS_
-#define CRIMILD_GL3_RENDERING_UTILS_
+#ifndef CRIMILD_GLFW_RENDERING_PROGRAMS_SKINNING_
+#define CRIMILD_GLFW_RENDERING_PROGRAMS_SKINNING_
 
 #include <Crimild.hpp>
 
@@ -34,25 +34,19 @@ namespace crimild {
 
 	namespace gl3 {
 
-		class Utils {
+		class SkinningShaderProgram : public ShaderProgram {
+			CRIMILD_DISALLOW_COPY_AND_ASSIGN( SkinningShaderProgram );
+
 		public:
-			static void checkErrors( std::string prefix );
-
-			static VertexShaderPtr getVertexShaderInstance( std::string source );
-			
-			static FragmentShaderPtr getFragmentShaderInstance( std::string source );
-
-			static std::string buildArrayShaderLocationName( std::string variable, int index );
-
-			static std::string buildArrayShaderLocationName( std::string variable, int index, std::string member );
+			SkinningShaderProgram( void );
+			virtual ~SkinningShaderProgram( void );
 		};
+
+		typedef std::shared_ptr< SkinningShaderProgram > SkinningShaderProgramPtr;
 
 	}
 
 }
-
-#define CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION crimild::gl3::Utils::checkErrors( std::string( "Before " ) + CRIMILD_CURRENT_FUNCTION );
-#define CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION crimild::gl3::Utils::checkErrors( std::string( "After " ) + CRIMILD_CURRENT_FUNCTION );
 
 #endif
 

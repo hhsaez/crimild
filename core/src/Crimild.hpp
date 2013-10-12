@@ -66,6 +66,8 @@
 #include "SceneGraph/Switch.hpp"
 #include "SceneGraph/Text.hpp"
 
+#include "Components/ColliderComponent.hpp"
+#include "Components/JointComponent.hpp"
 #include "Components/LambdaComponent.hpp"
 #include "Components/MaterialComponent.hpp"
 #include "Components/NodeComponent.hpp"
@@ -76,6 +78,7 @@
 #include "Components/RenderStateComponent.hpp"
 #include "Components/ColliderComponent.hpp"
 #include "Components/RigidBodyComponent.hpp"
+#include "Components/SkinComponent.hpp"
 
 #include "Visitors/FetchCameras.hpp"
 #include "Visitors/FetchLights.hpp"
@@ -136,6 +139,7 @@
 #include "Simulation/Tasks/UpdatePhysicsTask.hpp"
 
 #include "Debug/DebugRenderPass.hpp"
+#include "Debug/HierarchyRenderPass.hpp"
 
 #endif
 

@@ -25,34 +25,35 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_GL3_RENDERING_UTILS_
-#define CRIMILD_GL3_RENDERING_UTILS_
+#ifndef CRIMILD_CORE_COMPONENTS_SKIN_
+#define CRIMILD_CORE_COMPONENTS_SKIN_
 
-#include <Crimild.hpp>
+#include "NodeComponent.hpp"
+
+#include <functional>
+#include <vector>
 
 namespace crimild {
 
-	namespace gl3 {
+	class SkinComponent : public NodeComponent {
+	public:
+		static const char *NAME;
 
-		class Utils {
-		public:
-			static void checkErrors( std::string prefix );
+	public:
+		SkinComponent( void );
+		virtual ~SkinComponent( void );
 
-			static VertexShaderPtr getVertexShaderInstance( std::string source );
-			
-			static FragmentShaderPtr getFragmentShaderInstance( std::string source );
+		bool hasJoints( void );
+		void attachJoint( Node *joint );
+		void foreachJoint( std::function< void( Node *, unsigned int ) > callback );
 
-			static std::string buildArrayShaderLocationName( std::string variable, int index );
+	private:
+		std::vector< Node * > _joints;
+	};
 
-			static std::string buildArrayShaderLocationName( std::string variable, int index, std::string member );
-		};
-
-	}
+	typedef std::shared_ptr< SkinComponent > SkinComponentPtr;
 
 }
-
-#define CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION crimild::gl3::Utils::checkErrors( std::string( "Before " ) + CRIMILD_CURRENT_FUNCTION );
-#define CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION crimild::gl3::Utils::checkErrors( std::string( "After " ) + CRIMILD_CURRENT_FUNCTION );
 
 #endif
 

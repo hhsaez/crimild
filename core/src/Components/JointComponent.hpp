@@ -25,34 +25,40 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_GL3_RENDERING_UTILS_
-#define CRIMILD_GL3_RENDERING_UTILS_
+#ifndef CRIMILD_CORE_COMPONENTS_JOINT_
+#define CRIMILD_CORE_COMPONENTS_JOINT_
 
-#include <Crimild.hpp>
+#include "NodeComponent.hpp"
+#include "Mathematics/Matrix.hpp"
 
 namespace crimild {
 
-	namespace gl3 {
+	class JointComponent : public NodeComponent {
+	public:
+		static const char *NAME;
 
-		class Utils {
-		public:
-			static void checkErrors( std::string prefix );
+	public:
+		JointComponent( void );
+		virtual ~JointComponent( void );
 
-			static VertexShaderPtr getVertexShaderInstance( std::string source );
-			
-			static FragmentShaderPtr getFragmentShaderInstance( std::string source );
+		const Matrix4f &getWorldMatrix( void ) const { return _worldMatrix; }
+		void setWorldMatrix( const Matrix4f &worldMatrix ) { _worldMatrix = worldMatrix; }
 
-			static std::string buildArrayShaderLocationName( std::string variable, int index );
+		const Matrix4f &getInverseBindMatrix( void ) const { return _inverseBindMatrix; }
+		void setInverseBindMatrix( const Matrix4f &inverseBindMatrix ) { _inverseBindMatrix = inverseBindMatrix; }
 
-			static std::string buildArrayShaderLocationName( std::string variable, int index, std::string member );
-		};
+		void computeInverseBindMatrix( void );
 
-	}
+		virtual void update( const Time & ) override;
+
+	private:
+		Matrix4f _worldMatrix;
+		Matrix4f _inverseBindMatrix;
+	};
+
+	typedef std::shared_ptr< JointComponent > JointComponentPtr;
 
 }
-
-#define CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION crimild::gl3::Utils::checkErrors( std::string( "Before " ) + CRIMILD_CURRENT_FUNCTION );
-#define CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION crimild::gl3::Utils::checkErrors( std::string( "After " ) + CRIMILD_CURRENT_FUNCTION );
 
 #endif
 

@@ -25,34 +25,37 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_GL3_RENDERING_UTILS_
-#define CRIMILD_GL3_RENDERING_UTILS_
+#include "SkinComponent.hpp"
 
-#include <Crimild.hpp>
+using namespace crimild;
 
-namespace crimild {
+const char *SkinComponent::NAME = "skinning";
 
-	namespace gl3 {
-
-		class Utils {
-		public:
-			static void checkErrors( std::string prefix );
-
-			static VertexShaderPtr getVertexShaderInstance( std::string source );
-			
-			static FragmentShaderPtr getFragmentShaderInstance( std::string source );
-
-			static std::string buildArrayShaderLocationName( std::string variable, int index );
-
-			static std::string buildArrayShaderLocationName( std::string variable, int index, std::string member );
-		};
-
-	}
+SkinComponent::SkinComponent( void )
+	: NodeComponent( NAME )
+{
 
 }
 
-#define CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION crimild::gl3::Utils::checkErrors( std::string( "Before " ) + CRIMILD_CURRENT_FUNCTION );
-#define CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION crimild::gl3::Utils::checkErrors( std::string( "After " ) + CRIMILD_CURRENT_FUNCTION );
+SkinComponent::~SkinComponent( void )
+{
 
-#endif
+}
+
+bool SkinComponent::hasJoints( void )
+{
+	return _joints.size() > 0;
+}
+
+void SkinComponent::attachJoint( Node *joint )
+{
+	_joints.push_back( joint );
+}
+
+void SkinComponent::foreachJoint( std::function< void( Node *, unsigned int ) > callback )
+{
+	for ( int i = 0; i < _joints.size(); i++ ) {
+		callback( _joints[ i ], i );
+	}
+}
 

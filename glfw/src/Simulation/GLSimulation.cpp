@@ -35,8 +35,19 @@
 using namespace crimild;
 
 GLSimulation::GLSimulation( std::string name, int argc, char **argv )
-	: Simulation( name, argc, argv )
+	: Simulation( name, argc, argv ),
+	  _width( 1024 ),
+	  _height( 768 )
 {
+	for ( int i = 1; i < argc; i++ ) {
+		std::string arg( argv[ i ] );
+		if ( arg == "--width" ) {
+			_width = atoi( argv[ i + 1 ] );
+		}
+		else if ( arg == "--height" ) {
+			_height = atoi( argv[ i + 1 ] );
+		}
+	}
 }
 
 GLSimulation::~GLSimulation( void )
@@ -50,7 +61,7 @@ void GLSimulation::start( void )
 		throw RuntimeException( "Cannot start GLFW: glwfInit failed!" );
 	}
 
-	WindowTaskPtr windowTask( new WindowTask( 9000, 1280, 720 ) );
+	WindowTaskPtr windowTask( new WindowTask( 9000, _width, _height ) );
 	getMainLoop()->startTask( windowTask );
 
 	UpdateTimeTaskPtr updateTimeTask( new UpdateTimeTask( 9999 ) );

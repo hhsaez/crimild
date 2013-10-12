@@ -32,6 +32,8 @@
 
 #include "SceneGraph/Geometry.hpp"
 #include "Components/RenderStateComponent.hpp"
+#include "Components/SkinComponent.hpp"
+#include "Components/JointComponent.hpp"
 #include "Primitives/QuadPrimitive.hpp"
 
 using namespace crimild;
@@ -89,6 +91,16 @@ void RenderPass::render( Renderer *renderer, Geometry *geometry, Primitive *prim
 	if ( renderState->hasLights() ) {
 		renderState->foreachLight( [&]( Light *light ) {
 			renderer->bindLight( program, light );
+		});
+	}
+
+	// bind joints and other skinning information
+	SkinComponent *skinning = geometry->getComponent< SkinComponent >();
+	if ( skinning != nullptr && skinning->hasJoints() ) {
+		skinning->foreachJoint( [&]( Node *node, unsigned int index ) {
+			JointComponent *joint = node->getComponent< JointComponent >();
+			renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::JOINT_WORLD_MATRIX_UNIFORM + index ), joint->getWorldMatrix() );
+			renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::JOINT_INVERSE_BIND_MATRIX_UNIFORM + index ), joint->getInverseBindMatrix() );
 		});
 	}
 

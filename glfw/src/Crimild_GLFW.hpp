@@ -41,6 +41,7 @@
 
 #include "Rendering/GL3/Programs/ParticleSystemShaderProgram.hpp"
 #include "Rendering/GL3/Programs/SignedDistanceFieldShaderProgram.hpp"
+#include "Rendering/GL3/Programs/SkinningShaderProgram.hpp"
 
 #include "Rendering/GL3/Library/FlatMaterial.hpp"
 #include "Rendering/GL3/Library/FlatShaderProgram.hpp"

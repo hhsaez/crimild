@@ -25,34 +25,34 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_GL3_RENDERING_UTILS_
-#define CRIMILD_GL3_RENDERING_UTILS_
+#include "JointComponent.hpp"
+#include "SceneGraph/Node.hpp"
+#include "Visitors/UpdateWorldState.hpp"
 
-#include <Crimild.hpp>
+using namespace crimild;
 
-namespace crimild {
+const char *JointComponent::NAME = "joint";
 
-	namespace gl3 {
-
-		class Utils {
-		public:
-			static void checkErrors( std::string prefix );
-
-			static VertexShaderPtr getVertexShaderInstance( std::string source );
-			
-			static FragmentShaderPtr getFragmentShaderInstance( std::string source );
-
-			static std::string buildArrayShaderLocationName( std::string variable, int index );
-
-			static std::string buildArrayShaderLocationName( std::string variable, int index, std::string member );
-		};
-
-	}
+JointComponent::JointComponent( void )
+	: NodeComponent( NAME )
+{
 
 }
 
-#define CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION crimild::gl3::Utils::checkErrors( std::string( "Before " ) + CRIMILD_CURRENT_FUNCTION );
-#define CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION crimild::gl3::Utils::checkErrors( std::string( "After " ) + CRIMILD_CURRENT_FUNCTION );
+JointComponent::~JointComponent( void )
+{
 
-#endif
+}
+
+void JointComponent::computeInverseBindMatrix( void )
+{
+	getNode()->perform( UpdateWorldState() );
+	Matrix4f bindMatrix( getNode()->getWorld().computeModelMatrix() );
+	_inverseBindMatrix = bindMatrix.makeInverse();
+}
+
+void JointComponent::update( const Time & )
+{
+	_worldMatrix = getNode()->getWorld().computeModelMatrix();
+}
 

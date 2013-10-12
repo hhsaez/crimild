@@ -33,7 +33,9 @@
 using namespace crimild;
 
 WindowTask::WindowTask( int priority, int width, int height )
-	: Task( priority )
+	: Task( priority ),
+	  _width( width ),
+	  _height( height )
 {
 }
 
@@ -44,7 +46,7 @@ WindowTask::~WindowTask( void )
 
 void WindowTask::start( void )
 {
-	FrameBufferObjectPtr screenBuffer( new FrameBufferObject( 1024, 768, 8, 8, 8, 8, 16, 0 ) );
+	FrameBufferObjectPtr screenBuffer( new FrameBufferObject( _width, _height, 8, 8, 8, 8, 16, 0 ) );
 
 	glfwOpenWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
 	glfwOpenWindowHint( GLFW_OPENGL_VERSION_MAJOR, 3 );
