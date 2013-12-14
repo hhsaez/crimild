@@ -90,6 +90,7 @@
 #include "Visitors/UpdateWorldState.hpp"
 
 #include "Primitives/Primitive.hpp"
+#include "Primitives/BoxPrimitive.hpp"
 #include "Primitives/ParametricPrimitive.hpp"
 #include "Primitives/ParametricSpherePrimitive.hpp"
 #include "Primitives/ConePrimitive.hpp"
