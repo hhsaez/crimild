@@ -124,7 +124,11 @@ void Node::detachAllComponents( void )
 
 void Node::updateComponents( const Time &t )
 {
-	for ( auto cmp : _components ) {
+	// create a copy of the component's collection
+	// to prevent errors when attaching or detaching
+	// components during an update pass
+	auto components = _components;
+	for ( auto cmp : components ) {
 		if ( cmp.second != nullptr ) {
 			cmp.second->update( t );
 		}
