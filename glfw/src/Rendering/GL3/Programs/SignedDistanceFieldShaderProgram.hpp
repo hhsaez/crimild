@@ -38,7 +38,7 @@ namespace crimild {
 			CRIMILD_DISALLOW_COPY_AND_ASSIGN( SignedDistanceFieldShaderProgram );
 
 		public:
-			SignedDistanceFieldShaderProgram( void );
+			SignedDistanceFieldShaderProgram( bool screenSpace = false );
 			virtual ~SignedDistanceFieldShaderProgram( void );
 		};
 

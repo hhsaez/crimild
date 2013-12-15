@@ -48,6 +48,21 @@ const char *sdf_vs = { CRIMILD_TO_STRING(
 	}
 )};
 
+const char *sdf_screen_vs = { CRIMILD_TO_STRING(
+	in vec3 aPosition;
+	in vec2 aTextureCoord;
+
+	uniform mat4 uMMatrix;
+
+	out vec2 vTextureCoord;
+
+	void main()
+	{
+		vTextureCoord = aTextureCoord;
+		gl_Position = uMMatrix * vec4( aPosition.x, aPosition.y, 0.0, 1.0 );
+	}
+)};
+
 const char *sdf_fs = { CRIMILD_TO_STRING( 
 	struct Material {
 	    vec4 ambient;
@@ -74,8 +89,8 @@ const char *sdf_fs = { CRIMILD_TO_STRING(
 	}
 )};
 
-gl3::SignedDistanceFieldShaderProgram::SignedDistanceFieldShaderProgram( void )
-	: ShaderProgram( gl3::Utils::getVertexShaderInstance( sdf_vs ), gl3::Utils::getFragmentShaderInstance( sdf_fs ) )
+gl3::SignedDistanceFieldShaderProgram::SignedDistanceFieldShaderProgram( bool screenSpace )
+	: ShaderProgram( gl3::Utils::getVertexShaderInstance( screenSpace ? sdf_screen_vs : sdf_vs ), gl3::Utils::getFragmentShaderInstance( sdf_fs ) )
 { 
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
