@@ -64,8 +64,6 @@ void OBJLoader::reset( void )
 
 NodePtr OBJLoader::load( void )
 {
-	Log::Debug << "Loading " << _filePath << Log::End;
-
 	reset();
 
 	std::ifstream input;
@@ -118,7 +116,6 @@ void OBJLoader::processLine( std::ifstream &input )
 		// unknown object. discard the line
 		char buffer[ 1024 ];
 		input.getline( buffer, 1024 );
-		Log::Debug << "Skipping " << what << " " << buffer << Log::End;
 	}
 }
 
@@ -131,7 +128,6 @@ void OBJLoader::pushGroup( std::string name, std::string materialName )
 
 void OBJLoader::processMaterialFile( std::string materialFileName )
 {
-	Log::Debug << "Processing material file " << materialFileName << Log::End;
 	std::ifstream materialFile;
 	materialFile.open( materialFileName );
 	if ( !materialFile.is_open() ) {
@@ -216,11 +212,8 @@ NodePtr OBJLoader::generateScene( void )
 
 	for ( auto group : _groups ) {
 		if ( group->faces.size() == 0 ) {
-			Log::Debug << "Skipping empty group " << group->name << Log::End;
 			continue;
 		}
-
-		std::cout << "Processing group " << group->name << std::endl;
 
 		std::vector< float > vertices;
 		std::vector< unsigned short > indices;
