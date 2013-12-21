@@ -277,15 +277,16 @@ namespace crimild {
 
 		void lookAt( const Vector3Impl &target, const Vector3Impl &up )
 		{
-			Vector3f currentDirection;
-			computeDirection( currentDirection );
-			currentDirection.normalize();
+			Vector3f direction = target - getTranslate();
+			direction.normalize();
 
-			Vector3f newDirection = target - getTranslate();
-			newDirection.normalize();
+			Vector3f forward( 0.0f, 0.0f, -1.0f );
 
-			Vector3f axis = currentDirection ^ newDirection;
-			float angle = std::acos( currentDirection * newDirection );
+			Vector3f axis = forward ^ direction;
+			if ( axis.getSquaredMagnitude() == 0.0f ) {
+				axis = up;
+			}
+			float angle = std::acos( forward * direction );
 
 			_rotate.fromAxisAngle( axis, angle );
 		}
@@ -382,15 +383,17 @@ crimild::Transformation< U > operator+( const crimild::Transformation< U > &t0, 
 template< typename U, typename V >
 crimild::Transformation< U > operator*( const crimild::Transformation< U > &t, V scalar )
 {
-	t.setScalar( scalar );
-	return t;
+	crimild::Transformation< U > r( t );
+	r.setScale( scalar );
+	return r;
 }
 
 template< typename U, typename V >
 crimild::Transformation< U > operator*( V scalar, const crimild::Transformation< U > &t )
 {
-	t.setScalar( scalar );
-	return t;
+	crimild::Transformation< U > r( t );
+	r.setScale( scalar );
+	return r;
 }
 
 #endif

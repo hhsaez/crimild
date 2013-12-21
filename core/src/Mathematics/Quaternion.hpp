@@ -120,7 +120,7 @@ namespace crimild {
 		/**
 			\brief Explicit constructor
 		 */
-		Quaternion( PRECISION w, PRECISION x, PRECISION y, PRECISION z )
+		Quaternion( PRECISION x, PRECISION y, PRECISION z, PRECISION w )
 			: _data( x, y, z, w )
 		{
 		}
@@ -239,7 +239,7 @@ namespace crimild {
 		 */
 		Quaternion getConjugate( void ) const
 		{
-			return Quaternion( _data[ 3 ], -_data[ 0 ], -_data[ 1 ], -_data[ 2 ] );
+			return Quaternion( -_data[ 0 ], -_data[ 1 ], -_data[ 2 ], _data[ 3 ] );
 		}
 
 		Quaternion &makeIdentity( void )
