@@ -25,24 +25,26 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_SIMULATION_TASKS_UPDATE_PHYSICS_
-#define CRIMILD_CORE_SIMULATION_TASKS_UPDATE_PHYSICS_
+#ifndef CRIMILD_SIMULATION_TASKS_DISPATCH_MESSAGES_
+#define CRIMILD_SIMULATION_TASKS_DISPATCH_MESSAGES_
 
-#include "../Task.hpp"
+#include "Simulation/Task.hpp"
 
 namespace crimild {
 
-	class UpdatePhysicsTask : public Task {
+	class DispatchMessagesTask : public Task {
 	public:
-		UpdatePhysicsTask( unsigned int priority );
-		virtual ~UpdatePhysicsTask( void );
+		DispatchMessagesTask( int priority );
+		virtual ~DispatchMessagesTask( void );
 
+		virtual void start( void ) override;
 		virtual void update( void ) override;
+		virtual void stop( void ) override;
 	};
 
-	typedef std::shared_ptr< UpdatePhysicsTask > UpdatePhysicsTaskPtr;
+	typedef std::shared_ptr< DispatchMessagesTask > DispatchMessagesTaskPtr;
 
-	}
+}
 
 #endif
 

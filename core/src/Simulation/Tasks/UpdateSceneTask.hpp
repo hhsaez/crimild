@@ -29,21 +29,17 @@
 #define CRIMILD_SIMULATION_TASKS_UPDATE_SCENE_
 
 #include "Simulation/Task.hpp"
-#include "SceneGraph/Node.hpp"
 
 namespace crimild {
 
 	class UpdateSceneTask : public Task {
 	public:
-		UpdateSceneTask( int priority, NodePtr scene );
+		UpdateSceneTask( int priority );
 		virtual ~UpdateSceneTask( void );
 
 		virtual void start( void ) override;
 		virtual void update( void ) override;
 		virtual void stop( void ) override;
-
-	private:
-		NodePtr _scene;
 	};
 
 	typedef std::shared_ptr< UpdateSceneTask > UpdateSceneTaskPtr;

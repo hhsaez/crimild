@@ -25,24 +25,34 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_SIMULATION_TASKS_UPDATE_PHYSICS_
-#define CRIMILD_CORE_SIMULATION_TASKS_UPDATE_PHYSICS_
+#include "DispatchMessagesTask.hpp"
+#include "Messaging/MessageQueue.hpp"
 
-#include "../Task.hpp"
+using namespace crimild;
 
-namespace crimild {
+DispatchMessagesTask::DispatchMessagesTask( int priority )
+	: Task( priority )
+{
 
-	class UpdatePhysicsTask : public Task {
-	public:
-		UpdatePhysicsTask( unsigned int priority );
-		virtual ~UpdatePhysicsTask( void );
+}
 
-		virtual void update( void ) override;
-	};
+DispatchMessagesTask::~DispatchMessagesTask( void )
+{
 
-	typedef std::shared_ptr< UpdatePhysicsTask > UpdatePhysicsTaskPtr;
+}
 
-	}
+void DispatchMessagesTask::start( void )
+{
 
-#endif
+}
+
+void DispatchMessagesTask::update( void )
+{
+	MessageQueue::getInstance().dispatchMessages();
+}
+
+void DispatchMessagesTask::stop( void )
+{
+
+}
 

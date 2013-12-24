@@ -29,6 +29,7 @@
 #include "FileSystem.hpp"
  
 #include "Foundation/Log.hpp"
+#include "Tasks/DispatchMessagesTask.hpp"
 #include "Tasks/BeginRenderTask.hpp"
 #include "Tasks/EndRenderTask.hpp"
 #include "Tasks/UpdateSceneTask.hpp"
@@ -36,12 +37,8 @@
 #include "Tasks/RenderSceneTask.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "Visitors/FetchCameras.hpp"
-
-#define UPDATE_SCENE_PRIORITY 100
-#define UPDATE_PHYSICS_PRIORITY 200
-#define BEGIN_RENDER_PRIORITY 1000
-#define RENDER_SCENE_PRIORITY 2000
-#define END_RENDER_PRIORITY 3000
+#include "Visitors/UpdateWorldState.hpp"
+#include "Visitors/UpdateRenderState.hpp"
 
 using namespace crimild;
 
@@ -65,11 +62,23 @@ void Simulation::start( void )
 {
 	Log::Info << "Starting simulation \"" << getName() << "\"" << Log::End;
 
-	BeginRenderTaskPtr beginRender( new BeginRenderTask( BEGIN_RENDER_PRIORITY ) );
+	DispatchMessagesTaskPtr dispatchMessages( new DispatchMessagesTask( Priorities::HIGHEST_PRIORITY ) );
+	getMainLoop()->startTask( dispatchMessages );
+
+	BeginRenderTaskPtr beginRender( new BeginRenderTask( Priorities::BEGIN_RENDER_PRIORITY ) );
 	getMainLoop()->startTask( beginRender );
 
-	EndRenderTaskPtr endRender( new EndRenderTask( END_RENDER_PRIORITY ) );
+	EndRenderTaskPtr endRender( new EndRenderTask( Priorities::END_RENDER_PRIORITY ) );
 	getMainLoop()->startTask( endRender );
+
+	UpdateSceneTaskPtr updateScene( new UpdateSceneTask( Priorities::UPDATE_SCENE_PRIORITY ) );
+	getMainLoop()->startTask( updateScene );
+
+	UpdatePhysicsTaskPtr updatePhysics( new UpdatePhysicsTask( Priorities::UPDATE_PHYSICS_PRIORITY ) );
+	getMainLoop()->startTask( updatePhysics );
+
+	RenderSceneTaskPtr renderScene( new RenderSceneTask( Priorities::RENDER_SCENE_PRIORITY ) );
+	getMainLoop()->startTask( renderScene );
 }
 
 bool Simulation::step( void )
@@ -91,25 +100,29 @@ int Simulation::run( void )
 	return 0;
 }
 
-void Simulation::attachScene( NodePtr scene )
+void Simulation::setScene( NodePtr scene )
 {
-	FetchCameras fetchCameras;
-	scene->perform( fetchCameras );
-	if ( fetchCameras.hasCameras() ) {
-		fetchCameras.foreachCamera( [&]( Camera *camera ) mutable {
-			UpdateSceneTaskPtr updateScene( new UpdateSceneTask( UPDATE_SCENE_PRIORITY, scene ) );
-			getMainLoop()->startTask( updateScene );
+	_scene = scene;
+	_cameras.clear();
 
-			UpdatePhysicsTaskPtr updatePhysics( new UpdatePhysicsTask( UPDATE_PHYSICS_PRIORITY, scene ) );
-			getMainLoop()->startTask( updatePhysics );
+	if ( _scene != nullptr ) {
+		_scene->perform( UpdateWorldState() );
+		_scene->perform( UpdateRenderState() );
 
-			RenderSceneTaskPtr renderScene( new RenderSceneTask( RENDER_SCENE_PRIORITY, scene, camera ) );
-			getMainLoop()->startTask( renderScene );
-		});
+		FetchCameras fetchCameras;
+		_scene->perform( fetchCameras );
+		if ( fetchCameras.hasCameras() ) {
+			fetchCameras.foreachCamera( [&]( Camera *camera ) {
+				_cameras.push_back( camera );
+			});
+		}
 	}
-	else {
-		Log::Error << "Cannot find cameras for scene with name " << ( scene->getName().length() > 0 ? scene->getName() : "<unknown>" ) << Log::End;
-	}
+}
 
+void Simulation::forEachCamera( std::function< void ( Camera * ) > callback )
+{
+	for ( auto camera : _cameras ) {
+		callback( camera );
+	}
 }
 

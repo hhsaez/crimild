@@ -34,6 +34,9 @@
 #include "SceneGraph/Node.hpp" 
 #include "Rendering/Renderer.hpp"
 
+#include <functional>
+#include <list>
+
 namespace crimild {
 
 	class Simulation : public NamedObject {
@@ -42,6 +45,19 @@ namespace crimild {
 
 	public:
 		static Simulation *getCurrent( void ) { return _currentSimulation; }
+
+		class Priorities {
+		public:
+			enum {
+				HIGHEST_PRIORITY = 0,
+				UPDATE_SCENE_PRIORITY = 100,
+				UPDATE_PHYSICS_PRIORITY = 200,
+				BEGIN_RENDER_PRIORITY = 1000,
+				RENDER_SCENE_PRIORITY = 2000,
+				END_RENDER_PRIORITY = 3000,
+				LOWEST_PRIORITY = 99999
+			};
+		};
 
 	public:
 		Simulation( std::string name, int argc, char **argv );
@@ -72,7 +88,14 @@ namespace crimild {
 		RendererPtr _renderer;
 
 	public:
-		void attachScene( NodePtr scene );
+		void setScene( NodePtr scene );
+		Node *getScene( void ) { return _scene.get(); }
+
+		void forEachCamera( std::function< void ( Camera * ) > callback );
+
+	private:
+		NodePtr _scene;
+		std::list< Camera * > _cameras;
 	};
 
 	typedef std::shared_ptr< Simulation > SimulationPtr;

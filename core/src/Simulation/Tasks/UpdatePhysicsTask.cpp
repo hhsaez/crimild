@@ -26,15 +26,15 @@
  */
 
 #include "UpdatePhysicsTask.hpp"
+#include "Scenegraph/Node.hpp"
 #include "Components/NodeComponentCatalog.hpp"
 #include "Components/RigidBodyComponent.hpp"
 #include "Components/ColliderComponent.hpp"
 
 using namespace crimild;
 
-UpdatePhysicsTask::UpdatePhysicsTask( unsigned int priority, NodePtr scene )
-	: Task( priority ),
-	  _scene( scene )
+UpdatePhysicsTask::UpdatePhysicsTask( unsigned int priority )
+	: Task( priority )
 {
 
 }

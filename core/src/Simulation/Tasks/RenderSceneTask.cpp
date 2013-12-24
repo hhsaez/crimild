@@ -38,10 +38,8 @@
 
 using namespace crimild;
 
-RenderSceneTask::RenderSceneTask( int priority, NodePtr scene, Camera *camera )
-	: Task( priority ),
-	  _scene( scene ),
-	  _camera( camera )
+RenderSceneTask::RenderSceneTask( int priority )
+	: Task( priority )
 {
 
 }
@@ -53,20 +51,22 @@ RenderSceneTask::~RenderSceneTask( void )
 
 void RenderSceneTask::start( void )
 {
-	_scene->perform( UpdateRenderState() );
 }
 
 void RenderSceneTask::update( void )
 {
+	Node *scene = Simulation::getCurrent()->getScene();
 	Renderer *renderer = Simulation::getCurrent()->getRenderer();
-	if ( renderer ) {
-		VisibilitySet result;
-		_scene->perform( ComputeVisibilitySet( &result, _camera ) );
-		if ( result.hasGeometries() ) {
-			renderer->render( &result );
-		}
-	}
 
+	if ( scene != nullptr && renderer != nullptr ) {
+		VisibilitySet result;
+		Simulation::getCurrent()->forEachCamera( [&]( Camera *camera ) { 
+			scene->perform( ComputeVisibilitySet( &result, camera ) );
+			if ( result.hasGeometries() ) {
+				renderer->render( &result );
+			}
+		});
+	}
 }
 
 void RenderSceneTask::stop( void )

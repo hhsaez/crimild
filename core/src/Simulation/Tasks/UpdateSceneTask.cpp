@@ -29,12 +29,12 @@
 #include "Simulation/Simulation.hpp"
 #include "Visitors/UpdateComponents.hpp"
 #include "Visitors/UpdateWorldState.hpp"
+#include "SceneGraph/Node.hpp"
 
 using namespace crimild;
 
-UpdateSceneTask::UpdateSceneTask( int priority, NodePtr scene )
-	: Task( priority ),
-	  _scene( scene )
+UpdateSceneTask::UpdateSceneTask( int priority )
+	: Task( priority )
 {
 
 }
@@ -46,15 +46,18 @@ UpdateSceneTask::~UpdateSceneTask( void )
 
 void UpdateSceneTask::start( void )
 {
-	_scene->perform( UpdateWorldState() );
+
 }
 
 void UpdateSceneTask::update( void )
 {
 	const Time &t = Simulation::getCurrent()->getSimulationTime();
+	Node *scene = Simulation::getCurrent()->getScene();
 
-	_scene->perform( UpdateComponents( t ) );
-	_scene->perform( UpdateWorldState() );
+	if ( scene != nullptr ) {
+		scene->perform( UpdateComponents( t ) );
+		scene->perform( UpdateWorldState() );
+	}
 }
 
 void UpdateSceneTask::stop( void )
