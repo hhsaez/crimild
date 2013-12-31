@@ -29,13 +29,14 @@
 #define CRIMILD_COMPONENTS_NODE_COMPONENT_
 
 #include "Foundation/NamedObject.hpp"
+#include "Foundation/SharedObject.hpp"
 #include "Mathematics/Time.hpp"
 
 namespace crimild {
 
 	class Node;
 
-	class NodeComponent : public NamedObject {
+	class NodeComponent : public SharedObject, public NamedObject {
 	protected:
 		NodeComponent( std::string name = "update" );
 
@@ -43,6 +44,7 @@ namespace crimild {
 		virtual ~NodeComponent( void );
 
 		Node *getNode( void ) { return _node; }
+		const Node *getNode( void ) const { return _node; }
 		void setNode( Node *node ) { _node = node; }
 
 	private:
@@ -54,8 +56,6 @@ namespace crimild {
 		virtual void onDetach( void );
 
 	};
-
-	typedef std::shared_ptr< NodeComponent > NodeComponentPtr;
 
 }
 

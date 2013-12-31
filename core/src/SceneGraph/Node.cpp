@@ -73,7 +73,7 @@ void Node::accept( NodeVisitor &visitor )
 	visitor.visitNode( this );
 }
 
-void Node::attachComponent( NodeComponentPtr component )
+void Node::attachComponent( NodeComponent *component )
 {
 	if ( component->getNode() == this ) {
 		// the component is already attached to this node
@@ -86,7 +86,7 @@ void Node::attachComponent( NodeComponentPtr component )
 	component->onAttach();
 }
 
-void Node::detachComponent( NodeComponentPtr component )
+void Node::detachComponent( NodeComponent *component )
 {
 	if ( component->getNode() != this ) {
 		// the component is not attached to this node
@@ -101,13 +101,14 @@ void Node::detachComponentWithName( std::string name )
 	if ( _components.find( name ) != _components.end() ) {
 		_components[ name ]->onDetach();
 		_components[ name ]->setNode( nullptr );
+		_components[ name ] = nullptr;
 		_components.erase( name );
 	}
 }
 
 NodeComponent *Node::getComponentWithName( std::string name )
 {
-	return _components[ name ].get();
+	return _components[ name ];
 }
 
 void Node::detachAllComponents( void )

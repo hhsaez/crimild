@@ -29,6 +29,7 @@
 #define CRIMILD_CORE_BOUNDINGS_BOUNDING_VOLUME_
 
 #include "Foundation/Macros.hpp"
+#include "Foundation/SharedObject.hpp"
 #include "Mathematics/Vector.hpp"
 #include "Mathematics/Transformation.hpp"
 #include "Mathematics/Ray.hpp"
@@ -38,7 +39,7 @@
 
 namespace crimild {
 
-	class BoundingVolume {
+	class BoundingVolume : public SharedObject {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( BoundingVolume );
 
 	protected:
@@ -80,8 +81,6 @@ namespace crimild {
 		virtual void resolveIntersection( const Sphere3f &sphere, TransformationImpl &result ) const = 0;
 		virtual void resolveIntersection( const Plane3f &plane, TransformationImpl &result ) const = 0;
 	};
-
-	typedef std::shared_ptr< BoundingVolume > BoundingVolumePtr;
 
 }
 

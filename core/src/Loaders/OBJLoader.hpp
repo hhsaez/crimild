@@ -43,7 +43,7 @@ namespace crimild {
 		OBJLoader( std::string filePath );
 		virtual ~OBJLoader( void );
 
-		NodePtr load( void );
+		Pointer< Node > load( void );
 
 	private:
 		void reset( void );
@@ -76,7 +76,7 @@ namespace crimild {
 
 		void pushGroup( std::string name, std::string materialName );
 
-		NodePtr generateScene( void );
+		Pointer< Node > generateScene( void );
 
 	private:
 		std::string _filePath;
@@ -87,7 +87,7 @@ namespace crimild {
 		std::vector< float > _textureCoords;
 		unsigned int _textureCoordCount;
 
-		class GroupDef {
+		class GroupDef : public SharedObject {
 		public:
 			GroupDef( std::string name, std::string materialName )
 			{
@@ -97,7 +97,6 @@ namespace crimild {
 
 			std::string name;
 			std::string materialName;
-			//std::vector< std::string > faces;
 
 			class Face {
 			public:
@@ -131,16 +130,16 @@ namespace crimild {
 			std::vector< Face > faces;
 		};
 
-		std::vector< std::shared_ptr< GroupDef >> _groups;
+		std::vector< Pointer< GroupDef > > _groups;
 		GroupDef *_currentGroup;
 
-		class MaterialDef {
+		class MaterialDef : public SharedObject {
 		public:
 			std::string name;
 
-			TexturePtr diffuseMap;
-			TexturePtr normalMap;
-			TexturePtr specularMap;
+			Pointer< Texture > diffuseMap;
+			Pointer< Texture > normalMap;
+			Pointer< Texture > specularMap;
 			RGBAColorf diffuseColor;
 			RGBAColorf ambientColor;
 			RGBAColorf specularColor;
@@ -151,7 +150,7 @@ namespace crimild {
 			}
 		};	
 
-		std::map< std::string, std::shared_ptr< MaterialDef >> _materials;
+		std::map< std::string, Pointer< MaterialDef > > _materials;
 	};
 
 }

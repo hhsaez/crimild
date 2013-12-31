@@ -41,20 +41,18 @@ namespace crimild {
 		virtual ~Group( void );
 
 		bool hasNodes( void ) const { return ( _nodes.size() > 0 ); }
-		void attachNode( NodePtr node );
-		void detachNode( NodePtr node );
+		void attachNode( Node *node );
+		void detachNode( Node *node );
 		void detachAllNodes( void );
-		virtual void foreachNode( std::function< void( NodePtr & ) > callback );
+		virtual void foreachNode( std::function< void( Node * ) > callback );
 
 	protected:
-		std::list< NodePtr > _nodes;
+		std::list< Pointer< Node > > _nodes;
 
 	public:
 		virtual void accept( NodeVisitor &visitor ) override;
 
 	};
-
-	typedef std::shared_ptr< Group > GroupPtr;
 
 }
 

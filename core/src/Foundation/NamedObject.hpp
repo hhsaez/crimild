@@ -29,7 +29,6 @@
 #define CRIMILD_FOUNDATION_NAMED_OBJECT_
 
 #include <string>
-#include <memory>
 
 namespace crimild {
 	
@@ -45,8 +44,6 @@ namespace crimild {
 	private:
 		std::string _name;
 	};
-
-	typedef std::shared_ptr< NamedObject > NamedObjectPtr;
 	
 }
 

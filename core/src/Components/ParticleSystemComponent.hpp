@@ -43,7 +43,7 @@ namespace crimild {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( ParticleSystemComponent );
 
 	public:
-		static const char *NAME;
+		static const char *COMPONENT_NAME;
 
 	public:
 		ParticleSystemComponent( void );
@@ -75,7 +75,7 @@ namespace crimild {
 		void setLooping( float value ) { _looping = value; }
 		float getLooping( void ) const { return _looping; }
 
-		Material *getParticleMaterial( void ) { return _material.get(); }
+		Material *getParticleMaterial( void ) { return _material; }
 
 		void setShape( BoundingVolume *volume ) { _shape = volume; }
 		BoundingVolume *getShape( void ) { return _shape; }
@@ -83,8 +83,8 @@ namespace crimild {
 		void generateParticles( void );
 
 	private:
-		PrimitivePtr _primitive;
-		MaterialPtr _material;
+		Pointer< Primitive > _primitive;
+		Pointer< Material > _material;
 
 		unsigned short _particleCount;
 		float _particleSize;
@@ -93,16 +93,14 @@ namespace crimild {
 		Vector3f _velocity;
 		Vector3f _spread;
 		bool _looping;
-		BoundingVolume *_shape;
+		Pointer< BoundingVolume > _shape;
 
-		Vector3fUniformPtr _gravityUniform;
-		FloatUniformPtr _timeUniform;
-		FloatUniformPtr _durationUniform;
-		FloatUniformPtr _shapeRadiusUniform;
-		Vector3fUniformPtr _shapeCenterUniform;
+		Pointer< Vector3fUniform > _gravityUniform;
+		Pointer< FloatUniform > _timeUniform;
+		Pointer< FloatUniform > _durationUniform;
+		Pointer< FloatUniform > _shapeRadiusUniform;
+		Pointer< Vector3fUniform > _shapeCenterUniform;
 	};
-
-	typedef std::shared_ptr< ParticleSystemComponent > ParticleSystemComponentPtr;
 
 }
 

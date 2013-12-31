@@ -78,7 +78,7 @@ void Renderer::bindProgram( ShaderProgram *program )
 {
 	getShaderProgramCatalog()->bind( program );
 
-	program->foreachUniform( [&]( ShaderUniformPtr &uniform ) {
+	program->foreachUniform( [&]( ShaderUniform *uniform ) {
 		if ( uniform->getLocation() != nullptr ) {
 			uniform->onBind( this );
 		}

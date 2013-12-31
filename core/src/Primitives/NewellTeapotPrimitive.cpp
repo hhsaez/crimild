@@ -1887,11 +1887,8 @@ NewellTeapotPrimitive::NewellTeapotPrimitive( void )
 		774, 823, 822, 
 	};
 	
-	VertexBufferObjectPtr vbo( new VertexBufferObject( VertexFormat::VF_P3_N3_UV2, vertexCount, vertices ) );
-	setVertexBuffer( vbo );
-
-	IndexBufferObjectPtr ibo( new IndexBufferObject( indexCount, indices ) );
-	setIndexBuffer( ibo );
+	setVertexBuffer( new VertexBufferObject( VertexFormat::VF_P3_N3_UV2, vertexCount, vertices ) );
+	setIndexBuffer( new IndexBufferObject( indexCount, indices ) );
 }
 
 NewellTeapotPrimitive::~NewellTeapotPrimitive( void )

@@ -77,8 +77,6 @@ namespace crimild {
 		DstBlendFunc _dstBlendFunc;
 	};
 
-	typedef std::shared_ptr< AlphaState > AlphaStatePtr;
-
 }
 
 #endif

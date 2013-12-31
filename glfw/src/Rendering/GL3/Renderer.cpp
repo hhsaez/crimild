@@ -44,20 +44,20 @@
 
 using namespace crimild;
 
-gl3::Renderer::Renderer( FrameBufferObjectPtr screenBuffer )
+gl3::Renderer::Renderer( FrameBufferObject *screenBuffer )
 {
-	setShaderProgramCatalog( ShaderProgramCatalogPtr( new gl3::ShaderProgramCatalog() ) );
-	setVertexBufferObjectCatalog( VertexBufferObjectCatalogPtr( new gl3::VertexBufferObjectCatalog() ) );
-	setIndexBufferObjectCatalog( IndexBufferObjectCatalogPtr( new gl3::IndexBufferObjectCatalog() ) );
-	setFrameBufferObjectCatalog( FrameBufferObjectCatalogPtr( new gl3::FrameBufferObjectCatalog( this ) ) );
-	setTextureCatalog( TextureCatalogPtr( new gl3::TextureCatalog() ) );
+	setShaderProgramCatalog( new gl3::ShaderProgramCatalog() );
+	setVertexBufferObjectCatalog( new gl3::VertexBufferObjectCatalog() );
+	setIndexBufferObjectCatalog( new gl3::IndexBufferObjectCatalog() );
+	setFrameBufferObjectCatalog( new gl3::FrameBufferObjectCatalog( this ) );
+	setTextureCatalog( new gl3::TextureCatalog() );
 
-	_fallbackPrograms[ "flat" ] = ShaderProgramPtr( new FlatShaderProgram() );
-	_fallbackPrograms[ "gouraud" ] = ShaderProgramPtr( new GouraudShaderProgram() );
-	_fallbackPrograms[ "phong" ] = ShaderProgramPtr( new PhongShaderProgram() );
-	_fallbackPrograms[ "color" ] = ShaderProgramPtr( new ColorShaderProgram() );
-	_fallbackPrograms[ "screen" ] = ShaderProgramPtr( new ScreenShaderProgram() );
-	_fallbackPrograms[ "texture" ] = ShaderProgramPtr( new TextureShaderProgram() );
+	_fallbackPrograms[ "flat" ] = new FlatShaderProgram();
+	_fallbackPrograms[ "gouraud" ] = new GouraudShaderProgram();
+	_fallbackPrograms[ "phong" ] = new PhongShaderProgram();
+	_fallbackPrograms[ "color" ] = new ColorShaderProgram();
+	_fallbackPrograms[ "screen" ] = new ScreenShaderProgram();
+	_fallbackPrograms[ "texture" ] = new TextureShaderProgram();
 
 	setScreenBuffer( screenBuffer );
 }

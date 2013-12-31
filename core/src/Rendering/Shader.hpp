@@ -28,12 +28,13 @@
 #ifndef CRIMILD_RENDERING_SHADER_
 #define CRIMILD_RENDERING_SHADER_
 
-#include <memory>
+#include "Foundation/SharedObject.hpp"
+
 #include <string>
 
 namespace crimild {
 
-	class Shader {
+	class Shader : public SharedObject {
 	public:
 		explicit Shader( std::string source );
 		virtual ~Shader( void );
@@ -45,10 +46,7 @@ namespace crimild {
 	};
 
 	typedef Shader VertexShader;
-	typedef std::shared_ptr< VertexShader > VertexShaderPtr;
-
 	typedef Shader FragmentShader;
-	typedef std::shared_ptr< FragmentShader > FragmentShaderPtr;
 
 }
 

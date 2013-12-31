@@ -25,27 +25,30 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_COMPONENTS_LAMBDA_
-#define CRIMILD_COMPONENTS_LAMBDA_
+#ifndef CRIMILD_CORE_FOUNDATION_SHARED_OBJECT_
+#define CRIMILD_CORE_FOUNDATION_SHARED_OBJECT_
 
-#include "NodeComponent.hpp"
-
-#include <functional>
+#include "Macros.hpp"
 
 namespace crimild {
 
-	class LambdaComponent : public NodeComponent {
-	public:
-		static const char *COMPONENT_NAME;
+	class SharedObject {
+		CRIMILD_DISALLOW_COPY_AND_ASSIGN( SharedObject )
+
+	protected:
+		SharedObject( void );
 
 	public:
-		LambdaComponent( std::function< void( Node *, const Time & ) > callback );
-		virtual ~LambdaComponent( void );
+		virtual ~SharedObject( void );
 
-		virtual void update( const Time &t ) override;
+		void retain( void );
+
+		void release( void );
+
+		int getReferenceCount( void ) const { return _referenceCount; }
 
 	private:
-		std::function< void( Node *, const Time & ) > _callback;
+		int _referenceCount;
 	};
 
 }

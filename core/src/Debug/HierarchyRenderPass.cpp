@@ -41,7 +41,7 @@ HierarchyRenderPass::HierarchyRenderPass( void )
 	_renderBoundings = false;
 }
 
-HierarchyRenderPass::HierarchyRenderPass( RenderPassPtr actualRenderPass )
+HierarchyRenderPass::HierarchyRenderPass( RenderPass *actualRenderPass )
 	: _actualRenderPass( actualRenderPass ),
 	  _debugMaterial( new Material() )
 {
@@ -59,12 +59,12 @@ void HierarchyRenderPass::render( Renderer *renderer, VisibilitySet *vs, Camera 
 		_actualRenderPass->render( renderer, vs, camera );
 	}
 
-	SpherePrimitivePtr primitive( new SpherePrimitive( 
+	Pointer< SpherePrimitive > primitive( new SpherePrimitive( 
 		0.1f, 
 		VertexFormat::VF_P3, 
 		Vector2i( 30, 30 ) ) );
 
-	GeometryPtr geometry( new Geometry() );
+	Pointer< Geometry > geometry( new Geometry() );
 
 	_debugMaterial->getAlphaState()->setEnabled( true );
 	_debugMaterial->getDepthState()->setEnabled( false );
@@ -73,7 +73,7 @@ void HierarchyRenderPass::render( Renderer *renderer, VisibilitySet *vs, Camera 
 	std::vector< float > positions;
 	
 	if ( _targetScene != nullptr ) {
-		_targetScene->perform( SelectNodes( [&]( Node* node ) {
+		_targetScene->perform( SelectNodes( [&]( Node *node ) {
 			if ( node->hasParent() ) {
 				positions.push_back( node->getParent()->getWorld().getTranslate()[ 0 ] );
 				positions.push_back( node->getParent()->getWorld().getTranslate()[ 1 ] );
@@ -102,13 +102,12 @@ void HierarchyRenderPass::render( Renderer *renderer, VisibilitySet *vs, Camera 
 		indices[ i ] = i;
 	}
 
-	VertexBufferObjectPtr vbo( new VertexBufferObject( VertexFormat::VF_P3, positions.size() / 3, &positions[ 0 ] ) );
-	IndexBufferObjectPtr ibo( new IndexBufferObject( indices.size(), &indices[ 0 ] ) );
-	PrimitivePtr bones( new Primitive( Primitive::Type::LINES ) );
-	bones->setVertexBuffer( vbo );
-	bones->setIndexBuffer( ibo );
+	Pointer< Primitive > bones( new Primitive( Primitive::Type::LINES ) );
+	bones->setVertexBuffer( new VertexBufferObject( VertexFormat::VF_P3, positions.size() / 3, &positions[ 0 ] ) );
+	bones->setIndexBuffer( new IndexBufferObject( indices.size(), &indices[ 0 ] ) );
 	geometry->setWorld( TransformationImpl() );
 	_debugMaterial->setDiffuse( RGBAColorf( 1.0f, 0.0f, 0.0f, 1.0f ) );
+	
 	RenderPass::render( renderer, geometry.get(), bones.get(), _debugMaterial.get(), camera );
 }
 

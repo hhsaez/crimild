@@ -42,22 +42,20 @@ namespace crimild {
 		virtual ~Geometry( void );
 
 		bool hasPrimitives( void ) const { return _primitives.size(); }
-		void attachPrimitive( PrimitivePtr primitive );
-		void detachPrimitive( PrimitivePtr primitive );
+		void attachPrimitive( Primitive *primitive );
+		void detachPrimitive( Primitive *primitive );
 		void detachAllPrimitives( void );
-		void foreachPrimitive( std::function< void( PrimitivePtr & ) > callback );
+		void foreachPrimitive( std::function< void( Primitive * ) > callback );
 
 		void updateModelBounds( void );
 
 	private:
-		std::list< PrimitivePtr > _primitives;
+		std::list< Pointer< Primitive > > _primitives;
 
 	public:
 		virtual void accept( NodeVisitor &visitor ) override;
 		
 	};
-
-	typedef std::shared_ptr< Geometry > GeometryPtr;
 
 }
 

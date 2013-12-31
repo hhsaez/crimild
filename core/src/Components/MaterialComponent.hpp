@@ -39,22 +39,20 @@ namespace crimild {
 
 	class MaterialComponent : public NodeComponent {
 	public:
-		static const char *NAME;
+		static const char *COMPONENT_NAME;
 
 	public:
 		MaterialComponent( void );
 		virtual ~MaterialComponent( void );
 
 		bool hasMaterials( void ) const { return _materials.size() > 0; }
-		void attachMaterial( MaterialPtr material );
+		void attachMaterial( Material *material );
 		void detachAllMaterials( void );
-		void foreachMaterial( std::function< void( MaterialPtr & ) > callback );
+		void foreachMaterial( std::function< void( Material * ) > callback );
 
 	private:
-		std::list< MaterialPtr > _materials;
+		std::list< Pointer< Material > > _materials;
 	};
-
-	typedef std::shared_ptr< MaterialComponent > MaterialComponentPtr;
 
 }
 

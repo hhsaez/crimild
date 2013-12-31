@@ -34,7 +34,7 @@
 
 namespace crimild {
 
-	class Font {
+	class Font : public SharedObject {
 	public:
 		struct Glyph {
 			char symbol;
@@ -53,17 +53,15 @@ namespace crimild {
 		Font( std::string faceFilePath, std::string glyphFilePath );
 		virtual ~Font( void );
 
-		ImagePtr getFace( void ) { return _face; }
+		Image *getFace( void ) { return _face; }
 		Glyph getGlyph( char c ) { return _glyphs[ c ]; }
 
 	private:
 		void loadGlyphs( std::string file );
 
-		ImagePtr _face;
+		Pointer< Image > _face;
 		std::map< char, Glyph > _glyphs;
 	};
-
-	typedef std::shared_ptr< Font > FontPtr;
 
 	class Text : public Geometry {
 	public:
@@ -77,7 +75,7 @@ namespace crimild {
 		void setSize( float size );
 
 		Font *getFont( void ) { return _font.get(); }
-		void setFont( FontPtr font );
+		void setFont( Font *font );
 
 		Material *getMaterial( void ) { return _material.get(); }
 
@@ -86,12 +84,10 @@ namespace crimild {
 
 		std::string _text;
 		float _size;
-		FontPtr _font;
-		PrimitivePtr _primitive;
-		MaterialPtr _material;
+		Pointer< Font > _font;
+		Pointer< Primitive > _primitive;
+		Pointer< Material > _material;
 	};
-
-	typedef std::shared_ptr< Text > TextPtr;
 
 }
 

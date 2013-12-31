@@ -28,6 +28,8 @@
 #ifndef CRIMILD_RENDERING_RENDERER_
 #define CRIMILD_RENDERING_RENDERER_
 
+#include "Foundation/SharedObject.hpp"
+
 #include "FrameBufferObject.hpp"
 #include "Material.hpp"
 #include "Catalog.hpp"
@@ -47,7 +49,9 @@ namespace crimild {
 	class Camera;
 	class RenderStateComponent;
 
-	class Renderer {
+	class Renderer : public SharedObject {
+		CRIMILD_DISALLOW_COPY_AND_ASSIGN( Renderer );
+
 	protected:
 		Renderer( void );
 
@@ -57,11 +61,11 @@ namespace crimild {
 	public:
 		virtual void configure( void ) = 0;
 
-		void setScreenBuffer( FrameBufferObjectPtr screenBuffer ) { _screenBuffer = screenBuffer; }
-		FrameBufferObject *getScreenBuffer( void ) { return _screenBuffer.get(); }
+		void setScreenBuffer( FrameBufferObject *screenBuffer ) { _screenBuffer = screenBuffer; }
+		FrameBufferObject *getScreenBuffer( void ) { return _screenBuffer; }
 
 	private:
-		FrameBufferObjectPtr _screenBuffer;
+		Pointer< FrameBufferObject > _screenBuffer;
 
 	public:
 		virtual void beginRender( void ) = 0;
@@ -125,37 +129,31 @@ namespace crimild {
 		virtual ShaderProgram *getFallbackProgram( Material *, Geometry *, Primitive * ) { return nullptr; }
 
 	public:
-		MaterialPtr _defaultMaterial;
+		Pointer< Material > _defaultMaterial;
 
 	public:
-		ShaderProgramCatalog *getShaderProgramCatalog( void ) { return _shaderProgramCatalog.get(); }
-		void setShaderProgramCatalog( ShaderProgramCatalogPtr catalog ) { _shaderProgramCatalog = catalog; }
+		ShaderProgramCatalog *getShaderProgramCatalog( void ) { return _shaderProgramCatalog; }
+		void setShaderProgramCatalog( ShaderProgramCatalog *catalog ) { _shaderProgramCatalog = catalog; }
 
-		TextureCatalog *getTextureCatalog( void ) { return _textureCatalog.get(); }
-		void setTextureCatalog( TextureCatalogPtr catalog ) { _textureCatalog = catalog; }
+		TextureCatalog *getTextureCatalog( void ) { return _textureCatalog; }
+		void setTextureCatalog( TextureCatalog *catalog ) { _textureCatalog = catalog; }
 
-		VertexBufferObjectCatalog *getVertexBufferObjectCatalog( void ) { return _vertexBufferObjectCatalog.get(); }
-		void setVertexBufferObjectCatalog( VertexBufferObjectCatalogPtr catalog ) { _vertexBufferObjectCatalog = catalog; }
+		VertexBufferObjectCatalog *getVertexBufferObjectCatalog( void ) { return _vertexBufferObjectCatalog; }
+		void setVertexBufferObjectCatalog( VertexBufferObjectCatalog *catalog ) { _vertexBufferObjectCatalog = catalog; }
 
-		IndexBufferObjectCatalog *getIndexBufferObjectCatalog( void ) { return _indexBufferObjectCatalog.get(); }
-		void setIndexBufferObjectCatalog( IndexBufferObjectCatalogPtr catalog ) { _indexBufferObjectCatalog = catalog; }
+		IndexBufferObjectCatalog *getIndexBufferObjectCatalog( void ) { return _indexBufferObjectCatalog; }
+		void setIndexBufferObjectCatalog( IndexBufferObjectCatalog *catalog ) { _indexBufferObjectCatalog = catalog; }
 
-		FrameBufferObjectCatalog *getFrameBufferObjectCatalog( void ) { return _frameBufferObjectCatalog.get(); }
-		void setFrameBufferObjectCatalog( FrameBufferObjectCatalogPtr catalog ) { _frameBufferObjectCatalog = catalog; }
-
-	private:
-		ShaderProgramCatalogPtr _shaderProgramCatalog;
-		TextureCatalogPtr _textureCatalog;
-		VertexBufferObjectCatalogPtr _vertexBufferObjectCatalog;
-		IndexBufferObjectCatalogPtr _indexBufferObjectCatalog;
-		FrameBufferObjectCatalogPtr _frameBufferObjectCatalog;
+		FrameBufferObjectCatalog *getFrameBufferObjectCatalog( void ) { return _frameBufferObjectCatalog; }
+		void setFrameBufferObjectCatalog( FrameBufferObjectCatalog *catalog ) { _frameBufferObjectCatalog = catalog; }
 
 	private:
-		Renderer( const Renderer &renderer ) { }
-		Renderer &operator=( const Renderer & ) { return *this; }
+		Pointer< ShaderProgramCatalog > _shaderProgramCatalog;
+		Pointer< TextureCatalog > _textureCatalog;
+		Pointer< VertexBufferObjectCatalog > _vertexBufferObjectCatalog;
+		Pointer< IndexBufferObjectCatalog > _indexBufferObjectCatalog;
+		Pointer< FrameBufferObjectCatalog > _frameBufferObjectCatalog;
 	};
-
-	typedef std::shared_ptr< Renderer > RendererPtr;
 
 }
 

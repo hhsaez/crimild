@@ -28,9 +28,8 @@
 #ifndef CRIMILD_RENDERER_RENDER_PASS_
 #define CRIMILD_RENDERER_RENDER_PASS_
 
-#include <memory>
-
-#include "../Primitives/Primitive.hpp"
+#include "Foundation/SharedObject.hpp"
+#include "Primitives/Primitive.hpp"
 
 namespace crimild {
 
@@ -42,7 +41,7 @@ namespace crimild {
 	class FrameBufferObject;
 	class ShaderProgram;
 
-	class RenderPass {
+	class RenderPass : public SharedObject {
 	public:
 		RenderPass( void );
 		virtual ~RenderPass( void );
@@ -53,10 +52,8 @@ namespace crimild {
 		virtual void render( Renderer *renderer, FrameBufferObject *fbo, ShaderProgram *program );
 
 	private:
-		PrimitivePtr _screen;
+		Pointer< Primitive > _screen;
 	};
-
-	typedef std::shared_ptr< RenderPass > RenderPassPtr;
 
 }
 

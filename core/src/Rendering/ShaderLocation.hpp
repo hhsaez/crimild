@@ -29,11 +29,12 @@
 #define CRIMILD_RENDERING_SHADER_LOCATION_
 
 #include "Foundation/Macros.hpp"
+#include "Foundation/SharedObject.hpp"
 #include "Foundation/NamedObject.hpp"
 
 namespace crimild {
 
-	class ShaderLocation : public NamedObject {
+	class ShaderLocation : public NamedObject, public SharedObject {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( ShaderLocation );
 		
 	public:
@@ -58,8 +59,6 @@ namespace crimild {
 		Type _type;
 		int _location;
 	};
-
-	typedef std::shared_ptr< ShaderLocation > ShaderLocationPtr;
 
 }
 

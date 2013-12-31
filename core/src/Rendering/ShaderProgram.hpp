@@ -42,6 +42,8 @@
 namespace crimild {
 
 	class ShaderProgram : public Catalog< ShaderProgram >::Resource {
+		CRIMILD_DISALLOW_COPY_AND_ASSIGN( ShaderProgram );
+		
 	public:
 		class StandardLocation {
 		public:
@@ -84,41 +86,39 @@ namespace crimild {
 		};
 
 	public:
-		ShaderProgram( VertexShaderPtr vs, FragmentShaderPtr fs );
+		ShaderProgram( VertexShader *vs, FragmentShader *fs );
 		virtual ~ShaderProgram( void );
 
-		VertexShader *getVertexShader( void ) { return _vertexShader.get(); }
-		FragmentShader *getFragmentShader( void ) { return _fragmentShader.get(); }
+		VertexShader *getVertexShader( void ) { return _vertexShader; }
+		FragmentShader *getFragmentShader( void ) { return _fragmentShader; }
 
 	private:
-		VertexShaderPtr _vertexShader;
-		FragmentShaderPtr _fragmentShader;
+		Pointer< VertexShader > _vertexShader;
+		Pointer< FragmentShader > _fragmentShader;
 
 	public:
-		void registerLocation( ShaderLocationPtr location );
-		ShaderLocation *getLocation( std::string name ) { return _locations[ name ].get(); }
+		void registerLocation( ShaderLocation *location );
+		ShaderLocation *getLocation( std::string name ) { return _locations[ name ]; }
 		void resetLocations( void );
-		void foreachLocation( std::function< void( ShaderLocationPtr & ) > callback );
+		void foreachLocation( std::function< void( ShaderLocation * ) > callback );
 
 		void registerStandardLocation( ShaderLocation::Type locationType, unsigned int standardLocationId, std::string name );
 		ShaderLocation *getStandardLocation( unsigned int standardLocationId );
 
 	private:
-		std::map< std::string, ShaderLocationPtr > _locations;
+		std::map< std::string, Pointer< ShaderLocation > > _locations;
 		std::map< unsigned int, std::string > _standardLocations;
 
 	public:
-		void attachUniform( ShaderUniformPtr uniform );
+		void attachUniform( ShaderUniform *uniform );
 		void detachAllUniforms( void );
-		void foreachUniform( std::function< void( ShaderUniformPtr & ) > callback );
+		void foreachUniform( std::function< void( ShaderUniform * ) > callback );
 
 	private:
-		std::list< ShaderUniformPtr > _uniforms;
+		std::list< Pointer< ShaderUniform > > _uniforms;
 	};
 
-	typedef std::shared_ptr< ShaderProgram > ShaderProgramPtr;
 	typedef Catalog< ShaderProgram > ShaderProgramCatalog;
-	typedef std::shared_ptr< ShaderProgramCatalog > ShaderProgramCatalogPtr;
 
 }
 

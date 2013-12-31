@@ -45,7 +45,6 @@ namespace crimild {
 		std::string _filePath;
 	};
 
-	typedef std::shared_ptr< ImageTGA > ImageTGAPtr;
 }
 
 #endif

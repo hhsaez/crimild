@@ -62,23 +62,12 @@ void Simulation::start( void )
 {
 	Log::Info << "Starting simulation \"" << getName() << "\"" << Log::End;
 
-	DispatchMessagesTaskPtr dispatchMessages( new DispatchMessagesTask( Priorities::HIGHEST_PRIORITY ) );
-	getMainLoop()->startTask( dispatchMessages );
-
-	BeginRenderTaskPtr beginRender( new BeginRenderTask( Priorities::BEGIN_RENDER_PRIORITY ) );
-	getMainLoop()->startTask( beginRender );
-
-	EndRenderTaskPtr endRender( new EndRenderTask( Priorities::END_RENDER_PRIORITY ) );
-	getMainLoop()->startTask( endRender );
-
-	UpdateSceneTaskPtr updateScene( new UpdateSceneTask( Priorities::UPDATE_SCENE_PRIORITY ) );
-	getMainLoop()->startTask( updateScene );
-
-	UpdatePhysicsTaskPtr updatePhysics( new UpdatePhysicsTask( Priorities::UPDATE_PHYSICS_PRIORITY ) );
-	getMainLoop()->startTask( updatePhysics );
-
-	RenderSceneTaskPtr renderScene( new RenderSceneTask( Priorities::RENDER_SCENE_PRIORITY ) );
-	getMainLoop()->startTask( renderScene );
+	getMainLoop()->startTask( new DispatchMessagesTask( Priorities::HIGHEST_PRIORITY ) );
+	getMainLoop()->startTask( new BeginRenderTask( Priorities::BEGIN_RENDER_PRIORITY ) );
+	getMainLoop()->startTask( new EndRenderTask( Priorities::END_RENDER_PRIORITY ) );
+	getMainLoop()->startTask( new UpdateSceneTask( Priorities::UPDATE_SCENE_PRIORITY ) );
+	getMainLoop()->startTask( new UpdatePhysicsTask( Priorities::UPDATE_PHYSICS_PRIORITY ) );
+	getMainLoop()->startTask( new RenderSceneTask( Priorities::RENDER_SCENE_PRIORITY ) );
 }
 
 bool Simulation::step( void )
@@ -100,7 +89,7 @@ int Simulation::run( void )
 	return 0;
 }
 
-void Simulation::setScene( NodePtr scene )
+void Simulation::setScene( Node *scene )
 {
 	_scene = scene;
 	_cameras.clear();

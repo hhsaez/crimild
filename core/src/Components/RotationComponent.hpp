@@ -35,7 +35,7 @@ namespace crimild {
 
 	class RotationComponent : public NodeComponent {
 	public:
-		static const char *NAME;
+		static const char *COMPONENT_NAME;
 
 	public:
 		RotationComponent( const Vector3f &axis, float speed );
@@ -48,8 +48,6 @@ namespace crimild {
 		float _speed;
 		float _time;
 	};
-
-	typedef std::shared_ptr< RotationComponent > RotationComponentPtr;
 
 }
 

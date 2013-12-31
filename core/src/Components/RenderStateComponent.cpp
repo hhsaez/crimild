@@ -32,10 +32,10 @@
 
 using namespace crimild;
 
-const char *RenderStateComponent::NAME = "renderState";
+const char *RenderStateComponent::COMPONENT_NAME = "renderState";
 
 RenderStateComponent::RenderStateComponent( void )
-	: NodeComponent( NAME )
+	: NodeComponent( COMPONENT_NAME )
 {
 }
 

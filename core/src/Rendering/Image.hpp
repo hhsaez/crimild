@@ -28,12 +28,13 @@
 #ifndef CRIMILD_RENDERING_IMAGE_
 #define CRIMILD_RENDERING_IMAGE_
 
-#include <memory>
+#include "Foundation/SharedObject.hpp"
+
 #include <vector>
 
 namespace crimild {
 
-	class Image {
+	class Image : public SharedObject {
     public:
         enum class PixelFormat {
             RGB,

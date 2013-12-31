@@ -37,7 +37,7 @@ namespace crimild {
 
 	class SkinComponent : public NodeComponent {
 	public:
-		static const char *NAME;
+		static const char *COMPONENT_NAME;
 
 	public:
 		SkinComponent( void );
@@ -50,8 +50,6 @@ namespace crimild {
 	private:
 		std::vector< Node * > _joints;
 	};
-
-	typedef std::shared_ptr< SkinComponent > SkinComponentPtr;
 
 }
 

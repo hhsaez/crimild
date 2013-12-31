@@ -41,6 +41,8 @@
 namespace crimild {
 
 	class Camera : public Node {
+		CRIMILD_DISALLOW_COPY_AND_ASSIGN( Camera );
+		
 	public:
 		explicit Camera( void );
 		Camera( float fov, float aspect, float near, float far );
@@ -74,18 +76,12 @@ namespace crimild {
 		virtual void accept( NodeVisitor &visitor ) override;
 
 	public:
-		void setRenderPass( RenderPassPtr renderPass ) { _renderPass = renderPass; }
+		void setRenderPass( RenderPass *renderPass ) { _renderPass = renderPass; }
 		RenderPass *getRenderPass( void ) { return _renderPass.get(); }
 
 	private:
-		RenderPassPtr _renderPass;
-
-	private:
-		Camera( const Camera & ) { }
-		Camera &operator=( const Camera & ) { return *this; }
+		Pointer< RenderPass > _renderPass;
 	};
-
-	typedef std::shared_ptr< Camera > CameraPtr;
 
 }
 

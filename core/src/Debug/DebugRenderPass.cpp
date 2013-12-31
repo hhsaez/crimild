@@ -33,7 +33,7 @@
 
 using namespace crimild;
 
-DebugRenderPass::DebugRenderPass( RenderPassPtr actualRenderPass )
+DebugRenderPass::DebugRenderPass( RenderPass *actualRenderPass )
 	: _actualRenderPass( actualRenderPass ),
 	  _debugMaterial( new Material() )
 {
@@ -67,7 +67,7 @@ void DebugRenderPass::renderNormalsAndTangents( Renderer *renderer, Geometry *ge
 {
 	std::vector< float > vertices;
 
-	geometry->foreachPrimitive( [&]( PrimitivePtr primitive ) {
+	geometry->foreachPrimitive( [&]( Primitive *primitive ) {
 		VertexBufferObject *vbo = primitive->getVertexBuffer();
 		const VertexFormat &vf = vbo->getVertexFormat();
 
@@ -99,9 +99,9 @@ void DebugRenderPass::renderNormalsAndTangents( Renderer *renderer, Geometry *ge
 		indices.push_back( i );
 	}
 
-	VertexBufferObjectPtr vbo( new VertexBufferObject( format, vertexCount, &vertices[ 0 ] ) );
-	IndexBufferObjectPtr ibo( new IndexBufferObject( indices.size(), &indices[ 0 ] ) );
-	PrimitivePtr primitive( new Primitive( Primitive::Type::LINES ) );
+	Pointer< VertexBufferObject > vbo( new VertexBufferObject( format, vertexCount, &vertices[ 0 ] ) );
+	Pointer< IndexBufferObject > ibo( new IndexBufferObject( indices.size(), &indices[ 0 ] ) );
+	Pointer< Primitive > primitive( new Primitive( Primitive::Type::LINES ) );
 	primitive->setVertexBuffer( vbo );
 	primitive->setIndexBuffer( ibo );
 
@@ -110,7 +110,7 @@ void DebugRenderPass::renderNormalsAndTangents( Renderer *renderer, Geometry *ge
 
 void DebugRenderPass::renderBoundings( Renderer *renderer, Geometry *geometry, Material *material, Camera *camera )
 {
-	SpherePrimitivePtr primitive( new SpherePrimitive( 
+	Pointer< SpherePrimitive > primitive( new SpherePrimitive( 
 		geometry->getWorldBound()->getRadius(), 
 		VertexFormat::VF_P3, 
 		Vector2i( 30, 30 ), 

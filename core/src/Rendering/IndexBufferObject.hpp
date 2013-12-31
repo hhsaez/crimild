@@ -42,9 +42,7 @@ namespace crimild {
 
 	};
 
-	typedef std::shared_ptr< IndexBufferObject > IndexBufferObjectPtr;
 	typedef Catalog< IndexBufferObject > IndexBufferObjectCatalog;
-	typedef std::shared_ptr< IndexBufferObjectCatalog > IndexBufferObjectCatalogPtr;
 
 }
 

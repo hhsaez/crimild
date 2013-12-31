@@ -28,23 +28,22 @@
 #ifndef CRIMILD_RENDERING_IMAGE_EFFECT_
 #define CRIMILD_RENDERING_IMAGE_EFFECT_
 
+#include "Foundation/SharedObject.hpp"
 #include "ShaderProgram.hpp"
 
 namespace crimild {
 
-	class ImageEffect {
+	class ImageEffect : public SharedObject {
 	public:
 		ImageEffect( void );
 		virtual ~ImageEffect( void );
 
-		void setProgram( ShaderProgramPtr program ) { _program = program; }
-		ShaderProgram *getProgram( void ) { return _program.get(); }
+		void setProgram( ShaderProgram *program ) { _program = program; }
+		ShaderProgram *getProgram( void ) { return _program; }
 
 	private:
-		ShaderProgramPtr _program;
+		Pointer< ShaderProgram > _program;
 	};
-
-	typedef std::shared_ptr< ImageEffect > ImageEffectPtr;
 
 }
 

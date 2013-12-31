@@ -43,8 +43,6 @@ namespace crimild {
 
         virtual ~SpherePrimitive( void );
     };
-
-    typedef std::shared_ptr< SpherePrimitive > SpherePrimitivePtr;
         
 }
 

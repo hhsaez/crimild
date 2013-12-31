@@ -106,11 +106,11 @@ void Text::setSize( float size )
 	updatePrimitive();
 }
 
-void Text::setFont( FontPtr font )
+void Text::setFont( Font *font )
 {
 	_font = font;
-	ImagePtr face = _font->getFace();
-	TexturePtr texture( new Texture( face ) );
+	Pointer< Image > face = _font->getFace();
+	Pointer< Texture > texture( new Texture( face ) );
 	_material->setColorMap( texture );
 	_material->getAlphaState()->setEnabled( true );
 	updatePrimitive();
@@ -179,11 +179,8 @@ void Text::updatePrimitive( void )
 		horiAdvance += glyph.advance;
 	}
 
-	VertexBufferObjectPtr vbo( new VertexBufferObject( VertexFormat::VF_P3_UV2, vertices.size() / 5, &vertices[ 0 ] ) );
-	IndexBufferObjectPtr ibo( new IndexBufferObject( indices.size(), &indices[ 0 ] ) );
-
-	_primitive->setVertexBuffer( vbo );
-	_primitive->setIndexBuffer( ibo );
+	_primitive->setVertexBuffer( new VertexBufferObject( VertexFormat::VF_P3_UV2, vertices.size() / 5, &vertices[ 0 ] ) );
+	_primitive->setIndexBuffer( new IndexBufferObject( indices.size(), &indices[ 0 ] ) );
 	
 	updateModelBounds();
 }

@@ -29,10 +29,10 @@
 
 using namespace crimild;
 
-const char *SkinComponent::NAME = "skinning";
+const char *SkinComponent::COMPONENT_NAME = "skinning";
 
 SkinComponent::SkinComponent( void )
-	: NodeComponent( NAME )
+	: NodeComponent( COMPONENT_NAME )
 {
 
 }

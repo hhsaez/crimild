@@ -48,6 +48,8 @@
 #include "Foundation/NamedObject.hpp"
 #include "Foundation/Log.hpp"
 #include "Foundation/StringUtils.hpp"
+#include "Foundation/SharedObject.hpp"
+#include "Foundation/Pointer.hpp"
 
 #include "Boundings/BoundingVolume.hpp"
 #include "Boundings/PlaneBoundingVolume.hpp"

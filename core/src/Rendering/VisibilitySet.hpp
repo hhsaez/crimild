@@ -28,6 +28,8 @@
 #ifndef CRIMILD_RENDERING_VISIBILITY_SET_
 #define CRIMILD_RENDERING_VISIBILITY_SET_
 
+#include "Foundation/SharedObject.hpp"
+
 #include <functional>
 #include <list>
 
@@ -36,7 +38,7 @@ namespace crimild {
 	class Geometry;
 	class Camera;
 
-	class VisibilitySet {
+	class VisibilitySet : public SharedObject {
 	public:
 		VisibilitySet( void );
 		virtual ~VisibilitySet( void );

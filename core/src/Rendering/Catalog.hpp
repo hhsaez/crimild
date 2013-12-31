@@ -28,7 +28,9 @@
 #ifndef CRIMILD_RENDERING_CATALOG_
 #define CRIMILD_RENDERING_CATALOG_
 
-#include <memory>
+#include "Foundation/SharedObject.hpp"
+#include "Foundation/Pointer.hpp"
+
 #include <list>
 #include <functional>
 
@@ -38,9 +40,14 @@ namespace crimild {
 	class ShaderLocation;
 
 	template< class RESOURCE_TYPE >
-	class Catalog {
+	class Catalog : public SharedObject {
+		CRIMILD_DISALLOW_COPY_AND_ASSIGN( Catalog )
+
 	public:
-		class Resource {
+		
+		class Resource : public SharedObject {
+			CRIMILD_DISALLOW_COPY_AND_ASSIGN( Resource )
+
 		public:
 			Resource( void )
 				: _catalog( nullptr ),

@@ -30,28 +30,27 @@
 
 #include "NodeComponent.hpp"
 #include "Boundings/BoundingVolume.hpp"
+#include "Foundation/Pointer.hpp"
 
 namespace crimild {
 
 	class ColliderComponent : public NodeComponent {
 	public:
-		static const char *NAME;
+		static const char *COMPONENT_NAME;
 
 	public:
 		ColliderComponent( void );
-		explicit ColliderComponent( BoundingVolumePtr boundingVolume );
+		explicit ColliderComponent( BoundingVolume *boundingVolume );
 		virtual ~ColliderComponent( void );
 
-		virtual const BoundingVolume *getBoundingVolume( void );
+		virtual const BoundingVolume *getBoundingVolume( void ) const;
 
 		virtual bool testCollision( ColliderComponent *other );
 		virtual void onCollision( ColliderComponent *collider );
 
 	private:
-		BoundingVolumePtr _boundingVolume;
+		Pointer< BoundingVolume > _boundingVolume;
 	};
-
-	typedef std::shared_ptr< ColliderComponent > ColliderComponentPtr;
 
 }
 

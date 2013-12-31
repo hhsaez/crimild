@@ -42,8 +42,6 @@ namespace crimild {
 		virtual void stop( void ) override;
 	};
 
-	typedef std::shared_ptr< EndRenderTask > EndRenderTaskPtr;
-
 }
 
 #endif

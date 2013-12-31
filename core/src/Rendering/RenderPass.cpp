@@ -60,9 +60,9 @@ void RenderPass::render( Renderer *renderer, Geometry *geometry, Camera *camera 
 {
 	RenderStateComponent *renderState = geometry->getComponent< RenderStateComponent >();
 	if ( renderState->hasMaterials() ) {
-		geometry->foreachPrimitive( [&]( PrimitivePtr &primitive ) mutable {
+		geometry->foreachPrimitive( [&]( Primitive *primitive ) mutable {
 			renderState->foreachMaterial( [&]( Material *material ) mutable {
-				render( renderer, geometry, primitive.get(), material, camera );
+				render( renderer, geometry, primitive, material, camera );
 			});
 		});
 	}

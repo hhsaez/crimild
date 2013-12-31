@@ -31,23 +31,22 @@
 #include "Image.hpp"
 #include "Catalog.hpp"
 #include "Foundation/NamedObject.hpp"
+#include "Foundation/Pointer.hpp"
 
 namespace crimild {
 
 	class Texture : public NamedObject, public Catalog< Texture >::Resource {
 	public:
-		Texture( ImagePtr image, std::string name = "ColorMap" );
+		Texture( Image *image, std::string name = "ColorMap" );
 		virtual ~Texture( void );
 
-		Image *getImage( void ) { return _image.get(); }
+		Image *getImage( void ) { return _image; }
 
 	private:
-		ImagePtr _image;
+		Pointer< Image > _image;
 	};
 
-	typedef std::shared_ptr< Texture > TexturePtr;
 	typedef Catalog< Texture > TextureCatalog;
-	typedef std::shared_ptr< TextureCatalog > TextureCatalogPtr;
 	
 }
 

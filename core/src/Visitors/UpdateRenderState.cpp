@@ -35,11 +35,12 @@
 
 using namespace crimild;
 
-std::shared_ptr< Material > UpdateRenderState::defaultMaterial( new Material() );
-
-UpdateRenderState::UpdateRenderState( void )
+UpdateRenderState::UpdateRenderState( Material *defaultMaterial )
+	: _defaultMaterial( defaultMaterial )
 {
-
+	if ( _defaultMaterial == nullptr ) {
+		_defaultMaterial = new Material();
+	}
 }
 
 UpdateRenderState::~UpdateRenderState( void )
@@ -73,12 +74,12 @@ void UpdateRenderState::visitGeometry( Geometry *geometry )
 	rs->detachAllMaterials();
 	MaterialComponent *materials = geometry->getComponent< MaterialComponent >();
 	if ( materials->hasMaterials() ) {
-		materials->foreachMaterial( [&]( MaterialPtr &material ) mutable {
-			rs->attachMaterial( material.get() );
+		materials->foreachMaterial( [&]( Material *material ) mutable {
+			rs->attachMaterial( material );
 		});
 	}
 	else {
-		rs->attachMaterial( defaultMaterial.get() );
+		rs->attachMaterial( _defaultMaterial );
 	}
 
 	rs->detachAllLights();

@@ -32,10 +32,10 @@
 
 using namespace crimild;
 
-const char *RotationComponent::NAME = "rotation";
+const char *RotationComponent::COMPONENT_NAME = "rotation";
 
 RotationComponent::RotationComponent( const Vector3f &axis, float speed )
-	: NodeComponent( NAME ),
+	: NodeComponent( COMPONENT_NAME ),
 	  _axis( axis ),
 	  _speed( speed ),
 	  _time( 0 )

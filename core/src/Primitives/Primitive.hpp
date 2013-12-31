@@ -28,6 +28,8 @@
 #ifndef CRIMILD_PRIMITIVES_PRIMITIVE_
 #define CRIMILD_PRIMITIVES_PRIMITIVE_
 
+#include "Foundation/SharedObject.hpp"
+#include "Foundation/Pointer.hpp"
 #include "Rendering/VertexBufferObject.hpp"
 #include "Rendering/IndexBufferObject.hpp"
 
@@ -35,7 +37,7 @@
 
 namespace crimild {
 
-	class Primitive {
+	class Primitive : public SharedObject {
 	public:
 		enum class Type {
 			POINTS,
@@ -53,19 +55,17 @@ namespace crimild {
 
 		Primitive::Type getType( void ) const { return _type; }
 
-		void setVertexBuffer( VertexBufferObjectPtr vbo ) { _vertexBuffer = vbo; }
-		VertexBufferObject *getVertexBuffer( void ) { return _vertexBuffer.get(); }
+		void setVertexBuffer( VertexBufferObject *vbo ) { _vertexBuffer = vbo; }
+		VertexBufferObject *getVertexBuffer( void ) { return _vertexBuffer; }
 
-		void setIndexBuffer( IndexBufferObjectPtr ibo ) { _indexBuffer = ibo; }
-		IndexBufferObject *getIndexBuffer( void ) { return _indexBuffer.get(); }
+		void setIndexBuffer( IndexBufferObject *ibo ) { _indexBuffer = ibo; }
+		IndexBufferObject *getIndexBuffer( void ) { return _indexBuffer; }
 
 	private:
 		Primitive::Type _type;
-		VertexBufferObjectPtr _vertexBuffer;
-		IndexBufferObjectPtr _indexBuffer;
+		Pointer< VertexBufferObject > _vertexBuffer;
+		Pointer< IndexBufferObject > _indexBuffer;
 	};
-
-	typedef std::shared_ptr< Primitive > PrimitivePtr;
 
 }
 

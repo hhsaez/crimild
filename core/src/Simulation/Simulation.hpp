@@ -39,7 +39,7 @@
 
 namespace crimild {
 
-	class Simulation : public NamedObject {
+	class Simulation : public NamedObject, public SharedObject {
 	private:
 		static Simulation *_currentSimulation;
 
@@ -63,7 +63,7 @@ namespace crimild {
 		Simulation( std::string name, int argc, char **argv );
 		virtual ~Simulation( void );
 
-		RunLoop *getMainLoop( void ) { return _mainLoop.get(); }
+		RunLoop *getMainLoop( void ) { return _mainLoop; }
 
 		Time &getSimulationTime( void ) { return _simulationTime; }
 		const Time &getSimulationTime( void ) const { return _simulationTime; }
@@ -77,28 +77,26 @@ namespace crimild {
 		virtual int run( void );
 
 	private:
-		RunLoopPtr _mainLoop;
+		Pointer< RunLoop > _mainLoop;
 		Time _simulationTime;
 
 	public:
-		void setRenderer( RendererPtr renderer ) { _renderer = renderer; }
-		Renderer *getRenderer( void ) { return _renderer.get(); }
+		void setRenderer( Pointer< Renderer > renderer ) { _renderer = renderer; }
+		Renderer *getRenderer( void ) { return _renderer; }
 
 	private:
-		RendererPtr _renderer;
+		Pointer< Renderer > _renderer;
 
 	public:
-		void setScene( NodePtr scene );
-		Node *getScene( void ) { return _scene.get(); }
+		void setScene( Node *scene );
+		Node *getScene( void ) { return _scene; }
 
 		void forEachCamera( std::function< void ( Camera * ) > callback );
 
 	private:
-		NodePtr _scene;
-		std::list< Camera * > _cameras;
+		Pointer< Node > _scene;
+		std::list< Pointer< Camera > > _cameras;
 	};
-
-	typedef std::shared_ptr< Simulation > SimulationPtr;
 
 }
 

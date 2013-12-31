@@ -111,12 +111,12 @@ void gl3::ShaderProgramCatalog::load( ShaderProgram *program )
                 programId = 0;
             }
 
-            program->foreachLocation( [&]( ShaderLocationPtr &loc ) mutable {
+            program->foreachLocation( [&]( ShaderLocation *loc ) mutable {
             	if ( loc->getType() == ShaderLocation::Type::ATTRIBUTE ) {
-            		fetchAttributeLocation( program, loc.get() );
+            		fetchAttributeLocation( program, loc );
             	}
             	else {
-            		fetchUniformLocation( program, loc.get() );
+            		fetchUniformLocation( program, loc );
             	}
             });
         }

@@ -29,6 +29,9 @@
 #define CRIMILD_SIMULATION_RUN_LOOP_
 
 #include "Task.hpp"
+
+#include "Foundation/SharedObject.hpp"
+#include "Foundation/Pointer.hpp"
 #include "Mathematics/Time.hpp"
 
 #include <functional>
@@ -36,41 +39,39 @@
 
 namespace crimild {
 
-	class RunLoop {
+	class RunLoop : public SharedObject {
 	public:
 		RunLoop( void );
 		virtual ~RunLoop( void );
 
-		void startTask( TaskPtr task );
-		void stopTask( TaskPtr task );
-		void suspendTask( TaskPtr task );
-		void resumeTask( TaskPtr task );
+		void startTask( Task *task );
+		void stopTask( Task *task );
+		void suspendTask( Task *task );
+		void resumeTask( Task *task );
 
 		bool update( void );
 		void stop( void );
 
 		bool hasActiveTasks( void ) const { return _activeTasks.size() > 0; }
-		bool isTaskActive( TaskPtr task ) const;
-		void foreachActiveTask( std::function< void ( TaskPtr &task ) > callback );
+		bool isTaskActive( Task *task ) const;
+		void foreachActiveTask( std::function< void ( Task *task ) > callback );
 
 		bool hasKilledTasks( void ) const { return _killedTasks.size() > 0; }
-		bool isTaskKilled( TaskPtr task ) const;
-		void foreachKilledTask( std::function< void ( TaskPtr &task ) > callback );
+		bool isTaskKilled( Task *task ) const;
+		void foreachKilledTask( std::function< void ( Task *task ) > callback );
 
 		bool hasSuspendedTasks( void ) const { return _suspendedTasks.size() > 0; }
-		bool isTaskSuspended( TaskPtr task ) const;
-		void foreachSuspendedTask( std::function< void ( TaskPtr &task ) > callback );
+		bool isTaskSuspended( Task *task ) const;
+		void foreachSuspendedTask( std::function< void ( Task *task ) > callback );
 
 	protected:
 		void cleanup( void );
 
 	private:
-		std::list< TaskPtr > _activeTasks;
-		std::list< TaskPtr > _killedTasks;
-		std::list< TaskPtr > _suspendedTasks;
+		std::list< Pointer< Task > > _activeTasks;
+		std::list< Pointer< Task > > _killedTasks;
+		std::list< Pointer< Task > > _suspendedTasks;
 	};
-
-	typedef std::shared_ptr< RunLoop > RunLoopPtr;
 
 }
 

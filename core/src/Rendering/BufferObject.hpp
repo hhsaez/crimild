@@ -28,12 +28,16 @@
 #ifndef CRIMILD_RENDERING_BUFFER_OBJECT_
 #define CRIMILD_RENDERING_BUFFER_OBJECT_
 
+#include "Foundation/Macros.hpp"
+
 #include <memory>
 
 namespace crimild {
 
 	template< typename T >
 	class BufferObject {
+		CRIMILD_DISALLOW_COPY_AND_ASSIGN( BufferObject )
+
 	protected:
 		BufferObject( size_t size, const T *data )
 			: _size( size ),
@@ -67,10 +71,6 @@ namespace crimild {
 		T *_data;
 		size_t _size;
 
-	private:
-		BufferObject( void ) { }
-		BufferObject( const BufferObject & ) { }
-		BufferObject &operator=( const BufferObject & ) { return *this; }
 	};
 
 }

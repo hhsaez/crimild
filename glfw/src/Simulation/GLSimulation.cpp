@@ -61,14 +61,9 @@ void GLSimulation::start( void )
 		throw RuntimeException( "Cannot start GLFW: glwfInit failed!" );
 	}
 
-	WindowTaskPtr windowTask( new WindowTask( 9000, _width, _height ) );
-	getMainLoop()->startTask( windowTask );
-
-	UpdateTimeTaskPtr updateTimeTask( new UpdateTimeTask( 9999 ) );
-	getMainLoop()->startTask( updateTimeTask );
-
-	UpdateInputStateTaskPtr updateInputStateTask( new UpdateInputStateTask( 0 ) );
-	getMainLoop()->startTask( updateInputStateTask );
+	getMainLoop()->startTask( new WindowTask( 9000, _width, _height ) );
+	getMainLoop()->startTask( new UpdateTimeTask( 9999 ) );
+	getMainLoop()->startTask( new UpdateInputStateTask( 0 ) );
 
 	Simulation::start();
 }

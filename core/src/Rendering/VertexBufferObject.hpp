@@ -36,6 +36,8 @@
 namespace crimild {
 
 	class VertexBufferObject : public BufferObject< float >, public Catalog< VertexBufferObject >::Resource {
+		CRIMILD_DISALLOW_COPY_AND_ASSIGN( VertexBufferObject )
+		
 	public:
 		VertexBufferObject( const VertexFormat &vf, unsigned int vertexCount, const float *vertexData );
 		virtual ~VertexBufferObject( void );
@@ -55,9 +57,7 @@ namespace crimild {
 		unsigned int _vertexCount;
 	};
 
-	typedef std::shared_ptr< VertexBufferObject > VertexBufferObjectPtr;
 	typedef Catalog< VertexBufferObject > VertexBufferObjectCatalog;
-	typedef std::shared_ptr< VertexBufferObjectCatalog > VertexBufferObjectCatalogPtr;
 
 }
 

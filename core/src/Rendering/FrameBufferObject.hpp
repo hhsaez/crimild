@@ -54,7 +54,7 @@ namespace crimild {
 		int getDepthBits( void ) const { return _depthBits; }
 		int getStencilBits( void ) const { return _stencilBits; }
 
-		Texture *getTexture( void ) { return _texture.get(); }
+		Texture *getTexture( void ) { return _texture; }
 
 		void setClearColor( const RGBAColorf &color ) { _clearColor = color; }
 		const RGBAColorf &getClearColor( void ) const { return _clearColor; }
@@ -69,12 +69,10 @@ namespace crimild {
 		int _depthBits;
 		int _stencilBits;
 		RGBAColorf _clearColor;
-		TexturePtr _texture;
+		Pointer< Texture > _texture;
 	};
 
-	typedef std::shared_ptr< FrameBufferObject > FrameBufferObjectPtr;
 	typedef Catalog< FrameBufferObject > FrameBufferObjectCatalog;
-	typedef std::shared_ptr< FrameBufferObjectCatalog > FrameBufferObjectCatalogPtr;
 }
 
 #endif

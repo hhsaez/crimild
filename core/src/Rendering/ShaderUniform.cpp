@@ -30,8 +30,7 @@
 using namespace crimild;
 
 ShaderUniform::ShaderUniform( std::string name )
-	: NamedObject( name ),
-	  _location( nullptr )
+	: NamedObject( name )
 {
 }
 

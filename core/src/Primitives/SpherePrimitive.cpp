@@ -69,8 +69,7 @@ SpherePrimitive::SpherePrimitive( float radius, const VertexFormat &format, Vect
         }
     }
 
-    VertexBufferObjectPtr vbo( new VertexBufferObject( format, vertices.size() / format.getVertexSize(), &vertices[ 0 ] ) );
-    setVertexBuffer( vbo );
+    setVertexBuffer( new VertexBufferObject( format, vertices.size() / format.getVertexSize(), &vertices[ 0 ] ) );
 
     std::vector< unsigned short > indices;
     for ( unsigned short latitude = 0; latitude < divisions[ 1 ]; latitude++ ) {
@@ -88,8 +87,7 @@ SpherePrimitive::SpherePrimitive( float radius, const VertexFormat &format, Vect
         }
     }
 
-    IndexBufferObjectPtr ibo( new IndexBufferObject( indices.size(), &indices[ 0 ] ) );
-    setIndexBuffer( ibo );
+    setIndexBuffer( new IndexBufferObject( indices.size(), &indices[ 0 ] ) );
 }
 
 SpherePrimitive::~SpherePrimitive( void )

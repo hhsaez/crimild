@@ -73,16 +73,14 @@ void gl3::Utils::checkErrors( std::string prefix )
     }
 }
 
-VertexShaderPtr gl3::Utils::getVertexShaderInstance( std::string source )
+Pointer< VertexShader > gl3::Utils::getVertexShaderInstance( std::string source )
 {
-	VertexShaderPtr shader( new VertexShader( "#version 150\n" + source ) );
-	return shader;
+	return new VertexShader( "#version 150\n" + source );
 }
 
-FragmentShaderPtr gl3::Utils::getFragmentShaderInstance( std::string source )
+Pointer< FragmentShader > gl3::Utils::getFragmentShaderInstance( std::string source )
 {
-	FragmentShaderPtr shader( new FragmentShader( "#version 150\n" + source ) );
-	return shader;
+	return new FragmentShader( "#version 150\n" + source );
 }
 
 std::string gl3::Utils::buildArrayShaderLocationName( std::string variable, int index )

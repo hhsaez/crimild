@@ -29,7 +29,7 @@
 
 using namespace crimild;
 
-Texture::Texture( ImagePtr image, std::string name )
+Texture::Texture( Image *image, std::string name )
 	: NamedObject( name ),
 	  _image( image )
 {

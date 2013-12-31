@@ -29,10 +29,10 @@
 
 using namespace crimild;
 
-const char *MaterialComponent::NAME = "materials";
+const char *MaterialComponent::COMPONENT_NAME = "materials";
 
 MaterialComponent::MaterialComponent( void )
-	: NodeComponent( NAME )
+	: NodeComponent( COMPONENT_NAME )
 {
 }
 
@@ -41,7 +41,7 @@ MaterialComponent::~MaterialComponent( void )
 	detachAllMaterials();
 }
 
-void MaterialComponent::attachMaterial( MaterialPtr material )
+void MaterialComponent::attachMaterial( Material *material )
 {
 	_materials.push_back( material );
 }
@@ -51,9 +51,9 @@ void MaterialComponent::detachAllMaterials( void )
 	_materials.clear();
 }
 
-void MaterialComponent::foreachMaterial( std::function< void( MaterialPtr & ) > callback )
+void MaterialComponent::foreachMaterial( std::function< void( Material * ) > callback )
 {
-	for (auto material : _materials) {
+	for ( auto material : _materials ) {
 		callback( material );
 	}
 }

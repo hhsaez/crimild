@@ -41,8 +41,6 @@ namespace crimild {
 
         virtual ~BoxPrimitive( void );
     };
-
-    typedef std::shared_ptr< BoxPrimitive > BoxPrimitivePtr;
         
 }
 

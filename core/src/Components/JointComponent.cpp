@@ -31,10 +31,10 @@
 
 using namespace crimild;
 
-const char *JointComponent::NAME = "joint";
+const char *JointComponent::COMPONENT_NAME = "joint";
 
 JointComponent::JointComponent( void )
-	: NodeComponent( NAME )
+	: NodeComponent( COMPONENT_NAME )
 {
 
 }

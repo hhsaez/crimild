@@ -38,8 +38,6 @@ namespace crimild {
 		virtual ~DepthState( void );
 	};
 
-	typedef std::shared_ptr< DepthState > DepthStatePtr;
-
 }
 
 #endif

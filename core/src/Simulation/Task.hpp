@@ -29,12 +29,11 @@
 #define CRIMILD_SIMULATION_TASK_
 
 #include "Mathematics/Time.hpp"
-
-#include <memory>
+#include "Foundation/SharedObject.hpp"
 
 namespace crimild {
 
-	class Task {
+	class Task : public SharedObject {
 	protected:
 		Task( int priority = 0 );
 
@@ -53,8 +52,6 @@ namespace crimild {
 		virtual void resume( void ) { }
 		virtual void update( void ) { }
 	};
-
-	typedef std::shared_ptr< Task > TaskPtr;
 
 }
 

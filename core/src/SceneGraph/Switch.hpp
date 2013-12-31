@@ -37,16 +37,14 @@ namespace crimild {
 		explicit Switch( std::string name = "" );
 		virtual ~Switch( void );
         
-		virtual void foreachNode( std::function< void( NodePtr & ) > callback ) override;
+		virtual void foreachNode( std::function< void( Node * ) > callback ) override;
         
         Node *getCurrentNode( void );
         void selectNextNode( void );
         
     private:
-        std::list< NodePtr >::iterator _current;
+        std::list< Pointer< Node > >::iterator _current;
 	};
-    
-	typedef std::shared_ptr< Switch > SwitchPtr;
     
 }
 

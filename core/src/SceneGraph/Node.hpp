@@ -28,6 +28,8 @@
 #ifndef CRIMILD_SCENE_GRAPH_NODE_
 #define CRIMILD_SCENE_GRAPH_NODE_
 
+#include "Foundation/SharedObject.hpp"
+#include "Foundation/Pointer.hpp"
 #include "Foundation/NamedObject.hpp"
 #include "Visitors/NodeVisitor.hpp"
 #include "Components/NodeComponent.hpp"
@@ -43,7 +45,9 @@ namespace crimild {
 		\brief Base class for any object that can be attached to the scene graph
 
 	*/
-	class Node : public NamedObject {
+	class Node : public NamedObject, public SharedObject {
+		CRIMILD_DISALLOW_COPY_AND_ASSIGN( Node ) 
+
 	public:
 		explicit Node( std::string name = "" );
 		virtual ~Node( void );
@@ -76,21 +80,21 @@ namespace crimild {
 
 	public:
 		NodeComponent *getComponentWithName( std::string name );
-		void attachComponent( NodeComponentPtr component );
-		void detachComponent( NodeComponentPtr component );
+		void attachComponent( NodeComponent *component );
+		void detachComponent( NodeComponent *component );
 		void detachComponentWithName( std::string name );
 		void detachAllComponents( void );
 
 		template< class T >
 		T *getComponent( void )
 		{
-			return static_cast< T * >( _components[ T::NAME ].get() );
+			return static_cast< T * >( _components[ T::COMPONENT_NAME ].get() );
 		}
 
 		void updateComponents( const Time &t );
 
 	private:
-		std::map< std::string, NodeComponentPtr > _components;
+		std::map< std::string, Pointer< NodeComponent > > _components;
 
 	public:
 		void setLocal( const TransformationImpl &t ) { _local = t; }
@@ -119,20 +123,18 @@ namespace crimild {
 		bool _worldIsCurrent;
 
 	public:
-		BoundingVolume *localBound( void ) { return _localBound.get(); }
-		const BoundingVolume *getLocalBound( void ) const { return _localBound.get(); }
-		void setLocalBound( BoundingVolumePtr bound ) { _localBound = bound; }
+		BoundingVolume *localBound( void ) { return _localBound; }
+		const BoundingVolume *getLocalBound( void ) const { return _localBound; }
+		void setLocalBound( BoundingVolume *bound ) { _localBound = bound; }
 
-		BoundingVolume *worldBound( void ) { return _worldBound.get(); }
-		const BoundingVolume *getWorldBound( void ) const { return _worldBound.get(); }
-		void setWorldBound( BoundingVolumePtr bound ) { _worldBound = bound; }
+		BoundingVolume *worldBound( void ) { return _worldBound; }
+		const BoundingVolume *getWorldBound( void ) const { return _worldBound; }
+		void setWorldBound( BoundingVolume *bound ) { _worldBound = bound; }
 
 	private:
-		BoundingVolumePtr _localBound;
-		BoundingVolumePtr _worldBound;
+		Pointer< BoundingVolume > _localBound;
+		Pointer< BoundingVolume > _worldBound;
 	};
-
-	typedef std::shared_ptr< Node > NodePtr;
 
 }
 

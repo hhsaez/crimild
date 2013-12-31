@@ -63,7 +63,7 @@ void NodeVisitor::visitNode( Node *node )
 void NodeVisitor::visitGroup( Group *group )
 {
 	// by default, just traverse to child nodes
-	group->foreachNode( [&]( NodePtr &node ) { node->accept( *this ); } );
+	group->foreachNode( [&]( Node *node ) { node->accept( *this ); } );
 }
 
 void NodeVisitor::visitGeometry( Geometry *geometry )

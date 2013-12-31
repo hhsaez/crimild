@@ -63,19 +63,10 @@ namespace crimild {
 	};
 
 	typedef ShaderUniformImpl< bool > BoolUniform;
-	typedef std::shared_ptr< BoolUniform > BoolUniformPtr;
-
 	typedef ShaderUniformImpl< int > IntUniform;
-	typedef std::shared_ptr< IntUniform > IntUniformPtr;
-
 	typedef ShaderUniformImpl< float > FloatUniform;
-	typedef std::shared_ptr< FloatUniform > FloatUniformPtr;
-
 	typedef ShaderUniformImpl< Vector3f > Vector3fUniform;
-	typedef std::shared_ptr< Vector3fUniform > Vector3fUniformPtr;
-
 	typedef ShaderUniformImpl< Matrix3f > Matrix3fUniform;
-	typedef std::shared_ptr< Matrix3fUniform > Matrix3fPtr;
 
 }
 

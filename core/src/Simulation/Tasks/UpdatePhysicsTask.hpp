@@ -40,9 +40,7 @@ namespace crimild {
 		virtual void update( void ) override;
 	};
 
-	typedef std::shared_ptr< UpdatePhysicsTask > UpdatePhysicsTaskPtr;
-
-	}
+}
 
 #endif
 

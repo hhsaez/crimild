@@ -44,7 +44,7 @@ Group::~Group( void )
 	detachAllNodes();
 }
 
-void Group::attachNode( NodePtr node )
+void Group::attachNode( Node *node )
 {
 	if ( node->getParent() == this ) {
 		// the node is already attach to this group
@@ -59,7 +59,7 @@ void Group::attachNode( NodePtr node )
 	_nodes.push_back( node );
 }
 
-void Group::detachNode( NodePtr node )
+void Group::detachNode( Node *node )
 {
 	if ( node->getParent() == this ) {
 		_nodes.remove( node );
@@ -69,13 +69,13 @@ void Group::detachNode( NodePtr node )
 
 void Group::detachAllNodes( void )
 {
-	for ( NodePtr &node : _nodes ) {
+	for ( auto node : _nodes ) {
 		node->setParent( nullptr );
 	}
 	_nodes.clear();
 }
 
-void Group::foreachNode( std::function< void( NodePtr & ) > callback )
+void Group::foreachNode( std::function< void( Node * ) > callback )
 {
 	std::for_each( std::begin( _nodes ), std::end( _nodes ), callback );
 }

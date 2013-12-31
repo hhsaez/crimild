@@ -30,9 +30,11 @@
 
 #include "NodeVisitor.hpp"
 
+#include "Foundation/SharedObject.hpp"
+#include "Foundation/Pointer.hpp"
+
 #include <list>
 #include <functional>
-#include <memory>
 
 namespace crimild {
 
@@ -40,10 +42,7 @@ namespace crimild {
 
 	class UpdateRenderState : public NodeVisitor {
 	public:
-		static std::shared_ptr< Material > defaultMaterial;
-		
-	public:
-		UpdateRenderState( void );
+		UpdateRenderState( Material *defaultMaterial = nullptr );
 		virtual ~UpdateRenderState( void );
 
 		virtual void traverse( Node *node ) override;
@@ -52,6 +51,7 @@ namespace crimild {
 
 	private:
 		std::list< Light * > _lights;
+		Pointer< Material > _defaultMaterial;
 	};
 
 }

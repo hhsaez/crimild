@@ -31,17 +31,17 @@
 
 using namespace crimild;
 
-const char *ColliderComponent::NAME = "collider";
+const char *ColliderComponent::COMPONENT_NAME = "collider";
 
 ColliderComponent::ColliderComponent( void ) 
-	: NodeComponent( NAME )
+	: NodeComponent( COMPONENT_NAME )
 {
 	NodeComponentCatalog< ColliderComponent >::getInstance().registerComponent( this );
 }
 
-ColliderComponent::ColliderComponent( BoundingVolumePtr boundingVolume ) 
-	: NodeComponent( NAME ),
-	  _boundingVolume( boundingVolume)
+ColliderComponent::ColliderComponent( BoundingVolume *boundingVolume ) 
+	: NodeComponent( COMPONENT_NAME ),
+	  _boundingVolume( boundingVolume )
 {
 	NodeComponentCatalog< ColliderComponent >::getInstance().registerComponent( this );
 }
@@ -56,9 +56,13 @@ void ColliderComponent::onCollision( ColliderComponent *collider )
 
 }
 
-const BoundingVolume *ColliderComponent::getBoundingVolume( void )
+const BoundingVolume *ColliderComponent::getBoundingVolume( void ) const
 {
-	return _boundingVolume != nullptr ? _boundingVolume.get() : getNode()->getWorldBound();
+	if ( _boundingVolume == nullptr ) {
+		return getNode()->getWorldBound();
+	}
+
+	return _boundingVolume;
 }
 
 bool ColliderComponent::testCollision( ColliderComponent *other ) 

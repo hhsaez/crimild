@@ -35,7 +35,7 @@ namespace crimild {
 
 	class DebugRenderPass : public RenderPass {
 	public:
-		DebugRenderPass( RenderPassPtr actualRenderPass );
+		DebugRenderPass( RenderPass *actualRenderPass );
 		virtual ~DebugRenderPass( void );
 
 		void setRenderBoundings( bool value ) { _renderBoundings = value; }
@@ -52,11 +52,9 @@ namespace crimild {
 
 		bool _renderNormals;
 		bool _renderBoundings;
-		RenderPassPtr _actualRenderPass;
-		MaterialPtr _debugMaterial;
+		Pointer< RenderPass > _actualRenderPass;
+		Pointer< Material > _debugMaterial;
 	};
-
-	typedef std::shared_ptr< DebugRenderPass > DebugRenderPassPtr;
 
 }
 

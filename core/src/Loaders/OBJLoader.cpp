@@ -55,14 +55,14 @@ void OBJLoader::reset( void )
 	_normalCount = 0;
 	_textureCoordCount = 0;
 
-	std::vector< std::shared_ptr< GroupDef >> empty;
+	std::vector< Pointer< GroupDef > > empty;
 	_groups.swap( empty );
 	pushGroup( _filePath, _filePath );
 
 	_materials.clear();
 }
 
-NodePtr OBJLoader::load( void )
+Pointer< Node > OBJLoader::load( void )
 {
 	reset();
 
@@ -121,7 +121,7 @@ void OBJLoader::processLine( std::ifstream &input )
 
 void OBJLoader::pushGroup( std::string name, std::string materialName )
 {
-	std::shared_ptr< GroupDef > group( new GroupDef( name, materialName ) );
+	Pointer< GroupDef > group( new GroupDef( name, materialName ) );
 	_groups.push_back( group );
 	_currentGroup = group.get();
 }
@@ -148,7 +148,7 @@ void OBJLoader::processMaterialFile( std::string materialFileName )
 		if ( what == "newmtl" ) {
 			std::string materialName;
 			line >> materialName;
-			std::shared_ptr< MaterialDef > material( new MaterialDef( materialName ) );
+			Pointer< MaterialDef > material( new MaterialDef( materialName ) );
 			_materials[ material->name ] = material;
 			currentMaterial = material.get();
 		}
@@ -172,8 +172,8 @@ void OBJLoader::processMaterialFile( std::string materialFileName )
 			line >> diffuseMapFileName;
 			if ( diffuseMapFileName.length() > 0 ) {
 				Log::Debug << "Loading diffuse map " << diffuseMapFileName << Log::End;
-				ImagePtr image( new ImageTGA( FileSystem::getInstance().extractDirectory( materialFileName ) + "/" + diffuseMapFileName ) );
-				TexturePtr texture( new Texture( image ) );
+				Pointer< Image > image( new ImageTGA( FileSystem::getInstance().extractDirectory( materialFileName ) + "/" + diffuseMapFileName ) );
+				Pointer< Texture > texture( new Texture( image ) );
 				currentMaterial->diffuseMap = texture;
 			}
 		}
@@ -182,8 +182,8 @@ void OBJLoader::processMaterialFile( std::string materialFileName )
 			line >> normalMapFileName;
 			if ( normalMapFileName.length() > 0 ) {
 				Log::Debug << "Loading normal map " << normalMapFileName << Log::End;
-				ImagePtr image( new ImageTGA( FileSystem::getInstance().extractDirectory( materialFileName ) + "/" + normalMapFileName ) );
-				TexturePtr texture( new Texture( image ) );
+				Pointer< Image > image( new ImageTGA( FileSystem::getInstance().extractDirectory( materialFileName ) + "/" + normalMapFileName ) );
+				Pointer< Texture > texture( new Texture( image ) );
 				currentMaterial->normalMap = texture;
 			}
 		}
@@ -192,15 +192,15 @@ void OBJLoader::processMaterialFile( std::string materialFileName )
 			line >> specularMapFileName;
 			if ( specularMapFileName.length() > 0 ) {
 				Log::Debug << "Loading specular map " << specularMapFileName << Log::End;
-				ImagePtr image( new ImageTGA( FileSystem::getInstance().extractDirectory( materialFileName ) + "/" + specularMapFileName ) );
-				TexturePtr texture( new Texture( image ) );
+				Pointer< Image > image( new ImageTGA( FileSystem::getInstance().extractDirectory( materialFileName ) + "/" + specularMapFileName ) );
+				Pointer< Texture > texture( new Texture( image ) );
 				currentMaterial->specularMap = texture;
 			}
 		}
 	}
 }
 
-NodePtr OBJLoader::generateScene( void )
+Pointer< Node > OBJLoader::generateScene( void )
 {
 	VertexFormat vf( ( _positionCount > 0 ? 3 : 0 ), 
 					 0, // no color information is imported
@@ -208,7 +208,7 @@ NodePtr OBJLoader::generateScene( void )
 					 ( _normalCount > 0 && _textureCoordCount > 0 ? 3 : 0 ),
 					 ( _textureCoordCount > 0 ? 2 : 0 ) );
 
-	GroupPtr scene( new Group( _filePath ) );
+	Pointer< Group > scene( new Group( _filePath ) );
 
 	for ( auto group : _groups ) {
 		if ( group->faces.size() == 0 ) {
@@ -389,19 +389,16 @@ NodePtr OBJLoader::generateScene( void )
 
 		unsigned int vertexCount = vertices.size() / vf.getVertexSize();
 
-		VertexBufferObjectPtr vbo( new VertexBufferObject( vf, vertexCount, &vertices[ 0 ] ) );
-		IndexBufferObjectPtr ibo( new IndexBufferObject( indices.size(), &indices[ 0 ] ) );
-	
-		PrimitivePtr primitive( new Primitive( Primitive::Type::TRIANGLES ) );
-		primitive->setVertexBuffer( vbo );
-		primitive->setIndexBuffer( ibo );
+		Pointer< Primitive > primitive( new Primitive( Primitive::Type::TRIANGLES ) );
+		primitive->setVertexBuffer( new VertexBufferObject( vf, vertexCount, &vertices[ 0 ] ) );
+		primitive->setIndexBuffer( new IndexBufferObject( indices.size(), &indices[ 0 ] ) );
 
-		GeometryPtr geometry( new Geometry() );
+		Pointer< Geometry > geometry( new Geometry() );
 		geometry->attachPrimitive( primitive );
 
 		auto materialDef = _materials[ group->materialName ];
 		if ( materialDef != nullptr ) {
-			MaterialPtr material( new Material() );
+			Pointer< Material > material( new Material() );
 			material->setAmbient( materialDef->ambientColor );
 			material->setDiffuse( materialDef->diffuseColor );
 			material->setSpecular( materialDef->specularColor );

@@ -81,7 +81,7 @@ void ParametricPrimitive::generate( void )
 
 void ParametricPrimitive::generateVertexBuffer( void )
 {
-    VertexBufferObjectPtr vbo( new VertexBufferObject( _format, getVertexCount(), nullptr ) );
+    Pointer< VertexBufferObject > vbo( new VertexBufferObject( _format, getVertexCount(), nullptr ) );
     float *vertex = vbo->getData();
     for ( int i = 0; i < _divisions[ 1 ]; i++ ) {
         for ( int j = 0; j < _divisions[ 0 ]; j++ ) {
@@ -132,7 +132,7 @@ void ParametricPrimitive::generateVertexBuffer( void )
 
 void ParametricPrimitive::generateLineIndexBuffer( void )
 {
-    IndexBufferObjectPtr ibo( new IndexBufferObject( getLineIndexCount(), nullptr ) );
+    Pointer< IndexBufferObject > ibo( new IndexBufferObject( getLineIndexCount(), nullptr ) );
     unsigned short *index = ibo->getData();
     for ( int i = 0, vertex = 0; i < _slices[ 1 ]; i++ ) {
         for ( int j = 0; j < _slices[ 0 ]; j++ ) {
@@ -149,7 +149,7 @@ void ParametricPrimitive::generateLineIndexBuffer( void )
 
 void ParametricPrimitive::generateTriangleIndexBuffer( void )
 {
-    IndexBufferObjectPtr ibo( new IndexBufferObject( getTriangleIndexCount(), nullptr ) );
+    Pointer< IndexBufferObject > ibo( new IndexBufferObject( getTriangleIndexCount(), nullptr ) );
     unsigned short *index = ibo->getData();
     for ( int i = 0, vertex = 0; i < _slices[ 1 ]; i++ ) {
         for ( int j = 0; j < _slices[ 0 ]; j++ ) {

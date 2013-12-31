@@ -54,8 +54,6 @@ namespace crimild {
 		float _gamma;
 	};
 
-	typedef std::shared_ptr< OrbitComponent > OrbitComponentPtr;
-
 }
 
 #endif

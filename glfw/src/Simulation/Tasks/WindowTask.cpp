@@ -46,7 +46,7 @@ WindowTask::~WindowTask( void )
 
 void WindowTask::start( void )
 {
-	FrameBufferObjectPtr screenBuffer( new FrameBufferObject( _width, _height, 8, 8, 8, 8, 16, 0 ) );
+	Pointer< FrameBufferObject > screenBuffer( new FrameBufferObject( _width, _height, 8, 8, 8, 8, 16, 0 ) );
 
 	glfwOpenWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
 	glfwOpenWindowHint( GLFW_OPENGL_VERSION_MAJOR, 3 );
@@ -60,8 +60,7 @@ void WindowTask::start( void )
     	throw RuntimeException( "Cannot created main window" );
     }
 
-	RendererPtr renderer( new gl3::Renderer( screenBuffer ) );
-	Simulation::getCurrent()->setRenderer( renderer );
+	Simulation::getCurrent()->setRenderer( new gl3::Renderer( screenBuffer ) );
 }
 
 void WindowTask::stop( void )

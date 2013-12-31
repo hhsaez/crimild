@@ -37,11 +37,11 @@ namespace crimild {
 	class HierarchyRenderPass : public RenderPass {
 	public:
 		HierarchyRenderPass( void );
-		explicit HierarchyRenderPass( RenderPassPtr actualRenderPass );
+		explicit HierarchyRenderPass( RenderPass *actualRenderPass );
 		virtual ~HierarchyRenderPass( void );
 
-		void setTargetScene( NodePtr scene ) { _targetScene = scene; }
-		Node *getTargetScene( void ) { return _targetScene.get(); }
+		void setTargetScene( Node *scene ) { _targetScene = scene; }
+		Node *getTargetScene( void ) { return _targetScene; }
 
 		void setRenderBoundings( bool value ) { _renderBoundings = value; }
 		bool shouldRenderBoundings( void ) const { return _renderBoundings; }
@@ -52,12 +52,10 @@ namespace crimild {
 		void renderBoundings( Renderer *renderer, Geometry *geometry, Material *material, Camera *camera );
 
 		bool _renderBoundings;
-		RenderPassPtr _actualRenderPass;
-		MaterialPtr _debugMaterial;
-		NodePtr _targetScene;
+		Pointer< RenderPass > _actualRenderPass;
+		Pointer< Material > _debugMaterial;
+		Pointer< Node > _targetScene;
 	};
-
-	typedef std::shared_ptr< HierarchyRenderPass > HierarchyRenderPassPtr;
 
 }
 

@@ -37,11 +37,8 @@ using namespace crimild;
 Geometry::Geometry( std::string name )
 	: Node( name )
 {
-	MaterialComponentPtr materials( new MaterialComponent() );
-	attachComponent( materials );
-
-	RenderStateComponentPtr renderState( new RenderStateComponent() );
-	attachComponent( renderState );
+	attachComponent( new MaterialComponent() );
+	attachComponent( new RenderStateComponent() );
 }
 
 Geometry::~Geometry( void )
@@ -49,18 +46,18 @@ Geometry::~Geometry( void )
 	detachAllPrimitives();
 }
 
-void Geometry::attachPrimitive( PrimitivePtr primitive )
+void Geometry::attachPrimitive( Primitive *primitive )
 {
 	_primitives.push_back( primitive );	
 	updateModelBounds();
 }
 
-void Geometry::detachPrimitive( PrimitivePtr primitive )
+void Geometry::detachPrimitive( Primitive *primitive )
 {
 	_primitives.remove( primitive );
 }
 
-void Geometry::foreachPrimitive( std::function< void( PrimitivePtr & ) > callback )
+void Geometry::foreachPrimitive( std::function< void( Primitive * ) > callback )
 {
 	std::for_each( std::begin( _primitives ), std::end( _primitives ), callback );
 }
@@ -78,7 +75,7 @@ void Geometry::accept( NodeVisitor &visitor )
 void Geometry::updateModelBounds( void )
 {
 	bool firstChild = true;
-	foreachPrimitive( [&]( PrimitivePtr primitive ) {
+	foreachPrimitive( [&]( Primitive *primitive ) {
 		VertexBufferObject *vbo = primitive->getVertexBuffer();
 		if ( vbo != nullptr ) {
 			if ( firstChild ) {

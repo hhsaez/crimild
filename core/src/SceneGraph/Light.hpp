@@ -80,8 +80,6 @@ namespace crimild {
 		Light &operator=( const Light & ) { return *this; }
 	};
 
-	typedef std::shared_ptr< Light > LightPtr;
-
 }
 
 #endif

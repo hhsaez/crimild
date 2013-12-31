@@ -36,6 +36,7 @@ namespace crimild {
 	class NodeComponentCatalog {
 	private:
 		NodeComponentCatalog( void ) { };
+		
 		virtual ~NodeComponentCatalog( void ) { };
 
 	public:

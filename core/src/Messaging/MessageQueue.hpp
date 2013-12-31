@@ -28,14 +28,16 @@
 #ifndef CRIMILD_MESSAGING_MESSAGE_QUEUE_
 #define CRIMILD_MESSAGING_MESSAGE_QUEUE_
 
-#include <memory>
+#include "Foundation/SharedObject.hpp"
+#include "Foundation/Pointer.hpp"
+
 #include <algorithm>
 #include <list>
 #include <cassert>
 
 namespace crimild {
 
-	class Message {
+	class Message : public SharedObject {
 	public:
 		virtual ~Message( void ) { }
 
@@ -81,7 +83,7 @@ namespace crimild {
 
 	template< class MessageImpl >
 	class MessageDispatcherImpl : public MessageDispatcher {
-		typedef std::shared_ptr< MessageImpl > MessagePtr;
+		typedef Pointer< MessageImpl > MessagePtr;
 		typedef std::list< MessagePtr > MessageList;
 		typedef MessageHandler< MessageImpl > MessageHandlerImpl;
 		typedef std::list< MessageHandlerImpl * > MessageHandlerList;
@@ -226,7 +228,7 @@ namespace crimild {
 			\brief Push a new message into the queue
 		 */
 		template< class MessageImpl >
-		void pushMessage( std::shared_ptr< MessageImpl > message )
+		void pushMessage( MessageImpl *message )
 		{
 			MessageDispatcherImpl< MessageImpl >::getInstance().pushMessage( message );
 		}

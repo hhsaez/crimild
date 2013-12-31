@@ -37,7 +37,7 @@ namespace crimild {
 
 	class RigidBodyComponent : public NodeComponent {
 	public:
-		static const char *NAME;
+		static const char *COMPONENT_NAME;
 
 	public:
 		RigidBodyComponent( void );
@@ -59,8 +59,6 @@ namespace crimild {
 		Vector3f _force;
 		Vector3f _previousPosition;
 	};
-
-	typedef std::shared_ptr< RigidBodyComponent > RigidBodyComponentPtr;
 
 }
 

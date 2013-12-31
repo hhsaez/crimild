@@ -35,7 +35,7 @@ namespace crimild {
 
 	class JointComponent : public NodeComponent {
 	public:
-		static const char *NAME;
+		static const char *COMPONENT_NAME;
 
 	public:
 		JointComponent( void );
@@ -55,8 +55,6 @@ namespace crimild {
 		Matrix4f _worldMatrix;
 		Matrix4f _inverseBindMatrix;
 	};
-
-	typedef std::shared_ptr< JointComponent > JointComponentPtr;
 
 }
 

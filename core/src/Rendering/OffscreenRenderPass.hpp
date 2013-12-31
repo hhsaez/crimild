@@ -43,14 +43,12 @@ namespace crimild {
 
 		virtual void render( Renderer *renderer, VisibilitySet *vs, Camera *camera ) override;
 
-		void attachImageEffect( ImageEffectPtr imageEffect );
+		void attachImageEffect( ImageEffect *imageEffect );
 
 	private:
-		FrameBufferObjectPtr _offscreenBuffer;
-		std::list< ImageEffectPtr > _imageEffects;
+		Pointer< FrameBufferObject > _offscreenBuffer;
+		std::list< Pointer< ImageEffect > > _imageEffects;
 	};
-
-	typedef std::shared_ptr< OffscreenRenderPass > OffscreenRenderPassPtr;
 
 }
 

@@ -32,10 +32,10 @@
 
 using namespace crimild;
 
-const char *ParticleSystemComponent::NAME = "particleSystem";
+const char *ParticleSystemComponent::COMPONENT_NAME = "particleSystem";
 
 ParticleSystemComponent::ParticleSystemComponent( void )
-	: NodeComponent( NAME ),
+	: NodeComponent( COMPONENT_NAME ),
 	  _primitive( new Primitive( Primitive::Type::POINTS ) ),
 	  _material( new Material() ),
  	  _particleCount( 50 ),
@@ -45,7 +45,6 @@ ParticleSystemComponent::ParticleSystemComponent( void )
 	  _gravity( 0.0f, -9.8f, 0.0f ),
 	  _spread( 1.0f, 1.0f, 1.0f ),
 	  _looping( true ),
-	  _shape( nullptr ),
 	  _gravityUniform( new Vector3fUniform( "uGravity", Vector3f( 0.0f, 0.0f, 0.0f ) ) ),
 	  _timeUniform( new FloatUniform( "uTime", 0.0f ) ),
 	  _durationUniform( new FloatUniform( "uLifeTime", 1.0f ) ),
@@ -101,10 +100,10 @@ void ParticleSystemComponent::generateParticles( void )
 	int particleCount = getParticleCount();
 
 	VertexFormat format = VertexFormat::VF_P3_N3_UV2;
-	VertexBufferObjectPtr vbo( new VertexBufferObject( format, particleCount, NULL ) );
+	Pointer< VertexBufferObject > vbo( new VertexBufferObject( format, particleCount, NULL ) );
 	float *vertices = vbo->getData();
 
-	IndexBufferObjectPtr ibo( new IndexBufferObject( particleCount, NULL ) );
+	Pointer< IndexBufferObject > ibo( new IndexBufferObject( particleCount, NULL ) );
 	unsigned short *indices = ibo->getData();
 
 	for ( unsigned short i = 0; i < particleCount; i++ ) {

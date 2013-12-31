@@ -40,7 +40,7 @@ namespace crimild {
 
 	class RenderStateComponent : public NodeComponent {
 	public:
-		static const char *NAME;
+		static const char *COMPONENT_NAME;
 
 	public:
 		RenderStateComponent( void );
@@ -62,8 +62,6 @@ namespace crimild {
 		std::list< Material * > _materials;
 		std::list< Light * > _lights;
 	};
-
-	typedef std::shared_ptr< RenderStateComponent > RenderStateComponentPtr;
 
 }
 
