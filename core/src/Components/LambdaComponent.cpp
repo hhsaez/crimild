@@ -29,11 +29,8 @@
 
 using namespace crimild;
 
-const char *LambdaComponent::COMPONENT_NAME = "lambda";
-
 LambdaComponent::LambdaComponent( std::function< void( Node *, const Time & ) > callback )
-	: NodeComponent( COMPONENT_NAME ),
-	  _callback( callback )
+	: _callback( callback )
 {
 
 }

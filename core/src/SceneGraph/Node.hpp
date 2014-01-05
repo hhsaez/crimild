@@ -88,7 +88,7 @@ namespace crimild {
 		template< class T >
 		T *getComponent( void )
 		{
-			return static_cast< T * >( _components[ T::COMPONENT_NAME ].get() );
+			return static_cast< T * >( _components[ T::_COMPONENT_NAME() ].get() );
 		}
 
 		void updateComponents( const Time &t );

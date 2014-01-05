@@ -29,9 +29,8 @@
 
 using namespace crimild;
 
-NodeComponent::NodeComponent( std::string name )
-	: NamedObject( name ),
-	  _node( nullptr )
+NodeComponent::NodeComponent( void )
+	: _node( nullptr )
 {
 
 }

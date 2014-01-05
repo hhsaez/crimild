@@ -35,8 +35,8 @@
 namespace crimild {
 
 	class OrbitComponent : public NodeComponent {
-	public:
-		static const char *NAME;
+		CRIMILD_DISALLOW_COPY_AND_ASSIGN( OrbitComponent )
+		CRIMILD_NODE_COMPONENT_NAME( "update" )
 
 	public:
 		OrbitComponent( float x0 = 0.0f, float y0 = 0.0f, float major = 1.0f, float minor = 1.0f, float speed = 1.0f, float gamma = 0.0f );

@@ -32,11 +32,8 @@
 
 using namespace crimild;
 
-const char *RotationComponent::COMPONENT_NAME = "rotation";
-
 RotationComponent::RotationComponent( const Vector3f &axis, float speed )
-	: NodeComponent( COMPONENT_NAME ),
-	  _axis( axis ),
+	: _axis( axis ),
 	  _speed( speed ),
 	  _time( 0 )
 {

@@ -33,11 +33,8 @@
 
 using namespace crimild;
 
-const char *RigidBodyComponent::COMPONENT_NAME = "rigidBody";
-
 RigidBodyComponent::RigidBodyComponent( void )
-	: NodeComponent( COMPONENT_NAME ),
-	  _gravity( 0.0f, -4.8f, 0.0f )
+	: _gravity( 0.0f, -4.8f, 0.0f )
 {
 	NodeComponentCatalog< RigidBodyComponent >::getInstance().registerComponent( this );
 }

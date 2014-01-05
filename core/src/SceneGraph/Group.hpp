@@ -40,10 +40,20 @@ namespace crimild {
 		explicit Group( std::string name = "" );
 		virtual ~Group( void );
 
-		bool hasNodes( void ) const { return ( _nodes.size() > 0 ); }
+		bool hasNodes( void ) const { return ( getNodeCount() > 0 ); }
+		unsigned int getNodeCount( void ) const { return _nodes.size(); }
+
 		void attachNode( Node *node );
 		void detachNode( Node *node );
 		void detachAllNodes( void );
+
+		/**
+			\brief Gets a node at a given position
+
+			\warning This method is inefficient. Use it carefully
+		*/
+		Node *getNode( unsigned int index );
+
 		virtual void foreachNode( std::function< void( Node * ) > callback );
 
 	protected:

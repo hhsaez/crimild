@@ -80,9 +80,9 @@ void Node::attachComponent( NodeComponent *component )
 		return;
 	}
 
-	detachComponentWithName( component->getName() );
+	detachComponentWithName( component->getComponentName() );
 	component->setNode( this );
-	_components[ component->getName() ] = component;
+	_components[ component->getComponentName() ] = component;
 	component->onAttach();
 }
 
@@ -93,7 +93,7 @@ void Node::detachComponent( NodeComponent *component )
 		return;
 	}
 
-	detachComponentWithName( component->getName() );
+	detachComponentWithName( component->getComponentName() );
 }
 
 void Node::detachComponentWithName( std::string name )

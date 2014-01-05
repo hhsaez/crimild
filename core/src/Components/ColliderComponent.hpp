@@ -35,12 +35,11 @@
 namespace crimild {
 
 	class ColliderComponent : public NodeComponent {
-	public:
-		static const char *COMPONENT_NAME;
+		CRIMILD_DISALLOW_COPY_AND_ASSIGN( ColliderComponent )
+		CRIMILD_NODE_COMPONENT_NAME( "collider" )
 
 	public:
-		ColliderComponent( void );
-		explicit ColliderComponent( BoundingVolume *boundingVolume );
+		explicit ColliderComponent( BoundingVolume *boundingVolume = nullptr );
 		virtual ~ColliderComponent( void );
 
 		virtual const BoundingVolume *getBoundingVolume( void ) const;

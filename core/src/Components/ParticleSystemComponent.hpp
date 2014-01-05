@@ -41,9 +41,7 @@ namespace crimild {
 
 	class ParticleSystemComponent : public NodeComponent {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( ParticleSystemComponent );
-
-	public:
-		static const char *COMPONENT_NAME;
+		CRIMILD_NODE_COMPONENT_NAME( "particleSystem" )
 
 	public:
 		ParticleSystemComponent( void );

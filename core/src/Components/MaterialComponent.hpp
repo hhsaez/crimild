@@ -38,8 +38,8 @@
 namespace crimild {
 
 	class MaterialComponent : public NodeComponent {
-	public:
-		static const char *COMPONENT_NAME;
+		CRIMILD_DISALLOW_COPY_AND_ASSIGN( MaterialComponent )
+		CRIMILD_NODE_COMPONENT_NAME( "materials" )
 
 	public:
 		MaterialComponent( void );

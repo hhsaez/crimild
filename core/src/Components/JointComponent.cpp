@@ -31,10 +31,7 @@
 
 using namespace crimild;
 
-const char *JointComponent::COMPONENT_NAME = "joint";
-
 JointComponent::JointComponent( void )
-	: NodeComponent( COMPONENT_NAME )
 {
 
 }

@@ -32,10 +32,7 @@
 
 using namespace crimild;
 
-const char *OrbitComponent::NAME = "orbit";
-
 OrbitComponent::OrbitComponent( float x0, float y0, float major, float minor, float speed, float gamma )
-	: NodeComponent( NAME )
 {
 	_t = 0.0f;
 	_x0 = x0;

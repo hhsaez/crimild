@@ -31,17 +31,8 @@
 
 using namespace crimild;
 
-const char *ColliderComponent::COMPONENT_NAME = "collider";
-
-ColliderComponent::ColliderComponent( void ) 
-	: NodeComponent( COMPONENT_NAME )
-{
-	NodeComponentCatalog< ColliderComponent >::getInstance().registerComponent( this );
-}
-
 ColliderComponent::ColliderComponent( BoundingVolume *boundingVolume ) 
-	: NodeComponent( COMPONENT_NAME ),
-	  _boundingVolume( boundingVolume )
+	: _boundingVolume( boundingVolume )
 {
 	NodeComponentCatalog< ColliderComponent >::getInstance().registerComponent( this );
 }

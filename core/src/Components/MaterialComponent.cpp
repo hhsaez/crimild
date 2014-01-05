@@ -29,10 +29,7 @@
 
 using namespace crimild;
 
-const char *MaterialComponent::COMPONENT_NAME = "materials";
-
 MaterialComponent::MaterialComponent( void )
-	: NodeComponent( COMPONENT_NAME )
 {
 }
 

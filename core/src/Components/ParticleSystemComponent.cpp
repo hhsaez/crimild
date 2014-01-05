@@ -32,11 +32,8 @@
 
 using namespace crimild;
 
-const char *ParticleSystemComponent::COMPONENT_NAME = "particleSystem";
-
 ParticleSystemComponent::ParticleSystemComponent( void )
-	: NodeComponent( COMPONENT_NAME ),
-	  _primitive( new Primitive( Primitive::Type::POINTS ) ),
+	: _primitive( new Primitive( Primitive::Type::POINTS ) ),
 	  _material( new Material() ),
  	  _particleCount( 50 ),
 	  _particleSize( 20.0f ),

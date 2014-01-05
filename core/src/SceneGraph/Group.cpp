@@ -75,6 +75,13 @@ void Group::detachAllNodes( void )
 	_nodes.clear();
 }
 
+Node *Group::getNode( unsigned int index )
+{
+	std::list< Pointer< Node > >::iterator it = _nodes.begin();
+	std::advance( it, index );
+	return *it;
+}
+
 void Group::foreachNode( std::function< void( Node * ) > callback )
 {
 	std::for_each( std::begin( _nodes ), std::end( _nodes ), callback );

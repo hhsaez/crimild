@@ -36,8 +36,8 @@ namespace crimild {
 	class ColliderComponent;
 
 	class RigidBodyComponent : public NodeComponent {
-	public:
-		static const char *COMPONENT_NAME;
+		CRIMILD_DISALLOW_COPY_AND_ASSIGN( RigidBodyComponent )
+		CRIMILD_NODE_COMPONENT_NAME( "rigidBody" )
 
 	public:
 		RigidBodyComponent( void );

@@ -40,11 +40,8 @@
 using namespace crimild;
 using namespace crimild::al;
 
-const char *AudioComponent::NAME = "audio";
-
 AudioComponent::AudioComponent( AudioClipPtr audioClip )
-	: NodeComponent( NAME ),
-	  _audioClip( audioClip ),
+	: _audioClip( audioClip ),
 	  _gain( 1.0f )
 {
 	CRIMILD_CHECK_AL_ERRORS_BEFORE_CURRENT_FUNCTION;

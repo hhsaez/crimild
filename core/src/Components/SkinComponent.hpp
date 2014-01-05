@@ -36,8 +36,8 @@
 namespace crimild {
 
 	class SkinComponent : public NodeComponent {
-	public:
-		static const char *COMPONENT_NAME;
+		CRIMILD_DISALLOW_COPY_AND_ASSIGN( SkinComponent )
+		CRIMILD_NODE_COMPONENT_NAME( "skin" )
 
 	public:
 		SkinComponent( void );

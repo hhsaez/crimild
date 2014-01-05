@@ -35,8 +35,8 @@
 namespace crimild {
 
 	class LambdaComponent : public NodeComponent {
-	public:
-		static const char *COMPONENT_NAME;
+		CRIMILD_DISALLOW_COPY_AND_ASSIGN( LambdaComponent )
+		CRIMILD_NODE_COMPONENT_NAME( "update" )
 
 	public:
 		LambdaComponent( std::function< void( Node *, const Time & ) > callback );

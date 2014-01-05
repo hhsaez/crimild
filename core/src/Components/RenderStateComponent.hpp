@@ -39,8 +39,8 @@ namespace crimild {
 	class Light;
 
 	class RenderStateComponent : public NodeComponent {
-	public:
-		static const char *COMPONENT_NAME;
+		CRIMILD_DISALLOW_COPY_AND_ASSIGN( RenderStateComponent )
+		CRIMILD_NODE_COMPONENT_NAME( "renderState" )
 
 	public:
 		RenderStateComponent( void );

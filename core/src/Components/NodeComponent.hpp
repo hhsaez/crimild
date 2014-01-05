@@ -28,7 +28,6 @@
 #ifndef CRIMILD_COMPONENTS_NODE_COMPONENT_
 #define CRIMILD_COMPONENTS_NODE_COMPONENT_
 
-#include "Foundation/NamedObject.hpp"
 #include "Foundation/SharedObject.hpp"
 #include "Mathematics/Time.hpp"
 
@@ -36,9 +35,11 @@ namespace crimild {
 
 	class Node;
 
-	class NodeComponent : public SharedObject, public NamedObject {
+	class NodeComponent : public SharedObject {
+		CRIMILD_DISALLOW_COPY_AND_ASSIGN( NodeComponent )
+
 	protected:
-		NodeComponent( std::string name = "update" );
+		NodeComponent( void );
 
 	public:
 		virtual ~NodeComponent( void );
@@ -46,6 +47,8 @@ namespace crimild {
 		Node *getNode( void ) { return _node; }
 		const Node *getNode( void ) const { return _node; }
 		void setNode( Node *node ) { _node = node; }
+
+		virtual const char *getComponentName( void ) const { return "update"; }
 
 	private:
 		Node *_node;
@@ -58,6 +61,13 @@ namespace crimild {
 	};
 
 }
+
+// useful macro for declaring a component name
+// _COMPONENT_NAME is for internal use only (see Node and NodeComponentCatalog classes)
+#define CRIMILD_NODE_COMPONENT_NAME( X ) \
+ 	public: \
+ 		static const char *_COMPONENT_NAME( void ) { return X; } \
+ 		virtual const char *getComponentName( void ) const override { return _COMPONENT_NAME(); }
 
 #endif
 
