@@ -44,9 +44,12 @@ namespace crimild {
 	public:
 		virtual ~NodeComponent( void );
 
+		void setNode( Node *node ) { _node = node; }
 		Node *getNode( void ) { return _node; }
 		const Node *getNode( void ) const { return _node; }
-		void setNode( Node *node ) { _node = node; }
+
+		template< class NODE_TYPE >
+		NODE_TYPE *getNode( void ) { return static_cast< NODE_TYPE * >( _node ); }
 
 		virtual const char *getComponentName( void ) const { return "update"; }
 

@@ -337,19 +337,19 @@ namespace crimild {
 		        float wy = w * y2;
 		        float wz = w * z2;
 
-		    	result[0] = _scale * ( s * ( 1 - (yy + zz) ) );
-		    	result[1] = _scale * ( s * ( xy + wz ) );
-		    	result[2] = _scale * ( s * ( xz - wy ) );
+		    	result[0] = s * ( 1 - ( yy + zz ) );
+		    	result[1] = s * ( xy + wz );
+		    	result[2] = s * ( xz - wy );
 		    	result[3] = 0;
 
 			    result[4] = s * ( xy - wz );
-			    result[5] = s * ( 1 - (xx + zz) );
+			    result[5] = s * ( 1 - ( xx + zz ) );
 		    	result[6] = s * ( yz + wx );
 		    	result[7] = 0;
 
 		    	result[8] = s * ( xz + wy );
 		    	result[9] = s * ( yz - wx );
-		    	result[10] = s * ( 1 - (xx + yy) );
+		    	result[10] = s * ( 1 - ( xx + yy ) );
 		    	result[11] = 0;
 
 				result[ 12 ] = getTranslate()[ 0 ];

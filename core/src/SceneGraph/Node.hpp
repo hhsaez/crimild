@@ -59,6 +59,9 @@ namespace crimild {
 
 		Node *getRootParent( void );
 
+		template< class PARENT_TYPE >
+		PARENT_TYPE *getParent( void ) { return static_cast< PARENT_TYPE * >( _parent ); }
+
 	private:
 		/**
 			\brief A node's parent

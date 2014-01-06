@@ -51,7 +51,7 @@ void Log::ConsoleOutputHandler::write( Log *log, std::string message )
 	std::cout << log->getName() << " - " << message << std::endl;
 }
 
-void Log::setDefaultOutputHandler( LogOutputHandlerPtr handler )
+void Log::setDefaultOutputHandler( LogOutputHandler *handler )
 {
 	Debug.setOutputHandler( handler );
 	Error.setOutputHandler( handler );
@@ -63,8 +63,7 @@ void Log::setDefaultOutputHandler( LogOutputHandlerPtr handler )
 Log::Log( std::string name )
 	: NamedObject( name )
 {
-	LogOutputHandlerPtr handler( new ConsoleOutputHandler() );
-	setOutputHandler( handler );
+	setOutputHandler( new ConsoleOutputHandler() );
 }
 
 Log::~Log( void )

@@ -29,6 +29,8 @@
 #define CRIMILD_FOUNDATION_LOG_
 
 #include "NamedObject.hpp"
+#include "SharedObject.hpp"
+#include "Pointer.hpp"
 
 #include <string>
 #include <iostream>
@@ -38,14 +40,12 @@ namespace crimild {
 
 	class Log : public NamedObject {
 	public:
-		class LogOutputHandler {
+		class LogOutputHandler : public SharedObject {
 		public:
 			virtual ~LogOutputHandler( void );
 
 			virtual void write( Log *log, std::string message ) = 0;
 		};
-
-		typedef std::shared_ptr< LogOutputHandler > LogOutputHandlerPtr;
 
 		class ConsoleOutputHandler : public LogOutputHandler {
 		public:
@@ -66,14 +66,14 @@ namespace crimild {
 
 		static EndLine End;
 
-		static void setDefaultOutputHandler( LogOutputHandlerPtr handler );
+		static void setDefaultOutputHandler( LogOutputHandler *handler );
 
 	public:
 		Log( std::string name );
 		virtual ~Log( void );
 
-		void setOutputHandler( LogOutputHandlerPtr handler ) { _outputHandler = handler; }
-		LogOutputHandler *getOutputHandler( void ) { return _outputHandler.get(); }
+		void setOutputHandler( LogOutputHandler *handler ) { _outputHandler = handler; }
+		LogOutputHandler *getOutputHandler( void ) { return _outputHandler; }
 
 		template< typename T >
 		Log &operator<<( T in )
@@ -91,7 +91,7 @@ namespace crimild {
 
 	private:
 		std::stringstream _str;
-		LogOutputHandlerPtr _outputHandler;
+		Pointer< LogOutputHandler > _outputHandler;
 	};
 
 }
