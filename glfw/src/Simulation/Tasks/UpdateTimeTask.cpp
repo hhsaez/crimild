@@ -29,6 +29,11 @@
 
 #include <GL/glfw.h>
 
+#include <thread>
+#include <chrono>
+
+#define DESIRED_REFRESH_RATE 1.0f / 60.0f
+
 using namespace crimild;
 
 UpdateTimeTask::UpdateTimeTask( int priority )
@@ -64,6 +69,9 @@ void UpdateTimeTask::update( void )
 
 	t.setCurrentTime( currentTime );
 	t.setLastTime( lastTime );
-	t.setDeltaTime( Numericf::min( 1.0f / 60.0f, currentTime - lastTime ) );
+	t.setDeltaTime( Numericf::min( DESIRED_REFRESH_RATE, currentTime - lastTime ) );
+
+	int sleepTime = ( int )( ( DESIRED_REFRESH_RATE - t.getDeltaTime() ) * 1000 );
+	std::this_thread::sleep_for( std::chrono::milliseconds( sleepTime ) );
 }
 
