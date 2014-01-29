@@ -35,7 +35,7 @@ TEST( IndexBufferObject, construction )
 {
 	unsigned short indices[] = { 0, 1, 2 };
 
-	IndexBufferObjectPtr ibo( new IndexBufferObject( 3, indices ) );
+	Pointer< IndexBufferObject > ibo( new IndexBufferObject( 3, indices ) );
 
 	EXPECT_EQ( 3, ibo->getIndexCount() );
 	EXPECT_EQ( 0, memcmp( indices, ibo->getData(), sizeof( unsigned short ) * ibo->getSize() ) );

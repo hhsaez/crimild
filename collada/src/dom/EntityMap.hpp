@@ -2,6 +2,7 @@
 #define CRIMILD_COLLADA_ENTITY_CATALOG_
 
 #include "Utils.hpp"
+#include "Entity.hpp"
 
 #include <map>
 
@@ -17,7 +18,7 @@ namespace crimild {
 				_entities.clear();
 			}
 
-			void attach( std::shared_ptr< ENTITY_TYPE > entity )
+			void attach( ENTITY_TYPE *entity )
 			{
 				_entities[ entity->getID() ] = entity;
 			}
@@ -33,7 +34,7 @@ namespace crimild {
 				for ( xmlNode *childXML = input->children; childXML != nullptr; childXML = childXML->next ) {
 					if ( childXML->type == XML_ELEMENT_NODE ) {
 						if ( XMLUtils::compareXMLNodeName( childXML, _entityName ) ) {
-							std::shared_ptr< ENTITY_TYPE > entity( new ENTITY_TYPE() );
+							Pointer< ENTITY_TYPE > entity( new ENTITY_TYPE() );
 							if ( entity->parseXML( childXML ) ) {
 								attach( entity );
 							}
@@ -52,7 +53,7 @@ namespace crimild {
 
 		private:
 			const char *_entityName;
-			std::map< std::string, std::shared_ptr< ENTITY_TYPE > > _entities;
+			std::map< std::string, Pointer< ENTITY_TYPE > > _entities;
 		};
 
 	}

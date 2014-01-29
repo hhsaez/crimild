@@ -40,7 +40,7 @@ TEST( SimulationTest, construction )
 {
 	EXPECT_EQ( Simulation::getCurrent(), nullptr );
 
-	SimulationPtr simulation( new Simulation( "a simulation", 0, nullptr ) );
+	Pointer< Simulation > simulation( new Simulation( "a simulation", 0, nullptr ) );
 
 	EXPECT_EQ( simulation->getName(), "a simulation" );
 	EXPECT_EQ( Simulation::getCurrent(), simulation.get() );
@@ -49,12 +49,12 @@ TEST( SimulationTest, construction )
 TEST( SimulationTest, destruction )
 {
 	EXPECT_EQ( Simulation::getCurrent(), nullptr );
-	MockTaskPtr task( new MockTask( 0 ) );
+	Pointer< MockTask > task( new MockTask( 0 ) );
 	EXPECT_CALL( *task, stop() )
 		.Times( ::testing::Exactly( 1 ) );
 
 	{
-		SimulationPtr simulation( new Simulation( "a simulation", 0, nullptr ) );		
+		Pointer< Simulation > simulation( new Simulation( "a simulation", 0, nullptr ) );		
 		EXPECT_EQ( Simulation::getCurrent(), simulation.get() );
 		simulation->getMainLoop()->startTask( task );
 	}
@@ -64,9 +64,9 @@ TEST( SimulationTest, destruction )
 
 TEST( SimulationTest, step )
 {
-	SimulationPtr simulation( new Simulation( "a simulation", 0, nullptr ) );		
+	Pointer< Simulation > simulation( new Simulation( "a simulation", 0, nullptr ) );		
 
-	MockTaskPtr task( new MockTask( 0 ) );
+	Pointer< MockTask > task( new MockTask( 0 ) );
 	EXPECT_CALL( *task, start() )
 		.Times( ::testing::Exactly( 1 ) );
 	EXPECT_CALL( *task, update() )
@@ -88,9 +88,9 @@ TEST( SimulationTest, run )
 {
 	int loopCount = 0;
 
-	SimulationPtr simulation( new Simulation( "a simulation", 0, nullptr ) );
+	Pointer< Simulation > simulation( new Simulation( "a simulation", 0, nullptr ) );
 
-	MockTaskPtr task( new MockTask( 0 ) );
+	Pointer< MockTask > task( new MockTask( 0 ) );
 	EXPECT_CALL( *task, start() )
 		.Times( ::testing::Exactly( 1 ) );
 	EXPECT_CALL( *task, update() )
@@ -112,28 +112,28 @@ TEST( SimulationTest, run )
 
 TEST( SimulationTest, attachSceneWithoutCamera )
 {
-	SimulationPtr simulation( new Simulation( "a simulation", 0, nullptr ) );
+	Pointer< Simulation > simulation( new Simulation( "a simulation", 0, nullptr ) );
 
 	EXPECT_FALSE( simulation->getMainLoop()->hasActiveTasks() );
 
-	NodePtr simpleScene( new Node() );
+	Pointer< Node > simpleScene( new Node() );
 
-	simulation->attachScene( simpleScene );
+	simulation->setScene( simpleScene );
 
 	EXPECT_FALSE( simulation->getMainLoop()->hasActiveTasks() );
 }
 
 TEST( SimulationTest, attachSceneWithCamera )
 {
-	SimulationPtr simulation( new Simulation( "a simulation", 0, nullptr ) );
+	Pointer< Simulation > simulation( new Simulation( "a simulation", 0, nullptr ) );
 
 	EXPECT_FALSE( simulation->getMainLoop()->hasActiveTasks() );
 
-	GroupPtr scene( new Group() );
-	CameraPtr camera( new Camera() );
+	Pointer< Group > scene( new Group() );
+	Pointer< Camera > camera( new Camera() );
 	scene->attachNode( camera );
 
-	simulation->attachScene( scene );
+	simulation->setScene( scene );
 
 	EXPECT_TRUE( simulation->getMainLoop()->hasActiveTasks() );
 }

@@ -19,10 +19,8 @@ namespace crimild {
 			Accessor *getAccessor( void ) { return _accessor.get(); }
 
 		private:
-			AccessorPtr _accessor;
+			Pointer< Accessor > _accessor;
 		};
-
-		typedef std::shared_ptr< TechniqueCommon > TechniqueCommonPtr;
 
 	}
 

@@ -42,11 +42,11 @@ TEST( NodeVisitorTest, traversal )
 	//			/	\
 	//		node3	node4
 
-	GroupPtr node0( new Group( "node0" ) );
-	GroupPtr node2( new Group( "node2" ) );
-	NodePtr node1( new Node( "node1" ) );
-	NodePtr node3( new Node( "node3" ) );
-	NodePtr node4( new Node( "node4" ) );
+	Pointer< Group > node0( new Group( "node0" ) );
+	Pointer< Group > node2( new Group( "node2" ) );
+	Pointer< Node > node1( new Node( "node1" ) );
+	Pointer< Node > node3( new Node( "node3" ) );
+	Pointer< Node > node4( new Node( "node4" ) );
 
 	node0->attachNode( node1 );
 	node0->attachNode( node2 );
@@ -98,11 +98,11 @@ TEST( NodeVisitorTest, prependParentName )
 	//			/	\
 	//		node3	node4
 
-	GroupPtr node0( new Group( "node0" ) );
-	GroupPtr node2( new Group( "node2" ) );
-	NodePtr node1( new Node( "node1" ) );
-	NodePtr node3( new Node( "node3" ) );
-	NodePtr node4( new Node( "node4" ) );
+	Pointer< Group > node0( new Group( "node0" ) );
+	Pointer< Group > node2( new Group( "node2" ) );
+	Pointer< Node > node1( new Node( "node1" ) );
+	Pointer< Node > node3( new Node( "node3" ) );
+	Pointer< Node > node4( new Node( "node4" ) );
 
 	node0->attachNode( node1 );
 	node0->attachNode( node2 );

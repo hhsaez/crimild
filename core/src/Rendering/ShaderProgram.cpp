@@ -86,7 +86,9 @@ void ShaderProgram::attachUniform( ShaderUniform *uniform )
 void ShaderProgram::foreachUniform( std::function< void( ShaderUniform * ) > callback )
 {
 	for ( auto it : _uniforms ) {
-		callback( it );
+		if ( it != nullptr ) {
+			callback( it );
+		}
 	}
 }
 

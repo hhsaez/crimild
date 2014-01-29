@@ -34,7 +34,7 @@ namespace crimild {
 
 	namespace al {
 
-		class AudioClip {
+		class AudioClip : public SharedObject {
 		protected:
 			AudioClip( void );
 
@@ -49,8 +49,6 @@ namespace crimild {
 		private:
 			unsigned int _bufferId;
 		};
-
-		typedef std::shared_ptr< AudioClip > AudioClipPtr;
 
 	}
 

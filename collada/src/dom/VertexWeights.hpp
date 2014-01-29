@@ -23,8 +23,6 @@ namespace crimild {
 			std::vector< int > _indices;
 		};
 
-		typedef std::shared_ptr< VertexWeights > VertexWeightsPtr;
-
 	}
 
 }

@@ -30,8 +30,6 @@ namespace crimild {
 			Source *_source;
 		};
 
-		typedef std::shared_ptr< Input > InputPtr;
-
 		class InputList : public EntityList< Input > {
 		public:
 			InputList( void ) : EntityList< Input >( COLLADA_INPUT ) { }

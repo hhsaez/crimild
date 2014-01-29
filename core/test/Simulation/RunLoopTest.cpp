@@ -35,26 +35,26 @@ using namespace crimild;
 
 TEST( RunLoopTest, construction )
 {
-	RunLoopPtr loop( new RunLoop() );
+	Pointer< RunLoop > loop( new RunLoop() );
 }
 
 TEST( RunLoopTest, destruction )
 {
-	MockTaskPtr task0( new MockTask( 0 ) );
+	Pointer< MockTask > task0( new MockTask( 0 ) );
 	EXPECT_CALL( *task0, stop() )
 		.Times( ::testing::Exactly( 1 ) );
-	MockTaskPtr task1( new MockTask( 1000 ) );
+	Pointer< MockTask > task1( new MockTask( 1000 ) );
 	EXPECT_CALL( *task1, stop() )
 		.Times( ::testing::Exactly( 1 ) );
-	MockTaskPtr task2( new MockTask( 2000 ) );
+	Pointer< MockTask > task2( new MockTask( 2000 ) );
 	EXPECT_CALL( *task2, stop() )
 		.Times( ::testing::Exactly( 1 ) );
-	MockTaskPtr task3( new MockTask( -5 ) );
+	Pointer< MockTask > task3( new MockTask( -5 ) );
 	EXPECT_CALL( *task3, stop() )
 		.Times( ::testing::Exactly( 1 ) );
 
 	{
-		RunLoopPtr loop( new RunLoop() );
+		Pointer< RunLoop > loop( new RunLoop() );
 
 		loop->startTask( task0 );
 		loop->startTask( task1 );
@@ -65,12 +65,12 @@ TEST( RunLoopTest, destruction )
 
 TEST( RunLoopTest, startTasks )
 {
-	RunLoopPtr loop( new RunLoop() );
+	Pointer< RunLoop > loop( new RunLoop() );
 
-	MockTaskPtr task0( new MockTask( 0 ) );
-	MockTaskPtr task1( new MockTask( 1000 ) );
-	MockTaskPtr task2( new MockTask( 2000 ) );
-	MockTaskPtr task3( new MockTask( -5 ) );
+	Pointer< MockTask > task0( new MockTask( 0 ) );
+	Pointer< MockTask > task1( new MockTask( 1000 ) );
+	Pointer< MockTask > task2( new MockTask( 2000 ) );
+	Pointer< MockTask > task3( new MockTask( -5 ) );
 
 	EXPECT_FALSE( loop->hasActiveTasks() );
 
@@ -97,7 +97,7 @@ TEST( RunLoopTest, startTasks )
 	EXPECT_TRUE( loop->isTaskActive( task3 ) );
 
 	int i = 0;
-	loop->foreachActiveTask( [&]( TaskPtr &task ) {
+	loop->foreachActiveTask( [&]( Task *task ) {
 		switch (i) {
 			case 0:
 				EXPECT_EQ( task, task3 );
@@ -119,9 +119,9 @@ TEST( RunLoopTest, startTasks )
 
 TEST( RunLoopTest, startTaskAlreadyStarted )
 {
-	RunLoopPtr loop( new RunLoop() );
+	Pointer< RunLoop > loop( new RunLoop() );
 
-	MockTaskPtr task( new MockTask( 0 ) );
+	Pointer< MockTask > task( new MockTask( 0 ) );
 	EXPECT_CALL( *task, start() )
 		.Times( ::testing::Exactly( 1 ) );
 
@@ -129,7 +129,7 @@ TEST( RunLoopTest, startTaskAlreadyStarted )
 	loop->startTask( task );
 
 	int i = 0;
-	loop->foreachActiveTask( [&]( TaskPtr &task ) {
+	loop->foreachActiveTask( [&]( Task *task ) {
 		i++;
 	});
 	EXPECT_EQ( i, 1 );
@@ -137,9 +137,9 @@ TEST( RunLoopTest, startTaskAlreadyStarted )
 
 TEST( RunLoopTest, startSuspendedTask )
 {
-	RunLoopPtr loop( new RunLoop() );
+	Pointer< RunLoop > loop( new RunLoop() );
 
-	MockTaskPtr task( new MockTask( 0 ) );
+	Pointer< MockTask > task( new MockTask( 0 ) );
 	EXPECT_CALL( *task, start() )
 		.Times( ::testing::Exactly( 1 ) );
 
@@ -153,9 +153,9 @@ TEST( RunLoopTest, startSuspendedTask )
 
 TEST( RunLoopTest, startStoppedTask )
 {
-	RunLoopPtr loop( new RunLoop() );
+	Pointer< RunLoop > loop( new RunLoop() );
 
-	MockTaskPtr task( new MockTask( 0 ) );
+	Pointer< MockTask > task( new MockTask( 0 ) );
 	EXPECT_CALL( *task, start() )
 		.Times( ::testing::Exactly( 1 ) );
 
@@ -169,9 +169,9 @@ TEST( RunLoopTest, startStoppedTask )
 
 TEST( RunLoopTest, stopTasks )
 {
-	RunLoopPtr loop( new RunLoop() );
+	Pointer< RunLoop > loop( new RunLoop() );
 
-	MockTaskPtr task( new MockTask( 0 ) );
+	Pointer< MockTask > task( new MockTask( 0 ) );
 	EXPECT_CALL( *task, stop() )
 		.Times( ::testing::Exactly( 1 ) );
 
@@ -186,9 +186,9 @@ TEST( RunLoopTest, stopTasks )
 
 TEST( RunLoopTest, stopKilledTask )
 {
-	RunLoopPtr loop( new RunLoop() );
+	Pointer< RunLoop > loop( new RunLoop() );
 
-	MockTaskPtr task( new MockTask( 0 ) );
+	Pointer< MockTask > task( new MockTask( 0 ) );
 	EXPECT_CALL( *task, stop() )
 		.Times( ::testing::Exactly( 1 ) );
 
@@ -201,9 +201,9 @@ TEST( RunLoopTest, stopKilledTask )
 
 TEST( RunLoopTest, stopSuspendedTask )
 {
-	RunLoopPtr loop( new RunLoop() );
+	Pointer< RunLoop > loop( new RunLoop() );
 
-	MockTaskPtr task( new MockTask( 0 ) );
+	Pointer< MockTask > task( new MockTask( 0 ) );
 	EXPECT_CALL( *task, stop() )
 		.Times( ::testing::Exactly( 1 ) );
 
@@ -217,9 +217,9 @@ TEST( RunLoopTest, stopSuspendedTask )
 
 TEST( RunLoopTest, suspendTask )
 {
-	RunLoopPtr loop( new RunLoop() );
+	Pointer< RunLoop > loop( new RunLoop() );
 
-	MockTaskPtr task( new MockTask( 0 ) );
+	Pointer< MockTask > task( new MockTask( 0 ) );
 	EXPECT_CALL( *task, suspend() )
 		.Times( ::testing::Exactly( 1 ) );
 
@@ -234,9 +234,9 @@ TEST( RunLoopTest, suspendTask )
 
 TEST( RunLoopTest, suspendKilledTask )
 {
-	RunLoopPtr loop( new RunLoop() );
+	Pointer< RunLoop > loop( new RunLoop() );
 
-	MockTaskPtr task( new MockTask( 0 ) );
+	Pointer< MockTask > task( new MockTask( 0 ) );
 	EXPECT_CALL( *task, suspend() )
 		.Times( 0 );
 
@@ -250,9 +250,9 @@ TEST( RunLoopTest, suspendKilledTask )
 
 TEST( RunLoopTest, suspendAlreadySuspendedTask )
 {
-	RunLoopPtr loop( new RunLoop() );
+	Pointer< RunLoop > loop( new RunLoop() );
 
-	MockTaskPtr task( new MockTask( 0 ) );
+	Pointer< MockTask > task( new MockTask( 0 ) );
 	EXPECT_CALL( *task, suspend() )
 		.Times( ::testing::Exactly( 1 ) );
 
@@ -265,9 +265,9 @@ TEST( RunLoopTest, suspendAlreadySuspendedTask )
 
 TEST( RunLoopTest, resumeTasks )
 {
-	RunLoopPtr loop( new RunLoop() );
-	MockTaskPtr task0( new MockTask( 0 ) );
-	MockTaskPtr task1( new MockTask( 1000 ) );
+	Pointer< RunLoop > loop( new RunLoop() );
+	Pointer< MockTask > task0( new MockTask( 0 ) );
+	Pointer< MockTask > task1( new MockTask( 1000 ) );
 
 	EXPECT_CALL( *task0, suspend() )
 		.Times( ::testing::Exactly( 1 ) );
@@ -289,9 +289,9 @@ TEST( RunLoopTest, resumeTasks )
 
 TEST( RunLoopTest, resumeAlreadyStartedTask )
 {
-	RunLoopPtr loop( new RunLoop() );
+	Pointer< RunLoop > loop( new RunLoop() );
 
-	MockTaskPtr task( new MockTask( 0 ) );
+	Pointer< MockTask > task( new MockTask( 0 ) );
 	EXPECT_CALL( *task, resume() )
 		.Times( 0 );
 
@@ -303,9 +303,9 @@ TEST( RunLoopTest, resumeAlreadyStartedTask )
 
 TEST( RunLoopTest, resumeAlreadyKilledTask )
 {
-	RunLoopPtr loop( new RunLoop() );
+	Pointer< RunLoop > loop( new RunLoop() );
 
-	MockTaskPtr task( new MockTask( 0 ) );
+	Pointer< MockTask > task( new MockTask( 0 ) );
 	EXPECT_CALL( *task, resume() )
 		.Times( 0 );
 
@@ -318,21 +318,21 @@ TEST( RunLoopTest, resumeAlreadyKilledTask )
 
 TEST( RunLoopTest, updateTasks )
 {
-	RunLoopPtr loop( new RunLoop() );
+	Pointer< RunLoop > loop( new RunLoop() );
 
-	MockTaskPtr task0( new MockTask( 0 ) );
+	Pointer< MockTask > task0( new MockTask( 0 ) );
 	EXPECT_CALL( *task0, update() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	MockTaskPtr task1( new MockTask( 1000 ) );
+	Pointer< MockTask > task1( new MockTask( 1000 ) );
 	EXPECT_CALL( *task1, update() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	MockTaskPtr task2( new MockTask( 2000 ) );
+	Pointer< MockTask > task2( new MockTask( 2000 ) );
 	EXPECT_CALL( *task2, update() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	MockTaskPtr task3( new MockTask( -5 ) );
+	Pointer< MockTask > task3( new MockTask( -5 ) );
 	EXPECT_CALL( *task3, update() )
 		.Times( ::testing::Exactly( 1 ) );
 
@@ -346,9 +346,9 @@ TEST( RunLoopTest, updateTasks )
 
 TEST( RunLoopTest, breakLoop )
 {
-	RunLoopPtr loop( new RunLoop() );
+	Pointer< RunLoop > loop( new RunLoop() );
 
-	MockTaskPtr task( new MockTask( 0 ) );
+	Pointer< MockTask > task( new MockTask( 0 ) );
 	loop->startTask( task );
 
 	EXPECT_TRUE( loop->update() );
@@ -361,9 +361,9 @@ TEST( RunLoopTest, breakLoop )
 
 TEST( RunLoopTest, stop )
 {
-	RunLoopPtr loop( new RunLoop() );
+	Pointer< RunLoop > loop( new RunLoop() );
 
-	MockTaskPtr task( new MockTask( 0 ) );
+	Pointer< MockTask > task( new MockTask( 0 ) );
 	EXPECT_CALL( *task, stop() )
 		.Times( ::testing::Exactly( 1 ) );
 	loop->startTask( task );

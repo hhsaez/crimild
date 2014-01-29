@@ -21,8 +21,6 @@ namespace crimild {
 			float _data[ 16 ];
 		};
 
-		typedef std::shared_ptr< collada::Matrix > MatrixPtr;
-
 	}
 
 }

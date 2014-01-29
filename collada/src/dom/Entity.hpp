@@ -7,7 +7,7 @@ namespace crimild {
 
 	namespace collada {
 
-		class Entity {
+		class Entity : public SharedObject {
 		public:
 			virtual ~Entity( void );
 
@@ -22,8 +22,6 @@ namespace crimild {
 		private:
 			std::string _id;
 		};
-
-		typedef std::shared_ptr< Entity > EntityPtr;
 
 	}
 

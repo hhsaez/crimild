@@ -2,6 +2,7 @@
 #define CRIMILD_COLLADA_LIBRARY_
 
 #include "Utils.hpp"
+#include "Entity.hpp"
 
 namespace crimild {
 
@@ -9,26 +10,23 @@ namespace crimild {
 
 		template< class ENTITY_TYPE >
 		class EntityList {
-		private:
-			typedef std::shared_ptr< ENTITY_TYPE > EntityPtr;
-
 		public:
 			virtual ~EntityList( void )
 			{
 				_entities.clear();
 			}
 
-			void attach( EntityPtr entity )
+			void attach( ENTITY_TYPE *entity )
 			{
 				_entities.push_back( entity );
 			}
 
 			unsigned int getCount( void ) const { return _entities.size(); }
 
-			void foreach( std::function< void( EntityPtr ) > callback )
+			void foreach( std::function< void( ENTITY_TYPE * ) > callback )
 			{
 				for ( auto entity : _entities ) {
-					callback( entity );
+					callback( entity.get() );
 				}
 			}
 
@@ -49,7 +47,7 @@ namespace crimild {
 				for ( xmlNode *childXML = input->children; childXML != nullptr; childXML = childXML->next ) {
 					if ( childXML->type == XML_ELEMENT_NODE ) {
 						if ( XMLUtils::compareXMLNodeName( childXML, _entityName ) ) {
-							EntityPtr entity( new ENTITY_TYPE() );
+							Pointer< ENTITY_TYPE > entity( new ENTITY_TYPE() );
 							if ( entity->parseXML( childXML) ) {
 								attach( entity );
 							}
@@ -68,7 +66,7 @@ namespace crimild {
 
 		private:
 			const char *_entityName;
-			std::list< EntityPtr > _entities;
+			std::list< Pointer< ENTITY_TYPE > > _entities;
 		};
 
 	}

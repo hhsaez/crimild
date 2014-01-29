@@ -35,19 +35,17 @@
 namespace crimild {
 
 	class MockComponent : public NodeComponent {
-	public:
-		static const char *NAME;
+		CRIMILD_DISALLOW_COPY_AND_ASSIGN( MockComponent )
+		CRIMILD_NODE_COMPONENT_NAME( "mock" )
 
 	public:
-		MockComponent( std::string name = NAME );
+		MockComponent( void );
 		virtual ~MockComponent( void );
 
 		MOCK_METHOD0( onDetach, void( void ) );
 		MOCK_METHOD0( onAttach, void( void ) );
 		MOCK_METHOD1( update, void( const Time & ) );
 	};
-
-	typedef std::shared_ptr< MockComponent > MockComponentPtr;
 
 }
 

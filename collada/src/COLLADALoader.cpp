@@ -41,7 +41,7 @@ COLLADALoader::~COLLADALoader( void )
 
 }
 
-crimild::NodePtr COLLADALoader::load( void )
+Pointer< crimild::Node > COLLADALoader::load( void )
 {
 	Log::Info << "Loading COLLADA scene from file " << _filePath << Log::End;
 
@@ -50,7 +50,7 @@ crimild::NodePtr COLLADALoader::load( void )
 		throw FileNotFoundException( _filePath );
 	}
 
-	_result = GroupPtr( new Group( _filePath ) );
+	_result = new Group( _filePath );
 	_rootElement = xmlDocGetRootElement( _document );
 
 	XMLUtils::loadLibrary( _rootElement, COLLADA_LIBRARY_IMAGES, _images );
@@ -73,11 +73,11 @@ crimild::NodePtr COLLADALoader::load( void )
 
 void COLLADALoader::parseVisualScenes( void )
 {
-	_visualScenes.foreach( [&]( VisualScenePtr visualScene ) {
-		GroupPtr scene( new Group( visualScene->getID() ) );
+	_visualScenes.foreach( [&]( VisualScene *visualScene ) {
+		Pointer< Group > scene( new Group( visualScene->getID() ) );
 
-		visualScene->getNodes()->foreach( [&]( collada::NodePtr node ) {
-			parseNode( scene.get(), node.get() );
+		visualScene->getNodes()->foreach( [&]( collada::Node *node ) {
+			parseNode( scene.get(), node );
 
 			InstanceController *instanceController = node->getInstanceController();
 			if ( instanceController != NULL ) {
@@ -97,7 +97,7 @@ void COLLADALoader::parseVisualScenes( void )
 
 void COLLADALoader::parseNode( Group *parent, collada::Node *node )
 {
-	GroupPtr group( new Group() );
+	Pointer< Group > group( new Group() );
 	if ( node->getSID() != NULL ) {
 		group->setName( node->getSID() );
 	}
@@ -127,8 +127,8 @@ void COLLADALoader::parseNode( Group *parent, collada::Node *node )
 		group->local().rotate().fromRotationMatrix( Matrix3f( rotate ) );
 	}
 
-	node->getNodes()->foreach( [&]( collada::NodePtr child ) {
-		parseNode( group.get(), child.get() );
+	node->getNodes()->foreach( [&]( collada::Node *child ) {
+		parseNode( group.get(), child );
 	});
 }
 
@@ -168,8 +168,8 @@ void COLLADALoader::parseSkin( Group *parent, Skin *skin )
 
 	Log::Debug << "Found vertices information for mesh" << Log::End;
 
-	mesh->getTriangles()->foreach( [&]( collada::TrianglesPtr triangles ) {
-		parseTriangles( parent, mesh, vertices, triangles.get() );
+	mesh->getTriangles()->foreach( [&]( collada::Triangles *triangles ) {
+		parseTriangles( parent, mesh, vertices, triangles );
 	});
 }
 
@@ -188,14 +188,14 @@ void COLLADALoader::parseTriangles( crimild::Group *parent, Mesh *mesh, Vertices
 	unsigned int textureCoordsIndexOffset = 0;
 
 	Log::Debug << "Reading input information from triangle" << Log::End;
-	triangles->getInputs()->foreach( [&]( collada::InputPtr input ) {
+	triangles->getInputs()->foreach( [&]( collada::Input *input ) {
 		std::string semantic = input->getSemantic();
 
 		if ( semantic == COLLADA_SEMANTIC_VERTEX && vertices->getInputs()->getCount() > 0 ) {
 			Log::Debug << "Reading input information for " << semantic.c_str() << Log::End;
 
 			bool vertexInputFound = false;
-			vertices->getInputs()->foreach( [&]( collada::InputPtr vertexInput ) {
+			vertices->getInputs()->foreach( [&]( collada::Input *vertexInput ) {
 				std::string semantic = vertexInput->getSemantic();
 				Log::Debug << "Processing vertex input semantic: " << semantic << Log::End;
 
@@ -288,7 +288,7 @@ void COLLADALoader::parseTriangles( crimild::Group *parent, Mesh *mesh, Vertices
 	Log::Debug << "Vertex format = " << format << Log::End;
 
 	Log::Debug << "Allocating vertex buffer with size " << vertexCount << Log::End;
-	VertexBufferObjectPtr vbo( new VertexBufferObject( format, vertexCount, NULL ) );
+	Pointer< VertexBufferObject > vbo( new VertexBufferObject( format, vertexCount, NULL ) );
 	float *vertexData = vbo->getData();
 	memset( vertexData, 0, format.getVertexSizeInBytes() * vbo->getVertexCount() );
 
@@ -305,7 +305,7 @@ void COLLADALoader::parseTriangles( crimild::Group *parent, Mesh *mesh, Vertices
 	}
 
 	Log::Debug << "Allocating index buffer with size " << triangleCount * 3 << Log::End;
-	IndexBufferObjectPtr ibo( new IndexBufferObject( triangleCount * 3, NULL ) );
+	Pointer< IndexBufferObject > ibo( new IndexBufferObject( triangleCount * 3, NULL ) );
 	unsigned short *indexData = ibo->getData();
 	unsigned int indexCount = 0;
 
@@ -354,18 +354,18 @@ void COLLADALoader::parseTriangles( crimild::Group *parent, Mesh *mesh, Vertices
 		}
 	}
 
-	PrimitivePtr primitive( new Primitive( Primitive::Type::TRIANGLES ) );
+	Pointer< Primitive > primitive( new Primitive( Primitive::Type::TRIANGLES ) );
 	primitive->setVertexBuffer( vbo );
 	primitive->setIndexBuffer( ibo );
 
-	crimild::GeometryPtr geometry( new crimild::Geometry() );
+	Pointer< crimild::Geometry > geometry( new crimild::Geometry() );
 	geometry->attachPrimitive( primitive );
 	parent->attachNode( geometry );
 
 	if ( triangles->getMaterial().length() > 0 ) {
 		collada::Material *m = _materials.get( triangles->getMaterial() );		
 		if ( m != nullptr ) {
-			crimild::MaterialPtr material( new crimild::Material() );
+			Pointer< crimild::Material > material( new crimild::Material() );
 			geometry->getComponent< MaterialComponent >()->attachMaterial( material );
 
 			collada::Effect *e = _effects.get( m->getInstanceEffect()->getUrl() );
@@ -391,8 +391,8 @@ void COLLADALoader::parseTriangles( crimild::Group *parent, Mesh *mesh, Vertices
 												try {
 													std::string imagePath = _assetsDirectory + i->getFileName();
 													imagePath = FileSystem::getInstance().pathForResource( imagePath );
-													crimild::ImagePtr image( new ImageTGA( imagePath ) );
-													crimild::TexturePtr diffuseTexture( new crimild::Texture( image ) );
+													Pointer< crimild::Image > image( new ImageTGA( imagePath ) );
+													Pointer< crimild::Texture > diffuseTexture( new crimild::Texture( image ) );
 													material->setColorMap( diffuseTexture );
 												}
 												catch ( ... ) {

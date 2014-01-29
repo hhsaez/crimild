@@ -54,7 +54,7 @@ namespace crimild {
 			COLLADALoader( std::string filePath );
 			virtual ~COLLADALoader( void );
 
-			crimild::NodePtr load( void );
+			Pointer< crimild::Node > load( void );
 
 		private:
 			void parseVisualScenes( void );
@@ -71,7 +71,7 @@ namespace crimild {
 			xmlDocPtr _document;
 			xmlNode *_rootElement;
 
-			GroupPtr _result;
+			Pointer< Group > _result;
 
 			collada::VisualSceneList _visualScenes;
 			collada::GeometryList _geometries;

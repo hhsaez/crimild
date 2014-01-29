@@ -54,8 +54,6 @@ namespace crimild {
 			ChannelList _channels;
 		};
 
-		typedef std::shared_ptr< Animation > AnimationPtr;
-
 		class AnimationList : public EntityList< Animation > {
 		public:
 			AnimationList( void ) : EntityList< Animation >( COLLADA_ANIMATION ) { }

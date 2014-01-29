@@ -33,10 +33,10 @@ using namespace crimild;
 
 TEST( PrimitiveTest, construction )
 {
-	PrimitivePtr p1( new Primitive() );
+	Pointer< Primitive > p1( new Primitive() );
 	EXPECT_EQ( p1->getType(), Primitive::Type::TRIANGLES );
 
-	PrimitivePtr p2( new Primitive( Primitive::Type::LINES ) );
+	Pointer< Primitive > p2( new Primitive( Primitive::Type::LINES ) );
 	EXPECT_EQ( p2->getType(), Primitive::Type::LINES );
 }
 
@@ -47,11 +47,11 @@ TEST( PrimitiveTest, destruction )
 
 TEST( PrimitiveTest, setVertexBuffer )
 {
-	PrimitivePtr p( new Primitive() );
+	Pointer< Primitive > p( new Primitive() );
 
 	EXPECT_EQ( p->getVertexBuffer(), nullptr );
 
-	VertexBufferObjectPtr vbo( new VertexBufferObject( VertexFormat::VF_P3, 0, nullptr ) );
+	Pointer< VertexBufferObject > vbo( new VertexBufferObject( VertexFormat::VF_P3, 0, nullptr ) );
 	p->setVertexBuffer( vbo );
 
 	EXPECT_EQ( p->getVertexBuffer(), vbo.get() );
@@ -59,11 +59,11 @@ TEST( PrimitiveTest, setVertexBuffer )
 
 TEST( PrimitiveTest, setIndexBuffer )
 {
-	PrimitivePtr p( new Primitive() );
+	Pointer< Primitive > p( new Primitive() );
 
 	EXPECT_EQ( p->getIndexBuffer(), nullptr );
 
-	IndexBufferObjectPtr ibo( new IndexBufferObject(0, nullptr ) );
+	Pointer< IndexBufferObject > ibo( new IndexBufferObject(0, nullptr ) );
 	p->setIndexBuffer( ibo );
 
 	EXPECT_EQ( p->getIndexBuffer(), ibo.get() );

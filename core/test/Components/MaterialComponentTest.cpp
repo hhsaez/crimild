@@ -26,6 +26,7 @@
  */
 
 #include "Components/MaterialComponent.hpp"
+#include "Foundation/Pointer.hpp"
 
 #include "gtest/gtest.h"
 
@@ -33,19 +34,19 @@ using namespace crimild;
 
 TEST( MaterialComponentTest, attachMaterial )
 {
-	MaterialComponentPtr materials( new MaterialComponent() );
+	Pointer< MaterialComponent > materials( new MaterialComponent() );
 
 	EXPECT_FALSE( materials->hasMaterials() );
 
-	MaterialPtr material( new Material() );
+	Pointer< Material > material( new Material() );
 	materials->attachMaterial( material );
 
 	EXPECT_TRUE( materials->hasMaterials() );	
 
 	int i = 0;
-	materials->foreachMaterial( [&]( MaterialPtr &m ) mutable {
+	materials->foreachMaterial( [&]( Material *m ) mutable {
 		i++;
-		EXPECT_EQ( m.get(), material.get() );
+		EXPECT_EQ( m, material );
 	});
 	EXPECT_EQ( 1, i );
 }

@@ -35,7 +35,7 @@ using namespace crimild;
 
 TEST( LightTest, construction )
 {
-	LightPtr light( new Light() );
+	Pointer< Light > light( new Light() );
 
 	EXPECT_EQ( Light::Type::POINT, light->getType() );
 	EXPECT_EQ( Vector3f( 0.0f, 0.0f, 0.0f ), light->getPosition() );
@@ -49,9 +49,9 @@ TEST( LightTest, construction )
 
 TEST( LightTest, fetchLights )
 {
-	GroupPtr group( new Group() );
-	LightPtr light1( new Light() );
-	LightPtr light2( new Light() );
+	Pointer< Group > group( new Group() );
+	Pointer< Light > light1( new Light() );
+	Pointer< Light > light2( new Light() );
 
 	group->attachNode( light1 );
 	group->attachNode( light2 );

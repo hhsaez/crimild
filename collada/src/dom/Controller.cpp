@@ -24,7 +24,7 @@ bool Controller::parseXML( xmlNode *input )
 
 	xmlNode *skinXML = XMLUtils::getChildXMLNodeWithName( input, COLLADA_SKIN );
 	if ( skinXML ) {
-		SkinPtr skin( new Skin() );
+		Pointer< Skin > skin( new Skin() );
 		if ( skin->parseXML( skinXML ) ) {
 			_skin = skin;
 		}

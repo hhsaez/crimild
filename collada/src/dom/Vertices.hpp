@@ -22,8 +22,6 @@ namespace crimild {
 			InputList _inputs;
 		};
 
-		typedef std::shared_ptr< Vertices > VerticesPtr;
-
 	}
 
 }

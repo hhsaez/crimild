@@ -26,9 +26,6 @@ namespace crimild {
 			ParamList _params;
 		};
 
-		typedef std::shared_ptr< Accessor > AccessorPtr;
-
-
 	}
 
 }

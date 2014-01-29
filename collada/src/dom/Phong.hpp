@@ -19,10 +19,8 @@ namespace crimild {
 			Diffuse *getDiffuse( void ) { return _diffuse.get(); }
 
 		private:
-			DiffusePtr _diffuse;
+			Pointer< Diffuse > _diffuse;
 		};
-
-		typedef std::shared_ptr< collada::Phong > PhongPtr;
 
 	}
 

@@ -26,6 +26,7 @@
  */
 
 #include "Simulation/Task.hpp"
+#include "Foundation/Pointer.hpp"
 
 #include "gtest/gtest.h"
 
@@ -35,7 +36,7 @@ using namespace crimild;
 
 TEST( TaskTest, construction )
 {
-	TaskPtr task( new MockTask( 1000 ) );
+	Pointer< Task > task( new MockTask( 1000 ) );
 
 	EXPECT_EQ( task->getPriority(), 1000 );
 }

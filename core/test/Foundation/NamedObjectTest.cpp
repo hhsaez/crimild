@@ -26,6 +26,7 @@
  */
 
 #include "Foundation/NamedObject.hpp"
+#include "Foundation/Pointer.hpp" 
 
 #include "gtest/gtest.h"
 
@@ -33,7 +34,7 @@ using namespace crimild;
 
 TEST( NamedObjectTest, construction )
 {
-	NamedObjectPtr obj( new NamedObject( "a name" ) );
+	std::shared_ptr< NamedObject > obj( new NamedObject( "a name" ) );
 
 	EXPECT_EQ( obj->getName(), "a name" );
 

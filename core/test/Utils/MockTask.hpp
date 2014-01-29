@@ -46,8 +46,6 @@ namespace crimild {
 		MOCK_METHOD0( update, void( void ) );
 	};
 
-	typedef std::shared_ptr< MockTask > MockTaskPtr;
-
 }
 
 #endif

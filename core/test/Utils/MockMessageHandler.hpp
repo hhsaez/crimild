@@ -39,14 +39,10 @@ namespace crimild {
 		int value;
 	};
 
-	typedef std::shared_ptr< MockMessage > MockMessagePtr;
-
 	class MockDeferredMessage : public DeferredMessage {
 	public:
 		int value;
 	};
-
-	typedef std::shared_ptr< MockDeferredMessage > MockDeferredMessagePtr;
 
 	template< class MessageImpl >
 	class MockMessageHandlerImpl : public MessageHandler< MessageImpl > {

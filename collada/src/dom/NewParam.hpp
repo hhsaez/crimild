@@ -23,12 +23,10 @@ namespace crimild {
 			std::string getSID( void ) const { return _sid; }
 
 		private:
-			Sampler2DPtr _sampler2D;
-			SurfacePtr _surface;
+			Pointer< Sampler2D > _sampler2D;
+			Pointer< Surface > _surface;
 			std::string _sid;
 		};
-
-		typedef std::shared_ptr< NewParam > NewParamPtr;
 
 		class NewParamMap : public EntityMap< NewParam > {
 		public:

@@ -43,8 +43,6 @@ namespace crimild {
 		void NodeVisitor_visitGroup( Group *group ) { NodeVisitor::visitGroup( group ); }
 	};
 
-	typedef std::shared_ptr< MockVisitor > MockVisitorPtr;
-
 }
 
 #endif

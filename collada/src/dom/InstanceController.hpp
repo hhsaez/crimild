@@ -20,8 +20,6 @@ namespace crimild {
 			std::string _controllerID;
 		};
 
-		typedef std::shared_ptr< InstanceController > InstanceControllerPtr;
-
 	}
 
 }

@@ -34,7 +34,7 @@ using namespace crimild;
 
 TEST( GeometryNodeTest, construction )
 {
-	GeometryPtr geometry( new Geometry( "a geometry" ) );
+	Pointer< Geometry > geometry( new Geometry( "a geometry" ) );
 
 	EXPECT_EQ( geometry->getName(), "a geometry" );
 
@@ -45,8 +45,8 @@ TEST( GeometryNodeTest, construction )
 
 TEST( GeometryNodeTest, attachPrimitive )
 {
-	GeometryPtr geometry( new Geometry( "a geometry" ) );
-	PrimitivePtr primitive( new Primitive() );
+	Pointer< Geometry > geometry( new Geometry( "a geometry" ) );
+	Pointer< Primitive > primitive( new Primitive() );
 
 	EXPECT_FALSE( geometry->hasPrimitives() );	
 
@@ -56,7 +56,7 @@ TEST( GeometryNodeTest, attachPrimitive )
 	
 	bool found = false;
 	int count = 0;
-	geometry->foreachPrimitive( [&]( PrimitivePtr p ) mutable {
+	geometry->foreachPrimitive( [&]( Primitive *p ) mutable {
 		++count;
 		if ( p == primitive ) {
 			found = true;
@@ -69,8 +69,8 @@ TEST( GeometryNodeTest, attachPrimitive )
 
 TEST( GeometryNodeTest, detachPrimitive )
 {
-	GeometryPtr geometry( new Geometry( "a geometry" ) );
-	PrimitivePtr primitive( new Primitive() );
+	Pointer< Geometry > geometry( new Geometry( "a geometry" ) );
+	Pointer< Primitive > primitive( new Primitive() );
 
 	EXPECT_FALSE( geometry->hasPrimitives() );	
 
@@ -83,7 +83,7 @@ TEST( GeometryNodeTest, detachPrimitive )
 	EXPECT_FALSE( geometry->hasPrimitives() );	
 	
 	int count = 0;
-	geometry->foreachPrimitive( [&]( PrimitivePtr p ) mutable {
+	geometry->foreachPrimitive( [&]( Primitive *p ) mutable {
 		++count;
 	});
 
@@ -92,15 +92,15 @@ TEST( GeometryNodeTest, detachPrimitive )
 
 TEST( GeometryNodeTest, detachAllPrimitives )
 {
-	GeometryPtr geometry( new Geometry( "a geometry" ) );
-	PrimitivePtr primitive1( new Primitive() );
-	PrimitivePtr primitive2( new Primitive() );
+	Pointer< Geometry > geometry( new Geometry( "a geometry" ) );
+	Pointer< Primitive > primitive1( new Primitive() );
+	Pointer< Primitive > primitive2( new Primitive() );
 
 	geometry->attachPrimitive( primitive1 );
 	geometry->attachPrimitive( primitive2 );
 
 	int count = 0;
-	geometry->foreachPrimitive( [&]( PrimitivePtr p ) mutable {
+	geometry->foreachPrimitive( [&]( Primitive *p ) mutable {
 		++count;
 	});
 	EXPECT_EQ( count, 2 );
@@ -108,7 +108,7 @@ TEST( GeometryNodeTest, detachAllPrimitives )
 	geometry->detachAllPrimitives();
 
 	count = 0;
-	geometry->foreachPrimitive( [&]( PrimitivePtr p ) mutable {
+	geometry->foreachPrimitive( [&]( Primitive *p ) mutable {
 		++count;
 	});
 	EXPECT_EQ( count, 0 );

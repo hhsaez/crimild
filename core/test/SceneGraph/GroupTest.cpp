@@ -34,7 +34,7 @@ using namespace crimild;
 
 TEST( GroupNodeTest, construction)
 {
-	GroupPtr group( new Group( "a group" ) );
+	Pointer< Group > group( new Group( "a group" ) );
 
 	EXPECT_EQ( group->getName(), "a group" );
 	EXPECT_FALSE( group->hasNodes() );
@@ -42,11 +42,11 @@ TEST( GroupNodeTest, construction)
 
 TEST( GroupNodeTest, destruction )
 {
-	NodePtr child1( new Node( "child 1" ) );
-	NodePtr child2( new Node( "child 2" ) );
+	Pointer< Node > child1( new Node( "child 1" ) );
+	Pointer< Node > child2( new Node( "child 2" ) );
 
 	{
-		GroupPtr parent( new Group( "parent" ) );
+		Pointer< Group > parent( new Group( "parent" ) );
 
 		parent->attachNode( child1 );
 		EXPECT_TRUE( child1->hasParent() );
@@ -65,11 +65,11 @@ TEST( GroupNodeTest, destruction )
 
 TEST( GroupNodeTest, attachNode )
 {
-	GroupPtr parent( new Group( "parent" ) );
+	Pointer< Group > parent( new Group( "parent" ) );
 
 	EXPECT_FALSE( parent->hasNodes() );
 
-	NodePtr child( new Node( "child" ) );
+	Pointer< Node > child( new Node( "child" ) );
 	EXPECT_FALSE( child->hasParent() );
 	EXPECT_EQ( child->getParent(), nullptr );
 
@@ -81,7 +81,7 @@ TEST( GroupNodeTest, attachNode )
 
 	bool found = false;
 	int count = 0;
-	parent->foreachNode( [&]( NodePtr node ) mutable {
+	parent->foreachNode( [&]( Node *node ) mutable {
 		++count;
 		if ( node == child ) {
 			found = true;
@@ -94,11 +94,11 @@ TEST( GroupNodeTest, attachNode )
 
 TEST( GroupNodeTest, attachMultipleNodes )
 {
-	GroupPtr parent( new Group( "parent" ) );
+	Pointer< Group > parent( new Group( "parent" ) );
 	
-	NodePtr child1( new Node( "child 1" ) );
-	NodePtr child2( new Node( "child 2" ) );
-	NodePtr child3( new Node( "child 3" ) );
+	Pointer< Node > child1( new Node( "child 1" ) );
+	Pointer< Node > child2( new Node( "child 2" ) );
+	Pointer< Node > child3( new Node( "child 3" ) );
 
 	parent->attachNode( child1 );
 	parent->attachNode( child2 );
@@ -107,7 +107,7 @@ TEST( GroupNodeTest, attachMultipleNodes )
 	EXPECT_TRUE( parent->hasNodes() );
 
 	int count = 0;
-	parent->foreachNode( [&]( NodePtr node ) mutable {
+	parent->foreachNode( [&]( Node *node ) mutable {
 		++count;
 	});
 	EXPECT_EQ( count, 3 );
@@ -115,8 +115,8 @@ TEST( GroupNodeTest, attachMultipleNodes )
 
 TEST( GroupNodeTest, reattachNodeToSameParent )
 {
-	GroupPtr parent( new Group( "parent" ) );
-	NodePtr child( new Node( "child" ) );
+	Pointer< Group > parent( new Group( "parent" ) );
+	Pointer< Node > child( new Node( "child" ) );
 
 	parent->attachNode( child );
 
@@ -124,7 +124,7 @@ TEST( GroupNodeTest, reattachNodeToSameParent )
 
 	bool found = false;
 	int count = 0;
-	parent->foreachNode( [&]( NodePtr node ) mutable {
+	parent->foreachNode( [&]( Node *node ) mutable {
 		++count;
 		if ( node == child ) {
 			found = true;
@@ -137,9 +137,9 @@ TEST( GroupNodeTest, reattachNodeToSameParent )
 
 TEST( GroupNodeTest, reattachNodeToDifferentParent )
 {
-	GroupPtr parent1( new Group( "parent" ) );
-	GroupPtr parent2( new Group( "another parent" ) );
-	NodePtr child( new Node( "child" ) );
+	Pointer< Group > parent1( new Group( "parent" ) );
+	Pointer< Group > parent2( new Group( "another parent" ) );
+	Pointer< Node > child( new Node( "child" ) );
 
 	parent1->attachNode( child );
 
@@ -148,8 +148,8 @@ TEST( GroupNodeTest, reattachNodeToDifferentParent )
 
 TEST( GroupNodeTest, detachNode )
 {
-	GroupPtr parent( new Group( "parent" ) );
-	NodePtr child( new Node( "child" ) );
+	Pointer< Group > parent( new Group( "parent" ) );
+	Pointer< Node > child( new Node( "child" ) );
 
 	parent->attachNode( child );
 	parent->detachNode( child );
@@ -161,11 +161,11 @@ TEST( GroupNodeTest, detachNode )
 
 TEST( GroupNodeTest, detachMultipleNodes )
 {
-	GroupPtr parent( new Group( "parent" ) );
+	Pointer< Group > parent( new Group( "parent" ) );
 	
-	NodePtr child1( new Node( "child 1" ) );
-	NodePtr child2( new Node( "child 2" ) );
-	NodePtr child3( new Node( "child 3" ) );
+	Pointer< Node > child1( new Node( "child 1" ) );
+	Pointer< Node > child2( new Node( "child 2" ) );
+	Pointer< Node > child3( new Node( "child 3" ) );
 
 	parent->attachNode( child1 );
 	parent->attachNode( child2 );
@@ -177,7 +177,7 @@ TEST( GroupNodeTest, detachMultipleNodes )
 	EXPECT_TRUE( parent->hasNodes() );
 
 	int count = 0;
-	parent->foreachNode( [&]( NodePtr node ) {
+	parent->foreachNode( [&]( Node *node ) {
 		EXPECT_EQ( node->getName(), child3->getName() );
 		++count;
 	});
@@ -186,9 +186,9 @@ TEST( GroupNodeTest, detachMultipleNodes )
 
 TEST( GroupNodeTest, detachNodeFromDifferentParent )
 {
-	GroupPtr parent1( new Group( "parent" ) );
-	GroupPtr parent2( new Group( "another parent" ) );
-	NodePtr child( new Node( "child" ) );
+	Pointer< Group > parent1( new Group( "parent" ) );
+	Pointer< Group > parent2( new Group( "another parent" ) );
+	Pointer< Node > child( new Node( "child" ) );
 
 	parent1->attachNode( child );
 	parent2->detachNode( child );
@@ -201,11 +201,11 @@ TEST( GroupNodeTest, detachNodeFromDifferentParent )
 
 TEST( GroupNodeTest, detachAllNodes )
 {
-	GroupPtr parent( new Group( "parent" ) );
+	Pointer< Group > parent( new Group( "parent" ) );
 	
-	NodePtr child1( new Node( "child 1" ) );
-	NodePtr child2( new Node( "child 2" ) );
-	NodePtr child3( new Node( "child 3" ) );
+	Pointer< Node > child1( new Node( "child 1" ) );
+	Pointer< Node > child2( new Node( "child 2" ) );
+	Pointer< Node > child3( new Node( "child 3" ) );
 
 	parent->attachNode( child1 );
 	parent->attachNode( child2 );
@@ -223,7 +223,7 @@ TEST( GroupNodeTest, detachAllNodes )
 	EXPECT_EQ( child3->getParent(), nullptr );
 
 	int count = 0;
-	parent->foreachNode( [&]( NodePtr node ) {
+	parent->foreachNode( [&]( Node *node ) {
 		++count;
 	});
 
@@ -238,11 +238,11 @@ TEST( GroupNodeTest, buildHierarchy )
 	//			/	\
 	//		node3	node4
 
-	GroupPtr node0( new Group( "node0" ) );
-	GroupPtr node2( new Group( "node2" ) );
-	NodePtr node1( new Node( "node1" ) );
-	NodePtr node3( new Node( "node3" ) );
-	NodePtr node4( new Node( "node4" ) );
+	Pointer< Group > node0( new Group( "node0" ) );
+	Pointer< Group > node2( new Group( "node2" ) );
+	Pointer< Node > node1( new Node( "node1" ) );
+	Pointer< Node > node3( new Node( "node3" ) );
+	Pointer< Node > node4( new Node( "node4" ) );
 
 	node0->attachNode( node1 );
 	node0->attachNode( node2 );

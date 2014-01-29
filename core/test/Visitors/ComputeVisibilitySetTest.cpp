@@ -39,13 +39,13 @@ using namespace crimild;
 
 TEST( ComputeVisibilitySetTest, traversal )
 {
-	GroupPtr group1( new Group() );
-	GroupPtr group2( new Group() );
-	GeometryPtr geometry1( new Geometry() );
-	GeometryPtr geometry2( new Geometry() );
-	GeometryPtr geometry3( new Geometry() );
+	Pointer< Group > group1( new Group() );
+	Pointer< Group > group2( new Group() );
+	Pointer< Geometry > geometry1( new Geometry() );
+	Pointer< Geometry > geometry2( new Geometry() );
+	Pointer< Geometry > geometry3( new Geometry() );
 
-	CameraPtr camera( new Camera );
+	Pointer< Camera > camera( new Camera );
 
 	group1->attachNode( group2 );
 	group1->attachNode( geometry1 );
@@ -59,7 +59,7 @@ TEST( ComputeVisibilitySetTest, traversal )
 	EXPECT_TRUE( result.hasGeometries() );
 
 	int i = 0;
-	result.foreachGeometry( [&]( Geometry * geo ) mutable {
+	result.foreachGeometry( [&]( Geometry *geo ) mutable {
 		if ( i == 0 ) {
 			EXPECT_EQ( geo, geometry2.get() );
 		}

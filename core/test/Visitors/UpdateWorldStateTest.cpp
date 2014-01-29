@@ -37,7 +37,7 @@ using namespace crimild;
 
 TEST( UpdateWorldStateTest, singleNode )
 {
-	NodePtr node( new Node() );
+	Pointer< Node > node( new Node() );
 
 	EXPECT_TRUE( node->getLocal().isIdentity() );
 	EXPECT_TRUE( node->getWorld().isIdentity() );
@@ -58,11 +58,11 @@ TEST( UpdateWorldStateTest, singleNode )
 
 TEST( UpdateWorldStateTest, hierarchy )
 {
-	GroupPtr group1( new Group() );
-	GroupPtr group2( new Group() );
-	GeometryPtr geometry1( new Geometry() );
-	GeometryPtr geometry2( new Geometry() );
-	GeometryPtr geometry3( new Geometry() );
+	Pointer< Group > group1( new Group() );
+	Pointer< Group > group2( new Group() );
+	Pointer< Geometry > geometry1( new Geometry() );
+	Pointer< Geometry > geometry2( new Geometry() );
+	Pointer< Geometry > geometry3( new Geometry() );
 
 	group1->attachNode( group2 );
 	group1->attachNode( geometry1 );

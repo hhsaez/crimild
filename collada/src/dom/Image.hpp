@@ -26,8 +26,6 @@ namespace crimild {
 			std::string _fileName;
 		};
 
-		typedef std::shared_ptr< Image > ImagePtr;
-
 		class ImageMap : public EntityMap< collada::Image > {
 		public:
 			ImageMap( void ) : EntityMap< collada::Image >( COLLADA_IMAGE ) { }

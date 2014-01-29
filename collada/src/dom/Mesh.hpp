@@ -23,11 +23,9 @@ namespace crimild {
 
 		private:
 			SourceMap _sources;
-			VerticesPtr _vertices;
+			Pointer< Vertices > _vertices;
 			TrianglesList _triangles;
 		};
-
-		typedef std::shared_ptr< Mesh > MeshPtr;
 
 	}
 

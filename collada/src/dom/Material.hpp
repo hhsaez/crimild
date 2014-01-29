@@ -20,11 +20,9 @@ namespace crimild {
 			std::string getName( void ) const { return _name; }
 
 		private:
-			InstancePtr _instanceEffect;
+			Pointer< Instance > _instanceEffect;
 			std::string _name;
 		};
-
-		typedef std::shared_ptr< collada::Material > MaterialPtr;
 
 		class MaterialMap : public EntityMap< collada::Material > {
 		public:

@@ -21,10 +21,8 @@ namespace crimild {
 
 		private:
 			std::string _sid;
-			PhongPtr _phong;
+			Pointer< Phong > _phong;
 		};
-
-		typedef std::shared_ptr< collada::Technique > TechniquePtr;
 
 	}
 

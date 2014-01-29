@@ -33,9 +33,9 @@ using namespace crimild;
 
 TEST( ShaderProgramTest, construction )
 {
-	VertexShaderPtr vs( new VertexShader( "vs code" ) );
-	FragmentShaderPtr fs( new FragmentShader( "fs code" ) );
-	ShaderProgramPtr program( new ShaderProgram( vs, fs ) );
+	Pointer< VertexShader > vs( new VertexShader( "vs code" ) );
+	Pointer< FragmentShader > fs( new FragmentShader( "fs code" ) );
+	Pointer< ShaderProgram > program( new ShaderProgram( vs, fs ) );
 
 	EXPECT_EQ( vs.get(), program->getVertexShader() );
 	EXPECT_EQ( fs.get(), program->getFragmentShader() );
@@ -43,22 +43,22 @@ TEST( ShaderProgramTest, construction )
 
 TEST( ShaderProgramTest, locations )
 {
-	VertexShaderPtr vs( new VertexShader( "vs code" ) );
-	FragmentShaderPtr fs( new FragmentShader( "fs code" ) );
-	ShaderProgramPtr program( new ShaderProgram( vs, fs ) );
+	Pointer< VertexShader > vs( new VertexShader( "vs code" ) );
+	Pointer< FragmentShader > fs( new FragmentShader( "fs code" ) );
+	Pointer< ShaderProgram > program( new ShaderProgram( vs, fs ) );
 
-	ShaderLocationPtr vertexWeightLocation( new ShaderLocation( ShaderLocation::Type::ATTRIBUTE, "vertexWeight" ) );
+	Pointer< ShaderLocation > vertexWeightLocation( new ShaderLocation( ShaderLocation::Type::ATTRIBUTE, "vertexWeight" ) );
 	program->registerLocation( vertexWeightLocation );
 	ASSERT_EQ( vertexWeightLocation.get(), program->getLocation( vertexWeightLocation->getName() ) );
 	EXPECT_FALSE( vertexWeightLocation->isValid() );
 
-	ShaderLocationPtr timeLocation( new ShaderLocation( ShaderLocation::Type::UNIFORM, "time" ) );
+	Pointer< ShaderLocation > timeLocation( new ShaderLocation( ShaderLocation::Type::UNIFORM, "time" ) );
 	program->registerLocation( timeLocation );
 	ASSERT_EQ( timeLocation.get(), program->getLocation( timeLocation->getName() ) );
 	EXPECT_FALSE( timeLocation->isValid() );
 
 	int i = 0; 
-	program->foreachLocation( [&]( ShaderLocationPtr &loc ) mutable {
+	program->foreachLocation( [&]( ShaderLocation *loc ) mutable {
 		i++;
 	});
 	EXPECT_EQ( 2, i );
@@ -77,7 +77,7 @@ TEST( ShaderProgramTest, locations )
 
 TEST( ShaderProgramTest, multipleLightLocations )
 {
-	ShaderProgramPtr program( new ShaderProgram( nullptr, nullptr ) );
+	Pointer< ShaderProgram > program( new ShaderProgram( nullptr, nullptr ) );
 
 	program->registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_POSITION_UNIFORM + 0, "uLights[0].position" );
 	program->registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_ATTENUATION_UNIFORM + 0, "uLights[0].attenuation" );
@@ -92,7 +92,7 @@ TEST( ShaderProgramTest, multipleLightLocations )
 	program->registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_ATTENUATION_UNIFORM + 50, "uLights[50].attenuation" );
 
 	int i = 0;
-	program->foreachLocation( [&]( ShaderLocationPtr &location ) mutable {
+	program->foreachLocation( [&]( ShaderLocation *location ) mutable {
 		location->setLocation( i++ );
 	});
 

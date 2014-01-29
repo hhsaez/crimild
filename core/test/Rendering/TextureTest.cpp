@@ -33,8 +33,8 @@ using namespace crimild;
 
 TEST( TextureTest, construction )
 {
-	ImagePtr image( new Image( 0, 0, 0, nullptr ) );
-	TexturePtr texture( new Texture( image ) );
+	Pointer< Image > image( new Image( 0, 0, 0, nullptr ) );
+	Pointer< Texture > texture( new Texture( image ) );
 
 	EXPECT_EQ( image.get(), texture->getImage() );
 	EXPECT_EQ( "ColorMap", texture->getName() );

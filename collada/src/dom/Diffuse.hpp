@@ -19,10 +19,8 @@ namespace crimild {
 			collada::Texture *getTexture( void ) { return _texture.get(); }
 
 		private:
-			collada::TexturePtr _texture;
+			Pointer< collada::Texture > _texture;
 		};
-
-		typedef std::shared_ptr< collada::Diffuse > DiffusePtr;
 
 	}
 

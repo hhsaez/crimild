@@ -22,8 +22,6 @@ namespace crimild {
 			std::string _sourceName;
 		};
 
-		typedef std::shared_ptr< Sampler2D > Sampler2DPtr;
-
 	}
 
 }

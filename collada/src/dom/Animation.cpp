@@ -21,13 +21,13 @@ bool Animation::parseXML( xmlNode *animation )
 	_samplers.parseXML( animation );
 	_channels.parseXML( animation );
 
-	_channels.foreach( [&]( ChannelPtr channel ) {
+	_channels.foreach( [&]( Channel *channel ) {
 		Sampler *sampler = _samplers.get( channel->getSource() );
 		if ( sampler ) {
 			Log::Debug << "Linking sampler ' " << sampler->getID() << "' to channel with target '" << channel->getTarget() << "'" << Log::End;
 			channel->setSamplerRef( sampler );
 
-			sampler->getInputs()->foreach( [&]( InputPtr input ) {
+			sampler->getInputs()->foreach( [&]( Input *input ) {
 				Source *source = _sources.get( input->getSourceID() );
 				if ( source ) {
 					Log::Debug << "Linking source with id ' " << source->getID() << "' to input with semantic '" << input->getSemantic() << "'" << Log::End;

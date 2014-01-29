@@ -24,8 +24,6 @@ namespace crimild {
 			std::string _type;
 		};
 
-		typedef std::shared_ptr< collada::Param > ParamPtr;
-
 		class ParamList : public EntityList< Param > {
 		public:
 			ParamList( void ) : EntityList< Param >( COLLADA_PARAM ) { }

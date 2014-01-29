@@ -35,9 +35,9 @@ using namespace crimild;
 
 TEST( RenderPassTest, construction )
 {
-	RenderPassPtr renderPass( new RenderPass() );
+	Pointer< RenderPass > renderPass( new RenderPass() );
 
-	CameraPtr camera( new Camera() );
+	Pointer< Camera > camera( new Camera() );
 
 	ASSERT_NE( nullptr, camera->getRenderPass() );
 

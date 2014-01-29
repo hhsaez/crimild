@@ -23,8 +23,6 @@ namespace crimild {
 			std::string _texcoord;
 		};
 
-		typedef std::shared_ptr< collada::Texture > TexturePtr;
-
 	}
 
 }

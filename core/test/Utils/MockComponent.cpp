@@ -29,10 +29,7 @@
 
 using namespace crimild;
 
-const char *MockComponent::NAME = "mock";
-
-MockComponent::MockComponent( std::string name )
-	: NodeComponent( name )
+MockComponent::MockComponent( void )
 {
 }
 

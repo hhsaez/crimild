@@ -31,8 +31,6 @@ namespace crimild {
 			Sampler *_sampler;
 		};
 
-		typedef std::shared_ptr< Channel > ChannelPtr;
-
 		class ChannelList : public EntityList< Channel > {
 		public:
 			ChannelList( void ) : EntityList< Channel >( COLLADA_CHANNEL ) { }

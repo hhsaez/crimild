@@ -23,8 +23,6 @@ namespace crimild {
 			InputList _inputs;
 		};
 
-		typedef std::shared_ptr< Sampler > SamplerPtr;
-
 		class SamplerMap : public EntityMap< Sampler > {
 		public:
 			SamplerMap( void ) : EntityMap< Sampler >( COLLADA_SAMPLER ) { }

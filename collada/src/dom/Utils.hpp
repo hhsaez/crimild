@@ -136,7 +136,7 @@ namespace crimild {
 			}
 
 			template< typename T >
-			static bool parseChild( xmlNode *input, const char *name, std::shared_ptr< T > &result, bool warnOnNull = true ) 
+			static bool parseChild( xmlNode *input, const char *name, Pointer< T > &result, bool warnOnNull = true ) 
 			{
 				xmlNode *childXML = XMLUtils::getChildXMLNodeWithName( input, name );
 				if ( childXML == nullptr ) {
@@ -146,7 +146,7 @@ namespace crimild {
 					return false;
 				}
 
-				std::shared_ptr< T > child( new T() );
+				Pointer< T > child( new T() );
 				if ( !child->parseXML( childXML ) ) {
 					Log::Warning << "Cannot parse " << name << " element" << Log::End;
 					return false;

@@ -22,10 +22,8 @@ namespace crimild {
 
 		private:
 			std::string _name;
-			ProfileCommonPtr _profileCommon;
+			Pointer< ProfileCommon > _profileCommon;
 		};
-
-		typedef std::shared_ptr< collada::Effect > EffectPtr;
 
 		class EffectMap : public EntityMap< collada::Effect > {
 		public:

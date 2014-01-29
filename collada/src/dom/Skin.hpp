@@ -26,11 +26,9 @@ namespace crimild {
 		public:
 			std::string _sourceID;
 			SourceMap _sources;
-			JointsPtr _joints;
-			VertexWeightsPtr _vertexWeights;
+			Pointer< Joints > _joints;
+			Pointer< VertexWeights > _vertexWeights;
 		};
-
-		typedef std::shared_ptr< Skin > SkinPtr;
 
 	}
 

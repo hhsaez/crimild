@@ -24,8 +24,6 @@ namespace crimild {
 			std::string _imageID;
 		};
 
-		typedef std::shared_ptr< Surface > SurfacePtr;
-
 	}
 
 }

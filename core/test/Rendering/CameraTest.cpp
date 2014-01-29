@@ -37,12 +37,12 @@ using namespace crimild;
 
 TEST( CameraTest, construction )
 {
-	CameraPtr camera( new Camera() );
+	Pointer< Camera > camera( new Camera() );
 }
 
 TEST( CameraTest, viewMatrix )
 {
-	CameraPtr camera( new Camera() );
+	Pointer< Camera > camera( new Camera() );
 	camera->local().setTranslate( 0.0f, 1.0f, 5.0f );
 	camera->perform( UpdateWorldState() );
 
@@ -55,8 +55,8 @@ TEST( CameraTest, viewMatrix )
 
 TEST( CameraTest, fetchCameras )
 {
-	GroupPtr scene( new Group() );
-	CameraPtr camera( new Camera() );
+	Pointer< Group > scene( new Group() );
+	Pointer< Camera > camera( new Camera() );
 	scene->attachNode( camera );
 
 	FetchCameras fetchCameras;

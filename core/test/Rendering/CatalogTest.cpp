@@ -39,7 +39,7 @@ TEST( CatalogTest, construction )
 
 TEST( CatalogTest, destruction )
 {
-	TexturePtr texture( new Texture( nullptr ) );
+	Pointer< Texture > texture( new Texture( nullptr ) );
 
 	{
 		Catalog< Texture > catalog;
@@ -58,7 +58,7 @@ TEST( CatalogTest, destruction )
 TEST( CatalogTest, bindResource )
 {
 	Catalog< Texture > catalog;
-	TexturePtr texture( new Texture( nullptr ) );
+	Pointer< Texture > texture( new Texture( nullptr ) );
 	catalog.bind( texture.get() );
 
 	EXPECT_TRUE( catalog.hasResources() );
@@ -69,7 +69,7 @@ TEST( CatalogTest, bindResource )
 TEST( CatalogTest, bindResourceTwice )
 {
 	Catalog< Texture > catalog;
-	TexturePtr texture( new Texture( nullptr ) );
+	Pointer< Texture > texture( new Texture( nullptr ) );
 	
 	catalog.bind( texture.get() );
 
@@ -87,7 +87,7 @@ TEST( CatalogTest, bindResourceTwice )
 TEST( CatalogTest, unbindResource )
 {
 	Catalog< Texture > catalog;
-	TexturePtr texture( new Texture( nullptr ) );
+	Pointer< Texture > texture( new Texture( nullptr ) );
 	
 	catalog.bind( texture.get() );
 
@@ -105,7 +105,7 @@ TEST( CatalogTest, unbindResource )
 TEST( CatalogTest, loadResource )
 {
 	Catalog< Texture > catalog;
-	TexturePtr texture( new Texture( nullptr ) );
+	Pointer< Texture > texture( new Texture( nullptr ) );
 	
 	catalog.load( texture.get() );
 
@@ -117,7 +117,7 @@ TEST( CatalogTest, loadResource )
 TEST( CatalogTest, unloadResource )
 {
 	Catalog< Texture > catalog;
-	TexturePtr texture( new Texture( nullptr ) );
+	Pointer< Texture > texture( new Texture( nullptr ) );
 	
 	catalog.load( texture.get() );
 
@@ -137,7 +137,7 @@ TEST( CatalogTest, automaticResourceUnload )
 	Catalog< Texture > catalog;
 
 	{
-		TexturePtr texture( new Texture( nullptr ) );
+		Pointer< Texture > texture( new Texture( nullptr ) );
 		catalog.bind( texture.get() );
 
 		EXPECT_TRUE( catalog.hasResources() );

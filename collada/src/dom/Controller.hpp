@@ -21,10 +21,8 @@ namespace crimild {
 			inline Skin *getSkin( void ) { return _skin.get(); }
 
 		private:
-			SkinPtr _skin;
+			Pointer< Skin > _skin;
 		};
-
-		typedef std::shared_ptr< Controller > ControllerPtr;
 
 		class ControllerList : public EntityList< Controller > {
 		public:

@@ -39,7 +39,7 @@ namespace crimild {
 			CRIMILD_NODE_COMPONENT_NAME( "audio" )
 
 		public:
-			explicit AudioComponent( AudioClipPtr audioClip );
+			explicit AudioComponent( AudioClip *audioClip );
 			
 			virtual ~AudioComponent( void );
 
@@ -58,12 +58,10 @@ namespace crimild {
 			void resume( void );
 
 		private:
-			AudioClipPtr _audioClip;
+			Pointer< AudioClip > _audioClip;
 			unsigned int _sourceId;
 			float _gain;
 		};
-
-		typedef std::shared_ptr< AudioComponent > AudioComponentPtr;
 
 	}
 

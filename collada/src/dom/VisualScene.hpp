@@ -24,8 +24,6 @@ namespace crimild {
 			collada::NodeList _nodes;
 		};
 
-		typedef std::shared_ptr< VisualScene > VisualScenePtr;
-
 		class VisualSceneList : public EntityList< VisualScene > {
 		public:
 			VisualSceneList( void ) : EntityList< VisualScene >( COLLADA_VISUAL_SCENE ) { }

@@ -20,25 +20,28 @@ namespace crimild {
 
 			virtual bool parseXML( xmlNode *input ) override;
 
-			inline const char *getName( void ) const { return _name.c_str(); }
-			inline const char *getSID( void ) const { return _sid.c_str(); }
-			inline const char *getType( void ) const { return _type.c_str(); }
+			const char *getName( void ) const { return _name.c_str(); }
+			const char *getSID( void ) const { return _sid.c_str(); }
+			const char *getType( void ) const { return _type.c_str(); }
 
-			inline collada::Matrix *getMatrix( void ) const { return _matrix.get(); }
-			inline collada::InstanceController *getInstanceController( void ) { return _instanceController.get(); }
-			inline collada::NodeList *getNodes( void ) const { return _nodes; }
+			const collada::Matrix *getMatrix( void ) const { return _matrix.get(); }
+			collada::Matrix *getMatrix( void ) { return _matrix.get(); }
+
+			const collada::InstanceController *getInstanceController( void ) const { return _instanceController.get(); }
+			collada::InstanceController *getInstanceController( void ) { return _instanceController.get(); }
+
+			const collada::NodeList *getNodes( void ) const { return _nodes; }
+			collada::NodeList *getNodes( void ) { return _nodes; }
 
 		private:
 			std::string _name;
 			std::string _sid;
 			std::string _type;
 
-			collada::MatrixPtr _matrix;
-			collada::InstanceControllerPtr _instanceController;
+			Pointer< collada::Matrix > _matrix;
+			Pointer< collada::InstanceController > _instanceController;
 			NodeList *_nodes;
 		};
-
-		typedef std::shared_ptr< Node > NodePtr;
 
 		class NodeList : public EntityList< collada::Node > {
 		public:

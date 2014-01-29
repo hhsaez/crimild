@@ -21,11 +21,9 @@ namespace crimild {
 			NewParamMap *getNewParams( void ) { return &_newparams; }
 
 		private:
-			TechniquePtr _technique;
+			Pointer< Technique > _technique;
 			NewParamMap _newparams;
 		};
-
-		typedef std::shared_ptr< collada::ProfileCommon > ProfileCommonPtr;
 
 	}
 

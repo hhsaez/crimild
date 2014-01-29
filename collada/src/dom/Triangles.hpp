@@ -29,8 +29,6 @@ namespace crimild {
 			std::string _material;
 		};
 
-		typedef std::shared_ptr< Triangles > TrianglesPtr;
-
 		class TrianglesList : public EntityList< Triangles > {
 		public:
 			TrianglesList( void ) : EntityList< Triangles >( COLLADA_TRIANGLES ) { }

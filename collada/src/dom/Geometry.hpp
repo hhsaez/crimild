@@ -22,10 +22,8 @@ namespace crimild {
 
 		private:
 			std::string _name;
-			MeshPtr _mesh;
+			Pointer< Mesh > _mesh;
 		};
-
-		typedef std::shared_ptr< Geometry > GeometryPtr;
 
 		class GeometryList : public EntityList< Geometry > {
 		public:

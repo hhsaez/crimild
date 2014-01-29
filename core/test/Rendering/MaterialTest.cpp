@@ -33,7 +33,7 @@ using namespace crimild;
 
 TEST( MaterialTest, construction )
 {
-	MaterialPtr material( new Material() );
+	Pointer< Material > material( new Material() );
 
 	EXPECT_EQ( RGBAColorf( 0.0f, 0.0f, 0.0f, 1.0f ), material->getAmbient() );
 	EXPECT_EQ( RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ), material->getDiffuse() );
@@ -46,11 +46,11 @@ TEST( MaterialTest, construction )
 
 TEST( MaterialTest, setProgram )
 {
-	MaterialPtr material( new Material() );
+	Pointer< Material > material( new Material() );
 
-	VertexShaderPtr vs( new VertexShader( "vs code" ) );
-	FragmentShaderPtr fs( new FragmentShader( "fs code" ) );
-	ShaderProgramPtr program( new ShaderProgram( vs, fs ) );
+	Pointer< VertexShader > vs( new VertexShader( "vs code" ) );
+	Pointer< FragmentShader > fs( new FragmentShader( "fs code" ) );
+	Pointer< ShaderProgram > program( new ShaderProgram( vs, fs ) );
 	material->setProgram( program );
 
 	ASSERT_EQ( program.get(), material->getProgram() );
@@ -58,10 +58,10 @@ TEST( MaterialTest, setProgram )
 
 TEST( MaterialTest, setColorMap )
 {
-	MaterialPtr material( new Material() );
+	Pointer< Material > material( new Material() );
 
-	ImagePtr image( new Image( 0, 0, 0, nullptr ) );
-	TexturePtr texture( new Texture( image ) );
+	Pointer< Image > image( new Image( 0, 0, 0, nullptr ) );
+	Pointer< Texture > texture( new Texture( image ) );
 	material->setColorMap( texture );
 
 	ASSERT_EQ( texture.get(), material->getColorMap() );

@@ -20,8 +20,6 @@ namespace crimild {
 			std::string _url;
 		};
 
-		typedef std::shared_ptr< Instance > InstancePtr;
-
 	}
 
 }

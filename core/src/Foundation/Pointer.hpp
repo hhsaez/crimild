@@ -260,6 +260,8 @@ namespace crimild {
 
 		T *get( void ) { return _pointee; }
 
+		const T *get( void ) const { return _pointee; }
+
 	private:
 		T *_pointee;
 	};

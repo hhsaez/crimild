@@ -31,10 +31,8 @@ namespace crimild {
 			std::vector< bool > _boolArray;
 			std::vector< int > _intArray;
 			std::vector< std::string > _nameArray;
-			TechniqueCommonPtr _techniqueCommon;
+			Pointer< TechniqueCommon > _techniqueCommon;
 		};
-
-		typedef std::shared_ptr< Source > SourcePtr;
 
 		class SourceMap : public EntityMap< Source > {
 		public:

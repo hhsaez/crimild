@@ -41,10 +41,10 @@ using namespace crimild;
 
 TEST( UpdateRenderStateTest, lights )
 {
-	GroupPtr scene( new Group() );
-	GeometryPtr geometry( new Geometry() );
+	Pointer< Group > scene( new Group() );
+	Pointer< Geometry > geometry( new Geometry() );
 
-	LightPtr light( new Light() );
+	Pointer< Light > light( new Light() );
 
 	scene->attachNode( geometry );
 	scene->attachNode( light );
@@ -70,10 +70,10 @@ TEST( UpdateRenderStateTest, lights )
 
 TEST( UpdateRenderStateTest, materials )
 {
-	GroupPtr scene( new Group() );
+	Pointer< Group > scene( new Group() );
 
-	GeometryPtr geometry( new Geometry() );
-	MaterialPtr material( new Material() );
+	Pointer< Geometry > geometry( new Geometry() );
+	Pointer< Material > material( new Material() );
 	geometry->getComponent< MaterialComponent >()->attachMaterial( material );
 	scene->attachNode( geometry );
 
