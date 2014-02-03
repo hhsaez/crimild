@@ -29,6 +29,9 @@
 #define CRIMILD_COMPONENTS_RENDER_STATE_
 
 #include "NodeComponent.hpp"
+#include "Foundation/Pointer.hpp"
+#include "Rendering/Material.hpp"
+#include "SceneGraph/Light.hpp"
 
 #include <functional>
 #include <list>
@@ -59,8 +62,8 @@ namespace crimild {
 		void foreachLight( std::function< void( Light * ) > callback );
 
 	private:
-		std::list< Material * > _materials;
-		std::list< Light * > _lights;
+		std::list< Pointer< Material > > _materials;
+		std::list< Pointer< Light > > _lights;
 	};
 
 }

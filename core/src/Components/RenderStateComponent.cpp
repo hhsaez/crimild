@@ -44,7 +44,8 @@ RenderStateComponent::~RenderStateComponent( void )
 
 void RenderStateComponent::attachMaterial( Material *material )
 {
-	_materials.push_back( material );
+    Pointer< Material > materialPtr( material );
+	_materials.push_back( materialPtr );
 }
 
 void RenderStateComponent::detachAllMaterials( void )
@@ -54,12 +55,17 @@ void RenderStateComponent::detachAllMaterials( void )
 
 void RenderStateComponent::foreachMaterial( std::function< void( Material * ) > callback )
 {
-	std::for_each( std::begin( _materials ), std::end( _materials ), callback );
+    for ( auto material : _materials ) {
+        if ( material != nullptr ) {
+            callback( material.get() );
+        }
+    }
 }
 
 void RenderStateComponent::attachLight( Light *light )
 {
-	_lights.push_back( light );
+    Pointer< Light > lightPtr( light );
+	_lights.push_back( lightPtr );
 }
 
 void RenderStateComponent::detachAllLights( void )
@@ -69,6 +75,10 @@ void RenderStateComponent::detachAllLights( void )
 
 void RenderStateComponent::foreachLight( std::function< void( Light * ) > callback )
 {
-	std::for_each( std::begin( _lights ), std::end( _lights ), callback );
+    for ( auto light : _lights ) {
+        if ( light != nullptr ) {
+            callback( light.get() );
+        }
+    }
 }
 

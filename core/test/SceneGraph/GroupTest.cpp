@@ -48,11 +48,11 @@ TEST( GroupNodeTest, destruction )
 	{
 		Pointer< Group > parent( new Group( "parent" ) );
 
-		parent->attachNode( child1 );
+		parent->attachNode( child1.get() );
 		EXPECT_TRUE( child1->hasParent() );
 		EXPECT_EQ( child1->getParent(), parent.get() );
 
-		parent->attachNode( child2 );
+		parent->attachNode( child2.get() );
 		EXPECT_TRUE( child2->hasParent() );
 		EXPECT_EQ( child2->getParent(), parent.get() );
 	}
@@ -73,7 +73,7 @@ TEST( GroupNodeTest, attachNode )
 	EXPECT_FALSE( child->hasParent() );
 	EXPECT_EQ( child->getParent(), nullptr );
 
-	parent->attachNode( child );
+	parent->attachNode( child.get() );
 
 	EXPECT_TRUE( child->hasParent() );
 	ASSERT_EQ( child->getParent(), parent.get() );
@@ -83,7 +83,7 @@ TEST( GroupNodeTest, attachNode )
 	int count = 0;
 	parent->foreachNode( [&]( Node *node ) mutable {
 		++count;
-		if ( node == child ) {
+		if ( child == node ) {
 			found = true;
 		}
 	});
@@ -100,9 +100,9 @@ TEST( GroupNodeTest, attachMultipleNodes )
 	Pointer< Node > child2( new Node( "child 2" ) );
 	Pointer< Node > child3( new Node( "child 3" ) );
 
-	parent->attachNode( child1 );
-	parent->attachNode( child2 );
-	parent->attachNode( child3 );
+	parent->attachNode( child1.get() );
+	parent->attachNode( child2.get() );
+	parent->attachNode( child3.get() );
 
 	EXPECT_TRUE( parent->hasNodes() );
 
@@ -118,15 +118,15 @@ TEST( GroupNodeTest, reattachNodeToSameParent )
 	Pointer< Group > parent( new Group( "parent" ) );
 	Pointer< Node > child( new Node( "child" ) );
 
-	parent->attachNode( child );
+	parent->attachNode( child.get() );
 
-	EXPECT_NO_THROW( parent->attachNode( child ) );
+	EXPECT_NO_THROW( parent->attachNode( child.get() ) );
 
 	bool found = false;
 	int count = 0;
 	parent->foreachNode( [&]( Node *node ) mutable {
 		++count;
-		if ( node == child ) {
+		if ( child == node ) {
 			found = true;
 		}
 	});
@@ -141,9 +141,9 @@ TEST( GroupNodeTest, reattachNodeToDifferentParent )
 	Pointer< Group > parent2( new Group( "another parent" ) );
 	Pointer< Node > child( new Node( "child" ) );
 
-	parent1->attachNode( child );
+	parent1->attachNode( child.get() );
 
-	ASSERT_THROW( parent2->attachNode( child ), HasParentException );
+	ASSERT_THROW( parent2->attachNode( child.get() ), HasParentException );
 }
 
 TEST( GroupNodeTest, detachNode )
@@ -151,8 +151,8 @@ TEST( GroupNodeTest, detachNode )
 	Pointer< Group > parent( new Group( "parent" ) );
 	Pointer< Node > child( new Node( "child" ) );
 
-	parent->attachNode( child );
-	parent->detachNode( child );
+	parent->attachNode( child.get() );
+	parent->detachNode( child.get() );
 
 	EXPECT_FALSE( parent->hasNodes() );
 	EXPECT_FALSE( child->hasParent() );
@@ -167,12 +167,12 @@ TEST( GroupNodeTest, detachMultipleNodes )
 	Pointer< Node > child2( new Node( "child 2" ) );
 	Pointer< Node > child3( new Node( "child 3" ) );
 
-	parent->attachNode( child1 );
-	parent->attachNode( child2 );
-	parent->attachNode( child3 );
+	parent->attachNode( child1.get() );
+	parent->attachNode( child2.get() );
+	parent->attachNode( child3.get() );
 
-	parent->detachNode( child1 );
-	parent->detachNode( child2 );
+	parent->detachNode( child1.get() );
+	parent->detachNode( child2.get() );
 
 	EXPECT_TRUE( parent->hasNodes() );
 
@@ -190,8 +190,8 @@ TEST( GroupNodeTest, detachNodeFromDifferentParent )
 	Pointer< Group > parent2( new Group( "another parent" ) );
 	Pointer< Node > child( new Node( "child" ) );
 
-	parent1->attachNode( child );
-	parent2->detachNode( child );
+	parent1->attachNode( child.get() );
+	parent2->detachNode( child.get() );
 
 	EXPECT_TRUE( child->hasParent() );
 	ASSERT_EQ( child->getParent(), parent1.get() );
@@ -207,9 +207,9 @@ TEST( GroupNodeTest, detachAllNodes )
 	Pointer< Node > child2( new Node( "child 2" ) );
 	Pointer< Node > child3( new Node( "child 3" ) );
 
-	parent->attachNode( child1 );
-	parent->attachNode( child2 );
-	parent->attachNode( child3 );
+	parent->attachNode( child1.get() );
+	parent->attachNode( child2.get() );
+	parent->attachNode( child3.get() );
 
 	parent->detachAllNodes();
 
@@ -244,10 +244,10 @@ TEST( GroupNodeTest, buildHierarchy )
 	Pointer< Node > node3( new Node( "node3" ) );
 	Pointer< Node > node4( new Node( "node4" ) );
 
-	node0->attachNode( node1 );
-	node0->attachNode( node2 );
-	node2->attachNode( node3 );
-	node2->attachNode( node4 );
+	node0->attachNode( node1.get() );
+	node0->attachNode( node2.get() );
+	node2->attachNode( node3.get() );
+	node2->attachNode( node4.get() );
 
 	EXPECT_TRUE( node0->hasNodes() );
 	EXPECT_EQ( node1->getParent(), node0.get() );

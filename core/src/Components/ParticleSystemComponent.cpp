@@ -70,15 +70,15 @@ void ParticleSystemComponent::onAttach( void )
 		exit( 1 );
 	}
 
-	program->attachUniform( _gravityUniform );
-	program->attachUniform( _timeUniform );
-	program->attachUniform( _durationUniform );
-	program->attachUniform( _shapeRadiusUniform );
-	program->attachUniform( _shapeCenterUniform );
+	program->attachUniform( _gravityUniform.get() );
+	program->attachUniform( _timeUniform.get() );
+	program->attachUniform( _durationUniform.get() );
+	program->attachUniform( _shapeRadiusUniform.get() );
+	program->attachUniform( _shapeCenterUniform.get() );
 
 	generateParticles();
-	geometry->attachPrimitive( _primitive );
-	geometry->getComponent< MaterialComponent >()->attachMaterial( _material );
+	geometry->attachPrimitive( _primitive.get() );
+	geometry->getComponent< MaterialComponent >()->attachMaterial( _material.get() );
 }
 
 void ParticleSystemComponent::update( const Time &t )
@@ -118,7 +118,7 @@ void ParticleSystemComponent::generateParticles( void )
 		indices[ i ] = i;
 	}
 
-	_primitive->setVertexBuffer( vbo );
-	_primitive->setIndexBuffer( ibo );
+	_primitive->setVertexBuffer( vbo.get() );
+	_primitive->setIndexBuffer( ibo.get() );
 }
 

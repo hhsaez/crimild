@@ -79,7 +79,7 @@ void UpdateRenderState::visitGeometry( Geometry *geometry )
 		});
 	}
 	else {
-		rs->attachMaterial( _defaultMaterial );
+		rs->attachMaterial( _defaultMaterial.get() );
 	}
 
 	rs->detachAllLights();

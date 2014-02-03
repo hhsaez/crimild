@@ -57,7 +57,7 @@ TEST( CameraTest, fetchCameras )
 {
 	Pointer< Group > scene( new Group() );
 	Pointer< Camera > camera( new Camera() );
-	scene->attachNode( camera );
+	scene->attachNode( camera.get() );
 
 	FetchCameras fetchCameras;
 	scene->perform( fetchCameras );

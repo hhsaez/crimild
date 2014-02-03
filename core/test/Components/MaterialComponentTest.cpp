@@ -39,14 +39,14 @@ TEST( MaterialComponentTest, attachMaterial )
 	EXPECT_FALSE( materials->hasMaterials() );
 
 	Pointer< Material > material( new Material() );
-	materials->attachMaterial( material );
+	materials->attachMaterial( material.get() );
 
 	EXPECT_TRUE( materials->hasMaterials() );	
 
 	int i = 0;
 	materials->foreachMaterial( [&]( Material *m ) mutable {
 		i++;
-		EXPECT_EQ( m, material );
+		EXPECT_EQ( m, material.get() );
 	});
 	EXPECT_EQ( 1, i );
 }

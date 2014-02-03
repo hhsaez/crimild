@@ -46,14 +46,14 @@ TEST( NodeTest, construction )
 TEST( NodeTest, destruction )
 {
 	Pointer< MockComponent > cmp1( new MockComponent() );
-	EXPECT_CALL( *cmp1, onAttach() )
+	EXPECT_CALL( *( cmp1.get() ), onAttach() )
 		.Times( ::testing::Exactly( 1 ) );
-	EXPECT_CALL( *cmp1, onDetach() )
+	EXPECT_CALL( *( cmp1.get() ), onDetach() )
 		.Times( ::testing::Exactly( 1 ) );
 
 	{
 		Pointer< Node > node( new Node() );
-		node->attachComponent( cmp1 );
+		node->attachComponent( cmp1.get() );
 
 		EXPECT_EQ( node->getComponent< MockComponent >(), cmp1.get() );
 	}
@@ -85,10 +85,10 @@ TEST( NodeTest, attachComponent )
 	Pointer< Node > node( new Node() );
 
 	Pointer< MockComponent > cmp( new MockComponent() );
-	EXPECT_CALL( *cmp, onAttach() )
+	EXPECT_CALL( *( cmp.get() ), onAttach() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	node->attachComponent( cmp );
+	node->attachComponent( cmp.get() );
 
 	ASSERT_EQ( cmp->getNode(), node.get() );
 	ASSERT_EQ( node->getComponent< MockComponent >(), cmp.get() );
@@ -99,11 +99,11 @@ TEST( NodeTest, attachComponentTwice )
 	Pointer< Node > node( new Node() );
 
 	Pointer< MockComponent > cmp( new MockComponent() );
-	EXPECT_CALL( *cmp, onAttach() )
+	EXPECT_CALL( *( cmp.get() ), onAttach() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	node->attachComponent( cmp );
-	node->attachComponent( cmp );
+	node->attachComponent( cmp.get() );
+	node->attachComponent( cmp.get() );
 }
 
 TEST( NodeTest, getComponentWithName )
@@ -111,10 +111,10 @@ TEST( NodeTest, getComponentWithName )
 	Pointer< Node > node( new Node() );
 
 	Pointer< MockComponent > cmp( new MockComponent() );
-	EXPECT_CALL( *cmp, onAttach() )
+	EXPECT_CALL( *( cmp.get() ), onAttach() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	node->attachComponent( cmp );
+	node->attachComponent( cmp.get() );
 
 	ASSERT_EQ( cmp->getNode(), node.get() );
 	ASSERT_EQ( node->getComponentWithName( cmp->getComponentName() ), cmp.get() );
@@ -132,22 +132,22 @@ TEST( NodeTest, attachNewComponentWithSameName )
 	Pointer< Node > node( new Node() );
 	
 	Pointer< MockComponent > cmp1( new MockComponent() );
-	EXPECT_CALL( *cmp1, onAttach() )
+	EXPECT_CALL( *( cmp1.get() ), onAttach() )
 		.Times( ::testing::Exactly( 1 ) );
-	EXPECT_CALL( *cmp1, onDetach() )
+	EXPECT_CALL( *( cmp1.get() ), onDetach() )
 		.Times( ::testing::Exactly( 1 ) );
 
 	Pointer< MockComponent > cmp2( new MockComponent() );
-	EXPECT_CALL( *cmp2, onAttach() )
+	EXPECT_CALL( *( cmp2.get() ), onAttach() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	node->attachComponent( cmp1 );
+	node->attachComponent( cmp1.get() );
 
 	ASSERT_EQ( cmp1->getNode(), node.get() );
 	ASSERT_EQ( cmp2->getNode(), nullptr );
 	ASSERT_EQ( node->getComponent< MockComponent >(), cmp1.get() );
 
-	node->attachComponent( cmp2 );
+	node->attachComponent( cmp2.get() );
 
 	ASSERT_EQ( cmp1->getNode(), nullptr );
 	ASSERT_EQ( cmp2->getNode(), node.get() );
@@ -159,12 +159,12 @@ TEST( NodeTest, detachComponentWithName )
 	Pointer< Node > node( new Node() );
 
 	Pointer< MockComponent > cmp( new MockComponent() );
-	EXPECT_CALL( *cmp, onAttach() )
+	EXPECT_CALL( *( cmp.get() ), onAttach() )
 		.Times( ::testing::Exactly( 1 ) );
-	EXPECT_CALL( *cmp, onDetach() )
+	EXPECT_CALL( *( cmp.get() ), onDetach() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	node->attachComponent( cmp );
+	node->attachComponent( cmp.get() );
 	node->detachComponentWithName( cmp->getComponentName() );
 
 	ASSERT_EQ( cmp->getNode(), nullptr );
@@ -176,13 +176,13 @@ TEST( NodeTest, detachComponent )
 	Pointer< Node > node( new Node() );
 
 	Pointer< MockComponent > cmp( new MockComponent() );
-	EXPECT_CALL( *cmp, onAttach() )
+	EXPECT_CALL( *( cmp.get() ), onAttach() )
 		.Times( ::testing::Exactly( 1 ) );
-	EXPECT_CALL( *cmp, onDetach() )
+	EXPECT_CALL( *( cmp.get() ), onDetach() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	node->attachComponent( cmp );
-	node->detachComponent( cmp );
+	node->attachComponent( cmp.get() );
+	node->detachComponent( cmp.get() );
 
 	ASSERT_EQ( cmp->getNode(), nullptr );
 	ASSERT_EQ( node->getComponent< MockComponent >(), nullptr );
@@ -193,15 +193,15 @@ TEST( NodeTest, detachInvalidComponent )
 	Pointer< Node > node( new Node() );
 
 	Pointer< MockComponent > cmp1( new MockComponent() );
-	EXPECT_CALL( *cmp1, onAttach() )
+	EXPECT_CALL( *( cmp1.get() ), onAttach() )
 		.Times( ::testing::Exactly( 1 ) );
 
 	Pointer< MockComponent > cmp2( new MockComponent() );
-	EXPECT_CALL( *cmp2, onAttach() )
+	EXPECT_CALL( *( cmp2.get() ), onAttach() )
 		.Times( 0 );
 
-	node->attachComponent( cmp1 );
-	node->detachComponent( cmp2 );
+	node->attachComponent( cmp1.get() );
+	node->detachComponent( cmp2.get() );
 
 	ASSERT_EQ( cmp1->getNode(), node.get() );
 	ASSERT_EQ( node->getComponent< MockComponent >(), cmp1.get() );
@@ -214,10 +214,10 @@ TEST( NodeTest, invokeOnAttach )
 	Pointer< Node > node( new Node() );
 
 	Pointer< MockComponent > cmp( new MockComponent() );
-	EXPECT_CALL( *cmp, onAttach() )
+	EXPECT_CALL( *( cmp.get() ), onAttach() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	node->attachComponent( cmp );
+	node->attachComponent( cmp.get() );
 }
 
 TEST( NodeTest, invokeOnDetach )
@@ -225,13 +225,13 @@ TEST( NodeTest, invokeOnDetach )
 	Pointer< Node > node( new Node() );
 	
 	Pointer< MockComponent > cmp( new MockComponent() );
-	EXPECT_CALL( *cmp, onAttach() )
+	EXPECT_CALL( *( cmp.get() ), onAttach() )
 		.Times( ::testing::Exactly( 1 ) );
-	EXPECT_CALL( *cmp, onDetach() )
+	EXPECT_CALL( *( cmp.get() ), onDetach() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	node->attachComponent( cmp );
-	node->detachComponent( cmp );
+	node->attachComponent( cmp.get() );
+	node->detachComponent( cmp.get() );
 }
 
 TEST( NodeTest, detachAllComponents )
@@ -239,12 +239,12 @@ TEST( NodeTest, detachAllComponents )
 	Pointer< Node > node( new Node() );
 
 	Pointer< MockComponent > cmp1( new MockComponent() );
-	EXPECT_CALL( *cmp1, onAttach() )
+	EXPECT_CALL( *( cmp1.get() ), onAttach() )
 		.Times( ::testing::Exactly( 1 ) );
-	EXPECT_CALL( *cmp1, onDetach() )
+	EXPECT_CALL( *( cmp1.get() ), onDetach() )
 		.Times( ::testing::Exactly( 1 ) );
 	
-	node->attachComponent( cmp1 );
+	node->attachComponent( cmp1.get() );
 	EXPECT_EQ( node->getComponent< MockComponent >(), cmp1.get() );
 	EXPECT_EQ( cmp1->getNode(), node.get() );
 
@@ -261,10 +261,10 @@ TEST( NodeTest, updateComponents )
 	Time t;
 	
 	Pointer< MockComponent > cmp1( new MockComponent() );
-	EXPECT_CALL( *cmp1, update( testing::_ ) )
+	EXPECT_CALL( *( cmp1.get() ), update( testing::_ ) )
 		.Times( ::testing::Exactly( 3 ) );
 	
-	node->attachComponent( cmp1 );
+	node->attachComponent( cmp1.get() );
 
 	node->updateComponents( t );
 	node->updateComponents( t );
@@ -277,8 +277,8 @@ TEST( NodeTest, getRootParent )
 	Pointer< Group > g2( new Group() );
 	Pointer< Group > g3( new Group() );
 
-	g1->attachNode( g2 );
-	g2->attachNode( g3 );
+	g1->attachNode( g2.get() );
+	g2->attachNode( g3.get() );
 
 	EXPECT_EQ( g1.get(), g3->getRootParent() );
 }

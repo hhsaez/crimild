@@ -48,18 +48,24 @@ Geometry::~Geometry( void )
 
 void Geometry::attachPrimitive( Primitive *primitive )
 {
-	_primitives.push_back( primitive );	
+    Pointer< Primitive > primitivePtr( primitive );
+	_primitives.push_back( primitivePtr );
 	updateModelBounds();
 }
 
 void Geometry::detachPrimitive( Primitive *primitive )
 {
-	_primitives.remove( primitive );
+    Pointer< Primitive > primitivePtr( primitive );
+	_primitives.remove( primitivePtr );
 }
 
 void Geometry::foreachPrimitive( std::function< void( Primitive * ) > callback )
 {
-	std::for_each( std::begin( _primitives ), std::end( _primitives ), callback );
+    for ( auto primitive : _primitives ) {
+        if ( primitive != nullptr ) {
+            callback( primitive.get() );
+        }
+    }
 }
 
 void Geometry::detachAllPrimitives( void )

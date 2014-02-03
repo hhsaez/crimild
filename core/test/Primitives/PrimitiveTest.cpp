@@ -52,7 +52,7 @@ TEST( PrimitiveTest, setVertexBuffer )
 	EXPECT_EQ( p->getVertexBuffer(), nullptr );
 
 	Pointer< VertexBufferObject > vbo( new VertexBufferObject( VertexFormat::VF_P3, 0, nullptr ) );
-	p->setVertexBuffer( vbo );
+	p->setVertexBuffer( vbo.get() );
 
 	EXPECT_EQ( p->getVertexBuffer(), vbo.get() );
 }
@@ -64,7 +64,7 @@ TEST( PrimitiveTest, setIndexBuffer )
 	EXPECT_EQ( p->getIndexBuffer(), nullptr );
 
 	Pointer< IndexBufferObject > ibo( new IndexBufferObject(0, nullptr ) );
-	p->setIndexBuffer( ibo );
+	p->setIndexBuffer( ibo.get() );
 
 	EXPECT_EQ( p->getIndexBuffer(), ibo.get() );
 }

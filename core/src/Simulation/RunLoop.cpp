@@ -58,7 +58,8 @@ void RunLoop::startTask( Task *task )
 			break;
 		}
 	}
-	_activeTasks.insert( it, task );
+    Pointer< Task > taskPtr( task );
+	_activeTasks.insert( it, taskPtr );
 	task->start();
 }
 
@@ -68,21 +69,23 @@ void RunLoop::stopTask( Task *task )
 		return;
 	}
 
-	_killedTasks.push_back( task );
+    Pointer< Task > taskPtr( task );
+	_killedTasks.push_back( taskPtr );
 
 	if ( isTaskActive( task ) ) {
-		_activeTasks.remove( task );
+		_activeTasks.remove( taskPtr );
 	}
 	else {
-		_suspendedTasks.remove( task );
+		_suspendedTasks.remove( taskPtr );
 	}
 }
 
 void RunLoop::suspendTask( Task *task )
 {
 	if ( isTaskActive( task ) ) {
-		_suspendedTasks.push_back( task );
-		_activeTasks.remove( task );
+        Pointer< Task > taskPtr( task );
+		_suspendedTasks.push_back( taskPtr );
+		_activeTasks.remove( taskPtr );
 		task->suspend();
 	}
 }
@@ -99,8 +102,9 @@ void RunLoop::resumeTask( Task *task )
 			break;
 		}
 	}
-	_activeTasks.insert( it, task );
-	_suspendedTasks.remove( task );
+    Pointer< Task > taskPtr( task );
+	_activeTasks.insert( it, taskPtr );
+	_suspendedTasks.remove( taskPtr );
 
 	task->resume();
 }
@@ -113,7 +117,7 @@ bool RunLoop::isTaskActive( Task *task ) const
 void RunLoop::foreachActiveTask( std::function< void ( Task *task ) > callback )
 {
 	for ( auto task : _activeTasks ) {
-		callback( task );
+		callback( task.get() );
 	}
 }
 
@@ -125,7 +129,7 @@ bool RunLoop::isTaskKilled( Task *task ) const
 void RunLoop::foreachKilledTask( std::function< void ( Task *task ) > callback )
 {
 	for ( auto task : _killedTasks ) {
-		callback( task );
+		callback( task.get() );
 	}
 }
 
@@ -137,7 +141,7 @@ bool RunLoop::isTaskSuspended( Task *task ) const
 void RunLoop::foreachSuspendedTask( std::function< void ( Task *task ) > callback )
 {
 	for ( auto task : _suspendedTasks ) {
-		callback( task );
+		callback( task.get() );
 	}
 }
 

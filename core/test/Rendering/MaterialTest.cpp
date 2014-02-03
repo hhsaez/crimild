@@ -50,8 +50,8 @@ TEST( MaterialTest, setProgram )
 
 	Pointer< VertexShader > vs( new VertexShader( "vs code" ) );
 	Pointer< FragmentShader > fs( new FragmentShader( "fs code" ) );
-	Pointer< ShaderProgram > program( new ShaderProgram( vs, fs ) );
-	material->setProgram( program );
+	Pointer< ShaderProgram > program( new ShaderProgram( vs.get(), fs.get() ) );
+	material->setProgram( program.get() );
 
 	ASSERT_EQ( program.get(), material->getProgram() );
 }
@@ -61,8 +61,8 @@ TEST( MaterialTest, setColorMap )
 	Pointer< Material > material( new Material() );
 
 	Pointer< Image > image( new Image( 0, 0, 0, nullptr ) );
-	Pointer< Texture > texture( new Texture( image ) );
-	material->setColorMap( texture );
+	Pointer< Texture > texture( new Texture( image.get() ) );
+	material->setColorMap( texture.get() );
 
 	ASSERT_EQ( texture.get(), material->getColorMap() );
 }

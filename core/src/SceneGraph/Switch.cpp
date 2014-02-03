@@ -42,7 +42,7 @@ Switch::~Switch( void )
 void Switch::foreachNode( std::function< void( Node * ) > callback )
 {
     if ( hasNodes() && _current != std::end( _nodes ) ) {
-        callback( *_current );
+        callback( ( *_current ).get() );
     }
 }
 

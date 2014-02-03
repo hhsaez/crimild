@@ -40,7 +40,8 @@ MaterialComponent::~MaterialComponent( void )
 
 void MaterialComponent::attachMaterial( Material *material )
 {
-	_materials.push_back( material );
+    Pointer< Material > ptr( material );
+	_materials.push_back( ptr );
 }
 
 void MaterialComponent::detachAllMaterials( void )
@@ -51,7 +52,7 @@ void MaterialComponent::detachAllMaterials( void )
 void MaterialComponent::foreachMaterial( std::function< void( Material * ) > callback )
 {
 	for ( auto material : _materials ) {
-		callback( material );
+		callback( material.get() );
 	}
 }
 

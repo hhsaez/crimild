@@ -41,7 +41,7 @@ namespace crimild {
 		virtual ~HierarchyRenderPass( void );
 
 		void setTargetScene( Node *scene ) { _targetScene = scene; }
-		Node *getTargetScene( void ) { return _targetScene; }
+		Node *getTargetScene( void ) { return _targetScene.get(); }
 
 		void setRenderBoundings( bool value ) { _renderBoundings = value; }
 		bool shouldRenderBoundings( void ) const { return _renderBoundings; }

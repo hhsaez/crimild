@@ -102,8 +102,8 @@ void DebugRenderPass::renderNormalsAndTangents( Renderer *renderer, Geometry *ge
 	Pointer< VertexBufferObject > vbo( new VertexBufferObject( format, vertexCount, &vertices[ 0 ] ) );
 	Pointer< IndexBufferObject > ibo( new IndexBufferObject( indices.size(), &indices[ 0 ] ) );
 	Pointer< Primitive > primitive( new Primitive( Primitive::Type::LINES ) );
-	primitive->setVertexBuffer( vbo );
-	primitive->setIndexBuffer( ibo );
+	primitive->setVertexBuffer( vbo.get() );
+	primitive->setIndexBuffer( ibo.get() );
 
 	RenderPass::render( renderer, geometry, primitive.get(), material, camera );
 }

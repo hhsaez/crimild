@@ -35,7 +35,7 @@ TEST( ShaderProgramTest, construction )
 {
 	Pointer< VertexShader > vs( new VertexShader( "vs code" ) );
 	Pointer< FragmentShader > fs( new FragmentShader( "fs code" ) );
-	Pointer< ShaderProgram > program( new ShaderProgram( vs, fs ) );
+	Pointer< ShaderProgram > program( new ShaderProgram( vs.get(), fs.get() ) );
 
 	EXPECT_EQ( vs.get(), program->getVertexShader() );
 	EXPECT_EQ( fs.get(), program->getFragmentShader() );
@@ -45,15 +45,15 @@ TEST( ShaderProgramTest, locations )
 {
 	Pointer< VertexShader > vs( new VertexShader( "vs code" ) );
 	Pointer< FragmentShader > fs( new FragmentShader( "fs code" ) );
-	Pointer< ShaderProgram > program( new ShaderProgram( vs, fs ) );
+	Pointer< ShaderProgram > program( new ShaderProgram( vs.get(), fs.get() ) );
 
 	Pointer< ShaderLocation > vertexWeightLocation( new ShaderLocation( ShaderLocation::Type::ATTRIBUTE, "vertexWeight" ) );
-	program->registerLocation( vertexWeightLocation );
+	program->registerLocation( vertexWeightLocation.get() );
 	ASSERT_EQ( vertexWeightLocation.get(), program->getLocation( vertexWeightLocation->getName() ) );
 	EXPECT_FALSE( vertexWeightLocation->isValid() );
 
 	Pointer< ShaderLocation > timeLocation( new ShaderLocation( ShaderLocation::Type::UNIFORM, "time" ) );
-	program->registerLocation( timeLocation );
+	program->registerLocation( timeLocation.get() );
 	ASSERT_EQ( timeLocation.get(), program->getLocation( timeLocation->getName() ) );
 	EXPECT_FALSE( timeLocation->isValid() );
 

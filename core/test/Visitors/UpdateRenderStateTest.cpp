@@ -46,8 +46,8 @@ TEST( UpdateRenderStateTest, lights )
 
 	Pointer< Light > light( new Light() );
 
-	scene->attachNode( geometry );
-	scene->attachNode( light );
+	scene->attachNode( geometry.get() );
+	scene->attachNode( light.get() );
 
 	RenderStateComponent *rs = geometry->getComponent< RenderStateComponent >();
 	ASSERT_NE( nullptr, rs );
@@ -74,8 +74,8 @@ TEST( UpdateRenderStateTest, materials )
 
 	Pointer< Geometry > geometry( new Geometry() );
 	Pointer< Material > material( new Material() );
-	geometry->getComponent< MaterialComponent >()->attachMaterial( material );
-	scene->attachNode( geometry );
+	geometry->getComponent< MaterialComponent >()->attachMaterial( material.get() );
+	scene->attachNode( geometry.get() );
 
 	RenderStateComponent *rs = geometry->getComponent< RenderStateComponent >();
 	ASSERT_NE( nullptr, rs );

@@ -54,7 +54,7 @@ namespace crimild {
 		int getDepthBits( void ) const { return _depthBits; }
 		int getStencilBits( void ) const { return _stencilBits; }
 
-		Texture *getTexture( void ) { return _texture; }
+		Texture *getTexture( void ) { return _texture.get(); }
 
 		void setClearColor( const RGBAColorf &color ) { _clearColor = color; }
 		const RGBAColorf &getClearColor( void ) const { return _clearColor; }

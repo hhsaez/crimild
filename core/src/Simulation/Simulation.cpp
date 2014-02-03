@@ -102,7 +102,8 @@ void Simulation::setScene( Node *scene )
 		_scene->perform( fetchCameras );
 		if ( fetchCameras.hasCameras() ) {
 			fetchCameras.foreachCamera( [&]( Camera *camera ) {
-				_cameras.push_back( camera );
+                Pointer< Camera > cameraPtr( camera );
+				_cameras.push_back( cameraPtr );
 			});
 		}
 	}
@@ -111,7 +112,7 @@ void Simulation::setScene( Node *scene )
 void Simulation::forEachCamera( std::function< void ( Camera * ) > callback )
 {
 	for ( auto camera : _cameras ) {
-		callback( camera );
+		callback( camera.get() );
 	}
 }
 

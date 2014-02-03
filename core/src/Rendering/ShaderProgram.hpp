@@ -89,8 +89,8 @@ namespace crimild {
 		ShaderProgram( VertexShader *vs, FragmentShader *fs );
 		virtual ~ShaderProgram( void );
 
-		VertexShader *getVertexShader( void ) { return _vertexShader; }
-		FragmentShader *getFragmentShader( void ) { return _fragmentShader; }
+		VertexShader *getVertexShader( void ) { return _vertexShader.get(); }
+		FragmentShader *getFragmentShader( void ) { return _fragmentShader.get(); }
 
 	private:
 		Pointer< VertexShader > _vertexShader;
@@ -98,7 +98,7 @@ namespace crimild {
 
 	public:
 		void registerLocation( ShaderLocation *location );
-		ShaderLocation *getLocation( std::string name ) { return _locations[ name ]; }
+		ShaderLocation *getLocation( std::string name ) { return _locations[ name ].get(); }
 		void resetLocations( void );
 		void foreachLocation( std::function< void( ShaderLocation * ) > callback );
 

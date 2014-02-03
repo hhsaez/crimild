@@ -40,7 +40,7 @@ namespace crimild {
 		Texture( Image *image, std::string name = "ColorMap" );
 		virtual ~Texture( void );
 
-		Image *getImage( void ) { return _image; }
+		Image *getImage( void ) { return _image.get(); }
 
 	private:
 		Pointer< Image > _image;

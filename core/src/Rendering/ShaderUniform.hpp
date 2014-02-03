@@ -44,7 +44,7 @@ namespace crimild {
 		virtual ~ShaderUniform( void );
 
 		void setLocation( ShaderLocation *location ) { _location = location; }
-		ShaderLocation *getLocation( void ) { return _location; }
+		ShaderLocation *getLocation( void ) { return _location.get(); }
 
 		virtual void onBind( Renderer *renderer ) = 0;
 

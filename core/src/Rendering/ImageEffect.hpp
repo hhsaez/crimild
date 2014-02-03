@@ -39,7 +39,7 @@ namespace crimild {
 		virtual ~ImageEffect( void );
 
 		void setProgram( ShaderProgram *program ) { _program = program; }
-		ShaderProgram *getProgram( void ) { return _program; }
+		ShaderProgram *getProgram( void ) { return _program.get(); }
 
 	private:
 		Pointer< ShaderProgram > _program;

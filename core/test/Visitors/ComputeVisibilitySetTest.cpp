@@ -47,11 +47,11 @@ TEST( ComputeVisibilitySetTest, traversal )
 
 	Pointer< Camera > camera( new Camera );
 
-	group1->attachNode( group2 );
-	group1->attachNode( geometry1 );
+	group1->attachNode( group2.get() );
+	group1->attachNode( geometry1.get() );
 
-	group2->attachNode( geometry2 );
-	group2->attachNode( geometry3 );
+	group2->attachNode( geometry2.get() );
+	group2->attachNode( geometry3.get() );
 
 	VisibilitySet result;
 	group1->perform( ComputeVisibilitySet( &result, camera.get() ) );

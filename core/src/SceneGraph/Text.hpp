@@ -53,7 +53,7 @@ namespace crimild {
 		Font( std::string faceFilePath, std::string glyphFilePath );
 		virtual ~Font( void );
 
-		Image *getFace( void ) { return _face; }
+		Image *getFace( void ) { return _face.get(); }
 		Glyph getGlyph( char c ) { return _glyphs[ c ]; }
 
 	private:

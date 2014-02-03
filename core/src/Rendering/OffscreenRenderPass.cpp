@@ -45,7 +45,8 @@ OffscreenRenderPass::~OffscreenRenderPass( void )
 
 void OffscreenRenderPass::attachImageEffect( ImageEffect *imageEffect )
 {
-	_imageEffects.push_back( imageEffect );	
+    Pointer< ImageEffect > imageEffectPtr( imageEffect );
+	_imageEffects.push_back( imageEffectPtr );
 }
 
 void OffscreenRenderPass::render( Renderer *renderer, VisibilitySet *vs, Camera *camera ) 

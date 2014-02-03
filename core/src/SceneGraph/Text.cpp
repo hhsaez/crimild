@@ -85,8 +85,8 @@ Text::Text( void )
 {
 	_text = "";
 	_size = 1.0f;
-	attachPrimitive( _primitive );
-	getComponent< MaterialComponent >()->attachMaterial( _material );
+	attachPrimitive( _primitive.get() );
+	getComponent< MaterialComponent >()->attachMaterial( _material.get() );
 }
 
 Text::~Text( void )
@@ -109,9 +109,9 @@ void Text::setSize( float size )
 void Text::setFont( Font *font )
 {
 	_font = font;
-	Pointer< Image > face = _font->getFace();
-	Pointer< Texture > texture( new Texture( face ) );
-	_material->setColorMap( texture );
+	Pointer< Image > face( _font->getFace() );
+	Pointer< Texture > texture( new Texture( face.get() ) );
+	_material->setColorMap( texture.get() );
 	_material->getAlphaState()->setEnabled( true );
 	updatePrimitive();
 }

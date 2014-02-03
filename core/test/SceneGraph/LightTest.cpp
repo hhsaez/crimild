@@ -53,8 +53,8 @@ TEST( LightTest, fetchLights )
 	Pointer< Light > light1( new Light() );
 	Pointer< Light > light2( new Light() );
 
-	group->attachNode( light1 );
-	group->attachNode( light2 );
+	group->attachNode( light1.get() );
+	group->attachNode( light2.get() );
 
 	FetchLights fetchLights;
 	group->perform( fetchLights );

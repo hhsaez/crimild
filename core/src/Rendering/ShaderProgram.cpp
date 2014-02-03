@@ -49,7 +49,7 @@ void ShaderProgram::registerLocation( ShaderLocation *location )
 void ShaderProgram::resetLocations( void )
 {
 	for ( auto it : _locations ) {
-		if ( it.second ) {
+		if ( it.second != nullptr ) {
 			it.second->reset();
 		}
 	}
@@ -58,8 +58,8 @@ void ShaderProgram::resetLocations( void )
 void ShaderProgram::foreachLocation( std::function< void( ShaderLocation * ) > callback )
 {
 	for ( auto it : _locations ) {
-		if ( it.second ) {
-			callback( it.second );
+		if ( it.second != nullptr ) {
+			callback( it.second.get() );
 		}
 	}
 }
@@ -72,22 +72,23 @@ void ShaderProgram::registerStandardLocation( ShaderLocation::Type locationType,
 
 ShaderLocation *ShaderProgram::getStandardLocation( unsigned int standardLocationId )
 {
-	return _locations[ _standardLocations[ standardLocationId ] ];
+	return _locations[ _standardLocations[ standardLocationId ] ].get();
 }
 
 void ShaderProgram::attachUniform( ShaderUniform *uniform )
 {
-	_uniforms.push_back( uniform );
+    Pointer< ShaderUniform > uniformPtr( uniform );
+	_uniforms.push_back( uniformPtr );
 	Pointer< ShaderLocation > location( new ShaderLocation( ShaderLocation::Type::UNIFORM, uniform->getName() ) );
-	uniform->setLocation( location );
-	registerLocation( location );
+	uniform->setLocation( location.get() );
+	registerLocation( location.get() );
 }
 
 void ShaderProgram::foreachUniform( std::function< void( ShaderUniform * ) > callback )
 {
 	for ( auto it : _uniforms ) {
 		if ( it != nullptr ) {
-			callback( it );
+			callback( it.get() );
 		}
 	}
 }
@@ -95,7 +96,7 @@ void ShaderProgram::foreachUniform( std::function< void( ShaderUniform * ) > cal
 void ShaderProgram::detachAllUniforms( void )
 {
 	for ( auto it : _uniforms ) {
-		ShaderLocation *location = getLocation( it->getName() );
+		ShaderLocation *location = it->getLocation();
 		if ( location != nullptr ) {
 			location->reset();
 			it->setLocation( nullptr );

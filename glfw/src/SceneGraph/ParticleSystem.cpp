@@ -39,7 +39,7 @@ ParticleSystem::ParticleSystem( std::string name )
 
 	particleSystemComponent->getParticleMaterial()->setProgram( new ParticleSystemShaderProgram() );
 
-	attachComponent( particleSystemComponent );
+	attachComponent( particleSystemComponent.get() );
 }
 
 ParticleSystem::~ParticleSystem( void )

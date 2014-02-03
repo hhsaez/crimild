@@ -34,7 +34,7 @@ using namespace crimild;
 TEST( TextureTest, construction )
 {
 	Pointer< Image > image( new Image( 0, 0, 0, nullptr ) );
-	Pointer< Texture > texture( new Texture( image ) );
+	Pointer< Texture > texture( new Texture( image.get() ) );
 
 	EXPECT_EQ( image.get(), texture->getImage() );
 	EXPECT_EQ( "ColorMap", texture->getName() );

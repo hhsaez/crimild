@@ -64,7 +64,7 @@ namespace crimild {
 		Simulation( std::string name, int argc, char **argv );
 		virtual ~Simulation( void );
 
-		RunLoop *getMainLoop( void ) { return _mainLoop; }
+		RunLoop *getMainLoop( void ) { return _mainLoop.get(); }
 
 		Time &getSimulationTime( void ) { return _simulationTime; }
 		const Time &getSimulationTime( void ) const { return _simulationTime; }
@@ -82,15 +82,15 @@ namespace crimild {
 		Time _simulationTime;
 
 	public:
-		void setRenderer( Pointer< Renderer > renderer ) { _renderer = renderer; }
-		Renderer *getRenderer( void ) { return _renderer; }
+		void setRenderer( Renderer *renderer ) { _renderer = renderer; }
+		Renderer *getRenderer( void ) { return _renderer.get(); }
 
 	private:
 		Pointer< Renderer > _renderer;
 
 	public:
 		void setScene( Node *scene );
-		Node *getScene( void ) { return _scene; }
+		Node *getScene( void ) { return _scene.get(); }
 
 		void forEachCamera( std::function< void ( Camera * ) > callback );
 

@@ -110,11 +110,11 @@ QuadPrimitive::QuadPrimitive( float width, float height, const VertexFormat &for
     
     vertex += format.getVertexSize();
     
-    setVertexBuffer( vbo );
+    setVertexBuffer( vbo.get() );
     
     unsigned short indices[] = { 0, 1, 2, 3 };
     Pointer< IndexBufferObject > ibo( new IndexBufferObject( 4, indices ) );
-    setIndexBuffer( ibo );
+    setIndexBuffer( ibo.get() );
 }
 
 QuadPrimitive::~QuadPrimitive( void )

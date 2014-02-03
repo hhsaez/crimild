@@ -73,12 +73,12 @@ void gl3::Utils::checkErrors( std::string prefix )
     }
 }
 
-Pointer< VertexShader > gl3::Utils::getVertexShaderInstance( std::string source )
+VertexShader *gl3::Utils::getVertexShaderInstance( std::string source )
 {
 	return new VertexShader( "#version 150\n" + source );
 }
 
-Pointer< FragmentShader > gl3::Utils::getFragmentShaderInstance( std::string source )
+FragmentShader *gl3::Utils::getFragmentShaderInstance( std::string source )
 {
 	return new FragmentShader( "#version 150\n" + source );
 }

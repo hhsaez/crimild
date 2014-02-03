@@ -50,7 +50,7 @@ TEST( GeometryNodeTest, attachPrimitive )
 
 	EXPECT_FALSE( geometry->hasPrimitives() );	
 
-	geometry->attachPrimitive( primitive );
+	geometry->attachPrimitive( primitive.get() );
 
 	EXPECT_TRUE( geometry->hasPrimitives() );	
 	
@@ -58,7 +58,7 @@ TEST( GeometryNodeTest, attachPrimitive )
 	int count = 0;
 	geometry->foreachPrimitive( [&]( Primitive *p ) mutable {
 		++count;
-		if ( p == primitive ) {
+		if ( p == primitive.get() ) {
 			found = true;
 		}
 	});
@@ -74,11 +74,11 @@ TEST( GeometryNodeTest, detachPrimitive )
 
 	EXPECT_FALSE( geometry->hasPrimitives() );	
 
-	geometry->attachPrimitive( primitive );
+	geometry->attachPrimitive( primitive.get() );
 
 	EXPECT_TRUE( geometry->hasPrimitives() );	
 
-	geometry->detachPrimitive( primitive );
+	geometry->detachPrimitive( primitive.get() );
 
 	EXPECT_FALSE( geometry->hasPrimitives() );	
 	
@@ -96,8 +96,8 @@ TEST( GeometryNodeTest, detachAllPrimitives )
 	Pointer< Primitive > primitive1( new Primitive() );
 	Pointer< Primitive > primitive2( new Primitive() );
 
-	geometry->attachPrimitive( primitive1 );
-	geometry->attachPrimitive( primitive2 );
+	geometry->attachPrimitive( primitive1.get() );
+	geometry->attachPrimitive( primitive2.get() );
 
 	int count = 0;
 	geometry->foreachPrimitive( [&]( Primitive *p ) mutable {

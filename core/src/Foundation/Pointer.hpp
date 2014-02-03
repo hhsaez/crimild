@@ -31,241 +31,85 @@
 #include "SharedObject.hpp"
 
 namespace crimild {
-
-	/**
-		\brief A smart pointer implementation
-
-		This class is basically a smart pointer for any Object-derived class,
-		handling the calls to addRef() and release() methods
-		automatically and thus avoiding the need to doing it manually, which
-		is very error prone.
-
-		\remarks While the template argument does not enforce a specific
-		object type, this class is intended to be used by
-		instances of Object of any of its sub-classes.
-	 */
-	template< class T >
-	class Pointer {
-	public:
-		/**
-			\brief Default constructor
-		 */
-		Pointer( void )
-			: _pointee( nullptr )
-		{
-
-		}
-
-		/**
-			\brief Explicit constructor
-
-			If the pointee object is a valid one, the handler invokes
-			incReferences().
-		 */
-		Pointer( T *pointee )
-			: _pointee( pointee )
-		{
-			if ( _pointee ) {
-				_pointee->retain();
-			}
-		}
-
-		/**
-			\brief Explicit constructor
-
-			If the pointee object is a valid one, the handler invokes
-			incReferences().
-		 */
-		explicit Pointer( const T *pointee )
-			: _pointee( pointee )
-		{
-			if ( _pointee ) {
-				_pointee->retain();
-			}
-		}
-
-		/**
-			\brief Explicit constructor
-
-			The template construction allows for down-casting a pointer of
-			type U to its base class of type T
-
-			If the pointee object is a valid one, the handler invokes
-			incReferences().
-		 */
-		template< class U >
-		Pointer( U *pointee )
-			: _pointee( pointee )
-		{
-			if ( _pointee ) {
-				_pointee->retain();
-			}
-		}
-
-		/**
-			\brief Copy constructor
-		 */
-		Pointer( const Pointer &handler )
-			: _pointee( handler._pointee )
-		{
-			if ( _pointee ) {
-				_pointee->retain();
-			}
-		}
-
-		/**
-			\brief Copy constructor
-
-			The template construction allows for down-casting a pointer of
-			type U to its base class of type T
-
-			If the pointee object is a valid one, the handler invokes
-			incReferences().
-		 */
-		template< class U >
-		Pointer( Pointer< U > &handler )
-			: _pointee( handler.get() )
-		{
-			if ( _pointee ) {
-				_pointee->retain();
-			}
-		}
-
-		virtual ~Pointer( void )
-		{
-			if ( _pointee ) {
-				_pointee->release();
-			}
-		}
-
-		/**
-			\brief Assignment
-
-			Decreases the reference count of the existing _pointee object
-			before the assignment. Then, the handler class incReferences()
-			for the new _pointee object
-		 */
-		Pointer &operator=( T *p )
-		{
-			if ( p != _pointee ) {
-				if ( _pointee ) {
-					_pointee->release();
-				}
-
-				_pointee = p;
-
-				if ( _pointee ) {
-					_pointee->retain();
-				}
-			}
-
-			return *this;
-		}
-
-		/**
-			\brief Copy
-
-			Decreases the reference count of the existing _pointee object
-			before the assignment. Then, the handler class incReferences()
-			for the new _pointee object
-		*/
-		Pointer &operator=( const Pointer &p )
-		{
-			if ( p._pointee != _pointee ) {
-				if ( _pointee ) {
-					_pointee->release();
-				}
-
-				_pointee = p._pointee;
-
-				if ( _pointee ) {
-					_pointee->retain();
-				}
-			}
-
-			return *this;
-		}
-
-		/**
-			\brief Copy
-
-			This implementation has to do with inheriance.
-
-			Decreases the reference count of the existing _pointee object
-			before the assignment. Then, the handler class incReferences()
-			for the new _pointee object
-		*/
-		template< class U >
-		Pointer &operator=( const Pointer< U > &p )
-		{
-			T *ptr = ( U * ) p;
-			if ( ptr != _pointee ) {
-				if ( _pointee ) {
-					_pointee->release();
-				}
-
-				_pointee = ptr;
-
-				if ( _pointee ) {
-					_pointee->retain();
-				}
-			}
-
-			return *this;
-		}
-
-		T *operator->( void )
-		{
-			return _pointee;
-		}
-
-		const T *operator->( void ) const
-		{
-			return _pointee;
-		}
-
-		T &operator*( void )
-		{
-			return *_pointee;
-		}
-
-		const T &operator*( void ) const
-		{
-			return *_pointee;
-		}
-
-		/**
-			\brief Not operator
-		 */
-		bool operator!( void ) const { return !_pointee; }
-
-		/**
-			\brief Equality
-		 */
-		bool operator==( T *p ) const { return _pointee == p; }
-
-		/**
-			\brief Not operator
-		 */
-		bool operator!=( T *p ) const { return _pointee != p; }
-
-		bool operator==( const Pointer &p ) const { return _pointee == p._pointee; }
-
-		bool operator!=( const Pointer &p ) const { return _pointee != p._pointee; }
-
-		operator T*( void ) const
-		{
-			return _pointee;
-		}
-
-		T *get( void ) { return _pointee; }
-
-		const T *get( void ) const { return _pointee; }
-
-	private:
-		T *_pointee;
-	};
-
+    
+    template< class T >
+    class Pointer {
+    public:
+        Pointer( void ) : _data( nullptr ) { }
+        explicit Pointer( T *data ) : _data( data ) { if ( _data != nullptr ) _data->retain(); }
+        Pointer( const Pointer &ptr ) : _data( ptr._data ) { if ( _data != nullptr ) _data->retain(); }
+        
+        template< class U >
+        Pointer( const Pointer< U > &ptr ) : _data( ptr.get() ) { if ( _data != nullptr ) _data->retain(); }
+        
+        ~Pointer( void ) { if ( _data != nullptr ) { _data->release(); _data = nullptr; } }
+        
+        T &operator*( void ) const { return &_data; }
+        T *operator->( void ) const { return _data; }
+        
+        Pointer &operator=( T *data )
+        {
+            if ( data != _data ) {
+                if ( _data != nullptr ) {
+                    _data->release();
+                }
+                
+                _data = data;
+                
+                if ( _data != nullptr ) {
+                    _data->retain();
+                }
+            }
+            
+            return *this;
+        }
+        
+        Pointer &operator=( const Pointer &ptr )
+        {
+            if ( ptr._data != _data ) {
+                if ( _data != nullptr ) {
+                    _data->release();
+                }
+                
+                _data = ptr._data;
+                
+                if ( _data != nullptr ) {
+                    _data->retain();
+                }
+            }
+            
+            return *this;
+        }
+        
+        template< class U >
+        Pointer &operator=( const Pointer< U > &ptr )
+        {
+            if ( ptr.get() != _data ) {
+                if ( _data != nullptr ) {
+                    _data->release();
+                }
+                
+                _data = ptr.get();
+                
+                if ( _data != nullptr ) {
+                    _data->retain();
+                }
+            }
+            
+            return *this;
+        }
+        
+        bool operator==( T *data ) const { return _data == data; }
+        bool operator==( const Pointer &ptr ) const { return _data == ptr._data; }
+        bool operator!=( T *data ) const { return _data != data; }
+        bool operator!=( const Pointer &ptr ) const { return _data != ptr._data; }
+        
+        T *get( void ) const { return _data; }
+        
+    private:
+        T *_data = nullptr;
+    };
+    
 }
 
 #endif

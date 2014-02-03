@@ -91,7 +91,7 @@ void COLLADALoader::parseVisualScenes( void )
 			}
 		});
 
-		_result->attachNode( scene );
+		_result->attachNode( scene.get() );
 	});
 }
 
@@ -108,7 +108,7 @@ void COLLADALoader::parseNode( Group *parent, collada::Node *node )
 		group->setName( node->getName() );
 	}
 
-	parent->attachNode( group );
+	parent->attachNode( group.get() );
 
 	collada::Matrix *matrix = node->getMatrix();
 	if ( matrix != NULL ) {
@@ -355,18 +355,18 @@ void COLLADALoader::parseTriangles( crimild::Group *parent, Mesh *mesh, Vertices
 	}
 
 	Pointer< Primitive > primitive( new Primitive( Primitive::Type::TRIANGLES ) );
-	primitive->setVertexBuffer( vbo );
-	primitive->setIndexBuffer( ibo );
+	primitive->setVertexBuffer( vbo.get() );
+	primitive->setIndexBuffer( ibo.get() );
 
 	Pointer< crimild::Geometry > geometry( new crimild::Geometry() );
-	geometry->attachPrimitive( primitive );
-	parent->attachNode( geometry );
+	geometry->attachPrimitive( primitive.get() );
+	parent->attachNode( geometry.get() );
 
 	if ( triangles->getMaterial().length() > 0 ) {
 		collada::Material *m = _materials.get( triangles->getMaterial() );		
 		if ( m != nullptr ) {
 			Pointer< crimild::Material > material( new crimild::Material() );
-			geometry->getComponent< MaterialComponent >()->attachMaterial( material );
+			geometry->getComponent< MaterialComponent >()->attachMaterial( material.get() );
 
 			collada::Effect *e = _effects.get( m->getInstanceEffect()->getUrl() );
 			if ( e != nullptr ) {
@@ -392,8 +392,8 @@ void COLLADALoader::parseTriangles( crimild::Group *parent, Mesh *mesh, Vertices
 													std::string imagePath = _assetsDirectory + i->getFileName();
 													imagePath = FileSystem::getInstance().pathForResource( imagePath );
 													Pointer< crimild::Image > image( new ImageTGA( imagePath ) );
-													Pointer< crimild::Texture > diffuseTexture( new crimild::Texture( image ) );
-													material->setColorMap( diffuseTexture );
+													Pointer< crimild::Texture > diffuseTexture( new crimild::Texture( image.get() ) );
+													material->setColorMap( diffuseTexture.get() );
 												}
 												catch ( ... ) {
 													Log::Error << "Cannot load image for diffuse texture" << Log::End;

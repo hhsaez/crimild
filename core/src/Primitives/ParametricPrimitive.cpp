@@ -127,7 +127,7 @@ void ParametricPrimitive::generateVertexBuffer( void )
             vertex += _format.getVertexSize();
         }
     }
-    setVertexBuffer( vbo );
+    setVertexBuffer( vbo.get() );
 }
 
 void ParametricPrimitive::generateLineIndexBuffer( void )
@@ -144,7 +144,7 @@ void ParametricPrimitive::generateLineIndexBuffer( void )
         }
         vertex += _divisions[ 0 ];
     }
-    setIndexBuffer( ibo );
+    setIndexBuffer( ibo.get() );
 }
 
 void ParametricPrimitive::generateTriangleIndexBuffer( void )
@@ -163,6 +163,6 @@ void ParametricPrimitive::generateTriangleIndexBuffer( void )
         }
         vertex += _divisions[ 0 ];
     }
-    setIndexBuffer( ibo );
+    setIndexBuffer( ibo.get() );
 }
 

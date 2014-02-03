@@ -73,7 +73,7 @@ namespace crimild {
 		virtual ~Log( void );
 
 		void setOutputHandler( LogOutputHandler *handler ) { _outputHandler = handler; }
-		LogOutputHandler *getOutputHandler( void ) { return _outputHandler; }
+		LogOutputHandler *getOutputHandler( void ) { return _outputHandler.get(); }
 
 		template< typename T >
 		Log &operator<<( T in )

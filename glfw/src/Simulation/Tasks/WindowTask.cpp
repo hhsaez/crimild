@@ -60,7 +60,7 @@ void WindowTask::start( void )
     	throw RuntimeException( "Cannot created main window" );
     }
 
-	Simulation::getCurrent()->setRenderer( new gl3::Renderer( screenBuffer ) );
+	Simulation::getCurrent()->setRenderer( new gl3::Renderer( screenBuffer.get() ) );
 }
 
 void WindowTask::stop( void )

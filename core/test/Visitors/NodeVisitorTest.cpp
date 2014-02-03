@@ -48,10 +48,10 @@ TEST( NodeVisitorTest, traversal )
 	Pointer< Node > node3( new Node( "node3" ) );
 	Pointer< Node > node4( new Node( "node4" ) );
 
-	node0->attachNode( node1 );
-	node0->attachNode( node2 );
-	node2->attachNode( node3 );
-	node2->attachNode( node4 );
+	node0->attachNode( node1.get() );
+	node0->attachNode( node2.get() );
+	node2->attachNode( node3.get() );
+	node2->attachNode( node4.get() );
 
 	MockVisitor visitor;
 
@@ -104,10 +104,10 @@ TEST( NodeVisitorTest, prependParentName )
 	Pointer< Node > node3( new Node( "node3" ) );
 	Pointer< Node > node4( new Node( "node4" ) );
 
-	node0->attachNode( node1 );
-	node0->attachNode( node2 );
-	node2->attachNode( node3 );
-	node2->attachNode( node4 );
+	node0->attachNode( node1.get() );
+	node0->attachNode( node2.get() );
+	node2->attachNode( node3.get() );
+	node2->attachNode( node4.get() );
 
 	node0->perform( PrependParentNameVisitor() );
 

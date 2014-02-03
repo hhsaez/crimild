@@ -36,7 +36,7 @@ namespace crimild {
 						if ( XMLUtils::compareXMLNodeName( childXML, _entityName ) ) {
 							Pointer< ENTITY_TYPE > entity( new ENTITY_TYPE() );
 							if ( entity->parseXML( childXML ) ) {
-								attach( entity );
+								attach( entity.get() );
 							}
 						}
 					}

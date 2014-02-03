@@ -56,10 +56,10 @@ namespace crimild {
 		Primitive::Type getType( void ) const { return _type; }
 
 		void setVertexBuffer( VertexBufferObject *vbo ) { _vertexBuffer = vbo; }
-		VertexBufferObject *getVertexBuffer( void ) { return _vertexBuffer; }
+		VertexBufferObject *getVertexBuffer( void ) { return _vertexBuffer.get(); }
 
 		void setIndexBuffer( IndexBufferObject *ibo ) { _indexBuffer = ibo; }
-		IndexBufferObject *getIndexBuffer( void ) { return _indexBuffer; }
+		IndexBufferObject *getIndexBuffer( void ) { return _indexBuffer.get(); }
 
 	private:
 		Primitive::Type _type;

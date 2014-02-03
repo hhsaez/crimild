@@ -108,7 +108,7 @@ void Node::detachComponentWithName( std::string name )
 
 NodeComponent *Node::getComponentWithName( std::string name )
 {
-	return _components[ name ];
+	return _components[ name ].get();
 }
 
 void Node::detachAllComponents( void )

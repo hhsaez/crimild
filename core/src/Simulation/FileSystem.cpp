@@ -51,8 +51,13 @@ void FileSystem::init( int argc, char **argv )
 {
 	std::string base = "";
 	if ( argc > 0 ) {
-		base = extractDirectory( argv[ 0 ] ); 
+		base = extractDirectory( argv[ 0 ] );
 	}
+    
+    int pos = base.find( "/Debug" );
+    if ( pos > 0 ) {
+        base = base.substr( 0, pos + 1 );
+    }
 	
 	if ( base.length() == 0 ) {
 		base = ".";

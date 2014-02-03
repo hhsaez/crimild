@@ -47,7 +47,7 @@ namespace crimild {
 		virtual ~Material( void );
 
 		void setProgram( ShaderProgram *program ) { _program = program; }
-		ShaderProgram *getProgram( void ) { return _program; }
+		ShaderProgram *getProgram( void ) { return _program.get(); }
 
 		void setAmbient( const RGBAColorf &ambient ) { _ambient = ambient; }
 		const RGBAColorf &getAmbient( void ) const { return _ambient; }
@@ -62,19 +62,19 @@ namespace crimild {
 		float getShininess( void ) const { return _shininess; }
 
 		void setColorMap( Texture *texture ) { _colorMap = texture; }
-		Texture *getColorMap( void ) { return _colorMap; }
+		Texture *getColorMap( void ) { return _colorMap.get(); }
 
 		void setNormalMap( Texture *texture ) { _normalMap = texture; }
-		Texture *getNormalMap( void ) { return _normalMap; }
+		Texture *getNormalMap( void ) { return _normalMap.get(); }
 
 		void setSpecularMap( Texture *texture ) { _specularMap = texture; }
-		Texture *getSpecularMap( void ) { return _specularMap; }
+		Texture *getSpecularMap( void ) { return _specularMap.get(); }
 
 		void setDepthState( DepthState *state ) { _depthState = state; }
-		DepthState *getDepthState( void ) { return _depthState; }
+		DepthState *getDepthState( void ) { return _depthState.get(); }
 
 		void setAlphaState( AlphaState *alphaState ) { _alphaState = alphaState; }
-		AlphaState *getAlphaState( void ) { return _alphaState; }
+		AlphaState *getAlphaState( void ) { return _alphaState.get(); }
 
 	private:
 		Pointer< ShaderProgram > _program;

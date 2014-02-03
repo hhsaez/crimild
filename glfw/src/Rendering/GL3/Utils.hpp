@@ -38,9 +38,9 @@ namespace crimild {
 		public:
 			static void checkErrors( std::string prefix );
 
-			static Pointer< VertexShader > getVertexShaderInstance( std::string source );
+			static VertexShader *getVertexShaderInstance( std::string source );
 			
-			static Pointer< FragmentShader > getFragmentShaderInstance( std::string source );
+			static FragmentShader *getFragmentShaderInstance( std::string source );
 
 			static std::string buildArrayShaderLocationName( std::string variable, int index );
 

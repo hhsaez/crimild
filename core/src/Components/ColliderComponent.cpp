@@ -53,7 +53,7 @@ const BoundingVolume *ColliderComponent::getBoundingVolume( void ) const
 		return getNode()->getWorldBound();
 	}
 
-	return _boundingVolume;
+	return _boundingVolume.get();
 }
 
 bool ColliderComponent::testCollision( ColliderComponent *other ) 

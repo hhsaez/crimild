@@ -21,3 +21,6 @@ gtest-1.6.0
 
 crimild_core_test
 
+CRIMILD.xcodeproj
+CMakeScripts
+*.build

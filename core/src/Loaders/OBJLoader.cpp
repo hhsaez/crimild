@@ -70,7 +70,7 @@ Pointer< Node > OBJLoader::load( void )
 	input.open( _filePath.c_str() );
 	if ( !input.is_open() ) {
 		Log::Error << "Cannot find file " << _filePath << Log::End;
-		return nullptr;
+		return Pointer< Node >();
 	}
 	while ( !input.eof() ) {
 		processLine( input );
@@ -173,7 +173,7 @@ void OBJLoader::processMaterialFile( std::string materialFileName )
 			if ( diffuseMapFileName.length() > 0 ) {
 				Log::Debug << "Loading diffuse map " << diffuseMapFileName << Log::End;
 				Pointer< Image > image( new ImageTGA( FileSystem::getInstance().extractDirectory( materialFileName ) + "/" + diffuseMapFileName ) );
-				Pointer< Texture > texture( new Texture( image ) );
+				Pointer< Texture > texture( new Texture( image.get() ) );
 				currentMaterial->diffuseMap = texture;
 			}
 		}
@@ -183,7 +183,7 @@ void OBJLoader::processMaterialFile( std::string materialFileName )
 			if ( normalMapFileName.length() > 0 ) {
 				Log::Debug << "Loading normal map " << normalMapFileName << Log::End;
 				Pointer< Image > image( new ImageTGA( FileSystem::getInstance().extractDirectory( materialFileName ) + "/" + normalMapFileName ) );
-				Pointer< Texture > texture( new Texture( image ) );
+				Pointer< Texture > texture( new Texture( image.get() ) );
 				currentMaterial->normalMap = texture;
 			}
 		}
@@ -193,7 +193,7 @@ void OBJLoader::processMaterialFile( std::string materialFileName )
 			if ( specularMapFileName.length() > 0 ) {
 				Log::Debug << "Loading specular map " << specularMapFileName << Log::End;
 				Pointer< Image > image( new ImageTGA( FileSystem::getInstance().extractDirectory( materialFileName ) + "/" + specularMapFileName ) );
-				Pointer< Texture > texture( new Texture( image ) );
+				Pointer< Texture > texture( new Texture( image.get() ) );
 				currentMaterial->specularMap = texture;
 			}
 		}
@@ -394,7 +394,7 @@ Pointer< Node > OBJLoader::generateScene( void )
 		primitive->setIndexBuffer( new IndexBufferObject( indices.size(), &indices[ 0 ] ) );
 
 		Pointer< Geometry > geometry( new Geometry() );
-		geometry->attachPrimitive( primitive );
+		geometry->attachPrimitive( primitive.get() );
 
 		auto materialDef = _materials[ group->materialName ];
 		if ( materialDef != nullptr ) {
@@ -402,13 +402,13 @@ Pointer< Node > OBJLoader::generateScene( void )
 			material->setAmbient( materialDef->ambientColor );
 			material->setDiffuse( materialDef->diffuseColor );
 			material->setSpecular( materialDef->specularColor );
-			material->setColorMap( materialDef->diffuseMap );
-			material->setNormalMap( materialDef->normalMap );
-			material->setSpecularMap( materialDef->specularMap );
-			geometry->getComponent< MaterialComponent >()->attachMaterial( material );
+			material->setColorMap( materialDef->diffuseMap.get() );
+			material->setNormalMap( materialDef->normalMap.get() );
+			material->setSpecularMap( materialDef->specularMap.get() );
+			geometry->getComponent< MaterialComponent >()->attachMaterial( material.get() );
 		}
 
-		scene->attachNode( geometry );
+		scene->attachNode( geometry.get() );
 	}
 
 	return scene;

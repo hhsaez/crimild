@@ -64,11 +64,11 @@ TEST( UpdateWorldStateTest, hierarchy )
 	Pointer< Geometry > geometry2( new Geometry() );
 	Pointer< Geometry > geometry3( new Geometry() );
 
-	group1->attachNode( group2 );
-	group1->attachNode( geometry1 );
+	group1->attachNode( group2.get() );
+	group1->attachNode( geometry1.get() );
 
-	group2->attachNode( geometry2 );
-	group2->attachNode( geometry3 );
+	group2->attachNode( geometry2.get() );
+	group2->attachNode( geometry3.get() );
 
 	EXPECT_TRUE( geometry3->getLocal().isIdentity() );
 	EXPECT_TRUE( geometry3->getWorld().isIdentity() );

@@ -62,7 +62,7 @@ namespace crimild {
 		virtual void configure( void ) = 0;
 
 		void setScreenBuffer( FrameBufferObject *screenBuffer ) { _screenBuffer = screenBuffer; }
-		FrameBufferObject *getScreenBuffer( void ) { return _screenBuffer; }
+		FrameBufferObject *getScreenBuffer( void ) { return _screenBuffer.get(); }
 
 	private:
 		Pointer< FrameBufferObject > _screenBuffer;
@@ -132,19 +132,19 @@ namespace crimild {
 		Pointer< Material > _defaultMaterial;
 
 	public:
-		ShaderProgramCatalog *getShaderProgramCatalog( void ) { return _shaderProgramCatalog; }
+		ShaderProgramCatalog *getShaderProgramCatalog( void ) { return _shaderProgramCatalog.get(); }
 		void setShaderProgramCatalog( ShaderProgramCatalog *catalog ) { _shaderProgramCatalog = catalog; }
 
-		TextureCatalog *getTextureCatalog( void ) { return _textureCatalog; }
+		TextureCatalog *getTextureCatalog( void ) { return _textureCatalog.get(); }
 		void setTextureCatalog( TextureCatalog *catalog ) { _textureCatalog = catalog; }
 
-		VertexBufferObjectCatalog *getVertexBufferObjectCatalog( void ) { return _vertexBufferObjectCatalog; }
+		VertexBufferObjectCatalog *getVertexBufferObjectCatalog( void ) { return _vertexBufferObjectCatalog.get(); }
 		void setVertexBufferObjectCatalog( VertexBufferObjectCatalog *catalog ) { _vertexBufferObjectCatalog = catalog; }
 
-		IndexBufferObjectCatalog *getIndexBufferObjectCatalog( void ) { return _indexBufferObjectCatalog; }
+		IndexBufferObjectCatalog *getIndexBufferObjectCatalog( void ) { return _indexBufferObjectCatalog.get(); }
 		void setIndexBufferObjectCatalog( IndexBufferObjectCatalog *catalog ) { _indexBufferObjectCatalog = catalog; }
 
-		FrameBufferObjectCatalog *getFrameBufferObjectCatalog( void ) { return _frameBufferObjectCatalog; }
+		FrameBufferObjectCatalog *getFrameBufferObjectCatalog( void ) { return _frameBufferObjectCatalog.get(); }
 		void setFrameBufferObjectCatalog( FrameBufferObjectCatalog *catalog ) { _frameBufferObjectCatalog = catalog; }
 
 	private:

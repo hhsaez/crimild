@@ -18,7 +18,8 @@ namespace crimild {
 
 			void attach( ENTITY_TYPE *entity )
 			{
-				_entities.push_back( entity );
+                Pointer< ENTITY_TYPE > entityPtr( entity );
+				_entities.push_back( entityPtr );
 			}
 
 			unsigned int getCount( void ) const { return _entities.size(); }
@@ -49,7 +50,7 @@ namespace crimild {
 						if ( XMLUtils::compareXMLNodeName( childXML, _entityName ) ) {
 							Pointer< ENTITY_TYPE > entity( new ENTITY_TYPE() );
 							if ( entity->parseXML( childXML) ) {
-								attach( entity );
+								attach( entity.get() );
 							}
 						}
 					}

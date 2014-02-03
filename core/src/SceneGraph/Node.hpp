@@ -126,12 +126,12 @@ namespace crimild {
 		bool _worldIsCurrent;
 
 	public:
-		BoundingVolume *localBound( void ) { return _localBound; }
-		const BoundingVolume *getLocalBound( void ) const { return _localBound; }
+		BoundingVolume *localBound( void ) { return _localBound.get(); }
+		const BoundingVolume *getLocalBound( void ) const { return _localBound.get(); }
 		void setLocalBound( BoundingVolume *bound ) { _localBound = bound; }
 
-		BoundingVolume *worldBound( void ) { return _worldBound; }
-		const BoundingVolume *getWorldBound( void ) const { return _worldBound; }
+		BoundingVolume *worldBound( void ) { return _worldBound.get(); }
+		const BoundingVolume *getWorldBound( void ) const { return _worldBound.get(); }
 		void setWorldBound( BoundingVolume *bound ) { _worldBound = bound; }
 
 	private:

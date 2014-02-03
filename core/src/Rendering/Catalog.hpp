@@ -142,14 +142,14 @@ namespace crimild {
 
 		virtual void load( RESOURCE_TYPE *resource )
 		{
-			_resources.push_back( resource );
 			resource->setCatalogInfo( this, getNextResourceId() );
+			_resources.push_back( resource );
 		}
 
 		virtual void unload( RESOURCE_TYPE *resource )
 		{
-			_resources.remove( resource );
 			resource->setCatalogInfo( nullptr, getDefaultIdValue() );
+			_resources.remove( resource );
 		}
 
 		virtual void unloadAll( void )

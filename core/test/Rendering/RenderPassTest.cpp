@@ -41,7 +41,7 @@ TEST( RenderPassTest, construction )
 
 	ASSERT_NE( nullptr, camera->getRenderPass() );
 
-	camera->setRenderPass( renderPass );
+	camera->setRenderPass( renderPass.get() );
 
 	ASSERT_EQ( renderPass.get(), camera->getRenderPass() );
 }

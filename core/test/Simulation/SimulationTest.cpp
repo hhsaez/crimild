@@ -50,13 +50,13 @@ TEST( SimulationTest, destruction )
 {
 	EXPECT_EQ( Simulation::getCurrent(), nullptr );
 	Pointer< MockTask > task( new MockTask( 0 ) );
-	EXPECT_CALL( *task, stop() )
+	EXPECT_CALL( *( task.get() ), stop() )
 		.Times( ::testing::Exactly( 1 ) );
 
 	{
 		Pointer< Simulation > simulation( new Simulation( "a simulation", 0, nullptr ) );		
 		EXPECT_EQ( Simulation::getCurrent(), simulation.get() );
-		simulation->getMainLoop()->startTask( task );
+		simulation->getMainLoop()->startTask( task.get() );
 	}
 
 	EXPECT_EQ( Simulation::getCurrent(), nullptr );
@@ -67,13 +67,13 @@ TEST( SimulationTest, step )
 	Pointer< Simulation > simulation( new Simulation( "a simulation", 0, nullptr ) );		
 
 	Pointer< MockTask > task( new MockTask( 0 ) );
-	EXPECT_CALL( *task, start() )
+	EXPECT_CALL( *( task.get() ), start() )
 		.Times( ::testing::Exactly( 1 ) );
-	EXPECT_CALL( *task, update() )
+	EXPECT_CALL( *( task.get() ), update() )
 		.Times( ::testing::Exactly( 3 ) );
-	EXPECT_CALL( *task, stop() )
+	EXPECT_CALL( *( task.get() ), stop() )
 		.Times( ::testing::Exactly( 1 ) );
-	simulation->getMainLoop()->startTask( task );
+	simulation->getMainLoop()->startTask( task.get() );
 
 	EXPECT_TRUE( simulation->step() );
 	EXPECT_TRUE( simulation->step() );
@@ -91,9 +91,9 @@ TEST( SimulationTest, run )
 	Pointer< Simulation > simulation( new Simulation( "a simulation", 0, nullptr ) );
 
 	Pointer< MockTask > task( new MockTask( 0 ) );
-	EXPECT_CALL( *task, start() )
+	EXPECT_CALL( *( task.get() ), start() )
 		.Times( ::testing::Exactly( 1 ) );
-	EXPECT_CALL( *task, update() )
+	EXPECT_CALL( *( task.get() ), update() )
 		.Times( ::testing::Exactly( 10 ) )
 		.WillRepeatedly( ::testing::Invoke( [&]( void ) mutable {
 			loopCount++;
@@ -101,10 +101,10 @@ TEST( SimulationTest, run )
 				Simulation::getCurrent()->stop();				
 			}
 		}));
-	EXPECT_CALL( *task, stop() )
+	EXPECT_CALL( *( task.get() ), stop() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	simulation->getMainLoop()->startTask( task );
+	simulation->getMainLoop()->startTask( task.get() );
 	simulation->run();
 
 	EXPECT_EQ( 10, loopCount );
@@ -118,7 +118,7 @@ TEST( SimulationTest, attachSceneWithoutCamera )
 
 	Pointer< Node > simpleScene( new Node() );
 
-	simulation->setScene( simpleScene );
+	simulation->setScene( simpleScene.get() );
 
 	EXPECT_FALSE( simulation->getMainLoop()->hasActiveTasks() );
 }
@@ -131,9 +131,9 @@ TEST( SimulationTest, attachSceneWithCamera )
 
 	Pointer< Group > scene( new Group() );
 	Pointer< Camera > camera( new Camera() );
-	scene->attachNode( camera );
+	scene->attachNode( camera.get() );
 
-	simulation->setScene( scene );
+	simulation->setScene( scene.get() );
 
 	EXPECT_TRUE( simulation->getMainLoop()->hasActiveTasks() );
 }

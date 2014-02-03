@@ -56,15 +56,19 @@ void Group::attachNode( Node *node )
 	}
 
 	node->setParent( this );
-	_nodes.push_back( node );
+    Pointer< Node > nodePtr( node );
+	_nodes.push_back( nodePtr );
 }
 
 void Group::detachNode( Node *node )
 {
-	if ( node->getParent() == this ) {
-		_nodes.remove( node );
-		node->setParent( nullptr );
-	}
+    for ( auto it : _nodes ) {
+        if ( it == node ) {
+            node->setParent( nullptr );
+            _nodes.remove( it );
+            return;
+        }
+    }
 }
 
 void Group::detachAllNodes( void )
@@ -79,12 +83,16 @@ Node *Group::getNode( unsigned int index )
 {
 	std::list< Pointer< Node > >::iterator it = _nodes.begin();
 	std::advance( it, index );
-	return *it;
+	return ( *it ).get();
 }
 
 void Group::foreachNode( std::function< void( Node * ) > callback )
 {
-	std::for_each( std::begin( _nodes ), std::end( _nodes ), callback );
+    for ( auto node : _nodes ) {
+        if ( node != nullptr ) {
+            callback ( node.get() );
+        }
+    }
 }
 
 void Group::accept( NodeVisitor &visitor )

@@ -41,25 +41,25 @@ TEST( RunLoopTest, construction )
 TEST( RunLoopTest, destruction )
 {
 	Pointer< MockTask > task0( new MockTask( 0 ) );
-	EXPECT_CALL( *task0, stop() )
+	EXPECT_CALL( *( task0.get() ), stop() )
 		.Times( ::testing::Exactly( 1 ) );
 	Pointer< MockTask > task1( new MockTask( 1000 ) );
-	EXPECT_CALL( *task1, stop() )
+	EXPECT_CALL( *( task1.get() ), stop() )
 		.Times( ::testing::Exactly( 1 ) );
 	Pointer< MockTask > task2( new MockTask( 2000 ) );
-	EXPECT_CALL( *task2, stop() )
+	EXPECT_CALL( *( task2.get() ), stop() )
 		.Times( ::testing::Exactly( 1 ) );
 	Pointer< MockTask > task3( new MockTask( -5 ) );
-	EXPECT_CALL( *task3, stop() )
+	EXPECT_CALL( *( task3.get() ), stop() )
 		.Times( ::testing::Exactly( 1 ) );
 
 	{
 		Pointer< RunLoop > loop( new RunLoop() );
 
-		loop->startTask( task0 );
-		loop->startTask( task1 );
-		loop->startTask( task2 );
-		loop->startTask( task3 );
+		loop->startTask( task0.get() );
+		loop->startTask( task1.get() );
+		loop->startTask( task2.get() );
+		loop->startTask( task3.get() );
 	}
 }
 
@@ -74,42 +74,42 @@ TEST( RunLoopTest, startTasks )
 
 	EXPECT_FALSE( loop->hasActiveTasks() );
 
-	EXPECT_CALL( *task0, start() )
+	EXPECT_CALL( *( task0.get() ), start() )
 		.Times( ::testing::Exactly( 1 ) );
-	loop->startTask( task0 );
+	loop->startTask( task0.get() );
 
-	EXPECT_CALL( *task1, start() )
+	EXPECT_CALL( *( task1.get() ), start() )
 		.Times( ::testing::Exactly( 1 ) );
-	loop->startTask( task1 );
+	loop->startTask( task1.get() );
 
-	EXPECT_CALL( *task2, start() )
+	EXPECT_CALL( *( task2.get() ), start() )
 		.Times( ::testing::Exactly( 1 ) );
-	loop->startTask( task2 );
+	loop->startTask( task2.get() );
 
-	EXPECT_CALL( *task3, start() )
+	EXPECT_CALL( *( task3.get() ), start() )
 		.Times( ::testing::Exactly( 1 ) );
-	loop->startTask( task3 );
+	loop->startTask( task3.get() );
 
 	EXPECT_TRUE( loop->hasActiveTasks() );
-	EXPECT_TRUE( loop->isTaskActive( task0 ) );
-	EXPECT_TRUE( loop->isTaskActive( task1 ) );
-	EXPECT_TRUE( loop->isTaskActive( task2 ) );
-	EXPECT_TRUE( loop->isTaskActive( task3 ) );
+	EXPECT_TRUE( loop->isTaskActive( task0.get() ) );
+	EXPECT_TRUE( loop->isTaskActive( task1.get() ) );
+	EXPECT_TRUE( loop->isTaskActive( task2.get() ) );
+	EXPECT_TRUE( loop->isTaskActive( task3.get() ) );
 
 	int i = 0;
 	loop->foreachActiveTask( [&]( Task *task ) {
 		switch (i) {
 			case 0:
-				EXPECT_EQ( task, task3 );
+				EXPECT_EQ( task, task3.get() );
 				break;
 			case 1: 
-				EXPECT_EQ( task, task0 );
+				EXPECT_EQ( task, task0.get() );
 				break;
 			case 2: 
-				EXPECT_EQ( task, task1 );
+				EXPECT_EQ( task, task1.get() );
 				break;
 			case 3:
-				EXPECT_EQ( task, task2 );
+				EXPECT_EQ( task, task2.get() );
 				break;
 		}
 		i++;
@@ -122,11 +122,11 @@ TEST( RunLoopTest, startTaskAlreadyStarted )
 	Pointer< RunLoop > loop( new RunLoop() );
 
 	Pointer< MockTask > task( new MockTask( 0 ) );
-	EXPECT_CALL( *task, start() )
+	EXPECT_CALL( *( task.get() ), start() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	loop->startTask( task );
-	loop->startTask( task );
+	loop->startTask( task.get() );
+	loop->startTask( task.get() );
 
 	int i = 0;
 	loop->foreachActiveTask( [&]( Task *task ) {
@@ -140,15 +140,15 @@ TEST( RunLoopTest, startSuspendedTask )
 	Pointer< RunLoop > loop( new RunLoop() );
 
 	Pointer< MockTask > task( new MockTask( 0 ) );
-	EXPECT_CALL( *task, start() )
+	EXPECT_CALL( *( task.get() ), start() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	loop->startTask( task );
-	loop->suspendTask( task );
-	loop->startTask( task );
+	loop->startTask( task.get() );
+	loop->suspendTask( task.get() );
+	loop->startTask( task.get() );
 
-	EXPECT_FALSE( loop->isTaskActive( task ) );
-	EXPECT_TRUE( loop->isTaskSuspended( task ) );
+	EXPECT_FALSE( loop->isTaskActive( task.get() ) );
+	EXPECT_TRUE( loop->isTaskSuspended( task.get() ) );
 }
 
 TEST( RunLoopTest, startStoppedTask )
@@ -156,15 +156,15 @@ TEST( RunLoopTest, startStoppedTask )
 	Pointer< RunLoop > loop( new RunLoop() );
 
 	Pointer< MockTask > task( new MockTask( 0 ) );
-	EXPECT_CALL( *task, start() )
+	EXPECT_CALL( *( task.get() ), start() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	loop->startTask( task );
-	loop->stopTask( task );
-	loop->startTask( task );
+	loop->startTask( task.get() );
+	loop->stopTask( task.get() );
+	loop->startTask( task.get() );
 
-	EXPECT_FALSE( loop->isTaskActive( task ) );
-	EXPECT_TRUE( loop->isTaskKilled( task ) );
+	EXPECT_FALSE( loop->isTaskActive( task.get() ) );
+	EXPECT_TRUE( loop->isTaskKilled( task.get() ) );
 }
 
 TEST( RunLoopTest, stopTasks )
@@ -172,16 +172,16 @@ TEST( RunLoopTest, stopTasks )
 	Pointer< RunLoop > loop( new RunLoop() );
 
 	Pointer< MockTask > task( new MockTask( 0 ) );
-	EXPECT_CALL( *task, stop() )
+	EXPECT_CALL( *( task.get() ), stop() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	loop->startTask( task );
+	loop->startTask( task.get() );
 
-	loop->stopTask( task );
+	loop->stopTask( task.get() );
 
 	EXPECT_FALSE( loop->hasActiveTasks() );
 	EXPECT_TRUE( loop->hasKilledTasks() );
-	EXPECT_TRUE( loop->isTaskKilled( task ) );
+	EXPECT_TRUE( loop->isTaskKilled( task.get() ) );
 }
 
 TEST( RunLoopTest, stopKilledTask )
@@ -189,14 +189,14 @@ TEST( RunLoopTest, stopKilledTask )
 	Pointer< RunLoop > loop( new RunLoop() );
 
 	Pointer< MockTask > task( new MockTask( 0 ) );
-	EXPECT_CALL( *task, stop() )
+	EXPECT_CALL( *( task.get() ), stop() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	loop->startTask( task );
-	loop->stopTask( task );
-	loop->stopTask( task );
+	loop->startTask( task.get() );
+	loop->stopTask( task.get() );
+	loop->stopTask( task.get() );
 
-	EXPECT_TRUE( loop->isTaskKilled( task ) );
+	EXPECT_TRUE( loop->isTaskKilled( task.get() ) );
 }
 
 TEST( RunLoopTest, stopSuspendedTask )
@@ -204,15 +204,15 @@ TEST( RunLoopTest, stopSuspendedTask )
 	Pointer< RunLoop > loop( new RunLoop() );
 
 	Pointer< MockTask > task( new MockTask( 0 ) );
-	EXPECT_CALL( *task, stop() )
+	EXPECT_CALL( *( task.get() ), stop() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	loop->startTask( task );
-	loop->suspendTask( task );
-	loop->stopTask( task );
+	loop->startTask( task.get() );
+	loop->suspendTask( task.get() );
+	loop->stopTask( task.get() );
 
-	EXPECT_TRUE( loop->isTaskKilled( task ) );
-	EXPECT_FALSE( loop->isTaskSuspended( task ) );
+	EXPECT_TRUE( loop->isTaskKilled( task.get() ) );
+	EXPECT_FALSE( loop->isTaskSuspended( task.get() ) );
 }
 
 TEST( RunLoopTest, suspendTask )
@@ -220,16 +220,16 @@ TEST( RunLoopTest, suspendTask )
 	Pointer< RunLoop > loop( new RunLoop() );
 
 	Pointer< MockTask > task( new MockTask( 0 ) );
-	EXPECT_CALL( *task, suspend() )
+	EXPECT_CALL( *( task.get() ), suspend() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	loop->startTask( task );
+	loop->startTask( task.get() );
 
-	loop->suspendTask( task );
+	loop->suspendTask( task.get() );
 
 	EXPECT_FALSE( loop->hasActiveTasks() );
 	EXPECT_TRUE( loop->hasSuspendedTasks() );
-	EXPECT_TRUE( loop->isTaskSuspended( task ) );
+	EXPECT_TRUE( loop->isTaskSuspended( task.get() ) );
 }
 
 TEST( RunLoopTest, suspendKilledTask )
@@ -237,15 +237,15 @@ TEST( RunLoopTest, suspendKilledTask )
 	Pointer< RunLoop > loop( new RunLoop() );
 
 	Pointer< MockTask > task( new MockTask( 0 ) );
-	EXPECT_CALL( *task, suspend() )
+	EXPECT_CALL( *( task.get() ), suspend() )
 		.Times( 0 );
 
-	loop->startTask( task );
-	loop->stopTask( task );
-	loop->suspendTask( task );
+	loop->startTask( task.get() );
+	loop->stopTask( task.get() );
+	loop->suspendTask( task.get() );
 
-	EXPECT_TRUE( loop->isTaskKilled( task ) );
-	EXPECT_FALSE( loop->isTaskSuspended( task ) );
+	EXPECT_TRUE( loop->isTaskKilled( task.get() ) );
+	EXPECT_FALSE( loop->isTaskSuspended( task.get() ) );
 }
 
 TEST( RunLoopTest, suspendAlreadySuspendedTask )
@@ -253,14 +253,14 @@ TEST( RunLoopTest, suspendAlreadySuspendedTask )
 	Pointer< RunLoop > loop( new RunLoop() );
 
 	Pointer< MockTask > task( new MockTask( 0 ) );
-	EXPECT_CALL( *task, suspend() )
+	EXPECT_CALL( *( task.get() ), suspend() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	loop->startTask( task );
-	loop->suspendTask( task );
-	loop->suspendTask( task );
+	loop->startTask( task.get() );
+	loop->suspendTask( task.get() );
+	loop->suspendTask( task.get() );
 
-	EXPECT_TRUE( loop->isTaskSuspended( task ) );
+	EXPECT_TRUE( loop->isTaskSuspended( task.get() ) );
 }
 
 TEST( RunLoopTest, resumeTasks )
@@ -269,22 +269,22 @@ TEST( RunLoopTest, resumeTasks )
 	Pointer< MockTask > task0( new MockTask( 0 ) );
 	Pointer< MockTask > task1( new MockTask( 1000 ) );
 
-	EXPECT_CALL( *task0, suspend() )
+	EXPECT_CALL( *( task0.get() ), suspend() )
 		.Times( ::testing::Exactly( 1 ) );
-	EXPECT_CALL( *task0, resume() )
+	EXPECT_CALL( *( task0.get() ), resume() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	loop->startTask( task0 );
-	loop->startTask( task1 );
+	loop->startTask( task0.get() );
+	loop->startTask( task1.get() );
 
-	loop->suspendTask( task0 );
+	loop->suspendTask( task0.get() );
 	
-	loop->resumeTask( task0 );
+	loop->resumeTask( task0.get() );
 
 	EXPECT_TRUE( loop->hasActiveTasks() );
 	EXPECT_FALSE( loop->hasSuspendedTasks() );
-	EXPECT_FALSE( loop->isTaskSuspended( task0 ) );
-	EXPECT_TRUE( loop->isTaskActive( task0 ) );
+	EXPECT_FALSE( loop->isTaskSuspended( task0.get() ) );
+	EXPECT_TRUE( loop->isTaskActive( task0.get() ) );
 }
 
 TEST( RunLoopTest, resumeAlreadyStartedTask )
@@ -292,13 +292,13 @@ TEST( RunLoopTest, resumeAlreadyStartedTask )
 	Pointer< RunLoop > loop( new RunLoop() );
 
 	Pointer< MockTask > task( new MockTask( 0 ) );
-	EXPECT_CALL( *task, resume() )
+	EXPECT_CALL( *( task.get() ), resume() )
 		.Times( 0 );
 
-	loop->startTask( task );
-	loop->resumeTask( task );
+	loop->startTask( task.get() );
+	loop->resumeTask( task.get() );
 
-	EXPECT_TRUE( loop->isTaskActive( task ) );
+	EXPECT_TRUE( loop->isTaskActive( task.get() ) );
 }
 
 TEST( RunLoopTest, resumeAlreadyKilledTask )
@@ -306,14 +306,14 @@ TEST( RunLoopTest, resumeAlreadyKilledTask )
 	Pointer< RunLoop > loop( new RunLoop() );
 
 	Pointer< MockTask > task( new MockTask( 0 ) );
-	EXPECT_CALL( *task, resume() )
+	EXPECT_CALL( *( task.get() ), resume() )
 		.Times( 0 );
 
-	loop->startTask( task );
-	loop->stopTask( task );
-	loop->resumeTask( task );
+	loop->startTask( task.get() );
+	loop->stopTask( task.get() );
+	loop->resumeTask( task.get() );
 
-	EXPECT_TRUE( loop->isTaskKilled( task ) );
+	EXPECT_TRUE( loop->isTaskKilled( task.get() ) );
 }
 
 TEST( RunLoopTest, updateTasks )
@@ -321,25 +321,25 @@ TEST( RunLoopTest, updateTasks )
 	Pointer< RunLoop > loop( new RunLoop() );
 
 	Pointer< MockTask > task0( new MockTask( 0 ) );
-	EXPECT_CALL( *task0, update() )
+	EXPECT_CALL( *( task0.get() ), update() )
 		.Times( ::testing::Exactly( 1 ) );
 
 	Pointer< MockTask > task1( new MockTask( 1000 ) );
-	EXPECT_CALL( *task1, update() )
+	EXPECT_CALL( *( task1.get() ), update() )
 		.Times( ::testing::Exactly( 1 ) );
 
 	Pointer< MockTask > task2( new MockTask( 2000 ) );
-	EXPECT_CALL( *task2, update() )
+	EXPECT_CALL( *( task2.get() ), update() )
 		.Times( ::testing::Exactly( 1 ) );
 
 	Pointer< MockTask > task3( new MockTask( -5 ) );
-	EXPECT_CALL( *task3, update() )
+	EXPECT_CALL( *( task3.get() ), update() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	loop->startTask( task0 );
-	loop->startTask( task1 );
-	loop->startTask( task2 );
-	loop->startTask( task3 );
+	loop->startTask( task0.get() );
+	loop->startTask( task1.get() );
+	loop->startTask( task2.get() );
+	loop->startTask( task3.get() );
 
 	EXPECT_TRUE( loop->update() );
 }
@@ -349,12 +349,12 @@ TEST( RunLoopTest, breakLoop )
 	Pointer< RunLoop > loop( new RunLoop() );
 
 	Pointer< MockTask > task( new MockTask( 0 ) );
-	loop->startTask( task );
+	loop->startTask( task.get() );
 
 	EXPECT_TRUE( loop->update() );
 	EXPECT_TRUE( loop->update() );
 
-	loop->stopTask( task );
+	loop->stopTask( task.get() );
 
 	EXPECT_FALSE( loop->update() );
 }
@@ -364,9 +364,9 @@ TEST( RunLoopTest, stop )
 	Pointer< RunLoop > loop( new RunLoop() );
 
 	Pointer< MockTask > task( new MockTask( 0 ) );
-	EXPECT_CALL( *task, stop() )
+	EXPECT_CALL( *( task.get() ), stop() )
 		.Times( ::testing::Exactly( 1 ) );
-	loop->startTask( task );
+	loop->startTask( task.get() );
 
 	EXPECT_TRUE( loop->update() );
 	EXPECT_TRUE( loop->update() );
