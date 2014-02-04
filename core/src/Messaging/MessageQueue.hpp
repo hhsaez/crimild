@@ -131,14 +131,15 @@ namespace crimild {
 			If the message requires to use the deferred queue, it will be delayed.
 			Otherwise, it will be dispatched immediatelly.
 		*/
-		void pushMessage( MessagePtr message )
+		void pushMessage( MessageImpl *message )
 		{
 			if ( message->useDeferredQueue() ) {
-				_messages.push_back( message );
+                Pointer< MessageImpl > messagePtr( message );
+				_messages.push_back( messagePtr );
 			}
 			else {
 				for ( auto handler : _handlers ) {
-					handler->handleMessage( message.get() );
+					handler->handleMessage( message );
 				}
 			}
 		}
