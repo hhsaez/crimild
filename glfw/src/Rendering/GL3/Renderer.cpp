@@ -37,6 +37,8 @@
 #include "Library/PhongShaderProgram.hpp"
 #include "Library/ScreenShaderProgram.hpp"
 #include "Library/TextureShaderProgram.hpp"
+#include "Programs/DepthShaderProgram.hpp"
+#include "Programs/ForwardRenderShaderProgram.hpp"
 #include "Utils.hpp"
 
 #include <GL/glew.h>
@@ -52,12 +54,15 @@ gl3::Renderer::Renderer( FrameBufferObject *screenBuffer )
 	setFrameBufferObjectCatalog( new gl3::FrameBufferObjectCatalog( this ) );
 	setTextureCatalog( new gl3::TextureCatalog() );
 
-	_fallbackPrograms[ "flat" ] = new FlatShaderProgram();
-	_fallbackPrograms[ "gouraud" ] = new GouraudShaderProgram();
-	_fallbackPrograms[ "phong" ] = new PhongShaderProgram();
-	_fallbackPrograms[ "color" ] = new ColorShaderProgram();
-	_fallbackPrograms[ "screen" ] = new ScreenShaderProgram();
-	_fallbackPrograms[ "texture" ] = new TextureShaderProgram();
+	_programs[ "flat" ] = new FlatShaderProgram();
+	_programs[ "gouraud" ] = new GouraudShaderProgram();
+	_programs[ "phong" ] = new PhongShaderProgram();
+	_programs[ "color" ] = new ColorShaderProgram();
+	_programs[ "screen" ] = new ScreenShaderProgram();
+	_programs[ "texture" ] = new TextureShaderProgram();
+    
+    _programs[ "depth" ] = new DepthShaderProgram();
+    _programs[ "forward" ] = new ForwardRenderShaderProgram();
 
 	setScreenBuffer( screenBuffer );
 }
@@ -214,25 +219,35 @@ void gl3::Renderer::drawPrimitive( ShaderProgram *program, Primitive *primitive 
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
+ShaderProgram *gl3::Renderer::getDepthProgram( void )
+{
+    return _programs[ "depth" ].get();
+}
+
+ShaderProgram *gl3::Renderer::getForwardPassProgram( void )
+{
+    return _programs[ "forward" ].get();
+}
+
 ShaderProgram *gl3::Renderer::getFallbackProgram( Material *material, Geometry *geometry, Primitive *primitive )
 {
 	if ( material == nullptr || geometry == nullptr || primitive == nullptr ) {
-		return _fallbackPrograms[ "screen" ].get();
+		return _programs[ "screen" ].get();
 	}
 
 	if ( geometry->getComponent< RenderStateComponent >()->hasLights() && primitive->getVertexBuffer()->getVertexFormat().hasNormals() ) {
-		return _fallbackPrograms[ "phong" ].get();
+		return _programs[ "phong" ].get();
 	}
 
 	if ( material->getColorMap() && primitive->getVertexBuffer()->getVertexFormat().hasTextureCoords() ) {
-		return _fallbackPrograms[ "texture" ].get();
+		return _programs[ "texture" ].get();
 	}
 
 	if ( primitive->getVertexBuffer()->getVertexFormat().hasColors() ) {
-		return _fallbackPrograms[ "color" ].get();
+		return _programs[ "color" ].get();
 	}
 
-	return _fallbackPrograms[ "flat" ].get();
+	return _programs[ "flat" ].get();
 }
 
 void gl3::Renderer::setAlphaState( AlphaState *state )

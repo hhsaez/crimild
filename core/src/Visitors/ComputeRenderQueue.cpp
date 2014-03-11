@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,47 +25,36 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "RenderSceneTask.hpp"
-
-#include "Simulation/Simulation.hpp"
-#include "Rendering/Renderer.hpp"
 #include "Visitors/ComputeRenderQueue.hpp"
-
-#include <iostream>
 
 using namespace crimild;
 
-RenderSceneTask::RenderSceneTask( int priority )
-	: Task( priority ),
-      _renderQueue( new RenderQueue() )
-{
-
-}
-
-RenderSceneTask::~RenderSceneTask( void )
-{
-
-}
-
-void RenderSceneTask::start( void )
+ComputeRenderQueue::ComputeRenderQueue( Camera *camera, RenderQueue *result )
+    : _camera( camera ),
+      _result( result != nullptr ? result : new RenderQueue() )
 {
 }
 
-void RenderSceneTask::update( void )
+ComputeRenderQueue::~ComputeRenderQueue( void )
 {
-	Node *scene = Simulation::getCurrent()->getScene();
-	Renderer *renderer = Simulation::getCurrent()->getRenderer();
-
-	if ( scene != nullptr && renderer != nullptr ) {
-		Simulation::getCurrent()->forEachCamera( [&]( Camera *camera ) {
-            scene->perform( ComputeRenderQueue( camera, getRenderQueue() ) );
-            renderer->render( getRenderQueue() );
-		});
-	}
+    
 }
 
-void RenderSceneTask::stop( void )
+void ComputeRenderQueue::traverse( Node *scene )
 {
+    _result->reset();
+    _result->setCamera( _camera.get() );
+    
+    NodeVisitor::traverse( scene );
+}
 
+void ComputeRenderQueue::visitGeometry( Geometry *geometry )
+{
+    _result->getOpaqueObjects().add( geometry );
+}
+
+void ComputeRenderQueue::visitLight( Light *light )
+{
+    _result->getLights().add( light );
 }
 

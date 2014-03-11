@@ -48,6 +48,7 @@ namespace crimild {
 	class Primitive;
 	class Camera;
 	class RenderStateComponent;
+    class RenderQueue;
 
 	class Renderer : public SharedObject {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( Renderer );
@@ -71,6 +72,8 @@ namespace crimild {
 		virtual void beginRender( void ) = 0;
 		
 		virtual void clearBuffers( void ) = 0;
+        
+        virtual void render( RenderQueue *renderQueue );
 
 		virtual void render( VisibilitySet *vs );
 
@@ -120,12 +123,15 @@ namespace crimild {
 
 	public:
 		virtual void applyTransformations( ShaderProgram *program, Geometry *geometry, Camera *camera );
+        virtual void applyTransformations( ShaderProgram *program, const Matrix4f &projection, const Matrix4f &view, const Matrix4f &model, const Matrix4f &normal );
 		virtual void restoreTransformations( ShaderProgram *program, Geometry *geometry, Camera *camera );
 
 	public:
 		virtual void drawPrimitive( ShaderProgram *program, Primitive *primitive ) = 0;
 
 	public:
+        virtual ShaderProgram *getDepthProgram( void ) { return nullptr; }
+        virtual ShaderProgram *getForwardPassProgram( void ) { return nullptr; }
 		virtual ShaderProgram *getFallbackProgram( Material *, Geometry *, Primitive * ) { return nullptr; }
 
 	public:

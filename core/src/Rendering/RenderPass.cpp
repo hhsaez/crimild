@@ -25,11 +25,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "RenderPass.hpp"
-#include "Renderer.hpp"
-#include "VisibilitySet.hpp"
-#include "FrameBufferObject.hpp"
-
+#include "Rendering/RenderPass.hpp"
+#include "Rendering/Renderer.hpp"
+#include "Rendering/VisibilitySet.hpp"
+#include "Rendering/FrameBufferObject.hpp"
+#include "Rendering/RenderQueue.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "Components/RenderStateComponent.hpp"
 #include "Components/SkinComponent.hpp"
@@ -47,6 +47,13 @@ RenderPass::RenderPass( void )
 RenderPass::~RenderPass( void )
 {
 
+}
+
+void RenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
+{
+    renderQueue->getOpaqueObjects().each( [&]( Geometry *geometry, int ) {
+        render( renderer, geometry, camera );
+    });
 }
 
 void RenderPass::render( Renderer *renderer, VisibilitySet *vs, Camera *camera )

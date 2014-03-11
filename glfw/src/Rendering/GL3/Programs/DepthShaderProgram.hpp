@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,47 +25,24 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "RenderSceneTask.hpp"
+#ifndef CRIMILD_GL3_SHADER_LIBRARY_DEPTH_
+#define CRIMILD_GL3_SHADER_LIBRARY_DEPTH_
 
-#include "Simulation/Simulation.hpp"
-#include "Rendering/Renderer.hpp"
-#include "Visitors/ComputeRenderQueue.hpp"
+#include <Crimild.hpp>
 
-#include <iostream>
-
-using namespace crimild;
-
-RenderSceneTask::RenderSceneTask( int priority )
-	: Task( priority ),
-      _renderQueue( new RenderQueue() )
-{
-
-}
-
-RenderSceneTask::~RenderSceneTask( void )
-{
-
-}
-
-void RenderSceneTask::start( void )
-{
-}
-
-void RenderSceneTask::update( void )
-{
-	Node *scene = Simulation::getCurrent()->getScene();
-	Renderer *renderer = Simulation::getCurrent()->getRenderer();
-
-	if ( scene != nullptr && renderer != nullptr ) {
-		Simulation::getCurrent()->forEachCamera( [&]( Camera *camera ) {
-            scene->perform( ComputeRenderQueue( camera, getRenderQueue() ) );
-            renderer->render( getRenderQueue() );
-		});
+namespace crimild {
+    
+	namespace gl3 {
+        
+		class DepthShaderProgram : public ShaderProgram {
+		public:
+			DepthShaderProgram( void );
+			virtual ~DepthShaderProgram( void );
+		};
+        
 	}
+    
 }
 
-void RenderSceneTask::stop( void )
-{
-
-}
+#endif
 

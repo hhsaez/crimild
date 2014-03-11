@@ -59,10 +59,12 @@ namespace crimild {
 
 			virtual void drawPrimitive( ShaderProgram *program, Primitive *primitive ) override;
 
+            virtual ShaderProgram *getDepthProgram( void ) override;
+            virtual ShaderProgram *getForwardPassProgram( void ) override;
 			virtual ShaderProgram *getFallbackProgram( Material *material, Geometry *geometry, Primitive *primitive ) override;
 
 		private:
-			std::map< std::string, Pointer< ShaderProgram > > _fallbackPrograms;
+			std::map< std::string, Pointer< ShaderProgram > > _programs;
 		};
 
 	}

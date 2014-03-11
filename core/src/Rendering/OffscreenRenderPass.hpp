@@ -41,7 +41,7 @@ namespace crimild {
 		OffscreenRenderPass( void );
 		virtual ~OffscreenRenderPass( void );
 
-		virtual void render( Renderer *renderer, VisibilitySet *vs, Camera *camera ) override;
+		virtual void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera ) override;
 
 		void attachImageEffect( ImageEffect *imageEffect );
 

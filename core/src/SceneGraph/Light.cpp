@@ -26,6 +26,7 @@
  */
 
 #include "Light.hpp"
+#include "Mathematics/Frustum.hpp"
 
 using namespace crimild;
 
@@ -47,5 +48,16 @@ Light::~Light( void )
 void Light::accept( NodeVisitor &visitor )
 {
 	visitor.visitLight( this );
+}
+
+Matrix4f Light::computeProjectionMatrix( void ) const
+{
+    Frustumf f( 45.0f, 1.0f, 0.01f, 128.0f );
+    return f.computeProjectionMatrix();
+}
+
+Matrix4f Light::computeViewMatrix( void ) const
+{
+    return getWorld().computeModelMatrix().getInverse();
 }
 

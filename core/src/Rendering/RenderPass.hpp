@@ -40,12 +40,14 @@ namespace crimild {
 	class Camera;
 	class FrameBufferObject;
 	class ShaderProgram;
+    class RenderQueue;
 
 	class RenderPass : public SharedObject {
 	public:
 		RenderPass( void );
 		virtual ~RenderPass( void );
 
+        virtual void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
 		virtual void render( Renderer *renderer, VisibilitySet *vs, Camera *camera );
 		virtual void render( Renderer *renderer, Geometry *geometry, Camera *camera );
 		virtual void render( Renderer *renderer, Geometry *geometry, Primitive *primitive, Material *material, Camera *camera );

@@ -361,6 +361,15 @@ namespace crimild {
 			return result;
 		}
 
+		Matrix< 4, float > computeNormalMatrix( void ) const
+		{
+            Matrix< 4, float > result = computeModelMatrix();
+            result[ 12 ] = 0;
+            result[ 13 ] = 0;
+            result[ 14 ] = 0;
+            return result;
+        }
+        
 	private:
 		Vector3Impl _translate;
 		QuaternionImpl _rotate;

@@ -63,6 +63,9 @@ namespace crimild {
 
 		void setExponent( float value ) { _exponent = value; }
 		float getExponent( void ) const { return _exponent; }
+        
+        Matrix4f computeProjectionMatrix( void ) const;
+        Matrix4f computeViewMatrix( void ) const;
 
 	private:
 		Type _type;

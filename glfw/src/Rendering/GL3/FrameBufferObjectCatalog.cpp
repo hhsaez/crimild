@@ -73,6 +73,7 @@ void gl3::FrameBufferObjectCatalog::unbind( FrameBufferObject *fbo )
     glBindFramebuffer( GL_FRAMEBUFFER, 0 );
 
 	Catalog< FrameBufferObject >::unbind( fbo );
+    glViewport( 0.0f, 0.0f, getRenderer()->getScreenBuffer()->getWidth(), getRenderer()->getScreenBuffer()->getHeight() );
 
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
