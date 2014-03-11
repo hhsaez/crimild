@@ -58,11 +58,21 @@ void ForwardRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Ca
     
     renderer->bindFrameBuffer( _forwardPassBuffer.get() );
     
-    renderShadedObject( renderer, renderQueue, camera );
+    renderShadedObjects( renderer, renderQueue, camera );
+//    renderTranslucentObjects( renderer, renderQueue, camera );
+    
+#if 0
+    for ( auto it : _shadowMaps ) {
+        if ( it.second != nullptr ) {
+            RenderPass::render( renderer, it.second->getBuffer(), nullptr );
+        }
+    }
+#endif
     
     renderer->unbindFrameBuffer( _forwardPassBuffer.get() );
     
     RenderPass::render( renderer, _forwardPassBuffer.get(), nullptr );
+    
 }
 
 void ForwardRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
@@ -128,7 +138,7 @@ void ForwardRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *rend
     renderer->unbindProgram( program );
 }
 
-void ForwardRenderPass::renderShadedObject( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
+void ForwardRenderPass::renderShadedObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
 {
     renderQueue->getOpaqueObjects().each( [&]( Geometry *geometry, int ) {
         
@@ -207,5 +217,71 @@ void ForwardRenderPass::renderShadedObject( Renderer *renderer, RenderQueue *ren
         });
     });
 
+}
+
+void ForwardRenderPass::renderTranslucentObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
+{
+    renderQueue->getTranslucentObjects().each( [&]( Geometry *geometry, int ) {
+        
+        RenderStateComponent *renderState = geometry->getComponent< RenderStateComponent >();
+        renderState->foreachMaterial( [&]( Material *material ) {
+            geometry->foreachPrimitive( [&]( Primitive *primitive ) mutable {
+                ShaderProgram *program = material->getProgram();
+                if ( program == nullptr ) {
+                    program = renderer->getFallbackProgram( material, geometry, primitive );
+                }
+                
+                if ( program == nullptr ) {
+                    return;
+                }
+                
+                renderer->bindProgram( program );
+                
+                // bind material properties
+                renderer->bindMaterial( program, material );
+                
+                // bind lights
+                renderQueue->getLights().each( [&]( Light *light, int ) {
+                    renderer->bindLight( program, light );
+                });
+                
+                // bind joints and other skinning information
+                SkinComponent *skinning = geometry->getComponent< SkinComponent >();
+                if ( skinning != nullptr && skinning->hasJoints() ) {
+                    skinning->foreachJoint( [&]( Node *node, unsigned int index ) {
+                        JointComponent *joint = node->getComponent< JointComponent >();
+                        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::JOINT_WORLD_MATRIX_UNIFORM + index ), joint->getWorldMatrix() );
+                        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::JOINT_INVERSE_BIND_MATRIX_UNIFORM + index ), joint->getInverseBindMatrix() );
+                    });
+                }
+                
+                // bind vertex and index buffers
+                renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
+                renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
+                
+                renderer->applyTransformations( program, geometry, camera );
+                
+                // draw primitive
+                renderer->drawPrimitive( program, primitive );
+                
+                renderer->restoreTransformations( program, geometry, camera );
+                
+                // unbind primitive buffers
+                renderer->unbindVertexBuffer( program, primitive->getVertexBuffer() );
+                renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
+                
+                // unbind lights
+                renderQueue->getLights().each( [&]( Light *light, int ) {
+                    renderer->unbindLight( program, light );
+                });
+                
+                // unbind material properties
+                renderer->unbindMaterial( program, material );
+                
+                renderer->unbindProgram( program );
+            });
+        });
+    });
+    
 }
 

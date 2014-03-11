@@ -26,6 +26,7 @@
  */
 
 #include "Visitors/ComputeRenderQueue.hpp"
+#include "Components/RenderStateComponent.hpp"
 
 using namespace crimild;
 
@@ -50,7 +51,19 @@ void ComputeRenderQueue::traverse( Node *scene )
 
 void ComputeRenderQueue::visitGeometry( Geometry *geometry )
 {
-    _result->getOpaqueObjects().add( geometry );
+    bool opaque = true;
+    geometry->getComponent< RenderStateComponent >()->foreachMaterial( [&]( Material *material ) {
+        if ( material->getAlphaState()->isEnabled() ) {
+            opaque = false;
+        }
+    });
+    
+    if ( opaque ) {
+        _result->getOpaqueObjects().add( geometry );
+    }
+    else {
+        _result->getTranslucentObjects().add( geometry );
+    }
 }
 
 void ComputeRenderQueue::visitLight( Light *light )

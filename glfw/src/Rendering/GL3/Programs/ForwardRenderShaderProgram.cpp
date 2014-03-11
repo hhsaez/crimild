@@ -164,7 +164,7 @@ const char *forward_fs = { CRIMILD_TO_STRING(
             vec3 depth = vPosition.xyz / vPosition.w;
             depth.z = length( vWorldVertex.xyz - uLights[ 0 ].position ) * LinearDepthConstant;
             float shadow = 1.0;
-            depth.z *= 0.99;
+            depth.z *= 0.98;
             vec4 shadowColor = texture( uShadowMap, depth.xy );
             float shadowDepth = unpack( shadowColor );
             if ( depth.z > shadowDepth ) {

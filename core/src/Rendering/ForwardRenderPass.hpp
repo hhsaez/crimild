@@ -45,7 +45,8 @@ namespace crimild {
         virtual void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
         
     protected:
-        virtual void renderShadedObject( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+        virtual void renderShadedObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+        virtual void renderTranslucentObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
         
     private:
         void computeShadowMaps( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
