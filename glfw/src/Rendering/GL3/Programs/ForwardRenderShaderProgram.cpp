@@ -70,10 +70,6 @@ const char *forward_vs = { CRIMILD_TO_STRING(
 
 const char *forward_fs = { CRIMILD_TO_STRING(
                                              
-    const float Near = 1.0;
-    const float Far = 512.0;
-    const float LinearDepthConstant = 1.0 / ( Far - Near );
-                                             
     struct Light {
        vec3 position;
        vec3 attenuation;
@@ -105,6 +101,8 @@ const char *forward_fs = { CRIMILD_TO_STRING(
     uniform bool uUseColorMap;
     uniform bool uUseShadowMap;
     uniform sampler2D uShadowMap;
+                                             
+    uniform float uLinearDepthConstant;
 
     out vec4 vFragColor;
                                              
@@ -162,9 +160,9 @@ const char *forward_fs = { CRIMILD_TO_STRING(
         
         if ( uUseShadowMap ) {
             vec3 depth = vPosition.xyz / vPosition.w;
-            depth.z = length( vWorldVertex.xyz - uLights[ 0 ].position ) * LinearDepthConstant;
+            depth.z = length( vWorldVertex.xyz - uLights[ 0 ].position ) * uLinearDepthConstant;
             float shadow = 1.0;
-            depth.z *= 0.98;
+            //depth.z *= 0.99;
             vec4 shadowColor = texture( uShadowMap, depth.xy );
             float shadowDepth = unpack( shadowColor );
             if ( depth.z > shadowDepth ) {
@@ -211,6 +209,8 @@ ForwardRenderShaderProgram::ForwardRenderShaderProgram( void )
 
     registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::SHADOW_MAP_UNIFORM, "uShadowMap" );
     registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::USE_SHADOW_MAP_UNIFORM, "uUseShadowMap" );
+    
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LINEAR_DEPTH_CONSTANT_UNIFORM, "uLinearDepthConstant" );
 }
 
 ForwardRenderShaderProgram::~ForwardRenderShaderProgram( void )

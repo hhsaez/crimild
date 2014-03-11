@@ -52,10 +52,15 @@ namespace crimild {
         const Matrix4f &getLightViewMatrix( void ) const { return _lightViewMatrix; }
         void setLightViewMatrix( const Matrix4f &m ) { _lightViewMatrix = m; }
         
+        float getLinearDepthConstant( void ) const { return _linearDepthConstant; }
+        void setLinearDepthConstant( float value  ) { _linearDepthConstant = value; }
+        void computeLinearDepthConstant( float near, float far ) { _linearDepthConstant = 1.0f / ( far - near ); }
+        
     private:
         Light *_source;
         Matrix4f _lightProjectionMatrix;
         Matrix4f _lightViewMatrix;
+        float _linearDepthConstant;
         Pointer< FrameBufferObject > _buffer;
     };
     

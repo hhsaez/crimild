@@ -66,6 +66,15 @@ namespace crimild {
         
         Matrix4f computeProjectionMatrix( void ) const;
         Matrix4f computeViewMatrix( void ) const;
+        
+        bool shouldCastShadows( void ) const { return _castShadows; }
+        void setCastShadows( bool value ) { _castShadows = value; }
+        
+        float getShadowNearCoeff( void ) const { return _shadowNearCoeff; }
+        void setShadowNearCoeff( float value ) { _shadowNearCoeff = value; }
+        
+        float getShadowFarCoeff( void ) const { return _shadowFarCoeff; }
+        void setShadowFarCoeff( float value ) { _shadowFarCoeff = value; }
 
 	private:
 		Type _type;
@@ -74,6 +83,9 @@ namespace crimild {
 		float _outerCutoff;
 		float _innerCutoff;
 		float _exponent;
+        bool _castShadows;
+        float _shadowNearCoeff;
+        float _shadowFarCoeff;
 
 	public:
 		virtual void accept( NodeVisitor &visitor ) override;

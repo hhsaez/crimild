@@ -36,8 +36,12 @@ Light::Light( Type type )
 	  _color( 1.0f, 1.0f, 1.0f, 1.0f ),
 	  _outerCutoff( 0.0f ),
 	  _innerCutoff( 0.0f ),
-	  _exponent( 0.0f )
+	  _exponent( 0.0f ),
+      _castShadows( false ),
+      _shadowNearCoeff( 1.0f ),
+      _shadowFarCoeff( 512.0f )
 {
+    
 }
 
 Light::~Light( void )
@@ -52,7 +56,7 @@ void Light::accept( NodeVisitor &visitor )
 
 Matrix4f Light::computeProjectionMatrix( void ) const
 {
-    Frustumf f( 45.0f, 1.0f, 0.01f, 128.0f );
+    Frustumf f( 45.0f, 1.0f, getShadowNearCoeff(), getShadowFarCoeff() );
     return f.computeProjectionMatrix();
 }
 

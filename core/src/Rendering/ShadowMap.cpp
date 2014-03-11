@@ -26,6 +26,7 @@
  */
 
 #include "ShadowMap.hpp"
+#include "SceneGraph/Light.hpp"
 
 using namespace crimild;
 
@@ -33,7 +34,7 @@ ShadowMap::ShadowMap( Light *source, FrameBufferObject *fbo )
     : _source( source ),
       _buffer( fbo != nullptr ? fbo : new FrameBufferObject( 1024, 1024 ) )
 {
-    
+    computeLinearDepthConstant( source->getShadowNearCoeff(), source->getShadowFarCoeff() );
 }
 
 ShadowMap::~ShadowMap( void )

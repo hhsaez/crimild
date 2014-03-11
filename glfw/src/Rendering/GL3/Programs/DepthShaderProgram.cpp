@@ -48,11 +48,9 @@ const char *depth_vs = { CRIMILD_TO_STRING(
 )};
 
 const char *depth_fs = { CRIMILD_TO_STRING(
-    const float NEAR = 1.0;
-    const float FAR = 512.0;
-    const float LINEAR_DEPTH_CONSTANT = 1.0 / ( FAR - NEAR );
-                                           
     in vec4 vPosition;
+                                           
+    uniform float uLinearDepthConstant;
                                            
     out vec4 vFragColor;
                                            
@@ -74,7 +72,7 @@ const char *depth_fs = { CRIMILD_TO_STRING(
 
     void main( void )
     {
-        float linearDepth = length( vPosition ) * LINEAR_DEPTH_CONSTANT;
+        float linearDepth = length( vPosition ) * uLinearDepthConstant;
         vFragColor = pack( linearDepth );
     }
 )};
@@ -89,6 +87,8 @@ DepthShaderProgram::DepthShaderProgram( void )
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM, "uMMatrix" );
     
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_DIFFUSE_UNIFORM, "uMaterial.diffuse" );
+    
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LINEAR_DEPTH_CONSTANT_UNIFORM, "uLinearDepthConstant" );
 }
 
 DepthShaderProgram::~DepthShaderProgram( void )

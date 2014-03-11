@@ -87,6 +87,10 @@ void ForwardRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *rend
     
     renderQueue->getLights().each( [&]( Light *light, int ) {
         
+        if ( !light->shouldCastShadows() ) {
+            return;
+        }
+        
         ShadowMap *map = _shadowMaps[ light ].get();
         if ( map == nullptr ) {
             Pointer< ShadowMap > shadowMapPtr( new ShadowMap( light ) );
@@ -104,6 +108,9 @@ void ForwardRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *rend
             RenderStateComponent *renderState = geometry->getComponent< RenderStateComponent >();
             if ( renderState->hasMaterials() ) {
                 geometry->foreachPrimitive( [&]( Primitive *primitive ) mutable {
+                    
+                    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LINEAR_DEPTH_CONSTANT_UNIFORM ), map->getLinearDepthConstant() );
+                    
                     // bind joints and other skinning information
                     SkinComponent *skinning = geometry->getComponent< SkinComponent >();
                     if ( skinning != nullptr && skinning->hasJoints() ) {
@@ -159,11 +166,13 @@ void ForwardRenderPass::renderShadedObjects( Renderer *renderer, RenderQueue *re
                 // bind material properties
                 renderer->bindMaterial( program, material );
                 
+                renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::USE_SHADOW_MAP_UNIFORM ), false );
                 for ( auto it : _shadowMaps ) {
                     if ( it.second != nullptr ) {
                         renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_SOURCE_PROJECTION_MATRIX_UNIFORM ), it.second->getLightProjectionMatrix() );
                         renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_SOURCE_VIEW_MATRIX_UNIFORM ), it.second->getLightViewMatrix() );
                         renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::USE_SHADOW_MAP_UNIFORM ), true );
+                        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LINEAR_DEPTH_CONSTANT_UNIFORM ), it.second->getLinearDepthConstant() );
                         renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::SHADOW_MAP_UNIFORM ), it.second->getBuffer()->getTexture() );
                     }
                 }
