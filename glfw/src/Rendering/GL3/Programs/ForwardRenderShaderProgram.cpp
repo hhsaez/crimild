@@ -37,6 +37,7 @@ const char *forward_vs = { CRIMILD_TO_STRING(
                                              
     in vec3 aPosition;
     in vec3 aNormal;
+    in vec3 aTangent;
     in vec2 aTextureCoord;
    
     uniform mat4 uPMatrix;
@@ -46,8 +47,12 @@ const char *forward_vs = { CRIMILD_TO_STRING(
     uniform mat4 uLightSourceProjectionMatrix;
     uniform mat4 uLightSourceViewMatrix;
    
+    uniform bool uUseNormalMap;
+                                             
     out vec4 vWorldVertex;
     out vec3 vWorldNormal;
+    out vec3 vWorldTangent;
+    out vec3 vWorldBiTangent;
     out vec2 vTextureCoord;
     out vec3 vViewVec;
     out vec4 vPosition;
@@ -60,6 +65,11 @@ const char *forward_vs = { CRIMILD_TO_STRING(
        
         vWorldNormal = normalize( mat3( uNMatrix ) * aNormal );
        
+	    if ( uUseNormalMap ) {
+	    	vWorldTangent = normalize( mat3( uNMatrix ) * aTangent );
+	    	vWorldBiTangent = cross( vWorldNormal, vWorldTangent );
+	    }
+        
         vViewVec = normalize( -viewVertex.xyz );
         
 	    vTextureCoord = aTextureCoord;
@@ -89,6 +99,8 @@ const char *forward_fs = { CRIMILD_TO_STRING(
 
     in vec4 vWorldVertex;
     in vec3 vWorldNormal;
+    in vec3 vWorldTangent;
+    in vec3 vWorldBiTangent;
     in vec3 vViewVec;
     in vec2 vTextureCoord;
     in vec4 vPosition;
@@ -99,8 +111,12 @@ const char *forward_fs = { CRIMILD_TO_STRING(
 
     uniform sampler2D uColorMap;
     uniform bool uUseColorMap;
-    uniform bool uUseShadowMap;
+    uniform sampler2D uNormalMap;
+    uniform bool uUseNormalMap;
+    uniform sampler2D uSpecularMap;
+    uniform bool uUseSpecularMap;
     uniform sampler2D uShadowMap;
+    uniform bool uUseShadowMap;
                                              
     uniform float uLinearDepthConstant;
 
@@ -128,10 +144,11 @@ const char *forward_fs = { CRIMILD_TO_STRING(
     		discard;
     	}
         
-        vec4 specularColor = vec4( 1.0, 1.0, 1.0, 1.0 );
+    	vec4 specularColor = uUseSpecularMap ? texture( uSpecularMap, vTextureCoord ) : vec4( 1.0, 1.0, 1.0, 1.0 );
+    	specularColor *= uMaterial.specular;
         
-        vFragColor.rgb = uMaterial.ambient.rgb;
-        vFragColor.a = 1.0;
+    	vFragColor.rgb = uMaterial.ambient.rgb;
+    	vFragColor.a = color.a;
         
         for ( int i = 0; i < 4; i++ ) {
             if ( i >= uLightCount ) {
@@ -140,6 +157,24 @@ const char *forward_fs = { CRIMILD_TO_STRING(
             
             vec3 lightVec = normalize( uLights[ i ].position - vWorldVertex.xyz );
             vec3 halfVector = -normalize( reflect( lightVec, vWorldNormal ) );
+            
+            if ( uUseNormalMap ) {
+            	vec3 temp;
+            	vec3 lightDir = lightVec;
+                
+                temp.x = dot( lightVec, vWorldTangent );
+                temp.y = dot( lightVec, vWorldBiTangent );
+                temp.z = dot( lightVec, vWorldNormal );
+                lightVec = normalize( temp );
+                
+                temp.x = dot( halfVector, vWorldTangent );
+                temp.y = dot( halfVector, vWorldBiTangent );
+                temp.z = dot( halfVector, vWorldNormal );
+                halfVector = normalize( temp );
+                
+                normal = 2.0 * texture( uNormalMap, vTextureCoord ).xyz - 1.0;
+                normal = normalize( normal );
+            }
             
             float l = dot( normal, lightVec );
             if ( l > 0.0 ) {
@@ -150,7 +185,7 @@ const char *forward_fs = { CRIMILD_TO_STRING(
                     spotlight = pow( spotlight * spotlightFade, uLights[ i ].exponent );
                 }
                 
-                float s = pow( max( dot( halfVector, vViewVec ), 0.0 ), uMaterial.shininess );
+                float s = pow( max( dot( halfVector, uUseNormalMap ? normal : vViewVec ), 0.0 ), uMaterial.shininess );
                 float d = distance( vWorldVertex.xyz, uLights[ i ].position );
                 float a = 1.0 / ( uLights[ i ].attenuation.x + ( uLights[ i ].attenuation.y * d ) + ( uLights[ i ].attenuation.z * d * d ) );
                 
@@ -179,6 +214,7 @@ ForwardRenderShaderProgram::ForwardRenderShaderProgram( void )
 { 
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::NORMAL_ATTRIBUTE, "aNormal" );
+	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TANGENT_ATTRIBUTE, "aTangent" );
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
     
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::PROJECTION_MATRIX_UNIFORM, "uPMatrix" );
@@ -193,6 +229,10 @@ ForwardRenderShaderProgram::ForwardRenderShaderProgram( void )
     
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM, "uColorMap" );
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_USE_COLOR_MAP_UNIFORM, "uUseColorMap" );
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_NORMAL_MAP_UNIFORM, "uNormalMap" );
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_USE_NORMAL_MAP_UNIFORM, "uUseNormalMap" );
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_SPECULAR_MAP_UNIFORM, "uSpecularMap" );
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_USE_SPECULAR_MAP_UNIFORM, "uUseSpecularMap" );
     
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_COUNT_UNIFORM, "uLightCount" );
 	for ( int i = 0; i < 4; i++ ) {
