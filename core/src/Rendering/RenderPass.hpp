@@ -54,6 +54,9 @@ namespace crimild {
 		virtual void render( Renderer *renderer, Geometry *geometry, Primitive *primitive, Material *material, Camera *camera );
         virtual void render( Renderer *renderer, Texture *texture, ShaderProgram *program );
 		virtual void render( Renderer *renderer, FrameBufferObject *fbo, ShaderProgram *program );
+        
+    protected:
+        Primitive *getScreenPrimitive( void ) { return _screen.get(); }
 
 	private:
 		Pointer< Primitive > _screen;

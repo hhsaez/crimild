@@ -107,6 +107,7 @@
 #include "Rendering/AlphaState.hpp"
 #include "Rendering/BufferObject.hpp"
 #include "Rendering/Catalog.hpp"
+#include "Rendering/DeferredRenderPass.hpp"
 #include "Rendering/ForwardRenderPass.hpp"
 #include "Rendering/FrameBufferObject.hpp"
 #include "Rendering/Image.hpp"

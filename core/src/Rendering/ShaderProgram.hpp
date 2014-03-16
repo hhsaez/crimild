@@ -89,6 +89,10 @@ namespace crimild {
 				JOINT_INVERSE_BIND_MATRIX_UNIFORM = 6500,
                 
                 LINEAR_DEPTH_CONSTANT_UNIFORM = 8000,
+                
+                G_BUFFER_COLOR_MAP_UNIFORM = 10000,
+                G_BUFFER_POSITION_MAP_UNIFORM = 10010,
+                G_BUFFER_NORMAL_MAP_UNIFORM = 10020,
 			};
 		};
 

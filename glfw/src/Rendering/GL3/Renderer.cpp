@@ -39,6 +39,8 @@
 #include "Library/TextureShaderProgram.hpp"
 #include "Programs/DepthShaderProgram.hpp"
 #include "Programs/ForwardRenderShaderProgram.hpp"
+#include "Programs/DeferredRenderShaderProgram.hpp"
+#include "Programs/SSAOShaderProgram.hpp"
 #include "Utils.hpp"
 
 #include <GL/glew.h>
@@ -63,6 +65,8 @@ gl3::Renderer::Renderer( FrameBufferObject *screenBuffer )
     
     _programs[ "depth" ] = new DepthShaderProgram();
     _programs[ "forward" ] = new ForwardRenderShaderProgram();
+    _programs[ "deferred" ] = new DeferredRenderShaderProgram();
+    _programs[ "ssao" ] = new SSAOShaderProgram();
 
 	setScreenBuffer( screenBuffer );
 }
@@ -227,6 +231,16 @@ ShaderProgram *gl3::Renderer::getDepthProgram( void )
 ShaderProgram *gl3::Renderer::getForwardPassProgram( void )
 {
     return _programs[ "forward" ].get();
+}
+
+ShaderProgram *gl3::Renderer::getDeferredPassProgram( void )
+{
+    return _programs[ "deferred" ].get();
+}
+
+ShaderProgram *gl3::Renderer::getShaderProgram( const char *name )
+{
+    return _programs[ name ].get();
 }
 
 ShaderProgram *gl3::Renderer::getFallbackProgram( Material *material, Geometry *geometry, Primitive *primitive )

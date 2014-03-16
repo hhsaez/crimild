@@ -68,6 +68,8 @@ namespace crimild {
         int getHeight( void ) const { return _height; }
         
         Texture *getTexture( void ) { return _texture.get(); }
+        bool useFloatTexture( void ) const { return _useFloatTexture; }
+        void setUseFloatTexture( bool value ) { _useFloatTexture = value; }
         
     private:
         int _id;
@@ -76,6 +78,7 @@ namespace crimild {
         int _width;
         int _height;
         Pointer< Texture > _texture;
+        bool _useFloatTexture = false;
     };
 
 	class FrameBufferObject : public Catalog< FrameBufferObject >::Resource {
@@ -85,8 +88,6 @@ namespace crimild {
 
 		int getWidth( void ) const { return _width; }
 		int getHeight( void ) const { return _height; }
-
-//		Texture *getTexture( void );
 
 		void setClearColor( const RGBAColorf &color ) { _clearColor = color; }
 		const RGBAColorf &getClearColor( void ) const { return _clearColor; }

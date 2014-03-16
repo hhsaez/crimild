@@ -132,6 +132,8 @@ namespace crimild {
 	public:
         virtual ShaderProgram *getDepthProgram( void ) { return nullptr; }
         virtual ShaderProgram *getForwardPassProgram( void ) { return nullptr; }
+        virtual ShaderProgram *getDeferredPassProgram( void ) { return nullptr; }
+        virtual ShaderProgram *getShaderProgram( const char *name ) { return nullptr; }
 		virtual ShaderProgram *getFallbackProgram( Material *, Geometry *, Primitive * ) { return nullptr; }
 
 	public:

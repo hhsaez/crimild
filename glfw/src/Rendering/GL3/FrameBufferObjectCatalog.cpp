@@ -55,11 +55,32 @@ void gl3::FrameBufferObjectCatalog::bind( FrameBufferObject *fbo )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
+    const GLenum fboBuffers[] = {
+        GL_COLOR_ATTACHMENT0,
+        GL_COLOR_ATTACHMENT1,
+        GL_COLOR_ATTACHMENT2,
+        GL_COLOR_ATTACHMENT3,
+        GL_COLOR_ATTACHMENT4,
+        GL_COLOR_ATTACHMENT5,
+        GL_COLOR_ATTACHMENT6,
+        GL_COLOR_ATTACHMENT7,
+    };
+    
 	Catalog< FrameBufferObject >::bind( fbo );
 
     glBindFramebuffer( GL_FRAMEBUFFER, fbo->getCatalogId() );
     glViewport( 0.0f, 0.0f, fbo->getWidth(), fbo->getHeight() );
     const RGBAColorf &clearColor = fbo->getClearColor();
+    
+    // this may be wrong. what if there is no depth buffer?
+    int fboColorBufferCount = 0;
+    fbo->getRenderTargets().each( [&]( RenderTarget *target, int ) {
+        if ( target->getType() == RenderTarget::Type::COLOR_RGB || target->getType() == RenderTarget::Type::COLOR_RGBA ) {
+            fboColorBufferCount++;
+        }
+    });
+    glDrawBuffers( fboColorBufferCount, fboBuffers );
+    
     glClearColor( clearColor.r(), clearColor.g(), clearColor.b(), clearColor.a() );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
@@ -144,16 +165,53 @@ void gl3::FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
                     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
                     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
                     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-                    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, targetWidth, targetHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0 );
+                    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, targetWidth, targetHeight, 0, GL_RGBA, target->useFloatTexture() ? GL_FLOAT : GL_UNSIGNED_BYTE, 0 );
                     glFramebufferTexture2D( GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, target->getTexture()->getCatalogId(), 0 );
                 }
             }
         });
 
         GLenum status = glCheckFramebufferStatus( GL_FRAMEBUFFER );
-        if ( status != GL_FRAMEBUFFER_COMPLETE ) {
-            Log::Error << "Incomplete framebuffer object (error code = " << ( int ) status << ")" << Log::End;
-            exit( 1 );
+        switch ( status ) {
+            case GL_FRAMEBUFFER_COMPLETE:
+                Log::Debug << "Framebuffer setup complete" << Log::End;
+                break;
+            case GL_FRAMEBUFFER_UNDEFINED:
+                Log::Error << "Cannot setup FrameBuffer due to invalid window setup" << Log::End;
+                exit( 1 );
+                break;
+            case GL_FRAMEBUFFER_UNSUPPORTED:
+                Log::Error << "Invalid FBO attachments format. Check configuration for each attachment" << Log::End;
+                exit( 1 );
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+                Log::Error << "Cannot setup FrameBuffer. Error configuring attachments" << Log::End;
+                exit( 1 );
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+                Log::Error << "Cannot setup FrameBuffer. Attachments are not enabled for drawing" << Log::End;
+                exit( 1 );
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
+                Log::Error << "Cannot setup FrameBuffer. Layer params don't match" << Log::End;
+                exit( 1 );
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+                Log::Error << "Cannot setup FrameBuffer. No attachments found" << Log::End;
+                exit( 1 );
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+                Log::Error << "Cannot setup FrameBuffer. Multisample params don't match" << Log::End;
+                exit( 1 );
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+                Log::Error << "Cannot setup FrameBuffer. Attachments are not enabled for reading" << Log::End;
+                exit( 1 );
+                break;
+            default:
+                Log::Error << "Incomplete framebuffer object. Unknown error code: " << ( int ) status << Log::End;
+                exit( 1 );
+                break;
         }
 
         glBindFramebuffer( GL_FRAMEBUFFER, 0 );

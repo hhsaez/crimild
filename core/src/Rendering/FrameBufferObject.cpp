@@ -56,17 +56,3 @@ FrameBufferObject::~FrameBufferObject( void )
 
 }
 
-/*
-Texture *FrameBufferObject::getTexture( void )
-{
-    Texture *texture = nullptr;
-    getRenderTargets().each( [&]( RenderTarget *target, int ) {
-        if ( target->getOutput() == RenderTarget::Output::TEXTURE || target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
-            texture = target->getTexture();
-        }
-    });
-    
-    return texture;
-}
-*/
-

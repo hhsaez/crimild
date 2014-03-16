@@ -43,6 +43,25 @@ namespace crimild {
 		virtual ~DeferredRenderPass( void );
         
         virtual void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+        
+    private:
+        void buildGBuffer( int width, int height );
+        void renderToGBuffer( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+        
+        void buildSSAOBuffer( int width, int height );
+        void computeSSAO( Renderer *renderer );
+        
+        void composeFrame( void );
+        
+    private:
+        Pointer< FrameBufferObject > _gBuffer;
+        Pointer< Texture > _gBufferDepthOutput;
+        Pointer< Texture > _gBufferPositionOutput;
+        Pointer< Texture > _gBufferNormalOutput;
+        Pointer< Texture > _gBufferColorOutput;
+        
+        Pointer< FrameBufferObject > _ssaoBuffer;
+        Pointer< Texture > _ssaoBufferOutput;
 	};
     
 }

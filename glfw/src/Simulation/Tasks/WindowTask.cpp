@@ -59,6 +59,8 @@ void WindowTask::start( void )
     					  GLFW_WINDOW ) ) {
     	throw RuntimeException( "Cannot created main window" );
     }
+    
+    glfwSetWindowTitle( Simulation::getCurrent()->getName().c_str() );
 
 	Simulation::getCurrent()->setRenderer( new gl3::Renderer( screenBuffer.get() ) );
 }

@@ -275,7 +275,7 @@ namespace crimild {
 			return result;
 		}
 
-		void lookAt( const Vector3Impl &target, const Vector3Impl &up )
+		void lookAt( const Vector3Impl &target, const Vector3Impl &up = Vector3Impl( 0, 1, 0 ) )
 		{
 			Vector3f direction = target - getTranslate();
 			direction.normalize();
