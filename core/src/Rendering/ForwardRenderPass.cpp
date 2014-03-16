@@ -65,7 +65,7 @@ void ForwardRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Ca
     renderer->bindFrameBuffer( _forwardPassBuffer.get() );
     
     renderShadedObjects( renderer, renderQueue, camera );
-//    renderTranslucentObjects( renderer, renderQueue, camera );
+    renderTranslucentObjects( renderer, renderQueue, camera );
     
 #if 0
     for ( auto it : _shadowMaps ) {

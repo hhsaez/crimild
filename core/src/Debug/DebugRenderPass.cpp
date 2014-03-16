@@ -29,7 +29,7 @@
 #include "Primitives/Primitive.hpp"
 #include "Primitives/SpherePrimitive.hpp"
 #include "SceneGraph/Geometry.hpp"
-#include "Rendering/VisibilitySet.hpp"
+#include "Rendering/RenderQueue.hpp"
 
 using namespace crimild;
 
@@ -46,21 +46,21 @@ DebugRenderPass::~DebugRenderPass( void )
 
 }
 
-void DebugRenderPass::render( Renderer *renderer, VisibilitySet *vs, Camera *camera ) 
+void DebugRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
 {
 	if ( _actualRenderPass != nullptr ) {
-		_actualRenderPass->render( renderer, vs, camera );
+		_actualRenderPass->render( renderer, renderQueue, camera );
 	}
-
-	vs->foreachGeometry( [&]( Geometry *geometry ) {
+    
+    renderQueue->getOpaqueObjects().each( [&]( Geometry *geometry, int ) {
 		if ( _renderBoundings ) {
 			renderBoundings( renderer, geometry, _debugMaterial.get(), camera );
 		}
-
+        
 		if ( _renderNormals ) {
 			renderNormalsAndTangents( renderer, geometry, _debugMaterial.get(), camera );
 		}
-	});
+    });
 }
 
 void DebugRenderPass::renderNormalsAndTangents( Renderer *renderer, Geometry *geometry, Material *material, Camera *camera )

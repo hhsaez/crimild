@@ -26,6 +26,7 @@
  */
 
 #include "Camera.hpp"
+#include "Rendering/ForwardRenderPass.hpp"
 
 using namespace crimild;
 
@@ -33,7 +34,7 @@ Camera::Camera( void )
 	: _frustum( 45.0, 4.0f / 3.0f, 0.01f, 1024.0f ),
 	  _viewport( 0.0f, 0.0f, 1.0f, 1.0f ),
       _viewMatrixIsCurrent( false ),
-      _renderPass( new RenderPass() )
+      _renderPass( new ForwardRenderPass() )
 {
 	_projectionMatrix = _frustum.computeProjectionMatrix();
 	_viewMatrix.makeIdentity();
@@ -42,7 +43,8 @@ Camera::Camera( void )
 Camera::Camera( float fov, float aspect, float near, float far )
 	: _frustum( fov, aspect, near, far ),
 	  _viewport( 0.0f, 0.0f, 1.0f, 1.0f ),
-      _viewMatrixIsCurrent( false )
+      _viewMatrixIsCurrent( false ),
+      _renderPass( new ForwardRenderPass() )
 {
 	_projectionMatrix = _frustum.computeProjectionMatrix();
 	_viewMatrix.makeIdentity();

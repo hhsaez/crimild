@@ -44,7 +44,7 @@ namespace crimild {
 		void setRenderNormals( bool value ) { _renderNormals = value; }
 		bool shouldRenderNormals( void ) const { return _renderNormals; }
 
-		virtual void render( Renderer *renderer, VisibilitySet *vs, Camera *camera );
+		virtual void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
 
 	private:
 		void renderNormalsAndTangents( Renderer *renderer, Geometry *geometry, Material *material, Camera *camera );
