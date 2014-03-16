@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,49 +25,40 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "OffscreenRenderPass.hpp"
-#include "Renderer.hpp"
-#include "VisibilitySet.hpp"
-
-#include "SceneGraph/Camera.hpp"
+#include "Rendering/DeferredRenderPass.hpp"
+#include "Rendering/Renderer.hpp"
+#include "Rendering/VisibilitySet.hpp"
+#include "Rendering/FrameBufferObject.hpp"
+#include "Rendering/RenderQueue.hpp"
+#include "SceneGraph/Geometry.hpp"
+#include "Components/RenderStateComponent.hpp"
+#include "Components/SkinComponent.hpp"
+#include "Components/JointComponent.hpp"
+#include "Primitives/QuadPrimitive.hpp"
 
 using namespace crimild;
 
-OffscreenRenderPass::OffscreenRenderPass( void )
-{
-
-}
-
-OffscreenRenderPass::~OffscreenRenderPass( void )
-{
-
-}
-
-void OffscreenRenderPass::attachImageEffect( ImageEffect *imageEffect )
-{
-    Pointer< ImageEffect > imageEffectPtr( imageEffect );
-	_imageEffects.push_back( imageEffectPtr );
-}
-
-void OffscreenRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
+DeferredRenderPass::DeferredRenderPass( void )
 {
     /*
-	if ( _offscreenBuffer == nullptr ) {
-		_offscreenBuffer = new FrameBufferObject( renderer->getScreenBuffer() );
-	}
-
-	renderer->bindFrameBuffer( _offscreenBuffer.get() );	
-	RenderPass::render( renderer, renderQueue, camera );
-	renderer->unbindFrameBuffer( _offscreenBuffer.get() );
-
-	if ( _imageEffects.size() > 0 ) {
-		for ( auto effect : _imageEffects ) {
-			RenderPass::render( renderer, _offscreenBuffer.get(), effect->getProgram() );	
-		}
-	}
-	else {
-		RenderPass::render( renderer, _offscreenBuffer.get(), nullptr );
-	}
+    Pointer< FrameBufferObject > gBuffer( new FrameBufferObject( 0, 0 ) );
+    
+    int width = 0;
+    int height = 0;
+    gBuffer->getRenderTargets().add( new RenderTarget( RenderTarget::Type::DEPTH_24, RenderTarget::Output::TEXTURE, width, height ) );
+    gBuffer->getRenderTargets().add( new RenderTarget( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
+    gBuffer->getRenderTargets().add( new RenderTarget( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
+    gBuffer->getRenderTargets().add( new RenderTarget( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
      */
+}
+
+DeferredRenderPass::~DeferredRenderPass( void )
+{
+    
+}
+
+void DeferredRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
+{
+
 }
 

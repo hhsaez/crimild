@@ -32,8 +32,22 @@ using namespace crimild;
 
 ShadowMap::ShadowMap( Light *source, FrameBufferObject *fbo )
     : _source( source ),
-      _buffer( fbo != nullptr ? fbo : new FrameBufferObject( 1024, 1024 ) )
+      _buffer( fbo )
 {
+    if ( _buffer == nullptr ) {
+        int width = 1024;
+        int height = 1024;
+        _buffer.set( new FrameBufferObject( width, height ) );
+        _buffer->getRenderTargets().add( new RenderTarget( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
+        _buffer->getRenderTargets().add( new RenderTarget( RenderTarget::Type::DEPTH_16, RenderTarget::Output::RENDER, width, height ) );
+    }
+    
+    _buffer->getRenderTargets().each( [&]( RenderTarget *target, int ) {
+        if ( target->getOutput() == RenderTarget::Output::TEXTURE || target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
+            _texture.set( target->getTexture() );
+        }
+    });
+    
     computeLinearDepthConstant( source->getShadowNearCoeff(), source->getShadowFarCoeff() );
 }
 

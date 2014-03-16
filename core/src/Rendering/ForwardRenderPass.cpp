@@ -53,7 +53,13 @@ void ForwardRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Ca
     computeShadowMaps( renderer, renderQueue, camera );
     
     if ( _forwardPassBuffer == nullptr ) {
-        _forwardPassBuffer.set( new FrameBufferObject( renderer->getScreenBuffer() ) );
+        int width = renderer->getScreenBuffer()->getWidth();
+        int height = renderer->getScreenBuffer()->getHeight();
+        _forwardPassBuffer.set( new FrameBufferObject( width, height ) );
+        RenderTarget *result = new RenderTarget( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height );
+        _forwardPassResult = result->getTexture();
+        _forwardPassBuffer->getRenderTargets().add( result );
+        _forwardPassBuffer->getRenderTargets().add( new RenderTarget( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
     }
     
     renderer->bindFrameBuffer( _forwardPassBuffer.get() );
@@ -71,7 +77,7 @@ void ForwardRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Ca
     
     renderer->unbindFrameBuffer( _forwardPassBuffer.get() );
     
-    RenderPass::render( renderer, _forwardPassBuffer.get(), nullptr );
+    RenderPass::render( renderer, _forwardPassResult.get(), nullptr );
     
 }
 
@@ -173,7 +179,7 @@ void ForwardRenderPass::renderShadedObjects( Renderer *renderer, RenderQueue *re
                         renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_SOURCE_VIEW_MATRIX_UNIFORM ), it.second->getLightViewMatrix() );
                         renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::USE_SHADOW_MAP_UNIFORM ), true );
                         renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LINEAR_DEPTH_CONSTANT_UNIFORM ), it.second->getLinearDepthConstant() );
-                        renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::SHADOW_MAP_UNIFORM ), it.second->getBuffer()->getTexture() );
+                        renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::SHADOW_MAP_UNIFORM ), it.second->getTexture() );
                     }
                 }
                 
@@ -214,7 +220,7 @@ void ForwardRenderPass::renderShadedObjects( Renderer *renderer, RenderQueue *re
                 
                 for ( auto it : _shadowMaps ) {
                     if ( it.second != nullptr ) {
-                        renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::SHADOW_MAP_UNIFORM ), it.second->getBuffer()->getTexture() );
+                        renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::SHADOW_MAP_UNIFORM ), it.second->getTexture() );
                     }
                 }
                 

@@ -84,49 +84,82 @@ void gl3::FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
 
 	Catalog< FrameBufferObject >::load( fbo );
 
-    unsigned int width = fbo->getWidth();
-    unsigned int height = fbo->getHeight();
-
     int framebufferId = fbo->getCatalogId();
     if ( framebufferId > 0 ) {
         glBindFramebuffer( GL_FRAMEBUFFER, framebufferId );
-
-        GLuint colorBuffer;
-        glGenRenderbuffers( 1, &colorBuffer );
-        glBindRenderbuffer( GL_RENDERBUFFER, colorBuffer );
-        glRenderbufferStorage( GL_RENDERBUFFER, GL_RGBA8, width, height );
-        glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorBuffer );
-
-        if ( fbo->getDepthBits() > 0 ) {
-            GLuint depthBuffer;
-            glGenRenderbuffers( 1, &depthBuffer );
-            glBindRenderbuffer( GL_RENDERBUFFER, depthBuffer );
-            glRenderbufferStorage( GL_RENDERBUFFER, ( fbo->getDepthBits() == 16 ? GL_DEPTH_COMPONENT16 : GL_DEPTH_COMPONENT24 ), width, height );
-            glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer );
-        }
-
-        // generate texture that will be used as the rendering target
-        GLuint offscreenSurface;
-        glGenTextures( 1, &offscreenSurface );
-        glBindTexture( GL_TEXTURE_2D, offscreenSurface );
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-        glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0 );
-        glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, offscreenSurface, 0 );
-        fbo->getTexture()->setCatalogInfo( getRenderer()->getTextureCatalog(), offscreenSurface );
+        
+        int colorAttachmentOffset = 0;
+        fbo->getRenderTargets().each( [&]( RenderTarget *target, int index ) {
+            int targetWidth = target->getWidth();
+            int targetHeight = target->getHeight();
+            
+            GLuint renderBufferId;
+            glGenRenderbuffers( 1, &renderBufferId );
+            target->setId( renderBufferId );
+            
+            glBindRenderbuffer( GL_RENDERBUFFER, target->getId() );
+            
+            GLenum internalFormat = GL_INVALID_ENUM;
+            GLenum attachment = GL_INVALID_ENUM;
+            switch ( target->getType() ) {
+                case RenderTarget::Type::DEPTH_16:
+                    internalFormat = GL_DEPTH_COMPONENT16;
+                    attachment = GL_DEPTH_ATTACHMENT;
+                    break;
+                case RenderTarget::Type::DEPTH_24:
+                    internalFormat = GL_DEPTH_COMPONENT24;
+                    attachment = GL_DEPTH_ATTACHMENT;
+                    break;
+                case RenderTarget::Type::DEPTH_32:
+                    internalFormat = GL_DEPTH_COMPONENT32;
+                    attachment = GL_DEPTH_ATTACHMENT;
+                    break;
+                case RenderTarget::Type::COLOR_RGB:
+                    internalFormat = GL_RGB8;
+                    attachment = GL_COLOR_ATTACHMENT0 + colorAttachmentOffset++;
+                    break;
+                case RenderTarget::Type::COLOR_RGBA:
+                    internalFormat = GL_RGBA8;
+                    attachment = GL_COLOR_ATTACHMENT0 + colorAttachmentOffset++;
+                    break;
+                default:
+                    Log::Error << "Invalid target type: " << ( int ) target->getType() << Log::End;
+                    break;
+            }
+            
+            if ( internalFormat != GL_INVALID_ENUM && attachment != GL_INVALID_ENUM ) {
+                glRenderbufferStorage( GL_RENDERBUFFER, internalFormat, targetWidth, targetHeight );
+                
+                if ( target->getOutput() == RenderTarget::Output::RENDER || target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
+                    glFramebufferRenderbuffer( GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, target->getId() );
+                }
+                
+                if ( target->getOutput() == RenderTarget::Output::TEXTURE || target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
+                    GLuint textureId;
+                    glGenTextures( 1, &textureId );
+                    target->getTexture()->setCatalogInfo( getRenderer()->getTextureCatalog(), textureId );
+                    
+                    glBindTexture( GL_TEXTURE_2D, target->getTexture()->getCatalogId() );
+                    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+                    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+                    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+                    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+                    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, targetWidth, targetHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0 );
+                    glFramebufferTexture2D( GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, target->getTexture()->getCatalogId(), 0 );
+                }
+            }
+        });
 
         GLenum status = glCheckFramebufferStatus( GL_FRAMEBUFFER );
         if ( status != GL_FRAMEBUFFER_COMPLETE ) {
-            Log::Error << "Incomplete framebuffer object (error code = " << ( int ) status << Log::End;
+            Log::Error << "Incomplete framebuffer object (error code = " << ( int ) status << ")" << Log::End;
             exit( 1 );
         }
 
         glBindFramebuffer( GL_FRAMEBUFFER, 0 );
     }
     else {
-        Log::Error << "Cannot create framebuffer object (out of memory?)" << Log::End;
+        Log::Error << "Cannot create framebuffer object. Out of memory?" << Log::End;
         exit( 1 );
     }
 
@@ -139,6 +172,19 @@ void gl3::FrameBufferObjectCatalog::unload( FrameBufferObject *fbo )
 
     GLuint framebufferId = fbo->getCatalogId();
     if ( framebufferId > 0 ) {
+        
+        fbo->getRenderTargets().each( []( RenderTarget *target, int ) {
+            GLuint targetId = target->getId();
+            if ( targetId > 0 ) {
+                if ( target->getOutput() == RenderTarget::Output::TEXTURE ) {
+                    GLuint textureId = target->getTexture()->getCatalogId();
+                    glDeleteTextures( 1, &textureId );
+                    target->getTexture()->setCatalogInfo( nullptr, 0 );
+                }
+                glDeleteRenderbuffers( 1, &targetId );
+            }
+        });
+        
         glDeleteFramebuffers( 1, &framebufferId );
 
         Catalog< FrameBufferObject >::unload( fbo );

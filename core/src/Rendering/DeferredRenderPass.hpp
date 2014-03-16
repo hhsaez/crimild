@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,49 +25,27 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "OffscreenRenderPass.hpp"
-#include "Renderer.hpp"
-#include "VisibilitySet.hpp"
+#ifndef CRIMILD_RENDERER_DEFERRED_RENDER_PASS_
+#define CRIMILD_RENDERER_DEFERRED_RENDER_PASS_
 
-#include "SceneGraph/Camera.hpp"
+#include "RenderPass.hpp"
+#include "ShadowMap.hpp"
 
-using namespace crimild;
+#include <map>
 
-OffscreenRenderPass::OffscreenRenderPass( void )
-{
-
+namespace crimild {
+    
+    class Light;
+    
+	class DeferredRenderPass : public RenderPass {
+	public:
+		DeferredRenderPass( void );
+		virtual ~DeferredRenderPass( void );
+        
+        virtual void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+	};
+    
 }
 
-OffscreenRenderPass::~OffscreenRenderPass( void )
-{
-
-}
-
-void OffscreenRenderPass::attachImageEffect( ImageEffect *imageEffect )
-{
-    Pointer< ImageEffect > imageEffectPtr( imageEffect );
-	_imageEffects.push_back( imageEffectPtr );
-}
-
-void OffscreenRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
-{
-    /*
-	if ( _offscreenBuffer == nullptr ) {
-		_offscreenBuffer = new FrameBufferObject( renderer->getScreenBuffer() );
-	}
-
-	renderer->bindFrameBuffer( _offscreenBuffer.get() );	
-	RenderPass::render( renderer, renderQueue, camera );
-	renderer->unbindFrameBuffer( _offscreenBuffer.get() );
-
-	if ( _imageEffects.size() > 0 ) {
-		for ( auto effect : _imageEffects ) {
-			RenderPass::render( renderer, _offscreenBuffer.get(), effect->getProgram() );	
-		}
-	}
-	else {
-		RenderPass::render( renderer, _offscreenBuffer.get(), nullptr );
-	}
-     */
-}
+#endif
 

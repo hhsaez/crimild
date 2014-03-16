@@ -45,6 +45,7 @@ namespace crimild {
         Light *getSource( void ) { return _source; }
         
         FrameBufferObject *getBuffer( void ) { return _buffer.get(); }
+        Texture *getTexture ( void ) { return _texture.get(); }
         
         const Matrix4f &getLightProjectionMatrix( void ) const { return _lightProjectionMatrix; }
         void setLightProjectionMatrix( const Matrix4f &m ) { _lightProjectionMatrix = m; }
@@ -61,6 +62,7 @@ namespace crimild {
         Matrix4f _lightProjectionMatrix;
         Matrix4f _lightViewMatrix;
         float _linearDepthConstant;
+        Pointer< Texture > _texture;
         Pointer< FrameBufferObject > _buffer;
     };
     

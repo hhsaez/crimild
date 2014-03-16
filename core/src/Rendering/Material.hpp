@@ -88,8 +88,8 @@ namespace crimild {
 		Pointer< Texture > _normalMap;
 		Pointer< Texture > _specularMap;
 
-		Pointer< AlphaState > _alphaState;
 		Pointer< DepthState > _depthState;
+		Pointer< AlphaState > _alphaState;
 	};
 
 }

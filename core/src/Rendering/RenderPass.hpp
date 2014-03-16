@@ -41,6 +41,7 @@ namespace crimild {
 	class FrameBufferObject;
 	class ShaderProgram;
     class RenderQueue;
+    class Texture;
 
 	class RenderPass : public SharedObject {
 	public:
@@ -51,6 +52,7 @@ namespace crimild {
 		virtual void render( Renderer *renderer, VisibilitySet *vs, Camera *camera );
 		virtual void render( Renderer *renderer, Geometry *geometry, Camera *camera );
 		virtual void render( Renderer *renderer, Geometry *geometry, Primitive *primitive, Material *material, Camera *camera );
+        virtual void render( Renderer *renderer, Texture *texture, ShaderProgram *program );
 		virtual void render( Renderer *renderer, FrameBufferObject *fbo, ShaderProgram *program );
 
 	private:

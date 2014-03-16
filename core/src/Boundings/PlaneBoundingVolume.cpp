@@ -31,8 +31,8 @@
 using namespace crimild;
 
 PlaneBoundingVolume::PlaneBoundingVolume( void )
-	: _plane( Plane3f( Vector3f( 0.0f, 1.0f, 0.0f ), 0.0f ) ),
-	  _center( 0.0f, 0.0f, 0.0f ),
+	: _center( 0.0f, 0.0f, 0.0f ),
+      _plane( Plane3f( Vector3f( 0.0f, 1.0f, 0.0f ), 0.0f ) ),
       _r( 0.0f, 0.0f, 0.0f ),
       _s( 0.0f, 0.0f, 0.0f ),
       _t( 0.0f, 0.0f, 0.0f )
@@ -40,8 +40,8 @@ PlaneBoundingVolume::PlaneBoundingVolume( void )
 }
 
 PlaneBoundingVolume::PlaneBoundingVolume( const Plane3f &plane )
-	: _plane( plane ),
-	  _center( 0.0f, 0.0f, 0.0f ),
+	: _center( 0.0f, 0.0f, 0.0f ),
+      _plane( plane ),
       _r( 0.0f, 0.0f, 0.0f ),
       _s( 0.0f, 0.0f, 0.0f ),
       _t( 0.0f, 0.0f, 0.0f )

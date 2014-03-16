@@ -45,8 +45,6 @@ gl3::VertexBufferObjectCatalog::~VertexBufferObjectCatalog( void )
 
 int gl3::VertexBufferObjectCatalog::getNextResourceId( void )
 {
-	int compositeId;
-
 	GLuint vaoId;
 	glGenVertexArrays( 1, &vaoId );
 

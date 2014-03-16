@@ -30,6 +30,7 @@
 
 #include "RenderPass.hpp"
 #include "ShadowMap.hpp"
+#include "Texture.hpp"
 
 #include <map>
 
@@ -53,6 +54,7 @@ namespace crimild {
         
         std::map< Light *, Pointer< ShadowMap > > _shadowMaps;
         Pointer< FrameBufferObject > _forwardPassBuffer;
+        Pointer< Texture > _forwardPassResult;
 	};
     
 }

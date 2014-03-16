@@ -32,44 +32,72 @@
 #include "Texture.hpp"
 
 #include "Mathematics/Vector.hpp"
+#include "Foundation/SharedObjectList.hpp"
 
 #include <memory>
 
 namespace crimild {
+    
+    class RenderTarget : public SharedObject {
+    public:
+        enum class Type {
+            COLOR_RGB,
+            COLOR_RGBA,
+            DEPTH_16,
+            DEPTH_24,
+            DEPTH_32
+        };
+        
+        enum class Output {
+            RENDER,
+            TEXTURE,
+            RENDER_AND_TEXTURE
+        };
+        
+    public:
+        RenderTarget( Type type, Output output, int width, int height );
+        virtual ~RenderTarget( void );
+        
+        Type getType( void ) const { return _type; }
+        Output getOutput( void ) const { return _output; }
+        
+        int getId( void ) const { return _id; }
+        void setId( int value ) { _id = value; }
+        
+        int getWidth( void ) const { return _width; }
+        int getHeight( void ) const { return _height; }
+        
+        Texture *getTexture( void ) { return _texture.get(); }
+        
+    private:
+        int _id;
+        Type _type;
+        Output _output;
+        int _width;
+        int _height;
+        Pointer< Texture > _texture;
+    };
 
 	class FrameBufferObject : public Catalog< FrameBufferObject >::Resource {
 	public:
-		FrameBufferObject( int width, int height,
-						   int redBits = 8, int greenBits = 8, int blueBits = 8, int alphaBits = 8,
-						   int depthBits = 16, int stencilBits = 0 );
-		FrameBufferObject( FrameBufferObject *fb );
+        FrameBufferObject( int width, int height );
 		virtual ~FrameBufferObject( void );
 
 		int getWidth( void ) const { return _width; }
 		int getHeight( void ) const { return _height; }
-		int getRedBits( void ) const { return _redBits; }
-		int getGreenBits( void ) const { return _greenBits; }
-		int getBlueBits( void ) const { return _blueBits; }
-		int getAlphaBits( void ) const { return _alphaBits; }
-		int getDepthBits( void ) const { return _depthBits; }
-		int getStencilBits( void ) const { return _stencilBits; }
 
-		Texture *getTexture( void ) { return _texture.get(); }
+//		Texture *getTexture( void );
 
 		void setClearColor( const RGBAColorf &color ) { _clearColor = color; }
 		const RGBAColorf &getClearColor( void ) const { return _clearColor; }
+        
+        SharedObjectList< RenderTarget > &getRenderTargets( void ) { return _renderTargets; }
 
 	private:
 		int _width;
 		int _height;
-		int _redBits;
-		int _greenBits;
-		int _blueBits;
-		int _alphaBits;
-		int _depthBits;
-		int _stencilBits;
 		RGBAColorf _clearColor;
-		Pointer< Texture > _texture;
+        SharedObjectList< RenderTarget > _renderTargets;
 	};
 
 	typedef Catalog< FrameBufferObject > FrameBufferObjectCatalog;

@@ -142,8 +142,42 @@ void RenderPass::render( Renderer *renderer, Geometry *geometry, Primitive *prim
 	renderer->unbindProgram( program );
 }
 
+void RenderPass::render( Renderer *renderer, Texture *texture, ShaderProgram *program )
+{
+    if ( program == nullptr ) {
+        program = renderer->getFallbackProgram( nullptr, nullptr, nullptr );
+        if ( program == nullptr ) {
+            return;
+        }
+    }
+     
+    // bind shader program first
+    renderer->bindProgram( program );
+    
+    // bind framebuffer texture
+    renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM ), texture );
+     
+    // bind vertex and index buffers
+    renderer->bindVertexBuffer( program, _screen->getVertexBuffer() );
+    renderer->bindIndexBuffer( program, _screen->getIndexBuffer() );
+     
+    // draw primitive
+    renderer->drawPrimitive( program, _screen.get() );
+     
+    // unbind primitive buffers
+    renderer->unbindVertexBuffer( program, _screen->getVertexBuffer() );
+    renderer->unbindIndexBuffer( program, _screen->getIndexBuffer() );
+     
+    // unbind framebuffer texture
+    renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM ), texture );
+     
+    // lastly, unbind the shader program
+    renderer->unbindProgram( program );
+}
+
 void RenderPass::render( Renderer *renderer, FrameBufferObject *fbo, ShaderProgram *program )
 {
+    /*
 	if ( program == nullptr ) {
 		program = renderer->getFallbackProgram( nullptr, nullptr, nullptr );
 		if ( program == nullptr ) {
@@ -173,5 +207,6 @@ void RenderPass::render( Renderer *renderer, FrameBufferObject *fbo, ShaderProgr
 
 	// lastly, unbind the shader program
 	renderer->unbindProgram( program );
+     */
 }
 
