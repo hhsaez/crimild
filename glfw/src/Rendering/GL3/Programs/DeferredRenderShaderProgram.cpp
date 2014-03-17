@@ -40,8 +40,8 @@ const char *deferred_vs = { CRIMILD_TO_STRING(
     uniform mat4 uMMatrix;
     uniform mat4 uNMatrix;
                                               
-    out vec4 vViewVertex;
-    out vec3 vViewNormal;
+    out vec4 vWorldVertex;
+    out vec3 vWorldNormal;
     out float vLinearDepth;
 
     void main ()
@@ -49,27 +49,28 @@ const char *deferred_vs = { CRIMILD_TO_STRING(
         // replace this with an actual uniform
         float uLinearDepth = 1000.0;
         
-        vViewVertex = uVMatrix * uMMatrix * vec4( aPosition, 1.0 );
-        gl_Position = uPMatrix * vViewVertex;
+        vWorldVertex = uMMatrix * vec4( aPosition, 1.0 );
+        vec4 viewVertex = uVMatrix * vWorldVertex;
+        gl_Position = uPMatrix * viewVertex;
      
-        vLinearDepth = length( vViewVertex ) / uLinearDepth;
-        vViewNormal = mat3( uVMatrix * uNMatrix ) * aNormal;
+        vLinearDepth = length( viewVertex ) / uLinearDepth;
+        vWorldNormal = mat3( uVMatrix * uNMatrix ) * aNormal;
     }
 )};
 
 const char *deferred_fs = { CRIMILD_TO_STRING(
-    in vec4 vViewVertex;
-    in vec3 vViewNormal;
+    in vec4 vWorldVertex;
+    in vec3 vWorldNormal;
     in float vLinearDepth;
                                               
     out vec4 vFragData[ 3 ];
                                               
     void main( void )
     {
-        vec3 normal = normalize( vViewNormal );
+        vec3 normal = normalize( vWorldNormal );
         
         vFragData[ 0 ] = vec4( 1.0, 1.0, 1.0, 1.0 );
-        vFragData[ 1 ] = vec4( vViewVertex.xyz, vLinearDepth );
+        vFragData[ 1 ] = vec4( vWorldVertex.xyz, vLinearDepth );
         vFragData[ 2 ] = vec4( normal, 0.0 );
     }
 )};

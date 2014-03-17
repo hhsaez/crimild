@@ -55,8 +55,8 @@ const char *ssao_fs = { CRIMILD_TO_STRING(
     float samplePixels( vec3 srcPosition, vec3 srcNormal, vec2 uv )
     {
         // move this to an actual uniform
-        float uOccluderBias = 0.05;
-        vec2 uAttenuation = vec2( 1.0, 5.0 );
+        float uOccluderBias = 0.01;
+        vec2 uAttenuation = vec2( 1.0, 1.0 );
         
         vec3 dstPosition = texture( uPositionMap, uv ).xyz;
         
@@ -69,6 +69,10 @@ const char *ssao_fs = { CRIMILD_TO_STRING(
         return intensity * attenuation;
     }
                                           
+    float rand( vec2 co ){
+        return fract( sin( dot( co.xy ,vec2( 12.9898, 78.233 ) ) ) * 43758.5453 );
+    }
+                                          
     void main( void )
     {
         // move these to actual uniforms
@@ -78,7 +82,7 @@ const char *ssao_fs = { CRIMILD_TO_STRING(
         vec3 srcPosition = texture( uPositionMap, vTextureCoord ).xyz;
         vec3 srcNormal = texture( uNormalMap, vTextureCoord ).xyz;
         float srcDepth = texture( uPositionMap, vTextureCoord ).w;
-        vec2 randVec = vec2( 1.0, 0.0 );
+        vec2 randVec = normalize( vec2( 0.5 * rand( srcNormal.xy ) - 0.5, 0.5 * rand( srcPosition.xy ) - 0.5 ) );
         
         float kernelRadius = uSamplingRadius * ( 1.0 - srcDepth );
         

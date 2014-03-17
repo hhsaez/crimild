@@ -39,7 +39,8 @@ Light::Light( Type type )
 	  _exponent( 0.0f ),
       _castShadows( false ),
       _shadowNearCoeff( 1.0f ),
-      _shadowFarCoeff( 512.0f )
+      _shadowFarCoeff( 512.0f ),
+      _ambient( 0.0f, 0.0f, 0.0f, 0.0f )
 {
     
 }

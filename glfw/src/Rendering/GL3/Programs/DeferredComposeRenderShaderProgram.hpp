@@ -25,54 +25,22 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_RENDERER_DEFERRED_RENDER_PASS_
-#define CRIMILD_RENDERER_DEFERRED_RENDER_PASS_
+#ifndef CRIMILD_GL3_SHADER_LIBRARY_DEFERRED_COMPOSE_RENDER_
+#define CRIMILD_GL3_SHADER_LIBRARY_DEFERRED_COMPOSE_RENDER_
 
-#include "RenderPass.hpp"
-#include "ShadowMap.hpp"
-
-#include <map>
+#include <Crimild.hpp>
 
 namespace crimild {
     
-    class Light;
-    
-	class DeferredRenderPass : public RenderPass {
-	public:
-		DeferredRenderPass( void );
-		virtual ~DeferredRenderPass( void );
+	namespace gl3 {
         
-        virtual void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+		class DeferredComposeRenderShaderProgram : public ShaderProgram {
+		public:
+			DeferredComposeRenderShaderProgram( void );
+			virtual ~DeferredComposeRenderShaderProgram( void );
+		};
         
-    private:
-        void buildAccumBuffer( int width, int heigth );
-        
-        void buildGBuffer( int width, int height );
-        void renderToGBuffer( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
-        
-        void buildFrameBuffer( int width, int height );
-        void composeFrame( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
-        
-        void buildSSAOBuffer( int width, int height );
-        void computeSSAO( Renderer *renderer );
-        void applySSAO( Renderer *renderer );
-        
-    private:
-        Pointer< FrameBufferObject > _gBuffer;
-        Pointer< Texture > _gBufferDepthOutput;
-        Pointer< Texture > _gBufferPositionOutput;
-        Pointer< Texture > _gBufferNormalOutput;
-        Pointer< Texture > _gBufferColorOutput;
-        
-        Pointer< FrameBufferObject > _frameBuffer;
-        Pointer< Texture > _frameBufferOutput;
-        
-        Pointer< FrameBufferObject > _ssaoBuffer;
-        Pointer< Texture > _ssaoBufferOutput;
-        
-        Pointer< FrameBufferObject > _accumBuffer;
-        Pointer< Texture > _accumBufferOutput;
-	};
+	}
     
 }
 

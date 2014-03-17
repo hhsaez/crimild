@@ -75,6 +75,9 @@ namespace crimild {
         
         float getShadowFarCoeff( void ) const { return _shadowFarCoeff; }
         void setShadowFarCoeff( float value ) { _shadowFarCoeff = value; }
+        
+        const RGBAColorf &getAmbient( void ) const { return _ambient; }
+        void setAmbient( const RGBAColorf &ambient ) { _ambient = ambient; }
 
 	private:
 		Type _type;
@@ -86,6 +89,7 @@ namespace crimild {
         bool _castShadows;
         float _shadowNearCoeff;
         float _shadowFarCoeff;
+        RGBAColorf _ambient;
 
 	public:
 		virtual void accept( NodeVisitor &visitor ) override;
