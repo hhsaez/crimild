@@ -105,6 +105,8 @@ void gl3::Renderer::configure( void )
     glEnable( GL_DEPTH_TEST );
     glDepthFunc( GL_LESS );
     glEnable( GL_PROGRAM_POINT_SIZE );
+    glEnable( GL_CULL_FACE );
+    glCullFace( GL_BACK );
 
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
