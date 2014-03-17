@@ -56,7 +56,7 @@ const char *ssao_fs = { CRIMILD_TO_STRING(
     {
         // move this to an actual uniform
         float uOccluderBias = 0.01;
-        vec2 uAttenuation = vec2( 1.0, 1.0 );
+        vec2 uAttenuation = vec2( 1.0, 5.0 );
         
         vec3 dstPosition = texture( uPositionMap, uv ).xyz;
         
@@ -76,7 +76,7 @@ const char *ssao_fs = { CRIMILD_TO_STRING(
     void main( void )
     {
         // move these to actual uniforms
-        float uSamplingRadius = 20.0;
+        float uSamplingRadius = 40.0;
         float uTexelSize = 1.0 / 1024.0;
         
         vec3 srcPosition = texture( uPositionMap, vTextureCoord ).xyz;
