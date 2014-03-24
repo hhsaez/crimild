@@ -88,7 +88,7 @@ namespace crimild {
             clear();
         }
         
-        bool isEmpty( void ) const { return _objects.size() > 0; }
+        bool isEmpty( void ) const { return _objects.size() == 0; }
         
         void add( ObjectType *obj )
         {
@@ -120,6 +120,19 @@ namespace crimild {
             for ( auto oPtr : _objects ) {
                 callback( oPtr.get(), i++ );
             }
+        }
+            
+        ObjectType *find( std::function< bool( ObjectType * ) > callback )
+        {
+            ObjectType *result = nullptr;
+            for ( auto oPtr : _objects ) {
+                if ( callback( oPtr.get() ) ) {
+                    result = oPtr.get();
+                    break;
+                }
+            }
+            
+            return result;
         }
         
     private:

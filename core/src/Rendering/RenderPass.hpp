@@ -29,7 +29,9 @@
 #define CRIMILD_RENDERER_RENDER_PASS_
 
 #include "Foundation/SharedObject.hpp"
+#include "Foundation/SharedObjectList.hpp"
 #include "Primitives/Primitive.hpp"
+#include "Rendering/ImageEffect.hpp"
 
 namespace crimild {
 
@@ -55,11 +57,14 @@ namespace crimild {
         virtual void render( Renderer *renderer, Texture *texture, ShaderProgram *program );
 		virtual void render( Renderer *renderer, FrameBufferObject *fbo, ShaderProgram *program );
         
+        SharedObjectList< ImageEffect > &getImageEffects( void ) { return _imageEffects; }
+        
     protected:
         Primitive *getScreenPrimitive( void ) { return _screen.get(); }
 
 	private:
 		Pointer< Primitive > _screen;
+        SharedObjectList< ImageEffect > _imageEffects;
 	};
 
 }

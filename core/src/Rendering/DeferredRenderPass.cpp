@@ -51,20 +51,26 @@ DeferredRenderPass::~DeferredRenderPass( void )
 
 void DeferredRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
 {
-#if 0
-    RenderPass::render( renderer, renderQueue, camera );
-#else
     renderToGBuffer( renderer, renderQueue, camera );
     composeFrame( renderer, renderQueue, camera );
-//    RenderPass::render( renderer, _frameBufferOutput.get(), nullptr );
     
-    computeSSAO( renderer );
-//    RenderPass::render( renderer, _ssaoBufferOutput.get(), nullptr );
-    applySSAO( renderer );
+    Texture *inputs[] = {
+        _frameBufferOutput.get(),
+        _gBufferColorOutput.get(),
+        _gBufferPositionOutput.get(),
+        _gBufferNormalOutput.get(),
+    };
     
-    RenderPass::render( renderer, _accumBufferOutput.get(), nullptr );
-    
-#endif
+    if ( getImageEffects().isEmpty() ) {
+        RenderPass::render( renderer, _frameBufferOutput.get(), nullptr );
+    }
+    else {
+        getImageEffects().each( [&]( ImageEffect *effect, int ) {
+            effect->apply( renderer, 4, inputs, getScreenPrimitive(), _accumBuffer.get() );
+        });
+        
+        RenderPass::render( renderer, _accumBufferOutput.get(), nullptr );
+    }
 }
 
 void DeferredRenderPass::buildAccumBuffer( int width, int height )
@@ -98,6 +104,10 @@ void DeferredRenderPass::buildGBuffer( int width, int height )
     normalTarget->setUseFloatTexture( true );
     _gBufferNormalOutput = normalTarget->getTexture();
     _gBuffer->getRenderTargets().add( normalTarget );
+    
+    if ( _accumBuffer == nullptr ) {
+        buildAccumBuffer( width, height );
+    }
 }
 
 void DeferredRenderPass::renderToGBuffer( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
@@ -232,109 +242,5 @@ void DeferredRenderPass::composeFrame( Renderer *renderer, RenderQueue *renderQu
     
     // unbind buffer for ssao output
     renderer->unbindFrameBuffer( _frameBuffer.get() );
-}
-
-void DeferredRenderPass::buildSSAOBuffer( int width, int height )
-{
-    _ssaoBuffer.set( new FrameBufferObject( width, height ) );
-    _ssaoBuffer->getRenderTargets().add( new RenderTarget( RenderTarget::Type::DEPTH_16, RenderTarget::Output::RENDER, width, height ) );
-    
-    RenderTarget *colorTarget = new RenderTarget( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height );
-    _ssaoBufferOutput = colorTarget->getTexture();
-    _ssaoBuffer->getRenderTargets().add( colorTarget );
-}
-
-void DeferredRenderPass::computeSSAO( Renderer *renderer )
-{
-    if ( _ssaoBuffer == nullptr ) {
-        int width = renderer->getScreenBuffer()->getWidth();
-        int height = renderer->getScreenBuffer()->getHeight();
-        buildSSAOBuffer( width, height );
-    }
-    
-    // bind buffer for ssao output
-    renderer->bindFrameBuffer( _ssaoBuffer.get() );
-    
-    ShaderProgram *program = renderer->getShaderProgram( "ssao" );
-    if ( program == nullptr ) {
-        Log::Error << "Cannot find shader program for SSAO" << Log::End;
-        exit( 1 );
-        return;
-    }
-    
-    // bind shader program first
-    renderer->bindProgram( program );
-    
-    // bind framebuffer texture
-    renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_POSITION_MAP_UNIFORM ), _gBufferPositionOutput.get() );
-    renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_NORMAL_MAP_UNIFORM ), _gBufferNormalOutput.get() );
-    
-    // bind vertex and index buffers
-    renderer->bindVertexBuffer( program, getScreenPrimitive()->getVertexBuffer() );
-    renderer->bindIndexBuffer( program, getScreenPrimitive()->getIndexBuffer() );
-    
-    // draw primitive
-    renderer->drawPrimitive( program, getScreenPrimitive() );
-    
-    // unbind primitive buffers
-    renderer->unbindVertexBuffer( program, getScreenPrimitive()->getVertexBuffer() );
-    renderer->unbindIndexBuffer( program, getScreenPrimitive()->getIndexBuffer() );
-    
-    // unbind framebuffer texture
-    renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_POSITION_MAP_UNIFORM ), _gBufferPositionOutput.get() );
-    renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_NORMAL_MAP_UNIFORM ), _gBufferNormalOutput.get() );
-    
-    // lastly, unbind the shader program
-    renderer->unbindProgram( program );
-    
-    // unbind buffer for ssao output
-    renderer->unbindFrameBuffer( _ssaoBuffer.get() );
-}
-
-void DeferredRenderPass::applySSAO( Renderer *renderer )
-{
-    if ( _accumBuffer == nullptr ) {
-        int width = renderer->getScreenBuffer()->getWidth();
-        int height = renderer->getScreenBuffer()->getHeight();
-        buildAccumBuffer( width, height );
-    }
-    
-    // bind buffer for ssao output
-    renderer->bindFrameBuffer( _accumBuffer.get() );
-    
-    ShaderProgram *program = renderer->getShaderProgram( "ssaoBlend" );
-    if ( program == nullptr ) {
-        Log::Error << "Cannot find shader program for blending SSAO" << Log::End;
-        exit( 1 );
-        return;
-    }
-    
-    // bind shader program first
-    renderer->bindProgram( program );
-    
-    // bind framebuffer texture
-    renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ), _frameBufferOutput.get() );
-    renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::SSAO_MAP_UNIFORM ), _ssaoBufferOutput.get() );
-    
-    // bind vertex and index buffers
-    renderer->bindVertexBuffer( program, getScreenPrimitive()->getVertexBuffer() );
-    renderer->bindIndexBuffer( program, getScreenPrimitive()->getIndexBuffer() );
-    
-    // draw primitive
-    renderer->drawPrimitive( program, getScreenPrimitive() );
-    
-    // unbind primitive buffers
-    renderer->unbindVertexBuffer( program, getScreenPrimitive()->getVertexBuffer() );
-    renderer->unbindIndexBuffer( program, getScreenPrimitive()->getIndexBuffer() );
-    
-    // unbind framebuffer texture
-    renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ), _frameBufferOutput.get() );
-    renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::SSAO_MAP_UNIFORM ), _ssaoBufferOutput.get() );
-    
-    // lastly, unbind the shader program
-    renderer->unbindProgram( program );
-    
-    // unbind buffer for ssao output
-    renderer->unbindFrameBuffer( _accumBuffer.get() );
 }
 
