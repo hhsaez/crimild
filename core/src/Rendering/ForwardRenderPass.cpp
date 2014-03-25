@@ -134,6 +134,12 @@ void ForwardRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *rend
         
         renderer->bindFrameBuffer( map->getBuffer() );
         
+        AlphaState alphaState( false );
+        renderer->setAlphaState( &alphaState );
+        
+        DepthState depthState( true );
+        renderer->setDepthState( &depthState );
+        
         renderQueue->getOpaqueObjects().each( [&]( Geometry *geometry, int ) {
             RenderStateComponent *renderState = geometry->getComponent< RenderStateComponent >();
             if ( renderState->hasMaterials() ) {
