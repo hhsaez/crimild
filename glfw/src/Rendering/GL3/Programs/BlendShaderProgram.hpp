@@ -25,41 +25,31 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_RENDERER_FORWARD_RENDER_PASS_
-#define CRIMILD_RENDERER_FORWARD_RENDER_PASS_
+#ifndef CRIMILD_GL3_SHADER_LIBRARY_BLEND_
+#define CRIMILD_GL3_SHADER_LIBRARY_BLEND_
 
-#include "RenderPass.hpp"
-#include "ShadowMap.hpp"
-#include "Texture.hpp"
-
-#include <map>
+#include <Crimild.hpp>
 
 namespace crimild {
     
-    class Light;
-    
-	class ForwardRenderPass : public RenderPass {
-	public:
-		ForwardRenderPass( void );
-		virtual ~ForwardRenderPass( void );
+	namespace gl3 {
         
-        virtual void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+		class BlendShaderProgram : public ShaderProgram {
+        public:
+            enum class BlendMode {
+                ADDITIVE = 0,
+                SCREEN = 1,
+                SOFTLIGHT = 2,
+                SOURCE = 10,
+                DESTINATION = 11
+            };
+            
+		public:
+			BlendShaderProgram( void );
+			virtual ~BlendShaderProgram( void );
+		};
         
-    protected:
-        virtual void renderShadedObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
-        virtual void renderTranslucentObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
-        
-    private:
-        void buildAccumBuffer( int width, int height );
-        void computeShadowMaps( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
-        
-        std::map< Light *, Pointer< ShadowMap > > _shadowMaps;
-        Pointer< FrameBufferObject > _forwardPassBuffer;
-        Pointer< Texture > _forwardPassResult;
-        
-        Pointer< FrameBufferObject > _accumBuffer;
-        Pointer< Texture > _accumBufferOutput;
-	};
+	}
     
 }
 

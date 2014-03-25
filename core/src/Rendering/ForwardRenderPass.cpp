@@ -60,6 +60,8 @@ void ForwardRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Ca
         _forwardPassResult = result->getTexture();
         _forwardPassBuffer->getRenderTargets().add( result );
         _forwardPassBuffer->getRenderTargets().add( new RenderTarget( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
+        
+        buildAccumBuffer( width, height );
     }
     
     renderer->bindFrameBuffer( _forwardPassBuffer.get() );
@@ -77,8 +79,30 @@ void ForwardRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Ca
     
     renderer->unbindFrameBuffer( _forwardPassBuffer.get() );
     
-    RenderPass::render( renderer, _forwardPassResult.get(), nullptr );
+    if ( getImageEffects().isEmpty() ) {
+        RenderPass::render( renderer, _forwardPassResult.get(), nullptr );
+    }
+    else {
+        Texture *inputs[] = {
+            _forwardPassResult.get(),
+        };
+        
+        getImageEffects().each( [&]( ImageEffect *effect, int ) {
+            effect->apply( renderer, 4, inputs, getScreenPrimitive(), _accumBuffer.get() );
+        });
+        
+        RenderPass::render( renderer, _accumBufferOutput.get(), nullptr );
+    }
+}
+
+void ForwardRenderPass::buildAccumBuffer( int width, int height )
+{
+    _accumBuffer.set( new FrameBufferObject( width, height ) );
+    _accumBuffer->getRenderTargets().add( new RenderTarget( RenderTarget::Type::DEPTH_16, RenderTarget::Output::RENDER, width, height ) );
     
+    RenderTarget *colorTarget = new RenderTarget( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height );
+    _accumBufferOutput = colorTarget->getTexture();
+    _accumBuffer->getRenderTargets().add( colorTarget );
 }
 
 void ForwardRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )

@@ -54,17 +54,17 @@ void DeferredRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, C
     renderToGBuffer( renderer, renderQueue, camera );
     composeFrame( renderer, renderQueue, camera );
     
-    Texture *inputs[] = {
-        _frameBufferOutput.get(),
-        _gBufferColorOutput.get(),
-        _gBufferPositionOutput.get(),
-        _gBufferNormalOutput.get(),
-    };
-    
     if ( getImageEffects().isEmpty() ) {
         RenderPass::render( renderer, _frameBufferOutput.get(), nullptr );
     }
     else {
+        Texture *inputs[] = {
+            _frameBufferOutput.get(),
+            _gBufferColorOutput.get(),
+            _gBufferPositionOutput.get(),
+            _gBufferNormalOutput.get(),
+        };
+        
         getImageEffects().each( [&]( ImageEffect *effect, int ) {
             effect->apply( renderer, 4, inputs, getScreenPrimitive(), _accumBuffer.get() );
         });

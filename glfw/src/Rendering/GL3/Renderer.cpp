@@ -43,6 +43,8 @@
 #include "Programs/DeferredComposeRenderShaderProgram.hpp"
 #include "Programs/SSAOShaderProgram.hpp"
 #include "Programs/SSAOBlendShaderProgram.hpp"
+#include "Programs/BlendShaderProgram.hpp"
+#include "Programs/BlurShaderProgram.hpp"
 #include "Utils.hpp"
 
 #include <GL/glew.h>
@@ -71,6 +73,8 @@ gl3::Renderer::Renderer( FrameBufferObject *screenBuffer )
     _programs[ "deferredCompose" ] = new DeferredComposeRenderShaderProgram();
     _programs[ "ssao" ] = new SSAOShaderProgram();
     _programs[ "ssaoBlend" ] = new SSAOBlendShaderProgram();
+    _programs[ "blend" ] = new BlendShaderProgram();
+    _programs[ "blur" ] = new BlurShaderProgram();
 
 	setScreenBuffer( screenBuffer );
 }

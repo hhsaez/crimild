@@ -205,6 +205,7 @@ const char *forward_fs = { CRIMILD_TO_STRING(
             }
             
             vFragColor = clamp( vec4( vFragColor.rgb * shadow, vFragColor.a ), 0.0, 1.0 );
+            vFragColor.a = 1.0;
         }
     }
 )};

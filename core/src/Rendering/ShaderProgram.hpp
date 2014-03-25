@@ -77,6 +77,8 @@ namespace crimild {
                 SHADOW_MAP_UNIFORM,
                 USE_SSAO_MAP_UNIFORM,
                 SSAO_MAP_UNIFORM,
+                USE_GLOW_MAP_UNIFORM,
+                GLOW_MAP_UNIFORM,
 
 				LIGHT_COUNT_UNIFORM = 5000,
 				LIGHT_POSITION_UNIFORM = 5100,
@@ -98,6 +100,10 @@ namespace crimild {
                 G_BUFFER_COLOR_MAP_UNIFORM = 10000,
                 G_BUFFER_POSITION_MAP_UNIFORM = 10010,
                 G_BUFFER_NORMAL_MAP_UNIFORM = 10020,
+                
+                BLEND_SRC_MAP_UNIFORM = 20000,
+                BLEND_DST_MAP_UNIFORM,
+                BLEND_MODE_UNIFORM,
 			};
 		};
 
