@@ -165,6 +165,6 @@ void ImageTGA::load( void )
 
     fclose( file );
 
-    setData( width, height, bpp, &data[ 0 ] );
+    setData( width, height, bpp, &data[ 0 ], bpp == 3 ? PixelFormat::RGB : PixelFormat::RGBA );
 }
 

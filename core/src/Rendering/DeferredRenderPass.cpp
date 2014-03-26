@@ -63,10 +63,11 @@ void DeferredRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, C
             _gBufferColorOutput.get(),
             _gBufferPositionOutput.get(),
             _gBufferNormalOutput.get(),
+            _gBufferEmissiveOutput.get(),
         };
         
         getImageEffects().each( [&]( ImageEffect *effect, int ) {
-            effect->apply( renderer, 4, inputs, getScreenPrimitive(), _accumBuffer.get() );
+            effect->apply( renderer, 5, inputs, getScreenPrimitive(), _accumBuffer.get() );
         });
         
         RenderPass::render( renderer, _accumBufferOutput.get(), nullptr );
@@ -104,6 +105,10 @@ void DeferredRenderPass::buildGBuffer( int width, int height )
     normalTarget->setUseFloatTexture( true );
     _gBufferNormalOutput = normalTarget->getTexture();
     _gBuffer->getRenderTargets().add( normalTarget );
+    
+    RenderTarget *emissiveTarget = new RenderTarget( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height );
+    _gBufferEmissiveOutput = emissiveTarget->getTexture();
+    _gBuffer->getRenderTargets().add( emissiveTarget );
     
     if ( _accumBuffer == nullptr ) {
         buildAccumBuffer( width, height );
@@ -213,6 +218,7 @@ void DeferredRenderPass::composeFrame( Renderer *renderer, RenderQueue *renderQu
     renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_COLOR_MAP_UNIFORM ), _gBufferColorOutput.get() );
     renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_POSITION_MAP_UNIFORM ), _gBufferPositionOutput.get() );
     renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_NORMAL_MAP_UNIFORM ), _gBufferNormalOutput.get() );
+    renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_EMISSIVE_MAP_UNIFORM ), _gBufferEmissiveOutput.get() );
     
     renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM ), camera->getViewMatrix() );
     
@@ -231,6 +237,7 @@ void DeferredRenderPass::composeFrame( Renderer *renderer, RenderQueue *renderQu
     renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_COLOR_MAP_UNIFORM ), _gBufferColorOutput.get() );
     renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_POSITION_MAP_UNIFORM ), _gBufferPositionOutput.get() );
     renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_NORMAL_MAP_UNIFORM ), _gBufferNormalOutput.get() );
+    renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_EMISSIVE_MAP_UNIFORM ), _gBufferEmissiveOutput.get() );
     
     // unbind lights
     renderQueue->getLights().each( [&]( Light *light, int ) {

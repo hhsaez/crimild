@@ -61,6 +61,7 @@ const char *deferred_compose_fs = { CRIMILD_TO_STRING(
     uniform sampler2D uColorMap;
     uniform sampler2D uPositionMap;
     uniform sampler2D uNormalMap;
+    uniform sampler2D uEmissiveMap;
 
     uniform int uLightCount;
     uniform Light uLights[ 4 ];
@@ -72,12 +73,14 @@ const char *deferred_compose_fs = { CRIMILD_TO_STRING(
         vec3 srcPosition = texture( uPositionMap, vTextureCoord ).xyz;
         float srcDepth = texture( uPositionMap, vTextureCoord ).w;
         vec3 srcNormal = texture( uNormalMap, vTextureCoord ).xyz;
+        float srcSpecular = texture( uNormalMap, vTextureCoord ).w;
         vec4 srcColor = texture( uColorMap, vTextureCoord );
+        vec4 srcEmissive = texture( uEmissiveMap, vTextureCoord );
         
-        vec4 specularColor = vec4( 1.0, 1.0, 1.0, 1.0 );
+        vec4 specularColor = vec4( srcSpecular, srcSpecular, srcSpecular, srcSpecular );
         
         vec4 color = srcColor;
-        vFragColor = vec4( 0.0, 0.0, 0.0, 1.0 );
+        vFragColor = vec4( srcEmissive.rgb, 1.0 );
         
         vec3 normal = normalize( srcNormal );
         
@@ -119,6 +122,7 @@ DeferredComposeRenderShaderProgram::DeferredComposeRenderShaderProgram( void )
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::G_BUFFER_COLOR_MAP_UNIFORM, "uColorMap" );
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::G_BUFFER_POSITION_MAP_UNIFORM, "uPositionMap" );
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::G_BUFFER_NORMAL_MAP_UNIFORM, "uNormalMap" );
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::G_BUFFER_EMISSIVE_MAP_UNIFORM, "uEmissiveMap" );
     
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_COUNT_UNIFORM, "uLightCount" );
 	for ( int i = 0; i < 4; i++ ) {

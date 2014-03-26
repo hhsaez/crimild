@@ -70,6 +70,8 @@ namespace crimild {
 				MATERIAL_USE_SPECULAR_MAP_UNIFORM,
 				MATERIAL_NORMAL_MAP_UNIFORM,
 				MATERIAL_USE_NORMAL_MAP_UNIFORM,
+				MATERIAL_EMISSIVE_MAP_UNIFORM,
+				MATERIAL_USE_EMISSIVE_MAP_UNIFORM,
                 
                 USE_COLOR_MAP_UNIFORM = 2000,
                 COLOR_MAP_UNIFORM,
@@ -98,8 +100,9 @@ namespace crimild {
                 LINEAR_DEPTH_CONSTANT_UNIFORM = 8000,
                 
                 G_BUFFER_COLOR_MAP_UNIFORM = 10000,
-                G_BUFFER_POSITION_MAP_UNIFORM = 10010,
-                G_BUFFER_NORMAL_MAP_UNIFORM = 10020,
+                G_BUFFER_POSITION_MAP_UNIFORM,
+                G_BUFFER_NORMAL_MAP_UNIFORM,
+                G_BUFFER_EMISSIVE_MAP_UNIFORM,
                 
                 BLEND_SRC_MAP_UNIFORM = 20000,
                 BLEND_DST_MAP_UNIFORM,

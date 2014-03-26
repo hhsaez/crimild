@@ -48,12 +48,17 @@ namespace crimild {
             int getAmount( void ) const { return _amount; }
             
         private:
+            void buildBlurBuffer( int width, int height );
             void buildGlowBuffer( int width, int height );
             void computeGlow( crimild::Renderer *renderer, Texture *srcImage, Primitive *primitive );
-            void applyGlow( crimild::Renderer *renderer, Texture *srcImage, Texture *glowMap, Primitive *primitive, FrameBufferObject *output );
+            void computeBlur( crimild::Renderer *renderer, Texture *srcImage, Primitive *primitive );
+            void applyResult( crimild::Renderer *renderer, Texture *srcImage, Texture *glowMap, Primitive *primitive, FrameBufferObject *output );
             
             int _amount;
             int _glowMapSize;
+            
+            Pointer< FrameBufferObject > _blurBuffer;
+            Pointer< Texture > _blurMap;
             
             Pointer< FrameBufferObject > _glowMapBuffer;
             Pointer< Texture > _glowMap;
