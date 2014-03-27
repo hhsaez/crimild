@@ -64,18 +64,11 @@ void ForwardRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Ca
         buildAccumBuffer( width, height );
     }
     
+#if 1
     renderer->bindFrameBuffer( _forwardPassBuffer.get() );
     
     renderShadedObjects( renderer, renderQueue, camera );
     renderTranslucentObjects( renderer, renderQueue, camera );
-    
-#if 0
-    for ( auto it : _shadowMaps ) {
-        if ( it.second != nullptr ) {
-            RenderPass::render( renderer, it.second->getBuffer(), nullptr );
-        }
-    }
-#endif
     
     renderer->unbindFrameBuffer( _forwardPassBuffer.get() );
     
@@ -93,6 +86,14 @@ void ForwardRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Ca
         
         RenderPass::render( renderer, _accumBufferOutput.get(), nullptr );
     }
+    
+#else
+    for ( auto it : _shadowMaps ) {
+        if ( it.second != nullptr ) {
+            RenderPass::render( renderer, it.second->getTexture(), nullptr );
+        }
+    }
+#endif
 }
 
 void ForwardRenderPass::buildAccumBuffer( int width, int height )

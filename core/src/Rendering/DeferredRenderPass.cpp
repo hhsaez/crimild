@@ -51,6 +51,9 @@ DeferredRenderPass::~DeferredRenderPass( void )
 
 void DeferredRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
 {
+    computeShadowMaps( renderer, renderQueue, camera );
+    
+#if 1
     renderToGBuffer( renderer, renderQueue, camera );
     composeFrame( renderer, renderQueue, camera );
     
@@ -72,6 +75,13 @@ void DeferredRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, C
         
         RenderPass::render( renderer, _accumBufferOutput.get(), nullptr );
     }
+#else
+    for ( auto it : _shadowMaps ) {
+        if ( it.second != nullptr ) {
+            RenderPass::render( renderer, it.second->getTexture(), nullptr );
+        }
+    }
+#endif
 }
 
 void DeferredRenderPass::buildAccumBuffer( int width, int height )
@@ -209,6 +219,17 @@ void DeferredRenderPass::composeFrame( Renderer *renderer, RenderQueue *renderQu
     // bind shader program first
     renderer->bindProgram( program );
     
+    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::USE_SHADOW_MAP_UNIFORM ), true );
+    for ( auto it : _shadowMaps ) {
+        if ( it.second != nullptr ) {
+            renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_SOURCE_PROJECTION_MATRIX_UNIFORM ), it.second->getLightProjectionMatrix() );
+            renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_SOURCE_VIEW_MATRIX_UNIFORM ), it.second->getLightViewMatrix() );
+            renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::USE_SHADOW_MAP_UNIFORM ), true );
+            renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LINEAR_DEPTH_CONSTANT_UNIFORM ), it.second->getLinearDepthConstant() );
+            renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::SHADOW_MAP_UNIFORM ), it.second->getTexture() );
+        }
+    }
+    
     // bind lights
     renderQueue->getLights().each( [&]( Light *light, int ) {
         renderer->bindLight( program, light );
@@ -244,10 +265,92 @@ void DeferredRenderPass::composeFrame( Renderer *renderer, RenderQueue *renderQu
         renderer->unbindLight( program, light );
     });
     
+    for ( auto it : _shadowMaps ) {
+        if ( it.second != nullptr ) {
+            renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::SHADOW_MAP_UNIFORM ), it.second->getTexture() );
+        }
+    }
+    
     // lastly, unbind the shader program
     renderer->unbindProgram( program );
     
     // unbind buffer for ssao output
     renderer->unbindFrameBuffer( _frameBuffer.get() );
+}
+
+void DeferredRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
+{
+    ShaderProgram *program = renderer->getDepthProgram();
+    if ( program == nullptr ) {
+        return;
+    }
+    
+    // bind shader program first
+    renderer->bindProgram( program );
+    
+    renderQueue->getLights().each( [&]( Light *light, int ) {
+        
+        if ( !light->shouldCastShadows() ) {
+            return;
+        }
+        
+        ShadowMap *map = _shadowMaps[ light ].get();
+        if ( map == nullptr ) {
+            Pointer< ShadowMap > shadowMapPtr( new ShadowMap( light ) );
+            shadowMapPtr->getBuffer()->setClearColor( RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ) );
+            shadowMapPtr->setLightProjectionMatrix( light->computeProjectionMatrix() );
+            _shadowMaps[ light ] = shadowMapPtr;
+            map = shadowMapPtr.get();
+        }
+        
+        map->setLightViewMatrix( light->computeViewMatrix() );
+        
+        renderer->bindFrameBuffer( map->getBuffer() );
+        
+        AlphaState alphaState( false );
+        renderer->setAlphaState( &alphaState );
+        
+        DepthState depthState( true );
+        renderer->setDepthState( &depthState );
+        
+        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LINEAR_DEPTH_CONSTANT_UNIFORM ), map->getLinearDepthConstant() );
+        
+        renderQueue->getOpaqueObjects().each( [&]( Geometry *geometry, int ) {
+            RenderStateComponent *renderState = geometry->getComponent< RenderStateComponent >();
+            if ( renderState->hasMaterials() ) {
+                geometry->foreachPrimitive( [&]( Primitive *primitive ) mutable {
+                    
+                    // bind joints and other skinning information
+                    SkinComponent *skinning = geometry->getComponent< SkinComponent >();
+                    if ( skinning != nullptr && skinning->hasJoints() ) {
+                        skinning->foreachJoint( [&]( Node *node, unsigned int index ) {
+                            JointComponent *joint = node->getComponent< JointComponent >();
+                            renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::JOINT_WORLD_MATRIX_UNIFORM + index ), joint->getWorldMatrix() );
+                            renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::JOINT_INVERSE_BIND_MATRIX_UNIFORM + index ), joint->getInverseBindMatrix() );
+                        });
+                    }
+                    
+                    // bind vertex and index buffers
+                    renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
+                    renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
+                    
+                    renderer->applyTransformations( program, map->getLightProjectionMatrix(), map->getLightViewMatrix(), geometry->getWorld().computeModelMatrix(), geometry->getWorld().computeNormalMatrix() );
+                    
+                    // draw primitive
+                    renderer->drawPrimitive( program, primitive );
+                    
+                    // unbind primitive buffers
+                    renderer->unbindVertexBuffer( program, primitive->getVertexBuffer() );
+                    renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
+                    
+                });
+            }
+        });
+        
+        renderer->unbindFrameBuffer( map->getBuffer() );
+    });
+    
+    // unbind the shader program
+    renderer->unbindProgram( program );
 }
 

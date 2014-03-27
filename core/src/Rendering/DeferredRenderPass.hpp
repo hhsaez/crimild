@@ -53,6 +53,8 @@ namespace crimild {
         void buildFrameBuffer( int width, int height );
         void composeFrame( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
         
+        void computeShadowMaps( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+        
     private:
         Pointer< FrameBufferObject > _gBuffer;
         Pointer< Texture > _gBufferDepthOutput;
@@ -66,6 +68,8 @@ namespace crimild {
         
         Pointer< FrameBufferObject > _accumBuffer;
         Pointer< Texture > _accumBufferOutput;
+        
+        std::map< Light *, Pointer< ShadowMap > > _shadowMaps;
 	};
     
 }
