@@ -76,7 +76,7 @@ const char *blur_fs = { CRIMILD_TO_STRING(
         deviation *= deviation;
         float strength = 1.0 - uBlurStrength;
         
-        vec2 texelSize = vec2( 1.0 / 128.0, 1.0 / 128.0 );
+        vec2 texelSize = vec2( 1.0 / 1024.0, 1.0 / 1024.0 );
         
         if ( uBlurOrientation == 0 ) {
             // Horizontal blur
@@ -105,7 +105,7 @@ const char *blur_fs = { CRIMILD_TO_STRING(
         
         // Apply colour
         vFragColor = clamp( color, 0.0, 1.0 );
-        vFragColor.w = uBlurOrientation == 0 ? 1.0 : 0.5;
+        vFragColor.w = uBlurOrientation == 0 ? 1.0 : 1.0;
         
     }
 )};

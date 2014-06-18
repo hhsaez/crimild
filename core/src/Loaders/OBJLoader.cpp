@@ -197,6 +197,24 @@ void OBJLoader::processMaterialFile( std::string materialFileName )
 				currentMaterial->specularMap = texture;
 			}
 		}
+		else if ( what == "map_Ke" ) {
+			std::string emissiveMapFileName;
+			line >> emissiveMapFileName;
+			if ( emissiveMapFileName.length() > 0 ) {
+				Log::Debug << "Loading emissive map " << emissiveMapFileName << Log::End;
+				Pointer< Image > image( new ImageTGA( FileSystem::getInstance().extractDirectory( materialFileName ) + "/" + emissiveMapFileName ) );
+				Pointer< Texture > texture( new Texture( image.get() ) );
+				currentMaterial->emissiveMap = texture;
+			}
+		}
+        else if ( what == "map_opacity" ) {
+			std::string alphaMapFileName;
+			line >> alphaMapFileName;
+			if ( alphaMapFileName.length() > 0 ) {
+                // todo: load alpha map
+                currentMaterial->alphaState = new AlphaState( true );
+            }
+        }
 	}
 }
 
@@ -405,6 +423,9 @@ Pointer< Node > OBJLoader::generateScene( void )
 			material->setColorMap( materialDef->diffuseMap.get() );
 			material->setNormalMap( materialDef->normalMap.get() );
 			material->setSpecularMap( materialDef->specularMap.get() );
+            material->setEmissiveMap( materialDef->emissiveMap.get() );
+            material->setAlphaState( materialDef->alphaState.get() );
+            material->setDepthState( materialDef->depthState.get() );
 			geometry->getComponent< MaterialComponent >()->attachMaterial( material.get() );
 		}
 

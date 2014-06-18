@@ -44,7 +44,8 @@ const char *deferred_compose_vs = { CRIMILD_TO_STRING(
     }
 )};
 
-const char *deferred_compose_fs = { CRIMILD_TO_STRING(
+const char *deferred_compose_fs = {
+CRIMILD_TO_STRING(
     struct Light {
         vec3 position;
         vec3 attenuation;
@@ -56,28 +57,50 @@ const char *deferred_compose_fs = { CRIMILD_TO_STRING(
         vec4 ambient;
     };
 
+    // The scale matrix is used to push the projected vertex into the 0.0 - 1.0 region.
+    const mat4 ScaleMatrix = mat4( 0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.5, 0.5, 0.5, 1.0 );
+                                                      
     in vec2 vTextureCoord;
 
     uniform sampler2D uColorMap;
     uniform sampler2D uPositionMap;
     uniform sampler2D uNormalMap;
+    uniform sampler2D uEmissiveMap;
 
+    uniform sampler2D uShadowMap;
+    uniform bool uUseShadowMap;
+
+    uniform mat4 uLightSourceProjectionMatrix;
+    uniform mat4 uLightSourceViewMatrix;
     uniform int uLightCount;
     uniform Light uLights[ 4 ];
     
+    uniform float uLinearDepthConstant;
+                  
     out vec4 vFragColor;
 
+    float unpack( vec4 color )
+    {
+        const vec4 bitShifts = vec4(1.0,
+                                    1.0 / 255.0,
+                                    1.0 / (255.0 * 255.0),
+                                    1.0 / (255.0 * 255.0 * 255.0));
+        return dot( color, bitShifts );
+    }
+                  
     void main( void )
     {
         vec3 srcPosition = texture( uPositionMap, vTextureCoord ).xyz;
         float srcDepth = texture( uPositionMap, vTextureCoord ).w;
         vec3 srcNormal = texture( uNormalMap, vTextureCoord ).xyz;
+        float srcSpecular = texture( uNormalMap, vTextureCoord ).w;
         vec4 srcColor = texture( uColorMap, vTextureCoord );
+        vec4 srcEmissive = texture( uEmissiveMap, vTextureCoord );
         
-        vec4 specularColor = vec4( 1.0, 1.0, 1.0, 1.0 );
+        vec4 specularColor = vec4( srcSpecular, srcSpecular, srcSpecular, srcSpecular );
         
         vec4 color = srcColor;
-        vFragColor = vec4( 0.0, 0.0, 0.0, 1.0 );
+        vFragColor = vec4( srcEmissive.rgb, 1.0 );
         
         vec3 normal = normalize( srcNormal );
         
@@ -107,6 +130,21 @@ const char *deferred_compose_fs = { CRIMILD_TO_STRING(
                 vFragColor.rgb += ( ( color.rgb * l ) + ( specularColor.rgb * s ) ) * uLights[ i ].color.rgb * a * spotlight;
             }
         }
+        
+        if ( uUseShadowMap ) {
+            vec4 pos = ScaleMatrix * uLightSourceProjectionMatrix * uLightSourceViewMatrix * vec4( srcPosition, 1.0 );
+            vec3 depth = pos.xyz / pos.w;
+            depth.z = length( srcPosition - uLights[ 0 ].position ) * uLinearDepthConstant;
+            float shadow = 1.0;
+            vec4 shadowColor = texture( uShadowMap, depth.xy );
+            float shadowDepth = unpack( shadowColor );
+            if ( depth.z > shadowDepth ) {
+                shadow = 0.5;
+            }
+            
+            vFragColor = clamp( vec4( vFragColor.rgb * shadow, vFragColor.a ), 0.0, 1.0 );
+            vFragColor.a = 1.0;
+        }
     }
 )};
 
@@ -119,6 +157,7 @@ DeferredComposeRenderShaderProgram::DeferredComposeRenderShaderProgram( void )
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::G_BUFFER_COLOR_MAP_UNIFORM, "uColorMap" );
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::G_BUFFER_POSITION_MAP_UNIFORM, "uPositionMap" );
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::G_BUFFER_NORMAL_MAP_UNIFORM, "uNormalMap" );
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::G_BUFFER_EMISSIVE_MAP_UNIFORM, "uEmissiveMap" );
     
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_COUNT_UNIFORM, "uLightCount" );
 	for ( int i = 0; i < 4; i++ ) {
@@ -131,6 +170,13 @@ DeferredComposeRenderShaderProgram::DeferredComposeRenderShaderProgram( void )
 		registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_EXPONENT_UNIFORM + i, Utils::buildArrayShaderLocationName( "uLights", i, "exponent" ) );
 		registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_AMBIENT_UNIFORM + i, Utils::buildArrayShaderLocationName( "uLights", i, "ambient" ) );
 	}
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_SOURCE_PROJECTION_MATRIX_UNIFORM, "uLightSourceProjectionMatrix" );
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_SOURCE_VIEW_MATRIX_UNIFORM, "uLightSourceViewMatrix" );
+    
+    registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::SHADOW_MAP_UNIFORM, "uShadowMap" );
+    registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::USE_SHADOW_MAP_UNIFORM, "uUseShadowMap" );
+    
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LINEAR_DEPTH_CONSTANT_UNIFORM, "uLinearDepthConstant" );
 }
 
 DeferredComposeRenderShaderProgram::~DeferredComposeRenderShaderProgram( void )

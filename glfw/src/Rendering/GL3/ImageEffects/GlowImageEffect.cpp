@@ -48,16 +48,25 @@ GlowImageEffect::~GlowImageEffect( void )
 void GlowImageEffect::apply( crimild::Renderer *renderer, int inputCount, Texture **inputs, Primitive *primitive, FrameBufferObject *output )
 {
     if ( _glowMapBuffer == nullptr ) {
-        buildGlowBuffer( getGlowMapSize(), getGlowMapSize() );
+        buildGlowBuffer( 512, 512 );
     }
     
-    computeGlow( renderer, inputs[ 0 ], primitive );
-    applyGlow( renderer, inputs[ 0 ], _glowMap.get(), primitive, output );
+    if ( _blurBuffer == nullptr ) {
+        int width = renderer->getScreenBuffer()->getWidth();
+        int height = renderer->getScreenBuffer()->getHeight();
+        buildBlurBuffer( width, height );
+    }
+    
+    Texture *source = inputCount >= 5 ? inputs[ 4 ] : inputs[ 0 ];
+    computeGlow( renderer, source, primitive );
+    computeBlur( renderer, _glowMap.get(), primitive );
+    applyResult( renderer, inputs[ 0 ], _blurMap.get(), primitive, output );
 }
 
 void GlowImageEffect::buildGlowBuffer( int width, int height )
 {
     _glowMapBuffer.set( new FrameBufferObject( width, height ) );
+    _glowMapBuffer->setClearColor( RGBAColorf( 0.0f, 0.0f, 0.0f, 0.0f ) );
     _glowMapBuffer->getRenderTargets().add( new RenderTarget( RenderTarget::Type::DEPTH_16, RenderTarget::Output::RENDER, width, height ) );
     
     RenderTarget *glowTarget = new RenderTarget( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height );
@@ -65,13 +74,24 @@ void GlowImageEffect::buildGlowBuffer( int width, int height )
     _glowMapBuffer->getRenderTargets().add( glowTarget );
 }
 
+void GlowImageEffect::buildBlurBuffer( int width, int height )
+{
+    _blurBuffer.set( new FrameBufferObject( width, height ) );
+    _blurBuffer->setClearColor( RGBAColorf( 0.0f, 0.0f, 0.0f, 0.0f ) );
+    _blurBuffer->getRenderTargets().add( new RenderTarget( RenderTarget::Type::DEPTH_16, RenderTarget::Output::RENDER, width, height ) );
+    
+    RenderTarget *blurTarget = new RenderTarget( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height );
+    _blurMap = blurTarget->getTexture();
+    _blurBuffer->getRenderTargets().add( blurTarget );
+}
+
 void GlowImageEffect::computeGlow( crimild::Renderer *renderer, Texture *srcImage, Primitive *primitive )
 {
     renderer->bindFrameBuffer( _glowMapBuffer.get() );
     
-    ShaderProgram *program = renderer->getShaderProgram( "blur" );
+    ShaderProgram *program = renderer->getShaderProgram( "screen" );
     if ( program == nullptr ) {
-        Log::Error << "Cannot find shader program for glow effect" << Log::End;
+        Log::Error << "Cannot find shader program for screen rendering" << Log::End;
         exit( 1 );
         return;
     }
@@ -80,31 +100,79 @@ void GlowImageEffect::computeGlow( crimild::Renderer *renderer, Texture *srcImag
     renderer->setDepthState( _depthState.get() );
     
     renderer->bindProgram( program );
-    renderer->bindTexture( program->getLocation( BlurShaderProgram::UNIFORM_BLUR_INPUT ), srcImage );
-    
-    renderer->bindUniform( program->getLocation( BlurShaderProgram::UNIFORM_BLUR_AMOUNT ), getAmount() );
-    renderer->bindUniform( program->getLocation( BlurShaderProgram::UNIFORM_BLUR_SCALE ), 1.0f );
-    renderer->bindUniform( program->getLocation( BlurShaderProgram::UNIFORM_BLUR_STRENTH ), 0.5f );
+    renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM ), srcImage );
     
     renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
     renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
     
-    for ( int i = 0; i < 2; i++ ) {
-        renderer->bindUniform( program->getLocation( BlurShaderProgram::UNIFORM_BLUR_ORIENTATION ), i );
-        
-        renderer->drawPrimitive( program, primitive );
-    }
+    renderer->drawPrimitive( program, primitive );
     
     renderer->unbindVertexBuffer( program, primitive->getVertexBuffer() );
     renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
     
-    renderer->unbindTexture( program->getLocation( BlurShaderProgram::UNIFORM_BLUR_INPUT ), srcImage );
+    renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM ), srcImage );
     renderer->unbindProgram( program );
     
     renderer->unbindFrameBuffer( _glowMapBuffer.get() );
 }
 
-void GlowImageEffect::applyGlow( Renderer *renderer, Texture *srcImage, Texture *dstImage, Primitive *primitive, FrameBufferObject *output )
+void GlowImageEffect::computeBlur( crimild::Renderer *renderer, Texture *srcImage, Primitive *primitive )
+{
+    renderer->bindFrameBuffer( _blurBuffer.get() );
+    
+    ShaderProgram *program = renderer->getShaderProgram( "gaussianBlur" );
+    if ( program == nullptr ) {
+        Log::Error << "Cannot find shader program for blur effect" << Log::End;
+        exit( 1 );
+        return;
+    }
+    
+//    renderer->setAlphaState( _alphaState.get() );
+//    renderer->setDepthState( _depthState.get() );
+    
+    renderer->bindProgram( program );
+//    renderer->bindTexture( program->getLocation( BlurShaderProgram::UNIFORM_BLUR_INPUT ), srcImage );
+    renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM ), srcImage );
+    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_USE_COLOR_MAP_UNIFORM ), true );
+    
+//    renderer->bindUniform( program->getLocation( BlurShaderProgram::UNIFORM_BLUR_AMOUNT ), getAmount() );
+//    renderer->bindUniform( program->getLocation( BlurShaderProgram::UNIFORM_BLUR_SCALE ), 0.5f );
+//    renderer->bindUniform( program->getLocation( BlurShaderProgram::UNIFORM_BLUR_STRENTH ), 1.0f );
+    
+    renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
+    renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
+    
+//    for ( int i = 0; i < 2; i++ ) {
+//        if ( i == 0 ) {
+//            renderer->bindTexture( program->getLocation( BlurShaderProgram::UNIFORM_BLUR_INPUT ), srcImage );
+//        }
+//        else {
+//            renderer->bindTexture( program->getLocation( BlurShaderProgram::UNIFORM_BLUR_INPUT ), _blurMap.get() );
+//        }
+    
+//        renderer->bindUniform( program->getLocation( BlurShaderProgram::UNIFORM_BLUR_ORIENTATION ), i );
+    
+        renderer->drawPrimitive( program, primitive );
+        
+//        if ( i == 0 ) {
+//            renderer->unbindTexture( program->getLocation( BlurShaderProgram::UNIFORM_BLUR_INPUT ), srcImage );
+//        }
+//        else {
+//            renderer->unbindTexture( program->getLocation( BlurShaderProgram::UNIFORM_BLUR_INPUT ), _blurMap.get() );
+//        }
+//    }
+    
+    renderer->unbindVertexBuffer( program, primitive->getVertexBuffer() );
+    renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
+    
+    renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM ), srcImage );
+//    renderer->unbindTexture( program->getLocation( BlurShaderProgram::UNIFORM_BLUR_INPUT ), srcImage );
+    renderer->unbindProgram( program );
+    
+    renderer->unbindFrameBuffer( _blurBuffer.get() );
+}
+
+void GlowImageEffect::applyResult( Renderer *renderer, Texture *srcImage, Texture *dstImage, Primitive *primitive, FrameBufferObject *output )
 {
     // bind buffer for ssao output
     renderer->bindFrameBuffer( output );
@@ -122,7 +190,7 @@ void GlowImageEffect::applyGlow( Renderer *renderer, Texture *srcImage, Texture 
     // bind framebuffer texture
     renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::BLEND_SRC_MAP_UNIFORM ), srcImage );
     renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::BLEND_DST_MAP_UNIFORM ), dstImage );
-    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::BLEND_MODE_UNIFORM ), 1 );
+    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::BLEND_MODE_UNIFORM ), 0 );
     
     // bind vertex and index buffers
     renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );

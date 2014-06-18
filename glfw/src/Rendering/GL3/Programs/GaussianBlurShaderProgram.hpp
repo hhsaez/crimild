@@ -25,34 +25,24 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ShadowMap.hpp"
-#include "SceneGraph/Light.hpp"
+#ifndef CRIMILD_GL3_SHADER_PROGRAMS_GAUSSIAN_BLUR_
+#define CRIMILD_GL3_SHADER_PROGRAMS_GAUSSIAN_BLUR_
 
-using namespace crimild;
+#include <Crimild.hpp>
 
-ShadowMap::ShadowMap( Light *source, FrameBufferObject *fbo )
-    : _source( source ),
-      _buffer( fbo )
-{
-    if ( _buffer == nullptr ) {
-        int width = 1024;
-        int height = 1024;
-        _buffer.set( new FrameBufferObject( width, height ) );
-        _buffer->getRenderTargets().add( new RenderTarget( RenderTarget::Type::DEPTH_16, RenderTarget::Output::RENDER, width, height ) );
-        _buffer->getRenderTargets().add( new RenderTarget( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
-    }
+namespace crimild {
     
-    _buffer->getRenderTargets().each( [&]( RenderTarget *target, int ) {
-        if ( target->getOutput() == RenderTarget::Output::TEXTURE || target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
-            _texture.set( target->getTexture() );
-        }
-    });
-    
-    computeLinearDepthConstant( source->getShadowNearCoeff(), source->getShadowFarCoeff() );
-}
-
-ShadowMap::~ShadowMap( void )
-{
+	namespace gl3 {
+        
+		class GaussianBlurShaderProgram : public ShaderProgram {
+		public:
+			GaussianBlurShaderProgram( void );
+			virtual ~GaussianBlurShaderProgram( void );
+		};
+        
+	}
     
 }
+
+#endif
 
