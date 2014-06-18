@@ -28,7 +28,7 @@
 #ifndef CRIMILD_SCRIPTING_FOUNDATION_SCRIPTED_
 #define CRIMILD_SCRIPTING_FOUNDATION_SCRIPTED_
 
-#include "Context/ScriptingContext.hpp"
+#include "Foundation/ScriptContext.hpp"
 
 namespace crimild {
 
@@ -40,10 +40,10 @@ namespace crimild {
 		public:
 			virtual ~Scripted( void ) { }
 			
-			ScriptingContext &getScriptingContext( void ) { return _scriptingContext; }
+			ScriptContext &getScriptContext( void ) { return _scriptContext; }
 
 		private:
-			ScriptingContext _scriptingContext;
+			ScriptContext _scriptContext;
 		};
 
 	}
