@@ -46,7 +46,7 @@ TEST( CatalogTest, destruction )
 		catalog.bind( texture.get() );
 
 		EXPECT_TRUE( catalog.hasResources() );
-		EXPECT_EQ( 1, texture->getCatalogId() );
+		EXPECT_EQ( 0, texture->getCatalogId() );
 		EXPECT_EQ( &catalog, texture->getCatalog() );
 	}
 
@@ -62,7 +62,7 @@ TEST( CatalogTest, bindResource )
 	catalog.bind( texture.get() );
 
 	EXPECT_TRUE( catalog.hasResources() );
-	EXPECT_EQ( 1, texture->getCatalogId() );
+	EXPECT_EQ( 0, texture->getCatalogId() );
 	EXPECT_EQ( &catalog, texture->getCatalog() );
 }
 
@@ -74,13 +74,13 @@ TEST( CatalogTest, bindResourceTwice )
 	catalog.bind( texture.get() );
 
 	EXPECT_TRUE( catalog.hasResources() );
-	EXPECT_EQ( 1, texture->getCatalogId() );
+	EXPECT_EQ( 0, texture->getCatalogId() );
 	EXPECT_EQ( &catalog, texture->getCatalog() );
 
 	catalog.bind( texture.get() );
 
 	EXPECT_TRUE( catalog.hasResources() );
-	EXPECT_EQ( 1, texture->getCatalogId() );
+	EXPECT_EQ( 0, texture->getCatalogId() );
 	EXPECT_EQ( &catalog, texture->getCatalog() );
 }
 
@@ -92,13 +92,13 @@ TEST( CatalogTest, unbindResource )
 	catalog.bind( texture.get() );
 
 	EXPECT_TRUE( catalog.hasResources() );
-	EXPECT_EQ( 1, texture->getCatalogId() );
+	EXPECT_EQ( 0, texture->getCatalogId() );
 	EXPECT_EQ( &catalog, texture->getCatalog() );
 
 	catalog.unbind( texture.get() );
 
 	EXPECT_TRUE( catalog.hasResources() );
-	EXPECT_EQ( 1, texture->getCatalogId() );
+	EXPECT_EQ( 0, texture->getCatalogId() );
 	EXPECT_EQ( &catalog, texture->getCatalog() );
 }
 
@@ -110,7 +110,7 @@ TEST( CatalogTest, loadResource )
 	catalog.load( texture.get() );
 
 	EXPECT_TRUE( catalog.hasResources() );
-	EXPECT_EQ( 1, texture->getCatalogId() );
+	EXPECT_EQ( 0, texture->getCatalogId() );
 	EXPECT_EQ( &catalog, texture->getCatalog() );
 }
 
@@ -122,7 +122,7 @@ TEST( CatalogTest, unloadResource )
 	catalog.load( texture.get() );
 
 	EXPECT_TRUE( catalog.hasResources() );
-	EXPECT_EQ( 1, texture->getCatalogId() );
+	EXPECT_EQ( 0, texture->getCatalogId() );
 	EXPECT_EQ( &catalog, texture->getCatalog() );
 
 	catalog.unload( texture.get() );
@@ -141,7 +141,7 @@ TEST( CatalogTest, automaticResourceUnload )
 		catalog.bind( texture.get() );
 
 		EXPECT_TRUE( catalog.hasResources() );
-		EXPECT_EQ( 1, texture->getCatalogId() );
+		EXPECT_EQ( 0, texture->getCatalogId() );
 		EXPECT_EQ( &catalog, texture->getCatalog() );
 	}
 
