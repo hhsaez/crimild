@@ -60,8 +60,6 @@ Simulation::~Simulation( void )
 
 void Simulation::start( void )
 {
-	Log::Info << "Starting simulation \"" << getName() << "\"" << Log::End;
-
 	getMainLoop()->startTask( new DispatchMessagesTask( Priorities::HIGHEST_PRIORITY ) );
 	getMainLoop()->startTask( new BeginRenderTask( Priorities::BEGIN_RENDER_PRIORITY ) );
 	getMainLoop()->startTask( new EndRenderTask( Priorities::END_RENDER_PRIORITY ) );
@@ -78,8 +76,6 @@ bool Simulation::step( void )
 void Simulation::stop( void )
 {
 	_mainLoop->stop();
-	
-	Log::Info << "Simulation completed" << Log::End;
 }
 
 int Simulation::run( void )

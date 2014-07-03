@@ -25,54 +25,40 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "FileSystem.hpp"
+#include "Mathematics/Transformation.hpp"
 
-#include "Foundation/Log.hpp"
+#include "gtest/gtest.h"
 
 using namespace crimild;
 
-FileSystem &FileSystem::getInstance( void )
+bool orthonormalize( const Vector3f &u, const Vector3f &v, Vector3f &i, Vector3f &j, Vector3f &k )
 {
-	static FileSystem fs;
-	return fs;
+	Vector3f temp = u.getNormalized() ^ v.getNormalized();
+
+	i = u;
+	k = temp;
+	j = temp ^ u;
+
+	return true;
 }
 
-FileSystem::FileSystem( void )
+TEST ( TransformationTest, testTranslate )
 {
+	TransformationImpl t;
+	t.setTranslate( Vector3f( 1.0f, 2.0f, 3.0f ) );
 
+	EXPECT_EQ( Vector3f( 1.0f, 2.0f, 3.0f ), t.getTranslate() );
 }
 
-FileSystem::~FileSystem( void )
+TEST( TransformationTest, testLookAt )
 {
+	TransformationImpl t;
+	t.setTranslate( Vector3f( 1.0f, 2.0f, 3.0f ) );
 
-}
+	EXPECT_EQ( Vector3f( 1.0f, 2.0f, 3.0f ), t.getTranslate() );
 
-void FileSystem::init( int argc, char **argv )
-{
-	std::string base = "";
-	if ( argc > 0 ) {
-		base = extractDirectory( argv[ 0 ] );
-	}
-    
-    int pos = base.find( "/Debug" );
-    if ( pos > 0 ) {
-        base = base.substr( 0, pos + 1 );
-    }
-	
-	if ( base.length() == 0 ) {
-		base = ".";
-	}
+	t.lookAt( Vector3f( 0.0f, 0.0f, 0.0f ), Vector3f( 0.0f, 1.0f, 0.0f ) );
 
-	setBaseDirectory( base );
-}
-
-std::string FileSystem::extractDirectory( std::string path )
-{
-	return path.substr( 0, path.find_last_of( '/' ) );
-}
-
-std::string FileSystem::pathForResource( std::string filePath )
-{
-	return getBaseDirectory() + "/" + filePath;
+	EXPECT_EQ( Vector3f( -1.0f, -2.0f, -3.0f ).getNormalized(), t.computeDirection() );
 }
 

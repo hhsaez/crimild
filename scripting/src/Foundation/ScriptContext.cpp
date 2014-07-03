@@ -27,6 +27,8 @@
 
 #include "ScriptContext.hpp"
 
+#include <sstream>
+
 using namespace crimild;
 using namespace crimild::scripting;
 
@@ -55,12 +57,35 @@ ScriptContext::~ScriptContext( void )
 
 bool ScriptContext::load( const std::string &fileName )
 {
-	return !luaL_dofile( _state, fileName.c_str() );
+	if ( luaL_dofile( _state, fileName.c_str() ) != 0 ) {
+		Log::Error << "Cannot load file '" << fileName << "'" 
+				   << "\n\tReason: "
+				   << read< std::string >()
+				   << Log::End;
+		return false;
+	}
+
+	return true;
 }
 
 bool ScriptContext::parse( const std::string &text )
 {
 	return !luaL_loadstring( _state, text.c_str() ) &&
 		   !lua_pcall( 0, 0, 0, 0 );
+}
+
+std::string ScriptContext::dumpStack( void )
+{
+	return LuaUtils::dumpStack( _state );
+}
+
+void ScriptContext::foreach( const std::string &name, std::function< void( ScriptContext &, ScriptContext::Iterable &i ) > callback )
+{
+	int count = eval< int >( "#" + name );
+
+	for ( int i = 0; i < count; i++ ) {
+		Iterable it( *this, name, i );
+		callback( *this, it );
+	}
 }
 

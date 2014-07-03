@@ -67,21 +67,92 @@ namespace crimild {
 
 		public:
 			template< typename T >
-			T read( const int index ) const
+			T read( const int index = -1 ) const
 			{
 				return LuaUtils::get< T >( _state, index );
 			}
 
 		public:
-			template< typename T >
-			T getValue( const std::string &variableName )
+			bool test( const std::string &expr )
 			{
-				return LuaUtils::getValue( _state, variableName ) ? LuaUtils::get< T >( _state, -1 ) : getDefaultValue< T >();
+				std::stringstream str;
+				str << "evalExpr = " << expr;
+				if ( !luaL_dostring( _state, str.str().c_str() ) ) {
+					lua_getglobal( _state, "evalExpr" );
+					return !lua_isnil( _state, -1 );
+				}
+
+				return false;
+			}
+
+			template< typename T >
+			T eval( const std::string &expr )
+			{
+				std::stringstream str;
+				str << "evalExpr = " << expr;
+				if ( !luaL_dostring( _state, str.str().c_str() ) ) {
+					lua_getglobal( _state, "evalExpr" );
+					T ret = lua_isnil( _state, -1 ) ? getDefaultValue< T >() : read< T >( -1 );
+					lua_pop( _state, 1 );
+					return ret;
+				}
+
+				return getDefaultValue< T >();
 			}
 
 		private:
 			template< typename T >
 			T getDefaultValue( void ) const { return -1; }
+
+		public:
+			class Iterable {
+			public:
+				Iterable( ScriptContext &context, const std::string &prefix, int index ) 
+					: _context( context ), 
+					  _index( index )
+				{ 
+					std::stringstream str;
+					str << prefix << "[" << ( _index + 1 ) << "]";
+					_prefix = str.str();
+				}
+				
+				~Iterable( void ) { }
+
+				const std::string &getPrefix( void ) const { return _prefix; }
+				int getIndex( void ) const { return _index; }
+
+				bool test( const std::string &expr )
+				{
+					return _context.test( _prefix + "." + expr );
+				}
+
+				template< typename T >
+				T eval( void )
+				{
+					return _context.eval< T >( _prefix );
+				}
+
+				template< typename T >
+				T eval( const std::string &expr )
+				{
+					return _context.eval< T >( _prefix + "." + expr );
+				}
+
+				void foreach( const std::string &name, std::function< void( ScriptContext &, ScriptContext::Iterable &i ) > callback )
+				{
+					_context.foreach( getPrefix() + "." + name, callback );
+				}
+
+			private:
+				ScriptContext &_context;
+				std::string _prefix;
+				int _index;
+			};
+
+			void foreach( const std::string &name, std::function< void( ScriptContext &, ScriptContext::Iterable &i ) > callback );
+
+		public:
+			std::string dumpStack( void );
 
 		public:
 			bool isNil( const std::string &global )
@@ -176,6 +247,27 @@ namespace crimild {
 			return "null"; 
 		}
 
+		template<>
+		inline Vector3f ScriptContext::Iterable::eval( const std::string &name )
+		{
+			Vector3f v;
+			foreach( name, [&]( ScriptContext &, ScriptContext::Iterable &it ) {
+				v[ it.getIndex() ] = it.eval< float >();
+			});
+
+			return v;
+		}
+
+		template<>
+		inline Vector4f ScriptContext::Iterable::eval( const std::string &name )
+		{
+			Vector4f v;
+			foreach( name, [&]( ScriptContext &, ScriptContext::Iterable &it ) {
+				v[ it.getIndex() ] = it.eval< float >();
+			});
+			
+			return v;
+		}
 	}
 
 }

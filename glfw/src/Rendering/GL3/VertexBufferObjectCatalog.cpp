@@ -160,6 +160,7 @@ void gl3::VertexBufferObjectCatalog::unbind( ShaderProgram *program, VertexBuffe
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
     glBindVertexArray( 0 );
+    glBindBuffer( GL_ARRAY_BUFFER, 0 );
     
 	Catalog< VertexBufferObject >::unbind( program, vbo );
 

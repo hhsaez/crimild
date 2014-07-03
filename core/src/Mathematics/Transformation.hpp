@@ -279,13 +279,18 @@ namespace crimild {
 		{
 			Vector3f direction = target - getTranslate();
 			direction.normalize();
+			
+			Vector3f forward = computeDirection();
 
-			Vector3f forward( 0.0f, 0.0f, -1.0f );
+			Vector3f u = direction ^ forward;
+			u.normalize();
+			Vector3f v = u ^ up;
+			v.normalize();
+			u = v ^ u;
 
-			Vector3f axis = forward ^ direction;
-			if ( axis.getSquaredMagnitude() == 0.0f ) {
-				axis = up;
-			}
+			// Oh, Dark Lork, I summon thee!!!
+			Vector3f axis( -u[ 1 ], u[ 0 ], u[ 2 ] );
+
 			float angle = std::acos( forward * direction );
 
 			_rotate.fromAxisAngle( axis, angle );

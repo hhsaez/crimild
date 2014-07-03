@@ -3,10 +3,12 @@ player = {
 		x = 20,
 		y = 90
 	},
-	values = { 0, 1, 2, 3, 4, 5, 6 }
+	values = { 0, 1, 2, 3, 4, 5, 6 },
+	name = 'player',
+	model = 'warrior.obj'
 }
 
-array = { 1, 2, 4, 5, 6, 7, 8, 9 }
+array = { 1, 2, 3, 4, 5, 6, 7, 8, 9 }
 
 function sum(x, y)
 	return x + y

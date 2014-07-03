@@ -36,7 +36,7 @@ namespace crimild {
 
 		class Scripted {
 		protected:
-			Scripted( void ) { }
+			Scripted( bool loadDefaultLibs = false ) : _scriptContext( loadDefaultLibs ) { }
 		public:
 			virtual ~Scripted( void ) { }
 			

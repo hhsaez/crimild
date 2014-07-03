@@ -42,6 +42,9 @@ namespace crimild {
 
 		class LuaUtils {
 		public:
+			static void cleanStack( lua_State *l );
+
+		public:
 			static bool checkLuaState( lua_State *l, int code );
 
 		public:
@@ -169,7 +172,10 @@ namespace crimild {
 			}
 
 		public:
-			static bool getValue( lua_State *l, const std::string &name );
+			static std::string dumpStack( lua_State *l );
+
+		public:
+			std::string getErrorDescription( lua_State *l );
 		};
 
 	}

@@ -30,6 +30,12 @@
 using namespace crimild;
 using namespace crimild::scripting;
 
+void LuaUtils::cleanStack( lua_State *l )
+{
+	int n = lua_gettop( l );
+    lua_pop( l, n );
+}
+
 bool LuaUtils::checkLuaState( lua_State *l, int code )
 {
 	if ( code != LUA_OK ) {
@@ -147,45 +153,82 @@ void LuaUtils::push( lua_State *l, std::string &&s )
     lua_pushlstring( l, s.c_str(), s.size() );
 }
 
-bool LuaUtils::getValue( lua_State *l, const std::string &name )
+std::string LuaUtils::dumpStack( lua_State *l )
 {
-	int level = 0;
-	std::string var = "";
+	std::stringstream str;
 
-	for ( unsigned int i = 0; i < name.size(); i++ ) {
-		char c = name.at( i );
-		if ( c == '.' ) {
-			if ( level == 0 ) {
-				lua_getglobal( l, var.c_str() );
-			}
-			else {
-				lua_getfield( l, -1, var.c_str() );
-			}
+	int top = lua_gettop( l );
 
-			if ( lua_isnil( l, -1 ) ) {
-				return false;
-			}
-			else {
-				var = "";
-				level++;
-			}
+	str << "Total in stack: " << top << "\n";
+
+	for ( int i = 1; i <= top; i++ ) {
+		int t = lua_type( l, i );
+		switch ( t ) {
+			case LUA_TSTRING:
+				str << "string: " << lua_tostring( l, i ) << "\n";
+				break;
+			case LUA_TBOOLEAN:
+				str << "boolean: " << ( lua_toboolean( l, i ) ? "true" : "false" ) << "\n";
+				break;
+			case LUA_TNUMBER:
+				str << "number: " << lua_tonumber( l, i ) << "\n";
+				break;
+			default:
+				str << lua_typename( l, t ) << "\n";
+				break;
 		}
-		else {
-			var += c;
+
+		str << " ";
+	}
+
+	str << "\n";
+
+	return str.str();
+}
+
+std::string LuaUtils::getErrorDescription( lua_State *l )
+{
+	/*
+	std::string msg = 
+
+	lua_getglobal(l, "debug");
+  	lua_getfield(l, -1, "traceback");
+  	lua_remove(l, -2);
+  	int errindex = -p_iArgCount - 2;
+  	lua_insert(L, errindex);
+  	int error = lua_pcall(L, p_iArgCount, return_amount, errindex);
+
+
+	if ( l && !lua_isnil( l, -1 ) ) {
+		std::string msg = lua_tostring( l, -1 );
+		if ( msg == "" ) {
+			msg = "(error object is not a string)";
 		}
-	}
 
-	if ( level == 0 ) {
-		lua_getglobal( l, var.c_str() );
-	}
-	else {
-		lua_getfield( l, -1, var.c_str() );
-	}
+		lua_getfield( l, LUA_GLOBALSINDEX, "debug" );
+		if ( !lua_istable( l, -1 ) ) {
+			lua_pop( l, 1 );
+			return "cannot get debug table";
+		}
 
-	if ( lua_isnil( l, -1 ) ) {
-		return false;
-	}
+		lua_getfield( l, -1, "traceback" );
+		if ( !lua_isfunction( l, -1 ) ) {
+			lua_pop( l, 2 );
+			return "cannot get traceback";
+		}
 
-	return true;
+		lua_pushvalue( l, 1 );
+		lua_pushinteger( l, 2 );
+		lua_call( l, 2, 1 );
+
+		msg += "\n[LUA ERROR]: ";
+		msg += lua_tounsigned( l, -1 );
+
+		lua_pop( l, 1 );
+
+		return msg;
+	}
+	*/
+	return "unknown error";
 }
 

@@ -86,6 +86,7 @@
 #include "Visitors/FetchLights.hpp"
 #include "Visitors/NodeVisitor.hpp"
 #include "Visitors/ComputeVisibilitySet.hpp"
+#include "Visitors/ComputeRenderQueue.hpp"
 #include "Visitors/SelectNodes.hpp"
 #include "Visitors/UpdateComponents.hpp"
 #include "Visitors/UpdateRenderState.hpp"
