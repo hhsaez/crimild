@@ -94,6 +94,13 @@ namespace crimild {
             return Quaternion( s / 2.0, c[ 0 ] / s, c[ 1 ] / s, c[ 2 ] / s );
         }
 
+        static Quaternion createFromDirection( const Vector3f &direction, const Vector3f &up = Vector3f( 0.0f, 1.0f, 0.0f ) )
+        {
+        	Quaternion q;
+        	q.lookAt( direction, up );
+        	return q;
+		}
+
 	public:
 		/**
 			\brief Default constructor
@@ -283,7 +290,7 @@ namespace crimild {
 			return *this;
 		}
 
-		void fromAxisAngle( const Vector3Impl &axis, PRECISION angle )
+		Quaternion &fromAxisAngle( const Vector3Impl &axis, PRECISION angle )
 		{
 			double sinTheta = std::sin( 0.5 * angle );
 			double cosTheta = std::cos( 0.5 * angle );
@@ -292,6 +299,8 @@ namespace crimild {
 			_data[ 1 ] = axis[ 1 ] * sinTheta;
 			_data[ 2 ] = axis[ 2 ] * sinTheta;
 			_data[ 3 ] = cosTheta;
+
+			return *this;
 		}
 
 		/**
@@ -350,7 +359,7 @@ namespace crimild {
             Algorithm in Ken Shoemake's article in 1987 SIGGRAPH course notes
             article "Quaternion Calculus and Fast Animation".
          */
-        Quaternion fromRotationMatrix( const Matrix< 3, PRECISION > &m )
+        Quaternion &fromRotationMatrix( const Matrix< 3, PRECISION > &m )
         {
             float trace = 1.0f + m[ 0 ] + m[ 4 ] + m[ 8 ];
             float x, y, z, w;
@@ -395,6 +404,24 @@ namespace crimild {
             
             return *this;
         }
+
+        Quaternion &lookAt( const Vector3Impl &direction, const Vector3Impl &up = Vector3Impl( 0, 1, 0 ) )
+        {
+			Vector3Impl forward( 0, 0, -1 );
+
+			Vector3Impl u = direction ^ forward;
+			u.normalize();
+			Vector3Impl v = u ^ up;
+			v.normalize();
+			u = v ^ u;
+
+			// Oh, Dark Lork, I summon thee!!!
+			Vector3Impl axis( -u[ 1 ], u[ 0 ], u[ 2 ] );
+
+			float angle = std::acos( forward * direction );
+
+			return fromAxisAngle( axis, angle );
+		}
 
 	private:
 		Vector4Impl _data;

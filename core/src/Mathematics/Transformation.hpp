@@ -279,21 +279,8 @@ namespace crimild {
 		{
 			Vector3f direction = target - getTranslate();
 			direction.normalize();
-			
-			Vector3f forward = computeDirection();
 
-			Vector3f u = direction ^ forward;
-			u.normalize();
-			Vector3f v = u ^ up;
-			v.normalize();
-			u = v ^ u;
-
-			// Oh, Dark Lork, I summon thee!!!
-			Vector3f axis( -u[ 1 ], u[ 0 ], u[ 2 ] );
-
-			float angle = std::acos( forward * direction );
-
-			_rotate.fromAxisAngle( axis, angle );
+			_rotate.lookAt( direction, up );
 		}
         
         Transformation &fromMatrix( const Matrix4Impl &m )
