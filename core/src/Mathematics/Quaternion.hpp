@@ -408,15 +408,27 @@ namespace crimild {
         Quaternion &lookAt( const Vector3Impl &direction, const Vector3Impl &up = Vector3Impl( 0, 1, 0 ) )
         {
 			Vector3Impl forward( 0, 0, -1 );
+			Vector3Impl right( 1, 0, 0 );
 
-			Vector3Impl u = direction ^ forward;
+			Vector3Impl axis = up;
+
+			Vector3Impl u = forward ^ direction;
+			if ( Numeric< PRECISION >::isZero( u.getSquaredMagnitude() ) ) {
+				u = right ^ direction;
+			}
 			u.normalize();
-			Vector3Impl v = u ^ up;
-			v.normalize();
-			u = v ^ u;
 
-			// Oh, Dark Lork, I summon thee!!!
-			Vector3Impl axis( -u[ 1 ], u[ 0 ], u[ 2 ] );
+			Vector3Impl v = u ^ up;
+			if ( Numeric< PRECISION >::isZero( v.getSquaredMagnitude() ) ) {
+				axis = u;
+			}
+			else {
+				v.normalize();
+				u = v ^ u;
+
+				// Oh, Dark Lork, I summon thee!!!
+				axis = Vector3Impl( -u[ 1 ], u[ 0 ], u[ 2 ] );
+			}
 
 			float angle = std::acos( forward * direction );
 
