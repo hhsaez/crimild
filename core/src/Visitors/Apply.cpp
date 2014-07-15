@@ -25,68 +25,32 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_COMPONENTS_NODE_COMPONENT_
-#define CRIMILD_COMPONENTS_NODE_COMPONENT_
+#include "Apply.hpp"
 
-#include "Foundation/SharedObject.hpp"
-#include "Mathematics/Time.hpp"
+#include "SceneGraph/Node.hpp"
+#include "SceneGraph/Group.hpp"
 
-namespace crimild {
+using namespace crimild;
 
-	class Node;
+Apply::Apply( Apply::CallbackType callback )
+	: _callback( callback )
+{
+   
+}
 
-	class NodeComponent : public SharedObject {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( NodeComponent )
-
-	protected:
-		NodeComponent( void );
-
-	public:
-		virtual ~NodeComponent( void );
-
-		void setNode( Node *node ) { _node = node; }
-		Node *getNode( void ) { return _node; }
-		const Node *getNode( void ) const { return _node; }
-
-		template< class NODE_TYPE >
-		NODE_TYPE *getNode( void ) { return static_cast< NODE_TYPE * >( _node ); }
-
-		virtual const char *getComponentName( void ) const { return "update"; }
-
-	private:
-		Node *_node;
-
-	public:
-		/**
-		   \brief Invoked once when component is attached to a node
-		*/
-		virtual void onAttach( void );
-
-		/**
-		   \brief Invoked once when scene is loaded
-		*/
-		virtual void start( void );
-
-		/**
-		   \brief Invoked multiple times (usually once per simulation step)
-		*/
-		virtual void update( const Time &t );
-
-		/**
-		   \brief Invoked once when component is detached from a node
-		*/
-		virtual void onDetach( void );
-
-	};
+Apply::~Apply( void )
+{
 
 }
 
-// useful macro for declaring a component name
-// _COMPONENT_NAME is for internal use only (see Node and NodeComponentCatalog classes)
-#define CRIMILD_NODE_COMPONENT_NAME( X ) \
- 	public: \
- 		static const char *_COMPONENT_NAME( void ) { return X; } \
- 		virtual const char *getComponentName( void ) const override { return _COMPONENT_NAME(); }
+void Apply::visitNode( Node *node )
+{
+	_callback( node );
+}
 
-#endif
+void Apply::visitGroup( Group *group )
+{
+	_callback( group );
+	NodeVisitor::visitGroup( group );
+}
 

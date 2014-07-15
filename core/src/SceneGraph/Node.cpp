@@ -123,6 +123,16 @@ void Node::detachAllComponents( void )
 	_components.clear();
 }
 
+void Node::startComponents( void )
+{
+	auto components = _components;
+	for ( auto cmp : components ) {
+		if ( cmp.second != nullptr ) {
+			cmp.second->start();
+		}
+	}
+}
+
 void Node::updateComponents( const Time &t )
 {
 	// create a copy of the component's collection

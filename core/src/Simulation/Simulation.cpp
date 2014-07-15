@@ -29,16 +29,20 @@
 #include "FileSystem.hpp"
  
 #include "Foundation/Log.hpp"
+
 #include "Tasks/DispatchMessagesTask.hpp"
 #include "Tasks/BeginRenderTask.hpp"
 #include "Tasks/EndRenderTask.hpp"
 #include "Tasks/UpdateSceneTask.hpp"
 #include "Tasks/UpdatePhysicsTask.hpp"
 #include "Tasks/RenderSceneTask.hpp"
+
 #include "SceneGraph/Camera.hpp"
+
 #include "Visitors/FetchCameras.hpp"
 #include "Visitors/UpdateWorldState.hpp"
 #include "Visitors/UpdateRenderState.hpp"
+#include "Visitors/StartComponents.hpp"
 
 using namespace crimild;
 
@@ -93,6 +97,7 @@ void Simulation::setScene( Node *scene )
 	if ( _scene != nullptr ) {
 		_scene->perform( UpdateWorldState() );
 		_scene->perform( UpdateRenderState() );
+		_scene->perform( StartComponents() );
 
 		FetchCameras fetchCameras;
 		_scene->perform( fetchCameras );

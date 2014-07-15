@@ -94,6 +94,7 @@ namespace crimild {
 			return static_cast< T * >( _components[ T::_COMPONENT_NAME() ].get() );
 		}
 
+		void startComponents( void );
 		void updateComponents( const Time &t );
 
 	private:

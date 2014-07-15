@@ -50,6 +50,11 @@ void NodeComponent::onDetach( void )
 	
 }
 
+void NodeComponent::start( void )
+{
+
+}
+
 void NodeComponent::update( const Time &t )
 {
 

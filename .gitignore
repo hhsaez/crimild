@@ -26,3 +26,6 @@ crimild_core_test
 CRIMILD.xcodeproj
 CMakeScripts
 *.build
+
+\#*\#
+*~

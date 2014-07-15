@@ -25,68 +25,31 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_COMPONENTS_NODE_COMPONENT_
-#define CRIMILD_COMPONENTS_NODE_COMPONENT_
+#ifndef CRIMILD_VISITORS_APPLY_
+#define CRIMILD_VISITORS_APPLY_
 
-#include "Foundation/SharedObject.hpp"
-#include "Mathematics/Time.hpp"
+#include "NodeVisitor.hpp"
+
+#include <functional>
 
 namespace crimild {
 
-	class Node;
-
-	class NodeComponent : public SharedObject {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( NodeComponent )
-
-	protected:
-		NodeComponent( void );
+	class Apply : public NodeVisitor {
+	private:
+		typedef std::function< void( Node * ) > CallbackType;
 
 	public:
-		virtual ~NodeComponent( void );
+		explicit Apply( CallbackType callback );
+		virtual ~Apply( void );
 
-		void setNode( Node *node ) { _node = node; }
-		Node *getNode( void ) { return _node; }
-		const Node *getNode( void ) const { return _node; }
-
-		template< class NODE_TYPE >
-		NODE_TYPE *getNode( void ) { return static_cast< NODE_TYPE * >( _node ); }
-
-		virtual const char *getComponentName( void ) const { return "update"; }
+		virtual void visitNode( Node *node ) override;
+		virtual void visitGroup( Group *node ) override;
 
 	private:
-		Node *_node;
-
-	public:
-		/**
-		   \brief Invoked once when component is attached to a node
-		*/
-		virtual void onAttach( void );
-
-		/**
-		   \brief Invoked once when scene is loaded
-		*/
-		virtual void start( void );
-
-		/**
-		   \brief Invoked multiple times (usually once per simulation step)
-		*/
-		virtual void update( const Time &t );
-
-		/**
-		   \brief Invoked once when component is detached from a node
-		*/
-		virtual void onDetach( void );
-
+		CallbackType _callback;
 	};
 
 }
-
-// useful macro for declaring a component name
-// _COMPONENT_NAME is for internal use only (see Node and NodeComponentCatalog classes)
-#define CRIMILD_NODE_COMPONENT_NAME( X ) \
- 	public: \
- 		static const char *_COMPONENT_NAME( void ) { return X; } \
- 		virtual const char *getComponentName( void ) const override { return _COMPONENT_NAME(); }
 
 #endif
 
