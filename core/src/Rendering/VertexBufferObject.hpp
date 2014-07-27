@@ -46,6 +46,8 @@ namespace crimild {
 		unsigned int getVertexCount( void ) const { return _vertexCount; }
 
 		Vector3f getPositionAt( unsigned int index ) const;
+		void setPositionAt( unsigned int index, const Vector3f &position );
+
 		RGBAColorf getRGBAColorAt( unsigned int index ) const;
 		RGBColorf getRGBColorAt( unsigned int index ) const;
 		Vector3f getNormalAt( unsigned int index ) const;

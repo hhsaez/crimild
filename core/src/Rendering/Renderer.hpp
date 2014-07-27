@@ -38,6 +38,8 @@
 #include "VertexBufferObject.hpp"
 #include "IndexBufferObject.hpp"
 
+#include "primitives/Primitive.hpp"
+
 #include "Mathematics/Vector.hpp"
 #include "Mathematics/Matrix.hpp"
 
@@ -45,7 +47,6 @@ namespace crimild {
 
 	class VisibilitySet;
 	class Geometry;
-	class Primitive;
 	class Camera;
 	class RenderStateComponent;
     class RenderQueue;
@@ -128,6 +129,11 @@ namespace crimild {
 
 	public:
 		virtual void drawPrimitive( ShaderProgram *program, Primitive *primitive ) = 0;
+
+		/**
+			\brief optional
+		 */
+		virtual void drawBuffers( ShaderProgram *program, Primitive::Type type, VertexBufferObject *vbo ) { }
 
 	public:
         virtual ShaderProgram *getDepthProgram( void ) { return nullptr; }

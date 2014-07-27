@@ -116,10 +116,13 @@ namespace crimild {
 					_prefix = str.str();
 				}
 				
-				~Iterable( void ) { }
+				virtual ~Iterable( void ) { }
 
 				const std::string &getPrefix( void ) const { return _prefix; }
+				
 				int getIndex( void ) const { return _index; }
+				
+				ScriptContext *getContext( void ) { return &_context; }
 
 				bool test( const std::string &expr )
 				{

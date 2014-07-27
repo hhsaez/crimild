@@ -58,6 +58,7 @@ namespace crimild {
 			virtual void setAlphaState( AlphaState *state ) override;
 
 			virtual void drawPrimitive( ShaderProgram *program, Primitive *primitive ) override;
+			virtual void drawBuffers( ShaderProgram *program, Primitive::Type type, VertexBufferObject *vbo ) override;
 
             virtual ShaderProgram *getDepthProgram( void ) override;
             virtual ShaderProgram *getForwardPassProgram( void ) override;
