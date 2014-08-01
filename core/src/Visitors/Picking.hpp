@@ -25,17 +25,84 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Task.hpp"
+#ifndef CRIMILD_VISITORS_PICKING_
+#define CRIMILD_VISITORS_PICKING_
 
-using namespace crimild;
+#include "NodeVisitor.hpp"
 
-Task::Task( int priority )
-	: _priority( priority ),
-	  _runLoop( nullptr )
-{
+#include "Mathematics/Ray.hpp"
+
+#include <functional>
+#include <list>
+
+namespace crimild {
+
+	class Picking : public NodeVisitor {
+	private:
+		typedef std::function< bool( Node * ) > FilterType;
+
+	public:
+		class Results {
+		public:
+			Results( void ) { }
+			~Results( void ) { }
+
+			void reset( void )
+			{
+				_candidates.clear();
+			}
+
+			void sortCandidates( std::function< bool( Node *, Node * ) > callback )
+			{
+				_candidates.sort( callback );
+			}
+
+			void pushCandidate( Node *candidate )
+			{
+				_candidates.push_back( candidate );
+			}
+
+			void foreachCandidate( std::function< void( Node * ) > callback ) 
+			{
+				for ( auto c : _candidates ) {
+					callback( c );
+				}
+			}
+
+			bool hasResults( void )
+			{
+				return _candidates.size() > 0;
+			}
+
+			Node *getBestCandidate( void )
+			{
+				if ( !hasResults() ) {
+					return nullptr;
+				}
+
+				return _candidates.front();
+			}
+
+		private:
+			std::list< Node * > _candidates;
+		};
+
+	public:
+		Picking( const Ray3f &tester, Results &results, FilterType filter = nullptr );
+		virtual ~Picking( void );
+
+		virtual void traverse( Node *node ) override;
+
+		virtual void visitNode( Node *node ) override;
+		virtual void visitGroup( Group *node ) override;
+
+	private:
+		Ray3f _tester;
+		Results &_results;
+		FilterType _filter;
+	};
+
 }
 
-Task::~Task( void )
-{
-}
+#endif
 

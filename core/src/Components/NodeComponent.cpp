@@ -60,3 +60,8 @@ void NodeComponent::update( const Time &t )
 
 }
 
+void NodeComponent::renderDebugInfo( Renderer *, Camera * )
+{
+
+}
+

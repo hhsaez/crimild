@@ -26,6 +26,8 @@
  */
 
 #include "Node.hpp"
+#include "Group.hpp"
+
 #include "Boundings/SphereBoundingVolume.hpp"
 
 using namespace crimild;
@@ -34,8 +36,8 @@ Node::Node( std::string name )
 	: NamedObject( name ),
 	  _parent( nullptr ),
 	  _worldIsCurrent( false ),
-	  _localBound( new SphereBoundingVolume( Vector3f( 0.0f, 0.0f, 0.0f ), 1.0f ) ),
-	  _worldBound( new SphereBoundingVolume( Vector3f( 0.0f, 0.0f, 0.0f ), 1.0f ) )
+	  _localBound( new SphereBoundingVolume( Vector3f( 0.0f, 0.0f, 0.0f ), 0.5f ) ),
+	  _worldBound( new SphereBoundingVolume( Vector3f( 0.0f, 0.0f, 0.0f ), 0.5f ) )
 {
 }
 
@@ -56,6 +58,18 @@ Node *Node::getRootParent( void )
 	}
 	
 	return root;
+}
+
+Pointer< Node > Node::detachFromParent( void )
+{
+	Pointer< Node > thisNode( this );
+
+	Group *parent = getParent< Group >();
+	if ( parent != nullptr ) {
+		parent->detachNode( this );
+	}
+
+	return thisNode;
 }
 
 void Node::perform( NodeVisitor &visitor )
@@ -125,15 +139,19 @@ void Node::detachAllComponents( void )
 
 void Node::startComponents( void )
 {
-	auto components = _components;
-	for ( auto cmp : components ) {
-		if ( cmp.second != nullptr ) {
-			cmp.second->start();
-		}
-	}
+	foreachComponent( [&]( NodeComponent *component ) {
+		component->start();
+	});
 }
 
 void Node::updateComponents( const Time &t )
+{
+	foreachComponent( [&]( NodeComponent *component ) {
+		component->update( t );
+	});
+}
+
+void Node::foreachComponent( std::function< void ( NodeComponent * ) > callback )
 {
 	// create a copy of the component's collection
 	// to prevent errors when attaching or detaching
@@ -141,7 +159,7 @@ void Node::updateComponents( const Time &t )
 	auto components = _components;
 	for ( auto cmp : components ) {
 		if ( cmp.second != nullptr ) {
-			cmp.second->update( t );
+			callback( cmp.second.get() );
 		}
 	}
 }

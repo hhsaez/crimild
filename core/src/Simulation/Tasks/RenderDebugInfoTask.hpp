@@ -25,17 +25,44 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Task.hpp"
+#ifndef CRIMILD_SIMULATION_TASKS_RENDER_DEBUG_INFO_
+#define CRIMILD_SIMULATION_TASKS_RENDER_DEBUG_INFO_
 
-using namespace crimild;
+#include "Simulation/Task.hpp"
+#include "Messaging/MessageQueue.hpp"
 
-Task::Task( int priority )
-	: _priority( priority ),
-	  _runLoop( nullptr )
-{
+namespace crimild {
+
+	class EnableRenderDebugInfoMessage : public Message {
+	public:
+		EnableRenderDebugInfoMessage( void ) { }
+		virtual ~EnableRenderDebugInfoMessage( void ) { }
+	};
+
+	class DisableRenderDebugInfoMessage : public Message {
+	public:
+		DisableRenderDebugInfoMessage( void ) { }
+		virtual ~DisableRenderDebugInfoMessage( void ) { }
+	};
+
+	class RenderDebugInfoTask : 
+		public Task,
+		public MessageHandler< EnableRenderDebugInfoMessage >,
+		public MessageHandler< DisableRenderDebugInfoMessage > {
+	public:
+		RenderDebugInfoTask( int priority );
+		virtual ~RenderDebugInfoTask( void );
+
+		virtual void start( void ) override;
+		virtual void update( void ) override;
+		virtual void stop( void ) override;
+
+	public:
+		virtual void handleMessage( EnableRenderDebugInfoMessage *message ) override;
+		virtual void handleMessage( DisableRenderDebugInfoMessage *message ) override;
+	};
+
 }
 
-Task::~Task( void )
-{
-}
+#endif
 

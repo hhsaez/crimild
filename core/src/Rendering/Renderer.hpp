@@ -133,7 +133,7 @@ namespace crimild {
 		/**
 			\brief optional
 		 */
-		virtual void drawBuffers( ShaderProgram *program, Primitive::Type type, VertexBufferObject *vbo ) { }
+		virtual void drawBuffers( ShaderProgram *program, Primitive::Type type, VertexBufferObject *vbo, unsigned int count ) { }
 
 	public:
         virtual ShaderProgram *getDepthProgram( void ) { return nullptr; }

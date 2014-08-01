@@ -88,7 +88,8 @@ Node *Group::getNode( unsigned int index )
 
 void Group::foreachNode( std::function< void( Node * ) > callback )
 {
-    for ( auto node : _nodes ) {
+	auto nodes = _nodes;
+    for ( auto node : nodes ) {
         if ( node != nullptr ) {
             callback ( node.get() );
         }

@@ -25,17 +25,53 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Task.hpp"
+#include "Picking.hpp"
+
+#include "SceneGraph/Node.hpp"
+#include "SceneGraph/Group.hpp"
 
 using namespace crimild;
 
-Task::Task( int priority )
-	: _priority( priority ),
-	  _runLoop( nullptr )
+Picking::Picking( const Ray3f &tester, Picking::Results &results, FilterType filter )
+	: _tester( tester ),
+	  _results( results ),
+	  _filter( filter )
 {
+
 }
 
-Task::~Task( void )
+Picking::~Picking( void )
 {
+
 }
 
+void Picking::traverse( Node *node )
+{
+	_results.reset();
+
+	NodeVisitor::traverse( node );
+
+	// sort nodes based on how close the ray is to
+	// intersecting the scene of each bounding volume
+	_results.sortCandidates( [&]( Node *first, Node *second ) -> bool {
+			return Distance::compute( _tester, first->getWorldBound()->getCenter() ) <
+				Distance::compute( _tester, second->getWorldBound()->getCenter() );
+		});
+}
+
+void Picking::visitNode( Node *node )
+{
+	if ( _filter == nullptr || _filter( node ) ) {
+		_results.pushCandidate( node );				
+	}
+}
+
+void Picking::visitGroup( Group *group )
+{
+	visitNode( group );
+	group->foreachNode( [&]( Node *node ) { 
+			if ( node->getWorldBound()->testIntersection( _tester ) ) {
+				node->accept( *this );
+			}
+		});
+}

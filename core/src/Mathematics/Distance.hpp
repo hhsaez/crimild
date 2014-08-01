@@ -37,6 +37,18 @@ namespace crimild {
 	class Distance {
 	public:
 		template< unsigned int SIZE, typename PRECISION >
+		static double compute( const Vector< SIZE, PRECISION > &u, const Vector< SIZE, PRECISION > &v ) 
+		{
+			return std::sqrt( computeSquared( u, v ) );
+		}
+
+		template< unsigned int SIZE, typename PRECISION >
+		static double computeSquared( const Vector< SIZE, PRECISION > &u, const Vector< SIZE, PRECISION > &v ) 
+		{
+			return ( v - u ).getSquaredMagnitude();
+		}
+
+		template< unsigned int SIZE, typename PRECISION >
 		static double compute( const Ray< SIZE, PRECISION > &ray, const Vector< SIZE, PRECISION > &point )
 		{
 			return std::sqrt( computeSquared( ray, point ) );

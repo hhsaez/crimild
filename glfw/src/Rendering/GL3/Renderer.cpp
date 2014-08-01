@@ -235,7 +235,7 @@ void gl3::Renderer::drawPrimitive( ShaderProgram *program, Primitive *primitive 
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gl3::Renderer::drawBuffers( ShaderProgram *program, Primitive::Type bufferType, VertexBufferObject *vbo )
+void gl3::Renderer::drawBuffers( ShaderProgram *program, Primitive::Type bufferType, VertexBufferObject *vbo, unsigned int count )
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
@@ -273,7 +273,7 @@ void gl3::Renderer::drawBuffers( ShaderProgram *program, Primitive::Type bufferT
 
 	bindVertexBuffer( program, vbo );
 
-	glDrawArrays( type, 0, vbo->getVertexCount() );
+	glDrawArrays( type, 0, count );
 
 	unbindVertexBuffer( program, vbo );	
 
