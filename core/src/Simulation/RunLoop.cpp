@@ -60,6 +60,8 @@ void RunLoop::startTask( Task *task )
 	}
     Pointer< Task > taskPtr( task );
 	_activeTasks.insert( it, taskPtr );
+
+	task->setRunLoop( this );
 	task->start();
 }
 
@@ -147,10 +149,8 @@ void RunLoop::foreachSuspendedTask( std::function< void ( Task *task ) > callbac
 
 bool RunLoop::update( void )
 {
-	auto it = _activeTasks.begin();
-	while ( hasActiveTasks() && it != _activeTasks.end() ) {
-		Pointer< Task > task = *it;
-		++it;
+	auto tasks = _activeTasks;
+	for ( auto task : tasks ) {
 		task->update();
 	}
 
@@ -175,6 +175,7 @@ void RunLoop::cleanup( void )
 		Pointer< Task > task = *it;
 		++it;
 		task->stop();
+		task->setRunLoop( nullptr );
 	}
 	_killedTasks.clear();
 }

@@ -31,10 +31,23 @@
 #include "Numeric.hpp"
 #include "Matrix.hpp"
 
+#include <iostream>
+#include <iomanip>
+
 namespace crimild {
 
 	template< typename PRECISION >
 	class Frustum {
+	private:
+		enum {
+			FRUSTUM_R_MIN = 0,
+			FRUSTUM_R_MAX = 1,
+			FRUSTUM_U_MIN = 2,
+			FRUSTUM_U_MAX = 3,
+			FRUSTUM_D_MIN = 4,
+			FRUSTUM_D_MAX = 5,
+		};
+
 	public:
 		Frustum( void )
 		{
@@ -42,25 +55,24 @@ namespace crimild {
 
 		Frustum( PRECISION rMin, PRECISION rMax, PRECISION uMin, PRECISION uMax, PRECISION dMin, PRECISION dMax )
 		{
-			_data[ 0 ] = rMin;
-			_data[ 1 ] = rMax;
-			_data[ 2 ] = uMin;
-			_data[ 3 ] = uMax;
-			_data[ 4 ] = dMin;
-			_data[ 5 ] = dMax;
+			_data[ FRUSTUM_R_MIN ] = rMin;
+			_data[ FRUSTUM_R_MAX ] = rMax;
+			_data[ FRUSTUM_U_MIN ] = uMin;
+			_data[ FRUSTUM_U_MAX ] = uMax;
+			_data[ FRUSTUM_D_MIN ] = dMin;
+			_data[ FRUSTUM_D_MAX ] = dMax;
 		}
 
 		Frustum( PRECISION fov, PRECISION aspect, PRECISION near, PRECISION far )
 		{
-			PRECISION invE = static_cast< PRECISION >( tan( fov * Numeric< PRECISION >::DEG_TO_RAD / 2.0 ) );
-			PRECISION temp = near * invE;
+			float halfAngleRadians = 0.5f * fov * Numeric< PRECISION >::DEG_TO_RAD;
 
-			_data[ 0 ] = -temp;
-			_data[ 1 ] = +temp;
-			_data[ 2 ] = ( -1.0 / aspect ) * temp;
-			_data[ 3 ] = ( +1.0 / aspect ) * temp;
-			_data[ 4 ] = near;
-			_data[ 5 ] = far;
+			_data[ FRUSTUM_U_MAX ] = near * tan( halfAngleRadians );
+			_data[ FRUSTUM_R_MAX ] = aspect * _data[ FRUSTUM_U_MAX ];
+			_data[ FRUSTUM_U_MIN ] = -_data[ FRUSTUM_U_MAX ];
+			_data[ FRUSTUM_R_MIN ] = -_data[ FRUSTUM_R_MAX ];
+			_data[ FRUSTUM_D_MIN ] = near;
+			_data[ FRUSTUM_D_MAX ] = far;
 		}
 
 		Frustum( const Frustum &frustum )
@@ -82,12 +94,12 @@ namespace crimild {
 			return memcmp( _data, frustum._data, 6 * sizeof( PRECISION ) ) != 0;
 		}
 
-		PRECISION getRMin( void ) const { return _data[ 0 ]; }
-		PRECISION getRMax( void ) const { return _data[ 1 ]; }
-		PRECISION getUMin( void ) const { return _data[ 2 ]; }
-		PRECISION getUMax( void ) const { return _data[ 3 ]; }
-		PRECISION getDMin( void ) const { return _data[ 4 ]; }
-		PRECISION getDMax( void ) const { return _data[ 5 ]; }
+		PRECISION getRMin( void ) const { return _data[ FRUSTUM_R_MIN ]; }
+		PRECISION getRMax( void ) const { return _data[ FRUSTUM_R_MAX ]; }
+		PRECISION getUMin( void ) const { return _data[ FRUSTUM_U_MIN ]; }
+		PRECISION getUMax( void ) const { return _data[ FRUSTUM_U_MAX ]; }
+		PRECISION getDMin( void ) const { return _data[ FRUSTUM_D_MIN ]; }
+		PRECISION getDMax( void ) const { return _data[ FRUSTUM_D_MAX ]; }
 
 		Matrix< 4, PRECISION > computeProjectionMatrix( void )
 		{
@@ -124,6 +136,17 @@ namespace crimild {
 	private:
 		PRECISION _data[ 6 ];
 	};
+
+	template< typename PRECISION >
+	std::ostream &operator<<( std::ostream &out, const Frustum< PRECISION > &f )
+	{
+		out << std::setiosflags( std::ios::fixed | std::ios::showpoint  )
+			<< std::setprecision( 10 )
+			<< "[D = (" << f.getDMin() << ", " << f.getDMax() << "), "
+			<< "R = (" << f.getRMin() << ", " << f.getRMax() << "), "
+			<< "U = (" << f.getUMin() << ", " << f.getUMax() << ")]";
+		return out;
+	}
 
 	typedef Frustum< float > Frustumf;
 	typedef Frustum< double > Frustumd;

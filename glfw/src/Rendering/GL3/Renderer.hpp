@@ -58,11 +58,16 @@ namespace crimild {
 			virtual void setAlphaState( AlphaState *state ) override;
 
 			virtual void drawPrimitive( ShaderProgram *program, Primitive *primitive ) override;
+			virtual void drawBuffers( ShaderProgram *program, Primitive::Type type, VertexBufferObject *vbo, unsigned int count ) override;
 
+            virtual ShaderProgram *getDepthProgram( void ) override;
+            virtual ShaderProgram *getForwardPassProgram( void ) override;
+            virtual ShaderProgram *getDeferredPassProgram( void ) override;
+            virtual ShaderProgram *getShaderProgram( const char *name ) override;
 			virtual ShaderProgram *getFallbackProgram( Material *material, Geometry *geometry, Primitive *primitive ) override;
 
 		private:
-			std::map< std::string, Pointer< ShaderProgram > > _fallbackPrograms;
+			std::map< std::string, Pointer< ShaderProgram > > _programs;
 		};
 
 	}

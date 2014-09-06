@@ -12,6 +12,8 @@ glfw-2.7.8
 glfw-2.7.8/**/*
 glew-1.9.0
 glew-1.9.0/**/*
+lua-5.2.3
+lua-5.2.3/**/*
 
 CMakeCache.txt
 CTestTestfile.cmake
@@ -24,3 +26,6 @@ crimild_core_test
 CRIMILD.xcodeproj
 CMakeScripts
 *.build
+
+\#*\#
+*~

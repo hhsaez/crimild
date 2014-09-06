@@ -29,25 +29,20 @@
 #include "Tasks/WindowTask.hpp"
 #include "Tasks/UpdateTimeTask.hpp"
 #include "Tasks/UpdateInputStateTask.hpp"
+#include "Rendering/GL3/Renderer.hpp"
+
+#include <Crimild_Scripting.hpp>
 
 #include <GL/glfw.h>
 
 using namespace crimild;
+using namespace crimild::scripting;
 
 GLSimulation::GLSimulation( std::string name, int argc, char **argv )
-	: Simulation( name, argc, argv ),
-	  _width( 1024 ),
-	  _height( 768 )
+	: Simulation( name, argc, argv )
 {
-	for ( int i = 1; i < argc; i++ ) {
-		std::string arg( argv[ i ] );
-		if ( arg == "--width" ) {
-			_width = atoi( argv[ i + 1 ] );
-		}
-		else if ( arg == "--height" ) {
-			_height = atoi( argv[ i + 1 ] );
-		}
-	}
+	loadSettings();
+	init();
 }
 
 GLSimulation::~GLSimulation( void )
@@ -61,10 +56,38 @@ void GLSimulation::start( void )
 		throw RuntimeException( "Cannot start GLFW: glwfInit failed!" );
 	}
 
-	getMainLoop()->startTask( new WindowTask( 9000, _width, _height ) );
+	getMainLoop()->startTask( new WindowTask( 9000, -1, -1 ) );
 	getMainLoop()->startTask( new UpdateTimeTask( 9999 ) );
 	getMainLoop()->startTask( new UpdateInputStateTask( 0 ) );
 
 	Simulation::start();
+}
+
+void GLSimulation::loadSettings( void )
+{
+	ScriptContext context;
+	if ( context.load( FileSystem::getInstance().pathForResource( "crimild.lua" ) ) ) {
+		getSettings().add( "video.width", context.eval< int >( "video.width"  ) );
+		getSettings().add( "video.height", context.eval< int >( "video.height"  ) );
+		
+		getSettings().add( "video.clearColor.r", context.eval< float >( "video.clearColor.r"  ) );
+		getSettings().add( "video.clearColor.g", context.eval< float >( "video.clearColor.g"  ) );
+		getSettings().add( "video.clearColor.b", context.eval< float >( "video.clearColor.b"  ) );
+		getSettings().add( "video.clearColor.a", context.eval< float >( "video.clearColor.a"  ) );
+	}
+}
+
+void GLSimulation::init( void )
+{
+	int width = getSettings().get( "video.width", 1024 );
+	int height = getSettings().get( "video.height", 768 );
+	float r = getSettings().get( "video.clearColor.r", 0.0f );
+	float g = getSettings().get( "video.clearColor.g", 0.0f );
+	float b = getSettings().get( "video.clearColor.b", 0.0f );
+	float a = getSettings().get( "video.clearColor.a", 1.0f );
+
+	Pointer< FrameBufferObject > screenBuffer( new FrameBufferObject( width, height ) );
+	screenBuffer->setClearColor( RGBAColorf( r, g, b, a ) );
+	Simulation::getCurrent()->setRenderer( new gl3::Renderer( screenBuffer.get() ) );
 }
 

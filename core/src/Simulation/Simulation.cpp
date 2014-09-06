@@ -29,16 +29,20 @@
 #include "FileSystem.hpp"
  
 #include "Foundation/Log.hpp"
+
 #include "Tasks/DispatchMessagesTask.hpp"
 #include "Tasks/BeginRenderTask.hpp"
 #include "Tasks/EndRenderTask.hpp"
 #include "Tasks/UpdateSceneTask.hpp"
 #include "Tasks/UpdatePhysicsTask.hpp"
 #include "Tasks/RenderSceneTask.hpp"
+
 #include "SceneGraph/Camera.hpp"
+
 #include "Visitors/FetchCameras.hpp"
 #include "Visitors/UpdateWorldState.hpp"
 #include "Visitors/UpdateRenderState.hpp"
+#include "Visitors/StartComponents.hpp"
 
 using namespace crimild;
 
@@ -48,8 +52,12 @@ Simulation::Simulation( std::string name, int argc, char **argv )
 	: NamedObject( name ),
 	  _mainLoop( new RunLoop() )
 {
+	srand( time( NULL ) );	
+
 	_currentSimulation = this;
 
+	_settings.parseCommandLine( argc, argv );
+	
 	FileSystem::getInstance().init( argc, argv );
 }
 
@@ -60,8 +68,6 @@ Simulation::~Simulation( void )
 
 void Simulation::start( void )
 {
-	Log::Info << "Starting simulation \"" << getName() << "\"" << Log::End;
-
 	getMainLoop()->startTask( new DispatchMessagesTask( Priorities::HIGHEST_PRIORITY ) );
 	getMainLoop()->startTask( new BeginRenderTask( Priorities::BEGIN_RENDER_PRIORITY ) );
 	getMainLoop()->startTask( new EndRenderTask( Priorities::END_RENDER_PRIORITY ) );
@@ -78,8 +84,6 @@ bool Simulation::step( void )
 void Simulation::stop( void )
 {
 	_mainLoop->stop();
-	
-	Log::Info << "Simulation completed" << Log::End;
 }
 
 int Simulation::run( void )
@@ -97,6 +101,7 @@ void Simulation::setScene( Node *scene )
 	if ( _scene != nullptr ) {
 		_scene->perform( UpdateWorldState() );
 		_scene->perform( UpdateRenderState() );
+		_scene->perform( StartComponents() );
 
 		FetchCameras fetchCameras;
 		_scene->perform( fetchCameras );

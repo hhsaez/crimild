@@ -33,6 +33,8 @@
 
 namespace crimild {
 
+	class RunLoop;
+
 	class Task : public SharedObject {
 	protected:
 		Task( int priority = 0 );
@@ -51,6 +53,13 @@ namespace crimild {
 		virtual void suspend( void ) { }
 		virtual void resume( void ) { }
 		virtual void update( void ) { }
+
+	public:
+		void setRunLoop( RunLoop *runLoop ) { _runLoop = runLoop; }
+		RunLoop *getRunLoop( void ) { return _runLoop; }
+
+	private:
+		RunLoop *_runLoop;
 	};
 
 }

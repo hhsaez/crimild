@@ -231,7 +231,8 @@ namespace crimild {
 		template< class MessageImpl >
 		void pushMessage( MessageImpl *message )
 		{
-			MessageDispatcherImpl< MessageImpl >::getInstance().pushMessage( message );
+            Pointer< MessageImpl > messagePtr( message );
+			MessageDispatcherImpl< MessageImpl >::getInstance().pushMessage( messagePtr );
 		}
 
 		/**

@@ -1,10 +1,13 @@
 SET( CRIMILD_INCLUDE_DIRECTORIES 
 	${CRIMILD_SOURCE_DIR}/core/src 
+	${CRIMILD_SOURCE_DIR}/scripting/src 
+	${CRIMILD_SOURCE_DIR}/third-party/lua-5.2.3/src
 	${CRIMILD_SOURCE_DIR}/third-party/glfw-2.7.8/include
 	${CRIMILD_SOURCE_DIR}/third-party/glew-1.9.0/include )
 
 SET( CRIMILD_LIBRARY_LINK_LIBRARIES 
 	crimild_core
+	crimild_scripting
 	glfw )
 
 # Add GLEW sources as part of the library

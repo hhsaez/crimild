@@ -47,7 +47,9 @@ namespace crimild {
         T &operator*( void ) const { return &_data; }
         T *operator->( void ) const { return _data; }
         
-        Pointer &operator=( T *data )
+        T *get( void ) const { return _data; }
+        
+        void set( T *data )
         {
             if ( data != _data ) {
                 if ( _data != nullptr ) {
@@ -60,42 +62,24 @@ namespace crimild {
                     _data->retain();
                 }
             }
-            
+        }
+        
+        Pointer &operator=( T *data )
+        {
+            set( data );
             return *this;
         }
         
         Pointer &operator=( const Pointer &ptr )
         {
-            if ( ptr._data != _data ) {
-                if ( _data != nullptr ) {
-                    _data->release();
-                }
-                
-                _data = ptr._data;
-                
-                if ( _data != nullptr ) {
-                    _data->retain();
-                }
-            }
-            
+            set( ptr.get() );
             return *this;
         }
         
         template< class U >
         Pointer &operator=( const Pointer< U > &ptr )
         {
-            if ( ptr.get() != _data ) {
-                if ( _data != nullptr ) {
-                    _data->release();
-                }
-                
-                _data = ptr.get();
-                
-                if ( _data != nullptr ) {
-                    _data->retain();
-                }
-            }
-            
+            set( ptr.get() );
             return *this;
         }
         
@@ -103,8 +87,6 @@ namespace crimild {
         bool operator==( const Pointer &ptr ) const { return _data == ptr._data; }
         bool operator!=( T *data ) const { return _data != data; }
         bool operator!=( const Pointer &ptr ) const { return _data != ptr._data; }
-        
-        T *get( void ) const { return _data; }
         
     private:
         T *_data = nullptr;

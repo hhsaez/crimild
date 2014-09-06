@@ -29,7 +29,7 @@
 #include "Primitives/Primitive.hpp"
 #include "Primitives/SpherePrimitive.hpp"
 #include "SceneGraph/Geometry.hpp"
-#include "Rendering/VisibilitySet.hpp"
+#include "Rendering/RenderQueue.hpp"
 #include "Visitors/SelectNodes.hpp"
 
 using namespace crimild;
@@ -53,10 +53,10 @@ HierarchyRenderPass::~HierarchyRenderPass( void )
 
 }
 
-void HierarchyRenderPass::render( Renderer *renderer, VisibilitySet *vs, Camera *camera ) 
+void HierarchyRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
 {
 	if ( _actualRenderPass != nullptr ) {
-		_actualRenderPass->render( renderer, vs, camera );
+		_actualRenderPass->render( renderer, renderQueue, camera );
 	}
 
 	Pointer< SpherePrimitive > primitive( new SpherePrimitive( 

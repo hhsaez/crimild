@@ -29,17 +29,15 @@
 
 #include "Simulation/Simulation.hpp"
 #include "Rendering/Renderer.hpp"
-#include "Rendering/VisibilitySet.hpp"
-#include "SceneGraph/Camera.hpp"
-#include "Visitors/ComputeVisibilitySet.hpp"
-#include "Visitors/UpdateRenderState.hpp"
+#include "Visitors/ComputeRenderQueue.hpp"
 
 #include <iostream>
 
 using namespace crimild;
 
 RenderSceneTask::RenderSceneTask( int priority )
-	: Task( priority )
+	: Task( priority ),
+      _renderQueue( new RenderQueue() )
 {
 
 }
@@ -59,12 +57,9 @@ void RenderSceneTask::update( void )
 	Renderer *renderer = Simulation::getCurrent()->getRenderer();
 
 	if ( scene != nullptr && renderer != nullptr ) {
-		VisibilitySet result;
-		Simulation::getCurrent()->forEachCamera( [&]( Camera *camera ) { 
-			scene->perform( ComputeVisibilitySet( &result, camera ) );
-			if ( result.hasGeometries() ) {
-				renderer->render( &result );
-			}
+		Simulation::getCurrent()->forEachCamera( [&]( Camera *camera ) {
+            scene->perform( ComputeRenderQueue( camera, getRenderQueue() ) );
+            renderer->render( getRenderQueue() );
 		});
 	}
 }

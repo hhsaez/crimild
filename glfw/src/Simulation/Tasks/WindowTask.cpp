@@ -46,21 +46,21 @@ WindowTask::~WindowTask( void )
 
 void WindowTask::start( void )
 {
-	Pointer< FrameBufferObject > screenBuffer( new FrameBufferObject( _width, _height, 8, 8, 8, 8, 16, 0 ) );
-
 	glfwOpenWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
 	glfwOpenWindowHint( GLFW_OPENGL_VERSION_MAJOR, 3 );
 	glfwOpenWindowHint( GLFW_OPENGL_VERSION_MINOR, 2 );
     glfwOpenWindowHint( GLFW_WINDOW_NO_RESIZE, GL_TRUE );
 
+    FrameBufferObject *screenBuffer = Simulation::getCurrent()->getRenderer()->getScreenBuffer();
+
     if ( !glfwOpenWindow( screenBuffer->getWidth(), screenBuffer->getHeight(), 
-    					  screenBuffer->getRedBits(), screenBuffer->getGreenBits(), screenBuffer->getBlueBits(), screenBuffer->getAlphaBits(),
-    					  screenBuffer->getDepthBits(), screenBuffer->getStencilBits(),
+    					  8, 8, 8, 8,
+    					  16, 0,
     					  GLFW_WINDOW ) ) {
     	throw RuntimeException( "Cannot created main window" );
     }
-
-	Simulation::getCurrent()->setRenderer( new gl3::Renderer( screenBuffer.get() ) );
+    
+    glfwSetWindowTitle( Simulation::getCurrent()->getName().c_str() );
 }
 
 void WindowTask::stop( void )

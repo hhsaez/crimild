@@ -30,6 +30,8 @@
 
 #include "SceneGraph/Node.hpp"
 #include "Rendering/Texture.hpp"
+#include "Rendering/AlphaState.hpp"
+#include "Rendering/DepthState.hpp"
 
 #include <map>
 #include <string>
@@ -140,13 +142,18 @@ namespace crimild {
 			Pointer< Texture > diffuseMap;
 			Pointer< Texture > normalMap;
 			Pointer< Texture > specularMap;
+			Pointer< Texture > emissiveMap;
 			RGBAColorf diffuseColor;
 			RGBAColorf ambientColor;
 			RGBAColorf specularColor;
+            Pointer< AlphaState > alphaState;
+            Pointer< DepthState > depthState;
 
 			MaterialDef( std::string name )
 			{
 				this->name = name;
+                this->alphaState = new AlphaState( false );
+                this->depthState = new DepthState( true );
 			}
 		};	
 

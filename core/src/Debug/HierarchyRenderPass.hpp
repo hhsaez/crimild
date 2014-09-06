@@ -46,7 +46,7 @@ namespace crimild {
 		void setRenderBoundings( bool value ) { _renderBoundings = value; }
 		bool shouldRenderBoundings( void ) const { return _renderBoundings; }
 
-		virtual void render( Renderer *renderer, VisibilitySet *vs, Camera *camera );
+		virtual void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
 
 	private:
 		void renderBoundings( Renderer *renderer, Geometry *geometry, Material *material, Camera *camera );

@@ -40,8 +40,8 @@ namespace crimild {
 		virtual void start( void ) override;
 
 	private:
-		unsigned int _width; 
-		unsigned int _height;
+		void loadSettings( void );
+		void init( void );
 	};
 
 }

@@ -66,11 +66,11 @@ namespace crimild {
 		bool getPickRay( float normalizedX, float normalizedY, Ray3f &result ) const;
 
 	private:
+		Frustumf _frustum;
+		Rectf _viewport;
 		Matrix4f _projectionMatrix;
 		Matrix4f _viewMatrix;
         bool _viewMatrixIsCurrent;
-		Frustumf _frustum;
-		Rectf _viewport;
 
 	public:
 		virtual void accept( NodeVisitor &visitor ) override;

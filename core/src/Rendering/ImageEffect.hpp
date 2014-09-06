@@ -29,20 +29,26 @@
 #define CRIMILD_RENDERING_IMAGE_EFFECT_
 
 #include "Foundation/SharedObject.hpp"
-#include "ShaderProgram.hpp"
 
 namespace crimild {
+    
+    class Renderer;
+    class FrameBufferObject;
+    class Primitive;
+    class Texture;
+    class ShaderProgram;
 
 	class ImageEffect : public SharedObject {
+    protected:
+        ImageEffect( void );
+
 	public:
-		ImageEffect( void );
 		virtual ~ImageEffect( void );
 
-		void setProgram( ShaderProgram *program ) { _program = program; }
-		ShaderProgram *getProgram( void ) { return _program.get(); }
-
-	private:
-		Pointer< ShaderProgram > _program;
+        virtual void apply( Renderer *renderer, int inputCount, Texture **inputs, Primitive *primitive, FrameBufferObject *output ) = 0;
+        
+    protected:
+        void render( Renderer *renderer, FrameBufferObject *output, Texture *texture, ShaderProgram *program, Primitive *primitive );
 	};
 
 }

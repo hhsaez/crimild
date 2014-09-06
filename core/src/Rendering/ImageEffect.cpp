@@ -27,6 +27,13 @@
 
 #include "ImageEffect.hpp"
 
+#include "Rendering/Renderer.hpp"
+#include "Rendering/FrameBufferObject.hpp"
+#include "Rendering/Texture.hpp"
+#include "Rendering/ShaderProgram.hpp"
+#include "Foundation/Log.hpp"
+#include "Primitives/Primitive.hpp"
+
 using namespace crimild;
 
 ImageEffect::ImageEffect( void )
@@ -37,5 +44,32 @@ ImageEffect::ImageEffect( void )
 ImageEffect::~ImageEffect( void )
 {
 
+}
+
+void ImageEffect::render( Renderer *renderer, FrameBufferObject *output, Texture *texture, ShaderProgram *program, Primitive *primitive )
+{
+    if ( program == nullptr ) {
+        Log::Error << "Invalid program object" << Log::End;
+        return;
+    }
+    
+    if ( texture == nullptr ) {
+        Log::Error << "Invalid texture object" << Log::End;
+        return;
+    }
+    
+    renderer->bindFrameBuffer( output );
+    renderer->bindProgram( program );
+    renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM ), texture );
+    renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
+    renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
+    
+    renderer->drawPrimitive( program, primitive );
+    
+    renderer->unbindVertexBuffer( program, primitive->getVertexBuffer() );
+    renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
+    renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM ), texture );
+    renderer->unbindProgram( program );
+    renderer->unbindFrameBuffer( output );
 }
 

@@ -68,9 +68,8 @@ namespace crimild {
 		const T *getData( void ) const { return _data; }
 
 	private:
-		T *_data;
 		size_t _size;
-
+		T *_data;
 	};
 
 }

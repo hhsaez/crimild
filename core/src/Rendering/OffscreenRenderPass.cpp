@@ -49,14 +49,15 @@ void OffscreenRenderPass::attachImageEffect( ImageEffect *imageEffect )
 	_imageEffects.push_back( imageEffectPtr );
 }
 
-void OffscreenRenderPass::render( Renderer *renderer, VisibilitySet *vs, Camera *camera ) 
+void OffscreenRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
 {
+    /*
 	if ( _offscreenBuffer == nullptr ) {
 		_offscreenBuffer = new FrameBufferObject( renderer->getScreenBuffer() );
 	}
 
 	renderer->bindFrameBuffer( _offscreenBuffer.get() );	
-	RenderPass::render( renderer, vs, camera );
+	RenderPass::render( renderer, renderQueue, camera );
 	renderer->unbindFrameBuffer( _offscreenBuffer.get() );
 
 	if ( _imageEffects.size() > 0 ) {
@@ -67,5 +68,6 @@ void OffscreenRenderPass::render( Renderer *renderer, VisibilitySet *vs, Camera 
 	else {
 		RenderPass::render( renderer, _offscreenBuffer.get(), nullptr );
 	}
+     */
 }
 

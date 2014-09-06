@@ -334,6 +334,20 @@ namespace crimild {
 			result = from + ( 56 * tc * ts - 175 * ts * ts + 200 * tc - 100 * ts + 20 * t ) * ( to - from );
 		}
 
+		template< typename T, typename PRECISION >
+		static void sin( const T &from, const T &to, PRECISION t, T &result )
+		{
+			T diff = to - from;
+			result = std::sin( t * Numericf::TWO_PI ) * diff + from;
+		}
+
+		template< typename T, typename PRECISION >
+		static void cos( const T &from, const T &to, PRECISION t, T &result )
+		{
+			T diff = to - from;
+			result = std::cos( t * Numericf::TWO_PI ) * diff + from;
+		}
+
 		/**
 			\brief Calculate spherical liner interpolation for two quaternions
 
@@ -366,7 +380,7 @@ namespace crimild {
 
 			Quaternion< T > q = q1 - dot * q0;
 			q.normalize();
-			return cos( theta ) * q0 + sin( theta ) * q;
+			return std::cos( theta ) * q0 + std::sin( theta ) * q;
 		}
 
 	};

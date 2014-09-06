@@ -69,6 +69,9 @@ namespace crimild {
 
 		void setSpecularMap( Texture *texture ) { _specularMap = texture; }
 		Texture *getSpecularMap( void ) { return _specularMap.get(); }
+        
+        void setEmissiveMap( Texture *texture ) { _emissiveMap = texture; }
+        Texture *getEmissiveMap( void ) { return _emissiveMap.get(); }
 
 		void setDepthState( DepthState *state ) { _depthState = state; }
 		DepthState *getDepthState( void ) { return _depthState.get(); }
@@ -87,9 +90,10 @@ namespace crimild {
 		Pointer< Texture > _colorMap;
 		Pointer< Texture > _normalMap;
 		Pointer< Texture > _specularMap;
+        Pointer< Texture > _emissiveMap;
 
-		Pointer< AlphaState > _alphaState;
 		Pointer< DepthState > _depthState;
+		Pointer< AlphaState > _alphaState;
 	};
 
 }

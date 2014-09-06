@@ -26,14 +26,15 @@
  */
 
 #include "Camera.hpp"
+#include "Rendering/ForwardRenderPass.hpp"
 
 using namespace crimild;
 
 Camera::Camera( void )
-	: _frustum( 45.0, 4.0f / 3.0f, 0.01f, 1024.0f ),
+	: _frustum( 90.0, 4.0f / 3.0f, 1.0f, 1000.0f ),
 	  _viewport( 0.0f, 0.0f, 1.0f, 1.0f ),
       _viewMatrixIsCurrent( false ),
-      _renderPass( new RenderPass() )
+      _renderPass( new ForwardRenderPass() )
 {
 	_projectionMatrix = _frustum.computeProjectionMatrix();
 	_viewMatrix.makeIdentity();
@@ -42,7 +43,8 @@ Camera::Camera( void )
 Camera::Camera( float fov, float aspect, float near, float far )
 	: _frustum( fov, aspect, near, far ),
 	  _viewport( 0.0f, 0.0f, 1.0f, 1.0f ),
-      _viewMatrixIsCurrent( false )
+      _viewMatrixIsCurrent( false ),
+      _renderPass( new ForwardRenderPass() )
 {
 	_projectionMatrix = _frustum.computeProjectionMatrix();
 	_viewMatrix.makeIdentity();
@@ -91,19 +93,22 @@ bool Camera::getPickRay( float portX, float portY, Ray3f &result ) const
 		return false;
 	}
 	
-	float xWeight = ( portX - _viewport.getX() ) / ( _viewport.getWidth() - _viewport.getX() );
-	float viewX = ( 1.0f - xWeight ) * _frustum.getRMin() + xWeight * _frustum.getRMax();
-	
-	float yWeight = ( ( 1.0f - portY ) - _viewport.getY() ) / ( _viewport.getHeight() - _viewport.getY() );
-	float viewY = ( 1.0f - yWeight ) * _frustum.getUMin() + yWeight * _frustum.getUMax();
-	
+	float xWeight = ( portX - _viewport.getX() ) / ( _viewport.getWidth() );
+	float yWeight = ( portY - _viewport.getY() ) / ( _viewport.getHeight() );
+
+	float viewX = ( 1.0f - xWeight ) * _frustum.getRMin() + xWeight * _frustum.getRMax();	
+	float viewY = yWeight * _frustum.getUMin() + ( 1.0f - yWeight ) * _frustum.getUMax();
+
 	Vector3f direction = getWorld().computeDirection();
 	Vector3f up = getWorld().computeUp();
 	Vector3f right = getWorld().computeRight();
-	Vector3f origin = getWorld().getTranslate();
 
-	result.setOrigin( origin );
-	result.setDirection( ( _frustum.getDMin() * direction + viewX * right + viewY * up ).getNormalized() );
+	Vector3f rayOrigin = getWorld().getTranslate();
+	Vector3f rayDirection = _frustum.getDMin() * direction + viewX * right + viewY * up;
+	rayDirection.normalize();
+
+	result.setOrigin( rayOrigin );
+	result.setDirection( rayDirection );
 
 	return true;
 }

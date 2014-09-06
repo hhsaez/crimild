@@ -275,20 +275,12 @@ namespace crimild {
 			return result;
 		}
 
-		void lookAt( const Vector3Impl &target, const Vector3Impl &up )
+		void lookAt( const Vector3Impl &target, const Vector3Impl &up = Vector3Impl( 0, 1, 0 ) )
 		{
 			Vector3f direction = target - getTranslate();
 			direction.normalize();
 
-			Vector3f forward( 0.0f, 0.0f, -1.0f );
-
-			Vector3f axis = forward ^ direction;
-			if ( axis.getSquaredMagnitude() == 0.0f ) {
-				axis = up;
-			}
-			float angle = std::acos( forward * direction );
-
-			_rotate.fromAxisAngle( axis, angle );
+			_rotate.lookAt( direction, up );
 		}
         
         Transformation &fromMatrix( const Matrix4Impl &m )
@@ -361,6 +353,15 @@ namespace crimild {
 			return result;
 		}
 
+		Matrix< 4, float > computeNormalMatrix( void ) const
+		{
+            Matrix< 4, float > result = computeModelMatrix();
+            result[ 12 ] = 0;
+            result[ 13 ] = 0;
+            result[ 14 ] = 0;
+            return result;
+        }
+        
 	private:
 		Vector3Impl _translate;
 		QuaternionImpl _rotate;

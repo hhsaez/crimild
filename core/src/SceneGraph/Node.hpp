@@ -54,8 +54,12 @@ namespace crimild {
 
 	public:
 		bool hasParent( void ) const { return _parent != nullptr; }
+
 		Node *getParent( void ) { return _parent; }
+
 		void setParent( Node *parent ) { _parent = parent; }
+
+		Pointer< Node > detachFromParent( void );
 
 		Node *getRootParent( void );
 
@@ -94,7 +98,11 @@ namespace crimild {
 			return static_cast< T * >( _components[ T::_COMPONENT_NAME() ].get() );
 		}
 
+		void startComponents( void );
+		
 		void updateComponents( const Time &t );
+
+		void foreachComponent( std::function< void ( NodeComponent * ) > callback );
 
 	private:
 		std::map< std::string, Pointer< NodeComponent > > _components;

@@ -307,7 +307,6 @@ void COLLADALoader::parseTriangles( crimild::Group *parent, Mesh *mesh, Vertices
 	Log::Debug << "Allocating index buffer with size " << triangleCount * 3 << Log::End;
 	Pointer< IndexBufferObject > ibo( new IndexBufferObject( triangleCount * 3, NULL ) );
 	unsigned short *indexData = ibo->getData();
-	unsigned int indexCount = 0;
 
 	unsigned int vertexIndexOffset = Numerici::max( 1, positionIndexOffset + normalIndexOffset + textureCoordsIndexOffset );
 

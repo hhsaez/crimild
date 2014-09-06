@@ -82,7 +82,7 @@ void gl3::TextureCatalog::unbind( ShaderLocation *location, Texture *texture )
 	if ( _boundTextureCount > 0 ) {
 		--_boundTextureCount;
 		glActiveTexture( GL_TEXTURE0 + _boundTextureCount );
-		glBindTexture( GL_TEXTURE_2D, _boundTextureCount );
+		glBindTexture( GL_TEXTURE_2D, 0 );
 	}
 	
 	Catalog< Texture >::unbind( location, texture );
@@ -99,8 +99,8 @@ void gl3::TextureCatalog::load( Texture *texture )
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 
-	GLint internalFormat;
-	GLint format;
+	GLint internalFormat = GL_RGBA;
+	GLint format = GL_BGRA;
 	if ( texture->getImage()->getBpp() == 4 ) {
 		internalFormat = GL_RGBA;
 		if ( texture->getImage()->getPixelFormat() == Image::PixelFormat::BGRA ) {

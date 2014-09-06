@@ -29,38 +29,29 @@
 
 using namespace crimild;
 
-FrameBufferObject::FrameBufferObject( int width, int height,
-									  int redBits, int greenBits, int blueBits, int alphaBits,
-						   			  int depthBits, int stencilBits )
+RenderTarget::RenderTarget( RenderTarget::Type type, RenderTarget::Output output, int width, int height )
+{
+    _type = type;
+    _output = output;
+    _width = width;
+    _height = height;
+    _texture.set( new Texture( nullptr ) );
+}
+
+RenderTarget::~RenderTarget( void )
+{
+    
+}
+
+FrameBufferObject::FrameBufferObject( int width, int height )
 	: _width( width ),
 	  _height( height ),
-	  _redBits( redBits ),
-	  _greenBits( greenBits ),
-	  _blueBits( blueBits ),
-	  _alphaBits( alphaBits ),
-	  _depthBits( depthBits ),
-	  _stencilBits( stencilBits ),
-	  _clearColor( 0.0f, 0.0f, 0.0f, 1.0f ),
-	  _texture( new Texture( nullptr ) )
-{
-
-}
-FrameBufferObject::FrameBufferObject( FrameBufferObject *fb )
-	: _width( fb->_width ),
-	  _height( fb->_height ),
-	  _redBits( fb->_redBits ),
-	  _greenBits( fb->_greenBits ),
-	  _blueBits( fb->_blueBits ),
-	  _alphaBits( fb->_alphaBits ),
-	  _depthBits( fb->_depthBits ),
-	  _stencilBits( fb->_stencilBits ),
-	  _clearColor( fb->_clearColor ),
-	  _texture( new Texture( nullptr ) )
+	  _clearColor( 0.0f, 0.0f, 0.0f, 1.0f )
 {
 
 }
 
-FrameBufferObject::~FrameBufferObject( void ) 
+FrameBufferObject::~FrameBufferObject( void )
 {
 
 }

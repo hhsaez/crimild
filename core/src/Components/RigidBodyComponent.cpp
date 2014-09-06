@@ -34,7 +34,10 @@
 using namespace crimild;
 
 RigidBodyComponent::RigidBodyComponent( void )
-	: _gravity( 0.0f, -4.8f, 0.0f )
+	: _gravity( 0.0f, -9.8f, 0.0f ),
+	  _force( 0.0f, 0.0f, 0.0f ),
+	  _velocity( 0.0f, 0.0f, 0.0f ),
+	  _mass( 1.0f )
 {
 	NodeComponentCatalog< RigidBodyComponent >::getInstance().registerComponent( this );
 }
@@ -46,17 +49,18 @@ RigidBodyComponent::~RigidBodyComponent( void )
 
 void RigidBodyComponent::update( const Time &t )
 {
-	_previousPosition = getNode()->getLocal().getTranslate();
-	Vector3f result = _previousPosition;
+	float dt = t.getDeltaTime();
 
-	Vector3f gravityStep = t.getDeltaTime() * _gravity;
-	result += gravityStep;
+	Vector3f v0 = _velocity;
+	Vector3f p0 = getNode()->getLocal().getTranslate();
 
-	Vector3f forceStep = t.getDeltaTime() * _force;
-	_force -= forceStep;
-	result += forceStep;
+	// Integrate using Velicity Verlet
+	// http://en.wikipedia.org/wiki/Verlet_integration#Velocity_Verlet
+	Vector3f a = _gravity + ( _force / _mass );
+	_velocity += dt * a;
+	Vector3f position = p0 + dt * 0.5f * ( v0 + _velocity );
 
-	getNode()->local().setTranslate( result );
+	getNode()->local().setTranslate( position );
 }
 
 bool RigidBodyComponent::testCollision( ColliderComponent *other ) 
@@ -91,5 +95,7 @@ void RigidBodyComponent::resolveCollision( ColliderComponent *other )
 		otherRB->setForce( getForce() );
 		setForce( Vector3f( 0.0f, 0.0f, 0.0f ) );
 	}
+
+	setVelocity( Vector3f( 0.0f, 0.0f, 0.0f ) );
 }
 

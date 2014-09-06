@@ -34,6 +34,8 @@
 namespace crimild {
 
 	class Node;
+	class Renderer;
+	class Camera;
 
 	class NodeComponent : public SharedObject {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( NodeComponent )
@@ -57,8 +59,29 @@ namespace crimild {
 		Node *_node;
 
 	public:
+		/**
+		   \brief Invoked once when component is attached to a node
+		*/
 		virtual void onAttach( void );
+
+		/**
+		   \brief Invoked once when scene is loaded
+		*/
+		virtual void start( void );
+
+		/**
+		   \brief Invoked multiple times (usually once per simulation step)
+		*/
 		virtual void update( const Time &t );
+
+		/**
+			\brief Invoked only if debug rendering is enabled
+		*/
+		virtual void renderDebugInfo( Renderer *renderer, Camera *camera );
+
+		/**
+		   \brief Invoked once when component is detached from a node
+		*/
 		virtual void onDetach( void );
 
 	};

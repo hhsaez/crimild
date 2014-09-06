@@ -29,7 +29,9 @@
 #define CRIMILD_RENDERER_RENDER_PASS_
 
 #include "Foundation/SharedObject.hpp"
+#include "Foundation/SharedObjectList.hpp"
 #include "Primitives/Primitive.hpp"
+#include "Rendering/ImageEffect.hpp"
 
 namespace crimild {
 
@@ -40,20 +42,32 @@ namespace crimild {
 	class Camera;
 	class FrameBufferObject;
 	class ShaderProgram;
+    class RenderQueue;
+    class Texture;
 
 	class RenderPass : public SharedObject {
 	public:
 		RenderPass( void );
 		virtual ~RenderPass( void );
 
+        virtual void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
 		virtual void render( Renderer *renderer, VisibilitySet *vs, Camera *camera );
 		virtual void render( Renderer *renderer, Geometry *geometry, Camera *camera );
 		virtual void render( Renderer *renderer, Geometry *geometry, Primitive *primitive, Material *material, Camera *camera );
+        virtual void render( Renderer *renderer, Texture *texture, ShaderProgram *program );
 		virtual void render( Renderer *renderer, FrameBufferObject *fbo, ShaderProgram *program );
+        
+        SharedObjectList< ImageEffect > &getImageEffects( void ) { return _imageEffects; }
+        
+    protected:
+        Primitive *getScreenPrimitive( void ) { return _screen.get(); }
 
 	private:
 		Pointer< Primitive > _screen;
+        SharedObjectList< ImageEffect > _imageEffects;
 	};
+
+	typedef RenderPass BasicRenderPass;
 
 }
 

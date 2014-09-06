@@ -41,6 +41,7 @@ gl3::OffscreenRenderPass::~OffscreenRenderPass( void )
 
 void gl3::OffscreenRenderPass::render( Renderer *renderer, VisibilitySet *vs, Camera *camera ) 
 {
+    /*
 	if ( _offscreenBuffer == nullptr ) {
 		_offscreenBuffer = new FrameBufferObject( renderer->getScreenBuffer() );
 	}
@@ -50,5 +51,6 @@ void gl3::OffscreenRenderPass::render( Renderer *renderer, VisibilitySet *vs, Ca
 	renderer->unbindFrameBuffer( _offscreenBuffer.get() );
 
 	RenderPass::render( renderer, _offscreenBuffer.get(), nullptr );
+     */
 }
 

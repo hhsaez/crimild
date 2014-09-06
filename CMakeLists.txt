@@ -28,8 +28,14 @@ IF ( CRIMILD_ENABLE_TESTS )
 	ADD_SUBDIRECTORY( ${CRIMILD_SOURCE_DIR}/third-party/gmock-1.6.0 "${CMAKE_CURRENT_BINARY_DIR}/third-party/gmock-1.6.0" )
 ENDIF ( CRIMILD_ENABLE_TESTS )
 
-# Add sources
+# Add core sources
 ADD_SUBDIRECTORY( core )
+
+# Extract lua sources if needed
+EXTRACT_ARCHIVE( lua-5.2.3.tar.gz lua-5.2.3 ${CRIMILD_SOURCE_DIR}/third-party )
+
+# Add scripting sources
+ADD_SUBDIRECTORY( scripting )
 
 OPTION( CRIMILD_ENABLE_GLFW "Would you like to build the crimild-glfw extension?" OFF )
 IF ( CRIMILD_ENABLE_GLFW )

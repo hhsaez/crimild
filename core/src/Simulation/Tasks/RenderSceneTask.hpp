@@ -29,6 +29,7 @@
 #define CRIMILD_SIMULATION_TASKS_RENDER_SCENE_
 
 #include "Simulation/Task.hpp"
+#include "Rendering/RenderQueue.hpp"
 
 #include <list>
 
@@ -44,6 +45,11 @@ namespace crimild {
 		virtual void start( void ) override;
 		virtual void update( void ) override;
 		virtual void stop( void ) override;
+        
+        RenderQueue *getRenderQueue( void ) { return _renderQueue.get(); }
+        
+    private:
+        Pointer< RenderQueue > _renderQueue;
 	};
 
 }
