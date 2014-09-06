@@ -25,19 +25,34 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SCRIPTING_
-#define CRIMILD_SCRIPTING_
+#include "Settings.hpp"
 
-#include "Components/ScriptedComponent.hpp"
+using namespace crimild;
 
-#include "Foundation/Function.hpp"
-#include "Foundation/LuaUtils.hpp"
-#include "Foundation/ScriptContext.hpp"
-#include "Foundation/Scripted.hpp"
+Settings::Settings( void )
+{
 
-#include "SceneGraph/SceneBuilder.hpp"
+}
 
-#include "Simulation/Tasks/ScriptedTask.hpp"
+Settings::~Settings( void )
+{
 
-#endif
+}
+
+void Settings::parseCommandLine( int argc, char **argv )
+{
+	if ( argv > 0 ) {
+		_settings[ "base.directory" ] = argv[ 0 ];
+	}
+
+	for ( int i = 1; i < argc; i++ ) {
+		std::string option = argv[ i ];
+		int separatorPos = option.find_first_of( "=" );
+		if ( separatorPos > 0 ) {
+			std::string key = option.substr( 0, separatorPos );
+			std::string value = option.substr( separatorPos + 1 );
+			add( key, value );
+		}
+	}
+}
 

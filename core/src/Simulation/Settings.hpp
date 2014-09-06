@@ -25,19 +25,69 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SCRIPTING_
-#define CRIMILD_SCRIPTING_
+#ifndef CRIMILD_SIMULATION_SETTINGS_
+#define CRIMILD_SIMULATION_SETTINGS_
 
-#include "Components/ScriptedComponent.hpp"
+#include "Foundation/Log.hpp"
 
-#include "Foundation/Function.hpp"
-#include "Foundation/LuaUtils.hpp"
-#include "Foundation/ScriptContext.hpp"
-#include "Foundation/Scripted.hpp"
+#include <string>
+#include <sstream>
+#include <map>
 
-#include "SceneGraph/SceneBuilder.hpp"
+namespace crimild {
 
-#include "Simulation/Tasks/ScriptedTask.hpp"
+	class Settings {
+	public:
+		Settings( void );
+
+		virtual ~Settings( void );
+
+		template< typename T >
+		void add( std::string key, T value )
+		{
+			std::stringstream str;
+			str << value;
+			_settings[ key ] = str.str();
+		}
+		
+		void add( std::string key, std::string value )
+		{
+			_settings[ key ] = value;
+		}
+
+		template< typename T >
+		T get( std::string key, T defaultValue )
+		{
+			if ( _settings.find( key ) == _settings.end() ) {
+				// key not found
+				return defaultValue;
+			}
+			
+			std::stringstream str;
+			str << _settings[ key ];
+			T value;
+			str >> value;
+			return value;
+		}
+
+		std::string get( std::string key, std::string defaultValue )
+		{
+			if ( _settings.find( key ) == _settings.end() ) {
+				// key not found
+				return defaultValue;
+			}
+			
+			return _settings[ key ];
+		}
+
+		void parseCommandLine( int argc, char **argv );
+
+	private:
+		std::map< std::string, std::string > _settings;
+	};
+
+}
 
 #endif
+
 

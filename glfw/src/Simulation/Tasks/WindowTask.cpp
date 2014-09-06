@@ -46,12 +46,12 @@ WindowTask::~WindowTask( void )
 
 void WindowTask::start( void )
 {
-	Pointer< FrameBufferObject > screenBuffer( new FrameBufferObject( _width, _height ) );
-
 	glfwOpenWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
 	glfwOpenWindowHint( GLFW_OPENGL_VERSION_MAJOR, 3 );
 	glfwOpenWindowHint( GLFW_OPENGL_VERSION_MINOR, 2 );
     glfwOpenWindowHint( GLFW_WINDOW_NO_RESIZE, GL_TRUE );
+
+    FrameBufferObject *screenBuffer = Simulation::getCurrent()->getRenderer()->getScreenBuffer();
 
     if ( !glfwOpenWindow( screenBuffer->getWidth(), screenBuffer->getHeight(), 
     					  8, 8, 8, 8,
@@ -61,8 +61,6 @@ void WindowTask::start( void )
     }
     
     glfwSetWindowTitle( Simulation::getCurrent()->getName().c_str() );
-
-	Simulation::getCurrent()->setRenderer( new gl3::Renderer( screenBuffer.get() ) );
 }
 
 void WindowTask::stop( void )

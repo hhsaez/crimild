@@ -25,19 +25,58 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SCRIPTING_
-#define CRIMILD_SCRIPTING_
+#ifndef CRIMILD_SCRIPTING_SCENE_BUILDER_
+#define CRIMILD_SCRIPTING_SCENE_BUILDER_
 
-#include "Components/ScriptedComponent.hpp"
-
-#include "Foundation/Function.hpp"
-#include "Foundation/LuaUtils.hpp"
-#include "Foundation/ScriptContext.hpp"
 #include "Foundation/Scripted.hpp"
 
-#include "SceneGraph/SceneBuilder.hpp"
+namespace crimild {
 
-#include "Simulation/Tasks/ScriptedTask.hpp"
+	namespace scripting {
+
+		class SceneBuilder : public crimild::scripting::Scripted {
+		private:
+			typedef std::function< crimild::Pointer< crimild::NodeComponent >( crimild::scripting::ScriptContext::Iterable & ) > BuilderFunction;
+
+		public:
+			SceneBuilder( void );
+
+			virtual ~SceneBuilder( void );
+
+			crimild::Pointer< crimild::Node > fromFile( const std::string &filename );
+
+		public:
+			template< typename T >
+			void registerComponent( void )
+			{
+				registerComponentBuilder< T >( []( crimild::scripting::ScriptContext::Iterable &it ) {
+					crimild::Pointer< T > cmp( new T( it ) );
+					return cmp;
+				});
+			}
+
+			template< typename T >
+			void registerComponentBuilder( BuilderFunction builder )
+			{
+				_componentBuilders[ T::_COMPONENT_NAME() ] = builder;
+			}
+
+		private:
+			void buildNode( ScriptContext::Iterable &i, Group *parent );
+			void setupCamera( ScriptContext::Iterable &i, Camera *camera );
+			void setTransformation( ScriptContext::Iterable &it, Node *node );
+			
+			void buildNodeComponents( ScriptContext::Iterable &it, Node *node );
+			Pointer< NodeComponent > buildRigidBodyComponent( ScriptContext::Iterable &it );
+			Pointer< NodeComponent > buildColliderComponent( ScriptContext::Iterable &it );
+
+		private:
+			std::map< std::string, BuilderFunction > _componentBuilders;
+		};
+
+	}
+
+}
 
 #endif
 

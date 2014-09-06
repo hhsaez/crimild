@@ -29,6 +29,8 @@
 #define CRIMILD_SIMULATION_
 
 #include "RunLoop.hpp"
+#include "Settings.hpp"
+
 #include "Foundation/NamedObject.hpp"
 #include "Mathematics/Time.hpp"
 #include "SceneGraph/Node.hpp" 
@@ -64,6 +66,8 @@ namespace crimild {
 		Simulation( std::string name, int argc, char **argv );
 		virtual ~Simulation( void );
 
+		Settings &getSettings( void ) { return _settings; }
+
 		RunLoop *getMainLoop( void ) { return _mainLoop.get(); }
 
 		Time &getSimulationTime( void ) { return _simulationTime; }
@@ -78,6 +82,7 @@ namespace crimild {
 		virtual int run( void );
 
 	private:
+		Settings _settings;
 		Pointer< RunLoop > _mainLoop;
 		Time _simulationTime;
 

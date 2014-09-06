@@ -49,6 +49,12 @@ namespace crimild {
 		void setForce( const Vector3f &force ) { _force = force; }
 		const Vector3f &getForce( void ) const { return _force; }
 
+		void setVelocity( const Vector3f &velocity ) { _velocity = velocity; }
+		const Vector3f &getVelocity( void ) const { return _velocity; }
+
+		void setMass( float mass ) { _mass = mass; }
+		float getMass( void ) const { return _mass; }
+
 		virtual void update( const Time &t ) override;
 
 		virtual bool testCollision( ColliderComponent *other );
@@ -57,7 +63,8 @@ namespace crimild {
 	private:
 		Vector3f _gravity;
 		Vector3f _force;
-		Vector3f _previousPosition;
+		Vector3f _velocity;
+		float _mass;
 	};
 
 }

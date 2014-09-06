@@ -52,8 +52,12 @@ Simulation::Simulation( std::string name, int argc, char **argv )
 	: NamedObject( name ),
 	  _mainLoop( new RunLoop() )
 {
+	srand( time( NULL ) );	
+
 	_currentSimulation = this;
 
+	_settings.parseCommandLine( argc, argv );
+	
 	FileSystem::getInstance().init( argc, argv );
 }
 

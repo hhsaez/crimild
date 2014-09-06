@@ -54,6 +54,14 @@ void RenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Camera *c
     renderQueue->getOpaqueObjects().each( [&]( Geometry *geometry, int ) {
         render( renderer, geometry, camera );
     });
+
+    renderQueue->getTranslucentObjects().each( [&]( Geometry *geometry, int ) {
+        render( renderer, geometry, camera );
+    });
+
+    renderQueue->getScreenObjects().each( [&]( Geometry *geometry, int ) {
+        render( renderer, geometry, camera );
+    });
 }
 
 void RenderPass::render( Renderer *renderer, VisibilitySet *vs, Camera *camera )
