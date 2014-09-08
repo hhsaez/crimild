@@ -30,8 +30,9 @@ using namespace crimild::scripting;
 #define LIGHT_SHADOW_FAR_COEFF "shadowFarCoeff"
 #define LIGHT_SHADOW_NEAR_COEFF "shadowNearCoeff"
 
-SceneBuilder::SceneBuilder( void )
-	: Scripted( true )
+SceneBuilder::SceneBuilder( std::string rootNodeName )
+	: Scripted( true ),
+	  _rootNodeName( rootNodeName )
 {
 	registerComponentBuilder< RigidBodyComponent >( std::bind( &SceneBuilder::buildRigidBodyComponent, this, std::placeholders::_1 ) );
 	registerComponentBuilder< ColliderComponent >( std::bind( &SceneBuilder::buildColliderComponent, this, std::placeholders::_1 ) );
@@ -51,9 +52,14 @@ Pointer< Node > SceneBuilder::fromFile( const std::string &filename )
 
 	Log::Debug << "Loading scene from " << filename << Log::End;
 
+	if ( !getScriptContext().test( _rootNodeName ) ) {
+		Log::Error << "Cannot find root node named '" << _rootNodeName << "'" << Log::End;
+		return Pointer< Node >();
+	}
+
 	Pointer< Group > scene( new Group() );
 
-	getScriptContext().foreach( SCENE_NODES, [&]( ScriptContext &c, ScriptContext::Iterable &it ) {
+	getScriptContext().foreach( _rootNodeName + "." + GROUP_NODES, [&]( ScriptContext &c, ScriptContext::Iterable &it ) {
 		buildNode( it, scene.get() );
 	});
 

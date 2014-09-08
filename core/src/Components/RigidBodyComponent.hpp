@@ -55,7 +55,7 @@ namespace crimild {
 		void setMass( float mass ) { _mass = mass; }
 		float getMass( void ) const { return _mass; }
 
-		virtual void update( const Time &t ) override;
+		virtual void fixedUpdate( const Time &t ) override;
 
 		virtual bool testCollision( ColliderComponent *other );
 		virtual void resolveCollision( ColliderComponent *other );

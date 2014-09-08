@@ -101,6 +101,7 @@ namespace crimild {
 		void startComponents( void );
 		
 		void updateComponents( const Time &t );
+		void updateComponentsWithFixedTime( const Time &t );
 
 		void foreachComponent( std::function< void ( NodeComponent * ) > callback );
 

@@ -31,9 +31,7 @@ using namespace crimild;
 
 Time::Time( void )
 {
-	_currentTime = 0.0;
-	_lastTime = 0.0;
-	_deltaTime = 0.0;
+	reset();
 }
 
 Time::Time( const Time &t )
@@ -53,6 +51,21 @@ Time &Time::operator=( const Time &t )
 	_currentTime = t._currentTime;
 	_lastTime = t._lastTime;
 	_deltaTime = t._deltaTime;
+
 	return *this;
+}
+
+void Time::reset( void )
+{
+	_currentTime = 0.0;
+	_lastTime = 0.0;
+	_deltaTime = 0.0;
+}
+
+void Time::update( double current )
+{
+	_lastTime = _currentTime;
+	_currentTime = current;
+	_deltaTime = _currentTime - _lastTime;
 }
 

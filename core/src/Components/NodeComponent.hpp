@@ -75,6 +75,11 @@ namespace crimild {
 		virtual void update( const Time &t );
 
 		/**
+			\brief Invoked with fixed time (maybe be invoked multiple times per step)
+		*/	
+		virtual void fixedUpdate( const Time &t );
+
+		/**
 			\brief Invoked only if debug rendering is enabled
 		*/
 		virtual void renderDebugInfo( Renderer *renderer, Camera *camera );

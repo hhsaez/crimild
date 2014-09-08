@@ -60,6 +60,11 @@ void NodeComponent::update( const Time &t )
 
 }
 
+void NodeComponent::fixedUpdate( const Time & )
+{
+	
+}
+
 void NodeComponent::renderDebugInfo( Renderer *, Camera * )
 {
 

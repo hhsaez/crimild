@@ -47,7 +47,7 @@ RigidBodyComponent::~RigidBodyComponent( void )
 	NodeComponentCatalog< RigidBodyComponent >::getInstance().unregisterComponent( this );
 }
 
-void RigidBodyComponent::update( const Time &t )
+void RigidBodyComponent::fixedUpdate( const Time &t )
 {
 	float dt = t.getDeltaTime();
 
@@ -61,6 +61,7 @@ void RigidBodyComponent::update( const Time &t )
 	Vector3f position = p0 + dt * 0.5f * ( v0 + _velocity );
 
 	getNode()->local().setTranslate( position );
+	getNode()->perform( UpdateWorldState() );
 }
 
 bool RigidBodyComponent::testCollision( ColliderComponent *other ) 

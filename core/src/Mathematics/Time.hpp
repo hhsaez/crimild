@@ -38,14 +38,17 @@ namespace crimild {
 
 		Time &operator=( const Time &t );
 
+		void reset( void );
+		void update( double current );
+
 		double getCurrentTime( void ) const { return _currentTime; }
-		void setCurrentTime( float value ) { _currentTime = value; }
+		void setCurrentTime( double value ) { _currentTime = value; }
 
-		float getLastTime( void ) const { return _lastTime; }
-		void setLastTime( float value ) { _lastTime = value; }
+		double getLastTime( void ) const { return _lastTime; }
+		void setLastTime( double value ) { _lastTime = value; }
 
-		float getDeltaTime( void ) const { return _deltaTime; }
-		void setDeltaTime( float value ) { _deltaTime = value; }
+		double getDeltaTime( void ) const { return _deltaTime; }
+		void setDeltaTime( double value ) { _deltaTime = value; }
 
 	private:
 		double _currentTime;

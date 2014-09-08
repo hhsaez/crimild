@@ -151,6 +151,13 @@ void Node::updateComponents( const Time &t )
 	});
 }
 
+void Node::updateComponentsWithFixedTime( const Time &t )
+{
+	foreachComponent( [&]( NodeComponent *component ) {
+		component->fixedUpdate( t );
+	});
+}
+
 void Node::foreachComponent( std::function< void ( NodeComponent * ) > callback )
 {
 	// create a copy of the component's collection

@@ -32,9 +32,9 @@
 #include <thread>
 #include <chrono>
 
-#define DESIRED_REFRESH_RATE 1.0f / 60.0f
-
 using namespace crimild;
+
+#define CRIMILD_SIMULATION_TIME 1.0 / 60.0
 
 UpdateTimeTask::UpdateTimeTask( int priority )
 	: Task( priority )
@@ -51,9 +51,7 @@ void UpdateTimeTask::start( void )
 	Time &t = Simulation::getCurrent()->getSimulationTime();
 
 	double currentTime = glfwGetTime();
-	t.setCurrentTime( currentTime );
-	t.setLastTime( currentTime );
-	t.setDeltaTime( 0.0f );
+	t.update( currentTime );
 }
 
 void UpdateTimeTask::stop( void )
@@ -64,14 +62,15 @@ void UpdateTimeTask::update( void )
 {
 	Time &t = Simulation::getCurrent()->getSimulationTime();
 
-	double lastTime = t.getCurrentTime();
 	double currentTime = glfwGetTime();
+	t.update( currentTime );
 
-	t.setCurrentTime( currentTime );
-	t.setLastTime( lastTime );
-	t.setDeltaTime( Numericf::min( DESIRED_REFRESH_RATE, currentTime - lastTime ) );
-
-	int sleepTime = ( int )( ( DESIRED_REFRESH_RATE - t.getDeltaTime() ) * 1000 );
-	std::this_thread::sleep_for( std::chrono::milliseconds( sleepTime ) );
+	if ( t.getDeltaTime() < 0.002 ) {
+		// this trick prevents the simulation to run at very high speeds
+		// this usually happens when the window is sent to background
+		// and there is nothing to render
+		int sleepTime = ( int )( ( CRIMILD_SIMULATION_TIME - t.getDeltaTime() ) * 1000 );
+		std::this_thread::sleep_for( std::chrono::milliseconds( sleepTime ) );
+	}
 }
 

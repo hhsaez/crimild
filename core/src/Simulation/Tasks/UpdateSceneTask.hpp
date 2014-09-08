@@ -40,6 +40,9 @@ namespace crimild {
 		virtual void start( void ) override;
 		virtual void update( void ) override;
 		virtual void stop( void ) override;
+
+	private:
+		double _accumulator;
 	};
 
 }

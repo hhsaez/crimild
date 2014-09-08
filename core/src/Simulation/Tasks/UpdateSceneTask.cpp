@@ -31,10 +31,16 @@
 #include "Visitors/UpdateWorldState.hpp"
 #include "SceneGraph/Node.hpp"
 
+#include <thread>
+#include <chrono>
+
 using namespace crimild;
 
+#define CRIMILD_SIMULATION_TIME 1.0 / 60.0
+
 UpdateSceneTask::UpdateSceneTask( int priority )
-	: Task( priority )
+	: Task( priority ),
+	  _accumulator( 0.0 )
 {
 
 }
@@ -46,17 +52,36 @@ UpdateSceneTask::~UpdateSceneTask( void )
 
 void UpdateSceneTask::start( void )
 {
-
+	_accumulator = 0.0;
 }
 
 void UpdateSceneTask::update( void )
 {
 	const Time &t = Simulation::getCurrent()->getSimulationTime();
-	Node *scene = Simulation::getCurrent()->getScene();
+	
+	_accumulator += t.getDeltaTime();
 
-	if ( scene != nullptr ) {
-		scene->perform( UpdateComponents( t ) );
-		scene->perform( UpdateWorldState() );
+	Node *scene = Simulation::getCurrent()->getScene();
+	if ( scene == nullptr ) {
+		return;
+	}
+
+	scene->perform( UpdateComponents( t ) );
+
+	Time fixed = t;
+	fixed.setDeltaTime( CRIMILD_SIMULATION_TIME );
+	
+	while ( scene != nullptr && _accumulator >= CRIMILD_SIMULATION_TIME ) {
+		scene->perform( Apply( [&]( Node *n ) { 
+			n->updateComponentsWithFixedTime( fixed );
+		}));
+
+		_accumulator -= CRIMILD_SIMULATION_TIME;
+	}
+
+	if ( t.getDeltaTime() < 0.001 ) {
+		int sleepTime = ( int )( ( CRIMILD_SIMULATION_TIME - t.getDeltaTime() ) * 1000 );
+		std::this_thread::sleep_for( std::chrono::milliseconds( sleepTime ) );
 	}
 }
 

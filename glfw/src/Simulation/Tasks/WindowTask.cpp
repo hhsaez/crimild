@@ -72,6 +72,13 @@ void WindowTask::update( void )
 {
 	if ( glfwGetWindowParam( GLFW_OPENED ) ) {
 		glfwSwapBuffers();
+
+		Time &t = Simulation::getCurrent()->getSimulationTime();
+		std::stringstream str;
+		str.precision( 4 );
+		str << Simulation::getCurrent()->getName()
+			<< " (" << t.getDeltaTime() << " ms)";
+		glfwSetWindowTitle( str.str().c_str() );
 	}
 	else {
 		Simulation::getCurrent()->stop();

@@ -39,7 +39,7 @@ namespace crimild {
 			typedef std::function< crimild::Pointer< crimild::NodeComponent >( crimild::scripting::ScriptContext::Iterable & ) > BuilderFunction;
 
 		public:
-			SceneBuilder( void );
+			SceneBuilder( std::string rootNodeName = "scene" );
 
 			virtual ~SceneBuilder( void );
 
@@ -71,6 +71,7 @@ namespace crimild {
 			Pointer< NodeComponent > buildColliderComponent( ScriptContext::Iterable &it );
 
 		private:
+			std::string _rootNodeName;
 			std::map< std::string, BuilderFunction > _componentBuilders;
 		};
 
