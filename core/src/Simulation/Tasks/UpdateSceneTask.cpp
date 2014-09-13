@@ -78,11 +78,6 @@ void UpdateSceneTask::update( void )
 
 		_accumulator -= CRIMILD_SIMULATION_TIME;
 	}
-
-	if ( t.getDeltaTime() < 0.001 ) {
-		int sleepTime = ( int )( ( CRIMILD_SIMULATION_TIME - t.getDeltaTime() ) * 1000 );
-		std::this_thread::sleep_for( std::chrono::milliseconds( sleepTime ) );
-	}
 }
 
 void UpdateSceneTask::stop( void )

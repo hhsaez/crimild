@@ -55,10 +55,10 @@ Time &Time::operator=( const Time &t )
 	return *this;
 }
 
-void Time::reset( void )
+void Time::reset( double current )
 {
-	_currentTime = 0.0;
-	_lastTime = 0.0;
+	_currentTime = current;
+	_lastTime = current;
 	_deltaTime = 0.0;
 }
 

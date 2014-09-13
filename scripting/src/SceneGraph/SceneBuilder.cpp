@@ -34,8 +34,7 @@ SceneBuilder::SceneBuilder( std::string rootNodeName )
 	: Scripted( true ),
 	  _rootNodeName( rootNodeName )
 {
-	registerComponentBuilder< RigidBodyComponent >( std::bind( &SceneBuilder::buildRigidBodyComponent, this, std::placeholders::_1 ) );
-	registerComponentBuilder< ColliderComponent >( std::bind( &SceneBuilder::buildColliderComponent, this, std::placeholders::_1 ) );
+
 }
 
 SceneBuilder::~SceneBuilder( void )
@@ -182,17 +181,5 @@ void SceneBuilder::buildNodeComponents( ScriptContext::Iterable &it, Node *node 
 			Log::Warning << "Cannot find component builder for type '" << type << "'" << Log::End;
 		}
 	});
-}
-
-Pointer< NodeComponent > SceneBuilder::buildRigidBodyComponent( ScriptContext::Iterable &it )
-{
-	Pointer< RigidBodyComponent > rigidBody( new RigidBodyComponent() );
-	return rigidBody;
-}
-
-Pointer< NodeComponent > SceneBuilder::buildColliderComponent( ScriptContext::Iterable &it )
-{
-	Pointer< ColliderComponent > collider( new ColliderComponent() );
-	return collider;
 }
 

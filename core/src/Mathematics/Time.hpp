@@ -38,7 +38,7 @@ namespace crimild {
 
 		Time &operator=( const Time &t );
 
-		void reset( void );
+		void reset( double current = 0.0 );
 		void update( double current );
 
 		double getCurrentTime( void ) const { return _currentTime; }

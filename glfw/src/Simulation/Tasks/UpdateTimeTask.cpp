@@ -51,7 +51,7 @@ void UpdateTimeTask::start( void )
 	Time &t = Simulation::getCurrent()->getSimulationTime();
 
 	double currentTime = glfwGetTime();
-	t.update( currentTime );
+	t.reset( currentTime );
 }
 
 void UpdateTimeTask::stop( void )
@@ -65,6 +65,7 @@ void UpdateTimeTask::update( void )
 	double currentTime = glfwGetTime();
 	t.update( currentTime );
 
+#if 0
 	if ( t.getDeltaTime() < 0.002 ) {
 		// this trick prevents the simulation to run at very high speeds
 		// this usually happens when the window is sent to background
@@ -72,5 +73,6 @@ void UpdateTimeTask::update( void )
 		int sleepTime = ( int )( ( CRIMILD_SIMULATION_TIME - t.getDeltaTime() ) * 1000 );
 		std::this_thread::sleep_for( std::chrono::milliseconds( sleepTime ) );
 	}
+#endif
 }
 

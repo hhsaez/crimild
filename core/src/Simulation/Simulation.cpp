@@ -34,7 +34,6 @@
 #include "Tasks/BeginRenderTask.hpp"
 #include "Tasks/EndRenderTask.hpp"
 #include "Tasks/UpdateSceneTask.hpp"
-#include "Tasks/UpdatePhysicsTask.hpp"
 #include "Tasks/RenderSceneTask.hpp"
 
 #include "SceneGraph/Camera.hpp"
@@ -72,7 +71,6 @@ void Simulation::start( void )
 	getMainLoop()->startTask( new BeginRenderTask( Priorities::BEGIN_RENDER_PRIORITY ) );
 	getMainLoop()->startTask( new EndRenderTask( Priorities::END_RENDER_PRIORITY ) );
 	getMainLoop()->startTask( new UpdateSceneTask( Priorities::UPDATE_SCENE_PRIORITY ) );
-	getMainLoop()->startTask( new UpdatePhysicsTask( Priorities::UPDATE_PHYSICS_PRIORITY ) );
 	getMainLoop()->startTask( new RenderSceneTask( Priorities::RENDER_SCENE_PRIORITY ) );
 }
 

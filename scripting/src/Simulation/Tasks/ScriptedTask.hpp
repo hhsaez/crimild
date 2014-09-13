@@ -38,13 +38,12 @@ namespace crimild {
 
 		class ScriptedTask : public Task, public Scripted {
 		public:
-			// ScriptedTask( int priority = 0 );
+			ScriptedTask( int priority = 0 );
+			virtual ~ScriptedTask( void );
 
-			// virtual ~ScriptedTask( void );
-
-			// virtual void onStarted( void ) override;
-			// virtual void onUpdated( void ) override;
-			// virtual void onStopped( void ) override;
+			virtual void start( void ) override;
+			virtual void update( void ) override;
+			virtual void stop( void ) override;
 		};
 
 	}

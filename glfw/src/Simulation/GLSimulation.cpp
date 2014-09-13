@@ -29,14 +29,17 @@
 #include "Tasks/WindowTask.hpp"
 #include "Tasks/UpdateTimeTask.hpp"
 #include "Tasks/UpdateInputStateTask.hpp"
+#include "Tasks/UpdateSceneAndPhysicsTask.hpp"
 #include "Rendering/GL3/Renderer.hpp"
 
 #include <Crimild_Scripting.hpp>
+#include <Crimild_Physics.hpp>
 
 #include <GL/glfw.h>
 
 using namespace crimild;
 using namespace crimild::scripting;
+using namespace crimild::physics;
 
 GLSimulation::GLSimulation( std::string name, int argc, char **argv )
 	: Simulation( name, argc, argv )
@@ -56,11 +59,18 @@ void GLSimulation::start( void )
 		throw RuntimeException( "Cannot start GLFW: glwfInit failed!" );
 	}
 
-	getMainLoop()->startTask( new WindowTask( 9000, -1, -1 ) );
-	getMainLoop()->startTask( new UpdateTimeTask( 9999 ) );
-	getMainLoop()->startTask( new UpdateInputStateTask( 0 ) );
+	getMainLoop()->startTask( new WindowTask( Simulation::Priorities::LOWEST_PRIORITY, -1, -1 ) );
+	
+	getMainLoop()->startTask( new UpdateSceneAndPhysicsTask( Priorities::UPDATE_SCENE_PRIORITY ) );
+	
+	getMainLoop()->startTask( new BeginRenderTask( Priorities::BEGIN_RENDER_PRIORITY ) );
+	getMainLoop()->startTask( new RenderSceneTask( Priorities::RENDER_SCENE_PRIORITY ) );
+	getMainLoop()->startTask( new EndRenderTask( Priorities::END_RENDER_PRIORITY ) );
+	
+	getMainLoop()->startTask( new UpdateInputStateTask( Simulation::Priorities::HIGHEST_PRIORITY ) );
+	getMainLoop()->startTask( new DispatchMessagesTask( Priorities::HIGHEST_PRIORITY ) );
 
-	Simulation::start();
+	getMainLoop()->startTask( new UpdateTimeTask( Simulation::Priorities::LOWEST_PRIORITY ) );
 }
 
 void GLSimulation::loadSettings( void )
@@ -74,6 +84,10 @@ void GLSimulation::loadSettings( void )
 		getSettings().add( "video.clearColor.g", context.eval< float >( "video.clearColor.g"  ) );
 		getSettings().add( "video.clearColor.b", context.eval< float >( "video.clearColor.b"  ) );
 		getSettings().add( "video.clearColor.a", context.eval< float >( "video.clearColor.a"  ) );
+
+		getSettings().add( "physics.gravity.x", context.eval< float >( "physics.gravity.x"  ) );
+		getSettings().add( "physics.gravity.y", context.eval< float >( "physics.gravity.y"  ) );
+		getSettings().add( "physics.gravity.z", context.eval< float >( "physics.gravity.z"  ) );
 	}
 }
 

@@ -57,5 +57,7 @@
 
 #include "Simulation/GLSimulation.hpp"
 
+#include "Simulation/Tasks/LoadSceneTask.hpp"
+
 #endif
 

@@ -67,8 +67,6 @@ namespace crimild {
 			void setTransformation( ScriptContext::Iterable &it, Node *node );
 			
 			void buildNodeComponents( ScriptContext::Iterable &it, Node *node );
-			Pointer< NodeComponent > buildRigidBodyComponent( ScriptContext::Iterable &it );
-			Pointer< NodeComponent > buildColliderComponent( ScriptContext::Iterable &it );
 
 		private:
 			std::string _rootNodeName;
