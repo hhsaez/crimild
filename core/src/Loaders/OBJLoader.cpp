@@ -62,7 +62,7 @@ void OBJLoader::reset( void )
 	_materials.clear();
 }
 
-Pointer< Node > OBJLoader::load( void )
+Pointer< Group > OBJLoader::load( void )
 {
 	reset();
 
@@ -70,7 +70,7 @@ Pointer< Node > OBJLoader::load( void )
 	input.open( _filePath.c_str() );
 	if ( !input.is_open() ) {
 		Log::Error << "Cannot find file " << _filePath << Log::End;
-		return Pointer< Node >();
+		return Pointer< Group >();
 	}
 	while ( !input.eof() ) {
 		processLine( input );
@@ -218,7 +218,7 @@ void OBJLoader::processMaterialFile( std::string materialFileName )
 	}
 }
 
-Pointer< Node > OBJLoader::generateScene( void )
+Pointer< Group > OBJLoader::generateScene( void )
 {
 	VertexFormat vf( ( _positionCount > 0 ? 3 : 0 ), 
 					 0, // no color information is imported

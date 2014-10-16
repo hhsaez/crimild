@@ -112,7 +112,10 @@ namespace crimild {
 					  _index( index )
 				{ 
 					std::stringstream str;
-					str << prefix << "[" << ( _index + 1 ) << "]";
+					str << prefix;
+					if ( _index >= 0 ) {
+						str << "[" << ( _index + 1 ) << "]";
+					}
 					_prefix = str.str();
 				}
 				
@@ -126,7 +129,7 @@ namespace crimild {
 
 				bool test( const std::string &expr )
 				{
-					return _context.test( _prefix + "." + expr );
+					return _context.test( expandExpression( expr ) );
 				}
 
 				template< typename T >
@@ -138,12 +141,21 @@ namespace crimild {
 				template< typename T >
 				T eval( const std::string &expr )
 				{
-					return _context.eval< T >( _prefix + "." + expr );
+					return _context.eval< T >( expandExpression( expr ) );
 				}
 
 				void foreach( const std::string &name, std::function< void( ScriptContext &, ScriptContext::Iterable &i ) > callback )
 				{
-					_context.foreach( getPrefix() + "." + name, callback );
+					_context.foreach( expandExpression( name ), callback );
+				}
+
+				std::string expandExpression( std::string expr ) 
+				{
+					if ( _prefix == "" ) {
+						return expr;
+					}
+
+					return _prefix + "." + expr;
 				}
 
 			private:
@@ -270,6 +282,17 @@ namespace crimild {
 			});
 			
 			return v;
+		}
+
+		template<>
+		inline Quaternion4f ScriptContext::Iterable::eval( const std::string &name )
+		{
+			Vector4f values;
+			foreach( name, [&]( ScriptContext &, ScriptContext::Iterable &it ) {
+				values[ it.getIndex() ] = it.eval< float >();
+			});
+
+			return Quaternion4f( values[ 0 ], values[ 1 ], values[ 2 ], values[ 3 ] );
 		}
 	}
 

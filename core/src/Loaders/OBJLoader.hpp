@@ -28,7 +28,7 @@
 #ifndef CRIMILD_LOADERS_OBJ_
 #define CRIMILD_LOADERS_OBJ_
 
-#include "SceneGraph/Node.hpp"
+#include "SceneGraph/Group.hpp"
 #include "Rendering/Texture.hpp"
 #include "Rendering/AlphaState.hpp"
 #include "Rendering/DepthState.hpp"
@@ -45,7 +45,7 @@ namespace crimild {
 		OBJLoader( std::string filePath );
 		virtual ~OBJLoader( void );
 
-		Pointer< Node > load( void );
+		Pointer< Group > load( void );
 
 	private:
 		void reset( void );
@@ -78,7 +78,7 @@ namespace crimild {
 
 		void pushGroup( std::string name, std::string materialName );
 
-		Pointer< Node > generateScene( void );
+		Pointer< Group > generateScene( void );
 
 	private:
 		std::string _filePath;

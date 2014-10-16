@@ -12,6 +12,7 @@ using namespace crimild::scripting;
 #define NODE_TRANSFORMATION "transformation"
 #define NODE_TRANSFORMATION_TRANSLATE "transformation.translate"
 #define NODE_TRANSFORMATION_ROTATE "transformation.rotate"
+#define NODE_TRANSFORMATION_ROTATE_Q "transformation.rotate_q"
 #define NODE_TRANSFORMATION_LOOKAT "transformation.lookAt"
 
 #define GROUP_TYPE "group"
@@ -56,16 +57,11 @@ Pointer< Node > SceneBuilder::fromFile( const std::string &filename )
 		return Pointer< Node >();
 	}
 
-	Pointer< Group > scene( new Group() );
-
-	getScriptContext().foreach( _rootNodeName + "." + GROUP_NODES, [&]( ScriptContext &c, ScriptContext::Iterable &it ) {
-		buildNode( it, scene.get() );
-	});
-
-	return scene;
+	ScriptContext::Iterable first( getScriptContext(), _rootNodeName, -1 );
+	return buildNode( first, nullptr );
 }
 
-void SceneBuilder::buildNode( ScriptContext::Iterable &it, Group *parent ) 
+Pointer< Node > SceneBuilder::buildNode( ScriptContext::Iterable &it, Group *parent ) 
 {
 	Pointer< Node > current;
 
@@ -91,35 +87,37 @@ void SceneBuilder::buildNode( ScriptContext::Iterable &it, Group *parent )
 
 		current = light;
 	}
-	else if ( type == GROUP_TYPE ) {
-		Log::Debug << "Building 'group' node" << Log::End;
-		Pointer< Group > group( new Group() );
+	else {
+		Pointer< Group > group;
+
+		if ( it.test( NODE_FILENAME ) ) {
+			Log::Debug << "Building node" << Log::End;
+			std::string filename = it.eval< std::string >( NODE_FILENAME );
+			OBJLoader loader( FileSystem::getInstance().pathForResource( filename ) );
+			group = loader.load();
+		}
+		else {
+			Log::Debug << "Building 'group' node" << Log::End;
+			group.set( new Group() );
+		}
+
 		it.foreach( GROUP_NODES, [&]( ScriptContext &c, ScriptContext::Iterable &childId ) {
 			buildNode( childId, group.get() );
 		});
 
 		current = group;
 	}
-	else {
-		Log::Debug << "Building node" << Log::End;
-		std::string filename = it.eval< std::string >( NODE_FILENAME );
-		if ( filename != "null" ) {
-			OBJLoader loader( FileSystem::getInstance().pathForResource( filename ) );
-			current = loader.load();
-		}
-		else {
-			current = new Node();
+
+	if ( current != nullptr ) {
+		setTransformation( it, current.get() );
+		buildNodeComponents( it, current.get() );
+
+		if ( parent != nullptr ) {
+			parent->attachNode( current.get() );
 		}
 	}
 
-	if ( current == nullptr ) {
-		return;
-	}
-
-	setTransformation( it, current.get() );
-	buildNodeComponents( it, current.get() );
-
-	parent->attachNode( current.get() );
+	return current;
 }
 
 void SceneBuilder::setupCamera( ScriptContext::Iterable &it, Camera *camera ) 
@@ -154,6 +152,10 @@ void SceneBuilder::setTransformation( ScriptContext::Iterable &it, Node *node )
 	if ( it.test( NODE_TRANSFORMATION_ROTATE ) ) {
 		Vector4f axisAngle = it.eval< Vector4f >( NODE_TRANSFORMATION_ROTATE );
 		node->local().rotate().fromAxisAngle( Vector3f( axisAngle[ 0 ], axisAngle[ 1 ], axisAngle[ 2 ] ), Numericf::DEG_TO_RAD * axisAngle[ 3 ] );
+	}
+
+	if ( it.test( NODE_TRANSFORMATION_ROTATE_Q ) ) {
+		node->local().setRotate( it.eval< Quaternion4f >( NODE_TRANSFORMATION_ROTATE_Q ) );
 	}
 
 	if ( it.test( NODE_TRANSFORMATION_LOOKAT ) ) {

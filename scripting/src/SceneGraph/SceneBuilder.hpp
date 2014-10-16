@@ -62,7 +62,8 @@ namespace crimild {
 			}
 
 		private:
-			void buildNode( ScriptContext::Iterable &i, Group *parent );
+			Pointer< Node > buildNode( ScriptContext::Iterable &i, Group *parent );
+
 			void setupCamera( ScriptContext::Iterable &i, Camera *camera );
 			void setTransformation( ScriptContext::Iterable &it, Node *node );
 			

@@ -82,7 +82,6 @@ std::string ScriptContext::dumpStack( void )
 void ScriptContext::foreach( const std::string &name, std::function< void( ScriptContext &, ScriptContext::Iterable &i ) > callback )
 {
 	int count = eval< int >( "#" + name );
-
 	for ( int i = 0; i < count; i++ ) {
 		Iterable it( *this, name, i );
 		callback( *this, it );
