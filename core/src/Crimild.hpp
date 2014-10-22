@@ -92,6 +92,7 @@
 #include "Visitors/UpdateRenderState.hpp"
 #include "Visitors/UpdateWorldState.hpp"
 #include "Visitors/Picking.hpp"
+#include "Visitors/ShallowCopy.hpp"
 
 #include "Primitives/Primitive.hpp"
 #include "Primitives/BoxPrimitive.hpp"
