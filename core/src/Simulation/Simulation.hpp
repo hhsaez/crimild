@@ -97,6 +97,7 @@ namespace crimild {
 		void setScene( Node *scene );
 		Node *getScene( void ) { return _scene.get(); }
 
+		Camera *getMainCamera( void ) { return _cameras.front().get(); }
 		void forEachCamera( std::function< void ( Camera * ) > callback );
 
 	private:

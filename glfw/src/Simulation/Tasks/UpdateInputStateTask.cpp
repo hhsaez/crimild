@@ -27,8 +27,6 @@
 
 #include "UpdateInputStateTask.hpp"
 
-#include <GL/glfw.h>
-
 using namespace crimild;
 
 InputState &InputState::getCurrentState( void )
@@ -49,7 +47,7 @@ UpdateInputStateTask::~UpdateInputStateTask( void )
 
 void UpdateInputStateTask::start( void )
 {
-	InputState::getCurrentState().reset( 256, 8 );
+	InputState::getCurrentState().reset( GLFW_KEY_LAST, GLFW_MOUSE_BUTTON_LAST );
 }
 
 void UpdateInputStateTask::stop( void )
@@ -61,7 +59,7 @@ void UpdateInputStateTask::update( void )
 {
 	glfwPollEvents();
 
-	for ( int i = 0; i < 256; i++ ) {
+	for ( int i = 0; i < GLFW_KEY_LAST; i++ ) {
 		int keyState = glfwGetKey( i );
 		InputState::getCurrentState().setKeyState( i, keyState == GLFW_PRESS ? InputState::KeyState::PRESSED : InputState::KeyState::RELEASED );
 	}
@@ -75,7 +73,7 @@ void UpdateInputStateTask::update( void )
 		InputState::getCurrentState().setNormalizedMousePosition( Vector2f( ( float ) x / ( fbo->getWidth() - 1.0f ), ( float ) y / ( fbo->getHeight() - 1.0f ) ) );
 	}
 
-	for ( int i = GLFW_MOUSE_BUTTON_1; i < GLFW_MOUSE_BUTTON_8; i++ ) {
+	for ( int i = GLFW_MOUSE_BUTTON_1; i < GLFW_MOUSE_BUTTON_LAST; i++ ) {
 		int buttonState = glfwGetMouseButton( i );
 		InputState::getCurrentState().setMouseButtonState( i, buttonState == GLFW_PRESS ? InputState::MouseButtonState::PRESSED : InputState::MouseButtonState::RELEASED );
 	}

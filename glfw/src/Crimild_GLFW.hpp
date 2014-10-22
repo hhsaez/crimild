@@ -58,6 +58,7 @@
 #include "Simulation/GLSimulation.hpp"
 
 #include "Simulation/Tasks/LoadSceneTask.hpp"
+#include "Simulation/Tasks/UpdateInputStateTask.hpp"
 
 #endif
 
