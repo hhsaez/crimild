@@ -72,6 +72,8 @@ namespace crimild {
 		private:
 			std::string _rootNodeName;
 			std::map< std::string, BuilderFunction > _componentBuilders;
+
+			std::map< std::string, Pointer< Group > > _sceneCache;
 		};
 
 	}

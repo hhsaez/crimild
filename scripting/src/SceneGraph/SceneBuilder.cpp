@@ -93,8 +93,15 @@ Pointer< Node > SceneBuilder::buildNode( ScriptContext::Iterable &it, Group *par
 		if ( it.test( NODE_FILENAME ) ) {
 			Log::Debug << "Building node" << Log::End;
 			std::string filename = it.eval< std::string >( NODE_FILENAME );
-			OBJLoader loader( FileSystem::getInstance().pathForResource( filename ) );
-			group = loader.load();
+			
+			if ( _sceneCache[ filename ] == nullptr ) {
+				OBJLoader loader( FileSystem::getInstance().pathForResource( filename ) );				
+				_sceneCache[ filename ] = loader.load();
+			}
+
+			ShallowCopy shallowCopy;
+			_sceneCache[ filename ]->perform( shallowCopy );
+			group.set( shallowCopy.getResult< Group >() );
 		}
 		else {
 			Log::Debug << "Building 'group' node" << Log::End;
