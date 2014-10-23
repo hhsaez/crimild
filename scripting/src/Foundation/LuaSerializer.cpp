@@ -25,20 +25,79 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SCRIPTING_
-#define CRIMILD_SCRIPTING_
+#include "LuaSerializer.hpp"
 
-#include "Components/ScriptedComponent.hpp"
+using namespace crimild;
+using namespace crimild::scripting;
 
-#include "Foundation/Function.hpp"
-#include "Foundation/LuaUtils.hpp"
-#include "Foundation/ScriptContext.hpp"
-#include "Foundation/Scripted.hpp"
-#include "Foundation/LuaSerializer.hpp"
+LuaSerializer::LuaSerializer( std::ostream &output )
+	: _output( output ),
+	  _depth( 0 )
+{
 
-#include "SceneGraph/SceneBuilder.hpp"
+}
 
-#include "Simulation/Tasks/ScriptedTask.hpp"
+LuaSerializer::~LuaSerializer( void )
+{
 
-#endif
+}
+
+void LuaSerializer::pushObject( std::string name )
+{
+	pushLine( name != "" ? ( name + " = {" ) : "{" );
+	++_depth;
+}
+
+void LuaSerializer::popObject( void )
+{
+	--_depth;
+	pushLine( _depth > 0 ? "}," : "}" );
+}
+
+void LuaSerializer::pushProperty( std::string name, const char *value ) 
+{
+	pushLine( name + " = '" + value + "', " );
+}
+
+void LuaSerializer::pushProperty( std::string name, std::string value ) 
+{
+	pushProperty( name, value.c_str() );
+}
+
+void LuaSerializer::pushProperty( std::string name, const Vector3f &v )
+{
+	std::stringstream str;
+	str << name << " = { "
+		<< v[ 0 ] << ", " 
+		<< v[ 1 ] << ", " 
+		<< v[ 2 ] 
+		<< " }, ";
+	pushLine( str.str() );
+}
+
+void LuaSerializer::pushProperty( std::string name, const Quaternion4f &q )
+{
+	std::stringstream str;
+	str << name << " = { "
+		<< q.getImaginary()[ 0 ] << ", "
+		<< q.getImaginary()[ 1 ] << ", "
+		<< q.getImaginary()[ 2 ] << ", "
+		<< q.getReal()
+		<< " }, ";
+	pushLine( str.str() );
+}
+
+void LuaSerializer::pushText( std::string text )
+{
+	_output << text;
+}
+
+void LuaSerializer::pushLine( std::string line )
+{
+	for ( int i = 0; i < 4 * _depth; i++ ) {
+		_output << " ";
+	}
+
+	_output << line << "\n";
+}
 

@@ -25,20 +25,47 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SCRIPTING_
-#define CRIMILD_SCRIPTING_
+#ifndef CRIMILD_SCRIPTING_FOUNDATION_LUA_SERIALIZER_
+#define CRIMILD_SCRIPTING_FOUNDATION_LUA_SERIALIZER_
 
-#include "Components/ScriptedComponent.hpp"
+#include <Crimild.hpp>
 
-#include "Foundation/Function.hpp"
-#include "Foundation/LuaUtils.hpp"
-#include "Foundation/ScriptContext.hpp"
-#include "Foundation/Scripted.hpp"
-#include "Foundation/LuaSerializer.hpp"
+namespace crimild {
 
-#include "SceneGraph/SceneBuilder.hpp"
+	namespace scripting {
 
-#include "Simulation/Tasks/ScriptedTask.hpp"
+		class LuaSerializer {
+			CRIMILD_DISALLOW_COPY_AND_ASSIGN( LuaSerializer )
+
+		public:
+			LuaSerializer( std::ostream &output );
+			virtual ~LuaSerializer( void );
+
+			void pushObject( std::string name = "" );
+			void popObject( void );
+
+			template< typename T >
+			void pushProperty( std::string name, T value ) 
+			{
+				pushLine( name + " = " + value + ", " );
+			}
+
+			void pushProperty( std::string name, const char *value );
+			void pushProperty( std::string name, std::string value );
+			void pushProperty( std::string name, const Vector3f &v );
+			void pushProperty( std::string name, const Quaternion4f &q );
+
+			void pushText( std::string text );
+			void pushLine( std::string line );
+
+		private:
+			int _depth;
+			std::ostream &_output;
+		};
+
+	}
+
+}
 
 #endif
 
