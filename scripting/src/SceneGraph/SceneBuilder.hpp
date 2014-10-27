@@ -34,7 +34,7 @@ namespace crimild {
 
 	namespace scripting {
 
-		class SceneBuilder : public crimild::scripting::Scripted {
+		class SceneBuilder : public SharedObject, public crimild::scripting::Scripted {
 		private:
 			typedef std::function< crimild::Pointer< crimild::NodeComponent >( crimild::scripting::ScriptContext::Iterable & ) > BuilderFunction;
 

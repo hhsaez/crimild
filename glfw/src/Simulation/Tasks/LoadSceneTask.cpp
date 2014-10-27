@@ -32,11 +32,12 @@
 using namespace crimild;
 using namespace crimild::scripting;
 
-LoadSceneTask::LoadSceneTask( int priority, std::string sceneFileName )
+LoadSceneTask::LoadSceneTask( int priority, std::string sceneFileName, SceneBuilder *builder )
 	: Task( priority ),
-	  _sceneFileName( sceneFileName )
+	  _sceneFileName( sceneFileName ),
+	  _builder( builder != nullptr ? builder : new SceneBuilder() )
 {
-	getBuilder().registerComponentBuilder< physics::RigidBodyComponent >( []( ScriptContext::Iterable &it ) {
+	getBuilder()->registerComponentBuilder< physics::RigidBodyComponent >( []( ScriptContext::Iterable &it ) {
 		Pointer< physics::RigidBodyComponent > rigidBody( new physics::RigidBodyComponent() );
 
 		if ( it.test( "mass" ) ) rigidBody->setMass( it.eval< float >( "mass" ) );
@@ -72,7 +73,7 @@ void LoadSceneTask::stop( void )
 
 void LoadSceneTask::load( void )
 {
-	Pointer< Node > scene = getBuilder().fromFile( FileSystem::getInstance().pathForResource( _sceneFileName ) );
+	Pointer< Node > scene = getBuilder()->fromFile( FileSystem::getInstance().pathForResource( _sceneFileName ) );
 	Simulation::getCurrent()->setScene( scene.get() );
 	MessageQueue::getInstance().pushMessage( new SceneLoadedMessage() );
 }
