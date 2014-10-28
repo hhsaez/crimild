@@ -335,17 +335,31 @@ namespace crimild {
 		}
 
 		template< typename T, typename PRECISION >
-		static void sin( const T &from, const T &to, PRECISION t, T &result )
+		static void sin2Pi( const T &from, const T &to, PRECISION t, T &result )
 		{
 			T diff = to - from;
 			result = std::sin( t * Numericf::TWO_PI ) * diff + from;
 		}
 
 		template< typename T, typename PRECISION >
-		static void cos( const T &from, const T &to, PRECISION t, T &result )
+		static void sinPi( const T &from, const T &to, PRECISION t, T &result )
+		{
+			T diff = to - from;
+			result = std::sin( t * Numericf::PI ) * diff + from;
+		}
+
+		template< typename T, typename PRECISION >
+		static void cos2Pi( const T &from, const T &to, PRECISION t, T &result )
 		{
 			T diff = to - from;
 			result = std::cos( t * Numericf::TWO_PI ) * diff + from;
+		}
+
+		template< typename T, typename PRECISION >
+		static void cosPi( const T &from, const T &to, PRECISION t, T &result )
+		{
+			T diff = to - from;
+			result = std::cos( t * Numericf::PI ) * diff + from;
 		}
 
 		/**
