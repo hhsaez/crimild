@@ -47,7 +47,9 @@ namespace crimild {
 			template< typename T >
 			void pushProperty( std::string name, T value ) 
 			{
-				pushLine( name + " = " + value + ", " );
+				std::stringstream str;
+				str << name << " = " << value << ", ";
+				pushLine( str.str() );
 			}
 
 			void pushProperty( std::string name, const char *value );
