@@ -151,24 +151,7 @@ void SceneBuilder::setupCamera( ScriptContext::Iterable &it, Camera *camera )
 void SceneBuilder::setTransformation( ScriptContext::Iterable &it, Node *node ) 
 {
 	Log::Debug << "Setting node transformation" << Log::End;
-
-	if ( it.test( NODE_TRANSFORMATION_TRANSLATE ) ) {
-		node->local().setTranslate( it.eval< Vector3f >( NODE_TRANSFORMATION_TRANSLATE ) );
-	}
-
-	if ( it.test( NODE_TRANSFORMATION_ROTATE ) ) {
-		Vector4f axisAngle = it.eval< Vector4f >( NODE_TRANSFORMATION_ROTATE );
-		node->local().rotate().fromAxisAngle( Vector3f( axisAngle[ 0 ], axisAngle[ 1 ], axisAngle[ 2 ] ), Numericf::DEG_TO_RAD * axisAngle[ 3 ] );
-	}
-
-	if ( it.test( NODE_TRANSFORMATION_ROTATE_Q ) ) {
-		node->local().setRotate( it.eval< Quaternion4f >( NODE_TRANSFORMATION_ROTATE_Q ) );
-	}
-
-	if ( it.test( NODE_TRANSFORMATION_LOOKAT ) ) {
-		node->local().lookAt( it.eval< Vector3f >( NODE_TRANSFORMATION_LOOKAT ), Vector3f( 0.0f, 1.0f, 0.0f ) );
-	}
-
+	if ( it.test( NODE_TRANSFORMATION ) ) node->setLocal( it.eval< TransformationImpl >( NODE_TRANSFORMATION ) );
 }
 
 void SceneBuilder::buildNodeComponents( ScriptContext::Iterable &it, Node *node )

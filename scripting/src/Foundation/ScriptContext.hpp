@@ -294,6 +294,25 @@ namespace crimild {
 
 			return Quaternion4f( values[ 0 ], values[ 1 ], values[ 2 ], values[ 3 ] );
 		}
+
+		template<>
+		inline TransformationImpl ScriptContext::Iterable::eval( const std::string &name )
+		{
+			TransformationImpl result;
+
+			if ( test( name + ".translate" ) ) result.setTranslate( eval< Vector3f >( name + ".translate" ) );
+			
+			if ( test( name + ".rotate" ) ) {
+				Vector4f axisAngle = eval< Vector4f >( name + ".rotate" );
+				result.rotate().fromAxisAngle( Vector3f( axisAngle[ 0 ], axisAngle[ 1 ], axisAngle[ 2 ] ), Numericf::DEG_TO_RAD * axisAngle[ 3 ] );
+			}
+
+			if ( test( name + ".rotate_q" ) ) result.setRotate( eval< Quaternion4f >( name + ".rotate_q" ) );
+
+			if ( test( name + ".lookAt" ) ) result.lookAt( eval< Vector3f >( name + ".lookAt" ), Vector3f( 0.0f, 1.0f, 0.0f ) );
+
+			return result;
+		}
 	}
 
 }
