@@ -64,6 +64,11 @@ void LuaSerializer::pushProperty( std::string name, std::string value )
 	pushProperty( name, value.c_str() );
 }
 
+void LuaSerializer::pushProperty( std::string name, bool value )
+{
+	pushLine( name + " = " + ( value ? "true" : "false" ) + ", " );
+}
+
 void LuaSerializer::pushProperty( std::string name, const Vector3f &v )
 {
 	std::stringstream str;

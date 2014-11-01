@@ -54,6 +54,7 @@ namespace crimild {
 
 			void pushProperty( std::string name, const char *value );
 			void pushProperty( std::string name, std::string value );
+			void pushProperty( std::string name, bool value );
 			void pushProperty( std::string name, const Vector3f &v );
 			void pushProperty( std::string name, const Quaternion4f &q );
 

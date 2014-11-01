@@ -90,12 +90,12 @@ void gl3::Renderer::configure( void )
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
-	Log::Info << "Configuring renderer"
-    		  << "\n       OpenGL version: " << glGetString( GL_VERSION )
-    		  << "\n       GLSL version: " << glGetString( GL_SHADING_LANGUAGE_VERSION )
-    		  << "\n       Vendor: " << glGetString( GL_VENDOR )
-    		  << "\n       Renderer: " << glGetString( GL_RENDERER )
-    		  << Log::End;
+	Log::Debug << "Configuring renderer"
+    		   << "\n       OpenGL version: " << glGetString( GL_VERSION )
+    		   << "\n       GLSL version: " << glGetString( GL_SHADING_LANGUAGE_VERSION )
+    		   << "\n       Vendor: " << glGetString( GL_VENDOR )
+    		   << "\n       Renderer: " << glGetString( GL_RENDERER )
+    		   << Log::End;
 
 	glewExperimental = GL_TRUE; //stops glew crashing on OSX :-/
 	if ( glewInit() != GLEW_OK ) {
