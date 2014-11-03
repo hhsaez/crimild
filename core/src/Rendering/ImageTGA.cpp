@@ -37,6 +37,11 @@
 
 using namespace crimild;
 
+ImageTGA::ImageTGA( void )
+{
+    
+}
+
 ImageTGA::ImageTGA( std::string filePath )
 	: _filePath( filePath )
 {
@@ -166,5 +171,41 @@ void ImageTGA::load( void )
     fclose( file );
 
     setData( width, height, bpp, &data[ 0 ], bpp == 3 ? PixelFormat::RGB : PixelFormat::RGBA );
+}
+
+void ImageTGA::save( std::string path )
+{
+    TGAHeader header;
+    header.identsize = 0;
+    header.colorMapType = 0;
+    header.imageType = getBpp() == 1 ? 3 : 2;
+    header.colorMapStart = 0;
+    header.colorMapLength = 0;
+    header.colorMapBits = 0;
+    header.xstart = 0;
+    header.ystart = 0;
+    header.width = getWidth();
+    header.height = getHeight();
+    header.bits = getBpp() * 8;
+    header.descriptor = 0;
+
+    FILE *out = fopen( path.c_str(), "wb" );
+
+    fwrite( &header.identsize, sizeof( unsigned char ), 1, out );
+    fwrite( &header.colorMapType, sizeof( unsigned char ), 1, out );
+    fwrite( &header.imageType, sizeof( unsigned char ), 1, out );
+    fwrite( &header.colorMapStart, sizeof( unsigned short ), 1, out );
+    fwrite( &header.colorMapLength, sizeof( unsigned short ), 1, out );
+    fwrite( &header.colorMapBits, sizeof( unsigned char ), 1, out );
+    fwrite( &header.xstart, sizeof( unsigned short ), 1, out );
+    fwrite( &header.ystart, sizeof( unsigned short ), 1, out );
+    fwrite( &header.width, sizeof( unsigned short ), 1, out );
+    fwrite( &header.height, sizeof( unsigned short ), 1, out );
+    fwrite( &header.bits, sizeof( unsigned char ), 1, out );
+    fwrite( &header.descriptor, sizeof( unsigned char ), 1, out );
+
+    fwrite( &getData()[ 0 ], getWidth() * getHeight() * getBpp(), sizeof( unsigned char ), out );
+
+    fclose( out );
 }
 

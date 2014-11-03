@@ -36,9 +36,6 @@
 #include "Rendering/GL3/Utils.hpp"
 #include "Rendering/GL3/VertexBufferObjectCatalog.hpp"
 
-#include "Rendering/GL3/Library/SepiaToneShaderProgram.hpp"
-#include "Rendering/GL3/Library/GlowShaderProgram.hpp"
-
 #include "Rendering/GL3/Programs/ParticleSystemShaderProgram.hpp"
 #include "Rendering/GL3/Programs/SignedDistanceFieldShaderProgram.hpp"
 #include "Rendering/GL3/Programs/SkinningShaderProgram.hpp"
@@ -52,6 +49,9 @@
 #include "Rendering/GL3/Library/GouraudShaderProgram.hpp"
 #include "Rendering/GL3/Library/PhongMaterial.hpp"
 #include "Rendering/GL3/Library/PhongShaderProgram.hpp"
+#include "Rendering/GL3/Library/ScreenShaderProgram.hpp"
+#include "Rendering/GL3/Library/SepiaToneShaderProgram.hpp"
+#include "Rendering/GL3/Library/GlowShaderProgram.hpp"
 
 #include "SceneGraph/ParticleSystem.hpp"
 

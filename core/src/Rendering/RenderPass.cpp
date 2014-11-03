@@ -168,6 +168,10 @@ void RenderPass::render( Renderer *renderer, Texture *texture, ShaderProgram *pr
     // bind vertex and index buffers
     renderer->bindVertexBuffer( program, _screen->getVertexBuffer() );
     renderer->bindIndexBuffer( program, _screen->getIndexBuffer() );
+
+    Matrix4f mMatrix;
+    mMatrix.makeIdentity();
+    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM ), mMatrix );
      
     // draw primitive
     renderer->drawPrimitive( program, _screen.get() );

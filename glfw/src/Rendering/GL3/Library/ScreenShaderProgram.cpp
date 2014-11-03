@@ -35,12 +35,14 @@ const char *screen_vs = { CRIMILD_TO_STRING(
 	in vec3 aPosition;
 	in vec2 aTextureCoord;
 
+	uniform mat4 uMMatrix;
+
 	out vec2 vTextureCoord;
 
 	void main()
 	{
 		vTextureCoord = aTextureCoord;
-		gl_Position = vec4( aPosition.x, aPosition.y, 0.0, 1.0 );
+		gl_Position = uMMatrix * vec4( aPosition.x, aPosition.y, 0.0, 1.0 );
 	}
 )};
 
@@ -53,7 +55,12 @@ const char *screen_fs = { CRIMILD_TO_STRING(
 
 	void main( void ) 
 	{ 
-		vFragColor = texture( uColorMap, vTextureCoord );
+		vec4 color = texture( uColorMap, vTextureCoord );
+		if ( color.a == 0.0 ) {
+			discard;
+		}
+
+		vFragColor = color;
 	}
 )};
 
@@ -62,6 +69,8 @@ ScreenShaderProgram::ScreenShaderProgram( void )
 { 
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
+
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM, "uMMatrix" );
 
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM, "uColorMap" );
 }

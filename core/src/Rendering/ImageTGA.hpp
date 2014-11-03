@@ -36,12 +36,30 @@ namespace crimild {
 
 	class ImageTGA : public Image {
 	public:
+		ImageTGA( void );
 		explicit ImageTGA( std::string filePath );
 		virtual ~ImageTGA( void );
 
 		virtual void load( void ) override;
 
+		void save( std::string fileName );
+
 	private:
+		struct TGAHeader {
+			unsigned char identsize;
+		    unsigned char colorMapType;
+		    unsigned char imageType;	// 2 - rgb, 3 - greyscale
+		    unsigned short colorMapStart;
+		    unsigned short colorMapLength;
+		    unsigned char colorMapBits;
+		    unsigned short xstart;
+		    unsigned short ystart;
+		    unsigned short width;
+		    unsigned short height;
+		    unsigned char bits;
+		    unsigned char descriptor;
+		};
+
 		std::string _filePath;
 	};
 

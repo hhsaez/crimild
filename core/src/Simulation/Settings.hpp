@@ -50,6 +50,11 @@ namespace crimild {
 			_settings[ key ] = str.str();
 		}
 		
+		void add( std::string key, const char *value )
+		{
+			add( key, std::string( value ) );
+		}
+
 		void add( std::string key, std::string value )
 		{
 			_settings[ key ] = value;
@@ -70,6 +75,11 @@ namespace crimild {
 			return value;
 		}
 
+		std::string get( const char *key, const char *defaultValue )
+		{
+			return get( std::string( key ), std::string( defaultValue ) );
+		}
+
 		std::string get( std::string key, std::string defaultValue )
 		{
 			if ( _settings.find( key ) == _settings.end() ) {
@@ -81,6 +91,8 @@ namespace crimild {
 		}
 
 		void parseCommandLine( int argc, char **argv );
+
+		void dump( void );
 
 	private:
 		std::map< std::string, std::string > _settings;

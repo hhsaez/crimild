@@ -31,3 +31,4 @@ CMakeScripts
 *~
 third-party/bullet-2.82-r2704
 scripting/test/crimild_scripting_test
+tools/fontgen/fontgen

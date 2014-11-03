@@ -56,3 +56,11 @@ void Settings::parseCommandLine( int argc, char **argv )
 	}
 }
 
+void Settings::dump( void )
+{
+	std::cout << "Available Settings: " << std::endl;
+	for ( auto setting : _settings ) {
+		std::cout << "   " << setting.first << " -> " << setting.second << std::endl;
+	}
+}
+

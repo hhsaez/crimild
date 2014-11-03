@@ -78,14 +78,15 @@ const char *sdf_fs = { CRIMILD_TO_STRING(
 
 	out vec4 vFragColor;
 
-	const float smoothing = 1.0 / 64.0;
+	const float buffer = 0.5;
+	const float gamma = 0.05;
 
 	void main( void ) 
 	{ 
 		vec4 color = uMaterial.diffuse;
 		float distance = texture( uColorMap, vTextureCoord ).r;
-    	float alpha = smoothstep( 0.5 - smoothing, 0.5 + smoothing, distance );
-    	vFragColor = vec4( color.rgb, alpha );		
+    	float alpha = smoothstep( buffer - gamma, buffer + gamma, distance );
+    	vFragColor = vec4( color.rgb, color.a * alpha );		
 	}
 )};
 
