@@ -78,6 +78,12 @@ double LuaUtils::get< double >( lua_State *l, const int index )
 }
 
 template<>
+const char *LuaUtils::get< const char * >( lua_State *l, const int index )
+{
+	return lua_tostring( l, index );
+}
+
+template<>
 std::string LuaUtils::get< std::string >( lua_State *l, const int index )
 {
 	return lua_tostring( l, index );
@@ -111,6 +117,12 @@ template<>
 double LuaUtils::checkGet< double >( lua_State *l, const int index )
 {
 	return luaL_checknumber( l, index );
+}
+
+template<>
+const char *LuaUtils::checkGet< const char * >( lua_State *l, const int index )
+{
+	return luaL_checkstring( l, index );
 }
 
 template<>

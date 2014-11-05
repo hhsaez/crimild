@@ -51,9 +51,9 @@ namespace crimild {
 			lua_State *_state;
 
 		public:
-			bool load( const std::string &fileName );
+			bool load( std::string fileName );
 
-			bool parse( const std::string &text );
+			bool parse( std::string text );
 
 		public:
 			void push( void ) { }
@@ -250,7 +250,7 @@ namespace crimild {
  					_functions.erase( it );
  				}
  			}
- 
+
 		private:
 			std::map< std::string, std::unique_ptr< AbstractFunction > > _functions;
 

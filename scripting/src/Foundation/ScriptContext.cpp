@@ -45,6 +45,16 @@ ScriptContext::ScriptContext( bool openDefaultLibs )
 	if ( openDefaultLibs ) {
 		luaL_openlibs( _state );
 	}
+
+	registerFunction(
+		"getRuntimeDirectory",
+		std::function< std::string ( void ) >( []( void ) -> std::string {
+			return FileSystem::getInstance().getBaseDirectory();
+		}));
+
+	// this trick makes sure the runtime directory is in the search
+	// path for external modules
+	parse( "package.path = getRuntimeDirectory() .. '/?.lua;' .. package.path" );
 }
 
 ScriptContext::~ScriptContext( void )
@@ -55,9 +65,9 @@ ScriptContext::~ScriptContext( void )
 	}
 }
 
-bool ScriptContext::load( const std::string &fileName )
+bool ScriptContext::load( std::string fileName )
 {
-	if ( luaL_dofile( _state, fileName.c_str() ) != 0 ) {
+	if ( luaL_loadfile( _state, fileName.c_str() ) ) {
 		Log::Error << "Cannot load file '" << fileName << "'" 
 				   << "\n\tReason: "
 				   << read< std::string >()
@@ -65,13 +75,21 @@ bool ScriptContext::load( const std::string &fileName )
 		return false;
 	}
 
+	if ( lua_pcall( _state, 0, 0, 0 ) ) {
+		Log::Error << "Cannot execute file '" << fileName << "'"
+				   << "\n\tReason: " 
+				   << read< std::string >()
+				   << Log::End;
+	    return false;
+	}
+
 	return true;
 }
 
-bool ScriptContext::parse( const std::string &text )
+bool ScriptContext::parse( std::string text )
 {
 	return !luaL_loadstring( _state, text.c_str() ) &&
-		   !lua_pcall( 0, 0, 0, 0 );
+		   !lua_pcall( _state, 0, 0, 0 );
 }
 
 std::string ScriptContext::dumpStack( void )
