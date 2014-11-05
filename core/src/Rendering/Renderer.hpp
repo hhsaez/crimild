@@ -50,6 +50,7 @@ namespace crimild {
 	class Camera;
 	class RenderStateComponent;
     class RenderQueue;
+    class RenderPass;
 
 	class Renderer : public SharedObject {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( Renderer );
@@ -74,11 +75,11 @@ namespace crimild {
 		
 		virtual void clearBuffers( void ) = 0;
         
-        virtual void render( RenderQueue *renderQueue );
+        virtual void render( RenderQueue *renderQueue, RenderPass *renderPass = nullptr );
 
-		virtual void render( VisibilitySet *vs );
+		virtual void render( VisibilitySet *vs, RenderPass *renderPass = nullptr );
 
-		virtual void render( Geometry *geometry, Camera *camera );
+		virtual void render( Geometry *geometry, Camera *camera, RenderPass *renderPass = nullptr );
 
 		virtual void endRender( void ) = 0;
 

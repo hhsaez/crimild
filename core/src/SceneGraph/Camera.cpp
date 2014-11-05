@@ -37,6 +37,7 @@ Camera::Camera( void )
       _renderPass( new ForwardRenderPass() )
 {
 	_projectionMatrix = _frustum.computeProjectionMatrix();
+	_orthographicMatrix = _frustum.computeOrthographicMatrix();
 	_viewMatrix.makeIdentity();
 }
 
@@ -47,6 +48,7 @@ Camera::Camera( float fov, float aspect, float near, float far )
       _renderPass( new ForwardRenderPass() )
 {
 	_projectionMatrix = _frustum.computeProjectionMatrix();
+	_orthographicMatrix = _frustum.computeOrthographicMatrix();
 	_viewMatrix.makeIdentity();
 }
 
@@ -59,6 +61,7 @@ void Camera::setFrustum( const Frustumf &f )
 {
     _frustum = f;
 	_projectionMatrix = _frustum.computeProjectionMatrix();
+	_orthographicMatrix = _frustum.computeOrthographicMatrix();
 }
 
 void Camera::accept( NodeVisitor &visitor )
@@ -111,5 +114,10 @@ bool Camera::getPickRay( float portX, float portY, Ray3f &result ) const
 	result.setDirection( rayDirection );
 
 	return true;
+}
+
+float Camera::computeFOV( void ) const
+{
+	return getFrustum().getRMax() / getFrustum().getUMax();
 }
 

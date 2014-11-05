@@ -51,13 +51,20 @@ void ComputeRenderQueue::traverse( Node *scene )
 
 void ComputeRenderQueue::visitGeometry( Geometry *geometry )
 {
+    RenderStateComponent *renderState = geometry->getComponent< RenderStateComponent >();
+    
+    if ( renderState->renderOnScreen() ) {
+        _result->getScreenObjects().add( geometry );
+        return;
+    }
+
     bool opaque = true;
-    geometry->getComponent< RenderStateComponent >()->foreachMaterial( [&]( Material *material ) {
+    renderState->foreachMaterial( [&]( Material *material ) {
         if ( material->getAlphaState()->isEnabled() ) {
             opaque = false;
         }
     });
-    
+
     if ( opaque ) {
         _result->getOpaqueObjects().add( geometry );
     }

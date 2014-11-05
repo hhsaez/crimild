@@ -33,6 +33,7 @@
 using namespace crimild;
 
 RenderStateComponent::RenderStateComponent( void )
+    : _renderOnScreen( false )
 {
 }
 

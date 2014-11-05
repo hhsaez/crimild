@@ -54,26 +54,26 @@ Renderer::~Renderer( void )
     
 }
 
-void Renderer::render( RenderQueue *renderQueue )
+void Renderer::render( RenderQueue *renderQueue, RenderPass *renderPass )
 {
     Camera *camera = renderQueue->getCamera();
     if ( camera != nullptr ) {
-        RenderPass *pass = camera->getRenderPass();
+        RenderPass *pass = renderPass != nullptr ? renderPass : camera->getRenderPass();
         pass->render( this, renderQueue, camera );
     }
 }
 
-void Renderer::render( VisibilitySet *vs )
+void Renderer::render( VisibilitySet *vs, RenderPass *renderPass )
 {
 	Camera *camera = vs->getCamera();
-	RenderPass *renderPass = camera->getRenderPass();
-	renderPass->render( this, vs, camera );
+	RenderPass *pass = renderPass != nullptr ? renderPass : camera->getRenderPass();
+	pass->render( this, vs, camera );
 }
 
-void Renderer::render( Geometry *geometry, Camera *camera )
+void Renderer::render( Geometry *geometry, Camera *camera, RenderPass *renderPass )
 {
-	RenderPass *renderPass = camera->getRenderPass();
-	renderPass->render( this, geometry, camera );
+	RenderPass *pass = renderPass != nullptr ? renderPass : camera->getRenderPass();
+	pass->render( this, geometry, camera );
 }
 
 void Renderer::bindFrameBuffer( FrameBufferObject *fbo )

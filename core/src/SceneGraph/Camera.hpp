@@ -54,6 +54,9 @@ namespace crimild {
 		void setProjectionMatrix( const Matrix4f &projection ) { _projectionMatrix = projection; }
 		const Matrix4f &getProjectionMatrix( void ) const { return _projectionMatrix; }
 
+		void setOrthographicMatrix( const Matrix4f &orthographic ) { _orthographicMatrix = orthographic; }
+		const Matrix4f &getOrthographicMatrix( void ) const { return _orthographicMatrix; }
+
 		void setViewMatrix( const Matrix4f &view );
 		const Matrix4f &getViewMatrix( void );
         
@@ -65,10 +68,13 @@ namespace crimild {
 
 		bool getPickRay( float normalizedX, float normalizedY, Ray3f &result ) const;
 
+		float computeFOV( void ) const;
+
 	private:
 		Frustumf _frustum;
 		Rectf _viewport;
 		Matrix4f _projectionMatrix;
+		Matrix4f _orthographicMatrix;
 		Matrix4f _viewMatrix;
         bool _viewMatrixIsCurrent;
 

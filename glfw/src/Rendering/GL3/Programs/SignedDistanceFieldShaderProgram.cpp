@@ -52,14 +52,23 @@ const char *sdf_screen_vs = { CRIMILD_TO_STRING(
 	in vec3 aPosition;
 	in vec2 aTextureCoord;
 
+	uniform mat4 uPMatrix;
 	uniform mat4 uMMatrix;
 
 	out vec2 vTextureCoord;
 
 	void main()
 	{
+		mat4 oMatrix = mat4( 
+			1.0, 0.0, 0.0, 0.0, 
+			0.0, 1.0, 0.0, 0.0, 
+			0.0, 0.0, 0.0, 0.0, 
+			0.0, 0.0, 0.0, 1.0
+		);
+
 		vTextureCoord = aTextureCoord;
-		gl_Position = uMMatrix * vec4( aPosition.x, aPosition.y, 0.0, 1.0 );
+		vec4 position = oMatrix * uMMatrix * vec4( aPosition, 1.0 );
+		gl_Position = position;//vec4( position.x, position.y, 0.0, 1.0 );
 	}
 )};
 

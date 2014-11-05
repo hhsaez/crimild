@@ -62,6 +62,8 @@ namespace crimild {
     protected:
         Primitive *getScreenPrimitive( void ) { return _screen.get(); }
 
+        virtual void renderScreenObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+
 	private:
 		Pointer< Primitive > _screen;
         SharedObjectList< ImageEffect > _imageEffects;

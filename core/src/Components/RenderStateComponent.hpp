@@ -61,9 +61,14 @@ namespace crimild {
 		void detachAllLights( void );
 		void foreachLight( std::function< void( Light * ) > callback );
 
+		bool renderOnScreen( void ) const { return _renderOnScreen; }
+		void setRenderOnScreen( bool value ) { _renderOnScreen = value; }
+
 	private:
 		std::list< Pointer< Material > > _materials;
 		std::list< Pointer< Light > > _lights;
+
+		bool _renderOnScreen;
 	};
 
 }

@@ -59,9 +59,7 @@ void RenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Camera *c
         render( renderer, geometry, camera );
     });
 
-    renderQueue->getScreenObjects().each( [&]( Geometry *geometry, int ) {
-        render( renderer, geometry, camera );
-    });
+    renderScreenObjects( renderer, renderQueue, camera );
 }
 
 void RenderPass::render( Renderer *renderer, VisibilitySet *vs, Camera *camera )
@@ -189,36 +187,55 @@ void RenderPass::render( Renderer *renderer, Texture *texture, ShaderProgram *pr
 
 void RenderPass::render( Renderer *renderer, FrameBufferObject *fbo, ShaderProgram *program )
 {
-    /*
-	if ( program == nullptr ) {
-		program = renderer->getFallbackProgram( nullptr, nullptr, nullptr );
-		if ( program == nullptr ) {
-			return ;
+
+}
+
+void RenderPass::renderScreenObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
+{
+	const Matrix4f &projection = camera->getOrthographicMatrix();
+    Matrix4f view;
+    view.makeIdentity();
+    
+    renderQueue->getScreenObjects().each( [&]( Geometry *geometry, int ) {
+	    Matrix4f model = geometry->getWorld().computeModelMatrix();
+	    Matrix4f normal = model;
+		normal[ 12 ] = 0.0f;
+		normal[ 13 ] = 0.0f;
+		normal[ 14 ] = 0.0f;
+
+		RenderStateComponent *renderState = geometry->getComponent< RenderStateComponent >();
+		if ( renderState->hasMaterials() ) {
+			geometry->foreachPrimitive( [&]( Primitive *primitive ) mutable {
+				renderState->foreachMaterial( [&]( Material *material ) mutable {
+					if ( !material || !primitive ) {
+						return;
+					}
+
+					ShaderProgram *program = material->getProgram() ? material->getProgram() : renderer->getFallbackProgram( material, geometry, primitive );
+					if ( !program ) {
+						return;
+					}
+
+					renderer->bindProgram( program );
+
+					renderer->bindMaterial( program, material );
+
+					renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
+					renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
+
+					renderer->applyTransformations( program, projection, view, model, normal );
+
+					renderer->drawPrimitive( program, primitive );
+
+					renderer->unbindVertexBuffer( program, primitive->getVertexBuffer() );
+					renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
+
+					renderer->unbindMaterial( program, material );
+
+					renderer->unbindProgram( program );
+				});
+			});
 		}
-	}
-
-	// bind shader program first
-	renderer->bindProgram( program );
-
-	// bind framebuffer texture
-	renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM ), fbo->getTexture() );
-
-	// bind vertex and index buffers
-	renderer->bindVertexBuffer( program, _screen->getVertexBuffer() );
-	renderer->bindIndexBuffer( program, _screen->getIndexBuffer() );
-
-	// draw primitive
-	renderer->drawPrimitive( program, _screen.get() );
-
-	// unbind primitive buffers
-	renderer->unbindVertexBuffer( program, _screen->getVertexBuffer() );
-	renderer->unbindIndexBuffer( program, _screen->getIndexBuffer() );
-
-	// unbind framebuffer texture
-	renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM ), fbo->getTexture() );
-
-	// lastly, unbind the shader program
-	renderer->unbindProgram( program );
-     */
+    });
 }
 
