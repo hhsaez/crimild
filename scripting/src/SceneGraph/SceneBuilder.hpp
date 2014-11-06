@@ -43,6 +43,8 @@ namespace crimild {
 
 			virtual ~SceneBuilder( void );
 
+			virtual void reset( void );
+
 			crimild::Pointer< crimild::Node > fromFile( const std::string &filename );
 
 		public:

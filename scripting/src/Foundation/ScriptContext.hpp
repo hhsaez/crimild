@@ -47,8 +47,11 @@ namespace crimild {
 			ScriptContext( bool openDefaultLibs );
 			virtual ~ScriptContext( void );
 
+			void reset( void );
+
 		private:
 			lua_State *_state;
+			bool _openDefaultLibs;
 
 		public:
 			bool load( std::string fileName );

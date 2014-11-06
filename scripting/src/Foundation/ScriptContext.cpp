@@ -35,14 +35,33 @@ using namespace crimild::scripting;
 ScriptContext::ScriptContext( void )
 	: ScriptContext( false )
 {
-
+	reset();
 }
 
 ScriptContext::ScriptContext( bool openDefaultLibs )
-	: _state( nullptr )
+	: _state( nullptr ),
+	  _openDefaultLibs( openDefaultLibs )
 {
+	reset();
+}
+
+ScriptContext::~ScriptContext( void )
+{
+	if ( _state != nullptr ) {
+		lua_close( _state );
+		_state = nullptr;
+	}
+}
+
+void ScriptContext::reset( void )
+{
+	if ( _state != nullptr ) {
+		lua_close( _state );
+		_state = nullptr;
+	}
+
 	_state = luaL_newstate();
-	if ( openDefaultLibs ) {
+	if ( _openDefaultLibs ) {
 		luaL_openlibs( _state );
 	}
 
@@ -55,14 +74,6 @@ ScriptContext::ScriptContext( bool openDefaultLibs )
 	// this trick makes sure the runtime directory is in the search
 	// path for external modules
 	parse( "package.path = getRuntimeDirectory() .. '/?.lua;' .. package.path" );
-}
-
-ScriptContext::~ScriptContext( void )
-{
-	if ( _state != nullptr ) {
-		lua_close( _state );
-		_state = nullptr;
-	}
 }
 
 bool ScriptContext::load( std::string fileName )
@@ -88,8 +99,15 @@ bool ScriptContext::load( std::string fileName )
 
 bool ScriptContext::parse( std::string text )
 {
-	return !luaL_loadstring( _state, text.c_str() ) &&
-		   !lua_pcall( _state, 0, 0, 0 );
+	if ( luaL_loadstring( _state, text.c_str() ) || lua_pcall( _state, 0, 0, 0 ) ) {
+		Log::Error << "Cannot execute \"" << text << "\""
+				   << "\n\tReason: " 
+				   << read< std::string >()
+				   << Log::End;
+	    return false;
+	}
+
+	return true;
 }
 
 std::string ScriptContext::dumpStack( void )

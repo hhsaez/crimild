@@ -48,6 +48,11 @@ SceneBuilder::~SceneBuilder( void )
 
 }
 
+void SceneBuilder::reset( void )
+{
+	getScriptContext().reset();
+}
+
 Pointer< Node > SceneBuilder::fromFile( const std::string &filename )
 {
 	if ( !getScriptContext().load( filename ) ) {
