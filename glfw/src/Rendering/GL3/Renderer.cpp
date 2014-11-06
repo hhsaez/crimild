@@ -46,6 +46,7 @@
 #include "Programs/BlendShaderProgram.hpp"
 #include "Programs/BlurShaderProgram.hpp"
 #include "Programs/GaussianBlurShaderProgram.hpp"
+#include "Programs/SignedDistanceFieldShaderProgram.hpp"
 #include "Utils.hpp"
 
 #include <GL/glew.h>
@@ -77,6 +78,7 @@ gl3::Renderer::Renderer( FrameBufferObject *screenBuffer )
     _programs[ "blend" ] = new BlendShaderProgram();
     _programs[ "blur" ] = new BlurShaderProgram();
     _programs[ "gaussianBlur" ] = new GaussianBlurShaderProgram();
+    _programs[ "sdf" ] = new SignedDistanceFieldShaderProgram();
 
 	setScreenBuffer( screenBuffer );
 }

@@ -31,6 +31,11 @@ using namespace crimild::scripting;
 #define LIGHT_SHADOW_FAR_COEFF "shadowFarCoeff"
 #define LIGHT_SHADOW_NEAR_COEFF "shadowNearCoeff"
 
+#define TEXT_TYPE "text"
+#define TEXT_FONT "font"
+#define TEXT_SIZE "textSize"
+#define TEXT_TEXT "text"
+
 SceneBuilder::SceneBuilder( std::string rootNodeName )
 	: Scripted( true ),
 	  _rootNodeName( rootNodeName )
@@ -86,6 +91,30 @@ Pointer< Node > SceneBuilder::buildNode( ScriptContext::Iterable &it, Group *par
 		}
 
 		current = light;
+	}
+	else if ( type == TEXT_TYPE ) {
+		Log::Debug << "Building 'text' node" << Log::End;
+		Pointer< Text > text( new Text() );
+
+		std::string fontName = it.eval< std::string >( "font" );
+		float textSize = it.eval< float >( "textSize" );
+		//RGBAColorf textColor = it.eval< RGBAColorf >( "textColor" );
+
+		std::string fontFileName = FileSystem::getInstance().pathForResource( fontName + "_sdf.tga" );
+		std::string fontDefFileName = FileSystem::getInstance().pathForResource( fontName + ".txt" );
+		Pointer< Font > font( new Font( fontFileName, fontDefFileName ) );
+
+		text->setFont( font.get() );
+		text->setSize( textSize );
+		text->setText( it.eval< std::string >( TEXT_TEXT ) );
+		text->getComponent< RenderStateComponent >()->setRenderOnScreen( true );
+
+		Material *material = text->getMaterial();
+		material->setProgram( Simulation::getCurrent()->getRenderer()->getShaderProgram( "sdf" ) );
+		// material->setDiffuse( textColor );
+		material->getDepthState()->setEnabled( false );
+
+		current = text;
 	}
 	else {
 		Pointer< Group > group;

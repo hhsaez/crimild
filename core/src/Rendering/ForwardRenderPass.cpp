@@ -88,6 +88,9 @@ void ForwardRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Ca
         RenderPass::render( renderer, _accumBufferOutput.get(), nullptr );
     }
 
+    // UI elements need to be render on top of any image effect
+    renderScreenObjects( renderer, renderQueue, camera );
+
 #else
     for ( auto it : _shadowMaps ) {
         if ( it.second != nullptr ) {
@@ -95,6 +98,7 @@ void ForwardRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Ca
         }
     }
 #endif
+
 }
 
 void ForwardRenderPass::buildAccumBuffer( int width, int height )
