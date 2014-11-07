@@ -116,8 +116,8 @@ bool Camera::getPickRay( float portX, float portY, Ray3f &result ) const
 	return true;
 }
 
-float Camera::computeFOV( void ) const
+float Camera::computeAspect( void ) const
 {
-	return getFrustum().getRMax() / getFrustum().getUMax();
+	return getFrustum().computeAspect();
 }
 

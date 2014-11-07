@@ -65,15 +65,9 @@ void ScriptContext::reset( void )
 		luaL_openlibs( _state );
 	}
 
-	registerFunction(
-		"getRuntimeDirectory",
-		std::function< std::string ( void ) >( []( void ) -> std::string {
-			return FileSystem::getInstance().getBaseDirectory();
-		}));
-
 	// this trick makes sure the runtime directory is in the search
 	// path for external modules
-	parse( "package.path = getRuntimeDirectory() .. '/?.lua;' .. package.path" );
+	parse( "package.path = '" + FileSystem::getInstance().getBaseDirectory() + "' .. '/?.lua;' .. package.path" );
 }
 
 bool ScriptContext::load( std::string fileName )
@@ -100,10 +94,10 @@ bool ScriptContext::load( std::string fileName )
 bool ScriptContext::parse( std::string text )
 {
 	if ( luaL_loadstring( _state, text.c_str() ) || lua_pcall( _state, 0, 0, 0 ) ) {
-		Log::Error << "Cannot execute \"" << text << "\""
-				   << "\n\tReason: " 
-				   << read< std::string >()
-				   << Log::End;
+		// Log::Error << "Cannot execute \"" << text << "\""
+				   // << "\n\tReason: " 
+				   // << read< std::string >()
+				   // << Log::End;
 	    return false;
 	}
 

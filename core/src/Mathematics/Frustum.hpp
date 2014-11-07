@@ -101,6 +101,11 @@ namespace crimild {
 		PRECISION getDMin( void ) const { return _data[ FRUSTUM_D_MIN ]; }
 		PRECISION getDMax( void ) const { return _data[ FRUSTUM_D_MAX ]; }
 
+		PRECISION computeAspect( void ) const
+		{
+			return getRMax() / getUMax();	
+		}
+
 		Matrix< 4, PRECISION > computeProjectionMatrix( void ) const
 		{
             float n = getDMin();

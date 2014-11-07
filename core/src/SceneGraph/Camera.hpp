@@ -68,7 +68,7 @@ namespace crimild {
 
 		bool getPickRay( float normalizedX, float normalizedY, Ray3f &result ) const;
 
-		float computeFOV( void ) const;
+		float computeAspect( void ) const;
 
 	private:
 		Frustumf _frustum;
