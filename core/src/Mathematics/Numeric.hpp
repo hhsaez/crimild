@@ -41,6 +41,7 @@ namespace crimild {
 		static const PRECISION PI;
 		static const PRECISION HALF_PI;
 		static const PRECISION TWO_PI;
+		static const PRECISION SQRT_TWO;
 		static const PRECISION SQRT_TWO_DIV_TWO;
 
 		static const PRECISION DEG_TO_RAD;
@@ -136,12 +137,18 @@ namespace crimild {
 			return result;
 		}
 
+		static PRECISION fract( PRECISION x )
+		{
+			return x - ( long ) x;
+		}
+
 	};
 
 	template< typename T > const T Numeric< T >::ZERO_TOLERANCE = static_cast< T >( 1e-06 );
 	template< typename T > const T Numeric< T >::PI = static_cast< T >( 3.1415926535897932384626433832795 );
 	template< typename T > const T Numeric< T >::HALF_PI = static_cast< T >( 3.1415926535897932384626433832795 / 2.0 );
 	template< typename T > const T Numeric< T >::TWO_PI = static_cast< T >( 3.1415926535897932384626433832795 * 2 );
+	template< typename T > const T Numeric< T >::SQRT_TWO = static_cast< T >( std::sqrt( 2 ) );
 	template< typename T > const T Numeric< T >::SQRT_TWO_DIV_TWO = static_cast< T >( 0.5 * std::sqrt( 2 ) );
 	template< typename T > const T Numeric< T >::DEG_TO_RAD = static_cast< T >( 3.1415926535897932384626433832795 / 180.0 );
 	template< typename T > const T Numeric< T >::RAD_TO_DEG = static_cast< T >( 180.0 / 3.1415926535897932384626433832795 );

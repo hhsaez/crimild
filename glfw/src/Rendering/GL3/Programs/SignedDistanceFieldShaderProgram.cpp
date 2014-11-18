@@ -40,35 +40,15 @@ const char *sdf_vs = { CRIMILD_TO_STRING(
 	uniform mat4 uMMatrix;
 
 	out vec2 vTextureCoord;
+	out float vOneU;
+	out float vOneV;
 
 	void main()
 	{
 		vTextureCoord = aTextureCoord;
-		gl_Position = uPMatrix * uVMatrix * uMMatrix * vec4(aPosition, 1.0); 
-	}
-)};
-
-const char *sdf_screen_vs = { CRIMILD_TO_STRING(
-	in vec3 aPosition;
-	in vec2 aTextureCoord;
-
-	uniform mat4 uPMatrix;
-	uniform mat4 uMMatrix;
-
-	out vec2 vTextureCoord;
-
-	void main()
-	{
-		mat4 oMatrix = mat4( 
-			1.0, 0.0, 0.0, 0.0, 
-			0.0, 1.0, 0.0, 0.0, 
-			0.0, 0.0, 0.0, 0.0, 
-			0.0, 0.0, 0.0, 1.0
-		);
-
-		vTextureCoord = aTextureCoord;
-		vec4 position = oMatrix * uMMatrix * vec4( aPosition, 1.0 );
-		gl_Position = position;//vec4( position.x, position.y, 0.0, 1.0 );
+		vOneU = 1.0 / 1024.0;
+		vOneV = 1.0 / 1024.0;
+		gl_Position = uPMatrix * uVMatrix * uMMatrix * vec4( aPosition, 1.0 );
 	}
 )};
 
@@ -81,26 +61,49 @@ const char *sdf_fs = { CRIMILD_TO_STRING(
 	};
 
 	in vec2 vTextureCoord;
+	in float vOneU;
+	in float vOneV;
 
 	uniform sampler2D uColorMap;
 	uniform Material uMaterial; 
 
 	out vec4 vFragColor;
 
-	const float buffer = 0.5;
-	const float gamma = 0.05;
+	float aastep( float threshold, float value ) {
+	  float afwidth = 0.7 * length( vec2( dFdx( value ), dFdy( value ) ) );
+	  return smoothstep( threshold - afwidth, threshold + afwidth, value);
+	}
 
-	void main( void ) 
-	{ 
-		vec4 color = uMaterial.diffuse;
-		float distance = texture( uColorMap, vTextureCoord ).r;
-    	float alpha = smoothstep( buffer - gamma, buffer + gamma, distance );
-    	vFragColor = vec4( color.rgb, color.a * alpha );		
+	void main( void )
+	{
+		vec2 uv = vTextureCoord * vec2( 1024.0, 1024.0 );
+
+		vec2 uv00 = floor( uv - vec2( 0.5 ) );
+		vec2 uvlerp = uv - uv00 - vec2( 0.5 );
+		vec2 st00 = ( uv00 + vec2( 0.5 ) ) * vec2( vOneU, vOneV );
+
+		vec4 D00 = texture( uColorMap, st00 );
+		vec4 D10 = texture( uColorMap, st00 + vec2( vOneU, 0.0 ) );
+		vec4 D01 = texture( uColorMap, st00 + vec2( 0.0, vOneV ) );
+		vec4 D11 = texture( uColorMap, st00 + vec2( vOneU, vOneV ) );
+
+		vec2 D00_10 = vec2( D00.r, D10.r ) * 255.0 - 128.0 + vec2( D00.g, D10.g ) * ( 255.0 / 256.0 );
+		vec2 D01_11 = vec2( D01.r, D11.r ) * 255.0 - 128.0 + vec2( D01.g, D11.g ) * ( 255.0 / 256.0 );
+
+		vec2 D0_1 = mix( D00_10, D01_11, uvlerp.y );
+		float D = mix( D0_1.x, D0_1.y, uvlerp.x );
+
+		float g = 1.0 - aastep( 0.0, D );
+		if ( g < 0.001 ) {
+			discard;
+		}
+
+		vFragColor = vec4( uMaterial.diffuse.rgb, uMaterial.diffuse.a * g );
 	}
 )};
 
-gl3::SignedDistanceFieldShaderProgram::SignedDistanceFieldShaderProgram( bool screenSpace )
-	: ShaderProgram( gl3::Utils::getVertexShaderInstance( screenSpace ? sdf_screen_vs : sdf_vs ), gl3::Utils::getFragmentShaderInstance( sdf_fs ) )
+gl3::SignedDistanceFieldShaderProgram::SignedDistanceFieldShaderProgram( bool ignored )
+	: ShaderProgram( gl3::Utils::getVertexShaderInstance( sdf_vs ), gl3::Utils::getFragmentShaderInstance( sdf_fs ) )
 { 
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );

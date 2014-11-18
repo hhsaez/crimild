@@ -28,102 +28,6 @@
 using namespace crimild;
 using namespace crimild::tools::fontgen;
 
-class Grid {
-public:
-	struct Point {
-		int dx;
-		int dy;
-
-		int distSqr( void ) const { return dx * dx + dy * dy; }
-	};
-
-	Grid( unsigned int width, unsigned int height )
-		: _width( width ),
-		  _height( height ),
-		  _data( _width * _height )
-	{
-
-	}
-
-	virtual ~Grid( void )
-	{
-
-	}
-
-	void put( int x, int y, const Point &point )
-	{
-		_data[ y * _width + x ] = point;
-	}
-
-	Point &get( int x, int y )
-	{
-		return _data[ y * _width + x ];
-	}
-
-	void generateSDF( void )
-	{
-		// pass 1
-		for ( int y = 0; y < _height; y++ ) {
-			for ( int x = 0; x < _width; x++ ) {
-				Point p = get( x, y );
-				compare( p, x, y, -1, 0 );
-				compare( p, x, y, 0, -1 );
-				compare( p, x, y, -1, -1 );
-				compare( p, x, y, 1, -1 );
-				put( x, y, p );
-			}
-
-			for ( int x = _width - 1; x >= 0; x-- ) {
-				Point p = get( x, y );
-				compare( p, x, y, 1, 0 );
-				put( x, y, p );
-			}
-		}
-
-		// pass 2
-		for ( int y = _height - 1; y >= 0; y-- ) {
-			for ( int x = _width - 1; x >= 0; x-- ) {
-				Point p = get( x, y );
-				compare( p, x, y, 1, 0 );
-				compare( p, x, y, 0, 1 );
-				compare( p, x, y, -1, 0 );
-				compare( p, x, y, 1, 1 );
-				put( x, y, p );
-			}
-
-			for ( int x = 0; x < _width; x++ ) {
-				Point p = get( x, y );
-				compare( p, x, y, -1, 0 );
-				put( x, y, p );
-			}
-		}
-	}
-
-private:
-	void compare( Point &p, int x, int y, int offsetX, int offsetY )
-	{
-		if ( x < 0 || x + offsetX >= _width ) {
-			return;
-		}
-
-		if ( y < 0 || y + offsetY >= _height ) {
-			return;
-		}
-		
-		Point other = get( x + offsetX, y + offsetY );
-		other.dx += offsetX;
-		other.dy += offsetY;
-
-		if ( other.distSqr() < p.distSqr() ) {
-			p = other;
-		}
-	}
-
-	unsigned int _width;
-	unsigned int _height;
-	std::vector< Point > _data;
-};
-
 SDFGenerator::SDFGenerator( void )
 {
 
@@ -140,49 +44,73 @@ void SDFGenerator::execute( std::string source )
 
 	std::cout << input.getWidth() << "x" << input.getHeight() << "x" << input.getBpp() << std::endl;
 
-	Grid grid1( input.getWidth(), input.getHeight() );
-	Grid grid2( input.getWidth(), input.getHeight() );
+	const int INPUT_WIDTH = input.getWidth();
+	const int INPUT_HEIGHT = input.getHeight();
 
-	Grid::Point inside;
-	inside.dx = 0;
-	inside.dy = 0;
+	std::vector< short > xDist( INPUT_WIDTH * INPUT_HEIGHT );
+	std::vector< short > yDist( INPUT_WIDTH * INPUT_HEIGHT );
+	std::vector< double > gX( INPUT_WIDTH * INPUT_HEIGHT );
+	std::vector< double > gY( INPUT_WIDTH * INPUT_HEIGHT );
+	std::vector< double > data( INPUT_WIDTH * INPUT_HEIGHT );
+	std::vector< double > outside( INPUT_WIDTH * INPUT_HEIGHT );
+	std::vector< double > inside( INPUT_WIDTH * INPUT_HEIGHT );
 
-	Grid::Point outside;
-	outside.dx = 999;
-	outside.dy = 999;
+    double inputMin = 255.0;
+    double inputMax = -255.0;
+    unsigned char *inputData = input.getData();
 
-	std::vector< unsigned char > sdf( input.getWidth() * input.getHeight() );
-	for ( int y = 0; y < input.getHeight(); y++ ) {
-		for ( int x = 0; x < input.getWidth(); x++ ) {
-			unsigned char color = input.getData()[ y * ( input.getWidth() * input.getBpp() ) + x * input.getBpp() ];
-			grid1.put( x, y, color < 128 ? inside : outside );
-			grid2.put( x, y, color < 128 ? outside : inside );
-		}
-	}
+    for ( int i = 0; i < INPUT_WIDTH * INPUT_HEIGHT; i++ ) {
+        double v = inputData[ i ];
+        data[ i ] = v;
+        if ( v > inputMax ) inputMax = v;
+        if ( v < inputMin ) inputMin = v;
+    }
 
-	grid1.generateSDF();
-	grid2.generateSDF();
+    double inputOffset = ( inputMin < 128.0 ) ? inputMin : 0;
+    double inputRange = inputMax - inputMin;
+    if ( inputRange == 0.0 ) inputRange = 255.0;
+    for ( int i = 0; i < INPUT_WIDTH * INPUT_HEIGHT; i++ ) {
+        data[ i ] = ( inputData[ i ] - inputOffset ) / ( inputRange );
+    }
 
-	std::vector< unsigned char > data( input.getWidth() * input.getHeight() );
-	for ( int y = 0; y < input.getHeight(); y++ ) {
-		for ( int x = 0; x < input.getWidth(); x++ ) {
-			// Calculate the actual distance from the dx/dy
-			int dist1 = sqrt( grid1.get( x, y ).distSqr() );
-			int dist2 = sqrt( grid2.get( x, y ).distSqr() );
-			int dist = dist1 - dist2;
+    computeGradient( &data[ 0 ], INPUT_HEIGHT, INPUT_WIDTH, &gX[ 0 ], &gY[ 0 ] );
+    edtaa3( &data[ 0 ], &gX[ 0 ], &gY[ 0 ], INPUT_HEIGHT, INPUT_WIDTH, &xDist[ 0 ], &yDist[ 0 ], &outside[ 0 ] );
+    for ( int i = 0; i < INPUT_WIDTH * INPUT_HEIGHT; i++ ) {
+        if ( outside[ i ] < 0.0 ) {
+            outside[ i ] = 0.0;
+        }
+    }
 
-			// Clamp and scale it, just for display purposes.
-			int c = dist * 3 + 128;
-			if ( c < 0 ) c = 0;
-			if ( c > 255 ) c = 255;
+    memset( &gX[ 0 ], 0, sizeof( double ) * INPUT_WIDTH * INPUT_HEIGHT );
+    memset( &gY[ 0 ], 0, sizeof( double ) * INPUT_WIDTH * INPUT_HEIGHT );
+    for ( int i = 0; i < INPUT_WIDTH * INPUT_HEIGHT; i++ ) {
+        data[ i ] = 1 - data[ i ];
+    }
 
-			data[ y * input.getWidth() + x ] = c;
-		}
-	}
+    computeGradient( &data[ 0 ], INPUT_HEIGHT, INPUT_WIDTH, &gX[ 0 ], &gY[ 0 ] );
+    edtaa3( &data[ 0 ], &gX[ 0 ], &gY[ 0 ], INPUT_HEIGHT, INPUT_WIDTH, &xDist[ 0 ], &yDist[ 0 ], &inside[ 0 ] );
+    for ( int i = 0; i < INPUT_WIDTH * INPUT_HEIGHT; i++ ) {
+        if ( inside[ i ] < 0.0 ) {
+            inside[ i ] = 0.0;
+        }
+    }
+
+    int channels = 3;
+    std::vector< unsigned char > out( INPUT_WIDTH * INPUT_HEIGHT * channels * sizeof( unsigned char ) );
+    double dist;
+    for ( int i = 0; i < INPUT_WIDTH * INPUT_HEIGHT; i++ ) {
+        dist = outside[ i ] - inside[ i ];
+        dist = 128.0 + dist;
+        if ( dist < 0.0 ) dist = 0.0;
+        if ( dist >= 256.0 ) dist = 255.999;
+        out[ 3 * i + 2 ] = ( unsigned char ) dist;
+        out[ 3 * i + 1 ] = ( unsigned char ) ( ( dist - floor( dist ) ) * 256.0 );
+        out[ 3 * i ] = inputData[ i ];
+    }
 
 	std::string outputPath = source.substr( 0, source.find_last_of( "." ) ) + "_sdf.tga";
 	ImageTGA output;
-	output.setData( input.getWidth(), input.getHeight(), 1, &data[ 0 ] );
+	output.setData( input.getWidth(), input.getHeight(), channels, &out[ 0 ] );
 	output.save( outputPath );
 
 #ifdef __APPLE__
@@ -191,3 +119,494 @@ void SDFGenerator::execute( std::string source )
 #endif
 }
 
+void SDFGenerator::computeGradient( double *img, int w, int h, double *gx, double *gy )
+{
+    for ( int i = 1; i < h - 1; i++ ) {
+        for ( int j = 1; j < w - 1; j++ ) {
+            int k = i * w + j;
+            if ( ( img[ k ] > 0.0 ) && ( img[ k ] < 1.0 ) ) {
+                gx[ k ] = -img[ k - w - 1 ] - Numericd::SQRT_TWO * img[ k - 1 ] - img[ k + w - 1 ] + img[ k - w + 1 ] + Numericd::SQRT_TWO * img[ k + 1 ] + img[ k + w + 1 ];
+                gy[ k ] = -img[ k - w - 1 ] - Numericd::SQRT_TWO * img[ k - w ] - img[ k + w - 1 ] + img[ k - w + 1 ] + Numericd::SQRT_TWO * img[ k + w ] + img[ k + w + 1 ];
+                double gLength = gx[ k ] * gx[ k ] + gy[ k ] * gy[ k ];
+                if ( gLength > 0.0 ) {
+                    gLength = sqrt( gLength );
+                    gx[ k ] = gx[ k ] / gLength;
+                    gy[ k ] = gy[ k ] / gLength;
+                }
+            }
+        }
+    }
+}
+
+double SDFGenerator::edgedf( double gx, double gy, double a )
+{
+    double df, glength, temp, a1;
+
+    if ( ( gx == 0 ) || ( gy == 0 ) ) {
+        df = 0.5 - a;
+    } else {
+        glength = sqrt( gx * gx + gy * gy );
+        if ( glength > 0 ) {
+            gx = gx / glength;
+            gy = gy / glength;
+        }
+
+        gx = fabs( gx );
+        gy = fabs( gy );
+        if ( gx < gy ) {
+            temp = gx;
+            gx = gy;
+            gy = temp;
+        }
+
+        a1 = 0.5 * gy / gx;
+        if ( a < a1 ) {
+            df = 0.5 * ( gx + gy ) - sqrt( 2.0 * gx * gy * a );
+        } else if ( a < ( 1.0 - a1 ) ) {
+            df = ( 0.5 - a ) * gx;
+        } else {
+            df = -0.5 * ( gx + gy ) + sqrt( 2.0 * gx * gy * ( 1.0 - a ) );
+        }
+    }    
+
+    return df;
+}
+
+double SDFGenerator::distaa3( double *img, double *gximg, double *gyimg, int w, int c, int xc, int yc, int xi, int yi )
+{
+  double di, df, dx, dy, gx, gy, a;
+  int closest;
+  
+  closest = c-xc-yc*w;
+  a = img[closest];
+  gx = gximg[closest];
+  gy = gyimg[closest];
+  
+  if(a > 1.0) a = 1.0;
+  if(a < 0.0) a = 0.0;
+  if(a == 0.0) return 1000000.0;
+
+  dx = (double)xi;
+  dy = (double)yi;
+  di = sqrt(dx*dx + dy*dy);
+  if(di==0) {
+      df = edgedf(gx, gy, a);
+  } else {
+      df = edgedf(dx, dy, a);
+  }
+  return di + df;
+}
+
+void SDFGenerator::edtaa3(double *img, double *gx, double *gy, int w, int h, short *distx, short *disty, double *dist)
+{
+  int x, y, i, c;
+  int offset_u, offset_ur, offset_r, offset_rd,
+  offset_d, offset_dl, offset_l, offset_lu;
+  double olddist, newdist;
+  int cdistx, cdisty, newdistx, newdisty;
+  int changed;
+  double epsilon = 1e-3; // Safeguard against errors due to limited precision
+
+  /* Initialize index offsets for the current image width */
+  offset_u = -w;
+  offset_ur = -w+1;
+  offset_r = 1;
+  offset_rd = w+1;
+  offset_d = w;
+  offset_dl = w-1;
+  offset_l = -1;
+  offset_lu = -w-1;
+
+  /* Initialize the distance images */
+  for(i=0; i<w*h; i++) {
+    distx[i] = 0; // At first, all pixels point to
+    disty[i] = 0; // themselves as the closest known.
+    if(img[i] <= 0.0)
+      {
+	dist[i]= 1000000.0; // Big value, means "not set yet"
+      }
+    else if (img[i]<1.0) {
+      dist[i] = edgedf(gx[i], gy[i], img[i]); // Gradient-assisted estimate
+    }
+    else {
+      dist[i]= 0.0; // Inside the object
+    }
+  }
+
+  /* Perform the transformation */
+  do
+    {
+      changed = 0;
+
+      /* Scan rows, except first row */
+      for(y=1; y<h; y++)
+        {
+
+          /* move index to leftmost pixel of current row */
+          i = y*w;
+
+          /* scan right, propagate distances from above & left */
+
+          /* Leftmost pixel is special, has no left neighbors */
+          olddist = dist[i];
+          if(olddist > 0) // If non-zero distance or not set yet
+            {
+	      c = i + offset_u; // Index of candidate for testing
+	      cdistx = distx[c];
+	      cdisty = disty[c];
+              newdistx = cdistx;
+              newdisty = cdisty+1;
+              newdist = distaa3(img, gx, gy, w, c, cdistx, cdisty, newdistx, newdisty);
+              if(newdist < olddist-epsilon)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  dist[i]=newdist;
+                  olddist=newdist;
+                  changed = 1;
+                }
+
+	      c = i+offset_ur;
+	      cdistx = distx[c];
+	      cdisty = disty[c];
+              newdistx = cdistx-1;
+              newdisty = cdisty+1;
+              newdist = distaa3(img, gx, gy, w, c, cdistx, cdisty, newdistx, newdisty);
+              if(newdist < olddist-epsilon)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  dist[i]=newdist;
+                  changed = 1;
+                }
+            }
+          i++;
+
+          /* Middle pixels have all neighbors */
+          for(x=1; x<w-1; x++, i++)
+            {
+              olddist = dist[i];
+              if(olddist <= 0) continue; // No need to update further
+
+	      c = i+offset_l;
+	      cdistx = distx[c];
+	      cdisty = disty[c];
+              newdistx = cdistx+1;
+              newdisty = cdisty;
+              newdist = distaa3(img, gx, gy, w, c, cdistx, cdisty, newdistx, newdisty);
+              if(newdist < olddist-epsilon)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  dist[i]=newdist;
+                  olddist=newdist;
+                  changed = 1;
+                }
+
+	      c = i+offset_lu;
+	      cdistx = distx[c];
+	      cdisty = disty[c];
+              newdistx = cdistx+1;
+              newdisty = cdisty+1;
+              newdist = distaa3(img, gx, gy, w, c, cdistx, cdisty, newdistx, newdisty);
+              if(newdist < olddist-epsilon)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  dist[i]=newdist;
+                  olddist=newdist;
+                  changed = 1;
+                }
+
+	      c = i+offset_u;
+	      cdistx = distx[c];
+	      cdisty = disty[c];
+              newdistx = cdistx;
+              newdisty = cdisty+1;
+              newdist = distaa3(img, gx, gy, w, c, cdistx, cdisty, newdistx, newdisty);
+              if(newdist < olddist-epsilon)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  dist[i]=newdist;
+                  olddist=newdist;
+                  changed = 1;
+                }
+
+	      c = i+offset_ur;
+	      cdistx = distx[c];
+	      cdisty = disty[c];
+              newdistx = cdistx-1;
+              newdisty = cdisty+1;
+              newdist = distaa3(img, gx, gy, w, c, cdistx, cdisty, newdistx, newdisty);
+              if(newdist < olddist-epsilon)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  dist[i]=newdist;
+                  changed = 1;
+                }
+            }
+
+          /* Rightmost pixel of row is special, has no right neighbors */
+          olddist = dist[i];
+          if(olddist > 0) // If not already zero distance
+            {
+	      c = i+offset_l;
+	      cdistx = distx[c];
+	      cdisty = disty[c];
+              newdistx = cdistx+1;
+              newdisty = cdisty;
+              newdist = distaa3(img, gx, gy, w, c, cdistx, cdisty, newdistx, newdisty);
+              if(newdist < olddist-epsilon)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  dist[i]=newdist;
+                  olddist=newdist;
+                  changed = 1;
+                }
+
+	      c = i+offset_lu;
+	      cdistx = distx[c];
+	      cdisty = disty[c];
+              newdistx = cdistx+1;
+              newdisty = cdisty+1;
+              newdist = distaa3(img, gx, gy, w, c, cdistx, cdisty, newdistx, newdisty);
+              if(newdist < olddist-epsilon)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  dist[i]=newdist;
+                  olddist=newdist;
+                  changed = 1;
+                }
+
+	      c = i+offset_u;
+	      cdistx = distx[c];
+	      cdisty = disty[c];
+              newdistx = cdistx;
+              newdisty = cdisty+1;
+              newdist = distaa3(img, gx, gy, w, c, cdistx, cdisty, newdistx, newdisty);
+              if(newdist < olddist-epsilon)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  dist[i]=newdist;
+                  changed = 1;
+                }
+            }
+
+          /* Move index to second rightmost pixel of current row. */
+          /* Rightmost pixel is skipped, it has no right neighbor. */
+          i = y*w + w-2;
+
+          /* scan left, propagate distance from right */
+          for(x=w-2; x>=0; x--, i--)
+            {
+              olddist = dist[i];
+              if(olddist <= 0) continue; // Already zero distance
+
+	      c = i+offset_r;
+	      cdistx = distx[c];
+	      cdisty = disty[c];
+              newdistx = cdistx-1;
+              newdisty = cdisty;
+              newdist = distaa3(img, gx, gy, w, c, cdistx, cdisty, newdistx, newdisty);
+              if(newdist < olddist-epsilon)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  dist[i]=newdist;
+                  changed = 1;
+                }
+            }
+        }
+      
+      /* Scan rows in reverse order, except last row */
+      for(y=h-2; y>=0; y--)
+        {
+          /* move index to rightmost pixel of current row */
+          i = y*w + w-1;
+
+          /* Scan left, propagate distances from below & right */
+
+          /* Rightmost pixel is special, has no right neighbors */
+          olddist = dist[i];
+          if(olddist > 0) // If not already zero distance
+            {
+	      c = i+offset_d;
+	      cdistx = distx[c];
+	      cdisty = disty[c];
+              newdistx = cdistx;
+              newdisty = cdisty-1;
+              newdist = distaa3(img, gx, gy, w, c, cdistx, cdisty, newdistx, newdisty);
+              if(newdist < olddist-epsilon)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  dist[i]=newdist;
+                  olddist=newdist;
+                  changed = 1;
+                }
+
+	      c = i+offset_dl;
+	      cdistx = distx[c];
+	      cdisty = disty[c];
+              newdistx = cdistx+1;
+              newdisty = cdisty-1;
+              newdist = distaa3(img, gx, gy, w, c, cdistx, cdisty, newdistx, newdisty);
+              if(newdist < olddist-epsilon)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  dist[i]=newdist;
+                  changed = 1;
+                }
+            }
+          i--;
+
+          /* Middle pixels have all neighbors */
+          for(x=w-2; x>0; x--, i--)
+            {
+              olddist = dist[i];
+              if(olddist <= 0) continue; // Already zero distance
+
+	      c = i+offset_r;
+	      cdistx = distx[c];
+	      cdisty = disty[c];
+              newdistx = cdistx-1;
+              newdisty = cdisty;
+              newdist = distaa3(img, gx, gy, w, c, cdistx, cdisty, newdistx, newdisty);
+              if(newdist < olddist-epsilon)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  dist[i]=newdist;
+                  olddist=newdist;
+                  changed = 1;
+                }
+
+	      c = i+offset_rd;
+	      cdistx = distx[c];
+	      cdisty = disty[c];
+              newdistx = cdistx-1;
+              newdisty = cdisty-1;
+              newdist = distaa3(img, gx, gy, w, c, cdistx, cdisty, newdistx, newdisty);
+              if(newdist < olddist-epsilon)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  dist[i]=newdist;
+                  olddist=newdist;
+                  changed = 1;
+                }
+
+	      c = i+offset_d;
+	      cdistx = distx[c];
+	      cdisty = disty[c];
+              newdistx = cdistx;
+              newdisty = cdisty-1;
+              newdist = distaa3(img, gx, gy, w, c, cdistx, cdisty, newdistx, newdisty);
+              if(newdist < olddist-epsilon)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  dist[i]=newdist;
+                  olddist=newdist;
+                  changed = 1;
+                }
+
+	      c = i+offset_dl;
+	      cdistx = distx[c];
+	      cdisty = disty[c];
+              newdistx = cdistx+1;
+              newdisty = cdisty-1;
+              newdist = distaa3(img, gx, gy, w, c, cdistx, cdisty, newdistx, newdisty);
+              if(newdist < olddist-epsilon)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  dist[i]=newdist;
+                  changed = 1;
+                }
+            }
+          /* Leftmost pixel is special, has no left neighbors */
+          olddist = dist[i];
+          if(olddist > 0) // If not already zero distance
+            {
+	      c = i+offset_r;
+	      cdistx = distx[c];
+	      cdisty = disty[c];
+              newdistx = cdistx-1;
+              newdisty = cdisty;
+              newdist = distaa3(img, gx, gy, w, c, cdistx, cdisty, newdistx, newdisty);
+              if(newdist < olddist-epsilon)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  dist[i]=newdist;
+                  olddist=newdist;
+                  changed = 1;
+                }
+
+	      c = i+offset_rd;
+	      cdistx = distx[c];
+	      cdisty = disty[c];
+              newdistx = cdistx-1;
+              newdisty = cdisty-1;
+              newdist = distaa3(img, gx, gy, w, c, cdistx, cdisty, newdistx, newdisty);
+              if(newdist < olddist-epsilon)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  dist[i]=newdist;
+                  olddist=newdist;
+                  changed = 1;
+                }
+
+	      c = i+offset_d;
+	      cdistx = distx[c];
+	      cdisty = disty[c];
+              newdistx = cdistx;
+              newdisty = cdisty-1;
+              newdist = distaa3(img, gx, gy, w, c, cdistx, cdisty, newdistx, newdisty);
+              if(newdist < olddist-epsilon)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  dist[i]=newdist;
+                  changed = 1;
+                }
+            }
+
+          /* Move index to second leftmost pixel of current row. */
+          /* Leftmost pixel is skipped, it has no left neighbor. */
+          i = y*w + 1;
+          for(x=1; x<w; x++, i++)
+            {
+              /* scan right, propagate distance from left */
+              olddist = dist[i];
+              if(olddist <= 0) continue; // Already zero distance
+
+	      c = i+offset_l;
+	      cdistx = distx[c];
+	      cdisty = disty[c];
+              newdistx = cdistx+1;
+              newdisty = cdisty;
+              newdist = distaa3(img, gx, gy, w, c, cdistx, cdisty, newdistx, newdisty);
+              if(newdist < olddist-epsilon)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  dist[i]=newdist;
+                  changed = 1;
+                }
+            }
+        }
+    }
+  while(changed); // Sweep until no more updates are made
+
+  /* The transformation is completed. */
+
+}

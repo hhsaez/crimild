@@ -103,7 +103,6 @@ Pointer< Node > SceneBuilder::buildNode( ScriptContext::Iterable &it, Group *par
 
 		std::string fontName = it.eval< std::string >( "font" );
 		float textSize = it.eval< float >( "textSize" );
-		//RGBAColorf textColor = it.eval< RGBAColorf >( "textColor" );
 
 		std::string fontFileName = FileSystem::getInstance().pathForResource( fontName + "_sdf.tga" );
 		std::string fontDefFileName = FileSystem::getInstance().pathForResource( fontName + ".txt" );
@@ -112,12 +111,13 @@ Pointer< Node > SceneBuilder::buildNode( ScriptContext::Iterable &it, Group *par
 		text->setFont( font.get() );
 		text->setSize( textSize );
 		text->setText( it.eval< std::string >( TEXT_TEXT ) );
-		text->getComponent< RenderStateComponent >()->setRenderOnScreen( true );
+		if ( it.test( "renderOnScreen" ) ) text->getComponent< RenderStateComponent >()->setRenderOnScreen( it.eval< bool >( "renderOnScreen" ) );
 
 		Material *material = text->getMaterial();
 		material->setProgram( Simulation::getCurrent()->getRenderer()->getShaderProgram( "sdf" ) );
-		// material->setDiffuse( textColor );
+		if ( it.test( "textColor" ) ) material->setDiffuse( it.eval< RGBAColorf >( "textColor" ) );
 		material->getDepthState()->setEnabled( false );
+		if ( it.test( "enableDepthTest" ) ) material->getDepthState()->setEnabled( it.eval< bool >( "enableDepthTest" ) );
 
 		current = text;
 	}

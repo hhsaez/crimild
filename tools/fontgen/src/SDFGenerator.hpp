@@ -34,12 +34,24 @@ namespace crimild {
 
 		namespace fontgen {
 
+			/**
+				Compute Signed Distance Fields for greyscale bitmaps
+				based on Stefan Gustavson's Euclidean distance transform
+				implementation for the book OpenGL Insights
+				http://openglinsights.com/
+			*/
 			class SDFGenerator {
 			public:
 				SDFGenerator( void );
 				virtual ~SDFGenerator( void );
 
 				void execute( std::string source );
+
+			private:
+				void computeGradient( double *img, int w, int h, double *gx, double *gy );
+				double edgedf( double gx, double gy, double a );
+				double distaa3( double *img, double *gximg, double *gyimg, int w, int c, int xc, int yc, int xi, int yi );
+				void edtaa3(double *img, double *gx, double *gy, int w, int h, short *distx, short *disty, double *dist);
 			};
 
 		}
