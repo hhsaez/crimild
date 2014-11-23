@@ -73,6 +73,8 @@ void LoadSceneTask::stop( void )
 
 void LoadSceneTask::load( void )
 {
+	Simulation::getCurrent()->setScene( nullptr );
+
 	getBuilder()->reset();
 
 	Pointer< Node > scene = getBuilder()->fromFile( FileSystem::getInstance().pathForResource( _sceneFileName ) );

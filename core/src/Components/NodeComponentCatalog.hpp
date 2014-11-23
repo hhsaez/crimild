@@ -57,6 +57,10 @@ namespace crimild {
 			_components.remove( component );
 		}
 
+		bool isEmpty( void ) const { return _components.size() == 0; }
+
+		NODE_COMPONENT_TYPE *first( void ) { return isEmpty() ? nullptr : _components.front(); }
+
 		void forEach( std::function< void( NODE_COMPONENT_TYPE * ) > callback )
 		{
 			for ( NODE_COMPONENT_TYPE *component : _components ) {
