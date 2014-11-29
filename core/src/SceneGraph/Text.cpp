@@ -122,12 +122,19 @@ void Text::updatePrimitive( void )
 	std::vector< unsigned short > indices;
 
 	float horiAdvance = 0.0f;
+	float vertAdvance = 0.0f;
 	for ( int i = 0; i < _text.length(); i++ ) {
+		if ( _text[ i ] == '\n' ) {
+			vertAdvance -= _size;
+			horiAdvance = 0.0f;
+			continue;
+		}
+
 		Font::Glyph glyph = _font->getGlyph( _text[ i ] );
 
 		float minX = _size * ( horiAdvance + glyph.bearingX );
 		float maxX = minX + _size * glyph.width;
-		float minY = _size * ( glyph.bearingY - glyph.height );
+		float minY = vertAdvance + _size * ( glyph.bearingY - glyph.height );
 		float maxY = minY + _size * glyph.height;
 		float s0 = glyph.uOffset;
 		float s1 = s0 + glyph.u;
