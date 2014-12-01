@@ -36,10 +36,10 @@ TEST( QuaternionTest, testBasicOperations )
 {
 	Quaternion4i q( 1, 2, 3, 4 );
 
-	EXPECT_TRUE( q.getReal() == 1 );
-	EXPECT_TRUE( q.getImaginary()[ 0 ] == 2 );
-	EXPECT_TRUE( q.getImaginary()[ 1 ] == 3 );
-	EXPECT_TRUE( q.getImaginary()[ 2 ] == 4 );
+	EXPECT_TRUE( q.getReal() == 4 );
+	EXPECT_TRUE( q.getImaginary()[ 0 ] == 1 );
+	EXPECT_TRUE( q.getImaginary()[ 1 ] == 2 );
+	EXPECT_TRUE( q.getImaginary()[ 2 ] == 3 );
 }
 
 TEST( QuaternionTest, testProduct )
@@ -62,7 +62,7 @@ TEST( QuaternionTest, testConjugate )
 	Quaternion4f p( 5, 6, 7, 8 );
 	Quaternion4f r = q.getConjugate();
 
-	EXPECT_TRUE( r == Quaternion4f( 1, -2, -3, -4 ) );
+	EXPECT_TRUE( r == Quaternion4f( -1, -2, -3, 4 ) );
 	EXPECT_TRUE( r.getConjugate() == q );
 	EXPECT_TRUE( ( q + p ).getConjugate() == ( q.getConjugate() + p.getConjugate() ) );
 
@@ -87,7 +87,7 @@ TEST( QuaternionTest, testIdentity )
 {
 	Quaternion4f q( 1, 2, 3, 4 );
 	q.makeIdentity();
-	EXPECT_TRUE( q == Quaternion4f( 1.0f, 0, 0, 0 ) );
+	EXPECT_TRUE( q == Quaternion4f( 0.0f, 0.0f, 0.0f, 1.0f ) );
 }
 
 TEST( QuaternionTest, testInverse )
@@ -95,7 +95,7 @@ TEST( QuaternionTest, testInverse )
 	Quaternion4f q( 1, 2, 3, 4 );
 	Quaternion4f r = q.getInverse();
 
-	EXPECT_TRUE( ( q * r ) == Quaternion4f( 1.0f, 0, 0, 0 ) );
+	EXPECT_TRUE( ( q * r ) == Quaternion4f( 0.0f, 0.0f, 0.0f, 1.0f ) );
 }
 
 TEST( QuaternionTest, testRotationMatrix )

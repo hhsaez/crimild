@@ -231,6 +231,51 @@ void gl3::Renderer::drawPrimitive( ShaderProgram *program, Primitive *primitive 
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
+void gl3::Renderer::drawBuffers( ShaderProgram *program, Primitive::Type bufferType, VertexBufferObject *vbo, unsigned int count )
+{
+	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+
+	GLenum type;
+	switch ( bufferType ) {
+		case Primitive::Type::POINTS:
+			type = GL_POINTS;
+			break;
+
+		case Primitive::Type::LINES:
+			type = GL_LINES;
+			break;
+			
+		case Primitive::Type::LINE_LOOP:
+			type = GL_LINE_LOOP;
+			break;
+			
+		case Primitive::Type::LINE_STRIP:
+			type = GL_LINE_STRIP;
+			break;
+			
+		case Primitive::Type::TRIANGLE_FAN:
+			type = GL_TRIANGLE_FAN;
+			break;
+			
+		case Primitive::Type::TRIANGLE_STRIP:
+			type = GL_TRIANGLE_STRIP;
+			break;
+			
+		case Primitive::Type::TRIANGLES:
+		default:
+			type = GL_TRIANGLES;
+			break;
+	}
+
+	bindVertexBuffer( program, vbo );
+
+	glDrawArrays( type, 0, count );
+
+	unbindVertexBuffer( program, vbo );	
+
+	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+}
+
 ShaderProgram *gl3::Renderer::getDepthProgram( void )
 {
     return _programs[ "depth" ].get();

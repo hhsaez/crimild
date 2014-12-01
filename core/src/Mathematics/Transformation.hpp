@@ -280,15 +280,7 @@ namespace crimild {
 			Vector3f direction = target - getTranslate();
 			direction.normalize();
 
-			Vector3f forward( 0.0f, 0.0f, -1.0f );
-
-			Vector3f axis = forward ^ direction;
-			if ( axis.getSquaredMagnitude() == 0.0f ) {
-				axis = up;
-			}
-			float angle = std::acos( forward * direction );
-
-			_rotate.fromAxisAngle( axis, angle );
+			_rotate.lookAt( direction, up );
 		}
         
         Transformation &fromMatrix( const Matrix4Impl &m )

@@ -135,6 +135,10 @@ TEST( SimulationTest, attachSceneWithCamera )
 
 	simulation->setScene( scene.get() );
 
-	EXPECT_TRUE( simulation->getMainLoop()->hasActiveTasks() );
+	int i = 0;
+	simulation->forEachCamera( [&i]( Camera *camera ) {
+		i++;
+	});
+	EXPECT_EQ( 1, i );
 }
 

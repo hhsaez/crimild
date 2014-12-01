@@ -64,7 +64,7 @@ void UpdateWorldState::visitGroup( Group *group )
 
 	group->worldBound()->computeFrom( group->getLocalBound(), group->getWorld() );
 	group->foreachNode( [&]( Node *node ) {
-		group->worldBound()->expandToContain( node->getWorldBound() );
+			group->worldBound()->expandToContain( node->getWorldBound() );
 	});
 }
 

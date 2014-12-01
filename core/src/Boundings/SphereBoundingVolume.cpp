@@ -103,7 +103,7 @@ void SphereBoundingVolume::computeFrom( const VertexBufferObject *vbo )
 {
 	if ( vbo->getVertexCount() == 0 || !vbo->getVertexFormat().hasPositions() ) {
 		_sphere.setCenter( Vector3f( 0.0f, 0.0f, 0.0f ) );
-		_sphere.setRadius( 1.0f );
+		_sphere.setRadius( 0.5f );
 		return;
 	}
 

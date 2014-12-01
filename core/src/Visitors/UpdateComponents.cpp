@@ -32,7 +32,7 @@
 using namespace crimild;
 
 UpdateComponents::UpdateComponents( const Time &t )
-	: _time( t )
+	: Apply( [&]( Node *n ) { n->updateComponents( t ); } )
 {
 
 }
@@ -40,16 +40,5 @@ UpdateComponents::UpdateComponents( const Time &t )
 UpdateComponents::~UpdateComponents( void )
 {
 
-}
-
-void UpdateComponents::visitNode( Node *node )
-{
-	node->updateComponents( _time );
-}
-
-void UpdateComponents::visitGroup( Group *group )
-{
-	visitNode( group );
-	NodeVisitor::visitGroup( group );
 }
 

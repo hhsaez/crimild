@@ -46,6 +46,14 @@ Vector3f VertexBufferObject::getPositionAt( unsigned int index ) const
 	return Vector3f( data[ 0 ], data[ 1 ], data[ 2 ] );
 }
 
+void VertexBufferObject::setPositionAt( unsigned int index, const Vector3f &position )
+{
+	float *data = &( getData()[ index * _vertexFormat.getVertexSize() + _vertexFormat.getPositionsOffset() ] );
+	data[ 0 ] = position[ 0 ];
+	data[ 1 ] = position[ 1 ];
+	data[ 2 ] = position[ 2 ];
+}
+
 RGBAColorf VertexBufferObject::getRGBAColorAt( unsigned int index ) const
 {
 	const float *data = &( getData()[ index * _vertexFormat.getVertexSize() + _vertexFormat.getColorsOffset() ] );

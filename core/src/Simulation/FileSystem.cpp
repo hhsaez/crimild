@@ -64,8 +64,6 @@ void FileSystem::init( int argc, char **argv )
 	}
 
 	setBaseDirectory( base );
-	
-	Log::Debug << "Base directory: " << getBaseDirectory() << Log::End;
 }
 
 std::string FileSystem::extractDirectory( std::string path )

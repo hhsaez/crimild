@@ -82,14 +82,18 @@
 #include "Components/RigidBodyComponent.hpp"
 #include "Components/SkinComponent.hpp"
 
+#include "Visitors/Apply.hpp"
 #include "Visitors/FetchCameras.hpp"
 #include "Visitors/FetchLights.hpp"
 #include "Visitors/NodeVisitor.hpp"
 #include "Visitors/ComputeVisibilitySet.hpp"
+#include "Visitors/ComputeRenderQueue.hpp"
 #include "Visitors/SelectNodes.hpp"
+#include "Visitors/StartComponents.hpp"
 #include "Visitors/UpdateComponents.hpp"
 #include "Visitors/UpdateRenderState.hpp"
 #include "Visitors/UpdateWorldState.hpp"
+#include "Visitors/Picking.hpp"
 
 #include "Primitives/Primitive.hpp"
 #include "Primitives/BoxPrimitive.hpp"
@@ -137,12 +141,15 @@
 #include "Simulation/FileSystem.hpp"
 #include "Simulation/RunLoop.hpp"
 #include "Simulation/Task.hpp"
+
 #include "Simulation/Tasks/BeginRenderTask.hpp"
 #include "Simulation/Tasks/EndRenderTask.hpp"
 #include "Simulation/Tasks/RenderSceneTask.hpp"
 #include "Simulation/Tasks/UpdateSceneTask.hpp"
 #include "Simulation/Tasks/UpdatePhysicsTask.hpp"
+#include "Simulation/Tasks/RenderDebugInfoTask.hpp"
 
+#include "Debug/DebugRenderHelper.hpp"
 #include "Debug/DebugRenderPass.hpp"
 #include "Debug/HierarchyRenderPass.hpp"
 

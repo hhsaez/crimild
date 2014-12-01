@@ -71,8 +71,8 @@ namespace crimild {
         template < class > class CallbackPolicy = NoCallbacksPolicy
     >
     class SharedObjectList :
-        SharedObject,
-        CallbackPolicy< ObjectType > {
+        public SharedObject,
+        public CallbackPolicy< ObjectType > {
     private:
         typedef Pointer< ObjectType > ObjectPtr;
         typedef CallbackPolicy< ObjectType > CallbackPolicyImpl;

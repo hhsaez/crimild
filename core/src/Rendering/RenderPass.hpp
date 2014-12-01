@@ -67,6 +67,8 @@ namespace crimild {
         SharedObjectList< ImageEffect > _imageEffects;
 	};
 
+	typedef RenderPass BasicRenderPass;
+
 }
 
 #endif

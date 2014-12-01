@@ -82,7 +82,7 @@ void gl3::TextureCatalog::unbind( ShaderLocation *location, Texture *texture )
 	if ( _boundTextureCount > 0 ) {
 		--_boundTextureCount;
 		glActiveTexture( GL_TEXTURE0 + _boundTextureCount );
-		glBindTexture( GL_TEXTURE_2D, _boundTextureCount );
+		glBindTexture( GL_TEXTURE_2D, 0 );
 	}
 	
 	Catalog< Texture >::unbind( location, texture );

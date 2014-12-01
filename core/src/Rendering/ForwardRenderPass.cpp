@@ -35,6 +35,7 @@
 #include "Components/SkinComponent.hpp"
 #include "Components/JointComponent.hpp"
 #include "Primitives/QuadPrimitive.hpp"
+#include "Foundation/Log.hpp"
 
 using namespace crimild;
 
@@ -86,7 +87,7 @@ void ForwardRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Ca
         
         RenderPass::render( renderer, _accumBufferOutput.get(), nullptr );
     }
-    
+
 #else
     for ( auto it : _shadowMaps ) {
         if ( it.second != nullptr ) {
@@ -195,6 +196,7 @@ void ForwardRenderPass::renderShadedObjects( Renderer *renderer, RenderQueue *re
                 }
                 
                 if ( program == nullptr ) {
+                    Log::Warning << "No available shader program to render geometry" << Log::End;
                     return;
                 }
                 
