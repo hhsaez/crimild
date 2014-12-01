@@ -58,7 +58,7 @@ const char *simple_fs = { CRIMILD_TO_STRING(
 )};
 
 gles::SimpleShaderProgram::SimpleShaderProgram( void )
-    : ShaderProgram( VertexShaderPtr( new VertexShader( simple_vs ) ), FragmentShaderPtr( new FragmentShader( simple_fs ) ) )
+    : ShaderProgram( new VertexShader( simple_vs ), new FragmentShader( simple_fs ) )
 { 
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
     

@@ -28,8 +28,8 @@
 #include "ShaderProgramCatalog.hpp"
 
 #ifdef __APPLE__
-#import <OpenGLES/ES2/gl.h>
-#import <OpenGLES/ES2/glext.h>
+#import <OpenGLES/ES3/gl.h>
+#import <OpenGLES/ES3/glext.h>
 #else
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
@@ -107,12 +107,12 @@ void gles::ShaderProgramCatalog::load( ShaderProgram *program )
                 programId = 0;
             }
             
-            program->foreachLocation( [&]( ShaderLocationPtr &loc ) mutable {
+            program->foreachLocation( [&]( ShaderLocation *loc ) mutable {
             	if ( loc->getType() == ShaderLocation::Type::ATTRIBUTE ) {
-            		fetchAttributeLocation( program, loc.get() );
+            		fetchAttributeLocation( program, loc );
             	}
             	else {
-            		fetchUniformLocation( program, loc.get() );
+            		fetchUniformLocation( program, loc );
             	}
             });
         }

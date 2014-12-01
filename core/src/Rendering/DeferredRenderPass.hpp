@@ -38,11 +38,22 @@ namespace crimild {
     class Light;
     
 	class DeferredRenderPass : public RenderPass {
-	public:
+        CRIMILD_DISALLOW_COPY_AND_ASSIGN( DeferredRenderPass )
+        
+    protected:
 		DeferredRenderPass( void );
+        
+	public:
 		virtual ~DeferredRenderPass( void );
         
         virtual void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+        
+    public:
+        void setGBufferProgram( ShaderProgram *program ) { _gBufferProgram = program; }
+        ShaderProgram *getGBufferProgram( void ) { return _gBufferProgram.get(); }
+        
+        void setGBufferCompositionProgram( ShaderProgram *program ) { _gBufferCompositionProgram = program; }
+        ShaderProgram *getGBufferCompositionProgram( void ) { return _gBufferCompositionProgram.get(); }
         
     private:
         void buildAccumBuffer( int width, int heigth );
@@ -53,9 +64,14 @@ namespace crimild {
         void buildFrameBuffer( int width, int height );
         void composeFrame( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
         
+        void renderTranslucentObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+        
         void computeShadowMaps( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
         
     private:
+        Pointer< ShaderProgram > _gBufferProgram;
+        Pointer< ShaderProgram > _gBufferCompositionProgram;
+        
         Pointer< FrameBufferObject > _gBuffer;
         Pointer< Texture > _gBufferDepthOutput;
         Pointer< Texture > _gBufferPositionOutput;

@@ -39,9 +39,18 @@
 #include "Rendering/GL3/Library/SepiaToneShaderProgram.hpp"
 #include "Rendering/GL3/Library/GlowShaderProgram.hpp"
 
+#include "Rendering/GL3/Programs/DeferredRenderShaderProgram.hpp"
+#include "Rendering/GL3/Programs/DeferredComposeRenderShaderProgram.hpp"
+#include "Rendering/GL3/Programs/DeferredColorShaderProgram.hpp"
+#include "Rendering/GL3/Programs/DeferredEmissiveShaderProgram.hpp"
+#include "Rendering/GL3/Programs/DeferredPositionShaderProgram.hpp"
+#include "Rendering/GL3/Programs/DeferredNormalShaderProgram.hpp"
+#include "Rendering/GL3/Programs/DeferredSpecularShaderProgram.hpp"
 #include "Rendering/GL3/Programs/ParticleSystemShaderProgram.hpp"
 #include "Rendering/GL3/Programs/SignedDistanceFieldShaderProgram.hpp"
 #include "Rendering/GL3/Programs/SkinningShaderProgram.hpp"
+
+#include "Rendering/GL3/RenderPasses/DeferredRenderPass.hpp"
 
 #include "Rendering/GL3/ImageEffects/SSAOImageEffect.hpp"
 #include "Rendering/GL3/ImageEffects/GlowImageEffect.hpp"

@@ -25,66 +25,51 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "IndexBufferObjectCatalog.hpp"
-
-#ifdef __APPLE__
-#import <OpenGLES/ES3/gl.h>
-#import <OpenGLES/ES3/glext.h>
-#else
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
-#endif
+#include "DeferredColorShaderProgram.hpp"
+#include "Rendering/Utils.hpp"
 
 using namespace crimild;
+using namespace crimild::gles;
 
-gles::IndexBufferObjectCatalog::IndexBufferObjectCatalog( void )
-{
+const char *deferred_color_vs = { CRIMILD_TO_STRING(
+    in vec3 aPosition;
+    in vec2 aTextureCoord;
+
+    out vec2 vTextureCoord;
+
+    void main ()
+    {
+        gl_Position = vec4( aPosition.x, aPosition.y, 0.0, 1.0 );
+        vTextureCoord = aTextureCoord;
+    }
+)};
+
+const char *deferred_color_fs = {
+CRIMILD_TO_STRING(
+    precision highp float;
+    in vec2 vTextureCoord;
+
+    uniform sampler2D uColorMap;
+
+    out vec4 vFragColor;
+
+    void main( void )
+    {
+        vFragColor = texture( uColorMap, vTextureCoord );
+    }
+)};
+
+DeferredColorShaderProgram::DeferredColorShaderProgram( void )
+    : ShaderProgram( Utils::getVertexShaderInstance( deferred_color_vs ), Utils::getFragmentShaderInstance( deferred_color_fs ) )
+{ 
+	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
+	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
     
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::G_BUFFER_COLOR_MAP_UNIFORM, "uColorMap" );
 }
 
-gles::IndexBufferObjectCatalog::~IndexBufferObjectCatalog( void )
+DeferredColorShaderProgram::~DeferredColorShaderProgram( void )
 {
     
-}
-
-int gles::IndexBufferObjectCatalog::getNextResourceId( void )
-{
-    GLuint id;
-    glGenBuffers( 1, &id );
-    return id;
-}
-
-void gles::IndexBufferObjectCatalog::bind( ShaderProgram *program, IndexBufferObject *ibo )
-{
-	Catalog< IndexBufferObject >::bind( program, ibo );
-    
-	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, ibo->getCatalogId() );
-}
-
-void gles::IndexBufferObjectCatalog::unbind( ShaderProgram *program, IndexBufferObject *ibo )
-{
-	Catalog< IndexBufferObject >::unbind( program, ibo );
-    
-	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
-}
-
-void gles::IndexBufferObjectCatalog::load( IndexBufferObject *ibo )
-{
-	Catalog< IndexBufferObject >::load( ibo );
-    
-	int id = ibo->getCatalogId();
-	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, id );
-	glBufferData( GL_ELEMENT_ARRAY_BUFFER,
-                 sizeof( unsigned short ) * ibo->getIndexCount(),
-                 ibo->getData(),
-                 GL_STATIC_DRAW );
-}
-
-void gles::IndexBufferObjectCatalog::unload( IndexBufferObject *ibo )
-{
-	GLuint bufferId = ibo->getCatalogId();
-	glDeleteBuffers( 1, &bufferId );
-    
-	Catalog< IndexBufferObject >::unload( ibo );
 }
 

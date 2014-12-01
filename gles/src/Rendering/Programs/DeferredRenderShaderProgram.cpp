@@ -26,10 +26,10 @@
  */
 
 #include "DeferredRenderShaderProgram.hpp"
-#include "Rendering/GL3/Utils.hpp"
+#include "Rendering/Utils.hpp"
 
 using namespace crimild;
-using namespace crimild::gl3;
+using namespace crimild::gles;
 
 const char *deferred_vs = { CRIMILD_TO_STRING(
     in vec3 aPosition;
@@ -73,6 +73,8 @@ const char *deferred_vs = { CRIMILD_TO_STRING(
 )};
 
 const char *deferred_fs = { CRIMILD_TO_STRING(
+                                              precision highp float;
+
     struct Material {
         vec4 ambient;
         vec4 diffuse;

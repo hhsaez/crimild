@@ -65,7 +65,7 @@ const char *texture_fs = { CRIMILD_TO_STRING(
 )};
 
 gles::TextureShaderProgram::TextureShaderProgram( void )
-    : ShaderProgram( VertexShaderPtr( new VertexShader( texture_vs ) ), FragmentShaderPtr( new FragmentShader( texture_fs ) ) )
+    : ShaderProgram( new VertexShader( texture_vs ), new FragmentShader( texture_fs ) )
 {
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );

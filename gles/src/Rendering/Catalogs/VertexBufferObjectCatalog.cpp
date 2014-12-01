@@ -28,8 +28,8 @@
 #include "VertexBufferObjectCatalog.hpp"
 
 #ifdef __APPLE__
-#import <OpenGLES/ES2/gl.h>
-#import <OpenGLES/ES2/glext.h>
+#import <OpenGLES/ES3/gl.h>
+#import <OpenGLES/ES3/glext.h>
 #else
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
@@ -78,7 +78,7 @@ void gles::VertexBufferObjectCatalog::bind( ShaderProgram *program, VertexBuffer
     
     ShaderLocation *normalLocation = program->getStandardLocation( ShaderProgram::StandardLocation::NORMAL_ATTRIBUTE );
     if ( normalLocation && normalLocation->isValid() ) {
-        if ( format.hasPositions() ) {
+        if ( format.hasNormals() ) {
             glEnableVertexAttribArray( normalLocation->getLocation() );
             glVertexAttribPointer( normalLocation->getLocation(),
                                   format.getNormalComponents(),
@@ -99,6 +99,19 @@ void gles::VertexBufferObjectCatalog::bind( ShaderProgram *program, VertexBuffer
                                   GL_FALSE,
                                   format.getVertexSizeInBytes(),
                                   ( const GLvoid * )( baseOffset + format.getColorsOffset() ) );
+        }
+    }
+    
+    ShaderLocation *tangentLocation = program->getStandardLocation( ShaderProgram::StandardLocation::TANGENT_ATTRIBUTE );
+    if ( tangentLocation && tangentLocation->isValid() ) {
+        if ( format.hasTangents() ) {
+            glEnableVertexAttribArray( tangentLocation->getLocation() );
+            glVertexAttribPointer( tangentLocation->getLocation(),
+                                  format.getTangentComponents(),
+                                  GL_FLOAT,
+                                  GL_FALSE,
+                                  format.getVertexSizeInBytes(),
+                                  ( const GLvoid * )( baseOffset + format.getTangentsOffset() ) );
         }
     }
     
@@ -131,6 +144,11 @@ void gles::VertexBufferObjectCatalog::unbind( ShaderProgram *program, VertexBuff
     ShaderLocation *colorLocation = program->getStandardLocation( ShaderProgram::StandardLocation::COLOR_ATTRIBUTE );
     if ( colorLocation && colorLocation->isValid() ) {
         glDisableVertexAttribArray( positionLocation->getLocation() );
+    }
+    
+    ShaderLocation *tangentLocation = program->getStandardLocation( ShaderProgram::StandardLocation::TANGENT_ATTRIBUTE );
+    if ( tangentLocation && tangentLocation->isValid() ) {
+        glDisableVertexAttribArray( tangentLocation->getLocation() );
     }
     
     ShaderLocation *uvLocation = program->getStandardLocation( ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE );

@@ -39,8 +39,6 @@
 #include "Library/TextureShaderProgram.hpp"
 #include "Programs/DepthShaderProgram.hpp"
 #include "Programs/ForwardRenderShaderProgram.hpp"
-#include "Programs/DeferredRenderShaderProgram.hpp"
-#include "Programs/DeferredComposeRenderShaderProgram.hpp"
 #include "Programs/SSAOShaderProgram.hpp"
 #include "Programs/SSAOBlendShaderProgram.hpp"
 #include "Programs/BlendShaderProgram.hpp"
@@ -70,8 +68,6 @@ gl3::Renderer::Renderer( FrameBufferObject *screenBuffer )
     
     _programs[ "depth" ] = new DepthShaderProgram();
     _programs[ "forward" ] = new ForwardRenderShaderProgram();
-    _programs[ "deferred" ] = new DeferredRenderShaderProgram();
-    _programs[ "deferredCompose" ] = new DeferredComposeRenderShaderProgram();
     _programs[ "ssao" ] = new SSAOShaderProgram();
     _programs[ "ssaoBlend" ] = new SSAOBlendShaderProgram();
     _programs[ "blend" ] = new BlendShaderProgram();

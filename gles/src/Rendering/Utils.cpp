@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "IndexBufferObjectCatalog.hpp"
+#include "Utils.hpp"
 
 #ifdef __APPLE__
 #import <OpenGLES/ES3/gl.h>
@@ -37,54 +37,27 @@
 
 using namespace crimild;
 
-gles::IndexBufferObjectCatalog::IndexBufferObjectCatalog( void )
+VertexShader *gles::Utils::getVertexShaderInstance( std::string source )
 {
-    
+	return new VertexShader( "#version 300 es\n" + source );
 }
 
-gles::IndexBufferObjectCatalog::~IndexBufferObjectCatalog( void )
+FragmentShader *gles::Utils::getFragmentShaderInstance( std::string source )
 {
-    
+	return new FragmentShader( "#version 300 es\n" + source );
 }
 
-int gles::IndexBufferObjectCatalog::getNextResourceId( void )
+std::string gles::Utils::buildArrayShaderLocationName( std::string variable, int index )
 {
-    GLuint id;
-    glGenBuffers( 1, &id );
-    return id;
+	std::stringstream str;
+	str << variable << "[" << index << "]";
+	return str.str();
 }
 
-void gles::IndexBufferObjectCatalog::bind( ShaderProgram *program, IndexBufferObject *ibo )
+std::string gles::Utils::buildArrayShaderLocationName( std::string variable, int index, std::string member )
 {
-	Catalog< IndexBufferObject >::bind( program, ibo );
-    
-	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, ibo->getCatalogId() );
-}
-
-void gles::IndexBufferObjectCatalog::unbind( ShaderProgram *program, IndexBufferObject *ibo )
-{
-	Catalog< IndexBufferObject >::unbind( program, ibo );
-    
-	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
-}
-
-void gles::IndexBufferObjectCatalog::load( IndexBufferObject *ibo )
-{
-	Catalog< IndexBufferObject >::load( ibo );
-    
-	int id = ibo->getCatalogId();
-	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, id );
-	glBufferData( GL_ELEMENT_ARRAY_BUFFER,
-                 sizeof( unsigned short ) * ibo->getIndexCount(),
-                 ibo->getData(),
-                 GL_STATIC_DRAW );
-}
-
-void gles::IndexBufferObjectCatalog::unload( IndexBufferObject *ibo )
-{
-	GLuint bufferId = ibo->getCatalogId();
-	glDeleteBuffers( 1, &bufferId );
-    
-	Catalog< IndexBufferObject >::unload( ibo );
+	std::stringstream str;
+	str << variable << "[" << index << "]." << member;
+	return str.str();
 }
 

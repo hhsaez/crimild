@@ -56,6 +56,7 @@ void DeferredRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, C
 #if 1
     renderToGBuffer( renderer, renderQueue, camera );
     composeFrame( renderer, renderQueue, camera );
+    renderTranslucentObjects( renderer, renderQueue, camera );
     
     if ( getImageEffects().isEmpty() ) {
         RenderPass::render( renderer, _frameBufferOutput.get(), nullptr );
@@ -135,19 +136,20 @@ void DeferredRenderPass::renderToGBuffer( Renderer *renderer, RenderQueue *rende
     
     renderer->bindFrameBuffer( _gBuffer.get() );
     
+    ShaderProgram *program = getGBufferProgram();
+    if ( program == nullptr ) {
+        Log::Error << "Deferred rendering not supported in your platform" << Log::End;
+        exit( 1 );
+        return;
+    }
+    
+    renderer->bindProgram( program );
+    
     renderQueue->getOpaqueObjects().each( [&]( Geometry *geometry, int ) {
         
         RenderStateComponent *renderState = geometry->getComponent< RenderStateComponent >();
         renderState->foreachMaterial( [&]( Material *material ) {
             geometry->foreachPrimitive( [&]( Primitive *primitive ) mutable {
-                ShaderProgram *program = renderer->getDeferredPassProgram();
-                if ( program == nullptr ) {
-                    Log::Error << "Deferred rendering not supported in your platform" << Log::End;
-                    exit( 1 );
-                    return;
-                }
-                
-                renderer->bindProgram( program );
                 
                 // bind material properties
                 renderer->bindMaterial( program, material );
@@ -180,11 +182,11 @@ void DeferredRenderPass::renderToGBuffer( Renderer *renderer, RenderQueue *rende
                 // unbind material properties
                 renderer->unbindMaterial( program, material );
                 
-                renderer->unbindProgram( program );
             });
         });
     });
     
+    renderer->unbindProgram( program );
     renderer->unbindFrameBuffer( _gBuffer.get() );
 }
 
@@ -209,7 +211,7 @@ void DeferredRenderPass::composeFrame( Renderer *renderer, RenderQueue *renderQu
     // bind buffer for ssao output
     renderer->bindFrameBuffer( _frameBuffer.get() );
     
-    ShaderProgram *program = renderer->getShaderProgram( "deferredCompose" );
+    ShaderProgram *program = getGBufferCompositionProgram();
     if ( program == nullptr ) {
         Log::Error << "Cannot find shader program for composite deferred scene" << Log::End;
         exit( 1 );
@@ -352,5 +354,71 @@ void DeferredRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *ren
     
     // unbind the shader program
     renderer->unbindProgram( program );
+}
+
+void DeferredRenderPass::renderTranslucentObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
+{
+    renderQueue->getTranslucentObjects().each( [&]( Geometry *geometry, int ) {
+        
+        RenderStateComponent *renderState = geometry->getComponent< RenderStateComponent >();
+        renderState->foreachMaterial( [&]( Material *material ) {
+            geometry->foreachPrimitive( [&]( Primitive *primitive ) mutable {
+                ShaderProgram *program = material->getProgram();
+                if ( program == nullptr ) {
+                    program = renderer->getFallbackProgram( material, geometry, primitive );
+                }
+                
+                if ( program == nullptr ) {
+                    return;
+                }
+                
+                renderer->bindProgram( program );
+                
+                // bind material properties
+                renderer->bindMaterial( program, material );
+                
+                // bind lights
+                renderQueue->getLights().each( [&]( Light *light, int ) {
+                    renderer->bindLight( program, light );
+                });
+                
+                // bind joints and other skinning information
+                SkinComponent *skinning = geometry->getComponent< SkinComponent >();
+                if ( skinning != nullptr && skinning->hasJoints() ) {
+                    skinning->foreachJoint( [&]( Node *node, unsigned int index ) {
+                        JointComponent *joint = node->getComponent< JointComponent >();
+                        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::JOINT_WORLD_MATRIX_UNIFORM + index ), joint->getWorldMatrix() );
+                        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::JOINT_INVERSE_BIND_MATRIX_UNIFORM + index ), joint->getInverseBindMatrix() );
+                    });
+                }
+                
+                // bind vertex and index buffers
+                renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
+                renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
+                
+                renderer->applyTransformations( program, geometry, camera );
+                
+                // draw primitive
+                renderer->drawPrimitive( program, primitive );
+                
+                renderer->restoreTransformations( program, geometry, camera );
+                
+                // unbind primitive buffers
+                renderer->unbindVertexBuffer( program, primitive->getVertexBuffer() );
+                renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
+                
+                // unbind lights
+                renderQueue->getLights().each( [&]( Light *light, int ) {
+                    renderer->unbindLight( program, light );
+                });
+                
+                // unbind material properties
+                renderer->unbindMaterial( program, material );
+                
+                renderer->unbindProgram( program );
+            });
+        });
+    });
+    
 }
 
