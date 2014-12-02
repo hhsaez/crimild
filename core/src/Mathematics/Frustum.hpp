@@ -133,8 +133,8 @@ namespace crimild {
 
             projectionMatrix[ 12 ] = 0;
             projectionMatrix[ 13 ] = 0;
-            projectionMatrix[ 14 ] = -2.0f * f * n / ( f - n );
-            projectionMatrix[ 15 ] = 1.0f;
+            projectionMatrix[ 14 ] = -( 2.0f * f * n ) / ( f - n );
+            projectionMatrix[ 15 ] = 0.0f;
             
             return projectionMatrix;
 		}
