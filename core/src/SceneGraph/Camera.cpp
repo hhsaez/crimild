@@ -88,29 +88,21 @@ const Matrix4f &Camera::getViewMatrix( void )
 
 bool Camera::getPickRay( float portX, float portY, Ray3f &result ) const
 {
-	if ( portX < _viewport.getX() || portX > _viewport.getWidth() ) {
-		return false;
-	}
-	
-	if ( portY < _viewport.getY() || portY > _viewport.getHeight() ) {
-		return false;
-	}
-	
-	float xWeight = ( portX - _viewport.getX() ) / ( _viewport.getWidth() );
-	float yWeight = ( portY - _viewport.getY() ) / ( _viewport.getHeight() );
+	float x = 2.0f * portX - 1.0f;
+	float y = 1.0f - 2.0f * portY;
+	float z = 1.0f;
 
-	float viewX = ( 1.0f - xWeight ) * _frustum.getRMin() + xWeight * _frustum.getRMax();	
-	float viewY = yWeight * _frustum.getUMin() + ( 1.0f - yWeight ) * _frustum.getUMax();
+	Vector4f rayClip( x, y, -1.0f, 1.0f );
 
-	Vector3f direction = getWorld().computeDirection();
-	Vector3f up = getWorld().computeUp();
-	Vector3f right = getWorld().computeRight();
+	Vector4f rayEye = getProjectionMatrix().getInverse().getTranspose() * rayClip;
+	rayEye = Vector4f( rayEye[ 0 ], rayEye[ 1 ], -1.0f, 0.0f );
 
-	Vector3f rayOrigin = getWorld().getTranslate();
-	Vector3f rayDirection = _frustum.getDMin() * direction + viewX * right + viewY * up;
+	Vector4f rayWorld = getWorld().computeModelMatrix().getTranspose() * rayEye;
+
+	Vector3f rayDirection( rayWorld[ 0 ], rayWorld[ 1 ], rayWorld[ 2 ] );
 	rayDirection.normalize();
 
-	result.setOrigin( rayOrigin );
+	result.setOrigin( getWorld().getTranslate() );
 	result.setDirection( rayDirection );
 
 	return true;
