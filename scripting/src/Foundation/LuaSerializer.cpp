@@ -56,7 +56,7 @@ void LuaSerializer::popObject( void )
 
 void LuaSerializer::pushProperty( std::string name, const char *value ) 
 {
-	pushLine( name + " = '" + value + "', " );
+	pushLine( name + " = '" + StringUtils::replaceAll( value, "\n", "\\n" ) + "', " );
 }
 
 void LuaSerializer::pushProperty( std::string name, std::string value ) 
