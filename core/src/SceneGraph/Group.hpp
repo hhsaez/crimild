@@ -54,6 +54,12 @@ namespace crimild {
 		*/
 		Node *getNode( unsigned int index );
 
+		template< typename T >
+		T *getNode( unsigned int index )
+		{
+			return static_cast< T * >( getNode( index ) );
+		}
+
 		virtual void foreachNode( std::function< void( Node * ) > callback );
 
 	protected:

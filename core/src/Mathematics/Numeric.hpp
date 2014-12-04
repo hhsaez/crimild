@@ -142,6 +142,16 @@ namespace crimild {
 			return x - ( long ) x;
 		}
 
+		static PRECISION roundInc( PRECISION n, PRECISION max, PRECISION step = 1 )
+		{
+			return ( n + step ) % max;
+		}
+
+		static PRECISION roundDec( PRECISION n, PRECISION max, PRECISION step = -1 )
+		{
+			return ( n + step + max ) % max;
+		}
+
 	};
 
 	template< typename T > const T Numeric< T >::ZERO_TOLERANCE = static_cast< T >( 1e-06 );
