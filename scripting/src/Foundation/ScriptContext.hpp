@@ -105,7 +105,7 @@ namespace crimild {
 
 		private:
 			template< typename T >
-			T getDefaultValue( void ) const { return -1; }
+			T getDefaultValue( void ) const { return 0; }
 
 		public:
 			class Iterable {
@@ -258,6 +258,12 @@ namespace crimild {
 			std::map< std::string, std::unique_ptr< AbstractFunction > > _functions;
 
 		};
+
+		template<>
+		inline bool ScriptContext::getDefaultValue( void ) const
+		{
+			return false;
+		}
 
 		template<>
 		inline std::string ScriptContext::getDefaultValue( void ) const 
