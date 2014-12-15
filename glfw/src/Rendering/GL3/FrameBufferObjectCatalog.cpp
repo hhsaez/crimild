@@ -51,7 +51,7 @@ int gl3::FrameBufferObjectCatalog::getNextResourceId( void )
     return framebufferId;
 }
 
-void gl3::FrameBufferObjectCatalog::bind( FrameBufferObject *fbo )
+void gl3::FrameBufferObjectCatalog::bind( FrameBufferObjectPtr const &fbo )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
@@ -74,7 +74,7 @@ void gl3::FrameBufferObjectCatalog::bind( FrameBufferObject *fbo )
     
     // this may be wrong. what if there is no depth buffer?
     int fboColorBufferCount = 0;
-    fbo->getRenderTargets().each( [&]( RenderTarget *target, int ) {
+    fbo->getRenderTargets().each( [&]( RenderTargetPtr const &target, int ) {
         if ( target->getType() == RenderTarget::Type::COLOR_RGB || target->getType() == RenderTarget::Type::COLOR_RGBA ) {
             fboColorBufferCount++;
         }
@@ -87,7 +87,7 @@ void gl3::FrameBufferObjectCatalog::bind( FrameBufferObject *fbo )
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gl3::FrameBufferObjectCatalog::unbind( FrameBufferObject *fbo )
+void gl3::FrameBufferObjectCatalog::unbind( FrameBufferObjectPtr const &fbo )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
@@ -99,7 +99,7 @@ void gl3::FrameBufferObjectCatalog::unbind( FrameBufferObject *fbo )
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gl3::FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
+void gl3::FrameBufferObjectCatalog::load( FrameBufferObjectPtr const &fbo )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
@@ -110,7 +110,7 @@ void gl3::FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
         glBindFramebuffer( GL_FRAMEBUFFER, framebufferId );
         
         int colorAttachmentOffset = 0;
-        fbo->getRenderTargets().each( [&]( RenderTarget *target, int index ) {
+        fbo->getRenderTargets().each( [&]( RenderTargetPtr const &target, int index ) {
             int targetWidth = target->getWidth();
             int targetHeight = target->getHeight();
             
@@ -158,7 +158,7 @@ void gl3::FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
                 if ( target->getOutput() == RenderTarget::Output::TEXTURE || target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
                     GLuint textureId;
                     glGenTextures( 1, &textureId );
-                    target->getTexture()->setCatalogInfo( getRenderer()->getTextureCatalog(), textureId );
+                    target->getTexture()->setCatalogInfo( getRenderer()->getTextureCatalog().get(), textureId );
                     
                     glBindTexture( GL_TEXTURE_2D, target->getTexture()->getCatalogId() );
                     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
@@ -224,14 +224,14 @@ void gl3::FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gl3::FrameBufferObjectCatalog::unload( FrameBufferObject *fbo )
+void gl3::FrameBufferObjectCatalog::unload( FrameBufferObjectPtr const &fbo )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
     GLuint framebufferId = fbo->getCatalogId();
     if ( framebufferId > 0 ) {
         
-        fbo->getRenderTargets().each( []( RenderTarget *target, int ) {
+        fbo->getRenderTargets().each( []( RenderTargetPtr const &target, int ) {
             GLuint targetId = target->getId();
             if ( targetId > 0 ) {
                 if ( target->getOutput() == RenderTarget::Output::TEXTURE ) {

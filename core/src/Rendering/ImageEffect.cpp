@@ -46,7 +46,7 @@ ImageEffect::~ImageEffect( void )
 
 }
 
-void ImageEffect::render( Renderer *renderer, FrameBufferObject *output, Texture *texture, ShaderProgram *program, Primitive *primitive )
+void ImageEffect::render( std::shared_ptr< Renderer > const &renderer, std::shared_ptr< FrameBufferObject > const &output, std::shared_ptr< Texture > const &texture, std::shared_ptr< ShaderProgram > const &program, std::shared_ptr< Primitive > const &primitive )
 {
     if ( program == nullptr ) {
         Log::Error << "Invalid program object" << Log::End;

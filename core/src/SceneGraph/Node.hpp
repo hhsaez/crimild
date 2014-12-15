@@ -40,31 +40,35 @@
 #include <map>
 
 namespace crimild {
+    
+    class Node;
+    
+    using NodePtr = std::shared_ptr< Node >;
 
 	/**
 		\brief Base class for any object that can be attached to the scene graph
 
 	*/
 	class Node : public NamedObject, public SharedObject {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( Node ) 
+        CRIMILD_DISALLOW_COPY_AND_ASSIGN( Node )
 
 	public:
 		explicit Node( std::string name = "" );
 		virtual ~Node( void );
 
 	public:
-		bool hasParent( void ) const { return _parent != nullptr; }
+		bool hasParent( void ) const { return !_parent.expired(); }
 
-		Node *getParent( void ) { return _parent; }
+		NodePtr getParent( void ) { return _parent.lock(); }
 
-		void setParent( Node *parent ) { _parent = parent; }
+		void setParent( NodePtr const &parent ) { _parent = parent; }
 
-		Pointer< Node > detachFromParent( void );
+		NodePtr detachFromParent( void );
 
-		Node *getRootParent( void );
+		NodePtr getRootParent( void );
 
-		template< class PARENT_TYPE >
-		PARENT_TYPE *getParent( void ) { return static_cast< PARENT_TYPE * >( _parent ); }
+		template< class NodeClass >
+        std::shared_ptr< NodeClass > getParent( void ) { return std::static_pointer_cast< NodeClass >( _parent.lock() ); }
 
 	private:
 		/**
@@ -72,12 +76,8 @@ namespace crimild {
 
 			Every node if linked with its parent in the node hierarchy (provided
 			one is available). 
-
-			The reason for using a regular C++ pointer (instead of a smart pointer
-			like weak_ptr) lies in the fact that a child node cannot claim 
-			ownership over its parent node. A regular pointer emphasizes this. 
 		*/
-		Node *_parent;
+        std::weak_ptr< Node > _parent;
 
 	public:
 		void perform( NodeVisitor &visitor );
@@ -86,16 +86,16 @@ namespace crimild {
 		virtual void accept( NodeVisitor &visitor );
 
 	public:
-		NodeComponent *getComponentWithName( std::string name );
-		void attachComponent( NodeComponent *component );
-		void detachComponent( NodeComponent *component );
+		NodeComponentPtr getComponentWithName( std::string name );
+		void attachComponent( NodeComponentPtr const &component );
+		void detachComponent( NodeComponentPtr const &component );
 		void detachComponentWithName( std::string name );
 		void detachAllComponents( void );
 
-		template< class T >
-		T *getComponent( void )
+		template< class NODE_COMPONENT_CLASS >
+        std::shared_ptr< NODE_COMPONENT_CLASS > getComponent( void )
 		{
-			return static_cast< T * >( _components[ T::_COMPONENT_NAME() ].get() );
+            return std::static_pointer_cast< NODE_COMPONENT_CLASS >( _components[ NODE_COMPONENT_CLASS::_COMPONENT_NAME() ] );
 		}
 
 		void startComponents( void );
@@ -103,10 +103,10 @@ namespace crimild {
 		void updateComponents( const Time &t );
 		void updateComponentsWithFixedTime( const Time &t );
 
-		void foreachComponent( std::function< void ( NodeComponent * ) > callback );
+		void foreachComponent( std::function< void ( NodeComponentPtr const & ) > callback );
 
 	private:
-		std::map< std::string, Pointer< NodeComponent > > _components;
+		std::map< std::string, NodeComponentPtr > _components;
 
 	public:
 		void setLocal( const TransformationImpl &t ) { _local = t; }
@@ -135,17 +135,17 @@ namespace crimild {
 		bool _worldIsCurrent;
 
 	public:
-		BoundingVolume *localBound( void ) { return _localBound.get(); }
-		const BoundingVolume *getLocalBound( void ) const { return _localBound.get(); }
-		void setLocalBound( BoundingVolume *bound ) { _localBound = bound; }
+		BoundingVolumePtr &localBound( void ) { return _localBound; }
+		const BoundingVolumePtr &getLocalBound( void ) const { return _localBound; }
+		void setLocalBound( BoundingVolumePtr const &bound ) { _localBound = bound; }
 
-		BoundingVolume *worldBound( void ) { return _worldBound.get(); }
-		const BoundingVolume *getWorldBound( void ) const { return _worldBound.get(); }
-		void setWorldBound( BoundingVolume *bound ) { _worldBound = bound; }
+		BoundingVolumePtr &worldBound( void ) { return _worldBound; }
+		const BoundingVolumePtr &getWorldBound( void ) const { return _worldBound; }
+		void setWorldBound( BoundingVolumePtr const &bound ) { _worldBound = bound; }
 
 	private:
-		Pointer< BoundingVolume > _localBound;
-		Pointer< BoundingVolume > _worldBound;
+		BoundingVolumePtr _localBound;
+		BoundingVolumePtr _worldBound;
 	};
 
 }

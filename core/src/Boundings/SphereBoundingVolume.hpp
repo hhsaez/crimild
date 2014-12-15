@@ -55,16 +55,16 @@ namespace crimild {
 		Vector3f _t;
 
 	public:
-		virtual void computeFrom( const BoundingVolume *volume, const TransformationImpl &transform ) override;
+		virtual void computeFrom( const BoundingVolumePtr &volume, const TransformationImpl &transform ) override;
 		virtual void computeFrom( const Vector3f *positions, unsigned int positionCount ) override;
-		virtual void computeFrom( const VertexBufferObject *vbo ) override;
+		virtual void computeFrom( const VertexBufferObjectPtr &vbo ) override;
 		virtual void computeFrom( const Vector3f &r, const Vector3f &s, const Vector3f &t ) override;
 
 	public:
 		virtual void expandToContain( const Vector3f &point ) override;
 		virtual void expandToContain( const Vector3f *positions, unsigned int positionCount ) override;
-		virtual void expandToContain( const VertexBufferObject *vbo ) override;
-		virtual void expandToContain( const BoundingVolume *input ) override;
+		virtual void expandToContain( const VertexBufferObjectPtr &vbo ) override;
+		virtual void expandToContain( const BoundingVolumePtr &input ) override;
 
 	public:
 		virtual int whichSide( const Plane3f &plane ) const override;
@@ -72,14 +72,16 @@ namespace crimild {
 
 	public:
 		virtual bool testIntersection( const Ray3f &ray ) const override;
-		virtual bool testIntersection( const BoundingVolume *input ) const override;
+		virtual bool testIntersection( const BoundingVolumePtr &input ) const override;
 		virtual bool testIntersection( const Sphere3f &sphere ) const override;
 		virtual bool testIntersection( const Plane3f &plane ) const override;
 
-		virtual void resolveIntersection( const BoundingVolume *other, TransformationImpl &result ) const;
+		virtual void resolveIntersection( const BoundingVolumePtr &other, TransformationImpl &result ) const;
 		virtual void resolveIntersection( const Sphere3f &sphere, TransformationImpl &result ) const;
 		virtual void resolveIntersection( const Plane3f &plane, TransformationImpl &result ) const;
 	};
+    
+    using SphereBoundingVolumePtr = std::shared_ptr< SphereBoundingVolume >;
 
 }
 

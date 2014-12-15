@@ -32,9 +32,11 @@ using namespace crimild;
 ShaderUniform::ShaderUniform( std::string name )
 	: NamedObject( name )
 {
+    
 }
 
 ShaderUniform::~ShaderUniform( void )
 {
+    
 }
 

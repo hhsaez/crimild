@@ -53,15 +53,17 @@ namespace crimild {
 		Font( std::string faceFilePath, std::string glyphFilePath );
 		virtual ~Font( void );
 
-		Image *getFace( void ) { return _face.get(); }
+		ImagePtr &getFace( void ) { return _face; }
 		Glyph getGlyph( char c ) { return _glyphs[ c ]; }
 
 	private:
 		void loadGlyphs( std::string file );
 
-		Pointer< Image > _face;
+		ImagePtr _face;
 		std::map< char, Glyph > _glyphs;
 	};
+    
+    using FontPtr = std::shared_ptr< Font >;
 
 	class Text : public Geometry {
 	public:
@@ -74,20 +76,22 @@ namespace crimild {
 		float getSize( void ) const { return _size; }
 		void setSize( float size );
 
-		Font *getFont( void ) { return _font.get(); }
-		void setFont( Font *font );
+		FontPtr &getFont( void ) { return _font; }
+		void setFont( FontPtr const &font );
 
-		Material *getMaterial( void ) { return _material.get(); }
+		MaterialPtr &getMaterial( void ) { return _material; }
 
 	private:
 		void updatePrimitive( void );
 
 		std::string _text;
 		float _size;
-		Pointer< Font > _font;
-		Pointer< Primitive > _primitive;
-		Pointer< Material > _material;
+		FontPtr _font;
+		PrimitivePtr _primitive;
+		MaterialPtr _material;
 	};
+    
+    using TextPtr = std::shared_ptr< Text >;
 
 }
 

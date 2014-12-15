@@ -39,24 +39,27 @@ namespace crimild {
 
 	class NodeComponent : public SharedObject {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( NodeComponent )
-
+        
 	protected:
 		NodeComponent( void );
 
 	public:
 		virtual ~NodeComponent( void );
 
-		void setNode( Node *node ) { _node = node; }
-		Node *getNode( void ) { return _node; }
-		const Node *getNode( void ) const { return _node; }
-
-		template< class NODE_TYPE >
-		NODE_TYPE *getNode( void ) { return static_cast< NODE_TYPE * >( _node ); }
+        // internal use only
+        void setNode( Node *node ) { _node = node; }
+		
+        Node *getNode( void ) { return _node; }
+        
+        const Node *getNode( void ) const { return _node; }
+        
+		template< class NodeClass >
+        NodeClass *getNode( void ) { return static_cast< NodeClass * >( _node ); }
 
 		virtual const char *getComponentName( void ) const { return "update"; }
 
 	private:
-		Node *_node;
+        Node *_node;
 
 	public:
 		/**
@@ -82,7 +85,7 @@ namespace crimild {
 		/**
 			\brief Invoked only if debug rendering is enabled
 		*/
-		virtual void renderDebugInfo( Renderer *renderer, Camera *camera );
+        virtual void renderDebugInfo( std::shared_ptr< Renderer > const &renderer, std::shared_ptr< Camera > const &camera );
 
 		/**
 		   \brief Invoked once when component is detached from a node
@@ -90,6 +93,8 @@ namespace crimild {
 		virtual void onDetach( void );
 
 	};
+    
+    using NodeComponentPtr = std::shared_ptr< NodeComponent >;
 
 }
 

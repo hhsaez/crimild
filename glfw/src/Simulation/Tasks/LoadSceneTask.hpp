@@ -43,42 +43,48 @@ namespace crimild {
 	private:
 		std::string _fileName;
 	};
+    
+    using LoadSceneMessagePtr = std::shared_ptr< LoadSceneMessage >;
 
 	class ReloadSceneMessage : public DeferredMessage {
 	public:
 		ReloadSceneMessage( void ) { }
 		virtual ~ReloadSceneMessage( void ) { }
 	};
+    
+    using ReloadSceneMessagePtr = std::shared_ptr< ReloadSceneMessage >;
 
 	class SceneLoadedMessage : public DeferredMessage {
 	public:
 		SceneLoadedMessage( void ) { }
 		virtual ~SceneLoadedMessage( void ) { }
 	};
+    
+    using SceneLoadedMessagePtr = std::shared_ptr< SceneLoadedMessage >;
 
 	class LoadSceneTask : 
 		public Task,
 		public MessageHandler< LoadSceneMessage >,
 		public MessageHandler< ReloadSceneMessage > {
 	public:
-		LoadSceneTask( int priority, std::string sceneFileName, scripting::SceneBuilder *builder = nullptr );
+		LoadSceneTask( int priority, std::string sceneFileName, scripting::SceneBuilderPtr const &builder );
 		virtual ~LoadSceneTask( void );
 
-		scripting::SceneBuilder *getBuilder( void ) { return _builder.get(); }
+		scripting::SceneBuilderPtr &getBuilder( void ) { return _builder; }
 
 		virtual void start( void ) override;
 		virtual void update( void ) override;
 		virtual void stop( void ) override;
 
-		virtual void handleMessage( LoadSceneMessage *message ) override;
-		virtual void handleMessage( ReloadSceneMessage *message ) override;
+		virtual void handleMessage( LoadSceneMessagePtr const &message ) override;
+		virtual void handleMessage( ReloadSceneMessagePtr const &message ) override;
 
 	private:
 		void load( void );
 
 	private:
 		std::string _sceneFileName;
-		Pointer< scripting::SceneBuilder > _builder;
+		scripting::SceneBuilderPtr _builder;
 	};
 
 }

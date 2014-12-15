@@ -38,9 +38,6 @@
 
 namespace crimild {
 
-	class Material;
-	class Light;
-
 	class RenderStateComponent : public NodeComponent {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( RenderStateComponent )
 		CRIMILD_NODE_COMPONENT_NAME( "renderState" )
@@ -52,21 +49,21 @@ namespace crimild {
 		void reset( void );
 
 		bool hasMaterials( void ) const { return _materials.size() > 0; }
-		void attachMaterial( Material *material );
+		void attachMaterial( MaterialPtr const &material );
 		void detachAllMaterials( void );
-		void foreachMaterial( std::function< void( Material * ) > callback );
+		void foreachMaterial( std::function< void( MaterialPtr const & ) > callback );
 
 		bool hasLights( void ) const { return _lights.size() > 0; }
-		void attachLight( Light *light );
+		void attachLight( LightPtr const &light );
 		void detachAllLights( void );
-		void foreachLight( std::function< void( Light * ) > callback );
+		void foreachLight( std::function< void( LightPtr const & ) > callback );
 
 		bool renderOnScreen( void ) const { return _renderOnScreen; }
 		void setRenderOnScreen( bool value ) { _renderOnScreen = value; }
 
 	private:
-		std::list< Pointer< Material > > _materials;
-		std::list< Pointer< Light > > _lights;
+		std::list< MaterialPtr > _materials;
+		std::list< LightPtr > _lights;
 
 		bool _renderOnScreen;
 	};

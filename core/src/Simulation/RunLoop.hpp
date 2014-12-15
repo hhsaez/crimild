@@ -44,34 +44,36 @@ namespace crimild {
 		RunLoop( void );
 		virtual ~RunLoop( void );
 
-		void startTask( Task *task );
-		void stopTask( Task *task );
-		void suspendTask( Task *task );
-		void resumeTask( Task *task );
+		void startTask( TaskPtr const &task );
+		void stopTask( TaskPtr const &task );
+		void suspendTask( TaskPtr const &task );
+		void resumeTask( TaskPtr const &task );
 
 		bool update( void );
 		void stop( void );
 
 		bool hasActiveTasks( void ) const { return _activeTasks.size() > 0; }
-		bool isTaskActive( Task *task ) const;
-		void foreachActiveTask( std::function< void ( Task *task ) > callback );
+		bool isTaskActive( TaskPtr const &task ) const;
+		void foreachActiveTask( std::function< void ( TaskPtr const &task ) > callback );
 
 		bool hasKilledTasks( void ) const { return _killedTasks.size() > 0; }
-		bool isTaskKilled( Task *task ) const;
-		void foreachKilledTask( std::function< void ( Task *task ) > callback );
+		bool isTaskKilled( TaskPtr const &task ) const;
+		void foreachKilledTask( std::function< void ( TaskPtr const &task ) > callback );
 
 		bool hasSuspendedTasks( void ) const { return _suspendedTasks.size() > 0; }
-		bool isTaskSuspended( Task *task ) const;
-		void foreachSuspendedTask( std::function< void ( Task *task ) > callback );
+		bool isTaskSuspended( TaskPtr const &task ) const;
+		void foreachSuspendedTask( std::function< void ( TaskPtr const &task ) > callback );
 
 	protected:
 		void cleanup( void );
 
 	private:
-		std::list< Pointer< Task > > _activeTasks;
-		std::list< Pointer< Task > > _killedTasks;
-		std::list< Pointer< Task > > _suspendedTasks;
+		std::list< TaskPtr > _activeTasks;
+		std::list< TaskPtr > _killedTasks;
+		std::list< TaskPtr > _suspendedTasks;
 	};
+    
+    using RunLoopPtr = std::shared_ptr< RunLoop >;
 
 }
 

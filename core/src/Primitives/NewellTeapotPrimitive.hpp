@@ -38,6 +38,8 @@ namespace crimild {
 		virtual ~NewellTeapotPrimitive( void );
 
 	};
+    
+    using NewellTeapotPrimitivePtr = std::shared_ptr< NewellTeapotPrimitive >;
 
 }
 

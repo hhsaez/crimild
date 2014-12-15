@@ -53,38 +53,38 @@ void SceneBuilder::reset( void )
 	getScriptContext().reset();
 }
 
-Pointer< Node > SceneBuilder::fromFile( const std::string &filename )
+NodePtr SceneBuilder::fromFile( const std::string &filename )
 {
 	if ( !getScriptContext().load( filename ) ) {
 		Log::Error << "Cannot open scene file " << filename << Log::End;
-		return Pointer< Node >();
+        return NodePtr();
 	}
 
 	Log::Debug << "Loading scene from " << filename << Log::End;
 
 	if ( !getScriptContext().test( _rootNodeName ) ) {
 		Log::Error << "Cannot find root node named '" << _rootNodeName << "'" << Log::End;
-		return Pointer< Node >();
+        return NodePtr();
 	}
 
 	ScriptContext::Iterable first( getScriptContext(), _rootNodeName, -1 );
 	return buildNode( first, nullptr );
 }
 
-Pointer< Node > SceneBuilder::buildNode( ScriptContext::Iterable &it, Group *parent ) 
+NodePtr SceneBuilder::buildNode( ScriptContext::Iterable &it, GroupPtr const &parent )
 {
-	Pointer< Node > current;
+	NodePtr current;
 
 	std::string type = it.eval< std::string >( NODE_TYPE );
 	if ( type == CAMERA_TYPE ) {
 		Log::Debug << "Building 'camera' node" << Log::End;
-		Pointer< Camera > camera( new Camera( 90.0f, 4.0f / 3.0f, 1.0f, 1000.0f ) );
-		setupCamera( it, camera.get() );
+        auto camera = std::make_shared< Camera >( 90.0f, 4.0f / 3.0f, 1.0f, 1000.0f );
+		setupCamera( it, camera );
 		current = camera;
 	}
 	else if ( type == LIGHT_TYPE ) {
 		Log::Debug << "Building 'light' node" << Log::End;
-		Pointer< Light > light( new Light() );
+        auto light = std::make_shared< Light >();
 		light->setCastShadows( it.eval< bool >( LIGHT_CAST_SHADOWS ) );
 
 		if ( it.test( LIGHT_SHADOW_NEAR_COEFF ) ) {
@@ -99,21 +99,21 @@ Pointer< Node > SceneBuilder::buildNode( ScriptContext::Iterable &it, Group *par
 	}
 	else if ( type == TEXT_TYPE ) {
 		Log::Debug << "Building 'text' node" << Log::End;
-		Pointer< Text > text( new Text() );
+        auto text = std::make_shared< Text >();
 
 		std::string fontName = it.eval< std::string >( "font" );
 		float textSize = it.eval< float >( "textSize" );
 
 		std::string fontFileName = FileSystem::getInstance().pathForResource( fontName + "_sdf.tga" );
 		std::string fontDefFileName = FileSystem::getInstance().pathForResource( fontName + ".txt" );
-		Pointer< Font > font( new Font( fontFileName, fontDefFileName ) );
+        auto font = std::make_shared< Font >( fontFileName, fontDefFileName );
 
-		text->setFont( font.get() );
+		text->setFont( font );
 		text->setSize( textSize );
 		text->setText( it.eval< std::string >( TEXT_TEXT ) );
 		if ( it.test( "renderOnScreen" ) ) text->getComponent< RenderStateComponent >()->setRenderOnScreen( it.eval< bool >( "renderOnScreen" ) );
 
-		Material *material = text->getMaterial();
+		auto material = text->getMaterial();
 		material->setProgram( Simulation::getCurrent()->getRenderer()->getShaderProgram( "sdf" ) );
 		if ( it.test( "textColor" ) ) material->setDiffuse( it.eval< RGBAColorf >( "textColor" ) );
 		material->getDepthState()->setEnabled( false );
@@ -122,7 +122,7 @@ Pointer< Node > SceneBuilder::buildNode( ScriptContext::Iterable &it, Group *par
 		current = text;
 	}
 	else {
-		Pointer< Group > group;
+		GroupPtr group;
 
 		if ( it.test( NODE_FILENAME ) ) {
 			Log::Debug << "Building node" << Log::End;
@@ -135,37 +135,37 @@ Pointer< Node > SceneBuilder::buildNode( ScriptContext::Iterable &it, Group *par
 
 			ShallowCopy shallowCopy;
 			_sceneCache[ filename ]->perform( shallowCopy );
-			group.set( shallowCopy.getResult< Group >() );
+			group = shallowCopy.getResult< Group >();
 		}
 		else {
 			Log::Debug << "Building 'group' node" << Log::End;
-			group.set( new Group() );
+            group = std::make_shared< Group >();
 		}
 
 		it.foreach( GROUP_NODES, [&]( ScriptContext &c, ScriptContext::Iterable &childId ) {
-			buildNode( childId, group.get() );
+			buildNode( childId, group );
 		});
 
 		current = group;
 	}
 
 	if ( current != nullptr ) {
-		setTransformation( it, current.get() );
-		buildNodeComponents( it, current.get() );
+		setTransformation( it, current );
+		buildNodeComponents( it, current );
 
 		if ( parent != nullptr ) {
-			parent->attachNode( current.get() );
+			parent->attachNode( current );
 		}
 	}
 
 	return current;
 }
 
-void SceneBuilder::setupCamera( ScriptContext::Iterable &it, Camera *camera ) 
+void SceneBuilder::setupCamera( ScriptContext::Iterable &it, CameraPtr const &camera )
 {
 	std::string renderPassType = it.eval< std::string >( CAMERA_RENDER_PASS );
 	if ( renderPassType == "basic" ) {
-		camera->setRenderPass( new BasicRenderPass() );
+        camera->setRenderPass( std::make_shared< BasicRenderPass >() );
 	}
 
 	if ( it.test( CAMERA_FRUSTUM ) ) {
@@ -182,22 +182,22 @@ void SceneBuilder::setupCamera( ScriptContext::Iterable &it, Camera *camera )
 	}
 }
 
-void SceneBuilder::setTransformation( ScriptContext::Iterable &it, Node *node ) 
+void SceneBuilder::setTransformation( ScriptContext::Iterable &it, NodePtr const &node )
 {
 	Log::Debug << "Setting node transformation" << Log::End;
 	if ( it.test( NODE_TRANSFORMATION ) ) node->setLocal( it.eval< TransformationImpl >( NODE_TRANSFORMATION ) );
 }
 
-void SceneBuilder::buildNodeComponents( ScriptContext::Iterable &it, Node *node )
+void SceneBuilder::buildNodeComponents( ScriptContext::Iterable &it, NodePtr const &node )
 {
 	it.foreach( NODE_COMPONENTS, [&]( ScriptContext &c, ScriptContext::Iterable &componentIt ) {
 		std::string type = componentIt.eval< std::string >( NODE_COMPONENT_TYPE );
 		Log::Debug << "Building component of type '" << type << "'" << Log::End;
 
 		if ( type != "null" && _componentBuilders[ type ] != nullptr ) {
-			Pointer< NodeComponent > cmp = _componentBuilders[ type ]( componentIt );
+			auto cmp = _componentBuilders[ type ]( componentIt );
 			if ( cmp != nullptr ) {
-				node->attachComponent( cmp.get() );
+				node->attachComponent( cmp );
 			}
 			else {
 				Log::Error << "Cannot build component of type '" << type << "'" << Log::End;

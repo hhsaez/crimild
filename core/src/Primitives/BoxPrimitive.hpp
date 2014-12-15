@@ -36,11 +36,11 @@ namespace crimild {
     
     class BoxPrimitive : public Primitive {
     public:
-        BoxPrimitive( float width, float height, float depth, 
-            const VertexFormat &format = VertexFormat::VF_P3_N3 ); 
-
+        BoxPrimitive( float width, float height, float depth, const VertexFormat &format = VertexFormat::VF_P3_N3 );
         virtual ~BoxPrimitive( void );
     };
+    
+    using BoxPrimitivePtr = std::shared_ptr< BoxPrimitive >;
         
 }
 

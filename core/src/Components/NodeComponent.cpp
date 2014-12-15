@@ -30,7 +30,7 @@
 using namespace crimild;
 
 NodeComponent::NodeComponent( void )
-	: _node( nullptr )
+    : _node( nullptr )
 {
 
 }
@@ -65,7 +65,7 @@ void NodeComponent::fixedUpdate( const Time & )
 	
 }
 
-void NodeComponent::renderDebugInfo( Renderer *, Camera * )
+void NodeComponent::renderDebugInfo( std::shared_ptr< Renderer > const &, std::shared_ptr< Camera > const & )
 {
 
 }

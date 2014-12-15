@@ -50,7 +50,7 @@ int gl3::TextureCatalog::getNextResourceId( void )
     return textureId;
 }
 
-void gl3::TextureCatalog::bind( ShaderLocation *location, Texture *texture )
+void gl3::TextureCatalog::bind( ShaderLocationPtr const &location, TexturePtr const &texture )
 {
 	if ( !texture ) {
 		return;
@@ -71,7 +71,7 @@ void gl3::TextureCatalog::bind( ShaderLocation *location, Texture *texture )
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gl3::TextureCatalog::unbind( ShaderLocation *location, Texture *texture )
+void gl3::TextureCatalog::unbind( ShaderLocationPtr const &location, TexturePtr const &texture )
 {
 	if ( !texture ) {
 		return;
@@ -90,7 +90,7 @@ void gl3::TextureCatalog::unbind( ShaderLocation *location, Texture *texture )
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gl3::TextureCatalog::load( Texture *texture )
+void gl3::TextureCatalog::load( TexturePtr const &texture )
 {
 	Catalog< Texture >::load( texture );
 
@@ -131,7 +131,7 @@ void gl3::TextureCatalog::load( Texture *texture )
         ( GLvoid * ) texture->getImage()->getData() );
 }
 
-void gl3::TextureCatalog::unload( Texture *texture )
+void gl3::TextureCatalog::unload( TexturePtr const &texture )
 {
 	glBindTexture( GL_TEXTURE_2D, 0 );
 

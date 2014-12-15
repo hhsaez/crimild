@@ -43,13 +43,12 @@ OffscreenRenderPass::~OffscreenRenderPass( void )
 
 }
 
-void OffscreenRenderPass::attachImageEffect( ImageEffect *imageEffect )
+void OffscreenRenderPass::attachImageEffect( ImageEffectPtr const &imageEffect )
 {
-    Pointer< ImageEffect > imageEffectPtr( imageEffect );
-	_imageEffects.push_back( imageEffectPtr );
+	_imageEffects.push_back( imageEffect );
 }
 
-void OffscreenRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
+void OffscreenRenderPass::render( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
     /*
 	if ( _offscreenBuffer == nullptr ) {

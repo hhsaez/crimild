@@ -35,7 +35,7 @@
 namespace crimild {
 
 	class Renderer;
-
+    
 	class ShaderUniform : public NamedObject, public SharedObject {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( ShaderUniform );
 
@@ -43,15 +43,17 @@ namespace crimild {
 		ShaderUniform( std::string name );
 		virtual ~ShaderUniform( void );
 
-		void setLocation( ShaderLocation *location ) { _location = location; }
-		ShaderLocation *getLocation( void ) { return _location.get(); }
+		void setLocation( ShaderLocationPtr const &location ) { _location = location; }
+		ShaderLocationPtr &getLocation( void ) { return _location; }
 
-		virtual void onBind( Renderer *renderer ) = 0;
+        virtual void onBind( std::shared_ptr< Renderer > const &renderer ) = 0;
 
 	private:
-		Pointer< ShaderLocation > _location;
+		ShaderLocationPtr _location;
 	};
 
+    using ShaderUniformPtr = std::shared_ptr< ShaderUniform >;
+    
 }
 
 #endif

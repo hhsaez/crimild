@@ -38,7 +38,11 @@
 #include "Rendering/VertexBufferObject.hpp"
 
 namespace crimild {
-
+    
+    class BoundingVolume;
+    
+    using BoundingVolumePtr = std::shared_ptr< BoundingVolume >;
+    
 	class BoundingVolume : public SharedObject {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( BoundingVolume );
 
@@ -56,16 +60,16 @@ namespace crimild {
 		virtual const Vector3f &getTComponent( void ) const = 0;
 
 	public:
-		virtual void computeFrom( const BoundingVolume *volume, const TransformationImpl &transform ) = 0;
+		virtual void computeFrom( const BoundingVolumePtr &volume, const TransformationImpl &transform ) = 0;
 		virtual void computeFrom( const Vector3f *positions, unsigned int positionCount ) = 0;
-		virtual void computeFrom( const VertexBufferObject *vbo ) = 0;
+		virtual void computeFrom( const VertexBufferObjectPtr &vbo ) = 0;
 		virtual void computeFrom( const Vector3f &r, const Vector3f &s, const Vector3f &t ) = 0;
 
 	public:
 		virtual void expandToContain( const Vector3f &point ) = 0;
 		virtual void expandToContain( const Vector3f *positions, unsigned int positionCount ) = 0;
-		virtual void expandToContain( const VertexBufferObject *vbo ) = 0;
-		virtual void expandToContain( const BoundingVolume *other ) = 0;
+		virtual void expandToContain( const VertexBufferObjectPtr &vbo ) = 0;
+		virtual void expandToContain( const BoundingVolumePtr &other ) = 0;
 
 	public:
 		virtual int whichSide( const Plane3f &plane ) const = 0;
@@ -73,15 +77,15 @@ namespace crimild {
 
 	public:
 		virtual bool testIntersection( const Ray3f &ray ) const = 0;
-		virtual bool testIntersection( const BoundingVolume *other ) const = 0;
+		virtual bool testIntersection( const BoundingVolumePtr &other ) const = 0;
 		virtual bool testIntersection( const Sphere3f &sphere ) const = 0;
 		virtual bool testIntersection( const Plane3f &plane ) const = 0;
 
-		virtual void resolveIntersection( const BoundingVolume *other, TransformationImpl &result ) const = 0;
+		virtual void resolveIntersection( const BoundingVolumePtr &other, TransformationImpl &result ) const = 0;
 		virtual void resolveIntersection( const Sphere3f &sphere, TransformationImpl &result ) const = 0;
 		virtual void resolveIntersection( const Plane3f &plane, TransformationImpl &result ) const = 0;
 	};
-
+    
 }
 
 #endif

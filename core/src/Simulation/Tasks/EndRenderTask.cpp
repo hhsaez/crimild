@@ -48,8 +48,8 @@ void EndRenderTask::start( void )
 
 void EndRenderTask::update( void )
 {
-	Renderer *renderer = Simulation::getCurrent()->getRenderer();
-	if ( renderer ) {
+    auto renderer = Simulation::getCurrent()->getRenderer();
+	if ( renderer != nullptr ) {
 		renderer->endRender();
 	}
 }

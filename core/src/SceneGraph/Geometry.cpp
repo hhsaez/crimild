@@ -37,8 +37,8 @@ using namespace crimild;
 Geometry::Geometry( std::string name )
 	: Node( name )
 {
-	attachComponent( new MaterialComponent() );
-	attachComponent( new RenderStateComponent() );
+    attachComponent( std::make_shared< MaterialComponent >() );
+    attachComponent( std::make_shared< RenderStateComponent >() );
 }
 
 Geometry::~Geometry( void )
@@ -46,24 +46,22 @@ Geometry::~Geometry( void )
 	detachAllPrimitives();
 }
 
-void Geometry::attachPrimitive( Primitive *primitive )
+void Geometry::attachPrimitive( PrimitivePtr const &primitive )
 {
-    Pointer< Primitive > primitivePtr( primitive );
-	_primitives.push_back( primitivePtr );
+	_primitives.push_back( primitive );
 	updateModelBounds();
 }
 
-void Geometry::detachPrimitive( Primitive *primitive )
+void Geometry::detachPrimitive( PrimitivePtr const &primitive )
 {
-    Pointer< Primitive > primitivePtr( primitive );
-	_primitives.remove( primitivePtr );
+	_primitives.remove( primitive );
 }
 
-void Geometry::foreachPrimitive( std::function< void( Primitive * ) > callback )
+void Geometry::foreachPrimitive( std::function< void( PrimitivePtr const & ) > callback )
 {
     for ( auto primitive : _primitives ) {
         if ( primitive != nullptr ) {
-            callback( primitive.get() );
+            callback( primitive );
         }
     }
 }
@@ -75,14 +73,14 @@ void Geometry::detachAllPrimitives( void )
 
 void Geometry::accept( NodeVisitor &visitor )
 {
-	visitor.visitGeometry( this );
+	visitor.visitGeometry( getShared< Geometry >() );
 }
 
 void Geometry::updateModelBounds( void )
 {
 	bool firstChild = true;
-	foreachPrimitive( [&]( Primitive *primitive ) {
-		VertexBufferObject *vbo = primitive->getVertexBuffer();
+	foreachPrimitive( [&]( PrimitivePtr const &primitive ) {
+		auto vbo = primitive->getVertexBuffer();
 		if ( vbo != nullptr ) {
 			if ( firstChild ) {
 				localBound()->computeFrom( vbo);

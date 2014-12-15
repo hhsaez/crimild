@@ -26,7 +26,6 @@
  */
 
 #include "RenderStateComponent.hpp"
-#include "Rendering/Material.hpp"
 
 #include <algorithm>
 
@@ -43,10 +42,9 @@ RenderStateComponent::~RenderStateComponent( void )
 	detachAllLights();
 }
 
-void RenderStateComponent::attachMaterial( Material *material )
+void RenderStateComponent::attachMaterial( MaterialPtr const &material )
 {
-    Pointer< Material > materialPtr( material );
-	_materials.push_back( materialPtr );
+	_materials.push_back( material );
 }
 
 void RenderStateComponent::detachAllMaterials( void )
@@ -54,19 +52,18 @@ void RenderStateComponent::detachAllMaterials( void )
 	_materials.clear();
 }
 
-void RenderStateComponent::foreachMaterial( std::function< void( Material * ) > callback )
+void RenderStateComponent::foreachMaterial( std::function< void( MaterialPtr const & ) > callback )
 {
     for ( auto material : _materials ) {
         if ( material != nullptr ) {
-            callback( material.get() );
+            callback( material );
         }
     }
 }
 
-void RenderStateComponent::attachLight( Light *light )
+void RenderStateComponent::attachLight( LightPtr const &light )
 {
-    Pointer< Light > lightPtr( light );
-	_lights.push_back( lightPtr );
+	_lights.push_back( light );
 }
 
 void RenderStateComponent::detachAllLights( void )
@@ -74,11 +71,11 @@ void RenderStateComponent::detachAllLights( void )
 	_lights.clear();
 }
 
-void RenderStateComponent::foreachLight( std::function< void( Light * ) > callback )
+void RenderStateComponent::foreachLight( std::function< void( LightPtr const & ) > callback )
 {
     for ( auto light : _lights ) {
         if ( light != nullptr ) {
-            callback( light.get() );
+            callback( light );
         }
     }
 }

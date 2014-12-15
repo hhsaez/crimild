@@ -43,6 +43,8 @@ namespace crimild {
 
 		virtual bool useDeferredQueue( void ) const { return false; }
 	};
+    
+    using MessagePtr = std::shared_ptr< Message >;
 
 	class DeferredMessage : public Message {
 	public:
@@ -50,6 +52,8 @@ namespace crimild {
 		
 		virtual bool useDeferredQueue( void ) const { return true; }
 	};
+    
+    using DeferredMessagePtr = std::shared_ptr< DeferredMessage >;
 
 	template< class MessageImpl >
 	class MessageHandler {
@@ -62,7 +66,7 @@ namespace crimild {
 		 */
 		virtual ~MessageHandler( void );
 
-		virtual void handleMessage( MessageImpl *message ) = 0;
+        virtual void handleMessage( std::shared_ptr< MessageImpl > const &message ) = 0;
 
 	protected:
 		/**
@@ -83,8 +87,8 @@ namespace crimild {
 
 	template< class MessageImpl >
 	class MessageDispatcherImpl : public MessageDispatcher {
-		typedef Pointer< MessageImpl > MessagePtr;
-		typedef std::list< MessagePtr > MessageList;
+        typedef std::shared_ptr< MessageImpl > MessageImplPtr;
+		typedef std::list< MessageImplPtr > MessageImplList;
 		typedef MessageHandler< MessageImpl > MessageHandlerImpl;
 		typedef std::list< MessageHandlerImpl * > MessageHandlerList;
 
@@ -105,7 +109,7 @@ namespace crimild {
 			if ( _handlers.size() > 0 && _messages.size() ) {
 				for ( auto message : _messages ) {
 					for ( auto handler : _handlers ) {
-						handler->handleMessage( message.get() );
+						handler->handleMessage( message );
 					}
 				}
 			}
@@ -131,14 +135,14 @@ namespace crimild {
 			If the message requires to use the deferred queue, it will be delayed.
 			Otherwise, it will be dispatched immediatelly.
 		*/
-		void pushMessage( MessagePtr message )
+		void pushMessage( MessageImplPtr const &message )
 		{
 			if ( message->useDeferredQueue() ) {
 				_messages.push_back( message );
 			}
 			else {
 				for ( auto handler : _handlers ) {
-					handler->handleMessage( message.get() );
+					handler->handleMessage( message );
 				}
 			}
 		}
@@ -153,6 +157,7 @@ namespace crimild {
 
 			\warning This method can be use only with non-deferred message. 
 		 */
+        /*
 		void pushMessage( MessageImpl &message )
 		{
 			assert( message.useDeferredQueue() == false && "Deferred messages cannot be statically allocated (did you forget a 'new' somewhere?)");
@@ -160,6 +165,7 @@ namespace crimild {
 				handler->handleMessage( &message );
 			}
 		}
+         */
 
 		void registerHandler( MessageHandlerImpl *handler )
 		{
@@ -172,7 +178,7 @@ namespace crimild {
 		}
 
 	private:
-		MessageList _messages;
+		MessageImplList _messages;
 		MessageHandlerList _handlers;
 	};
 
@@ -185,11 +191,14 @@ namespace crimild {
 		\todo This class needs proper documentation
 	 */
 	class MessageQueue {
+    private:
+        static MessageQueue _instance;
+        
 	public:
 		/**
 			\brief Get the queue shared instance
 		 */
-		static MessageQueue &getInstance( void );
+        static MessageQueue &getInstance( void ) { return _instance; }
 
 	private:
 		/**
@@ -228,10 +237,9 @@ namespace crimild {
 			\brief Push a new message into the queue
 		 */
 		template< class MessageImpl >
-		void pushMessage( MessageImpl *message )
+        void pushMessage( std::shared_ptr< MessageImpl > const &message )
 		{
-            Pointer< MessageImpl > messagePtr( message );
-			MessageDispatcherImpl< MessageImpl >::getInstance().pushMessage( messagePtr );
+			MessageDispatcherImpl< MessageImpl >::getInstance().pushMessage( message );
 		}
 
 		/**
@@ -240,11 +248,13 @@ namespace crimild {
 			This implementation works with references to static allocated instances
 			and its only valid for regular, non-deferred, messages
 		 */
+        /*
 		template< class MessageImpl >
 		void pushMessage( MessageImpl &message )
 		{
 			MessageDispatcherImpl< MessageImpl >::getInstance().pushMessage( message );
 		}
+         */
 
 	private:
 		std::list< MessageDispatcher * > _dispatchers;

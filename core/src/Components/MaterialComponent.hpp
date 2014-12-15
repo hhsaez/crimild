@@ -46,12 +46,12 @@ namespace crimild {
 		virtual ~MaterialComponent( void );
 
 		bool hasMaterials( void ) const { return _materials.size() > 0; }
-		void attachMaterial( Material *material );
+		void attachMaterial( MaterialPtr const &material );
 		void detachAllMaterials( void );
-		void foreachMaterial( std::function< void( Material * ) > callback );
+		void foreachMaterial( std::function< void( MaterialPtr const & ) > callback );
 
 	private:
-		std::list< Pointer< Material > > _materials;
+		std::list< MaterialPtr > _materials;
 	};
 
 }

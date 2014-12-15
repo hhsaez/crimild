@@ -55,17 +55,19 @@ namespace crimild {
 
 		Primitive::Type getType( void ) const { return _type; }
 
-		void setVertexBuffer( VertexBufferObject *vbo ) { _vertexBuffer = vbo; }
-		VertexBufferObject *getVertexBuffer( void ) { return _vertexBuffer.get(); }
+		void setVertexBuffer( VertexBufferObjectPtr const &vbo ) { _vertexBuffer = vbo; }
+		VertexBufferObjectPtr &getVertexBuffer( void ) { return _vertexBuffer; }
 
-		void setIndexBuffer( IndexBufferObject *ibo ) { _indexBuffer = ibo; }
-		IndexBufferObject *getIndexBuffer( void ) { return _indexBuffer.get(); }
+		void setIndexBuffer( IndexBufferObjectPtr const &ibo ) { _indexBuffer = ibo; }
+		IndexBufferObjectPtr &getIndexBuffer( void ) { return _indexBuffer; }
 
 	private:
 		Primitive::Type _type;
-		Pointer< VertexBufferObject > _vertexBuffer;
-		Pointer< IndexBufferObject > _indexBuffer;
+		VertexBufferObjectPtr _vertexBuffer;
+		IndexBufferObjectPtr _indexBuffer;
 	};
+    
+    using PrimitivePtr = std::shared_ptr< Primitive >;
 
 }
 

@@ -48,21 +48,21 @@ int gl3::IndexBufferObjectCatalog::getNextResourceId( void )
     return id;
 }
 
-void gl3::IndexBufferObjectCatalog::bind( ShaderProgram *program, IndexBufferObject *ibo )
+void gl3::IndexBufferObjectCatalog::bind( ShaderProgramPtr const &program, IndexBufferObjectPtr const &ibo )
 {
 	Catalog< IndexBufferObject >::bind( program, ibo );
 
 	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, ibo->getCatalogId() );
 }
 
-void gl3::IndexBufferObjectCatalog::unbind( ShaderProgram *program, IndexBufferObject *ibo )
+void gl3::IndexBufferObjectCatalog::unbind( ShaderProgramPtr const &program, IndexBufferObjectPtr const &ibo )
 {
 	Catalog< IndexBufferObject >::unbind( program, ibo );
 
 	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
 }
 
-void gl3::IndexBufferObjectCatalog::load( IndexBufferObject *ibo )
+void gl3::IndexBufferObjectCatalog::load( IndexBufferObjectPtr const &ibo )
 {
 	Catalog< IndexBufferObject >::load( ibo );
 
@@ -74,7 +74,7 @@ void gl3::IndexBufferObjectCatalog::load( IndexBufferObject *ibo )
 		GL_STATIC_DRAW );
 }
 
-void gl3::IndexBufferObjectCatalog::unload( IndexBufferObject *ibo )
+void gl3::IndexBufferObjectCatalog::unload( IndexBufferObjectPtr const &ibo )
 {
 	GLuint bufferId = ibo->getCatalogId();
 	glDeleteBuffers( 1, &bufferId );

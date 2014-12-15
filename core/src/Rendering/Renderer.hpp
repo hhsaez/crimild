@@ -30,31 +30,33 @@
 
 #include "Foundation/SharedObject.hpp"
 
-#include "FrameBufferObject.hpp"
-#include "Material.hpp"
-#include "Catalog.hpp"
-#include "ShaderProgram.hpp"
-#include "Texture.hpp"
-#include "VertexBufferObject.hpp"
-#include "IndexBufferObject.hpp"
-
-#include "primitives/Primitive.hpp"
+#include "Primitives/Primitive.hpp"
 
 #include "Mathematics/Vector.hpp"
 #include "Mathematics/Matrix.hpp"
 
 namespace crimild {
-
-	class VisibilitySet;
-	class Geometry;
-	class Camera;
-	class RenderStateComponent;
-    class RenderQueue;
+    
+    class AlphaState;
+    class Camera;
+    class DepthState;
+    class FrameBufferObject;
+    class Geometry;
+    class IndexBufferObject;
+    class Light;
+    class Material;
     class RenderPass;
+    class RenderQueue;
+    class ShaderLocation;
+    class ShaderProgram;
+    class ShaderUniform;
+    class Texture;
+    class VertexBufferObject;
+    class VisibilitySet;
 
 	class Renderer : public SharedObject {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( Renderer );
-
+        
 	protected:
 		Renderer( void );
 
@@ -64,112 +66,115 @@ namespace crimild {
 	public:
 		virtual void configure( void ) = 0;
 
-		void setScreenBuffer( FrameBufferObject *screenBuffer ) { _screenBuffer = screenBuffer; }
-		FrameBufferObject *getScreenBuffer( void ) { return _screenBuffer.get(); }
+        void setScreenBuffer( std::shared_ptr< FrameBufferObject > const &screenBuffer ) { _screenBuffer = screenBuffer; }
+		std::shared_ptr< FrameBufferObject > &getScreenBuffer( void ) { return _screenBuffer; }
 
 	private:
-		Pointer< FrameBufferObject > _screenBuffer;
+		std::shared_ptr< FrameBufferObject > _screenBuffer;
 
 	public:
 		virtual void beginRender( void ) = 0;
 		
 		virtual void clearBuffers( void ) = 0;
         
-        virtual void render( RenderQueue *renderQueue, RenderPass *renderPass = nullptr );
+        virtual void render( std::shared_ptr< RenderQueue > const &renderQueue, std::shared_ptr< RenderPass > const &renderPass );
 
-		virtual void render( VisibilitySet *vs, RenderPass *renderPass = nullptr );
+        virtual void render( std::shared_ptr< VisibilitySet > const &vs, std::shared_ptr< RenderPass > const &renderPass );
 
-		virtual void render( Geometry *geometry, Camera *camera, RenderPass *renderPass = nullptr );
+        virtual void render( std::shared_ptr< Geometry > const &geometry, std::shared_ptr< Camera > const &camera, std::shared_ptr< RenderPass > const &renderPass );
 
 		virtual void endRender( void ) = 0;
 
 	public:
-		virtual void bindFrameBuffer( FrameBufferObject *fbo );
-		virtual void unbindFrameBuffer( FrameBufferObject *fbo );
+		virtual void bindFrameBuffer( std::shared_ptr< FrameBufferObject > const &fbo );
+		virtual void unbindFrameBuffer( std::shared_ptr< FrameBufferObject > const &fbo );
 
 	public:
-		virtual void bindProgram( ShaderProgram *program );
-		virtual void unbindProgram( ShaderProgram *program );
+        virtual void bindProgram( std::shared_ptr< ShaderProgram > const &program );
+		virtual void unbindProgram( std::shared_ptr< ShaderProgram > const &program );
 
-		virtual void bindUniform( ShaderLocation *location, bool value ) { bindUniform( location, value ? 1 : 0 ); }
-		virtual void bindUniform( ShaderLocation *location, int value ) = 0;
-		virtual void bindUniform( ShaderLocation *location, float value ) = 0;
-		virtual void bindUniform( ShaderLocation *location, const Vector3f &vector ) = 0;
-		virtual void bindUniform( ShaderLocation *location, const RGBAColorf &color ) = 0;
-		virtual void bindUniform( ShaderLocation *location, const Matrix4f &matrix ) = 0;
-
-	public:
-		virtual void bindMaterial( ShaderProgram *program, Material *material );
-		virtual void unbindMaterial( ShaderProgram *program, Material *material );
+		virtual void bindUniform( std::shared_ptr< ShaderLocation > const &location, bool value ) { bindUniform( location, value ? 1 : 0 ); }
+		virtual void bindUniform( std::shared_ptr< ShaderLocation > const &location, int value ) = 0;
+		virtual void bindUniform( std::shared_ptr< ShaderLocation > const &location, float value ) = 0;
+		virtual void bindUniform( std::shared_ptr< ShaderLocation > const &location, const Vector3f &vector ) = 0;
+		virtual void bindUniform( std::shared_ptr< ShaderLocation > const &location, const RGBAColorf &color ) = 0;
+		virtual void bindUniform( std::shared_ptr< ShaderLocation > const &location, const Matrix4f &matrix ) = 0;
 
 	public:
-		virtual void setDepthState( DepthState *state ) = 0;
-		virtual void setAlphaState( AlphaState *state ) = 0;
+        virtual void bindMaterial( std::shared_ptr< ShaderProgram > const &program, std::shared_ptr< Material > const &material );
+        virtual void unbindMaterial( std::shared_ptr< ShaderProgram > const &program, std::shared_ptr< Material > const &material );
 
 	public:
-		virtual void bindTexture( ShaderLocation *location, Texture *texture );
-		virtual void unbindTexture( ShaderLocation *location, Texture *texture );
+        virtual void setDepthState( std::shared_ptr< DepthState > const &state ) = 0;
+        virtual void setAlphaState( std::shared_ptr< AlphaState > const &state ) = 0;
 
 	public:
-		virtual void bindLight( ShaderProgram *program, Light *light );
-		virtual void unbindLight( ShaderProgram *program, Light *light );
+        virtual void bindTexture( std::shared_ptr< ShaderLocation > const &location, std::shared_ptr< Texture > const &texture );
+		virtual void unbindTexture( std::shared_ptr< ShaderLocation > const &location, std::shared_ptr< Texture > const &texture );
+
+	public:
+		virtual void bindLight( std::shared_ptr< ShaderProgram > const &program, std::shared_ptr< Light > const &light );
+		virtual void unbindLight( std::shared_ptr< ShaderProgram > const &program, std::shared_ptr< Light > const &light );
 
 	private:
 		int _lightCount;
 
 	public:
-		virtual void bindVertexBuffer( ShaderProgram *program, VertexBufferObject *vbo );
-		virtual void unbindVertexBuffer( ShaderProgram *program, VertexBufferObject *vbo );
-		virtual void bindIndexBuffer( ShaderProgram *program, IndexBufferObject *ibo );
-		virtual void unbindIndexBuffer( ShaderProgram *program, IndexBufferObject *ibo );
+		virtual void bindVertexBuffer( std::shared_ptr< ShaderProgram > const &program, std::shared_ptr< VertexBufferObject > const &vbo );
+		virtual void unbindVertexBuffer( std::shared_ptr< ShaderProgram > const &program, std::shared_ptr< VertexBufferObject > const &vbo );
+
+        virtual void bindIndexBuffer( std::shared_ptr< ShaderProgram > const &program, std::shared_ptr< IndexBufferObject > const &ibo );
+		virtual void unbindIndexBuffer( std::shared_ptr< ShaderProgram > const &program, std::shared_ptr< IndexBufferObject > const &ibo );
 
 	public:
-		virtual void applyTransformations( ShaderProgram *program, Geometry *geometry, Camera *camera );
-        virtual void applyTransformations( ShaderProgram *program, const Matrix4f &projection, const Matrix4f &view, const Matrix4f &model, const Matrix4f &normal );
-		virtual void restoreTransformations( ShaderProgram *program, Geometry *geometry, Camera *camera );
+		virtual void applyTransformations( std::shared_ptr< ShaderProgram > const &program, std::shared_ptr< Geometry > const &geometry, std::shared_ptr< Camera > const &camera );
+        virtual void applyTransformations( std::shared_ptr< ShaderProgram > const &program, const Matrix4f &projection, const Matrix4f &view, const Matrix4f &model, const Matrix4f &normal );
+		virtual void restoreTransformations( std::shared_ptr< ShaderProgram > const &program, std::shared_ptr< Geometry > const &geometry, std::shared_ptr< Camera > const &camera );
 
 	public:
-		virtual void drawPrimitive( ShaderProgram *program, Primitive *primitive ) = 0;
+		virtual void drawPrimitive( std::shared_ptr< ShaderProgram > const &program, std::shared_ptr< Primitive > const &primitive ) = 0;
 
 		/**
 			\brief optional
 		 */
-		virtual void drawBuffers( ShaderProgram *program, Primitive::Type type, VertexBufferObject *vbo, unsigned int count ) { }
+		virtual void drawBuffers( std::shared_ptr< ShaderProgram > const &program, Primitive::Type type, std::shared_ptr< VertexBufferObject > const &vbo, unsigned int count ) { }
 
 	public:
-        virtual ShaderProgram *getDepthProgram( void ) { return nullptr; }
-        virtual ShaderProgram *getForwardPassProgram( void ) { return nullptr; }
-        virtual ShaderProgram *getDeferredPassProgram( void ) { return nullptr; }
-        virtual ShaderProgram *getShaderProgram( const char *name ) { return nullptr; }
-		virtual ShaderProgram *getFallbackProgram( Material *, Geometry *, Primitive * ) { return nullptr; }
+        virtual std::shared_ptr< ShaderProgram > getDepthProgram( void ) { return std::shared_ptr< ShaderProgram >(); }
+        virtual std::shared_ptr< ShaderProgram > getForwardPassProgram( void ) { return std::shared_ptr< ShaderProgram >(); }
+        virtual std::shared_ptr< ShaderProgram > getDeferredPassProgram( void ) { return std::shared_ptr< ShaderProgram >(); }
+        virtual std::shared_ptr< ShaderProgram > getShaderProgram( const char *name ) { return std::shared_ptr< ShaderProgram >(); }
+        virtual std::shared_ptr< ShaderProgram > getFallbackProgram( std::shared_ptr< Material > const &, std::shared_ptr< Geometry > const &, std::shared_ptr< Primitive > const & ) { return std::shared_ptr< ShaderProgram >(); }
 
 	public:
-		Pointer< Material > _defaultMaterial;
+		std::shared_ptr< Material > _defaultMaterial;
 
 	public:
-		ShaderProgramCatalog *getShaderProgramCatalog( void ) { return _shaderProgramCatalog.get(); }
-		void setShaderProgramCatalog( ShaderProgramCatalog *catalog ) { _shaderProgramCatalog = catalog; }
+        std::shared_ptr< Catalog< ShaderProgram > > &getShaderProgramCatalog( void ) { return _shaderProgramCatalog; }
+		void setShaderProgramCatalog( std::shared_ptr< Catalog< ShaderProgram > > const &catalog ) { _shaderProgramCatalog = catalog; }
 
-		TextureCatalog *getTextureCatalog( void ) { return _textureCatalog.get(); }
-		void setTextureCatalog( TextureCatalog *catalog ) { _textureCatalog = catalog; }
+		std::shared_ptr< Catalog< Texture > > &getTextureCatalog( void ) { return _textureCatalog; }
+		void setTextureCatalog( std::shared_ptr< Catalog< Texture > > const &catalog ) { _textureCatalog = catalog; }
 
-		VertexBufferObjectCatalog *getVertexBufferObjectCatalog( void ) { return _vertexBufferObjectCatalog.get(); }
-		void setVertexBufferObjectCatalog( VertexBufferObjectCatalog *catalog ) { _vertexBufferObjectCatalog = catalog; }
+		std::shared_ptr< Catalog< VertexBufferObject > > &getVertexBufferObjectCatalog( void ) { return _vertexBufferObjectCatalog; }
+		void setVertexBufferObjectCatalog( std::shared_ptr< Catalog< VertexBufferObject > > const &catalog ) { _vertexBufferObjectCatalog = catalog; }
 
-		IndexBufferObjectCatalog *getIndexBufferObjectCatalog( void ) { return _indexBufferObjectCatalog.get(); }
-		void setIndexBufferObjectCatalog( IndexBufferObjectCatalog *catalog ) { _indexBufferObjectCatalog = catalog; }
+		std::shared_ptr< Catalog< IndexBufferObject > > &getIndexBufferObjectCatalog( void ) { return _indexBufferObjectCatalog; }
+		void setIndexBufferObjectCatalog( std::shared_ptr< Catalog< IndexBufferObject > > const &catalog ) { _indexBufferObjectCatalog = catalog; }
 
-		FrameBufferObjectCatalog *getFrameBufferObjectCatalog( void ) { return _frameBufferObjectCatalog.get(); }
-		void setFrameBufferObjectCatalog( FrameBufferObjectCatalog *catalog ) { _frameBufferObjectCatalog = catalog; }
+		std::shared_ptr< Catalog< FrameBufferObject > > &getFrameBufferObjectCatalog( void ) { return _frameBufferObjectCatalog; }
+		void setFrameBufferObjectCatalog( std::shared_ptr< Catalog< FrameBufferObject > > const &catalog ) { _frameBufferObjectCatalog = catalog; }
 
 	private:
-		Pointer< ShaderProgramCatalog > _shaderProgramCatalog;
-		Pointer< TextureCatalog > _textureCatalog;
-		Pointer< VertexBufferObjectCatalog > _vertexBufferObjectCatalog;
-		Pointer< IndexBufferObjectCatalog > _indexBufferObjectCatalog;
-		Pointer< FrameBufferObjectCatalog > _frameBufferObjectCatalog;
+		std::shared_ptr< Catalog< ShaderProgram > > _shaderProgramCatalog;
+		std::shared_ptr< Catalog< Texture > > _textureCatalog;
+		std::shared_ptr< Catalog< VertexBufferObject > > _vertexBufferObjectCatalog;
+		std::shared_ptr< Catalog< IndexBufferObject > > _indexBufferObjectCatalog;
+		std::shared_ptr< Catalog< FrameBufferObject > > _frameBufferObjectCatalog;
 	};
 
+    using RendererPtr = std::shared_ptr< Renderer >;
+    
 }
 
 #endif

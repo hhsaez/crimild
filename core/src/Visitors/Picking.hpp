@@ -32,6 +32,9 @@
 
 #include "Mathematics/Ray.hpp"
 
+#include "SceneGraph/Node.hpp"
+#include "SceneGraph/Group.hpp"
+
 #include <functional>
 #include <list>
 
@@ -39,7 +42,7 @@ namespace crimild {
 
 	class Picking : public NodeVisitor {
 	private:
-		typedef std::function< bool( Node * ) > FilterType;
+		typedef std::function< bool( NodePtr const & ) > FilterType;
 
 	public:
 		class Results {
@@ -52,17 +55,17 @@ namespace crimild {
 				_candidates.clear();
 			}
 
-			void sortCandidates( std::function< bool( Node *, Node * ) > callback )
+			void sortCandidates( std::function< bool( NodePtr const &, NodePtr const & ) > callback )
 			{
 				_candidates.sort( callback );
 			}
 
-			void pushCandidate( Node *candidate )
+			void pushCandidate( NodePtr const &candidate )
 			{
 				_candidates.push_back( candidate );
 			}
 
-			void foreachCandidate( std::function< void( Node * ) > callback ) 
+			void foreachCandidate( std::function< void( NodePtr const & ) > callback )
 			{
 				for ( auto c : _candidates ) {
 					callback( c );
@@ -74,7 +77,7 @@ namespace crimild {
 				return _candidates.size() > 0;
 			}
 
-			Node *getBestCandidate( void )
+			NodePtr getBestCandidate( void )
 			{
 				if ( !hasResults() ) {
 					return nullptr;
@@ -84,17 +87,17 @@ namespace crimild {
 			}
 
 		private:
-			std::list< Node * > _candidates;
+			std::list< NodePtr > _candidates;
 		};
 
 	public:
 		Picking( const Ray3f &tester, Results &results, FilterType filter = nullptr );
 		virtual ~Picking( void );
 
-		virtual void traverse( Node *node ) override;
+		virtual void traverse( NodePtr const &node ) override;
 
-		virtual void visitNode( Node *node ) override;
-		virtual void visitGroup( Group *node ) override;
+		virtual void visitNode( NodePtr const &node ) override;
+		virtual void visitGroup( GroupPtr const &node ) override;
 
 	private:
 		Ray3f _tester;

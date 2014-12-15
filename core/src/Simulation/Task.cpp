@@ -30,12 +30,13 @@
 using namespace crimild;
 
 Task::Task( int priority )
-	: _priority( priority ),
-	  _runLoop( nullptr )
+	: _priority( priority )
 {
+
 }
 
 Task::~Task( void )
 {
+
 }
 

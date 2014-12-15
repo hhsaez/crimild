@@ -30,11 +30,16 @@
 #include "Rendering/VisibilitySet.hpp"
 #include "Rendering/FrameBufferObject.hpp"
 #include "Rendering/RenderQueue.hpp"
+#include "Rendering/ImageEffect.hpp"
+
 #include "SceneGraph/Geometry.hpp"
+
 #include "Components/RenderStateComponent.hpp"
 #include "Components/SkinComponent.hpp"
 #include "Components/JointComponent.hpp"
+
 #include "Primitives/QuadPrimitive.hpp"
+
 #include "Foundation/Log.hpp"
 
 using namespace crimild;
@@ -49,43 +54,43 @@ ForwardRenderPass::~ForwardRenderPass( void )
     
 }
 
-void ForwardRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
+void ForwardRenderPass::render( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
     computeShadowMaps( renderer, renderQueue, camera );
     
     if ( _forwardPassBuffer == nullptr ) {
         int width = renderer->getScreenBuffer()->getWidth();
         int height = renderer->getScreenBuffer()->getHeight();
-        _forwardPassBuffer.set( new FrameBufferObject( width, height ) );
-        RenderTarget *result = new RenderTarget( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height );
+        _forwardPassBuffer = std::make_shared< FrameBufferObject >( width, height );
+        auto result = std::make_shared< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height );
         _forwardPassResult = result->getTexture();
         _forwardPassBuffer->getRenderTargets().add( result );
-        _forwardPassBuffer->getRenderTargets().add( new RenderTarget( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
+        _forwardPassBuffer->getRenderTargets().add( std::make_shared< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
         
         buildAccumBuffer( width, height );
     }
     
 #if 1
-    renderer->bindFrameBuffer( _forwardPassBuffer.get() );
+    renderer->bindFrameBuffer( _forwardPassBuffer );
     
     renderShadedObjects( renderer, renderQueue, camera );
     renderTranslucentObjects( renderer, renderQueue, camera );
     
-    renderer->unbindFrameBuffer( _forwardPassBuffer.get() );
+    renderer->unbindFrameBuffer( _forwardPassBuffer );
     
     if ( getImageEffects().isEmpty() ) {
-        RenderPass::render( renderer, _forwardPassResult.get(), nullptr );
+        RenderPass::render( renderer, _forwardPassResult, nullptr );
     }
     else {
         Texture *inputs[] = {
             _forwardPassResult.get(),
         };
         
-        getImageEffects().each( [&]( ImageEffect *effect, int ) {
-            effect->apply( renderer, 4, inputs, getScreenPrimitive(), _accumBuffer.get() );
+        getImageEffects().each( [&]( ImageEffectPtr const &effect, int ) {
+            effect->apply( renderer, 4, inputs, getScreenPrimitive(), _accumBuffer );
         });
         
-        RenderPass::render( renderer, _accumBufferOutput.get(), nullptr );
+        RenderPass::render( renderer, _accumBufferOutput, nullptr );
     }
 
     // UI elements need to be render on top of any image effect
@@ -98,22 +103,21 @@ void ForwardRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Ca
         }
     }
 #endif
-
 }
 
 void ForwardRenderPass::buildAccumBuffer( int width, int height )
 {
-    _accumBuffer.set( new FrameBufferObject( width, height ) );
-    _accumBuffer->getRenderTargets().add( new RenderTarget( RenderTarget::Type::DEPTH_16, RenderTarget::Output::RENDER, width, height ) );
+    _accumBuffer = std::make_shared< FrameBufferObject >( width, height );
+    _accumBuffer->getRenderTargets().add( std::make_shared< RenderTarget >( RenderTarget::Type::DEPTH_16, RenderTarget::Output::RENDER, width, height ) );
     
-    RenderTarget *colorTarget = new RenderTarget( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height );
+    auto colorTarget = std::make_shared< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height );
     _accumBufferOutput = colorTarget->getTexture();
     _accumBuffer->getRenderTargets().add( colorTarget );
 }
 
-void ForwardRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
+void ForwardRenderPass::computeShadowMaps( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
-    ShaderProgram *program = renderer->getDepthProgram();
+    auto program = renderer->getDepthProgram();
     if ( program == nullptr ) {
         return;
     }
@@ -121,43 +125,39 @@ void ForwardRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *rend
     // bind shader program first
     renderer->bindProgram( program );
     
-    renderQueue->getLights().each( [&]( Light *light, int ) {
+    renderQueue->getLights().each( [&]( LightPtr const &light, int ) {
         
         if ( !light->shouldCastShadows() ) {
             return;
         }
         
-        ShadowMap *map = _shadowMaps[ light ].get();
+        auto map = _shadowMaps[ light ];
         if ( map == nullptr ) {
-            Pointer< ShadowMap > shadowMapPtr( new ShadowMap( light ) );
-            shadowMapPtr->getBuffer()->setClearColor( RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ) );
-            shadowMapPtr->setLightProjectionMatrix( light->computeProjectionMatrix() );
-            _shadowMaps[ light ] = shadowMapPtr;
-            map = shadowMapPtr.get();
+            map = std::make_shared< ShadowMap >( light );
+            map->getBuffer()->setClearColor( RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ) );
+            map->setLightProjectionMatrix( light->computeProjectionMatrix() );
+            _shadowMaps[ light ] = map;
         }
         
         map->setLightViewMatrix( light->computeViewMatrix() );
         
         renderer->bindFrameBuffer( map->getBuffer() );
         
-        AlphaState alphaState( false );
-        renderer->setAlphaState( &alphaState );
+        renderer->setAlphaState( AlphaState::DISABLED );
+        renderer->setDepthState( DepthState::ENABLED );
         
-        DepthState depthState( true );
-        renderer->setDepthState( &depthState );
-        
-        renderQueue->getOpaqueObjects().each( [&]( Geometry *geometry, int ) {
-            RenderStateComponent *renderState = geometry->getComponent< RenderStateComponent >();
+        renderQueue->getOpaqueObjects().each( [&]( GeometryPtr const &geometry, int ) {
+            auto renderState = geometry->getComponent< RenderStateComponent >();
             if ( renderState->hasMaterials() ) {
-                geometry->foreachPrimitive( [&]( Primitive *primitive ) mutable {
+                geometry->foreachPrimitive( [&]( PrimitivePtr const &primitive ) mutable {
                     
                     renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LINEAR_DEPTH_CONSTANT_UNIFORM ), map->getLinearDepthConstant() );
                     
                     // bind joints and other skinning information
-                    SkinComponent *skinning = geometry->getComponent< SkinComponent >();
+                    auto skinning = geometry->getComponent< SkinComponent >();
                     if ( skinning != nullptr && skinning->hasJoints() ) {
-                        skinning->foreachJoint( [&]( Node *node, unsigned int index ) {
-                            JointComponent *joint = node->getComponent< JointComponent >();
+                        skinning->foreachJoint( [&]( NodePtr const &node, unsigned int index ) {
+                            auto joint = node->getComponent< JointComponent >();
                             renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::JOINT_WORLD_MATRIX_UNIFORM + index ), joint->getWorldMatrix() );
                             renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::JOINT_INVERSE_BIND_MATRIX_UNIFORM + index ), joint->getInverseBindMatrix() );
                         });
@@ -187,14 +187,14 @@ void ForwardRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *rend
     renderer->unbindProgram( program );
 }
 
-void ForwardRenderPass::renderShadedObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
+void ForwardRenderPass::renderShadedObjects( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
-    renderQueue->getOpaqueObjects().each( [&]( Geometry *geometry, int ) {
+    renderQueue->getOpaqueObjects().each( [&]( GeometryPtr const &geometry, int ) {
         
-        RenderStateComponent *renderState = geometry->getComponent< RenderStateComponent >();
-        renderState->foreachMaterial( [&]( Material *material ) {
-            geometry->foreachPrimitive( [&]( Primitive *primitive ) mutable {
-                ShaderProgram *program = renderer->getForwardPassProgram();
+        auto renderState = geometry->getComponent< RenderStateComponent >();
+        renderState->foreachMaterial( [&]( MaterialPtr const &material ) {
+            geometry->foreachPrimitive( [&]( PrimitivePtr const &primitive ) mutable {
+                auto program = renderer->getForwardPassProgram();
                 if ( program == nullptr ) {
                     program = material->getProgram() != nullptr ? material->getProgram() : renderer->getFallbackProgram( material, geometry, primitive );
                 }
@@ -221,15 +221,15 @@ void ForwardRenderPass::renderShadedObjects( Renderer *renderer, RenderQueue *re
                 }
                 
                 // bind lights
-                renderQueue->getLights().each( [&]( Light *light, int ) {
+                renderQueue->getLights().each( [&]( LightPtr const &light, int ) {
                     renderer->bindLight( program, light );
                 });
                 
                 // bind joints and other skinning information
-                SkinComponent *skinning = geometry->getComponent< SkinComponent >();
+                auto skinning = geometry->getComponent< SkinComponent >();
                 if ( skinning != nullptr && skinning->hasJoints() ) {
-                    skinning->foreachJoint( [&]( Node *node, unsigned int index ) {
-                        JointComponent *joint = node->getComponent< JointComponent >();
+                    skinning->foreachJoint( [&]( NodePtr const &node, unsigned int index ) {
+                        auto joint = node->getComponent< JointComponent >();
                         renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::JOINT_WORLD_MATRIX_UNIFORM + index ), joint->getWorldMatrix() );
                         renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::JOINT_INVERSE_BIND_MATRIX_UNIFORM + index ), joint->getInverseBindMatrix() );
                     });
@@ -251,7 +251,7 @@ void ForwardRenderPass::renderShadedObjects( Renderer *renderer, RenderQueue *re
                 renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
                 
                 // unbind lights
-                renderQueue->getLights().each( [&]( Light *light, int ) {
+                renderQueue->getLights().each( [&]( LightPtr const &light, int ) {
                     renderer->unbindLight( program, light );
                 });
                 
@@ -268,17 +268,16 @@ void ForwardRenderPass::renderShadedObjects( Renderer *renderer, RenderQueue *re
             });
         });
     });
-
 }
 
-void ForwardRenderPass::renderTranslucentObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
+void ForwardRenderPass::renderTranslucentObjects( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
-    renderQueue->getTranslucentObjects().each( [&]( Geometry *geometry, int ) {
+    renderQueue->getTranslucentObjects().each( [&]( GeometryPtr const &geometry, int ) {
         
-        RenderStateComponent *renderState = geometry->getComponent< RenderStateComponent >();
-        renderState->foreachMaterial( [&]( Material *material ) {
-            geometry->foreachPrimitive( [&]( Primitive *primitive ) mutable {
-                ShaderProgram *program = material->getProgram();
+        auto renderState = geometry->getComponent< RenderStateComponent >();
+        renderState->foreachMaterial( [&]( MaterialPtr const &material ) {
+            geometry->foreachPrimitive( [&]( PrimitivePtr const &primitive ) mutable {
+                auto program = material->getProgram();
                 if ( program == nullptr ) {
                     program = renderer->getFallbackProgram( material, geometry, primitive );
                 }
@@ -293,15 +292,15 @@ void ForwardRenderPass::renderTranslucentObjects( Renderer *renderer, RenderQueu
                 renderer->bindMaterial( program, material );
                 
                 // bind lights
-                renderQueue->getLights().each( [&]( Light *light, int ) {
+                renderQueue->getLights().each( [&]( LightPtr const &light, int ) {
                     renderer->bindLight( program, light );
                 });
                 
                 // bind joints and other skinning information
-                SkinComponent *skinning = geometry->getComponent< SkinComponent >();
+                auto skinning = geometry->getComponent< SkinComponent >();
                 if ( skinning != nullptr && skinning->hasJoints() ) {
-                    skinning->foreachJoint( [&]( Node *node, unsigned int index ) {
-                        JointComponent *joint = node->getComponent< JointComponent >();
+                    skinning->foreachJoint( [&]( NodePtr const &node, unsigned int index ) {
+                        auto joint = node->getComponent< JointComponent >();
                         renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::JOINT_WORLD_MATRIX_UNIFORM + index ), joint->getWorldMatrix() );
                         renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::JOINT_INVERSE_BIND_MATRIX_UNIFORM + index ), joint->getInverseBindMatrix() );
                     });
@@ -323,7 +322,7 @@ void ForwardRenderPass::renderTranslucentObjects( Renderer *renderer, RenderQueu
                 renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
                 
                 // unbind lights
-                renderQueue->getLights().each( [&]( Light *light, int ) {
+                renderQueue->getLights().each( [&]( LightPtr const &light, int ) {
                     renderer->unbindLight( program, light );
                 });
                 
@@ -334,6 +333,5 @@ void ForwardRenderPass::renderTranslucentObjects( Renderer *renderer, RenderQueu
             });
         });
     });
-    
 }
 

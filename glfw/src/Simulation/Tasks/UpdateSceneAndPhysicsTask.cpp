@@ -47,39 +47,39 @@ UpdateSceneAndPhysicsTask::~UpdateSceneAndPhysicsTask( void )
 
 void UpdateSceneAndPhysicsTask::start( void )
 {
-	_dtAccumulator = 0.0f;
-
-	float gx = Simulation::getCurrent()->getSettings().get( "physics.gravity.x", 0.0f );
-	float gy = Simulation::getCurrent()->getSettings().get( "physics.gravity.y", -9.8f );
-	float gz = Simulation::getCurrent()->getSettings().get( "physics.gravity.z", 0.0f );
-	PhysicsContext::getInstance().setGravity( Vector3f( gx, gy, gz ) );
+    _dtAccumulator = 0.0f;
+    
+    float gx = Simulation::getCurrent()->getSettings().get( "physics.gravity.x", 0.0f );
+    float gy = Simulation::getCurrent()->getSettings().get( "physics.gravity.y", -9.8f );
+    float gz = Simulation::getCurrent()->getSettings().get( "physics.gravity.z", 0.0f );
+    PhysicsContext::getInstance().setGravity( Vector3f( gx, gy, gz ) );
 }
 
 void UpdateSceneAndPhysicsTask::update( void )
 {
-	const Time &t = Simulation::getCurrent()->getSimulationTime();
-	
-	_dtAccumulator += t.getDeltaTime();
-
-	Node *scene = Simulation::getCurrent()->getScene();
-	if ( scene == nullptr ) {
-		return;
-	}
-
-	scene->perform( UpdateComponents( t ) );
-
-	Time fixed = t;
-	fixed.setDeltaTime( CRIMILD_SIMULATION_TIME );
-	
-	while ( scene != nullptr && _dtAccumulator >= CRIMILD_SIMULATION_TIME ) {
-		PhysicsContext::getInstance().step( CRIMILD_SIMULATION_TIME );
-		
-		scene->perform( Apply( [&]( Node *n ) { 
-			n->updateComponentsWithFixedTime( fixed );
-		}));
-
-		_dtAccumulator -= CRIMILD_SIMULATION_TIME;
-	}
+    const Time &t = Simulation::getCurrent()->getSimulationTime();
+    
+    _dtAccumulator += t.getDeltaTime();
+    
+    auto scene = Simulation::getCurrent()->getScene();
+    if ( scene == nullptr ) {
+        return;
+    }
+    
+    scene->perform( UpdateComponents( t ) );
+    
+    Time fixed = t;
+    fixed.setDeltaTime( CRIMILD_SIMULATION_TIME );
+    
+    while ( scene != nullptr && _dtAccumulator >= CRIMILD_SIMULATION_TIME ) {
+        PhysicsContext::getInstance().step( CRIMILD_SIMULATION_TIME );
+        
+        scene->perform( Apply( [&]( NodePtr const &n ) {
+            n->updateComponentsWithFixedTime( fixed );
+        }));
+        
+        _dtAccumulator -= CRIMILD_SIMULATION_TIME;
+    }
 }
 
 void UpdateSceneAndPhysicsTask::stop( void )

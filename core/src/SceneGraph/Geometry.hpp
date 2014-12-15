@@ -36,26 +36,27 @@
 
 namespace crimild {
 
-	class Geometry : public Node {
+    class Geometry : public Node {
 	public:
 		explicit Geometry( std::string name = "" );
 		virtual ~Geometry( void );
 
 		bool hasPrimitives( void ) const { return _primitives.size(); }
-		void attachPrimitive( Primitive *primitive );
-		void detachPrimitive( Primitive *primitive );
+		void attachPrimitive( PrimitivePtr const &primitive );
+		void detachPrimitive( PrimitivePtr const &primitive );
 		void detachAllPrimitives( void );
-		void foreachPrimitive( std::function< void( Primitive * ) > callback );
+		void foreachPrimitive( std::function< void( PrimitivePtr const & ) > callback );
 
 		void updateModelBounds( void );
 
 	private:
-		std::list< Pointer< Primitive > > _primitives;
+		std::list< PrimitivePtr > _primitives;
 
 	public:
 		virtual void accept( NodeVisitor &visitor ) override;
-		
 	};
+    
+    using GeometryPtr = std::shared_ptr< Geometry >;
 
 }
 

@@ -33,6 +33,7 @@
 namespace crimild {
 
 	class Light : public Node {
+            
 	public:
 		enum class Type {
 			POINT,
@@ -98,6 +99,8 @@ namespace crimild {
 		Light( const Light & ) { }
 		Light &operator=( const Light & ) { return *this; }
 	};
+    
+    using LightPtr = std::shared_ptr< Light >;
 
 }
 

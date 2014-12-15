@@ -33,9 +33,9 @@
 
 using namespace crimild;
 
-DebugRenderPass::DebugRenderPass( RenderPass *actualRenderPass )
+DebugRenderPass::DebugRenderPass( RenderPassPtr const &actualRenderPass )
 	: _actualRenderPass( actualRenderPass ),
-	  _debugMaterial( new Material() )
+      _debugMaterial( std::make_shared< Material >() )
 {
 	_renderBoundings = false;
 	_renderNormals = false;
@@ -46,36 +46,36 @@ DebugRenderPass::~DebugRenderPass( void )
 
 }
 
-void DebugRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
+void DebugRenderPass::render( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
 	if ( _actualRenderPass != nullptr ) {
 		_actualRenderPass->render( renderer, renderQueue, camera );
 	}
     
-    renderQueue->getOpaqueObjects().each( [&]( Geometry *geometry, int ) {
+    renderQueue->getOpaqueObjects().each( [&]( GeometryPtr const &geometry, int ) {
 		if ( _renderBoundings ) {
-			renderBoundings( renderer, geometry, _debugMaterial.get(), camera );
+			renderBoundings( renderer, geometry, _debugMaterial, camera );
 		}
         
 		if ( _renderNormals ) {
-			renderNormalsAndTangents( renderer, geometry, _debugMaterial.get(), camera );
+			renderNormalsAndTangents( renderer, geometry, _debugMaterial, camera );
 		}
     });
 }
 
-void DebugRenderPass::renderNormalsAndTangents( Renderer *renderer, Geometry *geometry, Material *material, Camera *camera )
+void DebugRenderPass::renderNormalsAndTangents( RendererPtr const &renderer, GeometryPtr const &geometry, MaterialPtr const &material, CameraPtr const &camera )
 {
 	std::vector< float > vertices;
 
-	geometry->foreachPrimitive( [&]( Primitive *primitive ) {
-		VertexBufferObject *vbo = primitive->getVertexBuffer();
+	geometry->foreachPrimitive( [&]( PrimitivePtr const &primitive ) {
+		auto vbo = primitive->getVertexBuffer();
 		const VertexFormat &vf = vbo->getVertexFormat();
 
 		for ( int i = 0; i < vbo->getVertexCount(); i++ ) {
-			Vector3f pos = vbo->getPositionAt( i );
+			auto pos = vbo->getPositionAt( i );
 
 			// render normals
-			Vector3f normal = vbo->getNormalAt( i );
+			auto normal = vbo->getNormalAt( i );
 			vertices.push_back( pos[ 0 ] ); vertices.push_back( pos[ 1 ] ); vertices.push_back( pos[ 2 ] );
 			vertices.push_back( 1.0f ); vertices.push_back( 1.0f ); vertices.push_back( 1.0f ); vertices.push_back( 1.0f );
 			vertices.push_back( pos[ 0 ] + 0.05 * normal[ 0 ] ); vertices.push_back( pos[ 1 ] + 0.05 * normal[ 1 ] ); vertices.push_back( pos[ 2 ] + 0.05 * normal[ 2 ] );
@@ -91,7 +91,7 @@ void DebugRenderPass::renderNormalsAndTangents( Renderer *renderer, Geometry *ge
 		}
 	});
 
-	VertexFormat format = VertexFormat::VF_P3_C4;
+	auto format = VertexFormat::VF_P3_C4;
 
 	int vertexCount = vertices.size() / format.getVertexSize();
 	std::vector< unsigned short > indices( vertexCount );
@@ -99,27 +99,27 @@ void DebugRenderPass::renderNormalsAndTangents( Renderer *renderer, Geometry *ge
 		indices.push_back( i );
 	}
 
-	Pointer< VertexBufferObject > vbo( new VertexBufferObject( format, vertexCount, &vertices[ 0 ] ) );
-	Pointer< IndexBufferObject > ibo( new IndexBufferObject( indices.size(), &indices[ 0 ] ) );
-	Pointer< Primitive > primitive( new Primitive( Primitive::Type::LINES ) );
-	primitive->setVertexBuffer( vbo.get() );
-	primitive->setIndexBuffer( ibo.get() );
+    auto vbo = std::make_shared< VertexBufferObject >( format, vertexCount, &vertices[ 0 ] );
+    auto ibo = std::make_shared< IndexBufferObject >( indices.size(), &indices[ 0 ] );
+    auto primitive = std::make_shared< Primitive >( Primitive::Type::LINES );
+	primitive->setVertexBuffer( vbo );
+	primitive->setIndexBuffer( ibo );
 
-	RenderPass::render( renderer, geometry, primitive.get(), material, camera );
+	RenderPass::render( renderer, geometry, primitive, material, camera );
 }
 
-void DebugRenderPass::renderBoundings( Renderer *renderer, Geometry *geometry, Material *material, Camera *camera )
+void DebugRenderPass::renderBoundings( RendererPtr const &renderer, GeometryPtr const &geometry, MaterialPtr const &material, CameraPtr const &camera )
 {
-	Pointer< SpherePrimitive > primitive( new SpherePrimitive( 
+    auto primitive = std::make_shared< SpherePrimitive >(
 		geometry->getWorldBound()->getRadius(), 
 		VertexFormat::VF_P3, 
 		Vector2i( 30, 30 ), 
-		geometry->getLocalBound()->getCenter() ) );
+		geometry->getLocalBound()->getCenter() );
 
 	material->getAlphaState()->setEnabled( true );
 	material->getDepthState()->setEnabled( false );
 	material->setDiffuse( RGBAColorf( 0.0f, 0.0f, 1.0f, 0.25f ) );
 	
-	RenderPass::render( renderer, geometry, primitive.get(), material, camera );	
+	RenderPass::render( renderer, geometry, primitive, material, camera );
 }
 

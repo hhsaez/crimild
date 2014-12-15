@@ -97,11 +97,11 @@ void PhysicsContext::step( float dt )
             physics::RigidBodyComponent *rbB = static_cast< physics::RigidBodyComponent * >( objB->getUserPointer() );
  
             if ( rbA != nullptr ) {
-            	rbA->onCollision( rbB );
+            	rbA->onCollision( rbB->getShared< RigidBodyComponent >() );
             }
 
             if ( rbB != nullptr ) {
-            	rbB->onCollision( rbA );
+            	rbB->onCollision( rbA->getShared< RigidBodyComponent >() );
             }
 		}
     }

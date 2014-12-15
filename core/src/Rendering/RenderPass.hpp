@@ -29,47 +29,51 @@
 #define CRIMILD_RENDERER_RENDER_PASS_
 
 #include "Foundation/SharedObject.hpp"
+#include "Foundation/Pointer.hpp"
 #include "Foundation/SharedObjectList.hpp"
-#include "Primitives/Primitive.hpp"
-#include "Rendering/ImageEffect.hpp"
 
 namespace crimild {
-
-	class Renderer;
-	class VisibilitySet;
-	class Geometry;
-	class Material;
-	class Camera;
-	class FrameBufferObject;
-	class ShaderProgram;
+    
+    class Camera;
+    class FrameBufferObject;
+    class Geometry;
+    class ImageEffect;
+    class Material;
+    class Primitive;
+    class Renderer;
     class RenderQueue;
+    class ShaderProgram;
     class Texture;
+    class VisibilitySet;
 
 	class RenderPass : public SharedObject {
 	public:
 		RenderPass( void );
 		virtual ~RenderPass( void );
 
-        virtual void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
-		virtual void render( Renderer *renderer, VisibilitySet *vs, Camera *camera );
-		virtual void render( Renderer *renderer, Geometry *geometry, Camera *camera );
-		virtual void render( Renderer *renderer, Geometry *geometry, Primitive *primitive, Material *material, Camera *camera );
-        virtual void render( Renderer *renderer, Texture *texture, ShaderProgram *program );
-		virtual void render( Renderer *renderer, FrameBufferObject *fbo, ShaderProgram *program );
+        virtual void render( std::shared_ptr< Renderer > const &renderer, std::shared_ptr< RenderQueue > const &renderQueue, std::shared_ptr< Camera > const &camera );
+		virtual void render( std::shared_ptr< Renderer > const &renderer, std::shared_ptr< VisibilitySet > const &vs, std::shared_ptr< Camera > const &camera );
+		virtual void render( std::shared_ptr< Renderer > const &renderer, std::shared_ptr< Geometry > const &geometry, std::shared_ptr< Camera > const &camera );
+		virtual void render( std::shared_ptr< Renderer > const &renderer, std::shared_ptr< Geometry > const &geometry, std::shared_ptr< Primitive > const &primitive, std::shared_ptr< Material > const &material, std::shared_ptr< Camera > const &camera );
+        virtual void render( std::shared_ptr< Renderer > const &renderer, std::shared_ptr< Texture > const &texture, std::shared_ptr< ShaderProgram > const &program );
+		virtual void render( std::shared_ptr< Renderer > const &renderer, std::shared_ptr< FrameBufferObject > const &fbo, std::shared_ptr< ShaderProgram > const &program );
         
         SharedObjectList< ImageEffect > &getImageEffects( void ) { return _imageEffects; }
         
     protected:
-        Primitive *getScreenPrimitive( void ) { return _screen.get(); }
+        std::shared_ptr< Primitive > &getScreenPrimitive( void ) { return _screen; }
 
-        virtual void renderScreenObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+        virtual void renderScreenObjects( std::shared_ptr< Renderer > const &renderer, std::shared_ptr< RenderQueue > const &renderQueue, std::shared_ptr< Camera > const &camera );
 
 	private:
-		Pointer< Primitive > _screen;
+		std::shared_ptr< Primitive > _screen;
         SharedObjectList< ImageEffect > _imageEffects;
 	};
+    
+    using RenderPassPtr = std::shared_ptr< RenderPass >;
 
-	typedef RenderPass BasicRenderPass;
+    using BasicRenderPass = RenderPass;
+    using BasicRenderPassPtr = RenderPassPtr;
 
 }
 

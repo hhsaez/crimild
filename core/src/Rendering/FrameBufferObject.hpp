@@ -67,7 +67,7 @@ namespace crimild {
         int getWidth( void ) const { return _width; }
         int getHeight( void ) const { return _height; }
         
-        Texture *getTexture( void ) { return _texture.get(); }
+        TexturePtr &getTexture( void ) { return _texture; }
         bool useFloatTexture( void ) const { return _useFloatTexture; }
         void setUseFloatTexture( bool value ) { _useFloatTexture = value; }
         
@@ -77,9 +77,11 @@ namespace crimild {
         Output _output;
         int _width;
         int _height;
-        Pointer< Texture > _texture;
+        TexturePtr _texture;
         bool _useFloatTexture = false;
     };
+    
+    using RenderTargetPtr = std::shared_ptr< RenderTarget >;
 
 	class FrameBufferObject : public Catalog< FrameBufferObject >::Resource {
 	public:
@@ -100,6 +102,8 @@ namespace crimild {
 		RGBAColorf _clearColor;
         SharedObjectList< RenderTarget > _renderTargets;
 	};
+    
+    using FrameBufferObjectPtr = std::shared_ptr< FrameBufferObject >;
 
 	typedef Catalog< FrameBufferObject > FrameBufferObjectCatalog;
 }

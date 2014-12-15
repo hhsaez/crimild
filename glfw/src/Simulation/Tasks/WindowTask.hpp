@@ -40,10 +40,6 @@ namespace crimild {
 		virtual void start( void ) override;
 		virtual void update( void ) override;
 		virtual void stop( void ) override;
-
-	private:
-		unsigned int _width;
-		unsigned int _height;
 	};
 
 	typedef std::shared_ptr< WindowTask > WindowTaskPtr;

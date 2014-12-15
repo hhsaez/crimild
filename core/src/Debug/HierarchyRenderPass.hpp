@@ -30,31 +30,34 @@
 
 #include "Rendering/RenderPass.hpp"
 #include "Rendering/Material.hpp"
+#include "Rendering/Renderer.hpp"
+#include "Rendering/RenderQueue.hpp"
 #include "SceneGraph/Node.hpp"
+#include "SceneGraph/Camera.hpp"
 
 namespace crimild {
 
 	class HierarchyRenderPass : public RenderPass {
 	public:
 		HierarchyRenderPass( void );
-		explicit HierarchyRenderPass( RenderPass *actualRenderPass );
+		explicit HierarchyRenderPass( RenderPassPtr const &actualRenderPass );
 		virtual ~HierarchyRenderPass( void );
 
-		void setTargetScene( Node *scene ) { _targetScene = scene; }
-		Node *getTargetScene( void ) { return _targetScene.get(); }
+		void setTargetScene( NodePtr const &scene ) { _targetScene = scene; }
+		NodePtr &getTargetScene( void ) { return _targetScene; }
 
 		void setRenderBoundings( bool value ) { _renderBoundings = value; }
 		bool shouldRenderBoundings( void ) const { return _renderBoundings; }
 
-		virtual void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+        virtual void render( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera ) override;
 
 	private:
-		void renderBoundings( Renderer *renderer, Geometry *geometry, Material *material, Camera *camera );
+		void renderBoundings( RendererPtr const &renderer, GeometryPtr const &geometry, MaterialPtr const &material, CameraPtr const &camera );
 
 		bool _renderBoundings;
-		Pointer< RenderPass > _actualRenderPass;
-		Pointer< Material > _debugMaterial;
-		Pointer< Node > _targetScene;
+		RenderPassPtr _actualRenderPass;
+		MaterialPtr _debugMaterial;
+		NodePtr _targetScene;
 	};
 
 }

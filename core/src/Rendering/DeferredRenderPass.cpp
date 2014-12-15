@@ -49,8 +49,9 @@ DeferredRenderPass::~DeferredRenderPass( void )
     
 }
 
-void DeferredRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
+void DeferredRenderPass::render( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
+    /*
     computeShadowMaps( renderer, renderQueue, camera );
     
 #if 1
@@ -82,20 +83,24 @@ void DeferredRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, C
         }
     }
 #endif
+     */
 }
 
 void DeferredRenderPass::buildAccumBuffer( int width, int height )
 {
+    /*
     _accumBuffer.set( new FrameBufferObject( width, height ) );
     _accumBuffer->getRenderTargets().add( new RenderTarget( RenderTarget::Type::DEPTH_16, RenderTarget::Output::RENDER, width, height ) );
     
     RenderTarget *colorTarget = new RenderTarget( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height );
     _accumBufferOutput = colorTarget->getTexture();
     _accumBuffer->getRenderTargets().add( colorTarget );
+     */
 }
 
 void DeferredRenderPass::buildGBuffer( int width, int height )
 {
+    /*
     _gBuffer.set( new FrameBufferObject( width, height ) );
     RenderTarget *depthTarget = new RenderTarget( RenderTarget::Type::DEPTH_16, RenderTarget::Output::RENDER, width, height );
     _gBufferDepthOutput = depthTarget->getTexture();
@@ -123,10 +128,12 @@ void DeferredRenderPass::buildGBuffer( int width, int height )
     if ( _accumBuffer == nullptr ) {
         buildAccumBuffer( width, height );
     }
+     */
 }
 
-void DeferredRenderPass::renderToGBuffer( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
+void DeferredRenderPass::renderToGBuffer( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
+    /*
     if ( _gBuffer == nullptr ) {
         int width = renderer->getScreenBuffer()->getWidth();
         int height = renderer->getScreenBuffer()->getHeight();
@@ -186,20 +193,24 @@ void DeferredRenderPass::renderToGBuffer( Renderer *renderer, RenderQueue *rende
     });
     
     renderer->unbindFrameBuffer( _gBuffer.get() );
+     */
 }
 
 void DeferredRenderPass::buildFrameBuffer(int width, int height )
 {
+    /*
     _frameBuffer.set( new FrameBufferObject( width, height ) );
     _frameBuffer->getRenderTargets().add( new RenderTarget( RenderTarget::Type::DEPTH_16, RenderTarget::Output::RENDER, width, height ) );
     
     RenderTarget *colorTarget = new RenderTarget( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height );
     _frameBufferOutput = colorTarget->getTexture();
     _frameBuffer->getRenderTargets().add( colorTarget );
+     */
 }
 
-void DeferredRenderPass::composeFrame( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
+void DeferredRenderPass::composeFrame( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
+    /*
     if ( _frameBuffer == nullptr ) {
         int width = renderer->getScreenBuffer()->getWidth();
         int height = renderer->getScreenBuffer()->getHeight();
@@ -276,10 +287,12 @@ void DeferredRenderPass::composeFrame( Renderer *renderer, RenderQueue *renderQu
     
     // unbind buffer for ssao output
     renderer->unbindFrameBuffer( _frameBuffer.get() );
+     */
 }
 
-void DeferredRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
+void DeferredRenderPass::computeShadowMaps( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
+    /*
     ShaderProgram *program = renderer->getDepthProgram();
     if ( program == nullptr ) {
         return;
@@ -352,5 +365,6 @@ void DeferredRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *ren
     
     // unbind the shader program
     renderer->unbindProgram( program );
+     */
 }
 

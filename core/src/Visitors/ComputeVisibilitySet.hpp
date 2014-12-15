@@ -30,28 +30,31 @@
 
 #include "NodeVisitor.hpp"
 
-namespace crimild {
+#include "SceneGraph/Node.hpp"
+#include "SceneGraph/Geometry.hpp"
+#include "SceneGraph/Camera.hpp"
 
-	class VisibilitySet;
-	class Camera;
+#include "Rendering/VisibilitySet.hpp"
+
+namespace crimild {
 
 	class ComputeVisibilitySet : public NodeVisitor {
 	public:
-		ComputeVisibilitySet( VisibilitySet *result, Camera *camera );
+		ComputeVisibilitySet( VisibilitySetPtr const &result, CameraPtr const &camera );
 
 		virtual ~ComputeVisibilitySet( void );
 
-		VisibilitySet *getResult( void ) { return _result; }
+		VisibilitySetPtr const &getResult( void ) { return _result; }
 
-		Camera *getCamera( void ) { return _camera; }
+		CameraPtr getCamera( void ) { return _camera; }
 
-		virtual void traverse( Node *node ) override;
+		virtual void traverse( NodePtr const &node ) override;
 
-		virtual void visitGeometry( Geometry *geometry ) override;
+		virtual void visitGeometry( GeometryPtr const &geometry ) override;
 
 	private:
-		VisibilitySet *_result;
-		Camera *_camera;
+		VisibilitySetPtr _result;
+		CameraPtr _camera;
 	};
 
 }

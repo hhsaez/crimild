@@ -35,7 +35,7 @@ QuadPrimitive::QuadPrimitive( float width, float height, const VertexFormat &for
     float halfWidth = 0.5f * width;
     float halfHeigh = 0.5f * height;
     
-    Pointer< VertexBufferObject > vbo( new VertexBufferObject( format, 4, nullptr ) );
+    auto vbo = std::make_shared< VertexBufferObject >( format, 4, nullptr );
     float *vertex = vbo->getData();
     
     // bottom left vertex
@@ -110,11 +110,11 @@ QuadPrimitive::QuadPrimitive( float width, float height, const VertexFormat &for
     
     vertex += format.getVertexSize();
     
-    setVertexBuffer( vbo.get() );
+    setVertexBuffer( vbo );
     
     unsigned short indices[] = { 0, 1, 2, 3 };
-    Pointer< IndexBufferObject > ibo( new IndexBufferObject( 4, indices ) );
-    setIndexBuffer( ibo.get() );
+    auto ibo = std::make_shared< IndexBufferObject >( 4, indices );
+    setIndexBuffer( ibo );
 }
 
 QuadPrimitive::~QuadPrimitive( void )

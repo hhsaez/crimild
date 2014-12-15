@@ -29,9 +29,10 @@
 #define CRIMILD_RENDERER_RENDER_STATE_
 
 #include "Foundation/SharedObject.hpp"
+#include "Foundation/Pointer.hpp"
 
 namespace crimild {
-
+    
 	class RenderState : public SharedObject {
 	protected:
 		RenderState( bool enabled );
@@ -45,6 +46,8 @@ namespace crimild {
 	private:
 		bool _enabled;
 	};
+    
+    using RenderStatePtr = std::shared_ptr< RenderState >;
 
 }
 

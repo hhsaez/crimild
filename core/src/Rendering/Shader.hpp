@@ -33,7 +33,7 @@
 #include <string>
 
 namespace crimild {
-
+    
 	class Shader : public SharedObject {
 	public:
 		explicit Shader( std::string source );
@@ -44,9 +44,14 @@ namespace crimild {
 	private:
 		std::string _source;
 	};
-
-	typedef Shader VertexShader;
-	typedef Shader FragmentShader;
+    
+    using ShaderPtr = std::shared_ptr< Shader >;
+    
+    using VertexShader = Shader;
+    using VertexShaderPtr = ShaderPtr;
+    
+    using FragmentShader = Shader;
+    using FragmentShaderPtr = ShaderPtr;
 
 }
 

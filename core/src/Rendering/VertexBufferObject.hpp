@@ -58,8 +58,9 @@ namespace crimild {
 		VertexFormat _vertexFormat;
 		unsigned int _vertexCount;
 	};
-
-	typedef Catalog< VertexBufferObject > VertexBufferObjectCatalog;
+    
+    using VertexBufferObjectPtr = std::shared_ptr< VertexBufferObject >;
+    using VertexBufferObjectCatalog = Catalog< VertexBufferObject >;
 
 }
 

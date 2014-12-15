@@ -67,6 +67,8 @@ namespace crimild {
         Vector2i _divisions;
         Vector2i _textureCount;
     };
+    
+    using ParametricPrimitivePtr = std::shared_ptr< ParametricPrimitive >;
         
 }
 

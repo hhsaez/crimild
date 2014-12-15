@@ -30,27 +30,68 @@
 
 #include "SharedObject.hpp"
 
+#include <mutex>
+
 namespace crimild {
+    
+    /*
+    template< class T >
+    class LockingProxy {
+    public:
+        LockingProxy( T *obj )
+            : _pointee( obj )
+        {
+            _pointee->lock();
+        }
+        
+        LockingProxy( const LockingProxy &proxy )
+            : _pointee( proxy._pointee )
+        {
+            _pointee->lock();
+        }
+        
+        virtual ~LockingProxy( void )
+        {
+            _pointee->unlock();
+        }
+        
+        T *operator->( void ) const
+        {
+            return _pointee;
+        }
+        
+    private:
+        LockingProxy &operator=( const LockingProxy & );
+        
+    private:
+        T *_pointee;
+    };
     
     template< class T >
     class Pointer {
     public:
-        Pointer( void ) : _data( nullptr ) { }
-        explicit Pointer( T *data ) : _data( data ) { if ( _data != nullptr ) _data->retain(); }
-        Pointer( const Pointer &ptr ) : _data( ptr._data ) { if ( _data != nullptr ) _data->retain(); }
+        static Pointer< T > make( T *data ) { return Pointer< T >( data ); }
+        
+    public:
+        Pointer( void ) { }
+        explicit Pointer( T *data ) { set( data ); }
+        Pointer( const Pointer &ptr ) { set( ptr.getPtr() ); }
         
         template< class U >
-        Pointer( const Pointer< U > &ptr ) : _data( ptr.get() ) { if ( _data != nullptr ) _data->retain(); }
+        Pointer( const Pointer< U > &ptr ) { set( ptr.getPtr() ); }
         
-        ~Pointer( void ) { if ( _data != nullptr ) { _data->release(); _data = nullptr; } }
+        ~Pointer( void ) { set( nullptr ); }
         
         T &operator*( void ) const { return &_data; }
-        T *operator->( void ) const { return _data; }
+
+        LockingProxy< T > operator->( void ) const { return LockingProxy< T >( _data ); }
         
-        T *get( void ) const { return _data; }
+        // internal use only
+        T *getPtr( void ) const { return _data; }
         
         void set( T *data )
         {
+            _mutex.lock();
             if ( data != _data ) {
                 if ( _data != nullptr ) {
                     _data->release();
@@ -62,6 +103,7 @@ namespace crimild {
                     _data->retain();
                 }
             }
+            _mutex.unlock();
         }
         
         Pointer &operator=( T *data )
@@ -72,14 +114,14 @@ namespace crimild {
         
         Pointer &operator=( const Pointer &ptr )
         {
-            set( ptr.get() );
+            set( ptr.getPtr() );
             return *this;
         }
         
         template< class U >
         Pointer &operator=( const Pointer< U > &ptr )
         {
-            set( ptr.get() );
+            set( ptr.getPtr() );
             return *this;
         }
         
@@ -90,7 +132,17 @@ namespace crimild {
         
     private:
         T *_data = nullptr;
+        std::mutex _mutex;
     };
+    
+    template< class T >
+    class WeakPointer {
+    public:
+    private:
+        T *_pointee;
+    };
+     
+     */
     
 }
 

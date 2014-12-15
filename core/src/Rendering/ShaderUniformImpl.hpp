@@ -34,7 +34,7 @@
 #include "Mathematics/Vector.hpp"
 
 namespace crimild {
-
+    
 	template< typename T >
 	class ShaderUniformImpl : public ShaderUniform {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( ShaderUniformImpl< T > );
@@ -53,7 +53,7 @@ namespace crimild {
 		void setValue( const T &value ) { _value = value; }
 		const T &getValue( void ) const { return _value; }
 
-		virtual void onBind( Renderer *renderer ) override 
+		virtual void onBind( std::shared_ptr< Renderer > const &renderer ) override
 		{
 			renderer->bindUniform( getLocation(), getValue() );
 		}
@@ -63,10 +63,19 @@ namespace crimild {
 	};
 
 	typedef ShaderUniformImpl< bool > BoolUniform;
+    using BoolUniformPtr = std::shared_ptr< BoolUniform >;
+    
 	typedef ShaderUniformImpl< int > IntUniform;
+    using IntUniformPtr = std::shared_ptr< IntUniform >;
+    
 	typedef ShaderUniformImpl< float > FloatUniform;
+    using FloatUniformPtr = std::shared_ptr< FloatUniform >;
+    
 	typedef ShaderUniformImpl< Vector3f > Vector3fUniform;
+    using Vector3fUniformPtr = std::shared_ptr< Vector3fUniform >;
+
 	typedef ShaderUniformImpl< Matrix3f > Matrix3fUniform;
+    using Matrix3fUniformPtr = std::shared_ptr< Matrix3fUniform >;
 
 }
 

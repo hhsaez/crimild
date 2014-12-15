@@ -85,8 +85,8 @@ BoxPrimitive::BoxPrimitive( float width, float height, float depth, const Vertex
         20, 21, 22, 20, 22, 23
     };
 
-    setVertexBuffer( new VertexBufferObject( VertexFormat::VF_P3_N3, 24, vertices ) );
-    setIndexBuffer( new IndexBufferObject( 36, indices ) );
+    setVertexBuffer( std::make_shared< VertexBufferObject >( VertexFormat::VF_P3_N3, 24, vertices ) );
+    setIndexBuffer( std::make_shared< IndexBufferObject >( 36, indices ) );
 }
 
 BoxPrimitive::~BoxPrimitive( void )

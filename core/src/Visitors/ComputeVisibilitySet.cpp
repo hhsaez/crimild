@@ -32,7 +32,7 @@
 
 using namespace crimild;
 
-ComputeVisibilitySet::ComputeVisibilitySet( VisibilitySet *result, Camera *camera )
+ComputeVisibilitySet::ComputeVisibilitySet( VisibilitySetPtr const &result, CameraPtr const &camera )
 	: _result( result ),
 	  _camera( camera )
 {
@@ -44,7 +44,7 @@ ComputeVisibilitySet::~ComputeVisibilitySet( void )
 
 }
 
-void ComputeVisibilitySet::traverse( Node *node )
+void ComputeVisibilitySet::traverse( NodePtr const &node )
 {
 	_result->reset();
 	_result->setCamera( _camera );
@@ -52,7 +52,7 @@ void ComputeVisibilitySet::traverse( Node *node )
 	NodeVisitor::traverse( node );
 }
 
-void ComputeVisibilitySet::visitGeometry( Geometry *geometry )
+void ComputeVisibilitySet::visitGeometry( GeometryPtr const &geometry )
 {
 	_result->addGeometry( geometry );
 }

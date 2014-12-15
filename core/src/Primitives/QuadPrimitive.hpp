@@ -42,6 +42,8 @@ namespace crimild {
         
         virtual ~QuadPrimitive( void );
     };
+    
+    using QuadPrimitivePtr = std::shared_ptr< QuadPrimitive >;
         
 }
 

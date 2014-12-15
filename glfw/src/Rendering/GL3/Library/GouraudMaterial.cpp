@@ -33,7 +33,7 @@ using namespace crimild::gl3;
 
 GouraudMaterial::GouraudMaterial( void )
 {
-	setProgram( new GouraudShaderProgram() );
+    setProgram( std::make_shared< GouraudShaderProgram >() );
 }
 
 GouraudMaterial::~GouraudMaterial( void )

@@ -44,16 +44,16 @@ BeginRenderTask::~BeginRenderTask( void )
 
 void BeginRenderTask::start( void )
 {
-	Renderer *renderer = Simulation::getCurrent()->getRenderer();
-	if ( renderer ) {
+    auto renderer = Simulation::getCurrent()->getRenderer();
+	if ( renderer != nullptr ) {
 		renderer->configure();
 	}
 }
 
 void BeginRenderTask::update( void )
 {
-	Renderer *renderer = Simulation::getCurrent()->getRenderer();
-	if ( renderer ) {
+    auto renderer = Simulation::getCurrent()->getRenderer();
+	if ( renderer != nullptr ) {
 		renderer->beginRender();
 		renderer->clearBuffers();
 	}

@@ -30,20 +30,23 @@
 
 #include "NodeVisitor.hpp"
 
+#include "SceneGraph/Node.hpp"
+#include "SceneGraph/Group.hpp"
+
 #include <functional>
 
 namespace crimild {
 
 	class Apply : public NodeVisitor {
 	private:
-		typedef std::function< void( Node * ) > CallbackType;
+		typedef std::function< void( NodePtr const & ) > CallbackType;
 
 	public:
 		explicit Apply( CallbackType callback );
 		virtual ~Apply( void );
 
-		virtual void visitNode( Node *node ) override;
-		virtual void visitGroup( Group *node ) override;
+		virtual void visitNode( NodePtr const &node ) override;
+		virtual void visitGroup( GroupPtr const &node ) override;
 
 	private:
 		CallbackType _callback;

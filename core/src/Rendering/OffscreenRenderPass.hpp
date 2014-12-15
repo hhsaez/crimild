@@ -31,6 +31,11 @@
 #include "RenderPass.hpp"
 #include "FrameBufferObject.hpp"
 #include "ImageEffect.hpp"
+#include "Renderer.hpp"
+#include "RenderQueue.hpp"
+#include "ShadowMap.hpp"
+
+#include "SceneGraph/Camera.hpp"
 
 #include <list>
 
@@ -41,13 +46,13 @@ namespace crimild {
 		OffscreenRenderPass( void );
 		virtual ~OffscreenRenderPass( void );
 
-		virtual void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera ) override;
+		virtual void render( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera ) override;
 
-		void attachImageEffect( ImageEffect *imageEffect );
+		void attachImageEffect( ImageEffectPtr const &imageEffect );
 
 	private:
-		Pointer< FrameBufferObject > _offscreenBuffer;
-		std::list< Pointer< ImageEffect > > _imageEffects;
+		FrameBufferObjectPtr _offscreenBuffer;
+		std::list< ImageEffectPtr > _imageEffects;
 	};
 
 }

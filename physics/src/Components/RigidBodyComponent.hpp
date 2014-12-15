@@ -33,13 +33,17 @@
 namespace crimild {
 
 	namespace physics {
+        
+        class RigidBodyComponent;
+        
+        using RigidBodyComponentPtr = std::shared_ptr< RigidBodyComponent >;
 
 		class RigidBodyComponent : public NodeComponent {
 			CRIMILD_DISALLOW_COPY_AND_ASSIGN( RigidBodyComponent )
 			CRIMILD_NODE_COMPONENT_NAME( "rigidBody" );
 
 		public:
-			typedef std::function< void ( RigidBodyComponent * ) > CollisionCallback;
+			typedef std::function< void ( RigidBodyComponentPtr const & ) > CollisionCallback;
 
 		public:
 			RigidBodyComponent( void );
@@ -71,7 +75,7 @@ namespace crimild {
 			void setConstraintVelocity( bool value ) { _constraintVelocity = value; }
 			bool shouldConstraintVelocity( void ) const { return _constraintVelocity; }
 
-			void onCollision( RigidBodyComponent *other );
+			void onCollision( RigidBodyComponentPtr const &other );
 
 			void setCollisionCallback( CollisionCallback callback ) { _collisionCallback = callback; }
 			CollisionCallback getCollisionCallback( void ) { return _collisionCallback; }

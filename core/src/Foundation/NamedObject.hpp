@@ -44,6 +44,8 @@ namespace crimild {
 	private:
 		std::string _name;
 	};
+    
+    using NamedObjectPtr = std::shared_ptr< NamedObject >;
 	
 }
 

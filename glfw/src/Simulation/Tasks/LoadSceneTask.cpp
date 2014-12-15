@@ -30,15 +30,16 @@
 #include <Crimild_Physics.hpp>
 
 using namespace crimild;
+using namespace crimild::physics;
 using namespace crimild::scripting;
 
-LoadSceneTask::LoadSceneTask( int priority, std::string sceneFileName, SceneBuilder *builder )
+LoadSceneTask::LoadSceneTask( int priority, std::string sceneFileName, SceneBuilderPtr const &builder )
 	: Task( priority ),
 	  _sceneFileName( sceneFileName ),
-	  _builder( builder != nullptr ? builder : new SceneBuilder() )
+      _builder( builder != nullptr ? builder : std::make_shared< SceneBuilder >() )
 {
 	getBuilder()->registerComponentBuilder< physics::RigidBodyComponent >( []( ScriptContext::Iterable &it ) {
-		Pointer< physics::RigidBodyComponent > rigidBody( new physics::RigidBodyComponent() );
+        auto rigidBody = std::make_shared< RigidBodyComponent >();
 
 		if ( it.test( "mass" ) ) rigidBody->setMass( it.eval< float >( "mass" ) );
 		if ( it.test( "convex" ) ) rigidBody->setConvex( it.eval< bool >( "convex" ) );
@@ -77,18 +78,18 @@ void LoadSceneTask::load( void )
 
 	getBuilder()->reset();
 
-	Pointer< Node > scene = getBuilder()->fromFile( FileSystem::getInstance().pathForResource( _sceneFileName ) );
-	Simulation::getCurrent()->setScene( scene.get() );
-	MessageQueue::getInstance().pushMessage( new SceneLoadedMessage() );
+	auto scene = getBuilder()->fromFile( FileSystem::getInstance().pathForResource( _sceneFileName ) );
+	Simulation::getCurrent()->setScene( scene );
+    MessageQueue::getInstance().pushMessage( std::make_shared< SceneLoadedMessage >() );
 }
 
-void LoadSceneTask::handleMessage( LoadSceneMessage *message )
+void LoadSceneTask::handleMessage( LoadSceneMessagePtr const &message )
 {
 	_sceneFileName = message->getFileName();
 	load();
 }
 
-void LoadSceneTask::handleMessage( ReloadSceneMessage *message )
+void LoadSceneTask::handleMessage( ReloadSceneMessagePtr const &message )
 {
 	load();
 }

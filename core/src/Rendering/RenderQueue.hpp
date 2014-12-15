@@ -47,8 +47,8 @@ namespace crimild {
         
         void reset( void );
         
-        void setCamera( Camera *camera ) { _camera = camera; }
-        Camera *getCamera( void ) { return _camera.get(); }
+        void setCamera( CameraPtr const &camera ) { _camera = camera; }
+        CameraPtr &getCamera( void ) { return _camera; }
         
         SharedObjectList< Light > &getLights( void ) { return _lights; }
         SharedObjectList< Geometry > &getShadowCasters( void ) { return _shadowCasters; }
@@ -57,7 +57,7 @@ namespace crimild {
         SharedObjectList< Geometry > &getScreenObjects( void ) { return _screenObjects; }
         
     private:
-        Pointer< Camera > _camera;
+        CameraPtr _camera;
         
         SharedObjectList< Light > _lights;
         SharedObjectList< Geometry > _shadowCasters;
@@ -65,6 +65,8 @@ namespace crimild {
         SharedObjectList< Geometry > _translucentObjects;
         SharedObjectList< Geometry > _screenObjects;
     };
+    
+    using RenderQueuePtr = std::shared_ptr< RenderQueue >;
     
 }
 

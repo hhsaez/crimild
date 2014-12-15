@@ -49,35 +49,35 @@ void NodeVisitor::reset( void )
 
 }
 
-void NodeVisitor::traverse( Node *node )
+void NodeVisitor::traverse( NodePtr const &node )
 {
 	reset();
 	node->accept( *this );
 }
 
-void NodeVisitor::visitNode( Node *node )
+void NodeVisitor::visitNode( NodePtr const &node )
 {
 	// do nothing
 }
 
-void NodeVisitor::visitGroup( Group *group )
+void NodeVisitor::visitGroup( GroupPtr const &group )
 {
 	// by default, just traverse to child nodes
-	group->foreachNode( [&]( Node *node ) { node->accept( *this ); } );
+	group->foreachNode( [&]( NodePtr const &node ) { node->accept( *this ); } );
 }
 
-void NodeVisitor::visitGeometry( Geometry *geometry )
+void NodeVisitor::visitGeometry( GeometryPtr const &geometry )
 {
 	// by default, do the same as with any other node
 	visitNode( geometry );
 }
 
-void NodeVisitor::visitCamera( Camera *camera )
+void NodeVisitor::visitCamera( CameraPtr const &camera )
 {
 	visitNode( camera );
 }
 
-void NodeVisitor::visitLight( Light *light )
+void NodeVisitor::visitLight( LightPtr const &light )
 {
 	visitNode( light );
 }

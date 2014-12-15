@@ -29,11 +29,12 @@
 #define CRIMILD_RENDERING_IMAGE_
 
 #include "Foundation/SharedObject.hpp"
+#include "Foundation/Pointer.hpp"
 
 #include <vector>
 
 namespace crimild {
-
+    
 	class Image : public SharedObject {
     public:
         enum class PixelFormat {
@@ -72,8 +73,9 @@ namespace crimild {
 		Image( const Image & ) { }
 		Image &operator=( const Image & ) { return *this; }
 	};
+    
+    using ImagePtr = std::shared_ptr< Image >;
 
-	typedef std::shared_ptr< Image > ImagePtr;
 }
 
 #endif

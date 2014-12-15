@@ -41,11 +41,11 @@ namespace crimild {
 
 			virtual int getNextResourceId( void ) override;
 
-			virtual void bind( ShaderLocation *location, Texture *texture ) override;
-			virtual void unbind( ShaderLocation *location, Texture *texture ) override;
+			virtual void bind( ShaderLocationPtr const &location, TexturePtr const &texture ) override;
+			virtual void unbind( ShaderLocationPtr const &location, TexturePtr const &texture ) override;
 
-			virtual void load( Texture *texture ) override;
-			virtual void unload( Texture *texture ) override;
+			virtual void load( TexturePtr const &texture ) override;
+			virtual void unload( TexturePtr const &texture ) override;
 
 		private:
 			int _boundTextureCount;

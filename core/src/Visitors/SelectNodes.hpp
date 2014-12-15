@@ -30,6 +30,8 @@
 
 #include "NodeVisitor.hpp"
 
+#include "SceneGraph/Node.hpp"
+
 #include <list>
 #include <functional>
 
@@ -37,7 +39,7 @@ namespace crimild {
 
 	class SelectNodes : public NodeVisitor {
 	public:
-		typedef std::function< bool( Node * ) > SelectorOp;
+		typedef std::function< bool( NodePtr const & ) > SelectorOp;
 
 	public:
 		SelectNodes( SelectorOp selector );
@@ -45,14 +47,14 @@ namespace crimild {
 
 		virtual void reset( void ) override;
 
-		virtual void visitNode( Node *node ) override;
-		virtual void visitGroup( Group *node ) override;
+        virtual void visitNode( std::shared_ptr< Node > const &node ) override;
+        virtual void visitGroup( std::shared_ptr< Group > const &node ) override;
 
-		virtual void foreachMatch( std::function< void( Node *node ) > callback );
+		virtual void foreachMatch( std::function< void( NodePtr const &node ) > callback );
 
 	private:
 		SelectorOp _selector;
-		std::list< Node * > _matches;
+		std::list< NodePtr > _matches;
 	};
 
 }

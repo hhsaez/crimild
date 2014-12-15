@@ -29,13 +29,15 @@
 #define CRIMILD_CORE_DEBUG_RENDER_PASS_
 
 #include "Rendering/RenderPass.hpp"
+#include "Rendering/RenderQueue.hpp"
 #include "Rendering/Material.hpp"
+#include "Rendering/Renderer.hpp"
 
 namespace crimild {
 
 	class DebugRenderPass : public RenderPass {
 	public:
-		DebugRenderPass( RenderPass *actualRenderPass );
+		DebugRenderPass( RenderPassPtr const &actualRenderPass );
 		virtual ~DebugRenderPass( void );
 
 		void setRenderBoundings( bool value ) { _renderBoundings = value; }
@@ -44,16 +46,16 @@ namespace crimild {
 		void setRenderNormals( bool value ) { _renderNormals = value; }
 		bool shouldRenderNormals( void ) const { return _renderNormals; }
 
-		virtual void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+		virtual void render( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera ) override;
 
 	private:
-		void renderNormalsAndTangents( Renderer *renderer, Geometry *geometry, Material *material, Camera *camera );
-		void renderBoundings( Renderer *renderer, Geometry *geometry, Material *material, Camera *camera );
+		void renderNormalsAndTangents( RendererPtr const &renderer, GeometryPtr const &geometry, MaterialPtr const &material, CameraPtr const &camera );
+		void renderBoundings( RendererPtr const &renderer, GeometryPtr const &geometry, MaterialPtr const &material, CameraPtr const &camera );
 
 		bool _renderNormals;
 		bool _renderBoundings;
-		Pointer< RenderPass > _actualRenderPass;
-		Pointer< Material > _debugMaterial;
+		RenderPassPtr _actualRenderPass;
+		MaterialPtr _debugMaterial;
 	};
 
 }

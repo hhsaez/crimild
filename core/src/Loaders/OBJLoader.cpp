@@ -55,14 +55,14 @@ void OBJLoader::reset( void )
 	_normalCount = 0;
 	_textureCoordCount = 0;
 
-	std::vector< Pointer< GroupDef > > empty;
+	std::vector< GroupDefPtr > empty;
 	_groups.swap( empty );
 	pushGroup( _filePath, _filePath );
 
 	_materials.clear();
 }
 
-Pointer< Group > OBJLoader::load( void )
+GroupPtr OBJLoader::load( void )
 {
 	reset();
 
@@ -70,7 +70,7 @@ Pointer< Group > OBJLoader::load( void )
 	input.open( _filePath.c_str() );
 	if ( !input.is_open() ) {
 		Log::Error << "Cannot find file " << _filePath << Log::End;
-		return Pointer< Group >();
+        return GroupPtr();
 	}
 	while ( !input.eof() ) {
 		processLine( input );
@@ -121,9 +121,9 @@ void OBJLoader::processLine( std::ifstream &input )
 
 void OBJLoader::pushGroup( std::string name, std::string materialName )
 {
-	Pointer< GroupDef > group( new GroupDef( name, materialName ) );
+    auto group = std::make_shared< GroupDef >( name, materialName );
 	_groups.push_back( group );
-	_currentGroup = group.get();
+	_currentGroup = group;
 }
 
 void OBJLoader::processMaterialFile( std::string materialFileName )
@@ -148,7 +148,7 @@ void OBJLoader::processMaterialFile( std::string materialFileName )
 		if ( what == "newmtl" ) {
 			std::string materialName;
 			line >> materialName;
-			Pointer< MaterialDef > material( new MaterialDef( materialName ) );
+            auto material = std::make_shared< MaterialDef >( materialName );
 			_materials[ material->name ] = material;
 			currentMaterial = material.get();
 		}
@@ -172,8 +172,8 @@ void OBJLoader::processMaterialFile( std::string materialFileName )
 			line >> diffuseMapFileName;
 			if ( diffuseMapFileName.length() > 0 ) {
 				Log::Debug << "Loading diffuse map " << diffuseMapFileName << Log::End;
-				Pointer< Image > image( new ImageTGA( FileSystem::getInstance().extractDirectory( materialFileName ) + "/" + diffuseMapFileName ) );
-				Pointer< Texture > texture( new Texture( image.get() ) );
+                auto image = std::make_shared< ImageTGA >( FileSystem::getInstance().extractDirectory( materialFileName ) + "/" + diffuseMapFileName );
+                auto texture = std::make_shared< Texture >( image );
 				currentMaterial->diffuseMap = texture;
 			}
 		}
@@ -182,8 +182,8 @@ void OBJLoader::processMaterialFile( std::string materialFileName )
 			line >> normalMapFileName;
 			if ( normalMapFileName.length() > 0 ) {
 				Log::Debug << "Loading normal map " << normalMapFileName << Log::End;
-				Pointer< Image > image( new ImageTGA( FileSystem::getInstance().extractDirectory( materialFileName ) + "/" + normalMapFileName ) );
-				Pointer< Texture > texture( new Texture( image.get() ) );
+                auto image = std::make_shared< ImageTGA >( FileSystem::getInstance().extractDirectory( materialFileName ) + "/" + normalMapFileName );
+                auto texture = std::make_shared< Texture >( image );
 				currentMaterial->normalMap = texture;
 			}
 		}
@@ -192,8 +192,8 @@ void OBJLoader::processMaterialFile( std::string materialFileName )
 			line >> specularMapFileName;
 			if ( specularMapFileName.length() > 0 ) {
 				Log::Debug << "Loading specular map " << specularMapFileName << Log::End;
-				Pointer< Image > image( new ImageTGA( FileSystem::getInstance().extractDirectory( materialFileName ) + "/" + specularMapFileName ) );
-				Pointer< Texture > texture( new Texture( image.get() ) );
+                auto image = std::make_shared< ImageTGA >( FileSystem::getInstance().extractDirectory( materialFileName ) + "/" + specularMapFileName );
+                auto texture = std::make_shared< Texture >( image );
 				currentMaterial->specularMap = texture;
 			}
 		}
@@ -202,8 +202,8 @@ void OBJLoader::processMaterialFile( std::string materialFileName )
 			line >> emissiveMapFileName;
 			if ( emissiveMapFileName.length() > 0 ) {
 				Log::Debug << "Loading emissive map " << emissiveMapFileName << Log::End;
-				Pointer< Image > image( new ImageTGA( FileSystem::getInstance().extractDirectory( materialFileName ) + "/" + emissiveMapFileName ) );
-				Pointer< Texture > texture( new Texture( image.get() ) );
+                auto image = std::make_shared< ImageTGA >( FileSystem::getInstance().extractDirectory( materialFileName ) + "/" + emissiveMapFileName );
+                auto texture = std::make_shared< Texture >( image );
 				currentMaterial->emissiveMap = texture;
 			}
 		}
@@ -212,13 +212,13 @@ void OBJLoader::processMaterialFile( std::string materialFileName )
 			line >> alphaMapFileName;
 			if ( alphaMapFileName.length() > 0 ) {
                 // todo: load alpha map
-                currentMaterial->alphaState = new AlphaState( true );
+                currentMaterial->alphaState = std::make_shared< AlphaState >( true );
             }
         }
 	}
 }
 
-Pointer< Group > OBJLoader::generateScene( void )
+GroupPtr OBJLoader::generateScene( void )
 {
 	VertexFormat vf( ( _positionCount > 0 ? 3 : 0 ), 
 					 0, // no color information is imported
@@ -226,7 +226,7 @@ Pointer< Group > OBJLoader::generateScene( void )
 					 ( _normalCount > 0 && _textureCoordCount > 0 ? 3 : 0 ),
 					 ( _textureCoordCount > 0 ? 2 : 0 ) );
 
-	Pointer< Group > scene( new Group( _filePath ) );
+    auto scene = std::make_shared< Group >( _filePath );
 
 	for ( auto group : _groups ) {
 		if ( group->faces.size() == 0 ) {
@@ -237,11 +237,11 @@ Pointer< Group > OBJLoader::generateScene( void )
 		std::vector< unsigned short > indices;
 		unsigned short idx = 0;
 		for ( auto face : group->faces ) {
-			std::vector< unsigned int > faceIndices = StringUtils::split< unsigned int >( face.v0, '/' );
+			auto faceIndices = StringUtils::split< unsigned int >( face.v0, '/' );
 
-			std::vector< unsigned int > face0 = StringUtils::split< unsigned int >( face.v0, '/' );
-			std::vector< unsigned int > face1 = StringUtils::split< unsigned int >( face.v1, '/' );
-			std::vector< unsigned int > face2 = StringUtils::split< unsigned int >( face.v2, '/' );
+			auto face0 = StringUtils::split< unsigned int >( face.v0, '/' );
+			auto face1 = StringUtils::split< unsigned int >( face.v1, '/' );
+			auto face2 = StringUtils::split< unsigned int >( face.v2, '/' );
 
 			Vector3f p0, p1, p2;
 			Vector3f n0, n1, n2;
@@ -407,29 +407,29 @@ Pointer< Group > OBJLoader::generateScene( void )
 
 		unsigned int vertexCount = vertices.size() / vf.getVertexSize();
 
-		Pointer< Primitive > primitive( new Primitive( Primitive::Type::TRIANGLES ) );
-		primitive->setVertexBuffer( new VertexBufferObject( vf, vertexCount, &vertices[ 0 ] ) );
-		primitive->setIndexBuffer( new IndexBufferObject( indices.size(), &indices[ 0 ] ) );
+        auto primitive = std::make_shared< Primitive >( Primitive::Type::TRIANGLES );
+        primitive->setVertexBuffer( std::make_shared< VertexBufferObject >( vf, vertexCount, &vertices[ 0 ] ) );
+		primitive->setIndexBuffer( std::make_shared< IndexBufferObject >( indices.size(), &indices[ 0 ] ) );
 
-		Pointer< Geometry > geometry( new Geometry() );
-		geometry->attachPrimitive( primitive.get() );
+		auto geometry = std::make_shared< Geometry >();
+		geometry->attachPrimitive( primitive );
 
 		auto materialDef = _materials[ group->materialName ];
 		if ( materialDef != nullptr ) {
-			Pointer< Material > material( new Material() );
+			auto material = std::make_shared< Material >();
 			material->setAmbient( materialDef->ambientColor );
 			material->setDiffuse( materialDef->diffuseColor );
 			material->setSpecular( materialDef->specularColor );
-			material->setColorMap( materialDef->diffuseMap.get() );
-			material->setNormalMap( materialDef->normalMap.get() );
-			material->setSpecularMap( materialDef->specularMap.get() );
-            material->setEmissiveMap( materialDef->emissiveMap.get() );
-            material->setAlphaState( materialDef->alphaState.get() );
-            material->setDepthState( materialDef->depthState.get() );
-			geometry->getComponent< MaterialComponent >()->attachMaterial( material.get() );
+			material->setColorMap( materialDef->diffuseMap );
+			material->setNormalMap( materialDef->normalMap );
+			material->setSpecularMap( materialDef->specularMap );
+            material->setEmissiveMap( materialDef->emissiveMap );
+            material->setAlphaState( materialDef->alphaState );
+            material->setDepthState( materialDef->depthState );
+			geometry->getComponent< MaterialComponent >()->attachMaterial( material );
 		}
 
-		scene->attachNode( geometry.get() );
+		scene->attachNode( geometry );
 	}
 
 	return scene;

@@ -33,6 +33,7 @@
 
 #include <list>
 #include <functional>
+#include <memory>
 
 namespace crimild {
 
@@ -45,13 +46,15 @@ namespace crimild {
 
 	public:
 		
-		class Resource : public SharedObject {
+		class Resource :
+            public SharedObject,
+            public std::enable_shared_from_this< Resource > {
 			CRIMILD_DISALLOW_COPY_AND_ASSIGN( Resource )
 
 		public:
 			Resource( void )
-				: _catalog( nullptr ),
-				  _catalogId( -1 )
+                : _catalog( nullptr ),
+                  _catalogId( -1 )
 			{
 			}
 
@@ -60,11 +63,11 @@ namespace crimild {
                 unload();
 			}
 
-			Catalog< RESOURCE_TYPE > *getCatalog( void ) { return _catalog; }
+            Catalog< RESOURCE_TYPE > *getCatalog( void ) { return _catalog; }
 
 			int getCatalogId( void ) const { return _catalogId; }
 
-			void setCatalogInfo( Catalog< RESOURCE_TYPE > *catalog, int id )
+            void setCatalogInfo( Catalog< RESOURCE_TYPE > *catalog, int id )
 			{
 				_catalog = catalog;
 				_catalogId = id;
@@ -72,14 +75,14 @@ namespace crimild {
             
             void unload( void )
             {
-				if ( _catalog ) {
-					_catalog->unload( static_cast< RESOURCE_TYPE * >( this ) );
-					_catalog = nullptr;
+				if ( _catalog != nullptr ) {
+                    _catalog->unload( static_cast< RESOURCE_TYPE * >( this ) );
+                    _catalog = nullptr;
 				}
             }
 
 		private:
-			Catalog< RESOURCE_TYPE > *_catalog;
+            Catalog< RESOURCE_TYPE > *_catalog;
 			int _catalogId;
 		};
 
@@ -109,59 +112,69 @@ namespace crimild {
 			return -1;
 		}
 
-		virtual void bind( RESOURCE_TYPE *resource )
+        virtual void bind( std::shared_ptr< RESOURCE_TYPE > const &resource )
 		{
 			if ( resource->getCatalog() == nullptr ) {
 				load( resource );
 			}
 		}
 
-		virtual void bind( ShaderProgram *program, RESOURCE_TYPE *resource )
+        virtual void bind( std::shared_ptr< ShaderProgram > const &program, std::shared_ptr< RESOURCE_TYPE > const &resource )
 		{
 			bind( resource );
 		}
 
-		virtual void bind( ShaderLocation *location, RESOURCE_TYPE *resource )
+        virtual void bind( std::shared_ptr< ShaderLocation > const &location, std::shared_ptr< RESOURCE_TYPE > const &resource )
 		{
 			bind( resource );
 		}
 
-		virtual void unbind( RESOURCE_TYPE *resource )
+        virtual void unbind( std::shared_ptr< RESOURCE_TYPE > const &resource )
 		{
 		}
 
-		virtual void unbind( ShaderProgram *program, RESOURCE_TYPE *resource )
-		{
-			unbind( resource );
-		}
-
-		virtual void unbind( ShaderLocation *location, RESOURCE_TYPE *resource )
+        virtual void unbind( std::shared_ptr< ShaderProgram > const &program, std::shared_ptr< RESOURCE_TYPE > const &resource )
 		{
 			unbind( resource );
 		}
 
-		virtual void load( RESOURCE_TYPE *resource )
+        virtual void unbind( std::shared_ptr< ShaderLocation > const &location, std::shared_ptr< RESOURCE_TYPE > const &resource )
+		{
+			unbind( resource );
+		}
+
+        virtual void load( std::shared_ptr< RESOURCE_TYPE > const &resource )
 		{
 			resource->setCatalogInfo( this, getNextResourceId() );
 			_resources.push_back( resource );
 		}
 
-		virtual void unload( RESOURCE_TYPE *resource )
+        virtual void unload( std::shared_ptr< RESOURCE_TYPE > const &resource )
 		{
 			resource->setCatalogInfo( nullptr, getDefaultIdValue() );
-			_resources.remove( resource );
+            _resources.remove_if( [&]( std::weak_ptr< RESOURCE_TYPE > const &r ) {
+                return r.lock() == resource;
+            });
 		}
 
+        virtual void unload( RESOURCE_TYPE *resource )
+        {
+            resource->setCatalogInfo( nullptr, getDefaultIdValue() );
+            _resources.remove_if( [&]( std::weak_ptr< RESOURCE_TYPE > const &r ) {
+                return r.lock().get() == resource;
+            });
+        }
+        
 		virtual void unloadAll( void )
 		{
 			for ( auto resource : _resources ) {
-				resource->setCatalogInfo( nullptr, getDefaultIdValue() );
+				resource.lock()->setCatalogInfo( nullptr, getDefaultIdValue() );
 			}
 			_resources.clear();
 		}
 
 	private:
-		std::list< RESOURCE_TYPE * > _resources;
+        std::list< std::weak_ptr< RESOURCE_TYPE > > _resources;
 	};
 
 }

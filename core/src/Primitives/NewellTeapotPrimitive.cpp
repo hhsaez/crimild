@@ -1887,8 +1887,8 @@ NewellTeapotPrimitive::NewellTeapotPrimitive( void )
 		774, 823, 822, 
 	};
 	
-	setVertexBuffer( new VertexBufferObject( VertexFormat::VF_P3_N3_UV2, vertexCount, vertices ) );
-	setIndexBuffer( new IndexBufferObject( indexCount, indices ) );
+    setVertexBuffer( std::make_shared< VertexBufferObject >( VertexFormat::VF_P3_N3_UV2, vertexCount, vertices ) );
+    setIndexBuffer( std::make_shared< IndexBufferObject >( indexCount, indices ) );
 }
 
 NewellTeapotPrimitive::~NewellTeapotPrimitive( void )

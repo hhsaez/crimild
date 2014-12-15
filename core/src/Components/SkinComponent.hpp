@@ -30,6 +30,8 @@
 
 #include "NodeComponent.hpp"
 
+#include "SceneGraph/Node.hpp"
+
 #include <functional>
 #include <vector>
 
@@ -44,11 +46,11 @@ namespace crimild {
 		virtual ~SkinComponent( void );
 
 		bool hasJoints( void );
-		void attachJoint( Node *joint );
-		void foreachJoint( std::function< void( Node *, unsigned int ) > callback );
+		void attachJoint( NodePtr const &joint );
+		void foreachJoint( std::function< void( NodePtr const &, unsigned int ) > callback );
 
 	private:
-		std::vector< Node * > _joints;
+		std::vector< NodePtr > _joints;
 	};
 
 }

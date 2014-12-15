@@ -30,46 +30,50 @@
 
 #include "RenderPass.hpp"
 #include "ShadowMap.hpp"
+#include "Renderer.hpp"
+#include "RenderQueue.hpp"
+#include "ShadowMap.hpp"
+
+#include "SceneGraph/Camera.hpp"
+#include "SceneGraph/Light.hpp"
 
 #include <map>
 
 namespace crimild {
-    
-    class Light;
     
 	class DeferredRenderPass : public RenderPass {
 	public:
 		DeferredRenderPass( void );
 		virtual ~DeferredRenderPass( void );
         
-        virtual void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+        virtual void render( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera );
         
     private:
         void buildAccumBuffer( int width, int heigth );
         
         void buildGBuffer( int width, int height );
-        void renderToGBuffer( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+        void renderToGBuffer( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera );
         
         void buildFrameBuffer( int width, int height );
-        void composeFrame( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+        void composeFrame( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera );
         
-        void computeShadowMaps( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+        void computeShadowMaps( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera );
         
     private:
-        Pointer< FrameBufferObject > _gBuffer;
-        Pointer< Texture > _gBufferDepthOutput;
-        Pointer< Texture > _gBufferPositionOutput;
-        Pointer< Texture > _gBufferNormalOutput;
-        Pointer< Texture > _gBufferColorOutput;
-        Pointer< Texture > _gBufferEmissiveOutput;
+        FrameBufferObjectPtr _gBuffer;
+        TexturePtr _gBufferDepthOutput;
+        TexturePtr _gBufferPositionOutput;
+        TexturePtr _gBufferNormalOutput;
+        TexturePtr _gBufferColorOutput;
+        TexturePtr _gBufferEmissiveOutput;
         
-        Pointer< FrameBufferObject > _frameBuffer;
-        Pointer< Texture > _frameBufferOutput;
+        FrameBufferObjectPtr _frameBuffer;
+        TexturePtr _frameBufferOutput;
         
-        Pointer< FrameBufferObject > _accumBuffer;
-        Pointer< Texture > _accumBufferOutput;
+        FrameBufferObjectPtr _accumBuffer;
+        TexturePtr _accumBufferOutput;
         
-        std::map< Light *, Pointer< ShadowMap > > _shadowMaps;
+        std::map< LightPtr, ShadowMapPtr > _shadowMaps;
 	};
     
 }

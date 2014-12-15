@@ -30,27 +30,51 @@
 
 #include "Macros.hpp"
 
+#include <thread>
+#include <memory>
+
 namespace crimild {
 
-	class SharedObject {
+    class SharedObject : public std::enable_shared_from_this< SharedObject > {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( SharedObject )
-
+        
 	protected:
-		SharedObject( void );
+        SharedObject( void ) { }
 
 	public:
-		virtual ~SharedObject( void );
-
-		void retain( void );
-
-		void release( void );
-
-		int getReferenceCount( void ) const { return _referenceCount; }
+        virtual ~SharedObject( void ) { }
+        
+        std::shared_ptr< SharedObject > getShared( void )
+        {
+            return shared_from_this();
+        }
+        
+        template< class T >
+        std::shared_ptr< T > getShared( void )
+        {
+            return std::static_pointer_cast< T >( shared_from_this() );
+        }
+        
+        void lock( void ) { _mutex.lock(); }
+        
+        void unlock( void ) { _mutex.unlock(); }
 
 	private:
-		int _referenceCount;
+        std::mutex _mutex;
 	};
+    
+    using SharedObjectPtr = std::shared_ptr< SharedObject >;
+    
+}
 
+namespace std {
+    
+    // from http://stackoverflow.com/a/6066150
+    template< class T, class U >
+    std::weak_ptr< T > static_pointer_cast( std::weak_ptr< U > const &r )
+    {
+        return std::static_pointer_cast< T >( std::shared_ptr< U >( r ) );
+    }
 }
 
 #endif

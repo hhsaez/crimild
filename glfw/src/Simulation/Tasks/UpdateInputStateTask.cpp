@@ -67,7 +67,7 @@ void UpdateInputStateTask::update( void )
 	int x, y;
 	glfwGetMousePos( &x, &y );
 
-	FrameBufferObject *fbo = Simulation::getCurrent()->getRenderer()->getScreenBuffer();
+	auto fbo = Simulation::getCurrent()->getRenderer()->getScreenBuffer();
 	if ( fbo && x >= 0 && x < fbo->getWidth() && y >= 0 && y < fbo->getHeight() ) {
 		InputState::getCurrentState().setMousePosition( Vector2i( x, y ) );
 		InputState::getCurrentState().setNormalizedMousePosition( Vector2f( ( float ) x / ( fbo->getWidth() - 1.0f ), ( float ) y / ( fbo->getHeight() - 1.0f ) ) );

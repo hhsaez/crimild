@@ -30,9 +30,9 @@
 
 using namespace crimild;
 
-ComputeRenderQueue::ComputeRenderQueue( Camera *camera, RenderQueue *result )
+ComputeRenderQueue::ComputeRenderQueue( CameraPtr const &camera, RenderQueuePtr const &result )
     : _camera( camera ),
-      _result( result != nullptr ? result : new RenderQueue() )
+      _result( result )
 {
 }
 
@@ -41,17 +41,17 @@ ComputeRenderQueue::~ComputeRenderQueue( void )
     
 }
 
-void ComputeRenderQueue::traverse( Node *scene )
+void ComputeRenderQueue::traverse( NodePtr const &scene )
 {
     _result->reset();
-    _result->setCamera( _camera.get() );
+    _result->setCamera( _camera );
     
     NodeVisitor::traverse( scene );
 }
 
-void ComputeRenderQueue::visitGeometry( Geometry *geometry )
+void ComputeRenderQueue::visitGeometry( GeometryPtr const &geometry )
 {
-    RenderStateComponent *renderState = geometry->getComponent< RenderStateComponent >();
+    auto renderState = geometry->getComponent< RenderStateComponent >();
     
     if ( renderState->renderOnScreen() ) {
         _result->getScreenObjects().add( geometry );
@@ -59,7 +59,7 @@ void ComputeRenderQueue::visitGeometry( Geometry *geometry )
     }
 
     bool opaque = true;
-    renderState->foreachMaterial( [&]( Material *material ) {
+    renderState->foreachMaterial( [&]( MaterialPtr const &material ) {
         if ( material->getAlphaState()->isEnabled() ) {
             opaque = false;
         }
@@ -73,7 +73,7 @@ void ComputeRenderQueue::visitGeometry( Geometry *geometry )
     }
 }
 
-void ComputeRenderQueue::visitLight( Light *light )
+void ComputeRenderQueue::visitLight( LightPtr const &light )
 {
     _result->getLights().add( light );
 }

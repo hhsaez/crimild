@@ -34,15 +34,16 @@
 #include "Mathematics/Frustum.hpp"
 #include "Mathematics/Ray.hpp"
 #include "Mathematics/Rect.hpp"
-#include "Rendering/RenderPass.hpp"
 
 #include <memory>
 
 namespace crimild {
+    
+    class RenderPass;
 
 	class Camera : public Node {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( Camera );
-		
+        
 	public:
 		explicit Camera( void );
 		Camera( float fov, float aspect, float near, float far );
@@ -82,12 +83,14 @@ namespace crimild {
 		virtual void accept( NodeVisitor &visitor ) override;
 
 	public:
-		void setRenderPass( RenderPass *renderPass ) { _renderPass = renderPass; }
-		RenderPass *getRenderPass( void ) { return _renderPass.get(); }
+        void setRenderPass( std::shared_ptr< RenderPass > const &renderPass ) { _renderPass = renderPass; }
+		std::shared_ptr< RenderPass > &getRenderPass( void ) { return _renderPass; }
 
 	private:
-		Pointer< RenderPass > _renderPass;
+		std::shared_ptr< RenderPass > _renderPass;
 	};
+    
+    using CameraPtr = std::shared_ptr< Camera >;
 
 }
 

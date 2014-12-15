@@ -27,18 +27,18 @@ void RenderDebugInfoTask::start( void )
 	DebugRenderHelper::init();
 
 	if ( getRunLoop() != nullptr ) {
-		getRunLoop()->suspendTask( this );
+		getRunLoop()->suspendTask( getShared< RenderDebugInfoTask >() );
 	}
 }
 
 void RenderDebugInfoTask::update( void )
 {
-	Renderer *renderer = Simulation::getCurrent()->getRenderer();
+	auto renderer = Simulation::getCurrent()->getRenderer();
 	
-	Simulation::getCurrent()->forEachCamera( [&]( Camera *camera ) {
+	Simulation::getCurrent()->forEachCamera( [&]( CameraPtr const &camera ) {
 
-		Simulation::getCurrent()->getScene()->perform( Apply( [&]( Node *node ) {
-			node->foreachComponent( [&]( NodeComponent *component ) {
+		Simulation::getCurrent()->getScene()->perform( Apply( [&]( NodePtr const &node ) {
+			node->foreachComponent( [&]( NodeComponentPtr const &component ) {
 				component->renderDebugInfo( renderer, camera );
 			});
 		}));
@@ -51,17 +51,17 @@ void RenderDebugInfoTask::stop( void )
 
 }
 
-void RenderDebugInfoTask::handleMessage( EnableRenderDebugInfoMessage *message )
+void RenderDebugInfoTask::handleMessage( EnableRenderDebugInfoMessagePtr const &message )
 {
 	if ( getRunLoop() != nullptr ) {
-		getRunLoop()->resumeTask( this );
+		getRunLoop()->resumeTask( getShared< RenderDebugInfoTask >() );
 	}
 }
 
-void RenderDebugInfoTask::handleMessage( DisableRenderDebugInfoMessage *message )
+void RenderDebugInfoTask::handleMessage( DisableRenderDebugInfoMessagePtr const &message )
 {
 	if ( getRunLoop() != nullptr ) {
-		getRunLoop()->suspendTask( this );
+		getRunLoop()->suspendTask( getShared< RenderDebugInfoTask>() );
 	}
 }
 

@@ -35,15 +35,15 @@
 using namespace crimild;
 
 HierarchyRenderPass::HierarchyRenderPass( void )
-	: _actualRenderPass( new RenderPass() ),
-	  _debugMaterial( new Material() )
+    : _actualRenderPass( std::make_shared< RenderPass >() ),
+      _debugMaterial( std::make_shared< Material >() )
 {
 	_renderBoundings = false;
 }
 
-HierarchyRenderPass::HierarchyRenderPass( RenderPass *actualRenderPass )
+HierarchyRenderPass::HierarchyRenderPass( RenderPassPtr const &actualRenderPass )
 	: _actualRenderPass( actualRenderPass ),
-	  _debugMaterial( new Material() )
+      _debugMaterial( std::make_shared< Material >() )
 {
 	_renderBoundings = false;
 }
@@ -53,18 +53,18 @@ HierarchyRenderPass::~HierarchyRenderPass( void )
 
 }
 
-void HierarchyRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
+void HierarchyRenderPass::render( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
 	if ( _actualRenderPass != nullptr ) {
 		_actualRenderPass->render( renderer, renderQueue, camera );
 	}
 
-	Pointer< SpherePrimitive > primitive( new SpherePrimitive( 
+    auto primitive = std::make_shared< SpherePrimitive >(
 		0.1f, 
 		VertexFormat::VF_P3, 
-		Vector2i( 30, 30 ) ) );
+		Vector2i( 30, 30 ) );
 
-	Pointer< Geometry > geometry( new Geometry() );
+    auto geometry = std::make_shared< Geometry >();
 
 	_debugMaterial->getAlphaState()->setEnabled( true );
 	_debugMaterial->getDepthState()->setEnabled( false );
@@ -73,7 +73,7 @@ void HierarchyRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, 
 	std::vector< float > positions;
 	
 	if ( _targetScene != nullptr ) {
-		_targetScene->perform( SelectNodes( [&]( Node *node ) {
+		_targetScene->perform( SelectNodes( [&]( NodePtr const &node ) {
 			if ( node->hasParent() ) {
 				positions.push_back( node->getParent()->getWorld().getTranslate()[ 0 ] );
 				positions.push_back( node->getParent()->getWorld().getTranslate()[ 1 ] );
@@ -91,7 +91,7 @@ void HierarchyRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, 
 
 			if ( node->getName().length() > 0 ) {
 				geometry->setWorld( node->getWorld() );
-				RenderPass::render( renderer, geometry.get(), primitive.get(), _debugMaterial.get(), camera );
+				RenderPass::render( renderer, geometry, primitive, _debugMaterial, camera );
 			}
 			return false;
 		}));
@@ -102,17 +102,17 @@ void HierarchyRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, 
 		indices[ i ] = i;
 	}
 
-	Pointer< Primitive > bones( new Primitive( Primitive::Type::LINES ) );
-	bones->setVertexBuffer( new VertexBufferObject( VertexFormat::VF_P3, positions.size() / 3, &positions[ 0 ] ) );
-	bones->setIndexBuffer( new IndexBufferObject( indices.size(), &indices[ 0 ] ) );
+    auto bones = std::make_shared< Primitive >( Primitive::Type::LINES );
+    bones->setVertexBuffer( std::make_shared< VertexBufferObject >( VertexFormat::VF_P3, positions.size() / 3, &positions[ 0 ] ) );
+	bones->setIndexBuffer( std::make_shared< IndexBufferObject >( indices.size(), &indices[ 0 ] ) );
 	geometry->setWorld( TransformationImpl() );
 	_debugMaterial->setDiffuse( RGBAColorf( 1.0f, 0.0f, 0.0f, 1.0f ) );
 	
-	RenderPass::render( renderer, geometry.get(), bones.get(), _debugMaterial.get(), camera );
+	RenderPass::render( renderer, geometry, bones, _debugMaterial, camera );
 }
 
 
-void HierarchyRenderPass::renderBoundings( Renderer *renderer, Geometry *geometry, Material *material, Camera *camera )
+void HierarchyRenderPass::renderBoundings( RendererPtr const &renderer, GeometryPtr const &geometry, MaterialPtr const &material, CameraPtr const &camera )
 {
 }
 

@@ -32,10 +32,9 @@ using namespace crimild;
 using namespace crimild::gl3;
 
 GlowImageEffect::GlowImageEffect( void )
+    : _alphaState( std::make_shared< AlphaState >( true ) ),
+      _depthState( std::make_shared< DepthState >( false ) )
 {
-    _alphaState.set( new AlphaState( true ) );
-    _depthState.set( new DepthState( false ) );
-    
     _amount = 10;
     _glowMapSize = 128;
 }
@@ -45,8 +44,9 @@ GlowImageEffect::~GlowImageEffect( void )
     
 }
 
-void GlowImageEffect::apply( crimild::Renderer *renderer, int inputCount, Texture **inputs, Primitive *primitive, FrameBufferObject *output )
+void GlowImageEffect::apply( crimild::RendererPtr const &renderer, int inputCount, Texture **inputs, PrimitivePtr const &primitive, FrameBufferObjectPtr const &output )
 {
+    /*
     if ( _glowMapBuffer == nullptr ) {
         buildGlowBuffer( 512, 512 );
     }
@@ -61,21 +61,25 @@ void GlowImageEffect::apply( crimild::Renderer *renderer, int inputCount, Textur
     computeGlow( renderer, source, primitive );
     computeBlur( renderer, _glowMap.get(), primitive );
     applyResult( renderer, inputs[ 0 ], _blurMap.get(), primitive, output );
+     */
 }
 
 void GlowImageEffect::buildGlowBuffer( int width, int height )
 {
-    _glowMapBuffer.set( new FrameBufferObject( width, height ) );
+    /*
+    _glowMapBuffer = std::make_shared< FrameBufferObject >( width, height ) );
     _glowMapBuffer->setClearColor( RGBAColorf( 0.0f, 0.0f, 0.0f, 0.0f ) );
     _glowMapBuffer->getRenderTargets().add( new RenderTarget( RenderTarget::Type::DEPTH_16, RenderTarget::Output::RENDER, width, height ) );
     
     RenderTarget *glowTarget = new RenderTarget( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height );
     _glowMap = glowTarget->getTexture();
     _glowMapBuffer->getRenderTargets().add( glowTarget );
+     */
 }
 
 void GlowImageEffect::buildBlurBuffer( int width, int height )
 {
+    /*
     _blurBuffer.set( new FrameBufferObject( width, height ) );
     _blurBuffer->setClearColor( RGBAColorf( 0.0f, 0.0f, 0.0f, 0.0f ) );
     _blurBuffer->getRenderTargets().add( new RenderTarget( RenderTarget::Type::DEPTH_16, RenderTarget::Output::RENDER, width, height ) );
@@ -83,10 +87,12 @@ void GlowImageEffect::buildBlurBuffer( int width, int height )
     RenderTarget *blurTarget = new RenderTarget( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height );
     _blurMap = blurTarget->getTexture();
     _blurBuffer->getRenderTargets().add( blurTarget );
+     */
 }
 
 void GlowImageEffect::computeGlow( crimild::Renderer *renderer, Texture *srcImage, Primitive *primitive )
 {
+    /*
     renderer->bindFrameBuffer( _glowMapBuffer.get() );
     
     ShaderProgram *program = renderer->getShaderProgram( "screen" );
@@ -114,10 +120,12 @@ void GlowImageEffect::computeGlow( crimild::Renderer *renderer, Texture *srcImag
     renderer->unbindProgram( program );
     
     renderer->unbindFrameBuffer( _glowMapBuffer.get() );
+     */
 }
 
 void GlowImageEffect::computeBlur( crimild::Renderer *renderer, Texture *srcImage, Primitive *primitive )
 {
+    /*
     renderer->bindFrameBuffer( _blurBuffer.get() );
     
     ShaderProgram *program = renderer->getShaderProgram( "gaussianBlur" );
@@ -170,10 +178,12 @@ void GlowImageEffect::computeBlur( crimild::Renderer *renderer, Texture *srcImag
     renderer->unbindProgram( program );
     
     renderer->unbindFrameBuffer( _blurBuffer.get() );
+     */
 }
 
 void GlowImageEffect::applyResult( Renderer *renderer, Texture *srcImage, Texture *dstImage, Primitive *primitive, FrameBufferObject *output )
 {
+    /*
     // bind buffer for ssao output
     renderer->bindFrameBuffer( output );
     
@@ -212,6 +222,7 @@ void GlowImageEffect::applyResult( Renderer *renderer, Texture *srcImage, Textur
     
     // unbind buffer for ssao output
     renderer->unbindFrameBuffer( output );
+     */
 }
 
 

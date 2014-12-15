@@ -34,10 +34,12 @@
 #include "Foundation/NamedObject.hpp"
 #include "Mathematics/Time.hpp"
 #include "SceneGraph/Node.hpp" 
+#include "SceneGraph/Camera.hpp"
 #include "Rendering/Renderer.hpp"
 
 #include <functional>
 #include <list>
+#include <thread>
 
 namespace crimild {
 
@@ -68,7 +70,7 @@ namespace crimild {
 
 		Settings &getSettings( void ) { return _settings; }
 
-		RunLoop *getMainLoop( void ) { return _mainLoop.get(); }
+        RunLoopPtr &getMainLoop( void ) { return _mainLoop; }
 
 		Time &getSimulationTime( void ) { return _simulationTime; }
 		const Time &getSimulationTime( void ) const { return _simulationTime; }
@@ -83,26 +85,26 @@ namespace crimild {
 
 	private:
 		Settings _settings;
-		Pointer< RunLoop > _mainLoop;
+		RunLoopPtr _mainLoop;
 		Time _simulationTime;
 
 	public:
-		void setRenderer( Renderer *renderer ) { _renderer = renderer; }
-		Renderer *getRenderer( void ) { return _renderer.get(); }
+		void setRenderer( RendererPtr const &renderer ) { _renderer = renderer; }
+		RendererPtr &getRenderer( void ) { return _renderer; }
 
 	private:
-		Pointer< Renderer > _renderer;
+		RendererPtr _renderer;
 
 	public:
-		void setScene( Node *scene );
-		Node *getScene( void ) { return _scene.get(); }
+		void setScene( NodePtr const &scene );
+		NodePtr &getScene( void ) { return _scene; }
 
-		Camera *getMainCamera( void ) { return _cameras.front().get(); }
-		void forEachCamera( std::function< void ( Camera * ) > callback );
+		CameraPtr getMainCamera( void ) { return _cameras.front(); }
+		void forEachCamera( std::function< void ( CameraPtr const & ) > callback );
 
 	private:
-		Pointer< Node > _scene;
-		std::list< Pointer< Camera > > _cameras;
+		NodePtr _scene;
+		std::list< CameraPtr > _cameras;
 	};
 
 }

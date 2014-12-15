@@ -30,19 +30,21 @@
 
 #include "NodeVisitor.hpp"
 
+#include "SceneGraph/Geometry.hpp"
+
 #include <functional>
 
 namespace crimild {
 
 	class ApplyToGeometries : public NodeVisitor {
 	private:
-		typedef std::function< void( Geometry * ) > CallbackType;
+		typedef std::function< void( GeometryPtr const & ) > CallbackType;
 
 	public:
 		ApplyToGeometries( CallbackType callback );
 		virtual ~ApplyToGeometries( void );
 
-		virtual void visitGeometry( Geometry *geometry ) override;
+		virtual void visitGeometry( GeometryPtr const &geometry ) override;
 
 	private:
 		CallbackType _callback;

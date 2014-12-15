@@ -46,12 +46,16 @@ namespace crimild {
 
 			virtual void write( Log *log, std::string message ) = 0;
 		};
+        
+        using LogOutputHandlerPtr = std::shared_ptr< LogOutputHandler >;
 
 		class ConsoleOutputHandler : public LogOutputHandler {
 		public:
 			virtual ~ConsoleOutputHandler( void );
 			virtual void write( Log *log, std::string message ) override;
 		};
+        
+        using ConsoleOutputHandlerPtr = std::shared_ptr< ConsoleOutputHandler >;
 
 	public:
 		static Log Debug;
@@ -66,14 +70,14 @@ namespace crimild {
 
 		static EndLine End;
 
-		static void setDefaultOutputHandler( LogOutputHandler *handler );
+		static void setDefaultOutputHandler( LogOutputHandlerPtr const &handler );
 
 	public:
 		Log( std::string name );
 		virtual ~Log( void );
 
-		void setOutputHandler( LogOutputHandler *handler ) { _outputHandler = handler; }
-		LogOutputHandler *getOutputHandler( void ) { return _outputHandler.get(); }
+		void setOutputHandler( LogOutputHandlerPtr const &handler ) { _outputHandler = handler; }
+		LogOutputHandlerPtr &getOutputHandler( void ) { return _outputHandler; }
 
 		template< typename T >
 		Log &operator<<( T in )
@@ -91,7 +95,7 @@ namespace crimild {
 
 	private:
 		std::stringstream _str;
-		Pointer< LogOutputHandler > _outputHandler;
+		LogOutputHandlerPtr _outputHandler;
 	};
 
 }

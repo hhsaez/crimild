@@ -30,12 +30,12 @@
 using namespace crimild;
 
 RenderTarget::RenderTarget( RenderTarget::Type type, RenderTarget::Output output, int width, int height )
+    : _texture( std::make_shared< Texture >( ImagePtr() ) )
 {
     _type = type;
     _output = output;
     _width = width;
     _height = height;
-    _texture.set( new Texture( nullptr ) );
 }
 
 RenderTarget::~RenderTarget( void )

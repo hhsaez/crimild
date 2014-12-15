@@ -45,7 +45,7 @@ Picking::~Picking( void )
 
 }
 
-void Picking::traverse( Node *node )
+void Picking::traverse( NodePtr const &node )
 {
 	_results.reset();
 
@@ -53,25 +53,25 @@ void Picking::traverse( Node *node )
 
 	// sort nodes based on how close the ray is to
 	// intersecting the scene of each bounding volume
-	_results.sortCandidates( [&]( Node *first, Node *second ) -> bool {
-			return Distance::compute( _tester, first->getWorldBound()->getCenter() ) <
-				Distance::compute( _tester, second->getWorldBound()->getCenter() );
-		});
+	_results.sortCandidates( [&]( NodePtr const &first, NodePtr const &second ) -> bool {
+        return Distance::compute( _tester, first->getWorldBound()->getCenter() ) <
+            Distance::compute( _tester, second->getWorldBound()->getCenter() );
+    });
 }
 
-void Picking::visitNode( Node *node )
+void Picking::visitNode( NodePtr const &node )
 {
 	if ( _filter == nullptr || _filter( node ) ) {
 		_results.pushCandidate( node );				
 	}
 }
 
-void Picking::visitGroup( Group *group )
+void Picking::visitGroup( GroupPtr const &group )
 {
 	visitNode( group );
-	group->foreachNode( [&]( Node *node ) { 
-			if ( node->getWorldBound()->testIntersection( _tester ) ) {
-				node->accept( *this );
-			}
-		});
+	group->foreachNode( [&]( NodePtr const &node ) {
+        if ( node->getWorldBound()->testIntersection( _tester ) ) {
+            node->accept( *this );
+        }
+    });
 }

@@ -32,10 +32,12 @@
 
 #include <list>
 #include <functional>
+#include <thread>
 
 namespace crimild {
 
 	class Group : public Node {
+            
 	public:
 		explicit Group( std::string name = "" );
 		virtual ~Group( void );
@@ -43,8 +45,8 @@ namespace crimild {
 		bool hasNodes( void ) const { return ( getNodeCount() > 0 ); }
 		unsigned int getNodeCount( void ) const { return _nodes.size(); }
 
-		void attachNode( Node *node );
-		void detachNode( Node *node );
+		void attachNode( NodePtr const &node );
+		void detachNode( NodePtr const &node );
 		void detachAllNodes( void );
 
 		/**
@@ -52,23 +54,25 @@ namespace crimild {
 
 			\warning This method is inefficient. Use it carefully
 		*/
-		Node *getNode( unsigned int index );
+		NodePtr getNodeAt( unsigned int index );
 
 		template< typename T >
-		T *getNode( unsigned int index )
+        std::shared_ptr< T > getNodeAt( unsigned int index )
 		{
-			return static_cast< T * >( getNode( index ) );
+            return std::static_pointer_cast< T >( getNodeAt( index ) );
 		}
 
-		virtual void foreachNode( std::function< void( Node * ) > callback );
+		virtual void foreachNode( std::function< void( NodePtr const & ) > callback );
 
 	protected:
-		std::list< Pointer< Node > > _nodes;
+		std::list< NodePtr > _nodes;
 
 	public:
 		virtual void accept( NodeVisitor &visitor ) override;
 
 	};
+    
+    using GroupPtr = std::shared_ptr< Group >;
 
 }
 

@@ -33,9 +33,7 @@
 using namespace crimild;
 
 WindowTask::WindowTask( int priority, int width, int height )
-	: Task( priority ),
-	  _width( width ),
-	  _height( height )
+	: Task( priority )
 {
 }
 
@@ -51,7 +49,7 @@ void WindowTask::start( void )
 	glfwOpenWindowHint( GLFW_OPENGL_VERSION_MINOR, 2 );
     glfwOpenWindowHint( GLFW_WINDOW_NO_RESIZE, GL_TRUE );
 
-    FrameBufferObject *screenBuffer = Simulation::getCurrent()->getRenderer()->getScreenBuffer();
+    auto screenBuffer = Simulation::getCurrent()->getRenderer()->getScreenBuffer();
 
     if ( !glfwOpenWindow( screenBuffer->getWidth(), screenBuffer->getHeight(), 
     					  8, 8, 8, 8,

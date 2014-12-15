@@ -39,24 +39,24 @@ namespace crimild {
     template< class T >
     class NoCallbacksPolicy {
     public:
-        void onAdded( T *object ) { }
-        void onRemoved( T *object ) { }
+        void onAdded( std::shared_ptr< T > const &object ) { }
+        void onRemoved( std::shared_ptr< T > const &object ) { }
     };
     
     template< class T >
     class InvokeCallbacksPolicy {
-        typedef std::function< void( T * ) > CallbackType;
+        typedef std::function< void( std::shared_ptr< T > const & ) > CallbackType;
     public:
         void setOnAddCallback( CallbackType callback ) { _onAddedCallback = callback; }
         
-        void onAdded( T *object )
+        void onAdded( std::shared_ptr< T > const &object )
         {
             _onAddedCallback( object );
         }
 
         void setOnRemovedCallback( CallbackType callback ) { _onRemovedCallback = callback; }
 
-        void onRemoved( T *object )
+        void onRemoved( std::shared_ptr< T > const &object )
         {
             _onRemovedCallback( object );
         }
@@ -74,7 +74,7 @@ namespace crimild {
         public SharedObject,
         public CallbackPolicy< ObjectType > {
     private:
-        typedef Pointer< ObjectType > ObjectPtr;
+        typedef std::shared_ptr< ObjectType > ObjectPtr;
         typedef CallbackPolicy< ObjectType > CallbackPolicyImpl;
         
     public:
@@ -90,44 +90,43 @@ namespace crimild {
         
         bool isEmpty( void ) const { return _objects.size() == 0; }
         
-        void add( ObjectType *obj )
+        void add( ObjectPtr const &obj )
         {
-            ObjectPtr oPtr( obj );
-            _objects.push_back( oPtr );
+            _objects.push_back( obj );
             CallbackPolicyImpl::onAdded( obj );
         }
         
-        ObjectPtr remove( ObjectType *obj )
+        ObjectPtr remove( ObjectPtr const &obj )
         {
-            ObjectPtr oPtr( obj );
-            _objects.remove( oPtr );
+            _objects.remove( obj );
             CallbackPolicyImpl::onRemoved( obj );
-            return oPtr;
+            return obj;
         }
         
         void clear( void )
         {
-            for ( auto oPtr : _objects ) {
-                CallbackPolicyImpl::onRemoved( oPtr.get() );
+            for ( auto obj : _objects ) {
+                CallbackPolicyImpl::onRemoved( obj );
             }
             
             _objects.clear();
         }
         
-        void each( std::function< void( ObjectType *, int index ) > callback )
+        void each( std::function< void( ObjectPtr const &, int index ) > callback )
         {
             int i = 0;
-            for ( auto oPtr : _objects ) {
-                callback( oPtr.get(), i++ );
+            auto os = _objects;
+            for ( auto o : os ) {
+                callback( o, i++ );
             }
         }
             
-        ObjectType *find( std::function< bool( ObjectType * ) > callback )
+        ObjectPtr find( std::function< bool( ObjectPtr const & ) > callback )
         {
-            ObjectType *result = nullptr;
-            for ( auto oPtr : _objects ) {
-                if ( callback( oPtr.get() ) ) {
-                    result = oPtr.get();
+            ObjectPtr result = nullptr;
+            for ( auto o : _objects ) {
+                if ( callback( o ) ) {
+                    result = o;
                     break;
                 }
             }

@@ -68,7 +68,7 @@ bool gl3::VertexBufferObjectCatalog::extractId( int compositeId, unsigned int &v
 	return true;
 }
 
-void gl3::VertexBufferObjectCatalog::bind( ShaderProgram *program, VertexBufferObject *vbo )
+void gl3::VertexBufferObjectCatalog::bind( ShaderProgramPtr const &program, VertexBufferObjectPtr const &vbo )
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
@@ -87,7 +87,7 @@ void gl3::VertexBufferObjectCatalog::bind( ShaderProgram *program, VertexBufferO
 
     const VertexFormat &format = vbo->getVertexFormat();
 
-    ShaderLocation *positionLocation = program->getStandardLocation( ShaderProgram::StandardLocation::POSITION_ATTRIBUTE );
+    auto positionLocation = program->getStandardLocation( ShaderProgram::StandardLocation::POSITION_ATTRIBUTE );
     if ( positionLocation && positionLocation->isValid() ) {
         if ( format.hasPositions() ) {
             glEnableVertexAttribArray( positionLocation->getLocation() );
@@ -100,7 +100,7 @@ void gl3::VertexBufferObjectCatalog::bind( ShaderProgram *program, VertexBufferO
         }
     }
 
-    ShaderLocation *normalLocation = program->getStandardLocation( ShaderProgram::StandardLocation::NORMAL_ATTRIBUTE );
+    auto normalLocation = program->getStandardLocation( ShaderProgram::StandardLocation::NORMAL_ATTRIBUTE );
     if ( normalLocation && normalLocation->isValid() ) {
         if ( format.hasNormals() ) {
             glEnableVertexAttribArray( normalLocation->getLocation() );
@@ -113,7 +113,7 @@ void gl3::VertexBufferObjectCatalog::bind( ShaderProgram *program, VertexBufferO
         }
     }
 
-    ShaderLocation *tangentLocation = program->getStandardLocation( ShaderProgram::StandardLocation::TANGENT_ATTRIBUTE );
+    auto tangentLocation = program->getStandardLocation( ShaderProgram::StandardLocation::TANGENT_ATTRIBUTE );
     if ( tangentLocation && tangentLocation->isValid() ) {
         if ( format.hasTangents() ) {
             glEnableVertexAttribArray( tangentLocation->getLocation() );
@@ -126,7 +126,7 @@ void gl3::VertexBufferObjectCatalog::bind( ShaderProgram *program, VertexBufferO
         }
     }
 
-    ShaderLocation *colorLocation = program->getStandardLocation( ShaderProgram::StandardLocation::COLOR_ATTRIBUTE );
+    auto colorLocation = program->getStandardLocation( ShaderProgram::StandardLocation::COLOR_ATTRIBUTE );
     if ( colorLocation && colorLocation->isValid() ) {
         if ( format.hasColors() ) {
             glEnableVertexAttribArray( colorLocation->getLocation() );
@@ -139,7 +139,7 @@ void gl3::VertexBufferObjectCatalog::bind( ShaderProgram *program, VertexBufferO
         }
     }
 
-    ShaderLocation *uvLocation = program->getStandardLocation( ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE );
+    auto uvLocation = program->getStandardLocation( ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE );
     if ( uvLocation && uvLocation->isValid() ) {
         if ( format.hasTextureCoords() ) {
             glEnableVertexAttribArray( uvLocation->getLocation() );
@@ -155,7 +155,7 @@ void gl3::VertexBufferObjectCatalog::bind( ShaderProgram *program, VertexBufferO
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gl3::VertexBufferObjectCatalog::unbind( ShaderProgram *program, VertexBufferObject *vbo )
+void gl3::VertexBufferObjectCatalog::unbind( ShaderProgramPtr const &program, VertexBufferObjectPtr const &vbo )
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
@@ -167,7 +167,7 @@ void gl3::VertexBufferObjectCatalog::unbind( ShaderProgram *program, VertexBuffe
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gl3::VertexBufferObjectCatalog::load( VertexBufferObject *vbo )
+void gl3::VertexBufferObjectCatalog::load( VertexBufferObjectPtr const &vbo )
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
@@ -187,7 +187,7 @@ void gl3::VertexBufferObjectCatalog::load( VertexBufferObject *vbo )
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gl3::VertexBufferObjectCatalog::unload( VertexBufferObject *vbo )
+void gl3::VertexBufferObjectCatalog::unload( VertexBufferObjectPtr const &vbo )
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 

@@ -29,14 +29,15 @@
 #define CRIMILD_RENDERING_VISIBILITY_SET_
 
 #include "Foundation/SharedObject.hpp"
+#include "Foundation/Pointer.hpp"
+
+#include "SceneGraph/Camera.hpp"
+#include "SceneGraph/Geometry.hpp"
 
 #include <functional>
 #include <list>
 
 namespace crimild {
-
-	class Geometry;
-	class Camera;
 
 	class VisibilitySet : public SharedObject {
 	public:
@@ -45,19 +46,21 @@ namespace crimild {
 
 		void reset( void );
 
-		void setCamera( Camera *camera ) { _camera = camera; }
-		Camera *getCamera( void ) { return _camera; }
+		void setCamera( CameraPtr const &camera ) { _camera = camera; }
+		CameraPtr &getCamera( void ) { return _camera; }
 
 		bool hasGeometries( void ) const { return _geometries.size() > 0; }
 
-		void addGeometry( Geometry * geometry );
+		void addGeometry( GeometryPtr const &geometry );
 
-		void foreachGeometry( std::function< void( Geometry * ) > callback );
+		void foreachGeometry( std::function< void( GeometryPtr const & ) > callback );
 
 	private:
-		std::list< Geometry * > _geometries;
-		Camera *_camera;
+		std::list< GeometryPtr > _geometries;
+		CameraPtr _camera;
 	};
+    
+    using VisibilitySetPtr = std::shared_ptr< VisibilitySet >;
 
 }
 

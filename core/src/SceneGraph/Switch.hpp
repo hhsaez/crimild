@@ -37,13 +37,13 @@ namespace crimild {
 		explicit Switch( std::string name = "" );
 		virtual ~Switch( void );
         
-		virtual void foreachNode( std::function< void( Node * ) > callback ) override;
+		virtual void foreachNode( std::function< void( NodePtr const & ) > callback ) override;
         
-        Node *getCurrentNode( void );
+        NodePtr getCurrentNode( void );
         void selectNextNode( void );
         
     private:
-        std::list< Pointer< Node > >::iterator _current;
+        std::list< NodePtr >::iterator _current;
 	};
     
 }

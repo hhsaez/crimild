@@ -57,27 +57,27 @@ void UpdateSceneTask::start( void )
 
 void UpdateSceneTask::update( void )
 {
-	const Time &t = Simulation::getCurrent()->getSimulationTime();
-	
-	_accumulator += t.getDeltaTime();
-
-	Node *scene = Simulation::getCurrent()->getScene();
-	if ( scene == nullptr ) {
-		return;
-	}
-
-	scene->perform( UpdateComponents( t ) );
-
-	Time fixed = t;
-	fixed.setDeltaTime( CRIMILD_SIMULATION_TIME );
-	
-	while ( scene != nullptr && _accumulator >= CRIMILD_SIMULATION_TIME ) {
-		scene->perform( Apply( [&]( Node *n ) { 
-			n->updateComponentsWithFixedTime( fixed );
-		}));
-
-		_accumulator -= CRIMILD_SIMULATION_TIME;
-	}
+    const Time &t = Simulation::getCurrent()->getSimulationTime();
+    
+    _accumulator += t.getDeltaTime();
+    
+    auto scene = Simulation::getCurrent()->getScene();
+    if ( scene == nullptr ) {
+        return;
+    }
+    
+    scene->perform( UpdateComponents( t ) );
+    
+    Time fixed = t;
+    fixed.setDeltaTime( CRIMILD_SIMULATION_TIME );
+    
+    while ( scene != nullptr && _accumulator >= CRIMILD_SIMULATION_TIME ) {
+        scene->perform( Apply( [&]( NodePtr const &n ) {
+            n->updateComponentsWithFixedTime( fixed );
+        }));
+        
+        _accumulator -= CRIMILD_SIMULATION_TIME;
+    }
 }
 
 void UpdateSceneTask::stop( void )

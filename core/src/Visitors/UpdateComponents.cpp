@@ -32,7 +32,7 @@
 using namespace crimild;
 
 UpdateComponents::UpdateComponents( const Time &t )
-	: Apply( [&]( Node *n ) { n->updateComponents( t ); } )
+	: Apply( [&]( NodePtr const &n ) { n->updateComponents( t ); } )
 {
 
 }

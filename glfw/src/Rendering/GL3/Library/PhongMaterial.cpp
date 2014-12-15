@@ -33,7 +33,7 @@ using namespace crimild::gl3;
 
 PhongMaterial::PhongMaterial( void )
 {
-	setProgram( new PhongShaderProgram() );
+    setProgram( std::make_shared< PhongShaderProgram >() );
 }
 
 PhongMaterial::~PhongMaterial( void )

@@ -49,6 +49,8 @@ namespace crimild {
     private:
         float _scale;
     };
+    
+    using TrefoilKnotPrimitivePtr = std::shared_ptr< TrefoilKnotPrimitive >;
         
 }
 

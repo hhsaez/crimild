@@ -45,11 +45,13 @@ namespace crimild {
 	public:
 		virtual ~ImageEffect( void );
 
-        virtual void apply( Renderer *renderer, int inputCount, Texture **inputs, Primitive *primitive, FrameBufferObject *output ) = 0;
+        virtual void apply( std::shared_ptr< Renderer > const &renderer, int inputCount, Texture **inputs, std::shared_ptr< Primitive > const &primitive, std::shared_ptr< FrameBufferObject > const &output ) = 0;
         
     protected:
-        void render( Renderer *renderer, FrameBufferObject *output, Texture *texture, ShaderProgram *program, Primitive *primitive );
+        void render( std::shared_ptr< Renderer > const &renderer, std::shared_ptr< FrameBufferObject > const &output, std::shared_ptr< Texture > const &texture, std::shared_ptr< ShaderProgram > const &program, std::shared_ptr< Primitive > const &primitive );
 	};
+    
+    using ImageEffectPtr = std::shared_ptr< ImageEffect >;
 
 }
 

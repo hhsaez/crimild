@@ -38,12 +38,16 @@ namespace crimild {
 		EnableRenderDebugInfoMessage( void ) { }
 		virtual ~EnableRenderDebugInfoMessage( void ) { }
 	};
+    
+    using EnableRenderDebugInfoMessagePtr = std::shared_ptr< EnableRenderDebugInfoMessage >;
 
 	class DisableRenderDebugInfoMessage : public Message {
 	public:
 		DisableRenderDebugInfoMessage( void ) { }
 		virtual ~DisableRenderDebugInfoMessage( void ) { }
 	};
+    
+    using DisableRenderDebugInfoMessagePtr = std::shared_ptr< DisableRenderDebugInfoMessage >;
 
 	class RenderDebugInfoTask : 
 		public Task,
@@ -58,8 +62,8 @@ namespace crimild {
 		virtual void stop( void ) override;
 
 	public:
-		virtual void handleMessage( EnableRenderDebugInfoMessage *message ) override;
-		virtual void handleMessage( DisableRenderDebugInfoMessage *message ) override;
+		virtual void handleMessage( EnableRenderDebugInfoMessagePtr const &message ) override;
+		virtual void handleMessage( DisableRenderDebugInfoMessagePtr const &message ) override;
 	};
 
 }

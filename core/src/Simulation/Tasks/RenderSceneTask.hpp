@@ -46,10 +46,10 @@ namespace crimild {
 		virtual void update( void ) override;
 		virtual void stop( void ) override;
         
-        RenderQueue *getRenderQueue( void ) { return _renderQueue.get(); }
+        RenderQueuePtr &getRenderQueue( void ) { return _renderQueue; }
         
     private:
-        Pointer< RenderQueue > _renderQueue;
+        RenderQueuePtr _renderQueue;
 	};
 
 }

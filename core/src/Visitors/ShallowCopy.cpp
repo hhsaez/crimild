@@ -32,7 +32,6 @@
 using namespace crimild;
 
 ShallowCopy::ShallowCopy( void )
-	: _parent( nullptr )
 {
 
 }
@@ -42,20 +41,20 @@ ShallowCopy::~ShallowCopy( void )
 
 }
 
-void ShallowCopy::traverse( Node *node )
+void ShallowCopy::traverse( NodePtr const &node )
 {
 	NodeVisitor::traverse( node );
 }
 
-void ShallowCopy::visitNode( Node *node )
+void ShallowCopy::visitNode( NodePtr const &node )
 {
-	Node *copy = new Node();
+    auto copy = std::make_shared< Node >();
 	copyNode( node, copy );
 }
 
-void ShallowCopy::visitGroup( Group *group )
+void ShallowCopy::visitGroup( GroupPtr const &group )
 {
-	Group *copy = new Group();
+    auto copy = std::make_shared< Group >();
 	copyNode( group, copy );
 
 	_parent = copy;
@@ -65,17 +64,17 @@ void ShallowCopy::visitGroup( Group *group )
 	_parent = copy->getParent< Group >();
 }
 
-void ShallowCopy::visitGeometry( Geometry *geometry )
+void ShallowCopy::visitGeometry( GeometryPtr const &geometry )
 {
-	Geometry *copy = new Geometry();
+    auto copy = std::make_shared< Geometry >();
 	copyNode( geometry, copy );
 
-	geometry->foreachPrimitive( [&]( Primitive *primitive ) {
+	geometry->foreachPrimitive( [&]( PrimitivePtr const &primitive ) {
 		copy->attachPrimitive( primitive );
 	});
 }
 
-void ShallowCopy::copyNode( Node *src, Node *dst )
+void ShallowCopy::copyNode( NodePtr const &src, NodePtr const &dst )
 {
 	if ( _result == nullptr ) {
 		_result = dst;
@@ -88,10 +87,10 @@ void ShallowCopy::copyNode( Node *src, Node *dst )
 	dst->setName( src->getName() );
 	dst->setLocal( src->getLocal() );
 
-	MaterialComponent *srcMaterials = src->getComponent< MaterialComponent >();
+	auto srcMaterials = src->getComponent< MaterialComponent >();
 	if ( srcMaterials != nullptr ) {
-		MaterialComponent *dstMaterials = new MaterialComponent();
-		srcMaterials->foreachMaterial( [&]( Material *material ) {
+        auto dstMaterials = std::make_shared< MaterialComponent >();
+		srcMaterials->foreachMaterial( [&]( MaterialPtr const &material ) {
 			dstMaterials->attachMaterial( material );
 		});
 		dst->attachComponent( dstMaterials );

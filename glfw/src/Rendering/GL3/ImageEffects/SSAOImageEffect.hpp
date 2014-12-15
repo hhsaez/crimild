@@ -46,15 +46,15 @@ namespace crimild {
                     - G-Buffer positions
                     - G-Buffer normals
              */
-            virtual void apply( crimild::Renderer *renderer, int inputCount, Texture **inputs, Primitive *primitive, FrameBufferObject *output ) override;
+            virtual void apply( crimild::RendererPtr const &renderer, int inputCount, Texture **inputs, PrimitivePtr const &primitive, FrameBufferObjectPtr const &output ) override;
             
         private:
             void buildSSAOBuffer( int width, int height );
             void computeSSAO( crimild::Renderer *renderer, Texture *srcPositions, Texture *srcNormals, Primitive *primitive );
             void applySSAO( crimild::Renderer *renderer, Texture *srcImage, Texture *ssaoMap, Primitive *primitive, FrameBufferObject *output );
             
-            Pointer< FrameBufferObject > _ssaoBuffer;
-            Pointer< Texture > _ssaoBufferOutput;
+            FrameBufferObjectPtr _ssaoBuffer;
+            TexturePtr _ssaoBufferOutput;
         };
         
     }

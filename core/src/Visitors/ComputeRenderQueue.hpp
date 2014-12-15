@@ -36,19 +36,19 @@ namespace crimild {
     
     class ComputeRenderQueue : public NodeVisitor {
     public:
-        ComputeRenderQueue( Camera *camera, RenderQueue *result = nullptr );
+        ComputeRenderQueue( CameraPtr const &camera, RenderQueuePtr const &result );
         virtual ~ComputeRenderQueue( void );
         
-        RenderQueue *getResult( void ) { return _result.get(); }
+        RenderQueuePtr &getResult( void ) { return _result; }
         
-        virtual void traverse( Node *scene ) override;
+        virtual void traverse( NodePtr const &scene ) override;
         
-        virtual void visitGeometry( Geometry *geometry ) override;
-        virtual void visitLight( Light *light ) override;
+        virtual void visitGeometry( GeometryPtr const &geometry ) override;
+        virtual void visitLight( LightPtr const &light ) override;
         
     private:
-        Pointer< Camera > _camera;
-        Pointer< RenderQueue > _result;
+        CameraPtr _camera;
+        RenderQueuePtr _result;
     };
     
 }

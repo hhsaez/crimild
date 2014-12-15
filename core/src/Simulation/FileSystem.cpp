@@ -59,6 +59,11 @@ void FileSystem::init( int argc, char **argv )
         base = base.substr( 0, pos + 1 );
     }
 	
+    pos = base.find( "/Release" );
+    if ( pos > 0 ) {
+        base = base.substr( 0, pos + 1 );
+    }
+    
 	if ( base.length() == 0 ) {
 		base = ".";
 	}

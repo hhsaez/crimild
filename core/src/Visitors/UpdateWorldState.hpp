@@ -37,8 +37,8 @@ namespace crimild {
 		UpdateWorldState( void );
 		virtual ~UpdateWorldState( void );
 
-		virtual void visitNode( Node *node ) override;
-		virtual void visitGroup( Group *node ) override;
+        virtual void visitNode( std::shared_ptr< Node > const &node ) override;
+        virtual void visitGroup( std::shared_ptr< Group > const &node ) override;
 	};
 
 }

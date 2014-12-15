@@ -17,22 +17,22 @@ namespace crimild {
 	public:
 		static void init( void );
 
-		static void renderLine( crimild::Renderer *renderer, Camera *camera, const Vector3f &from, const Vector3f &to, const RGBAColorf &color = RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ) );
-		static void renderLines( crimild::Renderer *renderer, Camera *camera, const Vector3f *lines, unsigned int count, const RGBAColorf &color = RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ) );
+		static void renderLine( RendererPtr const &renderer, CameraPtr const &camera, const Vector3f &from, const Vector3f &to, const RGBAColorf &color = RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ) );
+		static void renderLines( RendererPtr const &renderer, CameraPtr const &camera, const Vector3f *lines, unsigned int count, const RGBAColorf &color = RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ) );
 
-		static void render( crimild::Renderer *renderer, Camera *camera, Primitive *primitive, const TransformationImpl &model, const RGBAColorf &color );
+		static void render( RendererPtr const &renderer, CameraPtr const &camera, PrimitivePtr const &primitive, const TransformationImpl &model, const RGBAColorf &color );
 		
-		static void renderBox( crimild::Renderer *renderer, Camera *camera, const Vector3f &position, float scale, const RGBAColorf &color = RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ) );
-		static void renderSphere( crimild::Renderer *renderer, Camera *camera, const Vector3f &position, float scale, const RGBAColorf &color = RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ) );
+		static void renderBox( RendererPtr const &renderer, CameraPtr const &camera, const Vector3f &position, float scale, const RGBAColorf &color = RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ) );
+		static void renderSphere( RendererPtr const &renderer, CameraPtr const &camera, const Vector3f &position, float scale, const RGBAColorf &color = RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ) );
 
 	private:
-		static Pointer< Primitive > _boxPrimitive;
-		static Pointer< Primitive > _spherePrimitive;
+		static PrimitivePtr _boxPrimitive;
+		static PrimitivePtr _spherePrimitive;
 
-		static Pointer< VertexBufferObject > _linesVBO;
+		static VertexBufferObjectPtr _linesVBO;
 
-		static Pointer< DepthState > _depthState;
-		static Pointer< AlphaState > _alphaState;
+		static DepthStatePtr _depthState;
+		static AlphaStatePtr _alphaState;
 	};
 
 }

@@ -116,11 +116,11 @@ BlurShaderProgram::BlurShaderProgram( void )
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
     
-    registerLocation( new ShaderLocation( ShaderLocation::Type::UNIFORM, UNIFORM_BLUR_INPUT ) );
-    registerLocation( new ShaderLocation( ShaderLocation::Type::UNIFORM, UNIFORM_BLUR_ORIENTATION ) );
-    registerLocation( new ShaderLocation( ShaderLocation::Type::UNIFORM, UNIFORM_BLUR_AMOUNT ) );
-    registerLocation( new ShaderLocation( ShaderLocation::Type::UNIFORM, UNIFORM_BLUR_SCALE ) );
-    registerLocation( new ShaderLocation( ShaderLocation::Type::UNIFORM, UNIFORM_BLUR_STRENTH ) );
+    registerLocation( std::make_shared< ShaderLocation >( ShaderLocation::Type::UNIFORM, UNIFORM_BLUR_INPUT ) );
+    registerLocation( std::make_shared< ShaderLocation >( ShaderLocation::Type::UNIFORM, UNIFORM_BLUR_ORIENTATION ) );
+    registerLocation( std::make_shared< ShaderLocation >( ShaderLocation::Type::UNIFORM, UNIFORM_BLUR_AMOUNT ) );
+    registerLocation( std::make_shared< ShaderLocation >( ShaderLocation::Type::UNIFORM, UNIFORM_BLUR_SCALE ) );
+    registerLocation( std::make_shared< ShaderLocation >( ShaderLocation::Type::UNIFORM, UNIFORM_BLUR_STRENTH ) );
 }
 
 BlurShaderProgram::~BlurShaderProgram( void )

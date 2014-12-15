@@ -45,12 +45,12 @@ void VisibilitySet::reset( void )
 	_geometries.clear();
 }
 
-void VisibilitySet::addGeometry( Geometry *geometry )
+void VisibilitySet::addGeometry( GeometryPtr const &geometry )
 {
 	_geometries.push_back( geometry );
 }
 
-void VisibilitySet::foreachGeometry( std::function< void( Geometry * ) > callback ) 
+void VisibilitySet::foreachGeometry( std::function< void( GeometryPtr const & ) > callback )
 {
 	for ( auto geometry : _geometries ) {
 		callback( geometry );

@@ -39,7 +39,7 @@
 using namespace crimild;
 
 RenderPass::RenderPass( void )
-	: _screen( new QuadPrimitive( 2.0f, 2.0f, VertexFormat::VF_P3_UV2, Vector2f( 0.0f, 1.0f ), Vector2f( 1.0f, -1.0f ) ) )
+    : _screen( std::make_shared< QuadPrimitive >( 2.0f, 2.0f, VertexFormat::VF_P3_UV2, Vector2f( 0.0f, 1.0f ), Vector2f( 1.0f, -1.0f ) ) )
 {
 
 }
@@ -49,50 +49,50 @@ RenderPass::~RenderPass( void )
 
 }
 
-void RenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
+void RenderPass::render( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
-    renderQueue->getOpaqueObjects().each( [&]( Geometry *geometry, int ) {
+    renderQueue->getOpaqueObjects().each( [&]( GeometryPtr const &geometry, int ) {
         render( renderer, geometry, camera );
     });
 
-    renderQueue->getTranslucentObjects().each( [&]( Geometry *geometry, int ) {
+    renderQueue->getTranslucentObjects().each( [&]( GeometryPtr const &geometry, int ) {
         render( renderer, geometry, camera );
     });
 
     renderScreenObjects( renderer, renderQueue, camera );
 }
 
-void RenderPass::render( Renderer *renderer, VisibilitySet *vs, Camera *camera )
+void RenderPass::render( RendererPtr const &renderer, VisibilitySetPtr const &vs, CameraPtr const &camera )
 {
-	vs->foreachGeometry( [&]( Geometry *geometry ) mutable {
+	vs->foreachGeometry( [&]( GeometryPtr const &geometry ) mutable {
 		render( renderer, geometry, camera );
 	});
 }
 
-void RenderPass::render( Renderer *renderer, Geometry *geometry, Camera *camera )
+void RenderPass::render( RendererPtr const &renderer, GeometryPtr const &geometry, CameraPtr const &camera )
 {
-	RenderStateComponent *renderState = geometry->getComponent< RenderStateComponent >();
+	auto renderState = geometry->getComponent< RenderStateComponent >();
 	if ( renderState->hasMaterials() ) {
-		geometry->foreachPrimitive( [&]( Primitive *primitive ) mutable {
-			renderState->foreachMaterial( [&]( Material *material ) mutable {
+		geometry->foreachPrimitive( [&]( PrimitivePtr const &primitive ) {
+			renderState->foreachMaterial( [&]( MaterialPtr const &material ) {
 				render( renderer, geometry, primitive, material, camera );
 			});
 		});
 	}
 }
 
-void RenderPass::render( Renderer *renderer, Geometry *geometry, Primitive *primitive, Material *material, Camera *camera )
+void RenderPass::render( RendererPtr const &renderer, GeometryPtr const &geometry, PrimitivePtr const &primitive, MaterialPtr const &material, CameraPtr const &camera )
 {
 	if ( !material || !primitive ) {
 		return;
 	}
 
-	ShaderProgram *program = material->getProgram() ? material->getProgram() : renderer->getFallbackProgram( material, geometry, primitive );
+	auto program = material->getProgram() ? material->getProgram() : renderer->getFallbackProgram( material, geometry, primitive );
 	if ( !program ) {
 		return;
 	}
 
-	RenderStateComponent *renderState = geometry->getComponent< RenderStateComponent >();
+	auto renderState = geometry->getComponent< RenderStateComponent >();
 
 	// bind shader program first
 	renderer->bindProgram( program );
@@ -102,16 +102,16 @@ void RenderPass::render( Renderer *renderer, Geometry *geometry, Primitive *prim
 
 	// bind lights
 	if ( renderState->hasLights() ) {
-		renderState->foreachLight( [&]( Light *light ) {
+		renderState->foreachLight( [&]( LightPtr const &light ) {
 			renderer->bindLight( program, light );
 		});
 	}
 
 	// bind joints and other skinning information
-	SkinComponent *skinning = geometry->getComponent< SkinComponent >();
+	auto skinning = geometry->getComponent< SkinComponent >();
 	if ( skinning != nullptr && skinning->hasJoints() ) {
-		skinning->foreachJoint( [&]( Node *node, unsigned int index ) {
-			JointComponent *joint = node->getComponent< JointComponent >();
+		skinning->foreachJoint( [&]( NodePtr const &node, unsigned int index ) {
+			auto joint = node->getComponent< JointComponent >();
 			renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::JOINT_WORLD_MATRIX_UNIFORM + index ), joint->getWorldMatrix() );
 			renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::JOINT_INVERSE_BIND_MATRIX_UNIFORM + index ), joint->getInverseBindMatrix() );
 		});
@@ -136,7 +136,7 @@ void RenderPass::render( Renderer *renderer, Geometry *geometry, Primitive *prim
 
 	// unbind lights
 	if ( renderState->hasLights() ) {
-		renderState->foreachLight( [&]( Light *light ) {
+		renderState->foreachLight( [&]( LightPtr const &light ) {
 			renderer->unbindLight( program, light );
 		});
 	}
@@ -148,8 +148,9 @@ void RenderPass::render( Renderer *renderer, Geometry *geometry, Primitive *prim
 	renderer->unbindProgram( program );
 }
 
-void RenderPass::render( Renderer *renderer, Texture *texture, ShaderProgram *program )
+void RenderPass::render( RendererPtr const &renderer, TexturePtr const &texture, ShaderProgramPtr const &defaultProgram )
 {
+    auto program = defaultProgram;
     if ( program == nullptr ) {
         program = renderer->getFallbackProgram( nullptr, nullptr, nullptr );
         if ( program == nullptr ) {
@@ -172,7 +173,7 @@ void RenderPass::render( Renderer *renderer, Texture *texture, ShaderProgram *pr
     renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM ), mMatrix );
      
     // draw primitive
-    renderer->drawPrimitive( program, _screen.get() );
+    renderer->drawPrimitive( program, _screen );
      
     // unbind primitive buffers
     renderer->unbindVertexBuffer( program, _screen->getVertexBuffer() );
@@ -185,33 +186,33 @@ void RenderPass::render( Renderer *renderer, Texture *texture, ShaderProgram *pr
     renderer->unbindProgram( program );
 }
 
-void RenderPass::render( Renderer *renderer, FrameBufferObject *fbo, ShaderProgram *program )
+void RenderPass::render( RendererPtr const &renderer, FrameBufferObjectPtr const &fbo, ShaderProgramPtr const &program )
 {
 
 }
 
-void RenderPass::renderScreenObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
+void RenderPass::renderScreenObjects( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
 	const Matrix4f &projection = camera->getOrthographicMatrix();
     Matrix4f view;
     view.makeIdentity();
     
-    renderQueue->getScreenObjects().each( [&]( Geometry *geometry, int ) {
-	    Matrix4f model = geometry->getWorld().computeModelMatrix();
-	    Matrix4f normal = model;
+    renderQueue->getScreenObjects().each( [&]( GeometryPtr const &geometry, int ) {
+	    auto model = geometry->getWorld().computeModelMatrix();
+	    auto normal = model;
 		normal[ 12 ] = 0.0f;
 		normal[ 13 ] = 0.0f;
 		normal[ 14 ] = 0.0f;
 
-		RenderStateComponent *renderState = geometry->getComponent< RenderStateComponent >();
+		auto renderState = geometry->getComponent< RenderStateComponent >();
 		if ( renderState->hasMaterials() ) {
-			geometry->foreachPrimitive( [&]( Primitive *primitive ) mutable {
-				renderState->foreachMaterial( [&]( Material *material ) mutable {
+			geometry->foreachPrimitive( [&]( PrimitivePtr const &primitive ) {
+				renderState->foreachMaterial( [&]( MaterialPtr const &material ) {
 					if ( !material || !primitive ) {
 						return;
 					}
 
-					ShaderProgram *program = material->getProgram() ? material->getProgram() : renderer->getFallbackProgram( material, geometry, primitive );
+					auto program = material->getProgram() ? material->getProgram() : renderer->getFallbackProgram( material, geometry, primitive );
 					if ( !program ) {
 						return;
 					}

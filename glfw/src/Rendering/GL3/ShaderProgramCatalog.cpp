@@ -47,7 +47,7 @@ int gl3::ShaderProgramCatalog::getNextResourceId( void )
 	return glCreateProgram();
 }
 
-void gl3::ShaderProgramCatalog::bind( ShaderProgram *program )
+void gl3::ShaderProgramCatalog::bind( ShaderProgramPtr const &program )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
@@ -58,7 +58,7 @@ void gl3::ShaderProgramCatalog::bind( ShaderProgram *program )
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gl3::ShaderProgramCatalog::unbind( ShaderProgram *program )
+void gl3::ShaderProgramCatalog::unbind( ShaderProgramPtr const &program )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
@@ -69,7 +69,7 @@ void gl3::ShaderProgramCatalog::unbind( ShaderProgram *program )
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gl3::ShaderProgramCatalog::load( ShaderProgram *program )
+void gl3::ShaderProgramCatalog::load( ShaderProgramPtr const &program )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
@@ -111,7 +111,7 @@ void gl3::ShaderProgramCatalog::load( ShaderProgram *program )
                 programId = 0;
             }
 
-            program->foreachLocation( [&]( ShaderLocation *loc ) mutable {
+            program->foreachLocation( [&]( ShaderLocationPtr const &loc ) mutable {
             	if ( loc->getType() == ShaderLocation::Type::ATTRIBUTE ) {
             		fetchAttributeLocation( program, loc );
             	}
@@ -125,7 +125,7 @@ void gl3::ShaderProgramCatalog::load( ShaderProgram *program )
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gl3::ShaderProgramCatalog::unload( ShaderProgram *program )
+void gl3::ShaderProgramCatalog::unload( ShaderProgramPtr const &program )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
@@ -139,7 +139,7 @@ void gl3::ShaderProgramCatalog::unload( ShaderProgram *program )
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-int gl3::ShaderProgramCatalog::compileShader( Shader *shader, int type )
+int gl3::ShaderProgramCatalog::compileShader( ShaderPtr const &shader, int type )
 {
 	GLuint shaderId = glCreateShader( type );
     if ( shaderId > 0 ) {
@@ -173,12 +173,12 @@ int gl3::ShaderProgramCatalog::compileShader( Shader *shader, int type )
     return shaderId;
 }
 
-void gl3::ShaderProgramCatalog::fetchAttributeLocation( ShaderProgram *program, ShaderLocation *location )
+void gl3::ShaderProgramCatalog::fetchAttributeLocation( ShaderProgramPtr const &program, ShaderLocationPtr const &location )
 {
 	location->setLocation( glGetAttribLocation( program->getCatalogId(), location->getName().c_str() ) );
 }
 
-void gl3::ShaderProgramCatalog::fetchUniformLocation( ShaderProgram *program, ShaderLocation *location )
+void gl3::ShaderProgramCatalog::fetchUniformLocation( ShaderProgramPtr const &program, ShaderLocationPtr const &location )
 {
 	location->setLocation( glGetUniformLocation( program->getCatalogId(), location->getName().c_str() ) );
 }

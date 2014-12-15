@@ -33,7 +33,7 @@
 using namespace crimild;
 
 StartComponents::StartComponents( void )
-	: Apply( []( Node *n ) { n->startComponents(); } )
+	: Apply( []( NodePtr const &n ) { n->startComponents(); } )
 {
 
 }

@@ -41,17 +41,17 @@ namespace crimild {
 
 			virtual int getNextResourceId( void ) override;
 
-			virtual void bind( ShaderProgram *program ) override;
-			virtual void unbind( ShaderProgram *program ) override;
+			virtual void bind( ShaderProgramPtr const &program ) override;
+			virtual void unbind( ShaderProgramPtr const &program ) override;
 
-			virtual void load( ShaderProgram *program ) override;
-			virtual void unload( ShaderProgram *program ) override;
+			virtual void load( ShaderProgramPtr const &program ) override;
+			virtual void unload( ShaderProgramPtr const &program ) override;
 
 		private:
-			int compileShader( Shader *shader, int type );
+			int compileShader( ShaderPtr const &shader, int type );
 
-			void fetchAttributeLocation( ShaderProgram *program, ShaderLocation *location );
-			void fetchUniformLocation( ShaderProgram *program, ShaderLocation *location );
+			void fetchAttributeLocation( ShaderProgramPtr const &program, ShaderLocationPtr const &location );
+			void fetchUniformLocation( ShaderProgramPtr const &program, ShaderLocationPtr const &location );
 		};
 
 		typedef std::shared_ptr< ShaderProgramCatalog > ShaderProgramCatalogPtr;

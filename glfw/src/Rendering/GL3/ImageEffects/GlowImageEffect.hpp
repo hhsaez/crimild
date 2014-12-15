@@ -39,7 +39,7 @@ namespace crimild {
             GlowImageEffect( void );
             virtual ~GlowImageEffect( void );
             
-            virtual void apply( crimild::Renderer *renderer, int inputCount, Texture **inputs, Primitive *primitive, FrameBufferObject *output ) override;
+            virtual void apply( crimild::RendererPtr const &renderer, int inputCount, Texture **inputs, PrimitivePtr const &primitive, FrameBufferObjectPtr const &output ) override;
             
             void setGlowMapSize( int size ) { _glowMapSize = size; }
             int getGlowMapSize( void ) const { return _glowMapSize; }
@@ -57,14 +57,14 @@ namespace crimild {
             int _amount;
             int _glowMapSize;
             
-            Pointer< FrameBufferObject > _blurBuffer;
-            Pointer< Texture > _blurMap;
+            FrameBufferObjectPtr _blurBuffer;
+            TexturePtr _blurMap;
             
-            Pointer< FrameBufferObject > _glowMapBuffer;
-            Pointer< Texture > _glowMap;
+            FrameBufferObjectPtr _glowMapBuffer;
+            TexturePtr _glowMap;
             
-            Pointer< AlphaState > _alphaState;
-            Pointer< DepthState > _depthState;
+            AlphaStatePtr _alphaState;
+            DepthStatePtr _depthState;
         };
         
     }

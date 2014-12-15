@@ -51,6 +51,8 @@ namespace crimild {
         float _scale;
     };
     
+    using KleinBottlePrimitivePtr = std::shared_ptr< KleinBottlePrimitive >;
+    
 }
 
 #endif

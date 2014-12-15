@@ -41,8 +41,9 @@ namespace crimild {
 		unsigned int getIndexCount( void ) const { return getSize(); }
 
 	};
-
-	typedef Catalog< IndexBufferObject > IndexBufferObjectCatalog;
+    
+    using IndexBufferObjectPtr = std::shared_ptr< IndexBufferObject >;
+    using IndexBufferObjectCatalog = Catalog< IndexBufferObject >;
 
 }
 

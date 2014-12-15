@@ -33,25 +33,32 @@
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/Pointer.hpp"
 
+#include "Rendering/Material.hpp"
+
+#include "SceneGraph/Node.hpp"
+#include "SceneGraph/Geometry.hpp"
+#include "SceneGraph/Light.hpp"
+
 #include <list>
 #include <functional>
 
 namespace crimild {
 
-	class Material;
-
 	class UpdateRenderState : public NodeVisitor {
 	public:
-		UpdateRenderState( Material *defaultMaterial = nullptr );
+		UpdateRenderState( void );
 		virtual ~UpdateRenderState( void );
+        
+        void setDefaultMaterial( MaterialPtr const &material ) { _defaultMaterial = material; }
+        MaterialPtr &getDefaultMaterial( void ) { return _defaultMaterial; }
 
-		virtual void traverse( Node *node ) override;
+		virtual void traverse( NodePtr const &node ) override;
 
-		virtual void visitGeometry( Geometry *geometry ) override;
+		virtual void visitGeometry( GeometryPtr const &geometry ) override;
 
 	private:
-		std::list< Light * > _lights;
-		Pointer< Material > _defaultMaterial;
+		std::list< LightPtr > _lights;
+		MaterialPtr _defaultMaterial;
 	};
 
 }

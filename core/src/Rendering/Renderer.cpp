@@ -28,10 +28,14 @@
 #include "Rendering/Renderer.hpp"
 #include "Rendering/VisibilitySet.hpp"
 #include "Rendering/Material.hpp"
+#include "Rendering/RenderPass.hpp"
 #include "Rendering/RenderQueue.hpp"
+#include "Rendering/FrameBufferObject.hpp"
+
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "SceneGraph/Light.hpp"
+
 #include "Components/MaterialComponent.hpp"
 #include "Components/RenderStateComponent.hpp"
 
@@ -39,11 +43,11 @@ using namespace crimild;
 
 Renderer::Renderer( void )
 	: _lightCount( 0 ),
-      _shaderProgramCatalog( new Catalog< ShaderProgram >() ),
-	  _textureCatalog( new Catalog< Texture >() ),
-	  _vertexBufferObjectCatalog( new Catalog< VertexBufferObject >() ),
-	  _indexBufferObjectCatalog( new Catalog< IndexBufferObject >() ),
-	  _frameBufferObjectCatalog( new Catalog< FrameBufferObject >() )
+      _shaderProgramCatalog( std::make_shared< Catalog< ShaderProgram >>() ),
+	  _textureCatalog( std::make_shared< Catalog< Texture >>() ),
+	  _vertexBufferObjectCatalog( std::make_shared< Catalog< VertexBufferObject >>() ),
+	  _indexBufferObjectCatalog( std::make_shared< Catalog< IndexBufferObject >>() ),
+	  _frameBufferObjectCatalog( std::make_shared< Catalog< FrameBufferObject >>() )
 
 {
     
@@ -54,55 +58,51 @@ Renderer::~Renderer( void )
     
 }
 
-void Renderer::render( RenderQueue *renderQueue, RenderPass *renderPass )
+void Renderer::render( RenderQueuePtr const &renderQueue, RenderPassPtr const &renderPass )
 {
-    Camera *camera = renderQueue->getCamera();
-    if ( camera != nullptr ) {
-        RenderPass *pass = renderPass != nullptr ? renderPass : camera->getRenderPass();
-        pass->render( this, renderQueue, camera );
-    }
+    renderPass->render( getShared< Renderer >(), renderQueue, renderQueue->getCamera() );
 }
 
-void Renderer::render( VisibilitySet *vs, RenderPass *renderPass )
+void Renderer::render( VisibilitySetPtr const &vs, RenderPassPtr const &renderPass )
 {
-	Camera *camera = vs->getCamera();
-	RenderPass *pass = renderPass != nullptr ? renderPass : camera->getRenderPass();
-	pass->render( this, vs, camera );
+	auto camera = vs->getCamera();
+	auto pass = renderPass != nullptr ? renderPass : camera->getRenderPass();
+	pass->render( getShared< Renderer >(), vs, camera );
 }
 
-void Renderer::render( Geometry *geometry, Camera *camera, RenderPass *renderPass )
+void Renderer::render( GeometryPtr const &geometry, CameraPtr const &camera, RenderPassPtr const &renderPass )
 {
-	RenderPass *pass = renderPass != nullptr ? renderPass : camera->getRenderPass();
-	pass->render( this, geometry, camera );
+	auto pass = renderPass != nullptr ? renderPass : camera->getRenderPass();
+	pass->render( getShared< Renderer >(), geometry, camera );
 }
 
-void Renderer::bindFrameBuffer( FrameBufferObject *fbo )
+void Renderer::bindFrameBuffer( FrameBufferObjectPtr const &fbo )
 {
 	getFrameBufferObjectCatalog()->bind( fbo );
 }
 
-void Renderer::unbindFrameBuffer( FrameBufferObject *fbo )
+void Renderer::unbindFrameBuffer( FrameBufferObjectPtr const &fbo )
 {
 	getFrameBufferObjectCatalog()->unbind( fbo );
 }
 
-void Renderer::bindProgram( ShaderProgram *program )
+void Renderer::bindProgram( ShaderProgramPtr const &program )
 {
 	getShaderProgramCatalog()->bind( program );
 
-	program->foreachUniform( [&]( ShaderUniform *uniform ) {
+	program->foreachUniform( [&]( ShaderUniformPtr const &uniform ) {
 		if ( uniform != nullptr && uniform->getLocation() != nullptr ) {
-			uniform->onBind( this );
+			uniform->onBind( getShared< Renderer >() );
 		}
 	});
 }
 
-void Renderer::unbindProgram( ShaderProgram *program )
+void Renderer::unbindProgram( ShaderProgramPtr const &program )
 {	
 	getShaderProgramCatalog()->unbind( program );
 }
 
-void Renderer::bindMaterial( ShaderProgram *program, Material *material )
+void Renderer::bindMaterial( ShaderProgramPtr const &program, MaterialPtr const &material )
 {
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_USE_COLOR_MAP_UNIFORM ), material->getColorMap() != nullptr );
 	if ( material->getColorMap() ) {
@@ -133,7 +133,7 @@ void Renderer::bindMaterial( ShaderProgram *program, Material *material )
 	setAlphaState( material->getAlphaState() );
 }
 
-void Renderer::unbindMaterial( ShaderProgram *program, Material *material )
+void Renderer::unbindMaterial( ShaderProgramPtr const &program, MaterialPtr const &material )
 {
 	unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM ), material->getColorMap() );
 	unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_NORMAL_MAP_UNIFORM ), material->getNormalMap() );
@@ -141,17 +141,17 @@ void Renderer::unbindMaterial( ShaderProgram *program, Material *material )
 	unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_EMISSIVE_MAP_UNIFORM ), material->getEmissiveMap() );
 }
 
-void Renderer::bindTexture( ShaderLocation *location, Texture *texture )
+void Renderer::bindTexture( ShaderLocationPtr const &location, TexturePtr const &texture )
 {
 	getTextureCatalog()->bind( location, texture );
 }
 
-void Renderer::unbindTexture( ShaderLocation *location, Texture *texture )
+void Renderer::unbindTexture( ShaderLocationPtr const &location, TexturePtr const &texture )
 {
 	getTextureCatalog()->unbind( location, texture );
 }
 
-void Renderer::bindLight( ShaderProgram *program, Light *light )
+void Renderer::bindLight( ShaderProgramPtr const &program, LightPtr const &light )
 {
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_POSITION_UNIFORM + _lightCount ), light->getPosition() );
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_ATTENUATION_UNIFORM + _lightCount ), light->getAttenuation() );
@@ -166,32 +166,32 @@ void Renderer::bindLight( ShaderProgram *program, Light *light )
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_COUNT_UNIFORM ), _lightCount );
 }
 
-void Renderer::unbindLight( ShaderProgram *program, Light *light )
+void Renderer::unbindLight( ShaderProgramPtr const &program, LightPtr const &light )
 {
 	--_lightCount;
 }
 
-void Renderer::bindVertexBuffer( ShaderProgram *program, VertexBufferObject *vbo )
+void Renderer::bindVertexBuffer( ShaderProgramPtr const &program, VertexBufferObjectPtr const &vbo )
 {
 	getVertexBufferObjectCatalog()->bind( program, vbo );
 }
 
-void Renderer::unbindVertexBuffer( ShaderProgram *program, VertexBufferObject *vbo )
+void Renderer::unbindVertexBuffer( ShaderProgramPtr const &program, VertexBufferObjectPtr const &vbo )
 {
 	getVertexBufferObjectCatalog()->unbind( program, vbo );
 }
 
-void Renderer::bindIndexBuffer( ShaderProgram *program, IndexBufferObject *ibo )
+void Renderer::bindIndexBuffer( ShaderProgramPtr const &program, IndexBufferObjectPtr const &ibo )
 {
 	getIndexBufferObjectCatalog()->bind( program, ibo );
 }
 
-void Renderer::unbindIndexBuffer( ShaderProgram *program, IndexBufferObject *ibo )
+void Renderer::unbindIndexBuffer( ShaderProgramPtr const &program, IndexBufferObjectPtr const &ibo )
 {
 	getIndexBufferObjectCatalog()->unbind( program, ibo );
 }
 
-void Renderer::applyTransformations( ShaderProgram *program, Geometry *geometry, Camera *camera )
+void Renderer::applyTransformations( ShaderProgramPtr const &program, GeometryPtr const &geometry, CameraPtr const &camera )
 {
     const Matrix4f &projection = camera->getProjectionMatrix();
     const Matrix4f &view = camera->getViewMatrix();
@@ -204,7 +204,7 @@ void Renderer::applyTransformations( ShaderProgram *program, Geometry *geometry,
     applyTransformations( program, projection, view, model, normal );
 }
 
-void Renderer::applyTransformations( ShaderProgram *program, const Matrix4f &projection, const Matrix4f &view, const Matrix4f &model, const Matrix4f &normal )
+void Renderer::applyTransformations( ShaderProgramPtr const &program, const Matrix4f &projection, const Matrix4f &view, const Matrix4f &model, const Matrix4f &normal )
 {
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::PROJECTION_MATRIX_UNIFORM ), projection );
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM ), view );
@@ -212,7 +212,7 @@ void Renderer::applyTransformations( ShaderProgram *program, const Matrix4f &pro
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::NORMAL_MATRIX_UNIFORM ), normal );
 }
 
-void Renderer::restoreTransformations( ShaderProgram *program, Geometry *geometry, Camera *camera )
+void Renderer::restoreTransformations( ShaderProgramPtr const &program, GeometryPtr const &geometry, CameraPtr const &camera )
 {
 
 }

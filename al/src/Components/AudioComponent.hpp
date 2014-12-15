@@ -58,7 +58,7 @@ namespace crimild {
 			void resume( void );
 
 		private:
-			Pointer< AudioClip > _audioClip;
+			AudioClipPtr _audioClip;
 			unsigned int _sourceId;
 			float _gain;
 		};

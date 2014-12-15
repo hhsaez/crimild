@@ -45,7 +45,7 @@ namespace crimild {
 		OBJLoader( std::string filePath );
 		virtual ~OBJLoader( void );
 
-		Pointer< Group > load( void );
+		GroupPtr load( void );
 
 	private:
 		void reset( void );
@@ -78,7 +78,7 @@ namespace crimild {
 
 		void pushGroup( std::string name, std::string materialName );
 
-		Pointer< Group > generateScene( void );
+		GroupPtr generateScene( void );
 
 	private:
 		std::string _filePath;
@@ -131,33 +131,37 @@ namespace crimild {
 
 			std::vector< Face > faces;
 		};
+        
+        using GroupDefPtr = std::shared_ptr< GroupDef >;
 
-		std::vector< Pointer< GroupDef > > _groups;
-		GroupDef *_currentGroup;
+        std::vector< GroupDefPtr > _groups;
+		GroupDefPtr _currentGroup;
 
 		class MaterialDef : public SharedObject {
 		public:
 			std::string name;
 
-			Pointer< Texture > diffuseMap;
-			Pointer< Texture > normalMap;
-			Pointer< Texture > specularMap;
-			Pointer< Texture > emissiveMap;
+			TexturePtr diffuseMap;
+			TexturePtr normalMap;
+			TexturePtr specularMap;
+			TexturePtr emissiveMap;
 			RGBAColorf diffuseColor;
 			RGBAColorf ambientColor;
 			RGBAColorf specularColor;
-            Pointer< AlphaState > alphaState;
-            Pointer< DepthState > depthState;
+            AlphaStatePtr alphaState;
+            DepthStatePtr depthState;
 
 			MaterialDef( std::string name )
+                : alphaState( std::make_shared< AlphaState >( false ) ),
+                  depthState( std::make_shared< DepthState >( true ) )
 			{
 				this->name = name;
-                this->alphaState = new AlphaState( false );
-                this->depthState = new DepthState( true );
 			}
-		};	
+		};
+        
+        using MaterialDefPtr = std::shared_ptr< MaterialDef >;
 
-		std::map< std::string, Pointer< MaterialDef > > _materials;
+		std::map< std::string, MaterialDefPtr > _materials;
 	};
 
 }

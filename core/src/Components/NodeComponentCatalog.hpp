@@ -47,29 +47,32 @@ namespace crimild {
 		}
 
 	public:
-		void registerComponent( NODE_COMPONENT_TYPE *component ) 
+        void registerComponent( NODE_COMPONENT_TYPE *component )
 		{
 			_components.push_back( component );
 		}
 
 		void unregisterComponent( NODE_COMPONENT_TYPE *component )
 		{
-			_components.remove( component );
+            _components.remove( component );
 		}
 
 		bool isEmpty( void ) const { return _components.size() == 0; }
 
-		NODE_COMPONENT_TYPE *first( void ) { return isEmpty() ? nullptr : _components.front(); }
+		NODE_COMPONENT_TYPE *first( void )
+        {
+            return !isEmpty() ? _components.front() : nullptr;
+        }
 
 		void forEach( std::function< void( NODE_COMPONENT_TYPE * ) > callback )
 		{
-			for ( NODE_COMPONENT_TYPE *component : _components ) {
+			for ( auto component : _components ) {
 				callback( component );
 			}
 		}
 
 	private:
-		std::list< NODE_COMPONENT_TYPE * > _components;
+        std::list< NODE_COMPONENT_TYPE * > _components;
 	};
 
 }

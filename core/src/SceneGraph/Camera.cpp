@@ -26,6 +26,8 @@
  */
 
 #include "Camera.hpp"
+
+#include "Rendering/RenderPass.hpp"
 #include "Rendering/ForwardRenderPass.hpp"
 
 using namespace crimild;
@@ -34,7 +36,7 @@ Camera::Camera( void )
 	: _frustum( 90.0, 4.0f / 3.0f, 1.0f, 1000.0f ),
 	  _viewport( 0.0f, 0.0f, 1.0f, 1.0f ),
       _viewMatrixIsCurrent( false ),
-      _renderPass( new ForwardRenderPass() )
+      _renderPass( std::make_shared< ForwardRenderPass >() )
 {
 	_projectionMatrix = _frustum.computeProjectionMatrix();
 	_orthographicMatrix = _frustum.computeOrthographicMatrix();
@@ -45,7 +47,7 @@ Camera::Camera( float fov, float aspect, float near, float far )
 	: _frustum( fov, aspect, near, far ),
 	  _viewport( 0.0f, 0.0f, 1.0f, 1.0f ),
       _viewMatrixIsCurrent( false ),
-      _renderPass( new ForwardRenderPass() )
+      _renderPass( std::make_shared< ForwardRenderPass >() )
 {
 	_projectionMatrix = _frustum.computeProjectionMatrix();
 	_orthographicMatrix = _frustum.computeOrthographicMatrix();
@@ -66,7 +68,7 @@ void Camera::setFrustum( const Frustumf &f )
 
 void Camera::accept( NodeVisitor &visitor )
 {
-	visitor.visitCamera( this );
+	visitor.visitCamera( getShared< Camera >() );
 }
 
 void Camera::setViewMatrix( const Matrix4f &view ) 
@@ -90,7 +92,6 @@ bool Camera::getPickRay( float portX, float portY, Ray3f &result ) const
 {
 	float x = 2.0f * portX - 1.0f;
 	float y = 1.0f - 2.0f * portY;
-	float z = 1.0f;
 
 	Vector4f rayClip( x, y, -1.0f, 1.0f );
 

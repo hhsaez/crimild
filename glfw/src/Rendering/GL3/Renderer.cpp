@@ -54,31 +54,31 @@
 
 using namespace crimild;
 
-gl3::Renderer::Renderer( FrameBufferObject *screenBuffer )
+gl3::Renderer::Renderer( FrameBufferObjectPtr const &screenBuffer )
 {
-	setShaderProgramCatalog( new gl3::ShaderProgramCatalog() );
-	setVertexBufferObjectCatalog( new gl3::VertexBufferObjectCatalog() );
-	setIndexBufferObjectCatalog( new gl3::IndexBufferObjectCatalog() );
-	setFrameBufferObjectCatalog( new gl3::FrameBufferObjectCatalog( this ) );
-	setTextureCatalog( new gl3::TextureCatalog() );
+    setShaderProgramCatalog( std::make_shared< gl3::ShaderProgramCatalog >() );
+	setVertexBufferObjectCatalog( std::make_shared< gl3::VertexBufferObjectCatalog >() );
+	setIndexBufferObjectCatalog( std::make_shared< gl3::IndexBufferObjectCatalog >() );
+	setFrameBufferObjectCatalog( std::make_shared< gl3::FrameBufferObjectCatalog >( this ) );
+	setTextureCatalog( std::make_shared< gl3::TextureCatalog >() );
 
-	_programs[ "flat" ] = new FlatShaderProgram();
-	_programs[ "gouraud" ] = new GouraudShaderProgram();
-	_programs[ "phong" ] = new PhongShaderProgram();
-	_programs[ "color" ] = new ColorShaderProgram();
-	_programs[ "screen" ] = new ScreenShaderProgram();
-	_programs[ "texture" ] = new TextureShaderProgram();
+	_programs[ "flat" ] = std::make_shared< FlatShaderProgram >();
+	_programs[ "gouraud" ] = std::make_shared< GouraudShaderProgram >();
+	_programs[ "phong" ] = std::make_shared< PhongShaderProgram >();
+	_programs[ "color" ] = std::make_shared< ColorShaderProgram >();
+	_programs[ "screen" ] = std::make_shared< ScreenShaderProgram >();
+	_programs[ "texture" ] = std::make_shared< TextureShaderProgram >();
     
-    _programs[ "depth" ] = new DepthShaderProgram();
-    _programs[ "forward" ] = new ForwardRenderShaderProgram();
-    _programs[ "deferred" ] = new DeferredRenderShaderProgram();
-    _programs[ "deferredCompose" ] = new DeferredComposeRenderShaderProgram();
-    _programs[ "ssao" ] = new SSAOShaderProgram();
-    _programs[ "ssaoBlend" ] = new SSAOBlendShaderProgram();
-    _programs[ "blend" ] = new BlendShaderProgram();
-    _programs[ "blur" ] = new BlurShaderProgram();
-    _programs[ "gaussianBlur" ] = new GaussianBlurShaderProgram();
-    _programs[ "sdf" ] = new SignedDistanceFieldShaderProgram();
+    _programs[ "depth" ] = std::make_shared< DepthShaderProgram >();
+    _programs[ "forward" ] = std::make_shared< ForwardRenderShaderProgram >();
+    _programs[ "deferred" ] = std::make_shared< DeferredRenderShaderProgram >();
+    _programs[ "deferredCompose" ] = std::make_shared< DeferredComposeRenderShaderProgram >();
+    _programs[ "ssao" ] = std::make_shared< SSAOShaderProgram >();
+    _programs[ "ssaoBlend" ] = std::make_shared< SSAOBlendShaderProgram >();
+    _programs[ "blend" ] = std::make_shared< BlendShaderProgram >();
+    _programs[ "blur" ] = std::make_shared< BlurShaderProgram >();
+    _programs[ "gaussianBlur" ] = std::make_shared< GaussianBlurShaderProgram >();
+    _programs[ "sdf" ] = std::make_shared< SignedDistanceFieldShaderProgram >();
 
 	setScreenBuffer( screenBuffer );
 }
@@ -90,7 +90,7 @@ gl3::Renderer::~Renderer( void )
 
 void gl3::Renderer::configure( void )
 {
-	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+//	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
 	Log::Debug << "Configuring renderer"
     		   << "\n       OpenGL version: " << glGetString( GL_VERSION )
@@ -116,7 +116,7 @@ void gl3::Renderer::configure( void )
     glEnable( GL_CULL_FACE );
     glCullFace( GL_BACK );
 
-    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+//    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
 void gl3::Renderer::beginRender( void )
@@ -136,62 +136,62 @@ void gl3::Renderer::clearBuffers( void )
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 }
 
-void gl3::Renderer::bindUniform( ShaderLocation *location, int value ) 
+void gl3::Renderer::bindUniform( ShaderLocationPtr const &location, int value )
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
-	if ( location && location->isValid() ) {
+	if ( location != nullptr && location->isValid() ) {
 		glUniform1i( location->getLocation(), value );
 	}
 
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gl3::Renderer::bindUniform( ShaderLocation *location, float value ) 
+void gl3::Renderer::bindUniform( ShaderLocationPtr const &location, float value )
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
-	if ( location && location->isValid() ) {
+	if ( location != nullptr && location->isValid() ) {
 		glUniform1f( location->getLocation(), value );
 	}
 
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gl3::Renderer::bindUniform( ShaderLocation *location, const Vector3f &vector ) 
+void gl3::Renderer::bindUniform( ShaderLocationPtr const &location, const Vector3f &vector )
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
-	if ( location && location->isValid() ) {
+	if ( location != nullptr && location->isValid() ) {
 		glUniform3fv( location->getLocation(), 1, static_cast< const GLfloat * >( vector.getData() ) );
 	}
 
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gl3::Renderer::bindUniform( ShaderLocation *location, const RGBAColorf &color ) 
+void gl3::Renderer::bindUniform( ShaderLocationPtr const &location, const RGBAColorf &color )
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
-	if ( location && location->isValid() ) {
+	if ( location != nullptr && location->isValid() ) {
 		glUniform4fv( location->getLocation(), 1, static_cast< const GLfloat * >( color.getData() ) );
 	}
 
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gl3::Renderer::bindUniform( ShaderLocation *location, const Matrix4f &matrix ) 
+void gl3::Renderer::bindUniform( ShaderLocationPtr const &location, const Matrix4f &matrix )
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
-	if ( location && location->isValid() ) {
+	if ( location != nullptr && location->isValid() ) {
 		glUniformMatrix4fv( location->getLocation(), 1, GL_FALSE, static_cast< const GLfloat * >( matrix.getData() ) );
 	}
 
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gl3::Renderer::drawPrimitive( ShaderProgram *program, Primitive *primitive )
+void gl3::Renderer::drawPrimitive( ShaderProgramPtr const &program, PrimitivePtr const &primitive )
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
@@ -237,7 +237,7 @@ void gl3::Renderer::drawPrimitive( ShaderProgram *program, Primitive *primitive 
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gl3::Renderer::drawBuffers( ShaderProgram *program, Primitive::Type bufferType, VertexBufferObject *vbo, unsigned int count )
+void gl3::Renderer::drawBuffers( ShaderProgramPtr const &program, Primitive::Type bufferType, VertexBufferObjectPtr const &vbo, unsigned int count )
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
@@ -282,48 +282,48 @@ void gl3::Renderer::drawBuffers( ShaderProgram *program, Primitive::Type bufferT
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-ShaderProgram *gl3::Renderer::getDepthProgram( void )
+ShaderProgramPtr gl3::Renderer::getDepthProgram( void )
 {
-    return _programs[ "depth" ].get();
+    return _programs[ "depth" ];
 }
 
-ShaderProgram *gl3::Renderer::getForwardPassProgram( void )
+ShaderProgramPtr gl3::Renderer::getForwardPassProgram( void )
 {
-    return _programs[ "forward" ].get();
+    return _programs[ "forward" ];
 }
 
-ShaderProgram *gl3::Renderer::getDeferredPassProgram( void )
+ShaderProgramPtr gl3::Renderer::getDeferredPassProgram( void )
 {
-    return _programs[ "deferred" ].get();
+    return _programs[ "deferred" ];
 }
 
-ShaderProgram *gl3::Renderer::getShaderProgram( const char *name )
+ShaderProgramPtr gl3::Renderer::getShaderProgram( const char *name )
 {
-    return _programs[ name ].get();
+    return _programs[ name ];
 }
 
-ShaderProgram *gl3::Renderer::getFallbackProgram( Material *material, Geometry *geometry, Primitive *primitive )
+ShaderProgramPtr gl3::Renderer::getFallbackProgram( MaterialPtr const &material, GeometryPtr const &geometry, PrimitivePtr const &primitive )
 {
 	if ( material == nullptr || geometry == nullptr || primitive == nullptr ) {
-		return _programs[ "screen" ].get();
+		return _programs[ "screen" ];
 	}
 
 	if ( geometry->getComponent< RenderStateComponent >()->hasLights() && primitive->getVertexBuffer()->getVertexFormat().hasNormals() ) {
-		return _programs[ "phong" ].get();
+		return _programs[ "phong" ];
 	}
 
 	if ( material->getColorMap() && primitive->getVertexBuffer()->getVertexFormat().hasTextureCoords() ) {
-		return _programs[ "texture" ].get();
+		return _programs[ "texture" ];
 	}
 
 	if ( primitive->getVertexBuffer()->getVertexFormat().hasColors() ) {
-		return _programs[ "color" ].get();
+		return _programs[ "color" ];
 	}
 
-	return _programs[ "flat" ].get();
+	return _programs[ "flat" ];
 }
 
-void gl3::Renderer::setAlphaState( AlphaState *state )
+void gl3::Renderer::setAlphaState( AlphaStatePtr const &state )
 {
 	if ( state->isEnabled() ) {
 		glEnable( GL_BLEND );
@@ -401,7 +401,7 @@ void gl3::Renderer::setAlphaState( AlphaState *state )
 	}
 }
 
-void gl3::Renderer::setDepthState( DepthState *state )
+void gl3::Renderer::setDepthState( DepthStatePtr const &state )
 {
 	if ( state->isEnabled() ) {
 		glEnable( GL_DEPTH_TEST );

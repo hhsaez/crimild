@@ -50,20 +50,20 @@ void SelectNodes::reset( void )
 	NodeVisitor::reset();
 }
 
-void SelectNodes::visitNode( Node *node )
+void SelectNodes::visitNode( NodePtr const &node )
 {
 	if ( _selector( node ) ) {
 		_matches.push_back( node );
 	}
 }
 
-void SelectNodes::visitGroup( Group *group )
+void SelectNodes::visitGroup( GroupPtr const &group )
 {
 	visitNode( group );
 	NodeVisitor::visitGroup( group );
 }
 
-void SelectNodes::foreachMatch( std::function< void( Node * ) > callback )
+void SelectNodes::foreachMatch( std::function< void( NodePtr const & ) > callback )
 {
 	std::for_each( std::begin( _matches ), std::end( _matches ), callback );
 }

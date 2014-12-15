@@ -31,34 +31,38 @@
 #include "RenderPass.hpp"
 #include "ShadowMap.hpp"
 #include "Texture.hpp"
+#include "Renderer.hpp"
+#include "RenderQueue.hpp"
+#include "ShadowMap.hpp"
+
+#include "SceneGraph/Camera.hpp"
+#include "SceneGraph/Light.hpp"
 
 #include <map>
 
 namespace crimild {
-    
-    class Light;
     
 	class ForwardRenderPass : public RenderPass {
 	public:
 		ForwardRenderPass( void );
 		virtual ~ForwardRenderPass( void );
         
-        virtual void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+        virtual void render( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera ) override;
         
     protected:
-        virtual void renderShadedObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
-        virtual void renderTranslucentObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+        virtual void renderShadedObjects( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera );
+        virtual void renderTranslucentObjects( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera );
         
     private:
         void buildAccumBuffer( int width, int height );
-        void computeShadowMaps( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+        void computeShadowMaps( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera );
         
-        std::map< Light *, Pointer< ShadowMap > > _shadowMaps;
-        Pointer< FrameBufferObject > _forwardPassBuffer;
-        Pointer< Texture > _forwardPassResult;
+        std::map< LightPtr, ShadowMapPtr > _shadowMaps;
+        FrameBufferObjectPtr _forwardPassBuffer;
+        TexturePtr _forwardPassResult;
         
-        Pointer< FrameBufferObject > _accumBuffer;
-        Pointer< Texture > _accumBufferOutput;
+        FrameBufferObjectPtr _accumBuffer;
+        TexturePtr _accumBufferOutput;
 	};
     
 }

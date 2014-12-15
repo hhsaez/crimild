@@ -30,6 +30,8 @@
 
 #include "NodeComponent.hpp"
 
+#include "SceneGraph/Node.hpp"
+
 #include <functional>
 
 namespace crimild {
@@ -39,13 +41,13 @@ namespace crimild {
 		CRIMILD_NODE_COMPONENT_NAME( "update" )
 
 	public:
-		LambdaComponent( std::function< void( Node *, const Time & ) > callback );
+		LambdaComponent( std::function< void( NodePtr const &, const Time & ) > callback );
 		virtual ~LambdaComponent( void );
 
 		virtual void update( const Time &t ) override;
 
 	private:
-		std::function< void( Node *, const Time & ) > _callback;
+		std::function< void( NodePtr const &, const Time & ) > _callback;
 	};
 
 }

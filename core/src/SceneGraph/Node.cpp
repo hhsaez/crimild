@@ -34,11 +34,11 @@ using namespace crimild;
 
 Node::Node( std::string name )
 	: NamedObject( name ),
-	  _parent( nullptr ),
 	  _worldIsCurrent( false ),
-	  _localBound( new SphereBoundingVolume( Vector3f( 0.0f, 0.0f, 0.0f ), 0.5f ) ),
-	  _worldBound( new SphereBoundingVolume( Vector3f( 0.0f, 0.0f, 0.0f ), 0.5f ) )
+	  _localBound( std::make_shared< SphereBoundingVolume >( Vector3f( 0.0f, 0.0f, 0.0f ), 0.5f ) ),
+	  _worldBound( std::make_shared< SphereBoundingVolume >( Vector3f( 0.0f, 0.0f, 0.0f ), 0.5f ) )
 {
+
 }
 
 Node::~Node( void )
@@ -46,48 +46,46 @@ Node::~Node( void )
 	detachAllComponents();
 }
 
-Node *Node::getRootParent( void )
+NodePtr Node::getRootParent( void )
 {
-	if ( !hasParent() ) {
-		return nullptr;
-	}
-
-	Node *root = getParent();
-	while ( root->getParent() ) {
-		root = root->getParent();
-	}
-	
-	return root;
+    auto root = getParent();
+    if ( root != nullptr ) {
+        while ( root->hasParent() ) {
+            root = root->getParent();
+        }
+    }
+    
+    return root;
 }
 
-Pointer< Node > Node::detachFromParent( void )
+NodePtr Node::detachFromParent( void )
 {
-	Pointer< Node > thisNode( this );
+    auto node = getShared< Node >();
+    
+    GroupPtr parent = getParent< Group >();
+    if ( parent != nullptr ) {
+        parent->detachNode( node );
+    }
 
-	Group *parent = getParent< Group >();
-	if ( parent != nullptr ) {
-		parent->detachNode( this );
-	}
-
-	return thisNode;
+    return node;
 }
 
 void Node::perform( NodeVisitor &visitor )
 {
-	visitor.traverse( this );
+	visitor.traverse( getShared< Node >() );
 }
 
 void Node::perform( const NodeVisitor &visitor )
 {
-	const_cast< NodeVisitor & >( visitor ).traverse( this );
+	const_cast< NodeVisitor & >( visitor ).traverse( getShared< Node >() );
 }
 
 void Node::accept( NodeVisitor &visitor )
 {
-	visitor.visitNode( this );
+	visitor.visitNode( getShared< Node >() );
 }
 
-void Node::attachComponent( NodeComponent *component )
+void Node::attachComponent( NodeComponentPtr const &component )
 {
 	if ( component->getNode() == this ) {
 		// the component is already attached to this node
@@ -100,7 +98,7 @@ void Node::attachComponent( NodeComponent *component )
 	component->onAttach();
 }
 
-void Node::detachComponent( NodeComponent *component )
+void Node::detachComponent( NodeComponentPtr const &component )
 {
 	if ( component->getNode() != this ) {
 		// the component is not attached to this node
@@ -120,9 +118,9 @@ void Node::detachComponentWithName( std::string name )
 	}
 }
 
-NodeComponent *Node::getComponentWithName( std::string name )
+NodeComponentPtr Node::getComponentWithName( std::string name )
 {
-	return _components[ name ].get();
+	return _components[ name ];
 }
 
 void Node::detachAllComponents( void )
@@ -139,26 +137,26 @@ void Node::detachAllComponents( void )
 
 void Node::startComponents( void )
 {
-	foreachComponent( [&]( NodeComponent *component ) {
+	foreachComponent( [&]( NodeComponentPtr const &component ) {
 		component->start();
 	});
 }
 
 void Node::updateComponents( const Time &t )
 {
-	foreachComponent( [&]( NodeComponent *component ) {
+    foreachComponent( [&]( NodeComponentPtr const &component ) {
 		component->update( t );
 	});
 }
 
 void Node::updateComponentsWithFixedTime( const Time &t )
 {
-	foreachComponent( [&]( NodeComponent *component ) {
+    foreachComponent( [&]( NodeComponentPtr const &component ) {
 		component->fixedUpdate( t );
 	});
 }
 
-void Node::foreachComponent( std::function< void ( NodeComponent * ) > callback )
+void Node::foreachComponent( std::function< void ( NodeComponentPtr const & ) > callback )
 {
 	// create a copy of the component's collection
 	// to prevent errors when attaching or detaching
@@ -166,7 +164,7 @@ void Node::foreachComponent( std::function< void ( NodeComponent * ) > callback 
 	auto components = _components;
 	for ( auto cmp : components ) {
 		if ( cmp.second != nullptr ) {
-			callback( cmp.second.get() );
+			callback( cmp.second );
 		}
 	}
 }

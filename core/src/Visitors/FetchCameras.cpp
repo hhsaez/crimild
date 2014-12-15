@@ -47,12 +47,12 @@ void FetchCameras::reset( void )
 	NodeVisitor::reset();
 }
 
-void FetchCameras::visitCamera( Camera *camera )
+void FetchCameras::visitCamera( CameraPtr const &camera )
 {
 	_cameras.push_back( camera );
 }
 
-void FetchCameras::foreachCamera( std::function< void( Camera *camera ) > callback )
+void FetchCameras::foreachCamera( std::function< void( CameraPtr const &camera ) > callback )
 {
 	for ( auto camera : _cameras ) {
 		callback( camera );

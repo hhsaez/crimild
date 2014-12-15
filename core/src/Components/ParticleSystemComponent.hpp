@@ -73,16 +73,16 @@ namespace crimild {
 		void setLooping( float value ) { _looping = value; }
 		float getLooping( void ) const { return _looping; }
 
-		Material *getParticleMaterial( void ) { return _material.get(); }
+		MaterialPtr &getParticleMaterial( void ) { return _material; }
 
-		void setShape( BoundingVolume *volume ) { _shape = volume; }
-		BoundingVolume *getShape( void ) { return _shape.get(); }
+		void setShape( BoundingVolumePtr &volume ) { _shape = volume; }
+		BoundingVolumePtr &getShape( void ) { return _shape; }
 
 		void generateParticles( void );
 
 	private:
-		Pointer< Primitive > _primitive;
-		Pointer< Material > _material;
+		PrimitivePtr _primitive;
+		MaterialPtr _material;
 
 		unsigned short _particleCount;
 		float _particleSize;
@@ -91,13 +91,13 @@ namespace crimild {
 		Vector3f _velocity;
 		Vector3f _spread;
 		bool _looping;
-		Pointer< BoundingVolume > _shape;
+		BoundingVolumePtr _shape;
 
-		Pointer< Vector3fUniform > _gravityUniform;
-		Pointer< FloatUniform > _timeUniform;
-		Pointer< FloatUniform > _durationUniform;
-		Pointer< FloatUniform > _shapeRadiusUniform;
-		Pointer< Vector3fUniform > _shapeCenterUniform;
+		Vector3fUniformPtr _gravityUniform;
+		FloatUniformPtr _timeUniform;
+		FloatUniformPtr _durationUniform;
+		FloatUniformPtr _shapeRadiusUniform;
+		Vector3fUniformPtr _shapeCenterUniform;
 	};
 
 }

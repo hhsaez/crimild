@@ -36,7 +36,7 @@ namespace crimild {
 
 		class Renderer : public crimild::Renderer {
 		public:
-			Renderer( FrameBufferObject *screenBuffer );
+			Renderer( FrameBufferObjectPtr const &screenBuffer );
 			virtual ~Renderer( void );
 
 			virtual void configure( void ) override;
@@ -48,26 +48,26 @@ namespace crimild {
 			virtual void clearBuffers( void ) override;
 
 		public:
-			virtual void bindUniform( ShaderLocation *location, int value ) override;
-			virtual void bindUniform( ShaderLocation *location, float value ) override;
-			virtual void bindUniform( ShaderLocation *location, const Vector3f &vector ) override;
-			virtual void bindUniform( ShaderLocation *location, const RGBAColorf &color ) override;
-			virtual void bindUniform( ShaderLocation *location, const Matrix4f &matrix ) override;
+			virtual void bindUniform( ShaderLocationPtr const &location, int value ) override;
+			virtual void bindUniform( ShaderLocationPtr const &location, float value ) override;
+			virtual void bindUniform( ShaderLocationPtr const &location, const Vector3f &vector ) override;
+			virtual void bindUniform( ShaderLocationPtr const &location, const RGBAColorf &color ) override;
+			virtual void bindUniform( ShaderLocationPtr const &location, const Matrix4f &matrix ) override;
 
-			virtual void setDepthState( DepthState *state ) override;
-			virtual void setAlphaState( AlphaState *state ) override;
+			virtual void setDepthState( DepthStatePtr const &state ) override;
+			virtual void setAlphaState( AlphaStatePtr const &state ) override;
 
-			virtual void drawPrimitive( ShaderProgram *program, Primitive *primitive ) override;
-			virtual void drawBuffers( ShaderProgram *program, Primitive::Type type, VertexBufferObject *vbo, unsigned int count ) override;
+			virtual void drawPrimitive( ShaderProgramPtr const &program, PrimitivePtr const &primitive ) override;
+			virtual void drawBuffers( ShaderProgramPtr const &program, Primitive::Type type, VertexBufferObjectPtr const &vbo, unsigned int count ) override;
 
-            virtual ShaderProgram *getDepthProgram( void ) override;
-            virtual ShaderProgram *getForwardPassProgram( void ) override;
-            virtual ShaderProgram *getDeferredPassProgram( void ) override;
-            virtual ShaderProgram *getShaderProgram( const char *name ) override;
-			virtual ShaderProgram *getFallbackProgram( Material *material, Geometry *geometry, Primitive *primitive ) override;
+            virtual ShaderProgramPtr getDepthProgram( void ) override;
+            virtual ShaderProgramPtr getForwardPassProgram( void ) override;
+            virtual ShaderProgramPtr getDeferredPassProgram( void ) override;
+            virtual ShaderProgramPtr getShaderProgram( const char *name ) override;
+			virtual ShaderProgramPtr getFallbackProgram( MaterialPtr const &material, GeometryPtr const &geometry, PrimitivePtr const &primitive ) override;
 
 		private:
-			std::map< std::string, Pointer< ShaderProgram > > _programs;
+			std::map< std::string, ShaderProgramPtr > _programs;
 		};
 
 	}

@@ -40,8 +40,9 @@ SSAOImageEffect::~SSAOImageEffect( void )
     
 }
 
-void SSAOImageEffect::apply( crimild::Renderer *renderer, int inputCount, Texture **inputs, Primitive *primitive, FrameBufferObject *output )
+void SSAOImageEffect::apply( crimild::RendererPtr const &renderer, int inputCount, Texture **inputs, PrimitivePtr const &primitive, FrameBufferObjectPtr const &output )
 {
+    /*
     if ( _ssaoBuffer == nullptr ) {
         int width = renderer->getScreenBuffer()->getWidth();
         int height = renderer->getScreenBuffer()->getHeight();
@@ -55,20 +56,24 @@ void SSAOImageEffect::apply( crimild::Renderer *renderer, int inputCount, Textur
     
     computeSSAO( renderer, inputs[ 2 ], inputs[ 3 ], primitive );
     applySSAO( renderer, inputs[ 0 ], _ssaoBufferOutput.get(), primitive, output );
+     */
 }
 
 void SSAOImageEffect::buildSSAOBuffer( int width, int height )
 {
+    /*
     _ssaoBuffer.set( new FrameBufferObject( width, height ) );
     _ssaoBuffer->getRenderTargets().add( new RenderTarget( RenderTarget::Type::DEPTH_16, RenderTarget::Output::RENDER, width, height ) );
     
     RenderTarget *colorTarget = new RenderTarget( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height );
     _ssaoBufferOutput = colorTarget->getTexture();
     _ssaoBuffer->getRenderTargets().add( colorTarget );
+     */
 }
 
 void SSAOImageEffect::computeSSAO( Renderer *renderer, Texture *srcPositions, Texture *srcNormals, Primitive *primitive )
 {
+    /*
     // bind buffer for ssao output
     renderer->bindFrameBuffer( _ssaoBuffer.get() );
     
@@ -106,10 +111,12 @@ void SSAOImageEffect::computeSSAO( Renderer *renderer, Texture *srcPositions, Te
     
     // unbind buffer for ssao output
     renderer->unbindFrameBuffer( _ssaoBuffer.get() );
+     */
 }
 
 void SSAOImageEffect::applySSAO( Renderer *renderer, Texture *srcImage, Texture *ssaoMap, Primitive *primitive, FrameBufferObject *output )
 {
+    /*
     // bind buffer for ssao output
     renderer->bindFrameBuffer( output );
     
@@ -147,5 +154,6 @@ void SSAOImageEffect::applySSAO( Renderer *renderer, Texture *srcImage, Texture 
     
     // unbind buffer for ssao output
     renderer->unbindFrameBuffer( output );
+     */
 }
 

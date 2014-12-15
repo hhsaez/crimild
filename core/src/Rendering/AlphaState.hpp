@@ -32,7 +32,15 @@
 
 namespace crimild {
 
+    class AlphaState;
+    
+    using AlphaStatePtr = std::shared_ptr< AlphaState >;
+
 	class AlphaState : public RenderState {
+    public:
+        static AlphaStatePtr DISABLED;
+        static AlphaStatePtr ENABLED;
+        
 	public:
 		enum class SrcBlendFunc {
 			ZERO,

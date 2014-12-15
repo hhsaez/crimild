@@ -49,7 +49,7 @@ Simulation *Simulation::_currentSimulation = nullptr;
 
 Simulation::Simulation( std::string name, int argc, char **argv )
 	: NamedObject( name ),
-	  _mainLoop( new RunLoop() )
+      _mainLoop( std::make_shared< RunLoop >() )
 {
 	srand( time( NULL ) );	
 
@@ -67,11 +67,11 @@ Simulation::~Simulation( void )
 
 void Simulation::start( void )
 {
-	getMainLoop()->startTask( new DispatchMessagesTask( Priorities::HIGHEST_PRIORITY ) );
-	getMainLoop()->startTask( new BeginRenderTask( Priorities::BEGIN_RENDER_PRIORITY ) );
-	getMainLoop()->startTask( new EndRenderTask( Priorities::END_RENDER_PRIORITY ) );
-	getMainLoop()->startTask( new UpdateSceneTask( Priorities::UPDATE_SCENE_PRIORITY ) );
-	getMainLoop()->startTask( new RenderSceneTask( Priorities::RENDER_SCENE_PRIORITY ) );
+	getMainLoop()->startTask( std::make_shared< DispatchMessagesTask >( Priorities::HIGHEST_PRIORITY ) );
+	getMainLoop()->startTask( std::make_shared< BeginRenderTask >( Priorities::BEGIN_RENDER_PRIORITY ) );
+	getMainLoop()->startTask( std::make_shared< EndRenderTask >( Priorities::END_RENDER_PRIORITY ) );
+	getMainLoop()->startTask( std::make_shared< UpdateSceneTask >( Priorities::UPDATE_SCENE_PRIORITY ) );
+	getMainLoop()->startTask( std::make_shared< RenderSceneTask >( Priorities::RENDER_SCENE_PRIORITY ) );
 }
 
 bool Simulation::step( void )
@@ -91,7 +91,7 @@ int Simulation::run( void )
 	return 0;
 }
 
-void Simulation::setScene( Node *scene )
+void Simulation::setScene( NodePtr const &scene )
 {
 	_scene = scene;
 	_cameras.clear();
@@ -103,19 +103,16 @@ void Simulation::setScene( Node *scene )
 
 		FetchCameras fetchCameras;
 		_scene->perform( fetchCameras );
-		if ( fetchCameras.hasCameras() ) {
-			fetchCameras.foreachCamera( [&]( Camera *camera ) {
-                Pointer< Camera > cameraPtr( camera );
-				_cameras.push_back( cameraPtr );
-			});
-		}
+        fetchCameras.foreachCamera( [&]( CameraPtr const &camera ) {
+            _cameras.push_back( camera );
+        });
 	}
 }
 
-void Simulation::forEachCamera( std::function< void ( Camera * ) > callback )
+void Simulation::forEachCamera( std::function< void ( CameraPtr const & ) > callback )
 {
 	for ( auto camera : _cameras ) {
-		callback( camera.get() );
+		callback( camera );
 	}
 }
 

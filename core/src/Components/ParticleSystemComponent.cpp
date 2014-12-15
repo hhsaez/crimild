@@ -33,8 +33,8 @@
 using namespace crimild;
 
 ParticleSystemComponent::ParticleSystemComponent( void )
-	: _primitive( new Primitive( Primitive::Type::POINTS ) ),
-	  _material( new Material() ),
+    : _primitive( std::make_shared< Primitive >( Primitive::Type::POINTS ) ),
+	  _material( std::make_shared< Material >() ),
  	  _particleCount( 50 ),
 	  _particleSize( 20.0f ),
 	  _particleDuration( 1.0f ),
@@ -42,11 +42,11 @@ ParticleSystemComponent::ParticleSystemComponent( void )
       _velocity( 1.0f, 1.0f, 1.0f ),
 	  _spread( 1.0f, 1.0f, 1.0f ),
 	  _looping( true ),
-	  _gravityUniform( new Vector3fUniform( "uGravity", Vector3f( 0.0f, 0.0f, 0.0f ) ) ),
-	  _timeUniform( new FloatUniform( "uTime", 0.0f ) ),
-	  _durationUniform( new FloatUniform( "uLifeTime", 1.0f ) ),
-	  _shapeRadiusUniform( new FloatUniform( "uShape.radius", 0.0f ) ),
-	  _shapeCenterUniform( new Vector3fUniform( "uShape.center", Vector3f( 0.0f, 0.0f, 0.0f ) ) )
+	  _gravityUniform( std::make_shared< Vector3fUniform >( "uGravity", Vector3f( 0.0f, 0.0f, 0.0f ) ) ),
+	  _timeUniform( std::make_shared< FloatUniform >( "uTime", 0.0f ) ),
+	  _durationUniform( std::make_shared< FloatUniform >( "uLifeTime", 1.0f ) ),
+	  _shapeRadiusUniform( std::make_shared< FloatUniform >( "uShape.radius", 0.0f ) ),
+	  _shapeCenterUniform( std::make_shared< Vector3fUniform >( "uShape.center", Vector3f( 0.0f, 0.0f, 0.0f ) ) )
 {
 	_material->getAlphaState()->setEnabled( true );
 }
@@ -58,27 +58,27 @@ ParticleSystemComponent::~ParticleSystemComponent( void )
 
 void ParticleSystemComponent::onAttach( void )
 {
-	Geometry *geometry = dynamic_cast< Geometry * >( getNode() );
+    auto geometry = getNode< Geometry >();
 	if ( geometry == nullptr ) {
 		Log::Error << "Cannot attach a particle system to a node that is not a Geometry" << Log::End;
 		exit( 1 );
 	}
 
-	ShaderProgram *program = _material->getProgram();
+	auto program = _material->getProgram();
 	if ( program == nullptr ) {
 		Log::Error << "Particle system component requires a valid shader program in order to work" << Log::End;
 		exit( 1 );
 	}
 
-	program->attachUniform( _gravityUniform.get() );
-	program->attachUniform( _timeUniform.get() );
-	program->attachUniform( _durationUniform.get() );
-	program->attachUniform( _shapeRadiusUniform.get() );
-	program->attachUniform( _shapeCenterUniform.get() );
+	program->attachUniform( _gravityUniform );
+	program->attachUniform( _timeUniform );
+	program->attachUniform( _durationUniform );
+	program->attachUniform( _shapeRadiusUniform );
+	program->attachUniform( _shapeCenterUniform );
 
 	generateParticles();
-	geometry->attachPrimitive( _primitive.get() );
-	geometry->getComponent< MaterialComponent >()->attachMaterial( _material.get() );
+	geometry->attachPrimitive( _primitive );
+	geometry->getComponent< MaterialComponent >()->attachMaterial( _material );
 }
 
 void ParticleSystemComponent::update( const Time &t )
@@ -97,10 +97,10 @@ void ParticleSystemComponent::generateParticles( void )
 	int particleCount = getParticleCount();
 
 	VertexFormat format = VertexFormat::VF_P3_N3_UV2;
-	Pointer< VertexBufferObject > vbo( new VertexBufferObject( format, particleCount, NULL ) );
+    auto vbo = std::make_shared< VertexBufferObject >( format, particleCount, nullptr );
 	float *vertices = vbo->getData();
 
-	Pointer< IndexBufferObject > ibo( new IndexBufferObject( particleCount, NULL ) );
+    auto ibo = std::make_shared< IndexBufferObject >( particleCount, nullptr );
 	unsigned short *indices = ibo->getData();
 
 	for ( unsigned short i = 0; i < particleCount; i++ ) {
@@ -118,7 +118,7 @@ void ParticleSystemComponent::generateParticles( void )
 		indices[ i ] = i;
 	}
 
-	_primitive->setVertexBuffer( vbo.get() );
-	_primitive->setIndexBuffer( ibo.get() );
+	_primitive->setVertexBuffer( vbo );
+	_primitive->setIndexBuffer( ibo );
 }
 

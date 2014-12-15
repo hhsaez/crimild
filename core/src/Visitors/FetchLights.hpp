@@ -30,6 +30,8 @@
 
 #include "NodeVisitor.hpp"
 
+#include "SceneGraph/Light.hpp"
+
 #include <list>
 #include <functional>
 
@@ -42,14 +44,14 @@ namespace crimild {
 
 		virtual void reset( void ) override;
 
-		virtual void visitLight( Light *light ) override;
+		virtual void visitLight( LightPtr const &light ) override;
 
 		bool hasLights( void ) const { return _lights.size() > 0; }
 
-		void foreachLight( std::function< void( Light * ) > callback );
+		void foreachLight( std::function< void( LightPtr const & ) > callback );
 
 	private:
-		std::list< Light * > _lights;
+		std::list< LightPtr > _lights;
 	};
 
 }

@@ -31,8 +31,16 @@
 #include "RenderState.hpp"
 
 namespace crimild {
-
+    
+    class DepthState;
+    
+    using DepthStatePtr = std::shared_ptr< DepthState >;
+    
 	class DepthState : public RenderState {
+    public:
+        static DepthStatePtr DISABLED;
+        static DepthStatePtr ENABLED;
+        
 	public:
 		DepthState( bool enabled = true );
 		virtual ~DepthState( void );

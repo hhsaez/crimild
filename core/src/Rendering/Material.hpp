@@ -38,7 +38,7 @@
 namespace crimild {
 
 	class Light;
-
+    
 	class Material : public SharedObject {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( Material );
 
@@ -46,8 +46,8 @@ namespace crimild {
 		Material( void );
 		virtual ~Material( void );
 
-		void setProgram( ShaderProgram *program ) { _program = program; }
-		ShaderProgram *getProgram( void ) { return _program.get(); }
+		void setProgram( ShaderProgramPtr const &program ) { _program = program; }
+        ShaderProgramPtr &getProgram( void ) { return _program; }
 
 		void setAmbient( const RGBAColorf &ambient ) { _ambient = ambient; }
 		const RGBAColorf &getAmbient( void ) const { return _ambient; }
@@ -61,41 +61,43 @@ namespace crimild {
 		void setShininess( float value ) { _shininess = value; }
 		float getShininess( void ) const { return _shininess; }
 
-		void setColorMap( Texture *texture ) { _colorMap = texture; }
-		Texture *getColorMap( void ) { return _colorMap.get(); }
+		void setColorMap( TexturePtr const &texture ) { _colorMap = texture; }
+        TexturePtr &getColorMap( void ) { return _colorMap; }
 
-		void setNormalMap( Texture *texture ) { _normalMap = texture; }
-		Texture *getNormalMap( void ) { return _normalMap.get(); }
+		void setNormalMap( TexturePtr const &texture ) { _normalMap = texture; }
+        TexturePtr &getNormalMap( void ) { return _normalMap; }
 
-		void setSpecularMap( Texture *texture ) { _specularMap = texture; }
-		Texture *getSpecularMap( void ) { return _specularMap.get(); }
+		void setSpecularMap( TexturePtr const &texture ) { _specularMap = texture; }
+        TexturePtr &getSpecularMap( void ) { return _specularMap; }
         
-        void setEmissiveMap( Texture *texture ) { _emissiveMap = texture; }
-        Texture *getEmissiveMap( void ) { return _emissiveMap.get(); }
+        void setEmissiveMap( TexturePtr const &texture ) { _emissiveMap = texture; }
+        TexturePtr &getEmissiveMap( void ) { return _emissiveMap; }
 
-		void setDepthState( DepthState *state ) { _depthState = state; }
-		DepthState *getDepthState( void ) { return _depthState.get(); }
+		void setDepthState( DepthStatePtr const &state ) { _depthState = state; }
+        DepthStatePtr &getDepthState( void ) { return _depthState; }
 
-		void setAlphaState( AlphaState *alphaState ) { _alphaState = alphaState; }
-		AlphaState *getAlphaState( void ) { return _alphaState.get(); }
+		void setAlphaState( AlphaStatePtr const &alphaState ) { _alphaState = alphaState; }
+        AlphaStatePtr &getAlphaState( void ) { return _alphaState; }
 
 	private:
-		Pointer< ShaderProgram > _program;
+		ShaderProgramPtr _program;
 
 		RGBAColorf _ambient;
 		RGBAColorf _diffuse;
 		RGBAColorf _specular;
 		float _shininess;
 
-		Pointer< Texture > _colorMap;
-		Pointer< Texture > _normalMap;
-		Pointer< Texture > _specularMap;
-        Pointer< Texture > _emissiveMap;
+		TexturePtr _colorMap;
+		TexturePtr _normalMap;
+		TexturePtr _specularMap;
+        TexturePtr _emissiveMap;
 
-		Pointer< DepthState > _depthState;
-		Pointer< AlphaState > _alphaState;
+		DepthStatePtr _depthState;
+		AlphaStatePtr _alphaState;
 	};
 
+    using MaterialPtr = std::shared_ptr< Material >;
+    
 }
 
 #endif

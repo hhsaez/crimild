@@ -29,11 +29,7 @@
 
 using namespace crimild;
 
-MessageQueue &MessageQueue::getInstance( void )
-{
-	static MessageQueue instance;
-	return instance;
-}
+MessageQueue MessageQueue::_instance;
 
 MessageQueue::MessageQueue( void )
 {
@@ -52,30 +48,27 @@ void MessageQueue::registerDispatcher( MessageDispatcher *dispatcher )
 
 void MessageQueue::dispatchMessages( void )
 {
-	for ( std::list< MessageDispatcher * >::iterator it = _dispatchers.begin(); it != _dispatchers.end(); it++ ) {
-		MessageDispatcher *dispatcher = *it;
-		if ( dispatcher ) {
-			dispatcher->dispatchMessages();
-		}
-	}
+    for ( auto d : _dispatchers ) {
+        if ( d != nullptr ) {
+            d->dispatchMessages();
+        }
+    }
 }
 
 void MessageQueue::discardAllMessages( void )
 {
-	for ( std::list< MessageDispatcher * >::iterator it = _dispatchers.begin(); it != _dispatchers.end(); it++ ) {
-		MessageDispatcher *dispatcher = *it;
-		if ( dispatcher ) {
-			dispatcher->discardAllMessages();
-		}
-	}
+    for ( auto d : _dispatchers ) {
+        if ( d != nullptr ) {
+            d->discardAllMessages();
+        }
+    }
 }
 
 void MessageQueue::reset( void )
 {
-	for ( std::list< MessageDispatcher * >::iterator it = _dispatchers.begin(); it != _dispatchers.end(); it++ ) {
-		MessageDispatcher *dispatcher = *it;
-		if ( dispatcher ) {
-			dispatcher->reset();
-		}
-	}
+    for ( auto d : _dispatchers ) {
+        if ( d != nullptr ) {
+            d->reset();
+        }
+    }
 }

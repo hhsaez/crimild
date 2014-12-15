@@ -39,10 +39,10 @@ Switch::~Switch( void )
 {
 }
 
-void Switch::foreachNode( std::function< void( Node * ) > callback )
+void Switch::foreachNode( std::function< void( NodePtr const & ) > callback )
 {
     if ( hasNodes() && _current != std::end( _nodes ) ) {
-        callback( ( *_current ).get() );
+        callback( *_current );
     }
 }
 
@@ -57,12 +57,13 @@ void Switch::selectNextNode( void )
     }
 }
 
-Node *Switch::getCurrentNode( void )
+NodePtr Switch::getCurrentNode( void )
 {
+    NodePtr result;
     if ( hasNodes() && _current != std::end( _nodes ) ) {
-        return ( *_current ).get();
+        result = ( *_current );
     }
     
-    return nullptr;
+    return result;
 }
 

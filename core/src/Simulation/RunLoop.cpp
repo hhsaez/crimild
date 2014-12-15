@@ -46,7 +46,7 @@ RunLoop::~RunLoop( void )
 	cleanup();
 }
 
-void RunLoop::startTask( Task *task )
+void RunLoop::startTask( TaskPtr const &task )
 {
 	if ( isTaskActive( task ) || isTaskKilled( task ) || isTaskSuspended( task ) ) {
 		return;
@@ -58,41 +58,39 @@ void RunLoop::startTask( Task *task )
 			break;
 		}
 	}
-    Pointer< Task > taskPtr( task );
-	_activeTasks.insert( it, taskPtr );
 
-	task->setRunLoop( this );
+    _activeTasks.insert( it, task );
+
+	task->setRunLoop( getShared< RunLoop>() );
 	task->start();
 }
 
-void RunLoop::stopTask( Task *task )
+void RunLoop::stopTask( TaskPtr const &task )
 {
 	if ( isTaskKilled( task ) ) {
 		return;
 	}
 
-    Pointer< Task > taskPtr( task );
-	_killedTasks.push_back( taskPtr );
+	_killedTasks.push_back( task );
 
 	if ( isTaskActive( task ) ) {
-		_activeTasks.remove( taskPtr );
+		_activeTasks.remove( task );
 	}
 	else {
-		_suspendedTasks.remove( taskPtr );
+		_suspendedTasks.remove( task );
 	}
 }
 
-void RunLoop::suspendTask( Task *task )
+void RunLoop::suspendTask( TaskPtr const &task )
 {
 	if ( isTaskActive( task ) ) {
-        Pointer< Task > taskPtr( task );
-		_suspendedTasks.push_back( taskPtr );
-		_activeTasks.remove( taskPtr );
+		_suspendedTasks.push_back( task );
+		_activeTasks.remove( task );
 		task->suspend();
 	}
 }
 
-void RunLoop::resumeTask( Task *task )
+void RunLoop::resumeTask( TaskPtr const &task )
 {
 	if ( !isTaskSuspended( task ) ) {
 		return;
@@ -104,46 +102,46 @@ void RunLoop::resumeTask( Task *task )
 			break;
 		}
 	}
-    Pointer< Task > taskPtr( task );
-	_activeTasks.insert( it, taskPtr );
-	_suspendedTasks.remove( taskPtr );
+
+    _activeTasks.insert( it, task );
+	_suspendedTasks.remove( task );
 
 	task->resume();
 }
 
-bool RunLoop::isTaskActive( Task *task ) const
+bool RunLoop::isTaskActive( TaskPtr const &task ) const
 {
 	return std::find( std::begin( _activeTasks ), std::end( _activeTasks ), task ) != std::end( _activeTasks );
 }
 
-void RunLoop::foreachActiveTask( std::function< void ( Task *task ) > callback )
+void RunLoop::foreachActiveTask( std::function< void ( TaskPtr const &task ) > callback )
 {
 	for ( auto task : _activeTasks ) {
-		callback( task.get() );
+		callback( task );
 	}
 }
 
-bool RunLoop::isTaskKilled( Task *task ) const
+bool RunLoop::isTaskKilled( TaskPtr const &task ) const
 {
 	return std::find( std::begin( _killedTasks ), std::end( _killedTasks ), task ) != std::end( _killedTasks );
 }
 
-void RunLoop::foreachKilledTask( std::function< void ( Task *task ) > callback )
+void RunLoop::foreachKilledTask( std::function< void ( TaskPtr const &task ) > callback )
 {
 	for ( auto task : _killedTasks ) {
-		callback( task.get() );
+		callback( task );
 	}
 }
 
-bool RunLoop::isTaskSuspended( Task *task ) const
+bool RunLoop::isTaskSuspended( TaskPtr const &task ) const
 {
 	return std::find( std::begin( _suspendedTasks ), std::end( _suspendedTasks ), task ) != std::end( _suspendedTasks );
 }
 
-void RunLoop::foreachSuspendedTask( std::function< void ( Task *task ) > callback )
+void RunLoop::foreachSuspendedTask( std::function< void ( TaskPtr const &task ) > callback )
 {
 	for ( auto task : _suspendedTasks ) {
-		callback( task.get() );
+		callback( task );
 	}
 }
 
@@ -172,10 +170,10 @@ void RunLoop::cleanup( void )
 {
 	auto it = _killedTasks.begin();
 	while ( it != _killedTasks.end() ) {
-		Pointer< Task > task = *it;
+		auto task = *it;
 		++it;
 		task->stop();
-		task->setRunLoop( nullptr );
+		task->setRunLoop( RunLoopPtr() );
 	}
 	_killedTasks.clear();
 }

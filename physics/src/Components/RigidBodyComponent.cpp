@@ -39,13 +39,13 @@ physics::RigidBodyComponent::RigidBodyComponent( void )
 }
 
 physics::RigidBodyComponent::RigidBodyComponent( float mass, bool convex )
-	: _mass( mass ),
-	  _convex( convex ),
-	  _kinematic( false ),
-	  _shape( nullptr ),
-	  _body( nullptr ),
+	: _body( nullptr ),
+      _shape( nullptr ),
+      _mass( mass ),
+      _convex( convex ),
+      _kinematic( false ),
+      _linearFactor( 0.0f, 0.0f, 0.0f ),
 	  _linearVelocity( 0.0f, 0.0f, 0.0f ),
-	  _linearFactor( 0.0f, 0.0f, 0.0f ),
 	  _constraintVelocity( false )
 {
 
@@ -113,9 +113,9 @@ void physics::RigidBodyComponent::createShape( void )
 	if ( isConvex() ) {
 		_shape = new btConvexHullShape();
 
-		getNode()->perform( ApplyToGeometries( [&]( Geometry *geometry ) {
-			geometry->foreachPrimitive( [&]( Primitive *primitive ) {
-				VertexBufferObject *vbo = primitive->getVertexBuffer();
+		getNode()->perform( ApplyToGeometries( [&]( GeometryPtr const &geometry ) {
+			geometry->foreachPrimitive( [&]( PrimitivePtr const &primitive ) {
+				auto vbo = primitive->getVertexBuffer();
 				for ( int i = 0; i < vbo->getVertexCount(); i++ ) {
 					Vector3f v = vbo->getPositionAt( i );
 					btVector3 btv = btVector3( v[ 0 ], v[ 1 ], v[ 2 ] );
@@ -127,10 +127,10 @@ void physics::RigidBodyComponent::createShape( void )
 	else {
 		btTriangleMesh* mesh = new btTriangleMesh();
 
-		getNode()->perform( ApplyToGeometries( [&]( Geometry *geometry ) {
-			geometry->foreachPrimitive( [&]( Primitive *primitive ) {
-				IndexBufferObject *ibo = primitive->getIndexBuffer();
-				VertexBufferObject *vbo = primitive->getVertexBuffer();
+		getNode()->perform( ApplyToGeometries( [&]( GeometryPtr const &geometry ) {
+			geometry->foreachPrimitive( [&]( PrimitivePtr const &primitive ) {
+				auto ibo = primitive->getIndexBuffer();
+				auto vbo = primitive->getVertexBuffer();
 
 				const unsigned short *indices = static_cast< const unsigned short * >( ibo->getData() );
 				Vector3f vertices[ 3 ];
@@ -186,7 +186,7 @@ void physics::RigidBodyComponent::cleanup( void )
 	}
 }
 
-void physics::RigidBodyComponent::onCollision( RigidBodyComponent *other )
+void physics::RigidBodyComponent::onCollision( RigidBodyComponentPtr const &other )
 {
 	if ( _collisionCallback != nullptr ) {
 		_collisionCallback( other );

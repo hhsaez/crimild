@@ -35,12 +35,9 @@
 
 using namespace crimild;
 
-UpdateRenderState::UpdateRenderState( Material *defaultMaterial )
-	: _defaultMaterial( defaultMaterial )
+UpdateRenderState::UpdateRenderState( void )
 {
-	if ( _defaultMaterial == nullptr ) {
-		_defaultMaterial = new Material();
-	}
+    setDefaultMaterial( std::make_shared< Material >() );
 }
 
 UpdateRenderState::~UpdateRenderState( void )
@@ -48,7 +45,7 @@ UpdateRenderState::~UpdateRenderState( void )
 
 }
 
-void UpdateRenderState::traverse( Node *node )
+void UpdateRenderState::traverse( NodePtr const &node )
 {
 	_lights.clear();
 	
@@ -60,26 +57,26 @@ void UpdateRenderState::traverse( Node *node )
 		node->perform( fetchLights );
 	}
 
-	fetchLights.foreachLight( [&]( Light *light ) mutable {
+	fetchLights.foreachLight( [&]( LightPtr const &light ) mutable {
 		_lights.push_back( light );
 	});
 
 	NodeVisitor::traverse( node );
 }
 
-void UpdateRenderState::visitGeometry( Geometry *geometry )
+void UpdateRenderState::visitGeometry( GeometryPtr const &geometry )
 {
-	RenderStateComponent *rs = geometry->getComponent< RenderStateComponent >();
+	auto rs = geometry->getComponent< RenderStateComponent >();
 
 	rs->detachAllMaterials();
-	MaterialComponent *materials = geometry->getComponent< MaterialComponent >();
+	auto materials = geometry->getComponent< MaterialComponent >();
 	if ( materials->hasMaterials() ) {
-		materials->foreachMaterial( [&]( Material *material ) mutable {
+		materials->foreachMaterial( [&]( MaterialPtr const &material ) mutable {
 			rs->attachMaterial( material );
 		});
 	}
 	else {
-		rs->attachMaterial( _defaultMaterial.get() );
+		rs->attachMaterial( _defaultMaterial );
 	}
 
 	rs->detachAllLights();

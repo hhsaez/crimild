@@ -29,6 +29,9 @@
 
 using namespace crimild;
 
+AlphaStatePtr AlphaState::DISABLED( std::make_shared< AlphaState >( false ) );
+AlphaStatePtr AlphaState::ENABLED( std::make_shared< AlphaState >( true ) );
+
 AlphaState::AlphaState( bool enabled, SrcBlendFunc srcBlendFunc, DstBlendFunc dstBlendFunc )
 	: RenderState( enabled ),
 	  _srcBlendFunc( srcBlendFunc ),

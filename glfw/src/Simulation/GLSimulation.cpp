@@ -59,18 +59,18 @@ void GLSimulation::start( void )
 		throw RuntimeException( "Cannot start GLFW: glwfInit failed!" );
 	}
 
-	getMainLoop()->startTask( new WindowTask( Simulation::Priorities::LOWEST_PRIORITY, -1, -1 ) );
+    getMainLoop()->startTask( std::make_shared< WindowTask >( Simulation::Priorities::LOWEST_PRIORITY, -1, -1 ) );
 	
-	getMainLoop()->startTask( new UpdateSceneAndPhysicsTask( Priorities::UPDATE_SCENE_PRIORITY ) );
+	getMainLoop()->startTask( std::make_shared< UpdateSceneAndPhysicsTask >( Priorities::UPDATE_SCENE_PRIORITY ) );
 	
-	getMainLoop()->startTask( new BeginRenderTask( Priorities::BEGIN_RENDER_PRIORITY ) );
-	getMainLoop()->startTask( new RenderSceneTask( Priorities::RENDER_SCENE_PRIORITY ) );
-	getMainLoop()->startTask( new EndRenderTask( Priorities::END_RENDER_PRIORITY ) );
+	getMainLoop()->startTask( std::make_shared< BeginRenderTask >( Priorities::BEGIN_RENDER_PRIORITY ) );
+	getMainLoop()->startTask( std::make_shared< RenderSceneTask >( Priorities::RENDER_SCENE_PRIORITY ) );
+	getMainLoop()->startTask( std::make_shared< EndRenderTask >( Priorities::END_RENDER_PRIORITY ) );
 	
-	getMainLoop()->startTask( new UpdateInputStateTask( Simulation::Priorities::HIGHEST_PRIORITY ) );
-	getMainLoop()->startTask( new DispatchMessagesTask( Priorities::HIGHEST_PRIORITY ) );
+	getMainLoop()->startTask( std::make_shared< UpdateInputStateTask >( Simulation::Priorities::HIGHEST_PRIORITY ) );
+	getMainLoop()->startTask( std::make_shared< DispatchMessagesTask >( Priorities::HIGHEST_PRIORITY ) );
 
-	getMainLoop()->startTask( new UpdateTimeTask( Simulation::Priorities::LOWEST_PRIORITY ) );
+	getMainLoop()->startTask( std::make_shared< UpdateTimeTask >( Simulation::Priorities::LOWEST_PRIORITY ) );
 }
 
 void GLSimulation::loadSettings( void )
@@ -100,8 +100,8 @@ void GLSimulation::init( void )
 	float b = getSettings().get( "video.clearColor.b", 0.0f );
 	float a = getSettings().get( "video.clearColor.a", 1.0f );
 
-	Pointer< FrameBufferObject > screenBuffer( new FrameBufferObject( width, height ) );
+    auto screenBuffer = std::make_shared< FrameBufferObject >( width, height );
 	screenBuffer->setClearColor( RGBAColorf( r, g, b, a ) );
-	Simulation::getCurrent()->setRenderer( new gl3::Renderer( screenBuffer.get() ) );
+    Simulation::getCurrent()->setRenderer( std::make_shared< gl3::Renderer >( screenBuffer ) );
 }
 

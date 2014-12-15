@@ -53,7 +53,7 @@ PlaneBoundingVolume::~PlaneBoundingVolume( void )
 
 }
 
-void PlaneBoundingVolume::computeFrom( const BoundingVolume *volume, const TransformationImpl &transformation )
+void PlaneBoundingVolume::computeFrom( const BoundingVolumePtr &volume, const TransformationImpl &transformation )
 {
 }
 
@@ -61,7 +61,7 @@ void PlaneBoundingVolume::computeFrom( const Vector3f *positions, unsigned int p
 {
 }
 
-void PlaneBoundingVolume::computeFrom( const VertexBufferObject *vbo )
+void PlaneBoundingVolume::computeFrom( const VertexBufferObjectPtr &vbo )
 {
 }
 
@@ -77,11 +77,11 @@ void PlaneBoundingVolume::expandToContain( const Vector3f *positions, unsigned i
 {
 }
 
-void PlaneBoundingVolume::expandToContain( const VertexBufferObject *vbo )
+void PlaneBoundingVolume::expandToContain( const VertexBufferObjectPtr  &vbo )
 {
 }
 
-void PlaneBoundingVolume::expandToContain( const BoundingVolume *input )
+void PlaneBoundingVolume::expandToContain( const BoundingVolumePtr &input )
 {
 }
 
@@ -100,7 +100,7 @@ bool PlaneBoundingVolume::testIntersection( const Ray3f &ray ) const
 	return Intersection::test( _plane, ray );
 }
 
-bool PlaneBoundingVolume::testIntersection( const BoundingVolume *other ) const
+bool PlaneBoundingVolume::testIntersection( const BoundingVolumePtr &other ) const
 {
 	return other->testIntersection( _plane );
 }
@@ -115,7 +115,7 @@ bool PlaneBoundingVolume::testIntersection( const Plane3f &plane ) const
 	return 0;
 }
 
-void PlaneBoundingVolume::resolveIntersection( const BoundingVolume *other, TransformationImpl &result ) const
+void PlaneBoundingVolume::resolveIntersection( const BoundingVolumePtr &other, TransformationImpl &result ) const
 {
 	other->resolveIntersection( _plane, result );
 }

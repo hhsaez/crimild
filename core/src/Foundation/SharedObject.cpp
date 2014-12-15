@@ -29,26 +29,3 @@
 
 using namespace crimild;
 
-SharedObject::SharedObject( void )
-	: _referenceCount( 0 )
-{
-
-}
-
-SharedObject::~SharedObject( void )
-{
-
-}
-
-void SharedObject::retain( void )
-{
-	++_referenceCount;
-}
-
-void SharedObject::release( void )
-{
-	if ( --_referenceCount <= 0 ) {
- 		delete this;
-	}
-}
-

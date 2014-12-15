@@ -30,22 +30,26 @@
 
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/Pointer.hpp"
+
 #include "Mathematics/Matrix.hpp"
+
+#include "SceneGraph/Light.hpp"
+
 #include "FrameBufferObject.hpp"
+#include "Texture.hpp"
 
 namespace crimild {
     
-    class Light;
-    
     class ShadowMap : public SharedObject {
     public:
-        ShadowMap( Light *source, FrameBufferObject *fbo = nullptr );
+        ShadowMap( LightPtr const &source );
+        ShadowMap( LightPtr const &source, FrameBufferObjectPtr const &fbo );
         virtual ~ShadowMap( void );
         
-        Light *getSource( void ) { return _source; }
+        LightPtr &getSource( void ) { return _source; }
         
-        FrameBufferObject *getBuffer( void ) { return _buffer.get(); }
-        Texture *getTexture ( void ) { return _texture.get(); }
+        FrameBufferObjectPtr &getBuffer( void ) { return _buffer; }
+        TexturePtr &getTexture ( void ) { return _texture; }
         
         const Matrix4f &getLightProjectionMatrix( void ) const { return _lightProjectionMatrix; }
         void setLightProjectionMatrix( const Matrix4f &m ) { _lightProjectionMatrix = m; }
@@ -58,13 +62,15 @@ namespace crimild {
         void computeLinearDepthConstant( float near, float far ) { _linearDepthConstant = 1.0f / ( far - near ); }
         
     private:
-        Light *_source;
+        LightPtr _source;
         Matrix4f _lightProjectionMatrix;
         Matrix4f _lightViewMatrix;
         float _linearDepthConstant;
-        Pointer< Texture > _texture;
-        Pointer< FrameBufferObject > _buffer;
+        TexturePtr _texture;
+        FrameBufferObjectPtr _buffer;
     };
+    
+    using ShadowMapPtr = std::shared_ptr< ShadowMap >;
     
 }
 

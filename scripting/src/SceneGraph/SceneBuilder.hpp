@@ -36,7 +36,7 @@ namespace crimild {
 
 		class SceneBuilder : public SharedObject, public crimild::scripting::Scripted {
 		private:
-			typedef std::function< crimild::Pointer< crimild::NodeComponent >( crimild::scripting::ScriptContext::Iterable & ) > BuilderFunction;
+			typedef std::function< NodeComponentPtr ( crimild::scripting::ScriptContext::Iterable & ) > BuilderFunction;
 
 		public:
 			SceneBuilder( std::string rootNodeName = "scene" );
@@ -45,15 +45,14 @@ namespace crimild {
 
 			virtual void reset( void );
 
-			crimild::Pointer< crimild::Node > fromFile( const std::string &filename );
+			NodePtr fromFile( const std::string &filename );
 
 		public:
 			template< typename T >
 			void registerComponent( void )
 			{
 				registerComponentBuilder< T >( []( crimild::scripting::ScriptContext::Iterable &it ) {
-					crimild::Pointer< T > cmp( new T( it ) );
-					return cmp;
+                    return std::make_shared< T >( it );
 				});
 			}
 
@@ -64,19 +63,21 @@ namespace crimild {
 			}
 
 		private:
-			Pointer< Node > buildNode( ScriptContext::Iterable &i, Group *parent );
+			NodePtr buildNode( ScriptContext::Iterable &i, GroupPtr const &parent );
 
-			void setupCamera( ScriptContext::Iterable &i, Camera *camera );
-			void setTransformation( ScriptContext::Iterable &it, Node *node );
+			void setupCamera( ScriptContext::Iterable &i, CameraPtr const &camera );
+			void setTransformation( ScriptContext::Iterable &it, NodePtr const &node );
 			
-			void buildNodeComponents( ScriptContext::Iterable &it, Node *node );
+			void buildNodeComponents( ScriptContext::Iterable &it, NodePtr const &node );
 
 		private:
 			std::string _rootNodeName;
 			std::map< std::string, BuilderFunction > _componentBuilders;
 
-			std::map< std::string, Pointer< Group > > _sceneCache;
+			std::map< std::string, GroupPtr > _sceneCache;
 		};
+        
+        using SceneBuilderPtr = std::shared_ptr< SceneBuilder >;
 
 	}
 

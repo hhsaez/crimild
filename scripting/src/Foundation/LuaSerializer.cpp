@@ -31,8 +31,8 @@ using namespace crimild;
 using namespace crimild::scripting;
 
 LuaSerializer::LuaSerializer( std::ostream &output )
-	: _output( output ),
-	  _depth( 0 )
+    : _depth( 0 ),
+      _output( output )
 {
 
 }

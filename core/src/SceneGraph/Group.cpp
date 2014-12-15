@@ -30,6 +30,7 @@
 
 #include <cassert>
 #include <algorithm>
+#include <thread>
 
 using namespace crimild;
 
@@ -44,9 +45,9 @@ Group::~Group( void )
 	detachAllNodes();
 }
 
-void Group::attachNode( Node *node )
+void Group::attachNode( NodePtr const &node )
 {
-	if ( node->getParent() == this ) {
+	if ( node->getParent() == getShared< Group >() ) {
 		// the node is already attach to this group
 		return;
 	}
@@ -55,12 +56,11 @@ void Group::attachNode( Node *node )
 		throw HasParentException( node->getName(), this->getName(), node->getParent()->getName() );
 	}
 
-	node->setParent( this );
-    Pointer< Node > nodePtr( node );
-	_nodes.push_back( nodePtr );
+	node->setParent( getShared< Group >() );
+	_nodes.push_back( node );
 }
 
-void Group::detachNode( Node *node )
+void Group::detachNode( NodePtr const &node )
 {
     for ( auto it : _nodes ) {
         if ( it == node ) {
@@ -79,25 +79,25 @@ void Group::detachAllNodes( void )
 	_nodes.clear();
 }
 
-Node *Group::getNode( unsigned int index )
+NodePtr Group::getNodeAt( unsigned int index )
 {
-	std::list< Pointer< Node > >::iterator it = _nodes.begin();
+	auto it = _nodes.begin();
 	std::advance( it, index );
-	return ( *it ).get();
+	return *it;
 }
 
-void Group::foreachNode( std::function< void( Node * ) > callback )
+void Group::foreachNode( std::function< void( NodePtr const & ) > callback )
 {
 	auto nodes = _nodes;
     for ( auto node : nodes ) {
         if ( node != nullptr ) {
-            callback ( node.get() );
+            callback ( node );
         }
     }
 }
 
 void Group::accept( NodeVisitor &visitor )
 {
-	visitor.visitGroup( this );
+	visitor.visitGroup( getShared< Group >() );
 }
 

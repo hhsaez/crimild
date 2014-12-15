@@ -49,6 +49,8 @@ namespace crimild {
 		private:
 			unsigned int _bufferId;
 		};
+        
+        using AudioClipPtr = std::shared_ptr< AudioClip >;
 
 	}
 
