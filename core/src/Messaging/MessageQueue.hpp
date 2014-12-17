@@ -107,10 +107,10 @@ namespace crimild {
 		virtual void dispatchMessages( void ) override
 		{
 			if ( _handlers.size() > 0 && _messages.size() ) {
-				for ( auto message : _messages ) {
-					for ( auto handler : _handlers ) {
-						handler->handleMessage( message );
-					}
+                auto ms = _messages;
+				for ( auto message : ms ) {
+                    auto hs = _handlers;
+                    for ( auto handler : hs ) handler->handleMessage( message );
 				}
 			}
 
@@ -141,7 +141,8 @@ namespace crimild {
 				_messages.push_back( message );
 			}
 			else {
-				for ( auto handler : _handlers ) {
+                auto hs = _handlers;
+				for ( auto handler : hs ) {
 					handler->handleMessage( message );
 				}
 			}

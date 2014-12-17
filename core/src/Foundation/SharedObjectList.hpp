@@ -105,9 +105,8 @@ namespace crimild {
         
         void clear( void )
         {
-            for ( auto obj : _objects ) {
-                CallbackPolicyImpl::onRemoved( obj );
-            }
+            auto os = _objects;
+            for ( auto obj : os ) CallbackPolicyImpl::onRemoved( obj );
             
             _objects.clear();
         }
@@ -116,15 +115,14 @@ namespace crimild {
         {
             int i = 0;
             auto os = _objects;
-            for ( auto o : os ) {
-                callback( o, i++ );
-            }
+            for ( auto o : os ) callback( o, i++ );
         }
             
         ObjectPtr find( std::function< bool( ObjectPtr const & ) > callback )
         {
             ObjectPtr result = nullptr;
-            for ( auto o : _objects ) {
+            auto os = _objects;
+            for ( auto o : os ) {
                 if ( callback( o ) ) {
                     result = o;
                     break;

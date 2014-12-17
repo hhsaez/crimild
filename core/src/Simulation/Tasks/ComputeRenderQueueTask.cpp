@@ -25,42 +25,49 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_GL3_TEXTURE_CATALOG_
-#define CRIMILD_GL3_TEXTURE_CATALOG_
+#include "ComputeRenderQueueTask.hpp"
 
-#include <Crimild.hpp>
+#include "Simulation/Simulation.hpp"
+#include "Visitors/ComputeRenderQueue.hpp"
 
-namespace crimild {
+#include <iostream>
 
-	namespace gl3 {
+using namespace crimild;
 
-		class TextureCatalog : public Catalog< Texture > {
-		public:
-			TextureCatalog( void );
-			virtual ~TextureCatalog( void );
-
-			virtual int getNextResourceId( void ) override;
-
-			virtual void bind( ShaderLocationPtr const &location, TexturePtr const &texture ) override;
-			virtual void unbind( ShaderLocationPtr const &location, TexturePtr const &texture ) override;
-
-			virtual void load( TexturePtr const &texture ) override;
-			virtual void unload( TexturePtr const &texture ) override;
-            virtual void unload( Texture *texture ) override;
-            
-            virtual void cleanup( void ) override;
-
-		private:
-			int _boundTextureCount;
-            
-            std::list< int > _textureIdsToDelete;
-		};
-
-		typedef std::shared_ptr< TextureCatalog > TextureCatalogPtr;
-
-	}
+ComputeRenderQueueTask::ComputeRenderQueueTask( int priority )
+	: Task( priority )
+{
 
 }
 
-#endif
+ComputeRenderQueueTask::~ComputeRenderQueueTask( void )
+{
+
+}
+
+void ComputeRenderQueueTask::start( void )
+{
+}
+
+void ComputeRenderQueueTask::update( void )
+{
+	auto scene = Simulation::getCurrent()->getScene();
+    if ( scene == nullptr ) {
+        return;
+    }
+    
+    auto camera = Simulation::getCurrent()->getMainCamera();
+    if ( camera == nullptr ) {
+        return;
+    }
+    
+    RenderQueuePtr renderQueue( std::make_shared< RenderQueue >() );
+    scene->perform( ComputeRenderQueue( camera, renderQueue ) );
+    MessageQueue::getInstance().pushMessage( std::make_shared< RenderQueueGeneratedMessage >( renderQueue ) );
+}
+
+void ComputeRenderQueueTask::stop( void )
+{
+
+}
 

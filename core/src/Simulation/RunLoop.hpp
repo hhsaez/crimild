@@ -49,8 +49,8 @@ namespace crimild {
 		void suspendTask( TaskPtr const &task );
 		void resumeTask( TaskPtr const &task );
 
-		bool update( void );
-		void stop( void );
+		virtual bool update( void );
+		virtual void stop( void );
 
 		bool hasActiveTasks( void ) const { return _activeTasks.size() > 0; }
 		bool isTaskActive( TaskPtr const &task ) const;
@@ -74,6 +74,19 @@ namespace crimild {
 	};
     
     using RunLoopPtr = std::shared_ptr< RunLoop >;
+    
+    class ThreadedRunLoop : public RunLoop {
+    public:
+        ThreadedRunLoop( bool startImmediately = false );
+        virtual ~ThreadedRunLoop( void );
+        
+        virtual void run( void );
+        virtual void stop( void ) override;
+        
+    private:
+        bool _done;
+        std::thread _thread;
+    };
 
 }
 

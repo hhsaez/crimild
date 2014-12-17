@@ -76,9 +76,23 @@ void gl3::IndexBufferObjectCatalog::load( IndexBufferObjectPtr const &ibo )
 
 void gl3::IndexBufferObjectCatalog::unload( IndexBufferObjectPtr const &ibo )
 {
-	GLuint bufferId = ibo->getCatalogId();
-	glDeleteBuffers( 1, &bufferId );
-
+    _unusedIBOIds.push_back( ibo->getCatalogId() );
 	Catalog< IndexBufferObject >::unload( ibo );
+}
+
+void gl3::IndexBufferObjectCatalog::unload( IndexBufferObject *ibo )
+{
+    _unusedIBOIds.push_back( ibo->getCatalogId() );
+    Catalog< IndexBufferObject >::unload( ibo );
+}
+
+void gl3::IndexBufferObjectCatalog::cleanup( void )
+{
+    for ( auto id : _unusedIBOIds ) {
+        GLuint bufferId = id;
+        glDeleteBuffers( 1, &bufferId );
+    }
+    
+    _unusedIBOIds.clear();
 }
 

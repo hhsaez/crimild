@@ -227,27 +227,73 @@ void gl3::FrameBufferObjectCatalog::load( FrameBufferObjectPtr const &fbo )
 void gl3::FrameBufferObjectCatalog::unload( FrameBufferObjectPtr const &fbo )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
-
-    GLuint framebufferId = fbo->getCatalogId();
+    
+    int framebufferId = fbo->getCatalogId();
     if ( framebufferId > 0 ) {
+        _framebufferIdsToDelete.push_back( framebufferId );
         
-        fbo->getRenderTargets().each( []( RenderTargetPtr const &target, int ) {
-            GLuint targetId = target->getId();
+        fbo->getRenderTargets().each( [&]( RenderTargetPtr const &target, int ) {
+            int targetId = target->getId();
             if ( targetId > 0 ) {
+                _renderbufferIdsToDelete.push_back( targetId );
                 if ( target->getOutput() == RenderTarget::Output::TEXTURE ) {
-                    GLuint textureId = target->getTexture()->getCatalogId();
-                    glDeleteTextures( 1, &textureId );
+                    int textureId = target->getTexture()->getCatalogId();
+                    _textureIdsToDelete.push_back( textureId );
                     target->getTexture()->setCatalogInfo( nullptr, 0 );
                 }
-                glDeleteRenderbuffers( 1, &targetId );
             }
         });
         
-        glDeleteFramebuffers( 1, &framebufferId );
-
         Catalog< FrameBufferObject >::unload( fbo );
     }
 
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+}
+
+void gl3::FrameBufferObjectCatalog::unload( FrameBufferObject *fbo )
+{
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    
+    int framebufferId = fbo->getCatalogId();
+    if ( framebufferId > 0 ) {
+        _framebufferIdsToDelete.push_back( framebufferId );
+        
+        fbo->getRenderTargets().each( [&]( RenderTargetPtr const &target, int ) {
+            int targetId = target->getId();
+            if ( targetId > 0 ) {
+                _renderbufferIdsToDelete.push_back( targetId );
+                if ( target->getOutput() == RenderTarget::Output::TEXTURE ) {
+                    int textureId = target->getTexture()->getCatalogId();
+                    _textureIdsToDelete.push_back( textureId );
+                    target->getTexture()->setCatalogInfo( nullptr, 0 );
+                }
+            }
+        });
+        
+        Catalog< FrameBufferObject >::unload( fbo );
+    }
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+}
+
+void gl3::FrameBufferObjectCatalog::cleanup( void )
+{
+    for ( auto id : _textureIdsToDelete ) {
+        GLuint textureId = id;
+        glDeleteTextures( 1, &textureId );
+    }
+    _textureIdsToDelete.clear();
+    
+    for ( auto id : _renderbufferIdsToDelete ) {
+        GLuint renderbufferId = id;
+        glDeleteRenderbuffers( 1, &renderbufferId );
+    }
+    _renderbufferIdsToDelete.clear();
+    
+    for ( auto id : _framebufferIdsToDelete ) {
+        GLuint framebufferId = id;
+        glDeleteFramebuffers( 1, &framebufferId );
+    }
+    _framebufferIdsToDelete.clear();
 }
 

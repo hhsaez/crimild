@@ -186,8 +186,11 @@ void Text::updatePrimitive( void )
 		horiAdvance += glyph.advance;
 	}
 
-    _primitive->setVertexBuffer( std::make_shared< VertexBufferObject >( VertexFormat::VF_P3_UV2, vertices.size() / 5, &vertices[ 0 ] ) );
-	_primitive->setIndexBuffer( std::make_shared< IndexBufferObject >( indices.size(), &indices[ 0 ] ) );
+    auto vbo = std::make_shared< VertexBufferObject >( VertexFormat::VF_P3_UV2, vertices.size() / 5, &vertices[ 0 ] );
+    _primitive->setVertexBuffer( vbo );
+    
+    auto ibo = std::make_shared< IndexBufferObject >( indices.size(), &indices[ 0 ] );
+	_primitive->setIndexBuffer( ibo );
 	
 	updateModelBounds();
 }

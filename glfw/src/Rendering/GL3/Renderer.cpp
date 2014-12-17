@@ -90,7 +90,7 @@ gl3::Renderer::~Renderer( void )
 
 void gl3::Renderer::configure( void )
 {
-//	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
 	Log::Debug << "Configuring renderer"
     		   << "\n       OpenGL version: " << glGetString( GL_VERSION )
@@ -116,17 +116,19 @@ void gl3::Renderer::configure( void )
     glEnable( GL_CULL_FACE );
     glCullFace( GL_BACK );
 
-//    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
 void gl3::Renderer::beginRender( void )
 {
-
+    crimild::Renderer::beginRender();
 }
 
 void gl3::Renderer::endRender( void )
 {
-
+    crimild::Renderer::endRender();
+    glFlush();
 }
 
 void gl3::Renderer::clearBuffers( void )

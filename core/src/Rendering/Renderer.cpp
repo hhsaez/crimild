@@ -58,6 +58,20 @@ Renderer::~Renderer( void )
     
 }
 
+void Renderer::beginRender( void )
+{
+
+}
+
+void Renderer::endRender( void )
+{
+    getShaderProgramCatalog()->cleanup();
+    getTextureCatalog()->cleanup();
+    getVertexBufferObjectCatalog()->cleanup();
+    getIndexBufferObjectCatalog()->cleanup();
+    getFrameBufferObjectCatalog()->cleanup();
+}
+
 void Renderer::render( RenderQueuePtr const &renderQueue, RenderPassPtr const &renderPass )
 {
     renderPass->render( getShared< Renderer >(), renderQueue, renderQueue->getCamera() );

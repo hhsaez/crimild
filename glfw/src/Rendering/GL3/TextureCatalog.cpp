@@ -133,8 +133,29 @@ void gl3::TextureCatalog::load( TexturePtr const &texture )
 
 void gl3::TextureCatalog::unload( TexturePtr const &texture )
 {
-	glBindTexture( GL_TEXTURE_2D, 0 );
+    if ( texture->getCatalogId() > 0 ) {
+        _textureIdsToDelete.push_back( texture->getCatalogId() );
+    }
 
 	Catalog< Texture >::unload( texture );
+}
+
+void gl3::TextureCatalog::unload( Texture *texture )
+{
+    if ( texture->getCatalogId() > 0 ) {
+        _textureIdsToDelete.push_back( texture->getCatalogId() );
+    }
+    
+    Catalog< Texture >::unload( texture );
+}
+
+void gl3::TextureCatalog::cleanup( void )
+{
+    for ( auto id : _textureIdsToDelete ) {
+        GLuint textureId = id;
+        glDeleteTextures( 1, &textureId );
+    }
+    
+    _textureIdsToDelete.clear();
 }
 

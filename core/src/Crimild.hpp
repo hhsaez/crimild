@@ -143,6 +143,7 @@
 
 #include "Simulation/Tasks/BeginRenderTask.hpp"
 #include "Simulation/Tasks/EndRenderTask.hpp"
+#include "Simulation/Tasks/ComputeRenderQueueTask.hpp"
 #include "Simulation/Tasks/RenderSceneTask.hpp"
 #include "Simulation/Tasks/UpdateSceneTask.hpp"
 #include "Simulation/Tasks/RenderDebugInfoTask.hpp"

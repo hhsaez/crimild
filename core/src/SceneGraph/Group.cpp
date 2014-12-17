@@ -62,7 +62,8 @@ void Group::attachNode( NodePtr const &node )
 
 void Group::detachNode( NodePtr const &node )
 {
-    for ( auto it : _nodes ) {
+    auto ns = _nodes;
+    for ( auto it : ns ) {
         if ( it == node ) {
             node->setParent( nullptr );
             _nodes.remove( it );
@@ -73,7 +74,8 @@ void Group::detachNode( NodePtr const &node )
 
 void Group::detachAllNodes( void )
 {
-	for ( auto node : _nodes ) {
+    auto ns = _nodes;
+	for ( auto node : ns ) {
 		node->setParent( nullptr );
 	}
 	_nodes.clear();

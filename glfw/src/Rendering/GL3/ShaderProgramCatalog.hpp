@@ -46,12 +46,18 @@ namespace crimild {
 
 			virtual void load( ShaderProgramPtr const &program ) override;
 			virtual void unload( ShaderProgramPtr const &program ) override;
+            virtual void unload( ShaderProgram *program ) override;
+            
+            virtual void cleanup( void ) override;
 
 		private:
 			int compileShader( ShaderPtr const &shader, int type );
 
 			void fetchAttributeLocation( ShaderProgramPtr const &program, ShaderLocationPtr const &location );
 			void fetchUniformLocation( ShaderProgramPtr const &program, ShaderLocationPtr const &location );
+            
+        private:
+            std::list< int > _shaderIdsToDelete;
 		};
 
 		typedef std::shared_ptr< ShaderProgramCatalog > ShaderProgramCatalogPtr;

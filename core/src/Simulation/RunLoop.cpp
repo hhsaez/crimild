@@ -116,7 +116,8 @@ bool RunLoop::isTaskActive( TaskPtr const &task ) const
 
 void RunLoop::foreachActiveTask( std::function< void ( TaskPtr const &task ) > callback )
 {
-	for ( auto task : _activeTasks ) {
+    auto ts = _activeTasks;
+	for ( auto task : ts ) {
 		callback( task );
 	}
 }
@@ -128,7 +129,8 @@ bool RunLoop::isTaskKilled( TaskPtr const &task ) const
 
 void RunLoop::foreachKilledTask( std::function< void ( TaskPtr const &task ) > callback )
 {
-	for ( auto task : _killedTasks ) {
+    auto ks = _killedTasks;
+	for ( auto task : ks ) {
 		callback( task );
 	}
 }
@@ -140,15 +142,16 @@ bool RunLoop::isTaskSuspended( TaskPtr const &task ) const
 
 void RunLoop::foreachSuspendedTask( std::function< void ( TaskPtr const &task ) > callback )
 {
-	for ( auto task : _suspendedTasks ) {
+    auto ts = _suspendedTasks;
+	for ( auto task : ts ) {
 		callback( task );
 	}
 }
 
 bool RunLoop::update( void )
 {
-	auto tasks = _activeTasks;
-	for ( auto task : tasks ) {
+	auto ts = _activeTasks;
+	for ( auto task : ts ) {
 		task->update();
 	}
 
@@ -159,7 +162,8 @@ bool RunLoop::update( void )
 
 void RunLoop::stop( void )
 {
-	for ( auto task : _activeTasks ) {
+    auto ts = _activeTasks;
+	for ( auto task : ts ) {
 		_killedTasks.push_back( task );
 	}
 
@@ -176,5 +180,33 @@ void RunLoop::cleanup( void )
 		task->setRunLoop( RunLoopPtr() );
 	}
 	_killedTasks.clear();
+}
+
+ThreadedRunLoop::ThreadedRunLoop( bool startImmediately )
+{
+    if ( startImmediately ) run();
+}
+
+ThreadedRunLoop::~ThreadedRunLoop( void )
+{
+    
+}
+
+void ThreadedRunLoop::run( void )
+{
+    _done = false;
+    _thread = std::move( std::thread( [&]() {
+        while ( !_done ) {
+            update();
+        }
+    }));
+}
+
+void ThreadedRunLoop::stop( void )
+{
+    _done = true;
+    RunLoop::stop();
+    
+    _thread.join();
 }
 

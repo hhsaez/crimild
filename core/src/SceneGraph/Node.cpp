@@ -125,7 +125,8 @@ NodeComponentPtr Node::getComponentWithName( std::string name )
 
 void Node::detachAllComponents( void )
 {
-	for ( auto cmp : _components ) {
+    auto cs = _components;
+	for ( auto cmp : cs ) {
 		if ( cmp.second != nullptr ) {
 			cmp.second->onDetach();
 			cmp.second->setNode( nullptr );
@@ -149,20 +150,13 @@ void Node::updateComponents( const Time &t )
 	});
 }
 
-void Node::updateComponentsWithFixedTime( const Time &t )
-{
-    foreachComponent( [&]( NodeComponentPtr const &component ) {
-		component->fixedUpdate( t );
-	});
-}
-
 void Node::foreachComponent( std::function< void ( NodeComponentPtr const & ) > callback )
 {
 	// create a copy of the component's collection
 	// to prevent errors when attaching or detaching
 	// components during an update pass
-	auto components = _components;
-	for ( auto cmp : components ) {
+	auto cs = _components;
+	for ( auto cmp : cs ) {
 		if ( cmp.second != nullptr ) {
 			callback( cmp.second );
 		}

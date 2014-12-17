@@ -42,7 +42,7 @@ namespace crimild {
 		virtual void stop( void ) override;
         
 	private:
-		float _dtAccumulator;
+		double _dtAccumulator;
 	};
 
 }

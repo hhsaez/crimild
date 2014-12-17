@@ -67,7 +67,8 @@ namespace crimild {
 
 			void foreachCandidate( std::function< void( NodePtr const & ) > callback )
 			{
-				for ( auto c : _candidates ) {
+                auto cs = _candidates;
+				for ( auto c : cs ) {
 					callback( c );
 				}
 			}

@@ -25,7 +25,42 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "SharedObject.hpp"
+#ifndef CRIMILD_SIMULATION_TASKS_COMPUTE_RENDER_QUEUE_
+#define CRIMILD_SIMULATION_TASKS_COMPUTE_RENDER_QUEUE_
 
-using namespace crimild;
+#include "Simulation/Task.hpp"
+#include "Rendering/RenderQueue.hpp"
+#include "Messaging/MessageQueue.hpp"
+
+#include <list>
+
+namespace crimild {
+
+	class Camera;
+    
+    class RenderQueueGeneratedMessage : public Message {
+    public:
+        RenderQueueGeneratedMessage( RenderQueuePtr const &renderQueue ) : _renderQueue( renderQueue ) { }
+        virtual ~RenderQueueGeneratedMessage( void ) { }
+        
+        RenderQueuePtr &getRenderQueue( void ) { return _renderQueue; }
+    private:
+        RenderQueuePtr _renderQueue;
+    };
+    
+    using RenderQueueGeneratedMessagePtr = std::shared_ptr< RenderQueueGeneratedMessage >;
+
+	class ComputeRenderQueueTask : public Task {
+	public:
+		ComputeRenderQueueTask( int priority );
+		virtual ~ComputeRenderQueueTask( void );
+
+		virtual void start( void ) override;
+		virtual void update( void ) override;
+		virtual void stop( void ) override;
+	};
+
+}
+
+#endif
 

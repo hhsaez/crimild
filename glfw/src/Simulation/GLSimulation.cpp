@@ -60,17 +60,15 @@ void GLSimulation::start( void )
 	}
 
     getMainLoop()->startTask( std::make_shared< WindowTask >( Simulation::Priorities::LOWEST_PRIORITY, -1, -1 ) );
-	
-	getMainLoop()->startTask( std::make_shared< UpdateSceneAndPhysicsTask >( Priorities::UPDATE_SCENE_PRIORITY ) );
-	
 	getMainLoop()->startTask( std::make_shared< BeginRenderTask >( Priorities::BEGIN_RENDER_PRIORITY ) );
 	getMainLoop()->startTask( std::make_shared< RenderSceneTask >( Priorities::RENDER_SCENE_PRIORITY ) );
 	getMainLoop()->startTask( std::make_shared< EndRenderTask >( Priorities::END_RENDER_PRIORITY ) );
-	
 	getMainLoop()->startTask( std::make_shared< UpdateInputStateTask >( Simulation::Priorities::HIGHEST_PRIORITY ) );
-	getMainLoop()->startTask( std::make_shared< DispatchMessagesTask >( Priorities::HIGHEST_PRIORITY ) );
-
-	getMainLoop()->startTask( std::make_shared< UpdateTimeTask >( Simulation::Priorities::LOWEST_PRIORITY ) );
+	
+    getSimulationLoop()->startTask( std::make_shared< DispatchMessagesTask >( Priorities::HIGHEST_PRIORITY ) );
+	getSimulationLoop()->startTask( std::make_shared< UpdateTimeTask >( Simulation::Priorities::LOWEST_PRIORITY ) );
+    getSimulationLoop()->startTask( std::make_shared< UpdateSceneAndPhysicsTask >( Priorities::UPDATE_SCENE_PRIORITY ) );
+    getSimulationLoop()->startTask( std::make_shared< ComputeRenderQueueTask >( Priorities::RENDER_SCENE_PRIORITY ) );
 }
 
 void GLSimulation::loadSettings( void )

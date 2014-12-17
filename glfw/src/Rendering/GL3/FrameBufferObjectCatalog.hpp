@@ -47,10 +47,17 @@ namespace crimild {
 			virtual void unbind( FrameBufferObjectPtr const &fbo ) override;
 
 			virtual void load( FrameBufferObjectPtr const &fbo ) override;
+            
 			virtual void unload( FrameBufferObjectPtr const &fbo ) override;
+            virtual void unload( FrameBufferObject *fbo ) override;
+            
+            virtual void cleanup( void ) override;
 
 		private:
 			crimild::Renderer *_renderer;
+            std::list< int > _framebufferIdsToDelete;
+            std::list< int > _renderbufferIdsToDelete;
+            std::list< int > _textureIdsToDelete;
 		};
 
 		typedef std::shared_ptr< FrameBufferObjectCatalog > FrameBufferObjectCatalogPtr;

@@ -47,7 +47,7 @@ UpdateSceneAndPhysicsTask::~UpdateSceneAndPhysicsTask( void )
 
 void UpdateSceneAndPhysicsTask::start( void )
 {
-    _dtAccumulator = 0.0f;
+    _dtAccumulator = 0.0;
     
     float gx = Simulation::getCurrent()->getSettings().get( "physics.gravity.x", 0.0f );
     float gy = Simulation::getCurrent()->getSettings().get( "physics.gravity.y", -9.8f );
@@ -66,18 +66,11 @@ void UpdateSceneAndPhysicsTask::update( void )
         return;
     }
     
-    scene->perform( UpdateComponents( t ) );
-    
     Time fixed = t;
     fixed.setDeltaTime( CRIMILD_SIMULATION_TIME );
-    
-    while ( scene != nullptr && _dtAccumulator >= CRIMILD_SIMULATION_TIME ) {
+    while ( _dtAccumulator >= CRIMILD_SIMULATION_TIME ) {
         PhysicsContext::getInstance().step( CRIMILD_SIMULATION_TIME );
-        
-        scene->perform( Apply( [&]( NodePtr const &n ) {
-            n->updateComponentsWithFixedTime( fixed );
-        }));
-        
+        scene->perform( UpdateComponents( fixed ) );
         _dtAccumulator -= CRIMILD_SIMULATION_TIME;
     }
 }

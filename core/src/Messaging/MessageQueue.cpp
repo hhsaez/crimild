@@ -48,7 +48,8 @@ void MessageQueue::registerDispatcher( MessageDispatcher *dispatcher )
 
 void MessageQueue::dispatchMessages( void )
 {
-    for ( auto d : _dispatchers ) {
+    auto ds = _dispatchers;
+    for ( auto d : ds ) {
         if ( d != nullptr ) {
             d->dispatchMessages();
         }
@@ -57,7 +58,8 @@ void MessageQueue::dispatchMessages( void )
 
 void MessageQueue::discardAllMessages( void )
 {
-    for ( auto d : _dispatchers ) {
+    auto ds = _dispatchers;
+    for ( auto d : ds ) {
         if ( d != nullptr ) {
             d->discardAllMessages();
         }
@@ -66,7 +68,8 @@ void MessageQueue::discardAllMessages( void )
 
 void MessageQueue::reset( void )
 {
-    for ( auto d : _dispatchers ) {
+    auto ds = _dispatchers;
+    for ( auto d : ds ) {
         if ( d != nullptr ) {
             d->reset();
         }

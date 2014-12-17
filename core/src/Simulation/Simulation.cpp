@@ -35,6 +35,7 @@
 #include "Tasks/EndRenderTask.hpp"
 #include "Tasks/UpdateSceneTask.hpp"
 #include "Tasks/RenderSceneTask.hpp"
+#include "Tasks/ComputeRenderQueueTask.hpp"
 
 #include "SceneGraph/Camera.hpp"
 
@@ -49,9 +50,10 @@ Simulation *Simulation::_currentSimulation = nullptr;
 
 Simulation::Simulation( std::string name, int argc, char **argv )
 	: NamedObject( name ),
-      _mainLoop( std::make_shared< RunLoop >() )
+      _mainLoop( std::make_shared< RunLoop >() ),
+      _simulationLoop( std::make_shared< ThreadedRunLoop >( true ) )
 {
-	srand( time( NULL ) );	
+	srand( time( NULL ) );
 
 	_currentSimulation = this;
 
@@ -67,11 +69,13 @@ Simulation::~Simulation( void )
 
 void Simulation::start( void )
 {
-	getMainLoop()->startTask( std::make_shared< DispatchMessagesTask >( Priorities::HIGHEST_PRIORITY ) );
 	getMainLoop()->startTask( std::make_shared< BeginRenderTask >( Priorities::BEGIN_RENDER_PRIORITY ) );
 	getMainLoop()->startTask( std::make_shared< EndRenderTask >( Priorities::END_RENDER_PRIORITY ) );
-	getMainLoop()->startTask( std::make_shared< UpdateSceneTask >( Priorities::UPDATE_SCENE_PRIORITY ) );
 	getMainLoop()->startTask( std::make_shared< RenderSceneTask >( Priorities::RENDER_SCENE_PRIORITY ) );
+
+    getSimulationLoop()->startTask( std::make_shared< DispatchMessagesTask >( Priorities::HIGHEST_PRIORITY ) );
+    getSimulationLoop()->startTask( std::make_shared< UpdateSceneTask >( Priorities::UPDATE_SCENE_PRIORITY ) );
+    getSimulationLoop()->startTask( std::make_shared< ComputeRenderQueueTask >( Priorities::RENDER_SCENE_PRIORITY ) );
 }
 
 bool Simulation::step( void )
@@ -81,6 +85,7 @@ bool Simulation::step( void )
 
 void Simulation::stop( void )
 {
+    _simulationLoop->stop();
 	_mainLoop->stop();
 }
 

@@ -58,6 +58,8 @@ void WindowTask::start( void )
     	throw RuntimeException( "Cannot created main window" );
     }
     
+    glfwSwapInterval( 0 );
+    
     glfwSetWindowTitle( Simulation::getCurrent()->getName().c_str() );
 }
 
@@ -68,15 +70,48 @@ void WindowTask::stop( void )
 
 void WindowTask::update( void )
 {
+    static double min = 1.0f;
+    static double max = 0.0f;
+    static double accum = 0.0f;
+    static Time windowTime;
+    
 	if ( glfwGetWindowParam( GLFW_OPENED ) ) {
 		glfwSwapBuffers();
 
 		Time &t = Simulation::getCurrent()->getSimulationTime();
-		std::stringstream str;
-		str.precision( 4 );
+        
+        windowTime.update( t.getCurrentTime() );
+        double delta = windowTime.getDeltaTime();
+        
+        accum += delta;
+        if ( accum >= 1.0f ) {
+            max = delta;
+            min = delta;
+            accum = 0.0f;
+        }
+        
+        max = Numericf::max( max, delta );
+        min = Numericf::min( min, delta );
+
+        std::stringstream str;
+		str.precision( 6 );
 		str << Simulation::getCurrent()->getName()
-			<< " (" << t.getDeltaTime() << " ms)";
+			<< " "
+            << "(max=" << std::fixed << max << "ms"
+            << " min=" << min << "ms"
+            << " avg=" << (0.5f * (min + max)) << "ms"
+            << ")";
+        
 		glfwSetWindowTitle( str.str().c_str() );
+#if 1
+        if ( windowTime.getDeltaTime() < 0.002 ) {
+            // this trick prevents the simulation to run at very high speeds
+            // this usually happens when the window is sent to background
+            // and there is nothing to render
+            int sleepTime = ( int )( ( 1.0 / 60.0 - windowTime.getDeltaTime() ) * 1000.0 );
+            std::this_thread::sleep_for( std::chrono::milliseconds( sleepTime ) );
+        }
+#endif
 	}
 	else {
 		Simulation::getCurrent()->stop();

@@ -73,7 +73,7 @@ namespace crimild {
 		std::shared_ptr< FrameBufferObject > _screenBuffer;
 
 	public:
-		virtual void beginRender( void ) = 0;
+        virtual void beginRender( void );
 		
 		virtual void clearBuffers( void ) = 0;
         
@@ -83,7 +83,7 @@ namespace crimild {
 
         virtual void render( std::shared_ptr< Geometry > const &geometry, std::shared_ptr< Camera > const &camera, std::shared_ptr< RenderPass > const &renderPass );
 
-		virtual void endRender( void ) = 0;
+        virtual void endRender( void );
 
 	public:
 		virtual void bindFrameBuffer( std::shared_ptr< FrameBufferObject > const &fbo );

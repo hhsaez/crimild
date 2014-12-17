@@ -70,8 +70,6 @@ namespace crimild {
 
 		Settings &getSettings( void ) { return _settings; }
 
-        RunLoopPtr &getMainLoop( void ) { return _mainLoop; }
-
 		Time &getSimulationTime( void ) { return _simulationTime; }
 		const Time &getSimulationTime( void ) const { return _simulationTime; }
 
@@ -85,8 +83,15 @@ namespace crimild {
 
 	private:
 		Settings _settings;
-		RunLoopPtr _mainLoop;
 		Time _simulationTime;
+        
+    public:
+        RunLoopPtr &getMainLoop( void ) { return _mainLoop; }
+        RunLoopPtr &getSimulationLoop( void ) { return _simulationLoop; }
+        
+    private:
+        RunLoopPtr _mainLoop;
+        RunLoopPtr _simulationLoop;
 
 	public:
 		void setRenderer( RendererPtr const &renderer ) { _renderer = renderer; }
@@ -99,7 +104,7 @@ namespace crimild {
 		void setScene( NodePtr const &scene );
 		NodePtr &getScene( void ) { return _scene; }
 
-		CameraPtr getMainCamera( void ) { return _cameras.front(); }
+        CameraPtr getMainCamera( void ) { return _cameras.size() > 0 ? _cameras.front() : CameraPtr(); }
 		void forEachCamera( std::function< void ( CameraPtr const & ) > callback );
 
 	private:

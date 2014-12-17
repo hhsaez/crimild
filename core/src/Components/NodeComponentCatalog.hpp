@@ -66,7 +66,8 @@ namespace crimild {
 
 		void forEach( std::function< void( NODE_COMPONENT_TYPE * ) > callback )
 		{
-			for ( auto component : _components ) {
+            auto cs = _components;
+			for ( auto component : cs ) {
 				callback( component );
 			}
 		}

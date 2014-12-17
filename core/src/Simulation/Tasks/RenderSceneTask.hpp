@@ -31,13 +31,17 @@
 #include "Simulation/Task.hpp"
 #include "Rendering/RenderQueue.hpp"
 
+#include "ComputeRenderQueueTask.hpp"
+
 #include <list>
 
 namespace crimild {
 
 	class Camera;
 
-	class RenderSceneTask : public Task {
+	class RenderSceneTask :
+        public Task,
+        public MessageHandler< RenderQueueGeneratedMessage > {
 	public:
 		RenderSceneTask( int priority );
 		virtual ~RenderSceneTask( void );
@@ -45,11 +49,15 @@ namespace crimild {
 		virtual void start( void ) override;
 		virtual void update( void ) override;
 		virtual void stop( void ) override;
-        
+            
         RenderQueuePtr &getRenderQueue( void ) { return _renderQueue; }
-        
+            
     private:
         RenderQueuePtr _renderQueue;
+            
+    public:
+        virtual void handleMessage( RenderQueueGeneratedMessagePtr const &message ) override;
+            
 	};
 
 }

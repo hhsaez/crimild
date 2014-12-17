@@ -50,7 +50,8 @@ void MaterialComponent::detachAllMaterials( void )
 
 void MaterialComponent::foreachMaterial( std::function< void( MaterialPtr const & ) > callback )
 {
-	for ( auto material : _materials ) {
+    auto ms = _materials;
+	for ( auto material : ms ) {
 		callback( material );
 	}
 }

@@ -59,7 +59,8 @@ void Geometry::detachPrimitive( PrimitivePtr const &primitive )
 
 void Geometry::foreachPrimitive( std::function< void( PrimitivePtr const & ) > callback )
 {
-    for ( auto primitive : _primitives ) {
+    auto ps = _primitives;
+    for ( auto primitive : ps ) {
         if ( primitive != nullptr ) {
             callback( primitive );
         }

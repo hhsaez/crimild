@@ -55,7 +55,6 @@ namespace crimild {
 
 			virtual void start( void ) override;
 			virtual void update( const Time &t ) override;
-			virtual void fixedUpdate( const Time &t ) override;
 
 			void setMass( float mass ) { _mass = mass; }
 			float getMass( void ) const { return _mass; }

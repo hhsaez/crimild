@@ -85,27 +85,27 @@ void physics::RigidBodyComponent::start( void )
 
 void physics::RigidBodyComponent::update( const Time &t )
 {
-	if ( _body != nullptr && isKinematic() ) {
+    if ( _body == nullptr ) {
+        return;
+    }
+    
+	if ( isKinematic() ) {
     	_body->setWorldTransform( BulletUtils::convert( getNode()->getWorld() ) );
 	}
-}
-
-void physics::RigidBodyComponent::fixedUpdate( const Time &t )
-{
-	if ( _body != nullptr && !isKinematic() ) {
-		btTransform trans = _body->getWorldTransform();
-		getNode()->local().setTranslate( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
-		getNode()->perform( UpdateWorldState() );
-
-		if ( shouldConstraintVelocity() ) {
-			btVector3 currentVelocityDirection =_body->getLinearVelocity();
-			btScalar currentVelocty = currentVelocityDirection.length();
-			if ( currentVelocty != _desiredVelocity ) {
-    			currentVelocityDirection *= _desiredVelocity / currentVelocty;
-    			_body->setLinearVelocity( currentVelocityDirection );
-			}
-		}
-	}
+    else {
+        btTransform trans = _body->getWorldTransform();
+        getNode()->local().setTranslate( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
+        getNode()->perform( UpdateWorldState() );
+        
+        if ( shouldConstraintVelocity() ) {
+            btVector3 currentVelocityDirection =_body->getLinearVelocity();
+            btScalar currentVelocty = currentVelocityDirection.length();
+            if ( currentVelocty != _desiredVelocity ) {
+                currentVelocityDirection *= _desiredVelocity / currentVelocty;
+                _body->setLinearVelocity( currentVelocityDirection );
+            }
+        }
+    }
 }
 
 void physics::RigidBodyComponent::createShape( void )

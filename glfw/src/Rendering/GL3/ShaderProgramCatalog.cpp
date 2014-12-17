@@ -131,12 +131,34 @@ void gl3::ShaderProgramCatalog::unload( ShaderProgramPtr const &program )
 
 	int programId = program->getCatalogId();
 	if ( programId > 0 ) {
-		glDeleteProgram( programId );
+        _shaderIdsToDelete.push_back( programId );
 	}
 
 	Catalog< ShaderProgram >::unload( program );
 
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+}
+
+void gl3::ShaderProgramCatalog::unload( ShaderProgram *program )
+{
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    
+    int programId = program->getCatalogId();
+    if ( programId > 0 ) {
+        _shaderIdsToDelete.push_back( programId );
+    }
+    
+    Catalog< ShaderProgram >::unload( program );
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+}
+
+void gl3::ShaderProgramCatalog::cleanup( void )
+{
+    for ( auto id : _shaderIdsToDelete ) {
+        glDeleteProgram( id );
+    }
+    _shaderIdsToDelete.clear();
 }
 
 int gl3::ShaderProgramCatalog::compileShader( ShaderPtr const &shader, int type )

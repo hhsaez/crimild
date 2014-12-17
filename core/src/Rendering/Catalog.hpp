@@ -95,6 +95,7 @@ namespace crimild {
 		virtual ~Catalog( void ) 
 		{
 			unloadAll();
+            cleanup();
 		}
 
 		bool hasResources( void ) const
@@ -146,35 +147,38 @@ namespace crimild {
         virtual void load( std::shared_ptr< RESOURCE_TYPE > const &resource )
 		{
 			resource->setCatalogInfo( this, getNextResourceId() );
-			_resources.push_back( resource );
+			_resources.push_back( resource.get() );
 		}
 
         virtual void unload( std::shared_ptr< RESOURCE_TYPE > const &resource )
 		{
 			resource->setCatalogInfo( nullptr, getDefaultIdValue() );
-            _resources.remove_if( [&]( std::weak_ptr< RESOURCE_TYPE > const &r ) {
-                return r.lock() == resource;
-            });
+            _resources.remove( resource.get() );
 		}
 
         virtual void unload( RESOURCE_TYPE *resource )
         {
             resource->setCatalogInfo( nullptr, getDefaultIdValue() );
-            _resources.remove_if( [&]( std::weak_ptr< RESOURCE_TYPE > const &r ) {
-                return r.lock().get() == resource;
-            });
+            _resources.remove( resource );
         }
         
 		virtual void unloadAll( void )
 		{
-			for ( auto resource : _resources ) {
-				resource.lock()->setCatalogInfo( nullptr, getDefaultIdValue() );
+            auto rs = _resources;
+			for ( auto resource : rs ) {
+				resource->setCatalogInfo( nullptr, getDefaultIdValue() );
 			}
 			_resources.clear();
 		}
+        
+        virtual void cleanup( void )
+        {
+
+        }
 
 	private:
-        std::list< std::weak_ptr< RESOURCE_TYPE > > _resources;
+        std::list< RESOURCE_TYPE * > _resources;
+        std::list< int > _cleanupList;
 	};
 
 }

@@ -54,7 +54,8 @@ void RenderStateComponent::detachAllMaterials( void )
 
 void RenderStateComponent::foreachMaterial( std::function< void( MaterialPtr const & ) > callback )
 {
-    for ( auto material : _materials ) {
+    auto ms = _materials;
+    for ( auto material : ms ) {
         if ( material != nullptr ) {
             callback( material );
         }
@@ -73,7 +74,8 @@ void RenderStateComponent::detachAllLights( void )
 
 void RenderStateComponent::foreachLight( std::function< void( LightPtr const & ) > callback )
 {
-    for ( auto light : _lights ) {
+    auto ls = _lights;
+    for ( auto light : ls ) {
         if ( light != nullptr ) {
             callback( light );
         }

@@ -51,8 +51,15 @@ namespace crimild {
 
 }
 
-#define CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION crimild::gl3::Utils::checkErrors( std::string( "Before " ) + CRIMILD_CURRENT_FUNCTION );
-#define CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION crimild::gl3::Utils::checkErrors( std::string( "After " ) + CRIMILD_CURRENT_FUNCTION );
+#define CRIMILD_ENABLE_CHECK_GL_ERRORS 0
+
+#if CRIMILD_ENABLE_CHECK_GL_ERRORS
+    #define CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION crimild::gl3::Utils::checkErrors( std::string( "Before " ) + CRIMILD_CURRENT_FUNCTION );
+    #define CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION crimild::gl3::Utils::checkErrors( std::string( "After " ) + CRIMILD_CURRENT_FUNCTION );
+#else
+    #define CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION
+    #define CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION
+#endif
 
 #endif
 

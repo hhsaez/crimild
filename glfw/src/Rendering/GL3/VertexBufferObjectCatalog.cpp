@@ -190,15 +190,33 @@ void gl3::VertexBufferObjectCatalog::load( VertexBufferObjectPtr const &vbo )
 void gl3::VertexBufferObjectCatalog::unload( VertexBufferObjectPtr const &vbo )
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
-
-	GLuint vaoId, vboId;
-	extractId( vbo->getCatalogId(), vaoId, vboId );
-
-    glDeleteBuffers( 1, &vboId );
-	glDeleteVertexArrays( 1, &vaoId );
-
+    
+    _unusedVBOIds.push_back( vbo->getCatalogId() );
 	Catalog< VertexBufferObject >::unload( vbo );
 
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+}
+
+void gl3::VertexBufferObjectCatalog::unload( VertexBufferObject *vbo )
+{
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    
+    _unusedVBOIds.push_back( vbo->getCatalogId() );
+    Catalog< VertexBufferObject >::unload( vbo );
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+}
+
+void gl3::VertexBufferObjectCatalog::cleanup( void )
+{
+    for ( auto id : _unusedVBOIds ) {
+        GLuint vaoId, vboId;
+        extractId( id, vaoId, vboId );
+        
+        glDeleteBuffers( 1, &vboId );
+        glDeleteVertexArrays( 1, &vaoId );
+    }
+    
+    _unusedVBOIds.clear();
 }
 

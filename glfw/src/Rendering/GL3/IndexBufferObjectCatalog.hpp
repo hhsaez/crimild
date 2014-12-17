@@ -45,7 +45,13 @@ namespace crimild {
 			virtual void unbind( ShaderProgramPtr const &program, IndexBufferObjectPtr const &ibo ) override;
 
 			virtual void load( IndexBufferObjectPtr const &ibo ) override;
-			virtual void unload( IndexBufferObjectPtr const &ibo ) override;
+            virtual void unload( IndexBufferObjectPtr const &ibo ) override;
+            virtual void unload( IndexBufferObject *ibo ) override;
+            
+            virtual void cleanup( void ) override;
+            
+        private:
+            std::list< int > _unusedIBOIds;
 		};
 
 	}

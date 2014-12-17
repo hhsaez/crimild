@@ -66,16 +66,10 @@ void UpdateSceneTask::update( void )
         return;
     }
     
-    scene->perform( UpdateComponents( t ) );
-    
     Time fixed = t;
     fixed.setDeltaTime( CRIMILD_SIMULATION_TIME );
-    
-    while ( scene != nullptr && _accumulator >= CRIMILD_SIMULATION_TIME ) {
-        scene->perform( Apply( [&]( NodePtr const &n ) {
-            n->updateComponentsWithFixedTime( fixed );
-        }));
-        
+    while ( _accumulator >= CRIMILD_SIMULATION_TIME ) {
+        scene->perform( UpdateComponents( fixed ) );
         _accumulator -= CRIMILD_SIMULATION_TIME;
     }
 }

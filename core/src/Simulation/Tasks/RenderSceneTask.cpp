@@ -36,8 +36,7 @@
 using namespace crimild;
 
 RenderSceneTask::RenderSceneTask( int priority )
-	: Task( priority ),
-      _renderQueue( std::make_shared< RenderQueue >() )
+	: Task( priority )
 {
 
 }
@@ -54,18 +53,30 @@ void RenderSceneTask::start( void )
 void RenderSceneTask::update( void )
 {
 	auto scene = Simulation::getCurrent()->getScene();
+    if ( scene == nullptr ) {
+        return;
+    }
+    
 	auto renderer = Simulation::getCurrent()->getRenderer();
-
-	if ( scene != nullptr && renderer != nullptr ) {
-		Simulation::getCurrent()->forEachCamera( [&]( CameraPtr const &camera ) {
-            scene->perform( ComputeRenderQueue( camera, getRenderQueue() ) );
-            renderer->render( getRenderQueue(), camera->getRenderPass() );
-		});
-	}
+    if ( renderer == nullptr ) {
+        return;
+    }
+    
+    auto renderQueue = getRenderQueue();
+    if ( renderQueue == nullptr ) {
+        return;
+    }
+    
+    renderer->render( renderQueue, renderQueue->getCamera()->getRenderPass() );
 }
 
 void RenderSceneTask::stop( void )
 {
 
+}
+
+void RenderSceneTask::handleMessage( const RenderQueueGeneratedMessagePtr &message )
+{
+    _renderQueue = message->getRenderQueue();
 }
 
