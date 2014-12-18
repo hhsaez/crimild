@@ -32,6 +32,7 @@
 
 #include <thread>
 #include <memory>
+#include <functional>
 
 namespace crimild {
 
@@ -58,6 +59,12 @@ namespace crimild {
         void lock( void ) { _mutex.lock(); }
         
         void unlock( void ) { _mutex.unlock(); }
+
+        void synchronized( std::function< void( void ) > callback )
+        {
+            std::lock_guard< std::mutex > guard( _mutex);
+            callback();
+        }
 
 	private:
         std::mutex _mutex;
