@@ -28,12 +28,11 @@
 #include "WindowTask.hpp"
 #include "Rendering/GL3/Renderer.hpp"
 
-#include <GL/glfw.h>
-
 using namespace crimild;
 
-WindowTask::WindowTask( int priority, int width, int height )
-	: Task( priority )
+WindowTask::WindowTask( int priority, GLFWwindow *window )
+	: Task( priority ),
+      _window( window )
 {
 }
 
@@ -44,6 +43,7 @@ WindowTask::~WindowTask( void )
 
 void WindowTask::start( void )
 {
+    /*
 	glfwOpenWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
 	glfwOpenWindowHint( GLFW_OPENGL_VERSION_MAJOR, 3 );
 	glfwOpenWindowHint( GLFW_OPENGL_VERSION_MINOR, 2 );
@@ -61,6 +61,7 @@ void WindowTask::start( void )
     glfwSwapInterval( 0 );
     
     glfwSetWindowTitle( Simulation::getCurrent()->getName().c_str() );
+    */
 }
 
 void WindowTask::stop( void )
@@ -75,12 +76,13 @@ void WindowTask::update( void )
     static double accum = 0.0f;
     static Time windowTime;
     
-	if ( glfwGetWindowParam( GLFW_OPENED ) ) {
-		glfwSwapBuffers();
+	if ( !glfwWindowShouldClose( _window ) ) {
+		glfwSwapBuffers( _window );
 
-		Time &t = Simulation::getCurrent()->getSimulationTime();
-        
+        Time &t = Simulation::getCurrent()->getSimulationTime();
         windowTime.update( t.getCurrentTime() );
+
+#if 0
         double delta = windowTime.getDeltaTime();
         
         accum += delta;
@@ -103,6 +105,8 @@ void WindowTask::update( void )
             << ")";
         
 		glfwSetWindowTitle( str.str().c_str() );
+#endif
+
 #if 1
         if ( windowTime.getDeltaTime() < 0.002 ) {
             // this trick prevents the simulation to run at very high speeds

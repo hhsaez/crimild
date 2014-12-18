@@ -35,15 +35,19 @@
 #include <Crimild_Scripting.hpp>
 #include <Crimild_Physics.hpp>
 
-#include <GL/glfw.h>
-
 using namespace crimild;
 using namespace crimild::scripting;
 using namespace crimild::physics;
 
 GLSimulation::GLSimulation( std::string name, int argc, char **argv )
-	: Simulation( name, argc, argv )
+	: Simulation( name, argc, argv ),
+	  _window( nullptr )
 {
+	if ( !glfwInit() ) {
+		Log::Error << "Cannot start GLFW: glfwInit failed" << Log::End;
+		throw RuntimeException( "Cannot start GLFW: glwfInit failed!" );
+	}
+
 	loadSettings();
 	init();
 }
@@ -55,15 +59,11 @@ GLSimulation::~GLSimulation( void )
 
 void GLSimulation::start( void ) 
 {
-	if ( !glfwInit() ) {
-		throw RuntimeException( "Cannot start GLFW: glwfInit failed!" );
-	}
-
-    getMainLoop()->startTask( std::make_shared< WindowTask >( Simulation::Priorities::LOWEST_PRIORITY, -1, -1 ) );
+    getMainLoop()->startTask( std::make_shared< WindowTask >( Simulation::Priorities::LOWEST_PRIORITY, _window ) );
 	getMainLoop()->startTask( std::make_shared< BeginRenderTask >( Priorities::BEGIN_RENDER_PRIORITY ) );
 	getMainLoop()->startTask( std::make_shared< RenderSceneTask >( Priorities::RENDER_SCENE_PRIORITY ) );
 	getMainLoop()->startTask( std::make_shared< EndRenderTask >( Priorities::END_RENDER_PRIORITY ) );
-	getMainLoop()->startTask( std::make_shared< UpdateInputStateTask >( Simulation::Priorities::HIGHEST_PRIORITY ) );
+	getMainLoop()->startTask( std::make_shared< UpdateInputStateTask >( Simulation::Priorities::HIGHEST_PRIORITY, _window ) );
 	
     getSimulationLoop()->startTask( std::make_shared< DispatchMessagesTask >( Priorities::HIGHEST_PRIORITY ) );
 	getSimulationLoop()->startTask( std::make_shared< UpdateTimeTask >( Simulation::Priorities::LOWEST_PRIORITY ) );
@@ -98,7 +98,25 @@ void GLSimulation::init( void )
 	float b = getSettings().get( "video.clearColor.b", 0.0f );
 	float a = getSettings().get( "video.clearColor.a", 1.0f );
 
-    auto screenBuffer = std::make_shared< FrameBufferObject >( width, height );
+	glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 3 );
+	glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 2 );
+	glfwWindowHint( GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE );
+	glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
+    glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
+
+	_window = glfwCreateWindow( width, height, getName().c_str(), NULL, NULL );
+	if ( _window == nullptr ) {
+		Log::Error << "Cannot create window" << Log::End;
+		glfwTerminate();
+		throw new RuntimeException( "Cannot create window" );
+	}
+
+  	glfwMakeContextCurrent( _window );
+
+    int framebufferWidth, framebufferHeight;
+	glfwGetFramebufferSize( _window, &framebufferWidth, &framebufferHeight);
+
+    auto screenBuffer = std::make_shared< FrameBufferObject >( framebufferWidth, framebufferHeight );
 	screenBuffer->setClearColor( RGBAColorf( r, g, b, a ) );
     Simulation::getCurrent()->setRenderer( std::make_shared< gl3::Renderer >( screenBuffer ) );
 }

@@ -29,6 +29,13 @@
 
 using namespace crimild;
 
+InputState InputState::_instance;
+
+InputState &InputState::getCurrentState( void )
+{
+	return _instance;
+}
+
 InputState::InputState( void )
 {
 	reset( 256, 8 );

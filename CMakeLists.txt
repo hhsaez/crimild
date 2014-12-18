@@ -39,17 +39,12 @@ ADD_SUBDIRECTORY( scripting )
 
 OPTION( CRIMILD_ENABLE_GLFW "Would you like to build the crimild-glfw extension?" OFF )
 IF ( CRIMILD_ENABLE_GLFW )
-	IF ( NOT EXISTS ${CRIMILD_SOURCE_DIR}/third-party/glfw-2.7.8 )
-		EXTRACT_ARCHIVE( glfw-2.7.8.zip glfw-2.7.8 ${CRIMILD_SOURCE_DIR}/third-party )
+	IF ( NOT EXISTS ${CRIMILD_SOURCE_DIR}/third-party/glfw-3.0.4 )
+		EXTRACT_ARCHIVE( glfw-3.0.4.zip glfw-3.0.4 ${CRIMILD_SOURCE_DIR}/third-party )
 
-		IF ( APPLE )
-			MESSAGE( "   Building GLFW v2.7.8 for Cocoa" )
-			EXECUTE_PROCESS( COMMAND make -s cocoa WORKING_DIRECTORY ${CRIMILD_SOURCE_DIR}/third-party/glfw-2.7.8 )
-			EXECUTE_PROCESS( COMMAND ${CMAKE_COMMAND} -E copy 
-				${CRIMILD_SOURCE_DIR}/third-party/glfw-2.7.8/lib/cocoa/libglfw.a
-				${CRIMILD_SOURCE_DIR}/lib/libglfw.a )
-		ENDIF ( APPLE )
-	ENDIF ( NOT EXISTS ${CRIMILD_SOURCE_DIR}/third-party/glfw-2.7.8 )
+	ENDIF ( NOT EXISTS ${CRIMILD_SOURCE_DIR}/third-party/glfw-3.0.4 )
+
+	ADD_SUBDIRECTORY( ${CRIMILD_SOURCE_DIR}/third-party/glfw-3.0.4 )
 
 	IF ( NOT EXISTS ${CRIMILD_SOURCE_DIR}/third-party/glew-1.9.0 )
 		EXTRACT_ARCHIVE( glew-1.9.0.tgz glew-1.9.0 ${CRIMILD_SOURCE_DIR}/third-party )

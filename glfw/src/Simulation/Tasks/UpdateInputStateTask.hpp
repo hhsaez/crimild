@@ -30,7 +30,7 @@
 
 #include <Crimild.hpp>
 
-#include <GL/glfw.h>
+#include <GLFW/glfw3.h>
 
 #define CRIMILD_INPUT_KEY_SPACE GLFW_KEY_SPACE
 #define CRIMILD_INPUT_KEY_ESCAPE GLFW_KEY_ESC
@@ -63,8 +63,8 @@
 #define CRIMILD_INPUT_KEY_DOWN GLFW_KEY_DOWN
 #define CRIMILD_INPUT_KEY_LEFT GLFW_KEY_LEFT
 #define CRIMILD_INPUT_KEY_RIGHT GLFW_KEY_RIGHT
-#define CRIMILD_INPUT_KEY_LSHIFT GLFW_KEY_LSHIFT
-#define CRIMILD_INPUT_KEY_RSHIFT GLFW_KEY_RSHIFT
+#define CRIMILD_INPUT_KEY_LSHIFT GLFW_KEY_LEFT_SHIFT
+#define CRIMILD_INPUT_KEY_RSHIFT GLFW_KEY_RIGHT_SHIFT
 #define CRIMILD_INPUT_KEY_LCTRL GLFW_KEY_LCTRL
 #define CRIMILD_INPUT_KEY_RCTRL GLFW_KEY_RCTRL
 #define CRIMILD_INPUT_KEY_LALT GLFW_KEY_LALT
@@ -119,12 +119,17 @@ namespace crimild {
 
 	class UpdateInputStateTask : public Task {
 	public:
-		UpdateInputStateTask( int priority );
+		UpdateInputStateTask( int priority, GLFWwindow *window );
 		virtual ~UpdateInputStateTask( void );
 
 		virtual void start( void ) override;
 		virtual void update( void ) override;
 		virtual void stop( void ) override;
+
+	private:
+		GLFWwindow *_window;
+		int _windowWidth;
+		int _windowHeight;
 	};
 
 	typedef std::shared_ptr< UpdateInputStateTask > UpdateInputStateTaskPtr;

@@ -30,16 +30,21 @@
 
 #include <Crimild.hpp>
 
+#include <GLFW/glfw3.h>
+
 namespace crimild {
 
 	class WindowTask : public Task {
 	public:
-		WindowTask( int priority, int width, int height );
+		WindowTask( int priority, GLFWwindow *window );
 		virtual ~WindowTask( void );
 
 		virtual void start( void ) override;
 		virtual void update( void ) override;
 		virtual void stop( void ) override;
+
+	private:
+		GLFWwindow *_window;
 	};
 
 	typedef std::shared_ptr< WindowTask > WindowTaskPtr;

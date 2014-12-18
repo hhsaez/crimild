@@ -35,9 +35,13 @@
 namespace crimild {
 
 	class InputState {
+	private:
+		static InputState _instance;
+
 	public:
 		static InputState &getCurrentState( void );
 
+	public:
 		enum class KeyState {
 			PRESSED,
 			RELEASED

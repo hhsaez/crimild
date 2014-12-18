@@ -30,6 +30,8 @@
 
 #include <Crimild.hpp>
 
+#include <GLFW/glfw3.h>
+
 namespace crimild {
 
 	class GLSimulation : public Simulation {
@@ -42,6 +44,9 @@ namespace crimild {
 	private:
 		void loadSettings( void );
 		void init( void );
+
+	private:
+		GLFWwindow *_window;
 	};
 
 }

@@ -191,7 +191,10 @@ void gl3::VertexBufferObjectCatalog::unload( VertexBufferObjectPtr const &vbo )
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
     
-    _unusedVBOIds.push_back( vbo->getCatalogId() );
+    if ( vbo->getCatalogId() > 0 ) {
+      	_unusedVBOIds.push_back( vbo->getCatalogId() );
+    }
+
 	Catalog< VertexBufferObject >::unload( vbo );
 
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
@@ -201,7 +204,10 @@ void gl3::VertexBufferObjectCatalog::unload( VertexBufferObject *vbo )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
     
-    _unusedVBOIds.push_back( vbo->getCatalogId() );
+    if ( vbo->getCatalogId() > 0 ) {
+      	_unusedVBOIds.push_back( vbo->getCatalogId() );
+    }
+
     Catalog< VertexBufferObject >::unload( vbo );
     
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;

@@ -29,15 +29,11 @@
 
 using namespace crimild;
 
-InputState &InputState::getCurrentState( void )
+UpdateInputStateTask::UpdateInputStateTask( int priority, GLFWwindow *window )
+	: Task( priority ),
+	  _window( window )
 {
-	static InputState instance;
-	return instance;
-}
-
-UpdateInputStateTask::UpdateInputStateTask( int priority )
-	: Task( priority )
-{
+	glfwGetWindowSize( _window, &_windowWidth, &_windowHeight);
 }
 
 UpdateInputStateTask::~UpdateInputStateTask( void )
@@ -60,21 +56,20 @@ void UpdateInputStateTask::update( void )
 	glfwPollEvents();
 
 	for ( int i = 0; i < GLFW_KEY_LAST; i++ ) {
-		int keyState = glfwGetKey( i );
+		int keyState = glfwGetKey( _window, i );
 		InputState::getCurrentState().setKeyState( i, keyState == GLFW_PRESS ? InputState::KeyState::PRESSED : InputState::KeyState::RELEASED );
 	}
 
-	int x, y;
-	glfwGetMousePos( &x, &y );
+	double x, y;
+	glfwGetCursorPos( _window, &x, &y );
 
-	auto fbo = Simulation::getCurrent()->getRenderer()->getScreenBuffer();
-	if ( fbo && x >= 0 && x < fbo->getWidth() && y >= 0 && y < fbo->getHeight() ) {
+	if ( x >= 0 && x < _windowWidth && y >= 0 && y < _windowHeight ) {
 		InputState::getCurrentState().setMousePosition( Vector2i( x, y ) );
-		InputState::getCurrentState().setNormalizedMousePosition( Vector2f( ( float ) x / ( fbo->getWidth() - 1.0f ), ( float ) y / ( fbo->getHeight() - 1.0f ) ) );
+		InputState::getCurrentState().setNormalizedMousePosition( Vector2f( ( float ) x / float( _windowWidth - 1.0f ), ( float ) y / float( _windowHeight - 1.0f ) ) );
 	}
 
 	for ( int i = GLFW_MOUSE_BUTTON_1; i < GLFW_MOUSE_BUTTON_LAST; i++ ) {
-		int buttonState = glfwGetMouseButton( i );
+		int buttonState = glfwGetMouseButton( _window, i );
 		InputState::getCurrentState().setMouseButtonState( i, buttonState == GLFW_PRESS ? InputState::MouseButtonState::PRESSED : InputState::MouseButtonState::RELEASED );
 	}
 }
