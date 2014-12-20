@@ -27,14 +27,12 @@
 
 #include "UpdateTimeTask.hpp"
 
-#include <GL/glfw.h>
+#include <GLFW/glfw3.h>
 
 #include <thread>
 #include <chrono>
 
 using namespace crimild;
-
-#define CRIMILD_SIMULATION_TIME 1.0 / 60.0
 
 UpdateTimeTask::UpdateTimeTask( int priority )
 	: Task( priority )
@@ -48,31 +46,35 @@ UpdateTimeTask::~UpdateTimeTask( void )
 
 void UpdateTimeTask::start( void )
 {
-	Time &t = Simulation::getCurrent()->getSimulationTime();
-
-	double currentTime = glfwGetTime();
-	t.reset( currentTime );
+	resetTime();
 }
 
 void UpdateTimeTask::stop( void )
 {
+
 }
 
 void UpdateTimeTask::update( void )
 {
 	Time &t = Simulation::getCurrent()->getSimulationTime();
-
 	double currentTime = glfwGetTime();
 	t.update( currentTime );
+}
 
-#if 0
-	if ( t.getDeltaTime() < 0.002 ) {
-		// this trick prevents the simulation to run at very high speeds
-		// this usually happens when the window is sent to background
-		// and there is nothing to render
-		int sleepTime = ( int )( ( CRIMILD_SIMULATION_TIME - t.getDeltaTime() ) * 1000 );
-		std::this_thread::sleep_for( std::chrono::milliseconds( sleepTime ) );
-	}
-#endif
+void UpdateTimeTask::handleMessage( ResetSimulationTimeMessagePtr const & )
+{
+	resetTime();
+}
+
+void UpdateTimeTask::handleMessage( SceneLoadedMessagePtr const & )
+{
+	resetTime();
+}
+
+void UpdateTimeTask::resetTime( void )
+{
+	Time &t = Simulation::getCurrent()->getSimulationTime();
+	double currentTime = glfwGetTime();
+	t.reset( currentTime );
 }
 

@@ -30,9 +30,22 @@
 
 #include <Crimild.hpp>
 
+#include "LoadSceneTask.hpp"
+
 namespace crimild {
 
-	class UpdateTimeTask : public Task {
+	class ResetSimulationTimeMessage : public DeferredMessage {
+	public:
+		ResetSimulationTimeMessage( void ) { }
+		virtual ~ResetSimulationTimeMessage( void );
+	};
+
+	using ResetSimulationTimeMessagePtr = std::shared_ptr< ResetSimulationTimeMessage >;
+
+	class UpdateTimeTask : 
+		public Task,
+		public MessageHandler< ResetSimulationTimeMessage >,
+		public MessageHandler< SceneLoadedMessage > {
 	public:
 		UpdateTimeTask( int priority );
 		virtual ~UpdateTimeTask( void );
@@ -40,6 +53,13 @@ namespace crimild {
 		virtual void start( void ) override;
 		virtual void update( void ) override;
 		virtual void stop( void ) override;
+
+	public:
+		virtual void handleMessage( ResetSimulationTimeMessagePtr const &message );
+		virtual void handleMessage( SceneLoadedMessagePtr const &message );
+
+	private:
+		void resetTime( void );
 	};
 
 }
