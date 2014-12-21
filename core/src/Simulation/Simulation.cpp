@@ -53,7 +53,7 @@ Simulation::Simulation( std::string name, int argc, char **argv )
       _mainLoop( std::make_shared< RunLoop >() )
 {
 #if CRIMILD_ENABLE_SIMULATION_THREAD
-    _simulationLoop( std::make_shared< ThreadedRunLoop >( true ) )
+    _simulationLoop = std::make_shared< ThreadedRunLoop >( true );
 #endif
     
 	srand( time( NULL ) );

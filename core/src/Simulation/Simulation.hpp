@@ -41,7 +41,7 @@
 #include <list>
 #include <thread>
 
-#define CRIMILD_ENABLE_SIMULATION_THREAD 0
+#define CRIMILD_ENABLE_SIMULATION_THREAD 1
 
 namespace crimild {
 
