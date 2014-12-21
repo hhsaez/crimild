@@ -28,7 +28,7 @@
 #include "Utils.hpp"
 
 #include <GL/glew.h>
-#include <GL/glfw.h>
+#include <GLFW/glfw3.h>
 
 #include <sstream>
 

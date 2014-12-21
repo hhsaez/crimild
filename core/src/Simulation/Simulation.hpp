@@ -41,6 +41,8 @@
 #include <list>
 #include <thread>
 
+#define CRIMILD_ENABLE_SIMULATION_THREAD 0
+
 namespace crimild {
 
 	class Simulation : public NamedObject, public SharedObject {
@@ -86,8 +88,15 @@ namespace crimild {
 		Time _simulationTime;
         
     public:
-        RunLoopPtr &getMainLoop( void ) { return _mainLoop; }
-        RunLoopPtr &getSimulationLoop( void ) { return _simulationLoop; }
+        RunLoopPtr getMainLoop( void ) { return _mainLoop; }
+        
+        RunLoopPtr getSimulationLoop( void ) {
+#if CRIMILD_ENABLE_SIMULATION_THREAD
+            return _simulationLoop;
+#else
+            return _mainLoop;
+#endif
+        }
         
     private:
         RunLoopPtr _mainLoop;
@@ -95,14 +104,14 @@ namespace crimild {
 
 	public:
 		void setRenderer( RendererPtr const &renderer ) { _renderer = renderer; }
-		RendererPtr &getRenderer( void ) { return _renderer; }
+		RendererPtr getRenderer( void ) { return _renderer; }
 
 	private:
 		RendererPtr _renderer;
 
 	public:
 		void setScene( NodePtr const &scene );
-		NodePtr &getScene( void ) { return _scene; }
+		NodePtr getScene( void ) { return _scene; }
 
         CameraPtr getMainCamera( void ) { return _cameras.size() > 0 ? _cameras.front() : CameraPtr(); }
 		void forEachCamera( std::function< void ( CameraPtr const & ) > callback );

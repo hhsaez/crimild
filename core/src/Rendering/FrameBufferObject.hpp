@@ -67,7 +67,7 @@ namespace crimild {
         int getWidth( void ) const { return _width; }
         int getHeight( void ) const { return _height; }
         
-        TexturePtr &getTexture( void ) { return _texture; }
+        TexturePtr getTexture( void ) { return _texture; }
         bool useFloatTexture( void ) const { return _useFloatTexture; }
         void setUseFloatTexture( bool value ) { _useFloatTexture = value; }
         

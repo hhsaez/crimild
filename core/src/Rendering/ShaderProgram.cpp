@@ -70,7 +70,7 @@ void ShaderProgram::registerStandardLocation( ShaderLocation::Type locationType,
     registerLocation( std::make_shared< ShaderLocation >( locationType, name ) );
 }
 
-ShaderLocationPtr &ShaderProgram::getStandardLocation( unsigned int standardLocationId )
+ShaderLocationPtr ShaderProgram::getStandardLocation( unsigned int standardLocationId )
 {
 	return _locations[ _standardLocations[ standardLocationId ] ];
 }

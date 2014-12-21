@@ -67,10 +67,10 @@ namespace crimild {
 		public MessageHandler< LoadSceneMessage >,
 		public MessageHandler< ReloadSceneMessage > {
 	public:
-		LoadSceneTask( int priority, std::string sceneFileName, scripting::SceneBuilderPtr const &builder );
+		LoadSceneTask( int priority, std::string sceneFileName, scripting::SceneBuilderPtr const &builder, std::string loadingSceneFileName = "" );
 		virtual ~LoadSceneTask( void );
 
-		scripting::SceneBuilderPtr &getBuilder( void ) { return _builder; }
+		scripting::SceneBuilderPtr getBuilder( void ) { return _builder; }
 
 		virtual void start( void ) override;
 		virtual void update( void ) override;
@@ -84,6 +84,7 @@ namespace crimild {
 
 	private:
 		std::string _sceneFileName;
+		std::string _loadingSceneFileName;
 		scripting::SceneBuilderPtr _builder;
 	};
 

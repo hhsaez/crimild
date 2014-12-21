@@ -38,12 +38,13 @@ namespace crimild {
 
 	class Camera;
     
-    class RenderQueueGeneratedMessage : public Message {
+    class RenderQueueGeneratedMessage : public DeferredMessage {
     public:
         RenderQueueGeneratedMessage( RenderQueuePtr const &renderQueue ) : _renderQueue( renderQueue ) { }
         virtual ~RenderQueueGeneratedMessage( void ) { }
         
-        RenderQueuePtr &getRenderQueue( void ) { return _renderQueue; }
+        RenderQueuePtr getRenderQueue( void ) { return _renderQueue; }
+        
     private:
         RenderQueuePtr _renderQueue;
     };

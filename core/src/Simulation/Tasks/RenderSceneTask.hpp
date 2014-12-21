@@ -50,7 +50,7 @@ namespace crimild {
 		virtual void update( void ) override;
 		virtual void stop( void ) override;
             
-        RenderQueuePtr &getRenderQueue( void ) { return _renderQueue; }
+        RenderQueuePtr getRenderQueue( void ) { return _renderQueue; }
             
     private:
         RenderQueuePtr _renderQueue;

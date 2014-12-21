@@ -46,10 +46,10 @@ namespace crimild {
         ShadowMap( LightPtr const &source, FrameBufferObjectPtr const &fbo );
         virtual ~ShadowMap( void );
         
-        LightPtr &getSource( void ) { return _source; }
+        LightPtr getSource( void ) { return _source; }
         
-        FrameBufferObjectPtr &getBuffer( void ) { return _buffer; }
-        TexturePtr &getTexture ( void ) { return _texture; }
+        FrameBufferObjectPtr getBuffer( void ) { return _buffer; }
+        TexturePtr getTexture ( void ) { return _texture; }
         
         const Matrix4f &getLightProjectionMatrix( void ) const { return _lightProjectionMatrix; }
         void setLightProjectionMatrix( const Matrix4f &m ) { _lightProjectionMatrix = m; }

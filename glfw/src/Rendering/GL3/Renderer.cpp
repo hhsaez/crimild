@@ -50,7 +50,7 @@
 #include "Utils.hpp"
 
 #include <GL/glew.h>
-#include <GL/glfw.h>
+#include <GLFW/glfw3.h>
 
 using namespace crimild;
 
@@ -128,7 +128,6 @@ void gl3::Renderer::beginRender( void )
 void gl3::Renderer::endRender( void )
 {
     crimild::Renderer::endRender();
-    glFlush();
 }
 
 void gl3::Renderer::clearBuffers( void )

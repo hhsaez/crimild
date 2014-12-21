@@ -134,12 +134,12 @@ namespace crimild {
 		bool _worldIsCurrent;
 
 	public:
-		BoundingVolumePtr &localBound( void ) { return _localBound; }
-		const BoundingVolumePtr &getLocalBound( void ) const { return _localBound; }
+		BoundingVolumePtr localBound( void ) { return _localBound; }
+		const BoundingVolumePtr getLocalBound( void ) const { return _localBound; }
 		void setLocalBound( BoundingVolumePtr const &bound ) { _localBound = bound; }
 
-		BoundingVolumePtr &worldBound( void ) { return _worldBound; }
-		const BoundingVolumePtr &getWorldBound( void ) const { return _worldBound; }
+		BoundingVolumePtr worldBound( void ) { return _worldBound; }
+		const BoundingVolumePtr getWorldBound( void ) const { return _worldBound; }
 		void setWorldBound( BoundingVolumePtr const &bound ) { _worldBound = bound; }
 
 	private:

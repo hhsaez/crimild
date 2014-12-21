@@ -47,7 +47,7 @@ namespace crimild {
 		void reset( void );
 
 		void setCamera( CameraPtr const &camera ) { _camera = camera; }
-		CameraPtr &getCamera( void ) { return _camera; }
+		CameraPtr getCamera( void ) { return _camera; }
 
 		bool hasGeometries( void ) const { return _geometries.size() > 0; }
 

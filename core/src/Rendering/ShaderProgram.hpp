@@ -114,8 +114,8 @@ namespace crimild {
 		ShaderProgram( VertexShaderPtr const &vs, FragmentShaderPtr const &fs );
 		virtual ~ShaderProgram( void );
 
-		VertexShaderPtr &getVertexShader( void ) { return _vertexShader; }
-		FragmentShaderPtr &getFragmentShader( void ) { return _fragmentShader; }
+		VertexShaderPtr getVertexShader( void ) { return _vertexShader; }
+		FragmentShaderPtr getFragmentShader( void ) { return _fragmentShader; }
 
 	private:
 		VertexShaderPtr _vertexShader;
@@ -123,12 +123,12 @@ namespace crimild {
 
 	public:
 		void registerLocation( ShaderLocationPtr const &location );
-		ShaderLocationPtr &getLocation( std::string name ) { return _locations[ name ]; }
+		ShaderLocationPtr getLocation( std::string name ) { return _locations[ name ]; }
 		void resetLocations( void );
 		void foreachLocation( std::function< void( ShaderLocationPtr const & ) > callback );
 
 		void registerStandardLocation( ShaderLocation::Type locationType, unsigned int standardLocationId, std::string name );
-		ShaderLocationPtr &getStandardLocation( unsigned int standardLocationId );
+		ShaderLocationPtr getStandardLocation( unsigned int standardLocationId );
 
 	private:
 		std::map< std::string, ShaderLocationPtr > _locations;

@@ -61,7 +61,7 @@ void ComputeRenderQueueTask::update( void )
         return;
     }
     
-    RenderQueuePtr renderQueue( std::make_shared< RenderQueue >() );
+    auto renderQueue = std::make_shared< RenderQueue >();
     scene->perform( ComputeRenderQueue( camera, renderQueue ) );
     MessageQueue::getInstance().pushMessage( std::make_shared< RenderQueueGeneratedMessage >( renderQueue ) );
 }

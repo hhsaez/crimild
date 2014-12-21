@@ -53,7 +53,7 @@ namespace crimild {
 		Font( std::string faceFilePath, std::string glyphFilePath );
 		virtual ~Font( void );
 
-		ImagePtr &getFace( void ) { return _face; }
+		ImagePtr getFace( void ) { return _face; }
 		Glyph getGlyph( char c ) { return _glyphs[ c ]; }
 
 	private:
@@ -76,10 +76,10 @@ namespace crimild {
 		float getSize( void ) const { return _size; }
 		void setSize( float size );
 
-		FontPtr &getFont( void ) { return _font; }
+		FontPtr getFont( void ) { return _font; }
 		void setFont( FontPtr const &font );
 
-		MaterialPtr &getMaterial( void ) { return _material; }
+		MaterialPtr getMaterial( void ) { return _material; }
 
 	private:
 		void updatePrimitive( void );

@@ -48,7 +48,7 @@ namespace crimild {
         void reset( void );
         
         void setCamera( CameraPtr const &camera ) { _camera = camera; }
-        CameraPtr &getCamera( void ) { return _camera; }
+        CameraPtr getCamera( void ) { return _camera; }
         
         SharedObjectList< Light > &getLights( void ) { return _lights; }
         SharedObjectList< Geometry > &getShadowCasters( void ) { return _shadowCasters; }

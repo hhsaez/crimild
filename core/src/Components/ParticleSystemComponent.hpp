@@ -73,10 +73,10 @@ namespace crimild {
 		void setLooping( float value ) { _looping = value; }
 		float getLooping( void ) const { return _looping; }
 
-		MaterialPtr &getParticleMaterial( void ) { return _material; }
+		MaterialPtr getParticleMaterial( void ) { return _material; }
 
 		void setShape( BoundingVolumePtr &volume ) { _shape = volume; }
-		BoundingVolumePtr &getShape( void ) { return _shape; }
+		BoundingVolumePtr getShape( void ) { return _shape; }
 
 		void generateParticles( void );
 

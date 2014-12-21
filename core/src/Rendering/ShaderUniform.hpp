@@ -44,7 +44,7 @@ namespace crimild {
 		virtual ~ShaderUniform( void );
 
 		void setLocation( ShaderLocationPtr const &location ) { _location = location; }
-		ShaderLocationPtr &getLocation( void ) { return _location; }
+		ShaderLocationPtr getLocation( void ) { return _location; }
 
         virtual void onBind( std::shared_ptr< Renderer > const &renderer ) = 0;
 

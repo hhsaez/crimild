@@ -39,7 +39,7 @@ namespace crimild {
         ComputeRenderQueue( CameraPtr const &camera, RenderQueuePtr const &result );
         virtual ~ComputeRenderQueue( void );
         
-        RenderQueuePtr &getResult( void ) { return _result; }
+        RenderQueuePtr getResult( void ) { return _result; }
         
         virtual void traverse( NodePtr const &scene ) override;
         

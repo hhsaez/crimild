@@ -47,7 +47,7 @@ namespace crimild {
 		virtual ~Material( void );
 
 		void setProgram( ShaderProgramPtr const &program ) { _program = program; }
-        ShaderProgramPtr &getProgram( void ) { return _program; }
+        ShaderProgramPtr getProgram( void ) { return _program; }
 
 		void setAmbient( const RGBAColorf &ambient ) { _ambient = ambient; }
 		const RGBAColorf &getAmbient( void ) const { return _ambient; }
@@ -62,22 +62,22 @@ namespace crimild {
 		float getShininess( void ) const { return _shininess; }
 
 		void setColorMap( TexturePtr const &texture ) { _colorMap = texture; }
-        TexturePtr &getColorMap( void ) { return _colorMap; }
+        TexturePtr getColorMap( void ) { return _colorMap; }
 
 		void setNormalMap( TexturePtr const &texture ) { _normalMap = texture; }
-        TexturePtr &getNormalMap( void ) { return _normalMap; }
+        TexturePtr getNormalMap( void ) { return _normalMap; }
 
 		void setSpecularMap( TexturePtr const &texture ) { _specularMap = texture; }
-        TexturePtr &getSpecularMap( void ) { return _specularMap; }
+        TexturePtr getSpecularMap( void ) { return _specularMap; }
         
         void setEmissiveMap( TexturePtr const &texture ) { _emissiveMap = texture; }
-        TexturePtr &getEmissiveMap( void ) { return _emissiveMap; }
+        TexturePtr getEmissiveMap( void ) { return _emissiveMap; }
 
 		void setDepthState( DepthStatePtr const &state ) { _depthState = state; }
-        DepthStatePtr &getDepthState( void ) { return _depthState; }
+        DepthStatePtr getDepthState( void ) { return _depthState; }
 
 		void setAlphaState( AlphaStatePtr const &alphaState ) { _alphaState = alphaState; }
-        AlphaStatePtr &getAlphaState( void ) { return _alphaState; }
+        AlphaStatePtr getAlphaState( void ) { return _alphaState; }
 
 	private:
 		ShaderProgramPtr _program;

@@ -41,7 +41,7 @@ namespace crimild {
 		explicit Texture( ImagePtr const &image, std::string name = "ColorMap" );
 		virtual ~Texture( void );
 
-		ImagePtr &getImage( void ) { return _image; }
+		ImagePtr getImage( void ) { return _image; }
 
 	private:
 		ImagePtr _image;

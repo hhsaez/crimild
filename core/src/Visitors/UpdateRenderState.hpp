@@ -50,7 +50,7 @@ namespace crimild {
 		virtual ~UpdateRenderState( void );
         
         void setDefaultMaterial( MaterialPtr const &material ) { _defaultMaterial = material; }
-        MaterialPtr &getDefaultMaterial( void ) { return _defaultMaterial; }
+        MaterialPtr getDefaultMaterial( void ) { return _defaultMaterial; }
 
 		virtual void traverse( NodePtr const &node ) override;
 

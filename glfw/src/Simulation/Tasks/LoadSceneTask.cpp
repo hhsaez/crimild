@@ -33,9 +33,10 @@ using namespace crimild;
 using namespace crimild::physics;
 using namespace crimild::scripting;
 
-LoadSceneTask::LoadSceneTask( int priority, std::string sceneFileName, SceneBuilderPtr const &builder )
+LoadSceneTask::LoadSceneTask( int priority, std::string sceneFileName, SceneBuilderPtr const &builder, std::string loadingSceneFileName )
 	: Task( priority ),
 	  _sceneFileName( sceneFileName ),
+	  _loadingSceneFileName( loadingSceneFileName ),
       _builder( builder != nullptr ? builder : std::make_shared< SceneBuilder >() )
 {
 	getBuilder()->registerComponentBuilder< physics::RigidBodyComponent >( []( ScriptContext::Iterable &it ) {
@@ -74,12 +75,12 @@ void LoadSceneTask::stop( void )
 
 void LoadSceneTask::load( void )
 {
-	Simulation::getCurrent()->setScene( nullptr );
+    Simulation::getCurrent()->setScene( nullptr );
 
 	getBuilder()->reset();
-
 	auto scene = getBuilder()->fromFile( FileSystem::getInstance().pathForResource( _sceneFileName ) );
 	Simulation::getCurrent()->setScene( scene );
+
     MessageQueue::getInstance().pushMessage( std::make_shared< SceneLoadedMessage >() );
 }
 

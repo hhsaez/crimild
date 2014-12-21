@@ -50,9 +50,12 @@ Simulation *Simulation::_currentSimulation = nullptr;
 
 Simulation::Simulation( std::string name, int argc, char **argv )
 	: NamedObject( name ),
-      _mainLoop( std::make_shared< RunLoop >() ),
-      _simulationLoop( std::make_shared< ThreadedRunLoop >( true ) )
+      _mainLoop( std::make_shared< RunLoop >() )
 {
+#if CRIMILD_ENABLE_SIMULATION_THREAD
+    _simulationLoop( std::make_shared< ThreadedRunLoop >( true ) )
+#endif
+    
 	srand( time( NULL ) );
 
 	_currentSimulation = this;
@@ -85,8 +88,13 @@ bool Simulation::step( void )
 
 void Simulation::stop( void )
 {
-    _simulationLoop->stop();
-	_mainLoop->stop();
+    if ( _simulationLoop != nullptr ) {
+        _simulationLoop->stop();
+    }
+    
+    if ( _mainLoop != nullptr ) {
+        _mainLoop->stop();
+    }
 }
 
 int Simulation::run( void )

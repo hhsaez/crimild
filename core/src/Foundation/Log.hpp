@@ -77,7 +77,7 @@ namespace crimild {
 		virtual ~Log( void );
 
 		void setOutputHandler( LogOutputHandlerPtr const &handler ) { _outputHandler = handler; }
-		LogOutputHandlerPtr &getOutputHandler( void ) { return _outputHandler; }
+		LogOutputHandlerPtr getOutputHandler( void ) { return _outputHandler; }
 
 		template< typename T >
 		Log &operator<<( T in )
