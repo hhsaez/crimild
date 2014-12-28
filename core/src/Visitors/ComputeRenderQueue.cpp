@@ -52,29 +52,16 @@ void ComputeRenderQueue::traverse( NodePtr const &scene )
 void ComputeRenderQueue::visitGeometry( GeometryPtr const &geometry )
 {
     auto renderState = geometry->getComponent< RenderStateComponent >();
-    
-    if ( renderState->renderOnScreen() ) {
-        _result->getScreenObjects().add( geometry );
-        return;
-    }
 
-    bool opaque = true;
     renderState->foreachMaterial( [&]( MaterialPtr const &material ) {
-        if ( material->getAlphaState()->isEnabled() ) {
-            opaque = false;
-        }
+        geometry->foreachPrimitive( [&]( PrimitivePtr const &primitive ) {
+            _result->push( material, primitive, geometry, geometry->getWorld(), renderState->renderOnScreen() );
+        });
     });
-
-    if ( opaque ) {
-        _result->getOpaqueObjects().add( geometry );
-    }
-    else {
-        _result->getTranslucentObjects().add( geometry );
-    }
 }
 
 void ComputeRenderQueue::visitLight( LightPtr const &light )
 {
-    _result->getLights().add( light );
+    _result->push( light );
 }
 

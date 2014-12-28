@@ -48,6 +48,7 @@ DebugRenderPass::~DebugRenderPass( void )
 
 void DebugRenderPass::render( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
+	/*
 	if ( _actualRenderPass != nullptr ) {
 		_actualRenderPass->render( renderer, renderQueue, camera );
 	}
@@ -61,10 +62,12 @@ void DebugRenderPass::render( RendererPtr const &renderer, RenderQueuePtr const 
 			renderNormalsAndTangents( renderer, geometry, _debugMaterial, camera );
 		}
     });
+    */
 }
 
 void DebugRenderPass::renderNormalsAndTangents( RendererPtr const &renderer, GeometryPtr const &geometry, MaterialPtr const &material, CameraPtr const &camera )
 {
+	/*
 	std::vector< float > vertices;
 
 	geometry->foreachPrimitive( [&]( PrimitivePtr const &primitive ) {
@@ -106,10 +109,12 @@ void DebugRenderPass::renderNormalsAndTangents( RendererPtr const &renderer, Geo
 	primitive->setIndexBuffer( ibo );
 
 	RenderPass::render( renderer, geometry, primitive, material, camera );
+	*/
 }
 
 void DebugRenderPass::renderBoundings( RendererPtr const &renderer, GeometryPtr const &geometry, MaterialPtr const &material, CameraPtr const &camera )
 {
+	/*
     auto primitive = std::make_shared< SpherePrimitive >(
 		geometry->getWorldBound()->getRadius(), 
 		VertexFormat::VF_P3, 
@@ -121,5 +126,6 @@ void DebugRenderPass::renderBoundings( RendererPtr const &renderer, GeometryPtr 
 	material->setDiffuse( RGBAColorf( 0.0f, 0.0f, 1.0f, 0.25f ) );
 	
 	RenderPass::render( renderer, geometry, primitive, material, camera );
+	*/
 }
 

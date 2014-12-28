@@ -39,7 +39,7 @@ namespace crimild {
 			OffscreenRenderPass( void );
 			virtual ~OffscreenRenderPass( void );
 
-			virtual void render( crimild::RendererPtr const &renderer, VisibilitySetPtr const &vs, CameraPtr const &camera ) override;
+//			virtual void render( crimild::RendererPtr const &renderer, VisibilitySetPtr const &vs, CameraPtr const &camera ) override;
 
 		private:
 			FrameBufferObjectPtr _offscreenBuffer;

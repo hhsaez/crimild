@@ -41,8 +41,6 @@
 #include <list>
 #include <thread>
 
-#define CRIMILD_ENABLE_SIMULATION_THREAD 1
-
 namespace crimild {
 
 	class Simulation : public NamedObject, public SharedObject {
@@ -88,15 +86,8 @@ namespace crimild {
 		Time _simulationTime;
         
     public:
-        RunLoopPtr getMainLoop( void ) { return _mainLoop; }
-        
-        RunLoopPtr getSimulationLoop( void ) {
-#if CRIMILD_ENABLE_SIMULATION_THREAD
-            return _simulationLoop;
-#else
-            return _mainLoop;
-#endif
-        }
+        RunLoopPtr getMainLoop( void );
+        RunLoopPtr getSimulationLoop( void );
         
     private:
         RunLoopPtr _mainLoop;

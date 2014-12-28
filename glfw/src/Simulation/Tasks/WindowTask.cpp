@@ -43,25 +43,7 @@ WindowTask::~WindowTask( void )
 
 void WindowTask::start( void )
 {
-    /*
-	glfwOpenWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
-	glfwOpenWindowHint( GLFW_OPENGL_VERSION_MAJOR, 3 );
-	glfwOpenWindowHint( GLFW_OPENGL_VERSION_MINOR, 2 );
-    glfwOpenWindowHint( GLFW_WINDOW_NO_RESIZE, GL_TRUE );
 
-    auto screenBuffer = Simulation::getCurrent()->getRenderer()->getScreenBuffer();
-
-    if ( !glfwOpenWindow( screenBuffer->getWidth(), screenBuffer->getHeight(), 
-    					  8, 8, 8, 8,
-    					  16, 0,
-    					  GLFW_WINDOW ) ) {
-    	throw RuntimeException( "Cannot created main window" );
-    }
-    
-    glfwSwapInterval( 0 );
-    
-    glfwSetWindowTitle( Simulation::getCurrent()->getName().c_str() );
-    */
 }
 
 void WindowTask::stop( void )

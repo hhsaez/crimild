@@ -46,6 +46,8 @@
 
 using namespace crimild;
 
+#define CRIMILD_ENABLE_SIMULATION_THREAD 1
+
 Simulation *Simulation::_currentSimulation = nullptr;
 
 Simulation::Simulation( std::string name, int argc, char **argv )
@@ -68,6 +70,20 @@ Simulation::Simulation( std::string name, int argc, char **argv )
 Simulation::~Simulation( void )
 {
 	_currentSimulation = nullptr;
+}
+
+RunLoopPtr Simulation::getMainLoop( void )
+{
+	return _mainLoop;
+}
+
+RunLoopPtr Simulation::getSimulationLoop( void ) 
+{
+#if CRIMILD_ENABLE_SIMULATION_THREAD
+    return _simulationLoop;
+#else
+    return _mainLoop;
+#endif
 }
 
 void Simulation::start( void )

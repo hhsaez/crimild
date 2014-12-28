@@ -27,14 +27,15 @@
 
 #include "Rendering/RenderPass.hpp"
 #include "Rendering/Renderer.hpp"
-#include "Rendering/VisibilitySet.hpp"
-#include "Rendering/FrameBufferObject.hpp"
 #include "Rendering/RenderQueue.hpp"
+
 #include "SceneGraph/Geometry.hpp"
+
 #include "Components/RenderStateComponent.hpp"
-#include "Components/SkinComponent.hpp"
-#include "Components/JointComponent.hpp"
+
 #include "Primitives/QuadPrimitive.hpp"
+
+#include "Foundation/Log.hpp"
 
 using namespace crimild;
 
@@ -51,101 +52,68 @@ RenderPass::~RenderPass( void )
 
 void RenderPass::render( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
-    renderQueue->getOpaqueObjects().each( [&]( GeometryPtr const &geometry, int ) {
-        render( renderer, geometry, camera );
-    });
-
-    renderQueue->getTranslucentObjects().each( [&]( GeometryPtr const &geometry, int ) {
-        render( renderer, geometry, camera );
-    });
-
+    renderOpaqueObjects( renderer, renderQueue, camera );
+    renderTranslucentObjects( renderer, renderQueue, camera );
     renderScreenObjects( renderer, renderQueue, camera );
 }
 
-void RenderPass::render( RendererPtr const &renderer, VisibilitySetPtr const &vs, CameraPtr const &camera )
+void RenderPass::render( std::shared_ptr< Renderer > const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera, RenderQueue::MaterialMap const &objects )
 {
-	vs->foreachGeometry( [&]( GeometryPtr const &geometry ) mutable {
-		render( renderer, geometry, camera );
-	});
-}
-
-void RenderPass::render( RendererPtr const &renderer, GeometryPtr const &geometry, CameraPtr const &camera )
-{
-	auto renderState = geometry->getComponent< RenderStateComponent >();
-	if ( renderState->hasMaterials() ) {
-		geometry->foreachPrimitive( [&]( PrimitivePtr const &primitive ) {
-			renderState->foreachMaterial( [&]( MaterialPtr const &material ) {
-				render( renderer, geometry, primitive, material, camera );
-			});
-		});
-	}
-}
-
-void RenderPass::render( RendererPtr const &renderer, GeometryPtr const &geometry, PrimitivePtr const &primitive, MaterialPtr const &material, CameraPtr const &camera )
-{
-	if ( !material || !primitive ) {
-		return;
-	}
-
-	auto program = material->getProgram() ? material->getProgram() : renderer->getFallbackProgram( material, geometry, primitive );
-	if ( !program ) {
-		return;
-	}
-
-	auto renderState = geometry->getComponent< RenderStateComponent >();
-
-	// bind shader program first
-	renderer->bindProgram( program );
-
-	// bind material properties
-	renderer->bindMaterial( program, material );
-
-	// bind lights
-	if ( renderState->hasLights() ) {
-		renderState->foreachLight( [&]( LightPtr const &light ) {
-			renderer->bindLight( program, light );
-		});
-	}
-
-	// bind joints and other skinning information
-	auto skinning = geometry->getComponent< SkinComponent >();
-	if ( skinning != nullptr && skinning->hasJoints() ) {
-		skinning->foreachJoint( [&]( NodePtr const &node, unsigned int index ) {
-			auto joint = node->getComponent< JointComponent >();
-			renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::JOINT_WORLD_MATRIX_UNIFORM + index ), joint->getWorldMatrix() );
-			renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::JOINT_INVERSE_BIND_MATRIX_UNIFORM + index ), joint->getInverseBindMatrix() );
-		});
-	}
-
-	// bind vertex and index buffers
-	renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
-	renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
-
-	// apply transformations
-	renderer->applyTransformations( program, geometry, camera );
-
-	// draw primitive
-	renderer->drawPrimitive( program, primitive );
-
-	// restore transformation stack
-	renderer->restoreTransformations( program, geometry, camera );
-
-	// unbind primitive buffers
-	renderer->unbindVertexBuffer( program, primitive->getVertexBuffer() );
-	renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
-
-	// unbind lights
-	if ( renderState->hasLights() ) {
-		renderState->foreachLight( [&]( LightPtr const &light ) {
-			renderer->unbindLight( program, light );
-		});
-	}
-
-	// unbind material properties
-	renderer->unbindMaterial( program, material );
-
-	// lastly, unbind the shader program
-	renderer->unbindProgram( program );
+    const Matrix4f &projection = camera->getProjectionMatrix();
+    const Matrix4f &view = camera->getViewMatrix();
+    
+    renderQueue->each( objects, [&]( MaterialPtr const &material, RenderQueue::PrimitiveMap const &primitives ) {
+        auto program = material->getProgram() ? material->getProgram() : renderer->getShaderProgram( "phong" );
+        if ( program == nullptr ) {
+            Log::Error << "No valid program for batch" << Log::End;
+            return;
+        }
+        
+        // bind program
+        renderer->bindProgram( program );
+        
+        // bind lights
+        renderQueue->each( [&]( LightPtr const &light, int ) {
+            renderer->bindLight( program, light );
+        });
+        
+        // bind material properties
+        renderer->bindMaterial( program, material );
+        
+        for ( auto primitiveIt : primitives ) {
+            auto primitive = primitiveIt.first;
+            
+            // bind vertex and index buffers
+            renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
+            renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
+            
+            for ( auto geometryIt : primitiveIt.second ) {
+                Matrix4f model = geometryIt.second.computeModelMatrix();
+                Matrix4f normal = model;
+                normal[ 12 ] = 0.0f;
+                normal[ 13 ] = 0.0f;
+                normal[ 14 ] = 0.0f;
+                
+                renderer->applyTransformations( program, projection, view, model, normal );
+                renderer->drawPrimitive( program, primitive );
+            }
+            
+            // unbind primitive buffers
+            renderer->unbindVertexBuffer( program, primitive->getVertexBuffer() );
+            renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
+        }
+        
+        // unbind material properties
+        renderer->unbindMaterial( program, material );
+        
+        // unbind lights
+        renderQueue->each( [&]( LightPtr const &light, int ) {
+            renderer->unbindLight( program, light );
+        });
+        
+        // unbind program
+        renderer->unbindProgram( program );
+    });
 }
 
 void RenderPass::render( RendererPtr const &renderer, TexturePtr const &texture, ShaderProgramPtr const &defaultProgram )
@@ -186,57 +154,74 @@ void RenderPass::render( RendererPtr const &renderer, TexturePtr const &texture,
     renderer->unbindProgram( program );
 }
 
-void RenderPass::render( RendererPtr const &renderer, FrameBufferObjectPtr const &fbo, ShaderProgramPtr const &program )
+void RenderPass::renderOpaqueObjects( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
+    render( renderer, renderQueue, camera, renderQueue->getOpaqueObjects() );
+}
 
+void RenderPass::renderTranslucentObjects( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
+{
+    render( renderer, renderQueue, camera, renderQueue->getTranslucentObjects() );
 }
 
 void RenderPass::renderScreenObjects( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
-	const Matrix4f &projection = camera->getOrthographicMatrix();
+    const Matrix4f &projection = camera->getOrthographicMatrix();
     Matrix4f view;
     view.makeIdentity();
     
-    renderQueue->getScreenObjects().each( [&]( GeometryPtr const &geometry, int ) {
-	    auto model = geometry->getWorld().computeModelMatrix();
-	    auto normal = model;
-		normal[ 12 ] = 0.0f;
-		normal[ 13 ] = 0.0f;
-		normal[ 14 ] = 0.0f;
+    renderQueue->each( renderQueue->getScreenObjects(), [&]( MaterialPtr const &material, RenderQueue::PrimitiveMap const &primitives ) {
+        auto program = material->getProgram() ? material->getProgram() : renderer->getShaderProgram( "phong" );
+        if ( program == nullptr ) {
+            Log::Error << "No valid program for batch" << Log::End;
+            return;
+        }
+        
+        // bind program
+        renderer->bindProgram( program );
+        
+        // bind lights
+        renderQueue->each( [&]( LightPtr const &light, int ) {
+            renderer->bindLight( program, light );
+        });
+        
+        // bind material properties
+        renderer->bindMaterial( program, material );
+        
+        for ( auto it : primitives ) {
+            auto primitive = it.first;
+            
+            // bind vertex and index buffers
+            renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
+            renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
+            
+            for ( auto geometryIt : it.second ) {
+                auto model = geometryIt.second.computeModelMatrix();
+                auto normal = model;
+                normal[ 12 ] = 0.0f;
+                normal[ 13 ] = 0.0f;
+                normal[ 14 ] = 0.0f;
 
-		auto renderState = geometry->getComponent< RenderStateComponent >();
-		if ( renderState->hasMaterials() ) {
-			geometry->foreachPrimitive( [&]( PrimitivePtr const &primitive ) {
-				renderState->foreachMaterial( [&]( MaterialPtr const &material ) {
-					if ( !material || !primitive ) {
-						return;
-					}
-
-					auto program = material->getProgram() ? material->getProgram() : renderer->getFallbackProgram( material, geometry, primitive );
-					if ( !program ) {
-						return;
-					}
-
-					renderer->bindProgram( program );
-
-					renderer->bindMaterial( program, material );
-
-					renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
-					renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
-
-					renderer->applyTransformations( program, projection, view, model, normal );
-
-					renderer->drawPrimitive( program, primitive );
-
-					renderer->unbindVertexBuffer( program, primitive->getVertexBuffer() );
-					renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
-
-					renderer->unbindMaterial( program, material );
-
-					renderer->unbindProgram( program );
-				});
-			});
-		}
+                renderer->applyTransformations( program, projection, view, model, normal );
+                renderer->drawPrimitive( program, primitive );
+            }
+            
+            // unbind primitive buffers
+            renderer->unbindVertexBuffer( program, primitive->getVertexBuffer() );
+            renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
+        }
+        
+        // unbind material properties
+        renderer->unbindMaterial( program, material );
+        
+        // unbind lights
+        renderQueue->each( [&]( LightPtr const &light, int ) {
+            renderer->unbindLight( program, light );
+        });
+        
+        // unbind program
+        renderer->unbindProgram( program );
     });
+    
 }
 

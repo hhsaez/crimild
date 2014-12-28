@@ -77,6 +77,7 @@ void Renderer::render( RenderQueuePtr const &renderQueue, RenderPassPtr const &r
     renderPass->render( getShared< Renderer >(), renderQueue, renderQueue->getCamera() );
 }
 
+/*
 void Renderer::render( VisibilitySetPtr const &vs, RenderPassPtr const &renderPass )
 {
 	auto camera = vs->getCamera();
@@ -89,6 +90,7 @@ void Renderer::render( GeometryPtr const &geometry, CameraPtr const &camera, Ren
 	auto pass = renderPass != nullptr ? renderPass : camera->getRenderPass();
 	pass->render( getShared< Renderer >(), geometry, camera );
 }
+ */
 
 void Renderer::bindFrameBuffer( FrameBufferObjectPtr const &fbo )
 {

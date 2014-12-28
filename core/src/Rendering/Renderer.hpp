@@ -79,9 +79,9 @@ namespace crimild {
         
         virtual void render( std::shared_ptr< RenderQueue > const &renderQueue, std::shared_ptr< RenderPass > const &renderPass );
 
-        virtual void render( std::shared_ptr< VisibilitySet > const &vs, std::shared_ptr< RenderPass > const &renderPass );
+//        virtual void render( std::shared_ptr< VisibilitySet > const &vs, std::shared_ptr< RenderPass > const &renderPass );
 
-        virtual void render( std::shared_ptr< Geometry > const &geometry, std::shared_ptr< Camera > const &camera, std::shared_ptr< RenderPass > const &renderPass );
+//        virtual void render( std::shared_ptr< Geometry > const &geometry, std::shared_ptr< Camera > const &camera, std::shared_ptr< RenderPass > const &renderPass );
 
         virtual void endRender( void );
 

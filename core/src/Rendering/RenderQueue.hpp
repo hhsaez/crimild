@@ -31,16 +31,24 @@
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/SharedObjectList.hpp"
 #include "Foundation/Pointer.hpp"
+
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "SceneGraph/Light.hpp"
+
+#include "Material.hpp"
 
 #include <functional>
 #include <list>
 
 namespace crimild {
-    
+
     class RenderQueue : public SharedObject {
+    public:
+        using GeometryContext = std::pair< GeometryPtr, TransformationImpl >;
+        using PrimitiveMap = std::map< PrimitivePtr, std::list< GeometryContext >>;
+        using MaterialMap = std::map< MaterialPtr, PrimitiveMap >;
+
     public:
         RenderQueue( void );
         virtual ~RenderQueue( void );
@@ -50,20 +58,24 @@ namespace crimild {
         void setCamera( CameraPtr const &camera ) { _camera = camera; }
         CameraPtr getCamera( void ) { return _camera; }
         
-        SharedObjectList< Light > &getLights( void ) { return _lights; }
-        SharedObjectList< Geometry > &getShadowCasters( void ) { return _shadowCasters; }
-        SharedObjectList< Geometry > &getOpaqueObjects( void ) { return _opaqueObjects; }
-        SharedObjectList< Geometry > &getTranslucentObjects( void ) { return _translucentObjects; }
-        SharedObjectList< Geometry > &getScreenObjects( void ) { return _screenObjects; }
+        void push( MaterialPtr const &material, PrimitivePtr const &primitive, GeometryPtr const &geometry, const TransformationImpl &world, bool renderOnScreen = false );
+        void push( LightPtr const &light );
+
+        void each( MaterialMap const &objects, std::function< void( MaterialPtr const &, PrimitiveMap const & ) > callback );
+        void each( std::function< void( LightPtr const &, int ) > callback );
+
+        MaterialMap &getOpaqueObjects( void ) { return _opaqueObjects; }
+        MaterialMap &getTranslucentObjects( void ) { return _translucentObjects; }
+        MaterialMap &getScreenObjects( void ) { return _screenObjects; }
         
     private:
         CameraPtr _camera;
         
-        SharedObjectList< Light > _lights;
-        SharedObjectList< Geometry > _shadowCasters;
-        SharedObjectList< Geometry > _opaqueObjects;
-        SharedObjectList< Geometry > _translucentObjects;
-        SharedObjectList< Geometry > _screenObjects;
+        std::list< LightPtr > _lights;
+
+        MaterialMap _opaqueObjects;
+        MaterialMap _translucentObjects;
+        MaterialMap _screenObjects;
     };
     
     using RenderQueuePtr = std::shared_ptr< RenderQueue >;

@@ -51,7 +51,6 @@ namespace crimild {
         
     protected:
         virtual void renderShadedObjects( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera );
-        virtual void renderTranslucentObjects( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera );
         
     private:
         void buildAccumBuffer( int width, int height );

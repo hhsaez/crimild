@@ -32,37 +32,44 @@
 #include "Foundation/Pointer.hpp"
 #include "Foundation/SharedObjectList.hpp"
 
+#include "RenderQueue.hpp"
+
+#include <map>
+
 namespace crimild {
     
     class Camera;
-    class FrameBufferObject;
+//    class FrameBufferObject;
     class Geometry;
     class ImageEffect;
     class Material;
     class Primitive;
     class Renderer;
-    class RenderQueue;
     class ShaderProgram;
     class Texture;
-    class VisibilitySet;
+//    class VisibilitySet;
 
 	class RenderPass : public SharedObject {
 	public:
 		RenderPass( void );
 		virtual ~RenderPass( void );
 
-        virtual void render( std::shared_ptr< Renderer > const &renderer, std::shared_ptr< RenderQueue > const &renderQueue, std::shared_ptr< Camera > const &camera );
-		virtual void render( std::shared_ptr< Renderer > const &renderer, std::shared_ptr< VisibilitySet > const &vs, std::shared_ptr< Camera > const &camera );
-		virtual void render( std::shared_ptr< Renderer > const &renderer, std::shared_ptr< Geometry > const &geometry, std::shared_ptr< Camera > const &camera );
-		virtual void render( std::shared_ptr< Renderer > const &renderer, std::shared_ptr< Geometry > const &geometry, std::shared_ptr< Primitive > const &primitive, std::shared_ptr< Material > const &material, std::shared_ptr< Camera > const &camera );
+        virtual void render( std::shared_ptr< Renderer > const &renderer, RenderQueuePtr const &renderQueue, std::shared_ptr< Camera > const &camera );
+        virtual void render( std::shared_ptr< Renderer > const &renderer, RenderQueuePtr const &renderQueue, std::shared_ptr< Camera > const &camera, RenderQueue::MaterialMap const &objects );
+        
+//		virtual void render( std::shared_ptr< Renderer > const &renderer, std::shared_ptr< VisibilitySet > const &vs, std::shared_ptr< Camera > const &camera );
+//		virtual void render( std::shared_ptr< Renderer > const &renderer, std::shared_ptr< Geometry > const &geometry, std::shared_ptr< Camera > const &camera );
+//		virtual void render( std::shared_ptr< Renderer > const &renderer, std::shared_ptr< Geometry > const &geometry, std::shared_ptr< Primitive > const &primitive, std::shared_ptr< Material > const &material, std::shared_ptr< Camera > const &camera );
         virtual void render( std::shared_ptr< Renderer > const &renderer, std::shared_ptr< Texture > const &texture, std::shared_ptr< ShaderProgram > const &program );
-		virtual void render( std::shared_ptr< Renderer > const &renderer, std::shared_ptr< FrameBufferObject > const &fbo, std::shared_ptr< ShaderProgram > const &program );
+//		virtual void render( std::shared_ptr< Renderer > const &renderer, std::shared_ptr< FrameBufferObject > const &fbo, std::shared_ptr< ShaderProgram > const &program );
         
         SharedObjectList< ImageEffect > &getImageEffects( void ) { return _imageEffects; }
         
     protected:
         std::shared_ptr< Primitive > &getScreenPrimitive( void ) { return _screen; }
 
+        virtual void renderOpaqueObjects( std::shared_ptr< Renderer > const &renderer, std::shared_ptr< RenderQueue > const &renderQueue, std::shared_ptr< Camera > const &camera );
+        virtual void renderTranslucentObjects( std::shared_ptr< Renderer > const &renderer, std::shared_ptr< RenderQueue > const &renderQueue, std::shared_ptr< Camera > const &camera );
         virtual void renderScreenObjects( std::shared_ptr< Renderer > const &renderer, std::shared_ptr< RenderQueue > const &renderQueue, std::shared_ptr< Camera > const &camera );
 
 	private:

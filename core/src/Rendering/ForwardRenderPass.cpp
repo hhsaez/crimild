@@ -125,7 +125,7 @@ void ForwardRenderPass::computeShadowMaps( RendererPtr const &renderer, RenderQu
     // bind shader program first
     renderer->bindProgram( program );
     
-    renderQueue->getLights().each( [&]( LightPtr const &light, int ) {
+    renderQueue->each( [&]( LightPtr const &light, int ) {
         
         if ( !light->shouldCastShadows() ) {
             return;
@@ -145,38 +145,24 @@ void ForwardRenderPass::computeShadowMaps( RendererPtr const &renderer, RenderQu
         
         renderer->setAlphaState( AlphaState::DISABLED );
         renderer->setDepthState( DepthState::ENABLED );
-        
-        renderQueue->getOpaqueObjects().each( [&]( GeometryPtr const &geometry, int ) {
-            auto renderState = geometry->getComponent< RenderStateComponent >();
-            if ( renderState->hasMaterials() ) {
-                geometry->foreachPrimitive( [&]( PrimitivePtr const &primitive ) mutable {
-                    
-                    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LINEAR_DEPTH_CONSTANT_UNIFORM ), map->getLinearDepthConstant() );
-                    
-                    // bind joints and other skinning information
-                    auto skinning = geometry->getComponent< SkinComponent >();
-                    if ( skinning != nullptr && skinning->hasJoints() ) {
-                        skinning->foreachJoint( [&]( NodePtr const &node, unsigned int index ) {
-                            auto joint = node->getComponent< JointComponent >();
-                            renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::JOINT_WORLD_MATRIX_UNIFORM + index ), joint->getWorldMatrix() );
-                            renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::JOINT_INVERSE_BIND_MATRIX_UNIFORM + index ), joint->getInverseBindMatrix() );
-                        });
-                    }
-                    
-                    // bind vertex and index buffers
-                    renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
-                    renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
-                    
-                    renderer->applyTransformations( program, map->getLightProjectionMatrix(), map->getLightViewMatrix(), geometry->getWorld().computeModelMatrix(), geometry->getWorld().computeNormalMatrix() );
-                    
-                    // draw primitive
+
+        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LINEAR_DEPTH_CONSTANT_UNIFORM ), map->getLinearDepthConstant() );
+
+        renderQueue->each( renderQueue->getOpaqueObjects(), [&]( MaterialPtr const &material, RenderQueue::PrimitiveMap const &primitives ) {
+            for ( auto it : primitives ) {
+                auto primitive = it.first;
+
+                renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
+                renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
+
+                for ( auto geometryIt : it.second ) {
+                    renderer->applyTransformations( program, map->getLightProjectionMatrix(), map->getLightViewMatrix(), geometryIt.second.computeModelMatrix(), geometryIt.second.computeNormalMatrix() );
                     renderer->drawPrimitive( program, primitive );
-                    
-                    // unbind primitive buffers
-                    renderer->unbindVertexBuffer( program, primitive->getVertexBuffer() );
-                    renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
-                    
-                });
+                }
+
+                // unbind primitive buffers
+                renderer->unbindVertexBuffer( program, primitive->getVertexBuffer() );
+                renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
             }
         });
         
@@ -189,149 +175,71 @@ void ForwardRenderPass::computeShadowMaps( RendererPtr const &renderer, RenderQu
 
 void ForwardRenderPass::renderShadedObjects( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
-    renderQueue->getOpaqueObjects().each( [&]( GeometryPtr const &geometry, int ) {
-        
-        auto renderState = geometry->getComponent< RenderStateComponent >();
-        renderState->foreachMaterial( [&]( MaterialPtr const &material ) {
-            geometry->foreachPrimitive( [&]( PrimitivePtr const &primitive ) mutable {
-                auto program = renderer->getForwardPassProgram();
-                if ( program == nullptr ) {
-                    program = material->getProgram() != nullptr ? material->getProgram() : renderer->getFallbackProgram( material, geometry, primitive );
-                }
-                
-                if ( program == nullptr ) {
-                    Log::Warning << "No available shader program to render geometry" << Log::End;
-                    return;
-                }
-                
-                renderer->bindProgram( program );
-                
-                // bind material properties
-                renderer->bindMaterial( program, material );
-                
-                renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::USE_SHADOW_MAP_UNIFORM ), false );
-                for ( auto it : _shadowMaps ) {
-                    if ( it.second != nullptr ) {
-                        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_SOURCE_PROJECTION_MATRIX_UNIFORM ), it.second->getLightProjectionMatrix() );
-                        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_SOURCE_VIEW_MATRIX_UNIFORM ), it.second->getLightViewMatrix() );
-                        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::USE_SHADOW_MAP_UNIFORM ), true );
-                        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LINEAR_DEPTH_CONSTANT_UNIFORM ), it.second->getLinearDepthConstant() );
-                        renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::SHADOW_MAP_UNIFORM ), it.second->getTexture() );
-                    }
-                }
-                
-                // bind lights
-                renderQueue->getLights().each( [&]( LightPtr const &light, int ) {
-                    renderer->bindLight( program, light );
-                });
-                
-                // bind joints and other skinning information
-                auto skinning = geometry->getComponent< SkinComponent >();
-                if ( skinning != nullptr && skinning->hasJoints() ) {
-                    skinning->foreachJoint( [&]( NodePtr const &node, unsigned int index ) {
-                        auto joint = node->getComponent< JointComponent >();
-                        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::JOINT_WORLD_MATRIX_UNIFORM + index ), joint->getWorldMatrix() );
-                        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::JOINT_INVERSE_BIND_MATRIX_UNIFORM + index ), joint->getInverseBindMatrix() );
-                    });
-                }
-                
-                // bind vertex and index buffers
-                renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
-                renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
-                
-                renderer->applyTransformations( program, geometry, camera );
-                
-                // draw primitive
-                renderer->drawPrimitive( program, primitive );
-                
-                renderer->restoreTransformations( program, geometry, camera );
-                
-                // unbind primitive buffers
-                renderer->unbindVertexBuffer( program, primitive->getVertexBuffer() );
-                renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
-                
-                // unbind lights
-                renderQueue->getLights().each( [&]( LightPtr const &light, int ) {
-                    renderer->unbindLight( program, light );
-                });
-                
-                for ( auto it : _shadowMaps ) {
-                    if ( it.second != nullptr ) {
-                        renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::SHADOW_MAP_UNIFORM ), it.second->getTexture() );
-                    }
-                }
-                
-                // unbind material properties
-                renderer->unbindMaterial( program, material );
-                
-                renderer->unbindProgram( program );
-            });
-        });
-    });
-}
+    auto program = renderer->getForwardPassProgram();
 
-void ForwardRenderPass::renderTranslucentObjects( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
-{
-    renderQueue->getTranslucentObjects().each( [&]( GeometryPtr const &geometry, int ) {
-        
-        auto renderState = geometry->getComponent< RenderStateComponent >();
-        renderState->foreachMaterial( [&]( MaterialPtr const &material ) {
-            geometry->foreachPrimitive( [&]( PrimitivePtr const &primitive ) mutable {
-                auto program = material->getProgram();
-                if ( program == nullptr ) {
-                    program = renderer->getFallbackProgram( material, geometry, primitive );
-                }
-                
-                if ( program == nullptr ) {
-                    return;
-                }
-                
-                renderer->bindProgram( program );
-                
-                // bind material properties
-                renderer->bindMaterial( program, material );
-                
-                // bind lights
-                renderQueue->getLights().each( [&]( LightPtr const &light, int ) {
-                    renderer->bindLight( program, light );
-                });
-                
-                // bind joints and other skinning information
-                auto skinning = geometry->getComponent< SkinComponent >();
-                if ( skinning != nullptr && skinning->hasJoints() ) {
-                    skinning->foreachJoint( [&]( NodePtr const &node, unsigned int index ) {
-                        auto joint = node->getComponent< JointComponent >();
-                        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::JOINT_WORLD_MATRIX_UNIFORM + index ), joint->getWorldMatrix() );
-                        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::JOINT_INVERSE_BIND_MATRIX_UNIFORM + index ), joint->getInverseBindMatrix() );
-                    });
-                }
-                
-                // bind vertex and index buffers
-                renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
-                renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
-                
-                renderer->applyTransformations( program, geometry, camera );
-                
-                // draw primitive
-                renderer->drawPrimitive( program, primitive );
-                
-                renderer->restoreTransformations( program, geometry, camera );
-                
-                // unbind primitive buffers
-                renderer->unbindVertexBuffer( program, primitive->getVertexBuffer() );
-                renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
-                
-                // unbind lights
-                renderQueue->getLights().each( [&]( LightPtr const &light, int ) {
-                    renderer->unbindLight( program, light );
-                });
-                
-                // unbind material properties
-                renderer->unbindMaterial( program, material );
-                
-                renderer->unbindProgram( program );
-            });
-        });
+    // bind program
+    renderer->bindProgram( program );
+
+    const Matrix4f &projection = camera->getProjectionMatrix();
+    const Matrix4f &view = camera->getViewMatrix();
+    
+    // bind shadow maps
+    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::USE_SHADOW_MAP_UNIFORM ), false );
+    for ( auto it : _shadowMaps ) {
+        if ( it.second != nullptr ) {
+            renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_SOURCE_PROJECTION_MATRIX_UNIFORM ), it.second->getLightProjectionMatrix() );
+            renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_SOURCE_VIEW_MATRIX_UNIFORM ), it.second->getLightViewMatrix() );
+            renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::USE_SHADOW_MAP_UNIFORM ), true );
+            renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LINEAR_DEPTH_CONSTANT_UNIFORM ), it.second->getLinearDepthConstant() );
+            renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::SHADOW_MAP_UNIFORM ), it.second->getTexture() );
+        }
+    }
+    
+    // bind lights
+    renderQueue->each( [&]( LightPtr const &light, int ) {
+        renderer->bindLight( program, light );
     });
+    
+    renderQueue->each( renderQueue->getOpaqueObjects(), [&]( MaterialPtr const &material, RenderQueue::PrimitiveMap const &primitives ) {
+        // bind material properties
+        renderer->bindMaterial( program, material );
+
+        for ( auto it : primitives ) {
+            auto primitive = it.first;
+
+            // bind vertex and index buffers
+            renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
+            renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
+
+            for ( auto geometryIt : it.second ) {
+                auto world = geometryIt.second;
+                renderer->applyTransformations( program, projection, view, world.computeModelMatrix(), world.computeNormalMatrix() );
+                renderer->drawPrimitive( program, primitive );
+            }
+            
+            // unbind primitive buffers
+            renderer->unbindVertexBuffer( program, primitive->getVertexBuffer() );
+            renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
+        }
+
+        // unbind material properties
+        renderer->unbindMaterial( program, material );
+
+    });
+
+    // unbind lights
+    renderQueue->each( [&]( LightPtr const &light, int ) {
+        renderer->unbindLight( program, light );
+    });
+    
+    // unbind shadow maps
+    for ( auto it : _shadowMaps ) {
+        if ( it.second != nullptr ) {
+            renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::SHADOW_MAP_UNIFORM ), it.second->getTexture() );
+        }
+    }
+
+    // unbind program
+    renderer->unbindProgram( program );
 }
 

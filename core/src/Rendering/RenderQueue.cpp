@@ -43,11 +43,44 @@ void RenderQueue::reset( void )
 {
     setCamera( nullptr );
     
-    getLights().clear();
-    
-    getShadowCasters().clear();
-    getOpaqueObjects().clear();
-    getTranslucentObjects().clear();
-    getScreenObjects().clear();
+    _lights.clear();
+    _opaqueObjects.clear();
+    _translucentObjects.clear();
+    _screenObjects.clear();
+}
+
+void RenderQueue::push( MaterialPtr const &material, PrimitivePtr const &primitive, GeometryPtr const &geometry, const TransformationImpl &world, bool renderOnScreen )
+{
+    if ( renderOnScreen ) {
+        _screenObjects[ material ][ primitive ].push_back( std::make_pair( geometry, world ) );
+    }
+    else if ( material->getAlphaState()->isEnabled() ) {
+        _translucentObjects[ material ][ primitive ].push_back( std::make_pair( geometry, world ) );
+    }
+    else {
+        _opaqueObjects[ material ][ primitive ].push_back( std::make_pair( geometry, world ) );
+    }
+}
+
+void RenderQueue::push( LightPtr const &light )
+{
+    _lights.push_back( light );
+}
+
+void RenderQueue::each( MaterialMap const &objects, std::function< void( MaterialPtr const &, PrimitiveMap const & ) > callback )
+{
+    auto os = objects;
+	for ( auto it : os ) {
+		callback( it.first, it.second );
+	}
+}
+
+void RenderQueue::each( std::function< void ( const LightPtr &, int ) > callback )
+{
+    auto lights = _lights;
+    int i = 0;
+    for ( auto l : lights ) {
+        callback( l, i++ );
+    }
 }
 

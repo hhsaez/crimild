@@ -55,6 +55,7 @@ HierarchyRenderPass::~HierarchyRenderPass( void )
 
 void HierarchyRenderPass::render( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
+    /*
 	if ( _actualRenderPass != nullptr ) {
 		_actualRenderPass->render( renderer, renderQueue, camera );
 	}
@@ -109,6 +110,7 @@ void HierarchyRenderPass::render( RendererPtr const &renderer, RenderQueuePtr co
 	_debugMaterial->setDiffuse( RGBAColorf( 1.0f, 0.0f, 0.0f, 1.0f ) );
 	
 	RenderPass::render( renderer, geometry, bones, _debugMaterial, camera );
+     */
 }
 
 
