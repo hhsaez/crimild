@@ -25,61 +25,37 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SCRIPTING_SCENE_BUILDER_
-#define CRIMILD_SCRIPTING_SCENE_BUILDER_
+#include "AssetManager.hpp"
+#include "FileSystem.hpp"
 
-#include "Foundation/Scripted.hpp"
+#include "Foundation/StringUtils.hpp"
+#include "Rendering/Texture.hpp"
+#include "Rendering/ImageTGA.hpp"
 
-namespace crimild {
+using namespace crimild;
 
-	namespace scripting {
-
-		class SceneBuilder : public SharedObject, public crimild::scripting::Scripted {
-		private:
-			typedef std::function< NodeComponentPtr ( crimild::scripting::ScriptContext::Iterable & ) > BuilderFunction;
-
-		public:
-			SceneBuilder( std::string rootNodeName = "scene" );
-
-			virtual ~SceneBuilder( void );
-
-			virtual void reset( void );
-
-			NodePtr fromFile( const std::string &filename );
-
-		public:
-			template< typename T >
-			void registerComponent( void )
-			{
-				registerComponentBuilder< T >( []( crimild::scripting::ScriptContext::Iterable &it ) {
-                    return std::make_shared< T >( it );
-				});
-			}
-
-			template< typename T >
-			void registerComponentBuilder( BuilderFunction builder )
-			{
-				_componentBuilders[ T::_COMPONENT_NAME() ] = builder;
-			}
-
-		private:
-			NodePtr buildNode( ScriptContext::Iterable &i, GroupPtr const &parent );
-
-			void setupCamera( ScriptContext::Iterable &i, CameraPtr const &camera );
-			void setTransformation( ScriptContext::Iterable &it, NodePtr const &node );
-			
-			void buildNodeComponents( ScriptContext::Iterable &it, NodePtr const &node );
-
-		private:
-			std::string _rootNodeName;
-			std::map< std::string, BuilderFunction > _componentBuilders;
-		};
-        
-        using SceneBuilderPtr = std::shared_ptr< SceneBuilder >;
-
-	}
+AssetManager::AssetManager( void )
+{
 
 }
 
-#endif
+AssetManager::~AssetManager( void )
+{
+	clear();
+}
+
+template<>
+std::shared_ptr< Texture > AssetManager::get( std::string name )
+{
+	auto texture = std::static_pointer_cast< Texture >( _assets[ name ] );
+	if ( texture == nullptr && ( StringUtils::getFileExtension( name ) == ".tga" ) ) {
+		auto image = std::make_shared< ImageTGA >( FileSystem::getInstance().pathForResource( name ) );
+		if ( image != nullptr ) {
+			texture = std::make_shared< Texture >( image );
+			add( name, texture );
+		}
+	}
+
+	return texture;
+}
 

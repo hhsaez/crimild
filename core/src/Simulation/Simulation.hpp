@@ -30,6 +30,7 @@
 
 #include "RunLoop.hpp"
 #include "Settings.hpp"
+#include "AssetManager.hpp"
 
 #include "Foundation/NamedObject.hpp"
 #include "Mathematics/Time.hpp"
@@ -73,6 +74,8 @@ namespace crimild {
 		Time &getSimulationTime( void ) { return _simulationTime; }
 		const Time &getSimulationTime( void ) const { return _simulationTime; }
 
+		AssetManager &getAssets( void ) { return _assetManager; }
+
 		virtual void start( void );
 
 		virtual bool step( void );
@@ -84,6 +87,7 @@ namespace crimild {
 	private:
 		Settings _settings;
 		Time _simulationTime;
+		AssetManager _assetManager;
         
     public:
         RunLoopPtr getMainLoop( void );

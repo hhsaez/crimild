@@ -136,6 +136,9 @@ void Simulation::setScene( NodePtr const &scene )
             _cameras.push_back( camera );
         });
 	}
+	else {
+		_assetManager.clear();
+	}
 }
 
 void Simulation::forEachCamera( std::function< void ( CameraPtr const & ) > callback )

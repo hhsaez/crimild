@@ -128,14 +128,19 @@ NodePtr SceneBuilder::buildNode( ScriptContext::Iterable &it, GroupPtr const &pa
 			Log::Debug << "Building node" << Log::End;
 			std::string filename = it.eval< std::string >( NODE_FILENAME );
 			
-			if ( _sceneCache[ filename ] == nullptr ) {
+			auto assets = Simulation::getCurrent()->getAssets();
+			auto scene = assets.get< Group >( filename );
+			if ( scene == nullptr ) {
 				OBJLoader loader( FileSystem::getInstance().pathForResource( filename ) );				
-				_sceneCache[ filename ] = loader.load();
+				scene = loader.load();
+				assets.add( filename, scene );
+				group = scene;
 			}
-
-			ShallowCopy shallowCopy;
-			_sceneCache[ filename ]->perform( shallowCopy );
-			group = shallowCopy.getResult< Group >();
+			else {
+				ShallowCopy shallowCopy;
+				scene->perform( shallowCopy );
+				group = shallowCopy.getResult< Group >();
+			}
 		}
 		else {
 			Log::Debug << "Building 'group' node" << Log::End;

@@ -74,6 +74,16 @@ namespace crimild {
 		    return str;
 		}
 
+		static std::string getFileExtension( std::string path ) 
+		{
+			int pos = path.find_last_of( "." );
+			if ( pos < 0 ) {
+				return "";
+			}
+
+			return path.substr( pos );
+		}
+
 	};
 
 }

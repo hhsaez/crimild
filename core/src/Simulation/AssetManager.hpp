@@ -25,59 +25,41 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SCRIPTING_SCENE_BUILDER_
-#define CRIMILD_SCRIPTING_SCENE_BUILDER_
+#ifndef CRIMILD_CORE_SIMULATION_ASSET_MANAGER_
+#define CRIMILD_CORE_SIMULATION_ASSET_MANAGER_
 
-#include "Foundation/Scripted.hpp"
+#include "Foundation/SharedObject.hpp"
+
+#include <memory>
+#include <map>
+#include <string>
 
 namespace crimild {
 
-	namespace scripting {
+    class AssetManager {
+    public:
+        AssetManager( void );
+        virtual ~AssetManager( void );
 
-		class SceneBuilder : public SharedObject, public crimild::scripting::Scripted {
-		private:
-			typedef std::function< NodeComponentPtr ( crimild::scripting::ScriptContext::Iterable & ) > BuilderFunction;
+        void add( std::string name, SharedObjectPtr const &asset )
+        {
+            _assets[ name ] = asset;
+        }
 
-		public:
-			SceneBuilder( std::string rootNodeName = "scene" );
+        template< class T >
+        std::shared_ptr< T > get( std::string name )
+        {
+            return std::static_pointer_cast< T >( _assets[ name ] );
+        }
 
-			virtual ~SceneBuilder( void );
+        void clear( void )
+        {
+            _assets.clear();
+        }
 
-			virtual void reset( void );
-
-			NodePtr fromFile( const std::string &filename );
-
-		public:
-			template< typename T >
-			void registerComponent( void )
-			{
-				registerComponentBuilder< T >( []( crimild::scripting::ScriptContext::Iterable &it ) {
-                    return std::make_shared< T >( it );
-				});
-			}
-
-			template< typename T >
-			void registerComponentBuilder( BuilderFunction builder )
-			{
-				_componentBuilders[ T::_COMPONENT_NAME() ] = builder;
-			}
-
-		private:
-			NodePtr buildNode( ScriptContext::Iterable &i, GroupPtr const &parent );
-
-			void setupCamera( ScriptContext::Iterable &i, CameraPtr const &camera );
-			void setTransformation( ScriptContext::Iterable &it, NodePtr const &node );
-			
-			void buildNodeComponents( ScriptContext::Iterable &it, NodePtr const &node );
-
-		private:
-			std::string _rootNodeName;
-			std::map< std::string, BuilderFunction > _componentBuilders;
-		};
-        
-        using SceneBuilderPtr = std::shared_ptr< SceneBuilder >;
-
-	}
+    private:
+        std::map< std::string, SharedObjectPtr > _assets;
+    };
 
 }
 

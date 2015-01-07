@@ -75,6 +75,7 @@ void LoadSceneTask::stop( void )
 
 void LoadSceneTask::load( void )
 {
+	// clear current scene
     Simulation::getCurrent()->setScene( nullptr );
 
 	getBuilder()->reset();
