@@ -88,6 +88,14 @@ namespace crimild {
 
 	private:
 		std::shared_ptr< RenderPass > _renderPass;
+
+	public:
+		void computeCullingPlanes( void );
+
+		bool culled( BoundingVolumePtr const &volume );
+
+	private:
+		Plane3f _cullingPlanes[ 6 ];
 	};
     
     using CameraPtr = std::shared_ptr< Camera >;

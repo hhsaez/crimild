@@ -65,7 +65,7 @@ namespace crimild {
 		template< unsigned int SIZE, typename PRECISION >
 		static double compute( const Plane< SIZE, PRECISION > &plane, const Vector< SIZE, PRECISION > &point )
 		{
-			return ( plane.getNormal() * point ) + plane.getConstant();
+			return ( plane.getNormal() * point ) - plane.getConstant();
 		}
 	};
 

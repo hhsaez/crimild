@@ -124,6 +124,15 @@ namespace crimild {
 		PRECISION _constant;
 	};
 
+	template< unsigned int SIZE, typename PRECISION >
+	std::ostream &operator<<( std::ostream &out, const Plane< SIZE, PRECISION > &p )
+	{
+		out << std::setiosflags( std::ios::fixed | std::ios::showpoint  )
+			<< std::setprecision( 10 )
+			<< "[" << p.getNormal() << ", " << p.getConstant() << "]";
+		return out;
+	}
+
 	typedef Plane< 3, int > Plane3i;
 	typedef Plane< 3, float > Plane3f;
 	typedef Plane< 3, double > Plane3d;

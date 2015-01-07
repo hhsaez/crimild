@@ -30,6 +30,8 @@
 
 using namespace crimild;
 
+int geometries = 0;
+
 ComputeRenderQueue::ComputeRenderQueue( CameraPtr const &camera, RenderQueuePtr const &result )
     : _camera( camera ),
       _result( result )
@@ -45,12 +47,35 @@ void ComputeRenderQueue::traverse( NodePtr const &scene )
 {
     _result->reset();
     _result->setCamera( _camera );
+
+    if ( _camera != nullptr ) {
+        _camera->computeCullingPlanes();
+    }
+
+    geometries = 0;
     
     NodeVisitor::traverse( scene );
+
+    std::cout << "Geometries: " << geometries << std::endl;
+}
+
+void ComputeRenderQueue::visitGroup( GroupPtr const &group )
+{
+    if ( _camera != nullptr && _camera->culled( group->getWorldBound() ) ) {
+        return;
+    }
+    
+    NodeVisitor::visitGroup( group );
 }
 
 void ComputeRenderQueue::visitGeometry( GeometryPtr const &geometry )
 {
+    if ( _camera != nullptr && _camera->culled( geometry->getWorldBound() ) ) {
+        return;
+    }
+
+    ++geometries;
+
     auto renderState = geometry->getComponent< RenderStateComponent >();
 
     renderState->foreachMaterial( [&]( MaterialPtr const &material ) {

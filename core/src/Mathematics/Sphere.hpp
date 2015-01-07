@@ -129,7 +129,14 @@ namespace crimild {
 		int whichSide( const PlaneImpl &plane ) const
 		{
 			double d = Distance::compute( plane, _center );
-			return ( d < -_radius ? -1 : d > +_radius ? 1 : 0 );
+			if ( d < -_radius ) {
+				return -1; // behind
+			}
+			else if ( d > _radius ) {
+				return 1; // front
+			}
+
+			return 0; // intersecting
 		}
 
 	private:

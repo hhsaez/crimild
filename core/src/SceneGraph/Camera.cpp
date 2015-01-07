@@ -114,3 +114,55 @@ float Camera::computeAspect( void ) const
 	return getFrustum().computeAspect();
 }
 
+void Camera::computeCullingPlanes( void )
+{
+	Vector3f normal;
+	float constant;
+
+	Vector3f position = getWorld().getTranslate();
+	Vector3f direction = getWorld().computeDirection().getNormalized();
+	Vector3f up = getWorld().computeUp().getNormalized();
+	Vector3f right = getWorld().computeRight().getNormalized();
+
+	// near plane
+	_cullingPlanes[ 0 ] = Plane3f( direction, position + getFrustum().getDMin() * direction );
+
+	// far plane
+	_cullingPlanes[ 1 ] = Plane3f( -direction, position + getFrustum().getDMax() * direction );
+
+	// top plane
+	float invLengthTop = 1.0f / sqrtf( getFrustum().getDMin() * getFrustum().getDMin() + getFrustum().getUMax() * getFrustum().getUMax() );
+	normal = ( -getFrustum().getDMin() * up + getFrustum().getUMax() * direction  ) * invLengthTop;
+	constant = normal * position;
+	_cullingPlanes[ 2 ] = Plane3f( normal, constant );
+
+	// bottom plane
+	float invLengthBottom = 1.0f / sqrtf( getFrustum().getDMin() * getFrustum().getDMin() + getFrustum().getUMin() * getFrustum().getUMin() );
+	normal = ( getFrustum().getDMin() * up - getFrustum().getUMin() * direction ) * invLengthBottom;
+	constant = normal * position;
+	_cullingPlanes[ 3 ] = Plane3f( normal, constant );
+
+	// left plane
+	float invLengthLeft = 1.0f / sqrtf( getFrustum().getDMin() * getFrustum().getDMin() + getFrustum().getRMin() * getFrustum().getRMin() );
+	normal = ( getFrustum().getDMin() * right - getFrustum().getRMin() * direction ) * invLengthLeft;
+	constant = normal * position;
+	_cullingPlanes[ 4 ] = Plane3f( normal, constant );
+
+	// right plane
+	float invLengthRight = 1.0f / sqrtf( getFrustum().getDMin() * getFrustum().getDMin() + getFrustum().getRMax() * getFrustum().getRMax() );
+	normal = ( -getFrustum().getDMin() * right + getFrustum().getRMax() * direction ) * invLengthRight;
+	constant = normal * position;
+	_cullingPlanes[ 5 ] = Plane3f( normal, constant );
+}
+
+bool Camera::culled( BoundingVolumePtr const &volume )
+{
+	for ( auto &p : _cullingPlanes ) {
+		if ( volume->whichSide( p ) < 0 ) {
+			return true;
+		}
+	}
+
+	return false;
+}
+

@@ -29,8 +29,11 @@
 #define CRIMILD_CORE_VISITORS_COMPUTE_RENDER_QUEUE_
 
 #include "Visitors/NodeVisitor.hpp"
+
 #include "Rendering/RenderQueue.hpp"
+
 #include "SceneGraph/Camera.hpp"
+#include "SceneGraph/Group.hpp"
 
 namespace crimild {
     
@@ -43,6 +46,7 @@ namespace crimild {
         
         virtual void traverse( NodePtr const &scene ) override;
         
+        virtual void visitGroup( GroupPtr const &group ) override;
         virtual void visitGeometry( GeometryPtr const &geometry ) override;
         virtual void visitLight( LightPtr const &light ) override;
         
