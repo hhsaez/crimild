@@ -30,6 +30,12 @@
 using namespace crimild;
 
 RenderTarget::RenderTarget( RenderTarget::Type type, RenderTarget::Output output, int width, int height )
+    : RenderTarget( type, output, width, height, false )
+{
+
+}
+
+RenderTarget::RenderTarget( RenderTarget::Type type, RenderTarget::Output output, int width, int height, bool floatTextureHint )
     : _texture( std::make_shared< Texture >( ImagePtr() ) )
 {
     _type = type;
@@ -46,7 +52,8 @@ RenderTarget::~RenderTarget( void )
 FrameBufferObject::FrameBufferObject( int width, int height )
 	: _width( width ),
 	  _height( height ),
-	  _clearColor( 0.0f, 0.0f, 0.0f, 1.0f )
+	  _clearColor( 0.0f, 0.0f, 0.0f, 1.0f ),
+	  _renderTargets( std::make_shared< RenderTargetMap >() )
 {
 
 }

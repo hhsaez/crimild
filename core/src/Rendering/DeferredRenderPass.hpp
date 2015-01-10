@@ -51,7 +51,9 @@ namespace crimild {
     private:
         void buildAccumBuffer( int width, int heigth );
         
-        void buildGBuffer( int width, int height );
+        FrameBufferObjectPtr getGBuffer( RendererPtr const &renderer );
+        
+        void buildGBuffer( RendererPtr const &renderer );
         void renderToGBuffer( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera );
         
         void buildFrameBuffer( int width, int height );

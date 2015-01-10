@@ -44,11 +44,11 @@ ShadowMap::ShadowMap( LightPtr const &source, FrameBufferObjectPtr const &fbo )
         int width = 1024;
         int height = 1024;
         _buffer = std::make_shared< FrameBufferObject >( width, height );
-        _buffer->getRenderTargets().add( std::make_shared< RenderTarget >( RenderTarget::Type::DEPTH_16, RenderTarget::Output::RENDER, width, height ) );
-        _buffer->getRenderTargets().add( std::make_shared< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
+        _buffer->getRenderTargets()->add( "depth", std::make_shared< RenderTarget >( RenderTarget::Type::DEPTH_16, RenderTarget::Output::RENDER, width, height ) );
+        _buffer->getRenderTargets()->add( "color", std::make_shared< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
     }
     
-    _buffer->getRenderTargets().each( [&]( RenderTargetPtr const &target, int ) {
+    _buffer->getRenderTargets()->each( [&]( std::string, RenderTargetPtr const &target ) {
         if ( target->getOutput() == RenderTarget::Output::TEXTURE || target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
             _texture = target->getTexture();
         }

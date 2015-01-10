@@ -74,13 +74,13 @@ void gl3::FrameBufferObjectCatalog::bind( FrameBufferObjectPtr const &fbo )
     
     // this may be wrong. what if there is no depth buffer?
     int fboColorBufferCount = 0;
-    fbo->getRenderTargets().each( [&]( RenderTargetPtr const &target, int ) {
+    fbo->getRenderTargets()->each( [&]( std::string, RenderTargetPtr const &target ) {
         if ( target->getType() == RenderTarget::Type::COLOR_RGB || target->getType() == RenderTarget::Type::COLOR_RGBA ) {
             fboColorBufferCount++;
         }
     });
     glDrawBuffers( fboColorBufferCount, fboBuffers );
-    
+
     glClearColor( clearColor.r(), clearColor.g(), clearColor.b(), clearColor.a() );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
@@ -110,7 +110,7 @@ void gl3::FrameBufferObjectCatalog::load( FrameBufferObjectPtr const &fbo )
         glBindFramebuffer( GL_FRAMEBUFFER, framebufferId );
         
         int colorAttachmentOffset = 0;
-        fbo->getRenderTargets().each( [&]( RenderTargetPtr const &target, int index ) {
+        fbo->getRenderTargets()->each( [&]( std::string, RenderTargetPtr const &target ) {
             int targetWidth = target->getWidth();
             int targetHeight = target->getHeight();
             
@@ -122,27 +122,39 @@ void gl3::FrameBufferObjectCatalog::load( FrameBufferObjectPtr const &fbo )
             
             GLenum internalFormat = GL_INVALID_ENUM;
             GLenum attachment = GL_INVALID_ENUM;
+            GLenum textureType = target->useFloatTexture() ? GL_FLOAT : GL_UNSIGNED_BYTE;
+            GLenum textureFormat = GL_RGBA;
             switch ( target->getType() ) {
                 case RenderTarget::Type::DEPTH_16:
                     internalFormat = GL_DEPTH_COMPONENT16;
                     attachment = GL_DEPTH_ATTACHMENT;
+                    textureFormat = GL_DEPTH_COMPONENT;
                     break;
+
                 case RenderTarget::Type::DEPTH_24:
                     internalFormat = GL_DEPTH_COMPONENT24;
                     attachment = GL_DEPTH_ATTACHMENT;
+                    textureFormat = GL_DEPTH_COMPONENT;
                     break;
+
                 case RenderTarget::Type::DEPTH_32:
                     internalFormat = GL_DEPTH_COMPONENT32;
                     attachment = GL_DEPTH_ATTACHMENT;
+                    textureFormat = GL_DEPTH_COMPONENT;
                     break;
+
                 case RenderTarget::Type::COLOR_RGB:
                     internalFormat = GL_RGB8;
+                    textureFormat = GL_RGB;
                     attachment = GL_COLOR_ATTACHMENT0 + colorAttachmentOffset++;
                     break;
+
                 case RenderTarget::Type::COLOR_RGBA:
                     internalFormat = GL_RGBA8;
+                    textureFormat = GL_RGBA;
                     attachment = GL_COLOR_ATTACHMENT0 + colorAttachmentOffset++;
                     break;
+
                 default:
                     Log::Error << "Invalid target type: " << ( int ) target->getType() << Log::End;
                     break;
@@ -165,7 +177,8 @@ void gl3::FrameBufferObjectCatalog::load( FrameBufferObjectPtr const &fbo )
                     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
                     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
                     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-                    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, targetWidth, targetHeight, 0, GL_RGBA, target->useFloatTexture() ? GL_FLOAT : GL_UNSIGNED_BYTE, 0 );
+                    glTexImage2D( GL_TEXTURE_2D, 0, internalFormat, targetWidth, targetHeight, 0, textureFormat, textureType, 0 );
+
                     glFramebufferTexture2D( GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, target->getTexture()->getCatalogId(), 0 );
                 }
             }
@@ -232,7 +245,7 @@ void gl3::FrameBufferObjectCatalog::unload( FrameBufferObjectPtr const &fbo )
     if ( framebufferId > 0 ) {
         _framebufferIdsToDelete.push_back( framebufferId );
         
-        fbo->getRenderTargets().each( [&]( RenderTargetPtr const &target, int ) {
+        fbo->getRenderTargets()->each( [&]( std::string, RenderTargetPtr const &target ) {
             int targetId = target->getId();
             if ( targetId > 0 ) {
                 _renderbufferIdsToDelete.push_back( targetId );
@@ -258,7 +271,7 @@ void gl3::FrameBufferObjectCatalog::unload( FrameBufferObject *fbo )
     if ( framebufferId > 0 ) {
         _framebufferIdsToDelete.push_back( framebufferId );
         
-        fbo->getRenderTargets().each( [&]( RenderTargetPtr const &target, int ) {
+        fbo->getRenderTargets()->each( [&]( std::string, RenderTargetPtr const &target ) {
             int targetId = target->getId();
             if ( targetId > 0 ) {
                 _renderbufferIdsToDelete.push_back( targetId );

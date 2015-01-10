@@ -75,6 +75,8 @@ namespace crimild {
                 
                 USE_COLOR_MAP_UNIFORM = 2000,
                 COLOR_MAP_UNIFORM,
+                USE_DEPTH_MAP_UNIFORM,
+                DEPTH_MAP_UNIFORM,
                 USE_SHADOW_MAP_UNIFORM,
                 SHADOW_MAP_UNIFORM,
                 USE_SSAO_MAP_UNIFORM,

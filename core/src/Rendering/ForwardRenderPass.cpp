@@ -56,46 +56,33 @@ ForwardRenderPass::~ForwardRenderPass( void )
 
 void ForwardRenderPass::render( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
-    computeShadowMaps( renderer, renderQueue, camera );
-    
-    if ( _forwardPassBuffer == nullptr ) {
-        int width = renderer->getScreenBuffer()->getWidth();
-        int height = renderer->getScreenBuffer()->getHeight();
-        _forwardPassBuffer = std::make_shared< FrameBufferObject >( width, height );
-        auto result = std::make_shared< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height );
-        _forwardPassResult = result->getTexture();
-        _forwardPassBuffer->getRenderTargets().add( result );
-        _forwardPassBuffer->getRenderTargets().add( std::make_shared< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
-        
-        buildAccumBuffer( width, height );
-    }
-    
 #if 1
-    renderer->bindFrameBuffer( _forwardPassBuffer );
-    
+    computeShadowMaps( renderer, renderQueue, camera );
+
+    auto sceneFBO = renderer->getFrameBuffer( "scene" );
+    if ( sceneFBO == nullptr ) {
+        sceneFBO = createSceneFBO( renderer );
+    }
+
+    renderer->bindFrameBuffer( sceneFBO );
+
     renderShadedObjects( renderer, renderQueue, camera );
     renderTranslucentObjects( renderer, renderQueue, camera );
-    
-    renderer->unbindFrameBuffer( _forwardPassBuffer );
-    
-    if ( getImageEffects().isEmpty() ) {
-        RenderPass::render( renderer, _forwardPassResult, nullptr );
+
+    renderer->unbindFrameBuffer( sceneFBO );
+
+    if ( getImageEffects()->isEmpty() ) {
+        auto colorTarget = sceneFBO->getRenderTargets()->get( "color" );
+        RenderPass::render( renderer, colorTarget->getTexture(), nullptr );
     }
     else {
-        Texture *inputs[] = {
-            _forwardPassResult.get(),
-        };
-        
-        getImageEffects().each( [&]( ImageEffectPtr const &effect, int ) {
-            effect->apply( renderer, 4, inputs, getScreenPrimitive(), _accumBuffer );
+        getImageEffects()->each( [&]( ImageEffectPtr const &effect, int ) {
+            effect->apply( renderer );
         });
-        
-        RenderPass::render( renderer, _accumBufferOutput, nullptr );
     }
 
     // UI elements need to be render on top of any image effect
     renderScreenObjects( renderer, renderQueue, camera );
-
 #else
     for ( auto it : _shadowMaps ) {
         if ( it.second != nullptr ) {
@@ -105,19 +92,34 @@ void ForwardRenderPass::render( RendererPtr const &renderer, RenderQueuePtr cons
 #endif
 }
 
+FrameBufferObjectPtr ForwardRenderPass::createSceneFBO( RendererPtr const &renderer )
+{
+    int width = renderer->getScreenBuffer()->getWidth();
+    int height = renderer->getScreenBuffer()->getHeight();
+
+    auto sceneFBO = std::make_shared< FrameBufferObject >( width, height );
+    sceneFBO->getRenderTargets()->add( "color", std::make_shared< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
+    sceneFBO->getRenderTargets()->add( "depth", std::make_shared< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER_AND_TEXTURE, width, height ) );
+
+    renderer->addFrameBuffer( "scene", sceneFBO );
+    return sceneFBO;
+}
+
 void ForwardRenderPass::buildAccumBuffer( int width, int height )
 {
+    /*
     _accumBuffer = std::make_shared< FrameBufferObject >( width, height );
     _accumBuffer->getRenderTargets().add( std::make_shared< RenderTarget >( RenderTarget::Type::DEPTH_16, RenderTarget::Output::RENDER, width, height ) );
     
     auto colorTarget = std::make_shared< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height );
     _accumBufferOutput = colorTarget->getTexture();
     _accumBuffer->getRenderTargets().add( colorTarget );
+    */
 }
 
 void ForwardRenderPass::computeShadowMaps( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
-    auto program = renderer->getDepthProgram();
+    auto program = renderer->getShaderProgram( "depth" );
     if ( program == nullptr ) {
         return;
     }
@@ -175,7 +177,7 @@ void ForwardRenderPass::computeShadowMaps( RendererPtr const &renderer, RenderQu
 
 void ForwardRenderPass::renderShadedObjects( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
-    auto program = renderer->getForwardPassProgram();
+    auto program = renderer->getShaderProgram( "forward" );
 
     // bind program
     renderer->bindProgram( program );

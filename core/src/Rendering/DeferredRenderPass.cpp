@@ -30,11 +30,16 @@
 #include "Rendering/VisibilitySet.hpp"
 #include "Rendering/FrameBufferObject.hpp"
 #include "Rendering/RenderQueue.hpp"
+#include "Rendering/ImageEffect.hpp"
+
 #include "SceneGraph/Geometry.hpp"
+
 #include "Components/RenderStateComponent.hpp"
 #include "Components/SkinComponent.hpp"
 #include "Components/JointComponent.hpp"
+
 #include "Primitives/QuadPrimitive.hpp"
+
 #include "Foundation/Log.hpp"
 
 using namespace crimild;
@@ -52,30 +57,33 @@ DeferredRenderPass::~DeferredRenderPass( void )
 void DeferredRenderPass::render( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
     /*
+#if 1
     computeShadowMaps( renderer, renderQueue, camera );
     
-#if 1
-    renderToGBuffer( renderer, renderQueue, camera );
-    composeFrame( renderer, renderQueue, camera );
+    auto sceneFBO = renderer->getFrameBuffer( "scene" );
+    if ( sceneFBO == nullptr ) {
+        sceneFBO = createSceneFBO( renderer );
+    }
     
-    if ( getImageEffects().isEmpty() ) {
-        RenderPass::render( renderer, _frameBufferOutput.get(), nullptr );
+    renderer->bindFrameBuffer( sceneFBO );
+    
+    renderShadedObjects( renderer, renderQueue, camera );
+    renderTranslucentObjects( renderer, renderQueue, camera );
+    
+    renderer->unbindFrameBuffer( sceneFBO );
+    
+    if ( getImageEffects()->isEmpty() ) {
+        auto colorTarget = sceneFBO->getRenderTargets()->get( "color" );
+        RenderPass::render( renderer, colorTarget->getTexture(), nullptr );
     }
     else {
-        Texture *inputs[] = {
-            _frameBufferOutput.get(),
-            _gBufferColorOutput.get(),
-            _gBufferPositionOutput.get(),
-            _gBufferNormalOutput.get(),
-            _gBufferEmissiveOutput.get(),
-        };
-        
-        getImageEffects().each( [&]( ImageEffect *effect, int ) {
-            effect->apply( renderer, 5, inputs, getScreenPrimitive(), _accumBuffer.get() );
+        getImageEffects()->each( [&]( ImageEffectPtr const &effect, int ) {
+            effect->apply( renderer );
         });
-        
-        RenderPass::render( renderer, _accumBufferOutput.get(), nullptr );
     }
+    
+    // UI elements need to be render on top of any image effect
+    renderScreenObjects( renderer, renderQueue, camera );
 #else
     for ( auto it : _shadowMaps ) {
         if ( it.second != nullptr ) {
@@ -84,6 +92,52 @@ void DeferredRenderPass::render( RendererPtr const &renderer, RenderQueuePtr con
     }
 #endif
      */
+    
+    computeShadowMaps( renderer, renderQueue, camera );
+    
+#if 1
+    renderToGBuffer( renderer, renderQueue, camera );
+    composeFrame( renderer, renderQueue, camera );
+    
+    if ( getImageEffects()->isEmpty() ) {
+        auto sceneFBO = renderer->getFrameBuffer( "scene" );
+        auto colorTarget = sceneFBO->getRenderTargets()->get( "color" );
+        RenderPass::render( renderer, colorTarget->getTexture(), nullptr );
+    }
+    else {
+        getImageEffects()->each( [&]( ImageEffectPtr const &effect, int ) {
+            effect->apply( renderer );
+        });
+    }
+    
+    // UI elements need to be render on top of any image effect
+    renderScreenObjects( renderer, renderQueue, camera );
+    
+//    if ( getImageEffects().isEmpty() ) {
+//        RenderPass::render( renderer, _frameBufferOutput.get(), nullptr );
+//    }
+//    else {
+//        Texture *inputs[] = {
+//            _frameBufferOutput.get(),
+//            _gBufferColorOutput.get(),
+//            _gBufferPositionOutput.get(),
+//            _gBufferNormalOutput.get(),
+//            _gBufferEmissiveOutput.get(),
+//        };
+//        
+//        getImageEffects().each( [&]( ImageEffect *effect, int ) {
+//            effect->apply( renderer, 5, inputs, getScreenPrimitive(), _accumBuffer.get() );
+//        });
+//        
+//        RenderPass::render( renderer, _accumBufferOutput.get(), nullptr );
+//    }
+#else
+    for ( auto it : _shadowMaps ) {
+        if ( it.second != nullptr ) {
+            RenderPass::render( renderer, it.second->getTexture(), nullptr );
+        }
+    }
+#endif
 }
 
 void DeferredRenderPass::buildAccumBuffer( int width, int height )
@@ -98,7 +152,27 @@ void DeferredRenderPass::buildAccumBuffer( int width, int height )
      */
 }
 
-void DeferredRenderPass::buildGBuffer( int width, int height )
+FrameBufferObjectPtr DeferredRenderPass::getGBuffer( const RendererPtr &renderer )
+{
+    auto gBuffer = renderer->getFrameBuffer( "g_buffer" );
+    if ( gBuffer != nullptr ) {
+        return gBuffer;
+    }
+    
+    int width = renderer->getScreenBuffer()->getWidth();
+    int height = renderer->getScreenBuffer()->getHeight();
+    gBuffer = std::make_shared< FrameBufferObject >( width, height );
+    
+    gBuffer->getRenderTargets()->add( "depth", std::make_shared< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER_AND_TEXTURE, width, height ) );
+    gBuffer->getRenderTargets()->add( "color", std::make_shared< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height, true ) );
+    gBuffer->getRenderTargets()->add( "positions", std::make_shared< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height, true ) );
+    gBuffer->getRenderTargets()->add( "normals", std::make_shared< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height, true ) );
+    gBuffer->getRenderTargets()->add( "emissive", std::make_shared< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height, true ) );
+    
+    return  gBuffer;
+}
+
+void DeferredRenderPass::buildGBuffer( RendererPtr const &renderer )
 {
     /*
     _gBuffer.set( new FrameBufferObject( width, height ) );
@@ -133,6 +207,79 @@ void DeferredRenderPass::buildGBuffer( int width, int height )
 
 void DeferredRenderPass::renderToGBuffer( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
+    auto gBuffer = getGBuffer( renderer );
+    
+    renderer->bindFrameBuffer( gBuffer );
+    
+    auto program = renderer->getShaderProgram( "deferred" );
+    
+    // bind program
+    renderer->bindProgram( program );
+    
+    const Matrix4f &projection = camera->getProjectionMatrix();
+    const Matrix4f &view = camera->getViewMatrix();
+    
+    // bind shadow maps
+    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::USE_SHADOW_MAP_UNIFORM ), false );
+    for ( auto it : _shadowMaps ) {
+        if ( it.second != nullptr ) {
+            renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_SOURCE_PROJECTION_MATRIX_UNIFORM ), it.second->getLightProjectionMatrix() );
+            renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_SOURCE_VIEW_MATRIX_UNIFORM ), it.second->getLightViewMatrix() );
+            renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::USE_SHADOW_MAP_UNIFORM ), true );
+            renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LINEAR_DEPTH_CONSTANT_UNIFORM ), it.second->getLinearDepthConstant() );
+            renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::SHADOW_MAP_UNIFORM ), it.second->getTexture() );
+        }
+    }
+    
+    // bind lights
+    renderQueue->each( [&]( LightPtr const &light, int ) {
+        renderer->bindLight( program, light );
+    });
+    
+    renderQueue->each( renderQueue->getOpaqueObjects(), [&]( MaterialPtr const &material, RenderQueue::PrimitiveMap const &primitives ) {
+        // bind material properties
+        renderer->bindMaterial( program, material );
+        
+        for ( auto it : primitives ) {
+            auto primitive = it.first;
+            
+            // bind vertex and index buffers
+            renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
+            renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
+            
+            for ( auto geometryIt : it.second ) {
+                auto world = geometryIt.second;
+                renderer->applyTransformations( program, projection, view, world.computeModelMatrix(), world.computeNormalMatrix() );
+                renderer->drawPrimitive( program, primitive );
+            }
+            
+            // unbind primitive buffers
+            renderer->unbindVertexBuffer( program, primitive->getVertexBuffer() );
+            renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
+        }
+        
+        // unbind material properties
+        renderer->unbindMaterial( program, material );
+        
+    });
+    
+    // unbind lights
+    renderQueue->each( [&]( LightPtr const &light, int ) {
+        renderer->unbindLight( program, light );
+    });
+    
+    // unbind shadow maps
+    for ( auto it : _shadowMaps ) {
+        if ( it.second != nullptr ) {
+            renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::SHADOW_MAP_UNIFORM ), it.second->getTexture() );
+        }
+    }
+    
+    // unbind program
+    renderer->unbindProgram( program );
+    
+    renderer->unbindFrameBuffer( gBuffer );
+    
     /*
     if ( _gBuffer == nullptr ) {
         int width = renderer->getScreenBuffer()->getWidth();

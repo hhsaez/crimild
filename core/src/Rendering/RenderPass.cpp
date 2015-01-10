@@ -40,7 +40,8 @@
 using namespace crimild;
 
 RenderPass::RenderPass( void )
-    : _screen( std::make_shared< QuadPrimitive >( 2.0f, 2.0f, VertexFormat::VF_P3_UV2, Vector2f( 0.0f, 1.0f ), Vector2f( 1.0f, -1.0f ) ) )
+    : _screen( std::make_shared< QuadPrimitive >( 2.0f, 2.0f, VertexFormat::VF_P3_UV2, Vector2f( 0.0f, 1.0f ), Vector2f( 1.0f, -1.0f ) ) ),
+      _imageEffects( std::make_shared< SharedObjectList< ImageEffect >>() )
 {
 
 }

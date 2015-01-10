@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,61 +25,25 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_RENDERING_SHADER_UNIFORM_IMPL_
-#define CRIMILD_RENDERING_SHADER_UNIFORM_IMPL_
+#ifndef CRIMILD_GL3_RENDERING_IMAGE_EFFECT_SEPIA_TONE_
+#define CRIMILD_GL3_RENDERING_IMAGE_EFFECT_SEPIA_TONE_
 
-#include "ShaderUniform.hpp"
-#include "Renderer.hpp"
-#include "Mathematics/Matrix.hpp"
-#include "Mathematics/Vector.hpp"
+#include <Crimild.hpp>
 
 namespace crimild {
     
-	template< typename T >
-	class ShaderUniformImpl : public ShaderUniform {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( ShaderUniformImpl< T > );
-		
-	public:
-		ShaderUniformImpl( std::string name, const T &value ) 
-			: ShaderUniform( name ) 
-		{
-			setValue( value );
-		}
-
-		virtual ~ShaderUniformImpl( void ) 
-		{ 
-		}
-
-		void setValue( const T &value ) { _value = value; }
-		const T &getValue( void ) const { return _value; }
-
-		virtual void onBind( std::shared_ptr< Renderer > const &renderer ) override
-		{
-			renderer->bindUniform( getLocation(), getValue() );
-		}
-
-	private:
-		T _value;
-	};
-
-	typedef ShaderUniformImpl< bool > BoolUniform;
-    using BoolUniformPtr = std::shared_ptr< BoolUniform >;
+    namespace gl3 {
+        
+        class SepiaToneImageEffect : public ImageEffect {
+        public:
+            SepiaToneImageEffect( void );
+            virtual ~SepiaToneImageEffect( void );
+            
+            virtual void apply( crimild::RendererPtr const &renderer );
+        };
+        
+    }
     
-	typedef ShaderUniformImpl< int > IntUniform;
-    using IntUniformPtr = std::shared_ptr< IntUniform >;
-    
-	typedef ShaderUniformImpl< float > FloatUniform;
-    using FloatUniformPtr = std::shared_ptr< FloatUniform >;
-    
-	typedef ShaderUniformImpl< Vector3f > Vector3fUniform;
-    using Vector3fUniformPtr = std::shared_ptr< Vector3fUniform >;
-
-	typedef ShaderUniformImpl< Vector2f > Vector2fUniform;
-    using Vector2fUniformPtr = std::shared_ptr< Vector2fUniform >;
-
-	typedef ShaderUniformImpl< Matrix3f > Matrix3fUniform;
-    using Matrix3fUniformPtr = std::shared_ptr< Matrix3fUniform >;
-
 }
 
 #endif

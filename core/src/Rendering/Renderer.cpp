@@ -32,6 +32,8 @@
 #include "Rendering/RenderQueue.hpp"
 #include "Rendering/FrameBufferObject.hpp"
 
+#include "Primitives/QuadPrimitive.hpp"
+
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "SceneGraph/Light.hpp"
@@ -43,6 +45,7 @@ using namespace crimild;
 
 Renderer::Renderer( void )
 	: _lightCount( 0 ),
+	  _screenPrimitive( std::make_shared< QuadPrimitive >( 2.0f, 2.0f, VertexFormat::VF_P3_UV2, Vector2f( 0.0f, 1.0f ), Vector2f( 1.0f, -1.0f ) ) ),
       _shaderProgramCatalog( std::make_shared< Catalog< ShaderProgram >>() ),
 	  _textureCatalog( std::make_shared< Catalog< Texture >>() ),
 	  _vertexBufferObjectCatalog( std::make_shared< Catalog< VertexBufferObject >>() ),
@@ -56,6 +59,16 @@ Renderer::Renderer( void )
 Renderer::~Renderer( void )
 {
     
+}
+
+void Renderer::addFrameBuffer( std::string name, FrameBufferObjectPtr const &fbo )
+{
+	_framebuffers[ name ] = fbo;
+}
+
+FrameBufferObjectPtr Renderer::getFrameBuffer( std::string name )
+{
+	return _framebuffers[ name ];
 }
 
 void Renderer::beginRender( void )
@@ -76,21 +89,6 @@ void Renderer::render( RenderQueuePtr const &renderQueue, RenderPassPtr const &r
 {
     renderPass->render( getShared< Renderer >(), renderQueue, renderQueue->getCamera() );
 }
-
-/*
-void Renderer::render( VisibilitySetPtr const &vs, RenderPassPtr const &renderPass )
-{
-	auto camera = vs->getCamera();
-	auto pass = renderPass != nullptr ? renderPass : camera->getRenderPass();
-	pass->render( getShared< Renderer >(), vs, camera );
-}
-
-void Renderer::render( GeometryPtr const &geometry, CameraPtr const &camera, RenderPassPtr const &renderPass )
-{
-	auto pass = renderPass != nullptr ? renderPass : camera->getRenderPass();
-	pass->render( getShared< Renderer >(), geometry, camera );
-}
- */
 
 void Renderer::bindFrameBuffer( FrameBufferObjectPtr const &fbo )
 {
@@ -231,5 +229,19 @@ void Renderer::applyTransformations( ShaderProgramPtr const &program, const Matr
 void Renderer::restoreTransformations( ShaderProgramPtr const &program, GeometryPtr const &geometry, CameraPtr const &camera )
 {
 
+}
+
+void Renderer::drawScreenPrimitive( ShaderProgramPtr const &program )
+{
+    // bind vertex and index buffers
+    bindVertexBuffer( program, _screenPrimitive->getVertexBuffer() );
+    bindIndexBuffer( program, _screenPrimitive->getIndexBuffer() );
+
+    // draw primitive
+    drawPrimitive( program, _screenPrimitive );
+     
+    // unbind primitive buffers
+    unbindVertexBuffer( program, _screenPrimitive->getVertexBuffer() );
+    unbindIndexBuffer( program, _screenPrimitive->getIndexBuffer() );     
 }
 

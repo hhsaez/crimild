@@ -35,6 +35,8 @@
 #include "Mathematics/Vector.hpp"
 #include "Mathematics/Matrix.hpp"
 
+#include <map>
+
 namespace crimild {
     
     class AlphaState;
@@ -69,8 +71,12 @@ namespace crimild {
         void setScreenBuffer( std::shared_ptr< FrameBufferObject > const &screenBuffer ) { _screenBuffer = screenBuffer; }
 		std::shared_ptr< FrameBufferObject > &getScreenBuffer( void ) { return _screenBuffer; }
 
+		void addFrameBuffer( std::string name, std::shared_ptr< FrameBufferObject > const &fbo );
+		std::shared_ptr< FrameBufferObject > getFrameBuffer( std::string name );
+
 	private:
 		std::shared_ptr< FrameBufferObject > _screenBuffer;
+		std::map< std::string, std::shared_ptr< FrameBufferObject >> _framebuffers;
 
 	public:
         virtual void beginRender( void );
@@ -97,6 +103,7 @@ namespace crimild {
 		virtual void bindUniform( std::shared_ptr< ShaderLocation > const &location, int value ) = 0;
 		virtual void bindUniform( std::shared_ptr< ShaderLocation > const &location, float value ) = 0;
 		virtual void bindUniform( std::shared_ptr< ShaderLocation > const &location, const Vector3f &vector ) = 0;
+		virtual void bindUniform( std::shared_ptr< ShaderLocation > const &location, const Vector2f &vector ) = 0;
 		virtual void bindUniform( std::shared_ptr< ShaderLocation > const &location, const RGBAColorf &color ) = 0;
 		virtual void bindUniform( std::shared_ptr< ShaderLocation > const &location, const Matrix4f &matrix ) = 0;
 
@@ -139,15 +146,20 @@ namespace crimild {
 		 */
 		virtual void drawBuffers( std::shared_ptr< ShaderProgram > const &program, Primitive::Type type, std::shared_ptr< VertexBufferObject > const &vbo, unsigned int count ) { }
 
+		virtual void drawScreenPrimitive( std::shared_ptr< ShaderProgram > const &program );
+
+	private:
+		PrimitivePtr _screenPrimitive;
+
 	public:
-        virtual std::shared_ptr< ShaderProgram > getDepthProgram( void ) { return std::shared_ptr< ShaderProgram >(); }
-        virtual std::shared_ptr< ShaderProgram > getForwardPassProgram( void ) { return std::shared_ptr< ShaderProgram >(); }
-        virtual std::shared_ptr< ShaderProgram > getDeferredPassProgram( void ) { return std::shared_ptr< ShaderProgram >(); }
-        virtual std::shared_ptr< ShaderProgram > getShaderProgram( const char *name ) { return std::shared_ptr< ShaderProgram >(); }
+		virtual void addShaderProgram( std::string key, std::shared_ptr< ShaderProgram > const &program ) { _programs[ key ] = program; }
+        virtual std::shared_ptr< ShaderProgram > getShaderProgram( std::string key ) { return _programs[ key ]; }
+
         virtual std::shared_ptr< ShaderProgram > getFallbackProgram( std::shared_ptr< Material > const &, std::shared_ptr< Geometry > const &, std::shared_ptr< Primitive > const & ) { return std::shared_ptr< ShaderProgram >(); }
 
 	public:
 		std::shared_ptr< Material > _defaultMaterial;
+		std::map< std::string, std::shared_ptr< ShaderProgram >> _programs;
 
 	public:
         std::shared_ptr< Catalog< ShaderProgram > > &getShaderProgramCatalog( void ) { return _shaderProgramCatalog; }

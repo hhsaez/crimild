@@ -32,7 +32,7 @@
 #include "Texture.hpp"
 
 #include "Mathematics/Vector.hpp"
-#include "Foundation/SharedObjectList.hpp"
+#include "Foundation/SharedObjectMap.hpp"
 
 #include <memory>
 
@@ -56,6 +56,7 @@ namespace crimild {
         
     public:
         RenderTarget( Type type, Output output, int width, int height );
+        RenderTarget( Type type, Output output, int width, int height, bool floatTextureHint );
         virtual ~RenderTarget( void );
         
         Type getType( void ) const { return _type; }
@@ -82,6 +83,8 @@ namespace crimild {
     };
     
     using RenderTargetPtr = std::shared_ptr< RenderTarget >;
+    using RenderTargetMap = SharedObjectMap< RenderTarget >;
+    using RenderTargetMapPtr = std::shared_ptr< RenderTargetMap >;
 
 	class FrameBufferObject : public Catalog< FrameBufferObject >::Resource {
 	public:
@@ -93,14 +96,14 @@ namespace crimild {
 
 		void setClearColor( const RGBAColorf &color ) { _clearColor = color; }
 		const RGBAColorf &getClearColor( void ) const { return _clearColor; }
-        
-        SharedObjectList< RenderTarget > &getRenderTargets( void ) { return _renderTargets; }
 
+        RenderTargetMapPtr &getRenderTargets( void ) { return _renderTargets; }
+        
 	private:
 		int _width;
 		int _height;
 		RGBAColorf _clearColor;
-        SharedObjectList< RenderTarget > _renderTargets;
+        RenderTargetMapPtr _renderTargets;
 	};
     
     using FrameBufferObjectPtr = std::shared_ptr< FrameBufferObject >;

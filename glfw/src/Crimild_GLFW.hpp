@@ -40,8 +40,10 @@
 #include "Rendering/GL3/Programs/SignedDistanceFieldShaderProgram.hpp"
 #include "Rendering/GL3/Programs/SkinningShaderProgram.hpp"
 
+#include "Rendering/GL3/ImageEffects/DepthOfFieldImageEffect.hpp"
 #include "Rendering/GL3/ImageEffects/SSAOImageEffect.hpp"
 #include "Rendering/GL3/ImageEffects/GlowImageEffect.hpp"
+#include "Rendering/GL3/ImageEffects/SepiaToneImageEffect.hpp"
 
 #include "Rendering/GL3/Library/FlatMaterial.hpp"
 #include "Rendering/GL3/Library/FlatShaderProgram.hpp"

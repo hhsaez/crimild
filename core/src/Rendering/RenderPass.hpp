@@ -39,7 +39,6 @@
 namespace crimild {
     
     class Camera;
-//    class FrameBufferObject;
     class Geometry;
     class ImageEffect;
     class Material;
@@ -47,7 +46,6 @@ namespace crimild {
     class Renderer;
     class ShaderProgram;
     class Texture;
-//    class VisibilitySet;
 
 	class RenderPass : public SharedObject {
 	public:
@@ -56,14 +54,9 @@ namespace crimild {
 
         virtual void render( std::shared_ptr< Renderer > const &renderer, RenderQueuePtr const &renderQueue, std::shared_ptr< Camera > const &camera );
         virtual void render( std::shared_ptr< Renderer > const &renderer, RenderQueuePtr const &renderQueue, std::shared_ptr< Camera > const &camera, RenderQueue::MaterialMap const &objects );
-        
-//		virtual void render( std::shared_ptr< Renderer > const &renderer, std::shared_ptr< VisibilitySet > const &vs, std::shared_ptr< Camera > const &camera );
-//		virtual void render( std::shared_ptr< Renderer > const &renderer, std::shared_ptr< Geometry > const &geometry, std::shared_ptr< Camera > const &camera );
-//		virtual void render( std::shared_ptr< Renderer > const &renderer, std::shared_ptr< Geometry > const &geometry, std::shared_ptr< Primitive > const &primitive, std::shared_ptr< Material > const &material, std::shared_ptr< Camera > const &camera );
         virtual void render( std::shared_ptr< Renderer > const &renderer, std::shared_ptr< Texture > const &texture, std::shared_ptr< ShaderProgram > const &program );
-//		virtual void render( std::shared_ptr< Renderer > const &renderer, std::shared_ptr< FrameBufferObject > const &fbo, std::shared_ptr< ShaderProgram > const &program );
         
-        SharedObjectList< ImageEffect > &getImageEffects( void ) { return _imageEffects; }
+        std::shared_ptr< SharedObjectList< ImageEffect >> &getImageEffects( void ) { return _imageEffects; }
         
     protected:
         std::shared_ptr< Primitive > &getScreenPrimitive( void ) { return _screen; }
@@ -74,7 +67,7 @@ namespace crimild {
 
 	private:
 		std::shared_ptr< Primitive > _screen;
-        SharedObjectList< ImageEffect > _imageEffects;
+        std::shared_ptr< SharedObjectList< ImageEffect >> _imageEffects;
 	};
     
     using RenderPassPtr = std::shared_ptr< RenderPass >;

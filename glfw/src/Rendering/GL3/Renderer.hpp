@@ -51,6 +51,7 @@ namespace crimild {
 			virtual void bindUniform( ShaderLocationPtr const &location, int value ) override;
 			virtual void bindUniform( ShaderLocationPtr const &location, float value ) override;
 			virtual void bindUniform( ShaderLocationPtr const &location, const Vector3f &vector ) override;
+			virtual void bindUniform( ShaderLocationPtr const &location, const Vector2f &vector ) override;
 			virtual void bindUniform( ShaderLocationPtr const &location, const RGBAColorf &color ) override;
 			virtual void bindUniform( ShaderLocationPtr const &location, const Matrix4f &matrix ) override;
 
@@ -60,14 +61,7 @@ namespace crimild {
 			virtual void drawPrimitive( ShaderProgramPtr const &program, PrimitivePtr const &primitive ) override;
 			virtual void drawBuffers( ShaderProgramPtr const &program, Primitive::Type type, VertexBufferObjectPtr const &vbo, unsigned int count ) override;
 
-            virtual ShaderProgramPtr getDepthProgram( void ) override;
-            virtual ShaderProgramPtr getForwardPassProgram( void ) override;
-            virtual ShaderProgramPtr getDeferredPassProgram( void ) override;
-            virtual ShaderProgramPtr getShaderProgram( const char *name ) override;
 			virtual ShaderProgramPtr getFallbackProgram( MaterialPtr const &material, GeometryPtr const &geometry, PrimitivePtr const &primitive ) override;
-
-		private:
-			std::map< std::string, ShaderProgramPtr > _programs;
 		};
 
 	}

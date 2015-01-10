@@ -31,12 +31,15 @@
 #include "IndexBufferObjectCatalog.hpp"
 #include "FrameBufferObjectCatalog.hpp"
 #include "TextureCatalog.hpp"
+
 #include "Library/FlatShaderProgram.hpp"
 #include "Library/GouraudShaderProgram.hpp"
 #include "Library/ColorShaderProgram.hpp"
 #include "Library/PhongShaderProgram.hpp"
 #include "Library/ScreenShaderProgram.hpp"
 #include "Library/TextureShaderProgram.hpp"
+#include "Library/SepiaToneShaderProgram.hpp"
+
 #include "Programs/DepthShaderProgram.hpp"
 #include "Programs/ForwardRenderShaderProgram.hpp"
 #include "Programs/DeferredRenderShaderProgram.hpp"
@@ -62,23 +65,22 @@ gl3::Renderer::Renderer( FrameBufferObjectPtr const &screenBuffer )
 	setFrameBufferObjectCatalog( std::make_shared< gl3::FrameBufferObjectCatalog >( this ) );
 	setTextureCatalog( std::make_shared< gl3::TextureCatalog >() );
 
-	_programs[ "flat" ] = std::make_shared< FlatShaderProgram >();
-	_programs[ "gouraud" ] = std::make_shared< GouraudShaderProgram >();
-	_programs[ "phong" ] = std::make_shared< PhongShaderProgram >();
-	_programs[ "color" ] = std::make_shared< ColorShaderProgram >();
-	_programs[ "screen" ] = std::make_shared< ScreenShaderProgram >();
-	_programs[ "texture" ] = std::make_shared< TextureShaderProgram >();
-    
-    _programs[ "depth" ] = std::make_shared< DepthShaderProgram >();
-    _programs[ "forward" ] = std::make_shared< ForwardRenderShaderProgram >();
-    _programs[ "deferred" ] = std::make_shared< DeferredRenderShaderProgram >();
-    _programs[ "deferredCompose" ] = std::make_shared< DeferredComposeRenderShaderProgram >();
-    _programs[ "ssao" ] = std::make_shared< SSAOShaderProgram >();
-    _programs[ "ssaoBlend" ] = std::make_shared< SSAOBlendShaderProgram >();
-    _programs[ "blend" ] = std::make_shared< BlendShaderProgram >();
-    _programs[ "blur" ] = std::make_shared< BlurShaderProgram >();
-    _programs[ "gaussianBlur" ] = std::make_shared< GaussianBlurShaderProgram >();
-    _programs[ "sdf" ] = std::make_shared< SignedDistanceFieldShaderProgram >();
+	addShaderProgram( "flat", std::make_shared< FlatShaderProgram >() );
+	addShaderProgram( "gouraud", std::make_shared< GouraudShaderProgram >() );
+	addShaderProgram( "phong", std::make_shared< PhongShaderProgram >() );
+	addShaderProgram( "color", std::make_shared< ColorShaderProgram >() );
+	addShaderProgram( "screen", std::make_shared< ScreenShaderProgram >() );
+	addShaderProgram( "texture", std::make_shared< TextureShaderProgram >() );
+    addShaderProgram( "depth", std::make_shared< DepthShaderProgram >() );
+    addShaderProgram( "forward", std::make_shared< ForwardRenderShaderProgram >() );
+    addShaderProgram( "deferred", std::make_shared< DeferredRenderShaderProgram >() );
+    addShaderProgram( "deferredCompose", std::make_shared< DeferredComposeRenderShaderProgram >() );
+    addShaderProgram( "ssao", std::make_shared< SSAOShaderProgram >() );
+    addShaderProgram( "ssaoBlend", std::make_shared< SSAOBlendShaderProgram >() );
+    addShaderProgram( "blend", std::make_shared< BlendShaderProgram >() );
+    addShaderProgram( "blur", std::make_shared< BlurShaderProgram >() );
+    addShaderProgram( "gaussianBlur", std::make_shared< GaussianBlurShaderProgram >() );
+    addShaderProgram( "sdf", std::make_shared< SignedDistanceFieldShaderProgram >() );
 
 	setScreenBuffer( screenBuffer );
 }
@@ -165,6 +167,17 @@ void gl3::Renderer::bindUniform( ShaderLocationPtr const &location, const Vector
 
 	if ( location != nullptr && location->isValid() ) {
 		glUniform3fv( location->getLocation(), 1, static_cast< const GLfloat * >( vector.getData() ) );
+	}
+
+	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+}
+
+void gl3::Renderer::bindUniform( ShaderLocationPtr const &location, const Vector2f &vector )
+{
+	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+
+	if ( location != nullptr && location->isValid() ) {
+		glUniform2fv( location->getLocation(), 1, static_cast< const GLfloat * >( vector.getData() ) );
 	}
 
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
@@ -283,45 +296,25 @@ void gl3::Renderer::drawBuffers( ShaderProgramPtr const &program, Primitive::Typ
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-ShaderProgramPtr gl3::Renderer::getDepthProgram( void )
-{
-    return _programs[ "depth" ];
-}
-
-ShaderProgramPtr gl3::Renderer::getForwardPassProgram( void )
-{
-    return _programs[ "forward" ];
-}
-
-ShaderProgramPtr gl3::Renderer::getDeferredPassProgram( void )
-{
-    return _programs[ "deferred" ];
-}
-
-ShaderProgramPtr gl3::Renderer::getShaderProgram( const char *name )
-{
-    return _programs[ name ];
-}
-
 ShaderProgramPtr gl3::Renderer::getFallbackProgram( MaterialPtr const &material, GeometryPtr const &geometry, PrimitivePtr const &primitive )
 {
 	if ( material == nullptr || geometry == nullptr || primitive == nullptr ) {
-		return _programs[ "screen" ];
+		return getShaderProgram( "screen" );
 	}
 
 	if ( geometry->getComponent< RenderStateComponent >()->hasLights() && primitive->getVertexBuffer()->getVertexFormat().hasNormals() ) {
-		return _programs[ "phong" ];
+		return getShaderProgram( "phong" );
 	}
 
 	if ( material->getColorMap() && primitive->getVertexBuffer()->getVertexFormat().hasTextureCoords() ) {
-		return _programs[ "texture" ];
+		return getShaderProgram( "texture" );
 	}
 
 	if ( primitive->getVertexBuffer()->getVertexFormat().hasColors() ) {
-		return _programs[ "color" ];
+		return getShaderProgram( "color" );
 	}
 
-	return _programs[ "flat" ];
+	return getShaderProgram( "flat" );
 }
 
 void gl3::Renderer::setAlphaState( AlphaStatePtr const &state )
