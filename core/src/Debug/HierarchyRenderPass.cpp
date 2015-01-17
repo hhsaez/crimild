@@ -35,15 +35,15 @@
 using namespace crimild;
 
 HierarchyRenderPass::HierarchyRenderPass( void )
-    : _actualRenderPass( std::make_shared< RenderPass >() ),
-      _debugMaterial( std::make_shared< Material >() )
+    : _actualRenderPass( crimild::alloc< RenderPass >() ),
+      _debugMaterial( crimild::alloc< Material >() )
 {
 	_renderBoundings = false;
 }
 
 HierarchyRenderPass::HierarchyRenderPass( RenderPassPtr const &actualRenderPass )
 	: _actualRenderPass( actualRenderPass ),
-      _debugMaterial( std::make_shared< Material >() )
+      _debugMaterial( crimild::alloc< Material >() )
 {
 	_renderBoundings = false;
 }

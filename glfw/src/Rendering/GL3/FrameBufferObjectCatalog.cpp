@@ -138,19 +138,19 @@ void gl3::FrameBufferObjectCatalog::load( FrameBufferObjectPtr const &fbo )
                     break;
 
                 case RenderTarget::Type::DEPTH_32:
-                    internalFormat = GL_DEPTH_COMPONENT32;
+                    internalFormat = target->useFloatTexture() ? GL_DEPTH_COMPONENT32F : GL_DEPTH_COMPONENT32;
                     attachment = GL_DEPTH_ATTACHMENT;
                     textureFormat = GL_DEPTH_COMPONENT;
                     break;
 
                 case RenderTarget::Type::COLOR_RGB:
-                    internalFormat = GL_RGB8;
+                    internalFormat = target->useFloatTexture() ? GL_RGB16F : GL_RGB8;
                     textureFormat = GL_RGB;
                     attachment = GL_COLOR_ATTACHMENT0 + colorAttachmentOffset++;
                     break;
 
                 case RenderTarget::Type::COLOR_RGBA:
-                    internalFormat = GL_RGBA8;
+                    internalFormat = target->useFloatTexture() ? GL_RGBA16F : GL_RGBA8;
                     textureFormat = GL_RGBA;
                     attachment = GL_COLOR_ATTACHMENT0 + colorAttachmentOffset++;
                     break;

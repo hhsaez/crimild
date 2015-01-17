@@ -42,7 +42,7 @@ namespace crimild {
 			virtual ~ParticleSystemShaderProgram( void );
 		};
 
-		typedef std::shared_ptr< ParticleSystemShaderProgram > ParticleSystemShaderProgramPtr;
+		typedef SharedPointer< ParticleSystemShaderProgram > ParticleSystemShaderProgramPtr;
 
 	}
 

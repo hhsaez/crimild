@@ -80,7 +80,7 @@ namespace crimild {
 		/**
 			\brief Invoked only if debug rendering is enabled
 		*/
-        virtual void renderDebugInfo( std::shared_ptr< Renderer > const &renderer, std::shared_ptr< Camera > const &camera );
+        virtual void renderDebugInfo( SharedPointer< Renderer > const &renderer, SharedPointer< Camera > const &camera );
 
 		/**
 		   \brief Invoked once when component is detached from a node
@@ -89,7 +89,7 @@ namespace crimild {
 
 	};
     
-    using NodeComponentPtr = std::shared_ptr< NodeComponent >;
+    using NodeComponentPtr = SharedPointer< NodeComponent >;
 
 }
 

@@ -44,7 +44,7 @@ namespace crimild {
 		std::string _fileName;
 	};
     
-    using LoadSceneMessagePtr = std::shared_ptr< LoadSceneMessage >;
+    using LoadSceneMessagePtr = SharedPointer< LoadSceneMessage >;
 
 	class ReloadSceneMessage : public DeferredMessage {
 	public:
@@ -52,7 +52,7 @@ namespace crimild {
 		virtual ~ReloadSceneMessage( void ) { }
 	};
     
-    using ReloadSceneMessagePtr = std::shared_ptr< ReloadSceneMessage >;
+    using ReloadSceneMessagePtr = SharedPointer< ReloadSceneMessage >;
 
 	class SceneLoadedMessage : public DeferredMessage {
 	public:
@@ -60,7 +60,7 @@ namespace crimild {
 		virtual ~SceneLoadedMessage( void ) { }
 	};
     
-    using SceneLoadedMessagePtr = std::shared_ptr< SceneLoadedMessage >;
+    using SceneLoadedMessagePtr = SharedPointer< SceneLoadedMessage >;
 
 	class LoadSceneTask : 
 		public Task,

@@ -40,8 +40,8 @@
 using namespace crimild;
 
 RenderPass::RenderPass( void )
-    : _screen( std::make_shared< QuadPrimitive >( 2.0f, 2.0f, VertexFormat::VF_P3_UV2, Vector2f( 0.0f, 1.0f ), Vector2f( 1.0f, -1.0f ) ) ),
-      _imageEffects( std::make_shared< SharedObjectList< ImageEffect >>() )
+    : _screen( crimild::alloc< QuadPrimitive >( 2.0f, 2.0f, VertexFormat::VF_P3_UV2, Vector2f( 0.0f, 1.0f ), Vector2f( 1.0f, -1.0f ) ) ),
+      _imageEffects( crimild::alloc< SharedObjectList< ImageEffect >>() )
 {
 
 }
@@ -58,7 +58,7 @@ void RenderPass::render( RendererPtr const &renderer, RenderQueuePtr const &rend
     renderScreenObjects( renderer, renderQueue, camera );
 }
 
-void RenderPass::render( std::shared_ptr< Renderer > const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera, RenderQueue::MaterialMap const &objects )
+void RenderPass::render( SharedPointer< Renderer > const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera, RenderQueue::MaterialMap const &objects )
 {
     const Matrix4f &projection = camera->getProjectionMatrix();
     const Matrix4f &view = camera->getViewMatrix();

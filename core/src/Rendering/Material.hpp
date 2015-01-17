@@ -96,7 +96,7 @@ namespace crimild {
 		AlphaStatePtr _alphaState;
 	};
 
-    using MaterialPtr = std::shared_ptr< Material >;
+    using MaterialPtr = SharedPointer< Material >;
     
 }
 

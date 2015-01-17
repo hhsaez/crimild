@@ -40,7 +40,7 @@ namespace crimild {
     template< class ObjectType >
     class SharedObjectMap : public SharedObject {
     private:
-        typedef std::shared_ptr< ObjectType > ObjectPtr;
+        typedef SharedPointer< ObjectType > ObjectPtr;
         
     public:
         SharedObjectMap( void )

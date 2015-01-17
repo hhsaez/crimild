@@ -44,7 +44,7 @@ namespace crimild {
 		virtual bool useDeferredQueue( void ) const { return false; }
 	};
     
-    using MessagePtr = std::shared_ptr< Message >;
+    using MessagePtr = SharedPointer< Message >;
 
 	class DeferredMessage : public Message {
 	public:
@@ -53,7 +53,7 @@ namespace crimild {
 		virtual bool useDeferredQueue( void ) const { return true; }
 	};
     
-    using DeferredMessagePtr = std::shared_ptr< DeferredMessage >;
+    using DeferredMessagePtr = SharedPointer< DeferredMessage >;
 
 	template< class MessageImpl >
 	class MessageHandler {
@@ -66,7 +66,7 @@ namespace crimild {
 		 */
 		virtual ~MessageHandler( void );
 
-        virtual void handleMessage( std::shared_ptr< MessageImpl > const &message ) = 0;
+        virtual void handleMessage( SharedPointer< MessageImpl > const &message ) = 0;
 
 	protected:
 		/**
@@ -87,7 +87,7 @@ namespace crimild {
 
 	template< class MessageImpl >
 	class MessageDispatcherImpl : public MessageDispatcher {
-        typedef std::shared_ptr< MessageImpl > MessageImplPtr;
+        typedef SharedPointer< MessageImpl > MessageImplPtr;
 		typedef std::list< MessageImplPtr > MessageImplList;
 		typedef MessageHandler< MessageImpl > MessageHandlerImpl;
 		typedef std::list< MessageHandlerImpl * > MessageHandlerList;
@@ -238,7 +238,7 @@ namespace crimild {
 			\brief Push a new message into the queue
 		 */
 		template< class MessageImpl >
-        void pushMessage( std::shared_ptr< MessageImpl > const &message )
+        void pushMessage( SharedPointer< MessageImpl > const &message )
 		{
 			MessageDispatcherImpl< MessageImpl >::getInstance().pushMessage( message );
 		}

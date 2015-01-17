@@ -78,13 +78,13 @@ NodePtr SceneBuilder::buildNode( ScriptContext::Iterable &it, GroupPtr const &pa
 	std::string type = it.eval< std::string >( NODE_TYPE );
 	if ( type == CAMERA_TYPE ) {
 		Log::Debug << "Building 'camera' node" << Log::End;
-        auto camera = std::make_shared< Camera >( 90.0f, 4.0f / 3.0f, 1.0f, 1000.0f );
+        auto camera = crimild::alloc< Camera >( 90.0f, 4.0f / 3.0f, 1.0f, 1000.0f );
 		setupCamera( it, camera );
 		current = camera;
 	}
 	else if ( type == LIGHT_TYPE ) {
 		Log::Debug << "Building 'light' node" << Log::End;
-        auto light = std::make_shared< Light >();
+        auto light = crimild::alloc< Light >();
 		light->setCastShadows( it.eval< bool >( LIGHT_CAST_SHADOWS ) );
 
 		if ( it.test( LIGHT_SHADOW_NEAR_COEFF ) ) {
@@ -99,14 +99,14 @@ NodePtr SceneBuilder::buildNode( ScriptContext::Iterable &it, GroupPtr const &pa
 	}
 	else if ( type == TEXT_TYPE ) {
 		Log::Debug << "Building 'text' node" << Log::End;
-        auto text = std::make_shared< Text >();
+        auto text = crimild::alloc< Text >();
 
 		std::string fontName = it.eval< std::string >( "font" );
 		float textSize = it.eval< float >( "textSize" );
 
 		std::string fontFileName = FileSystem::getInstance().pathForResource( fontName + "_sdf.tga" );
 		std::string fontDefFileName = FileSystem::getInstance().pathForResource( fontName + ".txt" );
-        auto font = std::make_shared< Font >( fontFileName, fontDefFileName );
+        auto font = crimild::alloc< Font >( fontFileName, fontDefFileName );
 
 		text->setFont( font );
 		text->setSize( textSize );
@@ -170,7 +170,7 @@ void SceneBuilder::setupCamera( ScriptContext::Iterable &it, CameraPtr const &ca
 {
 	std::string renderPassType = it.eval< std::string >( CAMERA_RENDER_PASS );
 	if ( renderPassType == "basic" ) {
-        camera->setRenderPass( std::make_shared< BasicRenderPass >() );
+        camera->setRenderPass( crimild::alloc< BasicRenderPass >() );
 	}
 
 	if ( it.test( CAMERA_FRUSTUM ) ) {

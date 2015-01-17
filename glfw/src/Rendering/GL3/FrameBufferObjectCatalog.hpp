@@ -60,7 +60,7 @@ namespace crimild {
             std::list< int > _textureIdsToDelete;
 		};
 
-		typedef std::shared_ptr< FrameBufferObjectCatalog > FrameBufferObjectCatalogPtr;
+		typedef SharedPointer< FrameBufferObjectCatalog > FrameBufferObjectCatalogPtr;
 
 	}
 

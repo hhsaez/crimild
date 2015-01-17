@@ -60,7 +60,7 @@ namespace crimild {
 		CameraPtr _camera;
 	};
     
-    using VisibilitySetPtr = std::shared_ptr< VisibilitySet >;
+    using VisibilitySetPtr = SharedPointer< VisibilitySet >;
 
 }
 

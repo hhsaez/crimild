@@ -47,7 +47,7 @@ namespace crimild {
         }
 
         template< class T >
-        std::shared_ptr< T > get( std::string name )
+        SharedPointer< T > get( std::string name )
         {
             return std::static_pointer_cast< T >( _assets[ name ] );
         }

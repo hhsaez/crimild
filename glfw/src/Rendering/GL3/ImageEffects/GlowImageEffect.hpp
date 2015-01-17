@@ -39,7 +39,7 @@ namespace crimild {
             GlowImageEffect( void );
             virtual ~GlowImageEffect( void );
             
-            virtual void apply( crimild::RendererPtr const &renderer, int inputCount, Texture **inputs, PrimitivePtr const &primitive, FrameBufferObjectPtr const &output ) override;
+            virtual void apply( crimild::RendererPtr const &renderer, int inputCount, Texture **inputs, PrimitivePtr const &primitive, FrameBufferObjectPtr const &output );
             
             void setGlowMapSize( int size ) { _glowMapSize = size; }
             int getGlowMapSize( void ) const { return _glowMapSize; }

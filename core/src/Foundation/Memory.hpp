@@ -25,21 +25,43 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Foundation/NamedObject.hpp"
-#include "Foundation/Pointer.hpp" 
+#ifndef CRIMILD_CORE_FOUNDATION_MEMORY_
+#define CRIMILD_CORE_FOUNDATION_MEMORY_
 
-#include "gtest/gtest.h"
+#include <mutex>
+#include <memory>
 
-using namespace crimild;
+namespace crimild {
 
-TEST( NamedObjectTest, construction )
-{
-	SharedPointer< NamedObject > obj( new NamedObject( "a name" ) );
+    template< typename T >
+    using SharedPointer = std::shared_ptr< T >;
 
-	EXPECT_EQ( obj->getName(), "a name" );
+    template< typename T, typename... Args >
+    SharedPointer< T > alloc( Args &&... args )
+    {
+        return std::make_shared< T >( std::forward< Args >( args )... );
+    }
 
-	obj->setName( "a different name" );
+    template< typename T >
+    using UniquePointer = std::unique_ptr< T >;
 
-	EXPECT_EQ( obj->getName(), "a different name" );
+    template< typename T, typename... Args >
+    UniquePointer< T > allocUnique( Args &&... args )
+    {
+        return std::unique_ptr< T >( new T( std::forward< Args >( args )... ) );        
+    }
+    
 }
+
+namespace std {
+    
+    // from http://stackoverflow.com/a/6066150
+    template< class T, class U >
+    std::weak_ptr< T > static_pointer_cast( std::weak_ptr< U > const &r )
+    {
+        return std::static_pointer_cast< T >( std::shared_ptr< U >( r ) );
+    }
+}
+
+#endif
 

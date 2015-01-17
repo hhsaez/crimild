@@ -42,7 +42,7 @@ namespace crimild {
 			virtual ~SkinningShaderProgram( void );
 		};
 
-		typedef std::shared_ptr< SkinningShaderProgram > SkinningShaderProgramPtr;
+		typedef SharedPointer< SkinningShaderProgram > SkinningShaderProgramPtr;
 
 	}
 

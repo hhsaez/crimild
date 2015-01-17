@@ -19,13 +19,13 @@ VertexBufferObjectPtr DebugRenderHelper::_linesVBO;
 
 void DebugRenderHelper::init( void )
 {
-    _depthState = std::make_shared< DepthState >( false );
-    _alphaState = std::make_shared< AlphaState >( false );
+    _depthState = crimild::alloc< DepthState >( false );
+    _alphaState = crimild::alloc< AlphaState >( false );
 
-    _boxPrimitive = std::make_shared< BoxPrimitive >( 1.0f, 1.0f, 1.0f );
-    _spherePrimitive = std::make_shared< SpherePrimitive >( 1.0f );
+    _boxPrimitive = crimild::alloc< BoxPrimitive >( 1.0f, 1.0f, 1.0f );
+    _spherePrimitive = crimild::alloc< SpherePrimitive >( 1.0f );
 
-    _linesVBO = std::make_shared< VertexBufferObject >( VertexFormat::VF_P3, 10, nullptr );
+    _linesVBO = crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3, 10, nullptr );
 }
 
 void DebugRenderHelper::renderLine( RendererPtr const &renderer, CameraPtr const &camera, const Vector3f &from, const Vector3f &to, const RGBAColorf &color )
@@ -63,7 +63,7 @@ void DebugRenderHelper::renderLines( RendererPtr const &renderer, CameraPtr cons
 	renderer->setAlphaState( _alphaState );
 
 	if ( _linesVBO->getVertexCount() < count ) {
-        _linesVBO = std::make_shared< VertexBufferObject >( VertexFormat::VF_P3, count, ( const float * ) &data[ 0 ] );
+        _linesVBO = crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3, count, ( const float * ) &data[ 0 ] );
 	}
 	else {
 		for ( int i = 0; i < count; i++ ) {

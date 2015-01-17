@@ -67,7 +67,7 @@ void ShaderProgram::foreachLocation( std::function< void( ShaderLocationPtr cons
 void ShaderProgram::registerStandardLocation( ShaderLocation::Type locationType, unsigned int standardLocationId, std::string name )
 {
 	_standardLocations[ standardLocationId ] = name;
-    registerLocation( std::make_shared< ShaderLocation >( locationType, name ) );
+    registerLocation( crimild::alloc< ShaderLocation >( locationType, name ) );
 }
 
 ShaderLocationPtr ShaderProgram::getStandardLocation( unsigned int standardLocationId )
@@ -78,7 +78,7 @@ ShaderLocationPtr ShaderProgram::getStandardLocation( unsigned int standardLocat
 void ShaderProgram::attachUniform( ShaderUniformPtr const &uniform )
 {
 	_uniforms.push_back( uniform );
-    ShaderLocationPtr location( std::make_shared< ShaderLocation >( ShaderLocation::Type::UNIFORM, uniform->getName() ) );
+    ShaderLocationPtr location( crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, uniform->getName() ) );
 	uniform->setLocation( location );
 	registerLocation( location );
 }

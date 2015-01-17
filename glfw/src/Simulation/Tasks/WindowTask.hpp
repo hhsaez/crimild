@@ -47,7 +47,7 @@ namespace crimild {
 		GLFWwindow *_window;
 	};
 
-	typedef std::shared_ptr< WindowTask > WindowTaskPtr;
+	typedef SharedPointer< WindowTask > WindowTaskPtr;
 
 }
 

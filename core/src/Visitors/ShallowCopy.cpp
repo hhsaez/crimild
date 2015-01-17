@@ -48,13 +48,13 @@ void ShallowCopy::traverse( NodePtr const &node )
 
 void ShallowCopy::visitNode( NodePtr const &node )
 {
-    auto copy = std::make_shared< Node >();
+    auto copy = crimild::alloc< Node >();
 	copyNode( node, copy );
 }
 
 void ShallowCopy::visitGroup( GroupPtr const &group )
 {
-    auto copy = std::make_shared< Group >();
+    auto copy = crimild::alloc< Group >();
 	copyNode( group, copy );
 
 	_parent = copy;
@@ -66,7 +66,7 @@ void ShallowCopy::visitGroup( GroupPtr const &group )
 
 void ShallowCopy::visitGeometry( GeometryPtr const &geometry )
 {
-    auto copy = std::make_shared< Geometry >();
+    auto copy = crimild::alloc< Geometry >();
 	copyNode( geometry, copy );
 
 	geometry->foreachPrimitive( [&]( PrimitivePtr const &primitive ) {
@@ -89,7 +89,7 @@ void ShallowCopy::copyNode( NodePtr const &src, NodePtr const &dst )
 
 	auto srcMaterials = src->getComponent< MaterialComponent >();
 	if ( srcMaterials != nullptr ) {
-        auto dstMaterials = std::make_shared< MaterialComponent >();
+        auto dstMaterials = crimild::alloc< MaterialComponent >();
 		srcMaterials->foreachMaterial( [&]( MaterialPtr const &material ) {
 			dstMaterials->attachMaterial( material );
 		});

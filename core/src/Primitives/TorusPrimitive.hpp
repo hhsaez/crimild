@@ -52,7 +52,7 @@ namespace crimild {
         float _minorRadius;
     };
     
-    using TorusPrimitivePtr = std::shared_ptr< TorusPrimitive >;
+    using TorusPrimitivePtr = SharedPointer< TorusPrimitive >;
         
 }
 

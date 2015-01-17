@@ -47,7 +47,7 @@ namespace crimild {
 		bool _enabled;
 	};
     
-    using RenderStatePtr = std::shared_ptr< RenderState >;
+    using RenderStatePtr = SharedPointer< RenderState >;
 
 }
 

@@ -81,7 +81,7 @@ namespace crimild {
 		virtual void resolveIntersection( const Plane3f &plane, TransformationImpl &result ) const;
 	};
     
-    using PlaneBoundingVolumePtr = std::shared_ptr< PlaneBoundingVolume >;
+    using PlaneBoundingVolumePtr = SharedPointer< PlaneBoundingVolume >;
 
 }
 

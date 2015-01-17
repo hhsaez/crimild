@@ -42,7 +42,7 @@ namespace crimild {
 			virtual ~ParticleSystem( void );
 		};
 
-		typedef std::shared_ptr< ParticleSystem > ParticleSystemPtr;
+		typedef SharedPointer< ParticleSystem > ParticleSystemPtr;
 
 	}
 

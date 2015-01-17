@@ -40,7 +40,7 @@ namespace crimild {
 		virtual ~ResetSimulationTimeMessage( void );
 	};
 
-	using ResetSimulationTimeMessagePtr = std::shared_ptr< ResetSimulationTimeMessage >;
+	using ResetSimulationTimeMessagePtr = SharedPointer< ResetSimulationTimeMessage >;
 
 	class UpdateTimeTask : 
 		public Task,

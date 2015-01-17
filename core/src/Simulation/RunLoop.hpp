@@ -73,7 +73,7 @@ namespace crimild {
 		std::list< TaskPtr > _suspendedTasks;
 	};
     
-    using RunLoopPtr = std::shared_ptr< RunLoop >;
+    using RunLoopPtr = SharedPointer< RunLoop >;
     
     class ThreadedRunLoop : public RunLoop {
     public:

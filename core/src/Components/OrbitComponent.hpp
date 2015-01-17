@@ -54,7 +54,7 @@ namespace crimild {
 		float _gamma;
 	};
     
-    using OrbinComponentPtr = std::shared_ptr< OrbitComponent >;
+    using OrbinComponentPtr = SharedPointer< OrbitComponent >;
 
 }
 

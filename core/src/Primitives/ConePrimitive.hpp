@@ -57,7 +57,7 @@ namespace crimild {
         float _radius;
     };
     
-    using ConePrimitivePtr = std::shared_ptr< ConePrimitive >;
+    using ConePrimitivePtr = SharedPointer< ConePrimitive >;
         
 }
 

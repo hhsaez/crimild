@@ -50,7 +50,7 @@ namespace crimild {
 			unsigned int _bufferId;
 		};
         
-        using AudioClipPtr = std::shared_ptr< AudioClip >;
+        using AudioClipPtr = SharedPointer< AudioClip >;
 
 	}
 

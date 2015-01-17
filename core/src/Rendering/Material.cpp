@@ -34,8 +34,8 @@ Material::Material( void )
 	  _diffuse( 1.0f, 1.0f, 1.0f, 1.0f ),
 	  _specular( 1.0f, 1.0f, 1.0f, 1.0f ),
 	  _shininess( 50.0f ),
-      _depthState( std::make_shared< DepthState >( true ) ),
-      _alphaState( std::make_shared< AlphaState >( false ) )
+      _depthState( crimild::alloc< DepthState >( true ) ),
+      _alphaState( crimild::alloc< AlphaState >( false ) )
 {
 
 }

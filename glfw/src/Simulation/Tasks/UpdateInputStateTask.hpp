@@ -132,7 +132,7 @@ namespace crimild {
 		int _windowHeight;
 	};
 
-	typedef std::shared_ptr< UpdateInputStateTask > UpdateInputStateTaskPtr;
+	typedef SharedPointer< UpdateInputStateTask > UpdateInputStateTaskPtr;
 
 }
 

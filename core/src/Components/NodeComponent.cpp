@@ -60,7 +60,7 @@ void NodeComponent::update( const Time &t )
 
 }
 
-void NodeComponent::renderDebugInfo( std::shared_ptr< Renderer > const &, std::shared_ptr< Camera > const & )
+void NodeComponent::renderDebugInfo( SharedPointer< Renderer > const &, SharedPointer< Camera > const & )
 {
 
 }

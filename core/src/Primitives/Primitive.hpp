@@ -67,7 +67,7 @@ namespace crimild {
 		IndexBufferObjectPtr _indexBuffer;
 	};
     
-    using PrimitivePtr = std::shared_ptr< Primitive >;
+    using PrimitivePtr = SharedPointer< Primitive >;
 
 }
 

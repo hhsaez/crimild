@@ -37,10 +37,10 @@ LoadSceneTask::LoadSceneTask( int priority, std::string sceneFileName, SceneBuil
 	: Task( priority ),
 	  _sceneFileName( sceneFileName ),
 	  _loadingSceneFileName( loadingSceneFileName ),
-      _builder( builder != nullptr ? builder : std::make_shared< SceneBuilder >() )
+      _builder( builder != nullptr ? builder : crimild::alloc< SceneBuilder >() )
 {
 	getBuilder()->registerComponentBuilder< physics::RigidBodyComponent >( []( ScriptContext::Iterable &it ) {
-        auto rigidBody = std::make_shared< RigidBodyComponent >();
+        auto rigidBody = crimild::alloc< RigidBodyComponent >();
 
 		if ( it.test( "mass" ) ) rigidBody->setMass( it.eval< float >( "mass" ) );
 		if ( it.test( "convex" ) ) rigidBody->setConvex( it.eval< bool >( "convex" ) );
@@ -82,7 +82,7 @@ void LoadSceneTask::load( void )
 	auto scene = getBuilder()->fromFile( FileSystem::getInstance().pathForResource( _sceneFileName ) );
 	Simulation::getCurrent()->setScene( scene );
 
-    MessageQueue::getInstance().pushMessage( std::make_shared< SceneLoadedMessage >() );
+    MessageQueue::getInstance().pushMessage( crimild::alloc< SceneLoadedMessage >() );
 }
 
 void LoadSceneTask::handleMessage( LoadSceneMessagePtr const &message )

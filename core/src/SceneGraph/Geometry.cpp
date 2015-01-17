@@ -37,8 +37,8 @@ using namespace crimild;
 Geometry::Geometry( std::string name )
 	: Node( name )
 {
-    attachComponent( std::make_shared< MaterialComponent >() );
-    attachComponent( std::make_shared< RenderStateComponent >() );
+    attachComponent( crimild::alloc< MaterialComponent >() );
+    attachComponent( crimild::alloc< RenderStateComponent >() );
 }
 
 Geometry::~Geometry( void )

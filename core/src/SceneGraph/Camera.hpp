@@ -83,11 +83,11 @@ namespace crimild {
 		virtual void accept( NodeVisitor &visitor ) override;
 
 	public:
-        void setRenderPass( std::shared_ptr< RenderPass > const &renderPass ) { _renderPass = renderPass; }
-		std::shared_ptr< RenderPass > &getRenderPass( void ) { return _renderPass; }
+        void setRenderPass( SharedPointer< RenderPass > const &renderPass ) { _renderPass = renderPass; }
+		SharedPointer< RenderPass > &getRenderPass( void ) { return _renderPass; }
 
 	private:
-		std::shared_ptr< RenderPass > _renderPass;
+		SharedPointer< RenderPass > _renderPass;
 
 	public:
 		void computeCullingPlanes( void );
@@ -98,7 +98,7 @@ namespace crimild {
 		Plane3f _cullingPlanes[ 6 ];
 	};
     
-    using CameraPtr = std::shared_ptr< Camera >;
+    using CameraPtr = SharedPointer< Camera >;
 
 }
 

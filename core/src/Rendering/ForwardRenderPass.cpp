@@ -77,7 +77,8 @@ void ForwardRenderPass::render( RendererPtr const &renderer, RenderQueuePtr cons
     }
     else {
         getImageEffects()->each( [&]( ImageEffectPtr const &effect, int ) {
-            effect->apply( renderer );
+            effect->compute( renderer, camera );
+            effect->apply( renderer, camera );
         });
     }
 
@@ -97,24 +98,12 @@ FrameBufferObjectPtr ForwardRenderPass::createSceneFBO( RendererPtr const &rende
     int width = renderer->getScreenBuffer()->getWidth();
     int height = renderer->getScreenBuffer()->getHeight();
 
-    auto sceneFBO = std::make_shared< FrameBufferObject >( width, height );
-    sceneFBO->getRenderTargets()->add( "color", std::make_shared< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
-    sceneFBO->getRenderTargets()->add( "depth", std::make_shared< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER_AND_TEXTURE, width, height ) );
+    auto sceneFBO = crimild::alloc< FrameBufferObject >( width, height );
+    sceneFBO->getRenderTargets()->add( "color", crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
+    sceneFBO->getRenderTargets()->add( "depth", crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER_AND_TEXTURE, width, height ) );
 
     renderer->addFrameBuffer( "scene", sceneFBO );
     return sceneFBO;
-}
-
-void ForwardRenderPass::buildAccumBuffer( int width, int height )
-{
-    /*
-    _accumBuffer = std::make_shared< FrameBufferObject >( width, height );
-    _accumBuffer->getRenderTargets().add( std::make_shared< RenderTarget >( RenderTarget::Type::DEPTH_16, RenderTarget::Output::RENDER, width, height ) );
-    
-    auto colorTarget = std::make_shared< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height );
-    _accumBufferOutput = colorTarget->getTexture();
-    _accumBuffer->getRenderTargets().add( colorTarget );
-    */
 }
 
 void ForwardRenderPass::computeShadowMaps( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
@@ -135,7 +124,7 @@ void ForwardRenderPass::computeShadowMaps( RendererPtr const &renderer, RenderQu
         
         auto map = _shadowMaps[ light ];
         if ( map == nullptr ) {
-            map = std::make_shared< ShadowMap >( light );
+            map = crimild::alloc< ShadowMap >( light );
             map->getBuffer()->setClearColor( RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ) );
             map->setLightProjectionMatrix( light->computeProjectionMatrix() );
             _shadowMaps[ light ] = map;

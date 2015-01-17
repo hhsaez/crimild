@@ -59,7 +59,7 @@ namespace crimild {
 		unsigned int _vertexCount;
 	};
     
-    using VertexBufferObjectPtr = std::shared_ptr< VertexBufferObject >;
+    using VertexBufferObjectPtr = SharedPointer< VertexBufferObject >;
     using VertexBufferObjectCatalog = Catalog< VertexBufferObject >;
 
 }

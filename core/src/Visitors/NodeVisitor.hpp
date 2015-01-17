@@ -28,7 +28,7 @@
 #ifndef CRIMILD_VISITORS_NODE_VISITOR_
 #define CRIMILD_VISITORS_NODE_VISITOR_
 
-#include <mutex>
+#include "Foundation/Memory.hpp"
 
 namespace crimild {
 
@@ -47,13 +47,13 @@ namespace crimild {
 
 		virtual void reset( void );
 
-        virtual void traverse( std::shared_ptr< Node > const &node );
+        virtual void traverse( SharedPointer< Node > const &node );
 
-		virtual void visitNode( std::shared_ptr< Node > const &node );
-		virtual void visitGroup( std::shared_ptr< Group > const &group );
-		virtual void visitGeometry( std::shared_ptr< Geometry > const &geometry );
-		virtual void visitCamera( std::shared_ptr< Camera > const &camera );
-		virtual void visitLight( std::shared_ptr< Light > const &light );
+		virtual void visitNode( SharedPointer< Node > const &node );
+		virtual void visitGroup( SharedPointer< Group > const &group );
+		virtual void visitGeometry( SharedPointer< Geometry > const &geometry );
+		virtual void visitCamera( SharedPointer< Camera > const &camera );
+		virtual void visitLight( SharedPointer< Light > const &light );
 
 	private:
 		NodeVisitor( const NodeVisitor & ) { }

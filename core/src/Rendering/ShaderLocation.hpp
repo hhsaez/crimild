@@ -61,7 +61,7 @@ namespace crimild {
 		int _location;
 	};
 
-    using ShaderLocationPtr = std::shared_ptr< ShaderLocation >;
+    using ShaderLocationPtr = SharedPointer< ShaderLocation >;
     
 }
 

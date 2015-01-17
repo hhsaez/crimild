@@ -44,6 +44,7 @@
 #include "Mathematics/Transformation.hpp"
 #include "Mathematics/Vector.hpp"
 
+#include "Foundation/Memory.hpp"
 #include "Foundation/Macros.hpp"
 #include "Foundation/NamedObject.hpp"
 #include "Foundation/Log.hpp"

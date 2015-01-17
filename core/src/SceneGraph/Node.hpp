@@ -43,7 +43,7 @@ namespace crimild {
     
     class Node;
     
-    using NodePtr = std::shared_ptr< Node >;
+    using NodePtr = SharedPointer< Node >;
 
 	/**
 		\brief Base class for any object that can be attached to the scene graph
@@ -68,7 +68,7 @@ namespace crimild {
 		NodePtr getRootParent( void );
 
 		template< class NodeClass >
-        std::shared_ptr< NodeClass > getParent( void ) { return std::static_pointer_cast< NodeClass >( _parent.lock() ); }
+        SharedPointer< NodeClass > getParent( void ) { return std::static_pointer_cast< NodeClass >( _parent.lock() ); }
 
 	private:
 		/**
@@ -93,7 +93,7 @@ namespace crimild {
 		void detachAllComponents( void );
 
 		template< class NODE_COMPONENT_CLASS >
-        std::shared_ptr< NODE_COMPONENT_CLASS > getComponent( void )
+        SharedPointer< NODE_COMPONENT_CLASS > getComponent( void )
 		{
             return std::static_pointer_cast< NODE_COMPONENT_CLASS >( _components[ NODE_COMPONENT_CLASS::_COMPONENT_NAME() ] );
 		}

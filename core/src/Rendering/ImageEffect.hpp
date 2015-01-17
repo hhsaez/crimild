@@ -33,16 +33,26 @@
 namespace crimild {
     
     class Renderer;
-    class RenderPass;
-
+    class Camera;
     class FrameBufferObject;
-    class Primitive;
     class Texture;
-    class ShaderProgram;
 
 	class ImageEffect : public SharedObject {
+    public:
+        static constexpr const char *FBO_AUX_1 = "aux_buffer_1";
+        static constexpr const char *FBO_AUX_2 = "aux_buffer_2";
+        
+        static constexpr const char *FBO_AUX_HALF_RES_1 = "aux_half_buffer_1";
+        static constexpr const char *FBO_AUX_HALF_RES_2 = "aux_half_buffer_2";
+        
+        static constexpr const char *FBO_AUX_QUARTER_RES_1 = "aux_quarter_buffer_1";
+        static constexpr const char *FBO_AUX_QUARTER_RES_2 = "aux_quarter_buffer_2";
+
     private:
-        using RendererPtrImpl = std::shared_ptr< Renderer >;
+        using RendererPtrImpl = SharedPointer< Renderer >;
+        using CameraPtrImpl = SharedPointer< Camera >;
+        using FrameBufferObjectPtrImpl = SharedPointer< FrameBufferObject >;
+        using TexturePtrImpl = SharedPointer< Texture >;
 
     protected:
         ImageEffect( void );
@@ -50,15 +60,16 @@ namespace crimild {
 	public:
 		virtual ~ImageEffect( void );
 
-        virtual void apply( RendererPtrImpl const &renderer );
-
-        virtual void apply( std::shared_ptr< Renderer > const &renderer, int inputCount, Texture **inputs, std::shared_ptr< Primitive > const &primitive, std::shared_ptr< FrameBufferObject > const &output ) { }
+        virtual void compute( RendererPtrImpl const &renderer, CameraPtrImpl const &camera ) = 0;
+        virtual void apply( RendererPtrImpl const &renderer, CameraPtrImpl const &camera ) = 0;
         
     protected:
-        void render( std::shared_ptr< Renderer > const &renderer, std::shared_ptr< FrameBufferObject > const &output, std::shared_ptr< Texture > const &texture, std::shared_ptr< ShaderProgram > const &program, std::shared_ptr< Primitive > const &primitive );
+        virtual FrameBufferObjectPtrImpl getFrameBuffer( RendererPtrImpl const &renderer, std::string name );
+        
+        virtual void renderScreen( RendererPtrImpl const &renderer, TexturePtrImpl const &texture );
 	};
     
-    using ImageEffectPtr = std::shared_ptr< ImageEffect >;
+    using ImageEffectPtr = SharedPointer< ImageEffect >;
 
 }
 

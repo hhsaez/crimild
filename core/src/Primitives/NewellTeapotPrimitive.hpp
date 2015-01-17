@@ -39,7 +39,7 @@ namespace crimild {
 
 	};
     
-    using NewellTeapotPrimitivePtr = std::shared_ptr< NewellTeapotPrimitive >;
+    using NewellTeapotPrimitivePtr = SharedPointer< NewellTeapotPrimitive >;
 
 }
 

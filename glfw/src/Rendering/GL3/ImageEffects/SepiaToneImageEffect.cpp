@@ -45,7 +45,7 @@ void gl3::SepiaToneImageEffect::apply( crimild::RendererPtr const &renderer )
 {
 	auto program = renderer->getShaderProgram( "sepia" );
 	if ( program == nullptr ) {
-		program = std::make_shared< gl3::SepiaToneShaderProgram >();
+		program = crimild::alloc< gl3::SepiaToneShaderProgram >();
 		renderer->addShaderProgram( "sepia", program );
 	}
 

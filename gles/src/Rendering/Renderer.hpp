@@ -68,7 +68,7 @@ namespace crimild {
             std::map< std::string, crimild::ShaderProgramPtr > _fallbackPrograms;
         };
         
-        typedef std::shared_ptr< Renderer > RendererPtr;
+        typedef SharedPointer< Renderer > RendererPtr;
         
     }
     

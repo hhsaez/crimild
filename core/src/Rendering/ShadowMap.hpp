@@ -70,7 +70,7 @@ namespace crimild {
         FrameBufferObjectPtr _buffer;
     };
     
-    using ShadowMapPtr = std::shared_ptr< ShadowMap >;
+    using ShadowMapPtr = SharedPointer< ShadowMap >;
     
 }
 

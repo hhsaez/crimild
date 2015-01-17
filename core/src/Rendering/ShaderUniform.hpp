@@ -46,13 +46,13 @@ namespace crimild {
 		void setLocation( ShaderLocationPtr const &location ) { _location = location; }
 		ShaderLocationPtr getLocation( void ) { return _location; }
 
-        virtual void onBind( std::shared_ptr< Renderer > const &renderer ) = 0;
+        virtual void onBind( SharedPointer< Renderer > const &renderer ) = 0;
 
 	private:
 		ShaderLocationPtr _location;
 	};
 
-    using ShaderUniformPtr = std::shared_ptr< ShaderUniform >;
+    using ShaderUniformPtr = SharedPointer< ShaderUniform >;
     
 }
 

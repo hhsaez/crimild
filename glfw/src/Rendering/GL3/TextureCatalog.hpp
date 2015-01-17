@@ -56,7 +56,7 @@ namespace crimild {
             std::list< int > _textureIdsToDelete;
 		};
 
-		typedef std::shared_ptr< TextureCatalog > TextureCatalogPtr;
+		typedef SharedPointer< TextureCatalog > TextureCatalogPtr;
 
 	}
 

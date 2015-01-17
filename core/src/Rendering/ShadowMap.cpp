@@ -41,11 +41,11 @@ ShadowMap::ShadowMap( LightPtr const &source, FrameBufferObjectPtr const &fbo )
       _buffer( fbo )
 {
     if ( _buffer == nullptr ) {
-        int width = 1024;
-        int height = 1024;
-        _buffer = std::make_shared< FrameBufferObject >( width, height );
-        _buffer->getRenderTargets()->add( "depth", std::make_shared< RenderTarget >( RenderTarget::Type::DEPTH_16, RenderTarget::Output::RENDER, width, height ) );
-        _buffer->getRenderTargets()->add( "color", std::make_shared< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
+        int width = 2048;
+        int height = 2048;
+        _buffer = crimild::alloc< FrameBufferObject >( width, height );
+        _buffer->getRenderTargets()->add( "depth", crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_16, RenderTarget::Output::RENDER, width, height ) );
+        _buffer->getRenderTargets()->add( "color", crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
     }
     
     _buffer->getRenderTargets()->each( [&]( std::string, RenderTargetPtr const &target ) {

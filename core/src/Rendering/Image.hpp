@@ -74,7 +74,7 @@ namespace crimild {
 		Image &operator=( const Image & ) { return *this; }
 	};
     
-    using ImagePtr = std::shared_ptr< Image >;
+    using ImagePtr = SharedPointer< Image >;
 
 }
 

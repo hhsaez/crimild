@@ -44,7 +44,7 @@ namespace crimild {
         virtual ~SpherePrimitive( void );
     };
     
-    using SpherePrimitivePtr = std::shared_ptr< SpherePrimitive >;
+    using SpherePrimitivePtr = SharedPointer< SpherePrimitive >;
         
 }
 

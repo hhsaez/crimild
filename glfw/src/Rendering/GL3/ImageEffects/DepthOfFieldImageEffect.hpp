@@ -39,7 +39,8 @@ namespace crimild {
             DepthOfFieldImageEffect( void );
             virtual ~DepthOfFieldImageEffect( void );
             
-            virtual void apply( crimild::RendererPtr const &renderer );
+            virtual void compute( RendererPtr const &renderer, CameraPtr const &camera ) override;
+            virtual void apply( crimild::RendererPtr const &renderer, crimild::CameraPtr const &camera ) override;
             
             float getFocus( void ) { return _focus->getValue(); }
             void setFocus( float value ) { _focus->setValue( value ); }
@@ -63,7 +64,7 @@ namespace crimild {
             AlphaStatePtr _alphaState;
         };
         
-        using DepthOfFieldImageEffectPtr = std::shared_ptr< DepthOfFieldImageEffect >;
+        using DepthOfFieldImageEffectPtr = SharedPointer< DepthOfFieldImageEffect >;
         
     }
     

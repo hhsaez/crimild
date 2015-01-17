@@ -63,7 +63,7 @@ namespace crimild {
 		std::map< char, Glyph > _glyphs;
 	};
     
-    using FontPtr = std::shared_ptr< Font >;
+    using FontPtr = SharedPointer< Font >;
 
 	class Text : public Geometry {
 	public:
@@ -91,7 +91,7 @@ namespace crimild {
 		MaterialPtr _material;
 	};
     
-    using TextPtr = std::shared_ptr< Text >;
+    using TextPtr = SharedPointer< Text >;
 
 }
 

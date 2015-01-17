@@ -34,7 +34,7 @@ namespace crimild {
     
     class DepthState;
     
-    using DepthStatePtr = std::shared_ptr< DepthState >;
+    using DepthStatePtr = SharedPointer< DepthState >;
     
 	class DepthState : public RenderState {
     public:

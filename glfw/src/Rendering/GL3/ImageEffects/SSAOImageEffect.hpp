@@ -37,24 +37,25 @@ namespace crimild {
         class SSAOImageEffect : public ImageEffect {
         public:
             SSAOImageEffect( void );
+            explicit SSAOImageEffect( int noiseTextureSize, float radius, float occluderBias, const Vector2f &attenuation, int blurSize );
             virtual ~SSAOImageEffect( void );
             
-            /**
-                Expected inputs:
-                    - Full scene
-                    - G-Buffer color
-                    - G-Buffer positions
-                    - G-Buffer normals
-             */
-            virtual void apply( crimild::RendererPtr const &renderer, int inputCount, Texture **inputs, PrimitivePtr const &primitive, FrameBufferObjectPtr const &output ) override;
+            virtual void compute( RendererPtr const &renderer, CameraPtr const &camera ) override;
+            virtual void apply( crimild::RendererPtr const &renderer, crimild::CameraPtr const &camera );
             
         private:
-            void buildSSAOBuffer( int width, int height );
-            void computeSSAO( crimild::Renderer *renderer, Texture *srcPositions, Texture *srcNormals, Primitive *primitive );
-            void applySSAO( crimild::Renderer *renderer, Texture *srcImage, Texture *ssaoMap, Primitive *primitive, FrameBufferObject *output );
+            FrameBufferObjectPtr getSSAOBuffer( crimild::RendererPtr const &renderer );
+            FrameBufferObjectPtr getSSAOBlurBuffer( crimild::RendererPtr const &renderer );
             
-            FrameBufferObjectPtr _ssaoBuffer;
-            TexturePtr _ssaoBufferOutput;
+            void computeSSAO( crimild::RendererPtr const &renderer, CameraPtr const &camera );
+            void applySSAO( crimild::RendererPtr const &renderer );
+            
+            TexturePtr _noiseTexture;
+            float _ssaoRadius;
+            float _ssaoOccluderBias;
+            Vector2f _ssaoAttenuation;
+            int _ssaoBlurSize;
+            AlphaStatePtr _blendState;
         };
         
     }

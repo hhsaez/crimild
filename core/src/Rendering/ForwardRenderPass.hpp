@@ -55,15 +55,9 @@ namespace crimild {
     private:
         FrameBufferObjectPtr createSceneFBO( RendererPtr const &renderer );
         
-        void buildAccumBuffer( int width, int height );
         void computeShadowMaps( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera );
         
         std::map< LightPtr, ShadowMapPtr > _shadowMaps;
-        FrameBufferObjectPtr _forwardPassBuffer;
-        TexturePtr _forwardPassResult;
-        
-        FrameBufferObjectPtr _accumBuffer;
-        TexturePtr _accumBufferOutput;
 	};
     
 }

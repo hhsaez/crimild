@@ -33,8 +33,8 @@
 using namespace crimild;
 
 ParticleSystemComponent::ParticleSystemComponent( void )
-    : _primitive( std::make_shared< Primitive >( Primitive::Type::POINTS ) ),
-	  _material( std::make_shared< Material >() ),
+    : _primitive( crimild::alloc< Primitive >( Primitive::Type::POINTS ) ),
+	  _material( crimild::alloc< Material >() ),
  	  _particleCount( 50 ),
 	  _particleSize( 20.0f ),
 	  _particleDuration( 1.0f ),
@@ -42,11 +42,11 @@ ParticleSystemComponent::ParticleSystemComponent( void )
       _velocity( 1.0f, 1.0f, 1.0f ),
 	  _spread( 1.0f, 1.0f, 1.0f ),
 	  _looping( true ),
-	  _gravityUniform( std::make_shared< Vector3fUniform >( "uGravity", Vector3f( 0.0f, 0.0f, 0.0f ) ) ),
-	  _timeUniform( std::make_shared< FloatUniform >( "uTime", 0.0f ) ),
-	  _durationUniform( std::make_shared< FloatUniform >( "uLifeTime", 1.0f ) ),
-	  _shapeRadiusUniform( std::make_shared< FloatUniform >( "uShape.radius", 0.0f ) ),
-	  _shapeCenterUniform( std::make_shared< Vector3fUniform >( "uShape.center", Vector3f( 0.0f, 0.0f, 0.0f ) ) )
+	  _gravityUniform( crimild::alloc< Vector3fUniform >( "uGravity", Vector3f( 0.0f, 0.0f, 0.0f ) ) ),
+	  _timeUniform( crimild::alloc< FloatUniform >( "uTime", 0.0f ) ),
+	  _durationUniform( crimild::alloc< FloatUniform >( "uLifeTime", 1.0f ) ),
+	  _shapeRadiusUniform( crimild::alloc< FloatUniform >( "uShape.radius", 0.0f ) ),
+	  _shapeCenterUniform( crimild::alloc< Vector3fUniform >( "uShape.center", Vector3f( 0.0f, 0.0f, 0.0f ) ) )
 {
 	_material->getAlphaState()->setEnabled( true );
 }
@@ -97,10 +97,10 @@ void ParticleSystemComponent::generateParticles( void )
 	int particleCount = getParticleCount();
 
 	VertexFormat format = VertexFormat::VF_P3_N3_UV2;
-    auto vbo = std::make_shared< VertexBufferObject >( format, particleCount, nullptr );
+    auto vbo = crimild::alloc< VertexBufferObject >( format, particleCount, nullptr );
 	float *vertices = vbo->getData();
 
-    auto ibo = std::make_shared< IndexBufferObject >( particleCount, nullptr );
+    auto ibo = crimild::alloc< IndexBufferObject >( particleCount, nullptr );
 	unsigned short *indices = ibo->getData();
 
 	for ( unsigned short i = 0; i < particleCount; i++ ) {

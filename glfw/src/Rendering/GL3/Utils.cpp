@@ -75,12 +75,12 @@ void gl3::Utils::checkErrors( std::string prefix )
 
 VertexShaderPtr gl3::Utils::getVertexShaderInstance( std::string source )
 {
-    return std::make_shared< VertexShader >( "#version 150\n" + source );
+    return crimild::alloc< VertexShader >( "#version 150\n" + source );
 }
 
 FragmentShaderPtr gl3::Utils::getFragmentShaderInstance( std::string source )
 {
-    return std::make_shared< FragmentShader >( "#version 150\n" + source );
+    return crimild::alloc< FragmentShader >( "#version 150\n" + source );
 }
 
 std::string gl3::Utils::buildArrayShaderLocationName( std::string variable, int index )

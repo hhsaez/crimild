@@ -52,10 +52,10 @@ Simulation *Simulation::_currentSimulation = nullptr;
 
 Simulation::Simulation( std::string name, int argc, char **argv )
 	: NamedObject( name ),
-      _mainLoop( std::make_shared< RunLoop >() )
+      _mainLoop( crimild::alloc< RunLoop >() )
 {
 #if CRIMILD_ENABLE_SIMULATION_THREAD
-    _simulationLoop = std::make_shared< ThreadedRunLoop >( true );
+    _simulationLoop = crimild::alloc< ThreadedRunLoop >( true );
 #endif
     
 	srand( time( NULL ) );
@@ -88,13 +88,13 @@ RunLoopPtr Simulation::getSimulationLoop( void )
 
 void Simulation::start( void )
 {
-	getMainLoop()->startTask( std::make_shared< BeginRenderTask >( Priorities::BEGIN_RENDER_PRIORITY ) );
-	getMainLoop()->startTask( std::make_shared< EndRenderTask >( Priorities::END_RENDER_PRIORITY ) );
-	getMainLoop()->startTask( std::make_shared< RenderSceneTask >( Priorities::RENDER_SCENE_PRIORITY ) );
+	getMainLoop()->startTask( crimild::alloc< BeginRenderTask >( Priorities::BEGIN_RENDER_PRIORITY ) );
+	getMainLoop()->startTask( crimild::alloc< EndRenderTask >( Priorities::END_RENDER_PRIORITY ) );
+	getMainLoop()->startTask( crimild::alloc< RenderSceneTask >( Priorities::RENDER_SCENE_PRIORITY ) );
 
-    getSimulationLoop()->startTask( std::make_shared< DispatchMessagesTask >( Priorities::HIGHEST_PRIORITY ) );
-    getSimulationLoop()->startTask( std::make_shared< UpdateSceneTask >( Priorities::UPDATE_SCENE_PRIORITY ) );
-    getSimulationLoop()->startTask( std::make_shared< ComputeRenderQueueTask >( Priorities::RENDER_SCENE_PRIORITY ) );
+    getSimulationLoop()->startTask( crimild::alloc< DispatchMessagesTask >( Priorities::HIGHEST_PRIORITY ) );
+    getSimulationLoop()->startTask( crimild::alloc< UpdateSceneTask >( Priorities::UPDATE_SCENE_PRIORITY ) );
+    getSimulationLoop()->startTask( crimild::alloc< ComputeRenderQueueTask >( Priorities::RENDER_SCENE_PRIORITY ) );
 }
 
 bool Simulation::step( void )

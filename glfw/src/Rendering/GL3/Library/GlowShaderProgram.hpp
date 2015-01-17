@@ -40,7 +40,7 @@ namespace crimild {
 			virtual ~GlowShaderProgram( void );
 		};
 
-		typedef std::shared_ptr< GlowShaderProgram > GlowShaderProgramPtr;
+		typedef SharedPointer< GlowShaderProgram > GlowShaderProgramPtr;
 
 	}
 

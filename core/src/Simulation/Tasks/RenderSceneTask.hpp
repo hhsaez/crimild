@@ -34,6 +34,7 @@
 #include "ComputeRenderQueueTask.hpp"
 
 #include <list>
+#include <thread>
 
 namespace crimild {
 
@@ -54,6 +55,7 @@ namespace crimild {
             
     private:
         RenderQueuePtr _renderQueue;
+        std::mutex _mutex;
             
     public:
         virtual void handleMessage( RenderQueueGeneratedMessagePtr const &message ) override;

@@ -40,7 +40,7 @@ namespace crimild {
 			virtual ~SepiaToneShaderProgram( void );
 		};
 
-		typedef std::shared_ptr< SepiaToneShaderProgram > SepiaToneShaderProgramPtr;
+		typedef SharedPointer< SepiaToneShaderProgram > SepiaToneShaderProgramPtr;
 
 	}
 

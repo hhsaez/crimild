@@ -45,12 +45,12 @@ using namespace crimild;
 
 Renderer::Renderer( void )
 	: _lightCount( 0 ),
-	  _screenPrimitive( std::make_shared< QuadPrimitive >( 2.0f, 2.0f, VertexFormat::VF_P3_UV2, Vector2f( 0.0f, 1.0f ), Vector2f( 1.0f, -1.0f ) ) ),
-      _shaderProgramCatalog( std::make_shared< Catalog< ShaderProgram >>() ),
-	  _textureCatalog( std::make_shared< Catalog< Texture >>() ),
-	  _vertexBufferObjectCatalog( std::make_shared< Catalog< VertexBufferObject >>() ),
-	  _indexBufferObjectCatalog( std::make_shared< Catalog< IndexBufferObject >>() ),
-	  _frameBufferObjectCatalog( std::make_shared< Catalog< FrameBufferObject >>() )
+	  _screenPrimitive( crimild::alloc< QuadPrimitive >( 2.0f, 2.0f, VertexFormat::VF_P3_UV2, Vector2f( 0.0f, 1.0f ), Vector2f( 1.0f, -1.0f ) ) ),
+      _shaderProgramCatalog( crimild::alloc< Catalog< ShaderProgram >>() ),
+	  _textureCatalog( crimild::alloc< Catalog< Texture >>() ),
+	  _vertexBufferObjectCatalog( crimild::alloc< Catalog< VertexBufferObject >>() ),
+	  _indexBufferObjectCatalog( crimild::alloc< Catalog< IndexBufferObject >>() ),
+	  _frameBufferObjectCatalog( crimild::alloc< Catalog< FrameBufferObject >>() )
 
 {
     
@@ -224,6 +224,13 @@ void Renderer::applyTransformations( ShaderProgramPtr const &program, const Matr
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM ), view );
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM ), model );
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::NORMAL_MATRIX_UNIFORM ), normal );
+}
+
+void Renderer::applyTransformations( ShaderProgramPtr const &program, const Matrix4f &projection, const Matrix4f &view, const Matrix4f &model )
+{
+    bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::PROJECTION_MATRIX_UNIFORM ), projection );
+    bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM ), view );
+    bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM ), model );
 }
 
 void Renderer::restoreTransformations( ShaderProgramPtr const &program, GeometryPtr const &geometry, CameraPtr const &camera )

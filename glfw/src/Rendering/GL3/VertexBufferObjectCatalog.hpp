@@ -58,7 +58,7 @@ namespace crimild {
             std::list< int > _unusedVBOIds;
 		};
 
-		typedef std::shared_ptr< VertexBufferObjectCatalog > VertexBufferObjectCatalogPtr;
+		typedef SharedPointer< VertexBufferObjectCatalog > VertexBufferObjectCatalogPtr;
 
 	}
 

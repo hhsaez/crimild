@@ -35,8 +35,8 @@ using namespace crimild::gl3;
 ParticleSystem::ParticleSystem( std::string name )
 	: Geometry( name )
 {
-    auto particleSystemComponent = std::make_shared< ParticleSystemComponent >();
-    particleSystemComponent->getParticleMaterial()->setProgram( std::make_shared< ParticleSystemShaderProgram >() );
+    auto particleSystemComponent = crimild::alloc< ParticleSystemComponent >();
+    particleSystemComponent->getParticleMaterial()->setProgram( crimild::alloc< ParticleSystemShaderProgram >() );
 	attachComponent( particleSystemComponent );
 }
 

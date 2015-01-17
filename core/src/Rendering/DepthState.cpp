@@ -29,8 +29,8 @@
 
 using namespace crimild;
 
-DepthStatePtr DepthState::DISABLED( std::make_shared< DepthState >( false ) );
-DepthStatePtr DepthState::ENABLED( std::make_shared< DepthState >( true ) );
+DepthStatePtr DepthState::DISABLED( crimild::alloc< DepthState >( false ) );
+DepthStatePtr DepthState::ENABLED( crimild::alloc< DepthState >( true ) );
 
 DepthState::DepthState( bool enabled )
 	: RenderState( enabled )

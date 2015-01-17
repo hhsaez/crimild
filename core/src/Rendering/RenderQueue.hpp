@@ -78,7 +78,7 @@ namespace crimild {
         MaterialMap _screenObjects;
     };
     
-    using RenderQueuePtr = std::shared_ptr< RenderQueue >;
+    using RenderQueuePtr = SharedPointer< RenderQueue >;
     
 }
 

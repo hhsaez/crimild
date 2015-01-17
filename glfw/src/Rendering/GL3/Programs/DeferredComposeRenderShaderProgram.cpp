@@ -61,7 +61,10 @@ CRIMILD_TO_STRING(
     const mat4 ScaleMatrix = mat4( 0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.5, 0.5, 0.5, 1.0 );
                                                       
     in vec2 vTextureCoord;
+                  
+    uniform mat4 uVMatrix;
 
+    uniform sampler2D uDepthMap;
     uniform sampler2D uColorMap;
     uniform sampler2D uPositionMap;
     uniform sampler2D uNormalMap;
@@ -90,25 +93,26 @@ CRIMILD_TO_STRING(
                   
     void main( void )
     {
-        vec3 srcPosition = texture( uPositionMap, vTextureCoord ).xyz;
-        float srcDepth = texture( uPositionMap, vTextureCoord ).w;
-        vec3 srcNormal = texture( uNormalMap, vTextureCoord ).xyz;
-        float srcSpecular = texture( uNormalMap, vTextureCoord ).w;
-        vec4 srcColor = texture( uColorMap, vTextureCoord );
-        vec4 srcEmissive = texture( uEmissiveMap, vTextureCoord );
+        vec4 colorBufferData = texture( uColorMap, vTextureCoord );
+        vec4 positionDepthBufferData = texture( uPositionMap, vTextureCoord );
+        vec4 normalSpecularBufferData = texture( uNormalMap, vTextureCoord );
+        vec4 vsNormalEmissiveBufferData = texture( uEmissiveMap, vTextureCoord );
+        
+        vec4 srcColor = colorBufferData;
+        vec3 srcPosition = positionDepthBufferData.xyz;
+        float srcDepth = positionDepthBufferData.a;
+        vec3 srcNormal = normalSpecularBufferData.xyz;
+        float srcSpecular = normalSpecularBufferData.a;
+        float srcEmissive = vsNormalEmissiveBufferData.a;
         
         vec4 specularColor = vec4( srcSpecular, srcSpecular, srcSpecular, srcSpecular );
+        vec4 emissiveColor = vec4( srcEmissive, srcEmissive, srcEmissive, srcEmissive );
         
         vec4 color = srcColor;
-        vFragColor = vec4( srcEmissive.rgb, 1.0 );
+        vFragColor = emissiveColor;
         
         vec3 normal = normalize( srcNormal );
-        
-        for ( int i = 0; i < 4; i++ ) {
-            if ( i >= uLightCount ) {
-                break;
-            }
-            
+        for ( int i = 0; i < uLightCount; i++ ) {
             vec3 lightVec = normalize( uLights[ i ].position - srcPosition );
             vec3 halfVector = -normalize( reflect( lightVec, normal ) );
             
@@ -154,12 +158,15 @@ DeferredComposeRenderShaderProgram::DeferredComposeRenderShaderProgram( void )
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
     
+    registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::G_BUFFER_DEPTH_MAP_UNIFORM, "uDepthMap" );
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::G_BUFFER_COLOR_MAP_UNIFORM, "uColorMap" );
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::G_BUFFER_POSITION_MAP_UNIFORM, "uPositionMap" );
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::G_BUFFER_NORMAL_MAP_UNIFORM, "uNormalMap" );
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::G_BUFFER_EMISSIVE_MAP_UNIFORM, "uEmissiveMap" );
     
-	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_COUNT_UNIFORM, "uLightCount" );
+    registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM, "uVMatrix" );
+
+    registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_COUNT_UNIFORM, "uLightCount" );
 	for ( int i = 0; i < 4; i++ ) {
 		registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_POSITION_UNIFORM + i, Utils::buildArrayShaderLocationName( "uLights", i, "position" ) );
 		registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_ATTENUATION_UNIFORM + i, Utils::buildArrayShaderLocationName( "uLights", i, "attenuation" ) );

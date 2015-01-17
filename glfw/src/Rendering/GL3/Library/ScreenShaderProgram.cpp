@@ -56,10 +56,6 @@ const char *screen_fs = { CRIMILD_TO_STRING(
 	void main( void ) 
 	{ 
 		vec4 color = texture( uColorMap, vTextureCoord );
-		if ( color.a == 0.0 ) {
-			discard;
-		}
-
 		vFragColor = color;
 	}
 )};

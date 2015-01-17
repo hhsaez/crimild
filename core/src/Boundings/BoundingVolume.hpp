@@ -41,7 +41,7 @@ namespace crimild {
     
     class BoundingVolume;
     
-    using BoundingVolumePtr = std::shared_ptr< BoundingVolume >;
+    using BoundingVolumePtr = SharedPointer< BoundingVolume >;
     
 	class BoundingVolume : public SharedObject {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( BoundingVolume );

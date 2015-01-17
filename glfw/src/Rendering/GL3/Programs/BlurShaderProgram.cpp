@@ -116,11 +116,11 @@ BlurShaderProgram::BlurShaderProgram( void )
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
     
-    registerLocation( std::make_shared< ShaderLocation >( ShaderLocation::Type::UNIFORM, UNIFORM_BLUR_INPUT ) );
-    registerLocation( std::make_shared< ShaderLocation >( ShaderLocation::Type::UNIFORM, UNIFORM_BLUR_ORIENTATION ) );
-    registerLocation( std::make_shared< ShaderLocation >( ShaderLocation::Type::UNIFORM, UNIFORM_BLUR_AMOUNT ) );
-    registerLocation( std::make_shared< ShaderLocation >( ShaderLocation::Type::UNIFORM, UNIFORM_BLUR_SCALE ) );
-    registerLocation( std::make_shared< ShaderLocation >( ShaderLocation::Type::UNIFORM, UNIFORM_BLUR_STRENTH ) );
+    registerLocation( crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, UNIFORM_BLUR_INPUT ) );
+    registerLocation( crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, UNIFORM_BLUR_ORIENTATION ) );
+    registerLocation( crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, UNIFORM_BLUR_AMOUNT ) );
+    registerLocation( crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, UNIFORM_BLUR_SCALE ) );
+    registerLocation( crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, UNIFORM_BLUR_STRENTH ) );
 }
 
 BlurShaderProgram::~BlurShaderProgram( void )

@@ -40,7 +40,7 @@ namespace crimild {
 			virtual ~WavAudioClip( void );
 		};
 
-		typedef std::shared_ptr< WavAudioClip > WavAudioClipPtr;
+		typedef SharedPointer< WavAudioClip > WavAudioClipPtr;
 
 	}
 

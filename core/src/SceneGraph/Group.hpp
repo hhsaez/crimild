@@ -57,7 +57,7 @@ namespace crimild {
 		NodePtr getNodeAt( unsigned int index );
 
 		template< typename T >
-        std::shared_ptr< T > getNodeAt( unsigned int index )
+        SharedPointer< T > getNodeAt( unsigned int index )
 		{
             return std::static_pointer_cast< T >( getNodeAt( index ) );
 		}
@@ -72,7 +72,7 @@ namespace crimild {
 
 	};
     
-    using GroupPtr = std::shared_ptr< Group >;
+    using GroupPtr = SharedPointer< Group >;
 
 }
 

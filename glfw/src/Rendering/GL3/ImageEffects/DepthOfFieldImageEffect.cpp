@@ -269,18 +269,18 @@ const char *dof_apply_fs = { CRIMILD_TO_STRING(
 gl3::DepthOfFieldImageEffect::DepthOfFieldImageEffect( void )
 {
     _dofBlurMapSize = Vector2f( 256.0f, 256.0f );
-    _blurMapTexelSize = std::make_shared< Vector2fUniform >( "uTexelSize", Vector2f( 1.0f / _dofBlurMapSize[ 0 ], 1.0f / _dofBlurMapSize[ 1 ] ) );
-    _blurOrientation = std::make_shared< IntUniform >( "uOrientation", 0 );
-    _blurCoefficient = std::make_shared< FloatUniform >( "uBlurCoefficient", 1.0f );
-    _focusDistance = std::make_shared< FloatUniform >( "uFocusDistance", 0.5f );
-    _near = std::make_shared< FloatUniform >( "uNear", 1.0f );
-    _far = std::make_shared< FloatUniform >( "uFar", 1.0f );
-    _ppm = std::make_shared< FloatUniform >( "uPPM", 1.0f );
+    _blurMapTexelSize = crimild::alloc< Vector2fUniform >( "uTexelSize", Vector2f( 1.0f / _dofBlurMapSize[ 0 ], 1.0f / _dofBlurMapSize[ 1 ] ) );
+    _blurOrientation = crimild::alloc< IntUniform >( "uOrientation", 0 );
+    _blurCoefficient = crimild::alloc< FloatUniform >( "uBlurCoefficient", 1.0f );
+    _focusDistance = crimild::alloc< FloatUniform >( "uFocusDistance", 0.5f );
+    _near = crimild::alloc< FloatUniform >( "uNear", 1.0f );
+    _far = crimild::alloc< FloatUniform >( "uFar", 1.0f );
+    _ppm = crimild::alloc< FloatUniform >( "uPPM", 1.0f );
     
-    _focus = std::make_shared< FloatUniform >( "uFocus", 0.875f );
-    _aperture = std::make_shared< FloatUniform >( "uAperture", 0.1f );
+    _focus = crimild::alloc< FloatUniform >( "uFocus", 0.875f );
+    _aperture = crimild::alloc< FloatUniform >( "uAperture", 0.1f );
     
-    _alphaState = std::make_shared< AlphaState >( true, AlphaState::SrcBlendFunc::ONE, AlphaState::DstBlendFunc::ZERO );
+    _alphaState = crimild::alloc< AlphaState >( true, AlphaState::SrcBlendFunc::ONE, AlphaState::DstBlendFunc::ZERO );
 }
 
 gl3::DepthOfFieldImageEffect::~DepthOfFieldImageEffect( void )
@@ -288,7 +288,12 @@ gl3::DepthOfFieldImageEffect::~DepthOfFieldImageEffect( void )
 
 }
 
-void gl3::DepthOfFieldImageEffect::apply( crimild::RendererPtr const &renderer )
+void gl3::DepthOfFieldImageEffect::compute( RendererPtr const &renderer, CameraPtr const &camera )
+{
+    
+}
+
+void gl3::DepthOfFieldImageEffect::apply( crimild::RendererPtr const &renderer, crimild::CameraPtr const & )
 {
     const float blurCoefficient = 1.0f;
     const float focusDistance = 0.5f;
@@ -304,7 +309,7 @@ void gl3::DepthOfFieldImageEffect::apply( crimild::RendererPtr const &renderer )
 
     auto dofBlurProgram = renderer->getShaderProgram( "dof_blur" );
 	if ( dofBlurProgram == nullptr ) {
-		dofBlurProgram = std::make_shared< ShaderProgram >( Utils::getVertexShaderInstance( dof_blur_vs ), Utils::getFragmentShaderInstance( dof_blur2_fs ) );
+		dofBlurProgram = crimild::alloc< ShaderProgram >( Utils::getVertexShaderInstance( dof_blur_vs ), Utils::getFragmentShaderInstance( dof_blur2_fs ) );
 
 		dofBlurProgram->registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
 	    dofBlurProgram->registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
@@ -328,20 +333,20 @@ void gl3::DepthOfFieldImageEffect::apply( crimild::RendererPtr const &renderer )
 
     auto dofApplyProgram = renderer->getShaderProgram( "dof_apply" );
 	if ( dofApplyProgram == nullptr ) {
-		dofApplyProgram = std::make_shared< ShaderProgram >( Utils::getVertexShaderInstance( dof_apply_vs ), Utils::getFragmentShaderInstance( dof_apply_fs ) );
+		dofApplyProgram = crimild::alloc< ShaderProgram >( Utils::getVertexShaderInstance( dof_apply_vs ), Utils::getFragmentShaderInstance( dof_apply_fs ) );
 
 		dofApplyProgram->registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
 	    dofApplyProgram->registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
 
-	    dofApplyProgram->registerLocation( std::make_shared< ShaderLocation >( ShaderLocation::Type::UNIFORM, "uColorMap" ) );
-	    dofApplyProgram->registerLocation( std::make_shared< ShaderLocation >( ShaderLocation::Type::UNIFORM, "uDepthMap" ) );
-	    dofApplyProgram->registerLocation( std::make_shared< ShaderLocation >( ShaderLocation::Type::UNIFORM, "uBlurMap" ) );
+	    dofApplyProgram->registerLocation( crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, "uColorMap" ) );
+	    dofApplyProgram->registerLocation( crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, "uDepthMap" ) );
+	    dofApplyProgram->registerLocation( crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, "uBlurMap" ) );
 
-	    dofApplyProgram->attachUniform( std::make_shared< FloatUniform >( "uBlurCoefficient", blurCoefficient ) );
-	    dofApplyProgram->attachUniform( std::make_shared< FloatUniform >( "uFocusDistance", focusDistance ) );
-	    dofApplyProgram->attachUniform( std::make_shared< FloatUniform >( "uNear", near ) );
-	    dofApplyProgram->attachUniform( std::make_shared< FloatUniform >( "uFar", far ) );
-	    dofApplyProgram->attachUniform( std::make_shared< FloatUniform >( "uPPM", ppm ) );
+	    dofApplyProgram->attachUniform( crimild::alloc< FloatUniform >( "uBlurCoefficient", blurCoefficient ) );
+	    dofApplyProgram->attachUniform( crimild::alloc< FloatUniform >( "uFocusDistance", focusDistance ) );
+	    dofApplyProgram->attachUniform( crimild::alloc< FloatUniform >( "uNear", near ) );
+	    dofApplyProgram->attachUniform( crimild::alloc< FloatUniform >( "uFar", far ) );
+	    dofApplyProgram->attachUniform( crimild::alloc< FloatUniform >( "uPPM", ppm ) );
 		
 		renderer->addShaderProgram( "dof_apply", dofApplyProgram );
 	}
@@ -351,9 +356,9 @@ void gl3::DepthOfFieldImageEffect::apply( crimild::RendererPtr const &renderer )
 		int width = _dofBlurMapSize[ 0 ];
 		int height = _dofBlurMapSize[ 1 ];
 
-	    dofBlurFBO = std::make_shared< FrameBufferObject >( width, height );
-	    dofBlurFBO->getRenderTargets()->add( "blur", std::make_shared< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
-	    dofBlurFBO->getRenderTargets()->add( "depth", std::make_shared< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
+	    dofBlurFBO = crimild::alloc< FrameBufferObject >( width, height );
+	    dofBlurFBO->getRenderTargets()->add( "blur", crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
+	    dofBlurFBO->getRenderTargets()->add( "depth", crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
 
 	    renderer->addFrameBuffer( "dof_blur", dofBlurFBO );
 	}

@@ -45,7 +45,7 @@ namespace crimild {
 			FrameBufferObjectPtr _offscreenBuffer;
 		};
 
-		typedef std::shared_ptr< OffscreenRenderPass > OffscreenRenderPassPtr;
+		typedef SharedPointer< OffscreenRenderPass > OffscreenRenderPassPtr;
 
 	}
 

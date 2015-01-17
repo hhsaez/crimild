@@ -47,7 +47,7 @@ namespace crimild {
 			virtual void write( Log *log, std::string message ) = 0;
 		};
         
-        using LogOutputHandlerPtr = std::shared_ptr< LogOutputHandler >;
+        using LogOutputHandlerPtr = SharedPointer< LogOutputHandler >;
 
 		class ConsoleOutputHandler : public LogOutputHandler {
 		public:
@@ -55,7 +55,7 @@ namespace crimild {
 			virtual void write( Log *log, std::string message ) override;
 		};
         
-        using ConsoleOutputHandlerPtr = std::shared_ptr< ConsoleOutputHandler >;
+        using ConsoleOutputHandlerPtr = SharedPointer< ConsoleOutputHandler >;
 
 	public:
 		static Log Debug;

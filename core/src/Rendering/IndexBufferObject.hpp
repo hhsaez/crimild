@@ -42,7 +42,7 @@ namespace crimild {
 
 	};
     
-    using IndexBufferObjectPtr = std::shared_ptr< IndexBufferObject >;
+    using IndexBufferObjectPtr = SharedPointer< IndexBufferObject >;
     using IndexBufferObjectCatalog = Catalog< IndexBufferObject >;
 
 }

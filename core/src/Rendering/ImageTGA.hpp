@@ -63,7 +63,7 @@ namespace crimild {
 		std::string _filePath;
 	};
     
-    using ImageTGAPtr = std::shared_ptr< ImageTGA >;
+    using ImageTGAPtr = SharedPointer< ImageTGA >;
 
 }
 

@@ -45,13 +45,13 @@ AssetManager::~AssetManager( void )
 }
 
 template<>
-std::shared_ptr< Texture > AssetManager::get( std::string name )
+SharedPointer< Texture > AssetManager::get( std::string name )
 {
 	auto texture = std::static_pointer_cast< Texture >( _assets[ name ] );
 	if ( texture == nullptr && ( StringUtils::getFileExtension( name ) == ".tga" ) ) {
-		auto image = std::make_shared< ImageTGA >( FileSystem::getInstance().pathForResource( name ) );
+		auto image = crimild::alloc< ImageTGA >( FileSystem::getInstance().pathForResource( name ) );
 		if ( image != nullptr ) {
-			texture = std::make_shared< Texture >( image );
+			texture = crimild::alloc< Texture >( image );
 			add( name, texture );
 		}
 	}

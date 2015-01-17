@@ -33,7 +33,7 @@ using namespace crimild::gl3;
 
 FlatMaterial::FlatMaterial( const RGBAColorf &diffuse )
 {
-    setProgram( std::make_shared< FlatShaderProgram >() );
+    setProgram( crimild::alloc< FlatShaderProgram >() );
 	setDiffuse( diffuse );
 }
 

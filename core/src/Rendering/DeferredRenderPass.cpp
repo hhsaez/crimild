@@ -56,49 +56,58 @@ DeferredRenderPass::~DeferredRenderPass( void )
 
 void DeferredRenderPass::render( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
-    /*
-#if 1
     computeShadowMaps( renderer, renderQueue, camera );
     
-    auto sceneFBO = renderer->getFrameBuffer( "scene" );
-    if ( sceneFBO == nullptr ) {
-        sceneFBO = createSceneFBO( renderer );
-    }
-    
-    renderer->bindFrameBuffer( sceneFBO );
-    
-    renderShadedObjects( renderer, renderQueue, camera );
-    renderTranslucentObjects( renderer, renderQueue, camera );
-    
-    renderer->unbindFrameBuffer( sceneFBO );
-    
-    if ( getImageEffects()->isEmpty() ) {
-        auto colorTarget = sceneFBO->getRenderTargets()->get( "color" );
-        RenderPass::render( renderer, colorTarget->getTexture(), nullptr );
-    }
-    else {
-        getImageEffects()->each( [&]( ImageEffectPtr const &effect, int ) {
-            effect->apply( renderer );
-        });
-    }
-    
-    // UI elements need to be render on top of any image effect
-    renderScreenObjects( renderer, renderQueue, camera );
-#else
-    for ( auto it : _shadowMaps ) {
-        if ( it.second != nullptr ) {
-            RenderPass::render( renderer, it.second->getTexture(), nullptr );
-        }
-    }
-#endif
-     */
-    
-    computeShadowMaps( renderer, renderQueue, camera );
-    
-#if 1
     renderToGBuffer( renderer, renderQueue, camera );
     composeFrame( renderer, renderQueue, camera );
     
+#if 0
+    auto gBuffer = getGBuffer( renderer );
+    
+    renderer->setAlphaState( AlphaState::ENABLED_SRC_COLOR_ONLY );
+    renderer->setDepthState( DepthState::DISABLED );
+    
+    renderer->setViewport( Rectf( 0.0f, 0.75f, 0.25f, 0.25f ) );
+    RenderPass::render( renderer, gBuffer->getRenderTargets()->get( G_BUFFER_DEPTH_TARGET_NAME )->getTexture(), nullptr );
+    
+    if ( _shadowMaps.size() > 0 ) {
+        auto firstShadow = _shadowMaps.begin()->second;
+        renderer->setViewport( Rectf( 0.0f, 0.5f, 0.25f, 0.25f ) );
+        RenderPass::render( renderer, firstShadow->getTexture(), nullptr );
+    }
+    
+    renderer->setViewport( Rectf( 0.5f, 0.75f, 0.25f, 0.25f ) );
+    RenderPass::render( renderer, gBuffer->getRenderTargets()->get( G_BUFFER_COLOR_TARGET_NAME )->getTexture(), nullptr );
+    
+    renderer->setViewport( Rectf( 0.75f, 0.75f, 0.25f, 0.25f ) );
+    RenderPass::render( renderer, gBuffer->getRenderTargets()->get( G_BUFFER_POSITION_TARGET_NAME )->getTexture(), nullptr );
+    
+    renderer->setViewport( Rectf( 0.5f, 0.5f, 0.25f, 0.25f ) );
+    RenderPass::render( renderer, gBuffer->getRenderTargets()->get( G_BUFFER_NORMAL_TARGET_NAME )->getTexture(), nullptr );
+    
+    renderer->setViewport( Rectf( 0.75f, 0.5f, 0.25f, 0.25f ) );
+    RenderPass::render( renderer, gBuffer->getRenderTargets()->get( G_BUFFER_VIEW_SPACE_NORMAL_TARGET_NAME )->getTexture(), nullptr );
+    
+    auto sceneFBO = renderer->getFrameBuffer( "scene" );
+    renderer->setViewport( Rectf( 0.0f, 0.0f, 0.5f, 0.5f ) );
+    RenderPass::render( renderer, sceneFBO->getRenderTargets()->get( "color" )->getTexture(), nullptr );
+    
+    getImageEffects()->each( [&]( ImageEffectPtr const &effect, int ) {
+        effect->compute( renderer, camera );
+        renderer->setViewport( Rectf( 0.5f, 0.0f, 0.5f, 0.5f ) );
+        effect->apply( renderer, camera );
+    });
+    
+    renderer->setViewport( Rectf( 0.25f, 0.75f, 0.25f, 0.25f ) );
+    renderTranslucentObjects( renderer, renderQueue, camera );
+
+    renderer->setViewport( Rectf( 0.25f, 0.5f, 0.25f, 0.25f ) );
+    renderScreenObjects( renderer, renderQueue, camera );
+
+    // reset viewport
+    renderer->setViewport( Rectf( 0.0f, 0.0f, 1.0f, 1.0f ) );
+
+#else
     if ( getImageEffects()->isEmpty() ) {
         auto sceneFBO = renderer->getFrameBuffer( "scene" );
         auto colorTarget = sceneFBO->getRenderTargets()->get( "color" );
@@ -106,103 +115,36 @@ void DeferredRenderPass::render( RendererPtr const &renderer, RenderQueuePtr con
     }
     else {
         getImageEffects()->each( [&]( ImageEffectPtr const &effect, int ) {
-            effect->apply( renderer );
+            effect->compute( renderer, camera );
+            effect->apply( renderer, camera );
         });
     }
     
-    // UI elements need to be render on top of any image effect
+    renderTranslucentObjects( renderer, renderQueue, camera );
     renderScreenObjects( renderer, renderQueue, camera );
-    
-//    if ( getImageEffects().isEmpty() ) {
-//        RenderPass::render( renderer, _frameBufferOutput.get(), nullptr );
-//    }
-//    else {
-//        Texture *inputs[] = {
-//            _frameBufferOutput.get(),
-//            _gBufferColorOutput.get(),
-//            _gBufferPositionOutput.get(),
-//            _gBufferNormalOutput.get(),
-//            _gBufferEmissiveOutput.get(),
-//        };
-//        
-//        getImageEffects().each( [&]( ImageEffect *effect, int ) {
-//            effect->apply( renderer, 5, inputs, getScreenPrimitive(), _accumBuffer.get() );
-//        });
-//        
-//        RenderPass::render( renderer, _accumBufferOutput.get(), nullptr );
-//    }
-#else
-    for ( auto it : _shadowMaps ) {
-        if ( it.second != nullptr ) {
-            RenderPass::render( renderer, it.second->getTexture(), nullptr );
-        }
-    }
 #endif
-}
-
-void DeferredRenderPass::buildAccumBuffer( int width, int height )
-{
-    /*
-    _accumBuffer.set( new FrameBufferObject( width, height ) );
-    _accumBuffer->getRenderTargets().add( new RenderTarget( RenderTarget::Type::DEPTH_16, RenderTarget::Output::RENDER, width, height ) );
-    
-    RenderTarget *colorTarget = new RenderTarget( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height );
-    _accumBufferOutput = colorTarget->getTexture();
-    _accumBuffer->getRenderTargets().add( colorTarget );
-     */
 }
 
 FrameBufferObjectPtr DeferredRenderPass::getGBuffer( const RendererPtr &renderer )
 {
-    auto gBuffer = renderer->getFrameBuffer( "g_buffer" );
+    auto gBuffer = renderer->getFrameBuffer( G_BUFFER_NAME );
     if ( gBuffer != nullptr ) {
         return gBuffer;
     }
     
     int width = renderer->getScreenBuffer()->getWidth();
     int height = renderer->getScreenBuffer()->getHeight();
-    gBuffer = std::make_shared< FrameBufferObject >( width, height );
+    gBuffer = crimild::alloc< FrameBufferObject >( width, height );
     
-    gBuffer->getRenderTargets()->add( "depth", std::make_shared< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER_AND_TEXTURE, width, height ) );
-    gBuffer->getRenderTargets()->add( "color", std::make_shared< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height, true ) );
-    gBuffer->getRenderTargets()->add( "positions", std::make_shared< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height, true ) );
-    gBuffer->getRenderTargets()->add( "normals", std::make_shared< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height, true ) );
-    gBuffer->getRenderTargets()->add( "emissive", std::make_shared< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height, true ) );
+    gBuffer->getRenderTargets()->add( G_BUFFER_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_32, RenderTarget::Output::RENDER_AND_TEXTURE, width, height, true ) );
+    gBuffer->getRenderTargets()->add( G_BUFFER_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height, true ) );
+    gBuffer->getRenderTargets()->add( G_BUFFER_POSITION_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height, true ) );
+    gBuffer->getRenderTargets()->add( G_BUFFER_NORMAL_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height, true ) );
+    gBuffer->getRenderTargets()->add( G_BUFFER_VIEW_SPACE_NORMAL_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height, true ) );
+    
+    renderer->addFrameBuffer( G_BUFFER_NAME, gBuffer );
     
     return  gBuffer;
-}
-
-void DeferredRenderPass::buildGBuffer( RendererPtr const &renderer )
-{
-    /*
-    _gBuffer.set( new FrameBufferObject( width, height ) );
-    RenderTarget *depthTarget = new RenderTarget( RenderTarget::Type::DEPTH_16, RenderTarget::Output::RENDER, width, height );
-    _gBufferDepthOutput = depthTarget->getTexture();
-    _gBuffer->getRenderTargets().add( depthTarget );
-    
-    RenderTarget *colorTarget = new RenderTarget( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height );
-    colorTarget->setUseFloatTexture( true );
-    _gBufferColorOutput = colorTarget->getTexture();
-    _gBuffer->getRenderTargets().add( colorTarget );
-    
-    RenderTarget *positionTarget = new RenderTarget( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height );
-    positionTarget->setUseFloatTexture( true );
-    _gBufferPositionOutput = positionTarget->getTexture();
-    _gBuffer->getRenderTargets().add( positionTarget );
-    
-    RenderTarget *normalTarget = new RenderTarget( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height );
-    normalTarget->setUseFloatTexture( true );
-    _gBufferNormalOutput = normalTarget->getTexture();
-    _gBuffer->getRenderTargets().add( normalTarget );
-    
-    RenderTarget *emissiveTarget = new RenderTarget( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height );
-    _gBufferEmissiveOutput = emissiveTarget->getTexture();
-    _gBuffer->getRenderTargets().add( emissiveTarget );
-    
-    if ( _accumBuffer == nullptr ) {
-        buildAccumBuffer( width, height );
-    }
-     */
 }
 
 void DeferredRenderPass::renderToGBuffer( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
@@ -219,22 +161,10 @@ void DeferredRenderPass::renderToGBuffer( RendererPtr const &renderer, RenderQue
     const Matrix4f &projection = camera->getProjectionMatrix();
     const Matrix4f &view = camera->getViewMatrix();
     
-    // bind shadow maps
-    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::USE_SHADOW_MAP_UNIFORM ), false );
-    for ( auto it : _shadowMaps ) {
-        if ( it.second != nullptr ) {
-            renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_SOURCE_PROJECTION_MATRIX_UNIFORM ), it.second->getLightProjectionMatrix() );
-            renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_SOURCE_VIEW_MATRIX_UNIFORM ), it.second->getLightViewMatrix() );
-            renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::USE_SHADOW_MAP_UNIFORM ), true );
-            renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LINEAR_DEPTH_CONSTANT_UNIFORM ), it.second->getLinearDepthConstant() );
-            renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::SHADOW_MAP_UNIFORM ), it.second->getTexture() );
-        }
-    }
+    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LINEAR_DEPTH_CONSTANT_UNIFORM ), camera->getFrustum().computeLinearDepth() );
     
-    // bind lights
-    renderQueue->each( [&]( LightPtr const &light, int ) {
-        renderer->bindLight( program, light );
-    });
+    renderer->setAlphaState( AlphaState::DISABLED );
+    renderer->setDepthState( DepthState::ENABLED );
     
     renderQueue->each( renderQueue->getOpaqueObjects(), [&]( MaterialPtr const &material, RenderQueue::PrimitiveMap const &primitives ) {
         // bind material properties
@@ -249,7 +179,7 @@ void DeferredRenderPass::renderToGBuffer( RendererPtr const &renderer, RenderQue
             
             for ( auto geometryIt : it.second ) {
                 auto world = geometryIt.second;
-                renderer->applyTransformations( program, projection, view, world.computeModelMatrix(), world.computeNormalMatrix() );
+                renderer->applyTransformations( program, projection, view, world.computeModelMatrix() );
                 renderer->drawPrimitive( program, primitive );
             }
             
@@ -263,121 +193,32 @@ void DeferredRenderPass::renderToGBuffer( RendererPtr const &renderer, RenderQue
         
     });
     
-    // unbind lights
-    renderQueue->each( [&]( LightPtr const &light, int ) {
-        renderer->unbindLight( program, light );
-    });
-    
-    // unbind shadow maps
-    for ( auto it : _shadowMaps ) {
-        if ( it.second != nullptr ) {
-            renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::SHADOW_MAP_UNIFORM ), it.second->getTexture() );
-        }
-    }
-    
-    // unbind program
     renderer->unbindProgram( program );
     
     renderer->unbindFrameBuffer( gBuffer );
-    
-    /*
-    if ( _gBuffer == nullptr ) {
-        int width = renderer->getScreenBuffer()->getWidth();
-        int height = renderer->getScreenBuffer()->getHeight();
-        buildGBuffer( width, height );
-    }
-    
-    renderer->bindFrameBuffer( _gBuffer.get() );
-    
-    renderQueue->getOpaqueObjects().each( [&]( Geometry *geometry, int ) {
-        
-        RenderStateComponent *renderState = geometry->getComponent< RenderStateComponent >();
-        renderState->foreachMaterial( [&]( Material *material ) {
-            geometry->foreachPrimitive( [&]( Primitive *primitive ) mutable {
-                ShaderProgram *program = renderer->getDeferredPassProgram();
-                if ( program == nullptr ) {
-                    Log::Error << "Deferred rendering not supported in your platform" << Log::End;
-                    exit( 1 );
-                    return;
-                }
-                
-                renderer->bindProgram( program );
-                
-                // bind material properties
-                renderer->bindMaterial( program, material );
-                
-                // bind joints and other skinning information
-                SkinComponent *skinning = geometry->getComponent< SkinComponent >();
-                if ( skinning != nullptr && skinning->hasJoints() ) {
-                    skinning->foreachJoint( [&]( Node *node, unsigned int index ) {
-                        JointComponent *joint = node->getComponent< JointComponent >();
-                        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::JOINT_WORLD_MATRIX_UNIFORM + index ), joint->getWorldMatrix() );
-                        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::JOINT_INVERSE_BIND_MATRIX_UNIFORM + index ), joint->getInverseBindMatrix() );
-                    });
-                }
-                
-                // bind vertex and index buffers
-                renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
-                renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
-                
-                renderer->applyTransformations( program, geometry, camera );
-                
-                // draw primitive
-                renderer->drawPrimitive( program, primitive );
-                
-                renderer->restoreTransformations( program, geometry, camera );
-                
-                // unbind primitive buffers
-                renderer->unbindVertexBuffer( program, primitive->getVertexBuffer() );
-                renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
-                
-                // unbind material properties
-                renderer->unbindMaterial( program, material );
-                
-                renderer->unbindProgram( program );
-            });
-        });
-    });
-    
-    renderer->unbindFrameBuffer( _gBuffer.get() );
-     */
-}
-
-void DeferredRenderPass::buildFrameBuffer(int width, int height )
-{
-    /*
-    _frameBuffer.set( new FrameBufferObject( width, height ) );
-    _frameBuffer->getRenderTargets().add( new RenderTarget( RenderTarget::Type::DEPTH_16, RenderTarget::Output::RENDER, width, height ) );
-    
-    RenderTarget *colorTarget = new RenderTarget( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height );
-    _frameBufferOutput = colorTarget->getTexture();
-    _frameBuffer->getRenderTargets().add( colorTarget );
-     */
 }
 
 void DeferredRenderPass::composeFrame( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
-    /*
-    if ( _frameBuffer == nullptr ) {
+    auto sceneBuffer = renderer->getFrameBuffer( "scene" );
+    if ( sceneBuffer == nullptr ) {
         int width = renderer->getScreenBuffer()->getWidth();
         int height = renderer->getScreenBuffer()->getHeight();
-        buildFrameBuffer( width, height );
+        
+        sceneBuffer = crimild::alloc< FrameBufferObject >( width, height );
+        sceneBuffer->getRenderTargets()->add( "depth", crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER_AND_TEXTURE, width, height ) );
+        sceneBuffer->getRenderTargets()->add( "color", crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
+        
+        renderer->addFrameBuffer( "scene", sceneBuffer );
     }
     
-    // bind buffer for ssao output
-    renderer->bindFrameBuffer( _frameBuffer.get() );
+    renderer->bindFrameBuffer( sceneBuffer );
     
-    ShaderProgram *program = renderer->getShaderProgram( "deferredCompose" );
-    if ( program == nullptr ) {
-        Log::Error << "Cannot find shader program for composite deferred scene" << Log::End;
-        exit( 1 );
-        return;
-    }
+    auto program = renderer->getShaderProgram( "deferred_compose" );
     
-    // bind shader program first
     renderer->bindProgram( program );
     
-    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::USE_SHADOW_MAP_UNIFORM ), true );
+    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::USE_SHADOW_MAP_UNIFORM ), _shadowMaps.size() > 0 );
     for ( auto it : _shadowMaps ) {
         if ( it.second != nullptr ) {
             renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_SOURCE_PROJECTION_MATRIX_UNIFORM ), it.second->getLightProjectionMatrix() );
@@ -389,37 +230,31 @@ void DeferredRenderPass::composeFrame( RendererPtr const &renderer, RenderQueueP
     }
     
     // bind lights
-    renderQueue->getLights().each( [&]( Light *light, int ) {
+    renderQueue->each( [&]( LightPtr const &light, int ) {
         renderer->bindLight( program, light );
     });
     
     // bind framebuffer texture
-    renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_COLOR_MAP_UNIFORM ), _gBufferColorOutput.get() );
-    renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_POSITION_MAP_UNIFORM ), _gBufferPositionOutput.get() );
-    renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_NORMAL_MAP_UNIFORM ), _gBufferNormalOutput.get() );
-    renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_EMISSIVE_MAP_UNIFORM ), _gBufferEmissiveOutput.get() );
+    auto gBuffer = renderer->getFrameBuffer( G_BUFFER_NAME );
+    renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_DEPTH_MAP_UNIFORM ), gBuffer->getRenderTargets()->get( G_BUFFER_DEPTH_TARGET_NAME )->getTexture() );
+    renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_COLOR_MAP_UNIFORM ), gBuffer->getRenderTargets()->get( G_BUFFER_COLOR_TARGET_NAME )->getTexture() );
+    renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_POSITION_MAP_UNIFORM ), gBuffer->getRenderTargets()->get( G_BUFFER_POSITION_TARGET_NAME )->getTexture() );
+    renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_NORMAL_MAP_UNIFORM ), gBuffer->getRenderTargets()->get( G_BUFFER_NORMAL_TARGET_NAME )->getTexture() );
+    renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_EMISSIVE_MAP_UNIFORM ), gBuffer->getRenderTargets()->get( G_BUFFER_VIEW_SPACE_NORMAL_TARGET_NAME )->getTexture() );
     
     renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM ), camera->getViewMatrix() );
     
-    // bind vertex and index buffers
-    renderer->bindVertexBuffer( program, getScreenPrimitive()->getVertexBuffer() );
-    renderer->bindIndexBuffer( program, getScreenPrimitive()->getIndexBuffer() );
-    
-    // draw primitive
-    renderer->drawPrimitive( program, getScreenPrimitive() );
-    
-    // unbind primitive buffers
-    renderer->unbindVertexBuffer( program, getScreenPrimitive()->getVertexBuffer() );
-    renderer->unbindIndexBuffer( program, getScreenPrimitive()->getIndexBuffer() );
-    
+    renderer->drawScreenPrimitive( program );
+
     // unbind framebuffer texture
-    renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_COLOR_MAP_UNIFORM ), _gBufferColorOutput.get() );
-    renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_POSITION_MAP_UNIFORM ), _gBufferPositionOutput.get() );
-    renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_NORMAL_MAP_UNIFORM ), _gBufferNormalOutput.get() );
-    renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_EMISSIVE_MAP_UNIFORM ), _gBufferEmissiveOutput.get() );
+    renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_DEPTH_MAP_UNIFORM ), gBuffer->getRenderTargets()->get( G_BUFFER_DEPTH_TARGET_NAME )->getTexture() );
+    renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_COLOR_MAP_UNIFORM ), gBuffer->getRenderTargets()->get( G_BUFFER_COLOR_TARGET_NAME )->getTexture() );
+    renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_POSITION_MAP_UNIFORM ), gBuffer->getRenderTargets()->get( G_BUFFER_POSITION_TARGET_NAME )->getTexture() );
+    renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_NORMAL_MAP_UNIFORM ), gBuffer->getRenderTargets()->get( G_BUFFER_NORMAL_TARGET_NAME )->getTexture() );
+    renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_EMISSIVE_MAP_UNIFORM ), gBuffer->getRenderTargets()->get( G_BUFFER_VIEW_SPACE_NORMAL_TARGET_NAME )->getTexture() );
     
     // unbind lights
-    renderQueue->getLights().each( [&]( Light *light, int ) {
+    renderQueue->each( [&]( LightPtr const &light, int ) {
         renderer->unbindLight( program, light );
     });
     
@@ -429,18 +264,14 @@ void DeferredRenderPass::composeFrame( RendererPtr const &renderer, RenderQueueP
         }
     }
     
-    // lastly, unbind the shader program
     renderer->unbindProgram( program );
     
-    // unbind buffer for ssao output
-    renderer->unbindFrameBuffer( _frameBuffer.get() );
-     */
+    renderer->unbindFrameBuffer( sceneBuffer );
 }
 
 void DeferredRenderPass::computeShadowMaps( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
-    /*
-    ShaderProgram *program = renderer->getDepthProgram();
+    auto program = renderer->getShaderProgram( "depth" );
     if ( program == nullptr ) {
         return;
     }
@@ -448,62 +279,44 @@ void DeferredRenderPass::computeShadowMaps( RendererPtr const &renderer, RenderQ
     // bind shader program first
     renderer->bindProgram( program );
     
-    renderQueue->getLights().each( [&]( Light *light, int ) {
+    renderQueue->each( [&]( LightPtr const &light, int ) {
         
         if ( !light->shouldCastShadows() ) {
             return;
         }
         
-        ShadowMap *map = _shadowMaps[ light ].get();
+        auto map = _shadowMaps[ light ];
         if ( map == nullptr ) {
-            Pointer< ShadowMap > shadowMapPtr( new ShadowMap( light ) );
-            shadowMapPtr->getBuffer()->setClearColor( RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ) );
-            shadowMapPtr->setLightProjectionMatrix( light->computeProjectionMatrix() );
-            _shadowMaps[ light ] = shadowMapPtr;
-            map = shadowMapPtr.get();
+            map = crimild::alloc< ShadowMap >( light );
+            map->getBuffer()->setClearColor( RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ) );
+            map->setLightProjectionMatrix( light->computeProjectionMatrix() );
+            _shadowMaps[ light ] = map;
         }
         
         map->setLightViewMatrix( light->computeViewMatrix() );
         
         renderer->bindFrameBuffer( map->getBuffer() );
         
-        AlphaState alphaState( false );
-        renderer->setAlphaState( &alphaState );
-        
-        DepthState depthState( true );
-        renderer->setDepthState( &depthState );
+        renderer->setAlphaState( AlphaState::DISABLED );
+        renderer->setDepthState( DepthState::ENABLED );
         
         renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LINEAR_DEPTH_CONSTANT_UNIFORM ), map->getLinearDepthConstant() );
         
-        renderQueue->getOpaqueObjects().each( [&]( Geometry *geometry, int ) {
-            RenderStateComponent *renderState = geometry->getComponent< RenderStateComponent >();
-            if ( renderState->hasMaterials() ) {
-                geometry->foreachPrimitive( [&]( Primitive *primitive ) mutable {
-                    
-                    // bind joints and other skinning information
-                    SkinComponent *skinning = geometry->getComponent< SkinComponent >();
-                    if ( skinning != nullptr && skinning->hasJoints() ) {
-                        skinning->foreachJoint( [&]( Node *node, unsigned int index ) {
-                            JointComponent *joint = node->getComponent< JointComponent >();
-                            renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::JOINT_WORLD_MATRIX_UNIFORM + index ), joint->getWorldMatrix() );
-                            renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::JOINT_INVERSE_BIND_MATRIX_UNIFORM + index ), joint->getInverseBindMatrix() );
-                        });
-                    }
-                    
-                    // bind vertex and index buffers
-                    renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
-                    renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
-                    
-                    renderer->applyTransformations( program, map->getLightProjectionMatrix(), map->getLightViewMatrix(), geometry->getWorld().computeModelMatrix(), geometry->getWorld().computeNormalMatrix() );
-                    
-                    // draw primitive
+        renderQueue->each( renderQueue->getOpaqueObjects(), [&]( MaterialPtr const &material, RenderQueue::PrimitiveMap const &primitives ) {
+            for ( auto it : primitives ) {
+                auto primitive = it.first;
+                
+                renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
+                renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
+                
+                for ( auto geometryIt : it.second ) {
+                    renderer->applyTransformations( program, map->getLightProjectionMatrix(), map->getLightViewMatrix(), geometryIt.second.computeModelMatrix(), geometryIt.second.computeNormalMatrix() );
                     renderer->drawPrimitive( program, primitive );
-                    
-                    // unbind primitive buffers
-                    renderer->unbindVertexBuffer( program, primitive->getVertexBuffer() );
-                    renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
-                    
-                });
+                }
+                
+                // unbind primitive buffers
+                renderer->unbindVertexBuffer( program, primitive->getVertexBuffer() );
+                renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
             }
         });
         
@@ -512,6 +325,5 @@ void DeferredRenderPass::computeShadowMaps( RendererPtr const &renderer, RenderQ
     
     // unbind the shader program
     renderer->unbindProgram( program );
-     */
 }
 

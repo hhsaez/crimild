@@ -81,7 +81,7 @@ void ParametricPrimitive::generate( void )
 
 void ParametricPrimitive::generateVertexBuffer( void )
 {
-    auto vbo = std::make_shared< VertexBufferObject >( _format, getVertexCount(), nullptr );
+    auto vbo = crimild::alloc< VertexBufferObject >( _format, getVertexCount(), nullptr );
     float *vertex = vbo->getData();
     for ( int i = 0; i < _divisions[ 1 ]; i++ ) {
         for ( int j = 0; j < _divisions[ 0 ]; j++ ) {
@@ -132,7 +132,7 @@ void ParametricPrimitive::generateVertexBuffer( void )
 
 void ParametricPrimitive::generateLineIndexBuffer( void )
 {
-    auto ibo = std::make_shared< IndexBufferObject >( getLineIndexCount(), nullptr );
+    auto ibo = crimild::alloc< IndexBufferObject >( getLineIndexCount(), nullptr );
     unsigned short *index = ibo->getData();
     for ( int i = 0, vertex = 0; i < _slices[ 1 ]; i++ ) {
         for ( int j = 0; j < _slices[ 0 ]; j++ ) {
@@ -149,7 +149,7 @@ void ParametricPrimitive::generateLineIndexBuffer( void )
 
 void ParametricPrimitive::generateTriangleIndexBuffer( void )
 {
-    auto ibo = std::make_shared< IndexBufferObject >( getTriangleIndexCount(), nullptr );
+    auto ibo = crimild::alloc< IndexBufferObject >( getTriangleIndexCount(), nullptr );
     unsigned short *index = ibo->getData();
     for ( int i = 0, vertex = 0; i < _slices[ 1 ]; i++ ) {
         for ( int j = 0; j < _slices[ 0 ]; j++ ) {

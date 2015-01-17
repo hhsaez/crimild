@@ -50,7 +50,7 @@ namespace crimild {
         float _scale;
     };
     
-    using TrefoilKnotPrimitivePtr = std::shared_ptr< TrefoilKnotPrimitive >;
+    using TrefoilKnotPrimitivePtr = SharedPointer< TrefoilKnotPrimitive >;
         
 }
 

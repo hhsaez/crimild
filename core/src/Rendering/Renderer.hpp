@@ -34,6 +34,7 @@
 
 #include "Mathematics/Vector.hpp"
 #include "Mathematics/Matrix.hpp"
+#include "Mathematics/Rect.hpp"
 
 #include <map>
 
@@ -68,124 +69,123 @@ namespace crimild {
 	public:
 		virtual void configure( void ) = 0;
 
-        void setScreenBuffer( std::shared_ptr< FrameBufferObject > const &screenBuffer ) { _screenBuffer = screenBuffer; }
-		std::shared_ptr< FrameBufferObject > &getScreenBuffer( void ) { return _screenBuffer; }
+        void setScreenBuffer( SharedPointer< FrameBufferObject > const &screenBuffer ) { _screenBuffer = screenBuffer; }
+		SharedPointer< FrameBufferObject > &getScreenBuffer( void ) { return _screenBuffer; }
 
-		void addFrameBuffer( std::string name, std::shared_ptr< FrameBufferObject > const &fbo );
-		std::shared_ptr< FrameBufferObject > getFrameBuffer( std::string name );
+		void addFrameBuffer( std::string name, SharedPointer< FrameBufferObject > const &fbo );
+		SharedPointer< FrameBufferObject > getFrameBuffer( std::string name );
 
 	private:
-		std::shared_ptr< FrameBufferObject > _screenBuffer;
-		std::map< std::string, std::shared_ptr< FrameBufferObject >> _framebuffers;
+		SharedPointer< FrameBufferObject > _screenBuffer;
+		std::map< std::string, SharedPointer< FrameBufferObject >> _framebuffers;
 
 	public:
+        virtual void setViewport( const Rectf &viewport ) { }
+        
         virtual void beginRender( void );
 		
 		virtual void clearBuffers( void ) = 0;
         
-        virtual void render( std::shared_ptr< RenderQueue > const &renderQueue, std::shared_ptr< RenderPass > const &renderPass );
-
-//        virtual void render( std::shared_ptr< VisibilitySet > const &vs, std::shared_ptr< RenderPass > const &renderPass );
-
-//        virtual void render( std::shared_ptr< Geometry > const &geometry, std::shared_ptr< Camera > const &camera, std::shared_ptr< RenderPass > const &renderPass );
+        virtual void render( SharedPointer< RenderQueue > const &renderQueue, SharedPointer< RenderPass > const &renderPass );
 
         virtual void endRender( void );
 
 	public:
-		virtual void bindFrameBuffer( std::shared_ptr< FrameBufferObject > const &fbo );
-		virtual void unbindFrameBuffer( std::shared_ptr< FrameBufferObject > const &fbo );
+		virtual void bindFrameBuffer( SharedPointer< FrameBufferObject > const &fbo );
+		virtual void unbindFrameBuffer( SharedPointer< FrameBufferObject > const &fbo );
 
 	public:
-        virtual void bindProgram( std::shared_ptr< ShaderProgram > const &program );
-		virtual void unbindProgram( std::shared_ptr< ShaderProgram > const &program );
+        virtual void bindProgram( SharedPointer< ShaderProgram > const &program );
+		virtual void unbindProgram( SharedPointer< ShaderProgram > const &program );
 
-		virtual void bindUniform( std::shared_ptr< ShaderLocation > const &location, bool value ) { bindUniform( location, value ? 1 : 0 ); }
-		virtual void bindUniform( std::shared_ptr< ShaderLocation > const &location, int value ) = 0;
-		virtual void bindUniform( std::shared_ptr< ShaderLocation > const &location, float value ) = 0;
-		virtual void bindUniform( std::shared_ptr< ShaderLocation > const &location, const Vector3f &vector ) = 0;
-		virtual void bindUniform( std::shared_ptr< ShaderLocation > const &location, const Vector2f &vector ) = 0;
-		virtual void bindUniform( std::shared_ptr< ShaderLocation > const &location, const RGBAColorf &color ) = 0;
-		virtual void bindUniform( std::shared_ptr< ShaderLocation > const &location, const Matrix4f &matrix ) = 0;
-
-	public:
-        virtual void bindMaterial( std::shared_ptr< ShaderProgram > const &program, std::shared_ptr< Material > const &material );
-        virtual void unbindMaterial( std::shared_ptr< ShaderProgram > const &program, std::shared_ptr< Material > const &material );
+		virtual void bindUniform( SharedPointer< ShaderLocation > const &location, bool value ) { bindUniform( location, value ? 1 : 0 ); }
+		virtual void bindUniform( SharedPointer< ShaderLocation > const &location, int value ) = 0;
+		virtual void bindUniform( SharedPointer< ShaderLocation > const &location, float value ) = 0;
+		virtual void bindUniform( SharedPointer< ShaderLocation > const &location, const Vector3f &vector ) = 0;
+		virtual void bindUniform( SharedPointer< ShaderLocation > const &location, const Vector2f &vector ) = 0;
+		virtual void bindUniform( SharedPointer< ShaderLocation > const &location, const RGBAColorf &color ) = 0;
+		virtual void bindUniform( SharedPointer< ShaderLocation > const &location, const Matrix4f &matrix ) = 0;
 
 	public:
-        virtual void setDepthState( std::shared_ptr< DepthState > const &state ) = 0;
-        virtual void setAlphaState( std::shared_ptr< AlphaState > const &state ) = 0;
+        virtual void bindMaterial( SharedPointer< ShaderProgram > const &program, SharedPointer< Material > const &material );
+        virtual void unbindMaterial( SharedPointer< ShaderProgram > const &program, SharedPointer< Material > const &material );
 
 	public:
-        virtual void bindTexture( std::shared_ptr< ShaderLocation > const &location, std::shared_ptr< Texture > const &texture );
-		virtual void unbindTexture( std::shared_ptr< ShaderLocation > const &location, std::shared_ptr< Texture > const &texture );
+        virtual void setDepthState( SharedPointer< DepthState > const &state ) = 0;
+        virtual void setAlphaState( SharedPointer< AlphaState > const &state ) = 0;
 
 	public:
-		virtual void bindLight( std::shared_ptr< ShaderProgram > const &program, std::shared_ptr< Light > const &light );
-		virtual void unbindLight( std::shared_ptr< ShaderProgram > const &program, std::shared_ptr< Light > const &light );
+        virtual void bindTexture( SharedPointer< ShaderLocation > const &location, SharedPointer< Texture > const &texture );
+		virtual void unbindTexture( SharedPointer< ShaderLocation > const &location, SharedPointer< Texture > const &texture );
+
+	public:
+		virtual void bindLight( SharedPointer< ShaderProgram > const &program, SharedPointer< Light > const &light );
+		virtual void unbindLight( SharedPointer< ShaderProgram > const &program, SharedPointer< Light > const &light );
 
 	private:
 		int _lightCount;
 
 	public:
-		virtual void bindVertexBuffer( std::shared_ptr< ShaderProgram > const &program, std::shared_ptr< VertexBufferObject > const &vbo );
-		virtual void unbindVertexBuffer( std::shared_ptr< ShaderProgram > const &program, std::shared_ptr< VertexBufferObject > const &vbo );
+		virtual void bindVertexBuffer( SharedPointer< ShaderProgram > const &program, SharedPointer< VertexBufferObject > const &vbo );
+		virtual void unbindVertexBuffer( SharedPointer< ShaderProgram > const &program, SharedPointer< VertexBufferObject > const &vbo );
 
-        virtual void bindIndexBuffer( std::shared_ptr< ShaderProgram > const &program, std::shared_ptr< IndexBufferObject > const &ibo );
-		virtual void unbindIndexBuffer( std::shared_ptr< ShaderProgram > const &program, std::shared_ptr< IndexBufferObject > const &ibo );
-
-	public:
-		virtual void applyTransformations( std::shared_ptr< ShaderProgram > const &program, std::shared_ptr< Geometry > const &geometry, std::shared_ptr< Camera > const &camera );
-        virtual void applyTransformations( std::shared_ptr< ShaderProgram > const &program, const Matrix4f &projection, const Matrix4f &view, const Matrix4f &model, const Matrix4f &normal );
-		virtual void restoreTransformations( std::shared_ptr< ShaderProgram > const &program, std::shared_ptr< Geometry > const &geometry, std::shared_ptr< Camera > const &camera );
+        virtual void bindIndexBuffer( SharedPointer< ShaderProgram > const &program, SharedPointer< IndexBufferObject > const &ibo );
+		virtual void unbindIndexBuffer( SharedPointer< ShaderProgram > const &program, SharedPointer< IndexBufferObject > const &ibo );
 
 	public:
-		virtual void drawPrimitive( std::shared_ptr< ShaderProgram > const &program, std::shared_ptr< Primitive > const &primitive ) = 0;
+		virtual void applyTransformations( SharedPointer< ShaderProgram > const &program, SharedPointer< Geometry > const &geometry, SharedPointer< Camera > const &camera );
+        virtual void applyTransformations( SharedPointer< ShaderProgram > const &program, const Matrix4f &projection, const Matrix4f &view, const Matrix4f &model, const Matrix4f &normal );
+        virtual void applyTransformations( SharedPointer< ShaderProgram > const &program, const Matrix4f &projection, const Matrix4f &view, const Matrix4f &model );
+		virtual void restoreTransformations( SharedPointer< ShaderProgram > const &program, SharedPointer< Geometry > const &geometry, SharedPointer< Camera > const &camera );
+
+	public:
+		virtual void drawPrimitive( SharedPointer< ShaderProgram > const &program, SharedPointer< Primitive > const &primitive ) = 0;
 
 		/**
 			\brief optional
 		 */
-		virtual void drawBuffers( std::shared_ptr< ShaderProgram > const &program, Primitive::Type type, std::shared_ptr< VertexBufferObject > const &vbo, unsigned int count ) { }
+		virtual void drawBuffers( SharedPointer< ShaderProgram > const &program, Primitive::Type type, SharedPointer< VertexBufferObject > const &vbo, unsigned int count ) { }
 
-		virtual void drawScreenPrimitive( std::shared_ptr< ShaderProgram > const &program );
+		virtual void drawScreenPrimitive( SharedPointer< ShaderProgram > const &program );
 
 	private:
 		PrimitivePtr _screenPrimitive;
 
 	public:
-		virtual void addShaderProgram( std::string key, std::shared_ptr< ShaderProgram > const &program ) { _programs[ key ] = program; }
-        virtual std::shared_ptr< ShaderProgram > getShaderProgram( std::string key ) { return _programs[ key ]; }
+		virtual void addShaderProgram( std::string key, SharedPointer< ShaderProgram > const &program ) { _programs[ key ] = program; }
+        virtual SharedPointer< ShaderProgram > getShaderProgram( std::string key ) { return _programs[ key ]; }
 
-        virtual std::shared_ptr< ShaderProgram > getFallbackProgram( std::shared_ptr< Material > const &, std::shared_ptr< Geometry > const &, std::shared_ptr< Primitive > const & ) { return std::shared_ptr< ShaderProgram >(); }
-
-	public:
-		std::shared_ptr< Material > _defaultMaterial;
-		std::map< std::string, std::shared_ptr< ShaderProgram >> _programs;
+        virtual SharedPointer< ShaderProgram > getFallbackProgram( SharedPointer< Material > const &, SharedPointer< Geometry > const &, SharedPointer< Primitive > const & ) { return SharedPointer< ShaderProgram >(); }
 
 	public:
-        std::shared_ptr< Catalog< ShaderProgram > > &getShaderProgramCatalog( void ) { return _shaderProgramCatalog; }
-		void setShaderProgramCatalog( std::shared_ptr< Catalog< ShaderProgram > > const &catalog ) { _shaderProgramCatalog = catalog; }
+		SharedPointer< Material > _defaultMaterial;
+		std::map< std::string, SharedPointer< ShaderProgram >> _programs;
 
-		std::shared_ptr< Catalog< Texture > > &getTextureCatalog( void ) { return _textureCatalog; }
-		void setTextureCatalog( std::shared_ptr< Catalog< Texture > > const &catalog ) { _textureCatalog = catalog; }
+	public:
+        SharedPointer< Catalog< ShaderProgram > > &getShaderProgramCatalog( void ) { return _shaderProgramCatalog; }
+		void setShaderProgramCatalog( SharedPointer< Catalog< ShaderProgram > > const &catalog ) { _shaderProgramCatalog = catalog; }
 
-		std::shared_ptr< Catalog< VertexBufferObject > > &getVertexBufferObjectCatalog( void ) { return _vertexBufferObjectCatalog; }
-		void setVertexBufferObjectCatalog( std::shared_ptr< Catalog< VertexBufferObject > > const &catalog ) { _vertexBufferObjectCatalog = catalog; }
+		SharedPointer< Catalog< Texture > > &getTextureCatalog( void ) { return _textureCatalog; }
+		void setTextureCatalog( SharedPointer< Catalog< Texture > > const &catalog ) { _textureCatalog = catalog; }
 
-		std::shared_ptr< Catalog< IndexBufferObject > > &getIndexBufferObjectCatalog( void ) { return _indexBufferObjectCatalog; }
-		void setIndexBufferObjectCatalog( std::shared_ptr< Catalog< IndexBufferObject > > const &catalog ) { _indexBufferObjectCatalog = catalog; }
+		SharedPointer< Catalog< VertexBufferObject > > &getVertexBufferObjectCatalog( void ) { return _vertexBufferObjectCatalog; }
+		void setVertexBufferObjectCatalog( SharedPointer< Catalog< VertexBufferObject > > const &catalog ) { _vertexBufferObjectCatalog = catalog; }
 
-		std::shared_ptr< Catalog< FrameBufferObject > > &getFrameBufferObjectCatalog( void ) { return _frameBufferObjectCatalog; }
-		void setFrameBufferObjectCatalog( std::shared_ptr< Catalog< FrameBufferObject > > const &catalog ) { _frameBufferObjectCatalog = catalog; }
+		SharedPointer< Catalog< IndexBufferObject > > &getIndexBufferObjectCatalog( void ) { return _indexBufferObjectCatalog; }
+		void setIndexBufferObjectCatalog( SharedPointer< Catalog< IndexBufferObject > > const &catalog ) { _indexBufferObjectCatalog = catalog; }
+
+		SharedPointer< Catalog< FrameBufferObject > > &getFrameBufferObjectCatalog( void ) { return _frameBufferObjectCatalog; }
+		void setFrameBufferObjectCatalog( SharedPointer< Catalog< FrameBufferObject > > const &catalog ) { _frameBufferObjectCatalog = catalog; }
 
 	private:
-		std::shared_ptr< Catalog< ShaderProgram > > _shaderProgramCatalog;
-		std::shared_ptr< Catalog< Texture > > _textureCatalog;
-		std::shared_ptr< Catalog< VertexBufferObject > > _vertexBufferObjectCatalog;
-		std::shared_ptr< Catalog< IndexBufferObject > > _indexBufferObjectCatalog;
-		std::shared_ptr< Catalog< FrameBufferObject > > _frameBufferObjectCatalog;
+		SharedPointer< Catalog< ShaderProgram > > _shaderProgramCatalog;
+		SharedPointer< Catalog< Texture > > _textureCatalog;
+		SharedPointer< Catalog< VertexBufferObject > > _vertexBufferObjectCatalog;
+		SharedPointer< Catalog< IndexBufferObject > > _indexBufferObjectCatalog;
+		SharedPointer< Catalog< FrameBufferObject > > _frameBufferObjectCatalog;
 	};
 
-    using RendererPtr = std::shared_ptr< Renderer >;
+    using RendererPtr = SharedPointer< Renderer >;
     
 }
 

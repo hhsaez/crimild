@@ -34,12 +34,13 @@ namespace crimild {
 
     class AlphaState;
     
-    using AlphaStatePtr = std::shared_ptr< AlphaState >;
+    using AlphaStatePtr = SharedPointer< AlphaState >;
 
 	class AlphaState : public RenderState {
     public:
         static AlphaStatePtr DISABLED;
         static AlphaStatePtr ENABLED;
+        static AlphaStatePtr ENABLED_SRC_COLOR_ONLY;
         
 	public:
 		enum class SrcBlendFunc {

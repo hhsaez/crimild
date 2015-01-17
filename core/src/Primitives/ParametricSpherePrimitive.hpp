@@ -55,7 +55,7 @@ namespace crimild {
         float _radius;
     };
     
-    using ParametricSpherePrimitivePtr = std::shared_ptr< ParametricSpherePrimitive >;
+    using ParametricSpherePrimitivePtr = SharedPointer< ParametricSpherePrimitive >;
         
 }
 

@@ -35,8 +35,8 @@ using namespace crimild;
 Node::Node( std::string name )
 	: NamedObject( name ),
 	  _worldIsCurrent( false ),
-	  _localBound( std::make_shared< SphereBoundingVolume >( Vector3f( 0.0f, 0.0f, 0.0f ), 0.5f ) ),
-	  _worldBound( std::make_shared< SphereBoundingVolume >( Vector3f( 0.0f, 0.0f, 0.0f ), 0.5f ) )
+	  _localBound( crimild::alloc< SphereBoundingVolume >( Vector3f( 0.0f, 0.0f, 0.0f ), 0.5f ) ),
+	  _worldBound( crimild::alloc< SphereBoundingVolume >( Vector3f( 0.0f, 0.0f, 0.0f ), 0.5f ) )
 {
 
 }

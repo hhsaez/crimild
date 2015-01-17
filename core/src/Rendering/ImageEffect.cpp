@@ -46,35 +46,50 @@ ImageEffect::~ImageEffect( void )
 
 }
 
-void ImageEffect::apply( RendererPtr const &renderer )
+FrameBufferObjectPtr ImageEffect::getFrameBuffer( RendererPtrImpl const &renderer, std::string name )
 {
+    auto fbo = renderer->getFrameBuffer( name );
+    if ( fbo == nullptr ) {
+        int width = renderer->getScreenBuffer()->getWidth();
+        int height = renderer->getScreenBuffer()->getHeight();
+        
+        if ( name == FBO_AUX_HALF_RES_1 || name == FBO_AUX_HALF_RES_2 ) {
+            width /= 2;
+            height /= 2;
+        }
+        else if ( name == FBO_AUX_QUARTER_RES_1 || name == FBO_AUX_QUARTER_RES_2 ) {
+            width /= 4;
+            height /= 4;
+        }
+        
+        fbo = crimild::alloc< FrameBufferObject >( width, height );
+        fbo->getRenderTargets()->add( "depth", crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
+        fbo->getRenderTargets()->add( "color", crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
     
+        renderer->addFrameBuffer( name, fbo );
+    }
+    
+    return fbo;
 }
 
-void ImageEffect::render( std::shared_ptr< Renderer > const &renderer, std::shared_ptr< FrameBufferObject > const &output, std::shared_ptr< Texture > const &texture, std::shared_ptr< ShaderProgram > const &program, std::shared_ptr< Primitive > const &primitive )
+void ImageEffect::renderScreen( RendererPtr const &renderer, TexturePtr const &texture )
 {
+    auto program = renderer->getShaderProgram( "screen" );
     if ( program == nullptr ) {
-        Log::Error << "Invalid program object" << Log::End;
+        Log::Error << "No shader program provided with name 'texture'" << Log::End;
         return;
     }
     
-    if ( texture == nullptr ) {
-        Log::Error << "Invalid texture object" << Log::End;
-        return;
-    }
-    
-    renderer->bindFrameBuffer( output );
     renderer->bindProgram( program );
     renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM ), texture );
-    renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
-    renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
     
-    renderer->drawPrimitive( program, primitive );
+    Matrix4f mMatrix;
+    mMatrix.makeIdentity();
+    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM ), mMatrix );
     
-    renderer->unbindVertexBuffer( program, primitive->getVertexBuffer() );
-    renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
+    renderer->drawScreenPrimitive( program );
+    
     renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM ), texture );
     renderer->unbindProgram( program );
-    renderer->unbindFrameBuffer( output );
 }
 

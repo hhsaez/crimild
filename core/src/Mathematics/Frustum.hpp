@@ -100,11 +100,21 @@ namespace crimild {
 		PRECISION getUMax( void ) const { return _data[ FRUSTUM_U_MAX ]; }
 		PRECISION getDMin( void ) const { return _data[ FRUSTUM_D_MIN ]; }
 		PRECISION getDMax( void ) const { return _data[ FRUSTUM_D_MAX ]; }
+        
+        PRECISION computeTanHalfFOV( void ) const
+        {
+            return getUMax() / getDMin();
+        }
 
 		PRECISION computeAspect( void ) const
 		{
 			return getRMax() / getUMax();	
 		}
+        
+        PRECISION computeLinearDepth( void ) const
+        {
+            return getDMax() - getDMin();
+        }
 
 		Matrix< 4, PRECISION > computeProjectionMatrix( void ) const
 		{

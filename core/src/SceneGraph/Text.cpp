@@ -35,7 +35,7 @@
 using namespace crimild;
 
 Font::Font( std::string faceFilePath, std::string glyphFilePath )
-    : _face( std::make_shared< ImageTGA >( faceFilePath ) )
+    : _face( crimild::alloc< ImageTGA >( faceFilePath ) )
 {
 	loadGlyphs( glyphFilePath );
 }
@@ -80,8 +80,8 @@ void Font::loadGlyphs( std::string file )
 }
 
 Text::Text( void )
-    : _primitive( std::make_shared< Primitive >( Primitive::Type::TRIANGLES ) ),
-      _material( std::make_shared< Material >() )
+    : _primitive( crimild::alloc< Primitive >( Primitive::Type::TRIANGLES ) ),
+      _material( crimild::alloc< Material >() )
 {
 	_text = "";
 	_size = 1.0f;
@@ -110,7 +110,7 @@ void Text::setFont( FontPtr const &font )
 {
 	_font = font;
 	auto face = _font->getFace();
-    auto texture = std::make_shared< Texture >( face );
+    auto texture = crimild::alloc< Texture >( face );
 	_material->setColorMap( texture );
 	_material->getAlphaState()->setEnabled( true );
 	updatePrimitive();
@@ -186,10 +186,10 @@ void Text::updatePrimitive( void )
 		horiAdvance += glyph.advance;
 	}
 
-    auto vbo = std::make_shared< VertexBufferObject >( VertexFormat::VF_P3_UV2, vertices.size() / 5, &vertices[ 0 ] );
+    auto vbo = crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3_UV2, vertices.size() / 5, &vertices[ 0 ] );
     _primitive->setVertexBuffer( vbo );
     
-    auto ibo = std::make_shared< IndexBufferObject >( indices.size(), &indices[ 0 ] );
+    auto ibo = crimild::alloc< IndexBufferObject >( indices.size(), &indices[ 0 ] );
 	_primitive->setIndexBuffer( ibo );
 	
 	updateModelBounds();

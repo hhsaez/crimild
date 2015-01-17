@@ -43,7 +43,7 @@ namespace crimild {
 	template< class RESOURCE_TYPE >
 	class Catalog : public SharedObject {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( Catalog )
-
+        
 	public:
 		
 		class Resource :
@@ -113,44 +113,44 @@ namespace crimild {
 			return -1;
 		}
 
-        virtual void bind( std::shared_ptr< RESOURCE_TYPE > const &resource )
+        virtual void bind( SharedPointer< RESOURCE_TYPE > const &resource )
 		{
 			if ( resource->getCatalog() == nullptr ) {
 				load( resource );
 			}
 		}
 
-        virtual void bind( std::shared_ptr< ShaderProgram > const &program, std::shared_ptr< RESOURCE_TYPE > const &resource )
+        virtual void bind( SharedPointer< ShaderProgram > const &program, SharedPointer< RESOURCE_TYPE > const &resource )
 		{
 			bind( resource );
 		}
 
-        virtual void bind( std::shared_ptr< ShaderLocation > const &location, std::shared_ptr< RESOURCE_TYPE > const &resource )
+        virtual void bind( SharedPointer< ShaderLocation > const &location, SharedPointer< RESOURCE_TYPE > const &resource )
 		{
 			bind( resource );
 		}
 
-        virtual void unbind( std::shared_ptr< RESOURCE_TYPE > const &resource )
+        virtual void unbind( SharedPointer< RESOURCE_TYPE > const &resource )
 		{
 		}
 
-        virtual void unbind( std::shared_ptr< ShaderProgram > const &program, std::shared_ptr< RESOURCE_TYPE > const &resource )
-		{
-			unbind( resource );
-		}
-
-        virtual void unbind( std::shared_ptr< ShaderLocation > const &location, std::shared_ptr< RESOURCE_TYPE > const &resource )
+        virtual void unbind( SharedPointer< ShaderProgram > const &program, SharedPointer< RESOURCE_TYPE > const &resource )
 		{
 			unbind( resource );
 		}
 
-        virtual void load( std::shared_ptr< RESOURCE_TYPE > const &resource )
+        virtual void unbind( SharedPointer< ShaderLocation > const &location, SharedPointer< RESOURCE_TYPE > const &resource )
+		{
+			unbind( resource );
+		}
+
+        virtual void load( SharedPointer< RESOURCE_TYPE > const &resource )
 		{
 			resource->setCatalogInfo( this, getNextResourceId() );
 			_resources.push_back( resource.get() );
 		}
 
-        virtual void unload( std::shared_ptr< RESOURCE_TYPE > const &resource )
+        virtual void unload( SharedPointer< RESOURCE_TYPE > const &resource )
 		{
 			resource->setCatalogInfo( nullptr, getDefaultIdValue() );
             _resources.remove( resource.get() );

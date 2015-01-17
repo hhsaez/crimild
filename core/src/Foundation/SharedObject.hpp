@@ -29,9 +29,9 @@
 #define CRIMILD_CORE_FOUNDATION_SHARED_OBJECT_
 
 #include "Macros.hpp"
+#include "Memory.hpp"
 
 #include <thread>
-#include <memory>
 #include <functional>
 
 namespace crimild {
@@ -45,13 +45,13 @@ namespace crimild {
 	public:
         virtual ~SharedObject( void ) { }
         
-        std::shared_ptr< SharedObject > getShared( void )
+        SharedPointer< SharedObject > getShared( void )
         {
             return shared_from_this();
         }
         
         template< class T >
-        std::shared_ptr< T > getShared( void )
+        SharedPointer< T > getShared( void )
         {
             return std::static_pointer_cast< T >( shared_from_this() );
         }
@@ -70,18 +70,8 @@ namespace crimild {
         std::mutex _mutex;
 	};
     
-    using SharedObjectPtr = std::shared_ptr< SharedObject >;
+    using SharedObjectPtr = SharedPointer< SharedObject >;
     
-}
-
-namespace std {
-    
-    // from http://stackoverflow.com/a/6066150
-    template< class T, class U >
-    std::weak_ptr< T > static_pointer_cast( std::weak_ptr< U > const &r )
-    {
-        return std::static_pointer_cast< T >( std::shared_ptr< U >( r ) );
-    }
 }
 
 #endif

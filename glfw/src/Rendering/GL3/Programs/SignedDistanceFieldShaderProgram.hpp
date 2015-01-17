@@ -42,7 +42,7 @@ namespace crimild {
 			virtual ~SignedDistanceFieldShaderProgram( void );
 		};
 
-		typedef std::shared_ptr< SignedDistanceFieldShaderProgram > SignedDistanceFieldShaderProgramPtr;
+		typedef SharedPointer< SignedDistanceFieldShaderProgram > SignedDistanceFieldShaderProgramPtr;
 
 	}
 

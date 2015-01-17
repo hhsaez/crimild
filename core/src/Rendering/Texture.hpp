@@ -47,7 +47,7 @@ namespace crimild {
 		ImagePtr _image;
 	};
 
-    using TexturePtr = std::shared_ptr< Texture >;
+    using TexturePtr = SharedPointer< Texture >;
     
 	typedef Catalog< Texture > TextureCatalog;
 	

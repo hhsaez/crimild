@@ -105,6 +105,7 @@ namespace crimild {
                 G_BUFFER_POSITION_MAP_UNIFORM,
                 G_BUFFER_NORMAL_MAP_UNIFORM,
                 G_BUFFER_EMISSIVE_MAP_UNIFORM,
+                G_BUFFER_DEPTH_MAP_UNIFORM,
                 
                 BLEND_SRC_MAP_UNIFORM = 20000,
                 BLEND_DST_MAP_UNIFORM,
@@ -145,7 +146,7 @@ namespace crimild {
 		std::list< ShaderUniformPtr > _uniforms;
 	};
 
-    using ShaderProgramPtr = std::shared_ptr< ShaderProgram >;
+    using ShaderProgramPtr = SharedPointer< ShaderProgram >;
 	typedef Catalog< ShaderProgram > ShaderProgramCatalog;
 
 }

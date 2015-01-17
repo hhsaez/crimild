@@ -62,7 +62,10 @@ void RenderSceneTask::update( void )
         return;
     }
     
+    _mutex.lock();
     auto renderQueue = getRenderQueue();
+    _mutex.unlock();
+    
     if ( renderQueue == nullptr ) {
         return;
     }
@@ -77,6 +80,8 @@ void RenderSceneTask::stop( void )
 
 void RenderSceneTask::handleMessage( const RenderQueueGeneratedMessagePtr &message )
 {
+    _mutex.lock();
     _renderQueue = message->getRenderQueue();
+    _mutex.unlock();
 }
 

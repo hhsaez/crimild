@@ -52,7 +52,7 @@ namespace crimild {
 			void registerComponent( void )
 			{
 				registerComponentBuilder< T >( []( crimild::scripting::ScriptContext::Iterable &it ) {
-                    return std::make_shared< T >( it );
+                    return crimild::alloc< T >( it );
 				});
 			}
 
@@ -75,7 +75,7 @@ namespace crimild {
 			std::map< std::string, BuilderFunction > _componentBuilders;
 		};
         
-        using SceneBuilderPtr = std::shared_ptr< SceneBuilder >;
+        using SceneBuilderPtr = SharedPointer< SceneBuilder >;
 
 	}
 

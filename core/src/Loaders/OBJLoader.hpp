@@ -132,7 +132,7 @@ namespace crimild {
 			std::vector< Face > faces;
 		};
         
-        using GroupDefPtr = std::shared_ptr< GroupDef >;
+        using GroupDefPtr = SharedPointer< GroupDef >;
 
         std::vector< GroupDefPtr > _groups;
 		GroupDefPtr _currentGroup;
@@ -152,14 +152,14 @@ namespace crimild {
             DepthStatePtr depthState;
 
 			MaterialDef( std::string name )
-                : alphaState( std::make_shared< AlphaState >( false ) ),
-                  depthState( std::make_shared< DepthState >( true ) )
+                : alphaState( crimild::alloc< AlphaState >( false ) ),
+                  depthState( crimild::alloc< DepthState >( true ) )
 			{
 				this->name = name;
 			}
 		};
         
-        using MaterialDefPtr = std::shared_ptr< MaterialDef >;
+        using MaterialDefPtr = SharedPointer< MaterialDef >;
 
 		std::map< std::string, MaterialDefPtr > _materials;
 	};

@@ -32,8 +32,8 @@ using namespace crimild;
 using namespace crimild::gl3;
 
 GlowImageEffect::GlowImageEffect( void )
-    : _alphaState( std::make_shared< AlphaState >( true ) ),
-      _depthState( std::make_shared< DepthState >( false ) )
+    : _alphaState( crimild::alloc< AlphaState >( true ) ),
+      _depthState( crimild::alloc< DepthState >( false ) )
 {
     _amount = 10;
     _glowMapSize = 128;

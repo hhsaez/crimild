@@ -63,7 +63,7 @@ void Log::setDefaultOutputHandler( LogOutputHandlerPtr const &handler )
 Log::Log( std::string name )
 	: NamedObject( name )
 {
-    setOutputHandler( std::make_shared< ConsoleOutputHandler >() );
+    setOutputHandler( crimild::alloc< ConsoleOutputHandler >() );
 }
 
 Log::~Log( void )

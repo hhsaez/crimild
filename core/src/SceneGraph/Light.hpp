@@ -100,7 +100,7 @@ namespace crimild {
 		Light &operator=( const Light & ) { return *this; }
 	};
     
-    using LightPtr = std::shared_ptr< Light >;
+    using LightPtr = SharedPointer< Light >;
 
 }
 

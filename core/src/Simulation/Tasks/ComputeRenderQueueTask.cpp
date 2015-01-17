@@ -61,9 +61,9 @@ void ComputeRenderQueueTask::update( void )
         return;
     }
     
-    auto renderQueue = std::make_shared< RenderQueue >();
+    auto renderQueue = crimild::alloc< RenderQueue >();
     scene->perform( ComputeRenderQueue( camera, renderQueue ) );
-    MessageQueue::getInstance().pushMessage( std::make_shared< RenderQueueGeneratedMessage >( renderQueue ) );
+    MessageQueue::getInstance().pushMessage( crimild::alloc< RenderQueueGeneratedMessage >( renderQueue ) );
 }
 
 void ComputeRenderQueueTask::stop( void )

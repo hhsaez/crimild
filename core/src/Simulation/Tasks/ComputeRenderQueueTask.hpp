@@ -49,7 +49,7 @@ namespace crimild {
         RenderQueuePtr _renderQueue;
     };
     
-    using RenderQueueGeneratedMessagePtr = std::shared_ptr< RenderQueueGeneratedMessage >;
+    using RenderQueueGeneratedMessagePtr = SharedPointer< RenderQueueGeneratedMessage >;
 
 	class ComputeRenderQueueTask : public Task {
 	public:

@@ -121,7 +121,7 @@ void OBJLoader::processLine( std::ifstream &input )
 
 void OBJLoader::pushGroup( std::string name, std::string materialName )
 {
-    auto group = std::make_shared< GroupDef >( name, materialName );
+    auto group = crimild::alloc< GroupDef >( name, materialName );
 	_groups.push_back( group );
 	_currentGroup = group;
 }
@@ -148,7 +148,7 @@ void OBJLoader::processMaterialFile( std::string materialFileName )
 		if ( what == "newmtl" ) {
 			std::string materialName;
 			line >> materialName;
-            auto material = std::make_shared< MaterialDef >( materialName );
+            auto material = crimild::alloc< MaterialDef >( materialName );
 			_materials[ material->name ] = material;
 			currentMaterial = material.get();
 		}
@@ -172,8 +172,8 @@ void OBJLoader::processMaterialFile( std::string materialFileName )
 			line >> diffuseMapFileName;
 			if ( diffuseMapFileName.length() > 0 ) {
 				Log::Debug << "Loading diffuse map " << diffuseMapFileName << Log::End;
-                auto image = std::make_shared< ImageTGA >( FileSystem::getInstance().extractDirectory( materialFileName ) + "/" + diffuseMapFileName );
-                auto texture = std::make_shared< Texture >( image );
+                auto image = crimild::alloc< ImageTGA >( FileSystem::getInstance().extractDirectory( materialFileName ) + "/" + diffuseMapFileName );
+                auto texture = crimild::alloc< Texture >( image );
 				currentMaterial->diffuseMap = texture;
 			}
 		}
@@ -182,8 +182,8 @@ void OBJLoader::processMaterialFile( std::string materialFileName )
 			line >> normalMapFileName;
 			if ( normalMapFileName.length() > 0 ) {
 				Log::Debug << "Loading normal map " << normalMapFileName << Log::End;
-                auto image = std::make_shared< ImageTGA >( FileSystem::getInstance().extractDirectory( materialFileName ) + "/" + normalMapFileName );
-                auto texture = std::make_shared< Texture >( image );
+                auto image = crimild::alloc< ImageTGA >( FileSystem::getInstance().extractDirectory( materialFileName ) + "/" + normalMapFileName );
+                auto texture = crimild::alloc< Texture >( image );
 				currentMaterial->normalMap = texture;
 			}
 		}
@@ -192,8 +192,8 @@ void OBJLoader::processMaterialFile( std::string materialFileName )
 			line >> specularMapFileName;
 			if ( specularMapFileName.length() > 0 ) {
 				Log::Debug << "Loading specular map " << specularMapFileName << Log::End;
-                auto image = std::make_shared< ImageTGA >( FileSystem::getInstance().extractDirectory( materialFileName ) + "/" + specularMapFileName );
-                auto texture = std::make_shared< Texture >( image );
+                auto image = crimild::alloc< ImageTGA >( FileSystem::getInstance().extractDirectory( materialFileName ) + "/" + specularMapFileName );
+                auto texture = crimild::alloc< Texture >( image );
 				currentMaterial->specularMap = texture;
 			}
 		}
@@ -202,8 +202,8 @@ void OBJLoader::processMaterialFile( std::string materialFileName )
 			line >> emissiveMapFileName;
 			if ( emissiveMapFileName.length() > 0 ) {
 				Log::Debug << "Loading emissive map " << emissiveMapFileName << Log::End;
-                auto image = std::make_shared< ImageTGA >( FileSystem::getInstance().extractDirectory( materialFileName ) + "/" + emissiveMapFileName );
-                auto texture = std::make_shared< Texture >( image );
+                auto image = crimild::alloc< ImageTGA >( FileSystem::getInstance().extractDirectory( materialFileName ) + "/" + emissiveMapFileName );
+                auto texture = crimild::alloc< Texture >( image );
 				currentMaterial->emissiveMap = texture;
 			}
 		}
@@ -226,7 +226,7 @@ GroupPtr OBJLoader::generateScene( void )
 					 ( _normalCount > 0 && _textureCoordCount > 0 ? 3 : 0 ),
 					 ( _textureCoordCount > 0 ? 2 : 0 ) );
 
-    auto scene = std::make_shared< Group >( _filePath );
+    auto scene = crimild::alloc< Group >( _filePath );
 
 	for ( auto group : _groups ) {
 		if ( group->faces.size() == 0 ) {
@@ -407,16 +407,16 @@ GroupPtr OBJLoader::generateScene( void )
 
 		unsigned int vertexCount = vertices.size() / vf.getVertexSize();
 
-        auto primitive = std::make_shared< Primitive >( Primitive::Type::TRIANGLES );
-        primitive->setVertexBuffer( std::make_shared< VertexBufferObject >( vf, vertexCount, &vertices[ 0 ] ) );
-		primitive->setIndexBuffer( std::make_shared< IndexBufferObject >( indices.size(), &indices[ 0 ] ) );
+        auto primitive = crimild::alloc< Primitive >( Primitive::Type::TRIANGLES );
+        primitive->setVertexBuffer( crimild::alloc< VertexBufferObject >( vf, vertexCount, &vertices[ 0 ] ) );
+		primitive->setIndexBuffer( crimild::alloc< IndexBufferObject >( indices.size(), &indices[ 0 ] ) );
 
-		auto geometry = std::make_shared< Geometry >();
+		auto geometry = crimild::alloc< Geometry >();
 		geometry->attachPrimitive( primitive );
 
 		auto materialDef = _materials[ group->materialName ];
 		if ( materialDef != nullptr ) {
-			auto material = std::make_shared< Material >();
+			auto material = crimild::alloc< Material >();
 			material->setAmbient( materialDef->ambientColor );
 			material->setDiffuse( materialDef->diffuseColor );
 			material->setSpecular( materialDef->specularColor );

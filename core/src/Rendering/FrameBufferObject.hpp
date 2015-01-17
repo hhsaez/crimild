@@ -82,9 +82,9 @@ namespace crimild {
         bool _useFloatTexture = false;
     };
     
-    using RenderTargetPtr = std::shared_ptr< RenderTarget >;
+    using RenderTargetPtr = SharedPointer< RenderTarget >;
     using RenderTargetMap = SharedObjectMap< RenderTarget >;
-    using RenderTargetMapPtr = std::shared_ptr< RenderTargetMap >;
+    using RenderTargetMapPtr = SharedPointer< RenderTargetMap >;
 
 	class FrameBufferObject : public Catalog< FrameBufferObject >::Resource {
 	public:
@@ -106,7 +106,7 @@ namespace crimild {
         RenderTargetMapPtr _renderTargets;
 	};
     
-    using FrameBufferObjectPtr = std::shared_ptr< FrameBufferObject >;
+    using FrameBufferObjectPtr = SharedPointer< FrameBufferObject >;
 
 	typedef Catalog< FrameBufferObject > FrameBufferObjectCatalog;
 }

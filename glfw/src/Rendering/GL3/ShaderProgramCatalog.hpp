@@ -60,7 +60,7 @@ namespace crimild {
             std::list< int > _shaderIdsToDelete;
 		};
 
-		typedef std::shared_ptr< ShaderProgramCatalog > ShaderProgramCatalogPtr;
+		typedef SharedPointer< ShaderProgramCatalog > ShaderProgramCatalogPtr;
 
 	}
 

@@ -50,7 +50,7 @@ namespace crimild {
         float _scale;
     };
     
-    using MobiusStripPrimitivePtr = std::shared_ptr< MobiusStripPrimitive >;
+    using MobiusStripPrimitivePtr = SharedPointer< MobiusStripPrimitive >;
         
 }
 

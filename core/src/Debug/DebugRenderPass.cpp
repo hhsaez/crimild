@@ -35,7 +35,7 @@ using namespace crimild;
 
 DebugRenderPass::DebugRenderPass( RenderPassPtr const &actualRenderPass )
 	: _actualRenderPass( actualRenderPass ),
-      _debugMaterial( std::make_shared< Material >() )
+      _debugMaterial( crimild::alloc< Material >() )
 {
 	_renderBoundings = false;
 	_renderNormals = false;

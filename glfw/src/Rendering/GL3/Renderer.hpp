@@ -40,6 +40,8 @@ namespace crimild {
 			virtual ~Renderer( void );
 
 			virtual void configure( void ) override;
+            
+            virtual void setViewport( const Rectf &viewport ) override;
 
 			virtual void beginRender( void ) override;
 			

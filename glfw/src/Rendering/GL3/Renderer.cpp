@@ -59,28 +59,28 @@ using namespace crimild;
 
 gl3::Renderer::Renderer( FrameBufferObjectPtr const &screenBuffer )
 {
-    setShaderProgramCatalog( std::make_shared< gl3::ShaderProgramCatalog >() );
-	setVertexBufferObjectCatalog( std::make_shared< gl3::VertexBufferObjectCatalog >() );
-	setIndexBufferObjectCatalog( std::make_shared< gl3::IndexBufferObjectCatalog >() );
-	setFrameBufferObjectCatalog( std::make_shared< gl3::FrameBufferObjectCatalog >( this ) );
-	setTextureCatalog( std::make_shared< gl3::TextureCatalog >() );
+    setShaderProgramCatalog( crimild::alloc< gl3::ShaderProgramCatalog >() );
+	setVertexBufferObjectCatalog( crimild::alloc< gl3::VertexBufferObjectCatalog >() );
+	setIndexBufferObjectCatalog( crimild::alloc< gl3::IndexBufferObjectCatalog >() );
+	setFrameBufferObjectCatalog( crimild::alloc< gl3::FrameBufferObjectCatalog >( this ) );
+	setTextureCatalog( crimild::alloc< gl3::TextureCatalog >() );
 
-	addShaderProgram( "flat", std::make_shared< FlatShaderProgram >() );
-	addShaderProgram( "gouraud", std::make_shared< GouraudShaderProgram >() );
-	addShaderProgram( "phong", std::make_shared< PhongShaderProgram >() );
-	addShaderProgram( "color", std::make_shared< ColorShaderProgram >() );
-	addShaderProgram( "screen", std::make_shared< ScreenShaderProgram >() );
-	addShaderProgram( "texture", std::make_shared< TextureShaderProgram >() );
-    addShaderProgram( "depth", std::make_shared< DepthShaderProgram >() );
-    addShaderProgram( "forward", std::make_shared< ForwardRenderShaderProgram >() );
-    addShaderProgram( "deferred", std::make_shared< DeferredRenderShaderProgram >() );
-    addShaderProgram( "deferredCompose", std::make_shared< DeferredComposeRenderShaderProgram >() );
-    addShaderProgram( "ssao", std::make_shared< SSAOShaderProgram >() );
-    addShaderProgram( "ssaoBlend", std::make_shared< SSAOBlendShaderProgram >() );
-    addShaderProgram( "blend", std::make_shared< BlendShaderProgram >() );
-    addShaderProgram( "blur", std::make_shared< BlurShaderProgram >() );
-    addShaderProgram( "gaussianBlur", std::make_shared< GaussianBlurShaderProgram >() );
-    addShaderProgram( "sdf", std::make_shared< SignedDistanceFieldShaderProgram >() );
+	addShaderProgram( "flat", crimild::alloc< FlatShaderProgram >() );
+	addShaderProgram( "gouraud", crimild::alloc< GouraudShaderProgram >() );
+	addShaderProgram( "phong", crimild::alloc< PhongShaderProgram >() );
+	addShaderProgram( "color", crimild::alloc< ColorShaderProgram >() );
+	addShaderProgram( "screen", crimild::alloc< ScreenShaderProgram >() );
+	addShaderProgram( "texture", crimild::alloc< TextureShaderProgram >() );
+    addShaderProgram( "depth", crimild::alloc< DepthShaderProgram >() );
+    addShaderProgram( "forward", crimild::alloc< ForwardRenderShaderProgram >() );
+    addShaderProgram( "deferred", crimild::alloc< DeferredRenderShaderProgram >() );
+    addShaderProgram( "deferred_compose", crimild::alloc< DeferredComposeRenderShaderProgram >() );
+//    addShaderProgram( "ssao", crimild::alloc< SSAOShaderProgram >() );
+//    addShaderProgram( "ssaoBlend", crimild::alloc< SSAOBlendShaderProgram >() );
+    addShaderProgram( "blend", crimild::alloc< BlendShaderProgram >() );
+    addShaderProgram( "blur", crimild::alloc< BlurShaderProgram >() );
+    addShaderProgram( "gaussianBlur", crimild::alloc< GaussianBlurShaderProgram >() );
+    addShaderProgram( "sdf", crimild::alloc< SignedDistanceFieldShaderProgram >() );
 
 	setScreenBuffer( screenBuffer );
 }
@@ -120,6 +120,16 @@ void gl3::Renderer::configure( void )
 
     
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+}
+
+void gl3::Renderer::setViewport( const Rectf &viewport )
+{
+    auto screen = getScreenBuffer();
+    glViewport(
+        screen->getWidth() * viewport.getX(),
+        screen->getHeight() * viewport.getY(),
+        screen->getWidth() * viewport.getWidth(),
+        screen->getHeight() * viewport.getHeight() );
 }
 
 void gl3::Renderer::beginRender( void )

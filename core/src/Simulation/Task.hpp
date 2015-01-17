@@ -55,14 +55,14 @@ namespace crimild {
 		virtual void update( void ) { }
 
 	public:
-        void setRunLoop( std::shared_ptr< RunLoop > const &runLoop ) { _runLoop = runLoop; }
-        std::shared_ptr< RunLoop > getRunLoop( void ) { return _runLoop.lock(); }
+        void setRunLoop( SharedPointer< RunLoop > const &runLoop ) { _runLoop = runLoop; }
+        SharedPointer< RunLoop > getRunLoop( void ) { return _runLoop.lock(); }
 
 	private:
         std::weak_ptr< RunLoop > _runLoop;
 	};
     
-    using TaskPtr = std::shared_ptr< Task >;
+    using TaskPtr = SharedPointer< Task >;
 
 }
 

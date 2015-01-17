@@ -37,7 +37,7 @@ using namespace crimild;
 
 UpdateRenderState::UpdateRenderState( void )
 {
-    setDefaultMaterial( std::make_shared< Material >() );
+    setDefaultMaterial( crimild::alloc< Material >() );
 }
 
 UpdateRenderState::~UpdateRenderState( void )

@@ -44,7 +44,7 @@ namespace crimild {
 		virtual ~ShallowCopy( void );
 
 		template< class T >
-        std::shared_ptr< T > getResult( void ) { return std::static_pointer_cast< T >( _result ); }
+        SharedPointer< T > getResult( void ) { return std::static_pointer_cast< T >( _result ); }
 
 		virtual void traverse( NodePtr const &node ) override;
 

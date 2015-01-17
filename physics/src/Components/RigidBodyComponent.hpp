@@ -36,7 +36,7 @@ namespace crimild {
         
         class RigidBodyComponent;
         
-        using RigidBodyComponentPtr = std::shared_ptr< RigidBodyComponent >;
+        using RigidBodyComponentPtr = SharedPointer< RigidBodyComponent >;
 
 		class RigidBodyComponent : public NodeComponent {
 			CRIMILD_DISALLOW_COPY_AND_ASSIGN( RigidBodyComponent )

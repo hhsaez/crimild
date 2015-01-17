@@ -39,24 +39,24 @@ namespace crimild {
     template< class T >
     class NoCallbacksPolicy {
     public:
-        void onAdded( std::shared_ptr< T > const &object ) { }
-        void onRemoved( std::shared_ptr< T > const &object ) { }
+        void onAdded( SharedPointer< T > const &object ) { }
+        void onRemoved( SharedPointer< T > const &object ) { }
     };
     
     template< class T >
     class InvokeCallbacksPolicy {
-        typedef std::function< void( std::shared_ptr< T > const & ) > CallbackType;
+        typedef std::function< void( SharedPointer< T > const & ) > CallbackType;
     public:
         void setOnAddCallback( CallbackType callback ) { _onAddedCallback = callback; }
         
-        void onAdded( std::shared_ptr< T > const &object )
+        void onAdded( SharedPointer< T > const &object )
         {
             _onAddedCallback( object );
         }
 
         void setOnRemovedCallback( CallbackType callback ) { _onRemovedCallback = callback; }
 
-        void onRemoved( std::shared_ptr< T > const &object )
+        void onRemoved( SharedPointer< T > const &object )
         {
             _onRemovedCallback( object );
         }
@@ -74,7 +74,7 @@ namespace crimild {
         public SharedObject,
         public CallbackPolicy< ObjectType > {
     private:
-        typedef std::shared_ptr< ObjectType > ObjectPtr;
+        typedef SharedPointer< ObjectType > ObjectPtr;
         typedef CallbackPolicy< ObjectType > CallbackPolicyImpl;
         
     public:

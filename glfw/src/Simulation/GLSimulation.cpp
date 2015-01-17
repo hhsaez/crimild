@@ -59,16 +59,16 @@ GLSimulation::~GLSimulation( void )
 
 void GLSimulation::start( void ) 
 {
-    getMainLoop()->startTask( std::make_shared< WindowTask >( Simulation::Priorities::LOWEST_PRIORITY, _window ) );
-	getMainLoop()->startTask( std::make_shared< BeginRenderTask >( Priorities::BEGIN_RENDER_PRIORITY ) );
-	getMainLoop()->startTask( std::make_shared< RenderSceneTask >( Priorities::RENDER_SCENE_PRIORITY ) );
-	getMainLoop()->startTask( std::make_shared< EndRenderTask >( Priorities::END_RENDER_PRIORITY ) );
-	getMainLoop()->startTask( std::make_shared< UpdateInputStateTask >( Simulation::Priorities::HIGHEST_PRIORITY, _window ) );
+    getMainLoop()->startTask( crimild::alloc< WindowTask >( Simulation::Priorities::LOWEST_PRIORITY, _window ) );
+	getMainLoop()->startTask( crimild::alloc< BeginRenderTask >( Priorities::BEGIN_RENDER_PRIORITY ) );
+	getMainLoop()->startTask( crimild::alloc< RenderSceneTask >( Priorities::RENDER_SCENE_PRIORITY ) );
+	getMainLoop()->startTask( crimild::alloc< EndRenderTask >( Priorities::END_RENDER_PRIORITY ) );
+	getMainLoop()->startTask( crimild::alloc< UpdateInputStateTask >( Simulation::Priorities::HIGHEST_PRIORITY, _window ) );
 	
-    getSimulationLoop()->startTask( std::make_shared< DispatchMessagesTask >( Priorities::HIGHEST_PRIORITY ) );
-	getSimulationLoop()->startTask( std::make_shared< UpdateTimeTask >( Simulation::Priorities::LOWEST_PRIORITY ) );
-    getSimulationLoop()->startTask( std::make_shared< UpdateSceneAndPhysicsTask >( Priorities::UPDATE_SCENE_PRIORITY ) );
-    getSimulationLoop()->startTask( std::make_shared< ComputeRenderQueueTask >( Priorities::RENDER_SCENE_PRIORITY ) );
+    getSimulationLoop()->startTask( crimild::alloc< DispatchMessagesTask >( Priorities::HIGHEST_PRIORITY ) );
+	getSimulationLoop()->startTask( crimild::alloc< UpdateTimeTask >( Simulation::Priorities::LOWEST_PRIORITY ) );
+    getSimulationLoop()->startTask( crimild::alloc< UpdateSceneAndPhysicsTask >( Priorities::UPDATE_SCENE_PRIORITY ) );
+    getSimulationLoop()->startTask( crimild::alloc< ComputeRenderQueueTask >( Priorities::RENDER_SCENE_PRIORITY ) );
 }
 
 void GLSimulation::loadSettings( void )
@@ -96,13 +96,14 @@ void GLSimulation::init( void )
 	float r = getSettings().get( "video.clearColor.r", 0.0f );
 	float g = getSettings().get( "video.clearColor.g", 0.0f );
 	float b = getSettings().get( "video.clearColor.b", 0.0f );
-	float a = getSettings().get( "video.clearColor.a", 1.0f );
+	float a = getSettings().get( "video.clearColor.a", 0.0f );
 
 	glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 3 );
 	glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 2 );
 	glfwWindowHint( GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE );
 	glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
     glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
+    glfwWindowHint( GLFW_DEPTH_BITS, 32 );
 
 	_window = glfwCreateWindow( width, height, getName().c_str(), NULL, NULL );
 	if ( _window == nullptr ) {
@@ -116,8 +117,8 @@ void GLSimulation::init( void )
     int framebufferWidth, framebufferHeight;
 	glfwGetFramebufferSize( _window, &framebufferWidth, &framebufferHeight);
 
-    auto screenBuffer = std::make_shared< FrameBufferObject >( framebufferWidth, framebufferHeight );
+    auto screenBuffer = crimild::alloc< FrameBufferObject >( framebufferWidth, framebufferHeight );
 	screenBuffer->setClearColor( RGBAColorf( r, g, b, a ) );
-    Simulation::getCurrent()->setRenderer( std::make_shared< gl3::Renderer >( screenBuffer ) );
+    Simulation::getCurrent()->setRenderer( crimild::alloc< gl3::Renderer >( screenBuffer ) );
 }
 

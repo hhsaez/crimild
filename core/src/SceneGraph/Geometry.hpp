@@ -56,7 +56,7 @@ namespace crimild {
 		virtual void accept( NodeVisitor &visitor ) override;
 	};
     
-    using GeometryPtr = std::shared_ptr< Geometry >;
+    using GeometryPtr = SharedPointer< Geometry >;
 
 }
 
