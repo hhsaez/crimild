@@ -159,7 +159,7 @@ const char *ssao_apply_fs = { CRIMILD_TO_STRING(
 )};
 
 SSAOImageEffect::SSAOImageEffect( void )
-    : SSAOImageEffect( 64, 20.0f, 0.01f, Vector2f( 0.5f, 2.5f ), 4 )
+    : SSAOImageEffect( 64, 20.0f, 0.01f, Vector2f( 0.5f, 1.0f ), 4 )
 {
     
 }
@@ -203,8 +203,8 @@ void SSAOImageEffect::compute( RendererPtr const &renderer, CameraPtr const &cam
 
 void SSAOImageEffect::apply( crimild::RendererPtr const &renderer, CameraPtr const &camera )
 {
-    auto scene = renderer->getFrameBuffer( "scene" );
-    renderScreen( renderer, scene->getRenderTargets()->get( "color" )->getTexture() );
+    auto scene = renderer->getFrameBuffer( RenderPass::S_BUFFER_NAME );
+    renderScreen( renderer, scene->getRenderTargets()->get( RenderPass::S_BUFFER_COLOR_TARGET_NAME )->getTexture() );
     
     auto ssaoBlur = getSSAOBlurBuffer( renderer );
     

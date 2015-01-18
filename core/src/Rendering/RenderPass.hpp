@@ -48,6 +48,22 @@ namespace crimild {
     class Texture;
 
 	class RenderPass : public SharedObject {
+    public:
+        static constexpr const char *G_BUFFER_NAME = "G_BUFFER";
+        static constexpr const char *G_BUFFER_DIFFUSE_TARGET_NAME = "0-DIFFUSE";
+        static constexpr const char *G_BUFFER_POSITION_TARGET_NAME = "1-POSITION";
+        static constexpr const char *G_BUFFER_NORMAL_TARGET_NAME = "2-NORMAL";
+        static constexpr const char *G_BUFFER_VIEW_SPACE_NORMAL_TARGET_NAME = "3-VIEW_SPACE_NORMAL";
+        static constexpr const char *G_BUFFER_DEPTH_TARGET_NAME = "DEPTH";
+        
+        static constexpr const char *S_BUFFER_NAME = "S_BUFFER";
+        static constexpr const char *S_BUFFER_COLOR_TARGET_NAME = "0-COLOR";
+        static constexpr const char *S_BUFFER_DEPTH_TARGET_NAME = "DEPTH";
+        
+        static constexpr const char *D_BUFFER_NAME = "D_BUFFER";
+        static constexpr const char *D_BUFFER_COLOR_TARGET_NAME = "0-COLOR";
+        static constexpr const char *D_BUFFER_DEPTH_TARGET_NAME = "DEPTH";
+        
 	public:
 		RenderPass( void );
 		virtual ~RenderPass( void );

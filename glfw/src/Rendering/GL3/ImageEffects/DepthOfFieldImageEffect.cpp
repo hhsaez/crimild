@@ -44,81 +44,6 @@ const char *dof_blur_vs = { CRIMILD_TO_STRING(
 )};
 
 const char *dof_blur_fs = { CRIMILD_TO_STRING(
-    in vec2 vTextureCoord;
-
-    uniform sampler2D uColorMap; 		// Colour texture
-    uniform sampler2D uDepthMap; 		// Depth texture
-    
-    uniform vec2 uTexelSize; 			// Size of one texel (1 / width, 1 / height)
-    uniform int uOrientation; 			// 0 = horizontal, 1 = vertical
-    uniform float uBlurCoefficient; 	// Calculated from the blur equation, b = ( f * ms / N )
-    uniform float uFocusDistance; 		// The distance to the subject in perfect focus (= Ds)
-    uniform float uNear; 				// Near clipping plane
-    uniform float uFar; 				// Far clipping plane
-    uniform float uPPM; 				// Pixels per millimetre
-
-    out vec4 vFragColor;
-
-    /// <summary>
-    /// Calculate the blur diameter to apply on the image.
-    /// b = (f ms / N) (xd / (Ds +- xd))
-    /// Where:
-    /// (Ds + xd) for background objects
-    /// (Ds - xd) for foreground objects
-    /// </summary>
-    /// <param name="d">Depth of the fragment.</param>
-    float GetBlurDiameter( float d )
-    {
-        // Convert from linear depth to metres
-        float Dd = d * ( uFar - uNear );
-
-        float xd = abs( Dd - uFocusDistance );
-        float xdd = ( Dd < uFocusDistance ) ? ( uFocusDistance - xd ) : ( uFocusDistance + xd );
-        float b = uBlurCoefficient * ( xd / xdd );
-
-        return b * uPPM;
-    }
-
-    /// <summary>
-    /// Fragment shader entry.
-    /// <summary>
-    void main ()
-    {
-        // Maximum blur radius to limit hardware requirements.
-        // Cannot #define this due to a driver issue with some setups
-        const float MAX_BLUR_RADIUS = 10.0;
-
-        // Pass the linear depth values recorded in the depth map to the blur
-        // equation to find out how much each pixel should be blurred with the
-        // given camera settings.
-        float depth = texture( uDepthMap, vTextureCoord ).r;
-        float blurAmount = GetBlurDiameter( depth );
-        blurAmount = min( floor( blurAmount ), MAX_BLUR_RADIUS );
-
-        // Apply the blur
-        float count = 0.0;
-        vec4 color = vec4( 0.0 );
-        vec2 texelOffset = uOrientation == 0 ? vec2( uTexelSize.x, 0.0 ) : vec2( 0.0, uTexelSize.y );
-
-        if ( blurAmount >= 1.0 ) {
-            float halfBlur = 0.5 * blurAmount;
-            for ( float i = 0.0; i < MAX_BLUR_RADIUS; i++ ) {
-                if ( i >= blurAmount ) break;
-
-                float offset = i - halfBlur;
-                vec2 vOffset = vTextureCoord + ( texelOffset * offset );
-
-                color += texture( uColorMap, vOffset );
-                ++count;
-            }
-        }
-
-        vFragColor = count > 0.0 ? ( color / count ) : texture( uColorMap, vTextureCoord );
-        vFragColor.a = 0.5;
-    }
-)};
-
-const char *dof_blur2_fs = { CRIMILD_TO_STRING(
                                            
     in vec2 vTextureCoord;
                                                
@@ -195,92 +120,10 @@ const char *dof_blur2_fs = { CRIMILD_TO_STRING(
     }
 )};
 
-const char *dof_apply_vs = { CRIMILD_TO_STRING(
-    in vec3 aPosition;
-    in vec2 aTextureCoord;
-
-    out vec2 vTextureCoord;
-
-    void main()
-    {
-        vTextureCoord = aTextureCoord;
-        gl_Position = vec4( aPosition.x, aPosition.y, 0.0, 1.0 );
-    }
-)};
-
-const char *dof_apply_fs = { CRIMILD_TO_STRING(
-	in vec2 vTextureCoord;
-
-	uniform sampler2D uColorMap; // Colour texture
-	uniform sampler2D uDepthMap; // Depth texture
-	uniform sampler2D uBlurMap; // Blurred texture
-
-	uniform float uBlurCoefficient; // Calculated from the blur equation, b = ( f * ms / N )
-	uniform float uFocusDistance; // The distance to the subject in perfect focus (= Ds)
-	uniform float uNear; // Near clipping plane
-	uniform float uFar; // Far clipping plane
-	uniform float uPPM; // Pixels per millimetre
-
-    out vec4 vFragColor;
-
-	/// <summary>
-	/// Calculate the blur diameter to apply on the image.
-	/// b = (f ms / N) (xd / (Ds +- xd))
-	/// Where:
-	/// (Ds + xd) for background objects
-	/// (Ds - xd) for foreground objects
-	/// </summary>
-	/// <param name="d">Depth of the fragment.</param>
-	float GetBlurDiameter (float d)
-	{
-		// Convert from linear depth to metres
-		float Dd = d * ( uFar - uNear );
-
-		float xd = abs( Dd - uFocusDistance );
-		float xdd = ( Dd < uFocusDistance ) ? ( uFocusDistance - xd ) : ( uFocusDistance + xd );
-		float b = uBlurCoefficient * ( xd / xdd );
-
-		return b * uPPM;
-	}
-
-	/// <summary>
-	/// Fragment shader entry.
-	/// <summary>
-	void main ()
-	{
-		// Maximum blur radius to limit hardware requirements.
-		// Cannot #define this due to a driver issue with some setups
-		const float MAX_BLUR_RADIUS = 10.0;
-
-		// Get the colour, depth, and blur pixels
-		vec4 color = texture( uColorMap, vTextureCoord );
-		float depth = texture( uDepthMap, vTextureCoord ).r;
-		vec4 blur = texture( uBlurMap, vTextureCoord );
-
-		// Linearly interpolate between the colour and blur pixels based on DOF
-		float blurAmount = GetBlurDiameter( depth );
-		float lerp = min( blurAmount / MAX_BLUR_RADIUS, 1.0 );
-
-		// Blend
-		vFragColor = ( color * ( 1.0 - lerp ) ) + ( blur * lerp );
-	}
-)};
-
 gl3::DepthOfFieldImageEffect::DepthOfFieldImageEffect( void )
 {
-    _dofBlurMapSize = Vector2f( 256.0f, 256.0f );
-    _blurMapTexelSize = crimild::alloc< Vector2fUniform >( "uTexelSize", Vector2f( 1.0f / _dofBlurMapSize[ 0 ], 1.0f / _dofBlurMapSize[ 1 ] ) );
-    _blurOrientation = crimild::alloc< IntUniform >( "uOrientation", 0 );
-    _blurCoefficient = crimild::alloc< FloatUniform >( "uBlurCoefficient", 1.0f );
-    _focusDistance = crimild::alloc< FloatUniform >( "uFocusDistance", 0.5f );
-    _near = crimild::alloc< FloatUniform >( "uNear", 1.0f );
-    _far = crimild::alloc< FloatUniform >( "uFar", 1.0f );
-    _ppm = crimild::alloc< FloatUniform >( "uPPM", 1.0f );
-    
     _focus = crimild::alloc< FloatUniform >( "uFocus", 0.875f );
     _aperture = crimild::alloc< FloatUniform >( "uAperture", 0.1f );
-    
-    _alphaState = crimild::alloc< AlphaState >( true, AlphaState::SrcBlendFunc::ONE, AlphaState::DstBlendFunc::ZERO );
 }
 
 gl3::DepthOfFieldImageEffect::~DepthOfFieldImageEffect( void )
@@ -295,21 +138,25 @@ void gl3::DepthOfFieldImageEffect::compute( RendererPtr const &renderer, CameraP
 
 void gl3::DepthOfFieldImageEffect::apply( crimild::RendererPtr const &renderer, crimild::CameraPtr const & )
 {
-    const float blurCoefficient = 1.0f;
-    const float focusDistance = 0.5f;
-    const float near = 1.0f;
-    const float far = 1.0f;
-    const float ppm = 1.0f;
-    
-	auto sceneFBO = renderer->getFrameBuffer( "scene" );
+    auto sceneFBO = renderer->getFrameBuffer( RenderPass::S_BUFFER_NAME );
 	if ( sceneFBO == nullptr ) {
-		Log::Error << "Cannot find FBO named 'scene'" << Log::End;
+        Log::Error << "Cannot find FBO named '" << RenderPass::S_BUFFER_NAME << "'" << Log::End;
 		return;
 	}
+    
+    auto colorTarget = sceneFBO->getRenderTargets()->get( RenderPass::S_BUFFER_COLOR_TARGET_NAME );
+
+    auto gBuffer = renderer->getFrameBuffer( RenderPass::G_BUFFER_NAME );
+    if ( gBuffer == nullptr ) {
+        Log::Error << "Cannot find FBO named '" << RenderPass::G_BUFFER_NAME << "'" << Log::End;
+        return;
+    }
+    
+    auto depthTarget = gBuffer->getRenderTargets()->get( RenderPass::G_BUFFER_DEPTH_TARGET_NAME );
 
     auto dofBlurProgram = renderer->getShaderProgram( "dof_blur" );
 	if ( dofBlurProgram == nullptr ) {
-		dofBlurProgram = crimild::alloc< ShaderProgram >( Utils::getVertexShaderInstance( dof_blur_vs ), Utils::getFragmentShaderInstance( dof_blur2_fs ) );
+		dofBlurProgram = crimild::alloc< ShaderProgram >( Utils::getVertexShaderInstance( dof_blur_vs ), Utils::getFragmentShaderInstance( dof_blur_fs ) );
 
 		dofBlurProgram->registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
 	    dofBlurProgram->registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
@@ -320,86 +167,17 @@ void gl3::DepthOfFieldImageEffect::apply( crimild::RendererPtr const &renderer, 
         dofBlurProgram->attachUniform( _focus );
         dofBlurProgram->attachUniform( _aperture );
 
-//	    dofBlurProgram->attachUniform( std::make_shared< Vector2fUniform >( "uTexelSize", Vector2f( 1.0f / _dofBlurMapSize[ 0 ], 1.0f / _dofBlurMapSize[ 1 ] ) ) );
-//	    dofBlurProgram->attachUniform( _blurOrientation );
-//	    dofBlurProgram->attachUniform( std::make_shared< FloatUniform >( "uBlurCoefficient", blurCoefficient ) );
-//	    dofBlurProgram->attachUniform( std::make_shared< FloatUniform >( "uFocusDistance", focusDistance ) );
-//	    dofBlurProgram->attachUniform( std::make_shared< FloatUniform >( "uNear", near ) );
-//	    dofBlurProgram->attachUniform( std::make_shared< FloatUniform >( "uFar", far ) );
-//	    dofBlurProgram->attachUniform( std::make_shared< FloatUniform >( "uPPM", ppm ) );
-		
 		renderer->addShaderProgram( "dof_blur", dofBlurProgram );
 	}
 
-    auto dofApplyProgram = renderer->getShaderProgram( "dof_apply" );
-	if ( dofApplyProgram == nullptr ) {
-		dofApplyProgram = crimild::alloc< ShaderProgram >( Utils::getVertexShaderInstance( dof_apply_vs ), Utils::getFragmentShaderInstance( dof_apply_fs ) );
-
-		dofApplyProgram->registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
-	    dofApplyProgram->registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
-
-	    dofApplyProgram->registerLocation( crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, "uColorMap" ) );
-	    dofApplyProgram->registerLocation( crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, "uDepthMap" ) );
-	    dofApplyProgram->registerLocation( crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, "uBlurMap" ) );
-
-	    dofApplyProgram->attachUniform( crimild::alloc< FloatUniform >( "uBlurCoefficient", blurCoefficient ) );
-	    dofApplyProgram->attachUniform( crimild::alloc< FloatUniform >( "uFocusDistance", focusDistance ) );
-	    dofApplyProgram->attachUniform( crimild::alloc< FloatUniform >( "uNear", near ) );
-	    dofApplyProgram->attachUniform( crimild::alloc< FloatUniform >( "uFar", far ) );
-	    dofApplyProgram->attachUniform( crimild::alloc< FloatUniform >( "uPPM", ppm ) );
+    renderer->bindProgram( dofBlurProgram );
+    renderer->bindTexture( dofBlurProgram->getStandardLocation( ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ), colorTarget->getTexture() );
+    renderer->bindTexture( dofBlurProgram->getStandardLocation( ShaderProgram::StandardLocation::DEPTH_MAP_UNIFORM ), depthTarget->getTexture() );
 		
-		renderer->addShaderProgram( "dof_apply", dofApplyProgram );
-	}
-
-    auto dofBlurFBO = renderer->getFrameBuffer( "dof_blur" );
-	if ( dofBlurFBO == nullptr ) {
-		int width = _dofBlurMapSize[ 0 ];
-		int height = _dofBlurMapSize[ 1 ];
-
-	    dofBlurFBO = crimild::alloc< FrameBufferObject >( width, height );
-	    dofBlurFBO->getRenderTargets()->add( "blur", crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
-	    dofBlurFBO->getRenderTargets()->add( "depth", crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
-
-	    renderer->addFrameBuffer( "dof_blur", dofBlurFBO );
-	}
-
-	auto colorTarget = sceneFBO->getRenderTargets()->get( "color" );
-	auto depthTarget = sceneFBO->getRenderTargets()->get( "depth" );
-	auto blurTarget = dofBlurFBO->getRenderTargets()->get( "blur" );
-
-//	renderer->bindFrameBuffer( dofBlurFBO );
-		renderer->bindProgram( dofBlurProgram );
-		renderer->bindTexture( dofBlurProgram->getStandardLocation( ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ), colorTarget->getTexture() );
-		renderer->bindTexture( dofBlurProgram->getStandardLocation( ShaderProgram::StandardLocation::DEPTH_MAP_UNIFORM ), depthTarget->getTexture() );
+    renderer->drawScreenPrimitive( dofBlurProgram );
 		
-//		_blurOrientation->setValue( 0 );
-		renderer->drawScreenPrimitive( dofBlurProgram );
-		
-//		renderer->setAlphaState( _alphaState );
-    
-//		_blurOrientation->setValue( 0 );
-//		renderer->drawScreenPrimitive( dofBlurProgram );
-    
-//        renderer->setAlphaState( AlphaState::DISABLED );
-		
-		renderer->unbindTexture( dofBlurProgram->getStandardLocation( ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ), colorTarget->getTexture() );
-		renderer->unbindTexture( dofBlurProgram->getStandardLocation( ShaderProgram::StandardLocation::DEPTH_MAP_UNIFORM ), depthTarget->getTexture() );
-		renderer->unbindProgram( dofBlurProgram );
-//	renderer->unbindFrameBuffer( dofBlurFBO );
-
-//	renderer->bindProgram( dofApplyProgram );
-//    
-//	renderer->bindTexture( dofApplyProgram->getLocation( "uColorMap" ), colorTarget->getTexture() );
-//	renderer->bindTexture( dofApplyProgram->getLocation( "uDepthMap" ), depthTarget->getTexture() );
-//	renderer->bindTexture( dofApplyProgram->getLocation( "uBlurMap" ), blurTarget->getTexture() );
-	
-//	renderer->setAlphaState( AlphaState::DISABLED );
-//	renderer->drawScreenPrimitive( dofApplyProgram );
-	
-//	renderer->unbindTexture( dofApplyProgram->getLocation( "uColorMap" ), colorTarget->getTexture() );
-//	renderer->unbindTexture( dofApplyProgram->getLocation( "uDepthMap" ), depthTarget->getTexture() );
-//	renderer->unbindTexture( dofApplyProgram->getLocation( "uBlurMap" ), blurTarget->getTexture() );
-//
-//	renderer->unbindProgram( dofApplyProgram );
+    renderer->unbindTexture( dofBlurProgram->getStandardLocation( ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ), colorTarget->getTexture() );
+    renderer->unbindTexture( dofBlurProgram->getStandardLocation( ShaderProgram::StandardLocation::DEPTH_MAP_UNIFORM ), depthTarget->getTexture() );
+    renderer->unbindProgram( dofBlurProgram );
 }
 

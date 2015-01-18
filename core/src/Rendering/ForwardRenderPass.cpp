@@ -71,7 +71,7 @@ void ForwardRenderPass::render( RendererPtr const &renderer, RenderQueuePtr cons
 
     renderer->unbindFrameBuffer( sceneFBO );
 
-    if ( getImageEffects()->isEmpty() ) {
+    if ( true || getImageEffects()->isEmpty() ) {
         auto colorTarget = sceneFBO->getRenderTargets()->get( "color" );
         RenderPass::render( renderer, colorTarget->getTexture(), nullptr );
     }

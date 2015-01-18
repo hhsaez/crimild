@@ -51,17 +51,6 @@ namespace crimild {
         private:
             FloatUniformPtr _focus;
             FloatUniformPtr _aperture;
-            
-            Vector2f _dofBlurMapSize;
-            Vector2fUniformPtr _blurMapTexelSize;
-            IntUniformPtr _blurOrientation;
-            FloatUniformPtr _blurCoefficient;
-            FloatUniformPtr _focusDistance;
-            FloatUniformPtr _near;
-            FloatUniformPtr _far;
-            FloatUniformPtr _ppm;
-            
-            AlphaStatePtr _alphaState;
         };
         
         using DepthOfFieldImageEffectPtr = SharedPointer< DepthOfFieldImageEffect >;

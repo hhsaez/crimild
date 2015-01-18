@@ -42,15 +42,6 @@
 namespace crimild {
     
 	class DeferredRenderPass : public RenderPass {
-    public:
-        static constexpr const char *G_BUFFER_NAME = "G_BUFFER";
-        
-        static constexpr const char *G_BUFFER_COLOR_TARGET_NAME = "0-COLOR";
-        static constexpr const char *G_BUFFER_POSITION_TARGET_NAME = "1-POSITION";
-        static constexpr const char *G_BUFFER_NORMAL_TARGET_NAME = "2-NORMAL";
-        static constexpr const char *G_BUFFER_VIEW_SPACE_NORMAL_TARGET_NAME = "3-VIEW_SPACE_NORMAL";
-        static constexpr const char *G_BUFFER_DEPTH_TARGET_NAME = "DEPTH";
-        
 	public:
 		DeferredRenderPass( void );
 		virtual ~DeferredRenderPass( void );
@@ -58,27 +49,17 @@ namespace crimild {
         virtual void render( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera );
         
     private:
-        FrameBufferObjectPtr getGBuffer( RendererPtr const &renderer );
-        
         void computeShadowMaps( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera );
         
         void renderToGBuffer( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera );
         void composeFrame( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera );
         
+        void applyImageEffects( RendererPtr const &renderer, CameraPtr const &camera );
+        
+        void buildBuffers( RendererPtr const &renderer );
+        void swapSDBuffers( RendererPtr const &renderer );
+        
     private:
-//        FrameBufferObjectPtr _gBuffer;
-//        TexturePtr _gBufferDepthOutput;
-//        TexturePtr _gBufferPositionOutput;
-//        TexturePtr _gBufferNormalOutput;
-//        TexturePtr _gBufferColorOutput;
-//        TexturePtr _gBufferEmissiveOutput;
-        
-//        FrameBufferObjectPtr _frameBuffer;
-//        TexturePtr _frameBufferOutput;
-        
-//        FrameBufferObjectPtr _accumBuffer;
-//        TexturePtr _accumBufferOutput;
-        
         std::map< LightPtr, ShadowMapPtr > _shadowMaps;
 	};
     

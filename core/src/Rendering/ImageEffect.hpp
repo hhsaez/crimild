@@ -63,10 +63,16 @@ namespace crimild {
         virtual void compute( RendererPtrImpl const &renderer, CameraPtrImpl const &camera ) = 0;
         virtual void apply( RendererPtrImpl const &renderer, CameraPtrImpl const &camera ) = 0;
         
+        bool isEnabled( void ) const { return _enabled; }
+        void setEnabled( bool enabled ) { _enabled = enabled; }
+        
     protected:
         virtual FrameBufferObjectPtrImpl getFrameBuffer( RendererPtrImpl const &renderer, std::string name );
         
         virtual void renderScreen( RendererPtrImpl const &renderer, TexturePtrImpl const &texture );
+        
+    private:
+        bool _enabled = true;
 	};
     
     using ImageEffectPtr = SharedPointer< ImageEffect >;
