@@ -122,7 +122,7 @@ const char *deferred_fs = { CRIMILD_TO_STRING(
             normal = tbn * ( 2.0 * texture( uNormalMap, vVertex.textureCoord ).xyz - 1.0 );
         }
         normal = normalize( normal );
-        float specularFactor = uUseSpecularMap ? texture( uSpecularMap, vVertex.textureCoord ).r : 1.0;
+        float specularFactor = uUseSpecularMap ? texture( uSpecularMap, vVertex.textureCoord ).r : 0.0;
         vFragData[ 2 ] = vec4( encodeNormal( normal ), specularFactor );
         
         float emissiveFactor = uUseEmissiveMap ? texture( uEmissiveMap, vVertex.textureCoord ).r : 0.0;

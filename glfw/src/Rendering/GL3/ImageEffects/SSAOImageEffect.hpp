@@ -58,6 +58,8 @@ namespace crimild {
             AlphaStatePtr _blendState;
         };
         
+        using SSAOImageEffectPtr = SharedPointer< SSAOImageEffect >;
+        
     }
     
 }

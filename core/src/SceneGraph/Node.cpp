@@ -111,9 +111,13 @@ void Node::detachComponent( NodeComponentPtr const &component )
 void Node::detachComponentWithName( std::string name )
 {
 	if ( _components.find( name ) != _components.end() ) {
-		_components[ name ]->onDetach();
-		_components[ name ]->setNode( nullptr );
-		_components[ name ] = nullptr;
+        auto current = _components[ name ];
+        if ( current != nullptr ) {
+            current->onDetach();
+            current->setNode( nullptr );
+        }
+
+        _components[ name ] = nullptr;
 		_components.erase( name );
 	}
 }
