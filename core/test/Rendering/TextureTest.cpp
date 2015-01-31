@@ -33,10 +33,10 @@ using namespace crimild;
 
 TEST( TextureTest, construction )
 {
-	Pointer< Image > image( new Image( 0, 0, 0, nullptr ) );
-	Pointer< Texture > texture( new Texture( image.get() ) );
+	auto image = crimild::alloc< Image >( 0, 0, 0, nullptr );
+	auto texture = crimild::alloc< Texture >( image );
 
-	EXPECT_EQ( image.get(), texture->getImage() );
+	EXPECT_EQ( image, texture->getImage() );
 	EXPECT_EQ( "ColorMap", texture->getName() );
 }
 

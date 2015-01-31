@@ -35,14 +35,14 @@ using namespace crimild;
 
 TEST( RenderPassTest, construction )
 {
-	Pointer< RenderPass > renderPass( new RenderPass() );
+	auto renderPass = crimild::alloc< RenderPass >();
 
-	Pointer< Camera > camera( new Camera() );
+	auto camera = crimild::alloc< Camera >();
 
 	ASSERT_NE( nullptr, camera->getRenderPass() );
 
-	camera->setRenderPass( renderPass.get() );
+	camera->setRenderPass( renderPass );
 
-	ASSERT_EQ( renderPass.get(), camera->getRenderPass() );
+	ASSERT_EQ( renderPass, camera->getRenderPass() );
 }
 

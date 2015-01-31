@@ -39,6 +39,7 @@
 
 using namespace crimild;
 
+/*
 TEST( UpdateRenderStateTest, lights )
 {
 	Pointer< Group > scene( new Group() );
@@ -88,4 +89,6 @@ TEST( UpdateRenderStateTest, materials )
 	EXPECT_FALSE( rs->hasLights() );
 	EXPECT_TRUE( rs->hasMaterials() );
 }
+
+*/
 

@@ -25,35 +25,22 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_RENDER_PASS_OFFSCREEN_
-#define CRIMILD_RENDER_PASS_OFFSCREEN_
+#ifndef CRIMILD_GL3_SHADER_LIBRARY_SCREEN_RGB_
+#define CRIMILD_GL3_SHADER_LIBRARY_SCREEN_RGB_
 
-#include "RenderPass.hpp"
-#include "FrameBufferObject.hpp"
-#include "ImageEffect.hpp"
-#include "Renderer.hpp"
-#include "RenderQueue.hpp"
-#include "ShadowMap.hpp"
-
-#include "SceneGraph/Camera.hpp"
-
-#include <list>
+#include <Crimild.hpp>
 
 namespace crimild {
 
-	class OffscreenRenderPass : public RenderPass {
-	public:
-		OffscreenRenderPass( void );
-		virtual ~OffscreenRenderPass( void );
+	namespace gl3 {
 
-		virtual void render( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera ) override;
+		class ScreenRGBShaderProgram : public ShaderProgram {
+		public:
+			ScreenRGBShaderProgram( void );
+			virtual ~ScreenRGBShaderProgram( void );
+		};
 
-		void attachImageEffect( ImageEffectPtr const &imageEffect );
-
-	private:
-		FrameBufferObjectPtr _offscreenBuffer;
-		std::list< ImageEffectPtr > _imageEffects;
-	};
+	}
 
 }
 

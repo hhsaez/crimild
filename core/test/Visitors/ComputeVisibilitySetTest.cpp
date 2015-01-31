@@ -37,6 +37,8 @@
 
 using namespace crimild;
 
+/*
+
 TEST( ComputeVisibilitySetTest, traversal )
 {
 	Pointer< Group > group1( new Group() );
@@ -73,4 +75,6 @@ TEST( ComputeVisibilitySetTest, traversal )
 	});
 	EXPECT_EQ( 3, i );
 }
+
+*/
 

@@ -34,20 +34,20 @@ using namespace crimild;
 
 TEST( CatalogTest, construction )
 {
-	Catalog< Texture > catalog;
+	auto catalog = crimild::alloc< Catalog< Texture >>();
 }
 
 TEST( CatalogTest, destruction )
 {
-	Pointer< Texture > texture( new Texture( nullptr ) );
+	auto texture = crimild::alloc< Texture >();
 
 	{
-		Catalog< Texture > catalog;
-		catalog.bind( texture.get() );
+		auto catalog = crimild::alloc< Catalog< Texture >>();
+		catalog->bind( texture );
 
-		EXPECT_TRUE( catalog.hasResources() );
+		EXPECT_TRUE( catalog->hasResources() );
 		EXPECT_EQ( 0, texture->getCatalogId() );
-		EXPECT_EQ( &catalog, texture->getCatalog() );
+		EXPECT_EQ( catalog.get(), texture->getCatalog() );
 	}
 
 	EXPECT_EQ( -1, texture->getCatalogId() );
@@ -57,94 +57,95 @@ TEST( CatalogTest, destruction )
 
 TEST( CatalogTest, bindResource )
 {
-	Catalog< Texture > catalog;
-	Pointer< Texture > texture( new Texture( nullptr ) );
-	catalog.bind( texture.get() );
+	auto catalog = crimild::alloc< Catalog< Texture >>();
+	auto texture = crimild::alloc< Texture >();
 
-	EXPECT_TRUE( catalog.hasResources() );
+	catalog->bind( texture );
+
+	EXPECT_TRUE( catalog->hasResources() );
 	EXPECT_EQ( 0, texture->getCatalogId() );
-	EXPECT_EQ( &catalog, texture->getCatalog() );
+	EXPECT_EQ( catalog.get(), texture->getCatalog() );
 }
 
 TEST( CatalogTest, bindResourceTwice )
 {
-	Catalog< Texture > catalog;
-	Pointer< Texture > texture( new Texture( nullptr ) );
-	
-	catalog.bind( texture.get() );
+	auto catalog = crimild::alloc< Catalog< Texture >>();
+	auto texture = crimild::alloc< Texture >();
 
-	EXPECT_TRUE( catalog.hasResources() );
+	catalog->bind( texture );
+
+	EXPECT_TRUE( catalog->hasResources() );
 	EXPECT_EQ( 0, texture->getCatalogId() );
-	EXPECT_EQ( &catalog, texture->getCatalog() );
+	EXPECT_EQ( catalog.get(), texture->getCatalog() );
 
-	catalog.bind( texture.get() );
+	catalog->bind( texture );
 
-	EXPECT_TRUE( catalog.hasResources() );
+	EXPECT_TRUE( catalog->hasResources() );
 	EXPECT_EQ( 0, texture->getCatalogId() );
-	EXPECT_EQ( &catalog, texture->getCatalog() );
+	EXPECT_EQ( catalog.get(), texture->getCatalog() );
 }
 
 TEST( CatalogTest, unbindResource )
 {
-	Catalog< Texture > catalog;
-	Pointer< Texture > texture( new Texture( nullptr ) );
-	
-	catalog.bind( texture.get() );
+	auto catalog = crimild::alloc< Catalog< Texture >>();
+	auto texture = crimild::alloc< Texture >();
 
-	EXPECT_TRUE( catalog.hasResources() );
+	catalog->bind( texture );
+
+	EXPECT_TRUE( catalog->hasResources() );
 	EXPECT_EQ( 0, texture->getCatalogId() );
-	EXPECT_EQ( &catalog, texture->getCatalog() );
+	EXPECT_EQ( catalog.get(), texture->getCatalog() );
 
-	catalog.unbind( texture.get() );
+	catalog->unbind( texture );
 
-	EXPECT_TRUE( catalog.hasResources() );
+	EXPECT_TRUE( catalog->hasResources() );
 	EXPECT_EQ( 0, texture->getCatalogId() );
-	EXPECT_EQ( &catalog, texture->getCatalog() );
+	EXPECT_EQ( catalog.get(), texture->getCatalog() );
 }
 
 TEST( CatalogTest, loadResource )
 {
-	Catalog< Texture > catalog;
-	Pointer< Texture > texture( new Texture( nullptr ) );
-	
-	catalog.load( texture.get() );
+	auto catalog = crimild::alloc< Catalog< Texture >>();
+	auto texture = crimild::alloc< Texture >();
 
-	EXPECT_TRUE( catalog.hasResources() );
+	catalog->load( texture );
+
+	EXPECT_TRUE( catalog->hasResources() );
 	EXPECT_EQ( 0, texture->getCatalogId() );
-	EXPECT_EQ( &catalog, texture->getCatalog() );
+	EXPECT_EQ( catalog.get(), texture->getCatalog() );
 }
 
 TEST( CatalogTest, unloadResource )
 {
-	Catalog< Texture > catalog;
-	Pointer< Texture > texture( new Texture( nullptr ) );
-	
-	catalog.load( texture.get() );
+	auto catalog = crimild::alloc< Catalog< Texture >>();
+	auto texture = crimild::alloc< Texture >();
 
-	EXPECT_TRUE( catalog.hasResources() );
+	catalog->load( texture );
+
+	EXPECT_TRUE( catalog->hasResources() );
 	EXPECT_EQ( 0, texture->getCatalogId() );
-	EXPECT_EQ( &catalog, texture->getCatalog() );
+	EXPECT_EQ( catalog.get(), texture->getCatalog() );
 
-	catalog.unload( texture.get() );
+	catalog->unload( texture );
 
-	EXPECT_FALSE( catalog.hasResources() );
+	EXPECT_FALSE( catalog->hasResources() );
 	EXPECT_EQ( -1, texture->getCatalogId() );
 	EXPECT_EQ( nullptr, texture->getCatalog() );
 }
 
 TEST( CatalogTest, automaticResourceUnload )
 {
-	Catalog< Texture > catalog;
+	auto catalog = crimild::alloc< Catalog< Texture >>();
 
 	{
-		Pointer< Texture > texture( new Texture( nullptr ) );
-		catalog.bind( texture.get() );
+		auto texture = crimild::alloc< Texture >();
+		catalog->bind( texture );
 
-		EXPECT_TRUE( catalog.hasResources() );
+		EXPECT_TRUE( catalog->hasResources() );
 		EXPECT_EQ( 0, texture->getCatalogId() );
-		EXPECT_EQ( &catalog, texture->getCatalog() );
+		EXPECT_EQ( catalog.get(), texture->getCatalog() );
 	}
 
-	EXPECT_FALSE( catalog.hasResources() );
+	EXPECT_FALSE( catalog->hasResources() );
 }
 

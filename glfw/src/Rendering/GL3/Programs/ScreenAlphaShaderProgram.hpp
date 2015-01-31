@@ -25,47 +25,24 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Primitives/Primitive.hpp"
+#ifndef CRIMILD_GL3_SHADER_LIBRARY_SCREEN_ALPHA_
+#define CRIMILD_GL3_SHADER_LIBRARY_SCREEN_ALPHA_
 
-#include "gtest/gtest.h"
+#include <Crimild.hpp>
 
-using namespace crimild;
+namespace crimild {
 
-TEST( PrimitiveTest, construction )
-{
-	auto p1 = crimild::alloc< Primitive >();
-	EXPECT_EQ( p1->getType(), Primitive::Type::TRIANGLES );
+	namespace gl3 {
 
-	auto p2 = crimild::alloc< Primitive >( Primitive::Type::LINES );
-	EXPECT_EQ( p2->getType(), Primitive::Type::LINES );
+		class ScreenAlphaShaderProgram : public ShaderProgram {
+		public:
+			ScreenAlphaShaderProgram( void );
+			virtual ~ScreenAlphaShaderProgram( void );
+		};
+
+	}
+
 }
 
-TEST( PrimitiveTest, destruction )
-{
-
-}
-
-TEST( PrimitiveTest, setVertexBuffer )
-{
-	auto p = crimild::alloc< Primitive >();
-
-	EXPECT_EQ( p->getVertexBuffer(), nullptr );
-
-	auto vbo = crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3, 0, nullptr );
-	p->setVertexBuffer( vbo );
-
-	EXPECT_EQ( p->getVertexBuffer(), vbo );
-}
-
-TEST( PrimitiveTest, setIndexBuffer )
-{
-	auto p = crimild::alloc< Primitive >();
-
-	EXPECT_EQ( p->getIndexBuffer(), nullptr );
-
-	auto ibo = crimild::alloc< IndexBufferObject >( 0, nullptr );
-	p->setIndexBuffer( ibo );
-
-	EXPECT_EQ( p->getIndexBuffer(), ibo );
-}
+#endif
 

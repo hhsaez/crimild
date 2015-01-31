@@ -34,18 +34,18 @@ using namespace crimild;
 
 TEST( MessageQueueTest, pushMessage )
 {
-	MockMessage message;
-	message.value = 0;
+	auto message = crimild::alloc< MockMessage >();
+	message->value = 0;
 
 	MockMessageHandler handler1;
 
 	MessageQueue::getInstance().pushMessage( message );
-	EXPECT_EQ( 1, message.value );
+	EXPECT_EQ( 1, message->value );
 
 	MockMessageHandler handler2;
 
 	MessageQueue::getInstance().pushMessage( message );
-	EXPECT_EQ( 3, message.value );
+	EXPECT_EQ( 3, message->value );
 }
 
 TEST( MessageQueueTest, pushDeferredMessage )
@@ -97,17 +97,17 @@ TEST( MessageQueueTest, delayMessages )
 
 TEST( MessageQueueTest, staticAllocatedMessages ) 
 {
-	MockMessage message;
-	message.value = 0;
+	auto message = crimild::alloc< MockMessage >();
+	message->value = 0;
 
 	MockMessageHandler handler1;
 
 	MessageQueue::getInstance().pushMessage( message );
-	EXPECT_EQ( 1, message.value );
+	EXPECT_EQ( 1, message->value );
 
 	MockMessageHandler handler2;
 
 	MessageQueue::getInstance().pushMessage( message );
-	EXPECT_EQ( 3, message.value );
+	EXPECT_EQ( 3, message->value );
 }
 

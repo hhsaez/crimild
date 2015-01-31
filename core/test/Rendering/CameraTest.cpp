@@ -37,12 +37,12 @@ using namespace crimild;
 
 TEST( CameraTest, construction )
 {
-	Pointer< Camera > camera( new Camera() );
+	auto camera = crimild::alloc< Camera >();
 }
 
 TEST( CameraTest, viewMatrix )
 {
-	Pointer< Camera > camera( new Camera() );
+	auto camera = crimild::alloc< Camera >();
 	camera->local().setTranslate( 0.0f, 1.0f, 5.0f );
 	camera->perform( UpdateWorldState() );
 
@@ -55,15 +55,15 @@ TEST( CameraTest, viewMatrix )
 
 TEST( CameraTest, fetchCameras )
 {
-	Pointer< Group > scene( new Group() );
-	Pointer< Camera > camera( new Camera() );
-	scene->attachNode( camera.get() );
+	auto scene = crimild::alloc< Group >();
+	auto camera = crimild::alloc< Camera >();
+	scene->attachNode( camera );
 
 	FetchCameras fetchCameras;
 	scene->perform( fetchCameras );
 	int i = 0;
-	fetchCameras.foreachCamera( [&]( Camera *c ) mutable {
-		EXPECT_EQ( camera.get(), c );
+	fetchCameras.foreachCamera( [&]( CameraPtr const &c ) mutable {
+		EXPECT_EQ( camera, c );
 		i++;
 	});
 	EXPECT_EQ( 1, i );

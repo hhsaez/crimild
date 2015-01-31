@@ -34,7 +34,7 @@ using namespace crimild;
 
 TEST( NamedObjectTest, construction )
 {
-	SharedPointer< NamedObject > obj( new NamedObject( "a name" ) );
+	auto obj = crimild::alloc< NamedObject >( "a name" );
 
 	EXPECT_EQ( obj->getName(), "a name" );
 

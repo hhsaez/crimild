@@ -36,7 +36,7 @@ using namespace crimild;
 
 TEST( NodeTest, construction )
 {
-	Pointer< Node > node( new Node( "a Node" ) );
+	auto node = crimild::alloc< Node >( "a Node" );
 
 	EXPECT_EQ( node->getName(), "a Node" );
 	EXPECT_FALSE( node->hasParent() );
@@ -45,17 +45,17 @@ TEST( NodeTest, construction )
 
 TEST( NodeTest, destruction )
 {
-	Pointer< MockComponent > cmp1( new MockComponent() );
-	EXPECT_CALL( *( cmp1.get() ), onAttach() )
+	auto cmp1 = crimild::alloc< MockComponent >();
+	EXPECT_CALL( *( cmp1 ), onAttach() )
 		.Times( ::testing::Exactly( 1 ) );
-	EXPECT_CALL( *( cmp1.get() ), onDetach() )
+	EXPECT_CALL( *( cmp1 ), onDetach() )
 		.Times( ::testing::Exactly( 1 ) );
 
 	{
-		Pointer< Node > node( new Node() );
-		node->attachComponent( cmp1.get() );
+		auto node = crimild::alloc< Node >();
+		node->attachComponent( cmp1 );
 
-		EXPECT_EQ( node->getComponent< MockComponent >(), cmp1.get() );
+		EXPECT_EQ( node->getComponent< MockComponent >(), cmp1 );
 	}
 
 	EXPECT_EQ( cmp1->getNode(), nullptr );
@@ -63,8 +63,8 @@ TEST( NodeTest, destruction )
 
 TEST( NodeTest, setParent )
 {
-	Pointer< Node > parent( new Node( "the parent" ) );
-	Pointer< Node > child( new Node( "the child" ) );
+	auto parent = crimild::alloc< Node >( "the parent" );
+	auto child = crimild::alloc< Node >( "the child" );
 
 	EXPECT_FALSE( parent->hasParent() );
 	EXPECT_EQ( parent->getParent(), nullptr );
@@ -72,99 +72,99 @@ TEST( NodeTest, setParent )
 	EXPECT_FALSE( child->hasParent() );
 	EXPECT_EQ( child->getParent(), nullptr );
 
-	child->setParent( parent.get() );
+	child->setParent( parent );
 
 	EXPECT_TRUE( child->hasParent() );
 	ASSERT_NE( child->getParent(), nullptr );
-	EXPECT_EQ( child->getParent(), parent.get() );
+	EXPECT_EQ( child->getParent(), parent );
 	EXPECT_EQ( child->getParent()->getName(), parent->getName() );
 }
 
 TEST( NodeTest, attachComponent )
 {
-	Pointer< Node > node( new Node() );
+	auto node = crimild::alloc< Node >();
 
-	Pointer< MockComponent > cmp( new MockComponent() );
+	auto cmp = crimild::alloc< MockComponent >();
 	EXPECT_CALL( *( cmp.get() ), onAttach() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	node->attachComponent( cmp.get() );
+	node->attachComponent( cmp );
 
 	ASSERT_EQ( cmp->getNode(), node.get() );
-	ASSERT_EQ( node->getComponent< MockComponent >(), cmp.get() );
+	ASSERT_EQ( node->getComponent< MockComponent >(), cmp );
 }
 
 TEST( NodeTest, attachComponentTwice )
 {
-	Pointer< Node > node( new Node() );
+	auto node = crimild::alloc< Node >();
 
-	Pointer< MockComponent > cmp( new MockComponent() );
+	auto cmp = crimild::alloc< MockComponent >();
 	EXPECT_CALL( *( cmp.get() ), onAttach() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	node->attachComponent( cmp.get() );
-	node->attachComponent( cmp.get() );
+	node->attachComponent( cmp );
+	node->attachComponent( cmp );
 }
 
 TEST( NodeTest, getComponentWithName )
 {
-	Pointer< Node > node( new Node() );
+	auto node = crimild::alloc< Node >();
 
-	Pointer< MockComponent > cmp( new MockComponent() );
+	auto cmp = crimild::alloc< MockComponent >();
 	EXPECT_CALL( *( cmp.get() ), onAttach() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	node->attachComponent( cmp.get() );
+	node->attachComponent( cmp );
 
 	ASSERT_EQ( cmp->getNode(), node.get() );
-	ASSERT_EQ( node->getComponentWithName( cmp->getComponentName() ), cmp.get() );
+	ASSERT_EQ( node->getComponentWithName( cmp->getComponentName() ), cmp );
 }
 
 TEST( NodeTest, getInvalidComponent )
 {
-	Pointer< Node > node( new Node() );
+	auto node = crimild::alloc< Node >();
 
 	ASSERT_EQ( node->getComponent< MockComponent >(), nullptr );
 }
 
 TEST( NodeTest, attachNewComponentWithSameName )
 {
-	Pointer< Node > node( new Node() );
+	auto node = crimild::alloc< Node >();
 	
-	Pointer< MockComponent > cmp1( new MockComponent() );
+	auto cmp1 = crimild::alloc< MockComponent >();
 	EXPECT_CALL( *( cmp1.get() ), onAttach() )
 		.Times( ::testing::Exactly( 1 ) );
 	EXPECT_CALL( *( cmp1.get() ), onDetach() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	Pointer< MockComponent > cmp2( new MockComponent() );
+	auto cmp2 = crimild::alloc< MockComponent >();
 	EXPECT_CALL( *( cmp2.get() ), onAttach() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	node->attachComponent( cmp1.get() );
+	node->attachComponent( cmp1 );
 
 	ASSERT_EQ( cmp1->getNode(), node.get() );
 	ASSERT_EQ( cmp2->getNode(), nullptr );
-	ASSERT_EQ( node->getComponent< MockComponent >(), cmp1.get() );
+	ASSERT_EQ( node->getComponent< MockComponent >(), cmp1 );
 
-	node->attachComponent( cmp2.get() );
+	node->attachComponent( cmp2 );
 
 	ASSERT_EQ( cmp1->getNode(), nullptr );
 	ASSERT_EQ( cmp2->getNode(), node.get() );
-	ASSERT_EQ( node->getComponent< MockComponent >(), cmp2.get() );
+	ASSERT_EQ( node->getComponent< MockComponent >(), cmp2 );
 }
 
 TEST( NodeTest, detachComponentWithName )
 {
-	Pointer< Node > node( new Node() );
+	auto node = crimild::alloc< Node >();
 
-	Pointer< MockComponent > cmp( new MockComponent() );
+	auto cmp = crimild::alloc< MockComponent >();
 	EXPECT_CALL( *( cmp.get() ), onAttach() )
 		.Times( ::testing::Exactly( 1 ) );
 	EXPECT_CALL( *( cmp.get() ), onDetach() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	node->attachComponent( cmp.get() );
+	node->attachComponent( cmp );
 	node->detachComponentWithName( cmp->getComponentName() );
 
 	ASSERT_EQ( cmp->getNode(), nullptr );
@@ -173,16 +173,16 @@ TEST( NodeTest, detachComponentWithName )
 
 TEST( NodeTest, detachComponent )
 {
-	Pointer< Node > node( new Node() );
+	auto node = crimild::alloc< Node >();
 
-	Pointer< MockComponent > cmp( new MockComponent() );
+	auto cmp = crimild::alloc< MockComponent >();
 	EXPECT_CALL( *( cmp.get() ), onAttach() )
 		.Times( ::testing::Exactly( 1 ) );
 	EXPECT_CALL( *( cmp.get() ), onDetach() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	node->attachComponent( cmp.get() );
-	node->detachComponent( cmp.get() );
+	node->attachComponent( cmp );
+	node->detachComponent( cmp );
 
 	ASSERT_EQ( cmp->getNode(), nullptr );
 	ASSERT_EQ( node->getComponent< MockComponent >(), nullptr );
@@ -190,62 +190,62 @@ TEST( NodeTest, detachComponent )
 
 TEST( NodeTest, detachInvalidComponent )
 {
-	Pointer< Node > node( new Node() );
+	auto node = crimild::alloc< Node >();
 
-	Pointer< MockComponent > cmp1( new MockComponent() );
+	auto cmp1 = crimild::alloc< MockComponent >();
 	EXPECT_CALL( *( cmp1.get() ), onAttach() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	Pointer< MockComponent > cmp2( new MockComponent() );
+	auto cmp2 = crimild::alloc< MockComponent >();
 	EXPECT_CALL( *( cmp2.get() ), onAttach() )
 		.Times( 0 );
 
-	node->attachComponent( cmp1.get() );
-	node->detachComponent( cmp2.get() );
+	node->attachComponent( cmp1 );
+	node->detachComponent( cmp2 );
 
 	ASSERT_EQ( cmp1->getNode(), node.get() );
-	ASSERT_EQ( node->getComponent< MockComponent >(), cmp1.get() );
+	ASSERT_EQ( node->getComponent< MockComponent >(), cmp1 );
 
 	ASSERT_EQ( cmp2->getNode(), nullptr );
 }
 
 TEST( NodeTest, invokeOnAttach )
 {
-	Pointer< Node > node( new Node() );
+	auto node = crimild::alloc< Node >();
 
-	Pointer< MockComponent > cmp( new MockComponent() );
+	auto cmp = crimild::alloc< MockComponent >();
 	EXPECT_CALL( *( cmp.get() ), onAttach() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	node->attachComponent( cmp.get() );
+	node->attachComponent( cmp );
 }
 
 TEST( NodeTest, invokeOnDetach )
 {
-	Pointer< Node > node( new Node() );
+	auto node = crimild::alloc< Node >();
 	
-	Pointer< MockComponent > cmp( new MockComponent() );
+	auto cmp = crimild::alloc< MockComponent >();
 	EXPECT_CALL( *( cmp.get() ), onAttach() )
 		.Times( ::testing::Exactly( 1 ) );
 	EXPECT_CALL( *( cmp.get() ), onDetach() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	node->attachComponent( cmp.get() );
-	node->detachComponent( cmp.get() );
+	node->attachComponent( cmp );
+	node->detachComponent( cmp );
 }
 
 TEST( NodeTest, detachAllComponents )
 {
-	Pointer< Node > node( new Node() );
+	auto node = crimild::alloc< Node >();
 
-	Pointer< MockComponent > cmp1( new MockComponent() );
+	auto cmp1 = crimild::alloc< MockComponent >();
 	EXPECT_CALL( *( cmp1.get() ), onAttach() )
 		.Times( ::testing::Exactly( 1 ) );
 	EXPECT_CALL( *( cmp1.get() ), onDetach() )
 		.Times( ::testing::Exactly( 1 ) );
 	
-	node->attachComponent( cmp1.get() );
-	EXPECT_EQ( node->getComponent< MockComponent >(), cmp1.get() );
+	node->attachComponent( cmp1 );
+	EXPECT_EQ( node->getComponent< MockComponent >(), cmp1 );
 	EXPECT_EQ( cmp1->getNode(), node.get() );
 
 	node->detachAllComponents();
@@ -256,15 +256,15 @@ TEST( NodeTest, detachAllComponents )
 
 TEST( NodeTest, updateComponents )
 {
-	Pointer< Node > node( new Node() );
+	auto node = crimild::alloc< Node >();
 
 	Time t;
 	
-	Pointer< MockComponent > cmp1( new MockComponent() );
-	EXPECT_CALL( *( cmp1.get() ), update( testing::_ ) )
+	auto cmp = crimild::alloc< MockComponent >();
+	EXPECT_CALL( *( cmp.get() ), update( testing::_ ) )
 		.Times( ::testing::Exactly( 3 ) );
 	
-	node->attachComponent( cmp1.get() );
+	node->attachComponent( cmp );
 
 	node->updateComponents( t );
 	node->updateComponents( t );
@@ -273,13 +273,13 @@ TEST( NodeTest, updateComponents )
 
 TEST( NodeTest, getRootParent )
 {
-	Pointer< Group > g1( new Group() );
-	Pointer< Group > g2( new Group() );
-	Pointer< Group > g3( new Group() );
+	auto g1 = crimild::alloc< Group >();
+	auto g2 = crimild::alloc< Group >();
+	auto g3 = crimild::alloc< Group >();
 
-	g1->attachNode( g2.get() );
-	g2->attachNode( g3.get() );
+	g1->attachNode( g2 );
+	g2->attachNode( g3 );
 
-	EXPECT_EQ( g1.get(), g3->getRootParent() );
+	EXPECT_EQ( g1, g3->getRootParent() );
 }
 

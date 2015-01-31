@@ -78,7 +78,7 @@ void gles::VertexBufferObjectCatalog::bind( ShaderProgram *program, VertexBuffer
     
     ShaderLocation *normalLocation = program->getStandardLocation( ShaderProgram::StandardLocation::NORMAL_ATTRIBUTE );
     if ( normalLocation && normalLocation->isValid() ) {
-        if ( format.hasPositions() ) {
+        if ( format.hasNormals() ) {
             glEnableVertexAttribArray( normalLocation->getLocation() );
             glVertexAttribPointer( normalLocation->getLocation(),
                                   format.getNormalComponents(),

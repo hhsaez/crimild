@@ -37,10 +37,10 @@ namespace crimild {
 	class MockVisitor : public NodeVisitor {
 	public:
 		MOCK_METHOD0( reset, void( void ) );
-		MOCK_METHOD1( visitNode, void( Node * ) );
-		MOCK_METHOD1( visitGroup, void( Group * ) );
+		MOCK_METHOD1( visitNode, void( NodePtr const & ) );
+		MOCK_METHOD1( visitGroup, void( GroupPtr const & ) );
 
-		void NodeVisitor_visitGroup( Group *group ) { NodeVisitor::visitGroup( group ); }
+		void NodeVisitor_visitGroup( GroupPtr const &group ) { NodeVisitor::visitGroup( group ); }
 	};
 
 }

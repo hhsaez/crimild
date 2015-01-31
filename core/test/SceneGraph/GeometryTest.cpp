@@ -34,31 +34,32 @@ using namespace crimild;
 
 TEST( GeometryNodeTest, construction )
 {
-	Pointer< Geometry > geometry( new Geometry( "a geometry" ) );
+	auto geometry = crimild::alloc< Geometry >( "a geometry" );
 
 	EXPECT_EQ( geometry->getName(), "a geometry" );
 
-	MaterialComponent *materials = geometry->getComponent< MaterialComponent >();
+	auto materials = geometry->getComponent< MaterialComponent >();
 	ASSERT_NE( nullptr, materials );
 	EXPECT_FALSE( materials->hasMaterials() );
 }
 
 TEST( GeometryNodeTest, attachPrimitive )
 {
-	Pointer< Geometry > geometry( new Geometry( "a geometry" ) );
-	Pointer< Primitive > primitive( new Primitive() );
+	auto geometry = crimild::alloc< Geometry >( "a geometry" );
+
+	auto primitive = crimild::alloc< Primitive >();
 
 	EXPECT_FALSE( geometry->hasPrimitives() );	
 
-	geometry->attachPrimitive( primitive.get() );
+	geometry->attachPrimitive( primitive );
 
 	EXPECT_TRUE( geometry->hasPrimitives() );	
 	
 	bool found = false;
 	int count = 0;
-	geometry->foreachPrimitive( [&]( Primitive *p ) mutable {
+	geometry->foreachPrimitive( [&]( PrimitivePtr const &p ) mutable {
 		++count;
-		if ( p == primitive.get() ) {
+		if ( p == primitive ) {
 			found = true;
 		}
 	});
@@ -69,21 +70,22 @@ TEST( GeometryNodeTest, attachPrimitive )
 
 TEST( GeometryNodeTest, detachPrimitive )
 {
-	Pointer< Geometry > geometry( new Geometry( "a geometry" ) );
-	Pointer< Primitive > primitive( new Primitive() );
+	auto geometry = crimild::alloc< Geometry >( "a geometry" );
+
+	auto primitive = crimild::alloc< Primitive >();
 
 	EXPECT_FALSE( geometry->hasPrimitives() );	
 
-	geometry->attachPrimitive( primitive.get() );
+	geometry->attachPrimitive( primitive );
 
 	EXPECT_TRUE( geometry->hasPrimitives() );	
 
-	geometry->detachPrimitive( primitive.get() );
+	geometry->detachPrimitive( primitive );
 
 	EXPECT_FALSE( geometry->hasPrimitives() );	
 	
 	int count = 0;
-	geometry->foreachPrimitive( [&]( Primitive *p ) mutable {
+	geometry->foreachPrimitive( [&]( PrimitivePtr const &p ) mutable {
 		++count;
 	});
 
@@ -92,15 +94,16 @@ TEST( GeometryNodeTest, detachPrimitive )
 
 TEST( GeometryNodeTest, detachAllPrimitives )
 {
-	Pointer< Geometry > geometry( new Geometry( "a geometry" ) );
-	Pointer< Primitive > primitive1( new Primitive() );
-	Pointer< Primitive > primitive2( new Primitive() );
+	auto geometry = crimild::alloc< Geometry >( "a geometry" );
 
-	geometry->attachPrimitive( primitive1.get() );
-	geometry->attachPrimitive( primitive2.get() );
+	auto primitive1 = crimild::alloc< Primitive >();
+	auto primitive2 = crimild::alloc< Primitive >();
+
+	geometry->attachPrimitive( primitive1 );
+	geometry->attachPrimitive( primitive2 );
 
 	int count = 0;
-	geometry->foreachPrimitive( [&]( Primitive *p ) mutable {
+	geometry->foreachPrimitive( [&]( PrimitivePtr const &p ) mutable {
 		++count;
 	});
 	EXPECT_EQ( count, 2 );
@@ -108,7 +111,7 @@ TEST( GeometryNodeTest, detachAllPrimitives )
 	geometry->detachAllPrimitives();
 
 	count = 0;
-	geometry->foreachPrimitive( [&]( Primitive *p ) mutable {
+	geometry->foreachPrimitive( [&]( PrimitivePtr const &p ) mutable {
 		++count;
 	});
 	EXPECT_EQ( count, 0 );

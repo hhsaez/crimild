@@ -48,6 +48,9 @@ namespace crimild {
         
         virtual void render( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera );
         
+        bool isDebugModeEnabled( void ) const { return _debugModeEnabled; }
+        void enableDebugMode( bool enabled ) { _debugModeEnabled = enabled; }
+        
     private:
         void computeShadowMaps( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera );
         
@@ -58,9 +61,10 @@ namespace crimild {
         
         void buildBuffers( RendererPtr const &renderer );
         void swapSDBuffers( RendererPtr const &renderer );
-        
+
     private:
         std::map< LightPtr, ShadowMapPtr > _shadowMaps;
+        bool _debugModeEnabled;
 	};
     
 }

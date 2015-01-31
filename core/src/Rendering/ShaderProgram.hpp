@@ -84,6 +84,11 @@ namespace crimild {
                 USE_GLOW_MAP_UNIFORM,
                 GLOW_MAP_UNIFORM,
 
+                USE_NORMAL_ATTRIBUTE = 3000,
+                USE_TANGENT_ATTRIBUTE,
+                USE_TEXTURE_COORD_ATTRIBUTE,
+                USE_COLOR_ATTRIBUTE,
+
 				LIGHT_COUNT_UNIFORM = 5000,
 				LIGHT_POSITION_UNIFORM = 5100,
 				LIGHT_ATTENUATION_UNIFORM = 5200,

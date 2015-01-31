@@ -25,48 +25,54 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "OffscreenRenderPass.hpp"
-#include "Renderer.hpp"
-#include "VisibilitySet.hpp"
+#include "ScreenRGBShaderProgram.hpp"
 
-#include "SceneGraph/Camera.hpp"
+#include "Rendering/GL3/Utils.hpp"
 
 using namespace crimild;
+using namespace crimild::gl3;
 
-OffscreenRenderPass::OffscreenRenderPass( void )
-{
+const char *screen_rgb_vs = { CRIMILD_TO_STRING( 
+	in vec3 aPosition;
+	in vec2 aTextureCoord;
 
+	uniform mat4 uMMatrix;
+
+	out vec2 vTextureCoord;
+
+	void main()
+	{
+		vTextureCoord = aTextureCoord;
+		gl_Position = uMMatrix * vec4( aPosition.x, aPosition.y, 0.0, 1.0 );
+	}
+)};
+
+const char *screen_rgb_fs = { CRIMILD_TO_STRING( 
+	in vec2 vTextureCoord;
+
+	uniform sampler2D uColorMap;
+
+	out vec4 vFragColor;
+
+	void main( void ) 
+	{ 
+		vec4 color = texture( uColorMap, vTextureCoord );
+		vFragColor = vec4( color.rgb, 1.0 );
+	}
+)};
+
+ScreenRGBShaderProgram::ScreenRGBShaderProgram( void )
+	: ShaderProgram( Utils::getVertexShaderInstance( screen_rgb_vs ), Utils::getFragmentShaderInstance( screen_rgb_fs ) )
+{ 
+	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
+	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
+
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM, "uMMatrix" );
+
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM, "uColorMap" );
 }
 
-OffscreenRenderPass::~OffscreenRenderPass( void )
-{
-
-}
-
-void OffscreenRenderPass::attachImageEffect( ImageEffectPtr const &imageEffect )
-{
-	_imageEffects.push_back( imageEffect );
-}
-
-void OffscreenRenderPass::render( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
-{
-    /*
-	if ( _offscreenBuffer == nullptr ) {
-		_offscreenBuffer = new FrameBufferObject( renderer->getScreenBuffer() );
-	}
-
-	renderer->bindFrameBuffer( _offscreenBuffer.get() );	
-	RenderPass::render( renderer, renderQueue, camera );
-	renderer->unbindFrameBuffer( _offscreenBuffer.get() );
-
-	if ( _imageEffects.size() > 0 ) {
-		for ( auto effect : _imageEffects ) {
-			RenderPass::render( renderer, _offscreenBuffer.get(), effect->getProgram() );	
-		}
-	}
-	else {
-		RenderPass::render( renderer, _offscreenBuffer.get(), nullptr );
-	}
-     */
+ScreenRGBShaderProgram::~ScreenRGBShaderProgram( void )
+{ 
 }
 

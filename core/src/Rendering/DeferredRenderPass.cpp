@@ -45,6 +45,7 @@
 using namespace crimild;
 
 DeferredRenderPass::DeferredRenderPass( void )
+    : _debugModeEnabled( false )
 {
 
 }
@@ -64,53 +65,69 @@ void DeferredRenderPass::render( RendererPtr const &renderer, RenderQueuePtr con
     
     composeFrame( renderer, renderQueue, camera );
     
-#if 0
-    auto gBuffer = renderer->getFrameBuffer( G_BUFFER_NAME );
-    
-    renderer->setAlphaState( AlphaState::ENABLED_SRC_COLOR_ONLY );
-    renderer->setDepthState( DepthState::DISABLED );
-    
-    renderer->setViewport( Rectf( 0.0f, 0.75f, 0.25f, 0.25f ) );
-    RenderPass::render( renderer, gBuffer->getRenderTargets()->get( G_BUFFER_DEPTH_TARGET_NAME )->getTexture(), nullptr );
-    
-    if ( _shadowMaps.size() > 0 ) {
-        auto firstShadow = _shadowMaps.begin()->second;
-        renderer->setViewport( Rectf( 0.0f, 0.5f, 0.25f, 0.25f ) );
-        RenderPass::render( renderer, firstShadow->getTexture(), nullptr );
+    if ( !isDebugModeEnabled() ) {
+        applyImageEffects( renderer, camera );
+        auto sBuffer = renderer->getFrameBuffer( S_BUFFER_NAME );
+        RenderPass::render( renderer, sBuffer->getRenderTargets()->get( S_BUFFER_COLOR_TARGET_NAME )->getTexture(), nullptr );
+        
+        renderTranslucentObjects( renderer, renderQueue, camera );
+        renderScreenObjects( renderer, renderQueue, camera );
     }
-    
-    renderer->setViewport( Rectf( 0.5f, 0.75f, 0.25f, 0.25f ) );
-    RenderPass::render( renderer, gBuffer->getRenderTargets()->get( G_BUFFER_DIFFUSE_TARGET_NAME )->getTexture(), nullptr );
-    
-    renderer->setViewport( Rectf( 0.75f, 0.75f, 0.25f, 0.25f ) );
-    RenderPass::render( renderer, gBuffer->getRenderTargets()->get( G_BUFFER_POSITION_TARGET_NAME )->getTexture(), nullptr );
-    
-    renderer->setViewport( Rectf( 0.5f, 0.5f, 0.25f, 0.25f ) );
-    RenderPass::render( renderer, gBuffer->getRenderTargets()->get( G_BUFFER_NORMAL_TARGET_NAME )->getTexture(), nullptr );
-    
-    renderer->setViewport( Rectf( 0.75f, 0.5f, 0.25f, 0.25f ) );
-    RenderPass::render( renderer, gBuffer->getRenderTargets()->get( G_BUFFER_VIEW_SPACE_NORMAL_TARGET_NAME )->getTexture(), nullptr );
-    
-    auto sBuffer = renderer->getFrameBuffer( S_BUFFER_NAME );
-    renderer->setViewport( Rectf( 0.0f, 0.0f, 0.5f, 0.5f ) );
-    RenderPass::render( renderer, sBuffer->getRenderTargets()->get( S_BUFFER_COLOR_TARGET_NAME )->getTexture(), nullptr );
-    
-    applyImageEffects( renderer, camera );
-    sBuffer = renderer->getFrameBuffer( S_BUFFER_NAME );
-    renderer->setViewport( Rectf( 0.5f, 0.0f, 0.5f, 0.5f ) );
-    RenderPass::render( renderer, sBuffer->getRenderTargets()->get( S_BUFFER_COLOR_TARGET_NAME )->getTexture(), nullptr );
-    
-    // reset viewport
-    renderer->setViewport( Rectf( 0.0f, 0.0f, 1.0f, 1.0f ) );
-
-#else
-    applyImageEffects( renderer, camera );
-    auto sBuffer = renderer->getFrameBuffer( S_BUFFER_NAME );
-    RenderPass::render( renderer, sBuffer->getRenderTargets()->get( S_BUFFER_COLOR_TARGET_NAME )->getTexture(), nullptr );
-    
-    renderTranslucentObjects( renderer, renderQueue, camera );
-    renderScreenObjects( renderer, renderQueue, camera );
-#endif
+    else {
+        auto gBuffer = renderer->getFrameBuffer( G_BUFFER_NAME );
+        auto rgbProgram = renderer->getShaderProgram( "screen_rgb" );
+        auto alphaProgram = renderer->getShaderProgram( "screen_alpha" );
+        
+        renderer->setAlphaState( AlphaState::ENABLED_SRC_COLOR_ONLY );
+        renderer->setDepthState( DepthState::DISABLED );
+        
+        renderer->setViewport( Rectf( 0.0f, 0.75f, 0.25f, 0.25f ) );
+        RenderPass::render( renderer, gBuffer->getRenderTargets()->get( G_BUFFER_DEPTH_TARGET_NAME )->getTexture(), nullptr );
+        
+        if ( _shadowMaps.size() > 0 ) {
+            auto firstShadow = _shadowMaps.begin()->second;
+            renderer->setViewport( Rectf( 0.0f, 0.5f, 0.25f, 0.25f ) );
+            RenderPass::render( renderer, firstShadow->getTexture(), nullptr );
+        }
+        
+        // color
+        renderer->setViewport( Rectf( 0.5f, 0.75f, 0.25f, 0.25f ) );
+        RenderPass::render( renderer, gBuffer->getRenderTargets()->get( G_BUFFER_DIFFUSE_TARGET_NAME )->getTexture(), rgbProgram );
+        
+        // world-space positions
+        renderer->setViewport( Rectf( 0.75f, 0.75f, 0.25f, 0.25f ) );
+        RenderPass::render( renderer, gBuffer->getRenderTargets()->get( G_BUFFER_POSITION_TARGET_NAME )->getTexture(), rgbProgram );
+        
+        // world-space normals
+        renderer->setViewport( Rectf( 0.5f, 0.5f, 0.25f, 0.25f ) );
+        RenderPass::render( renderer, gBuffer->getRenderTargets()->get( G_BUFFER_NORMAL_TARGET_NAME )->getTexture(), rgbProgram );
+        
+        // specular
+        renderer->setViewport( Rectf( 0.25f, 0.5f, 0.25f, 0.25f ) );
+        RenderPass::render( renderer, gBuffer->getRenderTargets()->get( G_BUFFER_NORMAL_TARGET_NAME )->getTexture(), alphaProgram );
+        
+        // view-space normals
+        renderer->setViewport( Rectf( 0.75f, 0.5f, 0.25f, 0.25f ) );
+        RenderPass::render( renderer, gBuffer->getRenderTargets()->get( G_BUFFER_VIEW_SPACE_NORMAL_TARGET_NAME )->getTexture(), rgbProgram );
+        
+        // emissive
+        renderer->setViewport( Rectf( 0.25f, 0.75f, 0.25f, 0.25f ) );
+        RenderPass::render( renderer, gBuffer->getRenderTargets()->get( G_BUFFER_VIEW_SPACE_NORMAL_TARGET_NAME )->getTexture(), alphaProgram );
+        
+        // composed image
+        auto sBuffer = renderer->getFrameBuffer( S_BUFFER_NAME );
+        renderer->setViewport( Rectf( 0.0f, 0.0f, 0.5f, 0.5f ) );
+        RenderPass::render( renderer, sBuffer->getRenderTargets()->get( S_BUFFER_COLOR_TARGET_NAME )->getTexture(), nullptr );
+        
+        // iamge effects
+        applyImageEffects( renderer, camera );
+        sBuffer = renderer->getFrameBuffer( S_BUFFER_NAME );
+        renderer->setViewport( Rectf( 0.5f, 0.0f, 0.5f, 0.5f ) );
+        RenderPass::render( renderer, sBuffer->getRenderTargets()->get( S_BUFFER_COLOR_TARGET_NAME )->getTexture(), nullptr );
+        
+        // reset viewport
+        renderer->setViewport( Rectf( 0.0f, 0.0f, 1.0f, 1.0f ) );
+    }
 }
 
 void DeferredRenderPass::renderToGBuffer( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )

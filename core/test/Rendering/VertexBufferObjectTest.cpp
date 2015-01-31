@@ -39,7 +39,7 @@ TEST( VertexBufferObject, construction )
 		0.0f, 1.0f, 0.0f,
 	};
 
-	Pointer< VertexBufferObject > vbo( new VertexBufferObject( VertexFormat::VF_P3, 3, vertices ) );
+	auto vbo = crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3, 3, vertices );
 
 	EXPECT_EQ( VertexFormat::VF_P3, vbo->getVertexFormat() );
 	EXPECT_EQ( 3, vbo->getVertexCount() );
@@ -55,7 +55,7 @@ TEST( VertexBufferObject, complexConstruction )
 		+0.0f, 1.0f, 0.0f,	0.0f, 0.0f, 1.0f,	0.5f, 0.0f
 	};
 
-	Pointer< VertexBufferObject > vbo( new VertexBufferObject( VertexFormat::VF_P3_N3_UV2, 3, vertices ) );
+	auto vbo = crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3_N3_UV2, 3, vertices );
 
 	EXPECT_EQ( VertexFormat::VF_P3_N3_UV2, vbo->getVertexFormat() );
 	EXPECT_EQ( 3, vbo->getVertexCount() );

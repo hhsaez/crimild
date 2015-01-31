@@ -46,8 +46,10 @@ namespace crimild {
 
 	template< class MessageImpl >
 	class MockMessageHandlerImpl : public MessageHandler< MessageImpl > {
+	private:
+		using MessageImplPtr = SharedPointer< MessageImpl >;
 	public:
-		virtual void handleMessage( MessageImpl *message ) override
+		virtual void handleMessage( MessageImplPtr const &message ) override
 		{
 			message->value += 1;
 		}

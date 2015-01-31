@@ -33,7 +33,7 @@ using namespace crimild;
 
 TEST( MaterialTest, construction )
 {
-	Pointer< Material > material( new Material() );
+	auto material = crimild::alloc< Material >();
 
 	EXPECT_EQ( RGBAColorf( 0.0f, 0.0f, 0.0f, 1.0f ), material->getAmbient() );
 	EXPECT_EQ( RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ), material->getDiffuse() );
@@ -46,24 +46,24 @@ TEST( MaterialTest, construction )
 
 TEST( MaterialTest, setProgram )
 {
-	Pointer< Material > material( new Material() );
+	auto material = crimild::alloc< Material >();
 
-	Pointer< VertexShader > vs( new VertexShader( "vs code" ) );
-	Pointer< FragmentShader > fs( new FragmentShader( "fs code" ) );
-	Pointer< ShaderProgram > program( new ShaderProgram( vs.get(), fs.get() ) );
-	material->setProgram( program.get() );
+	auto vs = crimild::alloc< VertexShader >( "vs code" );
+	auto fs = crimild::alloc< FragmentShader >( "fs code" );
+	auto program = crimild::alloc< ShaderProgram >( vs, fs );
+	material->setProgram( program );
 
-	ASSERT_EQ( program.get(), material->getProgram() );
+	ASSERT_EQ( program, material->getProgram() );
 }
 
 TEST( MaterialTest, setColorMap )
 {
-	Pointer< Material > material( new Material() );
+	auto material = crimild::alloc< Material >();
 
-	Pointer< Image > image( new Image( 0, 0, 0, nullptr ) );
-	Pointer< Texture > texture( new Texture( image.get() ) );
-	material->setColorMap( texture.get() );
+	auto image = crimild::alloc< Image >( 0, 0, 0, nullptr );
+	auto texture = crimild::alloc< Texture >( image );
+	material->setColorMap( texture );
 
-	ASSERT_EQ( texture.get(), material->getColorMap() );
+	ASSERT_EQ( texture, material->getColorMap() );
 }
 

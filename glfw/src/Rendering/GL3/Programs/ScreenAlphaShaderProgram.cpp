@@ -25,47 +25,54 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Primitives/Primitive.hpp"
+#include "ScreenAlphaShaderProgram.hpp"
 
-#include "gtest/gtest.h"
+#include "Rendering/GL3/Utils.hpp"
 
 using namespace crimild;
+using namespace crimild::gl3;
 
-TEST( PrimitiveTest, construction )
-{
-	auto p1 = crimild::alloc< Primitive >();
-	EXPECT_EQ( p1->getType(), Primitive::Type::TRIANGLES );
+const char *screen_alpha_vs = { CRIMILD_TO_STRING( 
+	in vec3 aPosition;
+	in vec2 aTextureCoord;
 
-	auto p2 = crimild::alloc< Primitive >( Primitive::Type::LINES );
-	EXPECT_EQ( p2->getType(), Primitive::Type::LINES );
+	uniform mat4 uMMatrix;
+
+	out vec2 vTextureCoord;
+
+	void main()
+	{
+		vTextureCoord = aTextureCoord;
+		gl_Position = uMMatrix * vec4( aPosition.x, aPosition.y, 0.0, 1.0 );
+	}
+)};
+
+const char *screen_alpha_fs = { CRIMILD_TO_STRING( 
+	in vec2 vTextureCoord;
+
+	uniform sampler2D uColorMap;
+
+	out vec4 vFragColor;
+
+	void main( void ) 
+	{ 
+		vec4 color = texture( uColorMap, vTextureCoord );
+		vFragColor = vec4( vec3( color.a ), 1.0 );
+	}
+)};
+
+ScreenAlphaShaderProgram::ScreenAlphaShaderProgram( void )
+	: ShaderProgram( Utils::getVertexShaderInstance( screen_alpha_vs ), Utils::getFragmentShaderInstance( screen_alpha_fs ) )
+{ 
+	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
+	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
+
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM, "uMMatrix" );
+
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM, "uColorMap" );
 }
 
-TEST( PrimitiveTest, destruction )
-{
-
-}
-
-TEST( PrimitiveTest, setVertexBuffer )
-{
-	auto p = crimild::alloc< Primitive >();
-
-	EXPECT_EQ( p->getVertexBuffer(), nullptr );
-
-	auto vbo = crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3, 0, nullptr );
-	p->setVertexBuffer( vbo );
-
-	EXPECT_EQ( p->getVertexBuffer(), vbo );
-}
-
-TEST( PrimitiveTest, setIndexBuffer )
-{
-	auto p = crimild::alloc< Primitive >();
-
-	EXPECT_EQ( p->getIndexBuffer(), nullptr );
-
-	auto ibo = crimild::alloc< IndexBufferObject >( 0, nullptr );
-	p->setIndexBuffer( ibo );
-
-	EXPECT_EQ( p->getIndexBuffer(), ibo );
+ScreenAlphaShaderProgram::~ScreenAlphaShaderProgram( void )
+{ 
 }
 

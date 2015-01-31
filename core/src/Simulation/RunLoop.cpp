@@ -207,6 +207,8 @@ void ThreadedRunLoop::stop( void )
     _done = true;
     RunLoop::stop();
     
-    _thread.join();
+    if ( _thread.joinable() ) {
+	    _thread.join();
+    }
 }
 

@@ -69,6 +69,7 @@ Simulation::Simulation( std::string name, int argc, char **argv )
 
 Simulation::~Simulation( void )
 {
+	stop();
 	_currentSimulation = nullptr;
 }
 

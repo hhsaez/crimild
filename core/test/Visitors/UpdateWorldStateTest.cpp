@@ -35,6 +35,7 @@
 
 using namespace crimild;
 
+/*
 TEST( UpdateWorldStateTest, singleNode )
 {
 	Pointer< Node > node( new Node() );
@@ -97,4 +98,6 @@ TEST( UpdateWorldStateTest, hierarchy )
 	EXPECT_EQ( Vector3f( 0, 0, -5 ), geometry3->getWorld().getTranslate() );
 
 }
+
+*/
 

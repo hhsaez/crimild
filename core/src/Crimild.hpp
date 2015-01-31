@@ -109,6 +109,7 @@
 #include "Primitives/TrefoilKnotPrimitive.hpp"
 
 #include "Rendering/AlphaState.hpp"
+#include "Rendering/BasicRenderPass.hpp"
 #include "Rendering/BufferObject.hpp"
 #include "Rendering/Catalog.hpp"
 #include "Rendering/DeferredRenderPass.hpp"
@@ -119,7 +120,6 @@
 #include "Rendering/ImageTGA.hpp"
 #include "Rendering/IndexBufferObject.hpp"
 #include "Rendering/Material.hpp"
-#include "Rendering/OffscreenRenderPass.hpp"
 #include "Rendering/RenderState.hpp"
 #include "Rendering/Renderer.hpp"
 #include "Rendering/Shader.hpp"

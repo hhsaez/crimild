@@ -36,8 +36,7 @@ using namespace crimild;
 
 TEST( TaskTest, construction )
 {
-	Pointer< Task > task( new MockTask( 1000 ) );
-
+	auto task = crimild::alloc< MockTask >( 1000 );
 	EXPECT_EQ( task->getPriority(), 1000 );
 }
 

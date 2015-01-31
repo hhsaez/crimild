@@ -41,6 +41,7 @@
 #include "Library/SepiaToneShaderProgram.hpp"
 
 #include "Programs/DepthShaderProgram.hpp"
+#include "Programs/BasicRenderShaderProgram.hpp"
 #include "Programs/ForwardRenderShaderProgram.hpp"
 #include "Programs/DeferredRenderShaderProgram.hpp"
 #include "Programs/DeferredComposeRenderShaderProgram.hpp"
@@ -50,6 +51,8 @@
 #include "Programs/BlurShaderProgram.hpp"
 #include "Programs/GaussianBlurShaderProgram.hpp"
 #include "Programs/SignedDistanceFieldShaderProgram.hpp"
+#include "Programs/ScreenAlphaShaderProgram.hpp"
+#include "Programs/ScreenRGBShaderProgram.hpp"
 #include "Utils.hpp"
 
 #include <GL/glew.h>
@@ -70,8 +73,11 @@ gl3::Renderer::Renderer( FrameBufferObjectPtr const &screenBuffer )
 	addShaderProgram( "phong", crimild::alloc< PhongShaderProgram >() );
 	addShaderProgram( "color", crimild::alloc< ColorShaderProgram >() );
 	addShaderProgram( "screen", crimild::alloc< ScreenShaderProgram >() );
+	addShaderProgram( "screen_alpha", crimild::alloc< ScreenAlphaShaderProgram >() );
+	addShaderProgram( "screen_rgb", crimild::alloc< ScreenRGBShaderProgram >() );
 	addShaderProgram( "texture", crimild::alloc< TextureShaderProgram >() );
     addShaderProgram( "depth", crimild::alloc< DepthShaderProgram >() );
+    addShaderProgram( "basic", crimild::alloc< BasicRenderShaderProgram >() );
     addShaderProgram( "forward", crimild::alloc< ForwardRenderShaderProgram >() );
     addShaderProgram( "deferred", crimild::alloc< DeferredRenderShaderProgram >() );
     addShaderProgram( "deferred_compose", crimild::alloc< DeferredComposeRenderShaderProgram >() );
@@ -81,6 +87,7 @@ gl3::Renderer::Renderer( FrameBufferObjectPtr const &screenBuffer )
     addShaderProgram( "blur", crimild::alloc< BlurShaderProgram >() );
     addShaderProgram( "gaussianBlur", crimild::alloc< GaussianBlurShaderProgram >() );
     addShaderProgram( "sdf", crimild::alloc< SignedDistanceFieldShaderProgram >() );
+    addShaderProgram( "text", crimild::alloc< SignedDistanceFieldShaderProgram >() );
 
 	setScreenBuffer( screenBuffer );
 }

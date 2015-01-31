@@ -35,7 +35,7 @@ using namespace crimild;
 
 TEST( LightTest, construction )
 {
-	Pointer< Light > light( new Light() );
+	auto light = crimild::alloc< Light >();
 
 	EXPECT_EQ( Light::Type::POINT, light->getType() );
 	EXPECT_EQ( Vector3f( 0.0f, 0.0f, 0.0f ), light->getPosition() );
@@ -49,12 +49,12 @@ TEST( LightTest, construction )
 
 TEST( LightTest, fetchLights )
 {
-	Pointer< Group > group( new Group() );
-	Pointer< Light > light1( new Light() );
-	Pointer< Light > light2( new Light() );
+	auto group = crimild::alloc< Group >();
+	auto light1 = crimild::alloc< Light >();
+	auto light2 = crimild::alloc< Light >();
 
-	group->attachNode( light1.get() );
-	group->attachNode( light2.get() );
+	group->attachNode( light1 );
+	group->attachNode( light2 );
 
 	FetchLights fetchLights;
 	group->perform( fetchLights );
@@ -62,12 +62,12 @@ TEST( LightTest, fetchLights )
 	EXPECT_TRUE( fetchLights.hasLights() );
 
 	int i = 0; 
-	fetchLights.foreachLight( [&]( Light *light ) {
+	fetchLights.foreachLight( [&]( LightPtr const &light ) {
 		if ( i == 0 ) {
-			EXPECT_EQ( light1.get(), light );
+			EXPECT_EQ( light1, light );
 		}
 		else if ( i == 1 ) {
-			EXPECT_EQ( light2.get(), light );
+			EXPECT_EQ( light2, light );
 		}
 		i++;
 	});

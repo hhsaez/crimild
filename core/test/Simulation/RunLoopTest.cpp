@@ -35,81 +35,84 @@ using namespace crimild;
 
 TEST( RunLoopTest, construction )
 {
-	Pointer< RunLoop > loop( new RunLoop() );
+	auto loop = crimild::alloc< RunLoop >();
 }
 
 TEST( RunLoopTest, destruction )
 {
-	Pointer< MockTask > task0( new MockTask( 0 ) );
+	auto task0 = crimild::alloc< MockTask >( 0 );
 	EXPECT_CALL( *( task0.get() ), stop() )
 		.Times( ::testing::Exactly( 1 ) );
-	Pointer< MockTask > task1( new MockTask( 1000 ) );
+
+	auto task1 = crimild::alloc< MockTask >( 1000 );
 	EXPECT_CALL( *( task1.get() ), stop() )
 		.Times( ::testing::Exactly( 1 ) );
-	Pointer< MockTask > task2( new MockTask( 2000 ) );
+
+	auto task2 = crimild::alloc< MockTask >( 2000 );
 	EXPECT_CALL( *( task2.get() ), stop() )
 		.Times( ::testing::Exactly( 1 ) );
-	Pointer< MockTask > task3( new MockTask( -5 ) );
+
+	auto task3 = crimild::alloc< MockTask >( -5 );
 	EXPECT_CALL( *( task3.get() ), stop() )
 		.Times( ::testing::Exactly( 1 ) );
 
 	{
-		Pointer< RunLoop > loop( new RunLoop() );
+		auto loop = crimild::alloc< RunLoop >();
 
-		loop->startTask( task0.get() );
-		loop->startTask( task1.get() );
-		loop->startTask( task2.get() );
-		loop->startTask( task3.get() );
+		loop->startTask( task0 );
+		loop->startTask( task1 );
+		loop->startTask( task2 );
+		loop->startTask( task3 );
 	}
 }
 
 TEST( RunLoopTest, startTasks )
 {
-	Pointer< RunLoop > loop( new RunLoop() );
+	auto loop = crimild::alloc< RunLoop >();
 
-	Pointer< MockTask > task0( new MockTask( 0 ) );
-	Pointer< MockTask > task1( new MockTask( 1000 ) );
-	Pointer< MockTask > task2( new MockTask( 2000 ) );
-	Pointer< MockTask > task3( new MockTask( -5 ) );
+	auto task0 = crimild::alloc< MockTask >( 0 );
+	auto task1 = crimild::alloc< MockTask >( 100 );
+	auto task2 = crimild::alloc< MockTask >( 200 );
+	auto task3 = crimild::alloc< MockTask >( -5 );
 
 	EXPECT_FALSE( loop->hasActiveTasks() );
 
 	EXPECT_CALL( *( task0.get() ), start() )
 		.Times( ::testing::Exactly( 1 ) );
-	loop->startTask( task0.get() );
+	loop->startTask( task0 );
 
 	EXPECT_CALL( *( task1.get() ), start() )
 		.Times( ::testing::Exactly( 1 ) );
-	loop->startTask( task1.get() );
+	loop->startTask( task1 );
 
 	EXPECT_CALL( *( task2.get() ), start() )
 		.Times( ::testing::Exactly( 1 ) );
-	loop->startTask( task2.get() );
+	loop->startTask( task2 );
 
 	EXPECT_CALL( *( task3.get() ), start() )
 		.Times( ::testing::Exactly( 1 ) );
-	loop->startTask( task3.get() );
+	loop->startTask( task3 );
 
 	EXPECT_TRUE( loop->hasActiveTasks() );
-	EXPECT_TRUE( loop->isTaskActive( task0.get() ) );
-	EXPECT_TRUE( loop->isTaskActive( task1.get() ) );
-	EXPECT_TRUE( loop->isTaskActive( task2.get() ) );
-	EXPECT_TRUE( loop->isTaskActive( task3.get() ) );
+	EXPECT_TRUE( loop->isTaskActive( task0 ) );
+	EXPECT_TRUE( loop->isTaskActive( task1 ) );
+	EXPECT_TRUE( loop->isTaskActive( task2 ) );
+	EXPECT_TRUE( loop->isTaskActive( task3 ) );
 
 	int i = 0;
-	loop->foreachActiveTask( [&]( Task *task ) {
+	loop->foreachActiveTask( [&]( TaskPtr const &task ) {
 		switch (i) {
 			case 0:
-				EXPECT_EQ( task, task3.get() );
+				EXPECT_EQ( task, task3 );
 				break;
 			case 1: 
-				EXPECT_EQ( task, task0.get() );
+				EXPECT_EQ( task, task0 );
 				break;
 			case 2: 
-				EXPECT_EQ( task, task1.get() );
+				EXPECT_EQ( task, task1 );
 				break;
 			case 3:
-				EXPECT_EQ( task, task2.get() );
+				EXPECT_EQ( task, task2 );
 				break;
 		}
 		i++;
@@ -119,17 +122,17 @@ TEST( RunLoopTest, startTasks )
 
 TEST( RunLoopTest, startTaskAlreadyStarted )
 {
-	Pointer< RunLoop > loop( new RunLoop() );
+	auto loop = crimild::alloc< RunLoop >();
 
-	Pointer< MockTask > task( new MockTask( 0 ) );
+	auto task = crimild::alloc< MockTask >( 0 );
 	EXPECT_CALL( *( task.get() ), start() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	loop->startTask( task.get() );
-	loop->startTask( task.get() );
+	loop->startTask( task );
+	loop->startTask( task );
 
 	int i = 0;
-	loop->foreachActiveTask( [&]( Task *task ) {
+	loop->foreachActiveTask( [&]( TaskPtr const &task ) {
 		i++;
 	});
 	EXPECT_EQ( i, 1 );
@@ -137,236 +140,238 @@ TEST( RunLoopTest, startTaskAlreadyStarted )
 
 TEST( RunLoopTest, startSuspendedTask )
 {
-	Pointer< RunLoop > loop( new RunLoop() );
+	auto loop = crimild::alloc< RunLoop >();
 
-	Pointer< MockTask > task( new MockTask( 0 ) );
+	auto task = crimild::alloc< MockTask >( 0 );
 	EXPECT_CALL( *( task.get() ), start() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	loop->startTask( task.get() );
-	loop->suspendTask( task.get() );
-	loop->startTask( task.get() );
+	loop->startTask( task );
+	loop->suspendTask( task );
+	loop->startTask( task );
 
-	EXPECT_FALSE( loop->isTaskActive( task.get() ) );
-	EXPECT_TRUE( loop->isTaskSuspended( task.get() ) );
+	EXPECT_FALSE( loop->isTaskActive( task ) );
+	EXPECT_TRUE( loop->isTaskSuspended( task ) );
 }
 
 TEST( RunLoopTest, startStoppedTask )
 {
-	Pointer< RunLoop > loop( new RunLoop() );
+	auto loop = crimild::alloc< RunLoop >();
 
-	Pointer< MockTask > task( new MockTask( 0 ) );
+	auto task = crimild::alloc< MockTask >( 0 );
 	EXPECT_CALL( *( task.get() ), start() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	loop->startTask( task.get() );
-	loop->stopTask( task.get() );
-	loop->startTask( task.get() );
+	loop->startTask( task );
+	loop->stopTask( task );
+	loop->startTask( task );
 
-	EXPECT_FALSE( loop->isTaskActive( task.get() ) );
-	EXPECT_TRUE( loop->isTaskKilled( task.get() ) );
+	EXPECT_FALSE( loop->isTaskActive( task ) );
+	EXPECT_TRUE( loop->isTaskKilled( task ) );
 }
 
 TEST( RunLoopTest, stopTasks )
 {
-	Pointer< RunLoop > loop( new RunLoop() );
+	auto loop = crimild::alloc< RunLoop >();
 
-	Pointer< MockTask > task( new MockTask( 0 ) );
+	auto task = crimild::alloc< MockTask >( 0 );
 	EXPECT_CALL( *( task.get() ), stop() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	loop->startTask( task.get() );
+	loop->startTask( task );
 
-	loop->stopTask( task.get() );
+	loop->stopTask( task );
 
 	EXPECT_FALSE( loop->hasActiveTasks() );
 	EXPECT_TRUE( loop->hasKilledTasks() );
-	EXPECT_TRUE( loop->isTaskKilled( task.get() ) );
+	EXPECT_TRUE( loop->isTaskKilled( task ) );
 }
 
 TEST( RunLoopTest, stopKilledTask )
 {
-	Pointer< RunLoop > loop( new RunLoop() );
+	auto loop = crimild::alloc< RunLoop >();
 
-	Pointer< MockTask > task( new MockTask( 0 ) );
+	auto task = crimild::alloc< MockTask >( 0 );
 	EXPECT_CALL( *( task.get() ), stop() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	loop->startTask( task.get() );
-	loop->stopTask( task.get() );
-	loop->stopTask( task.get() );
+	loop->startTask( task );
+	loop->stopTask( task );
+	loop->stopTask( task );
 
-	EXPECT_TRUE( loop->isTaskKilled( task.get() ) );
+	EXPECT_TRUE( loop->isTaskKilled( task ) );
 }
 
 TEST( RunLoopTest, stopSuspendedTask )
 {
-	Pointer< RunLoop > loop( new RunLoop() );
+	auto loop = crimild::alloc< RunLoop >();
 
-	Pointer< MockTask > task( new MockTask( 0 ) );
+	auto task = crimild::alloc< MockTask >( 0 );
 	EXPECT_CALL( *( task.get() ), stop() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	loop->startTask( task.get() );
-	loop->suspendTask( task.get() );
-	loop->stopTask( task.get() );
+	loop->startTask( task );
+	loop->suspendTask( task );
+	loop->stopTask( task );
 
-	EXPECT_TRUE( loop->isTaskKilled( task.get() ) );
-	EXPECT_FALSE( loop->isTaskSuspended( task.get() ) );
+	EXPECT_TRUE( loop->isTaskKilled( task ) );
+	EXPECT_FALSE( loop->isTaskSuspended( task ) );
 }
 
 TEST( RunLoopTest, suspendTask )
 {
-	Pointer< RunLoop > loop( new RunLoop() );
+	auto loop = crimild::alloc< RunLoop >();
 
-	Pointer< MockTask > task( new MockTask( 0 ) );
+	auto task = crimild::alloc< MockTask >( 0 );
 	EXPECT_CALL( *( task.get() ), suspend() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	loop->startTask( task.get() );
+	loop->startTask( task );
 
-	loop->suspendTask( task.get() );
+	loop->suspendTask( task );
 
 	EXPECT_FALSE( loop->hasActiveTasks() );
 	EXPECT_TRUE( loop->hasSuspendedTasks() );
-	EXPECT_TRUE( loop->isTaskSuspended( task.get() ) );
+	EXPECT_TRUE( loop->isTaskSuspended( task ) );
 }
 
 TEST( RunLoopTest, suspendKilledTask )
 {
-	Pointer< RunLoop > loop( new RunLoop() );
+	auto loop = crimild::alloc< RunLoop >();
 
-	Pointer< MockTask > task( new MockTask( 0 ) );
+	auto task = crimild::alloc< MockTask >( 0 );
 	EXPECT_CALL( *( task.get() ), suspend() )
 		.Times( 0 );
 
-	loop->startTask( task.get() );
-	loop->stopTask( task.get() );
-	loop->suspendTask( task.get() );
+	loop->startTask( task );
+	loop->stopTask( task );
+	loop->suspendTask( task );
 
-	EXPECT_TRUE( loop->isTaskKilled( task.get() ) );
-	EXPECT_FALSE( loop->isTaskSuspended( task.get() ) );
+	EXPECT_TRUE( loop->isTaskKilled( task ) );
+	EXPECT_FALSE( loop->isTaskSuspended( task ) );
 }
 
 TEST( RunLoopTest, suspendAlreadySuspendedTask )
 {
-	Pointer< RunLoop > loop( new RunLoop() );
+	auto loop = crimild::alloc< RunLoop >();
 
-	Pointer< MockTask > task( new MockTask( 0 ) );
+	auto task = crimild::alloc< MockTask >( 0 );
 	EXPECT_CALL( *( task.get() ), suspend() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	loop->startTask( task.get() );
-	loop->suspendTask( task.get() );
-	loop->suspendTask( task.get() );
+	loop->startTask( task );
+	loop->suspendTask( task );
+	loop->suspendTask( task );
 
-	EXPECT_TRUE( loop->isTaskSuspended( task.get() ) );
+	EXPECT_TRUE( loop->isTaskSuspended( task ) );
 }
 
 TEST( RunLoopTest, resumeTasks )
 {
-	Pointer< RunLoop > loop( new RunLoop() );
-	Pointer< MockTask > task0( new MockTask( 0 ) );
-	Pointer< MockTask > task1( new MockTask( 1000 ) );
+	auto loop = crimild::alloc< RunLoop >();
+	auto task0 = crimild::alloc< MockTask >( 0 );
+	auto task1 = crimild::alloc< MockTask >( 1000 );
 
-	EXPECT_CALL( *( task0.get() ), suspend() )
+	EXPECT_CALL( *( task0 ), suspend() )
 		.Times( ::testing::Exactly( 1 ) );
-	EXPECT_CALL( *( task0.get() ), resume() )
+	EXPECT_CALL( *( task0 ), resume() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	loop->startTask( task0.get() );
-	loop->startTask( task1.get() );
+	loop->startTask( task0 );
+	loop->startTask( task1 );
 
-	loop->suspendTask( task0.get() );
+	loop->suspendTask( task0 );
 	
-	loop->resumeTask( task0.get() );
+	loop->resumeTask( task0 );
 
 	EXPECT_TRUE( loop->hasActiveTasks() );
 	EXPECT_FALSE( loop->hasSuspendedTasks() );
-	EXPECT_FALSE( loop->isTaskSuspended( task0.get() ) );
-	EXPECT_TRUE( loop->isTaskActive( task0.get() ) );
+	EXPECT_FALSE( loop->isTaskSuspended( task0 ) );
+	EXPECT_TRUE( loop->isTaskActive( task0 ) );
 }
 
 TEST( RunLoopTest, resumeAlreadyStartedTask )
 {
-	Pointer< RunLoop > loop( new RunLoop() );
+	auto loop = crimild::alloc< RunLoop >();
 
-	Pointer< MockTask > task( new MockTask( 0 ) );
+	auto task = crimild::alloc< MockTask >( 0 );
 	EXPECT_CALL( *( task.get() ), resume() )
 		.Times( 0 );
 
-	loop->startTask( task.get() );
-	loop->resumeTask( task.get() );
+	loop->startTask( task );
+	loop->resumeTask( task );
 
-	EXPECT_TRUE( loop->isTaskActive( task.get() ) );
+	EXPECT_TRUE( loop->isTaskActive( task ) );
 }
 
 TEST( RunLoopTest, resumeAlreadyKilledTask )
 {
-	Pointer< RunLoop > loop( new RunLoop() );
+	auto loop = crimild::alloc< RunLoop >();
 
-	Pointer< MockTask > task( new MockTask( 0 ) );
+	auto task = crimild::alloc< MockTask >( 0 );
 	EXPECT_CALL( *( task.get() ), resume() )
 		.Times( 0 );
 
-	loop->startTask( task.get() );
-	loop->stopTask( task.get() );
-	loop->resumeTask( task.get() );
+	loop->startTask( task );
+	loop->stopTask( task );
+	loop->resumeTask( task );
 
-	EXPECT_TRUE( loop->isTaskKilled( task.get() ) );
+	EXPECT_TRUE( loop->isTaskKilled( task ) );
 }
 
 TEST( RunLoopTest, updateTasks )
 {
-	Pointer< RunLoop > loop( new RunLoop() );
+	auto loop = crimild::alloc< RunLoop >();
 
-	Pointer< MockTask > task0( new MockTask( 0 ) );
+	auto task0 = crimild::alloc< MockTask >( 0 );
 	EXPECT_CALL( *( task0.get() ), update() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	Pointer< MockTask > task1( new MockTask( 1000 ) );
+	auto task1 = crimild::alloc< MockTask >( 1000 );
 	EXPECT_CALL( *( task1.get() ), update() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	Pointer< MockTask > task2( new MockTask( 2000 ) );
+	auto task2 = crimild::alloc< MockTask >( 2000 );
 	EXPECT_CALL( *( task2.get() ), update() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	Pointer< MockTask > task3( new MockTask( -5 ) );
+	auto task3 = crimild::alloc< MockTask >( -5 );
 	EXPECT_CALL( *( task3.get() ), update() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	loop->startTask( task0.get() );
-	loop->startTask( task1.get() );
-	loop->startTask( task2.get() );
-	loop->startTask( task3.get() );
+	loop->startTask( task0 );
+	loop->startTask( task1 );
+	loop->startTask( task2 );
+	loop->startTask( task3 );
 
 	EXPECT_TRUE( loop->update() );
 }
 
 TEST( RunLoopTest, breakLoop )
 {
-	Pointer< RunLoop > loop( new RunLoop() );
+	auto loop = crimild::alloc< RunLoop >();
 
-	Pointer< MockTask > task( new MockTask( 0 ) );
-	loop->startTask( task.get() );
+	auto task = crimild::alloc< MockTask >( 0 );
+	
+	loop->startTask( task );
 
 	EXPECT_TRUE( loop->update() );
 	EXPECT_TRUE( loop->update() );
 
-	loop->stopTask( task.get() );
+	loop->stopTask( task );
 
 	EXPECT_FALSE( loop->update() );
 }
 
 TEST( RunLoopTest, stop )
 {
-	Pointer< RunLoop > loop( new RunLoop() );
+	auto loop = crimild::alloc< RunLoop >();
 
-	Pointer< MockTask > task( new MockTask( 0 ) );
+	auto task = crimild::alloc< MockTask >( 0 );
 	EXPECT_CALL( *( task.get() ), stop() )
 		.Times( ::testing::Exactly( 1 ) );
-	loop->startTask( task.get() );
+	
+	loop->startTask( task );
 
 	EXPECT_TRUE( loop->update() );
 	EXPECT_TRUE( loop->update() );

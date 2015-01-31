@@ -88,9 +88,6 @@ namespace crimild {
     
     using RenderPassPtr = SharedPointer< RenderPass >;
 
-    using BasicRenderPass = RenderPass;
-    using BasicRenderPassPtr = RenderPassPtr;
-
 }
 
 #endif

@@ -40,7 +40,7 @@ TEST( SimulationTest, construction )
 {
 	EXPECT_EQ( Simulation::getCurrent(), nullptr );
 
-	Pointer< Simulation > simulation( new Simulation( "a simulation", 0, nullptr ) );
+	auto simulation = crimild::alloc< Simulation >( "a simulation", 0, nullptr );
 
 	EXPECT_EQ( simulation->getName(), "a simulation" );
 	EXPECT_EQ( Simulation::getCurrent(), simulation.get() );
@@ -49,14 +49,14 @@ TEST( SimulationTest, construction )
 TEST( SimulationTest, destruction )
 {
 	EXPECT_EQ( Simulation::getCurrent(), nullptr );
-	Pointer< MockTask > task( new MockTask( 0 ) );
+	auto task = crimild::alloc< MockTask >( 0 );
 	EXPECT_CALL( *( task.get() ), stop() )
 		.Times( ::testing::Exactly( 1 ) );
 
 	{
-		Pointer< Simulation > simulation( new Simulation( "a simulation", 0, nullptr ) );		
+		auto simulation = crimild::alloc< Simulation >( "a simulation", 0, nullptr );
 		EXPECT_EQ( Simulation::getCurrent(), simulation.get() );
-		simulation->getMainLoop()->startTask( task.get() );
+		simulation->getMainLoop()->startTask( task );
 	}
 
 	EXPECT_EQ( Simulation::getCurrent(), nullptr );
@@ -64,16 +64,16 @@ TEST( SimulationTest, destruction )
 
 TEST( SimulationTest, step )
 {
-	Pointer< Simulation > simulation( new Simulation( "a simulation", 0, nullptr ) );		
+	auto simulation = crimild::alloc< Simulation >( "a simulation", 0, nullptr );
 
-	Pointer< MockTask > task( new MockTask( 0 ) );
+	auto task = crimild::alloc< MockTask >( 0 );
 	EXPECT_CALL( *( task.get() ), start() )
 		.Times( ::testing::Exactly( 1 ) );
 	EXPECT_CALL( *( task.get() ), update() )
 		.Times( ::testing::Exactly( 3 ) );
 	EXPECT_CALL( *( task.get() ), stop() )
 		.Times( ::testing::Exactly( 1 ) );
-	simulation->getMainLoop()->startTask( task.get() );
+	simulation->getMainLoop()->startTask( task );
 
 	EXPECT_TRUE( simulation->step() );
 	EXPECT_TRUE( simulation->step() );
@@ -88,9 +88,9 @@ TEST( SimulationTest, run )
 {
 	int loopCount = 0;
 
-	Pointer< Simulation > simulation( new Simulation( "a simulation", 0, nullptr ) );
+	auto simulation = crimild::alloc< Simulation >( "a simulation", 0, nullptr );
 
-	Pointer< MockTask > task( new MockTask( 0 ) );
+	auto task = crimild::alloc< MockTask >( 0 );
 	EXPECT_CALL( *( task.get() ), start() )
 		.Times( ::testing::Exactly( 1 ) );
 	EXPECT_CALL( *( task.get() ), update() )
@@ -104,7 +104,7 @@ TEST( SimulationTest, run )
 	EXPECT_CALL( *( task.get() ), stop() )
 		.Times( ::testing::Exactly( 1 ) );
 
-	simulation->getMainLoop()->startTask( task.get() );
+	simulation->getMainLoop()->startTask( task );
 	simulation->run();
 
 	EXPECT_EQ( 10, loopCount );
@@ -112,31 +112,35 @@ TEST( SimulationTest, run )
 
 TEST( SimulationTest, attachSceneWithoutCamera )
 {
-	Pointer< Simulation > simulation( new Simulation( "a simulation", 0, nullptr ) );
+	auto simulation = crimild::alloc< Simulation >( "a simulation", 0, nullptr );
 
 	EXPECT_FALSE( simulation->getMainLoop()->hasActiveTasks() );
 
-	Pointer< Node > simpleScene( new Node() );
+	auto simpleScene = crimild::alloc< Node >();
 
-	simulation->setScene( simpleScene.get() );
+	simulation->setScene( simpleScene );
+
+	EXPECT_EQ( nullptr, simulation->getMainCamera() );
 
 	EXPECT_FALSE( simulation->getMainLoop()->hasActiveTasks() );
 }
 
 TEST( SimulationTest, attachSceneWithCamera )
 {
-	Pointer< Simulation > simulation( new Simulation( "a simulation", 0, nullptr ) );
+	auto simulation = crimild::alloc< Simulation >( "a simulation", 0, nullptr );
 
 	EXPECT_FALSE( simulation->getMainLoop()->hasActiveTasks() );
 
-	Pointer< Group > scene( new Group() );
-	Pointer< Camera > camera( new Camera() );
-	scene->attachNode( camera.get() );
+	auto scene = crimild::alloc< Group >();
+	auto camera = crimild::alloc< Camera >();
+	scene->attachNode( camera );
 
-	simulation->setScene( scene.get() );
+	simulation->setScene( scene );
+
+	EXPECT_EQ( camera, simulation->getMainCamera() );
 
 	int i = 0;
-	simulation->forEachCamera( [&i]( Camera *camera ) {
+	simulation->forEachCamera( [&i]( CameraPtr const &camera ) {
 		i++;
 	});
 	EXPECT_EQ( 1, i );

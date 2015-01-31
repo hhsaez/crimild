@@ -34,19 +34,19 @@ using namespace crimild;
 
 TEST( MaterialComponentTest, attachMaterial )
 {
-	Pointer< MaterialComponent > materials( new MaterialComponent() );
+	auto materials = crimild::alloc< MaterialComponent >();
 
 	EXPECT_FALSE( materials->hasMaterials() );
 
-	Pointer< Material > material( new Material() );
-	materials->attachMaterial( material.get() );
+	auto material = crimild::alloc< Material >();
+	materials->attachMaterial( material );
 
 	EXPECT_TRUE( materials->hasMaterials() );	
 
 	int i = 0;
-	materials->foreachMaterial( [&]( Material *m ) mutable {
+	materials->foreachMaterial( [&]( MaterialPtr const &m ) mutable {
 		i++;
-		EXPECT_EQ( m, material.get() );
+		EXPECT_EQ( m, material );
 	});
 	EXPECT_EQ( 1, i );
 }

@@ -42,16 +42,16 @@ TEST( NodeVisitorTest, traversal )
 	//			/	\
 	//		node3	node4
 
-	Pointer< Group > node0( new Group( "node0" ) );
-	Pointer< Group > node2( new Group( "node2" ) );
-	Pointer< Node > node1( new Node( "node1" ) );
-	Pointer< Node > node3( new Node( "node3" ) );
-	Pointer< Node > node4( new Node( "node4" ) );
+	auto node0 = crimild::alloc< Group >( "node0" );
+	auto node2 = crimild::alloc< Group >( "node2" );
+	auto node1 = crimild::alloc< Node >( "node1" );
+	auto node3 = crimild::alloc< Node >( "node3" );
+	auto node4 = crimild::alloc< Node >( "node4" );
 
-	node0->attachNode( node1.get() );
-	node0->attachNode( node2.get() );
-	node2->attachNode( node3.get() );
-	node2->attachNode( node4.get() );
+	node0->attachNode( node1 );
+	node0->attachNode( node2 );
+	node2->attachNode( node3 );
+	node2->attachNode( node4 );
 
 	MockVisitor visitor;
 
@@ -76,14 +76,14 @@ TEST( NodeVisitorTest, traversal )
 
 class PrependParentNameVisitor : public NodeVisitor {
 public:
-	virtual void visitNode( Node *node ) override
+	virtual void visitNode( NodePtr const &node ) override
 	{
 		if ( node->hasParent() ) {
 			node->setName( node->getParent()->getName() + "_" + node->getName() );
 		}
 	}
 
-	virtual void visitGroup( Group *group ) override
+	virtual void visitGroup( GroupPtr const &group ) override
 	{
 		visitNode( group );
 		NodeVisitor::visitGroup( group );
@@ -98,16 +98,16 @@ TEST( NodeVisitorTest, prependParentName )
 	//			/	\
 	//		node3	node4
 
-	Pointer< Group > node0( new Group( "node0" ) );
-	Pointer< Group > node2( new Group( "node2" ) );
-	Pointer< Node > node1( new Node( "node1" ) );
-	Pointer< Node > node3( new Node( "node3" ) );
-	Pointer< Node > node4( new Node( "node4" ) );
+	auto node0 = crimild::alloc< Group >( "node0" );
+	auto node2 = crimild::alloc< Group >( "node2" );
+	auto node1 = crimild::alloc< Node >( "node1" );
+	auto node3 = crimild::alloc< Node >( "node3" );
+	auto node4 = crimild::alloc< Node >( "node4" );
 
-	node0->attachNode( node1.get() );
-	node0->attachNode( node2.get() );
-	node2->attachNode( node3.get() );
-	node2->attachNode( node4.get() );
+	node0->attachNode( node1 );
+	node0->attachNode( node2 );
+	node2->attachNode( node3 );
+	node2->attachNode( node4 );
 
 	node0->perform( PrependParentNameVisitor() );
 
