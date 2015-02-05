@@ -36,6 +36,7 @@
 #include "Primitives/QuadPrimitive.hpp"
 
 #include "Foundation/Log.hpp"
+#include "Foundation/Profiler.hpp"
 
 using namespace crimild;
 
@@ -157,16 +158,22 @@ void RenderPass::render( RendererPtr const &renderer, TexturePtr const &texture,
 
 void RenderPass::renderOpaqueObjects( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
+    CRIMILD_PROFILE( "Render Opaque Objects" )
+
     render( renderer, renderQueue, camera, renderQueue->getOpaqueObjects() );
 }
 
 void RenderPass::renderTranslucentObjects( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
+    CRIMILD_PROFILE( "Render Translucent Objects" )
+    
     render( renderer, renderQueue, camera, renderQueue->getTranslucentObjects() );
 }
 
 void RenderPass::renderScreenObjects( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
+    CRIMILD_PROFILE( "Render Screen Objects" )
+    
     const Matrix4f &projection = camera->getOrthographicMatrix();
     Matrix4f view;
     view.makeIdentity();

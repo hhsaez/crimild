@@ -26,7 +26,7 @@
  */
 
 #include "Simulation/RunLoop.hpp"
-
+#include "Foundation/Profiler.hpp"
 #include "Utils/MockTask.hpp"
 
 #include "gtest/gtest.h"
@@ -321,6 +321,8 @@ TEST( RunLoopTest, resumeAlreadyKilledTask )
 
 TEST( RunLoopTest, updateTasks )
 {
+	Profiler profiler;
+
 	auto loop = crimild::alloc< RunLoop >( "Test Loop" );
 
 	auto task0 = crimild::alloc< MockTask >( 0 );
@@ -349,6 +351,8 @@ TEST( RunLoopTest, updateTasks )
 
 TEST( RunLoopTest, breakLoop )
 {
+	Profiler profiler;
+
 	auto loop = crimild::alloc< RunLoop >( "Test Loop" );
 
 	auto task = crimild::alloc< MockTask >( 0 );
@@ -365,6 +369,8 @@ TEST( RunLoopTest, breakLoop )
 
 TEST( RunLoopTest, stop )
 {
+	Profiler profiler;
+
 	auto loop = crimild::alloc< RunLoop >( "Test Loop" );
 
 	auto task = crimild::alloc< MockTask >( 0 );

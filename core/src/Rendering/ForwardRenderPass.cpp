@@ -41,6 +41,7 @@
 #include "Primitives/QuadPrimitive.hpp"
 
 #include "Foundation/Log.hpp"
+#include "Foundation/Profiler.hpp"
 
 using namespace crimild;
 
@@ -56,6 +57,8 @@ ForwardRenderPass::~ForwardRenderPass( void )
 
 void ForwardRenderPass::render( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
+    CRIMILD_PROFILE( "Forward Render Pass" )
+
 #if 1
     computeShadowMaps( renderer, renderQueue, camera );
 
@@ -108,6 +111,8 @@ FrameBufferObjectPtr ForwardRenderPass::createSceneFBO( RendererPtr const &rende
 
 void ForwardRenderPass::computeShadowMaps( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
+    CRIMILD_PROFILE( "Compute Shadows" )
+
     auto program = renderer->getShaderProgram( "depth" );
     if ( program == nullptr ) {
         return;
@@ -166,6 +171,8 @@ void ForwardRenderPass::computeShadowMaps( RendererPtr const &renderer, RenderQu
 
 void ForwardRenderPass::renderShadedObjects( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
+    CRIMILD_PROFILE( "Render Shaded Objects" )
+
     auto program = renderer->getShaderProgram( "forward" );
 
     // bind program
@@ -192,10 +199,14 @@ void ForwardRenderPass::renderShadedObjects( RendererPtr const &renderer, Render
     });
     
     renderQueue->each( renderQueue->getOpaqueObjects(), [&]( MaterialPtr const &material, RenderQueue::PrimitiveMap const &primitives ) {
+        CRIMILD_PROFILE( "Apply Materials" )
+
         // bind material properties
         renderer->bindMaterial( program, material );
 
         for ( auto it : primitives ) {
+            CRIMILD_PROFILE( "Bind Primitive" )
+
             auto primitive = it.first;
 
             // bind vertex and index buffers
@@ -203,6 +214,7 @@ void ForwardRenderPass::renderShadedObjects( RendererPtr const &renderer, Render
             renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
 
             for ( auto geometryIt : it.second ) {
+                CRIMILD_PROFILE( "Draw Primitive" )
                 auto world = geometryIt.second;
                 renderer->applyTransformations( program, projection, view, world.computeModelMatrix(), world.computeNormalMatrix() );
                 renderer->drawPrimitive( program, primitive );

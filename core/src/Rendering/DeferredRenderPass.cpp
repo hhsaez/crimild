@@ -41,6 +41,7 @@
 #include "Primitives/QuadPrimitive.hpp"
 
 #include "Foundation/Log.hpp"
+#include "Foundation/Profiler.hpp"
 
 using namespace crimild;
 
@@ -57,6 +58,8 @@ DeferredRenderPass::~DeferredRenderPass( void )
 
 void DeferredRenderPass::render( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
+    CRIMILD_PROFILE( "Deferred Render Pass" )
+
     buildBuffers( renderer );
     
     computeShadowMaps( renderer, renderQueue, camera );
@@ -132,6 +135,8 @@ void DeferredRenderPass::render( RendererPtr const &renderer, RenderQueuePtr con
 
 void DeferredRenderPass::renderToGBuffer( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
+    CRIMILD_PROFILE( "Render to G-Buffer" )
+
     auto gBuffer = renderer->getFrameBuffer( G_BUFFER_NAME );
     
     renderer->bindFrameBuffer( gBuffer );
@@ -150,10 +155,13 @@ void DeferredRenderPass::renderToGBuffer( RendererPtr const &renderer, RenderQue
     renderer->setDepthState( DepthState::ENABLED );
     
     renderQueue->each( renderQueue->getOpaqueObjects(), [&]( MaterialPtr const &material, RenderQueue::PrimitiveMap const &primitives ) {
+        CRIMILD_PROFILE( "Bind Material" )
         // bind material properties
         renderer->bindMaterial( program, material );
         
         for ( auto it : primitives ) {
+            CRIMILD_PROFILE( "Bind Primitive" )
+
             auto primitive = it.first;
             
             // bind vertex and index buffers
@@ -161,6 +169,8 @@ void DeferredRenderPass::renderToGBuffer( RendererPtr const &renderer, RenderQue
             renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
             
             for ( auto geometryIt : it.second ) {
+                CRIMILD_PROFILE( "Draw Primitive" )
+
                 auto world = geometryIt.second;
                 renderer->applyTransformations( program, projection, view, world.computeModelMatrix() );
                 renderer->drawPrimitive( program, primitive );
@@ -183,6 +193,8 @@ void DeferredRenderPass::renderToGBuffer( RendererPtr const &renderer, RenderQue
 
 void DeferredRenderPass::composeFrame( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
+    CRIMILD_PROFILE( "Compose Frame" )
+
     auto sceneBuffer = renderer->getFrameBuffer( RenderPass::S_BUFFER_NAME );
     
     renderer->bindFrameBuffer( sceneBuffer );
@@ -244,6 +256,8 @@ void DeferredRenderPass::composeFrame( RendererPtr const &renderer, RenderQueueP
 
 void DeferredRenderPass::computeShadowMaps( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
 {
+    CRIMILD_PROFILE( "Compute Shadow Maps" )
+
     auto program = renderer->getShaderProgram( "depth" );
     if ( program == nullptr ) {
         return;
@@ -302,6 +316,8 @@ void DeferredRenderPass::computeShadowMaps( RendererPtr const &renderer, RenderQ
 
 void DeferredRenderPass::applyImageEffects( RendererPtr const &renderer, CameraPtr const &camera )
 {
+    CRIMILD_PROFILE( "Apply Image Effects" )
+
     getImageEffects()->each( [&]( ImageEffectPtr const &effect, int ) {
         if ( effect->isEnabled() ) {
             auto dBuffer = renderer->getFrameBuffer( D_BUFFER_NAME );
@@ -319,6 +335,8 @@ void DeferredRenderPass::applyImageEffects( RendererPtr const &renderer, CameraP
 
 void DeferredRenderPass::buildBuffers( RendererPtr const &renderer )
 {
+    CRIMILD_PROFILE( "Build Buffers" )
+
     int width = renderer->getScreenBuffer()->getWidth();
     int height = renderer->getScreenBuffer()->getHeight();
     
