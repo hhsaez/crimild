@@ -55,8 +55,13 @@ void WindowTask::update( void )
 {
     CRIMILD_PROFILE( "Swap Buffers" )
     
+    static Time windowTime;
+    
 	if ( !glfwWindowShouldClose( _window ) ) {
 		glfwSwapBuffers( _window );
+
+        Time &t = Simulation::getCurrent()->getSimulationTime();
+        windowTime.update( t.getCurrentTime() );
 
 #if 1
         if ( windowTime.getDeltaTime() < 0.002 ) {
