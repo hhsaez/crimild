@@ -77,6 +77,7 @@ void GLSimulation::loadSettings( void )
 	if ( context.load( FileSystem::getInstance().pathForResource( "crimild.lua" ) ) ) {
 		getSettings().add( "video.width", context.eval< int >( "video.width"  ) );
 		getSettings().add( "video.height", context.eval< int >( "video.height"  ) );
+		getSettings().add( "video.fullscreen", context.eval< bool >( "video.fullscreen" ) );
 		
 		getSettings().add( "video.clearColor.r", context.eval< float >( "video.clearColor.r"  ) );
 		getSettings().add( "video.clearColor.g", context.eval< float >( "video.clearColor.g"  ) );
@@ -97,6 +98,7 @@ void GLSimulation::init( void )
 	float g = getSettings().get( "video.clearColor.g", 0.0f );
 	float b = getSettings().get( "video.clearColor.b", 0.0f );
 	float a = getSettings().get( "video.clearColor.a", 0.0f );
+	bool fullscreen = getSettings().get( "video.fullscreen", false );
 
 	glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 3 );
 	glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 2 );
@@ -104,8 +106,9 @@ void GLSimulation::init( void )
 	glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
     glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
     glfwWindowHint( GLFW_DEPTH_BITS, 32 );
+    // glfwWindowHint( GLFW_DOUBLEBUFFER, GL_TRUE );
 
-	_window = glfwCreateWindow( width, height, getName().c_str(), NULL, NULL );
+	_window = glfwCreateWindow( width, height, getName().c_str(), fullscreen ? glfwGetPrimaryMonitor() : NULL, NULL );
 	if ( _window == nullptr ) {
 		Log::Error << "Cannot create window" << Log::End;
 		glfwTerminate();

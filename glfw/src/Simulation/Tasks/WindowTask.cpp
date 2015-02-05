@@ -53,43 +53,10 @@ void WindowTask::stop( void )
 
 void WindowTask::update( void )
 {
-    CRIMILD_PROFILE( "WindowTask - Update" )
-    
-    static double min = 1.0f;
-    static double max = 0.0f;
-    static double accum = 0.0f;
-    static Time windowTime;
+    CRIMILD_PROFILE( "Swap Buffers" )
     
 	if ( !glfwWindowShouldClose( _window ) ) {
 		glfwSwapBuffers( _window );
-
-        Time &t = Simulation::getCurrent()->getSimulationTime();
-        windowTime.update( t.getCurrentTime() );
-
-#if 0
-        double delta = windowTime.getDeltaTime();
-        
-        accum += delta;
-        if ( accum >= 1.0f ) {
-            max = delta;
-            min = delta;
-            accum = 0.0f;
-        }
-        
-        max = Numericf::max( max, delta );
-        min = Numericf::min( min, delta );
-
-        std::stringstream str;
-		str.precision( 6 );
-		str << Simulation::getCurrent()->getName()
-			<< " "
-            << "(max=" << std::fixed << max << "ms"
-            << " min=" << min << "ms"
-            << " avg=" << (0.5f * (min + max)) << "ms"
-            << ")";
-        
-		glfwSetWindowTitle( str.str().c_str() );
-#endif
 
 #if 1
         if ( windowTime.getDeltaTime() < 0.002 ) {
