@@ -36,6 +36,7 @@
 #include "Tasks/UpdateSceneTask.hpp"
 #include "Tasks/RenderSceneTask.hpp"
 #include "Tasks/ComputeRenderQueueTask.hpp"
+#include "Tasks/ProfilerDumpTask.hpp"
 
 #include "SceneGraph/Camera.hpp"
 
@@ -52,10 +53,10 @@ Simulation *Simulation::_currentSimulation = nullptr;
 
 Simulation::Simulation( std::string name, int argc, char **argv )
 	: NamedObject( name ),
-      _mainLoop( crimild::alloc< RunLoop >() )
+      _mainLoop( crimild::alloc< RunLoop >( "Main Loop" ) )
 {
 #if CRIMILD_ENABLE_SIMULATION_THREAD
-    _simulationLoop = crimild::alloc< ThreadedRunLoop >( true );
+    _simulationLoop = crimild::alloc< ThreadedRunLoop >( "Background Loop", true );
 #endif
     
 	srand( time( NULL ) );
@@ -65,6 +66,9 @@ Simulation::Simulation( std::string name, int argc, char **argv )
 	_settings.parseCommandLine( argc, argv );
 	
 	FileSystem::getInstance().init( argc, argv );
+
+	// todo: not sure about this
+	getMainLoop()->startTask( crimild::alloc< ProfilerDumpTask >( Priorities::END_RENDER_PRIORITY ) );
 }
 
 Simulation::~Simulation( void )
@@ -100,7 +104,8 @@ void Simulation::start( void )
 
 bool Simulation::step( void )
 {
-	return _mainLoop->update();
+	bool result = _mainLoop->update();
+	return result;
 }
 
 void Simulation::stop( void )

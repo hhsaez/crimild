@@ -27,6 +27,8 @@
 
 #include "BeginRenderTask.hpp"
 #include "Simulation/Simulation.hpp"
+#include "Foundation/Profiler.hpp"
+
 #include <iostream>
 
 using namespace crimild;
@@ -52,6 +54,8 @@ void BeginRenderTask::start( void )
 
 void BeginRenderTask::update( void )
 {
+	CRIMILD_PROFILE( "Begin Render" );
+	
     auto renderer = Simulation::getCurrent()->getRenderer();
 	if ( renderer != nullptr ) {
 		renderer->beginRender();

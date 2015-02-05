@@ -57,6 +57,8 @@ void UpdateSceneAndPhysicsTask::start( void )
 
 void UpdateSceneAndPhysicsTask::update( void )
 {
+    CRIMILD_PROFILE( "Update Scene and Physics" )
+    
     const Time &t = Simulation::getCurrent()->getSimulationTime();
     
     _dtAccumulator += t.getDeltaTime();

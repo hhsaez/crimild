@@ -51,6 +51,8 @@
 #include "Foundation/StringUtils.hpp"
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/Pointer.hpp"
+#include "Foundation/Singleton.hpp"
+#include "Foundation/Profiler.hpp"
 
 #include "Boundings/BoundingVolume.hpp"
 #include "Boundings/PlaneBoundingVolume.hpp"
@@ -149,6 +151,7 @@
 #include "Simulation/Tasks/UpdateSceneTask.hpp"
 #include "Simulation/Tasks/RenderDebugInfoTask.hpp"
 #include "Simulation/Tasks/DispatchMessagesTask.hpp"
+#include "Simulation/Tasks/ProfilerDumpTask.hpp"
 
 #include "Debug/DebugRenderHelper.hpp"
 #include "Debug/DebugRenderPass.hpp"

@@ -31,6 +31,7 @@
 #include "Task.hpp"
 
 #include "Foundation/SharedObject.hpp"
+#include "Foundation/NamedObject.hpp"
 #include "Foundation/Pointer.hpp"
 #include "Mathematics/Time.hpp"
 
@@ -39,9 +40,9 @@
 
 namespace crimild {
 
-	class RunLoop : public SharedObject {
+	class RunLoop : public SharedObject, public NamedObject {
 	public:
-		RunLoop( void );
+		explicit RunLoop( std::string name );
 		virtual ~RunLoop( void );
 
 		void startTask( TaskPtr const &task );
@@ -77,7 +78,7 @@ namespace crimild {
     
     class ThreadedRunLoop : public RunLoop {
     public:
-        ThreadedRunLoop( bool startImmediately = false );
+        explicit ThreadedRunLoop( std::string name, bool startImmediately = false );
         virtual ~ThreadedRunLoop( void );
         
         virtual void run( void );

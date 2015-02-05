@@ -33,6 +33,8 @@
 #include "AssetManager.hpp"
 
 #include "Foundation/NamedObject.hpp"
+#include "Foundation/Profiler.hpp"
+
 #include "Mathematics/Time.hpp"
 #include "SceneGraph/Node.hpp" 
 #include "SceneGraph/Camera.hpp"
@@ -88,6 +90,7 @@ namespace crimild {
 		Settings _settings;
 		Time _simulationTime;
 		AssetManager _assetManager;
+		Profiler _profiler;
         
     public:
         RunLoopPtr getMainLoop( void );

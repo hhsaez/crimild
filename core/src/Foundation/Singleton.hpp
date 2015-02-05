@@ -25,54 +25,42 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "UpdateInputStateTask.hpp"
+#ifndef CRIMILD_FOUNDATION_SINGLETON_
+#define CRIMILD_FOUNDATION_SINGLETON_
 
-using namespace crimild;
+#include <cassert>
 
-UpdateInputStateTask::UpdateInputStateTask( int priority, GLFWwindow *window )
-	: Task( priority ),
-	  _window( window )
-{
-	glfwGetWindowSize( _window, &_windowWidth, &_windowHeight);
+namespace crimild {
+
+	template< class T >
+	class Singleton {
+	private:
+		static T *_instance;
+	
+	public:
+		static T &getInstance( void )
+		{
+			return *_instance;
+		}
+
+	protected:
+		Singleton( void )
+		{
+			assert( _instance == nullptr && "Singleton instance already set" );
+			_instance = static_cast< T * >( this );
+		}
+
+	public:
+		virtual ~Singleton( void )
+		{
+			_instance = nullptr;
+		}
+	};
+
+	template< class T >
+	T *Singleton< T >::_instance = nullptr;
+
 }
 
-UpdateInputStateTask::~UpdateInputStateTask( void )
-{
-
-}
-
-void UpdateInputStateTask::start( void )
-{
-	InputState::getCurrentState().reset( GLFW_KEY_LAST, GLFW_MOUSE_BUTTON_LAST );
-}
-
-void UpdateInputStateTask::stop( void )
-{
-
-}
-
-void UpdateInputStateTask::update( void )
-{
-	CRIMILD_PROFILE( "Update Input State" )
-
-	glfwPollEvents();
-
-	for ( int i = 0; i < GLFW_KEY_LAST; i++ ) {
-		int keyState = glfwGetKey( _window, i );
-		InputState::getCurrentState().setKeyState( i, keyState == GLFW_PRESS ? InputState::KeyState::PRESSED : InputState::KeyState::RELEASED );
-	}
-
-	double x, y;
-	glfwGetCursorPos( _window, &x, &y );
-
-	if ( x >= 0 && x < _windowWidth && y >= 0 && y < _windowHeight ) {
-		InputState::getCurrentState().setMousePosition( Vector2i( x, y ) );
-		InputState::getCurrentState().setNormalizedMousePosition( Vector2f( ( float ) x / float( _windowWidth - 1.0f ), ( float ) y / float( _windowHeight - 1.0f ) ) );
-	}
-
-	for ( int i = GLFW_MOUSE_BUTTON_1; i < GLFW_MOUSE_BUTTON_LAST; i++ ) {
-		int buttonState = glfwGetMouseButton( _window, i );
-		InputState::getCurrentState().setMouseButtonState( i, buttonState == GLFW_PRESS ? InputState::MouseButtonState::PRESSED : InputState::MouseButtonState::RELEASED );
-	}
-}
+#endif
 

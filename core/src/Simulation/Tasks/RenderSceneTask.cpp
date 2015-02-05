@@ -27,6 +27,7 @@
 
 #include "RenderSceneTask.hpp"
 
+#include "Foundation/Profiler.hpp"
 #include "Simulation/Simulation.hpp"
 #include "Rendering/Renderer.hpp"
 #include "Visitors/ComputeRenderQueue.hpp"
@@ -52,6 +53,8 @@ void RenderSceneTask::start( void )
 
 void RenderSceneTask::update( void )
 {
+    CRIMILD_PROFILE( "Render Scene" );
+    
 	auto scene = Simulation::getCurrent()->getScene();
     if ( scene == nullptr ) {
         return;

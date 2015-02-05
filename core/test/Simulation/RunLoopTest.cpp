@@ -35,7 +35,7 @@ using namespace crimild;
 
 TEST( RunLoopTest, construction )
 {
-	auto loop = crimild::alloc< RunLoop >();
+	auto loop = crimild::alloc< RunLoop >( "Test Loop" );
 }
 
 TEST( RunLoopTest, destruction )
@@ -57,7 +57,7 @@ TEST( RunLoopTest, destruction )
 		.Times( ::testing::Exactly( 1 ) );
 
 	{
-		auto loop = crimild::alloc< RunLoop >();
+		auto loop = crimild::alloc< RunLoop >( "Test Loop" );
 
 		loop->startTask( task0 );
 		loop->startTask( task1 );
@@ -68,7 +68,7 @@ TEST( RunLoopTest, destruction )
 
 TEST( RunLoopTest, startTasks )
 {
-	auto loop = crimild::alloc< RunLoop >();
+	auto loop = crimild::alloc< RunLoop >( "Test Loop" );
 
 	auto task0 = crimild::alloc< MockTask >( 0 );
 	auto task1 = crimild::alloc< MockTask >( 100 );
@@ -122,7 +122,7 @@ TEST( RunLoopTest, startTasks )
 
 TEST( RunLoopTest, startTaskAlreadyStarted )
 {
-	auto loop = crimild::alloc< RunLoop >();
+	auto loop = crimild::alloc< RunLoop >( "Test Loop" );
 
 	auto task = crimild::alloc< MockTask >( 0 );
 	EXPECT_CALL( *( task.get() ), start() )
@@ -140,7 +140,7 @@ TEST( RunLoopTest, startTaskAlreadyStarted )
 
 TEST( RunLoopTest, startSuspendedTask )
 {
-	auto loop = crimild::alloc< RunLoop >();
+	auto loop = crimild::alloc< RunLoop >( "Test Loop" );
 
 	auto task = crimild::alloc< MockTask >( 0 );
 	EXPECT_CALL( *( task.get() ), start() )
@@ -156,7 +156,7 @@ TEST( RunLoopTest, startSuspendedTask )
 
 TEST( RunLoopTest, startStoppedTask )
 {
-	auto loop = crimild::alloc< RunLoop >();
+	auto loop = crimild::alloc< RunLoop >( "Test Loop" );
 
 	auto task = crimild::alloc< MockTask >( 0 );
 	EXPECT_CALL( *( task.get() ), start() )
@@ -172,7 +172,7 @@ TEST( RunLoopTest, startStoppedTask )
 
 TEST( RunLoopTest, stopTasks )
 {
-	auto loop = crimild::alloc< RunLoop >();
+	auto loop = crimild::alloc< RunLoop >( "Test Loop" );
 
 	auto task = crimild::alloc< MockTask >( 0 );
 	EXPECT_CALL( *( task.get() ), stop() )
@@ -189,7 +189,7 @@ TEST( RunLoopTest, stopTasks )
 
 TEST( RunLoopTest, stopKilledTask )
 {
-	auto loop = crimild::alloc< RunLoop >();
+	auto loop = crimild::alloc< RunLoop >( "Test Loop" );
 
 	auto task = crimild::alloc< MockTask >( 0 );
 	EXPECT_CALL( *( task.get() ), stop() )
@@ -204,7 +204,7 @@ TEST( RunLoopTest, stopKilledTask )
 
 TEST( RunLoopTest, stopSuspendedTask )
 {
-	auto loop = crimild::alloc< RunLoop >();
+	auto loop = crimild::alloc< RunLoop >( "Test Loop" );
 
 	auto task = crimild::alloc< MockTask >( 0 );
 	EXPECT_CALL( *( task.get() ), stop() )
@@ -220,7 +220,7 @@ TEST( RunLoopTest, stopSuspendedTask )
 
 TEST( RunLoopTest, suspendTask )
 {
-	auto loop = crimild::alloc< RunLoop >();
+	auto loop = crimild::alloc< RunLoop >( "Test Loop" );
 
 	auto task = crimild::alloc< MockTask >( 0 );
 	EXPECT_CALL( *( task.get() ), suspend() )
@@ -237,7 +237,7 @@ TEST( RunLoopTest, suspendTask )
 
 TEST( RunLoopTest, suspendKilledTask )
 {
-	auto loop = crimild::alloc< RunLoop >();
+	auto loop = crimild::alloc< RunLoop >( "Test Loop" );
 
 	auto task = crimild::alloc< MockTask >( 0 );
 	EXPECT_CALL( *( task.get() ), suspend() )
@@ -253,7 +253,7 @@ TEST( RunLoopTest, suspendKilledTask )
 
 TEST( RunLoopTest, suspendAlreadySuspendedTask )
 {
-	auto loop = crimild::alloc< RunLoop >();
+	auto loop = crimild::alloc< RunLoop >( "Test Loop" );
 
 	auto task = crimild::alloc< MockTask >( 0 );
 	EXPECT_CALL( *( task.get() ), suspend() )
@@ -268,7 +268,7 @@ TEST( RunLoopTest, suspendAlreadySuspendedTask )
 
 TEST( RunLoopTest, resumeTasks )
 {
-	auto loop = crimild::alloc< RunLoop >();
+	auto loop = crimild::alloc< RunLoop >( "Test Loop" );
 	auto task0 = crimild::alloc< MockTask >( 0 );
 	auto task1 = crimild::alloc< MockTask >( 1000 );
 
@@ -292,7 +292,7 @@ TEST( RunLoopTest, resumeTasks )
 
 TEST( RunLoopTest, resumeAlreadyStartedTask )
 {
-	auto loop = crimild::alloc< RunLoop >();
+	auto loop = crimild::alloc< RunLoop >( "Test Loop" );
 
 	auto task = crimild::alloc< MockTask >( 0 );
 	EXPECT_CALL( *( task.get() ), resume() )
@@ -306,7 +306,7 @@ TEST( RunLoopTest, resumeAlreadyStartedTask )
 
 TEST( RunLoopTest, resumeAlreadyKilledTask )
 {
-	auto loop = crimild::alloc< RunLoop >();
+	auto loop = crimild::alloc< RunLoop >( "Test Loop" );
 
 	auto task = crimild::alloc< MockTask >( 0 );
 	EXPECT_CALL( *( task.get() ), resume() )
@@ -321,7 +321,7 @@ TEST( RunLoopTest, resumeAlreadyKilledTask )
 
 TEST( RunLoopTest, updateTasks )
 {
-	auto loop = crimild::alloc< RunLoop >();
+	auto loop = crimild::alloc< RunLoop >( "Test Loop" );
 
 	auto task0 = crimild::alloc< MockTask >( 0 );
 	EXPECT_CALL( *( task0.get() ), update() )
@@ -349,7 +349,7 @@ TEST( RunLoopTest, updateTasks )
 
 TEST( RunLoopTest, breakLoop )
 {
-	auto loop = crimild::alloc< RunLoop >();
+	auto loop = crimild::alloc< RunLoop >( "Test Loop" );
 
 	auto task = crimild::alloc< MockTask >( 0 );
 	
@@ -365,7 +365,7 @@ TEST( RunLoopTest, breakLoop )
 
 TEST( RunLoopTest, stop )
 {
-	auto loop = crimild::alloc< RunLoop >();
+	auto loop = crimild::alloc< RunLoop >( "Test Loop" );
 
 	auto task = crimild::alloc< MockTask >( 0 );
 	EXPECT_CALL( *( task.get() ), stop() )

@@ -8,15 +8,16 @@ PROJECT( fontgen )
 FILE( GLOB_RECURSE SOURCE_FILES "${PROJECT_SOURCE_DIR}/src/*.cpp" )
 FILE( GLOB_RECURSE HEADER_FILES "${PROJECT_SOURCE_DIR}/src/*.hpp" ) 
 
-FIND_PACKAGE( Freetype )
-IF ( NOT FREETYPE_FOUND )
-	IF ( APPLE )
-		SET( FREETYPE_INCLUDE_DIRS "/usr/local/include/freetype2" )
-	ELSE ( APPLE )
+IF ( APPLE ) 
+	SET( FREETYPE_INCLUDE_DIRS "/usr/local/include/freetype2" )
+	SET( FREETYPE_LIBRARIES freetype )
+ELSE ( APPLE )
+	FIND_PACKAGE( Freetype )
+	IF ( NOT FREETYPE_FOUND )
 		FIND_LIBRARY( FREETYPE_LIBRARIES NAMES libfreetype freetype.dll PATHS "./libs/MacOS" "./libs/Windows" DOC "Freetype library" )
 		FIND_PATH( FREETYPE_INCLUDE_DIRS ftbuild.h "./includes" DOC "Freetype includes" )
-	ENDIF ( APPLE )
-ENDIF ( NOT FREETYPE_FOUND )
+	ENDIF ( NOT FREETYPE_FOUND )
+ENDIF ( APPLE )
 
 SET( CRIMILD_FONTGEN_DEPENDENCIES 
 	crimild_core 

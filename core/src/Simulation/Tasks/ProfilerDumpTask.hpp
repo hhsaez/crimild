@@ -25,54 +25,48 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "UpdateInputStateTask.hpp"
+#ifndef CRIMILD_SIMULATION_TASKS_PROFILER_DUMP_
+#define CRIMILD_SIMULATION_TASKS_PROFILER_DUMP_
 
-using namespace crimild;
+#include "Simulation/Task.hpp"
+#include "Messaging/MessageQueue.hpp"
 
-UpdateInputStateTask::UpdateInputStateTask( int priority, GLFWwindow *window )
-	: Task( priority ),
-	  _window( window )
-{
-	glfwGetWindowSize( _window, &_windowWidth, &_windowHeight);
+namespace crimild {
+
+	class EnableProfilerDumpMessage : public Message {
+	public:
+		EnableProfilerDumpMessage( void ) { }
+		virtual ~EnableProfilerDumpMessage( void ) { }
+	};
+    
+    using EnableProfilerDumpMessagePtr = SharedPointer< EnableProfilerDumpMessage >;
+
+	class DisableProfilerDumpMessage : public Message {
+	public:
+		DisableProfilerDumpMessage( void ) { }
+		virtual ~DisableProfilerDumpMessage( void ) { }
+	};
+    
+    using DisableProfilerDumpMessagePtr = SharedPointer< DisableProfilerDumpMessage >;
+
+	class ProfilerDumpTask : 
+		public Task,
+		public MessageHandler< EnableProfilerDumpMessage >,
+		public MessageHandler< DisableProfilerDumpMessage > {
+	public:
+		ProfilerDumpTask( int priority );
+		virtual ~ProfilerDumpTask( void );
+
+		virtual void start( void ) override;
+		virtual void update( void ) override;
+		virtual void stop( void ) override;
+
+	public:
+		virtual void handleMessage( EnableProfilerDumpMessagePtr const &message ) override;
+		virtual void handleMessage( DisableProfilerDumpMessagePtr const &message ) override;
+	};
+
 }
 
-UpdateInputStateTask::~UpdateInputStateTask( void )
-{
-
-}
-
-void UpdateInputStateTask::start( void )
-{
-	InputState::getCurrentState().reset( GLFW_KEY_LAST, GLFW_MOUSE_BUTTON_LAST );
-}
-
-void UpdateInputStateTask::stop( void )
-{
-
-}
-
-void UpdateInputStateTask::update( void )
-{
-	CRIMILD_PROFILE( "Update Input State" )
-
-	glfwPollEvents();
-
-	for ( int i = 0; i < GLFW_KEY_LAST; i++ ) {
-		int keyState = glfwGetKey( _window, i );
-		InputState::getCurrentState().setKeyState( i, keyState == GLFW_PRESS ? InputState::KeyState::PRESSED : InputState::KeyState::RELEASED );
-	}
-
-	double x, y;
-	glfwGetCursorPos( _window, &x, &y );
-
-	if ( x >= 0 && x < _windowWidth && y >= 0 && y < _windowHeight ) {
-		InputState::getCurrentState().setMousePosition( Vector2i( x, y ) );
-		InputState::getCurrentState().setNormalizedMousePosition( Vector2f( ( float ) x / float( _windowWidth - 1.0f ), ( float ) y / float( _windowHeight - 1.0f ) ) );
-	}
-
-	for ( int i = GLFW_MOUSE_BUTTON_1; i < GLFW_MOUSE_BUTTON_LAST; i++ ) {
-		int buttonState = glfwGetMouseButton( _window, i );
-		InputState::getCurrentState().setMouseButtonState( i, buttonState == GLFW_PRESS ? InputState::MouseButtonState::PRESSED : InputState::MouseButtonState::RELEASED );
-	}
-}
+#endif
 

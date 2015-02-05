@@ -56,6 +56,8 @@ void UpdateTimeTask::stop( void )
 
 void UpdateTimeTask::update( void )
 {
+	CRIMILD_PROFILE( "Update Time" )
+	
 	Time &t = Simulation::getCurrent()->getSimulationTime();
 	double currentTime = glfwGetTime();
 	t.update( currentTime );

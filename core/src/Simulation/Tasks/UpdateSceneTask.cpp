@@ -57,6 +57,8 @@ void UpdateSceneTask::start( void )
 
 void UpdateSceneTask::update( void )
 {
+    CRIMILD_PROFILE( "UpdateSceneTask - Update" )
+    
     const Time &t = Simulation::getCurrent()->getSimulationTime();
     
     _accumulator += t.getDeltaTime();

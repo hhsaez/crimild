@@ -27,12 +27,15 @@
 
 #include "RunLoop.hpp"
 
+#include "Foundation/Profiler.hpp"
+
 #include <iostream>
 #include <algorithm>
 
 using namespace crimild;
 
-RunLoop::RunLoop( void )
+RunLoop::RunLoop( std::string name )
+	: NamedObject( name )
 {
 
 }
@@ -150,6 +153,8 @@ void RunLoop::foreachSuspendedTask( std::function< void ( TaskPtr const &task ) 
 
 bool RunLoop::update( void )
 {
+	CRIMILD_PROFILE( getName() + " Update" );
+
 	auto ts = _activeTasks;
 	for ( auto task : ts ) {
 		task->update();
@@ -182,7 +187,8 @@ void RunLoop::cleanup( void )
 	_killedTasks.clear();
 }
 
-ThreadedRunLoop::ThreadedRunLoop( bool startImmediately )
+ThreadedRunLoop::ThreadedRunLoop( std::string name, bool startImmediately )
+	: RunLoop( name )
 {
     if ( startImmediately ) run();
 }

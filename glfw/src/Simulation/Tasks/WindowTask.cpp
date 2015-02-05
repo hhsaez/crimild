@@ -53,6 +53,8 @@ void WindowTask::stop( void )
 
 void WindowTask::update( void )
 {
+    CRIMILD_PROFILE( "WindowTask - Update" )
+    
     static double min = 1.0f;
     static double max = 0.0f;
     static double accum = 0.0f;

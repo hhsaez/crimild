@@ -27,6 +27,7 @@
 
 #include "ComputeRenderQueueTask.hpp"
 
+#include "Foundation/Profiler.hpp"
 #include "Simulation/Simulation.hpp"
 #include "Visitors/ComputeRenderQueue.hpp"
 
@@ -51,6 +52,8 @@ void ComputeRenderQueueTask::start( void )
 
 void ComputeRenderQueueTask::update( void )
 {
+    CRIMILD_PROFILE( "Compute Render Queue" )
+
 	auto scene = Simulation::getCurrent()->getScene();
     if ( scene == nullptr ) {
         return;

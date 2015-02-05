@@ -27,6 +27,7 @@
 
 #include "DispatchMessagesTask.hpp"
 #include "Messaging/MessageQueue.hpp"
+#include "Foundation/Profiler.hpp"
 
 using namespace crimild;
 
@@ -48,6 +49,8 @@ void DispatchMessagesTask::start( void )
 
 void DispatchMessagesTask::update( void )
 {
+	CRIMILD_PROFILE( "Dispatch Messages" )
+
 	MessageQueue::getInstance().dispatchMessages();
 }
 
