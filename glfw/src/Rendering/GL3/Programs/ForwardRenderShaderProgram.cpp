@@ -43,7 +43,6 @@ const char *forward_vs = { CRIMILD_TO_STRING(
     uniform mat4 uPMatrix;
     uniform mat4 uVMatrix;
     uniform mat4 uMMatrix;
-    uniform mat4 uNMatrix;
     uniform mat4 uLightSourceProjectionMatrix;
     uniform mat4 uLightSourceViewMatrix;
    
@@ -63,10 +62,10 @@ const char *forward_vs = { CRIMILD_TO_STRING(
         vec4 viewVertex = uVMatrix * vWorldVertex;
         gl_Position = uPMatrix * viewVertex;
        
-        vWorldNormal = normalize( mat3( uNMatrix ) * aNormal );
+        vWorldNormal = normalize( mat3( uMMatrix ) * aNormal );
        
 	    if ( uUseNormalMap ) {
-	    	vWorldTangent = normalize( mat3( uNMatrix ) * aTangent );
+	    	vWorldTangent = normalize( mat3( uMMatrix ) * aTangent );
 	    	vWorldBiTangent = cross( vWorldNormal, vWorldTangent );
 	    }
         
@@ -95,6 +94,7 @@ const char *forward_fs = { CRIMILD_TO_STRING(
        vec4 diffuse;
        vec4 specular;
        float shininess;
+       float emissive;
     };
 
     in vec4 vWorldVertex;
@@ -143,6 +143,17 @@ const char *forward_fs = { CRIMILD_TO_STRING(
     	if ( color.a == 0.0 ) {
     		discard;
     	}
+
+        if ( uMaterial.emissive > 0.0f ) {
+            vFragColor.rgb = color.rgb;
+            vFragColor.a = 1.0f;
+            return;
+        }
+
+        if ( uLightCount == 0 ) {
+            vFragColor = color;
+            return;
+        }
         
     	vec4 specularColor = uUseSpecularMap ? texture( uSpecularMap, vTextureCoord ) : vec4( 1.0, 1.0, 1.0, 1.0 );
     	specularColor *= uMaterial.specular;
@@ -227,6 +238,7 @@ ForwardRenderShaderProgram::ForwardRenderShaderProgram( void )
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_DIFFUSE_UNIFORM, "uMaterial.diffuse" );
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_SPECULAR_UNIFORM, "uMaterial.specular" );
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_SHININESS_UNIFORM, "uMaterial.shininess" );
+    registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_EMISSIVE_UNIFORM, "uMaterial.emissive" );
     
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM, "uColorMap" );
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_USE_COLOR_MAP_UNIFORM, "uUseColorMap" );

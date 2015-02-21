@@ -58,6 +58,9 @@ namespace crimild {
 		void setSpecular( const RGBAColorf &color ) { _specular = color; }
 		const RGBAColorf &getSpecular( void ) const { return _specular; }
 
+		void setEmissive( float value ) { _emissive = value; }
+		float getEmissive( void ) const { return _emissive; }
+
 		void setShininess( float value ) { _shininess = value; }
 		float getShininess( void ) const { return _shininess; }
 
@@ -86,6 +89,7 @@ namespace crimild {
 		RGBAColorf _diffuse;
 		RGBAColorf _specular;
 		float _shininess;
+		float _emissive;
 
 		TexturePtr _colorMap;
 		TexturePtr _normalMap;

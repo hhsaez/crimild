@@ -152,6 +152,20 @@ namespace crimild {
 			return ( n + step + max ) % max;
 		}
 
+		static PRECISION cos( double angle )
+		{
+			return static_cast< PRECISION >( std::cos( angle ) );
+		}
+
+		static PRECISION sin( double angle )
+		{
+			return static_cast< PRECISION >( std::sin( angle ) );
+		}
+
+		static PRECISION tan( double angle )
+		{
+			return static_cast< PRECISION >( std::tan( angle ) );
+		}
 	};
 
 	template< typename T > const T Numeric< T >::ZERO_TOLERANCE = static_cast< T >( 1e-06 );
