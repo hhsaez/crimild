@@ -40,7 +40,13 @@ using namespace crimild::scripting;
 using namespace crimild::physics;
 
 GLSimulation::GLSimulation( std::string name, int argc, char **argv )
-	: Simulation( name, argc, argv ),
+	: GLSimulation( name, argc, argv, false )
+{
+
+}
+
+GLSimulation::GLSimulation( std::string name, int argc, char **argv, bool enableBackgroundLoop )
+	: Simulation( name, argc, argv, enableBackgroundLoop ),
 	  _window( nullptr )
 {
 	if ( !glfwInit() ) {
@@ -122,6 +128,6 @@ void GLSimulation::init( void )
 
     auto screenBuffer = crimild::alloc< FrameBufferObject >( framebufferWidth, framebufferHeight );
 	screenBuffer->setClearColor( RGBAColorf( r, g, b, a ) );
-    Simulation::getCurrent()->setRenderer( crimild::alloc< gl3::Renderer >( screenBuffer ) );
+    setRenderer( crimild::alloc< gl3::Renderer >( screenBuffer ) );
 }
 

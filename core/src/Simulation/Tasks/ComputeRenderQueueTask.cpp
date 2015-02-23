@@ -54,12 +54,12 @@ void ComputeRenderQueueTask::update( void )
 {
     CRIMILD_PROFILE( "Compute Render Queue" )
 
-	auto scene = Simulation::getCurrent()->getScene();
+	auto scene = Simulation::getInstance().getScene();
     if ( scene == nullptr ) {
         return;
     }
     
-    auto camera = Simulation::getCurrent()->getMainCamera();
+    auto camera = Simulation::getInstance().getMainCamera();
     if ( camera == nullptr ) {
         return;
     }

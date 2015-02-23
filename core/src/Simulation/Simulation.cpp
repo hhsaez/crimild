@@ -47,21 +47,24 @@
 
 using namespace crimild;
 
-#define CRIMILD_ENABLE_SIMULATION_THREAD 1
-
-Simulation *Simulation::_currentSimulation = nullptr;
-
 Simulation::Simulation( std::string name, int argc, char **argv )
+	: Simulation( name, argc, argv, false )
+{
+
+}
+
+Simulation::Simulation( std::string name, int argc, char **argv, bool enableBackgroundLoop )
 	: NamedObject( name ),
       _mainLoop( crimild::alloc< RunLoop >( "Main Loop" ) )
 {
-#if CRIMILD_ENABLE_SIMULATION_THREAD
-    _simulationLoop = crimild::alloc< ThreadedRunLoop >( "Background Loop", true );
-#endif
+	if ( enableBackgroundLoop ) {
+    	_simulationLoop = crimild::alloc< ThreadedRunLoop >( "Background Loop", true );
+    }
+    else {
+    	_simulationLoop = _mainLoop;
+    }
     
 	srand( time( NULL ) );
-
-	_currentSimulation = this;
 
 	_settings.parseCommandLine( argc, argv );
 	
@@ -74,7 +77,6 @@ Simulation::Simulation( std::string name, int argc, char **argv )
 Simulation::~Simulation( void )
 {
 	stop();
-	_currentSimulation = nullptr;
 }
 
 RunLoopPtr Simulation::getMainLoop( void )
@@ -84,11 +86,7 @@ RunLoopPtr Simulation::getMainLoop( void )
 
 RunLoopPtr Simulation::getSimulationLoop( void ) 
 {
-#if CRIMILD_ENABLE_SIMULATION_THREAD
     return _simulationLoop;
-#else
-    return _mainLoop;
-#endif
 }
 
 void Simulation::start( void )

@@ -55,12 +55,12 @@ void RenderSceneTask::update( void )
 {
     CRIMILD_PROFILE( "Render Scene" );
     
-	auto scene = Simulation::getCurrent()->getScene();
+	auto scene = Simulation::getInstance().getScene();
     if ( scene == nullptr ) {
         return;
     }
     
-	auto renderer = Simulation::getCurrent()->getRenderer();
+	auto renderer = Simulation::getInstance().getRenderer();
     if ( renderer == nullptr ) {
         return;
     }

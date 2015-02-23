@@ -49,9 +49,9 @@ void UpdateSceneAndPhysicsTask::start( void )
 {
     _dtAccumulator = 0.0;
     
-    float gx = Simulation::getCurrent()->getSettings().get( "physics.gravity.x", 0.0f );
-    float gy = Simulation::getCurrent()->getSettings().get( "physics.gravity.y", -9.8f );
-    float gz = Simulation::getCurrent()->getSettings().get( "physics.gravity.z", 0.0f );
+    float gx = Simulation::getInstance().getSettings().get( "physics.gravity.x", 0.0f );
+    float gy = Simulation::getInstance().getSettings().get( "physics.gravity.y", -9.8f );
+    float gz = Simulation::getInstance().getSettings().get( "physics.gravity.z", 0.0f );
     PhysicsContext::getInstance().setGravity( Vector3f( gx, gy, gz ) );
 }
 
@@ -59,11 +59,11 @@ void UpdateSceneAndPhysicsTask::update( void )
 {
     CRIMILD_PROFILE( "Update Scene and Physics" )
     
-    const Time &t = Simulation::getCurrent()->getSimulationTime();
+    const Time &t = Simulation::getInstance().getSimulationTime();
     
     _dtAccumulator += t.getDeltaTime();
     
-    auto scene = Simulation::getCurrent()->getScene();
+    auto scene = Simulation::getInstance().getScene();
     if ( scene == nullptr ) {
         return;
     }

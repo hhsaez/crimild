@@ -33,11 +33,11 @@ void RenderDebugInfoTask::start( void )
 
 void RenderDebugInfoTask::update( void )
 {
-	auto renderer = Simulation::getCurrent()->getRenderer();
+	auto renderer = Simulation::getInstance().getRenderer();
 	
-	Simulation::getCurrent()->forEachCamera( [&]( CameraPtr const &camera ) {
+	Simulation::getInstance().forEachCamera( [&]( CameraPtr const &camera ) {
 
-		Simulation::getCurrent()->getScene()->perform( Apply( [&]( NodePtr const &node ) {
+		Simulation::getInstance().getScene()->perform( Apply( [&]( NodePtr const &node ) {
 			node->foreachComponent( [&]( NodeComponentPtr const &component ) {
 				component->renderDebugInfo( renderer, camera );
 			});

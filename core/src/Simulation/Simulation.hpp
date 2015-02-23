@@ -34,6 +34,7 @@
 
 #include "Foundation/NamedObject.hpp"
 #include "Foundation/Profiler.hpp"
+#include "Foundation/Singleton.hpp"
 
 #include "Mathematics/Time.hpp"
 #include "SceneGraph/Node.hpp" 
@@ -46,13 +47,12 @@
 
 namespace crimild {
 
-	class Simulation : public NamedObject, public SharedObject {
-	private:
-		static Simulation *_currentSimulation;
+	class Simulation : 
+		public NamedObject, 
+		public SharedObject,
+		public Singleton< Simulation > {
 
 	public:
-		static Simulation *getCurrent( void ) { return _currentSimulation; }
-
 		class Priorities {
 		public:
 			enum {
@@ -69,6 +69,7 @@ namespace crimild {
 
 	public:
 		Simulation( std::string name, int argc, char **argv );
+		Simulation( std::string name, int argc, char **argv, bool enableBackgroundLoop );
 		virtual ~Simulation( void );
 
 		Settings &getSettings( void ) { return _settings; }

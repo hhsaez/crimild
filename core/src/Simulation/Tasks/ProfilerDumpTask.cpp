@@ -33,7 +33,7 @@ void ProfilerDumpTask::update( void )
 
 	static double accum = 0.0;
 	
-	auto t = Simulation::getCurrent()->getSimulationTime();
+	auto t = Simulation::getInstance().getSimulationTime();
 	accum += t.getDeltaTime() * 100.0;
 	if ( accum >= 1.0 ) {
 		Profiler::getInstance().resetAll();

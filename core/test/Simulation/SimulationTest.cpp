@@ -38,28 +38,30 @@ using namespace crimild;
 
 TEST( SimulationTest, construction )
 {
-	EXPECT_EQ( Simulation::getCurrent(), nullptr );
+	/*
+	EXPECT_EQ( Simulation::getInstance(), nullptr );
 
 	auto simulation = crimild::alloc< Simulation >( "a simulation", 0, nullptr );
 
 	EXPECT_EQ( simulation->getName(), "a simulation" );
 	EXPECT_EQ( Simulation::getCurrent(), simulation.get() );
+	*/
 }
 
 TEST( SimulationTest, destruction )
 {
-	EXPECT_EQ( Simulation::getCurrent(), nullptr );
+	// EXPECT_EQ( Simulation::getCurrent(), nullptr );
 	auto task = crimild::alloc< MockTask >( 0 );
 	EXPECT_CALL( *( task.get() ), stop() )
 		.Times( ::testing::Exactly( 1 ) );
 
 	{
 		auto simulation = crimild::alloc< Simulation >( "a simulation", 0, nullptr );
-		EXPECT_EQ( Simulation::getCurrent(), simulation.get() );
+		// EXPECT_EQ( Simulation::getInstance(), simulation.get() );
 		simulation->getMainLoop()->startTask( task );
 	}
 
-	EXPECT_EQ( Simulation::getCurrent(), nullptr );
+	// EXPECT_EQ( Simulation::getCurrent(), nullptr );
 }
 
 TEST( SimulationTest, step )
@@ -98,7 +100,7 @@ TEST( SimulationTest, run )
 		.WillRepeatedly( ::testing::Invoke( [&]( void ) mutable {
 			loopCount++;
 			if ( loopCount >= 10 ) {
-				Simulation::getCurrent()->stop();				
+				Simulation::getInstance().stop();				
 			}
 		}));
 	EXPECT_CALL( *( task.get() ), stop() )

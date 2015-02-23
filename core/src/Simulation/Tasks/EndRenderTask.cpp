@@ -51,7 +51,7 @@ void EndRenderTask::update( void )
 {
 	CRIMILD_PROFILE( "End Render" );
 
-    auto renderer = Simulation::getCurrent()->getRenderer();
+    auto renderer = Simulation::getInstance().getRenderer();
 	if ( renderer != nullptr ) {
 		renderer->endRender();
 	}

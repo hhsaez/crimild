@@ -59,11 +59,11 @@ void UpdateSceneTask::update( void )
 {
     CRIMILD_PROFILE( "UpdateSceneTask - Update" )
     
-    const Time &t = Simulation::getCurrent()->getSimulationTime();
+    const Time &t = Simulation::getInstance().getSimulationTime();
     
     _accumulator += t.getDeltaTime();
     
-    auto scene = Simulation::getCurrent()->getScene();
+    auto scene = Simulation::getInstance().getScene();
     if ( scene == nullptr ) {
         return;
     }
