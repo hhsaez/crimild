@@ -55,8 +55,10 @@ namespace crimild {
         
         void reset( void );
         
-        void setCamera( CameraPtr const &camera ) { _camera = camera; }
+        void setCamera( CameraPtr const &camera );
         CameraPtr getCamera( void ) { return _camera; }
+        const Matrix4f &getViewMatrix( void ) const { return _viewMatrix; }
+        const Matrix4f &getProjectionMatrix( void ) const { return _projectionMatrix; }
         
         void push( MaterialPtr const &material, PrimitivePtr const &primitive, GeometryPtr const &geometry, const TransformationImpl &world, bool renderOnScreen = false );
         void push( LightPtr const &light );
@@ -70,6 +72,8 @@ namespace crimild {
         
     private:
         CameraPtr _camera;
+        Matrix4f _viewMatrix;
+        Matrix4f _projectionMatrix;
         
         std::list< LightPtr > _lights;
 

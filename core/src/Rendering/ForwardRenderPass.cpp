@@ -178,8 +178,8 @@ void ForwardRenderPass::renderShadedObjects( RendererPtr const &renderer, Render
     // bind program
     renderer->bindProgram( program );
 
-    const Matrix4f &projection = camera->getProjectionMatrix();
-    const Matrix4f &view = camera->getViewMatrix();
+    const Matrix4f &projection = renderQueue->getProjectionMatrix();
+    const Matrix4f &view = renderQueue->getViewMatrix();
     
     // bind shadow maps
     renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::USE_SHADOW_MAP_UNIFORM ), false );

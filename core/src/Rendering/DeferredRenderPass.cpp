@@ -146,8 +146,8 @@ void DeferredRenderPass::renderToGBuffer( RendererPtr const &renderer, RenderQue
     // bind program
     renderer->bindProgram( program );
     
-    const Matrix4f &projection = camera->getProjectionMatrix();
-    const Matrix4f &view = camera->getViewMatrix();
+    const Matrix4f &projection = renderQueue->getProjectionMatrix();
+    const Matrix4f &view = renderQueue->getViewMatrix();
     
     renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LINEAR_DEPTH_CONSTANT_UNIFORM ), camera->getFrustum().computeLinearDepth() );
     
@@ -227,7 +227,7 @@ void DeferredRenderPass::composeFrame( RendererPtr const &renderer, RenderQueueP
     renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_NORMAL_MAP_UNIFORM ), gBuffer->getRenderTargets()->get( G_BUFFER_NORMAL_TARGET_NAME )->getTexture() );
     renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_EMISSIVE_MAP_UNIFORM ), gBuffer->getRenderTargets()->get( G_BUFFER_VIEW_SPACE_NORMAL_TARGET_NAME )->getTexture() );
     
-    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM ), camera->getViewMatrix() );
+    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM ), renderQueue->getViewMatrix() );
     
     renderer->drawScreenPrimitive( program );
 

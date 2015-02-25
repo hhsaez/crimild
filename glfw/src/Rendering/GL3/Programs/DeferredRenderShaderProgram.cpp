@@ -76,6 +76,7 @@ const char *deferred_fs = { CRIMILD_TO_STRING(
         vec4 diffuse;
         vec4 specular;
         float shininess;
+        float emissive;
     };
 
     struct VertexData {
@@ -125,7 +126,7 @@ const char *deferred_fs = { CRIMILD_TO_STRING(
         float specularFactor = uUseSpecularMap ? texture( uSpecularMap, vVertex.textureCoord ).r : 0.0;
         vFragData[ 2 ] = vec4( encodeNormal( normal ), specularFactor );
         
-        float emissiveFactor = uUseEmissiveMap ? texture( uEmissiveMap, vVertex.textureCoord ).r : 0.0;
+        float emissiveFactor = uUseEmissiveMap ? texture( uEmissiveMap, vVertex.textureCoord ).r : uMaterial.emissive;
         vFragData[ 3 ] = vec4( encodeNormal( vVertex.viewSpaceNormal ), emissiveFactor );
     }
 )};
@@ -146,6 +147,7 @@ DeferredRenderShaderProgram::DeferredRenderShaderProgram( void )
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_DIFFUSE_UNIFORM, "uMaterial.diffuse" );
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_SPECULAR_UNIFORM, "uMaterial.specular" );
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_SHININESS_UNIFORM, "uMaterial.shininess" );
+    registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_EMISSIVE_UNIFORM, "uMaterial.emissive" );
     
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM, "uColorMap" );
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_USE_COLOR_MAP_UNIFORM, "uUseColorMap" );

@@ -49,6 +49,19 @@ void RenderQueue::reset( void )
     _screenObjects.clear();
 }
 
+void RenderQueue::setCamera( CameraPtr const &camera )
+{
+    _camera = camera;
+    if ( _camera != nullptr ) {
+        _viewMatrix = _camera->getViewMatrix();
+        _projectionMatrix = _camera->getProjectionMatrix();
+    }
+    else {
+        _viewMatrix.makeIdentity();
+        _projectionMatrix.makeIdentity();
+    }
+}
+
 void RenderQueue::push( MaterialPtr const &material, PrimitivePtr const &primitive, GeometryPtr const &geometry, const TransformationImpl &world, bool renderOnScreen )
 {
     if ( renderOnScreen ) {
