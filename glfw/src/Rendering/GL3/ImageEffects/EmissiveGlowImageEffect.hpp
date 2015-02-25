@@ -25,8 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_GL3_RENDERING_IMAGE_EFFECT_GLOW_
-#define CRIMILD_GL3_RENDERING_IMAGE_EFFECT_GLOW_
+#ifndef CRIMILD_GL3_RENDERING_IMAGE_EMISSIVE_EFFECT_GLOW_
+#define CRIMILD_GL3_RENDERING_IMAGE_EMISSIVE_EFFECT_GLOW_
 
 #include <Crimild.hpp>
 
@@ -34,37 +34,13 @@ namespace crimild {
     
     namespace gl3 {
         
-        class GlowImageEffect : public ImageEffect {
+        class EmissiveGlowImageEffect : public ImageEffect {
         public:
-            GlowImageEffect( void );
-            virtual ~GlowImageEffect( void );
+            EmissiveGlowImageEffect( void );
+            virtual ~EmissiveGlowImageEffect( void );
             
-            virtual void apply( crimild::RendererPtr const &renderer, int inputCount, Texture **inputs, PrimitivePtr const &primitive, FrameBufferObjectPtr const &output );
-            
-            void setGlowMapSize( int size ) { _glowMapSize = size; }
-            int getGlowMapSize( void ) const { return _glowMapSize; }
-            
-            void setAmount( int value ) { _amount = value; }
-            int getAmount( void ) const { return _amount; }
-            
-        private:
-            void buildBlurBuffer( int width, int height );
-            void buildGlowBuffer( int width, int height );
-            void computeGlow( crimild::Renderer *renderer, Texture *srcImage, Primitive *primitive );
-            void computeBlur( crimild::Renderer *renderer, Texture *srcImage, Primitive *primitive );
-            void applyResult( crimild::Renderer *renderer, Texture *srcImage, Texture *glowMap, Primitive *primitive, FrameBufferObject *output );
-            
-            int _amount;
-            int _glowMapSize;
-            
-            FrameBufferObjectPtr _blurBuffer;
-            TexturePtr _blurMap;
-            
-            FrameBufferObjectPtr _glowMapBuffer;
-            TexturePtr _glowMap;
-            
-            AlphaStatePtr _alphaState;
-            DepthStatePtr _depthState;
+            virtual void compute( RendererPtr const &renderer, CameraPtr const &camera ) override;
+            virtual void apply( crimild::RendererPtr const &renderer, crimild::CameraPtr const &camera );
         };
         
     }

@@ -81,8 +81,6 @@ gl3::Renderer::Renderer( FrameBufferObjectPtr const &screenBuffer )
     addShaderProgram( "forward", crimild::alloc< ForwardRenderShaderProgram >() );
     addShaderProgram( "deferred", crimild::alloc< DeferredRenderShaderProgram >() );
     addShaderProgram( "deferred_compose", crimild::alloc< DeferredComposeRenderShaderProgram >() );
-//    addShaderProgram( "ssao", crimild::alloc< SSAOShaderProgram >() );
-//    addShaderProgram( "ssaoBlend", crimild::alloc< SSAOBlendShaderProgram >() );
     addShaderProgram( "blend", crimild::alloc< BlendShaderProgram >() );
     addShaderProgram( "blur", crimild::alloc< BlurShaderProgram >() );
     addShaderProgram( "gaussianBlur", crimild::alloc< GaussianBlurShaderProgram >() );

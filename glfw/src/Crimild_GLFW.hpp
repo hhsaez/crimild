@@ -42,8 +42,9 @@
 
 #include "Rendering/GL3/ImageEffects/DepthOfFieldImageEffect.hpp"
 #include "Rendering/GL3/ImageEffects/SSAOImageEffect.hpp"
-#include "Rendering/GL3/ImageEffects/GlowImageEffect.hpp"
+#include "Rendering/GL3/ImageEffects/EmissiveGlowImageEffect.hpp"
 #include "Rendering/GL3/ImageEffects/SepiaToneImageEffect.hpp"
+#include "Rendering/GL3/ImageEffects/BloomImageEffect.hpp"
 
 #include "Rendering/GL3/Library/FlatMaterial.hpp"
 #include "Rendering/GL3/Library/FlatShaderProgram.hpp"
@@ -53,7 +54,6 @@
 #include "Rendering/GL3/Library/PhongShaderProgram.hpp"
 #include "Rendering/GL3/Library/ScreenShaderProgram.hpp"
 #include "Rendering/GL3/Library/SepiaToneShaderProgram.hpp"
-#include "Rendering/GL3/Library/GlowShaderProgram.hpp"
 
 #include "SceneGraph/ParticleSystem.hpp"
 

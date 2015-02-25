@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,25 +25,37 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_GL3_SHADER_PROGRAMS_GLOW_
-#define CRIMILD_GL3_SHADER_PROGRAMS_GLOW_
+#ifndef CRIMILD_GL3_RENDERING_IMAGE_BLOOM_
+#define CRIMILD_GL3_RENDERING_IMAGE_BLOOM_
 
 #include <Crimild.hpp>
 
 namespace crimild {
+    
+    namespace gl3 {
+        
+        class BloomImageEffect : public ImageEffect {
+        public:
+        	BloomImageEffect( void );
+            BloomImageEffect( float brightFilter, float glowSize, float glowStrength, float glowScale );
+            virtual ~BloomImageEffect( void );
+            
+            virtual void compute( RendererPtr const &renderer, CameraPtr const &camera ) override;
+            virtual void apply( crimild::RendererPtr const &renderer, crimild::CameraPtr const &camera );
 
-	namespace gl3 {
+        private:
+        	void computeBrightPassFilter( RendererPtr const &renderer, CameraPtr const &camera );
+        	void computeGlowMap( RendererPtr const &renderer, CameraPtr const &camera );
 
-		class GlowShaderProgram : public ShaderProgram {
-		public:
-			GlowShaderProgram( void );
-			virtual ~GlowShaderProgram( void );
-		};
-
-		typedef SharedPointer< GlowShaderProgram > GlowShaderProgramPtr;
-
-	}
-
+        private:
+        	float _brightFilter;
+        	float _glowSize;
+        	float _glowStrength;
+        	float _glowScale;
+        };
+        
+    }
+    
 }
 
 #endif

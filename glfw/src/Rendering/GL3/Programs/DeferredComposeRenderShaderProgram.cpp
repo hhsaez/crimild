@@ -101,15 +101,24 @@ CRIMILD_TO_STRING(
         vec4 srcColor = colorBufferData;
         vec3 srcPosition = positionDepthBufferData.xyz;
         float srcDepth = positionDepthBufferData.a;
-        vec3 srcNormal = normalSpecularBufferData.xyz;
+        vec3 srcNormal = 2.0 * normalSpecularBufferData.xyz - 1.0;
         float srcSpecular = normalSpecularBufferData.a;
         float srcEmissive = vsNormalEmissiveBufferData.a;
         
         vec4 specularColor = vec4( srcSpecular, srcSpecular, srcSpecular, srcSpecular );
-        vec4 emissiveColor = vec4( srcEmissive, srcEmissive, srcEmissive, srcEmissive );
-        
+
+        if ( srcEmissive > 0.0 ) {
+            vFragColor = srcEmissive * srcColor;
+            return;
+        }
+
+        if ( uLightCount == 0 ) {
+            vFragColor = srcColor;
+            return;
+        }
+
         vec4 color = srcColor;
-        vFragColor = emissiveColor;
+        vFragColor = vec4( 0 );
         
         vec3 normal = normalize( srcNormal );
         for ( int i = 0; i < uLightCount; i++ ) {

@@ -41,6 +41,7 @@ namespace crimild {
         static AlphaStatePtr DISABLED;
         static AlphaStatePtr ENABLED;
         static AlphaStatePtr ENABLED_SRC_COLOR_ONLY;
+        static AlphaStatePtr ENABLED_ADDITIVE_BLEND;
         
 	public:
 		enum class SrcBlendFunc {
