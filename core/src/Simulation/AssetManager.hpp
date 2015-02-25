@@ -29,6 +29,7 @@
 #define CRIMILD_CORE_SIMULATION_ASSET_MANAGER_
 
 #include "Foundation/SharedObject.hpp"
+#include "Foundation/Macros.hpp"
 
 #include <memory>
 #include <map>
@@ -37,6 +38,8 @@
 namespace crimild {
 
     class AssetManager {
+        CRIMILD_DISALLOW_COPY_AND_ASSIGN( AssetManager )
+        
     public:
         AssetManager( void );
         virtual ~AssetManager( void );
