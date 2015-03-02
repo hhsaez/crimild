@@ -28,15 +28,15 @@
 #include "Node.hpp"
 #include "Group.hpp"
 
-#include "Boundings/SphereBoundingVolume.hpp"
+#include "Boundings/AABBBoundingVolume.hpp"
 
 using namespace crimild;
 
 Node::Node( std::string name )
 	: NamedObject( name ),
 	  _worldIsCurrent( false ),
-	  _localBound( crimild::alloc< SphereBoundingVolume >( Vector3f( 0.0f, 0.0f, 0.0f ), 0.5f ) ),
-	  _worldBound( crimild::alloc< SphereBoundingVolume >( Vector3f( 0.0f, 0.0f, 0.0f ), 0.5f ) )
+	  _localBound( crimild::alloc< AABBBoundingVolume >( Vector3f( 0.0f, 0.0f, 0.0f ), 0.5f ) ),
+	  _worldBound( crimild::alloc< AABBBoundingVolume >( Vector3f( 0.0f, 0.0f, 0.0f ), 0.5f ) )
 {
 
 }

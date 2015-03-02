@@ -43,22 +43,15 @@ namespace crimild {
 		virtual const Vector3f &getCenter( void ) const override { return _center; }
 		virtual float getRadius( void ) const override { return 0.0f; }
 
-		virtual const Vector3f &getRComponent( void ) const override { return _r; }
-		virtual const Vector3f &getSComponent( void ) const override { return _s; }
-		virtual const Vector3f &getTComponent( void ) const override { return _t; }
-
 	private:
 		Vector3f _center;
 		Plane3f _plane;
-		Vector3f _r;
-		Vector3f _s;
-		Vector3f _t;
 
 	public:
 		virtual void computeFrom( const BoundingVolumePtr &volume, const TransformationImpl &transform ) override;
 		virtual void computeFrom( const Vector3f *positions, unsigned int positionCount ) override;
 		virtual void computeFrom( const VertexBufferObjectPtr &vbo ) override;
-		virtual void computeFrom( const Vector3f &r, const Vector3f &s, const Vector3f &t ) override;
+		virtual void computeFrom( const Vector3f &min, const Vector3f &max ) override;
 
 	public:
 		virtual void expandToContain( const Vector3f &point ) override;

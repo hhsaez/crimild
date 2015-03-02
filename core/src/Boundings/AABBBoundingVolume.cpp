@@ -25,51 +25,53 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "SphereBoundingVolume.hpp"
+#include "AABBBoundingVolume.hpp"
 
 #include "Mathematics/Intersection.hpp"
 
 using namespace crimild;
 
-SphereBoundingVolume::SphereBoundingVolume( void )
+AABBBoundingVolume::AABBBoundingVolume( void )
 	: _sphere( Vector3f( 0.0f, 0.0f, 0.0f ), 1.0f )
 {
-
+	setMin( -Numericf::COS_45 * getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
+	setMax( +Numericf::COS_45 * getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
 }
 
-SphereBoundingVolume::SphereBoundingVolume( const Vector3f &center, float radius )
+AABBBoundingVolume::AABBBoundingVolume( const Vector3f &center, float radius )
 	: _sphere( center, radius )
 {
-
+	setMin( -Numericf::COS_45 * getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
+	setMax( +Numericf::COS_45 * getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
 }
 
-SphereBoundingVolume::SphereBoundingVolume( const Sphere3f &sphere )
+AABBBoundingVolume::AABBBoundingVolume( const Sphere3f &sphere )
 	: _sphere( sphere )
 {
-
+	setMin( -Numericf::COS_45 * getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
+	setMax( +Numericf::COS_45 * getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
 }
 
-SphereBoundingVolume::~SphereBoundingVolume( void )
+AABBBoundingVolume::~AABBBoundingVolume( void )
 {
 
 }
 
-void SphereBoundingVolume::computeFrom( const BoundingVolumePtr &volume, const TransformationImpl &transformation )
+void AABBBoundingVolume::computeFrom( const BoundingVolumePtr &volume, const TransformationImpl &transformation )
 {
-	Vector3f newCenter;
-	transformation.applyToPoint( volume->getCenter(), newCenter );
-	_sphere.setCenter( newCenter );
-	_sphere.setRadius( volume->getRadius() * transformation.getScale() );
+	Vector3f p0, p1;
+	transformation.applyToPoint( volume->getCenter() + volume->getMin(), p0 );
+	transformation.applyToPoint( volume->getCenter() + volume->getMax(), p1 );
 
-	setMin( -getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
-	setMax( +getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
+	Vector3f min( Numericf::min( p0[ 0 ], p1[ 0 ] ), Numericf::min( p0[ 1 ], p1[ 1 ] ), Numericf::min( p0[ 2 ], p1[ 2 ] ) );
+	Vector3f max( Numericf::max( p0[ 0 ], p1[ 0 ] ), Numericf::max( p0[ 1 ], p1[ 1 ] ), Numericf::max( p0[ 2 ], p1[ 2 ] ) );
+
+	computeFrom( min, max );
 }
 
-void SphereBoundingVolume::computeFrom( const Vector3f *positions, unsigned int positionCount )
+void AABBBoundingVolume::computeFrom( const Vector3f *positions, unsigned int positionCount )
 {
 	if ( positionCount == 0 || positions == NULL ) {
-		_sphere.setCenter( Vector3f( 0.0f, 0.0f, 0.0f ) );
-		_sphere.setRadius( 1.0f );
 		return;
 	}
 
@@ -88,71 +90,53 @@ void SphereBoundingVolume::computeFrom( const Vector3f *positions, unsigned int 
 		if ( pos[ 2 ] < min[ 2 ] ) min[ 2 ] = pos[ 2 ];
 	}
 
+	computeFrom( min, max );
+}
+
+void AABBBoundingVolume::computeFrom( const VertexBufferObjectPtr &vbo )
+{
+	if ( vbo->getVertexCount() == 0 || !vbo->getVertexFormat().hasPositions() ) {
+		return;
+	}
+
+	Vector3f max = vbo->getPositionAt( 0 );
+	Vector3f min = vbo->getPositionAt( 0 );
+	for ( unsigned int i = 1; i < vbo->getVertexCount(); i++ ) {
+		Vector3f pos = vbo->getPositionAt( i );
+
+		if ( pos[ 0 ] > max[ 0 ] ) max[ 0 ] = pos[ 0 ];
+		if ( pos[ 1 ] > max[ 1 ] ) max[ 1 ] = pos[ 1 ];
+		if ( pos[ 2 ] > max[ 2 ] ) max[ 2 ] = pos[ 2 ];
+
+		if ( pos[ 0 ] < min[ 0 ] ) min[ 0 ] = pos[ 0 ];
+		if ( pos[ 1 ] < min[ 1 ] ) min[ 1 ] = pos[ 1 ];
+		if ( pos[ 2 ] < min[ 2 ] ) min[ 2 ] = pos[ 2 ];
+	}
+
+	computeFrom( min, max );
+}
+
+void AABBBoundingVolume::computeFrom( const Vector3f &min, const Vector3f &max ) 
+{
 	_sphere.setCenter( 0.5f * ( max + min ) );
-	_sphere.setRadius( Numericf::max( 0.1f, ( max - _sphere.getCenter() ).getMagnitude() ) );
+	_sphere.setRadius( Numericf::max( 0.01f, ( max - _sphere.getCenter() ).getMagnitude() ) );
 
-	setMin( -getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
-	setMax( +getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
+	setMin( min - getCenter() );
+	setMax( max - getCenter() );
 }
 
-void SphereBoundingVolume::computeFrom( const VertexBufferObjectPtr  &vbo )
+void AABBBoundingVolume::expandToContain( const Vector3f &p )
 {
-	if ( vbo->getVertexCount() == 0 || !vbo->getVertexFormat().hasPositions() ) {
-		_sphere.setCenter( Vector3f( 0.0f, 0.0f, 0.0f ) );
-		_sphere.setRadius( 0.5f );
-		return;
-	}
+	Vector3f diff = p - getCenter();
+	Vector3f min( Numericf::min( diff[ 0 ], getMin()[ 0 ] ), Numericf::min( diff[ 1 ], getMin()[ 1 ] ), Numericf::min( diff[ 2 ], getMin()[ 2 ] ) );
+	Vector3f max( Numericf::max( diff[ 0 ], getMin()[ 0 ] ), Numericf::max( diff[ 1 ], getMin()[ 1 ] ), Numericf::max( diff[ 2 ], getMin()[ 2 ] ) );
 
-	Vector3f max = vbo->getPositionAt( 0 );
-	Vector3f min = vbo->getPositionAt( 0 );
-	for ( unsigned int i = 1; i < vbo->getVertexCount(); i++ ) {
-		Vector3f pos = vbo->getPositionAt( i );
-
-		if ( pos[ 0 ] > max[ 0 ] ) max[ 0 ] = pos[ 0 ];
-		if ( pos[ 1 ] > max[ 1 ] ) max[ 1 ] = pos[ 1 ];
-		if ( pos[ 2 ] > max[ 2 ] ) max[ 2 ] = pos[ 2 ];
-
-		if ( pos[ 0 ] < min[ 0 ] ) min[ 0 ] = pos[ 0 ];
-		if ( pos[ 1 ] < min[ 1 ] ) min[ 1 ] = pos[ 1 ];
-		if ( pos[ 2 ] < min[ 2 ] ) min[ 2 ] = pos[ 2 ];
-	}
-
-	Vector3f center = 0.5f * ( max + min );
-
-	float radius = 0.0f;
-	for ( unsigned int i = 0; i < vbo->getVertexCount(); i++ ) {
-		Vector3f pos = vbo->getPositionAt( i );
-		float mag2 = ( pos - center ).getSquaredMagnitude();
-		if ( mag2 > radius * radius ) {
-			radius = sqrt( mag2 );
-		}
-	}
-
-	_sphere.setCenter( center );
-	_sphere.setRadius( radius );
-
-	setMin( -getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
-	setMax( +getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
+	computeFrom( min, max );
 }
 
-void SphereBoundingVolume::computeFrom( const Vector3f &min, const Vector3f &max ) 
-{
-	// TODO
-}
-
-void SphereBoundingVolume::expandToContain( const Vector3f &point )
-{
-	_sphere.expandToContain( Sphere3f( point, 0.0f ) );
-
-	setMin( -getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
-	setMax( +getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
-}
-
-void SphereBoundingVolume::expandToContain( const Vector3f *positions, unsigned int positionCount )
+void AABBBoundingVolume::expandToContain( const Vector3f *positions, unsigned int positionCount )
 {
 	if ( positionCount == 0 || positions == NULL ) {
-		_sphere.setCenter( Vector3f( 0.0f, 0.0f, 0.0f ) );
-		_sphere.setRadius( 1.0f );
 		return;
 	}
 
@@ -175,11 +159,9 @@ void SphereBoundingVolume::expandToContain( const Vector3f *positions, unsigned 
 	expandToContain( min );
 }
 
-void SphereBoundingVolume::expandToContain( const VertexBufferObjectPtr &vbo )
+void AABBBoundingVolume::expandToContain( const VertexBufferObjectPtr &vbo )
 {
 	if ( vbo->getVertexCount() == 0 || !vbo->getVertexFormat().hasPositions() ) {
-		_sphere.setCenter( Vector3f( 0.0f, 0.0f, 0.0f ) );
-		_sphere.setRadius( 1.0f );
 		return;
 	}
 
@@ -202,52 +184,54 @@ void SphereBoundingVolume::expandToContain( const VertexBufferObjectPtr &vbo )
 	expandToContain( min );
 }
 
-void SphereBoundingVolume::expandToContain( const BoundingVolumePtr &input )
+void AABBBoundingVolume::expandToContain( const BoundingVolumePtr &input )
 {
-	_sphere.expandToContain( Sphere3f( input->getCenter(), input->getRadius() ) );
-
-	setMin( -getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
-	setMax( +getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
+	expandToContain( input->getCenter() + input->getMin() );
+	expandToContain( input->getCenter() + input->getMax() );
 }
 
-int SphereBoundingVolume::whichSide( const Plane3f &plane ) const
+int AABBBoundingVolume::whichSide( const Plane3f &plane ) const
 {
 	return _sphere.whichSide( plane );
 }
 
-bool SphereBoundingVolume::contains( const Vector3f &point ) const
+bool AABBBoundingVolume::contains( const Vector3f &point ) const
 {
 	float centerDiffSqr = ( _sphere.getCenter() - point ).getSquaredMagnitude();
 	float radiusSqr = _sphere.getRadius() * _sphere.getRadius();
 	return ( centerDiffSqr < radiusSqr );
 }
 
-bool SphereBoundingVolume::testIntersection( const Ray3f &ray ) const
+bool AABBBoundingVolume::testIntersection( const Ray3f &ray ) const
 {
-	return Intersection::test( _sphere, ray );
+	if ( !Intersection::test( _sphere, ray ) ) {
+		return false;
+	}
+
+	return Intersection::test( getCenter() + getMin(), getCenter() + getMax(), ray );
 }
 
-bool SphereBoundingVolume::testIntersection( const BoundingVolumePtr &other ) const
+bool AABBBoundingVolume::testIntersection( const BoundingVolumePtr &other ) const
 {
 	return other->testIntersection( _sphere );
 }
 
-bool SphereBoundingVolume::testIntersection( const Sphere3f &sphere ) const
+bool AABBBoundingVolume::testIntersection( const Sphere3f &sphere ) const
 {
 	return Intersection::test( _sphere, sphere );
 }
 
-bool SphereBoundingVolume::testIntersection( const Plane3f &plane ) const
+bool AABBBoundingVolume::testIntersection( const Plane3f &plane ) const
 {
 	return whichSide( plane ) == 0;
 }
 
-void SphereBoundingVolume::resolveIntersection( const BoundingVolumePtr &other, TransformationImpl &result ) const
+void AABBBoundingVolume::resolveIntersection( const BoundingVolumePtr &other, TransformationImpl &result ) const
 {
 	other->resolveIntersection( _sphere, result );
 }
 
-void SphereBoundingVolume::resolveIntersection( const Sphere3f &other, TransformationImpl &result ) const
+void AABBBoundingVolume::resolveIntersection( const Sphere3f &other, TransformationImpl &result ) const
 {
 	Vector3f direction = other.getCenter() - _sphere.getCenter();
 	float d = direction.getMagnitude();
@@ -255,7 +239,8 @@ void SphereBoundingVolume::resolveIntersection( const Sphere3f &other, Transform
 	result.setTranslate( direction.normalize() * diff );
 }
 
-void SphereBoundingVolume::resolveIntersection( const Plane3f &plane, TransformationImpl &result ) const
+void AABBBoundingVolume::resolveIntersection( const Plane3f &plane, TransformationImpl &result ) const
 {
+
 }
 

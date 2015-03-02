@@ -47,6 +47,12 @@ namespace crimild {
 		static const PRECISION DEG_TO_RAD;
 		static const PRECISION RAD_TO_DEG;
 
+		static const PRECISION COS_0;
+		static const PRECISION COS_45;
+		static const PRECISION COS_90;
+		static const PRECISION COS_135;
+		static const PRECISION COS_180;
+
 		static bool isZero( PRECISION number )
 		{
 			return ( std::fabs( number ) <= ZERO_TOLERANCE );
@@ -166,6 +172,18 @@ namespace crimild {
 		{
 			return static_cast< PRECISION >( std::tan( angle ) );
 		}
+
+		static void swap( PRECISION &a, PRECISION &b )
+		{
+			PRECISION temp = a;
+			a = b;
+			b = temp;
+		}
+
+		static PRECISION sqrt( double n )
+		{
+			return std::sqrt( n );
+		}
 	};
 
 	template< typename T > const T Numeric< T >::ZERO_TOLERANCE = static_cast< T >( 1e-06 );
@@ -173,9 +191,16 @@ namespace crimild {
 	template< typename T > const T Numeric< T >::HALF_PI = static_cast< T >( 3.1415926535897932384626433832795 / 2.0 );
 	template< typename T > const T Numeric< T >::TWO_PI = static_cast< T >( 3.1415926535897932384626433832795 * 2 );
 	template< typename T > const T Numeric< T >::SQRT_TWO = static_cast< T >( std::sqrt( 2 ) );
-	template< typename T > const T Numeric< T >::SQRT_TWO_DIV_TWO = static_cast< T >( 0.5 * std::sqrt( 2 ) );
+	template< typename T > const T Numeric< T >::SQRT_TWO_DIV_TWO = static_cast< T >( 0.5 * Numeric< double >::sqrt( 2 ) );
+	
 	template< typename T > const T Numeric< T >::DEG_TO_RAD = static_cast< T >( 3.1415926535897932384626433832795 / 180.0 );
 	template< typename T > const T Numeric< T >::RAD_TO_DEG = static_cast< T >( 180.0 / 3.1415926535897932384626433832795 );
+
+	template< typename T > const T Numeric< T >::COS_0 = static_cast< T >( 1.0 );
+	template< typename T > const T Numeric< T >::COS_45 = static_cast< T >( 0.5 * Numeric< double >::sqrt( 2.0 ) );
+	template< typename T > const T Numeric< T >::COS_90 = static_cast< T >( 0.0 );
+	template< typename T > const T Numeric< T >::COS_135 = static_cast< T >( -0.5 * Numeric< double >::sqrt( 2.0 ) );
+	template< typename T > const T Numeric< T >::COS_180 = static_cast< T >( -1.0 );
 
 	typedef Numeric< int > Numerici;
 	typedef Numeric< float > Numericf;

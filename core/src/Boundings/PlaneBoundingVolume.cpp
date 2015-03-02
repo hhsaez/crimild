@@ -32,20 +32,16 @@ using namespace crimild;
 
 PlaneBoundingVolume::PlaneBoundingVolume( void )
 	: _center( 0.0f, 0.0f, 0.0f ),
-      _plane( Plane3f( Vector3f( 0.0f, 1.0f, 0.0f ), 0.0f ) ),
-      _r( 0.0f, 0.0f, 0.0f ),
-      _s( 0.0f, 0.0f, 0.0f ),
-      _t( 0.0f, 0.0f, 0.0f )
+      _plane( Plane3f( Vector3f( 0.0f, 1.0f, 0.0f ), 0.0f ) )
 {
+
 }
 
 PlaneBoundingVolume::PlaneBoundingVolume( const Plane3f &plane )
 	: _center( 0.0f, 0.0f, 0.0f ),
-      _plane( plane ),
-      _r( 0.0f, 0.0f, 0.0f ),
-      _s( 0.0f, 0.0f, 0.0f ),
-      _t( 0.0f, 0.0f, 0.0f )
+      _plane( plane )
 {
+
 }
 
 PlaneBoundingVolume::~PlaneBoundingVolume( void )
@@ -55,34 +51,42 @@ PlaneBoundingVolume::~PlaneBoundingVolume( void )
 
 void PlaneBoundingVolume::computeFrom( const BoundingVolumePtr &volume, const TransformationImpl &transformation )
 {
+
 }
 
 void PlaneBoundingVolume::computeFrom( const Vector3f *positions, unsigned int positionCount )
 {
+
 }
 
 void PlaneBoundingVolume::computeFrom( const VertexBufferObjectPtr &vbo )
 {
+
 }
 
-void PlaneBoundingVolume::computeFrom( const Vector3f &r, const Vector3f &s, const Vector3f &t ) 
+void PlaneBoundingVolume::computeFrom( const Vector3f &min, const Vector3f &max ) 
 {
+
 }
 
 void PlaneBoundingVolume::expandToContain( const Vector3f &point )
 {
+
 }
 
 void PlaneBoundingVolume::expandToContain( const Vector3f *positions, unsigned int positionCount )
 {
+
 }
 
 void PlaneBoundingVolume::expandToContain( const VertexBufferObjectPtr  &vbo )
 {
+
 }
 
 void PlaneBoundingVolume::expandToContain( const BoundingVolumePtr &input )
 {
+	
 }
 
 int PlaneBoundingVolume::whichSide( const Plane3f &plane ) const

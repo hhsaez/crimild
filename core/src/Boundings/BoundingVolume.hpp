@@ -55,15 +55,22 @@ namespace crimild {
 		virtual const Vector3f &getCenter( void ) const = 0;
 		virtual float getRadius( void ) const = 0;
 
-		virtual const Vector3f &getRComponent( void ) const = 0;
-		virtual const Vector3f &getSComponent( void ) const = 0;
-		virtual const Vector3f &getTComponent( void ) const = 0;
+		const Vector3f &getMin( void ) const { return _min; }
+		const Vector3f &getMax( void ) const { return _max; }
+
+	protected:
+		void setMin( const Vector3f &min ) { _min = min; }
+		void setMax( const Vector3f &max ) { _max = max; }
+
+	private:
+		Vector3f _min;
+		Vector3f _max;
 
 	public:
 		virtual void computeFrom( const BoundingVolumePtr &volume, const TransformationImpl &transform ) = 0;
 		virtual void computeFrom( const Vector3f *positions, unsigned int positionCount ) = 0;
 		virtual void computeFrom( const VertexBufferObjectPtr &vbo ) = 0;
-		virtual void computeFrom( const Vector3f &r, const Vector3f &s, const Vector3f &t ) = 0;
+		virtual void computeFrom( const Vector3f &min, const Vector3f &max ) = 0;
 
 	public:
 		virtual void expandToContain( const Vector3f &point ) = 0;

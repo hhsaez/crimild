@@ -25,21 +25,21 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_BOUNDINGS_BOUNDING_VOLUME_SPHERE_
-#define CRIMILD_CORE_BOUNDINGS_BOUNDING_VOLUME_SPHERE_
+#ifndef CRIMILD_CORE_BOUNDINGS_BOUNDING_VOLUME_AABB_
+#define CRIMILD_CORE_BOUNDINGS_BOUNDING_VOLUME_AABB_
 
 #include "BoundingVolume.hpp"
 
 namespace crimild {
 
-	class SphereBoundingVolume : public BoundingVolume {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( SphereBoundingVolume );
+	class AABBBoundingVolume : public BoundingVolume {
+		CRIMILD_DISALLOW_COPY_AND_ASSIGN( AABBBoundingVolume );
 
 	public:
-		SphereBoundingVolume( void );
-		SphereBoundingVolume( const Vector3f &center, float radius );
-		explicit SphereBoundingVolume( const Sphere3f &sphere );
-		virtual ~SphereBoundingVolume( void );
+		AABBBoundingVolume( void );
+		AABBBoundingVolume( const Vector3f &center, float radius );
+		explicit AABBBoundingVolume( const Sphere3f &sphere );
+		virtual ~AABBBoundingVolume( void );
 
 		virtual const Vector3f &getCenter( void ) const override { return _sphere.getCenter(); }
 		virtual float getRadius( void ) const override { return _sphere.getRadius(); }
@@ -74,7 +74,7 @@ namespace crimild {
 		virtual void resolveIntersection( const Plane3f &plane, TransformationImpl &result ) const;
 	};
     
-    using SphereBoundingVolumePtr = SharedPointer< SphereBoundingVolume >;
+    using AABBBoundingVolumePtr = SharedPointer< AABBBoundingVolume >;
 
 }
 

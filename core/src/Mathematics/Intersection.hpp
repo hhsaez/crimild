@@ -168,6 +168,30 @@ namespace crimild {
 			return -1;
 		}
 
+		template< typename T >
+		static bool test( const Vector< 3, T > &min, const Vector< 3, T > &max, const Ray< 3, T > &ray )
+		{
+			double tx1 = ( min[ 0 ] - ray.getOrigin()[ 0 ] ) / ray.getDirection()[ 0 ];
+		  	double tx2 = ( max[ 0 ] - ray.getOrigin()[ 0 ] ) / ray.getDirection()[ 0 ];
+
+		  	double tmin = Numericf::min( tx1, tx2 );
+		  	double tmax = Numericf::max( tx1, tx2 );
+
+		  	double ty1 = ( min[ 1 ] - ray.getOrigin()[ 1 ] ) / ray.getDirection()[ 1 ];
+		  	double ty2 = ( max[ 1 ] - ray.getOrigin()[ 1 ] ) / ray.getDirection()[ 1 ];
+
+		  	tmin = Numericf::max( tmin, Numericf::min( ty1, ty2 ) );
+		  	tmax = Numericf::min( tmax, Numericf::max( ty1, ty2 ) );
+
+		  	double tz1 = ( min[ 2 ] - ray.getOrigin()[ 2 ] ) / ray.getDirection()[ 2 ];
+		  	double tz2 = ( max[ 2 ] - ray.getOrigin()[ 2 ] ) / ray.getDirection()[ 2 ];
+
+		  	tmin = Numericf::max( tmin, Numericf::min( tz1, tz2 ) );
+		  	tmax = Numericf::min( tmax, Numericf::max( tz1, tz2 ) );
+
+			return tmax >= Numericf::max( 0.0, tmin );
+		}
+
 	};
 
 }
