@@ -35,8 +35,8 @@ using namespace crimild;
 Node::Node( std::string name )
 	: NamedObject( name ),
 	  _worldIsCurrent( false ),
-	  _localBound( crimild::alloc< AABBBoundingVolume >( Vector3f( 0.0f, 0.0f, 0.0f ), 0.5f ) ),
-	  _worldBound( crimild::alloc< AABBBoundingVolume >( Vector3f( 0.0f, 0.0f, 0.0f ), 0.5f ) )
+	  _localBound( crimild::alloc< AABBBoundingVolume >( Vector3f( 0.0f, 0.0f, 0.0f ), 1.0f ) ),
+	  _worldBound( crimild::alloc< AABBBoundingVolume >( Vector3f( 0.0f, 0.0f, 0.0f ), 1.0f ) )
 {
 
 }
