@@ -76,11 +76,13 @@ void LoadSceneTask::stop( void )
 void LoadSceneTask::load( void )
 {
 	// clear current scene
-    Simulation::getInstance().setScene( nullptr );
+    Simulation::getInstance()->setScene( nullptr );
+    AssetManager::getInstance()->clear();
+    MessageQueue::getInstance().discardAllMessages();
 
 	getBuilder()->reset();
 	auto scene = getBuilder()->fromFile( FileSystem::getInstance().pathForResource( _sceneFileName ) );
-	Simulation::getInstance().setScene( scene );
+	Simulation::getInstance()->setScene( scene );
 
     MessageQueue::getInstance().pushMessage( crimild::alloc< SceneLoadedMessage >() );
 }

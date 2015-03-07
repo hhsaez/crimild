@@ -58,7 +58,7 @@ void UpdateTimeTask::update( void )
 {
 	CRIMILD_PROFILE( "Update Time" )
 	
-	Time &t = Simulation::getInstance().getSimulationTime();
+	Time &t = Simulation::getInstance()->getSimulationTime();
 	double currentTime = glfwGetTime();
 	t.update( currentTime );
 }
@@ -75,7 +75,7 @@ void UpdateTimeTask::handleMessage( SceneLoadedMessagePtr const & )
 
 void UpdateTimeTask::resetTime( void )
 {
-	Time &t = Simulation::getInstance().getSimulationTime();
+	Time &t = Simulation::getInstance()->getSimulationTime();
 	double currentTime = glfwGetTime();
 	t.reset( currentTime );
 }

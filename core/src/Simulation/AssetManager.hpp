@@ -30,6 +30,7 @@
 
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/Macros.hpp"
+#include "Foundation/Singleton.hpp"
 
 #include <memory>
 #include <map>
@@ -37,7 +38,7 @@
 
 namespace crimild {
 
-    class AssetManager {
+    class AssetManager : public Singleton< AssetManager > {
         CRIMILD_DISALLOW_COPY_AND_ASSIGN( AssetManager )
         
     public:

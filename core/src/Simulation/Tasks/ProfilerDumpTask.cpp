@@ -29,14 +29,14 @@ void ProfilerDumpTask::start( void )
 
 void ProfilerDumpTask::update( void )
 {
-	Profiler::getInstance().dump();
+	Profiler::getInstance()->dump();
 
 	static double accum = 0.0;
 	
-	auto t = Simulation::getInstance().getSimulationTime();
+	auto t = Simulation::getInstance()->getSimulationTime();
 	accum += t.getDeltaTime() * 100.0;
 	if ( accum >= 1.0 ) {
-		Profiler::getInstance().resetAll();
+		Profiler::getInstance()->resetAll();
 		accum = 0.0;
 	}
 }

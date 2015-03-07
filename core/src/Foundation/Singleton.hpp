@@ -38,9 +38,9 @@ namespace crimild {
 		static T *_instance;
 	
 	public:
-		static T &getInstance( void )
+		static T *getInstance( void )
 		{
-			return *_instance;
+			return _instance;
 		}
 
 	protected:

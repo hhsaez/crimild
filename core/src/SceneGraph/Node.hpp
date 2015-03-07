@@ -44,6 +44,7 @@ namespace crimild {
     class Node;
     
     using NodePtr = SharedPointer< Node >;
+    using NodeWPtr = WeakPointer< Node >;
 
 	/**
 		\brief Base class for any object that can be attached to the scene graph
@@ -57,9 +58,9 @@ namespace crimild {
 		virtual ~Node( void );
 
 	public:
-		bool hasParent( void ) const { return !_parent.expired(); }
+		bool hasParent( void ) const { return pointerIsValid( _parent ); }
 
-		NodePtr getParent( void ) { return _parent.lock(); }
+		NodePtr getParent( void ) { return getSharedPointer( _parent ); }
 
 		void setParent( NodePtr const &parent ) { _parent = parent; }
 
@@ -68,7 +69,7 @@ namespace crimild {
 		NodePtr getRootParent( void );
 
 		template< class NodeClass >
-        SharedPointer< NodeClass > getParent( void ) { return std::static_pointer_cast< NodeClass >( _parent.lock() ); }
+        SharedPointer< NodeClass > getParent( void ) { return std::static_pointer_cast< NodeClass >( getSharedPointer( _parent ) ); }
 
 	private:
 		/**
@@ -77,7 +78,7 @@ namespace crimild {
 			Every node if linked with its parent in the node hierarchy (provided
 			one is available). 
 		*/
-        std::weak_ptr< Node > _parent;
+        NodeWPtr _parent;
 
 	public:
 		void perform( NodeVisitor &visitor );

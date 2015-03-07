@@ -114,7 +114,7 @@ NodePtr SceneBuilder::buildNode( ScriptContext::Iterable &it, GroupPtr const &pa
 		if ( it.test( "renderOnScreen" ) ) text->getComponent< RenderStateComponent >()->setRenderOnScreen( it.eval< bool >( "renderOnScreen" ) );
 
 		auto material = text->getMaterial();
-		material->setProgram( Simulation::getInstance().getRenderer()->getShaderProgram( "sdf" ) );
+		material->setProgram( Simulation::getInstance()->getRenderer()->getShaderProgram( "sdf" ) );
 		if ( it.test( "textColor" ) ) material->setDiffuse( it.eval< RGBAColorf >( "textColor" ) );
 		material->getDepthState()->setEnabled( false );
 		if ( it.test( "enableDepthTest" ) ) material->getDepthState()->setEnabled( it.eval< bool >( "enableDepthTest" ) );
@@ -128,12 +128,11 @@ NodePtr SceneBuilder::buildNode( ScriptContext::Iterable &it, GroupPtr const &pa
 			Log::Debug << "Building node" << Log::End;
 			std::string filename = it.eval< std::string >( NODE_FILENAME );
 			
-			auto &assets = Simulation::getInstance().getAssets();
-			auto scene = assets.get< Group >( filename );
+			auto scene = AssetManager::getInstance()->get< Group >( filename );
 			if ( scene == nullptr ) {
 				OBJLoader loader( FileSystem::getInstance().pathForResource( filename ) );				
 				scene = loader.load();
-				assets.add( filename, scene );
+				AssetManager::getInstance()->add( filename, scene );
 				group = scene;
 			}
 			else {

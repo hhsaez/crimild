@@ -100,7 +100,7 @@ TEST( SimulationTest, run )
 		.WillRepeatedly( ::testing::Invoke( [&]( void ) mutable {
 			loopCount++;
 			if ( loopCount >= 10 ) {
-				Simulation::getInstance().stop();				
+				Simulation::getInstance()->stop();				
 			}
 		}));
 	EXPECT_CALL( *( task.get() ), stop() )

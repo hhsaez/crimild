@@ -46,7 +46,7 @@ BeginRenderTask::~BeginRenderTask( void )
 
 void BeginRenderTask::start( void )
 {
-    auto renderer = Simulation::getInstance().getRenderer();
+    auto renderer = Simulation::getInstance()->getRenderer();
 	if ( renderer != nullptr ) {
 		renderer->configure();
 	}
@@ -56,7 +56,7 @@ void BeginRenderTask::update( void )
 {
 	CRIMILD_PROFILE( "Begin Render" );
 	
-    auto renderer = Simulation::getInstance().getRenderer();
+    auto renderer = Simulation::getInstance()->getRenderer();
 	if ( renderer != nullptr ) {
 		renderer->beginRender();
 		renderer->clearBuffers();

@@ -36,6 +36,9 @@ namespace crimild {
     template< typename T >
     using SharedPointer = std::shared_ptr< T >;
 
+    template< typename T >
+    using WeakPointer = std::weak_ptr< T >;
+
     template< typename T, typename... Args >
     SharedPointer< T > alloc( Args &&... args )
     {
@@ -49,6 +52,24 @@ namespace crimild {
     UniquePointer< T > allocUnique( Args &&... args )
     {
         return std::unique_ptr< T >( new T( std::forward< Args >( args )... ) );        
+    }
+
+    template< typename T >
+    bool pointerIsValid( WeakPointer< T > const &ptr )
+    {
+        return !ptr.expired();
+    }
+
+    template< typename T >
+    WeakPointer< T > getWeakPointer( SharedPointer< T > const &ptr )
+    {
+        return ptr;
+    }
+
+    template< typename T >
+    SharedPointer< T > getSharedPointer( WeakPointer< T > const &ptr )
+    {
+        return ptr.lock();
     }
     
 }

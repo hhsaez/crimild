@@ -60,7 +60,7 @@ void WindowTask::update( void )
 	if ( !glfwWindowShouldClose( _window ) ) {
 		glfwSwapBuffers( _window );
 
-        Time &t = Simulation::getInstance().getSimulationTime();
+        Time &t = Simulation::getInstance()->getSimulationTime();
         windowTime.update( t.getCurrentTime() );
 
 #if 1
@@ -74,7 +74,7 @@ void WindowTask::update( void )
 #endif
 	}
 	else {
-		Simulation::getInstance().stop();
+		Simulation::getInstance()->stop();
 	}
 }
 

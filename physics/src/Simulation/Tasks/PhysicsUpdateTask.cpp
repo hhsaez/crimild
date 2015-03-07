@@ -48,15 +48,15 @@ PhysicsUpdateTask::~PhysicsUpdateTask( void )
 
 void PhysicsUpdateTask::start( void )
 {
-	float gx = Simulation::getInstance().getSettings().get( "physics.gravity.x", 0.0f );
-	float gy = Simulation::getInstance().getSettings().get( "physics.gravity.y", -9.8f );
-	float gz = Simulation::getInstance().getSettings().get( "physics.gravity.z", 0.0f );
+	float gx = Simulation::getInstance()->getSettings().get( "physics.gravity.x", 0.0f );
+	float gy = Simulation::getInstance()->getSettings().get( "physics.gravity.y", -9.8f );
+	float gz = Simulation::getInstance()->getSettings().get( "physics.gravity.z", 0.0f );
 	PhysicsContext::getInstance().setGravity( Vector3f( gx, gy, gz ) );
 }
 
 void PhysicsUpdateTask::update( void )
 {
-	const Time &t = Simulation::getInstance().getSimulationTime();
+	const Time &t = Simulation::getInstance()->getSimulationTime();
 
 	_accumulator += t.getDeltaTime();
 
