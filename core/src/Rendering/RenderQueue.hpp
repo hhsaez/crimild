@@ -39,14 +39,14 @@
 #include "Material.hpp"
 
 #include <functional>
-#include <list>
+#include <vector>
 
 namespace crimild {
 
     class RenderQueue : public SharedObject {
     public:
         using GeometryContext = std::pair< GeometryPtr, TransformationImpl >;
-        using PrimitiveMap = std::map< PrimitivePtr, std::list< GeometryContext >>;
+        using PrimitiveMap = std::map< PrimitivePtr, std::vector< GeometryContext >>;
         using MaterialMap = std::map< MaterialPtr, PrimitiveMap >;
 
     public:
@@ -75,7 +75,7 @@ namespace crimild {
         Matrix4f _viewMatrix;
         Matrix4f _projectionMatrix;
         
-        std::list< LightPtr > _lights;
+        std::vector< LightPtr > _lights;
 
         MaterialMap _opaqueObjects;
         MaterialMap _translucentObjects;

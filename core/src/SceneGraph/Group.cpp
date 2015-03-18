@@ -57,45 +57,32 @@ void Group::attachNode( NodePtr const &node )
 	}
 
 	node->setParent( getShared< Group >() );
-	_nodes.push_back( node );
+
+	_nodes.add( node );
 }
 
 void Group::detachNode( NodePtr const &node )
 {
-    auto ns = _nodes;
-    for ( auto it : ns ) {
-        if ( it == node ) {
-            node->setParent( nullptr );
-            _nodes.remove( it );
-            return;
-        }
-    }
+	if ( node->getParent().get() == this ) {
+		node->setParent( nullptr );
+		_nodes.remove( node );
+	}
 }
 
 void Group::detachAllNodes( void )
 {
-    auto ns = _nodes;
-	for ( auto node : ns ) {
-		node->setParent( nullptr );
-	}
+	_nodes.foreach( []( NodePtr const &node ) { node->setParent( nullptr ); } );
 	_nodes.clear();
 }
 
 NodePtr Group::getNodeAt( unsigned int index )
 {
-	auto it = _nodes.begin();
-	std::advance( it, index );
-	return *it;
+	return _nodes.get( index );
 }
 
 void Group::foreachNode( std::function< void( NodePtr const & ) > callback )
 {
-	auto nodes = _nodes;
-    for ( auto node : nodes ) {
-        if ( node != nullptr ) {
-            callback ( node );
-        }
-    }
+	return _nodes.foreach( callback );
 }
 
 void Group::accept( NodeVisitor &visitor )

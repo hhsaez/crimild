@@ -67,7 +67,7 @@ void RenderQueue::push( MaterialPtr const &material, PrimitivePtr const &primiti
     if ( renderOnScreen ) {
         _screenObjects[ material ][ primitive ].push_back( std::make_pair( geometry, world ) );
     }
-    else if ( material->getAlphaState()->isEnabled() ) {
+    else if ( material->getAlphaState()->isEnabled() || material->getProgram() != nullptr ) {
         _translucentObjects[ material ][ primitive ].push_back( std::make_pair( geometry, world ) );
     }
     else {

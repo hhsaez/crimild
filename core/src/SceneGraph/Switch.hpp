@@ -43,7 +43,7 @@ namespace crimild {
         void selectNextNode( void );
         
     private:
-        std::list< NodePtr >::iterator _current;
+        int _currentIndex = 0;
 	};
     
 }

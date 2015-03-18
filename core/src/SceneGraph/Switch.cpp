@@ -32,7 +32,7 @@ using namespace crimild;
 Switch::Switch( std::string name )
     : Group( name )
 {
-    _current = std::end( _nodes );
+
 }
 
 Switch::~Switch( void )
@@ -41,29 +41,27 @@ Switch::~Switch( void )
 
 void Switch::foreachNode( std::function< void( NodePtr const & ) > callback )
 {
-    if ( hasNodes() && _current != std::end( _nodes ) ) {
-        callback( *_current );
+    if ( !hasNodes() ) {
+        return;
+    }
+
+    auto current = getNodeAt( _currentIndex );
+    if ( current != nullptr ) {
+        callback( current );
     }
 }
 
 void Switch::selectNextNode( void )
 {
-    if ( hasNodes() && _current != std::end( _nodes ) ) {
-        ++_current;
+    if ( !hasNodes() ) {
+        return;
     }
-    
-    if ( _current == std::end( _nodes ) ) {
-        _current = std::begin( _nodes );
-    }
+
+    _currentIndex = ( _currentIndex + 1 ) % getNodeCount();
 }
 
 NodePtr Switch::getCurrentNode( void )
 {
-    NodePtr result;
-    if ( hasNodes() && _current != std::end( _nodes ) ) {
-        result = ( *_current );
-    }
-    
-    return result;
+    return getNodeAt( _currentIndex );
 }
 

@@ -30,7 +30,8 @@
 
 #include "Node.hpp"
 
-#include <list>
+#include "Foundation/SharedObjectArray.hpp"
+
 #include <functional>
 #include <thread>
 
@@ -42,7 +43,7 @@ namespace crimild {
 		explicit Group( std::string name = "" );
 		virtual ~Group( void );
 
-		bool hasNodes( void ) const { return ( getNodeCount() > 0 ); }
+		bool hasNodes( void ) const { return !_nodes.empty(); }
 		unsigned int getNodeCount( void ) const { return _nodes.size(); }
 
 		void attachNode( NodePtr const &node );
@@ -65,7 +66,7 @@ namespace crimild {
 		virtual void foreachNode( std::function< void( NodePtr const & ) > callback );
 
 	protected:
-		std::list< NodePtr > _nodes;
+		SharedObjectArray< Node > _nodes;
 
 	public:
 		virtual void accept( NodeVisitor &visitor ) override;
