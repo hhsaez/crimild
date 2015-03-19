@@ -146,6 +146,13 @@ namespace crimild {
 	private:
 		BoundingVolumePtr _localBound;
 		BoundingVolumePtr _worldBound;
+
+	public:
+		void setEnabled( bool enabled ) { _enabled = enabled; }
+		bool isEnabled( void ) { return _enabled; }
+
+	private:
+		bool _enabled = true;
 	};
 
 }

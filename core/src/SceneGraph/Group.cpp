@@ -82,7 +82,7 @@ NodePtr Group::getNodeAt( unsigned int index )
 
 void Group::foreachNode( std::function< void( NodePtr const & ) > callback )
 {
-	return _nodes.foreach( callback );
+	return _nodes.foreach( [&callback]( NodePtr const &node ) { if ( node->isEnabled() ) callback( node ); } );
 }
 
 void Group::accept( NodeVisitor &visitor )

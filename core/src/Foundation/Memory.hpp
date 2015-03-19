@@ -71,6 +71,18 @@ namespace crimild {
     {
         return ptr.lock();
     }
+
+    template< typename T >
+    void resetPointer( SharedPointer< T > &ptr )
+    {
+        ptr = nullptr;
+    }
+
+    template< typename T >
+    void resetPointer( WeakPointer< T > &ptr )
+    {
+        ptr.reset();
+    }
     
 }
 
