@@ -67,6 +67,7 @@ namespace crimild {
 		Vector3f _max;
 
 	public:
+		virtual void computeFrom( const BoundingVolumePtr &volume ) = 0;
 		virtual void computeFrom( const BoundingVolumePtr &volume, const TransformationImpl &transform ) = 0;
 		virtual void computeFrom( const Vector3f *positions, unsigned int positionCount ) = 0;
 		virtual void computeFrom( const VertexBufferObjectPtr &vbo ) = 0;

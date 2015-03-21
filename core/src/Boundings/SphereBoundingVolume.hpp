@@ -48,6 +48,7 @@ namespace crimild {
 		Sphere3f _sphere;
 
 	public:
+		virtual void computeFrom( const BoundingVolumePtr &volume );
 		virtual void computeFrom( const BoundingVolumePtr &volume, const TransformationImpl &transform ) override;
 		virtual void computeFrom( const Vector3f *positions, unsigned int positionCount ) override;
 		virtual void computeFrom( const VertexBufferObjectPtr &vbo ) override;

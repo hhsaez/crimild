@@ -40,7 +40,8 @@ ScriptContext::ScriptContext( void )
 
 ScriptContext::ScriptContext( bool openDefaultLibs )
 	: _state( nullptr ),
-	  _openDefaultLibs( openDefaultLibs )
+	  _openDefaultLibs( openDefaultLibs ),
+	  _backgroundThreadState( nullptr )
 {
 	reset();
 }
@@ -65,18 +66,28 @@ void ScriptContext::reset( void )
 		luaL_openlibs( _state );
 	}
 
+	_backgroundThreadState = nullptr;
+
 	// this trick makes sure the runtime directory is in the search
 	// path for external modules
 	parse( "package.path = '" + FileSystem::getInstance().getBaseDirectory() + "' .. '/?.lua;' .. package.path" );
 }
 
-bool ScriptContext::load( std::string fileName )
+bool ScriptContext::load( std::string fileName, bool supportCoroutines )
 {
-	if ( luaL_loadfile( _state, fileName.c_str() ) ) {
+#if 0
+	auto targetState = _state;
+	if ( supportCoroutines ) {
+		_backgroundThreadState = lua_newthread( _state );
+		targetState = _backgroundThreadState;
+	}
+
+	if ( luaL_loadfile( targetState, fileName.c_str() ) ) {
 		Log::Error << "Cannot load file '" << fileName << "'" 
 				   << "\n\tReason: "
 				   << read< std::string >()
 				   << Log::End;
+	   	lua_pop( _state, -1 );
 		return false;
 	}
 
@@ -85,8 +96,30 @@ bool ScriptContext::load( std::string fileName )
 				   << "\n\tReason: " 
 				   << read< std::string >()
 				   << Log::End;
+	   	lua_pop( _state, -1 );
 	    return false;
 	}
+#else
+	if ( supportCoroutines ) {
+		// TODO: I think this should go in the constructor...
+		_backgroundThreadState = lua_newthread( _state );
+	}
+	else {
+		_backgroundThreadState = nullptr;
+	}
+
+	if ( luaL_dofile( _state, fileName.c_str() ) ) {
+		Log::Error << "Cannot execute script in file " << fileName
+				   << "\n\tReason: " << lua_tostring( _state, -1 )
+				   << Log::End;
+	    return false;
+	}
+
+	return true;
+#endif
+
+	// resume();
+	// resume();
 
 	return true;
 }
@@ -102,6 +135,24 @@ bool ScriptContext::parse( std::string text )
 	}
 
 	return true;
+}
+
+int ScriptContext::yield( void )
+{
+	if ( _backgroundThreadState == nullptr ) {
+		return 0;
+	}
+
+	return lua_yield( _backgroundThreadState, 0 );
+}
+
+int ScriptContext::resume( void )
+{
+	if ( _backgroundThreadState == nullptr ) {
+		return 0;
+	}
+
+	return lua_resume( _backgroundThreadState, NULL, 0 );
 }
 
 std::string ScriptContext::dumpStack( void )

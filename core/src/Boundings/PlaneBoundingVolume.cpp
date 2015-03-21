@@ -49,6 +49,11 @@ PlaneBoundingVolume::~PlaneBoundingVolume( void )
 
 }
 
+void PlaneBoundingVolume::computeFrom( const BoundingVolumePtr &volume )
+{
+
+}
+
 void PlaneBoundingVolume::computeFrom( const BoundingVolumePtr &volume, const TransformationImpl &transformation )
 {
 

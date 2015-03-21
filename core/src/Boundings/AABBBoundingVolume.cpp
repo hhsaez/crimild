@@ -57,6 +57,11 @@ AABBBoundingVolume::~AABBBoundingVolume( void )
 
 }
 
+void AABBBoundingVolume::computeFrom( const BoundingVolumePtr &volume )
+{
+	computeFrom( volume->getCenter() + volume->getMin(), volume->getCenter() + volume->getMax() );
+}
+
 void AABBBoundingVolume::computeFrom( const BoundingVolumePtr &volume, const TransformationImpl &transformation )
 {
 	Vector3f p0, p1;

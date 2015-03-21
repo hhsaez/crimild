@@ -54,9 +54,16 @@ namespace crimild {
 			bool _openDefaultLibs;
 
 		public:
-			bool load( std::string fileName );
+			bool load( std::string fileName, bool supportCoroutines = false );
 
 			bool parse( std::string text );
+
+		public:
+			int yield( void );
+			int resume( void );
+
+		private:
+			lua_State *_backgroundThreadState;
 
 		public:
 			void push( void ) { }

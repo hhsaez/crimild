@@ -54,6 +54,11 @@ SphereBoundingVolume::~SphereBoundingVolume( void )
 
 }
 
+void SphereBoundingVolume::computeFrom( const BoundingVolumePtr &volume )
+{
+	computeFrom( volume->getCenter() + volume->getMin(), volume->getCenter() + volume->getMax() );
+}
+
 void SphereBoundingVolume::computeFrom( const BoundingVolumePtr &volume, const TransformationImpl &transformation )
 {
 	Vector3f newCenter;
