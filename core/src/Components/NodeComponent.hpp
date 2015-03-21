@@ -58,8 +58,12 @@ namespace crimild {
 
 		virtual const char *getComponentName( void ) const { return "update"; }
 
+		bool isEnabled( void ) const { return _enabled; }
+		void setEnabled( bool value ) { _enabled = value; }
+
 	private:
         Node *_node;
+        bool _enabled = true;
 
 	public:
 		/**

@@ -150,7 +150,9 @@ void Node::startComponents( void )
 void Node::updateComponents( const Time &t )
 {
     foreachComponent( [&]( NodeComponentPtr const &component ) {
-		component->update( t );
+    	if ( component->isEnabled() ) {
+			component->update( t );
+    	}
 	});
 }
 
