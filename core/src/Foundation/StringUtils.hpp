@@ -84,6 +84,28 @@ namespace crimild {
 			return path.substr( pos );
 		}
 
+		static std::string splitLines( std::string input, int charsPerLine )
+		{
+			std::stringstream str;
+			std::stringstream out;
+			str << input;
+
+			int charCount = 0;
+			while ( !str.eof() ) {
+				std::string temp;
+				str >> temp;
+				charCount += temp.length() + 1;
+				if ( charCount >= charsPerLine ) {
+					out << "\n";
+					charCount = 0;
+				}
+
+				out << temp << " ";
+			}
+
+			return out.str();
+		}
+
 	};
 
 }
