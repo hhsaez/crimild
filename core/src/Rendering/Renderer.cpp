@@ -58,7 +58,16 @@ Renderer::Renderer( void )
 
 Renderer::~Renderer( void )
 {
+    _screenBuffer = nullptr;
+    _framebuffers.clear();
+    _programs.clear();
+    _screenPrimitive = nullptr;
     
+    getShaderProgramCatalog()->unloadAll();
+    getTextureCatalog()->unloadAll();
+    getVertexBufferObjectCatalog()->unloadAll();
+    getIndexBufferObjectCatalog()->unloadAll();
+    getFrameBufferObjectCatalog()->unloadAll();
 }
 
 void Renderer::addFrameBuffer( std::string name, FrameBufferObjectPtr const &fbo )

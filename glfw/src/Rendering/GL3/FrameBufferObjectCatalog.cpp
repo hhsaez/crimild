@@ -249,7 +249,7 @@ void gl3::FrameBufferObjectCatalog::unload( FrameBufferObjectPtr const &fbo )
             int targetId = target->getId();
             if ( targetId > 0 ) {
                 _renderbufferIdsToDelete.push_back( targetId );
-                if ( target->getOutput() == RenderTarget::Output::TEXTURE ) {
+                if ( target->getOutput() == RenderTarget::Output::TEXTURE || target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
                     int textureId = target->getTexture()->getCatalogId();
                     _textureIdsToDelete.push_back( textureId );
                     target->getTexture()->setCatalogInfo( nullptr, 0 );

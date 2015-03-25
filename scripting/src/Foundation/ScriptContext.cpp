@@ -75,31 +75,6 @@ void ScriptContext::reset( void )
 
 bool ScriptContext::load( std::string fileName, bool supportCoroutines )
 {
-#if 0
-	auto targetState = _state;
-	if ( supportCoroutines ) {
-		_backgroundThreadState = lua_newthread( _state );
-		targetState = _backgroundThreadState;
-	}
-
-	if ( luaL_loadfile( targetState, fileName.c_str() ) ) {
-		Log::Error << "Cannot load file '" << fileName << "'" 
-				   << "\n\tReason: "
-				   << read< std::string >()
-				   << Log::End;
-	   	lua_pop( _state, -1 );
-		return false;
-	}
-
-	if ( lua_pcall( _state, 0, 0, 0 ) ) {
-		Log::Error << "Cannot execute file '" << fileName << "'"
-				   << "\n\tReason: " 
-				   << read< std::string >()
-				   << Log::End;
-	   	lua_pop( _state, -1 );
-	    return false;
-	}
-#else
 	if ( supportCoroutines ) {
 		// TODO: I think this should go in the constructor...
 		_backgroundThreadState = lua_newthread( _state );
@@ -116,21 +91,14 @@ bool ScriptContext::load( std::string fileName, bool supportCoroutines )
 	}
 
 	return true;
-#endif
-
-	// resume();
-	// resume();
-
-	return true;
 }
 
 bool ScriptContext::parse( std::string text )
 {
-	if ( luaL_loadstring( _state, text.c_str() ) || lua_pcall( _state, 0, 0, 0 ) ) {
-		// Log::Error << "Cannot execute \"" << text << "\""
-				   // << "\n\tReason: " 
-				   // << read< std::string >()
-				   // << Log::End;
+	if ( luaL_dostring( _state, text.c_str() ) ) {
+		Log::Error << "Cannot parse string \"" << text << "\""
+				   << "\n\tReason: " << lua_tostring( _state, -1 )
+				   << Log::End;
 	    return false;
 	}
 

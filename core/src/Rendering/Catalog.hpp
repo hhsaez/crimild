@@ -166,7 +166,7 @@ namespace crimild {
 		{
             auto rs = _resources;
 			for ( auto resource : rs ) {
-				resource->setCatalogInfo( nullptr, getDefaultIdValue() );
+                unload( resource );
 			}
 			_resources.clear();
 		}
