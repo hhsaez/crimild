@@ -73,6 +73,18 @@ namespace crimild {
     }
 
     template< typename T >
+    T *getRawPointer( SharedPointer< T > const &ptr )
+    {
+        return ptr.get();
+    }
+
+    template< typename T >
+    SharedPointer< T > getSharedPointer( T *ptr )
+    {
+        return std::static_pointer_cast< T >( ptr->shared_from_this() );
+    }
+
+    template< typename T >
     void resetPointer( SharedPointer< T > &ptr )
     {
         ptr = nullptr;
@@ -84,15 +96,16 @@ namespace crimild {
         ptr.reset();
     }
     
-}
-
-namespace std {
-    
-    // from http://stackoverflow.com/a/6066150
     template< class T, class U >
-    std::weak_ptr< T > static_pointer_cast( std::weak_ptr< U > const &r )
+    SharedPointer< T > castPointer( SharedPointer< U > const &ptr )
     {
-        return std::static_pointer_cast< T >( std::shared_ptr< U >( r ) );
+        return std::static_pointer_cast< T >( ptr );
+    }
+
+    template< class T, class U >
+    WeakPointer< T > castPointer( WeakPointer< U > const &ptr )
+    {
+        return castPointer< T >( getSharedPointer( ptr ) );
     }
 }
 
