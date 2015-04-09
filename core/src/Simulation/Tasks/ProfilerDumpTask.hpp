@@ -33,26 +33,14 @@
 
 namespace crimild {
 
-	class EnableProfilerDumpMessage : public Message {
-	public:
-		EnableProfilerDumpMessage( void ) { }
-		virtual ~EnableProfilerDumpMessage( void ) { }
-	};
-    
-    using EnableProfilerDumpMessagePtr = SharedPointer< EnableProfilerDumpMessage >;
-
-	class DisableProfilerDumpMessage : public Message {
-	public:
-		DisableProfilerDumpMessage( void ) { }
-		virtual ~DisableProfilerDumpMessage( void ) { }
-	};
-    
-    using DisableProfilerDumpMessagePtr = SharedPointer< DisableProfilerDumpMessage >;
-
 	class ProfilerDumpTask : 
 		public Task,
-		public MessageHandler< EnableProfilerDumpMessage >,
-		public MessageHandler< DisableProfilerDumpMessage > {
+		public Messenger {
+
+	public:
+		struct EnableDumpMessage { };
+		struct DisableDumpMessage { };
+
 	public:
 		ProfilerDumpTask( int priority );
 		virtual ~ProfilerDumpTask( void );
@@ -62,8 +50,8 @@ namespace crimild {
 		virtual void stop( void ) override;
 
 	public:
-		virtual void handleMessage( EnableProfilerDumpMessagePtr const &message ) override;
-		virtual void handleMessage( DisableProfilerDumpMessagePtr const &message ) override;
+		void enableDump( EnableDumpMessage const &message );
+		void disableDump( DisableDumpMessage const &message );
 	};
 
 }

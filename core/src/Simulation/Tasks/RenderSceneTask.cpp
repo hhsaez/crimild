@@ -39,7 +39,7 @@ using namespace crimild;
 RenderSceneTask::RenderSceneTask( int priority )
 	: Task( priority )
 {
-
+    CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( ComputeRenderQueueTask::RenderQueueGeneratedMessage, RenderSceneTask, handleMessage );
 }
 
 RenderSceneTask::~RenderSceneTask( void )
@@ -76,10 +76,10 @@ void RenderSceneTask::stop( void )
 
 }
 
-void RenderSceneTask::handleMessage( const RenderQueueGeneratedMessagePtr &message )
+void RenderSceneTask::handleMessage( ComputeRenderQueueTask::RenderQueueGeneratedMessage const &message )
 {
     _mutex.lock();
-    _renderQueue = message->getRenderQueue();
+    _renderQueue = message.renderQueue;
     _mutex.unlock();
 }
 

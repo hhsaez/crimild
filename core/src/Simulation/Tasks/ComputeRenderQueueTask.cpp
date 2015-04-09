@@ -66,7 +66,8 @@ void ComputeRenderQueueTask::update( void )
     
     auto renderQueue = crimild::alloc< RenderQueue >();
     scene->perform( ComputeRenderQueue( camera, renderQueue ) );
-    MessageQueue::getInstance().pushMessage( crimild::alloc< RenderQueueGeneratedMessage >( renderQueue ) );
+    
+    broadcastMessage( ComputeRenderQueueTask::RenderQueueGeneratedMessage { renderQueue } );
 }
 
 void ComputeRenderQueueTask::stop( void )

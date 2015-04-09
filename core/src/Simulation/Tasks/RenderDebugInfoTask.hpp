@@ -33,26 +33,16 @@
 
 namespace crimild {
 
-	class EnableRenderDebugInfoMessage : public Message {
-	public:
-		EnableRenderDebugInfoMessage( void ) { }
-		virtual ~EnableRenderDebugInfoMessage( void ) { }
-	};
-    
-    using EnableRenderDebugInfoMessagePtr = SharedPointer< EnableRenderDebugInfoMessage >;
-
-	class DisableRenderDebugInfoMessage : public Message {
-	public:
-		DisableRenderDebugInfoMessage( void ) { }
-		virtual ~DisableRenderDebugInfoMessage( void ) { }
-	};
-    
-    using DisableRenderDebugInfoMessagePtr = SharedPointer< DisableRenderDebugInfoMessage >;
-
 	class RenderDebugInfoTask : 
 		public Task,
-		public MessageHandler< EnableRenderDebugInfoMessage >,
-		public MessageHandler< DisableRenderDebugInfoMessage > {
+		public Messenger {
+
+	public:
+		struct Messages {
+			struct Enable {};
+			struct Disable {};
+		};
+
 	public:
 		RenderDebugInfoTask( int priority );
 		virtual ~RenderDebugInfoTask( void );
@@ -62,8 +52,8 @@ namespace crimild {
 		virtual void stop( void ) override;
 
 	public:
-		virtual void handleMessage( EnableRenderDebugInfoMessagePtr const &message ) override;
-		virtual void handleMessage( DisableRenderDebugInfoMessagePtr const &message ) override;
+		void enable( RenderDebugInfoTask::Messages::Enable const &message );
+		void disable( RenderDebugInfoTask::Messages::Disable const &message );
 	};
 
 }

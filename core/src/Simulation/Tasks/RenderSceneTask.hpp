@@ -42,7 +42,8 @@ namespace crimild {
 
 	class RenderSceneTask :
         public Task,
-        public MessageHandler< RenderQueueGeneratedMessage > {
+        public Messenger {
+
 	public:
 		RenderSceneTask( int priority );
 		virtual ~RenderSceneTask( void );
@@ -58,8 +59,7 @@ namespace crimild {
         std::mutex _mutex;
             
     public:
-        virtual void handleMessage( RenderQueueGeneratedMessagePtr const &message ) override;
-            
+        void handleMessage( ComputeRenderQueueTask::RenderQueueGeneratedMessage const &message );
 	};
 
 }

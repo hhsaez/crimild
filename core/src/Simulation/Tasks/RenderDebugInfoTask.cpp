@@ -14,7 +14,8 @@ using namespace crimild;
 RenderDebugInfoTask::RenderDebugInfoTask( int priority )
 	: Task( priority )
 {
-
+	CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( RenderDebugInfoTask::Messages::Enable, RenderDebugInfoTask, enable );
+	CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( RenderDebugInfoTask::Messages::Disable, RenderDebugInfoTask, disable );
 }
 
 RenderDebugInfoTask::~RenderDebugInfoTask( void )
@@ -51,14 +52,14 @@ void RenderDebugInfoTask::stop( void )
 
 }
 
-void RenderDebugInfoTask::handleMessage( EnableRenderDebugInfoMessagePtr const &message )
+void RenderDebugInfoTask::enable( RenderDebugInfoTask::Messages::Enable const &message )
 {
 	if ( getRunLoop() != nullptr ) {
 		getRunLoop()->resumeTask( getShared< RenderDebugInfoTask >() );
 	}
 }
 
-void RenderDebugInfoTask::handleMessage( DisableRenderDebugInfoMessagePtr const &message )
+void RenderDebugInfoTask::disable( RenderDebugInfoTask::Messages::Disable const &message )
 {
 	if ( getRunLoop() != nullptr ) {
 		getRunLoop()->suspendTask( getShared< RenderDebugInfoTask>() );

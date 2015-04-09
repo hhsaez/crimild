@@ -32,82 +32,89 @@
 
 using namespace crimild;
 
-TEST( MessageQueueTest, pushMessage )
+TEST( MessageQueueTest, broadcastMessage )
 {
-	auto message = crimild::alloc< MockMessage >();
-	message->value = 0;
+	MockMessenger m;
 
-	MockMessageHandler handler1;
+	EXPECT_EQ( 0, m.getCallCount() );
 
-	MessageQueue::getInstance().pushMessage( message );
-	EXPECT_EQ( 1, message->value );
+	m.broadcastMessage( MockMessage {} );
+	EXPECT_EQ( 1, m.getCallCount() );
 
-	MockMessageHandler handler2;
-
-	MessageQueue::getInstance().pushMessage( message );
-	EXPECT_EQ( 3, message->value );
+	m.broadcastMessage( MockMessage {} );
+	EXPECT_EQ( 2, m.getCallCount() );
 }
 
-TEST( MessageQueueTest, pushDeferredMessage )
+TEST( MessageQueueTest, unregisterMessageHandler )
 {
-	/*
-	Pointer< MockDeferredMessage > message( new MockDeferredMessage() );
-	message->value = 0;
+	MockMessenger m;
 
-	MockDeferredMessageHandler handler1;
+	EXPECT_EQ( 0, m.getCallCount() );
 
-	MessageQueue::getInstance().pushMessage( message );
-	EXPECT_EQ( 0, message->value );
+	m.broadcastMessage( MockMessage {} );
+	EXPECT_EQ( 1, m.getCallCount() );
 
-	MessageQueue::getInstance().dispatchMessages();
-	EXPECT_EQ( 1, message->value );
+	m.unregisterMessageHandler< MockMessage >();
 
-	MockDeferredMessageHandler handler2;
-
-	MessageQueue::getInstance().pushMessage( message );
-	EXPECT_EQ( 1, message->value );
-
-	MessageQueue::getInstance().dispatchMessages();
-	EXPECT_EQ( 3, message->value );
-
-	// do it again to make sure the message is not sent twice
-	MessageQueue::getInstance().dispatchMessages();
-	EXPECT_EQ( 3, message->value );
-	*/
+	m.broadcastMessage( MockMessage {} );
+	EXPECT_EQ( 1, m.getCallCount() );
 }
 
-TEST( MessageQueueTest, delayMessages )
+TEST( MessageQueueTest, overrideMessageHandler )
 {
-	/*
-	// this test must always pass. the only way for it to
-	// fail is if the message instance is lost, which won't
-	// happen since the queue is keeping a reference to it
+	MockMessenger m;
+
+	m.broadcastMessage( MockMessage {} );
+	EXPECT_EQ( 1, m.getCallCount() );
+
+	m.registerMessageHandler< MockMessage >( [&]( MockMessage const & ) {
+		m.incCallCount();
+		m.incCallCount();
+		m.incCallCount();
+	});
+
+	m.broadcastMessage( MockMessage {} );
+	EXPECT_EQ( 4, m.getCallCount() );
+}
+
+TEST( MessageQueueTest, destruction )
+{
+	int count = 0;
+	Messenger m1;
+	m1.registerMessageHandler< MockMessage >( [&]( MockMessage const & ) {
+		count++;
+	});
+
+	m1.broadcastMessage( MockMessage {} );
+	EXPECT_EQ( 1, count );
+
 	{
-		Pointer< MockDeferredMessage > message( new MockDeferredMessage() );
-		message->value = 0;
-		MessageQueue::getInstance().pushMessage( message );
+		Messenger m2;
+		m2.registerMessageHandler< MockMessage >( [&]( MockMessage const & ) {
+			count++;
+		});
+
+		m1.broadcastMessage( MockMessage {} );
+		EXPECT_EQ( 3, count );
 	}
 
-	MockDeferredMessageHandler handler1;
-	MockDeferredMessageHandler handler2;
-
-	MessageQueue::getInstance().dispatchMessages();
-	*/
+	m1.broadcastMessage( MockMessage {} );
+	EXPECT_EQ( 4, count );
 }
 
-TEST( MessageQueueTest, staticAllocatedMessages ) 
+TEST( MessageQueueTest, pushMessage )
 {
-	auto message = crimild::alloc< MockMessage >();
-	message->value = 0;
+	MockMessenger m;
 
-	MockMessageHandler handler1;
+	EXPECT_EQ( 0, m.getCallCount() );
 
-	MessageQueue::getInstance().pushMessage( message );
-	EXPECT_EQ( 1, message->value );
+	MessageQueue::getInstance()->pushMessage( MockMessage { } );
+	EXPECT_EQ( 0, m.getCallCount() );
 
-	MockMessageHandler handler2;
+	MessageQueue::getInstance()->pushMessage( MockMessage { } );
+	EXPECT_EQ( 0, m.getCallCount() );
 
-	MessageQueue::getInstance().pushMessage( message );
-	EXPECT_EQ( 3, message->value );
+	MessageQueue::getInstance()->dispatchDeferredMessages();
+	EXPECT_EQ( 2, m.getCallCount() );
 }
 

@@ -37,6 +37,8 @@ using namespace crimild;
 UpdateTimeTask::UpdateTimeTask( int priority )
 	: Task( priority )
 {
+	CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( UpdateTimeTask::Messages::ResetSimulationTime, UpdateTimeTask, onResetSimulationTime );
+	CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( LoadSceneTask::Messages::SceneLoaded, UpdateTimeTask, onSceneLoaded );
 }
 
 UpdateTimeTask::~UpdateTimeTask( void )
@@ -63,12 +65,12 @@ void UpdateTimeTask::update( void )
 	t.update( currentTime );
 }
 
-void UpdateTimeTask::handleMessage( ResetSimulationTimeMessagePtr const & )
+void UpdateTimeTask::onResetSimulationTime( Messages::ResetSimulationTime const & )
 {
 	resetTime();
 }
 
-void UpdateTimeTask::handleMessage( SceneLoadedMessagePtr const & )
+void UpdateTimeTask::onSceneLoaded( LoadSceneTask::Messages::SceneLoaded const & )
 {
 	resetTime();
 }

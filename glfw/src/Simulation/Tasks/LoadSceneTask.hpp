@@ -33,41 +33,23 @@
 
 namespace crimild {
 
-	class LoadSceneMessage : public DeferredMessage {
-	public:
-		LoadSceneMessage( std::string fileName ) : _fileName( fileName ) { }
-		virtual ~LoadSceneMessage( void ) { }
-
-		std::string getFileName( void ) const { return _fileName; }
-
-	private:
-		std::string _fileName;
-	};
-    
-    using LoadSceneMessagePtr = SharedPointer< LoadSceneMessage >;
-
-	class ReloadSceneMessage : public DeferredMessage {
-	public:
-		ReloadSceneMessage( void ) { }
-		virtual ~ReloadSceneMessage( void ) { }
-	};
-    
-    using ReloadSceneMessagePtr = SharedPointer< ReloadSceneMessage >;
-
-	class SceneLoadedMessage : public DeferredMessage {
-	public:
-		SceneLoadedMessage( void ) { }
-		virtual ~SceneLoadedMessage( void ) { }
-	};
-    
-    using SceneLoadedMessagePtr = SharedPointer< SceneLoadedMessage >;
-
 	class LoadSceneTask : 
 		public Task,
-		public MessageHandler< LoadSceneMessage >,
-		public MessageHandler< ReloadSceneMessage > {
+		public Messenger {
+
 	public:
-		LoadSceneTask( int priority, std::string sceneFileName, scripting::SceneBuilderPtr const &builder, std::string loadingSceneFileName = "" );
+		struct Messages {
+			struct LoadScene {
+				std::string fileName;
+			};
+
+			struct ReloadScene { };
+
+			struct SceneLoaded { };
+		};
+
+	public:
+		LoadSceneTask( int priority, std::string sceneFileName, scripting::SceneBuilderPtr const &builder );
 		virtual ~LoadSceneTask( void );
 
 		scripting::SceneBuilderPtr getBuilder( void ) { return _builder; }
@@ -76,15 +58,15 @@ namespace crimild {
 		virtual void update( void ) override;
 		virtual void stop( void ) override;
 
-		virtual void handleMessage( LoadSceneMessagePtr const &message ) override;
-		virtual void handleMessage( ReloadSceneMessagePtr const &message ) override;
+	private:
+		void loadScene( LoadSceneTask::Messages::LoadScene const &message );
+		void reloadScene( LoadSceneTask::Messages::ReloadScene const &message );
 
 	private:
 		void load( void );
 
 	private:
 		std::string _sceneFileName;
-		std::string _loadingSceneFileName;
 		scripting::SceneBuilderPtr _builder;
 	};
 

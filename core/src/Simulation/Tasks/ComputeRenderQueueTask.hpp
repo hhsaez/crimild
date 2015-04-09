@@ -38,20 +38,15 @@ namespace crimild {
 
 	class Camera;
     
-    class RenderQueueGeneratedMessage : public DeferredMessage {
-    public:
-        RenderQueueGeneratedMessage( RenderQueuePtr const &renderQueue ) : _renderQueue( renderQueue ) { }
-        virtual ~RenderQueueGeneratedMessage( void ) { }
-        
-        RenderQueuePtr getRenderQueue( void ) { return _renderQueue; }
-        
-    private:
-        RenderQueuePtr _renderQueue;
-    };
-    
-    using RenderQueueGeneratedMessagePtr = SharedPointer< RenderQueueGeneratedMessage >;
+	class ComputeRenderQueueTask : 
+		public Task, 
+		public Messenger {
+			
+	public:
+		struct RenderQueueGeneratedMessage {
+			RenderQueuePtr renderQueue;
+		};
 
-	class ComputeRenderQueueTask : public Task {
 	public:
 		ComputeRenderQueueTask( int priority );
 		virtual ~ComputeRenderQueueTask( void );

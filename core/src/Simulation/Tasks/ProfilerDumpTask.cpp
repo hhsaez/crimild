@@ -12,7 +12,8 @@ using namespace crimild;
 ProfilerDumpTask::ProfilerDumpTask( int priority )
 	: Task( priority )
 {
-
+	registerMessageHandler< ProfilerDumpTask::EnableDumpMessage >( std::bind( &ProfilerDumpTask::enableDump, this, std::placeholders::_1 ) );
+	registerMessageHandler< ProfilerDumpTask::DisableDumpMessage >( std::bind( &ProfilerDumpTask::disableDump, this, std::placeholders::_1 ) );
 }
 
 ProfilerDumpTask::~ProfilerDumpTask( void )
@@ -46,14 +47,14 @@ void ProfilerDumpTask::stop( void )
 
 }
 
-void ProfilerDumpTask::handleMessage( EnableProfilerDumpMessagePtr const &message )
+void ProfilerDumpTask::enableDump( EnableDumpMessage const &message )
 {
 	if ( getRunLoop() != nullptr ) {
 		getRunLoop()->resumeTask( getShared< ProfilerDumpTask >() );
 	}
 }
 
-void ProfilerDumpTask::handleMessage( DisableProfilerDumpMessagePtr const &message )
+void ProfilerDumpTask::disableDump( DisableDumpMessage const &message )
 {
 	if ( getRunLoop() != nullptr ) {
 		getRunLoop()->suspendTask( getShared< ProfilerDumpTask>() );

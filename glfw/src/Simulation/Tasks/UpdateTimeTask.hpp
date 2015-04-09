@@ -34,18 +34,15 @@
 
 namespace crimild {
 
-	class ResetSimulationTimeMessage : public DeferredMessage {
-	public:
-		ResetSimulationTimeMessage( void ) { }
-		virtual ~ResetSimulationTimeMessage( void );
-	};
-
-	using ResetSimulationTimeMessagePtr = SharedPointer< ResetSimulationTimeMessage >;
-
 	class UpdateTimeTask : 
 		public Task,
-		public MessageHandler< ResetSimulationTimeMessage >,
-		public MessageHandler< SceneLoadedMessage > {
+		public Messenger {
+
+	public:
+		struct Messages {
+			struct ResetSimulationTime { };
+		};
+
 	public:
 		UpdateTimeTask( int priority );
 		virtual ~UpdateTimeTask( void );
@@ -55,8 +52,8 @@ namespace crimild {
 		virtual void stop( void ) override;
 
 	public:
-		virtual void handleMessage( ResetSimulationTimeMessagePtr const &message );
-		virtual void handleMessage( SceneLoadedMessagePtr const &message );
+		void onResetSimulationTime( Messages::ResetSimulationTime const &message );
+		void onSceneLoaded( LoadSceneTask::Messages::SceneLoaded const &message );
 
 	private:
 		void resetTime( void );

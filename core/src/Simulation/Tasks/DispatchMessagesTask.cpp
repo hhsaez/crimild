@@ -51,11 +51,11 @@ void DispatchMessagesTask::update( void )
 {
 	CRIMILD_PROFILE( "Dispatch Messages" )
 
-	MessageQueue::getInstance().dispatchMessages();
+	MessageQueue::getInstance()->dispatchDeferredMessages();
 }
 
 void DispatchMessagesTask::stop( void )
 {
-
+    MessageQueue::getInstance()->clear();
 }
 

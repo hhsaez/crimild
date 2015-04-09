@@ -29,49 +29,13 @@
 
 using namespace crimild;
 
-MessageQueue MessageQueue::_instance;
-
-MessageQueue::MessageQueue( void )
+Messenger::Messenger( void )
 {
 
 }
 
-MessageQueue::~MessageQueue( void )
+Messenger::~Messenger( void )
 {
-
+    getMessageQueue()->unregisterHandler( this );
 }
 
-void MessageQueue::registerDispatcher( MessageDispatcher *dispatcher )
-{
-	_dispatchers.push_back( dispatcher );
-}
-
-void MessageQueue::dispatchMessages( void )
-{
-    auto ds = _dispatchers;
-    for ( auto d : ds ) {
-        if ( d != nullptr ) {
-            d->dispatchMessages();
-        }
-    }
-}
-
-void MessageQueue::discardAllMessages( void )
-{
-    auto ds = _dispatchers;
-    for ( auto d : ds ) {
-        if ( d != nullptr ) {
-            d->discardAllMessages();
-        }
-    }
-}
-
-void MessageQueue::reset( void )
-{
-    auto ds = _dispatchers;
-    for ( auto d : ds ) {
-        if ( d != nullptr ) {
-            d->reset();
-        }
-    }
-}

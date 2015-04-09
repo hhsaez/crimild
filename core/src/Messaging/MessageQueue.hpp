@@ -28,263 +28,226 @@
 #ifndef CRIMILD_MESSAGING_MESSAGE_QUEUE_
 #define CRIMILD_MESSAGING_MESSAGE_QUEUE_
 
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/Pointer.hpp"
+#include "Foundation/Macros.hpp"
+#include "Foundation/Singleton.hpp"
+#include "Foundation/Log.hpp"
 
-#include <algorithm>
-#include <list>
-#include <cassert>
+#include <functional>
+#include <map>
+#include <vector>
 
 namespace crimild {
 
-	class Message : public SharedObject {
-	public:
-		virtual ~Message( void ) { }
+	class Messenger;
 
-		virtual bool useDeferredQueue( void ) const { return false; }
-	};
-    
-    using MessagePtr = SharedPointer< Message >;
+	template< class MessageType >
+	using MessageHandler = std::function< void( MessageType const & ) >;
 
-	class DeferredMessage : public Message {
-	public:
-		virtual ~DeferredMessage( void ) { }
-		
-		virtual bool useDeferredQueue( void ) const { return true; }
-	};
-    
-    using DeferredMessagePtr = SharedPointer< DeferredMessage >;
-
-	template< class MessageImpl >
-	class MessageHandler {
-	public:
-		/**
-			\brief Destructor
-
-			The destructor automatically unregister the handler
-			from its corresponding message dispatcher
-		 */
-		virtual ~MessageHandler( void );
-
-        virtual void handleMessage( SharedPointer< MessageImpl > const &message ) = 0;
+	class MessageQueueDispatcher {
+		CRIMILD_DISALLOW_COPY_AND_ASSIGN( MessageQueueDispatcher )
 
 	protected:
-		/**
-			\brief Default constructor
-
-			The constructor automatically register the handler
-			from its corresponding message dispatcher
-		 */
-		MessageHandler( void );
-	};
-
-	class MessageDispatcher {
-	public:
-		virtual void dispatchMessages( void ) = 0;
-		virtual void discardAllMessages( void ) = 0;
-		virtual void reset( void ) = 0;
-	};
-
-	template< class MessageImpl >
-	class MessageDispatcherImpl : public MessageDispatcher {
-        typedef SharedPointer< MessageImpl > MessageImplPtr;
-		typedef std::list< MessageImplPtr > MessageImplList;
-		typedef MessageHandler< MessageImpl > MessageHandlerImpl;
-		typedef std::list< MessageHandlerImpl * > MessageHandlerList;
-
-	public:
-		static MessageDispatcherImpl &getInstance( void )
+		MessageQueueDispatcher( void )
 		{
-			static MessageDispatcherImpl instance;
-			return instance;
+
+		}
+
+	public:
+		virtual ~MessageQueueDispatcher( void )
+		{
+
+		}
+
+		virtual void unregisterHandler( Messenger *handler ) = 0;
+
+		virtual void dispatchDeferredMessages( void ) = 0;
+
+		virtual void clear( void ) = 0;
+	};
+
+	template< class MessageType >
+	class MessageQueueDispatcherImpl : 
+		public MessageQueueDispatcher,
+		public StaticSingleton< MessageQueueDispatcherImpl< MessageType >> {
+
+	public:
+		MessageQueueDispatcherImpl( void );
+
+		virtual ~MessageQueueDispatcherImpl( void ) { }
+
+		void registerHandler( Messenger *target, MessageHandler< MessageType > handler )
+		{
+			_handlers[ target ] = handler;
+		}
+
+		virtual void unregisterHandler( Messenger *handler ) override
+		{
+			auto it = _handlers.find( handler );
+			if ( it != _handlers.end() ) {
+				_handlers.erase( it );
+			}
 		}
 
 	private:
-		MessageDispatcherImpl( void );
-		virtual ~MessageDispatcherImpl( void );
+		std::map< Messenger *, MessageHandler< MessageType >> _handlers;
 
 	public:
-		virtual void dispatchMessages( void ) override
+		void broadcastMessage( MessageType const &message )
 		{
-			if ( _handlers.size() > 0 && _messages.size() ) {
-                auto ms = _messages;
-				for ( auto message : ms ) {
-                    auto hs = _handlers;
-                    for ( auto handler : hs ) handler->handleMessage( message );
-				}
-			}
-
-			discardAllMessages();
-		}
-
-		virtual void discardAllMessages( void )
-		{
-			_messages.clear();
-		}
-
-		virtual void reset( void )
-		{
-			discardAllMessages();
-
-			_handlers.clear();
-		}
-
-		/**
-			\brief Dispatchs a message
-
-			If the message requires to use the deferred queue, it will be delayed.
-			Otherwise, it will be dispatched immediatelly.
-		*/
-		void pushMessage( MessageImplPtr const &message )
-		{
-			if ( message->useDeferredQueue() ) {
-				_messages.push_back( message );
-			}
-			else {
-                auto hs = _handlers;
-				for ( auto handler : hs ) {
-					handler->handleMessage( message );
+            auto hs = _handlers;
+			for ( auto it : hs ) {
+				if ( it.first != nullptr && it.second != nullptr ) {
+					it.second( message );
 				}
 			}
 		}
 
-		/**
-			\brief Dispatchs a message
-
-			This function can be used only for forward messages (non-deferred). Since it
-			does not require to cache the message instance in the queue, we can do a nice
-			trick and use references to objects instead of new instances, avoiding the
-			overhead related with object allocation in memory
-
-			\warning This method can be use only with non-deferred message. 
-		 */
-        /*
-		void pushMessage( MessageImpl &message )
+	public:
+		void pushMessage( MessageType const &message )
 		{
-			assert( message.useDeferredQueue() == false && "Deferred messages cannot be statically allocated (did you forget a 'new' somewhere?)");
-			for ( auto handler : _handlers ) {
-				handler->handleMessage( &message );
+			_deferredMessages.push_back( message );
+		}
+
+		virtual void dispatchDeferredMessages( void ) override
+		{
+			for ( auto &m : _deferredMessages ) {
+				broadcastMessage( m );
 			}
-		}
-         */
-
-		void registerHandler( MessageHandlerImpl *handler )
-		{
-			_handlers.push_back( handler );
+			_deferredMessages.clear();
 		}
 
-		void unregisterHandler( MessageHandlerImpl *handler )
+	public:
+		virtual void clear( void ) override
 		{
-			_handlers.remove( handler );
+			_deferredMessages.clear();
 		}
 
 	private:
-		MessageImplList _messages;
-		MessageHandlerList _handlers;
+		std::vector< MessageType > _deferredMessages;
 	};
 
-	/**
-		\brief Entry point for the messaging sub-system
-
-		This class is the heart of the message sub-system. It is used
-		to manage all message execution.
-
-		\todo This class needs proper documentation
-	 */
-	class MessageQueue {
-    private:
-        static MessageQueue _instance;
+	class MessageQueue : public StaticSingleton< MessageQueue > {
+	public:
+        MessageQueue( void )
+        {
+            Log::Debug << "Initializing message queue" << Log::End;
+        }
         
-	public:
-		/**
-			\brief Get the queue shared instance
-		 */
-        static MessageQueue &getInstance( void ) { return _instance; }
-
-	private:
-		/**
-			\brief Default constructor
-		 */
-		MessageQueue( void );
-
-		/**
-			\brief Destructor
-		 */
-		virtual ~MessageQueue( void );
-
-	public:
-		/**
-			\brief Register a message dispatcher
-
-			\remarks This method is for internal use of the messaging
-			system only. Do not use it.
-		 */
-		void registerDispatcher( MessageDispatcher *dispatcher );
-
-	public:
-		/**
-			\brief Dispatch received messages
-		 */
-		void dispatchMessages( void );
-
-		/**
-			\brief Discard all received messages
-		 */
-		void discardAllMessages( void );
-
-		void reset( void );
-
-		/**
-			\brief Push a new message into the queue
-		 */
-		template< class MessageImpl >
-        void pushMessage( SharedPointer< MessageImpl > const &message )
+        virtual ~MessageQueue( void )
+        {
+            
+        }
+        
+		template< class MessageType >
+		void registerHandler( Messenger *target, MessageHandler< MessageType > handler )
 		{
-			MessageDispatcherImpl< MessageImpl >::getInstance().pushMessage( message );
+			MessageQueueDispatcherImpl< MessageType >::getInstance()->registerHandler( target, handler );
 		}
 
-		/**
-			\brief Push a new message into the queue
-
-			This implementation works with references to static allocated instances
-			and its only valid for regular, non-deferred, messages
-		 */
-        /*
-		template< class MessageImpl >
-		void pushMessage( MessageImpl &message )
+		template< class MessageType >
+		void unregisterHandler( Messenger *target )
 		{
-			MessageDispatcherImpl< MessageImpl >::getInstance().pushMessage( message );
+			MessageQueueDispatcherImpl< MessageType >::getInstance()->unregisterHandler( target );
 		}
-         */
+
+		void unregisterHandler( Messenger *target )
+		{
+			for ( auto d : _dispatchers ) {
+				if ( d != nullptr ) {
+					d->unregisterHandler( target );
+				}
+			}
+		}
+
+	public:
+		template< class MessageType >
+		void broadcastMessage( MessageType const &message )
+		{
+			MessageQueueDispatcherImpl< MessageType >::getInstance()->broadcastMessage( message );
+		}
+
+	public:
+		void registerMessageDispatcher( MessageQueueDispatcher *dispatcher )
+		{
+			_dispatchers.push_back( dispatcher );
+		}
+
+	public:
+		template< class MessageType >
+		void pushMessage( MessageType const &message )
+		{
+			MessageQueueDispatcherImpl< MessageType >::getInstance()->pushMessage( message );
+		}
+
+		void dispatchDeferredMessages( void )
+		{
+			for ( auto d : _dispatchers ) {
+				d->dispatchDeferredMessages();
+			}
+		}
+
+	public:
+		void clear( void )
+		{
+			for ( auto d : _dispatchers ) {
+				d->clear();
+			}
+		}
 
 	private:
-		std::list< MessageDispatcher * > _dispatchers;
+		std::vector< MessageQueueDispatcher * > _dispatchers;
 	};
 
 	template< class T >
-	MessageHandler< T >::MessageHandler( void )
+	MessageQueueDispatcherImpl< T >::MessageQueueDispatcherImpl( void )
 	{
-		MessageDispatcherImpl< T >::getInstance().registerHandler( this );
+		MessageQueue::getInstance()->registerMessageDispatcher( this );
 	}
 
-	template< class T >
-	MessageHandler< T >::~MessageHandler( void )
-	{
-		MessageDispatcherImpl< T >::getInstance().unregisterHandler( this );
-	}
+	class Messenger {
+		CRIMILD_DISALLOW_COPY_AND_ASSIGN( Messenger )
 
-	template< class T >
-	MessageDispatcherImpl< T >::MessageDispatcherImpl( void )
-	{
-		MessageQueue::getInstance().registerDispatcher( this );
-	}
+	public:
+		Messenger( void );
+		virtual ~Messenger( void );
 
-	template< class T >
-	MessageDispatcherImpl< T >::~MessageDispatcherImpl( void )
-	{
-	}
+	public:
+		template< class T >
+		void broadcastMessage( T const &message )
+		{
+			getMessageQueue()->broadcastMessage( message );
+		}
+
+//		template< class T >
+//		void pushMessage( T const &message )
+//		{
+//			getMessageQueue()->pushMessage( message );
+//		}
+
+	public:
+		template< class T >
+		void registerMessageHandler( MessageHandler< T > handler )
+		{
+			getMessageQueue()->registerHandler( this, handler );
+		}
+
+		template< class MessageType >
+		void unregisterMessageHandler( void )
+		{
+			getMessageQueue()->unregisterHandler< MessageType >( this );
+		}
+
+	private:
+		MessageQueue *getMessageQueue( void )
+		{
+			return MessageQueue::getInstance();
+		}
+	};
 
 }
+
+#define CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( MESSAGE_TYPE, CLASS_NAME, MEMBER_FUNCTION ) \
+	registerMessageHandler< MESSAGE_TYPE >( std::bind( &CLASS_NAME::MEMBER_FUNCTION, this, std::placeholders::_1 ) );
 
 #endif
 
