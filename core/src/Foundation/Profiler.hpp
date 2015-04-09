@@ -65,7 +65,7 @@ namespace crimild {
         virtual void endOutput( void ) override;
     };
 
-    class Profiler : public Singleton< Profiler > {
+    class Profiler : public DynamicSingleton< Profiler > {
     private:
         static constexpr int MAX_SAMPLES = 50;
 

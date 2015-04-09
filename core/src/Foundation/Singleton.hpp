@@ -25,40 +25,82 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_FOUNDATION_SINGLETON_
-#define CRIMILD_FOUNDATION_SINGLETON_
+#ifndef CRIMILD_CORE_FOUNDATION_SINGLETON_
+#define CRIMILD_CORE_FOUNDATION_SINGLETON_
 
 #include <cassert>
 
 namespace crimild {
 
-	template< class T >
-	class Singleton {
+	// thread safe
+	template< class ObjectType >
+	class SingletonStackStoragePolicy {
 	private:
-		static T *_instance;
-	
+		// forces singleton to be initialized before main
+		static ObjectType _dummyInstance;
+
 	public:
-		static T *getInstance( void )
+		static ObjectType *getInstance( void )
+		{
+  			static ObjectType instance;	// actual instance
+  			return &instance;
+		}
+	};
+
+	template< class ObjectType >
+	ObjectType SingletonStackStoragePolicy< ObjectType >::_dummyInstance;
+
+	// non-thread safe
+	template< class ObjectType >
+	class SingletonHeapStoragePolicy {
+	private:
+		static ObjectType *_instance;
+
+	public:
+		static ObjectType *getInstance( void )
 		{
 			return _instance;
 		}
 
 	protected:
-		Singleton( void )
+		SingletonHeapStoragePolicy( void )
 		{
 			assert( _instance == nullptr && "Singleton instance already set" );
-			_instance = static_cast< T * >( this );
+			_instance = static_cast< ObjectType * >( this );
 		}
 
 	public:
-		virtual ~Singleton( void )
+		virtual ~SingletonHeapStoragePolicy( void )
 		{
 			_instance = nullptr;
 		}
 	};
 
-	template< class T >
-	T *Singleton< T >::_instance = nullptr;
+	template< class ObjectType >
+	ObjectType *SingletonHeapStoragePolicy< ObjectType >::_instance = nullptr;
+
+	template< 
+		class ObjectType,
+		template< class > class SingletonStoragePolicy
+	>
+	class Singleton : public SingletonStoragePolicy< ObjectType > {
+	public:
+		Singleton( void )
+		{
+
+		}
+
+		virtual ~Singleton( void )
+		{
+
+		}
+	};
+
+	template< class ObjectType >
+	using StaticSingleton = Singleton< ObjectType, SingletonStackStoragePolicy >;
+
+	template< class ObjectType >
+	using DynamicSingleton = Singleton< ObjectType, SingletonHeapStoragePolicy >;
 
 }
 

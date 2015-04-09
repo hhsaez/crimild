@@ -38,7 +38,7 @@
 
 namespace crimild {
 
-    class AssetManager : public Singleton< AssetManager > {
+    class AssetManager : public DynamicSingleton< AssetManager > {
         CRIMILD_DISALLOW_COPY_AND_ASSIGN( AssetManager )
         
     public:

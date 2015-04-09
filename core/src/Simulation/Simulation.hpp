@@ -50,7 +50,7 @@ namespace crimild {
 	class Simulation : 
 		public NamedObject, 
 		public SharedObject,
-		public Singleton< Simulation > {
+		public DynamicSingleton< Simulation > {
 
 	public:
 		class Priorities {
