@@ -4,3 +4,4 @@
 [submodule "third-party/glew"]
 	path = third-party/glew
 	url = https://github.com/nigels-com/glew.git
+	ignore = dirty
