@@ -33,11 +33,13 @@
 #include "Rendering/GL3/Renderer.hpp"
 
 #include <Crimild_Scripting.hpp>
-#include <Crimild_Physics.hpp>
 
 using namespace crimild;
 using namespace crimild::scripting;
-using namespace crimild::physics;
+
+#ifdef CRIMILD_ENABLE_PHYSICS
+#include <Crimild_Physics.hpp>
+#endif
 
 GLSimulation::GLSimulation( std::string name, int argc, char **argv )
 	: GLSimulation( name, argc, argv, false )

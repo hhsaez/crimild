@@ -27,10 +27,11 @@
 
 #include "LoadSceneTask.hpp"
 
+#ifdef CRIMILD_ENABLE_PHYSICS
 #include <Crimild_Physics.hpp>
+#endif
 
 using namespace crimild;
-using namespace crimild::physics;
 using namespace crimild::scripting;
 
 LoadSceneTask::LoadSceneTask( int priority, std::string sceneFileName, SceneBuilderPtr const &builder )
@@ -38,6 +39,7 @@ LoadSceneTask::LoadSceneTask( int priority, std::string sceneFileName, SceneBuil
 	  _sceneFileName( sceneFileName ),
       _builder( builder != nullptr ? builder : crimild::alloc< SceneBuilder >() )
 {
+#if CRIMILD_ENABLE_PHYSICS
 	getBuilder()->registerComponentBuilder< physics::RigidBodyComponent >( []( ScriptContext::Iterable &it ) {
         auto rigidBody = crimild::alloc< RigidBodyComponent >();
 
@@ -50,6 +52,7 @@ LoadSceneTask::LoadSceneTask( int priority, std::string sceneFileName, SceneBuil
 
 		return rigidBody;
 	});
+#endif
 
 	CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( Messages::LoadScene, LoadSceneTask, loadScene );
 	CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( Messages::ReloadScene, LoadSceneTask, reloadScene );
@@ -62,21 +65,12 @@ LoadSceneTask::~LoadSceneTask( void )
 
 void LoadSceneTask::start( void )
 {
-//	load();
+
 }
 
 void LoadSceneTask::update( void )
 {
-    Simulation::getInstance()->setScene( nullptr );
-    AssetManager::getInstance()->clear();
-    MessageQueue::getInstance()->clear();
-    
-    getBuilder()->reset();
-    auto scene = getBuilder()->fromFile( FileSystem::getInstance().pathForResource( _sceneFileName ) );
-    Simulation::getInstance()->setScene( scene );
-    
-    broadcastMessage( Messages::SceneLoaded() );
-    
+	load();    
     getRunLoop()->suspendTask( getShared< LoadSceneTask >() );
 }
 
@@ -88,6 +82,15 @@ void LoadSceneTask::stop( void )
 void LoadSceneTask::load( void )
 {
 	// clear current scene
+    Simulation::getInstance()->setScene( nullptr );
+    AssetManager::getInstance()->clear();
+    MessageQueue::getInstance()->clear();
+    
+    getBuilder()->reset();
+    auto scene = getBuilder()->fromFile( FileSystem::getInstance().pathForResource( _sceneFileName ) );
+    Simulation::getInstance()->setScene( scene );
+    
+    broadcastMessage( Messages::SceneLoaded() );
 }
 
 void LoadSceneTask::loadScene( Messages::LoadScene const &message )
@@ -98,7 +101,6 @@ void LoadSceneTask::loadScene( Messages::LoadScene const &message )
 
 void LoadSceneTask::reloadScene( Messages::ReloadScene const &message )
 {
-	load();
     getRunLoop()->resumeTask( getShared< LoadSceneTask >() );
 }
 

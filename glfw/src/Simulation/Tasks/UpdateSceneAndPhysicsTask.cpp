@@ -27,10 +27,11 @@
 
 #include "UpdateSceneAndPhysicsTask.hpp"
 
+#if CRIMILD_ENABLE_PHYSICS
 #include <Crimild_Physics.hpp>
+#endif
 
 using namespace crimild;
-using namespace crimild::physics;
 
 #define CRIMILD_SIMULATION_TIME 1.0 / 60.0
 
@@ -49,10 +50,12 @@ void UpdateSceneAndPhysicsTask::start( void )
 {
     _dtAccumulator = 0.0;
     
+#if CRIMILD_ENABLE_PHYSICS
     float gx = Simulation::getInstance()->getSettings().get( "physics.gravity.x", 0.0f );
     float gy = Simulation::getInstance()->getSettings().get( "physics.gravity.y", -9.8f );
     float gz = Simulation::getInstance()->getSettings().get( "physics.gravity.z", 0.0f );
-    PhysicsContext::getInstance().setGravity( Vector3f( gx, gy, gz ) );
+    physics::PhysicsContext::getInstance().setGravity( Vector3f( gx, gy, gz ) );
+#endif
 }
 
 void UpdateSceneAndPhysicsTask::update( void )
@@ -71,7 +74,9 @@ void UpdateSceneAndPhysicsTask::update( void )
     Time fixed = t;
     fixed.setDeltaTime( CRIMILD_SIMULATION_TIME );
     while ( _dtAccumulator >= CRIMILD_SIMULATION_TIME ) {
-        PhysicsContext::getInstance().step( CRIMILD_SIMULATION_TIME );
+#if CRIMILD_ENABLE_PHYSICS
+        physics::PhysicsContext::getInstance().step( CRIMILD_SIMULATION_TIME );
+#endif
         scene->perform( UpdateComponents( fixed ) );
         _dtAccumulator -= CRIMILD_SIMULATION_TIME;
     }
