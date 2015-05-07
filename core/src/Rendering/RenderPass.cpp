@@ -61,8 +61,8 @@ void RenderPass::render( RendererPtr const &renderer, RenderQueuePtr const &rend
 
 void RenderPass::render( SharedPointer< Renderer > const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera, RenderQueue::MaterialMap const &objects )
 {
-    const Matrix4f &projection = camera->getProjectionMatrix();
-    const Matrix4f &view = camera->getViewMatrix();
+    const Matrix4f &projection = renderQueue->getProjectionMatrix();
+    const Matrix4f &view = renderQueue->getViewMatrix();
     
     renderQueue->each( objects, [&]( MaterialPtr const &material, RenderQueue::PrimitiveMap const &primitives ) {
         auto program = material->getProgram() ? material->getProgram() : renderer->getShaderProgram( "phong" );
