@@ -106,7 +106,7 @@ void GLSimulation::init( void )
 	float g = getSettings().get( "video.clearColor.g", 0.0f );
 	float b = getSettings().get( "video.clearColor.b", 0.0f );
 	float a = getSettings().get( "video.clearColor.a", 0.0f );
-	bool fullscreen = getSettings().get( "video.fullscreen", false );
+	bool fullscreen = getSettings().get< bool >( "video.fullscreen", false );
 
 	glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 3 );
 	glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 2 );

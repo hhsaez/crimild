@@ -31,6 +31,7 @@
 #include "Foundation/Macros.hpp"
 
 #include <memory>
+#include <cstring>
 
 namespace crimild {
 

@@ -46,89 +46,95 @@ bool LuaUtils::checkLuaState( lua_State *l, int code )
 	return true;
 }
 
+namespace crimild {
 
-template<>
-bool LuaUtils::get< bool >( lua_State *l, const int index )
-{
-	return lua_toboolean( l, index );
-}
+	namespace scripting {
+		
+		template<>
+		bool LuaUtils::get< bool >( lua_State *l, const int index )
+		{
+			return lua_toboolean( l, index );
+		}
 
-template<>
-int LuaUtils::get< int >( lua_State *l, const int index )
-{
-	return lua_tointeger( l, index );
-}
+		template<>
+		int LuaUtils::get< int >( lua_State *l, const int index )
+		{
+			return lua_tointeger( l, index );
+		}
 
-template<>
-unsigned int LuaUtils::get< unsigned int >( lua_State *l, const int index )
-{
-	return lua_tounsigned( l, index );
-}
+		template<>
+		unsigned int LuaUtils::get< unsigned int >( lua_State *l, const int index )
+		{
+			return lua_tounsigned( l, index );
+		}
 
-template<>
-float LuaUtils::get< float >( lua_State *l, const int index )
-{
-	return lua_tonumber( l, index );
-}
+		template<>
+		float LuaUtils::get< float >( lua_State *l, const int index )
+		{
+			return lua_tonumber( l, index );
+		}
 
-template<>
-double LuaUtils::get< double >( lua_State *l, const int index )
-{
-	return lua_tonumber( l, index );
-}
+		template<>
+		double LuaUtils::get< double >( lua_State *l, const int index )
+		{
+			return lua_tonumber( l, index );
+		}
 
-template<>
-const char *LuaUtils::get< const char * >( lua_State *l, const int index )
-{
-	return lua_tostring( l, index );
-}
+		template<>
+		const char *LuaUtils::get< const char * >( lua_State *l, const int index )
+		{
+			return lua_tostring( l, index );
+		}
 
-template<>
-std::string LuaUtils::get< std::string >( lua_State *l, const int index )
-{
-	return lua_tostring( l, index );
-}
+		template<>
+		std::string LuaUtils::get< std::string >( lua_State *l, const int index )
+		{
+			return lua_tostring( l, index );
+		}
 
-template<>
-bool LuaUtils::checkGet< bool >( lua_State *l, const int index )
-{
-	return lua_toboolean( l, index );
-}
+		template<>
+		bool LuaUtils::checkGet< bool >( lua_State *l, const int index )
+		{
+			return lua_toboolean( l, index );
+		}
 
-template<>
-int LuaUtils::checkGet< int >( lua_State *l, const int index )
-{
-	return luaL_checkint( l, index );
-}
+		template<>
+		int LuaUtils::checkGet< int >( lua_State *l, const int index )
+		{
+			return luaL_checkint( l, index );
+		}
 
-template<>
-unsigned int LuaUtils::checkGet< unsigned int >( lua_State *l, const int index )
-{
-	return luaL_checkunsigned( l, index );
-}
+		template<>
+		unsigned int LuaUtils::checkGet< unsigned int >( lua_State *l, const int index )
+		{
+			return luaL_checkunsigned( l, index );
+		}
 
-template<>
-float LuaUtils::checkGet< float >( lua_State *l, const int index )
-{
-	return luaL_checknumber( l, index );
-}
+		template<>
+		float LuaUtils::checkGet< float >( lua_State *l, const int index )
+		{
+			return luaL_checknumber( l, index );
+		}
 
-template<>
-double LuaUtils::checkGet< double >( lua_State *l, const int index )
-{
-	return luaL_checknumber( l, index );
-}
+		template<>
+		double LuaUtils::checkGet< double >( lua_State *l, const int index )
+		{
+			return luaL_checknumber( l, index );
+		}
 
-template<>
-const char *LuaUtils::checkGet< const char * >( lua_State *l, const int index )
-{
-	return luaL_checkstring( l, index );
-}
+		template<>
+		const char *LuaUtils::checkGet< const char * >( lua_State *l, const int index )
+		{
+			return luaL_checkstring( l, index );
+		}
 
-template<>
-std::string LuaUtils::checkGet< std::string >( lua_State *l, const int index )
-{
-	return luaL_checkstring( l, index );
+		template<>
+		std::string LuaUtils::checkGet< std::string >( lua_State *l, const int index )
+		{
+			return luaL_checkstring( l, index );
+		}
+
+	}
 }
 
 void LuaUtils::push( lua_State *l )

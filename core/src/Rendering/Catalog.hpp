@@ -46,9 +46,7 @@ namespace crimild {
         
 	public:
 		
-		class Resource :
-            public SharedObject,
-            public std::enable_shared_from_this< Resource > {
+		class Resource : public SharedObject {
 			CRIMILD_DISALLOW_COPY_AND_ASSIGN( Resource )
 
 		public:

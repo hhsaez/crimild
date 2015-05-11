@@ -44,8 +44,16 @@ AssetManager::~AssetManager( void )
 	clear();
 }
 
+namespace crimild {
+
+template< class T >
+SharedPointer< T > AssetManager::get( std::string name )
+{
+    return std::static_pointer_cast< T >( _assets[ name ] );
+}
+
 template<>
-SharedPointer< Texture > AssetManager::get( std::string name )
+SharedPointer< Texture > AssetManager::get< Texture >( std::string name )
 {
 	auto texture = std::static_pointer_cast< Texture >( _assets[ name ] );
 	if ( texture == nullptr && ( StringUtils::getFileExtension( name ) == ".tga" ) ) {
@@ -57,5 +65,7 @@ SharedPointer< Texture > AssetManager::get( std::string name )
 	}
 
 	return texture;
+}
+
 }
 

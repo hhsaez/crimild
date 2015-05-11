@@ -31,6 +31,7 @@
 #include <memory>
 #include <cmath>
 #include <cassert>
+#include <cstring>
 #include <iostream>
 #include <iomanip>
 #include "Numeric.hpp"

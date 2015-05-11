@@ -26,8 +26,7 @@
  */
 
 #include "IndexBufferObjectCatalog.hpp"
-
-#include <GLFW/glfw3.h>
+#include "Utils.hpp"
 
 using namespace crimild;
 
