@@ -28,8 +28,6 @@
 #include "TextureCatalog.hpp"
 #include "Utils.hpp"
 
-#include <GLFW/glfw3.h>
-
 using namespace crimild;
 
 gl3::TextureCatalog::TextureCatalog( void )

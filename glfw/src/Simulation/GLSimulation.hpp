@@ -29,8 +29,7 @@
 #define CRIMILD_GL_SIMULATION_
 
 #include <Crimild.hpp>
-
-#include <GLFW/glfw3.h>
+#include "Rendering/GL3/Utils.hpp"
 
 namespace crimild {
 

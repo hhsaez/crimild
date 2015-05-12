@@ -73,7 +73,11 @@ void FileSystem::init( int argc, char **argv )
 
 std::string FileSystem::extractDirectory( std::string path )
 {
+#if defined _WIN32 || defined __CYGWIN__
+	return path.substr( 0, path.find_last_of( '\\' ) );
+#else
 	return path.substr( 0, path.find_last_of( '/' ) );
+#endif
 }
 
 std::string FileSystem::pathForResource( std::string filePath )

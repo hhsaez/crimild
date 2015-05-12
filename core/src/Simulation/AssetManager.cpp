@@ -46,12 +46,6 @@ AssetManager::~AssetManager( void )
 
 namespace crimild {
 
-template< class T >
-SharedPointer< T > AssetManager::get( std::string name )
-{
-    return std::static_pointer_cast< T >( _assets[ name ] );
-}
-
 template<>
 SharedPointer< Texture > AssetManager::get< Texture >( std::string name )
 {

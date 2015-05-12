@@ -30,6 +30,8 @@
 
 #include <Crimild.hpp>
 
+#include "Utils.hpp"
+
 namespace crimild {
 
 	namespace gl3 {

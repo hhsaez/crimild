@@ -30,7 +30,7 @@
 
 #include <Crimild.hpp>
 
-#include <GLFW/glfw3.h>
+#include "Rendering/GL3/Utils.hpp"
 
 #define CRIMILD_INPUT_KEY_SPACE GLFW_KEY_SPACE
 #define CRIMILD_INPUT_KEY_ESCAPE GLFW_KEY_ESC

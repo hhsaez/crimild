@@ -38,6 +38,8 @@
 
 namespace crimild {
 
+    class Texture;
+
     class AssetManager : public DynamicSingleton< AssetManager > {
         CRIMILD_DISALLOW_COPY_AND_ASSIGN( AssetManager )
         
@@ -51,7 +53,10 @@ namespace crimild {
         }
 
         template< class T >
-        SharedPointer< T > get( std::string name );
+        SharedPointer< T > get( std::string name )
+        {
+            return std::static_pointer_cast< T >( _assets[ name ] );
+        }
 
         void clear( void )
         {
@@ -61,6 +66,9 @@ namespace crimild {
     private:
         std::map< std::string, SharedObjectPtr > _assets;
     };
+
+    template<>
+    SharedPointer< Texture > AssetManager::get< Texture >( std::string name );
 
 }
 

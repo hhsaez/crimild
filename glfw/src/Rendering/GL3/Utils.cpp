@@ -27,9 +27,6 @@
 
 #include "Utils.hpp"
 
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-
 #include <sstream>
 
 using namespace crimild;

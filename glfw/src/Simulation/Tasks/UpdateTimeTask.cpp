@@ -27,7 +27,7 @@
 
 #include "UpdateTimeTask.hpp"
 
-#include <GLFW/glfw3.h>
+#include "Rendering/GL3/Utils.hpp"
 
 #include <thread>
 #include <chrono>
