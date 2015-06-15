@@ -28,12 +28,12 @@
 #ifndef CRIMILD_COMPONENTS_ROTATION_
 #define CRIMILD_COMPONENTS_ROTATION_
 
-#include "NodeComponent.hpp"
+#include "BehaviorComponent.hpp"
 #include "Mathematics/Vector.hpp"
 
 namespace crimild {
 
-	class RotationComponent : public NodeComponent {
+	class RotationComponent : public BehaviorComponent {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( RotationComponent )
 		CRIMILD_NODE_COMPONENT_NAME( "update" )
 

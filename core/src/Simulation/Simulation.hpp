@@ -28,6 +28,9 @@
 #ifndef CRIMILD_SIMULATION_
 #define CRIMILD_SIMULATION_
 
+#include "TaskManager.hpp"
+#include "Systems/System.hpp"
+
 #include "RunLoop.hpp"
 #include "Settings.hpp"
 #include "AssetManager.hpp"
@@ -35,6 +38,8 @@
 #include "Foundation/NamedObject.hpp"
 #include "Foundation/Profiler.hpp"
 #include "Foundation/Singleton.hpp"
+
+#include "Messaging/MessageQueue.hpp"
 
 #include "Mathematics/Time.hpp"
 #include "SceneGraph/Node.hpp" 
@@ -50,6 +55,7 @@ namespace crimild {
 	class Simulation : 
 		public NamedObject, 
 		public SharedObject,
+		public Messenger,
 		public DynamicSingleton< Simulation > {
 
 	public:
@@ -92,6 +98,24 @@ namespace crimild {
 		Time _simulationTime;
 		AssetManager _assetManager;
 		Profiler _profiler;
+
+	public:
+		void addTask( TaskPtr const &task );
+
+	private:
+		TaskManager _taskManager;
+
+	public:
+		void addSystem( SystemPtr const &system );
+		SystemPtr getSystem( std::string name );
+
+	private:
+		void startSystems( void );
+		void stopSystems( void );
+
+	private:
+		using SystemMap = std::map< std::string, SystemPtr >;
+		SystemMap _systems;
         
     public:
         RunLoopPtr getMainLoop( void );

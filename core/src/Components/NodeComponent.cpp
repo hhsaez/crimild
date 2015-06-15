@@ -55,11 +55,6 @@ void NodeComponent::start( void )
 
 }
 
-void NodeComponent::update( const Time &t )
-{
-
-}
-
 void NodeComponent::renderDebugInfo( SharedPointer< Renderer > const &, SharedPointer< Camera > const & )
 {
 

@@ -26,6 +26,8 @@
  */
 
 #include "Task.hpp"
+#include "TaskManager.hpp"
+#include "Simulation.hpp"
 
 using namespace crimild;
 
@@ -35,8 +37,48 @@ Task::Task( int priority )
 
 }
 
+Task::Task( void )
+	: Task( Task::RepeatMode::ONCE, Task::ThreadMode::FOREGROUND, Task::SyncMode::NONE )
+{
+
+}
+
+Task::Task( Task::RepeatMode repeatMode, Task::ThreadMode threadMode, Task::SyncMode syncMode )
+	: _repeatMode( repeatMode ),
+	  _threadMode( threadMode ),
+	  _syncMode( syncMode )
+{
+
+}
+
 Task::~Task( void )
 {
 
+}
+
+void Task::execute( void )
+{
+    Simulation::getInstance()->addTask( getSharedPointer( this ) );
+}
+
+void Task::waitResult( void )
+{
+    /*
+    Task::ScopedLock _lock( _mutex );
+    _conditionVariable.wait( _lock );
+     */
+}
+
+void Task::notifyResult( void )
+{
+    /*
+    Task::ScopedLock _lock( _mutex );
+    
+    // Manual unlocking is done before notifying, to avoid waking up
+    // the waiting thread only to block again (see notify_one for details)
+    _lock.unlock();
+
+    _conditionVariable.notify_one();
+     */
 }
 

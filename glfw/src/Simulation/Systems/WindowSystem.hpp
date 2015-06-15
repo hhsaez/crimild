@@ -25,36 +25,68 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_TIME_
-#define CRIMILD_MATHEMATICS_TIME_
+#ifndef CRIMILD_GLFW_SIMULATION_SYSTEMS_WINDOW_
+#define CRIMILD_GLFW_SIMULATION_SYSTEMS_WINDOW_
+
+#include <Crimild.hpp>
+
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+
+#include <string>
 
 namespace crimild {
 
-	class Time {
+	class WindowSystem;
+
+	namespace messages {
+
+		struct WindowSystemDidStart { 
+			WindowSystem *video;
+		};
+
+		struct WindowSystemWillStop { 
+			WindowSystem *video;
+		};
+
+		struct WindowSystemWillUpdate { 
+			WindowSystem *video;
+		};
+
+		struct WindowSystemDidUpdate { 
+			WindowSystem *video;
+		};
+
+		struct WindowSystemDidCreateWindow { 
+			WindowSystem *video;
+		};
+
+		struct WindowSystemWillDestroyWindow { 
+			WindowSystem *video;
+		};
+	}
+
+	class WindowSystem : public System {
 	public:
-		Time( void );
-        explicit Time( double deltaTime );
-		Time( const Time &t );
-		~Time( void );
+		WindowSystem( void );
+		virtual ~WindowSystem( void );
 
-		Time &operator=( const Time &t );
+		virtual bool start( void ) override;
 
-		void reset( double current = 0.0 );
-		void update( double current );
+		virtual void update( void ) override;
 
-		double getCurrentTime( void ) const { return _currentTime; }
-		void setCurrentTime( double value ) { _currentTime = value; }
+		virtual void stop( void ) override;
 
-		double getLastTime( void ) const { return _lastTime; }
-		void setLastTime( double value ) { _lastTime = value; }
-
-		double getDeltaTime( void ) const { return _deltaTime; }
-		void setDeltaTime( double value ) { _deltaTime = value; }
+	public:
+		GLFWwindow *getWindowHandler( void ) { return _window; }
 
 	private:
-		double _currentTime;
-		double _lastTime;
-		double _deltaTime;
+		bool createWindow( void );
+
+		void destroyWindow( void );
+
+	private:
+		GLFWwindow *_window;
 	};
 
 }

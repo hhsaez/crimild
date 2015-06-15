@@ -45,6 +45,9 @@
 #include "Visitors/UpdateRenderState.hpp"
 #include "Visitors/StartComponents.hpp"
 
+#include "Simulation/Systems/RenderSystem.hpp"
+#include "Simulation/Systems/UpdateSystem.hpp"
+
 using namespace crimild;
 
 Simulation::Simulation( std::string name, int argc, char **argv )
@@ -57,26 +60,29 @@ Simulation::Simulation( std::string name, int argc, char **argv, bool enableBack
 	: NamedObject( name ),
       _mainLoop( crimild::alloc< RunLoop >( "Main Loop" ) )
 {
-	if ( enableBackgroundLoop ) {
-    	_simulationLoop = crimild::alloc< ThreadedRunLoop >( "Background Loop", true );
-    }
-    else {
+	// if ( enableBackgroundLoop ) {
+    	// _simulationLoop = crimild::alloc< ThreadedRunLoop >( "Background Loop", true );
+    // }
+    // else {
     	_simulationLoop = _mainLoop;
-    }
+    // }
     
-	srand( time( NULL ) );
+	// srand( time( NULL ) );
 
 	_settings.parseCommandLine( argc, argv );
 	
 	FileSystem::getInstance().init( argc, argv );
 
+	addSystem( crimild::alloc< UpdateSystem >() );
+	addSystem( crimild::alloc< RenderSystem >() );
+
 	// todo: not sure about this
-	getMainLoop()->startTask( crimild::alloc< ProfilerDumpTask >( Priorities::END_RENDER_PRIORITY ) );
+	// getMainLoop()->startTask( crimild::alloc< ProfilerDumpTask >( Priorities::END_RENDER_PRIORITY ) );
 }
 
 Simulation::~Simulation( void )
 {
-	stop();
+	stopSystems();
 }
 
 RunLoopPtr Simulation::getMainLoop( void )
@@ -91,37 +97,94 @@ RunLoopPtr Simulation::getSimulationLoop( void )
 
 void Simulation::start( void )
 {
-	getMainLoop()->startTask( crimild::alloc< BeginRenderTask >( Priorities::BEGIN_RENDER_PRIORITY ) );
-	getMainLoop()->startTask( crimild::alloc< EndRenderTask >( Priorities::END_RENDER_PRIORITY ) );
-	getMainLoop()->startTask( crimild::alloc< RenderSceneTask >( Priorities::RENDER_SCENE_PRIORITY ) );
+	// getMainLoop()->startTask( crimild::alloc< BeginRenderTask >( Priorities::BEGIN_RENDER_PRIORITY ) );
+	// getMainLoop()->startTask( crimild::alloc< EndRenderTask >( Priorities::END_RENDER_PRIORITY ) );
+	// getMainLoop()->startTask( crimild::alloc< RenderSceneTask >( Priorities::RENDER_SCENE_PRIORITY ) );
 
-    getSimulationLoop()->startTask( crimild::alloc< DispatchMessagesTask >( Priorities::HIGHEST_PRIORITY ) );
-    getSimulationLoop()->startTask( crimild::alloc< UpdateSceneTask >( Priorities::UPDATE_SCENE_PRIORITY ) );
-    getSimulationLoop()->startTask( crimild::alloc< ComputeRenderQueueTask >( Priorities::RENDER_SCENE_PRIORITY ) );
+    // getSimulationLoop()->startTask( crimild::alloc< DispatchMessagesTask >( Priorities::HIGHEST_PRIORITY ) );
+    // getSimulationLoop()->startTask( crimild::alloc< UpdateSceneTask >( Priorities::UPDATE_SCENE_PRIORITY ) );
+    // getSimulationLoop()->startTask( crimild::alloc< ComputeRenderQueueTask >( Priorities::RENDER_SCENE_PRIORITY ) );
+
+    startSystems();
 }
 
 bool Simulation::step( void )
 {
-	bool result = _mainLoop->update();
-	return result;
+	// bool result = _mainLoop->update();
+	// return result;
+	return true;
 }
 
 void Simulation::stop( void )
 {
-    if ( _simulationLoop != nullptr ) {
-        _simulationLoop->stop();
-    }
+	broadcastMessage( messages::TerminateTasks { } );
+    // if ( _simulationLoop != nullptr ) {
+        // _simulationLoop->stop();
+    // }
     
-    if ( _mainLoop != nullptr ) {
-        _mainLoop->stop();
-    }
+    // if ( _mainLoop != nullptr ) {
+        // _mainLoop->stop();
+    // }
 }
 
 int Simulation::run( void )
 {
 	start();
-	while( step() );
+
+	_taskManager.run();
+
+	stopSystems();
+
 	return 0;
+}
+
+void Simulation::addTask( TaskPtr const &task )
+{
+	_taskManager.addTask( task );		
+}
+
+void Simulation::addSystem( SystemPtr const &system )
+{
+	Log::Debug << "Adding system " << system->getName() << Log::End;
+
+	if ( _systems.find( system->getName() ) == _systems.end() ) {
+		if ( system->getUpdater() != nullptr ) {
+			Log::Debug << "Adding task for system update" << Log::End;
+			_taskManager.addTask( system->getUpdater() );
+		}
+		else {
+			Log::Warning << "System does not provide updater" << Log::End;
+		}
+
+		_systems.insert( std::make_pair( system->getName(), system ) );
+	}
+}
+
+SystemPtr Simulation::getSystem( std::string name )
+{
+	return _systems[ name ];
+}
+
+void Simulation::startSystems( void )
+{
+	Log::Debug << "Starting systems" << Log::End;
+	for ( auto s : _systems ) {
+		if ( s.second != nullptr ) {
+			s.second->start();
+		}
+	}
+}
+
+void Simulation::stopSystems( void )
+{
+	Log::Debug << "Stopping systems" << Log::End;
+	for ( auto s : _systems ) {
+		if ( s.second != nullptr ) {
+			s.second->stop();
+		}
+	}
+    
+    _systems.clear();
 }
 
 void Simulation::setScene( NodePtr const &scene )

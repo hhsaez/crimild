@@ -28,7 +28,7 @@
 #ifndef CRIMILD_SCENEGRAPH_CAMERA_
 #define CRIMILD_SCENEGRAPH_CAMERA_
 
-#include "Node.hpp"
+#include "Group.hpp"
 
 #include "Mathematics/Matrix.hpp"
 #include "Mathematics/Frustum.hpp"
@@ -41,7 +41,7 @@ namespace crimild {
     
     class RenderPass;
 
-	class Camera : public Node {
+	class Camera : public Group {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( Camera );
         
 	public:

@@ -28,7 +28,8 @@
 #ifndef CRIMILD_CORE_COMPONENTS_PARTICLE_SYSTEM_
 #define CRIMILD_CORE_COMPONENTS_PARTICLE_SYSTEM_
 
-#include "NodeComponent.hpp"
+#include "BehaviorComponent.hpp"
+
 #include "Foundation/Macros.hpp"
 #include "Mathematics/Vector.hpp"
 #include "Primitives/Primitive.hpp"
@@ -39,7 +40,7 @@
 
 namespace crimild {
 
-	class ParticleSystemComponent : public NodeComponent {
+	class ParticleSystemComponent : public BehaviorComponent {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( ParticleSystemComponent );
 		CRIMILD_NODE_COMPONENT_NAME( "particleSystem" )
 

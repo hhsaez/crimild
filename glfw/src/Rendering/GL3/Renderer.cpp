@@ -60,6 +60,12 @@
 
 using namespace crimild;
 
+gl3::Renderer::Renderer( void )
+    : gl3::Renderer( nullptr )
+{
+    
+}
+
 gl3::Renderer::Renderer( FrameBufferObjectPtr const &screenBuffer )
 {
     setShaderProgramCatalog( crimild::alloc< gl3::ShaderProgramCatalog >() );

@@ -152,7 +152,7 @@ void ForwardRenderPass::computeShadowMaps( RendererPtr const &renderer, RenderQu
                 renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
 
                 for ( auto geometryIt : it.second ) {
-                    renderer->applyTransformations( program, map->getLightProjectionMatrix(), map->getLightViewMatrix(), geometryIt.second.computeModelMatrix() );
+                    renderer->applyTransformations( program, map->getLightProjectionMatrix(), map->getLightViewMatrix(), geometryIt.second );
                     renderer->drawPrimitive( program, primitive );
                 }
 
@@ -178,8 +178,8 @@ void ForwardRenderPass::renderShadedObjects( RendererPtr const &renderer, Render
     // bind program
     renderer->bindProgram( program );
 
-    const Matrix4f &projection = renderQueue->getProjectionMatrix();
-    const Matrix4f &view = renderQueue->getViewMatrix();
+    auto projection = renderQueue->getProjectionMatrix();
+    auto view = renderQueue->getViewMatrix();
     
     // bind shadow maps
     renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::USE_SHADOW_MAP_UNIFORM ), false );
@@ -215,7 +215,7 @@ void ForwardRenderPass::renderShadedObjects( RendererPtr const &renderer, Render
 
             for ( auto geometryIt : it.second ) {
                 CRIMILD_PROFILE( "Draw Primitive" )
-                renderer->applyTransformations( program, projection, view, geometryIt.second.computeModelMatrix() );
+                renderer->applyTransformations( program, projection, view, geometryIt.second );
                 renderer->drawPrimitive( program, primitive );
             }
             

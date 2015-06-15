@@ -25,36 +25,42 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_TIME_
-#define CRIMILD_MATHEMATICS_TIME_
+#ifndef CRIMILD_GLFW_SIMULATION_SYSTEMS_RENDER_
+#define CRIMILD_GLFW_SIMULATION_SYSTEMS_RENDER_
+
+#include "System.hpp"
+
+#include "Rendering/RenderQueue.hpp"
 
 namespace crimild {
 
-	class Time {
+	class RenderSystem;
+
+	namespace messages {
+
+		// TODO: Move to RenderQueue.hpp
+		struct RenderQueueAvailable {
+			RenderQueuePtr renderQueue;
+		};
+
+	}
+
+	class RenderSystem : public System {
 	public:
-		Time( void );
-        explicit Time( double deltaTime );
-		Time( const Time &t );
-		~Time( void );
+		RenderSystem( void );
+		virtual ~RenderSystem( void );
 
-		Time &operator=( const Time &t );
+		virtual bool start( void ) override;
 
-		void reset( double current = 0.0 );
-		void update( double current );
+		virtual void update( void ) override;
 
-		double getCurrentTime( void ) const { return _currentTime; }
-		void setCurrentTime( double value ) { _currentTime = value; }
-
-		double getLastTime( void ) const { return _lastTime; }
-		void setLastTime( double value ) { _lastTime = value; }
-
-		double getDeltaTime( void ) const { return _deltaTime; }
-		void setDeltaTime( double value ) { _deltaTime = value; }
+		virtual void stop( void ) override;
 
 	private:
-		double _currentTime;
-		double _lastTime;
-		double _deltaTime;
+		void onRenderQueueAvailable( messages::RenderQueueAvailable const &message );
+
+	private:
+		RenderQueuePtr _renderQueue;
 	};
 
 }

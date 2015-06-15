@@ -25,36 +25,86 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_TIME_
-#define CRIMILD_MATHEMATICS_TIME_
+#ifndef CRIMILD_SIMULATION_SYSTEM_
+#define CRIMILD_SIMULATION_SYSTEM_
+
+#include "Foundation/SharedObject.hpp"
+#include "Foundation/NamedObject.hpp"
+#include "Foundation/Memory.hpp"
+
+#include "Messaging/MessageQueue.hpp"
+
+#include "Simulation/Task.hpp"
+
+#include <string>
 
 namespace crimild {
 
-	class Time {
+	class System;
+
+	using SystemPtr = SharedPointer< System >;
+
+	namespace messages {
+
+		struct SystemWillStart {
+			SystemPtr system;
+		};
+
+		struct SystemWillStop {
+			SystemPtr system;
+		};
+
+	}
+
+	class System : 
+		public SharedObject,
+		public NamedObject,
+		public Messenger {
+
+		CRIMILD_DISALLOW_COPY_AND_ASSIGN( System )
+
 	public:
-		Time( void );
-        explicit Time( double deltaTime );
-		Time( const Time &t );
-		~Time( void );
+		class Updater : public Task {
+		public:
+			Updater( System *system )
+				: _system( system )
+			{
+				setRepeatMode( Task::RepeatMode::REPEAT );
+			}
 
-		Time &operator=( const Time &t );
+			virtual ~Updater( void )
+			{
 
-		void reset( double current = 0.0 );
-		void update( double current );
+			}
 
-		double getCurrentTime( void ) const { return _currentTime; }
-		void setCurrentTime( double value ) { _currentTime = value; }
+			virtual void run( void ) override 
+			{
+				_system->update();
+			}
 
-		double getLastTime( void ) const { return _lastTime; }
-		void setLastTime( double value ) { _lastTime = value; }
+		private:
+			System *_system;
+		};
 
-		double getDeltaTime( void ) const { return _deltaTime; }
-		void setDeltaTime( double value ) { _deltaTime = value; }
+		using UpdaterPtr = SharedPointer< Updater >;
+
+	public:
+		explicit System( std::string name );
+
+		virtual ~System( void );
+
+		virtual bool start( void );
+
+		virtual void stop( void );
+
+		virtual void update( void );
+
+		void enableUpdater( void );
+
+		UpdaterPtr getUpdater( void ) { return _updater; }
 
 	private:
-		double _currentTime;
-		double _lastTime;
-		double _deltaTime;
+		UpdaterPtr _updater;
 	};
 
 }

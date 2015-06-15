@@ -36,7 +36,8 @@ namespace crimild {
 
 		class Renderer : public crimild::Renderer {
 		public:
-			Renderer( FrameBufferObjectPtr const &screenBuffer );
+            Renderer( void );
+			explicit Renderer( FrameBufferObjectPtr const &screenBuffer );
 			virtual ~Renderer( void );
 
 			virtual void configure( void ) override;

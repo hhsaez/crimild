@@ -25,37 +25,48 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_TIME_
-#define CRIMILD_MATHEMATICS_TIME_
+#ifndef CRIMILD_SIMULATION_TASK_GROUP_
+#define CRIMILD_SIMULATION_TASK_GROUP_
+
+#include "Foundation/ConcurrentList.hpp"
+
+#include "Messaging/MessageQueue.hpp"
+
+#include "Simulation/Task.hpp"
 
 namespace crimild {
-
-	class Time {
-	public:
-		Time( void );
-        explicit Time( double deltaTime );
-		Time( const Time &t );
-		~Time( void );
-
-		Time &operator=( const Time &t );
-
-		void reset( double current = 0.0 );
-		void update( double current );
-
-		double getCurrentTime( void ) const { return _currentTime; }
-		void setCurrentTime( double value ) { _currentTime = value; }
-
-		double getLastTime( void ) const { return _lastTime; }
-		void setLastTime( double value ) { _lastTime = value; }
-
-		double getDeltaTime( void ) const { return _deltaTime; }
-		void setDeltaTime( double value ) { _deltaTime = value; }
-
-	private:
-		double _currentTime;
-		double _lastTime;
-		double _deltaTime;
-	};
+    
+    class TaskGroup;
+    
+    using TaskGroupPtr = SharedPointer< TaskGroup >;
+    
+    namespace messages {
+        
+        struct TaskGroupCompleted {
+            TaskGroupPtr taskGroup;
+        };
+        
+    }
+    
+    class TaskGroup :
+        public SharedObject,
+        public Messenger {
+            
+        CRIMILD_DISALLOW_COPY_AND_ASSIGN( TaskGroup )
+        
+    private:
+        using TaskList = ConcurrentList< TaskPtr >;
+        using CompletionCallback = std::function< void( void ) >;
+        
+    public:
+        TaskGroup( std::list< TaskPtr > tasks, CompletionCallback completion );
+        virtual ~TaskGroup( void );
+        
+        TaskList &getTasks( void ) { return _tasks; }
+        
+    private:
+        TaskList _tasks;
+    };
 
 }
 

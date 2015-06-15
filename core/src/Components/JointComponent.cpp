@@ -43,7 +43,7 @@ JointComponent::~JointComponent( void )
 
 void JointComponent::computeInverseBindMatrix( void )
 {
-	getNode()->perform( UpdateWorldState() );
+//	getNode()->perform( UpdateWorldState() );
 	Matrix4f bindMatrix( getNode()->getWorld().computeModelMatrix() );
 	_inverseBindMatrix = bindMatrix.makeInverse();
 }

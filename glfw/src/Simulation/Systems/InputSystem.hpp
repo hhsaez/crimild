@@ -25,36 +25,35 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_TIME_
-#define CRIMILD_MATHEMATICS_TIME_
+#ifndef CRIMILD_GLFW_SIMULATION_SYSTEMS_INPUT_
+#define CRIMILD_GLFW_SIMULATION_SYSTEMS_INPUT_
+
+#include <Crimild.hpp>
+
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
 namespace crimild {
 
-	class Time {
+	namespace messages {
+
+	}
+
+	class InputSystem : public System {
 	public:
-		Time( void );
-        explicit Time( double deltaTime );
-		Time( const Time &t );
-		~Time( void );
+		InputSystem( void );
+		virtual ~InputSystem( void );
 
-		Time &operator=( const Time &t );
+		virtual bool start( void ) override;
 
-		void reset( double current = 0.0 );
-		void update( double current );
+		virtual void update( void ) override;
 
-		double getCurrentTime( void ) const { return _currentTime; }
-		void setCurrentTime( double value ) { _currentTime = value; }
-
-		double getLastTime( void ) const { return _lastTime; }
-		void setLastTime( double value ) { _lastTime = value; }
-
-		double getDeltaTime( void ) const { return _deltaTime; }
-		void setDeltaTime( double value ) { _deltaTime = value; }
-
-	private:
-		double _currentTime;
-		double _lastTime;
-		double _deltaTime;
+		virtual void stop( void ) override;
+        
+    private:
+        GLFWwindow *_window;
+        int _windowWidth;
+        int _windowHeight;
 	};
 
 }

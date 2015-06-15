@@ -25,39 +25,45 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_TIME_
-#define CRIMILD_MATHEMATICS_TIME_
+#include "System.hpp"
 
-namespace crimild {
+#include "Foundation/Log.hpp"
 
-	class Time {
-	public:
-		Time( void );
-        explicit Time( double deltaTime );
-		Time( const Time &t );
-		~Time( void );
+using namespace crimild;
 
-		Time &operator=( const Time &t );
-
-		void reset( double current = 0.0 );
-		void update( double current );
-
-		double getCurrentTime( void ) const { return _currentTime; }
-		void setCurrentTime( double value ) { _currentTime = value; }
-
-		double getLastTime( void ) const { return _lastTime; }
-		void setLastTime( double value ) { _lastTime = value; }
-
-		double getDeltaTime( void ) const { return _deltaTime; }
-		void setDeltaTime( double value ) { _deltaTime = value; }
-
-	private:
-		double _currentTime;
-		double _lastTime;
-		double _deltaTime;
-	};
+System::System( std::string name )
+	: NamedObject( name )
+{
 
 }
 
-#endif
+System::~System( void )
+{
+
+}
+
+bool System::start( void )
+{
+	Log::Debug << "Starting system " << getName() << Log::End;
+	broadcastMessage( messages::SystemWillStart { getSharedPointer< System >( this ) } );
+
+	return true;
+}
+
+void System::stop( void )
+{
+	Log::Debug << "Stopping system " << getName() << Log::End;
+	broadcastMessage( messages::SystemWillStop { getSharedPointer< System >( this ) } );
+}
+
+void System::enableUpdater( void )
+{
+	Log::Debug << "Enabling updater for '" << getName() << "'" << Log::End;
+	_updater = crimild::alloc< System::Updater >( this );
+}
+
+void System::update( void )
+{
+
+}
 

@@ -25,36 +25,37 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_TIME_
-#define CRIMILD_MATHEMATICS_TIME_
+#ifndef CRIMILD_GLFW_SIMULATION_SYSTEMS_UPDATE_
+#define CRIMILD_GLFW_SIMULATION_SYSTEMS_UPDATE_
+
+#include "System.hpp"
 
 namespace crimild {
 
-	class Time {
+	class UpdateSystem;
+
+	namespace messages {
+
+	}
+
+	class UpdateSystem : public System {
 	public:
-		Time( void );
-        explicit Time( double deltaTime );
-		Time( const Time &t );
-		~Time( void );
+		UpdateSystem( void );
+		virtual ~UpdateSystem( void );
 
-		Time &operator=( const Time &t );
+		virtual bool start( void ) override;
 
-		void reset( double current = 0.0 );
-		void update( double current );
+		virtual void update( void ) override;
 
-		double getCurrentTime( void ) const { return _currentTime; }
-		void setCurrentTime( double value ) { _currentTime = value; }
-
-		double getLastTime( void ) const { return _lastTime; }
-		void setLastTime( double value ) { _lastTime = value; }
-
-		double getDeltaTime( void ) const { return _deltaTime; }
-		void setDeltaTime( double value ) { _deltaTime = value; }
+		virtual void stop( void ) override;
+        
+    private:
+        void step( void );
+        void updateWorldState( void );
+        void computeRenderQueue( void );
 
 	private:
-		double _currentTime;
-		double _lastTime;
-		double _deltaTime;
+		double _accumulator = 0.0;
 	};
 
 }

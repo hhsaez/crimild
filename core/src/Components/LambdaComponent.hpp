@@ -28,7 +28,7 @@
 #ifndef CRIMILD_COMPONENTS_LAMBDA_
 #define CRIMILD_COMPONENTS_LAMBDA_
 
-#include "NodeComponent.hpp"
+#include "BehaviorComponent.hpp"
 
 #include "SceneGraph/Node.hpp"
 
@@ -36,7 +36,7 @@
 
 namespace crimild {
 
-	class LambdaComponent : public NodeComponent {
+	class LambdaComponent : public BehaviorComponent {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( LambdaComponent )
 		CRIMILD_NODE_COMPONENT_NAME( "update" )
 

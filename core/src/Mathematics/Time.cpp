@@ -34,6 +34,13 @@ Time::Time( void )
 	reset();
 }
 
+Time::Time( double deltaTime )
+{
+    reset();
+    
+    _deltaTime = deltaTime;
+}
+
 Time::Time( const Time &t )
 {
 	_currentTime = t._currentTime;

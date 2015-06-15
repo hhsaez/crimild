@@ -25,39 +25,32 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_TIME_
-#define CRIMILD_MATHEMATICS_TIME_
+#include "TaskGroup.hpp"
 
-namespace crimild {
+using namespace crimild;
 
-	class Time {
-	public:
-		Time( void );
-        explicit Time( double deltaTime );
-		Time( const Time &t );
-		~Time( void );
-
-		Time &operator=( const Time &t );
-
-		void reset( double current = 0.0 );
-		void update( double current );
-
-		double getCurrentTime( void ) const { return _currentTime; }
-		void setCurrentTime( double value ) { _currentTime = value; }
-
-		double getLastTime( void ) const { return _lastTime; }
-		void setLastTime( double value ) { _lastTime = value; }
-
-		double getDeltaTime( void ) const { return _deltaTime; }
-		void setDeltaTime( double value ) { _deltaTime = value; }
-
-	private:
-		double _currentTime;
-		double _lastTime;
-		double _deltaTime;
-	};
-
+TaskGroup::TaskGroup( std::list< TaskPtr > tasks, TaskGroup::CompletionCallback completion )
+{
+    for ( auto t : tasks ) {
+        _tasks.add( t );
+    }
+    
+    auto self = this;
+    registerMessageHandler< messages::TaskCompleted >( [self, completion]( messages::TaskCompleted const &message ) {
+        auto group = getSharedPointer( self );
+        group->getTasks().remove( message.task );
+        if ( group->getTasks().empty() ) {
+            if ( completion != nullptr ) {
+                completion();
+            }
+            
+            group->broadcastMessage( messages::TaskGroupCompleted { group } );
+        }
+    });
 }
 
-#endif
+TaskGroup::~TaskGroup( void )
+{
+    
+}
 

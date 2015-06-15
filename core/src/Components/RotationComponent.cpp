@@ -50,6 +50,6 @@ void RotationComponent::update( const Time &t )
 {
 	getNode()->local().rotate().fromAxisAngle( _axis, _time * 2.0f * Numericf::PI );
 	_time += _speed * t.getDeltaTime();
-	getNode()->perform( UpdateWorldState() );
+//	getNode()->perform( UpdateWorldState() );
 }
 

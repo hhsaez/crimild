@@ -35,10 +35,10 @@ using namespace crimild;
 using namespace crimild::scripting;
 
 LoadSceneTask::LoadSceneTask( int priority, std::string sceneFileName, SceneBuilderPtr const &builder )
-	: Task( priority ),
-	  _sceneFileName( sceneFileName ),
+	: _sceneFileName( sceneFileName ),
       _builder( builder != nullptr ? builder : crimild::alloc< SceneBuilder >() )
 {
+
 #if CRIMILD_ENABLE_PHYSICS
 	getBuilder()->registerComponentBuilder< physics::RigidBodyComponent >( []( ScriptContext::Iterable &it ) {
         auto rigidBody = crimild::alloc< RigidBodyComponent >();
@@ -54,8 +54,12 @@ LoadSceneTask::LoadSceneTask( int priority, std::string sceneFileName, SceneBuil
 	});
 #endif
 
-	CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( Messages::LoadScene, LoadSceneTask, loadScene );
-	CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( Messages::ReloadScene, LoadSceneTask, reloadScene );
+	setRepeatMode( Task::RepeatMode::ONCE );
+	setThreadMode( Task::ThreadMode::BACKGROUND );
+	// setSyncMode( Task::SyncMode::NONE );
+
+	// CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( Messages::LoadScene, LoadSceneTask, loadScene );
+	// CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( Messages::ReloadScene, LoadSceneTask, reloadScene );
 }
 
 LoadSceneTask::~LoadSceneTask( void )
@@ -68,6 +72,29 @@ void LoadSceneTask::start( void )
 
 }
 
+void LoadSceneTask::run( void )
+{
+	load();
+}
+
+void LoadSceneTask::load( void )
+{
+	Log::Debug << "Loading " << _sceneFileName << Log::End;
+
+	// clear current scene
+    Simulation::getInstance()->setScene( nullptr );
+    AssetManager::getInstance()->clear();
+    MessageQueue::getInstance()->clear();
+    
+    getBuilder()->reset();
+    auto scene = getBuilder()->fromFile( FileSystem::getInstance().pathForResource( _sceneFileName ) );
+    Simulation::getInstance()->setScene( scene );
+
+    Log::Debug << "Scene Loaded" << Log::End;
+    
+    broadcastMessage( Messages::SceneLoaded() );
+}
+
 void LoadSceneTask::update( void )
 {
 	load();    
@@ -77,20 +104,6 @@ void LoadSceneTask::update( void )
 void LoadSceneTask::stop( void )
 {
 
-}
-
-void LoadSceneTask::load( void )
-{
-	// clear current scene
-    Simulation::getInstance()->setScene( nullptr );
-    AssetManager::getInstance()->clear();
-    MessageQueue::getInstance()->clear();
-    
-    getBuilder()->reset();
-    auto scene = getBuilder()->fromFile( FileSystem::getInstance().pathForResource( _sceneFileName ) );
-    Simulation::getInstance()->setScene( scene );
-    
-    broadcastMessage( Messages::SceneLoaded() );
 }
 
 void LoadSceneTask::loadScene( Messages::LoadScene const &message )

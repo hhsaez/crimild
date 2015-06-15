@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,38 +25,72 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_TIME_
-#define CRIMILD_MATHEMATICS_TIME_
+#ifndef CRIMILD_FOUNDATION_CONCURRENT_LIST_
+#define CRIMILD_FOUNDATION_CONCURRENT_LIST_
+
+#include <list>
+#include <thread>
 
 namespace crimild {
-
-	class Time {
-	public:
-		Time( void );
-        explicit Time( double deltaTime );
-		Time( const Time &t );
-		~Time( void );
-
-		Time &operator=( const Time &t );
-
-		void reset( double current = 0.0 );
-		void update( double current );
-
-		double getCurrentTime( void ) const { return _currentTime; }
-		void setCurrentTime( double value ) { _currentTime = value; }
-
-		double getLastTime( void ) const { return _lastTime; }
-		void setLastTime( double value ) { _lastTime = value; }
-
-		double getDeltaTime( void ) const { return _deltaTime; }
-		void setDeltaTime( double value ) { _deltaTime = value; }
-
-	private:
-		double _currentTime;
-		double _lastTime;
-		double _deltaTime;
-	};
-
+    
+    template< class T >
+    class ConcurrentList {
+    public:
+    private:
+        using List = std::list< T >;
+        using Mutex = std::mutex;
+        using ScopedLock = std::unique_lock< Mutex >;
+        using Condition = std::condition_variable;
+        
+    public:
+        ConcurrentList( void )
+        {
+            
+        }
+        
+        ~ConcurrentList( void )
+        {
+            
+        }
+        
+        bool empty( void ) const
+        {
+            ScopedLock lock( _mutex );
+            return _list.empty();
+        }
+        
+        std::size_t size( void ) const
+        {
+            ScopedLock lock( _mutex );
+            return _list.size();
+        }
+        
+        void add( T const &value )
+        {
+            ScopedLock lock( _mutex );
+            _list.push_back( value );
+        }
+        
+        void remove( T const &value )
+        {
+            ScopedLock lock( _mutex );
+            _list.remove( value );
+        }
+        
+        void each( std::function< void( T const & ) > callback )
+        {
+            ScopedLock lock( _mutex );
+            auto elems = _list;
+            lock.unlock();
+            
+            for ( auto &e : elems ) callback( e );
+        }
+        
+    private:
+        List _list;
+        mutable Mutex _mutex;
+    };
+    
 }
 
 #endif

@@ -109,7 +109,7 @@ void AudioComponent::play( bool loop )
 {
 	CRIMILD_CHECK_AL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
-	getNode()->perform( UpdateWorldState() );
+//	getNode()->perform( UpdateWorldState() );
 
 	alSourcei( _sourceId, AL_LOOPING, loop ? AL_TRUE : AL_FALSE );
 	const Vector3f &translate = getNode()->getWorld().getTranslate();

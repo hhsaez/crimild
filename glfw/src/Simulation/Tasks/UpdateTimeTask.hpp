@@ -47,6 +47,8 @@ namespace crimild {
 		UpdateTimeTask( int priority );
 		virtual ~UpdateTimeTask( void );
 
+		virtual void run( void ) override;
+
 		virtual void start( void ) override;
 		virtual void update( void ) override;
 		virtual void stop( void ) override;

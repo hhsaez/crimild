@@ -54,6 +54,8 @@ namespace crimild {
 
 		scripting::SceneBuilderPtr getBuilder( void ) { return _builder; }
 
+		virtual void run( void ) override;
+
 		virtual void start( void ) override;
 		virtual void update( void ) override;
 		virtual void stop( void ) override;

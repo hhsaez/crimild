@@ -80,7 +80,12 @@ NodePtr SceneBuilder::buildNode( ScriptContext::Iterable &it, GroupPtr const &pa
 		Log::Debug << "Building 'camera' node" << Log::End;
         auto camera = crimild::alloc< Camera >( 90.0f, 4.0f / 3.0f, 1.0f, 1000.0f );
 		setupCamera( it, camera );
-		current = camera;
+        
+        it.foreach( GROUP_NODES, [&]( ScriptContext &c, ScriptContext::Iterable &childId ) {
+            buildNode( childId, camera );
+        });
+
+        current = camera;
 	}
 	else if ( type == LIGHT_TYPE ) {
 		Log::Debug << "Building 'light' node" << Log::End;

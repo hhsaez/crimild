@@ -28,13 +28,13 @@
 #ifndef CRIMILD_COMPONENTS_ORBIT_
 #define CRIMILD_COMPONENTS_ORBIT_
 
-#include "NodeComponent.hpp"
+#include "BehaviorComponent.hpp"
 
 #include "Mathematics/Vector.hpp"
 
 namespace crimild {
 
-	class OrbitComponent : public NodeComponent {
+	class OrbitComponent : public BehaviorComponent {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( OrbitComponent )
 		CRIMILD_NODE_COMPONENT_NAME( "update" )
 

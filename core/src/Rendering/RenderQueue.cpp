@@ -31,7 +31,7 @@ using namespace crimild;
 
 RenderQueue::RenderQueue( void )
 {
-    
+    setTimestamp( std::chrono::duration_cast< std::chrono::milliseconds >( std::chrono::system_clock::now().time_since_epoch() ).count() );
 }
 
 RenderQueue::~RenderQueue( void )
@@ -65,13 +65,13 @@ void RenderQueue::setCamera( CameraPtr const &camera )
 void RenderQueue::push( MaterialPtr const &material, PrimitivePtr const &primitive, GeometryPtr const &geometry, const TransformationImpl &world, bool renderOnScreen )
 {
     if ( renderOnScreen ) {
-        _screenObjects[ material ][ primitive ].push_back( std::make_pair( geometry, world ) );
+        _screenObjects[ material ][ primitive ].push_back( std::make_pair( geometry, world.computeModelMatrix() ) );
     }
     else if ( material->getAlphaState()->isEnabled() || material->getProgram() != nullptr ) {
-        _translucentObjects[ material ][ primitive ].push_back( std::make_pair( geometry, world ) );
+        _translucentObjects[ material ][ primitive ].push_back( std::make_pair( geometry, world.computeModelMatrix() ) );
     }
     else {
-        _opaqueObjects[ material ][ primitive ].push_back( std::make_pair( geometry, world ) );
+        _opaqueObjects[ material ][ primitive ].push_back( std::make_pair( geometry, world.computeModelMatrix() ) );
     }
 }
 

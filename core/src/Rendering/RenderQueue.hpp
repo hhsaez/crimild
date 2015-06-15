@@ -40,12 +40,13 @@
 
 #include <functional>
 #include <vector>
+#include <chrono>
 
 namespace crimild {
 
     class RenderQueue : public SharedObject {
     public:
-        using GeometryContext = std::pair< GeometryPtr, TransformationImpl >;
+        using GeometryContext = std::pair< GeometryPtr, Matrix4f >;
         using PrimitiveMap = std::map< PrimitivePtr, std::vector< GeometryContext >>;
         using MaterialMap = std::map< MaterialPtr, PrimitiveMap >;
 
@@ -80,6 +81,13 @@ namespace crimild {
         MaterialMap _opaqueObjects;
         MaterialMap _translucentObjects;
         MaterialMap _screenObjects;
+        
+    public:
+        unsigned long getTimestamp( void ) const { return _timestamp; }
+        void setTimestamp( unsigned long value ) { _timestamp = value; }
+        
+    private:
+        std::chrono::microseconds::rep _timestamp;
     };
     
     using RenderQueuePtr = SharedPointer< RenderQueue >;

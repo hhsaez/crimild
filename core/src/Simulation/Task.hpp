@@ -35,13 +35,87 @@ namespace crimild {
 
 	class RunLoop;
 
+	class Task;
+
+	using TaskPtr = SharedPointer< Task >;
+
+	namespace messages {
+
+		struct TaskCompleted {
+			TaskPtr task;
+		};
+
+		struct TaskStarted { 
+			TaskPtr task;
+		};
+
+	}
+
 	class Task : public SharedObject {
+		CRIMILD_DISALLOW_COPY_AND_ASSIGN( Task )
+        
+    private:
+        using Mutex = std::mutex;
+        using Condition = std::condition_variable;
+        using ScopedLock = std::unique_lock< Mutex >;
+
+	public:
+		enum class RepeatMode {
+			ONCE,
+			REPEAT
+		};
+
+		enum class ThreadMode {
+			FOREGROUND,
+			BACKGROUND
+		};
+
+		enum class SyncMode {
+			FRAME,
+			NONE
+		};
+
 	protected:
-		Task( int priority = 0 );
+		Task( void );
+		explicit Task( RepeatMode repeatMode, ThreadMode threadMode, SyncMode syncMode );
 
 	public:
 		virtual ~Task( void );
 
+		void setRepeatMode( RepeatMode value ) { _repeatMode = value; }
+		RepeatMode getRepeatMode( void ) const { return _repeatMode; }
+
+		void setThreadMode( ThreadMode value ) { _threadMode = value; }
+		ThreadMode getThreadMode( void ) const { return _threadMode; }
+
+		void setSyncMode( SyncMode value ) { _syncMode = value; }
+		SyncMode getSyncMode( void ) const { return _syncMode; }
+
+		// TODO: this should be abstract
+		virtual void run( void ) { }
+        
+        void execute( void );
+        
+        void waitResult( void );
+        
+        // internal use only
+        void notifyResult( void );
+
+	private:
+		RepeatMode _repeatMode;
+		ThreadMode _threadMode;
+		SyncMode _syncMode;
+        
+        Mutex _mutex;
+        Condition _conditionVariable;
+
+		/****************************************
+		 Deprecated from here
+		 ****************************************/
+	protected:
+		explicit Task( int priority );
+
+	public:
 		int getPriority( void ) const { return _priority; }
 
 	private:

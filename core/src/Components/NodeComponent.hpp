@@ -77,11 +77,6 @@ namespace crimild {
 		virtual void start( void );
 
 		/**
-		   \brief Invoked multiple times (usually once per simulation step)
-		*/
-		virtual void update( const Time &t );
-
-		/**
 			\brief Invoked only if debug rendering is enabled
 		*/
         virtual void renderDebugInfo( SharedPointer< Renderer > const &renderer, SharedPointer< Camera > const &camera );

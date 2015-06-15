@@ -70,6 +70,7 @@ void ProfilerConsoleOutputHandler::endOutput( void )
 
 ProfilerSample::ProfilerSample( std::string name )
 {
+    assert( Profiler::getInstance() != nullptr && "Profiler not initialized" );
     _sampleIndex = Profiler::getInstance()->onSampleCreated( name );
 }
 

@@ -25,36 +25,75 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_TIME_
-#define CRIMILD_MATHEMATICS_TIME_
+#ifndef CRIMILD_FOUNDATION_CONCURRENT_QUEUE_
+#define CRIMILD_FOUNDATION_CONCURRENT_QUEUE_
+
+#include <queue>
+#include <thread>
 
 namespace crimild {
 
-	class Time {
+	template< typename T >
+	class ConcurrentQueue {
+	private:
+		using Queue = std::queue< T >;
+		using Mutex = std::mutex;
+		using ScopedLock = std::unique_lock< Mutex >;
+		using Condition = std::condition_variable;
+
 	public:
-		Time( void );
-        explicit Time( double deltaTime );
-		Time( const Time &t );
-		~Time( void );
+		bool empty( void ) const 
+		{
+			ScopedLock lock( _mutex );
+			return _queue.empty();
+		}
 
-		Time &operator=( const Time &t );
+		std::size_t size( void ) const
+		{
+			ScopedLock lock( _mutex );
+			return _queue.size();
+		}
 
-		void reset( double current = 0.0 );
-		void update( double current );
+		void push( T const &value ) 
+		{
+			ScopedLock lock( _mutex );
+			_queue.push( value );
+			lock.unlock();
 
-		double getCurrentTime( void ) const { return _currentTime; }
-		void setCurrentTime( double value ) { _currentTime = value; }
+			_condition.notify_one();
+		}
 
-		double getLastTime( void ) const { return _lastTime; }
-		void setLastTime( double value ) { _lastTime = value; }
+		bool tryPop( T &result )
+		{
+			ScopedLock lock( _mutex );
 
-		double getDeltaTime( void ) const { return _deltaTime; }
-		void setDeltaTime( double value ) { _deltaTime = value; }
+			if ( _queue.empty() ) {
+				return false;
+			}
+
+			result = _queue.front();
+			_queue.pop();
+			return true;
+		}
+
+		T waitPop( void )
+		{
+			ScopedLock lock( _mutex );
+
+			while ( _queue.empty() ) {
+				_condition.wait( lock );
+			}
+
+			T result( _queue.front() );
+			_queue.pop();
+
+			return result;
+		}
 
 	private:
-		double _currentTime;
-		double _lastTime;
-		double _deltaTime;
+		Queue _queue;
+		mutable Mutex _mutex;
+		Condition _condition;
 	};
 
 }

@@ -30,6 +30,7 @@
 
 #include <Crimild.hpp>
 
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
 #define CRIMILD_INPUT_KEY_SPACE GLFW_KEY_SPACE
@@ -117,12 +118,16 @@
 
 namespace crimild {
 
-	class UpdateInputStateTask : public Task {
+	class UpdateInputStateTask :
+        public Task,
+        public Messenger {
 	public:
-		UpdateInputStateTask( int priority, GLFWwindow *window );
+		UpdateInputStateTask( int priority, GLFWwindow *window = nullptr );
 		virtual ~UpdateInputStateTask( void );
 
-		virtual void start( void ) override;
+        virtual void run( void ) override;
+
+        virtual void start( void ) override;
 		virtual void update( void ) override;
 		virtual void stop( void ) override;
 
