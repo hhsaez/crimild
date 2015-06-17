@@ -35,6 +35,8 @@
 
 using namespace crimild;
 
+#if 0
+
 ComputeRenderQueueTask::ComputeRenderQueueTask( int priority )
 	: Task( priority )
 {
@@ -74,4 +76,6 @@ void ComputeRenderQueueTask::stop( void )
 {
 
 }
+
+#endif
 

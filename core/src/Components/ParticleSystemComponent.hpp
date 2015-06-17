@@ -51,7 +51,7 @@ namespace crimild {
 
 		virtual void onAttach( void ) override;
 
-		virtual void update( const Time &t ) override;
+		virtual void update( const Clock &t ) override;
 
 		void setParticleCount( unsigned short value ) { _particleCount = value; }
 		unsigned short getParticleCount( void ) const { return _particleCount; }

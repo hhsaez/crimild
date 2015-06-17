@@ -30,8 +30,11 @@
 
 #include "System.hpp"
 
-namespace crimild {
+#include "SceneGraph/Node.hpp"
+#include "SceneGraph/Camera.hpp"
 
+namespace crimild {
+    
 	class UpdateSystem;
 
 	namespace messages {
@@ -45,19 +48,19 @@ namespace crimild {
 
 		virtual bool start( void ) override;
 
-		virtual void update( void ) override;
+		virtual void update( void );
 
 		virtual void stop( void ) override;
         
     private:
-        void step( void );
-        void updateWorldState( void );
-        void computeRenderQueue( void );
+        void updateBehaviors( NodePtr const &scene );
+        void updateWorldState( NodePtr const &scene );
+        void computeRenderQueue( NodePtr const &scene, CameraPtr const &camera );
 
 	private:
 		double _accumulator = 0.0;
 	};
-
+    
 }
 
 #endif

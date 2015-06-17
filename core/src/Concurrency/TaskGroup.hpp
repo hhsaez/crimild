@@ -25,27 +25,50 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SIMULATION_TASKS_UPDATE_SCENE_
-#define CRIMILD_SIMULATION_TASKS_UPDATE_SCENE_
+#ifndef CRIMILD_CONCURRENCY_TASK_GROUP_
+#define CRIMILD_CONCURRENCY_TASK_GROUP_
 
-//#include "Simulation/Task.hpp"
+#include "Task.hpp"
+
+#include "Foundation/ConcurrentList.hpp"
+
+#include "Messaging/MessageQueue.hpp"
 
 namespace crimild {
     
 #if 0
-
-	class UpdateSceneTask : public Task {
-	public:
-		UpdateSceneTask( int priority );
-		virtual ~UpdateSceneTask( void );
-
-		virtual void start( void ) override;
-		virtual void update( void ) override;
-		virtual void stop( void ) override;
+    
+    class TaskGroup;
+    
+    using TaskGroupPtr = SharedPointer< TaskGroup >;
+    
+    namespace messages {
         
-	private:
-		double _accumulator;
-	};
+        struct TaskGroupCompleted {
+            TaskGroupPtr taskGroup;
+        };
+        
+    }
+    
+    class TaskGroup :
+        public SharedObject,
+        public Messenger {
+            
+        CRIMILD_DISALLOW_COPY_AND_ASSIGN( TaskGroup )
+        
+    private:
+        using TaskList = ConcurrentList< TaskPtr >;
+        using CompletionCallback = std::function< void( void ) >;
+        
+    public:
+        TaskGroup( std::list< TaskPtr > tasks, CompletionCallback completion );
+        virtual ~TaskGroup( void );
+        
+        TaskList &getTasks( void ) { return _tasks; }
+        
+    private:
+        TaskList _tasks;
+    };
     
 #endif
 

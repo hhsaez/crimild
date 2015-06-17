@@ -28,9 +28,11 @@
 #ifndef CRIMILD_SIMULATION_TASKS_ASYNC_
 #define CRIMILD_SIMULATION_TASKS_ASYNC_
 
-#include "Simulation/Task.hpp"
+//#include "Simulation/Task.hpp"
 
 namespace crimild {
+    
+#if 0
 
 	class AsyncTask : public Task {
     private:
@@ -45,6 +47,8 @@ namespace crimild {
     private:
         Callback _callback;
     };
+    
+#endif
 
 }
 

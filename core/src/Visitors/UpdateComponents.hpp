@@ -30,13 +30,14 @@
 
 #include "Apply.hpp"
 
-#include "Mathematics/Time.hpp"
+#include "Mathematics/Clock.hpp"
 
 namespace crimild {
 
+    // TODO: Deprecated
 	class UpdateComponents : public Apply {
 	public:
-		UpdateComponents( const Time &t );
+		UpdateComponents( const Clock &t );
 		virtual ~UpdateComponents( void );
 	};
 

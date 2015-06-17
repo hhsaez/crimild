@@ -34,24 +34,20 @@
 
 #include "Messaging/MessageQueue.hpp"
 
-#include "Simulation/Task.hpp"
-
 #include <string>
 
 namespace crimild {
-
+    
 	class System;
-
-	using SystemPtr = SharedPointer< System >;
 
 	namespace messages {
 
 		struct SystemWillStart {
-			SystemPtr system;
+			System *system;
 		};
 
 		struct SystemWillStop {
-			SystemPtr system;
+			System *system;
 		};
 
 	}
@@ -64,31 +60,6 @@ namespace crimild {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( System )
 
 	public:
-		class Updater : public Task {
-		public:
-			Updater( System *system )
-				: _system( system )
-			{
-				setRepeatMode( Task::RepeatMode::REPEAT );
-			}
-
-			virtual ~Updater( void )
-			{
-
-			}
-
-			virtual void run( void ) override 
-			{
-				_system->update();
-			}
-
-		private:
-			System *_system;
-		};
-
-		using UpdaterPtr = SharedPointer< Updater >;
-
-	public:
 		explicit System( std::string name );
 
 		virtual ~System( void );
@@ -96,17 +67,10 @@ namespace crimild {
 		virtual bool start( void );
 
 		virtual void stop( void );
-
-		virtual void update( void );
-
-		void enableUpdater( void );
-
-		UpdaterPtr getUpdater( void ) { return _updater; }
-
-	private:
-		UpdaterPtr _updater;
 	};
-
+    
+    using SystemPtr = SharedPointer< System >;
+    
 }
 
 #endif

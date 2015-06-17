@@ -25,49 +25,35 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SIMULATION_TASK_GROUP_
-#define CRIMILD_SIMULATION_TASK_GROUP_
+#include "Concurrency/TaskGroup.hpp"
 
-#include "Foundation/ConcurrentList.hpp"
+using namespace crimild;
 
-#include "Messaging/MessageQueue.hpp"
+#if 0
 
-#include "Simulation/Task.hpp"
-
-namespace crimild {
-    
-    class TaskGroup;
-    
-    using TaskGroupPtr = SharedPointer< TaskGroup >;
-    
-    namespace messages {
-        
-        struct TaskGroupCompleted {
-            TaskGroupPtr taskGroup;
-        };
-        
+TaskGroup::TaskGroup( std::list< TaskPtr > tasks, TaskGroup::CompletionCallback completion )
+{
+    for ( auto t : tasks ) {
+        _tasks.add( t );
     }
     
-    class TaskGroup :
-        public SharedObject,
-        public Messenger {
+    auto self = this;
+    registerMessageHandler< messages::TaskCompleted >( [self, completion]( messages::TaskCompleted const &message ) {
+        auto group = getSharedPointer( self );
+        group->getTasks().remove( message.task );
+        if ( group->getTasks().empty() ) {
+            if ( completion != nullptr ) {
+                completion();
+            }
             
-        CRIMILD_DISALLOW_COPY_AND_ASSIGN( TaskGroup )
-        
-    private:
-        using TaskList = ConcurrentList< TaskPtr >;
-        using CompletionCallback = std::function< void( void ) >;
-        
-    public:
-        TaskGroup( std::list< TaskPtr > tasks, CompletionCallback completion );
-        virtual ~TaskGroup( void );
-        
-        TaskList &getTasks( void ) { return _tasks; }
-        
-    private:
-        TaskList _tasks;
-    };
+            group->broadcastMessage( messages::TaskGroupCompleted { group } );
+        }
+    });
+}
 
+TaskGroup::~TaskGroup( void )
+{
+    
 }
 
 #endif

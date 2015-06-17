@@ -44,7 +44,7 @@ namespace crimild {
 			virtual ~AudioComponent( void );
 
 			virtual void onAttach( void ) override;
-			virtual void update( const Time & ) override;
+			virtual void update( const Clock & ) override;
 
 			void setGain( float value );
 			float getGain( void ) const { return _gain; }

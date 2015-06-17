@@ -25,31 +25,51 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SIMULATION_TASK_
-#define CRIMILD_SIMULATION_TASK_
+#ifndef CRIMILD_CONCURRENCY_TASK_
+#define CRIMILD_CONCURRENCY_TASK_
 
-#include "Mathematics/Time.hpp"
-#include "Foundation/SharedObject.hpp"
+#include <functional>
 
 namespace crimild {
+    
+    class Task {
+    private:
+        using RunCallback = std::function< void( void ) >;
+        using CompletionCallback = std::function< void( void ) >;
+        
+    public:
+        Task( void );
+        Task( Task const &other );
+        ~Task( void );
+        
+        Task &operator=( Task const &other );
+        
+        bool isThreadSafe( void ) const { return _threadSafe; }
+        void setThreadSafe( bool value ) { _threadSafe = value; }
+        
+        bool getSyncFrame( void ) const { return _syncFrame; }
+        void setSyncFrame( bool value ) { _syncFrame = value; }
+        
+        void setRunCallback( RunCallback callback ) { _runCallback = callback; }
+        void setCompletionCallback( CompletionCallback callback ) { _completionCallback = callback; }
+        
+        void execute( void );
+        
+    private:
+        bool _threadSafe = false;
+        bool _syncFrame = false;
+        
+        RunCallback _runCallback;
+        CompletionCallback _completionCallback;
+    };
+    
+#if 0
 
 	class RunLoop;
 
 	class Task;
 
 	using TaskPtr = SharedPointer< Task >;
-
-	namespace messages {
-
-		struct TaskCompleted {
-			TaskPtr task;
-		};
-
-		struct TaskStarted { 
-			TaskPtr task;
-		};
-
-	}
 
 	class Task : public SharedObject {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( Task )
@@ -137,6 +157,8 @@ namespace crimild {
 	};
     
     using TaskPtr = SharedPointer< Task >;
+    
+#endif
 
 }
 

@@ -34,6 +34,8 @@
 
 using namespace crimild;
 
+#if 0
+
 UpdateTimeTask::UpdateTimeTask( int priority )
 	: Task( priority )
 {
@@ -90,4 +92,6 @@ void UpdateTimeTask::resetTime( void )
 	double currentTime = glfwGetTime();
 	t.reset( currentTime );
 }
+
+#endif
 

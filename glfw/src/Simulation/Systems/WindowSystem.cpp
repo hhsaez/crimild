@@ -5,9 +5,9 @@
 using namespace crimild;
 
 WindowSystem::WindowSystem( void )
-	: System( "Window" )
+	: System( "Window System" )
 {
-	enableUpdater();
+
 }
 
 WindowSystem::~WindowSystem( void )
@@ -43,6 +43,8 @@ bool WindowSystem::start( void )
 
     auto screenBuffer = crimild::alloc< FrameBufferObject >( framebufferWidth, framebufferHeight );
     Simulation::getInstance()->getRenderer()->setScreenBuffer( screenBuffer );
+    
+    crimild::async( crimild::AsyncDispatchPolicy::MAIN_QUEUE, std::bind( &WindowSystem::update, this ) );
 
 	return true;
 }
@@ -56,10 +58,8 @@ void WindowSystem::update( void )
 	double delta = currentTime - accumTime;
 	accumTime = currentTime;
 
-	System::update();
-
 	glfwPollEvents();
-
+    
 	if ( !glfwWindowShouldClose( _window ) ) {
 		glfwSwapBuffers( _window );
 
@@ -74,6 +74,8 @@ void WindowSystem::update( void )
 	else {
 		Simulation::getInstance()->stop();
 	}
+
+    crimild::async( crimild::AsyncDispatchPolicy::MAIN_QUEUE, std::bind( &WindowSystem::update, this ) );
 }
 
 void WindowSystem::stop( void )

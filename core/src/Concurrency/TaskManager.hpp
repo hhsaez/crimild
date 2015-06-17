@@ -25,39 +25,21 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SIMULATION_TASK_MANAGER_
-#define CRIMILD_SIMULATION_TASK_MANAGER_
+#ifndef CRIMILD_CONCURRENCY_TASK_MANAGER_
+#define CRIMILD_CONCURRENCY_TASK_MANAGER_
+
+#include "Task.hpp"
 
 #include "Foundation/ConcurrentQueue.hpp"
-#include "Messaging/MessageQueue.hpp"
-
-#include "Simulation/Task.hpp"
-#include "Simulation/TaskGroup.hpp"
+#include "Foundation/Singleton.hpp"
 
 #include <vector>
 
 namespace crimild {
 
-	namespace messages {
-
-		struct TerminateTasks {
-
-		};
-        
-        struct ExecuteTask {
-            TaskPtr task;
-        };
-        
-        struct ExecuteTaskGroup {
-            TaskGroupPtr tasks;
-        };
-
-	}
-
-	class TaskManager : public Messenger {
+	class TaskManager : public DynamicSingleton< TaskManager > {
 	private:
-		using TaskList = ConcurrentQueue< TaskPtr >;
-        using TaskGroupList = ConcurrentList< TaskGroupPtr >;
+		using TaskList = ConcurrentQueue< Task >;
 		using ThreadGroup = std::vector< std::thread >;
 
 		using Mutex = std::mutex;
@@ -66,27 +48,25 @@ namespace crimild {
 
 	public:
 		explicit TaskManager( unsigned int numThreads = 0 );
-		~TaskManager( void );
+		virtual ~TaskManager( void );
 
-		void addTask( TaskPtr const &task );
-		void executeTask( TaskPtr const &task );
+		void addTask( Task const &task );
 
 		void start( void );
-		void step( void );
-		void stop( void );
-
-		void run( void );
+        bool isRunning( void ) const { return _running; }
+        
+		void pollMainTasks( void );
+		
+        void stop( void );
 
 	private:
-		void worker( void );	
+        void executeTask( Task &task );
+            
+		void worker( void );
 
 		void synchronize( void );
-
-		void onTerminate( messages::TerminateTasks const & );
-        void onExecuteTask( messages::ExecuteTask const & );
-        void onExecuteTaskGroup( messages::ExecuteTaskGroup const & );
-		void onTaskCompleted( messages::TaskCompleted const & );
-        void onTaskGroupCompleted( messages::TaskGroupCompleted const & );
+        
+        void dummyTask( void );
 
 	private:
 		bool _running = false;
@@ -105,8 +85,6 @@ namespace crimild {
 		mutable Mutex _syncMutex;
 		Condition _syncCondition;
 		unsigned int _numTasksToWaitFor = 0;
-        
-        TaskGroupList _taskGroups;
 	};
 
 }

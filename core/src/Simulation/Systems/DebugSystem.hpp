@@ -25,30 +25,39 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SIMULATION_TASKS_UPDATE_SCENE_
-#define CRIMILD_SIMULATION_TASKS_UPDATE_SCENE_
+#ifndef CRIMILD_GLFW_SIMULATION_SYSTEMS_DEBUG_
+#define CRIMILD_GLFW_SIMULATION_SYSTEMS_DEBUG_
 
-//#include "Simulation/Task.hpp"
+#include "RenderSystem.hpp"
 
 namespace crimild {
     
-#if 0
+	class DebugSystem;
 
-	class UpdateSceneTask : public Task {
+	namespace messaging {
+     
+        struct ToggleDebugInfo { };
+
+	}
+
+	class DebugSystem : public System {
 	public:
-		UpdateSceneTask( int priority );
-		virtual ~UpdateSceneTask( void );
+		DebugSystem( void );
+		virtual ~DebugSystem( void );
 
-		virtual void start( void ) override;
-		virtual void update( void ) override;
+		virtual bool start( void ) override;
+
 		virtual void stop( void ) override;
         
-	private:
-		double _accumulator;
+    private:
+        void onDidRenderScene( messaging::DidRenderScene const & );
+        
+        void onToggleDebugInfo( messaging::ToggleDebugInfo const & );
+        
+    private:
+        bool _debugInfoEnabled = false;
 	};
     
-#endif
-
 }
 
 #endif

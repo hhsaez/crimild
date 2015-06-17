@@ -33,16 +33,14 @@
 #include "Rendering/RenderQueue.hpp"
 
 namespace crimild {
-
+    
 	class RenderSystem;
 
-	namespace messages {
-
-		// TODO: Move to RenderQueue.hpp
-		struct RenderQueueAvailable {
-			RenderQueuePtr renderQueue;
-		};
-
+	namespace messaging {
+        
+        struct WillRenderScene { };
+        struct DidRenderScene { };
+        
 	}
 
 	class RenderSystem : public System {
@@ -52,17 +50,17 @@ namespace crimild {
 
 		virtual bool start( void ) override;
 
-		virtual void update( void ) override;
+		virtual void renderFrame( void );
 
 		virtual void stop( void ) override;
 
 	private:
-		void onRenderQueueAvailable( messages::RenderQueueAvailable const &message );
+		void onRenderQueueAvailable( messaging::RenderQueueAvailable const &message );
 
 	private:
 		RenderQueuePtr _renderQueue;
 	};
-
+    
 }
 
 #endif

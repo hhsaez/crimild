@@ -43,7 +43,19 @@
 #include <chrono>
 
 namespace crimild {
+    
+    class RenderQueue;
 
+    using RenderQueuePtr = SharedPointer< RenderQueue >;
+    
+    namespace messaging {
+        
+        struct RenderQueueAvailable {
+            RenderQueuePtr renderQueue;
+        };
+        
+    }
+    
     class RenderQueue : public SharedObject {
     public:
         using GeometryContext = std::pair< GeometryPtr, Matrix4f >;
@@ -89,8 +101,6 @@ namespace crimild {
     private:
         std::chrono::microseconds::rep _timestamp;
     };
-    
-    using RenderQueuePtr = SharedPointer< RenderQueue >;
     
 }
 

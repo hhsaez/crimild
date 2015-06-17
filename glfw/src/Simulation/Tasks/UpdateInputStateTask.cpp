@@ -31,6 +31,8 @@
 
 using namespace crimild;
 
+#if 0
+
 UpdateInputStateTask::UpdateInputStateTask( int priority, GLFWwindow *window )
 	: Task( priority ),
 	  _window( window )
@@ -94,4 +96,6 @@ void UpdateInputStateTask::run( void )
 		InputState::getCurrentState().setMouseButtonState( i, buttonState == GLFW_PRESS ? InputState::MouseButtonState::PRESSED : InputState::MouseButtonState::RELEASED );
 	}
 }
+
+#endif
 

@@ -29,6 +29,8 @@
 
 using namespace crimild;
 
+#if 0
+
 AsyncTask::AsyncTask( AsyncTask::Callback callback )
     : Task( Task::RepeatMode::ONCE, Task::ThreadMode::BACKGROUND, Task::SyncMode::NONE ),
       _callback( callback )
@@ -47,4 +49,6 @@ void AsyncTask::run( void )
         _callback();
     }
 }
+
+#endif
 

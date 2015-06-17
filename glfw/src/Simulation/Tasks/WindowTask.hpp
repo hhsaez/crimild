@@ -33,6 +33,8 @@
 #include <GLFW/glfw3.h>
 
 namespace crimild {
+    
+#if 0
 
 	class WindowTask : public Task {
 	public:
@@ -48,6 +50,8 @@ namespace crimild {
 	};
 
 	typedef SharedPointer< WindowTask > WindowTaskPtr;
+    
+#endif
 
 }
 

@@ -33,8 +33,10 @@
 #include "LoadSceneTask.hpp"
 
 namespace crimild {
+    
+#if 0
 
-	class UpdateTimeTask : 
+	class UpdateTimeTask :
 		public Task,
 		public Messenger {
 
@@ -60,6 +62,8 @@ namespace crimild {
 	private:
 		void resetTime( void );
 	};
+    
+#endif
 
 }
 

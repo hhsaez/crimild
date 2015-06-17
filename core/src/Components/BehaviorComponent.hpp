@@ -30,6 +30,8 @@
 
 #include "NodeComponent.hpp"
 
+#include "Mathematics/Clock.hpp"
+
 namespace crimild {
 
 	class BehaviorComponent : public NodeComponent {
@@ -44,7 +46,7 @@ namespace crimild {
 		/**
 		   \brief Invoked multiple times (usually once per simulation step)
 		*/
-		virtual void update( const Time &t );
+		virtual void update( const Clock & );
 
 	};
     

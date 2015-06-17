@@ -41,7 +41,7 @@ namespace crimild {
 		RotationComponent( const Vector3f &axis, float speed );
 		virtual ~RotationComponent( void );
 
-		virtual void update( const Time &t ) override;
+		virtual void update( const Clock &c ) override;
 
 	private:
 		Vector3f _axis;

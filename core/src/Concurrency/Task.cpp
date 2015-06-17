@@ -25,32 +25,47 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "TaskGroup.hpp"
+#include "Concurrency/Task.hpp"
 
 using namespace crimild;
 
-TaskGroup::TaskGroup( std::list< TaskPtr > tasks, TaskGroup::CompletionCallback completion )
+Task::Task( void )
 {
-    for ( auto t : tasks ) {
-        _tasks.add( t );
-    }
-    
-    auto self = this;
-    registerMessageHandler< messages::TaskCompleted >( [self, completion]( messages::TaskCompleted const &message ) {
-        auto group = getSharedPointer( self );
-        group->getTasks().remove( message.task );
-        if ( group->getTasks().empty() ) {
-            if ( completion != nullptr ) {
-                completion();
-            }
-            
-            group->broadcastMessage( messages::TaskGroupCompleted { group } );
-        }
-    });
+
 }
 
-TaskGroup::~TaskGroup( void )
+Task::Task( Task const &other )
+    : _threadSafe( other._threadSafe ),
+      _syncFrame( other._syncFrame ),
+      _runCallback( other._runCallback ),
+      _completionCallback( other._completionCallback )
 {
+
+}
+
+Task::~Task( void )
+{
+
+}
+
+Task &Task::operator=( Task const &other )
+{
+    _threadSafe = other._threadSafe;
+    _syncFrame = other._syncFrame;
+    _runCallback = other._runCallback;
+    _completionCallback = other._completionCallback;
     
+    return *this;
+}
+
+void Task::execute( void )
+{
+    if ( _runCallback != nullptr ) {
+        _runCallback();
+    }
+    
+    if ( _completionCallback != nullptr ) {
+        _completionCallback();
+    }
 }
 

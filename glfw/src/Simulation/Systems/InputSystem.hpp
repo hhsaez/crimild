@@ -34,7 +34,7 @@
 #include <GLFW/glfw3.h>
 
 namespace crimild {
-
+    
 	namespace messages {
 
 	}
@@ -46,16 +46,17 @@ namespace crimild {
 
 		virtual bool start( void ) override;
 
-		virtual void update( void ) override;
-
 		virtual void stop( void ) override;
         
+    private:
+        void update( void );
+
     private:
         GLFWwindow *_window;
         int _windowWidth;
         int _windowHeight;
 	};
-
+    
 }
 
 #endif

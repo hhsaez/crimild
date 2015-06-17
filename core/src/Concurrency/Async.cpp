@@ -25,60 +25,26 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Task.hpp"
+#include "Async.hpp"
+
 #include "TaskManager.hpp"
-#include "Simulation.hpp"
 
 using namespace crimild;
 
-Task::Task( int priority )
-	: _priority( priority )
+void crimild::async( unsigned int dispatchPolicy, std::function< void( void ) > onRun, std::function< void( void ) > onCompleted )
 {
+    Task task;
+    task.setRunCallback( onRun );
+    task.setCompletionCallback( onCompleted );
+    task.setThreadSafe( dispatchPolicy & AsyncDispatchPolicy::BACKGROUND_QUEUE );
+    task.setSyncFrame( dispatchPolicy & AsyncDispatchPolicy::SYNC_FRAME );
 
+    TaskManager::getInstance()->addTask( task );
 }
 
-Task::Task( void )
-	: Task( Task::RepeatMode::ONCE, Task::ThreadMode::FOREGROUND, Task::SyncMode::NONE )
+void crimild::async( std::function< void( void ) > onRun, std::function< void( void ) > onCompleted )
 {
-
+    crimild::async( AsyncDispatchPolicy::BACKGROUND_QUEUE, onRun, onCompleted );
 }
-
-Task::Task( Task::RepeatMode repeatMode, Task::ThreadMode threadMode, Task::SyncMode syncMode )
-	: _repeatMode( repeatMode ),
-	  _threadMode( threadMode ),
-	  _syncMode( syncMode )
-{
-
-}
-
-Task::~Task( void )
-{
-
-}
-
-void Task::execute( void )
-{
-    Simulation::getInstance()->addTask( getSharedPointer( this ) );
-}
-
-void Task::waitResult( void )
-{
-    /*
-    Task::ScopedLock _lock( _mutex );
-    _conditionVariable.wait( _lock );
-     */
-}
-
-void Task::notifyResult( void )
-{
-    /*
-    Task::ScopedLock _lock( _mutex );
     
-    // Manual unlocking is done before notifying, to avoid waking up
-    // the waiting thread only to block again (see notify_one for details)
-    _lock.unlock();
-
-    _conditionVariable.notify_one();
-     */
-}
 

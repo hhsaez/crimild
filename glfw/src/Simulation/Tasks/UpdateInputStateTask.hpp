@@ -117,6 +117,8 @@
 #define CRIMILD_INPUT_MOUSE_BUTTON_MIDDLE GLFW_MOUSE_BUTTON_MIDDLE
 
 namespace crimild {
+    
+#if 0
 
 	class UpdateInputStateTask :
         public Task,
@@ -138,6 +140,8 @@ namespace crimild {
 	};
 
 	typedef SharedPointer< UpdateInputStateTask > UpdateInputStateTaskPtr;
+    
+#endif
 
 }
 

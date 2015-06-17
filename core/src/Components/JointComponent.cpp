@@ -48,7 +48,7 @@ void JointComponent::computeInverseBindMatrix( void )
 	_inverseBindMatrix = bindMatrix.makeInverse();
 }
 
-void JointComponent::update( const Time & )
+void JointComponent::update( const Clock & )
 {
 	_worldMatrix = getNode()->getWorld().computeModelMatrix();
 }

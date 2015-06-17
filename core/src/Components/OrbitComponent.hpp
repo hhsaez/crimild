@@ -42,7 +42,7 @@ namespace crimild {
 		OrbitComponent( float x0 = 0.0f, float y0 = 0.0f, float major = 1.0f, float minor = 1.0f, float speed = 1.0f, float gamma = 0.0f );
 		virtual ~OrbitComponent( void );
 
-		virtual void update( const Time &t ) override;
+		virtual void update( const Clock &c ) override;
 
 	private:
 		float _x0;

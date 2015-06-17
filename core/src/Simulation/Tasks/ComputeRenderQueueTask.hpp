@@ -28,13 +28,15 @@
 #ifndef CRIMILD_SIMULATION_TASKS_COMPUTE_RENDER_QUEUE_
 #define CRIMILD_SIMULATION_TASKS_COMPUTE_RENDER_QUEUE_
 
-#include "Simulation/Task.hpp"
+//#include "Simulation/Task.hpp"
 #include "Rendering/RenderQueue.hpp"
 #include "Messaging/MessageQueue.hpp"
 
 #include <list>
 
 namespace crimild {
+    
+#if 0
 
 	class Camera;
     
@@ -55,6 +57,8 @@ namespace crimild {
 		virtual void update( void ) override;
 		virtual void stop( void ) override;
 	};
+    
+#endif
 
 }
 

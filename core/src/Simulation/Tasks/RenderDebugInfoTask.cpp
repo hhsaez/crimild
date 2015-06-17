@@ -11,6 +11,8 @@
 
 using namespace crimild;
 
+#if 0
+
 RenderDebugInfoTask::RenderDebugInfoTask( int priority )
 	: Task( priority )
 {
@@ -65,4 +67,6 @@ void RenderDebugInfoTask::disable( RenderDebugInfoTask::Messages::Disable const 
 		getRunLoop()->suspendTask( getShared< RenderDebugInfoTask>() );
 	}
 }
+
+#endif
 

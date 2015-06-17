@@ -28,7 +28,7 @@
 #ifndef CRIMILD_SIMULATION_TASKS_RENDER_SCENE_
 #define CRIMILD_SIMULATION_TASKS_RENDER_SCENE_
 
-#include "Simulation/Task.hpp"
+//#include "Simulation/Task.hpp"
 #include "Rendering/RenderQueue.hpp"
 
 #include "ComputeRenderQueueTask.hpp"
@@ -37,6 +37,8 @@
 #include <thread>
 
 namespace crimild {
+    
+#if 0
 
 	class Camera;
 
@@ -61,6 +63,8 @@ namespace crimild {
     public:
         void handleMessage( ComputeRenderQueueTask::RenderQueueGeneratedMessage const &message );
 	};
+    
+#endif
 
 }
 

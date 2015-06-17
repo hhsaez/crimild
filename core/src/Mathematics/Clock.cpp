@@ -25,31 +25,60 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SIMULATION_TASKS_UPDATE_SCENE_
-#define CRIMILD_SIMULATION_TASKS_UPDATE_SCENE_
+#include "Clock.hpp"
 
-//#include "Simulation/Task.hpp"
+#include <chrono>
 
-namespace crimild {
+using namespace crimild;
+
+Clock::Clock( void )
+{
+	reset();
+}
+
+Clock::Clock( double deltaTime )
+{
+    reset();
     
-#if 0
+    _deltaTime = deltaTime;
+}
 
-	class UpdateSceneTask : public Task {
-	public:
-		UpdateSceneTask( int priority );
-		virtual ~UpdateSceneTask( void );
+Clock::Clock( const Clock &t )
+{
+	_currentTime = t._currentTime;
+	_lastTime = t._lastTime;
+	_deltaTime = t._deltaTime;
+    _accumTime = t._accumTime;
+}
 
-		virtual void start( void ) override;
-		virtual void update( void ) override;
-		virtual void stop( void ) override;
-        
-	private:
-		double _accumulator;
-	};
-    
-#endif
+Clock::~Clock( void )
+{
 
 }
 
-#endif
+Clock &Clock::operator=( const Clock &t )
+{
+	_currentTime = t._currentTime;
+	_lastTime = t._lastTime;
+	_deltaTime = t._deltaTime;
+    _accumTime = t._accumTime;
+
+	return *this;
+}
+
+void Clock::reset( double current )
+{
+	_currentTime = current;
+	_lastTime = current;
+	_deltaTime = 0.0;
+    _accumTime = 0.0;
+}
+
+void Clock::tick( void )
+{
+    _currentTime = 0.001 * std::chrono::duration_cast< std::chrono::milliseconds >( std::chrono::system_clock::now().time_since_epoch() ).count();
+    _deltaTime = _currentTime - _lastTime;
+    _lastTime = _currentTime;
+    _accumTime += _deltaTime;
+}
 

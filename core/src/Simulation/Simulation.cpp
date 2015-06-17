@@ -47,52 +47,25 @@
 
 #include "Simulation/Systems/RenderSystem.hpp"
 #include "Simulation/Systems/UpdateSystem.hpp"
+#include "Simulation/Systems/DebugSystem.hpp"
 
 using namespace crimild;
 
 Simulation::Simulation( std::string name, int argc, char **argv )
-	: Simulation( name, argc, argv, false )
+	: NamedObject( name )
 {
-
-}
-
-Simulation::Simulation( std::string name, int argc, char **argv, bool enableBackgroundLoop )
-	: NamedObject( name ),
-      _mainLoop( crimild::alloc< RunLoop >( "Main Loop" ) )
-{
-	// if ( enableBackgroundLoop ) {
-    	// _simulationLoop = crimild::alloc< ThreadedRunLoop >( "Background Loop", true );
-    // }
-    // else {
-    	_simulationLoop = _mainLoop;
-    // }
-    
-	// srand( time( NULL ) );
-
 	_settings.parseCommandLine( argc, argv );
 	
 	FileSystem::getInstance().init( argc, argv );
 
 	addSystem( crimild::alloc< UpdateSystem >() );
 	addSystem( crimild::alloc< RenderSystem >() );
-
-	// todo: not sure about this
-	// getMainLoop()->startTask( crimild::alloc< ProfilerDumpTask >( Priorities::END_RENDER_PRIORITY ) );
+    addSystem( crimild::alloc< DebugSystem >() );
 }
 
 Simulation::~Simulation( void )
 {
 	stopSystems();
-}
-
-RunLoopPtr Simulation::getMainLoop( void )
-{
-	return _mainLoop;
-}
-
-RunLoopPtr Simulation::getSimulationLoop( void ) 
-{
-    return _simulationLoop;
 }
 
 void Simulation::start( void )
@@ -106,41 +79,40 @@ void Simulation::start( void )
     // getSimulationLoop()->startTask( crimild::alloc< ComputeRenderQueueTask >( Priorities::RENDER_SCENE_PRIORITY ) );
 
     startSystems();
+    
+    _taskManager.start();
 }
 
-bool Simulation::step( void )
+bool Simulation::update( void )
 {
-	// bool result = _mainLoop->update();
-	// return result;
-	return true;
+    _simulationClock.tick();
+    
+    auto scene = getScene();
+    
+    broadcastMessage( messaging::SimulationWillUpdate { scene } );
+    
+    _taskManager.pollMainTasks();
+    
+    broadcastMessage( messaging::SimulationDidUpdate { scene } );
+    
+	return _taskManager.isRunning();
 }
 
 void Simulation::stop( void )
 {
-	broadcastMessage( messages::TerminateTasks { } );
-    // if ( _simulationLoop != nullptr ) {
-        // _simulationLoop->stop();
-    // }
-    
-    // if ( _mainLoop != nullptr ) {
-        // _mainLoop->stop();
-    // }
+    _taskManager.stop();
 }
 
 int Simulation::run( void )
 {
 	start();
-
-	_taskManager.run();
-
-	stopSystems();
-
+    while ( update() ) {
+        // do nothing
+    }
+    
+    stopSystems();  // redundant?
+    
 	return 0;
-}
-
-void Simulation::addTask( TaskPtr const &task )
-{
-	_taskManager.addTask( task );		
 }
 
 void Simulation::addSystem( SystemPtr const &system )
@@ -148,14 +120,6 @@ void Simulation::addSystem( SystemPtr const &system )
 	Log::Debug << "Adding system " << system->getName() << Log::End;
 
 	if ( _systems.find( system->getName() ) == _systems.end() ) {
-		if ( system->getUpdater() != nullptr ) {
-			Log::Debug << "Adding task for system update" << Log::End;
-			_taskManager.addTask( system->getUpdater() );
-		}
-		else {
-			Log::Warning << "System does not provide updater" << Log::End;
-		}
-
 		_systems.insert( std::make_pair( system->getName(), system ) );
 	}
 }
@@ -206,6 +170,13 @@ void Simulation::setScene( NodePtr const &scene )
 	else {
 		_assetManager.clear();
 	}
+    
+    AssetManager::getInstance()->clear();
+    MessageQueue::getInstance()->clear();
+    
+    _simulationClock.reset();
+
+    broadcastMessage( messaging::SceneChanged { _scene } );
 }
 
 void Simulation::forEachCamera( std::function< void ( CameraPtr const & ) > callback )

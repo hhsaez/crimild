@@ -29,7 +29,6 @@
 #define CRIMILD_COMPONENTS_NODE_COMPONENT_
 
 #include "Foundation/SharedObject.hpp"
-#include "Mathematics/Time.hpp"
 
 namespace crimild {
 

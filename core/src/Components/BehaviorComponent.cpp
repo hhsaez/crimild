@@ -40,7 +40,7 @@ BehaviorComponent::~BehaviorComponent( void )
     NodeComponentCatalog< BehaviorComponent >::getInstance().unregisterComponent( this );
 }
 
-void BehaviorComponent::update( const Time &t )
+void BehaviorComponent::update( const Clock & )
 {
 
 }

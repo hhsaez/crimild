@@ -36,7 +36,7 @@
 #include <string>
 
 namespace crimild {
-
+    
 	class WindowSystem;
 
 	namespace messages {
@@ -73,7 +73,7 @@ namespace crimild {
 
 		virtual bool start( void ) override;
 
-		virtual void update( void ) override;
+		virtual void update( void );
 
 		virtual void stop( void ) override;
 

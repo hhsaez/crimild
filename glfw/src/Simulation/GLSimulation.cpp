@@ -47,13 +47,7 @@ using namespace crimild::scripting;
 #endif
 
 GLSimulation::GLSimulation( std::string name, int argc, char **argv )
-	: GLSimulation( name, argc, argv, false )
-{
-
-}
-
-GLSimulation::GLSimulation( std::string name, int argc, char **argv, bool enableBackgroundLoop )
-	: Simulation( name, argc, argv, enableBackgroundLoop )
+	: Simulation( name, argc, argv )
 {
 	// _window = nullptr;
 	
@@ -68,7 +62,7 @@ GLSimulation::GLSimulation( std::string name, int argc, char **argv, bool enable
     addSystem( crimild::alloc< WindowSystem >() );
     addSystem( crimild::alloc< InputSystem >() );
 
-    addTask( crimild::alloc< UpdateTimeTask >( Simulation::Priorities::LOWEST_PRIORITY ) );
+//    addTask( crimild::alloc< UpdateTimeTask >( Simulation::Priorities::LOWEST_PRIORITY ) );
 //    addTask( crimild::alloc< UpdateInputStateTask >( Simulation::Priorities::HIGHEST_PRIORITY ) );
     
     setRenderer( crimild::alloc< gl3::Renderer >() );

@@ -28,10 +28,10 @@
 #ifndef CRIMILD_SIMULATION_
 #define CRIMILD_SIMULATION_
 
-#include "TaskManager.hpp"
+#include "Concurrency/TaskManager.hpp"
+
 #include "Systems/System.hpp"
 
-#include "RunLoop.hpp"
 #include "Settings.hpp"
 #include "AssetManager.hpp"
 
@@ -41,7 +41,7 @@
 
 #include "Messaging/MessageQueue.hpp"
 
-#include "Mathematics/Time.hpp"
+#include "Mathematics/Clock.hpp"
 #include "SceneGraph/Node.hpp" 
 #include "SceneGraph/Camera.hpp"
 #include "Rendering/Renderer.hpp"
@@ -51,6 +51,22 @@
 #include <thread>
 
 namespace crimild {
+    
+    namespace messaging {
+        
+        struct SceneChanged {
+            NodePtr scene;
+        };
+        
+        struct SimulationWillUpdate {
+            NodePtr scene;
+        };
+        
+        struct SimulationDidUpdate {
+            NodePtr scene;
+        };
+        
+    }
 
 	class Simulation : 
 		public NamedObject, 
@@ -59,50 +75,36 @@ namespace crimild {
 		public DynamicSingleton< Simulation > {
 
 	public:
-		class Priorities {
-		public:
-			enum {
-				HIGHEST_PRIORITY = 0,
-				UPDATE_SCENE_PRIORITY = 100,
-				UPDATE_PHYSICS_PRIORITY = 200,
-				BEGIN_RENDER_PRIORITY = 1000,
-				RENDER_SCENE_PRIORITY = 2000,
-				RENDER_EXTRAS_PRIORITY = 2500,
-				END_RENDER_PRIORITY = 3000,
-				LOWEST_PRIORITY = 99999
-			};
-		};
-
-	public:
 		Simulation( std::string name, int argc, char **argv );
-		Simulation( std::string name, int argc, char **argv, bool enableBackgroundLoop );
 		virtual ~Simulation( void );
 
+        virtual void start( void );
+        virtual bool update( void );
+        virtual void stop( void );
+            
+        virtual int run( void );
+        
+    public:
 		Settings &getSettings( void ) { return _settings; }
 
-		Time &getSimulationTime( void ) { return _simulationTime; }
-		const Time &getSimulationTime( void ) const { return _simulationTime; }
+    private:
+        Settings _settings;
+            
+    public:
+		Clock &getSimulationClock( void ) { return _simulationClock; }
+		const Clock &getSimulationClock( void ) const { return _simulationClock; }
 
-		AssetManager &getAssets( void ) { return _assetManager; }
+    private:
+        Clock _simulationClock;
 
-		virtual void start( void );
+    public:
+        AssetManager &getAssets( void ) { return _assetManager; }
+            
+    private:
+        AssetManager _assetManager;
 
-		virtual bool step( void );
-		
-		virtual void stop( void );
-
-		virtual int run( void );
-
-	private:
-		Settings _settings;
-		Time _simulationTime;
-		AssetManager _assetManager;
+    private:
 		Profiler _profiler;
-
-	public:
-		void addTask( TaskPtr const &task );
-
-	private:
 		TaskManager _taskManager;
 
 	public:
@@ -117,14 +119,6 @@ namespace crimild {
 		using SystemMap = std::map< std::string, SystemPtr >;
 		SystemMap _systems;
         
-    public:
-        RunLoopPtr getMainLoop( void );
-        RunLoopPtr getSimulationLoop( void );
-        
-    private:
-        RunLoopPtr _mainLoop;
-        RunLoopPtr _simulationLoop;
-
 	public:
 		void setRenderer( RendererPtr const &renderer ) { _renderer = renderer; }
 		RendererPtr getRenderer( void ) { return _renderer; }

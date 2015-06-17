@@ -36,6 +36,8 @@
 
 using namespace crimild;
 
+#if 0
+
 RenderSceneTask::RenderSceneTask( int priority )
 	: Task( priority )
 {
@@ -82,4 +84,6 @@ void RenderSceneTask::handleMessage( ComputeRenderQueueTask::RenderQueueGenerate
     _renderQueue = message.renderQueue;
     _mutex.unlock();
 }
+
+#endif
 

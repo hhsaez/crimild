@@ -30,6 +30,8 @@
 using namespace crimild;
 using namespace crimild::scripting;
 
+#if 0
+
 ScriptedTask::ScriptedTask( int priority )
 	: Task( priority )
 {
@@ -55,4 +57,6 @@ void ScriptedTask::stop( void )
 {
 
 }
+
+#endif
 

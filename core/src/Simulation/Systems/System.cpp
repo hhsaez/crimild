@@ -44,26 +44,15 @@ System::~System( void )
 
 bool System::start( void )
 {
-	Log::Debug << "Starting system " << getName() << Log::End;
-	broadcastMessage( messages::SystemWillStart { getSharedPointer< System >( this ) } );
+	Log::Debug << "Starting " << getName() << Log::End;
+	broadcastMessage( messages::SystemWillStart { this } );
 
 	return true;
 }
 
 void System::stop( void )
 {
-	Log::Debug << "Stopping system " << getName() << Log::End;
-	broadcastMessage( messages::SystemWillStop { getSharedPointer< System >( this ) } );
-}
-
-void System::enableUpdater( void )
-{
-	Log::Debug << "Enabling updater for '" << getName() << "'" << Log::End;
-	_updater = crimild::alloc< System::Updater >( this );
-}
-
-void System::update( void )
-{
-
+	Log::Debug << "Stopping " << getName() << Log::End;
+	broadcastMessage( messages::SystemWillStop { this } );
 }
 

@@ -49,7 +49,7 @@ namespace crimild {
 
 		void computeInverseBindMatrix( void );
 
-		virtual void update( const Time & ) override;
+		virtual void update( const Clock & ) override;
 
 	private:
 		Matrix4f _worldMatrix;

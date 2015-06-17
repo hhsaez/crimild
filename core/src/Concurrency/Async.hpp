@@ -25,54 +25,36 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Time.hpp"
+#ifndef CRIMILD_CONCURRENCY_ASYNC_
+#define CRIMILD_CONCURRENCY_ASYNC_
 
-using namespace crimild;
+#include <functional>
 
-Time::Time( void )
-{
-	reset();
-}
-
-Time::Time( double deltaTime )
-{
-    reset();
+namespace crimild {
     
-    _deltaTime = deltaTime;
+    class AsyncDispatchPolicy {
+    public:
+        enum {
+            NONE = 0x0,
+            
+            THREAD_SAFE = 0x1 << 0,
+            SYNC_FRAME = 0x1 << 1,
+            
+            MAIN_QUEUE = NONE,
+            MAIN_QUEUE_SYNC = SYNC_FRAME,
+            
+            BACKGROUND_QUEUE = THREAD_SAFE,
+            BACKGROUND_QUEUE_SYNC = BACKGROUND_QUEUE | SYNC_FRAME,
+            
+            ALL = ~NONE
+        };
+    };
+    
+    void async( unsigned int dispatchPolicy, std::function< void( void ) > onRun, std::function< void( void ) > onCompleted = nullptr );
+    
+    void async( std::function< void( void ) > onRun, std::function< void( void ) > onCompleted = nullptr );
+    
 }
 
-Time::Time( const Time &t )
-{
-	_currentTime = t._currentTime;
-	_lastTime = t._lastTime;
-	_deltaTime = t._deltaTime;
-}
-
-Time::~Time( void )
-{
-
-}
-
-Time &Time::operator=( const Time &t )
-{
-	_currentTime = t._currentTime;
-	_lastTime = t._lastTime;
-	_deltaTime = t._deltaTime;
-
-	return *this;
-}
-
-void Time::reset( double current )
-{
-	_currentTime = current;
-	_lastTime = current;
-	_deltaTime = 0.0;
-}
-
-void Time::update( double current )
-{
-	_lastTime = _currentTime;
-	_currentTime = current;
-	_deltaTime = _currentTime - _lastTime;
-}
+#endif
 

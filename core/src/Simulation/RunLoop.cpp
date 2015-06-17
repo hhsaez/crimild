@@ -34,6 +34,8 @@
 
 using namespace crimild;
 
+#if 0
+
 RunLoop::RunLoop( std::string name )
 	: NamedObject( name )
 {
@@ -225,4 +227,6 @@ void ThreadedRunLoop::stop( void )
 	    _thread.join();
     }
 }
+
+#endif
 

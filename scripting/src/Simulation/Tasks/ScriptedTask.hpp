@@ -33,6 +33,8 @@
 #include <Crimild.hpp>
 
 namespace crimild {
+    
+#if 0
 
 	namespace scripting {
 
@@ -47,6 +49,8 @@ namespace crimild {
 		};
 
 	}
+    
+#endif
 	
 }
 

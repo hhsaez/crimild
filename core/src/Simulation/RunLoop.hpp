@@ -28,17 +28,18 @@
 #ifndef CRIMILD_SIMULATION_RUN_LOOP_
 #define CRIMILD_SIMULATION_RUN_LOOP_
 
-#include "Task.hpp"
+//#include "Task.hpp"
 
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/NamedObject.hpp"
 #include "Foundation/Pointer.hpp"
-#include "Mathematics/Time.hpp"
 
 #include <functional>
 #include <list>
 
 namespace crimild {
+    
+#if 0
 
 	class RunLoop : public SharedObject, public NamedObject {
 	public:
@@ -88,6 +89,8 @@ namespace crimild {
         bool _done;
         std::thread _thread;
     };
+    
+#endif
 
 }
 

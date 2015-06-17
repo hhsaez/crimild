@@ -31,6 +31,8 @@
 #include <Crimild.hpp>
 
 namespace crimild {
+    
+#if 0
 
 	class UpdateSceneAndPhysicsTask : public Task {
 	public:
@@ -44,6 +46,8 @@ namespace crimild {
 	private:
 		double _dtAccumulator;
 	};
+    
+#endif
 
 }
 

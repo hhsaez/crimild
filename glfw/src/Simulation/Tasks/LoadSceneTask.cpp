@@ -31,6 +31,8 @@
 #include <Crimild_Physics.hpp>
 #endif
 
+#if 0
+
 using namespace crimild;
 using namespace crimild::scripting;
 
@@ -116,4 +118,6 @@ void LoadSceneTask::reloadScene( Messages::ReloadScene const &message )
 {
     getRunLoop()->resumeTask( getShared< LoadSceneTask >() );
 }
+
+#endif
 

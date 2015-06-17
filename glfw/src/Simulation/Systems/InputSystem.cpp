@@ -4,15 +4,17 @@
 using namespace crimild;
 
 InputSystem::InputSystem( void )
-	: System( "Input" )
+	: System( "Input System" )
 {
-	enableUpdater();
-
-    registerMessageHandler< messages::WindowSystemDidCreateWindow >( [&]( messages::WindowSystemDidCreateWindow const &message ) {
-        _window = message.video->getWindowHandler();
-        glfwGetWindowSize( _window, &_windowWidth, &_windowHeight);
+    auto weakSelf = this;
+    
+    registerMessageHandler< messages::WindowSystemDidCreateWindow >( [weakSelf]( messages::WindowSystemDidCreateWindow const &message ) {
+        weakSelf->_window = message.video->getWindowHandler();
+        glfwGetWindowSize( weakSelf->_window, &( weakSelf->_windowWidth ), &( weakSelf->_windowHeight ) );
         
         InputState::getCurrentState().reset( GLFW_KEY_LAST, GLFW_MOUSE_BUTTON_LAST );
+        
+        crimild::async( AsyncDispatchPolicy::MAIN_QUEUE, std::bind( &InputSystem::update, weakSelf ) );
     });
     
     registerMessageHandler< messages::WindowSystemWillDestroyWindow >( [&]( messages::WindowSystemWillDestroyWindow const &message ) {
@@ -30,14 +32,12 @@ bool InputSystem::start( void )
 	if ( !System::start() ) {
 		return false;
 	}
-
+    
     return true;
 }
 
 void InputSystem::update( void )
 {
-	System::update();
-    
     CRIMILD_PROFILE( "Update Input State" )
     
     if ( _window == nullptr ) {
@@ -61,6 +61,8 @@ void InputSystem::update( void )
         int buttonState = glfwGetMouseButton( _window, i );
         InputState::getCurrentState().setMouseButtonState( i, buttonState == GLFW_PRESS ? InputState::MouseButtonState::PRESSED : InputState::MouseButtonState::RELEASED );
     }
+    
+    crimild::async( AsyncDispatchPolicy::MAIN_QUEUE, std::bind( &InputSystem::update, this ) );
 }
 
 void InputSystem::stop( void )

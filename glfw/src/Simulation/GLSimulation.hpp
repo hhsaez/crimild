@@ -35,7 +35,6 @@ namespace crimild {
 	class GLSimulation : public Simulation {
 	public:
 		GLSimulation( std::string name, int argc, char **argv );
-		GLSimulation( std::string name, int argc, char **argv, bool enableBackgroundLoop );
 		virtual ~GLSimulation( void );
 
 		virtual void start( void ) override;
