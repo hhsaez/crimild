@@ -71,12 +71,12 @@ void ProfilerConsoleOutputHandler::endOutput( void )
 ProfilerSample::ProfilerSample( std::string name )
 {
     assert( Profiler::getInstance() != nullptr && "Profiler not initialized" );
-//    _sampleIndex = Profiler::getInstance()->onSampleCreated( name );
+    _sampleIndex = Profiler::getInstance()->onSampleCreated( name );
 }
 
 ProfilerSample::~ProfilerSample( void )
 {
-//    Profiler::getInstance()->onSampleDestroyed( _sampleIndex );
+    Profiler::getInstance()->onSampleDestroyed( _sampleIndex );
 }
 
 Profiler::Profiler( void )

@@ -15,6 +15,7 @@ DebugSystem::DebugSystem( void )
 {
     CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( messaging::DidRenderScene, DebugSystem, onDidRenderScene );
     CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( messaging::ToggleDebugInfo, DebugSystem, onToggleDebugInfo );
+    CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( messaging::ToggleProfilerInfo, DebugSystem, onToggleProfilerInfo );
 }
 
 DebugSystem::~DebugSystem( void )
@@ -55,10 +56,27 @@ void DebugSystem::onDidRenderScene( messaging::DidRenderScene const & )
             });
         }));
     }
+    
+    if ( _profilerInfoEnabled ) {
+        Profiler::getInstance()->dump();
+
+        static double accum = 0.0;
+        auto t = Simulation::getInstance()->getSimulationClock();
+        accum += t.getDeltaTime() * 100.0;
+        if ( accum >= 1.0 ) {
+            Profiler::getInstance()->resetAll();
+            accum = 0.0;
+        }
+    }
 }
 
 void DebugSystem::onToggleDebugInfo( messaging::ToggleDebugInfo const & )
 {
     _debugInfoEnabled = !_debugInfoEnabled;
+}
+
+void DebugSystem::onToggleProfilerInfo( messaging::ToggleProfilerInfo const & )
+{
+    _profilerInfoEnabled = !_profilerInfoEnabled;
 }
 

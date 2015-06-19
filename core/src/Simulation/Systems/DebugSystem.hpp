@@ -37,6 +37,8 @@ namespace crimild {
 	namespace messaging {
      
         struct ToggleDebugInfo { };
+        
+        struct ToggleProfilerInfo { };
 
 	}
 
@@ -53,9 +55,11 @@ namespace crimild {
         void onDidRenderScene( messaging::DidRenderScene const & );
         
         void onToggleDebugInfo( messaging::ToggleDebugInfo const & );
+        void onToggleProfilerInfo( messaging::ToggleProfilerInfo const & );
         
     private:
         bool _debugInfoEnabled = false;
+        bool _profilerInfoEnabled = false;
 	};
     
 }
