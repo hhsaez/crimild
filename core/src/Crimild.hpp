@@ -149,6 +149,8 @@
 #include "Simulation/RunLoop.hpp"
 
 #include "Simulation/Systems/DebugSystem.hpp"
+#include "Simulation/Systems/UpdateSystem.hpp"
+#include "Simulation/Systems/RenderSystem.hpp"
 
 #include "Simulation/Tasks/BeginRenderTask.hpp"
 #include "Simulation/Tasks/EndRenderTask.hpp"

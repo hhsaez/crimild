@@ -37,7 +37,17 @@ namespace crimild {
     
 	class UpdateSystem;
 
-	namespace messages {
+	namespace messaging {
+
+		struct WillUpdateScene { 
+			NodePtr scene;
+			CameraPtr mainCamera;
+		};
+
+		struct DidUpdateScene {
+			NodePtr scene;
+			CameraPtr mainCamera;
+		};
 
 	}
 

@@ -65,7 +65,11 @@ void UpdateSystem::update( void )
     const Clock &c = Simulation::getInstance()->getSimulationClock();
     _accumulator += Numericd::min( CRIMILD_SIMULATION_TIME, c.getDeltaTime() );
 
+
+    broadcastMessage( messaging::WillUpdateScene { scene, camera } );
     updateBehaviors( scene );
+    broadcastMessage( messaging::DidUpdateScene { scene, camera } );
+
     computeRenderQueue( scene, camera );
 }
 
