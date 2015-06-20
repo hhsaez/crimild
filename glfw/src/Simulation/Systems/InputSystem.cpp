@@ -52,7 +52,7 @@ void InputSystem::update( void )
     double x, y;
     glfwGetCursorPos( _window, &x, &y );
     
-    if ( x >= 0 && x < _windowWidth && y >= 0 && y < _windowHeight ) {
+    if ( InputState::getCurrentState().getMouseCursorMode() == InputState::MouseCursorMode::GRAB || ( x >= 0 && x < _windowWidth && y >= 0 && y < _windowHeight ) ) {
         InputState::getCurrentState().setMousePosition( Vector2i( x, y ) );
         InputState::getCurrentState().setNormalizedMousePosition( Vector2f( ( float ) x / float( _windowWidth - 1.0f ), ( float ) y / float( _windowHeight - 1.0f ) ) );
     }
@@ -60,6 +60,23 @@ void InputSystem::update( void )
     for ( int i = GLFW_MOUSE_BUTTON_1; i < GLFW_MOUSE_BUTTON_LAST; i++ ) {
         int buttonState = glfwGetMouseButton( _window, i );
         InputState::getCurrentState().setMouseButtonState( i, buttonState == GLFW_PRESS ? InputState::MouseButtonState::PRESSED : InputState::MouseButtonState::RELEASED );
+    }
+    
+    switch ( InputState::getCurrentState().getMouseCursorMode() ) {
+        case InputState::MouseCursorMode::NORMAL:
+            glfwSetInputMode( _window, GLFW_CURSOR, GLFW_CURSOR_NORMAL );
+            break;
+            
+        case InputState::MouseCursorMode::HIDDEN:
+            glfwSetInputMode( _window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN );
+            break;
+            
+        case InputState::MouseCursorMode::GRAB:
+            glfwSetInputMode( _window, GLFW_CURSOR, GLFW_CURSOR_DISABLED );
+            break;
+            
+        default:
+            break;
     }
     
     crimild::async( AsyncDispatchPolicy::MAIN_QUEUE, std::bind( &InputSystem::update, this ) );

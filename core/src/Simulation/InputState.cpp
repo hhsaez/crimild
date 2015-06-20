@@ -66,6 +66,8 @@ void InputState::reset( int keyCount, int mouseButtonCount )
 		_currentMouseButtons[ i ] = MouseButtonState::RELEASED;
 		_previousMouseButtons[ i ] = MouseButtonState::RELEASED;
 	}
+    
+    _mouseCursorMode = MouseCursorMode::NORMAL;
 }
 
 void InputState::setKeyState( int key, KeyState state )
