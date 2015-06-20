@@ -36,7 +36,11 @@ namespace crimild {
 	class Renderer;
 	class Camera;
 
-	class NodeComponent : public SharedObject {
+    class NodeComponent;
+    
+    using NodeComponentPtr = SharedPointer< NodeComponent >;
+
+    class NodeComponent : public SharedObject {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( NodeComponent )
         
 	protected:
@@ -63,6 +67,15 @@ namespace crimild {
 	private:
         Node *_node;
         bool _enabled = true;
+        
+    public:
+        NodeComponentPtr getComponentWithName( std::string name );
+        
+        template< class NODE_COMPONENT_CLASS >
+        SharedPointer< NODE_COMPONENT_CLASS > getComponent( void )
+        {
+            return std::static_pointer_cast< NODE_COMPONENT_CLASS >( getComponentWithName( NODE_COMPONENT_CLASS::_COMPONENT_NAME() ) );
+        }
 
 	public:
 		/**
@@ -86,8 +99,6 @@ namespace crimild {
 		virtual void onDetach( void );
 
 	};
-    
-    using NodeComponentPtr = SharedPointer< NodeComponent >;
 
 }
 
