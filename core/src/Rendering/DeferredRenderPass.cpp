@@ -67,6 +67,7 @@ void DeferredRenderPass::render( RendererPtr const &renderer, RenderQueuePtr con
     renderToGBuffer( renderer, renderQueue, camera );
     
     composeFrame( renderer, renderQueue, camera );
+    renderTranslucentObjects( renderer, renderQueue, camera );
     
     if ( !isDebugModeEnabled() ) {
         applyImageEffects( renderer, camera );

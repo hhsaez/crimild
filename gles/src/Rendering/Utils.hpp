@@ -25,66 +25,32 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "IndexBufferObjectCatalog.hpp"
+#ifndef CRIMILD_GLES_RENDERING_UTILS_
+#define CRIMILD_GLES_RENDERING_UTILS_
 
-#ifdef __APPLE__
-#import <OpenGLES/ES3/gl.h>
-#import <OpenGLES/ES3/glext.h>
-#else
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
+#include <Crimild.hpp>
+
+#include <map>
+#include <string>
+
+namespace crimild {
+    
+    namespace gles {
+    
+		class Utils {
+		public:
+            static VertexShader *getVertexShaderInstance( std::string source );
+            
+            static FragmentShader *getFragmentShaderInstance( std::string source );
+            
+			static std::string buildArrayShaderLocationName( std::string variable, int index );
+            
+			static std::string buildArrayShaderLocationName( std::string variable, int index, std::string member );
+		};
+        
+    }
+    
+}
+
 #endif
-
-using namespace crimild;
-
-gles::IndexBufferObjectCatalog::IndexBufferObjectCatalog( void )
-{
-    
-}
-
-gles::IndexBufferObjectCatalog::~IndexBufferObjectCatalog( void )
-{
-    
-}
-
-int gles::IndexBufferObjectCatalog::getNextResourceId( void )
-{
-    GLuint id;
-    glGenBuffers( 1, &id );
-    return id;
-}
-
-void gles::IndexBufferObjectCatalog::bind( ShaderProgram *program, IndexBufferObject *ibo )
-{
-	Catalog< IndexBufferObject >::bind( program, ibo );
-    
-	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, ibo->getCatalogId() );
-}
-
-void gles::IndexBufferObjectCatalog::unbind( ShaderProgram *program, IndexBufferObject *ibo )
-{
-	Catalog< IndexBufferObject >::unbind( program, ibo );
-    
-	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
-}
-
-void gles::IndexBufferObjectCatalog::load( IndexBufferObject *ibo )
-{
-	Catalog< IndexBufferObject >::load( ibo );
-    
-	int id = ibo->getCatalogId();
-	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, id );
-	glBufferData( GL_ELEMENT_ARRAY_BUFFER,
-                 sizeof( unsigned short ) * ibo->getIndexCount(),
-                 ibo->getData(),
-                 GL_STATIC_DRAW );
-}
-
-void gles::IndexBufferObjectCatalog::unload( IndexBufferObject *ibo )
-{
-	GLuint bufferId = ibo->getCatalogId();
-	glDeleteBuffers( 1, &bufferId );
-    
-	Catalog< IndexBufferObject >::unload( ibo );
-}
 

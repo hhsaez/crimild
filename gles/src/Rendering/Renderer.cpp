@@ -31,13 +31,15 @@
 #include "Catalogs/TextureCatalog.hpp"
 #include "Catalogs/IndexBufferObjectCatalog.hpp"
 #include "Catalogs/VertexBufferObjectCatalog.hpp"
+#include "Catalogs/FrameBufferObjectCatalog.hpp"
 
 #include "Programs/SimpleShaderProgram.hpp"
 #include "Programs/TextureShaderProgram.hpp"
+#include "Programs/ForwardRenderShaderProgram.hpp"
 
 #ifdef __APPLE__
-#import <OpenGLES/ES2/gl.h>
-#import <OpenGLES/ES2/glext.h>
+#import <OpenGLES/ES3/gl.h>
+#import <OpenGLES/ES3/glext.h>
 #else
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
@@ -45,15 +47,17 @@
 
 using namespace crimild;
 
-gles::Renderer::Renderer( FrameBufferObjectPtr screenBuffer )
+gles::Renderer::Renderer( FrameBufferObject *screenBuffer )
 {
-	setShaderProgramCatalog( ShaderProgramCatalogPtr( new gles::ShaderProgramCatalog() ) );
-	setVertexBufferObjectCatalog( VertexBufferObjectCatalogPtr( new gles::VertexBufferObjectCatalog() ) );
-	setIndexBufferObjectCatalog( IndexBufferObjectCatalogPtr( new gles::IndexBufferObjectCatalog() ) );
-	setTextureCatalog( TextureCatalogPtr( new gles::TextureCatalog() ) );
+	setShaderProgramCatalog( new gles::ShaderProgramCatalog() );
+	setVertexBufferObjectCatalog( new gles::VertexBufferObjectCatalog() );
+	setIndexBufferObjectCatalog( new gles::IndexBufferObjectCatalog() );
+	setTextureCatalog( new gles::TextureCatalog() );
+    setFrameBufferObjectCatalog( new gles::FrameBufferObjectCatalog( this ) );
     
-	_fallbackPrograms[ "simple" ] = ShaderProgramPtr( new gles::SimpleShaderProgram() );
-	_fallbackPrograms[ "texture" ] = ShaderProgramPtr( new gles::TextureShaderProgram() );
+	_fallbackPrograms[ "simple" ] = new gles::SimpleShaderProgram();
+	_fallbackPrograms[ "texture" ] = new gles::TextureShaderProgram();
+    _fallbackPrograms[ "forward" ] = new gles::ForwardRenderShaderProgram();
     
 	setScreenBuffer( screenBuffer );
 }
@@ -79,12 +83,12 @@ void gles::Renderer::configure( void )
     
     glEnable( GL_DEPTH_TEST );
     glDepthFunc( GL_LESS );
+    glEnable( GL_CULL_FACE );
+    glCullFace( GL_BACK );
 }
 
 void gles::Renderer::beginRender( void )
 {
-    glEnable( GL_DEPTH_TEST );
-    glDisable( GL_BLEND );
 }
 
 void gles::Renderer::endRender( void )
@@ -263,9 +267,18 @@ void gles::Renderer::drawPrimitive( ShaderProgram *program, Primitive *primitive
 				   ( const GLvoid * ) base );
 }
 
+ShaderProgram *gles::Renderer::getForwardPassProgram( void )
+{
+    return _fallbackPrograms[ "forward" ].get();
+}
+
 ShaderProgram *gles::Renderer::getFallbackProgram( Material *material, Geometry *geometry, Primitive *primitive )
 {
-	if ( material->getColorMap() ) {
+	if ( material == nullptr || geometry == nullptr || primitive == nullptr ) {
+		return _fallbackPrograms[ "screen" ].get();
+	}
+	
+    if ( material != nullptr && material->getColorMap() ) {
 		return _fallbackPrograms[ "texture" ].get();
 	}
     

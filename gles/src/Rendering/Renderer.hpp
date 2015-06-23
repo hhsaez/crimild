@@ -39,7 +39,7 @@ namespace crimild {
     
         class Renderer : public crimild::Renderer {
         public:
-            Renderer( crimild::FrameBufferObjectPtr screenBuffer );
+            Renderer( crimild::FrameBufferObject *screenBuffer );
             virtual ~Renderer( void );
             
             virtual void configure( void ) override;
@@ -62,10 +62,12 @@ namespace crimild {
             
             virtual void drawPrimitive( crimild::ShaderProgram *program, crimild::Primitive *primitive ) override;
             
+            virtual crimild::ShaderProgram *getForwardPassProgram( void ) override;
+            
             virtual crimild::ShaderProgram *getFallbackProgram( crimild::Material *material, Geometry *geometry, crimild::Primitive *primitive ) override;
             
         private:
-            std::map< std::string, crimild::ShaderProgramPtr > _fallbackPrograms;
+            std::map< std::string, Pointer< crimild::ShaderProgram > > _fallbackPrograms;
         };
         
         typedef SharedPointer< Renderer > RendererPtr;
