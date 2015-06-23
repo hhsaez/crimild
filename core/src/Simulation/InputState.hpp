@@ -51,6 +51,12 @@ namespace crimild {
 			PRESSED,
 			RELEASED
 		};
+        
+        enum class MouseCursorMode {
+            NORMAL, // default
+            HIDDEN,
+            GRAB,
+        };
 
 	private:
 		InputState( void );
@@ -89,6 +95,9 @@ namespace crimild {
 		bool isMouseButtonStillDown( int button ) { return getCurrentMouseButtonState( button ) == MouseButtonState::PRESSED && getPreviousMouseButtonState( button ) == MouseButtonState::PRESSED; }
 		bool isMouseButtonUp( int button ) { return getCurrentMouseButtonState( button ) == MouseButtonState::RELEASED && getPreviousMouseButtonState( button ) == MouseButtonState::PRESSED; }
 		bool isMouseButtonStillUp( int button ) { return getCurrentMouseButtonState( button ) == MouseButtonState::RELEASED && getPreviousMouseButtonState( button ) == MouseButtonState::RELEASED; }
+        
+        MouseCursorMode getMouseCursorMode( void ) const { return _mouseCursorMode; }
+        void setMouseCursorMode( MouseCursorMode mode ) { _mouseCursorMode = mode; }
 
 	private:
 		std::vector< KeyState > _currentKeys;
@@ -101,6 +110,8 @@ namespace crimild {
 
 		std::vector< MouseButtonState > _currentMouseButtons;
 		std::vector< MouseButtonState > _previousMouseButtons;
+        
+        MouseCursorMode _mouseCursorMode;
 	};
 
 }
