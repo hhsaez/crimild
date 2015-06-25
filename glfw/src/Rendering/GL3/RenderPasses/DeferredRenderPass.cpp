@@ -34,8 +34,7 @@ using namespace crimild;
 
 gl3::DeferredRenderPass::DeferredRenderPass( void )
 {
-    setGBufferProgram( new DeferredRenderShaderProgram() );
-    setGBufferCompositionProgram( new DeferredComposeRenderShaderProgram() );
+
 }
 
 gl3::DeferredRenderPass::~DeferredRenderPass( void )
