@@ -36,9 +36,7 @@
 #include "Foundation/Scripted.hpp"
 #include "Foundation/LuaSerializer.hpp"
 
-#include "SceneGraph/SceneBuilder.hpp"
-
-#include "Simulation/Tasks/ScriptedTask.hpp"
+#include "SceneGraph/LuaSceneBuilder.hpp"
 
 #endif
 

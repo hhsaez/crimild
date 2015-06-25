@@ -38,6 +38,7 @@
 #include "Foundation/NamedObject.hpp"
 #include "Foundation/Profiler.hpp"
 #include "Foundation/Singleton.hpp"
+#include "Foundation/Streaming.hpp"
 
 #include "Messaging/MessageQueue.hpp"
 
@@ -109,7 +110,14 @@ namespace crimild {
 
 	public:
 		void addSystem( SystemPtr const &system );
+		
 		SystemPtr getSystem( std::string name );
+
+		template< class SYSTEM_CLASS >
+        SharedPointer< SYSTEM_CLASS > getSystem( std::string name )
+		{
+            return std::static_pointer_cast< SYSTEM_CLASS >( getSystem( name ) );
+		}
 
 	private:
 		void startSystems( void );
@@ -129,6 +137,8 @@ namespace crimild {
 	public:
 		void setScene( NodePtr const &scene );
 		NodePtr getScene( void ) { return _scene; }
+            
+        void loadScene( std::string filename, SceneBuilderPtr const &sceneBuilder = nullptr );
 
         CameraPtr getMainCamera( void ) { return _cameras.size() > 0 ? _cameras.front() : CameraPtr(); }
 		void forEachCamera( std::function< void ( CameraPtr const & ) > callback );

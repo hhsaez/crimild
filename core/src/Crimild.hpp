@@ -53,6 +53,7 @@
 #include "Foundation/Pointer.hpp"
 #include "Foundation/Singleton.hpp"
 #include "Foundation/Profiler.hpp"
+#include "Foundation/Streaming.hpp"
 
 #include "Boundings/BoundingVolume.hpp"
 #include "Boundings/PlaneBoundingVolume.hpp"
@@ -151,6 +152,7 @@
 #include "Simulation/Systems/DebugSystem.hpp"
 #include "Simulation/Systems/UpdateSystem.hpp"
 #include "Simulation/Systems/RenderSystem.hpp"
+#include "Simulation/Systems/StreamingSystem.hpp"
 
 #include "Simulation/Tasks/BeginRenderTask.hpp"
 #include "Simulation/Tasks/EndRenderTask.hpp"

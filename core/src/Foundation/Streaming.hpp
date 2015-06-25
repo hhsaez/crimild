@@ -25,36 +25,35 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ScriptedTask.hpp"
+#ifndef CRIMILD_CORE_FOUNDATION_STREAMING_
+#define CRIMILD_CORE_FOUNDATION_STREAMING_
 
-using namespace crimild;
-using namespace crimild::scripting;
+#include "Macros.hpp"
+#include "Memory.hpp"
 
-#if 0
+#include "SceneGraph/Node.hpp"
 
-ScriptedTask::ScriptedTask( int priority )
-	: Task( priority )
-{
+#include <cassert>
+#include <string>
 
-}
+namespace crimild {
 
-ScriptedTask::~ScriptedTask( void )
-{
+	class SceneBuilder {
+		CRIMILD_DISALLOW_COPY_AND_ASSIGN( SceneBuilder )
 
-}
+	protected:
+		SceneBuilder( void ) { }
 
-void ScriptedTask::start( void )
-{
+	public:
+		virtual ~SceneBuilder( void ) { }
 
-}
+		virtual void reset( void ) = 0;
 
-void ScriptedTask::update( void )
-{
+		virtual NodePtr fromFile( const std::string &filename ) = 0;
 
-}
+	};
 
-void ScriptedTask::stop( void )
-{
+	using SceneBuilderPtr = SharedPointer< SceneBuilder >;
 
 }
 

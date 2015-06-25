@@ -25,33 +25,50 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SCRIPTING_SIMULATION_TASKS_SCRIPTED_
-#define CRIMILD_SCRIPTING_SIMULATION_TASKS_SCRIPTED_
+#ifndef CRIMILD_SIMULATION_SYSTEMS_STREAMING_
+#define CRIMILD_SIMULATION_SYSTEMS_STREAMING_
 
-#include "Foundation/Scripted.hpp"
+#include "System.hpp"
 
-#include <Crimild.hpp>
+#include "Foundation/Streaming.hpp"
 
 namespace crimild {
-    
-#if 0
 
-	namespace scripting {
+	namespace messaging {
 
-		class ScriptedTask : public Task, public Scripted {
-		public:
-			ScriptedTask( int priority = 0 );
-			virtual ~ScriptedTask( void );
-
-			virtual void start( void ) override;
-			virtual void update( void ) override;
-			virtual void stop( void ) override;
+		struct LoadScene {
+			std::string filename;
+            SceneBuilderPtr sceneBuilder;
 		};
 
+		struct ReloadScene { };
+		
 	}
-    
-#endif
-	
+
+	class StreamingSystem : public System {
+	public:
+		explicit StreamingSystem( void );
+		virtual ~StreamingSystem( void );
+
+		virtual bool start( void ) override;
+
+		virtual void stop( void ) override;
+
+		void setSceneBuilder( SceneBuilderPtr const &builder ) { _sceneBuilder = builder; }
+		SceneBuilderPtr &getSceneBuilder( void ) { return _sceneBuilder; }
+
+	private:
+		void onLoadScene( messaging::LoadScene const &message );
+		void onReloadScene( messaging::ReloadScene const &message );
+        
+    private:
+        void loadScene( std::string filename, SceneBuilderPtr const &builder );
+
+	private:
+		SceneBuilderPtr _sceneBuilder;
+		std::string _lastSceneFileName;
+	};
+
 }
 
 #endif

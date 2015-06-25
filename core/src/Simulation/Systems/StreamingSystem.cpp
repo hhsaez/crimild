@@ -25,61 +25,68 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SCRIPTING_SCENE_BUILDER_
-#define CRIMILD_SCRIPTING_SCENE_BUILDER_
+#include "StreamingSystem.hpp"
 
-#include "Foundation/Scripted.hpp"
+#include "Simulation/Simulation.hpp"
+#include "Simulation/FileSystem.hpp"
+ 
+#include "Concurrency/Async.hpp"
 
-namespace crimild {
+using namespace crimild;
 
-	namespace scripting {
+StreamingSystem::StreamingSystem( void )
+    : System( "Streaming System" )
+{
+	CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( messaging::LoadScene, StreamingSystem, onLoadScene );
+	CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( messaging::ReloadScene, StreamingSystem, onReloadScene );
+}
 
-		class SceneBuilder : public SharedObject, public crimild::scripting::Scripted {
-		private:
-			typedef std::function< NodeComponentPtr ( crimild::scripting::ScriptContext::Iterable & ) > BuilderFunction;
-
-		public:
-			SceneBuilder( std::string rootNodeName = "scene" );
-
-			virtual ~SceneBuilder( void );
-
-			virtual void reset( void );
-
-			NodePtr fromFile( const std::string &filename );
-
-		public:
-			template< typename T >
-			void registerComponent( void )
-			{
-				registerComponentBuilder< T >( []( crimild::scripting::ScriptContext::Iterable &it ) {
-                    return crimild::alloc< T >( it );
-				});
-			}
-
-			template< typename T >
-			void registerComponentBuilder( BuilderFunction builder )
-			{
-				_componentBuilders[ T::_COMPONENT_NAME() ] = builder;
-			}
-
-		private:
-			NodePtr buildNode( ScriptContext::Iterable &i, GroupPtr const &parent );
-
-			void setupCamera( ScriptContext::Iterable &i, CameraPtr const &camera );
-			void setTransformation( ScriptContext::Iterable &it, NodePtr const &node );
-			
-			void buildNodeComponents( ScriptContext::Iterable &it, NodePtr const &node );
-
-		private:
-			std::string _rootNodeName;
-			std::map< std::string, BuilderFunction > _componentBuilders;
-		};
-        
-        using SceneBuilderPtr = SharedPointer< SceneBuilder >;
-
-	}
+StreamingSystem::~StreamingSystem( void )
+{
 
 }
 
-#endif
+bool StreamingSystem::start( void )
+{
+    return System::start();
+}
+
+void StreamingSystem::stop( void )
+{
+
+}
+
+void StreamingSystem::onLoadScene( messaging::LoadScene const &message )
+{
+    if ( message.sceneBuilder != nullptr ) {
+        setSceneBuilder( message.sceneBuilder );
+    }
+    
+    loadScene( message.filename, getSceneBuilder() );
+}
+
+void StreamingSystem::onReloadScene( messaging::ReloadScene const &message )
+{
+    loadScene( _lastSceneFileName, getSceneBuilder() );
+}
+
+void StreamingSystem::loadScene( std::string filename, SceneBuilderPtr const &builder )
+{
+    if ( builder == nullptr ) {
+        Log::Error << "Undefined scene builder" << Log::End;
+        return;
+    }
+    
+    _lastSceneFileName = filename;
+    
+    crimild::async( crimild::AsyncDispatchPolicy::BACKGROUND_QUEUE, [builder, filename] {
+        builder->reset();
+        
+        auto scene = builder->fromFile( FileSystem::getInstance().pathForResource( filename ) );
+        
+        crimild::async( crimild::AsyncDispatchPolicy::MAIN_QUEUE, [scene] {
+            Simulation::getInstance()->setScene( scene );
+        });
+    });
+}
 

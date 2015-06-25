@@ -30,6 +30,8 @@
  
 #include "Foundation/Log.hpp"
 
+#include "Concurrency/Async.hpp"
+
 #include "Tasks/DispatchMessagesTask.hpp"
 #include "Tasks/BeginRenderTask.hpp"
 #include "Tasks/EndRenderTask.hpp"
@@ -48,6 +50,7 @@
 #include "Simulation/Systems/RenderSystem.hpp"
 #include "Simulation/Systems/UpdateSystem.hpp"
 #include "Simulation/Systems/DebugSystem.hpp"
+#include "Simulation/Systems/StreamingSystem.hpp"
 
 using namespace crimild;
 
@@ -61,6 +64,7 @@ Simulation::Simulation( std::string name, int argc, char **argv )
 	addSystem( crimild::alloc< UpdateSystem >() );
 	addSystem( crimild::alloc< RenderSystem >() );
     addSystem( crimild::alloc< DebugSystem >() );
+    addSystem( crimild::alloc< StreamingSystem >() );
 }
 
 Simulation::~Simulation( void )
@@ -177,6 +181,14 @@ void Simulation::setScene( NodePtr const &scene )
     _simulationClock.reset();
 
     broadcastMessage( messaging::SceneChanged { _scene } );
+}
+
+void Simulation::loadScene( std::string filename, SceneBuilderPtr const &builder )
+{
+    auto self = this;
+    crimild::async( [self, filename, builder] {
+        self->broadcastMessage( messaging::LoadScene { filename, builder } );
+    });
 }
 
 void Simulation::forEachCamera( std::function< void ( CameraPtr const & ) > callback )
