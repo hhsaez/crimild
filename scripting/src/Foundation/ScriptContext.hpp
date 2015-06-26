@@ -326,6 +326,8 @@ namespace crimild {
 			if ( test( name + ".rotate_q" ) ) result.setRotate( eval< Quaternion4f >( name + ".rotate_q" ) );
 
 			if ( test( name + ".lookAt" ) ) result.lookAt( eval< Vector3f >( name + ".lookAt" ), Vector3f( 0.0f, 1.0f, 0.0f ) );
+            
+            if ( test( name + ".scale" ) ) result.setScale( eval< float >( name + ".scale" ) );
 
 			return result;
 		}
