@@ -48,11 +48,11 @@ OrbitComponent::~OrbitComponent( void )
 
 }
 
-void OrbitComponent::update( const Time &t )
+void OrbitComponent::update( const Clock &c )
 {
     getNode()->local().translate()[0] = _x0 + _major * std::cos( _t ) * std::cos( _gamma ) - _minor * std::sin( _t ) * std::sin( _gamma );
     getNode()->local().translate()[1] = _y0 + _major * std::cos( _t ) * std::sin( _gamma ) + _minor * std::sin( _t ) * std::cos( _gamma );
 	
-	_t += _speed * t.getDeltaTime();
+	_t += _speed * c.getDeltaTime();
 }
 

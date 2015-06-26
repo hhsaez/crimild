@@ -9,6 +9,8 @@
 
 using namespace crimild;
 
+#if 0
+
 ProfilerDumpTask::ProfilerDumpTask( int priority )
 	: Task( priority )
 {
@@ -60,4 +62,6 @@ void ProfilerDumpTask::disableDump( DisableDumpMessage const &message )
 		getRunLoop()->suspendTask( getShared< ProfilerDumpTask>() );
 	}
 }
+
+#endif
 

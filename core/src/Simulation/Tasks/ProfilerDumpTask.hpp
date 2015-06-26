@@ -28,12 +28,14 @@
 #ifndef CRIMILD_SIMULATION_TASKS_PROFILER_DUMP_
 #define CRIMILD_SIMULATION_TASKS_PROFILER_DUMP_
 
-#include "Simulation/Task.hpp"
+//#include "Simulation/Task.hpp"
 #include "Messaging/MessageQueue.hpp"
 
 namespace crimild {
+    
+#if 0
 
-	class ProfilerDumpTask : 
+	class ProfilerDumpTask :
 		public Task,
 		public Messenger {
 
@@ -53,6 +55,8 @@ namespace crimild {
 		void enableDump( EnableDumpMessage const &message );
 		void disableDump( DisableDumpMessage const &message );
 	};
+    
+#endif
 
 }
 

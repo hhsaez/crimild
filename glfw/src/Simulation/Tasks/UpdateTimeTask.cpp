@@ -34,16 +34,31 @@
 
 using namespace crimild;
 
+#if 0
+
 UpdateTimeTask::UpdateTimeTask( int priority )
 	: Task( priority )
 {
-	CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( UpdateTimeTask::Messages::ResetSimulationTime, UpdateTimeTask, onResetSimulationTime );
-	CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( LoadSceneTask::Messages::SceneLoaded, UpdateTimeTask, onSceneLoaded );
+	 CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( UpdateTimeTask::Messages::ResetSimulationTime, UpdateTimeTask, onResetSimulationTime );
+	 CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( LoadSceneTask::Messages::SceneLoaded, UpdateTimeTask, onSceneLoaded );
+
+	setRepeatMode( Task::RepeatMode::REPEAT );
+	setThreadMode( Task::ThreadMode::BACKGROUND );
+	setSyncMode( Task::SyncMode::FRAME );
 }
 
 UpdateTimeTask::~UpdateTimeTask( void )
 {
 
+}
+
+void UpdateTimeTask::run( void )
+{
+	CRIMILD_PROFILE( "Update Time" )
+	
+	Time &t = Simulation::getInstance()->getSimulationTime();
+	double currentTime = glfwGetTime();
+	t.update( currentTime );
 }
 
 void UpdateTimeTask::start( void )
@@ -58,11 +73,7 @@ void UpdateTimeTask::stop( void )
 
 void UpdateTimeTask::update( void )
 {
-	CRIMILD_PROFILE( "Update Time" )
-	
-	Time &t = Simulation::getInstance()->getSimulationTime();
-	double currentTime = glfwGetTime();
-	t.update( currentTime );
+
 }
 
 void UpdateTimeTask::onResetSimulationTime( Messages::ResetSimulationTime const & )
@@ -81,4 +92,6 @@ void UpdateTimeTask::resetTime( void )
 	double currentTime = glfwGetTime();
 	t.reset( currentTime );
 }
+
+#endif
 

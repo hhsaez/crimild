@@ -25,38 +25,47 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_TIME_
-#define CRIMILD_MATHEMATICS_TIME_
+#include "Concurrency/Task.hpp"
 
-namespace crimild {
+using namespace crimild;
 
-	class Time {
-	public:
-		Time( void );
-		Time( const Time &t );
-		~Time( void );
-
-		Time &operator=( const Time &t );
-
-		void reset( double current = 0.0 );
-		void update( double current );
-
-		double getCurrentTime( void ) const { return _currentTime; }
-		void setCurrentTime( double value ) { _currentTime = value; }
-
-		double getLastTime( void ) const { return _lastTime; }
-		void setLastTime( double value ) { _lastTime = value; }
-
-		double getDeltaTime( void ) const { return _deltaTime; }
-		void setDeltaTime( double value ) { _deltaTime = value; }
-
-	private:
-		double _currentTime;
-		double _lastTime;
-		double _deltaTime;
-	};
+Task::Task( void )
+{
 
 }
 
-#endif
+Task::Task( Task const &other )
+    : _threadSafe( other._threadSafe ),
+      _syncFrame( other._syncFrame ),
+      _runCallback( other._runCallback ),
+      _completionCallback( other._completionCallback )
+{
+
+}
+
+Task::~Task( void )
+{
+
+}
+
+Task &Task::operator=( Task const &other )
+{
+    _threadSafe = other._threadSafe;
+    _syncFrame = other._syncFrame;
+    _runCallback = other._runCallback;
+    _completionCallback = other._completionCallback;
+    
+    return *this;
+}
+
+void Task::execute( void )
+{
+    if ( _runCallback != nullptr ) {
+        _runCallback();
+    }
+    
+    if ( _completionCallback != nullptr ) {
+        _completionCallback();
+    }
+}
 

@@ -27,6 +27,8 @@
 
 #include "NodeComponent.hpp"
 
+#include "SceneGraph/Node.hpp"
+
 using namespace crimild;
 
 NodeComponent::NodeComponent( void )
@@ -40,6 +42,15 @@ NodeComponent::~NodeComponent( void )
 
 }
 
+NodeComponentPtr NodeComponent::getComponentWithName( std::string name )
+{
+    if ( getNode() == nullptr ) {
+        return nullptr;
+    }
+    
+    return getNode()->getComponentWithName( name );
+}
+
 void NodeComponent::onAttach( void )
 {
 
@@ -51,11 +62,6 @@ void NodeComponent::onDetach( void )
 }
 
 void NodeComponent::start( void )
-{
-
-}
-
-void NodeComponent::update( const Time &t )
 {
 
 }

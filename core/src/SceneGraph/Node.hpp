@@ -34,7 +34,6 @@
 #include "Visitors/NodeVisitor.hpp"
 #include "Components/NodeComponent.hpp"
 #include "Mathematics/Transformation.hpp"
-#include "Mathematics/Time.hpp"
 #include "Boundings/BoundingVolume.hpp"
 
 #include <map>
@@ -101,8 +100,6 @@ namespace crimild {
 
 		void startComponents( void );
 		
-		void updateComponents( const Time &t );
-
 		void foreachComponent( std::function< void ( NodeComponentPtr const & ) > callback );
 
 	private:

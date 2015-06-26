@@ -27,13 +27,25 @@
 
 #include "UpdateInputStateTask.hpp"
 
+#include "Simulation/Systems/WindowSystem.hpp"
+
 using namespace crimild;
+
+#if 0
 
 UpdateInputStateTask::UpdateInputStateTask( int priority, GLFWwindow *window )
 	: Task( priority ),
 	  _window( window )
 {
-	glfwGetWindowSize( _window, &_windowWidth, &_windowHeight);
+    setRepeatMode( Task::RepeatMode::REPEAT );
+    setThreadMode( Task::ThreadMode::FOREGROUND );
+
+    registerMessageHandler<messages::WindowSystemDidCreateWindow >( [&]( messages::WindowSystemDidCreateWindow const &message ) {
+        _window = message.video->getWindowHandler();
+        glfwGetWindowSize( _window, &_windowWidth, &_windowHeight);
+        
+        InputState::getCurrentState().reset( GLFW_KEY_LAST, GLFW_MOUSE_BUTTON_LAST );
+    });
 }
 
 UpdateInputStateTask::~UpdateInputStateTask( void )
@@ -41,9 +53,14 @@ UpdateInputStateTask::~UpdateInputStateTask( void )
 
 }
 
+void UpdateInputStateTask::update( void )
+{
+    
+}
+
 void UpdateInputStateTask::start( void )
 {
-	InputState::getCurrentState().reset( GLFW_KEY_LAST, GLFW_MOUSE_BUTTON_LAST );
+
 }
 
 void UpdateInputStateTask::stop( void )
@@ -51,11 +68,15 @@ void UpdateInputStateTask::stop( void )
 
 }
 
-void UpdateInputStateTask::update( void )
+void UpdateInputStateTask::run( void )
 {
 	CRIMILD_PROFILE( "Update Input State" )
 
-	glfwPollEvents();
+//	glfwPollEvents();
+    
+    if ( _window == nullptr ) {
+        return;
+    }
 
 	for ( int i = 0; i < GLFW_KEY_LAST; i++ ) {
 		int keyState = glfwGetKey( _window, i );
@@ -75,4 +96,6 @@ void UpdateInputStateTask::update( void )
 		InputState::getCurrentState().setMouseButtonState( i, buttonState == GLFW_PRESS ? InputState::MouseButtonState::PRESSED : InputState::MouseButtonState::RELEASED );
 	}
 }
+
+#endif
 

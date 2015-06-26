@@ -28,12 +28,14 @@
 #ifndef CRIMILD_SIMULATION_TASKS_RENDER_DEBUG_INFO_
 #define CRIMILD_SIMULATION_TASKS_RENDER_DEBUG_INFO_
 
-#include "Simulation/Task.hpp"
+//#include "Simulation/Task.hpp"
 #include "Messaging/MessageQueue.hpp"
 
 namespace crimild {
+    
+#if 0
 
-	class RenderDebugInfoTask : 
+	class RenderDebugInfoTask :
 		public Task,
 		public Messenger {
 
@@ -55,6 +57,8 @@ namespace crimild {
 		void enable( RenderDebugInfoTask::Messages::Enable const &message );
 		void disable( RenderDebugInfoTask::Messages::Disable const &message );
 	};
+    
+#endif
 
 }
 

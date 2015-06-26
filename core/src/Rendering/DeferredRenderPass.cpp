@@ -67,6 +67,7 @@ void DeferredRenderPass::render( RendererPtr const &renderer, RenderQueuePtr con
     renderToGBuffer( renderer, renderQueue, camera );
     
     composeFrame( renderer, renderQueue, camera );
+    renderTranslucentObjects( renderer, renderQueue, camera );
     
     if ( !isDebugModeEnabled() ) {
         applyImageEffects( renderer, camera );
@@ -171,8 +172,7 @@ void DeferredRenderPass::renderToGBuffer( RendererPtr const &renderer, RenderQue
             for ( auto geometryIt : it.second ) {
                 CRIMILD_PROFILE( "Draw Primitive" )
 
-                auto world = geometryIt.second;
-                renderer->applyTransformations( program, projection, view, world.computeModelMatrix() );
+                renderer->applyTransformations( program, projection, view, geometryIt.second );
                 renderer->drawPrimitive( program, primitive );
             }
             
@@ -297,7 +297,7 @@ void DeferredRenderPass::computeShadowMaps( RendererPtr const &renderer, RenderQ
                 renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
                 
                 for ( auto geometryIt : it.second ) {
-                    renderer->applyTransformations( program, map->getLightProjectionMatrix(), map->getLightViewMatrix(), geometryIt.second.computeModelMatrix(), geometryIt.second.computeNormalMatrix() );
+                    renderer->applyTransformations( program, map->getLightProjectionMatrix(), map->getLightViewMatrix(), geometryIt.second, geometryIt.second );
                     renderer->drawPrimitive( program, primitive );
                 }
                 

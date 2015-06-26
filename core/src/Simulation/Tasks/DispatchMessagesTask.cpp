@@ -31,6 +31,8 @@
 
 using namespace crimild;
 
+#if 0
+
 DispatchMessagesTask::DispatchMessagesTask( int priority )
 	: Task( priority )
 {
@@ -58,4 +60,6 @@ void DispatchMessagesTask::stop( void )
 {
     MessageQueue::getInstance()->clear();
 }
+
+#endif
 

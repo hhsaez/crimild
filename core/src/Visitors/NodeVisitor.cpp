@@ -74,7 +74,7 @@ void NodeVisitor::visitGeometry( GeometryPtr const &geometry )
 
 void NodeVisitor::visitCamera( CameraPtr const &camera )
 {
-	visitNode( camera );
+	visitGroup( camera );
 }
 
 void NodeVisitor::visitLight( LightPtr const &light )

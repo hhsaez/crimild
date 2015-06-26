@@ -116,13 +116,19 @@
 #define CRIMILD_INPUT_MOUSE_BUTTON_MIDDLE GLFW_MOUSE_BUTTON_MIDDLE
 
 namespace crimild {
+    
+#if 0
 
-	class UpdateInputStateTask : public Task {
+	class UpdateInputStateTask :
+        public Task,
+        public Messenger {
 	public:
-		UpdateInputStateTask( int priority, GLFWwindow *window );
+		UpdateInputStateTask( int priority, GLFWwindow *window = nullptr );
 		virtual ~UpdateInputStateTask( void );
 
-		virtual void start( void ) override;
+        virtual void run( void ) override;
+
+        virtual void start( void ) override;
 		virtual void update( void ) override;
 		virtual void stop( void ) override;
 
@@ -133,6 +139,8 @@ namespace crimild {
 	};
 
 	typedef SharedPointer< UpdateInputStateTask > UpdateInputStateTaskPtr;
+    
+#endif
 
 }
 

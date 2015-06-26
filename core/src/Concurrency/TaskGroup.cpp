@@ -25,18 +25,36 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Task.hpp"
+#include "Concurrency/TaskGroup.hpp"
 
 using namespace crimild;
 
-Task::Task( int priority )
-	: _priority( priority )
-{
+#if 0
 
+TaskGroup::TaskGroup( std::list< TaskPtr > tasks, TaskGroup::CompletionCallback completion )
+{
+    for ( auto t : tasks ) {
+        _tasks.add( t );
+    }
+    
+    auto self = this;
+    registerMessageHandler< messages::TaskCompleted >( [self, completion]( messages::TaskCompleted const &message ) {
+        auto group = getSharedPointer( self );
+        group->getTasks().remove( message.task );
+        if ( group->getTasks().empty() ) {
+            if ( completion != nullptr ) {
+                completion();
+            }
+            
+            group->broadcastMessage( messages::TaskGroupCompleted { group } );
+        }
+    });
 }
 
-Task::~Task( void )
+TaskGroup::~TaskGroup( void )
 {
-
+    
 }
+
+#endif
 

@@ -25,60 +25,52 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SCRIPTING_SCENE_BUILDER_
-#define CRIMILD_SCRIPTING_SCENE_BUILDER_
+#ifndef CRIMILD_SIMULATION_SYSTEMS_UPDATE_
+#define CRIMILD_SIMULATION_SYSTEMS_UPDATE_
 
-#include "Foundation/Scripted.hpp"
+#include "System.hpp"
+
+#include "SceneGraph/Node.hpp"
+#include "SceneGraph/Camera.hpp"
 
 namespace crimild {
+    
+	class UpdateSystem;
 
-	namespace scripting {
+	namespace messaging {
 
-		class SceneBuilder : public SharedObject, public crimild::scripting::Scripted {
-		private:
-			typedef std::function< NodeComponentPtr ( crimild::scripting::ScriptContext::Iterable & ) > BuilderFunction;
-
-		public:
-			SceneBuilder( std::string rootNodeName = "scene" );
-
-			virtual ~SceneBuilder( void );
-
-			virtual void reset( void );
-
-			NodePtr fromFile( const std::string &filename );
-
-		public:
-			template< typename T >
-			void registerComponent( void )
-			{
-				registerComponentBuilder< T >( []( crimild::scripting::ScriptContext::Iterable &it ) {
-                    return crimild::alloc< T >( it );
-				});
-			}
-
-			template< typename T >
-			void registerComponentBuilder( BuilderFunction builder )
-			{
-				_componentBuilders[ T::_COMPONENT_NAME() ] = builder;
-			}
-
-		private:
-			NodePtr buildNode( ScriptContext::Iterable &i, GroupPtr const &parent );
-
-			void setupCamera( ScriptContext::Iterable &i, CameraPtr const &camera );
-			void setTransformation( ScriptContext::Iterable &it, NodePtr const &node );
-			
-			void buildNodeComponents( ScriptContext::Iterable &it, NodePtr const &node );
-
-		private:
-			std::string _rootNodeName;
-			std::map< std::string, BuilderFunction > _componentBuilders;
+		struct WillUpdateScene { 
+			NodePtr scene;
+			CameraPtr mainCamera;
 		};
-        
-        using SceneBuilderPtr = SharedPointer< SceneBuilder >;
+
+		struct DidUpdateScene {
+			NodePtr scene;
+			CameraPtr mainCamera;
+		};
 
 	}
 
+	class UpdateSystem : public System {
+	public:
+		UpdateSystem( void );
+		virtual ~UpdateSystem( void );
+
+		virtual bool start( void ) override;
+
+		virtual void update( void );
+
+		virtual void stop( void ) override;
+        
+    private:
+        void updateBehaviors( NodePtr const &scene );
+        void updateWorldState( NodePtr const &scene );
+        void computeRenderQueue( NodePtr const &scene, CameraPtr const &camera );
+
+	private:
+		double _accumulator = 0.0;
+	};
+    
 }
 
 #endif

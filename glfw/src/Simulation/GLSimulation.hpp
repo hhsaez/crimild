@@ -29,14 +29,12 @@
 #define CRIMILD_GL_SIMULATION_
 
 #include <Crimild.hpp>
-#include "Rendering/GL3/Utils.hpp"
 
 namespace crimild {
 
 	class GLSimulation : public Simulation {
 	public:
 		GLSimulation( std::string name, int argc, char **argv );
-		GLSimulation( std::string name, int argc, char **argv, bool enableBackgroundLoop );
 		virtual ~GLSimulation( void );
 
 		virtual void start( void ) override;
@@ -44,9 +42,6 @@ namespace crimild {
 	private:
 		void loadSettings( void );
 		void init( void );
-
-	private:
-		GLFWwindow *_window;
 	};
 
 }

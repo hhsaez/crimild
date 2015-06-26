@@ -28,9 +28,11 @@
 #ifndef CRIMILD_SIMULATION_TASKS_UPDATE_SCENE_
 #define CRIMILD_SIMULATION_TASKS_UPDATE_SCENE_
 
-#include "Simulation/Task.hpp"
+//#include "Simulation/Task.hpp"
 
 namespace crimild {
+    
+#if 0
 
 	class UpdateSceneTask : public Task {
 	public:
@@ -44,6 +46,8 @@ namespace crimild {
 	private:
 		double _accumulator;
 	};
+    
+#endif
 
 }
 

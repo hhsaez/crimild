@@ -32,8 +32,10 @@
 #include <Crimild_Scripting.hpp>
 
 namespace crimild {
+    
+#if 0
 
-	class LoadSceneTask : 
+	class LoadSceneTask :
 		public Task,
 		public Messenger {
 
@@ -54,6 +56,8 @@ namespace crimild {
 
 		scripting::SceneBuilderPtr getBuilder( void ) { return _builder; }
 
+		virtual void run( void ) override;
+
 		virtual void start( void ) override;
 		virtual void update( void ) override;
 		virtual void stop( void ) override;
@@ -69,6 +73,8 @@ namespace crimild {
 		std::string _sceneFileName;
 		scripting::SceneBuilderPtr _builder;
 	};
+    
+#endif
 
 }
 

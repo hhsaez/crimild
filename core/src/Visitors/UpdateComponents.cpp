@@ -31,8 +31,8 @@
 
 using namespace crimild;
 
-UpdateComponents::UpdateComponents( const Time &t )
-	: Apply( [&]( NodePtr const &n ) { n->updateComponents( t ); } )
+UpdateComponents::UpdateComponents( const Clock &t )
+	: Apply( [&]( NodePtr const &n ) { /*n->updateComponents( t );*/ } )
 {
 
 }

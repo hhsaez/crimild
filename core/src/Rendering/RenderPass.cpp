@@ -90,7 +90,7 @@ void RenderPass::render( SharedPointer< Renderer > const &renderer, RenderQueueP
             renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
             
             for ( auto geometryIt : primitiveIt.second ) {
-                Matrix4f model = geometryIt.second.computeModelMatrix();
+                auto &model = geometryIt.second;
                 Matrix4f normal = model;
                 normal[ 12 ] = 0.0f;
                 normal[ 13 ] = 0.0f;
@@ -204,7 +204,7 @@ void RenderPass::renderScreenObjects( RendererPtr const &renderer, RenderQueuePt
             renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
             
             for ( auto geometryIt : it.second ) {
-                auto model = geometryIt.second.computeModelMatrix();
+                auto &model = geometryIt.second;
                 auto normal = model;
                 normal[ 12 ] = 0.0f;
                 normal[ 13 ] = 0.0f;

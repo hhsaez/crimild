@@ -147,15 +147,6 @@ void Node::startComponents( void )
 	});
 }
 
-void Node::updateComponents( const Time &t )
-{
-    foreachComponent( [&]( NodeComponentPtr const &component ) {
-    	if ( component->isEnabled() ) {
-			component->update( t );
-    	}
-	});
-}
-
 void Node::foreachComponent( std::function< void ( NodeComponentPtr const & ) > callback )
 {
 	// create a copy of the component's collection

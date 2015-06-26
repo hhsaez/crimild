@@ -78,7 +78,7 @@ void BasicRenderPass::render( RendererPtr const &renderer, RenderQueuePtr const 
             renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::USE_COLOR_ATTRIBUTE ), vf.hasColors() );
             
             for ( auto geometryIt : primitiveIt.second ) {
-                Matrix4f model = geometryIt.second.computeModelMatrix();
+                auto &model = geometryIt.second;
                 Matrix4f normal = model;
                 normal[ 12 ] = 0.0f;
                 normal[ 13 ] = 0.0f;

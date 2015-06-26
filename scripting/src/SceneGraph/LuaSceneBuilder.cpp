@@ -1,4 +1,4 @@
-#include "SceneBuilder.hpp"
+#include "LuaSceneBuilder.hpp"
 
 using namespace crimild;
 using namespace crimild::scripting;
@@ -36,24 +36,24 @@ using namespace crimild::scripting;
 #define TEXT_SIZE "textSize"
 #define TEXT_TEXT "text"
 
-SceneBuilder::SceneBuilder( std::string rootNodeName )
+LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
 	: Scripted( true ),
 	  _rootNodeName( rootNodeName )
 {
 
 }
 
-SceneBuilder::~SceneBuilder( void )
+LuaSceneBuilder::~LuaSceneBuilder( void )
 {
 
 }
 
-void SceneBuilder::reset( void )
+void LuaSceneBuilder::reset( void )
 {
 	getScriptContext().reset();
 }
 
-NodePtr SceneBuilder::fromFile( const std::string &filename )
+NodePtr LuaSceneBuilder::fromFile( const std::string &filename )
 {
 	if ( !getScriptContext().load( filename ) ) {
 		Log::Error << "Cannot open scene file " << filename << Log::End;
@@ -71,7 +71,7 @@ NodePtr SceneBuilder::fromFile( const std::string &filename )
 	return buildNode( first, nullptr );
 }
 
-NodePtr SceneBuilder::buildNode( ScriptContext::Iterable &it, GroupPtr const &parent )
+NodePtr LuaSceneBuilder::buildNode( ScriptContext::Iterable &it, GroupPtr const &parent )
 {
 	NodePtr current;
 
@@ -80,7 +80,12 @@ NodePtr SceneBuilder::buildNode( ScriptContext::Iterable &it, GroupPtr const &pa
 		Log::Debug << "Building 'camera' node" << Log::End;
         auto camera = crimild::alloc< Camera >( 90.0f, 4.0f / 3.0f, 1.0f, 1000.0f );
 		setupCamera( it, camera );
-		current = camera;
+        
+        it.foreach( GROUP_NODES, [&]( ScriptContext &c, ScriptContext::Iterable &childId ) {
+            buildNode( childId, camera );
+        });
+
+        current = camera;
 	}
 	else if ( type == LIGHT_TYPE ) {
 		Log::Debug << "Building 'light' node" << Log::End;
@@ -165,7 +170,7 @@ NodePtr SceneBuilder::buildNode( ScriptContext::Iterable &it, GroupPtr const &pa
 	return current;
 }
 
-void SceneBuilder::setupCamera( ScriptContext::Iterable &it, CameraPtr const &camera )
+void LuaSceneBuilder::setupCamera( ScriptContext::Iterable &it, CameraPtr const &camera )
 {
 	std::string renderPassType = it.eval< std::string >( CAMERA_RENDER_PASS );
 	if ( renderPassType == "basic" ) {
@@ -186,13 +191,13 @@ void SceneBuilder::setupCamera( ScriptContext::Iterable &it, CameraPtr const &ca
 	}
 }
 
-void SceneBuilder::setTransformation( ScriptContext::Iterable &it, NodePtr const &node )
+void LuaSceneBuilder::setTransformation( ScriptContext::Iterable &it, NodePtr const &node )
 {
 	Log::Debug << "Setting node transformation" << Log::End;
 	if ( it.test( NODE_TRANSFORMATION ) ) node->setLocal( it.eval< TransformationImpl >( NODE_TRANSFORMATION ) );
 }
 
-void SceneBuilder::buildNodeComponents( ScriptContext::Iterable &it, NodePtr const &node )
+void LuaSceneBuilder::buildNodeComponents( ScriptContext::Iterable &it, NodePtr const &node )
 {
 	it.foreach( NODE_COMPONENTS, [&]( ScriptContext &c, ScriptContext::Iterable &componentIt ) {
 		std::string type = componentIt.eval< std::string >( NODE_COMPONENT_TYPE );

@@ -56,12 +56,12 @@ void FileSystem::init( int argc, char **argv )
     
     int pos = base.find( "/Debug" );
     if ( pos > 0 ) {
-        base = base.substr( 0, pos + 1 );
+        base = base.substr( 0, pos );
     }
 	
     pos = base.find( "/Release" );
     if ( pos > 0 ) {
-        base = base.substr( 0, pos + 1 );
+        base = base.substr( 0, pos );
     }
     
 	if ( base.length() == 0 ) {

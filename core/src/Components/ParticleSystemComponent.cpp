@@ -81,7 +81,7 @@ void ParticleSystemComponent::onAttach( void )
 	geometry->getComponent< MaterialComponent >()->attachMaterial( _material );
 }
 
-void ParticleSystemComponent::update( const Time &t )
+void ParticleSystemComponent::update( const Clock &t )
 {
 	_durationUniform->setValue( _particleDuration );
 	_gravityUniform->setValue( _gravity );

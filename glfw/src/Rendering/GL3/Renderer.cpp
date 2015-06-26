@@ -43,8 +43,6 @@
 #include "Programs/DepthShaderProgram.hpp"
 #include "Programs/BasicRenderShaderProgram.hpp"
 #include "Programs/ForwardRenderShaderProgram.hpp"
-#include "Programs/DeferredRenderShaderProgram.hpp"
-#include "Programs/DeferredComposeRenderShaderProgram.hpp"
 #include "Programs/SSAOShaderProgram.hpp"
 #include "Programs/SSAOBlendShaderProgram.hpp"
 #include "Programs/BlendShaderProgram.hpp"
@@ -53,9 +51,17 @@
 #include "Programs/SignedDistanceFieldShaderProgram.hpp"
 #include "Programs/ScreenAlphaShaderProgram.hpp"
 #include "Programs/ScreenRGBShaderProgram.hpp"
+#include "Programs/DeferredComposeRenderShaderProgram.hpp"
+#include "Programs/DeferredRenderShaderProgram.hpp"
 #include "Utils.hpp"
 
 using namespace crimild;
+
+gl3::Renderer::Renderer( void )
+    : gl3::Renderer( nullptr )
+{
+    
+}
 
 gl3::Renderer::Renderer( FrameBufferObjectPtr const &screenBuffer )
 {

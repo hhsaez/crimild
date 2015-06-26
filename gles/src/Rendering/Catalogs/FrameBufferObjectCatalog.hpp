@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,47 +25,37 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Time.hpp"
+#ifndef CRIMILD_GLES2_FRAME_BUFFER_OBJECT_CATALOG_
+#define CRIMILD_GLES2_FRAME_BUFFER_OBJECT_CATALOG_
 
-using namespace crimild;
+#include <Crimild.hpp>
 
-Time::Time( void )
-{
-	reset();
+namespace crimild {
+    
+    namespace gles {
+    
+        class FrameBufferObjectCatalog : public Catalog< FrameBufferObject > {
+        public:
+            FrameBufferObjectCatalog( crimild::Renderer *renderer );
+            virtual ~FrameBufferObjectCatalog( void );
+            
+            crimild::Renderer *getRenderer( void ) { return _renderer; }
+            
+            virtual int getNextResourceId( void ) override;
+            
+            virtual void bind( FrameBufferObject *vbo ) override;
+            virtual void unbind( FrameBufferObject *vbo ) override;
+            
+            virtual void load( FrameBufferObject *vbo ) override;
+            virtual void unload( FrameBufferObject *vbo ) override;
+            
+        private:
+            crimild::Renderer *_renderer;
+        };
+        
+    }
+    
 }
 
-Time::Time( const Time &t )
-{
-	_currentTime = t._currentTime;
-	_lastTime = t._lastTime;
-	_deltaTime = t._deltaTime;
-}
-
-Time::~Time( void )
-{
-
-}
-
-Time &Time::operator=( const Time &t )
-{
-	_currentTime = t._currentTime;
-	_lastTime = t._lastTime;
-	_deltaTime = t._deltaTime;
-
-	return *this;
-}
-
-void Time::reset( double current )
-{
-	_currentTime = current;
-	_lastTime = current;
-	_deltaTime = 0.0;
-}
-
-void Time::update( double current )
-{
-	_lastTime = _currentTime;
-	_currentTime = current;
-	_deltaTime = _currentTime - _lastTime;
-}
+#endif
 

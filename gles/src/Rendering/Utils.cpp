@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,46 +25,39 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SIMULATION_TASK_
-#define CRIMILD_SIMULATION_TASK_
+#include "Utils.hpp"
 
-#include "Mathematics/Time.hpp"
-#include "Foundation/SharedObject.hpp"
+#ifdef __APPLE__
+#import <OpenGLES/ES3/gl.h>
+#import <OpenGLES/ES3/glext.h>
+#else
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+#endif
 
-namespace crimild {
+using namespace crimild;
 
-	class RunLoop;
-
-	class Task : public SharedObject {
-	protected:
-		Task( int priority = 0 );
-
-	public:
-		virtual ~Task( void );
-
-		int getPriority( void ) const { return _priority; }
-
-	private:
-		int _priority;
-
-	public:
-		virtual void start( void ) { }
-		virtual void stop( void ) { }
-		virtual void suspend( void ) { }
-		virtual void resume( void ) { }
-		virtual void update( void ) { }
-
-	public:
-        void setRunLoop( SharedPointer< RunLoop > const &runLoop ) { _runLoop = runLoop; }
-        SharedPointer< RunLoop > getRunLoop( void ) { return _runLoop.lock(); }
-
-	private:
-        std::weak_ptr< RunLoop > _runLoop;
-	};
-    
-    using TaskPtr = SharedPointer< Task >;
-
+VertexShader *gles::Utils::getVertexShaderInstance( std::string source )
+{
+	return new VertexShader( "#version 300 es\n" + source );
 }
 
-#endif
+FragmentShader *gles::Utils::getFragmentShaderInstance( std::string source )
+{
+	return new FragmentShader( "#version 300 es\n" + source );
+}
+
+std::string gles::Utils::buildArrayShaderLocationName( std::string variable, int index )
+{
+	std::stringstream str;
+	str << variable << "[" << index << "]";
+	return str.str();
+}
+
+std::string gles::Utils::buildArrayShaderLocationName( std::string variable, int index, std::string member )
+{
+	std::stringstream str;
+	str << variable << "[" << index << "]." << member;
+	return str.str();
+}
 

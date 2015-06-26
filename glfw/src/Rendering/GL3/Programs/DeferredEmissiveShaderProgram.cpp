@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,34 +25,50 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ScriptedTask.hpp"
+#include "DeferredEmissiveShaderProgram.hpp"
+#include "Rendering/GL3/Utils.hpp"
 
 using namespace crimild;
-using namespace crimild::scripting;
+using namespace crimild::gl3;
 
-ScriptedTask::ScriptedTask( int priority )
-	: Task( priority )
-{
+const char *deferred_emissive_vs = { CRIMILD_TO_STRING(
+    in vec3 aPosition;
+    in vec2 aTextureCoord;
 
+    out vec2 vTextureCoord;
+
+    void main ()
+    {
+        gl_Position = vec4( aPosition.x, aPosition.y, 0.0, 1.0 );
+        vTextureCoord = aTextureCoord;
+    }
+)};
+
+const char *deferred_emissive_fs = {
+CRIMILD_TO_STRING(
+    in vec2 vTextureCoord;
+
+    uniform sampler2D uEmissiveMap;
+
+    out vec4 vFragColor;
+
+    void main( void )
+    {
+        vFragColor = texture( uEmissiveMap, vTextureCoord );
+    }
+)};
+
+DeferredEmissiveShaderProgram::DeferredEmissiveShaderProgram( void )
+    : ShaderProgram( Utils::getVertexShaderInstance( deferred_emissive_vs ), Utils::getFragmentShaderInstance( deferred_emissive_fs ) )
+{ 
+	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
+	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
+    
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::G_BUFFER_EMISSIVE_MAP_UNIFORM, "uEmissiveMap" );
 }
 
-ScriptedTask::~ScriptedTask( void )
+DeferredEmissiveShaderProgram::~DeferredEmissiveShaderProgram( void )
 {
-
-}
-
-void ScriptedTask::start( void )
-{
-
-}
-
-void ScriptedTask::update( void )
-{
-
-}
-
-void ScriptedTask::stop( void )
-{
-
+    
 }
 

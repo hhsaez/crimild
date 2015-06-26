@@ -28,13 +28,13 @@
 #ifndef CRIMILD_COMPONENTS_ORBIT_
 #define CRIMILD_COMPONENTS_ORBIT_
 
-#include "NodeComponent.hpp"
+#include "BehaviorComponent.hpp"
 
 #include "Mathematics/Vector.hpp"
 
 namespace crimild {
 
-	class OrbitComponent : public NodeComponent {
+	class OrbitComponent : public BehaviorComponent {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( OrbitComponent )
 		CRIMILD_NODE_COMPONENT_NAME( "update" )
 
@@ -42,7 +42,7 @@ namespace crimild {
 		OrbitComponent( float x0 = 0.0f, float y0 = 0.0f, float major = 1.0f, float minor = 1.0f, float speed = 1.0f, float gamma = 0.0f );
 		virtual ~OrbitComponent( void );
 
-		virtual void update( const Time &t ) override;
+		virtual void update( const Clock &c ) override;
 
 	private:
 		float _x0;

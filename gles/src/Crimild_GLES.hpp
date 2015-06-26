@@ -29,6 +29,9 @@
 #define CRIMILD_GLES_
 
 #include "Rendering/Renderer.hpp"
+#include "Rendering/Utils.hpp"
+
+#include "Rendering/DeferredRenderPass.hpp"
 
 #include "Rendering/Catalogs/ShaderProgramCatalog.hpp"
 #include "Rendering/Catalogs/TextureCatalog.hpp"
@@ -37,6 +40,13 @@
 
 #include "Rendering/Programs/SimpleShaderProgram.hpp"
 #include "Rendering/Programs/TextureShaderProgram.hpp"
+#include "Rendering/Programs/DeferredColorShaderProgram.hpp"
+#include "Rendering/Programs/DeferredComposeRenderShaderProgram.hpp"
+#include "Rendering/Programs/DeferredEmissiveShaderProgram.hpp"
+#include "Rendering/Programs/DeferredNormalShaderProgram.hpp"
+#include "Rendering/Programs/DeferredPositionShaderProgram.hpp"
+#include "Rendering/Programs/DeferredRenderShaderProgram.hpp"
+#include "Rendering/Programs/DeferredSpecularShaderProgram.hpp"
 
 #endif
 

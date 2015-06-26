@@ -28,6 +28,7 @@
 #ifndef CRIMILD_
 #define CRIMILD_
 
+#include "Mathematics/Clock.hpp"
 #include "Mathematics/Distance.hpp"
 #include "Mathematics/Frustum.hpp"
 #include "Mathematics/Interpolation.hpp"
@@ -40,7 +41,6 @@
 #include "Mathematics/Rect.hpp"
 #include "Mathematics/Root.hpp"
 #include "Mathematics/Sphere.hpp"
-#include "Mathematics/Time.hpp"
 #include "Mathematics/Transformation.hpp"
 #include "Mathematics/Vector.hpp"
 
@@ -53,6 +53,7 @@
 #include "Foundation/Pointer.hpp"
 #include "Foundation/Singleton.hpp"
 #include "Foundation/Profiler.hpp"
+#include "Foundation/Streaming.hpp"
 
 #include "Boundings/BoundingVolume.hpp"
 #include "Boundings/PlaneBoundingVolume.hpp"
@@ -71,6 +72,7 @@
 #include "SceneGraph/Switch.hpp"
 #include "SceneGraph/Text.hpp"
 
+#include "Components/BehaviorComponent.hpp"
 #include "Components/JointComponent.hpp"
 #include "Components/LambdaComponent.hpp"
 #include "Components/MaterialComponent.hpp"
@@ -81,6 +83,10 @@
 #include "Components/RotationComponent.hpp"
 #include "Components/RenderStateComponent.hpp"
 #include "Components/SkinComponent.hpp"
+
+#include "Concurrency/Async.hpp"
+#include "Concurrency/Task.hpp"
+#include "Concurrency/TaskManager.hpp"
 
 #include "Visitors/Apply.hpp"
 #include "Visitors/ApplyToGeometries.hpp"
@@ -142,7 +148,11 @@
 #include "Simulation/Simulation.hpp"
 #include "Simulation/FileSystem.hpp"
 #include "Simulation/RunLoop.hpp"
-#include "Simulation/Task.hpp"
+
+#include "Simulation/Systems/DebugSystem.hpp"
+#include "Simulation/Systems/UpdateSystem.hpp"
+#include "Simulation/Systems/RenderSystem.hpp"
+#include "Simulation/Systems/StreamingSystem.hpp"
 
 #include "Simulation/Tasks/BeginRenderTask.hpp"
 #include "Simulation/Tasks/EndRenderTask.hpp"

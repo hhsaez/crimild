@@ -28,9 +28,11 @@
 #ifndef CRIMILD_SIMULATION_TASKS_DISPATCH_MESSAGES_
 #define CRIMILD_SIMULATION_TASKS_DISPATCH_MESSAGES_
 
-#include "Simulation/Task.hpp"
+//#include "Simulation/Task.hpp"
 
 namespace crimild {
+    
+#if 0
 
 	class DispatchMessagesTask : public Task {
 	public:
@@ -41,6 +43,8 @@ namespace crimild {
 		virtual void update( void ) override;
 		virtual void stop( void ) override;
 	};
+    
+#endif
 
 }
 

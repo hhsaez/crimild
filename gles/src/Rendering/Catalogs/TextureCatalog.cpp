@@ -28,8 +28,8 @@
 #include "TextureCatalog.hpp"
 
 #ifdef __APPLE__
-#import <OpenGLES/ES2/gl.h>
-#import <OpenGLES/ES2/glext.h>
+#import <OpenGLES/ES3/gl.h>
+#import <OpenGLES/ES3/glext.h>
 #else
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
@@ -100,11 +100,38 @@ void gles::TextureCatalog::load( Texture *texture )
     glBindTexture( GL_TEXTURE_2D, textureId );
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA,
+    
+//	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+//	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+    
+    GLint internalFormat = GL_RGBA;
+	GLint format = GL_BGRA;
+	if ( texture->getImage()->getBpp() == 4 ) {
+		internalFormat = GL_RGBA;
+		if ( texture->getImage()->getPixelFormat() == Image::PixelFormat::BGRA ) {
+			format = GL_BGRA;
+		}
+		else {
+			format = GL_RGBA;
+		}
+	}
+	else if ( texture->getImage()->getBpp() == 3 ) {
+		internalFormat = GL_RGB;
+		if ( texture->getImage()->getPixelFormat() == Image::PixelFormat::BGR ) {
+			format = GL_BGRA;
+		}
+		else {
+			format = GL_RGB;
+		}
+	}
+	else if ( texture->getImage()->getBpp() == 1 ) {
+		internalFormat = GL_RED;
+		format = GL_RED;
+	}
+
+    glTexImage2D( GL_TEXTURE_2D, 0, internalFormat,
                  texture->getImage()->getWidth(), texture->getImage()->getHeight(), 0,
-                 ( texture->getImage()->getBpp() == 3 ? GL_RGB : ( texture->getImage()->getPixelFormat() == Image::PixelFormat::BGRA ? GL_BGRA : GL_RGBA ) ),
+                 format,
                  GL_UNSIGNED_BYTE,
                  ( GLvoid * ) texture->getImage()->getData() );
 }

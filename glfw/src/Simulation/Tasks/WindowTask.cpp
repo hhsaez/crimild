@@ -30,6 +30,8 @@
 
 using namespace crimild;
 
+#if 0
+
 WindowTask::WindowTask( int priority, GLFWwindow *window )
 	: Task( priority ),
       _window( window )
@@ -77,4 +79,6 @@ void WindowTask::update( void )
 		Simulation::getInstance()->stop();
 	}
 }
+
+#endif
 

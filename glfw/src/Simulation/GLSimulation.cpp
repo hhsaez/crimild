@@ -26,10 +26,15 @@
  */
 
 #include "GLSimulation.hpp"
+
+#include "Systems/WindowSystem.hpp"
+#include "Systems/InputSystem.hpp"
+
 #include "Tasks/WindowTask.hpp"
 #include "Tasks/UpdateTimeTask.hpp"
 #include "Tasks/UpdateInputStateTask.hpp"
 #include "Tasks/UpdateSceneAndPhysicsTask.hpp"
+
 #include "Rendering/GL3/Renderer.hpp"
 
 #include <Crimild_Scripting.hpp>
@@ -42,22 +47,25 @@ using namespace crimild::scripting;
 #endif
 
 GLSimulation::GLSimulation( std::string name, int argc, char **argv )
-	: GLSimulation( name, argc, argv, false )
+	: Simulation( name, argc, argv )
 {
-
-}
-
-GLSimulation::GLSimulation( std::string name, int argc, char **argv, bool enableBackgroundLoop )
-	: Simulation( name, argc, argv, enableBackgroundLoop ),
-	  _window( nullptr )
-{
+	// _window = nullptr;
+	
 	if ( !glfwInit() ) {
 		Log::Error << "Cannot start GLFW: glfwInit failed" << Log::End;
 		throw RuntimeException( "Cannot start GLFW: glwfInit failed!" );
 	}
 
-	loadSettings();
-	init();
+	 loadSettings();
+	// init();
+
+    addSystem( crimild::alloc< WindowSystem >() );
+    addSystem( crimild::alloc< InputSystem >() );
+
+//    addTask( crimild::alloc< UpdateTimeTask >( Simulation::Priorities::LOWEST_PRIORITY ) );
+//    addTask( crimild::alloc< UpdateInputStateTask >( Simulation::Priorities::HIGHEST_PRIORITY ) );
+    
+    setRenderer( crimild::alloc< gl3::Renderer >() );
 }
 
 GLSimulation::~GLSimulation( void )
@@ -67,6 +75,8 @@ GLSimulation::~GLSimulation( void )
 
 void GLSimulation::start( void ) 
 {
+	Simulation::start();
+	/*
     getMainLoop()->startTask( crimild::alloc< WindowTask >( Simulation::Priorities::LOWEST_PRIORITY, _window ) );
 	getMainLoop()->startTask( crimild::alloc< BeginRenderTask >( Priorities::BEGIN_RENDER_PRIORITY ) );
 	getMainLoop()->startTask( crimild::alloc< RenderSceneTask >( Priorities::RENDER_SCENE_PRIORITY ) );
@@ -77,6 +87,7 @@ void GLSimulation::start( void )
 	getSimulationLoop()->startTask( crimild::alloc< UpdateTimeTask >( Simulation::Priorities::LOWEST_PRIORITY ) );
     getSimulationLoop()->startTask( crimild::alloc< UpdateSceneAndPhysicsTask >( Priorities::UPDATE_SCENE_PRIORITY ) );
     getSimulationLoop()->startTask( crimild::alloc< ComputeRenderQueueTask >( Priorities::RENDER_SCENE_PRIORITY ) );
+    */
 }
 
 void GLSimulation::loadSettings( void )
@@ -100,6 +111,7 @@ void GLSimulation::loadSettings( void )
 
 void GLSimulation::init( void )
 {
+    /*
 	int width = getSettings().get( "video.width", 1024 );
 	int height = getSettings().get( "video.height", 768 );
 	float r = getSettings().get( "video.clearColor.r", 0.0f );
@@ -107,7 +119,9 @@ void GLSimulation::init( void )
 	float b = getSettings().get( "video.clearColor.b", 0.0f );
 	float a = getSettings().get( "video.clearColor.a", 0.0f );
 	bool fullscreen = getSettings().get< bool >( "video.fullscreen", false );
+     */
 
+	/*
 	glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 3 );
 	glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 2 );
 	glfwWindowHint( GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE );
@@ -125,11 +139,16 @@ void GLSimulation::init( void )
 
   	glfwMakeContextCurrent( _window );
 
-    int framebufferWidth, framebufferHeight;
-	glfwGetFramebufferSize( _window, &framebufferWidth, &framebufferHeight);
+    */
+    /*
+    // int framebufferWidth, framebufferHeight;
+    int framebufferWidth = width;
+    int framebufferHeight = height;
+	// glfwGetFramebufferSize( _window, &framebufferWidth, &framebufferHeight);
 
     auto screenBuffer = crimild::alloc< FrameBufferObject >( framebufferWidth, framebufferHeight );
-	screenBuffer->setClearColor( RGBAColorf( r, g, b, a ) );
+	// screenBuffer->setClearColor( RGBAColorf( r, g, b, a ) );
     setRenderer( crimild::alloc< gl3::Renderer >( screenBuffer ) );
+    */
 }
 

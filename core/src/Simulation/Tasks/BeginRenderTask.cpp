@@ -33,6 +33,8 @@
 
 using namespace crimild;
 
+#if 0
+
 BeginRenderTask::BeginRenderTask( int priority )
 	: Task( priority )
 {
@@ -67,4 +69,6 @@ void BeginRenderTask::stop( void )
 {
 
 }
+
+#endif
 

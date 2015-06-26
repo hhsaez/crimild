@@ -28,12 +28,12 @@
 #ifndef CRIMILD_CORE_COMPONENTS_JOINT_
 #define CRIMILD_CORE_COMPONENTS_JOINT_
 
-#include "NodeComponent.hpp"
+#include "BehaviorComponent.hpp"
 #include "Mathematics/Matrix.hpp"
 
 namespace crimild {
 
-	class JointComponent : public NodeComponent {
+	class JointComponent : public BehaviorComponent {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( JointComponent )
 		CRIMILD_NODE_COMPONENT_NAME( "joint" )
 
@@ -49,7 +49,7 @@ namespace crimild {
 
 		void computeInverseBindMatrix( void );
 
-		virtual void update( const Time & ) override;
+		virtual void update( const Clock & ) override;
 
 	private:
 		Matrix4f _worldMatrix;

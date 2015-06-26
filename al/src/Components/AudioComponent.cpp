@@ -75,7 +75,7 @@ void AudioComponent::onAttach( void )
 	CRIMILD_CHECK_AL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void AudioComponent::update( const Time & )
+void AudioComponent::update( const Clock & )
 {
 	const Vector3f &translate = getNode()->getWorld().getTranslate();
 	alSource3f( _sourceId, AL_POSITION, translate[ 0 ], translate[ 1 ], translate[ 2 ] );
@@ -109,7 +109,7 @@ void AudioComponent::play( bool loop )
 {
 	CRIMILD_CHECK_AL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
-	getNode()->perform( UpdateWorldState() );
+//	getNode()->perform( UpdateWorldState() );
 
 	alSourcei( _sourceId, AL_LOOPING, loop ? AL_TRUE : AL_FALSE );
 	const Vector3f &translate = getNode()->getWorld().getTranslate();

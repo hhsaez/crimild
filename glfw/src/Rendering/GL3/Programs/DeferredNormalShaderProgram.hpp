@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,29 +25,23 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SCRIPTING_SIMULATION_TASKS_SCRIPTED_
-#define CRIMILD_SCRIPTING_SIMULATION_TASKS_SCRIPTED_
-
-#include "Foundation/Scripted.hpp"
+#ifndef CRIMILD_GL3_SHADER_LIBRARY_DEFERRED_NORMAL_
+#define CRIMILD_GL3_SHADER_LIBRARY_DEFERRED_NORMAL_
 
 #include <Crimild.hpp>
 
 namespace crimild {
-
-	namespace scripting {
-
-		class ScriptedTask : public Task, public Scripted {
+    
+	namespace gl3 {
+        
+		class DeferredNormalShaderProgram : public ShaderProgram {
 		public:
-			ScriptedTask( int priority = 0 );
-			virtual ~ScriptedTask( void );
-
-			virtual void start( void ) override;
-			virtual void update( void ) override;
-			virtual void stop( void ) override;
+			DeferredNormalShaderProgram( void );
+			virtual ~DeferredNormalShaderProgram( void );
 		};
-
+        
 	}
-	
+    
 }
 
 #endif

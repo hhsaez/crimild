@@ -33,6 +33,8 @@
 
 using namespace crimild;
 
+#if 0
+
 #define CRIMILD_SIMULATION_TIME 1.0 / 60.0
 
 UpdateSceneAndPhysicsTask::UpdateSceneAndPhysicsTask( int priority )
@@ -86,4 +88,6 @@ void UpdateSceneAndPhysicsTask::stop( void )
 {
 
 }
+
+#endif
 

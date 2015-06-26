@@ -34,6 +34,8 @@
 
 using namespace crimild;
 
+#if 0
+
 RunLoop::RunLoop( std::string name )
 	: NamedObject( name )
 {
@@ -51,6 +53,7 @@ RunLoop::~RunLoop( void )
 
 void RunLoop::startTask( TaskPtr const &task )
 {
+	/*
 	if ( isTaskActive( task ) || isTaskKilled( task ) || isTaskSuspended( task ) ) {
 		return;
 	}
@@ -66,10 +69,12 @@ void RunLoop::startTask( TaskPtr const &task )
 
 	task->setRunLoop( getShared< RunLoop>() );
 	task->start();
+	*/
 }
 
 void RunLoop::stopTask( TaskPtr const &task )
 {
+	/*
 	if ( isTaskKilled( task ) ) {
 		return;
 	}
@@ -82,19 +87,23 @@ void RunLoop::stopTask( TaskPtr const &task )
 	else {
 		_suspendedTasks.remove( task );
 	}
+	*/
 }
 
 void RunLoop::suspendTask( TaskPtr const &task )
 {
+	/*
 	if ( isTaskActive( task ) ) {
 		_suspendedTasks.push_back( task );
 		_activeTasks.remove( task );
 		task->suspend();
 	}
+	*/
 }
 
 void RunLoop::resumeTask( TaskPtr const &task )
 {
+	/*
 	if ( !isTaskSuspended( task ) ) {
 		return;
 	}
@@ -110,6 +119,7 @@ void RunLoop::resumeTask( TaskPtr const &task )
 	_suspendedTasks.remove( task );
 
 	task->resume();
+	*/
 }
 
 bool RunLoop::isTaskActive( TaskPtr const &task ) const
@@ -217,4 +227,6 @@ void ThreadedRunLoop::stop( void )
 	    _thread.join();
     }
 }
+
+#endif
 
