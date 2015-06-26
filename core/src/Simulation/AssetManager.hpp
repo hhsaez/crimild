@@ -45,15 +45,25 @@ namespace crimild {
         AssetManager( void );
         virtual ~AssetManager( void );
 
-        void add( std::string name, SharedObjectPtr const &asset )
+        void add( std::string name, SharedObjectPtr const &asset, bool isPersistent = false )
         {
-            _assets[ name ] = asset;
+            if ( isPersistent ) {
+                _persistentAssets[ name ] = asset;
+            }
+            else {
+                _assets[ name ] = asset;
+            }
         }
-
+        
         template< class T >
         SharedPointer< T > get( std::string name )
         {
-            return std::static_pointer_cast< T >( _assets[ name ] );
+            auto asset = _assets[ name ];
+            if ( asset == nullptr ) {
+                asset = _persistentAssets[ name ];
+            }
+            
+            return std::static_pointer_cast< T >( asset );
         }
 
         void clear( void )
@@ -63,6 +73,7 @@ namespace crimild {
 
     private:
         std::map< std::string, SharedObjectPtr > _assets;
+        std::map< std::string, SharedObjectPtr > _persistentAssets;
     };
 
 }

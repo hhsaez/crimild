@@ -76,7 +76,13 @@ NodePtr LuaSceneBuilder::buildNode( ScriptContext::Iterable &it, GroupPtr const 
 	NodePtr current;
 
 	std::string type = it.eval< std::string >( NODE_TYPE );
-	if ( type == CAMERA_TYPE ) {
+
+	auto nodeBuilder = _nodeBuilders[ type ];
+	if ( nodeBuilder != nullptr ) {
+		Log::Debug << "Building '" << type << "' node" << Log::End;
+		current = nodeBuilder( it );
+	}
+	else if ( type == CAMERA_TYPE ) {
 		Log::Debug << "Building 'camera' node" << Log::End;
         auto camera = crimild::alloc< Camera >( 90.0f, 4.0f / 3.0f, 1.0f, 1000.0f );
 		setupCamera( it, camera );

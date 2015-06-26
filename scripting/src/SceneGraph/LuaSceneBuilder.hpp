@@ -40,7 +40,8 @@ namespace crimild {
             public crimild::SceneBuilder {
                 
 		private:
-			typedef std::function< NodeComponentPtr ( crimild::scripting::ScriptContext::Iterable & ) > BuilderFunction;
+			typedef std::function< NodePtr ( crimild::scripting::ScriptContext::Iterable & ) > NodeBuilderFunction;
+			typedef std::function< NodeComponentPtr ( crimild::scripting::ScriptContext::Iterable & ) > ComponentBuilderFunction;
 
 		public:
 			LuaSceneBuilder( std::string rootNodeName = "scene" );
@@ -53,6 +54,16 @@ namespace crimild {
 
 		public:
 			template< typename T >
+			void generateNodeBuilder( std::string type )
+			{
+				_nodeBuilders[ type ] = []( crimild::scripting::ScriptContext::Iterable &it ) {
+					auto node = crimild::alloc< T >();
+                    node->load( it );
+                    return node;
+                };
+			}
+
+			template< typename T >
 			void registerComponent( void )
 			{
 				registerComponentBuilder< T >( []( crimild::scripting::ScriptContext::Iterable &it ) {
@@ -61,7 +72,7 @@ namespace crimild {
 			}
 
 			template< typename T >
-			void registerComponentBuilder( BuilderFunction builder )
+			void registerComponentBuilder( ComponentBuilderFunction builder )
 			{
 				_componentBuilders[ T::_COMPONENT_NAME() ] = builder;
 			}
@@ -76,7 +87,8 @@ namespace crimild {
 
 		private:
 			std::string _rootNodeName;
-			std::map< std::string, BuilderFunction > _componentBuilders;
+            std::map< std::string, NodeBuilderFunction > _nodeBuilders;
+			std::map< std::string, ComponentBuilderFunction > _componentBuilders;
 		};
         
         using SceneBuilderPtr = SharedPointer< SceneBuilder >;
