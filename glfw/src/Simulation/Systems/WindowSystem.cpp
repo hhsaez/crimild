@@ -31,18 +31,14 @@ bool WindowSystem::start( void )
 		return false;
 	}
 
-	glewExperimental = GL_TRUE; //stops glew crashing on OSX :-/
-	if ( glewInit() != GLEW_OK ) {
-		Log::Fatal << "Cannot initialize GLEW" << Log::End;
-		exit( 1 );
-	}
-
     int framebufferWidth;
     int framebufferHeight;
 	glfwGetFramebufferSize( _window, &framebufferWidth, &framebufferHeight);
 
     auto screenBuffer = crimild::alloc< FrameBufferObject >( framebufferWidth, framebufferHeight );
-    Simulation::getInstance()->getRenderer()->setScreenBuffer( screenBuffer );
+    auto renderer = Simulation::getInstance()->getRenderer();
+    renderer->setScreenBuffer( screenBuffer );
+    renderer->configure();
     
     crimild::async( crimild::AsyncDispatchPolicy::MAIN_QUEUE, std::bind( &WindowSystem::update, this ) );
 
@@ -91,7 +87,7 @@ bool WindowSystem::createWindow( void )
     float g = Simulation::getInstance()->getSettings().get( "video.clearColor.g", 0.0f );
     float b = Simulation::getInstance()->getSettings().get( "video.clearColor.b", 0.0f );
     float a = Simulation::getInstance()->getSettings().get( "video.clearColor.a", 0.0f );
-    bool fullscreen = Simulation::getInstance()->getSettings().get( "video.fullscreen", false );
+    bool fullscreen = Simulation::getInstance()->getSettings().get< bool >( "video.fullscreen", false );
 
 //    int width = 1024;
 //	int height = 768;

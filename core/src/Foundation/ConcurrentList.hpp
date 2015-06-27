@@ -30,6 +30,8 @@
 
 #include <list>
 #include <thread>
+#include <mutex>
+#include <condition_variable>
 
 namespace crimild {
     
