@@ -29,6 +29,8 @@
 
 #include "Foundation/Log.hpp"
 
+#include "Mathematics/Numeric.hpp"
+
 using namespace crimild;
 
 FileSystem &FileSystem::getInstance( void )
@@ -73,11 +75,8 @@ void FileSystem::init( int argc, char **argv )
 
 std::string FileSystem::extractDirectory( std::string path )
 {
-#if defined _WIN32 || defined __CYGWIN__
-	return path.substr( 0, path.find_last_of( '\\' ) );
-#else
-	return path.substr( 0, path.find_last_of( '/' ) );
-#endif
+	// handles both Win32 and Unix like paths
+	return path.substr( 0, Numerici::max( path.find_last_of( '\\' ), path.find_last_of( '/' ) ) );
 }
 
 std::string FileSystem::pathForResource( std::string filePath )
