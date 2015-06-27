@@ -89,6 +89,8 @@ gl3::Renderer::Renderer( FrameBufferObjectPtr const &screenBuffer )
     addShaderProgram( "gaussianBlur", crimild::alloc< GaussianBlurShaderProgram >() );
     addShaderProgram( "sdf", crimild::alloc< SignedDistanceFieldShaderProgram >() );
     addShaderProgram( "text", crimild::alloc< SignedDistanceFieldShaderProgram >() );
+    
+    AssetManager::getInstance()->add( "unlit/texture", crimild::alloc< TextureShaderProgram >(), true );
 
 	setScreenBuffer( screenBuffer );
 }

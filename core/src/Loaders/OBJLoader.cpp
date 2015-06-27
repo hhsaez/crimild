@@ -31,9 +31,11 @@
 #include "SceneGraph/Geometry.hpp"
 #include "Foundation/StringUtils.hpp"
 #include "Foundation/Log.hpp"
+#include "Simulation/AssetManager.hpp"
 #include "Simulation/FileSystem.hpp"
 #include "Rendering/Material.hpp"
 #include "Rendering/ImageTGA.hpp"
+#include "Rendering/ShaderProgram.hpp"
 #include "Components/MaterialComponent.hpp"
 
 using namespace crimild;
@@ -215,6 +217,11 @@ void OBJLoader::processMaterialFile( std::string materialFileName )
                 currentMaterial->alphaState = std::make_shared< AlphaState >( true );
             }
         }
+		else if ( what == "illum" ) {
+			int level;
+			line >> level;
+			currentMaterial->illumLevel = level;
+		}
 	}
 }
 
@@ -426,6 +433,13 @@ GroupPtr OBJLoader::generateScene( void )
             material->setEmissiveMap( materialDef->emissiveMap );
             material->setAlphaState( materialDef->alphaState );
             material->setDepthState( materialDef->depthState );
+
+			switch ( materialDef->illumLevel ) {
+			    case 0:
+					material->setProgram( AssetManager::getInstance()->get< ShaderProgram >( "unlit/texture" ) );
+					break;
+			};
+
 			geometry->getComponent< MaterialComponent >()->attachMaterial( material );
 		}
 

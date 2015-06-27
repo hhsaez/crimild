@@ -98,6 +98,14 @@ namespace crimild {
             return std::static_pointer_cast< NODE_COMPONENT_CLASS >( _components[ NODE_COMPONENT_CLASS::_COMPONENT_NAME() ] );
 		}
 
+        template< typename T, typename... Args >
+        SharedPointer< T > attachComponent( Args &&... args )
+        {
+            auto cmp = crimild::alloc< T >( std::forward< Args >( args )... );
+            attachComponent( cmp );
+            return cmp;
+        }
+        
 		void startComponents( void );
 		
 		void foreachComponent( std::function< void ( NodeComponentPtr const & ) > callback );

@@ -150,6 +150,7 @@ namespace crimild {
 			RGBAColorf specularColor;
             AlphaStatePtr alphaState;
             DepthStatePtr depthState;
+			int illumLevel;
 
 			MaterialDef( std::string name )
                 : alphaState( crimild::alloc< AlphaState >( false ) ),
