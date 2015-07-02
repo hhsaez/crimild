@@ -29,6 +29,9 @@
 #define CRIMILD_LOADERS_OBJ_
 
 #include "SceneGraph/Group.hpp"
+#include "SceneGraph/Geometry.hpp"
+
+#include "Rendering/Material.hpp" 
 #include "Rendering/Texture.hpp"
 #include "Rendering/AlphaState.hpp"
 #include "Rendering/DepthState.hpp"
@@ -41,128 +44,82 @@
 namespace crimild {
 
 	class OBJLoader {
+		CRIMILD_DISALLOW_COPY_AND_ASSIGN( OBJLoader )
+
+	private:
+		class FileProcessor {
+		private:
+			using LineProcessor = std::function< void( std::stringstream &line ) >;
+
+		public:
+			FileProcessor( void );
+			~FileProcessor( void );
+
+			void readFile( std::string fileName );
+
+			void registerLineProcessor( std::string type, LineProcessor lineProcessor );
+
+		private:
+			std::stringstream getLine( std::ifstream &input );
+			void processLine( std::ifstream &input );
+
+		private:
+			std::map< std::string, LineProcessor > _lineProcessors;
+		};
+
 	public:
-		OBJLoader( std::string filePath );
-		virtual ~OBJLoader( void );
+		explicit OBJLoader( std::string fileName );
+		~OBJLoader( void );
 
 		GroupPtr load( void );
 
 	private:
+		const std::string &getFileName( void ) const { return _fileName; }
+
+		FileProcessor &getOBJProcessor( void ) { return _objProcessor; }
+		FileProcessor &getMTLProcessor( void ) { return _mtlProcessor; }
+
 		void reset( void );
-		void processLine( std::ifstream &input );
-		void processMaterialFile( std::string materialFileName );
-
-		template< typename T >
-		void loadData( std::ifstream &input, std::vector< T > &storage, unsigned int &usedCount, unsigned int dataCount ) 
-		{
-			for ( int i = 0; i < dataCount; i++ ) {
-				T value;
-				input >> value; 
-				pushData( storage, usedCount, value );
-			}
-		}
-
-		template< typename T >
-		void pushData( std::vector< T > &storage, unsigned int &usedCount, T data ) 
-		{
-			static const unsigned int OBJ_DATA_BUFFER_GROW_BY = 1024;
-
-			if ( usedCount >= storage.size() ) {
-				// resize storage if needed, making sure there is place for at least
-				// the number of items we're going to load
-				storage.resize( storage.size() + OBJ_DATA_BUFFER_GROW_BY );
-			}
-
-			storage[ usedCount++ ] = data;
-		}
-
-		void pushGroup( std::string name, std::string materialName );
-
 		GroupPtr generateScene( void );
 
+		void generateGeometry( void );
+
+        void readObject( std::stringstream &line );
+		void readObjectPositions( std::stringstream &line );
+		void readObjectNormals( std::stringstream &line );
+		void readObjectTextureCoords( std::stringstream &line );
+		void readObjectFaces( std::stringstream &line );
+		void readObjectMaterial( std::stringstream &line );
+
+		void readMaterialFile( std::stringstream &line );
+		void readMaterialName( std::stringstream &line );
+		void readMaterialAmbient( std::stringstream &line );
+		void readMaterialDiffuse( std::stringstream &line );
+		void readMaterialSpecular( std::stringstream &line );
+		void readMaterialColorMap( std::stringstream &line );
+		void readMaterialNormalMap( std::stringstream &line );
+		void readMaterialSpecularMap( std::stringstream &line );
+		void readMaterialEmissiveMap( std::stringstream &line );
+		void readMaterialShaderProgram( std::stringstream &line );
+
+		TexturePtr loadTexture( std::string textureFileName );
+
 	private:
-		std::string _filePath;
-		std::vector< float > _positions;
-		unsigned int _positionCount;
-		std::vector< float > _normals;
-		unsigned int _normalCount;
-		std::vector< float > _textureCoords;
-		unsigned int _textureCoordCount;
+		std::string _fileName;
 
-		class GroupDef : public SharedObject {
-		public:
-			GroupDef( std::string name, std::string materialName )
-			{
-				this->name = name;
-				this->materialName = materialName;
-			}
+		FileProcessor _objProcessor;
+		FileProcessor _mtlProcessor;
 
-			std::string name;
-			std::string materialName;
+		std::list< GroupPtr > _objects;
+		GroupPtr _currentObject;
 
-			class Face {
-			public:
-				Face( std::string v0, std::string v1, std::string v2 )
-				{
-					this->v0 = v0;
-					this->v1 = v1;
-					this->v2 = v2;
-				}
+		std::map< std::string, MaterialPtr > _materials;
+		MaterialPtr _currentMaterial;
 
-				Face( const Face &f ) 
-				{ 
-					v0 = f.v0;
-					v1 = f.v1;
-					v2 = f.v2;
-				}
-
-				Face &operator=( const Face &f )
-				{ 
-					v0 = f.v0;
-					v1 = f.v1;
-					v2 = f.v2;
-					return *this;
-				}
-
-				std::string v0;
-				std::string v1;
-				std::string v2;
-			};
-
-			std::vector< Face > faces;
-		};
-        
-        using GroupDefPtr = SharedPointer< GroupDef >;
-
-        std::vector< GroupDefPtr > _groups;
-		GroupDefPtr _currentGroup;
-
-		class MaterialDef : public SharedObject {
-		public:
-			std::string name;
-
-			TexturePtr diffuseMap;
-			TexturePtr normalMap;
-			TexturePtr specularMap;
-			TexturePtr emissiveMap;
-			RGBAColorf diffuseColor;
-			RGBAColorf ambientColor;
-			RGBAColorf specularColor;
-            AlphaStatePtr alphaState;
-            DepthStatePtr depthState;
-			int illumLevel;
-
-			MaterialDef( std::string name )
-                : alphaState( crimild::alloc< AlphaState >( false ) ),
-                  depthState( crimild::alloc< DepthState >( true ) )
-			{
-				this->name = name;
-			}
-		};
-        
-        using MaterialDefPtr = SharedPointer< MaterialDef >;
-
-		std::map< std::string, MaterialDefPtr > _materials;
+		std::vector< Vector3f > _positions;
+		std::vector< Vector2f > _textureCoords;
+		std::vector< Vector3f > _normals;
+        std::list< std::string > _faces;
 	};
 
 }

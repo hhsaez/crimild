@@ -40,10 +40,78 @@
 
 using namespace crimild;
 
-OBJLoader::OBJLoader( std::string filePath )
-	: _filePath( filePath ),
-	  _currentGroup( nullptr )
+OBJLoader::FileProcessor::FileProcessor( void )
 {
+
+}
+
+OBJLoader::FileProcessor::~FileProcessor( void )
+{
+
+}
+
+void OBJLoader::FileProcessor::readFile( std::string fileName )
+{
+	std::ifstream input;
+	input.open( fileName.c_str() );
+	if ( !input.is_open() ) {
+		Log::Error << "Cannot load OBJ file " << fileName << Log::End;
+		return;
+	}
+
+	while ( !input.eof() ) {
+		processLine( input );
+	}
+}
+
+void OBJLoader::FileProcessor::registerLineProcessor( std::string type, OBJLoader::FileProcessor::LineProcessor lineProcessor )
+{
+	_lineProcessors[ type ] = lineProcessor;
+}
+
+std::stringstream OBJLoader::FileProcessor::getLine( std::ifstream &input )
+{
+	char buffer[ 1024 ];
+	input.getline( buffer, 1024 );
+	
+	std::stringstream str;
+	str << buffer;
+	return str;
+}
+
+void OBJLoader::FileProcessor::processLine( std::ifstream &input )
+{
+	std::stringstream line = getLine( input );
+	
+	std::string what;
+	line >> what;
+
+	auto processor = _lineProcessors[ what ];
+	if ( processor != nullptr ) {
+		processor( line );
+	}
+}
+
+OBJLoader::OBJLoader( std::string fileName )
+	: _fileName( fileName )
+{
+	getOBJProcessor().registerLineProcessor( "o", std::bind( &OBJLoader::readObject, this, std::placeholders::_1 ) );
+	getOBJProcessor().registerLineProcessor( "v", std::bind( &OBJLoader::readObjectPositions, this, std::placeholders::_1 ) );
+	getOBJProcessor().registerLineProcessor( "vn", std::bind( &OBJLoader::readObjectNormals, this, std::placeholders::_1 ) );
+	getOBJProcessor().registerLineProcessor( "vt", std::bind( &OBJLoader::readObjectTextureCoords, this, std::placeholders::_1 ) );
+	getOBJProcessor().registerLineProcessor( "f", std::bind( &OBJLoader::readObjectFaces, this, std::placeholders::_1 ) );
+ 	getOBJProcessor().registerLineProcessor( "usemtl", std::bind( &OBJLoader::readObjectMaterial, this, std::placeholders::_1 ) );
+	getOBJProcessor().registerLineProcessor( "mtllib", std::bind( &OBJLoader::readMaterialFile, this, std::placeholders::_1 ) );
+
+	getMTLProcessor().registerLineProcessor( "newmtl", std::bind( &OBJLoader::readMaterialName, this, std::placeholders::_1 ) );
+	getMTLProcessor().registerLineProcessor( "Ka", std::bind( &OBJLoader::readMaterialAmbient, this, std::placeholders::_1 ) );
+	getMTLProcessor().registerLineProcessor( "Kd", std::bind( &OBJLoader::readMaterialDiffuse, this, std::placeholders::_1 ) );
+	getMTLProcessor().registerLineProcessor( "Ks", std::bind( &OBJLoader::readMaterialSpecular, this, std::placeholders::_1 ) );
+	getMTLProcessor().registerLineProcessor( "map_Kd", std::bind( &OBJLoader::readMaterialColorMap, this, std::placeholders::_1 ) );
+	getMTLProcessor().registerLineProcessor( "map_bump", std::bind( &OBJLoader::readMaterialNormalMap, this, std::placeholders::_1 ) );
+	getMTLProcessor().registerLineProcessor( "map_kS", std::bind( &OBJLoader::readMaterialSpecularMap, this, std::placeholders::_1 ) );
+	getMTLProcessor().registerLineProcessor( "map_Ke", std::bind( &OBJLoader::readMaterialEmissiveMap, this, std::placeholders::_1 ) );
+	getMTLProcessor().registerLineProcessor( "illum", std::bind( &OBJLoader::readMaterialShaderProgram, this, std::placeholders::_1 ) );
 }
 
 OBJLoader::~OBJLoader( void )
@@ -53,247 +121,66 @@ OBJLoader::~OBJLoader( void )
 
 void OBJLoader::reset( void )
 {
-	_positionCount = 0;
-	_normalCount = 0;
-	_textureCoordCount = 0;
+	_currentObject = nullptr;
+	_objects.clear();
 
-	std::vector< GroupDefPtr > empty;
-	_groups.swap( empty );
-	pushGroup( _filePath, _filePath );
-
+	_currentMaterial = nullptr;
 	_materials.clear();
+
+	_positions.clear();
+	_normals.clear();
+	_textureCoords.clear();
 }
 
 GroupPtr OBJLoader::load( void )
 {
 	reset();
 
-	std::ifstream input;
-	input.open( _filePath.c_str() );
-	if ( !input.is_open() ) {
-		Log::Error << "Cannot find file " << _filePath << Log::End;
-        return GroupPtr();
-	}
-	while ( !input.eof() ) {
-		processLine( input );
-	}
+	getOBJProcessor().readFile( getFileName() );
 
 	return generateScene();
 }
 
-void OBJLoader::processLine( std::ifstream &input )
+void OBJLoader::generateGeometry( void )
 {
-	std::string what;
-	input >> what;
-
-	if ( what == "v" ) {
-		loadData( input, _positions, _positionCount, 3 );
-	}
-	else if ( what == "vn" ) {
-		loadData( input, _normals, _normalCount, 3 );
-	}
-	else if ( what == "vt" ) {
-		loadData( input, _textureCoords, _textureCoordCount, 2 );
-	}
-	else if ( what == "f" ) {
-		// assumes a triangulated object
-		std::string f0, f1, f2;
-		input >> f0 >> f1 >> f2;
-		_currentGroup->faces.push_back( GroupDef::Face( f0, f1, f2 ) );
-		// _currentGroup->faces.push_back( f0 );
-		// _currentGroup->faces.push_back( f1 );
-		// _currentGroup->faces.push_back( f2 );
-	}
-	else if ( what == "mtllib" ) {
-		std::string materialFileName;
-		input >> materialFileName;
-		processMaterialFile( FileSystem::getInstance().extractDirectory( _filePath ) + "/" + materialFileName );
-	}
-	else if ( what == "usemtl" ) {
-		std::string name;
-		input >> name;
-		pushGroup( name, name );
-	}
-	else if ( what.length() > 0 ) {
-		// unknown object. discard the line
-		char buffer[ 1024 ];
-		input.getline( buffer, 1024 );
-	}
-}
-
-void OBJLoader::pushGroup( std::string name, std::string materialName )
-{
-    auto group = crimild::alloc< GroupDef >( name, materialName );
-	_groups.push_back( group );
-	_currentGroup = group;
-}
-
-void OBJLoader::processMaterialFile( std::string materialFileName )
-{
-	std::ifstream materialFile;
-	materialFile.open( materialFileName );
-	if ( !materialFile.is_open() ) {
-		Log::Error << "Cannot find material file with path " << materialFileName << Log::End;
+	if ( _faces.size() == 0 || _positions.size() == 0 ) {
+		// no data. skip
 		return;
 	}
 
-	MaterialDef *currentMaterial = nullptr;
-
-	while ( !materialFile.eof() ) {
-		char buffer[ 1024 ];
-		materialFile.getline( buffer, 1024 );
-		std::stringstream line;
-		line << buffer;
-		std::string what;
-		line >> what;
-
-		if ( what == "newmtl" ) {
-			std::string materialName;
-			line >> materialName;
-            auto material = crimild::alloc< MaterialDef >( materialName );
-			_materials[ material->name ] = material;
-			currentMaterial = material.get();
-		}
-		else if ( what == "Ka" ) {
-			float r, g, b;
-			line >> r >> g >> b;
-			currentMaterial->ambientColor = RGBAColorf( r, g, b, 1.0 );
-		}
-		else if ( what == "Kd" ) {
-			float r, g, b;
-			line >> r >> g >> b;
-			currentMaterial->diffuseColor = RGBAColorf( r, g, b, 1.0 );
-		}
-		else if ( what == "Ks" ) {
-			float r, g, b;
-			line >> r >> g >> b;
-			currentMaterial->specularColor = RGBAColorf( r, g, b, 1.0 );
-		}
-		else if ( what == "map_Kd" ) {
-			std::string diffuseMapFileName;
-			line >> diffuseMapFileName;
-			if ( diffuseMapFileName.length() > 0 ) {
-				Log::Debug << "Loading diffuse map " << diffuseMapFileName << Log::End;
-                auto image = crimild::alloc< ImageTGA >( FileSystem::getInstance().extractDirectory( materialFileName ) + "/" + diffuseMapFileName );
-                auto texture = crimild::alloc< Texture >( image );
-				currentMaterial->diffuseMap = texture;
-			}
-		}
-		else if ( what == "map_bump" ) {
-			std::string normalMapFileName;
-			line >> normalMapFileName;
-			if ( normalMapFileName.length() > 0 ) {
-				Log::Debug << "Loading normal map " << normalMapFileName << Log::End;
-                auto image = crimild::alloc< ImageTGA >( FileSystem::getInstance().extractDirectory( materialFileName ) + "/" + normalMapFileName );
-                auto texture = crimild::alloc< Texture >( image );
-				currentMaterial->normalMap = texture;
-			}
-		}
-		else if ( what == "map_kS" ) {
-			std::string specularMapFileName;
-			line >> specularMapFileName;
-			if ( specularMapFileName.length() > 0 ) {
-				Log::Debug << "Loading specular map " << specularMapFileName << Log::End;
-                auto image = crimild::alloc< ImageTGA >( FileSystem::getInstance().extractDirectory( materialFileName ) + "/" + specularMapFileName );
-                auto texture = crimild::alloc< Texture >( image );
-				currentMaterial->specularMap = texture;
-			}
-		}
-		else if ( what == "map_Ke" ) {
-			std::string emissiveMapFileName;
-			line >> emissiveMapFileName;
-			if ( emissiveMapFileName.length() > 0 ) {
-				Log::Debug << "Loading emissive map " << emissiveMapFileName << Log::End;
-                auto image = crimild::alloc< ImageTGA >( FileSystem::getInstance().extractDirectory( materialFileName ) + "/" + emissiveMapFileName );
-                auto texture = crimild::alloc< Texture >( image );
-				currentMaterial->emissiveMap = texture;
-			}
-		}
-        else if ( what == "map_opacity" ) {
-			std::string alphaMapFileName;
-			line >> alphaMapFileName;
-			if ( alphaMapFileName.length() > 0 ) {
-                // todo: load alpha map
-                currentMaterial->alphaState = std::make_shared< AlphaState >( true );
-            }
-        }
-		else if ( what == "illum" ) {
-			int level;
-			line >> level;
-			currentMaterial->illumLevel = level;
-		}
+	if ( _currentObject == nullptr ) {
+		// anonymous object
+		_currentObject = crimild::alloc< Group >();
+		_objects.push_back( _currentObject );
 	}
-}
 
-GroupPtr OBJLoader::generateScene( void )
-{
-	VertexFormat vf( ( _positionCount > 0 ? 3 : 0 ), 
-					 0, // no color information is imported
-					 ( _normalCount > 0 ? 3 : 0 ),
-					 ( _normalCount > 0 && _textureCoordCount > 0 ? 3 : 0 ),
-					 ( _textureCoordCount > 0 ? 2 : 0 ) );
+	VertexFormat format( 3,
+						 0,
+						 ( _normals.size() > 0 ? 3 : 0 ),
+						 0, //( _normalCount > 0 && _textureCoordCount > 0 ? 3 : 0 ),
+						 ( _textureCoords.size() > 0 ? 2 : 0 ) );
 
-    auto scene = crimild::alloc< Group >( _filePath );
+	std::vector< float > vertexData;
+	std::vector< unsigned short > indexData;
 
-	for ( auto group : _groups ) {
-		if ( group->faces.size() == 0 ) {
-			continue;
+	for ( auto face : _faces ) {
+		std::vector< int > f = StringUtils::split< int >( face, '/' );
+
+		if ( format.hasPositions() ) {
+            const Vector3f &position = _positions[ f[ 0 ] - 1 ];
+			vertexData.push_back( position[ 0 ] );
+			vertexData.push_back( position[ 1 ] );
+			vertexData.push_back( position[ 2 ] );
 		}
 
-		std::vector< float > vertices;
-		std::vector< unsigned short > indices;
-		unsigned short idx = 0;
-		for ( auto face : group->faces ) {
-			auto faceIndices = StringUtils::split< unsigned int >( face.v0, '/' );
+		if ( format.hasNormals() ) {
+            const Vector3f &normal = _normals[ f[ 2 ] - 1 ];
+			vertexData.push_back( normal[ 0 ] );
+			vertexData.push_back( normal[ 1 ] );
+			vertexData.push_back( normal[ 2 ] );
+		}
 
-			auto face0 = StringUtils::split< unsigned int >( face.v0, '/' );
-			auto face1 = StringUtils::split< unsigned int >( face.v1, '/' );
-			auto face2 = StringUtils::split< unsigned int >( face.v2, '/' );
-
-			Vector3f p0, p1, p2;
-			Vector3f n0, n1, n2;
-			Vector3f tg0, tg1, tg2;
-			Vector2f uv0, uv1, uv2;
-
-			if ( vf.hasPositions() ) {
-				p0[ 0 ] = _positions[ ( face0[ 0 ] - 1 ) * 3 + 0 ];
-				p0[ 1 ] = _positions[ ( face0[ 0 ] - 1 ) * 3 + 1 ];
-				p0[ 2 ] = _positions[ ( face0[ 0 ] - 1 ) * 3 + 2 ];
-
-				p1[ 0 ] = _positions[ ( face1[ 0 ] - 1 ) * 3 + 0 ];
-				p1[ 1 ] = _positions[ ( face1[ 0 ] - 1 ) * 3 + 1 ];
-				p1[ 2 ] = _positions[ ( face1[ 0 ] - 1 ) * 3 + 2 ];
-
-				p2[ 0 ] = _positions[ ( face2[ 0 ] - 1 ) * 3 + 0 ];
-				p2[ 1 ] = _positions[ ( face2[ 0 ] - 1 ) * 3 + 1 ];
-				p2[ 2 ] = _positions[ ( face2[ 0 ] - 1 ) * 3 + 2 ];
-			}
-
-			if ( vf.hasNormals() ) {
-				n0[ 0 ] = _normals[ ( face0[ 2 ] - 1 ) * 3 + 0 ];
-				n0[ 1 ] = _normals[ ( face0[ 2 ] - 1 ) * 3 + 1 ];
-				n0[ 2 ] = _normals[ ( face0[ 2 ] - 1 ) * 3 + 2 ];
-
-				n1[ 0 ] = _normals[ ( face1[ 2 ] - 1 ) * 3 + 0 ];
-				n1[ 1 ] = _normals[ ( face1[ 2 ] - 1 ) * 3 + 1 ];
-				n1[ 2 ] = _normals[ ( face1[ 2 ] - 1 ) * 3 + 2 ];
-
-				n2[ 0 ] = _normals[ ( face2[ 2 ] - 1 ) * 3 + 0 ];
-				n2[ 1 ] = _normals[ ( face2[ 2 ] - 1 ) * 3 + 1 ];
-				n2[ 2 ] = _normals[ ( face2[ 2 ] - 1 ) * 3 + 2 ];
-			}
-	
-			if ( vf.hasTextureCoords() ) {
-				uv0[ 0 ] = _textureCoords[ ( face0[ 1 ] - 1 ) * 2 + 0 ];
-				uv0[ 1 ] = 1.0 - _textureCoords[ ( face0[ 1 ] - 1 ) * 2 + 1 ];
-
-				uv1[ 0 ] = _textureCoords[ ( face1[ 1 ] - 1 ) * 2 + 0 ];
-				uv1[ 1 ] = 1.0 - _textureCoords[ ( face1[ 1 ] - 1 ) * 2 + 1 ];
-
-				uv2[ 0 ] = _textureCoords[ ( face2[ 1 ] - 1 ) * 2 + 0 ];
-				uv2[ 1 ] = 1.0 - _textureCoords[ ( face2[ 1 ] - 1 ) * 2 + 1 ];
-			}
-
+/*
 			if ( vf.hasTangents() ) {
 #if 1
 				Vector3f g;
@@ -337,115 +224,179 @@ GroupPtr OBJLoader::generateScene( void )
 				//tg1 = ( p2 - p1 );
 				//tg2 = ( p0 - p2 );
 			}
+*/
 
-			if ( vf.hasPositions() ) {		
-				vertices.push_back( p0[ 0 ] );
-				vertices.push_back( p0[ 1 ] );
-				vertices.push_back( p0[ 2 ] );
-			}
-				
-			if ( vf.hasNormals() ) {		
-				vertices.push_back( n0[ 0 ] );
-				vertices.push_back( n0[ 1 ] );
-				vertices.push_back( n0[ 2 ] );
-			}
-
-			if ( vf.hasTangents() ) {
-				vertices.push_back( tg0[ 0 ] );
-				vertices.push_back( tg0[ 1 ] );
-				vertices.push_back( tg0[ 2 ] );
-			}
-				
-			if ( vf.hasTextureCoords() ) {		
-				vertices.push_back( uv0[ 0 ] );
-				vertices.push_back( uv0[ 1 ] );
-			}
-				
-			if ( vf.hasPositions() ) {		
-				vertices.push_back( p1[ 0 ] );
-				vertices.push_back( p1[ 1 ] );
-				vertices.push_back( p1[ 2 ] );
-			}
-				
-			if ( vf.hasNormals() ) {		
-				vertices.push_back( n1[ 0 ] );
-				vertices.push_back( n1[ 1 ] );
-				vertices.push_back( n1[ 2 ] );
-			}
-				
-			if ( vf.hasTangents() ) {
-				vertices.push_back( tg1[ 0 ] );
-				vertices.push_back( tg1[ 1 ] );
-				vertices.push_back( tg1[ 2 ] );
-			}
-				
-			if ( vf.hasTextureCoords() ) {		
-				vertices.push_back( uv1[ 0 ] );
-				vertices.push_back( uv1[ 1 ] );
-			}
-				
-			if ( vf.hasPositions() ) {		
-				vertices.push_back( p2[ 0 ] );
-				vertices.push_back( p2[ 1 ] );
-				vertices.push_back( p2[ 2 ] );
-			}
-
-			if ( vf.hasNormals() ) {		
-				vertices.push_back( n2[ 0 ] );
-				vertices.push_back( n2[ 1 ] );
-				vertices.push_back( n2[ 2 ] );
-			}
-			
-			if ( vf.hasTangents() ) {
-				vertices.push_back( tg2[ 0 ] );
-				vertices.push_back( tg2[ 1 ] );
-				vertices.push_back( tg2[ 2 ] );
-			}
-				
-			if ( vf.hasTextureCoords() ) {		
-				vertices.push_back( uv2[ 0 ] );
-				vertices.push_back( uv2[ 1 ] );
-			}
-
-			indices.push_back( idx++ );
-			indices.push_back( idx++ );
-			indices.push_back( idx++ );
+		if ( format.hasTextureCoords() ) {
+            const Vector2f &uv = _textureCoords[ f[ 1 ] - 1 ];
+			vertexData.push_back( uv[ 0 ] );
+			vertexData.push_back( uv[ 1 ] );
 		}
 
-		unsigned int vertexCount = vertices.size() / vf.getVertexSize();
+		indexData.push_back( indexData.size() );
+	}
 
-        auto primitive = crimild::alloc< Primitive >( Primitive::Type::TRIANGLES );
-        primitive->setVertexBuffer( crimild::alloc< VertexBufferObject >( vf, vertexCount, &vertices[ 0 ] ) );
-		primitive->setIndexBuffer( crimild::alloc< IndexBufferObject >( indices.size(), &indices[ 0 ] ) );
+	int vertexCount = indexData.size();
 
-		auto geometry = crimild::alloc< Geometry >();
-		geometry->attachPrimitive( primitive );
+	auto primitive = crimild::alloc< Primitive >( Primitive::Type::TRIANGLES );
+	primitive->setVertexBuffer( crimild::alloc< VertexBufferObject >( format, vertexCount, &vertexData[ 0 ] ) );
+	primitive->setIndexBuffer( crimild::alloc< IndexBufferObject >( indexData.size(), &indexData[ 0 ] ) );
 
-		auto materialDef = _materials[ group->materialName ];
-		if ( materialDef != nullptr ) {
-			auto material = crimild::alloc< Material >();
-			material->setAmbient( materialDef->ambientColor );
-			material->setDiffuse( materialDef->diffuseColor );
-			material->setSpecular( materialDef->specularColor );
-			material->setColorMap( materialDef->diffuseMap );
-			material->setNormalMap( materialDef->normalMap );
-			material->setSpecularMap( materialDef->specularMap );
-            material->setEmissiveMap( materialDef->emissiveMap );
-            material->setAlphaState( materialDef->alphaState );
-            material->setDepthState( materialDef->depthState );
+	auto geometry = crimild::alloc< Geometry >( "geometry" );
+	geometry->attachPrimitive( primitive );
 
-			switch ( materialDef->illumLevel ) {
-			    case 0:
-					material->setProgram( AssetManager::getInstance()->get< ShaderProgram >( "unlit/texture" ) );
-					break;
-			};
+	if ( _currentMaterial ) {
+		geometry->getComponent< MaterialComponent >()->attachMaterial( _currentMaterial );	
+	}
 
-			geometry->getComponent< MaterialComponent >()->attachMaterial( material );
-		}
+	_currentObject->attachNode( geometry );
+}
 
-		scene->attachNode( geometry );
+GroupPtr OBJLoader::generateScene( void )
+{
+	// DON'T FORGET THE LAST OBJECT!!
+	generateGeometry();
+
+	auto scene = crimild::alloc< Group >( getFileName() );
+	for ( auto obj : _objects ) {
+		scene->attachNode( obj );
 	}
 
 	return scene;
+}
+
+void OBJLoader::readObject( std::stringstream &line )
+{
+	generateGeometry();
+
+	std::string name;
+	line >> name;
+
+	auto obj = crimild::alloc< Group >( name );
+	_currentObject = obj;
+	_objects.push_back( obj );
+}
+
+void OBJLoader::readObjectPositions( std::stringstream &line )
+{
+	float x, y, z;
+	line >> x >> y >> z;
+	_positions.push_back( Vector3f( x, y, z ) );
+}
+
+void OBJLoader::readObjectTextureCoords( std::stringstream &line )
+{
+	float s, t;
+	line >> s >> t;
+	_textureCoords.push_back( Vector2f( s, t ) );
+}
+
+void OBJLoader::readObjectNormals( std::stringstream &line ) 
+{
+	float x, y, z;
+	line >> x >> y >> z;
+	_normals.push_back( Vector3f( x, y, z ) );
+}
+
+void OBJLoader::readObjectFaces( std::stringstream &line )
+{
+	std::string f0, f1, f2;
+	line >> f0 >> f1 >> f2;
+	_faces.push_back( f0 );
+	_faces.push_back( f1 );
+	_faces.push_back( f2 );
+}
+
+void OBJLoader::readObjectMaterial( std::stringstream &line )
+{
+	std::string name;
+	line >> name;
+	_currentMaterial = _materials[ name ];
+}
+
+void OBJLoader::readMaterialFile( std::stringstream &line )
+{
+	std::string mtlFileName;
+	line >> mtlFileName;
+
+	std::string mtlFilePath = FileSystem::getInstance().extractDirectory( _fileName ) + "/" + mtlFileName;
+	getMTLProcessor().readFile( mtlFilePath );
+	_currentMaterial = nullptr;
+}
+
+void OBJLoader::readMaterialName( std::stringstream &line )
+{
+	std::string name;
+	line >> name;
+
+	_currentMaterial = crimild::alloc< Material >();
+	_materials[ name ] = _currentMaterial;
+}
+
+void OBJLoader::readMaterialAmbient( std::stringstream &line )
+{
+	float r, g, b;
+	line >> r >> g >> b;
+	_currentMaterial->setAmbient( RGBAColorf( r, g, b, 1.0f ) );
+}
+
+void OBJLoader::readMaterialDiffuse( std::stringstream &line )
+{
+	float r, g, b;
+	line >> r >> g >> b;
+	_currentMaterial->setDiffuse( RGBAColorf( r, g, b, 1.0f ) );
+}
+
+void OBJLoader::readMaterialSpecular( std::stringstream &line )
+{
+	float r, g, b;
+	line >> r >> g >> b;
+	_currentMaterial->setSpecular( RGBAColorf( r, g, b, 1.0f ) );
+}
+
+void OBJLoader::readMaterialColorMap( std::stringstream &line )
+{
+	std::string fileName;
+	line >> fileName;
+	_currentMaterial->setColorMap( loadTexture( fileName ) );
+}
+
+void OBJLoader::readMaterialNormalMap( std::stringstream &line )
+{
+	std::string fileName;
+	line >> fileName;
+	_currentMaterial->setNormalMap( loadTexture( fileName ) );
+}
+
+void OBJLoader::readMaterialSpecularMap( std::stringstream &line )
+{
+	std::string fileName;
+	line >> fileName;
+	_currentMaterial->setSpecularMap( loadTexture( fileName ) );
+}
+
+void OBJLoader::readMaterialEmissiveMap( std::stringstream &line )
+{
+	std::string fileName;
+	line >> fileName;
+	_currentMaterial->setEmissiveMap( loadTexture( fileName ) );
+}
+
+void OBJLoader::readMaterialShaderProgram( std::stringstream &line )
+{
+	int illumLevel;
+	line >> illumLevel;
+
+	switch ( illumLevel ) {
+	    case 0:
+            _currentMaterial->setProgram( AssetManager::getInstance()->get< ShaderProgram >( AssetManager::SHADER_PROGRAM_UNLIT_TEXTURE ) );
+			break;
+	};
+}
+
+TexturePtr OBJLoader::loadTexture( std::string textureFileName )
+{
+    auto image = crimild::alloc< ImageTGA >( FileSystem::getInstance().extractDirectory( _fileName ) + "/" + textureFileName );
+    auto texture = crimild::alloc< Texture >( image );
+    return texture;
 }
 
