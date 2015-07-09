@@ -85,7 +85,6 @@ void ShallowCopy::copyNode( NodePtr const &src, NodePtr const &dst )
 	}
 
 	dst->setName( src->getName() );
-	dst->setLocal( src->getLocal() );
 
 	auto srcMaterials = src->getComponent< MaterialComponent >();
 	if ( srcMaterials != nullptr ) {
