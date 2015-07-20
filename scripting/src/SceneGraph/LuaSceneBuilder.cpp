@@ -165,6 +165,8 @@ NodePtr LuaSceneBuilder::buildNode( ScriptContext::Iterable &it, GroupPtr const 
 	}
 
 	if ( current != nullptr ) {
+		if ( it.test( "name" ) ) current->setName( it.eval< std::string >( "name" ) );
+		
 		setTransformation( it, current );
 		buildNodeComponents( it, current );
 

@@ -80,6 +80,20 @@ NodePtr Group::getNodeAt( unsigned int index )
 	return _nodes.get( index );
 }
 
+NodePtr Group::getNode( std::string name )
+{
+	NodePtr result;
+	bool found = false;
+	_nodes.foreach( [&result, &found, name]( NodePtr const &node ) {
+		if ( !found && node->getName() == name ) {
+			result = node;
+			found = true;
+		}
+	});
+
+	return result;
+}
+
 void Group::foreachNode( std::function< void( NodePtr const & ) > callback )
 {
 	return _nodes.foreach( [&callback]( NodePtr const &node ) { if ( node->isEnabled() ) callback( node ); } );

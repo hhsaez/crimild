@@ -63,6 +63,14 @@ namespace crimild {
             return std::static_pointer_cast< T >( getNodeAt( index ) );
 		}
 
+		NodePtr getNode( std::string name );
+
+		template< typename T >
+		SharedPointer< T > getNode( std::string name )
+		{
+			return crimild::castPointer< T >( getNode( name ) );
+		} 
+
 		virtual void foreachNode( std::function< void( NodePtr const & ) > callback );
 
 	protected:
