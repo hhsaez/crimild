@@ -42,6 +42,16 @@ NodeComponent::~NodeComponent( void )
 
 }
 
+SharedPointer< Node > NodeComponent::getNode( void )
+{
+    return crimild::getSharedPointer( _node );
+}
+
+const SharedPointer< Node > NodeComponent::getNode( void ) const
+{
+    return crimild::getSharedPointer( _node );
+}
+
 NodeComponentPtr NodeComponent::getComponentWithName( std::string name )
 {
     if ( getNode() == nullptr ) {

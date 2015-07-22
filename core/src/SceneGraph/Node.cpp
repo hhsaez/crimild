@@ -87,7 +87,7 @@ void Node::accept( NodeVisitor &visitor )
 
 void Node::attachComponent( NodeComponentPtr const &component )
 {
-	if ( component->getNode() == this ) {
+    if ( _components[ component->getComponentName() ] == component ) {
 		// the component is already attached to this node
 		return;
 	}
@@ -100,10 +100,10 @@ void Node::attachComponent( NodeComponentPtr const &component )
 
 void Node::detachComponent( NodeComponentPtr const &component )
 {
-	if ( component->getNode() != this ) {
-		// the component is not attached to this node
-		return;
-	}
+    if ( _components[ component->getComponentName() ] != component ) {
+        // the component is already attached to this node
+        return;
+    }
 
 	detachComponentWithName( component->getComponentName() );
 }

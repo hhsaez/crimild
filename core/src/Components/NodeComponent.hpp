@@ -49,15 +49,20 @@ namespace crimild {
 	public:
 		virtual ~NodeComponent( void );
 
+    public:
         // internal use only
         void setNode( Node *node ) { _node = node; }
 		
-        Node *getNode( void ) { return _node; }
+        // internal use only
+        Node *getNodePointer( void ) { return _node; }
         
-        const Node *getNode( void ) const { return _node; }
+    public:
+        SharedPointer< Node > getNode( void );
+        
+        const SharedPointer< Node > getNode( void ) const;
         
 		template< class NodeClass >
-        NodeClass *getNode( void ) { return static_cast< NodeClass * >( _node ); }
+        SharedPointer< NodeClass > getNode( void ) { return crimild::castPointer< NodeClass >( getNode() ); }
 
 		virtual const char *getComponentName( void ) const { return "update"; }
 
