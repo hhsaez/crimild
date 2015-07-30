@@ -130,6 +130,24 @@ NodePtr LuaSceneBuilder::buildNode( ScriptContext::Iterable &it, GroupPtr const 
 		material->getDepthState()->setEnabled( false );
 		if ( it.test( "enableDepthTest" ) ) material->getDepthState()->setEnabled( it.eval< bool >( "enableDepthTest" ) );
 
+		if ( it.test( "textAnchor" ) ) {
+			std::string anchor = it.eval< std::string >( "textAnchor" );
+            
+            auto min = text->getLocalBound()->getMin();
+            auto max = text->getLocalBound()->getMax();
+            auto diff = max - min;
+
+			if ( anchor == "left" ) {
+                // do nothing?
+			}
+			else if ( anchor == "center" ) {
+                text->local().translate() += Vector3f( -0.5f * diff[ 0 ], 0.0f, 0.0f );
+			}
+			else if ( anchor == "right" ) {
+                text->local().translate() += Vector3f( -diff[ 0 ], 0.0f, 0.0f );
+			}
+		}
+
 		current = text;
 	}
 	else {
@@ -202,7 +220,12 @@ void LuaSceneBuilder::setupCamera( ScriptContext::Iterable &it, CameraPtr const 
 void LuaSceneBuilder::setTransformation( ScriptContext::Iterable &it, NodePtr const &node )
 {
 	Log::Debug << "Setting node transformation" << Log::End;
-	if ( it.test( NODE_TRANSFORMATION ) ) node->setLocal( it.eval< TransformationImpl >( NODE_TRANSFORMATION ) );
+    if ( it.test( NODE_TRANSFORMATION ) ) {
+        auto t = it.eval< TransformationImpl >( NODE_TRANSFORMATION );
+        node->local().translate() += t.translate();
+        node->local().setRotate( t.getRotate() );
+        node->local().setScale( t.getScale() );
+    }
 }
 
 void LuaSceneBuilder::buildNodeComponents( ScriptContext::Iterable &it, NodePtr const &node )
