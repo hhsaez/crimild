@@ -249,6 +249,8 @@ void OBJLoader::generateGeometry( void )
 	}
 
 	_currentObject->attachNode( geometry );
+
+	_faces.clear();
 }
 
 GroupPtr OBJLoader::generateScene( void )
