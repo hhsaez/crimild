@@ -30,6 +30,7 @@ using namespace crimild::scripting;
 #define LIGHT_CAST_SHADOWS "castShadows"
 #define LIGHT_SHADOW_FAR_COEFF "shadowFarCoeff"
 #define LIGHT_SHADOW_NEAR_COEFF "shadowNearCoeff"
+#define LIGHT_ATTENUATION "attenuation"
 
 #define TEXT_TYPE "text"
 #define TEXT_FONT "font"
@@ -98,13 +99,9 @@ NodePtr LuaSceneBuilder::buildNode( ScriptContext::Iterable &it, GroupPtr const 
         auto light = crimild::alloc< Light >();
 		light->setCastShadows( it.eval< bool >( LIGHT_CAST_SHADOWS ) );
 
-		if ( it.test( LIGHT_SHADOW_NEAR_COEFF ) ) {
-			light->setShadowNearCoeff( it.eval< float >( LIGHT_SHADOW_NEAR_COEFF ) );
-		}
-
-		if ( it.test( LIGHT_SHADOW_FAR_COEFF ) ) {
-			light->setShadowFarCoeff( it.eval< float >( LIGHT_SHADOW_FAR_COEFF ) );
-		}
+		if ( it.test( LIGHT_SHADOW_NEAR_COEFF ) ) light->setShadowNearCoeff( it.eval< float >( LIGHT_SHADOW_NEAR_COEFF ) );
+		if ( it.test( LIGHT_SHADOW_FAR_COEFF ) ) light->setShadowFarCoeff( it.eval< float >( LIGHT_SHADOW_FAR_COEFF ) );
+        if ( it.test( LIGHT_ATTENUATION ) ) light->setAttenuation( it.eval< Vector3f >( LIGHT_ATTENUATION ) );
 
 		current = light;
 	}

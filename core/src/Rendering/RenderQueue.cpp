@@ -71,7 +71,16 @@ void RenderQueue::push( MaterialPtr const &material, PrimitivePtr const &primiti
         _translucentObjects[ material ][ primitive ].push_back( std::make_pair( geometry, world.computeModelMatrix() ) );
     }
     else {
-        _opaqueObjects[ material ][ primitive ].push_back( std::make_pair( geometry, world.computeModelMatrix() ) );
+        if ( material->castShadows() ) {
+            _shadowCasters[ material ][ primitive ].push_back( std::make_pair( geometry, world.computeModelMatrix() ) );
+        }
+        
+        if ( material->receiveShadows() ) {
+            _shadedObjects[ material ][ primitive ].push_back( std::make_pair( geometry, world.computeModelMatrix() ) );
+        }
+        else {
+            _opaqueObjects[ material ][ primitive ].push_back( std::make_pair( geometry, world.computeModelMatrix() ) );
+        }
     }
 }
 

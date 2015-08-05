@@ -70,6 +70,7 @@ void ForwardRenderPass::render( RendererPtr const &renderer, RenderQueuePtr cons
     renderer->bindFrameBuffer( sceneFBO );
 
     renderShadedObjects( renderer, renderQueue, camera );
+    renderNonShadedObjects( renderer, renderQueue, camera );
     renderTranslucentObjects( renderer, renderQueue, camera );
 
     renderer->unbindFrameBuffer( sceneFBO );
@@ -144,7 +145,7 @@ void ForwardRenderPass::computeShadowMaps( RendererPtr const &renderer, RenderQu
 
         renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LINEAR_DEPTH_CONSTANT_UNIFORM ), map->getLinearDepthConstant() );
 
-        renderQueue->each( renderQueue->getOpaqueObjects(), [&]( MaterialPtr const &material, RenderQueue::PrimitiveMap const &primitives ) {
+        renderQueue->each( renderQueue->getShadowCasters(), [&]( MaterialPtr const &material, RenderQueue::PrimitiveMap const &primitives ) {
             for ( auto it : primitives ) {
                 auto primitive = it.first;
 
@@ -198,7 +199,7 @@ void ForwardRenderPass::renderShadedObjects( RendererPtr const &renderer, Render
         renderer->bindLight( program, light );
     });
     
-    renderQueue->each( renderQueue->getOpaqueObjects(), [&]( MaterialPtr const &material, RenderQueue::PrimitiveMap const &primitives ) {
+    renderQueue->each( renderQueue->getShadedObjects(), [&]( MaterialPtr const &material, RenderQueue::PrimitiveMap const &primitives ) {
         CRIMILD_PROFILE( "Apply Materials" )
 
         // bind material properties
@@ -241,6 +242,66 @@ void ForwardRenderPass::renderShadedObjects( RendererPtr const &renderer, Render
         }
     }
 
+    // unbind program
+    renderer->unbindProgram( program );
+}
+
+void ForwardRenderPass::renderNonShadedObjects( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
+{
+    CRIMILD_PROFILE( "Render Non-Shaded Objects" )
+    
+    auto program = renderer->getShaderProgram( "forward" );
+    
+    // bind program
+    renderer->bindProgram( program );
+    
+    auto projection = renderQueue->getProjectionMatrix();
+    auto view = renderQueue->getViewMatrix();
+    
+    // disable shadow maps
+    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::USE_SHADOW_MAP_UNIFORM ), false );
+    
+    // bind lights
+    renderQueue->each( [&]( LightPtr const &light, int ) {
+        renderer->bindLight( program, light );
+    });
+    
+    renderQueue->each( renderQueue->getOpaqueObjects(), [&]( MaterialPtr const &material, RenderQueue::PrimitiveMap const &primitives ) {
+        CRIMILD_PROFILE( "Apply Materials" )
+        
+        // bind material properties
+        renderer->bindMaterial( program, material );
+        
+        for ( auto it : primitives ) {
+            CRIMILD_PROFILE( "Bind Primitive" )
+            
+            auto primitive = it.first;
+            
+            // bind vertex and index buffers
+            renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
+            renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
+            
+            for ( auto geometryIt : it.second ) {
+                CRIMILD_PROFILE( "Draw Primitive" )
+                renderer->applyTransformations( program, projection, view, geometryIt.second );
+                renderer->drawPrimitive( program, primitive );
+            }
+            
+            // unbind primitive buffers
+            renderer->unbindVertexBuffer( program, primitive->getVertexBuffer() );
+            renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
+        }
+        
+        // unbind material properties
+        renderer->unbindMaterial( program, material );
+        
+    });
+    
+    // unbind lights
+    renderQueue->each( [&]( LightPtr const &light, int ) {
+        renderer->unbindLight( program, light );
+    });
+    
     // unbind program
     renderer->unbindProgram( program );
 }

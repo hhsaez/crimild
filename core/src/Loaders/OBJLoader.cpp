@@ -392,7 +392,23 @@ void OBJLoader::readMaterialShaderProgram( std::stringstream &line )
 	    case 0:
             _currentMaterial->setProgram( AssetManager::getInstance()->get< ShaderProgram >( AssetManager::SHADER_PROGRAM_UNLIT_TEXTURE ) );
 			break;
-	};
+
+        case 1:
+            _currentMaterial->setProgram( AssetManager::getInstance()->get< ShaderProgram >( AssetManager::SHADER_PROGRAM_UNLIT_DIFFUSE ) );
+            break;
+
+        case 3:
+            // receive shadows, but no casting
+            _currentMaterial->setCastShadows( false );
+            _currentMaterial->setReceiveShadows( true );
+            break;
+            
+        case 4:
+            // neither receive nor cast shadows
+            _currentMaterial->setCastShadows( false );
+            _currentMaterial->setReceiveShadows( false );
+            break;
+    };
 }
 
 TexturePtr OBJLoader::loadTexture( std::string textureFileName )

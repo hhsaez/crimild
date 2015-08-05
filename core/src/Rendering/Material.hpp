@@ -81,6 +81,12 @@ namespace crimild {
 
 		void setAlphaState( AlphaStatePtr const &alphaState ) { _alphaState = alphaState; }
         AlphaStatePtr getAlphaState( void ) { return _alphaState; }
+        
+        bool castShadows( void ) const { return _castShadows; }
+        void setCastShadows( bool value ) { _castShadows = value; }
+        
+        bool receiveShadows( void ) const { return _receiveShadows; }
+        void setReceiveShadows( bool value ) { _receiveShadows = value; }
 
 	private:
 		ShaderProgramPtr _program;
@@ -98,6 +104,9 @@ namespace crimild {
 
 		DepthStatePtr _depthState;
 		AlphaStatePtr _alphaState;
+        
+        bool _castShadows = true;
+        bool _receiveShadows = true;
 	};
 
     using MaterialPtr = SharedPointer< Material >;

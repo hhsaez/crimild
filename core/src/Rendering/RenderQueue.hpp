@@ -79,6 +79,8 @@ namespace crimild {
         void each( MaterialMap const &objects, std::function< void( MaterialPtr const &, PrimitiveMap const & ) > callback );
         void each( std::function< void( LightPtr const &, int ) > callback );
 
+        MaterialMap &getShadowCasters( void ) { return _shadowCasters; }
+        MaterialMap &getShadedObjects( void ) { return _shadedObjects; }
         MaterialMap &getOpaqueObjects( void ) { return _opaqueObjects; }
         MaterialMap &getTranslucentObjects( void ) { return _translucentObjects; }
         MaterialMap &getScreenObjects( void ) { return _screenObjects; }
@@ -90,6 +92,8 @@ namespace crimild {
         
         std::vector< LightPtr > _lights;
 
+        MaterialMap _shadowCasters;
+        MaterialMap _shadedObjects;
         MaterialMap _opaqueObjects;
         MaterialMap _translucentObjects;
         MaterialMap _screenObjects;

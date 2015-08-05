@@ -51,6 +51,7 @@ namespace crimild {
         
     protected:
         virtual void renderShadedObjects( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera );
+        virtual void renderNonShadedObjects( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera );
         
     private:
         FrameBufferObjectPtr createSceneFBO( RendererPtr const &renderer );
