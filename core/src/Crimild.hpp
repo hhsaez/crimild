@@ -37,6 +37,7 @@
 #include "Mathematics/Numeric.hpp"
 #include "Mathematics/Plane.hpp"
 #include "Mathematics/Quaternion.hpp"
+#include "Mathematics/Random.hpp"
 #include "Mathematics/Ray.hpp"
 #include "Mathematics/Rect.hpp"
 #include "Mathematics/Root.hpp"

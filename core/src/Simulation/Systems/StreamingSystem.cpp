@@ -67,7 +67,14 @@ void StreamingSystem::onLoadScene( messaging::LoadScene const &message )
 
 void StreamingSystem::onReloadScene( messaging::ReloadScene const &message )
 {
-    loadScene( _lastSceneFileName, getSceneBuilder() );
+    auto sceneName = _lastSceneFileName;
+    auto builder = getSceneBuilder();
+    auto self = this;
+    
+    crimild::async( crimild::AsyncDispatchPolicy::MAIN_QUEUE, [self, sceneName, builder] {
+        Simulation::getInstance()->setScene( nullptr );
+        self->loadScene( sceneName, builder );
+    });
 }
 
 void StreamingSystem::loadScene( std::string filename, SceneBuilderPtr const &builder )
