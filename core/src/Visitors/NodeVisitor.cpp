@@ -31,6 +31,7 @@
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "SceneGraph/Light.hpp"
+#include "SceneGraph/Text.hpp"
 
 using namespace crimild;
 
@@ -70,6 +71,12 @@ void NodeVisitor::visitGeometry( GeometryPtr const &geometry )
 {
 	// by default, do the same as with any other node
 	visitNode( geometry );
+}
+
+void NodeVisitor::visitText( TextPtr const &text )
+{
+    // by default, do the same as with geometries
+    visitGeometry( text );
 }
 
 void NodeVisitor::visitCamera( CameraPtr const &camera )

@@ -69,7 +69,7 @@ namespace crimild {
 	public:
 		Text( void );
 		virtual ~Text( void );
-
+        
 		std::string getText( void ) const { return _text; }
 		void setText( std::string text );
 
@@ -81,6 +81,9 @@ namespace crimild {
 
 		MaterialPtr getMaterial( void ) { return _material; }
 
+    public:
+        virtual void accept( NodeVisitor &visitor ) override;
+        
 	private:
 		void updatePrimitive( void );
 

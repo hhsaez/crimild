@@ -44,6 +44,11 @@ ShallowCopy::~ShallowCopy( void )
 void ShallowCopy::traverse( NodePtr const &node )
 {
 	NodeVisitor::traverse( node );
+    
+    if ( _result != nullptr ) {
+        // make sure the result is not transformed
+        _result->local().makeIdentity();
+    }
 }
 
 void ShallowCopy::visitNode( NodePtr const &node )
@@ -74,6 +79,15 @@ void ShallowCopy::visitGeometry( GeometryPtr const &geometry )
 	});
 }
 
+void ShallowCopy::visitText( TextPtr const &input )
+{
+    auto copy = crimild::alloc< Text >();
+    copyNode( input, copy );
+
+    copy->setFont( input->getFont() );
+    copy->setSize( input->getSize() );
+}
+
 void ShallowCopy::copyNode( NodePtr const &src, NodePtr const &dst )
 {
 	if ( _result == nullptr ) {
@@ -85,6 +99,7 @@ void ShallowCopy::copyNode( NodePtr const &src, NodePtr const &dst )
 	}
 
 	dst->setName( src->getName() );
+    dst->setLocal( src->getLocal() );
 
 	auto srcMaterials = src->getComponent< MaterialComponent >();
 	if ( srcMaterials != nullptr ) {

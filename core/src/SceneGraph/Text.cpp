@@ -94,6 +94,11 @@ Text::~Text( void )
 
 }
 
+void Text::accept( NodeVisitor &visitor )
+{
+    visitor.visitText( getShared< Text >() );
+}
+
 void Text::setText( std::string text )
 {
 	_text = text;

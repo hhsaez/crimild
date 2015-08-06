@@ -33,6 +33,7 @@
 #include "SceneGraph/Node.hpp"
 #include "SceneGraph/Group.hpp"
 #include "SceneGraph/Geometry.hpp"
+#include "SceneGraph/Text.hpp"
 
 namespace crimild {
 
@@ -51,6 +52,7 @@ namespace crimild {
 		virtual void visitNode( NodePtr const &node ) override;
 		virtual void visitGroup( GroupPtr const &node ) override;
 		virtual void visitGeometry( GeometryPtr const &geometry ) override;
+        virtual void visitText( TextPtr const &text ) override;
 
 	private:
 		void copyNode( NodePtr const &source, NodePtr const &destination );
