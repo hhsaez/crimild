@@ -78,7 +78,7 @@ void UpdateSystem::updateBehaviors( NodePtr const &scene )
     Clock fixed( CRIMILD_SIMULATION_TIME );
     while ( _accumulator >= CRIMILD_SIMULATION_TIME ) {
         NodeComponentCatalog< BehaviorComponent >::getInstance().forEach( [&]( BehaviorComponent *behavior ) {
-            if ( behavior != nullptr && behavior->isEnabled() && behavior->getNode()->isEnabled() ) {
+            if ( behavior != nullptr && behavior->isEnabled() && behavior->getNode() != nullptr && behavior->getNode()->isEnabled() ) {
                 behavior->update( fixed );
             }
         });

@@ -173,7 +173,7 @@ SSAOImageEffect::SSAOImageEffect( int noiseSize, float radius, float occluderBia
     std::vector< unsigned char > noiseData( noiseSize * noiseSize * 3 );
     for ( int z = 0; z < noiseSize; z++ ) {
         for ( int x = 0; x < noiseSize; x++ ) {
-            Vector3f noise( Random::generate( -1.0f, 1.0f ), Random::generate( -1.0f, 1.0f ), 0.0f );
+            Vector3f noise( Random::generate< float >( -1.0f, 1.0f ), Random::generate< float >( -1.0f, 1.0f ), 0.0f );
             noise.normalize();
 
             noiseData[ z * ( noiseSize * 3 ) + x * 3 + 0 ] = static_cast< unsigned char >( 255.0f * ( 0.5f * noise[ 0 ] + 0.5f ) );

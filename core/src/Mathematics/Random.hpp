@@ -31,9 +31,11 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
+#include <cfloat>
 #include <random>
 #include <vector>
 #include <list>
+#include <limits>
 
 namespace crimild {
 
@@ -42,22 +44,23 @@ namespace crimild {
 		template< typename PRECISION >
 		static PRECISION generate( void )
 		{
-            return generate< PRECISION >( 0, 1 );
+            return generate< PRECISION >( 0.0, 1.0 );
 		}
 
 		template< typename PRECISION >
-		static PRECISION generate( PRECISION max ) 
+		static PRECISION generate( double max )
 		{
-            return generate< PRECISION >( 0, max );
+            return generate< PRECISION >( 0.0, max );
 		}
 
 		template< typename PRECISION >
-		static PRECISION generate( PRECISION min, PRECISION max )
+		static PRECISION generate( double min, double max )
 		{
-            static std::default_random_engine generator;
-            static std::uniform_real_distribution< double > distribution( min, max );
-            return static_cast< PRECISION >( distribution( generator ) );
-		}
+            std::random_device rd;
+            std::mt19937 gen( rd() );
+            std::uniform_real_distribution<> dis( min, std::nextafter( max, DBL_MAX ) );
+            return static_cast< PRECISION >( dis( gen ) );
+        }
         
         template< class T >
         static void shuffle( std::vector< T > &input )

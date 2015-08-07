@@ -36,8 +36,8 @@ void crimild::async( unsigned int dispatchPolicy, std::function< void( void ) > 
     Task task;
     task.setRunCallback( onRun );
     task.setCompletionCallback( onCompleted );
-    task.setThreadSafe( dispatchPolicy & AsyncDispatchPolicy::BACKGROUND_QUEUE );
-    task.setSyncFrame( dispatchPolicy & AsyncDispatchPolicy::SYNC_FRAME );
+    task.setThreadSafe( dispatchPolicy == AsyncDispatchPolicy::BACKGROUND_QUEUE );
+    task.setSyncFrame( false );//dispatchPolicy & AsyncDispatchPolicy::SYNC_FRAME );
 
     TaskManager::getInstance()->addTask( task );
 }

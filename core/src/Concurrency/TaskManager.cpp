@@ -50,7 +50,7 @@ void TaskManager::pollMainTasks( void )
     }
     
     if ( _running ) {
-        synchronize();
+//        synchronize();
         std::swap( _readList, _writeList );
     }
 }

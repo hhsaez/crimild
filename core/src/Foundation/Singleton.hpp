@@ -65,7 +65,7 @@ namespace crimild {
 	protected:
 		SingletonHeapStoragePolicy( void )
 		{
-			assert( _instance == nullptr && "Singleton instance already set" );
+//			assert( _instance == nullptr && "Singleton instance already set" );
 			_instance = static_cast< ObjectType * >( this );
 		}
 

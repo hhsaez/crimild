@@ -44,6 +44,10 @@ NodeComponent::~NodeComponent( void )
 
 SharedPointer< Node > NodeComponent::getNode( void )
 {
+    if ( _node == nullptr ) {
+        return nullptr;
+    }
+    
     return crimild::getSharedPointer( _node );
 }
 
