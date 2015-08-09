@@ -28,6 +28,8 @@
 #ifndef CRIMILD_MATHEMATICS_RANDOM_
 #define CRIMILD_MATHEMATICS_RANDOM_
 
+#include "Foundation/Macros.hpp"
+
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
@@ -58,10 +60,15 @@ namespace crimild {
 		template< typename PRECISION >
 		static PRECISION generate( double min, double max )
 		{
+#ifndef CRIMILD_PLATFORM_WIN32
             std::random_device rd;
             std::mt19937 gen( rd() );
             std::uniform_real_distribution<> dis( min, std::nextafter( max, DBL_MAX ) );
             return static_cast< PRECISION >( dis( gen ) );
+#else
+            double r = 0.01 * ( std::rand() % 100 );
+            return static_cast< PRECISION >( min + ( max - min ) * r );
+#endif
         }
         
         template< class T >

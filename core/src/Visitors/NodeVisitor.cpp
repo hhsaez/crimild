@@ -31,7 +31,7 @@
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "SceneGraph/Light.hpp"
-#include "SceneGraph/Text.hpp"
+#include "SceneGraph/Text.hpp"
 
 using namespace crimild;
 
