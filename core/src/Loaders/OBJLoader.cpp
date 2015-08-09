@@ -69,19 +69,16 @@ void OBJLoader::FileProcessor::registerLineProcessor( std::string type, OBJLoade
 	_lineProcessors[ type ] = lineProcessor;
 }
 
-std::stringstream OBJLoader::FileProcessor::getLine( std::ifstream &input )
+std::string OBJLoader::FileProcessor::getLine( std::ifstream &input )
 {
 	char buffer[ 1024 ];
 	input.getline( buffer, 1024 );
-	
-	std::stringstream str;
-	str << buffer;
-	return str;
+	return std::string( buffer );
 }
 
 void OBJLoader::FileProcessor::processLine( std::ifstream &input )
 {
-	std::stringstream line = getLine( input );
+	std::stringstream line( getLine( input ) );
 	
 	std::string what;
 	line >> what;

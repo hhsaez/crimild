@@ -60,7 +60,7 @@ namespace crimild {
 			void registerLineProcessor( std::string type, LineProcessor lineProcessor );
 
 		private:
-			std::stringstream getLine( std::ifstream &input );
+			std::string getLine( std::ifstream &input );
 			void processLine( std::ifstream &input );
 
 		private:

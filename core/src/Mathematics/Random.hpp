@@ -36,6 +36,8 @@
 #include <vector>
 #include <list>
 #include <limits>
+#include <algorithm>
+#include <chrono>
 
 namespace crimild {
 
