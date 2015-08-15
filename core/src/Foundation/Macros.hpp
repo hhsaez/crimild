@@ -33,7 +33,7 @@
     #include <TargetConditionals.h>
     #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
         #define CRIMILD_PLATFORM_IOS
-    #elif TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
+    #else
         #define CRIMILD_PLATFORM_OSX
     #endif
 #elif defined( __CYGWIN__ ) || defined( __MINGW32__ ) || defined( _WIN32 ) || defined( __WIN32__ ) || defined( WIN32 )
