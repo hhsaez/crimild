@@ -194,7 +194,7 @@ const char *forward_fs = { CRIMILD_TO_STRING(
             }
         }
         
-        if ( uUseShadowMap ) {
+        if ( false && uUseShadowMap ) {
             vec3 depth = vPosition.xyz / vPosition.w;
             depth.z = length( vWorldVertex.xyz - uLights[ 0 ].position ) * uLinearDepthConstant;
             float shadow = 1.0;
@@ -212,7 +212,7 @@ const char *forward_fs = { CRIMILD_TO_STRING(
 )};
 
 gles::ForwardRenderShaderProgram::ForwardRenderShaderProgram( void )
-    : ShaderProgram( new VertexShader( forward_vs ), new FragmentShader( forward_fs ) )
+    : ShaderProgram( Utils::getVertexShaderInstance( forward_vs ), Utils::getFragmentShaderInstance( forward_fs ) )
 {
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::NORMAL_ATTRIBUTE, "aNormal" );

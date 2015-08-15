@@ -25,8 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_GLES_SHADER_PROGRAM_CATALOG_
-#define CRIMILD_GLES_SHADER_PROGRAM_CATALOG_
+#ifndef CRIMILD_GLES2_SHADER_LIBRARY_SIGNED_DISTANCE_FIELD_
+#define CRIMILD_GLES2_SHADER_LIBRARY_SIGNED_DISTANCE_FIELD_
 
 #include <Crimild.hpp>
 
@@ -34,30 +34,10 @@ namespace crimild {
     
     namespace gles {
     
-        class ShaderProgramCatalog : public Catalog< ShaderProgram > {
+        class SignedDistanceFieldShaderProgram : public ShaderProgram {
         public:
-            ShaderProgramCatalog( void );
-            virtual ~ShaderProgramCatalog( void );
-            
-            virtual int getNextResourceId( void ) override;
-            
-            virtual void bind( ShaderProgramPtr const &program ) override;
-            virtual void unbind( ShaderProgramPtr const &program ) override;
-            
-            virtual void load( ShaderProgramPtr const &program ) override;
-            virtual void unload( ShaderProgramPtr const &program ) override;
-            virtual void unload( ShaderProgram *program ) override;
-            
-            virtual void cleanup( void ) override;
-            
-        private:
-            int compileShader( ShaderPtr const &shader, int type );
-            
-            void fetchAttributeLocation( ShaderProgramPtr const &program, ShaderLocationPtr const &location );
-            void fetchUniformLocation( ShaderProgramPtr const &program, ShaderLocationPtr const &location );
-            
-        private:
-            std::list< int > _shaderIdsToDelete;
+            SignedDistanceFieldShaderProgram( bool ignored = false );
+            virtual ~SignedDistanceFieldShaderProgram( void );
         };
         
     }

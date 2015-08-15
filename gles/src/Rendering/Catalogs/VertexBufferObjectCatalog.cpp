@@ -26,6 +26,7 @@
  */
 
 #include "VertexBufferObjectCatalog.hpp"
+#include "Utils.hpp"
 
 #ifdef __APPLE__
 #import <OpenGLES/ES3/gl.h>
@@ -49,21 +50,49 @@ gles::VertexBufferObjectCatalog::~VertexBufferObjectCatalog( void )
 
 int gles::VertexBufferObjectCatalog::getNextResourceId( void )
 {
-	GLuint vboId;
+    GLuint vaoId;
+    glGenVertexArrays( 1, &vaoId );
+    
+    glBindVertexArray( vaoId );
+    
+    GLuint vboId;
     glGenBuffers( 1, &vboId );
-    return vboId;
+    
+    return composeId( vaoId, vboId );
 }
 
-void gles::VertexBufferObjectCatalog::bind( ShaderProgram *program, VertexBufferObject *vbo )
+int gles::VertexBufferObjectCatalog::composeId( unsigned int vaoId, unsigned int vboId )
 {
-	Catalog< VertexBufferObject >::bind( program, vbo );
+    return vaoId * 1000 + vboId;
+}
+
+bool gles::VertexBufferObjectCatalog::extractId( int compositeId, unsigned int &vaoId, unsigned int &vboId )
+{
+    vaoId = compositeId / 1000;
+    vboId = compositeId % 1000;
+    return true;
+}
+
+void gles::VertexBufferObjectCatalog::bind( ShaderProgramPtr const &program, VertexBufferObjectPtr const &vbo )
+{
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
     
-    glBindBuffer( GL_ARRAY_BUFFER, vbo->getCatalogId() );
+    GLuint vaoId, vboId;
+    
+    if ( vbo->getCatalog() == nullptr ) {
+        Catalog< VertexBufferObject >::bind( program, vbo );
+    }
+    
+    extractId( vbo->getCatalogId(), vaoId, vboId );
+    
+    glBindVertexArray( vaoId );
+    
+    glBindBuffer( GL_ARRAY_BUFFER, vboId );
     float *baseOffset = 0;
     
     const VertexFormat &format = vbo->getVertexFormat();
     
-    ShaderLocation *positionLocation = program->getStandardLocation( ShaderProgram::StandardLocation::POSITION_ATTRIBUTE );
+    auto positionLocation = program->getStandardLocation( ShaderProgram::StandardLocation::POSITION_ATTRIBUTE );
     if ( positionLocation && positionLocation->isValid() ) {
         if ( format.hasPositions() ) {
             glEnableVertexAttribArray( positionLocation->getLocation() );
@@ -76,7 +105,7 @@ void gles::VertexBufferObjectCatalog::bind( ShaderProgram *program, VertexBuffer
         }
     }
     
-    ShaderLocation *normalLocation = program->getStandardLocation( ShaderProgram::StandardLocation::NORMAL_ATTRIBUTE );
+    auto normalLocation = program->getStandardLocation( ShaderProgram::StandardLocation::NORMAL_ATTRIBUTE );
     if ( normalLocation && normalLocation->isValid() ) {
         if ( format.hasNormals() ) {
             glEnableVertexAttribArray( normalLocation->getLocation() );
@@ -89,20 +118,7 @@ void gles::VertexBufferObjectCatalog::bind( ShaderProgram *program, VertexBuffer
         }
     }
     
-    ShaderLocation *colorLocation = program->getStandardLocation( ShaderProgram::StandardLocation::COLOR_ATTRIBUTE );
-    if ( colorLocation && colorLocation->isValid() ) {
-        if ( format.hasColors() ) {
-            glEnableVertexAttribArray( colorLocation->getLocation() );
-            glVertexAttribPointer( colorLocation->getLocation(),
-                                  format.getColorComponents(),
-                                  GL_FLOAT,
-                                  GL_FALSE,
-                                  format.getVertexSizeInBytes(),
-                                  ( const GLvoid * )( baseOffset + format.getColorsOffset() ) );
-        }
-    }
-    
-    ShaderLocation *tangentLocation = program->getStandardLocation( ShaderProgram::StandardLocation::TANGENT_ATTRIBUTE );
+    auto tangentLocation = program->getStandardLocation( ShaderProgram::StandardLocation::TANGENT_ATTRIBUTE );
     if ( tangentLocation && tangentLocation->isValid() ) {
         if ( format.hasTangents() ) {
             glEnableVertexAttribArray( tangentLocation->getLocation() );
@@ -115,7 +131,20 @@ void gles::VertexBufferObjectCatalog::bind( ShaderProgram *program, VertexBuffer
         }
     }
     
-    ShaderLocation *uvLocation = program->getStandardLocation( ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE );
+    auto colorLocation = program->getStandardLocation( ShaderProgram::StandardLocation::COLOR_ATTRIBUTE );
+    if ( colorLocation && colorLocation->isValid() ) {
+        if ( format.hasColors() ) {
+            glEnableVertexAttribArray( colorLocation->getLocation() );
+            glVertexAttribPointer( colorLocation->getLocation(),
+                                  format.getColorComponents(),
+                                  GL_FLOAT,
+                                  GL_FALSE,
+                                  format.getVertexSizeInBytes(),
+                                  ( const GLvoid * )( baseOffset + format.getColorsOffset() ) );
+        }
+    }
+    
+    auto uvLocation = program->getStandardLocation( ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE );
     if ( uvLocation && uvLocation->isValid() ) {
         if ( format.hasTextureCoords() ) {
             glEnableVertexAttribArray( uvLocation->getLocation() );
@@ -127,57 +156,78 @@ void gles::VertexBufferObjectCatalog::bind( ShaderProgram *program, VertexBuffer
                                   ( const GLvoid * )( baseOffset + format.getTextureCoordsOffset() ) );
         }
     }
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gles::VertexBufferObjectCatalog::unbind( ShaderProgram *program, VertexBufferObject *vbo )
+void gles::VertexBufferObjectCatalog::unbind( ShaderProgramPtr const &program, VertexBufferObjectPtr const &vbo )
 {
-    ShaderLocation *positionLocation = program->getStandardLocation( ShaderProgram::StandardLocation::POSITION_ATTRIBUTE );
-    if ( positionLocation && positionLocation->isValid() ) {
-        glDisableVertexAttribArray( positionLocation->getLocation() );
-    }
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
     
-    ShaderLocation *normalLocation = program->getStandardLocation( ShaderProgram::StandardLocation::NORMAL_ATTRIBUTE );
-    if ( normalLocation && normalLocation->isValid() ) {
-        glDisableVertexAttribArray( positionLocation->getLocation() );
-    }
-    
-    ShaderLocation *colorLocation = program->getStandardLocation( ShaderProgram::StandardLocation::COLOR_ATTRIBUTE );
-    if ( colorLocation && colorLocation->isValid() ) {
-        glDisableVertexAttribArray( positionLocation->getLocation() );
-    }
-    
-    ShaderLocation *tangentLocation = program->getStandardLocation( ShaderProgram::StandardLocation::TANGENT_ATTRIBUTE );
-    if ( tangentLocation && tangentLocation->isValid() ) {
-        glDisableVertexAttribArray( tangentLocation->getLocation() );
-    }
-    
-    ShaderLocation *uvLocation = program->getStandardLocation( ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE );
-    if ( uvLocation && uvLocation->isValid() ) {
-        glDisableVertexAttribArray( uvLocation->getLocation() );
-    }
-    
+    glBindVertexArray( 0 );
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
     
-	Catalog< VertexBufferObject >::unbind( program, vbo );
+    Catalog< VertexBufferObject >::unbind( program, vbo );
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gles::VertexBufferObjectCatalog::load( VertexBufferObject *vbo )
+void gles::VertexBufferObjectCatalog::load( VertexBufferObjectPtr const &vbo )
 {
-	Catalog< VertexBufferObject >::load( vbo );
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
     
-    int id = vbo->getCatalogId();
-    glBindBuffer( GL_ARRAY_BUFFER, id );
+    Catalog< VertexBufferObject >::load( vbo );
+    
+    GLuint vaoId, vboId;
+    extractId( vbo->getCatalogId(), vaoId, vboId );
+    
+    glBindVertexArray( vaoId );
+    
+    glBindBuffer( GL_ARRAY_BUFFER, vboId );
     glBufferData( GL_ARRAY_BUFFER,
                  vbo->getVertexFormat().getVertexSizeInBytes() * vbo->getVertexCount(),
                  vbo->getData(),
                  GL_STATIC_DRAW );
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+}
+
+void gles::VertexBufferObjectCatalog::unload( VertexBufferObjectPtr const &vbo )
+{
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    
+    if ( vbo->getCatalogId() > 0 ) {
+        _unusedVBOIds.push_back( vbo->getCatalogId() );
+    }
+    
+    Catalog< VertexBufferObject >::unload( vbo );
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
 void gles::VertexBufferObjectCatalog::unload( VertexBufferObject *vbo )
 {
-    GLuint bufferId = vbo->getCatalogId();
-    glDeleteBuffers( 1, &bufferId );
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
     
-	Catalog< VertexBufferObject >::unload( vbo );
+    if ( vbo->getCatalogId() > 0 ) {
+        _unusedVBOIds.push_back( vbo->getCatalogId() );
+    }
+    
+    Catalog< VertexBufferObject >::unload( vbo );
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+}
+
+void gles::VertexBufferObjectCatalog::cleanup( void )
+{
+    for ( auto id : _unusedVBOIds ) {
+        GLuint vaoId, vboId;
+        extractId( id, vaoId, vboId );
+        
+        glDeleteBuffers( 1, &vboId );
+        glDeleteVertexArrays( 1, &vaoId );
+    }
+    
+    _unusedVBOIds.clear();
 }
 

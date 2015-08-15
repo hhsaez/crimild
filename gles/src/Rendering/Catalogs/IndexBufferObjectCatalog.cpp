@@ -54,37 +54,51 @@ int gles::IndexBufferObjectCatalog::getNextResourceId( void )
     return id;
 }
 
-void gles::IndexBufferObjectCatalog::bind( ShaderProgram *program, IndexBufferObject *ibo )
+void gles::IndexBufferObjectCatalog::bind( ShaderProgramPtr const &program, IndexBufferObjectPtr const &ibo )
 {
-	Catalog< IndexBufferObject >::bind( program, ibo );
+    Catalog< IndexBufferObject >::bind( program, ibo );
     
-	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, ibo->getCatalogId() );
+    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, ibo->getCatalogId() );
 }
 
-void gles::IndexBufferObjectCatalog::unbind( ShaderProgram *program, IndexBufferObject *ibo )
+void gles::IndexBufferObjectCatalog::unbind( ShaderProgramPtr const &program, IndexBufferObjectPtr const &ibo )
 {
-	Catalog< IndexBufferObject >::unbind( program, ibo );
+    Catalog< IndexBufferObject >::unbind( program, ibo );
     
-	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
 }
 
-void gles::IndexBufferObjectCatalog::load( IndexBufferObject *ibo )
+void gles::IndexBufferObjectCatalog::load( IndexBufferObjectPtr const &ibo )
 {
-	Catalog< IndexBufferObject >::load( ibo );
+    Catalog< IndexBufferObject >::load( ibo );
     
-	int id = ibo->getCatalogId();
-	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, id );
-	glBufferData( GL_ELEMENT_ARRAY_BUFFER,
+    int id = ibo->getCatalogId();
+    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, id );
+    glBufferData( GL_ELEMENT_ARRAY_BUFFER,
                  sizeof( unsigned short ) * ibo->getIndexCount(),
                  ibo->getData(),
                  GL_STATIC_DRAW );
 }
 
+void gles::IndexBufferObjectCatalog::unload( IndexBufferObjectPtr const &ibo )
+{
+    _unusedIBOIds.push_back( ibo->getCatalogId() );
+    Catalog< IndexBufferObject >::unload( ibo );
+}
+
 void gles::IndexBufferObjectCatalog::unload( IndexBufferObject *ibo )
 {
-	GLuint bufferId = ibo->getCatalogId();
-	glDeleteBuffers( 1, &bufferId );
+    _unusedIBOIds.push_back( ibo->getCatalogId() );
+    Catalog< IndexBufferObject >::unload( ibo );
+}
+
+void gles::IndexBufferObjectCatalog::cleanup( void )
+{
+    for ( auto id : _unusedIBOIds ) {
+        GLuint bufferId = id;
+        glDeleteBuffers( 1, &bufferId );
+    }
     
-	Catalog< IndexBufferObject >::unload( ibo );
+    _unusedIBOIds.clear();
 }
 

@@ -25,47 +25,59 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ScreenShaderProgram.hpp"
+#include "DiffuseShaderProgram.hpp"
 #include "Utils.hpp"
 
 using namespace crimild;
 
-const char *screen_vs = { CRIMILD_TO_STRING(
+const char *diffuse_vs = { CRIMILD_TO_STRING(
     attribute vec3 aPosition;
-    attribute vec2 aTextureCoord;
     
-    varying vec2 vTextureCoord;
+    uniform mat4 uPMatrix;
+    uniform mat4 uVMatrix;
+    uniform mat4 uMMatrix;
     
     void main( void )
     {
-		vTextureCoord = aTextureCoord;
-		gl_Position = vec4( aPosition.x, aPosition.y, 0.0, 1.0 );
+        vec4 mp = uMMatrix * vec4(aPosition, 1.0);
+        gl_Position = uPMatrix * uVMatrix * mp;
     }
 )};
 
-const char *screen_fs = { CRIMILD_TO_STRING(
+const char *diffuse_fs = { CRIMILD_TO_STRING(
     precision highp float;
                                             
-    varying vec2 vTextureCoord;
-    
-    uniform sampler2D uColorMap;
-    
-    void main( void ) 
-    {
-        gl_FragColor = texture2D( uColorMap, vTextureCoord );
+    struct Material {
+        vec4 ambient;
+        vec4 diffuse;
+        vec4 specular;
+        float shininess;
+    };
+
+    uniform Material uMaterial;
+
+    void main( void )
+    { 
+        gl_FragColor = uMaterial.diffuse;
     }
 )};
 
-gles::ScreenShaderProgram::ScreenShaderProgram( void )
-    : ShaderProgram( Utils::getVertexShaderInstance( screen_vs ), Utils::getFragmentShaderInstance( screen_fs ) )
+gles::DiffuseShaderProgram::DiffuseShaderProgram( void )
+    : ShaderProgram( Utils::getVertexShaderInstance( diffuse_vs ), Utils::getFragmentShaderInstance( diffuse_fs ) )
 {
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
-	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
     
-	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM, "uColorMap" );
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::PROJECTION_MATRIX_UNIFORM, "uPMatrix" );
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM, "uVMatrix" );
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM, "uMMatrix" );
+
+    registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_AMBIENT_UNIFORM, "uMaterial.ambient" );
+    registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_DIFFUSE_UNIFORM, "uMaterial.diffuse" );
+    registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_SPECULAR_UNIFORM, "uMaterial.specular" );
+    registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_SHININESS_UNIFORM, "uMaterial.shininess" );
+    
 }
 
-gles::ScreenShaderProgram::~ScreenShaderProgram( void )
+gles::DiffuseShaderProgram::~DiffuseShaderProgram( void )
 { 
 }
-

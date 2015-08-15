@@ -26,6 +26,7 @@
  */
 
 #include "TextureCatalog.hpp"
+#include "Utils.hpp"
 
 #ifdef __APPLE__
 #import <OpenGLES/ES3/gl.h>
@@ -38,6 +39,10 @@
 // workaround for unsupported color spaces
 #ifndef GL_BGRA
 	#define GL_BGRA GL_RGBA
+#endif
+
+#ifndef GL_BGR
+    #define GL_BGR GL_RGB
 #endif
 
 using namespace crimild;
@@ -55,80 +60,89 @@ gles::TextureCatalog::~TextureCatalog( void )
 
 int gles::TextureCatalog::getNextResourceId( void )
 {
-	GLuint textureId = 0;
-	glGenTextures( 1, &textureId );
+    GLuint textureId = 0;
+    glGenTextures( 1, &textureId );
     return textureId;
 }
 
-void gles::TextureCatalog::bind( ShaderLocation *location, Texture *texture )
+void gles::TextureCatalog::bind( ShaderLocationPtr const &location, TexturePtr const &texture )
 {
-	if ( !texture ) {
-		return;
-	}
+    if ( !texture ) {
+        return;
+    }
     
-	Catalog< Texture >::bind( location, texture );
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
     
-	if ( location && location->isValid() ) {
-		glActiveTexture( GL_TEXTURE0 + _boundTextureCount );
-		glBindTexture( GL_TEXTURE_2D, texture->getCatalogId() );
-		glUniform1i( location->getLocation(), _boundTextureCount );
+    Catalog< Texture >::bind( location, texture );
+    
+    if ( location && location->isValid() ) {
+        glActiveTexture( GL_TEXTURE0 + _boundTextureCount );
+        glBindTexture( GL_TEXTURE_2D, texture->getCatalogId() );
+        glUniform1i( location->getLocation(), _boundTextureCount );
         
-		++_boundTextureCount;
-	}
+        ++_boundTextureCount;
+    }
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gles::TextureCatalog::unbind( ShaderLocation *location, Texture *texture )
+void gles::TextureCatalog::unbind( ShaderLocationPtr const &location, TexturePtr const &texture )
 {
-	if ( !texture ) {
-		return;
-	}
+    if ( !texture ) {
+        return;
+    }
     
-	if ( _boundTextureCount > 0 ) {
-		--_boundTextureCount;
-		glActiveTexture( GL_TEXTURE0 + _boundTextureCount );
-		glBindTexture( GL_TEXTURE_2D, _boundTextureCount );
-	}
-	
-	Catalog< Texture >::unbind( location, texture );
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    
+    if ( _boundTextureCount > 0 ) {
+        --_boundTextureCount;
+        glActiveTexture( GL_TEXTURE0 + _boundTextureCount );
+        glBindTexture( GL_TEXTURE_2D, 0 );
+    }
+    
+    Catalog< Texture >::unbind( location, texture );
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gles::TextureCatalog::load( Texture *texture )
+void gles::TextureCatalog::load( TexturePtr const &texture )
 {
-	Catalog< Texture >::load( texture );
+    Catalog< Texture >::load( texture );
     
-	int textureId = texture->getCatalogId();
+    int textureId = texture->getCatalogId();
     glBindTexture( GL_TEXTURE_2D, textureId );
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
     
-//	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-//	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+    // clamp to edge
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     
     GLint internalFormat = GL_RGBA;
-	GLint format = GL_BGRA;
-	if ( texture->getImage()->getBpp() == 4 ) {
-		internalFormat = GL_RGBA;
-		if ( texture->getImage()->getPixelFormat() == Image::PixelFormat::BGRA ) {
-			format = GL_BGRA;
-		}
-		else {
-			format = GL_RGBA;
-		}
-	}
-	else if ( texture->getImage()->getBpp() == 3 ) {
-		internalFormat = GL_RGB;
-		if ( texture->getImage()->getPixelFormat() == Image::PixelFormat::BGR ) {
-			format = GL_BGRA;
-		}
-		else {
-			format = GL_RGB;
-		}
-	}
-	else if ( texture->getImage()->getBpp() == 1 ) {
-		internalFormat = GL_RED;
-		format = GL_RED;
-	}
-
+    GLint format = GL_BGRA;
+    if ( texture->getImage()->getBpp() == 4 ) {
+        internalFormat = GL_RGBA;
+        if ( texture->getImage()->getPixelFormat() == Image::PixelFormat::BGRA ) {
+            format = GL_BGRA;
+        }
+        else {
+            format = GL_RGBA;
+        }
+    }
+    else if ( texture->getImage()->getBpp() == 3 ) {
+        internalFormat = GL_RGB;
+        if ( texture->getImage()->getPixelFormat() == Image::PixelFormat::BGR ) {
+            format = GL_BGR;
+        }
+        else {
+            format = GL_RGB;
+        }
+    }
+    else if ( texture->getImage()->getBpp() == 1 ) {
+        internalFormat = GL_RED;
+        format = GL_RED;
+    }
+    
     glTexImage2D( GL_TEXTURE_2D, 0, internalFormat,
                  texture->getImage()->getWidth(), texture->getImage()->getHeight(), 0,
                  format,
@@ -136,13 +150,31 @@ void gles::TextureCatalog::load( Texture *texture )
                  ( GLvoid * ) texture->getImage()->getData() );
 }
 
+void gles::TextureCatalog::unload( TexturePtr const &texture )
+{
+    if ( texture->getCatalogId() > 0 ) {
+        _textureIdsToDelete.push_back( texture->getCatalogId() );
+    }
+    
+    Catalog< Texture >::unload( texture );
+}
+
 void gles::TextureCatalog::unload( Texture *texture )
 {
-    GLuint textureId = texture->getCatalogId();
-    glDeleteTextures( 1, &textureId );
+    if ( texture->getCatalogId() > 0 ) {
+        _textureIdsToDelete.push_back( texture->getCatalogId() );
+    }
     
-	Catalog< Texture >::unload( texture );
+    Catalog< Texture >::unload( texture );
+}
+
+void gles::TextureCatalog::cleanup( void )
+{
+    for ( auto id : _textureIdsToDelete ) {
+        GLuint textureId = id;
+        glDeleteTextures( 1, &textureId );
+    }
     
-	glBindTexture( GL_TEXTURE_2D, 0 );
+    _textureIdsToDelete.clear();
 }
 

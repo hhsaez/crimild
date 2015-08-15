@@ -37,27 +37,68 @@
 
 using namespace crimild;
 
-VertexShader *gles::Utils::getVertexShaderInstance( std::string source )
+void gles::Utils::checkErrors( std::string prefix )
 {
-	return new VertexShader( "#version 300 es\n" + source );
+    for ( GLint error = glGetError(); error; error = glGetError() ) {
+        
+        std::string errorDescription;
+        switch (error) {
+            case GL_INVALID_ENUM:
+                errorDescription += "GL_INVALID_ENUM";
+                break;
+                
+            case GL_INVALID_VALUE:
+                errorDescription += "GL_INVALID_VALUE";
+                break;
+                
+            case GL_INVALID_OPERATION:
+                errorDescription += "GL_INVALID_OPERATION";
+                break;
+
+                /*
+            case GL_STACK_OVERFLOW:
+                errorDescription += "GL_STACK_OVERFLOW";
+                break;
+                
+            case GL_STACK_UNDERFLOW:
+                errorDescription += "GL_STACK_UNDERFLOW";
+                break;
+                 */
+                
+            case GL_OUT_OF_MEMORY:
+                errorDescription += "GL_OUT_OF_MEMORY";
+                break;
+                
+            default:
+                errorDescription += "Unknown Error";
+                break;
+        }
+        
+        Log::Error << prefix << ": " << "(0x" << error << ") " << errorDescription << Log::End;
+    }
 }
 
-FragmentShader *gles::Utils::getFragmentShaderInstance( std::string source )
+VertexShaderPtr gles::Utils::getVertexShaderInstance( std::string source )
 {
-	return new FragmentShader( "#version 300 es\n" + source );
+    return crimild::alloc< VertexShader >( source );
+}
+
+FragmentShaderPtr gles::Utils::getFragmentShaderInstance( std::string source )
+{
+    return crimild::alloc< FragmentShader >( source );
 }
 
 std::string gles::Utils::buildArrayShaderLocationName( std::string variable, int index )
 {
-	std::stringstream str;
-	str << variable << "[" << index << "]";
-	return str.str();
+    std::stringstream str;
+    str << variable << "[" << index << "]";
+    return str.str();
 }
 
 std::string gles::Utils::buildArrayShaderLocationName( std::string variable, int index, std::string member )
 {
-	std::stringstream str;
-	str << variable << "[" << index << "]." << member;
-	return str.str();
+    std::stringstream str;
+    str << variable << "[" << index << "]." << member;
+    return str.str();
 }
 

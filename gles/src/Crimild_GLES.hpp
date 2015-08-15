@@ -28,6 +28,7 @@
 #ifndef CRIMILD_GLES_
 #define CRIMILD_GLES_
 
+/*
 #include "Rendering/Renderer.hpp"
 #include "Rendering/Utils.hpp"
 
@@ -47,6 +48,9 @@
 #include "Rendering/Programs/DeferredPositionShaderProgram.hpp"
 #include "Rendering/Programs/DeferredRenderShaderProgram.hpp"
 #include "Rendering/Programs/DeferredSpecularShaderProgram.hpp"
+ */
+
+#include "Simulation/GLESSimulation.hpp"
 
 #endif
 

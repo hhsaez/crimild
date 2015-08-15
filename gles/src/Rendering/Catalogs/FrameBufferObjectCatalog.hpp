@@ -43,14 +43,21 @@ namespace crimild {
             
             virtual int getNextResourceId( void ) override;
             
-            virtual void bind( FrameBufferObject *vbo ) override;
-            virtual void unbind( FrameBufferObject *vbo ) override;
+            virtual void bind( FrameBufferObjectPtr const &fbo ) override;
+            virtual void unbind( FrameBufferObjectPtr const &fbo ) override;
             
-            virtual void load( FrameBufferObject *vbo ) override;
-            virtual void unload( FrameBufferObject *vbo ) override;
+            virtual void load( FrameBufferObjectPtr const &fbo ) override;
+            
+            virtual void unload( FrameBufferObjectPtr const &fbo ) override;
+            virtual void unload( FrameBufferObject *fbo ) override;
+            
+            virtual void cleanup( void ) override;
             
         private:
             crimild::Renderer *_renderer;
+            std::list< int > _framebufferIdsToDelete;
+            std::list< int > _renderbufferIdsToDelete;
+            std::list< int > _textureIdsToDelete;
         };
         
     }

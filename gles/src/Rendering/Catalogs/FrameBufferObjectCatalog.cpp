@@ -26,6 +26,7 @@
  */
 
 #include "FrameBufferObjectCatalog.hpp"
+#include "Utils.hpp"
 
 #ifdef __APPLE__
 #import <OpenGLES/ES3/gl.h>
@@ -55,8 +56,10 @@ int gles::FrameBufferObjectCatalog::getNextResourceId( void )
     return framebufferId;
 }
 
-void gles::FrameBufferObjectCatalog::bind( FrameBufferObject *fbo )
+void gles::FrameBufferObjectCatalog::bind( FrameBufferObjectPtr const &fbo )
 {
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    
     const GLenum fboBuffers[] = {
         GL_COLOR_ATTACHMENT0,
         GL_COLOR_ATTACHMENT1,
@@ -68,7 +71,7 @@ void gles::FrameBufferObjectCatalog::bind( FrameBufferObject *fbo )
         GL_COLOR_ATTACHMENT7,
     };
     
-	Catalog< FrameBufferObject >::bind( fbo );
+    Catalog< FrameBufferObject >::bind( fbo );
     
     glBindFramebuffer( GL_FRAMEBUFFER, fbo->getCatalogId() );
     glViewport( 0.0f, 0.0f, fbo->getWidth(), fbo->getHeight() );
@@ -76,7 +79,7 @@ void gles::FrameBufferObjectCatalog::bind( FrameBufferObject *fbo )
     
     // this may be wrong. what if there is no depth buffer?
     int fboColorBufferCount = 0;
-    fbo->getRenderTargets().each( [&]( RenderTarget *target, int ) {
+    fbo->getRenderTargets()->each( [&]( std::string, RenderTargetPtr const &target ) {
         if ( target->getType() == RenderTarget::Type::COLOR_RGB || target->getType() == RenderTarget::Type::COLOR_RGBA ) {
             fboColorBufferCount++;
         }
@@ -85,29 +88,34 @@ void gles::FrameBufferObjectCatalog::bind( FrameBufferObject *fbo )
     
     glClearColor( clearColor.r(), clearColor.g(), clearColor.b(), clearColor.a() );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gles::FrameBufferObjectCatalog::unbind( FrameBufferObject *fbo )
+void gles::FrameBufferObjectCatalog::unbind( FrameBufferObjectPtr const &fbo )
 {
-//    glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
     
-    GLint defaultFBO;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
+    glBindFramebuffer( GL_FRAMEBUFFER, 0 );
     
-	Catalog< FrameBufferObject >::unbind( fbo );
+    Catalog< FrameBufferObject >::unbind( fbo );
     glViewport( 0.0f, 0.0f, getRenderer()->getScreenBuffer()->getWidth(), getRenderer()->getScreenBuffer()->getHeight() );
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gles::FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
+void gles::FrameBufferObjectCatalog::load( FrameBufferObjectPtr const &fbo )
 {
-	Catalog< FrameBufferObject >::load( fbo );
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    
+    Catalog< FrameBufferObject >::load( fbo );
     
     int framebufferId = fbo->getCatalogId();
     if ( framebufferId > 0 ) {
         glBindFramebuffer( GL_FRAMEBUFFER, framebufferId );
         
         int colorAttachmentOffset = 0;
-        fbo->getRenderTargets().each( [&]( RenderTarget *target, int index ) {
+        fbo->getRenderTargets()->each( [&]( std::string, RenderTargetPtr const &target ) {
             int targetWidth = target->getWidth();
             int targetHeight = target->getHeight();
             
@@ -116,34 +124,33 @@ void gles::FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
             target->setId( renderBufferId );
             
             glBindRenderbuffer( GL_RENDERBUFFER, target->getId() );
-            
+
             GLenum internalFormat = GL_INVALID_ENUM;
             GLenum attachment = GL_INVALID_ENUM;
+            GLenum textureType = target->useFloatTexture() ? GL_FLOAT : GL_UNSIGNED_BYTE;
+            GLenum textureFormat = GL_RGBA;
             switch ( target->getType() ) {
+                    // fallback to 16bits
                 case RenderTarget::Type::DEPTH_16:
-                    internalFormat = GL_DEPTH_COMPONENT16;
-                    attachment = GL_DEPTH_ATTACHMENT;
-                    break;
                 case RenderTarget::Type::DEPTH_24:
-//                    internalFormat = GL_DEPTH_COMPONENT24;
-                    internalFormat = GL_DEPTH_COMPONENT16;
-                    attachment = GL_DEPTH_ATTACHMENT;
-                    break;
                 case RenderTarget::Type::DEPTH_32:
-//                    internalFormat = GL_DEPTH_COMPONENT32;
                     internalFormat = GL_DEPTH_COMPONENT16;
                     attachment = GL_DEPTH_ATTACHMENT;
+                    textureFormat = GL_DEPTH_COMPONENT;
                     break;
+                    
                 case RenderTarget::Type::COLOR_RGB:
-                    internalFormat = GL_RGB8;
-//                    internalFormat = GL_RGB;
+                    internalFormat = target->useFloatTexture() ? GL_RGB16F : GL_RGB;
+                    textureFormat = GL_RGB;
                     attachment = GL_COLOR_ATTACHMENT0 + colorAttachmentOffset++;
                     break;
+                    
                 case RenderTarget::Type::COLOR_RGBA:
-                    internalFormat = GL_RGBA8;
-//                    internalFormat = GL_RGBA;
+                    internalFormat = target->useFloatTexture() ? GL_RGBA16F : GL_RGBA;
+                    textureFormat = GL_RGBA;
                     attachment = GL_COLOR_ATTACHMENT0 + colorAttachmentOffset++;
                     break;
+                    
                 default:
                     Log::Error << "Invalid target type: " << ( int ) target->getType() << Log::End;
                     break;
@@ -151,7 +158,6 @@ void gles::FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
             
             if ( internalFormat != GL_INVALID_ENUM && attachment != GL_INVALID_ENUM ) {
                 glRenderbufferStorage( GL_RENDERBUFFER, internalFormat, targetWidth, targetHeight );
-                
                 if ( target->getOutput() == RenderTarget::Output::RENDER || target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
                     glFramebufferRenderbuffer( GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, target->getId() );
                 }
@@ -159,15 +165,15 @@ void gles::FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
                 if ( target->getOutput() == RenderTarget::Output::TEXTURE || target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
                     GLuint textureId;
                     glGenTextures( 1, &textureId );
-                    target->getTexture()->setCatalogInfo( getRenderer()->getTextureCatalog(), textureId );
+                    target->getTexture()->setCatalogInfo( getRenderer()->getTextureCatalog().get(), textureId );
                     
                     glBindTexture( GL_TEXTURE_2D, target->getTexture()->getCatalogId() );
-                    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-//                    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-//                    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-//                    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-//                    glTexImage2D( GL_TEXTURE_2D, 0, target->useFloatTexture() ? GL_RGBA16F : GL_RGBA, targetWidth, targetHeight, 0, GL_RGBA, target->useFloatTexture() ? GL_HALF_FLOAT : GL_UNSIGNED_BYTE, 0 );
-                    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, targetWidth, targetHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL );
+                    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+                    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+                    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+                    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+                    glTexImage2D( GL_TEXTURE_2D, 0, internalFormat, targetWidth, targetHeight, 0, textureFormat, textureType, 0 );
+                    
                     glFramebufferTexture2D( GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, target->getTexture()->getCatalogId(), 0 );
                 }
             }
@@ -190,14 +196,18 @@ void gles::FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
                 Log::Error << "Cannot setup FrameBuffer. Error configuring attachments" << Log::End;
                 exit( 1 );
                 break;
-//            case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
-//                Log::Error << "Cannot setup FrameBuffer. Attachments are not enabled for drawing" << Log::End;
-//                exit( 1 );
-//                break;
-//            case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
-//                Log::Error << "Cannot setup FrameBuffer. Layer params don't match" << Log::End;
-//                exit( 1 );
-//                break;
+                /*
+            case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+                Log::Error << "Cannot setup FrameBuffer. Attachments are not enabled for drawing" << Log::End;
+                exit( 1 );
+                break;
+                 */
+                /*
+            case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
+                Log::Error << "Cannot setup FrameBuffer. Layer params don't match" << Log::End;
+                exit( 1 );
+                break;
+                 */
             case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
                 Log::Error << "Cannot setup FrameBuffer. No attachments found" << Log::End;
                 exit( 1 );
@@ -206,10 +216,12 @@ void gles::FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
                 Log::Error << "Cannot setup FrameBuffer. Multisample params don't match" << Log::End;
                 exit( 1 );
                 break;
-//            case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
-//                Log::Error << "Cannot setup FrameBuffer. Attachments are not enabled for reading" << Log::End;
-//                exit( 1 );
-//                break;
+                /*
+            case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+                Log::Error << "Cannot setup FrameBuffer. Attachments are not enabled for reading" << Log::End;
+                exit( 1 );
+                break;
+                 */
             default:
                 Log::Error << "Incomplete framebuffer object. Unknown error code: " << ( int ) status << Log::End;
                 exit( 1 );
@@ -222,28 +234,80 @@ void gles::FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
         Log::Error << "Cannot create framebuffer object. Out of memory?" << Log::End;
         exit( 1 );
     }
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+}
+
+void gles::FrameBufferObjectCatalog::unload( FrameBufferObjectPtr const &fbo )
+{
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    
+    int framebufferId = fbo->getCatalogId();
+    if ( framebufferId > 0 ) {
+        _framebufferIdsToDelete.push_back( framebufferId );
+        
+        fbo->getRenderTargets()->each( [&]( std::string, RenderTargetPtr const &target ) {
+            int targetId = target->getId();
+            if ( targetId > 0 ) {
+                _renderbufferIdsToDelete.push_back( targetId );
+                if ( target->getOutput() == RenderTarget::Output::TEXTURE || target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
+                    int textureId = target->getTexture()->getCatalogId();
+                    _textureIdsToDelete.push_back( textureId );
+                    target->getTexture()->setCatalogInfo( nullptr, 0 );
+                }
+            }
+        });
+        
+        Catalog< FrameBufferObject >::unload( fbo );
+    }
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
 void gles::FrameBufferObjectCatalog::unload( FrameBufferObject *fbo )
 {
-    GLuint framebufferId = fbo->getCatalogId();
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    
+    int framebufferId = fbo->getCatalogId();
     if ( framebufferId > 0 ) {
+        _framebufferIdsToDelete.push_back( framebufferId );
         
-        fbo->getRenderTargets().each( []( RenderTarget *target, int ) {
-            GLuint targetId = target->getId();
+        fbo->getRenderTargets()->each( [&]( std::string, RenderTargetPtr const &target ) {
+            int targetId = target->getId();
             if ( targetId > 0 ) {
+                _renderbufferIdsToDelete.push_back( targetId );
                 if ( target->getOutput() == RenderTarget::Output::TEXTURE ) {
-                    GLuint textureId = target->getTexture()->getCatalogId();
-                    glDeleteTextures( 1, &textureId );
+                    int textureId = target->getTexture()->getCatalogId();
+                    _textureIdsToDelete.push_back( textureId );
                     target->getTexture()->setCatalogInfo( nullptr, 0 );
                 }
-                glDeleteRenderbuffers( 1, &targetId );
             }
         });
         
-        glDeleteFramebuffers( 1, &framebufferId );
-        
         Catalog< FrameBufferObject >::unload( fbo );
     }
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+}
+
+void gles::FrameBufferObjectCatalog::cleanup( void )
+{
+    for ( auto id : _textureIdsToDelete ) {
+        GLuint textureId = id;
+        glDeleteTextures( 1, &textureId );
+    }
+    _textureIdsToDelete.clear();
+    
+    for ( auto id : _renderbufferIdsToDelete ) {
+        GLuint renderbufferId = id;
+        glDeleteRenderbuffers( 1, &renderbufferId );
+    }
+    _renderbufferIdsToDelete.clear();
+    
+    for ( auto id : _framebufferIdsToDelete ) {
+        GLuint framebufferId = id;
+        glDeleteFramebuffers( 1, &framebufferId );
+    }
+    _framebufferIdsToDelete.clear();
 }
 

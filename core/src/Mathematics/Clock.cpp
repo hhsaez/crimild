@@ -68,8 +68,7 @@ Clock &Clock::operator=( const Clock &t )
 
 void Clock::reset( double current )
 {
-	_currentTime = current;
-	_lastTime = current;
+	_lastTime = _currentTime;
 	_deltaTime = 0.0;
     _accumTime = 0.0;
 }

@@ -25,8 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_GLES_RENDERING_RENDERER_
-#define CRIMILD_GLES_RENDERING_RENDERER_
+#ifndef CRIMILD_GLES_RENDERING_GLES_RENDERER_
+#define CRIMILD_GLES_RENDERING_GLES_RENDERER_
 
 #include <Crimild.hpp>
 
@@ -37,12 +37,15 @@ namespace crimild {
     
     namespace gles {
     
-        class Renderer : public crimild::Renderer {
+        class GLESRenderer : public crimild::Renderer {
         public:
-            Renderer( crimild::FrameBufferObject *screenBuffer );
-            virtual ~Renderer( void );
+            GLESRenderer( void );
+            explicit GLESRenderer( FrameBufferObjectPtr const &screenBuffer );
+            virtual ~GLESRenderer( void );
             
             virtual void configure( void ) override;
+            
+            virtual void setViewport( const Rectf &viewport ) override;
             
             virtual void beginRender( void ) override;
             
@@ -51,26 +54,21 @@ namespace crimild {
             virtual void clearBuffers( void ) override;
             
         public:
-            virtual void bindUniform( crimild::ShaderLocation *location, int value ) override;
-            virtual void bindUniform( crimild::ShaderLocation *location, float value ) override;
-            virtual void bindUniform( crimild::ShaderLocation *location, const crimild::Vector3f &vector ) override;
-            virtual void bindUniform( crimild::ShaderLocation *location, const crimild::RGBAColorf &color ) override;
-            virtual void bindUniform( crimild::ShaderLocation *location, const crimild::Matrix4f &matrix ) override;
+            virtual void bindUniform( ShaderLocationPtr const &location, int value ) override;
+            virtual void bindUniform( ShaderLocationPtr const &location, float value ) override;
+            virtual void bindUniform( ShaderLocationPtr const &location, const Vector3f &vector ) override;
+            virtual void bindUniform( ShaderLocationPtr const &location, const Vector2f &vector ) override;
+            virtual void bindUniform( ShaderLocationPtr const &location, const RGBAColorf &color ) override;
+            virtual void bindUniform( ShaderLocationPtr const &location, const Matrix4f &matrix ) override;
             
-            virtual void setDepthState( DepthState *state );
-            virtual void setAlphaState( AlphaState *state );
+            virtual void setDepthState( DepthStatePtr const &state ) override;
+            virtual void setAlphaState( AlphaStatePtr const &state ) override;
             
-            virtual void drawPrimitive( crimild::ShaderProgram *program, crimild::Primitive *primitive ) override;
+            virtual void drawPrimitive( ShaderProgramPtr const &program, PrimitivePtr const &primitive ) override;
+            virtual void drawBuffers( ShaderProgramPtr const &program, Primitive::Type type, VertexBufferObjectPtr const &vbo, unsigned int count ) override;
             
-            virtual crimild::ShaderProgram *getForwardPassProgram( void ) override;
-            
-            virtual crimild::ShaderProgram *getFallbackProgram( crimild::Material *material, Geometry *geometry, crimild::Primitive *primitive ) override;
-            
-        private:
-            std::map< std::string, Pointer< crimild::ShaderProgram > > _fallbackPrograms;
+            virtual ShaderProgramPtr getFallbackProgram( MaterialPtr const &material, GeometryPtr const &geometry, PrimitivePtr const &primitive ) override;
         };
-        
-        typedef SharedPointer< Renderer > RendererPtr;
         
     }
     

@@ -34,8 +34,8 @@ using namespace crimild;
 
 gles::DeferredRenderPass::DeferredRenderPass( void )
 {
-    setGBufferProgram( new gles::DeferredRenderShaderProgram() );
-    setGBufferCompositionProgram( new gles::DeferredComposeRenderShaderProgram() );
+//    setGBufferProgram( new gles::DeferredRenderShaderProgram() );
+//    setGBufferCompositionProgram( new gles::DeferredComposeRenderShaderProgram() );
 }
 
 gles::DeferredRenderPass::~DeferredRenderPass( void )

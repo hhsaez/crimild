@@ -26,6 +26,7 @@
  */
 
 #include "SimpleShaderProgram.hpp"
+#include "Utils.hpp"
 
 using namespace crimild;
 
@@ -36,12 +37,9 @@ const char *simple_vs = { CRIMILD_TO_STRING(
     uniform mat4 uVMatrix;
     uniform mat4 uMMatrix;
     
-    varying vec4 vColor;
-    
     void main( void )
     {
         vec4 mp = uMMatrix * vec4(aPosition, 1.0);
-        vColor = vec4(0.5 + 0.5 * mp.x, 0.5 + 0.5 * mp.y, 0.5 + 0.5 * mp.z, 1.0);
         gl_Position = uPMatrix * uVMatrix * mp;
     }
 )};
@@ -49,17 +47,15 @@ const char *simple_vs = { CRIMILD_TO_STRING(
 const char *simple_fs = { CRIMILD_TO_STRING(
     precision highp float;
                                             
-    varying vec4 vColor;
-    
-    void main( void ) 
+    void main( void )
     { 
-        gl_FragColor = vColor; 
+        gl_FragColor = vec4( 1.0, 0.0, 1.0, 1.0 );
     }
 )};
 
 gles::SimpleShaderProgram::SimpleShaderProgram( void )
-    : ShaderProgram( new VertexShader( simple_vs ), new FragmentShader( simple_fs ) )
-{ 
+    : ShaderProgram( Utils::getVertexShaderInstance( simple_vs ), Utils::getFragmentShaderInstance( simple_fs ) )
+{
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
     
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::PROJECTION_MATRIX_UNIFORM, "uPMatrix" );
@@ -70,4 +66,3 @@ gles::SimpleShaderProgram::SimpleShaderProgram( void )
 gles::SimpleShaderProgram::~SimpleShaderProgram( void )
 { 
 }
-

@@ -26,6 +26,7 @@
  */
 
 #include "ShaderProgramCatalog.hpp"
+#include "Utils.hpp"
 
 #ifdef __APPLE__
 #import <OpenGLES/ES3/gl.h>
@@ -49,35 +50,45 @@ gles::ShaderProgramCatalog::~ShaderProgramCatalog( void )
 
 int gles::ShaderProgramCatalog::getNextResourceId( void )
 {
-	return glCreateProgram();
+    return glCreateProgram();
 }
 
-void gles::ShaderProgramCatalog::bind( ShaderProgram *program )
+void gles::ShaderProgramCatalog::bind( ShaderProgramPtr const &program )
 {
-	Catalog< ShaderProgram >::bind( program );
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
     
-	glUseProgram( program->getCatalogId() );
+    Catalog< ShaderProgram >::bind( program );
+    
+    glUseProgram( program->getCatalogId() );
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gles::ShaderProgramCatalog::unbind( ShaderProgram *program )
+void gles::ShaderProgramCatalog::unbind( ShaderProgramPtr const &program )
 {
-	Catalog< ShaderProgram >::unbind( program );
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
     
-	glUseProgram( 0 );
+    Catalog< ShaderProgram >::unbind( program );
+    
+    glUseProgram( 0 );
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gles::ShaderProgramCatalog::load( ShaderProgram *program )
+void gles::ShaderProgramCatalog::load( ShaderProgramPtr const &program )
 {
-	Catalog< ShaderProgram >::load( program );
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
     
-	int programId = program->getCatalogId();
-	if ( programId > 0 ) {
-		int vsId = compileShader( program->getVertexShader(), GL_VERTEX_SHADER );
-		int fsId = compileShader( program->getFragmentShader(), GL_FRAGMENT_SHADER );
+    Catalog< ShaderProgram >::load( program );
+    
+    int programId = program->getCatalogId();
+    if ( programId > 0 ) {
+        int vsId = compileShader( program->getVertexShader(), GL_VERTEX_SHADER );
+        int fsId = compileShader( program->getFragmentShader(), GL_FRAGMENT_SHADER );
         
         if ( vsId > 0 && fsId > 0 ) {
-    		glAttachShader( programId, vsId );
-    		glAttachShader( programId, fsId );
+            glAttachShader( programId, vsId );
+            glAttachShader( programId, fsId );
             
             glLinkProgram( programId );
             
@@ -96,10 +107,9 @@ void gles::ShaderProgramCatalog::load( ShaderProgram *program )
                     char *buf = ( char * ) malloc( bufLength );
                     if ( buf ) {
                         glGetProgramInfoLog( programId, bufLength, NULL, buf );
-                        std::string message( buf );
+                        Log::Fatal << "Could not link shader program. Reason: " << buf << Log::End;
                         free( buf );
-                        Log::Fatal << "Could not link program: " << message << Log::End;
-                        exit(1);
+                        exit( 1 );
                     }
                 }
                 
@@ -107,34 +117,62 @@ void gles::ShaderProgramCatalog::load( ShaderProgram *program )
                 programId = 0;
             }
             
-            program->foreachLocation( [&]( ShaderLocation *loc ) mutable {
-            	if ( loc->getType() == ShaderLocation::Type::ATTRIBUTE ) {
-            		fetchAttributeLocation( program, loc );
-            	}
-            	else {
-            		fetchUniformLocation( program, loc );
-            	}
+            program->foreachLocation( [&]( ShaderLocationPtr const &loc ) mutable {
+                if ( loc->getType() == ShaderLocation::Type::ATTRIBUTE ) {
+                    fetchAttributeLocation( program, loc );
+                }
+                else {
+                    fetchUniformLocation( program, loc );
+                }
             });
         }
-	}
+    }
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+}
+
+void gles::ShaderProgramCatalog::unload( ShaderProgramPtr const &program )
+{
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    
+    int programId = program->getCatalogId();
+    if ( programId > 0 ) {
+        _shaderIdsToDelete.push_back( programId );
+    }
+    
+    Catalog< ShaderProgram >::unload( program );
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
 void gles::ShaderProgramCatalog::unload( ShaderProgram *program )
 {
-	int programId = program->getCatalogId();
-	if ( programId > 0 ) {
-		glDeleteProgram( programId );
-	}
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
     
-	Catalog< ShaderProgram >::unload( program );
+    int programId = program->getCatalogId();
+    if ( programId > 0 ) {
+        _shaderIdsToDelete.push_back( programId );
+    }
+    
+    Catalog< ShaderProgram >::unload( program );
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-int gles::ShaderProgramCatalog::compileShader( Shader *shader, int type )
+void gles::ShaderProgramCatalog::cleanup( void )
 {
-	GLuint shaderId = glCreateShader( type );
+    for ( auto id : _shaderIdsToDelete ) {
+        glDeleteProgram( id );
+    }
+    _shaderIdsToDelete.clear();
+}
+
+int gles::ShaderProgramCatalog::compileShader( ShaderPtr const &shader, int type )
+{
+    GLuint shaderId = glCreateShader( type );
     if ( shaderId > 0 ) {
-		const char *source = shader->getSource();
-		glShaderSource( shaderId, 1, ( const GLchar ** ) &source, NULL );
+        const char *source = shader->getSource();
+        glShaderSource( shaderId, 1, ( const GLchar ** ) &source, NULL );
         glCompileShader( shaderId );
         
         GLint compiled = GL_FALSE;
@@ -145,14 +183,13 @@ int gles::ShaderProgramCatalog::compileShader( Shader *shader, int type )
             glGetShaderiv( shaderId, GL_INFO_LOG_LENGTH, &infoLen );
             if ( infoLen ) {
                 char* buf = ( char * ) malloc( infoLen );
-				if ( buf ) {
+                if ( buf ) {
                     glGetShaderInfoLog( shaderId, infoLen, NULL, buf );
-                    std::string message( buf );
-                    free( buf );
                     Log::Fatal << "Could not compile "
-                        << ( type == GL_VERTEX_SHADER ? "vertex" : "fragment" ) << " shader: "
-                        << message << Log::End;
-                    exit(1);
+                    << ( type == GL_VERTEX_SHADER ? "vertex" : "fragment" ) << " shader. "
+                    << "Reason: " << buf << Log::End;
+                    free( buf );
+                    exit( 1 );
                 }
             }
             
@@ -164,13 +201,13 @@ int gles::ShaderProgramCatalog::compileShader( Shader *shader, int type )
     return shaderId;
 }
 
-void gles::ShaderProgramCatalog::fetchAttributeLocation( ShaderProgram *program, ShaderLocation *location )
+void gles::ShaderProgramCatalog::fetchAttributeLocation( ShaderProgramPtr const &program, ShaderLocationPtr const &location )
 {
-	location->setLocation( glGetAttribLocation( program->getCatalogId(), location->getName().c_str() ) );
+    location->setLocation( glGetAttribLocation( program->getCatalogId(), location->getName().c_str() ) );
 }
 
-void gles::ShaderProgramCatalog::fetchUniformLocation( ShaderProgram *program, ShaderLocation *location )
+void gles::ShaderProgramCatalog::fetchUniformLocation( ShaderProgramPtr const &program, ShaderLocationPtr const &location )
 {
-	location->setLocation( glGetUniformLocation( program->getCatalogId(), location->getName().c_str() ) );
+    location->setLocation( glGetUniformLocation( program->getCatalogId(), location->getName().c_str() ) );
 }
 

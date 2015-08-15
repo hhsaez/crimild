@@ -39,18 +39,30 @@ namespace crimild {
     
 		class Utils {
 		public:
-            static VertexShader *getVertexShaderInstance( std::string source );
+            static void checkErrors( std::string prefix );
             
-            static FragmentShader *getFragmentShaderInstance( std::string source );
+            static VertexShaderPtr getVertexShaderInstance( std::string source );
             
-			static std::string buildArrayShaderLocationName( std::string variable, int index );
+            static FragmentShaderPtr getFragmentShaderInstance( std::string source );
             
-			static std::string buildArrayShaderLocationName( std::string variable, int index, std::string member );
+            static std::string buildArrayShaderLocationName( std::string variable, int index );
+            
+            static std::string buildArrayShaderLocationName( std::string variable, int index, std::string member );
 		};
         
     }
     
 }
+
+#define CRIMILD_ENABLE_CHECK_GL_ERRORS 1
+
+#if CRIMILD_ENABLE_CHECK_GL_ERRORS
+#define CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION crimild::gles::Utils::checkErrors( std::string( "Before " ) + CRIMILD_CURRENT_FUNCTION );
+#define CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION crimild::gles::Utils::checkErrors( std::string( "After " ) + CRIMILD_CURRENT_FUNCTION );
+#else
+#define CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION
+#define CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION
+#endif
 
 #endif
 

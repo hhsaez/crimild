@@ -26,6 +26,7 @@
  */
 
 #include "TextureShaderProgram.hpp"
+#include "Utils.hpp"
 
 using namespace crimild;
 
@@ -55,17 +56,12 @@ const char *texture_fs = { CRIMILD_TO_STRING(
      
      void main( void ) 
      {
-         vec4 color = texture2D( uColorMap, vTextureCoord );
-         if ( color.a <= 0.5 ) {
-             discard;
-         }
-         
-         gl_FragColor = color;
+         gl_FragColor = texture2D( uColorMap, vTextureCoord );
      }
 )};
 
 gles::TextureShaderProgram::TextureShaderProgram( void )
-    : ShaderProgram( new VertexShader( texture_vs ), new FragmentShader( texture_fs ) )
+    : ShaderProgram( Utils::getVertexShaderInstance( texture_vs ), Utils::getFragmentShaderInstance( texture_fs ) )
 {
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
@@ -80,4 +76,5 @@ gles::TextureShaderProgram::TextureShaderProgram( void )
 gles::TextureShaderProgram::~TextureShaderProgram( void )
 { 
 }
+
 

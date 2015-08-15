@@ -31,6 +31,7 @@
 using namespace crimild;
 using namespace crimild::gles;
 
+/*
 const char *deferred_position_vs = { CRIMILD_TO_STRING(
     in vec3 aPosition;
     in vec2 aTextureCoord;
@@ -74,4 +75,4 @@ DeferredPositionShaderProgram::~DeferredPositionShaderProgram( void )
 {
     
 }
-
+*/
