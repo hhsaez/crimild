@@ -31,10 +31,10 @@
 // Identify known platforms
 #if defined( __APPLE__ )
     #include <TargetConditionals.h>
-    #if defined( TARGET_OS_IPHONE )
-        #define CRIMILD_PLATFORM_IOS
-    #else
+    #if TARGET_OS_MAC
         #define CRIMILD_PLATFORM_OSX
+    #elif TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
+        #define CRIMILD_PLATFORM_IOS
     #endif
 #elif defined( __CYGWIN__ ) || defined( __MINGW32__ ) || defined( _WIN32 ) || defined( __WIN32__ ) || defined( WIN32 )
  	#define CRIMILD_PLATFORM_WIN32
