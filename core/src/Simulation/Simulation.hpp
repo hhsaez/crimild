@@ -76,7 +76,7 @@ namespace crimild {
 		public DynamicSingleton< Simulation > {
 
 	public:
-		Simulation( std::string name, int argc, char **argv );
+		Simulation( std::string name, SettingsPtr const &settings );
 		virtual ~Simulation( void );
 
         virtual void start( void );
@@ -86,10 +86,10 @@ namespace crimild {
         virtual int run( void );
         
     public:
-		Settings &getSettings( void ) { return _settings; }
+		SettingsPtr &getSettings( void ) { return _settings; }
 
     private:
-        Settings _settings;
+        SettingsPtr _settings;
             
     public:
 		Clock &getSimulationClock( void ) { return _simulationClock; }

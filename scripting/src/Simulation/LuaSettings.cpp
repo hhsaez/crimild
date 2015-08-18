@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,43 +25,45 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "GLSimulation.hpp"
-
-#include "Systems/WindowSystem.hpp"
-#include "Systems/InputSystem.hpp"
-
-#include "Tasks/WindowTask.hpp"
-#include "Tasks/UpdateTimeTask.hpp"
-#include "Tasks/UpdateInputStateTask.hpp"
-#include "Tasks/UpdateSceneAndPhysicsTask.hpp"
-
-#include "Rendering/GL3/Renderer.hpp"
-
-#include <Crimild_Scripting.hpp>
+#include "LuaSettings.hpp"
+#include "Foundation/ScriptContext.hpp"
 
 using namespace crimild;
 using namespace crimild::scripting;
 
-#ifdef CRIMILD_ENABLE_PHYSICS
-#include <Crimild_Physics.hpp>
-#endif
-
-GLSimulation::GLSimulation( std::string name, SettingsPtr const &settings )
-	: Simulation( name, settings )
+LuaSettings::LuaSettings( void )
 {
-	if ( !glfwInit() ) {
-		Log::Error << "Cannot start GLFW: glfwInit failed" << Log::End;
-		throw RuntimeException( "Cannot start GLFW: glwfInit failed!" );
-	}
-
-    addSystem( crimild::alloc< WindowSystem >() );
-    addSystem( crimild::alloc< InputSystem >() );
     
-    setRenderer( crimild::alloc< gl3::Renderer >() );
 }
 
-GLSimulation::~GLSimulation( void )
+LuaSettings::LuaSettings( int argc, char **argv, std::string filename )
+    : Settings( argc, argv )
 {
-	glfwTerminate();
+    if ( filename != "" ) {
+        load( filename );
+    }
+}
+
+LuaSettings::~LuaSettings( void )
+{
+    
+}
+
+void LuaSettings::load( std::string filename )
+{
+    ScriptContext context;
+    if ( context.load( FileSystem::getInstance().pathForResource( filename ) ) ) {
+        add( "video.width", context.eval< int >( "video.width"  ) );
+        add( "video.height", context.eval< int >( "video.height"  ) );
+        add( "video.fullscreen", context.eval< bool >( "video.fullscreen" ) );
+    }
+    else {
+        Log::Error << "Cannot open file " << filename << Log::End;
+    }
+}
+
+void LuaSettings::save( std::string filename )
+{
+    
 }
 

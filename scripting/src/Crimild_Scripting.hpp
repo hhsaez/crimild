@@ -38,5 +38,7 @@
 
 #include "SceneGraph/LuaSceneBuilder.hpp"
 
+#include "Simulation/LuaSettings.hpp"
+
 #endif
 

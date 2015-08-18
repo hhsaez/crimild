@@ -26,12 +26,21 @@
  */
 
 #include "Settings.hpp"
+#include "FileSystem.hpp"
 
 using namespace crimild;
 
 Settings::Settings( void )
 {
 
+}
+
+Settings::Settings( int argc, char **argv )
+{
+    parseCommandLine( argc, argv );
+    if ( argc > 0 && argv != nullptr ) {
+        FileSystem::getInstance().init( argc, argv );
+    }
 }
 
 Settings::~Settings( void )
@@ -42,7 +51,7 @@ Settings::~Settings( void )
 void Settings::parseCommandLine( int argc, char **argv )
 {
 	if ( argv > 0 ) {
-		_settings[ "base.directory" ] = argv[ 0 ];
+		_settings[ "__base_directory" ] = argv[ 0 ];
 	}
 
 	for ( int i = 1; i < argc; i++ ) {
@@ -56,11 +65,10 @@ void Settings::parseCommandLine( int argc, char **argv )
 	}
 }
 
-void Settings::dump( void )
+void Settings::each( std::function< void( std::string, Settings * ) > callback )
 {
-	std::cout << "Available Settings: " << std::endl;
-	for ( auto setting : _settings ) {
-		std::cout << "   " << setting.first << " -> " << setting.second << std::endl;
-	}
+    for ( auto it : _settings ) {
+        callback( it.first, this );
+    }
 }
 

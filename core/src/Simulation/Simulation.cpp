@@ -54,13 +54,10 @@
 
 using namespace crimild;
 
-Simulation::Simulation( std::string name, int argc, char **argv )
-	: NamedObject( name )
+Simulation::Simulation( std::string name, SettingsPtr const &settings )
+	: NamedObject( name ),
+      _settings( settings )
 {
-	_settings.parseCommandLine( argc, argv );
-	
-	FileSystem::getInstance().init( argc, argv );
-
 	addSystem( crimild::alloc< UpdateSystem >() );
 	addSystem( crimild::alloc< RenderSystem >() );
     addSystem( crimild::alloc< DebugSystem >() );
@@ -74,14 +71,6 @@ Simulation::~Simulation( void )
 
 void Simulation::start( void )
 {
-	// getMainLoop()->startTask( crimild::alloc< BeginRenderTask >( Priorities::BEGIN_RENDER_PRIORITY ) );
-	// getMainLoop()->startTask( crimild::alloc< EndRenderTask >( Priorities::END_RENDER_PRIORITY ) );
-	// getMainLoop()->startTask( crimild::alloc< RenderSceneTask >( Priorities::RENDER_SCENE_PRIORITY ) );
-
-    // getSimulationLoop()->startTask( crimild::alloc< DispatchMessagesTask >( Priorities::HIGHEST_PRIORITY ) );
-    // getSimulationLoop()->startTask( crimild::alloc< UpdateSceneTask >( Priorities::UPDATE_SCENE_PRIORITY ) );
-    // getSimulationLoop()->startTask( crimild::alloc< ComputeRenderQueueTask >( Priorities::RENDER_SCENE_PRIORITY ) );
-
     startSystems();
     
     _taskManager.start();

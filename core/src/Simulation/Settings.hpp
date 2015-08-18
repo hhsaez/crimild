@@ -29,6 +29,7 @@
 #define CRIMILD_SIMULATION_SETTINGS_
 
 #include "Foundation/Log.hpp"
+#include "Foundation/Memory.hpp"
 
 #include <string>
 #include <sstream>
@@ -36,11 +37,17 @@
 
 namespace crimild {
 
-	class Settings {
+    class Settings : public SharedObject {
 	public:
 		Settings( void );
+        
+        Settings( int argc, char **argv );
 
 		virtual ~Settings( void );
+        
+        virtual void load( std::string filename ) { }
+        
+        virtual void save( std::string filename ) { }
 
 		template< typename T >
 		void add( std::string key, T value )
@@ -59,11 +66,16 @@ namespace crimild {
 		{
 			_settings[ key ] = value;
 		}
+        
+        bool hasKey( std::string key )
+        {
+            return ( _settings.find( key ) != _settings.end() );
+        }
 
 		template< typename T >
 		T get( std::string key, T defaultValue )
 		{
-			if ( _settings.find( key ) == _settings.end() ) {
+			if ( !hasKey( key ) ) {
 				// key not found
 				return defaultValue;
 			}
@@ -91,12 +103,14 @@ namespace crimild {
 		}
 
 		void parseCommandLine( int argc, char **argv );
-
-		void dump( void );
+        
+        void each( std::function< void( std::string, Settings * ) > callback );
 
 	private:
 		std::map< std::string, std::string > _settings;
 	};
+    
+    using SettingsPtr = SharedPointer< Settings >;
 
 }
 

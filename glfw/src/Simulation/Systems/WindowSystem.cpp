@@ -81,18 +81,15 @@ void WindowSystem::stop( void )
 
 bool WindowSystem::createWindow( void )
 {
-    int width = Simulation::getInstance()->getSettings().get( "video.width", 1024 );
-    int height = Simulation::getInstance()->getSettings().get( "video.height", 768 );
-    float r = Simulation::getInstance()->getSettings().get( "video.clearColor.r", 0.0f );
-    float g = Simulation::getInstance()->getSettings().get( "video.clearColor.g", 0.0f );
-    float b = Simulation::getInstance()->getSettings().get( "video.clearColor.b", 0.0f );
-    float a = Simulation::getInstance()->getSettings().get( "video.clearColor.a", 0.0f );
-    bool fullscreen = Simulation::getInstance()->getSettings().get< bool >( "video.fullscreen", false );
+    int width = Simulation::getInstance()->getSettings()->get( "video.width", 1024 );
+    int height = Simulation::getInstance()->getSettings()->get( "video.height", 768 );
+    float r = Simulation::getInstance()->getSettings()->get( "video.clearColor.r", 0.0f );
+    float g = Simulation::getInstance()->getSettings()->get( "video.clearColor.g", 0.0f );
+    float b = Simulation::getInstance()->getSettings()->get( "video.clearColor.b", 0.0f );
+    float a = Simulation::getInstance()->getSettings()->get( "video.clearColor.a", 0.0f );
+    bool fullscreen = Simulation::getInstance()->getSettings()->get< bool >( "video.fullscreen", false );
 
-//    int width = 1024;
-//	int height = 768;
 	std::string name = "Crimild";
-//	bool fullscreen = false;
 	bool vsync = true;
 	int glMajor = 3;
 	int glMinor = 2;
