@@ -39,6 +39,10 @@ LuaSettings::LuaSettings( void )
 LuaSettings::LuaSettings( int argc, char **argv, std::string filename )
     : Settings( argc, argv )
 {
+    set( "video.width", 1024 );
+    set( "video.height", 768 );
+    set( "video.fullscreen", false );
+    
     if ( filename != "" ) {
         load( filename );
     }
@@ -53,9 +57,13 @@ void LuaSettings::load( std::string filename )
 {
     ScriptContext context;
     if ( context.load( FileSystem::getInstance().pathForResource( filename ) ) ) {
-        add( "video.width", context.eval< int >( "video.width"  ) );
-        add( "video.height", context.eval< int >( "video.height"  ) );
-        add( "video.fullscreen", context.eval< bool >( "video.fullscreen" ) );
+        auto &eval = context.getEvaluator();
+        each( [&eval]( std::string name, Settings *settings ) {
+            std::string value;
+            if ( eval.getPropValue( name, value ) && value != "" ) {
+                settings->set( name, value );
+            }
+        });
     }
     else {
         Log::Error << "Cannot open file " << filename << Log::End;

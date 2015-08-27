@@ -38,6 +38,64 @@
 namespace crimild {
 
 	namespace scripting {
+        
+        class ScriptContext;
+        
+        class ScriptEvaluator {
+        public:
+            ScriptEvaluator( ScriptContext *ctx, std::string prefix = "" );
+            ~ScriptEvaluator( void );
+            
+            const std::string &getPrefix( void ) const { return _prefix; }
+            void setPrefix( std::string prefix ) { _prefix = prefix; }
+            
+            ScriptContext *getContext( void ) { return _context; }
+            
+        private:
+            ScriptContext *_context;
+            std::string _prefix;
+            
+        public:
+            bool getPropValue( const std::string &expr, std::string &result, const char *defaultValue )
+            {
+                return getPropValue< std::string >( expr, result, std::string( defaultValue ) );
+            }
+            
+            template< typename T >
+            bool getPropValue( const std::string &expr, T &result, const T &defaultValue )
+            {
+                if ( !getPropValue< T >( expr, result ) ) {
+                    result = defaultValue;
+                }
+                
+                return true;
+            }
+            
+            template< typename T >
+            bool getPropValue( T &result )
+            {
+                return getPropValue< T >( "", result );
+            }
+            
+            template< typename T >
+            bool getPropValue( const std::string &expr, T &result );
+            
+            bool foreach( const std::string &name, std::function< void( ScriptEvaluator &, int ) > callback );
+            
+        private:
+            inline std::string expandExpression( std::string expr )
+            {
+                if ( _prefix == "" ) {
+                    return expr;
+                }
+                
+                if ( expr == "" ) {
+                    return _prefix;
+                }
+                
+                return _prefix + "." + expr;
+            }
+        };
 
 		class ScriptContext {
 			CRIMILD_DISALLOW_COPY_AND_ASSIGN( ScriptContext )
@@ -46,6 +104,8 @@ namespace crimild {
 			ScriptContext( void );
 			ScriptContext( bool openDefaultLibs );
 			virtual ~ScriptContext( void );
+            
+            lua_State *getLuaState( void ) { return _state; }
 
 			void reset( void );
 
@@ -57,6 +117,12 @@ namespace crimild {
 			bool load( std::string fileName, bool supportCoroutines = false );
 
 			bool parse( std::string text );
+            
+        public:
+            ScriptEvaluator &getEvaluator( void ) { return _evaluator; }
+            
+        private:
+            ScriptEvaluator _evaluator;
 
 		public:
 			int yield( void );
@@ -83,98 +149,7 @@ namespace crimild {
 			}
 
 		public:
-			bool test( const std::string &expr )
-			{
-				std::stringstream str;
-				str << "evalExpr = " << expr;
-				if ( !luaL_dostring( _state, str.str().c_str() ) ) {
-					lua_getglobal( _state, "evalExpr" );
-					return !lua_isnil( _state, -1 );
-				}
-
-				return false;
-			}
-
-			template< typename T >
-			T eval( const std::string &expr )
-			{
-				std::stringstream str;
-				str << "evalExpr = " << expr;
-				if ( !luaL_dostring( _state, str.str().c_str() ) ) {
-					lua_getglobal( _state, "evalExpr" );
-					T ret = lua_isnil( _state, -1 ) ? getDefaultValue< T >() : read< T >( -1 );
-					lua_pop( _state, 1 );
-					return ret;
-				}
-
-				return getDefaultValue< T >();
-			}
-
-		private:
-			template< typename T >
-			T getDefaultValue( void ) const { return 0; }
-
-		public:
-			class Iterable {
-			public:
-				Iterable( ScriptContext &context, const std::string &prefix, int index ) 
-					: _context( context ), 
-					  _index( index )
-				{ 
-					std::stringstream str;
-					str << prefix;
-					if ( _index >= 0 ) {
-						str << "[" << ( _index + 1 ) << "]";
-					}
-					_prefix = str.str();
-				}
-				
-				virtual ~Iterable( void ) { }
-
-				const std::string &getPrefix( void ) const { return _prefix; }
-				
-				int getIndex( void ) const { return _index; }
-				
-				ScriptContext *getContext( void ) { return &_context; }
-
-				bool test( const std::string &expr )
-				{
-					return _context.test( expandExpression( expr ) );
-				}
-
-				template< typename T >
-				T eval( void )
-				{
-					return _context.eval< T >( _prefix );
-				}
-
-				template< typename T >
-				T eval( const std::string &expr )
-				{
-					return _context.eval< T >( expandExpression( expr ) );
-				}
-
-				void foreach( const std::string &name, std::function< void( ScriptContext &, ScriptContext::Iterable &i ) > callback )
-				{
-					_context.foreach( expandExpression( name ), callback );
-				}
-
-				std::string expandExpression( std::string expr ) 
-				{
-					if ( _prefix == "" ) {
-						return expr;
-					}
-
-					return _prefix + "." + expr;
-				}
-
-			private:
-				ScriptContext &_context;
-				std::string _prefix;
-				int _index;
-			};
-
-			void foreach( const std::string &name, std::function< void( ScriptContext &, ScriptContext::Iterable &i ) > callback );
+			bool foreach( const std::string &name, std::function< void( ScriptEvaluator &, int ) > callback );
 
 		public:
 			std::string dumpStack( void );
@@ -265,73 +240,92 @@ namespace crimild {
 			std::map< std::string, std::unique_ptr< AbstractFunction > > _functions;
 
 		};
-
-		template<>
-		inline bool ScriptContext::getDefaultValue( void ) const
-		{
-			return false;
-		}
-
-		template<>
-		inline std::string ScriptContext::getDefaultValue( void ) const 
-		{ 
-			return "null"; 
-		}
-
-		template<>
-		inline Vector3f ScriptContext::Iterable::eval( const std::string &name )
-		{
-			Vector3f v;
-			foreach( name, [&]( ScriptContext &, ScriptContext::Iterable &it ) {
-				v[ it.getIndex() ] = it.eval< float >();
-			});
-
-			return v;
-		}
-
-		template<>
-		inline Vector4f ScriptContext::Iterable::eval( const std::string &name )
-		{
-			Vector4f v;
-			foreach( name, [&]( ScriptContext &, ScriptContext::Iterable &it ) {
-				v[ it.getIndex() ] = it.eval< float >();
-			});
-			
-			return v;
-		}
-
-		template<>
-		inline Quaternion4f ScriptContext::Iterable::eval( const std::string &name )
-		{
-			Vector4f values;
-			foreach( name, [&]( ScriptContext &, ScriptContext::Iterable &it ) {
-				values[ it.getIndex() ] = it.eval< float >();
-			});
-
-			return Quaternion4f( values[ 0 ], values[ 1 ], values[ 2 ], values[ 3 ] );
-		}
-
-		template<>
-		inline TransformationImpl ScriptContext::Iterable::eval( const std::string &name )
-		{
-			TransformationImpl result;
-
-			if ( test( name + ".translate" ) ) result.setTranslate( eval< Vector3f >( name + ".translate" ) );
-			
-			if ( test( name + ".rotate" ) ) {
-				Vector4f axisAngle = eval< Vector4f >( name + ".rotate" );
-				result.rotate().fromAxisAngle( Vector3f( axisAngle[ 0 ], axisAngle[ 1 ], axisAngle[ 2 ] ), Numericf::DEG_TO_RAD * axisAngle[ 3 ] );
-			}
-
-			if ( test( name + ".rotate_q" ) ) result.setRotate( eval< Quaternion4f >( name + ".rotate_q" ) );
-
-			if ( test( name + ".lookAt" ) ) result.lookAt( eval< Vector3f >( name + ".lookAt" ), Vector3f( 0.0f, 1.0f, 0.0f ) );
+        
+        template< typename T >
+        inline bool ScriptEvaluator::getPropValue( const std::string &expr, T &result )
+        {
+            auto state = getContext()->getLuaState();
             
-            if ( test( name + ".scale" ) ) result.setScale( eval< float >( name + ".scale" ) );
+            std::stringstream str;
+            str << "evalExpr = " << expandExpression( expr );
+            if ( !luaL_dostring( state, str.str().c_str() ) ) {
+                lua_getglobal( state, "evalExpr" );
+                bool hasValue = !lua_isnil( state, -1 );
+                if ( hasValue ) {
+                    result = getContext()->read< T >( -1 );
+                }
+                lua_pop( state, 1 );
+                return hasValue;
+            }
+            else {
+                Log::Error << "Cannot parse " << expandExpression( expr )
+                           << "\n\tReason: " << lua_tostring( state, -1 )
+                           << Log::End;
+            }
+            
+            return false;
+        }
+        
+        template<>
+        inline bool ScriptEvaluator::getPropValue( const std::string &name, Vector3f &result )
+        {
+            return foreach( name, [&result]( ScriptEvaluator &eval, int index ) {
+                float v;
+                eval.getPropValue< float >( v );
+                result[ index ] = v;
+            });
+        }
+        
+        template<>
+        inline bool ScriptEvaluator::getPropValue( const std::string &name, Vector4f &result )
+        {
+            return foreach( name, [&result]( ScriptEvaluator &eval, int index ) {
+                float v;
+                eval.getPropValue< float >( v );
+                result[ index ] = v;
+            });
+        }
+        
+        template<>
+        inline bool ScriptEvaluator::getPropValue( const std::string &name, Quaternion4f &result )
+        {
+            Vector4f values;
+            bool hasValue = foreach( name, [&values]( ScriptEvaluator &eval, int index ) {
+                float v;
+                eval.getPropValue< float >( v );
+                values[ index ] = v;
+            });
+            
+            if ( hasValue ) result = Quaternion4f( values[ 0 ], values[ 1 ], values[ 2 ], values[ 3 ] );
+            return hasValue;
+        }
+        
+        template<>
+        inline bool ScriptEvaluator::getPropValue( const std::string &name, TransformationImpl &result )
+        {
+            getPropValue( name + ".translate", result.translate() );
+            getPropValue( name + ".scale", result.scale() );
+            
+            Vector4f axisAngle;
+            if ( getPropValue( name + ".rotate", axisAngle ) ) {
+                result.rotate().fromAxisAngle( Vector3f( axisAngle[ 0 ], axisAngle[ 1 ], axisAngle[ 2 ] ), Numericf::DEG_TO_RAD * axisAngle[ 3 ] );
+                return true;
+            }
+            
+            if ( getPropValue( name + ".rotate_q", result.rotate() ) ) {
+                return true;
+            }
 
-			return result;
-		}
-	}
+            Vector3f lookAt;
+            if ( getPropValue( name + ".lookAt", lookAt ) ) {
+                result.lookAt( lookAt, Vector3f( 0.0f, 1.0f, 0.0f ) );
+                return true;    // redundant?
+            }
+            
+            return true;
+        }
+
+    }
 
 }
 

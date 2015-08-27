@@ -63,33 +63,30 @@ NodePtr LuaSceneBuilder::fromFile( const std::string &filename )
 
 	Log::Debug << "Loading scene from " << filename << Log::End;
 
-	if ( !getScriptContext().test( _rootNodeName ) ) {
-		Log::Error << "Cannot find root node named '" << _rootNodeName << "'" << Log::End;
-        return NodePtr();
-	}
-
-	ScriptContext::Iterable first( getScriptContext(), _rootNodeName, -1 );
-	return buildNode( first, nullptr );
+    ScriptEvaluator eval( &getScriptContext(), _rootNodeName );
+    
+	return buildNode( eval, nullptr );
 }
 
-NodePtr LuaSceneBuilder::buildNode( ScriptContext::Iterable &it, GroupPtr const &parent )
+NodePtr LuaSceneBuilder::buildNode( ScriptEvaluator &eval, GroupPtr const &parent )
 {
 	NodePtr current;
 
-	std::string type = it.eval< std::string >( NODE_TYPE );
+    std::string type;
+    eval.getPropValue( NODE_TYPE, type, "" );
 
 	auto nodeBuilder = _nodeBuilders[ type ];
 	if ( nodeBuilder != nullptr ) {
 		Log::Debug << "Building '" << type << "' node" << Log::End;
-		current = nodeBuilder( it );
+		current = nodeBuilder( eval );
 	}
 	else if ( type == CAMERA_TYPE ) {
 		Log::Debug << "Building 'camera' node" << Log::End;
         auto camera = crimild::alloc< Camera >( 90.0f, 4.0f / 3.0f, 1.0f, 1000.0f );
-		setupCamera( it, camera );
+		setupCamera( eval, camera );
         
-        it.foreach( GROUP_NODES, [&]( ScriptContext &c, ScriptContext::Iterable &childId ) {
-            buildNode( childId, camera );
+        eval.foreach( GROUP_NODES, [&]( ScriptEvaluator &child, int ) {
+            buildNode( child, camera );
         });
 
         current = camera;
@@ -97,11 +94,26 @@ NodePtr LuaSceneBuilder::buildNode( ScriptContext::Iterable &it, GroupPtr const 
 	else if ( type == LIGHT_TYPE ) {
 		Log::Debug << "Building 'light' node" << Log::End;
         auto light = crimild::alloc< Light >();
-		light->setCastShadows( it.eval< bool >( LIGHT_CAST_SHADOWS ) );
-
-		if ( it.test( LIGHT_SHADOW_NEAR_COEFF ) ) light->setShadowNearCoeff( it.eval< float >( LIGHT_SHADOW_NEAR_COEFF ) );
-		if ( it.test( LIGHT_SHADOW_FAR_COEFF ) ) light->setShadowFarCoeff( it.eval< float >( LIGHT_SHADOW_FAR_COEFF ) );
-        if ( it.test( LIGHT_ATTENUATION ) ) light->setAttenuation( it.eval< Vector3f >( LIGHT_ATTENUATION ) );
+        
+        bool castShadows;
+        if ( eval.getPropValue( LIGHT_CAST_SHADOWS, castShadows ) ) {
+            light->setCastShadows( castShadows );
+        }
+        
+        float shadowNearCoeff;
+        if ( eval.getPropValue( LIGHT_SHADOW_NEAR_COEFF, shadowNearCoeff ) ) {
+            light->setShadowNearCoeff( shadowNearCoeff );
+        }
+        
+        float shadowFarCoeff;
+        if ( eval.getPropValue( LIGHT_SHADOW_FAR_COEFF, shadowFarCoeff ) ) {
+            light->setShadowFarCoeff( shadowFarCoeff );
+        }
+        
+        Vector3f attenuation;
+        if ( eval.getPropValue( LIGHT_ATTENUATION, attenuation ) ) {
+            light->setAttenuation( attenuation );
+        }
 
 		current = light;
 	}
@@ -109,27 +121,44 @@ NodePtr LuaSceneBuilder::buildNode( ScriptContext::Iterable &it, GroupPtr const 
 		Log::Debug << "Building 'text' node" << Log::End;
         auto text = crimild::alloc< Text >();
 
-		std::string fontName = it.eval< std::string >( "font" );
-		float textSize = it.eval< float >( "textSize" );
-
+        std::string fontName;
+        eval.getPropValue( "font", fontName, "" );
+        
+        float textSize;
+        eval.getPropValue( "textSize", textSize );
+        
 		std::string fontFileName = FileSystem::getInstance().pathForResource( fontName + "_sdf.tga" );
 		std::string fontDefFileName = FileSystem::getInstance().pathForResource( fontName + ".txt" );
         auto font = crimild::alloc< Font >( fontFileName, fontDefFileName );
 
 		text->setFont( font );
 		text->setSize( textSize );
-		text->setText( it.eval< std::string >( TEXT_TEXT ) );
-		if ( it.test( "renderOnScreen" ) ) text->getComponent< RenderStateComponent >()->setRenderOnScreen( it.eval< bool >( "renderOnScreen" ) );
+        
+        std::string content;
+        if ( eval.getPropValue( TEXT_TEXT, content ) ) {
+            text->setText( content );
+        }
+        
+        bool renderOnScreen;
+        if ( eval.getPropValue( "renderOnScreen", renderOnScreen ) ) {
+            text->getComponent< RenderStateComponent >()->setRenderOnScreen( renderOnScreen );
+        }
 
 		auto material = text->getMaterial();
 		material->setProgram( Simulation::getInstance()->getRenderer()->getShaderProgram( "sdf" ) );
-		if ( it.test( "textColor" ) ) material->setDiffuse( it.eval< RGBAColorf >( "textColor" ) );
-		material->getDepthState()->setEnabled( false );
-		if ( it.test( "enableDepthTest" ) ) material->getDepthState()->setEnabled( it.eval< bool >( "enableDepthTest" ) );
+        
+        RGBAColorf textColor;
+        if ( eval.getPropValue( "textColor", textColor ) ) {
+            material->setDiffuse( textColor );
+        }
 
-		if ( it.test( "textAnchor" ) ) {
-			std::string anchor = it.eval< std::string >( "textAnchor" );
-            
+        bool enableDepthTest;
+        if ( eval.getPropValue( "enableDepthTest", enableDepthTest, false ) ) {
+            material->getDepthState()->setEnabled( enableDepthTest );
+        }
+
+        std::string anchor;
+        if ( eval.getPropValue( "textAnchor", anchor, "left" ) ) {
             auto min = text->getLocalBound()->getMin();
             auto max = text->getLocalBound()->getMax();
             auto diff = max - min;
@@ -150,9 +179,9 @@ NodePtr LuaSceneBuilder::buildNode( ScriptContext::Iterable &it, GroupPtr const 
 	else {
 		GroupPtr group;
 
-		if ( it.test( NODE_FILENAME ) ) {
+        std::string filename;
+        if ( eval.getPropValue( NODE_FILENAME, filename ) && filename != "" ) {
 			Log::Debug << "Building node" << Log::End;
-			std::string filename = it.eval< std::string >( NODE_FILENAME );
 			
 			auto scene = AssetManager::getInstance()->get< Group >( filename );
 			if ( scene == nullptr ) {
@@ -172,18 +201,21 @@ NodePtr LuaSceneBuilder::buildNode( ScriptContext::Iterable &it, GroupPtr const 
             group = std::make_shared< Group >();
 		}
 
-		it.foreach( GROUP_NODES, [&]( ScriptContext &c, ScriptContext::Iterable &childId ) {
-			buildNode( childId, group );
+		eval.foreach( GROUP_NODES, [&]( ScriptEvaluator &childEval, int ) {
+			buildNode( childEval, group );
 		});
 
 		current = group;
 	}
 
 	if ( current != nullptr ) {
-		if ( it.test( "name" ) ) current->setName( it.eval< std::string >( "name" ) );
+        std::string name;
+        if ( eval.getPropValue( "name", name ) ) {
+            current->setName( name );
+        }
 		
-		setTransformation( it, current );
-		buildNodeComponents( it, current );
+		setTransformation( eval, current );
+		buildNodeComponents( eval, current );
 
 		if ( parent != nullptr ) {
 			parent->attachNode( current );
@@ -193,56 +225,63 @@ NodePtr LuaSceneBuilder::buildNode( ScriptContext::Iterable &it, GroupPtr const 
 	return current;
 }
 
-void LuaSceneBuilder::setupCamera( ScriptContext::Iterable &it, CameraPtr const &camera )
+void LuaSceneBuilder::setupCamera( ScriptEvaluator &eval, CameraPtr const &camera )
 {
-	std::string renderPassType = it.eval< std::string >( CAMERA_RENDER_PASS );
-	if ( renderPassType == "basic" ) {
+    
+    std::string renderPassType;
+    eval.getPropValue( CAMERA_RENDER_PASS, renderPassType, "forward" );
+    if ( renderPassType == "basic" ) {
         camera->setRenderPass( crimild::alloc< BasicRenderPass >() );
 	}
 
-	if ( it.test( CAMERA_FRUSTUM ) ) {
-		float fov = 45.0f;
-		float aspect = 4.0f / 3.0f;
-		float near = 1.0f;
-		float far = 1000.0f;
-
-		if ( it.test( CAMERA_FRUSTUM_FOV ) ) fov = it.eval< float >( CAMERA_FRUSTUM_FOV );
-		if ( it.test( CAMERA_FRUSTUM_ASPECT ) ) aspect = it.eval< float >( CAMERA_FRUSTUM_ASPECT );
-		if ( it.test( CAMERA_FRUSTUM_NEAR ) ) near = it.eval< float >( CAMERA_FRUSTUM_NEAR );
-		if ( it.test( CAMERA_FRUSTUM_FAR ) ) far = it.eval< float >( CAMERA_FRUSTUM_FAR );
-		camera->setFrustum( Frustumf( fov, aspect, near, far ) );
-	}
+    float fov = 45.0f;
+    float aspect = 4.0f / 3.0f;
+    float near = 1.0f;
+    float far = 1000.0f;
+    
+    eval.getPropValue( CAMERA_FRUSTUM_FOV, fov );
+    eval.getPropValue( CAMERA_FRUSTUM_ASPECT, aspect );
+    eval.getPropValue( CAMERA_FRUSTUM_NEAR, near );
+    eval.getPropValue( CAMERA_FRUSTUM_FAR, far );
+    
+    camera->setFrustum( Frustumf( fov, aspect, near, far ) );
 }
 
-void LuaSceneBuilder::setTransformation( ScriptContext::Iterable &it, NodePtr const &node )
+void LuaSceneBuilder::setTransformation( ScriptEvaluator &eval, NodePtr const &node )
 {
 	Log::Debug << "Setting node transformation" << Log::End;
-    if ( it.test( NODE_TRANSFORMATION ) ) {
-        auto t = it.eval< TransformationImpl >( NODE_TRANSFORMATION );
+    TransformationImpl t;
+    if ( eval.getPropValue( NODE_TRANSFORMATION, t ) ) {
+        // this is related with Text nodes and their anchors
         node->local().translate() += t.translate();
         node->local().setRotate( t.getRotate() );
         node->local().setScale( t.getScale() );
     }
 }
 
-void LuaSceneBuilder::buildNodeComponents( ScriptContext::Iterable &it, NodePtr const &node )
+void LuaSceneBuilder::buildNodeComponents( ScriptEvaluator &eval, NodePtr const &node )
 {
-	it.foreach( NODE_COMPONENTS, [&]( ScriptContext &c, ScriptContext::Iterable &componentIt ) {
-		std::string type = componentIt.eval< std::string >( NODE_COMPONENT_TYPE );
-		Log::Debug << "Building component of type '" << type << "'" << Log::End;
-
-		if ( type != "null" && _componentBuilders[ type ] != nullptr ) {
-			auto cmp = _componentBuilders[ type ]( componentIt );
-			if ( cmp != nullptr ) {
-				node->attachComponent( cmp );
-			}
-			else {
-				Log::Error << "Cannot build component of type '" << type << "'" << Log::End;
-			}
-		}
-		else {
-			Log::Warning << "Cannot find component builder for type '" << type << "'" << Log::End;
-		}
+	eval.foreach( NODE_COMPONENTS, [&]( ScriptEvaluator &componentEval, int ) {
+        std::string type;
+        if ( componentEval.getPropValue( NODE_COMPONENT_TYPE, type ) ) {
+            Log::Debug << "Building component of type '" << type << "'" << Log::End;
+            if ( type != "null" && _componentBuilders[ type ] != nullptr ) {
+                auto cmp = _componentBuilders[ type ]( componentEval );
+                if ( cmp != nullptr ) {
+                    node->attachComponent( cmp );
+                }
+                else {
+                    Log::Error << "Cannot build component of type '" << type << "'" << Log::End;
+                }
+            }
+            else {
+                Log::Warning << "Cannot find component builder for type '" << type << "'" << Log::End;
+            }
+        }
+        else {
+            Log::Error << "No component type provided" << Log::End;
+            return;
+        }
 	});
 }
 

@@ -50,7 +50,7 @@ Settings::~Settings( void )
 
 void Settings::parseCommandLine( int argc, char **argv )
 {
-	if ( argv > 0 ) {
+	if ( argc > 0 ) {
 		_settings[ "__base_directory" ] = argv[ 0 ];
 	}
 
@@ -60,7 +60,7 @@ void Settings::parseCommandLine( int argc, char **argv )
 		if ( separatorPos > 0 ) {
 			std::string key = option.substr( 0, separatorPos );
 			std::string value = option.substr( separatorPos + 1 );
-			add( key, value );
+			set( key, value );
 		}
 	}
 }

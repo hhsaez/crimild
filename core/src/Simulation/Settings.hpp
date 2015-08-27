@@ -50,19 +50,19 @@ namespace crimild {
         virtual void save( std::string filename ) { }
 
 		template< typename T >
-		void add( std::string key, T value )
+		void set( std::string key, T value )
 		{
 			std::stringstream str;
 			str << value;
 			_settings[ key ] = str.str();
 		}
 		
-		void add( std::string key, const char *value )
+		void set( std::string key, const char *value )
 		{
-			add( key, std::string( value ) );
+			set( key, std::string( value ) );
 		}
 
-		void add( std::string key, std::string value )
+		void set( std::string key, std::string value )
 		{
 			_settings[ key ] = value;
 		}

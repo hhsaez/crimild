@@ -91,6 +91,8 @@ void StreamingSystem::loadScene( std::string filename, SceneBuilderPtr const &bu
         
         auto scene = builder->fromFile( FileSystem::getInstance().pathForResource( filename ) );
         
+        builder->reset();
+        
         crimild::async( crimild::AsyncDispatchPolicy::MAIN_QUEUE, [scene] {
             Simulation::getInstance()->setScene( scene );
         });

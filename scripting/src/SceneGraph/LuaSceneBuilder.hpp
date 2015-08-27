@@ -40,8 +40,8 @@ namespace crimild {
             public crimild::SceneBuilder {
                 
 		private:
-			typedef std::function< NodePtr ( crimild::scripting::ScriptContext::Iterable & ) > NodeBuilderFunction;
-			typedef std::function< NodeComponentPtr ( crimild::scripting::ScriptContext::Iterable & ) > ComponentBuilderFunction;
+			typedef std::function< NodePtr ( crimild::scripting::ScriptEvaluator & ) > NodeBuilderFunction;
+			typedef std::function< NodeComponentPtr ( crimild::scripting::ScriptEvaluator & ) > ComponentBuilderFunction;
 
 		public:
 			LuaSceneBuilder( std::string rootNodeName = "scene" );
@@ -56,9 +56,9 @@ namespace crimild {
 			template< typename T >
 			void generateNodeBuilder( std::string type )
 			{
-				_nodeBuilders[ type ] = []( crimild::scripting::ScriptContext::Iterable &it ) {
+				_nodeBuilders[ type ] = []( crimild::scripting::ScriptEvaluator &eval ) {
 					auto node = crimild::alloc< T >();
-                    node->load( it );
+                    node->load( eval );
                     return node;
                 };
 			}
@@ -66,8 +66,8 @@ namespace crimild {
 			template< typename T >
 			void registerComponent( void )
 			{
-				registerComponentBuilder< T >( []( crimild::scripting::ScriptContext::Iterable &it ) {
-                    return crimild::alloc< T >( it );
+				registerComponentBuilder< T >( []( crimild::scripting::ScriptEvaluator &eval ) {
+                    return crimild::alloc< T >( eval );
 				});
 			}
 
@@ -78,12 +78,12 @@ namespace crimild {
 			}
 
 		private:
-			NodePtr buildNode( ScriptContext::Iterable &i, GroupPtr const &parent );
+			NodePtr buildNode( ScriptEvaluator &eval, GroupPtr const &parent );
 
-			void setupCamera( ScriptContext::Iterable &i, CameraPtr const &camera );
-			void setTransformation( ScriptContext::Iterable &it, NodePtr const &node );
+			void setupCamera( ScriptEvaluator &eval, CameraPtr const &camera );
+			void setTransformation( ScriptEvaluator &eval, NodePtr const &node );
 			
-			void buildNodeComponents( ScriptContext::Iterable &it, NodePtr const &node );
+			void buildNodeComponents( ScriptEvaluator &eval, NodePtr const &node );
 
 		private:
 			std::string _rootNodeName;

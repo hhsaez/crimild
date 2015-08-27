@@ -78,8 +78,6 @@ void Simulation::start( void )
 
 bool Simulation::update( void )
 {
-    _simulationClock.tick();
-    
     auto scene = getScene();
     
     broadcastMessage( messaging::SimulationWillUpdate { scene } );

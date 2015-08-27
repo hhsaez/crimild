@@ -62,9 +62,12 @@ void UpdateSystem::update( void )
         return;
     }
 
-    const Clock &c = Simulation::getInstance()->getSimulationClock();
+    // update simulation time
+    // TODO: Should this system have its own clock?
+    auto &c = Simulation::getInstance()->getSimulationClock();
+    c.tick();
+    
     _accumulator += Numericd::min( CRIMILD_SIMULATION_TIME, c.getDeltaTime() );
-
 
     broadcastMessage( messaging::WillUpdateScene { scene, camera } );
     updateBehaviors( scene );
@@ -83,10 +86,10 @@ void UpdateSystem::updateBehaviors( NodePtr const &scene )
             }
         });
         
-        updateWorldState( scene );
-        
         _accumulator -= CRIMILD_SIMULATION_TIME;
     }
+    
+    updateWorldState( scene );
 }
 
 void UpdateSystem::updateWorldState( NodePtr const &scene )
