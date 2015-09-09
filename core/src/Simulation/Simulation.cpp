@@ -158,9 +158,6 @@ void Simulation::setScene( NodePtr const &scene )
             _cameras.push_back( camera );
         });
 	}
-	else {
-		_assetManager.clear();
-	}
     
     AssetManager::getInstance()->clear();
     MessageQueue::getInstance()->clear();

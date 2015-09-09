@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2015, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,78 +25,57 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_FOUNDATION_LOG_
-#define CRIMILD_FOUNDATION_LOG_
+#ifndef CRIMILD_MEMORY_SMALL_OBJECT_
+#define CRIMILD_MEMORY_SMALL_OBJECT_
 
-#include "NamedObject.hpp"
-#include "SharedObject.hpp"
-#include "Pointer.hpp"
+#include "Macros.hpp"
 
-#include <string>
-#include <iostream>
-#include <sstream>
+#include "SmallObjectAllocator.hpp"
+
+#include <thread>
+#include <mutex>
 
 namespace crimild {
 
-	class Log : public NamedObject {
-	public:
-		class LogOutputHandler : public SharedObject {
-		public:
-			virtual ~LogOutputHandler( void );
+	template< class Allocator = DefaultSmallObjectAllocator >
+	class SmallObject {
+		CRIMILD_DISALLOW_COPY_AND_ASSIGN( SmallObject )
 
-			virtual void write( Log *log, std::string message ) = 0;
-		};
-        
-        using LogOutputHandlerPtr = SharedPointer< LogOutputHandler >;
-
-		class ConsoleOutputHandler : public LogOutputHandler {
-		public:
-			virtual ~ConsoleOutputHandler( void );
-			virtual void write( Log *log, std::string message ) override;
-		};
-        
-        using ConsoleOutputHandlerPtr = SharedPointer< ConsoleOutputHandler >;
+	private:
+		using Mutex = std::mutex;
+		using Lock = std::unique_lock< Mutex >;
 
 	public:
-		static Log Debug;
-		static Log Warning;
-		static Log Error;
-		static Log Fatal;
-		static Log Info;
-
-		class EndLine {
-		public:
-		};
-
-		static EndLine End;
-
-		static void setDefaultOutputHandler( LogOutputHandlerPtr const &handler );
-
-	public:
-		Log( std::string name );
-		virtual ~Log( void );
-
-		void setOutputHandler( LogOutputHandlerPtr const &handler ) { _outputHandler = handler; }
-		LogOutputHandlerPtr getOutputHandler( void ) { return _outputHandler; }
-
-		template< typename T >
-		Log &operator<<( T in )
+		static void *operator new( std::size_t size )
 		{
-			_str << in;
-			return *this;
+			Lock lock( _mutex );
+			return Allocator::getInstance()->allocate( size );
 		}
 
-		Log &operator<<( EndLine & )
+		static void operator delete( void *p, std::size_t size )
 		{
-            if ( _outputHandler != nullptr ) _outputHandler->write( this, _str.str() );
-			_str.str( "" );
-			return *this;
+			Lock lock( _mutex );
+			Allocator::getInstance()->deallocate( p, size );
 		}
 
 	private:
-		std::stringstream _str;
-		LogOutputHandlerPtr _outputHandler;
+		static Mutex _mutex;
+
+	protected:
+		SmallObject( void )
+		{
+
+		}
+
+	public:
+		virtual ~SmallObject( void )
+		{
+
+		}
 	};
+
+	template< typename Allocator >
+	typename SmallObject< Allocator >::Mutex SmallObject< Allocator >::_mutex;
 
 }
 

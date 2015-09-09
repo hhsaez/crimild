@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2015, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,58 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_FOUNDATION_SHARED_OBJECT_
-#define CRIMILD_CORE_FOUNDATION_SHARED_OBJECT_
-
-#include "Macros.hpp"
-#include "Memory.hpp"
 #include "SmallObject.hpp"
 
-#include <thread>
-#include <functional>
+using namespace crimild;
 
-namespace crimild {
-
-    class SharedObject :
-        public SmallObject<>,
-        public std::enable_shared_from_this< SharedObject > {
-            
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( SharedObject )
-        
-	protected:
-        SharedObject( void ) { }
-
-	public:
-        virtual ~SharedObject( void ) { }
-        
-        SharedPointer< SharedObject > getShared( void )
-        {
-            return shared_from_this();
-        }
-        
-        template< class T >
-        SharedPointer< T > getShared( void )
-        {
-            return std::static_pointer_cast< T >( shared_from_this() );
-        }
-        
-        void lock( void ) { _mutex.lock(); }
-        
-        void unlock( void ) { _mutex.unlock(); }
-
-        void synchronized( std::function< void( void ) > callback )
-        {
-            std::lock_guard< std::mutex > guard( _mutex);
-            callback();
-        }
-
-	private:
-        std::mutex _mutex;
-	};
-    
-    using SharedObjectPtr = SharedPointer< SharedObject >;
-    
-}
-
-#endif
 

@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2015, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,78 +25,59 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_FOUNDATION_LOG_
-#define CRIMILD_FOUNDATION_LOG_
+#ifndef CRIMILD_MEMORY_SMALL_OBJECT_ALLOCATOR_
+#define CRIMILD_MEMORY_SMALL_OBJECT_ALLOCATOR_
 
-#include "NamedObject.hpp"
-#include "SharedObject.hpp"
-#include "Pointer.hpp"
+#include "FixedAllocator.hpp"
+#include "Singleton.hpp"
 
-#include <string>
 #include <iostream>
-#include <sstream>
+
+#ifndef CRIMILD_DEFAULT_CHUNK_SIZE
+#define CRIMILD_DEFAULT_CHUNK_SIZE 4096
+#endif
+
+#ifndef CRIMILD_MAX_SMALL_OBJECT_SIZE
+#define CRIMILD_MAX_SMALL_OBJECT_SIZE 2048 // sizeof( Group ) > 300
+#endif
+
+#ifndef CRIMILD_DEFAULT_OBJECT_ALIGNMENT
+#define CRIMILD_DEFAULT_OBJECT_ALIGNMENT 4
+#endif
 
 namespace crimild {
 
-	class Log : public NamedObject {
-	public:
-		class LogOutputHandler : public SharedObject {
-		public:
-			virtual ~LogOutputHandler( void );
-
-			virtual void write( Log *log, std::string message ) = 0;
-		};
-        
-        using LogOutputHandlerPtr = SharedPointer< LogOutputHandler >;
-
-		class ConsoleOutputHandler : public LogOutputHandler {
-		public:
-			virtual ~ConsoleOutputHandler( void );
-			virtual void write( Log *log, std::string message ) override;
-		};
-        
-        using ConsoleOutputHandlerPtr = SharedPointer< ConsoleOutputHandler >;
+    class SmallObjectAllocator : public StaticSingleton< SmallObjectAllocator > {
+	private:
+        inline static std::size_t getOffset( std::size_t numBytes, std::size_t alignment );
+        inline static void *defaultAlloc( std::size_t numBytes );
+        inline static void defaultDealloc( void *p );
 
 	public:
-		static Log Debug;
-		static Log Warning;
-		static Log Error;
-		static Log Fatal;
-		static Log Info;
+		SmallObjectAllocator( std::size_t pageSize = CRIMILD_DEFAULT_CHUNK_SIZE, 
+							  std::size_t maxObjectSize = CRIMILD_MAX_SMALL_OBJECT_SIZE, 
+							  std::size_t objectAlignSize = CRIMILD_DEFAULT_OBJECT_ALIGNMENT );
+		~SmallObjectAllocator( void );
 
-		class EndLine {
-		public:
-		};
+		void *allocate( std::size_t numBytes );
+		void deallocate( void *p, std::size_t size );
 
-		static EndLine End;
-
-		static void setDefaultOutputHandler( LogOutputHandlerPtr const &handler );
-
-	public:
-		Log( std::string name );
-		virtual ~Log( void );
-
-		void setOutputHandler( LogOutputHandlerPtr const &handler ) { _outputHandler = handler; }
-		LogOutputHandlerPtr getOutputHandler( void ) { return _outputHandler; }
-
-		template< typename T >
-		Log &operator<<( T in )
-		{
-			_str << in;
-			return *this;
-		}
-
-		Log &operator<<( EndLine & )
-		{
-            if ( _outputHandler != nullptr ) _outputHandler->write( this, _str.str() );
-			_str.str( "" );
-			return *this;
-		}
+		const std::size_t getMaxObjectSize( void ) const { return _maxObjectSize; }
+		const std::size_t getAlignment( void ) const { return _objectAlignSize; }
 
 	private:
-		std::stringstream _str;
-		LogOutputHandlerPtr _outputHandler;
+		bool trimExcessMemory( void );
+
+	private:
+		internal::FixedAllocator *_pool;
+		internal::FixedAllocator *_lastAlloc;
+		internal::FixedAllocator *_lastDealloc;
+
+		std::size_t _maxObjectSize;
+		std::size_t _objectAlignSize;
 	};
+
+	using DefaultSmallObjectAllocator = SmallObjectAllocator;
 
 }
 

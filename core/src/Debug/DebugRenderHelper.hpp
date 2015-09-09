@@ -24,15 +24,6 @@ namespace crimild {
 		
 		static void renderBox( RendererPtr const &renderer, CameraPtr const &camera, const Vector3f &position, float scale, const RGBAColorf &color = RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ) );
 		static void renderSphere( RendererPtr const &renderer, CameraPtr const &camera, const Vector3f &position, float scale, const RGBAColorf &color = RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ) );
-
-	private:
-		static PrimitivePtr _boxPrimitive;
-		static PrimitivePtr _spherePrimitive;
-
-		static VertexBufferObjectPtr _linesVBO;
-
-		static DepthStatePtr _depthState;
-		static AlphaStatePtr _alphaState;
 	};
 
 }

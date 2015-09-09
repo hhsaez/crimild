@@ -42,7 +42,7 @@ namespace crimild {
     template< typename T, typename... Args >
     SharedPointer< T > alloc( Args &&... args )
     {
-        return std::make_shared< T >( std::forward< Args >( args )... );
+        return SharedPointer< T >( new T( std::forward< Args >( args )... ) );
     }
 
     template< typename T >

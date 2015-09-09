@@ -37,7 +37,7 @@ const VertexFormat VertexFormat::VF_P3_N3_TG3( 3, 0, 3, 3, 0 );
 const VertexFormat VertexFormat::VF_P3_N3_UV2( 3, 0, 3, 0, 2 );
 const VertexFormat VertexFormat::VF_P3_N3_TG3_UV2( 3, 0, 3, 3, 2 );
 
-VertexFormat::VertexFormat( unsigned int positions, unsigned int colors, unsigned int normals, unsigned int tangents, unsigned int textureCoords )
+VertexFormat::VertexFormat( unsigned char positions, unsigned char colors, unsigned char normals, unsigned char tangents, unsigned char textureCoords )
 {
 	_positions = positions;
 	_positionsOffset = 0;
@@ -131,11 +131,11 @@ bool VertexFormat::operator!=( const VertexFormat &vf ) const
 
 std::ostream &crimild::operator<<( std::ostream &out, const VertexFormat &vf )
 {
-	out << "{p: " << vf.getPositionComponents() 
-		<< ", c: " << vf.getColorComponents() 
-		<< ", n: " << vf.getNormalComponents()
-		<< ", tg: " << vf.getTangentComponents() 
-		<< ", tc: " << vf.getTextureCoordComponents()
+	out << "{p: " << ( int ) vf.getPositionComponents()
+		<< ", c: " << ( int ) vf.getColorComponents()
+		<< ", n: " << ( int ) vf.getNormalComponents()
+		<< ", tg: " << ( int ) vf.getTangentComponents()
+		<< ", tc: " << ( int ) vf.getTextureCoordComponents()
 		<< "}";
 	return out;
 }
