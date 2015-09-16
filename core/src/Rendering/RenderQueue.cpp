@@ -49,7 +49,7 @@ void RenderQueue::reset( void )
     _screenObjects.clear();
 }
 
-void RenderQueue::setCamera( CameraPtr const &camera )
+void RenderQueue::setCamera( Camera *camera )
 {
     _camera = camera;
     if ( _camera != nullptr ) {
@@ -62,7 +62,7 @@ void RenderQueue::setCamera( CameraPtr const &camera )
     }
 }
 
-void RenderQueue::push( MaterialPtr const &material, PrimitivePtr const &primitive, GeometryPtr const &geometry, const TransformationImpl &world, bool renderOnScreen )
+void RenderQueue::push( Material *material, Primitive *primitive, Geometry *geometry, const Transformation &world, bool renderOnScreen )
 {
     if ( renderOnScreen ) {
         _screenObjects[ material ][ primitive ].push_back( std::make_pair( geometry, world.computeModelMatrix() ) );
@@ -84,12 +84,12 @@ void RenderQueue::push( MaterialPtr const &material, PrimitivePtr const &primiti
     }
 }
 
-void RenderQueue::push( LightPtr const &light )
+void RenderQueue::push( Light *light )
 {
     _lights.push_back( light );
 }
 
-void RenderQueue::each( MaterialMap const &objects, std::function< void( MaterialPtr const &, PrimitiveMap const & ) > callback )
+void RenderQueue::each( Renderables const &objects, std::function< void( Material *, PrimitiveMap const & ) > callback )
 {
     auto os = objects;
 	for ( auto it : os ) {
@@ -97,7 +97,7 @@ void RenderQueue::each( MaterialMap const &objects, std::function< void( Materia
 	}
 }
 
-void RenderQueue::each( std::function< void ( const LightPtr &, int ) > callback )
+void RenderQueue::each( std::function< void ( Light *, int ) > callback )
 {
     auto lights = _lights;
     int i = 0;

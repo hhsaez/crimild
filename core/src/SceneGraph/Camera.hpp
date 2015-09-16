@@ -84,7 +84,7 @@ namespace crimild {
 
 	public:
         void setRenderPass( SharedPointer< RenderPass > const &renderPass ) { _renderPass = renderPass; }
-		SharedPointer< RenderPass > &getRenderPass( void ) { return _renderPass; }
+        RenderPass *getRenderPass( void ) { return crimild::get_ptr( _renderPass ); }
 
 	private:
 		SharedPointer< RenderPass > _renderPass;
@@ -92,13 +92,11 @@ namespace crimild {
 	public:
 		void computeCullingPlanes( void );
 
-		bool culled( BoundingVolumePtr const &volume );
+		bool culled( const BoundingVolume *volume ) const;
 
 	private:
 		Plane3f _cullingPlanes[ 6 ];
 	};
-    
-    using CameraPtr = SharedPointer< Camera >;
 
 }
 

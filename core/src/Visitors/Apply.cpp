@@ -43,12 +43,12 @@ Apply::~Apply( void )
 
 }
 
-void Apply::visitNode( NodePtr const &node )
+void Apply::visitNode( Node *node )
 {
 	_callback( node );
 }
 
-void Apply::visitGroup( GroupPtr const &group )
+void Apply::visitGroup( Group *group )
 {
 	_callback( group );
 	NodeVisitor::visitGroup( group );

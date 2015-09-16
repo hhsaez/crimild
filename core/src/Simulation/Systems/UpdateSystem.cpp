@@ -7,7 +7,6 @@
 #include "Components/BehaviorComponent.hpp"
 
 #include "Visitors/UpdateWorldState.hpp"
-#include "Visitors/UpdateComponents.hpp"
 #include "Visitors/ComputeRenderQueue.hpp"
 
 #include "Rendering/RenderQueue.hpp"
@@ -15,7 +14,6 @@
 #include "SceneGraph/Node.hpp"
 
 #include "Simulation/Simulation.hpp"
-#include "Simulation/Tasks/AsyncTask.hpp"
 
 #define CRIMILD_SIMULATION_TIME 1.0f / 60.0f
 
@@ -76,7 +74,7 @@ void UpdateSystem::update( void )
     computeRenderQueue( scene, camera );
 }
 
-void UpdateSystem::updateBehaviors( NodePtr const &scene )
+void UpdateSystem::updateBehaviors( Node *scene )
 {
     Clock fixed( CRIMILD_SIMULATION_TIME );
     while ( _accumulator >= CRIMILD_SIMULATION_TIME ) {
@@ -92,16 +90,16 @@ void UpdateSystem::updateBehaviors( NodePtr const &scene )
     updateWorldState( scene );
 }
 
-void UpdateSystem::updateWorldState( NodePtr const &scene )
+void UpdateSystem::updateWorldState( Node *scene )
 {
     scene->perform( UpdateWorldState() );
 }
 
-void UpdateSystem::computeRenderQueue( NodePtr const &scene, CameraPtr const &camera )
+void UpdateSystem::computeRenderQueue( Node *scene, Camera *camera )
 {
     CRIMILD_PROFILE( "Compute Render Queue" )
     auto renderQueue = crimild::alloc< RenderQueue >();
-    scene->perform( ComputeRenderQueue( camera, renderQueue ) );
+    scene->perform( ComputeRenderQueue( camera, crimild::get_ptr( renderQueue ) ) );
     broadcastMessage( messaging::RenderQueueAvailable { renderQueue } );
 }
 

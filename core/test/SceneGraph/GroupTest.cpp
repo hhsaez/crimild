@@ -50,11 +50,11 @@ TEST( GroupNodeTest, destruction )
 
 		parent->attachNode( child1 );
 		EXPECT_TRUE( child1->hasParent() );
-		EXPECT_EQ( child1->getParent(), parent );
+		EXPECT_EQ( child1->getParent(), crimild::get_ptr( parent ) );
 
 		parent->attachNode( child2 );
 		EXPECT_TRUE( child2->hasParent() );
-		EXPECT_EQ( child2->getParent(), parent );
+		EXPECT_EQ( child2->getParent(), crimild::get_ptr( parent ) );
 	}
 
 	EXPECT_FALSE( child1->hasParent() );
@@ -77,14 +77,14 @@ TEST( GroupNodeTest, attachNode )
 	parent->attachNode( child );
 
 	EXPECT_TRUE( child->hasParent() );
-	ASSERT_EQ( child->getParent(), parent );
+	ASSERT_EQ( child->getParent(), crimild::get_ptr( parent ) );
 	EXPECT_TRUE( parent->hasNodes() );
 
 	bool found = false;
 	int count = 0;
-	parent->foreachNode( [&]( NodePtr const &node ) mutable {
+	parent->forEachNode( [&count, child, &found]( Node *node ) {
 		++count;
-		if ( child == node ) {
+		if ( crimild::get_ptr( child ) == node ) {
 			found = true;
 		}
 	});
@@ -108,7 +108,7 @@ TEST( GroupNodeTest, attachMultipleNodes )
 	EXPECT_TRUE( parent->hasNodes() );
 
 	int count = 0;
-	parent->foreachNode( [&]( NodePtr const &node ) mutable {
+	parent->forEachNode( [&count]( Node *node ) {
 		++count;
 	});
 	EXPECT_EQ( count, 3 );
@@ -125,9 +125,9 @@ TEST( GroupNodeTest, reattachNodeToSameParent )
 
 	bool found = false;
 	int count = 0;
-	parent->foreachNode( [&]( NodePtr const &node ) mutable {
+	parent->forEachNode( [&count, child, &found]( Node *node ) {
 		++count;
-		if ( child == node ) {
+		if ( crimild::get_ptr( child ) == node ) {
 			found = true;
 		}
 	});
@@ -178,7 +178,7 @@ TEST( GroupNodeTest, detachMultipleNodes )
 	EXPECT_TRUE( parent->hasNodes() );
 
 	int count = 0;
-	parent->foreachNode( [&]( NodePtr const &node ) {
+	parent->forEachNode( [&count, child3]( Node *node ) {
 		EXPECT_EQ( node->getName(), child3->getName() );
 		++count;
 	});
@@ -195,7 +195,7 @@ TEST( GroupNodeTest, detachNodeFromDifferentParent )
 	parent2->detachNode( child );
 
 	EXPECT_TRUE( child->hasParent() );
-	ASSERT_EQ( child->getParent(), parent1 );
+	ASSERT_EQ( child->getParent(), crimild::get_ptr( parent1 ) );
 	EXPECT_TRUE( parent1->hasNodes() );
 	EXPECT_FALSE( parent2->hasNodes() );
 }
@@ -224,7 +224,7 @@ TEST( GroupNodeTest, detachAllNodes )
 	EXPECT_EQ( child3->getParent(), nullptr );
 
 	int count = 0;
-	parent->foreachNode( [&]( NodePtr const &node ) {
+	parent->forEachNode( [&count]( Node *node ) {
 		++count;
 	});
 
@@ -251,11 +251,11 @@ TEST( GroupNodeTest, buildHierarchy )
 	node2->attachNode( node4 );
 
 	EXPECT_TRUE( node0->hasNodes() );
-	EXPECT_EQ( node1->getParent(), node0 );
-	EXPECT_EQ( node2->getParent(), node0 );
+	EXPECT_EQ( node1->getParent(), crimild::get_ptr( node0 ) );
+	EXPECT_EQ( node2->getParent(), crimild::get_ptr( node0 ) );
 
 	EXPECT_TRUE( node2->hasNodes() );
-	EXPECT_EQ( node3->getParent(), node2 );
-	EXPECT_EQ( node4->getParent(), node2 );
+	EXPECT_EQ( node3->getParent(), crimild::get_ptr( node2 ) );
+	EXPECT_EQ( node4->getParent(), crimild::get_ptr( node2 ) );
 }
 

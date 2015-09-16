@@ -39,14 +39,14 @@ namespace crimild {
 
 	class Apply : public NodeVisitor {
 	private:
-		typedef std::function< void( NodePtr const & ) > CallbackType;
+		typedef std::function< void( Node * ) > CallbackType;
 
 	public:
 		explicit Apply( CallbackType callback );
 		virtual ~Apply( void );
 
-		virtual void visitNode( NodePtr const &node ) override;
-		virtual void visitGroup( GroupPtr const &node ) override;
+		virtual void visitNode( Node *node ) override;
+		virtual void visitGroup( Group *group ) override;
 
 	private:
 		CallbackType _callback;

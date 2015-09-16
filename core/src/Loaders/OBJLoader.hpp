@@ -71,7 +71,7 @@ namespace crimild {
 		explicit OBJLoader( std::string fileName );
 		~OBJLoader( void );
 
-		GroupPtr load( void );
+		SharedPointer< Group > load( void );
 
 	private:
 		const std::string &getFileName( void ) const { return _fileName; }
@@ -80,7 +80,7 @@ namespace crimild {
 		FileProcessor &getMTLProcessor( void ) { return _mtlProcessor; }
 
 		void reset( void );
-		GroupPtr generateScene( void );
+		SharedPointer< Group > generateScene( void );
 
 		void generateGeometry( void );
 
@@ -101,8 +101,8 @@ namespace crimild {
 		void readMaterialSpecularMap( std::stringstream &line );
 		void readMaterialEmissiveMap( std::stringstream &line );
 		void readMaterialShaderProgram( std::stringstream &line );
-
-		TexturePtr loadTexture( std::string textureFileName );
+        
+        SharedPointer< Texture > loadTexture( std::string fileName );
 
 	private:
 		std::string _fileName;
@@ -110,11 +110,11 @@ namespace crimild {
 		FileProcessor _objProcessor;
 		FileProcessor _mtlProcessor;
 
-		std::list< GroupPtr > _objects;
-		GroupPtr _currentObject;
+		std::list< SharedPointer< Group > > _objects;
+		Group *_currentObject = nullptr;
 
-		std::map< std::string, MaterialPtr > _materials;
-		MaterialPtr _currentMaterial;
+		std::map< std::string, SharedPointer< Material > > _materials;
+		Material *_currentMaterial = nullptr;
 
 		std::vector< Vector3f > _positions;
 		std::vector< Vector2f > _textureCoords;

@@ -58,8 +58,7 @@ namespace crimild {
 		VertexFormat _vertexFormat;
 		unsigned int _vertexCount;
 	};
-    
-    using VertexBufferObjectPtr = SharedPointer< VertexBufferObject >;
+
     using VertexBufferObjectCatalog = Catalog< VertexBufferObject >;
 
 }

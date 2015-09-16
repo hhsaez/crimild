@@ -41,19 +41,19 @@ BasicRenderPass::~BasicRenderPass( void )
 
 }
 
-void BasicRenderPass::render( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
+void BasicRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
 {
     render( renderer, renderQueue, camera, renderQueue->getShadedObjects() );
     render( renderer, renderQueue, camera, renderQueue->getOpaqueObjects() );
     render( renderer, renderQueue, camera, renderQueue->getTranslucentObjects() );
 }
 
-void BasicRenderPass::render( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera, RenderQueue::MaterialMap const &objects )
+void BasicRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera, RenderQueue::Renderables const &objects )
 {
     const Matrix4f &projection = camera->getProjectionMatrix();
     const Matrix4f &view = camera->getViewMatrix();
     
-    renderQueue->each( objects, [&]( MaterialPtr const &material, RenderQueue::PrimitiveMap const &primitives ) {
+    renderQueue->each( objects, [&]( Material *material, RenderQueue::PrimitiveMap const &primitives ) {
         auto program = material->getProgram() != nullptr ? material->getProgram() : renderer->getShaderProgram( "basic" );
         if ( program == nullptr ) {
             Log::Error << "No valid program for batch" << Log::End;

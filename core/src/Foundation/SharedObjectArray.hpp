@@ -29,7 +29,6 @@
 #define CRIMILD_CORE_FOUNDATION_SHARED_OBJECT_ARRAY_
 
 #include "Foundation/SharedObject.hpp"
-#include "Foundation/Pointer.hpp"
 
 #include <vector>
 #include <functional>
@@ -67,7 +66,12 @@ namespace crimild {
 
         bool empty( void ) const { return _objectCount == 0; }
 
-        int size( void ) const { return _objects.size(); }
+        int size( void ) const { return _objectCount; }
+        
+        void add( ObjectType *obj )
+        {
+            add( crimild::retain( obj ) );
+        }
         
         void add( ObjectPtr const &obj )
         {
@@ -84,17 +88,23 @@ namespace crimild {
             ++_objectCount;
         }
         
-        ObjectPtr remove( ObjectPtr const &obj )
+        ObjectPtr remove( ObjectType *obj )
         {
             for ( int i = 0; i < _objects.size(); i++ ) {
-                if ( _objects[ i ] == obj ) {
+                if ( get_ptr( _objects[ i ] ) == obj ) {
+                    auto result = _objects[ i ];
                     _objects[ i ] = nullptr;
                     --_objectCount;
-                    break;
+                    return result;
                 }
             }
-
-            return obj;
+            
+            return nullptr;
+        }
+        
+        ObjectPtr remove( ObjectPtr const &obj )
+        {
+            return remove( get_ptr( obj ) );
         }
         
         void clear( void )
@@ -103,16 +113,16 @@ namespace crimild {
             _objectCount = 0;
         }
 
-        ObjectPtr get( int index )
+        ObjectType *get( int index )
         {
             if ( index >= _objects.size() ) {
                 return nullptr;
             }
 
-            return _objects[ index ];
+            return get_ptr( _objects[ index ] );
         }
         
-        void foreach( std::function< void( ObjectPtr const &, int index ) > callback, bool ignoreNulls = true )
+        void forEach( std::function< void( ObjectType *, int index ) > callback, bool ignoreNulls = true )
         {
             if ( empty() ) {
                 return;
@@ -121,22 +131,14 @@ namespace crimild {
             int i = 0;
             for ( auto &o : _objects ) {
                 if ( !ignoreNulls || o != nullptr ) {
-                    callback( o, i++ );
+                    callback( crimild::get_ptr( o ), i++ );
                 }
             }
         }
             
-        void foreach( std::function< void( ObjectPtr const & ) > callback, bool ignoreNulls = true )
+        void forEach( std::function< void( ObjectType * ) > callback, bool ignoreNulls = true )
         {
-            if ( empty() ) {
-                return;
-            }
-
-            for ( auto &o : _objects ) {
-                if ( !ignoreNulls || o != nullptr ) {
-                    callback( o );
-                }
-            }
+            forEach( [callback]( ObjectType *obj, int index ) { callback( obj ); }, ignoreNulls );
         }
             
     private:

@@ -27,7 +27,6 @@
 
 #include "Rendering/ForwardRenderPass.hpp"
 #include "Rendering/Renderer.hpp"
-#include "Rendering/VisibilitySet.hpp"
 #include "Rendering/FrameBufferObject.hpp"
 #include "Rendering/RenderQueue.hpp"
 #include "Rendering/ImageEffect.hpp"
@@ -55,17 +54,14 @@ ForwardRenderPass::~ForwardRenderPass( void )
     
 }
 
-void ForwardRenderPass::render( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
+void ForwardRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
 {
     CRIMILD_PROFILE( "Forward Render Pass" )
 
 #if 1
     computeShadowMaps( renderer, renderQueue, camera );
 
-    auto sceneFBO = renderer->getFrameBuffer( "scene" );
-    if ( sceneFBO == nullptr ) {
-        sceneFBO = createSceneFBO( renderer );
-    }
+    auto sceneFBO = getSceneFBO( renderer );
 
     renderer->bindFrameBuffer( sceneFBO );
 
@@ -75,12 +71,12 @@ void ForwardRenderPass::render( RendererPtr const &renderer, RenderQueuePtr cons
 
     renderer->unbindFrameBuffer( sceneFBO );
 
-    if ( true || getImageEffects()->isEmpty() ) {
-        auto colorTarget = sceneFBO->getRenderTargets()->get( "color" );
+    if ( true || getImageEffects().empty() ) {
+        auto colorTarget = sceneFBO->getRenderTargets().get( "color" );
         RenderPass::render( renderer, colorTarget->getTexture(), nullptr );
     }
     else {
-        getImageEffects()->each( [&]( ImageEffectPtr const &effect, int ) {
+        getImageEffects().forEach( [renderer, camera]( ImageEffect *effect, int ) {
             effect->compute( renderer, camera );
             effect->apply( renderer, camera );
         });
@@ -97,20 +93,26 @@ void ForwardRenderPass::render( RendererPtr const &renderer, RenderQueuePtr cons
 #endif
 }
 
-FrameBufferObjectPtr ForwardRenderPass::createSceneFBO( RendererPtr const &renderer )
+FrameBufferObject *ForwardRenderPass::getSceneFBO( Renderer *renderer )
 {
+    auto fbo = renderer->getFrameBuffer( "scene" );
+    if ( fbo != nullptr ) {
+        return fbo;
+    }
+
     int width = renderer->getScreenBuffer()->getWidth();
     int height = renderer->getScreenBuffer()->getHeight();
 
     auto sceneFBO = crimild::alloc< FrameBufferObject >( width, height );
-    sceneFBO->getRenderTargets()->add( "color", crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
-    sceneFBO->getRenderTargets()->add( "depth", crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER_AND_TEXTURE, width, height ) );
+    sceneFBO->getRenderTargets().add( "color", crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
+    sceneFBO->getRenderTargets().add( "depth", crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER_AND_TEXTURE, width, height ) );
 
     renderer->addFrameBuffer( "scene", sceneFBO );
-    return sceneFBO;
+    
+    return crimild::get_ptr( sceneFBO );
 }
 
-void ForwardRenderPass::computeShadowMaps( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
+void ForwardRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
 {
     CRIMILD_PROFILE( "Compute Shadows" )
 
@@ -122,7 +124,7 @@ void ForwardRenderPass::computeShadowMaps( RendererPtr const &renderer, RenderQu
     // bind shader program first
     renderer->bindProgram( program );
     
-    renderQueue->each( [&]( LightPtr const &light, int ) {
+    renderQueue->each( [&]( Light *light, int ) {
         
         if ( !light->shouldCastShadows() ) {
             return;
@@ -145,7 +147,7 @@ void ForwardRenderPass::computeShadowMaps( RendererPtr const &renderer, RenderQu
 
         renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LINEAR_DEPTH_CONSTANT_UNIFORM ), map->getLinearDepthConstant() );
 
-        renderQueue->each( renderQueue->getShadowCasters(), [&]( MaterialPtr const &material, RenderQueue::PrimitiveMap const &primitives ) {
+        renderQueue->each( renderQueue->getShadowCasters(), [&]( Material *material, RenderQueue::PrimitiveMap const &primitives ) {
             for ( auto it : primitives ) {
                 auto primitive = it.first;
 
@@ -170,7 +172,7 @@ void ForwardRenderPass::computeShadowMaps( RendererPtr const &renderer, RenderQu
     renderer->unbindProgram( program );
 }
 
-void ForwardRenderPass::renderShadedObjects( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
+void ForwardRenderPass::renderShadedObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
 {
     CRIMILD_PROFILE( "Render Shaded Objects" )
 
@@ -195,11 +197,11 @@ void ForwardRenderPass::renderShadedObjects( RendererPtr const &renderer, Render
     }
     
     // bind lights
-    renderQueue->each( [&]( LightPtr const &light, int ) {
+    renderQueue->each( [&]( Light *light, int ) {
         renderer->bindLight( program, light );
     });
     
-    renderQueue->each( renderQueue->getShadedObjects(), [&]( MaterialPtr const &material, RenderQueue::PrimitiveMap const &primitives ) {
+    renderQueue->each( renderQueue->getShadedObjects(), [&]( Material *material, RenderQueue::PrimitiveMap const &primitives ) {
         CRIMILD_PROFILE( "Apply Materials" )
 
         // bind material properties
@@ -231,7 +233,7 @@ void ForwardRenderPass::renderShadedObjects( RendererPtr const &renderer, Render
     });
 
     // unbind lights
-    renderQueue->each( [&]( LightPtr const &light, int ) {
+    renderQueue->each( [&]( Light *light, int ) {
         renderer->unbindLight( program, light );
     });
     
@@ -246,7 +248,7 @@ void ForwardRenderPass::renderShadedObjects( RendererPtr const &renderer, Render
     renderer->unbindProgram( program );
 }
 
-void ForwardRenderPass::renderNonShadedObjects( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
+void ForwardRenderPass::renderNonShadedObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
 {
     CRIMILD_PROFILE( "Render Non-Shaded Objects" )
     
@@ -262,11 +264,11 @@ void ForwardRenderPass::renderNonShadedObjects( RendererPtr const &renderer, Ren
     renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::USE_SHADOW_MAP_UNIFORM ), false );
     
     // bind lights
-    renderQueue->each( [&]( LightPtr const &light, int ) {
+    renderQueue->each( [&]( Light *light, int ) {
         renderer->bindLight( program, light );
     });
     
-    renderQueue->each( renderQueue->getOpaqueObjects(), [&]( MaterialPtr const &material, RenderQueue::PrimitiveMap const &primitives ) {
+    renderQueue->each( renderQueue->getOpaqueObjects(), [&]( Material *material, RenderQueue::PrimitiveMap const &primitives ) {
         CRIMILD_PROFILE( "Apply Materials" )
         
         // bind material properties
@@ -298,7 +300,7 @@ void ForwardRenderPass::renderNonShadedObjects( RendererPtr const &renderer, Ren
     });
     
     // unbind lights
-    renderQueue->each( [&]( LightPtr const &light, int ) {
+    renderQueue->each( [&]( Light *light, int ) {
         renderer->unbindLight( program, light );
     });
     

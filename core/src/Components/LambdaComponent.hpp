@@ -30,18 +30,18 @@
 
 #include "BehaviorComponent.hpp"
 
-#include "SceneGraph/Node.hpp"
-
 #include <functional>
 
 namespace crimild {
+    
+    class Node;
 
 	class LambdaComponent : public BehaviorComponent {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( LambdaComponent )
 		CRIMILD_NODE_COMPONENT_NAME( "update" )
         
     private:
-        using Callback = std::function< void( NodePtr const &, const Clock & ) >;
+        using Callback = std::function< void( Node *, const Clock & ) >;
 
 	public:
 		LambdaComponent( Callback callback );

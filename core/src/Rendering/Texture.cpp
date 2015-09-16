@@ -35,7 +35,7 @@ Texture::Texture( std::string name )
     
 }
 
-Texture::Texture( ImagePtr const &image, std::string name )
+Texture::Texture( SharedPointer< Image > const &image, std::string name )
 	: NamedObject( name ),
 	  _image( image )
 {

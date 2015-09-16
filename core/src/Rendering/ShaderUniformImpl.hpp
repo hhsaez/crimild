@@ -53,7 +53,7 @@ namespace crimild {
 		void setValue( const T &value ) { _value = value; }
 		const T &getValue( void ) const { return _value; }
 
-		virtual void onBind( SharedPointer< Renderer > const &renderer ) override
+		virtual void onBind( Renderer *renderer ) override
 		{
 			renderer->bindUniform( getLocation(), getValue() );
 		}
@@ -63,22 +63,11 @@ namespace crimild {
 	};
 
 	typedef ShaderUniformImpl< bool > BoolUniform;
-    using BoolUniformPtr = SharedPointer< BoolUniform >;
-    
 	typedef ShaderUniformImpl< int > IntUniform;
-    using IntUniformPtr = SharedPointer< IntUniform >;
-    
 	typedef ShaderUniformImpl< float > FloatUniform;
-    using FloatUniformPtr = SharedPointer< FloatUniform >;
-    
 	typedef ShaderUniformImpl< Vector3f > Vector3fUniform;
-    using Vector3fUniformPtr = SharedPointer< Vector3fUniform >;
-
 	typedef ShaderUniformImpl< Vector2f > Vector2fUniform;
-    using Vector2fUniformPtr = SharedPointer< Vector2fUniform >;
-
 	typedef ShaderUniformImpl< Matrix3f > Matrix3fUniform;
-    using Matrix3fUniformPtr = SharedPointer< Matrix3fUniform >;
 
 }
 

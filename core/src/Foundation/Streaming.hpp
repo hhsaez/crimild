@@ -31,12 +31,12 @@
 #include "Macros.hpp"
 #include "Memory.hpp"
 
-#include "SceneGraph/Node.hpp"
-
 #include <cassert>
 #include <string>
 
 namespace crimild {
+    
+    class Node;
 
 	class SceneBuilder {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( SceneBuilder )
@@ -49,11 +49,9 @@ namespace crimild {
 
 		virtual void reset( void ) = 0;
 
-		virtual NodePtr fromFile( const std::string &filename ) = 0;
+		virtual SharedPointer< Node > fromFile( const std::string &filename ) = 0;
 
 	};
-
-	using SceneBuilderPtr = SharedPointer< SceneBuilder >;
 
 }
 

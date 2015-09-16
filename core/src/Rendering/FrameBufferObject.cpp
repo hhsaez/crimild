@@ -36,7 +36,7 @@ RenderTarget::RenderTarget( RenderTarget::Type type, RenderTarget::Output output
 }
 
 RenderTarget::RenderTarget( RenderTarget::Type type, RenderTarget::Output output, int width, int height, bool floatTextureHint )
-    : _texture( crimild::alloc< Texture >( ImagePtr() ) )
+    : _texture( crimild::alloc< Texture >() )
 {
     _type = type;
     _output = output;
@@ -53,8 +53,7 @@ RenderTarget::~RenderTarget( void )
 FrameBufferObject::FrameBufferObject( int width, int height )
 	: _width( width ),
 	  _height( height ),
-	  _clearColor( 0.0f, 0.0f, 0.0f, 0.0f ),
-	  _renderTargets( crimild::alloc< RenderTargetMap >() )
+	  _clearColor( 0.0f, 0.0f, 0.0f, 0.0f )
 {
 
 }

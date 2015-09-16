@@ -26,11 +26,18 @@
  */
 
 #include "Foundation/NamedObject.hpp"
-#include "Foundation/Pointer.hpp" 
+#include "Foundation/Memory.hpp"
 
 #include "gtest/gtest.h"
 
 using namespace crimild;
+
+TEST( NamedObjectTest, defaultConstruction )
+{
+    auto obj = crimild::alloc< NamedObject >();
+    
+    EXPECT_EQ( obj->getName(), "" );
+}
 
 TEST( NamedObjectTest, construction )
 {

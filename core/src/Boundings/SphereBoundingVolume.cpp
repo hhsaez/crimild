@@ -54,12 +54,12 @@ SphereBoundingVolume::~SphereBoundingVolume( void )
 
 }
 
-void SphereBoundingVolume::computeFrom( const BoundingVolumePtr &volume )
+void SphereBoundingVolume::computeFrom( const BoundingVolume *volume )
 {
 	computeFrom( volume->getCenter() + volume->getMin(), volume->getCenter() + volume->getMax() );
 }
 
-void SphereBoundingVolume::computeFrom( const BoundingVolumePtr &volume, const TransformationImpl &transformation )
+void SphereBoundingVolume::computeFrom( const BoundingVolume *volume, const Transformation &transformation )
 {
 	Vector3f newCenter;
 	transformation.applyToPoint( volume->getCenter(), newCenter );
@@ -100,7 +100,7 @@ void SphereBoundingVolume::computeFrom( const Vector3f *positions, unsigned int 
 	setMax( +getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
 }
 
-void SphereBoundingVolume::computeFrom( const VertexBufferObjectPtr  &vbo )
+void SphereBoundingVolume::computeFrom( const VertexBufferObject *vbo )
 {
 	if ( vbo->getVertexCount() == 0 || !vbo->getVertexFormat().hasPositions() ) {
 		_sphere.setCenter( Vector3f( 0.0f, 0.0f, 0.0f ) );
@@ -180,7 +180,7 @@ void SphereBoundingVolume::expandToContain( const Vector3f *positions, unsigned 
 	expandToContain( min );
 }
 
-void SphereBoundingVolume::expandToContain( const VertexBufferObjectPtr &vbo )
+void SphereBoundingVolume::expandToContain( const VertexBufferObject *vbo )
 {
 	if ( vbo->getVertexCount() == 0 || !vbo->getVertexFormat().hasPositions() ) {
 		_sphere.setCenter( Vector3f( 0.0f, 0.0f, 0.0f ) );
@@ -207,7 +207,7 @@ void SphereBoundingVolume::expandToContain( const VertexBufferObjectPtr &vbo )
 	expandToContain( min );
 }
 
-void SphereBoundingVolume::expandToContain( const BoundingVolumePtr &input )
+void SphereBoundingVolume::expandToContain( const BoundingVolume *input )
 {
 	_sphere.expandToContain( Sphere3f( input->getCenter(), input->getRadius() ) );
 
@@ -232,7 +232,7 @@ bool SphereBoundingVolume::testIntersection( const Ray3f &ray ) const
 	return Intersection::test( _sphere, ray );
 }
 
-bool SphereBoundingVolume::testIntersection( const BoundingVolumePtr &other ) const
+bool SphereBoundingVolume::testIntersection( const BoundingVolume *other ) const
 {
 	return other->testIntersection( _sphere );
 }
@@ -247,12 +247,12 @@ bool SphereBoundingVolume::testIntersection( const Plane3f &plane ) const
 	return whichSide( plane ) == 0;
 }
 
-void SphereBoundingVolume::resolveIntersection( const BoundingVolumePtr &other, TransformationImpl &result ) const
+void SphereBoundingVolume::resolveIntersection( const BoundingVolume *other, Transformation &result ) const
 {
 	other->resolveIntersection( _sphere, result );
 }
 
-void SphereBoundingVolume::resolveIntersection( const Sphere3f &other, TransformationImpl &result ) const
+void SphereBoundingVolume::resolveIntersection( const Sphere3f &other, Transformation &result ) const
 {
 	Vector3f direction = other.getCenter() - _sphere.getCenter();
 	float d = direction.getMagnitude();
@@ -260,7 +260,7 @@ void SphereBoundingVolume::resolveIntersection( const Sphere3f &other, Transform
 	result.setTranslate( direction.normalize() * diff );
 }
 
-void SphereBoundingVolume::resolveIntersection( const Plane3f &plane, TransformationImpl &result ) const
+void SphereBoundingVolume::resolveIntersection( const Plane3f &plane, Transformation &result ) const
 {
 }
 

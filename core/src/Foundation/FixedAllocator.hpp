@@ -79,9 +79,9 @@ namespace crimild {
 			unsigned char _numBlocks;
 
 			ChunkArray _chunks;
-			Chunk *_allocChunk;
-			Chunk *_deallocChunk;
-			Chunk *_emptyChunk;
+			Chunk *_allocChunk = nullptr;
+			Chunk *_deallocChunk = nullptr;
+			Chunk *_emptyChunk = nullptr;
 		};
 
 	}

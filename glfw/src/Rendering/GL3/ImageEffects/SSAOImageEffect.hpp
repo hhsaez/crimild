@@ -40,25 +40,23 @@ namespace crimild {
             explicit SSAOImageEffect( int noiseTextureSize, float radius, float occluderBias, const Vector2f &attenuation, int blurSize );
             virtual ~SSAOImageEffect( void );
             
-            virtual void compute( RendererPtr const &renderer, CameraPtr const &camera ) override;
-            virtual void apply( crimild::RendererPtr const &renderer, crimild::CameraPtr const &camera );
+            virtual void compute( crimild::Renderer *renderer, Camera *camera ) override;
+            virtual void apply( crimild::Renderer *renderer, crimild::Camera *camera );
             
         private:
-            FrameBufferObjectPtr getSSAOBuffer( crimild::RendererPtr const &renderer );
-            FrameBufferObjectPtr getSSAOBlurBuffer( crimild::RendererPtr const &renderer );
+            FrameBufferObject *getSSAOBuffer( crimild::Renderer *renderer );
+            FrameBufferObject *getSSAOBlurBuffer( crimild::Renderer *renderer );
             
-            void computeSSAO( crimild::RendererPtr const &renderer, CameraPtr const &camera );
-            void applySSAO( crimild::RendererPtr const &renderer );
+            void computeSSAO( crimild::Renderer *renderer, Camera *camera );
+            void applySSAO( crimild::Renderer *renderer );
             
-            TexturePtr _noiseTexture;
+            SharedPointer< Texture > _noiseTexture;
             float _ssaoRadius;
             float _ssaoOccluderBias;
             Vector2f _ssaoAttenuation;
             int _ssaoBlurSize;
-            AlphaStatePtr _blendState;
+            SharedPointer< AlphaState > _blendState;
         };
-        
-        using SSAOImageEffectPtr = SharedPointer< SSAOImageEffect >;
         
     }
     

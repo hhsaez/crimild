@@ -48,7 +48,7 @@ int gl3::TextureCatalog::getNextResourceId( void )
     return textureId;
 }
 
-void gl3::TextureCatalog::bind( ShaderLocationPtr const &location, TexturePtr const &texture )
+void gl3::TextureCatalog::bind( ShaderLocation *location, Texture *texture )
 {
 	if ( !texture ) {
 		return;
@@ -69,9 +69,9 @@ void gl3::TextureCatalog::bind( ShaderLocationPtr const &location, TexturePtr co
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gl3::TextureCatalog::unbind( ShaderLocationPtr const &location, TexturePtr const &texture )
+void gl3::TextureCatalog::unbind( ShaderLocation *location, Texture *texture )
 {
-	if ( !texture ) {
+	if ( texture == nullptr ) {
 		return;
 	}
 	
@@ -88,7 +88,7 @@ void gl3::TextureCatalog::unbind( ShaderLocationPtr const &location, TexturePtr 
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gl3::TextureCatalog::load( TexturePtr const &texture )
+void gl3::TextureCatalog::load( Texture *texture )
 {
 	Catalog< Texture >::load( texture );
 
@@ -127,15 +127,6 @@ void gl3::TextureCatalog::load( TexturePtr const &texture )
     	format, 
     	GL_UNSIGNED_BYTE,
         ( GLvoid * ) texture->getImage()->getData() );
-}
-
-void gl3::TextureCatalog::unload( TexturePtr const &texture )
-{
-    if ( texture->getCatalogId() > 0 ) {
-        _textureIdsToDelete.push_back( texture->getCatalogId() );
-    }
-
-	Catalog< Texture >::unload( texture );
 }
 
 void gl3::TextureCatalog::unload( Texture *texture )

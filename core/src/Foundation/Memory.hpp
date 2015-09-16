@@ -37,76 +37,45 @@ namespace crimild {
     using SharedPointer = std::shared_ptr< T >;
 
     template< typename T >
-    using WeakPointer = std::weak_ptr< T >;
-
+    using UniquePointer = std::unique_ptr< T >;
+    
     template< typename T, typename... Args >
     SharedPointer< T > alloc( Args &&... args )
     {
+        // use 'new' instead of 'make_shared' to force the use of
+        // the custom allocator.
+        // TODO: use alloc_shared?
         return SharedPointer< T >( new T( std::forward< Args >( args )... ) );
     }
 
-    template< typename T >
-    using UniquePointer = std::unique_ptr< T >;
-
     template< typename T, typename... Args >
-    UniquePointer< T > allocUnique( Args &&... args )
+    UniquePointer< T > alloc_unique( Args &&... args )
     {
         return std::unique_ptr< T >( new T( std::forward< Args >( args )... ) );        
     }
-
+    
     template< typename T >
-    bool pointerIsValid( WeakPointer< T > const &ptr )
+    SharedPointer< T > retain( T *ptr )
     {
-        return !ptr.expired();
+        if ( ptr == nullptr ) {
+            return nullptr;
+        }
+        
+        return std::static_pointer_cast< T >( ptr->shared_from_this() );
     }
-
+    
     template< typename T >
-    WeakPointer< T > getWeakPointer( SharedPointer< T > const &ptr )
-    {
-        return ptr;
-    }
-
-    template< typename T >
-    SharedPointer< T > getSharedPointer( WeakPointer< T > const &ptr )
-    {
-        return ptr.lock();
-    }
-
-    template< typename T >
-    T *getRawPointer( SharedPointer< T > const &ptr )
+    T *get_ptr( SharedPointer< T > const &ptr )
     {
         return ptr.get();
     }
-
-    template< typename T >
-    SharedPointer< T > getSharedPointer( T *ptr )
-    {
-        return std::static_pointer_cast< T >( ptr->shared_from_this() );
-    }
-
-    template< typename T >
-    void resetPointer( SharedPointer< T > &ptr )
-    {
-        ptr = nullptr;
-    }
-
-    template< typename T >
-    void resetPointer( WeakPointer< T > &ptr )
-    {
-        ptr.reset();
-    }
     
     template< class T, class U >
-    SharedPointer< T > castPointer( SharedPointer< U > const &ptr )
+    SharedPointer< T > cast_ptr( SharedPointer< U > const &ptr )
     {
         return std::static_pointer_cast< T >( ptr );
     }
-
-    template< class T, class U >
-    WeakPointer< T > castPointer( WeakPointer< U > const &ptr )
-    {
-        return castPointer< T >( getSharedPointer( ptr ) );
-    }
+    
 }
 
 #endif

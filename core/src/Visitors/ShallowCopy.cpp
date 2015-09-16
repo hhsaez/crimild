@@ -41,7 +41,7 @@ ShallowCopy::~ShallowCopy( void )
 
 }
 
-void ShallowCopy::traverse( NodePtr const &node )
+void ShallowCopy::traverse( Node *node )
 {
 	NodeVisitor::traverse( node );
     
@@ -51,47 +51,47 @@ void ShallowCopy::traverse( NodePtr const &node )
     }
 }
 
-void ShallowCopy::visitNode( NodePtr const &node )
+void ShallowCopy::visitNode( Node *node )
 {
     auto copy = crimild::alloc< Node >();
-	copyNode( node, copy );
+    copyNode( node, crimild::get_ptr( copy ) );
 }
 
-void ShallowCopy::visitGroup( GroupPtr const &group )
+void ShallowCopy::visitGroup( Group *group )
 {
     auto copy = crimild::alloc< Group >();
-	copyNode( group, copy );
+    copyNode( group, crimild::get_ptr( copy ) );
 
-	_parent = copy;
+    _parent = crimild::get_ptr( copy );
 
 	NodeVisitor::visitGroup( group );
 
 	_parent = copy->getParent< Group >();
 }
 
-void ShallowCopy::visitGeometry( GeometryPtr const &geometry )
+void ShallowCopy::visitGeometry( Geometry *geometry )
 {
     auto copy = crimild::alloc< Geometry >();
-	copyNode( geometry, copy );
+    copyNode( geometry, crimild::get_ptr( copy ) );
 
-	geometry->foreachPrimitive( [&]( PrimitivePtr const &primitive ) {
+	geometry->forEachPrimitive( [&]( Primitive *primitive ) {
 		copy->attachPrimitive( primitive );
 	});
 }
 
-void ShallowCopy::visitText( TextPtr const &input )
+void ShallowCopy::visitText( Text *input )
 {
     auto copy = crimild::alloc< Text >();
-    copyNode( input, copy );
+    copyNode( input, crimild::get_ptr( copy ) );
 
     copy->setFont( input->getFont() );
     copy->setSize( input->getSize() );
 }
 
-void ShallowCopy::copyNode( NodePtr const &src, NodePtr const &dst )
+void ShallowCopy::copyNode( Node *src, Node *dst )
 {
 	if ( _result == nullptr ) {
-		_result = dst;
+        _result = std::move( crimild::retain( dst ) );
 	}
 
 	if ( _parent != nullptr ) {
@@ -104,7 +104,7 @@ void ShallowCopy::copyNode( NodePtr const &src, NodePtr const &dst )
 	auto srcMaterials = src->getComponent< MaterialComponent >();
 	if ( srcMaterials != nullptr ) {
         auto dstMaterials = crimild::alloc< MaterialComponent >();
-		srcMaterials->foreachMaterial( [&]( MaterialPtr const &material ) {
+		srcMaterials->forEachMaterial( [&]( Material *material ) {
 			dstMaterials->attachMaterial( material );
 		});
 		dst->attachComponent( dstMaterials );

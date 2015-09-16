@@ -77,7 +77,7 @@ void StreamingSystem::onReloadScene( messaging::ReloadScene const &message )
     });
 }
 
-void StreamingSystem::loadScene( std::string filename, SceneBuilderPtr const &builder )
+void StreamingSystem::loadScene( std::string filename, SceneBuilder *builder )
 {
     if ( builder == nullptr ) {
         Log::Error << "Undefined scene builder" << Log::End;

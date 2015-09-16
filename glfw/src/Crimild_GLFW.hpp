@@ -30,7 +30,6 @@
 
 #include "Rendering/GL3/IndexBufferObjectCatalog.hpp"
 #include "Rendering/GL3/Renderer.hpp"
-#include "Rendering/GL3/OffscreenRenderPass.hpp"
 #include "Rendering/GL3/ShaderProgramCatalog.hpp"
 #include "Rendering/GL3/TextureCatalog.hpp"
 #include "Rendering/GL3/Utils.hpp"

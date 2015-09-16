@@ -39,8 +39,8 @@ namespace crimild {
             EmissiveGlowImageEffect( void );
             virtual ~EmissiveGlowImageEffect( void );
             
-            virtual void compute( RendererPtr const &renderer, CameraPtr const &camera ) override;
-            virtual void apply( crimild::RendererPtr const &renderer, crimild::CameraPtr const &camera );
+            virtual void compute( crimild::Renderer *renderer, Camera *camera ) override;
+            virtual void apply( crimild::Renderer *renderer, crimild::Camera *camera );
         };
         
     }

@@ -29,7 +29,7 @@
 
 using namespace crimild;
 
-ShaderProgram::ShaderProgram( VertexShaderPtr const &vs, FragmentShaderPtr const &fs )
+ShaderProgram::ShaderProgram( SharedPointer< VertexShader > const &vs, SharedPointer< FragmentShader > const &fs )
 	: _vertexShader( vs ),
 	  _fragmentShader( fs )
 {
@@ -41,7 +41,7 @@ ShaderProgram::~ShaderProgram( void )
 	detachAllUniforms();
 }
 
-void ShaderProgram::registerLocation( ShaderLocationPtr const &location )
+void ShaderProgram::registerLocation( SharedPointer< ShaderLocation > const &location )
 {
 	_locations[ location->getName() ] = location;
 }
@@ -55,11 +55,11 @@ void ShaderProgram::resetLocations( void )
 	}
 }
 
-void ShaderProgram::foreachLocation( std::function< void( ShaderLocationPtr const & ) > callback )
+void ShaderProgram::forEachLocation( std::function< void( ShaderLocation * ) > callback )
 {
 	for ( auto it : _locations ) {
 		if ( it.second != nullptr ) {
-			callback( it.second );
+            callback( crimild::get_ptr( it.second ) );
 		}
 	}
 }
@@ -70,37 +70,34 @@ void ShaderProgram::registerStandardLocation( ShaderLocation::Type locationType,
     registerLocation( crimild::alloc< ShaderLocation >( locationType, name ) );
 }
 
-ShaderLocationPtr ShaderProgram::getStandardLocation( unsigned int standardLocationId )
+ShaderLocation *ShaderProgram::getStandardLocation( unsigned int standardLocationId )
 {
-	return _locations[ _standardLocations[ standardLocationId ] ];
+    return crimild::get_ptr( _locations[ _standardLocations[ standardLocationId ] ] );
 }
 
-void ShaderProgram::attachUniform( ShaderUniformPtr const &uniform )
+void ShaderProgram::attachUniform( SharedPointer< ShaderUniform > const &uniform )
 {
-	_uniforms.push_back( uniform );
-    ShaderLocationPtr location( crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, uniform->getName() ) );
+	_uniforms.add( uniform );
+    
+    auto location = crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, uniform->getName() );
 	uniform->setLocation( location );
 	registerLocation( location );
 }
 
-void ShaderProgram::foreachUniform( std::function< void( ShaderUniformPtr const & ) > callback )
+void ShaderProgram::forEachUniform( std::function< void( ShaderUniform * ) > callback )
 {
-	for ( auto it : _uniforms ) {
-		if ( it != nullptr ) {
-			callback( it );
-		}
-	}
+    _uniforms.forEach( callback );
 }
 
 void ShaderProgram::detachAllUniforms( void )
 {
-	for ( auto it : _uniforms ) {
-		auto location = it->getLocation();
-		if ( location != nullptr ) {
-			location->reset();
-			it->setLocation( ShaderLocationPtr() );
-		}
-	}
+    _uniforms.forEach( []( ShaderUniform *uniform ) {
+        auto location = uniform->getLocation();
+        if ( location != nullptr ) {
+            location->reset();
+            uniform->setLocation( nullptr );
+        }
+    });
 
 	_uniforms.clear();
 }

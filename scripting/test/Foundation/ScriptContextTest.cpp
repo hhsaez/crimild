@@ -32,6 +32,8 @@
 using namespace crimild;
 using namespace crimild::scripting;
 
+#if 0
+
 int my_add( int a, int b ) {
     return a + b;
 }
@@ -331,4 +333,6 @@ TEST ( ScriptContextTest, testMultipleTablesAndValues )
 	EXPECT_EQ( 1024, context.eval< int >( "settings.resolution.width" ) );
 	EXPECT_EQ( 768, context.eval< int >( "settings.resolution.height" ) );
 }
+
+#endif
 

@@ -77,8 +77,8 @@ void DebugSystem::onDidRenderScene( messaging::DidRenderScene const & )
     }
     
     if ( _debugInfoEnabled ) {
-        scene->perform( Apply( [renderer, camera]( NodePtr const &node ) {
-            node->foreachComponent( [renderer, camera]( NodeComponentPtr const &component ) {
+        scene->perform( Apply( [renderer, camera]( Node *node ) {
+            node->forEachComponent( [renderer, camera]( NodeComponent *component ) {
                 component->renderDebugInfo( renderer, camera );
             });
         }));

@@ -41,11 +41,10 @@ namespace crimild {
 
 			virtual int getNextResourceId( void ) override;
 
-			virtual void bind( ShaderProgramPtr const &program, IndexBufferObjectPtr const &ibo ) override;
-			virtual void unbind( ShaderProgramPtr const &program, IndexBufferObjectPtr const &ibo ) override;
+			virtual void bind( ShaderProgram *program, IndexBufferObject *ibo ) override;
+			virtual void unbind( ShaderProgram *program, IndexBufferObject *ibo ) override;
 
-			virtual void load( IndexBufferObjectPtr const &ibo ) override;
-            virtual void unload( IndexBufferObjectPtr const &ibo ) override;
+			virtual void load( IndexBufferObject *ibo ) override;
             virtual void unload( IndexBufferObject *ibo ) override;
             
             virtual void cleanup( void ) override;

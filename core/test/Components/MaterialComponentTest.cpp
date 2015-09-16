@@ -26,7 +26,6 @@
  */
 
 #include "Components/MaterialComponent.hpp"
-#include "Foundation/Pointer.hpp"
 
 #include "gtest/gtest.h"
 
@@ -44,9 +43,9 @@ TEST( MaterialComponentTest, attachMaterial )
 	EXPECT_TRUE( materials->hasMaterials() );	
 
 	int i = 0;
-	materials->foreachMaterial( [&]( MaterialPtr const &m ) mutable {
+	materials->forEachMaterial( [&i, material]( Material *m ) {
 		i++;
-		EXPECT_EQ( m, material );
+        EXPECT_EQ( m, crimild::get_ptr( material ) );
 	});
 	EXPECT_EQ( 1, i );
 }

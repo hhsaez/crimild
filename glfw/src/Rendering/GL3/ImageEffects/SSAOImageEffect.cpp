@@ -195,39 +195,39 @@ SSAOImageEffect::~SSAOImageEffect( void )
     
 }
 
-void SSAOImageEffect::compute( RendererPtr const &renderer, CameraPtr const &camera )
+void SSAOImageEffect::compute( Renderer *renderer, Camera *camera )
 {
     computeSSAO( renderer, camera );
     applySSAO( renderer );
 }
 
-void SSAOImageEffect::apply( crimild::RendererPtr const &renderer, CameraPtr const &camera )
+void SSAOImageEffect::apply( crimild::Renderer *renderer, Camera *camera )
 {
     auto scene = renderer->getFrameBuffer( RenderPass::S_BUFFER_NAME );
-    renderScreen( renderer, scene->getRenderTargets()->get( RenderPass::S_BUFFER_COLOR_TARGET_NAME )->getTexture() );
+    renderScreen( renderer, scene->getRenderTargets().get( RenderPass::S_BUFFER_COLOR_TARGET_NAME )->getTexture() );
     
     auto ssaoBlur = getSSAOBlurBuffer( renderer );
     
     renderer->setDepthState( DepthState::DISABLED );
     renderer->setAlphaState( _blendState );
     
-    renderScreen( renderer, ssaoBlur->getRenderTargets()->get( "color" )->getTexture() );
+    renderScreen( renderer, ssaoBlur->getRenderTargets().get( "color" )->getTexture() );
 
     renderer->setAlphaState( AlphaState::DISABLED );
     renderer->setDepthState( DepthState::ENABLED );
 }
 
-FrameBufferObjectPtr SSAOImageEffect::getSSAOBuffer( crimild::RendererPtr const &renderer )
+FrameBufferObject *SSAOImageEffect::getSSAOBuffer( crimild::Renderer *renderer )
 {
     return getFrameBuffer( renderer, ImageEffect::FBO_AUX_1 );
 }
 
-FrameBufferObjectPtr SSAOImageEffect::getSSAOBlurBuffer( crimild::RendererPtr const &renderer )
+FrameBufferObject *SSAOImageEffect::getSSAOBlurBuffer( crimild::Renderer *renderer )
 {
     return getFrameBuffer( renderer, ImageEffect::FBO_AUX_2 );
 }
 
-void SSAOImageEffect::computeSSAO( crimild::RendererPtr const &renderer, CameraPtr const &camera )
+void SSAOImageEffect::computeSSAO( crimild::Renderer *renderer, Camera *camera )
 {
     auto ssaoBuffer = getSSAOBuffer( renderer );
     
@@ -235,7 +235,10 @@ void SSAOImageEffect::computeSSAO( crimild::RendererPtr const &renderer, CameraP
     
     auto ssaoProgram = renderer->getShaderProgram( "ssao_compute" );
     if ( ssaoProgram == nullptr ) {
-        ssaoProgram = crimild::alloc< ShaderProgram >( Utils::getVertexShaderInstance( ssao_compute_vs ), Utils::getFragmentShaderInstance( ssao_compute_fs ) );
+        auto tmp = crimild::alloc< ShaderProgram >( Utils::getVertexShaderInstance( ssao_compute_vs ), Utils::getFragmentShaderInstance( ssao_compute_fs ) );
+        renderer->addShaderProgram( "ssao", tmp );
+        ssaoProgram = crimild::get_ptr( tmp );
+
         ssaoProgram->registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
         ssaoProgram->registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
         
@@ -247,13 +250,11 @@ void SSAOImageEffect::computeSSAO( crimild::RendererPtr const &renderer, CameraP
         ssaoProgram->registerLocation( crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, "uRadius" ) );
         ssaoProgram->registerLocation( crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, "uOccluderBias" ) );
         ssaoProgram->registerLocation( crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, "uAttenuation" ) );
-        
-        renderer->addShaderProgram( "ssao", ssaoProgram );
     }
     
     auto gBuffer = renderer->getFrameBuffer( DeferredRenderPass::G_BUFFER_NAME );
-    auto positions = gBuffer->getRenderTargets()->get( DeferredRenderPass::G_BUFFER_POSITION_TARGET_NAME );
-    auto normals = gBuffer->getRenderTargets()->get( DeferredRenderPass::G_BUFFER_VIEW_SPACE_NORMAL_TARGET_NAME );
+    auto positions = gBuffer->getRenderTargets().get( DeferredRenderPass::G_BUFFER_POSITION_TARGET_NAME );
+    auto normals = gBuffer->getRenderTargets().get( DeferredRenderPass::G_BUFFER_VIEW_SPACE_NORMAL_TARGET_NAME );
     
     renderer->bindProgram( ssaoProgram );
     
@@ -265,47 +266,48 @@ void SSAOImageEffect::computeSSAO( crimild::RendererPtr const &renderer, CameraP
     
     renderer->bindTexture( ssaoProgram->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_POSITION_MAP_UNIFORM ), positions->getTexture() );
     renderer->bindTexture( ssaoProgram->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_NORMAL_MAP_UNIFORM ), normals->getTexture() );
-    renderer->bindTexture( ssaoProgram->getLocation( "uNoiseMap" ), _noiseTexture );
+    renderer->bindTexture( ssaoProgram->getLocation( "uNoiseMap" ), crimild::get_ptr( _noiseTexture ) );
     
     renderer->drawScreenPrimitive( ssaoProgram );
     
     renderer->unbindTexture( ssaoProgram->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_POSITION_MAP_UNIFORM ), positions->getTexture() );
     renderer->unbindTexture( ssaoProgram->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_NORMAL_MAP_UNIFORM ), normals->getTexture() );
-    renderer->unbindTexture( ssaoProgram->getLocation( "uNoiseMap" ), _noiseTexture );
+    renderer->unbindTexture( ssaoProgram->getLocation( "uNoiseMap" ), crimild::get_ptr( _noiseTexture ) );
     
     renderer->unbindProgram( ssaoProgram );
     
     renderer->unbindFrameBuffer( ssaoBuffer );
 }
 
-void SSAOImageEffect::applySSAO( crimild::RendererPtr const &renderer )
+void SSAOImageEffect::applySSAO( crimild::Renderer *renderer )
 {
     auto ssaoBlurFBO = getSSAOBlurBuffer( renderer );
     
     auto ssaoApplyProgram = renderer->getShaderProgram( "ssao_apply" );
     if ( ssaoApplyProgram == nullptr ) {
-        ssaoApplyProgram = crimild::alloc< ShaderProgram >( Utils::getVertexShaderInstance( ssao_apply_vs ), Utils::getFragmentShaderInstance( ssao_apply_fs ) );
+        auto tmp = crimild::alloc< ShaderProgram >( Utils::getVertexShaderInstance( ssao_apply_vs ), Utils::getFragmentShaderInstance( ssao_apply_fs ) );
+        renderer->addShaderProgram( "ssao_apply", tmp );
+        ssaoApplyProgram = crimild::get_ptr( tmp );
+        
         ssaoApplyProgram->registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
         ssaoApplyProgram->registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
         
         ssaoApplyProgram->registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::SSAO_MAP_UNIFORM, "uSSAOMap" );
         
         ssaoApplyProgram->registerLocation( crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, "uBlurSize" ) );
-
-        renderer->addShaderProgram( "ssao_apply", ssaoApplyProgram );
     }
     
     auto ssaoBuffer = getSSAOBuffer( renderer );
     
     renderer->bindFrameBuffer( ssaoBlurFBO );
     renderer->bindProgram( ssaoApplyProgram );
-    renderer->bindTexture( ssaoApplyProgram->getStandardLocation( ShaderProgram::StandardLocation::SSAO_MAP_UNIFORM ), ssaoBuffer->getRenderTargets()->get( "color" )->getTexture() );
+    renderer->bindTexture( ssaoApplyProgram->getStandardLocation( ShaderProgram::StandardLocation::SSAO_MAP_UNIFORM ), ssaoBuffer->getRenderTargets().get( "color" )->getTexture() );
 
     renderer->bindUniform( ssaoApplyProgram->getLocation( "uBlurSize" ), _ssaoBlurSize );
 
     renderer->drawScreenPrimitive( ssaoApplyProgram );
 
-    renderer->unbindTexture( ssaoApplyProgram->getStandardLocation( ShaderProgram::StandardLocation::SSAO_MAP_UNIFORM ), ssaoBuffer->getRenderTargets()->get( "color" )->getTexture() );
+    renderer->unbindTexture( ssaoApplyProgram->getStandardLocation( ShaderProgram::StandardLocation::SSAO_MAP_UNIFORM ), ssaoBuffer->getRenderTargets().get( "color" )->getTexture() );
     renderer->unbindProgram( ssaoApplyProgram );
     renderer->unbindFrameBuffer( ssaoBlurFBO );
 }

@@ -1,9 +1,14 @@
 #include "DebugRenderHelper.hpp"
 
 #include "Rendering/ShaderProgram.hpp"
+#include "Rendering/AlphaState.hpp"
+#include "Rendering/DepthState.hpp"
+#include "Rendering/Renderer.hpp"
 
 #include "Primitives/BoxPrimitive.hpp"
 #include "Primitives/SpherePrimitive.hpp"
+
+#include "SceneGraph/Camera.hpp"
 
 #include "Simulation/AssetManager.hpp"
 
@@ -19,16 +24,16 @@ using namespace crimild;
 
 void DebugRenderHelper::init( void )
 {
-    AssetManager::getInstance()->add( CRIMILD_DEBUG_RENDER_HELPER_DEPTH_STATE, crimild::alloc< DepthState >( false ), true );
-    AssetManager::getInstance()->add( CRIMILD_DEBUG_RENDER_HELPER_ALPHA_STATE, crimild::alloc< AlphaState >( false ), true );
+    AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_HELPER_DEPTH_STATE, crimild::alloc< DepthState >( false ), true );
+    AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_HELPER_ALPHA_STATE, crimild::alloc< AlphaState >( false ), true );
 
-    AssetManager::getInstance()->add( CRIMILD_DEBUG_RENDER_HELPER_PRIMITIVE_BOX, crimild::alloc< BoxPrimitive >( 1.0f, 1.0f, 1.0f ), true );
-    AssetManager::getInstance()->add( CRIMILD_DEBUG_RENDER_HELPER_PRIMITIVE_SPHERE, crimild::alloc< SpherePrimitive >( 1.0f ), true );
+    AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_HELPER_PRIMITIVE_BOX, crimild::alloc< BoxPrimitive >( 1.0f, 1.0f, 1.0f ), true );
+    AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_HELPER_PRIMITIVE_SPHERE, crimild::alloc< SpherePrimitive >( 1.0f ), true );
 
-    AssetManager::getInstance()->add( CRIMILD_DEBUG_RENDER_HELPER_VBO_LINES, crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3, 10, nullptr ), true );
+    AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_HELPER_VBO_LINES, crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3, 10, nullptr ), true );
 }
 
-void DebugRenderHelper::renderLine( RendererPtr const &renderer, CameraPtr const &camera, const Vector3f &from, const Vector3f &to, const RGBAColorf &color )
+void DebugRenderHelper::renderLine( Renderer *renderer, Camera *camera, const Vector3f &from, const Vector3f &to, const RGBAColorf &color )
 {
 	Vector3f data[] = {
 		from,
@@ -38,7 +43,7 @@ void DebugRenderHelper::renderLine( RendererPtr const &renderer, CameraPtr const
 	renderLines( renderer, camera, data, 2, color );
 }
 
-void DebugRenderHelper::renderLines( RendererPtr const &renderer, CameraPtr const &camera, const Vector3f *data, unsigned int count, const RGBAColorf &color )
+void DebugRenderHelper::renderLines( Renderer *renderer, Camera *camera, const Vector3f *data, unsigned int count, const RGBAColorf &color )
 {
     auto depthState = AssetManager::getInstance()->get< DepthState >( CRIMILD_DEBUG_RENDER_HELPER_DEPTH_STATE );
     auto alphaState = AssetManager::getInstance()->get< AlphaState >( CRIMILD_DEBUG_RENDER_HELPER_ALPHA_STATE );
@@ -67,7 +72,9 @@ void DebugRenderHelper::renderLines( RendererPtr const &renderer, CameraPtr cons
 	renderer->setAlphaState( alphaState );
 
 	if ( linesVBO->getVertexCount() < count ) {
-        linesVBO = crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3, count, ( const float * ) &data[ 0 ] );
+        auto vbo = std::move( crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3, count, ( const float * ) &data[ 0 ] ) );
+        AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_HELPER_VBO_LINES, vbo );
+        linesVBO = crimild::get_ptr( vbo );
 	}
 	else {
 		for ( int i = 0; i < count; i++ ) {
@@ -82,9 +89,9 @@ void DebugRenderHelper::renderLines( RendererPtr const &renderer, CameraPtr cons
 	renderer->unbindProgram( program );
 }
 
-void DebugRenderHelper::renderBox( RendererPtr const &renderer, CameraPtr const &camera, const Vector3f &position, float scale, const RGBAColorf &color )
+void DebugRenderHelper::renderBox( Renderer *renderer, Camera *camera, const Vector3f &position, float scale, const RGBAColorf &color )
 {
-	TransformationImpl model;
+	Transformation model;
 	model.setTranslate( position );
 	model.setScale( scale );
 
@@ -92,9 +99,9 @@ void DebugRenderHelper::renderBox( RendererPtr const &renderer, CameraPtr const 
 	render( renderer, camera, box, model, color );
 }
 
-void DebugRenderHelper::renderSphere( RendererPtr const &renderer, CameraPtr const &camera, const Vector3f &position, float scale, const RGBAColorf &color )
+void DebugRenderHelper::renderSphere( Renderer *renderer, Camera *camera, const Vector3f &position, float scale, const RGBAColorf &color )
 {
-	TransformationImpl model;
+	Transformation model;
 	model.setTranslate( position );
 	model.setScale( scale );
 
@@ -102,7 +109,7 @@ void DebugRenderHelper::renderSphere( RendererPtr const &renderer, CameraPtr con
 	render( renderer, camera, sphere, model, color );
 }
 
-void DebugRenderHelper::render( RendererPtr const &renderer, CameraPtr const &camera, PrimitivePtr const &primitive, const TransformationImpl &model, const RGBAColorf &color )
+void DebugRenderHelper::render( Renderer *renderer, Camera *camera, Primitive *primitive, const Transformation &model, const RGBAColorf &color )
 {
     auto depthState = AssetManager::getInstance()->get< DepthState >( CRIMILD_DEBUG_RENDER_HELPER_DEPTH_STATE );
     auto alphaState = AssetManager::getInstance()->get< AlphaState >( CRIMILD_DEBUG_RENDER_HELPER_ALPHA_STATE );

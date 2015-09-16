@@ -36,6 +36,7 @@ using namespace crimild;
 RenderSystem::RenderSystem( void )
 	: System( "Render System" )
 {
+    auto self = this;
 	registerMessageHandler< messaging::RenderQueueAvailable >( [&]( messaging::RenderQueueAvailable const &message ) {
         if ( _renderQueue != nullptr ) {
             if ( _renderQueue->getTimestamp() >= message.renderQueue->getTimestamp() ) {
@@ -45,6 +46,10 @@ RenderSystem::RenderSystem( void )
         
 		_renderQueue = message.renderQueue;
 	});
+    
+    registerMessageHandler< messaging::SceneChanged >( [self]( messaging::SceneChanged const &message ) {
+        self->_renderQueue = nullptr;
+    });
 }
 
 RenderSystem::~RenderSystem( void )
@@ -85,7 +90,7 @@ void RenderSystem::renderFrame( void )
 	{
 		CRIMILD_PROFILE( "Render Scene" );
 		if ( renderQueue != nullptr ) {
-	    	renderer->render( renderQueue, renderQueue->getCamera()->getRenderPass() );
+            renderer->render( crimild::get_ptr( renderQueue ), renderQueue->getCamera()->getRenderPass() );
 	    }
 	}
 

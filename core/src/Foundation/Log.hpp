@@ -30,7 +30,6 @@
 
 #include "NamedObject.hpp"
 #include "SharedObject.hpp"
-#include "Pointer.hpp"
 
 #include <string>
 #include <iostream>

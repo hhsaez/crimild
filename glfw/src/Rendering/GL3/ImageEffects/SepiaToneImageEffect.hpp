@@ -39,7 +39,7 @@ namespace crimild {
             SepiaToneImageEffect( void );
             virtual ~SepiaToneImageEffect( void );
             
-            virtual void apply( crimild::RendererPtr const &renderer );
+            virtual void apply( crimild::Renderer *renderer, Camera * ) override;
         };
         
     }

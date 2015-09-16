@@ -141,7 +141,7 @@ EmissiveGlowImageEffect::~EmissiveGlowImageEffect( void )
     
 }
 
-void EmissiveGlowImageEffect::compute( RendererPtr const &renderer, CameraPtr const &camera )
+void EmissiveGlowImageEffect::compute( Renderer *renderer, Camera *camera )
 {
     // compute emissives
     auto emissiveBuffer = getFrameBuffer( renderer, EMISSIVE_BUFFER_NAME );
@@ -149,19 +149,20 @@ void EmissiveGlowImageEffect::compute( RendererPtr const &renderer, CameraPtr co
 
     auto emissiveProgram = renderer->getShaderProgram( "glow_emissive" );
     if ( emissiveProgram == nullptr ) {
-        emissiveProgram = crimild::alloc< ShaderProgram >( Utils::getVertexShaderInstance( glow_emissive_vs ), Utils::getFragmentShaderInstance( glow_emissive_fs ) );
+        auto tmp = crimild::alloc< ShaderProgram >( Utils::getVertexShaderInstance( glow_emissive_vs ), Utils::getFragmentShaderInstance( glow_emissive_fs ) );
+        renderer->addShaderProgram( "glow_emissive", tmp );
+        emissiveProgram = crimild::get_ptr( tmp );
+        
         emissiveProgram->registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
         emissiveProgram->registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
         
         emissiveProgram->registerLocation( crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, "uColorMap" ) );
         emissiveProgram->registerLocation( crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, "uEmissiveMap" ) );
-        
-        renderer->addShaderProgram( "glow_emissive", emissiveProgram );
     }
 
     auto gBuffer = renderer->getFrameBuffer( RenderPass::G_BUFFER_NAME );
-    auto color = gBuffer->getRenderTargets()->get( RenderPass::G_BUFFER_DIFFUSE_TARGET_NAME );
-    auto emissive = gBuffer->getRenderTargets()->get( RenderPass::G_BUFFER_VIEW_SPACE_NORMAL_TARGET_NAME );
+    auto color = gBuffer->getRenderTargets().get( RenderPass::G_BUFFER_DIFFUSE_TARGET_NAME );
+    auto emissive = gBuffer->getRenderTargets().get( RenderPass::G_BUFFER_VIEW_SPACE_NORMAL_TARGET_NAME );
 
     renderer->bindProgram( emissiveProgram );
 
@@ -183,19 +184,19 @@ void EmissiveGlowImageEffect::compute( RendererPtr const &renderer, CameraPtr co
 
     auto glowProgram = renderer->getShaderProgram( "glow_compute" );
     if ( glowProgram == nullptr ) {
-        glowProgram = crimild::alloc< ShaderProgram >( Utils::getVertexShaderInstance( glow_compute_vs ), Utils::getFragmentShaderInstance( glow_compute_fs ) );
+        auto tmp = crimild::alloc< ShaderProgram >( Utils::getVertexShaderInstance( glow_compute_vs ), Utils::getFragmentShaderInstance( glow_compute_fs ) );
+        renderer->addShaderProgram( "glow_compute", tmp );
+        glowProgram = crimild::get_ptr( tmp );
         glowProgram->registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
         glowProgram->registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
         
         glowProgram->registerLocation( crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, "uEmissiveMap" ) );
         glowProgram->registerLocation( crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, "uOrientation" ) );
-        
-        renderer->addShaderProgram( "glow_compute", glowProgram );
     }
 
     renderer->bindProgram( glowProgram );
 
-    renderer->bindTexture( glowProgram->getLocation( "uEmissiveMap" ), emissiveBuffer->getRenderTargets()->get( "color" )->getTexture() );
+    renderer->bindTexture( glowProgram->getLocation( "uEmissiveMap" ), emissiveBuffer->getRenderTargets().get( "color" )->getTexture() );
 
     renderer->bindUniform( glowProgram->getLocation( "uOrientation" ), 0 );
     renderer->drawScreenPrimitive( glowProgram );
@@ -207,22 +208,22 @@ void EmissiveGlowImageEffect::compute( RendererPtr const &renderer, CameraPtr co
     renderer->setAlphaState( AlphaState::DISABLED );
     renderer->setDepthState( DepthState::ENABLED );
 
-    renderer->unbindTexture( glowProgram->getLocation( "uEmissiveMap" ), emissiveBuffer->getRenderTargets()->get( "color" )->getTexture() );
+    renderer->unbindTexture( glowProgram->getLocation( "uEmissiveMap" ), emissiveBuffer->getRenderTargets().get( "color" )->getTexture() );
 
     renderer->unbindProgram( glowProgram );
 
     renderer->unbindFrameBuffer( glowBuffer );
 }
 
-void EmissiveGlowImageEffect::apply( crimild::RendererPtr const &renderer, crimild::CameraPtr const &camera )
+void EmissiveGlowImageEffect::apply( crimild::Renderer *renderer, crimild::Camera *camera )
 {
     auto scene = renderer->getFrameBuffer( RenderPass::S_BUFFER_NAME );
-    renderScreen( renderer, scene->getRenderTargets()->get( RenderPass::S_BUFFER_COLOR_TARGET_NAME )->getTexture() );
+    renderScreen( renderer, scene->getRenderTargets().get( RenderPass::S_BUFFER_COLOR_TARGET_NAME )->getTexture() );
 
     auto glow = renderer->getFrameBuffer( GLOW_BUFFER_NAME );
     renderer->setAlphaState( AlphaState::ENABLED_ADDITIVE_BLEND );
     renderer->setDepthState( DepthState::DISABLED );
-    renderScreen( renderer, glow->getRenderTargets()->get( "color" )->getTexture() );
+    renderScreen( renderer, glow->getRenderTargets().get( "color" )->getTexture() );
     renderer->setAlphaState( AlphaState::DISABLED );
     renderer->setDepthState( DepthState::ENABLED );
 }

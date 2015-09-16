@@ -259,7 +259,8 @@ void FixedAllocator::doDeallocate( void *p )
 				_allocChunk = _deallocChunk;
 			}
 		}
-		_emptyChunk = _deallocChunk;
+
+        _emptyChunk = _deallocChunk;
 	}
 
 	assert( ( _emptyChunk == nullptr ) || ( _emptyChunk->hasAvailable( _numBlocks ) ) );

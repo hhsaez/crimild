@@ -54,7 +54,7 @@ TEST( PrimitiveTest, setVertexBuffer )
 	auto vbo = crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3, 0, nullptr );
 	p->setVertexBuffer( vbo );
 
-	EXPECT_EQ( p->getVertexBuffer(), vbo );
+    EXPECT_EQ( p->getVertexBuffer(), crimild::get_ptr( vbo ) );
 }
 
 TEST( PrimitiveTest, setIndexBuffer )
@@ -66,6 +66,6 @@ TEST( PrimitiveTest, setIndexBuffer )
 	auto ibo = crimild::alloc< IndexBufferObject >( 0, nullptr );
 	p->setIndexBuffer( ibo );
 
-	EXPECT_EQ( p->getIndexBuffer(), ibo );
+    EXPECT_EQ( p->getIndexBuffer(), crimild::get_ptr( ibo ) );
 }
 

@@ -42,7 +42,7 @@ ApplyToGeometries::~ApplyToGeometries( void )
 
 }
 
-void ApplyToGeometries::visitGeometry( GeometryPtr const &geometry )
+void ApplyToGeometries::visitGeometry( Geometry *geometry )
 {
 	_callback( geometry );
 }

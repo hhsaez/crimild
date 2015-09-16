@@ -121,9 +121,10 @@ const char *dof_blur_fs = { CRIMILD_TO_STRING(
 )};
 
 gl3::DepthOfFieldImageEffect::DepthOfFieldImageEffect( void )
+    : _focus( crimild::alloc< FloatUniform >( "uFocus", 0.875f ) ),
+      _aperture( crimild::alloc< FloatUniform >( "uAperture", 0.1f ) )
 {
-    _focus = crimild::alloc< FloatUniform >( "uFocus", 0.875f );
-    _aperture = crimild::alloc< FloatUniform >( "uAperture", 0.1f );
+
 }
 
 gl3::DepthOfFieldImageEffect::~DepthOfFieldImageEffect( void )
@@ -131,12 +132,12 @@ gl3::DepthOfFieldImageEffect::~DepthOfFieldImageEffect( void )
 
 }
 
-void gl3::DepthOfFieldImageEffect::compute( RendererPtr const &renderer, CameraPtr const &camera )
+void gl3::DepthOfFieldImageEffect::compute( Renderer *renderer, Camera *camera )
 {
     
 }
 
-void gl3::DepthOfFieldImageEffect::apply( crimild::RendererPtr const &renderer, crimild::CameraPtr const & )
+void gl3::DepthOfFieldImageEffect::apply( crimild::Renderer *renderer, crimild::Camera * )
 {
     auto sceneFBO = renderer->getFrameBuffer( RenderPass::S_BUFFER_NAME );
 	if ( sceneFBO == nullptr ) {
@@ -144,7 +145,7 @@ void gl3::DepthOfFieldImageEffect::apply( crimild::RendererPtr const &renderer, 
 		return;
 	}
     
-    auto colorTarget = sceneFBO->getRenderTargets()->get( RenderPass::S_BUFFER_COLOR_TARGET_NAME );
+    auto colorTarget = sceneFBO->getRenderTargets().get( RenderPass::S_BUFFER_COLOR_TARGET_NAME );
 
     auto gBuffer = renderer->getFrameBuffer( RenderPass::G_BUFFER_NAME );
     if ( gBuffer == nullptr ) {
@@ -152,11 +153,13 @@ void gl3::DepthOfFieldImageEffect::apply( crimild::RendererPtr const &renderer, 
         return;
     }
     
-    auto depthTarget = gBuffer->getRenderTargets()->get( RenderPass::G_BUFFER_DEPTH_TARGET_NAME );
+    auto depthTarget = gBuffer->getRenderTargets().get( RenderPass::G_BUFFER_DEPTH_TARGET_NAME );
 
     auto dofBlurProgram = renderer->getShaderProgram( "dof_blur" );
 	if ( dofBlurProgram == nullptr ) {
-		dofBlurProgram = crimild::alloc< ShaderProgram >( Utils::getVertexShaderInstance( dof_blur_vs ), Utils::getFragmentShaderInstance( dof_blur_fs ) );
+		auto tmp = crimild::alloc< ShaderProgram >( Utils::getVertexShaderInstance( dof_blur_vs ), Utils::getFragmentShaderInstance( dof_blur_fs ) );
+        renderer->addShaderProgram( "dof_blur", tmp );
+        dofBlurProgram = crimild::get_ptr( tmp );
 
 		dofBlurProgram->registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
 	    dofBlurProgram->registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
@@ -166,8 +169,6 @@ void gl3::DepthOfFieldImageEffect::apply( crimild::RendererPtr const &renderer, 
         
         dofBlurProgram->attachUniform( _focus );
         dofBlurProgram->attachUniform( _aperture );
-
-		renderer->addShaderProgram( "dof_blur", dofBlurProgram );
 	}
 
     renderer->bindProgram( dofBlurProgram );

@@ -48,18 +48,7 @@ namespace crimild {
 
 	public:
         virtual ~SharedObject( void ) { }
-        
-        SharedPointer< SharedObject > getShared( void )
-        {
-            return shared_from_this();
-        }
-        
-        template< class T >
-        SharedPointer< T > getShared( void )
-        {
-            return std::static_pointer_cast< T >( shared_from_this() );
-        }
-        
+            
         void lock( void ) { _mutex.lock(); }
         
         void unlock( void ) { _mutex.unlock(); }
@@ -73,8 +62,6 @@ namespace crimild {
 	private:
         std::mutex _mutex;
 	};
-    
-    using SharedObjectPtr = SharedPointer< SharedObject >;
     
 }
 

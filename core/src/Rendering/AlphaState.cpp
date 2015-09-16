@@ -29,11 +29,10 @@
 
 using namespace crimild;
 
-AlphaStatePtr AlphaState::DISABLED( crimild::alloc< AlphaState >( false ) );
-
-AlphaStatePtr AlphaState::ENABLED( crimild::alloc< AlphaState >( true ) );
-AlphaStatePtr AlphaState::ENABLED_SRC_COLOR_ONLY( crimild::alloc< AlphaState >( true, AlphaState::SrcBlendFunc::SRC_COLOR, AlphaState::DstBlendFunc::ZERO ) );
-AlphaStatePtr AlphaState::ENABLED_ADDITIVE_BLEND( crimild::alloc< AlphaState >( true, AlphaState::SrcBlendFunc::SRC_ALPHA, AlphaState::DstBlendFunc::ONE ) );
+SharedPointer< AlphaState > AlphaState::DISABLED( crimild::alloc< AlphaState >( false ) );
+SharedPointer< AlphaState > AlphaState::ENABLED( crimild::alloc< AlphaState >( true ) );
+SharedPointer< AlphaState > AlphaState::ENABLED_SRC_COLOR_ONLY( crimild::alloc< AlphaState >( true, AlphaState::SrcBlendFunc::SRC_COLOR, AlphaState::DstBlendFunc::ZERO ) );
+SharedPointer< AlphaState > AlphaState::ENABLED_ADDITIVE_BLEND( crimild::alloc< AlphaState >( true, AlphaState::SrcBlendFunc::SRC_ALPHA, AlphaState::DstBlendFunc::ONE ) );
 
 AlphaState::AlphaState( bool enabled, SrcBlendFunc srcBlendFunc, DstBlendFunc dstBlendFunc )
 	: RenderState( enabled ),

@@ -28,13 +28,13 @@
 #ifndef CRIMILD_TESTS_UTILS_MOCK_COMPONENT_
 #define CRIMILD_TESTS_UTILS_MOCK_COMPONENT_
 
-#include "Components/NodeComponent.hpp"
+#include "Components/BehaviorComponent.hpp"
 
 #include "gmock/gmock.h"
 
 namespace crimild {
 
-	class MockComponent : public NodeComponent {
+	class MockComponent : public BehaviorComponent {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( MockComponent )
 		CRIMILD_NODE_COMPONENT_NAME( "mock" )
 
@@ -44,7 +44,7 @@ namespace crimild {
 
 		MOCK_METHOD0( onDetach, void( void ) );
 		MOCK_METHOD0( onAttach, void( void ) );
-		MOCK_METHOD1( update, void( const Time & ) );
+		MOCK_METHOD1( update, void( const Clock & ) );
 	};
 
 }

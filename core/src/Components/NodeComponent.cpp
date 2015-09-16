@@ -42,21 +42,7 @@ NodeComponent::~NodeComponent( void )
 
 }
 
-SharedPointer< Node > NodeComponent::getNode( void )
-{
-    if ( _node == nullptr ) {
-        return nullptr;
-    }
-    
-    return crimild::getSharedPointer( _node );
-}
-
-const SharedPointer< Node > NodeComponent::getNode( void ) const
-{
-    return crimild::getSharedPointer( _node );
-}
-
-NodeComponentPtr NodeComponent::getComponentWithName( std::string name )
+NodeComponent *NodeComponent::getComponentWithName( std::string name )
 {
     if ( getNode() == nullptr ) {
         return nullptr;
@@ -80,7 +66,7 @@ void NodeComponent::start( void )
 
 }
 
-void NodeComponent::renderDebugInfo( SharedPointer< Renderer > const &, SharedPointer< Camera > const & )
+void NodeComponent::renderDebugInfo( Renderer *, Camera * )
 {
 
 }

@@ -33,6 +33,7 @@
 #include "Foundation/Log.hpp"
 #include "Simulation/AssetManager.hpp"
 #include "Simulation/FileSystem.hpp"
+#include "Primitives/Primitive.hpp"
 #include "Rendering/Material.hpp"
 #include "Rendering/ImageTGA.hpp"
 #include "Rendering/ShaderProgram.hpp"
@@ -129,7 +130,7 @@ void OBJLoader::reset( void )
 	_textureCoords.clear();
 }
 
-GroupPtr OBJLoader::load( void )
+SharedPointer< Group > OBJLoader::load( void )
 {
 	reset();
 
@@ -147,8 +148,9 @@ void OBJLoader::generateGeometry( void )
 
 	if ( _currentObject == nullptr ) {
 		// anonymous object
-		_currentObject = crimild::alloc< Group >();
-		_objects.push_back( _currentObject );
+        _objects.push_back( std::move( crimild::alloc< Group >() ) );
+        _currentObject = crimild::get_ptr( _objects.back() );
+                           
 	}
 
 	VertexFormat format( 3,
@@ -250,7 +252,7 @@ void OBJLoader::generateGeometry( void )
 	_faces.clear();
 }
 
-GroupPtr OBJLoader::generateScene( void )
+SharedPointer< Group > OBJLoader::generateScene( void )
 {
 	// DON'T FORGET THE LAST OBJECT!!
 	generateGeometry();
@@ -270,9 +272,8 @@ void OBJLoader::readObject( std::stringstream &line )
 	std::string name;
 	line >> name;
 
-	auto obj = crimild::alloc< Group >( name );
-	_currentObject = obj;
-	_objects.push_back( obj );
+    _objects.push_back( std::move( crimild::alloc< Group >( name ) ) );
+    _currentObject = crimild::get_ptr( _objects.back() );
 }
 
 void OBJLoader::readObjectPositions( std::stringstream &line )
@@ -309,7 +310,7 @@ void OBJLoader::readObjectMaterial( std::stringstream &line )
 {
 	std::string name;
 	line >> name;
-	_currentMaterial = _materials[ name ];
+    _currentMaterial = crimild::get_ptr( _materials[ name ] );
 }
 
 void OBJLoader::readMaterialFile( std::stringstream &line )
@@ -327,8 +328,9 @@ void OBJLoader::readMaterialName( std::stringstream &line )
 	std::string name;
 	line >> name;
 
-	_currentMaterial = crimild::alloc< Material >();
-	_materials[ name ] = _currentMaterial;
+    auto tmp = std::move( crimild::alloc< Material >() );
+    _materials[ name ] = tmp;
+    _currentMaterial = crimild::get_ptr( tmp );
 }
 
 void OBJLoader::readMaterialAmbient( std::stringstream &line )
@@ -356,7 +358,7 @@ void OBJLoader::readMaterialColorMap( std::stringstream &line )
 {
 	std::string fileName;
 	line >> fileName;
-	_currentMaterial->setColorMap( loadTexture( fileName ) );
+    _currentMaterial->setColorMap( loadTexture( fileName ) );
 }
 
 void OBJLoader::readMaterialNormalMap( std::stringstream &line )
@@ -408,7 +410,7 @@ void OBJLoader::readMaterialShaderProgram( std::stringstream &line )
     };
 }
 
-TexturePtr OBJLoader::loadTexture( std::string textureFileName )
+SharedPointer< Texture > OBJLoader::loadTexture( std::string textureFileName )
 {
     auto image = crimild::alloc< ImageTGA >( FileSystem::getInstance().extractDirectory( _fileName ) + "/" + textureFileName );
     auto texture = crimild::alloc< Texture >( image );

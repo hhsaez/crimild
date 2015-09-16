@@ -76,14 +76,14 @@ TEST( NodeVisitorTest, traversal )
 
 class PrependParentNameVisitor : public NodeVisitor {
 public:
-	virtual void visitNode( NodePtr const &node ) override
+	virtual void visitNode( Node *node ) override
 	{
 		if ( node->hasParent() ) {
 			node->setName( node->getParent()->getName() + "_" + node->getName() );
 		}
 	}
 
-	virtual void visitGroup( GroupPtr const &group ) override
+	virtual void visitGroup( Group *group ) override
 	{
 		visitNode( group );
 		NodeVisitor::visitGroup( group );

@@ -53,18 +53,16 @@ namespace crimild {
 		Font( std::string faceFilePath, std::string glyphFilePath );
 		virtual ~Font( void );
 
-		ImagePtr getFace( void ) { return _face; }
+        Image *getFace( void ) { return crimild::get_ptr( _face ); }
 		Glyph getGlyph( char c ) { return _glyphs[ c ]; }
 
 	private:
 		void loadGlyphs( std::string file );
 
-		ImagePtr _face;
+		SharedPointer< Image > _face;
 		std::map< char, Glyph > _glyphs;
 	};
     
-    using FontPtr = SharedPointer< Font >;
-
 	class Text : public Geometry {
 	public:
 		Text( void );
@@ -76,10 +74,12 @@ namespace crimild {
 		float getSize( void ) const { return _size; }
 		void setSize( float size );
 
-		FontPtr getFont( void ) { return _font; }
-		void setFont( FontPtr const &font );
+        Font *getFont( void ) { return crimild::get_ptr( _font ); }
 
-		MaterialPtr getMaterial( void ) { return _material; }
+        void setFont( Font *font ) { setFont( std::move( crimild::retain( font ) ) ); }
+		void setFont( SharedPointer< Font > const &font );
+
+        Material *getMaterial( void ) { return crimild::get_ptr( _material ); }
 
     public:
         virtual void accept( NodeVisitor &visitor ) override;
@@ -89,12 +89,10 @@ namespace crimild {
 
 		std::string _text;
 		float _size;
-		FontPtr _font;
-		PrimitivePtr _primitive;
-		MaterialPtr _material;
+		SharedPointer< Font > _font;
+		SharedPointer< Primitive > _primitive;
+		SharedPointer< Material > _material;
 	};
-    
-    using TextPtr = SharedPointer< Text >;
 
 }
 

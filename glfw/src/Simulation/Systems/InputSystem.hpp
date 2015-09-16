@@ -52,7 +52,7 @@ namespace crimild {
         void update( void );
 
     private:
-        GLFWwindow *_window;
+        GLFWwindow *_window = nullptr;
         int _windowWidth;
         int _windowHeight;
 	};

@@ -27,6 +27,8 @@
 
 #include "Geometry.hpp"
 
+#include "Primitives/Primitive.hpp"
+
 #include "Components/MaterialComponent.hpp"
 #include "Components/RenderStateComponent.hpp"
 
@@ -46,25 +48,30 @@ Geometry::~Geometry( void )
 	detachAllPrimitives();
 }
 
-void Geometry::attachPrimitive( PrimitivePtr const &primitive )
+void Geometry::attachPrimitive( Primitive *primitive )
 {
-	_primitives.push_back( primitive );
+    attachPrimitive( crimild::retain( primitive ) );
+}
+
+void Geometry::attachPrimitive( SharedPointer< Primitive > const &primitive )
+{
+	_primitives.add( primitive );
 	updateModelBounds();
 }
 
-void Geometry::detachPrimitive( PrimitivePtr const &primitive )
+void Geometry::detachPrimitive( Primitive *primitive )
+{
+    _primitives.remove( primitive );
+}
+
+void Geometry::detachPrimitive( SharedPointer< Primitive > const &primitive )
 {
 	_primitives.remove( primitive );
 }
 
-void Geometry::foreachPrimitive( std::function< void( PrimitivePtr const & ) > callback )
+void Geometry::forEachPrimitive( std::function< void( Primitive * ) > callback )
 {
-    auto ps = _primitives;
-    for ( auto primitive : ps ) {
-        if ( primitive != nullptr ) {
-            callback( primitive );
-        }
-    }
+    _primitives.forEach( callback );
 }
 
 void Geometry::detachAllPrimitives( void )
@@ -74,21 +81,22 @@ void Geometry::detachAllPrimitives( void )
 
 void Geometry::accept( NodeVisitor &visitor )
 {
-	visitor.visitGeometry( getShared< Geometry >() );
+	visitor.visitGeometry( this );
 }
 
 void Geometry::updateModelBounds( void )
 {
 	bool firstChild = true;
-	foreachPrimitive( [&]( PrimitivePtr const &primitive ) {
+    auto bound = localBound();
+	forEachPrimitive( [&firstChild, bound]( Primitive *primitive ) {
 		auto vbo = primitive->getVertexBuffer();
 		if ( vbo != nullptr ) {
 			if ( firstChild ) {
-				localBound()->computeFrom( vbo);
+				bound->computeFrom( vbo );
 				firstChild = false;
 			}
 			else {
-				localBound()->expandToContain( vbo );
+				bound->expandToContain( vbo );
 			}
 		}
 	});	

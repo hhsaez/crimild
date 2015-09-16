@@ -86,7 +86,7 @@ namespace crimild {
 		void destroyWindow( void );
 
 	private:
-		GLFWwindow *_window;
+		GLFWwindow *_window = nullptr;
 	};
 
 }

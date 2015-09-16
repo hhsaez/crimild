@@ -48,24 +48,24 @@ namespace crimild {
         DeferredRenderPass( void );
 		virtual ~DeferredRenderPass( void );
         
-        virtual void render( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera );
+        virtual void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
         
         bool isDebugModeEnabled( void ) const { return _debugModeEnabled; }
         void enableDebugMode( bool enabled ) { _debugModeEnabled = enabled; }
         
     private:
-        void computeShadowMaps( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera );
+        void computeShadowMaps( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
         
-        void renderToGBuffer( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera );
-        void composeFrame( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera );
+        void renderToGBuffer( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+        void composeFrame( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
         
-        void applyImageEffects( RendererPtr const &renderer, CameraPtr const &camera );
+        void applyImageEffects( Renderer *renderer, Camera *camera );
         
-        void buildBuffers( RendererPtr const &renderer );
-        void swapSDBuffers( RendererPtr const &renderer );
+        void buildBuffers( Renderer *renderer );
+        void swapSDBuffers( Renderer *renderer );
 
     private:
-        std::map< LightPtr, ShadowMapPtr > _shadowMaps;
+        std::map< Light *, SharedPointer< ShadowMap >> _shadowMaps;
         bool _debugModeEnabled;
 	};
     

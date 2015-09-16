@@ -63,7 +63,7 @@ void Camera::setFrustum( const Frustumf &f )
 
 void Camera::accept( NodeVisitor &visitor )
 {
-	visitor.visitCamera( getShared< Camera >() );
+	visitor.visitCamera( this );
 }
 
 void Camera::setViewMatrix( const Matrix4f &view ) 
@@ -150,7 +150,7 @@ void Camera::computeCullingPlanes( void )
 	_cullingPlanes[ 5 ] = Plane3f( normal, constant );
 }
 
-bool Camera::culled( BoundingVolumePtr const &volume )
+bool Camera::culled( const BoundingVolume *volume ) const
 {
 	for ( auto &p : _cullingPlanes ) {
 		if ( volume->whichSide( p ) < 0 ) {

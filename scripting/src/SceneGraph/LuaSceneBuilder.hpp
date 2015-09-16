@@ -40,8 +40,8 @@ namespace crimild {
             public crimild::SceneBuilder {
                 
 		private:
-			typedef std::function< NodePtr ( crimild::scripting::ScriptEvaluator & ) > NodeBuilderFunction;
-			typedef std::function< NodeComponentPtr ( crimild::scripting::ScriptEvaluator & ) > ComponentBuilderFunction;
+			typedef std::function< SharedPointer< Node > ( crimild::scripting::ScriptEvaluator & ) > NodeBuilderFunction;
+			typedef std::function< SharedPointer< NodeComponent > ( crimild::scripting::ScriptEvaluator & ) > ComponentBuilderFunction;
 
 		public:
 			LuaSceneBuilder( std::string rootNodeName = "scene" );
@@ -50,7 +50,7 @@ namespace crimild {
 
 			virtual void reset( void );
 
-			NodePtr fromFile( const std::string &filename );
+            virtual SharedPointer< Node > fromFile( const std::string &filename ) override;
 
 		public:
 			template< typename T >
@@ -78,20 +78,18 @@ namespace crimild {
 			}
 
 		private:
-			NodePtr buildNode( ScriptEvaluator &eval, GroupPtr const &parent );
+			SharedPointer< Node > buildNode( ScriptEvaluator &eval, Group *parent );
 
-			void setupCamera( ScriptEvaluator &eval, CameraPtr const &camera );
-			void setTransformation( ScriptEvaluator &eval, NodePtr const &node );
+			void setupCamera( ScriptEvaluator &eval, SharedPointer< Camera > const &camera );
+			void setTransformation( ScriptEvaluator &eval, SharedPointer< Node > const &node );
 			
-			void buildNodeComponents( ScriptEvaluator &eval, NodePtr const &node );
+			void buildNodeComponents( ScriptEvaluator &eval, SharedPointer< Node > const &node );
 
 		private:
 			std::string _rootNodeName;
             std::map< std::string, NodeBuilderFunction > _nodeBuilders;
 			std::map< std::string, ComponentBuilderFunction > _componentBuilders;
 		};
-        
-        using SceneBuilderPtr = SharedPointer< SceneBuilder >;
 
 	}
 

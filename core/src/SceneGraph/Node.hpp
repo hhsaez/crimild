@@ -29,7 +29,6 @@
 #define CRIMILD_SCENE_GRAPH_NODE_
 
 #include "Foundation/SharedObject.hpp"
-#include "Foundation/Pointer.hpp"
 #include "Foundation/NamedObject.hpp"
 #include "Visitors/NodeVisitor.hpp"
 #include "Components/NodeComponent.hpp"
@@ -40,14 +39,8 @@
 
 namespace crimild {
     
-    class Node;
-    
-    using NodePtr = SharedPointer< Node >;
-    using NodeWPtr = WeakPointer< Node >;
-
 	/**
 		\brief Base class for any object that can be attached to the scene graph
-
 	*/
 	class Node : public NamedObject, public SharedObject {
         CRIMILD_DISALLOW_COPY_AND_ASSIGN( Node )
@@ -57,19 +50,28 @@ namespace crimild {
 		virtual ~Node( void );
 
 	public:
-		bool hasParent( void ) const { return pointerIsValid( _parent ); }
+		bool hasParent( void ) const { return _parent != nullptr; }
 
-		NodePtr getParent( void ) { return getSharedPointer( _parent ); }
+		Node *getParent( void ) { return _parent; }
 
-		void setParent( NodePtr const &parent ) { _parent = parent; }
+        template< class NodeClass >
+        NodeClass *getParent( void )
+        {
+            return static_cast< NodeClass * >( _parent );
+        }
+        
+		void setParent( Node *parent ) { _parent = parent; }
 
-		NodePtr detachFromParent( void );
+		SharedPointer< Node > detachFromParent( void );
 
-		NodePtr getRootParent( void );
+        Node *getRootParent( void );
 
-		template< class NodeClass >
-        SharedPointer< NodeClass > getParent( void ) { return std::static_pointer_cast< NodeClass >( getSharedPointer( _parent ) ); }
-
+        template< class NodeClass >
+        NodeClass *getRootParent( void )
+        {
+            return static_cast< NodeClass * >( getRootParent() );
+        }
+        
 	private:
 		/**
 			\brief A node's parent
@@ -77,7 +79,7 @@ namespace crimild {
 			Every node if linked with its parent in the node hierarchy (provided
 			one is available). 
 		*/
-        NodeWPtr _parent;
+        Node *_parent = nullptr;
 
 	public:
 		void perform( NodeVisitor &visitor );
@@ -86,48 +88,68 @@ namespace crimild {
 		virtual void accept( NodeVisitor &visitor );
 
 	public:
-		NodeComponentPtr getComponentWithName( std::string name );
-		void attachComponent( NodeComponentPtr const &component );
-		void detachComponent( NodeComponentPtr const &component );
-		void detachComponentWithName( std::string name );
-		void detachAllComponents( void );
-
-		template< class NODE_COMPONENT_CLASS >
-        SharedPointer< NODE_COMPONENT_CLASS > getComponent( void )
-		{
-            return std::static_pointer_cast< NODE_COMPONENT_CLASS >( _components[ NODE_COMPONENT_CLASS::_COMPONENT_NAME() ] );
-		}
-
+        NodeComponent *getComponentWithName( std::string name )
+        {
+            return crimild::get_ptr( _components[ name ] );
+        }
+        
+        template< class NODE_COMPONENT_CLASS >
+        NODE_COMPONENT_CLASS *getComponent( void )
+        {
+            return static_cast< NODE_COMPONENT_CLASS * >( getComponentWithName( NODE_COMPONENT_CLASS::_COMPONENT_NAME() ) );
+        }
+        
+        bool hasComponent( SharedPointer< NodeComponent > const &component )
+        {
+            return hasComponent( crimild::get_ptr( component ) );
+        }
+        
+        bool hasComponent( NodeComponent *component )
+        {
+            auto it = _components.find( component->getComponentName() );
+            return ( it != _components.end() && crimild::get_ptr( it->second ) == component );
+        }
+        
+		void attachComponent( NodeComponent *component );
+        void attachComponent( SharedPointer< NodeComponent > const &component );
+        
         template< typename T, typename... Args >
-        SharedPointer< T > attachComponent( Args &&... args )
+        T *attachComponent( Args &&... args )
         {
             auto cmp = crimild::alloc< T >( std::forward< Args >( args )... );
             attachComponent( cmp );
-            return cmp;
+            return crimild::get_ptr( cmp );
         }
         
+        void detachComponent( NodeComponent *component );
+		void detachComponent( SharedPointer< NodeComponent > const &component );
+		
+        SharedPointer< NodeComponent > detachComponentWithName( std::string name );
+		
+        void detachAllComponents( void );
+
 		void startComponents( void );
 		
-		void foreachComponent( std::function< void ( NodeComponentPtr const & ) > callback );
+		void forEachComponent( std::function< void ( NodeComponent * ) > callback );
 
 	private:
-		std::map< std::string, NodeComponentPtr > _components;
+		std::map< std::string, SharedPointer< NodeComponent >> _components;
 
 	public:
-		void setLocal( const TransformationImpl &t ) { _local = t; }
-		const TransformationImpl &getLocal( void ) const { return _local; }
-		TransformationImpl &local( void ) { return _local; }
+		void setLocal( const Transformation &t ) { _local = t; }
+		const Transformation &getLocal( void ) const { return _local; }
+		Transformation &local( void ) { return _local; }
 
-		void setWorld( const TransformationImpl &t ) { _world = t; }
-		const TransformationImpl &getWorld( void ) const { return _world; }
-		TransformationImpl &world( void ) { return _world; }
+		void setWorld( const Transformation &t ) { _world = t; }
+		const Transformation &getWorld( void ) const { return _world; }
+		Transformation &world( void ) { return _world; }
 
 		bool worldIsCurrent( void ) const { return _worldIsCurrent; }
 		void setWorldIsCurrent( bool isCurrent ) { _worldIsCurrent = isCurrent; }
 
 	private:
-		TransformationImpl _local;
-		TransformationImpl _world;
+		Transformation _local;
+		Transformation _world;
 
 		/**
 			\brief Indicates if the world transformation needs to be updated automatically
@@ -140,17 +162,17 @@ namespace crimild {
 		bool _worldIsCurrent;
 
 	public:
-		BoundingVolumePtr localBound( void ) { return _localBound; }
-		const BoundingVolumePtr getLocalBound( void ) const { return _localBound; }
-		void setLocalBound( BoundingVolumePtr const &bound ) { _localBound = bound; }
+        BoundingVolume *localBound( void ) { return crimild::get_ptr( _localBound ); }
+		const BoundingVolume *getLocalBound( void ) const { return crimild::get_ptr( _localBound ); }
+        void setLocalBound( BoundingVolume *bound ) { _localBound = std::move( crimild::retain( bound ) ); }
 
-		BoundingVolumePtr worldBound( void ) { return _worldBound; }
-		const BoundingVolumePtr getWorldBound( void ) const { return _worldBound; }
-		void setWorldBound( BoundingVolumePtr const &bound ) { _worldBound = bound; }
+		BoundingVolume *worldBound( void ) { return crimild::get_ptr( _worldBound ); }
+		const BoundingVolume *getWorldBound( void ) const { return crimild::get_ptr( _worldBound ); }
+        void setWorldBound( BoundingVolume *bound ) { _worldBound = std::move( crimild::retain( bound ) ); }
 
 	private:
-		BoundingVolumePtr _localBound;
-		BoundingVolumePtr _worldBound;
+		SharedPointer< BoundingVolume > _localBound;
+		SharedPointer< BoundingVolume > _worldBound;
 
 	public:
 		void setEnabled( bool enabled ) { _enabled = enabled; }

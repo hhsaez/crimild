@@ -63,7 +63,7 @@ gl3::Renderer::Renderer( void )
     
 }
 
-gl3::Renderer::Renderer( FrameBufferObjectPtr const &screenBuffer )
+gl3::Renderer::Renderer( SharedPointer< FrameBufferObject > const &screenBuffer )
 {
     setShaderProgramCatalog( crimild::alloc< gl3::ShaderProgramCatalog >() );
 	setVertexBufferObjectCatalog( crimild::alloc< gl3::VertexBufferObjectCatalog >() );
@@ -90,8 +90,8 @@ gl3::Renderer::Renderer( FrameBufferObjectPtr const &screenBuffer )
     addShaderProgram( "sdf", crimild::alloc< SignedDistanceFieldShaderProgram >() );
     addShaderProgram( "text", crimild::alloc< SignedDistanceFieldShaderProgram >() );
     
-    AssetManager::getInstance()->add( AssetManager::SHADER_PROGRAM_UNLIT_TEXTURE, crimild::alloc< TextureShaderProgram >(), true );
-    AssetManager::getInstance()->add( AssetManager::SHADER_PROGRAM_UNLIT_DIFFUSE, crimild::alloc< FlatShaderProgram >(), true );
+    AssetManager::getInstance()->set( AssetManager::SHADER_PROGRAM_UNLIT_TEXTURE, crimild::alloc< TextureShaderProgram >(), true );
+    AssetManager::getInstance()->set( AssetManager::SHADER_PROGRAM_UNLIT_DIFFUSE, crimild::alloc< FlatShaderProgram >(), true );
 
 	setScreenBuffer( screenBuffer );
 }
@@ -160,7 +160,7 @@ void gl3::Renderer::clearBuffers( void )
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 }
 
-void gl3::Renderer::bindUniform( ShaderLocationPtr const &location, int value )
+void gl3::Renderer::bindUniform( ShaderLocation *location, int value )
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
@@ -171,7 +171,7 @@ void gl3::Renderer::bindUniform( ShaderLocationPtr const &location, int value )
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gl3::Renderer::bindUniform( ShaderLocationPtr const &location, float value )
+void gl3::Renderer::bindUniform( ShaderLocation *location, float value )
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
@@ -182,7 +182,7 @@ void gl3::Renderer::bindUniform( ShaderLocationPtr const &location, float value 
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gl3::Renderer::bindUniform( ShaderLocationPtr const &location, const Vector3f &vector )
+void gl3::Renderer::bindUniform( ShaderLocation *location, const Vector3f &vector )
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
@@ -193,7 +193,7 @@ void gl3::Renderer::bindUniform( ShaderLocationPtr const &location, const Vector
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gl3::Renderer::bindUniform( ShaderLocationPtr const &location, const Vector2f &vector )
+void gl3::Renderer::bindUniform( ShaderLocation *location, const Vector2f &vector )
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
@@ -204,7 +204,7 @@ void gl3::Renderer::bindUniform( ShaderLocationPtr const &location, const Vector
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gl3::Renderer::bindUniform( ShaderLocationPtr const &location, const RGBAColorf &color )
+void gl3::Renderer::bindUniform( ShaderLocation *location, const RGBAColorf &color )
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
@@ -215,7 +215,7 @@ void gl3::Renderer::bindUniform( ShaderLocationPtr const &location, const RGBACo
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gl3::Renderer::bindUniform( ShaderLocationPtr const &location, const Matrix4f &matrix )
+void gl3::Renderer::bindUniform( ShaderLocation *location, const Matrix4f &matrix )
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
@@ -226,7 +226,7 @@ void gl3::Renderer::bindUniform( ShaderLocationPtr const &location, const Matrix
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gl3::Renderer::drawPrimitive( ShaderProgramPtr const &program, PrimitivePtr const &primitive )
+void gl3::Renderer::drawPrimitive( ShaderProgram *program, Primitive *primitive )
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
@@ -272,7 +272,7 @@ void gl3::Renderer::drawPrimitive( ShaderProgramPtr const &program, PrimitivePtr
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gl3::Renderer::drawBuffers( ShaderProgramPtr const &program, Primitive::Type bufferType, VertexBufferObjectPtr const &vbo, unsigned int count )
+void gl3::Renderer::drawBuffers( ShaderProgram *program, Primitive::Type bufferType, VertexBufferObject *vbo, unsigned int count )
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
@@ -317,7 +317,7 @@ void gl3::Renderer::drawBuffers( ShaderProgramPtr const &program, Primitive::Typ
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-ShaderProgramPtr gl3::Renderer::getFallbackProgram( MaterialPtr const &material, GeometryPtr const &geometry, PrimitivePtr const &primitive )
+ShaderProgram *gl3::Renderer::getFallbackProgram( Material *material, Geometry *geometry, Primitive *primitive )
 {
 	if ( material == nullptr || geometry == nullptr || primitive == nullptr ) {
 		return getShaderProgram( "screen" );
@@ -338,7 +338,7 @@ ShaderProgramPtr gl3::Renderer::getFallbackProgram( MaterialPtr const &material,
 	return getShaderProgram( "flat" );
 }
 
-void gl3::Renderer::setAlphaState( AlphaStatePtr const &state )
+void gl3::Renderer::setAlphaState( AlphaState *state )
 {
 	if ( state->isEnabled() ) {
 		glEnable( GL_BLEND );
@@ -416,7 +416,7 @@ void gl3::Renderer::setAlphaState( AlphaStatePtr const &state )
 	}
 }
 
-void gl3::Renderer::setDepthState( DepthStatePtr const &state )
+void gl3::Renderer::setDepthState( DepthState *state )
 {
 	if ( state->isEnabled() ) {
 		glEnable( GL_DEPTH_TEST );

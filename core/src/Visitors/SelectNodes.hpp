@@ -39,7 +39,7 @@ namespace crimild {
 
 	class SelectNodes : public NodeVisitor {
 	public:
-		typedef std::function< bool( NodePtr const & ) > SelectorOp;
+		typedef std::function< bool( Node * ) > SelectorOp;
 
 	public:
 		SelectNodes( SelectorOp selector );
@@ -47,14 +47,14 @@ namespace crimild {
 
 		virtual void reset( void ) override;
 
-        virtual void visitNode( SharedPointer< Node > const &node ) override;
-        virtual void visitGroup( SharedPointer< Group > const &node ) override;
+        virtual void visitNode( Node *node ) override;
+        virtual void visitGroup( Group *node ) override;
 
-		virtual void foreachMatch( std::function< void( NodePtr const &node ) > callback );
+		virtual void foreachMatch( std::function< void( Node * ) > callback );
 
 	private:
 		SelectorOp _selector;
-		std::list< NodePtr > _matches;
+		std::list< Node * > _matches;
 	};
 
 }

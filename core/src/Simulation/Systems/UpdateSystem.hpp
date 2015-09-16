@@ -40,13 +40,13 @@ namespace crimild {
 	namespace messaging {
 
 		struct WillUpdateScene { 
-			NodePtr scene;
-			CameraPtr mainCamera;
+			Node *scene;
+			Camera *mainCamera;
 		};
 
 		struct DidUpdateScene {
-			NodePtr scene;
-			CameraPtr mainCamera;
+			Node *scene;
+			Camera *mainCamera;
 		};
 
 	}
@@ -63,9 +63,9 @@ namespace crimild {
 		virtual void stop( void ) override;
         
     private:
-        void updateBehaviors( NodePtr const &scene );
-        void updateWorldState( NodePtr const &scene );
-        void computeRenderQueue( NodePtr const &scene, CameraPtr const &camera );
+        void updateBehaviors( Node *scene );
+        void updateWorldState( Node *scene );
+        void computeRenderQueue( Node *scene, Camera *camera );
 
 	private:
 		double _accumulator = 0.0;

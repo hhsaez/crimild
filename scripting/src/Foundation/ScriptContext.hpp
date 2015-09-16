@@ -52,7 +52,7 @@ namespace crimild {
             ScriptContext *getContext( void ) { return _context; }
             
         private:
-            ScriptContext *_context;
+            ScriptContext *_context = nullptr;
             std::string _prefix;
             
         public:
@@ -110,7 +110,7 @@ namespace crimild {
 			void reset( void );
 
 		private:
-			lua_State *_state;
+			lua_State *_state = nullptr;
 			bool _openDefaultLibs;
 
 		public:
@@ -129,7 +129,7 @@ namespace crimild {
 			int resume( void );
 
 		private:
-			lua_State *_backgroundThreadState;
+			lua_State *_backgroundThreadState = nullptr;
 
 		public:
 			void push( void ) { }
@@ -301,7 +301,7 @@ namespace crimild {
         }
         
         template<>
-        inline bool ScriptEvaluator::getPropValue( const std::string &name, TransformationImpl &result )
+        inline bool ScriptEvaluator::getPropValue( const std::string &name, Transformation &result )
         {
             getPropValue( name + ".translate", result.translate() );
             getPropValue( name + ".scale", result.scale() );

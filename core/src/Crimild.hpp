@@ -51,7 +51,6 @@
 #include "Foundation/Log.hpp"
 #include "Foundation/StringUtils.hpp"
 #include "Foundation/SharedObject.hpp"
-#include "Foundation/Pointer.hpp"
 #include "Foundation/Singleton.hpp"
 #include "Foundation/Profiler.hpp"
 #include "Foundation/Streaming.hpp"
@@ -94,11 +93,9 @@
 #include "Visitors/FetchCameras.hpp"
 #include "Visitors/FetchLights.hpp"
 #include "Visitors/NodeVisitor.hpp"
-#include "Visitors/ComputeVisibilitySet.hpp"
 #include "Visitors/ComputeRenderQueue.hpp"
 #include "Visitors/SelectNodes.hpp"
 #include "Visitors/StartComponents.hpp"
-#include "Visitors/UpdateComponents.hpp"
 #include "Visitors/UpdateRenderState.hpp"
 #include "Visitors/UpdateWorldState.hpp"
 #include "Visitors/Picking.hpp"
@@ -139,7 +136,6 @@
 #include "Rendering/Texture.hpp"
 #include "Rendering/VertexBufferObject.hpp"
 #include "Rendering/VertexFormat.hpp"
-#include "Rendering/VisibilitySet.hpp"
 
 #include "Messaging/MessageQueue.hpp"
 
@@ -148,25 +144,13 @@
 #include "Simulation/InputState.hpp"
 #include "Simulation/Simulation.hpp"
 #include "Simulation/FileSystem.hpp"
-#include "Simulation/RunLoop.hpp"
 
 #include "Simulation/Systems/DebugSystem.hpp"
 #include "Simulation/Systems/UpdateSystem.hpp"
 #include "Simulation/Systems/RenderSystem.hpp"
 #include "Simulation/Systems/StreamingSystem.hpp"
 
-#include "Simulation/Tasks/BeginRenderTask.hpp"
-#include "Simulation/Tasks/EndRenderTask.hpp"
-#include "Simulation/Tasks/ComputeRenderQueueTask.hpp"
-#include "Simulation/Tasks/RenderSceneTask.hpp"
-#include "Simulation/Tasks/UpdateSceneTask.hpp"
-#include "Simulation/Tasks/RenderDebugInfoTask.hpp"
-#include "Simulation/Tasks/DispatchMessagesTask.hpp"
-#include "Simulation/Tasks/ProfilerDumpTask.hpp"
-
 #include "Debug/DebugRenderHelper.hpp"
-#include "Debug/DebugRenderPass.hpp"
-#include "Debug/HierarchyRenderPass.hpp"
 
 #endif
 

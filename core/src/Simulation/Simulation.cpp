@@ -32,14 +32,6 @@
 
 #include "Concurrency/Async.hpp"
 
-#include "Tasks/DispatchMessagesTask.hpp"
-#include "Tasks/BeginRenderTask.hpp"
-#include "Tasks/EndRenderTask.hpp"
-#include "Tasks/UpdateSceneTask.hpp"
-#include "Tasks/RenderSceneTask.hpp"
-#include "Tasks/ComputeRenderQueueTask.hpp"
-#include "Tasks/ProfilerDumpTask.hpp"
-
 #include "SceneGraph/Camera.hpp"
 
 #include "Visitors/FetchCameras.hpp"
@@ -142,7 +134,7 @@ void Simulation::stopSystems( void )
     _systems.clear();
 }
 
-void Simulation::setScene( NodePtr const &scene )
+void Simulation::setScene( SharedPointer< Node > const &scene )
 {
 	_scene = scene;
 	_cameras.clear();
@@ -154,7 +146,7 @@ void Simulation::setScene( NodePtr const &scene )
 
 		FetchCameras fetchCameras;
 		_scene->perform( fetchCameras );
-        fetchCameras.foreachCamera( [&]( CameraPtr const &camera ) {
+        fetchCameras.forEachCamera( [&]( Camera *camera ) {
             _cameras.push_back( camera );
         });
 	}
@@ -164,10 +156,10 @@ void Simulation::setScene( NodePtr const &scene )
     
     _simulationClock.reset();
 
-    broadcastMessage( messaging::SceneChanged { _scene } );
+    broadcastMessage( messaging::SceneChanged { crimild::get_ptr( _scene ) } );
 }
 
-void Simulation::loadScene( std::string filename, SceneBuilderPtr const &builder )
+void Simulation::loadScene( std::string filename, SharedPointer< SceneBuilder > const &builder )
 {
     auto self = this;
     crimild::async( [self, filename, builder] {
@@ -175,7 +167,7 @@ void Simulation::loadScene( std::string filename, SceneBuilderPtr const &builder
     });
 }
 
-void Simulation::forEachCamera( std::function< void ( CameraPtr const & ) > callback )
+void Simulation::forEachCamera( std::function< void ( Camera * ) > callback )
 {
 	for ( auto camera : _cameras ) {
 		callback( camera );

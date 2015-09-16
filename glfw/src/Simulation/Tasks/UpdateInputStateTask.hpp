@@ -133,7 +133,7 @@ namespace crimild {
 		virtual void stop( void ) override;
 
 	private:
-		GLFWwindow *_window;
+		GLFWwindow *_window = nullptr;
 		int _windowWidth;
 		int _windowHeight;
 	};

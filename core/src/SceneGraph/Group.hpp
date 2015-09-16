@@ -46,32 +46,34 @@ namespace crimild {
 		bool hasNodes( void ) const { return !_nodes.empty(); }
 		unsigned int getNodeCount( void ) const { return _nodes.size(); }
 
-		void attachNode( NodePtr const &node );
-		void detachNode( NodePtr const &node );
+        void attachNode( Node *node );
+		void attachNode( SharedPointer< Node > const &node );
+        
+        void detachNode( Node *node );
+		void detachNode( SharedPointer< Node > const &node );
+        
 		void detachAllNodes( void );
 
 		/**
 			\brief Gets a node at a given position
-
-			\warning This method is inefficient. Use it carefully
 		*/
-		NodePtr getNodeAt( unsigned int index );
+		Node *getNodeAt( unsigned int index );
 
 		template< typename T >
-        SharedPointer< T > getNodeAt( unsigned int index )
+        T *getNodeAt( unsigned int index )
 		{
-            return std::static_pointer_cast< T >( getNodeAt( index ) );
+            return static_cast< T * >( getNodeAt( index ) );
 		}
 
-		NodePtr getNode( std::string name );
+		Node *getNode( std::string name );
 
 		template< typename T >
-		SharedPointer< T > getNode( std::string name )
+		T *getNode( std::string name )
 		{
-			return crimild::castPointer< T >( getNode( name ) );
+			return static_cast< T * >( getNode( name ) );
 		} 
 
-		virtual void foreachNode( std::function< void( NodePtr const & ) > callback );
+		virtual void forEachNode( std::function< void( Node * ) > callback );
 
 	protected:
 		SharedObjectArray< Node > _nodes;
@@ -80,8 +82,6 @@ namespace crimild {
 		virtual void accept( NodeVisitor &visitor ) override;
 
 	};
-    
-    using GroupPtr = SharedPointer< Group >;
 
 }
 

@@ -39,8 +39,8 @@ namespace crimild {
             DepthOfFieldImageEffect( void );
             virtual ~DepthOfFieldImageEffect( void );
             
-            virtual void compute( RendererPtr const &renderer, CameraPtr const &camera ) override;
-            virtual void apply( crimild::RendererPtr const &renderer, crimild::CameraPtr const &camera ) override;
+            virtual void compute( crimild::Renderer *renderer, Camera *camera ) override;
+            virtual void apply( crimild::Renderer *renderer, crimild::Camera *camera ) override;
             
             float getFocus( void ) { return _focus->getValue(); }
             void setFocus( float value ) { _focus->setValue( value ); }
@@ -49,11 +49,9 @@ namespace crimild {
             void setAperture( float value ) { _aperture->setValue( value ); }
             
         private:
-            FloatUniformPtr _focus;
-            FloatUniformPtr _aperture;
+            SharedPointer< FloatUniform > _focus;
+            SharedPointer< FloatUniform > _aperture;
         };
-        
-        using DepthOfFieldImageEffectPtr = SharedPointer< DepthOfFieldImageEffect >;
         
     }
     

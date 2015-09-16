@@ -30,13 +30,13 @@
 
 using namespace crimild;
 
-ShadowMap::ShadowMap( LightPtr const &source )
+ShadowMap::ShadowMap( Light *source )
     : ShadowMap( source, nullptr )
 {
     
 }
 
-ShadowMap::ShadowMap( LightPtr const &source, FrameBufferObjectPtr const &fbo )
+ShadowMap::ShadowMap( Light *source, FrameBufferObject *fbo )
     : _source( source ),
       _buffer( fbo )
 {
@@ -44,11 +44,11 @@ ShadowMap::ShadowMap( LightPtr const &source, FrameBufferObjectPtr const &fbo )
         int width = 2048;
         int height = 2048;
         _buffer = crimild::alloc< FrameBufferObject >( width, height );
-        _buffer->getRenderTargets()->add( "depth", crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_16, RenderTarget::Output::RENDER, width, height ) );
-        _buffer->getRenderTargets()->add( "color", crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
+        _buffer->getRenderTargets().add( "depth", crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_16, RenderTarget::Output::RENDER, width, height ) );
+        _buffer->getRenderTargets().add( "color", crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
     }
     
-    _buffer->getRenderTargets()->each( [&]( std::string, RenderTargetPtr const &target ) {
+    _buffer->getRenderTargets().each( [&]( std::string, RenderTarget *target ) {
         if ( target->getOutput() == RenderTarget::Output::TEXTURE || target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
             _texture = target->getTexture();
         }

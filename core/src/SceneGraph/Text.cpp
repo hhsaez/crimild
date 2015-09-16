@@ -26,6 +26,7 @@
  */
 
 #include "Text.hpp"
+#include "Primitives/Primitive.hpp"
 #include "Rendering/ImageTGA.hpp"
 #include "Foundation/Log.hpp"
 #include "Components/MaterialComponent.hpp"
@@ -96,7 +97,7 @@ Text::~Text( void )
 
 void Text::accept( NodeVisitor &visitor )
 {
-    visitor.visitText( getShared< Text >() );
+    visitor.visitText( this );
 }
 
 void Text::setText( std::string text )
@@ -111,13 +112,14 @@ void Text::setSize( float size )
 	updatePrimitive();
 }
 
-void Text::setFont( FontPtr const &font )
+void Text::setFont( SharedPointer< Font > const &font )
 {
 	_font = font;
 	auto face = _font->getFace();
-    auto texture = crimild::alloc< Texture >( face );
+    auto texture = crimild::alloc< Texture >( std::move( crimild::retain( face ) ) );
 	_material->setColorMap( texture );
 	_material->getAlphaState()->setEnabled( true );
+    
 	updatePrimitive();
 }
 

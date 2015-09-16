@@ -40,12 +40,12 @@ namespace crimild {
             BloomImageEffect( float brightFilter, float glowSize, float glowStrength, float glowScale );
             virtual ~BloomImageEffect( void );
             
-            virtual void compute( RendererPtr const &renderer, CameraPtr const &camera ) override;
-            virtual void apply( crimild::RendererPtr const &renderer, crimild::CameraPtr const &camera );
+            virtual void compute( crimild::Renderer *renderer, Camera *camera ) override;
+            virtual void apply( crimild::Renderer *renderer, crimild::Camera *camera );
 
         private:
-        	void computeBrightPassFilter( RendererPtr const &renderer, CameraPtr const &camera );
-        	void computeGlowMap( RendererPtr const &renderer, CameraPtr const &camera );
+            void computeBrightPassFilter( crimild::Renderer *renderer, Camera *camera );
+        	void computeGlowMap( Renderer *renderer, Camera *camera );
 
         private:
         	float _brightFilter;

@@ -42,7 +42,7 @@ namespace crimild {
 
 	class Picking : public NodeVisitor {
 	private:
-		typedef std::function< bool( NodePtr const & ) > FilterType;
+		typedef std::function< bool( Node * ) > FilterType;
 
 	public:
 		class Results {
@@ -55,17 +55,17 @@ namespace crimild {
 				_candidates.clear();
 			}
 
-			void sortCandidates( std::function< bool( NodePtr const &, NodePtr const & ) > callback )
+			void sortCandidates( std::function< bool( Node *, Node * ) > callback )
 			{
 				_candidates.sort( callback );
 			}
 
-			void pushCandidate( NodePtr const &candidate )
+			void pushCandidate( Node *candidate )
 			{
 				_candidates.push_back( candidate );
 			}
 
-			void foreachCandidate( std::function< void( NodePtr const & ) > callback )
+			void foreachCandidate( std::function< void( Node * ) > callback )
 			{
                 auto cs = _candidates;
 				for ( auto c : cs ) {
@@ -78,7 +78,7 @@ namespace crimild {
 				return _candidates.size() > 0;
 			}
 
-			NodePtr getBestCandidate( void )
+			Node *getBestCandidate( void )
 			{
 				if ( !hasResults() ) {
 					return nullptr;
@@ -88,17 +88,17 @@ namespace crimild {
 			}
 
 		private:
-			std::list< NodePtr > _candidates;
+			std::list< Node * > _candidates;
 		};
 
 	public:
 		Picking( const Ray3f &tester, Results &results, FilterType filter = nullptr );
 		virtual ~Picking( void );
 
-		virtual void traverse( NodePtr const &node ) override;
+		virtual void traverse( Node *node ) override;
 
-		virtual void visitNode( NodePtr const &node ) override;
-		virtual void visitGroup( GroupPtr const &node ) override;
+		virtual void visitNode( Node *node ) override;
+		virtual void visitGroup( Group *node ) override;
 
 	private:
 		Ray3f _tester;

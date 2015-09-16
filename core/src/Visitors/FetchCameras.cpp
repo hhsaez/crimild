@@ -27,7 +27,7 @@
 
 #include "FetchCameras.hpp"
 
-#include "SceneGraph/Node.hpp"
+#include "SceneGraph/Camera.hpp"
 
 using namespace crimild;
 
@@ -47,12 +47,12 @@ void FetchCameras::reset( void )
 	NodeVisitor::reset();
 }
 
-void FetchCameras::visitCamera( CameraPtr const &camera )
+void FetchCameras::visitCamera( Camera *camera )
 {
 	_cameras.push_back( camera );
 }
 
-void FetchCameras::foreachCamera( std::function< void( CameraPtr const &camera ) > callback )
+void FetchCameras::forEachCamera( std::function< void( Camera * ) > callback )
 {
 	for ( auto camera : _cameras ) {
 		callback( camera );

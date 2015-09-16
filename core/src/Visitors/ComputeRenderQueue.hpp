@@ -30,29 +30,25 @@
 
 #include "Visitors/NodeVisitor.hpp"
 
-#include "Rendering/RenderQueue.hpp"
-
-#include "SceneGraph/Camera.hpp"
-#include "SceneGraph/Group.hpp"
-
 namespace crimild {
+    
+    class Camera;
+    class RenderQueue;
     
     class ComputeRenderQueue : public NodeVisitor {
     public:
-        ComputeRenderQueue( CameraPtr const &camera, RenderQueuePtr const &result );
+        ComputeRenderQueue( Camera *camera, RenderQueue *result );
         virtual ~ComputeRenderQueue( void );
         
-        RenderQueuePtr getResult( void ) { return _result; }
+        virtual void traverse( Node *scene ) override;
         
-        virtual void traverse( NodePtr const &scene ) override;
-        
-        virtual void visitGroup( GroupPtr const &group ) override;
-        virtual void visitGeometry( GeometryPtr const &geometry ) override;
-        virtual void visitLight( LightPtr const &light ) override;
+        virtual void visitGroup( Group *group ) override;
+        virtual void visitGeometry( Geometry *geometry ) override;
+        virtual void visitLight( Light *light ) override;
         
     private:
-        CameraPtr _camera;
-        RenderQueuePtr _result;
+        Camera *_camera = nullptr;
+        RenderQueue *_result = nullptr;
     };
     
 }

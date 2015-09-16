@@ -70,12 +70,12 @@ void gl3::Utils::checkErrors( std::string prefix )
     }
 }
 
-VertexShaderPtr gl3::Utils::getVertexShaderInstance( std::string source )
+SharedPointer< VertexShader > gl3::Utils::getVertexShaderInstance( std::string source )
 {
     return crimild::alloc< VertexShader >( "#version 150\n" + source );
 }
 
-FragmentShaderPtr gl3::Utils::getFragmentShaderInstance( std::string source )
+SharedPointer< FragmentShader > gl3::Utils::getFragmentShaderInstance( std::string source )
 {
     return crimild::alloc< FragmentShader >( "#version 150\n" + source );
 }

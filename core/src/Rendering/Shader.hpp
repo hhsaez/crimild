@@ -45,13 +45,8 @@ namespace crimild {
 		std::string _source;
 	};
     
-    using ShaderPtr = SharedPointer< Shader >;
-    
     using VertexShader = Shader;
-    using VertexShaderPtr = ShaderPtr;
-    
     using FragmentShader = Shader;
-    using FragmentShaderPtr = ShaderPtr;
 
 }
 

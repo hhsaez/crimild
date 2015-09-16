@@ -38,9 +38,9 @@ MaterialComponent::~MaterialComponent( void )
 	detachAllMaterials();
 }
 
-void MaterialComponent::attachMaterial( MaterialPtr const &material )
+void MaterialComponent::attachMaterial( SharedPointer< Material > const &material )
 {
-	_materials.push_back( material );
+	_materials.add( material );
 }
 
 void MaterialComponent::detachAllMaterials( void )
@@ -48,11 +48,8 @@ void MaterialComponent::detachAllMaterials( void )
 	_materials.clear();
 }
 
-void MaterialComponent::foreachMaterial( std::function< void( MaterialPtr const & ) > callback )
+void MaterialComponent::forEachMaterial( std::function< void( Material * ) > callback )
 {
-    auto ms = _materials;
-	for ( auto material : ms ) {
-		callback( material );
-	}
+    _materials.forEach( callback );
 }
 

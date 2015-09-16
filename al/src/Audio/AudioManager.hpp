@@ -50,8 +50,8 @@ namespace crimild {
 			~AudioManager( void );
 
 		private:
-			ALCdevice_struct *_device;
-			ALCcontext_struct *_context;
+            ALCdevice_struct *_device = nullptr;
+            ALCcontext_struct *_context = nullptr;
 			float _gain;
 		};
 

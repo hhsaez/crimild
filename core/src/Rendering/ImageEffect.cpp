@@ -46,7 +46,7 @@ ImageEffect::~ImageEffect( void )
 
 }
 
-FrameBufferObjectPtr ImageEffect::getFrameBuffer( RendererPtrImpl const &renderer, std::string name )
+FrameBufferObject *ImageEffect::getFrameBuffer( Renderer *renderer, std::string name )
 {
     auto fbo = renderer->getFrameBuffer( name );
     if ( fbo == nullptr ) {
@@ -62,17 +62,18 @@ FrameBufferObjectPtr ImageEffect::getFrameBuffer( RendererPtrImpl const &rendere
             height /= 4;
         }
         
-        fbo = crimild::alloc< FrameBufferObject >( width, height );
-        fbo->getRenderTargets()->add( "depth", crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
-        fbo->getRenderTargets()->add( "color", crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
-    
-        renderer->addFrameBuffer( name, fbo );
+        auto newFBO = std::move( crimild::alloc< FrameBufferObject >( width, height ) );
+        renderer->addFrameBuffer( name, newFBO );
+        fbo = crimild::get_ptr( newFBO );
+        
+        fbo->getRenderTargets().add( "depth", crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
+        fbo->getRenderTargets().add( "color", crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
     }
     
     return fbo;
 }
 
-void ImageEffect::renderScreen( RendererPtr const &renderer, TexturePtr const &texture )
+void ImageEffect::renderScreen( Renderer *renderer, Texture *texture )
 {
     auto program = renderer->getShaderProgram( "screen" );
     if ( program == nullptr ) {

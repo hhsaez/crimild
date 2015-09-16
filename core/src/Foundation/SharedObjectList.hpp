@@ -29,7 +29,8 @@
 #define CRIMILD_CORE_FOUNDATION_SHARED_OBJECT_LIST_
 
 #include "Foundation/SharedObject.hpp"
-#include "Foundation/Pointer.hpp"
+
+#include "Mathematics/Random.hpp"
 
 #include <list>
 #include <functional>
@@ -87,6 +88,8 @@ namespace crimild {
         {
             clear();
         }
+            
+        std::size_t size( void ) const { return _objects.size(); }
         
         bool isEmpty( void ) const { return _objects.size() == 0; }
         
@@ -95,6 +98,22 @@ namespace crimild {
             _objects.push_back( obj );
             CallbackPolicyImpl::onAdded( obj );
         }
+            
+        void add( ObjectType *obj )
+        {
+            add( std::move( crimild::retain( obj ) ) );
+        }
+            
+        void addFront( ObjectPtr const &obj )
+        {
+            _objects.push_front( obj );
+            CallbackPolicyImpl::onAdded( obj );
+        }
+        
+        void addFront( ObjectType *obj )
+        {
+            addFront( std::move( crimild::retain( obj ) ) );
+        }
         
         ObjectPtr remove( ObjectPtr const &obj )
         {
@@ -102,7 +121,28 @@ namespace crimild {
             CallbackPolicyImpl::onRemoved( obj );
             return obj;
         }
-        
+            
+        ObjectPtr remove( ObjectType *obj )
+        {
+            return remove( std::move( crimild::retain( obj ) ) );
+        }
+            
+        ObjectPtr popFront( void )
+        {
+            auto obj = _objects.front();
+            _objects.pop_front();
+            CallbackPolicyImpl::onRemoved( obj );
+            return obj;
+        }
+            
+        ObjectPtr popBack( void )
+        {
+            auto obj = _objects.back();
+            _objects.pop_back();
+            CallbackPolicyImpl::onRemoved( obj );
+            return obj;
+        }
+    
         void clear( void )
         {
             auto os = _objects;
@@ -111,25 +151,35 @@ namespace crimild {
             _objects.clear();
         }
         
-        void each( std::function< void( ObjectPtr const &, int index ) > callback )
+        void each( std::function< void( ObjectType *, int index ) > callback )
         {
             int i = 0;
             auto os = _objects;
-            for ( auto o : os ) callback( o, i++ );
+            for ( auto o : os ) callback( crimild::get_ptr( o ), i++ );
         }
             
-        ObjectPtr find( std::function< bool( ObjectPtr const & ) > callback )
+        ObjectType *find( std::function< bool( ObjectPtr const & ) > callback )
         {
-            ObjectPtr result = nullptr;
+            ObjectType result = nullptr;
             auto os = _objects;
             for ( auto o : os ) {
                 if ( callback( o ) ) {
-                    result = o;
+                    result = crimild::get_ptr( o );
                     break;
                 }
             }
             
             return result;
+        }
+            
+        ObjectType *front( void )
+        {
+            return _objects.front();
+        }
+            
+        void shuffle( void )
+        {
+            Random::shuffle( _objects );
         }
         
     private:

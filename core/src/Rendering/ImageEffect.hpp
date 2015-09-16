@@ -48,34 +48,26 @@ namespace crimild {
         static constexpr const char *FBO_AUX_QUARTER_RES_1 = "aux_quarter_buffer_1";
         static constexpr const char *FBO_AUX_QUARTER_RES_2 = "aux_quarter_buffer_2";
 
-    private:
-        using RendererPtrImpl = SharedPointer< Renderer >;
-        using CameraPtrImpl = SharedPointer< Camera >;
-        using FrameBufferObjectPtrImpl = SharedPointer< FrameBufferObject >;
-        using TexturePtrImpl = SharedPointer< Texture >;
-
     protected:
         ImageEffect( void );
 
 	public:
 		virtual ~ImageEffect( void );
 
-        virtual void compute( RendererPtrImpl const &renderer, CameraPtrImpl const &camera ) = 0;
-        virtual void apply( RendererPtrImpl const &renderer, CameraPtrImpl const &camera ) = 0;
+        virtual void compute( Renderer *renderer, Camera *camera ) = 0;
+        virtual void apply( Renderer *renderer, Camera *camera ) = 0;
         
         bool isEnabled( void ) const { return _enabled; }
         void setEnabled( bool enabled ) { _enabled = enabled; }
         
     protected:
-        virtual FrameBufferObjectPtrImpl getFrameBuffer( RendererPtrImpl const &renderer, std::string name );
+        virtual FrameBufferObject *getFrameBuffer( Renderer *renderer, std::string name );
         
-        virtual void renderScreen( RendererPtrImpl const &renderer, TexturePtrImpl const &texture );
+        virtual void renderScreen( Renderer *renderer, Texture *texture );
         
     private:
         bool _enabled = true;
 	};
-    
-    using ImageEffectPtr = SharedPointer< ImageEffect >;
 
 }
 

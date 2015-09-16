@@ -29,7 +29,6 @@
 #define CRIMILD_PRIMITIVES_PRIMITIVE_
 
 #include "Foundation/SharedObject.hpp"
-#include "Foundation/Pointer.hpp"
 #include "Rendering/VertexBufferObject.hpp"
 #include "Rendering/IndexBufferObject.hpp"
 
@@ -55,19 +54,19 @@ namespace crimild {
 
 		Primitive::Type getType( void ) const { return _type; }
 
-		void setVertexBuffer( VertexBufferObjectPtr const &vbo ) { _vertexBuffer = vbo; }
-		VertexBufferObjectPtr getVertexBuffer( void ) { return _vertexBuffer; }
+        void setVertexBuffer( VertexBufferObject *vbo ) { _vertexBuffer = std::move( crimild::retain( vbo ) ); }
+        void setVertexBuffer( SharedPointer< VertexBufferObject > const &vbo ) { _vertexBuffer = vbo; }
+        VertexBufferObject *getVertexBuffer( void ) { return crimild::get_ptr( _vertexBuffer ); }
 
-		void setIndexBuffer( IndexBufferObjectPtr const &ibo ) { _indexBuffer = ibo; }
-		IndexBufferObjectPtr getIndexBuffer( void ) { return _indexBuffer; }
+        void setIndexBuffer( IndexBufferObject *ibo ) { _indexBuffer = std::move( crimild::retain( ibo ) ); }
+        void setIndexBuffer( SharedPointer< IndexBufferObject > const &ibo ) { _indexBuffer = ibo; }
+        IndexBufferObject *getIndexBuffer( void ) { return crimild::get_ptr( _indexBuffer ); }
 
 	private:
 		Primitive::Type _type;
-		VertexBufferObjectPtr _vertexBuffer;
-		IndexBufferObjectPtr _indexBuffer;
+		SharedPointer< VertexBufferObject > _vertexBuffer;
+		SharedPointer< IndexBufferObject > _indexBuffer;
 	};
-    
-    using PrimitivePtr = SharedPointer< Primitive >;
 
 }
 

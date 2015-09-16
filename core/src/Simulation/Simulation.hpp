@@ -56,15 +56,15 @@ namespace crimild {
     namespace messaging {
         
         struct SceneChanged {
-            NodePtr scene;
+            Node *scene;
         };
         
         struct SimulationWillUpdate {
-            NodePtr scene;
+            Node *scene;
         };
         
         struct SimulationDidUpdate {
-            NodePtr scene;
+            Node *scene;
         };
         
     }
@@ -128,24 +128,24 @@ namespace crimild {
 		SystemMap _systems;
         
 	public:
-		void setRenderer( RendererPtr const &renderer ) { _renderer = renderer; }
-		RendererPtr getRenderer( void ) { return _renderer; }
+		void setRenderer( SharedPointer< Renderer > const &renderer ) { _renderer = renderer; }
+        Renderer *getRenderer( void ) { return crimild::get_ptr( _renderer ); }
 
 	private:
-		RendererPtr _renderer;
+		SharedPointer< Renderer > _renderer;
 
 	public:
-		void setScene( NodePtr const &scene );
-		NodePtr getScene( void ) { return _scene; }
+		void setScene( SharedPointer< Node > const &scene );
+        Node *getScene( void ) { return crimild::get_ptr( _scene ); }
             
-        void loadScene( std::string filename, SceneBuilderPtr const &sceneBuilder = nullptr );
+        void loadScene( std::string filename, SharedPointer< SceneBuilder > const &sceneBuilder = nullptr );
 
-        CameraPtr getMainCamera( void ) { return _cameras.size() > 0 ? _cameras.front() : CameraPtr(); }
-		void forEachCamera( std::function< void ( CameraPtr const & ) > callback );
+        Camera *getMainCamera( void ) { return _cameras.size() > 0 ? _cameras.front() : nullptr; }
+		void forEachCamera( std::function< void ( Camera * ) > callback );
 
 	private:
-		NodePtr _scene;
-		std::list< CameraPtr > _cameras;
+		SharedPointer< Node > _scene;
+		std::list< Camera * > _cameras;
 	};
 
 }

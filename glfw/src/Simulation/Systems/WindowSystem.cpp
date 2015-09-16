@@ -83,10 +83,6 @@ bool WindowSystem::createWindow( void )
 {
     int width = Simulation::getInstance()->getSettings()->get( "video.width", 1024 );
     int height = Simulation::getInstance()->getSettings()->get( "video.height", 768 );
-    float r = Simulation::getInstance()->getSettings()->get( "video.clearColor.r", 0.0f );
-    float g = Simulation::getInstance()->getSettings()->get( "video.clearColor.g", 0.0f );
-    float b = Simulation::getInstance()->getSettings()->get( "video.clearColor.b", 0.0f );
-    float a = Simulation::getInstance()->getSettings()->get( "video.clearColor.a", 0.0f );
     bool fullscreen = Simulation::getInstance()->getSettings()->get< bool >( "video.fullscreen", false );
 
 	std::string name = "Crimild";

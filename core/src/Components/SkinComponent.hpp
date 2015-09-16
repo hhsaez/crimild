@@ -30,13 +30,12 @@
 
 #include "NodeComponent.hpp"
 
-#include "SceneGraph/Node.hpp"
-
 #include <functional>
 #include <vector>
 
 namespace crimild {
-
+    
+    // TODO: deprecated
 	class SkinComponent : public NodeComponent {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( SkinComponent )
 		CRIMILD_NODE_COMPONENT_NAME( "skin" )
@@ -46,11 +45,11 @@ namespace crimild {
 		virtual ~SkinComponent( void );
 
 		bool hasJoints( void );
-		void attachJoint( NodePtr const &joint );
-		void foreachJoint( std::function< void( NodePtr const &, unsigned int ) > callback );
+		void attachJoint( Node *joint );
+		void forEachJoint( std::function< void( Node *, unsigned int ) > callback );
 
 	private:
-		std::vector< NodePtr > _joints;
+		std::vector< Node * > _joints;
 	};
 
 }

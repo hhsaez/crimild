@@ -170,48 +170,48 @@ BloomImageEffect::~BloomImageEffect( void )
     
 }
 
-void BloomImageEffect::compute( RendererPtr const &renderer, CameraPtr const &camera )
+void BloomImageEffect::compute( crimild::Renderer *renderer, Camera *camera )
 {
     computeBrightPassFilter( renderer, camera );
     computeGlowMap( renderer, camera );
 }
 
-void BloomImageEffect::apply( crimild::RendererPtr const &renderer, crimild::CameraPtr const &camera )
+void BloomImageEffect::apply( crimild::Renderer *renderer, crimild::Camera *camera )
 {
 #if 0
     auto emissiveBuffer = getFrameBuffer( renderer, EMISSIVE_BUFFER_NAME );
     renderScreen( renderer, emissiveBuffer->getRenderTargets()->get( "color" )->getTexture() );
 #else
     auto scene = renderer->getFrameBuffer( RenderPass::S_BUFFER_NAME );
-    renderScreen( renderer, scene->getRenderTargets()->get( RenderPass::S_BUFFER_COLOR_TARGET_NAME )->getTexture() );
+    renderScreen( renderer, scene->getRenderTargets().get( RenderPass::S_BUFFER_COLOR_TARGET_NAME )->getTexture() );
 
     auto glow = renderer->getFrameBuffer( GLOW_BUFFER_NAME );
     renderer->setAlphaState( AlphaState::ENABLED_ADDITIVE_BLEND );
     renderer->setDepthState( DepthState::DISABLED );
-    renderScreen( renderer, glow->getRenderTargets()->get( "color" )->getTexture() );
+    renderScreen( renderer, glow->getRenderTargets().get( "color" )->getTexture() );
     renderer->setAlphaState( AlphaState::DISABLED );
     renderer->setDepthState( DepthState::ENABLED );
 #endif
 }
 
-void BloomImageEffect::computeBrightPassFilter( RendererPtr const &renderer, CameraPtr const &camera )
+void BloomImageEffect::computeBrightPassFilter( crimild::Renderer *renderer, Camera *camera )
 {
     auto emissiveBuffer = getFrameBuffer( renderer, EMISSIVE_BUFFER_NAME );
 
     auto program = renderer->getShaderProgram( "bloom_emissive" );
     if ( program == nullptr ) {
-        program = crimild::alloc< ShaderProgram >( Utils::getVertexShaderInstance( bloom_emissive_vs ), Utils::getFragmentShaderInstance( bloom_emissive_fs ) );
+        auto tmp = std::move( crimild::alloc< ShaderProgram >( Utils::getVertexShaderInstance( bloom_emissive_vs ), Utils::getFragmentShaderInstance( bloom_emissive_fs ) ) );
+        renderer->addShaderProgram( "bloom_emissive", tmp );
+        program = crimild::get_ptr( tmp );
+        
         program->registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
         program->registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
-        
         program->registerLocation( crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, "uColorMap" ) );
         program->registerLocation( crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, "uBrightFilter" ) );
-        
-        renderer->addShaderProgram( "bloom_emissive", program );
     }
 
     auto scene = renderer->getFrameBuffer( RenderPass::S_BUFFER_NAME );
-    auto color = scene->getRenderTargets()->get( RenderPass::S_BUFFER_COLOR_TARGET_NAME );
+    auto color = scene->getRenderTargets().get( RenderPass::S_BUFFER_COLOR_TARGET_NAME );
 
     renderer->bindFrameBuffer( emissiveBuffer );
     renderer->bindProgram( program );
@@ -225,7 +225,7 @@ void BloomImageEffect::computeBrightPassFilter( RendererPtr const &renderer, Cam
     renderer->unbindFrameBuffer( emissiveBuffer );
 }
 
-void BloomImageEffect::computeGlowMap( RendererPtr const &renderer, CameraPtr const &camera )
+void BloomImageEffect::computeGlowMap( crimild::Renderer *renderer, Camera *camera )
 {
     // compute glow map
     auto emissiveBuffer = getFrameBuffer( renderer, EMISSIVE_BUFFER_NAME );
@@ -234,7 +234,10 @@ void BloomImageEffect::computeGlowMap( RendererPtr const &renderer, CameraPtr co
 
     auto glowProgram = renderer->getShaderProgram( "bloom_compute" );
     if ( glowProgram == nullptr ) {
-        glowProgram = crimild::alloc< ShaderProgram >( Utils::getVertexShaderInstance( bloom_compute_vs ), Utils::getFragmentShaderInstance( bloom_compute_fs ) );
+        auto tmp = crimild::alloc< ShaderProgram >( Utils::getVertexShaderInstance( bloom_compute_vs ), Utils::getFragmentShaderInstance( bloom_compute_fs ) );
+        renderer->addShaderProgram( "bloom_compute", tmp );
+        glowProgram = crimild::get_ptr( tmp );
+        
         glowProgram->registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
         glowProgram->registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
         
@@ -243,13 +246,11 @@ void BloomImageEffect::computeGlowMap( RendererPtr const &renderer, CameraPtr co
         glowProgram->registerLocation( crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, "uBlurSize" ) );
         glowProgram->registerLocation( crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, "uBlurStrength" ) );
         glowProgram->registerLocation( crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, "uBlurScale" ) );
-        
-        renderer->addShaderProgram( "bloom_compute", glowProgram );
     }
 
     renderer->bindProgram( glowProgram );
 
-    renderer->bindTexture( glowProgram->getLocation( "uEmissiveMap" ), emissiveBuffer->getRenderTargets()->get( "color" )->getTexture() );
+    renderer->bindTexture( glowProgram->getLocation( "uEmissiveMap" ), emissiveBuffer->getRenderTargets().get( "color" )->getTexture() );
 
     renderer->bindUniform( glowProgram->getLocation( "uBlurSize" ), _glowSize );
     renderer->bindUniform( glowProgram->getLocation( "uBlurStrength" ), _glowStrength );
@@ -265,7 +266,7 @@ void BloomImageEffect::computeGlowMap( RendererPtr const &renderer, CameraPtr co
     renderer->setAlphaState( AlphaState::DISABLED );
     renderer->setDepthState( DepthState::ENABLED );
 
-    renderer->unbindTexture( glowProgram->getLocation( "uEmissiveMap" ), emissiveBuffer->getRenderTargets()->get( "color" )->getTexture() );
+    renderer->unbindTexture( glowProgram->getLocation( "uEmissiveMap" ), emissiveBuffer->getRenderTargets().get( "color" )->getTexture() );
 
     renderer->unbindProgram( glowProgram );
 

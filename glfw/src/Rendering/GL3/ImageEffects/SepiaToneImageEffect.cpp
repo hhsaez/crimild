@@ -41,12 +41,13 @@ gl3::SepiaToneImageEffect::~SepiaToneImageEffect( void )
 
 }
 
-void gl3::SepiaToneImageEffect::apply( crimild::RendererPtr const &renderer )
+void gl3::SepiaToneImageEffect::apply( crimild::Renderer *renderer, Camera * )
 {
 	auto program = renderer->getShaderProgram( "sepia" );
 	if ( program == nullptr ) {
-		program = crimild::alloc< gl3::SepiaToneShaderProgram >();
-		renderer->addShaderProgram( "sepia", program );
+		auto tmp = crimild::alloc< gl3::SepiaToneShaderProgram >();
+		renderer->addShaderProgram( "sepia", tmp );
+        program = crimild::get_ptr( tmp );
 	}
 
 	auto sceneFBO = renderer->getFrameBuffer( "scene" );
@@ -55,7 +56,7 @@ void gl3::SepiaToneImageEffect::apply( crimild::RendererPtr const &renderer )
 		return;
 	}
 
-	auto colorTarget = sceneFBO->getRenderTargets()->get( "color" );
+	auto colorTarget = sceneFBO->getRenderTargets().get( "color" );
 
 	renderer->bindProgram( program );
 

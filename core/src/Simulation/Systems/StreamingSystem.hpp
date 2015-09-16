@@ -38,7 +38,7 @@ namespace crimild {
 
 		struct LoadScene {
 			std::string filename;
-            SceneBuilderPtr sceneBuilder;
+            SharedPointer< SceneBuilder > sceneBuilder;
 		};
 
 		struct ReloadScene { };
@@ -54,18 +54,18 @@ namespace crimild {
 
 		virtual void stop( void ) override;
 
-		void setSceneBuilder( SceneBuilderPtr const &builder ) { _sceneBuilder = builder; }
-		SceneBuilderPtr &getSceneBuilder( void ) { return _sceneBuilder; }
+		void setSceneBuilder( SharedPointer< SceneBuilder > const &builder ) { _sceneBuilder = builder; }
+        SceneBuilder *getSceneBuilder( void ) { return crimild::get_ptr( _sceneBuilder ); }
 
 	private:
 		void onLoadScene( messaging::LoadScene const &message );
 		void onReloadScene( messaging::ReloadScene const &message );
         
     private:
-        void loadScene( std::string filename, SceneBuilderPtr const &builder );
+        void loadScene( std::string filename, SceneBuilder *builder );
 
 	private:
-		SceneBuilderPtr _sceneBuilder;
+		SharedPointer< SceneBuilder > _sceneBuilder;
 		std::string _lastSceneFileName;
 	};
 

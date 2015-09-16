@@ -31,7 +31,6 @@
 #include "Foundation/Macros.hpp"
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/NamedObject.hpp"
-#include "Foundation/Pointer.hpp"
 
 namespace crimild {
     
@@ -60,8 +59,6 @@ namespace crimild {
 		Type _type;
 		int _location;
 	};
-
-    using ShaderLocationPtr = SharedPointer< ShaderLocation >;
     
 }
 

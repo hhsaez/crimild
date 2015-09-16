@@ -69,9 +69,9 @@ namespace crimild {
 		bool trimExcessMemory( void );
 
 	private:
-		internal::FixedAllocator *_pool;
-		internal::FixedAllocator *_lastAlloc;
-		internal::FixedAllocator *_lastDealloc;
+		internal::FixedAllocator *_pool = nullptr;
+		internal::FixedAllocator *_lastAlloc = nullptr;
+		internal::FixedAllocator *_lastDealloc = nullptr;
 
 		std::size_t _maxObjectSize;
 		std::size_t _objectAlignSize;

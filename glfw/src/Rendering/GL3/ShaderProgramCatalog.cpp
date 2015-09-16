@@ -45,7 +45,7 @@ int gl3::ShaderProgramCatalog::getNextResourceId( void )
 	return glCreateProgram();
 }
 
-void gl3::ShaderProgramCatalog::bind( ShaderProgramPtr const &program )
+void gl3::ShaderProgramCatalog::bind( ShaderProgram *program )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
@@ -56,7 +56,7 @@ void gl3::ShaderProgramCatalog::bind( ShaderProgramPtr const &program )
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gl3::ShaderProgramCatalog::unbind( ShaderProgramPtr const &program )
+void gl3::ShaderProgramCatalog::unbind( ShaderProgram *program )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
@@ -67,7 +67,7 @@ void gl3::ShaderProgramCatalog::unbind( ShaderProgramPtr const &program )
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gl3::ShaderProgramCatalog::load( ShaderProgramPtr const &program )
+void gl3::ShaderProgramCatalog::load( ShaderProgram *program )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
@@ -109,7 +109,7 @@ void gl3::ShaderProgramCatalog::load( ShaderProgramPtr const &program )
                 programId = 0;
             }
 
-            program->foreachLocation( [&]( ShaderLocationPtr const &loc ) mutable {
+            program->forEachLocation( [&]( ShaderLocation *loc ) mutable {
             	if ( loc->getType() == ShaderLocation::Type::ATTRIBUTE ) {
             		fetchAttributeLocation( program, loc );
             	}
@@ -123,7 +123,7 @@ void gl3::ShaderProgramCatalog::load( ShaderProgramPtr const &program )
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gl3::ShaderProgramCatalog::unload( ShaderProgramPtr const &program )
+void gl3::ShaderProgramCatalog::unload( ShaderProgram *program )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
@@ -137,20 +137,6 @@ void gl3::ShaderProgramCatalog::unload( ShaderProgramPtr const &program )
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gl3::ShaderProgramCatalog::unload( ShaderProgram *program )
-{
-    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
-    
-    int programId = program->getCatalogId();
-    if ( programId > 0 ) {
-        _shaderIdsToDelete.push_back( programId );
-    }
-    
-    Catalog< ShaderProgram >::unload( program );
-    
-    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
-}
-
 void gl3::ShaderProgramCatalog::cleanup( void )
 {
     for ( auto id : _shaderIdsToDelete ) {
@@ -159,7 +145,7 @@ void gl3::ShaderProgramCatalog::cleanup( void )
     _shaderIdsToDelete.clear();
 }
 
-int gl3::ShaderProgramCatalog::compileShader( ShaderPtr const &shader, int type )
+int gl3::ShaderProgramCatalog::compileShader( Shader *shader, int type )
 {
 	GLuint shaderId = glCreateShader( type );
     if ( shaderId > 0 ) {
@@ -193,12 +179,12 @@ int gl3::ShaderProgramCatalog::compileShader( ShaderPtr const &shader, int type 
     return shaderId;
 }
 
-void gl3::ShaderProgramCatalog::fetchAttributeLocation( ShaderProgramPtr const &program, ShaderLocationPtr const &location )
+void gl3::ShaderProgramCatalog::fetchAttributeLocation( ShaderProgram *program, ShaderLocation *location )
 {
 	location->setLocation( glGetAttribLocation( program->getCatalogId(), location->getName().c_str() ) );
 }
 
-void gl3::ShaderProgramCatalog::fetchUniformLocation( ShaderProgramPtr const &program, ShaderLocationPtr const &location )
+void gl3::ShaderProgramCatalog::fetchUniformLocation( ShaderProgram *program, ShaderLocation *location )
 {
 	location->setLocation( glGetUniformLocation( program->getCatalogId(), location->getName().c_str() ) );
 }

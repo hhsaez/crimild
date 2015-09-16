@@ -30,7 +30,6 @@
 
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/SharedObjectList.hpp"
-#include "Foundation/Pointer.hpp"
 
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Camera.hpp"
@@ -58,9 +57,9 @@ namespace crimild {
     
     class RenderQueue : public SharedObject {
     public:
-        using GeometryContext = std::pair< GeometryPtr, Matrix4f >;
-        using PrimitiveMap = std::map< PrimitivePtr, std::vector< GeometryContext >>;
-        using MaterialMap = std::map< MaterialPtr, PrimitiveMap >;
+        using GeometryContext = std::pair< Geometry *, Matrix4f >;
+        using PrimitiveMap = std::map< Primitive *, std::vector< GeometryContext >>;
+        using Renderables = std::map< Material *, PrimitiveMap >;
 
     public:
         RenderQueue( void );
@@ -68,35 +67,37 @@ namespace crimild {
         
         void reset( void );
         
-        void setCamera( CameraPtr const &camera );
-        CameraPtr getCamera( void ) { return _camera; }
+        void setCamera( Camera *camera );
+        Camera *getCamera( void ) { return _camera; }
+        
         const Matrix4f &getViewMatrix( void ) const { return _viewMatrix; }
         const Matrix4f &getProjectionMatrix( void ) const { return _projectionMatrix; }
         
-        void push( MaterialPtr const &material, PrimitivePtr const &primitive, GeometryPtr const &geometry, const TransformationImpl &world, bool renderOnScreen = false );
-        void push( LightPtr const &light );
+        void push( Material *material, Primitive *primitive, Geometry *geometry, const Transformation &world, bool renderOnScreen = false );
+        void push( Light *light );
 
-        void each( MaterialMap const &objects, std::function< void( MaterialPtr const &, PrimitiveMap const & ) > callback );
-        void each( std::function< void( LightPtr const &, int ) > callback );
+        void each( Renderables const &renderables, std::function< void( Material *, PrimitiveMap const & ) > callback );
+        void each( std::function< void( Light *, int ) > callback );
 
-        MaterialMap &getShadowCasters( void ) { return _shadowCasters; }
-        MaterialMap &getShadedObjects( void ) { return _shadedObjects; }
-        MaterialMap &getOpaqueObjects( void ) { return _opaqueObjects; }
-        MaterialMap &getTranslucentObjects( void ) { return _translucentObjects; }
-        MaterialMap &getScreenObjects( void ) { return _screenObjects; }
+        Renderables &getShadowCasters( void ) { return _shadowCasters; }
+        Renderables &getShadedObjects( void ) { return _shadedObjects; }
+        Renderables &getOpaqueObjects( void ) { return _opaqueObjects; }
+        Renderables &getTranslucentObjects( void ) { return _translucentObjects; }
+        Renderables &getScreenObjects( void ) { return _screenObjects; }
         
     private:
-        CameraPtr _camera;
+        Camera *_camera = nullptr;
+        
         Matrix4f _viewMatrix;
         Matrix4f _projectionMatrix;
         
-        std::vector< LightPtr > _lights;
+        std::vector< Light * > _lights;
 
-        MaterialMap _shadowCasters;
-        MaterialMap _shadedObjects;
-        MaterialMap _opaqueObjects;
-        MaterialMap _translucentObjects;
-        MaterialMap _screenObjects;
+        Renderables _shadowCasters;
+        Renderables _shadedObjects;
+        Renderables _opaqueObjects;
+        Renderables _translucentObjects;
+        Renderables _screenObjects;
         
     public:
         unsigned long getTimestamp( void ) const { return _timestamp; }

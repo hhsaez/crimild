@@ -47,14 +47,15 @@ AssetManager::~AssetManager( void )
 namespace crimild {
 
 template<>
-SharedPointer< Texture > AssetManager::get< Texture >( std::string name )
+Texture *AssetManager::get< Texture >( std::string name )
 {
-	auto texture = std::static_pointer_cast< Texture >( _assets[ name ] );
+    auto texture = static_cast< Texture * >( crimild::get_ptr( _assets[ name ] ) );
 	if ( texture == nullptr && ( StringUtils::getFileExtension( name ) == ".tga" ) ) {
 		auto image = crimild::alloc< ImageTGA >( FileSystem::getInstance().pathForResource( name ) );
 		if ( image != nullptr ) {
-			texture = crimild::alloc< Texture >( image );
-			add( name, texture );
+            auto tmp = std::move( crimild::alloc< Texture >( image ) );
+			set( name, tmp );
+            texture = crimild::get_ptr( tmp );
 		}
 	}
 

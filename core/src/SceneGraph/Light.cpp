@@ -52,7 +52,7 @@ Light::~Light( void )
 
 void Light::accept( NodeVisitor &visitor )
 {
-	visitor.visitLight( getShared< Light >() );
+	visitor.visitLight( this );
 }
 
 Matrix4f Light::computeProjectionMatrix( void ) const

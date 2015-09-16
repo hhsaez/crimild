@@ -30,12 +30,12 @@
 
 #include "NodeVisitor.hpp"
 
-#include "SceneGraph/Camera.hpp"
-
-#include <list>
+#include <vector>
 #include <functional>
 
 namespace crimild {
+    
+    class Camera;
 
 	class FetchCameras : public NodeVisitor {
 	public:
@@ -44,14 +44,14 @@ namespace crimild {
 
 		virtual void reset( void ) override;
 
-        virtual void visitCamera( CameraPtr const &camera ) override;
+        virtual void visitCamera( Camera *camera ) override;
 
 		bool hasCameras( void ) const { return _cameras.size() > 0; }
 
-        void foreachCamera( std::function< void( CameraPtr const & ) > callback );
+        void forEachCamera( std::function< void( Camera * ) > callback );
 
 	private:
-        std::list< CameraPtr > _cameras;
+        std::vector< Camera * > _cameras;
 	};
 
 }

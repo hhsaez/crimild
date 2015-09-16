@@ -42,6 +42,6 @@ LambdaComponent::~LambdaComponent( void )
 
 void LambdaComponent::update( const Clock &c )
 {
-	_callback( getNode()->getShared< Node >(), c );
+	_callback( getNode(), c );
 }
 

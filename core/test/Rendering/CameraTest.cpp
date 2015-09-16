@@ -44,7 +44,7 @@ TEST( CameraTest, viewMatrix )
 {
 	auto camera = crimild::alloc< Camera >();
 	camera->local().setTranslate( 0.0f, 1.0f, 5.0f );
-//	camera->perform( UpdateWorldState() );
+	camera->perform( UpdateWorldState() );
 
 	Matrix4f view = camera->getViewMatrix();
 
@@ -62,8 +62,8 @@ TEST( CameraTest, fetchCameras )
 	FetchCameras fetchCameras;
 	scene->perform( fetchCameras );
 	int i = 0;
-	fetchCameras.foreachCamera( [&]( CameraPtr const &c ) mutable {
-		EXPECT_EQ( camera, c );
+	fetchCameras.forEachCamera( [&i, camera]( Camera *c ) {
+        EXPECT_EQ( crimild::get_ptr( camera ), c );
 		i++;
 	});
 	EXPECT_EQ( 1, i );

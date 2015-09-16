@@ -47,10 +47,10 @@ namespace crimild {
 		BasicRenderPass( void );
 		virtual ~BasicRenderPass( void );
         
-        virtual void render( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera ) override;
+        virtual void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera ) override;
 
     private:
-        void render( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera, RenderQueue::MaterialMap const &objects );
+        void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera, RenderQueue::Renderables const &objects );
 	};
     
 }

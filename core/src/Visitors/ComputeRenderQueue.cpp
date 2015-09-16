@@ -27,10 +27,15 @@
 
 #include "Visitors/ComputeRenderQueue.hpp"
 #include "Components/RenderStateComponent.hpp"
+#include "Rendering/RenderQueue.hpp"
+
+#include "SceneGraph/Camera.hpp"
+#include "SceneGraph/Group.hpp"
+
 
 using namespace crimild;
 
-ComputeRenderQueue::ComputeRenderQueue( CameraPtr const &camera, RenderQueuePtr const &result )
+ComputeRenderQueue::ComputeRenderQueue( Camera *camera, RenderQueue *result )
     : _camera( camera ),
       _result( result )
 {
@@ -41,7 +46,7 @@ ComputeRenderQueue::~ComputeRenderQueue( void )
     
 }
 
-void ComputeRenderQueue::traverse( NodePtr const &scene )
+void ComputeRenderQueue::traverse( Node *scene )
 {
     _result->reset();
     _result->setCamera( _camera );
@@ -53,7 +58,7 @@ void ComputeRenderQueue::traverse( NodePtr const &scene )
     NodeVisitor::traverse( scene );
 }
 
-void ComputeRenderQueue::visitGroup( GroupPtr const &group )
+void ComputeRenderQueue::visitGroup( Group *group )
 {
     if ( _camera != nullptr && _camera->culled( group->getWorldBound() ) ) {
         return;
@@ -62,7 +67,7 @@ void ComputeRenderQueue::visitGroup( GroupPtr const &group )
     NodeVisitor::visitGroup( group );
 }
 
-void ComputeRenderQueue::visitGeometry( GeometryPtr const &geometry )
+void ComputeRenderQueue::visitGeometry( Geometry *geometry )
 {
     if ( _camera != nullptr && _camera->culled( geometry->getWorldBound() ) ) {
         return;
@@ -70,14 +75,14 @@ void ComputeRenderQueue::visitGeometry( GeometryPtr const &geometry )
 
     auto renderState = geometry->getComponent< RenderStateComponent >();
 
-    renderState->foreachMaterial( [&]( MaterialPtr const &material ) {
-        geometry->foreachPrimitive( [&]( PrimitivePtr const &primitive ) {
+    renderState->forEachMaterial( [&]( Material *material ) {
+        geometry->forEachPrimitive( [&]( Primitive *primitive ) {
             _result->push( material, primitive, geometry, geometry->getWorld(), renderState->renderOnScreen() );
         });
     });
 }
 
-void ComputeRenderQueue::visitLight( LightPtr const &light )
+void ComputeRenderQueue::visitLight( Light *light )
 {
     _result->push( light );
 }

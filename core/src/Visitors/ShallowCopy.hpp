@@ -45,21 +45,21 @@ namespace crimild {
 		virtual ~ShallowCopy( void );
 
 		template< class T >
-        SharedPointer< T > getResult( void ) { return std::static_pointer_cast< T >( _result ); }
+        SharedPointer< T > getResult( void ) { return crimild::cast_ptr< T >( _result ); }
 
-		virtual void traverse( NodePtr const &node ) override;
+		virtual void traverse( Node *node ) override;
 
-		virtual void visitNode( NodePtr const &node ) override;
-		virtual void visitGroup( GroupPtr const &node ) override;
-		virtual void visitGeometry( GeometryPtr const &geometry ) override;
-        virtual void visitText( TextPtr const &text ) override;
-
-	private:
-		void copyNode( NodePtr const &source, NodePtr const &destination );
+		virtual void visitNode( Node *node ) override;
+		virtual void visitGroup( Group *node ) override;
+		virtual void visitGeometry( Geometry *geometry ) override;
+        virtual void visitText( Text *text ) override;
 
 	private:
-		NodePtr _result;
-		GroupPtr _parent;
+		void copyNode( Node *source, Node *destination );
+
+	private:
+		SharedPointer< Node > _result;
+        Group *_parent = nullptr;
 	};
 
 }

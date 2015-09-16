@@ -65,7 +65,7 @@ bool gl3::VertexBufferObjectCatalog::extractId( int compositeId, unsigned int &v
 	return true;
 }
 
-void gl3::VertexBufferObjectCatalog::bind( ShaderProgramPtr const &program, VertexBufferObjectPtr const &vbo )
+void gl3::VertexBufferObjectCatalog::bind( ShaderProgram *program, VertexBufferObject *vbo )
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
@@ -152,7 +152,7 @@ void gl3::VertexBufferObjectCatalog::bind( ShaderProgramPtr const &program, Vert
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gl3::VertexBufferObjectCatalog::unbind( ShaderProgramPtr const &program, VertexBufferObjectPtr const &vbo )
+void gl3::VertexBufferObjectCatalog::unbind( ShaderProgram *program, VertexBufferObject *vbo )
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
@@ -164,7 +164,7 @@ void gl3::VertexBufferObjectCatalog::unbind( ShaderProgramPtr const &program, Ve
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void gl3::VertexBufferObjectCatalog::load( VertexBufferObjectPtr const &vbo )
+void gl3::VertexBufferObjectCatalog::load( VertexBufferObject *vbo )
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
@@ -180,19 +180,6 @@ void gl3::VertexBufferObjectCatalog::load( VertexBufferObjectPtr const &vbo )
          vbo->getVertexFormat().getVertexSizeInBytes() * vbo->getVertexCount(),
          vbo->getData(),
          GL_STATIC_DRAW );
-
-    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
-}
-
-void gl3::VertexBufferObjectCatalog::unload( VertexBufferObjectPtr const &vbo )
-{
-	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
-    
-    if ( vbo->getCatalogId() > 0 ) {
-      	_unusedVBOIds.push_back( vbo->getCatalogId() );
-    }
-
-	Catalog< VertexBufferObject >::unload( vbo );
 
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }

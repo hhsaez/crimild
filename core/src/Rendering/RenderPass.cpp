@@ -41,8 +41,7 @@
 using namespace crimild;
 
 RenderPass::RenderPass( void )
-    : _screen( crimild::alloc< QuadPrimitive >( 2.0f, 2.0f, VertexFormat::VF_P3_UV2, Vector2f( 0.0f, 1.0f ), Vector2f( 1.0f, -1.0f ) ) ),
-      _imageEffects( crimild::alloc< SharedObjectList< ImageEffect >>() )
+    : _screen( crimild::alloc< QuadPrimitive >( 2.0f, 2.0f, VertexFormat::VF_P3_UV2, Vector2f( 0.0f, 1.0f ), Vector2f( 1.0f, -1.0f ) ) )
 {
 
 }
@@ -52,30 +51,32 @@ RenderPass::~RenderPass( void )
 
 }
 
-void RenderPass::render( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
+void RenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
 {
     renderOpaqueObjects( renderer, renderQueue, camera );
     renderTranslucentObjects( renderer, renderQueue, camera );
     renderScreenObjects( renderer, renderQueue, camera );
 }
 
-void RenderPass::render( SharedPointer< Renderer > const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera, RenderQueue::MaterialMap const &objects )
+void RenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera, RenderQueue::Renderables const &objects )
 {
     const Matrix4f &projection = renderQueue->getProjectionMatrix();
     const Matrix4f &view = renderQueue->getViewMatrix();
     
-    renderQueue->each( objects, [&]( MaterialPtr const &material, RenderQueue::PrimitiveMap const &primitives ) {
-        auto program = material->getProgram() ? material->getProgram() : renderer->getShaderProgram( "phong" );
+    renderQueue->each( objects, [&]( Material *material, RenderQueue::PrimitiveMap const &primitives ) {
+        auto program = material->getProgram() != nullptr ? material->getProgram() : renderer->getShaderProgram( "phong" );
         if ( program == nullptr ) {
             Log::Error << "No valid program for batch" << Log::End;
             return;
         }
         
+        // TODO: assign default program to material so we don't need to fetch it again
+        
         // bind program
         renderer->bindProgram( program );
         
         // bind lights
-        renderQueue->each( [&]( LightPtr const &light, int ) {
+        renderQueue->each( [&]( Light *light, int ) {
             renderer->bindLight( program, light );
         });
         
@@ -109,7 +110,7 @@ void RenderPass::render( SharedPointer< Renderer > const &renderer, RenderQueueP
         renderer->unbindMaterial( program, material );
         
         // unbind lights
-        renderQueue->each( [&]( LightPtr const &light, int ) {
+        renderQueue->each( [&]( Light *light, int ) {
             renderer->unbindLight( program, light );
         });
         
@@ -118,7 +119,7 @@ void RenderPass::render( SharedPointer< Renderer > const &renderer, RenderQueueP
     });
 }
 
-void RenderPass::render( RendererPtr const &renderer, TexturePtr const &texture, ShaderProgramPtr const &defaultProgram )
+void RenderPass::render( Renderer *renderer, Texture *texture, ShaderProgram *defaultProgram )
 {
     auto program = defaultProgram;
     if ( program == nullptr ) {
@@ -127,7 +128,7 @@ void RenderPass::render( RendererPtr const &renderer, TexturePtr const &texture,
             return;
         }
     }
-     
+    
     // bind shader program first
     renderer->bindProgram( program );
     
@@ -143,7 +144,7 @@ void RenderPass::render( RendererPtr const &renderer, TexturePtr const &texture,
     renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM ), mMatrix );
      
     // draw primitive
-    renderer->drawPrimitive( program, _screen );
+    renderer->drawPrimitive( program, crimild::get_ptr( _screen ) );
      
     // unbind primitive buffers
     renderer->unbindVertexBuffer( program, _screen->getVertexBuffer() );
@@ -156,21 +157,21 @@ void RenderPass::render( RendererPtr const &renderer, TexturePtr const &texture,
     renderer->unbindProgram( program );
 }
 
-void RenderPass::renderOpaqueObjects( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
+void RenderPass::renderOpaqueObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
 {
     CRIMILD_PROFILE( "Render Opaque Objects" )
 
     render( renderer, renderQueue, camera, renderQueue->getOpaqueObjects() );
 }
 
-void RenderPass::renderTranslucentObjects( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
+void RenderPass::renderTranslucentObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
 {
     CRIMILD_PROFILE( "Render Translucent Objects" )
     
     render( renderer, renderQueue, camera, renderQueue->getTranslucentObjects() );
 }
 
-void RenderPass::renderScreenObjects( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
+void RenderPass::renderScreenObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
 {
     CRIMILD_PROFILE( "Render Screen Objects" )
     
@@ -178,8 +179,8 @@ void RenderPass::renderScreenObjects( RendererPtr const &renderer, RenderQueuePt
     Matrix4f view;
     view.makeIdentity();
     
-    renderQueue->each( renderQueue->getScreenObjects(), [&]( MaterialPtr const &material, RenderQueue::PrimitiveMap const &primitives ) {
-        auto program = material->getProgram() ? material->getProgram() : renderer->getShaderProgram( "phong" );
+    renderQueue->each( renderQueue->getScreenObjects(), [&]( Material *material, RenderQueue::PrimitiveMap const &primitives ) {
+        auto program = material->getProgram() != nullptr ? material->getProgram() : renderer->getShaderProgram( "phong" );
         if ( program == nullptr ) {
             Log::Error << "No valid program for batch" << Log::End;
             return;
@@ -189,7 +190,7 @@ void RenderPass::renderScreenObjects( RendererPtr const &renderer, RenderQueuePt
         renderer->bindProgram( program );
         
         // bind lights
-        renderQueue->each( [&]( LightPtr const &light, int ) {
+        renderQueue->each( [&]( Light *light, int ) {
             renderer->bindLight( program, light );
         });
         
@@ -223,7 +224,7 @@ void RenderPass::renderScreenObjects( RendererPtr const &renderer, RenderQueuePt
         renderer->unbindMaterial( program, material );
         
         // unbind lights
-        renderQueue->each( [&]( LightPtr const &light, int ) {
+        renderQueue->each( [&]( Light *light, int ) {
             renderer->unbindLight( program, light );
         });
         

@@ -70,10 +70,10 @@ namespace crimild {
 		virtual void configure( void ) = 0;
 
         void setScreenBuffer( SharedPointer< FrameBufferObject > const &screenBuffer ) { _screenBuffer = screenBuffer; }
-		SharedPointer< FrameBufferObject > &getScreenBuffer( void ) { return _screenBuffer; }
+        FrameBufferObject *getScreenBuffer( void ) { return crimild::get_ptr( _screenBuffer ); }
 
 		void addFrameBuffer( std::string name, SharedPointer< FrameBufferObject > const &fbo );
-		SharedPointer< FrameBufferObject > getFrameBuffer( std::string name );
+		FrameBufferObject *getFrameBuffer( std::string name );
 
 	private:
 		SharedPointer< FrameBufferObject > _screenBuffer;
@@ -86,95 +86,98 @@ namespace crimild {
 		
 		virtual void clearBuffers( void ) = 0;
         
-        virtual void render( SharedPointer< RenderQueue > const &renderQueue, SharedPointer< RenderPass > const &renderPass );
+        virtual void render( RenderQueue *renderQueue, RenderPass *renderPass );
 
         virtual void endRender( void );
 
 	public:
-		virtual void bindFrameBuffer( SharedPointer< FrameBufferObject > const &fbo );
-		virtual void unbindFrameBuffer( SharedPointer< FrameBufferObject > const &fbo );
+		virtual void bindFrameBuffer( FrameBufferObject *fbo );
+		virtual void unbindFrameBuffer( FrameBufferObject *fbo );
 
 	public:
-        virtual void bindProgram( SharedPointer< ShaderProgram > const &program );
-		virtual void unbindProgram( SharedPointer< ShaderProgram > const &program );
+        virtual void bindProgram( ShaderProgram *program );
+		virtual void unbindProgram( ShaderProgram *program );
 
-		virtual void bindUniform( SharedPointer< ShaderLocation > const &location, bool value ) { bindUniform( location, value ? 1 : 0 ); }
-		virtual void bindUniform( SharedPointer< ShaderLocation > const &location, int value ) = 0;
-		virtual void bindUniform( SharedPointer< ShaderLocation > const &location, float value ) = 0;
-		virtual void bindUniform( SharedPointer< ShaderLocation > const &location, const Vector3f &vector ) = 0;
-		virtual void bindUniform( SharedPointer< ShaderLocation > const &location, const Vector2f &vector ) = 0;
-		virtual void bindUniform( SharedPointer< ShaderLocation > const &location, const RGBAColorf &color ) = 0;
-		virtual void bindUniform( SharedPointer< ShaderLocation > const &location, const Matrix4f &matrix ) = 0;
-
-	public:
-        virtual void bindMaterial( SharedPointer< ShaderProgram > const &program, SharedPointer< Material > const &material );
-        virtual void unbindMaterial( SharedPointer< ShaderProgram > const &program, SharedPointer< Material > const &material );
+		virtual void bindUniform( ShaderLocation *location, bool value ) { bindUniform( location, value ? 1 : 0 ); }
+		virtual void bindUniform( ShaderLocation *location, int value ) = 0;
+		virtual void bindUniform( ShaderLocation *location, float value ) = 0;
+		virtual void bindUniform( ShaderLocation *location, const Vector3f &vector ) = 0;
+		virtual void bindUniform( ShaderLocation *location, const Vector2f &vector ) = 0;
+		virtual void bindUniform( ShaderLocation *location, const RGBAColorf &color ) = 0;
+		virtual void bindUniform( ShaderLocation *location, const Matrix4f &matrix ) = 0;
 
 	public:
-        virtual void setDepthState( SharedPointer< DepthState > const &state ) = 0;
-        virtual void setAlphaState( SharedPointer< AlphaState > const &state ) = 0;
+        virtual void bindMaterial( ShaderProgram *program, Material *material );
+        virtual void unbindMaterial( ShaderProgram *program, Material *material );
 
 	public:
-        virtual void bindTexture( SharedPointer< ShaderLocation > const &location, SharedPointer< Texture > const &texture );
-		virtual void unbindTexture( SharedPointer< ShaderLocation > const &location, SharedPointer< Texture > const &texture );
+        void setDepthState( SharedPointer< DepthState > const &state ) { setDepthState( crimild::get_ptr( state ) ); }
+        virtual void setDepthState( DepthState *state ) = 0;
+
+        void setAlphaState( SharedPointer< AlphaState > const &state ) { setAlphaState( crimild::get_ptr( state ) ); }
+        virtual void setAlphaState( AlphaState *state ) = 0;
 
 	public:
-		virtual void bindLight( SharedPointer< ShaderProgram > const &program, SharedPointer< Light > const &light );
-		virtual void unbindLight( SharedPointer< ShaderProgram > const &program, SharedPointer< Light > const &light );
+        virtual void bindTexture( ShaderLocation *location, Texture *texture );
+		virtual void unbindTexture( ShaderLocation *location, Texture *texture );
+
+	public:
+		virtual void bindLight( ShaderProgram *program, Light *light );
+		virtual void unbindLight( ShaderProgram *program, Light *light );
 
 	private:
 		int _lightCount;
 
 	public:
-		virtual void bindVertexBuffer( SharedPointer< ShaderProgram > const &program, SharedPointer< VertexBufferObject > const &vbo );
-		virtual void unbindVertexBuffer( SharedPointer< ShaderProgram > const &program, SharedPointer< VertexBufferObject > const &vbo );
+		virtual void bindVertexBuffer( ShaderProgram *program, VertexBufferObject *vbo );
+		virtual void unbindVertexBuffer( ShaderProgram *program, VertexBufferObject *vbo );
 
-        virtual void bindIndexBuffer( SharedPointer< ShaderProgram > const &program, SharedPointer< IndexBufferObject > const &ibo );
-		virtual void unbindIndexBuffer( SharedPointer< ShaderProgram > const &program, SharedPointer< IndexBufferObject > const &ibo );
-
-	public:
-		virtual void applyTransformations( SharedPointer< ShaderProgram > const &program, SharedPointer< Geometry > const &geometry, SharedPointer< Camera > const &camera );
-        virtual void applyTransformations( SharedPointer< ShaderProgram > const &program, const Matrix4f &projection, const Matrix4f &view, const Matrix4f &model, const Matrix4f &normal );
-        virtual void applyTransformations( SharedPointer< ShaderProgram > const &program, const Matrix4f &projection, const Matrix4f &view, const Matrix4f &model );
-		virtual void restoreTransformations( SharedPointer< ShaderProgram > const &program, SharedPointer< Geometry > const &geometry, SharedPointer< Camera > const &camera );
+        virtual void bindIndexBuffer( ShaderProgram *program, IndexBufferObject *ibo );
+		virtual void unbindIndexBuffer( ShaderProgram *program, IndexBufferObject *ibo );
 
 	public:
-		virtual void drawPrimitive( SharedPointer< ShaderProgram > const &program, SharedPointer< Primitive > const &primitive ) = 0;
+		virtual void applyTransformations( ShaderProgram *program, Geometry *geometry, Camera *camera );
+        virtual void applyTransformations( ShaderProgram *program, const Matrix4f &projection, const Matrix4f &view, const Matrix4f &model, const Matrix4f &normal );
+        virtual void applyTransformations( ShaderProgram *program, const Matrix4f &projection, const Matrix4f &view, const Matrix4f &model );
+		virtual void restoreTransformations( ShaderProgram *program, Geometry *geometry, Camera *camera );
+
+	public:
+		virtual void drawPrimitive( ShaderProgram *program, Primitive *primitive ) = 0;
 
 		/**
 			\brief optional
 		 */
-		virtual void drawBuffers( SharedPointer< ShaderProgram > const &program, Primitive::Type type, SharedPointer< VertexBufferObject > const &vbo, unsigned int count ) { }
+		virtual void drawBuffers( ShaderProgram *program, Primitive::Type type, VertexBufferObject *vbo, unsigned int count ) { }
 
-		virtual void drawScreenPrimitive( SharedPointer< ShaderProgram > const &program );
+		virtual void drawScreenPrimitive( ShaderProgram *program );
 
 	private:
-		PrimitivePtr _screenPrimitive;
+		SharedPointer< Primitive > _screenPrimitive;
 
 	public:
 		virtual void addShaderProgram( std::string key, SharedPointer< ShaderProgram > const &program ) { _programs[ key ] = program; }
-        virtual SharedPointer< ShaderProgram > getShaderProgram( std::string key ) { return _programs[ key ]; }
+        virtual ShaderProgram *getShaderProgram( std::string key ) { return crimild::get_ptr( _programs[ key ] ); }
 
-        virtual SharedPointer< ShaderProgram > getFallbackProgram( SharedPointer< Material > const &, SharedPointer< Geometry > const &, SharedPointer< Primitive > const & ) { return SharedPointer< ShaderProgram >(); }
+        virtual ShaderProgram *getFallbackProgram( Material *, Geometry *, Primitive * ) { return nullptr; }
 
 	public:
 		SharedPointer< Material > _defaultMaterial;
 		std::map< std::string, SharedPointer< ShaderProgram >> _programs;
 
 	public:
-        SharedPointer< Catalog< ShaderProgram > > &getShaderProgramCatalog( void ) { return _shaderProgramCatalog; }
+        Catalog< ShaderProgram > *getShaderProgramCatalog( void ) { return crimild::get_ptr( _shaderProgramCatalog ); }
 		void setShaderProgramCatalog( SharedPointer< Catalog< ShaderProgram > > const &catalog ) { _shaderProgramCatalog = catalog; }
 
-		SharedPointer< Catalog< Texture > > &getTextureCatalog( void ) { return _textureCatalog; }
+		Catalog< Texture > *getTextureCatalog( void ) { return crimild::get_ptr( _textureCatalog ); }
 		void setTextureCatalog( SharedPointer< Catalog< Texture > > const &catalog ) { _textureCatalog = catalog; }
 
-		SharedPointer< Catalog< VertexBufferObject > > &getVertexBufferObjectCatalog( void ) { return _vertexBufferObjectCatalog; }
+		Catalog< VertexBufferObject > *getVertexBufferObjectCatalog( void ) { return crimild::get_ptr( _vertexBufferObjectCatalog ); }
 		void setVertexBufferObjectCatalog( SharedPointer< Catalog< VertexBufferObject > > const &catalog ) { _vertexBufferObjectCatalog = catalog; }
 
-		SharedPointer< Catalog< IndexBufferObject > > &getIndexBufferObjectCatalog( void ) { return _indexBufferObjectCatalog; }
+		Catalog< IndexBufferObject > *getIndexBufferObjectCatalog( void ) { return crimild::get_ptr( _indexBufferObjectCatalog ); }
 		void setIndexBufferObjectCatalog( SharedPointer< Catalog< IndexBufferObject > > const &catalog ) { _indexBufferObjectCatalog = catalog; }
 
-		SharedPointer< Catalog< FrameBufferObject > > &getFrameBufferObjectCatalog( void ) { return _frameBufferObjectCatalog; }
+		Catalog< FrameBufferObject > *getFrameBufferObjectCatalog( void ) { return crimild::get_ptr( _frameBufferObjectCatalog ); }
 		void setFrameBufferObjectCatalog( SharedPointer< Catalog< FrameBufferObject > > const &catalog ) { _frameBufferObjectCatalog = catalog; }
 
 	private:
@@ -184,8 +187,6 @@ namespace crimild {
 		SharedPointer< Catalog< IndexBufferObject > > _indexBufferObjectCatalog;
 		SharedPointer< Catalog< FrameBufferObject > > _frameBufferObjectCatalog;
 	};
-
-    using RendererPtr = SharedPointer< Renderer >;
     
 }
 

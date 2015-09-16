@@ -70,7 +70,7 @@ namespace crimild {
 
 	private:
 		size_t _size;
-		T *_data;
+		T *_data = nullptr;
 	};
 
 }

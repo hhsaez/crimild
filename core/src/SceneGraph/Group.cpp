@@ -45,9 +45,14 @@ Group::~Group( void )
 	detachAllNodes();
 }
 
-void Group::attachNode( NodePtr const &node )
+void Group::attachNode( Node *node )
 {
-	if ( node->getParent() == getShared< Group >() ) {
+    attachNode( crimild::retain( node ) );
+}
+
+void Group::attachNode( SharedPointer< Node > const &node )
+{
+	if ( node->getParent() == this ) {
 		// the node is already attach to this group
 		return;
 	}
@@ -56,35 +61,40 @@ void Group::attachNode( NodePtr const &node )
 		throw HasParentException( node->getName(), this->getName(), node->getParent()->getName() );
 	}
 
-	node->setParent( getShared< Group >() );
+	node->setParent( this );
 
 	_nodes.add( node );
 }
 
-void Group::detachNode( NodePtr const &node )
+void Group::detachNode( Node *node )
 {
-	if ( node->getParent().get() == this ) {
-		node->setParent( nullptr );
-		_nodes.remove( node );
-	}
+    if ( node->getParent() == this ) {
+        node->setParent( nullptr );
+        _nodes.remove( node );
+    }
+}
+
+void Group::detachNode( SharedPointer< Node > const &node )
+{
+    detachNode( crimild::get_ptr( node ) );
 }
 
 void Group::detachAllNodes( void )
 {
-	_nodes.foreach( []( NodePtr const &node ) { node->setParent( nullptr ); } );
+	_nodes.forEach( []( Node *node ) { node->setParent( nullptr ); } );
 	_nodes.clear();
 }
 
-NodePtr Group::getNodeAt( unsigned int index )
+Node *Group::getNodeAt( unsigned int index )
 {
 	return _nodes.get( index );
 }
 
-NodePtr Group::getNode( std::string name )
+Node *Group::getNode( std::string name )
 {
-	NodePtr result;
+	Node *result;
 	bool found = false;
-	_nodes.foreach( [&result, &found, name]( NodePtr const &node ) {
+	_nodes.forEach( [&result, &found, name]( Node *node ) {
 		if ( !found && node->getName() == name ) {
 			result = node;
 			found = true;
@@ -94,13 +104,13 @@ NodePtr Group::getNode( std::string name )
 	return result;
 }
 
-void Group::foreachNode( std::function< void( NodePtr const & ) > callback )
+void Group::forEachNode( std::function< void( Node * ) > callback )
 {
-	return _nodes.foreach( [&callback]( NodePtr const &node ) { if ( node->isEnabled() ) callback( node ); } );
+	return _nodes.forEach( [&callback]( Node *node ) { if ( node->isEnabled() ) callback( node ); } );
 }
 
 void Group::accept( NodeVisitor &visitor )
 {
-	visitor.visitGroup( getShared< Group >() );
+	visitor.visitGroup( this );
 }
 

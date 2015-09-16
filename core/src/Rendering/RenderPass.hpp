@@ -29,8 +29,7 @@
 #define CRIMILD_RENDERER_RENDER_PASS_
 
 #include "Foundation/SharedObject.hpp"
-#include "Foundation/Pointer.hpp"
-#include "Foundation/SharedObjectList.hpp"
+#include "Foundation/SharedObjectArray.hpp"
 
 #include "RenderQueue.hpp"
 
@@ -68,25 +67,23 @@ namespace crimild {
 		RenderPass( void );
 		virtual ~RenderPass( void );
 
-        virtual void render( SharedPointer< Renderer > const &renderer, RenderQueuePtr const &renderQueue, SharedPointer< Camera > const &camera );
-        virtual void render( SharedPointer< Renderer > const &renderer, RenderQueuePtr const &renderQueue, SharedPointer< Camera > const &camera, RenderQueue::MaterialMap const &objects );
-        virtual void render( SharedPointer< Renderer > const &renderer, SharedPointer< Texture > const &texture, SharedPointer< ShaderProgram > const &program );
+        virtual void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+        virtual void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera, RenderQueue::Renderables const &objects );
+        virtual void render( Renderer *renderer, Texture *texture, ShaderProgram *program );
         
-        SharedPointer< SharedObjectList< ImageEffect >> &getImageEffects( void ) { return _imageEffects; }
+        SharedObjectArray< ImageEffect > &getImageEffects( void ) { return _imageEffects; }
         
     protected:
-        SharedPointer< Primitive > &getScreenPrimitive( void ) { return _screen; }
+        Primitive *getScreenPrimitive( void ) { return crimild::get_ptr( _screen ); }
 
-        virtual void renderOpaqueObjects( SharedPointer< Renderer > const &renderer, SharedPointer< RenderQueue > const &renderQueue, SharedPointer< Camera > const &camera );
-        virtual void renderTranslucentObjects( SharedPointer< Renderer > const &renderer, SharedPointer< RenderQueue > const &renderQueue, SharedPointer< Camera > const &camera );
-        virtual void renderScreenObjects( SharedPointer< Renderer > const &renderer, SharedPointer< RenderQueue > const &renderQueue, SharedPointer< Camera > const &camera );
+        virtual void renderOpaqueObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+        virtual void renderTranslucentObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+        virtual void renderScreenObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
 
 	private:
 		SharedPointer< Primitive > _screen;
-        SharedPointer< SharedObjectList< ImageEffect >> _imageEffects;
+        SharedObjectArray< ImageEffect > _imageEffects;
 	};
-    
-    using RenderPassPtr = SharedPointer< RenderPass >;
 
 }
 

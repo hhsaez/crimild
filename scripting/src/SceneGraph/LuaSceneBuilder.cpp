@@ -54,11 +54,11 @@ void LuaSceneBuilder::reset( void )
 	getScriptContext().reset();
 }
 
-NodePtr LuaSceneBuilder::fromFile( const std::string &filename )
+SharedPointer< Node > LuaSceneBuilder::fromFile( const std::string &filename )
 {
 	if ( !getScriptContext().load( filename ) ) {
 		Log::Error << "Cannot open scene file " << filename << Log::End;
-        return NodePtr();
+        return nullptr;
 	}
 
 	Log::Debug << "Loading scene from " << filename << Log::End;
@@ -68,9 +68,9 @@ NodePtr LuaSceneBuilder::fromFile( const std::string &filename )
 	return buildNode( eval, nullptr );
 }
 
-NodePtr LuaSceneBuilder::buildNode( ScriptEvaluator &eval, GroupPtr const &parent )
+SharedPointer< Node > LuaSceneBuilder::buildNode( ScriptEvaluator &eval, Group *parent )
 {
-	NodePtr current;
+	SharedPointer< Node > current;
 
     std::string type;
     eval.getPropValue( NODE_TYPE, type, "" );
@@ -86,7 +86,7 @@ NodePtr LuaSceneBuilder::buildNode( ScriptEvaluator &eval, GroupPtr const &paren
 		setupCamera( eval, camera );
         
         eval.foreach( GROUP_NODES, [&]( ScriptEvaluator &child, int ) {
-            buildNode( child, camera );
+            buildNode( child, crimild::get_ptr( camera ) );
         });
 
         current = camera;
@@ -177,7 +177,7 @@ NodePtr LuaSceneBuilder::buildNode( ScriptEvaluator &eval, GroupPtr const &paren
 		current = text;
 	}
 	else {
-		GroupPtr group;
+		SharedPointer< Group > group;
 
         std::string filename;
         if ( eval.getPropValue( NODE_FILENAME, filename ) && filename != "" ) {
@@ -186,9 +186,9 @@ NodePtr LuaSceneBuilder::buildNode( ScriptEvaluator &eval, GroupPtr const &paren
 			auto scene = AssetManager::getInstance()->get< Group >( filename );
 			if ( scene == nullptr ) {
 				OBJLoader loader( FileSystem::getInstance().pathForResource( filename ) );				
-				scene = loader.load();
-				AssetManager::getInstance()->add( filename, scene );
-				group = scene;
+				auto tmp = loader.load();
+                AssetManager::getInstance()->set( filename, tmp );
+				group = tmp;
 			}
 			else {
 				ShallowCopy shallowCopy;
@@ -202,7 +202,7 @@ NodePtr LuaSceneBuilder::buildNode( ScriptEvaluator &eval, GroupPtr const &paren
 		}
 
 		eval.foreach( GROUP_NODES, [&]( ScriptEvaluator &childEval, int ) {
-			buildNode( childEval, group );
+            buildNode( childEval, crimild::get_ptr( group ) );
 		});
 
 		current = group;
@@ -225,7 +225,7 @@ NodePtr LuaSceneBuilder::buildNode( ScriptEvaluator &eval, GroupPtr const &paren
 	return current;
 }
 
-void LuaSceneBuilder::setupCamera( ScriptEvaluator &eval, CameraPtr const &camera )
+void LuaSceneBuilder::setupCamera( ScriptEvaluator &eval, SharedPointer< Camera > const &camera )
 {
     
     std::string renderPassType;
@@ -247,10 +247,10 @@ void LuaSceneBuilder::setupCamera( ScriptEvaluator &eval, CameraPtr const &camer
     camera->setFrustum( Frustumf( fov, aspect, near, far ) );
 }
 
-void LuaSceneBuilder::setTransformation( ScriptEvaluator &eval, NodePtr const &node )
+void LuaSceneBuilder::setTransformation( ScriptEvaluator &eval, SharedPointer< Node > const &node )
 {
 	Log::Debug << "Setting node transformation" << Log::End;
-    TransformationImpl t;
+    Transformation t;
     if ( eval.getPropValue( NODE_TRANSFORMATION, t ) ) {
         // this is related with Text nodes and their anchors
         node->local().translate() += t.translate();
@@ -259,7 +259,7 @@ void LuaSceneBuilder::setTransformation( ScriptEvaluator &eval, NodePtr const &n
     }
 }
 
-void LuaSceneBuilder::buildNodeComponents( ScriptEvaluator &eval, NodePtr const &node )
+void LuaSceneBuilder::buildNodeComponents( ScriptEvaluator &eval, SharedPointer< Node > const &node )
 {
 	eval.foreach( NODE_COMPONENTS, [&]( ScriptEvaluator &componentEval, int ) {
         std::string type;
