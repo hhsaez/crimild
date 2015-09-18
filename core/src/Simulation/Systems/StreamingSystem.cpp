@@ -85,17 +85,25 @@ void StreamingSystem::loadScene( std::string filename, SceneBuilder *builder )
     }
     
     _lastSceneFileName = filename;
+
+	// Althougth the actual loading happens in background, we trigger it
+	// in the main thread to ensure all systems are properly runnning. 
+	// Then, once the scene is completely loaded, we set it as the current 
+	// scene again in main thread to avoid changing scenes when rendering or updating
+	crimild::async( crimild::AsyncDispatchPolicy::MAIN_QUEUE, [builder, filename] {
+		Log::Debug << "Loading scene: " << filename << Log::End;
     
-    crimild::async( crimild::AsyncDispatchPolicy::BACKGROUND_QUEUE, [builder, filename] {
-        builder->reset();
+		crimild::async( crimild::AsyncDispatchPolicy::BACKGROUND_QUEUE, [builder, filename] {
+			builder->reset();
+			auto scene = builder->fromFile( FileSystem::getInstance().pathForResource( filename ) );
+			builder->reset();
+			Log::Debug << "Scene loaded: " << filename << Log::End;
         
-        auto scene = builder->fromFile( FileSystem::getInstance().pathForResource( filename ) );
-        
-        builder->reset();
-        
-        crimild::async( crimild::AsyncDispatchPolicy::MAIN_QUEUE, [scene] {
-            Simulation::getInstance()->setScene( scene );
-        });
-    });
+			crimild::async( crimild::AsyncDispatchPolicy::MAIN_QUEUE, [scene] {
+				Simulation::getInstance()->setScene( scene );
+			});
+		});
+
+	});
 }
 
