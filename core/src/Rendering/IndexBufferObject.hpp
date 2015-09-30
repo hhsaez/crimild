@@ -41,8 +41,6 @@ namespace crimild {
 		unsigned int getIndexCount( void ) const { return getSize(); }
 
 	};
-    
-    using IndexBufferObjectCatalog = Catalog< IndexBufferObject >;
 
 }
 

@@ -44,9 +44,6 @@ namespace crimild {
         CRIMILD_DISALLOW_COPY_AND_ASSIGN( AssetManager )
         
     public:
-        static constexpr const char *SHADER_PROGRAM_UNLIT_TEXTURE = "shaders/unlit/texture";
-        static constexpr const char *SHADER_PROGRAM_UNLIT_DIFFUSE = "shaders/unlit/diffuse";
-        
         static constexpr const char *FONT_DEFAULT = "fonts/default";
         
     public:

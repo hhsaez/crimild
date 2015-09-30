@@ -34,6 +34,7 @@
 #include "Simulation/AssetManager.hpp"
 #include "Simulation/FileSystem.hpp"
 #include "Primitives/Primitive.hpp"
+#include "Rendering/Renderer.hpp"
 #include "Rendering/Material.hpp"
 #include "Rendering/ImageTGA.hpp"
 #include "Rendering/ShaderProgram.hpp"
@@ -389,11 +390,11 @@ void OBJLoader::readMaterialShaderProgram( std::stringstream &line )
 
 	switch ( illumLevel ) {
 	    case 0:
-            _currentMaterial->setProgram( AssetManager::getInstance()->get< ShaderProgram >( AssetManager::SHADER_PROGRAM_UNLIT_TEXTURE ) );
+            _currentMaterial->setProgram( AssetManager::getInstance()->get< ShaderProgram >( Renderer::SHADER_PROGRAM_UNLIT_TEXTURE ) );
 			break;
 
         case 1:
-            _currentMaterial->setProgram( AssetManager::getInstance()->get< ShaderProgram >( AssetManager::SHADER_PROGRAM_UNLIT_DIFFUSE ) );
+            _currentMaterial->setProgram( AssetManager::getInstance()->get< ShaderProgram >( Renderer::SHADER_PROGRAM_UNLIT_DIFFUSE ) );
             break;
 
         case 3:

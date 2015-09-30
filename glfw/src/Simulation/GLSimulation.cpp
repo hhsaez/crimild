@@ -30,17 +30,9 @@
 #include "Systems/WindowSystem.hpp"
 #include "Systems/InputSystem.hpp"
 
-#include "Tasks/WindowTask.hpp"
-#include "Tasks/UpdateTimeTask.hpp"
-#include "Tasks/UpdateInputStateTask.hpp"
-#include "Tasks/UpdateSceneAndPhysicsTask.hpp"
-
-#include "Rendering/GL3/Renderer.hpp"
-
-#include <Crimild_Scripting.hpp>
+#include <Crimild_OpenGL.hpp>
 
 using namespace crimild;
-using namespace crimild::scripting;
 
 #ifdef CRIMILD_ENABLE_PHYSICS
 #include <Crimild_Physics.hpp>
@@ -57,7 +49,7 @@ GLSimulation::GLSimulation( std::string name, SettingsPtr const &settings )
     addSystem( crimild::alloc< WindowSystem >() );
     addSystem( crimild::alloc< InputSystem >() );
     
-    setRenderer( crimild::alloc< gl3::Renderer >() );
+    setRenderer( crimild::alloc< opengl::OpenGLRenderer >() );
 }
 
 GLSimulation::~GLSimulation( void )

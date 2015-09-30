@@ -26,8 +26,11 @@
  */
 
 #include "Rendering/BasicRenderPass.hpp"
+#include "Rendering/ShaderProgram.hpp"
 
 #include "Foundation/Log.hpp"
+
+#include "Simulation/AssetManager.hpp"
 
 using namespace crimild;
 
@@ -54,11 +57,12 @@ void BasicRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Came
     const Matrix4f &view = camera->getViewMatrix();
     
     renderQueue->each( objects, [&]( Material *material, RenderQueue::PrimitiveMap const &primitives ) {
-        auto program = material->getProgram() != nullptr ? material->getProgram() : renderer->getShaderProgram( "basic" );
-        if ( program == nullptr ) {
-            Log::Error << "No valid program for batch" << Log::End;
-            return;
+        if ( material->getProgram() == nullptr ) {
+            material->setProgram( renderer->getShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_TEXTURE ) );
         }
+
+        auto program = material->getProgram();
+        assert( program != nullptr && "No valid shader program to render primitive" );
         
         // bind program
         renderer->bindProgram( program );

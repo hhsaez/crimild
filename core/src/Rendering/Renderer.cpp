@@ -37,6 +37,8 @@
 #include "SceneGraph/Camera.hpp"
 #include "SceneGraph/Light.hpp"
 
+#include "Simulation/AssetManager.hpp"
+
 #include "Components/MaterialComponent.hpp"
 #include "Components/RenderStateComponent.hpp"
 
@@ -58,8 +60,6 @@ Renderer::Renderer( void )
 Renderer::~Renderer( void )
 {
     _screenBuffer = nullptr;
-    _framebuffers.clear();
-    _programs.clear();
     _screenPrimitive = nullptr;
     
     getShaderProgramCatalog()->unloadAll();
@@ -69,14 +69,26 @@ Renderer::~Renderer( void )
     getFrameBufferObjectCatalog()->unloadAll();
 }
 
-void Renderer::addFrameBuffer( std::string name, SharedPointer< FrameBufferObject > const &fbo )
+ShaderProgram *Renderer::getShaderProgram( std::string name )
 {
-	_framebuffers[ name ] = fbo;
+    return AssetManager::getInstance()->get< ShaderProgram >( name );
+}
+
+void Renderer::setShaderProgram( std::string name, SharedPointer< ShaderProgram > const &program )
+{
+    // assets stored by the renderer are assumed to be persistent
+    AssetManager::getInstance()->set( name, program, true );
+}
+
+void Renderer::setFrameBuffer( std::string name, SharedPointer< FrameBufferObject > const &fbo )
+{
+    // assets stored by the renderer are assumed to be persistent
+    AssetManager::getInstance()->set( name, fbo );
 }
 
 FrameBufferObject *Renderer::getFrameBuffer( std::string name )
 {
-    return crimild::get_ptr( _framebuffers[ name ] );
+    return AssetManager::getInstance()->get< FrameBufferObject >( name );
 }
 
 void Renderer::beginRender( void )

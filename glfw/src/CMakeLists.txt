@@ -2,6 +2,7 @@ SET( CRIMILD_INCLUDE_DIRECTORIES
 	${CRIMILD_SOURCE_DIR}/core/src 
 	${CRIMILD_SOURCE_DIR}/scripting/src 
 	${CRIMILD_SOURCE_DIR}/physics/src 
+	${CRIMILD_SOURCE_DIR}/opengl/src
 	${CRIMILD_SOURCE_DIR}/third-party/lua-5.2.3/src
 	${CRIMILD_SOURCE_DIR}/third-party/glfw/include
 	${CRIMILD_SOURCE_DIR}/third-party/glew/include )
@@ -9,6 +10,7 @@ SET( CRIMILD_INCLUDE_DIRECTORIES
 SET( CRIMILD_LIBRARY_LINK_LIBRARIES 
 	crimild_core
 	crimild_scripting
+	crimild_opengl
 	glfw )
 
 IF ( CRIMILD_ENABLE_PHYSICS )
@@ -20,8 +22,5 @@ IF ( CRIMILD_ENABLE_PHYSICS )
 		 ${CRIMILD_LIBRARY_LINK_LIBRARIES} 
 		 crimild_physics )
 ENDIF ( CRIMILD_ENABLE_PHYSICS )
-
-# Add GLEW sources as part of the library
-SET( CRIMILD_LIBRARY_ADDITIONAL_SOURCE_FILES ${CRIMILD_SOURCE_DIR}/third-party/glew/src/glew.c )
 
 INCLUDE( ModuleBuildLibrary )

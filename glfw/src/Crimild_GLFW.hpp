@@ -28,38 +28,9 @@
 #ifndef CRIMILD_GLFW_
 #define CRIMILD_GLFW_
 
-#include "Rendering/GL3/IndexBufferObjectCatalog.hpp"
-#include "Rendering/GL3/Renderer.hpp"
-#include "Rendering/GL3/ShaderProgramCatalog.hpp"
-#include "Rendering/GL3/TextureCatalog.hpp"
-#include "Rendering/GL3/Utils.hpp"
-#include "Rendering/GL3/VertexBufferObjectCatalog.hpp"
-
-#include "Rendering/GL3/Programs/ParticleSystemShaderProgram.hpp"
-#include "Rendering/GL3/Programs/SignedDistanceFieldShaderProgram.hpp"
-#include "Rendering/GL3/Programs/SkinningShaderProgram.hpp"
-
-#include "Rendering/GL3/ImageEffects/DepthOfFieldImageEffect.hpp"
-#include "Rendering/GL3/ImageEffects/SSAOImageEffect.hpp"
-#include "Rendering/GL3/ImageEffects/EmissiveGlowImageEffect.hpp"
-#include "Rendering/GL3/ImageEffects/SepiaToneImageEffect.hpp"
-#include "Rendering/GL3/ImageEffects/BloomImageEffect.hpp"
-
-#include "Rendering/GL3/Library/FlatMaterial.hpp"
-#include "Rendering/GL3/Library/FlatShaderProgram.hpp"
-#include "Rendering/GL3/Library/GouraudMaterial.hpp"
-#include "Rendering/GL3/Library/GouraudShaderProgram.hpp"
-#include "Rendering/GL3/Library/PhongMaterial.hpp"
-#include "Rendering/GL3/Library/PhongShaderProgram.hpp"
-#include "Rendering/GL3/Library/ScreenShaderProgram.hpp"
-#include "Rendering/GL3/Library/SepiaToneShaderProgram.hpp"
-
-#include "SceneGraph/ParticleSystem.hpp"
-
 #include "Simulation/GLSimulation.hpp"
 
-#include "Simulation/Tasks/LoadSceneTask.hpp"
-#include "Simulation/Tasks/UpdateInputStateTask.hpp"
+#include "Simulation/Systems/InputSystem.hpp"
 
 #endif
 

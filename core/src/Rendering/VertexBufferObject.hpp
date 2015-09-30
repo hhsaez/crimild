@@ -59,8 +59,6 @@ namespace crimild {
 		unsigned int _vertexCount;
 	};
 
-    using VertexBufferObjectCatalog = Catalog< VertexBufferObject >;
-
 }
 
 #endif

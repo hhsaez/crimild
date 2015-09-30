@@ -46,8 +46,6 @@ namespace crimild {
 	private:
 		SharedPointer< Image > _image;
 	};
-
-	using TextureCatalog = Catalog< Texture >;
 	
 }
 

@@ -30,6 +30,7 @@
 #include "Rendering/FrameBufferObject.hpp"
 #include "Rendering/RenderQueue.hpp"
 #include "Rendering/ImageEffect.hpp"
+#include "Rendering/ShaderProgram.hpp"
 
 #include "SceneGraph/Geometry.hpp"
 
@@ -41,6 +42,8 @@
 
 #include "Foundation/Log.hpp"
 #include "Foundation/Profiler.hpp"
+
+#include "Simulation/AssetManager.hpp"
 
 using namespace crimild;
 
@@ -107,9 +110,19 @@ FrameBufferObject *ForwardRenderPass::getSceneFBO( Renderer *renderer )
     sceneFBO->getRenderTargets().add( "color", crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
     sceneFBO->getRenderTargets().add( "depth", crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER_AND_TEXTURE, width, height ) );
 
-    renderer->addFrameBuffer( "scene", sceneFBO );
+    renderer->setFrameBuffer( "scene", sceneFBO );
     
     return crimild::get_ptr( sceneFBO );
+}
+
+ShaderProgram *ForwardRenderPass::getForwardProgram( void )
+{
+    if ( _forwardProgram == nullptr ) {
+        _forwardProgram = AssetManager::getInstance()->get< ShaderProgram >( Renderer::SHADER_PROGRAM_RENDER_PASS_FORWARD );
+    }
+    
+    assert( _forwardProgram != nullptr );
+    return _forwardProgram;
 }
 
 void ForwardRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
@@ -175,8 +188,8 @@ void ForwardRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *rend
 void ForwardRenderPass::renderShadedObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
 {
     CRIMILD_PROFILE( "Render Shaded Objects" )
-
-    auto program = renderer->getShaderProgram( "forward" );
+    
+    auto program = getForwardProgram();
 
     // bind program
     renderer->bindProgram( program );
@@ -252,7 +265,7 @@ void ForwardRenderPass::renderNonShadedObjects( Renderer *renderer, RenderQueue 
 {
     CRIMILD_PROFILE( "Render Non-Shaded Objects" )
     
-    auto program = renderer->getShaderProgram( "forward" );
+    auto program = getForwardProgram();
     
     // bind program
     renderer->bindProgram( program );

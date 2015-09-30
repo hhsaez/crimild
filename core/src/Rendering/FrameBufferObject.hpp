@@ -105,8 +105,7 @@ namespace crimild {
 		RGBAColorf _clearColor;
         RenderTargetMap _renderTargets;
 	};
-    
-	using FrameBufferObjectCatalog = Catalog< FrameBufferObject >;
+
 }
 
 #endif

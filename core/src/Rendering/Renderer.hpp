@@ -69,16 +69,6 @@ namespace crimild {
 	public:
 		virtual void configure( void ) = 0;
 
-        void setScreenBuffer( SharedPointer< FrameBufferObject > const &screenBuffer ) { _screenBuffer = screenBuffer; }
-        FrameBufferObject *getScreenBuffer( void ) { return crimild::get_ptr( _screenBuffer ); }
-
-		void addFrameBuffer( std::string name, SharedPointer< FrameBufferObject > const &fbo );
-		FrameBufferObject *getFrameBuffer( std::string name );
-
-	private:
-		SharedPointer< FrameBufferObject > _screenBuffer;
-		std::map< std::string, SharedPointer< FrameBufferObject >> _framebuffers;
-
 	public:
         virtual void setViewport( const Rectf &viewport ) { }
         
@@ -153,16 +143,29 @@ namespace crimild {
 
 	private:
 		SharedPointer< Primitive > _screenPrimitive;
-
-	public:
-		virtual void addShaderProgram( std::string key, SharedPointer< ShaderProgram > const &program ) { _programs[ key ] = program; }
-        virtual ShaderProgram *getShaderProgram( std::string key ) { return crimild::get_ptr( _programs[ key ] ); }
-
-        virtual ShaderProgram *getFallbackProgram( Material *, Geometry *, Primitive * ) { return nullptr; }
-
-	public:
-		SharedPointer< Material > _defaultMaterial;
-		std::map< std::string, SharedPointer< ShaderProgram >> _programs;
+        
+    public:
+        void setScreenBuffer( SharedPointer< FrameBufferObject > const &screenBuffer ) { _screenBuffer = screenBuffer; }
+        FrameBufferObject *getScreenBuffer( void ) { return crimild::get_ptr( _screenBuffer ); }
+        
+        void setFrameBuffer( std::string name, SharedPointer< FrameBufferObject > const &fbo );
+        FrameBufferObject *getFrameBuffer( std::string name );
+        
+    private:
+        SharedPointer< FrameBufferObject > _screenBuffer;
+        
+    public:
+        static constexpr const char *SHADER_PROGRAM_RENDER_PASS_FORWARD = "shaders/render_pass/forward";
+        static constexpr const char *SHADER_PROGRAM_LIT_TEXTURE = "shaders/lighting/texture";
+        static constexpr const char *SHADER_PROGRAM_LIT_DIFFUSE = "shaders/lighting/diffuse";
+        static constexpr const char *SHADER_PROGRAM_UNLIT_TEXTURE = "shaders/unlit/texture";
+        static constexpr const char *SHADER_PROGRAM_UNLIT_DIFFUSE = "shaders/unlit/diffuse";
+        static constexpr const char *SHADER_PROGRAM_TEXT_BASIC = "shaders/text/basic";
+        static constexpr const char *SHADER_PROGRAM_TEXT_SDF = "shaders/text/sdf";
+        static constexpr const char *SHADER_PROGRAM_SCREEN_TEXTURE = "shaders/misc/screen";
+        
+        void setShaderProgram( std::string name, SharedPointer< ShaderProgram > const &program );
+        ShaderProgram *getShaderProgram( std::string name );
 
 	public:
         Catalog< ShaderProgram > *getShaderProgramCatalog( void ) { return crimild::get_ptr( _shaderProgramCatalog ); }

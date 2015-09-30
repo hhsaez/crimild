@@ -53,12 +53,16 @@ namespace crimild {
         virtual void renderShadedObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
         virtual void renderNonShadedObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
         
+        inline ShaderProgram *getForwardProgram( void );
+        
     private:
         FrameBufferObject *getSceneFBO( Renderer *renderer );
         
         void computeShadowMaps( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
         
         std::map< Light *, SharedPointer< ShadowMap >> _shadowMaps;
+        
+        ShaderProgram *_forwardProgram = nullptr;
 	};
     
 }

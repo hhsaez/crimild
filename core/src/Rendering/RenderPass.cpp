@@ -38,6 +38,8 @@
 #include "Foundation/Log.hpp"
 #include "Foundation/Profiler.hpp"
 
+#include "Simulation/AssetManager.hpp"
+
 using namespace crimild;
 
 RenderPass::RenderPass( void )
@@ -64,13 +66,11 @@ void RenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Camera *c
     const Matrix4f &view = renderQueue->getViewMatrix();
     
     renderQueue->each( objects, [&]( Material *material, RenderQueue::PrimitiveMap const &primitives ) {
-        auto program = material->getProgram() != nullptr ? material->getProgram() : renderer->getShaderProgram( "phong" );
-        if ( program == nullptr ) {
-            Log::Error << "No valid program for batch" << Log::End;
-            return;
+        if ( material->getProgram() == nullptr ) {
+            material->setProgram( renderer->getShaderProgram( Renderer::SHADER_PROGRAM_LIT_TEXTURE ) );
         }
-        
-        // TODO: assign default program to material so we don't need to fetch it again
+        auto program = material->getProgram();
+        assert( program != nullptr && "No valid program to render batch" );
         
         // bind program
         renderer->bindProgram( program );
@@ -123,11 +123,10 @@ void RenderPass::render( Renderer *renderer, Texture *texture, ShaderProgram *de
 {
     auto program = defaultProgram;
     if ( program == nullptr ) {
-        program = renderer->getFallbackProgram( nullptr, nullptr, nullptr );
-        if ( program == nullptr ) {
-            return;
-        }
+        program = renderer->getShaderProgram( Renderer::SHADER_PROGRAM_SCREEN_TEXTURE );
     }
+    
+    assert( program && "No valid program to render texture" );
     
     // bind shader program first
     renderer->bindProgram( program );
@@ -180,11 +179,11 @@ void RenderPass::renderScreenObjects( Renderer *renderer, RenderQueue *renderQue
     view.makeIdentity();
     
     renderQueue->each( renderQueue->getScreenObjects(), [&]( Material *material, RenderQueue::PrimitiveMap const &primitives ) {
-        auto program = material->getProgram() != nullptr ? material->getProgram() : renderer->getShaderProgram( "phong" );
-        if ( program == nullptr ) {
-            Log::Error << "No valid program for batch" << Log::End;
-            return;
+        if ( material->getProgram() == nullptr ) {
+            material->setProgram( renderer->getShaderProgram( Renderer::SHADER_PROGRAM_LIT_TEXTURE ) );
         }
+        auto program = material->getProgram();
+        assert( program != nullptr && "No valid program to render batch" );
         
         // bind program
         renderer->bindProgram( program );

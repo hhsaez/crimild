@@ -1,7 +1,5 @@
 #include "WindowSystem.hpp"
 
-#include "Rendering/GL3/Renderer.hpp"
-
 using namespace crimild;
 
 WindowSystem::WindowSystem( void )

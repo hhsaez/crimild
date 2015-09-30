@@ -154,8 +154,6 @@ namespace crimild {
         SharedObjectArray< ShaderUniform > _uniforms;
 	};
 
-    using ShaderProgramCatalog = Catalog< ShaderProgram >;
-
 }
 
 #endif

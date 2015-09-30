@@ -33,6 +33,7 @@
 #include "Rendering/ShaderProgram.hpp"
 #include "Foundation/Log.hpp"
 #include "Primitives/Primitive.hpp"
+#include "Simulation/AssetManager.hpp"
 
 using namespace crimild;
 
@@ -63,7 +64,7 @@ FrameBufferObject *ImageEffect::getFrameBuffer( Renderer *renderer, std::string 
         }
         
         auto newFBO = std::move( crimild::alloc< FrameBufferObject >( width, height ) );
-        renderer->addFrameBuffer( name, newFBO );
+        renderer->setFrameBuffer( name, newFBO );
         fbo = crimild::get_ptr( newFBO );
         
         fbo->getRenderTargets().add( "depth", crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
@@ -75,7 +76,8 @@ FrameBufferObject *ImageEffect::getFrameBuffer( Renderer *renderer, std::string 
 
 void ImageEffect::renderScreen( Renderer *renderer, Texture *texture )
 {
-    auto program = renderer->getShaderProgram( "screen" );
+    // TODO: keep a reference to program to avoid string comparision every frame
+    auto program = renderer->getShaderProgram( Renderer::SHADER_PROGRAM_SCREEN_TEXTURE );
     if ( program == nullptr ) {
         Log::Error << "No shader program provided with name 'texture'" << Log::End;
         return;

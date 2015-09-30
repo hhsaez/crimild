@@ -145,7 +145,7 @@ SharedPointer< Node > LuaSceneBuilder::buildNode( ScriptEvaluator &eval, Group *
         }
 
 		auto material = text->getMaterial();
-		material->setProgram( Simulation::getInstance()->getRenderer()->getShaderProgram( "sdf" ) );
+        material->setProgram( Simulation::getInstance()->getRenderer()->getShaderProgram( Renderer::SHADER_PROGRAM_TEXT_SDF ) );
         
         RGBAColorf textColor;
         if ( eval.getPropValue( "textColor", textColor ) ) {

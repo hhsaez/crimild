@@ -49,7 +49,7 @@ void DebugRenderHelper::renderLines( Renderer *renderer, Camera *camera, const V
     auto alphaState = AssetManager::getInstance()->get< AlphaState >( CRIMILD_DEBUG_RENDER_HELPER_ALPHA_STATE );
     auto linesVBO = AssetManager::getInstance()->get< VertexBufferObject >( CRIMILD_DEBUG_RENDER_HELPER_VBO_LINES );
     
-    auto program= renderer->getShaderProgram( "flat" );
+    auto program = renderer->getShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_DIFFUSE );
 	if ( program == nullptr ) {
 		Log::Error << "No program found for debug rendering" << Log::End;
 		return;
@@ -114,7 +114,7 @@ void DebugRenderHelper::render( Renderer *renderer, Camera *camera, Primitive *p
     auto depthState = AssetManager::getInstance()->get< DepthState >( CRIMILD_DEBUG_RENDER_HELPER_DEPTH_STATE );
     auto alphaState = AssetManager::getInstance()->get< AlphaState >( CRIMILD_DEBUG_RENDER_HELPER_ALPHA_STATE );
 
-    auto program = renderer->getShaderProgram( "flat" );
+    auto program = renderer->getShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_DIFFUSE );
 	if ( program == nullptr ) {
 		Log::Error << "No program found for debug rendering" << Log::End;
 		return;
