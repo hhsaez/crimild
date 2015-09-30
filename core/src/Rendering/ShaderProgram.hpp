@@ -128,6 +128,19 @@ namespace crimild {
         VertexShader *getVertexShader( void ) { return crimild::get_ptr( _vertexShader ); }
         FragmentShader *getFragmentShader( void ) { return crimild::get_ptr( _fragmentShader ); }
 
+	protected:
+		/*
+		  \brief Default constructor 
+		  \warning Internal use only
+
+		  This constructor is intended to be used by derived clases only, providing
+		  the shader code inside the implemenation. See OpenGL stock shaders for examples
+		 */
+		ShaderProgram( void );
+
+		void setVertexShader( SharedPointer< VertexShader > const &vs ) { _vertexShader = vs; }
+		void setFragmentShader( SharedPointer< FragmentShader > const &fs ) { _fragmentShader = fs; }
+
 	private:
 		SharedPointer< VertexShader > _vertexShader;
 		SharedPointer< FragmentShader > _fragmentShader;

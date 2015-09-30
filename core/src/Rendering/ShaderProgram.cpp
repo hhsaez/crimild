@@ -29,6 +29,11 @@
 
 using namespace crimild;
 
+ShaderProgram::ShaderProgram( void )
+{
+
+}
+
 ShaderProgram::ShaderProgram( SharedPointer< VertexShader > const &vs, SharedPointer< FragmentShader > const &fs )
 	: _vertexShader( vs ),
 	  _fragmentShader( fs )
