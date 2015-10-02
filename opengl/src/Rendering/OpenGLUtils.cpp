@@ -50,6 +50,7 @@ void OpenGLUtils::checkErrors( std::string prefix )
 				errorDescription += "GL_INVALID_OPERATION";
 				break;
 
+#ifdef CRIMILD_PLATFORM_DESKTOP
 			case GL_STACK_OVERFLOW:
 				errorDescription += "GL_STACK_OVERFLOW";  
 				break;
@@ -57,7 +58,7 @@ void OpenGLUtils::checkErrors( std::string prefix )
 			case GL_STACK_UNDERFLOW: 
 				errorDescription += "GL_STACK_UNDERFLOW";
 				break;
-
+#endif
 			case GL_OUT_OF_MEMORY: 
 				errorDescription += "GL_OUT_OF_MEMORY";
 				break;
@@ -67,18 +68,39 @@ void OpenGLUtils::checkErrors( std::string prefix )
 				break;
     	}
 
-    	Log::Error << prefix << ": " << "(0x" << error << ") " << errorDescription << " " << glewGetErrorString( error ) << Log::End; 
+    	Log::Error << prefix << ": " << "(0x"
+                   << error << ") " << errorDescription
+#ifdef CRIMILD_PLATFORM_DESKTOP
+                   << " " << glewGetErrorString( error )
+#endif
+                   << Log::End;
     }
 }
 
 SharedPointer< VertexShader > OpenGLUtils::getVertexShaderInstance( std::string source )
 {
-    return crimild::alloc< VertexShader >( "#version 150\n" + source );
+	std::string prefix =
+#ifdef CRIMILD_PLATFORM_DESKTOP
+	#include "Rendering/Programs/_ShaderPrefixDesktop.txt"
+#else
+	#include "Rendering/Programs/_ShaderPrefixMobile.txt"
+#endif
+	;
+
+    return crimild::alloc< VertexShader >( prefix + source );
 }
 
 SharedPointer< FragmentShader > OpenGLUtils::getFragmentShaderInstance( std::string source )
 {
-    return crimild::alloc< FragmentShader >( "#version 150\n" + source );
+	std::string prefix =
+#ifdef CRIMILD_PLATFORM_DESKTOP
+	#include "Rendering/Programs/_ShaderPrefixDesktop.txt"
+#else
+	#include "Rendering/Programs/_ShaderPrefixMobile.txt"
+#endif
+	;
+
+    return crimild::alloc< FragmentShader >( prefix + source );
 }
 
 std::string OpenGLUtils::buildArrayShaderLocationName( std::string variable, int index )

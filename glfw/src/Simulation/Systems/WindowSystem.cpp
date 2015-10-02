@@ -55,6 +55,7 @@ void WindowSystem::update( void )
 	glfwPollEvents();
     
 	if ( !glfwWindowShouldClose( _window ) ) {
+        broadcastMessage( crimild::messaging::RenderNextFrame {} );
 		glfwSwapBuffers( _window );
 
 	    if ( delta < 0.002 ) {
@@ -68,7 +69,7 @@ void WindowSystem::update( void )
 	else {
 		Simulation::getInstance()->stop();
 	}
-
+    
     crimild::async( crimild::AsyncDispatchPolicy::MAIN_QUEUE, std::bind( &WindowSystem::update, this ) );
 }
 

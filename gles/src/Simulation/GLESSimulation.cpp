@@ -13,6 +13,8 @@
 using namespace crimild;
 using namespace crimild::gles;
 
+#if 0
+
 GLESSimulation::GLESSimulation( void )
     : Simulation( "gles", 0, nullptr )
 {
@@ -24,4 +26,6 @@ GLESSimulation::~GLESSimulation( void )
 {
     
 }
+
+#endif
 

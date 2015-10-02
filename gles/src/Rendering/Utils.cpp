@@ -27,6 +27,8 @@
 
 #include "Utils.hpp"
 
+#if 0
+
 #ifdef __APPLE__
 #import <OpenGLES/ES3/gl.h>
 #import <OpenGLES/ES3/glext.h>
@@ -101,4 +103,6 @@ std::string gles::Utils::buildArrayShaderLocationName( std::string variable, int
     str << variable << "[" << index << "]." << member;
     return str.str();
 }
+
+#endif
 

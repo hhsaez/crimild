@@ -38,7 +38,7 @@ namespace crimild {
     
     class Node;
 
-	class SceneBuilder {
+    class SceneBuilder : public SharedObject {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( SceneBuilder )
 
 	protected:

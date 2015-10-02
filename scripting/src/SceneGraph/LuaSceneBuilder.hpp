@@ -35,20 +35,19 @@ namespace crimild {
 	namespace scripting {
 
 		class LuaSceneBuilder :
-            public SharedObject,
             public crimild::scripting::Scripted,
             public crimild::SceneBuilder {
                 
 		private:
-			typedef std::function< SharedPointer< Node > ( crimild::scripting::ScriptEvaluator & ) > NodeBuilderFunction;
-			typedef std::function< SharedPointer< NodeComponent > ( crimild::scripting::ScriptEvaluator & ) > ComponentBuilderFunction;
+			using NodeBuilderFunction = std::function< SharedPointer< Node > ( crimild::scripting::ScriptEvaluator & ) >;
+			using ComponentBuilderFunction = std::function< SharedPointer< NodeComponent > ( crimild::scripting::ScriptEvaluator & ) >;
 
 		public:
 			LuaSceneBuilder( std::string rootNodeName = "scene" );
 
 			virtual ~LuaSceneBuilder( void );
 
-			virtual void reset( void );
+			virtual void reset( void ) override;
 
             virtual SharedPointer< Node > fromFile( const std::string &filename ) override;
 

@@ -151,8 +151,9 @@ int ShaderProgramCatalog::compileShader( Shader *shader, int type )
 {
 	GLuint shaderId = glCreateShader( type );
     if ( shaderId > 0 ) {
-		const char *source = shader->getSource();
-		glShaderSource( shaderId, 1, ( const GLchar ** ) &source, NULL );
+		const char *src = shader->getSource().c_str();
+        const GLint srcLength = ( GLint ) shader->getSource().length();
+		glShaderSource( shaderId, 1, ( const GLchar ** ) &src, &srcLength );
         glCompileShader( shaderId );
 
         GLint compiled = GL_FALSE;
@@ -167,7 +168,9 @@ int ShaderProgramCatalog::compileShader( Shader *shader, int type )
                     glGetShaderInfoLog( shaderId, infoLen, NULL, buf );
                     Log::Fatal << "Could not compile "
                         << ( type == GL_VERTEX_SHADER ? "vertex" : "fragment" ) << " shader. "
-                        << "Reason: " << buf << Log::End;
+                        << "Reason: " << buf
+                        << "\nSource: " << src
+                        << Log::End;
                     free( buf );
                     exit( 1 );
                 }

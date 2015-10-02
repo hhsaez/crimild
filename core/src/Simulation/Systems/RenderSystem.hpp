@@ -38,6 +38,7 @@ namespace crimild {
 
 	namespace messaging {
         
+        struct RenderNextFrame { };
         struct WillRenderScene { };
         struct DidRenderScene { };
         

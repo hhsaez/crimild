@@ -30,6 +30,8 @@
 
 using namespace crimild;
 
+#if 0
+
 const char *texture_vs = { CRIMILD_TO_STRING(
      attribute vec3 aPosition;
      attribute vec2 aTextureCoord;
@@ -77,4 +79,6 @@ gles::TextureShaderProgram::~TextureShaderProgram( void )
 { 
 }
 
+
+#endif
 

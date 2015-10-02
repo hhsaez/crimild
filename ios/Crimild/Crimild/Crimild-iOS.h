@@ -8,6 +8,7 @@
 
 #import <Crimild.hpp>
 #import <Crimild_Scripting.hpp>
+#import <Crimild_OpenGL.hpp>
 
 #import "CrimildViewController.h"
 

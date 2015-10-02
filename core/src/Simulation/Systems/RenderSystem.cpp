@@ -36,20 +36,7 @@ using namespace crimild;
 RenderSystem::RenderSystem( void )
 	: System( "Render System" )
 {
-    auto self = this;
-	registerMessageHandler< messaging::RenderQueueAvailable >( [&]( messaging::RenderQueueAvailable const &message ) {
-        if ( _renderQueue != nullptr ) {
-            if ( _renderQueue->getTimestamp() >= message.renderQueue->getTimestamp() ) {
-                return;
-            }
-        }
-        
-		_renderQueue = message.renderQueue;
-	});
-    
-    registerMessageHandler< messaging::SceneChanged >( [self]( messaging::SceneChanged const &message ) {
-        self->_renderQueue = nullptr;
-    });
+
 }
 
 RenderSystem::~RenderSystem( void )
@@ -63,7 +50,25 @@ bool RenderSystem::start( void )
 		return false;
 	}
     
-    crimild::async( crimild::AsyncDispatchPolicy::MAIN_QUEUE, std::bind( &RenderSystem::renderFrame, this ) );
+    auto self = this;
+    
+    registerMessageHandler< messaging::RenderQueueAvailable >( [&]( messaging::RenderQueueAvailable const &message ) {
+        if ( _renderQueue != nullptr ) {
+            if ( _renderQueue->getTimestamp() >= message.renderQueue->getTimestamp() ) {
+                return;
+            }
+        }
+        
+        _renderQueue = message.renderQueue;
+    });
+    
+    registerMessageHandler< messaging::SceneChanged >( [self]( messaging::SceneChanged const &message ) {
+        self->_renderQueue = nullptr;
+    });
+    
+    registerMessageHandler< messaging::RenderNextFrame >( [self]( messaging::RenderNextFrame const &message ) {
+        self->renderFrame();
+    });
 
 	return true;
 }
@@ -115,12 +120,14 @@ void RenderSystem::renderFrame( void )
 #endif
     
     broadcastMessage( messaging::DidRenderScene {} );
-    
-    crimild::async( crimild::AsyncDispatchPolicy::MAIN_QUEUE, std::bind( &RenderSystem::renderFrame, this ) );
 }
 
 void RenderSystem::stop( void )
 {
 	System::stop();
+    
+    unregisterMessageHandler< messaging::RenderQueueAvailable >();
+    unregisterMessageHandler< messaging::SceneChanged >();
+    unregisterMessageHandler< messaging::RenderNextFrame >();
 }
 

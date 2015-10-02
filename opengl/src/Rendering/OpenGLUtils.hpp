@@ -30,10 +30,18 @@
 
 #include <Crimild.hpp>
 
-#ifndef CRIMILD_PLATFORM_MOBILE
-#define GLEW_STATIC 1
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+#ifdef CRIMILD_PLATFORM_DESKTOP
+    #define GLEW_STATIC 1
+    #include <GL/glew.h>
+    #include <GLFW/glfw3.h>
+#else
+    #ifdef __APPLE__
+        #import <OpenGLES/ES3/gl.h>
+        #import <OpenGLES/ES3/glext.h>
+    #else
+        #include <GLES2/gl2.h>
+        #include <GLES2/gl2ext.h>
+    #endif
 #endif
 
 namespace crimild {

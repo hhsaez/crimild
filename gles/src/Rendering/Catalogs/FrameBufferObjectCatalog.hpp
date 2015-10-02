@@ -30,6 +30,8 @@
 
 #include <Crimild.hpp>
 
+#if 0
+
 namespace crimild {
     
     namespace gles {
@@ -63,6 +65,8 @@ namespace crimild {
     }
     
 }
+
+#endif
 
 #endif
 

@@ -95,8 +95,6 @@ bool FixedAllocator::makeNewChunk( void )
 	_allocChunk = &_chunks.back();
 	_deallocChunk = &_chunks.front();
     
-    Log::Debug << "Created new chunk with " << _blockSize << " bytes" << Log::End;
-    
 	return true;
 }
 

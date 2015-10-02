@@ -30,6 +30,8 @@
 
 #include <Crimild.hpp>
 
+#if 0
+
 #include <map>
 #include <string>
 
@@ -62,6 +64,8 @@ namespace crimild {
 #else
 #define CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION
 #define CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION
+#endif
+
 #endif
 
 #endif

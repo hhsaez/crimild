@@ -67,7 +67,9 @@ OpenGLRenderer::OpenGLRenderer( SharedPointer< FrameBufferObject > const &screen
     setShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_TEXTURE, crimild::alloc< UnlitTextureShaderProgram >() );
 	setShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_DIFFUSE, crimild::alloc< UnlitDiffuseShaderProgram >() );
     
+#ifdef CRIMILD_PLATFORM_DESKTOP
     setShaderProgram( Renderer::SHADER_PROGRAM_TEXT_SDF, crimild::alloc< SignedDistanceFieldShaderProgram >() );
+#endif
     setShaderProgram( Renderer::SHADER_PROGRAM_TEXT_BASIC, crimild::alloc< UnlitTextureShaderProgram >() );
 
 	setShaderProgram( Renderer::SHADER_PROGRAM_SCREEN_TEXTURE, crimild::alloc< ScreenTextureShaderProgram >() );
@@ -104,10 +106,12 @@ void OpenGLRenderer::configure( void )
 
     glEnable( GL_DEPTH_TEST );
     glDepthFunc( GL_LESS );
-    glEnable( GL_PROGRAM_POINT_SIZE );
     glEnable( GL_CULL_FACE );
     glCullFace( GL_BACK );
 
+#ifdef CRIMILD_PLATFORM_DESKTOP
+    glEnable( GL_PROGRAM_POINT_SIZE );
+#endif
     
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }

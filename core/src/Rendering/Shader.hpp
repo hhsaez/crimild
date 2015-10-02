@@ -39,7 +39,7 @@ namespace crimild {
 		explicit Shader( std::string source );
 		virtual ~Shader( void );
 
-		const char *getSource( void ) const { return _source.c_str(); }
+        const std::string &getSource( void ) const { return _source; }
 
 	private:
 		std::string _source;

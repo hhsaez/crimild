@@ -29,6 +29,11 @@
 
 #include "Rendering/OpenGLUtils.hpp"
 
+// TODO: this will cause visual artifacts in some platforms. use with care
+#ifndef GL_BGR
+    #define GL_BGR GL_RGB
+#endif
+
 using namespace crimild;
 using namespace crimild::opengl;
 

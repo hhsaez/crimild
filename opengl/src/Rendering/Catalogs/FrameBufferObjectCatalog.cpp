@@ -136,9 +136,11 @@ void FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
                     break;
 
                 case RenderTarget::Type::DEPTH_32:
+#ifdef CRIMILD_PLATFORM_DESKTOP
                     internalFormat = target->useFloatTexture() ? GL_DEPTH_COMPONENT32F : GL_DEPTH_COMPONENT32;
                     attachment = GL_DEPTH_ATTACHMENT;
                     textureFormat = GL_DEPTH_COMPONENT;
+#endif
                     break;
 
                 case RenderTarget::Type::COLOR_RGB:
@@ -199,14 +201,6 @@ void FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
                 Log::Error << "Cannot setup FrameBuffer. Error configuring attachments" << Log::End;
                 exit( 1 );
                 break;
-            case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
-                Log::Error << "Cannot setup FrameBuffer. Attachments are not enabled for drawing" << Log::End;
-                exit( 1 );
-                break;
-            case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
-                Log::Error << "Cannot setup FrameBuffer. Layer params don't match" << Log::End;
-                exit( 1 );
-                break;
             case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
                 Log::Error << "Cannot setup FrameBuffer. No attachments found" << Log::End;
                 exit( 1 );
@@ -215,10 +209,20 @@ void FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
                 Log::Error << "Cannot setup FrameBuffer. Multisample params don't match" << Log::End;
                 exit( 1 );
                 break;
+#ifdef CRIMILD_PLATFORM_DESKTOP
+            case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+                Log::Error << "Cannot setup FrameBuffer. Attachments are not enabled for drawing" << Log::End;
+                exit( 1 );
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
+                Log::Error << "Cannot setup FrameBuffer. Layer params don't match" << Log::End;
+                exit( 1 );
+                break;
             case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
                 Log::Error << "Cannot setup FrameBuffer. Attachments are not enabled for reading" << Log::End;
                 exit( 1 );
                 break;
+#endif
             default:
                 Log::Error << "Incomplete framebuffer object. Unknown error code: " << ( int ) status << Log::End;
                 exit( 1 );

@@ -75,10 +75,9 @@ SharedPointer< Node > LuaSceneBuilder::buildNode( ScriptEvaluator &eval, Group *
     std::string type;
     eval.getPropValue( NODE_TYPE, type, "" );
 
-	auto nodeBuilder = _nodeBuilders[ type ];
-	if ( nodeBuilder != nullptr ) {
+	if ( type != "" && _nodeBuilders.find( type ) != _nodeBuilders.end() ) {
 		Log::Debug << "Building '" << type << "' node" << Log::End;
-		current = nodeBuilder( eval );
+		current = _nodeBuilders[ type ]( eval );
 	}
 	else if ( type == CAMERA_TYPE ) {
 		Log::Debug << "Building 'camera' node" << Log::End;

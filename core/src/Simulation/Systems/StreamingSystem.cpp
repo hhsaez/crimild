@@ -79,24 +79,31 @@ void StreamingSystem::onReloadScene( messaging::ReloadScene const &message )
 
 void StreamingSystem::loadScene( std::string filename, SceneBuilder *builder )
 {
-    if ( builder == nullptr ) {
+    if ( builder != nullptr ) {
+        _sceneBuilder = crimild::retain( builder );
+    }
+    
+    if ( _sceneBuilder == nullptr ) {
         Log::Error << "Undefined scene builder" << Log::End;
         return;
     }
     
     _lastSceneFileName = filename;
+    
+    // get an owner for the builder that we can use in the lambdas below
+    auto sceneBuilder = crimild::retain( getSceneBuilder() );
 
 	// Althougth the actual loading happens in background, we trigger it
 	// in the main thread to ensure all systems are properly runnning. 
 	// Then, once the scene is completely loaded, we set it as the current 
 	// scene again in main thread to avoid changing scenes when rendering or updating
-	crimild::async( crimild::AsyncDispatchPolicy::MAIN_QUEUE, [builder, filename] {
+	crimild::async( crimild::AsyncDispatchPolicy::MAIN_QUEUE, [sceneBuilder, filename] {
 		Log::Debug << "Loading scene: " << filename << Log::End;
     
-		crimild::async( crimild::AsyncDispatchPolicy::BACKGROUND_QUEUE, [builder, filename] {
-			builder->reset();
-			auto scene = builder->fromFile( FileSystem::getInstance().pathForResource( filename ) );
-			builder->reset();
+		crimild::async( crimild::AsyncDispatchPolicy::BACKGROUND_QUEUE, [sceneBuilder, filename] {
+			sceneBuilder->reset();
+			auto scene = sceneBuilder->fromFile( FileSystem::getInstance().pathForResource( filename ) );
+			sceneBuilder->reset();
 			Log::Debug << "Scene loaded: " << filename << Log::End;
         
 			crimild::async( crimild::AsyncDispatchPolicy::MAIN_QUEUE, [scene] {

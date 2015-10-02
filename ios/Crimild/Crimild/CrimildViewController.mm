@@ -8,9 +8,7 @@
 
 #import "CrimildViewController.h"
 
-#import <Crimild_GLES.hpp>
-
-#import <OpenGLES/ES2/glext.h>
+#import <Crimild_OpenGL.hpp>
 
 @interface CrimildViewController () {
     crimild::SharedPointer< crimild::Simulation > _simulation;
@@ -77,14 +75,15 @@
 }
 
 - (crimild::Simulation *)simulation {
-    return crimild::getRawPointer(_simulation);
+    return crimild::get_ptr(_simulation);
 }
 
 #pragma mark - Crimild setup
 
 - (void)setupCrimild
 {
-    _simulation = crimild::alloc< crimild::gles::GLESSimulation >();
+    _simulation = crimild::alloc< crimild::Simulation >( "crimild", nullptr );
+    _simulation->setRenderer( crimild::alloc< crimild::opengl::OpenGLRenderer >() );
 
     NSString *tileDirectory = [[NSBundle mainBundle] resourcePath];
     crimild::FileSystem::getInstance().setBaseDirectory( [tileDirectory UTF8String] );
@@ -105,7 +104,7 @@
 {
     [EAGLContext setCurrentContext:self.context];
 
-    glBindVertexArrayOES(0);
+    glBindVertexArray(0);
 }
 
 - (void)tearDownGL
@@ -117,13 +116,15 @@
 
 - (void)update
 {
-
+    if ( _simulation != nullptr ) {
+        _simulation->update();
+    }
 }
 
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect
 {
     if ( _simulation != nullptr ) {
-        _simulation->update();
+        _simulation->broadcastMessage( crimild::messaging::RenderNextFrame {} );
     }
 }
 

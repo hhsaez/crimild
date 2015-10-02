@@ -32,48 +32,16 @@
 using namespace crimild;
 using namespace crimild::opengl;
 
-const char *unlit_texture_vs = { CRIMILD_TO_STRING(
-	in vec3 aPosition;
-	in vec2 aTextureCoord;
-
-	uniform mat4 uPMatrix; 
-	uniform mat4 uVMatrix; 
-	uniform mat4 uMMatrix;
-
-	out vec2 vTextureCoord;
-
-	void main()
-	{
-		vTextureCoord = aTextureCoord;
-		gl_Position = uPMatrix * uVMatrix * uMMatrix * vec4(aPosition, 1.0); 
-	}
-)};
-
-const char *unlit_texture_fs = { CRIMILD_TO_STRING(
-    struct Material {
-       vec4 diffuse;
-    };
-
-	in vec2 vTextureCoord;
-
-    uniform bool uUseColorMap;
-	uniform sampler2D uColorMap;
-    uniform Material uMaterial;
-
-	out vec4 vFragColor;
-
-	void main( void ) 
-	{
-        vec4 color = uUseColorMap ? texture( uColorMap, vTextureCoord ) : vec4( 1.0 );
-        color *= uMaterial.diffuse;
-        
-        vFragColor = color;
-	}
-)};
-
 UnlitTextureShaderProgram::UnlitTextureShaderProgram( void )
-	: ShaderProgram( OpenGLUtils::getVertexShaderInstance( unlit_texture_vs ), OpenGLUtils::getFragmentShaderInstance( unlit_texture_fs ) )
 { 
+	setVertexShader( OpenGLUtils::getVertexShaderInstance( 
+#include "UnlitTextureShaderProgram.vert"
+	));
+
+	setFragmentShader( OpenGLUtils::getFragmentShaderInstance(
+#include "UnlitTextureShaderProgram.frag"
+	));
+
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
 
