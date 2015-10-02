@@ -42,7 +42,7 @@ namespace crimild {
             virtual ~BloomImageEffect( void );
             
             virtual void compute( crimild::Renderer *renderer, Camera *camera ) override;
-            virtual void apply( crimild::Renderer *renderer, crimild::Camera *camera );
+            virtual void apply( crimild::Renderer *renderer, crimild::Camera *camera ) override;
 
         private:
             void computeBrightPassFilter( crimild::Renderer *renderer, Camera *camera );

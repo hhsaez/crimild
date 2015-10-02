@@ -26,7 +26,7 @@
  */
 
 #ifndef CRIMILD_OPENGL_
-#define CRIMILD_OEPNGL_
+#define CRIMILD_OPENGL_
 
 #include "Rendering/OpenGLRenderer.hpp"
 #include "Rendering/OpenGLUtils.hpp"

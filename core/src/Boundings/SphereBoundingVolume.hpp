@@ -48,7 +48,7 @@ namespace crimild {
 		Sphere3f _sphere;
 
 	public:
-		virtual void computeFrom( const BoundingVolume *volume );
+		virtual void computeFrom( const BoundingVolume *volume ) override;
 		virtual void computeFrom( const BoundingVolume *volume, const Transformation &transform ) override;
 		virtual void computeFrom( const Vector3f *positions, unsigned int positionCount ) override;
 		virtual void computeFrom( const VertexBufferObject *vbo ) override;
@@ -70,9 +70,9 @@ namespace crimild {
 		virtual bool testIntersection( const Sphere3f &sphere ) const override;
 		virtual bool testIntersection( const Plane3f &plane ) const override;
 
-		virtual void resolveIntersection( const BoundingVolume *other, Transformation &result ) const;
-		virtual void resolveIntersection( const Sphere3f &sphere, Transformation &result ) const;
-		virtual void resolveIntersection( const Plane3f &plane, Transformation &result ) const;
+		virtual void resolveIntersection( const BoundingVolume *other, Transformation &result ) const override;
+		virtual void resolveIntersection( const Sphere3f &sphere, Transformation &result ) const override;
+		virtual void resolveIntersection( const Plane3f &plane, Transformation &result ) const override;
 	};
 
 }

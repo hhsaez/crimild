@@ -48,7 +48,7 @@ namespace crimild {
 		Plane3f _plane;
 
 	public:
-		virtual void computeFrom( const BoundingVolume *volume );
+		virtual void computeFrom( const BoundingVolume *volume ) override;
 		virtual void computeFrom( const BoundingVolume *volume, const Transformation &transform ) override;
 		virtual void computeFrom( const Vector3f *positions, unsigned int positionCount ) override;
 		virtual void computeFrom( const VertexBufferObject *vbo ) override;

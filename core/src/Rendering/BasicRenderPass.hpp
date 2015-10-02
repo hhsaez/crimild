@@ -50,7 +50,7 @@ namespace crimild {
         virtual void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera ) override;
 
     private:
-        void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera, RenderQueue::Renderables const &objects );
+        void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera, RenderQueue::Renderables const &objects ) override;
 	};
     
 }

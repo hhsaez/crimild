@@ -70,8 +70,6 @@ namespace crimild {
 
 	private:
 		internal::FixedAllocator *_pool = nullptr;
-		internal::FixedAllocator *_lastAlloc = nullptr;
-		internal::FixedAllocator *_lastDealloc = nullptr;
 
 		std::size_t _maxObjectSize;
 		std::size_t _objectAlignSize;
