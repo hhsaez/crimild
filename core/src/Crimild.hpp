@@ -54,6 +54,7 @@
 #include "Foundation/Singleton.hpp"
 #include "Foundation/Profiler.hpp"
 #include "Foundation/Streaming.hpp"
+#include "Foundation/Version.hpp"
 
 #include "Boundings/BoundingVolume.hpp"
 #include "Boundings/PlaneBoundingVolume.hpp"

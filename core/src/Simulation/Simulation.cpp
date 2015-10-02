@@ -29,6 +29,7 @@
 #include "FileSystem.hpp"
  
 #include "Foundation/Log.hpp"
+#include "Foundation/Version.hpp"
 
 #include "Concurrency/Async.hpp"
 
@@ -63,6 +64,8 @@ Simulation::~Simulation( void )
 
 void Simulation::start( void )
 {
+    Log::Info << Version::getDescription() << Log::End;
+    
     startSystems();
     
     _taskManager.start();
