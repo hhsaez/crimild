@@ -126,9 +126,8 @@ SharedPointer< Node > LuaSceneBuilder::buildNode( ScriptEvaluator &eval, Group *
         float textSize;
         eval.getPropValue( "textSize", textSize );
         
-		std::string fontFileName = FileSystem::getInstance().pathForResource( fontName + "_sdf.tga" );
 		std::string fontDefFileName = FileSystem::getInstance().pathForResource( fontName + ".txt" );
-        auto font = crimild::alloc< Font >( fontFileName, fontDefFileName );
+        auto font = crimild::alloc< Font >( fontDefFileName );
 
 		text->setFont( font );
 		text->setSize( textSize );
@@ -143,17 +142,14 @@ SharedPointer< Node > LuaSceneBuilder::buildNode( ScriptEvaluator &eval, Group *
             text->getComponent< RenderStateComponent >()->setRenderOnScreen( renderOnScreen );
         }
 
-		auto material = text->getMaterial();
-        material->setProgram( Simulation::getInstance()->getRenderer()->getShaderProgram( Renderer::SHADER_PROGRAM_TEXT_SDF ) );
-        
         RGBAColorf textColor;
         if ( eval.getPropValue( "textColor", textColor ) ) {
-            material->setDiffuse( textColor );
+            text->setTextColor( textColor );
         }
 
         bool enableDepthTest;
         if ( eval.getPropValue( "enableDepthTest", enableDepthTest, false ) ) {
-            material->getDepthState()->setEnabled( enableDepthTest );
+            text->setDepthTestEnabled( enableDepthTest );
         }
 
         std::string anchor;

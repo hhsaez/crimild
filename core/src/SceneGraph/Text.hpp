@@ -50,16 +50,20 @@ namespace crimild {
 		};
 
 	public:
-		Font( std::string faceFilePath, std::string glyphFilePath );
+		explicit Font( std::string defFileName );
 		virtual ~Font( void );
 
-        Image *getFace( void ) { return crimild::get_ptr( _face ); }
+		Texture *getTexture( void );
+		Texture *getSDFTexture( void );
+
 		Glyph getGlyph( char c ) { return _glyphs[ c ]; }
 
 	private:
 		void loadGlyphs( std::string file );
 
-		SharedPointer< Image > _face;
+		std::string _textureFileName;
+		std::string _sdfTextureFileName;
+
 		std::map< char, Glyph > _glyphs;
 	};
     
@@ -75,11 +79,14 @@ namespace crimild {
 		void setSize( float size );
 
         Font *getFont( void ) { return crimild::get_ptr( _font ); }
-
         void setFont( Font *font ) { setFont( std::move( crimild::retain( font ) ) ); }
 		void setFont( SharedPointer< Font > const &font );
 
-        Material *getMaterial( void ) { return crimild::get_ptr( _material ); }
+		const RGBAColorf &getTextColor( void ) const { return _material->getDiffuse(); }
+		void setTextColor( const RGBAColorf &color ) { _material->setDiffuse( color ); }
+
+		bool isDepthTestEnabled( void ) const { return _material->getDepthState()->isEnabled(); }
+		void setDepthTestEnabled( bool enabled ) { _material->getDepthState()->setEnabled( enabled ); }
 
     public:
         virtual void accept( NodeVisitor &visitor ) override;

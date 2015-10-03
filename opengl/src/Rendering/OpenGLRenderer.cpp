@@ -39,6 +39,7 @@
 #include "Programs/UnlitDiffuseShaderProgram.hpp"
 #include "Programs/ScreenTextureShaderProgram.hpp"
 #include "Programs/SignedDistanceFieldShaderProgram.hpp"
+#include "Programs/TextShaderProgram.hpp"
 
 using namespace crimild;
 using namespace crimild::opengl;
@@ -70,7 +71,7 @@ OpenGLRenderer::OpenGLRenderer( SharedPointer< FrameBufferObject > const &screen
 #ifdef CRIMILD_PLATFORM_DESKTOP
     setShaderProgram( Renderer::SHADER_PROGRAM_TEXT_SDF, crimild::alloc< SignedDistanceFieldShaderProgram >() );
 #endif
-    setShaderProgram( Renderer::SHADER_PROGRAM_TEXT_BASIC, crimild::alloc< UnlitTextureShaderProgram >() );
+    setShaderProgram( Renderer::SHADER_PROGRAM_TEXT_BASIC, crimild::alloc< TextShaderProgram >() );
 
 	setShaderProgram( Renderer::SHADER_PROGRAM_SCREEN_TEXTURE, crimild::alloc< ScreenTextureShaderProgram >() );
 }

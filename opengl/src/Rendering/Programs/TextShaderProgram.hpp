@@ -25,37 +25,22 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SIMULATION_FILE_SYSTEM_
-#define CRIMILD_SIMULATION_FILE_SYSTEM_
+#ifndef CRIMILD_OPENGL_PROGRAMS_TEXT_
+#define CRIMILD_OPENGL_PROGRAMS_TEXT_
 
-#include <string>
+#include <Crimild.hpp>
 
 namespace crimild {
 
-	class FileSystem {
-	public:
-		static FileSystem &getInstance( void );
+	namespace opengl {
 
-	private:
-		FileSystem( void );
-		~FileSystem( void );
+		class TextShaderProgram : public ShaderProgram {
+		public:
+			TextShaderProgram( void );
+			virtual ~TextShaderProgram( void );
+		};
 
-	public:
-		void init( int argc, char **argv );
-
-		void setBaseDirectory( std::string baseDirectory ) { _baseDirectory = baseDirectory; }
-		std::string getBaseDirectory( void ) const { return _baseDirectory; }
-
-		std::string extractDirectory( std::string input );
-
-		std::string pathForResource( std::string relativePath );
-        
-        std::string getRelativePath( std::string absolutePath );
-
-	private:
-		std::string _baseDirectory;
-
-	};
+	}
 
 }
 

@@ -84,3 +84,13 @@ std::string FileSystem::pathForResource( std::string filePath )
 	return getBaseDirectory() + "/" + filePath;
 }
 
+std::string FileSystem::getRelativePath( std::string absolutePath )
+{
+    int pos = absolutePath.find( _baseDirectory );
+    if ( pos >= 0 ) {
+        return absolutePath.substr( _baseDirectory.length() );
+    }
+    
+    return absolutePath;
+}
+

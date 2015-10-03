@@ -26,19 +26,26 @@
  */
 
 #include "Text.hpp"
+
 #include "Primitives/Primitive.hpp"
+
 #include "Rendering/ImageTGA.hpp"
+#include "Rendering/Renderer.hpp"
+
 #include "Foundation/Log.hpp"
+
 #include "Components/MaterialComponent.hpp"
+
+#include "Simulation/AssetManager.hpp"
+#include "Simulation/FileSystem.hpp"
 
 #include <fstream>
 
 using namespace crimild;
 
-Font::Font( std::string faceFilePath, std::string glyphFilePath )
-    : _face( crimild::alloc< ImageTGA >( faceFilePath ) )
+Font::Font( std::string fontDefFile )
 {
-	loadGlyphs( glyphFilePath );
+	loadGlyphs( fontDefFile );
 }
 
 Font::~Font( void )
@@ -46,9 +53,24 @@ Font::~Font( void )
 
 }
 
+Texture *Font::getTexture( void )
+{
+	return AssetManager::getInstance()->get< Texture >( _textureFileName );
+}
+
+Texture *Font::getSDFTexture( void )
+{
+	return AssetManager::getInstance()->get< Texture >( _sdfTextureFileName );
+}
+
 void Font::loadGlyphs( std::string file )
 {
 	_glyphs.clear();
+
+	auto fontNamePrefix = file.substr( 0, file.find_last_of( "." ) );
+	fontNamePrefix = FileSystem::getInstance().getRelativePath( fontNamePrefix );
+	_textureFileName = fontNamePrefix + ".tga";
+	_sdfTextureFileName = fontNamePrefix + "_sdf.tga";
 
 	std::ifstream input;
 	input.open( file );
@@ -114,10 +136,24 @@ void Text::setSize( float size )
 
 void Text::setFont( SharedPointer< Font > const &font )
 {
+	if ( _font == font ) {
+		return;
+	}
+
 	_font = font;
-	auto face = _font->getFace();
-    auto texture = crimild::alloc< Texture >( std::move( crimild::retain( face ) ) );
-	_material->setColorMap( texture );
+
+	auto sdfProgram = AssetManager::getInstance()->get< ShaderProgram >( Renderer::SHADER_PROGRAM_TEXT_SDF );
+	if ( sdfProgram != nullptr ) {
+		// SDF Supported
+		_material->setColorMap( _font->getSDFTexture() );
+		_material->setProgram( sdfProgram );
+	}
+	else {
+		// SDF not supported by renderer
+		_material->setColorMap( _font->getTexture() );
+		_material->setProgram( AssetManager::getInstance()->get< ShaderProgram >( Renderer::SHADER_PROGRAM_TEXT_BASIC ) );
+	}
+
 	_material->getAlphaState()->setEnabled( true );
     
 	updatePrimitive();

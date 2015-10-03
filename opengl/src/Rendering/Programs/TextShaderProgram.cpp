@@ -25,39 +25,37 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SIMULATION_FILE_SYSTEM_
-#define CRIMILD_SIMULATION_FILE_SYSTEM_
+#include "TextShaderProgram.hpp"
 
-#include <string>
+#include "Rendering/OpenGLUtils.hpp"
 
-namespace crimild {
+using namespace crimild;
+using namespace crimild::opengl;
 
-	class FileSystem {
-	public:
-		static FileSystem &getInstance( void );
+TextShaderProgram::TextShaderProgram( void )
+{ 
+	setVertexShader( OpenGLUtils::getVertexShaderInstance( 
+#include "TextShaderProgram.vert"
+	));
 
-	private:
-		FileSystem( void );
-		~FileSystem( void );
+	setFragmentShader( OpenGLUtils::getFragmentShaderInstance(
+#include "TextShaderProgram.frag"
+	));
 
-	public:
-		void init( int argc, char **argv );
+	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
+	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
 
-		void setBaseDirectory( std::string baseDirectory ) { _baseDirectory = baseDirectory; }
-		std::string getBaseDirectory( void ) const { return _baseDirectory; }
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::PROJECTION_MATRIX_UNIFORM, "uPMatrix" );
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM, "uVMatrix" );
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM, "uMMatrix" );
 
-		std::string extractDirectory( std::string input );
-
-		std::string pathForResource( std::string relativePath );
-        
-        std::string getRelativePath( std::string absolutePath );
-
-	private:
-		std::string _baseDirectory;
-
-	};
-
+    registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_DIFFUSE_UNIFORM, "uMaterial.diffuse" );
+    
+    registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_USE_COLOR_MAP_UNIFORM, "uUseColorMap" );
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM, "uColorMap" );
 }
 
-#endif
+TextShaderProgram::~TextShaderProgram( void )
+{ 
+}
 
