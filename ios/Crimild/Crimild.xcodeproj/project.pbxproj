@@ -138,6 +138,7 @@
 		5F193E061BBC35CF00C1A135 /* ScriptContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F193D861BBC35CF00C1A135 /* ScriptContext.cpp */; settings = {ASSET_TAGS = (); }; };
 		5F193E081BBC35CF00C1A135 /* LuaSceneBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F193D8C1BBC35CF00C1A135 /* LuaSceneBuilder.cpp */; settings = {ASSET_TAGS = (); }; };
 		5F193E091BBC35CF00C1A135 /* LuaSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F193D8F1BBC35CF00C1A135 /* LuaSettings.cpp */; settings = {ASSET_TAGS = (); }; };
+		5F499BB11BBF600D00301095 /* TextShaderProgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F499BAF1BBF600D00301095 /* TextShaderProgram.cpp */; settings = {ASSET_TAGS = (); }; };
 		5F70321C1B7BB9D6001B548B /* Crimild-iOS.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 5F70321B1B7BB9D6001B548B /* Crimild-iOS.h */; };
 		5F7032241B7BB9D6001B548B /* libCrimild.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F7032181B7BB9D6001B548B /* libCrimild.a */; };
 		5F7033F91B7BBA38001B548B /* lapi.c in Sources */ = {isa = PBXBuildFile; fileRef = 5F7033BD1B7BBA38001B548B /* lapi.c */; };
@@ -506,6 +507,8 @@
 		5F193D8D1BBC35CF00C1A135 /* LuaSceneBuilder.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = LuaSceneBuilder.hpp; sourceTree = "<group>"; };
 		5F193D8F1BBC35CF00C1A135 /* LuaSettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LuaSettings.cpp; sourceTree = "<group>"; };
 		5F193D901BBC35CF00C1A135 /* LuaSettings.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = LuaSettings.hpp; sourceTree = "<group>"; };
+		5F499BAF1BBF600D00301095 /* TextShaderProgram.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TextShaderProgram.cpp; sourceTree = "<group>"; };
+		5F499BB01BBF600D00301095 /* TextShaderProgram.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = TextShaderProgram.hpp; sourceTree = "<group>"; };
 		5F7032181B7BB9D6001B548B /* libCrimild.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libCrimild.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		5F70321B1B7BB9D6001B548B /* Crimild-iOS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Crimild-iOS.h"; sourceTree = "<group>"; };
 		5F7032231B7BB9D6001B548B /* CrimildTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CrimildTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -661,6 +664,8 @@
 		5F1938DE1BBC356700C1A135 /* Programs */ = {
 			isa = PBXGroup;
 			children = (
+				5F499BAF1BBF600D00301095 /* TextShaderProgram.cpp */,
+				5F499BB01BBF600D00301095 /* TextShaderProgram.hpp */,
 				5F1938E11BBC356700C1A135 /* BlendShaderProgram.cpp */,
 				5F1938E21BBC356700C1A135 /* BlendShaderProgram.hpp */,
 				5F1938E31BBC356700C1A135 /* BlurShaderProgram.cpp */,
@@ -1482,6 +1487,7 @@
 				5F193CBA1BBC35A000C1A135 /* UpdateWorldState.cpp in Sources */,
 				5F193CB81BBC35A000C1A135 /* StartComponents.cpp in Sources */,
 				5F193BA91BBC35A000C1A135 /* LambdaComponent.cpp in Sources */,
+				5F499BB11BBF600D00301095 /* TextShaderProgram.cpp in Sources */,
 				5F70340C1B7BBA38001B548B /* lobject.c in Sources */,
 				5F7033FC1B7BBA38001B548B /* lbitlib.c in Sources */,
 				5F193C831BBC35A000C1A135 /* QuadPrimitive.cpp in Sources */,
