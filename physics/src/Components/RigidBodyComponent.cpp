@@ -83,8 +83,9 @@ void physics::RigidBodyComponent::start( void )
 
 }
 
-void physics::RigidBodyComponent::update( const Time &t )
+void physics::RigidBodyComponent::update( const Clock &t )
 {
+	/*
     if ( _body == nullptr ) {
         return;
     }
@@ -106,10 +107,12 @@ void physics::RigidBodyComponent::update( const Time &t )
             }
         }
     }
+	*/
 }
 
 void physics::RigidBodyComponent::createShape( void )
 {
+	/*
 	if ( isConvex() ) {
 		_shape = new btConvexHullShape();
 
@@ -145,6 +148,7 @@ void physics::RigidBodyComponent::createShape( void )
 
 		_shape = new btBvhTriangleMeshShape( mesh, true );
 	}
+	*/
 }
 
 void physics::RigidBodyComponent::createBody( void )

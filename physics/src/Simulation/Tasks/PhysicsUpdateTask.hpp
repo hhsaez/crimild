@@ -30,6 +30,8 @@
 
 #include <Crimild.hpp>
 
+#if 0
+
 namespace crimild {
 
 	namespace physics {
@@ -50,6 +52,8 @@ namespace crimild {
 	}
 	
 }
+
+#endif
 
 #endif
 

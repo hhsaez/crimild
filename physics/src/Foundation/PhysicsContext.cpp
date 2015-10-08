@@ -56,6 +56,7 @@ PhysicsContext::~PhysicsContext( void )
 
 void PhysicsContext::init( void )
 {
+	/*
 	 _broadphase = new btDbvtBroadphase();
  
     _collisionConfiguration = new btDefaultCollisionConfiguration();
@@ -66,18 +67,22 @@ void PhysicsContext::init( void )
     _world = new btDiscreteDynamicsWorld( _dispatcher, _broadphase, _solver, _collisionConfiguration );
  
     _world->setGravity( BulletUtils::convert( _gravity ) );
+	*/
 }
 
 void PhysicsContext::setGravity( const Vector3f &gravity ) 
 {
+	/*
 	_gravity = gravity;
 	if ( _world != nullptr ) {
 		_world->setGravity( BulletUtils::convert( _gravity ) );
 	}
+	*/
 }
 
 void PhysicsContext::step( float dt )
 {
+	/*
 	if ( _world == nullptr ) {
 		return;
 	}
@@ -105,5 +110,6 @@ void PhysicsContext::step( float dt )
             }
 		}
     }
+	*/
 }
 
