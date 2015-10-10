@@ -40,6 +40,7 @@
 #include "Programs/ScreenTextureShaderProgram.hpp"
 #include "Programs/SignedDistanceFieldShaderProgram.hpp"
 #include "Programs/TextShaderProgram.hpp"
+#include "Programs/DepthShaderProgram.hpp"
 
 using namespace crimild;
 using namespace crimild::opengl;
@@ -74,6 +75,8 @@ OpenGLRenderer::OpenGLRenderer( SharedPointer< FrameBufferObject > const &screen
     setShaderProgram( Renderer::SHADER_PROGRAM_TEXT_BASIC, crimild::alloc< TextShaderProgram >() );
 
 	setShaderProgram( Renderer::SHADER_PROGRAM_SCREEN_TEXTURE, crimild::alloc< ScreenTextureShaderProgram >() );
+
+	setShaderProgram( Renderer::SHADER_PROGRAM_DEPTH, crimild::alloc< DepthShaderProgram >() );
 }
 
 OpenGLRenderer::~OpenGLRenderer( void )

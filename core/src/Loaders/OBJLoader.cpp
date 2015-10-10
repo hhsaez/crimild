@@ -95,6 +95,7 @@ OBJLoader::OBJLoader( std::string fileName )
 	: _fileName( fileName )
 {
 	getOBJProcessor().registerLineProcessor( "o", std::bind( &OBJLoader::readObject, this, std::placeholders::_1 ) );
+	getOBJProcessor().registerLineProcessor( "g", std::bind( &OBJLoader::readObject, this, std::placeholders::_1 ) );
 	getOBJProcessor().registerLineProcessor( "v", std::bind( &OBJLoader::readObjectPositions, this, std::placeholders::_1 ) );
 	getOBJProcessor().registerLineProcessor( "vn", std::bind( &OBJLoader::readObjectNormals, this, std::placeholders::_1 ) );
 	getOBJProcessor().registerLineProcessor( "vt", std::bind( &OBJLoader::readObjectTextureCoords, this, std::placeholders::_1 ) );
@@ -157,7 +158,7 @@ void OBJLoader::generateGeometry( void )
 	VertexFormat format( 3,
 						 0,
 						 ( _normals.size() > 0 ? 3 : 0 ),
-						 0, //( _normalCount > 0 && _textureCoordCount > 0 ? 3 : 0 ),
+	                     0, //( _normalCount > 0 && _textureCoordCount > 0 ? 3 : 0 ),
 						 ( _textureCoords.size() > 0 ? 2 : 0 ) );
 
 	std::vector< float > vertexData;
@@ -181,36 +182,36 @@ void OBJLoader::generateGeometry( void )
 		}
 
 /*
-			if ( vf.hasTangents() ) {
+		if ( format.hasTangents() ) {
 #if 1
-				Vector3f g;
+			Vector3f g;
 
-				g = Vector3f( 1, 0, 0 );
-				if ( ( g ^ n0 ).getSquaredMagnitude() < Numericf::ZERO_TOLERANCE ) {
-					//g = Vector3f( 0.0f, 1.0f, 0.0f );
-				}
-				if ( ( g ^ n0 ).getSquaredMagnitude() < Numericf::ZERO_TOLERANCE ) {
-					//g = Vector3f( 0.0f, 0.0f, 1.0f );
-				}
-				tg0 = ( n0 ^ g );
+			g = Vector3f( 1, 0, 0 );
+			if ( ( g ^ n0 ).getSquaredMagnitude() < Numericf::ZERO_TOLERANCE ) {
+				//g = Vector3f( 0.0f, 1.0f, 0.0f );
+			}
+			if ( ( g ^ n0 ).getSquaredMagnitude() < Numericf::ZERO_TOLERANCE ) {
+				//g = Vector3f( 0.0f, 0.0f, 1.0f );
+			}
+			tg0 = ( n0 ^ g );
 
-				g = Vector3f( 1, 0, 0 );
-				if ( ( g ^ n1 ).getSquaredMagnitude() < Numericf::ZERO_TOLERANCE ) {
-					//g = Vector3f( 0.0f, 1.0f, 0.0f );
-				}
-				if ( ( g ^ n1 ).getSquaredMagnitude() < Numericf::ZERO_TOLERANCE ) {
-					//g = Vector3f( 0.0f, 0.0f, 1.0f );
-				}
-				tg1 = ( n1 ^ g );
+			g = Vector3f( 1, 0, 0 );
+			if ( ( g ^ n1 ).getSquaredMagnitude() < Numericf::ZERO_TOLERANCE ) {
+				//g = Vector3f( 0.0f, 1.0f, 0.0f );
+			}
+			if ( ( g ^ n1 ).getSquaredMagnitude() < Numericf::ZERO_TOLERANCE ) {
+				//g = Vector3f( 0.0f, 0.0f, 1.0f );
+			}
+			tg1 = ( n1 ^ g );
 
-				g = Vector3f( 1, 0, 0 );
-				if ( ( g ^ n2 ).getSquaredMagnitude() < Numericf::ZERO_TOLERANCE ) {
-					//g = Vector3f( 0.0f, 1.0f, 0.0f );
-				}
-				if ( ( g ^ n2 ).getSquaredMagnitude() < Numericf::ZERO_TOLERANCE ) {
-					//g = Vector3f( 0.0f, 0.0f, 1.0f );
-				}
-				tg2 = ( n2 ^ g );
+			g = Vector3f( 1, 0, 0 );
+			if ( ( g ^ n2 ).getSquaredMagnitude() < Numericf::ZERO_TOLERANCE ) {
+				//g = Vector3f( 0.0f, 1.0f, 0.0f );
+			}
+			if ( ( g ^ n2 ).getSquaredMagnitude() < Numericf::ZERO_TOLERANCE ) {
+				//g = Vector3f( 0.0f, 0.0f, 1.0f );
+			}
+			tg2 = ( n2 ^ g );
 #else
 				float coef = 1.0 / ( uv0[ 0 ] * uv1[ 1 ] - uv1[ 0 ] * uv0[ 1 ] );
 				Vector3f tangent;
@@ -318,6 +319,13 @@ void OBJLoader::readMaterialFile( std::stringstream &line )
 {
 	std::string mtlFileName;
 	line >> mtlFileName;
+	while ( !line.eof() ) {
+		// handle spaces in mtl file name
+		std::string temp;
+		line >> temp;
+		mtlFileName += " ";
+		mtlFileName += temp;
+	}
 
 	std::string mtlFilePath = FileSystem::getInstance().extractDirectory( _fileName ) + "/" + mtlFileName;
 	getMTLProcessor().readFile( mtlFilePath );
@@ -413,6 +421,9 @@ void OBJLoader::readMaterialShaderProgram( std::stringstream &line )
 
 SharedPointer< Texture > OBJLoader::loadTexture( std::string textureFileName )
 {
+	if ( textureFileName == "" ) {
+		return nullptr;
+	}
     auto image = crimild::alloc< ImageTGA >( FileSystem::getInstance().extractDirectory( _fileName ) + "/" + textureFileName );
     auto texture = crimild::alloc< Texture >( image );
     return texture;

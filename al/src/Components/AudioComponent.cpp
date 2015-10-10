@@ -40,7 +40,7 @@
 using namespace crimild;
 using namespace crimild::al;
 
-AudioComponent::AudioComponent( AudioClip *audioClip )
+AudioComponent::AudioComponent( AudioClipPtr const &audioClip )
 	: _audioClip( audioClip ),
 	  _gain( 1.0f )
 {

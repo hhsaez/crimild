@@ -39,7 +39,7 @@ namespace crimild {
 			CRIMILD_NODE_COMPONENT_NAME( "audio" )
 
 		public:
-			explicit AudioComponent( AudioClip *audioClip );
+			explicit AudioComponent( AudioClipPtr const &audioClip );
 			
 			virtual ~AudioComponent( void );
 
