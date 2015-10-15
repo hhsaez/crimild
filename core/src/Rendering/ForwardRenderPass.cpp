@@ -29,8 +29,9 @@
 #include "Rendering/Renderer.hpp"
 #include "Rendering/FrameBufferObject.hpp"
 #include "Rendering/RenderQueue.hpp"
-#include "Rendering/ImageEffect.hpp"
 #include "Rendering/ShaderProgram.hpp"
+
+#include "Rendering/ImageEffects/ImageEffect.hpp"
 
 #include "SceneGraph/Geometry.hpp"
 
@@ -64,26 +65,17 @@ void ForwardRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Ca
 #if 1
     computeShadowMaps( renderer, renderQueue, camera );
 
-    auto sceneFBO = getSceneFBO( renderer );
+    auto sBuffer = getSBuffer( renderer );
 
-    renderer->bindFrameBuffer( sceneFBO );
+    renderer->bindFrameBuffer( sBuffer );
 
     renderShadedObjects( renderer, renderQueue, camera );
     renderNonShadedObjects( renderer, renderQueue, camera );
     renderTranslucentObjects( renderer, renderQueue, camera );
 
-    renderer->unbindFrameBuffer( sceneFBO );
+    renderer->unbindFrameBuffer( sBuffer );
 
-    if ( true || getImageEffects().empty() ) {
-        auto colorTarget = sceneFBO->getRenderTargets().get( "color" );
-        RenderPass::render( renderer, colorTarget->getTexture(), nullptr );
-    }
-    else {
-        getImageEffects().forEach( [renderer, camera]( ImageEffect *effect, int ) {
-            effect->compute( renderer, camera );
-            effect->apply( renderer, camera );
-        });
-    }
+	applyImageEffects( renderer, camera );
 
     // UI elements need to be render on top of any image effect
     renderScreenObjects( renderer, renderQueue, camera );
@@ -94,25 +86,6 @@ void ForwardRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Ca
         }
     }
 #endif
-}
-
-FrameBufferObject *ForwardRenderPass::getSceneFBO( Renderer *renderer )
-{
-    auto fbo = renderer->getFrameBuffer( "scene" );
-    if ( fbo != nullptr ) {
-        return fbo;
-    }
-
-    int width = renderer->getScreenBuffer()->getWidth();
-    int height = renderer->getScreenBuffer()->getHeight();
-
-    auto sceneFBO = crimild::alloc< FrameBufferObject >( width, height );
-    sceneFBO->getRenderTargets().add( "color", crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
-    sceneFBO->getRenderTargets().add( "depth", crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER_AND_TEXTURE, width, height ) );
-
-    renderer->setFrameBuffer( "scene", sceneFBO );
-    
-    return crimild::get_ptr( sceneFBO );
 }
 
 ShaderProgram *ForwardRenderPass::getForwardProgram( void )

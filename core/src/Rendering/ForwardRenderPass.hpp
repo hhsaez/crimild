@@ -56,8 +56,6 @@ namespace crimild {
         inline ShaderProgram *getForwardProgram( void );
         
     private:
-        FrameBufferObject *getSceneFBO( Renderer *renderer );
-        
         void computeShadowMaps( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
         
         std::map< Light *, SharedPointer< ShadowMap >> _shadowMaps;

@@ -25,48 +25,31 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_RENDERER_DEFERRED_RENDER_PASS_
-#define CRIMILD_RENDERER_DEFERRED_RENDER_PASS_
+#include "ColorTintShaderProgram.hpp"
 
-#include "RenderPass.hpp"
-#include "ShadowMap.hpp"
-#include "Renderer.hpp"
-#include "RenderQueue.hpp"
-#include "ShadowMap.hpp"
+#include "Rendering/OpenGLUtils.hpp"
 
-#include "SceneGraph/Camera.hpp"
-#include "SceneGraph/Light.hpp"
+using namespace crimild;
+using namespace crimild::opengl;
 
-#include <map>
+ColorTintShaderProgram::ColorTintShaderProgram( void )
+{ 
+	setVertexShader( OpenGLUtils::getVertexShaderInstance(
+#include "ColorTintShaderProgram.vert"
+    ));
 
-namespace crimild {
-    
-	class DeferredRenderPass : public RenderPass {
-        CRIMILD_DISALLOW_COPY_AND_ASSIGN( DeferredRenderPass )
-        
-	public:
-        DeferredRenderPass( void );
-		virtual ~DeferredRenderPass( void );
-        
-        virtual void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
-        
-        bool isDebugModeEnabled( void ) const { return _debugModeEnabled; }
-        void enableDebugMode( bool enabled ) { _debugModeEnabled = enabled; }
-        
-    private:
-        void computeShadowMaps( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
-        
-        void renderToGBuffer( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
-        void composeFrame( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
-        
-        void buildBuffers( Renderer *renderer );
+	setFragmentShader( OpenGLUtils::getFragmentShaderInstance(
+#include "ColorTintShaderProgram.frag"
+    ));
 
-    private:
-        std::map< Light *, SharedPointer< ShadowMap >> _shadowMaps;
-        bool _debugModeEnabled;
-	};
-    
+	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
+	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
+
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM, "uColorMap" );
 }
 
-#endif
+ColorTintShaderProgram::~ColorTintShaderProgram( void )
+{ 
+
+}
 

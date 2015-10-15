@@ -31,6 +31,8 @@
 #include "Rendering/RenderQueue.hpp"
 #include "Rendering/FrameBufferObject.hpp"
 
+#include "Foundation/Log.hpp"
+
 #include "Primitives/QuadPrimitive.hpp"
 
 #include "SceneGraph/Geometry.hpp"
@@ -140,23 +142,27 @@ void Renderer::unbindProgram( ShaderProgram *program )
 void Renderer::bindMaterial( ShaderProgram *program, Material *material )
 {
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_USE_COLOR_MAP_UNIFORM ), material->getColorMap() != nullptr );
-	if ( material->getColorMap() ) {
-		bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM ), material->getColorMap() );
+	if ( material->getColorMap() != nullptr ) {
+		auto loc = program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM );
+		bindTexture( loc, material->getColorMap() );
 	}
 	
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_USE_NORMAL_MAP_UNIFORM ), material->getNormalMap() != nullptr );
-	if ( material->getNormalMap() ) {
-		bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_NORMAL_MAP_UNIFORM ), material->getNormalMap() );
+	if ( material->getNormalMap() != nullptr ) {
+		auto loc = program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_NORMAL_MAP_UNIFORM );
+		bindTexture( loc, material->getNormalMap() );
 	}
 	
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_USE_SPECULAR_MAP_UNIFORM ), material->getSpecularMap() != nullptr );
-	if ( material->getSpecularMap() ) {
-		bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_SPECULAR_MAP_UNIFORM ), material->getSpecularMap() );
+	if ( material->getSpecularMap() != nullptr ) {
+		auto loc = program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_SPECULAR_MAP_UNIFORM );
+		bindTexture( loc, material->getSpecularMap() );
 	}
 	
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_USE_EMISSIVE_MAP_UNIFORM ), material->getEmissiveMap() != nullptr );
-	if ( material->getEmissiveMap() ) {
-		bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_EMISSIVE_MAP_UNIFORM ), material->getEmissiveMap() );
+	if ( material->getEmissiveMap() != nullptr ) {
+		auto loc = program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_EMISSIVE_MAP_UNIFORM );
+		bindTexture( loc, material->getEmissiveMap() );
 	}
 	
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_AMBIENT_UNIFORM ), material->getAmbient() );

@@ -41,6 +41,7 @@
 #include "Programs/SignedDistanceFieldShaderProgram.hpp"
 #include "Programs/TextShaderProgram.hpp"
 #include "Programs/DepthShaderProgram.hpp"
+#include "Programs/ColorTintShaderProgram.hpp"
 
 using namespace crimild;
 using namespace crimild::opengl;
@@ -77,6 +78,9 @@ OpenGLRenderer::OpenGLRenderer( SharedPointer< FrameBufferObject > const &screen
 	setShaderProgram( Renderer::SHADER_PROGRAM_SCREEN_TEXTURE, crimild::alloc< ScreenTextureShaderProgram >() );
 
 	setShaderProgram( Renderer::SHADER_PROGRAM_DEPTH, crimild::alloc< DepthShaderProgram >() );
+
+	// image effects
+	setShaderProgram( ColorTintImageEffect::COLOR_TINT_PROGRAM_NAME, crimild::alloc< ColorTintShaderProgram >() );
 }
 
 OpenGLRenderer::~OpenGLRenderer( void )

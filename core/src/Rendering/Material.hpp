@@ -69,15 +69,15 @@ namespace crimild {
 		void setColorMap( SharedPointer< Texture > const &texture ) { _colorMap = texture; }
         Texture *getColorMap( void ) { return crimild::get_ptr( _colorMap ); }
 
-        void setNormalMap( Texture *texture ) { _colorMap = std::move( crimild::retain( texture ) ); }
+        void setNormalMap( Texture *texture ) { _normalMap = std::move( crimild::retain( texture ) ); }
 		void setNormalMap( SharedPointer< Texture > const &texture ) { _normalMap = texture; }
         Texture *getNormalMap( void ) { return crimild::get_ptr( _normalMap ); }
 
-        void setSpecularMap( Texture *texture ) { _colorMap = std::move( crimild::retain( texture ) ); }
+        void setSpecularMap( Texture *texture ) { _specularMap = std::move( crimild::retain( texture ) ); }
 		void setSpecularMap( SharedPointer< Texture > const &texture ) { _specularMap = texture; }
         Texture *getSpecularMap( void ) { return crimild::get_ptr( _specularMap ); }
         
-        void setEmissiveMap( Texture *texture ) { _colorMap = std::move( crimild::retain( texture ) ); }
+        void setEmissiveMap( Texture *texture ) { _emissiveMap = std::move( crimild::retain( texture ) ); }
         void setEmissiveMap( SharedPointer< Texture > const &texture ) { _emissiveMap = texture; }
         Texture *getEmissiveMap( void ) { return crimild::get_ptr( _emissiveMap ); }
 

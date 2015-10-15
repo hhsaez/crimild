@@ -25,47 +25,47 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_RENDERER_DEFERRED_RENDER_PASS_
-#define CRIMILD_RENDERER_DEFERRED_RENDER_PASS_
+#ifndef CRIMILD_CORE_RENDERING_IMAGE_EFFECT_COLOR_TINT_
+#define CRIMILD_CORE_RENDERING_IMAGE_EFFECT_COLOR_TINT_
 
-#include "RenderPass.hpp"
-#include "ShadowMap.hpp"
-#include "Renderer.hpp"
-#include "RenderQueue.hpp"
-#include "ShadowMap.hpp"
+#include "ImageEffect.hpp"
 
-#include "SceneGraph/Camera.hpp"
-#include "SceneGraph/Light.hpp"
-
-#include <map>
+#include "Mathematics/Vector.hpp"
+#include "Rendering/ShaderUniformImpl.hpp"
 
 namespace crimild {
     
-	class DeferredRenderPass : public RenderPass {
-        CRIMILD_DISALLOW_COPY_AND_ASSIGN( DeferredRenderPass )
-        
+	class ColorTintImageEffect : public ImageEffect {
 	public:
-        DeferredRenderPass( void );
-		virtual ~DeferredRenderPass( void );
-        
-        virtual void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
-        
-        bool isDebugModeEnabled( void ) const { return _debugModeEnabled; }
-        void enableDebugMode( bool enabled ) { _debugModeEnabled = enabled; }
-        
-    private:
-        void computeShadowMaps( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
-        
-        void renderToGBuffer( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
-        void composeFrame( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
-        
-        void buildBuffers( Renderer *renderer );
+		static constexpr const char *COLOR_TINT_PROGRAM_NAME = "image_effects/shaders/color_tint";
+		static constexpr const char *COLOR_TINT_UNIFORM_TINT = "uTint";
+        static constexpr const char *COLOR_TINT_UNIFORM_TINT_VALUE = "uTintValue";
 
-    private:
-        std::map< Light *, SharedPointer< ShadowMap >> _shadowMaps;
-        bool _debugModeEnabled;
+		static const RGBAColorf TINT_RED;
+        static const RGBAColorf TINT_GREEN;
+        static const RGBAColorf TINT_BLUE;
+        static const RGBAColorf TINT_SEPIA;
+
+	public:
+		ColorTintImageEffect( const RGBAColorf &tint = TINT_SEPIA, float value = 1.0f );
+		virtual ~ColorTintImageEffect( void );
+            
+		virtual void compute( crimild::Renderer *renderer, Camera *camera ) override;
+		virtual void apply( crimild::Renderer *renderer, crimild::Camera *camera ) override;
+
+		void setTint( const RGBAColorf &tint ) { _tint->setValue( tint ); }
+		const RGBAColorf &getTint( void ) const { return _tint->getValue(); }
+            
+        void setTintValue( float value ) { _tintValue->setValue( value ); }
+        float getTintValue( void ) const { return _tintValue->getValue(); }
+        
+	private:
+		SharedPointer< RGBAColorfUniform > _tint;
+        SharedPointer< FloatUniform > _tintValue;
+		
+		ShaderProgram *_colorTintProgram = nullptr;
 	};
-    
+            
 }
 
 #endif

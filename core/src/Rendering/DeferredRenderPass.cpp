@@ -29,7 +29,8 @@
 #include "Rendering/Renderer.hpp"
 #include "Rendering/FrameBufferObject.hpp"
 #include "Rendering/RenderQueue.hpp"
-#include "Rendering/ImageEffect.hpp"
+
+#include "Rendering/ImageEffects/ImageEffect.hpp"
 
 #include "SceneGraph/Geometry.hpp"
 
@@ -70,8 +71,6 @@ void DeferredRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, C
     
     if ( !isDebugModeEnabled() ) {
         applyImageEffects( renderer, camera );
-        auto sBuffer = renderer->getFrameBuffer( S_BUFFER_NAME );
-        RenderPass::render( renderer, sBuffer->getRenderTargets().get( S_BUFFER_COLOR_TARGET_NAME )->getTexture(), nullptr );
         
         renderTranslucentObjects( renderer, renderQueue, camera );
         renderScreenObjects( renderer, renderQueue, camera );
@@ -313,25 +312,6 @@ void DeferredRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *ren
     renderer->unbindProgram( program );
 }
 
-void DeferredRenderPass::applyImageEffects( Renderer *renderer, Camera *camera )
-{
-    CRIMILD_PROFILE( "Apply Image Effects" )
-
-    getImageEffects().forEach( [&]( ImageEffect *effect, int ) {
-        if ( effect->isEnabled() ) {
-            auto dBuffer = renderer->getFrameBuffer( D_BUFFER_NAME );
-            
-            effect->compute( renderer, camera );
-
-            renderer->bindFrameBuffer( dBuffer );
-            effect->apply( renderer, camera );
-            renderer->unbindFrameBuffer( dBuffer );
-            
-            swapSDBuffers( renderer );
-        }
-    });
-}
-
 void DeferredRenderPass::buildBuffers( Renderer *renderer )
 {
     CRIMILD_PROFILE( "Build Buffers" )
@@ -362,14 +342,5 @@ void DeferredRenderPass::buildBuffers( Renderer *renderer )
         dBuffer->getRenderTargets().add( RenderPass::D_BUFFER_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
         renderer->setFrameBuffer( RenderPass::D_BUFFER_NAME, dBuffer );
     }
-}
-
-void DeferredRenderPass::swapSDBuffers( Renderer *renderer )
-{
-    auto sBuffer = renderer->getFrameBuffer( RenderPass::S_BUFFER_NAME );
-    auto dBuffer = renderer->getFrameBuffer( RenderPass::D_BUFFER_NAME );
-    
-    renderer->setFrameBuffer( RenderPass::S_BUFFER_NAME, crimild::retain( dBuffer ) );
-    renderer->setFrameBuffer( RenderPass::D_BUFFER_NAME, crimild::retain( sBuffer ) );
 }
 

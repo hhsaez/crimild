@@ -25,46 +25,22 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_RENDERER_DEFERRED_RENDER_PASS_
-#define CRIMILD_RENDERER_DEFERRED_RENDER_PASS_
+#ifndef CRIMILD_OPENGL_SHADER_LIBRARY_COLOR_TINT_
+#define CRIMILD_OPENGL_SHADER_LIBRARY_COLOR_TINT_
 
-#include "RenderPass.hpp"
-#include "ShadowMap.hpp"
-#include "Renderer.hpp"
-#include "RenderQueue.hpp"
-#include "ShadowMap.hpp"
-
-#include "SceneGraph/Camera.hpp"
-#include "SceneGraph/Light.hpp"
-
-#include <map>
+#include <Crimild.hpp>
 
 namespace crimild {
     
-	class DeferredRenderPass : public RenderPass {
-        CRIMILD_DISALLOW_COPY_AND_ASSIGN( DeferredRenderPass )
+	namespace opengl {
         
-	public:
-        DeferredRenderPass( void );
-		virtual ~DeferredRenderPass( void );
+		class ColorTintShaderProgram : public ShaderProgram {
+		public:
+			ColorTintShaderProgram( void );
+			virtual ~ColorTintShaderProgram( void );
+		};
         
-        virtual void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
-        
-        bool isDebugModeEnabled( void ) const { return _debugModeEnabled; }
-        void enableDebugMode( bool enabled ) { _debugModeEnabled = enabled; }
-        
-    private:
-        void computeShadowMaps( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
-        
-        void renderToGBuffer( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
-        void composeFrame( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
-        
-        void buildBuffers( Renderer *renderer );
-
-    private:
-        std::map< Light *, SharedPointer< ShadowMap >> _shadowMaps;
-        bool _debugModeEnabled;
-	};
+	}
     
 }
 

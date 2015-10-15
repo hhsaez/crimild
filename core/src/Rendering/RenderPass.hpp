@@ -45,6 +45,7 @@ namespace crimild {
     class Renderer;
     class ShaderProgram;
     class Texture;
+    class FrameBufferObject;
 
 	class RenderPass : public SharedObject {
     public:
@@ -73,12 +74,18 @@ namespace crimild {
         
         SharedObjectArray< ImageEffect > &getImageEffects( void ) { return _imageEffects; }
         
+        FrameBufferObject *getSBuffer( Renderer *renderer );
+        FrameBufferObject *getDBuffer( Renderer *renderer );
+        
     protected:
         Primitive *getScreenPrimitive( void ) { return crimild::get_ptr( _screen ); }
 
         virtual void renderOpaqueObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
         virtual void renderTranslucentObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
         virtual void renderScreenObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+
+		virtual void applyImageEffects( Renderer *renderer, Camera *camera );
+		virtual void swapSDBuffers( Renderer *renderer );
 
 	private:
 		SharedPointer< Primitive > _screen;

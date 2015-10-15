@@ -123,7 +123,6 @@
 #include "Rendering/ForwardRenderPass.hpp"
 #include "Rendering/FrameBufferObject.hpp"
 #include "Rendering/Image.hpp"
-#include "Rendering/ImageEffect.hpp"
 #include "Rendering/ImageTGA.hpp"
 #include "Rendering/IndexBufferObject.hpp"
 #include "Rendering/Material.hpp"
@@ -137,6 +136,9 @@
 #include "Rendering/Texture.hpp"
 #include "Rendering/VertexBufferObject.hpp"
 #include "Rendering/VertexFormat.hpp"
+
+#include "Rendering/ImageEffects/ImageEffect.hpp"
+#include "Rendering/ImageEffects/ColorTintImageEffect.hpp"
 
 #include "Messaging/MessageQueue.hpp"
 

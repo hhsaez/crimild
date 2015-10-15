@@ -51,7 +51,6 @@ R"(
         return dot( color, bitShifts );
     }
 
-
     void main( void )
     {
         // vWorldNormal gets interpolated when passed to the fragment shader
@@ -102,7 +101,7 @@ R"(
                 temp.y = dot( halfVector, vWorldBiTangent );
                 temp.z = dot( halfVector, vWorldNormal );
                 halfVector = normalize( temp );
-                
+                        
                 normal = 2.0 * texture( uNormalMap, vTextureCoord ).xyz - 1.0;
                 normal = normalize( normal );
             }
