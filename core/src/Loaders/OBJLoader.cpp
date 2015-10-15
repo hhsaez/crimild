@@ -57,7 +57,7 @@ void OBJLoader::FileProcessor::readFile( std::string fileName )
 	std::ifstream input;
 	input.open( fileName.c_str() );
 	if ( !input.is_open() ) {
-		Log::Error << "Cannot load OBJ file " << fileName << Log::End;
+		Log::Error << "Cannot load file " << fileName << Log::End;
 		return;
 	}
 
@@ -317,16 +317,7 @@ void OBJLoader::readObjectMaterial( std::stringstream &line )
 
 void OBJLoader::readMaterialFile( std::stringstream &line )
 {
-	std::string mtlFileName;
-	line >> mtlFileName;
-	while ( !line.eof() ) {
-		// handle spaces in mtl file name
-		std::string temp;
-		line >> temp;
-		mtlFileName += " ";
-		mtlFileName += temp;
-	}
-
+    std::string mtlFileName = StringUtils::readFullString( line );
 	std::string mtlFilePath = FileSystem::getInstance().extractDirectory( _fileName ) + "/" + mtlFileName;
 	getMTLProcessor().readFile( mtlFilePath );
 	_currentMaterial = nullptr;
@@ -365,30 +356,22 @@ void OBJLoader::readMaterialSpecular( std::stringstream &line )
 
 void OBJLoader::readMaterialColorMap( std::stringstream &line )
 {
-	std::string fileName;
-	line >> fileName;
-    _currentMaterial->setColorMap( loadTexture( fileName ) );
+    _currentMaterial->setColorMap( loadTexture( StringUtils::readFullString( line ) ) );
 }
 
 void OBJLoader::readMaterialNormalMap( std::stringstream &line )
 {
-	std::string fileName;
-	line >> fileName;
-	_currentMaterial->setNormalMap( loadTexture( fileName ) );
+	_currentMaterial->setNormalMap( loadTexture( StringUtils::readFullString( line ) ) );
 }
 
 void OBJLoader::readMaterialSpecularMap( std::stringstream &line )
 {
-	std::string fileName;
-	line >> fileName;
-	_currentMaterial->setSpecularMap( loadTexture( fileName ) );
+	_currentMaterial->setSpecularMap( loadTexture( StringUtils::readFullString( line ) ) );
 }
 
 void OBJLoader::readMaterialEmissiveMap( std::stringstream &line )
 {
-	std::string fileName;
-	line >> fileName;
-	_currentMaterial->setEmissiveMap( loadTexture( fileName ) );
+    _currentMaterial->setEmissiveMap( loadTexture( StringUtils::readFullString( line ) ) );
 }
 
 void OBJLoader::readMaterialShaderProgram( std::stringstream &line )

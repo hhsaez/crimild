@@ -116,6 +116,25 @@ namespace crimild {
 
 			return out.str();
 		}
+        
+        /**
+            \brief Read a string from a stream, including all white spaces
+         */
+        static std::string readFullString( std::istream &input )
+        {
+            std::string result;
+            input >> result;
+            
+            if ( !input.eof() ) {
+                // handle spaces in string
+                std::istreambuf_iterator< char > it( input ), end;
+                std::string temp;
+                std::copy( it, end, std::inserter( temp, temp.begin() ) );
+                if ( temp != "\r" ) result += temp;
+            }
+            
+            return result;
+        }
 
 	};
 
