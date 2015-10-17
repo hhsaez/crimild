@@ -20,7 +20,7 @@ int main( int argc, char **argv )
 
 	std::string fontFile = settings.get( "font_file", "" );
 	if ( fontFile == "" ) {
-		std::cout << "usage: " << argv[ 0 ] << " font_file [texture_size]" << std::endl;
+		std::cout << "usage: " << argv[ 0 ] << " font_file=path/to/font.ttf [texture_size=number]" << std::endl;
 		return -1;
 	}
 

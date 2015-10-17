@@ -1,6 +1,6 @@
 R"(
 
-#version 150		
+#version 400
 
 #define CRIMILD_GLSL_ATTRIBUTE in
 
