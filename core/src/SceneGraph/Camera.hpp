@@ -91,10 +91,14 @@ namespace crimild {
 
 	public:
 		void computeCullingPlanes( void );
+        
+        void setCullingEnabled( bool value ) { _cullingEnabled = value; }
+        bool isCullingEnabled( void ) const { return _cullingEnabled; }
 
 		bool culled( const BoundingVolume *volume ) const;
 
 	private:
+        bool _cullingEnabled = true;
 		Plane3f _cullingPlanes[ 6 ];
 	};
 

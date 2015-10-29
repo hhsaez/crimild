@@ -152,6 +152,10 @@ void Camera::computeCullingPlanes( void )
 
 bool Camera::culled( const BoundingVolume *volume ) const
 {
+    if ( !isCullingEnabled() ) {
+        return false;
+    }
+    
 	for ( auto &p : _cullingPlanes ) {
 		if ( volume->whichSide( p ) < 0 ) {
 			return true;
