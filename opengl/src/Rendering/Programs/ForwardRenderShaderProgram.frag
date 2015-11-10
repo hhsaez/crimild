@@ -113,7 +113,7 @@ void main( void )
             temp.z = dot( eyeVector, vWorldNormal );
             eyeVector = normalize( temp );
                     
-            normal = 2.0 * texture( uNormalMap, vTextureCoord ).xyz - 1.0;
+            normal = 2.0 * CRIMILD_GLSL_FN_TEXTURE_2D( uNormalMap, vTextureCoord ).xyz - 1.0;
             normal = normalize( normal );
         }
         

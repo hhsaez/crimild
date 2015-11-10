@@ -32,10 +32,10 @@ using namespace crimild;
 using namespace crimild::opengl;
 
 const char *lit_texture_vs = { CRIMILD_TO_STRING(
-	in vec3 aPosition;
-	in vec3 aNormal;
-	in vec3 aTangent;
-	in vec2 aTextureCoord;
+	CRIMILD_GLSL_ATTRIBUTE vec3 aPosition;
+	CRIMILD_GLSL_ATTRIBUTE vec3 aNormal;
+	CRIMILD_GLSL_ATTRIBUTE vec3 aTangent;
+	CRIMILD_GLSL_ATTRIBUTE vec2 aTextureCoord;
 
 	uniform mat4 uPMatrix;
 	uniform mat4 uVMatrix;
@@ -44,12 +44,12 @@ const char *lit_texture_vs = { CRIMILD_TO_STRING(
 
 	uniform bool uUseNormalMap;
 
-	out vec4 vWorldVertex;
-	out vec3 vWorldNormal;
-	out vec3 vWorldTangent;
-	out vec3 vWorldBiTangent;
-	out vec2 vTextureCoord;
-	out vec3 vViewVec;
+	CRIMILD_GLSL_VARYING_OUT vec4 vWorldVertex;
+	CRIMILD_GLSL_VARYING_OUT vec3 vWorldNormal;
+	CRIMILD_GLSL_VARYING_OUT vec3 vWorldTangent;
+	CRIMILD_GLSL_VARYING_OUT vec3 vWorldBiTangent;
+	CRIMILD_GLSL_VARYING_OUT vec2 vTextureCoord;
+	CRIMILD_GLSL_VARYING_OUT vec3 vViewVec;
 
 	void main ()
 	{
@@ -67,7 +67,10 @@ const char *lit_texture_vs = { CRIMILD_TO_STRING(
 	}
 )};
 
-const char *lit_texture_fs = { CRIMILD_TO_STRING( 
+const char *lit_texture_fs = { CRIMILD_TO_STRING(
+                                                 
+    CRIMILD_GLSL_PRECISION_FLOAT_HIGH
+                                                 
 	struct Light {
 	    vec3 position;
 	    vec3 attenuation;
@@ -85,12 +88,12 @@ const char *lit_texture_fs = { CRIMILD_TO_STRING(
 	    float shininess;
 	};
 
-	in vec4 vWorldVertex;
-	in vec3 vWorldNormal;
-	in vec3 vWorldTangent;
-	in vec3 vWorldBiTangent;
-	in vec2 vTextureCoord;
-	in vec3 vViewVec;
+	CRIMILD_GLSL_VARYING_IN vec4 vWorldVertex;
+	CRIMILD_GLSL_VARYING_IN vec3 vWorldNormal;
+	CRIMILD_GLSL_VARYING_IN vec3 vWorldTangent;
+	CRIMILD_GLSL_VARYING_IN vec3 vWorldBiTangent;
+	CRIMILD_GLSL_VARYING_IN vec2 vTextureCoord;
+	CRIMILD_GLSL_VARYING_IN vec3 vViewVec;
 
 	uniform int uLightCount;
 	uniform Light uLights[ 4 ];
