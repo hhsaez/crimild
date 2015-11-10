@@ -101,6 +101,7 @@ namespace crimild {
 		void readMaterialSpecularMap( std::stringstream &line );
 		void readMaterialEmissiveMap( std::stringstream &line );
 		void readMaterialShaderProgram( std::stringstream &line );
+        void readMaterialTranslucency( std::stringstream &line );
         
         SharedPointer< Texture > loadTexture( std::string fileName );
 

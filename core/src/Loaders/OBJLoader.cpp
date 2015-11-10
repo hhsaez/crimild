@@ -112,6 +112,8 @@ OBJLoader::OBJLoader( std::string fileName )
 	getMTLProcessor().registerLineProcessor( "map_kS", std::bind( &OBJLoader::readMaterialSpecularMap, this, std::placeholders::_1 ) );
 	getMTLProcessor().registerLineProcessor( "map_Ke", std::bind( &OBJLoader::readMaterialEmissiveMap, this, std::placeholders::_1 ) );
 	getMTLProcessor().registerLineProcessor( "illum", std::bind( &OBJLoader::readMaterialShaderProgram, this, std::placeholders::_1 ) );
+    getMTLProcessor().registerLineProcessor( "d", std::bind( &OBJLoader::readMaterialTranslucency, this, std::placeholders::_1 ) );
+    getMTLProcessor().registerLineProcessor( "Tr", std::bind( &OBJLoader::readMaterialTranslucency, this, std::placeholders::_1 ) );
 }
 
 OBJLoader::~OBJLoader( void )
@@ -400,6 +402,16 @@ void OBJLoader::readMaterialShaderProgram( std::stringstream &line )
             _currentMaterial->setReceiveShadows( false );
             break;
     };
+}
+
+void OBJLoader::readMaterialTranslucency( std::stringstream &line )
+{
+    float translucency;
+    line >> translucency;
+    
+    if ( translucency < 1.0f ) {
+        _currentMaterial->getAlphaState()->setEnabled( true );
+    }
 }
 
 SharedPointer< Texture > OBJLoader::loadTexture( std::string textureFileName )

@@ -87,6 +87,7 @@ R"(
             
             vec3 lightVec = normalize( uLights[ i ].position - vWorldVertex.xyz );
             vec3 halfVector = -normalize( reflect( lightVec, vWorldNormal ) );
+            vec3 eyeVector = normalize( vViewVec );
             
             if ( uUseNormalMap ) {
             	vec3 temp;
@@ -101,6 +102,11 @@ R"(
                 temp.y = dot( halfVector, vWorldBiTangent );
                 temp.z = dot( halfVector, vWorldNormal );
                 halfVector = normalize( temp );
+                
+                temp.x = dot( eyeVector, vWorldTangent );
+                temp.y = dot( eyeVector, vWorldBiTangent );
+                temp.z = dot( eyeVector, vWorldNormal );
+                eyeVector = normalize( temp );
                         
                 normal = 2.0 * texture( uNormalMap, vTextureCoord ).xyz - 1.0;
                 normal = normalize( normal );
@@ -115,7 +121,7 @@ R"(
                     spotlight = pow( spotlight * spotlightFade, uLights[ i ].exponent );
                 }
                 
-                float s = pow( max( dot( halfVector, uUseNormalMap ? normal : vViewVec ), 0.0 ), uMaterial.shininess );
+                float s = pow( max( dot( halfVector, eyeVector ), 0.0 ), uMaterial.shininess );
                 float d = distance( vWorldVertex.xyz, uLights[ i ].position );
                 float a = 1.0 / ( uLights[ i ].attenuation.x + ( uLights[ i ].attenuation.y * d ) + ( uLights[ i ].attenuation.z * d * d ) );
                 
