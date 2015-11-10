@@ -3,10 +3,10 @@ R"(
 // The scale matrix is used to push the projected vertex into the 0.0 - 1.0 region.
 const mat4 ScaleMatrix = mat4( 0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.5, 0.5, 0.5, 1.0 );
                                              
-in vec3 aPosition;
-in vec3 aNormal;
-in vec3 aTangent;
-in vec2 aTextureCoord;
+CRIMILD_GLSL_ATTRIBUTE vec3 aPosition;
+CRIMILD_GLSL_ATTRIBUTE vec3 aNormal;
+CRIMILD_GLSL_ATTRIBUTE vec3 aTangent;
+CRIMILD_GLSL_ATTRIBUTE vec2 aTextureCoord;
    
 uniform mat4 uPMatrix;
 uniform mat4 uVMatrix;
@@ -16,13 +16,13 @@ uniform mat4 uLightSourceViewMatrix;
    
 uniform bool uUseNormalMap;
                                              
-out vec4 vWorldVertex;
-out vec3 vWorldNormal;
-out vec3 vWorldTangent;
-out vec3 vWorldBiTangent;
-out vec2 vTextureCoord;
-out vec3 vViewVec;
-out vec4 vPosition;
+CRIMILD_GLSL_VARYING_OUT vec4 vWorldVertex;
+CRIMILD_GLSL_VARYING_OUT vec3 vWorldNormal;
+CRIMILD_GLSL_VARYING_OUT vec3 vWorldTangent;
+CRIMILD_GLSL_VARYING_OUT vec3 vWorldBiTangent;
+CRIMILD_GLSL_VARYING_OUT vec2 vTextureCoord;
+CRIMILD_GLSL_VARYING_OUT vec3 vViewVec;
+CRIMILD_GLSL_VARYING_OUT vec4 vPosition;
 
 void main ()
 {

@@ -68,7 +68,7 @@ void OBJLoader::FileProcessor::readFile( std::string fileName )
 
 void OBJLoader::FileProcessor::registerLineProcessor( std::string type, OBJLoader::FileProcessor::LineProcessor lineProcessor )
 {
-	_lineProcessors[ type ] = lineProcessor;
+    _lineProcessors[ StringUtils::toLower( type ) ] = lineProcessor;
 }
 
 std::string OBJLoader::FileProcessor::getLine( std::ifstream &input )
@@ -85,7 +85,7 @@ void OBJLoader::FileProcessor::processLine( std::ifstream &input )
 	std::string what;
 	line >> what;
 
-	auto processor = _lineProcessors[ what ];
+    auto processor = _lineProcessors[ StringUtils::toLower( what ) ];
 	if ( processor != nullptr ) {
 		processor( line );
 	}
@@ -154,12 +154,16 @@ void OBJLoader::generateGeometry( void )
         _currentObject = crimild::get_ptr( _objects.back() );
                            
 	}
+    
+    bool useNormals = _normals.size() > 0;
+    bool useTangents = _currentMaterial->getNormalMap() != nullptr;
+    bool useTextureCoords = _textureCoords.size() > 0;
 
 	VertexFormat format( 3,
 						 0,
-						 ( _normals.size() > 0 ? 3 : 0 ),
-	                     0, //( _normalCount > 0 && _textureCoordCount > 0 ? 3 : 0 ),
-						 ( _textureCoords.size() > 0 ? 2 : 0 ) );
+						 ( useNormals > 0 ? 3 : 0 ),
+	                     ( useTangents > 0 ? 3 : 0 ),
+						 ( useTextureCoords > 0 ? 2 : 0 ) );
 
 	std::vector< float > vertexData;
 	std::vector< unsigned short > indexData;
@@ -176,57 +180,22 @@ void OBJLoader::generateGeometry( void )
 
 		if ( format.hasNormals() ) {
             const Vector3f &normal = _normals[ f[ 2 ] - 1 ];
+            
 			vertexData.push_back( normal[ 0 ] );
 			vertexData.push_back( normal[ 1 ] );
 			vertexData.push_back( normal[ 2 ] );
-		}
 
-/*
-		if ( format.hasTangents() ) {
-#if 1
-			Vector3f g;
-
-			g = Vector3f( 1, 0, 0 );
-			if ( ( g ^ n0 ).getSquaredMagnitude() < Numericf::ZERO_TOLERANCE ) {
-				//g = Vector3f( 0.0f, 1.0f, 0.0f );
-			}
-			if ( ( g ^ n0 ).getSquaredMagnitude() < Numericf::ZERO_TOLERANCE ) {
-				//g = Vector3f( 0.0f, 0.0f, 1.0f );
-			}
-			tg0 = ( n0 ^ g );
-
-			g = Vector3f( 1, 0, 0 );
-			if ( ( g ^ n1 ).getSquaredMagnitude() < Numericf::ZERO_TOLERANCE ) {
-				//g = Vector3f( 0.0f, 1.0f, 0.0f );
-			}
-			if ( ( g ^ n1 ).getSquaredMagnitude() < Numericf::ZERO_TOLERANCE ) {
-				//g = Vector3f( 0.0f, 0.0f, 1.0f );
-			}
-			tg1 = ( n1 ^ g );
-
-			g = Vector3f( 1, 0, 0 );
-			if ( ( g ^ n2 ).getSquaredMagnitude() < Numericf::ZERO_TOLERANCE ) {
-				//g = Vector3f( 0.0f, 1.0f, 0.0f );
-			}
-			if ( ( g ^ n2 ).getSquaredMagnitude() < Numericf::ZERO_TOLERANCE ) {
-				//g = Vector3f( 0.0f, 0.0f, 1.0f );
-			}
-			tg2 = ( n2 ^ g );
-#else
-				float coef = 1.0 / ( uv0[ 0 ] * uv1[ 1 ] - uv1[ 0 ] * uv0[ 1 ] );
-				Vector3f tangent;
-				tangent[ 0 ] = coef * ( ( p0[ 0 ] * uv1[ 1 ] ) + ( p1[ 0 ] * -uv0[ 1 ] ) );
-				tangent[ 1 ] = coef * ( ( p0[ 1 ] * uv1[ 1 ] ) + ( p1[ 1 ] * -uv0[ 1 ] ) );
-				tangent[ 2 ] = coef * ( ( p0[ 2 ] * uv1[ 1 ] ) + ( p1[ 2 ] * -uv0[ 1 ] ) );				
-				tangent.normalize();
-				tg0 = tg1 = tg2 = tangent;
-#endif
-				//tg0 = tg1 = tg2 = ( p1 - p0 );
-				//tg1 = ( p2 - p1 );
-				//tg2 = ( p0 - p2 );
-			}
-*/
-
+            if ( format.hasTangents() ) {
+                // TODO: This seems wrong. Computing tangents this way seems so wrong
+                Vector3f g( 1.0f, 0.0f, 0.0f );
+                Vector3f tg = ( normal ^ g );
+                
+                vertexData.push_back( tg[ 0 ] );
+                vertexData.push_back( tg[ 1 ] );
+                vertexData.push_back( tg[ 2 ] );
+            }
+        }
+        
 		if ( format.hasTextureCoords() ) {
             const Vector2f &uv = _textureCoords[ f[ 1 ] - 1 ];
 			vertexData.push_back( uv[ 0 ] );

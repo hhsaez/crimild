@@ -62,30 +62,26 @@ void ForwardRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Ca
 {
     CRIMILD_PROFILE( "Forward Render Pass" )
 
-#if 1
+#ifdef CRIMILD_PLATFORM_DESKTOP
     computeShadowMaps( renderer, renderQueue, camera );
 
     auto sBuffer = getSBuffer( renderer );
 
     renderer->bindFrameBuffer( sBuffer );
+#endif
 
     renderShadedObjects( renderer, renderQueue, camera );
     renderNonShadedObjects( renderer, renderQueue, camera );
     renderTranslucentObjects( renderer, renderQueue, camera );
 
+#ifdef CRIMILD_PLATFORM_DESKTOP
     renderer->unbindFrameBuffer( sBuffer );
 
 	applyImageEffects( renderer, camera );
+#endif
 
     // UI elements need to be render on top of any image effect
     renderScreenObjects( renderer, renderQueue, camera );
-#else
-    for ( auto it : _shadowMaps ) {
-        if ( it.second != nullptr ) {
-            RenderPass::render( renderer, it.second->getTexture(), nullptr );
-        }
-    }
-#endif
 }
 
 ShaderProgram *ForwardRenderPass::getForwardProgram( void )
