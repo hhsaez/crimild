@@ -402,6 +402,9 @@ void OBJLoader::readMaterialTranslucency( std::stringstream &line )
     
     if ( translucency < 1.0f ) {
         _currentMaterial->getAlphaState()->setEnabled( true );
+        auto diffuse = _currentMaterial->getDiffuse();
+        diffuse[ 3 ] = translucency;
+        _currentMaterial->setDiffuse( diffuse );
     }
 }
 
