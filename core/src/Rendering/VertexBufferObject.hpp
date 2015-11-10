@@ -46,13 +46,19 @@ namespace crimild {
 		unsigned int getVertexCount( void ) const { return _vertexCount; }
 
 		Vector3f getPositionAt( unsigned int index ) const;
-		void setPositionAt( unsigned int index, const Vector3f &position );
+		void setPositionAt( unsigned int index, const Vector3f &value );
 
+        Vector3f getNormalAt( unsigned int index ) const;
+        void setNormalAt( unsigned int index, const Vector3f &value );
+        
+        Vector3f getTangentAt( unsigned int index ) const;
+        void setTangentAt( unsigned int index, const Vector3f &value );
+        
+        Vector2f getTextureCoordAt( unsigned int index ) const;
+        void setTextureCoordAt( unsigned int index, const Vector2f &value );
+        
 		RGBAColorf getRGBAColorAt( unsigned int index ) const;
 		RGBColorf getRGBColorAt( unsigned int index ) const;
-		Vector3f getNormalAt( unsigned int index ) const;
-		Vector3f getTangentAt( unsigned int index ) const; 
-		Vector2f getTextureCoordAt( unsigned int index ) const;
 
 	private:
 		VertexFormat _vertexFormat;

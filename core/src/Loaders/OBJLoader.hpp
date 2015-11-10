@@ -101,6 +101,7 @@ namespace crimild {
 		void readMaterialSpecularMap( std::stringstream &line );
 		void readMaterialEmissiveMap( std::stringstream &line );
 		void readMaterialShaderProgram( std::stringstream &line );
+        void readMaterialTranslucency( std::stringstream &line );
         
         SharedPointer< Texture > loadTexture( std::string fileName );
 
@@ -119,7 +120,7 @@ namespace crimild {
 		std::vector< Vector3f > _positions;
 		std::vector< Vector2f > _textureCoords;
 		std::vector< Vector3f > _normals;
-        std::list< std::string > _faces;
+        std::vector< std::string > _faces;
 	};
 
 }

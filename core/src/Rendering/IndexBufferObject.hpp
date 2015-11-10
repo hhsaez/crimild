@@ -40,6 +40,7 @@ namespace crimild {
 
 		unsigned int getIndexCount( void ) const { return getSize(); }
 
+        void generateIncrementalIndices( void );
 	};
 
 }

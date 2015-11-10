@@ -46,7 +46,7 @@ namespace crimild {
 		{
 			if ( _size > 0 ) {
 				_data = new T[ _size ];
-				if ( data ) {
+				if ( data != nullptr ) {
 					memcpy( _data, data, sizeof( T ) * _size );
 				}
 				else {

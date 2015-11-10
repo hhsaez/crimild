@@ -40,3 +40,11 @@ IndexBufferObject::~IndexBufferObject( void )
 
 }
 
+void IndexBufferObject::generateIncrementalIndices( void )
+{
+    unsigned short *data = getData();
+    for ( unsigned short i = 0; i < getIndexCount(); i++ ) {
+        data[ i ] = i;
+    }
+}
+

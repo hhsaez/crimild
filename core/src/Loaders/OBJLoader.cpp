@@ -112,6 +112,8 @@ OBJLoader::OBJLoader( std::string fileName )
 	getMTLProcessor().registerLineProcessor( "map_kS", std::bind( &OBJLoader::readMaterialSpecularMap, this, std::placeholders::_1 ) );
 	getMTLProcessor().registerLineProcessor( "map_Ke", std::bind( &OBJLoader::readMaterialEmissiveMap, this, std::placeholders::_1 ) );
 	getMTLProcessor().registerLineProcessor( "illum", std::bind( &OBJLoader::readMaterialShaderProgram, this, std::placeholders::_1 ) );
+    getMTLProcessor().registerLineProcessor( "d", std::bind( &OBJLoader::readMaterialTranslucency, this, std::placeholders::_1 ) );
+    getMTLProcessor().registerLineProcessor( "Tr", std::bind( &OBJLoader::readMaterialTranslucency, this, std::placeholders::_1 ) );
 }
 
 OBJLoader::~OBJLoader( void )
@@ -167,49 +169,71 @@ void OBJLoader::generateGeometry( void )
 
 	std::vector< float > vertexData;
 	std::vector< unsigned short > indexData;
+    
+    Vector3f p0, p1, p2;
+    Vector3f n0, n1, n2;
+    Vector2f uv0, uv1, uv2;
+    Vector3f tangent;
+    
+    const int VERTEX_COUNT = _faces.size();
+    auto vbo = crimild::alloc< VertexBufferObject >( format, VERTEX_COUNT, nullptr );
+    
+    for ( unsigned int i = 0; i < _faces.size(); i += 3 ) {
+        std::vector< int > v0 = StringUtils::split< int >( _faces[ i + 0 ], '/' );
+        std::vector< int > v1 = StringUtils::split< int >( _faces[ i + 1 ], '/' );
+        std::vector< int > v2 = StringUtils::split< int >( _faces[ i + 2 ], '/' );
+        
+        // this is redundant
+        if ( format.hasPositions() ) {
+            p0 = _positions[ v0[ 0 ] - 1 ];
+            p1 = _positions[ v1[ 0 ] - 1 ];
+            p2 = _positions[ v2[ 0 ] - 1 ];
+        }
 
-	for ( auto face : _faces ) {
-		std::vector< int > f = StringUtils::split< int >( face, '/' );
-
-		if ( format.hasPositions() ) {
-            const Vector3f &position = _positions[ f[ 0 ] - 1 ];
-			vertexData.push_back( position[ 0 ] );
-			vertexData.push_back( position[ 1 ] );
-			vertexData.push_back( position[ 2 ] );
-		}
-
-		if ( format.hasNormals() ) {
-            const Vector3f &normal = _normals[ f[ 2 ] - 1 ];
-            
-			vertexData.push_back( normal[ 0 ] );
-			vertexData.push_back( normal[ 1 ] );
-			vertexData.push_back( normal[ 2 ] );
-
-            if ( format.hasTangents() ) {
-                // TODO: This seems wrong. Computing tangents this way seems so wrong
-                Vector3f g( 1.0f, 0.0f, 0.0f );
-                Vector3f tg = ( normal ^ g );
-                
-                vertexData.push_back( tg[ 0 ] );
-                vertexData.push_back( tg[ 1 ] );
-                vertexData.push_back( tg[ 2 ] );
-            }
+        if ( format.hasNormals() ) {
+            n0 = _normals[ v0[ 2 ] - 1 ];
+            n1 = _normals[ v1[ 2 ] - 1 ];
+            n2 = _normals[ v2[ 2 ] - 1 ];
         }
         
-		if ( format.hasTextureCoords() ) {
-            const Vector2f &uv = _textureCoords[ f[ 1 ] - 1 ];
-			vertexData.push_back( uv[ 0 ] );
-			vertexData.push_back( uv[ 1 ] );
-		}
+        if ( format.hasTextureCoords() ) {
+            uv0 = _textureCoords[ v0[ 1 ] - 1 ];
+            uv1 = _textureCoords[ v1[ 1 ] - 1 ];
+            uv2 = _textureCoords[ v2[ 1 ] - 1 ];
+        }
+        
+        if ( format.hasTangents() ) {
+            Vector3f dP1 = p1 - p0;
+            Vector3f dP2 = p2 - p0;
+            Vector2f dUV1 = uv1 - uv0;
+            Vector2f dUV2 = uv2 - uv0;
+            
+            float r = 1.0f / ( dUV1[ 0 ] * dUV2[ 1 ] - dUV1[ 1 ] * dUV2[ 0 ] );
+            tangent = ( dP1 * dUV2[ 1 ] - dP2 * dUV1[ 1 ] ) * r;
+        }
+        
+        if ( format.hasPositions() ) vbo->setPositionAt( i + 0, p0 );
+        if ( format.hasNormals() ) vbo->setNormalAt( i + 0, n0 );
+        if ( format.hasTangents() ) vbo->setTangentAt( i + 0, tangent );
+        if ( format.hasTextureCoords() ) vbo->setTextureCoordAt( i + 0, uv0 );
 
-		indexData.push_back( indexData.size() );
-	}
+        if ( format.hasPositions() ) vbo->setPositionAt( i + 1, p1 );
+        if ( format.hasNormals() ) vbo->setNormalAt( i + 1, n1 );
+        if ( format.hasTangents() ) vbo->setTangentAt( i + 1, tangent );
+        if ( format.hasTextureCoords() ) vbo->setTextureCoordAt( i + 1, uv1 );
 
-	int vertexCount = indexData.size();
+        if ( format.hasPositions() ) vbo->setPositionAt( i + 2, p2 );
+        if ( format.hasNormals() ) vbo->setNormalAt( i + 2, n2 );
+        if ( format.hasTangents() ) vbo->setTangentAt( i + 2, tangent );
+        if ( format.hasTextureCoords() ) vbo->setTextureCoordAt( i + 2, uv2 );
+    }
+    
+    auto ibo = crimild::alloc< IndexBufferObject >( VERTEX_COUNT, nullptr );
+    ibo->generateIncrementalIndices();
 
-	auto primitive = crimild::alloc< Primitive >( Primitive::Type::TRIANGLES );
-	primitive->setVertexBuffer( crimild::alloc< VertexBufferObject >( format, vertexCount, &vertexData[ 0 ] ) );
-	primitive->setIndexBuffer( crimild::alloc< IndexBufferObject >( indexData.size(), &indexData[ 0 ] ) );
+    auto primitive = crimild::alloc< Primitive >( Primitive::Type::TRIANGLES );
+    primitive->setVertexBuffer( vbo );
+    primitive->setIndexBuffer( ibo );
 
 	auto geometry = crimild::alloc< Geometry >( "geometry" );
 	geometry->attachPrimitive( primitive );
@@ -369,6 +393,16 @@ void OBJLoader::readMaterialShaderProgram( std::stringstream &line )
             _currentMaterial->setReceiveShadows( false );
             break;
     };
+}
+
+void OBJLoader::readMaterialTranslucency( std::stringstream &line )
+{
+    float translucency;
+    line >> translucency;
+    
+    if ( translucency < 1.0f ) {
+        _currentMaterial->getAlphaState()->setEnabled( true );
+    }
 }
 
 SharedPointer< Texture > OBJLoader::loadTexture( std::string textureFileName )
