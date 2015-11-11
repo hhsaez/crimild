@@ -29,12 +29,14 @@
 #define CRIMILD_SCENE_GRAPH_GEOMETRY_
 
 #include "Node.hpp"
-#include "Primitives/Primitive.hpp"
 
-#include <list>
+#include "Foundation/SharedObjectArray.hpp"
+
 #include <functional>
 
 namespace crimild {
+    
+    class Primitive;
 
     class Geometry : public Node {
 	public:
@@ -42,21 +44,25 @@ namespace crimild {
 		virtual ~Geometry( void );
 
 		bool hasPrimitives( void ) const { return _primitives.size(); }
-		void attachPrimitive( PrimitivePtr const &primitive );
-		void detachPrimitive( PrimitivePtr const &primitive );
-		void detachAllPrimitives( void );
-		void foreachPrimitive( std::function< void( PrimitivePtr const & ) > callback );
+        
+        void attachPrimitive( Primitive *primitive );
+		void attachPrimitive( SharedPointer< Primitive > const &primitive );
+		
+        void detachPrimitive( Primitive *primitive );
+        void detachPrimitive( SharedPointer< Primitive > const &primitive );
+		
+        void detachAllPrimitives( void );
+		
+        void forEachPrimitive( std::function< void( Primitive * ) > callback );
 
 		void updateModelBounds( void );
 
 	private:
-		std::list< PrimitivePtr > _primitives;
+        SharedObjectArray< Primitive > _primitives;
 
 	public:
 		virtual void accept( NodeVisitor &visitor ) override;
 	};
-    
-    using GeometryPtr = SharedPointer< Geometry >;
 
 }
 

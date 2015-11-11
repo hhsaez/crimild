@@ -62,12 +62,12 @@ TEST( LightTest, fetchLights )
 	EXPECT_TRUE( fetchLights.hasLights() );
 
 	int i = 0; 
-	fetchLights.foreachLight( [&]( LightPtr const &light ) {
+	fetchLights.forEachLight( [&i, light1, light2]( Light *light ) {
 		if ( i == 0 ) {
-			EXPECT_EQ( light1, light );
+			EXPECT_EQ( crimild::get_ptr( light1 ), light );
 		}
 		else if ( i == 1 ) {
-			EXPECT_EQ( light2, light );
+			EXPECT_EQ( crimild::get_ptr( light2 ), light );
 		}
 		i++;
 	});

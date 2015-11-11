@@ -37,6 +37,7 @@ namespace crimild {
 	class Geometry;
 	class Camera;
 	class Light;
+    class Text;
 
 	class NodeVisitor {
 	protected:
@@ -47,13 +48,14 @@ namespace crimild {
 
 		virtual void reset( void );
 
-        virtual void traverse( SharedPointer< Node > const &node );
+        virtual void traverse( Node *node );
 
-		virtual void visitNode( SharedPointer< Node > const &node );
-		virtual void visitGroup( SharedPointer< Group > const &group );
-		virtual void visitGeometry( SharedPointer< Geometry > const &geometry );
-		virtual void visitCamera( SharedPointer< Camera > const &camera );
-		virtual void visitLight( SharedPointer< Light > const &light );
+		virtual void visitNode( Node *node );
+		virtual void visitGroup( Group *group );
+		virtual void visitGeometry( Geometry *geometry );
+        virtual void visitText( Text *text );
+		virtual void visitCamera( Camera *camera );
+		virtual void visitLight( Light *light );
 
 	private:
 		NodeVisitor( const NodeVisitor & ) { }

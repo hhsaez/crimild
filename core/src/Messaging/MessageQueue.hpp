@@ -203,7 +203,7 @@ namespace crimild {
 	{
 		MessageQueue::getInstance()->registerMessageDispatcher( this );
 	}
-
+    
 	class Messenger {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( Messenger )
 

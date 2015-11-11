@@ -37,8 +37,8 @@ TEST( ShaderProgramTest, construction )
 	auto fs = crimild::alloc< FragmentShader >( "fs code" );
 	auto program = crimild::alloc< ShaderProgram >( vs, fs );
 
-	EXPECT_EQ( vs, program->getVertexShader() );
-	EXPECT_EQ( fs, program->getFragmentShader() );
+    EXPECT_EQ( crimild::get_ptr( vs ), program->getVertexShader() );
+    EXPECT_EQ( crimild::get_ptr( fs ), program->getFragmentShader() );
 }
 
 TEST( ShaderProgramTest, locations )
@@ -49,16 +49,16 @@ TEST( ShaderProgramTest, locations )
 
 	auto vertexWeightLocation = crimild::alloc< ShaderLocation >( ShaderLocation::Type::ATTRIBUTE, "vertexWeight" );
 	program->registerLocation( vertexWeightLocation );
-	ASSERT_EQ( vertexWeightLocation, program->getLocation( vertexWeightLocation->getName() ) );
+    ASSERT_EQ( crimild::get_ptr( vertexWeightLocation ), program->getLocation( vertexWeightLocation->getName() ) );
 	EXPECT_FALSE( vertexWeightLocation->isValid() );
 
 	auto timeLocation = crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, "time" );
 	program->registerLocation( timeLocation );
-	ASSERT_EQ( timeLocation, program->getLocation( timeLocation->getName() ) );
+	ASSERT_EQ( crimild::get_ptr( timeLocation ), program->getLocation( timeLocation->getName() ) );
 	EXPECT_FALSE( timeLocation->isValid() );
 
 	int i = 0; 
-	program->foreachLocation( [&]( ShaderLocationPtr const &loc ) mutable {
+	program->forEachLocation( [&i]( ShaderLocation *loc ) mutable {
 		i++;
 	});
 	EXPECT_EQ( 2, i );
@@ -94,7 +94,7 @@ TEST( ShaderProgramTest, multipleLightLocations )
 	program->registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_ATTENUATION_UNIFORM + 50, "uLights[50].attenuation" );
 
 	int i = 0;
-	program->foreachLocation( [&]( ShaderLocationPtr const &location ) mutable {
+	program->forEachLocation( [&i]( ShaderLocation *location ) mutable {
 		location->setLocation( i++ );
 	});
 

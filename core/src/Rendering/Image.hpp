@@ -29,7 +29,6 @@
 #define CRIMILD_RENDERING_IMAGE_
 
 #include "Foundation/SharedObject.hpp"
-#include "Foundation/Pointer.hpp"
 
 #include <vector>
 
@@ -73,8 +72,6 @@ namespace crimild {
 		Image( const Image & ) { }
 		Image &operator=( const Image & ) { return *this; }
 	};
-    
-    using ImagePtr = SharedPointer< Image >;
 
 }
 

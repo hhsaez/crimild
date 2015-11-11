@@ -28,6 +28,7 @@
 #ifndef CRIMILD_
 #define CRIMILD_
 
+#include "Mathematics/Clock.hpp"
 #include "Mathematics/Distance.hpp"
 #include "Mathematics/Frustum.hpp"
 #include "Mathematics/Interpolation.hpp"
@@ -36,11 +37,11 @@
 #include "Mathematics/Numeric.hpp"
 #include "Mathematics/Plane.hpp"
 #include "Mathematics/Quaternion.hpp"
+#include "Mathematics/Random.hpp"
 #include "Mathematics/Ray.hpp"
 #include "Mathematics/Rect.hpp"
 #include "Mathematics/Root.hpp"
 #include "Mathematics/Sphere.hpp"
-#include "Mathematics/Time.hpp"
 #include "Mathematics/Transformation.hpp"
 #include "Mathematics/Vector.hpp"
 
@@ -50,9 +51,10 @@
 #include "Foundation/Log.hpp"
 #include "Foundation/StringUtils.hpp"
 #include "Foundation/SharedObject.hpp"
-#include "Foundation/Pointer.hpp"
 #include "Foundation/Singleton.hpp"
 #include "Foundation/Profiler.hpp"
+#include "Foundation/Streaming.hpp"
+#include "Foundation/Version.hpp"
 
 #include "Boundings/BoundingVolume.hpp"
 #include "Boundings/PlaneBoundingVolume.hpp"
@@ -71,6 +73,7 @@
 #include "SceneGraph/Switch.hpp"
 #include "SceneGraph/Text.hpp"
 
+#include "Components/BehaviorComponent.hpp"
 #include "Components/JointComponent.hpp"
 #include "Components/LambdaComponent.hpp"
 #include "Components/MaterialComponent.hpp"
@@ -82,16 +85,18 @@
 #include "Components/RenderStateComponent.hpp"
 #include "Components/SkinComponent.hpp"
 
+#include "Concurrency/Async.hpp"
+#include "Concurrency/Task.hpp"
+#include "Concurrency/TaskManager.hpp"
+
 #include "Visitors/Apply.hpp"
 #include "Visitors/ApplyToGeometries.hpp"
 #include "Visitors/FetchCameras.hpp"
 #include "Visitors/FetchLights.hpp"
 #include "Visitors/NodeVisitor.hpp"
-#include "Visitors/ComputeVisibilitySet.hpp"
 #include "Visitors/ComputeRenderQueue.hpp"
 #include "Visitors/SelectNodes.hpp"
 #include "Visitors/StartComponents.hpp"
-#include "Visitors/UpdateComponents.hpp"
 #include "Visitors/UpdateRenderState.hpp"
 #include "Visitors/UpdateWorldState.hpp"
 #include "Visitors/Picking.hpp"
@@ -118,7 +123,6 @@
 #include "Rendering/ForwardRenderPass.hpp"
 #include "Rendering/FrameBufferObject.hpp"
 #include "Rendering/Image.hpp"
-#include "Rendering/ImageEffect.hpp"
 #include "Rendering/ImageTGA.hpp"
 #include "Rendering/IndexBufferObject.hpp"
 #include "Rendering/Material.hpp"
@@ -132,7 +136,9 @@
 #include "Rendering/Texture.hpp"
 #include "Rendering/VertexBufferObject.hpp"
 #include "Rendering/VertexFormat.hpp"
-#include "Rendering/VisibilitySet.hpp"
+
+#include "Rendering/ImageEffects/ImageEffect.hpp"
+#include "Rendering/ImageEffects/ColorTintImageEffect.hpp"
 
 #include "Messaging/MessageQueue.hpp"
 
@@ -141,21 +147,13 @@
 #include "Simulation/InputState.hpp"
 #include "Simulation/Simulation.hpp"
 #include "Simulation/FileSystem.hpp"
-#include "Simulation/RunLoop.hpp"
-#include "Simulation/Task.hpp"
 
-#include "Simulation/Tasks/BeginRenderTask.hpp"
-#include "Simulation/Tasks/EndRenderTask.hpp"
-#include "Simulation/Tasks/ComputeRenderQueueTask.hpp"
-#include "Simulation/Tasks/RenderSceneTask.hpp"
-#include "Simulation/Tasks/UpdateSceneTask.hpp"
-#include "Simulation/Tasks/RenderDebugInfoTask.hpp"
-#include "Simulation/Tasks/DispatchMessagesTask.hpp"
-#include "Simulation/Tasks/ProfilerDumpTask.hpp"
+#include "Simulation/Systems/DebugSystem.hpp"
+#include "Simulation/Systems/UpdateSystem.hpp"
+#include "Simulation/Systems/RenderSystem.hpp"
+#include "Simulation/Systems/StreamingSystem.hpp"
 
 #include "Debug/DebugRenderHelper.hpp"
-#include "Debug/DebugRenderPass.hpp"
-#include "Debug/HierarchyRenderPass.hpp"
 
 #endif
 

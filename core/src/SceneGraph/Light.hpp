@@ -99,8 +99,6 @@ namespace crimild {
 		Light( const Light & ) { }
 		Light &operator=( const Light & ) { return *this; }
 	};
-    
-    using LightPtr = SharedPointer< Light >;
 
 }
 

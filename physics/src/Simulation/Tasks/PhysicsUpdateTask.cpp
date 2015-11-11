@@ -32,6 +32,8 @@
 using namespace crimild;
 using namespace crimild::physics;
 
+#if 0
+
 #define CRIMILD_PHYSICS_STEP_DELTA 1.0 / 60.0
 
 PhysicsUpdateTask::PhysicsUpdateTask( int priority )
@@ -70,4 +72,7 @@ void PhysicsUpdateTask::stop( void )
 {
 
 }
+
+#endif
+
 

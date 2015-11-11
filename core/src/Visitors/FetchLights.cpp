@@ -47,12 +47,12 @@ void FetchLights::reset( void )
 	NodeVisitor::reset();
 }
 
-void FetchLights::visitLight( LightPtr const &light )
+void FetchLights::visitLight( Light *light )
 {
 	_lights.push_back( light );
 }
 
-void FetchLights::foreachLight( std::function< void( LightPtr const &light ) > callback )
+void FetchLights::forEachLight( std::function< void( Light *light ) > callback )
 {
 	for ( auto light : _lights ) {
 		callback( light );

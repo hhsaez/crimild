@@ -30,6 +30,8 @@
 #include "Foundation/Log.hpp"
 #include "SceneGraph/Geometry.hpp"
 
+#include "Mathematics/Random.hpp"
+
 using namespace crimild;
 
 ParticleSystemComponent::ParticleSystemComponent( void )
@@ -81,7 +83,7 @@ void ParticleSystemComponent::onAttach( void )
 	geometry->getComponent< MaterialComponent >()->attachMaterial( _material );
 }
 
-void ParticleSystemComponent::update( const Time &t )
+void ParticleSystemComponent::update( const Clock &t )
 {
 	_durationUniform->setValue( _particleDuration );
 	_gravityUniform->setValue( _gravity );
@@ -104,16 +106,16 @@ void ParticleSystemComponent::generateParticles( void )
 	unsigned short *indices = ibo->getData();
 
 	for ( unsigned short i = 0; i < particleCount; i++ ) {
-		vertices[ i * format.getVertexSize() + 0 ] = getSpread()[ 0 ] * ( 2.0f * Numericf::random() - 1.0f );
-		vertices[ i * format.getVertexSize() + 1 ] = getSpread()[ 1 ] * ( 2.0f * Numericf::random() - 1.0f );
-		vertices[ i * format.getVertexSize() + 2 ] = getSpread()[ 2 ] * ( 2.0f * Numericf::random() - 1.0f );
+		vertices[ i * format.getVertexSize() + 0 ] = getSpread()[ 0 ] * ( 2.0f * Random::generate< float >() - 1.0f );
+		vertices[ i * format.getVertexSize() + 1 ] = getSpread()[ 1 ] * ( 2.0f * Random::generate< float >() - 1.0f );
+		vertices[ i * format.getVertexSize() + 2 ] = getSpread()[ 2 ] * ( 2.0f * Random::generate< float >() - 1.0f );
 
 		vertices[ i * format.getVertexSize() + 3 ] = getVelocity()[ 0 ];
 		vertices[ i * format.getVertexSize() + 4 ] = getVelocity()[ 1 ];
 		vertices[ i * format.getVertexSize() + 5 ] = getVelocity()[ 2 ];
 
 		vertices[ i * format.getVertexSize() + 6 ] = getParticleSize();
-		vertices[ i * format.getVertexSize() + 7 ] = Numericf::random( getParticleDuration() );
+		vertices[ i * format.getVertexSize() + 7 ] = Random::generate< float >( getParticleDuration() );
 
 		indices[ i ] = i;
 	}

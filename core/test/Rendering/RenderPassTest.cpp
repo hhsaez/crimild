@@ -43,6 +43,6 @@ TEST( RenderPassTest, construction )
 
 	camera->setRenderPass( renderPass );
 
-	ASSERT_EQ( renderPass, camera->getRenderPass() );
+	ASSERT_EQ( crimild::get_ptr( renderPass ), camera->getRenderPass() );
 }
 

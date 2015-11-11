@@ -29,6 +29,8 @@
 
 #include "Foundation/Log.hpp"
 
+#include "Mathematics/Numeric.hpp"
+
 using namespace crimild;
 
 FileSystem &FileSystem::getInstance( void )
@@ -56,12 +58,12 @@ void FileSystem::init( int argc, char **argv )
     
     int pos = base.find( "/Debug" );
     if ( pos > 0 ) {
-        base = base.substr( 0, pos + 1 );
+        base = base.substr( 0, pos );
     }
 	
     pos = base.find( "/Release" );
     if ( pos > 0 ) {
-        base = base.substr( 0, pos + 1 );
+        base = base.substr( 0, pos );
     }
     
 	if ( base.length() == 0 ) {
@@ -73,11 +75,22 @@ void FileSystem::init( int argc, char **argv )
 
 std::string FileSystem::extractDirectory( std::string path )
 {
-	return path.substr( 0, path.find_last_of( '/' ) );
+	// handles both Win32 and Unix like paths
+	return path.substr( 0, Numerici::max( path.find_last_of( '\\' ), path.find_last_of( '/' ) ) );
 }
 
 std::string FileSystem::pathForResource( std::string filePath )
 {
 	return getBaseDirectory() + "/" + filePath;
+}
+
+std::string FileSystem::getRelativePath( std::string absolutePath )
+{
+    int pos = absolutePath.find( _baseDirectory );
+    if ( pos >= 0 ) {
+        return absolutePath.substr( _baseDirectory.length() );
+    }
+    
+    return absolutePath;
 }
 

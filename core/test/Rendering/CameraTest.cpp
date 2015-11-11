@@ -62,8 +62,8 @@ TEST( CameraTest, fetchCameras )
 	FetchCameras fetchCameras;
 	scene->perform( fetchCameras );
 	int i = 0;
-	fetchCameras.foreachCamera( [&]( CameraPtr const &c ) mutable {
-		EXPECT_EQ( camera, c );
+	fetchCameras.forEachCamera( [&i, camera]( Camera *c ) {
+        EXPECT_EQ( crimild::get_ptr( camera ), c );
 		i++;
 	});
 	EXPECT_EQ( 1, i );

@@ -38,13 +38,13 @@ namespace crimild {
 
 	class ApplyToGeometries : public NodeVisitor {
 	private:
-		typedef std::function< void( GeometryPtr const & ) > CallbackType;
+		typedef std::function< void( Geometry * ) > CallbackType;
 
 	public:
 		ApplyToGeometries( CallbackType callback );
 		virtual ~ApplyToGeometries( void );
 
-		virtual void visitGeometry( GeometryPtr const &geometry ) override;
+		virtual void visitGeometry( Geometry *geometry ) override;
 
 	private:
 		CallbackType _callback;

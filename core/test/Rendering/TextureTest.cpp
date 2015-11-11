@@ -36,7 +36,7 @@ TEST( TextureTest, construction )
 	auto image = crimild::alloc< Image >( 0, 0, 0, nullptr );
 	auto texture = crimild::alloc< Texture >( image );
 
-	EXPECT_EQ( image, texture->getImage() );
+    EXPECT_EQ( crimild::get_ptr( image ), texture->getImage() );
 	EXPECT_EQ( "ColorMap", texture->getName() );
 }
 

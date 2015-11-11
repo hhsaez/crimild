@@ -26,13 +26,14 @@
  */
 
 #include "SceneGraph/Geometry.hpp"
+#include "Primitives/Primitive.hpp"
 #include "Components/MaterialComponent.hpp"
 
 #include "gtest/gtest.h"
 
 using namespace crimild;
 
-TEST( GeometryNodeTest, construction )
+TEST( GeometryTest, construction )
 {
 	auto geometry = crimild::alloc< Geometry >( "a geometry" );
 
@@ -43,7 +44,7 @@ TEST( GeometryNodeTest, construction )
 	EXPECT_FALSE( materials->hasMaterials() );
 }
 
-TEST( GeometryNodeTest, attachPrimitive )
+TEST( GeometryTest, attachPrimitive )
 {
 	auto geometry = crimild::alloc< Geometry >( "a geometry" );
 
@@ -57,9 +58,9 @@ TEST( GeometryNodeTest, attachPrimitive )
 	
 	bool found = false;
 	int count = 0;
-	geometry->foreachPrimitive( [&]( PrimitivePtr const &p ) mutable {
+	geometry->forEachPrimitive( [&count, primitive, &found]( Primitive *p ) {
 		++count;
-		if ( p == primitive ) {
+		if ( p == crimild::get_ptr( primitive ) ) {
 			found = true;
 		}
 	});
@@ -68,7 +69,7 @@ TEST( GeometryNodeTest, attachPrimitive )
 	EXPECT_TRUE( found );
 }
 
-TEST( GeometryNodeTest, detachPrimitive )
+TEST( GeometryTest, detachPrimitive )
 {
 	auto geometry = crimild::alloc< Geometry >( "a geometry" );
 
@@ -85,14 +86,14 @@ TEST( GeometryNodeTest, detachPrimitive )
 	EXPECT_FALSE( geometry->hasPrimitives() );	
 	
 	int count = 0;
-	geometry->foreachPrimitive( [&]( PrimitivePtr const &p ) mutable {
+	geometry->forEachPrimitive( [&count]( Primitive *p ) {
 		++count;
 	});
 
 	EXPECT_EQ( count, 0 );
 }
 
-TEST( GeometryNodeTest, detachAllPrimitives )
+TEST( GeometryTest, detachAllPrimitives )
 {
 	auto geometry = crimild::alloc< Geometry >( "a geometry" );
 
@@ -103,7 +104,7 @@ TEST( GeometryNodeTest, detachAllPrimitives )
 	geometry->attachPrimitive( primitive2 );
 
 	int count = 0;
-	geometry->foreachPrimitive( [&]( PrimitivePtr const &p ) mutable {
+	geometry->forEachPrimitive( [&count]( Primitive *p ) {
 		++count;
 	});
 	EXPECT_EQ( count, 2 );
@@ -111,7 +112,7 @@ TEST( GeometryNodeTest, detachAllPrimitives )
 	geometry->detachAllPrimitives();
 
 	count = 0;
-	geometry->foreachPrimitive( [&]( PrimitivePtr const &p ) mutable {
+	geometry->forEachPrimitive( [&count]( Primitive *p ) {
 		++count;
 	});
 	EXPECT_EQ( count, 0 );

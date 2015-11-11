@@ -29,7 +29,6 @@
 #define CRIMILD_CORE_FOUNDATION_SHARED_OBJECT_MAP_
 
 #include "Foundation/SharedObject.hpp"
-#include "Foundation/Pointer.hpp"
 
 #include <map>
 #include <string>
@@ -67,9 +66,9 @@ namespace crimild {
             return obj;
         }
 
-        ObjectPtr get( std::string key )
+        ObjectType *get( std::string key )
         {
-            return _objects[ key ];
+            return crimild::get_ptr( _objects[ key ] );
         }
         
         void clear( void )
@@ -77,10 +76,14 @@ namespace crimild {
             _objects.clear();
         }
         
-        void each( std::function< void( std::string, ObjectPtr const & ) > callback )
+        void each( std::function< void( std::string, ObjectType * ) > callback )
         {
             auto os = _objects;
-            for ( auto o : os ) callback( o.first, o.second );
+            for ( auto o : os ) {
+                if ( o.second != nullptr ) {
+                    callback( o.first, crimild::get_ptr( o.second ) );
+                }
+            }
         }
         
     private:

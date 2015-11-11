@@ -32,14 +32,11 @@
 
 namespace crimild {
     
-    class DepthState;
-    
-    using DepthStatePtr = SharedPointer< DepthState >;
-    
 	class DepthState : public RenderState {
     public:
-        static DepthStatePtr DISABLED;
-        static DepthStatePtr ENABLED;
+        // TODO: these should be 'const'
+        static SharedPointer< DepthState > DISABLED;
+        static SharedPointer< DepthState > ENABLED;
         
 	public:
 		DepthState( bool enabled = true );

@@ -29,7 +29,7 @@
 
 using namespace crimild;
 
-LambdaComponent::LambdaComponent( std::function< void( NodePtr const &, const Time & ) > callback )
+LambdaComponent::LambdaComponent( LambdaComponent::Callback callback )
 	: _callback( callback )
 {
 
@@ -40,8 +40,8 @@ LambdaComponent::~LambdaComponent( void )
 
 }
 
-void LambdaComponent::update( const Time &t )
+void LambdaComponent::update( const Clock &c )
 {
-	_callback( getNode()->getShared< Node >(), t );
+	_callback( getNode(), c );
 }
 

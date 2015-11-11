@@ -27,10 +27,10 @@
 
 #include "Rendering/DeferredRenderPass.hpp"
 #include "Rendering/Renderer.hpp"
-#include "Rendering/VisibilitySet.hpp"
 #include "Rendering/FrameBufferObject.hpp"
 #include "Rendering/RenderQueue.hpp"
-#include "Rendering/ImageEffect.hpp"
+
+#include "Rendering/ImageEffects/ImageEffect.hpp"
 
 #include "SceneGraph/Geometry.hpp"
 
@@ -56,7 +56,7 @@ DeferredRenderPass::~DeferredRenderPass( void )
     
 }
 
-void DeferredRenderPass::render( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
+void DeferredRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
 {
     CRIMILD_PROFILE( "Deferred Render Pass" )
 
@@ -67,11 +67,10 @@ void DeferredRenderPass::render( RendererPtr const &renderer, RenderQueuePtr con
     renderToGBuffer( renderer, renderQueue, camera );
     
     composeFrame( renderer, renderQueue, camera );
+    renderTranslucentObjects( renderer, renderQueue, camera );
     
     if ( !isDebugModeEnabled() ) {
         applyImageEffects( renderer, camera );
-        auto sBuffer = renderer->getFrameBuffer( S_BUFFER_NAME );
-        RenderPass::render( renderer, sBuffer->getRenderTargets()->get( S_BUFFER_COLOR_TARGET_NAME )->getTexture(), nullptr );
         
         renderTranslucentObjects( renderer, renderQueue, camera );
         renderScreenObjects( renderer, renderQueue, camera );
@@ -85,7 +84,7 @@ void DeferredRenderPass::render( RendererPtr const &renderer, RenderQueuePtr con
         renderer->setDepthState( DepthState::DISABLED );
         
         renderer->setViewport( Rectf( 0.0f, 0.75f, 0.25f, 0.25f ) );
-        RenderPass::render( renderer, gBuffer->getRenderTargets()->get( G_BUFFER_DEPTH_TARGET_NAME )->getTexture(), nullptr );
+        RenderPass::render( renderer, gBuffer->getRenderTargets().get( G_BUFFER_DEPTH_TARGET_NAME )->getTexture(), nullptr );
         
         if ( _shadowMaps.size() > 0 ) {
             auto firstShadow = _shadowMaps.begin()->second;
@@ -95,45 +94,45 @@ void DeferredRenderPass::render( RendererPtr const &renderer, RenderQueuePtr con
         
         // color
         renderer->setViewport( Rectf( 0.5f, 0.75f, 0.25f, 0.25f ) );
-        RenderPass::render( renderer, gBuffer->getRenderTargets()->get( G_BUFFER_DIFFUSE_TARGET_NAME )->getTexture(), rgbProgram );
+        RenderPass::render( renderer, gBuffer->getRenderTargets().get( G_BUFFER_DIFFUSE_TARGET_NAME )->getTexture(), rgbProgram );
         
         // world-space positions
         renderer->setViewport( Rectf( 0.75f, 0.75f, 0.25f, 0.25f ) );
-        RenderPass::render( renderer, gBuffer->getRenderTargets()->get( G_BUFFER_POSITION_TARGET_NAME )->getTexture(), rgbProgram );
+        RenderPass::render( renderer, gBuffer->getRenderTargets().get( G_BUFFER_POSITION_TARGET_NAME )->getTexture(), rgbProgram );
         
         // world-space normals
         renderer->setViewport( Rectf( 0.5f, 0.5f, 0.25f, 0.25f ) );
-        RenderPass::render( renderer, gBuffer->getRenderTargets()->get( G_BUFFER_NORMAL_TARGET_NAME )->getTexture(), rgbProgram );
+        RenderPass::render( renderer, gBuffer->getRenderTargets().get( G_BUFFER_NORMAL_TARGET_NAME )->getTexture(), rgbProgram );
         
         // specular
         renderer->setViewport( Rectf( 0.25f, 0.5f, 0.25f, 0.25f ) );
-        RenderPass::render( renderer, gBuffer->getRenderTargets()->get( G_BUFFER_NORMAL_TARGET_NAME )->getTexture(), alphaProgram );
+        RenderPass::render( renderer, gBuffer->getRenderTargets().get( G_BUFFER_NORMAL_TARGET_NAME )->getTexture(), alphaProgram );
         
         // view-space normals
         renderer->setViewport( Rectf( 0.75f, 0.5f, 0.25f, 0.25f ) );
-        RenderPass::render( renderer, gBuffer->getRenderTargets()->get( G_BUFFER_VIEW_SPACE_NORMAL_TARGET_NAME )->getTexture(), rgbProgram );
+        RenderPass::render( renderer, gBuffer->getRenderTargets().get( G_BUFFER_VIEW_SPACE_NORMAL_TARGET_NAME )->getTexture(), rgbProgram );
         
         // emissive
         renderer->setViewport( Rectf( 0.25f, 0.75f, 0.25f, 0.25f ) );
-        RenderPass::render( renderer, gBuffer->getRenderTargets()->get( G_BUFFER_VIEW_SPACE_NORMAL_TARGET_NAME )->getTexture(), alphaProgram );
+        RenderPass::render( renderer, gBuffer->getRenderTargets().get( G_BUFFER_VIEW_SPACE_NORMAL_TARGET_NAME )->getTexture(), alphaProgram );
         
         // composed image
         auto sBuffer = renderer->getFrameBuffer( S_BUFFER_NAME );
         renderer->setViewport( Rectf( 0.0f, 0.0f, 0.5f, 0.5f ) );
-        RenderPass::render( renderer, sBuffer->getRenderTargets()->get( S_BUFFER_COLOR_TARGET_NAME )->getTexture(), nullptr );
+        RenderPass::render( renderer, sBuffer->getRenderTargets().get( S_BUFFER_COLOR_TARGET_NAME )->getTexture(), nullptr );
         
         // iamge effects
         applyImageEffects( renderer, camera );
         sBuffer = renderer->getFrameBuffer( S_BUFFER_NAME );
         renderer->setViewport( Rectf( 0.5f, 0.0f, 0.5f, 0.5f ) );
-        RenderPass::render( renderer, sBuffer->getRenderTargets()->get( S_BUFFER_COLOR_TARGET_NAME )->getTexture(), nullptr );
+        RenderPass::render( renderer, sBuffer->getRenderTargets().get( S_BUFFER_COLOR_TARGET_NAME )->getTexture(), nullptr );
         
         // reset viewport
         renderer->setViewport( Rectf( 0.0f, 0.0f, 1.0f, 1.0f ) );
     }
 }
 
-void DeferredRenderPass::renderToGBuffer( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
+void DeferredRenderPass::renderToGBuffer( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
 {
     CRIMILD_PROFILE( "Render to G-Buffer" )
 
@@ -154,7 +153,7 @@ void DeferredRenderPass::renderToGBuffer( RendererPtr const &renderer, RenderQue
     renderer->setAlphaState( AlphaState::DISABLED );
     renderer->setDepthState( DepthState::ENABLED );
     
-    renderQueue->each( renderQueue->getOpaqueObjects(), [&]( MaterialPtr const &material, RenderQueue::PrimitiveMap const &primitives ) {
+    renderQueue->each( renderQueue->getOpaqueObjects(), [&]( Material *material, RenderQueue::PrimitiveMap const &primitives ) {
         CRIMILD_PROFILE( "Bind Material" )
         // bind material properties
         renderer->bindMaterial( program, material );
@@ -171,8 +170,7 @@ void DeferredRenderPass::renderToGBuffer( RendererPtr const &renderer, RenderQue
             for ( auto geometryIt : it.second ) {
                 CRIMILD_PROFILE( "Draw Primitive" )
 
-                auto world = geometryIt.second;
-                renderer->applyTransformations( program, projection, view, world.computeModelMatrix() );
+                renderer->applyTransformations( program, projection, view, geometryIt.second );
                 renderer->drawPrimitive( program, primitive );
             }
             
@@ -191,7 +189,7 @@ void DeferredRenderPass::renderToGBuffer( RendererPtr const &renderer, RenderQue
     renderer->unbindFrameBuffer( gBuffer );
 }
 
-void DeferredRenderPass::composeFrame( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
+void DeferredRenderPass::composeFrame( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
 {
     CRIMILD_PROFILE( "Compose Frame" )
 
@@ -215,31 +213,31 @@ void DeferredRenderPass::composeFrame( RendererPtr const &renderer, RenderQueueP
     }
     
     // bind lights
-    renderQueue->each( [&]( LightPtr const &light, int ) {
+    renderQueue->each( [&]( Light *light, int ) {
         renderer->bindLight( program, light );
     });
     
     // bind framebuffer texture
     auto gBuffer = renderer->getFrameBuffer( G_BUFFER_NAME );
-    renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_DEPTH_MAP_UNIFORM ), gBuffer->getRenderTargets()->get( G_BUFFER_DEPTH_TARGET_NAME )->getTexture() );
-    renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_COLOR_MAP_UNIFORM ), gBuffer->getRenderTargets()->get( G_BUFFER_DIFFUSE_TARGET_NAME )->getTexture() );
-    renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_POSITION_MAP_UNIFORM ), gBuffer->getRenderTargets()->get( G_BUFFER_POSITION_TARGET_NAME )->getTexture() );
-    renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_NORMAL_MAP_UNIFORM ), gBuffer->getRenderTargets()->get( G_BUFFER_NORMAL_TARGET_NAME )->getTexture() );
-    renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_EMISSIVE_MAP_UNIFORM ), gBuffer->getRenderTargets()->get( G_BUFFER_VIEW_SPACE_NORMAL_TARGET_NAME )->getTexture() );
+    renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_DEPTH_MAP_UNIFORM ), gBuffer->getRenderTargets().get( G_BUFFER_DEPTH_TARGET_NAME )->getTexture() );
+    renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_COLOR_MAP_UNIFORM ), gBuffer->getRenderTargets().get( G_BUFFER_DIFFUSE_TARGET_NAME )->getTexture() );
+    renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_POSITION_MAP_UNIFORM ), gBuffer->getRenderTargets().get( G_BUFFER_POSITION_TARGET_NAME )->getTexture() );
+    renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_NORMAL_MAP_UNIFORM ), gBuffer->getRenderTargets().get( G_BUFFER_NORMAL_TARGET_NAME )->getTexture() );
+    renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_EMISSIVE_MAP_UNIFORM ), gBuffer->getRenderTargets().get( G_BUFFER_VIEW_SPACE_NORMAL_TARGET_NAME )->getTexture() );
     
     renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM ), renderQueue->getViewMatrix() );
     
     renderer->drawScreenPrimitive( program );
 
     // unbind framebuffer texture
-    renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_DEPTH_MAP_UNIFORM ), gBuffer->getRenderTargets()->get( G_BUFFER_DEPTH_TARGET_NAME )->getTexture() );
-    renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_COLOR_MAP_UNIFORM ), gBuffer->getRenderTargets()->get( G_BUFFER_DIFFUSE_TARGET_NAME )->getTexture() );
-    renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_POSITION_MAP_UNIFORM ), gBuffer->getRenderTargets()->get( G_BUFFER_POSITION_TARGET_NAME )->getTexture() );
-    renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_NORMAL_MAP_UNIFORM ), gBuffer->getRenderTargets()->get( G_BUFFER_NORMAL_TARGET_NAME )->getTexture() );
-    renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_EMISSIVE_MAP_UNIFORM ), gBuffer->getRenderTargets()->get( G_BUFFER_VIEW_SPACE_NORMAL_TARGET_NAME )->getTexture() );
+    renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_DEPTH_MAP_UNIFORM ), gBuffer->getRenderTargets().get( G_BUFFER_DEPTH_TARGET_NAME )->getTexture() );
+    renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_COLOR_MAP_UNIFORM ), gBuffer->getRenderTargets().get( G_BUFFER_DIFFUSE_TARGET_NAME )->getTexture() );
+    renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_POSITION_MAP_UNIFORM ), gBuffer->getRenderTargets().get( G_BUFFER_POSITION_TARGET_NAME )->getTexture() );
+    renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_NORMAL_MAP_UNIFORM ), gBuffer->getRenderTargets().get( G_BUFFER_NORMAL_TARGET_NAME )->getTexture() );
+    renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::G_BUFFER_EMISSIVE_MAP_UNIFORM ), gBuffer->getRenderTargets().get( G_BUFFER_VIEW_SPACE_NORMAL_TARGET_NAME )->getTexture() );
     
     // unbind lights
-    renderQueue->each( [&]( LightPtr const &light, int ) {
+    renderQueue->each( [&]( Light *light, int ) {
         renderer->unbindLight( program, light );
     });
     
@@ -254,7 +252,7 @@ void DeferredRenderPass::composeFrame( RendererPtr const &renderer, RenderQueueP
     renderer->unbindFrameBuffer( sceneBuffer );
 }
 
-void DeferredRenderPass::computeShadowMaps( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
+void DeferredRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
 {
     CRIMILD_PROFILE( "Compute Shadow Maps" )
 
@@ -266,7 +264,7 @@ void DeferredRenderPass::computeShadowMaps( RendererPtr const &renderer, RenderQ
     // bind shader program first
     renderer->bindProgram( program );
     
-    renderQueue->each( [&]( LightPtr const &light, int ) {
+    renderQueue->each( [&]( Light *light, int ) {
         
         if ( !light->shouldCastShadows() ) {
             return;
@@ -289,7 +287,7 @@ void DeferredRenderPass::computeShadowMaps( RendererPtr const &renderer, RenderQ
         
         renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LINEAR_DEPTH_CONSTANT_UNIFORM ), map->getLinearDepthConstant() );
         
-        renderQueue->each( renderQueue->getOpaqueObjects(), [&]( MaterialPtr const &material, RenderQueue::PrimitiveMap const &primitives ) {
+        renderQueue->each( renderQueue->getOpaqueObjects(), [&]( Material *material, RenderQueue::PrimitiveMap const &primitives ) {
             for ( auto it : primitives ) {
                 auto primitive = it.first;
                 
@@ -297,7 +295,7 @@ void DeferredRenderPass::computeShadowMaps( RendererPtr const &renderer, RenderQ
                 renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
                 
                 for ( auto geometryIt : it.second ) {
-                    renderer->applyTransformations( program, map->getLightProjectionMatrix(), map->getLightViewMatrix(), geometryIt.second.computeModelMatrix(), geometryIt.second.computeNormalMatrix() );
+                    renderer->applyTransformations( program, map->getLightProjectionMatrix(), map->getLightViewMatrix(), geometryIt.second, geometryIt.second );
                     renderer->drawPrimitive( program, primitive );
                 }
                 
@@ -314,66 +312,35 @@ void DeferredRenderPass::computeShadowMaps( RendererPtr const &renderer, RenderQ
     renderer->unbindProgram( program );
 }
 
-void DeferredRenderPass::applyImageEffects( RendererPtr const &renderer, CameraPtr const &camera )
-{
-    CRIMILD_PROFILE( "Apply Image Effects" )
-
-    getImageEffects()->each( [&]( ImageEffectPtr const &effect, int ) {
-        if ( effect->isEnabled() ) {
-            auto dBuffer = renderer->getFrameBuffer( D_BUFFER_NAME );
-            
-            effect->compute( renderer, camera );
-
-            renderer->bindFrameBuffer( dBuffer );
-            effect->apply( renderer, camera );
-            renderer->unbindFrameBuffer( dBuffer );
-            
-            swapSDBuffers( renderer );
-        }
-    });
-}
-
-void DeferredRenderPass::buildBuffers( RendererPtr const &renderer )
+void DeferredRenderPass::buildBuffers( Renderer *renderer )
 {
     CRIMILD_PROFILE( "Build Buffers" )
 
     int width = renderer->getScreenBuffer()->getWidth();
     int height = renderer->getScreenBuffer()->getHeight();
     
-    auto gBuffer = renderer->getFrameBuffer( G_BUFFER_NAME );
-    if ( gBuffer == nullptr ) {
-        gBuffer = crimild::alloc< FrameBufferObject >( width, height );
-        gBuffer->getRenderTargets()->add( RenderPass::G_BUFFER_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_32, RenderTarget::Output::RENDER_AND_TEXTURE, width, height, true ) );
-        gBuffer->getRenderTargets()->add( RenderPass::G_BUFFER_DIFFUSE_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height, true ) );
-        gBuffer->getRenderTargets()->add( RenderPass::G_BUFFER_POSITION_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height, true ) );
-        gBuffer->getRenderTargets()->add( RenderPass::G_BUFFER_NORMAL_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height, true ) );
-        gBuffer->getRenderTargets()->add( RenderPass::G_BUFFER_VIEW_SPACE_NORMAL_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height, true ) );
-        renderer->addFrameBuffer( G_BUFFER_NAME, gBuffer );
+    if ( renderer->getFrameBuffer( G_BUFFER_NAME ) == nullptr ) {
+        auto gBuffer = crimild::alloc< FrameBufferObject >( width, height );
+        gBuffer->getRenderTargets().add( RenderPass::G_BUFFER_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_32, RenderTarget::Output::RENDER_AND_TEXTURE, width, height, true ) );
+        gBuffer->getRenderTargets().add( RenderPass::G_BUFFER_DIFFUSE_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height, true ) );
+        gBuffer->getRenderTargets().add( RenderPass::G_BUFFER_POSITION_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height, true ) );
+        gBuffer->getRenderTargets().add( RenderPass::G_BUFFER_NORMAL_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height, true ) );
+        gBuffer->getRenderTargets().add( RenderPass::G_BUFFER_VIEW_SPACE_NORMAL_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height, true ) );
+        renderer->setFrameBuffer( G_BUFFER_NAME, gBuffer );
     }
     
-    auto sBuffer = renderer->getFrameBuffer( S_BUFFER_NAME );
-    if ( sBuffer == nullptr ) {
-        sBuffer = crimild::alloc< FrameBufferObject >( width, height );
-        sBuffer->getRenderTargets()->add( RenderPass::S_BUFFER_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER_AND_TEXTURE, width, height ) );
-        sBuffer->getRenderTargets()->add( RenderPass::S_BUFFER_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
-        renderer->addFrameBuffer( RenderPass::S_BUFFER_NAME, sBuffer );
+    if ( renderer->getFrameBuffer( S_BUFFER_NAME ) == nullptr ) {
+        auto sBuffer = crimild::alloc< FrameBufferObject >( width, height );
+        sBuffer->getRenderTargets().add( RenderPass::S_BUFFER_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER_AND_TEXTURE, width, height ) );
+        sBuffer->getRenderTargets().add( RenderPass::S_BUFFER_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
+        renderer->setFrameBuffer( RenderPass::S_BUFFER_NAME, sBuffer );
     }
 
-    auto dBuffer = renderer->getFrameBuffer( D_BUFFER_NAME );
-    if ( dBuffer == nullptr ) {
-        dBuffer = crimild::alloc< FrameBufferObject >( width, height );
-        dBuffer->getRenderTargets()->add( RenderPass::D_BUFFER_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER_AND_TEXTURE, width, height ) );
-        dBuffer->getRenderTargets()->add( RenderPass::D_BUFFER_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
-        renderer->addFrameBuffer( RenderPass::D_BUFFER_NAME, dBuffer );
+    if ( renderer->getFrameBuffer( D_BUFFER_NAME ) == nullptr ) {
+        auto dBuffer = crimild::alloc< FrameBufferObject >( width, height );
+        dBuffer->getRenderTargets().add( RenderPass::D_BUFFER_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER_AND_TEXTURE, width, height ) );
+        dBuffer->getRenderTargets().add( RenderPass::D_BUFFER_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
+        renderer->setFrameBuffer( RenderPass::D_BUFFER_NAME, dBuffer );
     }
-}
-
-void DeferredRenderPass::swapSDBuffers( RendererPtr const &renderer )
-{
-    auto sBuffer = renderer->getFrameBuffer( RenderPass::S_BUFFER_NAME );
-    auto dBuffer = renderer->getFrameBuffer( RenderPass::D_BUFFER_NAME );
-    
-    renderer->addFrameBuffer( RenderPass::S_BUFFER_NAME, dBuffer );
-    renderer->addFrameBuffer( RenderPass::D_BUFFER_NAME, sBuffer );
 }
 

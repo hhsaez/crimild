@@ -1,34 +1,39 @@
 #include "DebugRenderHelper.hpp"
 
 #include "Rendering/ShaderProgram.hpp"
+#include "Rendering/AlphaState.hpp"
+#include "Rendering/DepthState.hpp"
+#include "Rendering/Renderer.hpp"
 
 #include "Primitives/BoxPrimitive.hpp"
 #include "Primitives/SpherePrimitive.hpp"
+
+#include "SceneGraph/Camera.hpp"
+
+#include "Simulation/AssetManager.hpp"
 
 #include "Foundation/Log.hpp"
 
 using namespace crimild;
 
-DepthStatePtr DebugRenderHelper::_depthState;
-AlphaStatePtr DebugRenderHelper::_alphaState;
-
-PrimitivePtr DebugRenderHelper::_boxPrimitive;
-PrimitivePtr DebugRenderHelper::_spherePrimitive;
-
-VertexBufferObjectPtr DebugRenderHelper::_linesVBO;
+#define CRIMILD_DEBUG_RENDER_HELPER_DEPTH_STATE "debug/render_helper/depth_state"
+#define CRIMILD_DEBUG_RENDER_HELPER_ALPHA_STATE "debug/render_helper/alpha_state"
+#define CRIMILD_DEBUG_RENDER_HELPER_PRIMITIVE_BOX "debug/render_helper/primitive/box"
+#define CRIMILD_DEBUG_RENDER_HELPER_PRIMITIVE_SPHERE "debug/render_helper/primitive/sphere"
+#define CRIMILD_DEBUG_RENDER_HELPER_VBO_LINES "debug/render_helper/vbo/lines"
 
 void DebugRenderHelper::init( void )
 {
-    _depthState = crimild::alloc< DepthState >( false );
-    _alphaState = crimild::alloc< AlphaState >( false );
+    AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_HELPER_DEPTH_STATE, crimild::alloc< DepthState >( false ), true );
+    AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_HELPER_ALPHA_STATE, crimild::alloc< AlphaState >( false ), true );
 
-    _boxPrimitive = crimild::alloc< BoxPrimitive >( 1.0f, 1.0f, 1.0f );
-    _spherePrimitive = crimild::alloc< SpherePrimitive >( 1.0f );
+    AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_HELPER_PRIMITIVE_BOX, crimild::alloc< BoxPrimitive >( 1.0f, 1.0f, 1.0f ), true );
+    AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_HELPER_PRIMITIVE_SPHERE, crimild::alloc< SpherePrimitive >( 1.0f ), true );
 
-    _linesVBO = crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3, 10, nullptr );
+    AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_HELPER_VBO_LINES, crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3, 10, nullptr ), true );
 }
 
-void DebugRenderHelper::renderLine( RendererPtr const &renderer, CameraPtr const &camera, const Vector3f &from, const Vector3f &to, const RGBAColorf &color )
+void DebugRenderHelper::renderLine( Renderer *renderer, Camera *camera, const Vector3f &from, const Vector3f &to, const RGBAColorf &color )
 {
 	Vector3f data[] = {
 		from,
@@ -38,9 +43,13 @@ void DebugRenderHelper::renderLine( RendererPtr const &renderer, CameraPtr const
 	renderLines( renderer, camera, data, 2, color );
 }
 
-void DebugRenderHelper::renderLines( RendererPtr const &renderer, CameraPtr const &camera, const Vector3f *data, unsigned int count, const RGBAColorf &color )
+void DebugRenderHelper::renderLines( Renderer *renderer, Camera *camera, const Vector3f *data, unsigned int count, const RGBAColorf &color )
 {
-    auto program= renderer->getShaderProgram( "flat" );
+    auto depthState = AssetManager::getInstance()->get< DepthState >( CRIMILD_DEBUG_RENDER_HELPER_DEPTH_STATE );
+    auto alphaState = AssetManager::getInstance()->get< AlphaState >( CRIMILD_DEBUG_RENDER_HELPER_ALPHA_STATE );
+    auto linesVBO = AssetManager::getInstance()->get< VertexBufferObject >( CRIMILD_DEBUG_RENDER_HELPER_VBO_LINES );
+    
+    auto program = renderer->getShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_DIFFUSE );
 	if ( program == nullptr ) {
 		Log::Error << "No program found for debug rendering" << Log::End;
 		return;
@@ -57,48 +66,55 @@ void DebugRenderHelper::renderLines( RendererPtr const &renderer, CameraPtr cons
 
 	renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_DIFFUSE_UNIFORM ), color );
 
-	renderer->setDepthState( _depthState );
+	renderer->setDepthState( depthState );
 
-	_alphaState->setEnabled( color[ 3 ] < 1.0f );
-	renderer->setAlphaState( _alphaState );
+	alphaState->setEnabled( color[ 3 ] < 1.0f );
+	renderer->setAlphaState( alphaState );
 
-	if ( _linesVBO->getVertexCount() < count ) {
-        _linesVBO = crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3, count, ( const float * ) &data[ 0 ] );
+	if ( linesVBO->getVertexCount() < count ) {
+        auto vbo = std::move( crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3, count, ( const float * ) &data[ 0 ] ) );
+        AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_HELPER_VBO_LINES, vbo );
+        linesVBO = crimild::get_ptr( vbo );
 	}
 	else {
 		for ( int i = 0; i < count; i++ ) {
-			_linesVBO->setPositionAt( i, data[ i ] );
+			linesVBO->setPositionAt( i, data[ i ] );
 		}
 	}
 
-	renderer->drawBuffers( program, Primitive::Type::LINES, _linesVBO, count );
+	renderer->drawBuffers( program, Primitive::Type::LINES, linesVBO, count );
 
-	_linesVBO->unload();
+	linesVBO->unload();
 
 	renderer->unbindProgram( program );
 }
 
-void DebugRenderHelper::renderBox( RendererPtr const &renderer, CameraPtr const &camera, const Vector3f &position, float scale, const RGBAColorf &color )
+void DebugRenderHelper::renderBox( Renderer *renderer, Camera *camera, const Vector3f &position, float scale, const RGBAColorf &color )
 {
-	TransformationImpl model;
+	Transformation model;
 	model.setTranslate( position );
 	model.setScale( scale );
 
-	render( renderer, camera, _boxPrimitive, model, color );
+    auto box = AssetManager::getInstance()->get< Primitive >( CRIMILD_DEBUG_RENDER_HELPER_PRIMITIVE_BOX );
+	render( renderer, camera, box, model, color );
 }
 
-void DebugRenderHelper::renderSphere( RendererPtr const &renderer, CameraPtr const &camera, const Vector3f &position, float scale, const RGBAColorf &color )
+void DebugRenderHelper::renderSphere( Renderer *renderer, Camera *camera, const Vector3f &position, float scale, const RGBAColorf &color )
 {
-	TransformationImpl model;
+	Transformation model;
 	model.setTranslate( position );
 	model.setScale( scale );
 
-	render( renderer, camera, _spherePrimitive, model, color );
+    auto sphere = AssetManager::getInstance()->get< Primitive >( CRIMILD_DEBUG_RENDER_HELPER_PRIMITIVE_SPHERE );
+	render( renderer, camera, sphere, model, color );
 }
 
-void DebugRenderHelper::render( RendererPtr const &renderer, CameraPtr const &camera, PrimitivePtr const &primitive, const TransformationImpl &model, const RGBAColorf &color )
+void DebugRenderHelper::render( Renderer *renderer, Camera *camera, Primitive *primitive, const Transformation &model, const RGBAColorf &color )
 {
-	auto program = renderer->getShaderProgram( "flat" );
+    auto depthState = AssetManager::getInstance()->get< DepthState >( CRIMILD_DEBUG_RENDER_HELPER_DEPTH_STATE );
+    auto alphaState = AssetManager::getInstance()->get< AlphaState >( CRIMILD_DEBUG_RENDER_HELPER_ALPHA_STATE );
+
+    auto program = renderer->getShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_DIFFUSE );
 	if ( program == nullptr ) {
 		Log::Error << "No program found for debug rendering" << Log::End;
 		return;
@@ -112,10 +128,10 @@ void DebugRenderHelper::render( RendererPtr const &renderer, CameraPtr const &ca
 
 	renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_DIFFUSE_UNIFORM ), color );
 
-	renderer->setDepthState( _depthState );
+	renderer->setDepthState( depthState );
 
-	_alphaState->setEnabled( color[ 3 ] < 1.0f );
-	renderer->setAlphaState( _alphaState );
+	alphaState->setEnabled( color[ 3 ] < 1.0f );
+	renderer->setAlphaState( alphaState );
 
 	renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
 	renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );

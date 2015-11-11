@@ -31,6 +31,7 @@
 #include "Foundation/Macros.hpp"
 
 #include <memory>
+#include <cstring>
 
 namespace crimild {
 
@@ -45,7 +46,7 @@ namespace crimild {
 		{
 			if ( _size > 0 ) {
 				_data = new T[ _size ];
-				if ( data ) {
+				if ( data != nullptr ) {
 					memcpy( _data, data, sizeof( T ) * _size );
 				}
 				else {
@@ -69,7 +70,7 @@ namespace crimild {
 
 	private:
 		size_t _size;
-		T *_data;
+		T *_data = nullptr;
 	};
 
 }

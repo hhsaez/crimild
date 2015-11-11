@@ -57,12 +57,12 @@ AABBBoundingVolume::~AABBBoundingVolume( void )
 
 }
 
-void AABBBoundingVolume::computeFrom( const BoundingVolumePtr &volume )
+void AABBBoundingVolume::computeFrom( const BoundingVolume *volume )
 {
 	computeFrom( volume->getCenter() + volume->getMin(), volume->getCenter() + volume->getMax() );
 }
 
-void AABBBoundingVolume::computeFrom( const BoundingVolumePtr &volume, const TransformationImpl &transformation )
+void AABBBoundingVolume::computeFrom( const BoundingVolume *volume, const Transformation &transformation )
 {
 	Vector3f p0, p1;
 	transformation.applyToPoint( volume->getCenter() + volume->getMin(), p0 );
@@ -98,7 +98,7 @@ void AABBBoundingVolume::computeFrom( const Vector3f *positions, unsigned int po
 	computeFrom( min, max );
 }
 
-void AABBBoundingVolume::computeFrom( const VertexBufferObjectPtr &vbo )
+void AABBBoundingVolume::computeFrom( const VertexBufferObject *vbo )
 {
 	if ( vbo->getVertexCount() == 0 || !vbo->getVertexFormat().hasPositions() ) {
 		return;
@@ -164,7 +164,7 @@ void AABBBoundingVolume::expandToContain( const Vector3f *positions, unsigned in
 	expandToContain( min );
 }
 
-void AABBBoundingVolume::expandToContain( const VertexBufferObjectPtr &vbo )
+void AABBBoundingVolume::expandToContain( const VertexBufferObject *vbo )
 {
 	if ( vbo->getVertexCount() == 0 || !vbo->getVertexFormat().hasPositions() ) {
 		return;
@@ -189,7 +189,7 @@ void AABBBoundingVolume::expandToContain( const VertexBufferObjectPtr &vbo )
 	expandToContain( min );
 }
 
-void AABBBoundingVolume::expandToContain( const BoundingVolumePtr &input )
+void AABBBoundingVolume::expandToContain( const BoundingVolume *input )
 {
 	expandToContain( input->getCenter() + input->getMin() );
 	expandToContain( input->getCenter() + input->getMax() );
@@ -216,7 +216,7 @@ bool AABBBoundingVolume::testIntersection( const Ray3f &ray ) const
 	return Intersection::test( getCenter() + getMin(), getCenter() + getMax(), ray );
 }
 
-bool AABBBoundingVolume::testIntersection( const BoundingVolumePtr &other ) const
+bool AABBBoundingVolume::testIntersection( const BoundingVolume *other ) const
 {
 	return other->testIntersection( _sphere );
 }
@@ -231,12 +231,12 @@ bool AABBBoundingVolume::testIntersection( const Plane3f &plane ) const
 	return whichSide( plane ) == 0;
 }
 
-void AABBBoundingVolume::resolveIntersection( const BoundingVolumePtr &other, TransformationImpl &result ) const
+void AABBBoundingVolume::resolveIntersection( const BoundingVolume *other, Transformation &result ) const
 {
 	other->resolveIntersection( _sphere, result );
 }
 
-void AABBBoundingVolume::resolveIntersection( const Sphere3f &other, TransformationImpl &result ) const
+void AABBBoundingVolume::resolveIntersection( const Sphere3f &other, Transformation &result ) const
 {
 	Vector3f direction = other.getCenter() - _sphere.getCenter();
 	float d = direction.getMagnitude();
@@ -244,7 +244,7 @@ void AABBBoundingVolume::resolveIntersection( const Sphere3f &other, Transformat
 	result.setTranslate( direction.normalize() * diff );
 }
 
-void AABBBoundingVolume::resolveIntersection( const Plane3f &plane, TransformationImpl &result ) const
+void AABBBoundingVolume::resolveIntersection( const Plane3f &plane, Transformation &result ) const
 {
 
 }

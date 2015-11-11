@@ -44,12 +44,12 @@ bool SkinComponent::hasJoints( void )
 	return _joints.size() > 0;
 }
 
-void SkinComponent::attachJoint( NodePtr const &joint )
+void SkinComponent::attachJoint( Node *joint )
 {
 	_joints.push_back( joint );
 }
 
-void SkinComponent::foreachJoint( std::function< void( NodePtr const &, unsigned int ) > callback )
+void SkinComponent::forEachJoint( std::function< void( Node *, unsigned int ) > callback )
 {
 	for ( int i = 0; i < _joints.size(); i++ ) {
 		callback( _joints[ i ], i );

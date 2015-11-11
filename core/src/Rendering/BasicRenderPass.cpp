@@ -26,8 +26,11 @@
  */
 
 #include "Rendering/BasicRenderPass.hpp"
+#include "Rendering/ShaderProgram.hpp"
 
 #include "Foundation/Log.hpp"
+
+#include "Simulation/AssetManager.hpp"
 
 using namespace crimild;
 
@@ -41,23 +44,25 @@ BasicRenderPass::~BasicRenderPass( void )
 
 }
 
-void BasicRenderPass::render( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera )
+void BasicRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
 {
+    render( renderer, renderQueue, camera, renderQueue->getShadedObjects() );
     render( renderer, renderQueue, camera, renderQueue->getOpaqueObjects() );
     render( renderer, renderQueue, camera, renderQueue->getTranslucentObjects() );
 }
 
-void BasicRenderPass::render( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera, RenderQueue::MaterialMap const &objects )
+void BasicRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera, RenderQueue::Renderables const &objects )
 {
     const Matrix4f &projection = camera->getProjectionMatrix();
     const Matrix4f &view = camera->getViewMatrix();
     
-    renderQueue->each( objects, [&]( MaterialPtr const &material, RenderQueue::PrimitiveMap const &primitives ) {
-        auto program = material->getProgram() ? material->getProgram() : renderer->getShaderProgram( "basic" );
-        if ( program == nullptr ) {
-            Log::Error << "No valid program for batch" << Log::End;
-            return;
+    renderQueue->each( objects, [&]( Material *material, RenderQueue::PrimitiveMap const &primitives ) {
+        if ( material->getProgram() == nullptr ) {
+            material->setProgram( renderer->getShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_TEXTURE ) );
         }
+
+        auto program = material->getProgram();
+        assert( program != nullptr && "No valid shader program to render primitive" );
         
         // bind program
         renderer->bindProgram( program );
@@ -78,7 +83,7 @@ void BasicRenderPass::render( RendererPtr const &renderer, RenderQueuePtr const 
             renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::USE_COLOR_ATTRIBUTE ), vf.hasColors() );
             
             for ( auto geometryIt : primitiveIt.second ) {
-                Matrix4f model = geometryIt.second.computeModelMatrix();
+                auto &model = geometryIt.second;
                 Matrix4f normal = model;
                 normal[ 12 ] = 0.0f;
                 normal[ 13 ] = 0.0f;

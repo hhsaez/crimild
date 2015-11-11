@@ -41,7 +41,7 @@ UpdateWorldState::~UpdateWorldState( void )
 
 }
 
-void UpdateWorldState::visitNode( NodePtr const &node )
+void UpdateWorldState::visitNode( Node *node )
 {
 	if ( node->worldIsCurrent() ) {
 		return;
@@ -57,14 +57,14 @@ void UpdateWorldState::visitNode( NodePtr const &node )
 	node->worldBound()->computeFrom( node->getLocalBound(), node->getWorld() );
 }
 
-void UpdateWorldState::visitGroup( GroupPtr const &group )
+void UpdateWorldState::visitGroup( Group *group )
 {
 	visitNode( group );
 	NodeVisitor::visitGroup( group );
 
 	if ( group->hasNodes() ) {
 		bool firstChild = true;
-		group->foreachNode( [&]( NodePtr const &node ) {
+		group->forEachNode( [&]( Node *node ) {
 			if ( firstChild ) {
 				firstChild = false;
 				group->worldBound()->computeFrom( node->getWorldBound() );

@@ -29,7 +29,6 @@
 #define CRIMILD_RENDERING_CATALOG_
 
 #include "Foundation/SharedObject.hpp"
-#include "Foundation/Pointer.hpp"
 
 #include <list>
 #include <functional>
@@ -46,9 +45,7 @@ namespace crimild {
         
 	public:
 		
-		class Resource :
-            public SharedObject,
-            public std::enable_shared_from_this< Resource > {
+		class Resource : public SharedObject {
 			CRIMILD_DISALLOW_COPY_AND_ASSIGN( Resource )
 
 		public:
@@ -82,7 +79,7 @@ namespace crimild {
             }
 
 		private:
-            Catalog< RESOURCE_TYPE > *_catalog;
+            Catalog< RESOURCE_TYPE > *_catalog = nullptr;
 			int _catalogId;
 		};
 
@@ -113,55 +110,49 @@ namespace crimild {
 			return -1;
 		}
 
-        virtual void bind( SharedPointer< RESOURCE_TYPE > const &resource )
+        virtual void bind( RESOURCE_TYPE *resource )
 		{
 			if ( resource->getCatalog() == nullptr ) {
 				load( resource );
 			}
 		}
 
-        virtual void bind( SharedPointer< ShaderProgram > const &program, SharedPointer< RESOURCE_TYPE > const &resource )
+        virtual void bind( ShaderProgram *program, RESOURCE_TYPE *resource )
 		{
 			bind( resource );
 		}
 
-        virtual void bind( SharedPointer< ShaderLocation > const &location, SharedPointer< RESOURCE_TYPE > const &resource )
+        virtual void bind( ShaderLocation *location, RESOURCE_TYPE *resource )
 		{
 			bind( resource );
 		}
 
-        virtual void unbind( SharedPointer< RESOURCE_TYPE > const &resource )
+        virtual void unbind( RESOURCE_TYPE *resource )
 		{
 		}
 
-        virtual void unbind( SharedPointer< ShaderProgram > const &program, SharedPointer< RESOURCE_TYPE > const &resource )
-		{
-			unbind( resource );
-		}
-
-        virtual void unbind( SharedPointer< ShaderLocation > const &location, SharedPointer< RESOURCE_TYPE > const &resource )
+        virtual void unbind( ShaderProgram *program, RESOURCE_TYPE *resource )
 		{
 			unbind( resource );
 		}
 
-        virtual void load( SharedPointer< RESOURCE_TYPE > const &resource )
+        virtual void unbind( ShaderLocation *location, RESOURCE_TYPE *resource )
+		{
+			unbind( resource );
+		}
+
+        virtual void load( RESOURCE_TYPE *resource )
 		{
 			resource->setCatalogInfo( this, getNextResourceId() );
-			_resources.push_back( resource.get() );
-		}
-
-        virtual void unload( SharedPointer< RESOURCE_TYPE > const &resource )
-		{
-			resource->setCatalogInfo( nullptr, getDefaultIdValue() );
-            _resources.remove( resource.get() );
+			_resources.push_back( resource );
 		}
 
         virtual void unload( RESOURCE_TYPE *resource )
-        {
-            resource->setCatalogInfo( nullptr, getDefaultIdValue() );
+		{
+			resource->setCatalogInfo( nullptr, getDefaultIdValue() );
             _resources.remove( resource );
-        }
-        
+		}
+
 		virtual void unloadAll( void )
 		{
             auto rs = _resources;

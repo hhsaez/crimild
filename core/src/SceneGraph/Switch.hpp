@@ -37,9 +37,9 @@ namespace crimild {
 		explicit Switch( std::string name = "" );
 		virtual ~Switch( void );
         
-		virtual void foreachNode( std::function< void( NodePtr const & ) > callback ) override;
+		virtual void forEachNode( std::function< void( Node * ) > callback ) override;
         
-        NodePtr getCurrentNode( void );
+        Node *getCurrentNode( void );
         void selectNextNode( void );
         
     private:

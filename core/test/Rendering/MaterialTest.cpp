@@ -53,7 +53,7 @@ TEST( MaterialTest, setProgram )
 	auto program = crimild::alloc< ShaderProgram >( vs, fs );
 	material->setProgram( program );
 
-	ASSERT_EQ( program, material->getProgram() );
+	ASSERT_EQ( crimild::get_ptr( program ), material->getProgram() );
 }
 
 TEST( MaterialTest, setColorMap )
@@ -64,6 +64,6 @@ TEST( MaterialTest, setColorMap )
 	auto texture = crimild::alloc< Texture >( image );
 	material->setColorMap( texture );
 
-	ASSERT_EQ( texture, material->getColorMap() );
+	ASSERT_EQ( crimild::get_ptr( texture ), material->getColorMap() );
 }
 

@@ -30,7 +30,6 @@
 
 #include "NamedObject.hpp"
 #include "SharedObject.hpp"
-#include "Pointer.hpp"
 
 #include <string>
 #include <iostream>
@@ -88,7 +87,7 @@ namespace crimild {
 
 		Log &operator<<( EndLine & )
 		{
-			_outputHandler->write( this, _str.str() );
+            if ( _outputHandler != nullptr ) _outputHandler->write( this, _str.str() );
 			_str.str( "" );
 			return *this;
 		}

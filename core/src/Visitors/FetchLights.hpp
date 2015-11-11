@@ -44,14 +44,14 @@ namespace crimild {
 
 		virtual void reset( void ) override;
 
-		virtual void visitLight( LightPtr const &light ) override;
+		virtual void visitLight( Light *light ) override;
 
 		bool hasLights( void ) const { return _lights.size() > 0; }
 
-		void foreachLight( std::function< void( LightPtr const & ) > callback );
+		void forEachLight( std::function< void( Light * ) > callback );
 
 	private:
-		std::list< LightPtr > _lights;
+		std::list< Light * > _lights;
 	};
 
 }

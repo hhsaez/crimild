@@ -31,6 +31,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
+#include <random>
 
 namespace crimild {
 
@@ -123,24 +124,6 @@ namespace crimild {
 		static int sign( PRECISION input )
 		{
 			return input < 0 ? -1 : 1;
-		}
-
-		static double random( void )
-		{
-			double result = 0.01 * ( rand() % 100 );
-			return result;
-		}
-
-		static PRECISION random( PRECISION max ) 
-		{
-			PRECISION result = max * random();
-			return result;
-		}
-
-		static PRECISION random( PRECISION min, PRECISION max )
-		{
-			PRECISION result = min + random() * ( max - min );;
-			return result;
 		}
 
 		static PRECISION fract( PRECISION x )

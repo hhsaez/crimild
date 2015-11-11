@@ -161,7 +161,11 @@ namespace crimild {
 
 }
 
-#define CRIMILD_PROFILE( X ) crimild::ProfilerSample __crimild__profile__sample__instance__( X );
+#ifdef CRIMILD_PROFILER_ENABLE
+    #define CRIMILD_PROFILE( X ) crimild::ProfilerSample __crimild__profile__sample__instance__( X );
+#else
+    #define CRIMILD_PROFILE( X )
+#endif
 
 #endif
 

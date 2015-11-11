@@ -45,7 +45,7 @@ UpdateRenderState::~UpdateRenderState( void )
 
 }
 
-void UpdateRenderState::traverse( NodePtr const &node )
+void UpdateRenderState::traverse( Node *node )
 {
 	_lights.clear();
 	
@@ -57,21 +57,22 @@ void UpdateRenderState::traverse( NodePtr const &node )
 		node->perform( fetchLights );
 	}
 
-	fetchLights.foreachLight( [&]( LightPtr const &light ) mutable {
-		_lights.push_back( light );
+    auto self = this;
+	fetchLights.forEachLight( [self]( Light *light ) mutable {
+		self->_lights.push_back( light );
 	});
 
 	NodeVisitor::traverse( node );
 }
 
-void UpdateRenderState::visitGeometry( GeometryPtr const &geometry )
+void UpdateRenderState::visitGeometry( Geometry *geometry )
 {
 	auto rs = geometry->getComponent< RenderStateComponent >();
 
 	rs->detachAllMaterials();
 	auto materials = geometry->getComponent< MaterialComponent >();
 	if ( materials->hasMaterials() ) {
-		materials->foreachMaterial( [&]( MaterialPtr const &material ) mutable {
+		materials->forEachMaterial( [rs]( Material *material ) mutable {
 			rs->attachMaterial( material );
 		});
 	}

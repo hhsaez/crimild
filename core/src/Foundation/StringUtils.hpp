@@ -86,25 +86,62 @@ namespace crimild {
 
 		static std::string splitLines( std::string input, int charsPerLine )
 		{
-			std::stringstream str;
 			std::stringstream out;
-			str << input;
-
-			int charCount = 0;
-			while ( !str.eof() ) {
-				std::string temp;
-				str >> temp;
-				charCount += temp.length() + 1;
-				if ( charCount >= charsPerLine ) {
-					out << "\n";
-					charCount = 0;
-				}
-
-				out << temp << " ";
-			}
+            
+            std::stringstream ss( input );
+            std::string buffer;
+            std::vector< std::string > lines;
+            while ( std::getline( ss, buffer, '\n' ) ) {
+                lines.push_back( buffer );
+            }
+            
+            for ( auto line : lines ) {
+                std::stringstream str;
+                str << line;
+                
+                int charCount = 0;
+                while ( !str.eof() ) {
+                    std::string temp;
+                    str >> temp;
+                    charCount += temp.length() + 1;
+                    if ( charCount >= charsPerLine ) {
+                        out << "\n";
+                        charCount = 0;
+                    }
+                    
+                    out << temp << " ";
+                }
+                out << "\n";
+            }
 
 			return out.str();
 		}
+        
+        /**
+            \brief Read a string from a stream, including all white spaces
+         */
+        static std::string readFullString( std::istream &input )
+        {
+            std::string result;
+            input >> result;
+            
+            if ( !input.eof() ) {
+                // handle spaces in string
+                std::istreambuf_iterator< char > it( input ), end;
+                std::string temp;
+                std::copy( it, end, std::inserter( temp, temp.begin() ) );
+                if ( temp != "\r" ) result += temp;
+            }
+            
+            return result;
+        }
+        
+        static std::string toLower( const std::string &input )
+        {
+            std::string result( input );
+            std::transform( result.begin(), result.end(), result.begin(), ::tolower );
+            return result;
+        }
 
 	};
 

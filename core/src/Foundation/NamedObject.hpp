@@ -34,7 +34,7 @@ namespace crimild {
 	
 	class NamedObject {
 	public:
-		explicit NamedObject( std::string name );
+		explicit NamedObject( std::string name = "" );
 
 		virtual ~NamedObject( void );
 

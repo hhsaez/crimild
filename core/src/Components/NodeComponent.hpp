@@ -29,7 +29,6 @@
 #define CRIMILD_COMPONENTS_NODE_COMPONENT_
 
 #include "Foundation/SharedObject.hpp"
-#include "Mathematics/Time.hpp"
 
 namespace crimild {
 
@@ -37,7 +36,7 @@ namespace crimild {
 	class Renderer;
 	class Camera;
 
-	class NodeComponent : public SharedObject {
+    class NodeComponent : public SharedObject {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( NodeComponent )
         
 	protected:
@@ -46,24 +45,38 @@ namespace crimild {
 	public:
 		virtual ~NodeComponent( void );
 
+    public:
         // internal use only
         void setNode( Node *node ) { _node = node; }
 		
+        // internal use only
+        Node *getNodePointer( void ) { return _node; }
+        
+    public:
+        virtual const char *getComponentName( void ) const { return "update"; }
+        
         Node *getNode( void ) { return _node; }
         
         const Node *getNode( void ) const { return _node; }
         
 		template< class NodeClass >
-        NodeClass *getNode( void ) { return static_cast< NodeClass * >( _node ); }
-
-		virtual const char *getComponentName( void ) const { return "update"; }
+        NodeClass *getNode( void ) { return static_cast< NodeClass * >( getNode() ); }
 
 		bool isEnabled( void ) const { return _enabled; }
 		void setEnabled( bool value ) { _enabled = value; }
 
 	private:
-        Node *_node;
+        Node *_node = nullptr;
         bool _enabled = true;
+        
+    public:
+        NodeComponent *getComponentWithName( std::string name );
+        
+        template< class NODE_COMPONENT_CLASS >
+        NODE_COMPONENT_CLASS *getComponent( void )
+        {
+            return static_cast< NODE_COMPONENT_CLASS * >( getComponentWithName( NODE_COMPONENT_CLASS::_COMPONENT_NAME() ) );
+        }
 
 	public:
 		/**
@@ -77,14 +90,9 @@ namespace crimild {
 		virtual void start( void );
 
 		/**
-		   \brief Invoked multiple times (usually once per simulation step)
-		*/
-		virtual void update( const Time &t );
-
-		/**
 			\brief Invoked only if debug rendering is enabled
 		*/
-        virtual void renderDebugInfo( SharedPointer< Renderer > const &renderer, SharedPointer< Camera > const &camera );
+        virtual void renderDebugInfo( Renderer *renderer, Camera *camera );
 
 		/**
 		   \brief Invoked once when component is detached from a node
@@ -92,8 +100,6 @@ namespace crimild {
 		virtual void onDetach( void );
 
 	};
-    
-    using NodeComponentPtr = SharedPointer< NodeComponent >;
 
 }
 

@@ -40,10 +40,8 @@ namespace crimild {
 
 		unsigned int getIndexCount( void ) const { return getSize(); }
 
+        void generateIncrementalIndices( void );
 	};
-    
-    using IndexBufferObjectPtr = SharedPointer< IndexBufferObject >;
-    using IndexBufferObjectCatalog = Catalog< IndexBufferObject >;
 
 }
 

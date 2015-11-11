@@ -47,7 +47,7 @@ btVector3 BulletUtils::convert( const Vector3f &v )
     return btVector3( x, y, z );
 }
 
-btTransform BulletUtils::convert( const TransformationImpl &t )
+btTransform BulletUtils::convert( const Transformation &t )
 {
 	return btTransform( convert( t.getRotate() ), convert( t.getTranslate() ) );
 }

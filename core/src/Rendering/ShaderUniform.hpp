@@ -30,7 +30,6 @@
 
 #include "ShaderLocation.hpp"
 #include "Foundation/SharedObject.hpp"
-#include "Foundation/Pointer.hpp"
 
 namespace crimild {
 
@@ -43,16 +42,14 @@ namespace crimild {
 		ShaderUniform( std::string name );
 		virtual ~ShaderUniform( void );
 
-		void setLocation( ShaderLocationPtr const &location ) { _location = location; }
-		ShaderLocationPtr getLocation( void ) { return _location; }
+		void setLocation( SharedPointer< ShaderLocation > const &location ) { _location = location; }
+        ShaderLocation *getLocation( void ) { return crimild::get_ptr( _location ); }
 
-        virtual void onBind( SharedPointer< Renderer > const &renderer ) = 0;
+        virtual void onBind( Renderer *renderer ) = 0;
 
 	private:
-		ShaderLocationPtr _location;
+		SharedPointer< ShaderLocation > _location;
 	};
-
-    using ShaderUniformPtr = SharedPointer< ShaderUniform >;
     
 }
 

@@ -32,16 +32,13 @@
 
 namespace crimild {
 
-    class AlphaState;
-    
-    using AlphaStatePtr = SharedPointer< AlphaState >;
-
 	class AlphaState : public RenderState {
     public:
-        static AlphaStatePtr DISABLED;
-        static AlphaStatePtr ENABLED;
-        static AlphaStatePtr ENABLED_SRC_COLOR_ONLY;
-        static AlphaStatePtr ENABLED_ADDITIVE_BLEND;
+        // TODO: these should be const
+        static SharedPointer< AlphaState > DISABLED;
+        static SharedPointer< AlphaState > ENABLED;
+        static SharedPointer< AlphaState > ENABLED_SRC_COLOR_ONLY;
+        static SharedPointer< AlphaState > ENABLED_ADDITIVE_BLEND;
         
 	public:
 		enum class SrcBlendFunc {

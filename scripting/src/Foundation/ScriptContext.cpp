@@ -32,6 +32,23 @@
 using namespace crimild;
 using namespace crimild::scripting;
 
+ScriptEvaluator::ScriptEvaluator( ScriptContext *ctx, std::string prefix )
+    : _context( ctx ),
+      _prefix( prefix )
+{
+    
+}
+
+ScriptEvaluator::~ScriptEvaluator( void )
+{
+    
+}
+
+bool ScriptEvaluator::foreach( const std::string &name, std::function< void( ScriptEvaluator &, int )> callback )
+{
+    return getContext()->foreach( expandExpression( name ), callback );
+}
+
 ScriptContext::ScriptContext( void )
 	: ScriptContext( false )
 {
@@ -41,6 +58,7 @@ ScriptContext::ScriptContext( void )
 ScriptContext::ScriptContext( bool openDefaultLibs )
 	: _state( nullptr ),
 	  _openDefaultLibs( openDefaultLibs ),
+      _evaluator( this ),
 	  _backgroundThreadState( nullptr )
 {
 	reset();
@@ -128,12 +146,20 @@ std::string ScriptContext::dumpStack( void )
 	return LuaUtils::dumpStack( _state );
 }
 
-void ScriptContext::foreach( const std::string &name, std::function< void( ScriptContext &, ScriptContext::Iterable &i ) > callback )
+bool ScriptContext::foreach( const std::string &name, std::function< void( ScriptEvaluator &, int ) > callback )
 {
-	int count = eval< int >( "#" + name );
+    int count;
+    if ( !getEvaluator().getPropValue( "#" + name, count ) ) {
+        return false;
+    }
+    
 	for ( int i = 0; i < count; i++ ) {
-		Iterable it( *this, name, i );
-		callback( *this, it );
+        std::stringstream str;
+        str << name << "[" << ( i + 1 ) << "]";
+        ScriptEvaluator eval( this, str.str() );
+        callback( eval, i );
 	}
+    
+    return true;
 }
 

@@ -49,6 +49,8 @@ namespace crimild {
 		std::string extractDirectory( std::string input );
 
 		std::string pathForResource( std::string relativePath );
+        
+        std::string getRelativePath( std::string absolutePath );
 
 	private:
 		std::string _baseDirectory;

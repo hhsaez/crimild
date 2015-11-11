@@ -46,8 +46,9 @@ namespace crimild {
 		Material( void );
 		virtual ~Material( void );
 
-		void setProgram( ShaderProgramPtr const &program ) { _program = program; }
-        ShaderProgramPtr getProgram( void ) { return _program; }
+        void setProgram( ShaderProgram *program ) { _program = std::move( crimild::retain( program ) ); }
+		void setProgram( SharedPointer< ShaderProgram > const &program ) { _program = program; }
+        ShaderProgram *getProgram( void ) { return crimild::get_ptr( _program ); }
 
 		void setAmbient( const RGBAColorf &ambient ) { _ambient = ambient; }
 		const RGBAColorf &getAmbient( void ) const { return _ambient; }
@@ -64,26 +65,36 @@ namespace crimild {
 		void setShininess( float value ) { _shininess = value; }
 		float getShininess( void ) const { return _shininess; }
 
-		void setColorMap( TexturePtr const &texture ) { _colorMap = texture; }
-        TexturePtr getColorMap( void ) { return _colorMap; }
+        void setColorMap( Texture *texture ) { _colorMap = std::move( crimild::retain( texture ) ); }
+		void setColorMap( SharedPointer< Texture > const &texture ) { _colorMap = texture; }
+        Texture *getColorMap( void ) { return crimild::get_ptr( _colorMap ); }
 
-		void setNormalMap( TexturePtr const &texture ) { _normalMap = texture; }
-        TexturePtr getNormalMap( void ) { return _normalMap; }
+        void setNormalMap( Texture *texture ) { _normalMap = std::move( crimild::retain( texture ) ); }
+		void setNormalMap( SharedPointer< Texture > const &texture ) { _normalMap = texture; }
+        Texture *getNormalMap( void ) { return crimild::get_ptr( _normalMap ); }
 
-		void setSpecularMap( TexturePtr const &texture ) { _specularMap = texture; }
-        TexturePtr getSpecularMap( void ) { return _specularMap; }
+        void setSpecularMap( Texture *texture ) { _specularMap = std::move( crimild::retain( texture ) ); }
+		void setSpecularMap( SharedPointer< Texture > const &texture ) { _specularMap = texture; }
+        Texture *getSpecularMap( void ) { return crimild::get_ptr( _specularMap ); }
         
-        void setEmissiveMap( TexturePtr const &texture ) { _emissiveMap = texture; }
-        TexturePtr getEmissiveMap( void ) { return _emissiveMap; }
+        void setEmissiveMap( Texture *texture ) { _emissiveMap = std::move( crimild::retain( texture ) ); }
+        void setEmissiveMap( SharedPointer< Texture > const &texture ) { _emissiveMap = texture; }
+        Texture *getEmissiveMap( void ) { return crimild::get_ptr( _emissiveMap ); }
 
-		void setDepthState( DepthStatePtr const &state ) { _depthState = state; }
-        DepthStatePtr getDepthState( void ) { return _depthState; }
+		void setDepthState( SharedPointer< DepthState > const &state ) { _depthState = state; }
+        DepthState *getDepthState( void ) { return crimild::get_ptr( _depthState ); }
 
-		void setAlphaState( AlphaStatePtr const &alphaState ) { _alphaState = alphaState; }
-        AlphaStatePtr getAlphaState( void ) { return _alphaState; }
+		void setAlphaState( SharedPointer< AlphaState > const &alphaState ) { _alphaState = alphaState; }
+        AlphaState *getAlphaState( void ) { return crimild::get_ptr( _alphaState ); }
+        
+        bool castShadows( void ) const { return _castShadows; }
+        void setCastShadows( bool value ) { _castShadows = value; }
+        
+        bool receiveShadows( void ) const { return _receiveShadows; }
+        void setReceiveShadows( bool value ) { _receiveShadows = value; }
 
 	private:
-		ShaderProgramPtr _program;
+		SharedPointer< ShaderProgram > _program;
 
 		RGBAColorf _ambient;
 		RGBAColorf _diffuse;
@@ -91,16 +102,17 @@ namespace crimild {
 		float _shininess;
 		float _emissive;
 
-		TexturePtr _colorMap;
-		TexturePtr _normalMap;
-		TexturePtr _specularMap;
-        TexturePtr _emissiveMap;
+		SharedPointer< Texture > _colorMap;
+		SharedPointer< Texture > _normalMap;
+		SharedPointer< Texture > _specularMap;
+        SharedPointer< Texture > _emissiveMap;
 
-		DepthStatePtr _depthState;
-		AlphaStatePtr _alphaState;
+		SharedPointer< DepthState > _depthState;
+		SharedPointer< AlphaState > _alphaState;
+        
+        bool _castShadows = true;
+        bool _receiveShadows = true;
 	};
-
-    using MaterialPtr = SharedPointer< Material >;
     
 }
 

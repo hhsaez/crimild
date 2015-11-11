@@ -46,12 +46,12 @@ Vector3f VertexBufferObject::getPositionAt( unsigned int index ) const
 	return Vector3f( data[ 0 ], data[ 1 ], data[ 2 ] );
 }
 
-void VertexBufferObject::setPositionAt( unsigned int index, const Vector3f &position )
+void VertexBufferObject::setPositionAt( unsigned int index, const Vector3f &value )
 {
 	float *data = &( getData()[ index * _vertexFormat.getVertexSize() + _vertexFormat.getPositionsOffset() ] );
-	data[ 0 ] = position[ 0 ];
-	data[ 1 ] = position[ 1 ];
-	data[ 2 ] = position[ 2 ];
+	data[ 0 ] = value[ 0 ];
+	data[ 1 ] = value[ 1 ];
+	data[ 2 ] = value[ 2 ];
 }
 
 RGBAColorf VertexBufferObject::getRGBAColorAt( unsigned int index ) const
@@ -72,15 +72,38 @@ Vector3f VertexBufferObject::getNormalAt( unsigned int index ) const
 	return Vector3f( data[ 0 ], data[ 1 ], data[ 2 ] );
 }
 
+void VertexBufferObject::setNormalAt( unsigned int index, const Vector3f &value )
+{
+    float *data = &( getData()[ index * _vertexFormat.getVertexSize() + _vertexFormat.getNormalsOffset() ] );
+    data[ 0 ] = value[ 0 ];
+    data[ 1 ] = value[ 1 ];
+    data[ 2 ] = value[ 2 ];
+}
+
 Vector3f VertexBufferObject::getTangentAt( unsigned int index ) const
 {
 	const float *data = &( getData()[ index * _vertexFormat.getVertexSize() + _vertexFormat.getTangentsOffset() ] );
 	return Vector3f( data[ 0 ], data[ 1 ], data[ 2 ] );
 }
 
+void VertexBufferObject::setTangentAt( unsigned int index, const Vector3f &value )
+{
+    float *data = &( getData()[ index * _vertexFormat.getVertexSize() + _vertexFormat.getTangentsOffset() ] );
+    data[ 0 ] = value[ 0 ];
+    data[ 1 ] = value[ 1 ];
+    data[ 2 ] = value[ 2 ];
+}
+
 Vector2f VertexBufferObject::getTextureCoordAt( unsigned int index ) const
 {
 	const float *data = &( getData()[ index * _vertexFormat.getVertexSize() + _vertexFormat.getTextureCoordsOffset() ] );
 	return Vector2f( data[ 0 ], data[ 1 ] );
+}
+
+void VertexBufferObject::setTextureCoordAt( unsigned int index, const Vector2f &value )
+{
+    float *data = &( getData()[ index * _vertexFormat.getVertexSize() + _vertexFormat.getTextureCoordsOffset() ] );
+    data[ 0 ] = value[ 0 ];
+    data[ 1 ] = value[ 1 ];
 }
 

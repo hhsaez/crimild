@@ -44,7 +44,7 @@ bool orthonormalize( const Vector3f &u, const Vector3f &v, Vector3f &i, Vector3f
 
 TEST ( TransformationTest, testTranslate )
 {
-	TransformationImpl t;
+	Transformation t;
 	t.setTranslate( Vector3f( 1.0f, 2.0f, 3.0f ) );
 
 	EXPECT_EQ( Vector3f( 1.0f, 2.0f, 3.0f ), t.getTranslate() );
@@ -52,7 +52,7 @@ TEST ( TransformationTest, testTranslate )
 
 TEST( TransformationTest, testLookAt )
 {
-	TransformationImpl t;
+	Transformation t;
 	t.setTranslate( Vector3f( 1.0f, 2.0f, 3.0f ) );
 
 	EXPECT_EQ( Vector3f( 1.0f, 2.0f, 3.0f ), t.getTranslate() );

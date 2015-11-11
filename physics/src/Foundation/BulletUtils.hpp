@@ -40,7 +40,7 @@ namespace crimild {
 		public:
 			static btQuaternion convert( const Quaternion4f &q );
 			static btVector3 convert( const Vector3f &v );
-			static btTransform convert( const TransformationImpl &t );
+			static btTransform convert( const Transformation &t );
 		};
 
 	}

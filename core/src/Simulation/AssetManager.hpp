@@ -38,22 +38,37 @@
 
 namespace crimild {
 
+    class Texture;
+
     class AssetManager : public DynamicSingleton< AssetManager > {
         CRIMILD_DISALLOW_COPY_AND_ASSIGN( AssetManager )
+        
+    public:
+        static constexpr const char *FONT_DEFAULT = "fonts/default";
         
     public:
         AssetManager( void );
         virtual ~AssetManager( void );
 
-        void add( std::string name, SharedObjectPtr const &asset )
+        void set( std::string name, SharedPointer< SharedObject > const &asset, bool isPersistent = false )
         {
-            _assets[ name ] = asset;
+            if ( isPersistent ) {
+                _persistentAssets[ name ] = asset;
+            }
+            else {
+                _assets[ name ] = asset;
+            }
         }
-
+        
         template< class T >
-        SharedPointer< T > get( std::string name )
+        T *get( std::string name )
         {
-            return std::static_pointer_cast< T >( _assets[ name ] );
+            auto &asset = _assets[ name ];
+            if ( asset == nullptr ) {
+                asset = _persistentAssets[ name ];
+            }
+            
+            return static_cast< T * >( crimild::get_ptr( asset ) );
         }
 
         void clear( void )
@@ -62,8 +77,12 @@ namespace crimild {
         }
 
     private:
-        std::map< std::string, SharedObjectPtr > _assets;
+        std::map< std::string, SharedPointer< SharedObject > > _assets;
+        std::map< std::string, SharedPointer< SharedObject > > _persistentAssets;
     };
+
+    template<>
+    Texture *AssetManager::get< Texture >( std::string name );
 
 }
 

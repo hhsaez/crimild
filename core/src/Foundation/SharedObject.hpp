@@ -30,13 +30,17 @@
 
 #include "Macros.hpp"
 #include "Memory.hpp"
+#include "SmallObject.hpp"
 
 #include <thread>
 #include <functional>
 
 namespace crimild {
 
-    class SharedObject : public std::enable_shared_from_this< SharedObject > {
+    class SharedObject :
+        public SmallObject<>,
+        public std::enable_shared_from_this< SharedObject > {
+            
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( SharedObject )
         
 	protected:
@@ -44,18 +48,7 @@ namespace crimild {
 
 	public:
         virtual ~SharedObject( void ) { }
-        
-        SharedPointer< SharedObject > getShared( void )
-        {
-            return shared_from_this();
-        }
-        
-        template< class T >
-        SharedPointer< T > getShared( void )
-        {
-            return std::static_pointer_cast< T >( shared_from_this() );
-        }
-        
+            
         void lock( void ) { _mutex.lock(); }
         
         void unlock( void ) { _mutex.unlock(); }
@@ -69,8 +62,6 @@ namespace crimild {
 	private:
         std::mutex _mutex;
 	};
-    
-    using SharedObjectPtr = SharedPointer< SharedObject >;
     
 }
 

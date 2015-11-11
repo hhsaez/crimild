@@ -46,7 +46,7 @@ Node::~Node( void )
 	detachAllComponents();
 }
 
-NodePtr Node::getRootParent( void )
+Node *Node::getRootParent( void )
 {
     auto root = getParent();
     if ( root != nullptr ) {
@@ -58,11 +58,12 @@ NodePtr Node::getRootParent( void )
     return root;
 }
 
-NodePtr Node::detachFromParent( void )
+SharedPointer< Node > Node::detachFromParent( void )
 {
-    auto node = getShared< Node >();
+    // do this before detaching
+    auto node = crimild::retain( this );
     
-    GroupPtr parent = getParent< Group >();
+    Group *parent = getParent< Group >();
     if ( parent != nullptr ) {
         parent->detachNode( node );
     }
@@ -72,43 +73,55 @@ NodePtr Node::detachFromParent( void )
 
 void Node::perform( NodeVisitor &visitor )
 {
-	visitor.traverse( getShared< Node >() );
+	visitor.traverse( this );
 }
 
 void Node::perform( const NodeVisitor &visitor )
 {
-	const_cast< NodeVisitor & >( visitor ).traverse( getShared< Node >() );
+	const_cast< NodeVisitor & >( visitor ).traverse( this );
 }
 
 void Node::accept( NodeVisitor &visitor )
 {
-	visitor.visitNode( getShared< Node >() );
+	visitor.visitNode( this );
 }
 
-void Node::attachComponent( NodeComponentPtr const &component )
+void Node::attachComponent( NodeComponent *component )
 {
-	if ( component->getNode() == this ) {
+    attachComponent( crimild::retain( component ) );
+}
+
+void Node::attachComponent( SharedPointer< NodeComponent > const &component )
+{
+    if ( hasComponent( component ) ) {
 		// the component is already attached to this node
 		return;
 	}
 
+    // ignore return?
 	detachComponentWithName( component->getComponentName() );
+    
 	component->setNode( this );
 	_components[ component->getComponentName() ] = component;
 	component->onAttach();
 }
 
-void Node::detachComponent( NodeComponentPtr const &component )
+void Node::detachComponent( NodeComponent *component )
 {
-	if ( component->getNode() != this ) {
-		// the component is not attached to this node
-		return;
-	}
-
-	detachComponentWithName( component->getComponentName() );
+    if ( !hasComponent( component ) ) {
+        // the component is not attached to this node
+        return;
+    }
+    
+    detachComponentWithName( component->getComponentName() );
 }
 
-void Node::detachComponentWithName( std::string name )
+void Node::detachComponent( SharedPointer< NodeComponent > const &component )
+{
+    detachComponent( crimild::get_ptr( component ) );
+}
+
+SharedPointer< NodeComponent > Node::detachComponentWithName( std::string name )
 {
 	if ( _components.find( name ) != _components.end() ) {
         auto current = _components[ name ];
@@ -119,52 +132,38 @@ void Node::detachComponentWithName( std::string name )
 
         _components[ name ] = nullptr;
 		_components.erase( name );
+        
+        return current;
 	}
-}
-
-NodeComponentPtr Node::getComponentWithName( std::string name )
-{
-	return _components[ name ];
+    
+    return nullptr;
 }
 
 void Node::detachAllComponents( void )
 {
-    auto cs = _components;
-	for ( auto cmp : cs ) {
-		if ( cmp.second != nullptr ) {
-			cmp.second->onDetach();
-			cmp.second->setNode( nullptr );
-		}
-	}
+    forEachComponent( []( NodeComponent *cmp ) {
+        cmp->onDetach();
+        cmp->setNode( nullptr );
+    });
 
 	_components.clear();
 }
 
 void Node::startComponents( void )
 {
-	foreachComponent( [&]( NodeComponentPtr const &component ) {
-		component->start();
-	});
+	forEachComponent( []( NodeComponent *component ) { component->start(); } );
 }
 
-void Node::updateComponents( const Time &t )
-{
-    foreachComponent( [&]( NodeComponentPtr const &component ) {
-    	if ( component->isEnabled() ) {
-			component->update( t );
-    	}
-	});
-}
-
-void Node::foreachComponent( std::function< void ( NodeComponentPtr const & ) > callback )
+void Node::forEachComponent( std::function< void ( NodeComponent * ) > callback )
 {
 	// create a copy of the component's collection
 	// to prevent errors when attaching or detaching
 	// components during an update pass
+    // TODO: should we lock this instead?
 	auto cs = _components;
 	for ( auto cmp : cs ) {
 		if ( cmp.second != nullptr ) {
-			callback( cmp.second );
+            callback( crimild::get_ptr( cmp.second ) );
 		}
 	}
 }

@@ -47,17 +47,20 @@ namespace crimild {
 		ForwardRenderPass( void );
 		virtual ~ForwardRenderPass( void );
         
-        virtual void render( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera ) override;
+        virtual void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera ) override;
         
     protected:
-        virtual void renderShadedObjects( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera );
+        virtual void renderShadedObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+        virtual void renderNonShadedObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+        
+        inline ShaderProgram *getForwardProgram( void );
         
     private:
-        FrameBufferObjectPtr createSceneFBO( RendererPtr const &renderer );
+        void computeShadowMaps( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
         
-        void computeShadowMaps( RendererPtr const &renderer, RenderQueuePtr const &renderQueue, CameraPtr const &camera );
+        std::map< Light *, SharedPointer< ShadowMap >> _shadowMaps;
         
-        std::map< LightPtr, ShadowMapPtr > _shadowMaps;
+        ShaderProgram *_forwardProgram = nullptr;
 	};
     
 }

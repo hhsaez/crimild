@@ -44,7 +44,7 @@ namespace crimild {
 		static const VertexFormat VF_P3_N3_TG3_UV2;
 
 	public:
-		VertexFormat( unsigned int positions, unsigned int colors, unsigned int normals, unsigned int tangents, unsigned int textureCoords );
+		VertexFormat( unsigned char positions, unsigned char colors, unsigned char normals, unsigned char tangents, unsigned char textureCoords );
 		VertexFormat( const VertexFormat &vf );
 		~VertexFormat( void );
 
@@ -54,41 +54,41 @@ namespace crimild {
 		bool operator!=( const VertexFormat &vf ) const;
 
 		bool hasPositions( void ) const { return _positions > 0; }
-		unsigned int getPositionComponents( void ) const { return _positions; }
-		unsigned int getPositionsOffset( void ) const { return _positionsOffset; }
+		unsigned char getPositionComponents( void ) const { return _positions; }
+		unsigned char getPositionsOffset( void ) const { return _positionsOffset; }
 
 		bool hasColors( void ) const { return _colors > 0; }
-		unsigned int getColorComponents( void ) const { return _colors; }
-		unsigned int getColorsOffset( void ) const { return _colorsOffset; }
+		unsigned char getColorComponents( void ) const { return _colors; }
+		unsigned char getColorsOffset( void ) const { return _colorsOffset; }
 
 		bool hasNormals( void ) const { return _normals > 0; }
-		unsigned int getNormalComponents( void ) const { return _normals; }
-		unsigned int getNormalsOffset( void ) const { return _normalsOffset; }
+		unsigned char getNormalComponents( void ) const { return _normals; }
+		unsigned char getNormalsOffset( void ) const { return _normalsOffset; }
 
 		bool hasTangents( void ) const { return _tangents > 0; }
-		unsigned int getTangentComponents( void ) const { return _tangents; }
-		unsigned int getTangentsOffset( void ) const { return _tangentsOffset; }
+		unsigned char getTangentComponents( void ) const { return _tangents; }
+		unsigned char getTangentsOffset( void ) const { return _tangentsOffset; }
 
 		bool hasTextureCoords( void ) const { return _textureCoords > 0; }
-		unsigned int getTextureCoordComponents( void ) const { return _textureCoords; }
-		unsigned int getTextureCoordsOffset( void ) const { return _textureCoordsOffset; }
+		unsigned char getTextureCoordComponents( void ) const { return _textureCoords; }
+		unsigned char getTextureCoordsOffset( void ) const { return _textureCoordsOffset; }
 
-		unsigned int getVertexSize( void ) const { return _vertexSize; }
+		unsigned char getVertexSize( void ) const { return _vertexSize; }
 
 		size_t getVertexSizeInBytes( void ) const { return _vertexSizeInBytes; }
 
 	private:
-		unsigned int _positions;
-		unsigned int _positionsOffset;
-		unsigned int _colors;
-		unsigned int _colorsOffset;
-		unsigned int _normals;
-		unsigned int _normalsOffset;
-		unsigned int _tangents;
-		unsigned int _tangentsOffset;
-		unsigned int _textureCoords;
-		unsigned int _textureCoordsOffset;
-		unsigned int _vertexSize;
+		unsigned char _positions;
+		unsigned char _positionsOffset;
+		unsigned char _colors;
+		unsigned char _colorsOffset;
+		unsigned char _normals;
+		unsigned char _normalsOffset;
+		unsigned char _tangents;
+		unsigned char _tangentsOffset;
+		unsigned char _textureCoords;
+		unsigned char _textureCoordsOffset;
+		unsigned char _vertexSize;
 		size_t _vertexSizeInBytes;
 	};
 

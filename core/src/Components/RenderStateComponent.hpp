@@ -29,9 +29,10 @@
 #define CRIMILD_COMPONENTS_RENDER_STATE_
 
 #include "NodeComponent.hpp"
-#include "Foundation/Pointer.hpp"
+
 #include "Rendering/Material.hpp"
 #include "SceneGraph/Light.hpp"
+#include "Foundation/SharedObjectArray.hpp"
 
 #include <functional>
 #include <list>
@@ -49,21 +50,23 @@ namespace crimild {
 		void reset( void );
 
 		bool hasMaterials( void ) const { return _materials.size() > 0; }
-		void attachMaterial( MaterialPtr const &material );
-		void detachAllMaterials( void );
-		void foreachMaterial( std::function< void( MaterialPtr const & ) > callback );
+        void attachMaterial( Material *material ) { _materials.add( std::move( crimild::retain( material ) ) ); }
+        void attachMaterial( SharedPointer< Material > const &material ) { _materials.add( material ); }
+        void detachAllMaterials( void ) { _materials.clear(); }
+        void forEachMaterial( std::function< void( Material * ) > callback ) { _materials.forEach( callback ); }
 
 		bool hasLights( void ) const { return _lights.size() > 0; }
-		void attachLight( LightPtr const &light );
-		void detachAllLights( void );
-		void foreachLight( std::function< void( LightPtr const & ) > callback );
+        void attachLight( Light *light ) { _lights.add( std::move( crimild::retain( light ) ) ); }
+        void attachLight( SharedPointer< Light > const &light ) { _lights.add( light ); }
+        void detachAllLights( void ) { _lights.clear(); }
+        void forEachLight( std::function< void( Light * ) > callback ) { _lights.forEach( callback ); }
 
 		bool renderOnScreen( void ) const { return _renderOnScreen; }
 		void setRenderOnScreen( bool value ) { _renderOnScreen = value; }
 
 	private:
-		std::list< MaterialPtr > _materials;
-		std::list< LightPtr > _lights;
+		SharedObjectArray< Material > _materials;
+		SharedObjectArray< Light > _lights;
 
 		bool _renderOnScreen;
 	};

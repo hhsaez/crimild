@@ -37,7 +37,7 @@
 namespace crimild {
 
 	template< typename PRECISION >
-	class Transformation {
+	class TransformationImpl {
 	public:
 		typedef Vector< 3, PRECISION > Vector3Impl;
 		typedef Matrix< 3, PRECISION > Matrix3Impl;
@@ -46,42 +46,42 @@ namespace crimild {
 		typedef Plane< 3, PRECISION > PlaneImpl;
 
 	public:
-		Transformation( void )
+		TransformationImpl( void )
 		{
 			makeIdentity();
 		}
 
-		explicit Transformation( const Vector3Impl &v )
+		explicit TransformationImpl( const Vector3Impl &v )
 		{
 			makeIdentity();
 			setTranslate( v );
 		}
 
-		explicit Transformation( const QuaternionImpl &q )
+		explicit TransformationImpl( const QuaternionImpl &q )
 		{
 			makeIdentity();
 			setRotate( q );
 		}
 
-		explicit Transformation( PRECISION s )
+		explicit TransformationImpl( PRECISION s )
 		{
 			makeIdentity();
 			setScale( s );
 		}
 
-		Transformation( const Vector3Impl &t, const QuaternionImpl &r, PRECISION s )
+		TransformationImpl( const Vector3Impl &t, const QuaternionImpl &r, PRECISION s )
 		{
 			setTranslate( t );
 			setRotate( r );
 			setScale( s );
 		}
 
-		Transformation( const Transformation &t0, const Transformation &t1 )
+		TransformationImpl( const TransformationImpl &t0, const TransformationImpl &t1 )
 		{
 			computeFrom( t0, t1 );
 		}
 
-		Transformation( const Transformation &t )
+		TransformationImpl( const TransformationImpl &t )
 		{
 			_translate = t._translate;
 			_scale = t._scale;
@@ -89,12 +89,12 @@ namespace crimild {
 			_isIdentity = t._isIdentity;
 		}
 
-		~Transformation( void )
+		~TransformationImpl( void )
 		{
 
 		}
 
-		Transformation &operator=( const Transformation &t )
+		TransformationImpl &operator=( const TransformationImpl &t )
 		{
 			_translate = t._translate;
 			_scale = t._scale;
@@ -220,7 +220,7 @@ namespace crimild {
 
 		}
 
-		void computeFrom( const Transformation &a, const Transformation &b )
+		void computeFrom( const TransformationImpl &a, const TransformationImpl &b )
 		{
 			if ( a.isIdentity() ) {
 				*this = b;
@@ -283,7 +283,7 @@ namespace crimild {
 			_rotate.lookAt( direction, up );
 		}
         
-        Transformation &fromMatrix( const Matrix4Impl &m )
+        TransformationImpl &fromMatrix( const Matrix4Impl &m )
         {
             Matrix3f viewRotation;
             viewRotation[ 0 ] = m[ 0 ];
@@ -369,30 +369,30 @@ namespace crimild {
 		bool _isIdentity;
 	};
 
-	typedef Transformation< float > TransformationImpl;
+	typedef TransformationImpl< float > Transformation;
 
 }
 
 template< typename U >
-crimild::Transformation< U > operator+( const crimild::Transformation< U > &t0, const crimild::Transformation< U > &t1 )
+crimild::TransformationImpl< U > operator+( const crimild::TransformationImpl< U > &t0, const crimild::TransformationImpl< U > &t1 )
 {
-	crimild::Transformation< U > r;
+	crimild::TransformationImpl< U > r;
 	r.computeFrom( t0, t1 );
 	return r;
 }
 
 template< typename U, typename V >
-crimild::Transformation< U > operator*( const crimild::Transformation< U > &t, V scalar )
+crimild::TransformationImpl< U > operator*( const crimild::TransformationImpl< U > &t, V scalar )
 {
-	crimild::Transformation< U > r( t );
+	crimild::TransformationImpl< U > r( t );
 	r.setScale( scalar );
 	return r;
 }
 
 template< typename U, typename V >
-crimild::Transformation< U > operator*( V scalar, const crimild::Transformation< U > &t )
+crimild::TransformationImpl< U > operator*( V scalar, const crimild::TransformationImpl< U > &t )
 {
-	crimild::Transformation< U > r( t );
+	crimild::TransformationImpl< U > r( t );
 	r.setScale( scalar );
 	return r;
 }

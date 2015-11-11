@@ -68,7 +68,7 @@ namespace crimild {
         int getWidth( void ) const { return _width; }
         int getHeight( void ) const { return _height; }
         
-        TexturePtr getTexture( void ) { return _texture; }
+        Texture *getTexture( void ) { return crimild::get_ptr( _texture ); }
         bool useFloatTexture( void ) const { return _useFloatTexture; }
         void setUseFloatTexture( bool value ) { _useFloatTexture = value; }
         
@@ -78,13 +78,11 @@ namespace crimild {
         Output _output;
         int _width;
         int _height;
-        TexturePtr _texture;
+        SharedPointer< Texture > _texture;
         bool _useFloatTexture = false;
     };
     
-    using RenderTargetPtr = SharedPointer< RenderTarget >;
     using RenderTargetMap = SharedObjectMap< RenderTarget >;
-    using RenderTargetMapPtr = SharedPointer< RenderTargetMap >;
 
 	class FrameBufferObject : public Catalog< FrameBufferObject >::Resource {
 	public:
@@ -99,18 +97,15 @@ namespace crimild {
 		void setClearColor( const RGBAColorf &color ) { _clearColor = color; }
 		const RGBAColorf &getClearColor( void ) const { return _clearColor; }
 
-        RenderTargetMapPtr &getRenderTargets( void ) { return _renderTargets; }
+        RenderTargetMap &getRenderTargets( void ) { return _renderTargets; }
         
 	private:
 		int _width;
 		int _height;
 		RGBAColorf _clearColor;
-        RenderTargetMapPtr _renderTargets;
+        RenderTargetMap _renderTargets;
 	};
-    
-    using FrameBufferObjectPtr = SharedPointer< FrameBufferObject >;
 
-	typedef Catalog< FrameBufferObject > FrameBufferObjectCatalog;
 }
 
 #endif

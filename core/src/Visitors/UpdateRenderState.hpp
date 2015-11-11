@@ -31,7 +31,6 @@
 #include "NodeVisitor.hpp"
 
 #include "Foundation/SharedObject.hpp"
-#include "Foundation/Pointer.hpp"
 
 #include "Rendering/Material.hpp"
 
@@ -49,16 +48,16 @@ namespace crimild {
 		UpdateRenderState( void );
 		virtual ~UpdateRenderState( void );
         
-        void setDefaultMaterial( MaterialPtr const &material ) { _defaultMaterial = material; }
-        MaterialPtr getDefaultMaterial( void ) { return _defaultMaterial; }
+        void setDefaultMaterial( SharedPointer< Material > const &material ) { _defaultMaterial = material; }
+        Material *getDefaultMaterial( void ) { return crimild::get_ptr( _defaultMaterial ); }
 
-		virtual void traverse( NodePtr const &node ) override;
+		virtual void traverse( Node *node ) override;
 
-		virtual void visitGeometry( GeometryPtr const &geometry ) override;
+		virtual void visitGeometry( Geometry *geometry ) override;
 
 	private:
-		std::list< LightPtr > _lights;
-		MaterialPtr _defaultMaterial;
+		std::list< Light * > _lights;
+		SharedPointer< Material > _defaultMaterial;
 	};
 
 }

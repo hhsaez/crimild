@@ -28,6 +28,26 @@
 #ifndef CRIMILD_MACROS_
 #define CRIMILD_MACROS_
 
+// Identify known platforms
+#if defined( __APPLE__ )
+    #include <TargetConditionals.h>
+    #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
+        #define CRIMILD_PLATFORM_IOS
+    #else
+        #define CRIMILD_PLATFORM_OSX
+    #endif
+#elif defined( __CYGWIN__ ) || defined( __MINGW32__ ) || defined( _WIN32 ) || defined( __WIN32__ ) || defined( WIN32 )
+ 	#define CRIMILD_PLATFORM_WIN32
+#endif
+
+#if defined( CRIMILD_PLATFORM_OSX ) || defined( CRIMILD_PLATFORM_WIN32 )
+    #define CRIMILD_PLATFORM_DESKTOP
+#endif
+
+#if defined( CRIMILD_PLATFORM_IOS )
+    #define CRIMILD_PLATFORM_MOBILE
+#endif
+
 #ifdef __GNUC__
 	#define CRIMILD_CURRENT_FUNCTION __PRETTY_FUNCTION__
 #else

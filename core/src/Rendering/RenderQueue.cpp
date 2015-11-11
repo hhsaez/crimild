@@ -31,7 +31,7 @@ using namespace crimild;
 
 RenderQueue::RenderQueue( void )
 {
-    
+    setTimestamp( std::chrono::duration_cast< std::chrono::milliseconds >( std::chrono::system_clock::now().time_since_epoch() ).count() );
 }
 
 RenderQueue::~RenderQueue( void )
@@ -49,7 +49,7 @@ void RenderQueue::reset( void )
     _screenObjects.clear();
 }
 
-void RenderQueue::setCamera( CameraPtr const &camera )
+void RenderQueue::setCamera( Camera *camera )
 {
     _camera = camera;
     if ( _camera != nullptr ) {
@@ -62,25 +62,34 @@ void RenderQueue::setCamera( CameraPtr const &camera )
     }
 }
 
-void RenderQueue::push( MaterialPtr const &material, PrimitivePtr const &primitive, GeometryPtr const &geometry, const TransformationImpl &world, bool renderOnScreen )
+void RenderQueue::push( Material *material, Primitive *primitive, Geometry *geometry, const Transformation &world, bool renderOnScreen )
 {
     if ( renderOnScreen ) {
-        _screenObjects[ material ][ primitive ].push_back( std::make_pair( geometry, world ) );
+        _screenObjects[ material ][ primitive ].push_back( std::make_pair( geometry, world.computeModelMatrix() ) );
     }
     else if ( material->getAlphaState()->isEnabled() || material->getProgram() != nullptr ) {
-        _translucentObjects[ material ][ primitive ].push_back( std::make_pair( geometry, world ) );
+        _translucentObjects[ material ][ primitive ].push_back( std::make_pair( geometry, world.computeModelMatrix() ) );
     }
     else {
-        _opaqueObjects[ material ][ primitive ].push_back( std::make_pair( geometry, world ) );
+        if ( material->castShadows() ) {
+            _shadowCasters[ material ][ primitive ].push_back( std::make_pair( geometry, world.computeModelMatrix() ) );
+        }
+        
+        if ( material->receiveShadows() ) {
+            _shadedObjects[ material ][ primitive ].push_back( std::make_pair( geometry, world.computeModelMatrix() ) );
+        }
+        else {
+            _opaqueObjects[ material ][ primitive ].push_back( std::make_pair( geometry, world.computeModelMatrix() ) );
+        }
     }
 }
 
-void RenderQueue::push( LightPtr const &light )
+void RenderQueue::push( Light *light )
 {
     _lights.push_back( light );
 }
 
-void RenderQueue::each( MaterialMap const &objects, std::function< void( MaterialPtr const &, PrimitiveMap const & ) > callback )
+void RenderQueue::each( Renderables const &objects, std::function< void( Material *, PrimitiveMap const & ) > callback )
 {
     auto os = objects;
 	for ( auto it : os ) {
@@ -88,7 +97,7 @@ void RenderQueue::each( MaterialMap const &objects, std::function< void( Materia
 	}
 }
 
-void RenderQueue::each( std::function< void ( const LightPtr &, int ) > callback )
+void RenderQueue::each( std::function< void ( Light *, int ) > callback )
 {
     auto lights = _lights;
     int i = 0;

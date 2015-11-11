@@ -28,7 +28,8 @@
 #ifndef CRIMILD_CORE_COMPONENTS_PARTICLE_SYSTEM_
 #define CRIMILD_CORE_COMPONENTS_PARTICLE_SYSTEM_
 
-#include "NodeComponent.hpp"
+#include "BehaviorComponent.hpp"
+
 #include "Foundation/Macros.hpp"
 #include "Mathematics/Vector.hpp"
 #include "Primitives/Primitive.hpp"
@@ -39,7 +40,8 @@
 
 namespace crimild {
 
-	class ParticleSystemComponent : public NodeComponent {
+    // TODO: deprecated
+	class ParticleSystemComponent : public BehaviorComponent {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( ParticleSystemComponent );
 		CRIMILD_NODE_COMPONENT_NAME( "particleSystem" )
 
@@ -50,7 +52,7 @@ namespace crimild {
 
 		virtual void onAttach( void ) override;
 
-		virtual void update( const Time &t ) override;
+		virtual void update( const Clock &t ) override;
 
 		void setParticleCount( unsigned short value ) { _particleCount = value; }
 		unsigned short getParticleCount( void ) const { return _particleCount; }
@@ -73,16 +75,16 @@ namespace crimild {
 		void setLooping( float value ) { _looping = value; }
 		float getLooping( void ) const { return _looping; }
 
-		MaterialPtr getParticleMaterial( void ) { return _material; }
+        Material *getParticleMaterial( void ) { return crimild::get_ptr( _material ); }
 
-		void setShape( BoundingVolumePtr &volume ) { _shape = volume; }
-		BoundingVolumePtr getShape( void ) { return _shape; }
+		void setShape( SharedPointer< BoundingVolume > const &volume ) { _shape = volume; }
+        BoundingVolume *getShape( void ) { return crimild::get_ptr( _shape ); }
 
 		void generateParticles( void );
 
 	private:
-		PrimitivePtr _primitive;
-		MaterialPtr _material;
+		SharedPointer< Primitive > _primitive;
+		SharedPointer< Material > _material;
 
 		unsigned short _particleCount;
 		float _particleSize;
@@ -91,13 +93,13 @@ namespace crimild {
 		Vector3f _velocity;
 		Vector3f _spread;
 		bool _looping;
-		BoundingVolumePtr _shape;
+		SharedPointer< BoundingVolume > _shape;
 
-		Vector3fUniformPtr _gravityUniform;
-		FloatUniformPtr _timeUniform;
-		FloatUniformPtr _durationUniform;
-		FloatUniformPtr _shapeRadiusUniform;
-		Vector3fUniformPtr _shapeCenterUniform;
+		SharedPointer< Vector3fUniform > _gravityUniform;
+		SharedPointer< FloatUniform > _timeUniform;
+		SharedPointer< FloatUniform > _durationUniform;
+		SharedPointer< FloatUniform > _shapeRadiusUniform;
+		SharedPointer< Vector3fUniform > _shapeCenterUniform;
 	};
 
 }

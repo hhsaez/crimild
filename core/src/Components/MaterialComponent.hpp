@@ -31,9 +31,9 @@
 #include "NodeComponent.hpp"
 
 #include "Rendering/Material.hpp"
+#include "Foundation/SharedObjectArray.hpp"
 
 #include <functional>
-#include <list>
 
 namespace crimild {
 
@@ -46,12 +46,16 @@ namespace crimild {
 		virtual ~MaterialComponent( void );
 
 		bool hasMaterials( void ) const { return _materials.size() > 0; }
-		void attachMaterial( MaterialPtr const &material );
+        
+        void attachMaterial( Material *material ) { attachMaterial( std::move( crimild::retain( material ) ) ); }
+		void attachMaterial( SharedPointer< Material > const &material );
+        
 		void detachAllMaterials( void );
-		void foreachMaterial( std::function< void( MaterialPtr const & ) > callback );
+        
+		void forEachMaterial( std::function< void( Material * ) > callback );
 
 	private:
-		std::list< MaterialPtr > _materials;
+		SharedObjectArray< Material > _materials;
 	};
 
 }

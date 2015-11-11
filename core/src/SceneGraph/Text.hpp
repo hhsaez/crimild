@@ -50,48 +50,56 @@ namespace crimild {
 		};
 
 	public:
-		Font( std::string faceFilePath, std::string glyphFilePath );
+		explicit Font( std::string defFileName );
 		virtual ~Font( void );
 
-		ImagePtr getFace( void ) { return _face; }
+		Texture *getTexture( void );
+		Texture *getSDFTexture( void );
+
 		Glyph getGlyph( char c ) { return _glyphs[ c ]; }
 
 	private:
 		void loadGlyphs( std::string file );
 
-		ImagePtr _face;
+		std::string _textureFileName;
+		std::string _sdfTextureFileName;
+
 		std::map< char, Glyph > _glyphs;
 	};
     
-    using FontPtr = SharedPointer< Font >;
-
 	class Text : public Geometry {
 	public:
 		Text( void );
 		virtual ~Text( void );
-
+        
 		std::string getText( void ) const { return _text; }
 		void setText( std::string text );
 
 		float getSize( void ) const { return _size; }
 		void setSize( float size );
 
-		FontPtr getFont( void ) { return _font; }
-		void setFont( FontPtr const &font );
+        Font *getFont( void ) { return crimild::get_ptr( _font ); }
+        void setFont( Font *font ) { setFont( std::move( crimild::retain( font ) ) ); }
+		void setFont( SharedPointer< Font > const &font );
 
-		MaterialPtr getMaterial( void ) { return _material; }
+		const RGBAColorf &getTextColor( void ) const { return _material->getDiffuse(); }
+		void setTextColor( const RGBAColorf &color ) { _material->setDiffuse( color ); }
 
+		bool isDepthTestEnabled( void ) const { return _material->getDepthState()->isEnabled(); }
+		void setDepthTestEnabled( bool enabled ) { _material->getDepthState()->setEnabled( enabled ); }
+
+    public:
+        virtual void accept( NodeVisitor &visitor ) override;
+        
 	private:
 		void updatePrimitive( void );
 
 		std::string _text;
 		float _size;
-		FontPtr _font;
-		PrimitivePtr _primitive;
-		MaterialPtr _material;
+		SharedPointer< Font > _font;
+		SharedPointer< Primitive > _primitive;
+		SharedPointer< Material > _material;
 	};
-    
-    using TextPtr = SharedPointer< Text >;
 
 }
 

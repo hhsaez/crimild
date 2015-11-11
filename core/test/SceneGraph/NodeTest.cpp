@@ -55,7 +55,7 @@ TEST( NodeTest, destruction )
 		auto node = crimild::alloc< Node >();
 		node->attachComponent( cmp1 );
 
-		EXPECT_EQ( node->getComponent< MockComponent >(), cmp1 );
+		EXPECT_EQ( node->getComponent< MockComponent >(), crimild::get_ptr( cmp1 ) );
 	}
 
 	EXPECT_EQ( cmp1->getNode(), nullptr );
@@ -72,11 +72,11 @@ TEST( NodeTest, setParent )
 	EXPECT_FALSE( child->hasParent() );
 	EXPECT_EQ( child->getParent(), nullptr );
 
-	child->setParent( parent );
+	child->setParent( crimild::get_ptr( parent ) );
 
 	EXPECT_TRUE( child->hasParent() );
 	ASSERT_NE( child->getParent(), nullptr );
-	EXPECT_EQ( child->getParent(), parent );
+	EXPECT_EQ( child->getParent(), crimild::get_ptr( parent ) );
 	EXPECT_EQ( child->getParent()->getName(), parent->getName() );
 }
 
@@ -91,7 +91,7 @@ TEST( NodeTest, attachComponent )
 	node->attachComponent( cmp );
 
 	ASSERT_EQ( cmp->getNode(), node.get() );
-	ASSERT_EQ( node->getComponent< MockComponent >(), cmp );
+	ASSERT_EQ( node->getComponent< MockComponent >(), crimild::get_ptr( cmp ) );
 }
 
 TEST( NodeTest, attachComponentTwice )
@@ -117,7 +117,7 @@ TEST( NodeTest, getComponentWithName )
 	node->attachComponent( cmp );
 
 	ASSERT_EQ( cmp->getNode(), node.get() );
-	ASSERT_EQ( node->getComponentWithName( cmp->getComponentName() ), cmp );
+	ASSERT_EQ( node->getComponentWithName( cmp->getComponentName() ), crimild::get_ptr( cmp ) );
 }
 
 TEST( NodeTest, getInvalidComponent )
@@ -145,13 +145,13 @@ TEST( NodeTest, attachNewComponentWithSameName )
 
 	ASSERT_EQ( cmp1->getNode(), node.get() );
 	ASSERT_EQ( cmp2->getNode(), nullptr );
-	ASSERT_EQ( node->getComponent< MockComponent >(), cmp1 );
+	ASSERT_EQ( node->getComponent< MockComponent >(), crimild::get_ptr( cmp1 ) );
 
 	node->attachComponent( cmp2 );
 
 	ASSERT_EQ( cmp1->getNode(), nullptr );
 	ASSERT_EQ( cmp2->getNode(), node.get() );
-	ASSERT_EQ( node->getComponent< MockComponent >(), cmp2 );
+	ASSERT_EQ( node->getComponent< MockComponent >(), crimild::get_ptr( cmp2 ) );
 }
 
 TEST( NodeTest, detachComponentWithName )
@@ -204,7 +204,7 @@ TEST( NodeTest, detachInvalidComponent )
 	node->detachComponent( cmp2 );
 
 	ASSERT_EQ( cmp1->getNode(), node.get() );
-	ASSERT_EQ( node->getComponent< MockComponent >(), cmp1 );
+	ASSERT_EQ( node->getComponent< MockComponent >(), crimild::get_ptr( cmp1 ) );
 
 	ASSERT_EQ( cmp2->getNode(), nullptr );
 }
@@ -245,30 +245,13 @@ TEST( NodeTest, detachAllComponents )
 		.Times( ::testing::Exactly( 1 ) );
 	
 	node->attachComponent( cmp1 );
-	EXPECT_EQ( node->getComponent< MockComponent >(), cmp1 );
+	EXPECT_EQ( node->getComponent< MockComponent >(), crimild::get_ptr( cmp1 ) );
 	EXPECT_EQ( cmp1->getNode(), node.get() );
 
 	node->detachAllComponents();
 
 	EXPECT_EQ( node->getComponent< MockComponent >(), nullptr );
 	EXPECT_EQ( cmp1->getNode(), nullptr );
-}
-
-TEST( NodeTest, updateComponents )
-{
-	auto node = crimild::alloc< Node >();
-
-	Time t;
-	
-	auto cmp = crimild::alloc< MockComponent >();
-	EXPECT_CALL( *( cmp.get() ), update( testing::_ ) )
-		.Times( ::testing::Exactly( 3 ) );
-	
-	node->attachComponent( cmp );
-
-	node->updateComponents( t );
-	node->updateComponents( t );
-	node->updateComponents( t );
 }
 
 TEST( NodeTest, getRootParent )
@@ -280,6 +263,6 @@ TEST( NodeTest, getRootParent )
 	g1->attachNode( g2 );
 	g2->attachNode( g3 );
 
-	EXPECT_EQ( g1, g3->getRootParent() );
+	EXPECT_EQ( crimild::get_ptr( g1 ), g3->getRootParent() );
 }
 

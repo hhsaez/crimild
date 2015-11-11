@@ -34,17 +34,17 @@ namespace crimild {
 
 	namespace al {
 
-		class AudioComponent : public NodeComponent {
+		class AudioComponent : public BehaviorComponent {
 			CRIMILD_DISALLOW_COPY_AND_ASSIGN( AudioComponent )
 			CRIMILD_NODE_COMPONENT_NAME( "audio" )
 
 		public:
-			explicit AudioComponent( AudioClip *audioClip );
+			explicit AudioComponent( AudioClipPtr const &audioClip );
 			
 			virtual ~AudioComponent( void );
 
 			virtual void onAttach( void ) override;
-			virtual void update( const Time & ) override;
+			virtual void update( const Clock & ) override;
 
 			void setGain( float value );
 			float getGain( void ) const { return _gain; }

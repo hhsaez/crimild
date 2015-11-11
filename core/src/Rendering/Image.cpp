@@ -27,6 +27,8 @@
 
 #include "Image.hpp"
 
+#include <cstring>
+
 using namespace crimild;
 
 Image::Image( void )

@@ -28,7 +28,7 @@
 #ifndef CRIMILD_SCENEGRAPH_CAMERA_
 #define CRIMILD_SCENEGRAPH_CAMERA_
 
-#include "Node.hpp"
+#include "Group.hpp"
 
 #include "Mathematics/Matrix.hpp"
 #include "Mathematics/Frustum.hpp"
@@ -41,7 +41,7 @@ namespace crimild {
     
     class RenderPass;
 
-	class Camera : public Node {
+	class Camera : public Group {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( Camera );
         
 	public:
@@ -84,21 +84,23 @@ namespace crimild {
 
 	public:
         void setRenderPass( SharedPointer< RenderPass > const &renderPass ) { _renderPass = renderPass; }
-		SharedPointer< RenderPass > &getRenderPass( void ) { return _renderPass; }
+        RenderPass *getRenderPass( void ) { return crimild::get_ptr( _renderPass ); }
 
 	private:
 		SharedPointer< RenderPass > _renderPass;
 
 	public:
 		void computeCullingPlanes( void );
+        
+        void setCullingEnabled( bool value ) { _cullingEnabled = value; }
+        bool isCullingEnabled( void ) const { return _cullingEnabled; }
 
-		bool culled( BoundingVolumePtr const &volume );
+		bool culled( const BoundingVolume *volume ) const;
 
 	private:
+        bool _cullingEnabled = true;
 		Plane3f _cullingPlanes[ 6 ];
 	};
-    
-    using CameraPtr = SharedPointer< Camera >;
 
 }
 
