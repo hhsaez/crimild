@@ -32,7 +32,7 @@
 #include <sstream>
 
 #ifndef CRIMILD_VERSION_MAJOR
-#define CRIMILD_VERSION_MAJOR 0
+#define CRIMILD_VERSION_MAJOR 4
 #endif
 
 #ifndef CRIMILD_VERSION_MINOR
@@ -40,7 +40,7 @@
 #endif
 
 #ifndef CRIMILD_VERSION_PATCH
-#define CRIMILD_VERSION_PATCH 0
+#define CRIMILD_VERSION_PATCH 1
 #endif
 
 namespace crimild {
