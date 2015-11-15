@@ -33,6 +33,9 @@
 #ifndef GL_BGR
     #define GL_BGR GL_RGB
 #endif
+#ifndef GL_BGRA
+	#define GL_BGRA GL_RGBA
+#endif
 
 using namespace crimild;
 using namespace crimild::opengl;

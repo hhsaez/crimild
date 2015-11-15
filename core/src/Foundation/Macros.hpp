@@ -36,6 +36,8 @@
     #else
         #define CRIMILD_PLATFORM_OSX
     #endif
+#elif defined( __ANDROID__ )
+    #define CRIMILD_PLATFORM_ANDROID
 #elif defined( __CYGWIN__ ) || defined( __MINGW32__ ) || defined( _WIN32 ) || defined( __WIN32__ ) || defined( WIN32 )
  	#define CRIMILD_PLATFORM_WIN32
 #endif
@@ -44,7 +46,7 @@
     #define CRIMILD_PLATFORM_DESKTOP
 #endif
 
-#if defined( CRIMILD_PLATFORM_IOS )
+#if defined( CRIMILD_PLATFORM_IOS ) || defined( CRIMILD_PLATFORM_ANDROID )
     #define CRIMILD_PLATFORM_MOBILE
 #endif
 
