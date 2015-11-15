@@ -7,7 +7,17 @@ SET( CRIMILD_LIBRARY_LINK_LIBRARIES
 	crimild_core
 	glfw )
 
+ADD_DEFINITIONS( -DGLEW_STATIC=1 )
+
 # Add GLEW sources as part of the library
 SET( CRIMILD_LIBRARY_ADDITIONAL_SOURCE_FILES ${CRIMILD_SOURCE_DIR}/third-party/glew/src/glew.c )
+
+IF ( APPLE )
+	SET( CRIMILD_LIBRARY_LINK_LIBRARIES 
+		${CRIMILD_LIBRARY_LINK_LIBRARIES} 
+		"-framework Cocoa -framework OpenGL -framework IOKit -framework CoreVideo" )
+ELSE ( APPLE )
+	SET( CRIMILD_LIBRARY_LINK_LIBRARIES ${CRIMILD_LIBRARY_LINK_LIBRARIES} opengl32 )
+ENDIF ( APPLE )
 
 INCLUDE( ModuleBuildLibrary )
