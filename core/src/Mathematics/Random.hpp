@@ -60,7 +60,7 @@ namespace crimild {
 		template< typename PRECISION >
 		static PRECISION generate( double min, double max )
 		{
-#ifndef CRIMILD_PLATFORM_WIN32
+#if !defined( CRIMILD_PLATFORM_WIN32) && !defined( CRIMILD_PLATFORM_ANDROID )
             std::random_device rd;
             std::mt19937 gen( rd() );
             std::uniform_real_distribution<> dis( min, std::nextafter( max, DBL_MAX ) );

@@ -33,7 +33,7 @@ using namespace crimild;
 using namespace crimild::opengl;
 
 const char *unlit_diffuse_vs = { CRIMILD_TO_STRING(
-	in vec3 aPosition;
+    CRIMILD_GLSL_ATTRIBUTE vec3 aPosition;
 
 	uniform mat4 uPMatrix; 
 	uniform mat4 uVMatrix; 
@@ -41,22 +41,25 @@ const char *unlit_diffuse_vs = { CRIMILD_TO_STRING(
 
 	void main()
 	{
-		gl_Position = uPMatrix * uVMatrix * uMMatrix * vec4(aPosition, 1.0); 
+		CRIMILD_GLSL_VERTEX_OUTPUT = uPMatrix * uVMatrix * uMMatrix * vec4(aPosition, 1.0);
 	}
 )};
 
 const char *unlit_diffuse_fs = { CRIMILD_TO_STRING(
+
+    CRIMILD_GLSL_PRECISION_FLOAT_HIGH
+
 	struct Material {
 		vec4 diffuse;
 	};
 
-	uniform Material uMaterial; 
+	uniform Material uMaterial;
 
-	out vec4 vFragColor;
+    CRIMILD_GLSL_DECLARE_FRAGMENT_OUTPUT
 
 	void main( void ) 
-	{ 
-		vFragColor = uMaterial.diffuse; 
+	{
+		CRIMILD_GLSL_FRAGMENT_OUTPUT = uMaterial.diffuse;
 	}
 )};
 
