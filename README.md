@@ -28,6 +28,15 @@ Crimild is distributed under the BSD license. See the LICENSE file for details
 Release Notes
 ====================
 
+v4.0.1
+------
+* Build System
+ * Fixed Windows (MSYS) build
+ * Fixed Android build
+* Misc
+ * Removed old COLLADA files
+
+
 v4.0.0
 ------
 * Foundation
