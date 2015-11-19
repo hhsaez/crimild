@@ -114,9 +114,12 @@ bool ScriptContext::load( std::string fileName, bool supportCoroutines )
 bool ScriptContext::parse( std::string text )
 {
 	if ( luaL_dostring( _state, text.c_str() ) ) {
+        std::string reason = lua_tostring( _state, -1 );
+#if 0
 		Log::Error << "Cannot parse string \"" << text << "\""
-				   << "\n\tReason: " << lua_tostring( _state, -1 )
+                   << "\n\tReason: " << reason;
 				   << Log::End;
+#endif
 	    return false;
 	}
 
