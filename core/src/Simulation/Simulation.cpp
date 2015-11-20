@@ -35,6 +35,8 @@
 
 #include "SceneGraph/Camera.hpp"
 
+#include "Rendering/FrameBufferObject.hpp"
+
 #include "Visitors/FetchCameras.hpp"
 #include "Visitors/UpdateWorldState.hpp"
 #include "Visitors/UpdateRenderState.hpp"
@@ -158,6 +160,16 @@ void Simulation::setScene( SharedPointer< Node > const &scene )
     MessageQueue::getInstance()->clear();
     
     _simulationClock.reset();
+
+	auto renderer = Simulation::getInstance()->getRenderer();
+	if ( getMainCamera() != nullptr && renderer != nullptr && renderer->getScreenBuffer() != nullptr ) {
+		auto screen = renderer->getScreenBuffer();
+		auto aspect = ( float ) screen->getWidth() / ( float ) screen->getHeight();
+
+		if ( getMainCamera() != nullptr ) {
+			getMainCamera()->setAspectRatio( aspect );
+		}
+	}
 
     broadcastMessage( messaging::SceneChanged { crimild::get_ptr( _scene ) } );
 }
