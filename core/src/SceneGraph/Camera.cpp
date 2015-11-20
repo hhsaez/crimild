@@ -112,7 +112,7 @@ float Camera::computeAspect( void ) const
 void Camera::setAspectRatio( float aspect )
 {
 	auto &f = getFrustum();
-	setFrustum( Frustumf( f.getRMin(), aspect * f.getUMax(), f.getUMin(), f.getUMax(), f.getDMin(), f.getDMax() ) );
+	setFrustum( Frustumf( -aspect * f.getUMax(), aspect * f.getUMax(), f.getUMin(), f.getUMax(), f.getDMin(), f.getDMax() ) );
 }
 
 void Camera::computeCullingPlanes( void )
