@@ -53,8 +53,13 @@ TextureCatalog::~TextureCatalog( void )
 
 int TextureCatalog::getNextResourceId( void )
 {
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    
 	GLuint textureId = 0;
 	glGenTextures( 1, &textureId );
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+    
     return textureId;
 }
 
@@ -100,6 +105,8 @@ void TextureCatalog::unbind( ShaderLocation *location, Texture *texture )
 
 void TextureCatalog::load( Texture *texture )
 {
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    
 	Catalog< Texture >::load( texture );
 
 	int textureId = texture->getCatalogId();
@@ -137,24 +144,34 @@ void TextureCatalog::load( Texture *texture )
     	format, 
     	GL_UNSIGNED_BYTE,
         ( GLvoid * ) texture->getImage()->getData() );
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
 void TextureCatalog::unload( Texture *texture )
 {
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    
     if ( texture->getCatalogId() > 0 ) {
         _textureIdsToDelete.push_back( texture->getCatalogId() );
     }
     
     Catalog< Texture >::unload( texture );
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
 void TextureCatalog::cleanup( void )
 {
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    
     for ( auto id : _textureIdsToDelete ) {
         GLuint textureId = id;
         glDeleteTextures( 1, &textureId );
     }
     
     _textureIdsToDelete.clear();
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION
 }
 

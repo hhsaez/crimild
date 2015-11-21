@@ -43,27 +43,42 @@ IndexBufferObjectCatalog::~IndexBufferObjectCatalog( void )
 
 int IndexBufferObjectCatalog::getNextResourceId( void )
 {
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    
     GLuint id;
     glGenBuffers( 1, &id );
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+    
     return id;
 }
 
 void IndexBufferObjectCatalog::bind( ShaderProgram *program, IndexBufferObject *ibo )
 {
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    
 	Catalog< IndexBufferObject >::bind( program, ibo );
 
 	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, ibo->getCatalogId() );
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
 void IndexBufferObjectCatalog::unbind( ShaderProgram *program, IndexBufferObject *ibo )
 {
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    
 	Catalog< IndexBufferObject >::unbind( program, ibo );
 
 	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
 void IndexBufferObjectCatalog::load( IndexBufferObject *ibo )
 {
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    
 	Catalog< IndexBufferObject >::load( ibo );
 
 	int id = ibo->getCatalogId();
@@ -72,21 +87,31 @@ void IndexBufferObjectCatalog::load( IndexBufferObject *ibo )
 		sizeof( unsigned short ) * ibo->getIndexCount(), 
 		ibo->getData(), 
 		GL_STATIC_DRAW );
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
 void IndexBufferObjectCatalog::unload( IndexBufferObject *ibo )
 {
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    
     _unusedIBOIds.push_back( ibo->getCatalogId() );
 	Catalog< IndexBufferObject >::unload( ibo );
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
 void IndexBufferObjectCatalog::cleanup( void )
 {
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    
     for ( auto id : _unusedIBOIds ) {
         GLuint bufferId = id;
         glDeleteBuffers( 1, &bufferId );
     }
     
     _unusedIBOIds.clear();
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 

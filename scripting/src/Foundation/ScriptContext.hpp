@@ -35,6 +35,10 @@
 #include <string>
 #include <tuple>
 
+#ifndef CRIMILD_SCRIPTING_LOG_VERBOSE
+#define CRIMILD_SCRIPTING_LOG_VERBOSE 0
+#endif
+
 namespace crimild {
 
 	namespace scripting {
@@ -258,9 +262,11 @@ namespace crimild {
                 return hasValue;
             }
             else {
+#if CRIMILD_SCRIPTING_LOG_VERBOSE
                 Log::Error << "Cannot parse " << expandExpression( expr )
                            << "\n\tReason: " << lua_tostring( state, -1 )
                            << Log::End;
+#endif
             }
             
             return false;

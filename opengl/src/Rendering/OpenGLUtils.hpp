@@ -64,7 +64,9 @@ namespace crimild {
 
 }
 
+#ifndef CRIMILD_ENABLE_CHECK_GL_ERRORS
 #define CRIMILD_ENABLE_CHECK_GL_ERRORS 0
+#endif
 
 #if CRIMILD_ENABLE_CHECK_GL_ERRORS
     #define CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION crimild::opengl::OpenGLUtils::checkErrors( std::string( "Before " ) + CRIMILD_CURRENT_FUNCTION );

@@ -49,12 +49,14 @@ LuaNodeBuilderRegistry::~LuaNodeBuilderRegistry( void )
 
 void LuaNodeBuilderRegistry::flush( void )
 {
+#if CRIMILD_SCRIPTING_LOG_VERBOSE
     std::cout << "Available node builders: " << std::endl;
     for ( auto it : _nodeBuilders ) {
         if ( it.second != nullptr ) {
             std::cout << "\t" << it.first << std::endl;
         }
     }
+#endif
 }
 
 LuaComponentBuilderRegistry::LuaComponentBuilderRegistry( void )
@@ -69,12 +71,14 @@ LuaComponentBuilderRegistry::~LuaComponentBuilderRegistry( void )
 
 void LuaComponentBuilderRegistry::flush( void )
 {
+#if CRIMILD_SCRIPTING_LOG_VERBOSE
     std::cout << "Available component builders: " << std::endl;
     for ( auto it : _componentBuilders ) {
         if ( it.second != nullptr ) {
             std::cout << "\t" << it.first << std::endl;
         }
     }
+#endif
 }
 
 LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )

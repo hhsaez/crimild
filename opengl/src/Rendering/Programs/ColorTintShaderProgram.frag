@@ -6,8 +6,8 @@ CRIMILD_GLSL_VARYING_IN vec2 vTextureCoord;
 
 uniform sampler2D uColorMap;
 
-uniform float uTintValue = 1.0;
-uniform vec4 uTint = vec4( 0.4392156863, 0.2588235294, 0.07843137255, 1.0 );
+uniform float uTintValue;
+uniform vec4 uTint;
 
 CRIMILD_GLSL_DECLARE_FRAGMENT_OUTPUT
 

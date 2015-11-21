@@ -44,6 +44,8 @@ VertexBufferObjectCatalog::~VertexBufferObjectCatalog( void )
 
 int VertexBufferObjectCatalog::getNextResourceId( void )
 {
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    
 	GLuint vaoId;
 	glGenVertexArrays( 1, &vaoId );
 
@@ -51,6 +53,8 @@ int VertexBufferObjectCatalog::getNextResourceId( void )
 
 	GLuint vboId;    
     glGenBuffers( 1, &vboId );
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 
     return composeId( vaoId, vboId );
 }
@@ -201,6 +205,8 @@ void VertexBufferObjectCatalog::unload( VertexBufferObject *vbo )
 
 void VertexBufferObjectCatalog::cleanup( void )
 {
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    
     for ( auto id : _unusedVBOIds ) {
         GLuint vaoId, vboId;
         extractId( id, vaoId, vboId );
@@ -210,5 +216,7 @@ void VertexBufferObjectCatalog::cleanup( void )
     }
     
     _unusedVBOIds.clear();
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 

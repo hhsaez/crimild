@@ -89,7 +89,7 @@
     crimild::FileSystem::getInstance().setBaseDirectory( [tileDirectory UTF8String] );
     
     CGRect framebufferRect = [[UIScreen mainScreen] bounds];
-    auto screenBuffer = crimild::alloc< crimild::FrameBufferObject >( framebufferRect.size.width, framebufferRect.size.height );
+    auto screenBuffer = crimild::alloc< crimild::FrameBufferObject >( 2 * framebufferRect.size.width, 2 * framebufferRect.size.height );
     screenBuffer->setClearColor( crimild::RGBAColorf( 0.0f, 0.0f, 0.0f, 0.0f ) );
     auto renderer = _simulation->getRenderer();
     renderer->setScreenBuffer( screenBuffer );
@@ -125,6 +125,10 @@
 {
     if ( _simulation != nullptr ) {
         _simulation->broadcastMessage( crimild::messaging::RenderNextFrame {} );
+        
+        [((GLKView *) self.view) bindDrawable];
+        
+        _simulation->broadcastMessage( crimild::messaging::PresentNextFrame {} );
     }
 }
 

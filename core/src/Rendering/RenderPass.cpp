@@ -248,8 +248,8 @@ FrameBufferObject *RenderPass::getSBuffer( Renderer *renderer )
     int height = renderer->getScreenBuffer()->getHeight();
     
     auto sBuffer = crimild::alloc< FrameBufferObject >( width, height );
+    sBuffer->getRenderTargets().add( S_BUFFER_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
     sBuffer->getRenderTargets().add( S_BUFFER_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
-    sBuffer->getRenderTargets().add( S_BUFFER_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER_AND_TEXTURE, width, height ) );
     renderer->setFrameBuffer( S_BUFFER_NAME, sBuffer );
     
     return crimild::get_ptr( sBuffer );
@@ -267,8 +267,8 @@ FrameBufferObject *RenderPass::getDBuffer( Renderer *renderer )
     int height = renderer->getScreenBuffer()->getHeight();
     
     auto dBuffer = crimild::alloc< FrameBufferObject >( width, height );
+    dBuffer->getRenderTargets().add( D_BUFFER_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
     dBuffer->getRenderTargets().add( D_BUFFER_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
-    dBuffer->getRenderTargets().add( D_BUFFER_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER_AND_TEXTURE, width, height ) );
     renderer->setFrameBuffer( D_BUFFER_NAME, dBuffer );
     
     return crimild::get_ptr( dBuffer );
@@ -290,9 +290,6 @@ void RenderPass::applyImageEffects( Renderer *renderer, Camera *camera )
 			self->swapSDBuffers( renderer );
 		}
 	});
-    
-    auto sBuffer = getSBuffer( renderer );
-    RenderPass::render( renderer, sBuffer->getRenderTargets().get( S_BUFFER_COLOR_TARGET_NAME )->getTexture(), nullptr );
 }
 
 void RenderPass::swapSDBuffers( Renderer *renderer )

@@ -121,24 +121,53 @@ void OpenGLRenderer::configure( void )
     glEnable( GL_PROGRAM_POINT_SIZE );
 #endif
     
+    if ( getScreenBuffer() != nullptr ) {
+        // default FBO is not always 0
+        int defaultFBO;
+        glGetIntegerv( GL_FRAMEBUFFER_BINDING, &defaultFBO );
+        getScreenBuffer()->setCatalogInfo( getFrameBufferObjectCatalog(), defaultFBO );
+    }
+    
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
 void OpenGLRenderer::setViewport( const Rectf &viewport )
 {
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    
     auto screen = getScreenBuffer();
     glViewport(
         screen->getWidth() * viewport.getX(),
         screen->getHeight() * viewport.getY(),
         screen->getWidth() * viewport.getWidth(),
         screen->getHeight() * viewport.getHeight() );
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+}
+
+void OpenGLRenderer::beginRender( void )
+{
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    Renderer::beginRender();
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+}
+
+void OpenGLRenderer::endRender( void )
+{
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    Renderer::endRender();
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
 void OpenGLRenderer::clearBuffers( void )
 {
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    
 	const RGBAColorf &clearColor = getScreenBuffer()->getClearColor();
 	glClearColor( clearColor.r(), clearColor.g(), clearColor.b(), clearColor.a() );
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
 void OpenGLRenderer::bindUniform( ShaderLocation *location, int value )
@@ -300,6 +329,8 @@ void OpenGLRenderer::drawBuffers( ShaderProgram *program, Primitive::Type buffer
 
 void OpenGLRenderer::setAlphaState( AlphaState *state )
 {
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    
 	if ( state->isEnabled() ) {
 		glEnable( GL_BLEND );
 
@@ -374,15 +405,21 @@ void OpenGLRenderer::setAlphaState( AlphaState *state )
 	else {
 		glDisable( GL_BLEND );
 	}
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
 void OpenGLRenderer::setDepthState( DepthState *state )
 {
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    
 	if ( state->isEnabled() ) {
 		glEnable( GL_DEPTH_TEST );
 	}
 	else {
 		glDisable( GL_DEPTH_TEST );
 	}
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
