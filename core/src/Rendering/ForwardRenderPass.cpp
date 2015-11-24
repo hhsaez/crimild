@@ -152,6 +152,10 @@ void ForwardRenderPass::renderShadedObjects( Renderer *renderer, RenderQueue *re
 {
     CRIMILD_PROFILE( "Render Shaded Objects" )
     
+    if ( renderQueue->getShadedObjects().size() == 0 ) {
+        return;
+    }
+    
     auto program = getForwardProgram();
 
     // bind program
@@ -159,6 +163,9 @@ void ForwardRenderPass::renderShadedObjects( Renderer *renderer, RenderQueue *re
 
     auto projection = renderQueue->getProjectionMatrix();
     auto view = renderQueue->getViewMatrix();
+    
+    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::PROJECTION_MATRIX_UNIFORM ), projection );
+    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM ), view );
     
     // bind shadow maps
     renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::USE_SHADOW_MAP_UNIFORM ), false );
@@ -188,13 +195,14 @@ void ForwardRenderPass::renderShadedObjects( Renderer *renderer, RenderQueue *re
 
             auto primitive = it.first;
 
-            // bind vertex and index buffers
+            // bind vertex and index buffersbl
             renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
             renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
 
             for ( auto geometryIt : it.second ) {
                 CRIMILD_PROFILE( "Draw Primitive" )
-                renderer->applyTransformations( program, projection, view, geometryIt.second );
+                renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM ), geometryIt.second );
+
                 renderer->drawPrimitive( program, primitive );
             }
             
@@ -227,6 +235,10 @@ void ForwardRenderPass::renderShadedObjects( Renderer *renderer, RenderQueue *re
 void ForwardRenderPass::renderNonShadedObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
 {
     CRIMILD_PROFILE( "Render Non-Shaded Objects" )
+    
+    if ( renderQueue->getOpaqueObjects().size() == 0 ) {
+        return;
+    }
     
     auto program = getForwardProgram();
     
