@@ -177,6 +177,12 @@
 		5F8CB2C61BE7ECF00039D32A /* TextShaderProgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F8CB22D1BE7ECF00039D32A /* TextShaderProgram.cpp */; };
 		5F8CB2C71BE7ECF00039D32A /* UnlitDiffuseShaderProgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F8CB2311BE7ECF00039D32A /* UnlitDiffuseShaderProgram.cpp */; };
 		5F8CB2C81BE7ECF00039D32A /* UnlitTextureShaderProgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F8CB2331BE7ECF00039D32A /* UnlitTextureShaderProgram.cpp */; };
+		5FE67B6A1C04106400A944FC /* AudioClip.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5FE67B451C04106400A944FC /* AudioClip.cpp */; };
+		5FE67B6B1C04106400A944FC /* AudioManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5FE67B471C04106400A944FC /* AudioManager.cpp */; };
+		5FE67B6C1C04106400A944FC /* Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5FE67B491C04106400A944FC /* Utils.cpp */; };
+		5FE67B6D1C04106400A944FC /* WavAudioClip.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5FE67B4B1C04106400A944FC /* WavAudioClip.cpp */; };
+		5FE67B6E1C04106400A944FC /* AudioComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5FE67B511C04106400A944FC /* AudioComponent.cpp */; };
+		5FE67B821C04118700A944FC /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5FE67B811C04118700A944FC /* OpenAL.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -586,6 +592,18 @@
 		5F8CB2341BE7ECF00039D32A /* UnlitTextureShaderProgram.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = UnlitTextureShaderProgram.frag; sourceTree = "<group>"; };
 		5F8CB2351BE7ECF00039D32A /* UnlitTextureShaderProgram.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = UnlitTextureShaderProgram.hpp; sourceTree = "<group>"; };
 		5F8CB2361BE7ECF00039D32A /* UnlitTextureShaderProgram.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = UnlitTextureShaderProgram.vert; sourceTree = "<group>"; };
+		5FE67B451C04106400A944FC /* AudioClip.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AudioClip.cpp; sourceTree = "<group>"; };
+		5FE67B461C04106400A944FC /* AudioClip.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AudioClip.hpp; sourceTree = "<group>"; };
+		5FE67B471C04106400A944FC /* AudioManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AudioManager.cpp; sourceTree = "<group>"; };
+		5FE67B481C04106400A944FC /* AudioManager.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AudioManager.hpp; sourceTree = "<group>"; };
+		5FE67B491C04106400A944FC /* Utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Utils.cpp; sourceTree = "<group>"; };
+		5FE67B4A1C04106400A944FC /* Utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Utils.hpp; sourceTree = "<group>"; };
+		5FE67B4B1C04106400A944FC /* WavAudioClip.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WavAudioClip.cpp; sourceTree = "<group>"; };
+		5FE67B4C1C04106400A944FC /* WavAudioClip.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = WavAudioClip.hpp; sourceTree = "<group>"; };
+		5FE67B511C04106400A944FC /* AudioComponent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AudioComponent.cpp; sourceTree = "<group>"; };
+		5FE67B521C04106400A944FC /* AudioComponent.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AudioComponent.hpp; sourceTree = "<group>"; };
+		5FE67B531C04106400A944FC /* Crimild_AL.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Crimild_AL.hpp; sourceTree = "<group>"; };
+		5FE67B811C04118700A944FC /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -593,6 +611,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5FE67B821C04118700A944FC /* OpenAL.framework in Frameworks */,
 				5F7035281B7CF467001B548B /* GLKit.framework in Frameworks */,
 				5F7035291B7CF467001B548B /* OpenGLES.framework in Frameworks */,
 			);
@@ -620,6 +639,7 @@
 		5F70320F1B7BB9D6001B548B = {
 			isa = PBXGroup;
 			children = (
+				5FE67B811C04118700A944FC /* OpenAL.framework */,
 				5F7035261B7CF467001B548B /* GLKit.framework */,
 				5F7035271B7CF467001B548B /* OpenGLES.framework */,
 				5F70321A1B7BB9D6001B548B /* Crimild */,
@@ -640,6 +660,7 @@
 		5F70321A1B7BB9D6001B548B /* Crimild */ = {
 			isa = PBXGroup;
 			children = (
+				5FE67B421C04105400A944FC /* AL */,
 				5F1938361BBC351C00C1A135 /* OpenGL */,
 				5F70351F1B7CF1AC001B548B /* iOS */,
 				5F7033BA1B7BBA21001B548B /* Third Party */,
@@ -1306,6 +1327,49 @@
 			path = Programs;
 			sourceTree = "<group>";
 		};
+		5FE67B421C04105400A944FC /* AL */ = {
+			isa = PBXGroup;
+			children = (
+				5FE67B431C04106400A944FC /* src */,
+			);
+			name = AL;
+			sourceTree = "<group>";
+		};
+		5FE67B431C04106400A944FC /* src */ = {
+			isa = PBXGroup;
+			children = (
+				5FE67B441C04106400A944FC /* Audio */,
+				5FE67B501C04106400A944FC /* Components */,
+				5FE67B531C04106400A944FC /* Crimild_AL.hpp */,
+			);
+			name = src;
+			path = ../../../al/src;
+			sourceTree = "<group>";
+		};
+		5FE67B441C04106400A944FC /* Audio */ = {
+			isa = PBXGroup;
+			children = (
+				5FE67B451C04106400A944FC /* AudioClip.cpp */,
+				5FE67B461C04106400A944FC /* AudioClip.hpp */,
+				5FE67B471C04106400A944FC /* AudioManager.cpp */,
+				5FE67B481C04106400A944FC /* AudioManager.hpp */,
+				5FE67B491C04106400A944FC /* Utils.cpp */,
+				5FE67B4A1C04106400A944FC /* Utils.hpp */,
+				5FE67B4B1C04106400A944FC /* WavAudioClip.cpp */,
+				5FE67B4C1C04106400A944FC /* WavAudioClip.hpp */,
+			);
+			path = Audio;
+			sourceTree = "<group>";
+		};
+		5FE67B501C04106400A944FC /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				5FE67B511C04106400A944FC /* AudioComponent.cpp */,
+				5FE67B521C04106400A944FC /* AudioComponent.hpp */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1473,6 +1537,7 @@
 				5F8CB0301BE7ECAA0039D32A /* Simulation.cpp in Sources */,
 				5F8CB2AE1BE7ECF00039D32A /* EmissiveGlowImageEffect.cpp in Sources */,
 				5F70340A1B7BBA38001B548B /* lmem.c in Sources */,
+				5FE67B6D1C04106400A944FC /* WavAudioClip.cpp in Sources */,
 				5F8CB0271BE7ECAA0039D32A /* Group.cpp in Sources */,
 				5F8CB2C11BE7ECF00039D32A /* ScreenRGBShaderProgram.cpp in Sources */,
 				5F8CB2BA1BE7ECF00039D32A /* DeferredRenderShaderProgram.cpp in Sources */,
@@ -1515,10 +1580,12 @@
 				5F7033FA1B7BBA38001B548B /* lauxlib.c in Sources */,
 				5F8CB0081BE7ECAA0039D32A /* Primitive.cpp in Sources */,
 				5F8CB2BC1BE7ECF00039D32A /* DepthShaderProgram.cpp in Sources */,
+				5FE67B6A1C04106400A944FC /* AudioClip.cpp in Sources */,
 				5F8CB01C1BE7ECAA0039D32A /* RenderState.cpp in Sources */,
 				5F70340C1B7BBA38001B548B /* lobject.c in Sources */,
 				5F8CB2A81BE7ECF00039D32A /* IndexBufferObjectCatalog.cpp in Sources */,
 				5F8CAFF61BE7ECAA0039D32A /* TaskManager.cpp in Sources */,
+				5FE67B6B1C04106400A944FC /* AudioManager.cpp in Sources */,
 				5F8CAFEF1BE7ECAA0039D32A /* ParticleSystemComponent.cpp in Sources */,
 				5F8CB02F1BE7ECAA0039D32A /* Settings.cpp in Sources */,
 				5F8CAFF41BE7ECAA0039D32A /* Task.cpp in Sources */,
@@ -1533,6 +1600,7 @@
 				5F8CB2B11BE7ECF00039D32A /* OpenGLUtils.cpp in Sources */,
 				5F8CB0311BE7ECAA0039D32A /* DebugSystem.cpp in Sources */,
 				5F8CAFFB1BE7ECAA0039D32A /* NamedObject.cpp in Sources */,
+				5FE67B6E1C04106400A944FC /* AudioComponent.cpp in Sources */,
 				5F8CB0221BE7ECAA0039D32A /* Texture.cpp in Sources */,
 				5F8CB2A71BE7ECF00039D32A /* FrameBufferObjectCatalog.cpp in Sources */,
 				5F8CB0021BE7ECAA0039D32A /* ConePrimitive.cpp in Sources */,
@@ -1557,6 +1625,7 @@
 				5F8CB2B01BE7ECF00039D32A /* OpenGLRenderer.cpp in Sources */,
 				5F8CB2B21BE7ECF00039D32A /* BlendShaderProgram.cpp in Sources */,
 				5F8CB0121BE7ECAA0039D32A /* FrameBufferObject.cpp in Sources */,
+				5FE67B6C1C04106400A944FC /* Utils.cpp in Sources */,
 				5F7034141B7BBA38001B548B /* ltablib.c in Sources */,
 				5F8CAFE71BE7ECAA0039D32A /* PlaneBoundingVolume.cpp in Sources */,
 				5F8CAFE91BE7ECAA0039D32A /* BehaviorComponent.cpp in Sources */,
@@ -1669,6 +1738,7 @@
 					"${SRCROOT}/../../scripting/src",
 					"${SRCROOT}/../../third-party/lua-5.2.3/src",
 					"${SRCROOT}/../../opengl/src",
+					"${SRCROOT}/../../al/src",
 				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1686,6 +1756,7 @@
 					"${SRCROOT}/../../scripting/src",
 					"${SRCROOT}/../../third-party/lua-5.2.3/src",
 					"${SRCROOT}/../../opengl/src",
+					"${SRCROOT}/../../al/src",
 				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
