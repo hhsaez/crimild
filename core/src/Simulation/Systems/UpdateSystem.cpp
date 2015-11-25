@@ -66,7 +66,7 @@ void UpdateSystem::update( void )
     c.tick();
     
     // prevent integration errors when delta is too big (i.e. after loading a new scene)
-    _accumulator += Numericd::min( 1.0f, c.getDeltaTime() );
+    _accumulator += Numericd::min( 4 * CRIMILD_SIMULATION_TIME, c.getDeltaTime() );
 
     broadcastMessage( messaging::WillUpdateScene { scene, camera } );
     updateBehaviors( scene );
