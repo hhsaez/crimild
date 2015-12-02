@@ -51,7 +51,8 @@ using namespace crimild;
 
 Simulation::Simulation( std::string name, SettingsPtr const &settings )
 	: NamedObject( name ),
-      _settings( settings )
+      _settings( settings ),
+      _taskManager( 0 ) // by default, disable background threads
 {
 	addSystem( crimild::alloc< UpdateSystem >() );
 	addSystem( crimild::alloc< RenderSystem >() );

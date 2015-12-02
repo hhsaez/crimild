@@ -6,13 +6,9 @@
 
 using namespace crimild;
 
-TaskManager::TaskManager( unsigned int numThreads )
+TaskManager::TaskManager( int numThreads )
 	: _numThreads( numThreads )
 {
-	if ( _numThreads == 0 ) {
-		_numThreads = std::thread::hardware_concurrency() + 1;
-	}
-
 	_writeList = 0;
 	_readList = 1;
 	_numTasksToWaitFor = 0;
@@ -29,11 +25,14 @@ void TaskManager::start( void )
 {
 	Log::Debug << "Starting task manager" << Log::End;
 
-	Log::Debug << "Spawning " << _numThreads << " threads" << Log::End;
-
     // provides at least one background task
     dummyTask();
     
+    if ( _numThreads < 0 ) {
+        _numThreads = std::thread::hardware_concurrency();
+    }
+    
+    Log::Debug << "Spawning " << _numThreads << " threads" << Log::End;
 	for ( unsigned int i = 0; i < _numThreads; i++ ) {
 		_threads.push_back( std::thread( std::bind( &TaskManager::worker, this ) ) );
 	}
@@ -79,7 +78,7 @@ void TaskManager::worker( void )
 
 void TaskManager::addTask( Task const &task )
 {
-    if ( task.isThreadSafe() ) {
+    if ( task.isThreadSafe() && _numThreads > 0 ) {
         if ( task.getSyncFrame() ) {
             _syncTasks.push( task );
         }
@@ -105,7 +104,7 @@ void TaskManager::synchronize( void )
 		_syncCondition.wait( lock );
 	}
 
-	_numTasksToWaitFor = _syncTasks.size();
+	_numTasksToWaitFor = ( int ) _syncTasks.size();
 
 	while ( !_syncTasks.empty() ) {
 		_backgroundTasks.push( _syncTasks.waitPop() );
