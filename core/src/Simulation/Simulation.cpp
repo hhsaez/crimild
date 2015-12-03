@@ -157,7 +157,6 @@ void Simulation::setScene( SharedPointer< Node > const &scene )
         });
 	}
     
-    AssetManager::getInstance()->clear();
     MessageQueue::getInstance()->clear();
     
     _simulationClock.reset();
@@ -177,6 +176,8 @@ void Simulation::setScene( SharedPointer< Node > const &scene )
 
 void Simulation::loadScene( std::string filename, SharedPointer< SceneBuilder > const &builder )
 {
+    AssetManager::getInstance()->clear();
+
     auto self = this;
     crimild::async( [self, filename, builder] {
         self->broadcastMessage( messaging::LoadScene { filename, builder } );
