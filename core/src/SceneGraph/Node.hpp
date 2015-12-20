@@ -129,6 +129,8 @@ namespace crimild {
         void detachAllComponents( void );
 
 		void startComponents( void );
+
+		void updateComponents( const Clock &clock );
 		
 		void forEachComponent( std::function< void ( NodeComponent * ) > callback );
 

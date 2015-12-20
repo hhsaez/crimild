@@ -73,7 +73,6 @@
 #include "SceneGraph/Switch.hpp"
 #include "SceneGraph/Text.hpp"
 
-#include "Components/BehaviorComponent.hpp"
 #include "Components/JointComponent.hpp"
 #include "Components/LambdaComponent.hpp"
 #include "Components/MaterialComponent.hpp"
@@ -154,6 +153,7 @@
 #include "Simulation/Systems/StreamingSystem.hpp"
 
 #include "Debug/DebugRenderHelper.hpp"
+#include "Debug/SceneDebugDump.hpp"
 
 #endif
 

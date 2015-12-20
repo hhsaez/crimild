@@ -25,53 +25,20 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "NodeComponent.hpp"
+#include "UpdateComponents.hpp"
 
 #include "SceneGraph/Node.hpp"
+#include "SceneGraph/Group.hpp"
 
 using namespace crimild;
 
-NodeComponent::NodeComponent( void )
-    : _node( nullptr )
+UpdateComponents::UpdateComponents( const Clock &clock )
+	: Apply( [clock]( Node *n ) { n->updateComponents( clock ); } )
 {
 
 }
 
-NodeComponent::~NodeComponent( void )
-{
-
-}
-
-NodeComponent *NodeComponent::getComponentWithName( std::string name )
-{
-    if ( getNode() == nullptr ) {
-        return nullptr;
-    }
-    
-    return getNode()->getComponentWithName( name );
-}
-
-void NodeComponent::onAttach( void )
-{
-
-}
-
-void NodeComponent::onDetach( void )
-{
-	
-}
-
-void NodeComponent::start( void )
-{
-
-}
-
-void NodeComponent::update( const Clock & )
-{
-	
-}
-
-void NodeComponent::renderDebugInfo( Renderer *, Camera * )
+UpdateComponents::~UpdateComponents( void )
 {
 
 }

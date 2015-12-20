@@ -25,23 +25,22 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "BehaviorComponent.hpp"
-#include "NodeComponentCatalog.hpp"
+#ifndef CRIMILD_VISITORS_UPDATE_COMPONENTS_
+#define CRIMILD_VISITORS_UPDATE_COMPONENTS_
 
-using namespace crimild;
+#include "Apply.hpp"
 
-BehaviorComponent::BehaviorComponent( void )
-{
-    NodeComponentCatalog< BehaviorComponent >::getInstance().registerComponent( this );
-}
+#include "Mathematics/Clock.hpp"
 
-BehaviorComponent::~BehaviorComponent( void )
-{
-    NodeComponentCatalog< BehaviorComponent >::getInstance().unregisterComponent( this );
-}
+namespace crimild {
 
-void BehaviorComponent::update( const Clock & )
-{
+	class UpdateComponents : public Apply {
+	public:
+		UpdateComponents( const Clock &clock );
+		virtual ~UpdateComponents( void );
+	};
 
 }
+
+#endif
 

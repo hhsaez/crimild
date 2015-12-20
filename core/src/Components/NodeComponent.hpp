@@ -30,6 +30,8 @@
 
 #include "Foundation/SharedObject.hpp"
 
+#include "Mathematics/Clock.hpp"
+
 namespace crimild {
 
 	class Node;
@@ -88,6 +90,11 @@ namespace crimild {
 		   \brief Invoked once when scene is loaded
 		*/
 		virtual void start( void );
+
+		/**
+			\brief Invoked once per scene update
+		*/
+		virtual void update( const Clock & );
 
 		/**
 			\brief Invoked only if debug rendering is enabled

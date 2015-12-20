@@ -100,13 +100,13 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
                 OBJLoader loader( FileSystem::getInstance().pathForResource( filename ) );
                 auto tmp = loader.load();
                 AssetManager::getInstance()->set( filename, tmp );
-                group = tmp;
+                scene = crimild::get_ptr( tmp );
             }
-            else {
-                ShallowCopy shallowCopy;
-                scene->perform( shallowCopy );
-                group = shallowCopy.getResult< Group >();
-            }
+
+            // always copy assets from the cache
+            ShallowCopy shallowCopy;
+            scene->perform( shallowCopy );
+            group = shallowCopy.getResult< Group >();
         }
         else {
             Log::Debug << "Building 'group' node" << Log::End;

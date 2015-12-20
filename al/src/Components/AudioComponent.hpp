@@ -34,7 +34,7 @@ namespace crimild {
 
 	namespace al {
 
-		class AudioComponent : public BehaviorComponent {
+		class AudioComponent : public NodeComponent {
 			CRIMILD_DISALLOW_COPY_AND_ASSIGN( AudioComponent )
 			CRIMILD_NODE_COMPONENT_NAME( "audio" )
 

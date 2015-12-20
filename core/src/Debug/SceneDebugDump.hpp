@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,32 +25,36 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_COMPONENTS_BEHAVIOR_COMPONENT_
-#define CRIMILD_COMPONENTS_BEHAVIOR_COMPONENT_
+#ifndef CRIMILD_CORE_DEBUG_SCENE_DEBUG_DUMP_
+#define CRIMILD_CORE_DEBUG_SCENE_DEBUG_DUMP_
 
-#include "NodeComponent.hpp"
+#include "Visitors/NodeVisitor.hpp"
 
-#include "Mathematics/Clock.hpp"
+#include <fstream>
 
 namespace crimild {
-
-	class BehaviorComponent : public NodeComponent {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( BehaviorComponent )
-        
-	protected:
-		BehaviorComponent( void );
-
-	public:
-		virtual ~BehaviorComponent( void );
-
-		/**
-		   \brief Invoked multiple times (usually once per simulation step)
-		*/
-		virtual void update( const Clock & );
-
-	};
     
-    using BehaviorComponentPtr = SharedPointer< BehaviorComponent >;
+    class SceneDebugDump : public NodeVisitor {
+    public:
+        SceneDebugDump( std::string filename );
+        virtual ~SceneDebugDump( void );
+        
+        virtual void traverse( Node *node ) override;
+        
+        virtual void visitNode( Node *node ) override;
+        virtual void visitGroup( Group *group ) override;
+        virtual void visitGeometry( Geometry *geometry ) override;
+        virtual void visitText( Text *text ) override;
+        virtual void visitCamera( Camera *camera ) override;
+        virtual void visitLight( Light *light ) override;
+
+    private:
+        void dumpNode( Node *node, std::string type );
+        
+    private:
+        int _parentLevel = 0;
+        std::ofstream _output;
+    };
 
 }
 
