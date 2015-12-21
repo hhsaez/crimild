@@ -80,13 +80,27 @@
 
 #pragma mark - Crimild setup
 
-- (void)setupCrimild
+- (NSString *) applicationBundleDirectory
+{
+    return [[NSBundle mainBundle] resourcePath];
+}
+
+- (NSString *) applicationDocumentsDirectory
+{
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *basePath = paths.firstObject;
+    return basePath;
+}
+
+- (void) setupCrimild
 {
     _simulation = crimild::alloc< crimild::Simulation >( "crimild", nullptr );
     _simulation->setRenderer( crimild::alloc< crimild::opengl::OpenGLRenderer >() );
 
-    NSString *tileDirectory = [[NSBundle mainBundle] resourcePath];
-    crimild::FileSystem::getInstance().setBaseDirectory( [tileDirectory UTF8String] );
+    crimild::FileSystem::getInstance().setBaseDirectory( [[self applicationBundleDirectory] UTF8String] );
+    crimild::FileSystem::getInstance().setDocumentsDirectory( [[self applicationDocumentsDirectory] UTF8String] );
+    
+    crimild::TaskManager::getInstance()->setNumThreads( 1 );
     
     CGRect framebufferRect = [[UIScreen mainScreen] bounds];
     auto screenBuffer = crimild::alloc< crimild::FrameBufferObject >( 2 * framebufferRect.size.width, 2 * framebufferRect.size.height );
