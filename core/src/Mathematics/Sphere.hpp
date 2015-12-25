@@ -65,6 +65,7 @@ namespace crimild {
 		{
 			_center = sphere._center;
 			_radius = sphere._radius;
+            return *this;
 		}
 
 		void setCenter( const VectorImpl &c )

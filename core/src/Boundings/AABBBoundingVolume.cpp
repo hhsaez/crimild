@@ -57,6 +57,15 @@ AABBBoundingVolume::~AABBBoundingVolume( void )
 
 }
 
+SharedPointer< BoundingVolume > AABBBoundingVolume::clone( void ) const
+{
+    auto bb = crimild::alloc< AABBBoundingVolume >();
+    bb->_sphere = _sphere;
+    bb->setMin( getMin() );
+    bb->setMax( getMin() );
+    return bb;
+}
+
 void AABBBoundingVolume::computeFrom( const BoundingVolume *volume )
 {
 	computeFrom( volume->getCenter() + volume->getMin(), volume->getCenter() + volume->getMax() );

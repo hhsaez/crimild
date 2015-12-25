@@ -36,7 +36,7 @@
 #include <tuple>
 
 #ifndef CRIMILD_SCRIPTING_LOG_VERBOSE
-#define CRIMILD_SCRIPTING_LOG_VERBOSE 0
+#define CRIMILD_SCRIPTING_LOG_VERBOSE 1
 #endif
 
 namespace crimild {

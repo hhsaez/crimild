@@ -105,7 +105,7 @@ bool ScriptContext::load( std::string fileName, bool supportCoroutines )
         std::string reason = lua_tostring( _state, -1 );
 #if CRIMILD_SCRIPTING_LOG_VERBOSE
         Log::Error << "Cannot execute script in file " << fileName
-                   << "\n\tReason: " << reason;
+                   << "\n\tReason: " << reason
                    << Log::End;
 #endif
 	    return false;
@@ -120,7 +120,7 @@ bool ScriptContext::parse( std::string text )
         std::string reason = lua_tostring( _state, -1 );
 #if CRIMILD_SCRIPTING_LOG_VERBOSE
 		Log::Error << "Cannot parse string \"" << text << "\""
-                   << "\n\tReason: " << reason;
+                   << "\n\tReason: " << reason
 				   << Log::End;
 #endif
 	    return false;

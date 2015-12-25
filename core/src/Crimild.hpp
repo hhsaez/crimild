@@ -59,6 +59,7 @@
 #include "Boundings/BoundingVolume.hpp"
 #include "Boundings/PlaneBoundingVolume.hpp"
 #include "Boundings/SphereBoundingVolume.hpp"
+#include "Boundings/AABBBoundingVolume.hpp"
 
 #include "Exceptions/Exception.hpp"
 #include "Exceptions/FileNotFoundException.hpp"
