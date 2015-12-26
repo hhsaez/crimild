@@ -100,16 +100,21 @@
     crimild::FileSystem::getInstance().setBaseDirectory( [[self applicationBundleDirectory] UTF8String] );
     crimild::FileSystem::getInstance().setDocumentsDirectory( [[self applicationDocumentsDirectory] UTF8String] );
     
-    crimild::TaskManager::getInstance()->setNumThreads( 1 );
-    
     CGRect framebufferRect = [[UIScreen mainScreen] bounds];
     auto screenBuffer = crimild::alloc< crimild::FrameBufferObject >( 2 * framebufferRect.size.width, 2 * framebufferRect.size.height );
     screenBuffer->setClearColor( crimild::RGBAColorf( 0.0f, 0.0f, 0.0f, 0.0f ) );
     auto renderer = _simulation->getRenderer();
     renderer->setScreenBuffer( screenBuffer );
     renderer->configure();
+    
+    [self simulationWillStart: self.simulation];
 
     [self simulation]->start();
+}
+
+- (void) simulationWillStart: (crimild::Simulation *) simulation
+{
+    
 }
 
 #pragma mark - GL Setup

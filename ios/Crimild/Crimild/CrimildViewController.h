@@ -15,4 +15,6 @@
 
 @property (nonatomic, readonly) crimild::Simulation *simulation;
 
+- (void) simulationWillStart: (crimild::Simulation *) simulation;
+
 @end
