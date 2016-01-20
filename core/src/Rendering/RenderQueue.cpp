@@ -44,6 +44,8 @@ void RenderQueue::reset( void )
     setCamera( nullptr );
     
     _lights.clear();
+    _shadowCasters.clear();
+    _shadedObjects.clear();
     _opaqueObjects.clear();
     _translucentObjects.clear();
     _screenObjects.clear();
