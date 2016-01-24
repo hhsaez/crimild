@@ -148,28 +148,32 @@ void Simulation::setScene( SharedPointer< Node > const &scene )
 	if ( _scene != nullptr ) {
 		_scene->perform( UpdateWorldState() );
 		_scene->perform( UpdateRenderState() );
-		_scene->perform( StartComponents() );
 
+        // fetch all cameras from the scene
 		FetchCameras fetchCameras;
 		_scene->perform( fetchCameras );
         fetchCameras.forEachCamera( [&]( Camera *camera ) {
             _cameras.push_back( camera );
         });
-	}
+
+        // compute actual aspect ratio for main camera
+        auto renderer = Simulation::getInstance()->getRenderer();
+        if ( getMainCamera() != nullptr && renderer != nullptr && renderer->getScreenBuffer() != nullptr ) {
+            auto screen = renderer->getScreenBuffer();
+            auto aspect = ( float ) screen->getWidth() / ( float ) screen->getHeight();
+            
+            if ( getMainCamera() != nullptr ) {
+                getMainCamera()->setAspectRatio( aspect );
+            }
+        }
+        
+        // start all components
+        _scene->perform( StartComponents() );
+    }
     
     MessageQueue::getInstance()->clear();
     
     _simulationClock.reset();
-
-	auto renderer = Simulation::getInstance()->getRenderer();
-	if ( getMainCamera() != nullptr && renderer != nullptr && renderer->getScreenBuffer() != nullptr ) {
-		auto screen = renderer->getScreenBuffer();
-		auto aspect = ( float ) screen->getWidth() / ( float ) screen->getHeight();
-
-		if ( getMainCamera() != nullptr ) {
-			getMainCamera()->setAspectRatio( aspect );
-		}
-	}
 
     broadcastMessage( messaging::SceneChanged { crimild::get_ptr( _scene ) } );
 }
