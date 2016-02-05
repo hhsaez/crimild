@@ -144,7 +144,7 @@
 
 #include "Loaders/OBJLoader.hpp"
 
-#include "Simulation/InputState.hpp"
+#include "Simulation/Input.hpp"
 #include "Simulation/Simulation.hpp"
 #include "Simulation/FileSystem.hpp"
 

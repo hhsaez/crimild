@@ -155,11 +155,15 @@
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    crimild::InputState::getCurrentState().setMouseButtonState( 0, crimild::InputState::MouseButtonState::PRESSED );
-
     CGPoint location = [[touches anyObject] locationInView: self.view];
-    crimild::InputState::getCurrentState().setMousePosition( crimild::Vector2i( location.x, location.y ) );
-    crimild::InputState::getCurrentState().setNormalizedMousePosition( crimild::Vector2f( (float) location.x / self.view.bounds.size.width, (float) location.y / self.view.bounds.size.height ) );
+    
+    float x = location.x;
+    float y = location.y;
+    float nx = x / self.view.bounds.size.width;
+    float ny = y / self.view.bounds.size.height;
+    
+    crimild::MessageQueue::getInstance()->pushMessage( crimild::messaging::MouseMotion { x, y, nx, ny } );
+    crimild::MessageQueue::getInstance()->pushMessage( crimild::messaging::MouseButtonDown { CRIMILD_INPUT_MOUSE_BUTTON_LEFT } );
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
@@ -169,11 +173,15 @@
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    crimild::InputState::getCurrentState().setMouseButtonState( 0, crimild::InputState::MouseButtonState::RELEASED );
-    
     CGPoint location = [[touches anyObject] locationInView: self.view];
-    crimild::InputState::getCurrentState().setMousePosition( crimild::Vector2i( location.x, location.y ) );
-    crimild::InputState::getCurrentState().setNormalizedMousePosition( crimild::Vector2f( (float) location.x / self.view.bounds.size.width, (float) location.y / self.view.bounds.size.height ) );
+    
+    float x = location.x;
+    float y = location.y;
+    float nx = x / self.view.bounds.size.width;
+    float ny = y / self.view.bounds.size.height;
+    
+    crimild::MessageQueue::getInstance()->pushMessage( crimild::messaging::MouseMotion { x, y, nx, ny } );
+    crimild::MessageQueue::getInstance()->pushMessage( crimild::messaging::MouseButtonUp { CRIMILD_INPUT_MOUSE_BUTTON_LEFT } );
 }
 
 @end

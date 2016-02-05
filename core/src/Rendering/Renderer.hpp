@@ -29,6 +29,7 @@
 #define CRIMILD_RENDERING_RENDERER_
 
 #include "Foundation/SharedObject.hpp"
+#include "Foundation/Singleton.hpp"
 
 #include "Primitives/Primitive.hpp"
 
@@ -57,7 +58,9 @@ namespace crimild {
     class VertexBufferObject;
     class VisibilitySet;
 
-	class Renderer : public SharedObject {
+	class Renderer : 
+		public SharedObject,
+		public DynamicSingleton< Renderer > {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( Renderer );
         
 	protected:

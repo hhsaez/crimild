@@ -2,7 +2,8 @@
 #
 # Arguments:
 # - CRIMILD_APP_NAME: (Required) Name for the example project
-# - CRIMILD_APP_SOURCE_DIR: (Required) Base directory for sources
+# - CRIMILD_APP_SOURCE_DIRECTORIES: (Required) Base directory for sources
+# - CRIMILD_APP_INCLUDE_DIRECTORIES: (Required) Base directory for includes
 
 MESSAGE( "Configuring ${CRIMILD_APP_NAME} app" )
 
@@ -16,9 +17,13 @@ ELSE ( APPLE )
 	SET( CMAKE_CXX_FLAGS "-std=c++11 -static-libgcc -static-libstdc++ -static -U__STRICT_ANSI__" )
 ENDIF ( APPLE )
 
-# TODO: Avoid the absolute path to the 'examples' directory
-FILE( GLOB_RECURSE CRIMILD_APP_HEADER_FILES "${CRIMILD_APP_SOURCE_DIR}/*.hpp" )
-FILE( GLOB_RECURSE CRIMILD_APP_SOURCE_FILES "${CRIMILD_APP_SOURCE_DIR}/*.cpp" )
+FOREACH( ITR ${CRIMILD_APP_SOURCE_DIRECTORIES} )
+	FILE( GLOB_RECURSE TMP_FILES "${ITR}/*.hpp" )
+	SET( CRIMILD_APP_HEADER_FILES ${CRIMILD_APP_HEADER_FILES} ${TMP_FILES} )
+
+	FILE( GLOB_RECURSE TMP_FILES "${ITR}/*.cpp" )
+	SET( CRIMILD_APP_SOURCE_FILES ${CRIMILD_APP_SOURCE_FILES} ${TMP_FILES} )
+ENDFOREACH ( ITR )
 
 SET( CRIMILD_APP_DEPENDENCIES 
 	crimild_core
@@ -44,7 +49,7 @@ SET( CRIMILD_APP_INCLUDE_DIRECTORIES
 	${CRIMILD_SOURCE_DIR}/third-party/glfw/include
 	${CRIMILD_SOURCE_DIR}/third-party/glew/include
 	${CRIMILD_SOURCE_DIR}/third-party/lua-5.2.3/src
-	${CRIMILD_APP_SOURCE_DIR}
+	${CRIMILD_APP_INCLUDE_DIRECTORIES}
 ) 
 
 SET( CRIMILD_APP_LINK_DIRECTORIES 
