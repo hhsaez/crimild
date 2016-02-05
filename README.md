@@ -28,6 +28,47 @@ Crimild is distributed under the BSD license. See the LICENSE file for details
 Release Notes
 ====================
 
+v4.1.0
+------
+* Core
+ * Fixed aspect calculation for main camera
+ * Added dump debug tool
+ * Added cloning mechanism for bounding volumes
+
+* Rendering
+ * Added flag to textures in order to support different wrap modes
+ * Avoid switching rendering states when the queues are empty
+ * Wait for message to present next frame
+ * Fixed bug in render queue reset
+ * [iOS] Create frame buffer objects in with correct resolution
+ * [iOS] trigger frame presentation after binding default FBO
+ * [OpenGL] Improved frame buffer object catalog to support iOS
+ * [OpenGL] Improved error logging
+ * [OpenGL] Fix screen shaders to work on iOS
+ * [OpenGL] Improved Image Effects to support iOS
+
+* Simulation
+ * Compute aspect ratio automatically for Main Camera
+ * Allow custom configurations for TaskManager
+ * Fixed integration error in Update system
+ * Decreased accumulation threshold to at most 4 frames in update system
+ * Clear AssetManager cache before loading a scene
+ * Add tools for getting the documents directory
+ * Make sure there is a main camera before starting components  
+
+* Scripting
+ * Use RTTI for builders in Lua Scene Builder
+ * Enable on-demand logging
+ * Clone nodes in lua builder
+
+* Audio
+ * Enable OpenAL in iOS
+
+* Infrastructure
+ * Added CMake tool for easier app configuration
+ * Added CMake tool for easier app configuration
+
+
 v4.0.1
 ------
 * Build System
