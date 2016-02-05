@@ -50,6 +50,8 @@ namespace crimild {
 
 		virtual const Vector3f &getCenter( void ) const = 0;
 		virtual float getRadius( void ) const = 0;
+        
+        virtual SharedPointer< BoundingVolume > clone( void ) const { return nullptr; }
 
 		const Vector3f &getMin( void ) const { return _min; }
 		const Vector3f &getMax( void ) const { return _max; }

@@ -154,6 +154,11 @@ void Node::startComponents( void )
 	forEachComponent( []( NodeComponent *component ) { component->start(); } );
 }
 
+void Node::updateComponents( const Clock &clock )
+{
+    forEachComponent( [clock]( NodeComponent *component ) { if ( component->isEnabled() ) component->update( clock ); } );
+}
+
 void Node::forEachComponent( std::function< void ( NodeComponent * ) > callback )
 {
 	// create a copy of the component's collection

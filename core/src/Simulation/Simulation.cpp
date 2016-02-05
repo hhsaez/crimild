@@ -35,6 +35,8 @@
 
 #include "SceneGraph/Camera.hpp"
 
+#include "Rendering/FrameBufferObject.hpp"
+
 #include "Visitors/FetchCameras.hpp"
 #include "Visitors/UpdateWorldState.hpp"
 #include "Visitors/UpdateRenderState.hpp"
@@ -49,7 +51,8 @@ using namespace crimild;
 
 Simulation::Simulation( std::string name, SettingsPtr const &settings )
 	: NamedObject( name ),
-      _settings( settings )
+      _settings( settings ),
+      _taskManager( 0 ) // by default, disable background threads
 {
 	addSystem( crimild::alloc< UpdateSystem >() );
 	addSystem( crimild::alloc< RenderSystem >() );
@@ -145,16 +148,29 @@ void Simulation::setScene( SharedPointer< Node > const &scene )
 	if ( _scene != nullptr ) {
 		_scene->perform( UpdateWorldState() );
 		_scene->perform( UpdateRenderState() );
-		_scene->perform( StartComponents() );
 
+        // fetch all cameras from the scene
 		FetchCameras fetchCameras;
 		_scene->perform( fetchCameras );
         fetchCameras.forEachCamera( [&]( Camera *camera ) {
             _cameras.push_back( camera );
         });
-	}
+
+        // compute actual aspect ratio for main camera
+        auto renderer = Simulation::getInstance()->getRenderer();
+        if ( getMainCamera() != nullptr && renderer != nullptr && renderer->getScreenBuffer() != nullptr ) {
+            auto screen = renderer->getScreenBuffer();
+            auto aspect = ( float ) screen->getWidth() / ( float ) screen->getHeight();
+            
+            if ( getMainCamera() != nullptr ) {
+                getMainCamera()->setAspectRatio( aspect );
+            }
+        }
+        
+        // start all components
+        _scene->perform( StartComponents() );
+    }
     
-    AssetManager::getInstance()->clear();
     MessageQueue::getInstance()->clear();
     
     _simulationClock.reset();
@@ -164,6 +180,8 @@ void Simulation::setScene( SharedPointer< Node > const &scene )
 
 void Simulation::loadScene( std::string filename, SharedPointer< SceneBuilder > const &builder )
 {
+    AssetManager::getInstance()->clear();
+
     auto self = this;
     crimild::async( [self, filename, builder] {
         self->broadcastMessage( messaging::LoadScene { filename, builder } );

@@ -45,6 +45,9 @@ namespace crimild {
 			virtual void configure( void ) override;
             virtual void setViewport( const Rectf &viewport ) override;
 
+            virtual void beginRender( void ) override;
+            virtual void endRender( void ) override;
+            
 			virtual void clearBuffers( void ) override;
 
 		public:

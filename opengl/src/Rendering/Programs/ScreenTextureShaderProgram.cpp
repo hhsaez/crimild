@@ -32,36 +32,31 @@ using namespace crimild;
 using namespace crimild::opengl;
 
 const char *screen_texture_vs = { CRIMILD_TO_STRING(
-	in vec3 aPosition;
-	in vec2 aTextureCoord;
+	CRIMILD_GLSL_ATTRIBUTE vec3 aPosition;
+	CRIMILD_GLSL_ATTRIBUTE vec2 aTextureCoord;
 
-	uniform mat4 uMMatrix;
-
-	out vec2 vTextureCoord;
+	CRIMILD_GLSL_VARYING_OUT vec2 vTextureCoord;
 
 	void main()
 	{
 		vTextureCoord = aTextureCoord;
-		gl_Position = uMMatrix * vec4( aPosition.x, aPosition.y, 0.0, 1.0 );
+		CRIMILD_GLSL_VERTEX_OUTPUT = vec4( aPosition.x, aPosition.y, 0.0, 1.0 );
 	}
 )};
 
 const char *screen_texture_fs = { CRIMILD_TO_STRING(
-    struct Material {
-        vec4 diffuse;
-    };
-
-    in vec2 vTextureCoord;
+    CRIMILD_GLSL_PRECISION_FLOAT_HIGH
+                                                    
+    CRIMILD_GLSL_VARYING_IN vec2 vTextureCoord;
 
     uniform sampler2D uColorMap;
-    uniform Material uMaterial;
 
-    out vec4 vFragColor;
+    CRIMILD_GLSL_DECLARE_FRAGMENT_OUTPUT
 
     void main( void ) 
     {
-        vec4 color = texture( uColorMap, vTextureCoord );
-        vFragColor = color;
+        vec4 color = CRIMILD_GLSL_FN_TEXTURE_2D( uColorMap, vTextureCoord );
+        CRIMILD_GLSL_FRAGMENT_OUTPUT = color;
     }
 )};
 
@@ -71,9 +66,7 @@ ScreenTextureShaderProgram::ScreenTextureShaderProgram( void )
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
 
-	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM, "uMMatrix" );
-
-	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM, "uColorMap" );
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM, "uColorMap" );
 }
 
 ScreenTextureShaderProgram::~ScreenTextureShaderProgram( void )

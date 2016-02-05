@@ -7,6 +7,10 @@ SET( CRIMILD_LIBRARY_LINK_LIBRARIES
 	crimild_core
 	glfw )
 
+IF ( NOT EXISTS "${CRIMILD_SOURCE_DIR}/third-party/glew/src/glew.c" )
+   EXECUTE_PROCESS( COMMAND make WORKING_DIRECTORY ${CRIMILD_SOURCE_DIR}/third-party/glew/auto )
+ENDIF()
+
 ADD_DEFINITIONS( -DGLEW_STATIC=1 )
 
 # Add GLEW sources as part of the library

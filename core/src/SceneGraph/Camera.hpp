@@ -69,6 +69,7 @@ namespace crimild {
 
 		bool getPickRay( float normalizedX, float normalizedY, Ray3f &result ) const;
 
+		void setAspectRatio( float aspect );
 		float computeAspect( void ) const;
 
 	private:

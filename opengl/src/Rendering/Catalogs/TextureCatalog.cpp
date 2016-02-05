@@ -53,8 +53,13 @@ TextureCatalog::~TextureCatalog( void )
 
 int TextureCatalog::getNextResourceId( void )
 {
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    
 	GLuint textureId = 0;
 	glGenTextures( 1, &textureId );
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+    
     return textureId;
 }
 
@@ -100,6 +105,8 @@ void TextureCatalog::unbind( ShaderLocation *location, Texture *texture )
 
 void TextureCatalog::load( Texture *texture )
 {
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    
 	Catalog< Texture >::load( texture );
 
 	int textureId = texture->getCatalogId();
@@ -107,7 +114,16 @@ void TextureCatalog::load( Texture *texture )
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 
-	GLint internalFormat = GL_RGBA;
+    if ( texture->getWrapMode() == Texture::WrapMode::CLAMP_TO_EDGE ) {
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+    }
+    else if ( texture->getWrapMode() == Texture::WrapMode::REPEAT ) {
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+    }
+
+    GLint internalFormat = GL_RGBA;
 	GLint format = GL_BGRA;
 	if ( texture->getImage()->getBpp() == 4 ) {
 		internalFormat = GL_RGBA;
@@ -137,24 +153,34 @@ void TextureCatalog::load( Texture *texture )
     	format, 
     	GL_UNSIGNED_BYTE,
         ( GLvoid * ) texture->getImage()->getData() );
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
 void TextureCatalog::unload( Texture *texture )
 {
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    
     if ( texture->getCatalogId() > 0 ) {
         _textureIdsToDelete.push_back( texture->getCatalogId() );
     }
     
     Catalog< Texture >::unload( texture );
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
 void TextureCatalog::cleanup( void )
 {
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    
     for ( auto id : _textureIdsToDelete ) {
         GLuint textureId = id;
         glDeleteTextures( 1, &textureId );
     }
     
     _textureIdsToDelete.clear();
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION
 }
 

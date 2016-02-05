@@ -92,7 +92,7 @@ Node *Group::getNodeAt( unsigned int index )
 
 Node *Group::getNode( std::string name )
 {
-	Node *result;
+    Node *result = nullptr;
 	bool found = false;
 	_nodes.forEach( [&result, &found, name]( Node *node ) {
 		if ( !found && node->getName() == name ) {

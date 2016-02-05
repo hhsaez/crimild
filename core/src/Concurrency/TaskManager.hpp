@@ -47,8 +47,11 @@ namespace crimild {
 		using ScopedLock = std::unique_lock< Mutex >;
 
 	public:
-		explicit TaskManager( unsigned int numThreads = 0 );
+		explicit TaskManager( int numThreads = -1 /* available platform threads */ );
 		virtual ~TaskManager( void );
+        
+        void setNumThreads( int numThreads ) { _numThreads = numThreads; }
+        int getNumThreads( void ) const { return _numThreads; }
 
 		void addTask( Task const &task );
 
@@ -79,7 +82,7 @@ namespace crimild {
 
 		TaskList _backgroundTasks;
 		
-		unsigned int _numThreads = 0;
+		int _numThreads = 0;
 		ThreadGroup _threads;
 
 		mutable Mutex _syncMutex;

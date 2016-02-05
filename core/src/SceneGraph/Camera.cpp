@@ -109,6 +109,12 @@ float Camera::computeAspect( void ) const
 	return getFrustum().computeAspect();
 }
 
+void Camera::setAspectRatio( float aspect )
+{
+	auto &f = getFrustum();
+	setFrustum( Frustumf( -aspect * f.getUMax(), aspect * f.getUMax(), f.getUMin(), f.getUMax(), f.getDMin(), f.getDMax() ) );
+}
+
 void Camera::computeCullingPlanes( void )
 {
 	Vector3f normal;

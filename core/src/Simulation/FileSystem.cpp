@@ -49,6 +49,13 @@ FileSystem::~FileSystem( void )
 
 }
 
+void FileSystem::setBaseDirectory( std::string baseDirectory ) 
+{ 
+	_baseDirectory = baseDirectory; 
+
+	setDocumentsDirectory( _baseDirectory );
+}
+
 void FileSystem::init( int argc, char **argv )
 {
 	std::string base = "";
@@ -82,6 +89,11 @@ std::string FileSystem::extractDirectory( std::string path )
 std::string FileSystem::pathForResource( std::string filePath )
 {
 	return getBaseDirectory() + "/" + filePath;
+}
+
+std::string FileSystem::pathForDocument( std::string filePath )
+{
+	return getDocumentsDirectory() + "/" + filePath;
 }
 
 std::string FileSystem::getRelativePath( std::string absolutePath )

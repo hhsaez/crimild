@@ -33,7 +33,105 @@
 namespace crimild {
 
 	namespace scripting {
+        
+        class LuaNodeBuilderRegistry : public StaticSingleton< LuaNodeBuilderRegistry > {
+        public:
+            using NodeBuilderFunction = std::function< SharedPointer< Node > ( crimild::scripting::ScriptEvaluator & ) >;
+            
+        public:
+            LuaNodeBuilderRegistry( void );
+            virtual ~LuaNodeBuilderRegistry( void );
+            
+            template< typename T >
+            void registerNodeBuilder( std::string type )
+            {
+                _nodeBuilders[ type ] = []( crimild::scripting::ScriptEvaluator &eval ) {
+                    auto node = crimild::alloc< T >();
+                    node->load( eval );
+                    return node;
+                };
+            }
+            
+            void registerCustomNodeBuilder( std::string type, NodeBuilderFunction builder )
+            {
+                _nodeBuilders[ type ] = builder;
+            }
+            
+            NodeBuilderFunction getBuilder( std::string type ) { return _nodeBuilders[ type ]; }
+            
+        public:
+            template< class T >
+            class RegistrationHelper {
+            public:
+                RegistrationHelper( const char *name )
+                {
+                    LuaNodeBuilderRegistry::getInstance()->registerNodeBuilder< T >( name );
+                }
+                
+                ~RegistrationHelper( void )
+                {
+                    
+                }
+            };
+            
+        public:
+            void flush( void );
+            
+        private:
+            std::map< std::string, NodeBuilderFunction > _nodeBuilders;
+        };
+        
+#define CRIMILD_SCRIPTING_REGISTER_NODE_BUILDER( X ) \
+    static crimild::scripting::LuaNodeBuilderRegistry::RegistrationHelper< X > __nodeRegistrationHelper( #X );
+        
+        class LuaComponentBuilderRegistry : public StaticSingleton< LuaComponentBuilderRegistry > {
+        public:
+            using ComponentBuilderFunction = std::function< SharedPointer< NodeComponent > ( crimild::scripting::ScriptEvaluator & ) >;
+            
+        public:
+            LuaComponentBuilderRegistry( void );
+            virtual ~LuaComponentBuilderRegistry( void );
+            
+            template< typename T >
+            void registerComponentBuilder( std::string type )
+            {
+                _componentBuilders[ type ] = []( crimild::scripting::ScriptEvaluator &eval ) {
+                    return crimild::alloc< T >( eval );
+                };
+            }
+            
+            void registerCustomComponentBuilder( std::string type, ComponentBuilderFunction builder )
+            {
+                _componentBuilders[ type ] = builder;
+            }
+            
+            ComponentBuilderFunction getBuilder( std::string type ) { return _componentBuilders[ type ]; }
 
+        public:
+            template< class T >
+            class RegistrationHelper {
+            public:
+                RegistrationHelper( const char *name )
+                {
+                    LuaComponentBuilderRegistry::getInstance()->registerComponentBuilder< T >( name );
+                }
+                
+                ~RegistrationHelper( void )
+                {
+                    
+                }
+            };
+            
+        public:
+            void flush( void );
+            
+        private:
+            std::map< std::string, ComponentBuilderFunction > _componentBuilders;
+        };
+
+#define CRIMILD_SCRIPTING_REGISTER_COMPONENT_BUILDER( X ) \
+    static crimild::scripting::LuaComponentBuilderRegistry::RegistrationHelper< X > __componentRegistrationHelper( #X );
+        
 		class LuaSceneBuilder :
             public crimild::scripting::Scripted,
             public crimild::SceneBuilder {
@@ -79,7 +177,6 @@ namespace crimild {
 		private:
 			SharedPointer< Node > buildNode( ScriptEvaluator &eval, Group *parent );
 
-			void setupCamera( ScriptEvaluator &eval, SharedPointer< Camera > const &camera );
 			void setTransformation( ScriptEvaluator &eval, SharedPointer< Node > const &node );
 			
 			void buildNodeComponents( ScriptEvaluator &eval, SharedPointer< Node > const &node );

@@ -46,6 +46,11 @@ GLSimulation::GLSimulation( std::string name, SettingsPtr const &settings )
 		throw RuntimeException( "Cannot start GLFW: glwfInit failed!" );
 	}
 
+	if ( TaskManager::getInstance()->getNumThreads() == 0 ) {
+		// enable some threads if not already specified
+		TaskManager::getInstance()->setNumThreads( 2 );
+	}
+
     addSystem( crimild::alloc< WindowSystem >() );
     addSystem( crimild::alloc< InputSystem >() );
     

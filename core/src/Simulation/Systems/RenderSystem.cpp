@@ -27,6 +27,9 @@
 
 #include "RenderSystem.hpp"
 
+#include "Rendering/RenderPass.hpp"
+#include "Rendering/FrameBufferObject.hpp"
+
 #include "Simulation/Simulation.hpp"
 
 #include "Concurrency/Async.hpp"
@@ -70,6 +73,10 @@ bool RenderSystem::start( void )
         self->renderFrame();
     });
 
+    registerMessageHandler< messaging::PresentNextFrame >( [self]( messaging::PresentNextFrame const &message ) {
+        self->presentFrame();
+    });
+    
 	return true;
 }
 
@@ -120,6 +127,21 @@ void RenderSystem::renderFrame( void )
 #endif
     
     broadcastMessage( messaging::DidRenderScene {} );
+}
+
+void RenderSystem::presentFrame( void )
+{
+    auto renderer = Simulation::getInstance()->getRenderer();
+    auto sBuffer = renderer->getFrameBuffer( RenderPass::S_BUFFER_NAME );
+    if ( sBuffer != nullptr ) {
+        auto color = sBuffer->getRenderTargets().get( RenderPass::S_BUFFER_COLOR_TARGET_NAME );
+        auto program = renderer->getShaderProgram( crimild::Renderer::SHADER_PROGRAM_SCREEN_TEXTURE );
+        renderer->bindProgram( program );
+        renderer->bindTexture( program->getStandardLocation( crimild::ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ), color->getTexture() );
+        renderer->drawScreenPrimitive( program );
+        renderer->unbindTexture( program->getStandardLocation( crimild::ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ), color->getTexture() );
+        renderer->unbindProgram( program );
+    }
 }
 
 void RenderSystem::stop( void )

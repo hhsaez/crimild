@@ -3,11 +3,9 @@
 
 #include "Concurrency/Async.hpp"
 
-#include "Components/NodeComponentCatalog.hpp"
-#include "Components/BehaviorComponent.hpp"
-
 #include "Visitors/UpdateWorldState.hpp"
 #include "Visitors/ComputeRenderQueue.hpp"
+#include "Visitors/UpdateComponents.hpp"
 
 #include "Rendering/RenderQueue.hpp"
 
@@ -65,7 +63,8 @@ void UpdateSystem::update( void )
     auto &c = Simulation::getInstance()->getSimulationClock();
     c.tick();
     
-    _accumulator += Numericd::min( CRIMILD_SIMULATION_TIME, c.getDeltaTime() );
+    // prevent integration errors when delta is too big (i.e. after loading a new scene)
+    _accumulator += Numericd::min( 4 * CRIMILD_SIMULATION_TIME, c.getDeltaTime() );
 
     broadcastMessage( messaging::WillUpdateScene { scene, camera } );
     updateBehaviors( scene );
@@ -78,12 +77,7 @@ void UpdateSystem::updateBehaviors( Node *scene )
 {
     Clock fixed( CRIMILD_SIMULATION_TIME );
     while ( _accumulator >= CRIMILD_SIMULATION_TIME ) {
-        NodeComponentCatalog< BehaviorComponent >::getInstance().forEach( [&]( BehaviorComponent *behavior ) {
-            if ( behavior != nullptr && behavior->isEnabled() && behavior->getNode() != nullptr && behavior->getNode()->isEnabled() ) {
-                behavior->update( fixed );
-            }
-        });
-        
+        scene->perform( UpdateComponents( fixed ) );
         _accumulator -= CRIMILD_SIMULATION_TIME;
     }
     

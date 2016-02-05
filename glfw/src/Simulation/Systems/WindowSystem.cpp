@@ -56,6 +56,7 @@ void WindowSystem::update( void )
     
 	if ( !glfwWindowShouldClose( _window ) ) {
         broadcastMessage( crimild::messaging::RenderNextFrame {} );
+		broadcastMessage( crimild::messaging::PresentNextFrame {} );
 		glfwSwapBuffers( _window );
 
 	    if ( delta < 0.002 ) {

@@ -43,17 +43,40 @@ namespace crimild {
 	public:
 		void init( int argc, char **argv );
 
-		void setBaseDirectory( std::string baseDirectory ) { _baseDirectory = baseDirectory; }
+        /**
+            \brief Sets the base directory
+         
+            As a side effect, this also sets the documents directory to
+            the same path. It can be changed later
+         */
+		void setBaseDirectory( std::string baseDirectory );
 		std::string getBaseDirectory( void ) const { return _baseDirectory; }
+
+		void setDocumentsDirectory( std::string documentsDirectory ) { _documentsDirectory = documentsDirectory; }
+		std::string getDocumentsDirectory( void ) const { return _documentsDirectory; }
 
 		std::string extractDirectory( std::string input );
 
+		/**
+			\brief Gets the full path for a resources
+
+			Resources are usually bundled with the application and
+			are supposed to be stored in a read-only directory.
+		*/
 		std::string pathForResource( std::string relativePath );
+
+		/**
+			\brief Gets the full path for a document
+
+			Documents are stored in writable directories. 
+		*/
+		std::string pathForDocument( std::string relativePath );
         
         std::string getRelativePath( std::string absolutePath );
 
 	private:
 		std::string _baseDirectory;
+        std::string _documentsDirectory;
 
 	};
 

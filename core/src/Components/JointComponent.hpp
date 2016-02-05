@@ -28,12 +28,12 @@
 #ifndef CRIMILD_CORE_COMPONENTS_JOINT_
 #define CRIMILD_CORE_COMPONENTS_JOINT_
 
-#include "BehaviorComponent.hpp"
+#include "NodeComponent.hpp"
 #include "Mathematics/Matrix.hpp"
 
 namespace crimild {
 
-	class JointComponent : public BehaviorComponent {
+	class JointComponent : public NodeComponent {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( JointComponent )
 		CRIMILD_NODE_COMPONENT_NAME( "joint" )
 

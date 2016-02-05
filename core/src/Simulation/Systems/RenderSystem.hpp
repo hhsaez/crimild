@@ -39,6 +39,7 @@ namespace crimild {
 	namespace messaging {
         
         struct RenderNextFrame { };
+        struct PresentNextFrame { };
         struct WillRenderScene { };
         struct DidRenderScene { };
         
@@ -52,6 +53,7 @@ namespace crimild {
 		virtual bool start( void ) override;
 
 		virtual void renderFrame( void );
+        virtual void presentFrame( void );
 
 		virtual void stop( void ) override;
 

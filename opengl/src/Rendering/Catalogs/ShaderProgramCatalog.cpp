@@ -149,6 +149,8 @@ void ShaderProgramCatalog::cleanup( void )
 
 int ShaderProgramCatalog::compileShader( Shader *shader, int type )
 {
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    
 	GLuint shaderId = glCreateShader( type );
     if ( shaderId > 0 ) {
 		const char *src = shader->getSource().c_str();
@@ -180,6 +182,8 @@ int ShaderProgramCatalog::compileShader( Shader *shader, int type )
             shaderId = 0;
         }
     }
+    
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 
     return shaderId;
 }

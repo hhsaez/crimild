@@ -103,7 +103,7 @@ namespace crimild {
             
     private:
         AssetManager _assetManager;
-
+            
     private:
 		Profiler _profiler;
 		TaskManager _taskManager;

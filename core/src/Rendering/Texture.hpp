@@ -41,11 +41,24 @@ namespace crimild {
 		explicit Texture( SharedPointer< Image > const &image, std::string name = "ColorMap" );
 		virtual ~Texture( void );
 
+    public:
         Image *getImage( void ) { return crimild::get_ptr( _image ); }
-
+        
 	private:
 		SharedPointer< Image > _image;
-	};
+
+    public:
+        enum class WrapMode {
+            REPEAT,
+            CLAMP_TO_EDGE   //< default
+        };
+        
+        WrapMode getWrapMode( void ) const { return _wrapMode; }
+        void setWrapMode( const WrapMode &mode ) { _wrapMode = mode; }
+        
+    private:
+        WrapMode _wrapMode = WrapMode::CLAMP_TO_EDGE;
+    };
 	
 }
 
