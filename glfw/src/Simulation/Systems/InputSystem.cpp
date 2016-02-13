@@ -39,10 +39,10 @@ InputSystem::InputSystem( void )
             glfwGetCursorPos( window, &x, &y );
             
             if ( action == GLFW_PRESS ) {
-                MessageQueue::getInstance()->pushMessage( messaging::MouseButtonDown { button, ( float ) x, ( float ) y } );
+                MessageQueue::getInstance()->pushMessage( messaging::MouseButtonDown { button } );
             }
             else {
-                MessageQueue::getInstance()->pushMessage( messaging::MouseButtonUp { button, ( float ) x, ( float ) y } );
+                MessageQueue::getInstance()->pushMessage( messaging::MouseButtonUp { button } );
             }
         });
         

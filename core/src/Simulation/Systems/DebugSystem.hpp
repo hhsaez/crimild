@@ -38,6 +38,10 @@ namespace crimild {
      
         struct ToggleDebugInfo { };
         
+        struct DebugModeEnabled { };
+        
+        struct DebugModeDisabled { };
+        
         struct ToggleProfilerInfo { };
 
 	}
