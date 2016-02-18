@@ -25,48 +25,37 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_OPENGL_RENDERER_
-#define CRIMILD_OPENGL_RENDERER_
+#ifndef CRIMILD_RENDERING_CULL_FACE_STATE_
+#define CRIMILD_RENDERING_CULL_FACE_STATE_
 
-#include <Crimild.hpp>
-
-#include "OpenGLUtils.hpp"
+#include "RenderState.hpp"
 
 namespace crimild {
+    
+	class CullFaceState : public RenderState {
+    public:
+        // TODO: these should be 'const'
+        static SharedPointer< CullFaceState > DISABLED;
+        static SharedPointer< CullFaceState > ENABLED_BACK;
+        static SharedPointer< CullFaceState > ENABLED_FRONT;
 
-	namespace opengl {
-
-		class OpenGLRenderer : public crimild::Renderer {
-		public:
-            OpenGLRenderer( void );
-			explicit OpenGLRenderer( SharedPointer< FrameBufferObject > const &screenBuffer );
-			virtual ~OpenGLRenderer( void );
-
-			virtual void configure( void ) override;
-            virtual void setViewport( const Rectf &viewport ) override;
-
-            virtual void beginRender( void ) override;
-            virtual void endRender( void ) override;
-            
-			virtual void clearBuffers( void ) override;
-
-		public:
-			virtual void bindUniform( ShaderLocation *location, int value ) override;
-			virtual void bindUniform( ShaderLocation *location, float value ) override;
-			virtual void bindUniform( ShaderLocation *location, const Vector3f &vector ) override;
-			virtual void bindUniform( ShaderLocation *location, const Vector2f &vector ) override;
-			virtual void bindUniform( ShaderLocation *location, const RGBAColorf &color ) override;
-			virtual void bindUniform( ShaderLocation *location, const Matrix4f &matrix ) override;
-
-			virtual void setDepthState( DepthState *state ) override;
-			virtual void setAlphaState( AlphaState *state ) override;
-			virtual void setCullFaceState( CullFaceState *state ) override;
-
-			virtual void drawPrimitive( ShaderProgram *program, Primitive *primitive ) override;
-			virtual void drawBuffers( ShaderProgram *program, Primitive::Type type, VertexBufferObject *vbo, unsigned int count ) override;
+	public:
+        enum class CullFaceMode {
+        	BACK,
+        	FRONT,
+        	FRONT_AND_BACK
 		};
+        
+	public:
+		CullFaceState( bool enabled = true, CullFaceMode mode = CullFaceMode::BACK );
+		virtual ~CullFaceState( void );
 
-	}
+		CullFaceMode getCullFaceMode( void ) const { return _cullFaceMode; }
+		void setCullFaceMode( CullFaceMode value ) { _cullFaceMode = value; }
+
+	private:
+		CullFaceMode _cullFaceMode;
+	};
 
 }
 

@@ -43,6 +43,7 @@ namespace crimild {
     
     class AlphaState;
     class Camera;
+    class CullFaceState;
     class DepthState;
     class FrameBufferObject;
     class Geometry;
@@ -110,6 +111,9 @@ namespace crimild {
         void setAlphaState( SharedPointer< AlphaState > const &state ) { setAlphaState( crimild::get_ptr( state ) ); }
         virtual void setAlphaState( AlphaState *state ) = 0;
 
+        void setCullFaceState( SharedPointer< CullFaceState > const &state ) { setCullFaceState( crimild::get_ptr( state ) ); }
+        virtual void setCullFaceState( CullFaceState *state ) = 0;
+
 	public:
         virtual void bindTexture( ShaderLocation *location, Texture *texture );
 		virtual void unbindTexture( ShaderLocation *location, Texture *texture );
@@ -163,6 +167,7 @@ namespace crimild {
         static constexpr const char *SHADER_PROGRAM_LIT_DIFFUSE = "shaders/lighting/diffuse";
         static constexpr const char *SHADER_PROGRAM_UNLIT_TEXTURE = "shaders/unlit/texture";
         static constexpr const char *SHADER_PROGRAM_UNLIT_DIFFUSE = "shaders/unlit/diffuse";
+        static constexpr const char *SHADER_PROGRAM_UNLIT_VERTEX_COLOR = "shaders/unlit/vertex_color";
         static constexpr const char *SHADER_PROGRAM_TEXT_BASIC = "shaders/text/basic";
         static constexpr const char *SHADER_PROGRAM_TEXT_SDF = "shaders/text/sdf";
         static constexpr const char *SHADER_PROGRAM_SCREEN_TEXTURE = "shaders/misc/screen";

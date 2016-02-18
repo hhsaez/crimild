@@ -25,24 +25,22 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Material.hpp"
+#include "CullFaceState.hpp"
 
 using namespace crimild;
 
-Material::Material( void )
-	: _ambient( 0.0f, 0.0f, 0.0f, 1.0f ),
-	  _diffuse( 1.0f, 1.0f, 1.0f, 1.0f ),
-	  _specular( 1.0f, 1.0f, 1.0f, 1.0f ),
-	  _shininess( 50.0f ),
-	  _emissive( 0.0f ),
-      _depthState( crimild::alloc< DepthState >( true ) ),
-      _alphaState( crimild::alloc< AlphaState >( false ) ),
-      _cullFaceState( crimild::alloc< CullFaceState >( true, CullFaceState::CullFaceMode::BACK ) )
+SharedPointer< CullFaceState > CullFaceState::DISABLED( crimild::alloc< CullFaceState >( false ) );
+SharedPointer< CullFaceState > CullFaceState::ENABLED_BACK( crimild::alloc< CullFaceState >( true, CullFaceState::CullFaceMode::BACK ) );
+SharedPointer< CullFaceState > CullFaceState::ENABLED_FRONT( crimild::alloc< CullFaceState >( true, CullFaceState::CullFaceMode::FRONT ) );
+
+CullFaceState::CullFaceState( bool enabled, CullFaceState::CullFaceMode cullFaceMode )
+	: RenderState( enabled ),
+	  _cullFaceMode( cullFaceMode )
 {
 
 }
 
-Material::~Material( void )
+CullFaceState::~CullFaceState( void )
 {
 
 }
