@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015, Hernan Saez
+ * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- *
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,63 +25,21 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MEMORY_FIXED_ALLOCATOR_
-#define CRIMILD_MEMORY_FIXED_ALLOCATOR_
+#ifndef CRIMILD_IMPORT_SCENE_IMPORTER_
+#define CRIMILD_IMPORT_SCENE_IMPORTER_
 
-#include "Macros.hpp"
-#include "Chunk.hpp"
-
-#include <limits>
-#include <vector>
+#include <Crimild.hpp>
 
 namespace crimild {
 
-	namespace internal {
+	namespace import {
 
-		class FixedAllocator {
-			CRIMILD_DISALLOW_COPY_AND_ASSIGN( FixedAllocator )
-
-		private:
-			static constexpr unsigned char MIN_OBJECTS_PER_CHUNK = 8;
-			static constexpr unsigned char MAX_OBJECTS_PER_CHUNK = std::numeric_limits< unsigned char >::max();
-
-		private:
-			using ChunkArray = std::vector< Chunk >;
-			using ChunkIterator = ChunkArray::iterator;
-			using ChunkConstIterator = ChunkArray::const_iterator;
-
+		class SceneImporter {
 		public:
-			FixedAllocator( void );
-			~FixedAllocator( void );
+			SceneImporter( void );
+			virtual ~SceneImporter( void );
 
-			void init( std::size_t blockSize, std::size_t pageSize );
-
-			void *allocate( void );
-			bool deallocate( void *p, Chunk *hint );
-
-			std::size_t countEmptyChunks( void ) const;
-			
-			inline std::size_t getBlockSize( void ) const { return _blockSize; }
-
-			bool trimEmptyChunk( void );
-			bool trimChunkList( void );
-
-			Chunk *hasBlock( void *p );
-
-		private:
-			bool makeNewChunk( void );
-
-			Chunk *vicinityFind( void *p ) const;
-			void doDeallocate( void *p );
-
-		private:
-			std::size_t _blockSize;
-			unsigned char _numBlocks;
-
-			ChunkArray _chunks;
-			Chunk *_allocChunk = nullptr;
-			Chunk *_deallocChunk = nullptr;
-			Chunk *_emptyChunk = nullptr;
+			SharedPointer< Group > import( std::string filename );
 		};
 
 	}

@@ -88,7 +88,7 @@ std::string FileSystem::extractDirectory( std::string path )
 
 std::string FileSystem::pathForResource( std::string filePath )
 {
-	return getBaseDirectory() + "/" + filePath;
+	return getBaseDirectory() + "/" +  getRelativePath( filePath );
 }
 
 std::string FileSystem::pathForDocument( std::string filePath )

@@ -25,6 +25,11 @@ Licensing
 =========
 Crimild is distributed under the BSD license. See the LICENSE file for details
 
+Contributing
+============
+
+The easiest way to contribute is to submit pull requests with your changes against the master branch in GitHub.
+
 Release Notes
 ====================
 
