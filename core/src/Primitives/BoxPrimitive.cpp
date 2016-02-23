@@ -34,11 +34,11 @@ using namespace crimild;
 BoxPrimitive::BoxPrimitive( float width, float height, float depth, const VertexFormat &format )
     : Primitive( Primitive::Type::TRIANGLES )
 {
-    float halfWidth = 0.5f * width;
-    float halfHeight = 0.5f * height;
-    float halfDepth = 0.5f * depth;
+    VertexPrecision halfWidth = 0.5f * width;
+    VertexPrecision halfHeight = 0.5f * height;
+    VertexPrecision halfDepth = 0.5f * depth;
 
-    float vertices[] = {
+    VertexPrecision vertices[] = {
         // top
         -halfWidth, +halfHeight, -halfDepth, 0.0f, 1.0f, 0.0f,
         -halfWidth, +halfHeight, +halfDepth, 0.0f, 1.0f, 0.0f,
@@ -76,7 +76,7 @@ BoxPrimitive::BoxPrimitive( float width, float height, float depth, const Vertex
         -halfWidth, -halfHeight, -halfDepth, 0.0f, -1.0f, 0.0f,
     };
 
-    unsigned short indices[] = {
+    IndexPrecision indices[] = {
         0, 1, 2, 0, 2, 3,
         4, 5, 6, 4, 6, 7,
         8, 9, 10, 8, 10, 11,

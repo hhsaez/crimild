@@ -35,30 +35,54 @@
 
 namespace crimild {
 
-	class VertexBufferObject : public BufferObject< float >, public Catalog< VertexBufferObject >::Resource {
+	using VertexPrecision = float;
+
+	class VertexBufferObject : 
+		public BufferObject< VertexPrecision >, 
+		public Catalog< VertexBufferObject >::Resource {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( VertexBufferObject )
+
+	private:
+		using Vector2Impl = Vector< 2, VertexPrecision >;
+		using Vector3Impl = Vector< 3, VertexPrecision >;
+		using RGBAColorImpl = Vector< 4, VertexPrecision >;
+		using RGBColorImpl = Vector< 3, VertexPrecision >;
 		
 	public:
-		VertexBufferObject( const VertexFormat &vf, unsigned int vertexCount, const float *vertexData );
+		VertexBufferObject( const VertexFormat &vf, unsigned int vertexCount );
+
+		VertexBufferObject( const VertexFormat &vf, unsigned int vertexCount, const VertexPrecision *vertexData );
+
 		virtual ~VertexBufferObject( void );
 
 		const VertexFormat &getVertexFormat( void ) const { return _vertexFormat; }
 		unsigned int getVertexCount( void ) const { return _vertexCount; }
 
-		Vector3f getPositionAt( unsigned int index ) const;
-		void setPositionAt( unsigned int index, const Vector3f &value );
+		const Vector3Impl &getPositionAt( unsigned int pos ) const
+		{
+			return *( ( Vector3Impl * ) &( getData()[ pos * getVertexFormat().getVertexSize() + getVertexFormat().getPositionsOffset() ] ) );
+		}
 
-        Vector3f getNormalAt( unsigned int index ) const;
-        void setNormalAt( unsigned int index, const Vector3f &value );
+		void setPositionAt( unsigned int pos, const Vector3Impl &value )
+		{
+			auto d = &data()[ pos * getVertexFormat().getVertexSize() + getVertexFormat().getPositionsOffset() ];
+			memcpy( d, static_cast< const VertexPrecision * >( value ), sizeof( VertexPrecision ) * getVertexFormat().getPositionComponents() );
+		}
+
+        Vector3Impl getNormalAt( unsigned int pos ) const;
+        void setNormalAt( unsigned int pos, const Vector3Impl &value );
         
-        Vector3f getTangentAt( unsigned int index ) const;
-        void setTangentAt( unsigned int index, const Vector3f &value );
+        Vector3Impl getTangentAt( unsigned int pos ) const;
+        void setTangentAt( unsigned int pos, const Vector3Impl &value );
         
-        Vector2f getTextureCoordAt( unsigned int index ) const;
-        void setTextureCoordAt( unsigned int index, const Vector2f &value );
+        Vector2Impl getTextureCoordAt( unsigned int pos ) const;
+        void setTextureCoordAt( unsigned int pos, const Vector2Impl &value );
         
-		RGBAColorf getRGBAColorAt( unsigned int index ) const;
-		RGBColorf getRGBColorAt( unsigned int index ) const;
+		RGBAColorImpl getRGBAColorAt( unsigned int pos ) const;
+		void setRGBAColorAt( unsigned int pos, const RGBAColorImpl &value );
+
+		RGBColorImpl getRGBColorAt( unsigned int pos ) const;
+		void setRGBColorAt( unsigned int pos, const RGBColorImpl &value );
 
 	private:
 		VertexFormat _vertexFormat;

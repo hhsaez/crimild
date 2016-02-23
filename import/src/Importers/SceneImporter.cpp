@@ -137,6 +137,7 @@ void recursiveSceneBuilder( SharedPointer< Group > parent, const struct aiScene 
 			mesh->mTangents != nullptr ? 3 : 0,
 			mesh->HasTextureCoords( 0 ) ? 2 : 0 );
 
+		// assume all faces have the same topology
 		auto primitiveType = Primitive::Type::TRIANGLES;
 		const struct aiFace* face = &mesh->mFaces[ 0 ];
 		switch ( face->mNumIndices ) {
@@ -146,48 +147,40 @@ void recursiveSceneBuilder( SharedPointer< Group > parent, const struct aiScene 
 			// default: primitiveType = GL_POLYGON; break;
 		}
 
-		std::vector< float > vertices;
-		std::vector< unsigned short > indices;
+		const unsigned int VERTEX_COUNT = mesh->mNumVertices;
+		auto vbo = crimild::alloc< VertexBufferObject >( vertexFormat, VERTEX_COUNT );
+
+		for ( int v = 0; v < VERTEX_COUNT; v++ ) {
+			vbo->setPositionAt( v, Vector3f( &mesh->mVertices[ v ].x ) );
+
+			if ( vertexFormat.hasNormals() ) {
+				vbo->setNormalAt( v, Vector3f( &mesh->mNormals[ v ].x ) );
+			}
+
+			if ( vertexFormat.hasTangents() ) {
+				vbo->setTangentAt( v, Vector3f( &mesh->mTangents[ v ].x ) );
+			}
+
+			if ( vertexFormat.hasTextureCoords() ) {
+				vbo->setTextureCoordAt( v, Vector2f( &mesh->mTextureCoords[ 0 ][ v ].x ) );
+			}
+		}
+
+		const unsigned int INDEX_COUNT = mesh->mNumFaces * face->mNumIndices;
+		auto ibo = crimild::alloc< IndexBufferObject >( INDEX_COUNT );
 
 		for ( int f = 0; f < mesh->mNumFaces; f++ ) {
 			const struct aiFace *face = &mesh->mFaces[ f ];
 
 			for ( int idx = 0; idx < face->mNumIndices; idx++ ) {
 				int vIdx = face->mIndices[ idx ];
-
-				indices.push_back( indices.size() );
-
-				vertices.push_back( mesh->mVertices[ vIdx ].x );
-				vertices.push_back( mesh->mVertices[ vIdx ].y );
-				vertices.push_back( mesh->mVertices[ vIdx ].z );
-
-				if ( vertexFormat.hasNormals() ) {
-					vertices.push_back( mesh->mNormals[ vIdx ].x );
-					vertices.push_back( mesh->mNormals[ vIdx ].y );
-					vertices.push_back( mesh->mNormals[ vIdx ].z );
-				}
-
-				if ( vertexFormat.hasTangents() ) {
-					vertices.push_back( mesh->mTangents[ vIdx].x );
-					vertices.push_back( mesh->mTangents[ vIdx].y );
-					vertices.push_back( mesh->mTangents[ vIdx].z );
-				}
-
-				if ( vertexFormat.hasTextureCoords() ) {
-					vertices.push_back( mesh->mTextureCoords[ 0 ][ vIdx ].x );
-					vertices.push_back( mesh->mTextureCoords[ 0 ][ vIdx ].y );
-				}
+				ibo->setIndexAt( f * face->mNumIndices + idx, vIdx );
 			}
-
-		}
-
-		if ( indices.size() >= std::numeric_limits<unsigned short>::max() ) {
-			std::cout << "Vertices: " << indices.size() << "(max: " << std::numeric_limits<unsigned short>::max() << ")" << std::endl;
 		}
 
 		auto primitive = crimild::alloc< Primitive >( primitiveType );
-		primitive->setVertexBuffer( crimild::alloc< VertexBufferObject >( vertexFormat, indices.size(), &vertices[ 0 ] ) );
-		primitive->setIndexBuffer( crimild::alloc< IndexBufferObject >( indices.size(), &indices[ 0 ] ) );
+		primitive->setVertexBuffer( vbo );
+		primitive->setIndexBuffer( ibo );
 
 		auto geometry = crimild::alloc< Geometry >();
 		geometry->attachPrimitive( primitive );

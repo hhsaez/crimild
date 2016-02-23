@@ -82,7 +82,7 @@ void ParametricPrimitive::generate( void )
 void ParametricPrimitive::generateVertexBuffer( void )
 {
     auto vbo = crimild::alloc< VertexBufferObject >( _format, getVertexCount(), nullptr );
-    float *vertex = vbo->getData();
+    VertexPrecision *vertex = vbo->data();
     for ( int i = 0; i < _divisions[ 1 ]; i++ ) {
         for ( int j = 0; j < _divisions[ 0 ]; j++ ) {
             // compute position
@@ -133,7 +133,7 @@ void ParametricPrimitive::generateVertexBuffer( void )
 void ParametricPrimitive::generateLineIndexBuffer( void )
 {
     auto ibo = crimild::alloc< IndexBufferObject >( getLineIndexCount(), nullptr );
-    unsigned short *index = ibo->getData();
+    IndexPrecision *index = ibo->data();
     for ( int i = 0, vertex = 0; i < _slices[ 1 ]; i++ ) {
         for ( int j = 0; j < _slices[ 0 ]; j++ ) {
             int next = ( j + 1 ) % _divisions[ 0 ];
@@ -150,7 +150,7 @@ void ParametricPrimitive::generateLineIndexBuffer( void )
 void ParametricPrimitive::generateTriangleIndexBuffer( void )
 {
     auto ibo = crimild::alloc< IndexBufferObject >( getTriangleIndexCount(), nullptr );
-    unsigned short *index = ibo->getData();
+    IndexPrecision *index = ibo->data();
     for ( int i = 0, vertex = 0; i < _slices[ 1 ]; i++ ) {
         for ( int j = 0; j < _slices[ 0 ]; j++ ) {
             int next = ( j + 1 ) % _divisions[ 0 ];
