@@ -45,6 +45,7 @@ namespace crimild {
 
 	public:
 		VertexFormat( unsigned char positions, unsigned char colors, unsigned char normals, unsigned char tangents, unsigned char textureCoords );
+		VertexFormat( unsigned char positions, unsigned char colors, unsigned char normals, unsigned char tangents, unsigned char textureCoords, unsigned char boneIds, unsigned char boneWeights );
 		VertexFormat( const VertexFormat &vf );
 		~VertexFormat( void );
 
@@ -73,6 +74,14 @@ namespace crimild {
 		unsigned char getTextureCoordComponents( void ) const { return _textureCoords; }
 		unsigned char getTextureCoordsOffset( void ) const { return _textureCoordsOffset; }
 
+		bool hasBoneIds( void ) const { return _boneIds > 0; }
+		unsigned char getBoneIdComponents( void ) const { return _boneIds; }
+		unsigned char getBoneIdsOffset( void ) const { return _boneIdsOffset; }
+
+		bool hasBoneWeights( void ) const { return _boneWeights > 0; }
+		unsigned char getBoneWeightComponents( void ) const { return _boneWeights; }
+		unsigned char getBoneWeightsOffset( void ) const { return _boneWeightsOffset; }
+
 		unsigned char getVertexSize( void ) const { return _vertexSize; }
 
 		size_t getVertexSizeInBytes( void ) const { return _vertexSizeInBytes; }
@@ -88,6 +97,10 @@ namespace crimild {
 		unsigned char _tangentsOffset;
 		unsigned char _textureCoords;
 		unsigned char _textureCoordsOffset;
+		unsigned char _boneIds;
+		unsigned char _boneIdsOffset;
+		unsigned char _boneWeights;
+		unsigned char _boneWeightsOffset;
 		unsigned char _vertexSize;
 		size_t _vertexSizeInBytes;
 	};
