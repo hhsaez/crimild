@@ -134,19 +134,19 @@ VertexFormat &VertexFormat::operator=( const VertexFormat &vf )
 bool VertexFormat::operator==( const VertexFormat &vf ) const
 {
 	return ( _positions == vf._positions ) &&
-		   ( _positionsOffset == vf._positionsOffset ) &&
+		   // ( _positionsOffset == vf._positionsOffset ) &&
 		   ( _colors == vf._colors ) && 
-		   ( _colorsOffset == vf._colorsOffset ) &&
+		   // ( _colorsOffset == vf._colorsOffset ) &&
 		   ( _normals == vf._normals ) && 
-		   ( _normalsOffset == vf._normalsOffset ) &&
+		   // ( _normalsOffset == vf._normalsOffset ) &&
 		   ( _tangents == vf._tangents ) && 
-		   ( _tangentsOffset == vf._tangentsOffset ) &&
+		   // ( _tangentsOffset == vf._tangentsOffset ) &&
 		   ( _textureCoords == vf._textureCoords ) &&
-		   ( _textureCoordsOffset == vf._textureCoordsOffset ) &&
+		   // ( _textureCoordsOffset == vf._textureCoordsOffset ) &&
 		   ( _boneIds == vf._boneIds ) &&
-		   ( _boneIdsOffset == vf._boneIdsOffset ) && 
+		   // ( _boneIdsOffset == vf._boneIdsOffset ) && 
 		   ( _boneWeights == vf._boneWeightsOffset ) &&
-		   ( _boneWeightsOffset == vf._boneWeightsOffset ) &&
+		   // ( _boneWeightsOffset == vf._boneWeightsOffset ) &&
 		   ( _vertexSize == vf._vertexSize ) &&
 		   ( _vertexSizeInBytes == vf._vertexSizeInBytes );
 

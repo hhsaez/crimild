@@ -27,6 +27,9 @@
 
 #include "SceneImporter.hpp"
 
+#include "Components/SkinnedMeshComponent.hpp"
+#include "Rendering/SkinnedMesh.hpp"
+
 #include "assimp/Importer.hpp"
 #include "assimp/postprocess.h"
 #include "assimp/scene.h"
@@ -35,43 +38,6 @@
 
 using namespace crimild;
 using namespace crimild::import;
-
-namespace crimild {
-
-	class SkinnedMeshBone : public SharedObject {
-	public:
-		unsigned int id;
-		Transformation offset;
-	};
-
-	class SkinnedMeshBoneCollection : public SharedObject {
-	public:
-		std::map< std::string, unsigned int > bones;
-		std::vector< Transformation > offsets;
-	};
-
-	class SkinnedMeshAnimationChannel : public SharedObject {
-	public:
-
-	};
-
-	class SkinnedMeshAnimation : public SharedObject {
-	public:
-
-	};
-
-	using SkinnedMeshAnimationArray = std::vector< SharedPointer< SkinnedMeshAnimation >>;
-
-	class SkinnedMesh : public SharedObject {
-		SkinnedMeshAnimationArray animations;
-	};
-
-	class SkinnedMeshComponent : public NodeComponent {
-	public:
-
-	};
-
-}
 
 void computeTransform( const aiMatrix4x4 &m, Transformation &t )
 {
@@ -83,236 +49,6 @@ void computeTransform( const aiMatrix4x4 &m, Transformation &t )
  	t.setScale( ( scaling.x + scaling.y + scaling.z ) / 3.0f );
  	t.setRotate( Quaternion4f( rotation.x, rotation.y, rotation.z, rotation.w ) );
 }
-
-class Animator : public NodeComponent {
-	CRIMILD_DISALLOW_COPY_AND_ASSIGN( Animator )
-	CRIMILD_NODE_COMPONENT_NAME( "Animator" )
-public:
-
-	struct AnimationBoneInfo {
-		std::map< std::string, unsigned int > boneMap;
-		std::vector< Transformation > boneOffsets;
-	};
-
-	template< typename T >
-	struct AnimationKey {
-		double time;
-		T value;
-	};
-
-	using AnimationPositionKey = AnimationKey< Vector3f >;
-	using AnimationRotationKey = AnimationKey< Quaternion4f >;
-	using AnimationScaleKey = AnimationKey< float >;
-
-	struct AnimationJoint {
-		std::string name;
-		std::vector< AnimationPositionKey > positionKeys;
-		std::vector< AnimationRotationKey > rotationKeys;
-		std::vector< AnimationScaleKey > scaleKeys;
-	};
-
-	using AnimationJointArray = std::vector< AnimationJoint >;
-	using AnimationJointMap = std::map< std::string, AnimationJoint >;
-
-	struct AnimationInfo {
-		float duration;
-		float frameRate;
-		AnimationJointMap joints;
-	};
-
-	using AnimationInfoArray = std::vector< AnimationInfo >;
-
-public:
-	Animator( void ) { }
-
-	virtual ~Animator( void ) { }
-
-	const Transformation &getGlobalInverseTranspose( void ) const { return _globalInversePose; }
-	void setGlobalInversePose( const Transformation &t ) { _globalInversePose = t; }
-
-	const AnimationBoneInfo &getBones( void ) const { return _bones; }
-	// AnimationBoneInfo &bones( void ) { return _bones; }
-	void setBones( AnimationBoneInfo &bones ) { _bones = bones; }
-
-	const AnimationInfoArray &getAnimations( void ) const { return _animations; }
-	void setAnimations( const AnimationInfoArray &animations ) 
-	{ 
-		_animations = animations; 
-		if ( _animations.size() > 0 ) {
-			setCurrentAnimation( 0 );
-		}
-	}
-
-	unsigned int getCurrentAnimation( void ) const { return _currentAnimation; }
-	void setCurrentAnimation( unsigned int index ) 
-	{ 
-		_currentAnimation = index; 
-		setCurrentAnimationTime( 0.0f, -1.0f );
-	}
-
-	float getCurrentAnimationStartTime( void ) const { return _currentAnimationStartTime; }
-	float getCurrentAnimationEndTime( void ) const { return _currentAnimationEndTime; }
-	void setCurrentAnimationTime( float start, float end ) 
-	{ 
-		_currentAnimationStartTime = start; 
-		_currentAnimationEndTime = end; 
-		if ( _currentAnimationEndTime < 0.0f ) {
-			_currentAnimationEndTime = _animations[ _currentAnimation ].duration;
-		}
-		_currentAnimationTime = _currentAnimationStartTime;
-	}
-
-	virtual void start( void ) override
-	{	
-		NodeComponent::start();
-
-		_time = 0.0f;
-	}
-
-	virtual void update( const Clock &c ) override
-	{
-		NodeComponent::update( c );
-
-		/*
-		_currentAnimationTime += c.getDeltaTime();
-		if ( _currentAnimationTime >= _currentAnimationEndTime ) {
-			_currentAnimationTime = _currentAnimationStartTime;
-		}
-		*/
-
-		 _time += c.getDeltaTime();
-		float timeInTicks = _time * _animations[ _currentAnimation ].frameRate;
-		float animationTime = fmod( timeInTicks, _animations[ _currentAnimation ].duration );
-
-		auto self = this;
-		getNode()->perform( Apply( [self, animationTime]( Node *node ) {
-			// if ( node == self->getNode() ) {
-				// do nothing for the first node in the scene
-				// return;
-			// }
-
-			Transformation modelTransform( node->getLocal() );
-
-			auto &joints = self->_animations[ self->_currentAnimation ].joints;
-			if ( joints.find( node->getName() ) != joints.end() ) {
-				auto const &joint = joints[ node->getName() ];
-
-				Transformation tTransform;
-				Transformation rTransform;
-				Transformation sTransform;
-
-				if ( joint.positionKeys.size() > 1 ) {
-					unsigned int positionIndex = 0;
-					for ( int i = 0; i < joint.positionKeys.size() - 1; i++ ) {
-						if ( animationTime < joint.positionKeys[ i + 1 ].time ) {
-							positionIndex = i;
-							break;
-						}
-					}
-					auto const &p0 = joint.positionKeys[ positionIndex ];
-					auto const &p1 = joint.positionKeys[ positionIndex + 1 ];
-					float dt = p1.time - p0.time;
-					float factor = ( animationTime - p0.time ) / dt;
-					Interpolation::linear( p0.value, p1.value, factor, tTransform.translate() );
-
-					// std::cout << node->getName()
-					// 		  << " " << self->_time
-					//  		  << " " << animationTime 
-					//  		  << " " << positionIndex
-					//  		  << " " << p0.time
-					//  		  << " " << p1.time
-					// 		  << " " << dt 
-					// 		  << " " << factor
-					// 		  << std::endl;
-				}
-				else {
-					tTransform.setTranslate( joint.positionKeys[ 0 ].value );
-				}
-
-				if ( joint.rotationKeys.size() > 1 ) {
-					unsigned int rotationIndex = 0;
-					for ( int i = 0; i < joint.rotationKeys.size() - 1; i++ ) {
-						if ( animationTime < joint.rotationKeys[ i + 1 ].time ) {
-							rotationIndex = i;
-							break;
-						}
-					}
-					auto const &r0 = joint.rotationKeys[ rotationIndex ];
-					auto const &r1 = joint.rotationKeys[ rotationIndex + 1 ];
-					float dt = r1.time - r0.time;
-					float factor = ( animationTime - r0.time ) / dt;
-					rTransform.setRotate( Interpolation::slerp( r0.value, r1.value, factor ) );
-				}
-				else {
-					rTransform.setRotate( joint.rotationKeys[ 0 ].value );
-				}
-
-				if ( joint.scaleKeys.size() > 1 ) {
-					unsigned int scaleIndex = 0;
-					for ( int i = 0; i < joint.scaleKeys.size() - 1; i++ ) {
-						if ( animationTime < joint.scaleKeys[ i + 1 ].time ) {
-							scaleIndex = i;
-							break;
-						}
-					}
-					auto const &s0 = joint.scaleKeys[ scaleIndex ];
-					auto const &s1 = joint.scaleKeys[ scaleIndex + 1 ];
-					float dt = s1.time - s0.time;
-					float factor = ( animationTime - s0.time ) / dt;
-					Interpolation::linear( s0.value, s1.value, factor, sTransform.scale() );
-				}
-				else {
-					sTransform.setScale( joint.scaleKeys[ 0 ].value );
-				}
-
-				modelTransform.computeFrom( rTransform, sTransform );
-				modelTransform.computeFrom( tTransform, modelTransform );
-			}
-			
-			Transformation worldTransform = modelTransform;
-			// worldTransform.computeFrom( node->getParent()->getWorld(), modelTransform );
-
-			if ( false && self->_bones.boneMap.find( node->getName() ) != self->_bones.boneMap.end() ) {
-				unsigned int boneIndex = self->_bones.boneMap[ node->getName() ];
-				worldTransform.computeFrom( worldTransform, self->_bones.boneOffsets[ boneIndex ] );
-				worldTransform.computeFrom( self->getGlobalInverseTranspose(), worldTransform );
-			}
-
-			// node->setWorld( worldTransform );
-			node->setLocal( worldTransform );
-			// node->setWorldIsCurrent( true );
-		}));
-	}
-
-	virtual void renderDebugInfo( Renderer *renderer, Camera *camera ) override
-	{
-		std::vector< Vector3f > lines;
-		auto self = this;
-		getNode()->perform( Apply( [&lines, self]( Node *node ) {
-			if ( node->hasParent() ) {
-				if ( self->getBones().boneMap.find( node->getName() ) != self->getBones().boneMap.end() ) {
-					lines.push_back( node->getParent()->getWorld().getTranslate() );
-					lines.push_back( node->getWorld().getTranslate() );
-				}
-			}
-		}));
-
-		DebugRenderHelper::renderLines( renderer, camera, &lines[ 0 ], lines.size(), RGBAColorf( 1.0f, 0.0f, 0.0f, 1.0f ) );
-	}
-
-private:
-	AnimationBoneInfo _bones;
-
-	std::vector< AnimationInfo > _animations;
-	unsigned int _currentAnimation = 0;
-	float _currentAnimationTime = 0.0f;
-	float _currentAnimationStartTime = 0.0f;
-	float _currentAnimationEndTime = 0.0f;
-
-	Transformation _globalInversePose;
-
-	float _time = 0.0f;
-};
 
 SharedPointer< Material > buildMaterial( const aiMaterial *mtl, std::string basePath )
 {
@@ -389,7 +125,7 @@ SharedPointer< Material > buildMaterial( const aiMaterial *mtl, std::string base
 	return material;
 }
 
-void recursiveSceneBuilder( SharedPointer< Group > parent, const struct aiScene *s, const struct aiNode *n, std::string basePath, Animator::AnimationBoneInfo &bones ) 
+void recursiveSceneBuilder( SharedPointer< Group > parent, const struct aiScene *s, const struct aiNode *n, std::string basePath, SharedPointer< SkinnedMesh > &skinnedMesh ) 
 {
 	auto group = crimild::alloc< Group >( std::string( n->mName.data ) );
 	computeTransform( n->mTransformation, group->local() );
@@ -463,58 +199,23 @@ void recursiveSceneBuilder( SharedPointer< Group > parent, const struct aiScene 
 
 		for ( unsigned int boneIdx = 0; boneIdx < mesh->mNumBones; boneIdx++ ) {
 			const aiBone *bone = mesh->mBones[ boneIdx ];
-			// std::cout << "Bone: " << bone->mName.data << " W=" << bone->mNumWeights << std::endl;
 
-			unsigned int boneIndex = 0;
-			std::string boneName( bone->mName.data );
-
-			if ( bones.boneMap.find( boneName ) == bones.boneMap.end() ) {
-				boneIndex = bones.boneOffsets.size();
-				bones.boneOffsets.push_back( Transformation() );
-				bones.boneMap[ boneName ] = boneIndex;
-			}
-			else {
-				boneIndex = bones.boneMap[ boneName ];
-			}
-
-			computeTransform( mesh->mBones[ boneIdx ]->mOffsetMatrix, bones.boneOffsets[ boneIndex ] );
-
-			// bones.boneOffsets[ boneIndex ].fromMatrix( Matrix4f( mesh->mBones[ boneIndex ]->mOffsetMatrix[ 0 ] ) );
-		}
-
-		/*
-		// load bones
-		for ( int boneIdx = 0; boneIdx < mesh->mNumBones; boneIdx++ ) {
-			unsigned int boneIndex = 0;
-			std::string boneName( mesh->mBones[ boneIdx ]->mName.data );
-
-			if ( _boneMap.find( boneName ) == _boneMap.end() ) {
-				boneIndex = _boneCount;
-				_boneCount++;
-				BoneInfo bi;
-				_bones.push_back( bi );
-				_boneMap[ boneName ] = boneIndex;
-			}
-			else {
-				boneIndex = _boneMap[ boneName ];
-			}
-
-			// TODO: Transform to actual transform
-			_bones[ boneIndex ].boneOffset = mesh->mBones[ boneIdx ]->mOffsetMatrix;
+			Transformation offset;
+			computeTransform( mesh->mBones[ boneIdx ]->mOffsetMatrix, offset );
+			auto joint = skinnedMesh->getSkeleton()->getJoints().updateOrCreateJoint( std::string( bone->mName.data ), offset );
 
 			for ( int weightIdx = 0; weightIdx < mesh->mBones[ boneIdx ]->mNumWeights; weightIdx++ ) {
-				unsigned int vertexIdx = mesh->mBones[ boneIndex ]->mWeights[ weightIdx ].mVertexId;
-				float weightValue = mesh->mBones[ boneIndex ]->mWeights[ weightIdx ].mWeight;
+				unsigned int vertexIdx = mesh->mBones[ boneIdx ]->mWeights[ weightIdx ].mVertexId;
+				float weightValue = mesh->mBones[ boneIdx ]->mWeights[ weightIdx ].mWeight;
 				for ( int vbw = 0.0f; vbw < vertexFormat.getBoneWeightComponents(); vbw++ ) {
-					if ( vbo->getBoneWeightAt( vbw ) == 0.0f ) {
-						vbo->setBoneIdAt( vbw, boneIndex );
-						vbo->setBoneWeightAt( vbw, weightValue );
+					if ( vbo->getBoneWeightAt( vertexIdx, vbw ) == 0.0f ) {
+						vbo->setBoneIdAt( vertexIdx, vbw, joint->getId() );
+						vbo->setBoneWeightAt( vertexIdx, vbw, weightValue );
 						break;
 					}
 				}
 			}
 		}
-		*/
 
 		auto primitive = crimild::alloc< Primitive >( primitiveType );
 		primitive->setVertexBuffer( vbo );
@@ -524,6 +225,10 @@ void recursiveSceneBuilder( SharedPointer< Group > parent, const struct aiScene 
 		geometry->attachPrimitive( primitive );
 		group->attachNode( geometry );
 
+		if ( skinnedMesh->getSkeleton() != nullptr ) {
+			geometry->getComponent< RenderStateComponent >()->setSkinnedMesh( skinnedMesh );
+		}
+
 		auto material = buildMaterial( s->mMaterials[ mesh->mMaterialIndex ], basePath );
 		if ( material != nullptr ) {
 			geometry->getComponent< MaterialComponent >()->attachMaterial( material );
@@ -531,13 +236,13 @@ void recursiveSceneBuilder( SharedPointer< Group > parent, const struct aiScene 
 	}
 
 	for ( int i = 0; i < n->mNumChildren; i++ ) {
-		recursiveSceneBuilder( group, s, n->mChildren[ i ], basePath, bones );
+		recursiveSceneBuilder( group, s, n->mChildren[ i ], basePath, skinnedMesh );
 	}
 
 	parent->attachNode( group );
 }
 
-void loadAnimations( const aiScene *scene, Animator::AnimationInfoArray &animations )
+void loadAnimations( const aiScene *scene, SharedPointer< SkinnedMesh > &skinnedMesh )
 {
 	if ( scene->mNumAnimations == 0 ) {
 		// nothing to load
@@ -545,61 +250,49 @@ void loadAnimations( const aiScene *scene, Animator::AnimationInfoArray &animati
 		return;
 	}
 
+	auto skeleton = crimild::alloc< SkinnedMeshSkeleton >();
+
+	skeleton->getClips().resize( scene->mNumAnimations );
 	for ( unsigned int aIdx = 0; aIdx < scene->mNumAnimations; aIdx++ ) {
 		const aiAnimation *animation = scene->mAnimations[ aIdx ];
 
-		Animator::AnimationInfo animationInfo;
-		animationInfo.duration = animation->mDuration;
-		animationInfo.frameRate = animation->mTicksPerSecond;
-
-		std::cout << "Animation: #" << aIdx
-				  << "\n\tDuration: " << animation->mDuration
-				  << "\n\tFrame Rate: " << animation->mTicksPerSecond
-				  << "\n\tChannels: " << animation->mNumChannels
-				  << std::endl;
+		auto clip = crimild::alloc< SkinnedMeshAnimationClip >();
+		clip->setDuration( animation->mDuration );
+		clip->setFrameRate( animation->mTicksPerSecond );
+		skeleton->getClips()[ aIdx ] = clip;
 
 		for ( unsigned int cIdx = 0; cIdx < animation->mNumChannels; cIdx++ ) {
 			const aiNodeAnim *channel = animation->mChannels[ cIdx ];
 
-			std::cout << "\t *" 
-					  << " Channel: " << std::string( channel->mNodeName.data )
-					  << " P=" << channel->mNumPositionKeys << "(" << channel->mPositionKeys[0].mTime << " - " << channel->mPositionKeys[channel->mNumPositionKeys - 1].mTime << ")"
-					  << " R=" << channel->mNumRotationKeys
-					  << " S=" << channel->mNumScalingKeys
-					  << std::endl;
+			auto animationChannel = crimild::alloc< SkinnedMeshAnimationChannel >();
+			animationChannel->setName( channel->mNodeName.data );
 
-			Animator::AnimationJoint joint;
-			joint.name = std::string( channel->mNodeName.data );
-
+			animationChannel->getPositionKeys().resize( channel->mNumPositionKeys );
 			for ( int pIndex = 0; pIndex < channel->mNumPositionKeys; pIndex++ ) {
 				auto pKey = channel->mPositionKeys[ pIndex ];
-				joint.positionKeys.push_back( Animator::AnimationPositionKey {
-					pKey.mTime,
-					Vector3f( pKey.mValue.x, pKey.mValue.y, pKey.mValue.z )
-				});
+				animationChannel->getPositionKeys()[ pIndex ].time = pKey.mTime;
+				animationChannel->getPositionKeys()[ pIndex ].value = Vector3f( pKey.mValue.x, pKey.mValue.y, pKey.mValue.z );
 			}
 
+			animationChannel->getRotationKeys().resize( channel->mNumRotationKeys );
 			for ( int rIndex = 0; rIndex < channel->mNumRotationKeys; rIndex++ ) {
 				auto rKey = channel->mRotationKeys[ rIndex ];
-				joint.rotationKeys.push_back( Animator::AnimationRotationKey {
-					rKey.mTime,
-					Quaternion4f( rKey.mValue.x, rKey.mValue.y, rKey.mValue.z, rKey.mValue.w )
-				});
+				animationChannel->getRotationKeys()[ rIndex ].time = rKey.mTime;
+				animationChannel->getRotationKeys()[ rIndex ].value = Quaternion4f( rKey.mValue.x, rKey.mValue.y, rKey.mValue.z, rKey.mValue.w );
 			}
 
+			animationChannel->getScaleKeys().resize( channel->mNumScalingKeys );
 			for ( int sIndex = 0; sIndex < channel->mNumScalingKeys; sIndex++ ) {
 				auto sKey = channel->mScalingKeys[ sIndex ];
-				joint.scaleKeys.push_back( Animator::AnimationScaleKey {
-					sKey.mTime,
-					( ( sKey.mValue.x * sKey.mValue.y * sKey.mValue.z ) / 3.0f )
-				});
+				animationChannel->getScaleKeys()[ sIndex ].time = sKey.mTime;
+				animationChannel->getScaleKeys()[ sIndex ].value = ( ( sKey.mValue.x * sKey.mValue.y * sKey.mValue.z ) / 3.0f );
 			}
 
-			animationInfo.joints[ joint.name ] = joint;
+			clip->getChannels().add( animationChannel->getName(), animationChannel );
 		}
-
-		animations.push_back( animationInfo );
 	}
+
+	skinnedMesh->setSkeleton( skeleton );
 }
 
 SceneImporter::SceneImporter( void )
@@ -636,23 +329,21 @@ SharedPointer< Group > SceneImporter::import( std::string filename )
 	 	return nullptr;
 	}
 
-	Animator::AnimationInfoArray animations;
-	Animator::AnimationBoneInfo bones;
-	loadAnimations( importedScene, animations );
+	auto skinnedMesh = crimild::alloc< SkinnedMesh >();
+	loadAnimations( importedScene, skinnedMesh );
+	skinnedMesh->debugDump();
 
 	auto root = crimild::alloc< Group >( filename );
 	auto basePath = FileSystem::getInstance().extractDirectory( filename ) + "/";
-	recursiveSceneBuilder( root, importedScene, importedScene->mRootNode, basePath, bones );
+	recursiveSceneBuilder( root, importedScene, importedScene->mRootNode, basePath, skinnedMesh );
 
-	if ( animations.size() > 0 ) {
-		auto animator = crimild::alloc< Animator >();
-		animator->setAnimations( animations );
-		animator->setCurrentAnimation( 0 );
-		animator->setBones( bones );
-		Transformation globalInversePose;
-		computeTransform( importedScene->mRootNode->mTransformation.Inverse(), globalInversePose );
-		animator->setGlobalInversePose( globalInversePose );
-		root->attachComponent( animator );
+	if ( skinnedMesh->getSkeleton() != nullptr && skinnedMesh->getSkeleton()->getClips().size() > 0 ) {
+		Transformation globalInverseTransform;
+		computeTransform( importedScene->mRootNode->mTransformation.Inverse(), globalInverseTransform );
+		skinnedMesh->getSkeleton()->setGlobalInverseTransform( globalInverseTransform );
+
+		auto cmp = crimild::alloc< SkinnedMeshComponent >( skinnedMesh );
+		root->attachComponent( cmp );
 	}
 
 	return root;

@@ -58,91 +58,29 @@ namespace crimild {
 		const VertexFormat &getVertexFormat( void ) const { return _vertexFormat; }
 		unsigned int getVertexCount( void ) const { return _vertexCount; }
 
-		const Vector3Impl &getPositionAt( unsigned int vIdx ) const
-		{
-			return *( ( Vector3Impl * ) &( getData()[ vIdx * getVertexFormat().getVertexSize() + getVertexFormat().getPositionsOffset() ] ) );
-		}
+		const Vector3Impl &getPositionAt( unsigned int vIdx ) const;
+		void setPositionAt( unsigned int vIdx, const Vector3Impl &value );
 
-		void setPositionAt( unsigned int vIdx, const Vector3Impl &value )
-		{
-			auto d = &data()[ vIdx * getVertexFormat().getVertexSize() + getVertexFormat().getPositionsOffset() ];
-			memcpy( d, static_cast< const VertexPrecision * >( value ), sizeof( VertexPrecision ) * getVertexFormat().getPositionComponents() );
-		}
+		RGBAColorImpl getRGBAColorAt( unsigned int vIdx ) const;
+		void setRGBAColorAt( unsigned int vIdx, const RGBAColorImpl &value );
 
-		RGBAColorImpl getRGBAColorAt( unsigned int vIdx ) const
-        {
-			return *( ( RGBAColorImpl * ) &( getData()[ vIdx * getVertexFormat().getVertexSize() + getVertexFormat().getColorsOffset() ] ) );
-        }
+		RGBColorImpl getRGBColorAt( unsigned int vIdx ) const;
+		void setRGBColorAt( unsigned int vIdx, const RGBColorImpl &value );
 
-		void setRGBAColorAt( unsigned int vIdx, const RGBAColorImpl &value )
-		{
-			auto d = &data()[ vIdx * getVertexFormat().getVertexSize() + getVertexFormat().getColorsOffset() ];
-			memcpy( d, static_cast< const VertexPrecision * >( value ), sizeof( VertexPrecision ) * getVertexFormat().getColorComponents() );
-		}
-
-		RGBColorImpl getRGBColorAt( unsigned int vIdx ) const
-        {
-			return *( ( RGBColorImpl * ) &( getData()[ vIdx * getVertexFormat().getVertexSize() + getVertexFormat().getColorsOffset() ] ) );
-        }
-
-		void setRGBColorAt( unsigned int vIdx, const RGBColorImpl &value )
-		{
-			auto d = &data()[ vIdx * getVertexFormat().getVertexSize() + getVertexFormat().getColorsOffset() ];
-			memcpy( d, static_cast< const VertexPrecision * >( value ), sizeof( VertexPrecision ) * getVertexFormat().getColorComponents() );
-		}
-
-        Vector3Impl getNormalAt( unsigned int vIdx ) const
-        {
-			return *( ( Vector3Impl * ) &( getData()[ vIdx * getVertexFormat().getVertexSize() + getVertexFormat().getNormalsOffset() ] ) );
-        }
-
-        void setNormalAt( unsigned int vIdx, const Vector3Impl &value )
-		{
-			auto d = &data()[ vIdx * getVertexFormat().getVertexSize() + getVertexFormat().getNormalsOffset() ];
-			memcpy( d, static_cast< const VertexPrecision * >( value ), sizeof( VertexPrecision ) * getVertexFormat().getNormalComponents() );
-		}
+        Vector3Impl getNormalAt( unsigned int vIdx ) const;
+        void setNormalAt( unsigned int vIdx, const Vector3Impl &value );
         
-        Vector3Impl getTangentAt( unsigned int vIdx ) const
-        {
-			return *( ( Vector3Impl * ) &( getData()[ vIdx * getVertexFormat().getVertexSize() + getVertexFormat().getTangentsOffset() ] ) );
-        }
-
-        void setTangentAt( unsigned int vIdx, const Vector3Impl &value )
-		{
-			auto d = &data()[ vIdx * getVertexFormat().getVertexSize() + getVertexFormat().getTangentsOffset() ];
-			memcpy( d, static_cast< const VertexPrecision * >( value ), sizeof( VertexPrecision ) * getVertexFormat().getTangentComponents() );
-		}
+        Vector3Impl getTangentAt( unsigned int vIdx ) const;
+        void setTangentAt( unsigned int vIdx, const Vector3Impl &value );
         
-        Vector2Impl getTextureCoordAt( unsigned int vIdx ) const
-        {
-			return *( ( Vector2Impl * ) &( getData()[ vIdx * getVertexFormat().getVertexSize() + getVertexFormat().getTextureCoordsOffset() ] ) );
-        }
-
-        void setTextureCoordAt( unsigned int vIdx, const Vector2Impl &value )
-		{
-			auto d = &data()[ vIdx * getVertexFormat().getVertexSize() + getVertexFormat().getTextureCoordsOffset() ];
-			memcpy( d, static_cast< const VertexPrecision * >( value ), sizeof( VertexPrecision ) * getVertexFormat().getTextureCoordComponents() );
-		}
+        Vector2Impl getTextureCoordAt( unsigned int vIdx ) const;
+        void setTextureCoordAt( unsigned int vIdx, const Vector2Impl &value );
         
-        VertexPrecision getBoneIdAt( unsigned int vIdx, unsigned int bone ) const
-        {
-        	return getData()[ vIdx + getVertexFormat().getVertexSize() + getVertexFormat().getBoneIdsOffset() + bone ];
-        }
+        VertexPrecision getBoneIdAt( unsigned int vIdx, unsigned int bone ) const;
+        void setBoneIdAt( unsigned int vIdx, unsigned int bone, VertexPrecision value );
 
-        void setBoneIdAt( unsigned int vIdx, unsigned int bone, VertexPrecision value )
-		{
-			data()[ vIdx * getVertexFormat().getVertexSize() + getVertexFormat().getBoneIdsOffset() + bone ] = value;
-		}
-        
-        VertexPrecision getBoneWeightAt( unsigned int vIdx, unsigned int bone ) const
-        {
-        	return getData()[ vIdx + getVertexFormat().getVertexSize() + getVertexFormat().getBoneWeightsOffset() + bone ];
-        }
-
-        void setBoneWeightAt( unsigned int vIdx, unsigned int bone, VertexPrecision value )
-		{
-			data()[ vIdx * getVertexFormat().getVertexSize() + getVertexFormat().getBoneWeightsOffset() + bone ] = value;
-		}
+        VertexPrecision getBoneWeightAt( unsigned int vIdx, unsigned int bone ) const;
+        void setBoneWeightAt( unsigned int vIdx, unsigned int bone, VertexPrecision value );
         
 	private:
 		VertexFormat _vertexFormat;

@@ -147,7 +147,7 @@ void main( void )
         outColor = clamp( vec4( outColor.rgb * shadow, outColor.a ), 0.0, 1.0 );
         outColor.a = 1.0;
     }
-    
+
     CRIMILD_GLSL_FRAGMENT_OUTPUT = outColor;
 
 }

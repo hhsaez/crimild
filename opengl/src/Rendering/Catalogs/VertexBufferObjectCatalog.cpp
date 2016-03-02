@@ -155,7 +155,7 @@ void VertexBufferObjectCatalog::bind( ShaderProgram *program, VertexBufferObject
         }
     }
 
-    auto boneIdLocation = program->getStandardLocation( ShaderProgram::StandardLocation::BONE_ID_ATTRIBUTE );
+    auto boneIdLocation = program->getStandardLocation( ShaderProgram::StandardLocation::BONE_IDS_ATTRIBUTE );
     if ( boneIdLocation && boneIdLocation->isValid() ) {
     	if ( format.hasBoneIds() ) {
     		glEnableVertexAttribArray( boneIdLocation->getLocation() );
@@ -168,9 +168,9 @@ void VertexBufferObjectCatalog::bind( ShaderProgram *program, VertexBufferObject
     	}
     }
 
-    auto boneWeightLocation = program->getStandardLocation( ShaderProgram::StandardLocation::BONE_WEIGHT_ATTRIBUTE );
+    auto boneWeightLocation = program->getStandardLocation( ShaderProgram::StandardLocation::BONE_WEIGHTS_ATTRIBUTE );
     if ( boneWeightLocation && boneWeightLocation->isValid() ) {
-    	if ( format.hasBoneIds() ) {
+    	if ( format.hasBoneWeights() ) {
     		glEnableVertexAttribArray( boneWeightLocation->getLocation() );
     		glVertexAttribPointer( boneWeightLocation->getLocation(),
     							   format.getBoneWeightComponents(),
