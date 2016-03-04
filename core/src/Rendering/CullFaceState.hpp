@@ -25,54 +25,36 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_RENDERING_BUFFER_OBJECT_
-#define CRIMILD_RENDERING_BUFFER_OBJECT_
+#ifndef CRIMILD_RENDERING_CULL_FACE_STATE_
+#define CRIMILD_RENDERING_CULL_FACE_STATE_
 
-#include "Foundation/Macros.hpp"
-
-#include <memory>
-#include <cstring>
+#include "RenderState.hpp"
 
 namespace crimild {
-
-	template< typename T >
-	class BufferObject {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( BufferObject )
-
-	protected:
-		BufferObject( size_t size, const T *data )
-			: _size( size ),
-			  _data( nullptr )
-		{
-			if ( _size > 0 ) {
-				_data = new T[ _size ];
-				if ( data != nullptr ) {
-					memcpy( _data, data, sizeof( T ) * _size );
-				}
-				else {
-					memset( _data, 0, sizeof( T ) * _size );					
-				}
-			}
-		}
+    
+	class CullFaceState : public RenderState {
+    public:
+        // TODO: these should be 'const'
+        static SharedPointer< CullFaceState > DISABLED;
+        static SharedPointer< CullFaceState > ENABLED_BACK;
+        static SharedPointer< CullFaceState > ENABLED_FRONT;
 
 	public:
-		virtual ~BufferObject( void )
-		{
-			if ( _data ) {
-				delete [] _data;
-				_data = nullptr;
-			}
-		}
+        enum class CullFaceMode {
+        	BACK,
+        	FRONT,
+        	FRONT_AND_BACK
+		};
+        
+	public:
+		CullFaceState( bool enabled = true, CullFaceMode mode = CullFaceMode::BACK );
+		virtual ~CullFaceState( void );
 
-		size_t getSize( void ) const { return _size; }
-
-		T *data( void ) { return _data; }
-
-		const T *getData( void ) const { return _data; }
+		CullFaceMode getCullFaceMode( void ) const { return _cullFaceMode; }
+		void setCullFaceMode( CullFaceMode value ) { _cullFaceMode = value; }
 
 	private:
-		size_t _size;
-		T *_data = nullptr;
+		CullFaceMode _cullFaceMode;
 	};
 
 }

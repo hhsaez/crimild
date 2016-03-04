@@ -71,11 +71,11 @@ SpherePrimitive::SpherePrimitive( float radius, const VertexFormat &format, Vect
 
     setVertexBuffer( crimild::alloc< VertexBufferObject >( format, vertices.size() / format.getVertexSize(), &vertices[ 0 ] ) );
 
-    std::vector< unsigned short > indices;
-    for ( unsigned short latitude = 0; latitude < divisions[ 1 ]; latitude++ ) {
-        for ( unsigned short longitude = 0; longitude < divisions[ 0 ]; longitude++ ) {
-            unsigned short first = ( latitude * ( divisions[ 1 ] + 1 ) ) + longitude;
-            unsigned short second = first + divisions[ 0 ] + 1;
+    std::vector< IndexPrecision > indices;
+    for ( IndexPrecision latitude = 0; latitude < divisions[ 1 ]; latitude++ ) {
+        for ( IndexPrecision longitude = 0; longitude < divisions[ 0 ]; longitude++ ) {
+            IndexPrecision first = ( latitude * ( divisions[ 1 ] + 1 ) ) + longitude;
+            IndexPrecision second = first + divisions[ 0 ] + 1;
 
             indices.push_back( first );
             indices.push_back( first + 1 );

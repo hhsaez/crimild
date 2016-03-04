@@ -33,7 +33,7 @@
 using namespace crimild;
 
 Camera::Camera( void )
-	: Camera( 90.0, 4.0f / 3.0f, 1.0f, 1000.0f )
+	: Camera( 60.0, 4.0f / 3.0f, 1.0f, 1000.0f )
 {
 
 }

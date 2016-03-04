@@ -51,6 +51,8 @@ namespace crimild {
 		void attachMaterial( SharedPointer< Material > const &material );
         
 		void detachAllMaterials( void );
+
+		Material *first( void ) { return _materials.get( 0 ); }
         
 		void forEachMaterial( std::function< void( Material * ) > callback );
 

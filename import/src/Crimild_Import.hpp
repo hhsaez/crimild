@@ -25,57 +25,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_RENDERING_BUFFER_OBJECT_
-#define CRIMILD_RENDERING_BUFFER_OBJECT_
+#ifndef CRIMILD_IMPORT_
+#define CRIMILD_IMPORT_
 
-#include "Foundation/Macros.hpp"
-
-#include <memory>
-#include <cstring>
-
-namespace crimild {
-
-	template< typename T >
-	class BufferObject {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( BufferObject )
-
-	protected:
-		BufferObject( size_t size, const T *data )
-			: _size( size ),
-			  _data( nullptr )
-		{
-			if ( _size > 0 ) {
-				_data = new T[ _size ];
-				if ( data != nullptr ) {
-					memcpy( _data, data, sizeof( T ) * _size );
-				}
-				else {
-					memset( _data, 0, sizeof( T ) * _size );					
-				}
-			}
-		}
-
-	public:
-		virtual ~BufferObject( void )
-		{
-			if ( _data ) {
-				delete [] _data;
-				_data = nullptr;
-			}
-		}
-
-		size_t getSize( void ) const { return _size; }
-
-		T *data( void ) { return _data; }
-
-		const T *getData( void ) const { return _data; }
-
-	private:
-		size_t _size;
-		T *_data = nullptr;
-	};
-
-}
+#include "Importers/SceneImporter.hpp"
 
 #endif
 

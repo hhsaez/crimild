@@ -33,7 +33,7 @@ using namespace crimild;
 
 TEST( VertexBufferObject, construction )
 {
-	float vertices[] = {
+	VertexPrecision vertices[] = {
 		1.0f, 0.0f, 0.0f,
 		-1.0f, 0.0f, 0.0f,
 		0.0f, 1.0f, 0.0f,
@@ -44,12 +44,12 @@ TEST( VertexBufferObject, construction )
 	EXPECT_EQ( VertexFormat::VF_P3, vbo->getVertexFormat() );
 	EXPECT_EQ( 3, vbo->getVertexCount() );
 	EXPECT_EQ( 3 * vbo->getVertexFormat().getVertexSize(), vbo->getSize() );
-	EXPECT_EQ( 0, memcmp( vertices, vbo->getData(), sizeof( float ) * vbo->getSize() ) );
+	EXPECT_EQ( 0, memcmp( vertices, vbo->getData(), sizeof( VertexPrecision ) * vbo->getSize() ) );
 }
 
 TEST( VertexBufferObject, complexConstruction )
 {
-	float vertices[] = {
+	VertexPrecision vertices[] = {
 		+1.0f, 0.0f, 0.0f,	0.0f, 0.0f, 1.0f,	0.0f, 1.0,
 		-1.0f, 0.0f, 0.0f,	0.0f, 0.0f, 1.0f,	1.0f, 0.0f,
 		+0.0f, 1.0f, 0.0f,	0.0f, 0.0f, 1.0f,	0.5f, 0.0f
@@ -60,6 +60,31 @@ TEST( VertexBufferObject, complexConstruction )
 	EXPECT_EQ( VertexFormat::VF_P3_N3_UV2, vbo->getVertexFormat() );
 	EXPECT_EQ( 3, vbo->getVertexCount() );
 	EXPECT_EQ( 3 * vbo->getVertexFormat().getVertexSize(), vbo->getSize() );
-	EXPECT_EQ( 0, memcmp( vertices, vbo->getData(), sizeof( float ) * vbo->getSize() ) );
+	EXPECT_EQ( 0, memcmp( vertices, vbo->getData(), sizeof( VertexPrecision ) * vbo->getSize() ) );
+}
+
+TEST( VertexBufferObject, positions )
+{
+	auto vbo = crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3, 3 );
+	vbo->setPositionAt( 0, Vector3f( -1.0f, -1.0f, 0.0f ) );
+	vbo->setPositionAt( 1, Vector3f( 1.0f, -1.0f, 0.0f ) );
+	vbo->setPositionAt( 2, Vector3f( 0.0f, 1.0f, 0.0f ) );
+
+	EXPECT_EQ( 3, vbo->getVertexCount() );
+
+	auto data = vbo->getData();
+	EXPECT_EQ( -1.0f, data[ 0 ] );
+	EXPECT_EQ( -1.0f, data[ 1 ] );
+	EXPECT_EQ( 0.0f, data[ 2 ] );
+	EXPECT_EQ( 1.0f, data[ 3 ] );
+	EXPECT_EQ( -1.0f, data[ 4 ] );
+	EXPECT_EQ( 0.0f, data[ 5 ] );
+	EXPECT_EQ( 0.0f, data[ 6 ] );
+	EXPECT_EQ( 1.0f, data[ 7 ] );
+	EXPECT_EQ( 0.0f, data[ 8 ] );
+
+	EXPECT_EQ( Vector3f( -1.0f, -1.0f, 0.0f ), vbo->getPositionAt( 0 ) );
+	EXPECT_EQ( Vector3f( 1.0f, -1.0f, 0.0f ), vbo->getPositionAt( 1 ) );
+	EXPECT_EQ( Vector3f( 0.0f, 1.0f, 0.0f ), vbo->getPositionAt( 2 ) );
 }
 
