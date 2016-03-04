@@ -14,6 +14,8 @@
 @interface CrimildViewController : GLKViewController
 
 @property (nonatomic, readonly) crimild::Simulation *simulation;
+@property (nonatomic, assign) BOOL touchEnabled;
+@property (nonatomic, assign) BOOL swipeEnabled;
 
 - (void) simulationWillStart: (crimild::Simulation *) simulation;
 

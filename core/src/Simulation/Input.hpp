@@ -214,6 +214,14 @@ namespace crimild {
             float dx;
             float dy;
         };
+        
+        struct SwipeLeft { };
+        
+        struct SwipeRight { };
+        
+        struct SwipeUp { };
+        
+        struct SwipeDown { };
 
 	}
 

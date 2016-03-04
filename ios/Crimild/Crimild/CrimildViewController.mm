@@ -39,6 +39,9 @@
     
     [self setupGL];
     [self setupCrimild];
+    
+    self.touchEnabled = YES;
+    self.swipeEnabled = NO;
 }
 
 - (void)dealloc
@@ -78,6 +81,30 @@
     return crimild::get_ptr(_simulation);
 }
 
+- (void) viewWillAppear:(BOOL)animated {
+    [super viewWillAppear: animated];
+    
+    self.view.userInteractionEnabled = self.touchEnabled;
+    
+    if (self.swipeEnabled) {
+        UISwipeGestureRecognizer *upRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeGesture:)];
+        upRecognizer.direction = UISwipeGestureRecognizerDirectionUp;
+        [self.view addGestureRecognizer:upRecognizer];
+        
+        UISwipeGestureRecognizer *downRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeGesture:)];
+        downRecognizer.direction = UISwipeGestureRecognizerDirectionDown;
+        [self.view addGestureRecognizer:downRecognizer];
+        
+        UISwipeGestureRecognizer *leftRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeGesture:)];
+        leftRecognizer.direction = UISwipeGestureRecognizerDirectionLeft;
+        [self.view addGestureRecognizer:leftRecognizer];
+        
+        UISwipeGestureRecognizer *rightRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeGesture:)];
+        rightRecognizer.direction = UISwipeGestureRecognizerDirectionRight;
+        [self.view addGestureRecognizer:rightRecognizer];
+    }
+}
+
 #pragma mark - Crimild setup
 
 - (NSString *) applicationBundleDirectory
@@ -101,7 +128,8 @@
     crimild::FileSystem::getInstance().setDocumentsDirectory( [[self applicationDocumentsDirectory] UTF8String] );
     
     CGRect framebufferRect = [[UIScreen mainScreen] bounds];
-    auto screenBuffer = crimild::alloc< crimild::FrameBufferObject >( 2 * framebufferRect.size.width, 2 * framebufferRect.size.height );
+    CGFloat screenScale = [[UIScreen mainScreen] scale];
+    auto screenBuffer = crimild::alloc< crimild::FrameBufferObject >( screenScale * framebufferRect.size.width, screenScale * framebufferRect.size.height );
     screenBuffer->setClearColor( crimild::RGBAColorf( 0.0f, 0.0f, 0.0f, 0.0f ) );
     auto renderer = _simulation->getRenderer();
     renderer->setScreenBuffer( screenBuffer );
@@ -168,7 +196,14 @@
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
+    CGPoint location = [[touches anyObject] locationInView: self.view];
     
+    float x = location.x;
+    float y = location.y;
+    float nx = x / self.view.bounds.size.width;
+    float ny = y / self.view.bounds.size.height;
+    
+    crimild::MessageQueue::getInstance()->pushMessage( crimild::messaging::MouseMotion { x, y, nx, ny } );
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
@@ -182,6 +217,31 @@
     
     crimild::MessageQueue::getInstance()->pushMessage( crimild::messaging::MouseMotion { x, y, nx, ny } );
     crimild::MessageQueue::getInstance()->pushMessage( crimild::messaging::MouseButtonUp { CRIMILD_INPUT_MOUSE_BUTTON_LEFT } );
+}
+
+- (void) handleSwipeGesture: (UISwipeGestureRecognizer *) swipeGesture
+{
+    if (swipeGesture.state != UIGestureRecognizerStateEnded) {
+        return;
+    }
+    
+    switch (swipeGesture.direction) {
+        case UISwipeGestureRecognizerDirectionDown:
+            crimild::MessageQueue::getInstance()->pushMessage( crimild::messaging::SwipeDown { } );
+            break;
+
+        case UISwipeGestureRecognizerDirectionUp:
+            crimild::MessageQueue::getInstance()->pushMessage( crimild::messaging::SwipeUp { } );
+            break;
+            
+        case UISwipeGestureRecognizerDirectionLeft:
+            crimild::MessageQueue::getInstance()->pushMessage( crimild::messaging::SwipeLeft { } );
+            break;
+            
+        case UISwipeGestureRecognizerDirectionRight:
+            crimild::MessageQueue::getInstance()->pushMessage( crimild::messaging::SwipeRight { } );
+            break;
+    }
 }
 
 @end
