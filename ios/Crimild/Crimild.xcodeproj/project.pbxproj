@@ -100,6 +100,8 @@
 		5F113CBF1C272CF60030C3F4 /* UpdateComponents.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F113ADC1C272CF50030C3F4 /* UpdateComponents.cpp */; };
 		5F113CC01C272CF60030C3F4 /* UpdateRenderState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F113ADE1C272CF50030C3F4 /* UpdateRenderState.cpp */; };
 		5F113CC11C272CF60030C3F4 /* UpdateWorldState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F113AE01C272CF50030C3F4 /* UpdateWorldState.cpp */; };
+		5F39572C1C8C7BAD00E99FE7 /* UnlitVertexColorShaderProgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F39572A1C8C7BAD00E99FE7 /* UnlitVertexColorShaderProgram.cpp */; };
+		5F39572F1C8C7BE200E99FE7 /* CullFaceState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F39572D1C8C7BE200E99FE7 /* CullFaceState.cpp */; };
 		5F70321C1B7BB9D6001B548B /* Crimild-iOS.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 5F70321B1B7BB9D6001B548B /* Crimild-iOS.h */; };
 		5F7032241B7BB9D6001B548B /* libCrimild.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F7032181B7BB9D6001B548B /* libCrimild.a */; };
 		5F7033F91B7BBA38001B548B /* lapi.c in Sources */ = {isa = PBXBuildFile; fileRef = 5F7033BD1B7BBA38001B548B /* lapi.c */; };
@@ -434,6 +436,10 @@
 		5F113ADF1C272CF50030C3F4 /* UpdateRenderState.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = UpdateRenderState.hpp; sourceTree = "<group>"; };
 		5F113AE01C272CF50030C3F4 /* UpdateWorldState.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UpdateWorldState.cpp; sourceTree = "<group>"; };
 		5F113AE11C272CF50030C3F4 /* UpdateWorldState.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = UpdateWorldState.hpp; sourceTree = "<group>"; };
+		5F39572A1C8C7BAD00E99FE7 /* UnlitVertexColorShaderProgram.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UnlitVertexColorShaderProgram.cpp; sourceTree = "<group>"; };
+		5F39572B1C8C7BAD00E99FE7 /* UnlitVertexColorShaderProgram.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = UnlitVertexColorShaderProgram.hpp; sourceTree = "<group>"; };
+		5F39572D1C8C7BE200E99FE7 /* CullFaceState.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CullFaceState.cpp; sourceTree = "<group>"; };
+		5F39572E1C8C7BE200E99FE7 /* CullFaceState.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CullFaceState.hpp; sourceTree = "<group>"; };
 		5F7032181B7BB9D6001B548B /* libCrimild.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libCrimild.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		5F70321B1B7BB9D6001B548B /* Crimild-iOS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Crimild-iOS.h"; sourceTree = "<group>"; };
 		5F7032231B7BB9D6001B548B /* CrimildTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CrimildTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -841,6 +847,8 @@
 		5F113A6D1C272CF50030C3F4 /* Rendering */ = {
 			isa = PBXGroup;
 			children = (
+				5F39572D1C8C7BE200E99FE7 /* CullFaceState.cpp */,
+				5F39572E1C8C7BE200E99FE7 /* CullFaceState.hpp */,
 				5F113A6E1C272CF50030C3F4 /* AlphaState.cpp */,
 				5F113A6F1C272CF50030C3F4 /* AlphaState.hpp */,
 				5F113A701C272CF50030C3F4 /* BasicRenderPass.cpp */,
@@ -1272,6 +1280,8 @@
 		5F8CB1FE1BE7ECF00039D32A /* Programs */ = {
 			isa = PBXGroup;
 			children = (
+				5F39572A1C8C7BAD00E99FE7 /* UnlitVertexColorShaderProgram.cpp */,
+				5F39572B1C8C7BAD00E99FE7 /* UnlitVertexColorShaderProgram.hpp */,
 				5F8CB1FF1BE7ECF00039D32A /* _ShaderPrefixDesktop.txt */,
 				5F8CB2001BE7ECF00039D32A /* _ShaderPrefixMobile.txt */,
 				5F8CB2011BE7ECF00039D32A /* BlendShaderProgram.cpp */,
@@ -1511,6 +1521,7 @@
 				5F113C7F1C272CF60030C3F4 /* MessageQueue.cpp in Sources */,
 				5F113CA71C272CF60030C3F4 /* Light.cpp in Sources */,
 				5F113CAC1C272CF60030C3F4 /* FileSystem.cpp in Sources */,
+				5F39572F1C8C7BE200E99FE7 /* CullFaceState.cpp in Sources */,
 				5F113C681C272CF60030C3F4 /* LambdaComponent.cpp in Sources */,
 				5F70340E1B7BBA38001B548B /* loslib.c in Sources */,
 				5F8CB2BD1BE7ECF00039D32A /* ForwardRenderShaderProgram.cpp in Sources */,
@@ -1540,6 +1551,7 @@
 				5F113C961C272CF60030C3F4 /* IndexBufferObject.cpp in Sources */,
 				5F113CBB1C272CF60030C3F4 /* Picking.cpp in Sources */,
 				5F8CB2AE1BE7ECF00039D32A /* EmissiveGlowImageEffect.cpp in Sources */,
+				5F39572C1C8C7BAD00E99FE7 /* UnlitVertexColorShaderProgram.cpp in Sources */,
 				5F113CB41C272CF60030C3F4 /* UpdateSystem.cpp in Sources */,
 				5F70340A1B7BBA38001B548B /* lmem.c in Sources */,
 				5FE67B6D1C04106400A944FC /* WavAudioClip.cpp in Sources */,
