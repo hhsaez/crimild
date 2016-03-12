@@ -85,7 +85,11 @@ bool WindowSystem::createWindow( void )
     int height = Simulation::getInstance()->getSettings()->get( "video.height", 768 );
     bool fullscreen = Simulation::getInstance()->getSettings()->get< bool >( "video.fullscreen", false );
 
-	std::string name = "Crimild";
+	std::string name = Simulation::getInstance()->getName();
+	if ( name == "" ) {
+		name = "Crimild";
+	}
+	
 	bool vsync = true;
 	int glMajor = 3;
 	int glMinor = 2;
