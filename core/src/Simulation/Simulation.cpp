@@ -46,6 +46,7 @@
 #include "Simulation/Systems/UpdateSystem.hpp"
 #include "Simulation/Systems/DebugSystem.hpp"
 #include "Simulation/Systems/StreamingSystem.hpp"
+#include "Simulation/Systems/UISystem.hpp"
 
 using namespace crimild;
 
@@ -60,6 +61,7 @@ Simulation::Simulation( std::string name, SettingsPtr const &settings )
 	addSystem( crimild::alloc< RenderSystem >() );
     addSystem( crimild::alloc< DebugSystem >() );
     addSystem( crimild::alloc< StreamingSystem >() );
+    addSystem( crimild::alloc< UISystem >() );
 }
 
 Simulation::~Simulation( void )

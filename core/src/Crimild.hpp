@@ -85,6 +85,7 @@
 #include "Components/RotationComponent.hpp"
 #include "Components/RenderStateComponent.hpp"
 #include "Components/SkinComponent.hpp"
+#include "Components/UIResponder.hpp"
 
 #include "Concurrency/Async.hpp"
 #include "Concurrency/Task.hpp"
@@ -154,6 +155,7 @@
 #include "Simulation/Systems/UpdateSystem.hpp"
 #include "Simulation/Systems/RenderSystem.hpp"
 #include "Simulation/Systems/StreamingSystem.hpp"
+#include "Simulation/Systems/UISystem.hpp"
 
 #include "Debug/DebugRenderHelper.hpp"
 #include "Debug/SceneDebugDump.hpp"
