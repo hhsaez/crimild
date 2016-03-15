@@ -58,32 +58,30 @@ namespace crimild {
 		const VertexFormat &getVertexFormat( void ) const { return _vertexFormat; }
 		unsigned int getVertexCount( void ) const { return _vertexCount; }
 
-		const Vector3Impl &getPositionAt( unsigned int pos ) const
-		{
-			return *( ( Vector3Impl * ) &( getData()[ pos * getVertexFormat().getVertexSize() + getVertexFormat().getPositionsOffset() ] ) );
-		}
+		const Vector3Impl &getPositionAt( unsigned int vIdx ) const;
+		void setPositionAt( unsigned int vIdx, const Vector3Impl &value );
 
-		void setPositionAt( unsigned int pos, const Vector3Impl &value )
-		{
-			auto d = &data()[ pos * getVertexFormat().getVertexSize() + getVertexFormat().getPositionsOffset() ];
-			memcpy( d, static_cast< const VertexPrecision * >( value ), sizeof( VertexPrecision ) * getVertexFormat().getPositionComponents() );
-		}
+		RGBAColorImpl getRGBAColorAt( unsigned int vIdx ) const;
+		void setRGBAColorAt( unsigned int vIdx, const RGBAColorImpl &value );
 
-        Vector3Impl getNormalAt( unsigned int pos ) const;
-        void setNormalAt( unsigned int pos, const Vector3Impl &value );
+		RGBColorImpl getRGBColorAt( unsigned int vIdx ) const;
+		void setRGBColorAt( unsigned int vIdx, const RGBColorImpl &value );
+
+        Vector3Impl getNormalAt( unsigned int vIdx ) const;
+        void setNormalAt( unsigned int vIdx, const Vector3Impl &value );
         
-        Vector3Impl getTangentAt( unsigned int pos ) const;
-        void setTangentAt( unsigned int pos, const Vector3Impl &value );
+        Vector3Impl getTangentAt( unsigned int vIdx ) const;
+        void setTangentAt( unsigned int vIdx, const Vector3Impl &value );
         
-        Vector2Impl getTextureCoordAt( unsigned int pos ) const;
-        void setTextureCoordAt( unsigned int pos, const Vector2Impl &value );
+        Vector2Impl getTextureCoordAt( unsigned int vIdx ) const;
+        void setTextureCoordAt( unsigned int vIdx, const Vector2Impl &value );
         
-		RGBAColorImpl getRGBAColorAt( unsigned int pos ) const;
-		void setRGBAColorAt( unsigned int pos, const RGBAColorImpl &value );
+        VertexPrecision getBoneIdAt( unsigned int vIdx, unsigned int bone ) const;
+        void setBoneIdAt( unsigned int vIdx, unsigned int bone, VertexPrecision value );
 
-		RGBColorImpl getRGBColorAt( unsigned int pos ) const;
-		void setRGBColorAt( unsigned int pos, const RGBColorImpl &value );
-
+        VertexPrecision getBoneWeightAt( unsigned int vIdx, unsigned int bone ) const;
+        void setBoneWeightAt( unsigned int vIdx, unsigned int bone, VertexPrecision value );
+        
 	private:
 		VertexFormat _vertexFormat;
 		unsigned int _vertexCount;
