@@ -25,18 +25,51 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "RenderStateComponent.hpp"
+#ifndef CRIMILD_CORE_COMPONENTS_UI_RESPONDER_
+#define CRIMILD_CORE_COMPONENTS_UI_RESPONDER_
 
-using namespace crimild;
+#include "NodeComponent.hpp"
 
-RenderStateComponent::RenderStateComponent( void )
-    : _renderOnScreen( false )
-{
+#include "SceneGraph/Node.hpp"
+
+#include "Mathematics/Ray.hpp"
+
+namespace crimild {
+
+	class BoundingVolume;
+
+	class UIResponder : public NodeComponent {
+		CRIMILD_DISALLOW_COPY_AND_ASSIGN( UIResponder )
+		CRIMILD_NODE_COMPONENT_NAME( "ui_responder" )
+
+	private:
+		using CallbackType = std::function< bool( Node * ) >;
+
+	public:
+		explicit UIResponder( CallbackType callback );
+		UIResponder( CallbackType callback, BoundingVolume *boundingVolume );
+		virtual ~UIResponder( void );
+
+		virtual void onAttach( void ) override;
+		virtual void onDetach( void ) override;
+
+		virtual void start( void ) override;
+
+        BoundingVolume *getBoundingVolume( void );
+        void setBoundingVolume( BoundingVolume *boundingVolume );
+
+		bool testIntersection( const Ray3f &ray );
+
+		bool invoke( void );
+
+		virtual void renderDebugInfo( Renderer *renderer, Camera *camera ) override;
+
+	private:
+		CallbackType _callback;
+        SharedPointer< BoundingVolume > _boundingVolume;
+	};
+
 }
 
-RenderStateComponent::~RenderStateComponent( void )
-{
-	detachAllMaterials();
-	detachAllLights();
-}
+#endif
 

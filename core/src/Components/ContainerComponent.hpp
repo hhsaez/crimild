@@ -25,18 +25,54 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "RenderStateComponent.hpp"
+#ifndef CRIMILD_CORE_COMPONENTS_CONTAINER_
+#define CRIMILD_CORE_COMPONENTS_CONTAINER_
 
-using namespace crimild;
+#include "NodeComponent.hpp"
 
-RenderStateComponent::RenderStateComponent( void )
-    : _renderOnScreen( false )
-{
+namespace crimild {
+
+	template< class OBJECT_TYPE >
+	class ContainerComponent : public NodeComponent {
+		CRIMILD_DISALLOW_COPY_AND_ASSIGN( ContainerComponent )
+
+	public:
+		ContainerComponent( void )
+		{
+
+		}
+
+		ContainerComponent( OBJECT_TYPE const &obj )
+			: _obj( obj )
+		{
+
+		}
+
+		virtual ~ContainerComponent( void )
+		{
+
+		}
+
+		void set( OBJECT_TYPE const &obj )
+		{
+			_obj = obj;
+		}
+
+		OBJECT_TYPE &get( void )
+		{
+			return _obj;
+		}
+
+		const OBJECT_TYPE &get( void ) const
+		{
+			return _obj;
+		}
+
+	private:
+		OBJECT_TYPE _obj;
+	};
+
 }
 
-RenderStateComponent::~RenderStateComponent( void )
-{
-	detachAllMaterials();
-	detachAllLights();
-}
+#endif
 

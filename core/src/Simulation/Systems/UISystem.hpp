@@ -25,18 +25,23 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "RenderStateComponent.hpp"
+#ifndef CRIMILD_SIMULATION_SYSTEMS_UI_
+#define CRIMILD_SIMULATION_SYSTEMS_UI_
 
-using namespace crimild;
+#include "System.hpp"
 
-RenderStateComponent::RenderStateComponent( void )
-    : _renderOnScreen( false )
-{
+namespace crimild {
+
+	class UISystem : public System {
+	public:
+		UISystem( void );
+		virtual ~UISystem( void );
+
+		virtual bool start( void ) override;
+		virtual void stop( void ) override;
+	};
+
 }
 
-RenderStateComponent::~RenderStateComponent( void )
-{
-	detachAllMaterials();
-	detachAllLights();
-}
+#endif
 

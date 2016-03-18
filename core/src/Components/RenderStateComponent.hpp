@@ -39,6 +39,8 @@
 
 namespace crimild {
 
+	class SkinnedMesh;
+
 	class RenderStateComponent : public NodeComponent {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( RenderStateComponent )
 		CRIMILD_NODE_COMPONENT_NAME( "renderState" )
@@ -61,12 +63,17 @@ namespace crimild {
         void detachAllLights( void ) { _lights.clear(); }
         void forEachLight( std::function< void( Light * ) > callback ) { _lights.forEach( callback ); }
 
+        void setSkinnedMesh( SharedPointer< SkinnedMesh > const &skinnedMesh ) { _skinnedMesh = skinnedMesh; }
+        SkinnedMesh *getSkinnedMesh( void ) { return crimild::get_ptr( _skinnedMesh ); }
+
 		bool renderOnScreen( void ) const { return _renderOnScreen; }
 		void setRenderOnScreen( bool value ) { _renderOnScreen = value; }
 
 	private:
 		SharedObjectArray< Material > _materials;
 		SharedObjectArray< Light > _lights;
+
+		SharedPointer< SkinnedMesh > _skinnedMesh;
 
 		bool _renderOnScreen;
 	};

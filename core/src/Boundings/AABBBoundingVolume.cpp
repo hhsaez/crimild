@@ -141,9 +141,11 @@ void AABBBoundingVolume::computeFrom( const Vector3f &min, const Vector3f &max )
 
 void AABBBoundingVolume::expandToContain( const Vector3f &p )
 {
-	Vector3f diff = p - getCenter();
-	Vector3f min( Numericf::min( diff[ 0 ], getMin()[ 0 ] ), Numericf::min( diff[ 1 ], getMin()[ 1 ] ), Numericf::min( diff[ 2 ], getMin()[ 2 ] ) );
-	Vector3f max( Numericf::max( diff[ 0 ], getMin()[ 0 ] ), Numericf::max( diff[ 1 ], getMin()[ 1 ] ), Numericf::max( diff[ 2 ], getMin()[ 2 ] ) );
+	auto min = getCenter() + getMin();
+	auto max = getCenter() + getMax();
+
+	min = Vector3f( Numericf::min( p[ 0 ], min[ 0 ] ), Numericf::min( p[ 1 ], min[ 1 ] ), Numericf::min( p[ 2 ], min[ 2 ] ) );
+	max = Vector3f( Numericf::max( p[ 0 ], max[ 0 ] ), Numericf::max( p[ 1 ], max[ 1 ] ), Numericf::max( p[ 2 ], max[ 2 ] ) );
 
 	computeFrom( min, max );
 }
