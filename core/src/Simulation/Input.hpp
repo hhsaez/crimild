@@ -216,12 +216,13 @@ namespace crimild {
         };
         
         struct SwipeLeft { };
-        
         struct SwipeRight { };
-        
         struct SwipeUp { };
-        
         struct SwipeDown { };
+        
+        struct ButtonAcceptActivated { };
+        struct ButtonBackActivated { };
+        struct ButtonMenuActivated { };
 
 	}
 
