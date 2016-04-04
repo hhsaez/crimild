@@ -6,7 +6,3 @@
 	path = third-party/glew
 	url = https://github.com/nigels-com/glew.git
 	ignore = dirty
-[submodule "third-party/assimp"]
-	path = third-party/assimp
-	url = https://github.com/hhsaez/assimp.git
-	ignore = dirty

@@ -29,13 +29,7 @@
 
 using namespace crimild;
 
-IndexBufferObject::IndexBufferObject( unsigned int indexCount )
-	: IndexBufferObject( indexCount, nullptr )
-{ 
-
-}
-
-IndexBufferObject::IndexBufferObject( unsigned int indexCount, const IndexPrecision *indexData )
+IndexBufferObject::IndexBufferObject( unsigned int indexCount, const unsigned short *indexData )
 	: BufferObject( indexCount, indexData )
 {
 
@@ -48,8 +42,9 @@ IndexBufferObject::~IndexBufferObject( void )
 
 void IndexBufferObject::generateIncrementalIndices( void )
 {
-    for ( unsigned int i = 0; i < getIndexCount(); i++ ) {
-        data()[ i ] = static_cast< IndexPrecision >( i );
+    unsigned short *data = getData();
+    for ( unsigned short i = 0; i < getIndexCount(); i++ ) {
+        data[ i ] = i;
     }
 }
 

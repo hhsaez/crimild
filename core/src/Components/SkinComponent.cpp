@@ -25,26 +25,34 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_IMPORT_SCENE_IMPORTER_
-#define CRIMILD_IMPORT_SCENE_IMPORTER_
+#include "SkinComponent.hpp"
 
-#include <Crimild.hpp>
+using namespace crimild;
 
-namespace crimild {
-
-	namespace import {
-
-		class SceneImporter {
-		public:
-			SceneImporter( void );
-			virtual ~SceneImporter( void );
-
-			SharedPointer< Group > import( std::string filename );
-		};
-
-	}
+SkinComponent::SkinComponent( void )
+{
 
 }
 
-#endif
+SkinComponent::~SkinComponent( void )
+{
+
+}
+
+bool SkinComponent::hasJoints( void )
+{
+	return _joints.size() > 0;
+}
+
+void SkinComponent::attachJoint( Node *joint )
+{
+	_joints.push_back( joint );
+}
+
+void SkinComponent::forEachJoint( std::function< void( Node *, unsigned int ) > callback )
+{
+	for ( int i = 0; i < _joints.size(); i++ ) {
+		callback( _joints[ i ], i );
+	}
+}
 

@@ -29,7 +29,6 @@
 #define CRIMILD_RENDERING_MATERIAL_
 
 #include "AlphaState.hpp"
-#include "CullFaceState.hpp"
 #include "DepthState.hpp"
 #include "Texture.hpp"
 #include "ShaderProgram.hpp"
@@ -87,9 +86,6 @@ namespace crimild {
 
 		void setAlphaState( SharedPointer< AlphaState > const &alphaState ) { _alphaState = alphaState; }
         AlphaState *getAlphaState( void ) { return crimild::get_ptr( _alphaState ); }
-
-        void setCullFaceState( SharedPointer< CullFaceState > const &cullFaceState ) { _cullFaceState = cullFaceState; }
-        CullFaceState *getCullFaceState( void ) { return crimild::get_ptr( _cullFaceState ); }
         
         bool castShadows( void ) const { return _castShadows; }
         void setCastShadows( bool value ) { _castShadows = value; }
@@ -113,7 +109,6 @@ namespace crimild {
 
 		SharedPointer< DepthState > _depthState;
 		SharedPointer< AlphaState > _alphaState;
-		SharedPointer< CullFaceState > _cullFaceState;
         
         bool _castShadows = true;
         bool _receiveShadows = true;

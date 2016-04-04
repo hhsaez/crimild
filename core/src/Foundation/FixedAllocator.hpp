@@ -43,7 +43,7 @@ namespace crimild {
 
 		private:
 			static constexpr unsigned char MIN_OBJECTS_PER_CHUNK = 8;
-			static constexpr unsigned char MAX_OBJECTS_PER_CHUNK = std::numeric_limits< unsigned char >::max();
+			static constexpr unsigned char MAX_OBJECTS_PER_CHUNK = UCHAR_MAX;
 
 		private:
 			using ChunkArray = std::vector< Chunk >;

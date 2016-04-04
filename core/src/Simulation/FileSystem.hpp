@@ -74,8 +74,6 @@ namespace crimild {
         
         std::string getRelativePath( std::string absolutePath );
 
-        std::string getFileName( std::string path, bool includeExtension = true );
-
 	private:
 		std::string _baseDirectory;
         std::string _documentsDirectory;

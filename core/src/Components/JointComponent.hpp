@@ -25,22 +25,36 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_OPENGL_PROGRAMS_UNLIT_VERTEX_COLOR_
-#define CRIMILD_OPENGL_PROGRAMS_UNLIT_VERTEX_COLOR_
+#ifndef CRIMILD_CORE_COMPONENTS_JOINT_
+#define CRIMILD_CORE_COMPONENTS_JOINT_
 
-#include <Crimild.hpp>
+#include "NodeComponent.hpp"
+#include "Mathematics/Matrix.hpp"
 
 namespace crimild {
 
-	namespace opengl {
+	class JointComponent : public NodeComponent {
+		CRIMILD_DISALLOW_COPY_AND_ASSIGN( JointComponent )
+		CRIMILD_NODE_COMPONENT_NAME( "joint" )
 
-		class UnlitVertexColorShaderProgram : public ShaderProgram {
-		public:
-			UnlitVertexColorShaderProgram( void );
-			virtual ~UnlitVertexColorShaderProgram( void );
-		};
+	public:
+		JointComponent( void );
+		virtual ~JointComponent( void );
 
-	}
+		const Matrix4f &getWorldMatrix( void ) const { return _worldMatrix; }
+		void setWorldMatrix( const Matrix4f &worldMatrix ) { _worldMatrix = worldMatrix; }
+
+		const Matrix4f &getInverseBindMatrix( void ) const { return _inverseBindMatrix; }
+		void setInverseBindMatrix( const Matrix4f &inverseBindMatrix ) { _inverseBindMatrix = inverseBindMatrix; }
+
+		void computeInverseBindMatrix( void );
+
+		virtual void update( const Clock & ) override;
+
+	private:
+		Matrix4f _worldMatrix;
+		Matrix4f _inverseBindMatrix;
+	};
 
 }
 

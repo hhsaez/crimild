@@ -100,12 +100,6 @@ void DebugSystem::onDidRenderScene( messaging::DidRenderScene const & )
 void DebugSystem::onToggleDebugInfo( messaging::ToggleDebugInfo const & )
 {
     _debugInfoEnabled = !_debugInfoEnabled;
-    if ( _debugInfoEnabled ) {
-        broadcastMessage( messaging::DebugModeEnabled { } );
-    }
-    else {
-        broadcastMessage( messaging::DebugModeDisabled { } );
-    }
 }
 
 void DebugSystem::onToggleProfilerInfo( messaging::ToggleProfilerInfo const & )

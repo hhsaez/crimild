@@ -96,7 +96,6 @@ void ParticleSystemComponent::update( const Clock &t )
 
 void ParticleSystemComponent::generateParticles( void )
 {
-	/*
 	int particleCount = getParticleCount();
 
 	VertexFormat format = VertexFormat::VF_P3_N3_UV2;
@@ -123,6 +122,5 @@ void ParticleSystemComponent::generateParticles( void )
 
 	_primitive->setVertexBuffer( vbo );
 	_primitive->setIndexBuffer( ibo );
-	*/
 }
 

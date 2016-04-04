@@ -32,8 +32,6 @@
 #include "Foundation/Macros.hpp"
 #include "Foundation/Singleton.hpp"
 
-#include "Visitors/ShallowCopy.hpp"
-
 #include <memory>
 #include <map>
 #include <string>
@@ -71,17 +69,6 @@ namespace crimild {
             }
             
             return static_cast< T * >( crimild::get_ptr( asset ) );
-        }
-
-        template< class T >
-        SharedPointer< T > clone( std::string filename )
-        {
-            auto assetProto = get< T >( filename );
-            assert( assetProto != nullptr && ( filename + " does not exist in Asset Manager cache" ).c_str() );
-    
-            ShallowCopy shallowCopy;
-            assetProto->perform( shallowCopy );
-            return shallowCopy.getResult< T >();
         }
 
         void clear( void )

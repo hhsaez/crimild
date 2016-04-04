@@ -32,9 +32,6 @@
 using namespace crimild;
 using namespace crimild::opengl;
 
-#define MAX_LIGHTS 4
-#define MAX_JOINTS 100
-
 ForwardRenderShaderProgram::ForwardRenderShaderProgram( void )
 { 
 	setVertexShader( OpenGLUtils::getVertexShaderInstance(
@@ -49,8 +46,6 @@ ForwardRenderShaderProgram::ForwardRenderShaderProgram( void )
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::NORMAL_ATTRIBUTE, "aNormal" );
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TANGENT_ATTRIBUTE, "aTangent" );
 	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
-	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::BONE_IDS_ATTRIBUTE, "aBoneIds" );
-	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::BONE_WEIGHTS_ATTRIBUTE, "aBoneWeights" );
     
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::PROJECTION_MATRIX_UNIFORM, "uPMatrix" );
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM, "uVMatrix" );
@@ -71,7 +66,7 @@ ForwardRenderShaderProgram::ForwardRenderShaderProgram( void )
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_USE_SPECULAR_MAP_UNIFORM, "uUseSpecularMap" );
     
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_COUNT_UNIFORM, "uLightCount" );
-	for ( int i = 0; i < MAX_LIGHTS; i++ ) {
+	for ( int i = 0; i < 4; i++ ) {
 		registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_POSITION_UNIFORM + i, OpenGLUtils::buildArrayShaderLocationName( "uLights", i, "position" ) );
 		registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_ATTENUATION_UNIFORM + i, OpenGLUtils::buildArrayShaderLocationName( "uLights", i, "attenuation" ) );
 		registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_DIRECTION_UNIFORM + i, OpenGLUtils::buildArrayShaderLocationName( "uLights", i, "direction" ) );
@@ -82,11 +77,6 @@ ForwardRenderShaderProgram::ForwardRenderShaderProgram( void )
 	}
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_SOURCE_PROJECTION_MATRIX_UNIFORM, "uLightSourceProjectionMatrix" );
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_SOURCE_VIEW_MATRIX_UNIFORM, "uLightSourceViewMatrix" );
-
-	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_COUNT_UNIFORM, "uJointCount" );
-	for ( int i = 0; i < MAX_JOINTS; i++ ) {
-		registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_POSE_UNIFORM + i, OpenGLUtils::buildArrayShaderLocationName( "uJoints", i ) );
-	}
 
     registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::SHADOW_MAP_UNIFORM, "uShadowMap" );
     registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::USE_SHADOW_MAP_UNIFORM, "uUseShadowMap" );

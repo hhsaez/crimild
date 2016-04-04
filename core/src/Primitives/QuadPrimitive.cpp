@@ -36,7 +36,7 @@ QuadPrimitive::QuadPrimitive( float width, float height, const VertexFormat &for
     float halfHeigh = 0.5f * height;
     
     auto vbo = crimild::alloc< VertexBufferObject >( format, 4, nullptr );
-    float *vertex = vbo->data();
+    float *vertex = vbo->getData();
     
     // bottom left vertex
     vertex[ format.getPositionsOffset() + 0 ] = -halfWidth;
@@ -112,7 +112,7 @@ QuadPrimitive::QuadPrimitive( float width, float height, const VertexFormat &for
     
     setVertexBuffer( vbo );
     
-    IndexPrecision indices[] = { 0, 1, 2, 3 };
+    unsigned short indices[] = { 0, 1, 2, 3 };
     auto ibo = crimild::alloc< IndexBufferObject >( 4, indices );
     setIndexBuffer( ibo );
 }

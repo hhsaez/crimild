@@ -155,32 +155,6 @@ void VertexBufferObjectCatalog::bind( ShaderProgram *program, VertexBufferObject
         }
     }
 
-    auto boneIdLocation = program->getStandardLocation( ShaderProgram::StandardLocation::BONE_IDS_ATTRIBUTE );
-    if ( boneIdLocation && boneIdLocation->isValid() ) {
-    	if ( format.hasBoneIds() ) {
-    		glEnableVertexAttribArray( boneIdLocation->getLocation() );
-    		glVertexAttribPointer( boneIdLocation->getLocation(),
-    							   format.getBoneIdComponents(),
-    							   GL_FLOAT,
-    							   GL_FALSE,
-    							   format.getVertexSizeInBytes(),
-    							   ( const GLvoid * )( baseOffset + format.getBoneIdsOffset() ) );
-    	}
-    }
-
-    auto boneWeightLocation = program->getStandardLocation( ShaderProgram::StandardLocation::BONE_WEIGHTS_ATTRIBUTE );
-    if ( boneWeightLocation && boneWeightLocation->isValid() ) {
-    	if ( format.hasBoneWeights() ) {
-    		glEnableVertexAttribArray( boneWeightLocation->getLocation() );
-    		glVertexAttribPointer( boneWeightLocation->getLocation(),
-    							   format.getBoneWeightComponents(),
-    							   GL_FLOAT,
-    							   GL_FALSE,
-    							   format.getVertexSizeInBytes(),
-    							   ( const GLvoid * )( baseOffset + format.getBoneWeightsOffset() ) );
-    	}
-    }
-
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 

@@ -35,6 +35,8 @@
 #include "SceneGraph/Geometry.hpp"
 
 #include "Components/RenderStateComponent.hpp"
+#include "Components/SkinComponent.hpp"
+#include "Components/JointComponent.hpp"
 
 #include "Primitives/QuadPrimitive.hpp"
 

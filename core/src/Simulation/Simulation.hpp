@@ -34,7 +34,6 @@
 
 #include "Settings.hpp"
 #include "AssetManager.hpp"
-#include "Input.hpp"
 
 #include "Foundation/NamedObject.hpp"
 #include "Foundation/Profiler.hpp"
@@ -108,7 +107,6 @@ namespace crimild {
     private:
 		Profiler _profiler;
 		TaskManager _taskManager;
-        Input _input;
 
 	public:
 		void addSystem( SystemPtr const &system );

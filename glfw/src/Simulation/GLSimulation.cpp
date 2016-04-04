@@ -51,8 +51,8 @@ GLSimulation::GLSimulation( std::string name, SettingsPtr const &settings )
 		TaskManager::getInstance()->setNumThreads( 2 );
 	}
 
-    addSystem( crimild::alloc< InputSystem >() );
     addSystem( crimild::alloc< WindowSystem >() );
+    addSystem( crimild::alloc< InputSystem >() );
     
     setRenderer( crimild::alloc< opengl::OpenGLRenderer >() );
 }

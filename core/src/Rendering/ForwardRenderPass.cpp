@@ -30,13 +30,14 @@
 #include "Rendering/FrameBufferObject.hpp"
 #include "Rendering/RenderQueue.hpp"
 #include "Rendering/ShaderProgram.hpp"
-#include "Rendering/SkinnedMesh.hpp"
 
 #include "Rendering/ImageEffects/ImageEffect.hpp"
 
 #include "SceneGraph/Geometry.hpp"
 
 #include "Components/RenderStateComponent.hpp"
+#include "Components/SkinComponent.hpp"
+#include "Components/JointComponent.hpp"
 
 #include "Primitives/QuadPrimitive.hpp"
 
@@ -200,19 +201,6 @@ void ForwardRenderPass::renderShadedObjects( Renderer *renderer, RenderQueue *re
 
             for ( auto geometryIt : it.second ) {
                 CRIMILD_PROFILE( "Draw Primitive" )
-                
-                auto geometry = geometryIt.first;
-                auto rc = geometry->getComponent< RenderStateComponent >();
-
-                renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_COUNT_UNIFORM ), 0 );
-                if ( rc->getSkinnedMesh() != nullptr && rc->getSkinnedMesh()->getAnimationState() != nullptr ) {
-                    auto animationState = rc->getSkinnedMesh()->getAnimationState();
-                    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_COUNT_UNIFORM ), animationState->getJointPoses().size() );
-                    for ( int i = 0; i < animationState->getJointPoses().size(); i++ ) {
-                        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_POSE_UNIFORM + i ), animationState->getJointPoses()[ i ] );
-                    }
-                }
-
                 renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM ), geometryIt.second );
 
                 renderer->drawPrimitive( program, primitive );
@@ -285,24 +273,6 @@ void ForwardRenderPass::renderNonShadedObjects( Renderer *renderer, RenderQueue 
             
             for ( auto geometryIt : it.second ) {
                 CRIMILD_PROFILE( "Draw Primitive" )
-
-                auto geometry = geometryIt.first;
-                auto rc = geometry->getComponent< RenderStateComponent >();
-
-                renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_COUNT_UNIFORM ), 0 );
-                if ( rc->getSkinnedMesh() != nullptr && rc->getSkinnedMesh()->getAnimationState() != nullptr ) {
-                    std::cout << "Test" << std::endl;
-                    auto animationState = rc->getSkinnedMesh()->getAnimationState();
-                    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_COUNT_UNIFORM ), animationState->getJointPoses().size() );
-                    std::cout << "Size " << animationState->getJointPoses().size() << std::endl;
-                    for ( int i = 0; i < animationState->getJointPoses().size(); i++ ) {
-                        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_POSE_UNIFORM + i ), animationState->getJointPoses()[ i ] );
-                    }
-                }
-                else {
-                    std::cout << "No skinned mesh " << std::endl;
-                }
-
                 renderer->applyTransformations( program, projection, view, geometryIt.second );
                 renderer->drawPrimitive( program, primitive );
             }

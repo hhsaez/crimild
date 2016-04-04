@@ -54,8 +54,6 @@ Simulation::Simulation( std::string name, SettingsPtr const &settings )
       _settings( settings ),
       _taskManager( 0 ) // by default, disable background threads
 {
-    Log::Info << Version::getDescription() << Log::End;
-    
 	addSystem( crimild::alloc< UpdateSystem >() );
 	addSystem( crimild::alloc< RenderSystem >() );
     addSystem( crimild::alloc< DebugSystem >() );
@@ -69,7 +67,10 @@ Simulation::~Simulation( void )
 
 void Simulation::start( void )
 {
+    Log::Info << Version::getDescription() << Log::End;
+    
     startSystems();
+    
     _taskManager.start();
 }
 

@@ -88,7 +88,7 @@ std::string FileSystem::extractDirectory( std::string path )
 
 std::string FileSystem::pathForResource( std::string filePath )
 {
-	return getBaseDirectory() + "/" + getRelativePath( filePath );
+	return getBaseDirectory() + "/" + filePath;
 }
 
 std::string FileSystem::pathForDocument( std::string filePath )
@@ -98,30 +98,11 @@ std::string FileSystem::pathForDocument( std::string filePath )
 
 std::string FileSystem::getRelativePath( std::string absolutePath )
 {
-	// check if the absolute path includes the base 
-	// directory at the very beginning
-    int pos = absolutePath.find( _baseDirectory + "/" );
-    if ( pos == 0 ) {
-        return absolutePath.substr( _baseDirectory.length() + 1 );
+    int pos = absolutePath.find( _baseDirectory );
+    if ( pos >= 0 ) {
+        return absolutePath.substr( _baseDirectory.length() );
     }
     
     return absolutePath;
-}
-
-std::string FileSystem::getFileName( std::string path, bool includeExtension )
-{
-	auto pos = Numerici::max( path.find_last_of( '\\' ), path.find_last_of( '/' ) );
-	if ( pos >= 0 ) {
-		path = path.substr( pos + 1 );
-	}
-	
-	if ( !includeExtension ) {
-		pos = path.find_last_of( "." );
-		if ( pos >= 0 ) {
-			path = path.substr( 0, pos );
-		}
-	}
-
-	return path;
 }
 

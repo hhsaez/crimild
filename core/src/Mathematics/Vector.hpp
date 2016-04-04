@@ -118,10 +118,6 @@ namespace crimild {
 			return *this;
 		}
 
-		// explicit conversion
-		explicit operator PRECISION *( void ) { return &_data[ 0 ]; }
-		explicit operator const PRECISION *( void ) const { return &_data[ 0 ]; }
-
 		PRECISION x( void ) const { return _data[ 0 ]; }
 		PRECISION y( void ) const { return _data[ 1 ]; }
 		PRECISION z( void ) const { return _data[ 2 ]; }

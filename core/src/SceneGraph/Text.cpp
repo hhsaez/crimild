@@ -161,8 +161,8 @@ void Text::setFont( SharedPointer< Font > const &font )
 
 void Text::updatePrimitive( void )
 {
-	std::vector< VertexPrecision > vertices;
-	std::vector< IndexPrecision > indices;
+	std::vector< float > vertices;
+	std::vector< unsigned short > indices;
 
 	float horiAdvance = 0.0f;
 	float vertAdvance = 0.0f;

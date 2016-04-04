@@ -42,7 +42,6 @@
 #include "Programs/TextShaderProgram.hpp"
 #include "Programs/DepthShaderProgram.hpp"
 #include "Programs/ColorTintShaderProgram.hpp"
-#include "Programs/UnlitVertexColorShaderProgram.hpp"
 
 using namespace crimild;
 using namespace crimild::opengl;
@@ -70,7 +69,6 @@ OpenGLRenderer::OpenGLRenderer( SharedPointer< FrameBufferObject > const &screen
     
     setShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_TEXTURE, crimild::alloc< UnlitTextureShaderProgram >() );
 	setShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_DIFFUSE, crimild::alloc< UnlitDiffuseShaderProgram >() );
-	setShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_VERTEX_COLOR, crimild::alloc< UnlitVertexColorShaderProgram >() );
     
 #ifdef CRIMILD_PLATFORM_DESKTOP
     setShaderProgram( Renderer::SHADER_PROGRAM_TEXT_SDF, crimild::alloc< SignedDistanceFieldShaderProgram >() );
@@ -424,36 +422,4 @@ void OpenGLRenderer::setDepthState( DepthState *state )
     
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
-
-void OpenGLRenderer::setCullFaceState( CullFaceState *state )
-{
-    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
-    
-	if ( state->isEnabled() ) {
-	    glEnable( GL_CULL_FACE );
-
-	    GLenum mode = GL_BACK;
-	    switch ( state->getCullFaceMode() ) {
-	    	case CullFaceState::CullFaceMode::BACK:
-	    		mode = GL_BACK;
-	    		break;
-	    	case CullFaceState::CullFaceMode::FRONT:
-	    		mode = GL_FRONT;
-	    		break;
-    		case CullFaceState::CullFaceMode::FRONT_AND_BACK:
-    			mode = GL_FRONT_AND_BACK;
-    			break;
-			default:
-				break;
-	    }
-    	glCullFace( mode );
-
-	}
-	else {
-		glDisable( GL_CULL_FACE );
-	}
-    
-    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
-}
-
 

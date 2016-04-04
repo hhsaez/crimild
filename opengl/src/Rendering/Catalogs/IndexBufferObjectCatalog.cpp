@@ -84,7 +84,7 @@ void IndexBufferObjectCatalog::load( IndexBufferObject *ibo )
 	int id = ibo->getCatalogId();
 	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, id );
 	glBufferData( GL_ELEMENT_ARRAY_BUFFER, 
-		sizeof( IndexPrecision ) * ibo->getIndexCount(), 
+		sizeof( unsigned short ) * ibo->getIndexCount(), 
 		ibo->getData(), 
 		GL_STATIC_DRAW );
     

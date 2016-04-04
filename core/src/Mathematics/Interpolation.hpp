@@ -362,12 +362,6 @@ namespace crimild {
 			result = std::cos( t * Numericf::PI ) * diff + from;
 		}
 
-		template< typename T, typename PRECISION >
-		static void slerp( const Quaternion< T > &from, const Quaternion< T > &to, PRECISION t, Quaternion< T > &result )
-		{
-			result = slerp( from, to, t );
-		}
-
 		/**
 			\brief Calculate spherical liner interpolation for two quaternions
 

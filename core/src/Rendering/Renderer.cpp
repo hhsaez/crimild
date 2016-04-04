@@ -173,7 +173,6 @@ void Renderer::bindMaterial( ShaderProgram *program, Material *material )
 
 	setDepthState( material->getDepthState() );
 	setAlphaState( material->getAlphaState() );
-	setCullFaceState( material->getCullFaceState() );
 }
 
 void Renderer::unbindMaterial( ShaderProgram *program, Material *material )
