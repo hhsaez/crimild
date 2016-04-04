@@ -50,45 +50,55 @@ void computeTransform( const aiMatrix4x4 &m, Transformation &t )
  	t.setRotate( Quaternion4f( rotation.x, rotation.y, rotation.z, rotation.w ) );
 }
 
+void loadMaterialTexture( SharedPointer< Material > material, const aiMaterial *input, std::string basePath, aiTextureType texType, unsigned int texIndex = 0 )
+{
+	aiString texPath;
+	if ( AI_SUCCESS == input->GetTexture( texType, texIndex, &texPath ) ) {
+		// assume textures are in the same directory as model. Force TGA images
+		auto fileName = FileSystem::getInstance().getFileName( texPath.data, false );
+		fileName += ".tga";
+		auto texturePath = basePath + fileName;
+		auto texture = AssetManager::getInstance()->get< Texture >( texturePath );
+		if ( texture != nullptr ) {
+			switch ( texType ) {
+				case aiTextureType_DIFFUSE:
+					material->setColorMap( texture );
+					break;
+
+				case aiTextureType_SPECULAR:
+					material->setSpecularMap( texture );
+					break;
+
+				case aiTextureType_HEIGHT:
+					material->setNormalMap( texture );
+					break;
+
+				case aiTextureType_NORMALS:
+					material->setNormalMap( texture );
+					break;
+
+				default:
+					Log::Warning << "Unsupported texture type " << texType << Log::End;
+					break;
+			}
+		}
+		else {
+			Log::Warning << "Cannot find texture with path " << texturePath << Log::End;
+		}
+	}
+
+}
+
 SharedPointer< Material > buildMaterial( const aiMaterial *mtl, std::string basePath )
 {
 	auto material = crimild::alloc< Material >();
 
-	int texIndex = 0;
 	unsigned int max = 1;
 
-	aiString texPath;
-	if ( AI_SUCCESS == mtl->GetTexture( aiTextureType_DIFFUSE, texIndex, &texPath ) ) {
-		auto texturePath = basePath + texPath.data;
-		auto texture = AssetManager::getInstance()->get< Texture >( texturePath );
-		if ( texture != nullptr ) {
-			material->setColorMap( texture );
-		}
-	}
-
-	if ( AI_SUCCESS == mtl->GetTexture( aiTextureType_SPECULAR, texIndex, &texPath ) ) {
-		auto texturePath = basePath + texPath.data;
-		auto texture = AssetManager::getInstance()->get< Texture >( texturePath );
-		if ( texture != nullptr ) {
-			material->setSpecularMap( texture );
-		}
-	}
-
-	if ( AI_SUCCESS == mtl->GetTexture( aiTextureType_HEIGHT, texIndex, &texPath ) ) {
-		auto texturePath = basePath + texPath.data;
-		auto texture = AssetManager::getInstance()->get< Texture >( texturePath );
-		if ( texture != nullptr ) {
-			material->setNormalMap( texture );
-		}
-	}
-
-	if ( AI_SUCCESS == mtl->GetTexture( aiTextureType_NORMALS, texIndex, &texPath ) ) {
-		auto texturePath = basePath + texPath.data;
-		auto texture = AssetManager::getInstance()->get< Texture >( texturePath );
-		if ( texture != nullptr ) {
-			material->setNormalMap( texture );
-		}
-	}
+	loadMaterialTexture( material, mtl, basePath, aiTextureType_DIFFUSE, 0 );
+	loadMaterialTexture( material, mtl, basePath, aiTextureType_SPECULAR, 0 );
+	loadMaterialTexture( material, mtl, basePath, aiTextureType_HEIGHT, 0 );
+	loadMaterialTexture( material, mtl, basePath, aiTextureType_NORMALS, 0 );
 
 	aiColor4D color;
 

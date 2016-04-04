@@ -57,16 +57,6 @@ namespace crimild {
 			_settings[ key ] = str.str();
 		}
 		
-		void set( std::string key, const char *value )
-		{
-			set( key, std::string( value ) );
-		}
-
-		void set( std::string key, std::string value )
-		{
-			_settings[ key ] = value;
-		}
-        
         bool hasKey( std::string key )
         {
             return ( _settings.find( key ) != _settings.end() );
@@ -87,21 +77,6 @@ namespace crimild {
 			return value;
 		}
 
-		std::string get( const char *key, const char *defaultValue )
-		{
-			return get( std::string( key ), std::string( defaultValue ) );
-		}
-
-		std::string get( std::string key, std::string defaultValue )
-		{
-			if ( _settings.find( key ) == _settings.end() ) {
-				// key not found
-				return defaultValue;
-			}
-			
-			return _settings[ key ];
-		}
-
 		void parseCommandLine( int argc, char **argv );
         
         void each( std::function< void( std::string, Settings * ) > callback );
@@ -109,7 +84,7 @@ namespace crimild {
 	private:
 		std::map< std::string, std::string > _settings;
 	};
-    
+
     using SettingsPtr = SharedPointer< Settings >;
 
 }

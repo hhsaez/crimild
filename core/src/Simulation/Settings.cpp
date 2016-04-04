@@ -48,6 +48,29 @@ Settings::~Settings( void )
 
 }
 
+template<>
+void Settings::set< std::string >( std::string key, std::string value )
+{
+	_settings[ key ] = value;
+}
+
+template<>
+void Settings::set< const char * >( std::string key, const char *value )
+{
+	set< std::string >( key, std::string( value ) );
+}
+
+template<>
+std::string Settings::get< std::string >( std::string key, std::string defaultValue )
+{
+	if ( _settings.find( key ) == _settings.end() ) {
+		// key not found
+		return defaultValue;
+	}
+	
+	return _settings[ key ];
+}
+
 void Settings::parseCommandLine( int argc, char **argv )
 {
 	if ( argc > 0 ) {
@@ -62,6 +85,10 @@ void Settings::parseCommandLine( int argc, char **argv )
 			std::string value = option.substr( separatorPos + 1 );
 			set( key, value );
 		}
+	}
+
+	for ( auto it : _settings ) {
+		std::cout << it.first << " -> " << it.second << std::endl;
 	}
 }
 
