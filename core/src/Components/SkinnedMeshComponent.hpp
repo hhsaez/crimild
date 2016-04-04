@@ -25,31 +25,36 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "JointComponent.hpp"
-#include "SceneGraph/Node.hpp"
-#include "Visitors/UpdateWorldState.hpp"
+#ifndef CRIMILD_CORE_COMPONENTS_SKINNED_MESH_
+#define CRIMILD_CORE_COMPONENTS_SKINNED_MESH_
 
-using namespace crimild;
+#include "ContainerComponent.hpp"
 
-JointComponent::JointComponent( void )
-{
+#include "Foundation/SharedObject.hpp"
+
+namespace crimild {
+
+	class SkinnedMesh;
+
+	class SkinnedMeshComponent : public ContainerComponent< SharedPointer< SkinnedMesh >> {
+		CRIMILD_NODE_COMPONENT_NAME( "SkinnedMesh" )
+		CRIMILD_DISALLOW_COPY_AND_ASSIGN( SkinnedMeshComponent )
+
+	public:
+		SkinnedMeshComponent( void );
+		SkinnedMeshComponent( SharedPointer< SkinnedMesh > const &skinnedMesh );
+		virtual ~SkinnedMeshComponent( void );
+
+		virtual void start( void ) override;
+		virtual void update( const Clock &c ) override;
+		virtual void renderDebugInfo( Renderer *renderer, Camera *camera ) override;
+
+	private:
+		float _time = 0.0f;
+		unsigned int _currentAnimation = 0;
+	};
 
 }
 
-JointComponent::~JointComponent( void )
-{
-
-}
-
-void JointComponent::computeInverseBindMatrix( void )
-{
-//	getNode()->perform( UpdateWorldState() );
-	Matrix4f bindMatrix( getNode()->getWorld().computeModelMatrix() );
-	_inverseBindMatrix = bindMatrix.makeInverse();
-}
-
-void JointComponent::update( const Clock & )
-{
-	_worldMatrix = getNode()->getWorld().computeModelMatrix();
-}
+#endif
 

@@ -29,6 +29,7 @@
 #define CRIMILD_RENDERING_RENDERER_
 
 #include "Foundation/SharedObject.hpp"
+#include "Foundation/Singleton.hpp"
 
 #include "Primitives/Primitive.hpp"
 
@@ -42,6 +43,7 @@ namespace crimild {
     
     class AlphaState;
     class Camera;
+    class CullFaceState;
     class DepthState;
     class FrameBufferObject;
     class Geometry;
@@ -57,7 +59,9 @@ namespace crimild {
     class VertexBufferObject;
     class VisibilitySet;
 
-	class Renderer : public SharedObject {
+	class Renderer : 
+		public SharedObject,
+		public DynamicSingleton< Renderer > {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( Renderer );
         
 	protected:
@@ -89,6 +93,7 @@ namespace crimild {
 		virtual void unbindProgram( ShaderProgram *program );
 
 		virtual void bindUniform( ShaderLocation *location, bool value ) { bindUniform( location, value ? 1 : 0 ); }
+		virtual void bindUniform( ShaderLocation *location, size_t value ) { bindUniform( location, ( int ) value ); }
 		virtual void bindUniform( ShaderLocation *location, int value ) = 0;
 		virtual void bindUniform( ShaderLocation *location, float value ) = 0;
 		virtual void bindUniform( ShaderLocation *location, const Vector3f &vector ) = 0;
@@ -106,6 +111,9 @@ namespace crimild {
 
         void setAlphaState( SharedPointer< AlphaState > const &state ) { setAlphaState( crimild::get_ptr( state ) ); }
         virtual void setAlphaState( AlphaState *state ) = 0;
+
+        void setCullFaceState( SharedPointer< CullFaceState > const &state ) { setCullFaceState( crimild::get_ptr( state ) ); }
+        virtual void setCullFaceState( CullFaceState *state ) = 0;
 
 	public:
         virtual void bindTexture( ShaderLocation *location, Texture *texture );
@@ -160,6 +168,7 @@ namespace crimild {
         static constexpr const char *SHADER_PROGRAM_LIT_DIFFUSE = "shaders/lighting/diffuse";
         static constexpr const char *SHADER_PROGRAM_UNLIT_TEXTURE = "shaders/unlit/texture";
         static constexpr const char *SHADER_PROGRAM_UNLIT_DIFFUSE = "shaders/unlit/diffuse";
+        static constexpr const char *SHADER_PROGRAM_UNLIT_VERTEX_COLOR = "shaders/unlit/vertex_color";
         static constexpr const char *SHADER_PROGRAM_TEXT_BASIC = "shaders/text/basic";
         static constexpr const char *SHADER_PROGRAM_TEXT_SDF = "shaders/text/sdf";
         static constexpr const char *SHADER_PROGRAM_SCREEN_TEXTURE = "shaders/misc/screen";

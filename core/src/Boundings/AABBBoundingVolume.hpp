@@ -44,7 +44,7 @@ namespace crimild {
 		virtual const Vector3f &getCenter( void ) const override { return _sphere.getCenter(); }
 		virtual float getRadius( void ) const override { return _sphere.getRadius(); }
         
-        virtual SharedPointer< BoundingVolume > clone( void ) const;
+        virtual SharedPointer< BoundingVolume > clone( void ) const override;
 
 	private:
 		Sphere3f _sphere;

@@ -69,13 +69,12 @@ void main( void )
     }
 
     if ( uMaterial.emissive > 0.0 ) {
-        outColor.rgb = color.rgb;
-        outColor.a = 1.0;
+        CRIMILD_GLSL_FRAGMENT_OUTPUT = vec4( color.rgb, 1.0 );
         return;
     }
 
     if ( uLightCount == 0 ) {
-        outColor = color;
+        CRIMILD_GLSL_FRAGMENT_OUTPUT = color;
         return;
     }
     
@@ -148,7 +147,7 @@ void main( void )
         outColor = clamp( vec4( outColor.rgb * shadow, outColor.a ), 0.0, 1.0 );
         outColor.a = 1.0;
     }
-    
+
     CRIMILD_GLSL_FRAGMENT_OUTPUT = outColor;
 
 }

@@ -80,7 +80,6 @@
 		5F113CAA1C272CF60030C3F4 /* Text.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F113AAF1C272CF50030C3F4 /* Text.cpp */; };
 		5F113CAB1C272CF60030C3F4 /* AssetManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F113AB21C272CF50030C3F4 /* AssetManager.cpp */; };
 		5F113CAC1C272CF60030C3F4 /* FileSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F113AB41C272CF50030C3F4 /* FileSystem.cpp */; };
-		5F113CAD1C272CF60030C3F4 /* InputState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F113AB61C272CF50030C3F4 /* InputState.cpp */; };
 		5F113CAE1C272CF60030C3F4 /* Settings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F113AB81C272CF50030C3F4 /* Settings.cpp */; };
 		5F113CAF1C272CF60030C3F4 /* Simulation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F113ABA1C272CF50030C3F4 /* Simulation.cpp */; };
 		5F113CB01C272CF60030C3F4 /* DebugSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F113ABD1C272CF50030C3F4 /* DebugSystem.cpp */; };
@@ -138,6 +137,7 @@
 		5F7035251B7CF3BD001B548B /* CrimildViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5F7035241B7CF3BD001B548B /* CrimildViewController.mm */; };
 		5F7035281B7CF467001B548B /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F7035261B7CF467001B548B /* GLKit.framework */; };
 		5F7035291B7CF467001B548B /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F7035271B7CF467001B548B /* OpenGLES.framework */; };
+		5F7780921C6261FA00A0AE04 /* Input.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F7780901C6261FA00A0AE04 /* Input.cpp */; };
 		5F8CB18D1BE7ECCE0039D32A /* Function.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F8CB1051BE7ECCE0039D32A /* Function.cpp */; };
 		5F8CB18E1BE7ECCE0039D32A /* LuaSerializer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F8CB1071BE7ECCE0039D32A /* LuaSerializer.cpp */; };
 		5F8CB18F1BE7ECCE0039D32A /* LuaUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F8CB1091BE7ECCE0039D32A /* LuaUtils.cpp */; };
@@ -394,8 +394,6 @@
 		5F113AB31C272CF50030C3F4 /* AssetManager.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AssetManager.hpp; sourceTree = "<group>"; };
 		5F113AB41C272CF50030C3F4 /* FileSystem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FileSystem.cpp; sourceTree = "<group>"; };
 		5F113AB51C272CF50030C3F4 /* FileSystem.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = FileSystem.hpp; sourceTree = "<group>"; };
-		5F113AB61C272CF50030C3F4 /* InputState.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = InputState.cpp; sourceTree = "<group>"; };
-		5F113AB71C272CF50030C3F4 /* InputState.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = InputState.hpp; sourceTree = "<group>"; };
 		5F113AB81C272CF50030C3F4 /* Settings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Settings.cpp; sourceTree = "<group>"; };
 		5F113AB91C272CF50030C3F4 /* Settings.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Settings.hpp; sourceTree = "<group>"; };
 		5F113ABA1C272CF50030C3F4 /* Simulation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Simulation.cpp; sourceTree = "<group>"; };
@@ -501,6 +499,8 @@
 		5F7035241B7CF3BD001B548B /* CrimildViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CrimildViewController.mm; sourceTree = "<group>"; };
 		5F7035261B7CF467001B548B /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
 		5F7035271B7CF467001B548B /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
+		5F7780901C6261FA00A0AE04 /* Input.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Input.cpp; sourceTree = "<group>"; };
+		5F7780911C6261FA00A0AE04 /* Input.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Input.hpp; sourceTree = "<group>"; };
 		5F8CB1011BE7ECCE0039D32A /* ScriptedComponent.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ScriptedComponent.hpp; sourceTree = "<group>"; };
 		5F8CB1021BE7ECCE0039D32A /* Crimild_Scripting.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Crimild_Scripting.hpp; sourceTree = "<group>"; };
 		5F8CB1051BE7ECCE0039D32A /* Function.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Function.cpp; sourceTree = "<group>"; };
@@ -928,12 +928,12 @@
 		5F113AB11C272CF50030C3F4 /* Simulation */ = {
 			isa = PBXGroup;
 			children = (
+				5F7780901C6261FA00A0AE04 /* Input.cpp */,
+				5F7780911C6261FA00A0AE04 /* Input.hpp */,
 				5F113AB21C272CF50030C3F4 /* AssetManager.cpp */,
 				5F113AB31C272CF50030C3F4 /* AssetManager.hpp */,
 				5F113AB41C272CF50030C3F4 /* FileSystem.cpp */,
 				5F113AB51C272CF50030C3F4 /* FileSystem.hpp */,
-				5F113AB61C272CF50030C3F4 /* InputState.cpp */,
-				5F113AB71C272CF50030C3F4 /* InputState.hpp */,
 				5F113AB81C272CF50030C3F4 /* Settings.cpp */,
 				5F113AB91C272CF50030C3F4 /* Settings.hpp */,
 				5F113ABA1C272CF50030C3F4 /* Simulation.cpp */,
@@ -1597,10 +1597,10 @@
 				5F113CBC1C272CF60030C3F4 /* SelectNodes.cpp in Sources */,
 				5F113C741C272CF60030C3F4 /* DebugRenderHelper.cpp in Sources */,
 				5F113CB91C272CF60030C3F4 /* FetchLights.cpp in Sources */,
+				5F7780921C6261FA00A0AE04 /* Input.cpp in Sources */,
 				5F113C071C272CF60030C3F4 /* BoundingVolume.cpp in Sources */,
 				5F113CA61C272CF60030C3F4 /* Group.cpp in Sources */,
 				5F8CB2B91BE7ECF00039D32A /* DeferredPositionShaderProgram.cpp in Sources */,
-				5F113CAD1C272CF60030C3F4 /* InputState.cpp in Sources */,
 				5F8CB2B31BE7ECF00039D32A /* BlurShaderProgram.cpp in Sources */,
 				5F113C771C272CF60030C3F4 /* FixedAllocator.cpp in Sources */,
 				5F8CB2B41BE7ECF00039D32A /* ColorTintShaderProgram.cpp in Sources */,

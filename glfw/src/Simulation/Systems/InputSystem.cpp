@@ -6,15 +6,51 @@ using namespace crimild;
 InputSystem::InputSystem( void )
 	: System( "Input System" )
 {
-    auto weakSelf = this;
+    auto self = this;
     
-    registerMessageHandler< messages::WindowSystemDidCreateWindow >( [weakSelf]( messages::WindowSystemDidCreateWindow const &message ) {
-        weakSelf->_window = message.video->getWindowHandler();
-        glfwGetWindowSize( weakSelf->_window, &( weakSelf->_windowWidth ), &( weakSelf->_windowHeight ) );
+    registerMessageHandler< messages::WindowSystemDidCreateWindow >( [self]( messages::WindowSystemDidCreateWindow const &message ) {
+        self->_window = message.video->getWindowHandler();
         
-        InputState::getCurrentState().reset( GLFW_KEY_LAST, GLFW_MOUSE_BUTTON_LAST );
+        Input::getInstance()->reset( GLFW_KEY_LAST, GLFW_MOUSE_BUTTON_LAST );
         
-        crimild::async( AsyncDispatchPolicy::MAIN_QUEUE, std::bind( &InputSystem::update, weakSelf ) );
+        glfwSetKeyCallback( self->_window, []( GLFWwindow* window, int key, int scancode, int action, int mods ) {
+            if ( action == GLFW_PRESS || action == GLFW_REPEAT ) {
+                MessageQueue::getInstance()->pushMessage( messaging::KeyPressed { key } );
+            }
+            else {
+                MessageQueue::getInstance()->pushMessage( messaging::KeyReleased { key } );
+            }
+        });
+        
+        glfwSetCursorPosCallback( self->_window, []( GLFWwindow* window, double xpos, double ypos ) {
+            int windowWidth, windowHeight;
+            glfwGetWindowSize( window, &windowWidth, &windowHeight );
+            
+            MessageQueue::getInstance()->pushMessage( messaging::MouseMotion {
+                ( float ) xpos,
+                ( float ) ypos,
+                ( float ) xpos / ( float ) windowWidth,
+                ( float ) ypos / ( float ) windowHeight
+            });
+        });
+        
+        glfwSetMouseButtonCallback( self->_window, []( GLFWwindow* window, int button, int action, int mods ) {
+            double x, y;
+            glfwGetCursorPos( window, &x, &y );
+            
+            if ( action == GLFW_PRESS ) {
+                MessageQueue::getInstance()->pushMessage( messaging::MouseButtonDown { button } );
+            }
+            else {
+                MessageQueue::getInstance()->pushMessage( messaging::MouseButtonUp { button } );
+            }
+        });
+        
+        glfwSetScrollCallback( self->_window, []( GLFWwindow* window, double xoffset, double yoffset ) {
+            MessageQueue::getInstance()->pushMessage( messaging::MouseScroll { ( float ) xoffset, ( float ) yoffset } );
+        });
+        
+        crimild::async( AsyncDispatchPolicy::MAIN_QUEUE, std::bind( &InputSystem::update, self ) );
     });
     
     registerMessageHandler< messages::WindowSystemWillDestroyWindow >( [&]( messages::WindowSystemWillDestroyWindow const &message ) {
@@ -38,40 +74,22 @@ bool InputSystem::start( void )
 
 void InputSystem::update( void )
 {
-    CRIMILD_PROFILE( "Update Input State" )
+    CRIMILD_PROFILE( "Update Input" )
     
     if ( _window == nullptr ) {
         return;
     }
     
-    for ( int i = 0; i < GLFW_KEY_LAST; i++ ) {
-        int keyState = glfwGetKey( _window, i );
-        InputState::getCurrentState().setKeyState( i, keyState == GLFW_PRESS ? InputState::KeyState::PRESSED : InputState::KeyState::RELEASED );
-    }
-    
-    double x, y;
-    glfwGetCursorPos( _window, &x, &y );
-    
-    if ( InputState::getCurrentState().getMouseCursorMode() == InputState::MouseCursorMode::GRAB || ( x >= 0 && x < _windowWidth && y >= 0 && y < _windowHeight ) ) {
-        InputState::getCurrentState().setMousePosition( Vector2i( x, y ) );
-        InputState::getCurrentState().setNormalizedMousePosition( Vector2f( ( float ) x / float( _windowWidth - 1.0f ), ( float ) y / float( _windowHeight - 1.0f ) ) );
-    }
-    
-    for ( int i = GLFW_MOUSE_BUTTON_1; i < GLFW_MOUSE_BUTTON_LAST; i++ ) {
-        int buttonState = glfwGetMouseButton( _window, i );
-        InputState::getCurrentState().setMouseButtonState( i, buttonState == GLFW_PRESS ? InputState::MouseButtonState::PRESSED : InputState::MouseButtonState::RELEASED );
-    }
-    
-    switch ( InputState::getCurrentState().getMouseCursorMode() ) {
-        case InputState::MouseCursorMode::NORMAL:
+    switch ( Input::getInstance()->getMouseCursorMode() ) {
+        case Input::MouseCursorMode::NORMAL:
             glfwSetInputMode( _window, GLFW_CURSOR, GLFW_CURSOR_NORMAL );
             break;
             
-        case InputState::MouseCursorMode::HIDDEN:
+        case Input::MouseCursorMode::HIDDEN:
             glfwSetInputMode( _window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN );
             break;
             
-        case InputState::MouseCursorMode::GRAB:
+        case Input::MouseCursorMode::GRAB:
             glfwSetInputMode( _window, GLFW_CURSOR, GLFW_CURSOR_DISABLED );
             break;
             

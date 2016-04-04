@@ -33,7 +33,8 @@ NewellTeapotPrimitive::NewellTeapotPrimitive( void )
 	: Primitive( Primitive::Type::TRIANGLES )
 {
 	int vertexCount = 824;
-	float vertices[] = {
+
+	VertexPrecision vertices[] = {
 		11.2222, 20.0303, -0.1103, -0.964496, -0.255454, -0.067011, 0.608828, 0.354913, 
 		10.3023, 20.0303, 4.4615, -0.865037, -0.256198, -0.431362, 0.609037, 0.41465, 
 		10.1523, 20.6449, 4.3972, -0.914727, -0.255904, -0.312709, 0.627128, 0.412296, 
@@ -859,8 +860,10 @@ NewellTeapotPrimitive::NewellTeapotPrimitive( void )
 		-19.838, 8.9294, -1.6285, 0.590633, 0.782671, -0.196416, 0.180175, 0.298414, 
 		-16.9523, 7.1502, -1.6178, 0.516476, 0.836579, -0.182725, 0.189013, 0.199932, 
 	};
+
 	int indexCount = 3072;
-	unsigned short indices[] = {
+	
+	IndexPrecision indices[] = {
 		0, 1, 2, 
 		2, 3, 0, 
 		4, 5, 6, 

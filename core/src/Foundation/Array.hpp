@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,32 +25,62 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_COMPONENTS_SKIN_
-#define CRIMILD_CORE_COMPONENTS_SKIN_
+#ifndef CRIMILD_FOUNDATION_ARRAY_
+#define CRIMILD_FOUNDATION_ARRAY_
 
-#include "NodeComponent.hpp"
-
-#include <functional>
 #include <vector>
+#include <functional>
 
 namespace crimild {
     
-    // TODO: deprecated
-	class SkinComponent : public NodeComponent {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( SkinComponent )
-		CRIMILD_NODE_COMPONENT_NAME( "skin" )
+    template< class VALUE_TYPE >
+    class Array {
+    public:
+        Array( void ) { }
+        Array( size_t size ) : _array( size ) { }
+        Array( const Array &other ) : _array( other._array ) { }
+        ~Array( void ) { }
 
-	public:
-		SkinComponent( void );
-		virtual ~SkinComponent( void );
+        bool isEmpty( void ) const { return size() == 0; }
 
-		bool hasJoints( void );
-		void attachJoint( Node *joint );
-		void forEachJoint( std::function< void( Node *, unsigned int ) > callback );
+        size_t size( void ) const { return _array.size(); }
 
-	private:
-		std::vector< Node * > _joints;
-	};
+        void resize( size_t size ) { _array.resize( size ); }
+
+        bool find( const VALUE_TYPE &value ) const
+        {
+            return _array.find( value ) != _array.end();
+        }
+
+        void add( VALUE_TYPE &value )
+        {
+            _array.push_back( value );
+        }
+
+        void remove( VALUE_TYPE &value )
+        {
+            _array.erase( std::remove( _array.begin(), _array.end(), value ), _array.end() );
+        }
+
+        VALUE_TYPE &operator[]( unsigned int index ) { return _array[ index ]; }
+        const VALUE_TYPE &operator[]( unsigned int index ) const { return _array[ index ]; }
+
+        void clear( void )
+        {
+            _array.clear();
+        }
+
+        void foreach( std::function< void( VALUE_TYPE &, unsigned int ) > callback ) 
+        {
+            unsigned int i = 0;
+            for ( auto &it : _array ) {
+                callback( it, i++ );
+            }
+        };
+
+    private:
+        std::vector< VALUE_TYPE > _array;
+    };
 
 }
 

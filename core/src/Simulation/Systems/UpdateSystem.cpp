@@ -46,6 +46,8 @@ void UpdateSystem::update( void )
 {
     CRIMILD_PROFILE( "Simulation step" )
     
+    MessageQueue::getInstance()->dispatchDeferredMessages();
+    
 	auto scene = Simulation::getInstance()->getScene();
     if ( scene == nullptr ) {
     	Log::Debug << "No scene found" << Log::End;

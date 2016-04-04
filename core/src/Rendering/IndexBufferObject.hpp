@@ -33,12 +33,21 @@
 
 namespace crimild {
 
-	class IndexBufferObject : public BufferObject< unsigned short >, public Catalog< IndexBufferObject >::Resource {
+	using IndexPrecision = unsigned short;
+
+	class IndexBufferObject : public BufferObject< IndexPrecision >, public Catalog< IndexBufferObject >::Resource {
 	public:
-		IndexBufferObject( unsigned int indexCount, const unsigned short *indexData );
+		explicit IndexBufferObject( unsigned int indexCount );
+
+		IndexBufferObject( unsigned int indexCount, const IndexPrecision *indexData );
+		
 		virtual ~IndexBufferObject( void );
 
 		unsigned int getIndexCount( void ) const { return getSize(); }
+
+        void setIndexAt( unsigned int position, IndexPrecision value ) { data()[ position ] = value; }
+
+        IndexPrecision getIndexAt( unsigned int position ) const { return getData()[ position ]; }
 
         void generateIncrementalIndices( void );
 	};

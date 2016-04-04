@@ -29,81 +29,110 @@
 
 using namespace crimild;
 
-VertexBufferObject::VertexBufferObject( const VertexFormat &vf, unsigned int vertexCount, const float *vertexData )
+VertexBufferObject::VertexBufferObject( const VertexFormat &vf, unsigned int vertexCount )
+	: VertexBufferObject( vf, vertexCount, nullptr )
+{
+
+}
+
+VertexBufferObject::VertexBufferObject( const VertexFormat &vf, unsigned int vertexCount, const VertexPrecision *vertexData )
 	: BufferObject( vertexCount * vf.getVertexSize(), vertexData ),
 	  _vertexFormat( vf ),
 	  _vertexCount( vertexCount )
 {
+
 }
 
 VertexBufferObject::~VertexBufferObject( void )
 {
+
 }
 
-Vector3f VertexBufferObject::getPositionAt( unsigned int index ) const
+const VertexBufferObject::Vector3Impl &VertexBufferObject::getPositionAt( unsigned int vIdx ) const
 {
-	const float *data = &( getData()[ index * _vertexFormat.getVertexSize() + _vertexFormat.getPositionsOffset() ] );
-	return Vector3f( data[ 0 ], data[ 1 ], data[ 2 ] );
+	return *( ( VertexBufferObject::Vector3Impl * ) &( getData()[ vIdx * getVertexFormat().getVertexSize() + getVertexFormat().getPositionsOffset() ] ) );
 }
 
-void VertexBufferObject::setPositionAt( unsigned int index, const Vector3f &value )
+void VertexBufferObject::setPositionAt( unsigned int vIdx, const VertexBufferObject::Vector3Impl &value )
 {
-	float *data = &( getData()[ index * _vertexFormat.getVertexSize() + _vertexFormat.getPositionsOffset() ] );
-	data[ 0 ] = value[ 0 ];
-	data[ 1 ] = value[ 1 ];
-	data[ 2 ] = value[ 2 ];
+	auto d = &data()[ vIdx * getVertexFormat().getVertexSize() + getVertexFormat().getPositionsOffset() ];
+	memcpy( d, static_cast< const VertexPrecision * >( value ), sizeof( VertexPrecision ) * getVertexFormat().getPositionComponents() );
 }
 
-RGBAColorf VertexBufferObject::getRGBAColorAt( unsigned int index ) const
+VertexBufferObject::RGBAColorImpl VertexBufferObject::getRGBAColorAt( unsigned int vIdx ) const
 {
-	const float *data = &( getData()[ index * _vertexFormat.getVertexSize() + _vertexFormat.getColorsOffset() ] );
-	return RGBAColorf( data[ 0 ], data[ 1 ], data[ 2 ], data[ 3 ] );
+	return *( ( VertexBufferObject::RGBAColorImpl * ) &( getData()[ vIdx * getVertexFormat().getVertexSize() + getVertexFormat().getColorsOffset() ] ) );
 }
 
-RGBColorf VertexBufferObject::getRGBColorAt( unsigned int index ) const
+void VertexBufferObject::setRGBAColorAt( unsigned int vIdx, const VertexBufferObject::RGBAColorImpl &value )
 {
-	const float *data = &( getData()[ index * _vertexFormat.getVertexSize() + _vertexFormat.getColorsOffset() ] );
-	return RGBColorf( data[ 0 ], data[ 1 ], data[ 2 ] );
+	auto d = &data()[ vIdx * getVertexFormat().getVertexSize() + getVertexFormat().getColorsOffset() ];
+	memcpy( d, static_cast< const VertexPrecision * >( value ), sizeof( VertexPrecision ) * getVertexFormat().getColorComponents() );
 }
 
-Vector3f VertexBufferObject::getNormalAt( unsigned int index ) const
+VertexBufferObject::RGBColorImpl VertexBufferObject::getRGBColorAt( unsigned int vIdx ) const
 {
-	const float *data = &( getData()[ index * _vertexFormat.getVertexSize() + _vertexFormat.getNormalsOffset() ] );
-	return Vector3f( data[ 0 ], data[ 1 ], data[ 2 ] );
+	return *( ( VertexBufferObject::RGBColorImpl * ) &( getData()[ vIdx * getVertexFormat().getVertexSize() + getVertexFormat().getColorsOffset() ] ) );
 }
 
-void VertexBufferObject::setNormalAt( unsigned int index, const Vector3f &value )
+void VertexBufferObject::setRGBColorAt( unsigned int vIdx, const VertexBufferObject::RGBColorImpl &value )
 {
-    float *data = &( getData()[ index * _vertexFormat.getVertexSize() + _vertexFormat.getNormalsOffset() ] );
-    data[ 0 ] = value[ 0 ];
-    data[ 1 ] = value[ 1 ];
-    data[ 2 ] = value[ 2 ];
+	auto d = &data()[ vIdx * getVertexFormat().getVertexSize() + getVertexFormat().getColorsOffset() ];
+	memcpy( d, static_cast< const VertexPrecision * >( value ), sizeof( VertexPrecision ) * getVertexFormat().getColorComponents() );
 }
 
-Vector3f VertexBufferObject::getTangentAt( unsigned int index ) const
+VertexBufferObject::Vector3Impl VertexBufferObject::getNormalAt( unsigned int vIdx ) const
 {
-	const float *data = &( getData()[ index * _vertexFormat.getVertexSize() + _vertexFormat.getTangentsOffset() ] );
-	return Vector3f( data[ 0 ], data[ 1 ], data[ 2 ] );
+	return *( ( VertexBufferObject::Vector3Impl * ) &( getData()[ vIdx * getVertexFormat().getVertexSize() + getVertexFormat().getNormalsOffset() ] ) );
 }
 
-void VertexBufferObject::setTangentAt( unsigned int index, const Vector3f &value )
+void VertexBufferObject::setNormalAt( unsigned int vIdx, const VertexBufferObject::Vector3Impl &value )
 {
-    float *data = &( getData()[ index * _vertexFormat.getVertexSize() + _vertexFormat.getTangentsOffset() ] );
-    data[ 0 ] = value[ 0 ];
-    data[ 1 ] = value[ 1 ];
-    data[ 2 ] = value[ 2 ];
+	auto d = &data()[ vIdx * getVertexFormat().getVertexSize() + getVertexFormat().getNormalsOffset() ];
+	memcpy( d, static_cast< const VertexPrecision * >( value ), sizeof( VertexPrecision ) * getVertexFormat().getNormalComponents() );
 }
 
-Vector2f VertexBufferObject::getTextureCoordAt( unsigned int index ) const
+VertexBufferObject::Vector3Impl VertexBufferObject::getTangentAt( unsigned int vIdx ) const
 {
-	const float *data = &( getData()[ index * _vertexFormat.getVertexSize() + _vertexFormat.getTextureCoordsOffset() ] );
-	return Vector2f( data[ 0 ], data[ 1 ] );
+	return *( ( VertexBufferObject::Vector3Impl * ) &( getData()[ vIdx * getVertexFormat().getVertexSize() + getVertexFormat().getTangentsOffset() ] ) );
 }
 
-void VertexBufferObject::setTextureCoordAt( unsigned int index, const Vector2f &value )
+void VertexBufferObject::setTangentAt( unsigned int vIdx, const VertexBufferObject::Vector3Impl &value )
 {
-    float *data = &( getData()[ index * _vertexFormat.getVertexSize() + _vertexFormat.getTextureCoordsOffset() ] );
-    data[ 0 ] = value[ 0 ];
-    data[ 1 ] = value[ 1 ];
+	auto d = &data()[ vIdx * getVertexFormat().getVertexSize() + getVertexFormat().getTangentsOffset() ];
+	memcpy( d, static_cast< const VertexPrecision * >( value ), sizeof( VertexPrecision ) * getVertexFormat().getTangentComponents() );
+}
+
+VertexBufferObject::Vector2Impl VertexBufferObject::getTextureCoordAt( unsigned int vIdx ) const
+{
+	return *( ( VertexBufferObject::Vector2Impl * ) &( getData()[ vIdx * getVertexFormat().getVertexSize() + getVertexFormat().getTextureCoordsOffset() ] ) );
+}
+
+void VertexBufferObject::setTextureCoordAt( unsigned int vIdx, const VertexBufferObject::Vector2Impl &value )
+{
+	auto d = &data()[ vIdx * getVertexFormat().getVertexSize() + getVertexFormat().getTextureCoordsOffset() ];
+	memcpy( d, static_cast< const VertexPrecision * >( value ), sizeof( VertexPrecision ) * getVertexFormat().getTextureCoordComponents() );
+}
+
+VertexPrecision VertexBufferObject::getBoneIdAt( unsigned int vIdx, unsigned int bone ) const
+{
+	return getData()[ vIdx * getVertexFormat().getVertexSize() + getVertexFormat().getBoneIdsOffset() + bone ];
+}
+
+void VertexBufferObject::setBoneIdAt( unsigned int vIdx, unsigned int bone, VertexPrecision value )
+{
+	float *d = data();
+	d[ vIdx * getVertexFormat().getVertexSize() + getVertexFormat().getBoneIdsOffset() + bone ] = value;
+}
+
+VertexPrecision VertexBufferObject::getBoneWeightAt( unsigned int vIdx, unsigned int bone ) const
+{
+	return getData()[ vIdx * getVertexFormat().getVertexSize() + getVertexFormat().getBoneWeightsOffset() + bone ];
+}
+
+void VertexBufferObject::setBoneWeightAt( unsigned int vIdx, unsigned int bone, VertexPrecision value )
+{
+	float *d = data();
+	d[ vIdx * getVertexFormat().getVertexSize() + getVertexFormat().getBoneWeightsOffset() + bone ] = value;
 }
 

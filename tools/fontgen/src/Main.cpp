@@ -18,7 +18,7 @@ int main( int argc, char **argv )
 	Settings settings;
 	settings.parseCommandLine( argc, argv );
 
-	std::string fontFile = settings.get( "font_file", "" );
+	std::string fontFile = settings.get< std::string >( "font_file", "" );
 	if ( fontFile == "" ) {
 		std::cout << "usage: " << argv[ 0 ] << " font_file=path/to/font.ttf [texture_size=number]" << std::endl;
 		return -1;

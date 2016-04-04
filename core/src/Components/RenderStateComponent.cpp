@@ -27,8 +27,6 @@
 
 #include "RenderStateComponent.hpp"
 
-#include <algorithm>
-
 using namespace crimild;
 
 RenderStateComponent::RenderStateComponent( void )

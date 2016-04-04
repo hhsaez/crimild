@@ -33,11 +33,29 @@ using namespace crimild;
 
 TEST( IndexBufferObject, construction )
 {
-	unsigned short indices[] = { 0, 1, 2 };
+	IndexPrecision indices[] = { 0, 1, 2 };
 
 	auto ibo = crimild::alloc< IndexBufferObject >( 3, indices );
 
 	EXPECT_EQ( 3, ibo->getIndexCount() );
-	EXPECT_EQ( 0, memcmp( indices, ibo->getData(), sizeof( unsigned short ) * ibo->getSize() ) );
+	EXPECT_EQ( 0, memcmp( indices, ibo->getData(), sizeof( IndexPrecision ) * ibo->getSize() ) );
+}
+
+TEST( IndexBufferObject, setIndexAt )
+{
+	auto ibo = crimild::alloc< IndexBufferObject >( 6 );
+	ibo->setIndexAt( 0, 0 );
+	ibo->setIndexAt( 1, 1 );
+	ibo->setIndexAt( 2, 2 );
+	ibo->setIndexAt( 3, 0 );
+	ibo->setIndexAt( 4, 2 );
+	ibo->setIndexAt( 5, 3 );
+
+	EXPECT_EQ( 0, ibo->getIndexAt( 0 ) );
+	EXPECT_EQ( 1, ibo->getIndexAt( 1 ) );
+	EXPECT_EQ( 2, ibo->getIndexAt( 2 ) );
+	EXPECT_EQ( 0, ibo->getIndexAt( 3 ) );
+	EXPECT_EQ( 2, ibo->getIndexAt( 4 ) );
+	EXPECT_EQ( 3, ibo->getIndexAt( 5 ) );
 }
 
