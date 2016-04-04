@@ -73,7 +73,7 @@ void SkinnedMeshComponent::update( const Clock &c )
 	auto currentClip = skeleton->getClips()[ _currentAnimation ];
 
 	float timeInTicks = _time * currentClip->getFrameRate();
-	float animationTime = fmod( timeInTicks, currentClip->getDuration() );
+	float animationTime = Numericf::clamp( fmod( timeInTicks, currentClip->getDuration() ), 0.0f, currentClip->getDuration() );
 
 	getNode()->perform( Apply( [mesh, skeleton, currentClip, animationState, animationTime]( Node *node ) {
 

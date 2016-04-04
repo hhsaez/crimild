@@ -75,7 +75,6 @@
 #include "SceneGraph/Text.hpp"
 
 #include "Components/AnimatorComponent.hpp"
-#include "Components/JointComponent.hpp"
 #include "Components/LambdaComponent.hpp"
 #include "Components/MaterialComponent.hpp"
 #include "Components/NodeComponent.hpp"
@@ -84,8 +83,8 @@
 #include "Components/ParticleSystemComponent.hpp"
 #include "Components/RotationComponent.hpp"
 #include "Components/RenderStateComponent.hpp"
-#include "Components/SkinComponent.hpp"
 #include "Components/UIResponder.hpp"
+#include "Components/SkinnedMeshComponent.hpp"
 
 #include "Concurrency/Async.hpp"
 #include "Concurrency/Task.hpp"
