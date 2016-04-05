@@ -28,6 +28,10 @@
 #include "ShallowCopy.hpp"
 
 #include "Components/MaterialComponent.hpp"
+#include "Components/RenderStateComponent.hpp"
+#include "Components/SkinnedMeshComponent.hpp"
+
+#include "Rendering/SkinnedMesh.hpp"
 
 using namespace crimild;
 
@@ -77,6 +81,14 @@ void ShallowCopy::visitGeometry( Geometry *geometry )
 	geometry->forEachPrimitive( [&]( Primitive *primitive ) {
 		copy->attachPrimitive( primitive );
 	});
+
+	auto rs = geometry->getComponent< RenderStateComponent >();
+	if ( rs != nullptr ) {
+		auto skin = rs->getSkinnedMesh();
+		if ( skin != nullptr ) {
+			copy->getComponent< RenderStateComponent >()->setSkinnedMesh( crimild::retain( skin ) );
+		}
+	}
 }
 
 void ShallowCopy::visitText( Text *input )
@@ -108,6 +120,12 @@ void ShallowCopy::copyNode( Node *src, Node *dst )
 			dstMaterials->attachMaterial( material );
 		});
 		dst->attachComponent( dstMaterials );
+	}
+
+	auto srcSkinnedMeshComponent = src->getComponent< SkinnedMeshComponent >();
+	if ( srcSkinnedMeshComponent != nullptr ) {
+		auto dstSkinnedMeshComponent = crimild::alloc< SkinnedMeshComponent >( srcSkinnedMeshComponent->get() );
+		dst->attachComponent( dstSkinnedMeshComponent );
 	}
 }
 

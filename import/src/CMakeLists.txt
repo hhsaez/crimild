@@ -8,7 +8,6 @@ SET( CRIMILD_LIBRARY_LINK_LIBRARIES
 	assimp )
 
 SET( CRIMILD_LINK_DIRECTORIES
-#	${Assimp_BINARY_DIR}/lib
   	${Assimp_BINARY_DIR} )
 
 INCLUDE( ModuleBuildLibrary )

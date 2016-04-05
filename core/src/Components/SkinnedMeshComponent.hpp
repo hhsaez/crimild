@@ -49,9 +49,16 @@ namespace crimild {
 		virtual void update( const Clock &c ) override;
 		virtual void renderDebugInfo( Renderer *renderer, Camera *camera ) override;
 
+		void setAnimationParams( float firstFrame, float lastFrame, bool loop, float timeScale = 1.0f );
+
 	private:
 		float _time = 0.0f;
 		unsigned int _currentAnimation = 0;
+
+		float _firstFrame;
+		float _lastFrame;
+		bool _loop;
+		float _timeScale;
 	};
 
 }

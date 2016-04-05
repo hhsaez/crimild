@@ -36,13 +36,13 @@ using namespace crimild;
 
 SkinnedMeshComponent::SkinnedMeshComponent( void )
 {
-
+	setAnimationParams( 0.0f, -1.0f, true, 1.0f );
 }
 
 SkinnedMeshComponent::SkinnedMeshComponent( SharedPointer< SkinnedMesh > const &skinnedMesh )
 	: ContainerComponent< SharedPointer< SkinnedMesh >>( skinnedMesh )
 {
-
+	setAnimationParams( 0.0f, -1.0f, true, 1.0f );
 }
 
 SkinnedMeshComponent::~SkinnedMeshComponent( void )
@@ -72,8 +72,17 @@ void SkinnedMeshComponent::update( const Clock &c )
 
 	auto currentClip = skeleton->getClips()[ _currentAnimation ];
 
-	float timeInTicks = _time * currentClip->getFrameRate();
-	float animationTime = Numericf::clamp( fmod( timeInTicks, currentClip->getDuration() ), 0.0f, currentClip->getDuration() );
+	float firstFrame = _firstFrame;
+	float lastFrame = _lastFrame >= 0.0f ? _lastFrame : currentClip->getDuration();
+	bool loop = _loop;
+
+	float timeInTicks = _time * _timeScale * currentClip->getFrameRate();
+	float duration = lastFrame - firstFrame;
+	float animationTime = firstFrame +  Numericf::clamp( fmod( timeInTicks, duration ), 0.0f, duration );
+
+	if ( !loop && timeInTicks > ( lastFrame - firstFrame ) ) {
+		animationTime = lastFrame;
+	}
 
 	getNode()->perform( Apply( [mesh, skeleton, currentClip, animationState, animationTime]( Node *node ) {
 
@@ -122,6 +131,14 @@ void SkinnedMeshComponent::update( const Clock &c )
 		node->setLocal( modelTransform );
 		// node->setWorldIsCurrent( true );
 	}));		
+}
+
+void SkinnedMeshComponent::setAnimationParams( float firstFrame, float lastFrame, bool loop, float timeScale )
+{
+	_firstFrame = firstFrame;
+	_lastFrame = lastFrame;
+	_loop = loop;
+	_timeScale = timeScale;
 }
 
 void SkinnedMeshComponent::renderDebugInfo( Renderer *renderer, Camera *camera )

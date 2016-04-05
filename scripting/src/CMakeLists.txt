@@ -41,4 +41,18 @@ SET(
 	${CRIMILD_SOURCE_DIR}/third-party/lua-5.2.3/src/loadlib.c 
 	${CRIMILD_SOURCE_DIR}/third-party/lua-5.2.3/src/linit.c )
 
+IF ( CRIMILD_ENABLE_IMPORT )
+
+	SET( CRIMILD_LIBRARY_LINK_LIBRARIES 
+		${CRIMILD_LIBRARY_LINK_LIBRARIES} 
+		crimild_import )
+
+	SET( CRIMILD_INCLUDE_DIRECTORIES 
+		${CRIMILD_INCLUDE_DIRECTORIES}
+		${CRIMILD_SOURCE_DIR}/import/src
+		${Assimp_SOURCE_DIR}/include
+  		${Assimp_SOURCE_DIR}/code )
+
+ENDIF ( CRIMILD_ENABLE_IMPORT )
+
 INCLUDE( ModuleBuildLibrary )

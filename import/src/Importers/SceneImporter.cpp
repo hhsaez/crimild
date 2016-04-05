@@ -256,7 +256,6 @@ void loadAnimations( const aiScene *scene, SharedPointer< SkinnedMesh > &skinned
 {
 	if ( scene->mNumAnimations == 0 ) {
 		// nothing to load
-		std::cout << "No animations" << std::endl;
 		return;
 	}
 

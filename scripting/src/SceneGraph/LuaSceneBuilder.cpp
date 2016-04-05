@@ -3,6 +3,12 @@
 using namespace crimild;
 using namespace crimild::scripting;
 
+#ifdef CRIMILD_ENABLE_IMPORT
+    #include <Crimild_Import.hpp>
+
+    using namespace crimild::import;
+#endif
+
 #define SCENE_NODES "scene.nodes"
 
 #define NODE_TYPE "type"
@@ -101,8 +107,13 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
             
             auto scene = AssetManager::getInstance()->get< Group >( filename );
             if ( scene == nullptr ) {
+#ifdef CRIMILD_ENABLE_IMPORT
+                SceneImporter importer;
+                auto tmp = importer.import( FileSystem::getInstance().pathForResource( filename ) );
+#else
                 OBJLoader loader( FileSystem::getInstance().pathForResource( filename ) );
                 auto tmp = loader.load();
+#endif
                 AssetManager::getInstance()->set( filename, tmp );
                 scene = crimild::get_ptr( tmp );
             }
