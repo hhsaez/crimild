@@ -103,6 +103,15 @@
         rightRecognizer.direction = UISwipeGestureRecognizerDirectionRight;
         [self.view addGestureRecognizer:rightRecognizer];
     }
+    
+#if TARGET_OS_TV
+    UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTVTap:)];
+    [self.view addGestureRecognizer:tapRecognizer];
+    
+    UITapGestureRecognizer *pauseRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTVPause:)];
+    pauseRecognizer.allowedPressTypes = @[@(UIPressTypePlayPause)];
+    [self.view addGestureRecognizer: pauseRecognizer];
+#endif
 }
 
 #pragma mark - Crimild setup
@@ -127,9 +136,20 @@
     crimild::FileSystem::getInstance().setBaseDirectory( [[self applicationBundleDirectory] UTF8String] );
     crimild::FileSystem::getInstance().setDocumentsDirectory( [[self applicationDocumentsDirectory] UTF8String] );
     
+#if TARGET_OS_TV
+    crimild::TaskManager::getInstance()->setNumThreads( 2 );
+    
+#endif
+    
+    self.preferredFramesPerSecond = 30;
+
+#if TARGET_OS_TV
+    auto screenBuffer = crimild::alloc< crimild::FrameBufferObject >( 1280, 720 );
+#else
     CGRect framebufferRect = [[UIScreen mainScreen] bounds];
     CGFloat screenScale = [[UIScreen mainScreen] scale];
     auto screenBuffer = crimild::alloc< crimild::FrameBufferObject >( screenScale * framebufferRect.size.width, screenScale * framebufferRect.size.height );
+#endif
     screenBuffer->setClearColor( crimild::RGBAColorf( 0.0f, 0.0f, 0.0f, 0.0f ) );
     auto renderer = _simulation->getRenderer();
     renderer->setScreenBuffer( screenBuffer );
@@ -183,6 +203,7 @@
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
+#if !TARGET_OS_TV
     CGPoint location = [[touches anyObject] locationInView: self.view];
     
     float x = location.x;
@@ -192,10 +213,12 @@
     
     crimild::MessageQueue::getInstance()->pushMessage( crimild::messaging::MouseMotion { x, y, nx, ny } );
     crimild::MessageQueue::getInstance()->pushMessage( crimild::messaging::MouseButtonDown { CRIMILD_INPUT_MOUSE_BUTTON_LEFT } );
+#endif
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
+#if !TARGET_OS_TV
     CGPoint location = [[touches anyObject] locationInView: self.view];
     
     float x = location.x;
@@ -204,10 +227,12 @@
     float ny = y / self.view.bounds.size.height;
     
     crimild::MessageQueue::getInstance()->pushMessage( crimild::messaging::MouseMotion { x, y, nx, ny } );
+#endif
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
+#if !TARGET_OS_TV
     CGPoint location = [[touches anyObject] locationInView: self.view];
     
     float x = location.x;
@@ -217,6 +242,7 @@
     
     crimild::MessageQueue::getInstance()->pushMessage( crimild::messaging::MouseMotion { x, y, nx, ny } );
     crimild::MessageQueue::getInstance()->pushMessage( crimild::messaging::MouseButtonUp { CRIMILD_INPUT_MOUSE_BUTTON_LEFT } );
+#endif
 }
 
 - (void) handleSwipeGesture: (UISwipeGestureRecognizer *) swipeGesture
@@ -242,6 +268,16 @@
             crimild::MessageQueue::getInstance()->pushMessage( crimild::messaging::SwipeRight { } );
             break;
     }
+}
+
+- (void) handleTVTap: (UITapGestureRecognizer *) tapGesture
+{
+    crimild::MessageQueue::getInstance()->pushMessage( crimild::messaging::ButtonAcceptActivated { } );
+}
+
+- (void) handleTVPause: (UITapGestureRecognizer *) tapGesture
+{
+    crimild::MessageQueue::getInstance()->pushMessage( crimild::messaging::ButtonMenuActivated { } );
 }
 
 @end
