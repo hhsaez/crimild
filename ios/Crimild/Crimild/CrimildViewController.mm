@@ -28,11 +28,10 @@
 #import "CrimildViewController.h"
 #import "CrimildView.h"
 
-#ifdef CRIMILD_IOS_ENABLE_METAL
-// TODO
-#else
-#import "CrimildEAGLView.h"
-#endif
+#define CRIMILD_IOS_ENABLE_METAL 1
+
+#import "Metal/CrimildMetalView.h"
+#import "EAGL/CrimildEAGLView.h"
 
 @interface CrimildViewController () {
     crimild::SharedPointer< crimild::Simulation > _simulation;
@@ -57,6 +56,8 @@
         _animating = FALSE;
         _animationFrameInterval = 1;
         _displayLink = nil;
+        
+        self.useMetalRenderPath = YES;
     }
     
     return self;
@@ -70,6 +71,8 @@
         _animating = FALSE;
         _animationFrameInterval = 1;
         _displayLink = nil;
+        
+        self.useMetalRenderPath = YES;
     }
     
     return self;
@@ -78,12 +81,13 @@
 - (void) viewDidLoad
 {
     [super viewDidLoad];
-    
-#ifdef CRIMILD_IOS_ENABLE_METAL
-    // TODO
-#else
-    self.crimildView = [[CrimildEAGLView alloc] initWithFrame:self.view.bounds];
-#endif
+
+    if (self.useMetalRenderPath) {
+        self.crimildView = [[CrimildMetalView alloc] initWithFrame:self.view.bounds];
+    }
+    else {
+        self.crimildView = [[CrimildEAGLView alloc] initWithFrame:self.view.bounds];
+    }
     
     [self.view addSubview:self.crimildView];
     

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,59 +25,21 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_RENDERING_BUFFER_OBJECT_
-#define CRIMILD_RENDERING_BUFFER_OBJECT_
+#import "CrimildMetalUnlitDiffuseShaderProgram.h"
 
-#include "Foundation/Macros.hpp"
+using namespace crimild;
+using namespace crimild::metal;
 
-#include <memory>
-#include <cstring>
-
-namespace crimild {
-
-	template< typename T >
-	class BufferObject {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( BufferObject )
-
-	protected:
-		BufferObject( size_t size, const T *data )
-			: _size( size ),
-			  _data( nullptr )
-		{
-			if ( _size > 0 ) {
-				_data = new T[ _size ];
-				if ( data != nullptr ) {
-					memcpy( _data, data, sizeof( T ) * _size );
-				}
-				else {
-					memset( _data, 0, sizeof( T ) * _size );					
-				}
-			}
-		}
-
-	public:
-		virtual ~BufferObject( void )
-		{
-			if ( _data ) {
-				delete [] _data;
-				_data = nullptr;
-			}
-		}
-
-		size_t getSize( void ) const { return _size; }
-        
-        size_t getSizeInBytes( void ) const { return sizeof( T ) * _size; }
-
-		T *data( void ) { return _data; }
-
-		const T *getData( void ) const { return _data; }
-
-	private:
-		size_t _size;
-		T *_data = nullptr;
-	};
-
+UnlitDiffuseShaderProgram::UnlitDiffuseShaderProgram( void )
+    : ShaderProgram( crimild::alloc< VertexShader >( "crimild_vertex_shader_unlit_diffuse" ), crimild::alloc< FragmentShader >( "crimild_fragment_shader_unlit_diffuse" ) )
+{
+    registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM, "mMatrix" );
+    registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM, "vMatrix" );
+    registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::PROJECTION_MATRIX_UNIFORM, "pMatrix" );
 }
 
-#endif
+UnlitDiffuseShaderProgram::~UnlitDiffuseShaderProgram( void )
+{ 
+
+}
 

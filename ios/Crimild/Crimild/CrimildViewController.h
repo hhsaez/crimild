@@ -32,6 +32,8 @@
 @interface CrimildViewController : UIViewController
 
 @property (nonatomic, readonly) crimild::Simulation *simulation;
+
+@property (nonatomic, assign) BOOL useMetalRenderPath;
 @property (nonatomic, assign) BOOL touchEnabled;
 @property (nonatomic, assign) BOOL swipeEnabled;
 
