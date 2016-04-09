@@ -26,15 +26,13 @@
  */
 
 #import <UIKit/UIKit.h>
+#import <QuartzCore/QuartzCore.h>
+#import <OpenGLES/EAGL.h>
+#import <OpenGLES/EAGLDrawable.h>
 
-#import <Crimild.hpp>
+#import "CrimildView.h"
 
-@interface CrimildViewController : UIViewController
-
-@property (nonatomic, readonly) crimild::Simulation *simulation;
-@property (nonatomic, assign) BOOL touchEnabled;
-@property (nonatomic, assign) BOOL swipeEnabled;
-
-- (void) simulationWillStart: (crimild::Simulation *) simulation;
+@interface CrimildEAGLView : CrimildView
 
 @end
+

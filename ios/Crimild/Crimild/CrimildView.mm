@@ -25,16 +25,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <UIKit/UIKit.h>
+#import "CrimildView.h"
 
 #import <Crimild.hpp>
 
-@interface CrimildViewController : UIViewController
+@implementation CrimildView
 
-@property (nonatomic, readonly) crimild::Simulation *simulation;
-@property (nonatomic, assign) BOOL touchEnabled;
-@property (nonatomic, assign) BOOL swipeEnabled;
-
-- (void) simulationWillStart: (crimild::Simulation *) simulation;
+- (void) render
+{
+    crimild::MessageQueue::getInstance()->broadcastMessage( crimild::messaging::RenderNextFrame() );
+    crimild::MessageQueue::getInstance()->broadcastMessage( crimild::messaging::PresentNextFrame() );
+}
 
 @end

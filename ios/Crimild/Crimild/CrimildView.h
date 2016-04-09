@@ -27,14 +27,8 @@
 
 #import <UIKit/UIKit.h>
 
-#import <Crimild.hpp>
+@interface CrimildView : UIView
 
-@interface CrimildViewController : UIViewController
-
-@property (nonatomic, readonly) crimild::Simulation *simulation;
-@property (nonatomic, assign) BOOL touchEnabled;
-@property (nonatomic, assign) BOOL swipeEnabled;
-
-- (void) simulationWillStart: (crimild::Simulation *) simulation;
+- (void) render;
 
 @end

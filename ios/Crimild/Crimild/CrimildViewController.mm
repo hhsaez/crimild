@@ -1,87 +1,126 @@
-//
-//  CrimildViewController.m
-//  Crimild
-//
-//  Created by Hernan Saez on 8/13/15.
-//  Copyright (c) 2015 Hernan Saez. All rights reserved.
-//
+/*
+ * Copyright (c) 2013, Hernan Saez
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the <organization> nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import "CrimildViewController.h"
+#import "CrimildView.h"
 
-#import <Crimild_OpenGL.hpp>
+#ifdef CRIMILD_IOS_ENABLE_METAL
+// TODO
+#else
+#import "CrimildEAGLView.h"
+#endif
 
 @interface CrimildViewController () {
     crimild::SharedPointer< crimild::Simulation > _simulation;
+    
+    CADisplayLink *_displayLink;
+    NSInteger _animationFrameInterval;
 }
 
-@property (strong, nonatomic) EAGLContext *context;
-
-- (void)setupGL;
-- (void)tearDownGL;
+@property (strong, nonatomic) CrimildView *crimildView;
+@property (readonly, nonatomic, getter=isAnimating) BOOL animating;
+@property (nonatomic) NSInteger animationFrameInterval;
 
 @end
 
 @implementation CrimildViewController
 
-- (void)viewDidLoad
+- (instancetype) init
+{
+    self = [super init];
+    if (self) {
+        _simulation = crimild::alloc< crimild::Simulation >( "crimild", nullptr );
+        _animating = FALSE;
+        _animationFrameInterval = 1;
+        _displayLink = nil;
+    }
+    
+    return self;
+}
+
+- (instancetype) initWithCoder:(NSCoder *)aDecoder
+{
+    self = [super initWithCoder:aDecoder];
+    if (self) {
+        _simulation = crimild::alloc< crimild::Simulation >( "crimild", nullptr );
+        _animating = FALSE;
+        _animationFrameInterval = 1;
+        _displayLink = nil;
+    }
+    
+    return self;
+}
+
+- (void) viewDidLoad
 {
     [super viewDidLoad];
     
-    self.context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+#ifdef CRIMILD_IOS_ENABLE_METAL
+    // TODO
+#else
+    self.crimildView = [[CrimildEAGLView alloc] initWithFrame:self.view.bounds];
+#endif
     
-    if (!self.context) {
-        NSLog(@"Failed to create ES context");
-    }
+    [self.view addSubview:self.crimildView];
     
-    GLKView *view = (GLKView *)self.view;
-    view.context = self.context;
-    view.drawableDepthFormat = GLKViewDrawableDepthFormat24;
-    
-    [self setupGL];
     [self setupCrimild];
     
     self.touchEnabled = YES;
     self.swipeEnabled = NO;
 }
 
-- (void)dealloc
+- (void) dealloc
 {
     _simulation = nullptr;
-    
-    [self tearDownGL];
-    
-    if ([EAGLContext currentContext] == self.context) {
-        [EAGLContext setCurrentContext:nil];
-    }
 }
 
-- (void)didReceiveMemoryWarning
+- (void) didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     
     if ([self isViewLoaded] && ([[self view] window] == nil)) {
-        self.view = nil;
-        
         _simulation = nullptr;
-        
-        [self tearDownGL];
-        
-        if ([EAGLContext currentContext] == self.context) {
-            [EAGLContext setCurrentContext:nil];
-        }
-        self.context = nil;
+        self.view = nil;
+        self.crimildView = nil;
     }
 }
 
-- (BOOL)prefersStatusBarHidden {
+- (BOOL) prefersStatusBarHidden
+{
     return YES;
 }
 
-- (crimild::Simulation *)simulation {
+- (crimild::Simulation *) simulation
+{
     return crimild::get_ptr(_simulation);
 }
 
-- (void) viewWillAppear:(BOOL)animated {
+- (void) viewWillAppear:(BOOL)animated
+{
     [super viewWillAppear: animated];
     
     self.view.userInteractionEnabled = self.touchEnabled;
@@ -114,7 +153,21 @@
 #endif
 }
 
-#pragma mark - Crimild setup
+- (void) viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+    
+    [self startAnimation];
+}
+
+- (void) viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    
+    [self stopAnimation];
+}
+
+#pragma mark - Crimild
 
 - (NSString *) applicationBundleDirectory
 {
@@ -130,19 +183,13 @@
 
 - (void) setupCrimild
 {
-    _simulation = crimild::alloc< crimild::Simulation >( "crimild", nullptr );
-    _simulation->setRenderer( crimild::alloc< crimild::opengl::OpenGLRenderer >() );
-
     crimild::FileSystem::getInstance().setBaseDirectory( [[self applicationBundleDirectory] UTF8String] );
     crimild::FileSystem::getInstance().setDocumentsDirectory( [[self applicationDocumentsDirectory] UTF8String] );
     
 #if TARGET_OS_TV
     crimild::TaskManager::getInstance()->setNumThreads( 2 );
-    
 #endif
     
-    self.preferredFramesPerSecond = 30;
-
 #if TARGET_OS_TV
     auto screenBuffer = crimild::alloc< crimild::FrameBufferObject >( 1280, 720 );
 #else
@@ -165,37 +212,53 @@
     
 }
 
-#pragma mark - GL Setup
+#pragma mark - Animation
 
-- (void)setupGL
+- (NSInteger) animationFrameInterval
 {
-    [EAGLContext setCurrentContext:self.context];
-
-    glBindVertexArray(0);
+    return _animationFrameInterval;
 }
 
-- (void)tearDownGL
+- (void) setAnimationFrameInterval:(NSInteger)frameInterval
 {
-    [EAGLContext setCurrentContext:self.context];
-}
-
-#pragma mark - GLKView and GLKViewController delegate methods
-
-- (void)update
-{
-    if ( _simulation != nullptr ) {
-        _simulation->update();
+    if (frameInterval >= 1) {
+        _animationFrameInterval = frameInterval;
+        
+        if (_animating) {
+            [self stopAnimation];
+            [self startAnimation];
+        }
     }
 }
 
-- (void)glkView:(GLKView *)view drawInRect:(CGRect)rect
+- (void) startAnimation
+{
+    if (!_animating) {
+        _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(simulationStep:)];
+        [_displayLink setFrameInterval:_animationFrameInterval];
+        [_displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+        
+        _animating = TRUE;
+    }
+}
+
+- (void) stopAnimation
+{
+    if (_animating) {
+        [_displayLink invalidate];
+        _displayLink = nil;
+        _animating = FALSE;
+    }
+}
+
+- (void) simulationStep: (id) sender
 {
     if ( _simulation != nullptr ) {
-        _simulation->broadcastMessage( crimild::messaging::RenderNextFrame {} );
+        _simulation->update();
         
-        [((GLKView *) self.view) bindDrawable];
-        
-        _simulation->broadcastMessage( crimild::messaging::PresentNextFrame {} );
+        if (self.crimildView != nil) {
+            [self.crimildView render];
+        }
     }
 }
 
