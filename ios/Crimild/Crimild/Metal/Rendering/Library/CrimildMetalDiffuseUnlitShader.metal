@@ -11,27 +11,30 @@
 using namespace metal;
 
 struct VertexIn {
-    packed_float3 positions;
-    packed_float3 normals;
-    packed_float2 uvs;
+    float3 positions [[ attribute( 0 ) ]];
+    float3 normals [[ attribute( 1 ) ]];
+    float2 uvs [[ attribute( 2 ) ]];
 };
 
-struct Uniforms {
-    float4x4 mMatrix;
-    float4x4 vMatrix;
-    float4x4 pMatrix;
+struct VertexOut {
+    float4 positions [[ position ]];
+    float4 color;
 };
 
-vertex float4 crimild_vertex_shader_unlit_diffuse( const device VertexIn *vertices [[ buffer( 0 ) ]],
-                                                   const device ushort *indices [[ buffer( 1 ) ]],
-                                                   const device Uniforms &uniforms [[ buffer( 2 ) ]],
-                                                   unsigned int vid [[ vertex_id ]] )
+vertex VertexOut crimild_vertex_shader_unlit_diffuse( VertexIn vert [[ stage_in ]],
+                                                      constant float4x4 &mMatrix [[ buffer( 1 ) ]],
+                                                      constant float4x4 &vMatrix [[ buffer( 2 ) ]],
+                                                      constant float4x4 &pMatrix [[ buffer( 3 ) ]],
+                                                      constant float4 &materialDiffuse [[ buffer( 4 ) ]] )
 {
-    return uniforms.pMatrix * uniforms.vMatrix * uniforms.mMatrix * float4( vertices[ indices[ vid ] ].positions, 1.0 );
+    VertexOut out;
+    out.positions = pMatrix * vMatrix * mMatrix * float4( vert.positions, 1.0 );
+    out.color = materialDiffuse;
+    return out;
 }
 
-fragment half4 crimild_fragment_shader_unlit_diffuse()
+fragment float4 crimild_fragment_shader_unlit_diffuse( VertexOut projectedVertex [[ stage_in ]] )
 {
-    return half4( 1.0 );
+    return projectedVertex.color;
 }
 

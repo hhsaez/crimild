@@ -53,11 +53,10 @@ int IndexBufferObjectCatalog::getNextResourceId( void )
 void IndexBufferObjectCatalog::bind( ShaderProgram *program, IndexBufferObject *ibo )
 {
     Catalog< IndexBufferObject >::bind( ibo );
-    
-    [getRenderer()->getRenderEncoder() setVertexBuffer: _ibos[ ibo->getCatalogId() ]
-                                                offset: 0
-                                               atIndex: 1];
-    
+//    
+//    [getRenderer()->getRenderEncoder() setVertexBuffer: _ibos[ ibo->getCatalogId() ]
+//                                                offset: 0
+//                                               atIndex: 1];
 }
 
 void IndexBufferObjectCatalog::unbind( ShaderProgram *program, IndexBufferObject *vbo )
@@ -87,5 +86,10 @@ void IndexBufferObjectCatalog::unload( IndexBufferObject *ibo )
 void IndexBufferObjectCatalog::cleanup( void )
 {
     // TODO
+}
+
+id< MTLBuffer > IndexBufferObjectCatalog::getMetalIndexBuffer( crimild::IndexBufferObject *ibo )
+{
+    return _ibos[ ibo->getCatalogId() ];
 }
 

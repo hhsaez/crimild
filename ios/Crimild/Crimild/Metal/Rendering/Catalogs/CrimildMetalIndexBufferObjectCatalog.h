@@ -53,6 +53,9 @@ namespace crimild {
             
             virtual void cleanup( void ) override;
             
+        public:
+            id< MTLBuffer > getMetalIndexBuffer( IndexBufferObject *ibo );
+            
         protected:
             MetalRenderer *getRenderer( void ) { return _renderer; }
             

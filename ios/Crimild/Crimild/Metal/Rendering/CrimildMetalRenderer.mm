@@ -117,7 +117,7 @@ void MetalRenderer::setViewport( const Rectf &viewport )
 void MetalRenderer::beginRender( void )
 {
     Renderer::beginRender();
-
+    
     dispatch_semaphore_wait( _inflightSemaphore, DISPATCH_TIME_FOREVER );
     
     _drawable = [_layer nextDrawable];
@@ -180,63 +180,87 @@ void MetalRenderer::clearBuffers( void )
 
 void MetalRenderer::bindUniform( ShaderLocation *location, int value )
 {
-
+    if ( location == nullptr || location->getLocation() < VERTEX_BUFFER_INDEX_UNIFORM_DATA ) {
+        return;
+    }
+    
+    id< MTLBuffer > uniform = [_device newBufferWithBytes: &value
+                                                   length: sizeof( int )
+                                                  options: MTLResourceCPUCacheModeDefaultCache];
+    [getRenderEncoder() setVertexBuffer: uniform offset: 0 atIndex: location->getLocation()];
 }
 
 void MetalRenderer::bindUniform( ShaderLocation *location, float value )
 {
+    if ( location == nullptr || location->getLocation() < VERTEX_BUFFER_INDEX_UNIFORM_DATA ) {
+        return;
+    }
+    
+    id< MTLBuffer > uniform = [_device newBufferWithBytes: &value
+                                                   length: sizeof( float )
+                                                  options: MTLResourceCPUCacheModeDefaultCache];
+    [getRenderEncoder() setVertexBuffer: uniform offset: 0 atIndex: location->getLocation()];
 
 }
 
 void MetalRenderer::bindUniform( ShaderLocation *location, const Vector3f &vector )
 {
+    if ( location == nullptr || location->getLocation() < VERTEX_BUFFER_INDEX_UNIFORM_DATA ) {
+        return;
+    }
     
+    id< MTLBuffer > uniform = [_device newBufferWithBytes: vector.getData()
+                                                   length: 3 * sizeof( float )
+                                                  options: MTLResourceCPUCacheModeDefaultCache];
+    [getRenderEncoder() setVertexBuffer: uniform offset: 0 atIndex: location->getLocation()];
 }
 
 void MetalRenderer::bindUniform( ShaderLocation *location, const Vector2f &vector )
 {
-
+    if ( location == nullptr || location->getLocation() < VERTEX_BUFFER_INDEX_UNIFORM_DATA ) {
+        return;
+    }
+    
+    id< MTLBuffer > uniform = [_device newBufferWithBytes: vector.getData()
+                                                   length: 2 * sizeof( float )
+                                                  options: MTLResourceCPUCacheModeDefaultCache];
+    [getRenderEncoder() setVertexBuffer: uniform offset: 0 atIndex: location->getLocation()];
 }
 
 void MetalRenderer::bindUniform( ShaderLocation *location, const RGBAColorf &color )
 {
-
+    if ( location == nullptr || location->getLocation() < VERTEX_BUFFER_INDEX_UNIFORM_DATA ) {
+        return;
+    }
+    
+    id< MTLBuffer > uniform = [_device newBufferWithBytes: color.getData()
+                                                   length: 4 * sizeof( float )
+                                                  options: MTLResourceCPUCacheModeDefaultCache];
+    [getRenderEncoder() setVertexBuffer: uniform offset: 0 atIndex: location->getLocation()];
 }
 
 void MetalRenderer::bindUniform( ShaderLocation *location, const Matrix4f &matrix )
 {
-    /*
-    if ( location == nullptr ) {
+    if ( location == nullptr || location->getLocation() < VERTEX_BUFFER_INDEX_UNIFORM_DATA ) {
         return;
     }
     
-    auto uniforms = [_device newBufferWithLength: sizeof( float ) * 16 options: 0];
-    float *data = ( float * )[uniforms contents];
-    memcpy( data, matrix.getData(), 16 * sizeof( float ) );
-    [getRenderEncoder() setVertexBuffer: uniforms offset: 0 atIndex: location->getLocation()];
-     */
-}
-
-void MetalRenderer::applyTransformations( ShaderProgram *program, const Matrix4f &projection, const Matrix4f &view, const Matrix4f &model, const Matrix4f &normal )
-{
-//    Renderer::applyTransformations( program, projection, view, model, normal );
-     //TODO: do not allocate this every frame!
-    _uniforms = [_device newBufferWithLength: sizeof( float ) * 16 * 3 options:0];
-    float *data = ( float * )[_uniforms contents];
-
-    memcpy( &data[ 0 * 16 ], model.getData(), 16 * sizeof( float ) );
-    memcpy( &data[ 1 * 16 ], view.getData(), 16 * sizeof( float ) );
-    memcpy( &data[ 2 * 16 ], projection.getData(), 16 * sizeof( float ) );
+    id< MTLBuffer > uniform = [_device newBufferWithBytes: matrix.getData()
+                                                   length: 16 * sizeof( float )
+                                                   options: MTLResourceCPUCacheModeDefaultCache];
+    [getRenderEncoder() setVertexBuffer: uniform offset: 0 atIndex: location->getLocation()];
 }
 
 void MetalRenderer::drawPrimitive( ShaderProgram *program, Primitive *primitive )
 {
-    [getRenderEncoder() setVertexBuffer: _uniforms offset: 0 atIndex: 2];
+    auto indexCount = primitive->getIndexBuffer()->getIndexCount();
+    auto indexBuffer = static_cast< IndexBufferObjectCatalog * >( getIndexBufferObjectCatalog() )->getMetalIndexBuffer( primitive->getIndexBuffer() );
     
-    [getRenderEncoder() drawPrimitives: MTLPrimitiveTypeTriangle
-                           vertexStart: 0
-                           vertexCount: primitive->getIndexBuffer()->getIndexCount()
-                         instanceCount: 1];
+    [getRenderEncoder() drawIndexedPrimitives: MTLPrimitiveTypeTriangle
+                                   indexCount: indexCount
+                                    indexType: MTLIndexTypeUInt16
+                                  indexBuffer: indexBuffer
+                            indexBufferOffset: 0];
 }
 
 void MetalRenderer::drawBuffers( ShaderProgram *program, Primitive::Type bufferType, VertexBufferObject *vbo, unsigned int count )

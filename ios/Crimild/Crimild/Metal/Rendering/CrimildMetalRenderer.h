@@ -42,7 +42,11 @@ namespace crimild {
         
         class MetalRenderer : public crimild::Renderer {
         public:
-            MetalRenderer( CrimildMetalView *view );
+            static constexpr unsigned int VERTEX_BUFFER_INDEX_VERTEX_DATA = 0;
+            static constexpr unsigned int VERTEX_BUFFER_INDEX_UNIFORM_DATA = 1;
+            
+        public:
+            explicit MetalRenderer( CrimildMetalView *view );
             virtual ~MetalRenderer( void );
             
             CrimildMetalView *getView( void ) { return _view; }
@@ -65,8 +69,6 @@ namespace crimild {
             virtual void bindUniform( ShaderLocation *location, const Vector2f &vector ) override;
             virtual void bindUniform( ShaderLocation *location, const RGBAColorf &color ) override;
             virtual void bindUniform( ShaderLocation *location, const Matrix4f &matrix ) override;
-            
-            virtual void applyTransformations( ShaderProgram *program, const Matrix4f &projection, const Matrix4f &view, const Matrix4f &model, const Matrix4f &normal ) override;
             
             virtual void setDepthState( DepthState *state ) override;
             virtual void setAlphaState( AlphaState *state ) override;
@@ -91,8 +93,6 @@ namespace crimild {
             id< MTLRenderCommandEncoder > _renderEncoder;
             
             dispatch_semaphore_t _inflightSemaphore;
-            
-            id< MTLBuffer > _uniforms;
         };
 
     }

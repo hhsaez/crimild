@@ -153,7 +153,7 @@ namespace crimild {
 		void resetLocations( void );
 		void forEachLocation( std::function< void( ShaderLocation * ) > callback );
 
-		void registerStandardLocation( ShaderLocation::Type locationType, unsigned int standardLocationId, std::string name );
+		ShaderLocation *registerStandardLocation( ShaderLocation::Type locationType, unsigned int standardLocationId, std::string name );
         ShaderLocation *getStandardLocation( unsigned int standardLocationId );
 
 	private:

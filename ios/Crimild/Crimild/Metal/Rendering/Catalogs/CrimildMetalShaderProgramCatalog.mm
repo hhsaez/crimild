@@ -68,11 +68,6 @@ void ShaderProgramCatalog::bind( ShaderProgram *program )
     Catalog< ShaderProgram >::bind( program );
     
     [getRenderer()->getRenderEncoder() setRenderPipelineState: _pipelines[ program->getCatalogId() ]];
-    
-    unsigned int uniformIdx = 2;
-    program->forEachLocation( [&uniformIdx]( ShaderLocation *location ) {
-        location->setLocation( uniformIdx++ );
-    });
 }
 
 void ShaderProgramCatalog::unbind( ShaderProgram *program )
@@ -101,6 +96,20 @@ void ShaderProgramCatalog::load( ShaderProgram *program )
     desc.vertexFunction = vertexProgram;
     desc.fragmentFunction = fragmentProgram;
     desc.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
+    
+    MTLVertexDescriptor* vertexDesc = [[MTLVertexDescriptor alloc] init];
+    vertexDesc.attributes[0].format = MTLVertexFormatFloat3;
+    vertexDesc.attributes[0].bufferIndex = 0;
+    vertexDesc.attributes[0].offset = VertexFormat::VF_P3_N3_UV2.getPositionsOffset() * sizeof( float );;
+    vertexDesc.attributes[1].format = MTLVertexFormatFloat3;
+    vertexDesc.attributes[1].bufferIndex = 0;
+    vertexDesc.attributes[1].offset = VertexFormat::VF_P3_N3_UV2.getNormalsOffset() * sizeof( float );
+    vertexDesc.attributes[2].format = MTLVertexFormatFloat2;
+    vertexDesc.attributes[2].bufferIndex = 0;
+    vertexDesc.attributes[2].offset = VertexFormat::VF_P3_N3_UV2.getTextureCoordsOffset() * sizeof( float );
+    vertexDesc.layouts[0].stride = VertexFormat::VF_P3_N3_UV2.getVertexSize() * sizeof( float );
+    vertexDesc.layouts[0].stepFunction = MTLVertexStepFunctionPerVertex;
+    desc.vertexDescriptor = vertexDesc;
     
     NSError *error = nullptr;
     id<MTLRenderPipelineState> renderPipeline = [getRenderer()->getDevice() newRenderPipelineStateWithDescriptor: desc error: &error];

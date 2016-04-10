@@ -33,9 +33,11 @@ using namespace crimild::metal;
 UnlitDiffuseShaderProgram::UnlitDiffuseShaderProgram( void )
     : ShaderProgram( crimild::alloc< VertexShader >( "crimild_vertex_shader_unlit_diffuse" ), crimild::alloc< FragmentShader >( "crimild_fragment_shader_unlit_diffuse" ) )
 {
-    registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM, "mMatrix" );
-    registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM, "vMatrix" );
-    registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::PROJECTION_MATRIX_UNIFORM, "pMatrix" );
+    registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM, "mMatrix" )->setLocation( 1 );
+    registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM, "vMatrix" )->setLocation( 2 );
+    registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::PROJECTION_MATRIX_UNIFORM, "pMatrix" )->setLocation( 3 );
+    
+    registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_DIFFUSE_UNIFORM, "materialDiffuse" )->setLocation( 4 );
 }
 
 UnlitDiffuseShaderProgram::~UnlitDiffuseShaderProgram( void )
