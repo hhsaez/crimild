@@ -34,6 +34,8 @@
 
 #include <Crimild.hpp>
 
+#import "CrimildMetalStandardUniforms.h"
+
 @class CrimildMetalView;
 
 namespace crimild {
@@ -63,6 +65,10 @@ namespace crimild {
             
             virtual void clearBuffers( void ) override;
             
+            virtual void bindMaterial( ShaderProgram *program, Material *material ) override;
+            
+            virtual void bindLight( ShaderProgram *program, Light *light ) override;
+            
             virtual void bindUniform( ShaderLocation *location, int value ) override;
             virtual void bindUniform( ShaderLocation *location, float value ) override;
             virtual void bindUniform( ShaderLocation *location, const Vector3f &vector ) override;
@@ -73,6 +79,9 @@ namespace crimild {
             virtual void setDepthState( DepthState *state ) override;
             virtual void setAlphaState( AlphaState *state ) override;
             virtual void setCullFaceState( CullFaceState *state ) override;
+            
+            virtual void applyTransformations( ShaderProgram *program, const Matrix4f &projection, const Matrix4f &view, const Matrix4f &model, const Matrix4f &normal ) override;
+            virtual void applyTransformations( ShaderProgram *program, const Matrix4f &projection, const Matrix4f &view, const Matrix4f &model ) override;
             
             virtual void drawPrimitive( ShaderProgram *program, Primitive *primitive ) override;
             virtual void drawBuffers( ShaderProgram *program, Primitive::Type type, VertexBufferObject *vbo, unsigned int count ) override;
@@ -93,6 +102,8 @@ namespace crimild {
             id< MTLRenderCommandEncoder > _renderEncoder;
             
             dispatch_semaphore_t _inflightSemaphore;
+            
+            MetalStandardUniforms _standardUniforms;
         };
 
     }

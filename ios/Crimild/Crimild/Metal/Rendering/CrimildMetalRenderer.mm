@@ -40,6 +40,29 @@ using namespace crimild::metal;
 
 static const long IN_FLIGHT_COMMAND_BUFFERS = 1;
 
+simd::float4x4 convertMatrix( const Matrix4f &input )
+{
+    simd::float4 c0 = { input[ 0 ], input[ 1 ], input[ 2 ], input[ 3 ] };
+    simd::float4 c1 = { input[ 4 ], input[ 5 ], input[ 6 ], input[ 7 ] };
+    simd::float4 c2 = { input[ 8 ], input[ 9 ], input[ 10 ], input[ 11 ] };
+    simd::float4 c3 = { input[ 12 ], input[ 13 ], input[ 14 ], input[ 15 ] };
+    
+    return simd::float4x4( c0, c1, c2, c3 );
+}
+
+void matrix2float4x4( const Matrix4f &input, simd::float4x4 &output )
+{
+    simd::float4 c0 = { input[ 0 ], input[ 1 ], input[ 2 ], input[ 3 ] };
+    simd::float4 c1 = { input[ 4 ], input[ 5 ], input[ 6 ], input[ 7 ] };
+    simd::float4 c2 = { input[ 8 ], input[ 9 ], input[ 10 ], input[ 11 ] };
+    simd::float4 c3 = { input[ 12 ], input[ 13 ], input[ 14 ], input[ 15 ] };
+    
+    memcpy( &output.columns[ 0 ], &c0, 4 * sizeof( float ) );
+    memcpy( &output.columns[ 1 ], &c1, 4 * sizeof( float ) );
+    memcpy( &output.columns[ 2 ], &c2, 4 * sizeof( float ) );
+    memcpy( &output.columns[ 3 ], &c3, 4 * sizeof( float ) );
+}
+
 MetalRenderer::MetalRenderer( CrimildMetalView *view )
     : _view( view )
 {
@@ -178,6 +201,34 @@ void MetalRenderer::clearBuffers( void )
 
 }
 
+void MetalRenderer::bindMaterial( ShaderProgram *program, Material *material )
+{
+    memcpy( &_standardUniforms.material.ambient[ 0 ], material->getAmbient().getData(), 4 * sizeof( float ) );
+    memcpy( &_standardUniforms.material.diffuse[ 0 ], material->getDiffuse().getData(), 4 * sizeof( float ) );
+    memcpy( &_standardUniforms.material.specular[ 0 ], material->getSpecular().getData(), 4 * sizeof( float ) );
+
+    _standardUniforms.material.shininess = material->getShininess();
+    
+    setDepthState( material->getDepthState() );
+    setAlphaState( material->getAlphaState() );
+    setCullFaceState( material->getCullFaceState() );
+}
+
+void MetalRenderer::bindLight( ShaderProgram *program, Light *light )
+{
+    /*
+    auto uniform = [_device newBufferWithLength: sizeof( LightUniform ) options: MTLResourceCPUCacheModeDefaultCache];
+    LightUniform *data = ( LightUniform * )[uniform contents];
+    
+    memcpy( &data->position[ 0 ], light->getPosition().getData(), 3 * sizeof( float ) );
+    memcpy( &data->attenuation[ 0 ], light->getAttenuation().getData(), 3 * sizeof( float ) );
+    memcpy( &data->direction[ 0 ], light->getDirection().getData(), 3 * sizeof( float ) );
+    
+    auto location = program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT );
+    [getRenderEncoder() setVertexBuffer: uniform offset: 0 atIndex: location->getLocation()];
+     */
+}
+
 void MetalRenderer::bindUniform( ShaderLocation *location, int value )
 {
     if ( location == nullptr || location->getLocation() < VERTEX_BUFFER_INDEX_UNIFORM_DATA ) {
@@ -251,8 +302,31 @@ void MetalRenderer::bindUniform( ShaderLocation *location, const Matrix4f &matri
     [getRenderEncoder() setVertexBuffer: uniform offset: 0 atIndex: location->getLocation()];
 }
 
+void MetalRenderer::applyTransformations( ShaderProgram *program, const Matrix4f &projection, const Matrix4f &view, const Matrix4f &model, const Matrix4f &normal )
+{
+    matrix2float4x4( projection, _standardUniforms.pMatrix );
+    matrix2float4x4( view, _standardUniforms.vMatrix );
+    matrix2float4x4( model, _standardUniforms.mMatrix );
+}
+
+void MetalRenderer::applyTransformations( ShaderProgram *program, const Matrix4f &projection, const Matrix4f &view, const Matrix4f &model )
+{
+    matrix2float4x4( projection, _standardUniforms.pMatrix );
+    matrix2float4x4( view, _standardUniforms.vMatrix );
+    matrix2float4x4( model, _standardUniforms.mMatrix );
+}
+
 void MetalRenderer::drawPrimitive( ShaderProgram *program, Primitive *primitive )
 {
+    auto location = program->getLocation( "uniforms" );
+    
+    auto uniforms = [_device newBufferWithLength: sizeof( MetalStandardUniforms ) options:MTLResourceCPUCacheModeDefaultCache];
+    void *uniformData = [uniforms contents];
+    memcpy( uniformData, &_standardUniforms, sizeof( MetalStandardUniforms ) );
+    
+    [getRenderEncoder() setVertexBuffer: uniforms offset: 0 atIndex: location->getLocation()];
+    [getRenderEncoder() setFragmentBuffer: uniforms offset: 0 atIndex: location->getLocation()];
+
     auto indexCount = primitive->getIndexBuffer()->getIndexCount();
     auto indexBuffer = static_cast< IndexBufferObjectCatalog * >( getIndexBufferObjectCatalog() )->getMetalIndexBuffer( primitive->getIndexBuffer() );
     
@@ -275,11 +349,18 @@ void MetalRenderer::setAlphaState( AlphaState *state )
 
 void MetalRenderer::setDepthState( DepthState *state )
 {
+    MTLDepthStencilDescriptor *depthStencilDescriptor = [MTLDepthStencilDescriptor new];
+    depthStencilDescriptor.depthCompareFunction = MTLCompareFunctionLess;
+    depthStencilDescriptor.depthWriteEnabled = state->isEnabled() ? YES : NO;
 
+    auto depthStencilState = [_device newDepthStencilStateWithDescriptor:depthStencilDescriptor];
+    
+    [getRenderEncoder() setDepthStencilState: depthStencilState];
 }
 
 void MetalRenderer::setCullFaceState( CullFaceState *state )
 {
-
+    [getRenderEncoder() setFrontFacingWinding: MTLWindingCounterClockwise];
+    [getRenderEncoder() setCullMode: MTLCullModeBack];
 }
 
