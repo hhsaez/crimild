@@ -34,6 +34,8 @@
 #import "CrimildMetalView.h"
 
 #import "CrimildMetalUnlitDiffuseShaderProgram.h"
+#import "CrimildMetalLitTextureShaderProgram.h"
+#import "CrimildMetalForwardShaderProgram.h"
 
 using namespace crimild;
 using namespace crimild::metal;
@@ -74,6 +76,14 @@ MetalRenderer::MetalRenderer( CrimildMetalView *view )
     
     setShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_TEXTURE, crimild::alloc< UnlitDiffuseShaderProgram >() );
     setShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_DIFFUSE, crimild::alloc< UnlitDiffuseShaderProgram >() );
+
+    setShaderProgram( Renderer::SHADER_PROGRAM_LIT_TEXTURE, crimild::alloc< LitTextureShaderProgram >() );
+//    setShaderProgram( Renderer::SHADER_PROGRAM_LIT_TEXTURE, crimild::retain( getShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_TEXTURE ) ) );
+
+    setShaderProgram( Renderer::SHADER_PROGRAM_RENDER_PASS_FORWARD, crimild::retain( getShaderProgram( Renderer::SHADER_PROGRAM_LIT_TEXTURE ) ) );
+//    setShaderProgram( Renderer::SHADER_PROGRAM_RENDER_PASS_FORWARD, crimild::alloc< LitTextureShaderProgram >() );
+    
+    
 }
 
 MetalRenderer::~MetalRenderer( void )
@@ -203,9 +213,9 @@ void MetalRenderer::clearBuffers( void )
 
 void MetalRenderer::bindMaterial( ShaderProgram *program, Material *material )
 {
-    memcpy( &_standardUniforms.material.ambient[ 0 ], material->getAmbient().getData(), 4 * sizeof( float ) );
-    memcpy( &_standardUniforms.material.diffuse[ 0 ], material->getDiffuse().getData(), 4 * sizeof( float ) );
-    memcpy( &_standardUniforms.material.specular[ 0 ], material->getSpecular().getData(), 4 * sizeof( float ) );
+    memcpy( &_standardUniforms.material.ambient, material->getAmbient().getData(), 4 * sizeof( float ) );
+    memcpy( &_standardUniforms.material.diffuse, material->getDiffuse().getData(), 4 * sizeof( float ) );
+    memcpy( &_standardUniforms.material.specular, material->getSpecular().getData(), 4 * sizeof( float ) );
 
     _standardUniforms.material.shininess = material->getShininess();
     
@@ -216,22 +226,23 @@ void MetalRenderer::bindMaterial( ShaderProgram *program, Material *material )
 
 void MetalRenderer::bindLight( ShaderProgram *program, Light *light )
 {
-    /*
-    auto uniform = [_device newBufferWithLength: sizeof( LightUniform ) options: MTLResourceCPUCacheModeDefaultCache];
-    LightUniform *data = ( LightUniform * )[uniform contents];
+    memcpy( &_standardUniforms.lights[ _lightCount ].position, light->getPosition().getData(), 3 * sizeof( float ) );
+    memcpy( &_standardUniforms.lights[ _lightCount ].attenuation, light->getAttenuation().getData(), 3 * sizeof( float ) );
+    memcpy( &_standardUniforms.lights[ _lightCount ].direction, light->getDirection().getData(), 3 * sizeof( float ) );
+    memcpy( &_standardUniforms.lights[ _lightCount ].color, light->getColor().getData(), 4 * sizeof( float ) );
     
-    memcpy( &data->position[ 0 ], light->getPosition().getData(), 3 * sizeof( float ) );
-    memcpy( &data->attenuation[ 0 ], light->getAttenuation().getData(), 3 * sizeof( float ) );
-    memcpy( &data->direction[ 0 ], light->getDirection().getData(), 3 * sizeof( float ) );
-    
-    auto location = program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT );
-    [getRenderEncoder() setVertexBuffer: uniform offset: 0 atIndex: location->getLocation()];
-     */
+    ++_lightCount;
+}
+
+void MetalRenderer::unbindLight( ShaderProgram *program, Light *light )
+{
+    --_lightCount;
 }
 
 void MetalRenderer::bindUniform( ShaderLocation *location, int value )
 {
-    if ( location == nullptr || location->getLocation() < VERTEX_BUFFER_INDEX_UNIFORM_DATA ) {
+    /*
+    if ( location == nullptr ) {
         return;
     }
     
@@ -239,10 +250,12 @@ void MetalRenderer::bindUniform( ShaderLocation *location, int value )
                                                    length: sizeof( int )
                                                   options: MTLResourceCPUCacheModeDefaultCache];
     [getRenderEncoder() setVertexBuffer: uniform offset: 0 atIndex: location->getLocation()];
+     */
 }
 
 void MetalRenderer::bindUniform( ShaderLocation *location, float value )
 {
+    /*
     if ( location == nullptr || location->getLocation() < VERTEX_BUFFER_INDEX_UNIFORM_DATA ) {
         return;
     }
@@ -251,11 +264,13 @@ void MetalRenderer::bindUniform( ShaderLocation *location, float value )
                                                    length: sizeof( float )
                                                   options: MTLResourceCPUCacheModeDefaultCache];
     [getRenderEncoder() setVertexBuffer: uniform offset: 0 atIndex: location->getLocation()];
+     */
 
 }
 
 void MetalRenderer::bindUniform( ShaderLocation *location, const Vector3f &vector )
 {
+    /*
     if ( location == nullptr || location->getLocation() < VERTEX_BUFFER_INDEX_UNIFORM_DATA ) {
         return;
     }
@@ -264,10 +279,12 @@ void MetalRenderer::bindUniform( ShaderLocation *location, const Vector3f &vecto
                                                    length: 3 * sizeof( float )
                                                   options: MTLResourceCPUCacheModeDefaultCache];
     [getRenderEncoder() setVertexBuffer: uniform offset: 0 atIndex: location->getLocation()];
+     */
 }
 
 void MetalRenderer::bindUniform( ShaderLocation *location, const Vector2f &vector )
 {
+    /*
     if ( location == nullptr || location->getLocation() < VERTEX_BUFFER_INDEX_UNIFORM_DATA ) {
         return;
     }
@@ -276,10 +293,12 @@ void MetalRenderer::bindUniform( ShaderLocation *location, const Vector2f &vecto
                                                    length: 2 * sizeof( float )
                                                   options: MTLResourceCPUCacheModeDefaultCache];
     [getRenderEncoder() setVertexBuffer: uniform offset: 0 atIndex: location->getLocation()];
+     */
 }
 
 void MetalRenderer::bindUniform( ShaderLocation *location, const RGBAColorf &color )
 {
+    /*
     if ( location == nullptr || location->getLocation() < VERTEX_BUFFER_INDEX_UNIFORM_DATA ) {
         return;
     }
@@ -288,10 +307,12 @@ void MetalRenderer::bindUniform( ShaderLocation *location, const RGBAColorf &col
                                                    length: 4 * sizeof( float )
                                                   options: MTLResourceCPUCacheModeDefaultCache];
     [getRenderEncoder() setVertexBuffer: uniform offset: 0 atIndex: location->getLocation()];
+     */
 }
 
 void MetalRenderer::bindUniform( ShaderLocation *location, const Matrix4f &matrix )
 {
+    /*
     if ( location == nullptr || location->getLocation() < VERTEX_BUFFER_INDEX_UNIFORM_DATA ) {
         return;
     }
@@ -300,6 +321,7 @@ void MetalRenderer::bindUniform( ShaderLocation *location, const Matrix4f &matri
                                                    length: 16 * sizeof( float )
                                                    options: MTLResourceCPUCacheModeDefaultCache];
     [getRenderEncoder() setVertexBuffer: uniform offset: 0 atIndex: location->getLocation()];
+     */
 }
 
 void MetalRenderer::applyTransformations( ShaderProgram *program, const Matrix4f &projection, const Matrix4f &view, const Matrix4f &model, const Matrix4f &normal )
@@ -320,6 +342,8 @@ void MetalRenderer::drawPrimitive( ShaderProgram *program, Primitive *primitive 
 {
     auto location = program->getLocation( "uniforms" );
     
+    _standardUniforms.lightCount = _lightCount;
+
     auto uniforms = [_device newBufferWithLength: sizeof( MetalStandardUniforms ) options:MTLResourceCPUCacheModeDefaultCache];
     void *uniformData = [uniforms contents];
     memcpy( uniformData, &_standardUniforms, sizeof( MetalStandardUniforms ) );

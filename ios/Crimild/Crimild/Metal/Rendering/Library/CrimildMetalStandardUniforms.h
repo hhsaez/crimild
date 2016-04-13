@@ -22,17 +22,17 @@ namespace crimild {
     namespace metal {
         
         typedef struct {
-            float ambient[ 4 ];
-            float diffuse[ 4 ];
-            float specular[ 4 ];
+            simd::float4 ambient;
+            simd::float4 diffuse;
+            simd::float4 specular;
             float shininess;
         } MaterialUniform;
         
         typedef struct {
-            float position[ 3 ];
-            float attenuation[ 3 ];
-            float direction[ 3 ];
-            float color[ 4 ];
+            simd::float3 position;
+            simd::float3 attenuation;
+            simd::float3 direction;
+            simd::float4 color;
         } LightUniform;
         
         typedef struct {

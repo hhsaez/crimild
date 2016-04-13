@@ -68,6 +68,7 @@ namespace crimild {
             virtual void bindMaterial( ShaderProgram *program, Material *material ) override;
             
             virtual void bindLight( ShaderProgram *program, Light *light ) override;
+            virtual void unbindLight( ShaderProgram *program, Light *light ) override;
             
             virtual void bindUniform( ShaderLocation *location, int value ) override;
             virtual void bindUniform( ShaderLocation *location, float value ) override;
@@ -104,6 +105,8 @@ namespace crimild {
             dispatch_semaphore_t _inflightSemaphore;
             
             MetalStandardUniforms _standardUniforms;
+            
+            unsigned int _lightCount = 0;
         };
 
     }

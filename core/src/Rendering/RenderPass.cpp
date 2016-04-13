@@ -58,6 +58,7 @@ RenderPass::~RenderPass( void )
 
 void RenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
 {
+    render( renderer, renderQueue, camera, renderQueue->getShadedObjects() );
     renderOpaqueObjects( renderer, renderQueue, camera );
     renderTranslucentObjects( renderer, renderQueue, camera );
     renderScreenObjects( renderer, renderQueue, camera );

@@ -24,8 +24,8 @@ struct VertexOut {
     float3 eye;
 };
 
-vertex VertexOut crimild_vertex_shader_unlit_diffuse( VertexIn vert [[ stage_in ]],
-                                                      constant crimild::metal::MetalStandardUniforms &uniforms [[ buffer( 1 ) ]] )
+vertex VertexOut crimild_vertex_shader_forward( VertexIn vert [[ stage_in ]],
+                                                constant crimild::metal::MetalStandardUniforms &uniforms [[ buffer( 1 ) ]] )
 {
     float4x4 mvMatrix = uniforms.vMatrix * uniforms.mMatrix;
     float3x3 nMatrix( mvMatrix[ 0 ].xyz, mvMatrix[ 1 ].xyz, mvMatrix[ 2 ].xyz );
@@ -39,9 +39,9 @@ vertex VertexOut crimild_vertex_shader_unlit_diffuse( VertexIn vert [[ stage_in 
     return out;
 }
 
-fragment float4 crimild_fragment_shader_unlit_diffuse( VertexOut projectedVertex [[ stage_in ]],
-                                                       constant crimild::metal::MetalStandardUniforms &uniforms [[ buffer( 1 ) ]] )
+fragment float4 crimild_fragment_shader_forward( VertexOut projectedVertex [[ stage_in ]],
+                                                 constant crimild::metal::MetalStandardUniforms &uniforms [[ buffer( 1 ) ]] )
 {
-    return uniforms.material.diffuse;
+    return float4( uniforms.material.diffuse[ 0 ], uniforms.material.diffuse[ 1 ], uniforms.material.diffuse[ 2 ], uniforms.material.diffuse[ 3 ] );
 }
 

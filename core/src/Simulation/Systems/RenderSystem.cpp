@@ -136,11 +136,13 @@ void RenderSystem::presentFrame( void )
     if ( sBuffer != nullptr ) {
         auto color = sBuffer->getRenderTargets().get( RenderPass::S_BUFFER_COLOR_TARGET_NAME );
         auto program = renderer->getShaderProgram( crimild::Renderer::SHADER_PROGRAM_SCREEN_TEXTURE );
-        renderer->bindProgram( program );
-        renderer->bindTexture( program->getStandardLocation( crimild::ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ), color->getTexture() );
-        renderer->drawScreenPrimitive( program );
-        renderer->unbindTexture( program->getStandardLocation( crimild::ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ), color->getTexture() );
-        renderer->unbindProgram( program );
+        if ( program != nullptr ) {
+            renderer->bindProgram( program );
+            renderer->bindTexture( program->getStandardLocation( crimild::ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ), color->getTexture() );
+            renderer->drawScreenPrimitive( program );
+            renderer->unbindTexture( program->getStandardLocation( crimild::ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ), color->getTexture() );
+            renderer->unbindProgram( program );
+        }
     }
 }
 
