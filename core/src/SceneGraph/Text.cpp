@@ -125,6 +125,9 @@ void Text::accept( NodeVisitor &visitor )
 void Text::setText( std::string text )
 {
 	_text = text;
+	if ( _text == "" ) {
+		_text = " ";
+	}
 	updatePrimitive();
 }
 
@@ -187,6 +190,9 @@ void Text::updatePrimitive( void )
 		vertices.push_back( minX ); 
 		vertices.push_back( maxY );
 		vertices.push_back( 0.0f );
+		vertices.push_back( 0.0f );
+		vertices.push_back( 0.0f );
+		vertices.push_back( 1.0f );
 		vertices.push_back( s0 );
 		vertices.push_back( 1.0f - t0 );
 		indices.push_back( indices.size() );
@@ -194,6 +200,9 @@ void Text::updatePrimitive( void )
 		vertices.push_back( minX ); 
 		vertices.push_back( minY );
 		vertices.push_back( 0.0f );
+		vertices.push_back( 0.0f );
+		vertices.push_back( 0.0f );
+		vertices.push_back( 1.0f );
 		vertices.push_back( s0 );
 		vertices.push_back( 1.0f - t1 );
 		indices.push_back( indices.size() );
@@ -201,6 +210,9 @@ void Text::updatePrimitive( void )
 		vertices.push_back( maxX ); 
 		vertices.push_back( minY );
 		vertices.push_back( 0.0f );
+		vertices.push_back( 0.0f );
+		vertices.push_back( 0.0f );
+		vertices.push_back( 1.0f );
 		vertices.push_back( s1 );
 		vertices.push_back( 1.0f - t1 );
 		indices.push_back( indices.size() );
@@ -208,6 +220,9 @@ void Text::updatePrimitive( void )
 		vertices.push_back( minX ); 
 		vertices.push_back( maxY );
 		vertices.push_back( 0.0f );
+		vertices.push_back( 0.0f );
+		vertices.push_back( 0.0f );
+		vertices.push_back( 1.0f );
 		vertices.push_back( s0 );
 		vertices.push_back( 1.0f - t0 );
 		indices.push_back( indices.size() );
@@ -215,6 +230,9 @@ void Text::updatePrimitive( void )
 		vertices.push_back( maxX ); 
 		vertices.push_back( minY );
 		vertices.push_back( 0.0f );
+		vertices.push_back( 0.0f );
+		vertices.push_back( 0.0f );
+		vertices.push_back( 1.0f );
 		vertices.push_back( s1 );
 		vertices.push_back( 1.0f - t1 );
 		indices.push_back( indices.size() );
@@ -222,6 +240,9 @@ void Text::updatePrimitive( void )
 		vertices.push_back( maxX ); 
 		vertices.push_back( maxY );
 		vertices.push_back( 0.0f );
+		vertices.push_back( 0.0f );
+		vertices.push_back( 0.0f );
+		vertices.push_back( 1.0f );
 		vertices.push_back( s1 );
 		vertices.push_back( 1.0f - t0 );
 		indices.push_back( indices.size() );
@@ -229,7 +250,8 @@ void Text::updatePrimitive( void )
 		horiAdvance += glyph.advance;
 	}
 
-    auto vbo = crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3_UV2, vertices.size() / 5, &vertices[ 0 ] );
+    auto format = VertexFormat::VF_P3_N3_UV2;
+    auto vbo = crimild::alloc< VertexBufferObject >( format, vertices.size() / format.getVertexSize(), &vertices[ 0 ] );
     _primitive->setVertexBuffer( vbo );
     
     auto ibo = crimild::alloc< IndexBufferObject >( indices.size(), &indices[ 0 ] );

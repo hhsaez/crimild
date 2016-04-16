@@ -29,12 +29,15 @@
 
 #import "CrimildMetalVertexBufferObjectCatalog.h"
 #import "CrimildMetalIndexBufferObjectCatalog.h"
+#import "CrimildMetalTextureCatalog.h"
 #import "CrimildMetalShaderProgramCatalog.h"
 
 #import "CrimildMetalView.h"
 
 #import "CrimildMetalUnlitDiffuseShaderProgram.h"
+#import "CrimildMetalUnlitTextureShaderProgram.h"
 #import "CrimildMetalLitTextureShaderProgram.h"
+#import "CrimildMetalTextShaderProgram.h"
 #import "CrimildMetalForwardShaderProgram.h"
 
 using namespace crimild;
@@ -68,13 +71,15 @@ void matrix2float4x4( const Matrix4f &input, simd::float4x4 &output )
 MetalRenderer::MetalRenderer( CrimildMetalView *view )
     : _view( view )
 {
-    setScreenBuffer( crimild::alloc< FrameBufferObject >( getView().bounds.size.width, getView().bounds.size.height ) );
+    float scale = [[UIScreen mainScreen] scale];
+    setScreenBuffer( crimild::alloc< FrameBufferObject >( scale * getView().bounds.size.width, scale * getView().bounds.size.height ) );
 
     setVertexBufferObjectCatalog( crimild::alloc< VertexBufferObjectCatalog > ( this ) );
     setIndexBufferObjectCatalog( crimild::alloc< IndexBufferObjectCatalog > ( this ) );
     setShaderProgramCatalog( crimild::alloc< ShaderProgramCatalog > ( this ) );
+    setTextureCatalog( crimild::alloc< TextureCatalog > ( this ) );
     
-    setShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_TEXTURE, crimild::alloc< UnlitDiffuseShaderProgram >() );
+    setShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_TEXTURE, crimild::alloc< UnlitTextureShaderProgram >() );
     setShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_DIFFUSE, crimild::alloc< UnlitDiffuseShaderProgram >() );
 
     setShaderProgram( Renderer::SHADER_PROGRAM_LIT_TEXTURE, crimild::alloc< LitTextureShaderProgram >() );
@@ -83,7 +88,7 @@ MetalRenderer::MetalRenderer( CrimildMetalView *view )
     setShaderProgram( Renderer::SHADER_PROGRAM_RENDER_PASS_FORWARD, crimild::retain( getShaderProgram( Renderer::SHADER_PROGRAM_LIT_TEXTURE ) ) );
 //    setShaderProgram( Renderer::SHADER_PROGRAM_RENDER_PASS_FORWARD, crimild::alloc< LitTextureShaderProgram >() );
     
-    
+    setShaderProgram( Renderer::SHADER_PROGRAM_TEXT_BASIC, crimild::alloc< TextShaderProgram >() );
 }
 
 MetalRenderer::~MetalRenderer( void )
@@ -102,6 +107,7 @@ void MetalRenderer::configure( void )
     _commandQueue = [_device newCommandQueue];
 
     _layer = (CAMetalLayer *) getView().layer;
+    _layer.contentsScale = [[UIScreen mainScreen] scale];
     _layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
     _layer.framebufferOnly = true;
     _layer.presentsWithTransaction = false;
@@ -111,7 +117,7 @@ void MetalRenderer::configure( void )
     CGRect bounds = getView().frame;
     _viewport = MTLViewport {
         0.0f, 0.0f,
-        bounds.size.width, bounds.size.height,
+        _layer.contentsScale * bounds.size.width, _layer.contentsScale * bounds.size.height,
         0.0f, 1.0f
     };
 
@@ -222,6 +228,12 @@ void MetalRenderer::bindMaterial( ShaderProgram *program, Material *material )
     setDepthState( material->getDepthState() );
     setAlphaState( material->getAlphaState() );
     setCullFaceState( material->getCullFaceState() );
+    
+    bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_USE_COLOR_MAP_UNIFORM ), material->getColorMap() != nullptr );
+    if ( material->getColorMap() != nullptr ) {
+        auto loc = program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM );
+        bindTexture( loc, material->getColorMap() );
+    }
 }
 
 void MetalRenderer::bindLight( ShaderProgram *program, Light *light )

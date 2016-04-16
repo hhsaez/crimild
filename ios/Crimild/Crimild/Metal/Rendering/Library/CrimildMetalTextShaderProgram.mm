@@ -25,67 +25,21 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "CrimildMetalIndexBufferObjectCatalog.h"
-
-#import "CrimildMetalRenderer.h"
+#import "CrimildMetalTextShaderProgram.h"
 
 using namespace crimild;
 using namespace crimild::metal;
 
-IndexBufferObjectCatalog::IndexBufferObjectCatalog( MetalRenderer *renderer )
-: _nextBufferId( 0 ),
-_renderer( renderer )
+TextShaderProgram::TextShaderProgram( void )
+    : ShaderProgram( crimild::alloc< VertexShader >( "crimild_vertex_shader_text" ), crimild::alloc< FragmentShader >( "crimild_fragment_shader_text" ) )
 {
-    
+    auto location = crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, "uniforms" );
+    location->setLocation( 1 );
+    registerLocation( location );
 }
 
-IndexBufferObjectCatalog::~IndexBufferObjectCatalog( void )
-{
-    
-}
+TextShaderProgram::~TextShaderProgram( void )
+{ 
 
-int IndexBufferObjectCatalog::getNextResourceId( void )
-{
-    int bufferId = _nextBufferId++;
-    return bufferId;
-}
-
-void IndexBufferObjectCatalog::bind( ShaderProgram *program, IndexBufferObject *ibo )
-{
-    Catalog< IndexBufferObject >::bind( ibo );
-}
-
-void IndexBufferObjectCatalog::unbind( ShaderProgram *program, IndexBufferObject *vbo )
-{
-    Catalog< IndexBufferObject >::unbind( vbo );
-}
-
-void IndexBufferObjectCatalog::load( IndexBufferObject *ibo )
-{
-    Catalog< IndexBufferObject >::load( ibo );
-    
-    id< MTLBuffer > indexArray = [getRenderer()->getDevice() newBufferWithBytes: ibo->getData()
-                                                                         length: ibo->getSizeInBytes()
-                                                                        options: MTLResourceOptionCPUCacheModeDefault];
-    
-    _ibos[ ibo->getCatalogId() ] = indexArray;
-    
-}
-
-void IndexBufferObjectCatalog::unload( IndexBufferObject *ibo )
-{
-    _ibos[ ibo->getCatalogId() ] = nullptr;
-    
-    Catalog< IndexBufferObject >::unload( ibo );
-}
-
-void IndexBufferObjectCatalog::cleanup( void )
-{
-    // TODO
-}
-
-id< MTLBuffer > IndexBufferObjectCatalog::getMetalIndexBuffer( crimild::IndexBufferObject *ibo )
-{
-    return _ibos[ ibo->getCatalogId() ];
 }
 

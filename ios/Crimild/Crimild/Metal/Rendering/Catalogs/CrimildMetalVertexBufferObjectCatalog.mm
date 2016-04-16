@@ -54,6 +54,10 @@ void VertexBufferObjectCatalog::bind( ShaderProgram *program, VertexBufferObject
 {
     Catalog< VertexBufferObject >::bind( vbo );
     
+    if ( vbo->getCatalogId() < 0 ) {
+        return;
+    }
+    
     [getRenderer()->getRenderEncoder() setVertexBuffer: _vbos[ vbo->getCatalogId() ]
                                                 offset: 0
                                                atIndex: 0];
@@ -68,12 +72,12 @@ void VertexBufferObjectCatalog::load( VertexBufferObject *vbo )
 {
     Catalog< VertexBufferObject >::load( vbo );
     
-    id< MTLBuffer > vertexArray = [getRenderer()->getDevice() newBufferWithBytes: vbo->getData()
-                                                                          length: vbo->getSizeInBytes()
-                                                                         options: MTLResourceOptionCPUCacheModeDefault];
-    
-    _vbos[ vbo->getCatalogId() ] = vertexArray;
-
+    if ( vbo->getData() != nullptr ) {
+        id< MTLBuffer > vertexArray = [getRenderer()->getDevice() newBufferWithBytes: vbo->getData()
+                                                                              length: vbo->getSizeInBytes()
+                                                                             options: MTLResourceOptionCPUCacheModeDefault];
+        _vbos[ vbo->getCatalogId() ] = vertexArray;
+    }
 }
 
 void VertexBufferObjectCatalog::unload( VertexBufferObject *vbo )

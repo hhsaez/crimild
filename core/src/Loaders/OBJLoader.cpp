@@ -158,7 +158,7 @@ void OBJLoader::generateGeometry( void )
 	}
     
     bool useNormals = _normals.size() > 0;
-    bool useTangents = _currentMaterial->getNormalMap() != nullptr;
+    bool useTangents = _currentMaterial != nullptr && _currentMaterial->getNormalMap() != nullptr;
     bool useTextureCoords = _textureCoords.size() > 0;
 
 	VertexFormat format( 3,
