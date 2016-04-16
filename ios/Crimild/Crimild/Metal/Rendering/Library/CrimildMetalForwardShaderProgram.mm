@@ -26,16 +26,32 @@
  */
 
 #import "CrimildMetalForwardShaderProgram.h"
+#import "CrimildMetalStandardUniforms.h"
 
 using namespace crimild;
 using namespace crimild::metal;
 
 ForwardShaderProgram::ForwardShaderProgram( void )
-    : ShaderProgram( crimild::alloc< VertexShader >( "crimild_vertex_shader_unlit_diffuse" ), crimild::alloc< FragmentShader >( "crimild_fragment_shader_unlit_diffuse" ) )
+    : ShaderProgram( crimild::alloc< VertexShader >( "crimild_vertex_shader_forward" ), crimild::alloc< FragmentShader >( "crimild_fragment_shader_forward" ) )
 {
     auto location = crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, "uniforms" );
     location->setLocation( 1 );
     registerLocation( location );
+    
+    registerStandardLocation(
+        ShaderLocation::Type::UNIFORM,
+        ShaderProgram::StandardLocation::PROJECTION_MATRIX_UNIFORM, "pMatrix" )
+    ->setLocation( MetalStandardLocation::PROJECTION_MATRIX_UNIFORM );
+
+    registerStandardLocation(
+         ShaderLocation::Type::UNIFORM,
+         ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM, "vMatrix" )
+    ->setLocation( MetalStandardLocation::VIEW_MATRIX_UNIFORM );
+
+    registerStandardLocation(
+         ShaderLocation::Type::UNIFORM,
+         ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM, "mMatrix" )
+    ->setLocation( MetalStandardLocation::MODEL_MATRIX_UNIFORM );
 }
 
 ForwardShaderProgram::~ForwardShaderProgram( void )

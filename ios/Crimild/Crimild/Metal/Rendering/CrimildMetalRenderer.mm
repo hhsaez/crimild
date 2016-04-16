@@ -83,10 +83,8 @@ MetalRenderer::MetalRenderer( CrimildMetalView *view )
     setShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_DIFFUSE, crimild::alloc< UnlitDiffuseShaderProgram >() );
 
     setShaderProgram( Renderer::SHADER_PROGRAM_LIT_TEXTURE, crimild::alloc< LitTextureShaderProgram >() );
-//    setShaderProgram( Renderer::SHADER_PROGRAM_LIT_TEXTURE, crimild::retain( getShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_TEXTURE ) ) );
 
-    setShaderProgram( Renderer::SHADER_PROGRAM_RENDER_PASS_FORWARD, crimild::retain( getShaderProgram( Renderer::SHADER_PROGRAM_LIT_TEXTURE ) ) );
-//    setShaderProgram( Renderer::SHADER_PROGRAM_RENDER_PASS_FORWARD, crimild::alloc< LitTextureShaderProgram >() );
+    setShaderProgram( Renderer::SHADER_PROGRAM_RENDER_PASS_FORWARD, crimild::alloc< ForwardShaderProgram >() );
     
     setShaderProgram( Renderer::SHADER_PROGRAM_TEXT_BASIC, crimild::alloc< TextShaderProgram >() );
 }
@@ -324,16 +322,21 @@ void MetalRenderer::bindUniform( ShaderLocation *location, const RGBAColorf &col
 
 void MetalRenderer::bindUniform( ShaderLocation *location, const Matrix4f &matrix )
 {
-    /*
-    if ( location == nullptr || location->getLocation() < VERTEX_BUFFER_INDEX_UNIFORM_DATA ) {
+    if ( location == nullptr ) {
         return;
     }
     
-    id< MTLBuffer > uniform = [_device newBufferWithBytes: matrix.getData()
-                                                   length: 16 * sizeof( float )
-                                                   options: MTLResourceCPUCacheModeDefaultCache];
-    [getRenderEncoder() setVertexBuffer: uniform offset: 0 atIndex: location->getLocation()];
-     */
+    switch ( location->getLocation() ) {
+        case MetalStandardLocation::PROJECTION_MATRIX_UNIFORM:
+            matrix2float4x4( matrix, _standardUniforms.pMatrix );
+            break;
+        case MetalStandardLocation::VIEW_MATRIX_UNIFORM:
+            matrix2float4x4( matrix, _standardUniforms.vMatrix );
+            break;
+        case MetalStandardLocation::MODEL_MATRIX_UNIFORM:
+            matrix2float4x4( matrix, _standardUniforms.mMatrix );
+            break;
+    }
 }
 
 void MetalRenderer::applyTransformations( ShaderProgram *program, const Matrix4f &projection, const Matrix4f &view, const Matrix4f &model, const Matrix4f &normal )

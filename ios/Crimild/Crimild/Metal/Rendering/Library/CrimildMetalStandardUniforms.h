@@ -21,6 +21,15 @@ namespace crimild {
     
     namespace metal {
         
+        class MetalStandardLocation {
+        public:
+            enum {
+                PROJECTION_MATRIX_UNIFORM,
+                VIEW_MATRIX_UNIFORM,
+                MODEL_MATRIX_UNIFORM
+            };
+        };
+        
         typedef struct {
             simd::float4 ambient;
             simd::float4 diffuse;
