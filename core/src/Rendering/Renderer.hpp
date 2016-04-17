@@ -83,6 +83,8 @@ namespace crimild {
         virtual void render( RenderQueue *renderQueue, RenderPass *renderPass );
 
         virtual void endRender( void );
+            
+        virtual void presentFrame( void );
 
 	public:
 		virtual void bindFrameBuffer( FrameBufferObject *fbo );

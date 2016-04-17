@@ -25,51 +25,21 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_METAL_TEXTURE_CATALOG_
-#define CRIMILD_METAL_TEXTURE_CATALOG_
+#import "CrimildMetalScreenTextureShaderProgram.h"
 
-#include <Crimild.hpp>
+using namespace crimild;
+using namespace crimild::metal;
 
-#import <Metal/Metal.h>
-
-namespace crimild {
-    
-    namespace metal {
-        
-        class MetalRenderer;
-        
-        class TextureCatalog : public Catalog< Texture > {
-        public:
-            TextureCatalog( MetalRenderer *renderer );
-            virtual ~TextureCatalog( void );
-            
-            virtual int getNextResourceId( void ) override;
-            
-            virtual void bind( ShaderLocation *location, Texture *texture ) override;
-            virtual void unbind( ShaderLocation *location, Texture *texture ) override;
-            
-            virtual void load( Texture *texture ) override;
-            virtual void unload( Texture *texture ) override;
-            
-            virtual void cleanup( void ) override;
-            
-        public:
-            id< MTLTexture > generateRenderTargetTexture( RenderTarget *renderTarget );
-            
-        protected:
-            MetalRenderer *getRenderer( void ) { return _renderer; }
-            
-        private:
-            MetalRenderer *_renderer;
-            std::map< int, id< MTLTexture > > _textures;
-            int _nextBufferId;
-            
-            unsigned int _activeTextureCount = 0;
-        };
-        
-    }
-    
+ScreenTextureShaderProgram::ScreenTextureShaderProgram( void )
+    : ShaderProgram( crimild::alloc< VertexShader >( "crimild_vertex_shader_screen_texture" ), crimild::alloc< FragmentShader >( "crimild_fragment_shader_screen_texture" ) )
+{
+    auto location = crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, "uniforms" );
+    location->setLocation( 1 );
+    registerLocation( location );
 }
 
-#endif
+ScreenTextureShaderProgram::~ScreenTextureShaderProgram( void )
+{ 
+
+}
 

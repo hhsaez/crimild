@@ -39,6 +39,13 @@ namespace crimild {
         class MetalRenderer;
         
         class FrameBufferObjectCatalog : public Catalog< FrameBufferObject > {
+        private:
+            struct FBOCache {
+                MTLRenderPassDescriptor *renderPassDescriptor;
+                id< MTLTexture > texture;
+                id< MTLDrawable > drawable;
+            };
+            
         public:
             FrameBufferObjectCatalog( MetalRenderer *renderer );
             virtual ~FrameBufferObjectCatalog( void );
@@ -57,16 +64,11 @@ namespace crimild {
             MetalRenderer *getRenderer( void ) { return _renderer; }
             
         private:
-            MetalRenderer *_renderer;
-            std::map< int, id< MTLBuffer > > _fbos;
-            int _nextBufferId;
+            MetalRenderer *_renderer = nullptr;
             
-            id< MTLCommandQueue > _commandQueue;
-            id< MTLCommandBuffer > _commandBuffer;
-//            id< MTLRenderCommandEncoder > _renderEncoder;
-            id< MTLDrawable > _drawable;
+            std::map< int, FBOCache > _fboCache;
             
-            dispatch_semaphore_t _inflightSemaphore;
+            unsigned int _nextTextureID = 0;
         };
         
     }

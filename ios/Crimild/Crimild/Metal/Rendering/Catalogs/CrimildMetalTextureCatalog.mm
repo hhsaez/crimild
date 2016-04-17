@@ -124,3 +124,19 @@ void TextureCatalog::cleanup( void )
     Catalog< Texture >::cleanup();
 }
 
+id< MTLTexture > TextureCatalog::generateRenderTargetTexture( RenderTarget *renderTarget )
+{
+    MTLTextureDescriptor *textureDescriptor = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat: MTLPixelFormatBGRA8Unorm
+                                                                                                 width: renderTarget->getWidth()
+                                                                                                height: renderTarget->getHeight()
+                                                                                             mipmapped: NO];
+    
+    id< MTLTexture > mtlTexture = [getRenderer()->getDevice() newTextureWithDescriptor:textureDescriptor];
+    
+    auto texture = renderTarget->getTexture();
+    Catalog< Texture >::load( texture );
+    _textures[ texture->getCatalogId() ] = mtlTexture;
+    
+    return mtlTexture;
+}
+

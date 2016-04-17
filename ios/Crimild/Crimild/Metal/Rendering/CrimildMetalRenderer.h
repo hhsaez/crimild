@@ -65,6 +65,8 @@ namespace crimild {
             
             virtual void clearBuffers( void ) override;
             
+            virtual void presentFrame( void ) override;
+            
             virtual void bindMaterial( ShaderProgram *program, Material *material ) override;
             
             virtual void bindLight( ShaderProgram *program, Light *light ) override;
@@ -91,6 +93,8 @@ namespace crimild {
             CAMetalLayer *getLayer( void ) { return _layer; }
             
             id< MTLDevice > getDevice( void ) { return _device; }
+            id< MTLCommandBuffer > getCommandBuffer( void ) { return _commandBuffer; }
+            id< CAMetalDrawable > getDrawable( void ) { return _drawable; }
             
             void setRenderEncoder( id< MTLRenderCommandEncoder > encoder ) { _renderEncoder = encoder; }
             id< MTLRenderCommandEncoder > getRenderEncoder( void ) { return _renderEncoder; }
@@ -98,15 +102,12 @@ namespace crimild {
         private:
             CAMetalLayer *_layer;
             id< MTLDevice > _device;
-//            id< MTLCommandQueue > _commandQueue;
-//            id< MTLCommandBuffer > _commandBuffer;
-//            id< CAMetalDrawable > _drawable;
-//            MTLClearColor _clearColor;
-//            MTLViewport _viewport;
-//            id< MTLDepthStencilState > _depthStencilState;
+            id< MTLCommandQueue > _commandQueue;
+            id< MTLCommandBuffer > _commandBuffer;
+            id< CAMetalDrawable > _drawable;
             id< MTLRenderCommandEncoder > _renderEncoder;
             
-//            dispatch_semaphore_t _inflightSemaphore;
+            dispatch_semaphore_t _inflightSemaphore;
             
             MetalStandardUniforms _standardUniforms;
             

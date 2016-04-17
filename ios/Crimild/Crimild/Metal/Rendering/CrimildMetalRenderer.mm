@@ -40,9 +40,12 @@
 #import "CrimildMetalLitTextureShaderProgram.h"
 #import "CrimildMetalTextShaderProgram.h"
 #import "CrimildMetalForwardShaderProgram.h"
+#import "CrimildMetalScreenTextureShaderProgram.h"
 
 using namespace crimild;
 using namespace crimild::metal;
+
+static const long CRIMILD_METAL_IN_FLIGHT_COMMAND_BUFFERS = 1;
 
 simd::float4x4 convertMatrix( const Matrix4f &input )
 {
@@ -81,6 +84,8 @@ MetalRenderer::MetalRenderer( CrimildMetalView *view )
     setShaderProgram( Renderer::SHADER_PROGRAM_RENDER_PASS_FORWARD, crimild::alloc< ForwardShaderProgram >() );
     
     setShaderProgram( Renderer::SHADER_PROGRAM_TEXT_BASIC, crimild::alloc< TextShaderProgram >() );
+
+    setShaderProgram( Renderer::SHADER_PROGRAM_SCREEN_TEXTURE, crimild::alloc< ScreenTextureShaderProgram >() );
 }
 
 MetalRenderer::~MetalRenderer( void )
@@ -88,6 +93,7 @@ MetalRenderer::~MetalRenderer( void )
     _device = nil;
     _view = nil;
     _layer = nil;
+    _commandQueue = nil;
 }
 
 void MetalRenderer::configure( void )
@@ -115,6 +121,10 @@ void MetalRenderer::configure( void )
         CFRelease( colorSpace );
     }
     
+    _inflightSemaphore = dispatch_semaphore_create( CRIMILD_METAL_IN_FLIGHT_COMMAND_BUFFERS );
+    
+    _commandQueue = [getDevice() newCommandQueue];
+    
     setVertexBufferObjectCatalog( crimild::alloc< VertexBufferObjectCatalog > ( this ) );
     setIndexBufferObjectCatalog( crimild::alloc< IndexBufferObjectCatalog > ( this ) );
     setShaderProgramCatalog( crimild::alloc< ShaderProgramCatalog > ( this ) );
@@ -131,14 +141,43 @@ void MetalRenderer::beginRender( void )
 {
     Renderer::beginRender();
     
-    getFrameBufferObjectCatalog()->bind( getScreenBuffer() );
+    dispatch_semaphore_wait( _inflightSemaphore, DISPATCH_TIME_FOREVER );
+    
+    _commandBuffer = [_commandQueue commandBuffer];
+    if ( _commandBuffer == nil ) {
+        Log::Error << "Cannot obtain command buffer" << Log::End;
+        return;
+    }
+    
+    _drawable = [getLayer() nextDrawable];
+    if ( _drawable == nil ) {
+        Log::Error << "Cannot obtain next drawable" << Log::End;
+        return;
+    }
+    
 }
 
 void MetalRenderer::endRender( void )
 {
     Renderer::endRender();
-    
+}
+
+void MetalRenderer::presentFrame( void )
+{
+    getFrameBufferObjectCatalog()->bind( getScreenBuffer() );
+
+    Renderer::presentFrame();
+
     getFrameBufferObjectCatalog()->unbind( getScreenBuffer() );
+    
+    __block dispatch_semaphore_t dispatchSemaphore = _inflightSemaphore;
+    
+    [_commandBuffer addCompletedHandler:^(id<MTLCommandBuffer>) {
+        dispatch_semaphore_signal( dispatchSemaphore );
+    }];
+    
+    [_commandBuffer presentDrawable: _drawable];
+    [_commandBuffer commit];
 }
 
 void MetalRenderer::clearBuffers( void )

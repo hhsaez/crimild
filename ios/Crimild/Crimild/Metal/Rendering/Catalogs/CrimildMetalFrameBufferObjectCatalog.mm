@@ -26,73 +26,46 @@
  */
 
 #import "CrimildMetalFrameBufferObjectCatalog.h"
+#import "CrimildMetalTextureCatalog.h"
 
 #import "CrimildMetalRenderer.h"
 
 using namespace crimild;
 using namespace crimild::metal;
 
-static const long CRIMILD_METAL_IN_FLIGHT_COMMAND_BUFFERS = 1;
-
 FrameBufferObjectCatalog::FrameBufferObjectCatalog( MetalRenderer *renderer )
-    : _nextBufferId( 0 ),
-      _renderer( renderer )
+    : _renderer( renderer )
 {
-    _inflightSemaphore = dispatch_semaphore_create( CRIMILD_METAL_IN_FLIGHT_COMMAND_BUFFERS );
     
-    _commandQueue = [getRenderer()->getDevice() newCommandQueue];
 }
 
 FrameBufferObjectCatalog::~FrameBufferObjectCatalog( void )
 {
-    _commandQueue = nil;
+    
 }
 
 int FrameBufferObjectCatalog::getNextResourceId( void )
 {
-    int bufferId = _nextBufferId++;
-    return bufferId;
+    return Catalog< FrameBufferObject >::getNextResourceId();
 }
 
 void FrameBufferObjectCatalog::bind( FrameBufferObject *fbo )
 {
     Catalog< FrameBufferObject >::bind( fbo );
     
-    dispatch_semaphore_wait( _inflightSemaphore, DISPATCH_TIME_FOREVER );
+    auto &cachedFBO = _fboCache[ fbo->getCatalogId() ];
     
-    _commandBuffer = [_commandQueue commandBuffer];
-    if ( _commandBuffer == nil ) {
-        Log::Error << "Cannot obtain command buffer" << Log::End;
-        return;
-    }
-    
-    MTLRenderPassDescriptor *renderPassDescriptor = [MTLRenderPassDescriptor renderPassDescriptor];
+    auto renderPassDescriptor = cachedFBO.renderPassDescriptor;
     if ( renderPassDescriptor == nil ) {
         Log::Error << "Cannot obtain a render pass descriptor" << Log::End;
         return;
     }
     
-    if ( fbo == getRenderer()->getScreenBuffer() ) {
-        id< CAMetalDrawable > nextDrawable = [getRenderer()->getLayer() nextDrawable];
-        if ( nextDrawable == nil ) {
-            Log::Error << "Cannot obtain next drawable" << Log::End;
-            return;
-        }
-        _drawable = nextDrawable;
-        renderPassDescriptor.colorAttachments[ 0 ].texture = nextDrawable.texture;
-    }
-    else {
-        assert( false && "Unsorported" );
+    if ( cachedFBO.texture == nil ) {
+        renderPassDescriptor.colorAttachments[ 0 ].texture = getRenderer()->getDrawable().texture;
     }
     
-    renderPassDescriptor.colorAttachments[0].loadAction = MTLLoadActionClear;
-    
-    const RGBAColorf &clearColor = fbo->getClearColor();
-    renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColorMake( clearColor[ 0 ], clearColor[ 1 ], clearColor[ 2 ], clearColor[ 3 ] );
-    
-    renderPassDescriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
-    
-    auto renderEncoder = [_commandBuffer renderCommandEncoderWithDescriptor: renderPassDescriptor];
+    auto renderEncoder = [getRenderer()->getCommandBuffer() renderCommandEncoderWithDescriptor: renderPassDescriptor];
     if ( renderEncoder == nil ) {
         Log::Error << "Cannot create render encoder" << Log::End;
         return;
@@ -125,21 +98,36 @@ void FrameBufferObjectCatalog::unbind( FrameBufferObject *fbo )
     Catalog< FrameBufferObject >::unbind( fbo );
     
     [getRenderer()->getRenderEncoder() endEncoding];
-    
-    __block dispatch_semaphore_t dispatchSemaphore = _inflightSemaphore;
-    
-    [_commandBuffer addCompletedHandler:^(id<MTLCommandBuffer>) {
-        dispatch_semaphore_signal( dispatchSemaphore );
-    }];
-    
-    [_commandBuffer presentDrawable: _drawable];
-    [_commandBuffer commit];
-    
 }
 
 void FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
 {
     Catalog< FrameBufferObject >::load( fbo );
+    
+    auto &cache = _fboCache[ fbo->getCatalogId() ];
+
+    cache.renderPassDescriptor = [MTLRenderPassDescriptor new];
+    cache.renderPassDescriptor.colorAttachments[ 0 ].loadAction = MTLLoadActionClear;
+    const RGBAColorf &clearColor = fbo->getClearColor();
+    cache.renderPassDescriptor.colorAttachments[ 0 ].clearColor = MTLClearColorMake( clearColor[ 0 ], clearColor[ 1 ], clearColor[ 2 ], clearColor[ 3 ] );
+    cache.renderPassDescriptor.colorAttachments[ 0 ].storeAction = MTLStoreActionStore;
+    
+    if ( fbo == getRenderer()->getScreenBuffer() ) {
+        // no need for further operations
+        return;
+    }
+    
+    auto textureCatalog = static_cast< TextureCatalog * >( getRenderer()->getTextureCatalog() );
+    
+    int currentColorAttachment = 0;
+    fbo->getRenderTargets().each( [textureCatalog, &cache, &currentColorAttachment]( std::string, RenderTarget *renderTarget ) {
+        if ( ( renderTarget->getType() == RenderTarget::Type::COLOR_RGB || renderTarget->getType() == RenderTarget::Type::COLOR_RGBA ) &&
+             ( renderTarget->getOutput() == RenderTarget::Output::TEXTURE || renderTarget->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) ) {
+            
+            cache.texture = textureCatalog->generateRenderTargetTexture( renderTarget );
+            cache.renderPassDescriptor.colorAttachments[ currentColorAttachment++ ].texture = cache.texture;
+        }
+    });
 }
 
 void FrameBufferObjectCatalog::unload( FrameBufferObject *fbo )
