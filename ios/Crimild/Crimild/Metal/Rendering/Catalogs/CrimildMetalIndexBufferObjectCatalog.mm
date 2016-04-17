@@ -81,7 +81,7 @@ void IndexBufferObjectCatalog::unload( IndexBufferObject *ibo )
 
 void IndexBufferObjectCatalog::cleanup( void )
 {
-    // TODO
+    Catalog< IndexBufferObject >::cleanup();
 }
 
 id< MTLBuffer > IndexBufferObjectCatalog::getMetalIndexBuffer( crimild::IndexBufferObject *ibo )

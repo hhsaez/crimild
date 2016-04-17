@@ -132,6 +132,6 @@ void ShaderProgramCatalog::unload( ShaderProgram *program )
 
 void ShaderProgramCatalog::cleanup( void )
 {
-    // TODO
+    Catalog< ShaderProgram >::cleanup();
 }
 

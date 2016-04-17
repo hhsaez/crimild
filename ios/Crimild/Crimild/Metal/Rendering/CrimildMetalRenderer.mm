@@ -31,6 +31,7 @@
 #import "CrimildMetalIndexBufferObjectCatalog.h"
 #import "CrimildMetalTextureCatalog.h"
 #import "CrimildMetalShaderProgramCatalog.h"
+#import "CrimildMetalFrameBufferObjectCatalog.h"
 
 #import "CrimildMetalView.h"
 
@@ -42,8 +43,6 @@
 
 using namespace crimild;
 using namespace crimild::metal;
-
-static const long IN_FLIGHT_COMMAND_BUFFERS = 1;
 
 simd::float4x4 convertMatrix( const Matrix4f &input )
 {
@@ -74,11 +73,6 @@ MetalRenderer::MetalRenderer( CrimildMetalView *view )
     float scale = [[UIScreen mainScreen] scale];
     setScreenBuffer( crimild::alloc< FrameBufferObject >( scale * getView().bounds.size.width, scale * getView().bounds.size.height ) );
 
-    setVertexBufferObjectCatalog( crimild::alloc< VertexBufferObjectCatalog > ( this ) );
-    setIndexBufferObjectCatalog( crimild::alloc< IndexBufferObjectCatalog > ( this ) );
-    setShaderProgramCatalog( crimild::alloc< ShaderProgramCatalog > ( this ) );
-    setTextureCatalog( crimild::alloc< TextureCatalog > ( this ) );
-    
     setShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_TEXTURE, crimild::alloc< UnlitTextureShaderProgram >() );
     setShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_DIFFUSE, crimild::alloc< UnlitDiffuseShaderProgram >() );
 
@@ -91,8 +85,6 @@ MetalRenderer::MetalRenderer( CrimildMetalView *view )
 
 MetalRenderer::~MetalRenderer( void )
 {
-    _depthStencilState = nil;
-    _commandQueue = nil;
     _device = nil;
     _view = nil;
     _layer = nil;
@@ -102,8 +94,6 @@ void MetalRenderer::configure( void )
 {
     _device = MTLCreateSystemDefaultDevice();
 
-    _commandQueue = [_device newCommandQueue];
-
     _layer = (CAMetalLayer *) getView().layer;
     _layer.contentsScale = [[UIScreen mainScreen] scale];
     _layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
@@ -111,13 +101,6 @@ void MetalRenderer::configure( void )
     _layer.presentsWithTransaction = false;
     _layer.drawsAsynchronously = true;
     _layer.device = _device;
-
-    CGRect bounds = getView().frame;
-    _viewport = MTLViewport {
-        0.0f, 0.0f,
-        _layer.contentsScale * bounds.size.width, _layer.contentsScale * bounds.size.height,
-        0.0f, 1.0f
-    };
 
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     if ( colorSpace != nullptr ) {
@@ -132,18 +115,11 @@ void MetalRenderer::configure( void )
         CFRelease( colorSpace );
     }
     
-    MTLDepthStencilDescriptor *depthStateDesc = [MTLDepthStencilDescriptor new];
-    if ( !depthStateDesc ) {
-        Log::Error << "Cannot create depth-stencil descriptor";
-        return;
-    }
-    depthStateDesc.depthCompareFunction = MTLCompareFunctionAlways;
-    depthStateDesc.depthWriteEnabled = true;
-    _depthStencilState = [_device newDepthStencilStateWithDescriptor: depthStateDesc];
-    depthStateDesc = nil;
-    
-    // create semaphores
-    _inflightSemaphore = dispatch_semaphore_create( IN_FLIGHT_COMMAND_BUFFERS );
+    setVertexBufferObjectCatalog( crimild::alloc< VertexBufferObjectCatalog > ( this ) );
+    setIndexBufferObjectCatalog( crimild::alloc< IndexBufferObjectCatalog > ( this ) );
+    setShaderProgramCatalog( crimild::alloc< ShaderProgramCatalog > ( this ) );
+    setTextureCatalog( crimild::alloc< TextureCatalog > ( this ) );
+    setFrameBufferObjectCatalog( crimild::alloc< FrameBufferObjectCatalog >( this ) );
 }
 
 void MetalRenderer::setViewport( const Rectf &viewport )
@@ -155,59 +131,14 @@ void MetalRenderer::beginRender( void )
 {
     Renderer::beginRender();
     
-    dispatch_semaphore_wait( _inflightSemaphore, DISPATCH_TIME_FOREVER );
-    
-    _drawable = [_layer nextDrawable];
-    if ( _drawable == nil ) {
-        Log::Error << "Cannot obtain next drawable" << Log::End;
-        return;
-    }
-    
-    _commandBuffer = [_commandQueue commandBuffer];
-    if ( _commandBuffer == nil ) {
-        Log::Error << "Cannot obtain command buffer" << Log::End;
-        return;
-    }
-    
-    MTLRenderPassDescriptor *renderPassDescriptor = [MTLRenderPassDescriptor renderPassDescriptor];
-    if ( renderPassDescriptor == nil ) {
-        Log::Error << "Cannot obtain a render pass descriptor" << Log::End;
-        return;
-    }
-    
-    renderPassDescriptor.colorAttachments[0].texture = _drawable.texture;
-    renderPassDescriptor.colorAttachments[0].loadAction = MTLLoadActionClear;
-    
-    const RGBAColorf &clearColor = getScreenBuffer()->getClearColor();
-    renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColorMake( clearColor[ 0 ], clearColor[ 1 ], clearColor[ 2 ], clearColor[ 3 ] );
-    
-    renderPassDescriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
-    
-    _renderEncoder = [_commandBuffer renderCommandEncoderWithDescriptor: renderPassDescriptor];
-    if ( _renderEncoder == nil ) {
-        Log::Error << "Cannot create render encoder" << Log::End;
-        return;
-    }
-    
-    [_renderEncoder setViewport: _viewport];
-    [_renderEncoder setFrontFacingWinding: MTLWindingCounterClockwise];
-    [_renderEncoder setDepthStencilState: _depthStencilState];
+    getFrameBufferObjectCatalog()->bind( getScreenBuffer() );
 }
 
 void MetalRenderer::endRender( void )
 {
     Renderer::endRender();
-
-    [_renderEncoder endEncoding];
     
-    __block dispatch_semaphore_t dispatchSemaphore = _inflightSemaphore;
-    
-    [_commandBuffer addCompletedHandler:^(id<MTLCommandBuffer>) {
-        dispatch_semaphore_signal( dispatchSemaphore );
-    }];
-    
-    [_commandBuffer presentDrawable: _drawable];
-    [_commandBuffer commit];
+    getFrameBufferObjectCatalog()->unbind( getScreenBuffer() );
 }
 
 void MetalRenderer::clearBuffers( void )

@@ -121,6 +121,6 @@ void TextureCatalog::unload( Texture *texture )
 
 void TextureCatalog::cleanup( void )
 {
-    // TODO
+    Catalog< Texture >::cleanup();
 }
 

@@ -89,6 +89,6 @@ void VertexBufferObjectCatalog::unload( VertexBufferObject *vbo )
 
 void VertexBufferObjectCatalog::cleanup( void )
 {
-    // TODO
+    Catalog< VertexBufferObject >::cleanup();
 }
 
