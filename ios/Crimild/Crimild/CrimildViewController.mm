@@ -72,7 +72,7 @@
         _animationFrameInterval = 1;
         _displayLink = nil;
         
-        self.useMetalRenderPath = YES;
+        self.useMetalRenderPath = NO;
     }
     
     return self;
@@ -84,9 +84,11 @@
 
     if (self.useMetalRenderPath) {
         self.crimildView = [[CrimildMetalView alloc] initWithFrame:self.view.bounds];
+        self.animationFrameInterval = 1;
     }
     else {
         self.crimildView = [[CrimildEAGLView alloc] initWithFrame:self.view.bounds];
+        self.animationFrameInterval = 2;
     }
     
     [self.view addSubview:self.crimildView];

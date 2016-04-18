@@ -77,7 +77,11 @@ namespace crimild {
                     _catalog = nullptr;
 				}
             }
-
+            
+            virtual void onBind( void ) { }
+            
+            virtual void onUnbind( void ) { }
+            
 		private:
             Catalog< RESOURCE_TYPE > *_catalog = nullptr;
 			int _catalogId;
@@ -115,6 +119,8 @@ namespace crimild {
 			if ( resource->getCatalog() == nullptr ) {
 				load( resource );
 			}
+            
+            resource->onBind();
 		}
 
         virtual void bind( ShaderProgram *program, RESOURCE_TYPE *resource )
@@ -129,6 +135,9 @@ namespace crimild {
 
         virtual void unbind( RESOURCE_TYPE *resource )
 		{
+            if ( resource != nullptr ) {
+                resource->onUnbind();
+            }
 		}
 
         virtual void unbind( ShaderProgram *program, RESOURCE_TYPE *resource )

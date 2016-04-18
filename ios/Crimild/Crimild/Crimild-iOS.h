@@ -31,3 +31,6 @@
 
 #import "CrimildViewController.h"
 
+#import "Metal/Rendering/CrimildMetalRenderer.h"
+#import "Metal/Rendering/Library/CrimildMetalStandardUniforms.h"
+
