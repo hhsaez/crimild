@@ -147,7 +147,7 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
         
         float fov = 45.0f;
         float aspect = 4.0f / 3.0f;
-        float near = 1.0f;
+        float near = 0.1f;
         float far = 1000.0f;
         
         eval.getPropValue( CAMERA_FRUSTUM_FOV, fov );
@@ -223,24 +223,24 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
         }
         
         bool enableDepthTest;
-        if ( eval.getPropValue( "enableDepthTest", enableDepthTest, false ) ) {
+        if ( eval.getPropValue( "enableDepthTest", enableDepthTest, true ) ) {
             text->setDepthTestEnabled( enableDepthTest );
         }
         
         std::string anchor;
         if ( eval.getPropValue( "textAnchor", anchor, "left" ) ) {
-            auto min = text->getLocalBound()->getMin();
-            auto max = text->getLocalBound()->getMax();
-            auto diff = max - min;
+            if ( anchor != "left" ) {
+                text->updateModelBounds();
+                auto min = text->getLocalBound()->getMin();
+                auto max = text->getLocalBound()->getMax();
+                auto diff = max - min;
             
-            if ( anchor == "left" ) {
-                // do nothing?
-            }
-            else if ( anchor == "center" ) {
-                text->local().translate() += Vector3f( -0.5f * diff[ 0 ], 0.0f, 0.0f );
-            }
-            else if ( anchor == "right" ) {
-                text->local().translate() += Vector3f( -diff[ 0 ], 0.0f, 0.0f );
+                if ( anchor == "center" ) {
+                    text->local().translate() += Vector3f( -0.5f * diff[ 0 ], 0.0f, 0.0f );
+                }
+                else if ( anchor == "right" ) {
+                    text->local().translate() += Vector3f( -diff[ 0 ], 0.0f, 0.0f );
+                }
             }
         }
         

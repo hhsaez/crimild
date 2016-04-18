@@ -25,12 +25,21 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Crimild.hpp>
-#import <Crimild_Scripting.hpp>
-#import <Crimild_OpenGL.hpp>
+#import "CrimildMetalUnlitDiffuseShaderProgram.h"
 
-#import "CrimildViewController.h"
+using namespace crimild;
+using namespace crimild::metal;
 
-#import "Metal/Rendering/CrimildMetalRenderer.h"
-#import "Metal/Rendering/Library/CrimildMetalStandardUniforms.h"
+UnlitDiffuseShaderProgram::UnlitDiffuseShaderProgram( void )
+    : ShaderProgram( crimild::alloc< VertexShader >( "crimild_vertex_shader_unlit_diffuse" ), crimild::alloc< FragmentShader >( "crimild_fragment_shader_unlit_diffuse" ) )
+{
+    auto location = crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, "uniforms" );
+    location->setLocation( 1 );
+    registerLocation( location );
+}
+
+UnlitDiffuseShaderProgram::~UnlitDiffuseShaderProgram( void )
+{ 
+
+}
 

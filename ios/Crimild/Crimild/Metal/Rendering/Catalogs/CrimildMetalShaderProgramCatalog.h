@@ -25,12 +25,48 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Crimild.hpp>
-#import <Crimild_Scripting.hpp>
-#import <Crimild_OpenGL.hpp>
+#ifndef CRIMILD_METAL_SHADER_PROGRAM_CATALOG_
+#define CRIMILD_METAL_SHADER_PROGRAM_CATALOG_
 
-#import "CrimildViewController.h"
+#include <Crimild.hpp>
 
-#import "Metal/Rendering/CrimildMetalRenderer.h"
-#import "Metal/Rendering/Library/CrimildMetalStandardUniforms.h"
+#import <Metal/Metal.h>
+
+namespace crimild {
+    
+    namespace metal {
+        
+        class MetalRenderer;
+        
+        class ShaderProgramCatalog : public Catalog< ShaderProgram > {
+        public:
+            ShaderProgramCatalog( MetalRenderer *renderer );
+            virtual ~ShaderProgramCatalog( void );
+            
+            virtual int getNextResourceId( void ) override;
+            
+            virtual void bind( ShaderProgram *program ) override;
+            virtual void unbind( ShaderProgram *program ) override;
+            
+            virtual void load( ShaderProgram *program ) override;
+            virtual void unload( ShaderProgram *program ) override;
+            
+            virtual void cleanup( void ) override;
+            
+        protected:
+            MetalRenderer *getRenderer( void ) { return _renderer; }
+            id< MTLLibrary > getDefaultLibrary( void );
+            
+        private:
+            MetalRenderer *_renderer;
+            id< MTLLibrary > _defaultLibrary;
+            std::map< int, id< MTLRenderPipelineState > > _pipelines;
+            int _nextBufferId;
+        };
+        
+    }
+    
+}
+
+#endif
 

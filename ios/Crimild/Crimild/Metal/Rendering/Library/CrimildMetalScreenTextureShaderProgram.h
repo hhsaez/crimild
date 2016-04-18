@@ -25,12 +25,24 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Crimild.hpp>
-#import <Crimild_Scripting.hpp>
-#import <Crimild_OpenGL.hpp>
+#ifndef CRIMILD_METAL_SHADER_PROGRAMS_SCREEN_TEXTURE_
+#define CRIMILD_METAL_SHADER_PROGRAMS_SCREEN_TEXTURE_
 
-#import "CrimildViewController.h"
+#include <Crimild.hpp>
 
-#import "Metal/Rendering/CrimildMetalRenderer.h"
-#import "Metal/Rendering/Library/CrimildMetalStandardUniforms.h"
+namespace crimild {
+    
+    namespace metal {
+        
+        class ScreenTextureShaderProgram : public ShaderProgram {
+        public:
+            ScreenTextureShaderProgram( void );
+            virtual ~ScreenTextureShaderProgram( void );
+        };
+        
+    }
+    
+}
+
+#endif
 

@@ -25,12 +25,49 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Crimild.hpp>
-#import <Crimild_Scripting.hpp>
-#import <Crimild_OpenGL.hpp>
+#ifndef CRIMILD_METAL_INDEX_BUFFER_OBJECT_CATALOG_
+#define CRIMILD_METAL_INDEX_BUFFER_OBJECT_CATALOG_
 
-#import "CrimildViewController.h"
+#include <Crimild.hpp>
 
-#import "Metal/Rendering/CrimildMetalRenderer.h"
-#import "Metal/Rendering/Library/CrimildMetalStandardUniforms.h"
+#import <Metal/Metal.h>
+
+namespace crimild {
+    
+    namespace metal {
+        
+        class MetalRenderer;
+        
+        class IndexBufferObjectCatalog : public Catalog< IndexBufferObject > {
+        public:
+            IndexBufferObjectCatalog( MetalRenderer *renderer );
+            virtual ~IndexBufferObjectCatalog( void );
+            
+            virtual int getNextResourceId( void ) override;
+            
+            virtual void bind( ShaderProgram *program, IndexBufferObject *ibo ) override;
+            virtual void unbind( ShaderProgram *program, IndexBufferObject *ibo ) override;
+            
+            virtual void load( IndexBufferObject *ibo ) override;
+            virtual void unload( IndexBufferObject *ibo ) override;
+            
+            virtual void cleanup( void ) override;
+            
+        public:
+            id< MTLBuffer > getMetalIndexBuffer( IndexBufferObject *ibo );
+            
+        protected:
+            MetalRenderer *getRenderer( void ) { return _renderer; }
+            
+        private:
+            MetalRenderer *_renderer;
+            std::map< int, id< MTLBuffer > > _ibos;
+            int _nextBufferId;
+        };
+        
+    }
+    
+}
+
+#endif
 

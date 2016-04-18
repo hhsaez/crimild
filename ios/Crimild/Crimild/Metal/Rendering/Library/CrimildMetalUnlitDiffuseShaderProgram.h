@@ -25,12 +25,24 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Crimild.hpp>
-#import <Crimild_Scripting.hpp>
-#import <Crimild_OpenGL.hpp>
+#ifndef CRIMILD_METAL_SHADER_PROGRAMS_UNLIT_DIFFUSE_
+#define CRIMILD_METAL_SHADER_PROGRAMS_UNLIT_DIFFUSE_
 
-#import "CrimildViewController.h"
+#include <Crimild.hpp>
 
-#import "Metal/Rendering/CrimildMetalRenderer.h"
-#import "Metal/Rendering/Library/CrimildMetalStandardUniforms.h"
+namespace crimild {
+    
+    namespace metal {
+        
+        class UnlitDiffuseShaderProgram : public ShaderProgram {
+        public:
+            UnlitDiffuseShaderProgram( void );
+            virtual ~UnlitDiffuseShaderProgram( void );
+        };
+        
+    }
+    
+}
+
+#endif
 

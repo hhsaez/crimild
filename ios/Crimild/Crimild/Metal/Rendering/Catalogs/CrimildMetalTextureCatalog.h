@@ -25,12 +25,51 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Crimild.hpp>
-#import <Crimild_Scripting.hpp>
-#import <Crimild_OpenGL.hpp>
+#ifndef CRIMILD_METAL_TEXTURE_CATALOG_
+#define CRIMILD_METAL_TEXTURE_CATALOG_
 
-#import "CrimildViewController.h"
+#include <Crimild.hpp>
 
-#import "Metal/Rendering/CrimildMetalRenderer.h"
-#import "Metal/Rendering/Library/CrimildMetalStandardUniforms.h"
+#import <Metal/Metal.h>
+
+namespace crimild {
+    
+    namespace metal {
+        
+        class MetalRenderer;
+        
+        class TextureCatalog : public Catalog< Texture > {
+        public:
+            TextureCatalog( MetalRenderer *renderer );
+            virtual ~TextureCatalog( void );
+            
+            virtual int getNextResourceId( void ) override;
+            
+            virtual void bind( ShaderLocation *location, Texture *texture ) override;
+            virtual void unbind( ShaderLocation *location, Texture *texture ) override;
+            
+            virtual void load( Texture *texture ) override;
+            virtual void unload( Texture *texture ) override;
+            
+            virtual void cleanup( void ) override;
+            
+        public:
+            id< MTLTexture > generateRenderTargetTexture( RenderTarget *renderTarget );
+            
+        protected:
+            MetalRenderer *getRenderer( void ) { return _renderer; }
+            
+        private:
+            MetalRenderer *_renderer;
+            std::map< int, id< MTLTexture > > _textures;
+            int _nextBufferId;
+            
+            unsigned int _activeTextureCount = 0;
+        };
+        
+    }
+    
+}
+
+#endif
 

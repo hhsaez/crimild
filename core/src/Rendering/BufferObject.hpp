@@ -65,6 +65,8 @@ namespace crimild {
 		}
 
 		size_t getSize( void ) const { return _size; }
+        
+        size_t getSizeInBytes( void ) const { return sizeof( T ) * _size; }
 
 		T *data( void ) { return _data; }
 

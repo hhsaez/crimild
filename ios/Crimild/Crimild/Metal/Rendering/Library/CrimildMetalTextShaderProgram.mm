@@ -25,12 +25,21 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Crimild.hpp>
-#import <Crimild_Scripting.hpp>
-#import <Crimild_OpenGL.hpp>
+#import "CrimildMetalTextShaderProgram.h"
 
-#import "CrimildViewController.h"
+using namespace crimild;
+using namespace crimild::metal;
 
-#import "Metal/Rendering/CrimildMetalRenderer.h"
-#import "Metal/Rendering/Library/CrimildMetalStandardUniforms.h"
+TextShaderProgram::TextShaderProgram( void )
+    : ShaderProgram( crimild::alloc< VertexShader >( "crimild_vertex_shader_text" ), crimild::alloc< FragmentShader >( "crimild_fragment_shader_text" ) )
+{
+    auto location = crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, "uniforms" );
+    location->setLocation( 1 );
+    registerLocation( location );
+}
+
+TextShaderProgram::~TextShaderProgram( void )
+{ 
+
+}
 

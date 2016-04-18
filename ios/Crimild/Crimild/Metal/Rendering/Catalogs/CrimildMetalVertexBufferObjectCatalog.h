@@ -25,12 +25,46 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Crimild.hpp>
-#import <Crimild_Scripting.hpp>
-#import <Crimild_OpenGL.hpp>
+#ifndef CRIMILD_METAL_VERTEX_BUFFER_OBJECT_CATALOG_
+#define CRIMILD_METAL_VERTEX_BUFFER_OBJECT_CATALOG_
 
-#import "CrimildViewController.h"
+#include <Crimild.hpp>
 
-#import "Metal/Rendering/CrimildMetalRenderer.h"
-#import "Metal/Rendering/Library/CrimildMetalStandardUniforms.h"
+#import <Metal/Metal.h>
+
+namespace crimild {
+    
+    namespace metal {
+        
+        class MetalRenderer;
+        
+        class VertexBufferObjectCatalog : public Catalog< VertexBufferObject > {
+        public:
+            VertexBufferObjectCatalog( MetalRenderer *renderer );
+            virtual ~VertexBufferObjectCatalog( void );
+            
+            virtual int getNextResourceId( void ) override;
+            
+            virtual void bind( ShaderProgram *program, VertexBufferObject *vbo ) override;
+            virtual void unbind( ShaderProgram *program, VertexBufferObject *vbo ) override;
+            
+            virtual void load( VertexBufferObject *vbo ) override;
+            virtual void unload( VertexBufferObject *vbo ) override;
+            
+            virtual void cleanup( void ) override;
+            
+        protected:
+            MetalRenderer *getRenderer( void ) { return _renderer; }
+            
+        private:
+            MetalRenderer *_renderer;
+            std::map< int, id< MTLBuffer > > _vbos;
+            int _nextBufferId;
+        };
+        
+    }
+    
+}
+
+#endif
 

@@ -25,12 +25,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#import "CrimildView.h"
+
 #import <Crimild.hpp>
-#import <Crimild_Scripting.hpp>
-#import <Crimild_OpenGL.hpp>
 
-#import "CrimildViewController.h"
+@implementation CrimildView
 
-#import "Metal/Rendering/CrimildMetalRenderer.h"
-#import "Metal/Rendering/Library/CrimildMetalStandardUniforms.h"
+- (void) render
+{
+    crimild::MessageQueue::getInstance()->broadcastMessage( crimild::messaging::RenderNextFrame() );
+    crimild::MessageQueue::getInstance()->broadcastMessage( crimild::messaging::PresentNextFrame() );
+}
 
+@end

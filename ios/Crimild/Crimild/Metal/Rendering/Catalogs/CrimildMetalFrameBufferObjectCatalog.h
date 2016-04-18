@@ -25,12 +25,55 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Crimild.hpp>
-#import <Crimild_Scripting.hpp>
-#import <Crimild_OpenGL.hpp>
+#ifndef CRIMILD_METAL_FRAME_BUFFER_OBJECT_CATALOG_
+#define CRIMILD_METAL_FRAME_BUFFER_OBJECT_CATALOG_
 
-#import "CrimildViewController.h"
+#include <Crimild.hpp>
 
-#import "Metal/Rendering/CrimildMetalRenderer.h"
-#import "Metal/Rendering/Library/CrimildMetalStandardUniforms.h"
+#import <Metal/Metal.h>
+
+namespace crimild {
+    
+    namespace metal {
+        
+        class MetalRenderer;
+        
+        class FrameBufferObjectCatalog : public Catalog< FrameBufferObject > {
+        private:
+            struct FBOCache {
+                MTLRenderPassDescriptor *renderPassDescriptor;
+                id< MTLTexture > texture;
+                id< MTLDrawable > drawable;
+            };
+            
+        public:
+            FrameBufferObjectCatalog( MetalRenderer *renderer );
+            virtual ~FrameBufferObjectCatalog( void );
+            
+            virtual int getNextResourceId( void ) override;
+            
+            virtual void bind( FrameBufferObject *fbo ) override;
+            virtual void unbind( FrameBufferObject *fbo ) override;
+            
+            virtual void load( FrameBufferObject *fbo ) override;
+            virtual void unload( FrameBufferObject *fbo ) override;
+            
+            virtual void cleanup( void ) override;
+            
+        protected:
+            MetalRenderer *getRenderer( void ) { return _renderer; }
+            
+        private:
+            MetalRenderer *_renderer = nullptr;
+            
+            std::map< int, FBOCache > _fboCache;
+            
+            unsigned int _nextTextureID = 0;
+        };
+        
+    }
+    
+}
+
+#endif
 
