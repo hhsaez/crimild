@@ -193,16 +193,12 @@
     crimild::FileSystem::getInstance().setDocumentsDirectory( [[self applicationDocumentsDirectory] UTF8String] );
     
 #if TARGET_OS_TV
-    crimild::TaskManager::getInstance()->setNumThreads( 2 );
+//    crimild::TaskManager::getInstance()->setNumThreads( 2 );
 #endif
     
-#if TARGET_OS_TV
-    auto screenBuffer = crimild::alloc< crimild::FrameBufferObject >( 1280, 720 );
-#else
     CGRect framebufferRect = [[UIScreen mainScreen] bounds];
     CGFloat screenScale = [[UIScreen mainScreen] scale];
     auto screenBuffer = crimild::alloc< crimild::FrameBufferObject >( screenScale * framebufferRect.size.width, screenScale * framebufferRect.size.height );
-#endif
     screenBuffer->setClearColor( crimild::RGBAColorf( 0.0f, 0.0f, 0.0f, 0.0f ) );
     auto renderer = _simulation->getRenderer();
     renderer->setScreenBuffer( screenBuffer );
