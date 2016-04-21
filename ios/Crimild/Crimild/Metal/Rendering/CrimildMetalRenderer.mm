@@ -45,7 +45,7 @@
 using namespace crimild;
 using namespace crimild::metal;
 
-static const long CRIMILD_METAL_IN_FLIGHT_COMMAND_BUFFERS = 1;
+static const long CRIMILD_METAL_IN_FLIGHT_COMMAND_BUFFERS = 3;
 
 simd::float4x4 convertMatrix( const Matrix4f &input )
 {
@@ -148,13 +148,6 @@ void MetalRenderer::beginRender( void )
         Log::Error << "Cannot obtain command buffer" << Log::End;
         return;
     }
-    
-    _drawable = [getLayer() nextDrawable];
-    if ( _drawable == nil ) {
-        Log::Error << "Cannot obtain next drawable" << Log::End;
-        return;
-    }
-    
 }
 
 void MetalRenderer::endRender( void )
@@ -164,6 +157,12 @@ void MetalRenderer::endRender( void )
 
 void MetalRenderer::presentFrame( void )
 {
+    _drawable = [getLayer() nextDrawable];
+    if ( _drawable == nil ) {
+        Log::Error << "Cannot obtain next drawable" << Log::End;
+        return;
+    }
+    
     getFrameBufferObjectCatalog()->bind( getScreenBuffer() );
 
     Renderer::presentFrame();

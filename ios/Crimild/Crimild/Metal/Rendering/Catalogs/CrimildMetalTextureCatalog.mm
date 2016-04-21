@@ -55,7 +55,7 @@ void TextureCatalog::bind( ShaderLocation *location, Texture *texture )
     Catalog< Texture >::bind( texture );
     
     auto mtlTexture = _textures[ texture->getCatalogId() ];
-    [getRenderer()->getRenderEncoder() setFragmentTexture:mtlTexture atIndex: 0];
+    [getRenderer()->getRenderEncoder() setFragmentTexture:mtlTexture atIndex: _activeTextureCount];
     
     ++_activeTextureCount;
 }
@@ -64,7 +64,9 @@ void TextureCatalog::unbind( ShaderLocation *location, Texture *texture )
 {
     Catalog< Texture >::unbind( texture );
 
-    --_activeTextureCount;
+    if ( _activeTextureCount > 0 ) {
+        --_activeTextureCount;
+    }
 }
 
 void TextureCatalog::load( Texture *texture )
