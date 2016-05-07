@@ -36,6 +36,8 @@ using namespace crimild;
 
 #ifdef CRIMILD_ENABLE_PHYSICS
 #include <Crimild_Physics.hpp>
+
+using namespace crimild::physics;
 #endif
 
 GLSimulation::GLSimulation( std::string name, SettingsPtr const &settings )
@@ -53,6 +55,10 @@ GLSimulation::GLSimulation( std::string name, SettingsPtr const &settings )
 
     addSystem( crimild::alloc< InputSystem >() );
     addSystem( crimild::alloc< WindowSystem >() );
+
+#ifdef CRIMILD_ENABLE_PHYSICS
+    addSystem( crimild::alloc< PhysicsSystem >() );
+#endif
     
     setRenderer( crimild::alloc< opengl::OpenGLRenderer >() );
 }

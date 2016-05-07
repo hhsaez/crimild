@@ -34,13 +34,7 @@ namespace crimild {
 
 	namespace physics {
 
-		class PhysicsContext {
-		private:
-			static PhysicsContext _instance;
-
-		public:
-			static PhysicsContext &getInstance() { return _instance; }
-
+		class PhysicsContext : public DynamicSingleton< PhysicsContext > {
 		public:
 			PhysicsContext( void );
 			~PhysicsContext( void );

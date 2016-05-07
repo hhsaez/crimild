@@ -36,14 +36,12 @@ namespace crimild {
         
         class RigidBodyComponent;
         
-        using RigidBodyComponentPtr = SharedPointer< RigidBodyComponent >;
-
 		class RigidBodyComponent : public NodeComponent {
 			CRIMILD_DISALLOW_COPY_AND_ASSIGN( RigidBodyComponent )
 			CRIMILD_NODE_COMPONENT_NAME( "rigidBody" );
 
 		public:
-			typedef std::function< void ( RigidBodyComponentPtr const & ) > CollisionCallback;
+			typedef std::function< void ( RigidBodyComponent * ) > CollisionCallback;
 
 		public:
 			RigidBodyComponent( void );
@@ -72,10 +70,13 @@ namespace crimild {
 			void setLinearVelocity( const Vector3f &linearVelocity ) { _linearVelocity = linearVelocity; }
 			const Vector3f &getLinearVelocity( void ) const { return _linearVelocity; }
 
+			void setAngularFactor( const Vector3f &angularFactor ) { _angularFactor = angularFactor; }
+			const Vector3f &getAngularFactor( void ) const { return _angularFactor; }
+
 			void setConstraintVelocity( bool value ) { _constraintVelocity = value; }
 			bool shouldConstraintVelocity( void ) const { return _constraintVelocity; }
 
-			void onCollision( RigidBodyComponentPtr const &other );
+			void onCollision( RigidBodyComponent *other );
 
 			void setCollisionCallback( CollisionCallback callback ) { _collisionCallback = callback; }
 			CollisionCallback getCollisionCallback( void ) { return _collisionCallback; }
@@ -95,6 +96,7 @@ namespace crimild {
 			bool _kinematic;
 			Vector3f _linearFactor;
 			Vector3f _linearVelocity;
+			Vector3f _angularFactor;
 			bool _constraintVelocity;
 			float _desiredVelocity;
 

@@ -25,54 +25,36 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "PhysicsUpdateTask.hpp"
+#ifndef CRIMILD_PHYSICS_SIMULATION_SYSTEMS_PHYSICS_
+#define CRIMILD_PHYSICS_SIMULATION_SYSTEMS_PHYSICS_
+
+#include <Crimild.hpp>
 
 #include "Foundation/PhysicsContext.hpp"
 
-using namespace crimild;
-using namespace crimild::physics;
+namespace crimild {
 
-#if 0
+	namespace physics {
 
-#define CRIMILD_PHYSICS_STEP_DELTA 1.0 / 60.0
+		class PhysicsSystem : public System { 
+		public:
+			PhysicsSystem( void );
+			virtual ~PhysicsSystem( void );
 
-PhysicsUpdateTask::PhysicsUpdateTask( int priority )
-	: Task( priority ),
-	  _accumulator( 0.0f )
-{
+			virtual bool start( void ) override;
 
-}
+			virtual void update( void );
+			
+			virtual void stop( void ) override;
+		
+		private:
+			PhysicsContext _context;
+			float _accumulator = 0.0f;
+		};
 
-PhysicsUpdateTask::~PhysicsUpdateTask( void )
-{
-
-}
-
-void PhysicsUpdateTask::start( void )
-{
-	float gx = Simulation::getInstance()->getSettings().get( "physics.gravity.x", 0.0f );
-	float gy = Simulation::getInstance()->getSettings().get( "physics.gravity.y", -9.8f );
-	float gz = Simulation::getInstance()->getSettings().get( "physics.gravity.z", 0.0f );
-	PhysicsContext::getInstance().setGravity( Vector3f( gx, gy, gz ) );
-}
-
-void PhysicsUpdateTask::update( void )
-{
-	const Time &t = Simulation::getInstance()->getSimulationTime();
-
-	_accumulator += t.getDeltaTime();
-
-	while ( _accumulator >= CRIMILD_PHYSICS_STEP_DELTA ) {
-		PhysicsContext::getInstance().step( CRIMILD_PHYSICS_STEP_DELTA );
-		_accumulator -= CRIMILD_PHYSICS_STEP_DELTA;
 	}
-}
-
-void PhysicsUpdateTask::stop( void )
-{
-
+	
 }
 
 #endif
-
 
