@@ -70,8 +70,9 @@ void matrix2float4x4( const Matrix4f &input, simd::float4x4 &output )
     memcpy( &output.columns[ 3 ], &c3, 4 * sizeof( float ) );
 }
 
-MetalRenderer::MetalRenderer( CrimildMetalView *view )
-    : _view( view )
+MetalRenderer::MetalRenderer( CrimildMetalView *view, id< MTLDevice > device )
+    : _view( view ),
+      _device( device )
 {
     float scale = [[UIScreen mainScreen] scale];
     setScreenBuffer( crimild::alloc< FrameBufferObject >( scale * getView().bounds.size.width, scale * getView().bounds.size.height ) );
@@ -98,8 +99,6 @@ MetalRenderer::~MetalRenderer( void )
 
 void MetalRenderer::configure( void )
 {
-    _device = MTLCreateSystemDefaultDevice();
-
     _layer = (CAMetalLayer *) getView().layer;
     _layer.contentsScale = [[UIScreen mainScreen] scale];
     _layer.pixelFormat = MTLPixelFormatBGRA8Unorm;

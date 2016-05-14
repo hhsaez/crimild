@@ -222,6 +222,7 @@ namespace crimild {
         
         struct ButtonAcceptActivated { };
         struct ButtonBackActivated { };
+        struct ButtonPauseActivated { };
         struct ButtonMenuActivated { };
 
 	}

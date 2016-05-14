@@ -45,7 +45,12 @@
 
 - (BOOL) configure
 {
-    crimild::Simulation::getInstance()->setRenderer( crimild::alloc< crimild::metal::MetalRenderer >( ( CrimildMetalView * ) self ) );
+    id< MTLDevice > device = MTLCreateSystemDefaultDevice();
+    if ( device == nil ) {
+        return NO;
+    }
+
+    crimild::Simulation::getInstance()->setRenderer( crimild::alloc< crimild::metal::MetalRenderer >( ( CrimildMetalView * ) self, device ) );
     
     return YES;
 }

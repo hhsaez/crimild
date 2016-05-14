@@ -48,7 +48,7 @@ namespace crimild {
             static constexpr unsigned int VERTEX_BUFFER_INDEX_UNIFORM_DATA = 1;
             
         public:
-            explicit MetalRenderer( CrimildMetalView *view );
+            explicit MetalRenderer( CrimildMetalView *view, id< MTLDevice > device );
             virtual ~MetalRenderer( void );
             
             CrimildMetalView *getView( void ) { return _view; }

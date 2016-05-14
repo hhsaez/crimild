@@ -86,7 +86,9 @@
         self.crimildView = [[CrimildMetalView alloc] initWithFrame:self.view.bounds];
         self.animationFrameInterval = 1;
     }
-    else {
+    
+    if (self.crimildView == nil) {
+        self.useMetalRenderPath = NO;
         self.crimildView = [[CrimildEAGLView alloc] initWithFrame:self.view.bounds];
         self.animationFrameInterval = 2;
     }
@@ -148,15 +150,6 @@
         rightRecognizer.direction = UISwipeGestureRecognizerDirectionRight;
         [self.view addGestureRecognizer:rightRecognizer];
     }
-    
-#if TARGET_OS_TV
-    UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTVTap:)];
-    [self.view addGestureRecognizer:tapRecognizer];
-    
-    UITapGestureRecognizer *pauseRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTVPause:)];
-    pauseRecognizer.allowedPressTypes = @[@(UIPressTypePlayPause)];
-    [self.view addGestureRecognizer: pauseRecognizer];
-#endif
 }
 
 - (void) viewDidAppear:(BOOL)animated
@@ -192,9 +185,9 @@
     crimild::FileSystem::getInstance().setBaseDirectory( [[self applicationBundleDirectory] UTF8String] );
     crimild::FileSystem::getInstance().setDocumentsDirectory( [[self applicationDocumentsDirectory] UTF8String] );
     
-#if TARGET_OS_TV
+//#if TARGET_OS_TV
 //    crimild::TaskManager::getInstance()->setNumThreads( 2 );
-#endif
+//#endif
     
     CGRect framebufferRect = [[UIScreen mainScreen] bounds];
     CGFloat screenScale = [[UIScreen mainScreen] scale];
@@ -333,16 +326,6 @@
             crimild::MessageQueue::getInstance()->pushMessage( crimild::messaging::SwipeRight { } );
             break;
     }
-}
-
-- (void) handleTVTap: (UITapGestureRecognizer *) tapGesture
-{
-    crimild::MessageQueue::getInstance()->pushMessage( crimild::messaging::ButtonAcceptActivated { } );
-}
-
-- (void) handleTVPause: (UITapGestureRecognizer *) tapGesture
-{
-    crimild::MessageQueue::getInstance()->pushMessage( crimild::messaging::ButtonMenuActivated { } );
 }
 
 @end
