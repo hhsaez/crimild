@@ -46,6 +46,7 @@ physics::RigidBodyComponent::RigidBodyComponent( float mass, bool convex )
       _kinematic( false ),
       _linearFactor( 0.0f, 0.0f, 0.0f ),
 	  _linearVelocity( 0.0f, 0.0f, 0.0f ),
+	  _angularFactor( 0.0f, 0.0f, 0.0f ),
 	  _constraintVelocity( false )
 {
 
@@ -65,14 +66,14 @@ void physics::RigidBodyComponent::onAttach( void )
 	}
 
 	if ( _body != nullptr ) {
-		PhysicsContext::getInstance().getWorld()->addRigidBody( _body );
+		PhysicsContext::getInstance()->getWorld()->addRigidBody( _body );
 	}
 }
 
 void physics::RigidBodyComponent::onDetach( void )
 {
 	if ( _body != nullptr ) {
-		PhysicsContext::getInstance().getWorld()->removeRigidBody( _body );
+		PhysicsContext::getInstance()->getWorld()->removeRigidBody( _body );
 	}
 
 	cleanup();
@@ -85,7 +86,6 @@ void physics::RigidBodyComponent::start( void )
 
 void physics::RigidBodyComponent::update( const Clock &t )
 {
-	/*
     if ( _body == nullptr ) {
         return;
     }
@@ -96,7 +96,7 @@ void physics::RigidBodyComponent::update( const Clock &t )
     else {
         btTransform trans = _body->getWorldTransform();
         getNode()->local().setTranslate( trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z() );
-        getNode()->perform( UpdateWorldState() );
+        //getNode()->perform( UpdateWorldState() );
         
         if ( shouldConstraintVelocity() ) {
             btVector3 currentVelocityDirection =_body->getLinearVelocity();
@@ -107,17 +107,15 @@ void physics::RigidBodyComponent::update( const Clock &t )
             }
         }
     }
-	*/
 }
 
 void physics::RigidBodyComponent::createShape( void )
 {
-	/*
 	if ( isConvex() ) {
 		_shape = new btConvexHullShape();
 
-		getNode()->perform( ApplyToGeometries( [&]( GeometryPtr const &geometry ) {
-			geometry->foreachPrimitive( [&]( PrimitivePtr const &primitive ) {
+		getNode()->perform( ApplyToGeometries( [&]( Geometry *geometry ) {
+			geometry->forEachPrimitive( [&]( Primitive *primitive ) {
 				auto vbo = primitive->getVertexBuffer();
 				for ( int i = 0; i < vbo->getVertexCount(); i++ ) {
 					Vector3f v = vbo->getPositionAt( i );
@@ -130,8 +128,8 @@ void physics::RigidBodyComponent::createShape( void )
 	else {
 		btTriangleMesh* mesh = new btTriangleMesh();
 
-		getNode()->perform( ApplyToGeometries( [&]( GeometryPtr const &geometry ) {
-			geometry->foreachPrimitive( [&]( PrimitivePtr const &primitive ) {
+		getNode()->perform( ApplyToGeometries( [&]( Geometry *geometry ) {
+			geometry->forEachPrimitive( [&]( Primitive *primitive ) {
 				auto ibo = primitive->getIndexBuffer();
 				auto vbo = primitive->getVertexBuffer();
 
@@ -148,7 +146,6 @@ void physics::RigidBodyComponent::createShape( void )
 
 		_shape = new btBvhTriangleMeshShape( mesh, true );
 	}
-	*/
 }
 
 void physics::RigidBodyComponent::createBody( void )
@@ -170,6 +167,7 @@ void physics::RigidBodyComponent::createBody( void )
     _body->setUserPointer( this );
     _body->setLinearFactor( BulletUtils::convert( getLinearFactor() ) );
     _body->setLinearVelocity( BulletUtils::convert( getLinearVelocity() ) );
+    _body->setAngularFactor( BulletUtils::convert( getAngularFactor() ) );
 
     if ( shouldConstraintVelocity() ) {
     	_desiredVelocity = getLinearVelocity().getMagnitude();
@@ -190,7 +188,7 @@ void physics::RigidBodyComponent::cleanup( void )
 	}
 }
 
-void physics::RigidBodyComponent::onCollision( RigidBodyComponentPtr const &other )
+void physics::RigidBodyComponent::onCollision( RigidBodyComponent *other )
 {
 	if ( _collisionCallback != nullptr ) {
 		_collisionCallback( other );

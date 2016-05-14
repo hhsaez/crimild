@@ -32,8 +32,6 @@
 using namespace crimild;
 using namespace crimild::physics;
 
-PhysicsContext PhysicsContext::_instance;
-
 PhysicsContext::PhysicsContext( void )
 	: _broadphase( nullptr ),
 	  _collisionConfiguration( nullptr ),
@@ -56,7 +54,6 @@ PhysicsContext::~PhysicsContext( void )
 
 void PhysicsContext::init( void )
 {
-	/*
 	 _broadphase = new btDbvtBroadphase();
  
     _collisionConfiguration = new btDefaultCollisionConfiguration();
@@ -67,22 +64,18 @@ void PhysicsContext::init( void )
     _world = new btDiscreteDynamicsWorld( _dispatcher, _broadphase, _solver, _collisionConfiguration );
  
     _world->setGravity( BulletUtils::convert( _gravity ) );
-	*/
 }
 
 void PhysicsContext::setGravity( const Vector3f &gravity ) 
 {
-	/*
 	_gravity = gravity;
 	if ( _world != nullptr ) {
 		_world->setGravity( BulletUtils::convert( _gravity ) );
 	}
-	*/
 }
 
 void PhysicsContext::step( float dt )
 {
-	/*
 	if ( _world == nullptr ) {
 		return;
 	}
@@ -102,14 +95,13 @@ void PhysicsContext::step( float dt )
             physics::RigidBodyComponent *rbB = static_cast< physics::RigidBodyComponent * >( objB->getUserPointer() );
  
             if ( rbA != nullptr ) {
-            	rbA->onCollision( rbB->getShared< RigidBodyComponent >() );
+            	rbA->onCollision( rbB );
             }
 
             if ( rbB != nullptr ) {
-            	rbB->onCollision( rbA->getShared< RigidBodyComponent >() );
+            	rbB->onCollision( rbA );
             }
 		}
     }
-	*/
 }
 

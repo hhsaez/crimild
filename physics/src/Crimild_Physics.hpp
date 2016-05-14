@@ -32,7 +32,7 @@
 
 #include "Foundation/PhysicsContext.hpp"
 
-#include "Simulation/Tasks/PhysicsUpdateTask.hpp"
+#include "Simulation/Systems/PhysicsSystem.hpp"
 
 #endif
 

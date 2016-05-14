@@ -25,35 +25,54 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_PHYSICS_SIMULATION_TASKS_UPDATE_
-#define CRIMILD_PHYSICS_SIMULATION_TASKS_UPDATE_
+#include "PhysicsSystem.hpp"
 
-#include <Crimild.hpp>
+#include "Foundation/PhysicsContext.hpp"
 
-#if 0
+using namespace crimild;
+using namespace crimild::physics;
 
-namespace crimild {
+#define CRIMILD_PHYSICS_STEP_DELTA 1.0 / 60.0
 
-	namespace physics {
+PhysicsSystem::PhysicsSystem( void )
+	: System( "Physics" )
+{
+	auto self = this;
+	registerMessageHandler< messaging::DidUpdateScene >( [self]( messaging::DidUpdateScene const &msg ) {
+		self->update();
+	});
 
-		class PhysicsUpdateTask : public Task { 
-		public:
-			PhysicsUpdateTask( int priority );
-			virtual ~PhysicsUpdateTask( void );
-
-			virtual void start( void ) override;
-			virtual void update( void ) override;
-			virtual void stop( void ) override;
-
-		private:
-			float _accumulator;
-		};
-
-	}
-	
+	_context.setGravity( Vector3f( 0.0f, -9.8f, 0.0f ) );
 }
 
-#endif
+PhysicsSystem::~PhysicsSystem( void )
+{
 
-#endif
+}
+
+bool PhysicsSystem::start( void )
+{
+	return true;
+}
+
+void PhysicsSystem::update( void )
+{
+	/*
+	const Clock &c = Simulation::getInstance()->getSimulationClock();
+
+	_accumulator += c.getDeltaTime();
+
+	while ( _accumulator >= CRIMILD_PHYSICS_STEP_DELTA ) {
+		PhysicsContext::getInstance().step( CRIMILD_PHYSICS_STEP_DELTA );
+		_accumulator -= CRIMILD_PHYSICS_STEP_DELTA;
+	}
+	*/
+
+	PhysicsContext::getInstance()->step( CRIMILD_PHYSICS_STEP_DELTA );
+}
+
+void PhysicsSystem::stop( void )
+{
+
+}
 
