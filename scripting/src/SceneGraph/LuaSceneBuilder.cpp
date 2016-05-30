@@ -9,6 +9,12 @@ using namespace crimild::scripting;
     using namespace crimild::import;
 #endif
 
+#ifdef CRIMILD_ENABLE_PHYSICS
+    #include <Crimild_Physics.hpp>
+
+    using namespace crimild::physics;
+#endif
+
 #define SCENE_NODES "scene.nodes"
 
 #define NODE_TYPE "type"
@@ -42,6 +48,8 @@ using namespace crimild::scripting;
 #define TEXT_FONT "font"
 #define TEXT_SIZE "textSize"
 #define TEXT_TEXT "text"
+
+#define RIGID_BODY_TYPE "crimild::physics::RigidBody"
 
 LuaNodeBuilderRegistry::LuaNodeBuilderRegistry( void )
 {
@@ -147,7 +155,7 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
         
         float fov = 45.0f;
         float aspect = 4.0f / 3.0f;
-        float near = 1.0f;
+        float near = 0.1f;
         float far = 1000.0f;
         
         eval.getPropValue( CAMERA_FRUSTUM_FOV, fov );
@@ -223,30 +231,67 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
         }
         
         bool enableDepthTest;
-        if ( eval.getPropValue( "enableDepthTest", enableDepthTest, false ) ) {
+        if ( eval.getPropValue( "enableDepthTest", enableDepthTest, true ) ) {
             text->setDepthTestEnabled( enableDepthTest );
         }
         
         std::string anchor;
         if ( eval.getPropValue( "textAnchor", anchor, "left" ) ) {
-            auto min = text->getLocalBound()->getMin();
-            auto max = text->getLocalBound()->getMax();
-            auto diff = max - min;
+            if ( anchor != "left" ) {
+                text->updateModelBounds();
+                auto min = text->getLocalBound()->getMin();
+                auto max = text->getLocalBound()->getMax();
+                auto diff = max - min;
             
-            if ( anchor == "left" ) {
-                // do nothing?
-            }
-            else if ( anchor == "center" ) {
-                text->local().translate() += Vector3f( -0.5f * diff[ 0 ], 0.0f, 0.0f );
-            }
-            else if ( anchor == "right" ) {
-                text->local().translate() += Vector3f( -diff[ 0 ], 0.0f, 0.0f );
+                if ( anchor == "center" ) {
+                    text->local().translate() += Vector3f( -0.5f * diff[ 0 ], 0.0f, 0.0f );
+                }
+                else if ( anchor == "right" ) {
+                    text->local().translate() += Vector3f( -diff[ 0 ], 0.0f, 0.0f );
+                }
             }
         }
         
         return text;
     });
-    
+
+#ifdef CRIMILD_ENABLE_PHYSICS
+    // TODO: Use RTTI for getting class type name
+    LuaComponentBuilderRegistry::getInstance()->registerCustomComponentBuilder( RIGID_BODY_TYPE, [self]( ScriptEvaluator &eval ) -> SharedPointer< NodeComponent > {
+        auto rigidBody = crimild::alloc< RigidBodyComponent >();
+
+        float mass = 0.0f;
+        eval.getPropValue( "mass", mass );
+        rigidBody->setMass( mass );
+
+        bool convex = false;
+        eval.getPropValue( "convex", convex );
+        rigidBody->setConvex( convex );
+
+        bool kinematic = false;
+        eval.getPropValue( "kinematic", kinematic );
+        rigidBody->setKinematic( kinematic );
+
+        Vector3f linearVelocity( 0.0f, 0.0f, 0.0f );
+        eval.getPropValue( "linearVelocity", linearVelocity );
+        rigidBody->setLinearVelocity( linearVelocity );
+
+        Vector3f linearFactor( 0.0f, 0.0f, 0.0f );
+        eval.getPropValue( "linearFactor", linearFactor );
+        rigidBody->setLinearFactor( linearFactor );
+
+        Vector3f angularFactor( 0.0f, 0.0f, 0.0f );
+        eval.getPropValue( "angularFactor", angularFactor );
+        rigidBody->setAngularFactor( angularFactor );
+
+        bool constraintVelocity = false;
+        eval.getPropValue( "constraintVelocity", constraintVelocity );
+        rigidBody->setConstraintVelocity( constraintVelocity );
+
+        return rigidBody;
+    });
+#endif
+
     LuaNodeBuilderRegistry::getInstance()->flush();
     LuaComponentBuilderRegistry::getInstance()->flush();
 }

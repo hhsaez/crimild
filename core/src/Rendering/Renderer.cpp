@@ -48,7 +48,7 @@ using namespace crimild;
 
 Renderer::Renderer( void )
 	: _lightCount( 0 ),
-	  _screenPrimitive( crimild::alloc< QuadPrimitive >( 2.0f, 2.0f, VertexFormat::VF_P3_UV2, Vector2f( 0.0f, 1.0f ), Vector2f( 1.0f, -1.0f ) ) ),
+	  _screenPrimitive( crimild::alloc< QuadPrimitive >( 2.0f, 2.0f, VertexFormat::VF_P3_N3_UV2, Vector2f( 0.0f, 1.0f ), Vector2f( 1.0f, -1.0f ) ) ),
       _shaderProgramCatalog( crimild::alloc< Catalog< ShaderProgram >>() ),
 	  _textureCatalog( crimild::alloc< Catalog< Texture >>() ),
 	  _vertexBufferObjectCatalog( crimild::alloc< Catalog< VertexBufferObject >>() ),
@@ -105,6 +105,22 @@ void Renderer::endRender( void )
     getVertexBufferObjectCatalog()->cleanup();
     getIndexBufferObjectCatalog()->cleanup();
     getFrameBufferObjectCatalog()->cleanup();
+}
+
+void Renderer::presentFrame( void )
+{
+    auto sBuffer = getFrameBuffer( RenderPass::S_BUFFER_NAME );
+    if ( sBuffer != nullptr ) {
+        auto color = sBuffer->getRenderTargets().get( RenderPass::S_BUFFER_COLOR_TARGET_NAME );
+        auto program = getShaderProgram( crimild::Renderer::SHADER_PROGRAM_SCREEN_TEXTURE );
+        if ( program != nullptr ) {
+            bindProgram( program );
+            bindTexture( program->getStandardLocation( crimild::ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ), color->getTexture() );
+            drawScreenPrimitive( program );
+            unbindTexture( program->getStandardLocation( crimild::ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ), color->getTexture() );
+            unbindProgram( program );
+        }
+    }
 }
 
 void Renderer::render( RenderQueue *renderQueue, RenderPass *renderPass )

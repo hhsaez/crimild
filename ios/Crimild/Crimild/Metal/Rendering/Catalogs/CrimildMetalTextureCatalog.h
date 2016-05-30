@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,35 +25,51 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_PHYSICS_SIMULATION_TASKS_UPDATE_
-#define CRIMILD_PHYSICS_SIMULATION_TASKS_UPDATE_
+#ifndef CRIMILD_METAL_TEXTURE_CATALOG_
+#define CRIMILD_METAL_TEXTURE_CATALOG_
 
 #include <Crimild.hpp>
 
-#if 0
+#import <Metal/Metal.h>
 
 namespace crimild {
-
-	namespace physics {
-
-		class PhysicsUpdateTask : public Task { 
-		public:
-			PhysicsUpdateTask( int priority );
-			virtual ~PhysicsUpdateTask( void );
-
-			virtual void start( void ) override;
-			virtual void update( void ) override;
-			virtual void stop( void ) override;
-
-		private:
-			float _accumulator;
-		};
-
-	}
-	
+    
+    namespace metal {
+        
+        class MetalRenderer;
+        
+        class TextureCatalog : public Catalog< Texture > {
+        public:
+            TextureCatalog( MetalRenderer *renderer );
+            virtual ~TextureCatalog( void );
+            
+            virtual int getNextResourceId( void ) override;
+            
+            virtual void bind( ShaderLocation *location, Texture *texture ) override;
+            virtual void unbind( ShaderLocation *location, Texture *texture ) override;
+            
+            virtual void load( Texture *texture ) override;
+            virtual void unload( Texture *texture ) override;
+            
+            virtual void cleanup( void ) override;
+            
+        public:
+            id< MTLTexture > generateRenderTargetTexture( RenderTarget *renderTarget );
+            
+        protected:
+            MetalRenderer *getRenderer( void ) { return _renderer; }
+            
+        private:
+            MetalRenderer *_renderer;
+            std::map< int, id< MTLTexture > > _textures;
+            int _nextBufferId;
+            
+            unsigned int _activeTextureCount = 0;
+        };
+        
+    }
+    
 }
-
-#endif
 
 #endif
 

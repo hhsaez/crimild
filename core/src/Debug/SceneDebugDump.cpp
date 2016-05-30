@@ -66,6 +66,10 @@ void SceneDebugDump::visitText( Text *text )
 void SceneDebugDump::visitCamera( Camera *camera )
 {
     dumpNode( camera, "Camera" );
+
+    ++_parentLevel;
+    NodeVisitor::visitGroup( camera );
+    --_parentLevel;
 }
 
 void SceneDebugDump::visitLight( Light *light )
@@ -82,6 +86,7 @@ void SceneDebugDump::dumpNode( Node *node, std::string type )
     }
     
     _output << indent.str()
-    << "(" + type + ") " << node->getName() << " [" << &node << "]";    
+            << "(" + type + ") " << node->getName() << " [" << &node << "]"
+            << "\t" << node->getWorld().getTranslate();
 }
 

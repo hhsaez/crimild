@@ -69,10 +69,12 @@ void ShaderProgram::forEachLocation( std::function< void( ShaderLocation * ) > c
 	}
 }
 
-void ShaderProgram::registerStandardLocation( ShaderLocation::Type locationType, unsigned int standardLocationId, std::string name )
+ShaderLocation *ShaderProgram::registerStandardLocation( ShaderLocation::Type locationType, unsigned int standardLocationId, std::string name )
 {
 	_standardLocations[ standardLocationId ] = name;
-    registerLocation( crimild::alloc< ShaderLocation >( locationType, name ) );
+    auto location = crimild::alloc< ShaderLocation >( locationType, name );
+    registerLocation( location );
+    return crimild::get_ptr( location );
 }
 
 ShaderLocation *ShaderProgram::getStandardLocation( unsigned int standardLocationId )

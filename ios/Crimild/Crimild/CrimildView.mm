@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,54 +25,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "PhysicsUpdateTask.hpp"
+#import "CrimildView.h"
 
-#include "Foundation/PhysicsContext.hpp"
+#import <Crimild.hpp>
 
-using namespace crimild;
-using namespace crimild::physics;
+@implementation CrimildView
 
-#if 0
-
-#define CRIMILD_PHYSICS_STEP_DELTA 1.0 / 60.0
-
-PhysicsUpdateTask::PhysicsUpdateTask( int priority )
-	: Task( priority ),
-	  _accumulator( 0.0f )
+- (void) render
 {
-
+    crimild::MessageQueue::getInstance()->broadcastMessage( crimild::messaging::RenderNextFrame() );
+    crimild::MessageQueue::getInstance()->broadcastMessage( crimild::messaging::PresentNextFrame() );
 }
 
-PhysicsUpdateTask::~PhysicsUpdateTask( void )
-{
-
-}
-
-void PhysicsUpdateTask::start( void )
-{
-	float gx = Simulation::getInstance()->getSettings().get( "physics.gravity.x", 0.0f );
-	float gy = Simulation::getInstance()->getSettings().get( "physics.gravity.y", -9.8f );
-	float gz = Simulation::getInstance()->getSettings().get( "physics.gravity.z", 0.0f );
-	PhysicsContext::getInstance().setGravity( Vector3f( gx, gy, gz ) );
-}
-
-void PhysicsUpdateTask::update( void )
-{
-	const Time &t = Simulation::getInstance()->getSimulationTime();
-
-	_accumulator += t.getDeltaTime();
-
-	while ( _accumulator >= CRIMILD_PHYSICS_STEP_DELTA ) {
-		PhysicsContext::getInstance().step( CRIMILD_PHYSICS_STEP_DELTA );
-		_accumulator -= CRIMILD_PHYSICS_STEP_DELTA;
-	}
-}
-
-void PhysicsUpdateTask::stop( void )
-{
-
-}
-
-#endif
-
-
+@end
