@@ -167,6 +167,11 @@ namespace crimild {
 		{
 			return std::sqrt( n );
 		}
+
+		static PRECISION fabs( PRECISION n )
+		{
+			return std::fabs( n );
+		}
 	};
 
 	template< typename T > const T Numeric< T >::ZERO_TOLERANCE = static_cast< T >( 1e-06 );
