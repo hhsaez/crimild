@@ -25,29 +25,53 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_PHYSICS_FOUNDATION_BULLET_UTILS_
-#define CRIMILD_PHYSICS_FOUNDATION_BULLET_UTILS_
+#include "MeshCollider.hpp"
 
-#include <Crimild.hpp>
+using namespace crimild;
+using namespace crimild::physics;
 
-#include "btBulletDynamicsCommon.h"
+MeshCollider::MeshCollider( void )
+{
 
-namespace crimild {
-
-	namespace physics {
-
-		class BulletUtils {
-		public:
-			static btQuaternion convert( const Quaternion4f &q );
-			static btVector3 convert( const Vector3f &v );
-			static btTransform convert( const Transformation &t );
-
-			static Vector3f convert( const btVector3 &v );
-		};
-
-	}
-	
 }
 
-#endif
+MeshCollider::~MeshCollider( void )
+{
+
+}
+
+SharedPointer< btCollisionShape > MeshCollider::generateShape( void ) 
+{
+	Log::Debug << "Generating shape for mesh collider" << Log::End;
+
+	auto mesh = new btTriangleMesh(); // is this a leak?
+
+	getNode()->perform( ApplyToGeometries( [mesh]( Geometry *geometry ) {
+		geometry->forEachPrimitive( [mesh]( Primitive *primitive ) {
+			auto ibo = primitive->getIndexBuffer();
+			auto vbo = primitive->getVertexBuffer();
+
+			const unsigned short *indices = static_cast< const unsigned short * >( ibo->getData() );
+			Vector3f vertices[ 3 ];
+			for ( int i = 0; i < ibo->getIndexCount() / 3; i++ ) {
+				for ( int j = 0; j < 3; j++ ) {
+					vertices[ j ] = vbo->getPositionAt( indices[ i * 3 + j ] );
+				}
+				mesh->addTriangle( BulletUtils::convert( vertices[ 0 ] ), BulletUtils::convert( vertices[ 1 ] ), BulletUtils::convert( vertices[ 2 ] ) );
+			}
+		});
+	}));
+
+	return crimild::alloc< btBvhTriangleMeshShape >( mesh, true );
+}
+
+void MeshCollider::renderDebugInfo( Renderer *renderer, Camera *camera )
+{
+	DebugRenderHelper::renderSphere( 
+		renderer, 
+		camera, 
+		getNode()->getWorldBound()->getCenter(), 
+		getNode()->getWorldBound()->getRadius(), 
+		RGBAColorf( 1.0f, 0.0f, 0.0f, 0.5f ) );
+}
 

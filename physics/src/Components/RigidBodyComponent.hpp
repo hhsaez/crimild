@@ -45,7 +45,7 @@ namespace crimild {
 
 		public:
 			RigidBodyComponent( void );
-			RigidBodyComponent( float mass, bool convex = true );
+			RigidBodyComponent( float mass );
 			virtual ~RigidBodyComponent( void );
 
 			virtual void onAttach( void ) override;
@@ -58,23 +58,27 @@ namespace crimild {
 			void setMass( float mass ) { _mass = mass; }
 			float getMass( void ) const { return _mass; }
 
-			void setConvex( bool convex ) { _convex = convex; }
-			bool isConvex( void ) const { return _convex; } 
-
 			void setKinematic( bool kinematic ) { _kinematic = kinematic; }
 			bool isKinematic( void ) const { return _kinematic; }
 
-			void setLinearFactor( const Vector3f &linearFactor ) { _linearFactor = linearFactor; }
+			void setLinearFactor( const Vector3f &linearFactor );
 			const Vector3f &getLinearFactor( void ) const { return _linearFactor; }
 
-			void setLinearVelocity( const Vector3f &linearVelocity ) { _linearVelocity = linearVelocity; }
+			void setLinearVelocity( const Vector3f &linearVelocity );
 			const Vector3f &getLinearVelocity( void ) const { return _linearVelocity; }
+			Vector3f getCurrentLinearVelocity( void ) const;
 
-			void setAngularFactor( const Vector3f &angularFactor ) { _angularFactor = angularFactor; }
+			void setAngularFactor( const Vector3f &angularFactor );
 			const Vector3f &getAngularFactor( void ) const { return _angularFactor; }
 
 			void setConstraintVelocity( bool value ) { _constraintVelocity = value; }
 			bool shouldConstraintVelocity( void ) const { return _constraintVelocity; }
+
+			void setRestitution( float restitution ) { _restitution = restitution; }
+			float getRestitution( void ) const { return _restitution; }
+
+			void setFriction( float friction ) { _friction = friction; }
+			float getFriction( void ) const { return _friction; }
 
 			void onCollision( RigidBodyComponent *other );
 
@@ -88,17 +92,18 @@ namespace crimild {
 			void cleanup( void );
 
 		private:
-			btRigidBody *_body;
-			btCollisionShape *_shape;
+			SharedPointer< btRigidBody > _body;
+			SharedPointer< btCollisionShape > _shape;
 
 			float _mass;
-			bool _convex;
 			bool _kinematic;
 			Vector3f _linearFactor;
 			Vector3f _linearVelocity;
 			Vector3f _angularFactor;
 			bool _constraintVelocity;
 			float _desiredVelocity;
+			float _restitution;
+			float _friction;
 
 			CollisionCallback _collisionCallback;
 		};

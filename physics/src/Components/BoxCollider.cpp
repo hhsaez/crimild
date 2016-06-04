@@ -25,29 +25,49 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_PHYSICS_FOUNDATION_BULLET_UTILS_
-#define CRIMILD_PHYSICS_FOUNDATION_BULLET_UTILS_
+#include "BoxCollider.hpp"
 
-#include <Crimild.hpp>
+using namespace crimild;
+using namespace crimild::physics;
 
-#include "btBulletDynamicsCommon.h"
+BoxCollider::BoxCollider( void )
+	: BoxCollider( Vector3f( 1.0f, 1.0f, 1.0f ) )
+{
 
-namespace crimild {
-
-	namespace physics {
-
-		class BulletUtils {
-		public:
-			static btQuaternion convert( const Quaternion4f &q );
-			static btVector3 convert( const Vector3f &v );
-			static btTransform convert( const Transformation &t );
-
-			static Vector3f convert( const btVector3 &v );
-		};
-
-	}
-	
 }
 
-#endif
+BoxCollider::BoxCollider( const Vector3f &boxHalfExtents )
+	: _boxHalfExtents( boxHalfExtents ),
+	  _offset( 0.0f, 0.0f, 0.0f )
+{
+
+}
+
+BoxCollider::~BoxCollider( void )
+{
+
+}
+
+SharedPointer< btCollisionShape > BoxCollider::generateShape( void )
+{
+	Log::Debug << "Generating shape for box collider" << Log::End;
+	
+	auto box = new btBoxShape( btVector3( _boxHalfExtents[ 0 ], _boxHalfExtents[ 1 ], _boxHalfExtents[ 2 ] ) );
+	btTransform boxTransform;
+	boxTransform.setIdentity();
+	boxTransform.setOrigin( btVector3( _offset[ 0 ], _offset[ 1 ], _offset[ 2 ] ) );
+
+	auto shape = crimild::alloc< btCompoundShape >();
+	shape->addChildShape( boxTransform, box );
+
+	return shape;
+}
+
+void BoxCollider::renderDebugInfo( Renderer *renderer, Camera *camera )
+{
+	auto size = 2.0f * getHalfExtents();
+	auto center = getNode()->getWorld().getTranslate() + getOffset();
+
+	DebugRenderHelper::renderBox( renderer, camera, center, size, RGBAColorf( 1.0f, 0.0f, 0.0f, 0.5f ) );
+}
 

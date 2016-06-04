@@ -68,6 +68,9 @@ Input::Input( void )
         self->_normalizedMouseDelta = npos - self->_normalizedMousePos;
         self->_normalizedMousePos = npos;
 	});
+
+	setAxis( AXIS_HORIZONTAL, 0.0f );
+	setAxis( AXIS_VERTICAL, 0.0f );
 }
 
 Input::~Input( void )

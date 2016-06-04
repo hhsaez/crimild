@@ -62,7 +62,7 @@ void PhysicsContext::init( void )
     _solver = new btSequentialImpulseConstraintSolver();
  
     _world = new btDiscreteDynamicsWorld( _dispatcher, _broadphase, _solver, _collisionConfiguration );
- 
+    _world->getDispatchInfo().m_allowedCcdPenetration = 0.0001f; 
     _world->setGravity( BulletUtils::convert( _gravity ) );
 }
 

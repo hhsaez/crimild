@@ -29,6 +29,8 @@
 
 using namespace crimild;
 
+#define CRIMILD_INTERPOLATE_POSES 0
+
 SkinnedMeshJoint::SkinnedMeshJoint( void ) 
 { 
 
@@ -109,9 +111,15 @@ bool SkinnedMeshAnimationChannel::computePosition( float animationTime, Vector3f
 
 	auto const &p0 = getPositionKeys()[ positionIndex ];
 	auto const &p1 = getPositionKeys()[ positionIndex + 1 ];
+
+#if CRIMILD_INTERPOLATE_POSES
 	float dt = p1.time - p0.time;
 	float factor = ( animationTime - p0.time ) / dt;
 	Interpolation::linear( p0.value, p1.value, factor, result );
+#else
+	result = p1.value;
+#endif
+
 	return true;
 }
 
@@ -132,9 +140,15 @@ bool SkinnedMeshAnimationChannel::computeRotation( float animationTime, Quaterni
 
 	auto const &r0 = getRotationKeys()[ rotationIndex ];
 	auto const &r1 = getRotationKeys()[ rotationIndex + 1 ];
+
+#if CRIMILD_INTERPOLATE_POSES
 	float dt = r1.time - r0.time;
 	float factor = ( animationTime - r0.time ) / dt;
 	Interpolation::slerp( r0.value, r1.value, factor, result );
+#else
+	result = r1.value;
+#endif
+
 	return true;
 }
 
@@ -155,9 +169,15 @@ bool SkinnedMeshAnimationChannel::computeScale( float animationTime, float &resu
 
 	auto const &s0 = getScaleKeys()[ scaleIndex ];
 	auto const &s1 = getScaleKeys()[ scaleIndex + 1 ];
+
+#if CRIMILD_INTERPOLATE_POSES
 	float dt = s1.time - s0.time;
 	float factor = ( animationTime - s0.time ) / dt;
 	Interpolation::linear( s0.value, s1.value, factor, result );
+#else
+	result = s1.value;
+#endif
+
 	return true;
 }
 

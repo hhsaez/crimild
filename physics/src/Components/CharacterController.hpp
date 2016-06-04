@@ -25,26 +25,41 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_PHYSICS_FOUNDATION_BULLET_UTILS_
-#define CRIMILD_PHYSICS_FOUNDATION_BULLET_UTILS_
+#ifndef CRIMILD_PHYSICS_COMPONENTS_CHARACTER_CONTROLLER_
+#define CRIMILD_PHYSICS_COMPONENTS_CHARACTER_CONTROLLER_
 
-#include <Crimild.hpp>
+#include "Foundation/BulletUtils.hpp"
 
-#include "btBulletDynamicsCommon.h"
+#include "BulletDynamics/Character/btKinematicCharacterController.h"
+#include "BulletCollision/CollisionDispatch/btGhostObject.h"
 
 namespace crimild {
 
 	namespace physics {
 
-		class BulletUtils {
+		class CharacterController : public NodeComponent {
+			CRIMILD_DISALLOW_COPY_AND_ASSIGN( CharacterController )
+			CRIMILD_NODE_COMPONENT_NAME( "CharacterController" )
+
 		public:
-			static btQuaternion convert( const Quaternion4f &q );
-			static btVector3 convert( const Vector3f &v );
-			static btTransform convert( const Transformation &t );
+			CharacterController( void );
+			virtual ~CharacterController( void );
 
-			static Vector3f convert( const btVector3 &v );
+			virtual void onAttach( void ) override;
+			virtual void onDetach( void ) override;
+
+			virtual void start( void ) override;
+			virtual void update( const Clock & ) override;
+
+		private:
+			SharedPointer< btPairCachingGhostObject > _ghostObject;
+			SharedPointer< btConvexShape > _shape;
+			SharedPointer< btKinematicCharacterController > _character;
+
+		public:
+			virtual void renderDebugInfo( Renderer *renderer, Camera *camera ) override;
 		};
-
+        
 	}
 	
 }

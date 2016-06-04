@@ -49,7 +49,12 @@ using namespace crimild::scripting;
 #define TEXT_SIZE "textSize"
 #define TEXT_TEXT "text"
 
-#define RIGID_BODY_TYPE "crimild::physics::RigidBody"
+#define PHYSICS_RIGID_BODY_TYPE "crimild::physics::RigidBody"
+#define PHYSICS_CHARACTER_CONTROLLER_TYPE "crimild::physics::CharacterController"
+#define PHYSICS_BOX_COLLIDER_TYPE "crimild::physics::BoxCollider"
+#define PHYSICS_MESH_COLLIDER_TYPE "crimild::physics::MeshCollider"
+#define PHYSICS_CAPSULE_COLLIDER_TYPE "crimild::physics::CapsuleCollider"
+#define PHYSICS_CONVEX_HULL_COLLIDER_TYPE "crimild::physics::ConvexHullCollider"
 
 LuaNodeBuilderRegistry::LuaNodeBuilderRegistry( void )
 {
@@ -257,16 +262,12 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
 
 #ifdef CRIMILD_ENABLE_PHYSICS
     // TODO: Use RTTI for getting class type name
-    LuaComponentBuilderRegistry::getInstance()->registerCustomComponentBuilder( RIGID_BODY_TYPE, [self]( ScriptEvaluator &eval ) -> SharedPointer< NodeComponent > {
+    LuaComponentBuilderRegistry::getInstance()->registerCustomComponentBuilder( PHYSICS_RIGID_BODY_TYPE, [self]( ScriptEvaluator &eval ) -> SharedPointer< NodeComponent > {
         auto rigidBody = crimild::alloc< RigidBodyComponent >();
 
         float mass = 0.0f;
         eval.getPropValue( "mass", mass );
         rigidBody->setMass( mass );
-
-        bool convex = false;
-        eval.getPropValue( "convex", convex );
-        rigidBody->setConvex( convex );
 
         bool kinematic = false;
         eval.getPropValue( "kinematic", kinematic );
@@ -276,7 +277,7 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
         eval.getPropValue( "linearVelocity", linearVelocity );
         rigidBody->setLinearVelocity( linearVelocity );
 
-        Vector3f linearFactor( 0.0f, 0.0f, 0.0f );
+        Vector3f linearFactor( 1.0f, 1.0f, 1.0f );
         eval.getPropValue( "linearFactor", linearFactor );
         rigidBody->setLinearFactor( linearFactor );
 
@@ -288,7 +289,74 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
         eval.getPropValue( "constraintVelocity", constraintVelocity );
         rigidBody->setConstraintVelocity( constraintVelocity );
 
+        float restitution;
+        if ( eval.getPropValue( "restitution", restitution ) ) {
+            rigidBody->setRestitution( restitution );
+        }
+
+        float friction;
+        if ( eval.getPropValue( "friction", friction ) ) {
+            rigidBody->setFriction( friction );
+        }
+
         return rigidBody;
+    });
+
+    // TODO: Use RTTI for getting class type name
+    LuaComponentBuilderRegistry::getInstance()->registerCustomComponentBuilder( PHYSICS_BOX_COLLIDER_TYPE, [self]( ScriptEvaluator &eval ) -> SharedPointer< NodeComponent > {
+        auto boxCollider = crimild::alloc< BoxCollider >();
+
+        Vector3f boxHalfExtents;
+        if ( eval.getPropValue( "boxHalfExtents", boxHalfExtents ) ) {
+            boxCollider->setHalfExtents( boxHalfExtents );
+        }
+
+        Vector3f offset;
+        if ( eval.getPropValue( "offset", offset ) ) {
+            boxCollider->setOffset( offset );
+        }
+
+        return boxCollider;
+    });
+
+    // TODO: Use RTTI for getting class type name
+    LuaComponentBuilderRegistry::getInstance()->registerCustomComponentBuilder( PHYSICS_MESH_COLLIDER_TYPE, [self]( ScriptEvaluator &eval ) -> SharedPointer< NodeComponent > {
+        auto collider = crimild::alloc< MeshCollider >();
+        return collider;
+    });
+
+    // TODO: Use RTTI for getting class type name
+    LuaComponentBuilderRegistry::getInstance()->registerCustomComponentBuilder( PHYSICS_CONVEX_HULL_COLLIDER_TYPE, [self]( ScriptEvaluator &eval ) -> SharedPointer< NodeComponent > {
+        auto collider = crimild::alloc< ConvexHullCollider >();
+        return collider;
+    });
+
+    // TODO: Use RTTI for getting class type name
+    LuaComponentBuilderRegistry::getInstance()->registerCustomComponentBuilder( PHYSICS_CAPSULE_COLLIDER_TYPE, [self]( ScriptEvaluator &eval ) -> SharedPointer< NodeComponent > {
+        auto collider = crimild::alloc< CapsuleCollider >();
+
+        float width;
+        if ( eval.getPropValue( "width", width ) ) {
+            collider->setWidth( width );
+        }
+
+        float height;
+        if ( eval.getPropValue( "height", height ) ) {
+            collider->setHeight( height );
+        }
+
+        Vector3f offset;
+        if ( eval.getPropValue( "offset", offset ) ) {
+            collider->setOffset( offset );
+        }
+
+        return collider;
+    });
+
+    // TODO: Use RTTI for getting class type name
+    LuaComponentBuilderRegistry::getInstance()->registerCustomComponentBuilder( PHYSICS_CHARACTER_CONTROLLER_TYPE, [self]( ScriptEvaluator &eval ) -> SharedPointer< NodeComponent > {
+        auto characterController = crimild::alloc< CharacterController >();
+        return characterController;
     });
 #endif
 

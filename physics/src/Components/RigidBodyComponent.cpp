@@ -26,6 +26,7 @@
  */
 
 #include "RigidBodyComponent.hpp"
+#include "Collider.hpp"
 
 #include "Foundation/PhysicsContext.hpp"
 
@@ -33,21 +34,22 @@ using namespace crimild;
 using namespace crimild::physics;
 
 physics::RigidBodyComponent::RigidBodyComponent( void )
-	: physics::RigidBodyComponent( 0.0f, false )
+	: physics::RigidBodyComponent( 0.0f )
 {
 
 }
 
-physics::RigidBodyComponent::RigidBodyComponent( float mass, bool convex )
+physics::RigidBodyComponent::RigidBodyComponent( float mass )
 	: _body( nullptr ),
       _shape( nullptr ),
       _mass( mass ),
-      _convex( convex ),
       _kinematic( false ),
       _linearFactor( 0.0f, 0.0f, 0.0f ),
 	  _linearVelocity( 0.0f, 0.0f, 0.0f ),
 	  _angularFactor( 0.0f, 0.0f, 0.0f ),
-	  _constraintVelocity( false )
+	  _constraintVelocity( false ),
+	  _restitution( 0.0f ),
+	  _friction( 0.5f )
 {
 
 }
@@ -59,21 +61,13 @@ physics::RigidBodyComponent::~RigidBodyComponent( void )
 
 void physics::RigidBodyComponent::onAttach( void )
 {
-	createShape();
 
-	if ( _shape != nullptr ) {
-		createBody();
-	}
-
-	if ( _body != nullptr ) {
-		PhysicsContext::getInstance()->getWorld()->addRigidBody( _body );
-	}
 }
 
 void physics::RigidBodyComponent::onDetach( void )
 {
 	if ( _body != nullptr ) {
-		PhysicsContext::getInstance()->getWorld()->removeRigidBody( _body );
+		PhysicsContext::getInstance()->getWorld()->removeRigidBody( crimild::get_ptr( _body ) );
 	}
 
 	cleanup();
@@ -81,12 +75,21 @@ void physics::RigidBodyComponent::onDetach( void )
 
 void physics::RigidBodyComponent::start( void )
 {
+	createShape();
 
+	if ( _shape != nullptr ) {
+		createBody();
+	}
+
+	if ( _body != nullptr ) {
+		PhysicsContext::getInstance()->getWorld()->addRigidBody( crimild::get_ptr( _body ) );
+	}
 }
 
 void physics::RigidBodyComponent::update( const Clock &t )
 {
     if ( _body == nullptr ) {
+    	Log::Warning << "No rigid body found" << Log::End;
         return;
     }
     
@@ -109,81 +112,97 @@ void physics::RigidBodyComponent::update( const Clock &t )
     }
 }
 
-void physics::RigidBodyComponent::createShape( void )
-{
-	if ( isConvex() ) {
-		_shape = new btConvexHullShape();
+void physics::RigidBodyComponent::setLinearFactor( const Vector3f &linearFactor ) 
+{ 
+	_linearFactor = linearFactor; 
 
-		getNode()->perform( ApplyToGeometries( [&]( Geometry *geometry ) {
-			geometry->forEachPrimitive( [&]( Primitive *primitive ) {
-				auto vbo = primitive->getVertexBuffer();
-				for ( int i = 0; i < vbo->getVertexCount(); i++ ) {
-					Vector3f v = vbo->getPositionAt( i );
-					btVector3 btv = btVector3( v[ 0 ], v[ 1 ], v[ 2 ] );
-            		( ( btConvexHullShape * ) _shape )->addPoint( btv );
-				}
-			});
-		}));
-	}
-	else {
-		btTriangleMesh* mesh = new btTriangleMesh();
-
-		getNode()->perform( ApplyToGeometries( [&]( Geometry *geometry ) {
-			geometry->forEachPrimitive( [&]( Primitive *primitive ) {
-				auto ibo = primitive->getIndexBuffer();
-				auto vbo = primitive->getVertexBuffer();
-
-				const unsigned short *indices = static_cast< const unsigned short * >( ibo->getData() );
-				Vector3f vertices[ 3 ];
-				for ( int i = 0; i < ibo->getIndexCount() / 3; i++ ) {
-					for ( int j = 0; j < 3; j++ ) {
-						vertices[ j ] = vbo->getPositionAt( indices[ i * 3 + j ] );
-					}
-					mesh->addTriangle( BulletUtils::convert( vertices[ 0 ] ), BulletUtils::convert( vertices[ 1 ] ), BulletUtils::convert( vertices[ 2 ] ) );
-				}
-			});
-		}));
-
-		_shape = new btBvhTriangleMeshShape( mesh, true );
-	}
+	if ( _body != nullptr ) {
+    	_body->setLinearFactor( BulletUtils::convert( getLinearFactor() ) );
+    }
 }
 
-void physics::RigidBodyComponent::createBody( void )
-{
-	getNode()->perform( UpdateWorldState() );
+void physics::RigidBodyComponent::setLinearVelocity( const Vector3f &linearVelocity )
+{ 
+	_linearVelocity = linearVelocity; 
 
-    btDefaultMotionState* motionState = new btDefaultMotionState( BulletUtils::convert( getNode()->getWorld() ) );
- 
-    btScalar bodyMass = isKinematic() ? 0.0f : getMass();
-    btVector3 bodyInertia;
-    _shape->calculateLocalInertia( bodyMass, bodyInertia );
- 
-    btRigidBody::btRigidBodyConstructionInfo bodyCI = btRigidBody::btRigidBodyConstructionInfo( bodyMass, motionState, _shape, bodyInertia );
- 
-    bodyCI.m_restitution = 1.0f;
-    bodyCI.m_friction = 0.5f;
- 
-    _body = new btRigidBody( bodyCI );
-    _body->setUserPointer( this );
-    _body->setLinearFactor( BulletUtils::convert( getLinearFactor() ) );
-    _body->setLinearVelocity( BulletUtils::convert( getLinearVelocity() ) );
-    _body->setAngularFactor( BulletUtils::convert( getAngularFactor() ) );
+	if ( _body != nullptr ) {
+	    _body->setLinearVelocity( BulletUtils::convert( getLinearVelocity() ) );
+	}
 
     if ( shouldConstraintVelocity() ) {
     	_desiredVelocity = getLinearVelocity().getMagnitude();
     }
 }
 
+Vector3f physics::RigidBodyComponent::getCurrentLinearVelocity( void ) const
+{
+	if ( _body == nullptr ) {
+		return getLinearVelocity();
+	}
+
+	return BulletUtils::convert( _body->getLinearVelocity() );
+}
+
+void physics::RigidBodyComponent::setAngularFactor( const Vector3f &angularFactor ) 
+{ 
+	_angularFactor = angularFactor; 
+
+	if ( _body != nullptr ) {
+	    _body->setAngularFactor( BulletUtils::convert( getAngularFactor() ) );
+	}
+}
+
+void physics::RigidBodyComponent::createShape( void )
+{
+	auto collider = getComponent< Collider >();
+	if ( collider == nullptr ) {
+		Log::Error << "No collider assigned to rigid body" << Log::End;
+		return;
+	}
+
+	_shape = collider->generateShape();
+}
+
+void physics::RigidBodyComponent::createBody( void )
+{
+	if ( _shape == nullptr ) {
+		Log::Debug << "No shape for rigid body" << Log::End;
+		return;
+	}
+
+	getNode()->perform( UpdateWorldState() );
+
+    btDefaultMotionState* motionState = new btDefaultMotionState( BulletUtils::convert( getNode()->getWorld() ) );
+ 
+    btScalar bodyMass = isKinematic() ? 0.0f : getMass();
+    btVector3 bodyInertia( 0.0f, 0.0f, 0.0f );
+    _shape->calculateLocalInertia( bodyMass, bodyInertia );
+ 
+    btRigidBody::btRigidBodyConstructionInfo bodyCI = btRigidBody::btRigidBodyConstructionInfo( bodyMass, motionState, crimild::get_ptr( _shape ), bodyInertia );
+ 
+    bodyCI.m_restitution = _restitution;
+    bodyCI.m_friction = _friction;
+ 
+    _body = crimild::alloc< btRigidBody >( bodyCI );
+    _body->setUserPointer( this );
+    _body->setLinearFactor( BulletUtils::convert( getLinearFactor() ) );
+    _body->setLinearVelocity( BulletUtils::convert( getLinearVelocity() ) );
+
+    if ( shouldConstraintVelocity() ) {
+    	_desiredVelocity = getLinearVelocity().getMagnitude();
+    }
+
+    _body->setAngularFactor( BulletUtils::convert( getAngularFactor() ) );
+}
+
 void physics::RigidBodyComponent::cleanup( void )
 {
 	if ( _body != nullptr ) {
 		delete _body->getMotionState();
-		delete _body;
 		_body = nullptr;
 	}
 
 	if ( _shape != nullptr ) {
-		delete _shape;
 		_shape = nullptr;
 	}
 }

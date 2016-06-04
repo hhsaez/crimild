@@ -99,6 +99,16 @@ void DebugRenderHelper::renderBox( Renderer *renderer, Camera *camera, const Vec
 	render( renderer, camera, box, model, color );
 }
 
+void DebugRenderHelper::renderBox( Renderer *renderer, Camera *camera, const Vector3f &position, const Vector3f &size, const RGBAColorf &color )
+{
+	Transformation model;
+	model.setTranslate( position );
+
+	auto box = crimild::alloc< BoxPrimitive >( size[ 0 ], size[ 1 ], size[ 2 ] );
+
+	render( renderer, camera, crimild::get_ptr( box ), model, color );
+}
+
 void DebugRenderHelper::renderSphere( Renderer *renderer, Camera *camera, const Vector3f &position, float scale, const RGBAColorf &color )
 {
 	Transformation model;

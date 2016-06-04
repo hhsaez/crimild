@@ -25,29 +25,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_PHYSICS_FOUNDATION_BULLET_UTILS_
-#define CRIMILD_PHYSICS_FOUNDATION_BULLET_UTILS_
+#include "Collider.hpp"
 
-#include <Crimild.hpp>
+using namespace crimild;
+using namespace crimild::physics;
 
-#include "btBulletDynamicsCommon.h"
+Collider::Collider( void )
+{
 
-namespace crimild {
-
-	namespace physics {
-
-		class BulletUtils {
-		public:
-			static btQuaternion convert( const Quaternion4f &q );
-			static btVector3 convert( const Vector3f &v );
-			static btTransform convert( const Transformation &t );
-
-			static Vector3f convert( const btVector3 &v );
-		};
-
-	}
-	
 }
 
-#endif
+Collider::~Collider( void )
+{
+
+}
 

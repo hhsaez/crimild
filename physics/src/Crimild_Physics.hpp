@@ -29,6 +29,12 @@
 #define CRIMILD_PHYSICS_
 
 #include "Components/RigidBodyComponent.hpp"
+#include "Components/CharacterController.hpp"
+#include "Components/Collider.hpp"
+#include "Components/BoxCollider.hpp"
+#include "Components/MeshCollider.hpp"
+#include "Components/ConvexHullCollider.hpp"
+#include "Components/CapsuleCollider.hpp"
 
 #include "Foundation/PhysicsContext.hpp"
 

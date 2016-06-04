@@ -25,26 +25,29 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_PHYSICS_FOUNDATION_BULLET_UTILS_
-#define CRIMILD_PHYSICS_FOUNDATION_BULLET_UTILS_
+#ifndef CRIMILD_PHYSICS_COMPONENTS_COLLIDER_
+#define CRIMILD_PHYSICS_COMPONENTS_COLLIDER_
 
-#include <Crimild.hpp>
-
-#include "btBulletDynamicsCommon.h"
+#include "Foundation/BulletUtils.hpp"
 
 namespace crimild {
 
 	namespace physics {
 
-		class BulletUtils {
+		class Collider : public NodeComponent {
+			CRIMILD_DISALLOW_COPY_AND_ASSIGN( Collider )
+			CRIMILD_NODE_COMPONENT_NAME( "collider" )
+
+		protected:
+			Collider( void );
+
 		public:
-			static btQuaternion convert( const Quaternion4f &q );
-			static btVector3 convert( const Vector3f &v );
-			static btTransform convert( const Transformation &t );
+			virtual ~Collider( void );
 
-			static Vector3f convert( const btVector3 &v );
+		public:
+			virtual SharedPointer< btCollisionShape > generateShape( void ) = 0;
 		};
-
+        
 	}
 	
 }

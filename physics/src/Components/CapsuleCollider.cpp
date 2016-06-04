@@ -25,29 +25,53 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_PHYSICS_FOUNDATION_BULLET_UTILS_
-#define CRIMILD_PHYSICS_FOUNDATION_BULLET_UTILS_
+#include "CapsuleCollider.hpp"
 
-#include <Crimild.hpp>
+using namespace crimild;
+using namespace crimild::physics;
 
-#include "btBulletDynamicsCommon.h"
+CapsuleCollider::CapsuleCollider( void )
+	: CapsuleCollider( 1.75f, 1.75 )
+{
 
-namespace crimild {
-
-	namespace physics {
-
-		class BulletUtils {
-		public:
-			static btQuaternion convert( const Quaternion4f &q );
-			static btVector3 convert( const Vector3f &v );
-			static btTransform convert( const Transformation &t );
-
-			static Vector3f convert( const btVector3 &v );
-		};
-
-	}
-	
 }
 
-#endif
+CapsuleCollider::CapsuleCollider( float width, float height )
+	: _width( width ),
+	  _height( height ),
+	  _offset( 0.0f, 0.0f, 0.0f )
+{
+
+}
+
+CapsuleCollider::~CapsuleCollider( void )
+{
+
+}
+
+SharedPointer< btCollisionShape > CapsuleCollider::generateShape( void ) 
+{
+	Log::Debug << "Generating shape for capsule collider" << Log::End;
+
+	auto capsule = new btCapsuleShape( getWidth(), getHeight() );
+
+	btTransform boxTransform;
+	boxTransform.setIdentity();
+	boxTransform.setOrigin( BulletUtils::convert( getOffset() ) );
+
+	auto shape = crimild::alloc< btCompoundShape >();
+	shape->addChildShape( boxTransform, capsule );
+
+	return shape;
+}
+
+void CapsuleCollider::renderDebugInfo( Renderer *renderer, Camera *camera )
+{
+	DebugRenderHelper::renderBox( 
+		renderer, 
+		camera, 
+		getNode()->getWorld().getTranslate() + getOffset(), 
+		Vector3f( getWidth(), getHeight(), 1.0f ),
+		RGBAColorf( 1.0f, 1.0f, 0.0f, 0.5f ) );
+}
 

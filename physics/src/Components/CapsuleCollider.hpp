@@ -25,26 +25,44 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_PHYSICS_FOUNDATION_BULLET_UTILS_
-#define CRIMILD_PHYSICS_FOUNDATION_BULLET_UTILS_
+#ifndef CRIMILD_PHYSICS_COMPONENTS_CAPSULE_COLLIDER_
+#define CRIMILD_PHYSICS_COMPONENTS_CAPSULE_COLLIDER_
 
-#include <Crimild.hpp>
-
-#include "btBulletDynamicsCommon.h"
+#include "Collider.hpp"
 
 namespace crimild {
 
 	namespace physics {
 
-		class BulletUtils {
+		class CapsuleCollider : public Collider {
+			CRIMILD_DISALLOW_COPY_AND_ASSIGN( CapsuleCollider )
+
 		public:
-			static btQuaternion convert( const Quaternion4f &q );
-			static btVector3 convert( const Vector3f &v );
-			static btTransform convert( const Transformation &t );
+			CapsuleCollider( void );
+			CapsuleCollider( float width, float height );
+			virtual ~CapsuleCollider( void );
 
-			static Vector3f convert( const btVector3 &v );
+			void setWidth( float value ) { _width = value; }
+			float getWidth( void ) const { return _width; }
+
+			void setHeight( float value ) { _height = value; }
+			float getHeight( void ) const { return _height; }
+
+			void setOffset( const Vector3f &value ) { _offset = value; }
+			const Vector3f &getOffset( void ) const { return _offset; }
+
+		private:
+			float _width;
+			float _height;
+			Vector3f _offset;
+
+		public:
+			virtual SharedPointer< btCollisionShape > generateShape( void ) override;
+
+		public:
+			virtual void renderDebugInfo( Renderer *renderer, Camera *camera ) override;
 		};
-
+        
 	}
 	
 }

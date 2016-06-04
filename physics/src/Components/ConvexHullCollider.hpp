@@ -25,26 +25,29 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_PHYSICS_FOUNDATION_BULLET_UTILS_
-#define CRIMILD_PHYSICS_FOUNDATION_BULLET_UTILS_
+#ifndef CRIMILD_PHYSICS_COMPONENTS_CONVEX_HULL_COLLIDER_
+#define CRIMILD_PHYSICS_COMPONENTS_CONVEX_HULL_COLLIDER_
 
-#include <Crimild.hpp>
-
-#include "btBulletDynamicsCommon.h"
+#include "Collider.hpp"
 
 namespace crimild {
 
 	namespace physics {
 
-		class BulletUtils {
+		class ConvexHullCollider : public Collider {
+			CRIMILD_DISALLOW_COPY_AND_ASSIGN( ConvexHullCollider )
+
 		public:
-			static btQuaternion convert( const Quaternion4f &q );
-			static btVector3 convert( const Vector3f &v );
-			static btTransform convert( const Transformation &t );
+			ConvexHullCollider( void );
+			virtual ~ConvexHullCollider( void );
 
-			static Vector3f convert( const btVector3 &v );
+		public:
+			virtual SharedPointer< btCollisionShape > generateShape( void ) override;
+
+		public:
+			virtual void renderDebugInfo( Renderer *renderer, Camera *camera ) override;
 		};
-
+        
 	}
 	
 }

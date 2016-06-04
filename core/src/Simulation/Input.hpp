@@ -34,6 +34,7 @@
 #include "Messaging/MessageQueue.hpp"
 
 #include <vector>
+#include <map>
 
 // This codes are ment to match those of GLFW to avoid translation tables
 #define CRIMILD_INPUT_KEY_UNKNOWN            -1
@@ -268,6 +269,16 @@ namespace crimild {
 		Vector2f _normalizedMouseDelta;
 
 		MouseCursorMode _mouseCursorMode;
+
+	public:
+		static constexpr const char *AXIS_HORIZONTAL = "Horizontal";
+		static constexpr const char *AXIS_VERTICAL = "Vertical";
+
+		void setAxis( std::string key, float value ) { _axes[ key ] = value; }
+		float getAxis( std::string key ) { return _axes[ key ]; }
+
+	private:
+		std::map< std::string, float > _axes;
 	};
 
 }
