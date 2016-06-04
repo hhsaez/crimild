@@ -85,6 +85,8 @@ namespace crimild {
 			void setCollisionCallback( CollisionCallback callback ) { _collisionCallback = callback; }
 			CollisionCallback getCollisionCallback( void ) { return _collisionCallback; }
 
+			bool checkGroundCollision( void ) const;
+
 		private:
 			void createShape( void );
 			void createBody( void );
