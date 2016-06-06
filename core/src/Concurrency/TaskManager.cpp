@@ -16,9 +16,7 @@ TaskManager::TaskManager( int numThreads )
 
 TaskManager::~TaskManager( void )
 {
-	for ( auto &t : _threads ) {
-		t.join();
-	}
+
 }
 
 void TaskManager::start( void )
@@ -34,7 +32,7 @@ void TaskManager::start( void )
     
     Log::Debug << "Spawning " << _numThreads << " threads" << Log::End;
 	for ( unsigned int i = 0; i < _numThreads; i++ ) {
-		_threads.push_back( std::thread( std::bind( &TaskManager::worker, this ) ) );
+		_threads.push_back( std::move( std::thread( std::bind( &TaskManager::worker, this ) ) ) );
 	}
 
 	_running = true;
@@ -57,6 +55,12 @@ void TaskManager::pollMainTasks( void )
 void TaskManager::stop( void )
 {
 	_running = false;
+	for ( auto &t : _threads ) {
+		if ( t.joinable() ) {
+			t.join();
+		}
+	}
+	_threads.clear();
 }
 
 void TaskManager::worker( void )

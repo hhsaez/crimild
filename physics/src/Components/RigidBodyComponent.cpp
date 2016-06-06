@@ -216,13 +216,21 @@ void physics::RigidBodyComponent::onCollision( RigidBodyComponent *other )
 
 bool physics::RigidBodyComponent::checkGroundCollision( void ) const
 {
+	if ( PhysicsContext::getInstance() == nullptr ) {
+		throw RuntimeException( "Invalid PhysicsContext instance" );
+	}
+
+    auto world = PhysicsContext::getInstance()->getWorld();
+    if ( world == nullptr ) {
+    	return false;
+    }
+
 	auto center = getNode()->getWorldBound()->getCenter();
 
     auto from = BulletUtils::convert( center );
     auto to = from + BulletUtils::convert( Vector3f( 0.0f, -20.0f * getNode()->getWorldBound()->getRadius(), 0.0f ) );
     btCollisionWorld::ClosestRayResultCallback res( from, to );
 
-    auto world = PhysicsContext::getInstance()->getWorld();
     world->rayTest( from, to, res );
 
     bool grounded = false;

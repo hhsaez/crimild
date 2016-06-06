@@ -20,10 +20,7 @@ using namespace crimild;
 UpdateSystem::UpdateSystem( void )
 	: System( "Update System" )
 {
-    auto weakSelf = this;
-    registerMessageHandler< messaging::SimulationWillUpdate >( [weakSelf]( messaging::SimulationWillUpdate const &message ) {
-        crimild::async( AsyncDispatchPolicy::BACKGROUND_QUEUE_SYNC, std::bind( &UpdateSystem::update, weakSelf ) );
-    });
+
 }
 
 UpdateSystem::~UpdateSystem( void )
@@ -39,6 +36,11 @@ bool UpdateSystem::start( void )
     
     _accumulator = 0.0;
     
+    auto weakSelf = this;
+    registerMessageHandler< messaging::SimulationWillUpdate >( [weakSelf]( messaging::SimulationWillUpdate const &message ) {
+        crimild::async( AsyncDispatchPolicy::BACKGROUND_QUEUE_SYNC, std::bind( &UpdateSystem::update, weakSelf ) );
+    });
+
 	return true;
 }
 
@@ -102,5 +104,7 @@ void UpdateSystem::computeRenderQueue( Node *scene, Camera *camera )
 void UpdateSystem::stop( void )
 {
 	System::stop();
+
+    unregisterMessageHandler< messaging::SimulationWillUpdate >();
 }
 

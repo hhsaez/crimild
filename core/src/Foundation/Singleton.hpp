@@ -59,13 +59,14 @@ namespace crimild {
 	public:
 		static ObjectType *getInstance( void )
 		{
+			assert( _instance != nullptr && "Singleton instance not set" );
 			return _instance;
 		}
 
 	protected:
 		SingletonHeapStoragePolicy( void )
 		{
-//			assert( _instance == nullptr && "Singleton instance already set" );
+			assert( _instance == nullptr && "Singleton instance already set" );
 			_instance = static_cast< ObjectType * >( this );
 		}
 

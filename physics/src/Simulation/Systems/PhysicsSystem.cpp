@@ -52,7 +52,7 @@ PhysicsSystem::~PhysicsSystem( void )
 
 bool PhysicsSystem::start( void )
 {
-	return true;
+	return System::start();
 }
 
 void PhysicsSystem::update( void )
@@ -73,6 +73,8 @@ void PhysicsSystem::update( void )
 
 void PhysicsSystem::stop( void )
 {
-
+	System::stop();
+	
+	PhysicsContext::getInstance()->cleanup();
 }
 

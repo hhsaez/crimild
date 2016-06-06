@@ -66,12 +66,13 @@ Simulation::Simulation( std::string name, SettingsPtr const &settings )
 
 Simulation::~Simulation( void )
 {
-	stopSystems();
+    stopSystems();
 }
 
 void Simulation::start( void )
 {
     startSystems();
+
     _taskManager.start();
 }
 
@@ -90,17 +91,20 @@ bool Simulation::update( void )
 
 void Simulation::stop( void )
 {
+    // stop all unfinished tasks first
     _taskManager.stop();
+
+    setScene( nullptr );
 }
 
 int Simulation::run( void )
 {
 	start();
-    while ( update() ) {
-        // do nothing
+
+    bool done = false;
+    while ( !done ) {
+        done = !update();
     }
-    
-    stopSystems();  // redundant?
     
 	return 0;
 }

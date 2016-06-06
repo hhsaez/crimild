@@ -54,22 +54,22 @@ void WindowSystem::update( void )
 
 	glfwPollEvents();
     
-	if ( !glfwWindowShouldClose( _window ) ) {
-        broadcastMessage( crimild::messaging::RenderNextFrame {} );
-		broadcastMessage( crimild::messaging::PresentNextFrame {} );
-		glfwSwapBuffers( _window );
-
-	    if ( delta < 0.002 ) {
-	        // this trick prevents the simulation to run at very high speeds
-	        // this usually happens when the window is sent to background
-	        // and there is nothing to render
-	        int sleepTime = ( int )( ( 1.0 / 60.0 - delta ) * 1000.0 );
-	        std::this_thread::sleep_for( std::chrono::milliseconds( sleepTime ) );
-	    }
-	}
-	else {
+	if ( glfwWindowShouldClose( _window ) ) {
 		Simulation::getInstance()->stop();
+		return;
 	}
+
+    broadcastMessage( crimild::messaging::RenderNextFrame {} );
+	broadcastMessage( crimild::messaging::PresentNextFrame {} );
+	glfwSwapBuffers( _window );
+
+    if ( delta < 0.002 ) {
+        // this trick prevents the simulation to run at very high speeds
+        // this usually happens when the window is sent to background
+        // and there is nothing to render
+        int sleepTime = ( int )( ( 1.0 / 60.0 - delta ) * 1000.0 );
+        std::this_thread::sleep_for( std::chrono::milliseconds( sleepTime ) );
+    }
     
     crimild::async( crimild::AsyncDispatchPolicy::MAIN_QUEUE, std::bind( &WindowSystem::update, this ) );
 }

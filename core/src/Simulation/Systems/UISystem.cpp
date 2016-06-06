@@ -13,6 +13,18 @@ using namespace crimild::messaging;
 UISystem::UISystem( void )
     : System( "UI System" )
 {
+
+}
+
+UISystem::~UISystem( void )
+{
+
+}
+
+bool UISystem::start( void )
+{
+    return System::start();
+
     auto self = this;
  
     // TODO: This should be a click, not just a mouse button up   
@@ -56,18 +68,10 @@ UISystem::UISystem( void )
     });
 }
 
-UISystem::~UISystem( void )
-{
-
-}
-
-bool UISystem::start( void )
-{
-    return System::start();
-}
-
 void UISystem::stop( void )
 {
     System::stop();
+
+    unregisterMessageHandler< MouseButtonUp >();
 }
 

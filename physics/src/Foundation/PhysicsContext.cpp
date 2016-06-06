@@ -45,25 +45,35 @@ PhysicsContext::PhysicsContext( void )
 
 PhysicsContext::~PhysicsContext( void )
 {
-	delete _world;
-	delete _solver;
-	delete _dispatcher;
-	delete _collisionConfiguration;
-	delete _broadphase;
+
 }
 
 void PhysicsContext::init( void )
 {
-	 _broadphase = new btDbvtBroadphase();
+	_broadphase = crimild::alloc< btDbvtBroadphase >();
  
-    _collisionConfiguration = new btDefaultCollisionConfiguration();
-    _dispatcher = new btCollisionDispatcher( _collisionConfiguration );
+    _collisionConfiguration = crimild::alloc< btDefaultCollisionConfiguration >();
+    _dispatcher = crimild::alloc< btCollisionDispatcher >( crimild::get_ptr( _collisionConfiguration ) );
  
-    _solver = new btSequentialImpulseConstraintSolver();
+    _solver = crimild::alloc< btSequentialImpulseConstraintSolver >();
  
-    _world = new btDiscreteDynamicsWorld( _dispatcher, _broadphase, _solver, _collisionConfiguration );
+    _world = crimild::alloc< btDiscreteDynamicsWorld >( 
+    	crimild::get_ptr( _dispatcher ), 
+    	crimild::get_ptr( _broadphase ), 
+    	crimild::get_ptr( _solver ), 
+    	crimild::get_ptr( _collisionConfiguration ) );
+
     _world->getDispatchInfo().m_allowedCcdPenetration = 0.0001f; 
     _world->setGravity( BulletUtils::convert( _gravity ) );
+}
+
+void PhysicsContext::cleanup( void )
+{
+	_world = nullptr;
+	_solver = nullptr;
+	_dispatcher = nullptr;
+	_collisionConfiguration = nullptr;
+	_broadphase = nullptr;
 }
 
 void PhysicsContext::setGravity( const Vector3f &gravity ) 
@@ -80,11 +90,16 @@ void PhysicsContext::step( float dt )
 		return;
 	}
 
+	auto dispatcher = _world->getDispatcher();
+	if ( dispatcher == nullptr ) {
+		return;
+	}
+
 	_world->stepSimulation( dt );
 
-	int numManifolds = _world->getDispatcher()->getNumManifolds();
+	int numManifolds = dispatcher->getNumManifolds();
     for ( int i = 0; i < numManifolds; i++ ) {
-		btPersistentManifold *contactManifold = _world->getDispatcher()->getManifoldByIndexInternal( i );
+		btPersistentManifold *contactManifold = dispatcher->getManifoldByIndexInternal( i );
  
 		int numContacts = contactManifold->getNumContacts();
 		if ( numContacts > 0 ) {

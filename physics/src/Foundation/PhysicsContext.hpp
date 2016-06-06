@@ -39,22 +39,24 @@ namespace crimild {
 			PhysicsContext( void );
 			~PhysicsContext( void );
 
-			btDiscreteDynamicsWorld *getWorld( void ) { return _world; }
+			btDiscreteDynamicsWorld *getWorld( void ) { return crimild::get_ptr( _world ); }
 
 			void setGravity( const Vector3f &gravity );
 			const Vector3f getGravity( void ) const { return _gravity; }
 
 			void step( float dt );
 
+			void cleanup( void );
+
 		private:
 			void init( void );
 
 		private:
-			btBroadphaseInterface * _broadphase;
-    		btDefaultCollisionConfiguration *_collisionConfiguration;
-    		btCollisionDispatcher *_dispatcher;
-    		btSequentialImpulseConstraintSolver *_solver;
-    		btDiscreteDynamicsWorld *_world;
+			SharedPointer< btBroadphaseInterface > _broadphase;
+    		SharedPointer< btDefaultCollisionConfiguration > _collisionConfiguration;
+    		SharedPointer< btCollisionDispatcher > _dispatcher;
+    		SharedPointer< btSequentialImpulseConstraintSolver > _solver;
+    		SharedPointer< btDiscreteDynamicsWorld > _world;
 
     		Vector3f _gravity;
 		};
