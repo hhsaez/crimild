@@ -41,6 +41,9 @@ namespace crimild {
 		CRIMILD_DISALLOW_COPY_AND_ASSIGN( SkinnedMeshComponent )
 
 	public:
+		using AnimationProgressCallback = std::function< void( float ) >;
+
+	public:
 		SkinnedMeshComponent( void );
 		SkinnedMeshComponent( SharedPointer< SkinnedMesh > const &skinnedMesh );
 		virtual ~SkinnedMeshComponent( void );
@@ -49,7 +52,12 @@ namespace crimild {
 		virtual void update( const Clock &c ) override;
 		virtual void renderDebugInfo( Renderer *renderer, Camera *camera ) override;
 
-		void setAnimationParams( float firstFrame, float lastFrame, bool loop, float timeScale = 1.0f );
+		void setAnimationParams( 
+			float firstFrame, 
+			float lastFrame, 
+			bool loop, 
+			float timeScale = 1.0f, 
+			AnimationProgressCallback const &animationProgressCallack = nullptr );
 
 	private:
 		float _time = 0.0f;
@@ -59,6 +67,7 @@ namespace crimild {
 		float _lastFrame;
 		bool _loop;
 		float _timeScale;
+		AnimationProgressCallback _animationProgressCallback;
 	};
 
 }

@@ -79,9 +79,14 @@ void SkinnedMeshComponent::update( const Clock &c )
 	float timeInTicks = _time * _timeScale * currentClip->getFrameRate();
 	float duration = lastFrame - firstFrame;
 	float animationTime = firstFrame +  Numericf::clamp( fmod( timeInTicks, duration ), 0.0f, duration );
+	float animationProgress = Numericf::min( 1.0f, timeInTicks / ( lastFrame - firstFrame ) );
 
-	if ( !loop && timeInTicks > ( lastFrame - firstFrame ) ) {
+	if ( !loop && animationProgress >= 1.0f ) {
 		animationTime = lastFrame;
+	}
+
+	if ( _animationProgressCallback != nullptr ) {
+		_animationProgressCallback( animationProgress );
 	}
 
 	getNode()->perform( Apply( [mesh, skeleton, currentClip, animationState, animationTime]( Node *node ) {
@@ -109,36 +114,31 @@ void SkinnedMeshComponent::update( const Clock &c )
 			modelTransform = node->getLocal();
 		}
 		
-		// Transformation worldTransform = modelTransform;
-		// worldTransform.computeFrom( node->getParent()->getWorld(), modelTransform );
-
 		auto joint = skeleton->getJoints().find( node->getName() );
 		if ( joint != nullptr ) {
 			Transformation t;
 			t.computeFrom( node->getParent()->getWorld(), modelTransform );
 			t.computeFrom( t, joint->getOffset() );
-			// t.computeFrom( skeleton->getGlobalInverseTransform(), t );
 			animationState->getJointPoses()[ joint->getId() ] = t.computeModelMatrix();
 		}
 
-		// if ( false && self->_bones.boneMap.find( node->getName() ) != self->_bones.boneMap.end() ) {
-		// 	unsigned int boneIndex = self->_bones.boneMap[ node->getName() ];
-		// 	worldTransform.computeFrom( worldTransform, self->_bones.boneOffsets[ boneIndex ] );
-		// 	worldTransform.computeFrom( self->getGlobalInverseTranspose(), worldTransform );
-		// }
-
-		// node->setWorld( worldTransform );
 		node->setLocal( modelTransform );
-		// node->setWorldIsCurrent( true );
 	}));		
 }
 
-void SkinnedMeshComponent::setAnimationParams( float firstFrame, float lastFrame, bool loop, float timeScale )
+void SkinnedMeshComponent::setAnimationParams( 
+	float firstFrame, 
+	float lastFrame, 
+	bool loop, 
+	float timeScale, 
+	SkinnedMeshComponent::AnimationProgressCallback const &callback )
 {
 	_firstFrame = firstFrame;
 	_lastFrame = lastFrame;
 	_loop = loop;
 	_timeScale = timeScale;
+	_time = 0.0f;
+	_animationProgressCallback = callback;
 }
 
 void SkinnedMeshComponent::renderDebugInfo( Renderer *renderer, Camera *camera )
