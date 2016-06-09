@@ -225,18 +225,21 @@ bool physics::RigidBodyComponent::checkGroundCollision( void ) const
     	return false;
     }
 
-	auto center = getNode()->getWorldBound()->getCenter();
+    btTransform transform;
+    transform.setIdentity();
+    btVector3 min, max;
+    _shape->getAabb( transform, min, max );
 
-    auto from = BulletUtils::convert( center );
-    auto to = from + BulletUtils::convert( Vector3f( 0.0f, -20.0f * getNode()->getWorldBound()->getRadius(), 0.0f ) );
+    auto from = BulletUtils::convert( getNode()->getWorld().getTranslate() );
+    auto to = from + btVector3( 0.0f, min.y() - 100.0f, 0.0f );
     btCollisionWorld::ClosestRayResultCallback res( from, to );
 
     world->rayTest( from, to, res );
 
     bool grounded = false;
     if ( res.hasHit() ) {
-    	auto d = Distance::compute( center, BulletUtils::convert( res.m_hitPointWorld ) );
-    	grounded = !Numericf::isZero( d ) && d < getNode()->getWorldBound()->getRadius();
+    	auto d = Distance::compute( getNode()->getWorld().getTranslate(), BulletUtils::convert( res.m_hitPointWorld ) );
+    	grounded = d <= Numericf::fabs( min.y() );
     }
 
     return grounded;
