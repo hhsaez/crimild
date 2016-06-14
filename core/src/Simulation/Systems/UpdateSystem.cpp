@@ -52,13 +52,13 @@ void UpdateSystem::update( void )
     
 	auto scene = Simulation::getInstance()->getScene();
     if ( scene == nullptr ) {
-    	Log::Debug << "No scene found" << Log::End;
+    	// Log::Debug << "No scene found" << Log::End;
         return;
     }
     
     auto camera = Simulation::getInstance()->getMainCamera();
     if ( camera == nullptr ) {
-    	Log::Debug << "No camera detected" << Log::End;
+    	// Log::Debug << "No camera detected" << Log::End;
         return;
     }
 
