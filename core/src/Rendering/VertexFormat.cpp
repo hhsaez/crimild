@@ -32,6 +32,7 @@ using namespace crimild;
 const VertexFormat VertexFormat::VF_P3( 3, 0, 0, 0, 0 );
 const VertexFormat VertexFormat::VF_P3_C4( 3, 4, 0, 0, 0 );
 const VertexFormat VertexFormat::VF_P3_UV2( 3, 0, 0, 0, 2 );
+const VertexFormat VertexFormat::VF_P3_C4_UV2( 3, 4, 0, 0, 2 );
 const VertexFormat VertexFormat::VF_P3_N3( 3, 0, 3, 0, 0 );
 const VertexFormat VertexFormat::VF_P3_N3_TG3( 3, 0, 3, 3, 0 );
 const VertexFormat VertexFormat::VF_P3_N3_UV2( 3, 0, 3, 0, 2 );

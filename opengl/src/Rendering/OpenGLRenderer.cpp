@@ -43,6 +43,7 @@
 #include "Programs/DepthShaderProgram.hpp"
 #include "Programs/ColorTintShaderProgram.hpp"
 #include "Programs/UnlitVertexColorShaderProgram.hpp"
+#include "Programs/ParticleSystemShaderProgram.hpp"
 
 using namespace crimild;
 using namespace crimild::opengl;
@@ -72,6 +73,8 @@ OpenGLRenderer::OpenGLRenderer( SharedPointer< FrameBufferObject > const &screen
 	setShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_DIFFUSE, crimild::alloc< UnlitDiffuseShaderProgram >() );
 	setShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_VERTEX_COLOR, crimild::alloc< UnlitVertexColorShaderProgram >() );
     
+	setShaderProgram( Renderer::SHADER_PROGRAM_PARTICLE_SYSTEM, crimild::alloc< ParticleSystemShaderProgram >() );
+
 #ifdef CRIMILD_PLATFORM_DESKTOP
     setShaderProgram( Renderer::SHADER_PROGRAM_TEXT_SDF, crimild::alloc< SignedDistanceFieldShaderProgram >() );
 #endif

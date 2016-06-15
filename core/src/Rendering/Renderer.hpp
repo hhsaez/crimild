@@ -171,6 +171,7 @@ namespace crimild {
         static constexpr const char *SHADER_PROGRAM_UNLIT_TEXTURE = "shaders/unlit/texture";
         static constexpr const char *SHADER_PROGRAM_UNLIT_DIFFUSE = "shaders/unlit/diffuse";
         static constexpr const char *SHADER_PROGRAM_UNLIT_VERTEX_COLOR = "shaders/unlit/vertex_color";
+        static constexpr const char *SHADER_PROGRAM_PARTICLE_SYSTEM = "shaders/unlit/particle_system";
         static constexpr const char *SHADER_PROGRAM_TEXT_BASIC = "shaders/text/basic";
         static constexpr const char *SHADER_PROGRAM_TEXT_SDF = "shaders/text/sdf";
         static constexpr const char *SHADER_PROGRAM_SCREEN_TEXTURE = "shaders/misc/screen";

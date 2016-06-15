@@ -38,6 +38,7 @@ namespace crimild {
 		static const VertexFormat VF_P3;
 		static const VertexFormat VF_P3_C4;
 		static const VertexFormat VF_P3_UV2;
+		static const VertexFormat VF_P3_C4_UV2;
 		static const VertexFormat VF_P3_N3;
 		static const VertexFormat VF_P3_N3_TG3;
 		static const VertexFormat VF_P3_N3_UV2;
