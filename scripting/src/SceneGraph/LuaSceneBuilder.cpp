@@ -49,6 +49,8 @@ using namespace crimild::scripting;
 #define TEXT_SIZE "textSize"
 #define TEXT_TEXT "text"
 
+#define PARTICLE_SYSTEM_TYPE "crimild::ParticleSystem"
+
 #define PHYSICS_RIGID_BODY_TYPE "crimild::physics::RigidBody"
 #define PHYSICS_CHARACTER_CONTROLLER_TYPE "crimild::physics::CharacterController"
 #define PHYSICS_BOX_COLLIDER_TYPE "crimild::physics::BoxCollider"
@@ -258,6 +260,90 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
         }
         
         return text;
+    });
+
+    // TODO: Use RTTI for getting class type name
+    LuaNodeBuilderRegistry::getInstance()->registerCustomNodeBuilder( PARTICLE_SYSTEM_TYPE, [self]( ScriptEvaluator &eval ) -> SharedPointer< Node > {
+        auto ps = crimild::alloc< ParticleSystem >();
+
+        float maxParticles;
+        if ( eval.getPropValue( "maxParticles", maxParticles ) ) ps->setMaxParticles( maxParticles );
+
+        float particleLifetime;
+        if ( eval.getPropValue( "particleLifetime", particleLifetime ) ) ps->setParticleLifetime( particleLifetime );
+
+        float particleSpeed;
+        if ( eval.getPropValue( "particleSpeed", particleSpeed ) ) ps->setParticleSpeed( particleSpeed );
+
+        float particleStartSize;
+        if ( eval.getPropValue( "particleStartSize", particleStartSize ) ) ps->setParticleStartSize( particleStartSize );
+
+        float particleEndSize;
+        if ( eval.getPropValue( "particleEndSize", particleEndSize ) ) ps->setParticleEndSize( particleEndSize );
+
+        RGBAColorf particleStartColor;
+        if ( eval.getPropValue( "particleStartColor", particleStartColor ) ) ps->setParticleStartColor( particleStartColor );
+
+        RGBAColorf particleEndColor;
+        if ( eval.getPropValue( "particleEndColor", particleEndColor ) ) ps->setParticleEndColor( particleEndColor );
+
+        bool useWorldSpace;
+        if ( eval.getPropValue( "useWorldSpace", useWorldSpace ) ) ps->setUseWorldSpace( useWorldSpace );
+
+        std::string emitterType;
+        if ( eval.getPropValue( "emitter.type", emitterType ) ) {
+            SharedPointer< ParticleEmitter > emitter;
+            if ( emitterType == "cone" ) {
+                float height = 1.0f;
+                eval.getPropValue( "emitter.height", height );
+
+                float radius = 1.0f;
+                eval.getPropValue( "emitter.radius", radius );
+
+                emitter = crimild::alloc< ConeParticleEmitter >( height, radius );
+            }
+            else if ( emitterType == "cylinder" ) {
+                float height = 1.0f;
+                eval.getPropValue( "emitter.height", height );
+
+                float radius = 1.0f;
+                eval.getPropValue( "emitter.radius", radius );
+
+                emitter = crimild::alloc< CylinderParticleEmitter >( height, radius );
+            }
+            else if ( emitterType == "sphere" ) {
+                float radius = 1.0f;
+                eval.getPropValue( "emitter.radius", radius );
+
+                emitter = crimild::alloc< SphereParticleEmitter >( radius );
+            }
+
+            if ( emitter != nullptr ) {
+                Transformation t;
+                if ( eval.getPropValue( "emitter.transformation", t ) ) emitter->setTransformation( t );
+
+                ps->setEmitter( emitter );
+            }
+        }
+
+        bool precomputeParticles;
+        if ( eval.getPropValue( "precomputeParticles", precomputeParticles ) ) ps->setPreComputeParticles( precomputeParticles );
+
+        std::string textureFileName;
+        if ( eval.getPropValue( "texture", textureFileName ) ) {
+            ps->setTexture( crimild::retain( AssetManager::getInstance()->get< Texture >( textureFileName ) ) );
+        }
+
+        // auto psEmitter = crimild::alloc< ConeParticleEmitter >( 1.0f, 0.25f );
+        // Transformation t;
+        // t.rotate().fromAxisAngle( Vector3f( 1.0f, 0.0f, 0.0f ), Numericf::PI );
+        // psEmitter->setTransformation( t );
+        // auto psEmitter = crimild::alloc< CylinderParticleEmitter >( 0.1f, 0.5f );
+        // auto psEmitter = crimild::alloc< SphereParticleEmitter >( 1.0f );
+
+        ps->generate();
+
+        return ps;
     });
 
 #ifdef CRIMILD_ENABLE_PHYSICS

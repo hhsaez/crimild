@@ -156,6 +156,10 @@ void ParticleSystem::resetParticle( ParticleSystem::Particle &p )
 {
     p.time = Random::generate< float >();
     getEmitter()->generate( p.position, p.velocity );
+
+    if ( useWorldSpace() ) {
+        getWorld().applyInverseToVector( p.velocity, p.velocity );
+    }
 }
 
 void ParticleSystem::updateParticles( const Clock &c )

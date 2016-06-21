@@ -132,9 +132,13 @@ namespace crimild {
         void setPreComputeParticles( bool value ) { _preComputeParticles = value; }
         bool shouldPreComputeParticles( void ) const { return _preComputeParticles; }
 
+        void setUseWorldSpace( bool value ) { _useWorldSpace = value; }
+        bool useWorldSpace( void ) const { return _useWorldSpace; }
+
     private:
         unsigned int _maxParticles = 10;
         bool _preComputeParticles = false;
+        bool _useWorldSpace = false;
 
     public:
         void setParticleLifetime( float value ) { _particleLifetime = value; }
