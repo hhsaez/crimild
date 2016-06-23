@@ -83,3 +83,6 @@ IF ( CRIMILD_BUILD_TOOLS )
 	ADD_SUBDIRECTORY( tools )
 ENDIF ( CRIMILD_BUILD_TOOLS )
 
+# Options for app bundles
+OPTION( CRIMILD_BUNDLE_APPS "Enable bundles for apps" OFF )
+
