@@ -37,12 +37,15 @@ using namespace crimild::scripting;
 #define CAMERA_FRUSTUM_ASPECT "frustum.aspect"
 #define CAMERA_FRUSTUM_NEAR "frustum.near"
 #define CAMERA_FRUSTUM_FAR "frustum.far"
+#define CAMERA_CULLING_ENABLED "enableCulling"
 
 #define LIGHT_TYPE "crimild::Light"
 #define LIGHT_CAST_SHADOWS "castShadows"
 #define LIGHT_SHADOW_FAR_COEFF "shadowFarCoeff"
 #define LIGHT_SHADOW_NEAR_COEFF "shadowNearCoeff"
 #define LIGHT_ATTENUATION "attenuation"
+#define LIGHT_LIGHT_TYPE "lightType"
+#define LIGHT_COLOR "color"
 
 #define TEXT_TYPE "crimild::Text"
 #define TEXT_FONT "font"
@@ -169,19 +172,35 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
         eval.getPropValue( CAMERA_FRUSTUM_ASPECT, aspect );
         eval.getPropValue( CAMERA_FRUSTUM_NEAR, near );
         eval.getPropValue( CAMERA_FRUSTUM_FAR, far );
-        
+
         camera->setFrustum( Frustumf( fov, aspect, near, far ) );
         
         eval.foreach( GROUP_NODES, [self, camera]( ScriptEvaluator &child, int ) {
             self->buildNode( child, crimild::get_ptr( camera ) );
         });
+
+        bool cullingEnabled = true;
+        if ( eval.getPropValue( CAMERA_CULLING_ENABLED, cullingEnabled ) ) {
+            camera->setCullingEnabled( cullingEnabled );
+        }
         
         return camera;
     });
     
     // TODO: Use RTTI for getting class type name
     LuaNodeBuilderRegistry::getInstance()->registerCustomNodeBuilder( LIGHT_TYPE, [self]( ScriptEvaluator &eval ) -> SharedPointer< Node > {
-        auto light = crimild::alloc< Light >();
+        Light::Type lightType = Light::Type::POINT;
+        std::string lightTypeStr;
+        if ( eval.getPropValue( LIGHT_LIGHT_TYPE, lightTypeStr ) ) {
+            if ( lightTypeStr == "directional" ) {
+                lightType = Light::Type::DIRECTIONAL;
+            }
+            else if ( lightTypeStr == "spot" ) {
+                lightType = Light::Type::SPOT;
+            }
+        }
+
+        auto light = crimild::alloc< Light >( lightType );
         
         bool castShadows;
         if ( eval.getPropValue( LIGHT_CAST_SHADOWS, castShadows ) ) {
@@ -202,6 +221,9 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
         if ( eval.getPropValue( LIGHT_ATTENUATION, attenuation ) ) {
             light->setAttenuation( attenuation );
         }
+
+        RGBAColorf color;
+        if ( eval.getPropValue( LIGHT_COLOR, color ) ) light->setColor( color );
         
         return light;
     });
