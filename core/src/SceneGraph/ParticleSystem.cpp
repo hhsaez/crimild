@@ -120,8 +120,7 @@ void ParticleSystem::generate( void )
     getComponent< MaterialComponent >()->attachMaterial( material );
 
     material->setColorMap( _texture );
-    material->setAlphaState( AlphaState::ENABLED );
-    // material->setDepthState( DepthState::DISABLED );
+    material->setAlphaState( crimild::alloc< AlphaState >( true, AlphaState::SrcBlendFunc::SRC_ALPHA, AlphaState::DstBlendFunc::ONE ) );
     material->setCullFaceState( CullFaceState::DISABLED );
 
     _program = crimild::retain( AssetManager::getInstance()->get< ShaderProgram >( Renderer::SHADER_PROGRAM_PARTICLE_SYSTEM ) );
@@ -154,7 +153,7 @@ void ParticleSystem::generate( void )
 
 void ParticleSystem::resetParticle( ParticleSystem::Particle &p )
 {
-    p.time = Random::generate< float >();
+    p.time = 0.0f;
     getEmitter()->generate( p.position, p.velocity );
 
     if ( useWorldSpace() ) {
@@ -200,19 +199,19 @@ void ParticleSystem::updateParticles( const Clock &c )
         Interpolation::linear( getParticleStartSize(), getParticleEndSize(), _particles[ i ].time, size );
 
         vbo->setPositionAt( i * 4 + 0, _particles[ i ].position + size * up - size * right );
-        vbo->setTextureCoordAt( i * 4 + 0, Vector2f( 0.0f, 0.0f ) );
+        vbo->setTextureCoordAt( i * 4 + 0, Vector2f( 0.0f, 1.0f ) );
         vbo->setRGBAColorAt( i * 4 + 0, color );
         
         vbo->setPositionAt( i * 4 + 1, _particles[ i ].position - size * up - size * right );
-        vbo->setTextureCoordAt( i * 4 + 1, Vector2f( 0.0f, 1.0f ) );
+        vbo->setTextureCoordAt( i * 4 + 1, Vector2f( 0.0f, 0.0f ) );
         vbo->setRGBAColorAt( i * 4 + 1, color );
         
         vbo->setPositionAt( i * 4 + 2, _particles[ i ].position - size * up + size * right );
-        vbo->setTextureCoordAt( i * 4 + 2, Vector2f( 1.0f, 1.0f ) );
+        vbo->setTextureCoordAt( i * 4 + 2, Vector2f( 1.0f, 0.0f ) );
         vbo->setRGBAColorAt( i * 4 + 2, color );
         
         vbo->setPositionAt( i * 4 + 3, _particles[ i ].position + size * up + size * right );
-        vbo->setTextureCoordAt( i * 4 + 3, Vector2f( 1.0f, 0.0f ) );
+        vbo->setTextureCoordAt( i * 4 + 3, Vector2f( 1.0f, 1.0f ) );
         vbo->setRGBAColorAt( i * 4 + 3, color );
     }
     _primitive->setVertexBuffer( vbo );

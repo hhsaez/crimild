@@ -51,6 +51,11 @@ namespace crimild {
 			makeIdentity();
 		}
 
+		TransformationImpl( const Matrix4Impl &m )
+		{
+			fromMatrix( m );
+		}
+
 		explicit TransformationImpl( const Vector3Impl &v )
 		{
 			makeIdentity();

@@ -56,7 +56,9 @@ Renderer::Renderer( void )
 	  _frameBufferObjectCatalog( crimild::alloc< Catalog< FrameBufferObject >>() )
 
 {
-    
+ 	generateAuxFBO( FBO_AUX_256, 256, 256 );
+ 	generateAuxFBO( FBO_AUX_512, 512, 512 );
+ 	generateAuxFBO( FBO_AUX_1024, 1024, 1024 );   
 }
 
 Renderer::~Renderer( void )
@@ -91,6 +93,15 @@ void Renderer::setFrameBuffer( std::string name, SharedPointer< FrameBufferObjec
 FrameBufferObject *Renderer::getFrameBuffer( std::string name )
 {
     return AssetManager::getInstance()->get< FrameBufferObject >( name );
+}
+
+SharedPointer< FrameBufferObject > Renderer::generateAuxFBO( std::string name, int width, int height )
+{
+    auto fbo = crimild::alloc< FrameBufferObject >( width, height );
+    fbo->getRenderTargets().add( FBO_AUX_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
+    fbo->getRenderTargets().add( FBO_AUX_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
+    AssetManager::getInstance()->set( name, fbo, true );
+    return fbo;
 }
 
 void Renderer::beginRender( void )

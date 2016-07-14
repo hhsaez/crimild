@@ -121,7 +121,9 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
         
         std::string filename;
         if ( eval.getPropValue( NODE_FILENAME, filename ) && filename != "" ) {
+#ifdef CRIMILD_SCRIPTING_LOG_VERBOSE
             Log::Debug << "Building node" << Log::End;
+#endif
             
             auto scene = AssetManager::getInstance()->get< Group >( filename );
             if ( scene == nullptr ) {
@@ -142,7 +144,9 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
             group = shallowCopy.getResult< Group >();
         }
         else {
+#ifdef CRIMILD_SCRIPTING_LOG_VERBOSE
             Log::Debug << "Building 'group' node" << Log::End;
+#endif
             group = std::make_shared< Group >();
         }
         
@@ -531,7 +535,6 @@ SharedPointer< Node > LuaSceneBuilder::buildNode( ScriptEvaluator &eval, Group *
 
 void LuaSceneBuilder::setTransformation( ScriptEvaluator &eval, SharedPointer< Node > const &node )
 {
-	Log::Debug << "Setting node transformation" << Log::End;
     Transformation t;
     if ( eval.getPropValue( NODE_TRANSFORMATION, t ) ) {
         // this is related with Text nodes and their anchors
@@ -546,7 +549,9 @@ void LuaSceneBuilder::buildNodeComponents( ScriptEvaluator &eval, SharedPointer<
 	eval.foreach( NODE_COMPONENTS, [&]( ScriptEvaluator &componentEval, int ) {
         std::string type;
         if ( componentEval.getPropValue( NODE_COMPONENT_TYPE, type ) ) {
+#ifdef CRIMILD_SCRIPTING_LOG_VERBOSE
             Log::Debug << "Building component of type '" << type << "'" << Log::End;
+#endif
             auto builder = LuaComponentBuilderRegistry::getInstance()->getBuilder( type );
             if ( builder == nullptr ) {
                 Log::Warning << "Cannot find component builder for type '" << type << "'" << Log::End;
