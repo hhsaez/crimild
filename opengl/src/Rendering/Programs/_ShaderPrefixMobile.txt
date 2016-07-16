@@ -8,6 +8,9 @@ R"(
 
 #define CRIMILD_GLSL_VERTEX_OUTPUT gl_Position
 
+#define CRIMILD_GLSL_POINT_SIZE gl_PointSize
+#define CRIMILD_GLSL_POINT_COORD gl_PointCoord
+
 #define CRIMILD_GLSL_FRAGMENT_OUTPUT gl_FragColor
 #define CRIMILD_GLSL_DECLARE_FRAGMENT_OUTPUT 
 

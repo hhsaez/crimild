@@ -126,7 +126,7 @@ void ParticleSystem::generate( void )
     _program = crimild::retain( AssetManager::getInstance()->get< ShaderProgram >( Renderer::SHADER_PROGRAM_PARTICLE_SYSTEM ) );
     material->setProgram( _program );
 
-    _primitive = crimild::alloc< Primitive >( Primitive::Type::TRIANGLES );
+    _primitive = crimild::alloc< Primitive >( Primitive::Type::POINTS );
 
     _particles.resize( getMaxParticles() );
     for ( auto &p : _particles ) {
@@ -137,14 +137,9 @@ void ParticleSystem::generate( void )
         }
     }
 
-    auto ibo = crimild::alloc< IndexBufferObject >( 6 * getMaxParticles() );
+    auto ibo = crimild::alloc< IndexBufferObject >( getMaxParticles() );
     for ( IndexPrecision i = 0; i < getMaxParticles(); i++ ) {
-        ibo->setIndexAt( i * 6 + 0, i * 4 + 0 );
-        ibo->setIndexAt( i * 6 + 1, i * 4 + 1 );
-        ibo->setIndexAt( i * 6 + 2, i * 4 + 2 );
-        ibo->setIndexAt( i * 6 + 3, i * 4 + 0 );
-        ibo->setIndexAt( i * 6 + 4, i * 4 + 2 );
-        ibo->setIndexAt( i * 6 + 5, i * 4 + 3 );
+        ibo->setIndexAt( i, i );
     }
     _primitive->setIndexBuffer( ibo );
 
@@ -180,17 +175,10 @@ void ParticleSystem::updateParticles( const Clock &c )
     getWorld().applyInverseToPoint( camera->getWorld().getTranslate(), localCameraPos );
 
     std::sort( _particles.begin(), _particles.end(), [localCameraPos]( const ParticleSystem::Particle &a, const ParticleSystem::Particle &b ) -> bool {
-        // return Distance::computeSquared( localCameraPos, a.position ) > Distance::computeSquared( localCameraPos, b.position );
         return a.position[ 2 ] < b.position[ 2 ];
     });
 
-    auto up = 0.5f * camera->getWorld().computeUp();
-    auto right = 0.5f * camera->getWorld().computeRight();
-
-    getWorld().applyInverseToVector( up, up );
-    getWorld().applyInverseToVector( right, right );
-
-    auto vbo = crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3_C4_UV2, 4 * getMaxParticles() );
+    auto vbo = crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3_C4_UV2, getMaxParticles() );
     for ( unsigned int i = 0; i < getMaxParticles(); i++ ) {
         RGBAColorf color;
         Interpolation::linear( getParticleStartColor(), getParticleEndColor(), _particles[ i ].time, color );
@@ -198,21 +186,9 @@ void ParticleSystem::updateParticles( const Clock &c )
         float size;
         Interpolation::linear( getParticleStartSize(), getParticleEndSize(), _particles[ i ].time, size );
 
-        vbo->setPositionAt( i * 4 + 0, _particles[ i ].position + size * up - size * right );
-        vbo->setTextureCoordAt( i * 4 + 0, Vector2f( 0.0f, 1.0f ) );
-        vbo->setRGBAColorAt( i * 4 + 0, color );
-        
-        vbo->setPositionAt( i * 4 + 1, _particles[ i ].position - size * up - size * right );
-        vbo->setTextureCoordAt( i * 4 + 1, Vector2f( 0.0f, 0.0f ) );
-        vbo->setRGBAColorAt( i * 4 + 1, color );
-        
-        vbo->setPositionAt( i * 4 + 2, _particles[ i ].position - size * up + size * right );
-        vbo->setTextureCoordAt( i * 4 + 2, Vector2f( 1.0f, 0.0f ) );
-        vbo->setRGBAColorAt( i * 4 + 2, color );
-        
-        vbo->setPositionAt( i * 4 + 3, _particles[ i ].position + size * up + size * right );
-        vbo->setTextureCoordAt( i * 4 + 3, Vector2f( 1.0f, 1.0f ) );
-        vbo->setRGBAColorAt( i * 4 + 3, color );
+        vbo->setPositionAt( i, _particles[ i ].position );
+        vbo->setTextureCoordAt( i, Vector2f( size, 0.0f ) );
+        vbo->setRGBAColorAt( i, color );
     }
     _primitive->setVertexBuffer( vbo );
 }
