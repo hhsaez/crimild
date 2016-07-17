@@ -16,5 +16,7 @@ R"(
 
 #define CRIMILD_GLSL_FN_TEXTURE_2D texture
 
+#define CRIMILD_GLSL_MAX_JOINTS 100
+
 )"
 

@@ -19,7 +19,7 @@ uniform mat4 uLightSourceViewMatrix;
 uniform bool uUseNormalMap;
 
 uniform int uJointCount;
-uniform mat4 uJoints[ 100 ];
+uniform mat4 uJoints[ CRIMILD_GLSL_MAX_JOINTS ];
                                              
 CRIMILD_GLSL_VARYING_OUT vec4 vWorldVertex;
 CRIMILD_GLSL_VARYING_OUT vec3 vWorldNormal;
