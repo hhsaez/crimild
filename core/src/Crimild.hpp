@@ -104,6 +104,7 @@
 #include "Visitors/ShallowCopy.hpp"
 
 #include "Primitives/Primitive.hpp"
+#include "Primitives/ArcPrimitive.hpp"
 #include "Primitives/BoxPrimitive.hpp"
 #include "Primitives/ParametricPrimitive.hpp"
 #include "Primitives/ParametricSpherePrimitive.hpp"
