@@ -156,8 +156,16 @@ namespace crimild {
         void setScreenBuffer( SharedPointer< FrameBufferObject > const &screenBuffer ) { _screenBuffer = screenBuffer; }
         FrameBufferObject *getScreenBuffer( void ) { return crimild::get_ptr( _screenBuffer ); }
         
+        static constexpr const char *FBO_AUX_256 = "framebuffers/aux_256";
+        static constexpr const char *FBO_AUX_512 = "framebuffers/aux_512";
+        static constexpr const char *FBO_AUX_1024 = "framebuffers/aux_1024";
+        static constexpr const char *FBO_AUX_COLOR_TARGET_NAME = "framebuffers/aux_color";
+        static constexpr const char *FBO_AUX_DEPTH_TARGET_NAME = "framebuffers/aux_depth";
+
         void setFrameBuffer( std::string name, SharedPointer< FrameBufferObject > const &fbo );
         FrameBufferObject *getFrameBuffer( std::string name );
+
+        SharedPointer< FrameBufferObject > generateAuxFBO( std::string name, int width, int height );
         
     private:
         SharedPointer< FrameBufferObject > _screenBuffer;

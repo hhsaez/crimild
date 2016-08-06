@@ -249,7 +249,11 @@ FrameBufferObject *RenderPass::getSBuffer( Renderer *renderer )
     int height = renderer->getScreenBuffer()->getHeight();
     
     auto sBuffer = crimild::alloc< FrameBufferObject >( width, height );
+#ifdef CRIMILD_PLATFORM_DESKTOP
+    sBuffer->getRenderTargets().add( S_BUFFER_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER_AND_TEXTURE, width, height, true ) );
+#else
     sBuffer->getRenderTargets().add( S_BUFFER_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
+#endif
     sBuffer->getRenderTargets().add( S_BUFFER_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
     renderer->setFrameBuffer( S_BUFFER_NAME, sBuffer );
     
@@ -268,7 +272,11 @@ FrameBufferObject *RenderPass::getDBuffer( Renderer *renderer )
     int height = renderer->getScreenBuffer()->getHeight();
     
     auto dBuffer = crimild::alloc< FrameBufferObject >( width, height );
+#ifdef CRIMILD_PLATFORM_DESKTOP
+    dBuffer->getRenderTargets().add( D_BUFFER_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER_AND_TEXTURE, width, height, true ) );
+#else
     dBuffer->getRenderTargets().add( D_BUFFER_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
+#endif
     dBuffer->getRenderTargets().add( D_BUFFER_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
     renderer->setFrameBuffer( D_BUFFER_NAME, dBuffer );
     

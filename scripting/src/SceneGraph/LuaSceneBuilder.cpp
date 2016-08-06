@@ -37,17 +37,22 @@ using namespace crimild::scripting;
 #define CAMERA_FRUSTUM_ASPECT "frustum.aspect"
 #define CAMERA_FRUSTUM_NEAR "frustum.near"
 #define CAMERA_FRUSTUM_FAR "frustum.far"
+#define CAMERA_CULLING_ENABLED "enableCulling"
 
 #define LIGHT_TYPE "crimild::Light"
 #define LIGHT_CAST_SHADOWS "castShadows"
 #define LIGHT_SHADOW_FAR_COEFF "shadowFarCoeff"
 #define LIGHT_SHADOW_NEAR_COEFF "shadowNearCoeff"
 #define LIGHT_ATTENUATION "attenuation"
+#define LIGHT_LIGHT_TYPE "lightType"
+#define LIGHT_COLOR "color"
 
 #define TEXT_TYPE "crimild::Text"
 #define TEXT_FONT "font"
 #define TEXT_SIZE "textSize"
 #define TEXT_TEXT "text"
+
+#define PARTICLE_SYSTEM_TYPE "crimild::ParticleSystem"
 
 #define PHYSICS_RIGID_BODY_TYPE "crimild::physics::RigidBody"
 #define PHYSICS_CHARACTER_CONTROLLER_TYPE "crimild::physics::CharacterController"
@@ -116,7 +121,9 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
         
         std::string filename;
         if ( eval.getPropValue( NODE_FILENAME, filename ) && filename != "" ) {
+#ifdef CRIMILD_SCRIPTING_LOG_VERBOSE
             Log::Debug << "Building node" << Log::End;
+#endif
             
             auto scene = AssetManager::getInstance()->get< Group >( filename );
             if ( scene == nullptr ) {
@@ -137,7 +144,9 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
             group = shallowCopy.getResult< Group >();
         }
         else {
+#ifdef CRIMILD_SCRIPTING_LOG_VERBOSE
             Log::Debug << "Building 'group' node" << Log::End;
+#endif
             group = std::make_shared< Group >();
         }
         
@@ -167,19 +176,35 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
         eval.getPropValue( CAMERA_FRUSTUM_ASPECT, aspect );
         eval.getPropValue( CAMERA_FRUSTUM_NEAR, near );
         eval.getPropValue( CAMERA_FRUSTUM_FAR, far );
-        
+
         camera->setFrustum( Frustumf( fov, aspect, near, far ) );
         
         eval.foreach( GROUP_NODES, [self, camera]( ScriptEvaluator &child, int ) {
             self->buildNode( child, crimild::get_ptr( camera ) );
         });
+
+        bool cullingEnabled = true;
+        if ( eval.getPropValue( CAMERA_CULLING_ENABLED, cullingEnabled ) ) {
+            camera->setCullingEnabled( cullingEnabled );
+        }
         
         return camera;
     });
     
     // TODO: Use RTTI for getting class type name
     LuaNodeBuilderRegistry::getInstance()->registerCustomNodeBuilder( LIGHT_TYPE, [self]( ScriptEvaluator &eval ) -> SharedPointer< Node > {
-        auto light = crimild::alloc< Light >();
+        Light::Type lightType = Light::Type::POINT;
+        std::string lightTypeStr;
+        if ( eval.getPropValue( LIGHT_LIGHT_TYPE, lightTypeStr ) ) {
+            if ( lightTypeStr == "directional" ) {
+                lightType = Light::Type::DIRECTIONAL;
+            }
+            else if ( lightTypeStr == "spot" ) {
+                lightType = Light::Type::SPOT;
+            }
+        }
+
+        auto light = crimild::alloc< Light >( lightType );
         
         bool castShadows;
         if ( eval.getPropValue( LIGHT_CAST_SHADOWS, castShadows ) ) {
@@ -200,6 +225,9 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
         if ( eval.getPropValue( LIGHT_ATTENUATION, attenuation ) ) {
             light->setAttenuation( attenuation );
         }
+
+        RGBAColorf color;
+        if ( eval.getPropValue( LIGHT_COLOR, color ) ) light->setColor( color );
         
         return light;
     });
@@ -258,6 +286,90 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
         }
         
         return text;
+    });
+
+    // TODO: Use RTTI for getting class type name
+    LuaNodeBuilderRegistry::getInstance()->registerCustomNodeBuilder( PARTICLE_SYSTEM_TYPE, [self]( ScriptEvaluator &eval ) -> SharedPointer< Node > {
+        auto ps = crimild::alloc< ParticleSystem >();
+
+        float maxParticles;
+        if ( eval.getPropValue( "maxParticles", maxParticles ) ) ps->setMaxParticles( maxParticles );
+
+        float particleLifetime;
+        if ( eval.getPropValue( "particleLifetime", particleLifetime ) ) ps->setParticleLifetime( particleLifetime );
+
+        float particleSpeed;
+        if ( eval.getPropValue( "particleSpeed", particleSpeed ) ) ps->setParticleSpeed( particleSpeed );
+
+        float particleStartSize;
+        if ( eval.getPropValue( "particleStartSize", particleStartSize ) ) ps->setParticleStartSize( particleStartSize );
+
+        float particleEndSize;
+        if ( eval.getPropValue( "particleEndSize", particleEndSize ) ) ps->setParticleEndSize( particleEndSize );
+
+        RGBAColorf particleStartColor;
+        if ( eval.getPropValue( "particleStartColor", particleStartColor ) ) ps->setParticleStartColor( particleStartColor );
+
+        RGBAColorf particleEndColor;
+        if ( eval.getPropValue( "particleEndColor", particleEndColor ) ) ps->setParticleEndColor( particleEndColor );
+
+        bool useWorldSpace;
+        if ( eval.getPropValue( "useWorldSpace", useWorldSpace ) ) ps->setUseWorldSpace( useWorldSpace );
+
+        std::string emitterType;
+        if ( eval.getPropValue( "emitter.type", emitterType ) ) {
+            SharedPointer< ParticleEmitter > emitter;
+            if ( emitterType == "cone" ) {
+                float height = 1.0f;
+                eval.getPropValue( "emitter.height", height );
+
+                float radius = 1.0f;
+                eval.getPropValue( "emitter.radius", radius );
+
+                emitter = crimild::alloc< ConeParticleEmitter >( height, radius );
+            }
+            else if ( emitterType == "cylinder" ) {
+                float height = 1.0f;
+                eval.getPropValue( "emitter.height", height );
+
+                float radius = 1.0f;
+                eval.getPropValue( "emitter.radius", radius );
+
+                emitter = crimild::alloc< CylinderParticleEmitter >( height, radius );
+            }
+            else if ( emitterType == "sphere" ) {
+                float radius = 1.0f;
+                eval.getPropValue( "emitter.radius", radius );
+
+                emitter = crimild::alloc< SphereParticleEmitter >( radius );
+            }
+
+            if ( emitter != nullptr ) {
+                Transformation t;
+                if ( eval.getPropValue( "emitter.transformation", t ) ) emitter->setTransformation( t );
+
+                ps->setEmitter( emitter );
+            }
+        }
+
+        bool precomputeParticles;
+        if ( eval.getPropValue( "precomputeParticles", precomputeParticles ) ) ps->setPreComputeParticles( precomputeParticles );
+
+        std::string textureFileName;
+        if ( eval.getPropValue( "texture", textureFileName ) ) {
+            ps->setTexture( crimild::retain( AssetManager::getInstance()->get< Texture >( textureFileName ) ) );
+        }
+
+        // auto psEmitter = crimild::alloc< ConeParticleEmitter >( 1.0f, 0.25f );
+        // Transformation t;
+        // t.rotate().fromAxisAngle( Vector3f( 1.0f, 0.0f, 0.0f ), Numericf::PI );
+        // psEmitter->setTransformation( t );
+        // auto psEmitter = crimild::alloc< CylinderParticleEmitter >( 0.1f, 0.5f );
+        // auto psEmitter = crimild::alloc< SphereParticleEmitter >( 1.0f );
+
+        ps->generate();
+
+        return ps;
     });
 
 #ifdef CRIMILD_ENABLE_PHYSICS
@@ -423,7 +535,6 @@ SharedPointer< Node > LuaSceneBuilder::buildNode( ScriptEvaluator &eval, Group *
 
 void LuaSceneBuilder::setTransformation( ScriptEvaluator &eval, SharedPointer< Node > const &node )
 {
-	Log::Debug << "Setting node transformation" << Log::End;
     Transformation t;
     if ( eval.getPropValue( NODE_TRANSFORMATION, t ) ) {
         // this is related with Text nodes and their anchors
@@ -438,7 +549,9 @@ void LuaSceneBuilder::buildNodeComponents( ScriptEvaluator &eval, SharedPointer<
 	eval.foreach( NODE_COMPONENTS, [&]( ScriptEvaluator &componentEval, int ) {
         std::string type;
         if ( componentEval.getPropValue( NODE_COMPONENT_TYPE, type ) ) {
+#ifdef CRIMILD_SCRIPTING_LOG_VERBOSE
             Log::Debug << "Building component of type '" << type << "'" << Log::End;
+#endif
             auto builder = LuaComponentBuilderRegistry::getInstance()->getBuilder( type );
             if ( builder == nullptr ) {
                 Log::Warning << "Cannot find component builder for type '" << type << "'" << Log::End;

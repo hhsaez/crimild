@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,20 +25,37 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_OPENGL_
-#define CRIMILD_OPENGL_
+#ifndef CRIMILD_GL3_RENDERING_IMAGE_EFFECT_VIGNETTE_
+#define CRIMILD_GL3_RENDERING_IMAGE_EFFECT_VIGNETTE_
 
-#include "Rendering/OpenGLRenderer.hpp"
-#include "Rendering/OpenGLUtils.hpp"
+#include <Crimild.hpp>
 
-#ifdef CRIMILD_PLATFORM_DESKTOP
-
-#include "Rendering/ImageEffects/DepthOfFieldImageEffect.hpp"
-#include "Rendering/ImageEffects/BloomImageEffect.hpp"
-#include "Rendering/ImageEffects/SSAOImageEffect.hpp"
-#include "Rendering/ImageEffects/VignetteImageEffect.hpp"
-
-#endif
+namespace crimild {
+    
+    namespace opengl {
+        
+        class VignetteImageEffect : public ImageEffect {
+        public:
+            VignetteImageEffect( void );
+            virtual ~VignetteImageEffect( void );
+            
+            virtual void compute( crimild::Renderer *renderer, Camera *camera ) override;
+            virtual void apply( crimild::Renderer *renderer, crimild::Camera *camera ) override;
+            
+            float getInnerCutoff( void ) { return _innerCutoff; }
+            void setInnerCutoff( float value ) { _innerCutoff = value; }
+            
+            float getOuterCutoff( void ) { return _outerCutoff; }
+            void setOuterCutoff( float value ) { _outerCutoff = value; }
+            
+        private:
+            float _innerCutoff;
+            float _outerCutoff;
+        };
+        
+    }
+    
+}
 
 #endif
 

@@ -60,10 +60,9 @@ void ComputeRenderQueue::traverse( Node *scene )
 
 void ComputeRenderQueue::visitGroup( Group *group )
 {
-    if ( _camera != nullptr && _camera->culled( group->getWorldBound() ) ) {
-        return;
-    }
-    
+    // we should not discard groups based on culling
+    // since there could be lights or other nodes
+    // that affect the scene even if they are not visible
     NodeVisitor::visitGroup( group );
 }
 
