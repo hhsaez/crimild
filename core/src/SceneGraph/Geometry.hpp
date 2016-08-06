@@ -39,6 +39,8 @@ namespace crimild {
     class Primitive;
 
     class Geometry : public Node {
+    	CRIMILD_IMPLEMENT_RTTI( crimild::Geometry )
+
 	public:
 		explicit Geometry( std::string name = "" );
 		virtual ~Geometry( void );
@@ -62,6 +64,11 @@ namespace crimild {
 
 	public:
 		virtual void accept( NodeVisitor &visitor ) override;
+
+	public:
+		virtual bool registerInStream( Stream &s ) override;
+		virtual void save( Stream &s ) override;
+		virtual void load( Stream &s ) override;
 	};
 
 }

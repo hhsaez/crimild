@@ -32,8 +32,6 @@
 using namespace crimild;
 using namespace crimild::scripting;
 
-#if 0
-
 int my_add( int a, int b ) {
     return a + b;
 }
@@ -173,125 +171,148 @@ TEST ( ScriptContextTest, testEval )
 {
 	ScriptContext context;
 	context.load( FileSystem::getInstance().pathForResource( "Scripts/simple.lua" ) );
+	auto &eval = context.getEvaluator();
 
-	EXPECT_EQ( 20, context.eval< float >( "player.position.x" ) );
-	EXPECT_EQ( 90, context.eval< float >( "player.position.y" ) );
-	EXPECT_EQ( "player", context.eval< std::string >( "player.name" ) );
-	EXPECT_EQ( "warrior.obj", context.eval< std::string >( "player.model" ) );
+	float value;
+	eval.getPropValue( "player.position.x", value );
+	EXPECT_EQ( 20, value );
+
+	eval.getPropValue( "player.position.y", value );
+	EXPECT_EQ( 90, value );
+
+	std::string str;
+	eval.getPropValue( "player.name", str );
+	EXPECT_EQ( "player", str );
+
+	eval.getPropValue( "player.model", str );
+	EXPECT_EQ( "warrior.obj", str );
 }
 
 TEST ( ScriptContextTest, testTest )
 {
 	ScriptContext context;
 	context.load( FileSystem::getInstance().pathForResource( "Scripts/simple.lua" ) );
+	auto &eval = context.getEvaluator();
 
-	EXPECT_TRUE( context.test( "player.position.x" ) );
-	EXPECT_FALSE( context.test( "player.position.z" ) );
+	float value;
+	EXPECT_TRUE( eval.getPropValue( "player.position.x", value ) );
+
+	EXPECT_FALSE( eval.getPropValue( "player.position.z", value ) );
 }
 
 TEST ( ScriptContextTest, testDefaultValues )
 {
 	ScriptContext context;
 	context.load( FileSystem::getInstance().pathForResource( "Scripts/simple.lua" ) );
+	auto &eval = context.getEvaluator();
 
-	EXPECT_EQ( 0, context.eval< float >( "player.position.z" ) );
-	EXPECT_EQ( "null", context.eval< std::string >( "player.background" ) );
+	float value = 0;
+	EXPECT_FALSE( eval.getPropValue( "player.position.z", value ) );
+	EXPECT_EQ( 0, value );
+
+	std::string str = "null";
+	EXPECT_FALSE(eval.getPropValue( "player.background", str ) );
+	EXPECT_EQ( "null", str );
 }
 
 TEST ( ScriptContextTest, testArrays )
 {
 	ScriptContext context;
 	context.load( FileSystem::getInstance().pathForResource( "Scripts/simple.lua" ) );
+	auto &eval = context.getEvaluator();
 
 	std::vector< int > values;
 
-	EXPECT_EQ( 9, context.eval< int >( "#array" ) );
-	EXPECT_EQ( 1, context.eval< int >( "array[ 1 ]" ) );
-	EXPECT_EQ( 2, context.eval< int >( "array[ 2 ]" ) );
-	EXPECT_EQ( 3, context.eval< int >( "array[ 3 ]" ) );
-	EXPECT_EQ( 4, context.eval< int >( "array[ 4 ]" ) );
-	EXPECT_EQ( 5, context.eval< int >( "array[ 5 ]" ) );
-	EXPECT_EQ( 6, context.eval< int >( "array[ 6 ]" ) );
-	EXPECT_EQ( 7, context.eval< int >( "array[ 7 ]" ) );
-	EXPECT_EQ( 8, context.eval< int >( "array[ 8 ]" ) );
-	EXPECT_EQ( 9, context.eval< int >( "array[ 9 ]" ) );
+	EXPECT_EQ( 9, eval.getPropValue< int >( "#array" ) );
+	EXPECT_EQ( 1, eval.getPropValue< int >( "array[ 1 ]" ) );
+	EXPECT_EQ( 2, eval.getPropValue< int >( "array[ 2 ]" ) );
+	EXPECT_EQ( 3, eval.getPropValue< int >( "array[ 3 ]" ) );
+	EXPECT_EQ( 4, eval.getPropValue< int >( "array[ 4 ]" ) );
+	EXPECT_EQ( 5, eval.getPropValue< int >( "array[ 5 ]" ) );
+	EXPECT_EQ( 6, eval.getPropValue< int >( "array[ 6 ]" ) );
+	EXPECT_EQ( 7, eval.getPropValue< int >( "array[ 7 ]" ) );
+	EXPECT_EQ( 8, eval.getPropValue< int >( "array[ 8 ]" ) );
+	EXPECT_EQ( 9, eval.getPropValue< int >( "array[ 9 ]" ) );
 }
 
 TEST ( ScriptContextTest, testArrayInTable )
 {
 	ScriptContext context;
 	context.load( FileSystem::getInstance().pathForResource( "Scripts/simple.lua" ) );
+	auto &eval = context.getEvaluator();
 
 	std::vector< int > values;
 
-	EXPECT_EQ( 7, context.eval< int >( "#player.values" ) );
-	EXPECT_EQ( 0, context.eval< int >( "player.values[ 1 ]" ) );
-	EXPECT_EQ( 1, context.eval< int >( "player.values[ 2 ]" ) );
-	EXPECT_EQ( 2, context.eval< int >( "player.values[ 3 ]" ) );
-	EXPECT_EQ( 3, context.eval< int >( "player.values[ 4 ]" ) );
-	EXPECT_EQ( 4, context.eval< int >( "player.values[ 5 ]" ) );
-	EXPECT_EQ( 5, context.eval< int >( "player.values[ 6 ]" ) );
-	EXPECT_EQ( 6, context.eval< int >( "player.values[ 7 ]" ) );
+	EXPECT_EQ( 7, eval.getPropValue< int >( "#player.values" ) );
+	EXPECT_EQ( 0, eval.getPropValue< int >( "player.values[ 1 ]" ) );
+	EXPECT_EQ( 1, eval.getPropValue< int >( "player.values[ 2 ]" ) );
+	EXPECT_EQ( 2, eval.getPropValue< int >( "player.values[ 3 ]" ) );
+	EXPECT_EQ( 3, eval.getPropValue< int >( "player.values[ 4 ]" ) );
+	EXPECT_EQ( 4, eval.getPropValue< int >( "player.values[ 5 ]" ) );
+	EXPECT_EQ( 5, eval.getPropValue< int >( "player.values[ 6 ]" ) );
+	EXPECT_EQ( 6, eval.getPropValue< int >( "player.values[ 7 ]" ) );
 }
 
 TEST ( ScriptContextTest, testNestedTables )
 {
 	ScriptContext context;
 	context.load( FileSystem::getInstance().pathForResource( "Scripts/scene.lua" ) );
+	auto &eval = context.getEvaluator();
 
-	int objCount = context.eval< int >( "#scene.objects" );
+	int objCount = eval.getPropValue< int >( "#scene.objects" );
 	EXPECT_EQ( 4, objCount );
 
-	EXPECT_EQ( "obj1", context.eval< std::string >( "scene.objects[ 1 ].type" ) );
-	EXPECT_EQ( "11", context.eval< std::string >( "scene.objects[ 1 ].position.x" ) );
-	EXPECT_EQ( "21", context.eval< std::string >( "scene.objects[ 1 ].position.y" ) );
+	EXPECT_EQ( "obj1", eval.getPropValue< std::string >( "scene.objects[ 1 ].type" ) );
+	EXPECT_EQ( "11", eval.getPropValue< std::string >( "scene.objects[ 1 ].position.x" ) );
+	EXPECT_EQ( "21", eval.getPropValue< std::string >( "scene.objects[ 1 ].position.y" ) );
 
-	EXPECT_EQ( "obj2", context.eval< std::string >( "scene.objects[ 2 ].type" ) );
-	EXPECT_EQ( "12", context.eval< std::string >( "scene.objects[ 2 ].position.x" ) );
-	EXPECT_EQ( "22", context.eval< std::string >( "scene.objects[ 2 ].position.y" ) );
+	EXPECT_EQ( "obj2", eval.getPropValue< std::string >( "scene.objects[ 2 ].type" ) );
+	EXPECT_EQ( "12", eval.getPropValue< std::string >( "scene.objects[ 2 ].position.x" ) );
+	EXPECT_EQ( "22", eval.getPropValue< std::string >( "scene.objects[ 2 ].position.y" ) );
 
-	EXPECT_EQ( "obj3", context.eval< std::string >( "scene.objects[ 3 ].type" ) );
-	EXPECT_EQ( "13", context.eval< std::string >( "scene.objects[ 3 ].position.x" ) );
-	EXPECT_EQ( "23", context.eval< std::string >( "scene.objects[ 3 ].position.y" ) );
+	EXPECT_EQ( "obj3", eval.getPropValue< std::string >( "scene.objects[ 3 ].type" ) );
+	EXPECT_EQ( "13", eval.getPropValue< std::string >( "scene.objects[ 3 ].position.x" ) );
+	EXPECT_EQ( "23", eval.getPropValue< std::string >( "scene.objects[ 3 ].position.y" ) );
 
-	EXPECT_EQ( "obj4", context.eval< std::string >( "scene.objects[ 4 ].type" ) );
-	EXPECT_EQ( "14", context.eval< std::string >( "scene.objects[ 4 ].position.x" ) );
-	EXPECT_EQ( "24", context.eval< std::string >( "scene.objects[ 4 ].position.y" ) );
+	EXPECT_EQ( "obj4", eval.getPropValue< std::string >( "scene.objects[ 4 ].type" ) );
+	EXPECT_EQ( "14", eval.getPropValue< std::string >( "scene.objects[ 4 ].position.x" ) );
+	EXPECT_EQ( "24", eval.getPropValue< std::string >( "scene.objects[ 4 ].position.y" ) );
 }
 
 TEST ( ScriptContextTest, testIterables )
 {
 	ScriptContext context;
 	context.load( FileSystem::getInstance().pathForResource( "Scripts/scene.lua" ) );
+	auto &eval = context.getEvaluator();
 
 	int i = 0;
 
-	context.foreach( "scene.objects", [&i]( ScriptContext &c, ScriptContext::Iterable &it ) {
+	context.foreach( "scene.objects", [&i]( ScriptEvaluator &eval, int index ) {
 		i++;
 
-		switch (it.getIndex()) {
+		switch ( index ) {
 			case 0:
-				EXPECT_EQ( "obj1", it.eval< std::string >( "type" ) );
-				EXPECT_EQ( "11", it.eval< std::string >( "position.x" ) );
-				EXPECT_EQ( "21", it.eval< std::string >( "position.y" ) );
+				EXPECT_EQ( "obj1", eval.getPropValue< std::string >( "type" ) );
+				EXPECT_EQ( "11", eval.getPropValue< std::string >( "position.x" ) );
+				EXPECT_EQ( "21", eval.getPropValue< std::string >( "position.y" ) );
 				break;
 
 			case 1:
-				EXPECT_EQ( "obj2", it.eval< std::string >( "type" ) );
-				EXPECT_EQ( "12", it.eval< std::string >( "position.x" ) );
-				EXPECT_EQ( "22", it.eval< std::string >( "position.y" ) );
+				EXPECT_EQ( "obj2", eval.getPropValue< std::string >( "type" ) );
+				EXPECT_EQ( "12", eval.getPropValue< std::string >( "position.x" ) );
+				EXPECT_EQ( "22", eval.getPropValue< std::string >( "position.y" ) );
 				break;
 
 			case 2:
-				EXPECT_EQ( "obj3", it.eval< std::string >( "type" ) );
-				EXPECT_EQ( "13", it.eval< std::string >( "position.x" ) );
-				EXPECT_EQ( "23", it.eval< std::string >( "position.y" ) );
+				EXPECT_EQ( "obj3", eval.getPropValue< std::string >( "type" ) );
+				EXPECT_EQ( "13", eval.getPropValue< std::string >( "position.x" ) );
+				EXPECT_EQ( "23", eval.getPropValue< std::string >( "position.y" ) );
 				break;
 
 			case 3:
-				EXPECT_EQ( "obj4", it.eval< std::string >( "type" ) );
-				EXPECT_EQ( "14", it.eval< std::string >( "position.x" ) );
-				EXPECT_EQ( "24", it.eval< std::string >( "position.y" ) );
+				EXPECT_EQ( "obj4", eval.getPropValue< std::string >( "type" ) );
+				EXPECT_EQ( "14", eval.getPropValue< std::string >( "position.x" ) );
+				EXPECT_EQ( "24", eval.getPropValue< std::string >( "position.y" ) );
 				break;
 
 			default:
@@ -307,32 +328,31 @@ TEST ( ScriptContextTest, testMultipleTablesAndValues )
 {
 	ScriptContext context;
 	context.load( FileSystem::getInstance().pathForResource( "Scripts/scene.lua" ) );
+	auto &eval = context.getEvaluator();
 	
-	EXPECT_EQ( "a scene", context.eval< std::string >( "scene.name" ) );
+	EXPECT_EQ( "a scene", eval.getPropValue< std::string >( "scene.name" ) );
 
-	EXPECT_EQ( 4, context.eval< int >( "#scene.objects" ) );
+	EXPECT_EQ( 4, eval.getPropValue< int >( "#scene.objects" ) );
 
-	EXPECT_EQ( "obj1", context.eval< std::string >( "scene.objects[ 1 ].type" ) );
-	EXPECT_EQ( 11, context.eval< int >( "scene.objects[ 1 ].position.x" ) );
-	EXPECT_EQ( 21, context.eval< int >( "scene.objects[ 1 ].position.y" ) );
+	EXPECT_EQ( "obj1", eval.getPropValue< std::string >( "scene.objects[ 1 ].type" ) );
+	EXPECT_EQ( 11, eval.getPropValue< int >( "scene.objects[ 1 ].position.x" ) );
+	EXPECT_EQ( 21, eval.getPropValue< int >( "scene.objects[ 1 ].position.y" ) );
 
-	EXPECT_EQ( "obj2", context.eval< std::string >( "scene.objects[ 2 ].type" ) );
-	EXPECT_EQ( 12, context.eval< int >( "scene.objects[ 2 ].position.x" ) );
-	EXPECT_EQ( 22, context.eval< int >( "scene.objects[ 2 ].position.y" ) );
+	EXPECT_EQ( "obj2", eval.getPropValue< std::string >( "scene.objects[ 2 ].type" ) );
+	EXPECT_EQ( 12, eval.getPropValue< int >( "scene.objects[ 2 ].position.x" ) );
+	EXPECT_EQ( 22, eval.getPropValue< int >( "scene.objects[ 2 ].position.y" ) );
 
-	EXPECT_EQ( "obj3", context.eval< std::string >( "scene.objects[ 3 ].type" ) );
-	EXPECT_EQ( 13, context.eval< int >( "scene.objects[ 3 ].position.x" ) );
-	EXPECT_EQ( 23, context.eval< int >( "scene.objects[ 3 ].position.y" ) );
+	EXPECT_EQ( "obj3", eval.getPropValue< std::string >( "scene.objects[ 3 ].type" ) );
+	EXPECT_EQ( 13, eval.getPropValue< int >( "scene.objects[ 3 ].position.x" ) );
+	EXPECT_EQ( 23, eval.getPropValue< int >( "scene.objects[ 3 ].position.y" ) );
 
-	EXPECT_EQ( "obj4", context.eval< std::string >( "scene.objects[ 4 ].type" ) );
-	EXPECT_EQ( 14, context.eval< int >( "scene.objects[ 4 ].position.x" ) );
-	EXPECT_EQ( 24, context.eval< int >( "scene.objects[ 4 ].position.y" ) );
+	EXPECT_EQ( "obj4", eval.getPropValue< std::string >( "scene.objects[ 4 ].type" ) );
+	EXPECT_EQ( 14, eval.getPropValue< int >( "scene.objects[ 4 ].position.x" ) );
+	EXPECT_EQ( 24, eval.getPropValue< int >( "scene.objects[ 4 ].position.y" ) );
 
-	EXPECT_EQ( "bridge", context.eval< std::string >( "scene.map" ) );
+	EXPECT_EQ( "bridge", eval.getPropValue< std::string >( "scene.map" ) );
 
-	EXPECT_EQ( 1024, context.eval< int >( "settings.resolution.width" ) );
-	EXPECT_EQ( 768, context.eval< int >( "settings.resolution.height" ) );
+	EXPECT_EQ( 1024, eval.getPropValue< int >( "settings.resolution.width" ) );
+	EXPECT_EQ( 768, eval.getPropValue< int >( "settings.resolution.height" ) );
 }
-
-#endif
 

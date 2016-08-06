@@ -43,6 +43,8 @@
 
 namespace crimild {
 
+	class SkinnedMesh;
+
 	class UpdateRenderState : public NodeVisitor {
 	public:
 		UpdateRenderState( void );
@@ -53,11 +55,13 @@ namespace crimild {
 
 		virtual void traverse( Node *node ) override;
 
+		virtual void visitGroup( Group *group ) override;
 		virtual void visitGeometry( Geometry *geometry ) override;
 
 	private:
 		std::list< Light * > _lights;
 		SharedPointer< Material > _defaultMaterial;
+		SharedPointer< SkinnedMesh > _skinnedMesh;
 	};
 
 }

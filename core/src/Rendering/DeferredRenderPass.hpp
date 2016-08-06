@@ -42,8 +42,6 @@
 namespace crimild {
     
 	class DeferredRenderPass : public RenderPass {
-        CRIMILD_DISALLOW_COPY_AND_ASSIGN( DeferredRenderPass )
-        
 	public:
         DeferredRenderPass( void );
 		virtual ~DeferredRenderPass( void );

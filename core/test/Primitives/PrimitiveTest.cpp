@@ -69,3 +69,40 @@ TEST( PrimitiveTest, setIndexBuffer )
     EXPECT_EQ( p->getIndexBuffer(), crimild::get_ptr( ibo ) );
 }
 
+TEST( PrimitiveTest, primitiveStream )
+{
+	auto primitive = crimild::alloc< Primitive >( Primitive::Type::POINTS );
+
+	auto vbo = crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3, 3 );
+	vbo->setPositionAt( 0, Vector3f( -1.0f, 0.0f, 0.0f ) );
+	vbo->setPositionAt( 1, Vector3f( 1.0f, 0.0f, 0.0f ) );
+	vbo->setPositionAt( 1, Vector3f( 0.0f, 1.0f, 0.0f ) );
+	primitive->setVertexBuffer( vbo );
+
+	auto ibo = crimild::alloc< IndexBufferObject >( 3 );
+	ibo->generateIncrementalIndices();
+	primitive->setIndexBuffer( ibo );
+
+	{
+		FileStream os( "primitive.crimild", FileStream::OpenMode::WRITE );
+		os.addObject( primitive );
+		EXPECT_TRUE( os.flush() );
+	}
+
+	{
+		FileStream is( "primitive.crimild", FileStream::OpenMode::READ );
+		EXPECT_TRUE( is.load() );
+		EXPECT_EQ( 1, is.getObjectCount() );
+		
+		auto p = is.getObjectAt< Primitive >( 0 );
+		EXPECT_TRUE( p != nullptr );
+		EXPECT_EQ( p->getType(), Primitive::Type::POINTS );
+		
+		EXPECT_TRUE( p->getVertexBuffer() != nullptr );
+		EXPECT_EQ( primitive->getVertexBuffer()->getVertexCount(), p->getVertexBuffer()->getVertexCount() );
+		
+		EXPECT_TRUE( p->getIndexBuffer() != nullptr );
+		EXPECT_EQ( primitive->getIndexBuffer()->getIndexCount(), p->getIndexBuffer()->getIndexCount() );
+	}
+}
+

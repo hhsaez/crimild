@@ -40,7 +40,7 @@ namespace crimild {
 	class VertexBufferObject : 
 		public BufferObject< VertexPrecision >, 
 		public Catalog< VertexBufferObject >::Resource {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( VertexBufferObject )
+		CRIMILD_IMPLEMENT_RTTI( crimild::VertexBufferObject )
 
 	private:
 		using Vector2Impl = Vector< 2, VertexPrecision >;
@@ -85,6 +85,25 @@ namespace crimild {
 	private:
 		VertexFormat _vertexFormat;
 		unsigned int _vertexCount;
+
+        /**
+        	\name Streaming
+        */
+        //@{
+
+	public:
+    	/**
+    		\brief Default constructor
+
+    		\warning Used only for streaming purposes
+    	*/
+		VertexBufferObject( void );
+
+		virtual bool registerInStream( Stream &s ) override;
+		virtual void save( Stream &s ) override;
+		virtual void load( Stream &s ) override;
+
+		//@}
 	};
 
 }

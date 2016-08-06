@@ -29,6 +29,8 @@
 
 #import "CrimildMetalRenderer.h"
 
+#if !TARGET_OS_SIMULATOR
+
 using namespace crimild;
 using namespace crimild::metal;
 
@@ -91,4 +93,6 @@ void VertexBufferObjectCatalog::cleanup( void )
 {
     Catalog< VertexBufferObject >::cleanup();
 }
+
+#endif // TARGET_OS_SIMULATOR
 

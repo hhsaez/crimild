@@ -43,9 +43,7 @@
 
 namespace crimild {
     
-	class ShaderProgram : public Catalog< ShaderProgram >::Resource {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( ShaderProgram );
-		
+	class ShaderProgram : public SharedObject, public Catalog< ShaderProgram >::Resource {
 	public:
 		class StandardLocation {
 		public:

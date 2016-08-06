@@ -27,17 +27,26 @@
 
 #include "SkinnedMesh.hpp"
 
+#include "Foundation/Log.hpp"
+
+CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::SkinnedMeshJoint );
+CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::SkinnedMeshJointCatalog );
+CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::SkinnedMeshAnimationChannel );
+CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::SkinnedMeshAnimationClip );
+CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::SkinnedMeshSkeleton );
+CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::SkinnedMeshAnimationState );
+CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::SkinnedMesh );
+
 using namespace crimild;
 
-#define CRIMILD_INTERPOLATE_POSES 0
-
-SkinnedMeshJoint::SkinnedMeshJoint( void ) 
+SkinnedMeshJoint::SkinnedMeshJoint( void )
 { 
 
 }
 
-SkinnedMeshJoint::SkinnedMeshJoint( unsigned int id, const Transformation &offset )
-	: _id( id ), 
+SkinnedMeshJoint::SkinnedMeshJoint( unsigned int id, const Transformation &offset, std::string name )
+	: NamedObject( name ),
+	  _id( id ), 
 	  _offset( offset ) 
 { 
 
@@ -46,6 +55,36 @@ SkinnedMeshJoint::SkinnedMeshJoint( unsigned int id, const Transformation &offse
 SkinnedMeshJoint::~SkinnedMeshJoint( void ) 
 { 
 
+}
+
+bool SkinnedMeshJoint::registerInStream( Stream &s )
+{
+	if ( !StreamObject::registerInStream( s ) ) {
+		return false;
+	}
+
+	return true;
+}
+
+void SkinnedMeshJoint::save( Stream &s )
+{
+	StreamObject::save( s );
+
+	s.write( getName() );
+	s.write( _id );
+	s.write( _offset );
+}
+
+void SkinnedMeshJoint::load( Stream &s )
+{
+	StreamObject::load( s );
+
+	std::string name;
+	s.read( name );
+	setName( name );
+
+	s.read( _id );
+	s.read( _offset );
 }
 
 SkinnedMeshJointCatalog::SkinnedMeshJointCatalog( void ) 
@@ -60,28 +99,66 @@ SkinnedMeshJointCatalog::~SkinnedMeshJointCatalog( void )
 
 SkinnedMeshJoint *SkinnedMeshJointCatalog::find( std::string name )
 {			
-	if ( !_lookup.find( name ) ) {
+	if ( !_joints.find( name ) ) {
 		return nullptr;
 	}
 
-	return crimild::get_ptr( _joints[ _lookup[ name ] ] );
+	return crimild::get_ptr( _joints[ name ] );
 }
 
 SkinnedMeshJoint *SkinnedMeshJointCatalog::updateOrCreateJoint( std::string name, const Transformation &offset )
 {
-	if ( _lookup.find( name ) ) {
-		auto id = _lookup[ name ];
-		auto joint = _joints[ id ];
+	if ( _joints.find( name ) ) {
+		auto joint = _joints[ name ];
 		joint->setOffset( offset );
 		return crimild::get_ptr( joint );
 	}
 
 	unsigned int jointId = _joints.size();
-	auto joint = crimild::alloc< SkinnedMeshJoint >( jointId, offset );
-	_joints.add( joint );
-	_lookup[ name ] = jointId;
+	auto joint = crimild::alloc< SkinnedMeshJoint >( jointId, offset, name );
+	_joints[ name ] = joint;
 
 	return crimild::get_ptr( joint );
+}
+
+bool SkinnedMeshJointCatalog::registerInStream( Stream &s )
+{
+	if ( !StreamObject::registerInStream( s ) ) {
+		return false;
+	}
+
+	_joints.foreach( [&s]( std::string const &, SharedPointer< SkinnedMeshJoint > &j, unsigned int ) {
+		if ( j != nullptr ) {
+			j->registerInStream( s );
+		}
+	});
+
+	return true;
+}
+
+void SkinnedMeshJointCatalog::save( Stream &s )
+{
+	StreamObject::save( s );
+
+	std::vector< StreamObject * > os;
+	_joints.foreach( [&os]( std::string const &, SharedPointer< SkinnedMeshJoint > &j, unsigned int ) {
+		if ( j != nullptr ) {
+			os.push_back( crimild::get_ptr( j ) );
+		}
+	});
+	s.writeChildObjects( os );
+}
+
+void SkinnedMeshJointCatalog::load( Stream &s )
+{
+	StreamObject::load( s );
+
+	auto self = this;
+	s.readChildObjects< SkinnedMeshJoint >( [self]( SharedPointer< SkinnedMeshJoint > const &j ) {
+		if ( j != nullptr ) {
+			self->_joints[ j->getName() ] = j;
+		}
+	});
 }
 
 SkinnedMeshAnimationChannel::SkinnedMeshAnimationChannel( void )
@@ -112,13 +189,9 @@ bool SkinnedMeshAnimationChannel::computePosition( float animationTime, Vector3f
 	auto const &p0 = getPositionKeys()[ positionIndex ];
 	auto const &p1 = getPositionKeys()[ positionIndex + 1 ];
 
-#if CRIMILD_INTERPOLATE_POSES
 	float dt = p1.time - p0.time;
 	float factor = ( animationTime - p0.time ) / dt;
 	Interpolation::linear( p0.value, p1.value, factor, result );
-#else
-	result = p1.value;
-#endif
 
 	return true;
 }
@@ -141,13 +214,9 @@ bool SkinnedMeshAnimationChannel::computeRotation( float animationTime, Quaterni
 	auto const &r0 = getRotationKeys()[ rotationIndex ];
 	auto const &r1 = getRotationKeys()[ rotationIndex + 1 ];
 
-#if CRIMILD_INTERPOLATE_POSES
 	float dt = r1.time - r0.time;
 	float factor = ( animationTime - r0.time ) / dt;
 	Interpolation::slerp( r0.value, r1.value, factor, result );
-#else
-	result = r1.value;
-#endif
 
 	return true;
 }
@@ -170,15 +239,87 @@ bool SkinnedMeshAnimationChannel::computeScale( float animationTime, float &resu
 	auto const &s0 = getScaleKeys()[ scaleIndex ];
 	auto const &s1 = getScaleKeys()[ scaleIndex + 1 ];
 
-#if CRIMILD_INTERPOLATE_POSES
 	float dt = s1.time - s0.time;
 	float factor = ( animationTime - s0.time ) / dt;
 	Interpolation::linear( s0.value, s1.value, factor, result );
-#else
-	result = s1.value;
-#endif
 
 	return true;
+}
+
+bool SkinnedMeshAnimationChannel::registerInStream( Stream &s )
+{
+	if ( !StreamObject::registerInStream( s ) ) {
+		return false;
+	}
+
+	return true;
+}
+
+void SkinnedMeshAnimationChannel::save( Stream &s )
+{
+	StreamObject::save( s );
+
+	s.write( getName() );
+
+	size_t positionKeyCount = _positionKeys.size();
+	s.write( positionKeyCount );
+	_positionKeys.foreach( [&s]( PositionKey const &p, unsigned int ) {
+		s.write( p.time );
+		s.write( p.value );
+	});
+
+	size_t rotationKeyCount = _rotationKeys.size();
+	s.write( rotationKeyCount );
+	_rotationKeys.foreach( [&s]( RotationKey const &p, unsigned int ) {
+		s.write( p.time );
+		s.write( p.value );
+	});
+
+	size_t scaleKeyCount = _scaleKeys.size();
+	s.write( scaleKeyCount );
+	_scaleKeys.foreach( [&s]( ScaleKey const &p, unsigned int ) {
+		s.write( p.time );
+		s.write( p.value );
+	});
+}
+
+void SkinnedMeshAnimationChannel::load( Stream &s )
+{
+	StreamObject::load( s );
+
+	std::string name;
+	s.read( name );
+	setName( name );
+
+	size_t positionKeyCount;
+	s.read( positionKeyCount );
+	_positionKeys.resize( positionKeyCount );
+	for ( unsigned int i = 0; i < positionKeyCount; i++ ) {
+		PositionKey p;
+		s.read( p.time );
+		s.read( p.value );
+		_positionKeys[ i ] = p;
+	}
+
+	size_t rotationKeyCount;
+	s.read( rotationKeyCount );
+	_rotationKeys.resize( rotationKeyCount );
+	for ( unsigned int i = 0; i < rotationKeyCount; i++ ) {
+		RotationKey k;
+		s.read( k.time );
+		s.read( k.value );
+		_rotationKeys[ i ] = k;
+	}
+
+	size_t scaleKeyCount;
+	s.read( scaleKeyCount );
+	_scaleKeys.resize( scaleKeyCount );
+	for ( unsigned int i = 0; i < scaleKeyCount; i++ ) {
+		ScaleKey k;
+		s.read( k.time );
+		s.read( k.value );
+		_scaleKeys[ i ] = k;
+	}
 }
 
 SkinnedMeshAnimationClip::SkinnedMeshAnimationClip( void )
@@ -191,14 +332,104 @@ SkinnedMeshAnimationClip::~SkinnedMeshAnimationClip( void )
 
 }
 
+bool SkinnedMeshAnimationClip::registerInStream( Stream &s )
+{
+	if ( !StreamObject::registerInStream( s ) ) {
+		return false;
+	}
+
+	_channels.foreach( [&s]( std::string const &, SharedPointer< SkinnedMeshAnimationChannel > const &c, unsigned int ) {
+		c->registerInStream( s );
+	});
+
+	return true;
+}
+
+void SkinnedMeshAnimationClip::save( Stream &s )
+{
+	StreamObject::save( s );
+
+	s.write( _duration );
+	s.write( _frameRate );
+
+	std::vector< StreamObject * > cs;
+	_channels.foreach( [&cs]( std::string const &, SharedPointer< SkinnedMeshAnimationChannel > const &c, unsigned int ) {
+		cs.push_back( crimild::get_ptr( c ) );
+	});
+	s.writeChildObjects( cs );
+}
+
+void SkinnedMeshAnimationClip::load( Stream &s )
+{
+	StreamObject::load( s );
+
+	s.read( _duration );
+	s.read( _frameRate );
+
+	auto self = this;
+
+	s.readChildObjects< SkinnedMeshAnimationChannel >( [self]( SharedPointer< SkinnedMeshAnimationChannel > const &c ) {
+		self->getChannels().add( c->getName(), c );
+	});
+}
+
 SkinnedMeshSkeleton::SkinnedMeshSkeleton( void )
 {
-
+	_joints = crimild::alloc< SkinnedMeshJointCatalog >();
 }
 
 SkinnedMeshSkeleton::~SkinnedMeshSkeleton( void ) 
 {
 
+}
+
+bool SkinnedMeshSkeleton::registerInStream( Stream &s )
+{
+	if ( !StreamObject::registerInStream( s ) ) {
+		return false;
+	}
+
+	_clips.foreach( [&s]( SharedPointer< SkinnedMeshAnimationClip > const &c, unsigned int ) {
+		c->registerInStream( s );
+	});
+
+	if ( _joints != nullptr ) {
+		_joints->registerInStream( s );
+	}
+
+	return true;
+}
+
+void SkinnedMeshSkeleton::save( Stream &s )
+{
+	StreamObject::save( s );
+
+	std::vector< StreamObject * > cs;
+	_clips.foreach( [&cs]( SharedPointer< SkinnedMeshAnimationClip > const &c, unsigned int ) {
+		cs.push_back( crimild::get_ptr( c ) );
+	});
+	s.writeChildObjects( cs );
+
+	s.writeChildObject( _joints );
+
+	s.write( _globalInverseTransform );
+}
+
+void SkinnedMeshSkeleton::load( Stream &s )
+{
+	StreamObject::load( s );
+
+	auto self = this;
+
+	s.readChildObjects< SkinnedMeshAnimationClip >( [self]( SharedPointer< SkinnedMeshAnimationClip > const &c ) {
+		self->_clips.add( c );
+	});
+
+	s.readChildObject< SkinnedMeshJointCatalog >( [self]( SharedPointer< SkinnedMeshJointCatalog > const &j ) {
+		self->_joints = j;
+	});
+
+	s.read( _globalInverseTransform );
 }
 
 SkinnedMeshAnimationState::SkinnedMeshAnimationState( void )
@@ -209,6 +440,40 @@ SkinnedMeshAnimationState::SkinnedMeshAnimationState( void )
 SkinnedMeshAnimationState::~SkinnedMeshAnimationState( void )
 {
 
+}
+
+bool SkinnedMeshAnimationState::registerInStream( Stream &s )
+{
+	if ( !StreamObject::registerInStream( s ) ) {
+		return false;
+	}
+
+	return true;
+}
+
+void SkinnedMeshAnimationState::save( Stream &s )
+{
+	StreamObject::save( s );
+
+	size_t poseCount = _jointPoses.size();
+	s.write( poseCount );
+	for ( int i = 0; i < poseCount; i++ ) {
+		s.write( _jointPoses[ i ] );
+	}
+}
+
+void SkinnedMeshAnimationState::load( Stream &s )
+{
+	StreamObject::load( s );
+
+	size_t poseCount;
+	s.read( poseCount );
+	_jointPoses.resize( poseCount );
+	for ( int i = 0; i < poseCount; i++ ) {
+		Matrix4f m;
+		s.read( m );
+		_jointPoses[ i ] = m;
+	}
 }
 
 SkinnedMesh::SkinnedMesh( void )
@@ -222,9 +487,50 @@ SkinnedMesh::~SkinnedMesh( void )
 
 }
 
+bool SkinnedMesh::registerInStream( Stream &s )
+{
+	if ( !StreamObject::registerInStream( s ) ) {
+		return false;
+	}
+
+	if ( _skeleton != nullptr ) {
+		_skeleton->registerInStream( s );
+	}
+
+	if ( _animationState != nullptr ) {
+		_animationState->registerInStream( s );
+	}
+
+	return true;
+}
+
+void SkinnedMesh::save( Stream &s )
+{
+	StreamObject::save( s );
+
+	s.writeChildObject( _skeleton );
+	s.writeChildObject( _animationState );
+}
+
+void SkinnedMesh::load( Stream &s )
+{
+	StreamObject::load( s );
+
+	auto self = this;
+
+	s.readChildObject< SkinnedMeshSkeleton >( [self]( SharedPointer< SkinnedMeshSkeleton > const &s ) { 
+		self->_skeleton = s; 
+	});
+	
+	s.readChildObject< SkinnedMeshAnimationState >( [self]( SharedPointer< SkinnedMeshAnimationState > const &s ) { 
+		self->_animationState = s; 
+	});
+}
+
 void SkinnedMesh::debugDump( void )
 {
 	if ( getSkeleton() == nullptr ) {
+		Log::Debug << "No skeleton attached to skinned mesh" << Log::End;
 		return;
 	}
 	

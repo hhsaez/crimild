@@ -28,7 +28,7 @@
 #ifndef CRIMILD_CORE_COMPONENTS_SKINNED_MESH_
 #define CRIMILD_CORE_COMPONENTS_SKINNED_MESH_
 
-#include "ContainerComponent.hpp"
+#include "NodeComponent.hpp"
 
 #include "Foundation/SharedObject.hpp"
 
@@ -36,9 +36,8 @@ namespace crimild {
 
 	class SkinnedMesh;
 
-	class SkinnedMeshComponent : public ContainerComponent< SharedPointer< SkinnedMesh >> {
-		CRIMILD_NODE_COMPONENT_NAME( "SkinnedMesh" )
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( SkinnedMeshComponent )
+	class SkinnedMeshComponent : public NodeComponent {
+		CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMeshComponent )
 
 	public:
 		using AnimationProgressCallback = std::function< void( float ) >;
@@ -52,6 +51,9 @@ namespace crimild {
 		virtual void update( const Clock &c ) override;
 		virtual void renderDebugInfo( Renderer *renderer, Camera *camera ) override;
 
+		void setSkinnedMesh( SharedPointer< SkinnedMesh > const &mesh ) { _skinnedMesh = mesh; }
+		SkinnedMesh *getSkinnedMesh( void ) { return crimild::get_ptr( _skinnedMesh ); }
+
 		void setAnimationParams( 
 			float firstFrame, 
 			float lastFrame, 
@@ -63,11 +65,26 @@ namespace crimild {
 		float _time = 0.0f;
 		unsigned int _currentAnimation = 0;
 
+		SharedPointer< SkinnedMesh > _skinnedMesh;
+
 		float _firstFrame;
 		float _lastFrame;
 		bool _loop;
 		float _timeScale;
 		AnimationProgressCallback _animationProgressCallback;
+
+		/**
+			\name Streaming
+		*/
+		//@{
+
+	public:
+		virtual bool registerInStream( Stream &s ) override;
+		virtual void save( Stream &s ) override;
+		virtual void load( Stream &s ) override;
+
+		//@}
+
 	};
 
 }

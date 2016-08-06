@@ -27,6 +27,8 @@
 
 #import "CrimildMetalShaderProgramCatalog.h"
 
+#if !TARGET_OS_SIMULATOR
+
 #import "CrimildMetalRenderer.h"
 
 using namespace crimild;
@@ -134,4 +136,6 @@ void ShaderProgramCatalog::cleanup( void )
 {
     Catalog< ShaderProgram >::cleanup();
 }
+
+#endif // TARGET_OS_SIMULATOR
 

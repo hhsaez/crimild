@@ -35,12 +35,11 @@
 namespace crimild {
 
 	class MockComponent : public NodeComponent {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( MockComponent )
-		CRIMILD_NODE_COMPONENT_NAME( "mock" )
+		CRIMILD_IMPLEMENT_RTTI( crimild::MockComponent )
 
 	public:
-		MockComponent( void );
-		virtual ~MockComponent( void );
+		MockComponent( void ) { }
+		virtual ~MockComponent( void ) { }
 
 		MOCK_METHOD0( onDetach, void( void ) );
 		MOCK_METHOD0( onAttach, void( void ) );

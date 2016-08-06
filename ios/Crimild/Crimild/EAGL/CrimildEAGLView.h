@@ -34,5 +34,7 @@
 
 @interface CrimildEAGLView : CrimildView
 
+@property (nonatomic, readonly) EAGLContext *context;
+
 @end
 

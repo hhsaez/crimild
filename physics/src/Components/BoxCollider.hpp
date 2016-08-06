@@ -35,8 +35,6 @@ namespace crimild {
 	namespace physics {
 
 		class BoxCollider : public Collider {
-			CRIMILD_DISALLOW_COPY_AND_ASSIGN( BoxCollider )
-
 		public:
 			BoxCollider( void );
 			BoxCollider( const Vector3f &boxHalfExtents );

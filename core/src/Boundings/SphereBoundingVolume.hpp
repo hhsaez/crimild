@@ -33,8 +33,6 @@
 namespace crimild {
 
 	class SphereBoundingVolume : public BoundingVolume {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( SphereBoundingVolume );
-
 	public:
 		SphereBoundingVolume( void );
 		SphereBoundingVolume( const Vector3f &center, float radius );

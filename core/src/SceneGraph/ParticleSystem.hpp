@@ -35,9 +35,7 @@ namespace crimild {
 	class Texture;
 	class Material;
 
-    class ParticleEmitter {
-        CRIMILD_DISALLOW_COPY_AND_ASSIGN( ParticleEmitter )
-
+    class ParticleEmitter : public NonCopyable {
     protected:
         ParticleEmitter( void ) { }
 

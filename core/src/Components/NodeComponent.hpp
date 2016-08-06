@@ -28,7 +28,7 @@
 #ifndef CRIMILD_COMPONENTS_NODE_COMPONENT_
 #define CRIMILD_COMPONENTS_NODE_COMPONENT_
 
-#include "Foundation/SharedObject.hpp"
+#include "Foundation/Stream.hpp"
 
 #include "Mathematics/Clock.hpp"
 
@@ -38,8 +38,8 @@ namespace crimild {
 	class Renderer;
 	class Camera;
 
-    class NodeComponent : public SharedObject {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( NodeComponent )
+    class NodeComponent : public StreamObject {
+    	CRIMILD_IMPLEMENT_RTTI( crimild::NodeComponent )
         
 	protected:
 		NodeComponent( void );
@@ -55,7 +55,7 @@ namespace crimild {
         Node *getNodePointer( void ) { return _node; }
         
     public:
-        virtual const char *getComponentName( void ) const { return "update"; }
+        virtual const char *getComponentName( void ) const { return getClassName(); }
         
         Node *getNode( void ) { return _node; }
         
@@ -77,7 +77,7 @@ namespace crimild {
         template< class NODE_COMPONENT_CLASS >
         NODE_COMPONENT_CLASS *getComponent( void )
         {
-            return static_cast< NODE_COMPONENT_CLASS * >( getComponentWithName( NODE_COMPONENT_CLASS::_COMPONENT_NAME() ) );
+            return static_cast< NODE_COMPONENT_CLASS * >( getComponentWithName( NODE_COMPONENT_CLASS::__CLASS_NAME ) );
         }
 
 	public:
@@ -106,16 +106,21 @@ namespace crimild {
 		*/
 		virtual void onDetach( void );
 
+		/**
+			\name Streaming
+		*/
+		//@{
+
+	public:
+		virtual bool registerInStream( Stream &s ) override;
+		virtual void save( Stream &s ) override;
+		virtual void load( Stream &s ) override;	
+
+		//@}
+		
 	};
 
 }
-
-// useful macro for declaring a component name
-// _COMPONENT_NAME is for internal use only (see Node and NodeComponentCatalog classes)
-#define CRIMILD_NODE_COMPONENT_NAME( X ) \
- 	public: \
- 		static const char *_COMPONENT_NAME( void ) { return X; } \
- 		virtual const char *getComponentName( void ) const override { return _COMPONENT_NAME(); }
 
 #endif
 

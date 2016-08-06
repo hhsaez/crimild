@@ -61,9 +61,7 @@ void ForwardRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Ca
 {
     CRIMILD_PROFILE( "Forward Render Pass" )
 
-#ifdef CRIMILD_PLATFORM_DESKTOP
     computeShadowMaps( renderer, renderQueue, camera );
-#endif
 
     auto sBuffer = getSBuffer( renderer );
 

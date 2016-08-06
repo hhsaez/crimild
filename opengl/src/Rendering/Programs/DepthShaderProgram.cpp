@@ -33,27 +33,29 @@ using namespace crimild;
 using namespace crimild::opengl;
 
 const char *depth_vs = { CRIMILD_TO_STRING(
-    in vec3 aPosition;
+    CRIMILD_GLSL_ATTRIBUTE vec3 aPosition;
 
     uniform mat4 uPMatrix;
     uniform mat4 uVMatrix;
     uniform mat4 uMMatrix;
                                            
-    out vec4 vPosition;
+    CRIMILD_GLSL_VARYING_OUT vec4 vPosition;
 
     void main()
     {
         vPosition = uVMatrix * uMMatrix * vec4( aPosition, 1.0 );
-        gl_Position = uPMatrix * vPosition;
+        CRIMILD_GLSL_VERTEX_OUTPUT = uPMatrix * vPosition;
     }
 )};
 
 const char *depth_fs = { CRIMILD_TO_STRING(
-    in vec4 vPosition;
+    CRIMILD_GLSL_PRECISION_FLOAT_HIGH
+    
+    CRIMILD_GLSL_VARYING_IN vec4 vPosition;
                                            
     uniform float uLinearDepthConstant;
                                            
-    out vec4 vFragColor;
+    CRIMILD_GLSL_DECLARE_FRAGMENT_OUTPUT
                                            
     vec4 pack ( float depth )
     {
@@ -74,7 +76,7 @@ const char *depth_fs = { CRIMILD_TO_STRING(
     void main( void )
     {
         float linearDepth = length( vPosition ) * uLinearDepthConstant;
-        vFragColor = pack( linearDepth );
+        CRIMILD_GLSL_FRAGMENT_OUTPUT = pack( linearDepth );
     }
 )};
 

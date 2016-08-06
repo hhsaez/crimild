@@ -57,8 +57,6 @@ namespace crimild {
 		public NamedObject,
 		public Messenger {
 
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( System )
-
 	public:
 		explicit System( std::string name );
 

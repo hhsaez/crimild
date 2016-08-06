@@ -49,8 +49,6 @@ namespace crimild {
 
 		template< int N, typename ReturnType, typename... Args >
 		class Function : public AbstractFunction {
-			CRIMILD_DISALLOW_COPY_AND_ASSIGN( Function )
-
 		private:
 			typedef std::function< ReturnType( Args... ) > FunctionType;
 

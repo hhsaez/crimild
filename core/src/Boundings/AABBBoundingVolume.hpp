@@ -33,8 +33,6 @@
 namespace crimild {
 
 	class AABBBoundingVolume : public BoundingVolume {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( AABBBoundingVolume );
-
 	public:
 		AABBBoundingVolume( void );
 		AABBBoundingVolume( const Vector3f &center, float radius );

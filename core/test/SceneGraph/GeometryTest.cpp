@@ -27,6 +27,7 @@
 
 #include "SceneGraph/Geometry.hpp"
 #include "Primitives/Primitive.hpp"
+#include "Primitives/QuadPrimitive.hpp"
 #include "Components/MaterialComponent.hpp"
 
 #include "gtest/gtest.h"
@@ -116,5 +117,34 @@ TEST( GeometryTest, detachAllPrimitives )
 		++count;
 	});
 	EXPECT_EQ( count, 0 );
+}
+
+TEST( GeometryTest, geometryStream )
+{
+	{
+		auto geometry = crimild::alloc< Geometry >( "a geometry" );
+		geometry->attachPrimitive( crimild::alloc< QuadPrimitive >( 100.0f, 200.0f, VertexFormat::VF_P3_N3 ) );
+
+		FileStream os( "geometry.crimild", FileStream::OpenMode::WRITE );
+		os.addObject( geometry );
+		EXPECT_TRUE( os.flush() );
+	}
+
+	{
+		FileStream is( "geometry.crimild", FileStream::OpenMode::READ );
+		EXPECT_TRUE( is.load() );
+		EXPECT_EQ( 1, is.getObjectCount() );
+		
+		auto g = is.getObjectAt< Geometry >( 0 );
+		EXPECT_TRUE( g != nullptr );
+		EXPECT_EQ( "a geometry", g->getName() );
+
+		int primitiveCount = 0;
+		g->forEachPrimitive( [&]( Primitive *p ) {
+			++primitiveCount;
+			EXPECT_EQ( 4, p->getVertexBuffer()->getVertexCount() );
+		});
+		EXPECT_EQ( 1, primitiveCount );
+	}
 }
 

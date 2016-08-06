@@ -212,7 +212,7 @@ void recursiveSceneBuilder( SharedPointer< Group > parent, const struct aiScene 
 
 			Transformation offset;
 			computeTransform( mesh->mBones[ boneIdx ]->mOffsetMatrix, offset );
-			auto joint = skinnedMesh->getSkeleton()->getJoints().updateOrCreateJoint( std::string( bone->mName.data ), offset );
+			auto joint = skinnedMesh->getSkeleton()->getJoints()->updateOrCreateJoint( std::string( bone->mName.data ), offset );
 
 			for ( int weightIdx = 0; weightIdx < mesh->mBones[ boneIdx ]->mNumWeights; weightIdx++ ) {
 				unsigned int vertexIdx = mesh->mBones[ boneIdx ]->mWeights[ weightIdx ].mVertexId;
@@ -234,10 +234,6 @@ void recursiveSceneBuilder( SharedPointer< Group > parent, const struct aiScene 
 		auto geometry = crimild::alloc< Geometry >();
 		geometry->attachPrimitive( primitive );
 		group->attachNode( geometry );
-
-		if ( skinnedMesh->getSkeleton() != nullptr ) {
-			geometry->getComponent< RenderStateComponent >()->setSkinnedMesh( skinnedMesh );
-		}
 
 		auto material = buildMaterial( s->mMaterials[ mesh->mMaterialIndex ], basePath );
 		if ( material != nullptr ) {

@@ -42,8 +42,7 @@ namespace crimild {
 	class SkinnedMesh;
 
 	class RenderStateComponent : public NodeComponent {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( RenderStateComponent )
-		CRIMILD_NODE_COMPONENT_NAME( "renderState" )
+		CRIMILD_IMPLEMENT_RTTI( crimild::RenderStateComponent )
 
 	public:
 		RenderStateComponent( void );

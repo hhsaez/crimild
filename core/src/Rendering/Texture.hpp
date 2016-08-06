@@ -35,7 +35,9 @@
 
 namespace crimild {
     
-	class Texture : public NamedObject, public Catalog< Texture >::Resource {
+	class Texture : public NamedObject, public StreamObject, public Catalog< Texture >::Resource {
+        CRIMILD_IMPLEMENT_RTTI( crimild::Texture )
+
 	public:
         explicit Texture( std::string name = "ColorMap" );
 		explicit Texture( SharedPointer< Image > const &image, std::string name = "ColorMap" );
@@ -58,6 +60,18 @@ namespace crimild {
         
     private:
         WrapMode _wrapMode = WrapMode::CLAMP_TO_EDGE;
+
+        /**
+            \name Streaming
+        */
+        //@{
+
+    public:
+        virtual bool registerInStream( Stream &s ) override;
+        virtual void save( Stream &s ) override;
+        virtual void load( Stream &s ) override;
+
+        //@}
     };
 	
 }

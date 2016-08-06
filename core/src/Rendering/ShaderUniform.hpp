@@ -36,8 +36,6 @@ namespace crimild {
 	class Renderer;
     
 	class ShaderUniform : public NamedObject, public SharedObject {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( ShaderUniform );
-
 	public:
 		ShaderUniform( std::string name );
 		virtual ~ShaderUniform( void );

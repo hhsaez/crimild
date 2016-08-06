@@ -33,8 +33,6 @@
 namespace crimild {
 
 	class PlaneBoundingVolume : public BoundingVolume {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( PlaneBoundingVolume );
-
 	public:
 		PlaneBoundingVolume( void );
 		explicit PlaneBoundingVolume( const Plane3f &plane );

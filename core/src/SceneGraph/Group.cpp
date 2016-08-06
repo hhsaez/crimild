@@ -32,6 +32,8 @@
 #include <algorithm>
 #include <thread>
 
+CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::Group )
+
 using namespace crimild;
 
 Group::Group( std::string name )
@@ -112,5 +114,43 @@ void Group::forEachNode( std::function< void( Node * ) > callback )
 void Group::accept( NodeVisitor &visitor )
 {
 	visitor.visitGroup( this );
+}
+
+bool Group::registerInStream( Stream &s )
+{
+	if ( !Node::registerInStream( s ) ) {
+		return false;
+	}
+
+	forEachNode( [&s]( Node *node ) {
+		if ( node != nullptr ) {
+			node->registerInStream( s );
+		}
+	});
+
+	return true;
+}
+
+void Group::save( Stream &s )
+{
+	Node::save( s );
+
+	std::vector< StreamObject * > children;
+	forEachNode( [&children]( Node *node ) {
+		if ( node != nullptr ) {
+			children.push_back( node );
+		}
+	});
+	s.writeChildObjects( children );
+}
+
+void Group::load( Stream &s )
+{
+	Node::load( s );
+
+	auto self = this;
+	s.readChildObjects< Node >( [self]( SharedPointer< Node > const &node ) {
+		self->attachNode( node );
+	});
 }
 

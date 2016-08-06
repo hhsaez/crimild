@@ -35,7 +35,11 @@ namespace crimild {
 
 	using IndexPrecision = unsigned short;
 
-	class IndexBufferObject : public BufferObject< IndexPrecision >, public Catalog< IndexBufferObject >::Resource {
+	class IndexBufferObject : 
+		public BufferObject< IndexPrecision >, 
+		public Catalog< IndexBufferObject >::Resource {
+		CRIMILD_IMPLEMENT_RTTI( crimild::IndexBufferObject )
+
 	public:
 		explicit IndexBufferObject( unsigned int indexCount );
 
@@ -50,6 +54,25 @@ namespace crimild {
         IndexPrecision getIndexAt( unsigned int position ) const { return getData()[ position ]; }
 
         void generateIncrementalIndices( void );
+
+        /**
+        	\name Streaming
+        */
+        //@{
+
+    public:
+    	/**
+    		\brief Default constructor
+
+    		\warning Used only for streaming purposes
+    	*/
+    	IndexBufferObject( void );
+
+    	virtual bool registerInStream( Stream &s ) override;
+    	virtual void save( Stream &s ) override;
+    	virtual void load( Stream &s ) override;
+
+    	//@}
 	};
 
 }

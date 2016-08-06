@@ -14,9 +14,7 @@ namespace crimild {
 
 	template< typename T >
 	class AnimatorComponent : public NodeComponent {
-		CRIMILD_NODE_COMPONENT_NAME( "AnimatorComponent" )
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( AnimatorComponent )
-
+		CRIMILD_IMPLEMENT_RTTI( crimild::AnimatorComponent )
 	private:
 		using Interpolator = std::function< void( const T &, const T &, float, T & ) >;
 		using OnCompleteCallback = std::function< void( Node * ) >;

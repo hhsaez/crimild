@@ -29,6 +29,8 @@
 
 #import "CrimildMetalRenderer.h"
 
+#if !TARGET_OS_SIMULATOR
+
 using namespace crimild;
 using namespace crimild::metal;
 
@@ -88,4 +90,6 @@ id< MTLBuffer > IndexBufferObjectCatalog::getMetalIndexBuffer( crimild::IndexBuf
 {
     return _ibos[ ibo->getCatalogId() ];
 }
+
+#endif // TARGET_OS_SIMULATOR
 

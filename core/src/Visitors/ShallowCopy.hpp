@@ -38,8 +38,6 @@
 namespace crimild {
 
 	class ShallowCopy : public NodeVisitor {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( ShallowCopy )
-
 	public:
 		explicit ShallowCopy( void );
 		virtual ~ShallowCopy( void );

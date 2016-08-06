@@ -37,8 +37,7 @@ namespace crimild {
         class RigidBodyComponent;
         
 		class RigidBodyComponent : public NodeComponent {
-			CRIMILD_DISALLOW_COPY_AND_ASSIGN( RigidBodyComponent )
-			CRIMILD_NODE_COMPONENT_NAME( "rigidBody" );
+			CRIMILD_IMPLEMENT_RTTI( crimild::physics::RigidBodyComponent )
 
 		public:
 			typedef std::function< void ( RigidBodyComponent * ) > CollisionCallback;

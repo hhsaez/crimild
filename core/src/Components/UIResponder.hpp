@@ -39,8 +39,7 @@ namespace crimild {
 	class BoundingVolume;
 
 	class UIResponder : public NodeComponent {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( UIResponder )
-		CRIMILD_NODE_COMPONENT_NAME( "ui_responder" )
+		CRIMILD_IMPLEMENT_RTTI( crimild::UIResponder )
 
 	private:
 		using CallbackType = std::function< bool( Node * ) >;

@@ -57,7 +57,7 @@
         _animationFrameInterval = 1;
         _displayLink = nil;
         
-        self.useMetalRenderPath = YES;
+        self.useMetalRenderPath = NO;
     }
     
     return self;
@@ -78,22 +78,24 @@
     return self;
 }
 
-- (void) viewDidLoad
+- (void) loadView
 {
-    [super viewDidLoad];
+    [super loadView];
 
+#if !TARGET_OS_SIMULATOR
     if (self.useMetalRenderPath) {
-        self.crimildView = [[CrimildMetalView alloc] initWithFrame:self.view.bounds];
+        self.crimildView = [[CrimildMetalView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
         self.animationFrameInterval = 1;
     }
+#endif
     
     if (self.crimildView == nil) {
         self.useMetalRenderPath = NO;
-        self.crimildView = [[CrimildEAGLView alloc] initWithFrame:self.view.bounds];
+        self.crimildView = [[CrimildEAGLView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
         self.animationFrameInterval = 2;
     }
     
-    [self.view addSubview:self.crimildView];
+    self.view = self.crimildView;
     
     [self setupCrimild];
     
@@ -164,6 +166,7 @@
     [super viewWillDisappear:animated];
     
     [self stopAnimation];
+    self.simulation->stop();
 }
 
 #pragma mark - Crimild

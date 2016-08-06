@@ -29,28 +29,26 @@
 #define CRIMILD_RENDERING_BUFFER_OBJECT_
 
 #include "Foundation/Macros.hpp"
+#include "Foundation/Stream.hpp"
 
 #include <memory>
 #include <cstring>
+#include <vector>
 
 namespace crimild {
 
 	template< typename T >
-	class BufferObject {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( BufferObject )
-
+	class BufferObject : public StreamObject {
 	protected:
 		BufferObject( size_t size, const T *data )
-			: _size( size ),
-			  _data( nullptr )
 		{
-			if ( _size > 0 ) {
-				_data = new T[ _size ];
+			if ( size > 0 ) {
+				_data.resize( size );
 				if ( data != nullptr ) {
-					memcpy( _data, data, sizeof( T ) * _size );
+					memcpy( &_data[ 0 ], data, sizeof( T ) * size );
 				}
 				else {
-					memset( _data, 0, sizeof( T ) * _size );					
+					memset( &_data[ 0 ], 0, sizeof( T ) * size );					
 				}
 			}
 		}
@@ -58,23 +56,51 @@ namespace crimild {
 	public:
 		virtual ~BufferObject( void )
 		{
-			if ( _data ) {
-				delete [] _data;
-				_data = nullptr;
+
+		}
+
+		size_t getSize( void ) const { return _data.size(); }
+        
+        size_t getSizeInBytes( void ) const { return sizeof( T ) * getSize(); }
+
+		T *data( void ) { return &_data[ 0 ]; }
+
+		const T *getData( void ) const { return &_data[ 0 ]; }
+
+	private:
+		std::vector< T > _data;
+
+	public:
+		BufferObject( void ) { }
+
+		virtual bool registerInStream( Stream &s ) override
+		{
+			return StreamObject::registerInStream( s );
+		}
+
+		virtual void save( Stream &s ) override
+		{
+			StreamObject::save( s );
+
+			size_t size = getSize();
+			s.write( size );
+			if ( size > 0 ) {
+				s.writeRawBytes( &_data[ 0 ], getSizeInBytes() );
 			}
 		}
 
-		size_t getSize( void ) const { return _size; }
-        
-        size_t getSizeInBytes( void ) const { return sizeof( T ) * _size; }
+		virtual void load( Stream &s ) override
+		{
+			StreamObject::load( s );
 
-		T *data( void ) { return _data; }
+			size_t size;
+			s.read( size );
 
-		const T *getData( void ) const { return _data; }
-
-	private:
-		size_t _size;
-		T *_data = nullptr;
+			if ( size > 0 ) {
+				_data.resize( size );
+				s.readRawBytes( &_data[ 0 ], getSizeInBytes() );
+			}
+		}
 	};
 
 }

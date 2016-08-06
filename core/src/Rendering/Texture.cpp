@@ -27,6 +27,8 @@
 
 #include "Texture.hpp"
 
+CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::Texture )
+
 using namespace crimild;
 
 Texture::Texture( std::string name )
@@ -45,5 +47,36 @@ Texture::Texture( SharedPointer< Image > const &image, std::string name )
 Texture::~Texture( void )
 {
 
+}
+
+bool Texture::registerInStream( Stream &s )
+{
+	if ( !StreamObject::registerInStream( s ) ) {
+		return false;
+	}
+
+	if ( getImage() != nullptr ) {
+		getImage()->registerInStream( s );
+	}
+
+	return true;
+}
+
+void Texture::save( Stream &s )
+{
+	StreamObject::save( s );
+
+	s.writeChildObject( getImage() );
+}
+
+void Texture::load( Stream &s )
+{
+	StreamObject::load( s );
+
+	auto self = this;
+
+	s.readChildObject< Image >( [self]( SharedPointer< Image > const &i ) {
+		self->_image = i;
+	});
 }
 

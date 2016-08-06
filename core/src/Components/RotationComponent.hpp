@@ -34,8 +34,7 @@
 namespace crimild {
 
 	class RotationComponent : public NodeComponent {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( RotationComponent )
-		CRIMILD_NODE_COMPONENT_NAME( "update" )
+		CRIMILD_IMPLEMENT_RTTI( crimild::RotationComponent )
 
 	public:
 		RotationComponent( const Vector3f &axis, float speed );

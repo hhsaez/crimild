@@ -28,7 +28,7 @@
 #ifndef CRIMILD_PRIMITIVES_PRIMITIVE_
 #define CRIMILD_PRIMITIVES_PRIMITIVE_
 
-#include "Foundation/SharedObject.hpp"
+#include "Foundation/Stream.hpp"
 #include "Rendering/VertexBufferObject.hpp"
 #include "Rendering/IndexBufferObject.hpp"
 
@@ -36,7 +36,9 @@
 
 namespace crimild {
 
-	class Primitive : public SharedObject {
+	class Primitive : public StreamObject {
+		CRIMILD_IMPLEMENT_RTTI( crimild::Primitive )
+
 	public:
 		enum class Type {
 			POINTS,
@@ -66,6 +68,17 @@ namespace crimild {
 		Primitive::Type _type;
 		SharedPointer< VertexBufferObject > _vertexBuffer;
 		SharedPointer< IndexBufferObject > _indexBuffer;
+
+		/**
+			\name Streaming
+		*/
+		//@{
+	public:
+		virtual bool registerInStream( Stream &s ) override;
+		virtual void save( Stream &s ) override;
+		virtual void load( Stream &s ) override;
+
+		//@}
 	};
 
 }

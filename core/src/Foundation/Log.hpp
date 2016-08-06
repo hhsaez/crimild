@@ -54,8 +54,12 @@ namespace crimild {
 			virtual void write( Log *log, std::string message ) override;
 		};
         
-        using ConsoleOutputHandlerPtr = SharedPointer< ConsoleOutputHandler >;
-
+		class NullOutputHandler : public LogOutputHandler {
+		public:
+			virtual ~NullOutputHandler( void ) { }
+			virtual void write( Log *, std::string ) override { }
+		};
+        
 	public:
 		static Log Debug;
 		static Log Warning;

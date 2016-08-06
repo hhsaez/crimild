@@ -376,32 +376,33 @@ namespace crimild {
 
 			\remarks This interpolation requires the use of quaternions only
 		 */
-		template< typename T >
-		static Quaternion< T > slerp( const Quaternion< T > &q0, const Quaternion< T > q1, double t )
-		{
-			// calculate dot product for input quaternion
-			// we'll use this as the cosine for the angle between two vectors
-			double dot = q0.getReal() * q1.getReal() + q0.getImaginary() * q1.getImaginary();
-
-			const double DOT_THRESHOLD = 0.9995;
-			if ( dot > DOT_THRESHOLD ) {
-				// if the inputs are too close for comfort, use linear interpolation
-				// and normalize the result.
-				Quaternion< T > result;
-				linear( q0, q1, t, result );
-				return result.normalize();
-			}
-
-			// clamp dot value to stay within the domain for acos()
-			dot = Numericd::clamp( dot, -1, 1 );
-
-			// calculate angle from q0 to q1, interpolating according the time value
-			double theta = t * acos( dot );
-
-			Quaternion< T > q = q1 - dot * q0;
-			q.normalize();
-			return std::cos( theta ) * q0 + std::sin( theta ) * q;
-		}
+        template< typename PRECISION >
+        static Quaternion< PRECISION > slerp( const Quaternion< PRECISION > &a, const Quaternion< PRECISION > b, double t )
+        {
+            PRECISION cosTheta = a.getReal() * b.getReal() + a.getImaginary() * b.getImaginary();
+            Quaternion< PRECISION > b1 = b;
+            if ( cosTheta < 0.0 ) {
+                b1 = b.getConjugate();
+                cosTheta = -cosTheta;
+            }
+            
+            PRECISION w1, w2;
+            PRECISION theta = Numeric< PRECISION >::acos( cosTheta );
+            PRECISION sinTheta = Numeric< PRECISION >::sin( theta );
+            
+            if ( sinTheta > 0.0001 ) {
+                w1 = ( PRECISION )( Numeric< PRECISION >::sin( ( 1.0 - t ) * theta ) / sinTheta );
+                w2 = ( PRECISION )( Numeric< PRECISION >::sin( t * theta ) / sinTheta );
+            }
+            else {
+                w1 = 1.0 - t;
+                w2 = t;
+            }
+            
+            Quaternion< PRECISION > result = a * w1 + b1 * w2;
+            result.normalize();
+            return result;
+        }
 
 	};
 

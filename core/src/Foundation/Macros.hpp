@@ -58,10 +58,11 @@
 
 #define CRIMILD_TO_STRING( A ) #A
 
-#define CRIMILD_DISALLOW_COPY_AND_ASSIGN( TypeName ) \
- 	private: \
-		TypeName( const TypeName & );               \
-		void operator=( const TypeName & );
+#define CRIMILD_CONCAT_IMPL( A, B ) A##B
+#define CRIMILD_CONCAT( A, B ) CRIMILD_CONCAT_IMPL( A, B )
+
+#define CRIMILD_RANDOM_VARIABLE_NAME( PREFIX ) \
+    CRIMILD_CONCAT( PREFIX, __LINE__ )
 
 #endif
 

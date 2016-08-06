@@ -42,9 +42,7 @@ namespace crimild {
 
     class Texture;
 
-    class AssetManager : public DynamicSingleton< AssetManager > {
-        CRIMILD_DISALLOW_COPY_AND_ASSIGN( AssetManager )
-        
+    class AssetManager : public NonCopyable, public DynamicSingleton< AssetManager > {
     public:
         static constexpr const char *FONT_DEFAULT = "fonts/default";
         

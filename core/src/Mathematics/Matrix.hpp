@@ -128,7 +128,7 @@ namespace crimild {
 		PRECISION *data( void ) { return _data; }
 		const PRECISION *getData( void ) const { return _data; }
 
-		bool operator==( const Matrix &u )
+		bool operator==( const Matrix &u ) const
 		{
 			if ( SIZE == 3 ) {
 				return ( Numeric< PRECISION >::equals( _data[ 0 ], u._data[ 0 ] ) ) &&

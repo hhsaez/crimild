@@ -59,3 +59,38 @@ TEST( IndexBufferObject, setIndexAt )
 	EXPECT_EQ( 3, ibo->getIndexAt( 5 ) );
 }
 
+TEST( IndexBufferObjectTest, testGenerateIncrementalIndices )
+{
+	auto ibo = crimild::alloc< IndexBufferObject >( 6 );
+	ibo->generateIncrementalIndices();
+
+	EXPECT_EQ( 0, ibo->getIndexAt( 0 ) );
+	EXPECT_EQ( 1, ibo->getIndexAt( 1 ) );
+	EXPECT_EQ( 2, ibo->getIndexAt( 2 ) );
+	EXPECT_EQ( 3, ibo->getIndexAt( 3 ) );
+	EXPECT_EQ( 4, ibo->getIndexAt( 4 ) );
+	EXPECT_EQ( 5, ibo->getIndexAt( 5 ) );
+}
+
+TEST( IndexBufferObject, iboStream )
+{
+	auto ibo = crimild::alloc< IndexBufferObject >( 6 );
+	ibo->generateIncrementalIndices();
+
+	{
+		FileStream os( "ibo.crimild", FileStream::OpenMode::WRITE );
+		os.addObject( ibo );
+		EXPECT_TRUE( os.flush() );
+	}
+
+	{
+		FileStream is( "ibo.crimild", FileStream::OpenMode::READ );
+		EXPECT_TRUE( is.load() );
+		EXPECT_EQ( 1, is.getObjectCount() );
+		auto ibo1 = is.getObjectAt< IndexBufferObject >( 0 );
+		EXPECT_TRUE( ibo1 != nullptr );
+		EXPECT_EQ( ibo->getIndexCount(), ibo1->getIndexCount() );
+		EXPECT_EQ( 0, memcmp( ibo->getData(), ibo1->getData(), sizeof( IndexPrecision ) * ibo1->getIndexCount() ) );
+	}
+}
+

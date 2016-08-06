@@ -30,6 +30,7 @@
 
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/NamedObject.hpp"
+#include "Foundation/Stream.hpp"
 #include "Visitors/NodeVisitor.hpp"
 #include "Components/NodeComponent.hpp"
 #include "Mathematics/Transformation.hpp"
@@ -42,8 +43,10 @@ namespace crimild {
 	/**
 		\brief Base class for any object that can be attached to the scene graph
 	*/
-	class Node : public NamedObject, public SharedObject {
-        CRIMILD_DISALLOW_COPY_AND_ASSIGN( Node )
+	class Node : 
+		public NamedObject, 
+		public StreamObject {
+        CRIMILD_IMPLEMENT_RTTI( crimild::Node )
 
 	public:
 		explicit Node( std::string name = "" );
@@ -96,7 +99,7 @@ namespace crimild {
         template< class NODE_COMPONENT_CLASS >
         NODE_COMPONENT_CLASS *getComponent( void )
         {
-            return static_cast< NODE_COMPONENT_CLASS * >( getComponentWithName( NODE_COMPONENT_CLASS::_COMPONENT_NAME() ) );
+            return static_cast< NODE_COMPONENT_CLASS * >( getComponentWithName( NODE_COMPONENT_CLASS::__CLASS_NAME ) );
         }
         
         bool hasComponent( SharedPointer< NodeComponent > const &component )
@@ -182,6 +185,18 @@ namespace crimild {
 
 	private:
 		bool _enabled = true;
+
+		/**
+			\name Streaming support
+		*/
+		//@{
+
+	public:
+		bool registerInStream( Stream &s ) override;
+		void save( Stream &s ) override;
+		void load( Stream &s ) override;
+
+		//@}
 	};
 
 }

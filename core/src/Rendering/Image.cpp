@@ -29,6 +29,8 @@
 
 #include <cstring>
 
+CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::Image )
+
 using namespace crimild;
 
 Image::Image( void )
@@ -82,5 +84,35 @@ void Image::unload( void )
 	_height = 0;
 	_bpp = 0;
     _data.resize( 0 );
+}
+
+bool Image::registerInStream( Stream &s )
+{
+	if ( !StreamObject::registerInStream( s ) ) {
+		return false;
+	}
+
+	return true;
+}
+
+void Image::save( Stream &s )
+{
+	StreamObject::save( s );
+
+	s.write( _width );
+	s.write( _height );
+	s.write( _bpp );
+	s.writeRawBytes( &_data[ 0 ], _width * _height * _bpp * sizeof( unsigned char ) );
+}
+
+void Image::load( Stream &s )
+{
+	StreamObject::load( s );
+
+	s.read( _width );
+	s.read( _height );
+	s.read( _bpp );
+	_data.resize( _width * _height * _bpp );
+	s.readRawBytes( &_data[ 0 ], _data.size() * sizeof( unsigned char ) );
 }
 

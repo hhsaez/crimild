@@ -27,6 +27,8 @@
 
 #include "Primitive.hpp"
 
+CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::Primitive )
+
 using namespace crimild;
 
 Primitive::Primitive( Primitive::Type type )
@@ -37,5 +39,47 @@ Primitive::Primitive( Primitive::Type type )
 Primitive::~Primitive( void )
 {
 
+}
+
+bool Primitive::registerInStream( Stream &s )
+{
+	if ( !StreamObject::registerInStream( s ) ) {
+		return false;
+	}
+
+	if ( getVertexBuffer() != nullptr ) {
+		getVertexBuffer()->registerInStream( s );
+	}
+
+	if ( getIndexBuffer() != nullptr ) {
+		getIndexBuffer()->registerInStream( s );
+	}
+
+	return true;
+}
+
+void Primitive::save( Stream &s )
+{
+	StreamObject::save( s );
+
+	s.write( _type );
+
+	s.writeChildObject( _vertexBuffer );
+	s.writeChildObject( _indexBuffer );
+}
+
+void Primitive::load( Stream &s )
+{
+	StreamObject::load( s );
+
+	s.read( _type );
+
+	s.readChildObject< VertexBufferObject >( [&]( SharedPointer< VertexBufferObject > const &obj ) {
+		setVertexBuffer( obj );
+	});
+	
+	s.readChildObject< IndexBufferObject >( [&]( SharedPointer< IndexBufferObject > const &obj ) {
+		setIndexBuffer( obj );
+	});
 }
 

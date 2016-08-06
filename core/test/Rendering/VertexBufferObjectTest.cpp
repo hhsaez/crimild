@@ -128,3 +128,32 @@ TEST( VertexBufferObject, boneData )
 	EXPECT_EQ( 1.0f, vbo->getBoneWeightAt( 2, 0 ) );
 }
 
+TEST( VertexBufferObject, vboStream )
+{
+	VertexPrecision vertices[] = {
+		+1.0f, 0.0f, 0.0f,	0.0f, 0.0f, 1.0f,	0.0f, 1.0,
+		-1.0f, 0.0f, 0.0f,	0.0f, 0.0f, 1.0f,	1.0f, 0.0f,
+		+0.0f, 1.0f, 0.0f,	0.0f, 0.0f, 1.0f,	0.5f, 0.0f
+	};
+
+	auto vbo = crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3_N3_UV2, 3, vertices );
+
+	{
+		FileStream os( "vbo.crimild", FileStream::OpenMode::WRITE );
+		os.addObject( vbo );
+		EXPECT_TRUE( os.flush() );
+	}
+
+	{
+		FileStream is( "vbo.crimild", FileStream::OpenMode::READ );
+		EXPECT_TRUE( is.load() );
+		EXPECT_EQ( 1, is.getObjectCount() );
+		auto vbo1 = is.getObjectAt< VertexBufferObject >( 0 );
+		EXPECT_TRUE( vbo1 != nullptr );
+		EXPECT_EQ( vbo->getVertexFormat(), vbo1->getVertexFormat() );
+		EXPECT_EQ( vbo->getVertexFormat().getVertexSizeInBytes(), vbo1->getVertexFormat().getVertexSizeInBytes() );
+		EXPECT_EQ( vbo->getVertexCount(), vbo1->getVertexCount() );
+		EXPECT_EQ( 0, memcmp( vbo->getData(), vbo1->getData(), vbo1->getVertexFormat().getVertexSizeInBytes() * vbo1->getVertexCount() ) );
+	}
+}
+

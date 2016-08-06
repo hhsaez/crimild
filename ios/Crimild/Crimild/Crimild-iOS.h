@@ -25,12 +25,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Crimild.hpp>
+#import "Crimild.hpp"
 #import <Crimild_Scripting.hpp>
 #import <Crimild_OpenGL.hpp>
 
 #import "CrimildViewController.h"
 
+#import "EAGL/CrimildEAGLView.h"
+
+#if TARGET_OS_IOS
+
 #import "Metal/Rendering/CrimildMetalRenderer.h"
 #import "Metal/Rendering/Library/CrimildMetalStandardUniforms.h"
+
+#endif
 

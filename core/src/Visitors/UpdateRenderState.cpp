@@ -29,9 +29,12 @@
 #include "FetchLights.hpp"
 #include "SceneGraph/Light.hpp"
 #include "SceneGraph/Geometry.hpp"
+#include "SceneGraph/Group.hpp"
 #include "Rendering/Material.hpp"
+#include "Rendering/SkinnedMesh.hpp"
 #include "Components/RenderStateComponent.hpp"
 #include "Components/MaterialComponent.hpp"
+#include "Components/SkinnedMeshComponent.hpp"
 
 using namespace crimild;
 
@@ -65,6 +68,19 @@ void UpdateRenderState::traverse( Node *node )
 	NodeVisitor::traverse( node );
 }
 
+void UpdateRenderState::visitGroup( Group *group )
+{
+	auto tmpSkin = _skinnedMesh;
+	auto skin = group->getComponent< SkinnedMeshComponent >();
+	if ( skin != nullptr ) {
+		_skinnedMesh = crimild::retain( skin->getSkinnedMesh() );
+	}
+
+	NodeVisitor::visitGroup( group );
+
+	_skinnedMesh = tmpSkin;
+}
+
 void UpdateRenderState::visitGeometry( Geometry *geometry )
 {
 	auto rs = geometry->getComponent< RenderStateComponent >();
@@ -83,6 +99,14 @@ void UpdateRenderState::visitGeometry( Geometry *geometry )
 	rs->detachAllLights();
 	for ( auto light : _lights ) {
 		rs->attachLight( light );
+	}
+
+	auto skin = geometry->getComponent< SkinnedMeshComponent >();
+	if ( skin != nullptr ) {
+		rs->setSkinnedMesh( crimild::retain( skin->getSkinnedMesh() ) );
+	}
+	else {
+		rs->setSkinnedMesh( _skinnedMesh );
 	}
 }
 

@@ -45,6 +45,7 @@ namespace crimild {
 		static const VertexFormat VF_P3_N3_TG3_UV2;
 
 	public:
+		VertexFormat( void );
 		VertexFormat( unsigned char positions, unsigned char colors, unsigned char normals, unsigned char tangents, unsigned char textureCoords );
 		VertexFormat( unsigned char positions, unsigned char colors, unsigned char normals, unsigned char tangents, unsigned char textureCoords, unsigned char boneIds, unsigned char boneWeights );
 		VertexFormat( const VertexFormat &vf );

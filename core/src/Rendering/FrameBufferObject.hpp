@@ -84,7 +84,7 @@ namespace crimild {
     
     using RenderTargetMap = SharedObjectMap< RenderTarget >;
 
-	class FrameBufferObject : public Catalog< FrameBufferObject >::Resource {
+	class FrameBufferObject : public SharedObject, public Catalog< FrameBufferObject >::Resource {
 	public:
         FrameBufferObject( int width, int height );
 		virtual ~FrameBufferObject( void );

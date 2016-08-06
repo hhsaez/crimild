@@ -29,6 +29,8 @@
 
 #import "CrimildMetalRenderer.h"
 
+#if !TARGET_OS_SIMULATOR
+
 using namespace crimild;
 using namespace crimild::metal;
 
@@ -141,4 +143,6 @@ id< MTLTexture > TextureCatalog::generateRenderTargetTexture( RenderTarget *rend
     
     return mtlTexture;
 }
+
+#endif // TARGET_OS_SIMULATOR
 

@@ -75,6 +75,12 @@ namespace crimild {
 			setRotate( r );
 			setScale( s );
 		}
+        
+        TransformationImpl( const Matrix4Impl &m )
+        {
+            makeIdentity();
+            fromMatrix( m );
+        }
 
 		TransformationImpl( const TransformationImpl &t0, const TransformationImpl &t1 )
 		{
@@ -298,6 +304,7 @@ namespace crimild {
             
             rotate().fromRotationMatrix( viewRotation );
             setTranslate( m[ 12 ], m[ 13 ], m[ 14 ] );
+            setScale( 1.0f );
 
             return *this;
         }

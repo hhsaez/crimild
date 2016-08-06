@@ -28,13 +28,15 @@
 #ifndef CRIMILD_METAL_RENDERING_RENDERER_
 #define CRIMILD_METAL_RENDERING_RENDERER_
 
+#include <Crimild.hpp>
+
+#if !TARGET_OS_SIMULATOR
+
 #import <Metal/Metal.h>
 #import <QuartzCore/CAMetalLayer.h>
 #import <simd/simd.h>
 
-#include <Crimild.hpp>
-
-#import "CrimildMetalStandardUniforms.h"
+#import "Library/CrimildMetalStandardUniforms.h"
 
 @class CrimildMetalView;
 
@@ -117,6 +119,8 @@ namespace crimild {
     }
 
 }
+
+#endif
 
 #endif
 

@@ -42,8 +42,6 @@ namespace crimild {
     class RenderPass;
 
 	class Camera : public Group {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( Camera );
-        
 	public:
 		explicit Camera( void );
 		Camera( float fov, float aspect, float near, float far );

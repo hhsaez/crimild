@@ -35,8 +35,6 @@ namespace crimild {
 	namespace physics {
 
 		class ConvexHullCollider : public Collider {
-			CRIMILD_DISALLOW_COPY_AND_ASSIGN( ConvexHullCollider )
-
 		public:
 			ConvexHullCollider( void );
 			virtual ~ConvexHullCollider( void );

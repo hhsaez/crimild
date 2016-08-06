@@ -37,9 +37,7 @@ namespace crimild {
     class Node;
 
 	class LambdaComponent : public NodeComponent {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( LambdaComponent )
-		CRIMILD_NODE_COMPONENT_NAME( "update" )
-        
+		CRIMILD_IMPLEMENT_RTTI( crimild::LambdaComponent )
     private:
         using Callback = std::function< void( Node *, const Clock & ) >;
 

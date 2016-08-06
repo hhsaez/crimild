@@ -83,6 +83,14 @@ namespace crimild {
             
             template< typename T >
             bool getPropValue( const std::string &expr, T &result );
+
+            template< typename T >
+            T getPropValue( const std::string &expr )
+            {
+                T result;
+                getPropValue< T >( expr, result );
+                return result;
+            }
             
             bool foreach( const std::string &name, std::function< void( ScriptEvaluator &, int ) > callback );
             
@@ -102,8 +110,6 @@ namespace crimild {
         };
 
 		class ScriptContext {
-			CRIMILD_DISALLOW_COPY_AND_ASSIGN( ScriptContext )
-
 		public:
 			ScriptContext( void );
 			ScriptContext( bool openDefaultLibs );

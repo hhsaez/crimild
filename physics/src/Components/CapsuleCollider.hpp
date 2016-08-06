@@ -35,8 +35,6 @@ namespace crimild {
 	namespace physics {
 
 		class CapsuleCollider : public Collider {
-			CRIMILD_DISALLOW_COPY_AND_ASSIGN( CapsuleCollider )
-
 		public:
 			CapsuleCollider( void );
 			CapsuleCollider( float width, float height );

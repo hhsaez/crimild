@@ -38,7 +38,8 @@
 namespace crimild {
 
 	class Group : public Node {
-            
+		CRIMILD_IMPLEMENT_RTTI( crimild::Group )
+		
 	public:
 		explicit Group( std::string name = "" );
 		virtual ~Group( void );
@@ -81,6 +82,17 @@ namespace crimild {
 	public:
 		virtual void accept( NodeVisitor &visitor ) override;
 
+		/**
+			\name Streaming support
+		*/
+		//@{
+			
+	public:
+		bool registerInStream( Stream &s ) override;
+		void save( Stream &s ) override;
+		void load( Stream &s ) override;
+
+		//@}
 	};
 
 }

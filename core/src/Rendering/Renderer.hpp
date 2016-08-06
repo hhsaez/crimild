@@ -62,8 +62,6 @@ namespace crimild {
 	class Renderer : 
 		public SharedObject,
 		public DynamicSingleton< Renderer > {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( Renderer );
-        
 	protected:
 		Renderer( void );
 

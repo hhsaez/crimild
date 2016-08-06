@@ -31,6 +31,7 @@
 #include "Macros.hpp"
 #include "Memory.hpp"
 #include "SmallObject.hpp"
+#include "NonCopyable.hpp"
 
 #include <thread>
 #include <functional>
@@ -40,9 +41,6 @@ namespace crimild {
     class SharedObject :
         public SmallObject<>,
         public std::enable_shared_from_this< SharedObject > {
-            
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( SharedObject )
-        
 	protected:
         SharedObject( void ) { }
 

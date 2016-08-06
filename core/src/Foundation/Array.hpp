@@ -58,6 +58,11 @@ namespace crimild {
             _array.push_back( value );
         }
 
+        void add( VALUE_TYPE const &value )
+        {
+            _array.push_back( value );
+        }
+
         void remove( VALUE_TYPE &value )
         {
             _array.erase( std::remove( _array.begin(), _array.end(), value ), _array.end() );

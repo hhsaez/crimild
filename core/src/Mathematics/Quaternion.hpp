@@ -153,6 +153,11 @@ namespace crimild {
 		{
 		}
 
+		const Vector4Impl &getRawData( void ) const
+		{
+			return _data;
+		}
+
 		/**
 			\brief Assignment operator
 		 */

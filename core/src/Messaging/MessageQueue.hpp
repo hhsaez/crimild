@@ -43,9 +43,7 @@ namespace crimild {
 	template< class MessageType >
 	using MessageHandler = std::function< void( MessageType const & ) >;
 
-	class MessageQueueDispatcher {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( MessageQueueDispatcher )
-
+	class MessageQueueDispatcher : public NonCopyable {
 	protected:
 		MessageQueueDispatcher( void )
 		{
@@ -205,8 +203,6 @@ namespace crimild {
 	}
     
 	class Messenger {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( Messenger )
-
 	public:
 		Messenger( void );
 		virtual ~Messenger( void );

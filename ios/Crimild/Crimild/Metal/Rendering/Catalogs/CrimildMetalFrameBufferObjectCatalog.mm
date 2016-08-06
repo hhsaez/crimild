@@ -30,6 +30,8 @@
 
 #import "CrimildMetalRenderer.h"
 
+#if !TARGET_OS_SIMULATOR
+
 using namespace crimild;
 using namespace crimild::metal;
 
@@ -139,4 +141,6 @@ void FrameBufferObjectCatalog::cleanup( void )
 {
     Catalog< FrameBufferObject >::cleanup();
 }
+
+#endif // TARGET_OS_SIMULATOR
 

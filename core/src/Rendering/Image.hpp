@@ -28,13 +28,15 @@
 #ifndef CRIMILD_RENDERING_IMAGE_
 #define CRIMILD_RENDERING_IMAGE_
 
-#include "Foundation/SharedObject.hpp"
+#include "Foundation/Stream.hpp"
 
 #include <vector>
 
 namespace crimild {
     
-	class Image : public SharedObject {
+	class Image : public StreamObject {
+		CRIMILD_IMPLEMENT_RTTI( crimild::Image )
+
     public:
         enum class PixelFormat {
             RGB,
@@ -68,9 +70,17 @@ namespace crimild {
         PixelFormat _pixelFormat;
         std::vector< unsigned char > _data;
 
-	private:
-		Image( const Image & ) { }
-		Image &operator=( const Image & ) { return *this; }
+        /**
+        	\name Streaming
+        */
+        //@{
+
+    public:
+    	virtual bool registerInStream( Stream &s ) override;
+    	virtual void save( Stream &s ) override;
+    	virtual void load( Stream &s ) override;
+
+    	//@}
 	};
 
 }

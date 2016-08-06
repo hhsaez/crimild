@@ -40,8 +40,6 @@
 namespace crimild {
     
 	class BoundingVolume : public SharedObject {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( BoundingVolume );
-
 	protected:
 		BoundingVolume( void );
 

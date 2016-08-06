@@ -30,6 +30,8 @@
 
 #include "Boundings/AABBBoundingVolume.hpp"
 
+CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::Node )
+
 using namespace crimild;
 
 Node::Node( std::string name )
@@ -171,5 +173,50 @@ void Node::forEachComponent( std::function< void ( NodeComponent * ) > callback 
             callback( crimild::get_ptr( cmp.second ) );
 		}
 	}
+}
+
+bool Node::registerInStream( Stream &s )
+{
+    if ( !StreamObject::registerInStream( s ) ) {
+        return false;
+    }
+
+    forEachComponent( [&s]( NodeComponent *cmp ) {
+        cmp->registerInStream( s );
+    });
+
+    return true;
+}
+
+void Node::save( Stream &s )
+{
+    StreamObject::save( s );
+
+    s.write( getName() );
+    
+    s.write( _local );
+
+    std::vector< StreamObject * > components;
+    forEachComponent( [&components]( NodeComponent *c ) {
+        components.push_back( c );
+    });
+    s.writeChildObjects( components );
+}
+
+void Node::load( Stream &s )
+{
+    StreamObject::load( s );
+
+    std::string name;
+    s.read( name );
+    setName( name );
+
+    s.read( _local );
+
+    auto self = this;
+
+    s.readChildObjects< NodeComponent >( [self]( SharedPointer< NodeComponent > const &c ) {
+        self->attachComponent( c );
+    });
 }
 

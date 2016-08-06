@@ -29,7 +29,7 @@
 #define CRIMILD_RENDERING_SKINNED_MESH_
 
 #include "Foundation/NamedObject.hpp"
-#include "Foundation/SharedObject.hpp"
+#include "Foundation/Stream.hpp"
 #include "Foundation/Map.hpp"
 #include "Foundation/Array.hpp"
 
@@ -38,10 +38,12 @@
 
 namespace crimild {
     
-	class SkinnedMeshJoint : public SharedObject {
+	class SkinnedMeshJoint : public StreamObject, public NamedObject {
+		CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMeshJoint )
+
 	public:
 		SkinnedMeshJoint( void );
-		SkinnedMeshJoint( unsigned int id, const Transformation &offset );
+		SkinnedMeshJoint( unsigned int id, const Transformation &offset, std::string name );
 		virtual ~SkinnedMeshJoint( void );
 
 		unsigned int getId( void ) const { return _id; }
@@ -52,9 +54,24 @@ namespace crimild {
 	private:
 		unsigned char _id;
 		Transformation _offset;
+
+		/**
+			\name Streaming
+		*/
+		//@{
+
+	public:
+		virtual bool registerInStream( Stream &s ) override;
+		virtual void save( Stream &s ) override;
+		virtual void load( Stream &s ) override;
+
+		//@}
+
 	};
 
-	class SkinnedMeshJointCatalog : public SharedObject {
+	class SkinnedMeshJointCatalog : public StreamObject {
+		CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMeshJointCatalog )
+
 	public:
 		SkinnedMeshJointCatalog( void );
 		virtual ~SkinnedMeshJointCatalog( void );
@@ -66,12 +83,24 @@ namespace crimild {
 		SkinnedMeshJoint *updateOrCreateJoint( std::string name, const Transformation &offset );
 
 	private:
-		Map< std::string, unsigned int > _lookup;
-		Array< SharedPointer< SkinnedMeshJoint >> _joints;
+		Map< std::string, SharedPointer< SkinnedMeshJoint >> _joints;
+
+		/**
+			\name Streaming
+		*/
+		//@{
+
+	public:
+		virtual bool registerInStream( Stream &s ) override;
+		virtual void save( Stream &s ) override;
+		virtual void load( Stream &s ) override;
+
+		//@}
+
 	};
 
-	class SkinnedMeshAnimationChannel : public NamedObject, public SharedObject {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( SkinnedMeshAnimationChannel )
+	class SkinnedMeshAnimationChannel : public NamedObject, public StreamObject {
+		CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMeshAnimationChannel )
 
 	public:
 		template< typename T >
@@ -113,10 +142,22 @@ namespace crimild {
 		PositionKeyArray _positionKeys;
 		RotationKeyArray _rotationKeys;
 		ScaleKeyArray _scaleKeys;
+
+		/**
+			\name Streaming
+		*/
+		//@{
+
+	public:
+		virtual bool registerInStream( Stream &s ) override;
+		virtual void save( Stream &s ) override;
+		virtual void load( Stream &s ) override;
+
+		//@}		
 	};
 
-	class SkinnedMeshAnimationClip : public SharedObject {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( SkinnedMeshAnimationClip )
+	class SkinnedMeshAnimationClip : public StreamObject {
+		CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMeshAnimationClip )
 
 	private:
 		using SkinnedMeshAnimationChannelMap = Map< std::string, SharedPointer< SkinnedMeshAnimationChannel >>;
@@ -137,10 +178,23 @@ namespace crimild {
 		float _duration;
 		float _frameRate;
 		SkinnedMeshAnimationChannelMap _channels;
+
+		/**
+			\name Streaming
+		*/
+		//@{
+
+	public:
+		virtual bool registerInStream( Stream &s ) override;
+		virtual void save( Stream &s ) override;
+		virtual void load( Stream &s ) override;
+
+		//@}		
 	};
 
-	class SkinnedMeshSkeleton : public SharedObject {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( SkinnedMeshSkeleton )
+	class SkinnedMeshSkeleton : public StreamObject {
+		CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMeshSkeleton )
+
 	private:
 		using SkinnedMeshAnimationClipArray = Array< SharedPointer< SkinnedMeshAnimationClip >>;
 
@@ -149,20 +203,32 @@ namespace crimild {
 		virtual ~SkinnedMeshSkeleton( void );
 
 		SkinnedMeshAnimationClipArray &getClips( void ) { return _clips; }
-		SkinnedMeshJointCatalog &getJoints( void ) { return _joints; }
+		SkinnedMeshJointCatalog *getJoints( void ) { return crimild::get_ptr( _joints ); }
 
 		void setGlobalInverseTransform( const Transformation &value ) { _globalInverseTransform = value; }
 		const Transformation &getGlobalInverseTransform( void ) const { return _globalInverseTransform; }
 
 	private:
 		SkinnedMeshAnimationClipArray _clips;
-		SkinnedMeshJointCatalog _joints;
+		SharedPointer< SkinnedMeshJointCatalog > _joints;
 
 		Transformation _globalInverseTransform;
+
+		/**
+			\name Streaming
+		*/
+		//@{
+
+	public:
+		virtual bool registerInStream( Stream &s ) override;
+		virtual void save( Stream &s ) override;
+		virtual void load( Stream &s ) override;
+
+		//@}		
 	};
 
-	class SkinnedMeshAnimationState : public SharedObject {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( SkinnedMeshAnimationState )
+	class SkinnedMeshAnimationState : public StreamObject {
+		CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMeshAnimationState )
 
 	private:
 		using JointPoseArray = Array< Matrix4f >;
@@ -176,10 +242,22 @@ namespace crimild {
 
 	private:
 		JointPoseArray _jointPoses;
+
+		/**
+			\name Streaming
+		*/
+		//@{
+
+	public:
+		virtual bool registerInStream( Stream &s ) override;
+		virtual void save( Stream &s ) override;
+		virtual void load( Stream &s ) override;
+
+		//@}		
 	};
 
-	class SkinnedMesh : public SharedObject {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( SkinnedMesh )
+	class SkinnedMesh : public StreamObject {
+		CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMesh )
 
 	public:
 		SkinnedMesh( void );
@@ -195,6 +273,18 @@ namespace crimild {
 	private:
 		SharedPointer< SkinnedMeshSkeleton > _skeleton;
 		SharedPointer< SkinnedMeshAnimationState > _animationState;
+
+		/**
+			\name Streaming
+		*/
+		//@{
+
+	public:
+		virtual bool registerInStream( Stream &s ) override;
+		virtual void save( Stream &s ) override;
+		virtual void load( Stream &s ) override;
+
+		//@}
 
 	public:
 		void debugDump( void );

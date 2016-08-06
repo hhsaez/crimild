@@ -35,8 +35,6 @@
 namespace crimild {
     
 	class ShaderLocation : public NamedObject, public SharedObject {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( ShaderLocation );
-		
 	public:
 		enum class Type {
 			ATTRIBUTE,

@@ -53,9 +53,6 @@ namespace crimild {
     class TaskGroup :
         public SharedObject,
         public Messenger {
-            
-        CRIMILD_DISALLOW_COPY_AND_ASSIGN( TaskGroup )
-        
     private:
         using TaskList = ConcurrentList< TaskPtr >;
         using CompletionCallback = std::function< void( void ) >;

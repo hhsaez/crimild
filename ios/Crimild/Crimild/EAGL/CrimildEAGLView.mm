@@ -31,12 +31,12 @@
 #import <Crimild_OpenGL.hpp>
 
 @interface CrimildEAGLView () {
-    EAGLContext* _context;
-    
     GLuint _defaultFBOName;
     GLuint _colorRenderbuffer;
     GLuint _depthRenderbuffer;
 }
+
+@property (nonatomic, strong) EAGLContext *context;
 
 - (BOOL) configure;
 
@@ -86,7 +86,7 @@
         _colorRenderbuffer = 0;
     }
     
-    if ([EAGLContext currentContext] == _context) {
+    if ([EAGLContext currentContext] == self.context) {
         [EAGLContext setCurrentContext:nil];
     }
 }
@@ -103,8 +103,8 @@
                                      kEAGLDrawablePropertyColorFormat: kEAGLColorFormatRGBA8
                                      };
 
-    _context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
-    if (!_context || ![EAGLContext setCurrentContext:_context]) {
+    self.context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+    if (!self.context || ![EAGLContext setCurrentContext:self.context]) {
         return NO;
     }
     
@@ -121,7 +121,7 @@
     glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBOName);
     glBindRenderbuffer(GL_RENDERBUFFER, _colorRenderbuffer);
     
-    [_context renderbufferStorage:GL_RENDERBUFFER fromDrawable:drawable];
+    [self.context renderbufferStorage:GL_RENDERBUFFER fromDrawable:drawable];
     
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, _colorRenderbuffer);
     
@@ -156,13 +156,13 @@
 
 - (void) render
 {
-    [EAGLContext setCurrentContext:_context];
+    [EAGLContext setCurrentContext:self.context];
     glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBOName);
 
     [super render];
     
     glBindRenderbuffer(GL_RENDERBUFFER, _colorRenderbuffer);
-    [_context presentRenderbuffer:GL_RENDERBUFFER];
+    [self.context presentRenderbuffer:GL_RENDERBUFFER];
 }
 
 - (void) layoutSubviews
@@ -173,7 +173,7 @@
     
     // Allocate color buffer backing based on the current layer size
     glBindRenderbuffer(GL_RENDERBUFFER, _colorRenderbuffer);
-    [_context renderbufferStorage:GL_RENDERBUFFER fromDrawable:(CAEAGLLayer*)self.layer];
+    [self.context renderbufferStorage:GL_RENDERBUFFER fromDrawable:(CAEAGLLayer*)self.layer];
     glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &backingWidth);
     glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &backingHeight);
     

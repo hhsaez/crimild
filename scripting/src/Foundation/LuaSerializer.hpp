@@ -34,9 +34,7 @@ namespace crimild {
 
 	namespace scripting {
 
-		class LuaSerializer {
-			CRIMILD_DISALLOW_COPY_AND_ASSIGN( LuaSerializer )
-
+		class LuaSerializer : public NonCopyable {
 		public:
 			LuaSerializer( std::ostream &output );
 			virtual ~LuaSerializer( void );

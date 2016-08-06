@@ -143,3 +143,11 @@ TEST( VertexFormatTest, P3_UV2 )
 	EXPECT_EQ( 5 * sizeof( float ), vf.getVertexSizeInBytes() );
 }
 
+TEST( VertexFormatTest, equality )
+{
+	VertexFormat vf1( 3, 0, 0, 0, 2 );
+	VertexFormat vf2( 3, 0, 0, 0, 2 );
+
+	EXPECT_EQ( vf1, vf2 );
+}
+

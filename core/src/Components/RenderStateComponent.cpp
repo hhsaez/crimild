@@ -27,6 +27,8 @@
 
 #include "RenderStateComponent.hpp"
 
+CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::RenderStateComponent )
+
 using namespace crimild;
 
 RenderStateComponent::RenderStateComponent( void )

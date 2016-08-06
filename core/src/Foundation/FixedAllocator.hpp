@@ -30,6 +30,7 @@
 
 #include "Macros.hpp"
 #include "Chunk.hpp"
+#include "NonCopyable.hpp"
 
 #include <limits>
 #include <vector>
@@ -38,9 +39,7 @@ namespace crimild {
 
 	namespace internal {
 
-		class FixedAllocator {
-			CRIMILD_DISALLOW_COPY_AND_ASSIGN( FixedAllocator )
-
+		class FixedAllocator : public NonCopyable {
 		private:
 			static constexpr unsigned char MIN_OBJECTS_PER_CHUNK = 8;
 			static constexpr unsigned char MAX_OBJECTS_PER_CHUNK = std::numeric_limits< unsigned char >::max();

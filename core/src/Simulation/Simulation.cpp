@@ -95,6 +95,8 @@ void Simulation::stop( void )
     _taskManager.stop();
 
     setScene( nullptr );
+    
+    _assetManager.clear();
 }
 
 int Simulation::run( void )

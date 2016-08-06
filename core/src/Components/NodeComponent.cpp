@@ -76,3 +76,18 @@ void NodeComponent::renderDebugInfo( Renderer *, Camera * )
 
 }
 
+bool NodeComponent::registerInStream( Stream &s )
+{
+	return StreamObject::registerInStream( s );
+}
+
+void NodeComponent::save( Stream &s )
+{
+	StreamObject::save( s );
+}
+
+void NodeComponent::load( Stream &s )
+{
+	StreamObject::load( s );
+}
+

@@ -35,8 +35,7 @@ namespace crimild {
 	namespace al {
 
 		class AudioComponent : public NodeComponent {
-			CRIMILD_DISALLOW_COPY_AND_ASSIGN( AudioComponent )
-			CRIMILD_NODE_COMPONENT_NAME( "audio" )
+			CRIMILD_IMPLEMENT_RTTI( crimild::al::AudioComponent )
 
 		public:
 			explicit AudioComponent( AudioClipPtr const &audioClip );

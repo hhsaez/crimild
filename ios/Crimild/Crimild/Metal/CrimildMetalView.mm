@@ -8,6 +8,8 @@
 
 #import "CrimildMetalView.h"
 
+#if !TARGET_OS_SIMULATOR
+
 #import <QuartzCore/CAMetalLayer.h>
 
 #import "Rendering/CrimildMetalRenderer.h"
@@ -61,3 +63,6 @@
 }
 
 @end
+
+#endif // TARGET_OS_SIMULATOR
+

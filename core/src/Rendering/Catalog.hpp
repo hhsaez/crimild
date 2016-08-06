@@ -41,13 +41,12 @@ namespace crimild {
 
 	template< class RESOURCE_TYPE >
 	class Catalog : public SharedObject {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( Catalog )
-        
 	public:
 		
-		class Resource : public SharedObject {
-			CRIMILD_DISALLOW_COPY_AND_ASSIGN( Resource )
-
+		/**
+			RESOURCE_TYPE must be derived from SharedObject
+		*/
+		class Resource : public NonCopyable {
 		public:
 			Resource( void )
                 : _catalog( nullptr ),

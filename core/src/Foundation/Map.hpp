@@ -56,6 +56,11 @@ namespace crimild {
             _map[ key ] = value;
         }
 
+        void add( KEY_TYPE const &key, VALUE_TYPE const &value )
+        {
+            _map[ key ] = value;
+        }
+
         void remove( KEY_TYPE const &key )
         {
             _map.erase( key );

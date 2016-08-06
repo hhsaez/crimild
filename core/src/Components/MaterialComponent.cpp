@@ -27,6 +27,8 @@
 
 #include "MaterialComponent.hpp"
 
+CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::MaterialComponent )
+
 using namespace crimild;
 
 MaterialComponent::MaterialComponent( void )
@@ -51,5 +53,40 @@ void MaterialComponent::detachAllMaterials( void )
 void MaterialComponent::forEachMaterial( std::function< void( Material * ) > callback )
 {
     _materials.forEach( callback );
+}
+
+bool MaterialComponent::registerInStream( Stream &s )
+{
+	if ( !NodeComponent::registerInStream( s ) ) {
+		return false;
+	}
+
+	forEachMaterial( [&s]( Material *m ) {
+		m->registerInStream( s );
+	});
+
+	return true;
+}
+
+void MaterialComponent::save( Stream &s )
+{
+	NodeComponent::save( s );
+
+	std::vector< StreamObject * > ms;
+	forEachMaterial( [&ms]( Material *m ) {
+		ms.push_back( m );
+	});
+	s.writeChildObjects( ms );
+}
+
+void MaterialComponent::load( Stream &s )
+{
+	NodeComponent::load( s );
+
+	auto self = this;
+
+	s.readChildObjects< Material >( [self]( SharedPointer< Material > const &m ) {
+		self->attachMaterial( m );
+	});
 }
 

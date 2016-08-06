@@ -27,6 +27,8 @@
 
 #import "CrimildMetalRenderer.h"
 
+#if !TARGET_OS_SIMULATOR
+
 #import "CrimildMetalVertexBufferObjectCatalog.h"
 #import "CrimildMetalIndexBufferObjectCatalog.h"
 #import "CrimildMetalTextureCatalog.h"
@@ -370,4 +372,6 @@ void MetalRenderer::setCullFaceState( CullFaceState *state )
     [getRenderEncoder() setFrontFacingWinding: MTLWindingCounterClockwise];
     [getRenderEncoder() setCullMode: MTLCullModeBack];
 }
+
+#endif // TARGET_OS_IOS
 

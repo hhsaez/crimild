@@ -146,6 +146,11 @@ namespace crimild {
 			return static_cast< PRECISION >( std::cos( angle ) );
 		}
 
+        static PRECISION acos( double value )
+        {
+            return static_cast< PRECISION >( std::acos( value ) );
+        }
+        
 		static PRECISION sin( double angle )
 		{
 			return static_cast< PRECISION >( std::sin( angle ) );

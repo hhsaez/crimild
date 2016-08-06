@@ -37,3 +37,4 @@ tools/fontgen/fontgen
 *.xcodeproj
 scripting/test/Debug
 /bin
+*.crimild

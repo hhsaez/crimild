@@ -27,6 +27,8 @@
 
 #include "Material.hpp"
 
+CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::Material )
+
 using namespace crimild;
 
 Material::Material( void )
@@ -45,5 +47,75 @@ Material::Material( void )
 Material::~Material( void )
 {
 
+}
+
+bool Material::registerInStream( Stream &s )
+{
+	if ( !StreamObject::registerInStream( s ) ) {
+		return false;
+	}
+
+	if ( getColorMap() != nullptr ) {
+		getColorMap()->registerInStream( s );
+	}
+
+	if ( getNormalMap() != nullptr ) {
+		getNormalMap()->registerInStream( s );
+	}
+
+	if ( getSpecularMap() != nullptr ) {
+		getSpecularMap()->registerInStream( s );
+	}
+
+	if ( getEmissiveMap() != nullptr ) {
+		getEmissiveMap()->registerInStream( s );
+	}
+
+	return true;
+}
+
+void Material::save( Stream &s )
+{
+	StreamObject::save( s );
+
+	s.write( _ambient );
+	s.write( _diffuse );
+	s.write( _specular );
+	s.write( _emissive );
+	s.write( _shininess );
+
+	s.writeChildObject( getColorMap() );
+	s.writeChildObject( getNormalMap() );
+	s.writeChildObject( getSpecularMap() );
+	s.writeChildObject( getEmissiveMap() );
+}
+
+void Material::load( Stream &s )
+{
+	StreamObject::load( s );
+
+	auto self = this;
+
+	s.read( _ambient );
+	s.read( _diffuse );
+	s.read( _specular );
+	s.read( _emissive );
+	s.read( _shininess );
+
+	s.readChildObject< Texture >( [self]( SharedPointer< Texture > const &t ) {
+		self->setColorMap( t );
+	});
+
+	s.readChildObject< Texture >( [self]( SharedPointer< Texture > const &t ) {
+		self->setNormalMap( t );
+	});
+
+	s.readChildObject< Texture >( [self]( SharedPointer< Texture > const &t ) {
+		self->setSpecularMap( t );
+	});
+
+	s.readChildObject< Texture >( [self]( SharedPointer< Texture > const &t ) {
+		self->setEmissiveMap( t );
+	});
 }
 

@@ -43,9 +43,7 @@
 
 namespace crimild {
 
-	class OBJLoader {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( OBJLoader )
-
+	class OBJLoader : public NonCopyable {
 	private:
 		class FileProcessor {
 		private:

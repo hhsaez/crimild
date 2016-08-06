@@ -35,8 +35,7 @@ namespace crimild {
 	namespace physics {
 
 		class Collider : public NodeComponent {
-			CRIMILD_DISALLOW_COPY_AND_ASSIGN( Collider )
-			CRIMILD_NODE_COMPONENT_NAME( "collider" )
+			CRIMILD_IMPLEMENT_RTTI( crimild::physics::Collider )
 
 		protected:
 			Collider( void );

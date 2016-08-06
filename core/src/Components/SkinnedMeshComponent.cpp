@@ -31,6 +31,9 @@
 #include "SceneGraph/Node.hpp"
 #include "Visitors/Apply.hpp"
 #include "Debug/DebugRenderHelper.hpp"
+#include "Foundation/Log.hpp"
+
+CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::SkinnedMeshComponent )
 
 using namespace crimild;
 
@@ -40,7 +43,7 @@ SkinnedMeshComponent::SkinnedMeshComponent( void )
 }
 
 SkinnedMeshComponent::SkinnedMeshComponent( SharedPointer< SkinnedMesh > const &skinnedMesh )
-	: ContainerComponent< SharedPointer< SkinnedMesh >>( skinnedMesh )
+	: _skinnedMesh( skinnedMesh )
 {
 	setAnimationParams( 0.0f, -1.0f, true, 1.0f );
 }
@@ -52,23 +55,36 @@ SkinnedMeshComponent::~SkinnedMeshComponent( void )
 
 void SkinnedMeshComponent::start( void )
 {
-	ContainerComponent< SharedPointer< SkinnedMesh >>::start();
+	NodeComponent::start();
 
 	_time = 0;
 }
 
 void SkinnedMeshComponent::update( const Clock &c )
 {
-	ContainerComponent< SharedPointer< SkinnedMesh >>::update( c );
+	NodeComponent::update( c );
 
 	_time += c.getDeltaTime();
 
-	auto mesh = get();
+	auto mesh = getSkinnedMesh();
+	if ( mesh == nullptr ) {
+		Log::Error << "No skinned mesh attach to component" << Log::End;
+		return;
+	}
 	
 	auto skeleton = mesh->getSkeleton();
+	if ( skeleton == nullptr ) {
+		Log::Error << "No skinned mesh skeleton attach to component" << Log::End;
+		return;
+	}
 	
 	auto animationState = mesh->getAnimationState();
-	animationState->getJointPoses().resize( skeleton->getJoints().getJointCount() );
+	if ( animationState == nullptr ) {
+		Log::Error << "No skinned mesh animation state attach to component" << Log::End;
+		return;
+	}
+
+	animationState->getJointPoses().resize( skeleton->getJoints()->getJointCount() );
 
 	auto currentClip = skeleton->getClips()[ _currentAnimation ];
 
@@ -114,7 +130,7 @@ void SkinnedMeshComponent::update( const Clock &c )
 			modelTransform = node->getLocal();
 		}
 		
-		auto joint = skeleton->getJoints().find( node->getName() );
+		auto joint = skeleton->getJoints()->find( node->getName() );
 		if ( joint != nullptr ) {
 			Transformation t;
 			t.computeFrom( node->getParent()->getWorld(), modelTransform );
@@ -155,5 +171,35 @@ void SkinnedMeshComponent::renderDebugInfo( Renderer *renderer, Camera *camera )
 	}));
 
 	DebugRenderHelper::renderLines( renderer, camera, &lines[ 0 ], lines.size(), RGBAColorf( 1.0f, 0.0f, 0.0f, 1.0f ) );
+}
+
+bool SkinnedMeshComponent::registerInStream( Stream &s )
+{
+	if ( !NodeComponent::registerInStream( s ) ) {
+		return false;
+	}
+
+	if ( _skinnedMesh != nullptr ) {
+		_skinnedMesh->registerInStream( s );
+	}
+
+	return true;
+}
+
+void SkinnedMeshComponent::save( Stream &s )
+{
+	NodeComponent::save( s );
+
+	s.writeChildObject( _skinnedMesh );
+}
+
+void SkinnedMeshComponent::load( Stream &s )
+{
+	NodeComponent::load( s );
+
+	auto self = this;
+	s.readChildObject< SkinnedMesh >( [self]( SharedPointer< SkinnedMesh > const &mesh ) {
+		self->_skinnedMesh = mesh;
+	});
 }
 

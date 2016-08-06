@@ -135,6 +135,7 @@
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/ShaderUniform.hpp"
 #include "Rendering/ShaderUniformImpl.hpp"
+#include "Rendering/SkinnedMesh.hpp"
 #include "Rendering/Texture.hpp"
 #include "Rendering/VertexBufferObject.hpp"
 #include "Rendering/VertexFormat.hpp"

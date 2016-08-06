@@ -38,6 +38,12 @@ const VertexFormat VertexFormat::VF_P3_N3_TG3( 3, 0, 3, 3, 0 );
 const VertexFormat VertexFormat::VF_P3_N3_UV2( 3, 0, 3, 0, 2 );
 const VertexFormat VertexFormat::VF_P3_N3_TG3_UV2( 3, 0, 3, 3, 2 );
 
+VertexFormat::VertexFormat( void )
+	: VertexFormat( 0, 0, 0, 0, 0, 0, 0 )
+{
+
+}
+
 VertexFormat::VertexFormat( unsigned char positions, unsigned char colors, unsigned char normals, unsigned char tangents, unsigned char textureCoords )
 	: VertexFormat( positions, colors, normals, tangents, textureCoords, 0, 0 )
 {
@@ -135,22 +141,21 @@ VertexFormat &VertexFormat::operator=( const VertexFormat &vf )
 bool VertexFormat::operator==( const VertexFormat &vf ) const
 {
 	return ( _positions == vf._positions ) &&
-		   // ( _positionsOffset == vf._positionsOffset ) &&
+		   ( _positionsOffset == vf._positionsOffset ) &&
 		   ( _colors == vf._colors ) && 
-		   // ( _colorsOffset == vf._colorsOffset ) &&
+		   ( _colorsOffset == vf._colorsOffset ) &&
 		   ( _normals == vf._normals ) && 
-		   // ( _normalsOffset == vf._normalsOffset ) &&
+		   ( _normalsOffset == vf._normalsOffset ) &&
 		   ( _tangents == vf._tangents ) && 
-		   // ( _tangentsOffset == vf._tangentsOffset ) &&
+		   ( _tangentsOffset == vf._tangentsOffset ) &&
 		   ( _textureCoords == vf._textureCoords ) &&
-		   // ( _textureCoordsOffset == vf._textureCoordsOffset ) &&
+		   ( _textureCoordsOffset == vf._textureCoordsOffset ) &&
 		   ( _boneIds == vf._boneIds ) &&
-		   // ( _boneIdsOffset == vf._boneIdsOffset ) && 
-		   ( _boneWeights == vf._boneWeightsOffset ) &&
-		   // ( _boneWeightsOffset == vf._boneWeightsOffset ) &&
+		   ( _boneIdsOffset == vf._boneIdsOffset ) && 
+		   ( _boneWeights == vf._boneWeights) &&
+		   ( _boneWeightsOffset == vf._boneWeightsOffset ) &&
 		   ( _vertexSize == vf._vertexSize ) &&
 		   ( _vertexSizeInBytes == vf._vertexSizeInBytes );
-
 }
 
 bool VertexFormat::operator!=( const VertexFormat &vf ) const

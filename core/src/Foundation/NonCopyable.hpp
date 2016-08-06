@@ -25,16 +25,39 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "MockComponent.hpp"
+#ifndef CRIMILD_FOUNDATION_NON_COPYABLE_
+#define CRIMILD_FOUNDATION_NON_COPYABLE_
 
-using namespace crimild;
+namespace crimild {
 
-MockComponent::MockComponent( void )
-{
+	/**
+		\brief A class that cannot be copied nor assigned
+	*/
+    class NonCopyable {
+    private:
+    	/*
+    		\brief Disabled copy constructor
+    	*/
+        NonCopyable( NonCopyable const & );
+
+        /*
+        	\brief Disabled asignment operator
+        */
+        NonCopyable &operator=( NonCopyable const & );
+
+    protected:
+    	/*
+    		\brief Default constructor
+    	*/
+    	NonCopyable( void ) { }
+
+    public:
+    	/*
+    		\brief Destructor
+    	*/
+        virtual ~NonCopyable( void ) { }
+    };
 }
 
-MockComponent::~MockComponent( void )
-{
-
-}
+#endif
 

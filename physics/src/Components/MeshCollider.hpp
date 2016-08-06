@@ -35,8 +35,6 @@ namespace crimild {
 	namespace physics {
 
 		class MeshCollider : public Collider {
-			CRIMILD_DISALLOW_COPY_AND_ASSIGN( MeshCollider )
-
 		public:
 			MeshCollider( void );
 			virtual ~MeshCollider( void );

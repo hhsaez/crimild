@@ -27,7 +27,14 @@
 
 #include "IndexBufferObject.hpp"
 
+CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::IndexBufferObject )
+
 using namespace crimild;
+
+IndexBufferObject::IndexBufferObject( void )
+{
+	
+}
 
 IndexBufferObject::IndexBufferObject( unsigned int indexCount )
 	: IndexBufferObject( indexCount, nullptr )
@@ -51,5 +58,20 @@ void IndexBufferObject::generateIncrementalIndices( void )
     for ( unsigned int i = 0; i < getIndexCount(); i++ ) {
         data()[ i ] = static_cast< IndexPrecision >( i );
     }
+}
+
+bool IndexBufferObject::registerInStream( Stream &s )
+{
+	return BufferObject< IndexPrecision >::registerInStream( s );
+}
+
+void IndexBufferObject::save( Stream &s )
+{
+	BufferObject< IndexPrecision >::save( s );
+}
+
+void IndexBufferObject::load( Stream &s )
+{
+	BufferObject< IndexPrecision >::load( s );
 }
 

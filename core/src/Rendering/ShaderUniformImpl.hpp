@@ -37,8 +37,6 @@ namespace crimild {
     
 	template< typename T >
 	class ShaderUniformImpl : public ShaderUniform {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( ShaderUniformImpl< T > );
-		
 	public:
 		ShaderUniformImpl( std::string name, const T &value ) 
 			: ShaderUniform( name ) 

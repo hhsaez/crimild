@@ -29,7 +29,7 @@
 #define CRIMILD_MEMORY_SMALL_OBJECT_
 
 #include "Macros.hpp"
-
+#include "NonCopyable.hpp"
 #include "SmallObjectAllocator.hpp"
 
 #include <thread>
@@ -38,9 +38,7 @@
 namespace crimild {
 
 	template< class Allocator = DefaultSmallObjectAllocator >
-	class SmallObject {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( SmallObject )
-
+	class SmallObject : public NonCopyable {
 	private:
 		using Mutex = std::mutex;
 		using Lock = std::unique_lock< Mutex >;

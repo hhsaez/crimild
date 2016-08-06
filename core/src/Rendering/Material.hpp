@@ -40,8 +40,8 @@ namespace crimild {
 
 	class Light;
     
-	class Material : public SharedObject {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( Material );
+	class Material : public StreamObject {
+		CRIMILD_IMPLEMENT_RTTI( crimild::Material )
 
 	public:
 		Material( void );
@@ -117,6 +117,18 @@ namespace crimild {
         
         bool _castShadows = true;
         bool _receiveShadows = true;
+
+        /**
+        	\name Streaming
+        */
+        //@{
+
+    public:
+    	virtual bool registerInStream( Stream &s ) override;
+    	virtual void save( Stream &s ) override;
+    	virtual void load( Stream &s ) override;
+
+    	//@}
 	};
     
 }

@@ -38,8 +38,7 @@ namespace crimild {
 	namespace physics {
 
 		class CharacterController : public NodeComponent {
-			CRIMILD_DISALLOW_COPY_AND_ASSIGN( CharacterController )
-			CRIMILD_NODE_COMPONENT_NAME( "CharacterController" )
+			CRIMILD_IMPLEMENT_RTTI( crimild::physics::CharacterController )
 
 		public:
 			CharacterController( void );

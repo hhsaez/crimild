@@ -38,8 +38,7 @@
 namespace crimild {
 
 	class MaterialComponent : public NodeComponent {
-		CRIMILD_DISALLOW_COPY_AND_ASSIGN( MaterialComponent )
-		CRIMILD_NODE_COMPONENT_NAME( "materials" )
+		CRIMILD_IMPLEMENT_RTTI( crimild::MaterialComponent )
 
 	public:
 		MaterialComponent( void );
@@ -58,6 +57,18 @@ namespace crimild {
 
 	private:
 		SharedObjectArray< Material > _materials;
+
+		/**
+			\name Streaming support
+		*/
+		//@{
+
+	public:
+		bool registerInStream( Stream &s ) override;
+		void save( Stream &s ) override;
+		void load( Stream &s ) override;
+
+		//@}
 	};
 
 }
