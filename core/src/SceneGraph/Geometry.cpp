@@ -121,20 +121,21 @@ void Geometry::save( Stream &s )
 {
 	Node::save( s );
 
-	auto ps = std::vector< StreamObject * >();
+	std::vector< SharedPointer< Primitive >> ps;
 	forEachPrimitive( [&ps]( Primitive *p ) {
-		ps.push_back( p );
+		ps.push_back( crimild::retain( p ) );
 	});
-	s.writeChildObjects( ps );
+	s.write( ps );
 }
 
 void Geometry::load( Stream &s )
 {
 	Node::load( s );
 
-	auto self = this;
-	s.readChildObjects< Primitive >( [self]( SharedPointer< Primitive > const &p ) {
-		self->attachPrimitive( p );
-	});
+	std::vector< SharedPointer< Primitive >> ps;
+	s.read( ps );
+	for ( auto &p : ps ) {
+		attachPrimitive( p );
+	}
 }
 

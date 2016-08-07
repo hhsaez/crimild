@@ -140,25 +140,24 @@ void SkinnedMeshJointCatalog::save( Stream &s )
 {
 	StreamObject::save( s );
 
-	std::vector< StreamObject * > os;
+	std::vector< SharedPointer< SkinnedMeshJoint >> os;
 	_joints.foreach( [&os]( std::string const &, SharedPointer< SkinnedMeshJoint > &j, unsigned int ) {
 		if ( j != nullptr ) {
-			os.push_back( crimild::get_ptr( j ) );
+			os.push_back( j );
 		}
 	});
-	s.writeChildObjects( os );
+	s.write( os );
 }
 
 void SkinnedMeshJointCatalog::load( Stream &s )
 {
 	StreamObject::load( s );
 
-	auto self = this;
-	s.readChildObjects< SkinnedMeshJoint >( [self]( SharedPointer< SkinnedMeshJoint > const &j ) {
-		if ( j != nullptr ) {
-			self->_joints[ j->getName() ] = j;
-		}
-	});
+	std::vector< SharedPointer< SkinnedMeshJoint >> js;
+	s.read( js );
+	for ( auto &j : js ) {
+		_joints[ j->getName() ] = j;
+	}
 }
 
 SkinnedMeshAnimationChannel::SkinnedMeshAnimationChannel( void )
@@ -352,11 +351,11 @@ void SkinnedMeshAnimationClip::save( Stream &s )
 	s.write( _duration );
 	s.write( _frameRate );
 
-	std::vector< StreamObject * > cs;
+	std::vector< SharedPointer< StreamObject >> cs;
 	_channels.foreach( [&cs]( std::string const &, SharedPointer< SkinnedMeshAnimationChannel > const &c, unsigned int ) {
-		cs.push_back( crimild::get_ptr( c ) );
+		cs.push_back( c );
 	});
-	s.writeChildObjects( cs );
+	s.write( cs );
 }
 
 void SkinnedMeshAnimationClip::load( Stream &s )
@@ -366,11 +365,11 @@ void SkinnedMeshAnimationClip::load( Stream &s )
 	s.read( _duration );
 	s.read( _frameRate );
 
-	auto self = this;
-
-	s.readChildObjects< SkinnedMeshAnimationChannel >( [self]( SharedPointer< SkinnedMeshAnimationChannel > const &c ) {
-		self->getChannels().add( c->getName(), c );
-	});
+	std::vector< SharedPointer< SkinnedMeshAnimationChannel >> cs;
+	s.read( cs );
+	for ( auto &c : cs ) {
+		getChannels().add( c->getName(), c );
+	}
 }
 
 SkinnedMeshSkeleton::SkinnedMeshSkeleton( void )
@@ -404,14 +403,13 @@ void SkinnedMeshSkeleton::save( Stream &s )
 {
 	StreamObject::save( s );
 
-	std::vector< StreamObject * > cs;
+	std::vector< SharedPointer< SkinnedMeshAnimationClip >> cs;
 	_clips.foreach( [&cs]( SharedPointer< SkinnedMeshAnimationClip > const &c, unsigned int ) {
-		cs.push_back( crimild::get_ptr( c ) );
+		cs.push_back( c );
 	});
-	s.writeChildObjects( cs );
+	s.write( cs );
 
-	s.writeChildObject( _joints );
-
+	s.write( _joints );
 	s.write( _globalInverseTransform );
 }
 
@@ -419,16 +417,13 @@ void SkinnedMeshSkeleton::load( Stream &s )
 {
 	StreamObject::load( s );
 
-	auto self = this;
+	std::vector< SharedPointer< SkinnedMeshAnimationClip >> cs;
+	s.read( cs );
+	for ( auto &c : cs ) {
+		_clips.add( c );
+	}
 
-	s.readChildObjects< SkinnedMeshAnimationClip >( [self]( SharedPointer< SkinnedMeshAnimationClip > const &c ) {
-		self->_clips.add( c );
-	});
-
-	s.readChildObject< SkinnedMeshJointCatalog >( [self]( SharedPointer< SkinnedMeshJointCatalog > const &j ) {
-		self->_joints = j;
-	});
-
+	s.read( _joints );
 	s.read( _globalInverseTransform );
 }
 
@@ -455,24 +450,22 @@ void SkinnedMeshAnimationState::save( Stream &s )
 {
 	StreamObject::save( s );
 
-	size_t poseCount = _jointPoses.size();
-	s.write( poseCount );
-	for ( int i = 0; i < poseCount; i++ ) {
-		s.write( _jointPoses[ i ] );
-	}
+	s.write( _jointPoses.size() );
+	_jointPoses.foreach( [&s]( Matrix4f &m, unsigned int ) {
+		s.write( m );
+	});
 }
 
 void SkinnedMeshAnimationState::load( Stream &s )
 {
 	StreamObject::load( s );
 
-	size_t poseCount;
-	s.read( poseCount );
-	_jointPoses.resize( poseCount );
-	for ( int i = 0; i < poseCount; i++ ) {
+	size_t posesCount;
+	s.read( posesCount );
+	for ( int i = 0; i < posesCount; i++ ) {
 		Matrix4f m;
 		s.read( m );
-		_jointPoses[ i ] = m;
+		_jointPoses.add( m );
 	}
 }
 
@@ -508,23 +501,16 @@ void SkinnedMesh::save( Stream &s )
 {
 	StreamObject::save( s );
 
-	s.writeChildObject( _skeleton );
-	s.writeChildObject( _animationState );
+	s.write( _skeleton );
+	s.write( _animationState );
 }
 
 void SkinnedMesh::load( Stream &s )
 {
 	StreamObject::load( s );
 
-	auto self = this;
-
-	s.readChildObject< SkinnedMeshSkeleton >( [self]( SharedPointer< SkinnedMeshSkeleton > const &s ) { 
-		self->_skeleton = s; 
-	});
-	
-	s.readChildObject< SkinnedMeshAnimationState >( [self]( SharedPointer< SkinnedMeshAnimationState > const &s ) { 
-		self->_animationState = s; 
-	});
+	s.read( _skeleton );
+	s.read( _animationState );
 }
 
 void SkinnedMesh::debugDump( void )

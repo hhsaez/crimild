@@ -25,62 +25,30 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_RENDERING_IMAGE_
-#define CRIMILD_RENDERING_IMAGE_
+#ifndef CRIMILD_CORE_FOUNDATION_SCENE_BUILDER_
+#define CRIMILD_CORE_FOUNDATION_SCENE_BUILDER_
 
-#include "Streaming/Stream.hpp"
+#include "Foundation/Macros.hpp"
+#include "Foundation/Memory.hpp"
 
-#include <vector>
+#include <cassert>
+#include <string>
 
 namespace crimild {
     
-	class Image : public StreamObject {
-		CRIMILD_IMPLEMENT_RTTI( crimild::Image )
+    class Node;
 
-    public:
-        enum class PixelFormat {
-            RGB,
-            RGBA,
-            BGR,
-            BGRA
-        };
-        
+    class SceneBuilder : public SharedObject {
+	protected:
+		SceneBuilder( void ) { }
+
 	public:
-		Image( void );
-		Image( int width, int height, int bpp, const unsigned char *data, PixelFormat format = PixelFormat::RGBA );
-		virtual ~Image( void );
+		virtual ~SceneBuilder( void ) { }
 
-		int getWidth( void ) const { return _width; }
-		int getHeight( void ) const { return _height; }
-		int getBpp( void ) const { return _bpp; }
-        PixelFormat getPixelFormat( void ) const { return _pixelFormat; }
-		unsigned char *getData( void ) { return &_data[ 0 ]; }
-		const unsigned char *getData( void ) const { return &_data[ 0 ]; }
+		virtual void reset( void ) = 0;
 
-		void setData( int width, int height, int bpp, const unsigned char *data, PixelFormat format = PixelFormat::RGBA );
+		virtual SharedPointer< Node > fromFile( const std::string &filename ) = 0;
 
-		bool isLoaded( void ) const { return _data.size() > 0; }
-		virtual void load( void );
-		virtual void unload( void );
-
-	private:
-		int _width;
-		int _height;
-		int _bpp;
-        PixelFormat _pixelFormat;
-        std::vector< unsigned char > _data;
-
-        /**
-        	\name Streaming
-        */
-        //@{
-
-    public:
-    	virtual bool registerInStream( Stream &s ) override;
-    	virtual void save( Stream &s ) override;
-    	virtual void load( Stream &s ) override;
-
-    	//@}
 	};
 
 }

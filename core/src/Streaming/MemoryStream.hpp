@@ -25,63 +25,33 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_RENDERING_IMAGE_
-#define CRIMILD_RENDERING_IMAGE_
+#ifndef CRIMILD_CORE_STREAMING_STREAM_MEMORY_
+#define CRIMILD_CORE_STREAMING_STREAM_MEMORY_
 
-#include "Streaming/Stream.hpp"
-
-#include <vector>
+#include "Stream.hpp"
 
 namespace crimild {
     
-	class Image : public StreamObject {
-		CRIMILD_IMPLEMENT_RTTI( crimild::Image )
+    /**
+        \brief Implements a stream that uses a memory buffer
+    */
+    class MemoryStream : public Stream {
+    public:
+    	MemoryStream( void );
+    	virtual ~MemoryStream( void );
+
+    	virtual bool load( void ) override;
+
+    	virtual bool flush( void ) override;
 
     public:
-        enum class PixelFormat {
-            RGB,
-            RGBA,
-            BGR,
-            BGRA
-        };
-        
-	public:
-		Image( void );
-		Image( int width, int height, int bpp, const unsigned char *data, PixelFormat format = PixelFormat::RGBA );
-		virtual ~Image( void );
+        virtual void writeRawBytes( const void *bytes, size_t size ) override;
+        virtual void readRawBytes( void *bytes, size_t size ) override;
 
-		int getWidth( void ) const { return _width; }
-		int getHeight( void ) const { return _height; }
-		int getBpp( void ) const { return _bpp; }
-        PixelFormat getPixelFormat( void ) const { return _pixelFormat; }
-		unsigned char *getData( void ) { return &_data[ 0 ]; }
-		const unsigned char *getData( void ) const { return &_data[ 0 ]; }
-
-		void setData( int width, int height, int bpp, const unsigned char *data, PixelFormat format = PixelFormat::RGBA );
-
-		bool isLoaded( void ) const { return _data.size() > 0; }
-		virtual void load( void );
-		virtual void unload( void );
-
-	private:
-		int _width;
-		int _height;
-		int _bpp;
-        PixelFormat _pixelFormat;
-        std::vector< unsigned char > _data;
-
-        /**
-        	\name Streaming
-        */
-        //@{
-
-    public:
-    	virtual bool registerInStream( Stream &s ) override;
-    	virtual void save( Stream &s ) override;
-    	virtual void load( Stream &s ) override;
-
-    	//@}
-	};
+    private:
+        std::vector< unsigned char > _buffer;
+        size_t _offset = 0;
+    };
 
 }
 

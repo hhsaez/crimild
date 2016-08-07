@@ -28,6 +28,23 @@
 #ifndef CRIMILD_FOUNDATION_RTTI_
 #define CRIMILD_FOUNDATION_RTTI_
 
+namespace crimild {
+
+	class RTTI {
+	protected:
+		RTTI( void ) { }
+
+	public:
+		virtual ~RTTI( void ) { }
+
+        /**
+            \brief Get the class name
+        */
+		virtual const char *getClassName( void ) const = 0;
+	};
+
+}
+
 /**
     \brief Helper macro to implement RTTI in classes
 

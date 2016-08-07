@@ -27,7 +27,7 @@
 
 #include "SceneGraph/Group.hpp"
 #include "Exceptions/HasParentException.hpp"
-#include "Foundation/Stream.hpp"
+#include "Streaming/FileStream.hpp"
 
 #include "gtest/gtest.h"
 

@@ -26,7 +26,8 @@
  */
 
 #include "Rendering/IndexBufferObject.hpp"
-
+#include "Streaming/FileStream.hpp"
+ 
 #include "gtest/gtest.h"
 
 using namespace crimild;

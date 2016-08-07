@@ -28,7 +28,7 @@
 #ifndef CRIMILD_PRIMITIVES_PRIMITIVE_
 #define CRIMILD_PRIMITIVES_PRIMITIVE_
 
-#include "Foundation/Stream.hpp"
+#include "Streaming/Stream.hpp"
 #include "Rendering/VertexBufferObject.hpp"
 #include "Rendering/IndexBufferObject.hpp"
 

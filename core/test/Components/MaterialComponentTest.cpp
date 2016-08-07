@@ -26,12 +26,13 @@
  */
 
 #include "Components/MaterialComponent.hpp"
+#include "Streaming/FileStream.hpp"
 
 #include "gtest/gtest.h"
 
 using namespace crimild;
 
-TEST( MaterialComponentTest, attachMaterial )
+TEST( MaterialComponent, attachMaterial )
 {
 	auto materials = crimild::alloc< MaterialComponent >();
 
@@ -48,5 +49,35 @@ TEST( MaterialComponentTest, attachMaterial )
         EXPECT_EQ( m, crimild::get_ptr( material ) );
 	});
 	EXPECT_EQ( 1, i );
+}
+
+TEST( MaterialComponent, streaming )
+{
+	{
+		auto material = crimild::alloc< Material >();
+		material->setDiffuse( RGBAColorf( 0.7f, 0.7f, 0.7f, 1.0f ) );
+		material->setColorMap( crimild::alloc< Texture >() );
+
+		auto materials = crimild::alloc< MaterialComponent >();
+		materials->attachMaterial( material );
+
+		FileStream os( "materials.crimild", FileStream::OpenMode::WRITE );
+		os.addObject( materials );
+		EXPECT_TRUE( os.flush() );
+	}
+
+	{
+		FileStream is( "materials.crimild", FileStream::OpenMode::READ );
+		EXPECT_TRUE( is.load() );
+		EXPECT_EQ( 1, is.getObjectCount() );
+		
+		auto materials = is.getObjectAt< MaterialComponent >( 0 );
+		EXPECT_TRUE( materials != nullptr );
+
+		EXPECT_TRUE( materials->hasMaterials() );
+		
+		EXPECT_NE( nullptr, materials->first() );
+		EXPECT_EQ( RGBAColorf( 0.7f, 0.7f, 0.7f, 1.0f ), materials->first()->getDiffuse() );
+	}
 }
 

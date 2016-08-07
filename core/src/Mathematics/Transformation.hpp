@@ -81,12 +81,6 @@ namespace crimild {
 			setScale( s );
 		}
         
-        TransformationImpl( const Matrix4Impl &m )
-        {
-            makeIdentity();
-            fromMatrix( m );
-        }
-
 		TransformationImpl( const TransformationImpl &t0, const TransformationImpl &t1 )
 		{
 			computeFrom( t0, t1 );
@@ -294,6 +288,11 @@ namespace crimild {
 			_rotate.lookAt( direction, up );
 		}
         
+        /**
+        	\brief Constructs a Transformation from a 4x4 Matrix
+
+        	\remarks Assumes transformation matrix is row-major
+        */
         TransformationImpl &fromMatrix( const Matrix4Impl &m )
         {
             Matrix3f viewRotation;

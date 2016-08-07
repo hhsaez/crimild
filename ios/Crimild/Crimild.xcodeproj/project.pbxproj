@@ -7,6 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5F3394131D57D046004F2AAC /* FileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F33940C1D57D046004F2AAC /* FileStream.cpp */; };
+		5F3394141D57D046004F2AAC /* FileStream.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F33940D1D57D046004F2AAC /* FileStream.hpp */; };
+		5F3394151D57D046004F2AAC /* MemoryStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F33940E1D57D046004F2AAC /* MemoryStream.cpp */; };
+		5F3394161D57D046004F2AAC /* MemoryStream.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F33940F1D57D046004F2AAC /* MemoryStream.hpp */; };
+		5F3394171D57D046004F2AAC /* SceneBuilder.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F3394101D57D046004F2AAC /* SceneBuilder.hpp */; };
+		5F3394181D57D046004F2AAC /* Stream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F3394111D57D046004F2AAC /* Stream.cpp */; };
+		5F3394191D57D046004F2AAC /* Stream.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F3394121D57D046004F2AAC /* Stream.hpp */; };
 		5F35A34C1D4E6662001F5C7C /* AudioClip.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F35A30B1D4E6662001F5C7C /* AudioClip.cpp */; };
 		5F35A34D1D4E6662001F5C7C /* AudioClip.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F35A30C1D4E6662001F5C7C /* AudioClip.hpp */; };
 		5F35A34E1D4E6662001F5C7C /* AudioManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F35A30D1D4E6662001F5C7C /* AudioManager.cpp */; };
@@ -88,9 +95,6 @@
 		5F35AA311D4E6688001F5C7C /* SmallObject.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F35A5961D4E6686001F5C7C /* SmallObject.hpp */; };
 		5F35AA321D4E6688001F5C7C /* SmallObjectAllocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F35A5971D4E6686001F5C7C /* SmallObjectAllocator.cpp */; };
 		5F35AA331D4E6688001F5C7C /* SmallObjectAllocator.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F35A5981D4E6686001F5C7C /* SmallObjectAllocator.hpp */; };
-		5F35AA341D4E6688001F5C7C /* Stream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F35A5991D4E6686001F5C7C /* Stream.cpp */; };
-		5F35AA351D4E6688001F5C7C /* Stream.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F35A59A1D4E6686001F5C7C /* Stream.hpp */; };
-		5F35AA361D4E6688001F5C7C /* Streaming.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F35A59B1D4E6686001F5C7C /* Streaming.hpp */; };
 		5F35AA371D4E6688001F5C7C /* StringUtils.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F35A59C1D4E6686001F5C7C /* StringUtils.hpp */; };
 		5F35AA381D4E6688001F5C7C /* Version.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F35A59D1D4E6686001F5C7C /* Version.hpp */; };
 		5F35AA391D4E6688001F5C7C /* OBJLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F35A59F1D4E6686001F5C7C /* OBJLoader.cpp */; };
@@ -476,6 +480,13 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		5F33940C1D57D046004F2AAC /* FileStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FileStream.cpp; sourceTree = "<group>"; };
+		5F33940D1D57D046004F2AAC /* FileStream.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = FileStream.hpp; sourceTree = "<group>"; };
+		5F33940E1D57D046004F2AAC /* MemoryStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MemoryStream.cpp; sourceTree = "<group>"; };
+		5F33940F1D57D046004F2AAC /* MemoryStream.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MemoryStream.hpp; sourceTree = "<group>"; };
+		5F3394101D57D046004F2AAC /* SceneBuilder.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SceneBuilder.hpp; sourceTree = "<group>"; };
+		5F3394111D57D046004F2AAC /* Stream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Stream.cpp; sourceTree = "<group>"; };
+		5F3394121D57D046004F2AAC /* Stream.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Stream.hpp; sourceTree = "<group>"; };
 		5F35A30B1D4E6662001F5C7C /* AudioClip.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AudioClip.cpp; sourceTree = "<group>"; };
 		5F35A30C1D4E6662001F5C7C /* AudioClip.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AudioClip.hpp; sourceTree = "<group>"; };
 		5F35A30D1D4E6662001F5C7C /* AudioManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AudioManager.cpp; sourceTree = "<group>"; };
@@ -557,9 +568,6 @@
 		5F35A5961D4E6686001F5C7C /* SmallObject.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SmallObject.hpp; sourceTree = "<group>"; };
 		5F35A5971D4E6686001F5C7C /* SmallObjectAllocator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SmallObjectAllocator.cpp; sourceTree = "<group>"; };
 		5F35A5981D4E6686001F5C7C /* SmallObjectAllocator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SmallObjectAllocator.hpp; sourceTree = "<group>"; };
-		5F35A5991D4E6686001F5C7C /* Stream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Stream.cpp; sourceTree = "<group>"; };
-		5F35A59A1D4E6686001F5C7C /* Stream.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Stream.hpp; sourceTree = "<group>"; };
-		5F35A59B1D4E6686001F5C7C /* Streaming.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Streaming.hpp; sourceTree = "<group>"; };
 		5F35A59C1D4E6686001F5C7C /* StringUtils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = StringUtils.hpp; sourceTree = "<group>"; };
 		5F35A59D1D4E6686001F5C7C /* Version.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Version.hpp; sourceTree = "<group>"; };
 		5F35A59F1D4E6686001F5C7C /* OBJLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OBJLoader.cpp; sourceTree = "<group>"; };
@@ -960,6 +968,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5F33940B1D57D046004F2AAC /* Streaming */ = {
+			isa = PBXGroup;
+			children = (
+				5F33940C1D57D046004F2AAC /* FileStream.cpp */,
+				5F33940D1D57D046004F2AAC /* FileStream.hpp */,
+				5F33940E1D57D046004F2AAC /* MemoryStream.cpp */,
+				5F33940F1D57D046004F2AAC /* MemoryStream.hpp */,
+				5F3394101D57D046004F2AAC /* SceneBuilder.hpp */,
+				5F3394111D57D046004F2AAC /* Stream.cpp */,
+				5F3394121D57D046004F2AAC /* Stream.hpp */,
+			);
+			path = Streaming;
+			sourceTree = "<group>";
+		};
 		5F35A3011D4E6661001F5C7C /* al */ = {
 			isa = PBXGroup;
 			children = (
@@ -1015,6 +1037,7 @@
 		5F35A36F1D4E6685001F5C7C /* src */ = {
 			isa = PBXGroup;
 			children = (
+				5F33940B1D57D046004F2AAC /* Streaming */,
 				5F35A3701D4E6685001F5C7C /* Boundings */,
 				5F35A3FF1D4E6685001F5C7C /* Components */,
 				5F35A4121D4E6685001F5C7C /* Concurrency */,
@@ -1141,9 +1164,6 @@
 				5F35A5961D4E6686001F5C7C /* SmallObject.hpp */,
 				5F35A5971D4E6686001F5C7C /* SmallObjectAllocator.cpp */,
 				5F35A5981D4E6686001F5C7C /* SmallObjectAllocator.hpp */,
-				5F35A5991D4E6686001F5C7C /* Stream.cpp */,
-				5F35A59A1D4E6686001F5C7C /* Stream.hpp */,
-				5F35A59B1D4E6686001F5C7C /* Streaming.hpp */,
 				5F35A59C1D4E6686001F5C7C /* StringUtils.hpp */,
 				5F35A59D1D4E6686001F5C7C /* Version.hpp */,
 			);
@@ -1823,7 +1843,6 @@
 				5F35AA2D1D4E6688001F5C7C /* SharedObjectArray.hpp in Headers */,
 				5F35D5961D4E66F6001F5C7C /* SignedDistanceFieldShaderProgram.hpp in Headers */,
 				5F35E3181D4E6713001F5C7C /* lctype.h in Headers */,
-				5F35AA361D4E6688001F5C7C /* Streaming.hpp in Headers */,
 				5F35D6251D4E66F6001F5C7C /* LuaSettings.hpp in Headers */,
 				5F35AA121D4E6688001F5C7C /* DebugRenderHelper.hpp in Headers */,
 				5F35D5861D4E66F6001F5C7C /* DepthShaderProgram.hpp in Headers */,
@@ -1955,6 +1974,7 @@
 				5F35A8AD1D4E6687001F5C7C /* AABBBoundingVolume.hpp in Headers */,
 				5F35AA1D1D4E6688001F5C7C /* ConcurrentList.hpp in Headers */,
 				5F35AA201D4E6688001F5C7C /* FixedAllocator.hpp in Headers */,
+				5F3394171D57D046004F2AAC /* SceneBuilder.hpp in Headers */,
 				5F35AADB1D4E6689001F5C7C /* UpdateRenderState.hpp in Headers */,
 				5F35A3531D4E6662001F5C7C /* WavAudioClip.hpp in Headers */,
 				5F35E3461D4E6714001F5C7C /* lvm.h in Headers */,
@@ -1976,6 +1996,7 @@
 				5F35AA171D4E6688001F5C7C /* HasParentException.hpp in Headers */,
 				5F35AA681D4E6689001F5C7C /* AlphaState.hpp in Headers */,
 				5F35A9231D4E6687001F5C7C /* OrbitComponent.hpp in Headers */,
+				5F3394161D57D046004F2AAC /* MemoryStream.hpp in Headers */,
 				5F35AA881D4E6689001F5C7C /* RenderQueue.hpp in Headers */,
 				5F35AA151D4E6688001F5C7C /* Exception.hpp in Headers */,
 				5F35AA161D4E6688001F5C7C /* FileNotFoundException.hpp in Headers */,
@@ -1998,11 +2019,11 @@
 				5F35AAAF1D4E6689001F5C7C /* AssetManager.hpp in Headers */,
 				5F35E3441D4E6714001F5C7C /* lundump.h in Headers */,
 				5F35E33F1D4E6714001F5C7C /* lua.hpp in Headers */,
+				5F3394141D57D046004F2AAC /* FileStream.hpp in Headers */,
 				5F35A92D1D4E6687001F5C7C /* Async.hpp in Headers */,
 				5F35AA301D4E6688001F5C7C /* Singleton.hpp in Headers */,
 				5F35D56C1D4E66F5001F5C7C /* SSAOImageEffect.hpp in Headers */,
 				5F35ABD31D4E66BB001F5C7C /* CrimildMetalTextureCatalog.h in Headers */,
-				5F35AA351D4E6688001F5C7C /* Stream.hpp in Headers */,
 				5F35AAA11D4E6689001F5C7C /* Geometry.hpp in Headers */,
 				5F35D5CA1D4E66F6001F5C7C /* ScriptedComponent.hpp in Headers */,
 				5F35AA221D4E6688001F5C7C /* Log.hpp in Headers */,
@@ -2021,6 +2042,7 @@
 				5F35AA721D4E6689001F5C7C /* DepthState.hpp in Headers */,
 				5F35D5A01D4E66F6001F5C7C /* UnlitTextureShaderProgram.hpp in Headers */,
 				5F35AA491D4E6689001F5C7C /* Root.hpp in Headers */,
+				5F3394191D57D046004F2AAC /* Stream.hpp in Headers */,
 				5F35AA9B1D4E6689001F5C7C /* VertexBufferObject.hpp in Headers */,
 				5F35AA191D4E6688001F5C7C /* RuntimeException.hpp in Headers */,
 				5F35AA501D4E6689001F5C7C /* BoxPrimitive.hpp in Headers */,
@@ -2242,6 +2264,7 @@
 				5F35AAB21D4E6689001F5C7C /* Input.cpp in Sources */,
 				5F35ABC61D4E66BB001F5C7C /* CrimildView.mm in Sources */,
 				5F35AA531D4E6689001F5C7C /* KleinBottlePrimitive.cpp in Sources */,
+				5F3394131D57D046004F2AAC /* FileStream.cpp in Sources */,
 				5F35AAB61D4E6689001F5C7C /* Simulation.cpp in Sources */,
 				5F35ABCE1D4E66BB001F5C7C /* CrimildMetalFrameBufferObjectCatalog.mm in Sources */,
 				5F35AAD61D4E6689001F5C7C /* StartComponents.cpp in Sources */,
@@ -2313,7 +2336,6 @@
 				5F35AA5D1D4E6689001F5C7C /* Primitive.cpp in Sources */,
 				5F35AADA1D4E6689001F5C7C /* UpdateRenderState.cpp in Sources */,
 				5F35AA941D4E6689001F5C7C /* ShadowMap.cpp in Sources */,
-				5F35AA341D4E6688001F5C7C /* Stream.cpp in Sources */,
 				5F35AAA61D4E6689001F5C7C /* Node.cpp in Sources */,
 				5F35ABE81D4E66BB001F5C7C /* CrimildMetalUnlitDiffuseShaderProgram.mm in Sources */,
 				5F35E3491D4E6714001F5C7C /* Makefile in Sources */,
@@ -2334,7 +2356,9 @@
 				5F35AABA1D4E6689001F5C7C /* RenderSystem.cpp in Sources */,
 				5F35AA1F1D4E6688001F5C7C /* FixedAllocator.cpp in Sources */,
 				5F35E31C1D4E6713001F5C7C /* ldo.c in Sources */,
+				5F3394151D57D046004F2AAC /* MemoryStream.cpp in Sources */,
 				5F35D56F1D4E66F5001F5C7C /* OpenGLUtils.cpp in Sources */,
+				5F3394181D57D046004F2AAC /* Stream.cpp in Sources */,
 				5F35AAC01D4E6689001F5C7C /* UISystem.cpp in Sources */,
 				5F35D55D1D4E66F5001F5C7C /* IndexBufferObjectCatalog.cpp in Sources */,
 				5F35AA691D4E6689001F5C7C /* BasicRenderPass.cpp in Sources */,

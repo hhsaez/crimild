@@ -30,7 +30,7 @@
 
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/NamedObject.hpp"
-#include "Foundation/Stream.hpp"
+#include "Streaming/Stream.hpp"
 #include "Visitors/NodeVisitor.hpp"
 #include "Components/NodeComponent.hpp"
 #include "Mathematics/Transformation.hpp"

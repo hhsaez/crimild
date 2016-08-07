@@ -26,10 +26,12 @@
  */
 
 #include "Stream.hpp"
-#include "Version.hpp"
-#include "Log.hpp"
 
+#include "Foundation/Version.hpp"
+#include "Foundation/Log.hpp"
 #include "Rendering/VertexFormat.hpp"
+
+#include <algorithm>
 
 using namespace crimild;
 
@@ -89,11 +91,13 @@ bool Stream::registerObject( StreamObject *obj )
 bool Stream::registerObject( StreamObject::StreamObjectId objId, SharedPointer< StreamObject > const &obj )
 {
 	if ( _objects[ objId ] != nullptr ) {
-		// object already register
-		return false;
+		// object already register, remove it so it will be reinserted
+		// again with a higher priority
+		_orderedObjects.remove( obj );
 	}
 
 	_objects[ objId ] = obj;
+	_orderedObjects.push_back( obj );
 
 	return true;
 }
@@ -118,8 +122,8 @@ bool Stream::flush( void )
 		}
 	}
 
-	for ( auto &it : _objects ) {
-		auto &obj = it.second;
+	for ( auto it = _orderedObjects.rbegin(); it != _orderedObjects.rend(); it++ ) {
+		auto &obj = *it;
 		if ( obj != nullptr ) {
 			if ( isTopLevel( obj ) ) {
 				write( Stream::FLAG_TOP_LEVEL_OBJECT );
@@ -173,6 +177,7 @@ bool Stream::load( void )
 
 		auto obj = StreamObjectFactory::getInstance()->buildObject( className );
 		if ( obj == nullptr ) {
+			Log::Debug << "Cannot build object of type " << className << " with id " << objId << Log::End;
 			return false;
 		}
 
@@ -189,10 +194,6 @@ bool Stream::load( void )
 			Log::Error << "Invalid file format. Expected " << Stream::FLAG_OBJECT_END << Log::End;
 			return false;
 		}
-	}
-
-	for ( auto &action : _deferredActions ) {
-		action( *this );
 	}
 
 	return true;
@@ -230,26 +231,6 @@ void Stream::write( const Transformation &t )
 	write( t.getTranslate() );
 	write( t.getRotate() );
 	write( t.getScale() );
-}
-
-void Stream::writeChildObject( StreamObject *o )
-{
-	if ( o != nullptr ) {
-		write( o->getUniqueIdentifier() );
-	}
-	else {
-		StreamObject::StreamObjectId objId = 0;
-		write( objId );
-	}
-}
-
-void Stream::writeChildObjects( std::vector< StreamObject * > &os )
-{
-	size_t count = os.size();
-	write( count );
-	for ( auto &o : os ) {
-		write( o->getUniqueIdentifier() );
-	}
 }
 
 void Stream::read( std::string &str )
@@ -306,69 +287,5 @@ void Stream::read( Transformation &t )
 	read( t.translate() );
 	read( t.rotate() );
 	read( t.scale() );
-}
-
-FileStream::FileStream( std::string path, FileStream::OpenMode openMode )
-	: _path( path ),
-	  _openMode( openMode ),
-	  _file( nullptr )
-{
-
-}
-
-FileStream::~FileStream( void )
-{
-	close();
-}
-
-bool FileStream::open( void )
-{
-	close();
-
-	_file = fopen( _path.c_str(), _openMode == FileStream::OpenMode::WRITE ? "w" : "r" );
-	if ( _file == nullptr ) {
-		Log::Error << "Invalid file path " << _path;
-		return false;
-	}
-
-	return true;
-}
-
-bool FileStream::close( void )
-{
-	if ( _file != nullptr ) {
-		fclose( _file );
-		_file = nullptr;
-	}	
-
-	return true;
-}
-
-bool FileStream::flush( void )
-{
-	open();
-	auto result = Stream::flush();
-	close();
-
-	return result;
-}
-
-bool FileStream::load( void )
-{
-	open();
-	auto result = Stream::load();
-	close();
-
-	return result;
-}
-
-void FileStream::writeRawBytes( const void *bytes, size_t size )
-{
-	fwrite( bytes, 1, size, _file );
-}
-
-void FileStream::readRawBytes( void *bytes, size_t size )
-{
-	fread( bytes, 1, size, _file );
 }
 

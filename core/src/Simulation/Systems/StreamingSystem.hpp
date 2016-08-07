@@ -30,7 +30,7 @@
 
 #include "System.hpp"
 
-#include "Foundation/Streaming.hpp"
+#include "Streaming/SceneBuilder.hpp"
 
 namespace crimild {
 

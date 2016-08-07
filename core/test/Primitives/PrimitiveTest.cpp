@@ -26,6 +26,7 @@
  */
 
 #include "Primitives/Primitive.hpp"
+#include "Streaming/FileStream.hpp"
 
 #include "gtest/gtest.h"
 

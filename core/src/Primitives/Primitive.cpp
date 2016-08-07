@@ -63,9 +63,8 @@ void Primitive::save( Stream &s )
 	StreamObject::save( s );
 
 	s.write( _type );
-
-	s.writeChildObject( _vertexBuffer );
-	s.writeChildObject( _indexBuffer );
+	s.write( _vertexBuffer );
+	s.write( _indexBuffer );
 }
 
 void Primitive::load( Stream &s )
@@ -73,13 +72,7 @@ void Primitive::load( Stream &s )
 	StreamObject::load( s );
 
 	s.read( _type );
-
-	s.readChildObject< VertexBufferObject >( [&]( SharedPointer< VertexBufferObject > const &obj ) {
-		setVertexBuffer( obj );
-	});
-	
-	s.readChildObject< IndexBufferObject >( [&]( SharedPointer< IndexBufferObject > const &obj ) {
-		setIndexBuffer( obj );
-	});
+	s.read( _vertexBuffer );
+	s.read( _indexBuffer );
 }
 

@@ -135,22 +135,21 @@ void Group::save( Stream &s )
 {
 	Node::save( s );
 
-	std::vector< StreamObject * > children;
-	forEachNode( [&children]( Node *node ) {
-		if ( node != nullptr ) {
-			children.push_back( node );
-		}
+	std::vector< SharedPointer< Node >> ns;
+	forEachNode( [&ns]( Node *n ) {
+		ns.push_back( crimild::retain( n ) );
 	});
-	s.writeChildObjects( children );
+	s.write( ns );
 }
 
 void Group::load( Stream &s )
 {
 	Node::load( s );
 
-	auto self = this;
-	s.readChildObjects< Node >( [self]( SharedPointer< Node > const &node ) {
-		self->attachNode( node );
-	});
+	std::vector< SharedPointer< Node >> nodes;
+	s.read( nodes );
+	for ( auto &n : nodes ) {
+		attachNode( n );
+	}
 }
 

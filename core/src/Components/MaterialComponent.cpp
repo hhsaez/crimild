@@ -72,21 +72,21 @@ void MaterialComponent::save( Stream &s )
 {
 	NodeComponent::save( s );
 
-	std::vector< StreamObject * > ms;
+	std::vector< SharedPointer< Material >> ms;
 	forEachMaterial( [&ms]( Material *m ) {
-		ms.push_back( m );
+		ms.push_back( crimild::retain( m ) );
 	});
-	s.writeChildObjects( ms );
+	s.write( ms );
 }
 
 void MaterialComponent::load( Stream &s )
 {
 	NodeComponent::load( s );
 
-	auto self = this;
-
-	s.readChildObjects< Material >( [self]( SharedPointer< Material > const &m ) {
-		self->attachMaterial( m );
-	});
+	std::vector< SharedPointer< Material >> ms;
+	s.read( ms );
+	for ( auto &m : ms ) {
+		attachMaterial( m );
+	}
 }
 

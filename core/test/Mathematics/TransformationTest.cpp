@@ -42,7 +42,7 @@ bool orthonormalize( const Vector3f &u, const Vector3f &v, Vector3f &i, Vector3f
 	return true;
 }
 
-TEST ( TransformationTest, testTranslate )
+TEST ( Transformation, testTranslate )
 {
 	Transformation t;
 	t.setTranslate( Vector3f( 1.0f, 2.0f, 3.0f ) );
@@ -50,7 +50,7 @@ TEST ( TransformationTest, testTranslate )
 	EXPECT_EQ( Vector3f( 1.0f, 2.0f, 3.0f ), t.getTranslate() );
 }
 
-TEST( TransformationTest, testLookAt )
+TEST( Transformation, testLookAt )
 {
 	Transformation t;
 	t.setTranslate( Vector3f( 1.0f, 2.0f, 3.0f ) );
@@ -60,5 +60,19 @@ TEST( TransformationTest, testLookAt )
 	t.lookAt( Vector3f( 0.0f, 0.0f, 0.0f ), Vector3f( 0.0f, 1.0f, 0.0f ) );
 
 	EXPECT_EQ( Vector3f( -1.0f, -2.0f, -3.0f ).getNormalized(), t.computeDirection() );
+}
+
+TEST( Transformation, constructFromMatrix )
+{
+	Matrix4f m( 1.0f, 0.0f, 0.0f, 0.0f, 
+				0.0f, 1.0f, 0.0f, 0.0f,
+				0.0f, 0.0f, 1.0f, 0.0f,
+				3.0f, 4.0f, 5.0f, 1.0f );
+	
+	Transformation t( m );
+
+	EXPECT_EQ( Vector3f( 3.0f, 4.0f, 5.0f ), t.getTranslate() );
+	EXPECT_EQ( 1.0f, t.getScale() );
+	EXPECT_EQ( Quaternion4f( 0.0f, 0.0f, 0.0f, 1.0f ), t.getRotate() );
 }
 

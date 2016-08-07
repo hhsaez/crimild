@@ -28,8 +28,7 @@
 #ifndef CRIMILD_COMPONENTS_NODE_COMPONENT_
 #define CRIMILD_COMPONENTS_NODE_COMPONENT_
 
-#include "Foundation/Stream.hpp"
-
+#include "Streaming/Stream.hpp"
 #include "Mathematics/Clock.hpp"
 
 namespace crimild {

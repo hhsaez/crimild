@@ -190,16 +190,13 @@ void SkinnedMeshComponent::save( Stream &s )
 {
 	NodeComponent::save( s );
 
-	s.writeChildObject( _skinnedMesh );
+	s.write( _skinnedMesh );
 }
 
 void SkinnedMeshComponent::load( Stream &s )
 {
 	NodeComponent::load( s );
 
-	auto self = this;
-	s.readChildObject< SkinnedMesh >( [self]( SharedPointer< SkinnedMesh > const &mesh ) {
-		self->_skinnedMesh = mesh;
-	});
+	s.read( _skinnedMesh );
 }
 

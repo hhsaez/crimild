@@ -29,7 +29,8 @@
 #include "Primitives/Primitive.hpp"
 #include "Primitives/QuadPrimitive.hpp"
 #include "Components/MaterialComponent.hpp"
-
+#include "Streaming/FileStream.hpp"
+ 
 #include "gtest/gtest.h"
 
 using namespace crimild;
@@ -136,7 +137,7 @@ TEST( GeometryTest, geometryStream )
 		EXPECT_EQ( 1, is.getObjectCount() );
 		
 		auto g = is.getObjectAt< Geometry >( 0 );
-		EXPECT_TRUE( g != nullptr );
+		EXPECT_NE( nullptr, g );
 		EXPECT_EQ( "a geometry", g->getName() );
 
 		int primitiveCount = 0;

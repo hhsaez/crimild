@@ -27,6 +27,7 @@
 
 #include "SceneGraph/Node.hpp"
 #include "SceneGraph/Group.hpp"
+#include "Streaming/FileStream.hpp"
 
 #include "Utils/MockComponent.hpp"
 

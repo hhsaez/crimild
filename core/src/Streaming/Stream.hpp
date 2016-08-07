@@ -25,18 +25,20 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_FOUNDATION_STREAM_
-#define CRIMILD_CORE_FOUNDATION_STREAM_
+#ifndef CRIMILD_CORE_STREAMING_STREAM_
+#define CRIMILD_CORE_STREAMING_STREAM_
 
-#include "Macros.hpp"
-#include "SharedObject.hpp"
-#include "Memory.hpp"
-#include "RTTI.hpp"
+#include "Foundation/Macros.hpp"
+#include "Foundation/SharedObject.hpp"
+#include "Foundation/Memory.hpp"
+#include "Foundation/RTTI.hpp"
+#include "Foundation/Log.hpp"
 
 #include "Mathematics/Transformation.hpp"
 
 #include <cassert>
 #include <string>
+#include <list>
 #include <vector>
 #include <map>
 
@@ -48,31 +50,24 @@ namespace crimild {
     /**
         \brief An object that can be inserted into a stream
     */
-    class StreamObject : public SharedObject {
+    class StreamObject : public SharedObject, public RTTI {
     public:
         /**
             \brief Alias for a stream object unique identifier
         */
-    	using StreamObjectId = size_t;
+        using StreamObjectId = size_t;
 
     protected:
         /**
             \brief Default constructor
         */
-    	StreamObject( void ) { }
+        StreamObject( void ) { }
 
     public:
         /**
             \brief Destructor
         */
-    	virtual ~StreamObject( void ) { }
-
-        /**
-            \brief Get the class name
-
-            \see RTTI.hpp for details on how to use this method
-        */
-    	virtual const char *getClassName( void ) const = 0;
+        virtual ~StreamObject( void ) { }
 
         /*
             \brief Retrieves the object unique identifier
@@ -82,7 +77,7 @@ namespace crimild {
             in history, but at the time of streaming an object, no 
             two objects can have the same memory address
         */
-    	StreamObjectId getUniqueIdentifier( void ) const { return ( StreamObjectId ) this; }
+        StreamObjectId getUniqueIdentifier( void ) const { return ( StreamObjectId ) this; }
 
         /**
             \brief Register an object in the stream
@@ -105,19 +100,19 @@ namespace crimild {
                 };
             \endcode
         */
-    	virtual bool registerInStream( Stream &s );
+        virtual bool registerInStream( Stream &s );
 
         /**
             \briefs Writes an object into the stream
 
             \remarks Subclases must invoke this method
         */
-    	virtual void save( Stream &s );
+        virtual void save( Stream &s );
 
         /**
             \brief Reads an object's properties from the stream
         */
-    	virtual void load( Stream &s );
+        virtual void load( Stream &s );
     };
 
     /**
@@ -182,12 +177,12 @@ namespace crimild {
         /**
             \brief Default constructor
         */
-    	Stream( void );
+        Stream( void );
 
         /**
             \brief Destructor
         */
-    	virtual ~Stream( void );
+        virtual ~Stream( void );
 
         /**
             \name Saving
@@ -195,12 +190,12 @@ namespace crimild {
         //@{
     public:
 
-		void addObject( StreamObject *obj ) 
+        void addObject( StreamObject *obj ) 
         { 
             addObject( crimild::retain( obj ) ); 
         }
 
-		void addObject( SharedPointer< StreamObject > const &obj );
+        void addObject( SharedPointer< StreamObject > const &obj );
 
         virtual bool flush( void );
 
@@ -236,6 +231,7 @@ namespace crimild {
     private:
         // TODO: replace this for crimild::Map<>
         std::map< StreamObject::StreamObjectId, SharedPointer< StreamObject >> _objects;
+        std::list< SharedPointer< StreamObject >> _orderedObjects;
 
         /**
             \name Writing properites
@@ -261,23 +257,28 @@ namespace crimild {
         void write( const Quaternion4f &q );
         void write( const Transformation &t );
 
+        template< class T >
+        void write( SharedPointer< T > &obj )
+        {
+            StreamObject::StreamObjectId objId = ( obj != nullptr ? obj->getUniqueIdentifier() : 0 );
+            write( objId );
+        }
+
+        template< class T >
+        void write( std::vector< SharedPointer< T >> &os )
+        {
+            size_t count = os.size();
+            write( count );
+            for ( auto &o : os ) {
+                write( o->getUniqueIdentifier() );
+            }
+        }
+
         template< typename T >
         void write( const T &value )
         {
             writeRawBytes( &value, sizeof( T ) );
         }
-
-        void writeChildObject( SharedPointer< StreamObject > const &obj )
-        {
-            writeChildObject( crimild::get_ptr( obj ) );
-        }
-
-        void writeChildObject( StreamObject *child );
-
-        /**
-            \brief Write a collection of StreamObjects
-        */
-        void writeChildObjects( std::vector< StreamObject * > &children );
 
         virtual void writeRawBytes( const void *bytes, size_t size ) = 0;
 
@@ -311,16 +312,8 @@ namespace crimild {
         void read( Quaternion4f &q );
         void read( Transformation &t );
 
-        template< typename T >
-        void read( T &value )
-        {
-            readRawBytes( &value, sizeof( T ) );
-        }
-
-        virtual void readRawBytes( void *bytes, size_t size ) = 0;
-
         template< class T >
-        void readChildObject( std::function< void( SharedPointer< T > const & ) > callback )
+        void read( SharedPointer< T > &ptr )
         {
             StreamObject::StreamObjectId objId;
             read( objId );
@@ -329,14 +322,17 @@ namespace crimild {
                 return;
             }
 
-            _deferredActions.push_back( [objId, callback]( Stream &self ) {
-                auto obj = self._objects[ objId ];
-                callback( crimild::cast_ptr< T >( obj ) );
-            });
+            auto obj = _objects[ objId ];
+            if ( obj == nullptr ) {
+                Log::Error << "Cannot find object with id " << objId << Log::End;
+                return;
+            }
+
+            ptr = crimild::cast_ptr< T >( obj );
         }
 
         template< class T >
-        void readChildObjects( std::function< void( SharedPointer< T > const & ) > callback )
+        void read( std::vector< SharedPointer< T >> &objs )
         {
             size_t count;
             read( count );
@@ -344,53 +340,24 @@ namespace crimild {
             for ( int i = 0; i < count; i++ ) {
                 StreamObject::StreamObjectId objId;
                 read( objId );
-                _deferredActions.push_back( [objId, callback]( Stream &self) {
-                    auto obj = self._objects[ objId ];
-                    callback( crimild::cast_ptr< T >( obj ) );
-                });
+                auto obj = _objects[ objId ];
+                if ( obj == nullptr ) {
+                    Log::Error << "Cannot find object with id " << objId << Log::End;
+                    continue;
+                }
+                objs.push_back( crimild::cast_ptr< T >( obj ) );
             }
         }
 
+        template< typename T >
+        void read( T &value )
+        {
+            readRawBytes( &value, sizeof( T ) );
+        }
+
+        virtual void readRawBytes( void *bytes, size_t size ) = 0;
+
         //@}
-
-    private:
-        std::vector< std::function< void( Stream & ) >> _deferredActions;
-    };
-
-    /**
-        \brief Implements a stream that uses files
-
-        \todo Move this to a separated file
-    */
-    class FileStream : public Stream {
-    public:
-        enum class OpenMode {
-            READ,
-            WRITE
-        };
-
-    public:
-    	explicit FileStream( std::string path, OpenMode openMode );
-    	virtual ~FileStream( void );
-
-    	virtual bool load( void ) override;
-
-    	virtual bool flush( void ) override;
-
-    public:
-        bool open( void );
-
-        bool isOpen( void ) const { return _file != nullptr; }
-
-        bool close( void );
-
-        virtual void writeRawBytes( const void *bytes, size_t size ) override;
-        virtual void readRawBytes( void *bytes, size_t size ) override;
-
-    private:
-        std::string _path;
-        OpenMode _openMode;
-        FILE *_file;
     };
 
 }

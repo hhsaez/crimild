@@ -84,17 +84,15 @@ void Material::save( Stream &s )
 	s.write( _emissive );
 	s.write( _shininess );
 
-	s.writeChildObject( getColorMap() );
-	s.writeChildObject( getNormalMap() );
-	s.writeChildObject( getSpecularMap() );
-	s.writeChildObject( getEmissiveMap() );
+	s.write( _colorMap );
+	s.write( _normalMap );
+	s.write( _specularMap );
+	s.write( _emissiveMap );
 }
 
 void Material::load( Stream &s )
 {
 	StreamObject::load( s );
-
-	auto self = this;
 
 	s.read( _ambient );
 	s.read( _diffuse );
@@ -102,20 +100,9 @@ void Material::load( Stream &s )
 	s.read( _emissive );
 	s.read( _shininess );
 
-	s.readChildObject< Texture >( [self]( SharedPointer< Texture > const &t ) {
-		self->setColorMap( t );
-	});
-
-	s.readChildObject< Texture >( [self]( SharedPointer< Texture > const &t ) {
-		self->setNormalMap( t );
-	});
-
-	s.readChildObject< Texture >( [self]( SharedPointer< Texture > const &t ) {
-		self->setSpecularMap( t );
-	});
-
-	s.readChildObject< Texture >( [self]( SharedPointer< Texture > const &t ) {
-		self->setEmissiveMap( t );
-	});
+	s.read( _colorMap );
+	s.read( _normalMap );
+	s.read( _specularMap );
+	s.read( _emissiveMap );
 }
 

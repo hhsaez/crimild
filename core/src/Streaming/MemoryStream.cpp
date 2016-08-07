@@ -25,33 +25,42 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_FOUNDATION_STREAMING_
-#define CRIMILD_CORE_FOUNDATION_STREAMING_
+#include "MemoryStream.hpp"
 
-#include "Macros.hpp"
-#include "Memory.hpp"
+using namespace crimild;
 
-#include <cassert>
-#include <string>
-
-namespace crimild {
-    
-    class Node;
-
-    class SceneBuilder : public SharedObject {
-	protected:
-		SceneBuilder( void ) { }
-
-	public:
-		virtual ~SceneBuilder( void ) { }
-
-		virtual void reset( void ) = 0;
-
-		virtual SharedPointer< Node > fromFile( const std::string &filename ) = 0;
-
-	};
+MemoryStream::MemoryStream( void )
+{
 
 }
 
-#endif
+MemoryStream::~MemoryStream( void )
+{
+
+}
+
+bool MemoryStream::flush( void )
+{
+	_buffer.clear();
+	_offset = 0;
+
+	return Stream::flush();
+}
+
+bool MemoryStream::load( void )
+{
+	_offset = 0;
+
+	return Stream::load();
+}
+
+void MemoryStream::writeRawBytes( const void *bytes, size_t size )
+{
+	// fwrite( bytes, 1, size, _file );
+}
+
+void MemoryStream::readRawBytes( void *bytes, size_t size )
+{
+	// fread( bytes, 1, size, _file );
+}
 

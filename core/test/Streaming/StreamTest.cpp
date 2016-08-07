@@ -25,7 +25,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Foundation/Stream.hpp"
+#include "Streaming/Stream.hpp"
+#include "Streaming/FileStream.hpp"
+
 #include "Foundation/Memory.hpp"
 
 #include "gtest/gtest.h"
@@ -140,21 +142,86 @@ namespace crimild {
 			{
 				StreamObject::save( s );
 
-				s.writeChildObject( _child );
+				s.write( _child );
 			}
 
 			virtual void load( Stream &s ) override
 			{
 				StreamObject::load( s );
 
-				auto self = this;
-				s.readChildObject< IntMockStreamObject >( [self]( SharedPointer< IntMockStreamObject > const &child ) {
-					self->_child = child;
-				});
+				s.read( _child );
 			}
 
 		private:
 			SharedPointer< IntMockStreamObject > _child;
+		};
+
+		class MockStreamObjectArray : public StreamObject {
+			CRIMILD_IMPLEMENT_RTTI( crimild::test::MockStreamObjectArray )
+
+		public:
+			MockStreamObjectArray( void )
+			{
+
+			}
+
+			virtual ~MockStreamObjectArray( void )
+			{
+
+			}
+
+			void attachChild( SharedPointer< StreamObject > const &child )
+			{
+				_children.push_back( child );
+			}
+
+			bool empty( void ) const 
+			{
+				return _children.size() == 0;
+			}
+
+			SharedPointer< StreamObject > &first( void )
+			{
+				return _children.front();
+			}
+
+			void each( std::function< void( StreamObject * ) > const &callback ) 
+			{
+				for ( auto &it : _children ) {
+					callback( crimild::get_ptr( it ) );
+				}
+			}
+
+		private:
+			std::vector< SharedPointer< StreamObject >> _children;
+
+		public:
+			virtual bool registerInStream( Stream &s ) override
+			{
+				if ( !StreamObject::registerInStream( s ) ) {
+					return false;
+				}
+
+				each( [&s]( StreamObject *o ) {
+					o->registerInStream( s );
+				});
+
+				return true;
+			}
+
+			virtual void save( Stream &s ) override
+			{
+				StreamObject::save( s );
+
+				s.write( _children );
+			}
+
+			virtual void load( Stream &s ) override
+			{
+				StreamObject::load( s );
+
+				s.read( _children );
+			}
 		};
 
 	}
@@ -165,6 +232,7 @@ CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::test::IntMockStreamObject );
 CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::test::Vector3fMockStreamObject );
 CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::test::Matrix4fMockStreamObject );
 CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::test::CompositeMockStreamObject );
+CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::test::MockStreamObjectArray );
 
 using namespace crimild;
 using namespace crimild::test;
@@ -273,5 +341,46 @@ TEST( StreamingTest, streamNullChild )
 
 		EXPECT_TRUE( p->getChild() == nullptr );
 	}
+}
+
+TEST( StreamingTest, streamingSharedObjects )
+{
+	{
+		auto c0 = crimild::alloc< IntMockStreamObject >( 10 );
+		auto p0 = crimild::alloc< MockStreamObjectArray >();
+		p0->attachChild( c0 );
+		auto p1 = crimild::alloc< MockStreamObjectArray >();
+		p1->attachChild( c0 );
+		auto p2 = crimild::alloc< MockStreamObjectArray >();
+		p2->attachChild( c0 );
+		
+		FileStream os( "streamTest.crimild", FileStream::OpenMode::WRITE );
+		os.addObject( p0 );
+		os.addObject( p1 );
+		os.addObject( p2 );
+		EXPECT_TRUE( os.flush() );
+	}
+
+	{
+		FileStream is( "streamTest.crimild", FileStream::OpenMode::READ );
+		EXPECT_TRUE( is.load() );
+		EXPECT_EQ( 3, is.getObjectCount() );
+		
+		auto p0 = is.getObjectAt< MockStreamObjectArray >( 0 );
+		EXPECT_NE( nullptr, p0 );
+		EXPECT_FALSE( p0->empty() );
+		EXPECT_NE( nullptr, p0->first() );
+
+		auto p1 = is.getObjectAt< MockStreamObjectArray >( 1 );
+		EXPECT_NE( nullptr, p1 );
+		EXPECT_FALSE( p1->empty() );
+		EXPECT_NE( nullptr, p1->first() );
+
+		auto p2 = is.getObjectAt< MockStreamObjectArray >( 2 );
+		EXPECT_NE( nullptr, p2 );
+		EXPECT_FALSE( p2->empty() );
+		EXPECT_NE( nullptr, p2->first() );
+	}
+
 }
 

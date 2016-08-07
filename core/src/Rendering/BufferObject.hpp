@@ -29,7 +29,7 @@
 #define CRIMILD_RENDERING_BUFFER_OBJECT_
 
 #include "Foundation/Macros.hpp"
-#include "Foundation/Stream.hpp"
+#include "Streaming/Stream.hpp"
 
 #include <memory>
 #include <cstring>

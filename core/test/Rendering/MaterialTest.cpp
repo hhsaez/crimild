@@ -26,6 +26,7 @@
  */
 
 #include "Rendering/Material.hpp"
+#include "Streaming/FileStream.hpp"
 
 #include "gtest/gtest.h"
 
@@ -65,5 +66,38 @@ TEST( MaterialTest, setColorMap )
 	material->setColorMap( texture );
 
 	ASSERT_EQ( crimild::get_ptr( texture ), material->getColorMap() );
+}
+
+TEST( Material, streaming )
+{
+	{
+		auto material = crimild::alloc< Material >();
+		material->setDiffuse( RGBAColorf( 0.9f, 0.9f, 0.9f, 1.0f ) );
+		material->setAmbient( RGBAColorf( 0.1f, 0.1f, 0.1f, 1.0f ) );
+		material->setSpecular( RGBAColorf( 0.5f, 0.5f, 0.5f, 1.0f ) );
+		material->setShininess( 25.0f );
+
+		material->setColorMap( crimild::alloc< Texture >() );
+
+		FileStream os( "material.crimild", FileStream::OpenMode::WRITE );
+		os.addObject( material );
+		EXPECT_TRUE( os.flush() );
+	}
+
+	{
+		FileStream is( "material.crimild", FileStream::OpenMode::READ );
+		EXPECT_TRUE( is.load() );
+		EXPECT_EQ( 1, is.getObjectCount() );
+		
+		auto material = is.getObjectAt< Material >( 0 );
+		EXPECT_TRUE( material != nullptr );
+
+		EXPECT_EQ( RGBAColorf( 0.9f, 0.9f, 0.9f, 1.0f ), material->getDiffuse() );
+		EXPECT_EQ( RGBAColorf( 0.1f, 0.1f, 0.1f, 1.0f ), material->getAmbient() );
+		EXPECT_EQ( RGBAColorf( 0.5f, 0.5f, 0.5f, 1.0f ), material->getSpecular() );
+		EXPECT_EQ( 25.0f, material->getShininess() );
+
+		EXPECT_NE( nullptr, material->getColorMap() );
+	}
 }
 

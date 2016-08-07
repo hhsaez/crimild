@@ -39,7 +39,8 @@
 #include "Foundation/NamedObject.hpp"
 #include "Foundation/Profiler.hpp"
 #include "Foundation/Singleton.hpp"
-#include "Foundation/Streaming.hpp"
+
+#include "Streaming/SceneBuilder.hpp"
 
 #include "Messaging/MessageQueue.hpp"
 

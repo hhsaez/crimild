@@ -53,7 +53,6 @@
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/Singleton.hpp"
 #include "Foundation/Profiler.hpp"
-#include "Foundation/Streaming.hpp"
 #include "Foundation/Version.hpp"
 
 #include "Boundings/BoundingVolume.hpp"
@@ -157,6 +156,11 @@
 #include "Simulation/Systems/RenderSystem.hpp"
 #include "Simulation/Systems/StreamingSystem.hpp"
 #include "Simulation/Systems/UISystem.hpp"
+
+#include "Streaming/Stream.hpp"
+#include "Streaming/FileStream.hpp"
+#include "Streaming/MemoryStream.hpp"
+#include "Streaming/Scenebuilder.hpp"
 
 #include "Debug/DebugRenderHelper.hpp"
 #include "Debug/SceneDebugDump.hpp"

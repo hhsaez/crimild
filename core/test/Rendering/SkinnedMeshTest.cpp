@@ -26,7 +26,8 @@
  */
 
 #include "Rendering/SkinnedMesh.hpp"
-
+#include "Streaming/FileStream.hpp"
+ 
 #include "gtest/gtest.h"
 
 using namespace crimild;
@@ -209,16 +210,94 @@ TEST( SkinnedMesh, streamSkinnedMeshAnimationClip )
 
 TEST( SkinnedMesh, streamSkinnedMeshSkeleton )
 {
-	EXPECT_TRUE( false );
+	{
+		auto skeleton = crimild::alloc< SkinnedMeshSkeleton >();
+
+		skeleton->getClips().add( crimild::alloc< SkinnedMeshAnimationClip >() );
+		skeleton->getClips().add( crimild::alloc< SkinnedMeshAnimationClip >() );
+		skeleton->getClips().add( crimild::alloc< SkinnedMeshAnimationClip >() );
+
+		Transformation offset;
+		skeleton->getJoints()->updateOrCreateJoint( "joint2", offset );
+		skeleton->getJoints()->updateOrCreateJoint( "joint3", offset );
+
+		Transformation t;
+		t.setTranslate( 0.0f, 1.0f, 3.0f );
+		skeleton->setGlobalInverseTransform( t );
+
+		FileStream os( "skinnedMesh.crimild", FileStream::OpenMode::WRITE );
+		os.addObject( skeleton );
+		EXPECT_TRUE( os.flush() );
+	}
+
+	{
+		FileStream is( "skinnedMesh.crimild", FileStream::OpenMode::READ );
+		EXPECT_TRUE( is.load() );
+		EXPECT_EQ( 1, is.getObjectCount() );
+		
+		auto skeleton = is.getObjectAt< SkinnedMeshSkeleton >( 0 );
+		EXPECT_TRUE( skeleton != nullptr );
+
+		EXPECT_EQ( 3, skeleton->getClips().size() );
+
+		EXPECT_NE( nullptr, skeleton->getJoints() );
+		EXPECT_EQ( 2, skeleton->getJoints()->getJointCount() );
+		EXPECT_EQ( 0, skeleton->getJoints()->find( "joint2" )->getId() );
+		EXPECT_EQ( 1, skeleton->getJoints()->find( "joint3" )->getId() );
+	}
 }
 
 TEST( SkinnedMesh, streamSkinnedMeshAnimationState )
 {
-	EXPECT_TRUE( false );
+	{
+		auto state = crimild::alloc< SkinnedMeshAnimationState >();
+		state->getJointPoses().add( Matrix4f() );
+		state->getJointPoses().add( Matrix4f() );
+		state->getJointPoses().add( Matrix4f() );
+
+		FileStream os( "skinnedMesh.crimild", FileStream::OpenMode::WRITE );
+		os.addObject( state );
+		EXPECT_TRUE( os.flush() );
+	}
+
+	{
+		FileStream is( "skinnedMesh.crimild", FileStream::OpenMode::READ );
+		EXPECT_TRUE( is.load() );
+		EXPECT_EQ( 1, is.getObjectCount() );
+		
+		auto state = is.getObjectAt< SkinnedMeshAnimationState >( 0 );
+		EXPECT_TRUE( state != nullptr );
+
+		EXPECT_EQ( 3, state->getJointPoses().size() );
+	}
 }
 
 TEST( SkinnedMesh, streamSkinnedMesh )
 {
-	EXPECT_TRUE( false );
+	{
+		auto skinnedMesh = crimild::alloc< SkinnedMesh >();
+		skinnedMesh->setSkeleton( crimild::alloc< SkinnedMeshSkeleton >() );
+
+		auto state = skinnedMesh->getAnimationState();
+		state->getJointPoses().add( Matrix4f() );
+		state->getJointPoses().add( Matrix4f() );
+		state->getJointPoses().add( Matrix4f() );
+
+		FileStream os( "skinnedMesh.crimild", FileStream::OpenMode::WRITE );
+		os.addObject( skinnedMesh );
+		EXPECT_TRUE( os.flush() );
+	}
+
+	{
+		FileStream is( "skinnedMesh.crimild", FileStream::OpenMode::READ );
+		EXPECT_TRUE( is.load() );
+		EXPECT_EQ( 1, is.getObjectCount() );
+		
+		auto skinnedMesh = is.getObjectAt< SkinnedMesh >( 0 );
+		EXPECT_TRUE( skinnedMesh != nullptr );
+
+		EXPECT_NE( nullptr, skinnedMesh->getSkeleton() );
+		EXPECT_EQ( 3, skinnedMesh->getAnimationState()->getJointPoses().size() );
+	}
 }
 

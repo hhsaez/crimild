@@ -193,14 +193,16 @@ void Node::save( Stream &s )
     StreamObject::save( s );
 
     s.write( getName() );
-    
+
     s.write( _local );
 
-    std::vector< StreamObject * > components;
-    forEachComponent( [&components]( NodeComponent *c ) {
-        components.push_back( c );
-    });
-    s.writeChildObjects( components );
+    std::vector< SharedPointer< NodeComponent >> cs;
+    for ( auto &it : _components ) {
+        if ( it.second != nullptr ) {
+            cs.push_back( it.second );
+        }
+    }
+    s.write( cs );
 }
 
 void Node::load( Stream &s )
@@ -213,10 +215,10 @@ void Node::load( Stream &s )
 
     s.read( _local );
 
-    auto self = this;
-
-    s.readChildObjects< NodeComponent >( [self]( SharedPointer< NodeComponent > const &c ) {
-        self->attachComponent( c );
-    });
+    std::vector< SharedPointer< NodeComponent >> cmps;
+    s.read( cmps );
+    for ( auto &cmp : cmps ) {
+        attachComponent( cmp );
+    }
 }
 
