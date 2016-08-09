@@ -27,7 +27,7 @@
 
 #include "RenderSystem.hpp"
 
-#include "Rendering/RenderPass.hpp"
+#include "Rendering/RenderPasses/RenderPass.hpp"
 #include "Rendering/FrameBufferObject.hpp"
 
 #include "Simulation/Simulation.hpp"

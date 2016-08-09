@@ -33,6 +33,7 @@
 #include "Catalogs/FrameBufferObjectCatalog.hpp"
 #include "Catalogs/TextureCatalog.hpp"
 
+#include "Programs/StandardShaderProgram.hpp"
 #include "Programs/ForwardRenderShaderProgram.hpp"
 #include "Programs/LitTextureShaderProgram.hpp"
 #include "Programs/UnlitTextureShaderProgram.hpp"
@@ -66,6 +67,7 @@ OpenGLRenderer::OpenGLRenderer( SharedPointer< FrameBufferObject > const &screen
 
 	// TODO: Move these calls to 'configure()'?
     setShaderProgram( Renderer::SHADER_PROGRAM_RENDER_PASS_FORWARD, crimild::alloc< ForwardRenderShaderProgram >() );
+    setShaderProgram( Renderer::SHADER_PROGRAM_RENDER_PASS_STANDARD, crimild::alloc< StandardShaderProgram >() );
     
     setShaderProgram( Renderer::SHADER_PROGRAM_LIT_TEXTURE, crimild::alloc< ForwardRenderShaderProgram >() );
     

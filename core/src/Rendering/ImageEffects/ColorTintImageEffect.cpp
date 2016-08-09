@@ -28,10 +28,9 @@
 #include "ColorTintImageEffect.hpp"
 
 #include "Foundation/Log.hpp"
-
 #include "Rendering/Renderer.hpp"
-#include "Rendering/RenderPass.hpp"
 #include "Rendering/FrameBufferObject.hpp"
+#include "Rendering/RenderPasses/RenderPass.hpp"
 
 using namespace crimild;
 

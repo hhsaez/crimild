@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,24 +25,45 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "SceneGraph/Camera.hpp"
+#ifndef CRIMILD_RENDERER_DEFERRED_RENDER_PASS_
+#define CRIMILD_RENDERER_DEFERRED_RENDER_PASS_
+
+#include "RenderPass.hpp"
+#include "Rendering/ShadowMap.hpp"
 #include "Rendering/Renderer.hpp"
-#include "Rendering/RenderPasses/RenderPass.hpp"
+#include "Rendering/RenderQueue.hpp"
+#include "Rendering/ShadowMap.hpp"
+#include "SceneGraph/Camera.hpp"
+#include "SceneGraph/Light.hpp"
 
-#include "gtest/gtest.h"
+#include <map>
 
-using namespace crimild;
+namespace crimild {
+    
+	class DeferredRenderPass : public RenderPass {
+	public:
+        DeferredRenderPass( void );
+		virtual ~DeferredRenderPass( void );
+        
+        virtual void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+        
+        bool isDebugModeEnabled( void ) const { return _debugModeEnabled; }
+        void enableDebugMode( bool enabled ) { _debugModeEnabled = enabled; }
+        
+    private:
+        void computeShadowMaps( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+        
+        void renderToGBuffer( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+        void composeFrame( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+        
+        void buildBuffers( Renderer *renderer );
 
-TEST( RenderPassTest, construction )
-{
-	auto renderPass = crimild::alloc< RenderPass >();
-
-	auto camera = crimild::alloc< Camera >();
-
-	ASSERT_NE( nullptr, camera->getRenderPass() );
-
-	camera->setRenderPass( renderPass );
-
-	ASSERT_EQ( crimild::get_ptr( renderPass ), camera->getRenderPass() );
+    private:
+        std::map< Light *, SharedPointer< ShadowMap >> _shadowMaps;
+        bool _debugModeEnabled;
+	};
+    
 }
+
+#endif
 

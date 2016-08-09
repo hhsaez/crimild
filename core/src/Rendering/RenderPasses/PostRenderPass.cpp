@@ -25,46 +25,38 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_RENDERER_DEFERRED_RENDER_PASS_
-#define CRIMILD_RENDERER_DEFERRED_RENDER_PASS_
+#include "PostRenderPass.hpp"
 
-#include "RenderPass.hpp"
-#include "ShadowMap.hpp"
-#include "Renderer.hpp"
-#include "RenderQueue.hpp"
-#include "ShadowMap.hpp"
+#include "Rendering/Renderer.hpp"
+#include "Rendering/FrameBufferObject.hpp"
+#include "Rendering/RenderQueue.hpp"
+#include "Rendering/ShaderProgram.hpp"
+#include "Rendering/SkinnedMesh.hpp"
+#include "Rendering/ImageEffects/ImageEffect.hpp"
 
-#include "SceneGraph/Camera.hpp"
-#include "SceneGraph/Light.hpp"
+using namespace crimild;
 
-#include <map>
-
-namespace crimild {
-    
-	class DeferredRenderPass : public RenderPass {
-	public:
-        DeferredRenderPass( void );
-		virtual ~DeferredRenderPass( void );
-        
-        virtual void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
-        
-        bool isDebugModeEnabled( void ) const { return _debugModeEnabled; }
-        void enableDebugMode( bool enabled ) { _debugModeEnabled = enabled; }
-        
-    private:
-        void computeShadowMaps( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
-        
-        void renderToGBuffer( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
-        void composeFrame( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
-        
-        void buildBuffers( Renderer *renderer );
-
-    private:
-        std::map< Light *, SharedPointer< ShadowMap >> _shadowMaps;
-        bool _debugModeEnabled;
-	};
+PostRenderPass::PostRenderPass( SharedPointer< RenderPass > const &sceneRenderPass )
+    : _sceneRenderPass( sceneRenderPass )
+{
     
 }
 
-#endif
+PostRenderPass::~PostRenderPass( void )
+{
+    
+}
+
+void PostRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
+{
+    auto sBuffer = getSBuffer( renderer );
+
+    renderer->bindFrameBuffer( sBuffer );
+
+    _sceneRenderPass->render( renderer, renderQueue, camera );
+
+    renderer->unbindFrameBuffer( sBuffer );
+    
+    applyImageEffects( renderer, camera );
+}
 

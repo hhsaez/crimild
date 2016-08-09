@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,24 +25,32 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "SceneGraph/Camera.hpp"
-#include "Rendering/Renderer.hpp"
-#include "Rendering/RenderPasses/RenderPass.hpp"
+#ifndef CRIMILD_RENDERER_RENDER_PASS_POST_PROCESSING_
+#define CRIMILD_RENDERER_RENDER_PASS_POST_PROCESSING_
 
-#include "gtest/gtest.h"
+#include "RenderPass.hpp"
 
-using namespace crimild;
+namespace crimild {
+    
+    /**
+        \brief A render pass for post-processing
+    */
+	class PostRenderPass : public RenderPass {
+	public:
+		explicit PostRenderPass( SharedPointer< RenderPass > const &sceneRenderPass );
 
-TEST( RenderPassTest, construction )
-{
-	auto renderPass = crimild::alloc< RenderPass >();
+		virtual ~PostRenderPass( void );
+        
+        virtual void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera ) override;
 
-	auto camera = crimild::alloc< Camera >();
+        RenderPass *getSceneRenderPass( void ) { return crimild::get_ptr( _sceneRenderPass ); }
 
-	ASSERT_NE( nullptr, camera->getRenderPass() );
+    private:
+        SharedPointer< RenderPass > _sceneRenderPass;
 
-	camera->setRenderPass( renderPass );
-
-	ASSERT_EQ( crimild::get_ptr( renderPass ), camera->getRenderPass() );
+	};
+    
 }
+
+#endif
 

@@ -25,11 +25,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Rendering/BasicRenderPass.hpp"
+#include "BasicRenderPass.hpp"
+
 #include "Rendering/ShaderProgram.hpp"
-
 #include "Foundation/Log.hpp"
-
 #include "Simulation/AssetManager.hpp"
 
 using namespace crimild;

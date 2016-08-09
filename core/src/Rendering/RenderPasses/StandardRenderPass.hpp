@@ -25,16 +25,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_RENDERER_BASIC_RENDER_PASS_
-#define CRIMILD_RENDERER_BASIC_RENDER_PASS_
+#ifndef CRIMILD_RENDERER_RENDER_PASS_STANDARD_
+#define CRIMILD_RENDERER_RENDER_PASS_STANDARD_
 
 #include "RenderPass.hpp"
-#include "ShadowMap.hpp"
-#include "Texture.hpp"
-#include "Renderer.hpp"
-#include "RenderQueue.hpp"
-#include "ShadowMap.hpp"
-
+ 
+#include "Rendering/ShadowMap.hpp"
+#include "Rendering/Texture.hpp"
+#include "Rendering/Renderer.hpp"
+#include "Rendering/RenderQueue.hpp"
+#include "Rendering/ShadowMap.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "SceneGraph/Light.hpp"
 
@@ -42,15 +42,41 @@
 
 namespace crimild {
     
-	class BasicRenderPass : public RenderPass {
+	class StandardRenderPass : public RenderPass {
 	public:
-		BasicRenderPass( void );
-		virtual ~BasicRenderPass( void );
+		StandardRenderPass( void );
+		virtual ~StandardRenderPass( void );
         
         virtual void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera ) override;
 
+    protected:
+        virtual void renderShadedObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+        virtual void renderNonShadedObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+        
+        inline ShaderProgram *getStandardProgram( void );
+
     private:
-        void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera, RenderQueue::Renderables const &objects ) override;
+        ShaderProgram *_standardProgram = nullptr;
+        
+    public:
+        void setLightingEnabled( bool enabled ) { _lightingEnabled = enabled; }
+        bool isLightingEnabled( void ) const { return _lightingEnabled; }
+
+    private:
+        bool _lightingEnabled = true;
+
+    public:
+        void setShadowMappingEnabled( bool enabled ) { _shadowMapping = enabled; }
+        bool isShadowMappingEnabled( void ) const { return _shadowMapping; }
+
+    private:
+        void computeShadowMaps( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+        
+    private:
+        bool _shadowMapping = true;
+        
+        std::map< Light *, SharedPointer< ShadowMap >> _shadowMaps;
+        
 	};
     
 }

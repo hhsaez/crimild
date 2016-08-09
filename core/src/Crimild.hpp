@@ -117,12 +117,9 @@
 #include "Primitives/TrefoilKnotPrimitive.hpp"
 
 #include "Rendering/AlphaState.hpp"
-#include "Rendering/BasicRenderPass.hpp"
 #include "Rendering/BufferObject.hpp"
 #include "Rendering/Catalog.hpp"
 #include "Rendering/CullFaceState.hpp"
-#include "Rendering/DeferredRenderPass.hpp"
-#include "Rendering/ForwardRenderPass.hpp"
 #include "Rendering/FrameBufferObject.hpp"
 #include "Rendering/Image.hpp"
 #include "Rendering/ImageTGA.hpp"
@@ -139,6 +136,13 @@
 #include "Rendering/Texture.hpp"
 #include "Rendering/VertexBufferObject.hpp"
 #include "Rendering/VertexFormat.hpp"
+
+#include "Rendering/RenderPasses/RenderPass.hpp"
+#include "Rendering/RenderPasses/StandardRenderPass.hpp"
+#include "Rendering/RenderPasses/PostRenderPass.hpp"
+#include "Rendering/RenderPasses/BasicRenderPass.hpp"
+#include "Rendering/RenderPasses/DeferredRenderPass.hpp"
+#include "Rendering/RenderPasses/ForwardRenderPass.hpp"
 
 #include "Rendering/ImageEffects/ImageEffect.hpp"
 #include "Rendering/ImageEffects/ColorTintImageEffect.hpp"

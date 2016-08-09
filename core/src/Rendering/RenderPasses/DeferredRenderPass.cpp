@@ -25,19 +25,15 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Rendering/DeferredRenderPass.hpp"
+#include "DeferredRenderPass.hpp"
+
 #include "Rendering/Renderer.hpp"
 #include "Rendering/FrameBufferObject.hpp"
 #include "Rendering/RenderQueue.hpp"
-
 #include "Rendering/ImageEffects/ImageEffect.hpp"
-
 #include "SceneGraph/Geometry.hpp"
-
 #include "Components/RenderStateComponent.hpp"
-
 #include "Primitives/QuadPrimitive.hpp"
-
 #include "Foundation/Log.hpp"
 #include "Foundation/Profiler.hpp"
 

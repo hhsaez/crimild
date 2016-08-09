@@ -172,6 +172,7 @@ namespace crimild {
         
     public:
         static constexpr const char *SHADER_PROGRAM_RENDER_PASS_FORWARD = "shaders/render_pass/forward";
+        static constexpr const char *SHADER_PROGRAM_RENDER_PASS_STANDARD = "shaders/render_pass/standard";
         static constexpr const char *SHADER_PROGRAM_LIT_TEXTURE = "shaders/lighting/texture";
         static constexpr const char *SHADER_PROGRAM_LIT_DIFFUSE = "shaders/lighting/diffuse";
         static constexpr const char *SHADER_PROGRAM_UNLIT_TEXTURE = "shaders/unlit/texture";

@@ -30,8 +30,7 @@
 
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/SharedObjectArray.hpp"
-
-#include "RenderQueue.hpp"
+#include "Rendering/RenderQueue.hpp"
 
 #include <map>
 

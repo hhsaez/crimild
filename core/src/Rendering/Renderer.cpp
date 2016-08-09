@@ -27,20 +27,15 @@
 
 #include "Rendering/Renderer.hpp"
 #include "Rendering/Material.hpp"
-#include "Rendering/RenderPass.hpp"
 #include "Rendering/RenderQueue.hpp"
 #include "Rendering/FrameBufferObject.hpp"
-
+#include "Rendering/RenderPasses/RenderPass.hpp"
 #include "Foundation/Log.hpp"
-
 #include "Primitives/QuadPrimitive.hpp"
-
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "SceneGraph/Light.hpp"
-
 #include "Simulation/AssetManager.hpp"
-
 #include "Components/MaterialComponent.hpp"
 #include "Components/RenderStateComponent.hpp"
 

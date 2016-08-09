@@ -29,12 +29,12 @@
 #define CRIMILD_RENDERER_FORWARD_RENDER_PASS_
 
 #include "RenderPass.hpp"
-#include "ShadowMap.hpp"
-#include "Texture.hpp"
-#include "Renderer.hpp"
-#include "RenderQueue.hpp"
-#include "ShadowMap.hpp"
-
+ 
+#include "Rendering/ShadowMap.hpp"
+#include "Rendering/Texture.hpp"
+#include "Rendering/Renderer.hpp"
+#include "Rendering/RenderQueue.hpp"
+#include "Rendering/ShadowMap.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "SceneGraph/Light.hpp"
 
@@ -42,6 +42,9 @@
 
 namespace crimild {
     
+    /**
+        \deprecated Use StandardRenderPass instead
+    */
 	class ForwardRenderPass : public RenderPass {
 	public:
 		ForwardRenderPass( void );
