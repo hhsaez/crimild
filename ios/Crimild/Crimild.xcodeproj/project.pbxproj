@@ -7,6 +7,20 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5F02EED01D63B1A4003EE891 /* StandardShaderProgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F02EECC1D63B1A4003EE891 /* StandardShaderProgram.cpp */; };
+		5F02EED11D63B1A4003EE891 /* StandardShaderProgram.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F02EECE1D63B1A4003EE891 /* StandardShaderProgram.hpp */; };
+		5F0875511D63ADB200C9FC2F /* BasicRenderPass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F0875451D63ADB200C9FC2F /* BasicRenderPass.cpp */; };
+		5F0875521D63ADB200C9FC2F /* BasicRenderPass.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F0875461D63ADB200C9FC2F /* BasicRenderPass.hpp */; };
+		5F0875531D63ADB200C9FC2F /* DeferredRenderPass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F0875471D63ADB200C9FC2F /* DeferredRenderPass.cpp */; };
+		5F0875541D63ADB200C9FC2F /* DeferredRenderPass.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F0875481D63ADB200C9FC2F /* DeferredRenderPass.hpp */; };
+		5F0875551D63ADB200C9FC2F /* ForwardRenderPass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F0875491D63ADB200C9FC2F /* ForwardRenderPass.cpp */; };
+		5F0875561D63ADB200C9FC2F /* ForwardRenderPass.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F08754A1D63ADB200C9FC2F /* ForwardRenderPass.hpp */; };
+		5F0875571D63ADB200C9FC2F /* PostRenderPass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F08754B1D63ADB200C9FC2F /* PostRenderPass.cpp */; };
+		5F0875581D63ADB200C9FC2F /* PostRenderPass.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F08754C1D63ADB200C9FC2F /* PostRenderPass.hpp */; };
+		5F0875591D63ADB200C9FC2F /* RenderPass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F08754D1D63ADB200C9FC2F /* RenderPass.cpp */; };
+		5F08755A1D63ADB200C9FC2F /* RenderPass.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F08754E1D63ADB200C9FC2F /* RenderPass.hpp */; };
+		5F08755B1D63ADB200C9FC2F /* StandardRenderPass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F08754F1D63ADB200C9FC2F /* StandardRenderPass.cpp */; };
+		5F08755C1D63ADB200C9FC2F /* StandardRenderPass.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F0875501D63ADB200C9FC2F /* StandardRenderPass.hpp */; };
 		5F3394131D57D046004F2AAC /* FileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F33940C1D57D046004F2AAC /* FileStream.cpp */; };
 		5F3394141D57D046004F2AAC /* FileStream.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F33940D1D57D046004F2AAC /* FileStream.hpp */; };
 		5F3394151D57D046004F2AAC /* MemoryStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F33940E1D57D046004F2AAC /* MemoryStream.cpp */; };
@@ -144,18 +158,12 @@
 		5F35AA661D4E6689001F5C7C /* TrefoilKnotPrimitive.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F35A5CF1D4E6686001F5C7C /* TrefoilKnotPrimitive.hpp */; };
 		5F35AA671D4E6689001F5C7C /* AlphaState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F35A5D11D4E6686001F5C7C /* AlphaState.cpp */; };
 		5F35AA681D4E6689001F5C7C /* AlphaState.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F35A5D21D4E6686001F5C7C /* AlphaState.hpp */; };
-		5F35AA691D4E6689001F5C7C /* BasicRenderPass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F35A5D31D4E6686001F5C7C /* BasicRenderPass.cpp */; };
-		5F35AA6A1D4E6689001F5C7C /* BasicRenderPass.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F35A5D41D4E6686001F5C7C /* BasicRenderPass.hpp */; };
 		5F35AA6B1D4E6689001F5C7C /* BufferObject.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F35A5D51D4E6686001F5C7C /* BufferObject.hpp */; };
 		5F35AA6C1D4E6689001F5C7C /* Catalog.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F35A5D61D4E6686001F5C7C /* Catalog.hpp */; };
 		5F35AA6D1D4E6689001F5C7C /* CullFaceState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F35A5D71D4E6686001F5C7C /* CullFaceState.cpp */; };
 		5F35AA6E1D4E6689001F5C7C /* CullFaceState.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F35A5D81D4E6686001F5C7C /* CullFaceState.hpp */; };
-		5F35AA6F1D4E6689001F5C7C /* DeferredRenderPass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F35A5D91D4E6686001F5C7C /* DeferredRenderPass.cpp */; };
-		5F35AA701D4E6689001F5C7C /* DeferredRenderPass.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F35A5DA1D4E6686001F5C7C /* DeferredRenderPass.hpp */; };
 		5F35AA711D4E6689001F5C7C /* DepthState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F35A5DB1D4E6686001F5C7C /* DepthState.cpp */; };
 		5F35AA721D4E6689001F5C7C /* DepthState.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F35A5DC1D4E6686001F5C7C /* DepthState.hpp */; };
-		5F35AA731D4E6689001F5C7C /* ForwardRenderPass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F35A5DD1D4E6686001F5C7C /* ForwardRenderPass.cpp */; };
-		5F35AA741D4E6689001F5C7C /* ForwardRenderPass.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F35A5DE1D4E6686001F5C7C /* ForwardRenderPass.hpp */; };
 		5F35AA751D4E6689001F5C7C /* FrameBufferObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F35A5DF1D4E6686001F5C7C /* FrameBufferObject.cpp */; };
 		5F35AA761D4E6689001F5C7C /* FrameBufferObject.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F35A5E01D4E6686001F5C7C /* FrameBufferObject.hpp */; };
 		5F35AA771D4E6689001F5C7C /* Image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F35A5E11D4E6686001F5C7C /* Image.cpp */; };
@@ -172,8 +180,6 @@
 		5F35AA821D4E6689001F5C7C /* Material.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F35A5ED1D4E6686001F5C7C /* Material.hpp */; };
 		5F35AA831D4E6689001F5C7C /* Renderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F35A5EE1D4E6686001F5C7C /* Renderer.cpp */; };
 		5F35AA841D4E6689001F5C7C /* Renderer.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F35A5EF1D4E6686001F5C7C /* Renderer.hpp */; };
-		5F35AA851D4E6689001F5C7C /* RenderPass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F35A5F01D4E6686001F5C7C /* RenderPass.cpp */; };
-		5F35AA861D4E6689001F5C7C /* RenderPass.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F35A5F11D4E6686001F5C7C /* RenderPass.hpp */; };
 		5F35AA871D4E6689001F5C7C /* RenderQueue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F35A5F21D4E6686001F5C7C /* RenderQueue.cpp */; };
 		5F35AA881D4E6689001F5C7C /* RenderQueue.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F35A5F31D4E6686001F5C7C /* RenderQueue.hpp */; };
 		5F35AA891D4E6689001F5C7C /* RenderState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F35A5F41D4E6686001F5C7C /* RenderState.cpp */; };
@@ -480,6 +486,22 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		5F02EECC1D63B1A4003EE891 /* StandardShaderProgram.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StandardShaderProgram.cpp; sourceTree = "<group>"; };
+		5F02EECD1D63B1A4003EE891 /* StandardShaderProgram.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = StandardShaderProgram.frag; sourceTree = "<group>"; };
+		5F02EECE1D63B1A4003EE891 /* StandardShaderProgram.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = StandardShaderProgram.hpp; sourceTree = "<group>"; };
+		5F02EECF1D63B1A4003EE891 /* StandardShaderProgram.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = StandardShaderProgram.vert; sourceTree = "<group>"; };
+		5F0875451D63ADB200C9FC2F /* BasicRenderPass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BasicRenderPass.cpp; sourceTree = "<group>"; };
+		5F0875461D63ADB200C9FC2F /* BasicRenderPass.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BasicRenderPass.hpp; sourceTree = "<group>"; };
+		5F0875471D63ADB200C9FC2F /* DeferredRenderPass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DeferredRenderPass.cpp; sourceTree = "<group>"; };
+		5F0875481D63ADB200C9FC2F /* DeferredRenderPass.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = DeferredRenderPass.hpp; sourceTree = "<group>"; };
+		5F0875491D63ADB200C9FC2F /* ForwardRenderPass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ForwardRenderPass.cpp; sourceTree = "<group>"; };
+		5F08754A1D63ADB200C9FC2F /* ForwardRenderPass.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ForwardRenderPass.hpp; sourceTree = "<group>"; };
+		5F08754B1D63ADB200C9FC2F /* PostRenderPass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PostRenderPass.cpp; sourceTree = "<group>"; };
+		5F08754C1D63ADB200C9FC2F /* PostRenderPass.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PostRenderPass.hpp; sourceTree = "<group>"; };
+		5F08754D1D63ADB200C9FC2F /* RenderPass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RenderPass.cpp; sourceTree = "<group>"; };
+		5F08754E1D63ADB200C9FC2F /* RenderPass.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = RenderPass.hpp; sourceTree = "<group>"; };
+		5F08754F1D63ADB200C9FC2F /* StandardRenderPass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StandardRenderPass.cpp; sourceTree = "<group>"; };
+		5F0875501D63ADB200C9FC2F /* StandardRenderPass.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = StandardRenderPass.hpp; sourceTree = "<group>"; };
 		5F33940C1D57D046004F2AAC /* FileStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FileStream.cpp; sourceTree = "<group>"; };
 		5F33940D1D57D046004F2AAC /* FileStream.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = FileStream.hpp; sourceTree = "<group>"; };
 		5F33940E1D57D046004F2AAC /* MemoryStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MemoryStream.cpp; sourceTree = "<group>"; };
@@ -617,18 +639,12 @@
 		5F35A5CF1D4E6686001F5C7C /* TrefoilKnotPrimitive.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = TrefoilKnotPrimitive.hpp; sourceTree = "<group>"; };
 		5F35A5D11D4E6686001F5C7C /* AlphaState.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AlphaState.cpp; sourceTree = "<group>"; };
 		5F35A5D21D4E6686001F5C7C /* AlphaState.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AlphaState.hpp; sourceTree = "<group>"; };
-		5F35A5D31D4E6686001F5C7C /* BasicRenderPass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BasicRenderPass.cpp; sourceTree = "<group>"; };
-		5F35A5D41D4E6686001F5C7C /* BasicRenderPass.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BasicRenderPass.hpp; sourceTree = "<group>"; };
 		5F35A5D51D4E6686001F5C7C /* BufferObject.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BufferObject.hpp; sourceTree = "<group>"; };
 		5F35A5D61D4E6686001F5C7C /* Catalog.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Catalog.hpp; sourceTree = "<group>"; };
 		5F35A5D71D4E6686001F5C7C /* CullFaceState.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CullFaceState.cpp; sourceTree = "<group>"; };
 		5F35A5D81D4E6686001F5C7C /* CullFaceState.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CullFaceState.hpp; sourceTree = "<group>"; };
-		5F35A5D91D4E6686001F5C7C /* DeferredRenderPass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DeferredRenderPass.cpp; sourceTree = "<group>"; };
-		5F35A5DA1D4E6686001F5C7C /* DeferredRenderPass.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = DeferredRenderPass.hpp; sourceTree = "<group>"; };
 		5F35A5DB1D4E6686001F5C7C /* DepthState.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DepthState.cpp; sourceTree = "<group>"; };
 		5F35A5DC1D4E6686001F5C7C /* DepthState.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = DepthState.hpp; sourceTree = "<group>"; };
-		5F35A5DD1D4E6686001F5C7C /* ForwardRenderPass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ForwardRenderPass.cpp; sourceTree = "<group>"; };
-		5F35A5DE1D4E6686001F5C7C /* ForwardRenderPass.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ForwardRenderPass.hpp; sourceTree = "<group>"; };
 		5F35A5DF1D4E6686001F5C7C /* FrameBufferObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FrameBufferObject.cpp; sourceTree = "<group>"; };
 		5F35A5E01D4E6686001F5C7C /* FrameBufferObject.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = FrameBufferObject.hpp; sourceTree = "<group>"; };
 		5F35A5E11D4E6686001F5C7C /* Image.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Image.cpp; sourceTree = "<group>"; };
@@ -645,8 +661,6 @@
 		5F35A5ED1D4E6686001F5C7C /* Material.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Material.hpp; sourceTree = "<group>"; };
 		5F35A5EE1D4E6686001F5C7C /* Renderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Renderer.cpp; sourceTree = "<group>"; };
 		5F35A5EF1D4E6686001F5C7C /* Renderer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Renderer.hpp; sourceTree = "<group>"; };
-		5F35A5F01D4E6686001F5C7C /* RenderPass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RenderPass.cpp; sourceTree = "<group>"; };
-		5F35A5F11D4E6686001F5C7C /* RenderPass.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = RenderPass.hpp; sourceTree = "<group>"; };
 		5F35A5F21D4E6686001F5C7C /* RenderQueue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RenderQueue.cpp; sourceTree = "<group>"; };
 		5F35A5F31D4E6686001F5C7C /* RenderQueue.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = RenderQueue.hpp; sourceTree = "<group>"; };
 		5F35A5F41D4E6686001F5C7C /* RenderState.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RenderState.cpp; sourceTree = "<group>"; };
@@ -968,6 +982,25 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5F0875441D63ADB200C9FC2F /* RenderPasses */ = {
+			isa = PBXGroup;
+			children = (
+				5F0875451D63ADB200C9FC2F /* BasicRenderPass.cpp */,
+				5F0875461D63ADB200C9FC2F /* BasicRenderPass.hpp */,
+				5F0875471D63ADB200C9FC2F /* DeferredRenderPass.cpp */,
+				5F0875481D63ADB200C9FC2F /* DeferredRenderPass.hpp */,
+				5F0875491D63ADB200C9FC2F /* ForwardRenderPass.cpp */,
+				5F08754A1D63ADB200C9FC2F /* ForwardRenderPass.hpp */,
+				5F08754B1D63ADB200C9FC2F /* PostRenderPass.cpp */,
+				5F08754C1D63ADB200C9FC2F /* PostRenderPass.hpp */,
+				5F08754D1D63ADB200C9FC2F /* RenderPass.cpp */,
+				5F08754E1D63ADB200C9FC2F /* RenderPass.hpp */,
+				5F08754F1D63ADB200C9FC2F /* StandardRenderPass.cpp */,
+				5F0875501D63ADB200C9FC2F /* StandardRenderPass.hpp */,
+			);
+			path = RenderPasses;
+			sourceTree = "<group>";
+		};
 		5F33940B1D57D046004F2AAC /* Streaming */ = {
 			isa = PBXGroup;
 			children = (
@@ -1246,20 +1279,15 @@
 		5F35A5D01D4E6686001F5C7C /* Rendering */ = {
 			isa = PBXGroup;
 			children = (
+				5F0875441D63ADB200C9FC2F /* RenderPasses */,
 				5F35A5D11D4E6686001F5C7C /* AlphaState.cpp */,
 				5F35A5D21D4E6686001F5C7C /* AlphaState.hpp */,
-				5F35A5D31D4E6686001F5C7C /* BasicRenderPass.cpp */,
-				5F35A5D41D4E6686001F5C7C /* BasicRenderPass.hpp */,
 				5F35A5D51D4E6686001F5C7C /* BufferObject.hpp */,
 				5F35A5D61D4E6686001F5C7C /* Catalog.hpp */,
 				5F35A5D71D4E6686001F5C7C /* CullFaceState.cpp */,
 				5F35A5D81D4E6686001F5C7C /* CullFaceState.hpp */,
-				5F35A5D91D4E6686001F5C7C /* DeferredRenderPass.cpp */,
-				5F35A5DA1D4E6686001F5C7C /* DeferredRenderPass.hpp */,
 				5F35A5DB1D4E6686001F5C7C /* DepthState.cpp */,
 				5F35A5DC1D4E6686001F5C7C /* DepthState.hpp */,
-				5F35A5DD1D4E6686001F5C7C /* ForwardRenderPass.cpp */,
-				5F35A5DE1D4E6686001F5C7C /* ForwardRenderPass.hpp */,
 				5F35A5DF1D4E6686001F5C7C /* FrameBufferObject.cpp */,
 				5F35A5E01D4E6686001F5C7C /* FrameBufferObject.hpp */,
 				5F35A5E11D4E6686001F5C7C /* Image.cpp */,
@@ -1273,8 +1301,6 @@
 				5F35A5ED1D4E6686001F5C7C /* Material.hpp */,
 				5F35A5EE1D4E6686001F5C7C /* Renderer.cpp */,
 				5F35A5EF1D4E6686001F5C7C /* Renderer.hpp */,
-				5F35A5F01D4E6686001F5C7C /* RenderPass.cpp */,
-				5F35A5F11D4E6686001F5C7C /* RenderPass.hpp */,
 				5F35A5F21D4E6686001F5C7C /* RenderQueue.cpp */,
 				5F35A5F31D4E6686001F5C7C /* RenderQueue.hpp */,
 				5F35A5F41D4E6686001F5C7C /* RenderState.cpp */,
@@ -1560,6 +1586,10 @@
 		5F35ACC01D4E66DC001F5C7C /* Programs */ = {
 			isa = PBXGroup;
 			children = (
+				5F02EECC1D63B1A4003EE891 /* StandardShaderProgram.cpp */,
+				5F02EECD1D63B1A4003EE891 /* StandardShaderProgram.frag */,
+				5F02EECE1D63B1A4003EE891 /* StandardShaderProgram.hpp */,
+				5F02EECF1D63B1A4003EE891 /* StandardShaderProgram.vert */,
 				5F35ACC11D4E66DC001F5C7C /* _ShaderPrefixDesktop.txt */,
 				5F35ACC21D4E66DC001F5C7C /* _ShaderPrefixMobile.txt */,
 				5F35ACC31D4E66DC001F5C7C /* BlendShaderProgram.cpp */,
@@ -1837,7 +1867,6 @@
 				5F35D61D1D4E66F6001F5C7C /* LuaUtils.hpp in Headers */,
 				5F35AA4A1D4E6689001F5C7C /* Sphere.hpp in Headers */,
 				5F35D59C1D4E66F6001F5C7C /* TextShaderProgram.hpp in Headers */,
-				5F35AA6A1D4E6689001F5C7C /* BasicRenderPass.hpp in Headers */,
 				5F35AAA71D4E6689001F5C7C /* Node.hpp in Headers */,
 				5F35D6201D4E66F6001F5C7C /* Scripted.hpp in Headers */,
 				5F35AA2D1D4E6688001F5C7C /* SharedObjectArray.hpp in Headers */,
@@ -1876,7 +1905,6 @@
 				5F35ABC91D4E66BB001F5C7C /* CrimildEAGLView.h in Headers */,
 				5F35A92B1D4E6687001F5C7C /* UIResponder.hpp in Headers */,
 				5F35AA3A1D4E6688001F5C7C /* OBJLoader.hpp in Headers */,
-				5F35AA861D4E6689001F5C7C /* RenderPass.hpp in Headers */,
 				5F35AA601D4E6689001F5C7C /* QuadPrimitive.hpp in Headers */,
 				5F35AAB11D4E6689001F5C7C /* FileSystem.hpp in Headers */,
 				5F35AA441D4E6688001F5C7C /* Plane.hpp in Headers */,
@@ -1903,19 +1931,20 @@
 				5F35AA241D4E6688001F5C7C /* Map.hpp in Headers */,
 				5F35E31D1D4E6713001F5C7C /* ldo.h in Headers */,
 				5F35AAA31D4E6689001F5C7C /* Group.hpp in Headers */,
+				5F0875581D63ADB200C9FC2F /* PostRenderPass.hpp in Headers */,
 				5F35AA141D4E6688001F5C7C /* SceneDebugDump.hpp in Headers */,
 				5F35A9311D4E6687001F5C7C /* TaskGroup.hpp in Headers */,
 				5F35AA4E1D4E6689001F5C7C /* MessageQueue.hpp in Headers */,
 				5F35AAD31D4E6689001F5C7C /* SelectNodes.hpp in Headers */,
 				5F35AA5A1D4E6689001F5C7C /* ParametricPrimitive.hpp in Headers */,
 				5F35AA2F1D4E6688001F5C7C /* SharedObjectMap.hpp in Headers */,
+				5F0875561D63ADB200C9FC2F /* ForwardRenderPass.hpp in Headers */,
 				5F35D58E1D4E66F6001F5C7C /* ParticleSystemShaderProgram.hpp in Headers */,
 				5F35AA331D4E6688001F5C7C /* SmallObjectAllocator.hpp in Headers */,
 				5F35A3511D4E6662001F5C7C /* Utils.hpp in Headers */,
 				5F35A9271D4E6687001F5C7C /* RotationComponent.hpp in Headers */,
 				5F35D59E1D4E66F6001F5C7C /* UnlitDiffuseShaderProgram.hpp in Headers */,
 				5F35D5A21D4E66F6001F5C7C /* UnlitVertexColorShaderProgram.hpp in Headers */,
-				5F35AA741D4E6689001F5C7C /* ForwardRenderPass.hpp in Headers */,
 				5F35AA971D4E6689001F5C7C /* SkinnedMesh.hpp in Headers */,
 				5F35ABCF1D4E66BB001F5C7C /* CrimildMetalIndexBufferObjectCatalog.h in Headers */,
 				5F35AAC31D4E6689001F5C7C /* UpdateSystem.hpp in Headers */,
@@ -1932,6 +1961,7 @@
 				5F35AAC71D4E6689001F5C7C /* ApplyToGeometries.hpp in Headers */,
 				5F35ABE51D4E66BB001F5C7C /* CrimildMetalTextShaderProgram.h in Headers */,
 				5F35D57C1D4E66F6001F5C7C /* DeferredEmissiveShaderProgram.hpp in Headers */,
+				5F08755A1D63ADB200C9FC2F /* RenderPass.hpp in Headers */,
 				5F35AABD1D4E6689001F5C7C /* StreamingSystem.hpp in Headers */,
 				5F35AA1C1D4E6688001F5C7C /* Chunk.hpp in Headers */,
 				5F35AACF1D4E6689001F5C7C /* NodeVisitor.hpp in Headers */,
@@ -1984,7 +2014,6 @@
 				5F35AAA51D4E6689001F5C7C /* Light.hpp in Headers */,
 				5F35E3111D4E6713001F5C7C /* lauxlib.h in Headers */,
 				5F35E3151D4E6713001F5C7C /* lcode.h in Headers */,
-				5F35AA701D4E6689001F5C7C /* DeferredRenderPass.hpp in Headers */,
 				5F35AA461D4E6688001F5C7C /* Random.hpp in Headers */,
 				5F35A34F1D4E6662001F5C7C /* AudioManager.hpp in Headers */,
 				5F35AAD51D4E6689001F5C7C /* ShallowCopy.hpp in Headers */,
@@ -2002,7 +2031,9 @@
 				5F35AA161D4E6688001F5C7C /* FileNotFoundException.hpp in Headers */,
 				5F35AAC91D4E6689001F5C7C /* ComputeRenderQueue.hpp in Headers */,
 				5F35AA1E1D4E6688001F5C7C /* ConcurrentQueue.hpp in Headers */,
+				5F0875521D63ADB200C9FC2F /* BasicRenderPass.hpp in Headers */,
 				5F35AA8C1D4E6689001F5C7C /* Shader.hpp in Headers */,
+				5F0875541D63ADB200C9FC2F /* DeferredRenderPass.hpp in Headers */,
 				5F35AA6B1D4E6689001F5C7C /* BufferObject.hpp in Headers */,
 				5F35E32D1D4E6714001F5C7C /* lobject.h in Headers */,
 				5F35ABCD1D4E66BB001F5C7C /* CrimildMetalFrameBufferObjectCatalog.h in Headers */,
@@ -2017,6 +2048,7 @@
 				5F35AA521D4E6689001F5C7C /* ConePrimitive.hpp in Headers */,
 				5F35E3361D4E6714001F5C7C /* lstring.h in Headers */,
 				5F35AAAF1D4E6689001F5C7C /* AssetManager.hpp in Headers */,
+				5F02EED11D63B1A4003EE891 /* StandardShaderProgram.hpp in Headers */,
 				5F35E3441D4E6714001F5C7C /* lundump.h in Headers */,
 				5F35E33F1D4E6714001F5C7C /* lua.hpp in Headers */,
 				5F3394141D57D046004F2AAC /* FileStream.hpp in Headers */,
@@ -2059,6 +2091,7 @@
 				5F35AAA91D4E6689001F5C7C /* ParticleSystem.hpp in Headers */,
 				5F35AAB51D4E6689001F5C7C /* Settings.hpp in Headers */,
 				5F35AA6E1D4E6689001F5C7C /* CullFaceState.hpp in Headers */,
+				5F08755C1D63ADB200C9FC2F /* StandardRenderPass.hpp in Headers */,
 				5F35AACB1D4E6689001F5C7C /* FetchCameras.hpp in Headers */,
 				5F35E3261D4E6713001F5C7C /* llex.h in Headers */,
 				5F35AA3E1D4E6688001F5C7C /* Distance.hpp in Headers */,
@@ -2178,10 +2211,13 @@
 				5F35AAC21D4E6689001F5C7C /* UpdateSystem.cpp in Sources */,
 				5F35A8AC1D4E6687001F5C7C /* AABBBoundingVolume.cpp in Sources */,
 				5F35A8AE1D4E6687001F5C7C /* BoundingVolume.cpp in Sources */,
+				5F0875591D63ADB200C9FC2F /* RenderPass.cpp in Sources */,
 				5F35D58F1D4E66F6001F5C7C /* ScreenAlphaShaderProgram.cpp in Sources */,
 				5F35AA261D4E6688001F5C7C /* NamedObject.cpp in Sources */,
 				5F35ABD21D4E66BB001F5C7C /* CrimildMetalShaderProgramCatalog.mm in Sources */,
 				5F35A9221D4E6687001F5C7C /* OrbitComponent.cpp in Sources */,
+				5F0875531D63ADB200C9FC2F /* DeferredRenderPass.cpp in Sources */,
+				5F0875571D63ADB200C9FC2F /* PostRenderPass.cpp in Sources */,
 				5F35D5691D4E66F5001F5C7C /* EmissiveGlowImageEffect.cpp in Sources */,
 				5F35ABDA1D4E66BB001F5C7C /* CrimildMetalForwardShader.metal in Sources */,
 				5F35ABE61D4E66BB001F5C7C /* CrimildMetalTextShaderProgram.mm in Sources */,
@@ -2206,7 +2242,6 @@
 				5F35D5631D4E66F5001F5C7C /* VertexBufferObjectCatalog.cpp in Sources */,
 				5F35E3291D4E6714001F5C7C /* lmem.c in Sources */,
 				5F35AA751D4E6689001F5C7C /* FrameBufferObject.cpp in Sources */,
-				5F35AA6F1D4E6689001F5C7C /* DeferredRenderPass.cpp in Sources */,
 				5F35E3171D4E6713001F5C7C /* lctype.c in Sources */,
 				5F35D5831D4E66F6001F5C7C /* DeferredSpecularShaderProgram.cpp in Sources */,
 				5F35E32C1D4E6714001F5C7C /* lobject.c in Sources */,
@@ -2219,6 +2254,7 @@
 				5F35A92E1D4E6687001F5C7C /* Task.cpp in Sources */,
 				5F35AA111D4E6688001F5C7C /* DebugRenderHelper.cpp in Sources */,
 				5F35AA791D4E6689001F5C7C /* ColorTintImageEffect.cpp in Sources */,
+				5F02EED01D63B1A4003EE891 /* StandardShaderProgram.cpp in Sources */,
 				5F35E3241D4E6713001F5C7C /* liolib.c in Sources */,
 				5F35AA4D1D4E6689001F5C7C /* MessageQueue.cpp in Sources */,
 				5F35AA961D4E6689001F5C7C /* SkinnedMesh.cpp in Sources */,
@@ -2246,11 +2282,9 @@
 				5F35E3381D4E6714001F5C7C /* ltable.c in Sources */,
 				5F35A34E1D4E6662001F5C7C /* AudioManager.cpp in Sources */,
 				5F35A34C1D4E6662001F5C7C /* AudioClip.cpp in Sources */,
-				5F35AA851D4E6689001F5C7C /* RenderPass.cpp in Sources */,
 				5F35D5711D4E66F5001F5C7C /* BlendShaderProgram.cpp in Sources */,
 				5F35D59F1D4E66F6001F5C7C /* UnlitTextureShaderProgram.cpp in Sources */,
 				5F35AABC1D4E6689001F5C7C /* StreamingSystem.cpp in Sources */,
-				5F35AA731D4E6689001F5C7C /* ForwardRenderPass.cpp in Sources */,
 				5F35D56D1D4E66F5001F5C7C /* OpenGLRenderer.cpp in Sources */,
 				5F35E32B1D4E6714001F5C7C /* loadlib.c in Sources */,
 				5F35ABDF1D4E66BB001F5C7C /* CrimildMetalLitTextureShaderProgram.mm in Sources */,
@@ -2278,6 +2312,7 @@
 				5F35ABE01D4E66BB001F5C7C /* CrimildMetalScreenTextureShader.metal in Sources */,
 				5F35AA9A1D4E6689001F5C7C /* VertexBufferObject.cpp in Sources */,
 				5F35A8B21D4E6687001F5C7C /* SphereBoundingVolume.cpp in Sources */,
+				5F08755B1D63ADB200C9FC2F /* StandardRenderPass.cpp in Sources */,
 				5F35AAC41D4E6689001F5C7C /* Apply.cpp in Sources */,
 				5F35AA511D4E6689001F5C7C /* ConePrimitive.cpp in Sources */,
 				5F35AAB41D4E6689001F5C7C /* Settings.cpp in Sources */,
@@ -2350,9 +2385,11 @@
 				5F35D5611D4E66F5001F5C7C /* TextureCatalog.cpp in Sources */,
 				5F35D5971D4E66F6001F5C7C /* SSAOBlendShaderProgram.cpp in Sources */,
 				5F35ABE91D4E66BB001F5C7C /* CrimildMetalUnlitTextureShader.metal in Sources */,
+				5F0875511D63ADB200C9FC2F /* BasicRenderPass.cpp in Sources */,
 				5F35AA551D4E6689001F5C7C /* MobiusStripPrimitive.cpp in Sources */,
 				5F35AA5B1D4E6689001F5C7C /* ParametricSpherePrimitive.cpp in Sources */,
 				5F35AAAC1D4E6689001F5C7C /* Text.cpp in Sources */,
+				5F0875551D63ADB200C9FC2F /* ForwardRenderPass.cpp in Sources */,
 				5F35AABA1D4E6689001F5C7C /* RenderSystem.cpp in Sources */,
 				5F35AA1F1D4E6688001F5C7C /* FixedAllocator.cpp in Sources */,
 				5F35E31C1D4E6713001F5C7C /* ldo.c in Sources */,
@@ -2361,7 +2398,6 @@
 				5F3394181D57D046004F2AAC /* Stream.cpp in Sources */,
 				5F35AAC01D4E6689001F5C7C /* UISystem.cpp in Sources */,
 				5F35D55D1D4E66F5001F5C7C /* IndexBufferObjectCatalog.cpp in Sources */,
-				5F35AA691D4E6689001F5C7C /* BasicRenderPass.cpp in Sources */,
 				5F35AA981D4E6689001F5C7C /* Texture.cpp in Sources */,
 				5F35D58D1D4E66F6001F5C7C /* ParticleSystemShaderProgram.cpp in Sources */,
 				5F35AA811D4E6689001F5C7C /* Material.cpp in Sources */,
@@ -2479,7 +2515,10 @@
 					"${SRCROOT}/../../al/src",
 					"${SRCROOT}/../../ios/Crimild/Crimild",
 				);
-				OTHER_LDFLAGS = "-ObjC";
+				OTHER_LDFLAGS = (
+					"${inherited}",
+					"-ObjC",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PUBLIC_HEADERS_FOLDER_PATH = "include/${PRODUCT_NAME}";
 				SKIP_INSTALL = YES;
@@ -2499,7 +2538,10 @@
 					"${SRCROOT}/../../al/src",
 					"${SRCROOT}/../../ios/Crimild/Crimild",
 				);
-				OTHER_LDFLAGS = "-ObjC";
+				OTHER_LDFLAGS = (
+					"${inherited}",
+					"-ObjC",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PUBLIC_HEADERS_FOLDER_PATH = "include/${PRODUCT_NAME}";
 				SKIP_INSTALL = YES;
