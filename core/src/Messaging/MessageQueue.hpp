@@ -180,7 +180,9 @@ namespace crimild {
 		void dispatchDeferredMessages( void )
 		{
 			for ( auto d : _dispatchers ) {
-				d->dispatchDeferredMessages();
+				if ( d != nullptr ) {
+					d->dispatchDeferredMessages();
+				}
 			}
 		}
 
@@ -188,7 +190,9 @@ namespace crimild {
 		void clear( void )
 		{
 			for ( auto d : _dispatchers ) {
-				d->clear();
+				if ( d != nullptr ) {
+					d->clear();
+				}
 			}
 		}
 
