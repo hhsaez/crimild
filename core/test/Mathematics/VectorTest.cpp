@@ -31,6 +31,15 @@
 
 using namespace crimild;
 
+TEST( VectorTest, construction )
+{
+	Vector< 3, float > u( 5 );
+
+	EXPECT_EQ( 5, u.x() );
+	EXPECT_EQ( 5, u.y() );
+	EXPECT_EQ( 5, u.z() );
+}
+
 TEST( VectorTest, testBasicOperations )
 {
 	float data[ 3 ] = { 1.0f, 2.0f, 3.0f };
@@ -197,5 +206,16 @@ TEST( VectorTest, testNormalize )
 	EXPECT_TRUE( Numeric< float >::equals( v[ 0 ], u[ 0 ] / u.getMagnitude() ) );
 	EXPECT_TRUE( Numeric< float >::equals( v[ 1 ], u[ 1 ] / u.getMagnitude() ) );
 	EXPECT_TRUE( Numeric< float >::equals( v[ 2 ], u[ 2 ] / u.getMagnitude() ) );
+}
+
+TEST( VectorTest, times )
+{
+	Vector< 3, float > u( 2, 0, 5 );
+	Vector< 3, float > v( 3, 4, 10 );
+	u.times( v );
+
+	EXPECT_EQ( 6, u.x() );
+	EXPECT_EQ( 0, u.y() );
+	EXPECT_EQ( 50, u.z() );
 }
 

@@ -70,13 +70,13 @@ namespace crimild {
 				T s = -b / 2 * a;
 
 				if ( discriminant == 0 ) {
-					t0 = t1 = -b / 2 * a;
+					t0 = t1 = s;
 					return 1;	// one real root
 				}
 				else {
-					T sqrtDiscriminant = static_cast< T >( std::sqrt( discriminant ) / a );
-					t0 = s + sqrtDiscriminant;
-					t1 = s - sqrtDiscriminant;
+					T sqrtDiscriminant = static_cast< T >( std::sqrt( discriminant ) / ( 2 * a ) );
+					t0 = s - sqrtDiscriminant;
+					t1 = s + sqrtDiscriminant;
 					return 2;	// two real roots
 				}
 			}

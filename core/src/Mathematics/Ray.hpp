@@ -109,6 +109,11 @@ namespace crimild {
 			return !( *this == ray );
 		}
 
+		VectorImpl getPointAt( float t ) const
+		{
+			return getOrigin() + t * getDirection();
+		}
+
 	private:
 		VectorImpl _origin;
 		VectorImpl _direction;

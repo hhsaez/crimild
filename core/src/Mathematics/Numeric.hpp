@@ -104,9 +104,19 @@ namespace crimild {
 			return ( x * x );
 		}
 
+		static PRECISION pow( PRECISION x, PRECISION e )
+		{
+			return std::pow( x, e );
+		}
+
 		static PRECISION noiseFunc( PRECISION reference )
 		{
 			return sqrt( -2 * log( ( PRECISION ) std::rand() / RAND_MAX ) ) * sin( 2 * PI * ( PRECISION ) std::rand() / RAND_MAX ) * reference;
+		}
+
+		static PRECISION clamp( PRECISION input )
+		{
+			return clamp( input, 0, 1 );
 		}
 
 		static PRECISION clamp( PRECISION input, PRECISION min, PRECISION max )

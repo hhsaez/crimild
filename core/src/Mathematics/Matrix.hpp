@@ -380,6 +380,14 @@ namespace crimild {
 			_data[ 8 ] = static_cast< PRECISION >( cosine + ( 1 - cosine ) * axis[ 2 ] * axis[ 2 ] );
 		}
 
+		Matrix &times( const Matrix &other )
+		{
+			for ( size_t i = 0; i < SIZE; i++ ) {
+				_data[ i ] = _data[ i ] * other._data[ i ];
+			}
+			return *this;
+		}
+
 		template< typename U >
 		friend Matrix< SIZE, U > operator-( const Matrix< SIZE, U > &a );
 

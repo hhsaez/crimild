@@ -46,9 +46,28 @@ namespace crimild {
 	template< unsigned int SIZE, typename PRECISION >
 	class Vector {
 	public:
+		static const Vector< SIZE, PRECISION > UNIT_X;
+		static const Vector< SIZE, PRECISION > UNIT_Y;
+		static const Vector< SIZE, PRECISION > UNIT_Z;
+		static const Vector< SIZE, PRECISION > UNIT_W;
+
+		static const Vector< SIZE, PRECISION > ZERO;
+		static const Vector< SIZE, PRECISION > ONE;
+
+	public:
 		Vector( void )
 		{
 			// vector's data is not initialized in order to avoid overhead
+		}
+
+		/**
+			\brief Initialize all components to the same value
+		*/
+		explicit Vector( PRECISION value ) 
+		{
+			for ( int i = 0; i < SIZE; i++ ) {
+				_data[ i ] = value;
+			}
 		}
 
 		Vector( PRECISION x, PRECISION y )
@@ -220,6 +239,14 @@ namespace crimild {
 		Vector project( const Vector &base )
 		{
 			return ( static_cast< PRECISION >( *this * base / ( base.getSquaredMagnitude() ) ) * base );
+		}
+
+		Vector &times( const Vector &other )
+		{
+			for ( size_t i = 0; i < SIZE; i++ ) {
+				_data[ i ] = _data[ i ] * other._data[ i ];
+			}
+			return *this;
 		}
 
 		template< typename U >
@@ -606,6 +633,13 @@ namespace crimild {
 		return out;
 	}
 
+	template< unsigned int SIZE, typename PRECISION > const Vector< SIZE, PRECISION > Vector< SIZE, PRECISION >::UNIT_X = Vector< SIZE, PRECISION >( 1, 0 );
+	template< unsigned int SIZE, typename PRECISION > const Vector< SIZE, PRECISION > Vector< SIZE, PRECISION >::UNIT_Y( 0, 1 );
+	template< unsigned int SIZE, typename PRECISION > const Vector< SIZE, PRECISION > Vector< SIZE, PRECISION >::UNIT_Z( 0, 0, 1 );
+	template< unsigned int SIZE, typename PRECISION > const Vector< SIZE, PRECISION > Vector< SIZE, PRECISION >::UNIT_W( 0, 0, 0, 1 );
+	template< unsigned int SIZE, typename PRECISION > const Vector< SIZE, PRECISION > Vector< SIZE, PRECISION >::ZERO( static_cast< PRECISION >( 0.0f ) );
+	template< unsigned int SIZE, typename PRECISION > const Vector< SIZE, PRECISION > Vector< SIZE, PRECISION >::ONE( 1 );
+
 	typedef Vector< 2, unsigned int > Vector2ui;
 	typedef Vector< 2, int > Vector2i;
 	typedef Vector< 2, float > Vector2f;
@@ -621,7 +655,9 @@ namespace crimild {
 	typedef Vector< 4, float > Vector4f;
 
 	typedef Vector< 4, float > RGBAColorf;
+	typedef Vector< 4, int > RGBAColori;
 	typedef Vector< 3, float > RGBColorf;
+	typedef Vector< 3, int > RGBColori;
 
 }
 

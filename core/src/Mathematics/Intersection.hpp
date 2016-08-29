@@ -50,12 +50,7 @@ namespace crimild {
 			T b = 2 * ( centerDiff * ray.getDirection() );
 			T c = centerDiff.getSquaredMagnitude() - ( sphere.getRadius() * sphere.getRadius() );
 
-	        T t0, t1;
-			if ( Root::compute( a, b, c, t0, t1 ) > 0 ) {
-				return ( Numeric< T >::max( t0, t1 ) >= 0.0f );
-			}
-
-			return false;
+			return Root::hasRealRoots( a, b, c );
 		}
 
 		/**
@@ -63,7 +58,10 @@ namespace crimild {
 			\return The intersection time (-1 if they do not intersect)
 		 */
 		template< typename T >
-		static T find( const Sphere< T > &sphere, const Ray< 3, T > &ray )
+		static T find( const Sphere< T > &sphere, 
+					   const Ray< 3, T > &ray, 
+					   T lowerBound = Numeric< T >::ZERO_TOLERANCE, 
+					   T upperBound = std::numeric_limits< T >::max() )
 		{
 			Vector< 3, T > centerDiff( ray.getOrigin() - sphere.getCenter() );
 			T a = ray.getDirection().getSquaredMagnitude();
@@ -71,12 +69,19 @@ namespace crimild {
 			T c = centerDiff.getSquaredMagnitude() - ( sphere.getRadius() * sphere.getRadius() );
 
 	        T t0, t1;
-			if ( Root::compute( a, b, c, t0, t1 ) > 0 ) {
-				return Numeric< T >::max( t0, t1 );
-			}
-			else {
+			if ( Root::compute( a, b, c, t0, t1 ) == 0 ) {
 				return -1;
 			}
+
+			if ( t0 < upperBound && t0 > lowerBound ) {
+				return t0;
+			}
+
+			if ( t1 < upperBound && t1 > lowerBound ) {
+				return t1;
+			}
+
+			return -1;
 		}
 
 		/**
