@@ -45,6 +45,11 @@ TEST( MessageQueueTest, broadcastMessage )
 	EXPECT_EQ( 2, m.getCallCount() );
 }
 
+TEST( MessageQueueTest, broadcastMessageWithoutHandler )
+{
+	MessageQueue::getInstance()->broadcastMessage( MockMessage {} );
+}
+
 TEST( MessageQueueTest, unregisterMessageHandler )
 {
 	MockMessenger m;
@@ -116,5 +121,10 @@ TEST( MessageQueueTest, pushMessage )
 
 	MessageQueue::getInstance()->dispatchDeferredMessages();
 	EXPECT_EQ( 2, m.getCallCount() );
+}
+
+TEST( MessageQueueTest, pushMessageWithoutHandlers )
+{
+	MessageQueue::getInstance()->pushMessage( MockMessage { } );
 }
 

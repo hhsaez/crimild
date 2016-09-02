@@ -128,7 +128,7 @@ namespace crimild {
 	public:
         MessageQueue( void )
         {
-            Log::Debug << "Initializing message queue" << Log::End;
+            //Log::Debug << "Initializing message queue" << Log::End;
         }
         
         virtual ~MessageQueue( void )
@@ -150,7 +150,8 @@ namespace crimild {
 
 		void unregisterHandler( Messenger *target )
 		{
-			for ( auto d : _dispatchers ) {
+			auto ds = _dispatchers;
+			for ( auto d : ds ) {
 				if ( d != nullptr ) {
 					d->unregisterHandler( target );
 				}
@@ -179,7 +180,8 @@ namespace crimild {
 
 		void dispatchDeferredMessages( void )
 		{
-			for ( auto d : _dispatchers ) {
+			auto ds = _dispatchers;
+			for ( auto d : ds ) {
 				if ( d != nullptr ) {
 					d->dispatchDeferredMessages();
 				}
@@ -189,7 +191,8 @@ namespace crimild {
 	public:
 		void clear( void )
 		{
-			for ( auto d : _dispatchers ) {
+			auto ds = _dispatchers;
+			for ( auto d : ds ) {
 				if ( d != nullptr ) {
 					d->clear();
 				}
@@ -205,8 +208,8 @@ namespace crimild {
 	{
 		MessageQueue::getInstance()->registerMessageDispatcher( this );
 	}
-    
-	class Messenger {
+
+	class Messenger : public NonCopyable {
 	public:
 		Messenger( void );
 		virtual ~Messenger( void );

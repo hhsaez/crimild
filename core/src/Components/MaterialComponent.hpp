@@ -46,7 +46,7 @@ namespace crimild {
 
 		bool hasMaterials( void ) const { return _materials.size() > 0; }
         
-        void attachMaterial( Material *material ) { attachMaterial( std::move( crimild::retain( material ) ) ); }
+        void attachMaterial( Material *material ) { attachMaterial( crimild::retain( material ) ); }
 		void attachMaterial( SharedPointer< Material > const &material );
         
 		void detachAllMaterials( void );

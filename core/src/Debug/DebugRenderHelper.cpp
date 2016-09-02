@@ -72,7 +72,7 @@ void DebugRenderHelper::renderLines( Renderer *renderer, Camera *camera, const V
 	renderer->setAlphaState( alphaState );
 
 	if ( linesVBO->getVertexCount() < count ) {
-        auto vbo = std::move( crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3, count, ( const float * ) &data[ 0 ] ) );
+        auto vbo = crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3, count, ( const float * ) &data[ 0 ] );
         AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_HELPER_VBO_LINES, vbo );
         linesVBO = crimild::get_ptr( vbo );
 	}

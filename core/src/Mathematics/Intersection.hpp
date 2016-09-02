@@ -45,12 +45,7 @@ namespace crimild {
 		template< typename T >
 		static bool test( const Sphere< T > &sphere, const Ray< 3, T > &ray )
 		{
-			Vector< 3, T > centerDiff( ray.getOrigin() - sphere.getCenter() );
-			T a = ray.getDirection().getSquaredMagnitude();
-			T b = 2 * ( centerDiff * ray.getDirection() );
-			T c = centerDiff.getSquaredMagnitude() - ( sphere.getRadius() * sphere.getRadius() );
-
-			return Root::hasRealRoots( a, b, c );
+			return find( sphere, ray ) >= 0;
 		}
 
 		/**

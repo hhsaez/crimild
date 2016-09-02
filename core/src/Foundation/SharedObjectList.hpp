@@ -101,7 +101,7 @@ namespace crimild {
             
         void add( ObjectType *obj )
         {
-            add( std::move( crimild::retain( obj ) ) );
+            add( crimild::retain( obj ) );
         }
             
         void addFront( ObjectPtr const &obj )
@@ -112,7 +112,7 @@ namespace crimild {
         
         void addFront( ObjectType *obj )
         {
-            addFront( std::move( crimild::retain( obj ) ) );
+            addFront( crimild::retain( obj ) );
         }
         
         ObjectPtr remove( ObjectPtr const &obj )

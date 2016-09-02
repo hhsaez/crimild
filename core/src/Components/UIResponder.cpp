@@ -76,7 +76,7 @@ crimild::BoundingVolume *UIResponder::getBoundingVolume( void )
 
 void UIResponder::setBoundingVolume( crimild::BoundingVolume *boundingVolume )
 {
-    _boundingVolume = std::move( crimild::retain( boundingVolume ) );
+    _boundingVolume = crimild::retain( boundingVolume );
 }
 
 

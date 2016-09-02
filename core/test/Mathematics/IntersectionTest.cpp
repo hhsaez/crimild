@@ -37,15 +37,15 @@ TEST( IntersectionTest, testRaySphere )
 	Ray3f r0( Vector3f( 0.0f, 0.0f, -5.0f ), Vector3f( 0.0f, 0.0f, -1.0f ) );
 	Ray3f r1( Vector3f( 0.0f, 0.0f, -5.0f ), Vector3f( 0.0f, 0.0f, 1.0f ) );
 
-	EXPECT_TRUE( Intersection::test( s0, r0 ) == false );
-	EXPECT_TRUE( Intersection::test( s0, r1 ) == true );
+	EXPECT_FALSE( Intersection::test( s0, r0 ) );
+	EXPECT_TRUE( Intersection::test( s0, r1 ) );
 
 	Sphere3f sphere1( Vector3f( 0.0f, 0.0f, -10.0f ), 2.0f );
 	Sphere3f sphere2( Vector3f( 0.0f, 0.0f, 10.0f ), 2.0f );
 	Ray3f ray( Vector3f( 0.0f, 0.0f, 0.0f ), Vector3f( 0.0f, 0.0f, -1.0 ) );
 
-	EXPECT_TRUE( Intersection::test( sphere1, ray ) == true );
-	EXPECT_TRUE( Intersection::test( sphere2, ray ) == false );
+	EXPECT_TRUE( Intersection::test( sphere1, ray ) );
+	EXPECT_FALSE( Intersection::test( sphere2, ray ) );
 }
 
 TEST( IntersectionTest, testRayPlane )
