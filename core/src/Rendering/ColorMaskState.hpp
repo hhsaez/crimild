@@ -25,47 +25,42 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "FrameBufferObject.hpp"
+#ifndef CRIMILD_RENDERING_COLOR_MASK_STATE_
+#define CRIMILD_RENDERING_COLOR_MASK_STATE_
 
-using namespace crimild;
+#include "RenderState.hpp"
 
-RenderTarget::RenderTarget( RenderTarget::Type type, RenderTarget::Output output, int width, int height )
-    : RenderTarget( type, output, width, height, false )
-{
-
-}
-
-RenderTarget::RenderTarget( RenderTarget::Type type, RenderTarget::Output output, int width, int height, bool floatTextureHint )
-    : _texture( crimild::alloc< Texture >() )
-{
-    _type = type;
-    _output = output;
-    _width = width;
-    _height = height;
-    _useFloatTexture = floatTextureHint;
-}
-
-RenderTarget::~RenderTarget( void )
-{
+namespace crimild {
     
+	class ColorMaskState : public RenderState {
+    public:
+        static const SharedPointer< ColorMaskState > DISABLED;
+        static const SharedPointer< ColorMaskState > ENABLED;
+
+	public:
+		ColorMaskState( bool enabled, bool rMask, bool gMask, bool bMask, bool aMask );
+		virtual ~ColorMaskState( void );
+
+		void setRMask( bool value ) { _rMask = value; }
+		bool getRMask( void ) const { return _rMask; }
+
+		void setGMask( bool value ) { _gMask = value; }
+		bool getGMask( void ) const { return _gMask; }
+
+		void setBMask( bool value ) { _bMask = value; }
+		bool getBMask( void ) const { return _bMask; }
+
+		void setAMask( bool value ) { _aMask = value; }
+		bool getAMask( void ) const { return _aMask; }
+
+	private:
+		bool _rMask;
+		bool _gMask;
+		bool _bMask;
+		bool _aMask;
+	};
+
 }
 
-FrameBufferObject::FrameBufferObject( int width, int height )
-	: _width( width ),
-	  _height( height ),
-	  _clearColor( 0.0f, 0.0f, 0.0f, 0.0f )
-{
-
-}
-
-FrameBufferObject::~FrameBufferObject( void )
-{
-
-}
-
-void FrameBufferObject::resize( int width, int height )
-{
-    _width = width;
-    _height = height;
-}
+#endif
 

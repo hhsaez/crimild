@@ -38,9 +38,6 @@ Settings::Settings( void )
 Settings::Settings( int argc, char **argv )
 {
     parseCommandLine( argc, argv );
-    if ( argc > 0 && argv != nullptr ) {
-        FileSystem::getInstance().init( argc, argv );
-    }
 }
 
 Settings::~Settings( void )
@@ -73,8 +70,12 @@ std::string Settings::get< std::string >( std::string key, std::string defaultVa
 
 void Settings::parseCommandLine( int argc, char **argv )
 {
+    if ( argc > 0 && argv != nullptr ) {
+	    FileSystem::getInstance().init( argc, argv );
+    }
+
 	if ( argc > 0 ) {
-		_settings[ "__base_directory" ] = argv[ 0 ];
+		_settings[ "__base_directory" ] = FileSystem::getInstance().getBaseDirectory();
 	}
 
 	for ( int i = 1; i < argc; i++ ) {

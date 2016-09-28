@@ -49,8 +49,9 @@ Renderer::Renderer( void )
 	  _vertexBufferObjectCatalog( crimild::alloc< Catalog< VertexBufferObject >>() ),
 	  _indexBufferObjectCatalog( crimild::alloc< Catalog< IndexBufferObject >>() ),
 	  _frameBufferObjectCatalog( crimild::alloc< Catalog< FrameBufferObject >>() )
-
 {
+	_screenBuffer = crimild::alloc< FrameBufferObject >( 800, 600 );
+
  	generateAuxFBO( FBO_AUX_256, 256, 256 );
  	generateAuxFBO( FBO_AUX_512, 512, 512 );
  	generateAuxFBO( FBO_AUX_1024, 1024, 1024 );   
@@ -196,6 +197,7 @@ void Renderer::bindMaterial( ShaderProgram *program, Material *material )
 	setDepthState( material->getDepthState() );
 	setAlphaState( material->getAlphaState() );
 	setCullFaceState( material->getCullFaceState() );
+	setColorMaskState( material->getColorMaskState() );
 }
 
 void Renderer::unbindMaterial( ShaderProgram *program, Material *material )

@@ -41,7 +41,7 @@ FileSystem &FileSystem::getInstance( void )
 
 FileSystem::FileSystem( void )
 {
-
+	setBaseDirectory( "." );
 }
 
 FileSystem::~FileSystem( void )
@@ -89,7 +89,12 @@ void FileSystem::init( int argc, char **argv )
 std::string FileSystem::extractDirectory( std::string path )
 {
 	// handles both Win32 and Unix like paths
-	return path.substr( 0, Numerici::max( path.find_last_of( '\\' ), path.find_last_of( '/' ) ) );
+	auto dir = path.substr( 0, Numerici::max( path.find_last_of( '\\' ), path.find_last_of( '/' ) ) );
+	if ( dir == path ) {
+		return "";
+	}
+
+	return dir;
 }
 
 std::string FileSystem::pathForResource( std::string filePath )

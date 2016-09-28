@@ -33,9 +33,9 @@ bool WindowSystem::start( void )
     int framebufferHeight;
 	glfwGetFramebufferSize( _window, &framebufferWidth, &framebufferHeight);
 
-    auto screenBuffer = crimild::alloc< FrameBufferObject >( framebufferWidth, framebufferHeight );
     auto renderer = Simulation::getInstance()->getRenderer();
-    renderer->setScreenBuffer( screenBuffer );
+    auto screenBuffer = renderer->getScreenBuffer();
+ 	screenBuffer->resize( framebufferWidth, framebufferHeight );
     renderer->configure();
     
     crimild::async( crimild::AsyncDispatchPolicy::MAIN_QUEUE, std::bind( &WindowSystem::update, this ) );

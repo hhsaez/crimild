@@ -45,6 +45,7 @@ namespace crimild {
     class Camera;
     class CullFaceState;
     class DepthState;
+    class ColorMaskState;
     class FrameBufferObject;
     class Geometry;
     class IndexBufferObject;
@@ -114,6 +115,9 @@ namespace crimild {
 
         void setCullFaceState( SharedPointer< CullFaceState > const &state ) { setCullFaceState( crimild::get_ptr( state ) ); }
         virtual void setCullFaceState( CullFaceState *state ) = 0;
+
+        void setColorMaskState( SharedPointer< ColorMaskState > const &state ) { setColorMaskState( crimild::get_ptr( state ) ); }
+        virtual void setColorMaskState( ColorMaskState *state ) = 0;
 
 	public:
         virtual void bindTexture( ShaderLocation *location, Texture *texture );
