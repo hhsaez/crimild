@@ -92,6 +92,8 @@ namespace crimild {
 		int getWidth( void ) const { return _width; }
 		int getHeight( void ) const { return _height; }
 
+        void resize( int width, int height );
+
         float getAspectRatio( void ) const { return ( float ) _width / ( float ) _height; }
 
 		void setClearColor( const RGBAColorf &color ) { _clearColor = color; }

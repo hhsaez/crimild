@@ -39,7 +39,8 @@ Material::Material( void )
 	  _emissive( 0.0f ),
       _depthState( crimild::alloc< DepthState >( true ) ),
       _alphaState( crimild::alloc< AlphaState >( false ) ),
-      _cullFaceState( crimild::alloc< CullFaceState >( true, CullFaceState::CullFaceMode::BACK ) )
+      _cullFaceState( crimild::alloc< CullFaceState >( true, CullFaceState::CullFaceMode::BACK ) ),
+      _colorMaskState( crimild::alloc< ColorMaskState >( true, true, true, true, true ) )
 {
 
 }

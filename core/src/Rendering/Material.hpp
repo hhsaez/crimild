@@ -31,6 +31,7 @@
 #include "AlphaState.hpp"
 #include "CullFaceState.hpp"
 #include "DepthState.hpp"
+#include "ColorMaskState.hpp"
 #include "Texture.hpp"
 #include "ShaderProgram.hpp"
 
@@ -90,6 +91,9 @@ namespace crimild {
 
         void setCullFaceState( SharedPointer< CullFaceState > const &cullFaceState ) { _cullFaceState = cullFaceState; }
         CullFaceState *getCullFaceState( void ) { return crimild::get_ptr( _cullFaceState ); }
+
+        void setColorMaskState( SharedPointer< ColorMaskState > const &colorMaskState ) { _colorMaskState = colorMaskState; }
+        ColorMaskState *getColorMaskState( void ) { return crimild::get_ptr( _colorMaskState ); }
         
         bool castShadows( void ) const { return _castShadows; }
         void setCastShadows( bool value ) { _castShadows = value; }
@@ -114,6 +118,7 @@ namespace crimild {
 		SharedPointer< DepthState > _depthState;
 		SharedPointer< AlphaState > _alphaState;
 		SharedPointer< CullFaceState > _cullFaceState;
+		SharedPointer< ColorMaskState > _colorMaskState;
         
         bool _castShadows = true;
         bool _receiveShadows = true;

@@ -63,7 +63,9 @@ OpenGLRenderer::OpenGLRenderer( SharedPointer< FrameBufferObject > const &screen
 	setFrameBufferObjectCatalog( crimild::alloc< FrameBufferObjectCatalog >( this ) );
 	setTextureCatalog( crimild::alloc< TextureCatalog >() );
 
-	setScreenBuffer( screenBuffer );
+	if ( screenBuffer != nullptr ) {
+		setScreenBuffer( screenBuffer );
+	}
 
 	// TODO: Move these calls to 'configure()'?
     setShaderProgram( Renderer::SHADER_PROGRAM_RENDER_PASS_FORWARD, crimild::alloc< ForwardRenderShaderProgram >() );
@@ -461,4 +463,21 @@ void OpenGLRenderer::setCullFaceState( CullFaceState *state )
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
+void OpenGLRenderer::setColorMaskState( ColorMaskState *state )
+{
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    
+	if ( state->isEnabled() ) {
+		glColorMask( 
+			state->getRMask() ? GL_TRUE : GL_FALSE,
+			state->getGMask() ? GL_TRUE : GL_FALSE,
+			state->getBMask() ? GL_TRUE : GL_FALSE,
+			state->getAMask() ? GL_TRUE : GL_FALSE );
+	}
+	else {
+		glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
+	}
+
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+}
 

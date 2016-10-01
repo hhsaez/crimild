@@ -25,47 +25,25 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "FrameBufferObject.hpp"
+#include "ColorMaskState.hpp"
 
 using namespace crimild;
 
-RenderTarget::RenderTarget( RenderTarget::Type type, RenderTarget::Output output, int width, int height )
-    : RenderTarget( type, output, width, height, false )
+const SharedPointer< ColorMaskState > ColorMaskState::DISABLED( crimild::alloc< ColorMaskState >( true, false, false, false, false ) );
+const SharedPointer< ColorMaskState > ColorMaskState::ENABLED( crimild::alloc< ColorMaskState >( true, true, true, true, true ) );
+
+ColorMaskState::ColorMaskState( bool enabled, bool rMask, bool gMask, bool bMask, bool aMask )
+	: RenderState( enabled ),
+	  _rMask( rMask ),
+	  _gMask( gMask ),
+	  _bMask( bMask ),
+	  _aMask( aMask )
 {
 
 }
 
-RenderTarget::RenderTarget( RenderTarget::Type type, RenderTarget::Output output, int width, int height, bool floatTextureHint )
-    : _texture( crimild::alloc< Texture >() )
-{
-    _type = type;
-    _output = output;
-    _width = width;
-    _height = height;
-    _useFloatTexture = floatTextureHint;
-}
-
-RenderTarget::~RenderTarget( void )
-{
-    
-}
-
-FrameBufferObject::FrameBufferObject( int width, int height )
-	: _width( width ),
-	  _height( height ),
-	  _clearColor( 0.0f, 0.0f, 0.0f, 0.0f )
+ColorMaskState::~ColorMaskState( void )
 {
 
-}
-
-FrameBufferObject::~FrameBufferObject( void )
-{
-
-}
-
-void FrameBufferObject::resize( int width, int height )
-{
-    _width = width;
-    _height = height;
 }
 
