@@ -124,7 +124,7 @@ void ShallowCopy::copyNode( Node *src, Node *dst )
 
 	auto srcSkinnedMeshComponent = src->getComponent< SkinnedMeshComponent >();
 	if ( srcSkinnedMeshComponent != nullptr ) {
-		auto dstSkinnedMeshComponent = crimild::alloc< SkinnedMeshComponent >( crimild::retain( srcSkinnedMeshComponent->getSkinnedMesh() ) );
+		auto dstSkinnedMeshComponent = crimild::alloc< SkinnedMeshComponent >( srcSkinnedMeshComponent->getSkinnedMesh()->clone() );
 		dst->attachComponent( dstSkinnedMeshComponent );
 	}
 }

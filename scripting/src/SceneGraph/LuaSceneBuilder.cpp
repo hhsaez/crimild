@@ -127,13 +127,23 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
             
             auto scene = AssetManager::getInstance()->get< Group >( filename );
             if ( scene == nullptr ) {
+                SharedPointer< Group > tmp;
+                if ( StringUtils::getFileExtension( filename ) == ".crimild" ) {
+                    FileStream is( FileSystem::getInstance().pathForResource( filename ), FileStream::OpenMode::READ );
+                    is.load();
+                    if ( is.getObjectCount() > 0 ) {
+                        tmp = is.getObjectAt< Group >( 0 );
+                    }
+                }
+                else {
 #ifdef CRIMILD_ENABLE_IMPORT
-                SceneImporter importer;
-                auto tmp = importer.import( FileSystem::getInstance().pathForResource( filename ) );
+                    SceneImporter importer;
+                    tmp = importer.import( FileSystem::getInstance().pathForResource( filename ) );
 #else
-                OBJLoader loader( FileSystem::getInstance().pathForResource( filename ) );
-                auto tmp = loader.load();
+                    OBJLoader loader( FileSystem::getInstance().pathForResource( filename ) );
+                    tmp = loader.load();
 #endif
+                }
                 AssetManager::getInstance()->set( filename, tmp );
                 scene = crimild::get_ptr( tmp );
             }

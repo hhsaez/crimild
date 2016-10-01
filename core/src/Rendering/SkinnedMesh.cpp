@@ -480,6 +480,13 @@ SkinnedMesh::~SkinnedMesh( void )
 
 }
 
+SharedPointer< SkinnedMesh > SkinnedMesh::clone( void )
+{
+	auto result = crimild::alloc< SkinnedMesh >();
+	result->setSkeleton( crimild::retain( getSkeleton() ) );
+	return result;
+}
+
 bool SkinnedMesh::registerInStream( Stream &s )
 {
 	if ( !StreamObject::registerInStream( s ) ) {

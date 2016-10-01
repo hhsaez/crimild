@@ -57,7 +57,7 @@ namespace crimild {
     
     class RenderQueue : public SharedObject {
     public:
-        using GeometryContext = std::pair< Geometry *, Matrix4f >;
+        using GeometryContext = std::pair< SharedPointer< Geometry >, Matrix4f >;
         using PrimitiveMap = std::map< Primitive *, std::vector< GeometryContext >>;
         using Renderables = std::map< Material *, PrimitiveMap >;
 
@@ -68,7 +68,7 @@ namespace crimild {
         void reset( void );
         
         void setCamera( Camera *camera );
-        Camera *getCamera( void ) { return _camera; }
+        Camera *getCamera( void ) { return crimild::get_ptr( _camera ); }
         
         const Matrix4f &getViewMatrix( void ) const { return _viewMatrix; }
         const Matrix4f &getProjectionMatrix( void ) const { return _projectionMatrix; }
@@ -86,12 +86,12 @@ namespace crimild {
         Renderables &getScreenObjects( void ) { return _screenObjects; }
         
     private:
-        Camera *_camera = nullptr;
+        SharedPointer< Camera > _camera;
         
         Matrix4f _viewMatrix;
         Matrix4f _projectionMatrix;
         
-        std::vector< Light * > _lights;
+        std::vector< SharedPointer< Light >> _lights;
 
         Renderables _shadowCasters;
         Renderables _shadedObjects;

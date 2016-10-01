@@ -138,7 +138,12 @@ void RenderSystem::presentFrame( void )
 void RenderSystem::stop( void )
 {
 	System::stop();
-    
+
+    if ( _renderQueue != nullptr ) {
+        _renderQueue->reset();
+        _renderQueue = nullptr;
+    }
+
     unregisterMessageHandler< messaging::RenderQueueAvailable >();
     unregisterMessageHandler< messaging::SceneChanged >();
     unregisterMessageHandler< messaging::RenderNextFrame >();

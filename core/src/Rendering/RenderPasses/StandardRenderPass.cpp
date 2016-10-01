@@ -195,7 +195,14 @@ void StandardRenderPass::renderShadedObjects( Renderer *renderer, RenderQueue *r
                 CRIMILD_PROFILE( "Draw Primitive" )
                 
                 auto geometry = geometryIt.first;
+                if ( geometry == nullptr ) {
+                    continue;
+                }
+                
                 auto rc = geometry->getComponent< RenderStateComponent >();
+                if ( rc == nullptr ) {
+                    continue;
+                }
 
                 renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_COUNT_UNIFORM ), 0 );
                 if ( rc->getSkinnedMesh() != nullptr && rc->getSkinnedMesh()->getAnimationState() != nullptr ) {
@@ -284,7 +291,14 @@ void StandardRenderPass::renderNonShadedObjects( Renderer *renderer, RenderQueue
                 CRIMILD_PROFILE( "Draw Primitive" )
 
                 auto geometry = geometryIt.first;
+                if ( geometry == nullptr ) {
+                    continue;
+                }
+                
                 auto rc = geometry->getComponent< RenderStateComponent >();
+                if ( rc == nullptr ) {
+                    continue;
+                }
 
                 renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_COUNT_UNIFORM ), 0 );
                 if ( rc->getSkinnedMesh() != nullptr && rc->getSkinnedMesh()->getAnimationState() != nullptr ) {

@@ -74,7 +74,7 @@ namespace crimild {
         template< class T >
         static void shuffle( std::vector< T > &input )
         {
-            unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+            auto seed = std::chrono::system_clock::now().time_since_epoch().count();
             std::shuffle( input.begin(), input.end(), std::default_random_engine( seed ) );
         }
         

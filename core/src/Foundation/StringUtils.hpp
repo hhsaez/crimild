@@ -77,8 +77,8 @@ namespace crimild {
 
 		static std::string getFileExtension( std::string path ) 
 		{
-			int pos = path.find_last_of( "." );
-			if ( pos < 0 ) {
+			auto pos = path.find_last_of( "." );
+			if ( pos == std::string::npos ) {
 				return "";
 			}
 

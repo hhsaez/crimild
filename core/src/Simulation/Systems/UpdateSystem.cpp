@@ -38,7 +38,7 @@ bool UpdateSystem::start( void )
     
     auto weakSelf = this;
     registerMessageHandler< messaging::SimulationWillUpdate >( [weakSelf]( messaging::SimulationWillUpdate const &message ) {
-        crimild::async( AsyncDispatchPolicy::BACKGROUND_QUEUE_SYNC, std::bind( &UpdateSystem::update, weakSelf ) );
+        crimild::async( AsyncDispatchPolicy::MAIN_QUEUE_SYNC, std::bind( &UpdateSystem::update, weakSelf ) );
     });
 
 	return true;

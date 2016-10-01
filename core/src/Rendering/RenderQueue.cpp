@@ -26,6 +26,7 @@
  */
 
 #include "Rendering/RenderQueue.hpp"
+#include "Primitives/Primitive.hpp"
 
 using namespace crimild;
 
@@ -36,7 +37,7 @@ RenderQueue::RenderQueue( void )
 
 RenderQueue::~RenderQueue( void )
 {
-    
+    reset();
 }
 
 void RenderQueue::reset( void )
@@ -53,12 +54,13 @@ void RenderQueue::reset( void )
 
 void RenderQueue::setCamera( Camera *camera )
 {
-    _camera = camera;
-    if ( _camera != nullptr ) {
+    if ( camera != nullptr ) {
+        _camera = crimild::retain( camera );
         _viewMatrix = _camera->getViewMatrix();
         _projectionMatrix = _camera->getProjectionMatrix();
     }
     else {
+        _camera = nullptr;
         _viewMatrix.makeIdentity();
         _projectionMatrix.makeIdentity();
     }
@@ -67,28 +69,28 @@ void RenderQueue::setCamera( Camera *camera )
 void RenderQueue::push( Material *material, Primitive *primitive, Geometry *geometry, const Transformation &world, bool renderOnScreen )
 {
     if ( renderOnScreen ) {
-        _screenObjects[ material ][ primitive ].push_back( std::make_pair( geometry, world.computeModelMatrix() ) );
+        _screenObjects[ material ][ primitive ].push_back( std::make_pair( crimild::retain( geometry ), world.computeModelMatrix() ) );
     }
     else if ( material->getAlphaState()->isEnabled() || material->getProgram() != nullptr ) {
-        _translucentObjects[ material ][ primitive ].push_back( std::make_pair( geometry, world.computeModelMatrix() ) );
+        _translucentObjects[ material ][ primitive ].push_back( std::make_pair( crimild::retain( geometry ), world.computeModelMatrix() ) );
     }
     else {
         if ( material->castShadows() ) {
-            _shadowCasters[ material ][ primitive ].push_back( std::make_pair( geometry, world.computeModelMatrix() ) );
+            _shadowCasters[ material ][ primitive ].push_back( std::make_pair( crimild::retain( geometry ), world.computeModelMatrix() ) );
         }
         
         if ( material->receiveShadows() ) {
-            _shadedObjects[ material ][ primitive ].push_back( std::make_pair( geometry, world.computeModelMatrix() ) );
+            _shadedObjects[ material ][ primitive ].push_back( std::make_pair( crimild::retain( geometry ), world.computeModelMatrix() ) );
         }
         else {
-            _opaqueObjects[ material ][ primitive ].push_back( std::make_pair( geometry, world.computeModelMatrix() ) );
+            _opaqueObjects[ material ][ primitive ].push_back( std::make_pair( crimild::retain( geometry ), world.computeModelMatrix() ) );
         }
     }
 }
 
 void RenderQueue::push( Light *light )
 {
-    _lights.push_back( light );
+    _lights.push_back( crimild::retain( light ) );
 }
 
 void RenderQueue::each( Renderables const &objects, std::function< void( Material *, PrimitiveMap const & ) > callback )
@@ -104,7 +106,7 @@ void RenderQueue::each( std::function< void ( Light *, int ) > callback )
     auto lights = _lights;
     int i = 0;
     for ( auto l : lights ) {
-        callback( l, i++ );
+        callback( crimild::get_ptr( l ), i++ );
     }
 }
 
