@@ -38,3 +38,4 @@ tools/fontgen/fontgen
 scripting/test/Debug
 /bin
 *.crimild
+third-party/glew-1.13.0
