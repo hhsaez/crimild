@@ -88,8 +88,10 @@ void main( void )
         if ( i >= uLightCount ) {
             break;
         }
+
+        bool hasDirection = dot( uLights[ i ].direction, uLights[ i ].direction ) != 0.0;
         
-        vec3 lightVec = normalize( uLights[ i ].position - vWorldVertex.xyz );
+        vec3 lightVec = normalize( hasDirection ? uLights[ i ].direction : ( uLights[ i ].position - vWorldVertex.xyz ) );
         vec3 halfVector = -normalize( reflect( lightVec, vWorldNormal ) );
         vec3 eyeVector = normalize( vViewVec );
         
@@ -119,7 +121,7 @@ void main( void )
         float l = dot( normal, lightVec );
         if ( l > 0.0 ) {
             float spotlight = 1.0;
-            if ( ( uLights[ i ].direction.x != 0.0 ) || ( uLights[ i ].direction.y != 0.0 ) || ( uLights[ i ].direction.z != 0.0 ) ) {
+            if ( hasDirection && uLights[ i ].outerCutoff > 0 ) {
                 spotlight = max( -dot( lightVec, uLights[ i ].direction ), 0.0 );
                 float spotlightFade = clamp( ( uLights[ i ].outerCutoff - spotlight ) / ( uLights[ i ].outerCutoff - uLights[ i ].innerCutoff ), 0.0, 1.0 );
                 spotlight = pow( spotlight * spotlightFade, uLights[ i ].exponent );
