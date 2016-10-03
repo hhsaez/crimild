@@ -33,6 +33,78 @@ The easiest way to contribute is to submit pull requests with your changes again
 Release Notes
 ====================
 
+v4.2.0
+------
+
+* Math
+	* Return best match in intersection test
+	* Implemented pow function in numeric
+	* Implemented times function in Matrix and Vector to perform element-wise multipliciation
+	* Added method in Ray class to compute interpolated point in ray
+	* Fixed polynomial root solver bug
+	* Added helper constants in Vector class for known vectors
+    * Improved numerical methods
+    * Fixed Quaternion SLERP interpolation
+    * Allow transformations to be created form a 4x4 matrix
+
+* Core
+    * Implemented NonCopyable classes (replacing CRIMILD_DISALLOW_COPY_AND_ASSIGN macro)
+    * Implemented simple low-overhead RTTI facilities
+    * Improved SkinnedMesh animation
+	* Implemented streaming for objects in a scene
+	* Fixed concurrency problems with render queues.
+	* Fixed cloning for skinned mesh
+    * Fixed FileSystem base directory bug
+	* Check if message dispatcher instances are valid before invoking them
+	* Implemented ArcPrimitive
+    * Save skinned mesh (if any) when updating render state for a scene
+	* Avoid discarding groups on culling pass.
+	* New particle system
+	* Implemented progress callback for animations. Fixed time for animation reset
+
+* Rendering
+	* Implemented StandardRenderPass
+    * Deprecated ForwardRenderPass
+    * Deprecated BasicRenderPass
+    * Implemented PostRenderPass for post-processing
+    * Moved render passes to their own folder
+	* Implemented ColorMaskState for occluders
+    * Create and configure the screen buffer as early as possible
+    * ForwardRenderPass will compute shadow maps in all platforms
+    * Fixed shadow map shaders
+    * Generate auxiliary FBOs on Renderer setup and store them in asset cache
+	* Use GLEW from sources instead of as a submodule
+	* Fixed directional lighting rendering issue
+    * Improved debug render tools
+    * (Experimental) Metal support on iOS/tvOS
+
+* Simulation
+    * Clear AssetManager when stopping a simulation
+	* Improved deinitialization for simulation and subsystems
+    * Implemented axis state in input facilities
+
+* Scripting
+    * Enable/Disable verbose logging for scripting from CMake
+ 	* Improved light support on lua scene builder
+ 	* Build new particle system from Lua script
+    * Enhanced Lua builder to support physical entities
+
+* Audio
+	* No changes
+
+* Physics
+	* Fixed ground check for rigid bodies
+	* Implemented function to detect ground collisions in rigid bodies
+    * Implemented standard colliders for physical objects
+    * Improved rigid body configuration for physical objects
+    * Allowed to apply linear velocity to bodies during simulation
+
+Testing:
+    * Fixed existing tests
+    * Implement new tests for streaming
+    * Modified CMake scripts to include GTest cases
+    
+    
 v4.1.0
 ------
 * Core
