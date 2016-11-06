@@ -99,6 +99,7 @@
 #include "Visitors/StartComponents.hpp"
 #include "Visitors/UpdateRenderState.hpp"
 #include "Visitors/UpdateWorldState.hpp"
+#include "Visitors/UpdateComponents.hpp"
 #include "Visitors/Picking.hpp"
 #include "Visitors/ShallowCopy.hpp"
 
