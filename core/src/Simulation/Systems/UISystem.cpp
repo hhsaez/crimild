@@ -25,8 +25,6 @@ bool UISystem::start( void )
 {
     return System::start();
 
-    auto self = this;
- 
     // TODO: This should be a click, not just a mouse button up   
     registerMessageHandler< MouseButtonUp >( []( MouseButtonUp const &msg ) {
         if ( msg.button == CRIMILD_INPUT_MOUSE_BUTTON_LEFT ) {

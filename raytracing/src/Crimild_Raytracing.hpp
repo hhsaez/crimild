@@ -25,63 +25,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_PRIMITIVES_PRIMITIVE_
-#define CRIMILD_PRIMITIVES_PRIMITIVE_
+#ifndef CRIMILD_RAYTRACING_
+#define CRIMILD_RAYTRACING_
 
-#include "Streaming/Stream.hpp"
-#include "Rendering/VertexBufferObject.hpp"
-#include "Rendering/IndexBufferObject.hpp"
+#include "Rendering/RTRenderer.hpp"
+#include "Rendering/RTMaterial.hpp"
 
-#include <functional>
-
-namespace crimild {
-
-	class Primitive : public StreamObject {
-		CRIMILD_IMPLEMENT_RTTI( crimild::Primitive )
-
-	public:
-		enum class Type {
-			POINTS,
-			LINES,
-			LINE_LOOP,
-			LINE_STRIP,
-			TRIANGLES,
-			TRIANGLE_STRIP,
-			TRIANGLE_FAN
-		};
-
-	public:
-		explicit Primitive( Primitive::Type type = Primitive::Type::TRIANGLES );
-		virtual ~Primitive( void );
-
-		Primitive::Type getType( void ) const { return _type; }
-
-        void setVertexBuffer( VertexBufferObject *vbo ) { _vertexBuffer = crimild::retain( vbo ) ; }
-        void setVertexBuffer( SharedPointer< VertexBufferObject > const &vbo ) { _vertexBuffer = vbo; }
-        VertexBufferObject *getVertexBuffer( void ) { return crimild::get_ptr( _vertexBuffer ); }
-
-        void setIndexBuffer( IndexBufferObject *ibo ) { _indexBuffer = crimild::retain( ibo ) ; }
-        void setIndexBuffer( SharedPointer< IndexBufferObject > const &ibo ) { _indexBuffer = ibo; }
-        IndexBufferObject *getIndexBuffer( void ) { return crimild::get_ptr( _indexBuffer ); }
-
-	private:
-		Primitive::Type _type;
-		SharedPointer< VertexBufferObject > _vertexBuffer;
-		SharedPointer< IndexBufferObject > _indexBuffer;
-
-		/**
-			\name Streaming
-		*/
-		//@{
-	public:
-		virtual bool registerInStream( Stream &s ) override;
-		virtual void save( Stream &s ) override;
-		virtual void load( Stream &s ) override;
-
-		//@}
-	};
-
-}
+#include "Visitors/RTRayCaster.hpp"
 
 #endif
 

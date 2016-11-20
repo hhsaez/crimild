@@ -152,7 +152,7 @@ void OBJLoader::generateGeometry( void )
 
 	if ( _currentObject == nullptr ) {
 		// anonymous object
-        _objects.push_back( std::move( crimild::alloc< Group >() ) );
+        _objects.push_back( crimild::alloc< Group >() );
         _currentObject = crimild::get_ptr( _objects.back() );
                            
 	}
@@ -321,7 +321,7 @@ void OBJLoader::readMaterialName( std::stringstream &line )
 	std::string name;
 	line >> name;
 
-    auto tmp = std::move( crimild::alloc< Material >() );
+    auto tmp =  crimild::alloc< Material >() ;
     _materials[ name ] = tmp;
     _currentMaterial = crimild::get_ptr( tmp );
 }

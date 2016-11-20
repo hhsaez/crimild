@@ -88,6 +88,10 @@
 #include "Concurrency/Async.hpp"
 #include "Concurrency/Task.hpp"
 #include "Concurrency/TaskManager.hpp"
+#include "Concurrency/Concurrency.hpp"
+#include "Concurrency/Job.hpp"
+#include "Concurrency/JobScheduler.hpp"
+#include "Concurrency/WorkStealingDeque.hpp"
 
 #include "Visitors/Apply.hpp"
 #include "Visitors/ApplyToGeometries.hpp"

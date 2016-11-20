@@ -85,7 +85,6 @@ void CylinderParticleEmitter::evaluate( Vector3f &position, Vector3f &velocity )
 
 void SphereParticleEmitter::evaluate( Vector3f &position, Vector3f &velocity ) const
 {
-    float u = Random::generate< float >() * _radius;
     float s = Random::generate< float >() * Numericf::PI;
     float t = Random::generate< float >() * Numericf::TWO_PI;
     

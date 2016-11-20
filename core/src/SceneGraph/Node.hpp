@@ -169,12 +169,12 @@ namespace crimild {
 	public:
         BoundingVolume *localBound( void ) { return crimild::get_ptr( _localBound ); }
 		const BoundingVolume *getLocalBound( void ) const { return crimild::get_ptr( _localBound ); }
-        void setLocalBound( BoundingVolume *bound ) { _localBound = std::move( crimild::retain( bound ) ); }
+        void setLocalBound( BoundingVolume *bound ) { _localBound = crimild::retain( bound ); }
         void setLocalBound( SharedPointer< BoundingVolume > const &bound ) { _localBound = bound; }
 
 		BoundingVolume *worldBound( void ) { return crimild::get_ptr( _worldBound ); }
 		const BoundingVolume *getWorldBound( void ) const { return crimild::get_ptr( _worldBound ); }
-        void setWorldBound( BoundingVolume *bound ) { _worldBound = std::move( crimild::retain( bound ) ); }
+        void setWorldBound( BoundingVolume *bound ) { _worldBound = crimild::retain( bound ); }
         void setWorldBound( SharedPointer< BoundingVolume > const &bound ) { _worldBound = bound; }
 
 	private:

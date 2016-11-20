@@ -39,3 +39,6 @@ scripting/test/Debug
 /bin
 *.crimild
 third-party/glew-1.13.0
+/third-party/glew
+/tools/fontgen/*.tga
+/tools/fontgen/*.txt

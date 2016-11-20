@@ -53,7 +53,7 @@ Texture *AssetManager::get< Texture >( std::string name )
 	if ( texture == nullptr && ( StringUtils::getFileExtension( name ) == ".tga" ) ) {
 		auto image = crimild::alloc< ImageTGA >( FileSystem::getInstance().pathForResource( name ) );
 		if ( image != nullptr ) {
-            auto tmp = std::move( crimild::alloc< Texture >( image ) );
+            auto tmp = crimild::alloc< Texture >( image ) ;
 			set( name, tmp );
             texture = crimild::get_ptr( tmp );
 		}

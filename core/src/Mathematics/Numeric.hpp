@@ -187,6 +187,11 @@ namespace crimild {
 		{
 			return std::fabs( n );
 		}
+
+		static PRECISION log2( PRECISION n )
+		{
+			return ::log2( n );
+		}
 	};
 
 	template< typename T > const T Numeric< T >::ZERO_TOLERANCE = static_cast< T >( 1e-06 );

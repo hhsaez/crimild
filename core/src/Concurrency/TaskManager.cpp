@@ -32,8 +32,8 @@ void TaskManager::start( void )
     
     Log::Debug << "Spawning " << _numThreads << " threads" << Log::End;
 	for ( unsigned int i = 0; i < _numThreads; i++ ) {
-		_threads.push_back( std::move( std::thread( std::bind( &TaskManager::worker, this ) ) ) );
-	}
+		_threads.push_back( std::thread( std::bind( &TaskManager::worker, this ) ) );
+    }
 
 	_running = true;
 }
