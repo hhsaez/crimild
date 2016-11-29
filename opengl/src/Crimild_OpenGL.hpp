@@ -31,6 +31,22 @@
 #include "Rendering/OpenGLRenderer.hpp"
 #include "Rendering/OpenGLUtils.hpp"
 
+#include "Rendering/Catalogs/ShaderProgramCatalog.hpp"
+#include "Rendering/Catalogs/VertexBufferObjectCatalog.hpp"
+#include "Rendering/Catalogs/IndexBufferObjectCatalog.hpp"
+#include "Rendering/Catalogs/FrameBufferObjectCatalog.hpp"
+#include "Rendering/Catalogs/TextureCatalog.hpp"
+
+#include "Rendering/Programs/ForwardRenderShaderProgram.hpp"
+#include "Rendering/Programs/LitTextureShaderProgram.hpp"
+#include "Rendering/Programs/UnlitTextureShaderProgram.hpp"
+#include "Rendering/Programs/UnlitDiffuseShaderProgram.hpp"
+#include "Rendering/Programs/ScreenTextureShaderProgram.hpp"
+#include "Rendering/Programs/SignedDistanceFieldShaderProgram.hpp"
+#include "Rendering/Programs/TextShaderProgram.hpp"
+#include "Rendering/Programs/DepthShaderProgram.hpp"
+#include "Rendering/Programs/ColorTintShaderProgram.hpp"
+
 #ifdef CRIMILD_PLATFORM_DESKTOP
 
 #include "Rendering/ImageEffects/DepthOfFieldImageEffect.hpp"
