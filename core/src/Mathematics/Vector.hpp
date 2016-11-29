@@ -285,6 +285,11 @@ namespace crimild {
 		template< typename U, typename V >
 		friend Vector< SIZE, U > &operator/=( Vector< SIZE, U > &u, V scalar );
 
+        Vector< 3, PRECISION > toVector3xz( void ) const
+        {
+            return Vector< 3, PRECISION >( x(), 0, y() );
+        }
+
 	protected:
 		PRECISION _data[ SIZE ];
 	};
@@ -643,6 +648,7 @@ namespace crimild {
 	typedef Vector< 2, unsigned int > Vector2ui;
 	typedef Vector< 2, int > Vector2i;
 	typedef Vector< 2, float > Vector2f;
+	typedef Vector< 2, double > Vector2d;
 
 	typedef Vector< 3, int > Vector3i;
 	typedef Vector< 3, short > Vector3s;
