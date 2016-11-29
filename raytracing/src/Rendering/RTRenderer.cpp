@@ -46,11 +46,9 @@ SharedPointer< Image > RTRenderer::render( SharedPointer< Node > const &scene, S
 	}
 	auto parentJob = crimild::alloc< crimild::concurrency::Job >();
     
-	std::atomic< size_t > jobCount( ( _height / dy ) * ( _width / dx ) );
-	
 	for ( size_t y = 0; y < _height; y += dy ) {
 		for ( size_t x = 0; x < _width; x += dx ) {
-			crimild::concurrency::async( parentJob, [this, camera, x, y, dx, dy, bpp, scene, &pixels, &jobCount ]( void ) {
+			crimild::concurrency::async( parentJob, [this, camera, x, y, dx, dy, bpp, scene, &pixels ]( void ) {
 				for ( size_t t = y; t < y + dy; t++ ) {
 					for ( size_t s = x; s < x + dx; s++ ) {
 						RGBColorf c = RGBColorf::ZERO;
@@ -80,9 +78,6 @@ SharedPointer< Image > RTRenderer::render( SharedPointer< Node > const &scene, S
 						}
 					}
 				}
-//				--jobCount;
-//				size_t count = jobCount;
-//				Log::Debug << "Remaining jobs " << count << " (" << concurrency::JobScheduler::getInstance()->getWorkerId() << ")" << Log::End;
 			});
 		}
 	}
