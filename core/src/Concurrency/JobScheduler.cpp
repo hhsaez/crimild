@@ -85,7 +85,7 @@ void JobScheduler::initWorker( bool mainWorker )
     }
 
     _workerStats[ getWorkerId() ].jobCount = 0;
-	_workerJobQueues[ getWorkerId() ] = crimild::alloc< WorkerJobQueue >( 512 );
+	_workerJobQueues[ getWorkerId() ] = crimild::alloc< WorkerJobQueue >();
 }	
 
 JobScheduler::WorkerId JobScheduler::getWorkerId( void ) const

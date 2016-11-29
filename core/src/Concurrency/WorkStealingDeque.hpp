@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <mutex>
+#include <list>
 
 namespace crimild {
 
@@ -12,8 +13,7 @@ namespace crimild {
 	template< class T >
 	class WorkStealingQueue {
 	public:
-		WorkStealingQueue( size_t initialCapacity )
-			: _elems( initialCapacity )
+		WorkStealingQueue( void )
 		{
 
 		}
@@ -23,22 +23,11 @@ namespace crimild {
 
 		}
 
-		size_t capacity( void )
-		{
-			std::unique_lock< std::mutex >( _mutex );
-			
-			return _elems.size();
-		}
-
 		size_t size( void )
 		{
 			std::unique_lock< std::mutex >( _mutex );
-			
-			if ( _bottom > _top ) {
-				return _bottom - _top;
-			}
 
-			return 0;
+			return _elems.size();
 		}
 
 		bool empty( void )
@@ -53,10 +42,7 @@ namespace crimild {
 		{
 			std::unique_lock< std::mutex >( _mutex );
 
-			assert( size() < capacity() && "WorkStelalingQueue: Not enough storage" );
-			
-			_elems[ _bottom % capacity() ] = elem;
-			_bottom++;
+			_elems.push_back( elem );
 		}
 
 		/**
@@ -72,7 +58,9 @@ namespace crimild {
 				return T();
 			}
 
-			return _elems[ --_bottom % capacity() ];
+            auto elem = std::move( _elems.back() );
+			_elems.pop_back();
+			return elem;
 		}
 
 		/**
@@ -87,15 +75,14 @@ namespace crimild {
 			if ( empty() ) {
 				return T();
 			}
-			
-			return _elems[ _top++ % capacity() ];
+
+            auto elem = std::move( _elems.front() );
+			_elems.pop_front();
+			return elem;
 		}
 
 	private:
-		size_t _bottom = 0; //< Next available slot in the array for pushing elements
-		size_t _top = 0; //< Next element that can be stolen
-		std::vector< T > _elems;
-
+		std::list< T > _elems;
 		std::mutex _mutex;
 	};
 

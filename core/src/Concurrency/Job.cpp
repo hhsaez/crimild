@@ -4,23 +4,24 @@ using namespace crimild;
 using namespace crimild::concurrency;
 
 Job::Job( void )
-	: _parent( nullptr ),
+	: _callback( nullptr ),
+      _parent( nullptr ),
 	  _childCount( 0 )
 {
 
 }
 
 Job::Job( JobCallback const &callback )
-	: _parent( nullptr ),
-	  _callback( callback ),
+	: _callback( callback ),
+      _parent( nullptr ),
 	  _childCount( 1 )
 {
 
 }
 
 Job::Job( Job *parent, JobCallback const &callback )
-	: _parent( parent ),
-	  _callback( callback ),
+	: _callback( callback ),
+      _parent( parent ),
 	  _childCount( 1 )
 {
 	if ( _parent != nullptr ) {
