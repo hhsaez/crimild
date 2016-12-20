@@ -55,7 +55,7 @@ Simulation::Simulation( std::string name, SettingsPtr const &settings )
       _settings( settings ),
       _taskManager( 0 ) // by default, disable background threads
 {
-    Log::Info << Version::getDescription() << Log::End;
+    Log::info( Version::getDescription() );
     
 	addSystem( crimild::alloc< UpdateSystem >() );
 	addSystem( crimild::alloc< RenderSystem >() );
@@ -113,7 +113,7 @@ int Simulation::run( void )
 
 void Simulation::addSystem( SystemPtr const &system )
 {
-	Log::Debug << "Adding system " << system->getName() << Log::End;
+    Log::debug( "Adding system ", system->getName() );
 
 	if ( _systems.find( system->getName() ) == _systems.end() ) {
 		_systems.insert( std::make_pair( system->getName(), system ) );
@@ -127,7 +127,7 @@ SystemPtr Simulation::getSystem( std::string name )
 
 void Simulation::startSystems( void )
 {
-	Log::Debug << "Starting systems" << Log::End;
+    Log::debug( "Starting systems" );
 	for ( auto s : _systems ) {
 		if ( s.second != nullptr ) {
 			s.second->start();
@@ -137,7 +137,7 @@ void Simulation::startSystems( void )
 
 void Simulation::stopSystems( void )
 {
-	Log::Debug << "Stopping systems" << Log::End;
+    Log::debug( "Stopping systems" );
 	for ( auto s : _systems ) {
 		if ( s.second != nullptr ) {
 			s.second->stop();

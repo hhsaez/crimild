@@ -49,7 +49,7 @@ bool FileStream::open( void )
 
 	_file = fopen( _path.c_str(), _openMode == FileStream::OpenMode::WRITE ? "w" : "r" );
 	if ( _file == nullptr ) {
-		Log::Error << "Invalid file path " << _path;
+        Log::error( "Invalid file path " );
 		return false;
 	}
 

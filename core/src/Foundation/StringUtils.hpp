@@ -143,6 +143,20 @@ namespace crimild {
             std::transform( result.begin(), result.end(), result.begin(), ::tolower );
             return result;
         }
+        
+        template< typename ... Args >
+        static std::string toString( Args &&... args )
+        {
+            std::stringstream ss;
+            ( void ) std::initializer_list< int > {
+                (
+                 ss << args,
+                 0
+                 )...
+            };
+            
+            return ss.str();
+        }
 
 	};
 

@@ -103,7 +103,7 @@ void ShallowCopy::visitText( Text *input )
 void ShallowCopy::copyNode( Node *src, Node *dst )
 {
 	if ( _result == nullptr ) {
-        _result = std::move( crimild::retain( dst ) );
+        _result = crimild::retain( dst ) ;
 	}
 
 	if ( _parent != nullptr ) {

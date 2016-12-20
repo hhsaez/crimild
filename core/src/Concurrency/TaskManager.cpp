@@ -21,7 +21,7 @@ TaskManager::~TaskManager( void )
 
 void TaskManager::start( void )
 {
-	Log::Debug << "Starting task manager" << Log::End;
+    Log::debug( "Starting task manager" );
 
     // provides at least one background task
     dummyTask();
@@ -30,7 +30,7 @@ void TaskManager::start( void )
         _numThreads = std::thread::hardware_concurrency();
     }
     
-    Log::Debug << "Spawning " << _numThreads << " threads" << Log::End;
+    Log::debug( "Spawning ", _numThreads, " threads" );
 	for ( unsigned int i = 0; i < _numThreads; i++ ) {
 		_threads.push_back( std::thread( std::bind( &TaskManager::worker, this ) ) );
     }

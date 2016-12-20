@@ -11,27 +11,34 @@ Job::Job( void )
 
 }
 
-Job::Job( JobCallback const &callback )
-	: _callback( callback ),
-      _parent( nullptr ),
-	  _childCount( 1 )
-{
-
-}
-
-Job::Job( Job *parent, JobCallback const &callback )
-	: _callback( callback ),
-      _parent( parent ),
-	  _childCount( 1 )
-{
-	if ( _parent != nullptr ) {
-		_parent->increaseChildCount();
-	}
-}
-
 Job::~Job( void )
 {
 
+}
+
+void Job::reset( void )
+{
+	_callback = nullptr;
+	_parent = nullptr;
+	_childCount = 0;
+}
+
+void Job::reset( JobCallback const &callback )
+{
+	_callback = callback;
+	_parent = nullptr;
+	_childCount = 1;
+}
+
+void Job::reset( JobPtr const &parent, JobCallback const &callback )
+{
+	_callback = callback;
+    _parent = crimild::get_ptr( parent );
+	_childCount = 1;
+
+	if ( _parent != nullptr ) {
+		_parent->increaseChildCount();
+	}
 }
 
 void Job::increaseChildCount( void )
@@ -67,6 +74,7 @@ void Job::finish( void )
 		if ( _parent != nullptr ) {
 			_parent->finish();
 		}
+        _callback = nullptr;
 	}
 }
 

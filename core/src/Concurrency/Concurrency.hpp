@@ -7,17 +7,17 @@ namespace crimild {
 
 	namespace concurrency {
 
-		SharedPointer< Job > async( SharedPointer< Job > const &job );
+		JobPtr async( void );
 
-		SharedPointer< Job > async( JobCallback const &callback );
+		JobPtr async( JobCallback const &callback );
 
-		SharedPointer< Job > async( SharedPointer< Job > const &parent, JobCallback const &callback );
+		JobPtr async( JobPtr const &parent, JobCallback const &callback );
 
-		SharedPointer< Job > sync_frame( void );
+		JobPtr sync_frame( void );
 
-		SharedPointer< Job > async_frame( void );
+		JobPtr async_frame( void );
 
-		void wait( SharedPointer< Job > const &job );
+		void wait( JobPtr const &job );
 
 	}
 

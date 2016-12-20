@@ -89,7 +89,7 @@ void physics::RigidBodyComponent::start( void )
 void physics::RigidBodyComponent::update( const Clock &t )
 {
     if ( _body == nullptr ) {
-    	Log::Warning << "No rigid body found" << Log::End;
+        Log::warning( "No rigid body found" );
         return;
     }
     
@@ -156,7 +156,7 @@ void physics::RigidBodyComponent::createShape( void )
 {
 	auto collider = getComponent< Collider >();
 	if ( collider == nullptr ) {
-		Log::Error << "No collider assigned to rigid body" << Log::End;
+        Log::error( "No collider assigned to rigid body" );
 		return;
 	}
 
@@ -166,7 +166,7 @@ void physics::RigidBodyComponent::createShape( void )
 void physics::RigidBodyComponent::createBody( void )
 {
 	if ( _shape == nullptr ) {
-		Log::Debug << "No shape for rigid body" << Log::End;
+        Log::debug( "No shape for rigid body" );
 		return;
 	}
 

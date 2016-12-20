@@ -40,6 +40,19 @@
 
 using namespace crimild;
 
+constexpr const char *RenderPass::G_BUFFER_NAME;
+constexpr const char *RenderPass::G_BUFFER_DIFFUSE_TARGET_NAME;
+constexpr const char *RenderPass::G_BUFFER_POSITION_TARGET_NAME;
+constexpr const char *RenderPass::G_BUFFER_NORMAL_TARGET_NAME;
+constexpr const char *RenderPass::G_BUFFER_VIEW_SPACE_NORMAL_TARGET_NAME;
+constexpr const char *RenderPass::G_BUFFER_DEPTH_TARGET_NAME;
+constexpr const char *RenderPass::S_BUFFER_NAME;
+constexpr const char *RenderPass::S_BUFFER_COLOR_TARGET_NAME;
+constexpr const char *RenderPass::S_BUFFER_DEPTH_TARGET_NAME;
+constexpr const char *RenderPass::D_BUFFER_NAME;
+constexpr const char *RenderPass::D_BUFFER_COLOR_TARGET_NAME;
+constexpr const char *RenderPass::D_BUFFER_DEPTH_TARGET_NAME;
+
 RenderPass::RenderPass( void )
     : _screen( crimild::alloc< QuadPrimitive >( 2.0f, 2.0f, VertexFormat::VF_P3_UV2, Vector2f( 0.0f, 1.0f ), Vector2f( 1.0f, -1.0f ) ) )
 {

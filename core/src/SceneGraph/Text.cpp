@@ -75,7 +75,7 @@ void Font::loadGlyphs( std::string file )
 	std::ifstream input;
 	input.open( file );
 	if ( !input.is_open() ) {
-		crimild::Log::Error << "Cannot open glyph file " << file << crimild::Log::End;
+        Log::error( "Cannot open glyph file ", file );
 		return;
 	}
 

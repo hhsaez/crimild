@@ -26,7 +26,7 @@ bool JobScheduler::start( int numWorkers )
 		numWorkers = std::thread::hardware_concurrency();
 	}
 
-	Log::Info << "Initializing job scheduler with " << numWorkers << " workers" << Log::End;
+    Log::info( "Initializing job scheduler with ", numWorkers, " workers" );
 
 	for ( int i = 0; i < numWorkers; i++ ) {
 		_workers.push_back( std::thread( std::bind( &JobScheduler::worker, this ) ) );
@@ -48,13 +48,14 @@ void JobScheduler::stop( void )
 	}
 
     size_t jobCount = 0;
-    Log::Debug << "Stats: ";
+    std::stringstream ss;
+    ss << "Stats: ";
     for ( auto &it : _workerStats ) {
-        Log::Debug << "\n\tWorker " << it.first << " executed " << it.second.jobCount << " jobs";
+        ss << "\n\tWorker " << it.first << " executed " << it.second.jobCount << " jobs";
         jobCount += it.second.jobCount;
     }
-    Log::Debug << "\n\tTotal jobs: " << jobCount;
-    Log::Debug << Log::End;
+    ss << "\n\tTotal jobs: " << jobCount;
+    Log::info( ss.str() );
     
 	_workers.clear();
     _workerJobQueues.clear();
@@ -78,7 +79,7 @@ void JobScheduler::worker( void )
 
 void JobScheduler::initWorker( bool mainWorker )
 {
-    std::unique_lock< std::mutex > lock( _mutex );
+    std::lock_guard< std::mutex > lock( _mutex );
     
     if ( mainWorker ) {
         _mainWorkerId = getWorkerId();
@@ -113,13 +114,18 @@ JobScheduler::WorkerJobQueue *JobScheduler::getRandomJobQueue( void )
 	return nullptr;
 }
 
-void JobScheduler::schedule( SharedPointer< Job > const &job )
+void JobScheduler::schedule( JobPtr const &job )
 {
+    if ( job == nullptr ) {
+        Log::error( "Cannot schedule null job" );
+        return;
+    }
+    
 	auto queue = getWorkerJobQueue();
 	queue->push( job );
 }
 
-SharedPointer< Job > JobScheduler::getJob( void )
+JobPtr JobScheduler::getJob( void )
 {
 	auto queue = getWorkerJobQueue();
 
@@ -156,12 +162,12 @@ bool JobScheduler::executeNextJob( void )
 	return false;
 }
 
-void JobScheduler::execute( SharedPointer< Job > const &job )
+void JobScheduler::execute( JobPtr const &job )
 {
 	job->execute();
 }
 
-void JobScheduler::wait( SharedPointer< Job > const &job )
+void JobScheduler::wait( JobPtr const &job )
 {
 	while( !job->isCompleted() ) {
 		executeNextJob();
@@ -170,10 +176,10 @@ void JobScheduler::wait( SharedPointer< Job > const &job )
 
 void JobScheduler::yield( void )
 {
-    if ( isMainWorker() ) {
-        // main worker does not yield
-        return;
-    }
-
+//    if ( isMainWorker() ) {
+//        // main worker does not yield
+//        return;
+//    }
+//
 	std::this_thread::yield();
 }

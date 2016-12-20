@@ -4,39 +4,45 @@
 using namespace crimild;
 using namespace crimild::concurrency;
 
-SharedPointer< Job > crimild::concurrency::async( SharedPointer< Job > const &job )
+JobPtr crimild::concurrency::async( void )
 {
+//	auto job = JobAllocator::getInstance()->allocate();
+    auto job = crimild::alloc< Job >();
+	job->reset();
+	return job;
+}
+
+JobPtr crimild::concurrency::async( JobCallback const &callback )
+{
+//	auto job = JobAllocator::getInstance()->allocate();
+    auto job = crimild::alloc< Job >();
+	job->reset( callback );
 	JobScheduler::getInstance()->schedule( job );
 	return job;
 }
 
-SharedPointer< Job > crimild::concurrency::async( JobCallback const &callback )
+JobPtr crimild::concurrency::async( JobPtr const &parent, JobCallback const &callback )
 {
-	auto job = crimild::alloc< Job >( callback );
-	JobScheduler::getInstance()->schedule( job );
-	return job;
-}
-
-SharedPointer< Job > crimild::concurrency::async( SharedPointer< Job > const &parent, JobCallback const &callback )
-{
-	auto child = crimild::alloc< Job >( crimild::get_ptr( parent ), callback );
+//	auto child = JobAllocator::getInstance()->allocate();
+    auto child = crimild::alloc< Job >();
+	child->reset( parent, callback );
 	JobScheduler::getInstance()->schedule( child );
 	return child;
 }
 
-SharedPointer< Job > crimild::concurrency::sync_frame( void )
+JobPtr crimild::concurrency::sync_frame( void )
 {
 	// TODO
 	return nullptr;
 }
 
-SharedPointer< Job > crimild::concurrency::async_frame( void )
+JobPtr crimild::concurrency::async_frame( void )
 {
 	// TODO
 	return nullptr;
 }
 
-void crimild::concurrency::wait( SharedPointer< Job > const &job )
+void crimild::concurrency::wait( JobPtr const &job )
 {
 	JobScheduler::getInstance()->wait( job );
 }

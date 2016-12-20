@@ -51,7 +51,7 @@ CapsuleCollider::~CapsuleCollider( void )
 
 SharedPointer< btCollisionShape > CapsuleCollider::generateShape( void ) 
 {
-	Log::Debug << "Generating shape for capsule collider" << Log::End;
+    Log::debug( "Generating shape for capsule collider" );
 
 	auto capsule = new btCapsuleShape( getWidth(), getHeight() );
 

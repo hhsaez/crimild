@@ -42,7 +42,7 @@ namespace crimild {
 
 		virtual void load( void ) override;
 
-		void save( std::string fileName );
+		void saveToFile( const std::string &fileName ) const;
 
 	private:
 		struct TGAHeader {

@@ -38,7 +38,8 @@ Primitive::Primitive( Primitive::Type type )
 
 Primitive::~Primitive( void )
 {
-
+    _indexBuffer = nullptr;
+    _vertexBuffer = nullptr;
 }
 
 bool Primitive::registerInStream( Stream &s )

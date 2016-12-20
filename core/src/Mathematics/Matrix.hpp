@@ -245,9 +245,35 @@ namespace crimild {
 			else if ( SIZE == 2 ) {
 				result = _data[ 0 ] * _data[ 3 ] - _data[ 1 ] * _data[ 2 ];
 			}
+            else if ( SIZE == 4 ) {
+                PRECISION a00 = _data[ 0 ], a01 = _data[ 1 ], a02 = _data[ 2 ], a03 = _data[ 3 ],
+        			  	  a10 = _data[ 4 ], a11 = _data[ 5 ], a12 = _data[ 6 ], a13 = _data[ 7 ],
+        			  	  a20 = _data[ 8 ], a21 = _data[ 9 ], a22 = _data[ 10 ], a23 = _data[ 11 ],
+        			  	  a30 = _data[ 12 ], a31 = _data[ 13 ], a32 = _data[ 14 ], a33 = _data[ 15 ];
+                
+                PRECISION b00 = a00 * a11 - a01 * a10;
+                PRECISION b01 = a00 * a12 - a02 * a10;
+                PRECISION b02 = a00 * a13 - a03 * a10;
+                PRECISION b03 = a01 * a12 - a02 * a11;
+                PRECISION b04 = a01 * a13 - a03 * a11;
+                PRECISION b05 = a02 * a13 - a03 * a12;
+                PRECISION b06 = a20 * a31 - a21 * a30;
+                PRECISION b07 = a20 * a32 - a22 * a30;
+                PRECISION b08 = a20 * a33 - a23 * a30;
+                PRECISION b09 = a21 * a32 - a22 * a31;
+                PRECISION b10 = a21 * a33 - a23 * a31;
+                PRECISION b11 = a22 * a33 - a23 * a32;
+
+                result = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
+            }
 
 			return result;
 		}
+
+        bool isInvertible( void ) const
+        {
+            return getDeterminant() != 0;
+        }
 
 		Matrix getInverse( void ) const
 		{

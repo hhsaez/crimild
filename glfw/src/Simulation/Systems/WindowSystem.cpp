@@ -23,7 +23,7 @@ bool WindowSystem::start( void )
 	int versionMinor;
 	int versionRevision;
 	glfwGetVersion( &versionMajor, &versionMinor, &versionRevision );
-	Log::Info << "Initialized GLFW " << versionMajor << "." << versionMinor << " rev. " << versionRevision << Log::End;
+    Log::info( "Initialized GLFW ", versionMajor, ".", versionMinor, " rev. ", versionRevision );
 
 	if ( !createWindow() ) {
 		return false;
@@ -106,7 +106,7 @@ bool WindowSystem::createWindow( void )
 
 	_window = glfwCreateWindow( width, height, name.c_str(), fullscreen ? glfwGetPrimaryMonitor() : NULL, NULL );
 	if ( _window == nullptr ) {
-		Log::Error << "Failed to create window" << Log::End;
+        Log::error( "Failed to create window" );
 		return false;
 	}
 

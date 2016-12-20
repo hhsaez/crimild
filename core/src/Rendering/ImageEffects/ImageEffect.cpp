@@ -63,7 +63,7 @@ FrameBufferObject *ImageEffect::getFrameBuffer( Renderer *renderer, std::string 
             height /= 4;
         }
         
-        auto newFBO = std::move( crimild::alloc< FrameBufferObject >( width, height ) );
+        auto newFBO = crimild::alloc< FrameBufferObject >( width, height ) ;
         renderer->setFrameBuffer( name, newFBO );
         fbo = crimild::get_ptr( newFBO );
         
@@ -79,7 +79,7 @@ void ImageEffect::renderScreen( Renderer *renderer, Texture *texture )
     // TODO: keep a reference to program to avoid string comparision every frame
     auto program = renderer->getShaderProgram( Renderer::SHADER_PROGRAM_SCREEN_TEXTURE );
     if ( program == nullptr ) {
-        Log::Error << "No shader program provided with name 'texture'" << Log::End;
+        Log::error( "No shader program provided with name 'texture'" );
         return;
     }
     

@@ -42,7 +42,7 @@ MeshCollider::~MeshCollider( void )
 
 SharedPointer< btCollisionShape > MeshCollider::generateShape( void ) 
 {
-	Log::Debug << "Generating shape for mesh collider" << Log::End;
+    Log::debug( "Generating shape for mesh collider" );
 
 	auto mesh = new btTriangleMesh(); // is this a leak?
 

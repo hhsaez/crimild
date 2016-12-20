@@ -1,9 +1,11 @@
 #ifndef CRIMILD_CORE_CONCURRENCY_WORK_STEALING_QUEUE_
 #define CRIMILD_CORE_CONCURRENCY_WORK_STEALING_QUEUE_
 
+#include "Foundation/SharedObject.hpp"
+
 #include <vector>
-#include <mutex>
 #include <list>
+#include <mutex>
 
 namespace crimild {
 
@@ -11,7 +13,10 @@ namespace crimild {
 	   \brief A double-ended queue implemeting the work stealing pattern
 	 */
 	template< class T >
-	class WorkStealingQueue {
+    class WorkStealingQueue : public SharedObject {
+		using Mutex = std::mutex;
+		using Lock = std::lock_guard< Mutex >;
+		
 	public:
 		WorkStealingQueue( void )
 		{
@@ -22,11 +27,10 @@ namespace crimild {
 		{
 
 		}
-
+        
 		size_t size( void )
 		{
-			std::unique_lock< std::mutex >( _mutex );
-
+			Lock lock( _mutex );
 			return _elems.size();
 		}
 
@@ -35,13 +39,20 @@ namespace crimild {
 			return size() == 0;
 		}
 
+		void clear( void )
+		{
+			Lock lock( _mutex );
+
+			_elems.clear();
+		}
+
 		/**
 		   \brief Adds an element to the private end of the queue (LIFO)
+
 		 */
 		void push( T const &elem )
 		{
-			std::unique_lock< std::mutex >( _mutex );
-
+			Lock lock( _mutex );
 			_elems.push_back( elem );
 		}
 
@@ -52,15 +63,15 @@ namespace crimild {
 		 */
 		T pop( void )
 		{
-			std::unique_lock< std::mutex >( _mutex );
+			Lock lock( _mutex );
 
-			if ( empty() ) {
-				return T();
-			}
-
-            auto elem = std::move( _elems.back() );
+            if ( _elems.size() == 0 ) {
+                return nullptr;
+            }
+            
+			auto e = _elems.back();
 			_elems.pop_back();
-			return elem;
+			return e;
 		}
 
 		/**
@@ -70,19 +81,19 @@ namespace crimild {
 		 */
 		T steal( void )
 		{
-			std::unique_lock< std::mutex >( _mutex );
+			Lock lock( _mutex );
+            
+            if ( _elems.size() == 0 ) {
+                return nullptr;
+            }
 
-			if ( empty() ) {
-				return T();
-			}
-
-            auto elem = std::move( _elems.front() );
+			auto e = _elems.front();
 			_elems.pop_front();
-			return elem;
+			return e;
 		}
 
 	private:
-		std::list< T > _elems;
+        std::list< T > _elems;
 		std::mutex _mutex;
 	};
 

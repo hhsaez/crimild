@@ -8,6 +8,10 @@ namespace crimild {
 	namespace raytracing {
 
 		class RTRenderer : public SharedObject {
+        private:
+            using Mutex = std::mutex;
+            using Lock = std::lock_guard< Mutex >;
+            
 		public:
 			RTRenderer( int width, int height, int samples );
 			virtual ~RTRenderer( void );
@@ -32,6 +36,8 @@ namespace crimild {
 			int _width;
 			int _height;
 			int _samples;
+            
+            Mutex _mutex;
 		};
 		
 	}

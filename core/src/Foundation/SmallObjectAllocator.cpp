@@ -41,7 +41,7 @@ std::size_t SmallObjectAllocator::getOffset( std::size_t numBytes, std::size_t a
 
 void *SmallObjectAllocator::defaultAlloc( std::size_t numBytes )
 {
-    Log::Debug << "Allocating " << numBytes << " bytes using default allocator" << Log::End;
+    Log::debug( "Allocating ", numBytes, " bytes using default allocator" );
     return ::operator new( numBytes );
 }
 

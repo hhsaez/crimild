@@ -57,7 +57,7 @@ void OBJLoader::FileProcessor::readFile( std::string fileName )
 	std::ifstream input;
 	input.open( fileName.c_str() );
 	if ( !input.is_open() ) {
-		Log::Error << "Cannot load file " << fileName << Log::End;
+        Log::error( "Cannot load file ", fileName );
 		return;
 	}
 
@@ -267,7 +267,7 @@ void OBJLoader::readObject( std::stringstream &line )
 	std::string name;
 	line >> name;
 
-    _objects.push_back( std::move( crimild::alloc< Group >( name ) ) );
+    _objects.push_back( crimild::alloc< Group >( name ) );
     _currentObject = crimild::get_ptr( _objects.back() );
 }
 

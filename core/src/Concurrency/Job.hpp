@@ -10,6 +10,10 @@
 namespace crimild {
 
 	namespace concurrency {
+        
+        class Job;
+        
+        using JobPtr = SharedPointer< Job >;
 
 		/**
 		   \brief Callback for a job
@@ -27,10 +31,12 @@ namespace crimild {
 		class Job : public SharedObject, public NamedObject {
 		public:
 			Job( void );
-			explicit Job( JobCallback const &callback );
-			Job( Job *parent, JobCallback const &callback );
 			virtual ~Job( void );
 
+			void reset( void );
+			void reset( JobCallback const &callback );
+			void reset( JobPtr const &parent, JobCallback const &callback );
+			
 			void execute( void );
 			void finish( void );
 

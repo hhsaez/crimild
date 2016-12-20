@@ -53,7 +53,7 @@ namespace crimild {
             WorkerId _mainWorkerId;
 
 		private:
-			using WorkerJobQueue = WorkStealingQueue< SharedPointer< Job >>;
+			using WorkerJobQueue = WorkStealingQueue< JobPtr >;
 
 			void initWorker( bool mainWorker = false );
 			WorkerJobQueue *getWorkerJobQueue( void );
@@ -65,16 +65,16 @@ namespace crimild {
 			std::map< WorkerId, SharedPointer< WorkerJobQueue >> _workerJobQueues;
 
 		public:
-			void schedule( SharedPointer< Job > const &job );
-			void wait( SharedPointer< Job > const &job );
+			void schedule( JobPtr const &job );
+			void wait( JobPtr const &job );
 
 			void yield( void );
 
 		private:
-			SharedPointer< Job > getJob( void );
+			JobPtr getJob( void );
 			
 			bool executeNextJob( void );
-			void execute( SharedPointer< Job > const &job );
+			void execute( JobPtr const &job );
 
 		private:
 			struct WorkerStat {

@@ -66,7 +66,7 @@ int TextureCatalog::getNextResourceId( void )
 void TextureCatalog::bind( ShaderLocation *location, Texture *texture )
 {
 	if ( texture == nullptr ) {
-		Log::Error << "Invalid texture pointer" << Log::End;
+        Log::error( "Invalid texture pointer" );
 		return;
 	}
 
@@ -75,7 +75,7 @@ void TextureCatalog::bind( ShaderLocation *location, Texture *texture )
 	Catalog< Texture >::bind( location, texture );
 
 	if ( texture->getCatalog() == nullptr ) {
-		Log::Error << "Could not bind texture" << Log::End;
+        Log::error( "Could not bind texture" );
 		return;
 	}
 

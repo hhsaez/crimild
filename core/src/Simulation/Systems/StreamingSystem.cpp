@@ -84,7 +84,7 @@ void StreamingSystem::loadScene( std::string filename, SceneBuilder *builder )
     }
     
     if ( _sceneBuilder == nullptr ) {
-        Log::Error << "Undefined scene builder" << Log::End;
+        Log::error( "Undefined scene builder" );
         return;
     }
     
@@ -98,13 +98,13 @@ void StreamingSystem::loadScene( std::string filename, SceneBuilder *builder )
 	// Then, once the scene is completely loaded, we set it as the current 
 	// scene again in main thread to avoid changing scenes when rendering or updating
 	crimild::async( crimild::AsyncDispatchPolicy::MAIN_QUEUE, [sceneBuilder, filename] {
-		Log::Debug << "Loading scene: " << filename << Log::End;
+        Log::debug( "Loading scene: ", filename );
     
 		crimild::async( crimild::AsyncDispatchPolicy::BACKGROUND_QUEUE, [sceneBuilder, filename] {
 			sceneBuilder->reset();
 			auto scene = sceneBuilder->fromFile( FileSystem::getInstance().pathForResource( filename ) );
 			sceneBuilder->reset();
-			Log::Debug << "Scene loaded: " << filename << Log::End;
+            Log::debug( "Scene loaded: ", filename );
         
 			crimild::async( crimild::AsyncDispatchPolicy::MAIN_QUEUE, [scene] {
 				Simulation::getInstance()->setScene( scene );

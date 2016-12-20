@@ -200,7 +200,7 @@ void BloomImageEffect::computeBrightPassFilter( crimild::Renderer *renderer, Cam
 
     auto program = renderer->getShaderProgram( "bloom_emissive" );
     if ( program == nullptr ) {
-        auto tmp = std::move( crimild::alloc< ShaderProgram >( OpenGLUtils::getVertexShaderInstance( bloom_emissive_vs ), OpenGLUtils::getFragmentShaderInstance( bloom_emissive_fs ) ) );
+        auto tmp = crimild::alloc< ShaderProgram >( OpenGLUtils::getVertexShaderInstance( bloom_emissive_vs ), OpenGLUtils::getFragmentShaderInstance( bloom_emissive_fs ) ) ;
         renderer->setShaderProgram( "bloom_emissive", tmp );
         program = crimild::get_ptr( tmp );
         

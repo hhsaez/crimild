@@ -41,6 +41,19 @@
 
 using namespace crimild;
 
+constexpr const char *Renderer::SHADER_PROGRAM_RENDER_PASS_FORWARD;
+constexpr const char *Renderer::SHADER_PROGRAM_RENDER_PASS_STANDARD;
+constexpr const char *Renderer::SHADER_PROGRAM_LIT_TEXTURE;
+constexpr const char *Renderer::SHADER_PROGRAM_LIT_DIFFUSE;
+constexpr const char *Renderer::SHADER_PROGRAM_UNLIT_TEXTURE;
+constexpr const char *Renderer::SHADER_PROGRAM_UNLIT_DIFFUSE;
+constexpr const char *Renderer::SHADER_PROGRAM_UNLIT_VERTEX_COLOR;
+constexpr const char *Renderer::SHADER_PROGRAM_PARTICLE_SYSTEM;
+constexpr const char *Renderer::SHADER_PROGRAM_TEXT_BASIC;
+constexpr const char *Renderer::SHADER_PROGRAM_TEXT_SDF;
+constexpr const char *Renderer::SHADER_PROGRAM_SCREEN_TEXTURE;
+constexpr const char *Renderer::SHADER_PROGRAM_DEPTH;
+
 Renderer::Renderer( void )
 	: _lightCount( 0 ),
 	  _screenPrimitive( crimild::alloc< QuadPrimitive >( 2.0f, 2.0f, VertexFormat::VF_P3_N3_UV2, Vector2f( 0.0f, 1.0f ), Vector2f( 1.0f, -1.0f ) ) ),

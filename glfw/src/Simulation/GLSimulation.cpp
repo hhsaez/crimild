@@ -44,7 +44,7 @@ GLSimulation::GLSimulation( std::string name, SettingsPtr const &settings )
 	: Simulation( name, settings )
 {
 	if ( !glfwInit() ) {
-		Log::Error << "Cannot start GLFW: glfwInit failed" << Log::End;
+        Log::error( "Cannot start GLFW: glfwInit failed" );
 		throw RuntimeException( "Cannot start GLFW: glwfInit failed!" );
 	}
 

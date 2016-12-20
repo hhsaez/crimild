@@ -3,6 +3,16 @@
 
 #include "Visitors/RTRayCaster.hpp"
 
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <iomanip>
+#include <thread>
+#include <chrono>
+#include <ctime>
+#include <fstream>
+
 using namespace crimild;
 using namespace crimild::raytracing;
 
@@ -24,31 +34,19 @@ SharedPointer< Image > RTRenderer::render( SharedPointer< Node > const &scene, S
 	int bpp = 3;
 	std::vector< unsigned char > pixels( _width * _height * bpp );
 	
-	// Divide the target image into N sections, based on a concurrency
-	// factor (i.e. number of cores in the system). For example, if there
-	// are 8 cores in the system, we divide the screen in 8 jobs. Then
-	// each job will render that portion of the image
-	int N = 64;//crimild::concurrency::JobScheduler::getInstance()->getNumWorkers();
-	if ( N == 0 ) {
-		N = 1;
-	}
-	size_t dx = _width;
-	size_t dy = _height;
-	bool vertical = true;
-	for ( size_t i = 0; i < Numerici::log2( N ); i++ ) {
-		if ( vertical ) {
-			dx >>= 1;
-		}
-		else {
-			dy >>= 1;
-		}
-		vertical = !vertical;
-	}
-	auto parentJob = crimild::alloc< crimild::concurrency::Job >();
+    // this might be overkill, but we're going to create a job
+    // for each pixel in the image
+    size_t dx = 1;
+    size_t dy = 1;
+	
+	auto parentJob = crimild::concurrency::async();
+    
+    std::atomic< long > jobCount( 0 );
+    const int JOB_TOTAL = _height * _width;
     
 	for ( size_t y = 0; y < _height; y += dy ) {
 		for ( size_t x = 0; x < _width; x += dx ) {
-			crimild::concurrency::async( parentJob, [this, camera, x, y, dx, dy, bpp, scene, &pixels ]( void ) {
+			crimild::concurrency::async( parentJob, [this, &jobCount, JOB_TOTAL, camera, x, y, dx, dy, bpp, scene, &pixels ]( void ) {
 				for ( size_t t = y; t < y + dy; t++ ) {
 					for ( size_t s = x; s < x + dx; s++ ) {
 						RGBColorf c = RGBColorf::ZERO;
@@ -76,6 +74,9 @@ SharedPointer< Image > RTRenderer::render( SharedPointer< Node > const &scene, S
 						for ( int i = 0; i < bpp; i++ ) {
 							pixels[ ( t * _width + s ) * bpp + i ] = ( unsigned char )( 255.99f * c[ i ] );
 						}
+                        
+                        jobCount++;
+                        Log::debug( "RTRenderer", "Progress: ", jobCount, "/", JOB_TOTAL );
 					}
 				}
 			});
@@ -83,9 +84,10 @@ SharedPointer< Image > RTRenderer::render( SharedPointer< Node > const &scene, S
 	}
 	
 	crimild::concurrency::wait( parentJob );
-	Log::Debug << "Done rendering frames" << Log::End;
-	
-	return crimild::alloc< Image >( _width, _height, bpp, &pixels[ 0 ], Image::PixelFormat::RGB );
+    Log::debug( "Done rendering frames" );
+    
+    auto result = crimild::alloc< Image >( _width, _height, bpp, &pixels[ 0 ], Image::PixelFormat::RGB );
+    return result;
 }
 
 RGBColorf RTRenderer::computeColor( SharedPointer< Node > const &scene, const Ray3f &r, int depth ) const
@@ -106,7 +108,7 @@ RGBColorf RTRenderer::computeColor( SharedPointer< Node > const &scene, const Ra
 			reflected += material->getFuzz() * randomInUnitSphere();
 			reflected.normalize();
 			scattered = Ray3f( hit.position, reflected );
-			bool visible = ( scattered.getDirection() * hit.normal > 0 );
+			visible = ( scattered.getDirection() * hit.normal > 0 );
 			break;
 		}
 		case RTMaterial::Type::DIELECTRIC: {

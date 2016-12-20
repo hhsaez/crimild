@@ -66,7 +66,7 @@ void LuaSettings::load( std::string filename )
         });
     }
     else {
-        Log::Error << "Cannot open file " << filename << Log::End;
+        Log::error( "Cannot open file ", filename );
     }
 }
 

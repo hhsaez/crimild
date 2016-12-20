@@ -30,13 +30,157 @@
 
 #include "NamedObject.hpp"
 #include "SharedObject.hpp"
+#include "StringUtils.hpp"
 
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <fstream>
 
 namespace crimild {
+    
+    class Log {
+    private:
+        Log( void ) { }
+        ~Log( void ) { }
+        
+    public:
+        enum Level {
+            NONE = -1,
+            FATAL = 100,
+            ERROR = 200,
+            WARNING = 300,
+            INFO = 400,
+            DEBUG = 500,
+            TRACE = 600,
+            ALL
+        };
+        
+        static void setLevel( int level ) { _level = level; };
+        static int getLevel( void ) { return _level; }
+        
+    private:
+        static int _level;
+        
+    public:
+        template< typename ... Args >
+        static void fatal( std::string const &TAG, Args &&... args )
+        {
+            print( Level::FATAL, "F", TAG, std::forward< Args >( args )... );
+        }
+        
+        template< typename ... Args >
+        static void error( std::string const &TAG, Args &&... args )
+        {
+            print( Level::ERROR, "E", TAG, std::forward< Args >( args )... );
+        }
+        
+        template< typename ... Args >
+        static void warning( std::string const &TAG, Args &&... args )
+        {
+            print( Level::WARNING, "W", TAG, std::forward< Args >( args )... );
+        }
+        
+        template< typename ... Args >
+        static void info( std::string const &TAG, Args &&... args )
+        {
+            print( Level::INFO, "I", TAG, std::forward< Args >( args )... );
+        }
+        
+        template< typename ... Args >
+        static void debug( std::string const &TAG, Args &&... args )
+        {
+            print( Level::DEBUG, "D", TAG, std::forward< Args >( args )... );
+        }
+        
+        template< typename ... Args >
+        static void trace( std::string const &TAG, Args &&... args )
+        {
+            print( Level::TRACE, "T", TAG, std::forward< Args >( args )... );
+        }
+        
+        template< typename ... Args >
+        static void print( int level, std::string const &levelStr, std::string const &TAG, Args &&... args )
+        {
+            if ( getLevel() >= level && _outputHandler != nullptr ) {
+                auto tp = std::chrono::system_clock::now();
+                auto s = std::chrono::duration_cast< std::chrono::microseconds >( tp.time_since_epoch() );
+                auto t = ( time_t )( s.count() );
+                
+                auto str = StringUtils::toString(
+                                                 t, " ",
+                                                 std::this_thread::get_id(), " ",
+                                                 levelStr, "/", TAG, " - ",
+                                                 std::forward< Args >( args )... );
+                _outputHandler->printLine( str );
+            }
+        }
+        
+    public:
+        class OutputHandler {
+        public:
+            virtual ~OutputHandler( void ) { }
+            
+            virtual void printLine( std::string const &line ) = 0;
+        };
+        
+        class NullOutputHandler : public OutputHandler {
+        public:
+            NullOutputHandler( void ) { }
+            virtual ~NullOutputHandler( void ) { }
+            
+            virtual void printLine( std::string const &line ) override
+            {
+                // do nothing
+            }
+        };
+        
+        class ConsoleOutputHandler : public OutputHandler {
+        public:
+            ConsoleOutputHandler( void ) { }
+            virtual ~ConsoleOutputHandler( void ) { }
+            
+            virtual void printLine( std::string const &line ) override
+            {
+                std::lock_guard< std::mutex > lock( _mutex );
+                
+                std::cout << line << "\n";
+            }
+                
+            private:
+                std::mutex _mutex;
+        };
+                
+        class FileOutputHandler : public OutputHandler {
+        public:
+            FileOutputHandler( std::string const &path ) : _out( path, std::ios::out ) { }
+            virtual ~FileOutputHandler( void ) { }
+            
+            virtual void printLine( std::string const &line ) override
+            {
+                std::lock_guard< std::mutex > locK( _mutex );
+                
+                _out << line << "\n";
+            }
+            
+        private:
+            std::ofstream _out;
+            std::mutex _mutex;
+        };
+                
+        template< class T, typename ... Args >
+        static void setOutputHandler( Args &&... args )
+        {
+            _outputHandler = std::move( std::unique_ptr< T >( new T( std::forward< Args >( args )... ) ) );
+        }
+        
+    private:
+        static std::unique_ptr< OutputHandler > _outputHandler;
+                
+    };
+                
 
+/**
 	class Log : public NamedObject {
 	public:
 		class LogOutputHandler : public SharedObject {
@@ -100,6 +244,8 @@ namespace crimild {
 		std::stringstream _str;
 		LogOutputHandlerPtr _outputHandler;
 	};
+ 
+ */
 
 }
 

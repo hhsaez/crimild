@@ -66,7 +66,7 @@ void al::Utils::checkErrors( std::string prefix )
 				break;
 		}
 
-    	Log::Error << prefix << ": " << "(0x" << error << ") " << errorDescription << Log::End;
+        Log::error( prefix, ": (0x", error, ") ", errorDescription );
     }
 }
 

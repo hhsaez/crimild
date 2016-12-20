@@ -324,7 +324,7 @@ namespace crimild {
 
             auto obj = _objects[ objId ];
             if ( obj == nullptr ) {
-                Log::Error << "Cannot find object with id " << objId << Log::End;
+                Log::error( "Cannot find object with id ", objId );
                 return;
             }
 
@@ -342,7 +342,7 @@ namespace crimild {
                 read( objId );
                 auto obj = _objects[ objId ];
                 if ( obj == nullptr ) {
-                    Log::Error << "Cannot find object with id " << objId << Log::End;
+                    Log::error( "Cannot find object with id ", objId );
                     continue;
                 }
                 objs.push_back( crimild::cast_ptr< T >( obj ) );
