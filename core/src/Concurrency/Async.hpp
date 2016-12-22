@@ -25,35 +25,70 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CONCURRENCY_ASYNC_
-#define CRIMILD_CONCURRENCY_ASYNC_
+#ifndef CRIMILD_CORE_ASYNC_
+#define CRIMILD_CORE_ASYNC_
 
-#include <functional>
+#include "Job.hpp"
 
 namespace crimild {
-    
-    class AsyncDispatchPolicy {
-    public:
-        enum {
-            NONE = 0x0,
-            
-            THREAD_SAFE = 0x1 << 0,
-            SYNC_FRAME = 0x1 << 1,
-            
-            MAIN_QUEUE = NONE,
-            MAIN_QUEUE_SYNC = SYNC_FRAME,
-            
-            BACKGROUND_QUEUE = THREAD_SAFE,
-            BACKGROUND_QUEUE_SYNC = BACKGROUND_QUEUE | SYNC_FRAME,
-            
-            ALL = ~NONE
-        };
-    };
-    
-    void async( unsigned int dispatchPolicy, std::function< void( void ) > onRun, std::function< void( void ) > onCompleted = nullptr );
-    
-    void async( std::function< void( void ) > onRun, std::function< void( void ) > onCompleted = nullptr );
-    
+
+	namespace concurrency {
+
+        /**
+            \brief Creates an empty job
+         
+            Since the job is empty, it is not dispatched to the scheduler. This
+            function is useful to create parent jobs for parallel operations
+         
+            \remarks The new job will not be executed since it's empty
+         */
+		JobPtr async( void );
+
+        /**
+            \brief Creates and dispatches an async job
+         
+            \remarks The job will be executed in a background thread
+         */
+		JobPtr async( JobCallback const &callback );
+
+        /**
+            \brief Creates and dispatches an async job linked to a parent
+         
+            \remarks The job will be executed in a background thread
+         */
+		JobPtr async( JobPtr const &parent, JobCallback const &callback );
+
+        /**
+            \brief Creates and dispatches a job in the main thread
+         
+            This method will create a new job and enqueue it to be executed
+            at the beginning of the next simulation step. 
+         
+            \remarks The job will be executed in the main thread.
+         */
+		JobPtr sync_frame( JobCallback const &callback );
+
+        /**
+            \brief Creates and dispatches an async job in the main thread
+         
+            This method will create a new job and enqueue it to be executed
+            at the beginning of the next simulation step. 
+         
+            \remarks The job will be executed in a background thread
+         */
+		JobPtr async_frame( JobCallback const &callback );
+
+        /**
+            \brief Waits for a job to be completed
+         
+            Blocks the operation of the current thread until the job
+            is completed. In the meantime, other jobs may be executed
+            in the current thread, if any.
+         */
+		void wait( JobPtr const &job );
+
+	}
+
 }
 
 #endif

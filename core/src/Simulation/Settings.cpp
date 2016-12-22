@@ -89,7 +89,7 @@ void Settings::parseCommandLine( int argc, char **argv )
 	}
 
 	for ( auto it : _settings ) {
-		std::cout << it.first << " -> " << it.second << std::endl;
+        Log::debug( CRIMILD_CURRENT_CLASS_NAME, it.first, " -> ", it.second );
 	}
 }
 

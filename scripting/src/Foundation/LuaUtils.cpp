@@ -42,7 +42,7 @@ bool LuaUtils::checkLuaState( lua_State *l, int code )
 		return false;
 	}
 
-    Log::warning( lua_tostring( l, -1 ) );
+    Log::warning( CRIMILD_CURRENT_CLASS_NAME, lua_tostring( l, -1 ) );
 	return true;
 }
 

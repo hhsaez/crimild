@@ -57,7 +57,7 @@ void CharacterController::start( void )
 {
 	auto collider = getComponent< Collider >();
 	if ( collider == nullptr ) {
-        Log::error( "No collider found for character controller" );
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "No collider found for character controller" );
 		return;
 	}
 

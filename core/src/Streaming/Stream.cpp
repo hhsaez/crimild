@@ -61,7 +61,7 @@ void StreamObject::load( Stream &s )
 SharedPointer< StreamObject > StreamObjectFactory::buildObject( std::string className )
 {
     if ( _builders[ className ] == nullptr ) {
-        Log::error( "No builder registred for StreamObject of class ", className );
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "No builder registred for StreamObject of class ", className );
         return nullptr;
     }
 
@@ -155,7 +155,7 @@ bool Stream::load( void )
 	std::string flag;
 	read( flag );
 	if ( flag != Stream::FLAG_STREAM_START ) {
-        Log::error( "Invalid file format" );
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid file format" );
 		return false;
 	}
 
@@ -172,7 +172,7 @@ bool Stream::load( void )
 
 		read( flag );
 		if ( flag != Stream::FLAG_OBJECT_START ) {
-            Log::error( "Invalid file format. Expected ", Stream::FLAG_OBJECT_START );
+            Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid file format. Expected ", Stream::FLAG_OBJECT_START );
 			return false;
 		}
 
@@ -184,7 +184,7 @@ bool Stream::load( void )
 
 		auto obj = StreamObjectFactory::getInstance()->buildObject( className );
 		if ( obj == nullptr ) {
-            Log::debug( "Cannot build object of type ", className, " with id ", objId );
+            Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Cannot build object of type ", className, " with id ", objId );
 			return false;
 		}
 
@@ -198,7 +198,7 @@ bool Stream::load( void )
 
 		read( flag );
 		if ( flag != Stream::FLAG_OBJECT_END ) {
-            Log::error( "Invalid file format. Expected ", Stream::FLAG_OBJECT_END );
+            Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid file format. Expected ", Stream::FLAG_OBJECT_END );
 			return false;
 		}
 	}

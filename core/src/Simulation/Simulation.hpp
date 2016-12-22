@@ -28,7 +28,7 @@
 #ifndef CRIMILD_SIMULATION_
 #define CRIMILD_SIMULATION_
 
-#include "Concurrency/TaskManager.hpp"
+#include "Concurrency/JobScheduler.hpp"
 
 #include "Systems/System.hpp"
 
@@ -86,6 +86,9 @@ namespace crimild {
         virtual void stop( void );
             
         virtual int run( void );
+            
+    private:
+        concurrency::JobScheduler _jobScheduler;
         
     public:
 		SettingsPtr &getSettings( void ) { return _settings; }
@@ -108,7 +111,6 @@ namespace crimild {
             
     private:
 		Profiler _profiler;
-		TaskManager _taskManager;
         Input _input;
 
 	public:

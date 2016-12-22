@@ -69,11 +69,10 @@ void StreamingSystem::onReloadScene( messaging::ReloadScene const &message )
 {
     auto sceneName = _lastSceneFileName;
     auto builder = getSceneBuilder();
-    auto self = this;
     
-    crimild::async( crimild::AsyncDispatchPolicy::MAIN_QUEUE, [self, sceneName, builder] {
+    crimild::concurrency::sync_frame( [this, sceneName, builder] {
         Simulation::getInstance()->setScene( nullptr );
-        self->loadScene( sceneName, builder );
+        loadScene( sceneName, builder );
     });
 }
 
@@ -84,7 +83,7 @@ void StreamingSystem::loadScene( std::string filename, SceneBuilder *builder )
     }
     
     if ( _sceneBuilder == nullptr ) {
-        Log::error( "Undefined scene builder" );
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Undefined scene builder" );
         return;
     }
     
@@ -97,20 +96,15 @@ void StreamingSystem::loadScene( std::string filename, SceneBuilder *builder )
 	// in the main thread to ensure all systems are properly runnning. 
 	// Then, once the scene is completely loaded, we set it as the current 
 	// scene again in main thread to avoid changing scenes when rendering or updating
-	crimild::async( crimild::AsyncDispatchPolicy::MAIN_QUEUE, [sceneBuilder, filename] {
-        Log::debug( "Loading scene: ", filename );
-    
-		crimild::async( crimild::AsyncDispatchPolicy::BACKGROUND_QUEUE, [sceneBuilder, filename] {
-			sceneBuilder->reset();
-			auto scene = sceneBuilder->fromFile( FileSystem::getInstance().pathForResource( filename ) );
-			sceneBuilder->reset();
-            Log::debug( "Scene loaded: ", filename );
+    crimild::concurrency::async_frame( [sceneBuilder, filename] {
+        sceneBuilder->reset();
+        auto scene = sceneBuilder->fromFile( FileSystem::getInstance().pathForResource( filename ) );
+        sceneBuilder->reset();
+        Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Scene loaded: ", filename );
         
-			crimild::async( crimild::AsyncDispatchPolicy::MAIN_QUEUE, [scene] {
-				Simulation::getInstance()->setScene( scene );
-			});
-		});
-
-	});
+        crimild::concurrency::sync_frame( [scene] {
+            Simulation::getInstance()->setScene( scene );
+        });
+    });
 }
 

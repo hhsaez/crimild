@@ -79,7 +79,7 @@ void ImageEffect::renderScreen( Renderer *renderer, Texture *texture )
     // TODO: keep a reference to program to avoid string comparision every frame
     auto program = renderer->getShaderProgram( Renderer::SHADER_PROGRAM_SCREEN_TEXTURE );
     if ( program == nullptr ) {
-        Log::error( "No shader program provided with name 'texture'" );
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "No shader program provided with name 'texture'" );
         return;
     }
     

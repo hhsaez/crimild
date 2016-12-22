@@ -76,7 +76,7 @@ SharedPointer< Image > RTRenderer::render( SharedPointer< Node > const &scene, S
 						}
                         
                         jobCount++;
-                        Log::debug( "RTRenderer", "Progress: ", jobCount, "/", JOB_TOTAL );
+                        Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Progress: ", jobCount, "/", JOB_TOTAL );
 					}
 				}
 			});
@@ -84,7 +84,7 @@ SharedPointer< Image > RTRenderer::render( SharedPointer< Node > const &scene, S
 	}
 	
 	crimild::concurrency::wait( parentJob );
-    Log::debug( "Done rendering frames" );
+    Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Done rendering frames" );
     
     auto result = crimild::alloc< Image >( _width, _height, bpp, &pixels[ 0 ], Image::PixelFormat::RGB );
     return result;

@@ -51,7 +51,7 @@ void DebugRenderHelper::renderLines( Renderer *renderer, Camera *camera, const V
     
     auto program = renderer->getShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_DIFFUSE );
 	if ( program == nullptr ) {
-        Log::error( "No program found for debug rendering" );
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "No program found for debug rendering" );
 		return;
 	}
 
@@ -126,7 +126,7 @@ void DebugRenderHelper::render( Renderer *renderer, Camera *camera, Primitive *p
 
     auto program = renderer->getShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_DIFFUSE );
 	if ( program == nullptr ) {
-        Log::error( "No program found for debug rendering" );
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "No program found for debug rendering" );
 		return;
 	}
 

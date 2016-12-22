@@ -36,9 +36,8 @@ bool UpdateSystem::start( void )
     
     _accumulator = 0.0;
     
-    auto weakSelf = this;
-    registerMessageHandler< messaging::SimulationWillUpdate >( [weakSelf]( messaging::SimulationWillUpdate const &message ) {
-        crimild::async( AsyncDispatchPolicy::MAIN_QUEUE_SYNC, std::bind( &UpdateSystem::update, weakSelf ) );
+    registerMessageHandler< messaging::SimulationWillUpdate >( [this]( messaging::SimulationWillUpdate const &message ) {
+        crimild::concurrency::async( std::bind( &UpdateSystem::update, this ) );
     });
 
 	return true;
@@ -98,7 +97,10 @@ void UpdateSystem::computeRenderQueue( Node *scene, Camera *camera )
     CRIMILD_PROFILE( "Compute Render Queue" )
     auto renderQueue = crimild::alloc< RenderQueue >();
     scene->perform( ComputeRenderQueue( camera, crimild::get_ptr( renderQueue ) ) );
-    broadcastMessage( messaging::RenderQueueAvailable { renderQueue } );
+    
+    crimild::concurrency::sync_frame( [this, renderQueue]() {
+        broadcastMessage( messaging::RenderQueueAvailable { renderQueue } );
+    });
 }
 
 void UpdateSystem::stop( void )

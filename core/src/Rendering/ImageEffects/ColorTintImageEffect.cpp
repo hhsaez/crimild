@@ -65,7 +65,7 @@ void ColorTintImageEffect::apply( crimild::Renderer *renderer, crimild::Camera *
 	if ( _colorTintProgram == nullptr ) {
 		_colorTintProgram = renderer->getShaderProgram( COLOR_TINT_PROGRAM_NAME );
 		if ( _colorTintProgram == nullptr ) {
-            Log::warning( "No shader program found with name ", COLOR_TINT_PROGRAM_NAME );
+            Log::warning( CRIMILD_CURRENT_CLASS_NAME, "No shader program found with name ", COLOR_TINT_PROGRAM_NAME );
 			setEnabled( false );
 			return;
 		}
@@ -76,14 +76,14 @@ void ColorTintImageEffect::apply( crimild::Renderer *renderer, crimild::Camera *
 
     auto sceneFBO = renderer->getFrameBuffer( RenderPass::S_BUFFER_NAME );
 	if ( sceneFBO == nullptr ) {
-        Log::warning( "Cannot find FBO named '", RenderPass::S_BUFFER_NAME, "'" );
+        Log::warning( CRIMILD_CURRENT_CLASS_NAME, "Cannot find FBO named '", RenderPass::S_BUFFER_NAME, "'" );
 		setEnabled( false );
 		return;
 	}
     
     auto colorTarget = sceneFBO->getRenderTargets().get( RenderPass::S_BUFFER_COLOR_TARGET_NAME );
 	if ( colorTarget == nullptr ) {
-        Log::warning( "Cannot find render target named '", RenderPass::S_BUFFER_COLOR_TARGET_NAME, "'" );
+        Log::warning( CRIMILD_CURRENT_CLASS_NAME, "Cannot find render target named '", RenderPass::S_BUFFER_COLOR_TARGET_NAME, "'" );
 		setEnabled( false );
 		return;		
 	}

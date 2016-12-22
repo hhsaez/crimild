@@ -134,20 +134,20 @@ void DepthOfFieldImageEffect::compute( Renderer *renderer, Camera *camera )
 {
     auto sceneFBO = renderer->getFrameBuffer( RenderPass::S_BUFFER_NAME );
     if ( sceneFBO == nullptr ) {
-        Log::error( "Cannot find FBO named '", RenderPass::S_BUFFER_NAME, "'" );
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot find FBO named '", RenderPass::S_BUFFER_NAME, "'" );
         return;
     }
     
     auto colorTarget = sceneFBO->getRenderTargets().get( RenderPass::S_BUFFER_COLOR_TARGET_NAME );
     if ( colorTarget == nullptr ) {
-        Log::error( "Cannot get color target from scene" );
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot get color target from scene" );
         return;
     }
 
     // STEP 1: Downscale
     auto downscaleFBO = renderer->getFrameBuffer( Renderer::FBO_AUX_512 );
     if ( downscaleFBO == nullptr ) {
-        Log::error( "Cannot find FBO named '", Renderer::FBO_AUX_512, "'" );
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot find FBO named '", Renderer::FBO_AUX_512, "'" );
         return;
     }
 
@@ -174,13 +174,13 @@ void DepthOfFieldImageEffect::compute( Renderer *renderer, Camera *camera )
     // STEP 2: Blur
     auto blurFBO = renderer->getFrameBuffer( Renderer::FBO_AUX_1024 );
     if ( blurFBO == nullptr ) {
-        Log::error( "Cannot find FBO named '", Renderer::FBO_AUX_1024, "'" );
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot find FBO named '", Renderer::FBO_AUX_1024, "'" );
         return;
     }
 
     colorTarget = downscaleFBO->getRenderTargets().get( Renderer::FBO_AUX_COLOR_TARGET_NAME );
     if ( colorTarget->getTexture() == nullptr ) {
-        Log::error( "Color texture is null" );
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Color texture is null" );
         return;
     }
 
@@ -213,31 +213,31 @@ void DepthOfFieldImageEffect::apply( crimild::Renderer *renderer, crimild::Camer
 {
     auto sceneFBO = renderer->getFrameBuffer( RenderPass::S_BUFFER_NAME );
 	if ( sceneFBO == nullptr ) {
-        Log::error( "Cannot find FBO named '", RenderPass::S_BUFFER_NAME, "'" );
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot find FBO named '", RenderPass::S_BUFFER_NAME, "'" );
 		return;
 	}
     
     auto colorTarget = sceneFBO->getRenderTargets().get( RenderPass::S_BUFFER_COLOR_TARGET_NAME );
     if ( colorTarget->getTexture() == nullptr ) {
-        Log::error( "Color texture is null" );
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Color texture is null" );
         return;
     }
 
     auto depthTarget = sceneFBO->getRenderTargets().get( RenderPass::S_BUFFER_DEPTH_TARGET_NAME );
     if ( depthTarget->getTexture() == nullptr ) {
-        Log::error( "Depth texture is null" );
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Depth texture is null" );
         return;
     }
 
     auto blurFBO = renderer->getFrameBuffer( Renderer::FBO_AUX_1024 );
     if ( blurFBO == nullptr ) {
-        Log::error( "Cannot find FBO named '", Renderer::FBO_AUX_1024, "'" );
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot find FBO named '", Renderer::FBO_AUX_1024, "'" );
         return;
     }
 
     auto blurTarget = blurFBO->getRenderTargets().get( Renderer::FBO_AUX_COLOR_TARGET_NAME );
     if ( blurTarget->getTexture() == nullptr ) {
-        Log::error( "Blur texture is null" );
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Blur texture is null" );
         return;
     }
 

@@ -78,12 +78,12 @@ void loadMaterialTexture( SharedPointer< Material > material, const aiMaterial *
 					break;
 
 				default:
-                    Log::warning( "Unsupported texture type ", texType );
+                    Log::warning( CRIMILD_CURRENT_CLASS_NAME, "Unsupported texture type ", texType );
 					break;
 			}
 		}
 		else {
-            Log::warning( "Cannot find texture with path ", texturePath );
+            Log::warning( CRIMILD_CURRENT_CLASS_NAME, "Cannot find texture with path ", texturePath );
 		}
 	}
 
@@ -328,7 +328,7 @@ SharedPointer< Group > SceneImporter::import( std::string filename )
 		aiProcess_CalcTangentSpace |
 		aiProcess_Triangulate );
 	if ( importedScene == nullptr ) {
-		Log::error( "Error importing file ", filename, "\n", importer.GetErrorString() );
+		Log::error( CRIMILD_CURRENT_CLASS_NAME, "Error importing file ", filename, "\n", importer.GetErrorString() );
 	 	return nullptr;
 	}
 

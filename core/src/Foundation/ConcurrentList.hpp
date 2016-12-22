@@ -41,8 +41,7 @@ namespace crimild {
     private:
         using List = std::list< T >;
         using Mutex = std::mutex;
-        using ScopedLock = std::unique_lock< Mutex >;
-        using Condition = std::condition_variable;
+        using ScopedLock = std::lock_guard< Mutex >;
         
     public:
         ConcurrentList( void )
@@ -67,10 +66,16 @@ namespace crimild {
             return _list.size();
         }
         
-        void add( T const &value )
+        void push_back( T const &value )
         {
             ScopedLock lock( _mutex );
             _list.push_back( value );
+        }
+        
+        void push_front( T const &value )
+        {
+            ScopedLock lock( _mutex );
+            _list.push_front( value );
         }
         
         void remove( T const &value )
@@ -79,11 +84,32 @@ namespace crimild {
             _list.remove( value );
         }
         
-        void each( std::function< void( T const & ) > callback )
+        void clear( void )
         {
             ScopedLock lock( _mutex );
-            auto elems = _list;
-            lock.unlock();
+            _list.clear();
+        }
+        
+        /**
+            \brief Traverses the list 
+         
+            This method will create a temporary copy of the list. That way, the callbacks
+            may add new elements if needed at the same time
+         
+            \param flush If true, the list will be cleared before iterating the elems
+         */
+        void each( std::function< void( T const & ) > callback, bool flush = false )
+        {
+            List elems;
+
+            {
+                ScopedLock lock( _mutex );
+                elems = _list;
+                
+                if ( flush ) {
+                    _list.clear();
+                }
+            }
             
             for ( auto &e : elems ) callback( e );
         }

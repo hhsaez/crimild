@@ -28,6 +28,8 @@
 #ifndef CRIMILD_MACROS_
 #define CRIMILD_MACROS_
 
+#include <string>
+
 // Identify known platforms
 #if defined( __APPLE__ )
     #include <TargetConditionals.h>
@@ -55,6 +57,29 @@
 #else
 	#define CRIMILD_CURRENT_FUNCTION __FUNCTION__
 #endif
+
+namespace crimild {
+    
+    inline std::string getClassName( const std::string &funcName )
+    {
+        auto parentesis = funcName.find( "(" );
+        if ( parentesis == std::string::npos ) {
+            return "::";
+        }
+        
+        auto colons = funcName.substr( 0, parentesis ).rfind( "::" );
+        if ( colons == std::string::npos ) {
+            return "::";
+        }
+        
+        auto begin = funcName.substr( 0, colons ).rfind( " " ) + 1;
+        auto end = colons - begin;
+        
+        return funcName.substr( begin, end );
+    }
+}
+
+#define CRIMILD_CURRENT_CLASS_NAME ::crimild::getClassName( CRIMILD_CURRENT_FUNCTION )
 
 #define CRIMILD_TO_STRING( A ) #A
 

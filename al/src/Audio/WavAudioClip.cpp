@@ -73,7 +73,7 @@ WavAudioClip::WavAudioClip( std::string filename )
  
 	FILE *soundFile = fopen( filename.c_str(), "rb" );
 	if ( !soundFile ) {
-        Log::error( "Cannot open file ", filename );
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot open file ", filename );
 		return;
 	}
 
@@ -82,12 +82,12 @@ WavAudioClip::WavAudioClip( std::string filename )
 
 	//check for RIFF and WAVE tag in memeory
 	if ( riff_header.chunkID[ 0 ] != 'R' || riff_header.chunkID[ 1 ] != 'I' || riff_header.chunkID[ 2 ] != 'F' || riff_header.chunkID[ 3 ] != 'F') {
-        Log::error( "Invalid RIFF header: ", riff_header.chunkID );
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid RIFF header: ", riff_header.chunkID );
 		return;
 	}
 
 	if ( riff_header.format[ 0 ] != 'W' || riff_header.format[ 1 ] != 'A' || riff_header.format[ 2 ] != 'V' || riff_header.format[ 3 ] != 'E' ) {
-        Log::error( "Invalid WAVE header: ", riff_header.format );
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid WAVE header: ", riff_header.format );
 		return;
 	}
 
@@ -96,7 +96,7 @@ WavAudioClip::WavAudioClip( std::string filename )
 
 	//check for fmt tag in memory
 	if ( wave_format.subChunkID[ 0 ] != 'f' || wave_format.subChunkID[ 1 ] != 'm' || wave_format.subChunkID[ 2 ] != 't' || wave_format.subChunkID[ 3 ] != ' ') {
-        Log::error( "Invalid Wave format: ", wave_format.subChunkID );
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid Wave format: ", wave_format.subChunkID );
 		return;
 	}
 
@@ -109,7 +109,7 @@ WavAudioClip::WavAudioClip( std::string filename )
 	fread( &wave_data, sizeof( WAVE_Data ), 1, soundFile );
 	//check for data tag in memory
 	if ( wave_data.subChunkID[ 0 ] != 'd' || wave_data.subChunkID[ 1 ] != 'a' || wave_data.subChunkID[ 2 ] != 't' || wave_data.subChunkID[ 3 ] != 'a') {
-        Log::error( "Invalid data header: ", wave_data.subChunkID );
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid data header: ", wave_data.subChunkID );
 		return;
 	}
 
@@ -118,7 +118,7 @@ WavAudioClip::WavAudioClip( std::string filename )
 
 	// Read in the sound data into the soundData variable
 	if ( !fread( &data[ 0 ], data.size() * sizeof( unsigned char ), 1, soundFile ) ) {
-        Log::error( "Error loading WAVE data into struct" );
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Error loading WAVE data into struct" );
 		return;
 	}
 

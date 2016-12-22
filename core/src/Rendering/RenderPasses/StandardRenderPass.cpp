@@ -81,7 +81,7 @@ void StandardRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *ren
 
     auto program = renderer->getShaderProgram( Renderer::SHADER_PROGRAM_DEPTH );
     if ( program == nullptr ) {
-        Log::error( "No shader program with name '", Renderer::SHADER_PROGRAM_DEPTH, "'" );
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "No shader program with name '", Renderer::SHADER_PROGRAM_DEPTH, "'" );
         return;
     }
     

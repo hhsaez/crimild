@@ -50,7 +50,7 @@ BoxCollider::~BoxCollider( void )
 
 SharedPointer< btCollisionShape > BoxCollider::generateShape( void )
 {
-    Log::debug( "Generating shape for box collider" );
+    Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Generating shape for box collider" );
 	
 	auto box = new btBoxShape( btVector3( _boxHalfExtents[ 0 ], _boxHalfExtents[ 1 ], _boxHalfExtents[ 2 ] ) );
 	btTransform boxTransform;

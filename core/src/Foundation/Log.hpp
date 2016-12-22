@@ -107,11 +107,11 @@ namespace crimild {
                 auto s = std::chrono::duration_cast< std::chrono::microseconds >( tp.time_since_epoch() );
                 auto t = ( time_t )( s.count() );
                 
-                auto str = StringUtils::toString(
-                                                 t, " ",
-                                                 std::this_thread::get_id(), " ",
-                                                 levelStr, "/", TAG, " - ",
-                                                 std::forward< Args >( args )... );
+                auto str = StringUtils::toString( t, " ",
+                    std::this_thread::get_id(), " ",
+                    levelStr, "/", TAG, " - ",
+                    std::forward< Args >( args )... );
+                
                 _outputHandler->printLine( str );
             }
         }
@@ -178,74 +178,6 @@ namespace crimild {
         static std::unique_ptr< OutputHandler > _outputHandler;
                 
     };
-                
-
-/**
-	class Log : public NamedObject {
-	public:
-		class LogOutputHandler : public SharedObject {
-		public:
-			virtual ~LogOutputHandler( void );
-
-			virtual void write( Log *log, std::string message ) = 0;
-		};
-        
-        using LogOutputHandlerPtr = SharedPointer< LogOutputHandler >;
-
-		class ConsoleOutputHandler : public LogOutputHandler {
-		public:
-			virtual ~ConsoleOutputHandler( void );
-			virtual void write( Log *log, std::string message ) override;
-		};
-        
-		class NullOutputHandler : public LogOutputHandler {
-		public:
-			virtual ~NullOutputHandler( void ) { }
-			virtual void write( Log *, std::string ) override { }
-		};
-        
-	public:
-		static Log Debug;
-		static Log Warning;
-		static Log Error;
-		static Log Fatal;
-		static Log Info;
-
-		class EndLine {
-		public:
-		};
-
-		static EndLine End;
-
-		static void setDefaultOutputHandler( LogOutputHandlerPtr const &handler );
-
-	public:
-		Log( std::string name );
-		virtual ~Log( void );
-
-		void setOutputHandler( LogOutputHandlerPtr const &handler ) { _outputHandler = handler; }
-		LogOutputHandlerPtr getOutputHandler( void ) { return _outputHandler; }
-
-		template< typename T >
-		Log &operator<<( T in )
-		{
-			_str << in;
-			return *this;
-		}
-
-		Log &operator<<( EndLine & )
-		{
-            if ( _outputHandler != nullptr ) _outputHandler->write( this, _str.str() );
-			_str.str( "" );
-			return *this;
-		}
-
-	private:
-		std::stringstream _str;
-		LogOutputHandlerPtr _outputHandler;
-	};
- 
- */
 
 }
 

@@ -57,7 +57,7 @@ void OBJLoader::FileProcessor::readFile( std::string fileName )
 	std::ifstream input;
 	input.open( fileName.c_str() );
 	if ( !input.is_open() ) {
-        Log::error( "Cannot load file ", fileName );
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot load file ", fileName );
 		return;
 	}
 

@@ -68,19 +68,19 @@ void SkinnedMeshComponent::update( const Clock &c )
 
 	auto mesh = getSkinnedMesh();
 	if ( mesh == nullptr ) {
-        Log::error( "No skinned mesh attach to component" );
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "No skinned mesh attach to component" );
 		return;
 	}
 	
 	auto skeleton = mesh->getSkeleton();
 	if ( skeleton == nullptr ) {
-        Log::error( "No skinned mesh skeleton attach to component" );
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "No skinned mesh skeleton attach to component" );
 		return;
 	}
 	
 	auto animationState = mesh->getAnimationState();
 	if ( animationState == nullptr ) {
-        Log::error( "No skinned mesh animation state attach to component" );
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "No skinned mesh animation state attach to component" );
 		return;
 	}
 

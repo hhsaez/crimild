@@ -269,9 +269,7 @@ namespace crimild {
             }
             else {
 #if CRIMILD_SCRIPTING_LOG_VERBOSE
-                Log::Error << "Cannot parse " << expandExpression( expr )
-                           << "\n\tReason: " << lua_tostring( state, -1 )
-                           << Log::End;
+                Log::Error( CRIMILD_CURRENT_CLASS_NAME, "Cannot parse ", expandExpression( expr ), "\n\tReason: ", lua_tostring( state, -1 ) );
 #endif
             }
             

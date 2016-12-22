@@ -167,7 +167,7 @@ void FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
                     break;
 
                 default:
-                    Log::error( "Invalid target type: ", ( int ) target->getType() );
+                    Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid target type: ", ( int ) target->getType() );
                     break;
             }
             
@@ -203,44 +203,44 @@ void FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
         GLenum status = glCheckFramebufferStatus( GL_FRAMEBUFFER );
         switch ( status ) {
             case GL_FRAMEBUFFER_COMPLETE:
-                Log::debug( "Framebuffer setup complete" );
+                Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Framebuffer setup complete" );
                 break;
             case GL_FRAMEBUFFER_UNDEFINED:
-                Log::fatal( "Cannot setup FrameBuffer due to invalid window setup" );
+                Log::fatal( CRIMILD_CURRENT_CLASS_NAME, "Cannot setup FrameBuffer due to invalid window setup" );
                 exit( 1 );
                 break;
             case GL_FRAMEBUFFER_UNSUPPORTED:
-                Log::fatal( "Invalid FBO attachments format. Check configuration for each attachment" );
+                Log::fatal( CRIMILD_CURRENT_CLASS_NAME, "Invalid FBO attachments format. Check configuration for each attachment" );
                 exit( 1 );
                 break;
             case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-                Log::fatal( "Cannot setup FrameBuffer. Error configuring attachments" );
+                Log::fatal( CRIMILD_CURRENT_CLASS_NAME, "Cannot setup FrameBuffer. Error configuring attachments" );
                 exit( 1 );
                 break;
             case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-                Log::fatal( "Cannot setup FrameBuffer. No attachments found" );
+                Log::fatal( CRIMILD_CURRENT_CLASS_NAME, "Cannot setup FrameBuffer. No attachments found" );
                 exit( 1 );
                 break;
             case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
-                Log::fatal( "Cannot setup FrameBuffer. Multisample params don't match" );
+                Log::fatal( CRIMILD_CURRENT_CLASS_NAME, "Cannot setup FrameBuffer. Multisample params don't match" );
                 exit( 1 );
                 break;
 #ifdef CRIMILD_PLATFORM_DESKTOP
             case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
-                Log::fatal( "Cannot setup FrameBuffer. Attachments are not enabled for drawing" );
+                Log::fatal( CRIMILD_CURRENT_CLASS_NAME, "Cannot setup FrameBuffer. Attachments are not enabled for drawing" );
                 exit( 1 );
                 break;
             case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
-                Log::fatal( "Cannot setup FrameBuffer. Layer params don't match" );
+                Log::fatal( CRIMILD_CURRENT_CLASS_NAME, "Cannot setup FrameBuffer. Layer params don't match" );
                 exit( 1 );
                 break;
             case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
-                Log::fatal( "Cannot setup FrameBuffer. Attachments are not enabled for reading" );
+                Log::fatal( CRIMILD_CURRENT_CLASS_NAME, "Cannot setup FrameBuffer. Attachments are not enabled for reading" );
                 exit( 1 );
                 break;
 #endif
             default:
-                Log::fatal( "Incomplete framebuffer object. Unknown error code: ", ( int ) status );
+                Log::fatal( CRIMILD_CURRENT_CLASS_NAME, "Incomplete framebuffer object. Unknown error code: ", ( int ) status );
                 exit( 1 );
                 break;
         }
@@ -253,7 +253,7 @@ void FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
         glBindFramebuffer( GL_FRAMEBUFFER, defaultFBO );
     }
     else {
-        Log::fatal( "Cannot create framebuffer object. Out of memory?" );
+        Log::fatal( CRIMILD_CURRENT_CLASS_NAME, "Cannot create framebuffer object. Out of memory?" );
         exit( 1 );
     }
 

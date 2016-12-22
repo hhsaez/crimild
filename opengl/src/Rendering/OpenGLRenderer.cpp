@@ -101,21 +101,22 @@ void OpenGLRenderer::configure( void )
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
-	Log::info( "Configuring renderer",
+	Log::info( CRIMILD_CURRENT_CLASS_NAME,
+               "Configuring renderer",
                "\n       OpenGL version: ", glGetString( GL_VERSION ),
     		   "\n       GLSL version: ", glGetString( GL_SHADING_LANGUAGE_VERSION ),
     		   "\n       Vendor: ", glGetString( GL_VENDOR ),
-              "\n       Renderer: ", glGetString( GL_RENDERER ) );
+               "\n       Renderer: ", glGetString( GL_RENDERER ) );
 
 #ifndef CRIMILD_PLATFORM_MOBILE
 	glewExperimental = GL_TRUE; //stops glew crashing on OSX :-/
 	if ( glewInit() != GLEW_OK ) {
-        Log::fatal( "Cannot initialize GLEW" );
+        Log::fatal( CRIMILD_CURRENT_CLASS_NAME, "Cannot initialize GLEW" );
 		exit( 1 );
 	}
 
 	if ( !GLEW_VERSION_3_2 ) {
-        Log::fatal( "OpenGL 3.2 API is not available" );
+        Log::fatal( CRIMILD_CURRENT_CLASS_NAME, "OpenGL 3.2 API is not available" );
 		exit( 1 );
     }
 #endif

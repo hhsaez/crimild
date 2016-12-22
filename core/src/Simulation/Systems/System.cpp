@@ -44,7 +44,7 @@ System::~System( void )
 
 bool System::start( void )
 {
-    Log::debug( "Starting ", getName() );
+    Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Starting ", getName() );
 	broadcastMessage( messages::SystemWillStart { this } );
 
 	return true;
@@ -52,7 +52,7 @@ bool System::start( void )
 
 void System::stop( void )
 {
-    Log::debug( "Stopping ", getName() );
+    Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Stopping ", getName() );
 	broadcastMessage( messages::SystemWillStop { this } );
 }
 
