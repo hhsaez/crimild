@@ -30,5 +30,5 @@
 using namespace crimild;
 
 std::unique_ptr< Log::OutputHandler > Log::_outputHandler = std::unique_ptr< Log::ConsoleOutputHandler >( new Log::ConsoleOutputHandler() );
-int Log::_level = Log::Level::DEBUG;
+int Log::_level = Log::Level::LOG_LEVEL_DEBUG;
 

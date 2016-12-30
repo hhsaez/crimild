@@ -46,14 +46,14 @@ namespace crimild {
         
     public:
         enum Level {
-            NONE = -1,
-            FATAL = 100,
-            ERROR = 200,
-            WARNING = 300,
-            INFO = 400,
-            DEBUG = 500,
-            TRACE = 600,
-            ALL
+            LOG_LEVEL_NONE = -1,
+            LOG_LEVEL_FATAL = 100,
+            LOG_LEVEL_ERROR = 200,
+            LOG_LEVEL_WARNING = 300,
+            LOG_LEVEL_INFO = 400,
+            LOG_LEVEL_DEBUG = 500,
+            LOG_LEVEL_TRACE = 600,
+            LOG_LEVEL_ALL = 9999
         };
         
         static void setLevel( int level ) { _level = level; };
@@ -66,37 +66,37 @@ namespace crimild {
         template< typename ... Args >
         static void fatal( std::string const &TAG, Args &&... args )
         {
-            print( Level::FATAL, "F", TAG, std::forward< Args >( args )... );
+            print( Level::LOG_LEVEL_FATAL, "F", TAG, std::forward< Args >( args )... );
         }
         
         template< typename ... Args >
         static void error( std::string const &TAG, Args &&... args )
         {
-            print( Level::ERROR, "E", TAG, std::forward< Args >( args )... );
+            print( Level::LOG_LEVEL_ERROR, "E", TAG, std::forward< Args >( args )... );
         }
         
         template< typename ... Args >
         static void warning( std::string const &TAG, Args &&... args )
         {
-            print( Level::WARNING, "W", TAG, std::forward< Args >( args )... );
+            print( Level::LOG_LEVEL_WARNING, "W", TAG, std::forward< Args >( args )... );
         }
         
         template< typename ... Args >
         static void info( std::string const &TAG, Args &&... args )
         {
-            print( Level::INFO, "I", TAG, std::forward< Args >( args )... );
+            print( Level::LOG_LEVEL_INFO, "I", TAG, std::forward< Args >( args )... );
         }
         
         template< typename ... Args >
         static void debug( std::string const &TAG, Args &&... args )
         {
-            print( Level::DEBUG, "D", TAG, std::forward< Args >( args )... );
+            print( Level::LOG_LEVEL_DEBUG, "D", TAG, std::forward< Args >( args )... );
         }
         
         template< typename ... Args >
         static void trace( std::string const &TAG, Args &&... args )
         {
-            print( Level::TRACE, "T", TAG, std::forward< Args >( args )... );
+            print( Level::LOG_LEVEL_TRACE, "T", TAG, std::forward< Args >( args )... );
         }
         
         template< typename ... Args >
