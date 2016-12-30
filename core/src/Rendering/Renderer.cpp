@@ -41,6 +41,12 @@
 
 using namespace crimild;
 
+constexpr const char *Renderer::FBO_AUX_256;
+constexpr const char *Renderer::FBO_AUX_512;
+constexpr const char *Renderer::FBO_AUX_1024;
+constexpr const char *Renderer::FBO_AUX_COLOR_TARGET_NAME;
+constexpr const char *Renderer::FBO_AUX_DEPTH_TARGET_NAME;
+
 constexpr const char *Renderer::SHADER_PROGRAM_RENDER_PASS_FORWARD;
 constexpr const char *Renderer::SHADER_PROGRAM_RENDER_PASS_STANDARD;
 constexpr const char *Renderer::SHADER_PROGRAM_LIT_TEXTURE;

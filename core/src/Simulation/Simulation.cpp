@@ -189,11 +189,7 @@ void Simulation::setScene( SharedPointer< Node > const &scene )
 
 void Simulation::loadScene( std::string filename, SharedPointer< SceneBuilder > const &builder )
 {
-    AssetManager::getInstance()->clear();
-
-    crimild::concurrency::async( [this, filename, builder] {
-        broadcastMessage( messaging::LoadScene { filename, builder } );
-    });
+    broadcastMessage( messaging::LoadScene { filename, builder } );
 }
 
 void Simulation::forEachCamera( std::function< void ( Camera * ) > callback )
