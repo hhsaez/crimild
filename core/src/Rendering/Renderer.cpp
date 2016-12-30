@@ -115,7 +115,8 @@ SharedPointer< FrameBufferObject > Renderer::generateAuxFBO( std::string name, i
 
 void Renderer::beginRender( void )
 {
-
+    static const Rectf VIEWPORT( 0.0f, 0.0f, 1.0f, 1.0f );
+    setViewport( VIEWPORT );
 }
 
 void Renderer::endRender( void )

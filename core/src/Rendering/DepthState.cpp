@@ -32,8 +32,10 @@ using namespace crimild;
 SharedPointer< DepthState > DepthState::DISABLED( crimild::alloc< DepthState >( false ) );
 SharedPointer< DepthState > DepthState::ENABLED( crimild::alloc< DepthState >( true ) );
 
-DepthState::DepthState( bool enabled )
-	: RenderState( enabled )
+DepthState::DepthState( bool enabled, DepthState::CompareFunc compareFunc, bool writable )
+	: RenderState( enabled ),
+	  _compareFunc( compareFunc ),
+	  _writable( writable )
 {
 
 }

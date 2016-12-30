@@ -34,7 +34,6 @@
 #include "Catalogs/TextureCatalog.hpp"
 
 #include "Programs/StandardShaderProgram.hpp"
-#include "Programs/ForwardRenderShaderProgram.hpp"
 #include "Programs/LitTextureShaderProgram.hpp"
 #include "Programs/UnlitTextureShaderProgram.hpp"
 #include "Programs/UnlitDiffuseShaderProgram.hpp"
@@ -68,10 +67,9 @@ OpenGLRenderer::OpenGLRenderer( SharedPointer< FrameBufferObject > const &screen
 	}
 
 	// TODO: Move these calls to 'configure()'?
-    setShaderProgram( Renderer::SHADER_PROGRAM_RENDER_PASS_FORWARD, crimild::alloc< ForwardRenderShaderProgram >() );
     setShaderProgram( Renderer::SHADER_PROGRAM_RENDER_PASS_STANDARD, crimild::alloc< StandardShaderProgram >() );
     
-    setShaderProgram( Renderer::SHADER_PROGRAM_LIT_TEXTURE, crimild::alloc< ForwardRenderShaderProgram >() );
+    setShaderProgram( Renderer::SHADER_PROGRAM_LIT_TEXTURE, crimild::alloc< StandardShaderProgram >() );
     
     setShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_TEXTURE, crimild::alloc< UnlitTextureShaderProgram >() );
 	setShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_DIFFUSE, crimild::alloc< UnlitDiffuseShaderProgram >() );
@@ -429,6 +427,37 @@ void OpenGLRenderer::setDepthState( DepthState *state )
 		glDisable( GL_DEPTH_TEST );
 	}
     
+    GLenum compareFunc = GL_LESS;
+    switch ( state->getCompareFunc() ) {
+        case DepthState::CompareFunc::NEVER:
+            compareFunc = GL_NEVER;
+            break;
+        case DepthState::CompareFunc::LESS:
+            compareFunc = GL_LESS;
+            break;
+        case DepthState::CompareFunc::EQUAL:
+            compareFunc = GL_EQUAL;
+            break;
+        case DepthState::CompareFunc::LEQUAL:
+            compareFunc = GL_LEQUAL;
+            break;
+        case DepthState::CompareFunc::GREATER:
+            compareFunc = GL_GREATER;
+            break;
+        case DepthState::CompareFunc::NOTEQUAL:
+            compareFunc = GL_NOTEQUAL;
+            break;
+        case DepthState::CompareFunc::GEQUAL:
+            compareFunc = GL_GEQUAL;
+            break;
+        case DepthState::CompareFunc::ALWAYS:
+            compareFunc = GL_ALWAYS;
+            break;
+    }
+    glDepthFunc( compareFunc );
+    
+    glDepthMask( state->isWritable() ? GL_TRUE : GL_FALSE );
+
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 

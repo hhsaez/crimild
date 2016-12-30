@@ -37,7 +37,7 @@
 #include "Rendering/Catalogs/FrameBufferObjectCatalog.hpp"
 #include "Rendering/Catalogs/TextureCatalog.hpp"
 
-#include "Rendering/Programs/ForwardRenderShaderProgram.hpp"
+#include "Rendering/Programs/StandardShaderProgram.hpp"
 #include "Rendering/Programs/LitTextureShaderProgram.hpp"
 #include "Rendering/Programs/UnlitTextureShaderProgram.hpp"
 #include "Rendering/Programs/UnlitDiffuseShaderProgram.hpp"
