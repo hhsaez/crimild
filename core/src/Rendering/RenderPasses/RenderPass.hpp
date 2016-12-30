@@ -79,10 +79,6 @@ namespace crimild {
     protected:
         Primitive *getScreenPrimitive( void ) { return crimild::get_ptr( _screen ); }
 
-        virtual void renderOpaqueObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
-        virtual void renderTranslucentObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
-        virtual void renderScreenObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
-
 		virtual void applyImageEffects( Renderer *renderer, Camera *camera );
 		virtual void swapSDBuffers( Renderer *renderer );
 

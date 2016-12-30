@@ -66,69 +66,12 @@ RenderPass::~RenderPass( void )
 
 void RenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
 {
-    render( renderer, renderQueue, camera, renderQueue->getShadedObjects() );
-    renderOpaqueObjects( renderer, renderQueue, camera );
-    renderTranslucentObjects( renderer, renderQueue, camera );
-    renderScreenObjects( renderer, renderQueue, camera );
+
 }
 
 void RenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera, RenderQueue::Renderables const &objects )
 {
-    const Matrix4f &projection = renderQueue->getProjectionMatrix();
-    const Matrix4f &view = renderQueue->getViewMatrix();
-    
-    renderQueue->each( objects, [&]( Material *material, RenderQueue::PrimitiveMap const &primitives ) {
-        if ( material->getProgram() == nullptr ) {
-            material->setProgram( renderer->getShaderProgram( Renderer::SHADER_PROGRAM_LIT_TEXTURE ) );
-        }
-        auto program = material->getProgram();
-        assert( program != nullptr && "No valid program to render batch" );
-        
-        // bind program
-        renderer->bindProgram( program );
-        
-        // bind lights
-        renderQueue->each( [&]( Light *light, int ) {
-            renderer->bindLight( program, light );
-        });
-        
-        // bind material properties
-        renderer->bindMaterial( program, material );
-        
-        for ( auto primitiveIt : primitives ) {
-            auto primitive = primitiveIt.first;
-            
-            // bind vertex and index buffers
-            renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
-            renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
-            
-            for ( auto geometryIt : primitiveIt.second ) {
-                auto &model = geometryIt.second;
-                Matrix4f normal = model;
-                normal[ 12 ] = 0.0f;
-                normal[ 13 ] = 0.0f;
-                normal[ 14 ] = 0.0f;
-                
-                renderer->applyTransformations( program, projection, view, model, normal );
-                renderer->drawPrimitive( program, primitive );
-            }
-            
-            // unbind primitive buffers
-            renderer->unbindVertexBuffer( program, primitive->getVertexBuffer() );
-            renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
-        }
-        
-        // unbind material properties
-        renderer->unbindMaterial( program, material );
-        
-        // unbind lights
-        renderQueue->each( [&]( Light *light, int ) {
-            renderer->unbindLight( program, light );
-        });
-        
-        // unbind program
-        renderer->unbindProgram( program );
-    });
+
 }
 
 void RenderPass::render( Renderer *renderer, Texture *texture, ShaderProgram *defaultProgram )
@@ -166,83 +109,6 @@ void RenderPass::render( Renderer *renderer, Texture *texture, ShaderProgram *de
      
     // lastly, unbind the shader program
     renderer->unbindProgram( program );
-}
-
-void RenderPass::renderOpaqueObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
-{
-    CRIMILD_PROFILE( "Render Opaque Objects" )
-
-    render( renderer, renderQueue, camera, renderQueue->getOpaqueObjects() );
-}
-
-void RenderPass::renderTranslucentObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
-{
-    CRIMILD_PROFILE( "Render Translucent Objects" )
-    
-    render( renderer, renderQueue, camera, renderQueue->getTranslucentObjects() );
-}
-
-void RenderPass::renderScreenObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
-{
-    CRIMILD_PROFILE( "Render Screen Objects" )
-    
-    const Matrix4f &projection = camera->getOrthographicMatrix();
-    Matrix4f view;
-    view.makeIdentity();
-    
-    renderQueue->each( renderQueue->getScreenObjects(), [&]( Material *material, RenderQueue::PrimitiveMap const &primitives ) {
-        if ( material->getProgram() == nullptr ) {
-            material->setProgram( renderer->getShaderProgram( Renderer::SHADER_PROGRAM_LIT_TEXTURE ) );
-        }
-        auto program = material->getProgram();
-        assert( program != nullptr && "No valid program to render batch" );
-        
-        // bind program
-        renderer->bindProgram( program );
-        
-        // bind lights
-        renderQueue->each( [&]( Light *light, int ) {
-            renderer->bindLight( program, light );
-        });
-        
-        // bind material properties
-        renderer->bindMaterial( program, material );
-        
-        for ( auto it : primitives ) {
-            auto primitive = it.first;
-            
-            // bind vertex and index buffers
-            renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
-            renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
-            
-            for ( auto geometryIt : it.second ) {
-                auto &model = geometryIt.second;
-                auto normal = model;
-                normal[ 12 ] = 0.0f;
-                normal[ 13 ] = 0.0f;
-                normal[ 14 ] = 0.0f;
-
-                renderer->applyTransformations( program, projection, view, model, normal );
-                renderer->drawPrimitive( program, primitive );
-            }
-            
-            // unbind primitive buffers
-            renderer->unbindVertexBuffer( program, primitive->getVertexBuffer() );
-            renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
-        }
-        
-        // unbind material properties
-        renderer->unbindMaterial( program, material );
-        
-        // unbind lights
-        renderQueue->each( [&]( Light *light, int ) {
-            renderer->unbindLight( program, light );
-        });
-        
-        // unbind program
-        renderer->unbindProgram( program );
-    });
-    
 }
 
 FrameBufferObject *RenderPass::getSBuffer( Renderer *renderer )

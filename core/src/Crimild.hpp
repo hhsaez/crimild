@@ -75,6 +75,7 @@
 #include "SceneGraph/Text.hpp"
 
 #include "Components/AnimatorComponent.hpp"
+#include "Components/BillboardComponent.hpp"
 #include "Components/LambdaComponent.hpp"
 #include "Components/MaterialComponent.hpp"
 #include "Components/NodeComponent.hpp"
@@ -143,9 +144,7 @@
 #include "Rendering/RenderPasses/RenderPass.hpp"
 #include "Rendering/RenderPasses/StandardRenderPass.hpp"
 #include "Rendering/RenderPasses/PostRenderPass.hpp"
-#include "Rendering/RenderPasses/BasicRenderPass.hpp"
 #include "Rendering/RenderPasses/DeferredRenderPass.hpp"
-#include "Rendering/RenderPasses/ForwardRenderPass.hpp"
 
 #include "Rendering/ImageEffects/ImageEffect.hpp"
 #include "Rendering/ImageEffects/ColorTintImageEffect.hpp"

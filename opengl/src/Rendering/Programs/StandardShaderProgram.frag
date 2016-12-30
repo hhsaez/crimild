@@ -65,7 +65,7 @@ void main( void )
     vec4 color = uUseColorMap ? CRIMILD_GLSL_FN_TEXTURE_2D( uColorMap, vTextureCoord ) : vec4( 1.0, 1.0, 1.0, 1.0 );
     color *= uMaterial.diffuse;
     if ( color.a == 0.0 ) {
-        discard;
+	   discard;
     }
 
     if ( uMaterial.emissive > 0.0 ) {
@@ -121,7 +121,7 @@ void main( void )
         float l = dot( normal, lightVec );
         if ( l > 0.0 ) {
             float spotlight = 1.0;
-            if ( hasDirection && uLights[ i ].outerCutoff > 0 ) {
+            if ( hasDirection && uLights[ i ].outerCutoff > 0.0 ) {
                 spotlight = max( -dot( lightVec, uLights[ i ].direction ), 0.0 );
                 float spotlightFade = clamp( ( uLights[ i ].outerCutoff - spotlight ) / ( uLights[ i ].outerCutoff - uLights[ i ].innerCutoff ), 0.0, 1.0 );
                 spotlight = pow( spotlight * spotlightFade, uLights[ i ].exponent );

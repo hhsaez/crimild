@@ -72,13 +72,7 @@ void ComputeRenderQueue::visitGeometry( Geometry *geometry )
         return;
     }
 
-    auto renderState = geometry->getComponent< RenderStateComponent >();
-
-    renderState->forEachMaterial( [&]( Material *material ) {
-        geometry->forEachPrimitive( [&]( Primitive *primitive ) {
-            _result->push( material, primitive, geometry, geometry->getWorld(), renderState->renderOnScreen() );
-        });
-    });
+    _result->push( geometry );
 }
 
 void ComputeRenderQueue::visitLight( Light *light )

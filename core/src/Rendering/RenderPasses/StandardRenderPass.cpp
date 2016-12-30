@@ -44,7 +44,8 @@ using namespace crimild;
 
 StandardRenderPass::StandardRenderPass( void )
 {
-    
+    // TODO: fix this
+    setShadowMappingEnabled( false );
 }
 
 StandardRenderPass::~StandardRenderPass( void )
@@ -60,8 +61,8 @@ void StandardRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, C
         computeShadowMaps( renderer, renderQueue, camera );
     }
 
-    renderShadedObjects( renderer, renderQueue, camera );
-    renderNonShadedObjects( renderer, renderQueue, camera );
+    renderOccluders( renderer, renderQueue, camera );
+    renderOpaqueObjects( renderer, renderQueue, camera );
     renderTranslucentObjects( renderer, renderQueue, camera );
 }
 
@@ -88,6 +89,9 @@ void StandardRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *ren
     // bind shader program first
     renderer->bindProgram( program );
     
+    renderer->setAlphaState( AlphaState::DISABLED );
+    renderer->setDepthState( DepthState::ENABLED );
+    
     renderQueue->each( [&]( Light *light, int ) {
         
         if ( !light->shouldCastShadows() ) {
@@ -106,29 +110,19 @@ void StandardRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *ren
         
         renderer->bindFrameBuffer( map->getBuffer() );
         
-        renderer->setAlphaState( AlphaState::DISABLED );
-        renderer->setDepthState( DepthState::ENABLED );
-
         renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LINEAR_DEPTH_CONSTANT_UNIFORM ), map->getLinearDepthConstant() );
-
-        renderQueue->each( renderQueue->getShadowCasters(), [&]( Material *material, RenderQueue::PrimitiveMap const &primitives ) {
-            for ( auto it : primitives ) {
-                auto primitive = it.first;
-
-                renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
-                renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
-
-                for ( auto geometryIt : it.second ) {
-                    renderer->applyTransformations( program, map->getLightProjectionMatrix(), map->getLightViewMatrix(), geometryIt.second );
-                    renderer->drawPrimitive( program, primitive );
-                }
-
-                // unbind primitive buffers
-                renderer->unbindVertexBuffer( program, primitive->getVertexBuffer() );
-                renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
-            }
-        });
         
+        auto renderables = renderQueue->getRenderables( RenderQueue::RenderableType::SHADOW_CASTER );
+        
+        renderQueue->each( renderables, [this, renderer, program]( RenderQueue::Renderable *renderable ) {
+            renderStandardGeometry(
+                renderer,
+                crimild::get_ptr( renderable->geometry ),
+                program,
+                nullptr, // no material
+                renderable->modelTransform );
+        });
+
         renderer->unbindFrameBuffer( map->getBuffer() );
     });
     
@@ -136,204 +130,161 @@ void StandardRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *ren
     renderer->unbindProgram( program );
 }
 
-void StandardRenderPass::renderShadedObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
+void StandardRenderPass::renderOccluders( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
 {
-    CRIMILD_PROFILE( "Render Shaded Objects" )
+    CRIMILD_PROFILE( "Render Translucent Objects" )
     
-    if ( renderQueue->getShadedObjects().size() == 0 ) {
+    auto renderables = renderQueue->getRenderables( RenderQueue::RenderableType::OCCLUDER );
+    
+    if ( renderables->size() == 0 ) {
         return;
     }
     
-    auto program = getStandardProgram();
-
-    // bind program
-    renderer->bindProgram( program );
-
-    auto projection = renderQueue->getProjectionMatrix();
-    auto view = renderQueue->getViewMatrix();
-    
-    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::PROJECTION_MATRIX_UNIFORM ), projection );
-    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM ), view );
-    
-    // bind shadow maps
-    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::USE_SHADOW_MAP_UNIFORM ), false );
-    if ( isShadowMappingEnabled() ) {
-        for ( auto it : _shadowMaps ) {
-            if ( it.second != nullptr ) {
-                renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_SOURCE_PROJECTION_MATRIX_UNIFORM ), it.second->getLightProjectionMatrix() );
-                renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_SOURCE_VIEW_MATRIX_UNIFORM ), it.second->getLightViewMatrix() );
-                renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::USE_SHADOW_MAP_UNIFORM ), true );
-                renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LINEAR_DEPTH_CONSTANT_UNIFORM ), it.second->getLinearDepthConstant() );
-                renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::SHADOW_MAP_UNIFORM ), it.second->getTexture() );
-            }
+    renderQueue->each( renderables, [this, renderer, renderQueue]( RenderQueue::Renderable *renderable ) {
+        auto material = crimild::get_ptr( renderable->material );
+        auto program = material->getProgram();
+        if ( program == nullptr ) {
+            program = getStandardProgram();
         }
-    }
-    
-    if ( isLightingEnabled() ) {
-        // bind lights
-        renderQueue->each( [&]( Light *light, int ) {
-            renderer->bindLight( program, light );
-        });
-    }
-    
-    renderQueue->each( renderQueue->getShadedObjects(), [&]( Material *material, RenderQueue::PrimitiveMap const &primitives ) {
-        CRIMILD_PROFILE( "Apply Materials" )
-
-        // bind material properties
-        renderer->bindMaterial( program, material );
-
-        for ( auto it : primitives ) {
-            CRIMILD_PROFILE( "Bind Primitive" )
-
-            auto primitive = it.first;
-
-            // bind vertex and index buffersbl
-            renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
-            renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
-
-            for ( auto geometryIt : it.second ) {
-                CRIMILD_PROFILE( "Draw Primitive" )
-                
-                auto geometry = geometryIt.first;
-                if ( geometry == nullptr ) {
-                    continue;
-                }
-                
-                auto rc = geometry->getComponent< RenderStateComponent >();
-                if ( rc == nullptr ) {
-                    continue;
-                }
-
-                renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_COUNT_UNIFORM ), 0 );
-                if ( rc->getSkinnedMesh() != nullptr && rc->getSkinnedMesh()->getAnimationState() != nullptr ) {
-                    auto animationState = rc->getSkinnedMesh()->getAnimationState();
-                    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_COUNT_UNIFORM ), animationState->getJointPoses().size() );
-                    for ( int i = 0; i < animationState->getJointPoses().size(); i++ ) {
-                        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_POSE_UNIFORM + i ), animationState->getJointPoses()[ i ] );
-                    }
-                }
-
-                renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM ), geometryIt.second );
-
-                renderer->drawPrimitive( program, primitive );
-            }
-            
-            // unbind primitive buffers
-            renderer->unbindVertexBuffer( program, primitive->getVertexBuffer() );
-            renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
-        }
-
-        // unbind material properties
-        renderer->unbindMaterial( program, material );
-
+        
+        renderer->bindProgram( program );
+        
+        auto projection = renderQueue->getProjectionMatrix();
+        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::PROJECTION_MATRIX_UNIFORM ), projection );
+        
+        auto view = renderQueue->getViewMatrix();
+        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM ), view );
+        
+        renderStandardGeometry( renderer, crimild::get_ptr( renderable->geometry ), program, material, renderable->modelTransform );
+        
+        renderer->unbindProgram( program );
     });
-
-    if ( isLightingEnabled() ) {
-        // unbind lights
-        renderQueue->each( [&]( Light *light, int ) {
-            renderer->unbindLight( program, light );
-        });
-    }
-    
-    if ( isShadowMappingEnabled() ) {
-        // unbind shadow maps
-        for ( auto it : _shadowMaps ) {
-            if ( it.second != nullptr ) {
-                renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::SHADOW_MAP_UNIFORM ), it.second->getTexture() );
-            }
-        }
-    }
-
-    // unbind program
-    renderer->unbindProgram( program );
 }
 
-void StandardRenderPass::renderNonShadedObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
+void StandardRenderPass::renderOpaqueObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
 {
-    CRIMILD_PROFILE( "Render Non-Shaded Objects" )
+    CRIMILD_PROFILE( "Render Opaque Objects" )
     
-    if ( renderQueue->getOpaqueObjects().size() == 0 ) {
+    auto renderables = renderQueue->getRenderables( RenderQueue::RenderableType::OPAQUE );
+    
+    if ( renderables->size() == 0 ) {
         return;
     }
     
-    auto program = getStandardProgram();
-    
-    // bind program
-    renderer->bindProgram( program );
-    
-    auto projection = renderQueue->getProjectionMatrix();
-    auto view = renderQueue->getViewMatrix();
-    
-    // disable shadow maps
-    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::USE_SHADOW_MAP_UNIFORM ), false );
-    
-    // bind lights
-    renderQueue->each( [&]( Light *light, int ) {
-        renderer->bindLight( program, light );
-    });
-    
-    renderQueue->each( renderQueue->getOpaqueObjects(), [&]( Material *material, RenderQueue::PrimitiveMap const &primitives ) {
-        CRIMILD_PROFILE( "Apply Materials" )
-        
-        // bind material properties
-        renderer->bindMaterial( program, material );
-        
-        for ( auto it : primitives ) {
-            CRIMILD_PROFILE( "Bind Primitive" )
-            
-            auto primitive = it.first;
-            
-            // bind vertex and index buffers
-            renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
-            renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
-            
-            for ( auto geometryIt : it.second ) {
-                CRIMILD_PROFILE( "Draw Primitive" )
-
-                auto geometry = geometryIt.first;
-                if ( geometry == nullptr ) {
-                    continue;
-                }
-                
-                auto rc = geometry->getComponent< RenderStateComponent >();
-                if ( rc == nullptr ) {
-                    continue;
-                }
-
-                renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_COUNT_UNIFORM ), 0 );
-                if ( rc->getSkinnedMesh() != nullptr && rc->getSkinnedMesh()->getAnimationState() != nullptr ) {
-                    std::cout << "Test" << std::endl;
-                    auto animationState = rc->getSkinnedMesh()->getAnimationState();
-                    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_COUNT_UNIFORM ), animationState->getJointPoses().size() );
-                    std::cout << "Size " << animationState->getJointPoses().size() << std::endl;
-                    for ( int i = 0; i < animationState->getJointPoses().size(); i++ ) {
-                        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_POSE_UNIFORM + i ), animationState->getJointPoses()[ i ] );
-                    }
-                }
-                else {
-                    std::cout << "No skinned mesh " << std::endl;
-                }
-
-                renderer->applyTransformations( program, projection, view, geometryIt.second );
-                renderer->drawPrimitive( program, primitive );
-            }
-            
-            // unbind primitive buffers
-            renderer->unbindVertexBuffer( program, primitive->getVertexBuffer() );
-            renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
+    renderQueue->each( renderables, [this, renderer, renderQueue]( RenderQueue::Renderable *renderable ) {
+        auto material = crimild::get_ptr( renderable->material );
+        auto program = material->getProgram();
+        if ( program == nullptr ) {
+            program = getStandardProgram();
         }
         
-        // unbind material properties
-        renderer->unbindMaterial( program, material );
+        renderer->bindProgram( program );
         
+        auto projection = renderQueue->getProjectionMatrix();
+        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::PROJECTION_MATRIX_UNIFORM ), projection );
+        
+        auto view = renderQueue->getViewMatrix();
+        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM ), view );
+        
+        if ( isShadowMappingEnabled() ) {
+            renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::USE_SHADOW_MAP_UNIFORM ), _shadowMaps.size() > 0 );
+            for ( auto it : _shadowMaps ) {
+                if ( it.second != nullptr ) {
+                    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_SOURCE_PROJECTION_MATRIX_UNIFORM ), it.second->getLightProjectionMatrix() );
+                    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_SOURCE_VIEW_MATRIX_UNIFORM ), it.second->getLightViewMatrix() );
+                    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LINEAR_DEPTH_CONSTANT_UNIFORM ), it.second->getLinearDepthConstant() );
+                    renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::SHADOW_MAP_UNIFORM ), it.second->getTexture() );
+                }
+            }
+        }
+        
+        if ( isLightingEnabled() ) {
+            renderQueue->each( [renderer, program]( Light *light, int ) {
+                renderer->bindLight( program, light );
+            });
+        }
+        
+        renderStandardGeometry( renderer, crimild::get_ptr( renderable->geometry ), program, material, renderable->modelTransform );
+        
+        if ( isLightingEnabled() ) {
+            renderQueue->each( [ renderer, program ]( Light *light, int ) {
+                renderer->unbindLight( program, light );
+            });
+        }
+        
+        if ( isShadowMappingEnabled() ) {
+            for ( auto it : _shadowMaps ) {
+                if ( it.second != nullptr ) {
+                    renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::SHADOW_MAP_UNIFORM ), it.second->getTexture() );
+                }
+            }
+        }
+        
+        renderer->unbindProgram( program );
+    });
+}
+
+void StandardRenderPass::renderTranslucentObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
+{
+    CRIMILD_PROFILE( "Render Translucent Objects" )
+    
+    auto renderables = renderQueue->getRenderables( RenderQueue::RenderableType::TRANSLUCENT );
+    
+    if ( renderables->size() == 0 ) {
+        return;
+    }
+    
+    renderQueue->each( renderables, [this, renderer, renderQueue]( RenderQueue::Renderable *renderable ) {
+        auto material = crimild::get_ptr( renderable->material );
+        auto program = material->getProgram();
+        if ( program == nullptr ) {
+            program = getStandardProgram();
+        }
+        
+        renderer->bindProgram( program );
+        
+        auto projection = renderQueue->getProjectionMatrix();
+        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::PROJECTION_MATRIX_UNIFORM ), projection );
+        
+        auto view = renderQueue->getViewMatrix();
+        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM ), view );
+        
+        renderStandardGeometry( renderer, crimild::get_ptr( renderable->geometry ), program, material, renderable->modelTransform );
+        
+        renderer->unbindProgram( program );
+    });
+}
+
+void StandardRenderPass::renderStandardGeometry( Renderer *renderer, Geometry *geometry, ShaderProgram *program, Material *material, const Matrix4f &modelTransform )
+{
+    if ( material != nullptr ) {
+        renderer->bindMaterial( program, material );
+    }
+    
+    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM ), modelTransform );
+    
+    auto rc = geometry->getComponent< RenderStateComponent >();
+    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_COUNT_UNIFORM ), 0 );
+    if ( rc->getSkinnedMesh() != nullptr && rc->getSkinnedMesh()->getAnimationState() != nullptr ) {
+        auto animationState = rc->getSkinnedMesh()->getAnimationState();
+        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_COUNT_UNIFORM ), animationState->getJointPoses().size() );
+        for ( int i = 0; i < animationState->getJointPoses().size(); i++ ) {
+            renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_POSE_UNIFORM + i ), animationState->getJointPoses()[ i ] );
+        }
+    }
+    
+    geometry->forEachPrimitive( [renderer, program]( Primitive *primitive ) {
+        renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
+        renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
+        
+        renderer->drawPrimitive( program, primitive );
+        
+        renderer->unbindVertexBuffer( program, primitive->getVertexBuffer() );
+        renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
     });
     
-    // unbind lights
-    renderQueue->each( [&]( Light *light, int ) {
-        renderer->unbindLight( program, light );
-    });
-    
-    // unbind program
-    renderer->unbindProgram( program );
+    if ( material != nullptr ) {
+        renderer->unbindMaterial( program, material );
+    }
 }
 

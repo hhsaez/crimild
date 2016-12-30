@@ -171,11 +171,11 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
     LuaNodeBuilderRegistry::getInstance()->registerCustomNodeBuilder( CAMERA_TYPE, [self]( ScriptEvaluator &eval ) -> SharedPointer< Node > {
         auto camera = crimild::alloc< Camera >();
         
-        std::string renderPassType;
-        eval.getPropValue( CAMERA_RENDER_PASS, renderPassType, "forward" );
-        if ( renderPassType == "basic" ) {
-            camera->setRenderPass( crimild::alloc< BasicRenderPass >() );
-        }
+//        std::string renderPassType;
+//        eval.getPropValue( CAMERA_RENDER_PASS, renderPassType, "forward" );
+//        if ( renderPassType == "basic" ) {
+//            camera->setRenderPass( crimild::alloc< BasicRenderPass >() );
+//        }
         
         float fov = 45.0f;
         float aspect = 4.0f / 3.0f;
