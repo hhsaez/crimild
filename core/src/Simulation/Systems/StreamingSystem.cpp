@@ -97,6 +97,8 @@ void StreamingSystem::loadScene( std::string filename, SceneBuilder *builder )
 	// Then, once the scene is completely loaded, we set it as the current 
 	// scene again in main thread to avoid changing scenes when rendering or updating
     crimild::concurrency::async_frame( [sceneBuilder, filename] {
+        AssetManager::getInstance()->clear();
+    
         sceneBuilder->reset();
         auto scene = sceneBuilder->fromFile( FileSystem::getInstance().pathForResource( filename ) );
         sceneBuilder->reset();
