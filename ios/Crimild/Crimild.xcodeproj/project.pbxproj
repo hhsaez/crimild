@@ -9,12 +9,8 @@
 /* Begin PBXBuildFile section */
 		5F02EED01D63B1A4003EE891 /* StandardShaderProgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F02EECC1D63B1A4003EE891 /* StandardShaderProgram.cpp */; };
 		5F02EED11D63B1A4003EE891 /* StandardShaderProgram.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F02EECE1D63B1A4003EE891 /* StandardShaderProgram.hpp */; };
-		5F0875511D63ADB200C9FC2F /* BasicRenderPass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F0875451D63ADB200C9FC2F /* BasicRenderPass.cpp */; };
-		5F0875521D63ADB200C9FC2F /* BasicRenderPass.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F0875461D63ADB200C9FC2F /* BasicRenderPass.hpp */; };
 		5F0875531D63ADB200C9FC2F /* DeferredRenderPass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F0875471D63ADB200C9FC2F /* DeferredRenderPass.cpp */; };
 		5F0875541D63ADB200C9FC2F /* DeferredRenderPass.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F0875481D63ADB200C9FC2F /* DeferredRenderPass.hpp */; };
-		5F0875551D63ADB200C9FC2F /* ForwardRenderPass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F0875491D63ADB200C9FC2F /* ForwardRenderPass.cpp */; };
-		5F0875561D63ADB200C9FC2F /* ForwardRenderPass.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F08754A1D63ADB200C9FC2F /* ForwardRenderPass.hpp */; };
 		5F0875571D63ADB200C9FC2F /* PostRenderPass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F08754B1D63ADB200C9FC2F /* PostRenderPass.cpp */; };
 		5F0875581D63ADB200C9FC2F /* PostRenderPass.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F08754C1D63ADB200C9FC2F /* PostRenderPass.hpp */; };
 		5F0875591D63ADB200C9FC2F /* RenderPass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F08754D1D63ADB200C9FC2F /* RenderPass.cpp */; };
@@ -67,12 +63,6 @@
 		5F35A92B1D4E6687001F5C7C /* UIResponder.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F35A4111D4E6685001F5C7C /* UIResponder.hpp */; };
 		5F35A92C1D4E6687001F5C7C /* Async.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F35A4131D4E6685001F5C7C /* Async.cpp */; };
 		5F35A92D1D4E6687001F5C7C /* Async.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F35A4141D4E6685001F5C7C /* Async.hpp */; };
-		5F35A92E1D4E6687001F5C7C /* Task.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F35A4151D4E6685001F5C7C /* Task.cpp */; };
-		5F35A92F1D4E6687001F5C7C /* Task.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F35A4161D4E6685001F5C7C /* Task.hpp */; };
-		5F35A9301D4E6687001F5C7C /* TaskGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F35A4171D4E6685001F5C7C /* TaskGroup.cpp */; };
-		5F35A9311D4E6687001F5C7C /* TaskGroup.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F35A4181D4E6685001F5C7C /* TaskGroup.hpp */; };
-		5F35A9321D4E6687001F5C7C /* TaskManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F35A4191D4E6685001F5C7C /* TaskManager.cpp */; };
-		5F35A9331D4E6687001F5C7C /* TaskManager.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F35A41A1D4E6685001F5C7C /* TaskManager.hpp */; };
 		5F35A9341D4E6687001F5C7C /* Crimild.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F35A41B1D4E6685001F5C7C /* Crimild.hpp */; };
 		5F35AA111D4E6688001F5C7C /* DebugRenderHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F35A5741D4E6686001F5C7C /* DebugRenderHelper.cpp */; };
 		5F35AA121D4E6688001F5C7C /* DebugRenderHelper.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F35A5751D4E6686001F5C7C /* DebugRenderHelper.hpp */; };
@@ -457,6 +447,12 @@
 		5F35E3491D4E6714001F5C7C /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = 5F35D4EB1D4E66F5001F5C7C /* Makefile */; };
 		5F35E3A41D4E67AC001F5C7C /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F35E3A31D4E67AC001F5C7C /* Metal.framework */; };
 		5F35E3A61D4E67C4001F5C7C /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F35E3A51D4E67C4001F5C7C /* QuartzCore.framework */; };
+		5F608EF81E144B5400C9E56D /* Job.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F608EF31E144B5400C9E56D /* Job.cpp */; };
+		5F608EF91E144B5400C9E56D /* Job.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F608EF41E144B5400C9E56D /* Job.hpp */; };
+		5F608EFA1E144B5400C9E56D /* JobScheduler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F608EF51E144B5400C9E56D /* JobScheduler.cpp */; };
+		5F608EFB1E144B5400C9E56D /* JobScheduler.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F608EF61E144B5400C9E56D /* JobScheduler.hpp */; };
+		5F608EFC1E144B5400C9E56D /* WorkStealingDeque.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F608EF71E144B5400C9E56D /* WorkStealingDeque.hpp */; };
+		5F608EFE1E144D6200C9E56D /* ColorMaskState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F608EFD1E144D6200C9E56D /* ColorMaskState.cpp */; };
 		5F7032241B7BB9D6001B548B /* libCrimild.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F7032181B7BB9D6001B548B /* libCrimild.a */; };
 		5F7035281B7CF467001B548B /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F7035261B7CF467001B548B /* GLKit.framework */; };
 		5F7035291B7CF467001B548B /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F7035271B7CF467001B548B /* OpenGLES.framework */; };
@@ -490,12 +486,8 @@
 		5F02EECD1D63B1A4003EE891 /* StandardShaderProgram.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = StandardShaderProgram.frag; sourceTree = "<group>"; };
 		5F02EECE1D63B1A4003EE891 /* StandardShaderProgram.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = StandardShaderProgram.hpp; sourceTree = "<group>"; };
 		5F02EECF1D63B1A4003EE891 /* StandardShaderProgram.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = StandardShaderProgram.vert; sourceTree = "<group>"; };
-		5F0875451D63ADB200C9FC2F /* BasicRenderPass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BasicRenderPass.cpp; sourceTree = "<group>"; };
-		5F0875461D63ADB200C9FC2F /* BasicRenderPass.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BasicRenderPass.hpp; sourceTree = "<group>"; };
 		5F0875471D63ADB200C9FC2F /* DeferredRenderPass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DeferredRenderPass.cpp; sourceTree = "<group>"; };
 		5F0875481D63ADB200C9FC2F /* DeferredRenderPass.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = DeferredRenderPass.hpp; sourceTree = "<group>"; };
-		5F0875491D63ADB200C9FC2F /* ForwardRenderPass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ForwardRenderPass.cpp; sourceTree = "<group>"; };
-		5F08754A1D63ADB200C9FC2F /* ForwardRenderPass.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ForwardRenderPass.hpp; sourceTree = "<group>"; };
 		5F08754B1D63ADB200C9FC2F /* PostRenderPass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PostRenderPass.cpp; sourceTree = "<group>"; };
 		5F08754C1D63ADB200C9FC2F /* PostRenderPass.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PostRenderPass.hpp; sourceTree = "<group>"; };
 		5F08754D1D63ADB200C9FC2F /* RenderPass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RenderPass.cpp; sourceTree = "<group>"; };
@@ -548,12 +540,6 @@
 		5F35A4111D4E6685001F5C7C /* UIResponder.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = UIResponder.hpp; sourceTree = "<group>"; };
 		5F35A4131D4E6685001F5C7C /* Async.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Async.cpp; sourceTree = "<group>"; };
 		5F35A4141D4E6685001F5C7C /* Async.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Async.hpp; sourceTree = "<group>"; };
-		5F35A4151D4E6685001F5C7C /* Task.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Task.cpp; sourceTree = "<group>"; };
-		5F35A4161D4E6685001F5C7C /* Task.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Task.hpp; sourceTree = "<group>"; };
-		5F35A4171D4E6685001F5C7C /* TaskGroup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TaskGroup.cpp; sourceTree = "<group>"; };
-		5F35A4181D4E6685001F5C7C /* TaskGroup.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = TaskGroup.hpp; sourceTree = "<group>"; };
-		5F35A4191D4E6685001F5C7C /* TaskManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TaskManager.cpp; sourceTree = "<group>"; };
-		5F35A41A1D4E6685001F5C7C /* TaskManager.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = TaskManager.hpp; sourceTree = "<group>"; };
 		5F35A41B1D4E6685001F5C7C /* Crimild.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Crimild.hpp; sourceTree = "<group>"; };
 		5F35A5741D4E6686001F5C7C /* DebugRenderHelper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DebugRenderHelper.cpp; sourceTree = "<group>"; };
 		5F35A5751D4E6686001F5C7C /* DebugRenderHelper.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = DebugRenderHelper.hpp; sourceTree = "<group>"; };
@@ -950,6 +936,12 @@
 		5F35D4EB1D4E66F5001F5C7C /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 		5F35E3A31D4E67AC001F5C7C /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
 		5F35E3A51D4E67C4001F5C7C /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		5F608EF31E144B5400C9E56D /* Job.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Job.cpp; sourceTree = "<group>"; };
+		5F608EF41E144B5400C9E56D /* Job.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Job.hpp; sourceTree = "<group>"; };
+		5F608EF51E144B5400C9E56D /* JobScheduler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = JobScheduler.cpp; sourceTree = "<group>"; };
+		5F608EF61E144B5400C9E56D /* JobScheduler.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = JobScheduler.hpp; sourceTree = "<group>"; };
+		5F608EF71E144B5400C9E56D /* WorkStealingDeque.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = WorkStealingDeque.hpp; sourceTree = "<group>"; };
+		5F608EFD1E144D6200C9E56D /* ColorMaskState.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ColorMaskState.cpp; sourceTree = "<group>"; };
 		5F7032181B7BB9D6001B548B /* libCrimild.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libCrimild.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		5F7032231B7BB9D6001B548B /* CrimildTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CrimildTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5F7032291B7BB9D6001B548B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -985,12 +977,8 @@
 		5F0875441D63ADB200C9FC2F /* RenderPasses */ = {
 			isa = PBXGroup;
 			children = (
-				5F0875451D63ADB200C9FC2F /* BasicRenderPass.cpp */,
-				5F0875461D63ADB200C9FC2F /* BasicRenderPass.hpp */,
 				5F0875471D63ADB200C9FC2F /* DeferredRenderPass.cpp */,
 				5F0875481D63ADB200C9FC2F /* DeferredRenderPass.hpp */,
-				5F0875491D63ADB200C9FC2F /* ForwardRenderPass.cpp */,
-				5F08754A1D63ADB200C9FC2F /* ForwardRenderPass.hpp */,
 				5F08754B1D63ADB200C9FC2F /* PostRenderPass.cpp */,
 				5F08754C1D63ADB200C9FC2F /* PostRenderPass.hpp */,
 				5F08754D1D63ADB200C9FC2F /* RenderPass.cpp */,
@@ -1133,14 +1121,13 @@
 		5F35A4121D4E6685001F5C7C /* Concurrency */ = {
 			isa = PBXGroup;
 			children = (
+				5F608EF31E144B5400C9E56D /* Job.cpp */,
+				5F608EF41E144B5400C9E56D /* Job.hpp */,
+				5F608EF51E144B5400C9E56D /* JobScheduler.cpp */,
+				5F608EF61E144B5400C9E56D /* JobScheduler.hpp */,
+				5F608EF71E144B5400C9E56D /* WorkStealingDeque.hpp */,
 				5F35A4131D4E6685001F5C7C /* Async.cpp */,
 				5F35A4141D4E6685001F5C7C /* Async.hpp */,
-				5F35A4151D4E6685001F5C7C /* Task.cpp */,
-				5F35A4161D4E6685001F5C7C /* Task.hpp */,
-				5F35A4171D4E6685001F5C7C /* TaskGroup.cpp */,
-				5F35A4181D4E6685001F5C7C /* TaskGroup.hpp */,
-				5F35A4191D4E6685001F5C7C /* TaskManager.cpp */,
-				5F35A41A1D4E6685001F5C7C /* TaskManager.hpp */,
 			);
 			path = Concurrency;
 			sourceTree = "<group>";
@@ -1279,6 +1266,7 @@
 		5F35A5D01D4E6686001F5C7C /* Rendering */ = {
 			isa = PBXGroup;
 			children = (
+				5F608EFD1E144D6200C9E56D /* ColorMaskState.cpp */,
 				5F0875441D63ADB200C9FC2F /* RenderPasses */,
 				5F35A5D11D4E6686001F5C7C /* AlphaState.cpp */,
 				5F35A5D21D4E6686001F5C7C /* AlphaState.hpp */,
@@ -1862,6 +1850,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5F608EFB1E144B5400C9E56D /* JobScheduler.hpp in Headers */,
 				5F35AA4C1D4E6689001F5C7C /* Vector.hpp in Headers */,
 				5F35AA9F1D4E6689001F5C7C /* Camera.hpp in Headers */,
 				5F35D61D1D4E66F6001F5C7C /* LuaUtils.hpp in Headers */,
@@ -1919,7 +1908,6 @@
 				5F35E32F1D4E6714001F5C7C /* lopcodes.h in Headers */,
 				5F35D5641D4E66F5001F5C7C /* VertexBufferObjectCatalog.hpp in Headers */,
 				5F35AA6C1D4E6689001F5C7C /* Catalog.hpp in Headers */,
-				5F35A92F1D4E6687001F5C7C /* Task.hpp in Headers */,
 				5F35A35B1D4E6662001F5C7C /* Crimild_AL.hpp in Headers */,
 				5F35AABF1D4E6689001F5C7C /* System.hpp in Headers */,
 				5F35A8B31D4E6687001F5C7C /* SphereBoundingVolume.hpp in Headers */,
@@ -1933,12 +1921,10 @@
 				5F35AAA31D4E6689001F5C7C /* Group.hpp in Headers */,
 				5F0875581D63ADB200C9FC2F /* PostRenderPass.hpp in Headers */,
 				5F35AA141D4E6688001F5C7C /* SceneDebugDump.hpp in Headers */,
-				5F35A9311D4E6687001F5C7C /* TaskGroup.hpp in Headers */,
 				5F35AA4E1D4E6689001F5C7C /* MessageQueue.hpp in Headers */,
 				5F35AAD31D4E6689001F5C7C /* SelectNodes.hpp in Headers */,
 				5F35AA5A1D4E6689001F5C7C /* ParametricPrimitive.hpp in Headers */,
 				5F35AA2F1D4E6688001F5C7C /* SharedObjectMap.hpp in Headers */,
-				5F0875561D63ADB200C9FC2F /* ForwardRenderPass.hpp in Headers */,
 				5F35D58E1D4E66F6001F5C7C /* ParticleSystemShaderProgram.hpp in Headers */,
 				5F35AA331D4E6688001F5C7C /* SmallObjectAllocator.hpp in Headers */,
 				5F35A3511D4E6662001F5C7C /* Utils.hpp in Headers */,
@@ -1976,7 +1962,6 @@
 				5F35D5821D4E66F6001F5C7C /* DeferredRenderShaderProgram.hpp in Headers */,
 				5F35D5901D4E66F6001F5C7C /* ScreenAlphaShaderProgram.hpp in Headers */,
 				5F35ABCB1D4E66BB001F5C7C /* CrimildMetalView.h in Headers */,
-				5F35A9331D4E6687001F5C7C /* TaskManager.hpp in Headers */,
 				5F35AA2C1D4E6688001F5C7C /* SharedObject.hpp in Headers */,
 				5F35AA901D4E6689001F5C7C /* ShaderProgram.hpp in Headers */,
 				5F35D58C1D4E66F6001F5C7C /* LitTextureShaderProgram.hpp in Headers */,
@@ -2031,7 +2016,6 @@
 				5F35AA161D4E6688001F5C7C /* FileNotFoundException.hpp in Headers */,
 				5F35AAC91D4E6689001F5C7C /* ComputeRenderQueue.hpp in Headers */,
 				5F35AA1E1D4E6688001F5C7C /* ConcurrentQueue.hpp in Headers */,
-				5F0875521D63ADB200C9FC2F /* BasicRenderPass.hpp in Headers */,
 				5F35AA8C1D4E6689001F5C7C /* Shader.hpp in Headers */,
 				5F0875541D63ADB200C9FC2F /* DeferredRenderPass.hpp in Headers */,
 				5F35AA6B1D4E6689001F5C7C /* BufferObject.hpp in Headers */,
@@ -2053,9 +2037,11 @@
 				5F35E33F1D4E6714001F5C7C /* lua.hpp in Headers */,
 				5F3394141D57D046004F2AAC /* FileStream.hpp in Headers */,
 				5F35A92D1D4E6687001F5C7C /* Async.hpp in Headers */,
+				5F608EF91E144B5400C9E56D /* Job.hpp in Headers */,
 				5F35AA301D4E6688001F5C7C /* Singleton.hpp in Headers */,
 				5F35D56C1D4E66F5001F5C7C /* SSAOImageEffect.hpp in Headers */,
 				5F35ABD31D4E66BB001F5C7C /* CrimildMetalTextureCatalog.h in Headers */,
+				5F608EFC1E144B5400C9E56D /* WorkStealingDeque.hpp in Headers */,
 				5F35AAA11D4E6689001F5C7C /* Geometry.hpp in Headers */,
 				5F35D5CA1D4E66F6001F5C7C /* ScriptedComponent.hpp in Headers */,
 				5F35AA221D4E6688001F5C7C /* Log.hpp in Headers */,
@@ -2207,7 +2193,6 @@
 				5F35E3301D4E6714001F5C7C /* loslib.c in Sources */,
 				5F35D5791D4E66F6001F5C7C /* DeferredComposeRenderShaderProgram.cpp in Sources */,
 				5F35AA8D1D4E6689001F5C7C /* ShaderLocation.cpp in Sources */,
-				5F35A9301D4E6687001F5C7C /* TaskGroup.cpp in Sources */,
 				5F35AAC21D4E6689001F5C7C /* UpdateSystem.cpp in Sources */,
 				5F35A8AC1D4E6687001F5C7C /* AABBBoundingVolume.cpp in Sources */,
 				5F35A8AE1D4E6687001F5C7C /* BoundingVolume.cpp in Sources */,
@@ -2251,7 +2236,6 @@
 				5F35AAA81D4E6689001F5C7C /* ParticleSystem.cpp in Sources */,
 				5F35AA611D4E6689001F5C7C /* SpherePrimitive.cpp in Sources */,
 				5F35AA671D4E6689001F5C7C /* AlphaState.cpp in Sources */,
-				5F35A92E1D4E6687001F5C7C /* Task.cpp in Sources */,
 				5F35AA111D4E6688001F5C7C /* DebugRenderHelper.cpp in Sources */,
 				5F35AA791D4E6689001F5C7C /* ColorTintImageEffect.cpp in Sources */,
 				5F02EED01D63B1A4003EE891 /* StandardShaderProgram.cpp in Sources */,
@@ -2279,7 +2263,9 @@
 				5F35D5931D4E66F6001F5C7C /* ScreenTextureShaderProgram.cpp in Sources */,
 				5F35AAA41D4E6689001F5C7C /* Light.cpp in Sources */,
 				5F35D5651D4E66F5001F5C7C /* BloomImageEffect.cpp in Sources */,
+				5F608EFA1E144B5400C9E56D /* JobScheduler.cpp in Sources */,
 				5F35E3381D4E6714001F5C7C /* ltable.c in Sources */,
+				5F608EFE1E144D6200C9E56D /* ColorMaskState.cpp in Sources */,
 				5F35A34E1D4E6662001F5C7C /* AudioManager.cpp in Sources */,
 				5F35A34C1D4E6662001F5C7C /* AudioClip.cpp in Sources */,
 				5F35D5711D4E66F5001F5C7C /* BlendShaderProgram.cpp in Sources */,
@@ -2312,12 +2298,12 @@
 				5F35ABE01D4E66BB001F5C7C /* CrimildMetalScreenTextureShader.metal in Sources */,
 				5F35AA9A1D4E6689001F5C7C /* VertexBufferObject.cpp in Sources */,
 				5F35A8B21D4E6687001F5C7C /* SphereBoundingVolume.cpp in Sources */,
+				5F608EF81E144B5400C9E56D /* Job.cpp in Sources */,
 				5F08755B1D63ADB200C9FC2F /* StandardRenderPass.cpp in Sources */,
 				5F35AAC41D4E6689001F5C7C /* Apply.cpp in Sources */,
 				5F35AA511D4E6689001F5C7C /* ConePrimitive.cpp in Sources */,
 				5F35AAB41D4E6689001F5C7C /* Settings.cpp in Sources */,
 				5F35E3431D4E6714001F5C7C /* lundump.c in Sources */,
-				5F35A9321D4E6687001F5C7C /* TaskManager.cpp in Sources */,
 				5F35ABDC1D4E66BB001F5C7C /* CrimildMetalForwardShaderProgram.mm in Sources */,
 				5F35AA7D1D4E6689001F5C7C /* ImageTGA.cpp in Sources */,
 				5F35D5A11D4E66F6001F5C7C /* UnlitVertexColorShaderProgram.cpp in Sources */,
@@ -2385,11 +2371,9 @@
 				5F35D5611D4E66F5001F5C7C /* TextureCatalog.cpp in Sources */,
 				5F35D5971D4E66F6001F5C7C /* SSAOBlendShaderProgram.cpp in Sources */,
 				5F35ABE91D4E66BB001F5C7C /* CrimildMetalUnlitTextureShader.metal in Sources */,
-				5F0875511D63ADB200C9FC2F /* BasicRenderPass.cpp in Sources */,
 				5F35AA551D4E6689001F5C7C /* MobiusStripPrimitive.cpp in Sources */,
 				5F35AA5B1D4E6689001F5C7C /* ParametricSpherePrimitive.cpp in Sources */,
 				5F35AAAC1D4E6689001F5C7C /* Text.cpp in Sources */,
-				5F0875551D63ADB200C9FC2F /* ForwardRenderPass.cpp in Sources */,
 				5F35AABA1D4E6689001F5C7C /* RenderSystem.cpp in Sources */,
 				5F35AA1F1D4E6688001F5C7C /* FixedAllocator.cpp in Sources */,
 				5F35E31C1D4E6713001F5C7C /* ldo.c in Sources */,

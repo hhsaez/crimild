@@ -58,7 +58,7 @@ id< MTLLibrary > ShaderProgramCatalog::getDefaultLibrary( void )
     if ( _defaultLibrary == nil ) {
         _defaultLibrary = [getRenderer()->getDevice() newDefaultLibrary];
         if ( _defaultLibrary == nil ) {
-            Log::Error << "Cannot create default library" << Log::End;
+            Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot create default library" );
         }
     }
     
@@ -82,14 +82,14 @@ void ShaderProgramCatalog::load( ShaderProgram *program )
     NSString *vertexProgramName = [NSString stringWithUTF8String: program->getVertexShader()->getSource().c_str()];
     id <MTLFunction> vertexProgram = [getDefaultLibrary() newFunctionWithName: vertexProgramName];
     if ( vertexProgram == nullptr ) {
-        Log::Error << "Could not load vertex program named " << [vertexProgramName UTF8String] << Log::End;
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Could not load vertex program named ", [vertexProgramName UTF8String] );
         return;
     }
     
     NSString *fragmentProgramName = [NSString stringWithUTF8String: program->getFragmentShader()->getSource().c_str()];
     id <MTLFunction> fragmentProgram = [getDefaultLibrary() newFunctionWithName: fragmentProgramName];
     if ( fragmentProgram == nullptr ) {
-        Log::Error << "Could not load fragment program named " << [fragmentProgramName UTF8String] << Log::End;
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Could not load fragment program named ", [fragmentProgramName UTF8String] );
         return;
     }
     
@@ -116,7 +116,7 @@ void ShaderProgramCatalog::load( ShaderProgram *program )
     NSError *error = nullptr;
     id<MTLRenderPipelineState> renderPipeline = [getRenderer()->getDevice() newRenderPipelineStateWithDescriptor: desc error: &error];
     if ( renderPipeline == nullptr ) {
-        Log::Error << "Couldn't create render pipeline: " << [[error description] UTF8String] << Log::End;
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Couldn't create render pipeline: ", [[error description] UTF8String] );
         return;
     }
     

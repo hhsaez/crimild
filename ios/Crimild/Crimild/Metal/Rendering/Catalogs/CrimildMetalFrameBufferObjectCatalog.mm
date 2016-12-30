@@ -59,7 +59,7 @@ void FrameBufferObjectCatalog::bind( FrameBufferObject *fbo )
     
     auto renderPassDescriptor = cachedFBO.renderPassDescriptor;
     if ( renderPassDescriptor == nil ) {
-        Log::Error << "Cannot obtain a render pass descriptor" << Log::End;
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot obtain a render pass descriptor" );
         return;
     }
     
@@ -69,7 +69,7 @@ void FrameBufferObjectCatalog::bind( FrameBufferObject *fbo )
     
     auto renderEncoder = [getRenderer()->getCommandBuffer() renderCommandEncoderWithDescriptor: renderPassDescriptor];
     if ( renderEncoder == nil ) {
-        Log::Error << "Cannot create render encoder" << Log::End;
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot create render encoder" );
         return;
     }
     

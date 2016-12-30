@@ -84,6 +84,7 @@ MetalRenderer::MetalRenderer( CrimildMetalView *view, id< MTLDevice > device )
 
     setShaderProgram( Renderer::SHADER_PROGRAM_LIT_TEXTURE, crimild::alloc< LitTextureShaderProgram >() );
 
+    setShaderProgram( Renderer::SHADER_PROGRAM_RENDER_PASS_STANDARD, crimild::alloc< ForwardShaderProgram >() );
     setShaderProgram( Renderer::SHADER_PROGRAM_RENDER_PASS_FORWARD, crimild::alloc< ForwardShaderProgram >() );
     
     setShaderProgram( Renderer::SHADER_PROGRAM_TEXT_BASIC, crimild::alloc< TextShaderProgram >() );
@@ -146,7 +147,7 @@ void MetalRenderer::beginRender( void )
     
     _commandBuffer = [_commandQueue commandBuffer];
     if ( _commandBuffer == nil ) {
-        Log::Error << "Cannot obtain command buffer" << Log::End;
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot obtain command buffer" );
         return;
     }
 }
@@ -160,7 +161,7 @@ void MetalRenderer::presentFrame( void )
 {
     _drawable = [getLayer() nextDrawable];
     if ( _drawable == nil ) {
-        Log::Error << "Cannot obtain next drawable" << Log::End;
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot obtain next drawable" );
         return;
     }
     
@@ -371,6 +372,11 @@ void MetalRenderer::setCullFaceState( CullFaceState *state )
 {
     [getRenderEncoder() setFrontFacingWinding: MTLWindingCounterClockwise];
     [getRenderEncoder() setCullMode: MTLCullModeBack];
+}
+
+void MetalRenderer::setColorMaskState( ColorMaskState *state )
+{
+    // TODO
 }
 
 #endif // TARGET_OS_IOS
