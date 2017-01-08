@@ -1,0 +1,88 @@
+/**
+	\page INFLUENCES Influences
+	
+	I would like to say that Crimild design has come to me in a dream and
+	I magically implement every single feature of it, but unfortunately I can't. So
+	the purpose of this article is to mention the most important sources from where
+	Crimild is borrowing concepts.
+	
+	\section GAME_ENGINE_ARCHITECTURE "3D Game Engine Architecture" books, by Dave Eberly
+	
+	Perhaps the most important influence for the design of Crimild, these series of books
+	are used to introduce the WildMagic engine, which has been used to develop several
+	major games. WildMagic have been the basis for the mathematical foundation and 
+	scenegraph system in Crimild. Yet, several modifications have been made to the 
+	scene graph design implemented in WildMagic as introduce by the author of the book.
+	
+	In Crimild, the Crimild::Node class hierarchy is intended to be more static than in WildMagic, 
+	considering that subclassing Node is discouraged and beats the purpose of a 
+	component system (more on that below). Scene graph traversing operations (like
+	updating the world state for nodes) is needed and requires maximum flexibility in
+	order to define new operations without modifying the Node hierachy. This is the
+	ideal sceneario for implementing the Visitor pattern. Then, most scene traversal
+	operations in Crimild have been extracted into several NodeVisitor objects, in
+	addition to allow custom visitor implementations as required by developers.
+	While Crimild still includes operations like world state updates and
+	culling and drawing passes, but since they are implemented either as visitors or as
+	components, the way you handle and trigger them is completely different. 
+	
+	In addition, nodes in Crimild implement the Game Object Component pattern which is
+	becoming more and more important in game engines lately. A component can be anything 
+	froma a single value to a complex physics behavior and you can only attach
+	at most one componenty of any given component type. Components are stored in a map
+	within the Crimild::Node class, using the name of the component as a key. WildMagic
+	includes Controller objects, which are used to modify the behavior of a node
+	and are updated at least once per frame. But a Controller is quite different from
+	a Component, as components can serve as a storage of data as well as behaviors.
+	
+	Concerning rendering, Crimild implements the drawing pass by using both a visitor 
+	that defines how the scene is traverse and drawable objects are obtained, and a
+	component that implements the actual drawing pass for a visibility set. This 
+	diverges from the rendering pass introduced by WildMagic.
+	
+	Beyond the scene graph itself, Crimild starts to diverge from the design propossed in
+	this series of books. While WildMagic provides an Application framework, Crimild
+	includes the Simulation library which servers a different purpose, but some 
+	resemblance can be found as both of them are used to control the application
+	flow.
+	
+	\section ENGINUITY "Enginuity" series, by Richard "Superpig" Fine
+	
+	This is an old series of articles about how to design a simple framework for
+	applications. These articles explain the concept of a micro-kernel and tasks
+	and how they can be used to create a flexible mechasims that support 
+	pausing and resuming tasks that are executed concurrently.
+	
+	Crimild borrows these concepts to implement the Simulation library. The most
+	significant difference is the inclusing of all the scene management mechanisms
+	into the Crimild::Simulation::SceneSimulator class.
+	
+	\section MODERN_CPP_DESIGN "Modern C++ Design" book by Andrei Alexandrescu
+	
+	This book talks about how to design a generic library that can be addapted
+	to different development scenarios. The library, called Loki, makes heavy use
+	of generic programming using C++ templates.
+	
+	Crimild's Object System (the one providing memory managmenet or RTTI) is based
+	on several of the concepts introduced by this book. Smart pointers in Crimild
+	are a lot simpler than the ones included in Loki, but they serve a very specific
+	purpose. The entire Mathematics library in Crimild is based on policies to
+	support several different data types and dimensions for vectors, matrices and
+	operations.
+	
+	\section REFERENCES Referencias
+	
+	\subsection BOOKS Books
+	
+	- "3D Game Engine Design" - David H. Eberly
+	- "3D Game Engine Architecture" - David H. Eberly
+	- "Modern C++ Design: Generic Programming and Design Patters Applied" - Andrei Alexandrescu
+	
+	\subsection WEBSITES Websites and Articles
+
+	- "Geometric Tools" - http://www.geometrictools.com/
+	- "Enginuity" - http://www.gamedev.net/reference/programming/features/enginuity1/
+	- "Open Scenegraph" - http://www.openscenegraph.org
+	
+*/
+

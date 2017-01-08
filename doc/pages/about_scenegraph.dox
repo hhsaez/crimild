@@ -1,0 +1,128 @@
+/**
+	\page ABOUT_SCENEGRAPH Scene Graph
+	
+	Since the Crimild Project is a 3D Game Engine, one would expect to
+	find lots of rendering functions at the very hearth of the system. While
+	rendering is an integral part of every graphics engine, the hearth of
+	Crimild lies in its scene management subsystem. 
+	
+	\section THE_SCENE_GRAPH Scene Graph
+	
+	A scene graph is a data structure that organizes all entities of our world
+	in a logical and spatial representation. A scene graph is implemented as a
+	collection of nodes organized in a tree-like structure. A node may have 
+	children, but a child has only one parent (if any), with the effect of the 
+	parent applied to all of its children, meaning that an operation performed 
+	at the root of a scene must be replicated into all of the nodes in the hierarchy.
+	
+	Consider the example of a car. A car can be decomposed into four wheels and
+	a chassis. Therefore, by representing the car with a scene graph we will have
+	something like this:
+		
+	- car
+		- chassis
+		- wheels
+			- wheel 1
+			- wheel 2
+			- wheel 3
+			- wheel 4
+			
+	If we want to move the car around a street, for example, we just need to 
+	translate the parent node (car) and all of its children is automatically repositioned
+	according to the new car's location, instead of having to translate each 
+	of the nodes manually.
+	
+	\section SCENE_GRAPH_DESIGN Scene Graph Design
+	
+	Crimild's scene graph follows a spatial coherence design. That means that nodes 
+	in the scene hierarchy should be organized based on their position in the world. 
+	Therefore, a scene graph is considered well organized if nodes that are closer to each 
+	other are be part of the same scene hierarchy. But that is not mandatory.
+	The scene graph in Crimild has been designed with flexibility in mind, considering
+	the possibility of a different node organization.
+	
+	If you have a room and two players, you may create a scene graph that looks
+	like this:
+	
+	- room
+		- player A
+			- gun
+		- player B
+			- knife
+			
+	The room has two children: player A and player B. Each player has a position
+	relative to the room. Each player has a weapon. And each weapon
+	is positioned realtively from their parents. 
+	
+	Organizing the scene like this serves several purposes. As it was mentioned 
+	before, translating a parent node automatically translates  all of its children. 
+	
+	In addition, each node defines a bounding volume, which is
+	used to represent the portion of space occupied by it. For geometric nodes,
+	a bounding volume is defined as the volume containing all vertices in the
+	geometry. For groups, the volume is calculated by adding all the volumes
+	of its children. This creates a hierarchy of volumes, where the volume of
+	the parent contains that of its children. Bounding volumes are used to 
+	compute a visibility set, which is the collection of nodes that are visible
+	from the current view point. Since the parent bounding volume contains that
+	of its children, we can verify if a scene is not visible just by using the
+	parent bounding volume. If the parent is not visible, none of its children are
+	and thus reducing the amount of calculations required. This is also useful
+	for speeding up collision detection between objects or selection.
+	
+	\section SCENE_GRAPH_IMPLEMENTATION Scene Graph Implementation
+	
+	The simplest representation for a node in the scene has a transformation and
+	a bounding volume. A transformation is used to position and orient the node
+	in the world. You can translate, rotate, or scale a node. A bounding volume is
+	used to represent the portion of space occupied by a given node. Then, you 
+	can use it to compute collisions or culling (the process of avoid drawing nodes
+	that are not visible from the current point of view). The Crimild::Node class
+	represents a simple node, which has no support for children.
+	
+	In order to create a hierarchy of nodes, we need to group them together. A
+	group is a special kind of node that is allowed to have any number of 
+	child nodes attach to it. You can compose complex hierarchies by having
+	several groups together. The Crimild::GroupNode class extends Crimild::Node
+	by implementing a children list.
+	
+	\section SCENE_GRAPH_OPERATIONS_AND_TRAVERSAL Scene Graph Operations and Traversal
+	
+	Performing operations on the scene graph requires some way of dispatching
+	messages based on the node type. For example, in a render operation, we
+	need to collect the nodes that contain geometry information (usually, we
+	apply some sort of query in order to discard entire scene graph branches 
+	that are not visible from the current point of view). In order to support
+	these operations, Crimild makes use of the Visitor design pattern.
+	
+	The Crimild::NodeVisitor class implements the Visitor pattern by providing
+	empty virtual functions for groups, geometries or any other node in the 
+	hierarchy. A visitor can be applied to any node. If the node is a leaf
+	one (an instance of Crimild::Node or Crimild::GeometryNode for example),
+	the operation is performed directly. If the node is a group, the visitor
+	will perform the operation on each of its children as well. Still, the
+	visitor can be fully customized if required. Still, some scene graph
+	operations require the scene to be traverse back from children to
+	parents instead. The Crimild::Visitor class can be fully customized
+	to support this kind of operations too. 
+	
+	\section WHERE_TO_GO_NEXT Where to go next?
+	
+	The best way to understand how scene graphs work is to build some scenes.
+	You can do this by following any of the various tutorials in 
+	the \ref TUTORIALS "Tutorials" section. In addition, you can take a look
+	at the reference documentation for any of the classes mentioned above.
+	
+	Wikipedia does a great job in explaining different scene graph implementations,
+	including PHIGS, the first commercial scene graph specification. If you
+	are insterested in a scene graph implementation oriented to games,
+	you should check Dave Eberly's book series "Game Engine Design" and 
+	"Game Engine Architecture".
+	
+	\section REFERENCES References
+	
+	- "Game Engine Architecture" book - Dave Eberly
+	- OpenSceneGraph.org - http://www.openscenegraph.org
+	- http://en.wikipedia.org/wiki/Scene_graph
+
+*/

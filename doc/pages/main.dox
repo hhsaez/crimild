@@ -1,0 +1,50 @@
+/**
+	\mainpage Welcome to the Crimild Engine project
+	
+	Crimild is a multi-purpose, modern 3D graphics engine and game development kit
+	that can be used to create a variety of graphic intensive applications,
+	including games, simulations, training and architectural software.
+	Written in portable C++ and using several multiplatform libraries and tools like
+	OpenGL, SDL, libXML and CMake, it has been designed to make development of new
+	3D applications easy.
+	
+	\section WHERE_TO_START Getting Started
+	
+	- \subpage ABOUT "A litle bit of history"
+	- \subpage INFLUENCES "Influcences"
+	- \subpage ABOUT_SCENEGRAPH "What is a Scene Graph?"
+	- \ref BUILD_CRIMILD "Building Crimild"
+	- \ref TUTORIALS "Tutorials"
+
+	\section OTHER_CONCEPTS Other Concepts
+		
+	- \subpage ABOUT_SIMULATION_LIBRARY "The Simulation Framework"
+	- \subpage ABOUT_TERRAIN_LIBRARY "Terrain"
+	- \subpage ABOUT_PERSISTENCE_LIBRARY "Persistence"
+	- \subpage ABOUT_MESSAGING_TOOLS "Messaging"
+	- \subpage ABOUT_NODE_COMPONENTS "About Node components"
+	- \subpage ABOUT_RENDERING_PIPELINE "The rendering pipeline"
+	
+	\section CONTRIBUTING Contributing
+	
+	\subsection SUBVERSION_REPOSITORY Subversion Repository
+	
+	Crimild uses Subversion to manage project sources, documentation, examples and tools. 
+	You can browse the sources repository or checkout any source code version by 
+	using an SVN client:
+	
+	\code
+	svn co http://crimild.svn.sourceforge.net/svnroot/crimild/trunk crimild
+	\endcode
+
+	\subsection ISSUE_TRACKER Issue Tracker
+	
+	The Crimild Project makes use of the Trak application to keep track of all issues 
+	regarding the current or past versions. It can be used to report bugs or compatibility 
+	issues as well as request new features or changes.
+
+	You can find CrimildŐs Trak page here: http://sourceforge.net/apps/trac/crimild
+	(A valid SF.net user is required in order to submit issues)
+
+*/
+
