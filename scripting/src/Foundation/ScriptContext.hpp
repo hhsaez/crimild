@@ -54,6 +54,11 @@ namespace crimild {
             void setPrefix( std::string prefix ) { _prefix = prefix; }
             
             ScriptContext *getContext( void ) { return _context; }
+
+			ScriptEvaluator getChildEvaluator( std::string childName )
+			{
+				return ScriptEvaluator( getContext(), getPrefix() + "." + childName );
+			}
             
         private:
             ScriptContext *_context = nullptr;
