@@ -28,7 +28,7 @@
 #ifndef CRIMILD_MATHEMATICS_RECT_
 #define CRIMILD_MATHEMATICS_RECT_
 
-#include <memory>
+#include "Vector.hpp"
 
 namespace crimild {
 
@@ -71,6 +71,11 @@ namespace crimild {
 		PRECISION getY( void ) const { return _data[ 1 ]; }
 		PRECISION getWidth( void ) const { return _data[ 2 ]; }
 		PRECISION getHeight( void ) const { return _data[ 3 ]; }
+        
+        Vector< 2, PRECISION > getCenter( void ) const
+        {
+            return Vector< 2, PRECISION >( getX() + 0.5 * getWidth(), getY() + 0.5 * getHeight() );
+        }
 
 	private:
 		PRECISION _data[ 4 ];
@@ -78,6 +83,7 @@ namespace crimild {
 
 	typedef Rect< int > Recti;
 	typedef Rect< float > Rectf;
+    typedef Rect< double > Rectd;
 
 }
 

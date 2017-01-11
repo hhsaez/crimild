@@ -81,7 +81,7 @@ void LuaNodeBuilderRegistry::flush( void )
             str << "\t" << it.first << "\n";
         }
     }
-    Log::Debug << str.str() << Log::End;
+    Log::debug( CRIMILD_CURRENT_CLASS_NAME, str.str() );
 #endif
 }
 
@@ -105,7 +105,7 @@ void LuaComponentBuilderRegistry::flush( void )
             str << "\t" << it.first << "\n";
         }
     }
-    Log::Debug << str.str() << Log::End;
+    Log::debug( CRIMILD_CURRENT_CLASS_NAME, str.str() );
 #endif
 }
 
@@ -122,7 +122,7 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
         std::string filename;
         if ( eval.getPropValue( NODE_FILENAME, filename ) && filename != "" ) {
 #ifdef CRIMILD_SCRIPTING_LOG_VERBOSE
-            Log::Debug << "Building node" << Log::End;
+            Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Building node" );
 #endif
             
             auto scene = AssetManager::getInstance()->get< Group >( filename );
@@ -155,7 +155,7 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
         }
         else {
 #ifdef CRIMILD_SCRIPTING_LOG_VERBOSE
-            Log::Debug << "Building 'group' node" << Log::End;
+            Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Building 'group' node" );
 #endif
             group = std::make_shared< Group >();
         }
@@ -171,11 +171,11 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
     LuaNodeBuilderRegistry::getInstance()->registerCustomNodeBuilder( CAMERA_TYPE, [self]( ScriptEvaluator &eval ) -> SharedPointer< Node > {
         auto camera = crimild::alloc< Camera >();
         
-        std::string renderPassType;
-        eval.getPropValue( CAMERA_RENDER_PASS, renderPassType, "forward" );
-        if ( renderPassType == "basic" ) {
-            camera->setRenderPass( crimild::alloc< BasicRenderPass >() );
-        }
+//        std::string renderPassType;
+//        eval.getPropValue( CAMERA_RENDER_PASS, renderPassType, "forward" );
+//        if ( renderPassType == "basic" ) {
+//            camera->setRenderPass( crimild::alloc< BasicRenderPass >() );
+//        }
         
         float fov = 45.0f;
         float aspect = 4.0f / 3.0f;
@@ -499,11 +499,11 @@ void LuaSceneBuilder::reset( void )
 SharedPointer< Node > LuaSceneBuilder::fromFile( const std::string &filename )
 {
 	if ( !getScriptContext().load( filename ) ) {
-		Log::Error << "Cannot open scene file " << filename << Log::End;
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot open scene file ", filename );
         return nullptr;
 	}
 
-	Log::Debug << "Loading scene from " << filename << Log::End;
+    Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Loading scene from ", filename );
 
     ScriptEvaluator eval( &getScriptContext(), _rootNodeName );
     
@@ -517,14 +517,14 @@ SharedPointer< Node > LuaSceneBuilder::buildNode( ScriptEvaluator &eval, Group *
     
     auto builder = LuaNodeBuilderRegistry::getInstance()->getBuilder( type );
     if ( builder == nullptr ) {
-        Log::Warning << "No registered builder for type '" << type << "'" << Log::End;
+        Log::warning( CRIMILD_CURRENT_CLASS_NAME, "No registered builder for type '", type, "'" );
         return nullptr;
     }
     
-    Log::Debug << "Building node with type '" << type << "'" << Log::End;
+    Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Building node with type '", type, "'" );
     auto current = builder( eval );
     if ( current == nullptr ) {
-        Log::Error << "Cannot builder node of type '" << type << "'" << Log::End;
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot builder node of type '", type, "'" );
         return nullptr;
     }
 
@@ -560,24 +560,24 @@ void LuaSceneBuilder::buildNodeComponents( ScriptEvaluator &eval, SharedPointer<
         std::string type;
         if ( componentEval.getPropValue( NODE_COMPONENT_TYPE, type ) ) {
 #ifdef CRIMILD_SCRIPTING_LOG_VERBOSE
-            Log::Debug << "Building component of type '" << type << "'" << Log::End;
+            Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Building component of type '", type, "'" );
 #endif
             auto builder = LuaComponentBuilderRegistry::getInstance()->getBuilder( type );
             if ( builder == nullptr ) {
-                Log::Warning << "Cannot find component builder for type '" << type << "'" << Log::End;
+                Log::warning( CRIMILD_CURRENT_CLASS_NAME, "Cannot find component builder for type '", type, "'" );
                 return;
             }
             
             auto cmp = builder( componentEval );
             if ( cmp == nullptr ) {
-                Log::Error << "Cannot build component of type '" << type << "'" << Log::End;
+                Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot build component of type '", type, "'" );
                 return;
             }
             
             node->attachComponent( cmp );
         }
         else {
-            Log::Error << "No component type provided" << Log::End;
+            Log::error( CRIMILD_CURRENT_CLASS_NAME, "No component type provided" );
         }
 	});
 }

@@ -162,7 +162,7 @@ int Profiler::onSampleCreated( std::string name )
 void Profiler::onSampleDestroyed( int sampleIndex )
 {
     if ( sampleIndex < 0 ) {
-        Log::Error << "Invalid sample index " << sampleIndex << Log::End;
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid sample index ", sampleIndex );
         return;
     }
 
@@ -170,7 +170,7 @@ void Profiler::onSampleDestroyed( int sampleIndex )
     std::thread::id this_id = std::this_thread::get_id();
     auto stack = _samples[ this_id ];
     if ( stack == nullptr ) {
-        Log::Error << "Cannot find stack for given thread id" << Log::End;
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot find stack for given thread id" );
         return;
     }
 

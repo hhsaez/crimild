@@ -54,6 +54,7 @@ void DeferredRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, C
 {
     CRIMILD_PROFILE( "Deferred Render Pass" )
 
+	/*
     buildBuffers( renderer );
     
     computeShadowMaps( renderer, renderQueue, camera );
@@ -124,12 +125,14 @@ void DeferredRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, C
         // reset viewport
         renderer->setViewport( Rectf( 0.0f, 0.0f, 1.0f, 1.0f ) );
     }
+	*/
 }
 
 void DeferredRenderPass::renderToGBuffer( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
 {
     CRIMILD_PROFILE( "Render to G-Buffer" )
 
+    /*
     auto gBuffer = renderer->getFrameBuffer( G_BUFFER_NAME );
     
     renderer->bindFrameBuffer( gBuffer );
@@ -147,7 +150,7 @@ void DeferredRenderPass::renderToGBuffer( Renderer *renderer, RenderQueue *rende
     renderer->setAlphaState( AlphaState::DISABLED );
     renderer->setDepthState( DepthState::ENABLED );
     
-    renderQueue->each( renderQueue->getOpaqueObjects(), [&]( Material *material, RenderQueue::PrimitiveMap const &primitives ) {
+    renderQueue->each( renderQueue->getRenderables( RenderQueue::RenderableType::NOT_SHADED ), [&]( Material *material, RenderQueue::PrimitiveMap const &primitives ) {
         CRIMILD_PROFILE( "Bind Material" )
         // bind material properties
         renderer->bindMaterial( program, material );
@@ -161,10 +164,10 @@ void DeferredRenderPass::renderToGBuffer( Renderer *renderer, RenderQueue *rende
             renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
             renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
             
-            for ( auto geometryIt : it.second ) {
+            for ( auto renderable : it.second ) {
                 CRIMILD_PROFILE( "Draw Primitive" )
 
-                renderer->applyTransformations( program, projection, view, geometryIt.second );
+                renderer->applyTransformations( program, projection, view, renderable.world );
                 renderer->drawPrimitive( program, primitive );
             }
             
@@ -181,6 +184,7 @@ void DeferredRenderPass::renderToGBuffer( Renderer *renderer, RenderQueue *rende
     renderer->unbindProgram( program );
     
     renderer->unbindFrameBuffer( gBuffer );
+     */
 }
 
 void DeferredRenderPass::composeFrame( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
@@ -249,6 +253,8 @@ void DeferredRenderPass::composeFrame( Renderer *renderer, RenderQueue *renderQu
 void DeferredRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
 {
     CRIMILD_PROFILE( "Compute Shadow Maps" )
+    
+    /*
 
     auto program = renderer->getShaderProgram( "depth" );
     if ( program == nullptr ) {
@@ -281,15 +287,15 @@ void DeferredRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *ren
         
         renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LINEAR_DEPTH_CONSTANT_UNIFORM ), map->getLinearDepthConstant() );
         
-        renderQueue->each( renderQueue->getOpaqueObjects(), [&]( Material *material, RenderQueue::PrimitiveMap const &primitives ) {
+        renderQueue->each( renderQueue->getRenderables( RenderQueue::RenderableType::NOT_SHADED ), [&]( Material *material, RenderQueue::PrimitiveMap const &primitives ) {
             for ( auto it : primitives ) {
                 auto primitive = it.first;
                 
                 renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
                 renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
                 
-                for ( auto geometryIt : it.second ) {
-                    renderer->applyTransformations( program, map->getLightProjectionMatrix(), map->getLightViewMatrix(), geometryIt.second, geometryIt.second );
+                for ( auto renderable : it.second ) {
+                    renderer->applyTransformations( program, map->getLightProjectionMatrix(), map->getLightViewMatrix(), renderable.world, renderable.world );
                     renderer->drawPrimitive( program, primitive );
                 }
                 
@@ -304,6 +310,7 @@ void DeferredRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *ren
     
     // unbind the shader program
     renderer->unbindProgram( program );
+     */
 }
 
 void DeferredRenderPass::buildBuffers( Renderer *renderer )

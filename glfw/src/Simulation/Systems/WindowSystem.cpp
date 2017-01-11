@@ -23,7 +23,7 @@ bool WindowSystem::start( void )
 	int versionMinor;
 	int versionRevision;
 	glfwGetVersion( &versionMajor, &versionMinor, &versionRevision );
-	Log::Info << "Initialized GLFW " << versionMajor << "." << versionMinor << " rev. " << versionRevision << Log::End;
+    Log::info( CRIMILD_CURRENT_CLASS_NAME, "Initialized GLFW ", versionMajor, ".", versionMinor, " rev. ", versionRevision );
 
 	if ( !createWindow() ) {
 		return false;
@@ -38,7 +38,7 @@ bool WindowSystem::start( void )
  	screenBuffer->resize( framebufferWidth, framebufferHeight );
     renderer->configure();
     
-    crimild::async( crimild::AsyncDispatchPolicy::MAIN_QUEUE, std::bind( &WindowSystem::update, this ) );
+    crimild::concurrency::sync_frame( std::bind( &WindowSystem::update, this ) );
 
 	return true;
 }
@@ -71,7 +71,7 @@ void WindowSystem::update( void )
         std::this_thread::sleep_for( std::chrono::milliseconds( sleepTime ) );
     }
     
-    crimild::async( crimild::AsyncDispatchPolicy::MAIN_QUEUE, std::bind( &WindowSystem::update, this ) );
+    crimild::concurrency::sync_frame( std::bind( &WindowSystem::update, this ) );
 }
 
 void WindowSystem::stop( void )
@@ -106,7 +106,7 @@ bool WindowSystem::createWindow( void )
 
 	_window = glfwCreateWindow( width, height, name.c_str(), fullscreen ? glfwGetPrimaryMonitor() : NULL, NULL );
 	if ( _window == nullptr ) {
-		Log::Error << "Failed to create window" << Log::End;
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Failed to create window" );
 		return false;
 	}
 

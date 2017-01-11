@@ -53,6 +53,7 @@
     self = [super init];
     if (self) {
         _simulation = crimild::alloc< crimild::Simulation >( "crimild", nullptr );
+        crimild::concurrency::JobScheduler::getInstance()->configure( 1 );
         _animating = FALSE;
         _animationFrameInterval = 1;
         _displayLink = nil;
@@ -68,11 +69,12 @@
     self = [super initWithCoder:aDecoder];
     if (self) {
         _simulation = crimild::alloc< crimild::Simulation >( "crimild", nullptr );
+        crimild::concurrency::JobScheduler::getInstance()->configure( 1 );
         _animating = FALSE;
         _animationFrameInterval = 1;
         _displayLink = nil;
         
-        self.useMetalRenderPath = NO;
+//        self.useMetalRenderPath = NO;
     }
     
     return self;

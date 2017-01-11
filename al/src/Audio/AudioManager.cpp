@@ -47,19 +47,19 @@ AudioManager &AudioManager::getInstance( void )
 
 AudioManager::AudioManager( void )
 {
-	Log::Info << "Initializing audio sub-system" << Log::End;
-
 	CRIMILD_CHECK_AL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
+    Log::info( CRIMILD_CURRENT_CLASS_NAME, "Initializing audio sub-system" );
+    
 	_device = alcOpenDevice( NULL );
     if ( !_device ) {
-        Log::Error << "Cannot open sound device" << Log::End;
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot open sound device" );
         return;
     }
 
     _context = alcCreateContext( _device, NULL );
     if ( !_context ) {
-        Log::Error << "Cannot open sound context" << Log::End;
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot open sound context" );
     }
 
     alcMakeContextCurrent( _context );

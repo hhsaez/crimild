@@ -35,6 +35,13 @@
 
 using namespace crimild;
 
+constexpr const char *Stream::FLAG_STREAM_START;
+constexpr const char *Stream::FLAG_STREAM_END;
+constexpr const char *Stream::FLAG_TOP_LEVEL_OBJECT;
+constexpr const char *Stream::FLAG_INNER_OBJECT;
+constexpr const char *Stream::FLAG_OBJECT_START;
+constexpr const char *Stream::FLAG_OBJECT_END;
+
 bool StreamObject::registerInStream( Stream &s )
 {
 	return s.registerObject( this );
@@ -54,7 +61,7 @@ void StreamObject::load( Stream &s )
 SharedPointer< StreamObject > StreamObjectFactory::buildObject( std::string className )
 {
     if ( _builders[ className ] == nullptr ) {
-        Log::Error << "No builder registred for StreamObject of class " << className << Log::End;
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "No builder registred for StreamObject of class ", className );
         return nullptr;
     }
 
@@ -148,7 +155,7 @@ bool Stream::load( void )
 	std::string flag;
 	read( flag );
 	if ( flag != Stream::FLAG_STREAM_START ) {
-		Log::Error << "Invalid file format";
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid file format" );
 		return false;
 	}
 
@@ -165,7 +172,7 @@ bool Stream::load( void )
 
 		read( flag );
 		if ( flag != Stream::FLAG_OBJECT_START ) {
-			Log::Error << "Invalid file format. Expected " << Stream::FLAG_OBJECT_START << Log::End;
+            Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid file format. Expected ", Stream::FLAG_OBJECT_START );
 			return false;
 		}
 
@@ -177,7 +184,7 @@ bool Stream::load( void )
 
 		auto obj = StreamObjectFactory::getInstance()->buildObject( className );
 		if ( obj == nullptr ) {
-			Log::Debug << "Cannot build object of type " << className << " with id " << objId << Log::End;
+            Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Cannot build object of type ", className, " with id ", objId );
 			return false;
 		}
 
@@ -191,7 +198,7 @@ bool Stream::load( void )
 
 		read( flag );
 		if ( flag != Stream::FLAG_OBJECT_END ) {
-			Log::Error << "Invalid file format. Expected " << Stream::FLAG_OBJECT_END << Log::End;
+            Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid file format. Expected ", Stream::FLAG_OBJECT_END );
 			return false;
 		}
 	}

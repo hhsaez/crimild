@@ -173,7 +173,7 @@ void ImageTGA::load( void )
     setData( width, height, bpp, &data[ 0 ], bpp == 3 ? PixelFormat::RGB : PixelFormat::RGBA );
 }
 
-void ImageTGA::save( std::string path )
+void ImageTGA::saveToFile( const std::string &path ) const
 {
     TGAHeader header;
     header.identsize = 0;

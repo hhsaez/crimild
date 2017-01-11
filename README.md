@@ -33,6 +33,28 @@ The easiest way to contribute is to submit pull requests with your changes again
 Release Notes
 ====================
 
+v4.3.0
+------
+
+* Math
+    * Improved Clock
+
+* Core
+    * New Job System for concurrency
+    * Removed old task manager
+    * New logging facilitites
+    * Implemented BillboardComponent class
+
+* Rendering
+    * Improve render queues to sort objects based on type
+    * Add compare functions to DepthState
+    * Removed deprecated render passes
+    * Promote raytracing-related code to a core module
+    * Fixed viewport-related bug when beginning a frame
+
+* iOS
+    * Updated iOS project
+
 v4.2.0
 ------
 

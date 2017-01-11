@@ -25,36 +25,34 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Concurrency/TaskGroup.hpp"
+#include "BillboardComponent.hpp"
+
+#include "Mathematics/Numeric.hpp"
+#include "SceneGraph/Camera.hpp"
+#include "Simulation/Simulation.hpp"
 
 using namespace crimild;
 
-#if 0
-
-TaskGroup::TaskGroup( std::list< TaskPtr > tasks, TaskGroup::CompletionCallback completion )
+BillboardComponent::BillboardComponent( void )
 {
-    for ( auto t : tasks ) {
-        _tasks.add( t );
-    }
-    
-    auto self = this;
-    registerMessageHandler< messages::TaskCompleted >( [self, completion]( messages::TaskCompleted const &message ) {
-        auto group = getSharedPointer( self );
-        group->getTasks().remove( message.task );
-        if ( group->getTasks().empty() ) {
-            if ( completion != nullptr ) {
-                completion();
-            }
-            
-            group->broadcastMessage( messages::TaskGroupCompleted { group } );
-        }
-    });
+
 }
 
-TaskGroup::~TaskGroup( void )
+BillboardComponent::~BillboardComponent( void )
 {
-    
+
 }
 
-#endif
+void BillboardComponent::update( const Clock &c )
+{
+	auto camera = Simulation::getInstance()->getMainCamera();
+	if ( camera == nullptr ) {
+		return;
+	}
+    
+	if ( getNode()->hasParent() ) {
+		auto invParentRot = getNode()->getParent()->getWorld().getRotate().getInverse();
+		getNode()->local().setRotate( invParentRot * camera->getWorld().getRotate() );				
+	}
+}
 

@@ -68,12 +68,13 @@ void OpenGLUtils::checkErrors( std::string prefix )
 				break;
     	}
 
-    	Log::Error << prefix << ": " << "(0x"
-                   << error << ") " << errorDescription
+    	Log::error( CRIMILD_CURRENT_CLASS_NAME, prefix,
+                   ": (0x", error, ") ",
+                   errorDescription
 #ifdef CRIMILD_PLATFORM_DESKTOP
-                   << " " << glewGetErrorString( error )
+                   ," ", glewGetErrorString( error )
 #endif
-                   << Log::End;
+                   );
     }
 }
 

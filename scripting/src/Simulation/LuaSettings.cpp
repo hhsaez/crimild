@@ -66,7 +66,7 @@ void LuaSettings::load( std::string filename )
         });
     }
     else {
-        Log::Error << "Cannot open file " << filename << Log::End;
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot open file ", filename );
     }
 }
 

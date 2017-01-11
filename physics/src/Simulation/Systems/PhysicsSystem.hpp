@@ -49,7 +49,6 @@ namespace crimild {
 		
 		private:
 			PhysicsContext _context;
-			float _accumulator = 0.0f;
 		};
 
 	}

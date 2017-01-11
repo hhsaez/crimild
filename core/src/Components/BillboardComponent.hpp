@@ -25,44 +25,25 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CONCURRENCY_TASK_
-#define CRIMILD_CONCURRENCY_TASK_
+#ifndef CRIMILD_COMPONENTS_BILLBOARD_
+#define CRIMILD_COMPONENTS_BILLBOARD_
 
-#include <functional>
+#include "NodeComponent.hpp"
+#include "Mathematics/Vector.hpp"
 
 namespace crimild {
-    
-    class Task {
-    private:
-        using RunCallback = std::function< void( void ) >;
-        using CompletionCallback = std::function< void( void ) >;
-        
-    public:
-        Task( void );
-        Task( Task const &other );
-        ~Task( void );
-        
-        Task &operator=( Task const &other );
-        
-        bool isThreadSafe( void ) const { return _threadSafe; }
-        void setThreadSafe( bool value ) { _threadSafe = value; }
-        
-        bool getSyncFrame( void ) const { return _syncFrame; }
-        void setSyncFrame( bool value ) { _syncFrame = value; }
-        
-        void setRunCallback( RunCallback callback ) { _runCallback = callback; }
-        void setCompletionCallback( CompletionCallback callback ) { _completionCallback = callback; }
-        
-        void execute( void );
-        
-    private:
-        bool _threadSafe = false;
-        bool _syncFrame = false;
-        
-        RunCallback _runCallback;
-        CompletionCallback _completionCallback;
-    };
-    
+
+	/**
+	   \brief Makes sure the target node always faces the camera
+	 */
+	class BillboardComponent : public NodeComponent {
+	public:
+        BillboardComponent( void );
+        virtual ~BillboardComponent( void );
+
+        virtual void update( const Clock &c ) override;
+	};
+
 }
 
 #endif

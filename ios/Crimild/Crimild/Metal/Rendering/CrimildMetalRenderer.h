@@ -84,6 +84,7 @@ namespace crimild {
             virtual void setDepthState( DepthState *state ) override;
             virtual void setAlphaState( AlphaState *state ) override;
             virtual void setCullFaceState( CullFaceState *state ) override;
+            virtual void setColorMaskState( ColorMaskState *state ) override;
             
             virtual void applyTransformations( ShaderProgram *program, const Matrix4f &projection, const Matrix4f &view, const Matrix4f &model, const Matrix4f &normal ) override;
             virtual void applyTransformations( ShaderProgram *program, const Matrix4f &projection, const Matrix4f &view, const Matrix4f &model ) override;

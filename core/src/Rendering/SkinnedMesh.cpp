@@ -523,7 +523,7 @@ void SkinnedMesh::load( Stream &s )
 void SkinnedMesh::debugDump( void )
 {
 	if ( getSkeleton() == nullptr ) {
-		Log::Debug << "No skeleton attached to skinned mesh" << Log::End;
+        Log::debug( CRIMILD_CURRENT_CLASS_NAME, "No skeleton attached to skinned mesh" );
 		return;
 	}
 	

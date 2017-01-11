@@ -1,0 +1,80 @@
+/**
+	\page ABOUT About Crimild Project
+	
+	\section ABOUT_INTRODUCTION Introduction
+	
+	... or, How do I ended up here?	
+	
+	I always loved Quake and Quake 2, a wonderful game I might 
+	add, but it wasn't until I started hearing about projects like Sin, Soldier of 
+	Fortune or even Half Life, and how those games used (and abused) of Id's technology, 
+	that I was enlighted with the idea of what a game engine is.
+	
+	So there I was, a teenager still in highschool, living in a small city, with this
+	crazy idea and limited resources. Luckly for me,
+	I managed to obtain a C++ book (Deitel's "C++ How to Program", a must have in every
+	C++ developer's bookself) a compiler (Borland's Turbo C++ 3.0) and a lot of patience.
+	
+	\section AND_THE_QUEST_BEGAN And so the quest began  
+	
+	It was on 2001, during in my first year in the University, that I started learning about
+	OpenGL and DirectX. At that time I was too busy with my studies to actually build 
+	something. And of course, most of my free time was spent in "researching" (yeah, researching
+	about how to obtain the best weapon combination in Diablo 2, hehe). In the end,
+	I left DirectX behind because I liked the idea of making a multiplatform project, mainly
+	encouraged by my incursions into the Linux OS, and OpenGL was (and still is) the best
+	choice.
+	
+	At some point between 2002 and 2003, the project (until then just called "Engine")
+	was dubbed "Crimild". I'm not going to bore you with the origin of the name, but
+	those of you familiar with the Nibelungenlied story might recognize it as the name of
+	Sigfried's wife. Anyway, by that time a had some knowledge regarding how to build
+	a game engine (I remember spending countless hours reading Gamasutra) and
+	several technical demos (like a custom ROAM terrain implementation), but no actual
+	experience as a professional developer, so the project was lacking consistency. An 
+	architecture was needed.
+	
+	And then I found Dave Eberly's book, "3D Game Engine Design". Besides all of the
+	mathematical concepts that I wasn't even aware of, Dave's book featured a design
+	that blowed my mind the first time I made contact with: a "scene graph". It 
+	radically changed the way I used to face not only the project itself, but also other
+	common pitfals of software development.
+	
+	\section OPEN_SOURCE Going Open Source.
+	
+	By late 2005 I was working at TeraCode (http://www.teracode.com) as a full-time .NET
+	developer. Our architecture was based on
+	several open source projects like NHibernate, Spring.NET, NAnt, etc and it was then
+	when I realize the benefits of going open source. 
+	
+	The Crimild Project was officially released as an open source project in 2006. Why 
+	making it open source? Despite the fanatical reasons, most of my knowledge came 
+	(and still does) from the work of others. So, I like to think of this as a kind of 
+	retributtion to software society. And I hope one day Crimild will have a great
+	community supporting it.
+	
+	\section DOGFIGHTER And then it came TeraCode's DogFighter
+	
+	When the iPhone SDK was released in 2008, we saw the oportunity to build something
+	interesting, considering the experience and resources I had at the moment.
+	
+	TeraCode's DogFighter was released on March 2009 for the iPhone and iPod Touch. It
+	was a huge step forward for Crimild. Until then, Crimild was only used on minor
+	demos and a couple of University thesis, so DogFighter became the first commercial
+	product to use Crimild.
+	
+	You can find DogFighter here: http://itunes.apple.com/ar/app/dogfighter/id306428720?mt=8
+
+	\section THE_FUTURE The Future of Crimild
+	
+	I quit my job in August 2010 in 
+	order to dedicate myself to Crimild (almost full-time) and some other projects. The
+	blog has been quite active during the past months and I managed to create some techinical
+	demos that might became full length games in the near future. Of course, there's
+	still a lof of work ahead, but the future of Crimild looks very promissing.  
+	
+	<p align="right">
+	Hernan Saez<br />Crimild Engine Project Leader<br />December, 2010
+	</p>
+*/
+

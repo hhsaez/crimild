@@ -25,47 +25,83 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Concurrency/Task.hpp"
+#include "Job.hpp"
 
 using namespace crimild;
+using namespace crimild::concurrency;
 
-Task::Task( void )
+Job::Job( void )
+	: _callback( nullptr ),
+      _parent( nullptr ),
+	  _childCount( 0 )
 {
 
 }
 
-Task::Task( Task const &other )
-    : _threadSafe( other._threadSafe ),
-      _syncFrame( other._syncFrame ),
-      _runCallback( other._runCallback ),
-      _completionCallback( other._completionCallback )
+Job::~Job( void )
 {
 
 }
 
-Task::~Task( void )
+void Job::reset( void )
 {
-
+	_callback = nullptr;
+	_parent = nullptr;
+	_childCount = 0;
 }
 
-Task &Task::operator=( Task const &other )
+void Job::reset( JobCallback const &callback )
 {
-    _threadSafe = other._threadSafe;
-    _syncFrame = other._syncFrame;
-    _runCallback = other._runCallback;
-    _completionCallback = other._completionCallback;
-    
-    return *this;
+	_callback = callback;
+	_parent = nullptr;
+	_childCount = 1;
 }
 
-void Task::execute( void )
+void Job::reset( JobPtr const &parent, JobCallback const &callback )
 {
-    if ( _runCallback != nullptr ) {
-        _runCallback();
-    }
-    
-    if ( _completionCallback != nullptr ) {
-        _completionCallback();
-    }
+	_callback = callback;
+    _parent = crimild::get_ptr( parent );
+	_childCount = 1;
+
+	if ( _parent != nullptr ) {
+		_parent->increaseChildCount();
+	}
+}
+
+void Job::increaseChildCount( void )
+{
+	++_childCount;
+}
+
+void Job::decreaseChildCount( void )
+{
+	if ( _childCount > 0 ) {
+		--_childCount;
+	}
+}
+
+void Job::attachContinuation( JobContinuationCallback const &callback )
+{
+	_continuations.push_back( callback );
+}
+
+void Job::execute( void )
+{
+	if ( _callback != nullptr ) {
+		_callback();
+	}
+
+	finish();
+}
+
+void Job::finish( void )
+{
+	decreaseChildCount();
+	if ( isCompleted() ) {
+		if ( _parent != nullptr ) {
+			_parent->finish();
+		}
+        _callback = nullptr;
+	}
 }
 

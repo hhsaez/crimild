@@ -50,7 +50,7 @@ InputSystem::InputSystem( void )
             MessageQueue::getInstance()->pushMessage( messaging::MouseScroll { ( float ) xoffset, ( float ) yoffset } );
         });
         
-        crimild::async( AsyncDispatchPolicy::MAIN_QUEUE, std::bind( &InputSystem::update, self ) );
+        crimild::concurrency::sync_frame( std::bind( &InputSystem::update, self ) );
     });
     
     registerMessageHandler< messages::WindowSystemWillDestroyWindow >( [&]( messages::WindowSystemWillDestroyWindow const &message ) {
@@ -97,7 +97,7 @@ void InputSystem::update( void )
             break;
     }
     
-    crimild::async( AsyncDispatchPolicy::MAIN_QUEUE, std::bind( &InputSystem::update, this ) );
+    crimild::concurrency::sync_frame( std::bind( &InputSystem::update, this ) );
 }
 
 void InputSystem::stop( void )

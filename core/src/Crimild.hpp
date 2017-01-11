@@ -75,6 +75,7 @@
 #include "SceneGraph/Text.hpp"
 
 #include "Components/AnimatorComponent.hpp"
+#include "Components/BillboardComponent.hpp"
 #include "Components/LambdaComponent.hpp"
 #include "Components/MaterialComponent.hpp"
 #include "Components/NodeComponent.hpp"
@@ -86,8 +87,9 @@
 #include "Components/SkinnedMeshComponent.hpp"
 
 #include "Concurrency/Async.hpp"
-#include "Concurrency/Task.hpp"
-#include "Concurrency/TaskManager.hpp"
+#include "Concurrency/Job.hpp"
+#include "Concurrency/JobScheduler.hpp"
+#include "Concurrency/WorkStealingDeque.hpp"
 
 #include "Visitors/Apply.hpp"
 #include "Visitors/ApplyToGeometries.hpp"
@@ -99,6 +101,7 @@
 #include "Visitors/StartComponents.hpp"
 #include "Visitors/UpdateRenderState.hpp"
 #include "Visitors/UpdateWorldState.hpp"
+#include "Visitors/UpdateComponents.hpp"
 #include "Visitors/Picking.hpp"
 #include "Visitors/ShallowCopy.hpp"
 
@@ -141,9 +144,7 @@
 #include "Rendering/RenderPasses/RenderPass.hpp"
 #include "Rendering/RenderPasses/StandardRenderPass.hpp"
 #include "Rendering/RenderPasses/PostRenderPass.hpp"
-#include "Rendering/RenderPasses/BasicRenderPass.hpp"
 #include "Rendering/RenderPasses/DeferredRenderPass.hpp"
-#include "Rendering/RenderPasses/ForwardRenderPass.hpp"
 
 #include "Rendering/ImageEffects/ImageEffect.hpp"
 #include "Rendering/ImageEffects/ColorTintImageEffect.hpp"

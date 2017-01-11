@@ -27,6 +27,7 @@
 
 #include "Rendering/RenderQueue.hpp"
 #include "Primitives/Primitive.hpp"
+#include "Components/RenderStateComponent.hpp"
 
 using namespace crimild;
 
@@ -43,13 +44,13 @@ RenderQueue::~RenderQueue( void )
 void RenderQueue::reset( void )
 {
     setCamera( nullptr );
-    
+
     _lights.clear();
-    _shadowCasters.clear();
-    _shadedObjects.clear();
-    _opaqueObjects.clear();
-    _translucentObjects.clear();
-    _screenObjects.clear();
+
+    for ( auto &it : _renderables ) {
+        it.second.clear();
+    }
+    _renderables.clear();
 }
 
 void RenderQueue::setCamera( Camera *camera )
@@ -66,26 +67,74 @@ void RenderQueue::setCamera( Camera *camera )
     }
 }
 
-void RenderQueue::push( Material *material, Primitive *primitive, Geometry *geometry, const Transformation &world, bool renderOnScreen )
+void RenderQueue::push( Geometry *geometry )
 {
-    if ( renderOnScreen ) {
-        _screenObjects[ material ][ primitive ].push_back( std::make_pair( crimild::retain( geometry ), world.computeModelMatrix() ) );
+    auto rs = geometry->getComponent< RenderStateComponent >();
+    if ( rs == nullptr ) {
+        return;
     }
-    else if ( material->getAlphaState()->isEnabled() || material->getProgram() != nullptr ) {
-        _translucentObjects[ material ][ primitive ].push_back( std::make_pair( crimild::retain( geometry ), world.computeModelMatrix() ) );
-    }
-    else {
-        if ( material->castShadows() ) {
-            _shadowCasters[ material ][ primitive ].push_back( std::make_pair( crimild::retain( geometry ), world.computeModelMatrix() ) );
-        }
+    
+    bool renderOnScreen = rs->renderOnScreen();
+    
+    rs->forEachMaterial( [this, geometry, renderOnScreen]( Material *material ) {
+        auto renderableType = RenderQueue::RenderableType::OPAQUE;
+        bool castShadows = false;
         
-        if ( material->receiveShadows() ) {
-            _shadedObjects[ material ][ primitive ].push_back( std::make_pair( crimild::retain( geometry ), world.computeModelMatrix() ) );
+        if ( renderOnScreen ) {
+            renderableType = RenderQueue::RenderableType::SCREEN;
+        }
+        else if ( !material->getColorMaskState()->isEnabled() ) {
+            renderableType = RenderQueue::RenderableType::OCCLUDER;
+        }
+        else if ( material->getAlphaState()->isEnabled() ) {
+            renderableType = RenderQueue::RenderableType::TRANSLUCENT;
         }
         else {
-            _opaqueObjects[ material ][ primitive ].push_back( std::make_pair( crimild::retain( geometry ), world.computeModelMatrix() ) );
+            // only opaque objects cast shadows
+            castShadows = material->castShadows();
+            renderableType = RenderQueue::RenderableType::OPAQUE;
         }
-    }
+        
+        auto renderable = RenderQueue::Renderable {
+            crimild::retain( geometry ),
+            crimild::retain( material ),
+            
+            geometry->getWorld().computeModelMatrix(),
+            
+            // we use the squared distance to avoid performance penalties
+            Distance::computeSquared( geometry->getWorld().getTranslate(), getCamera()->getWorld().getTranslate() ),
+        };
+        
+        auto queue = &_renderables[ renderableType ];
+        
+        if ( renderableType == RenderQueue::RenderableType::TRANSLUCENT ) {
+            // order BACK_TO_FRONT for translucent objects
+            auto it = queue->begin();
+            while ( it != queue->end() && ( *it ).distanceFromCamera >= renderable.distanceFromCamera ) {
+                it++;
+            }
+            queue->insert( it, renderable );
+        }
+        else {
+            // order FRONT_TO_BACK for everything else
+            auto it = queue->begin();
+            while ( it != queue->end() && ( *it ).distanceFromCamera <= renderable.distanceFromCamera ) {
+                it++;
+            }
+            queue->insert( it, renderable );
+        }
+        
+        if ( castShadows ) {
+            // if the geometry is supposed to cast shadows, we also add it to that queue
+            // order FRONT_TO_BACK
+            auto casters = &_renderables[ RenderQueue::RenderableType::SHADOW_CASTER ];
+            auto it = casters->begin();
+            while ( it != casters->end() && ( *it ).distanceFromCamera <= renderable.distanceFromCamera ) {
+                it++;
+            }
+            casters->insert( it, renderable );
+        }
+    });
 }
 
 void RenderQueue::push( Light *light )
@@ -93,12 +142,11 @@ void RenderQueue::push( Light *light )
     _lights.push_back( crimild::retain( light ) );
 }
 
-void RenderQueue::each( Renderables const &objects, std::function< void( Material *, PrimitiveMap const & ) > callback )
+void RenderQueue::each( Renderables *renderables, std::function< void( Renderable * ) > callback )
 {
-    auto os = objects;
-	for ( auto it : os ) {
-		callback( it.first, it.second );
-	}
+    for ( auto &r : *renderables ) {
+        callback( &r );
+    }
 }
 
 void RenderQueue::each( std::function< void ( Light *, int ) > callback )

@@ -48,7 +48,7 @@ namespace crimild {
 		Material( void );
 		virtual ~Material( void );
 
-        void setProgram( ShaderProgram *program ) { _program = std::move( crimild::retain( program ) ); }
+        void setProgram( ShaderProgram *program ) { _program = crimild::retain( program ); }
 		void setProgram( SharedPointer< ShaderProgram > const &program ) { _program = program; }
         ShaderProgram *getProgram( void ) { return crimild::get_ptr( _program ); }
 
@@ -67,19 +67,19 @@ namespace crimild {
 		void setShininess( float value ) { _shininess = value; }
 		float getShininess( void ) const { return _shininess; }
 
-        void setColorMap( Texture *texture ) { _colorMap = std::move( crimild::retain( texture ) ); }
+        void setColorMap( Texture *texture ) { _colorMap = crimild::retain( texture ); }
 		void setColorMap( SharedPointer< Texture > const &texture ) { _colorMap = texture; }
         Texture *getColorMap( void ) { return crimild::get_ptr( _colorMap ); }
 
-        void setNormalMap( Texture *texture ) { _normalMap = std::move( crimild::retain( texture ) ); }
+        void setNormalMap( Texture *texture ) { _normalMap = crimild::retain( texture ); }
 		void setNormalMap( SharedPointer< Texture > const &texture ) { _normalMap = texture; }
         Texture *getNormalMap( void ) { return crimild::get_ptr( _normalMap ); }
 
-        void setSpecularMap( Texture *texture ) { _specularMap = std::move( crimild::retain( texture ) ); }
+        void setSpecularMap( Texture *texture ) { _specularMap = crimild::retain( texture ); }
 		void setSpecularMap( SharedPointer< Texture > const &texture ) { _specularMap = texture; }
         Texture *getSpecularMap( void ) { return crimild::get_ptr( _specularMap ); }
         
-        void setEmissiveMap( Texture *texture ) { _emissiveMap = std::move( crimild::retain( texture ) ); }
+        void setEmissiveMap( Texture *texture ) { _emissiveMap = crimild::retain( texture ); }
         void setEmissiveMap( SharedPointer< Texture > const &texture ) { _emissiveMap = texture; }
         Texture *getEmissiveMap( void ) { return crimild::get_ptr( _emissiveMap ); }
 

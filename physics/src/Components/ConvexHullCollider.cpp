@@ -42,7 +42,7 @@ ConvexHullCollider::~ConvexHullCollider( void )
 
 SharedPointer< btCollisionShape > ConvexHullCollider::generateShape( void ) 
 {
-	Log::Debug << "Generating shape for convex hull collider" << Log::End;
+    Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Generating shape for convex hull collider" );
 
 	auto shape = crimild::alloc< btConvexHullShape >();
 

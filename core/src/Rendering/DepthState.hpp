@@ -38,9 +38,35 @@ namespace crimild {
         static SharedPointer< DepthState > DISABLED;
         static SharedPointer< DepthState > ENABLED;
         
+    public:
+        enum class CompareFunc {
+            NEVER,
+            LESS,
+            EQUAL,
+            LEQUAL,
+            GREATER,
+            NOTEQUAL,
+            GEQUAL,
+            ALWAYS
+        };
+        
 	public:
-		DepthState( bool enabled = true );
+        explicit DepthState( bool enabled = true, CompareFunc compareFunc = CompareFunc::LESS, bool writable = true );
 		virtual ~DepthState( void );
+        
+    public:
+        void setCompareFunc( CompareFunc const &compareFunc ) { _compareFunc = compareFunc; }
+        CompareFunc getCompareFunc( void ) const { return _compareFunc; }
+        
+    private:
+        CompareFunc _compareFunc = CompareFunc::LESS;
+        
+    public:
+        void setWritable( bool writable ) { _writable = writable; }
+        bool isWritable( void ) const { return _writable; }
+        
+    private:
+        bool _writable = true;
 	};
 
 }

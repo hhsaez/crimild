@@ -26,25 +26,52 @@
  */
 
 #include "Async.hpp"
-
-#include "TaskManager.hpp"
+#include "JobScheduler.hpp"
 
 using namespace crimild;
+using namespace crimild::concurrency;
 
-void crimild::async( unsigned int dispatchPolicy, std::function< void( void ) > onRun, std::function< void( void ) > onCompleted )
+JobPtr crimild::concurrency::async( void )
 {
-    Task task;
-    task.setRunCallback( onRun );
-    task.setCompletionCallback( onCompleted );
-    task.setThreadSafe( dispatchPolicy & AsyncDispatchPolicy::THREAD_SAFE );
-    task.setSyncFrame( false );//dispatchPolicy & AsyncDispatchPolicy::SYNC_FRAME );
-
-    TaskManager::getInstance()->addTask( task );
+    auto job = crimild::alloc< Job >();
+	job->reset();
+	return job;
 }
 
-void crimild::async( std::function< void( void ) > onRun, std::function< void( void ) > onCompleted )
+JobPtr crimild::concurrency::async( JobCallback const &callback )
 {
-    crimild::async( AsyncDispatchPolicy::BACKGROUND_QUEUE, onRun, onCompleted );
+    auto job = crimild::alloc< Job >();
+	job->reset( callback );
+	JobScheduler::getInstance()->schedule( job );
+	return job;
 }
-    
+
+JobPtr crimild::concurrency::async( JobPtr const &parent, JobCallback const &callback )
+{
+    auto child = crimild::alloc< Job >();
+	child->reset( parent, callback );
+	JobScheduler::getInstance()->schedule( child );
+	return child;
+}
+
+JobPtr crimild::concurrency::sync_frame( JobCallback const &callback )
+{
+    auto job = crimild::alloc< Job >();
+    job->reset( callback );
+    JobScheduler::getInstance()->delaySync( job );
+    return job;
+}
+
+JobPtr crimild::concurrency::async_frame( JobCallback const &callback )
+{
+    auto job = crimild::alloc< Job >();
+    job->reset( callback );
+    JobScheduler::getInstance()->delayAsync( job );
+    return job;
+}
+
+void crimild::concurrency::wait( JobPtr const &job )
+{
+	JobScheduler::getInstance()->wait( job );
+}
 

@@ -50,9 +50,15 @@ namespace crimild {
         virtual void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera ) override;
 
     protected:
-        virtual void renderShadedObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
-        virtual void renderNonShadedObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+        void computeShadowMaps( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
         
+        void renderOccluders( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+        virtual void renderOpaqueObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+        virtual void renderTranslucentObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+        
+        void renderStandardGeometry( Renderer *renderer, Geometry *geometry, ShaderProgram *program, Material *material, const Matrix4f &modelTransform );
+
+    protected:
         inline ShaderProgram *getStandardProgram( void );
 
     private:
@@ -69,9 +75,6 @@ namespace crimild {
         void setShadowMappingEnabled( bool enabled ) { _shadowMapping = enabled; }
         bool isShadowMappingEnabled( void ) const { return _shadowMapping; }
 
-    private:
-        void computeShadowMaps( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
-        
     private:
         bool _shadowMapping = true;
         

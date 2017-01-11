@@ -52,10 +52,12 @@ using namespace crimild;
 
 Simulation::Simulation( std::string name, SettingsPtr const &settings )
 	: NamedObject( name ),
-      _settings( settings ),
-      _taskManager( 0 ) // by default, disable background threads
+      _settings( settings )
 {
-    Log::Info << Version::getDescription() << Log::End;
+    Log::info( CRIMILD_CURRENT_CLASS_NAME, Version::getDescription() );
+    
+    // worker threads are disabled by default
+    _jobScheduler.configure( 0 );
     
 	addSystem( crimild::alloc< UpdateSystem >() );
 	addSystem( crimild::alloc< RenderSystem >() );
@@ -73,7 +75,7 @@ void Simulation::start( void )
 {
     startSystems();
 
-    _taskManager.start();
+    _jobScheduler.start();
 }
 
 bool Simulation::update( void )
@@ -82,17 +84,17 @@ bool Simulation::update( void )
     
     broadcastMessage( messaging::SimulationWillUpdate { scene } );
     
-    _taskManager.pollMainTasks();
+    _jobScheduler.executeDelayedJobs();
     
     broadcastMessage( messaging::SimulationDidUpdate { scene } );
     
-	return _taskManager.isRunning();
+	return _jobScheduler.isRunning();
 }
 
 void Simulation::stop( void )
 {
     // stop all unfinished tasks first
-    _taskManager.stop();
+    _jobScheduler.stop();
 
     setScene( nullptr );
     
@@ -113,7 +115,7 @@ int Simulation::run( void )
 
 void Simulation::addSystem( SystemPtr const &system )
 {
-	Log::Debug << "Adding system " << system->getName() << Log::End;
+    Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Adding system ", system->getName() );
 
 	if ( _systems.find( system->getName() ) == _systems.end() ) {
 		_systems.insert( std::make_pair( system->getName(), system ) );
@@ -127,7 +129,7 @@ SystemPtr Simulation::getSystem( std::string name )
 
 void Simulation::startSystems( void )
 {
-	Log::Debug << "Starting systems" << Log::End;
+    Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Starting systems" );
 	for ( auto s : _systems ) {
 		if ( s.second != nullptr ) {
 			s.second->start();
@@ -137,7 +139,7 @@ void Simulation::startSystems( void )
 
 void Simulation::stopSystems( void )
 {
-	Log::Debug << "Stopping systems" << Log::End;
+    Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Stopping systems" );
 	for ( auto s : _systems ) {
 		if ( s.second != nullptr ) {
 			s.second->stop();
@@ -187,12 +189,7 @@ void Simulation::setScene( SharedPointer< Node > const &scene )
 
 void Simulation::loadScene( std::string filename, SharedPointer< SceneBuilder > const &builder )
 {
-    AssetManager::getInstance()->clear();
-
-    auto self = this;
-    crimild::async( [self, filename, builder] {
-        self->broadcastMessage( messaging::LoadScene { filename, builder } );
-    });
+    broadcastMessage( messaging::LoadScene { filename, builder } );
 }
 
 void Simulation::forEachCamera( std::function< void ( Camera * ) > callback )

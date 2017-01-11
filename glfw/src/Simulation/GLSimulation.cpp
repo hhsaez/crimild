@@ -33,6 +33,7 @@
 #include <Crimild_OpenGL.hpp>
 
 using namespace crimild;
+using namespace crimild::concurrency;
 
 #ifdef CRIMILD_ENABLE_PHYSICS
 #include <Crimild_Physics.hpp>
@@ -44,13 +45,13 @@ GLSimulation::GLSimulation( std::string name, SettingsPtr const &settings )
 	: Simulation( name, settings )
 {
 	if ( !glfwInit() ) {
-		Log::Error << "Cannot start GLFW: glfwInit failed" << Log::End;
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot start GLFW: glfwInit failed" );
 		throw RuntimeException( "Cannot start GLFW: glwfInit failed!" );
 	}
 
-	if ( TaskManager::getInstance()->getNumThreads() == 0 ) {
+	if ( JobScheduler::getInstance()->getNumWorkers() == 0 ) {
 		// enable some threads if not already specified
-		TaskManager::getInstance()->setNumThreads( 2 );
+		JobScheduler::getInstance()->configure( 2 );
 	}
 
     addSystem( crimild::alloc< InputSystem >() );

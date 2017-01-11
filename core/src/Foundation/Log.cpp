@@ -29,45 +29,6 @@
 
 using namespace crimild;
 
-Log Log::Debug( "DEBUG" );
-Log Log::Warning( "WARNING" );
-Log Log::Error( "ERROR" );
-Log Log::Fatal( "FATAL" );
-Log Log::Info( "INFO" );
-Log::EndLine Log::End;
-
-Log::LogOutputHandler::~LogOutputHandler( void )
-{
-
-}
-
-Log::ConsoleOutputHandler::~ConsoleOutputHandler( void )
-{
-
-}
-
-void Log::ConsoleOutputHandler::write( Log *log, std::string message )
-{
-	std::cout << log->getName() << " - " << message << std::endl;
-}
-
-void Log::setDefaultOutputHandler( LogOutputHandlerPtr const &handler )
-{
-	Debug.setOutputHandler( handler );
-	Error.setOutputHandler( handler );
-	Warning.setOutputHandler( handler );
-	Fatal.setOutputHandler( handler );
-	Info.setOutputHandler( handler );
-}
-
-Log::Log( std::string name )
-	: NamedObject( name )
-{
-    setOutputHandler( crimild::alloc< ConsoleOutputHandler >() );
-}
-
-Log::~Log( void )
-{
-
-}
+std::unique_ptr< Log::OutputHandler > Log::_outputHandler = std::unique_ptr< Log::ConsoleOutputHandler >( new Log::ConsoleOutputHandler() );
+int Log::_level = Log::Level::LOG_LEVEL_DEBUG;
 

@@ -56,11 +56,11 @@ namespace crimild {
 
 		Primitive::Type getType( void ) const { return _type; }
 
-        void setVertexBuffer( VertexBufferObject *vbo ) { _vertexBuffer = std::move( crimild::retain( vbo ) ); }
+        void setVertexBuffer( VertexBufferObject *vbo ) { _vertexBuffer = crimild::retain( vbo ) ; }
         void setVertexBuffer( SharedPointer< VertexBufferObject > const &vbo ) { _vertexBuffer = vbo; }
         VertexBufferObject *getVertexBuffer( void ) { return crimild::get_ptr( _vertexBuffer ); }
 
-        void setIndexBuffer( IndexBufferObject *ibo ) { _indexBuffer = std::move( crimild::retain( ibo ) ); }
+        void setIndexBuffer( IndexBufferObject *ibo ) { _indexBuffer = crimild::retain( ibo ) ; }
         void setIndexBuffer( SharedPointer< IndexBufferObject > const &ibo ) { _indexBuffer = ibo; }
         IndexBufferObject *getIndexBuffer( void ) { return crimild::get_ptr( _indexBuffer ); }
 

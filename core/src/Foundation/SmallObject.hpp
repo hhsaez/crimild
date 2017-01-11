@@ -41,7 +41,7 @@ namespace crimild {
 	class SmallObject : public NonCopyable {
 	private:
 		using Mutex = std::mutex;
-		using Lock = std::unique_lock< Mutex >;
+		using Lock = std::lock_guard< Mutex >;
 
 	public:
 		static void *operator new( std::size_t size )

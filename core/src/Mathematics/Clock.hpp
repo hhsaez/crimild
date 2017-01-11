@@ -28,6 +28,8 @@
 #ifndef CRIMILD_MATHEMATICS_CLOCK_
 #define CRIMILD_MATHEMATICS_CLOCK_
 
+#include <functional>
+
 namespace crimild {
 
 	class Clock {
@@ -39,7 +41,7 @@ namespace crimild {
 
 		Clock &operator=( const Clock &other );
 
-		void reset( double current = 0.0 );
+		void reset( void );
 		void tick( void );
 
 		double getCurrentTime( void ) const { return _currentTime; }
@@ -59,6 +61,35 @@ namespace crimild {
 		double _lastTime;
 		double _deltaTime;
         double _accumTime;
+
+	public:
+		using TimeoutCallback = std::function< void( void ) >;
+		void setTimeout( TimeoutCallback const &callback, double timeout, bool repeat = false );
+
+	private:
+		TimeoutCallback _timeoutCallback;
+		double _timeout;
+		bool _repeat;
+
+	public:
+		/**
+		   \brief Ticks the clock by a fixed delta time
+
+		   As a side effect, _accumTime gets incremented by the new
+		   _deltaTime. Callbacks get executed if timeout is over
+		 */
+		Clock &operator+=( double delta );
+
+		/**
+		   \brief Ticks the clock by another clock's delta time
+
+		   As a side effect, _accumTime gets incremented by the new
+		   _deltaTime. Callbacks get executed if timeout is over
+		 */
+		Clock &operator+=( const Clock &other );
+
+	private:
+		void onTick( void );
 	};
 
 }

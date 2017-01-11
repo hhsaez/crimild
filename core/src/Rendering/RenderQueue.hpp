@@ -54,17 +54,31 @@ namespace crimild {
         };
         
     }
-    
+
     class RenderQueue : public SharedObject {
     public:
-        using GeometryContext = std::pair< SharedPointer< Geometry >, Matrix4f >;
-        using PrimitiveMap = std::map< Primitive *, std::vector< GeometryContext >>;
-        using Renderables = std::map< Material *, PrimitiveMap >;
+        struct Renderable {
+            SharedPointer< Geometry > geometry;
+            SharedPointer< Material > material;
+            Matrix4f modelTransform;
+            double distanceFromCamera;
+        };
+        
+        enum class RenderableType {
+            OCCLUDER,
+            SHADOW_CASTER,
+            OPAQUE,
+            TRANSLUCENT,
+            SCREEN, // deprecated
+        };
+        
+        using Renderables = std::list< Renderable >;
 
     public:
-        RenderQueue( void );
+        explicit RenderQueue( void );
         virtual ~RenderQueue( void );
-        
+
+    public:
         void reset( void );
         
         void setCamera( Camera *camera );
@@ -73,18 +87,14 @@ namespace crimild {
         const Matrix4f &getViewMatrix( void ) const { return _viewMatrix; }
         const Matrix4f &getProjectionMatrix( void ) const { return _projectionMatrix; }
         
-        void push( Material *material, Primitive *primitive, Geometry *geometry, const Transformation &world, bool renderOnScreen = false );
+        void push( Geometry *geometry );
         void push( Light *light );
 
-        void each( Renderables const &renderables, std::function< void( Material *, PrimitiveMap const & ) > callback );
+        Renderables *getRenderables( RenderableType type ) { return &_renderables[ type ]; }
+        
+        void each( Renderables *renderables, std::function< void( Renderable * ) > callback );
         void each( std::function< void( Light *, int ) > callback );
 
-        Renderables &getShadowCasters( void ) { return _shadowCasters; }
-        Renderables &getShadedObjects( void ) { return _shadedObjects; }
-        Renderables &getOpaqueObjects( void ) { return _opaqueObjects; }
-        Renderables &getTranslucentObjects( void ) { return _translucentObjects; }
-        Renderables &getScreenObjects( void ) { return _screenObjects; }
-        
     private:
         SharedPointer< Camera > _camera;
         
@@ -93,11 +103,7 @@ namespace crimild {
         
         std::vector< SharedPointer< Light >> _lights;
 
-        Renderables _shadowCasters;
-        Renderables _shadedObjects;
-        Renderables _opaqueObjects;
-        Renderables _translucentObjects;
-        Renderables _screenObjects;
+        std::map< RenderableType, Renderables > _renderables;
         
     public:
         unsigned long getTimestamp( void ) const { return _timestamp; }

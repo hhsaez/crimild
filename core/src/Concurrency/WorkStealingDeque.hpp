@@ -25,69 +25,103 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CONCURRENCY_TASK_MANAGER_
-#define CRIMILD_CONCURRENCY_TASK_MANAGER_
+#ifndef CRIMILD_CORE_CONCURRENCY_WORK_STEALING_QUEUE_
+#define CRIMILD_CORE_CONCURRENCY_WORK_STEALING_QUEUE_
 
-#include "Task.hpp"
-
-#include "Foundation/ConcurrentQueue.hpp"
-#include "Foundation/Singleton.hpp"
+#include "Foundation/SharedObject.hpp"
 
 #include <vector>
+#include <list>
+#include <mutex>
 
 namespace crimild {
 
-	class TaskManager : public DynamicSingleton< TaskManager > {
-	private:
-		using TaskList = ConcurrentQueue< Task >;
-		using ThreadGroup = std::vector< std::thread >;
-
+	/**
+	   \brief A double-ended queue implemeting the work stealing pattern
+	 */
+	template< class T >
+    class WorkStealingQueue : public SharedObject {
 		using Mutex = std::mutex;
-		using Condition = std::condition_variable;
-		using ScopedLock = std::unique_lock< Mutex >;
-
+		using Lock = std::lock_guard< Mutex >;
+		
 	public:
-		explicit TaskManager( int numThreads = -1 /* available platform threads */ );
-		virtual ~TaskManager( void );
+		WorkStealingQueue( void )
+		{
+
+		}
+
+		~WorkStealingQueue( void )
+		{
+
+		}
         
-        void setNumThreads( int numThreads ) { _numThreads = numThreads; }
-        int getNumThreads( void ) const { return _numThreads; }
+		size_t size( void )
+		{
+			Lock lock( _mutex );
+			return _elems.size();
+		}
 
-		void addTask( Task const &task );
+		bool empty( void )
+		{
+			return size() == 0;
+		}
 
-		void start( void );
-        bool isRunning( void ) const { return _running; }
-        
-		void pollMainTasks( void );
-		
-        void stop( void );
+		void clear( void )
+		{
+			Lock lock( _mutex );
 
-	private:
-        void executeTask( Task &task );
+			_elems.clear();
+		}
+
+		/**
+		   \brief Adds an element to the private end of the queue (LIFO)
+
+		 */
+		void push( T const &elem )
+		{
+			Lock lock( _mutex );
+			_elems.push_back( elem );
+		}
+
+		/**
+		   \brief Retrieves an element from the private end of the queue (LIFO)
+
+		   \warning You should check if the collection is empty before calling this method.
+		 */
+		T pop( void )
+		{
+			Lock lock( _mutex );
+
+            if ( _elems.size() == 0 ) {
+                return nullptr;
+            }
             
-		void worker( void );
+			auto e = _elems.back();
+			_elems.pop_back();
+			return e;
+		}
 
-		void synchronize( void );
-        
-        void dummyTask( void );
+		/**
+		   \brief Retrieves an element from the public end of the queue (FIFO)
+
+		   \warning You should check if the collection is empty before calling this method
+		 */
+		T steal( void )
+		{
+			Lock lock( _mutex );
+            
+            if ( _elems.size() == 0 ) {
+                return nullptr;
+            }
+
+			auto e = _elems.front();
+			_elems.pop_front();
+			return e;
+		}
 
 	private:
-		bool _running = false;
-		
-		TaskList _tasks[ 2 ];
-		unsigned int _writeList = 0;
-		unsigned int _readList = 1;
-
-		TaskList _syncTasks;
-
-		TaskList _backgroundTasks;
-		
-		int _numThreads = 0;
-		ThreadGroup _threads;
-
-		mutable Mutex _syncMutex;
-		Condition _syncCondition;
-		unsigned int _numTasksToWaitFor = 0;
+        std::list< T > _elems;
+		std::mutex _mutex;
 	};
 
 }

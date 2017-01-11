@@ -111,7 +111,7 @@ void SDFGenerator::execute( std::string source )
 	std::string outputPath = source.substr( 0, source.find_last_of( "." ) ) + "_sdf.tga";
 	ImageTGA output;
 	output.setData( input.getWidth(), input.getHeight(), channels, &out[ 0 ] );
-	output.save( outputPath );
+	output.saveToFile( outputPath );
 
 #ifdef __APPLE__
 	system( ( std::string( "open \"" ) + source + "\"" ).c_str() );

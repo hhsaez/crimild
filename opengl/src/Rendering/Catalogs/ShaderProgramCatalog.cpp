@@ -101,7 +101,7 @@ void ShaderProgramCatalog::load( ShaderProgram *program )
                     char *buf = ( char * ) malloc( bufLength );
                     if ( buf ) {
                         glGetProgramInfoLog( programId, bufLength, NULL, buf );
-                        Log::Fatal << "Could not link shader program. Reason: " << buf << Log::End;
+                        Log::fatal( CRIMILD_CURRENT_CLASS_NAME, "Could not link shader program. Reason: ", buf );
                         free( buf );
                         exit( 1 );
                     }
@@ -168,11 +168,10 @@ int ShaderProgramCatalog::compileShader( Shader *shader, int type )
                 char* buf = ( char * ) malloc( infoLen );
 				if ( buf ) {
                     glGetShaderInfoLog( shaderId, infoLen, NULL, buf );
-                    Log::Fatal << "Could not compile "
-                        << ( type == GL_VERTEX_SHADER ? "vertex" : "fragment" ) << " shader. "
-                        << "Reason: " << buf
-                        << "\nSource: " << src
-                        << Log::End;
+                    Log::fatal( CRIMILD_CURRENT_CLASS_NAME, "Could not compile ",
+                               ( type == GL_VERTEX_SHADER ? "vertex" : "fragment" ), " shader. ",
+                               "Reason: ", buf,
+                               "\nSource: ", src );
                     free( buf );
                     exit( 1 );
                 }

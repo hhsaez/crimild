@@ -34,14 +34,14 @@
 
 using namespace crimild;
 
+constexpr const char *ColorTintImageEffect::COLOR_TINT_PROGRAM_NAME;
+constexpr const char *ColorTintImageEffect::COLOR_TINT_UNIFORM_TINT;
+constexpr const char *ColorTintImageEffect::COLOR_TINT_UNIFORM_TINT_VALUE;
+
 const RGBAColorf ColorTintImageEffect::TINT_RED = RGBAColorf( 1.0f, 0.0f, 0.0f, 1.0f );
 const RGBAColorf ColorTintImageEffect::TINT_GREEN = RGBAColorf( 0.0f, 1.0f, 0.0f, 1.0f );
 const RGBAColorf ColorTintImageEffect::TINT_BLUE = RGBAColorf( 0.0f, 0.0f, 1.0f, 1.0f );
 const RGBAColorf ColorTintImageEffect::TINT_SEPIA = RGBAColorf( 0.4392156863f, 0.2588235294f, 0.07843137255f, 1.0f );
-
-// TODO: WHY DO I NEED TO DO THIS??
-constexpr const char *ColorTintImageEffect::COLOR_TINT_UNIFORM_TINT;
-constexpr const char *ColorTintImageEffect::COLOR_TINT_UNIFORM_TINT_VALUE;
 
 ColorTintImageEffect::ColorTintImageEffect( const RGBAColorf &tint, float value )
     : _tint( crimild::alloc< RGBAColorfUniform >( ColorTintImageEffect::COLOR_TINT_UNIFORM_TINT, tint ) ),
@@ -65,7 +65,7 @@ void ColorTintImageEffect::apply( crimild::Renderer *renderer, crimild::Camera *
 	if ( _colorTintProgram == nullptr ) {
 		_colorTintProgram = renderer->getShaderProgram( COLOR_TINT_PROGRAM_NAME );
 		if ( _colorTintProgram == nullptr ) {
-			Log::Warning << "No shader program found with name " << COLOR_TINT_PROGRAM_NAME << Log::End;
+            Log::warning( CRIMILD_CURRENT_CLASS_NAME, "No shader program found with name ", COLOR_TINT_PROGRAM_NAME );
 			setEnabled( false );
 			return;
 		}
@@ -76,14 +76,14 @@ void ColorTintImageEffect::apply( crimild::Renderer *renderer, crimild::Camera *
 
     auto sceneFBO = renderer->getFrameBuffer( RenderPass::S_BUFFER_NAME );
 	if ( sceneFBO == nullptr ) {
-        Log::Warning << "Cannot find FBO named '" << RenderPass::S_BUFFER_NAME << "'" << Log::End;
+        Log::warning( CRIMILD_CURRENT_CLASS_NAME, "Cannot find FBO named '", RenderPass::S_BUFFER_NAME, "'" );
 		setEnabled( false );
 		return;
 	}
     
     auto colorTarget = sceneFBO->getRenderTargets().get( RenderPass::S_BUFFER_COLOR_TARGET_NAME );
 	if ( colorTarget == nullptr ) {
-        Log::Warning << "Cannot find render target named '" << RenderPass::S_BUFFER_COLOR_TARGET_NAME << "'" << Log::End;
+        Log::warning( CRIMILD_CURRENT_CLASS_NAME, "Cannot find render target named '", RenderPass::S_BUFFER_COLOR_TARGET_NAME, "'" );
 		setEnabled( false );
 		return;		
 	}
