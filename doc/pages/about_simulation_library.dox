@@ -1,0 +1,145 @@
+/**
+	\page ABOUT_SIMULATION_LIBRARY About the Crimild.Simulation Framework
+	
+	As a developer, you know that there are specific tasks that are common 
+	to all applications, regardless of whether you're writing a physics 
+	simulation or the next blockbuster video game. Even if you have to develop
+	a simple test for that particular cool feature you are adding to a game,
+	you need to have a way to setup a proper execution environment without
+	having to worry about the internals of the operative system your working
+	on.  
+	
+	The Simulation Framework aims to provide an object-oriented set of tools to
+	rapidly develop any Crimild-based application while ensuring the maximum
+	extensibility and portability in order to support as many execution 
+	environments as possible.
+	
+	The rest of this document introduces the Simulation Framework, its common 
+	uses and best practices, along with a depth explanation of the SDL-based 
+	implementation that is distributed as part of the Crimild Project.
+	
+	\section BEFORE_WE_BEGIN Before we begin
+	
+	It's very important for the reader to understand the purpose of this 
+	library. While the Simulation Framework and all of its related tools do
+	provide a quick way to develop our applications, it's no silver bullet.
+	It was conceived as a tool to be used mainly for research or testing rather
+	than production environment or large-scale projects. Hence the name: 
+	<i>Simulation</i>, instead of something like Application or Game. 
+	In particular, I didn't feel comfortable with calling it <i>Application</i>
+	considering the fact that an actual application can include other things
+	beyond the 3D scene, like a user interface. 
+	
+	\remarks Most of the examples and tools included as part of the Crimild 
+	Project make use of the Crimild.Simulation Framework, so understanding
+	how it works will help you with the rest of the engine features.
+
+	\section CORE_COMPONTENTS Core Components
+	
+	There are several classes included as part of the Crimild.Simulation Framework,
+	all of them live within the Crimild::Simulation namespace. The most relevant
+	ones are:
+	
+	- Task
+	- RunLoop
+	- SceneSimulator
+	
+	These classes are responsible for managing the basic tasks and execution 
+	flow for our Simulation.
+	
+	\section TASKS Tasks
+	
+	Usually, a simulation requires several processes to be executed
+	in a certain order to work correctly. For example, a window has
+	to be created before rendering anything on the screen. A camera needs
+	to be updated in response for user interaction. Each of this processes is 
+	implemented by one or more Task objects.
+	
+	During the simulation initialization, the developer creates and configures
+	the minimum set of tasks required to launch the simulation. Then, the
+	Simulator sorts those Tasks by their priorities and executes them once per
+	frame during the simulation step. It is also posible to add or remove tasks
+	during the simualtion execution.
+	
+	Refer to the Crimild::Simulation::Task class documentation for 
+	more information about task lifeclycle.
+	
+	\section RUN_LOOPS Run loops
+	
+	Run loops are part of the fundamental insfractructure associated with tasks,
+	and are used to schedule and coordinate tasks. As it names suggests, a run 
+	loop is a task processing loop that is executed as long as there are 
+	tasks to update. 
+	
+	You just need to create a RunLoop object and attach some tasks to its task 
+	pool, like this:
+	
+	\code
+	RunLoop *runLoop = new RunLoop();
+	runLoop->startTask( new SomeTask() );
+	runLoop->startTask( new AnotherTask() );
+	runLoop->run();
+	\endcode
+	
+	Since a RunLoop object will run indefinitelly, the developer must make use of
+	threads in order to work with more than one RunLoop instance at a time.
+	
+	\remarks A RunLoop object is not a thread itself but its a fundamental part of
+	it as discussed later in this document.
+	
+	Refer to the Crimild::Simulation::RunLoop class documentation to understand 
+	how to use run loops in your simulation.
+	
+	\section SCENE_SIMULATOR SceneSimulator
+	
+	The SceneSimulator class is probably the most important one in the entire Simulation
+	Framework. It provides a definitive flow for all of our applications, and it
+	can be customized with our own tasks and threads if needed.
+	
+	A simulator stores one or more scenes. Each scene can be handled by different
+	tasks if required. For example, you may have a task for rendering a terrain,
+	while a different task takes care of rendering the HUD.
+	
+	In addition to scenes, the simulator also stores the Renderer and the cameras
+	used for culling and rendering.
+	
+	\remarks We can only create one instance of SceneSimulator at the same time. 
+	That means that we can have at most one simulator alive at any given point 
+	in time. The implementation is similar to a Singleton design pattern. 
+	
+	\section PORTABILITY Portability Notes
+	
+	As with the Core components in the Crimild Project, the Crimild::Simulation
+	library needs to ensure the maximum portability and flexibility. For this
+	reason, this library is written entirelly in ANSI C++, doing practically no
+	platform-dependent system calls in the way. 
+	
+	Here is where SDL comes to the rescue. The Simple DirectMedia Layer [1] provides
+	a great abstraction to the underlying platform and has been ported to the
+	most popular operative systems. Therefore, an implementation of the
+	Crimild::Simulation framework based on SDL is included as part of the Crimild 
+	Project in the Crimild::Simulation::SDL library.
+	
+	\section CONCLUSION Final Thoughts
+	
+	There is catch while using the Simulation Framework. Developers should be 
+	careful when using the it in real world applications. This 
+	framework ensures portability and flexibiliy over performance. Although the 
+	Crimild::Simulation framework does provide acceptable performance in most 
+	situations, you might need to develop your own framework if your application 
+	requires it.
+	
+	\section REFERENCES References
+	
+	- Simple DirectMedia Library - www.libsdl.org
+	- "Focus on SDL" by Ernest Pazera. Premier Press, 2003.
+	- "3D Game Engine Design" by David Eberly, 2006.
+
+	\todo Explain event handling during simulations
+	\todo Add examples of how to use the simulators
+	\todo Explain how simulation settings are used
+	\todo Add documentation for threading support in simulations
+	
+*/
+
+
