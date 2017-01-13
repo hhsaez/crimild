@@ -100,6 +100,13 @@ namespace crimild {
         	q.lookAt( direction, up );
         	return q;
 		}
+        
+        static Quaternion createFromEulerAngles( PRECISION pitch, PRECISION yaw, PRECISION roll )
+        {
+            Quaternion q;
+            q.fromEulerAngles( pitch, yaw, roll );
+            return q;
+        }
 
 	public:
 		/**
@@ -308,6 +315,16 @@ namespace crimild {
 			return *this;
 		}
 
+        Quaternion &fromEulerAngles( PRECISION pitch, PRECISION yaw, PRECISION roll )
+        {
+            Quaternion q0, q1, q2;
+            q0.fromAxisAngle( crimild::Vector3f( 1.0f, 0.0f, 0.0f ), pitch );
+            q1.fromAxisAngle( crimild::Vector3f( 0.0f, 1.0f, 0.0f ), yaw );
+            q2.fromAxisAngle( crimild::Vector3f( 0.0f, 0.0f, 1.0f ), roll );
+            *this = q0 * q1 * q2;
+            return *this;
+        }
+        
 		/**
 		 	\brief Computes the rotation from the compositions of two quaternions
 		 */
