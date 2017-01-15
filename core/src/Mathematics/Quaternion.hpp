@@ -315,16 +315,61 @@ namespace crimild {
 			return *this;
 		}
 
-        Quaternion &fromEulerAngles( PRECISION pitch, PRECISION yaw, PRECISION roll )
-        {
-            Quaternion q0, q1, q2;
-            q0.fromAxisAngle( crimild::Vector3f( 1.0f, 0.0f, 0.0f ), pitch );
-            q1.fromAxisAngle( crimild::Vector3f( 0.0f, 1.0f, 0.0f ), yaw );
-            q2.fromAxisAngle( crimild::Vector3f( 0.0f, 0.0f, 1.0f ), roll );
-            *this = q0 * q1 * q2;
-            return *this;
-        }
-        
+		Quaternion &fromEulerAngles( PRECISION pitch, PRECISION yaw, PRECISION roll )
+		{
+			// from https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+			
+			Quaternion q;
+			double t0 = std::cos( roll * 0.5 );
+			double t1 = std::sin( roll * 0.5 );
+			double t2 = std::cos( pitch * 0.5 );
+			double t3 = std::sin( pitch * 0.5 );
+			double t4 = std::cos( yaw * 0.5 );
+			double t5 = std::sin( yaw * 0.5 );
+			
+			auto w = t0 * t2 * t4 + t1 * t3 * t5;
+			auto x = t0 * t3 * t4 - t1 * t2 * t5;
+			auto y = t0 * t2 * t5 + t1 * t3 * t4;
+			auto z = t1 * t2 * t4 - t0 * t3 * t5;
+
+			_data[ 0 ] = ( PRECISION ) x;
+			_data[ 1 ] = ( PRECISION ) y;
+			_data[ 2 ] = ( PRECISION ) z;
+			_data[ 3 ] = ( PRECISION ) w;
+
+			return *this;
+		}
+
+		Vector3Impl toEulerAngles( void ) const
+		{
+			// from https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+			
+			double x = getImaginary().z();
+			double y = getImaginary().x();
+			double z = getImaginary().y();
+			double w = getReal();
+			
+			double ysqr = y * y;
+			
+			// roll (x-axis rotation)
+			double t0 = +2.0f * ( w  * x + y * z );
+			double t1 = +1.0f - 2.0f * ( x * x + ysqr );
+			double roll = std::atan2( t0, t1 );
+			
+			// pitch (y-axis rotation)
+			double t2 = +2.0f * ( w * y - z * x );
+			t2 = t2 > 1.0f ? 1.0f : t2;
+			t2 = t2 < -1.0f ? -1.0f : t2;
+			double pitch = std::asin(t2);
+			
+			// yaw (z-axis rotation)
+			double t3 = +2.0f * ( w * z + x *y );
+			double t4 = +1.0f - 2.0f * (ysqr + z * z );  
+			double yaw = std::atan2(t3, t4);
+			
+			return Vector3Impl( ( PRECISION ) pitch, ( PRECISION ) yaw, ( PRECISION ) roll );
+		}
+
 		/**
 		 	\brief Computes the rotation from the compositions of two quaternions
 		 */
