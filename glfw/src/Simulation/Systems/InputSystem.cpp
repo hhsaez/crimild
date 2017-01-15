@@ -22,6 +22,7 @@ InputSystem::InputSystem( void )
             }
         });
         
+        /*
         glfwSetCursorPosCallback( self->_window, []( GLFWwindow* window, double xpos, double ypos ) {
             int windowWidth, windowHeight;
             glfwGetWindowSize( window, &windowWidth, &windowHeight );
@@ -33,6 +34,7 @@ InputSystem::InputSystem( void )
                 ( float ) ypos / ( float ) windowHeight
             });
         });
+        */
         
         glfwSetMouseButtonCallback( self->_window, []( GLFWwindow* window, int button, int action, int mods ) {
             double x, y;
@@ -96,6 +98,21 @@ void InputSystem::update( void )
         default:
             break;
     }
+
+    // trigger MouseMotion in every update to handle cases
+    // when the mouse is not moving and the delta pos should
+    // be updated 
+    int windowWidth, windowHeight;
+    double x, y;
+    glfwGetWindowSize( _window, &windowWidth, &windowHeight );
+    glfwGetCursorPos( _window, &x, &y );
+    
+    MessageQueue::getInstance()->pushMessage( messaging::MouseMotion {
+        ( float ) x,
+        ( float ) y,
+        ( float ) x / ( float ) windowWidth,
+        ( float ) y / ( float ) windowHeight
+    });
     
     crimild::concurrency::sync_frame( std::bind( &InputSystem::update, this ) );
 }
