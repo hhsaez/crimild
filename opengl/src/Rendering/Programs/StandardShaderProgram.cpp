@@ -72,6 +72,7 @@ StandardShaderProgram::StandardShaderProgram( void )
     
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_COUNT_UNIFORM, "uLightCount" );
 	for ( int i = 0; i < MAX_LIGHTS; i++ ) {
+		registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_TYPE_UNIFORM + i, OpenGLUtils::buildArrayShaderLocationName( "uLights", i, "lightType" ) );
 		registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_POSITION_UNIFORM + i, OpenGLUtils::buildArrayShaderLocationName( "uLights", i, "position" ) );
 		registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_ATTENUATION_UNIFORM + i, OpenGLUtils::buildArrayShaderLocationName( "uLights", i, "attenuation" ) );
 		registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_DIRECTION_UNIFORM + i, OpenGLUtils::buildArrayShaderLocationName( "uLights", i, "direction" ) );

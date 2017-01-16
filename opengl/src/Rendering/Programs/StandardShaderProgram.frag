@@ -3,14 +3,19 @@ R"(
 CRIMILD_GLSL_PRECISION_FLOAT_HIGH
 
 struct Light {
-   vec3 position;
-   vec3 attenuation;
-   vec3 direction;
-   vec4 color;
-   float outerCutoff;
-   float innerCutoff;
-   float exponent;
+    float lightType;
+    vec3 position;
+    vec3 attenuation;
+    vec3 direction;
+    vec4 color;
+    float outerCutoff;
+    float innerCutoff;
+    float exponent;
 };
+
+const float LIGHT_TYPE_POINT = 0.0;
+const float LIGHT_TYPE_DIRECTIONAL = 1.0;
+const float LIGHT_TYPE_SPOT = 2.0;
 
 struct Material {
    vec4 ambient;
@@ -89,9 +94,15 @@ void main( void )
             break;
         }
 
-        bool hasDirection = dot( uLights[ i ].direction, uLights[ i ].direction ) != 0.0;
-        
-        vec3 lightVec = normalize( hasDirection ? uLights[ i ].direction : ( uLights[ i ].position - vWorldVertex.xyz ) );
+        vec3 lightVec;
+        if ( uLights[ i ].lightType == LIGHT_TYPE_DIRECTIONAL ) {
+            lightVec = -uLights[ i ].direction;
+        }
+        else {
+            lightVec = uLights[ i ].position - vWorldVertex.xyz;
+        }
+        lightVec = normalize( lightVec );
+
         vec3 halfVector = -normalize( reflect( lightVec, vWorldNormal ) );
         vec3 eyeVector = normalize( vViewVec );
         
@@ -121,7 +132,7 @@ void main( void )
         float l = dot( normal, lightVec );
         if ( l > 0.0 ) {
             float spotlight = 1.0;
-            if ( hasDirection && uLights[ i ].outerCutoff > 0.0 ) {
+            if ( uLights[ i ].lightType == LIGHT_TYPE_SPOT && uLights[ i ].outerCutoff > 0.0 ) {
                 spotlight = max( -dot( lightVec, uLights[ i ].direction ), 0.0 );
                 float spotlightFade = clamp( ( uLights[ i ].outerCutoff - spotlight ) / ( uLights[ i ].outerCutoff - uLights[ i ].innerCutoff ), 0.0, 1.0 );
                 spotlight = pow( spotlight * spotlightFade, uLights[ i ].exponent );
@@ -153,4 +164,6 @@ void main( void )
     CRIMILD_GLSL_FRAGMENT_OUTPUT = outColor;
 
 }
+
 )"
+

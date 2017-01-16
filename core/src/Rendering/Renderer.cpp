@@ -240,6 +240,22 @@ void Renderer::unbindTexture( ShaderLocation *location, Texture *texture )
 
 void Renderer::bindLight( ShaderProgram *program, Light *light )
 {
+	float lightType = 0;
+	switch ( light->getType() ) {
+		case Light::Type::POINT:
+			lightType = 0;
+			break;
+
+		case Light::Type::DIRECTIONAL:
+			lightType = 1;
+			break;
+
+		case Light::Type::SPOT:
+			lightType = 2;
+			break;
+	}
+
+	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_TYPE_UNIFORM + _lightCount ), lightType );
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_POSITION_UNIFORM + _lightCount ), light->getPosition() );
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_ATTENUATION_UNIFORM + _lightCount ), light->getAttenuation() );
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_DIRECTION_UNIFORM + _lightCount ), light->getDirection() );
