@@ -154,7 +154,9 @@ void RenderQueue::each( std::function< void ( Light *, int ) > callback )
     auto lights = _lights;
     int i = 0;
     for ( auto l : lights ) {
-        callback( crimild::get_ptr( l ), i++ );
+        if ( l->isEnabled() ) {
+            callback( crimild::get_ptr( l ), i++ );
+        }
     }
 }
 
