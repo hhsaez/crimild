@@ -51,7 +51,7 @@ GLSimulation::GLSimulation( std::string name, SettingsPtr const &settings )
 
 	if ( JobScheduler::getInstance()->getNumWorkers() == 0 ) {
 		// enable some threads if not already specified
-		JobScheduler::getInstance()->configure( 2 );
+		JobScheduler::getInstance()->configure( 1 );
 	}
 
     addSystem( crimild::alloc< InputSystem >() );

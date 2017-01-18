@@ -102,7 +102,7 @@ void Renderer::setShaderProgram( std::string name, SharedPointer< ShaderProgram 
 void Renderer::setFrameBuffer( std::string name, SharedPointer< FrameBufferObject > const &fbo )
 {
     // assets stored by the renderer are assumed to be persistent
-    AssetManager::getInstance()->set( name, fbo );
+    AssetManager::getInstance()->set( name, fbo, true );
 }
 
 FrameBufferObject *Renderer::getFrameBuffer( std::string name )

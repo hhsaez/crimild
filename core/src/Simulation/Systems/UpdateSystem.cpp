@@ -49,7 +49,7 @@ void UpdateSystem::update( void )
     
     MessageQueue::getInstance()->dispatchDeferredMessages();
     
-	auto scene = Simulation::getInstance()->getScene();
+    auto scene = crimild::retain( Simulation::getInstance()->getScene() );
     if ( scene == nullptr ) {
     	// Log::Debug << "No scene found" << Log::End;
         return;
@@ -69,11 +69,11 @@ void UpdateSystem::update( void )
     // prevent integration errors when delta is too big (i.e. after loading a new scene)
     _accumulator += Numericd::min( 4 * CRIMILD_SIMULATION_TIME, c.getDeltaTime() );
 
-    broadcastMessage( messaging::WillUpdateScene { scene, camera } );
-    updateBehaviors( scene );
-    broadcastMessage( messaging::DidUpdateScene { scene, camera } );
+    broadcastMessage( messaging::WillUpdateScene { crimild::get_ptr( scene ), camera } );
+    updateBehaviors( crimild::get_ptr( scene ) );
+    broadcastMessage( messaging::DidUpdateScene { crimild::get_ptr( scene ), camera } );
 
-    computeRenderQueue( scene, camera );
+    computeRenderQueue( crimild::get_ptr( scene ), camera );
 }
 
 void UpdateSystem::updateBehaviors( Node *scene )
