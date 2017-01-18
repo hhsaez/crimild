@@ -36,7 +36,7 @@ bool UpdateSystem::start( void )
     
     _accumulator = 0.0;
     
-    crimild::concurrency::async_frame( std::bind( &UpdateSystem::update, this ) );
+    crimild::concurrency::sync_frame( std::bind( &UpdateSystem::update, this ) );
 
 	return true;
 }
@@ -50,14 +50,14 @@ void UpdateSystem::update( void )
     auto scene = crimild::retain( Simulation::getInstance()->getScene() );
     if ( scene == nullptr ) {
     	// schedule next update
-        crimild::concurrency::async_frame( std::bind( &UpdateSystem::update, this ) );
+        crimild::concurrency::sync_frame( std::bind( &UpdateSystem::update, this ) );
         return;
     }
     
     auto camera = Simulation::getInstance()->getMainCamera();
     if ( camera == nullptr ) {
         // schedule next update
-        crimild::concurrency::async_frame( std::bind( &UpdateSystem::update, this ) );
+        crimild::concurrency::sync_frame( std::bind( &UpdateSystem::update, this ) );
         return;
     }
 
@@ -76,7 +76,7 @@ void UpdateSystem::update( void )
     computeRenderQueue( crimild::get_ptr( scene ), camera );
     
     // schedule next update
-    crimild::concurrency::async_frame( std::bind( &UpdateSystem::update, this ) );
+    crimild::concurrency::sync_frame( std::bind( &UpdateSystem::update, this ) );
 }
 
 void UpdateSystem::updateBehaviors( Node *scene )
