@@ -88,7 +88,9 @@ void ScriptContext::reset( void )
 
 	// this trick makes sure the runtime directory is in the search
 	// path for external modules
-	parse( "package.path = '" + FileSystem::getInstance().getBaseDirectory() + "' .. '/?.lua;' .. package.path" );
+	auto baseDir = FileSystem::getInstance().getBaseDirectory();
+	baseDir = StringUtils::replaceAll(baseDir, "\\", "/");
+	parse( "package.path = '" + baseDir + "' .. '/?.lua;' .. package.path" );
 }
 
 bool ScriptContext::load( std::string fileName, bool supportCoroutines )

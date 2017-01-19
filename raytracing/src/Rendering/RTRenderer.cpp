@@ -177,7 +177,7 @@ RGBColorf RTRenderer::computeColor( SharedPointer< Node > const &scene, const Ra
 
 float RTRenderer::getRandom() const
 {
-#if 0
+#if 1
 	return Random::generate< float >();
 #else
 	return drand48();

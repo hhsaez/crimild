@@ -73,7 +73,17 @@ void FileSystem::init( int argc, char **argv )
         base = base.substr( 0, pos );
     }
 
-    pos = base.find( "/Contents/MacOS" );
+	pos = base.find("\\Debug");
+	if (pos > 0) {
+		base = base.substr(0, pos);
+	}
+
+	pos = base.find("\\Release");
+	if (pos > 0) {
+		base = base.substr(0, pos);
+	}
+
+	pos = base.find( "/Contents/MacOS" );
     if ( pos > 0 ) {
     	base = base.substr( 0, pos );
     	base = base + "/Contents/Resources";

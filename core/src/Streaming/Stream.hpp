@@ -245,13 +245,13 @@ namespace crimild {
         template< size_t SIZE, typename PRECISION >
         void write( const Vector< SIZE, PRECISION > &v )
         {
-            writeRawBytes( ( PRECISION * ) v, SIZE * sizeof( PRECISION ) );
+            writeRawBytes( ( const PRECISION * ) v, SIZE * sizeof( PRECISION ) );
         }
 
         template< size_t SIZE, typename PRECISION >
         void write( const Matrix< SIZE, PRECISION > &m )
         {
-            writeRawBytes( ( PRECISION * ) m, SIZE * sizeof( PRECISION ) );
+            writeRawBytes( ( const PRECISION * ) m, SIZE * sizeof( PRECISION ) );
         }
 
         void write( const Quaternion4f &q );

@@ -49,6 +49,16 @@ namespace crimild {
         
         virtual void save( std::string filename ) { }
 
+		void set(std::string key, std::string value)
+		{
+			_settings[key] = value;
+		}
+
+		void set(std::string key, const char *value)
+		{
+			set(key, std::string(value));
+		}
+
 		template< typename T >
 		void set( std::string key, T value )
 		{
@@ -61,6 +71,26 @@ namespace crimild {
         {
             return ( _settings.find( key ) != _settings.end() );
         }
+
+		std::string get(std::string key, const char *defaultValue)
+		{
+			if (_settings.find(key) == _settings.end()) {
+				// key not found
+				return defaultValue;
+			}
+
+			return _settings[key];
+		}
+
+		std::string get(std::string key, std::string defaultValue)
+		{
+			if (_settings.find(key) == _settings.end()) {
+				// key not found
+				return defaultValue;
+			}
+
+			return _settings[key];
+		}
 
 		template< typename T >
 		T get( std::string key, T defaultValue )

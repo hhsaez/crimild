@@ -250,6 +250,10 @@ void Text::updatePrimitive( void )
 		horiAdvance += glyph.advance;
 	}
 
+	if (vertices.size() == 0) {
+		return;
+	}
+
     auto format = VertexFormat::VF_P3_N3_UV2;
     auto vbo = crimild::alloc< VertexBufferObject >( format, vertices.size() / format.getVertexSize(), &vertices[ 0 ] );
     _primitive->setVertexBuffer( vbo );
