@@ -35,7 +35,7 @@ InputSystem::InputSystem( void )
             });
         });
         */
-        
+
         glfwSetMouseButtonCallback( self->_window, []( GLFWwindow* window, int button, int action, int mods ) {
             double x, y;
             glfwGetCursorPos( window, &x, &y );
@@ -113,6 +113,17 @@ void InputSystem::update( void )
         ( float ) x / ( float ) windowWidth,
         ( float ) y / ( float ) windowHeight
     });
+
+	std::vector< float > axes;
+	auto joyPresent = glfwJoystickPresent(GLFW_JOYSTICK_1);
+	if (joyPresent == 1) {
+		int axesCount;
+		const float *axesData = glfwGetJoystickAxes( GLFW_JOYSTICK_1, &axesCount );
+		for ( int i = 0; i < axesCount; i++ ) {
+			axes.push_back( axesData[ i ] );
+		}
+	}
+	Input::getInstance()->resetJoystickAxes( axes );
     
     crimild::concurrency::sync_frame( std::bind( &InputSystem::update, this ) );
 }
