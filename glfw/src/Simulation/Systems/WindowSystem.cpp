@@ -70,6 +70,11 @@ void WindowSystem::update( void )
         int sleepTime = ( int )( ( 1.0 / 60.0 - delta ) * 1000.0 );
         std::this_thread::sleep_for( std::chrono::milliseconds( sleepTime ) );
     }
+
+	std::string name = Simulation::getInstance()->getName();
+	std::stringstream ss;
+	ss << name << " (" << delta << "ms)";
+	glfwSetWindowTitle( _window, ss.str().c_str() );
     
     crimild::concurrency::sync_frame( std::bind( &WindowSystem::update, this ) );
 }
