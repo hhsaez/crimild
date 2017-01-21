@@ -81,9 +81,18 @@ void UpdateSystem::update( void )
 
 void UpdateSystem::updateBehaviors( Node *scene )
 {
-    Clock fixed( CRIMILD_SIMULATION_TIME );
+    static const Clock fixed( CRIMILD_SIMULATION_TIME );
+
     while ( _accumulator >= CRIMILD_SIMULATION_TIME ) {
-        scene->perform( UpdateComponents( fixed ) );
+        auto job = crimild::concurrency::async();
+        scene->perform( Apply( [job]( Node *node ) {
+            node->forEachComponent( [job, node] ( NodeComponent *component ) {
+                crimild::concurrency::async( job, [component] {
+                    component->update( fixed );
+                });
+            });
+        }));
+        crimild::concurrency::wait( job );
         _accumulator -= CRIMILD_SIMULATION_TIME;
     }
     
