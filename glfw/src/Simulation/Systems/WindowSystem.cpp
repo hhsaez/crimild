@@ -29,9 +29,22 @@ bool WindowSystem::start( void )
 		return false;
 	}
 
-    int framebufferWidth;
-    int framebufferHeight;
+    int framebufferWidth = 0;
+    int framebufferHeight = 0;
 	glfwGetFramebufferSize( _window, &framebufferWidth, &framebufferHeight);
+
+    bool supersampling = Simulation::getInstance()->getSettings()->get( "video.supersampling", true );
+    if ( supersampling ) {
+	    int windowWidth = Simulation::getInstance()->getSettings()->get( "video.width", 1024 );
+    	int windowHeight = Simulation::getInstance()->getSettings()->get( "video.height", 768 );
+
+    	framebufferWidth = Numerici::max( framebufferWidth, 2 * windowWidth );
+    	framebufferHeight = Numerici::max( framebufferHeight, 2 * windowHeight );
+    }
+    else {
+	    framebufferWidth = Simulation::getInstance()->getSettings()->get( "video.width", 1024 );
+    	framebufferHeight = Simulation::getInstance()->getSettings()->get( "video.height", 768 );
+    }
 
     auto renderer = Simulation::getInstance()->getRenderer();
     auto screenBuffer = renderer->getScreenBuffer();
