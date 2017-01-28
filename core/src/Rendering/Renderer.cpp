@@ -113,7 +113,11 @@ FrameBufferObject *Renderer::getFrameBuffer( std::string name )
 SharedPointer< FrameBufferObject > Renderer::generateAuxFBO( std::string name, int width, int height )
 {
     auto fbo = crimild::alloc< FrameBufferObject >( width, height );
+#ifdef CRIMILD_PLATFORM_DESKTOP
+    fbo->getRenderTargets().add( FBO_AUX_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_32, RenderTarget::Output::RENDER_AND_TEXTURE, width, height, true ) );
+#else
     fbo->getRenderTargets().add( FBO_AUX_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
+#endif
     fbo->getRenderTargets().add( FBO_AUX_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
     AssetManager::getInstance()->set( name, fbo, true );
     return fbo;
@@ -276,6 +280,10 @@ void Renderer::unbindLight( ShaderProgram *program, Light *light )
 
 void Renderer::bindVertexBuffer( ShaderProgram *program, VertexBufferObject *vbo )
 {
+	if ( vbo == nullptr ) {
+		return;
+	}
+	
 	getVertexBufferObjectCatalog()->bind( program, vbo );
 }
 

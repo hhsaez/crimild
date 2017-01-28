@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,37 +25,35 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_OPENGL_
-#define CRIMILD_OPENGL_
+#ifndef CRIMILD_GL3_RENDERING_IMAGE_EFFECT_BLUR_
+#define CRIMILD_GL3_RENDERING_IMAGE_EFFECT_BLUR_
 
-#include "Rendering/OpenGLRenderer.hpp"
-#include "Rendering/OpenGLUtils.hpp"
+#include <Crimild.hpp>
 
-#include "Rendering/Catalogs/ShaderProgramCatalog.hpp"
-#include "Rendering/Catalogs/VertexBufferObjectCatalog.hpp"
-#include "Rendering/Catalogs/IndexBufferObjectCatalog.hpp"
-#include "Rendering/Catalogs/FrameBufferObjectCatalog.hpp"
-#include "Rendering/Catalogs/TextureCatalog.hpp"
+namespace crimild {
+    
+    namespace opengl {
+        
+        class BlurImageEffect : public ImageEffect {
+        public:
+            explicit BlurImageEffect( float radius = 1.0f, size_t resolution = 1024 );
+            virtual ~BlurImageEffect( void );
+            
+            virtual void compute( crimild::Renderer *renderer, Camera *camera ) override;
+            virtual void apply( crimild::Renderer *renderer, crimild::Camera *camera ) override;
 
-#include "Rendering/Programs/StandardShaderProgram.hpp"
-#include "Rendering/Programs/LitTextureShaderProgram.hpp"
-#include "Rendering/Programs/UnlitTextureShaderProgram.hpp"
-#include "Rendering/Programs/UnlitDiffuseShaderProgram.hpp"
-#include "Rendering/Programs/ScreenTextureShaderProgram.hpp"
-#include "Rendering/Programs/SignedDistanceFieldShaderProgram.hpp"
-#include "Rendering/Programs/TextShaderProgram.hpp"
-#include "Rendering/Programs/DepthShaderProgram.hpp"
-#include "Rendering/Programs/ColorTintShaderProgram.hpp"
-
-#ifdef CRIMILD_PLATFORM_DESKTOP
-
-#include "Rendering/ImageEffects/DepthOfFieldImageEffect.hpp"
-#include "Rendering/ImageEffects/BloomImageEffect.hpp"
-#include "Rendering/ImageEffects/SSAOImageEffect.hpp"
-#include "Rendering/ImageEffects/VignetteImageEffect.hpp"
-#include "Rendering/ImageEffects/BlurImageEffect.hpp"
-
-#endif
+            size_t getResolution( void ) const { return _resolution->getValue(); }
+            float getRadius( void ) const { return _radius->getValue(); }
+            
+        private:
+            SharedPointer< FloatUniform > _radius;
+            SharedPointer< IntUniform > _resolution;
+            SharedPointer< Vector2fUniform > _direction;
+        };
+        
+    }
+    
+}
 
 #endif
 
