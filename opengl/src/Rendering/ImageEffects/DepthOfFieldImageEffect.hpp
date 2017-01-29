@@ -36,21 +36,33 @@ namespace crimild {
         
         class DepthOfFieldImageEffect : public ImageEffect {
         public:
-            DepthOfFieldImageEffect( void );
+			DepthOfFieldImageEffect( void );
+            explicit DepthOfFieldImageEffect( int resolution );
             virtual ~DepthOfFieldImageEffect( void );
             
             virtual void compute( crimild::Renderer *renderer, Camera *camera ) override;
             virtual void apply( crimild::Renderer *renderer, crimild::Camera *camera ) override;
+
+			int getResolution( void ) const { return _resolution; }
+
+            float getFocalDistance( void ) { return _focalDistance->getValue(); }
+            void setFocalDistance( float value ) { _focalDistance->setValue( value ); }
             
-            float getFocus( void ) { return _focus->getValue(); }
-            void setFocus( float value ) { _focus->setValue( value ); }
+            float getFocusDistance( void ) { return _focusDistance->getValue(); }
+            void setFocusDistance( float value ) { _focusDistance->setValue( value ); }
+
+            float getFStop( void ) { return _fStop->getValue(); }
+            void setFStop( float value ) { _fStop->setValue( value ); }
             
             float getAperture( void ) { return _aperture->getValue(); }
             void setAperture( float value ) { _aperture->setValue( value ); }
             
         private:
-            SharedPointer< FloatUniform > _focus;
-            SharedPointer< FloatUniform > _aperture;
+			int _resolution;
+            SharedPointer< FloatUniform > _focalDistance; //< in millimeters
+            SharedPointer< FloatUniform > _fStop; //< in millimeters
+            SharedPointer< FloatUniform > _aperture; //< in millimeters
+            SharedPointer< FloatUniform > _focusDistance; //< in millimeters
         };
         
     }

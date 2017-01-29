@@ -34,6 +34,9 @@ bool WindowSystem::start( void )
 	glfwGetFramebufferSize( _window, &framebufferWidth, &framebufferHeight);
 
     bool supersampling = Simulation::getInstance()->getSettings()->get( "video.supersampling", true );
+#ifdef CRIMILD_PLATFORM_WIN32
+	supersampling = false;
+#endif
     if ( supersampling ) {
 	    int windowWidth = Simulation::getInstance()->getSettings()->get( "video.width", 1024 );
     	int windowHeight = Simulation::getInstance()->getSettings()->get( "video.height", 768 );
