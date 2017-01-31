@@ -72,7 +72,9 @@ void WindowSystem::update( void )
 	glfwPollEvents();
     
 	if ( glfwWindowShouldClose( _window ) ) {
-		Simulation::getInstance()->stop();
+        crimild::concurrency::sync_frame( [] {
+            Simulation::getInstance()->stop();
+        });
 		return;
 	}
 

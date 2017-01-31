@@ -92,11 +92,15 @@ namespace crimild {
             return shallowCopy.getResult< T >();
         }
 
-        void clear( void )
+        void clear( bool clearAll = false )
         {
             ScopedLock lock( _mutex );
             
             _assets.clear();
+            
+            if ( clearAll ) {
+                _persistentAssets.clear();
+            }
         }
 
     private:

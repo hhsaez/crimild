@@ -68,6 +68,7 @@ Simulation::Simulation( std::string name, SettingsPtr const &settings )
 
 Simulation::~Simulation( void )
 {
+    stop();
     stopSystems();
 }
 
@@ -96,9 +97,12 @@ void Simulation::stop( void )
     // stop all unfinished tasks first
     _jobScheduler.stop();
 
+    // clear all messages
+    MessageQueue::getInstance()->clear();
+    
     setScene( nullptr );
     
-    _assetManager.clear();
+    _assetManager.clear( true );
 }
 
 int Simulation::run( void )

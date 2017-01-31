@@ -121,7 +121,7 @@ void FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
         glBindFramebuffer( GL_FRAMEBUFFER, framebufferId );
         
         int colorAttachmentOffset = 0;
-        fbo->getRenderTargets().each( [&]( std::string, RenderTarget *target ) {
+        fbo->getRenderTargets().each( [&]( std::string rtName, RenderTarget *target ) {
             CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
             
             int targetWidth = target->getWidth();
@@ -185,6 +185,7 @@ void FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
                 if ( target->getOutput() == RenderTarget::Output::TEXTURE || target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
                     GLuint textureId;
                     glGenTextures( 1, &textureId );
+                    target->getTexture()->setName( rtName );
                     target->getTexture()->setCatalogInfo( getRenderer()->getTextureCatalog(), textureId );
                     
                     glBindTexture( GL_TEXTURE_2D, target->getTexture()->getCatalogId() );
@@ -272,11 +273,12 @@ void FrameBufferObjectCatalog::unload( FrameBufferObject *fbo )
             int targetId = target->getId();
             if ( targetId > 0 ) {
                 _renderbufferIdsToDelete.push_back( targetId );
-                if ( target->getOutput() == RenderTarget::Output::TEXTURE || target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
-                    int textureId = target->getTexture()->getCatalogId();
-                    _textureIdsToDelete.push_back( textureId );
-                    target->getTexture()->setCatalogInfo( nullptr, 0 );
-                }
+            }
+
+            if ( target->getOutput() == RenderTarget::Output::TEXTURE || target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
+                int textureId = target->getTexture()->getCatalogId();
+                _textureIdsToDelete.push_back( textureId );
+                target->getTexture()->setCatalogInfo( nullptr, 0 );
             }
         });
         
