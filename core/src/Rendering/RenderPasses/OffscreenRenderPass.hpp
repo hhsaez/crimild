@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,50 +25,45 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SIMULATION_SYSTEMS_UPDATE_
-#define CRIMILD_SIMULATION_SYSTEMS_UPDATE_
+#ifndef CRIMILD_RENDERER_RENDER_PASS_OFFSCREEN_
+#define CRIMILD_RENDERER_RENDER_PASS_OFFSCREEN_
 
-#include "System.hpp"
-
-#include "SceneGraph/Node.hpp"
-#include "SceneGraph/Camera.hpp"
+#include "RenderPass.hpp"
 
 namespace crimild {
     
-	class UpdateSystem;
-
-	namespace messaging {
-
-		struct WillUpdateScene { 
-			Node *scene;
-			Camera *mainCamera;
-		};
-
-		struct DidUpdateScene {
-			Node *scene;
-			Camera *mainCamera;
-		};
-
-	}
-
-	class UpdateSystem : public System {
+    /**
+        \brief A render pass for rendering a scene in an offscreen buffer
+    */
+	class OffscreenRenderPass : public RenderPass {
 	public:
-		UpdateSystem( void );
-		virtual ~UpdateSystem( void );
+		/**
+		   \brief Explicit constructor
 
-		virtual bool start( void ) override;
+		   \remarks Uses the StandardRenderPass for rendering
+		 */
+		OffscreenRenderPass( SharedPointer< FrameBufferObject > const &fbo );
 
-		virtual void update( void );
+		/**
+		   \brief Explicit constructor
+		 */
+		explicit OffscreenRenderPass( SharedPointer< FrameBufferObject > const &fbo, SharedPointer< RenderPass > const &sceneRenderPass );
 
-		virtual void stop( void ) override;
+		/**
+		   \brief Destructor
+		 */
+		virtual ~OffscreenRenderPass( void );
         
-    private:
-        void updateBehaviors( Node *scene );
-        void updateWorldState( Node *scene );
-        void computeRenderQueues( Node *scene );
+        virtual void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera ) override;
 
-	private:
-		double _accumulator = 0.0;
+		FrameBufferObject *getTargetFBO( void ) { return crimild::get_ptr( _targetFBO ); }
+
+        RenderPass *getSceneRenderPass( void ) { return crimild::get_ptr( _sceneRenderPass ); }
+
+    private:
+		SharedPointer< FrameBufferObject > _targetFBO;
+        SharedPointer< RenderPass > _sceneRenderPass;
+
 	};
     
 }

@@ -145,6 +145,7 @@
 #include "Rendering/RenderPasses/StandardRenderPass.hpp"
 #include "Rendering/RenderPasses/PostRenderPass.hpp"
 #include "Rendering/RenderPasses/DeferredRenderPass.hpp"
+#include "Rendering/RenderPasses/OffscreenRenderPass.hpp"
 
 #include "Rendering/ImageEffects/ImageEffect.hpp"
 #include "Rendering/ImageEffects/ColorTintImageEffect.hpp"

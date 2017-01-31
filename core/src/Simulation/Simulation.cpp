@@ -162,6 +162,10 @@ void Simulation::setScene( SharedPointer< Node > const &scene )
 		FetchCameras fetchCameras;
 		_scene->perform( fetchCameras );
         fetchCameras.forEachCamera( [&]( Camera *camera ) {
+			if ( Camera::getMainCamera() == nullptr ) {
+				Camera::setMainCamera( camera );
+			}
+			
             _cameras.push_back( camera );
         });
 

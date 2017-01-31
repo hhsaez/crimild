@@ -43,6 +43,15 @@ namespace crimild {
 
 	class Camera : public Group {
 	public:
+		static Camera *getMainCamera( void ) { return _mainCamera; }
+
+		static void setMainCamera( Camera *camera ) { _mainCamera = camera; }
+		static void setMainCamera( SharedPointer< Camera > const &camera ) { _mainCamera = crimild::get_ptr( camera ); }
+
+	private:
+		static Camera *_mainCamera;
+		
+	public:
 		explicit Camera( void );
 		Camera( float fov, float aspect, float near, float far );
 		virtual ~Camera( void );

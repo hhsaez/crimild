@@ -145,7 +145,7 @@ namespace crimild {
             
         void loadScene( std::string filename, SharedPointer< SceneBuilder > const &sceneBuilder = nullptr );
 
-        Camera *getMainCamera( void ) { return _cameras.size() > 0 ? _cameras.front() : nullptr; }
+        Camera *getMainCamera( void ) { return Camera::getMainCamera(); }
 		void forEachCamera( std::function< void ( Camera * ) > callback );
 
 	private:
