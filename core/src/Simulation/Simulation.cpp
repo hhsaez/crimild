@@ -187,6 +187,10 @@ void Simulation::setScene( SharedPointer< Node > const &scene )
         // start all components
         _scene->perform( StartComponents() );
     }
+	else {
+		// invalid scene. reset camera
+		Camera::setMainCamera( nullptr );
+	}
     
     MessageQueue::getInstance()->clear();
     

@@ -38,24 +38,6 @@ QuadPrimitive::QuadPrimitive( float width, float height, const VertexFormat &for
     auto vbo = crimild::alloc< VertexBufferObject >( format, 4, nullptr );
     float *vertex = vbo->data();
     
-    // top left vertex
-    vertex[ format.getPositionsOffset() + 0 ] = -halfWidth;
-    vertex[ format.getPositionsOffset() + 1 ] = +halfHeigh;
-    vertex[ format.getPositionsOffset() + 2 ] = 0.0f;
-    
-    if ( format.hasNormals() ) {
-        vertex[ format.getNormalsOffset() + 0 ] = 0.0f;
-        vertex[ format.getNormalsOffset() + 1 ] = 0.0f;
-        vertex[ format.getNormalsOffset() + 2 ] = 1.0f;
-    }
-    
-    if ( format.hasTextureCoords() ) {
-        vertex[ format.getTextureCoordsOffset() + 0 ] = textureOffset[ 0 ] + textureScale[ 0 ] * 0.0f;
-        vertex[ format.getTextureCoordsOffset() + 1 ] = textureOffset[ 1 ] + textureScale[ 1 ] * 0.0f;
-    }
-    
-    vertex += format.getVertexSize();
-    
     // bottom left vertex
     vertex[ format.getPositionsOffset() + 0 ] = -halfWidth;
     vertex[ format.getPositionsOffset() + 1 ] = -halfHeigh;
@@ -92,6 +74,24 @@ QuadPrimitive::QuadPrimitive( float width, float height, const VertexFormat &for
     
     vertex += format.getVertexSize();
     
+    // top left vertex
+    vertex[ format.getPositionsOffset() + 0 ] = -halfWidth;
+    vertex[ format.getPositionsOffset() + 1 ] = +halfHeigh;
+    vertex[ format.getPositionsOffset() + 2 ] = 0.0f;
+    
+    if ( format.hasNormals() ) {
+        vertex[ format.getNormalsOffset() + 0 ] = 0.0f;
+        vertex[ format.getNormalsOffset() + 1 ] = 0.0f;
+        vertex[ format.getNormalsOffset() + 2 ] = 1.0f;
+    }
+    
+    if ( format.hasTextureCoords() ) {
+        vertex[ format.getTextureCoordsOffset() + 0 ] = textureOffset[ 0 ] + textureScale[ 0 ] * 0.0f;
+        vertex[ format.getTextureCoordsOffset() + 1 ] = textureOffset[ 1 ] + textureScale[ 1 ] * 0.0f;
+    }
+    
+    vertex += format.getVertexSize();
+    
     // top right vertex
     vertex[ format.getPositionsOffset() + 0 ] = +halfWidth;
     vertex[ format.getPositionsOffset() + 1 ] = +halfHeigh;
@@ -112,8 +112,8 @@ QuadPrimitive::QuadPrimitive( float width, float height, const VertexFormat &for
     
     setVertexBuffer( vbo );
     
-    IndexPrecision indices[] = { 0, 1, 2, 0, 2, 3 };
-    auto ibo = crimild::alloc< IndexBufferObject >( 6, indices );
+    unsigned short indices[] = { 0, 1, 2, 3 };
+    auto ibo = crimild::alloc< IndexBufferObject >( 4, indices );
     setIndexBuffer( ibo );
 }
 
