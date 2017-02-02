@@ -188,20 +188,82 @@ const char *dof_composite_fs = R"(
     }
 )";
 
+DepthOfFieldImageEffect::DoFBlurShaderProgram::DoFBlurShaderProgram( void )
+    : ShaderProgram( OpenGLUtils::getVertexShaderInstance( dof_generic_vs ), OpenGLUtils::getFragmentShaderInstance( dof_blur_fs ) )
+{
+    registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
+    registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
+    registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM, "uColorMap" );
+    registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::DEPTH_MAP_UNIFORM, "uDepthMap" );
+
+    _uOrientation = crimild::alloc< IntUniform >( "uOrientation", 0 );
+    _uTexelSize = crimild::alloc< Vector2fUniform >( "uTexelSize", Vector2f::ZERO );
+    _uBlurCoefficient = crimild::alloc< FloatUniform >( "uBlurCoefficient", 0.0f );
+    _uFocusDistance = crimild::alloc< FloatUniform >( "uFocusDistance", 0.0f );
+    _uPPM = crimild::alloc< FloatUniform >( "uPPM", 0.0f );
+    _uNear = crimild::alloc< FloatUniform >( "uNear", 0.0f );
+    _uFar = crimild::alloc< FloatUniform >( "uFar", 0.0f );
+
+    attachUniform( _uTexelSize );
+    attachUniform( _uOrientation );
+    attachUniform( _uBlurCoefficient );
+    attachUniform( _uFocusDistance );
+    attachUniform( _uNear );
+    attachUniform( _uFar );
+    attachUniform( _uPPM );
+}
+
+DepthOfFieldImageEffect::DoFBlurShaderProgram::~DoFBlurShaderProgram( void )
+{
+    
+}
+
+DepthOfFieldImageEffect::DoFCompositeShaderProgram::DoFCompositeShaderProgram( void )
+    : ShaderProgram( OpenGLUtils::getVertexShaderInstance( dof_generic_vs ), OpenGLUtils::getFragmentShaderInstance( dof_composite_fs ) )
+{
+    registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
+    registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
+    registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM, "uColorMap" );
+    registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::DEPTH_MAP_UNIFORM, "uDepthMap" );
+    
+    registerLocation( crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, "uBlurMap" ) );
+
+    _uBlurCoefficient = crimild::alloc< FloatUniform >( "uBlurCoefficient", 0.0f );
+    _uFocusDistance = crimild::alloc< FloatUniform >( "uFocusDistance", 0.0f );
+    _uPPM = crimild::alloc< FloatUniform >( "uPPM", 0.0f );
+    _uNear = crimild::alloc< FloatUniform >( "uNear", 0.0f );
+    _uFar = crimild::alloc< FloatUniform >( "uFar", 0.0f );
+
+    attachUniform( _uBlurCoefficient );
+    attachUniform( _uFocusDistance );
+    attachUniform( _uNear );
+    attachUniform( _uFar );
+    attachUniform( _uPPM );
+}
+
+DepthOfFieldImageEffect::DoFCompositeShaderProgram::~DoFCompositeShaderProgram( void )
+{
+    
+}
+
 DepthOfFieldImageEffect::DepthOfFieldImageEffect( void )
 	: DepthOfFieldImageEffect( 1024 )
 {
-
+    
 }
 
 DepthOfFieldImageEffect::DepthOfFieldImageEffect( int resolution )
     : _resolution( resolution ),
-	  _focalDistance( crimild::alloc< FloatUniform >( "uFocalDistance", 50.0f ) ),
-      _fStop( crimild::alloc< FloatUniform >( "uFStop", 2.8f ) ),
+      _focalDistance( crimild::alloc< FloatUniform >( "uFocalDistance", 50.0f ) ),
       _focusDistance( crimild::alloc< FloatUniform >( "uFocusDistance", 10000.0f ) ),
+      _fStop( crimild::alloc< FloatUniform >( "uFStop", 2.8f ) ),
       _aperture( crimild::alloc< FloatUniform >( "uAperture", 35.0f ) )
 {
-
+    _auxFBOs.push_back( crimild::alloc< StandardFrameBufferObject >( resolution, resolution ) );
+    _auxFBOs.push_back( crimild::alloc< StandardFrameBufferObject >( resolution, resolution ) );
+    
+    _dofBlurProgram = crimild::alloc< DoFBlurShaderProgram >();
+    _dofCompositeProgram = crimild::alloc< DoFCompositeShaderProgram >();
 }
 
 DepthOfFieldImageEffect::~DepthOfFieldImageEffect( void )
@@ -235,98 +297,55 @@ void DepthOfFieldImageEffect::compute( Renderer *renderer, Camera *camera )
         return;
     }
 
-    auto dofBlurProgram = renderer->getShaderProgram( "dof_blur" );
-    if ( dofBlurProgram == nullptr ) {
-        auto tmp = crimild::alloc< ShaderProgram >( OpenGLUtils::getVertexShaderInstance( dof_generic_vs ), OpenGLUtils::getFragmentShaderInstance( dof_blur_fs ) );
-        renderer->setShaderProgram( "dof_blur", tmp );
-        dofBlurProgram = crimild::get_ptr( tmp );
-
-        dofBlurProgram->registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
-        dofBlurProgram->registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
-        
-        dofBlurProgram->registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM, "uColorMap" );
-        dofBlurProgram->registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::DEPTH_MAP_UNIFORM, "uDepthMap" );
-
-        auto uTexelSize = crimild::alloc< Vector2fUniform >( "uTexelSize", Vector2f( 1.0f / blurFBO->getWidth(), 1.0f / blurFBO->getHeight() ) );
-        AssetManager::getInstance()->set( "dof/uniforms/uTexelSize", uTexelSize );
-        dofBlurProgram->attachUniform( uTexelSize );
-
-        auto uOrientation = crimild::alloc< IntUniform >( "uOrientation", 0 );
-        AssetManager::getInstance()->set( "dof/uniforms/uOrientation", uOrientation );
-        dofBlurProgram->attachUniform( uOrientation );
-
-        float f = getFocalDistance();
-        float Ds = getFocusDistance();
-        float ms = f / ( Ds - f );
-        float N = getFStop();
-        float PPM = Numericf::sqrt( ( getResolution() * getResolution() ) + ( getResolution() * getResolution() ) ) / getAperture();
-        float b = f * ms / N;
-
-        auto uBlurCoefficient = crimild::alloc< FloatUniform >( "uBlurCoefficient", b );
-        AssetManager::getInstance()->set( "dof/uniforms/uBlurCoefficient", uBlurCoefficient );
-        dofBlurProgram->attachUniform( uBlurCoefficient );
-
-        auto uFocusDistance = crimild::alloc< FloatUniform >( "uFocusDistance", Ds ); 
-        AssetManager::getInstance()->set( "dof/uniforms/uFocusDistance", uFocusDistance );
-        dofBlurProgram->attachUniform( uFocusDistance );
-
-        auto uNear = crimild::alloc< FloatUniform >( "uNear", 1000.0f * camera->getFrustum().getDMin() );
-        AssetManager::getInstance()->set( "dof/uniforms/uNear", uNear );
-        dofBlurProgram->attachUniform( uNear );
-
-        auto uFar = crimild::alloc< FloatUniform >( "uFar", 1000.0f * camera->getFrustum().getDMax() );
-        AssetManager::getInstance()->set( "dof/uniforms/uFar", uFar );
-        dofBlurProgram->attachUniform( uFar );
-
-        auto uPPM = crimild::alloc< FloatUniform >( "uPPM", PPM );
-        AssetManager::getInstance()->set( "dof/uniforms/uPPM", uPPM );
-        dofBlurProgram->attachUniform( uPPM );
-    }
-
-    auto fboA = renderer->getFrameBuffer( "dof/fbo/fboA" );
-    if ( fboA == nullptr ) {
-        renderer->generateAuxFBO( "dof/fbo/fboA", getResolution(), getResolution());
-        fboA = renderer->getFrameBuffer( "dof/fbo/fboA" );
-    }
-
-    auto fboB = renderer->getFrameBuffer( "dof/fbo/fboB" );
-    if ( fboB == nullptr ) {
-        renderer->generateAuxFBO( "dof/fbo/fboB", getResolution(), getResolution());
-        fboB = renderer->getFrameBuffer( "dof/fbo/fboB" );
-    }
-
-    AssetManager::getInstance()->get< IntUniform >( "dof/uniforms/uOrientation" )->setValue( 0 );
+    float f = getFocalDistance();
+    float Ds = getFocusDistance();
+    float ms = f / ( Ds - f );
+    float N = getFStop();
+    float PPM = Numericf::sqrt( ( getResolution() * getResolution() ) + ( getResolution() * getResolution() ) ) / getAperture();
+    float b = f * ms / N;
+    
+    auto fboA = getAuxFBO( 0 );
+    auto fboB = getAuxFBO( 1 );
+    
+    getBlurProgram()->setTexelSize( Vector2f( 1.0f / ( float ) getResolution(), 1.0f / ( float ) getResolution() ) );
+    getBlurProgram()->setBlurCoefficient( b );
+    getBlurProgram()->setFocusDistance( Ds );
+    getBlurProgram()->setPPM( PPM );
+    getBlurProgram()->setNear( 1000.0f * camera->getFrustum().getDMin() );
+    getBlurProgram()->setFar( 1000.0f * camera->getFrustum().getDMax() );
+    
+    getBlurProgram()->setOrientation( 0 );
 
     renderer->bindFrameBuffer( fboA );
-    renderer->bindProgram( dofBlurProgram );
-    renderer->bindTexture( dofBlurProgram->getStandardLocation( ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ), colorTarget->getTexture() );
-    renderer->bindTexture( dofBlurProgram->getStandardLocation( ShaderProgram::StandardLocation::DEPTH_MAP_UNIFORM ), depthTarget->getTexture() );
+    renderer->bindProgram( getBlurProgram() );
+    renderer->bindTexture( getBlurProgram()->getStandardLocation( ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ), colorTarget->getTexture() );
+    renderer->bindTexture( getBlurProgram()->getStandardLocation( ShaderProgram::StandardLocation::DEPTH_MAP_UNIFORM ), depthTarget->getTexture() );
         
-    renderer->drawScreenPrimitive( dofBlurProgram );
+    renderer->drawScreenPrimitive( getBlurProgram() );
         
-    renderer->unbindTexture( dofBlurProgram->getStandardLocation( ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ), colorTarget->getTexture() );
-    renderer->unbindTexture( dofBlurProgram->getStandardLocation( ShaderProgram::StandardLocation::DEPTH_MAP_UNIFORM ), depthTarget->getTexture() );
-    renderer->unbindProgram( dofBlurProgram );
+    renderer->unbindTexture( getBlurProgram()->getStandardLocation( ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ), colorTarget->getTexture() );
+    renderer->unbindTexture( getBlurProgram()->getStandardLocation( ShaderProgram::StandardLocation::DEPTH_MAP_UNIFORM ), depthTarget->getTexture() );
+    renderer->unbindProgram( getBlurProgram() );
     renderer->unbindFrameBuffer( fboA );
 
-    auto aColorTarget = fboA->getRenderTargets().get( Renderer::FBO_AUX_COLOR_TARGET_NAME );
+    auto aColorTarget = fboA->getRenderTargets().get( RenderTarget::RENDER_TARGET_NAME_COLOR );
     if ( aColorTarget == nullptr ) {
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot get color target from scene" );
         return;
     }
 
-    AssetManager::getInstance()->get< IntUniform >( "dof/uniforms/uOrientation" )->setValue( 1 );
-
+    getBlurProgram()->setOrientation( 0 );
+    
     renderer->bindFrameBuffer( fboB );
-    renderer->bindProgram( dofBlurProgram );
-    renderer->bindTexture( dofBlurProgram->getStandardLocation( ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ), aColorTarget->getTexture() );
-    renderer->bindTexture( dofBlurProgram->getStandardLocation( ShaderProgram::StandardLocation::DEPTH_MAP_UNIFORM ), depthTarget->getTexture() );
+    renderer->bindProgram( getBlurProgram() );
+    renderer->bindTexture( getBlurProgram()->getStandardLocation( ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ), aColorTarget->getTexture() );
+    renderer->bindTexture( getBlurProgram()->getStandardLocation( ShaderProgram::StandardLocation::DEPTH_MAP_UNIFORM ), depthTarget->getTexture() );
         
-    renderer->drawScreenPrimitive( dofBlurProgram );
+    renderer->drawScreenPrimitive( getBlurProgram() );
         
-    renderer->unbindTexture( dofBlurProgram->getStandardLocation( ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ), aColorTarget->getTexture() );
-    renderer->unbindTexture( dofBlurProgram->getStandardLocation( ShaderProgram::StandardLocation::DEPTH_MAP_UNIFORM ), depthTarget->getTexture() );
-    renderer->unbindProgram( dofBlurProgram );
+    renderer->unbindTexture( getBlurProgram()->getStandardLocation( ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ), aColorTarget->getTexture() );
+    renderer->unbindTexture( getBlurProgram()->getStandardLocation( ShaderProgram::StandardLocation::DEPTH_MAP_UNIFORM ), depthTarget->getTexture() );
+    renderer->unbindProgram( getBlurProgram() );
     renderer->unbindFrameBuffer( fboB );   
 }
 
@@ -350,69 +369,41 @@ void DepthOfFieldImageEffect::apply( crimild::Renderer *renderer, crimild::Camer
         return;
     }
 
-    auto blurFBO = renderer->getFrameBuffer( "dof/fbo/fboB" );
+    auto blurFBO = getAuxFBO( 1 );
     if ( blurFBO == nullptr ) {
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot find FBO named 'dof/fbo/fboB'" );
         return;
     }
 
-    auto blurTarget = blurFBO->getRenderTargets().get( Renderer::FBO_AUX_COLOR_TARGET_NAME );
-    if ( blurTarget->getTexture() == nullptr ) {
+    auto blurTarget = blurFBO->getRenderTargets().get( RenderTarget::RENDER_TARGET_NAME_COLOR );
+    if ( blurTarget->getTexture() == nullptr || blurTarget->getTexture()->getCatalog() == nullptr ) {
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "Blur texture is null" );
         return;
     }
 
-    auto program = renderer->getShaderProgram( "dof_composite" );
-    if ( program == nullptr ) {
-        auto tmp = crimild::alloc< ShaderProgram >( OpenGLUtils::getVertexShaderInstance( dof_generic_vs ), OpenGLUtils::getFragmentShaderInstance( dof_composite_fs ) );
-        renderer->setShaderProgram( "dof_composite", tmp );
-        program = crimild::get_ptr( tmp );
-
-        program->registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
-        program->registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
-        
-        program->registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM, "uColorMap" );
-        program->registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::DEPTH_MAP_UNIFORM, "uDepthMap" );
-        program->registerLocation( crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, "uBlurMap" ) );
-        
-        float f = getFocalDistance();
-        float Ds = getFocusDistance();
-        float ms = f / ( Ds - f );
-        float N = getFStop();
-		float PPM = Numericf::sqrt( ( getResolution() * getResolution() ) + ( getResolution() * getResolution() ) ) / getAperture();
-		float b = f * ms / N;
-
-        auto uBlurCoefficient = crimild::alloc< FloatUniform >( "uBlurCoefficient", b );
-        AssetManager::getInstance()->set( "dof/uniforms/uBlurCoefficient", uBlurCoefficient );
-        program->attachUniform( uBlurCoefficient );
-
-        auto uFocusDistance = crimild::alloc< FloatUniform >( "uFocusDistance", Ds );
-        AssetManager::getInstance()->set( "dof/uniforms/uFocusDistance", uFocusDistance );
-        program->attachUniform( uFocusDistance );
-
-        auto uNear = crimild::alloc< FloatUniform >( "uNear", 1000.0f * camera->getFrustum().getDMin() );
-        AssetManager::getInstance()->set( "dof/uniforms/uNear", uNear );
-        program->attachUniform( uNear );
-
-        auto uFar = crimild::alloc< FloatUniform >( "uFar", 1000.0f * camera->getFrustum().getDMax() );
-        AssetManager::getInstance()->set( "dof/uniforms/uFar", uFar );
-        program->attachUniform( uFar );
-
-        auto uPPM = crimild::alloc< FloatUniform >( "uPPM", PPM );
-        AssetManager::getInstance()->set( "dof/uniforms/uPPM", uPPM );
-        program->attachUniform( uPPM );
-    }
+    float f = getFocalDistance();
+    float Ds = getFocusDistance();
+    float ms = f / ( Ds - f );
+    float N = getFStop();
+    float PPM = Numericf::sqrt( ( getResolution() * getResolution() ) + ( getResolution() * getResolution() ) ) / getAperture();
+    float b = f * ms / N;
     
-    renderer->bindProgram( program );
-    renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ), colorTarget->getTexture() );
-    renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::DEPTH_MAP_UNIFORM ), depthTarget->getTexture() );
-    renderer->bindTexture( program->getLocation( "uBlurMap" ), blurTarget->getTexture() );
+    getCompositeProgram()->setBlurCoefficient( b );
+    getCompositeProgram()->setFocusDistance( Ds );
+    getCompositeProgram()->setPPM( PPM );
+    getCompositeProgram()->setNear( 1000.0f * camera->getFrustum().getDMin() );
+    getCompositeProgram()->setFar( 1000.0f * camera->getFrustum().getDMax() );
 
-    renderer->drawScreenPrimitive( program );
+    renderer->bindProgram( getCompositeProgram() );
+    renderer->bindTexture( getCompositeProgram()->getStandardLocation( ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ), colorTarget->getTexture() );
+    renderer->bindTexture( getCompositeProgram()->getStandardLocation( ShaderProgram::StandardLocation::DEPTH_MAP_UNIFORM ), depthTarget->getTexture() );
+    renderer->bindTexture( getCompositeProgram()->getLocation( "uBlurMap" ), blurTarget->getTexture() );
 
-    renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ), colorTarget->getTexture() );
-    renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::DEPTH_MAP_UNIFORM ), depthTarget->getTexture() );
-    renderer->unbindTexture( program->getLocation( "uBlurMap" ), blurTarget->getTexture() );
-    renderer->unbindProgram( program );
+    renderer->drawScreenPrimitive( getCompositeProgram() );
+
+    renderer->unbindTexture( getCompositeProgram()->getStandardLocation( ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ), colorTarget->getTexture() );
+    renderer->unbindTexture( getCompositeProgram()->getStandardLocation( ShaderProgram::StandardLocation::DEPTH_MAP_UNIFORM ), depthTarget->getTexture() );
+    renderer->unbindTexture( getCompositeProgram()->getLocation( "uBlurMap" ), blurTarget->getTexture() );
+    renderer->unbindProgram( getCompositeProgram() );
 }
 

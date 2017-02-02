@@ -122,6 +122,8 @@ FrameBufferObject *RenderPass::getSBuffer( Renderer *renderer )
     int width = renderer->getScreenBuffer()->getWidth();
     int height = renderer->getScreenBuffer()->getHeight();
     
+    Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Creating S_BUFFER with size ", width, "x", height );
+    
     auto sBuffer = crimild::alloc< FrameBufferObject >( width, height );
 #ifdef CRIMILD_PLATFORM_DESKTOP
     sBuffer->getRenderTargets().add( S_BUFFER_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER_AND_TEXTURE, width, height, true ) );
@@ -144,6 +146,8 @@ FrameBufferObject *RenderPass::getDBuffer( Renderer *renderer )
     
     int width = renderer->getScreenBuffer()->getWidth();
     int height = renderer->getScreenBuffer()->getHeight();
+    
+    Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Creating D_BUFFER with size ", width, "x", height );
     
     auto dBuffer = crimild::alloc< FrameBufferObject >( width, height );
 #ifdef CRIMILD_PLATFORM_DESKTOP
