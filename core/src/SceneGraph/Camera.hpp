@@ -45,7 +45,14 @@ namespace crimild {
 	public:
 		static Camera *getMainCamera( void ) { return _mainCamera; }
 
+		/**
+		   \remarks Internal use only
+		 */
 		static void setMainCamera( Camera *camera ) { _mainCamera = camera; }
+
+		/**
+		   remarks Internal use only
+		 */
 		static void setMainCamera( SharedPointer< Camera > const &camera ) { _mainCamera = crimild::get_ptr( camera ); }
 
 	private:
@@ -55,7 +62,14 @@ namespace crimild {
 		explicit Camera( void );
 		Camera( float fov, float aspect, float near, float far );
 		virtual ~Camera( void );
-        
+
+		bool isMainCamera( void ) const { return _isMainCamera; }
+		void setIsMainCamera( bool value ) { _isMainCamera = value; }
+
+	private:
+		bool _isMainCamera = false;
+
+    public:    
         void setFrustum( const Frustumf &f );
         const Frustumf &getFrustum( void ) const { return _frustum; }
 

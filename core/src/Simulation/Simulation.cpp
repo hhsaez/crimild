@@ -166,7 +166,7 @@ void Simulation::setScene( SharedPointer< Node > const &scene )
 		FetchCameras fetchCameras;
 		_scene->perform( fetchCameras );
         fetchCameras.forEachCamera( [&]( Camera *camera ) {
-			if ( Camera::getMainCamera() == nullptr ) {
+			if ( Camera::getMainCamera() == nullptr || camera->isMainCamera() ) {
 				Camera::setMainCamera( camera );
 			}
 			
@@ -186,6 +186,10 @@ void Simulation::setScene( SharedPointer< Node > const &scene )
         
         // start all components
         _scene->perform( StartComponents() );
+
+		// update state one more time after starting components
+		_scene->perform( UpdateWorldState() );
+		_scene->perform( UpdateRenderState() );
     }
 	else {
 		// invalid scene. reset camera
