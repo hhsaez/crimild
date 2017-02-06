@@ -68,6 +68,7 @@ Simulation::Simulation( std::string name, SettingsPtr const &settings )
 
 Simulation::~Simulation( void )
 {
+    stop();
     stopSystems();
 }
 
@@ -96,9 +97,12 @@ void Simulation::stop( void )
     // stop all unfinished tasks first
     _jobScheduler.stop();
 
+    // clear all messages
+    MessageQueue::getInstance()->clear();
+    
     setScene( nullptr );
     
-    _assetManager.clear();
+    _assetManager.clear( true );
 }
 
 int Simulation::run( void )
@@ -162,6 +166,10 @@ void Simulation::setScene( SharedPointer< Node > const &scene )
 		FetchCameras fetchCameras;
 		_scene->perform( fetchCameras );
         fetchCameras.forEachCamera( [&]( Camera *camera ) {
+			if ( Camera::getMainCamera() == nullptr || camera->isMainCamera() ) {
+				Camera::setMainCamera( camera );
+			}
+			
             _cameras.push_back( camera );
         });
 
@@ -178,7 +186,15 @@ void Simulation::setScene( SharedPointer< Node > const &scene )
         
         // start all components
         _scene->perform( StartComponents() );
+
+		// update state one more time after starting components
+		_scene->perform( UpdateWorldState() );
+		_scene->perform( UpdateRenderState() );
     }
+	else {
+		// invalid scene. reset camera
+		Camera::setMainCamera( nullptr );
+	}
     
     MessageQueue::getInstance()->clear();
     

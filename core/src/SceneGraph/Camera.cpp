@@ -31,6 +31,8 @@
 
 using namespace crimild;
 
+Camera *Camera::_mainCamera = nullptr;
+
 Camera::Camera( void )
 	: Camera( 60.0, 4.0f / 3.0f, 0.1f, 1000.0f )
 {
@@ -50,7 +52,9 @@ Camera::Camera( float fov, float aspect, float near, float far )
 
 Camera::~Camera( void )
 {
-
+	if ( getMainCamera() == this ) {
+		setMainCamera( nullptr );
+	}
 }
 
 void Camera::setFrustum( const Frustumf &f )

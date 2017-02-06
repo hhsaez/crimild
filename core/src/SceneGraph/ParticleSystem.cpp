@@ -37,6 +37,7 @@
 #include "Simulation/AssetManager.hpp"
 #include "Mathematics/Interpolation.hpp"
 #include "Mathematics/Random.hpp"
+#include "Concurrency/Async.hpp"
 
 using namespace crimild;
 
@@ -75,9 +76,10 @@ void CylinderParticleEmitter::evaluate( Vector3f &position, Vector3f &velocity )
 {
     float u = Random::generate< float >() * _height;
     float t = Random::generate< float >() * Numericf::TWO_PI;
+    float r = Random::generate< float >( 0.1f, 1.0f ) * _radius;
     
-    position[ 0 ] = _radius * Numericf::cos( t );
-    position[ 2 ] = _radius * Numericf::sin( t );
+    position[ 0 ] = r * Numericf::cos( t );
+    position[ 2 ] = r * Numericf::sin( t );
     position[ 1 ] = u;
 
     velocity = Vector3f( 0.0f, 1.0f, 0.0f );
@@ -131,8 +133,11 @@ void ParticleSystem::generate( void )
     for ( auto &p : _particles ) {
         resetParticle( p );
         if ( shouldPreComputeParticles() ) {
-            p.time = Random::generate< float >();
-            p.position += p.time * getParticleLifetime() * p.velocity;
+            p.time = Random::generate< float >( 0.0f, 1.0f );
+            p.position += p.time * getParticleSpeed() * getParticleLifetime() * p.velocity;
+
+            //}
+            
         }
     }
 
@@ -151,7 +156,13 @@ void ParticleSystem::resetParticle( ParticleSystem::Particle &p )
     getEmitter()->generate( p.position, p.velocity );
 
     if ( useWorldSpace() ) {
-        getWorld().applyInverseToVector( p.velocity, p.velocity );
+        Node *parent = this;
+        if ( hasParent() ) {
+            parent = getParent();
+        }
+
+        parent->getWorld().applyToPoint( p.position, p.position );
+        parent->getWorld().applyToVector( p.velocity, p.velocity );
     }
 }
 
@@ -185,10 +196,16 @@ void ParticleSystem::updateParticles( const Clock &c )
         float size;
         Interpolation::linear( getParticleStartSize(), getParticleEndSize(), _particles[ i ].time, size );
 
-        vbo->setPositionAt( i, _particles[ i ].position );
+        Vector3f pos;
+        getParent()->getWorld().applyInverseToPoint( _particles[ i ].position, pos );
+
+        vbo->setPositionAt( i, pos );
         vbo->setTextureCoordAt( i, Vector2f( size, 0.0f ) );
         vbo->setRGBAColorAt( i, color );
     }
-    _primitive->setVertexBuffer( vbo );
+
+    crimild::concurrency::sync_frame( [this, vbo] {
+        _primitive->setVertexBuffer( vbo );
+    });
 }
 

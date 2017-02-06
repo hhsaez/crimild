@@ -121,7 +121,7 @@ void FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
         glBindFramebuffer( GL_FRAMEBUFFER, framebufferId );
         
         int colorAttachmentOffset = 0;
-        fbo->getRenderTargets().each( [&]( std::string, RenderTarget *target ) {
+        fbo->getRenderTargets().each( [&]( std::string rtName, RenderTarget *target ) {
             CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
             
             int targetWidth = target->getWidth();
@@ -185,11 +185,12 @@ void FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
                 if ( target->getOutput() == RenderTarget::Output::TEXTURE || target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
                     GLuint textureId;
                     glGenTextures( 1, &textureId );
+                    target->getTexture()->setName( rtName );
                     target->getTexture()->setCatalogInfo( getRenderer()->getTextureCatalog(), textureId );
                     
                     glBindTexture( GL_TEXTURE_2D, target->getTexture()->getCatalogId() );
                     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-                    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+                    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
                     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
                     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
                     glTexImage2D( GL_TEXTURE_2D, 0, internalFormat, targetWidth, targetHeight, 0, textureFormat, textureType, 0 );
@@ -272,11 +273,12 @@ void FrameBufferObjectCatalog::unload( FrameBufferObject *fbo )
             int targetId = target->getId();
             if ( targetId > 0 ) {
                 _renderbufferIdsToDelete.push_back( targetId );
-                if ( target->getOutput() == RenderTarget::Output::TEXTURE || target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
-                    int textureId = target->getTexture()->getCatalogId();
-                    _textureIdsToDelete.push_back( textureId );
-                    target->getTexture()->setCatalogInfo( nullptr, 0 );
-                }
+            }
+
+            if ( target->getOutput() == RenderTarget::Output::TEXTURE || target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
+                int textureId = target->getTexture()->getCatalogId();
+                _textureIdsToDelete.push_back( textureId );
+                target->getTexture()->setCatalogInfo( nullptr, 0 );
             }
         });
         

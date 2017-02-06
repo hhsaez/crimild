@@ -40,7 +40,12 @@ namespace crimild {
 		virtual void forEachNode( std::function< void( Node * ) > callback ) override;
         
         Node *getCurrentNode( void );
+        
+        int getCurrentNodeIndex( void ) const { return _currentIndex; }
+        void setCurrentNodeIndex( int index ) { _currentIndex = index; }
+        
         void selectNextNode( void );
+        void selectPrevNode( void );
         
     private:
         int _currentIndex = 0;

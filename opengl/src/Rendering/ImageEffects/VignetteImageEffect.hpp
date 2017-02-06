@@ -41,16 +41,19 @@ namespace crimild {
             
             virtual void compute( crimild::Renderer *renderer, Camera *camera ) override;
             virtual void apply( crimild::Renderer *renderer, crimild::Camera *camera ) override;
+
+            ShaderProgram *getProgram( void ) { return crimild::get_ptr( _program ); }
             
-            float getInnerCutoff( void ) { return _innerCutoff; }
-            void setInnerCutoff( float value ) { _innerCutoff = value; }
+            float getInnerCutoff( void ) { return _innerCutoff->getValue(); }
+            void setInnerCutoff( float value ) { _innerCutoff->setValue( value ); }
             
-            float getOuterCutoff( void ) { return _outerCutoff; }
-            void setOuterCutoff( float value ) { _outerCutoff = value; }
+            float getOuterCutoff( void ) { return _outerCutoff->getValue(); }
+            void setOuterCutoff( float value ) { _outerCutoff->setValue( value ); }
             
         private:
-            float _innerCutoff;
-            float _outerCutoff;
+            SharedPointer< ShaderProgram > _program;
+            SharedPointer< FloatUniform > _innerCutoff;
+            SharedPointer< FloatUniform > _outerCutoff;
         };
         
     }

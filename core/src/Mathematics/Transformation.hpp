@@ -267,6 +267,25 @@ namespace crimild {
 			return result;
 		}
 
+		/**
+			\brief Transforms the world UP vector (usually Y-axis) into local space
+		*/
+		Vector3Impl computeWorldUp( void ) const
+		{
+			Vector3Impl result;
+			applyInverseToVector( Vector3Impl::UNIT_Y, result );
+			return result;
+		}
+
+		/**
+			\brief Transforms the world UP vector (usually Y-axis) into local space
+		*/
+		Vector3Impl computeWorldUp( Vector3Impl &result ) const
+		{
+			applyInverseToVector( Vector3Impl::UNIT_Y, result );
+			return result;
+		}
+
 		Vector3Impl computeRight( void ) const
 		{
 			Vector3Impl result;

@@ -65,7 +65,7 @@ namespace crimild {
     private:
         void updateBehaviors( Node *scene );
         void updateWorldState( Node *scene );
-        void computeRenderQueue( Node *scene, Camera *camera );
+        void computeRenderQueues( Node *scene );
 
 	private:
 		double _accumulator = 0.0;

@@ -43,3 +43,11 @@ third-party/glew-1.13.0
 /tools/fontgen/*.tga
 /tools/fontgen/*.txt
 /doc/documentation
+tools/fontgen/Debug/
+
+# visual studio files
+*.vcxproj
+*.vcxproj.filters
+*.sln
+*.dir/
+

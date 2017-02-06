@@ -29,6 +29,9 @@
 
 using namespace crimild;
 
+constexpr const char *RenderTarget::RENDER_TARGET_NAME_COLOR;
+constexpr const char *RenderTarget::RENDER_TARGET_NAME_DEPTH;
+
 RenderTarget::RenderTarget( RenderTarget::Type type, RenderTarget::Output output, int width, int height )
     : RenderTarget( type, output, width, height, false )
 {
@@ -67,5 +70,21 @@ void FrameBufferObject::resize( int width, int height )
 {
     _width = width;
     _height = height;
+}
+
+StandardFrameBufferObject::StandardFrameBufferObject( int width, int height )
+	: FrameBufferObject( width, height )
+{
+#ifdef CRIMILD_PLATFORM_DESKTOP
+    getRenderTargets().add( RenderTarget::RENDER_TARGET_NAME_DEPTH, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_32, RenderTarget::Output::RENDER_AND_TEXTURE, width, height, true ) );
+#else
+    getRenderTargets().add( RenderTarget::RENDER_TARGET_NAME_DEPTH, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
+#endif
+    getRenderTargets().add( RenderTarget::RENDER_TARGET_NAME_COLOR, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
+}
+
+StandardFrameBufferObject::~StandardFrameBufferObject( void )
+{
+
 }
 

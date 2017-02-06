@@ -49,7 +49,13 @@ namespace crimild {
 template<>
 Texture *AssetManager::get< Texture >( std::string name )
 {
-    auto texture = static_cast< Texture * >( crimild::get_ptr( _assets[ name ] ) );
+    Texture *texture = nullptr;
+    
+    {
+        ScopedLock lock( _mutex );
+        texture = static_cast< Texture * >( crimild::get_ptr( _assets[ name ] ) );
+    }
+    
 	if ( texture == nullptr && ( StringUtils::getFileExtension( name ) == ".tga" ) ) {
 		auto image = crimild::alloc< ImageTGA >( FileSystem::getInstance().pathForResource( name ) );
 		if ( image != nullptr ) {

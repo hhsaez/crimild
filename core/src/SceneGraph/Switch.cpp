@@ -60,6 +60,15 @@ void Switch::selectNextNode( void )
     _currentIndex = ( _currentIndex + 1 ) % getNodeCount();
 }
 
+void Switch::selectPrevNode( void )
+{
+    if ( !hasNodes() ) {
+        return;
+    }
+    
+    _currentIndex = ( _currentIndex + getNodeCount() - 1 ) % getNodeCount();
+}
+
 Node *Switch::getCurrentNode( void )
 {
     return getNodeAt( _currentIndex );

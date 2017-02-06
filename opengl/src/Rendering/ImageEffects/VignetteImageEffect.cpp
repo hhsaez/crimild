@@ -71,7 +71,18 @@ const char *vignette_apply_fs = R"(
 
 VignetteImageEffect::VignetteImageEffect( void )
 {
+    _program = crimild::alloc< ShaderProgram >( OpenGLUtils::getVertexShaderInstance( vignette_apply_vs ), OpenGLUtils::getFragmentShaderInstance( vignette_apply_fs ) );
 
+    _program->registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
+    _program->registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
+    
+    _program->registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM, "uColorMap" );
+
+    _innerCutoff = crimild::alloc< FloatUniform >( "uInnerVignetting", 0.0f );
+    _program->attachUniform( _innerCutoff );
+
+    _outerCutoff = crimild::alloc< FloatUniform >( "uOuterVignetting", 0.0f );
+    _program->attachUniform( _outerCutoff );
 }
 
 VignetteImageEffect::~VignetteImageEffect( void )
@@ -93,27 +104,12 @@ void VignetteImageEffect::apply( crimild::Renderer *renderer, crimild::Camera * 
         return;
     }
 
-    auto program = renderer->getShaderProgram( "shaders/vignette" );
-    if ( program == nullptr ) {
-        auto tmp = crimild::alloc< ShaderProgram >( OpenGLUtils::getVertexShaderInstance( vignette_apply_vs ), OpenGLUtils::getFragmentShaderInstance( vignette_apply_fs ) );
-        renderer->setShaderProgram( "shaders/vignette", tmp );
-        program = crimild::get_ptr( tmp );
-
-        program->registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
-        program->registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
-        
-        program->registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM, "uColorMap" );
-        
-        program->attachUniform( crimild::alloc< FloatUniform >( "uInnerVignetting", _innerCutoff ) );
-        program->attachUniform( crimild::alloc< FloatUniform >( "uOuterVignetting", _outerCutoff ) );
-    }
-
-    renderer->bindProgram( program );
-    renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ), color->getTexture() );
+    renderer->bindProgram( getProgram() );
+    renderer->bindTexture( getProgram()->getStandardLocation( ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ), color->getTexture() );
     
-    renderer->drawScreenPrimitive( program );
+    renderer->drawScreenPrimitive( getProgram() );
 
-    renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ), color->getTexture() );
-    renderer->unbindProgram( program );
+    renderer->unbindTexture( getProgram()->getStandardLocation( ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ), color->getTexture() );
+    renderer->unbindProgram( getProgram() );
 }
 

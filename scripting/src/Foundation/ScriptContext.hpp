@@ -54,6 +54,11 @@ namespace crimild {
             void setPrefix( std::string prefix ) { _prefix = prefix; }
             
             ScriptContext *getContext( void ) { return _context; }
+
+			ScriptEvaluator getChildEvaluator( std::string childName )
+			{
+				return ScriptEvaluator( getContext(), getPrefix() + "." + childName );
+			}
             
         private:
             ScriptContext *_context = nullptr;
@@ -321,6 +326,13 @@ namespace crimild {
                 result.rotate().fromAxisAngle( Vector3f( axisAngle[ 0 ], axisAngle[ 1 ], axisAngle[ 2 ] ), Numericf::DEG_TO_RAD * axisAngle[ 3 ] );
                 return true;
             }
+
+			Vector3f euler;
+			if ( getPropValue( name + ".rotate_euler", euler ) ) {
+				euler = Numericf::DEG_TO_RAD * euler;
+				result.rotate().fromEulerAngles( euler[ 0 ], euler[ 1 ], euler[ 2 ] );
+				return true;
+			}
             
             if ( getPropValue( name + ".rotate_q", result.rotate() ) ) {
                 return true;

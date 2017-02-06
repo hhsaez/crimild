@@ -37,12 +37,17 @@
 #include <memory>
 #include <map>
 #include <string>
+#include <mutex>
 
 namespace crimild {
 
     class Texture;
 
     class AssetManager : public NonCopyable, public DynamicSingleton< AssetManager > {
+    private:
+        using Mutex = std::mutex;
+        using ScopedLock = std::lock_guard< Mutex >;
+        
     public:
         static constexpr const char *FONT_DEFAULT = "fonts/default";
         
@@ -52,6 +57,8 @@ namespace crimild {
 
         void set( std::string name, SharedPointer< SharedObject > const &asset, bool isPersistent = false )
         {
+            ScopedLock lock( _mutex );
+            
             if ( isPersistent ) {
                 _persistentAssets[ name ] = asset;
             }
@@ -63,6 +70,8 @@ namespace crimild {
         template< class T >
         T *get( std::string name )
         {
+            ScopedLock lock( _mutex );
+            
             auto &asset = _assets[ name ];
             if ( asset == nullptr ) {
                 asset = _persistentAssets[ name ];
@@ -74,6 +83,7 @@ namespace crimild {
         template< class T >
         SharedPointer< T > clone( std::string filename )
         {
+            // No need for lock once we get the prototype
             auto assetProto = get< T >( filename );
             assert( assetProto != nullptr && ( filename + " does not exist in Asset Manager cache" ).c_str() );
     
@@ -82,14 +92,22 @@ namespace crimild {
             return shallowCopy.getResult< T >();
         }
 
-        void clear( void )
+        void clear( bool clearAll = false )
         {
+            ScopedLock lock( _mutex );
+            
             _assets.clear();
+            
+            if ( clearAll ) {
+                _persistentAssets.clear();
+            }
         }
 
     private:
         std::map< std::string, SharedPointer< SharedObject > > _assets;
         std::map< std::string, SharedPointer< SharedObject > > _persistentAssets;
+        
+        Mutex _mutex;
     };
 
     template<>

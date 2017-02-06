@@ -46,14 +46,6 @@ namespace crimild {
     class RenderQueue;
 
     using RenderQueuePtr = SharedPointer< RenderQueue >;
-    
-    namespace messaging {
-        
-        struct RenderQueueAvailable {
-            RenderQueuePtr renderQueue;
-        };
-        
-    }
 
     class RenderQueue : public SharedObject {
     public:
@@ -112,6 +104,17 @@ namespace crimild {
     private:
         std::chrono::microseconds::rep _timestamp;
     };
+
+	using RenderQueueCollection = SharedObjectList< RenderQueue >;
+	using RenderQueueCollectionPtr = SharedPointer< RenderQueueCollection >;
+
+    namespace messaging {
+        
+        struct RenderQueueAvailable {
+			RenderQueueCollectionPtr renderQueues;
+        };
+        
+    }
     
 }
 

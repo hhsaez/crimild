@@ -100,11 +100,13 @@ Clock &Clock::operator+=( double deltaTime )
 	_deltaTime = deltaTime;
 	_accumTime += _deltaTime;
 	onTick();
+	return *this;
 }
 
 Clock &Clock::operator+=( const Clock &other )
 {
 	*this += other.getDeltaTime();
+	return *this;
 }
 
 void Clock::onTick( void )

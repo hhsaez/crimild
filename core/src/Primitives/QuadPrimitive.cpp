@@ -112,8 +112,8 @@ QuadPrimitive::QuadPrimitive( float width, float height, const VertexFormat &for
     
     setVertexBuffer( vbo );
     
-    IndexPrecision indices[] = { 0, 1, 2, 2, 3, 1 };
-    auto ibo = crimild::alloc< IndexBufferObject >( 6, indices );
+    unsigned short indices[] = { 0, 1, 2, 3 };
+    auto ibo = crimild::alloc< IndexBufferObject >( 4, indices );
     setIndexBuffer( ibo );
 }
 

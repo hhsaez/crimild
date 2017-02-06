@@ -53,28 +53,20 @@ bool RenderSystem::start( void )
 		return false;
 	}
     
-    auto self = this;
-    
-    registerMessageHandler< messaging::RenderQueueAvailable >( [&]( messaging::RenderQueueAvailable const &message ) {
-        if ( _renderQueue != nullptr ) {
-            if ( _renderQueue->getTimestamp() >= message.renderQueue->getTimestamp() ) {
-                return;
-            }
-        }
-        
-        _renderQueue = message.renderQueue;
+    registerMessageHandler< messaging::RenderQueueAvailable >( [this]( messaging::RenderQueueAvailable const &message ) {
+        _renderQueues = message.renderQueues;
     });
     
-    registerMessageHandler< messaging::SceneChanged >( [self]( messaging::SceneChanged const &message ) {
-        self->_renderQueue = nullptr;
+    registerMessageHandler< messaging::SceneChanged >( [this]( messaging::SceneChanged const &message ) {
+        _renderQueues = nullptr;
     });
     
-    registerMessageHandler< messaging::RenderNextFrame >( [self]( messaging::RenderNextFrame const &message ) {
-        self->renderFrame();
+    registerMessageHandler< messaging::RenderNextFrame >( [this]( messaging::RenderNextFrame const &message ) {
+        renderFrame();
     });
 
-    registerMessageHandler< messaging::PresentNextFrame >( [self]( messaging::PresentNextFrame const &message ) {
-        self->presentFrame();
+    registerMessageHandler< messaging::PresentNextFrame >( [this]( messaging::PresentNextFrame const &message ) {
+        presentFrame();
     });
     
 	return true;
@@ -89,7 +81,7 @@ void RenderSystem::renderFrame( void )
 		return;
 	}
 
-	auto renderQueue = _renderQueue;
+	auto renderQueues = _renderQueues;
     
 	{
 		CRIMILD_PROFILE( "Begin Render" );
@@ -101,8 +93,22 @@ void RenderSystem::renderFrame( void )
     
 	{
 		CRIMILD_PROFILE( "Render Scene" );
-		if ( renderQueue != nullptr ) {
-            renderer->render( crimild::get_ptr( renderQueue ), renderQueue->getCamera()->getRenderPass() );
+
+		if ( _renderQueues != nullptr ) {
+			RenderQueue *mainQueue = nullptr;
+			_renderQueues->each( [ this, &mainQueue, renderer ]( RenderQueue *queue, int ) {
+				// main camera is rendered last
+				if ( queue->getCamera() != Camera::getMainCamera() ) {
+					renderer->render( queue, queue->getCamera()->getRenderPass() );
+				}
+				else {
+					mainQueue = queue;
+				}
+			});
+
+			if ( mainQueue != nullptr ) {
+				renderer->render( mainQueue, mainQueue->getCamera()->getRenderPass() );
+			}
 	    }
 	}
 
@@ -139,9 +145,8 @@ void RenderSystem::stop( void )
 {
 	System::stop();
 
-    if ( _renderQueue != nullptr ) {
-        _renderQueue->reset();
-        _renderQueue = nullptr;
+    if ( _renderQueues != nullptr ) {
+        _renderQueues = nullptr;
     }
 
     unregisterMessageHandler< messaging::RenderQueueAvailable >();

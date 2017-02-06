@@ -113,6 +113,11 @@ void TextureCatalog::load( Texture *texture )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
     
+    if ( texture->getImage() == nullptr ) {
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot load texture without image" );
+        return;
+    }
+    
 	Catalog< Texture >::load( texture );
 
 	int textureId = texture->getCatalogId();

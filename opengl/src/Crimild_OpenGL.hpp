@@ -53,6 +53,7 @@
 #include "Rendering/ImageEffects/BloomImageEffect.hpp"
 #include "Rendering/ImageEffects/SSAOImageEffect.hpp"
 #include "Rendering/ImageEffects/VignetteImageEffect.hpp"
+#include "Rendering/ImageEffects/BlurImageEffect.hpp"
 
 #endif
 

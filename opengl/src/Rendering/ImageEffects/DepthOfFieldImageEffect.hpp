@@ -36,21 +36,114 @@ namespace crimild {
         
         class DepthOfFieldImageEffect : public ImageEffect {
         public:
-            DepthOfFieldImageEffect( void );
+            class DoFBlurShaderProgram : public ShaderProgram {
+            public:
+                DoFBlurShaderProgram( void );
+                virtual ~DoFBlurShaderProgram( void );
+                
+                void setOrientation( int value ) { _uOrientation->setValue( value ); }
+                int getOrientation( void ) { return _uOrientation->getValue(); }
+                
+                void setTexelSize( const Vector2f &value ) { _uTexelSize->setValue( value ); }
+                Vector2f getTexelSize( void ) { return _uTexelSize->getValue(); }
+                
+                void setBlurCoefficient( float value ) { _uBlurCoefficient->setValue( value ); }
+                float getBlurCoefficient( void ) { return _uBlurCoefficient->getValue(); }
+                
+                void setFocusDistance( float value ) { _uFocusDistance->setValue( value ); }
+                float getFocusDistance( void ) { return _uFocusDistance->getValue(); }
+                
+                void setPPM( float value ) { _uPPM->setValue( value ); }
+                float getPPM( void ) { return _uPPM->getValue(); }
+                
+                void setNear( float value ) { _uNear->setValue( value ); }
+                float getNear( void ) { return _uNear->getValue(); }
+                
+                void setFar( float value ) { _uFar->setValue( value ); }
+                float getFar( void ) { return _uFar->getValue(); }
+                
+            private:
+                SharedPointer< IntUniform > _uOrientation;
+                SharedPointer< Vector2fUniform > _uTexelSize;
+                SharedPointer< FloatUniform > _uBlurCoefficient;
+                SharedPointer< FloatUniform > _uFocusDistance;
+                SharedPointer< FloatUniform > _uPPM;
+                SharedPointer< FloatUniform > _uNear;
+                SharedPointer< FloatUniform > _uFar;
+            };
+            
+            class DoFCompositeShaderProgram : public ShaderProgram {
+            public:
+                DoFCompositeShaderProgram( void );
+                virtual ~DoFCompositeShaderProgram( void );
+                
+                void setBlurCoefficient( float value ) { _uBlurCoefficient->setValue( value ); }
+                float getBlurCoefficient( void ) { return _uBlurCoefficient->getValue(); }
+                
+                void setFocusDistance( float value ) { _uFocusDistance->setValue( value ); }
+                float getFocusDistance( void ) { return _uFocusDistance->getValue(); }
+                
+                void setPPM( float value ) { _uPPM->setValue( value ); }
+                float getPPM( void ) { return _uPPM->getValue(); }
+                
+                void setNear( float value ) { _uNear->setValue( value ); }
+                float getNear( void ) { return _uNear->getValue(); }
+                
+                void setFar( float value ) { _uFar->setValue( value ); }
+                float getFar( void ) { return _uFar->getValue(); }
+                
+            private:
+                SharedPointer< IntUniform > _uOrientation;
+                SharedPointer< Vector2fUniform > _uTexelSize;
+                SharedPointer< FloatUniform > _uBlurCoefficient;
+                SharedPointer< FloatUniform > _uFocusDistance;
+                SharedPointer< FloatUniform > _uPPM;
+                SharedPointer< FloatUniform > _uNear;
+                SharedPointer< FloatUniform > _uFar;
+            };
+            
+        public:
+			DepthOfFieldImageEffect( void );
+            explicit DepthOfFieldImageEffect( int resolution );
             virtual ~DepthOfFieldImageEffect( void );
             
             virtual void compute( crimild::Renderer *renderer, Camera *camera ) override;
             virtual void apply( crimild::Renderer *renderer, crimild::Camera *camera ) override;
+
+			int getResolution( void ) const { return _resolution; }
+
+            float getFocalDistance( void ) { return _focalDistance->getValue(); }
+            void setFocalDistance( float value ) { _focalDistance->setValue( value ); }
             
-            float getFocus( void ) { return _focus->getValue(); }
-            void setFocus( float value ) { _focus->setValue( value ); }
+            float getFocusDistance( void ) { return _focusDistance->getValue(); }
+            void setFocusDistance( float value ) { _focusDistance->setValue( value ); }
+
+            float getFStop( void ) { return _fStop->getValue(); }
+            void setFStop( float value ) { _fStop->setValue( value ); }
             
             float getAperture( void ) { return _aperture->getValue(); }
             void setAperture( float value ) { _aperture->setValue( value ); }
             
         private:
-            SharedPointer< FloatUniform > _focus;
-            SharedPointer< FloatUniform > _aperture;
+			int _resolution;
+            SharedPointer< FloatUniform > _focalDistance; //< in millimeters
+            SharedPointer< FloatUniform > _focusDistance; //< in millimeters
+            SharedPointer< FloatUniform > _fStop; //< in millimeters
+            SharedPointer< FloatUniform > _aperture; //< in millimeters
+            
+        private:
+            DoFBlurShaderProgram *getBlurProgram( void ) { return crimild::get_ptr( _dofBlurProgram ); }
+            DoFCompositeShaderProgram *getCompositeProgram( void ) { return crimild::get_ptr( _dofCompositeProgram ); }
+            
+        private:
+            SharedPointer< DoFBlurShaderProgram > _dofBlurProgram;
+            SharedPointer< DoFCompositeShaderProgram > _dofCompositeProgram;
+            
+        private:
+            FrameBufferObject *getAuxFBO( int index ) { return crimild::get_ptr( _auxFBOs[ index ] ); }
+            
+        private:
+            std::vector< SharedPointer< FrameBufferObject >> _auxFBOs;
         };
         
     }

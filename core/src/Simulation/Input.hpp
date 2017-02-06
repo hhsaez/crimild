@@ -215,7 +215,7 @@ namespace crimild {
             float dx;
             float dy;
         };
-        
+
         struct SwipeLeft { };
         struct SwipeRight { };
         struct SwipeUp { };
@@ -279,6 +279,16 @@ namespace crimild {
 
 	private:
 		std::map< std::string, float > _axes;
+
+	public:
+		bool joystickIsPresent( void ) const { return _joystickAxes.size(); }
+
+		void resetJoystickAxes( std::vector< float > const &axes ) { _joystickAxes = axes; }
+
+		float getJoystickAxis( int axis ) { return _joystickAxes[axis]; }
+
+	private:
+		std::vector< float > _joystickAxes;
 	};
 
 }

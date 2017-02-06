@@ -31,6 +31,7 @@ using namespace crimild::scripting;
 #define GROUP_NODES "nodes"
 
 #define CAMERA_TYPE "crimild::Camera"
+#define CAMERA_MAIN_CAMERA "isMainCamera"
 #define CAMERA_RENDER_PASS "renderPass"
 #define CAMERA_FRUSTUM "frustum"
 #define CAMERA_FRUSTUM_FOV "frustum.fov"
@@ -181,6 +182,7 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
         float aspect = 4.0f / 3.0f;
         float near = 0.1f;
         float far = 1000.0f;
+		bool isMainCamera = true;
         
         eval.getPropValue( CAMERA_FRUSTUM_FOV, fov );
         eval.getPropValue( CAMERA_FRUSTUM_ASPECT, aspect );
@@ -189,6 +191,9 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
 
         camera->setFrustum( Frustumf( fov, aspect, near, far ) );
         
+		eval.getPropValue( CAMERA_MAIN_CAMERA, isMainCamera );
+		camera->setIsMainCamera( isMainCamera );
+
         eval.foreach( GROUP_NODES, [self, camera]( ScriptEvaluator &child, int ) {
             self->buildNode( child, crimild::get_ptr( camera ) );
         });

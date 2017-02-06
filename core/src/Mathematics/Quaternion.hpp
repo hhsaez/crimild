@@ -100,6 +100,13 @@ namespace crimild {
         	q.lookAt( direction, up );
         	return q;
 		}
+        
+        static Quaternion createFromEulerAngles( PRECISION pitch, PRECISION yaw, PRECISION roll )
+        {
+            Quaternion q;
+            q.fromEulerAngles( pitch, yaw, roll );
+            return q;
+        }
 
 	public:
 		/**
@@ -306,6 +313,61 @@ namespace crimild {
 			_data[ 3 ] = cosTheta;
 
 			return *this;
+		}
+
+		Quaternion &fromEulerAngles( PRECISION pitch, PRECISION yaw, PRECISION roll )
+		{
+			// from https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+			
+			Quaternion q;
+			double t0 = std::cos( roll * 0.5 );
+			double t1 = std::sin( roll * 0.5 );
+			double t2 = std::cos( pitch * 0.5 );
+			double t3 = std::sin( pitch * 0.5 );
+			double t4 = std::cos( yaw * 0.5 );
+			double t5 = std::sin( yaw * 0.5 );
+			
+			auto w = t0 * t2 * t4 + t1 * t3 * t5;
+			auto x = t0 * t3 * t4 - t1 * t2 * t5;
+			auto y = t0 * t2 * t5 + t1 * t3 * t4;
+			auto z = t1 * t2 * t4 - t0 * t3 * t5;
+
+			_data[ 0 ] = ( PRECISION ) x;
+			_data[ 1 ] = ( PRECISION ) y;
+			_data[ 2 ] = ( PRECISION ) z;
+			_data[ 3 ] = ( PRECISION ) w;
+
+			return *this;
+		}
+
+		Vector3Impl toEulerAngles( void ) const
+		{
+			// from https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+			
+			double x = getImaginary().z();
+			double y = getImaginary().x();
+			double z = getImaginary().y();
+			double w = getReal();
+			
+			double ysqr = y * y;
+			
+			// roll (x-axis rotation)
+			double t0 = +2.0f * ( w  * x + y * z );
+			double t1 = +1.0f - 2.0f * ( x * x + ysqr );
+			double roll = std::atan2( t0, t1 );
+			
+			// pitch (y-axis rotation)
+			double t2 = +2.0f * ( w * y - z * x );
+			t2 = t2 > 1.0f ? 1.0f : t2;
+			t2 = t2 < -1.0f ? -1.0f : t2;
+			double pitch = std::asin(t2);
+			
+			// yaw (z-axis rotation)
+			double t3 = +2.0f * ( w * z + x *y );
+			double t4 = +1.0f - 2.0f * (ysqr + z * z );  
+			double yaw = std::atan2(t3, t4);
+			
+			return Vector3Impl( ( PRECISION ) pitch, ( PRECISION ) yaw, ( PRECISION ) roll );
 		}
 
 		/**

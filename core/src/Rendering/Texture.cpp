@@ -48,7 +48,7 @@ Texture::Texture( SharedPointer< Image > const &image, std::string name )
 
 Texture::~Texture( void )
 {
-
+    unload();
 }
 
 bool Texture::registerInStream( Stream &s )

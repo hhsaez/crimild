@@ -153,6 +153,11 @@ void JobScheduler::schedule( JobPtr const &job )
         return;
     }
     
+    if ( getState() == JobScheduler::State::STOPPING || getState() == JobScheduler::State::STOPPED ) {
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot schedule new jobs since the scheduler is not running" );
+        return;
+    }
+    
 	auto queue = getWorkerJobQueue();
 	queue->push( job );
 }

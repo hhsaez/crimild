@@ -29,9 +29,26 @@ bool WindowSystem::start( void )
 		return false;
 	}
 
-    int framebufferWidth;
-    int framebufferHeight;
+    int framebufferWidth = 0;
+    int framebufferHeight = 0;
 	glfwGetFramebufferSize( _window, &framebufferWidth, &framebufferHeight);
+
+    // this is not working
+//    bool supersampling = Simulation::getInstance()->getSettings()->get( "video.supersampling", true );
+//#ifdef CRIMILD_PLATFORM_WIN32
+//	supersampling = false;
+//#endif
+//    if ( supersampling ) {
+//	    int windowWidth = Simulation::getInstance()->getSettings()->get( "video.width", 1024 );
+//    	int windowHeight = Simulation::getInstance()->getSettings()->get( "video.height", 768 );
+//
+//    	framebufferWidth = Numerici::max( framebufferWidth, 2 * windowWidth );
+//    	framebufferHeight = Numerici::max( framebufferHeight, 2 * windowHeight );
+//    }
+//    else {
+//	    framebufferWidth = Simulation::getInstance()->getSettings()->get( "video.width", 1024 );
+//    	framebufferHeight = Simulation::getInstance()->getSettings()->get( "video.height", 768 );
+//    }
 
     auto renderer = Simulation::getInstance()->getRenderer();
     auto screenBuffer = renderer->getScreenBuffer();
@@ -55,7 +72,9 @@ void WindowSystem::update( void )
 	glfwPollEvents();
     
 	if ( glfwWindowShouldClose( _window ) ) {
-		Simulation::getInstance()->stop();
+        crimild::concurrency::sync_frame( [] {
+            Simulation::getInstance()->stop();
+        });
 		return;
 	}
 
@@ -70,6 +89,11 @@ void WindowSystem::update( void )
         int sleepTime = ( int )( ( 1.0 / 60.0 - delta ) * 1000.0 );
         std::this_thread::sleep_for( std::chrono::milliseconds( sleepTime ) );
     }
+
+	std::string name = Simulation::getInstance()->getName();
+	std::stringstream ss;
+	ss << name << " (" << delta << "ms)";
+	glfwSetWindowTitle( _window, ss.str().c_str() );
     
     crimild::concurrency::sync_frame( std::bind( &WindowSystem::update, this ) );
 }

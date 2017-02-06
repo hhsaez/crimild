@@ -36,9 +36,7 @@ bool UpdateSystem::start( void )
     
     _accumulator = 0.0;
     
-    registerMessageHandler< messaging::SimulationWillUpdate >( [this]( messaging::SimulationWillUpdate const &message ) {
-        crimild::concurrency::async( std::bind( &UpdateSystem::update, this ) );
-    });
+    crimild::concurrency::sync_frame( std::bind( &UpdateSystem::update, this ) );
 
 	return true;
 }
@@ -49,18 +47,13 @@ void UpdateSystem::update( void )
     
     MessageQueue::getInstance()->dispatchDeferredMessages();
     
-	auto scene = Simulation::getInstance()->getScene();
+    auto scene = crimild::retain( Simulation::getInstance()->getScene() );
     if ( scene == nullptr ) {
-    	// Log::Debug << "No scene found" << Log::End;
+    	// schedule next update
+        crimild::concurrency::sync_frame( std::bind( &UpdateSystem::update, this ) );
         return;
     }
     
-    auto camera = Simulation::getInstance()->getMainCamera();
-    if ( camera == nullptr ) {
-    	// Log::Debug << "No camera detected" << Log::End;
-        return;
-    }
-
     // update simulation time
     // TODO: Should this system have its own clock?
     auto &c = Simulation::getInstance()->getSimulationClock();
@@ -69,22 +62,36 @@ void UpdateSystem::update( void )
     // prevent integration errors when delta is too big (i.e. after loading a new scene)
     _accumulator += Numericd::min( 4 * CRIMILD_SIMULATION_TIME, c.getDeltaTime() );
 
-    broadcastMessage( messaging::WillUpdateScene { scene, camera } );
-    updateBehaviors( scene );
-    broadcastMessage( messaging::DidUpdateScene { scene, camera } );
+    updateBehaviors( crimild::get_ptr( scene ) );
 
-    computeRenderQueue( scene, camera );
+    computeRenderQueues( crimild::get_ptr( scene ) );
+    
+    // schedule next update
+    crimild::concurrency::sync_frame( std::bind( &UpdateSystem::update, this ) );
 }
 
 void UpdateSystem::updateBehaviors( Node *scene )
 {
-    Clock fixed( CRIMILD_SIMULATION_TIME );
+    broadcastMessage( messaging::WillUpdateScene { scene } );
+
+    static const Clock fixed( CRIMILD_SIMULATION_TIME );
+
     while ( _accumulator >= CRIMILD_SIMULATION_TIME ) {
-        scene->perform( UpdateComponents( fixed ) );
+        auto job = crimild::concurrency::async();
+        scene->perform( Apply( [job]( Node *node ) {
+            node->forEachComponent( [job, node] ( NodeComponent *component ) {
+                crimild::concurrency::async( job, [component] {
+                    component->update( fixed );
+                });
+            });
+        }));
+        crimild::concurrency::wait( job );
         _accumulator -= CRIMILD_SIMULATION_TIME;
     }
     
     updateWorldState( scene );
+
+    broadcastMessage( messaging::DidUpdateScene { scene } );	
 }
 
 void UpdateSystem::updateWorldState( Node *scene )
@@ -92,14 +99,22 @@ void UpdateSystem::updateWorldState( Node *scene )
     scene->perform( UpdateWorldState() );
 }
 
-void UpdateSystem::computeRenderQueue( Node *scene, Camera *camera )
+void UpdateSystem::computeRenderQueues( Node *scene )
 {
     CRIMILD_PROFILE( "Compute Render Queue" )
-    auto renderQueue = crimild::alloc< RenderQueue >();
-    scene->perform( ComputeRenderQueue( camera, crimild::get_ptr( renderQueue ) ) );
+
+	auto renderQueueCollection = crimild::alloc< RenderQueueCollection >();
+	
+	Simulation::getInstance()->forEachCamera( [ this, &renderQueueCollection, scene ]( Camera *camera ) {
+		if ( camera != nullptr && camera->isEnabled() ) {
+			auto renderQueue = crimild::alloc< RenderQueue >();
+			scene->perform( ComputeRenderQueue( camera, crimild::get_ptr( renderQueue ) ) );
+			renderQueueCollection->add( renderQueue );
+		}
+	});
     
-    crimild::concurrency::sync_frame( [this, renderQueue]() {
-        broadcastMessage( messaging::RenderQueueAvailable { renderQueue } );
+    crimild::concurrency::sync_frame( [this, renderQueueCollection]() {
+        broadcastMessage( messaging::RenderQueueAvailable { renderQueueCollection } );
     });
 }
 

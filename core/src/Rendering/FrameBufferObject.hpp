@@ -40,6 +40,9 @@ namespace crimild {
     
     class RenderTarget : public SharedObject {
     public:
+		static constexpr const char *RENDER_TARGET_NAME_COLOR = "fbo_color";
+		static constexpr const char *RENDER_TARGET_NAME_DEPTH = "fbo_depth";
+		
         enum class Type {
             COLOR_RGB,
             COLOR_RGBA,
@@ -107,6 +110,16 @@ namespace crimild {
 		RGBAColorf _clearColor;
         RenderTargetMap _renderTargets;
 	};
+
+	/**
+	   \brief A simple FBO with color and depth components
+	 */
+	class StandardFrameBufferObject : public FrameBufferObject {
+	public:
+		StandardFrameBufferObject( int width, int height );
+		virtual ~StandardFrameBufferObject( void );
+	};
+		
 
 }
 

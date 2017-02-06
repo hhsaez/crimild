@@ -125,6 +125,10 @@ namespace crimild {
 			return _data[ i ];
 		}
 
+		// explicit conversion
+		explicit operator PRECISION *(void) { return &_data[0]; }
+		explicit operator const PRECISION *(void) const { return &_data[0]; }
+
 		PRECISION *data( void ) { return _data; }
 		const PRECISION *getData( void ) const { return _data; }
 
