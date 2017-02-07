@@ -40,7 +40,7 @@
 #endif
 
 #ifndef CRIMILD_VERSION_PATCH
-#define CRIMILD_VERSION_PATCH 0
+#define CRIMILD_VERSION_PATCH 1
 #endif
 
 namespace crimild {
