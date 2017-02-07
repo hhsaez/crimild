@@ -28,6 +28,13 @@
 #include "Rendering/Catalogs/FrameBufferObjectCatalog.hpp"
 #include "Rendering/OpenGLUtils.hpp"
 
+#ifndef GL_RGBA16F
+#define GL_RGBA16F 0x881A
+#endif
+#ifndef GL_RGB16F
+#define GL_RGB16F 0x881B
+#endif
+
 using namespace crimild;
 using namespace crimild::opengl;
 
@@ -206,10 +213,12 @@ void FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
             case GL_FRAMEBUFFER_COMPLETE:
                 Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Framebuffer setup complete" );
                 break;
+#ifdef GL_FRAMEBUFFER_UNDEFINED
             case GL_FRAMEBUFFER_UNDEFINED:
-                Log::fatal( CRIMILD_CURRENT_CLASS_NAME, "Cannot setup FrameBuffer due to invalid window setup" );
+                Log::fatal( CRIMILD_CURRENT_CLASS_NAME,  "Cannot setup FrameBuffer due to invalid window setup" );
                 exit( 1 );
                 break;
+#endif
             case GL_FRAMEBUFFER_UNSUPPORTED:
                 Log::fatal( CRIMILD_CURRENT_CLASS_NAME, "Invalid FBO attachments format. Check configuration for each attachment" );
                 exit( 1 );
@@ -222,10 +231,12 @@ void FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
                 Log::fatal( CRIMILD_CURRENT_CLASS_NAME, "Cannot setup FrameBuffer. No attachments found" );
                 exit( 1 );
                 break;
+#ifdef GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE
             case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
                 Log::fatal( CRIMILD_CURRENT_CLASS_NAME, "Cannot setup FrameBuffer. Multisample params don't match" );
                 exit( 1 );
                 break;
+#endif
 #ifdef CRIMILD_PLATFORM_DESKTOP
             case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
                 Log::fatal( CRIMILD_CURRENT_CLASS_NAME, "Cannot setup FrameBuffer. Attachments are not enabled for drawing" );

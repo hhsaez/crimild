@@ -32,7 +32,7 @@
 using namespace crimild;
 using namespace crimild::opengl;
         
-const char *blur_vs = R"(
+const char *blur_effect_vs = R"(
     CRIMILD_GLSL_ATTRIBUTE vec3 aPosition;
     CRIMILD_GLSL_ATTRIBUTE vec2 aTextureCoord;
 
@@ -45,7 +45,7 @@ const char *blur_vs = R"(
     }    
 )";
 
-const char *blur_fs = R"(
+const char *blur_effect_fs = R"(
     CRIMILD_GLSL_PRECISION_FLOAT_HIGH
 
     CRIMILD_GLSL_VARYING_IN vec2 vTextureCoord;
@@ -113,7 +113,7 @@ void BlurImageEffect::compute( crimild::Renderer *renderer, Camera *camera )
 
     auto program = renderer->getShaderProgram( "shaders/blur" );
     if ( program == nullptr ) {
-        auto tmp = crimild::alloc< ShaderProgram >( OpenGLUtils::getVertexShaderInstance( blur_vs ), OpenGLUtils::getFragmentShaderInstance( blur_fs ) );
+        auto tmp = crimild::alloc< ShaderProgram >( OpenGLUtils::getVertexShaderInstance( blur_effect_vs ), OpenGLUtils::getFragmentShaderInstance( blur_effect_fs ) );
         renderer->setShaderProgram( "shaders/blur", tmp );
         program = crimild::get_ptr( tmp );
 

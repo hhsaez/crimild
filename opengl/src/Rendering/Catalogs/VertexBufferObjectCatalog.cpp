@@ -47,10 +47,12 @@ int VertexBufferObjectCatalog::getNextResourceId( void )
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
     
 	GLuint vaoId;
-	glGenVertexArrays( 1, &vaoId );
 
-	glBindVertexArray( vaoId );
-
+#ifndef __ANDROID__
+    glGenVertexArrays( 1, &vaoId );
+  	glBindVertexArray( vaoId );
+#endif
+	
 	GLuint vboId;    
     glGenBuffers( 1, &vboId );
     
@@ -61,13 +63,22 @@ int VertexBufferObjectCatalog::getNextResourceId( void )
 
 int VertexBufferObjectCatalog::composeId( unsigned int vaoId, unsigned int vboId )
 {
+#ifndef __ANDROID__
 	return vaoId * 1000 + vboId;
+#else
+    return vboId;
+#endif
 }
 
 bool VertexBufferObjectCatalog::extractId( int compositeId, unsigned int &vaoId, unsigned int &vboId )
 {
+#ifndef __ANDROID__
 	vaoId = compositeId / 1000;
 	vboId = compositeId % 1000;
+#else
+    vaoId = 0;
+    vboId = compositeId;
+#endif
 	return true;
 }
 
@@ -83,7 +94,9 @@ void VertexBufferObjectCatalog::bind( ShaderProgram *program, VertexBufferObject
 
     extractId( vbo->getCatalogId(), vaoId, vboId );
 
+#ifndef __ANDROID__
     glBindVertexArray( vaoId );
+#endif
 
     glBindBuffer( GL_ARRAY_BUFFER, vboId );
     float *baseOffset = 0;
@@ -188,7 +201,10 @@ void VertexBufferObjectCatalog::unbind( ShaderProgram *program, VertexBufferObje
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
+#ifndef __ANDROID__
     glBindVertexArray( 0 );
+#endif
+
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
     
 	Catalog< VertexBufferObject >::unbind( program, vbo );
@@ -205,7 +221,9 @@ void VertexBufferObjectCatalog::load( VertexBufferObject *vbo )
 	GLuint vaoId, vboId;
 	extractId( vbo->getCatalogId(), vaoId, vboId );
 
-	glBindVertexArray( vaoId );	
+#ifndef __ANDROID__
+	glBindVertexArray( vaoId );
+#endif
 
     glBindBuffer( GL_ARRAY_BUFFER, vboId );
     glBufferData( GL_ARRAY_BUFFER,
@@ -238,7 +256,9 @@ void VertexBufferObjectCatalog::cleanup( void )
         extractId( id, vaoId, vboId );
         
         glDeleteBuffers( 1, &vboId );
+#ifndef __ANDROID__
         glDeleteVertexArrays( 1, &vaoId );
+#endif
     }
     
     _unusedVBOIds.clear();
