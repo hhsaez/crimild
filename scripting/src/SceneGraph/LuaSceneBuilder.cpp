@@ -182,7 +182,7 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
         float aspect = 4.0f / 3.0f;
         float near = 0.1f;
         float far = 1000.0f;
-		bool isMainCamera = true;
+		bool isMainCamera = false;
         
         eval.getPropValue( CAMERA_FRUSTUM_FOV, fov );
         eval.getPropValue( CAMERA_FRUSTUM_ASPECT, aspect );
