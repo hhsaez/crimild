@@ -33,7 +33,7 @@ using namespace crimild;
 
 RenderQueue::RenderQueue( void )
 {
-    setTimestamp( std::chrono::duration_cast< std::chrono::milliseconds >( std::chrono::system_clock::now().time_since_epoch() ).count() );
+    setTimestamp( ( unsigned long ) std::chrono::duration_cast< std::chrono::milliseconds >( std::chrono::system_clock::now().time_since_epoch() ).count() );
 }
 
 RenderQueue::~RenderQueue( void )
@@ -83,7 +83,13 @@ void RenderQueue::push( Geometry *geometry )
         if ( renderOnScreen ) {
             renderableType = RenderQueue::RenderableType::SCREEN;
         }
-        else if ( !material->getColorMaskState()->isEnabled() ) {
+        else if ( material->getColorMaskState()->isEnabled() &&
+                  ( !material->getColorMaskState()->getRMask() ||
+                    !material->getColorMaskState()->getGMask() ||
+                    !material->getColorMaskState()->getBMask() ||
+                    !material->getColorMaskState()->getAMask() ) ) {
+            // if at least one of the color masks is disabled, then
+            // the object is considered as an occluder
             renderableType = RenderQueue::RenderableType::OCCLUDER;
         }
         else if ( material->getAlphaState()->isEnabled() ) {

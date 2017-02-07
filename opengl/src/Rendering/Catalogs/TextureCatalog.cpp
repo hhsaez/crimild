@@ -36,6 +36,9 @@
 #ifndef GL_BGRA
 	#define GL_BGRA GL_RGBA
 #endif
+#ifndef GL_RED
+#define GL_RED 0x1903
+#endif
 
 using namespace crimild;
 using namespace crimild::opengl;

@@ -39,7 +39,7 @@
         #import <OpenGLES/ES3/gl.h>
         #import <OpenGLES/ES3/glext.h>
     #else
-        #include <GLES3/gl3.h>
+        #include <GLES2/gl2.h>
     #endif
 #endif
 
