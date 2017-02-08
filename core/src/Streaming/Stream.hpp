@@ -54,8 +54,10 @@ namespace crimild {
     public:
         /**
             \brief Alias for a stream object unique identifier
+
+            \remarks Type unsigned long long is always guaranteed to be 64bits
         */
-        using StreamObjectId = size_t;
+        using StreamObjectId = unsigned long long;
 
     protected:
         /**
@@ -208,7 +210,7 @@ namespace crimild {
     public:
         virtual bool load( void );
 
-        size_t getObjectCount( void ) const { return _topLevelObjects.size(); }
+        unsigned int getObjectCount( void ) const { return _topLevelObjects.size(); }
 
         template< class T >
         SharedPointer< T > getObjectAt( unsigned int index ) 
@@ -242,16 +244,16 @@ namespace crimild {
         void write( const std::string &str );
         void write( const VertexFormat &vf );
 
-        template< size_t SIZE, typename PRECISION >
+        template< unsigned int SIZE, typename PRECISION >
         void write( const Vector< SIZE, PRECISION > &v )
         {
-            writeRawBytes( ( const PRECISION * ) v, SIZE * sizeof( PRECISION ) );
+            writeRawBytes( v.getData(), SIZE * sizeof( PRECISION ) );
         }
 
-        template< size_t SIZE, typename PRECISION >
+        template< unsigned int SIZE, typename PRECISION >
         void write( const Matrix< SIZE, PRECISION > &m )
         {
-            writeRawBytes( ( const PRECISION * ) m, SIZE * sizeof( PRECISION ) );
+            writeRawBytes( m.getData(), SIZE * SIZE * sizeof( PRECISION ) );
         }
 
         void write( const Quaternion4f &q );
@@ -267,18 +269,22 @@ namespace crimild {
         template< class T >
         void write( std::vector< SharedPointer< T >> &os )
         {
-            size_t count = os.size();
+            unsigned int count = os.size();
             write( count );
             for ( auto &o : os ) {
                 write( o->getUniqueIdentifier() );
             }
         }
 
-        template< typename T >
-        void write( const T &value )
-        {
-            writeRawBytes( &value, sizeof( T ) );
-        }
+        void write( char c );
+        void write( unsigned char c );
+        void write( short s );
+        void write( unsigned short s );
+        void write( int i );
+        void write( unsigned int i );
+        void write( long long ll );
+        void write( unsigned long long ll );
+        void write( float f );
 
         virtual void writeRawBytes( const void *bytes, size_t size ) = 0;
 
@@ -293,7 +299,7 @@ namespace crimild {
         void read( std::string &str );
         void read( VertexFormat &vf );
 
-        template< size_t SIZE, typename PRECISION >
+        template< unsigned int SIZE, typename PRECISION >
         void read( Vector< SIZE, PRECISION > &v )
         {
             PRECISION data[ SIZE ];
@@ -301,11 +307,11 @@ namespace crimild {
             v = Vector< SIZE, PRECISION >( data );
         }
 
-        template< size_t SIZE, typename PRECISION >
+        template< unsigned int SIZE, typename PRECISION >
         void read( Matrix< SIZE, PRECISION > &m )
         {
-            PRECISION data[ SIZE ];
-            readRawBytes( &data[ 0 ], SIZE * sizeof( PRECISION ) );
+            PRECISION data[ SIZE * SIZE ];
+            readRawBytes( &data[ 0 ], SIZE * SIZE * sizeof( PRECISION ) );
             m = Matrix< SIZE, PRECISION >( data );
         }
 
@@ -334,7 +340,7 @@ namespace crimild {
         template< class T >
         void read( std::vector< SharedPointer< T >> &objs )
         {
-            size_t count;
+            unsigned int count;
             read( count );
 
             for ( int i = 0; i < count; i++ ) {
@@ -349,11 +355,15 @@ namespace crimild {
             }
         }
 
-        template< typename T >
-        void read( T &value )
-        {
-            readRawBytes( &value, sizeof( T ) );
-        }
+        void read( char &c );
+        void read( unsigned char &c );
+        void read( short &s );
+        void read( unsigned short &s );
+        void read( int &i );
+        void read( unsigned int &i );
+        void read( long long &ll );
+        void read( unsigned long long &ll );
+        void read( float &f );
 
         virtual void readRawBytes( void *bytes, size_t size ) = 0;
 

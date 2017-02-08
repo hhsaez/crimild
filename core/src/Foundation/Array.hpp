@@ -38,15 +38,15 @@ namespace crimild {
     class Array {
     public:
         Array( void ) { }
-        Array( size_t size ) : _array( size ) { }
+        Array( unsigned int size ) : _array( size ) { }
         Array( const Array &other ) : _array( other._array ) { }
         ~Array( void ) { }
 
         bool isEmpty( void ) const { return size() == 0; }
 
-        size_t size( void ) const { return _array.size(); }
+        unsigned int size( void ) const { return _array.size(); }
 
-        void resize( size_t size ) { _array.resize( size ); }
+        void resize( unsigned int size ) { _array.resize( size ); }
 
         bool find( const VALUE_TYPE &value ) const
         {

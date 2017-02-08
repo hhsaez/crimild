@@ -68,7 +68,10 @@ bool FileStream::close( void )
 
 bool FileStream::flush( void )
 {
-	open();
+	if ( !open() ) {
+		return false;
+	}
+	
 	auto result = Stream::flush();
 	close();
 
@@ -77,7 +80,10 @@ bool FileStream::flush( void )
 
 bool FileStream::load( void )
 {
-	open();
+	if ( !open() ) {
+		return false;
+	}
+
 	auto result = Stream::load();
 	close();
 

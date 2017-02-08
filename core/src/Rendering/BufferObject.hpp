@@ -40,7 +40,7 @@ namespace crimild {
 	template< typename T >
 	class BufferObject : public StreamObject {
 	protected:
-		BufferObject( size_t size, const T *data )
+		BufferObject( unsigned int size, const T *data )
 		{
 			if ( size > 0 ) {
 				_data.resize( size );
@@ -59,9 +59,9 @@ namespace crimild {
 
 		}
 
-		size_t getSize( void ) const { return _data.size(); }
+		unsigned int getSize( void ) const { return _data.size(); }
         
-        size_t getSizeInBytes( void ) const { return sizeof( T ) * getSize(); }
+        unsigned int getSizeInBytes( void ) const { return sizeof( T ) * getSize(); }
 
 		T *data( void ) { return &_data[ 0 ]; }
 
@@ -82,7 +82,7 @@ namespace crimild {
 		{
 			StreamObject::save( s );
 
-			size_t size = getSize();
+			unsigned int size = getSize();
 			s.write( size );
 			if ( size > 0 ) {
 				s.writeRawBytes( &_data[ 0 ], getSizeInBytes() );
@@ -93,7 +93,7 @@ namespace crimild {
 		{
 			StreamObject::load( s );
 
-			size_t size;
+			unsigned int size;
 			s.read( size );
 
 			if ( size > 0 ) {

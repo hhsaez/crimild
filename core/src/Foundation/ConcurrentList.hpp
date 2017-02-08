@@ -60,7 +60,7 @@ namespace crimild {
             return _list.empty();
         }
         
-        std::size_t size( void ) const
+        unsigned int size( void ) const
         {
             ScopedLock lock( _mutex );
             return _list.size();
