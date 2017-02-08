@@ -213,7 +213,7 @@ void Stream::write( const std::string &str )
 
 void Stream::write( const char *str )
 {
-	write( strlen( str ) );
+	write( ( unsigned int ) strlen( str ) );
 	writeRawBytes( str, strlen( str ) );
 }
 
@@ -240,9 +240,54 @@ void Stream::write( const Transformation &t )
 	write( t.getScale() );
 }
 
+void Stream::write( char c )
+{
+	writeRawBytes( &c, sizeof( char ) );
+}
+
+void Stream::write( unsigned char c )
+{
+	writeRawBytes( &c, sizeof( unsigned char ) );
+}
+
+void Stream::write( short s )
+{
+	writeRawBytes( &s, sizeof( short ) );
+}
+
+void Stream::write( unsigned short s )
+{
+	writeRawBytes( &s, sizeof( unsigned short ) );
+}
+
+void Stream::write( int i )
+{
+	writeRawBytes( &i, sizeof( int ) );
+}
+
+void Stream::write( unsigned int i )
+{
+	writeRawBytes( &i, sizeof( unsigned int ) );
+}
+
+void Stream::write( long long ll )
+{
+	writeRawBytes( &ll, sizeof( long long ) );
+}
+
+void Stream::write( unsigned long long ll )
+{
+	writeRawBytes( &ll, sizeof( unsigned long long ) );
+}
+
+void Stream::write( float f )
+{
+	writeRawBytes( &f, sizeof( float ) );
+}
+
 void Stream::read( std::string &str )
 {
-	size_t count = 0;
+	unsigned int count = 0;
 	read( count );
 	if ( count == 0 ) {
 		str = "";
@@ -294,5 +339,50 @@ void Stream::read( Transformation &t )
 	read( t.translate() );
 	read( t.rotate() );
 	read( t.scale() );
+}
+
+void Stream::read( char &c )
+{
+	readRawBytes( &c, sizeof( char ) );
+}
+
+void Stream::read( unsigned char &c )
+{
+	readRawBytes( &c, sizeof( unsigned char ) );
+}
+
+void Stream::read( short &s )
+{
+	readRawBytes( &s, sizeof( short ) );
+}
+
+void Stream::read( unsigned short &s )
+{
+	readRawBytes( &s, sizeof( unsigned short ) );
+}
+
+void Stream::read( int &i )
+{
+	readRawBytes( &i, sizeof( int ) );
+}
+
+void Stream::read( unsigned int &i )
+{
+	readRawBytes( &i, sizeof( unsigned int ) );
+}
+
+void Stream::read( long long &i )
+{
+	readRawBytes( &i, sizeof( long long ) );
+}
+
+void Stream::read( unsigned long long &i )
+{
+	readRawBytes( &i, sizeof( unsigned long long ) );
+}
+
+void Stream::read( float &f )
+{
+	readRawBytes( &f, sizeof( float ) );
 }
 

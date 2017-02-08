@@ -84,7 +84,7 @@ const char *blur_effect_fs = R"(
     }
 )";
 
-BlurImageEffect::BlurImageEffect( float radius, size_t resolution )
+BlurImageEffect::BlurImageEffect( float radius, unsigned int resolution )
     : _radius( crimild::alloc< FloatUniform >( "uRadius", radius ) ),
       _resolution( crimild::alloc< IntUniform >( "uResolution", resolution ) ),
       _direction( crimild::alloc< Vector2fUniform >( "uDirection", Vector2f::ZERO ) )

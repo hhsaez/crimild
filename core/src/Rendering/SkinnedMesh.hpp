@@ -45,7 +45,7 @@ namespace crimild {
 		SkinnedMeshJoint( unsigned int id, const Transformation &offset, std::string name );
 		virtual ~SkinnedMeshJoint( void );
 
-		unsigned int getId( void ) const { return _id; }
+		unsigned char getId( void ) const { return _id; }
 
 		void setOffset( const Transformation &t ) { _offset = t; }
 		const Transformation &getOffset( void ) const { return _offset; }
@@ -104,7 +104,7 @@ namespace crimild {
 	public:
 		template< typename T >
 		struct AnimationKey {
-			double time;
+			float time;
 			T value;
 		};
 

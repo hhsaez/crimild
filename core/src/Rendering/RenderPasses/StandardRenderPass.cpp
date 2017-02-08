@@ -267,7 +267,7 @@ void StandardRenderPass::renderStandardGeometry( Renderer *renderer, Geometry *g
     renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_COUNT_UNIFORM ), 0 );
     if ( rc->getSkinnedMesh() != nullptr && rc->getSkinnedMesh()->getAnimationState() != nullptr ) {
         auto animationState = rc->getSkinnedMesh()->getAnimationState();
-        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_COUNT_UNIFORM ), animationState->getJointPoses().size() );
+        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_COUNT_UNIFORM ), ( int ) animationState->getJointPoses().size() );
         for ( int i = 0; i < animationState->getJointPoses().size(); i++ ) {
             renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_POSE_UNIFORM + i ), animationState->getJointPoses()[ i ] );
         }

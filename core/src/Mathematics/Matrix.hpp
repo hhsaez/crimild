@@ -412,7 +412,7 @@ namespace crimild {
 
 		Matrix &times( const Matrix &other )
 		{
-			for ( size_t i = 0; i < SIZE; i++ ) {
+			for ( unsigned int i = 0; i < SIZE; i++ ) {
 				_data[ i ] = _data[ i ] * other._data[ i ];
 			}
 			return *this;

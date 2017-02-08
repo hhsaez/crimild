@@ -44,7 +44,7 @@ namespace crimild {
 
         bool isEmpty( void ) const { return _map.size() == 0; }
 
-        size_t size( void ) const { return _map.size(); }
+        unsigned int size( void ) const { return _map.size(); }
 
         bool find( KEY_TYPE const &key )
         {
