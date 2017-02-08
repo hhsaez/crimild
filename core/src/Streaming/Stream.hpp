@@ -247,13 +247,13 @@ namespace crimild {
         template< unsigned int SIZE, typename PRECISION >
         void write( const Vector< SIZE, PRECISION > &v )
         {
-            writeRawBytes( ( const PRECISION * ) v, SIZE * sizeof( PRECISION ) );
+            writeRawBytes( v.getData(), SIZE * sizeof( PRECISION ) );
         }
 
         template< unsigned int SIZE, typename PRECISION >
         void write( const Matrix< SIZE, PRECISION > &m )
         {
-            writeRawBytes( ( const PRECISION * ) m, SIZE * sizeof( PRECISION ) );
+            writeRawBytes( m.getData(), SIZE * SIZE * sizeof( PRECISION ) );
         }
 
         void write( const Quaternion4f &q );
@@ -310,8 +310,8 @@ namespace crimild {
         template< unsigned int SIZE, typename PRECISION >
         void read( Matrix< SIZE, PRECISION > &m )
         {
-            PRECISION data[ SIZE ];
-            readRawBytes( &data[ 0 ], SIZE * sizeof( PRECISION ) );
+            PRECISION data[ SIZE * SIZE ];
+            readRawBytes( &data[ 0 ], SIZE * SIZE * sizeof( PRECISION ) );
             m = Matrix< SIZE, PRECISION >( data );
         }
 
