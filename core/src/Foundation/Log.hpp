@@ -137,8 +137,16 @@ namespace crimild {
         
         class ConsoleOutputHandler : public OutputHandler {
         public:
-            ConsoleOutputHandler( void ) { }
-            virtual ~ConsoleOutputHandler( void ) { }
+            ConsoleOutputHandler( void ) 
+            { 
+
+            }
+            
+            virtual ~ConsoleOutputHandler( void ) 
+            {
+                // force a flush when destroying
+                std::cout << std::endl;
+            }
             
             virtual void printLine( std::string const &line ) override
             {
