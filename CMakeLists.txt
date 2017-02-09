@@ -46,9 +46,6 @@ IF ( CRIMILD_ENABLE_IMPORT )
 	ADD_SUBDIRECTORY( import )
 ENDIF ( CRIMILD_ENABLE_IMPORT )
 
-# Extract lua sources if needed
-EXTRACT_ARCHIVE( lua-5.2.3.tar.gz lua-5.2.3 ${CRIMILD_SOURCE_DIR}/third-party )
-
 OPTION( CRIMILD_ENABLE_AL "Would you like to build the crimild-al extension?" OFF )
 IF ( CRIMILD_ENABLE_AL )
 	ADD_DEFINITIONS( -DCRIMILD_ENABLE_AL=1 )
@@ -62,11 +59,17 @@ IF ( CRIMILD_ENABLE_PHYSICS )
 ENDIF ( CRIMILD_ENABLE_PHYSICS )
 
 # Add scripting sources
-OPTION( CRIMILD_SCRIPTING_LOG_VERBOSE "Enable verbose logs for scripting system" OFF )
-IF ( CRIMILD_SCRIPTING_LOG_VERBOSE )
-	ADD_DEFINITIONS( -DCRIMILD_SCRIPTING_LOG_VERBOSE=1 )
-ENDIF ( CRIMILD_SCRIPTING_LOG_VERBOSE )
-ADD_SUBDIRECTORY( scripting )
+OPTION( CRIMILD_ENABLE_SCRIPTING "Would you like to build the crimild-scripting extension?" OFF )
+iF ( CRIMILD_ENABLE_SCRIPTING )
+	# Extract lua sources if needed
+	EXTRACT_ARCHIVE( lua-5.2.3.tar.gz lua-5.2.3 ${CRIMILD_SOURCE_DIR}/third-party )
+
+	OPTION( CRIMILD_SCRIPTING_LOG_VERBOSE "Enable verbose logs for scripting system" OFF )
+	IF ( CRIMILD_SCRIPTING_LOG_VERBOSE )
+		ADD_DEFINITIONS( -DCRIMILD_SCRIPTING_LOG_VERBOSE=1 )
+	ENDIF ()
+	ADD_SUBDIRECTORY( scripting )
+ENDIF ()
 
 OPTION( CRIMILD_ENABLE_GLFW "Would you like to build the crimild-glfw extension?" OFF )
 IF ( CRIMILD_ENABLE_GLFW )

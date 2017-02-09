@@ -527,28 +527,33 @@ void SkinnedMesh::debugDump( void )
         Log::debug( CRIMILD_CURRENT_CLASS_NAME, "No skeleton attached to skinned mesh" );
 		return;
 	}
-	
-	std::cout << "Skinned Mesh: " << std::endl;
-	getSkeleton()->getClips().foreach( []( SharedPointer< SkinnedMeshAnimationClip > &clip, unsigned int clipIdx ) {
-		std::cout << "  Animation: #" << clipIdx
-		  		  << "\n    Duration: " << clip->getDuration()
-		  		  << "\n    Frame Rate: " << clip->getFrameRate()
-		  		  << "\n    Channels: " << clip->getChannels().size()
-		  		  << std::endl;
 
-		clip->getChannels().foreach( []( std::string name, SharedPointer< SkinnedMeshAnimationChannel > &channel, unsigned int channelIdx ) {
-			std::cout << "      *" 
-					  << " Channel: " << std::string( channel->getName() )
-					  << " P=" << channel->getPositionKeys().size() 
-					  << "(" << channel->getPositionKeys()[ 0 ].time 
-					  << "-" << channel->getPositionKeys()[ channel->getPositionKeys().size() - 1 ].time << ")"
-					  << " R=" << channel->getRotationKeys().size()
-					  << "(" << channel->getRotationKeys()[ 0 ].time 
-					  << "-" << channel->getRotationKeys()[ channel->getRotationKeys().size() - 1 ].time << ")"
-					  << " S=" << channel->getScaleKeys().size()
-					  << "(" << channel->getScaleKeys()[ 0 ].time 
-					  << "-" << channel->getScaleKeys()[ channel->getScaleKeys().size() - 1 ].time << ")"
-					  << std::endl;
+	std::stringstream ss;
+	
+	ss << "Skinned Mesh: ";
+	getSkeleton()->getClips().foreach( [&ss]( SharedPointer< SkinnedMeshAnimationClip > &clip, unsigned int clipIdx ) {
+		ss << "\n  Animation: #" << clipIdx
+		   << "\n    Duration: " << clip->getDuration()
+		   << "\n    Frame Rate: " << clip->getFrameRate()
+		   << "\n    Channels: " << clip->getChannels().size()
+		   << "\n";
+
+		clip->getChannels().foreach( [&ss]( std::string name, SharedPointer< SkinnedMeshAnimationChannel > &channel, unsigned int channelIdx ) {
+			ss << "      *" 
+			   << " Channel: " << std::string( channel->getName() )
+			   << " P=" << channel->getPositionKeys().size() 
+			   << "(" << channel->getPositionKeys()[ 0 ].time 
+			   << "-" << channel->getPositionKeys()[ channel->getPositionKeys().size() - 1 ].time << ")"
+			   << " R=" << channel->getRotationKeys().size()
+			   << "(" << channel->getRotationKeys()[ 0 ].time 
+			   << "-" << channel->getRotationKeys()[ channel->getRotationKeys().size() - 1 ].time << ")"
+			   << " S=" << channel->getScaleKeys().size()
+			   << "(" << channel->getScaleKeys()[ 0 ].time 
+			   << "-" << channel->getScaleKeys()[ channel->getScaleKeys().size() - 1 ].time << ")"
+			   << "\n";
 		});
 	});
+
+	Log::debug( CRIMILD_CURRENT_CLASS_NAME, ss.str() );
 }
+
