@@ -129,7 +129,7 @@ IF ( CRIMILD_ENABLE_GLFW )
 	)
 	SET( CRIMILD_APP_INCLUDE_DIRECTORIES 
 		 ${CRIMILD_APP_INCLUDE_DIRECTORIES} 
-		 ${CRIMILD_SOURCE_DIR}/openg/src
+		 ${CRIMILD_SOURCE_DIR}/opengl/src
 		 ${CRIMILD_SOURCE_DIR}/glfw/src
 		 ${CRIMILD_SOURCE_DIR}/third-party/glfw/include
 		 ${CRIMILD_SOURCE_DIR}/third-party/glew/include
