@@ -13,6 +13,8 @@ IF ( APPLE )
 
 	set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++0x")
 	set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
+
+	set(CMAKE_MACOSX_RPATH 1)
 ELSE ( APPLE )
 	SET( CMAKE_CXX_FLAGS "-std=c++11 -static-libgcc -static-libstdc++ -static -U__STRICT_ANSI__" )
 ENDIF ( APPLE )
@@ -30,38 +32,42 @@ FOREACH( ITR ${CRIMILD_APP_SOURCE_DIRECTORIES} )
 ENDFOREACH ( ITR )
 
 SET( CRIMILD_APP_DEPENDENCIES 
-	crimild_core
-	crimild_opengl
+	crimild_core	
 	crimild_raytracing
-	crimild_glfw
-	crimild_scripting
-	glfw 
 )
 
 SET( CRIMILD_APP_LINK_LIBRARIES 
 	crimild_core
-	crimild_opengl
 	crimild_raytracing
-	crimild_glfw
-	crimild_scripting
-	glfw 
 )
 
 SET( CRIMILD_APP_INCLUDE_DIRECTORIES 
 	${CRIMILD_SOURCE_DIR}/core/src
-	${CRIMILD_SOURCE_DIR}/opengl/src
-	${CRIMILD_SOURCE_DIR}/scripting/src
-	${CRIMILD_SOURCE_DIR}/glfw/src
 	${CRIMILD_SOURCE_DIR}/raytracing/src
-	${CRIMILD_SOURCE_DIR}/third-party/glfw/include
-	${CRIMILD_SOURCE_DIR}/third-party/glew/include
-	${CRIMILD_SOURCE_DIR}/third-party/lua-5.2.3/src
 	${CRIMILD_APP_INCLUDE_DIRECTORIES}
 ) 
 
 SET( CRIMILD_APP_LINK_DIRECTORIES 
-	${CRIMILD_SOURCE_DIR}/lib 
-	${CRIMILD_SOURCE_DIR}/third-party/glfw/src )
+	${CRIMILD_SOURCE_DIR}/lib
+) 
+	
+IF ( CRIMILD_ENABLE_SCRIPTING )
+	SET( CRIMILD_APP_DEPENDENCIES 
+		 ${CRIMILD_APP_DEPENDENCIES} 
+		 crimild_scripting 
+	)
+	
+	SET( CRIMILD_APP_LINK_LIBRARIES 
+		 ${CRIMILD_APP_LINK_LIBRARIES} 
+		 crimild_scripting 
+	)
+	
+	SET( CRIMILD_APP_INCLUDE_DIRECTORIES 
+		 ${CRIMILD_APP_INCLUDE_DIRECTORIES} 
+		 ${CRIMILD_SOURCE_DIR}/scripting/src
+		 ${CRIMILD_SOURCE_DIR}/third-party/lua-5.2.3/src
+	)
+ENDIF ()
 
 IF ( CRIMILD_ENABLE_AL )
 	SET( CRIMILD_APP_DEPENDENCIES 
@@ -107,6 +113,32 @@ IF ( CRIMILD_ENABLE_IMPORT )
 		${CRIMILD_APP_LINK_DIRECTORIES} 
   		${Assimp_BINARY_DIR} )
 ENDIF ( CRIMILD_ENABLE_IMPORT )
+
+IF ( CRIMILD_ENABLE_GLFW )
+	SET( CRIMILD_APP_DEPENDENCIES 
+		 ${CRIMILD_APP_DEPENDENCIES} 
+		 crimild_opengl
+		 crimild_glfw
+		 glfw 
+	)
+	SET( CRIMILD_APP_LINK_LIBRARIES 
+		 ${CRIMILD_APP_LINK_LIBRARIES} 
+		 crimild_opengl
+		 crimild_glfw
+		 glfw 
+	)
+	SET( CRIMILD_APP_INCLUDE_DIRECTORIES 
+		 ${CRIMILD_APP_INCLUDE_DIRECTORIES} 
+		 ${CRIMILD_SOURCE_DIR}/openg/src
+		 ${CRIMILD_SOURCE_DIR}/glfw/src
+		 ${CRIMILD_SOURCE_DIR}/third-party/glfw/include
+		 ${CRIMILD_SOURCE_DIR}/third-party/glew/include
+ 	)
+	SET( CRIMILD_APP_LINK_DIRECTORIES 
+		 ${CRIMILD_APP_LINK_DIRECTORIES} 
+		 ${CRIMILD_SOURCE_DIR}/third-party/glfw/src
+	)
+ENDIF ()
 
 INCLUDE_DIRECTORIES( ${CRIMILD_APP_INCLUDE_DIRECTORIES} )
 
