@@ -50,16 +50,36 @@ namespace crimild {
 		SharedPointer< Image > _image;
 
     public:
-        enum class WrapMode {
-            REPEAT,
-            CLAMP_TO_EDGE   //< default
+        enum class WrapMode : uint8_t {
+            REPEAT,         //< Default
+            CLAMP_TO_EDGE   
         };
         
         WrapMode getWrapMode( void ) const { return _wrapMode; }
         void setWrapMode( const WrapMode &mode ) { _wrapMode = mode; }
         
     private:
-        WrapMode _wrapMode = WrapMode::CLAMP_TO_EDGE;
+        WrapMode _wrapMode = WrapMode::REPEAT;
+
+    public:
+        enum class Filter : uint8_t {
+            NEAREST,
+            LINEAR,                     //< Default
+            NEAREST_MIPMAP_NEAREST,
+            NEAREST_MIPMAP_LINEAR,
+            LINEAR_MIPMAP_NEAREST,
+            LINEAR_MIPMAP_LINEAR
+        };
+
+        void setMinFilter( Filter filter ) { _minFilter = filter; }
+        Filter getMinFilter( void ) const { return _minFilter; }
+
+        void setMagFilter( Filter filter ) { _magFilter = filter; }
+        Filter getMagFilter( void ) const { return _magFilter; }
+
+    private:
+        Filter _minFilter = Filter::LINEAR;
+        Filter _magFilter = Filter::LINEAR;
 
         /**
             \name Streaming

@@ -41,7 +41,7 @@ namespace crimild {
         static SharedPointer< AlphaState > ENABLED_ADDITIVE_BLEND;
         
 	public:
-		enum class SrcBlendFunc {
+		enum class SrcBlendFunc : uint8_t {
 			ZERO,
 			ONE,
 			SRC_COLOR,
@@ -55,7 +55,7 @@ namespace crimild {
 			SRC_ALPHA_SATURATE
 		};
 
-		enum class DstBlendFunc {
+		enum class DstBlendFunc : uint8_t {
 			ZERO,
 			ONE,
 			SRC_COLOR,
@@ -80,8 +80,8 @@ namespace crimild {
 		void setDstBlendFunc( DstBlendFunc value ) { _dstBlendFunc = value; }
 
 	private:
-		SrcBlendFunc _srcBlendFunc;
-		DstBlendFunc _dstBlendFunc;
+		SrcBlendFunc _srcBlendFunc = SrcBlendFunc::SRC_ALPHA;
+		DstBlendFunc _dstBlendFunc = DstBlendFunc::ONE_MINUS_SRC_ALPHA;
 	};
 
 }

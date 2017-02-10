@@ -32,6 +32,72 @@
 using namespace crimild;
 using namespace crimild::opengl;
 
+const GLenum OpenGLUtils::PRIMITIVE_TYPE[] = {
+	GL_POINTS,
+	GL_LINES,
+	GL_LINE_LOOP,
+	GL_LINE_STRIP,
+	GL_TRIANGLES,
+	GL_TRIANGLE_STRIP,
+	GL_TRIANGLE_FAN
+};
+
+const GLenum OpenGLUtils::TEXTURE_WRAP_MODE_CLAMP[] = {
+	GL_REPEAT,
+	GL_CLAMP_TO_EDGE,
+};
+
+const GLenum OpenGLUtils::TEXTURE_FILTER_MAP[] = {
+    GL_NEAREST,
+    GL_LINEAR,
+    GL_NEAREST_MIPMAP_NEAREST,
+    GL_NEAREST_MIPMAP_LINEAR,
+    GL_LINEAR_MIPMAP_NEAREST,
+    GL_LINEAR_MIPMAP_LINEAR
+};
+
+const GLenum OpenGLUtils::ALPHA_SRC_BLEND_FUNC[] = {
+	GL_ZERO,
+	GL_ONE,
+	GL_SRC_COLOR,
+	GL_ONE_MINUS_SRC_COLOR,
+	GL_DST_COLOR,
+	GL_ONE_MINUS_DST_COLOR,
+	GL_SRC_ALPHA,
+	GL_ONE_MINUS_SRC_ALPHA,
+	GL_DST_ALPHA,
+	GL_ONE_MINUS_DST_ALPHA,
+	GL_SRC_ALPHA_SATURATE
+};
+
+const GLenum OpenGLUtils::ALPHA_DST_BLEND_FUNC[] = {
+	GL_ZERO,
+	GL_ONE,
+	GL_SRC_COLOR,
+	GL_ONE_MINUS_SRC_COLOR,
+	GL_SRC_ALPHA,
+	GL_ONE_MINUS_SRC_ALPHA,
+	GL_DST_ALPHA,
+	GL_ONE_MINUS_DST_ALPHA
+};
+
+const GLenum OpenGLUtils::DEPTH_COMPARE_FUNC[] = {
+    GL_NEVER,
+    GL_LESS,
+    GL_EQUAL,
+    GL_LEQUAL,
+    GL_GREATER,
+    GL_NOTEQUAL,
+    GL_GEQUAL,
+    GL_ALWAYS
+};
+
+const GLenum OpenGLUtils::CULL_FACE_MODE[] = {
+	GL_BACK,
+	GL_FRONT,
+	GL_FRONT_AND_BACK
+};
+
 void OpenGLUtils::checkErrors( std::string prefix )
 {
     for ( GLint error = glGetError(); error; error = glGetError() ) {
