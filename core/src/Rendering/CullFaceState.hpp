@@ -40,7 +40,7 @@ namespace crimild {
         static SharedPointer< CullFaceState > ENABLED_FRONT;
 
 	public:
-        enum class CullFaceMode {
+        enum class CullFaceMode : uint8_t {
         	BACK,
         	FRONT,
         	FRONT_AND_BACK
@@ -54,7 +54,7 @@ namespace crimild {
 		void setCullFaceMode( CullFaceMode value ) { _cullFaceMode = value; }
 
 	private:
-		CullFaceMode _cullFaceMode;
+		CullFaceMode _cullFaceMode = CullFaceMode::BACK;
 	};
 
 }

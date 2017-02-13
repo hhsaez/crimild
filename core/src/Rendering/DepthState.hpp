@@ -39,7 +39,7 @@ namespace crimild {
         static SharedPointer< DepthState > ENABLED;
         
     public:
-        enum class CompareFunc {
+        enum class CompareFunc : uint8_t {
             NEVER,
             LESS,
             EQUAL,
