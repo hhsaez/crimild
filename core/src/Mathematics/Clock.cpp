@@ -31,6 +31,9 @@
 
 using namespace crimild;
 
+const double Clock::DEFAULT_TICK_TIME = 1.0 / 60.0;
+double Clock::_globalTimeScale = 1.0;
+
 Clock::Clock( void )
 {
 	reset();
@@ -49,6 +52,7 @@ Clock::Clock( const Clock &t )
 	_lastTime = t._lastTime;
 	_deltaTime = t._deltaTime;
     _accumTime = t._accumTime;
+	_timeScale = t._timeScale;
 }
 
 Clock::~Clock( void )
@@ -62,6 +66,7 @@ Clock &Clock::operator=( const Clock &t )
 	_lastTime = t._lastTime;
 	_deltaTime = t._deltaTime;
     _accumTime = t._accumTime;
+	_timeScale = t._timeScale;
 
 	return *this;
 }
@@ -74,6 +79,7 @@ void Clock::reset( void )
 	_lastTime = _currentTime;
     _deltaTime = 0;
     _accumTime = 0;
+	_timeScale = 1.0;
 }
 
 void Clock::tick( void )
@@ -81,11 +87,10 @@ void Clock::tick( void )
 	auto now = std::chrono::high_resolution_clock::now().time_since_epoch();
 
     _currentTime = 0.001 * std::chrono::duration_cast< std::chrono::milliseconds >( now ).count();
-    _deltaTime = _currentTime - _lastTime;
+    auto dt = _currentTime - _lastTime;
     _lastTime = _currentTime;
-    _accumTime += _deltaTime;
 
-	onTick();
+	onTick( dt );
 }
 
 void Clock::setTimeout( Clock::TimeoutCallback const &callback, double timeout, bool repeat )
@@ -95,22 +100,23 @@ void Clock::setTimeout( Clock::TimeoutCallback const &callback, double timeout, 
 	_repeat = repeat;
 }
 
-Clock &Clock::operator+=( double deltaTime )
+Clock &Clock::operator+=( double dt )
 {
-	_deltaTime = deltaTime;
-	_accumTime += _deltaTime;
-	onTick();
+	onTick( dt );
 	return *this;
 }
 
 Clock &Clock::operator+=( const Clock &other )
 {
-	*this += other.getDeltaTime();
+	onTick( other.getDeltaTime() );
 	return *this;
 }
 
-void Clock::onTick( void )
+void Clock::onTick( double dt )
 {
+	_deltaTime = dt * getGlobalTimeScale() * getTimeScale();
+	_accumTime += _deltaTime;
+	
 	if ( _timeoutCallback != nullptr ) {
 		_timeout -= _deltaTime;
 		if ( _timeout <= 0.0 ) {

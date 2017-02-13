@@ -13,8 +13,6 @@
 
 #include "Simulation/Simulation.hpp"
 
-#define CRIMILD_SIMULATION_TIME 1.0f / 60.0f
-
 using namespace crimild;
 
 UpdateSystem::UpdateSystem( void )
@@ -60,7 +58,7 @@ void UpdateSystem::update( void )
     c.tick();
     
     // prevent integration errors when delta is too big (i.e. after loading a new scene)
-    _accumulator += Numericd::min( 4 * CRIMILD_SIMULATION_TIME, c.getDeltaTime() );
+    _accumulator += Numericd::min( 4 * Clock::getScaledTickTime(), c.getDeltaTime() );
 
     updateBehaviors( crimild::get_ptr( scene ) );
 
@@ -74,19 +72,20 @@ void UpdateSystem::updateBehaviors( Node *scene )
 {
     broadcastMessage( messaging::WillUpdateScene { scene } );
 
-    static const Clock fixed( CRIMILD_SIMULATION_TIME );
+	const double FIXED_TIME = Clock::getScaledTickTime();
+    const Clock FIXED_CLOCK( FIXED_TIME );
 
-    while ( _accumulator >= CRIMILD_SIMULATION_TIME ) {
+    while ( _accumulator >= FIXED_TIME ) {
         auto job = crimild::concurrency::async();
-        scene->perform( Apply( [job]( Node *node ) {
-            node->forEachComponent( [job, node] ( NodeComponent *component ) {
-                crimild::concurrency::async( job, [component] {
-                    component->update( fixed );
+        scene->perform( Apply( [ job, &FIXED_CLOCK ]( Node *node ) {
+            node->forEachComponent( [ job, node, &FIXED_CLOCK ] ( NodeComponent *component ) {
+                crimild::concurrency::async( job, [ component, &FIXED_CLOCK ] {
+                    component->update( FIXED_CLOCK );
                 });
             });
         }));
         crimild::concurrency::wait( job );
-        _accumulator -= CRIMILD_SIMULATION_TIME;
+        _accumulator -= FIXED_TIME;
     }
     
     updateWorldState( scene );
