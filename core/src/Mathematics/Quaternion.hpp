@@ -317,6 +317,7 @@ namespace crimild {
 
 		Quaternion &fromEulerAngles( PRECISION pitch, PRECISION yaw, PRECISION roll )
 		{
+#if 0
 			// from https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
 			
 			Quaternion q;
@@ -336,6 +337,13 @@ namespace crimild {
 			_data[ 1 ] = ( PRECISION ) y;
 			_data[ 2 ] = ( PRECISION ) z;
 			_data[ 3 ] = ( PRECISION ) w;
+#else
+            Quaternion q0, q1, q2;
+            q0.fromAxisAngle( Vector3Impl::UNIT_X, pitch );
+            q1.fromAxisAngle( Vector3Impl::UNIT_Y, yaw );
+            q2.fromAxisAngle( Vector3Impl::UNIT_Z, roll );
+            *this = q0 * q1 * q2;
+#endif
 
 			return *this;
 		}
