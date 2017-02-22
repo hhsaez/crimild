@@ -53,6 +53,7 @@ Clock::Clock( const Clock &t )
 	_deltaTime = t._deltaTime;
     _accumTime = t._accumTime;
 	_timeScale = t._timeScale;
+	_ignoreGlobalTimeScale = t._ignoreGlobalTimeScale;
 }
 
 Clock::~Clock( void )
@@ -67,6 +68,7 @@ Clock &Clock::operator=( const Clock &t )
 	_deltaTime = t._deltaTime;
     _accumTime = t._accumTime;
 	_timeScale = t._timeScale;
+	_ignoreGlobalTimeScale = t._ignoreGlobalTimeScale;
 
 	return *this;
 }
@@ -80,6 +82,7 @@ void Clock::reset( void )
     _deltaTime = 0;
     _accumTime = 0;
 	_timeScale = 1.0;
+	_ignoreGlobalTimeScale = false;
 }
 
 void Clock::tick( void )
@@ -114,7 +117,11 @@ Clock &Clock::operator+=( const Clock &other )
 
 void Clock::onTick( double dt )
 {
-	_deltaTime = dt * getGlobalTimeScale() * getTimeScale();
+	_deltaTime = dt * getTimeScale();
+	if ( !shouldIgnoreGlobalTimeScale() ) {
+		_deltaTime *= getGlobalTimeScale();
+	}
+
 	_accumTime += _deltaTime;
 	
 	if ( _timeoutCallback != nullptr ) {

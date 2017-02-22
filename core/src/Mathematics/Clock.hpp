@@ -52,6 +52,14 @@ namespace crimild {
 
 		Clock &operator=( const Clock &other );
 
+	public:
+		void setIgnoreGlobalTimeScale( bool ignoreScale ) { _ignoreGlobalTimeScale = ignoreScale; }
+		bool shouldIgnoreGlobalTimeScale( void ) const { return _ignoreGlobalTimeScale; }
+
+	private:
+		bool _ignoreGlobalTimeScale = false;
+
+	public:
 		void reset( void );
 		void tick( void );
 
