@@ -6,6 +6,7 @@
 #include "Visitors/UpdateWorldState.hpp"
 #include "Visitors/ComputeRenderQueue.hpp"
 #include "Visitors/UpdateComponents.hpp"
+#include "Visitors/ParallelApply.hpp"
 
 #include "Rendering/RenderQueue.hpp"
 
@@ -76,15 +77,12 @@ void UpdateSystem::updateBehaviors( Node *scene )
     const Clock FIXED_CLOCK( FIXED_TIME );
 
     while ( _accumulator >= FIXED_TIME ) {
-        auto job = crimild::concurrency::async();
-        scene->perform( Apply( [ job, &FIXED_CLOCK ]( Node *node ) {
-            node->forEachComponent( [ job, node, &FIXED_CLOCK ] ( NodeComponent *component ) {
-                crimild::concurrency::async( job, [ component, &FIXED_CLOCK ] {
-                    component->update( FIXED_CLOCK );
-                });
+        scene->perform( Apply( [ &FIXED_CLOCK ]( Node *node ) {
+            node->forEachComponent( [ node, &FIXED_CLOCK ] ( NodeComponent *component ) {
+                component->update( FIXED_CLOCK );
             });
         }));
-        crimild::concurrency::wait( job );
+
         _accumulator -= FIXED_TIME;
     }
     
