@@ -136,15 +136,16 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
                         tmp = is.getObjectAt< Group >( 0 );
                     }
                 }
-                else {
-#ifdef CRIMILD_ENABLE_IMPORT
-                    SceneImporter importer;
-                    tmp = importer.import( FileSystem::getInstance().pathForResource( filename ) );
-#else
+                else if ( StringUtils::getFileExtension( filename ) == ".obj" ) {
                     OBJLoader loader( FileSystem::getInstance().pathForResource( filename ) );
                     tmp = loader.load();
-#endif
                 }
+#ifdef CRIMILD_ENABLE_IMPORT
+                else {
+                    SceneImporter importer;
+                    tmp = importer.import( FileSystem::getInstance().pathForResource( filename ) );
+                }
+#endif
                 AssetManager::getInstance()->set( filename, tmp );
                 scene = crimild::get_ptr( tmp );
             }
