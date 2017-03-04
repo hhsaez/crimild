@@ -34,6 +34,17 @@ namespace crimild {
 
 	class Clock {
 	public:
+		static const double DEFAULT_TICK_TIME;
+
+		static double getScaledTickTime( void ) { return getGlobalTimeScale() * DEFAULT_TICK_TIME; }
+
+		static double getGlobalTimeScale( void ) { return _globalTimeScale; }
+		static void setGlobalTimeScale( double value ) { _globalTimeScale = value; }
+
+	private:
+		static double _globalTimeScale;
+		
+	public:
 		Clock( void );
 		explicit Clock( double deltaTime );
 		Clock( const Clock &other );
@@ -41,6 +52,14 @@ namespace crimild {
 
 		Clock &operator=( const Clock &other );
 
+	public:
+		void setIgnoreGlobalTimeScale( bool ignoreScale ) { _ignoreGlobalTimeScale = ignoreScale; }
+		bool shouldIgnoreGlobalTimeScale( void ) const { return _ignoreGlobalTimeScale; }
+
+	private:
+		bool _ignoreGlobalTimeScale = false;
+
+	public:
 		void reset( void );
 		void tick( void );
 
@@ -61,6 +80,13 @@ namespace crimild {
 		double _lastTime;
 		double _deltaTime;
         double _accumTime;
+
+	public:
+		double getTimeScale( void ) const { return _timeScale; }
+		void setTimeScale( double value ) { _timeScale = value; }
+
+	private:
+		double _timeScale = 1.0;
 
 	public:
 		using TimeoutCallback = std::function< void( void ) >;
@@ -89,7 +115,7 @@ namespace crimild {
 		Clock &operator+=( const Clock &other );
 
 	private:
-		void onTick( void );
+		void onTick( double dt );
 	};
 
 }
