@@ -28,13 +28,20 @@
 #ifndef CRIMILD_FOUNDATION_ARRAY_
 #define CRIMILD_FOUNDATION_ARRAY_
 
+#include "Types.hpp"
+
 #include <vector>
 #include <functional>
 #include <algorithm>
 
 namespace crimild {
-    
-    template< class VALUE_TYPE >
+
+	/**
+	   \todo Implement theading policy
+	   \todo Implement checking policy
+	   \todo Remove std::vector (too slow on debug)
+	 */
+    template< typename VALUE_TYPE >
     class Array {
     public:
         Array( void ) { }
@@ -44,7 +51,16 @@ namespace crimild {
 
         bool isEmpty( void ) const { return size() == 0; }
 
+		/**
+		   \deprecated Use getCount() instead
+		 */
         unsigned int size( void ) const { return _array.size(); }
+
+		inline crimild::Size getCount( void ) { return _array.size(); }
+
+		inline VALUE_TYPE *getData( void ) { return &_array[ 0 ]; }
+
+		inline const VALUE_TYPE *getData( void ) const { return &_array[ 0 ]; }
 
         void resize( unsigned int size ) { _array.resize( size ); }
 
@@ -68,8 +84,9 @@ namespace crimild {
             _array.erase( std::remove( _array.begin(), _array.end(), value ), _array.end() );
         }
 
-        VALUE_TYPE &operator[]( unsigned int index ) { return _array[ index ]; }
-        const VALUE_TYPE &operator[]( unsigned int index ) const { return _array[ index ]; }
+        VALUE_TYPE &operator[]( crimild::Size index ) { return _array[ index ]; }
+
+        const VALUE_TYPE &operator[]( crimild::Size index ) const { return _array[ index ]; }
 
         void clear( void )
         {
@@ -78,15 +95,31 @@ namespace crimild {
 
         void foreach( std::function< void( VALUE_TYPE &, unsigned int ) > callback ) 
         {
-            unsigned int i = 0;
-            for ( auto &it : _array ) {
-                callback( it, i++ );
+			if ( getCount() == 0 ) {
+				return;
+			}
+
+			const auto count = getCount();
+
+			// optimized for loop
+			for ( int i = 0; i < count; i++ ) {
+                callback( _array[ i ], i );
             }
         };
+
+		void swap( crimild::Size a, crimild::Size b )
+		{
+			auto t = _array[ a ];
+			_array[ a ] = _array[ b ];
+			_array[ b ] = t;
+		}
 
     private:
         std::vector< VALUE_TYPE > _array;
     };
+
+	template< typename T >
+	using ThreadSafeArray = Array< T >;
 
 }
 

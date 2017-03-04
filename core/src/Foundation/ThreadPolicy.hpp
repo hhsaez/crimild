@@ -25,54 +25,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SCENE_GRAPH_GEOMETRY_
-#define CRIMILD_SCENE_GRAPH_GEOMETRY_
-
-#include "Node.hpp"
-
-#include "Foundation/SharedObjectArray.hpp"
-
-#include <functional>
+#ifndef CRIMILD_FOUNDATION_THREAD_POLICY_
+#define CRIMILD_FOUNDATION_THREAD_POLICY_
 
 namespace crimild {
-    
-    class Primitive;
 
-    class Geometry : public Node {
-    	CRIMILD_IMPLEMENT_RTTI( crimild::Geometry )
-
-	public:
-		explicit Geometry( std::string name = "" );
-		virtual ~Geometry( void );
-
-		bool hasPrimitives( void ) const { return _primitives.size(); }
-        
-        void attachPrimitive( Primitive *primitive );
-		void attachPrimitive( SharedPointer< Primitive > const &primitive );
-		
-        void detachPrimitive( Primitive *primitive );
-        void detachPrimitive( SharedPointer< Primitive > const &primitive );
-		
-        void detachAllPrimitives( void );
-		
-        void forEachPrimitive( std::function< void( Primitive * ) > callback );
-
-		void updateModelBounds( void );
-
-	private:
-        SharedObjectArray< Primitive > _primitives;
-
-	public:
-		virtual void accept( NodeVisitor &visitor ) override;
-
-	public:
-		virtual bool registerInStream( Stream &s ) override;
-		virtual void save( Stream &s ) override;
-		virtual void load( Stream &s ) override;
-	};
-
-	using GeometryPtr = SharedPointer< Geometry >;
-
+	// TODO
+	
 }
 
 #endif

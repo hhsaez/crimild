@@ -81,6 +81,8 @@ namespace crimild {
 		//@}
 	};
 
+	using PrimitivePtr = SharedPointer< Primitive >;
+
 }
 
 #endif

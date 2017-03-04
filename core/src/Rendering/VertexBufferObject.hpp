@@ -106,6 +106,8 @@ namespace crimild {
 		//@}
 	};
 
+	using VertexBufferObjectPtr = SharedPointer< VertexBufferObject >;
+
 }
 
 #endif

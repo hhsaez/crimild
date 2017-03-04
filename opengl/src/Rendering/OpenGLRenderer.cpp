@@ -76,6 +76,7 @@ OpenGLRenderer::OpenGLRenderer( SharedPointer< FrameBufferObject > const &screen
 	setShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_VERTEX_COLOR, crimild::alloc< UnlitVertexColorShaderProgram >() );
     
 	setShaderProgram( Renderer::SHADER_PROGRAM_PARTICLE_SYSTEM, crimild::alloc< ParticleSystemShaderProgram >() );
+	setShaderProgram( Renderer::SHADER_PROGRAM_POINT_SPRITE, crimild::alloc< ParticleSystemShaderProgram >() );
 
 #ifdef CRIMILD_PLATFORM_DESKTOP
     setShaderProgram( Renderer::SHADER_PROGRAM_TEXT_SDF, crimild::alloc< SignedDistanceFieldShaderProgram >() );

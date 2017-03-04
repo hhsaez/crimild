@@ -28,7 +28,10 @@
 #ifndef CRIMILD_MATHEMATICS_RANDOM_
 #define CRIMILD_MATHEMATICS_RANDOM_
 
+#include "Vector.hpp"
+
 #include "Foundation/Macros.hpp"
+#include "Foundation/Types.hpp"
 
 #include <cstdio>
 #include <cstdlib>
@@ -45,6 +48,11 @@ namespace crimild {
 
 	class Random {
 	public:
+		static void configure( void )
+		{
+			srand( time( 0 ) );
+		}
+		
 		template< typename PRECISION >
 		static PRECISION generate( void )
 		{
@@ -58,17 +66,10 @@ namespace crimild {
 		}
 
 		template< typename PRECISION >
-		static PRECISION generate( double min, double max )
+		static PRECISION generate( PRECISION min, PRECISION max )
 		{
-#if !defined( CRIMILD_PLATFORM_WIN32) && !defined( CRIMILD_PLATFORM_ANDROID )
-            std::random_device rd;
-            std::mt19937 gen( rd() );
-            std::uniform_real_distribution<> dis( min, std::nextafter( max, DBL_MAX ) );
-            return static_cast< PRECISION >( dis( gen ) );
-#else
-            double r = 0.01 * ( std::rand() % 100 );
-            return static_cast< PRECISION >( min + ( max - min ) * r );
-#endif
+			crimild::Real64 r = 0.01 * ( std::rand() % 100 );
+            return min + r * ( max - min );
         }
         
         template< class T >

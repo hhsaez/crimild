@@ -29,6 +29,7 @@
 #define CRIMILD_RENDERING_BUFFER_OBJECT_
 
 #include "Foundation/Macros.hpp"
+#include "Foundation/Types.hpp"
 #include "Streaming/Stream.hpp"
 
 #include <memory>
@@ -43,6 +44,7 @@ namespace crimild {
 		BufferObject( unsigned int size, const T *data )
 		{
 			if ( size > 0 ) {
+				_usedCount = size;
 				_data.resize( size );
 				if ( data != nullptr ) {
 					memcpy( &_data[ 0 ], data, sizeof( T ) * size );
@@ -59,16 +61,21 @@ namespace crimild {
 
 		}
 
-		unsigned int getSize( void ) const { return _data.size(); }
+		inline unsigned int getSize( void ) const { return _data.size(); }
         
-        unsigned int getSizeInBytes( void ) const { return sizeof( T ) * getSize(); }
+        inline unsigned int getSizeInBytes( void ) const { return sizeof( T ) * getSize(); }
 
-		T *data( void ) { return &_data[ 0 ]; }
+		inline T *data( void ) { return &_data[ 0 ]; }
 
-		const T *getData( void ) const { return &_data[ 0 ]; }
+		inline const T *getData( void ) const { return &_data[ 0 ]; }
+
+		inline crimild::Size getUsedCount( void ) const { return _usedCount; }
+
+		inline void setUsedCount( crimild::Size count ) { _usedCount = count; }
 
 	private:
 		std::vector< T > _data;
+		crimild::Size _usedCount;
 
 	public:
 		BufferObject( void ) { }
@@ -84,6 +91,9 @@ namespace crimild {
 
 			unsigned int size = getSize();
 			s.write( size );
+
+			s.write( _usedCount );
+			
 			if ( size > 0 ) {
 				s.writeRawBytes( &_data[ 0 ], getSizeInBytes() );
 			}
@@ -95,6 +105,8 @@ namespace crimild {
 
 			unsigned int size;
 			s.read( size );
+
+			s.read( _usedCount );
 
 			if ( size > 0 ) {
 				_data.resize( size );

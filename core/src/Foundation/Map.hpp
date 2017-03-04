@@ -33,7 +33,7 @@
 
 namespace crimild {
     
-    template< class KEY_TYPE, class VALUE_TYPE >
+    template< typename KEY_TYPE, typename VALUE_TYPE >
     class Map {
     public:
         Map( void ) { }
@@ -92,6 +92,9 @@ namespace crimild {
     private:
         std::map< KEY_TYPE, VALUE_TYPE > _map;
     };
+
+	template< typename KEY_TYPE, typename VALUE_TYPE >
+	using ThreadSafeMap = Map< KEY_TYPE, VALUE_TYPE >; //< TODO
 
 }
 
