@@ -28,17 +28,19 @@
 #ifndef CRIMILD_FOUNDATION_TYPES_
 #define CRIMILD_FOUNDATION_TYPES_
 
+#include <cstdint>
+
 namespace crimild {
 
-	using Int8 = char;
-	using Int16 = short;
-	using Int32 = int; //< Warning: standard says "at least 16"
-	using Int64 = long long;
+	using Int8 = int8_t;
+	using Int16 = int16_t;
+	using Int32 = int32_t;
+	using Int64 = int64_t;
 
-	using UInt8 = unsigned char;
-	using UInt16 = unsigned short;
-	using UInt32 = unsigned int;
-	using UInt64 = unsigned long long;
+	using UInt8 = uint8_t;
+	using UInt16 = uint16_t;
+	using UInt32 = uint32_t;
+	using UInt64 = uint64_t;
 
 	using Real32 = float;
 	using Real64 = double;
