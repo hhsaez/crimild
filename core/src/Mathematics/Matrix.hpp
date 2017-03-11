@@ -36,7 +36,7 @@ namespace crimild {
 	/**
 		\brief A geometric matrix
 	 */
-	template< unsigned int SIZE, typename PRECISION >
+	template< crimild::Size SIZE, typename PRECISION >
 	class Matrix {
 	public:
 		Matrix( void )
@@ -152,7 +152,7 @@ namespace crimild {
 			}
 			else {
 				bool areEqual = true;
-				for ( unsigned int i = 0; i < SIZE * SIZE; i++ ) {
+				for ( crimild::Size i = 0; i < SIZE * SIZE; i++ ) {
 					areEqual &= Numeric< PRECISION >::equals( _data[ i ], u._data[ i ] );
 				}
 				return areEqual;
@@ -184,8 +184,8 @@ namespace crimild {
 				_data[ 3 ] = 1;
 			}
 			else {
-				for ( unsigned int i = 0; i < SIZE; i++ ) {
-					for ( unsigned int j = 0; j < SIZE; j++ ) {
+				for ( crimild::Size i = 0; i < SIZE; i++ ) {
+					for ( crimild::Size j = 0; j < SIZE; j++ ) {
 						if ( i == j ) {
 							_data[ i * SIZE + j ] = 1;
 						}
@@ -221,8 +221,8 @@ namespace crimild {
 				result._data[ 3 ] = _data[ 3 ];
 			}
 			else {
-				for ( unsigned int i = 0; i < SIZE; i++ ) {
-					for ( unsigned int j = 0; j < SIZE; j++ ) {
+				for ( crimild::Size i = 0; i < SIZE; i++ ) {
+					for ( crimild::Size j = 0; j < SIZE; j++ ) {
 						result._data[ j * SIZE + i ] = _data[ i * SIZE + j ];
 					}
 				}
@@ -412,7 +412,7 @@ namespace crimild {
 
 		Matrix &times( const Matrix &other )
 		{
-			for ( unsigned int i = 0; i < SIZE; i++ ) {
+			for ( crimild::Size i = 0; i < SIZE; i++ ) {
 				_data[ i ] = _data[ i ] * other._data[ i ];
 			}
 			return *this;
@@ -680,9 +680,9 @@ namespace crimild {
 		Matrix< 4, U > result;
 		memset( &result[ 0 ], 0, sizeof( U ) * 16 );
 
-		for ( unsigned int i = 0; i < 4; i++ ) {
-			for ( unsigned int j = 0; j < 4; j++ ) {
-				for ( unsigned int k = 0; k < 4; k++ ) {
+		for ( crimild::Size i = 0; i < 4; i++ ) {
+			for ( crimild::Size j = 0; j < 4; j++ ) {
+				for ( crimild::Size k = 0; k < 4; k++ ) {
 					result[ i * 4 + j ] += a[ i * 4 + k ] * b[ k * 4 + j ];
 				}
 			}
@@ -739,14 +739,14 @@ namespace crimild {
 		return result;
 	}
     
-	template< unsigned int SIZE, typename PRECISION >
+	template< crimild::Size SIZE, typename PRECISION >
 	std::ostream &operator<<( std::ostream &out, const Matrix< SIZE, PRECISION > &m )
 	{
 		out << std::setiosflags( std::ios::fixed | std::ios::showpoint  )
         << std::setprecision( 10 );
 		out << "(";
-		for ( unsigned int i = 0; i < SIZE; i++ ) {
-            for ( unsigned int j = 0; j < SIZE; j++ ) {
+		for ( crimild::Size i = 0; i < SIZE; i++ ) {
+            for ( crimild::Size j = 0; j < SIZE; j++ ) {
                 out << m[ i * SIZE + j ];
                 if ( j < SIZE - 1 || i < SIZE - 1 ) {
                     out << ", ";

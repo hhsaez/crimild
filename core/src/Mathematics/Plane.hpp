@@ -37,7 +37,7 @@ namespace crimild {
 
 		A plane is represented by a normal vector and a constant
 	 */
-	template< unsigned int SIZE, typename PRECISION >
+	template< crimild::Size SIZE, typename PRECISION >
 	class Plane {
 	public:
 		typedef Vector< SIZE, PRECISION > VectorImpl;
@@ -124,7 +124,7 @@ namespace crimild {
 		PRECISION _constant;
 	};
 
-	template< unsigned int SIZE, typename PRECISION >
+	template< crimild::Size SIZE, typename PRECISION >
 	std::ostream &operator<<( std::ostream &out, const Plane< SIZE, PRECISION > &p )
 	{
 		out << std::setiosflags( std::ios::fixed | std::ios::showpoint  )

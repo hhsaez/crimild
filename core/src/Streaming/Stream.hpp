@@ -244,13 +244,13 @@ namespace crimild {
         void write( const std::string &str );
         void write( const VertexFormat &vf );
 
-        template< unsigned int SIZE, typename PRECISION >
+        template< crimild::Size SIZE, typename PRECISION >
         void write( const Vector< SIZE, PRECISION > &v )
         {
             writeRawBytes( v.getData(), SIZE * sizeof( PRECISION ) );
         }
 
-        template< unsigned int SIZE, typename PRECISION >
+        template< crimild::Size SIZE, typename PRECISION >
         void write( const Matrix< SIZE, PRECISION > &m )
         {
             writeRawBytes( m.getData(), SIZE * SIZE * sizeof( PRECISION ) );
@@ -299,7 +299,7 @@ namespace crimild {
         void read( std::string &str );
         void read( VertexFormat &vf );
 
-        template< unsigned int SIZE, typename PRECISION >
+        template< crimild::Size SIZE, typename PRECISION >
         void read( Vector< SIZE, PRECISION > &v )
         {
             PRECISION data[ SIZE ];
@@ -307,7 +307,7 @@ namespace crimild {
             v = Vector< SIZE, PRECISION >( data );
         }
 
-        template< unsigned int SIZE, typename PRECISION >
+        template< crimild::Size SIZE, typename PRECISION >
         void read( Matrix< SIZE, PRECISION > &m )
         {
             PRECISION data[ SIZE * SIZE ];

@@ -52,7 +52,8 @@ namespace crimild {
 		{
 			srand( time( 0 ) );
 		}
-		
+
+	public:
 		template< typename PRECISION >
 		static PRECISION generate( void )
 		{
@@ -65,42 +66,51 @@ namespace crimild {
             return generate< PRECISION >( 0.0, max );
 		}
 
-		template< crimild::Size SIZE, typename PRECISION >
-		inline Vector< SIZE, PRECISION > generate( const Vector< SIZE, PRECISION > &min, const Vector< SIZE, PRECISION > &max )
+		template< typename T >
+		static T generate( const T &min, const T &max )
 		{
-			if ( SIZE == 2 ) {
-				return Vector< SIZE, PRECISION >(
-					Random::generate< PRECISION >( min.x(), max.x() ),
-					Random::generate< PRECISION >( min.y(), max.y() ) );
-			}
-			else if ( SIZE == 3 ) {
-				return Vector< SIZE, PRECISION >(
-					Random::generate< PRECISION >( min.x(), max.x() ),
-					Random::generate< PRECISION >( min.y(), max.y() ),
-					Random::generate< PRECISION >( min.z(), max.z() ) );
-			}
-			else if ( SIZE == 4 ) {
-				return Vector< SIZE, PRECISION >(
-					Random::generate< PRECISION >( min.x(), max.x() ),
-					Random::generate< PRECISION >( min.y(), max.y() ),
-					Random::generate< PRECISION >( min.z(), max.z() ),
-					Random::generate< PRECISION >( min.w(), max.w() ) );
-			}
-			
-			Vector< SIZE, PRECISION > result;
-			for ( crimild::Size i = 0; i < SIZE; i++ ) {
-				result[ i ] = Random::generate< PRECISION >( min[ i ], max[ i ] );
-			}
+			T result;
+			generateImpl( result, min, max );
 			return result;
 		}
 
+	private:
+		template< crimild::Size SIZE, typename PRECISION >
+		inline static void generateImpl( Vector< SIZE, PRECISION > &result, const Vector< SIZE, PRECISION > &min, const Vector< SIZE, PRECISION > &max )
+		{
+			if ( SIZE == 2 ) {
+				result = Vector< SIZE, PRECISION >(
+					Random::generate< PRECISION >( min[ 0 ], max[ 0 ] ),
+					Random::generate< PRECISION >( min[ 1 ], max[ 1 ] ) );
+			}
+			else if ( SIZE == 3 ) {
+				result = Vector< SIZE, PRECISION >(
+					Random::generate< PRECISION >( min[ 0 ], max[ 0 ] ),
+					Random::generate< PRECISION >( min[ 1 ], max[ 1 ] ),
+					Random::generate< PRECISION >( min[ 2 ], max[ 2 ] ) );
+			}
+			else if ( SIZE == 4 ) {
+				result = Vector< SIZE, PRECISION >(
+					Random::generate< PRECISION >( min[ 0 ], max[ 0 ] ),
+					Random::generate< PRECISION >( min[ 1 ], max[ 1 ] ),
+					Random::generate< PRECISION >( min[ 2 ], max[ 2 ] ),
+					Random::generate< PRECISION >( min[ 3 ], max[ 3 ] ) );
+			}
+			else {
+				for ( crimild::Size i = 0; i < SIZE; i++ ) {
+					result[ i ] = Random::generate< PRECISION >( min[ i ], max[ i ] );
+				}
+			}
+		}
+
 		template< typename PRECISION >
-		static PRECISION generate( const PRECISION &min, const PRECISION &max )
+		inline static void generateImpl( PRECISION &result, const PRECISION &min, const PRECISION &max )
 		{
 			crimild::Real64 r = 0.01 * ( std::rand() % 100 );
-            return min + r * ( max - min );
+            result = min + r * ( max - min );
         }
-        
+
+	public:
         template< class T >
         static void shuffle( std::vector< T > &input )
         {
