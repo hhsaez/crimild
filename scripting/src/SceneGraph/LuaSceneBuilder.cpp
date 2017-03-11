@@ -304,6 +304,7 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
         return text;
     });
 
+#if 0
     // TODO: Use RTTI for getting class type name
     LuaNodeBuilderRegistry::getInstance()->registerCustomNodeBuilder( PARTICLE_SYSTEM_TYPE, [self]( ScriptEvaluator &eval ) -> SharedPointer< Node > {
         auto ps = crimild::alloc< ParticleSystem >();
@@ -387,6 +388,8 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
 
         return ps;
     });
+
+#endif
 
 #ifdef CRIMILD_ENABLE_PHYSICS
     // TODO: Use RTTI for getting class type name
