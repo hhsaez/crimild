@@ -25,38 +25,27 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "TimeParticleUpdater.hpp"
+#include "LuaTimeParticleGeneratorBuilder.hpp"
+
+#include "SceneGraph/LuaSceneBuilder.hpp"
 
 using namespace crimild;
+using namespace crimild::scripting;
 
-TimeParticleUpdater::TimeParticleUpdater( void )
+SharedPointer< TimeParticleGenerator > LuaTimeParticleGeneratorBuilder::build( ScriptEvaluator &eval )
 {
+	auto generator = crimild::alloc< TimeParticleGenerator >();
 
-}
-
-TimeParticleUpdater::~TimeParticleUpdater( void )
-{
-
-}
-
-void TimeParticleUpdater::configure( Node *node, ParticleData *particles )
-{
-	_times = particles->createAttribArray< crimild::Real32 >( ParticleAttrib::TIME );
-	assert( _times != nullptr );
-}
-
-void TimeParticleUpdater::update( Node *node, double dt, ParticleData *particles )
-{
-	const auto count = particles->getAliveCount();
-
-	auto ts = _times->getData< crimild::Real32 >();
-	assert( ts != nullptr );
-
-	for ( int i = 0; i < count; i++ ) {
-		ts[ i ] -= dt;
-		if ( ts[ i ] <= 0.0f ) {
-			particles->kill( i );
-		}
+	crimild::Real32 min;
+	if ( eval.getPropValue( "minTime", min ) ) {
+		generator->setMinTime( min );
 	}
+
+	crimild::Real32 max;
+	if ( eval.getPropValue( "maxTime", max ) ) {
+		generator->setMaxTime( max );
+	}
+	
+	return generator;
 }
 

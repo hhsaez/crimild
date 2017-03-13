@@ -25,38 +25,23 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "TimeParticleUpdater.hpp"
+#ifndef CRIMILD_SCRIPTING_BUILDER_PARTICLE_SYSTEM_GENRATORS_RANDOM_VECTOR3F_
+#define CRIMILD_SCRIPTING_BUILDER_PARTICLE_SYSTEM_GENRATORS_RANDOM_VECTOR3F_
 
-using namespace crimild;
+#include "Foundation/Scripted.hpp"
 
-TimeParticleUpdater::TimeParticleUpdater( void )
-{
+namespace crimild {
 
-}
+	namespace scripting {
+        
+		class LuaRandomVector3fParticleGeneratorBuilder {
+		public:
+			static SharedPointer< RandomVector3fParticleGenerator > build( ScriptEvaluator &eval );
+		};
 
-TimeParticleUpdater::~TimeParticleUpdater( void )
-{
-
-}
-
-void TimeParticleUpdater::configure( Node *node, ParticleData *particles )
-{
-	_times = particles->createAttribArray< crimild::Real32 >( ParticleAttrib::TIME );
-	assert( _times != nullptr );
-}
-
-void TimeParticleUpdater::update( Node *node, double dt, ParticleData *particles )
-{
-	const auto count = particles->getAliveCount();
-
-	auto ts = _times->getData< crimild::Real32 >();
-	assert( ts != nullptr );
-
-	for ( int i = 0; i < count; i++ ) {
-		ts[ i ] -= dt;
-		if ( ts[ i ] <= 0.0f ) {
-			particles->kill( i );
-		}
 	}
+
 }
+
+#endif
 

@@ -95,7 +95,7 @@ namespace crimild {
 		/**
 		   \brief A generator for particle attributes
 		 */
-        class ParticleGenerator {
+        class ParticleGenerator : public SharedObject {
         public:
             virtual ~ParticleGenerator( void ) { }
 
@@ -145,7 +145,7 @@ namespace crimild {
 		/**
 		   \brief Updates the particles of a particle system
 		*/
-        class ParticleUpdater {
+        class ParticleUpdater : public SharedObject {
         public:
             virtual ~ParticleUpdater( void ) { }
 
@@ -177,7 +177,7 @@ namespace crimild {
 		/**
 		   \brief Generate renderables for a particle system
 		*/
-        class ParticleRenderer {
+        class ParticleRenderer : public SharedObject {
         public:
             virtual ~ParticleRenderer( void ) { }
 

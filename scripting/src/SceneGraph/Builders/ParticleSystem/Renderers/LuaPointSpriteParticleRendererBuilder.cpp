@@ -25,38 +25,40 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "TimeParticleUpdater.hpp"
+#include "LuaPointSpriteParticleRendererBuilder.hpp"
+
+#include "SceneGraph/LuaSceneBuilder.hpp"
 
 using namespace crimild;
+using namespace crimild::scripting;
 
-TimeParticleUpdater::TimeParticleUpdater( void )
+SharedPointer< PointSpriteParticleRenderer > LuaPointSpriteParticleRendererBuilder::build( ScriptEvaluator &eval )
 {
+	auto renderer = crimild::alloc< PointSpriteParticleRenderer >();
 
-}
+	std::string textureFileName;
+	if ( eval.getPropValue( "texture", textureFileName ) ) {
+		auto texture = crimild::alloc< Texture >( crimild::alloc< ImageTGA >( FileSystem::getInstance().pathForResource( textureFileName ) ) );
+		renderer->getMaterial()->setColorMap( texture );
+	}
 
-TimeParticleUpdater::~TimeParticleUpdater( void )
-{
-
-}
-
-void TimeParticleUpdater::configure( Node *node, ParticleData *particles )
-{
-	_times = particles->createAttribArray< crimild::Real32 >( ParticleAttrib::TIME );
-	assert( _times != nullptr );
-}
-
-void TimeParticleUpdater::update( Node *node, double dt, ParticleData *particles )
-{
-	const auto count = particles->getAliveCount();
-
-	auto ts = _times->getData< crimild::Real32 >();
-	assert( ts != nullptr );
-
-	for ( int i = 0; i < count; i++ ) {
-		ts[ i ] -= dt;
-		if ( ts[ i ] <= 0.0f ) {
-			particles->kill( i );
+	std::string blendMode;
+	if ( eval.getPropValue( "blendMode", blendMode ) ) {
+		if ( blendMode == "additive" ) {
+			renderer->getMaterial()->setAlphaState( crimild::alloc< AlphaState >( true, AlphaState::SrcBlendFunc::SRC_ALPHA, AlphaState::DstBlendFunc::ONE ) );
 		}
 	}
+
+	crimild::Bool cullFaceEnabled;
+	if ( eval.getPropValue( "cullFaceEnabled", cullFaceEnabled ) ) {
+		renderer->getMaterial()->getCullFaceState()->setEnabled( cullFaceEnabled );
+	}
+
+	crimild::Bool depthStateEnabled;
+	if ( eval.getPropValue( "depthStateEnabled", depthStateEnabled ) ) {
+		renderer->getMaterial()->setDepthState( depthStateEnabled ? DepthState::ENABLED : DepthState::DISABLED );
+	}
+
+	return renderer;
 }
 

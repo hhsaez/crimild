@@ -1,5 +1,21 @@
 #include "LuaSceneBuilder.hpp"
 
+#include "SceneGraph/Builders/Components/LuaFreeLookCameraComponentBuilder.hpp"
+
+#include "SceneGraph/Builders/ParticleSystem/LuaParticleSystemComponentBuilder.hpp"
+
+#include "SceneGraph/Builders/ParticleSystem/Generators/LuaBoxPositionParticleGeneratorBuilder.hpp"
+#include "SceneGraph/Builders/ParticleSystem/Generators/LuaRandomVector3fParticleGeneratorBuilder.hpp"
+#include "SceneGraph/Builders/ParticleSystem/Generators/LuaRandomReal32ParticleGeneratorBuilder.hpp"
+#include "SceneGraph/Builders/ParticleSystem/Generators/LuaDefaultVector3fParticleGeneratorBuilder.hpp"
+#include "SceneGraph/Builders/ParticleSystem/Generators/LuaColorParticleGeneratorBuilder.hpp"
+#include "SceneGraph/Builders/ParticleSystem/Generators/LuaTimeParticleGeneratorBuilder.hpp"
+
+#include "SceneGraph/Builders/ParticleSystem/Updaters/LuaEulerParticleUpdaterBuilder.hpp"
+#include "SceneGraph/Builders/ParticleSystem/Updaters/LuaTimeParticleUpdaterBuilder.hpp"
+
+#include "SceneGraph/Builders/ParticleSystem/Renderers/LuaPointSpriteParticleRendererBuilder.hpp"
+
 using namespace crimild;
 using namespace crimild::scripting;
 
@@ -110,10 +126,50 @@ void LuaComponentBuilderRegistry::flush( void )
 #endif
 }
 
+LuaObjectBuilderRegistry::LuaObjectBuilderRegistry( void )
+{
+    
+}
+
+LuaObjectBuilderRegistry::~LuaObjectBuilderRegistry( void )
+{
+    
+}
+
+void LuaObjectBuilderRegistry::flush( void )
+{
+#if CRIMILD_SCRIPTING_LOG_VERBOSE
+    std::stringstream str;
+    str << "Available object builders:\n";
+    for ( auto it : _builders ) {
+        if ( it.second != nullptr ) {
+            str << "\t" << it.first << "\n";
+        }
+    }
+    Log::debug( CRIMILD_CURRENT_CLASS_NAME, str.str() );
+#endif
+}
+
 LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
 	: Scripted( true ),
 	  _rootNodeName( rootNodeName )
 {
+	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::FreeLookCameraComponent, LuaFreeLookCameraComponentBuilder::build );
+	
+	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::ParticleSystemComponent, LuaParticleSystemComponentBuilder::build );
+	
+	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::BoxPositionParticleGenerator, LuaBoxPositionParticleGeneratorBuilder::build );
+	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::RandomVector3fParticleGenerator, LuaRandomVector3fParticleGeneratorBuilder::build );
+	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::RandomReal32ParticleGenerator, LuaRandomReal32ParticleGeneratorBuilder::build );
+	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::DefaultVector3fParticleGenerator, LuaDefaultVector3fParticleGeneratorBuilder::build );
+	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::ColorParticleGenerator, LuaColorParticleGeneratorBuilder::build );
+	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::TimeParticleGenerator, LuaTimeParticleGeneratorBuilder::build );
+
+	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::EulerParticleUpdater, LuaEulerParticleUpdaterBuilder::build );
+	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::TimeParticleUpdater, LuaTimeParticleUpdaterBuilder::build );
+
+	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::PointSpriteParticleRenderer, LuaPointSpriteParticleRendererBuilder::build );
+
     auto self = this;
     
     // TODO: Use RTTI for getting class type name
@@ -493,6 +549,7 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
 
     LuaNodeBuilderRegistry::getInstance()->flush();
     LuaComponentBuilderRegistry::getInstance()->flush();
+	LuaObjectBuilderRegistry::getInstance()->flush();
 }
 
 LuaSceneBuilder::~LuaSceneBuilder( void )
@@ -571,13 +628,24 @@ void LuaSceneBuilder::buildNodeComponents( ScriptEvaluator &eval, SharedPointer<
 #ifdef CRIMILD_SCRIPTING_LOG_VERBOSE
             Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Building component of type '", type, "'" );
 #endif
+
+			SharedPointer< NodeComponent > cmp;
+			
             auto builder = LuaComponentBuilderRegistry::getInstance()->getBuilder( type );
-            if ( builder == nullptr ) {
-                Log::warning( CRIMILD_CURRENT_CLASS_NAME, "Cannot find component builder for type '", type, "'" );
-                return;
+            if ( builder != nullptr ) {
+				cmp = builder( componentEval );
+			}
+			else {
+				auto objBuilder = LuaObjectBuilderRegistry::getInstance()->getBuilder( type );
+				if ( objBuilder != nullptr ) {
+					cmp = crimild::cast_ptr< NodeComponent >( objBuilder( componentEval ) );
+				}
+				else {
+					Log::warning( CRIMILD_CURRENT_CLASS_NAME, "Cannot find component builder for type '", type, "'" );
+					return;
+				}
             }
             
-            auto cmp = builder( componentEval );
             if ( cmp == nullptr ) {
                 Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot build component of type '", type, "'" );
                 return;

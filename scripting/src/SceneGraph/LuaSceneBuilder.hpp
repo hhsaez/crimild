@@ -34,6 +34,9 @@ namespace crimild {
 
 	namespace scripting {
         
+		/**
+		   \deprecated Use LuaObjectBuilderRegistry instead
+		 */
         class LuaNodeBuilderRegistry : public StaticSingleton< LuaNodeBuilderRegistry > {
         public:
             using NodeBuilderFunction = std::function< SharedPointer< Node > ( crimild::scripting::ScriptEvaluator & ) >;
@@ -83,7 +86,10 @@ namespace crimild {
         
 #define CRIMILD_SCRIPTING_REGISTER_NODE_BUILDER( X ) \
     static crimild::scripting::LuaNodeBuilderRegistry::RegistrationHelper< X > __nodeRegistrationHelper( #X );
-        
+
+		/**
+		   \deprecated Use LuaObjectBuilderRegistry instead
+		 */
         class LuaComponentBuilderRegistry : public StaticSingleton< LuaComponentBuilderRegistry > {
         public:
             using ComponentBuilderFunction = std::function< SharedPointer< NodeComponent > ( crimild::scripting::ScriptEvaluator & ) >;
@@ -131,6 +137,42 @@ namespace crimild {
 
 #define CRIMILD_SCRIPTING_REGISTER_COMPONENT_BUILDER( X ) \
     static crimild::scripting::LuaComponentBuilderRegistry::RegistrationHelper< X > __componentRegistrationHelper( #X );
+        
+        class LuaObjectBuilderRegistry : public StaticSingleton< LuaObjectBuilderRegistry > {
+        public:
+            using BuilderFunction = std::function< SharedPointer< SharedObject > ( crimild::scripting::ScriptEvaluator & ) >;
+            
+        public:
+            LuaObjectBuilderRegistry( void );
+            virtual ~LuaObjectBuilderRegistry( void );
+            
+            template< typename T >
+            void registerBuilder( std::string type )
+            {
+                _builders[ type ] = []( crimild::scripting::ScriptEvaluator &eval ) {
+                    return crimild::alloc< T >( eval );
+                };
+            }
+            
+            void registerCustomBuilder( std::string type, BuilderFunction builder )
+            {
+                _builders[ type ] = builder;
+            }
+
+            BuilderFunction getBuilder( std::string type ) { return _builders[ type ]; }
+
+        public:
+            void flush( void );
+            
+        private:
+            std::map< std::string, BuilderFunction > _builders;
+        };
+
+#define CRIMILD_SCRIPTING_REGISTER_BUILDER( X ) \
+		crimild::scripting::LuaObjectBuilderRegistry::getInstance()->registerBuilder< T >( #X );
+
+#define CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( X, BUILDER_FUNC ) \
+		crimild::scripting::LuaObjectBuilderRegistry::getInstance()->registerCustomBuilder( #X, BUILDER_FUNC );
         
 		class LuaSceneBuilder :
             public crimild::scripting::Scripted,

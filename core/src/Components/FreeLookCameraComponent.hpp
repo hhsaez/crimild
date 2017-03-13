@@ -25,38 +25,26 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "TimeParticleUpdater.hpp"
+#ifndef CRIMILD_COMPONENTS_FREE_LOOK_CAMERA_
+#define CRIMILD_COMPONENTS_FREE_LOOK_CAMERA_
 
-using namespace crimild;
+#include "NodeComponent.hpp"
+#include "Mathematics/Vector.hpp"
 
-TimeParticleUpdater::TimeParticleUpdater( void )
-{
+namespace crimild {
+
+	class FreeLookCameraComponent : public NodeComponent {
+		CRIMILD_IMPLEMENT_RTTI( crimild::FreeLookCameraComponent )
+
+	public:
+		FreeLookCameraComponent( void );
+		virtual ~FreeLookCameraComponent( void );
+
+		virtual void start( void ) override;
+		virtual void update( const Clock &c ) override;
+	};
 
 }
 
-TimeParticleUpdater::~TimeParticleUpdater( void )
-{
-
-}
-
-void TimeParticleUpdater::configure( Node *node, ParticleData *particles )
-{
-	_times = particles->createAttribArray< crimild::Real32 >( ParticleAttrib::TIME );
-	assert( _times != nullptr );
-}
-
-void TimeParticleUpdater::update( Node *node, double dt, ParticleData *particles )
-{
-	const auto count = particles->getAliveCount();
-
-	auto ts = _times->getData< crimild::Real32 >();
-	assert( ts != nullptr );
-
-	for ( int i = 0; i < count; i++ ) {
-		ts[ i ] -= dt;
-		if ( ts[ i ] <= 0.0f ) {
-			particles->kill( i );
-		}
-	}
-}
+#endif
 

@@ -84,6 +84,7 @@
 #include "Components/RenderStateComponent.hpp"
 #include "Components/UIResponder.hpp"
 #include "Components/SkinnedMeshComponent.hpp"
+#include "Components/FreeLookCameraComponent.hpp"
 
 #include "Concurrency/Async.hpp"
 #include "Concurrency/Job.hpp"

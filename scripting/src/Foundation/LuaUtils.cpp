@@ -69,6 +69,24 @@ namespace crimild {
 		}
 
 		template<>
+		crimild::UInt16 LuaUtils::get< crimild::UInt16 >( lua_State *l, const int index )
+		{
+			return lua_tounsigned( l, index );
+		}
+
+		template<>
+		crimild::Int16 LuaUtils::get< crimild::Int16 >( lua_State *l, const int index )
+		{
+			return lua_tointeger( l, index );
+		}
+
+		template<>
+		crimild::Size LuaUtils::get< crimild::Size >( lua_State *l, const int index )
+		{
+			return lua_tounsigned( l, index );
+		}
+
+		template<>
 		float LuaUtils::get< float >( lua_State *l, const int index )
 		{
 			return lua_tonumber( l, index );

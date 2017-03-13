@@ -25,38 +25,35 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "TimeParticleUpdater.hpp"
+#include "LuaDefaultVector3fParticleGeneratorBuilder.hpp"
+
+#include "SceneGraph/LuaSceneBuilder.hpp"
 
 using namespace crimild;
+using namespace crimild::scripting;
 
-TimeParticleUpdater::TimeParticleUpdater( void )
+SharedPointer< DefaultVector3fParticleGenerator > LuaDefaultVector3fParticleGeneratorBuilder::build( ScriptEvaluator &eval )
 {
+	auto generator = crimild::alloc< DefaultVector3fParticleGenerator >();
 
-}
-
-TimeParticleUpdater::~TimeParticleUpdater( void )
-{
-
-}
-
-void TimeParticleUpdater::configure( Node *node, ParticleData *particles )
-{
-	_times = particles->createAttribArray< crimild::Real32 >( ParticleAttrib::TIME );
-	assert( _times != nullptr );
-}
-
-void TimeParticleUpdater::update( Node *node, double dt, ParticleData *particles )
-{
-	const auto count = particles->getAliveCount();
-
-	auto ts = _times->getData< crimild::Real32 >();
-	assert( ts != nullptr );
-
-	for ( int i = 0; i < count; i++ ) {
-		ts[ i ] -= dt;
-		if ( ts[ i ] <= 0.0f ) {
-			particles->kill( i );
+	std::string attribType;
+	if ( eval.getPropValue( "attrib", attribType ) ) {
+		if ( attribType == "position" ) {
+			generator->setParticleAttribType( ParticleAttrib::POSITION );
+		}
+		else if ( attribType == "velocity" ) {
+			generator->setParticleAttribType( ParticleAttrib::VELOCITY );
+		}
+		else if ( attribType == "acceleration" ) {
+			generator->setParticleAttribType( ParticleAttrib::ACCELERATION );
 		}
 	}
+
+	Vector3f value;
+	if ( eval.getPropValue( "value", value ) ) {
+		generator->setValue( value );
+	}
+	
+	return generator;
 }
 
