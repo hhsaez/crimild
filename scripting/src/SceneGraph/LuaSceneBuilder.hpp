@@ -169,7 +169,7 @@ namespace crimild {
         };
 
 #define CRIMILD_SCRIPTING_REGISTER_BUILDER( X ) \
-		crimild::scripting::LuaObjectBuilderRegistry::getInstance()->registerBuilder< T >( #X );
+		crimild::scripting::LuaObjectBuilderRegistry::getInstance()->registerBuilder< X >( #X );
 
 #define CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( X, BUILDER_FUNC ) \
 		crimild::scripting::LuaObjectBuilderRegistry::getInstance()->registerCustomBuilder( #X, BUILDER_FUNC );

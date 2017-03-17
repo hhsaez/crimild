@@ -55,6 +55,8 @@ namespace crimild {
 			END_COLOR,
 			COLOR,
 			UNIFORM_SCALE,
+			UNIFORM_SCALE_START,
+			UNIFORM_SCALE_END,
 			TIME,
 			LIFE_TIME,
 			USER_DEFINED = 1000,

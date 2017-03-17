@@ -274,13 +274,27 @@ void StandardRenderPass::renderStandardGeometry( Renderer *renderer, Geometry *g
     }
     
     geometry->forEachPrimitive( [renderer, program]( Primitive *primitive ) {
-        renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
-        renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
+		// TODO: maybe we shound't add a geometry to the queue if it
+		// has no valid primitive instead of quering the state of the
+		// VBO and IBO while rendering
+		
+		auto vbo = primitive->getVertexBuffer();
+		if ( vbo == nullptr ) {
+			return;
+		}
+
+		auto ibo = primitive->getIndexBuffer();
+		if ( ibo == nullptr ) {
+			return;
+		}
+		
+        renderer->bindVertexBuffer( program, vbo );
+        renderer->bindIndexBuffer( program, ibo );
         
         renderer->drawPrimitive( program, primitive );
         
-        renderer->unbindVertexBuffer( program, primitive->getVertexBuffer() );
-        renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
+        renderer->unbindVertexBuffer( program, vbo );
+        renderer->unbindIndexBuffer( program, ibo );
     });
     
     if ( material != nullptr ) {

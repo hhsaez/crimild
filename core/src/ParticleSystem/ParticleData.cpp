@@ -46,8 +46,10 @@ void ParticleData::generate( void )
 
 	// reset all particle attributes
 	const auto count = getParticleCount();
-    _attribs.foreach( [ count ]( const ParticleAttribType &, ParticleAttribArrayPtr &attr, unsigned int ) {
-        attr->reset( count );
+    _attribs.foreach( [ count ]( const ParticleAttribType &type, ParticleAttribArrayPtr &attr, unsigned int ) {
+		if ( attr != nullptr ) {
+			attr->reset( count );
+		}
     });
 
 	// reset alive flags for all particles (all dead)

@@ -47,6 +47,15 @@ SharedPointer< PointSpriteParticleRenderer > LuaPointSpriteParticleRendererBuild
 		if ( blendMode == "additive" ) {
 			renderer->getMaterial()->setAlphaState( crimild::alloc< AlphaState >( true, AlphaState::SrcBlendFunc::SRC_ALPHA, AlphaState::DstBlendFunc::ONE ) );
 		}
+		else if ( blendMode == "multiply" ) {
+			renderer->getMaterial()->setAlphaState( crimild::alloc< AlphaState >( true, AlphaState::SrcBlendFunc::ONE, AlphaState::DstBlendFunc::ONE_MINUS_SRC_ALPHA ) );
+		}
+		else if ( blendMode == "disabled" ) {
+			renderer->getMaterial()->setAlphaState( AlphaState::DISABLED );
+		}
+		else {
+			renderer->getMaterial()->setAlphaState( AlphaState::ENABLED );
+		}
 	}
 
 	crimild::Bool cullFaceEnabled;

@@ -37,6 +37,9 @@ namespace crimild {
         NodePositionParticleGenerator( void );
         virtual ~NodePositionParticleGenerator( void );
 
+		inline void setTargetNodeName( const std::string name ) { _targetNodeName = name; }
+		inline const std::string &getTargetNodeName( void ) const { return _targetNodeName; }
+
 		inline void setTargetNode( Node *node ) { _targetNode = node; }
 		inline Node *getTargetNode( void ) { return _targetNode; }
 		inline const Node *getTargetNode( void ) const { return _targetNode; }
@@ -48,6 +51,7 @@ namespace crimild {
         virtual void generate( Node *node, crimild::Real64 dt, ParticleData *particles, ParticleId startId, ParticleId endId ) override;
 
     private:
+		std::string _targetNodeName;
 		Node *_targetNode = nullptr;
         Vector3f _size;
 

@@ -50,12 +50,12 @@ SharedPointer< RandomVector3fParticleGenerator > LuaRandomVector3fParticleGenera
 	}
 
 	Vector3f min;
-	if ( eval.getPropValue( "min", min ) ) {
+	if ( eval.getPropValue( "minValue", min ) ) {
 		generator->setMinValue( min );
 	}
 
 	Vector3f max;
-	if ( eval.getPropValue( "max", max ) ) {
+	if ( eval.getPropValue( "maxValue", max ) ) {
 		generator->setMaxValue( max );
 	}
 	

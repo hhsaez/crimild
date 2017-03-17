@@ -25,51 +25,17 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ColorParticleUpdater.hpp"
+#include "LuaUniformScaleParticleUpdaterBuilder.hpp"
 
-#include "Mathematics/Interpolation.hpp"
+#include "SceneGraph/LuaSceneBuilder.hpp"
 
 using namespace crimild;
+using namespace crimild::scripting;
 
-ColorParticleUpdater::ColorParticleUpdater( void )
+SharedPointer< UniformScaleParticleUpdater > LuaUniformScaleParticleUpdaterBuilder::build( ScriptEvaluator &eval )
 {
+	auto updater = crimild::alloc< UniformScaleParticleUpdater >();
 
-}
-
-ColorParticleUpdater::~ColorParticleUpdater( void )
-{
-
-}
-
-void ColorParticleUpdater::configure( Node *node, ParticleData *particles )
-{
-	_startColors = particles->createAttribArray< RGBAColorf >( ParticleAttrib::START_COLOR );
-	_endColors = particles->createAttribArray< RGBAColorf >( ParticleAttrib::END_COLOR );
-	_colors = particles->createAttribArray< RGBAColorf >( ParticleAttrib::COLOR );
-	_times = particles->createAttribArray< crimild::Real32 >( ParticleAttrib::TIME );
-	_lifetimes = particles->createAttribArray< crimild::Real32 >( ParticleAttrib::LIFE_TIME );
-    
-}
-
-void ColorParticleUpdater::update( Node *node, double dt, ParticleData *particles )
-{
-	const auto count = particles->getAliveCount();
-
-	auto startData = _startColors->getData< RGBAColorf >();
-	auto endData = _endColors->getData< RGBAColorf >();
-	auto colorData = _colors->getData< RGBAColorf >();
-	auto timeData = _times->getData< crimild::Real32 >();
-	auto lifetimeData = _lifetimes->getData< crimild::Real32 >();
-
-	for ( crimild::Size i = 0; i < count; i++ ) {
-		const auto s0 = startData[ i ];
-		const auto s1 = endData[ i ];
-
-		const auto t = 1.0f - ( timeData[ i ] / lifetimeData[ i ] );
-
-		RGBAColorf c;
-		Interpolation::linear( s0, s1, t, c );
-		colorData[ i ] = c;
-	}
+	return updater;
 }
 

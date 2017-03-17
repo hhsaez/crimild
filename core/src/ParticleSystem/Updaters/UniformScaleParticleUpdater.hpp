@@ -37,7 +37,15 @@ namespace crimild {
         UniformScaleParticleUpdater( void );
         virtual ~UniformScaleParticleUpdater( void );
 
+		virtual void configure( Node *node, ParticleData *particles ) override;
         virtual void update( Node *node, crimild::Real64 dt, ParticleData *particles ) override;
+
+	private:
+		ParticleAttribArray *_startScales = nullptr;
+		ParticleAttribArray *_endScales = nullptr;
+		ParticleAttribArray *_scales = nullptr;
+		ParticleAttribArray *_times = nullptr;
+		ParticleAttribArray *_lifetimes = nullptr;
     };
 
 }

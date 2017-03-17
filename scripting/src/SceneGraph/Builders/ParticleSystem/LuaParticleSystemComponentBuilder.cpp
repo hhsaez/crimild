@@ -43,19 +43,27 @@ SharedPointer< ParticleSystemComponent > LuaParticleSystemComponentBuilder::buil
 	auto particles = crimild::alloc< ParticleData >( maxParticles );
 
 	crimild::Bool computeInWorldSpace = false;
-	eval.getPropValue( "computeInWorldSpace", computeInWorldSpace );
-	particles->setComputeInWorldSpace( computeInWorldSpace );
+	if ( eval.getPropValue( "computeInWorldSpace", computeInWorldSpace ) ) {
+		particles->setComputeInWorldSpace( computeInWorldSpace );
+	}
+
+	auto ps = crimild::alloc< ParticleSystemComponent >( particles );
 
 	crimild::Real32 emitRate = maxParticles;
-	eval.getPropValue( "emitRate", emitRate );
+	if ( eval.getPropValue( "emitRate", emitRate ) ) {
+		ps->setEmitRate( emitRate );
+	}
 
 	crimild::Real32 preWarmTime = 0.0;
-	eval.getPropValue( "preWarmTime", preWarmTime );
-	
-	auto ps = crimild::alloc< ParticleSystemComponent >( particles );
-	ps->setEmitRate( emitRate );
-	ps->setPreWarmTime( preWarmTime );
+	if ( eval.getPropValue( "preWarmTime", preWarmTime ) ) {
+		ps->setPreWarmTime( preWarmTime );
+	}
 
+	crimild::Bool burst = false;
+	if ( eval.getPropValue( "burst", burst ) ) {
+		ps->setBurst( burst );
+	}
+	
 	eval.foreach( "generators", [ ps ]( ScriptEvaluator &gEval, int ) {
 		std::string type;
 		if ( gEval.getPropValue( "type", type ) ) {

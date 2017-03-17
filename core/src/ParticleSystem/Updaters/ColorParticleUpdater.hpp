@@ -39,6 +39,13 @@ namespace crimild {
 
         virtual void configure( Node *node, ParticleData *particles ) override;
         virtual void update( Node *node, crimild::Real64 dt, ParticleData *particles ) override;
+		
+	private:
+		ParticleAttribArray *_startColors = nullptr;
+		ParticleAttribArray *_endColors = nullptr;
+		ParticleAttribArray *_colors = nullptr;
+		ParticleAttribArray *_times = nullptr;
+		ParticleAttribArray *_lifetimes = nullptr;
     };
 
 }

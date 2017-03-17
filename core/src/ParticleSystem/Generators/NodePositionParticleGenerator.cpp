@@ -31,6 +31,8 @@
 
 #include "SceneGraph/Node.hpp"
 
+#include "Visitors/Apply.hpp"
+
 using namespace crimild;
 
 NodePositionParticleGenerator::NodePositionParticleGenerator( void )
@@ -46,6 +48,14 @@ NodePositionParticleGenerator::~NodePositionParticleGenerator( void )
 void NodePositionParticleGenerator::configure( Node *node, ParticleData *particles )
 {
 	_positions = particles->createAttribArray< Vector3f >( ParticleAttrib::POSITION );
+
+	if ( _targetNode == nullptr && !_targetNodeName.empty() ) {
+		node->getParent()->perform( Apply( [ this ]( Node *node ) {
+			if ( node->getName() == _targetNodeName ) {
+				_targetNode = node;
+			}
+		}));
+	}
 }
 
 void NodePositionParticleGenerator::generate( Node *node, crimild::Real64 dt, ParticleData *particles, ParticleId startId, ParticleId endId )

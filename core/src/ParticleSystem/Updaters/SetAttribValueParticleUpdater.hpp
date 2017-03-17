@@ -79,6 +79,8 @@ namespace crimild {
 		ParticleAttribArray *_attribData = nullptr;
     };
 
+	using SetVector3fValueParticleUpdater = SetAttribValueParticleUpdater< Vector3f >;
+
 }
 
 #endif

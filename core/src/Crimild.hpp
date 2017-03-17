@@ -124,6 +124,8 @@
 #include "ParticleSystem/Updaters/CameraSortParticleUpdater.hpp"
 #include "ParticleSystem/Updaters/AttractorParticleUpdater.hpp"
 #include "ParticleSystem/Updaters/SetAttribValueParticleUpdater.hpp"
+#include "ParticleSystem/Updaters/UniformScaleParticleUpdater.hpp"
+#include "ParticleSystem/Updaters/ColorParticleUpdater.hpp"
 #include "ParticleSystem/Renderers/PointSpriteParticleRenderer.hpp"
 #include "ParticleSystem/Renderers/OrientedQuadParticleRenderer.hpp"
 #include "ParticleSystem/Renderers/NodeParticleRenderer.hpp"

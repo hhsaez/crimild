@@ -41,15 +41,21 @@ SharedPointer< RandomReal32ParticleGenerator > LuaRandomReal32ParticleGeneratorB
 		if ( attribType == "uniform_scale" ) {
 			generator->setParticleAttribType( ParticleAttrib::UNIFORM_SCALE );
 		}
+		else if ( attribType == "uniform_scale_start" ) {
+			generator->setParticleAttribType( ParticleAttrib::UNIFORM_SCALE_START );
+		}
+		else if ( attribType == "uniform_scale_end" ) {
+			generator->setParticleAttribType( ParticleAttrib::UNIFORM_SCALE_END );
+		}
 	}
 
 	crimild::Real32 min;
-	if ( eval.getPropValue( "min", min ) ) {
+	if ( eval.getPropValue( "minValue", min ) ) {
 		generator->setMinValue( min );
 	}
 
 	crimild::Real32 max;
-	if ( eval.getPropValue( "max", max ) ) {
+	if ( eval.getPropValue( "maxValue", max ) ) {
 		generator->setMaxValue( max );
 	}
 	
