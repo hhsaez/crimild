@@ -36,7 +36,7 @@
 
 using namespace crimild;
 
-void ProfilerConsoleOutputHandler::beginOutput( void )
+void ProfilerConsoleOutputHandler::beginOutput( crimild::Size fps, crimild::Real64 avgFrameTime, crimild::Real64 minFrameTime, crimild::Real64 maxFrameTime )
 {
     std::cout << std::setiosflags( std::ios::fixed )
               << std::setprecision( 3 )
@@ -52,15 +52,20 @@ void ProfilerConsoleOutputHandler::beginOutput( void )
 
 void ProfilerConsoleOutputHandler::sample( float minPc, float avgPc, float maxPc, unsigned int totalTime, unsigned int callCount, std::string name, unsigned int parentCount )
 {
-    std::cout << std::setiosflags( std::ios::fixed | std::ios::showpoint )
-              << std::setprecision( 3 )
-              << std::setw( 7 ) << std::right << minPc << " | "
-              << std::setw( 7 ) << std::right << avgPc << " | "
-              << std::setw( 7 ) << std::right << maxPc << " | "
-              << std::setw( 7 ) << std::right << totalTime << " | "
-              << std::setw( 7 ) << std::right << callCount << " | "
-              << std::left << name
-              << std::endl;
+	std::stringstream spaces;
+	for ( int i = 0; i < parentCount; i++ ) {
+		spaces << " ";
+	}
+	
+	std::cout << std::setiosflags( std::ios::fixed | std::ios::showpoint )
+			  << std::setprecision( 3 )
+			  << std::setw( 7 ) << std::right << minPc << " | "
+			  << std::setw( 7 ) << std::right << avgPc << " | "
+			  << std::setw( 7 ) << std::right << maxPc << " | "
+			  << std::setw( 7 ) << std::right << totalTime << " | "
+			  << std::setw( 7 ) << std::right << callCount << " | "
+			  << std::left << spaces.str() << name
+			  << "\n";
 }
 
 void ProfilerConsoleOutputHandler::endOutput( void )
@@ -81,7 +86,7 @@ ProfilerSample::~ProfilerSample( void )
 
 Profiler::Profiler( void )
 {
-    setOutputHandler( crimild::alloc< ProfilerConsoleOutputHandler >() );
+	resetAll();
 }
 
 Profiler::~Profiler( void )
@@ -89,24 +94,17 @@ Profiler::~Profiler( void )
 
 }
 
-unsigned long Profiler::getTime( void )
+crimild::Real64 Profiler::getTime( void )
 {
-    return std::chrono::duration_cast< std::chrono::milliseconds >( std::chrono::high_resolution_clock::now().time_since_epoch() ).count();
+	auto now = std::chrono::high_resolution_clock::now().time_since_epoch();
+    return 0.001 * std::chrono::duration_cast< std::chrono::microseconds >( now ).count();
 }
 
 int Profiler::onSampleCreated( std::string name )
 {
-    std::thread::id this_id = std::this_thread::get_id();
-
-    auto stack = _samples[ this_id ];
-    if ( stack == nullptr ) {
-        stack = crimild::alloc< ProfilerSampleStack >();
-        _samples[ this_id ] = stack;
-    }
-
     int firstInvalidIndex = -1;
     for ( int i = 0; i < Profiler::MAX_SAMPLES; i++ ) {
-        auto &sample = stack->samples[ i ];
+        auto &sample = _samples[ i ];
 
         if ( !sample.isValid ) {
             if ( firstInvalidIndex < 0 ) {
@@ -116,12 +114,12 @@ int Profiler::onSampleCreated( std::string name )
         else if ( sample.name == name ) {
             assert( !sample.isOpened && "Tried to profile a sample that is already being profiled" );
 
-            sample.parentIndex = stack->lastOpenedSample;
-            stack->lastOpenedSample = i;
+            sample.parentIndex = _lastOpenedSample;
+            _lastOpenedSample = i;
 
-            sample.parentCount = stack->openSampleCount;
+            sample.parentCount = _openSampleCount;
 
-            stack->openSampleCount++;
+            _openSampleCount++;
 
             sample.isOpened = true;
 
@@ -129,7 +127,7 @@ int Profiler::onSampleCreated( std::string name )
             sample.startTime = getTime();
 
             if ( sample.parentIndex < 0 ) {
-                stack->rootBegin = sample.startTime;
+                _rootBegin = sample.startTime;
             }
 
             return i;
@@ -138,14 +136,14 @@ int Profiler::onSampleCreated( std::string name )
 
     assert( firstInvalidIndex >= 0 && "Profiler run out of sample slots" );
 
-    auto &sample = stack->samples[ firstInvalidIndex ];
+    auto &sample = _samples[ firstInvalidIndex ];
 
     sample.isValid = true;
     sample.name = name;
-    sample.parentIndex = stack->lastOpenedSample;
-    stack->lastOpenedSample = firstInvalidIndex;
-    sample.parentCount = stack->openSampleCount;
-    stack->openSampleCount++;
+    sample.parentIndex = _lastOpenedSample;
+    _lastOpenedSample = firstInvalidIndex;
+    sample.parentCount = _openSampleCount;
+    _openSampleCount++;
     sample.isOpened = true;
     sample.callCount = 1;
     sample.totalTime = 0.0f;
@@ -153,7 +151,7 @@ int Profiler::onSampleCreated( std::string name )
     sample.startTime = getTime();
 
     if ( sample.parentIndex < 0 ) {
-        stack->rootBegin = sample.startTime;
+        _rootBegin = sample.startTime;
     }
 
     return firstInvalidIndex;
@@ -167,46 +165,62 @@ void Profiler::onSampleDestroyed( int sampleIndex )
     }
 
 
-    std::thread::id this_id = std::this_thread::get_id();
-    auto stack = _samples[ this_id ];
-    if ( stack == nullptr ) {
-        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot find stack for given thread id" );
-        return;
-    }
-
     auto endTime = getTime();
 
-    auto &sample = stack->samples[ sampleIndex ];
+    auto &sample = _samples[ sampleIndex ];
 
     sample.isOpened = false;
 
     unsigned long deltaTime = endTime - sample.startTime;
 
     if ( sample.parentIndex >= 0 ) {
-        stack->samples[ sample.parentIndex ].childTime += deltaTime;
+        _samples[ sample.parentIndex ].childTime += deltaTime;
     }
     else {
-        stack->rootEnd = endTime;
+        _rootEnd = endTime;
     }
 
     sample.totalTime += deltaTime;
 
-    stack->lastOpenedSample = sample.parentIndex;
+    _lastOpenedSample = sample.parentIndex;
 
-    stack->openSampleCount--;
+    _openSampleCount--;
 }
 
 void Profiler::resetAll( void )
 {
-    for ( auto it : _samples ) {
-        for ( int i = 0; i < MAX_SAMPLES; i++ ) {
-            auto &sample = it.second->samples[ i ];
-            sample.avgTime = 0.0f;
-            sample.minTime = -1.0f;
-            sample.maxTime = -1.0f;
-            sample.dataCount = 0;
-        }
-    }
+	for ( int i = 0; i < MAX_SAMPLES; i++ ) {
+		auto &sample = _samples[ i ];
+		sample.avgTime = 0.0f;
+		sample.minTime = -1.0f;
+		sample.maxTime = -1.0f;
+		sample.dataCount = 0;
+	}
+
+	if ( _frameCount > 0 ) {
+		_fps = _frameCount;
+		_avgFrameTime = _totalFrameTime / _fps;
+	}
+
+	const auto t = _minFrameTime;
+	_minFrameTime = _maxFrameTime;
+	_maxFrameTime = t;
+	_frameCount = 0;
+	_totalFrameTime = 0;
+	_lastFrameTime = getTime();
+}
+
+void Profiler::step( void )
+{
+	_frameCount++;
+	
+	const auto currentFrameTime = getTime();
+	const auto frameTime = currentFrameTime - _lastFrameTime;
+	_minFrameTime = Numeric< crimild::Real64 >::min( frameTime, _minFrameTime );
+	_maxFrameTime = Numeric< crimild::Real64 >::max( frameTime, _maxFrameTime );
+
+	_lastFrameTime = currentFrameTime;
+	_totalFrameTime += frameTime;
 }
 
 void Profiler::dump( void )
@@ -215,28 +229,26 @@ void Profiler::dump( void )
         return;
     }
 
-    getOutputHandler()->beginOutput();
+    getOutputHandler()->beginOutput( _fps, _avgFrameTime, _minFrameTime, _maxFrameTime );
 
-    for ( auto it : _samples ) {
-        for ( int i = 0; i < MAX_SAMPLES; i++ ) {
-            auto &sample = it.second->samples[ i ];
-
-            if ( sample.isValid ) {
-                float accumTime = sample.avgTime * sample.dataCount + sample.totalTime;
-                sample.dataCount++;
-                sample.avgTime = accumTime / ( float ) sample.dataCount;
-                sample.minTime = sample.minTime < 0 ? sample.totalTime : Numericf::min( sample.minTime, sample.totalTime );
-                sample.maxTime = sample.maxTime < 0 ? sample.totalTime : Numericf::max( sample.maxTime, sample.totalTime );
-
-                getOutputHandler()->sample( sample.minTime, sample.avgTime, sample.maxTime, sample.totalTime, sample.callCount, sample.name, sample.parentCount );
-
-                sample.callCount = 0;
-                sample.totalTime = 0;
-                sample.childTime = 0;
-
-            }
-        }
-    }
+	for ( int i = 0; i < MAX_SAMPLES; i++ ) {
+		auto &sample = _samples[ i ];
+		
+		if ( sample.isValid ) {
+			float accumTime = sample.avgTime * sample.dataCount + sample.totalTime;
+			sample.dataCount++;
+			sample.avgTime = accumTime / ( float ) sample.dataCount;
+			sample.minTime = sample.minTime < 0 ? sample.totalTime : Numericf::min( sample.minTime, sample.totalTime );
+			sample.maxTime = sample.maxTime < 0 ? sample.totalTime : Numericf::max( sample.maxTime, sample.totalTime );
+			
+			getOutputHandler()->sample( sample.minTime, sample.avgTime, sample.maxTime, sample.totalTime, sample.callCount, sample.name, sample.parentCount );
+			
+			sample.callCount = 0;
+			sample.totalTime = 0;
+			sample.childTime = 0;
+			
+		}
+	}
 
     getOutputHandler()->endOutput();
 }

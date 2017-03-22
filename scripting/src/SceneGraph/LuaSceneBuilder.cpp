@@ -27,6 +27,7 @@
 #include "SceneGraph/Builders/ParticleSystem/Renderers/LuaPointSpriteParticleRendererBuilder.hpp"
 #include "SceneGraph/Builders/ParticleSystem/Renderers/LuaOrientedQuadParticleRendererBuilder.hpp"
 #include "SceneGraph/Builders/ParticleSystem/Renderers/LuaNodeParticleRendererBuilder.hpp"
+#include "SceneGraph/Builders/ParticleSystem/Renderers/LuaAnimatedSpriteParticleRendererBuilder.hpp"
 
 using namespace crimild;
 using namespace crimild::scripting;
@@ -193,6 +194,7 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::PointSpriteParticleRenderer, LuaPointSpriteParticleRendererBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::OrientedQuadParticleRenderer, LuaOrientedQuadParticleRendererBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::NodeParticleRenderer, LuaNodeParticleRendererBuilder::build );
+	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::AnimatedSpriteParticleRenderer, LuaAnimatedSpriteParticleRendererBuilder::build );
 
     auto self = this;
     

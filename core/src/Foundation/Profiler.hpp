@@ -32,11 +32,16 @@
 #include "Memory.hpp"
 #include "SharedObject.hpp"
 #include "Singleton.hpp"
+#include "Types.hpp"
 
 #include <string>
 #include <sstream>
 #include <thread>
 #include <map>
+
+#ifndef CRIMILD_PROFILER_ENABLED
+#define CRIMILD_PROFILER_ENABLED 1
+#endif
 
 namespace crimild {
 
@@ -51,7 +56,7 @@ namespace crimild {
 
     class ProfilerOutputHandler : public SharedObject {
     public:
-        virtual void beginOutput( void ) = 0;
+        virtual void beginOutput( crimild::Size fps, crimild::Real64 avgFrameTime, crimild::Real64 minFrameTime, crimild::Real64 maxFrameTime ) = 0;
         virtual void sample( float minPc, float avgPc, float maxPc, unsigned int totalTime, unsigned int callCount, std::string name, unsigned int parentCount ) = 0;
         virtual void endOutput( void ) = 0;
     };
@@ -60,7 +65,7 @@ namespace crimild {
 
     class ProfilerConsoleOutputHandler : public ProfilerOutputHandler {
     public:
-        virtual void beginOutput( void ) override;
+        virtual void beginOutput( crimild::Size fps, crimild::Real64 avgFrameTime, crimild::Real64 minFrameTime, crimild::Real64 maxFrameTime ) override = 0;
         virtual void sample( float minPc, float avgPc, float maxPc, unsigned int totalTime, unsigned int callCount, std::string name, unsigned int parentCount ) override;
         virtual void endOutput( void ) override;
     };
@@ -73,6 +78,8 @@ namespace crimild {
         Profiler( void );
         ~Profiler( void );
 
+		void step( void );
+		
         void dump( void );
 
         void resetAll( void );
@@ -87,46 +94,10 @@ namespace crimild {
         void onSampleDestroyed( int index );
 
     private:
-        unsigned long getTime( void );
+		crimild::Real64 getTime( void );
 
     private:
 
-        class ProfilerSampleStack : public SharedObject {
-        public:
-            struct ProfilerSampleInfo {
-                bool isValid = false;
-                bool isOpened = false;
-
-                std::string name;
-                unsigned int callCount = 0;
-
-                unsigned long startTime = 0;
-                unsigned long totalTime = 0;
-                unsigned long childTime = 0;
-
-                float avgTime = 0.0f;
-                float minTime = 0.0f;
-                float maxTime = 0.0f;
-
-                unsigned int dataCount = 0;
-
-                int parentCount = 0;
-                int parentIndex = -1;
-
-            };
-
-            ProfilerSampleInfo samples[ MAX_SAMPLES ];
-
-            int lastOpenedSample = -1;
-            int openSampleCount = 0;
-            float rootBegin = 0.0f;
-            float rootEnd = 0.0f;
-        };
-
-        using ProfilerSampleStackPtr = SharedPointer< ProfilerSampleStack >;
-        std::map< std::thread::id, ProfilerSampleStackPtr > _samples;
-
-        /*
         struct ProfilerSampleInfo {
             bool isValid = false;
             bool isOpened = false;
@@ -134,13 +105,13 @@ namespace crimild {
             std::string name;
             unsigned int callCount = 0;
 
-            unsigned long startTime = 0;
-            unsigned long totalTime = 0;
-            unsigned long childTime = 0;
+			crimild::Real64 startTime = 0;
+			crimild::Real64 totalTime = 0;
+			crimild::Real64 childTime = 0;
 
-            float avgTime = 0.0f;
-            float minTime = 0.0f;
-            float maxTime = 0.0f;
+			crimild::Real64 avgTime = 0.0f;
+			crimild::Real64 minTime = 0.0f;
+			crimild::Real64 maxTime = 0.0f;
 
             unsigned int dataCount = 0;
 
@@ -154,14 +125,22 @@ namespace crimild {
         int _openSampleCount = 0;
         float _rootBegin = 0.0f;
         float _rootEnd = 0.0f;
-        */
 
         ProfilerOutputHandlerPtr _outputHandler;
+
+		crimild::Real64 _minFrameTime = 0;
+		crimild::Real64 _maxFrameTime = 0;
+		crimild::Size _frameCount = 0;
+		crimild::Real64 _totalFrameTime = 0;
+		crimild::Real64 _lastFrameTime = 0;
+
+		crimild::Size _fps = 0;
+		crimild::Real64 _avgFrameTime = 0;
     };
 
 }
 
-#ifdef CRIMILD_PROFILER_ENABLE
+#if CRIMILD_PROFILER_ENABLED
     #define CRIMILD_PROFILE( X ) crimild::ProfilerSample __crimild__profile__sample__instance__( X );
 #else
     #define CRIMILD_PROFILE( X )

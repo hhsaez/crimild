@@ -129,6 +129,7 @@
 #include "ParticleSystem/Renderers/PointSpriteParticleRenderer.hpp"
 #include "ParticleSystem/Renderers/OrientedQuadParticleRenderer.hpp"
 #include "ParticleSystem/Renderers/NodeParticleRenderer.hpp"
+#include "ParticleSystem/Renderers/AnimatedSpriteParticleRenderer.hpp"
 
 #include "Primitives/Primitive.hpp"
 #include "Primitives/ArcPrimitive.hpp"

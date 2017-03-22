@@ -282,6 +282,16 @@ namespace crimild {
         }
         
         template<>
+        inline bool ScriptEvaluator::getPropValue( const std::string &name, Vector2f &result )
+        {
+            return foreach( name, [&result]( ScriptEvaluator &eval, int index ) {
+                float v;
+                eval.getPropValue< float >( v );
+                result[ index ] = v;
+            });
+        }
+        
+        template<>
         inline bool ScriptEvaluator::getPropValue( const std::string &name, Vector3f &result )
         {
             return foreach( name, [&result]( ScriptEvaluator &eval, int index ) {

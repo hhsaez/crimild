@@ -28,6 +28,7 @@
 #include "DebugSystem.hpp"
 
 #include "Simulation/Simulation.hpp"
+#include "Simulation/Settings.hpp"
 
 #include "Debug/DebugRenderHelper.hpp"
 
@@ -57,6 +58,8 @@ bool DebugSystem::start( void )
 	}
     
     DebugRenderHelper::init();
+
+	_profilerInfoEnabled = Simulation::getInstance()->getSettings()->get< crimild::Bool >( "profiler.enabled", false );
     
 	return true;
 }
@@ -83,13 +86,15 @@ void DebugSystem::onDidRenderScene( messaging::DidRenderScene const & )
             });
         }));
     }
+
+	Profiler::getInstance()->step();
     
     if ( _profilerInfoEnabled ) {
-        Profiler::getInstance()->dump();
-
+		Profiler::getInstance()->dump();
+		
         static double accum = 0.0;
         auto t = Simulation::getInstance()->getSimulationClock();
-        accum += t.getDeltaTime() * 100.0;
+        accum += t.getDeltaTime();
         if ( accum >= 1.0 ) {
             Profiler::getInstance()->resetAll();
             accum = 0.0;
