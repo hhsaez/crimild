@@ -48,9 +48,9 @@ ShadowMap::ShadowMap( Light *source, FrameBufferObject *fbo )
         _buffer->getRenderTargets().add( "color", crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
     }
     
-    _buffer->getRenderTargets().each( [&]( std::string, RenderTarget *target ) {
-        if ( target->getOutput() == RenderTarget::Output::TEXTURE || target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
-            _texture = target->getTexture();
+    _buffer->getRenderTargets().each( [&]( std::string name, RenderTarget *target ) {
+        if ( name == "color" ) {
+                _texture = target->getTexture();
         }
     });
     

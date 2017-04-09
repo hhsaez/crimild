@@ -44,8 +44,10 @@ using namespace crimild;
 
 StandardRenderPass::StandardRenderPass( void )
 {
-    // TODO: fix this
+#if !defined( CRIMILD_PLATFORM_DESKTOP )
+    // TODO: shadows work on desktop only for the moment
     setShadowMappingEnabled( false );
+#endif
 }
 
 StandardRenderPass::~StandardRenderPass( void )
@@ -64,6 +66,20 @@ void StandardRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, C
     renderOccluders( renderer, renderQueue, camera );
     renderOpaqueObjects( renderer, renderQueue, camera );
     renderTranslucentObjects( renderer, renderQueue, camera );
+
+#if 0
+    renderer->setViewport( Rectf( 0.0f, 0.75f, 0.25f, 0.25f ) );
+
+    renderer->setDepthState( DepthState::DISABLED );
+
+    for ( auto it : _shadowMaps ) {
+        if ( it.second != nullptr ) {
+            RenderPass::render( renderer, it.second->getTexture(), nullptr );
+        }
+    }
+
+    renderer->setViewport( Rectf( 0.0f, 0.0f, 1.0f, 1.0f ) );
+#endif
 }
 
 ShaderProgram *StandardRenderPass::getStandardProgram( void )
@@ -97,7 +113,7 @@ void StandardRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *ren
         if ( !light->shouldCastShadows() ) {
             return;
         }
-        
+
         auto map = _shadowMaps[ light ];
         if ( map == nullptr ) {
             map = crimild::alloc< ShadowMap >( light );
@@ -113,6 +129,12 @@ void StandardRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *ren
         renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LINEAR_DEPTH_CONSTANT_UNIFORM ), map->getLinearDepthConstant() );
         
         auto renderables = renderQueue->getRenderables( RenderQueue::RenderableType::SHADOW_CASTER );
+        
+        const auto projection = map->getLightProjectionMatrix();
+        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::PROJECTION_MATRIX_UNIFORM ), projection );
+        
+        const auto view = map->getLightViewMatrix();
+        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM ), view );
         
         renderQueue->each( renderables, [this, renderer, program]( RenderQueue::Renderable *renderable ) {
             renderStandardGeometry(
