@@ -91,7 +91,13 @@ void FrameBufferObjectCatalog::bind( FrameBufferObject *fbo )
             fboColorBufferCount++;
         }
     });
-    glDrawBuffers( fboColorBufferCount, fboBuffers );
+
+    if ( fboColorBufferCount > 0 ) {
+        glDrawBuffers( fboColorBufferCount, fboBuffers );
+    }
+    else {
+        glDrawBuffer( GL_NONE );
+    }
 #endif
 
     glClearColor( clearColor.r(), clearColor.g(), clearColor.b(), clearColor.a() );

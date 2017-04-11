@@ -150,7 +150,7 @@ void main( void )
         vec3 depth = vPosition.xyz / vPosition.w;
         depth.z = length( vWorldVertex.xyz - uLights[ 0 ].position ) * uLinearDepthConstant;
         float shadow = 1.0;
-        //depth.z *= 0.99;
+        float bias = 0.005;
         vec4 shadowColor = CRIMILD_GLSL_FN_TEXTURE_2D( uShadowMap, depth.xy );
         float shadowDepth = unpack( shadowColor );
         if ( depth.z > shadowDepth ) {

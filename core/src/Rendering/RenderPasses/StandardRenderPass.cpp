@@ -68,7 +68,7 @@ void StandardRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, C
     renderTranslucentObjects( renderer, renderQueue, camera );
 
 #if 0
-    renderer->setViewport( Rectf( 0.0f, 0.75f, 0.25f, 0.25f ) );
+    // renderer->setViewport( Rectf( 0.0f, 0.75f, 0.25f, 0.25f ) );
 
     renderer->setDepthState( DepthState::DISABLED );
 
@@ -78,7 +78,7 @@ void StandardRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, C
         }
     }
 
-    renderer->setViewport( Rectf( 0.0f, 0.0f, 1.0f, 1.0f ) );
+    // renderer->setViewport( Rectf( 0.0f, 0.0f, 1.0f, 1.0f ) );
 #endif
 }
 

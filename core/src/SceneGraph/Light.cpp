@@ -57,8 +57,22 @@ void Light::accept( NodeVisitor &visitor )
 
 Matrix4f Light::computeProjectionMatrix( void ) const
 {
-    Frustumf f( 45.0f, 1.0f, getShadowNearCoeff(), getShadowFarCoeff() );
-    return f.computeProjectionMatrix();
+	const float top = 10.0f;
+	const float bottom = -10.0f;
+	const float left = -10.0f;
+	const float right = 10.0f;
+	const float far = getShadowFarCoeff();
+	const float near = getShadowNearCoeff();
+
+	return Matrix4f(
+		2.0f / ( right - left ), 0.0f, 0.0f, - ( right + left ) / ( right - left ),
+		0.0f, 2.0f / ( top - bottom ), 0.0f, - ( top + bottom ) / ( top - bottom ),
+		0.0f, 0.0f, -2.0f / ( far - near ), - ( far + near ) / ( far - near ),
+		0.0f, 0.0f, 0.0f, 1.0f
+	);
+
+    // Frustumf f( 45.0f, 1.0f, getShadowNearCoeff(), getShadowFarCoeff() );
+    // return f.computeProjectionMatrix();
 }
 
 Matrix4f Light::computeViewMatrix( void ) const

@@ -50,7 +50,7 @@ ShadowMap::ShadowMap( Light *source, FrameBufferObject *fbo )
     
     _buffer->getRenderTargets().each( [&]( std::string name, RenderTarget *target ) {
         if ( name == "color" ) {
-                _texture = target->getTexture();
+            _texture = target->getTexture();
         }
     });
     
