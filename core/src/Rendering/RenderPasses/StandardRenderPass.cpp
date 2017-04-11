@@ -63,22 +63,16 @@ void StandardRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, C
         computeShadowMaps( renderer, renderQueue, camera );
     }
 
+#if 1
     renderOccluders( renderer, renderQueue, camera );
     renderOpaqueObjects( renderer, renderQueue, camera );
     renderTranslucentObjects( renderer, renderQueue, camera );
-
-#if 0
-    // renderer->setViewport( Rectf( 0.0f, 0.75f, 0.25f, 0.25f ) );
-
-    renderer->setDepthState( DepthState::DISABLED );
-
+#else
     for ( auto it : _shadowMaps ) {
         if ( it.second != nullptr ) {
             RenderPass::render( renderer, it.second->getTexture(), nullptr );
         }
     }
-
-    // renderer->setViewport( Rectf( 0.0f, 0.0f, 1.0f, 1.0f ) );
 #endif
 }
 
