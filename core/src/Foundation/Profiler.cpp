@@ -30,47 +30,98 @@
 
 #include "Mathematics/Numeric.hpp"
 
+#include "Debug/DebugRenderHelper.hpp"
+
 #include <chrono>
 #include <iostream>
 #include <iomanip>
 
 using namespace crimild;
 
-void ProfilerConsoleOutputHandler::beginOutput( crimild::Size fps, crimild::Real64 avgFrameTime, crimild::Real64 minFrameTime, crimild::Real64 maxFrameTime )
+ProfilerOutputHandler::~ProfilerOutputHandler( void )
 {
-    std::cout << std::setiosflags( std::ios::fixed )
-              << std::setprecision( 3 )
-              << std::setw( 10 ) << std::right << "MIN | "
-              << std::setw( 10 ) << std::right << "AVG | "
-              << std::setw( 10 ) << std::right << "MAX | "
-              << std::setw( 10 ) << std::right << "TIME | "
-              << std::setw( 10 ) << std::right << "COUNT | "
-              << std::left << "NAME"
-              << "\n--------------------------------------------------------------------------------------------"
-              << std::endl;
+
 }
 
-void ProfilerConsoleOutputHandler::sample( float minPc, float avgPc, float maxPc, unsigned int totalTime, unsigned int callCount, std::string name, unsigned int parentCount )
+void ProfilerOutputHandler::beginOutput( crimild::Size fps, crimild::Real64 avgFrameTime, crimild::Real64 minFrameTime, crimild::Real64 maxFrameTime )
+{
+    _output.str( "" );
+
+    _output << std::setiosflags( std::ios::fixed )
+            << std::setprecision( 3 )
+            << "FPS: " << std::setw( 10 ) << fps
+            << "MIN: " << std::setw( 10 ) << minFrameTime
+            << "AVG: " << std::setw( 10 ) << avgFrameTime
+            << "MAX: " << std::setw( 10 ) << maxFrameTime
+            << "\n";
+            
+    _output << "\n--------------------------------------------------------------------------------------------\n"
+            << std::setiosflags( std::ios::fixed )
+            << std::setprecision( 3 )
+            << std::setw( 10 ) << std::right << "MIN | "
+            << std::setw( 10 ) << std::right << "AVG | "
+            << std::setw( 10 ) << std::right << "MAX | "
+            << std::setw( 10 ) << std::right << "TIME | "
+            << std::setw( 10 ) << std::right << "COUNT | "
+            << std::left << "NAME"
+            << "\n--------------------------------------------------------------------------------------------\n";
+}
+
+void ProfilerOutputHandler::sample( float minPc, float avgPc, float maxPc, unsigned int totalTime, unsigned int callCount, std::string name, unsigned int parentCount )
 {
 	std::stringstream spaces;
 	for ( int i = 0; i < parentCount; i++ ) {
 		spaces << " ";
 	}
 	
-	std::cout << std::setiosflags( std::ios::fixed | std::ios::showpoint )
-			  << std::setprecision( 3 )
-			  << std::setw( 7 ) << std::right << minPc << " | "
-			  << std::setw( 7 ) << std::right << avgPc << " | "
-			  << std::setw( 7 ) << std::right << maxPc << " | "
-			  << std::setw( 7 ) << std::right << totalTime << " | "
-			  << std::setw( 7 ) << std::right << callCount << " | "
-			  << std::left << spaces.str() << name
-			  << "\n";
+	_output << std::setiosflags( std::ios::fixed | std::ios::showpoint )
+			<< std::setprecision( 3 )
+			<< std::setw( 7 ) << std::right << minPc << " | "
+			<< std::setw( 7 ) << std::right << avgPc << " | "
+			<< std::setw( 7 ) << std::right << maxPc << " | "
+			<< std::setw( 7 ) << std::right << totalTime << " | "
+			<< std::setw( 7 ) << std::right << callCount << " | "
+			<< std::left << spaces.str() << name
+			<< "\n";
+}
+
+void ProfilerOutputHandler::endOutput( void )
+{
+    _output << "\n";
+}
+
+ProfilerConsoleOutputHandler::ProfilerConsoleOutputHandler( void )
+{
+
+}
+
+ProfilerConsoleOutputHandler::~ProfilerConsoleOutputHandler( void )
+{
+
 }
 
 void ProfilerConsoleOutputHandler::endOutput( void )
 {
-    std::cout << "\n" << std::endl;
+    ProfilerOutputHandler::endOutput();
+
+    std::cout << getOutput() << std::endl;
+}
+
+ProfilerScreenOutputHandler::ProfilerScreenOutputHandler( void )
+{
+    
+}
+
+ProfilerScreenOutputHandler::~ProfilerScreenOutputHandler( void )
+{
+    
+}
+
+void ProfilerScreenOutputHandler::endOutput( void )
+{
+    ProfilerOutputHandler::endOutput();
+
+    DebugRenderHelper::renderText( getOutput(), Vector3f( -0.9f, 0.9f, 0.0f ), RGBAColorf( 1.0f, 1.0f, 0.0f, 1.0f ) );
 }
 
 ProfilerSample::ProfilerSample( std::string name )

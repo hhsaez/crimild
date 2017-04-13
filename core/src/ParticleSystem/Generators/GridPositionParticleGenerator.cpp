@@ -25,55 +25,58 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "AssetManager.hpp"
-#include "FileSystem.hpp"
+#include "GridPositionParticleGenerator.hpp"
 
-#include "Foundation/StringUtils.hpp"
-#include "Rendering/Texture.hpp"
-#include "Rendering/ImageTGA.hpp"
+#include "Mathematics/Random.hpp"
+
+#include "SceneGraph/Node.hpp"
 
 using namespace crimild;
 
-AssetManager::AssetManager( void )
+GridPositionParticleGenerator::GridPositionParticleGenerator( void )
+	: _origin( Vector3f::ZERO ),
+	  _size( Vector3f::ONE )
 {
 
 }
 
-AssetManager::~AssetManager( void )
+GridPositionParticleGenerator::~GridPositionParticleGenerator( void )
 {
-	clear();
-}
-
-namespace crimild {
-
-	template<>
-	Texture *AssetManager::get< Texture >( std::string name )
-	{
-	    Texture *texture = nullptr;
-	    
-	    {
-	        ScopedLock lock( _mutex );
-	        texture = static_cast< Texture * >( crimild::get_ptr( _assets[ name ] ) );
-	    }
-	    
-		if ( texture == nullptr && ( StringUtils::getFileExtension( name ) == ".tga" ) ) {
-			auto image = crimild::alloc< ImageTGA >( FileSystem::getInstance().pathForResource( name ) );
-			if ( image != nullptr ) {
-	            auto tmp = crimild::alloc< Texture >( image ) ;
-				set( name, tmp );
-	            texture = crimild::get_ptr( tmp );
-			}
-		}
-
-		return texture;
-	}
 
 }
 
-void AssetManager::loadFont( std::string name, std::string fileName )
+void GridPositionParticleGenerator::configure( Node *node, ParticleData *particles )
 {
-    std::string fontDefFileName = FileSystem::getInstance().pathForResource( fileName );
-    auto font = crimild::alloc< Font >( fontDefFileName );
-	set( name, font, true );    
+	_positions = particles->createAttribArray< Vector3f >( ParticleAttrib::POSITION );
+	assert( _positions != nullptr );
+}
+
+void GridPositionParticleGenerator::generate( Node *node, crimild::Real64 dt, ParticleData *particles, ParticleId startId, ParticleId endId )
+{
+	auto ps = _positions->getData< Vector3f >();
+	
+    const auto posMin = _origin - _size;
+    const auto posMax = _origin + _size;
+
+    const auto halfSize = 0.5f * _size;
+
+    auto i = startId;
+    const auto pCount = endId - startId;
+    if ( pCount == 0 ) {
+    	return;
+    }
+
+    for ( auto z = -halfSize.z(); z <= halfSize.z(); z += 1.0f ) {
+    	for ( auto x = -halfSize.x(); x <= halfSize.x(); x += 1.0f ) {
+			auto p = Vector3f( 2 * x, 0.0f, 2 * z );
+    		if ( particles->shouldComputeInWorldSpace() ) {
+    			node->getWorld().applyToPoint( p, p );
+    		}
+    		ps[ i ] = p;
+    		if ( ++i >= pCount ) {
+    			return;
+    		}
+    	}
+    }
 }
 

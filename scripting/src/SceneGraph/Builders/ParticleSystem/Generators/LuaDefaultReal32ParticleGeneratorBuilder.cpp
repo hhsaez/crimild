@@ -25,55 +25,29 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "AssetManager.hpp"
-#include "FileSystem.hpp"
+#include "LuaDefaultReal32ParticleGeneratorBuilder.hpp"
 
-#include "Foundation/StringUtils.hpp"
-#include "Rendering/Texture.hpp"
-#include "Rendering/ImageTGA.hpp"
+#include "SceneGraph/LuaSceneBuilder.hpp"
 
 using namespace crimild;
+using namespace crimild::scripting;
 
-AssetManager::AssetManager( void )
+SharedPointer< DefaultReal32ParticleGenerator > LuaDefaultReal32ParticleGeneratorBuilder::build( ScriptEvaluator &eval )
 {
+	auto generator = crimild::alloc< DefaultReal32ParticleGenerator >();
 
-}
-
-AssetManager::~AssetManager( void )
-{
-	clear();
-}
-
-namespace crimild {
-
-	template<>
-	Texture *AssetManager::get< Texture >( std::string name )
-	{
-	    Texture *texture = nullptr;
-	    
-	    {
-	        ScopedLock lock( _mutex );
-	        texture = static_cast< Texture * >( crimild::get_ptr( _assets[ name ] ) );
-	    }
-	    
-		if ( texture == nullptr && ( StringUtils::getFileExtension( name ) == ".tga" ) ) {
-			auto image = crimild::alloc< ImageTGA >( FileSystem::getInstance().pathForResource( name ) );
-			if ( image != nullptr ) {
-	            auto tmp = crimild::alloc< Texture >( image ) ;
-				set( name, tmp );
-	            texture = crimild::get_ptr( tmp );
-			}
+	std::string attribType;
+	if ( eval.getPropValue( "attrib", attribType ) ) {
+		if ( attribType == "uniform_scale" ) {
+			generator->setParticleAttribType( ParticleAttrib::UNIFORM_SCALE );
 		}
-
-		return texture;
 	}
 
-}
-
-void AssetManager::loadFont( std::string name, std::string fileName )
-{
-    std::string fontDefFileName = FileSystem::getInstance().pathForResource( fileName );
-    auto font = crimild::alloc< Font >( fontDefFileName );
-	set( name, font, true );    
+	crimild::Real32 value;
+	if ( eval.getPropValue( "value", value ) ) {
+		generator->setValue( value );
+	}
+	
+	return generator;
 }
 

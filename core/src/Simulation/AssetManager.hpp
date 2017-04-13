@@ -50,6 +50,7 @@ namespace crimild {
         
     public:
         static constexpr const char *FONT_DEFAULT = "fonts/default";
+        static constexpr const char *FONT_SYSTEM = "fonts/system";
         
     public:
         AssetManager( void );
@@ -108,6 +109,9 @@ namespace crimild {
         std::map< std::string, SharedPointer< SharedObject > > _persistentAssets;
         
         Mutex _mutex;
+
+    public:
+        void loadFont( std::string name, std::string fileName );
     };
 
     template<>

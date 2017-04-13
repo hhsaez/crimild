@@ -6,11 +6,13 @@
 #include "SceneGraph/Builders/ParticleSystem/LuaParticleSystemComponentBuilder.hpp"
 
 #include "SceneGraph/Builders/ParticleSystem/Generators/LuaBoxPositionParticleGeneratorBuilder.hpp"
+#include "SceneGraph/Builders/ParticleSystem/Generators/LuaGridPositionParticleGeneratorBuilder.hpp"
 #include "SceneGraph/Builders/ParticleSystem/Generators/LuaSpherePositionParticleGeneratorBuilder.hpp"
 #include "SceneGraph/Builders/ParticleSystem/Generators/LuaSphereVelocityParticleGeneratorBuilder.hpp"
 #include "SceneGraph/Builders/ParticleSystem/Generators/LuaRandomVector3fParticleGeneratorBuilder.hpp"
 #include "SceneGraph/Builders/ParticleSystem/Generators/LuaRandomReal32ParticleGeneratorBuilder.hpp"
 #include "SceneGraph/Builders/ParticleSystem/Generators/LuaDefaultVector3fParticleGeneratorBuilder.hpp"
+#include "SceneGraph/Builders/ParticleSystem/Generators/LuaDefaultReal32ParticleGeneratorBuilder.hpp"
 #include "SceneGraph/Builders/ParticleSystem/Generators/LuaColorParticleGeneratorBuilder.hpp"
 #include "SceneGraph/Builders/ParticleSystem/Generators/LuaTimeParticleGeneratorBuilder.hpp"
 #include "SceneGraph/Builders/ParticleSystem/Generators/LuaNodePositionParticleGeneratorBuilder.hpp"
@@ -173,11 +175,13 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::ParticleSystemComponent, LuaParticleSystemComponentBuilder::build );
 	
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::BoxPositionParticleGenerator, LuaBoxPositionParticleGeneratorBuilder::build );
+    CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::GridPositionParticleGenerator, LuaGridPositionParticleGeneratorBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::SpherePositionParticleGenerator, LuaSpherePositionParticleGeneratorBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::SphereVelocityParticleGenerator, LuaSphereVelocityParticleGeneratorBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::RandomVector3fParticleGenerator, LuaRandomVector3fParticleGeneratorBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::RandomReal32ParticleGenerator, LuaRandomReal32ParticleGeneratorBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::DefaultVector3fParticleGenerator, LuaDefaultVector3fParticleGeneratorBuilder::build );
+    CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::DefaultReal32ParticleGenerator, LuaDefaultReal32ParticleGeneratorBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::ColorParticleGenerator, LuaColorParticleGeneratorBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::TimeParticleGenerator, LuaTimeParticleGeneratorBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::NodePositionParticleGenerator, LuaNodePositionParticleGeneratorBuilder::build );

@@ -108,6 +108,7 @@
 #include "ParticleSystem/ParticleData.hpp"
 #include "ParticleSystem/ParticleSystemComponent.hpp"
 #include "ParticleSystem/Generators/BoxPositionParticleGenerator.hpp"
+#include "ParticleSystem/Generators/GridPositionParticleGenerator.hpp"
 #include "ParticleSystem/Generators/VelocityParticleGenerator.hpp"
 #include "ParticleSystem/Generators/SphereVelocityParticleGenerator.hpp"
 #include "ParticleSystem/Generators/SpherePositionParticleGenerator.hpp"
