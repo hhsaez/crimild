@@ -97,7 +97,7 @@ void Font::loadGlyphs( std::string file )
 			 >> glyph.vOffset
 			 >> glyph.u
 			 >> glyph.v;
-		glyph.symbol = ( char ) symbol;
+		glyph.symbol = ( unsigned char ) symbol;
 		_glyphs[ glyph.symbol ] = glyph;
 	}
 }
@@ -169,14 +169,29 @@ void Text::updatePrimitive( void )
 
 	float horiAdvance = 0.0f;
 	float vertAdvance = 0.0f;
-	for ( int i = 0; i < _text.length(); i++ ) {
-		if ( _text[ i ] == '\n' ) {
+	const auto textLength = _text.length();
+	for ( int i = 0; i < textLength; i++ ) {
+		auto c = ( unsigned char ) _text[ i ];
+		if ( c > 127 ) {
+			// handle extended-ascii
+			if ( i < textLength - 1 ) {
+				auto nextChar = ( unsigned char ) _text[ ++i ];
+				if ( c == 195 ) {
+					c = ( unsigned char )( 195 + ( int ) nextChar - 131 );
+				}
+				else {
+					c = nextChar;
+				}
+			}
+		}
+
+		if ( c == '\n' ) {
 			vertAdvance -= _size;
 			horiAdvance = 0.0f;
 			continue;
 		}
 
-		Font::Glyph glyph = _font->getGlyph( _text[ i ] );
+		Font::Glyph glyph = _font->getGlyph( c );
 
 		float minX = _size * ( horiAdvance + glyph.bearingX );
 		float maxX = minX + _size * glyph.width;
