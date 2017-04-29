@@ -56,17 +56,34 @@ namespace crimild {
 
     class ProfilerOutputHandler : public SharedObject {
     public:
-        virtual void beginOutput( crimild::Size fps, crimild::Real64 avgFrameTime, crimild::Real64 minFrameTime, crimild::Real64 maxFrameTime ) = 0;
-        virtual void sample( float minPc, float avgPc, float maxPc, unsigned int totalTime, unsigned int callCount, std::string name, unsigned int parentCount ) = 0;
-        virtual void endOutput( void ) = 0;
+        virtual ~ProfilerOutputHandler( void );
+
+        virtual void beginOutput( crimild::Size fps, crimild::Real64 avgFrameTime, crimild::Real64 minFrameTime, crimild::Real64 maxFrameTime );
+        virtual void sample( float minPc, float avgPc, float maxPc, unsigned int totalTime, unsigned int callCount, std::string name, unsigned int parentCount );
+        virtual void endOutput( void );
+
+    protected:
+        inline std::string getOutput( void ) { return _output.str(); }
+
+    private:
+        std::stringstream _output;
     };
 
     using ProfilerOutputHandlerPtr = SharedPointer< ProfilerOutputHandler >;
 
     class ProfilerConsoleOutputHandler : public ProfilerOutputHandler {
     public:
-        virtual void beginOutput( crimild::Size fps, crimild::Real64 avgFrameTime, crimild::Real64 minFrameTime, crimild::Real64 maxFrameTime ) override = 0;
-        virtual void sample( float minPc, float avgPc, float maxPc, unsigned int totalTime, unsigned int callCount, std::string name, unsigned int parentCount ) override;
+        ProfilerConsoleOutputHandler( void );
+        virtual ~ProfilerConsoleOutputHandler( void );
+
+        virtual void endOutput( void ) override;
+    };
+
+    class ProfilerScreenOutputHandler : public ProfilerOutputHandler {
+    public:
+        ProfilerScreenOutputHandler( void );
+        virtual ~ProfilerScreenOutputHandler( void );
+
         virtual void endOutput( void ) override;
     };
 

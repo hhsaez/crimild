@@ -54,9 +54,8 @@ void ParticleData::generate( void )
 
 	// reset alive flags for all particles (all dead)
 	_alive.resize( count );
-	auto aliveData = &_alive[ 0 ];
 	for ( auto i = 0; i < count; i++ ) {
-		aliveData[ i ] = false;
+		_alive[ i ] = false;
 	}
 }
 

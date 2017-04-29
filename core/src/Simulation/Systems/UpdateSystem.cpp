@@ -73,20 +73,27 @@ void UpdateSystem::updateBehaviors( Node *scene )
 {
     broadcastMessage( messaging::WillUpdateScene { scene } );
 
-	const double FIXED_TIME = Clock::getScaledTickTime();
-    const Clock FIXED_CLOCK( FIXED_TIME );
+	// const double FIXED_TIME = Clock::getScaledTickTime();
+    // const Clock FIXED_CLOCK( FIXED_TIME );
+    const auto FIXED_CLOCK = Simulation::getInstance()->getSimulationClock();
 
-    while ( _accumulator >= FIXED_TIME ) {
+    // while ( _accumulator >= FIXED_TIME ) {
 		CRIMILD_PROFILE( "Updating Components" )
 		
-        scene->perform( Apply( [ &FIXED_CLOCK ]( Node *node ) {
-            node->forEachComponent( [ node, &FIXED_CLOCK ] ( NodeComponent *component ) {
-                component->update( FIXED_CLOCK );
+        auto job = crimild::concurrency::async();
+
+        scene->perform( Apply( [ &FIXED_CLOCK, job ]( Node *node ) {
+            node->forEachComponent( [ node, &FIXED_CLOCK, job ] ( NodeComponent *component ) {
+                crimild::concurrency::async( job, [ component, &FIXED_CLOCK ] {
+                    component->update( FIXED_CLOCK );
+                });
             });
         }));
 
-        _accumulator -= FIXED_TIME;
-    }
+        crimild::concurrency::wait( job );
+
+        // _accumulator -= FIXED_TIME;
+    // }
     
     updateWorldState( scene );
 

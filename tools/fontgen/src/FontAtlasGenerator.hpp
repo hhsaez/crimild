@@ -48,13 +48,13 @@ namespace crimild {
 				FontAtlasGenerator( std::string fontFace, unsigned int width, unsigned int height );
 				virtual ~FontAtlasGenerator( void );
 
-				bool execute( std::string text, std::string output );
+				bool execute( std::string output );
 
 			private:
 				bool init( void );
 				bool loadFont( std::string fontFace );
 				void cleanup( void );
-				void pushChar( char c );
+				void pushChar( unsigned char c );
 				void writeBuffer( FT_GlyphSlot &slot, int x, int y );
 				void saveTexture( std::string fileName, bool greyscale = true );
 				void saveGlyphs( std::string filename );

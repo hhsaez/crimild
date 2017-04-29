@@ -29,16 +29,8 @@ int main( int argc, char **argv )
 	std::string fontName = extractFontName( fontFile );
 	int size = settings.get( "texture_size", 1024 );
 
-	// generate the list of characters to be processed
-	char buffer[ 97 ];
-	for ( char i = 0; i < 95; i++ ) {
-		buffer[ i ] = 32 + i;
-	}
-	buffer[ 96 ] = '\0';
-	std::string text = buffer;
-
 	FontAtlasGenerator fontAtlasGenerator( fontFile, size, size );
-	if ( fontAtlasGenerator.execute( text, fontName ) ) {
+	if ( fontAtlasGenerator.execute( fontName ) ) {
 #ifdef __APPLE__		
 		system( ( std::string( "open \"" ) + fontName + ".tga\"" ).c_str() );
 		system( ( std::string( "open \"" ) + fontName + ".txt\"" ).c_str() );

@@ -25,55 +25,40 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "AssetManager.hpp"
-#include "FileSystem.hpp"
+#ifndef CRIMILD_PARTICLE_GENERATOR_POSITION_GRID_
+#define CRIMILD_PARTICLE_GENERATOR_POSITION_GRID_
 
-#include "Foundation/StringUtils.hpp"
-#include "Rendering/Texture.hpp"
-#include "Rendering/ImageTGA.hpp"
-
-using namespace crimild;
-
-AssetManager::AssetManager( void )
-{
-
-}
-
-AssetManager::~AssetManager( void )
-{
-	clear();
-}
+#include "ParticleSystem/ParticleSystemComponent.hpp"
 
 namespace crimild {
 
-	template<>
-	Texture *AssetManager::get< Texture >( std::string name )
-	{
-	    Texture *texture = nullptr;
-	    
-	    {
-	        ScopedLock lock( _mutex );
-	        texture = static_cast< Texture * >( crimild::get_ptr( _assets[ name ] ) );
-	    }
-	    
-		if ( texture == nullptr && ( StringUtils::getFileExtension( name ) == ".tga" ) ) {
-			auto image = crimild::alloc< ImageTGA >( FileSystem::getInstance().pathForResource( name ) );
-			if ( image != nullptr ) {
-	            auto tmp = crimild::alloc< Texture >( image ) ;
-				set( name, tmp );
-	            texture = crimild::get_ptr( tmp );
-			}
-		}
+    /**
+        \brief Generate particles in a grid
 
-		return texture;
-	}
+        \remarks Should be used with burst mode
+    */
+    class GridPositionParticleGenerator : public ParticleSystemComponent::ParticleGenerator {
+    public:
+        GridPositionParticleGenerator( void );
+        virtual ~GridPositionParticleGenerator( void );
+
+		inline void setOrigin( const Vector3f &origin ) { _origin = origin; }
+		inline const Vector3f &getOrigin( void ) const { return _origin; }
+
+		inline void setSize( const Vector3f &size ) { _size = size; }
+		inline const Vector3f &getSize( void ) const { return _size; }
+
+		virtual void configure( Node *node, ParticleData *particles ) override;
+        virtual void generate( Node *node, crimild::Real64 dt, ParticleData *particles, ParticleId startId, ParticleId endId ) override;
+
+    private:
+        Vector3f _origin;
+        Vector3f _size;
+
+		ParticleAttribArray *_positions = nullptr;
+    };
 
 }
 
-void AssetManager::loadFont( std::string name, std::string fileName )
-{
-    std::string fontDefFileName = FileSystem::getInstance().pathForResource( fileName );
-    auto font = crimild::alloc< Font >( fontDefFileName );
-	set( name, font, true );    
-}
+#endif
 
