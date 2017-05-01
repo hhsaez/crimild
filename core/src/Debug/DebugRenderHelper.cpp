@@ -202,6 +202,9 @@ void DebugRenderHelper::render( Geometry *geometry )
 			if ( material->getProgram() != nullptr ) {
 				program = material->getProgram();
 			}
+			else if ( material->getColorMap() == nullptr ) {
+				program = renderer->getShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_DIFFUSE );
+			}
 
 			if ( program == nullptr ) {
 		        Log::error( CRIMILD_CURRENT_CLASS_NAME, "No program found for debug rendering" );
@@ -261,6 +264,20 @@ void DebugRenderHelper::renderText( std::string str, const Vector3f &position, c
 
 	text->local().setTranslate( position );
 
+    const auto min = text->getLocalBound()->getMin();
+    const auto max = text->getLocalBound()->getMax();
+    const auto diff = max - min;
+    const auto center = text->getLocalBound()->getCenter();
+            
+	auto box = crimild::alloc< BoxPrimitive >( diff[ 0 ], diff[ 1 ], Numericf::max( 0.1f, max[ 2 ] ) );
+	auto background = crimild::alloc< Geometry >();
+	background->attachPrimitive( box );
+	background->local().setTranslate( position + Vector3f( 0.28f * diff[ 0 ], center[ 1 ], center[ 1 ] ) );
+	auto m = crimild::alloc< Material >();
+	m->setDiffuse( RGBAColorf( 0.0f, 0.0f, 0.0f, 0.75f ) );
+	background->getComponent< MaterialComponent >()->attachMaterial( m );
+
+	render( crimild::get_ptr( background ) );
 	render( crimild::get_ptr( text ) );
 }
 
