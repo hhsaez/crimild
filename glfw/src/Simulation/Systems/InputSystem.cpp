@@ -14,11 +14,37 @@ InputSystem::InputSystem( void )
         Input::getInstance()->reset( GLFW_KEY_LAST, GLFW_MOUSE_BUTTON_LAST );
         
         glfwSetKeyCallback( self->_window, []( GLFWwindow* window, int key, int scancode, int action, int mods ) {
+            if ( Console::getInstance()->isEnabled() ) {
+                if ( action == GLFW_PRESS ) {
+                    switch ( key ) {
+                        case CRIMILD_INPUT_KEY_BACKSPACE:
+                        case CRIMILD_INPUT_KEY_UP:
+                        case CRIMILD_INPUT_KEY_DOWN:
+                        case CRIMILD_INPUT_KEY_ENTER:
+                            Console::getInstance()->handleInput( key, mods );
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
+
+                if ( Console::getInstance()->isActive() ) {
+                    return;
+                }
+            }
+
             if ( action == GLFW_PRESS || action == GLFW_REPEAT ) {
                 MessageQueue::getInstance()->pushMessage( messaging::KeyPressed { key } );
             }
             else {
                 MessageQueue::getInstance()->pushMessage( messaging::KeyReleased { key } );
+            }
+        });
+
+        glfwSetCharCallback( self->_window, []( GLFWwindow *window, unsigned int codepoint ) {
+            if ( Console::getInstance()->isEnabled() ) {
+                Console::getInstance()->handleInput( codepoint, 0 );
             }
         });
         

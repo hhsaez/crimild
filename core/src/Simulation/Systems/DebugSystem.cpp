@@ -75,21 +75,24 @@ void DebugSystem::onDidRenderScene( messaging::DidRenderScene const & )
     auto scene = Simulation::getInstance()->getScene();
     auto camera = Simulation::getInstance()->getMainCamera();
     
-    if ( renderer == nullptr || scene == nullptr || camera == nullptr ) {
+    if ( renderer == nullptr ) {
         return;
     }
     
-    if ( _debugInfoEnabled ) {
-        scene->perform( Apply( [renderer, camera]( Node *node ) {
-            node->forEachComponent( [renderer, camera]( NodeComponent *component ) {
-                component->renderDebugInfo( renderer, camera );
-            });
-        }));
+    if ( scene != nullptr && camera != nullptr ) {
+        if ( _debugInfoEnabled ) {
+            scene->perform( Apply( [renderer, camera]( Node *node ) {
+                node->forEachComponent( [renderer, camera]( NodeComponent *component ) {
+                    component->renderDebugInfo( renderer, camera );
+                });
+            }));
+        }
     }
 
 	Profiler::getInstance()->step();
     
-    if ( _profilerInfoEnabled ) {
+    auto profilerEnabled = Simulation::getInstance()->getSettings()->get< crimild::Bool >( "profiler.enabled", false );
+    if ( profilerEnabled ) {
 		Profiler::getInstance()->dump();
 		
         static double accum = 0.0;
@@ -115,6 +118,7 @@ void DebugSystem::onToggleDebugInfo( messaging::ToggleDebugInfo const & )
 
 void DebugSystem::onToggleProfilerInfo( messaging::ToggleProfilerInfo const & )
 {
-    _profilerInfoEnabled = !_profilerInfoEnabled;
+    auto profilerEnabled = Simulation::getInstance()->getSettings()->get< crimild::Bool >( "profiler.enabled", false );
+    Simulation::getInstance()->getSettings()->set( "profiler.enabled", !profilerEnabled );
 }
 

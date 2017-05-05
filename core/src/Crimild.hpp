@@ -191,6 +191,8 @@
 #include "Simulation/Systems/StreamingSystem.hpp"
 #include "Simulation/Systems/UISystem.hpp"
 
+#include "Simulation/Console/Console.hpp"
+
 #include "Streaming/Stream.hpp"
 #include "Streaming/FileStream.hpp"
 #include "Streaming/MemoryStream.hpp"
