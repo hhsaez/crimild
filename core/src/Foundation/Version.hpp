@@ -36,11 +36,11 @@
 #endif
 
 #ifndef CRIMILD_VERSION_MINOR
-#define CRIMILD_VERSION_MINOR 4
+#define CRIMILD_VERSION_MINOR 5
 #endif
 
 #ifndef CRIMILD_VERSION_PATCH
-#define CRIMILD_VERSION_PATCH 1
+#define CRIMILD_VERSION_PATCH 0
 #endif
 
 namespace crimild {

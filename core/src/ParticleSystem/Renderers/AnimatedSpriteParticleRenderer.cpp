@@ -83,17 +83,22 @@ void AnimatedSpriteParticleRenderer::update( Node *node, crimild::Real64 dt, Par
     auto vbo = crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3_UV2, 4 * pCount );
 	auto ibo = crimild::alloc< IndexBufferObject >( 6 * pCount );
 
-	const auto camera = Camera::getMainCamera();
-	auto cameraUp = camera->getWorld().computeUp();
-	auto cameraRight = camera->getWorld().computeRight();
+	auto up = Vector3f::UNIT_Y;
+	auto right = Vector3f::UNIT_X;
 
-	node->getWorld().applyInverseToVector( cameraUp, cameraUp );
-	node->getWorld().applyInverseToVector( cameraRight, cameraRight );
+	if ( shouldUseOrientedQuads() ) {
+		const auto camera = Camera::getMainCamera();
+		up = camera->getWorld().computeUp();
+		right = camera->getWorld().computeRight();
 
-	const auto offset0 = cameraUp - cameraRight;
-	const auto offset1 = -cameraUp - cameraRight;
-	const auto offset2 = -cameraUp + cameraRight;
-	const auto offset3 = cameraUp + cameraRight;
+		node->getWorld().applyInverseToVector( up, up );
+		node->getWorld().applyInverseToVector( right, right );
+	}
+
+	const auto offset0 = up - right;
+	const auto offset1 = -up - right;
+	const auto offset2 = -up + right;
+	const auto offset3 = up + right;
 
 	const crimild::UInt8 frameCount = _spriteSheetSize.x() * _spriteSheetSize.y();
 	const auto spriteSize = Vector2f( 1.0f / _spriteSheetSize.x(), 1.0f / _spriteSheetSize.y() );

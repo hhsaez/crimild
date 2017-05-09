@@ -25,59 +25,44 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ConsoleSystem.hpp"
-#include "RenderSystem.hpp"
-
-#include "Simulation/Simulation.hpp"
-#include "Simulation/Settings.hpp"
-
-#include "Debug/DebugRenderHelper.hpp"
+#include "Random.hpp"
 
 using namespace crimild;
 
-ConsoleSystem::ConsoleSystem( void )
-	: System( "Console System" )
+Random::Generator::Generator( void )
+	: _distribution( 0, 1 )
 {
-    registerMessageHandler< messaging::DidRenderScene >( [ this ]( messaging::DidRenderScene const & ) {
-        onDidRenderScene();
-    });
+	// initialize the random number generator with time-dependent seed
+	uint64_t timeSeed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+	std::seed_seq ss { uint32_t( timeSeed & 0xffffffff ), uint32_t( timeSeed >> 32 ) };
+	
+	_generator.seed( ss );	
 }
 
-ConsoleSystem::~ConsoleSystem( void )
+Random::Generator::Generator( crimild::UInt32 seed )
+	: _distribution( 0, 1 ),
+	  _generator( seed )
 {
 
 }
 
-bool ConsoleSystem::start( void )
-{	
-	if ( !System::start() ) {
-		return false;
-	}
+Random::Generator::~Generator( void )
+{
 
-    // the console is enabled ONLY if a valid system font is provided
-    auto font = AssetManager::getInstance()->get< Font >( AssetManager::FONT_SYSTEM );
-    Console::getInstance()->setEnabled( font != nullptr );
-
-	return true;
 }
 
-void ConsoleSystem::stop( void )
+crimild::Real64 Random::Generator::generate( void )
 {
-	System::stop();
+	return _distribution( _generator );
 }
 
-void ConsoleSystem::onDidRenderScene( void )
+crimild::Real64 Random::Generator::generate( crimild::Real64 max )
 {
-    auto renderer = Simulation::getInstance()->getRenderer();
-    
-    if ( renderer == nullptr ) {
-        return;
-    }
+	return max * generate();
+}
 
-    auto console = getConsole();
-    if ( console->isEnabled() && console->isActive() ) {
-        auto output = console->getOutput( 30 );
-        DebugRenderHelper::renderText( output, Vector3f( -0.95f, 0.95f, 0.0f ), RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ) );
-    }
+crimild::Real64 Random::Generator::generate( crimild::Real64 min, crimild::Real64 max )
+{
+	return min + generate() * ( max - min );
 }
 

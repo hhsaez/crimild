@@ -25,59 +25,36 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ConsoleSystem.hpp"
-#include "RenderSystem.hpp"
-
-#include "Simulation/Simulation.hpp"
-#include "Simulation/Settings.hpp"
-
-#include "Debug/DebugRenderHelper.hpp"
+#include "PositionVelocityParticleUpdater.hpp"
 
 using namespace crimild;
 
-ConsoleSystem::ConsoleSystem( void )
-	: System( "Console System" )
-{
-    registerMessageHandler< messaging::DidRenderScene >( [ this ]( messaging::DidRenderScene const & ) {
-        onDidRenderScene();
-    });
-}
-
-ConsoleSystem::~ConsoleSystem( void )
+PositionVelocityParticleUpdater::PositionVelocityParticleUpdater( void )
 {
 
 }
 
-bool ConsoleSystem::start( void )
-{	
-	if ( !System::start() ) {
-		return false;
+PositionVelocityParticleUpdater::~PositionVelocityParticleUpdater( void )
+{
+
+}
+
+void PositionVelocityParticleUpdater::configure( Node *node, ParticleData *particles )
+{
+	_positions = particles->createAttribArray< Vector3f >( ParticleAttrib::POSITION );
+	_velocities = particles->createAttribArray< Vector3f >( ParticleAttrib::VELOCITY );
+}
+
+void PositionVelocityParticleUpdater::update( Node *node, double dt, ParticleData *particles )
+{
+	const auto count = particles->getAliveCount();
+
+	auto vs = _velocities->getData< Vector3f >();
+	auto ps = _positions->getData< Vector3f >();
+
+	for ( int i = 0; i < count; i++ ) {
+		auto v = dt * vs[ i ];
+		ps[ i ] += v;
 	}
-
-    // the console is enabled ONLY if a valid system font is provided
-    auto font = AssetManager::getInstance()->get< Font >( AssetManager::FONT_SYSTEM );
-    Console::getInstance()->setEnabled( font != nullptr );
-
-	return true;
-}
-
-void ConsoleSystem::stop( void )
-{
-	System::stop();
-}
-
-void ConsoleSystem::onDidRenderScene( void )
-{
-    auto renderer = Simulation::getInstance()->getRenderer();
-    
-    if ( renderer == nullptr ) {
-        return;
-    }
-
-    auto console = getConsole();
-    if ( console->isEnabled() && console->isActive() ) {
-        auto output = console->getOutput( 30 );
-        DebugRenderHelper::renderText( output, Vector3f( -0.95f, 0.95f, 0.0f ), RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ) );
-    }
 }
 

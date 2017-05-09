@@ -25,59 +25,23 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ConsoleSystem.hpp"
-#include "RenderSystem.hpp"
+#ifndef CRIMILD_SCRIPTING_BUILDER_PARTICLE_SYSTEM_UPDATERS_POSITION_VELOCITY
+#define CRIMILD_SCRIPTING_BUILDER_PARTICLE_SYSTEM_UPDATERS_POSITION_VELOCITY
 
-#include "Simulation/Simulation.hpp"
-#include "Simulation/Settings.hpp"
+#include "Foundation/Scripted.hpp"
 
-#include "Debug/DebugRenderHelper.hpp"
+namespace crimild {
 
-using namespace crimild;
+	namespace scripting {
+        
+		class LuaPositionVelocityParticleUpdaterBuilder {
+		public:
+			static SharedPointer< PositionVelocityParticleUpdater > build( ScriptEvaluator &eval );
+		};
 
-ConsoleSystem::ConsoleSystem( void )
-	: System( "Console System" )
-{
-    registerMessageHandler< messaging::DidRenderScene >( [ this ]( messaging::DidRenderScene const & ) {
-        onDidRenderScene();
-    });
-}
-
-ConsoleSystem::~ConsoleSystem( void )
-{
-
-}
-
-bool ConsoleSystem::start( void )
-{	
-	if ( !System::start() ) {
-		return false;
 	}
 
-    // the console is enabled ONLY if a valid system font is provided
-    auto font = AssetManager::getInstance()->get< Font >( AssetManager::FONT_SYSTEM );
-    Console::getInstance()->setEnabled( font != nullptr );
-
-	return true;
 }
 
-void ConsoleSystem::stop( void )
-{
-	System::stop();
-}
-
-void ConsoleSystem::onDidRenderScene( void )
-{
-    auto renderer = Simulation::getInstance()->getRenderer();
-    
-    if ( renderer == nullptr ) {
-        return;
-    }
-
-    auto console = getConsole();
-    if ( console->isEnabled() && console->isActive() ) {
-        auto output = console->getOutput( 30 );
-        DebugRenderHelper::renderText( output, Vector3f( -0.95f, 0.95f, 0.0f ), RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ) );
-    }
-}
+#endif
 

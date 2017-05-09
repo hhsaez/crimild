@@ -25,59 +25,34 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ConsoleSystem.hpp"
-#include "RenderSystem.hpp"
+#ifndef CRIMILD_PARTICLE_UPDATER_Z_SORT_
+#define CRIMILD_PARTICLE_UPDATER_Z_SORT_
 
-#include "Simulation/Simulation.hpp"
-#include "Simulation/Settings.hpp"
+#include "../ParticleSystemComponent.hpp"
 
-#include "Debug/DebugRenderHelper.hpp"
+namespace crimild {
 
-using namespace crimild;
+	/**
+	   \brief Sort particles by their z-coordinate in local space
 
-ConsoleSystem::ConsoleSystem( void )
-	: System( "Console System" )
-{
-    registerMessageHandler< messaging::DidRenderScene >( [ this ]( messaging::DidRenderScene const & ) {
-        onDidRenderScene();
-    });
+	   Sorting particles is not always required (i.e. particles with depth
+	   buffer disabled).
+
+	   \remarks Use it after a position updater
+	 */
+    class ZSortParticleUpdater : public ParticleSystemComponent::ParticleUpdater {
+    public:
+        ZSortParticleUpdater( void );
+        virtual ~ZSortParticleUpdater( void );
+
+        virtual void configure( Node *node, ParticleData *particles ) override;
+        virtual void update( Node *node, crimild::Real64 dt, ParticleData *particles ) override;
+        
+    private:
+        ParticleAttribArray *_positions = nullptr;
+    };
+
 }
 
-ConsoleSystem::~ConsoleSystem( void )
-{
-
-}
-
-bool ConsoleSystem::start( void )
-{	
-	if ( !System::start() ) {
-		return false;
-	}
-
-    // the console is enabled ONLY if a valid system font is provided
-    auto font = AssetManager::getInstance()->get< Font >( AssetManager::FONT_SYSTEM );
-    Console::getInstance()->setEnabled( font != nullptr );
-
-	return true;
-}
-
-void ConsoleSystem::stop( void )
-{
-	System::stop();
-}
-
-void ConsoleSystem::onDidRenderScene( void )
-{
-    auto renderer = Simulation::getInstance()->getRenderer();
-    
-    if ( renderer == nullptr ) {
-        return;
-    }
-
-    auto console = getConsole();
-    if ( console->isEnabled() && console->isActive() ) {
-        auto output = console->getOutput( 30 );
-        DebugRenderHelper::renderText( output, Vector3f( -0.95f, 0.95f, 0.0f ), RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ) );
-    }
-}
+#endif
 

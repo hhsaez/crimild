@@ -18,9 +18,11 @@
 #include "SceneGraph/Builders/ParticleSystem/Generators/LuaNodePositionParticleGeneratorBuilder.hpp"
 
 #include "SceneGraph/Builders/ParticleSystem/Updaters/LuaEulerParticleUpdaterBuilder.hpp"
+#include "SceneGraph/Builders/ParticleSystem/Updaters/LuaPositionVelocityParticleUpdaterBuilder.hpp"
 #include "SceneGraph/Builders/ParticleSystem/Updaters/LuaTimeParticleUpdaterBuilder.hpp"
 #include "SceneGraph/Builders/ParticleSystem/Updaters/LuaFloorParticleUpdaterBuilder.hpp"
 #include "SceneGraph/Builders/ParticleSystem/Updaters/LuaCameraSortParticleUpdaterBuilder.hpp"
+#include "SceneGraph/Builders/ParticleSystem/Updaters/LuaZSortParticleUpdaterBuilder.hpp"
 #include "SceneGraph/Builders/ParticleSystem/Updaters/LuaSetVector3fValueParticleUpdaterBuilder.hpp"
 #include "SceneGraph/Builders/ParticleSystem/Updaters/LuaAttractorParticleUpdaterBuilder.hpp"
 #include "SceneGraph/Builders/ParticleSystem/Updaters/LuaUniformScaleParticleUpdaterBuilder.hpp"
@@ -187,9 +189,11 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::NodePositionParticleGenerator, LuaNodePositionParticleGeneratorBuilder::build );
 
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::EulerParticleUpdater, LuaEulerParticleUpdaterBuilder::build );
+    CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::PositionVelocityParticleUpdater, LuaPositionVelocityParticleUpdaterBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::TimeParticleUpdater, LuaTimeParticleUpdaterBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::FloorParticleUpdater, LuaFloorParticleUpdaterBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::CameraSortParticleUpdater, LuaCameraSortParticleUpdaterBuilder::build );
+    CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::ZSortParticleUpdater, LuaZSortParticleUpdaterBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::AttractorParticleUpdater, LuaAttractorParticleUpdaterBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::SetVector3fValueParticleUpdater, LuaSetVector3fValueParticleUpdaterBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::UniformScaleParticleUpdater, LuaUniformScaleParticleUpdaterBuilder::build );

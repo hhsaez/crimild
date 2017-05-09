@@ -180,7 +180,9 @@ namespace crimild {
 
         virtual void swap( ParticleId a, ParticleId b ) override
         {
-			_data.swap( a, b );
+        	auto temp = _data[ a ];
+        	_data[ a ] = _data[ b ];
+        	_data[ b ] = temp;
         }
 
     private:

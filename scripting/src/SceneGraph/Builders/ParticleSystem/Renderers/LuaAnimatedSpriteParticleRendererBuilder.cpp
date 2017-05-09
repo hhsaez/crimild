@@ -55,6 +55,12 @@ SharedPointer< AnimatedSpriteParticleRenderer > LuaAnimatedSpriteParticleRendere
 		else if ( blendMode == "color" ) {
 			renderer->getMaterial()->setAlphaState( crimild::alloc< AlphaState >( true, AlphaState::SrcBlendFunc::SRC_COLOR, AlphaState::DstBlendFunc::ONE_MINUS_SRC_COLOR ) );
 		}
+		else if ( blendMode == "transparent" ) {
+			renderer->getMaterial()->setAlphaState( crimild::alloc< AlphaState >( true, AlphaState::SrcBlendFunc::SRC_ALPHA, AlphaState::DstBlendFunc::ONE_MINUS_SRC_ALPHA ) );
+		}
+		else if ( blendMode == "additive_no_alpha" ) {
+			renderer->getMaterial()->setAlphaState( crimild::alloc< AlphaState >( true, AlphaState::SrcBlendFunc::ONE, AlphaState::DstBlendFunc::ONE ) );
+		}
 		else {
 			renderer->getMaterial()->setAlphaState( AlphaState::ENABLED );
 		}
@@ -68,6 +74,11 @@ SharedPointer< AnimatedSpriteParticleRenderer > LuaAnimatedSpriteParticleRendere
 	crimild::Bool depthStateEnabled;
 	if ( eval.getPropValue( "depthStateEnabled", depthStateEnabled ) ) {
 		renderer->getMaterial()->setDepthState( depthStateEnabled ? DepthState::ENABLED : DepthState::DISABLED );
+	}
+
+	crimild::Bool useOrientedQuads;
+	if ( eval.getPropValue( "useOrientedQuads", useOrientedQuads ) ) {
+		renderer->setUseOrientedQuads( useOrientedQuads );
 	}
 
 	return renderer;

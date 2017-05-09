@@ -62,10 +62,10 @@ void CameraSortParticleUpdater::update( Node *node, double dt, ParticleData *par
 
 	// TODO: I know, bubble sort is slow...
 	// TODO: Also, precompute distances?
-	for ( int i = 0; i < pCount; i++ ) {
-		for ( int j = i + 1; j < pCount; j++ ) {
-			if ( Distance::computeSquared( ps[ j ], cameraPos ) > Distance::computeSquared( ps[ i ], cameraPos ) ) {
-				particles->swap( i, j );
+	for ( int i = 1; i < pCount; i++ ) {
+		for ( int j = 0; j < pCount - i; j++ ) {
+			if ( Distance::computeSquared( ps[ j ], cameraPos ) < Distance::computeSquared( ps[ j + 1 ], cameraPos ) ) {
+				particles->swap( j, j + 1 );
 			}
 		}
 	}

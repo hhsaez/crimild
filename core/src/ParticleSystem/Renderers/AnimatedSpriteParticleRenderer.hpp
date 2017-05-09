@@ -45,6 +45,9 @@ namespace crimild {
 		inline void setSpriteSheetSize( const Vector2f &size ) { _spriteSheetSize = size; }
 		inline const Vector2f &getSpriteSheetSize( void ) const { return _spriteSheetSize; }
 
+		inline void setUseOrientedQuads( crimild::Bool value ) { _useOrientedQuads = value; }
+		inline crimild::Bool shouldUseOrientedQuads( void ) const { return _useOrientedQuads; }
+
         inline Material *getMaterial( void ) { return crimild::get_ptr( _material ); }
         
 		virtual void configure( Node *node, ParticleData *particles ) override;
@@ -55,6 +58,8 @@ namespace crimild {
 		PrimitivePtr _primitive;
 		GeometryPtr _geometry;
 		Vector2f _spriteSheetSize;
+
+		crimild::Bool _useOrientedQuads = true;
 		
 		ParticleAttribArray *_positions = nullptr;
 		ParticleAttribArray *_sizes = nullptr;

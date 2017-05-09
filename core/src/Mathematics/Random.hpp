@@ -48,26 +48,36 @@ namespace crimild {
 
 	class Random {
 	public:
-		static void configure( void )
-		{
-			srand( time( 0 ) );
-		}
+		class Generator {
+		public:
+			Generator( void );
+			Generator( crimild::UInt32 seed );
+			~Generator( void );
+
+			crimild::Real64 generate( void );
+			crimild::Real64 generate( crimild::Real64 max );
+			crimild::Real64 generate( crimild::Real64 min, crimild::Real64 max );
+
+		private:
+			std::mt19937_64 _generator;
+			std::uniform_real_distribution< double > _distribution;
+		};
 
 	public:
 		template< typename PRECISION >
-		static PRECISION generate( void )
+		inline static PRECISION generate( void )
 		{
             return generate< PRECISION >( 0.0, 1.0 );
 		}
 
 		template< typename PRECISION >
-		static PRECISION generate( double max )
+		inline static PRECISION generate( double max )
 		{
             return generate< PRECISION >( 0.0, max );
 		}
 
 		template< typename T >
-		static T generate( const T &min, const T &max )
+		inline static T generate( const T &min, const T &max )
 		{
 			T result;
 			generateImpl( result, min, max );
@@ -106,7 +116,9 @@ namespace crimild {
 		template< typename PRECISION >
 		inline static void generateImpl( PRECISION &result, const PRECISION &min, const PRECISION &max )
 		{
-			crimild::Real64 r = 0.01 * ( std::rand() % 100 );
+			static Random::Generator defaultGenerator;
+
+			crimild::Real64 r = defaultGenerator.generate();
             result = min + r * ( max - min );
         }
 

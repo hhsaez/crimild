@@ -25,59 +25,40 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ConsoleSystem.hpp"
-#include "RenderSystem.hpp"
+#include "ZSortParticleUpdater.hpp"
 
-#include "Simulation/Simulation.hpp"
-#include "Simulation/Settings.hpp"
-
-#include "Debug/DebugRenderHelper.hpp"
+#include "SceneGraph/Camera.hpp"
 
 using namespace crimild;
 
-ConsoleSystem::ConsoleSystem( void )
-	: System( "Console System" )
-{
-    registerMessageHandler< messaging::DidRenderScene >( [ this ]( messaging::DidRenderScene const & ) {
-        onDidRenderScene();
-    });
-}
-
-ConsoleSystem::~ConsoleSystem( void )
+ZSortParticleUpdater::ZSortParticleUpdater( void )
 {
 
 }
 
-bool ConsoleSystem::start( void )
-{	
-	if ( !System::start() ) {
-		return false;
+ZSortParticleUpdater::~ZSortParticleUpdater( void )
+{
+
+}
+
+void ZSortParticleUpdater::configure( Node *node, ParticleData *particles )
+{
+	_positions = particles->createAttribArray< Vector3f >( ParticleAttrib::POSITION );
+}
+
+void ZSortParticleUpdater::update( Node *node, double dt, ParticleData *particles )
+{
+	const auto pCount = particles->getAliveCount();
+
+	const auto ps = _positions->getData< Vector3f >();
+
+	// TODO: I know, bubble sort is slow...
+	for ( int i = 1; i < pCount; i++ ) {
+		for ( int j = 0; j < pCount - i; j++ ) {
+			if ( ps[ j ].z() > ps[ j + 1 ].z() ) {
+				particles->swap( j, j + 1 );
+			}
+		}
 	}
-
-    // the console is enabled ONLY if a valid system font is provided
-    auto font = AssetManager::getInstance()->get< Font >( AssetManager::FONT_SYSTEM );
-    Console::getInstance()->setEnabled( font != nullptr );
-
-	return true;
-}
-
-void ConsoleSystem::stop( void )
-{
-	System::stop();
-}
-
-void ConsoleSystem::onDidRenderScene( void )
-{
-    auto renderer = Simulation::getInstance()->getRenderer();
-    
-    if ( renderer == nullptr ) {
-        return;
-    }
-
-    auto console = getConsole();
-    if ( console->isEnabled() && console->isActive() ) {
-        auto output = console->getOutput( 30 );
-        DebugRenderHelper::renderText( output, Vector3f( -0.95f, 0.95f, 0.0f ), RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ) );
-    }
 }
 

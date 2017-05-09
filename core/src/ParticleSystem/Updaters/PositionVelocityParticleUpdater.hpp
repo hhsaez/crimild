@@ -25,59 +25,27 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ConsoleSystem.hpp"
-#include "RenderSystem.hpp"
+#ifndef CRIMILD_PARTICLE_UPDATER_POSITION_VELOCITY_
+#define CRIMILD_PARTICLE_UPDATER_POSITION_VELOCITY_
 
-#include "Simulation/Simulation.hpp"
-#include "Simulation/Settings.hpp"
+#include "../ParticleSystemComponent.hpp"
 
-#include "Debug/DebugRenderHelper.hpp"
+namespace crimild {
 
-using namespace crimild;
+    class PositionVelocityParticleUpdater : public ParticleSystemComponent::ParticleUpdater {
+    public:
+        PositionVelocityParticleUpdater( void );
+        virtual ~PositionVelocityParticleUpdater( void );
 
-ConsoleSystem::ConsoleSystem( void )
-	: System( "Console System" )
-{
-    registerMessageHandler< messaging::DidRenderScene >( [ this ]( messaging::DidRenderScene const & ) {
-        onDidRenderScene();
-    });
+		virtual void configure( Node *node, ParticleData *particles ) override;
+        virtual void update( Node *node, crimild::Real64 dt, ParticleData *particles ) override;
+
+	private:
+		ParticleAttribArray *_positions = nullptr;
+		ParticleAttribArray *_velocities = nullptr;
+    };
+
 }
 
-ConsoleSystem::~ConsoleSystem( void )
-{
-
-}
-
-bool ConsoleSystem::start( void )
-{	
-	if ( !System::start() ) {
-		return false;
-	}
-
-    // the console is enabled ONLY if a valid system font is provided
-    auto font = AssetManager::getInstance()->get< Font >( AssetManager::FONT_SYSTEM );
-    Console::getInstance()->setEnabled( font != nullptr );
-
-	return true;
-}
-
-void ConsoleSystem::stop( void )
-{
-	System::stop();
-}
-
-void ConsoleSystem::onDidRenderScene( void )
-{
-    auto renderer = Simulation::getInstance()->getRenderer();
-    
-    if ( renderer == nullptr ) {
-        return;
-    }
-
-    auto console = getConsole();
-    if ( console->isEnabled() && console->isActive() ) {
-        auto output = console->getOutput( 30 );
-        DebugRenderHelper::renderText( output, Vector3f( -0.95f, 0.95f, 0.0f ), RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ) );
-    }
-}
+#endif
 
