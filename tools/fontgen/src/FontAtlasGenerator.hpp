@@ -56,7 +56,7 @@ namespace crimild {
 				void cleanup( void );
 				void pushChar( unsigned char c );
 				void writeBuffer( FT_GlyphSlot &slot, int x, int y );
-				void saveTexture( std::string fileName, bool greyscale = true );
+				void saveTexture( std::string fileName );
 				void saveGlyphs( std::string filename );
 
 				std::vector< unsigned char > _buffer;

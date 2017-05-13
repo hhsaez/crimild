@@ -29,14 +29,20 @@
 #include "Log.hpp"
 
 #include "Mathematics/Numeric.hpp"
+#include "Mathematics/Clock.hpp"
 
 #include "Debug/DebugRenderHelper.hpp"
+
+#include "Rendering/Renderer.hpp"
+
+#include "Concurrency/JobScheduler.hpp"
 
 #include <chrono>
 #include <iostream>
 #include <iomanip>
 
 using namespace crimild;
+using namespace crimild::concurrency;
 
 ProfilerOutputHandler::~ProfilerOutputHandler( void )
 {
@@ -47,16 +53,48 @@ void ProfilerOutputHandler::beginOutput( crimild::Size fps, crimild::Real64 avgF
 {
     _output.str( "" );
 
+    // FPS
     _output << std::setiosflags( std::ios::fixed )
             << std::setprecision( 3 )
             << "FPS: " << std::setw( 10 ) << fps
             << "MIN: " << std::setw( 10 ) << minFrameTime
             << "AVG: " << std::setw( 10 ) << avgFrameTime
             << "MAX: " << std::setw( 10 ) << maxFrameTime
-            << "\n";
-            
-    _output << "\n--------------------------------------------------------------------------------------------\n"
-            << std::setiosflags( std::ios::fixed )
+            << "\n--------------------------------------------------------------------------------------------\n";
+          
+    // Rendering  
+    _output << std::setiosflags( std::ios::fixed )
+            << std::setprecision( 3 )
+            << std::left 
+            << "Rendering"
+            << "\n   Textures:" 
+                << " Loaded: " << Renderer::getInstance()->getTextureCatalog()->getResourceCount()
+                << " Active: " << Renderer::getInstance()->getTextureCatalog()->getActiveResourceCount()
+            << "\n   FBOs:" 
+                << " Loaded: " << Renderer::getInstance()->getFrameBufferObjectCatalog()->getResourceCount()
+                << " Active: " << Renderer::getInstance()->getFrameBufferObjectCatalog()->getActiveResourceCount()
+            << "\n   VBOs:" 
+                << " Loaded: " << Renderer::getInstance()->getVertexBufferObjectCatalog()->getResourceCount()
+                << " Active: " << Renderer::getInstance()->getVertexBufferObjectCatalog()->getActiveResourceCount()
+            << "\n   IBOs:" 
+                << " Loaded: " << Renderer::getInstance()->getIndexBufferObjectCatalog()->getResourceCount()
+                << " Active: " << Renderer::getInstance()->getIndexBufferObjectCatalog()->getActiveResourceCount()
+            << "\n   Programs:" 
+                << " Loaded: " << Renderer::getInstance()->getShaderProgramCatalog()->getResourceCount()
+                << " Active: " << Renderer::getInstance()->getShaderProgramCatalog()->getActiveResourceCount()
+            << "\n--------------------------------------------------------------------------------------------\n";
+
+    // Job system
+    _output << "Job count (" << ( JobScheduler::getInstance()->getNumWorkers() + 1 ) << " workers): ";
+    JobScheduler::getInstance()->eachWorkerStat( [this]( JobScheduler::WorkerId workerId, const JobScheduler::WorkerStat &stat ) {
+        _output << std::setw( 5 ) << std::right << stat.jobCount;
+    });
+    JobScheduler::getInstance()->clearWorkerStats();
+    _output << std::left 
+            << "\n--------------------------------------------------------------------------------------------\n";
+
+    // profilers
+    _output << std::setiosflags( std::ios::fixed )
             << std::setprecision( 3 )
             << std::setw( 10 ) << std::right << "MIN | "
             << std::setw( 10 ) << std::right << "AVG | "
@@ -69,11 +107,6 @@ void ProfilerOutputHandler::beginOutput( crimild::Size fps, crimild::Real64 avgF
 
 void ProfilerOutputHandler::sample( float minPc, float avgPc, float maxPc, unsigned int totalTime, unsigned int callCount, std::string name, unsigned int parentCount )
 {
-	std::stringstream spaces;
-	for ( int i = 0; i < parentCount; i++ ) {
-		spaces << " ";
-	}
-	
 	_output << std::setiosflags( std::ios::fixed | std::ios::showpoint )
 			<< std::setprecision( 3 )
 			<< std::setw( 7 ) << std::right << minPc << " | "
@@ -81,7 +114,7 @@ void ProfilerOutputHandler::sample( float minPc, float avgPc, float maxPc, unsig
 			<< std::setw( 7 ) << std::right << maxPc << " | "
 			<< std::setw( 7 ) << std::right << totalTime << " | "
 			<< std::setw( 7 ) << std::right << callCount << " | "
-			<< std::left << spaces.str() << name
+			<< std::left << name
 			<< "\n";
 }
 
@@ -267,6 +300,13 @@ void Profiler::step( void )
 	
 	const auto currentFrameTime = getTime();
 	const auto frameTime = currentFrameTime - _lastFrameTime;
+    
+    // normalized frame time, clamped to [0, 2]
+    _frameTimeHistory.push_back( Numericd::min( 2.0, ( 0.001 * frameTime ) / Clock::DEFAULT_TICK_TIME ) ); 
+    while ( _frameTimeHistory.size() > 100 ) {
+        _frameTimeHistory.pop_front();
+    }
+
 	_minFrameTime = Numeric< crimild::Real64 >::min( frameTime, _minFrameTime );
 	_maxFrameTime = Numeric< crimild::Real64 >::max( frameTime, _maxFrameTime );
 
@@ -297,10 +337,46 @@ void Profiler::dump( void )
 			sample.callCount = 0;
 			sample.totalTime = 0;
 			sample.childTime = 0;
-			
 		}
 	}
 
     getOutputHandler()->endOutput();
+
+    const auto HISTOGRAM_WIDTH = 1.1f;
+    const auto HISTOGRAM_HEIGHT = 0.15f;
+
+    Vector3f frame[] = {
+        Vector3f( -HISTOGRAM_WIDTH, -0.9f + 2.0f * HISTOGRAM_HEIGHT, 0.0f ),
+        Vector3f( +HISTOGRAM_WIDTH, -0.9f + 2.0f * HISTOGRAM_HEIGHT, 0.0f ),
+
+        Vector3f( -HISTOGRAM_WIDTH, -0.9f + 2.0f * HISTOGRAM_HEIGHT, 0.0f ),
+        Vector3f( -HISTOGRAM_WIDTH, -0.9f + 0.0f * HISTOGRAM_HEIGHT, 0.0f ),
+
+        Vector3f( -HISTOGRAM_WIDTH, -0.9f + HISTOGRAM_HEIGHT, 0.0f ),
+        Vector3f( +HISTOGRAM_WIDTH, -0.9f + HISTOGRAM_HEIGHT, 0.0f ),
+
+        Vector3f( -HISTOGRAM_WIDTH, -0.9f + 0.0f * HISTOGRAM_HEIGHT, 0.0f ),
+        Vector3f( +HISTOGRAM_WIDTH, -0.9f + 0.0f * HISTOGRAM_HEIGHT, 0.0f ),
+
+        Vector3f( +HISTOGRAM_WIDTH, -0.9f + 2.0f * HISTOGRAM_HEIGHT, 0.0f ),
+        Vector3f( +HISTOGRAM_WIDTH, -0.9f + 0.0f * HISTOGRAM_HEIGHT, 0.0f ),
+    };
+
+    DebugRenderHelper::renderLines( &frame[ 0 ], 10, RGBAColorf( 1.0f, 1.0f, 1.0f, 0.5f ) );
+
+    const auto frameTimeCount = _frameTimeHistory.size();
+
+    Vector3f lines[ frameTimeCount * 2 ];
+
+    for ( int i = 0; i < frameTimeCount - 1; i++ ) {
+        auto f0 = _frameTimeHistory[ i ];
+        auto f1 = _frameTimeHistory[ i + 1 ];
+
+        lines[ i * 2 + 0 ] = Vector3f( -HISTOGRAM_WIDTH + 2.0 * HISTOGRAM_WIDTH * ( i / ( crimild::Real32 ) frameTimeCount ), -0.9f + HISTOGRAM_HEIGHT * f0, 0.0f );
+        lines[ i * 2 + 1 ] = Vector3f( -HISTOGRAM_WIDTH + 2.0 * HISTOGRAM_WIDTH * ( ( i  + 1 ) / ( crimild::Real32 ) frameTimeCount ), -0.9f + HISTOGRAM_HEIGHT * f1, 0.0f );
+    }
+
+    DebugRenderHelper::renderLines( &lines[ 0 ], frameTimeCount * 2, RGBAColorf( 1.0f, 0.0f, 0.0f, 1.0f ) );
+
 }
 

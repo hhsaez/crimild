@@ -133,11 +133,16 @@ namespace crimild {
 			bool executeNextJob( void );
 			void execute( JobPtr const &job );
 
-		private:
+		public:
 			struct WorkerStat {
 				size_t jobCount = 0;
 			};
 			
+			void eachWorkerStat( std::function< void( WorkerId, const WorkerStat & ) > const &callback ) const;
+			
+			void clearWorkerStats( void );
+
+		private:
 			std::map< WorkerId, WorkerStat > _workerStats;
             
         private:

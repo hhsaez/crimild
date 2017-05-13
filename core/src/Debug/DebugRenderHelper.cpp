@@ -96,6 +96,29 @@ void DebugRenderHelper::renderLines( Renderer *renderer, Camera *camera, const V
 	renderer->unbindProgram( program );
 }
 
+void DebugRenderHelper::renderLines( const Vector3f *data, unsigned int count, const RGBAColorf &color )
+{
+	auto vbo = crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3, count );
+	auto ibo = crimild::alloc< IndexBufferObject >( count );
+	for ( int i = 0; i < count; i++ ) {
+		vbo->setPositionAt( i, data[ i ] );
+		ibo->setIndexAt( i, i );
+	}
+
+	auto primitive = crimild::alloc< Primitive >( Primitive::Type::LINES );
+	primitive->setVertexBuffer( vbo );
+	primitive->setIndexBuffer( ibo );
+
+	auto geometry = crimild::alloc< Geometry >();
+	geometry->attachPrimitive( primitive );
+
+	auto material = crimild::alloc< Material >();
+	material->setDiffuse( color );
+	geometry->getComponent< MaterialComponent >()->attachMaterial( material );
+
+	render( crimild::get_ptr( geometry ) );
+}
+
 void DebugRenderHelper::renderBox( Renderer *renderer, Camera *camera, const Vector3f &position, float scale, const RGBAColorf &color )
 {
 	Transformation model;
@@ -251,11 +274,13 @@ void DebugRenderHelper::render( Geometry *geometry )
 
 void DebugRenderHelper::renderText( std::string str, const Vector3f &position, const RGBAColorf &color )
 {
-	auto text = crimild::alloc< Text >();
-
 	auto font = AssetManager::getInstance()->get< Font >( AssetManager::FONT_SYSTEM );
-	assert( font != nullptr );
+	if ( font == nullptr ) {
+		Log::warning( CRIMILD_CURRENT_CLASS_NAME, "No available system font" );
+		return;
+	}
 
+	auto text = crimild::alloc< Text >();
 	text->setFont( font );
 	text->setSize( 0.05f );
 	text->setTextColor( color );

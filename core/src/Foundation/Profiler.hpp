@@ -38,6 +38,7 @@
 #include <sstream>
 #include <thread>
 #include <map>
+#include <deque>
 
 #ifndef CRIMILD_PROFILER_ENABLED
 #define CRIMILD_PROFILER_ENABLED 1
@@ -150,6 +151,7 @@ namespace crimild {
 		crimild::Size _frameCount = 0;
 		crimild::Real64 _totalFrameTime = 0;
 		crimild::Real64 _lastFrameTime = 0;
+        std::deque< crimild::Real64 > _frameTimeHistory;
 
 		crimild::Size _fps = 0;
 		crimild::Real64 _avgFrameTime = 0;
