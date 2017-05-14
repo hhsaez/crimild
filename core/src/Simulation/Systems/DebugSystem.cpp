@@ -28,6 +28,7 @@
 #include "DebugSystem.hpp"
 
 #include "Simulation/Simulation.hpp"
+#include "Simulation/Settings.hpp"
 
 #include "Debug/DebugRenderHelper.hpp"
 
@@ -57,6 +58,8 @@ bool DebugSystem::start( void )
 	}
     
     DebugRenderHelper::init();
+
+	_profilerInfoEnabled = Simulation::getInstance()->getSettings()->get< crimild::Bool >( "profiler.enabled", false );
     
 	return true;
 }
@@ -72,24 +75,29 @@ void DebugSystem::onDidRenderScene( messaging::DidRenderScene const & )
     auto scene = Simulation::getInstance()->getScene();
     auto camera = Simulation::getInstance()->getMainCamera();
     
-    if ( renderer == nullptr || scene == nullptr || camera == nullptr ) {
+    if ( renderer == nullptr ) {
         return;
     }
     
-    if ( _debugInfoEnabled ) {
-        scene->perform( Apply( [renderer, camera]( Node *node ) {
-            node->forEachComponent( [renderer, camera]( NodeComponent *component ) {
-                component->renderDebugInfo( renderer, camera );
-            });
-        }));
+    if ( scene != nullptr && camera != nullptr ) {
+        if ( _debugInfoEnabled ) {
+            scene->perform( Apply( [renderer, camera]( Node *node ) {
+                node->forEachComponent( [renderer, camera]( NodeComponent *component ) {
+                    component->renderDebugInfo( renderer, camera );
+                });
+            }));
+        }
     }
-    
-    if ( _profilerInfoEnabled ) {
-        Profiler::getInstance()->dump();
 
+	Profiler::getInstance()->step();
+    
+    auto profilerEnabled = Simulation::getInstance()->getSettings()->get< crimild::Bool >( "profiler.enabled", false );
+    if ( profilerEnabled ) {
+		Profiler::getInstance()->dump();
+		
         static double accum = 0.0;
         auto t = Simulation::getInstance()->getSimulationClock();
-        accum += t.getDeltaTime() * 100.0;
+        accum += t.getDeltaTime();
         if ( accum >= 1.0 ) {
             Profiler::getInstance()->resetAll();
             accum = 0.0;
@@ -110,6 +118,7 @@ void DebugSystem::onToggleDebugInfo( messaging::ToggleDebugInfo const & )
 
 void DebugSystem::onToggleProfilerInfo( messaging::ToggleProfilerInfo const & )
 {
-    _profilerInfoEnabled = !_profilerInfoEnabled;
+    auto profilerEnabled = Simulation::getInstance()->getSettings()->get< crimild::Bool >( "profiler.enabled", false );
+    Simulation::getInstance()->getSettings()->set( "profiler.enabled", !profilerEnabled );
 }
 

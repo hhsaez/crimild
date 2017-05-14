@@ -117,21 +117,6 @@ void RenderSystem::renderFrame( void )
         renderer->endRender();
     }
 
-#if 0
-    {
-        // move to own system
-        Profiler::getInstance()->dump();
-        
-        static double accum = 0.0;
-        auto t = Simulation::getInstance()->getSimulationTime();
-        accum += t.getDeltaTime() * 100.0;
-        if ( accum >= 1.0 ) {
-            Profiler::getInstance()->resetAll();
-            accum = 0.0;
-        }
-    }
-#endif
-    
     broadcastMessage( messaging::DidRenderScene {} );
 }
 

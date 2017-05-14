@@ -40,7 +40,7 @@ namespace crimild {
 		CRIMILD_IMPLEMENT_RTTI( crimild::Primitive )
 
 	public:
-		enum class Type {
+		enum class Type : uint8_t {
 			POINTS,
 			LINES,
 			LINE_LOOP,
@@ -80,6 +80,8 @@ namespace crimild {
 
 		//@}
 	};
+
+	using PrimitivePtr = SharedPointer< Primitive >;
 
 }
 

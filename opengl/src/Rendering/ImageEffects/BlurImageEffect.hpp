@@ -36,13 +36,13 @@ namespace crimild {
         
         class BlurImageEffect : public ImageEffect {
         public:
-            explicit BlurImageEffect( float radius = 1.0f, size_t resolution = 1024 );
+            explicit BlurImageEffect( float radius = 1.0f, unsigned int resolution = 1024 );
             virtual ~BlurImageEffect( void );
             
             virtual void compute( crimild::Renderer *renderer, Camera *camera ) override;
             virtual void apply( crimild::Renderer *renderer, crimild::Camera *camera ) override;
 
-            size_t getResolution( void ) const { return _resolution->getValue(); }
+            unsigned int getResolution( void ) const { return _resolution->getValue(); }
             float getRadius( void ) const { return _radius->getValue(); }
             
         private:

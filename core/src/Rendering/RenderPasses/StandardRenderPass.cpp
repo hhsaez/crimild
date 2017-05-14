@@ -44,8 +44,10 @@ using namespace crimild;
 
 StandardRenderPass::StandardRenderPass( void )
 {
-    // TODO: fix this
+#if !defined( CRIMILD_PLATFORM_DESKTOP )
+    // TODO: shadows work on desktop only for the moment
     setShadowMappingEnabled( false );
+#endif
 }
 
 StandardRenderPass::~StandardRenderPass( void )
@@ -61,9 +63,17 @@ void StandardRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, C
         computeShadowMaps( renderer, renderQueue, camera );
     }
 
+#if 1
     renderOccluders( renderer, renderQueue, camera );
     renderOpaqueObjects( renderer, renderQueue, camera );
     renderTranslucentObjects( renderer, renderQueue, camera );
+#else
+    for ( auto it : _shadowMaps ) {
+        if ( it.second != nullptr ) {
+            RenderPass::render( renderer, it.second->getTexture(), nullptr );
+        }
+    }
+#endif
 }
 
 ShaderProgram *StandardRenderPass::getStandardProgram( void )
@@ -97,7 +107,7 @@ void StandardRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *ren
         if ( !light->shouldCastShadows() ) {
             return;
         }
-        
+
         auto map = _shadowMaps[ light ];
         if ( map == nullptr ) {
             map = crimild::alloc< ShadowMap >( light );
@@ -113,6 +123,12 @@ void StandardRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *ren
         renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LINEAR_DEPTH_CONSTANT_UNIFORM ), map->getLinearDepthConstant() );
         
         auto renderables = renderQueue->getRenderables( RenderQueue::RenderableType::SHADOW_CASTER );
+        
+        const auto projection = map->getLightProjectionMatrix();
+        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::PROJECTION_MATRIX_UNIFORM ), projection );
+        
+        const auto view = map->getLightViewMatrix();
+        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM ), view );
         
         renderQueue->each( renderables, [this, renderer, program]( RenderQueue::Renderable *renderable ) {
             renderStandardGeometry(
@@ -267,20 +283,34 @@ void StandardRenderPass::renderStandardGeometry( Renderer *renderer, Geometry *g
     renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_COUNT_UNIFORM ), 0 );
     if ( rc->getSkinnedMesh() != nullptr && rc->getSkinnedMesh()->getAnimationState() != nullptr ) {
         auto animationState = rc->getSkinnedMesh()->getAnimationState();
-        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_COUNT_UNIFORM ), animationState->getJointPoses().size() );
+        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_COUNT_UNIFORM ), ( int ) animationState->getJointPoses().size() );
         for ( int i = 0; i < animationState->getJointPoses().size(); i++ ) {
             renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_POSE_UNIFORM + i ), animationState->getJointPoses()[ i ] );
         }
     }
     
     geometry->forEachPrimitive( [renderer, program]( Primitive *primitive ) {
-        renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
-        renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
+		// TODO: maybe we shound't add a geometry to the queue if it
+		// has no valid primitive instead of quering the state of the
+		// VBO and IBO while rendering
+		
+		auto vbo = primitive->getVertexBuffer();
+		if ( vbo == nullptr ) {
+			return;
+		}
+
+		auto ibo = primitive->getIndexBuffer();
+		if ( ibo == nullptr ) {
+			return;
+		}
+		
+        renderer->bindVertexBuffer( program, vbo );
+        renderer->bindIndexBuffer( program, ibo );
         
         renderer->drawPrimitive( program, primitive );
         
-        renderer->unbindVertexBuffer( program, primitive->getVertexBuffer() );
-        renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
+        renderer->unbindVertexBuffer( program, vbo );
+        renderer->unbindIndexBuffer( program, ibo );
     });
     
     if ( material != nullptr ) {

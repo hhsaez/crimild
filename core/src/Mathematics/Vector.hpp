@@ -28,6 +28,9 @@
 #ifndef CRIMILD_CORE_MATHEMATICS_VECTOR_
 #define CRIMILD_CORE_MATHEMATICS_VECTOR_
 
+#include "Foundation/Macros.hpp"
+#include "Foundation/Types.hpp"
+
 #include <memory>
 #include <cmath>
 #include <cassert>
@@ -43,7 +46,7 @@ namespace crimild {
 
 		\todo This class needs proper unit tests
 	 */
-	template< unsigned int SIZE, typename PRECISION >
+	template< crimild::Size SIZE, typename PRECISION >
 	class Vector {
 	public:
 		static const Vector< SIZE, PRECISION > UNIT_X;
@@ -65,7 +68,7 @@ namespace crimild {
 		*/
 		explicit Vector( PRECISION value ) 
 		{
-			for ( int i = 0; i < SIZE; i++ ) {
+			for ( crimild::Size i = 0; i < SIZE; i++ ) {
 				_data[ i ] = value;
 			}
 		}
@@ -122,7 +125,7 @@ namespace crimild {
         template< typename U >
         Vector( const Vector< SIZE, U > &u )
         {
-            for ( unsigned int i = 0; i < SIZE; i++ ) {
+            for ( crimild::Size i = 0; i < SIZE; i++ ) {
                 _data[ i ] = static_cast< PRECISION >( u[ i ] );
             }
         }
@@ -209,11 +212,10 @@ namespace crimild {
 					   Numeric< PRECISION >::equals( _data[ 1 ], u._data[ 1 ] ) &&
 					   Numeric< PRECISION >::equals( _data[ 2 ], u._data[ 2 ] ) &&
 					   Numeric< PRECISION >::equals( _data[ 3 ], u._data[ 3 ] );
-
 			}
 			else {
-				bool areEqual = true;
-				for ( unsigned int i = 0; i < SIZE; i++ ) {
+				crimild::Bool areEqual = true;
+				for ( crimild::Size i = 0; i < SIZE; i++ ) {
 					areEqual &= Numeric< PRECISION >::equals( _data[ i ], u._data[ i ] );
 				}
 				return areEqual;
@@ -243,7 +245,7 @@ namespace crimild {
 
 		Vector &times( const Vector &other )
 		{
-			for ( size_t i = 0; i < SIZE; i++ ) {
+			for ( crimild::Size i = 0; i < SIZE; i++ ) {
 				_data[ i ] = _data[ i ] * other._data[ i ];
 			}
 			return *this;
@@ -625,25 +627,25 @@ namespace crimild {
 		return u;
 	}
 
-	template< unsigned int SIZE, typename PRECISION >
+	template< crimild::Size SIZE, typename PRECISION >
 	std::ostream &operator<<( std::ostream &out, const Vector< SIZE, PRECISION > &v )
 	{
 		out << std::setiosflags( std::ios::fixed | std::ios::showpoint  )
 			<< std::setprecision( 10 );
 		out << "(" << v[ 0 ];
-		for ( unsigned int i = 1; i < SIZE; i++ ) {
+		for ( crimild::Size i = 1; i < SIZE; i++ ) {
 			out << ", " << v[ i ];
 		}
 		out << ")";
 		return out;
 	}
 
-	template< unsigned int SIZE, typename PRECISION > const Vector< SIZE, PRECISION > Vector< SIZE, PRECISION >::UNIT_X = Vector< SIZE, PRECISION >( 1, 0 );
-	template< unsigned int SIZE, typename PRECISION > const Vector< SIZE, PRECISION > Vector< SIZE, PRECISION >::UNIT_Y( 0, 1 );
-	template< unsigned int SIZE, typename PRECISION > const Vector< SIZE, PRECISION > Vector< SIZE, PRECISION >::UNIT_Z( 0, 0, 1 );
-	template< unsigned int SIZE, typename PRECISION > const Vector< SIZE, PRECISION > Vector< SIZE, PRECISION >::UNIT_W( 0, 0, 0, 1 );
-	template< unsigned int SIZE, typename PRECISION > const Vector< SIZE, PRECISION > Vector< SIZE, PRECISION >::ZERO( static_cast< PRECISION >( 0.0f ) );
-	template< unsigned int SIZE, typename PRECISION > const Vector< SIZE, PRECISION > Vector< SIZE, PRECISION >::ONE( 1 );
+	template< crimild::Size SIZE, typename PRECISION > const Vector< SIZE, PRECISION > Vector< SIZE, PRECISION >::UNIT_X = Vector< SIZE, PRECISION >( 1, 0 );
+	template< crimild::Size SIZE, typename PRECISION > const Vector< SIZE, PRECISION > Vector< SIZE, PRECISION >::UNIT_Y( 0, 1 );
+	template< crimild::Size SIZE, typename PRECISION > const Vector< SIZE, PRECISION > Vector< SIZE, PRECISION >::UNIT_Z( 0, 0, 1 );
+	template< crimild::Size SIZE, typename PRECISION > const Vector< SIZE, PRECISION > Vector< SIZE, PRECISION >::UNIT_W( 0, 0, 0, 1 );
+	template< crimild::Size SIZE, typename PRECISION > const Vector< SIZE, PRECISION > Vector< SIZE, PRECISION >::ZERO( static_cast< PRECISION >( 0.0f ) );
+	template< crimild::Size SIZE, typename PRECISION > const Vector< SIZE, PRECISION > Vector< SIZE, PRECISION >::ONE( 1 );
 
 	typedef Vector< 2, unsigned int > Vector2ui;
 	typedef Vector< 2, int > Vector2i;

@@ -135,6 +135,8 @@ namespace crimild {
 
     	//@}
 	};
+
+	using MaterialPtr = SharedPointer< Material >;
     
 }
 

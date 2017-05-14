@@ -37,7 +37,7 @@ namespace crimild {
 	class Font : public SharedObject {
 	public:
 		struct Glyph {
-			char symbol;
+			unsigned char symbol;
 			float width;
 			float height;
 			float bearingX;
@@ -56,7 +56,7 @@ namespace crimild {
 		Texture *getTexture( void );
 		Texture *getSDFTexture( void );
 
-		Glyph getGlyph( char c ) { return _glyphs[ c ]; }
+		Glyph getGlyph( unsigned char c ) { return _glyphs[ c ]; }
 
 	private:
 		void loadGlyphs( std::string file );
@@ -64,7 +64,7 @@ namespace crimild {
 		std::string _textureFileName;
 		std::string _sdfTextureFileName;
 
-		std::map< char, Glyph > _glyphs;
+		std::map< unsigned char, Glyph > _glyphs;
 	};
     
 	class Text : public Geometry {

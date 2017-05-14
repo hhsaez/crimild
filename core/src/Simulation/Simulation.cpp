@@ -47,6 +47,9 @@
 #include "Simulation/Systems/DebugSystem.hpp"
 #include "Simulation/Systems/StreamingSystem.hpp"
 #include "Simulation/Systems/UISystem.hpp"
+#include "Simulation/Systems/ConsoleSystem.hpp"
+
+#include "Simulation/Console/ConsoleCommand.hpp"
 
 using namespace crimild;
 
@@ -55,15 +58,25 @@ Simulation::Simulation( std::string name, SettingsPtr const &settings )
       _settings( settings )
 {
     Log::info( CRIMILD_CURRENT_CLASS_NAME, Version::getDescription() );
-    
+
     // worker threads are disabled by default
     _jobScheduler.configure( 0 );
     
+    addSystem( crimild::alloc< ConsoleSystem >() );
 	addSystem( crimild::alloc< UpdateSystem >() );
 	addSystem( crimild::alloc< RenderSystem >() );
     addSystem( crimild::alloc< DebugSystem >() );
     addSystem( crimild::alloc< StreamingSystem >() );
     addSystem( crimild::alloc< UISystem >() );
+
+    Console::getInstance()->registerCommand( crimild::alloc< SimpleConsoleCommand >( "quit", []( Console *console, ConsoleCommand::ConsoleCommandArgs const & ) {
+        // we need to disable the console so no further commands are triggered
+        console->setEnabled( false );
+
+        crimild::concurrency::sync_frame( [] {
+            Simulation::getInstance()->stop();
+        });
+    }));
 }
 
 Simulation::~Simulation( void )

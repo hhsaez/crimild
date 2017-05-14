@@ -36,25 +36,25 @@ namespace crimild {
 
 	class Distance {
 	public:
-		template< unsigned int SIZE, typename PRECISION >
+		template< crimild::Size SIZE, typename PRECISION >
 		static double compute( const Vector< SIZE, PRECISION > &u, const Vector< SIZE, PRECISION > &v ) 
 		{
 			return std::sqrt( computeSquared( u, v ) );
 		}
 
-		template< unsigned int SIZE, typename PRECISION >
+		template< crimild::Size SIZE, typename PRECISION >
 		static double computeSquared( const Vector< SIZE, PRECISION > &u, const Vector< SIZE, PRECISION > &v ) 
 		{
 			return ( v - u ).getSquaredMagnitude();
 		}
 
-		template< unsigned int SIZE, typename PRECISION >
+		template< crimild::Size SIZE, typename PRECISION >
 		static double compute( const Ray< SIZE, PRECISION > &ray, const Vector< SIZE, PRECISION > &point )
 		{
 			return std::sqrt( computeSquared( ray, point ) );
 		}
 
-		template< unsigned int SIZE, typename PRECISION >
+		template< crimild::Size SIZE, typename PRECISION >
 		static double computeSquared( const Ray< SIZE, PRECISION > &ray, const Vector< SIZE, PRECISION > &point )
 		{
 			Vector< SIZE, PRECISION > v0 = point - ray.getOrigin();
@@ -62,7 +62,7 @@ namespace crimild {
 			return ( v0 * v0 - v1 * v1 / ( ray.getDirection().getSquaredMagnitude() ) );
 		}
 
-		template< unsigned int SIZE, typename PRECISION >
+		template< crimild::Size SIZE, typename PRECISION >
 		static double compute( const Plane< SIZE, PRECISION > &plane, const Vector< SIZE, PRECISION > &point )
 		{
 			return ( plane.getNormal() * point ) - plane.getConstant();

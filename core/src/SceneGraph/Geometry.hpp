@@ -71,6 +71,8 @@ namespace crimild {
 		virtual void load( Stream &s ) override;
 	};
 
+	using GeometryPtr = SharedPointer< Geometry >;
+
 }
 
 #endif

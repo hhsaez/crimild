@@ -46,27 +46,34 @@ AssetManager::~AssetManager( void )
 
 namespace crimild {
 
-template<>
-Texture *AssetManager::get< Texture >( std::string name )
-{
-    Texture *texture = nullptr;
-    
-    {
-        ScopedLock lock( _mutex );
-        texture = static_cast< Texture * >( crimild::get_ptr( _assets[ name ] ) );
-    }
-    
-	if ( texture == nullptr && ( StringUtils::getFileExtension( name ) == ".tga" ) ) {
-		auto image = crimild::alloc< ImageTGA >( FileSystem::getInstance().pathForResource( name ) );
-		if ( image != nullptr ) {
-            auto tmp = crimild::alloc< Texture >( image ) ;
-			set( name, tmp );
-            texture = crimild::get_ptr( tmp );
+	template<>
+	Texture *AssetManager::get< Texture >( std::string name )
+	{
+	    Texture *texture = nullptr;
+	    
+	    {
+	        ScopedLock lock( _mutex );
+	        texture = static_cast< Texture * >( crimild::get_ptr( _assets[ name ] ) );
+	    }
+	    
+		if ( texture == nullptr && ( StringUtils::getFileExtension( name ) == ".tga" ) ) {
+			auto image = crimild::alloc< ImageTGA >( FileSystem::getInstance().pathForResource( name ) );
+			if ( image != nullptr ) {
+	            auto tmp = crimild::alloc< Texture >( image ) ;
+				set( name, tmp );
+	            texture = crimild::get_ptr( tmp );
+			}
 		}
+
+		return texture;
 	}
 
-	return texture;
 }
 
+void AssetManager::loadFont( std::string name, std::string fileName )
+{
+    std::string fontDefFileName = FileSystem::getInstance().pathForResource( fileName );
+    auto font = crimild::alloc< Font >( fontDefFileName );
+	set( name, font, true );    
 }
 

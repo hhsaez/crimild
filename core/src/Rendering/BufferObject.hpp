@@ -29,6 +29,7 @@
 #define CRIMILD_RENDERING_BUFFER_OBJECT_
 
 #include "Foundation/Macros.hpp"
+#include "Foundation/Types.hpp"
 #include "Streaming/Stream.hpp"
 
 #include <memory>
@@ -40,9 +41,10 @@ namespace crimild {
 	template< typename T >
 	class BufferObject : public StreamObject {
 	protected:
-		BufferObject( size_t size, const T *data )
+		BufferObject( unsigned int size, const T *data )
 		{
 			if ( size > 0 ) {
+				_usedCount = size;
 				_data.resize( size );
 				if ( data != nullptr ) {
 					memcpy( &_data[ 0 ], data, sizeof( T ) * size );
@@ -59,16 +61,21 @@ namespace crimild {
 
 		}
 
-		size_t getSize( void ) const { return _data.size(); }
+		inline unsigned int getSize( void ) const { return _data.size(); }
         
-        size_t getSizeInBytes( void ) const { return sizeof( T ) * getSize(); }
+        inline unsigned int getSizeInBytes( void ) const { return sizeof( T ) * getSize(); }
 
-		T *data( void ) { return &_data[ 0 ]; }
+		inline T *data( void ) { return &_data[ 0 ]; }
 
-		const T *getData( void ) const { return &_data[ 0 ]; }
+		inline const T *getData( void ) const { return &_data[ 0 ]; }
+
+		inline crimild::Size getUsedCount( void ) const { return _usedCount; }
+
+		inline void setUsedCount( crimild::Size count ) { _usedCount = count; }
 
 	private:
 		std::vector< T > _data;
+		crimild::Size _usedCount;
 
 	public:
 		BufferObject( void ) { }
@@ -82,8 +89,11 @@ namespace crimild {
 		{
 			StreamObject::save( s );
 
-			size_t size = getSize();
+			unsigned int size = getSize();
 			s.write( size );
+
+			s.write( _usedCount );
+			
 			if ( size > 0 ) {
 				s.writeRawBytes( &_data[ 0 ], getSizeInBytes() );
 			}
@@ -93,8 +103,10 @@ namespace crimild {
 		{
 			StreamObject::load( s );
 
-			size_t size;
+			unsigned int size;
 			s.read( size );
+
+			s.read( _usedCount );
 
 			if ( size > 0 ) {
 				_data.resize( size );

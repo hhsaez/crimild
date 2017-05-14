@@ -58,6 +58,15 @@ namespace crimild {
 			static std::string buildArrayShaderLocationName( std::string variable, int index );
 
 			static std::string buildArrayShaderLocationName( std::string variable, int index, std::string member );
+
+        public:
+            static const GLenum PRIMITIVE_TYPE[];
+            static const GLenum TEXTURE_WRAP_MODE_CLAMP[];
+            static const GLenum TEXTURE_FILTER_MAP[];
+            static const GLenum ALPHA_SRC_BLEND_FUNC[];
+            static const GLenum ALPHA_DST_BLEND_FUNC[];
+            static const GLenum DEPTH_COMPARE_FUNC[];
+            static const GLenum CULL_FACE_MODE[];
 		};
 
 	}

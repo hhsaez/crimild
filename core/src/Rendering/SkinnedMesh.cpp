@@ -260,21 +260,21 @@ void SkinnedMeshAnimationChannel::save( Stream &s )
 
 	s.write( getName() );
 
-	size_t positionKeyCount = _positionKeys.size();
+	unsigned int positionKeyCount = _positionKeys.size();
 	s.write( positionKeyCount );
 	_positionKeys.foreach( [&s]( PositionKey const &p, unsigned int ) {
 		s.write( p.time );
 		s.write( p.value );
 	});
 
-	size_t rotationKeyCount = _rotationKeys.size();
+	unsigned int rotationKeyCount = _rotationKeys.size();
 	s.write( rotationKeyCount );
 	_rotationKeys.foreach( [&s]( RotationKey const &p, unsigned int ) {
 		s.write( p.time );
 		s.write( p.value );
 	});
 
-	size_t scaleKeyCount = _scaleKeys.size();
+	unsigned int scaleKeyCount = _scaleKeys.size();
 	s.write( scaleKeyCount );
 	_scaleKeys.foreach( [&s]( ScaleKey const &p, unsigned int ) {
 		s.write( p.time );
@@ -290,7 +290,7 @@ void SkinnedMeshAnimationChannel::load( Stream &s )
 	s.read( name );
 	setName( name );
 
-	size_t positionKeyCount;
+	unsigned int positionKeyCount;
 	s.read( positionKeyCount );
 	_positionKeys.resize( positionKeyCount );
 	for ( unsigned int i = 0; i < positionKeyCount; i++ ) {
@@ -300,7 +300,7 @@ void SkinnedMeshAnimationChannel::load( Stream &s )
 		_positionKeys[ i ] = p;
 	}
 
-	size_t rotationKeyCount;
+	unsigned int rotationKeyCount;
 	s.read( rotationKeyCount );
 	_rotationKeys.resize( rotationKeyCount );
 	for ( unsigned int i = 0; i < rotationKeyCount; i++ ) {
@@ -310,7 +310,7 @@ void SkinnedMeshAnimationChannel::load( Stream &s )
 		_rotationKeys[ i ] = k;
 	}
 
-	size_t scaleKeyCount;
+	unsigned int scaleKeyCount;
 	s.read( scaleKeyCount );
 	_scaleKeys.resize( scaleKeyCount );
 	for ( unsigned int i = 0; i < scaleKeyCount; i++ ) {
@@ -450,7 +450,8 @@ void SkinnedMeshAnimationState::save( Stream &s )
 {
 	StreamObject::save( s );
 
-	s.write( _jointPoses.size() );
+	unsigned int posesCount = _jointPoses.size();
+	s.write( posesCount );
 	_jointPoses.foreach( [&s]( Matrix4f &m, unsigned int ) {
 		s.write( m );
 	});
@@ -460,7 +461,7 @@ void SkinnedMeshAnimationState::load( Stream &s )
 {
 	StreamObject::load( s );
 
-	size_t posesCount;
+	unsigned int posesCount;
 	s.read( posesCount );
 	for ( int i = 0; i < posesCount; i++ ) {
 		Matrix4f m;
@@ -526,28 +527,33 @@ void SkinnedMesh::debugDump( void )
         Log::debug( CRIMILD_CURRENT_CLASS_NAME, "No skeleton attached to skinned mesh" );
 		return;
 	}
-	
-	std::cout << "Skinned Mesh: " << std::endl;
-	getSkeleton()->getClips().foreach( []( SharedPointer< SkinnedMeshAnimationClip > &clip, unsigned int clipIdx ) {
-		std::cout << "  Animation: #" << clipIdx
-		  		  << "\n    Duration: " << clip->getDuration()
-		  		  << "\n    Frame Rate: " << clip->getFrameRate()
-		  		  << "\n    Channels: " << clip->getChannels().size()
-		  		  << std::endl;
 
-		clip->getChannels().foreach( []( std::string name, SharedPointer< SkinnedMeshAnimationChannel > &channel, unsigned int channelIdx ) {
-			std::cout << "      *" 
-					  << " Channel: " << std::string( channel->getName() )
-					  << " P=" << channel->getPositionKeys().size() 
-					  << "(" << channel->getPositionKeys()[ 0 ].time 
-					  << "-" << channel->getPositionKeys()[ channel->getPositionKeys().size() - 1 ].time << ")"
-					  << " R=" << channel->getRotationKeys().size()
-					  << "(" << channel->getRotationKeys()[ 0 ].time 
-					  << "-" << channel->getRotationKeys()[ channel->getRotationKeys().size() - 1 ].time << ")"
-					  << " S=" << channel->getScaleKeys().size()
-					  << "(" << channel->getScaleKeys()[ 0 ].time 
-					  << "-" << channel->getScaleKeys()[ channel->getScaleKeys().size() - 1 ].time << ")"
-					  << std::endl;
+	std::stringstream ss;
+	
+	ss << "Skinned Mesh: ";
+	getSkeleton()->getClips().foreach( [&ss]( SharedPointer< SkinnedMeshAnimationClip > &clip, unsigned int clipIdx ) {
+		ss << "\n  Animation: #" << clipIdx
+		   << "\n    Duration: " << clip->getDuration()
+		   << "\n    Frame Rate: " << clip->getFrameRate()
+		   << "\n    Channels: " << clip->getChannels().size()
+		   << "\n";
+
+		clip->getChannels().foreach( [&ss]( std::string name, SharedPointer< SkinnedMeshAnimationChannel > &channel, unsigned int channelIdx ) {
+			ss << "      *" 
+			   << " Channel: " << std::string( channel->getName() )
+			   << " P=" << channel->getPositionKeys().size() 
+			   << "(" << channel->getPositionKeys()[ 0 ].time 
+			   << "-" << channel->getPositionKeys()[ channel->getPositionKeys().size() - 1 ].time << ")"
+			   << " R=" << channel->getRotationKeys().size()
+			   << "(" << channel->getRotationKeys()[ 0 ].time 
+			   << "-" << channel->getRotationKeys()[ channel->getRotationKeys().size() - 1 ].time << ")"
+			   << " S=" << channel->getScaleKeys().size()
+			   << "(" << channel->getScaleKeys()[ 0 ].time 
+			   << "-" << channel->getScaleKeys()[ channel->getScaleKeys().size() - 1 ].time << ")"
+			   << "\n";
 		});
 	});
+
+	Log::debug( CRIMILD_CURRENT_CLASS_NAME, ss.str() );
 }
+

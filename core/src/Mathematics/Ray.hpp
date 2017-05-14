@@ -37,7 +37,7 @@ namespace crimild {
 
 		A ray is represented by an origin and a direction
 	 */
-	template< unsigned int SIZE, typename PRECISION >
+	template< crimild::Size SIZE, typename PRECISION >
 	class Ray {
 	public:
 		typedef Vector< SIZE, PRECISION > VectorImpl;
@@ -119,7 +119,7 @@ namespace crimild {
 		VectorImpl _direction;
 	};
 
-	template< unsigned int SIZE, typename PRECISION >
+	template< crimild::Size SIZE, typename PRECISION >
 	std::ostream &operator<<( std::ostream &out, const Ray< SIZE, PRECISION > &r )
 	{
 		out << std::setiosflags( std::ios::fixed | std::ios::showpoint  )

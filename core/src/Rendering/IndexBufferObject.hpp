@@ -47,7 +47,7 @@ namespace crimild {
 		
 		virtual ~IndexBufferObject( void );
 
-		unsigned int getIndexCount( void ) const { return getSize(); }
+		unsigned int getIndexCount( void ) const { return getUsedCount(); }
 
         void setIndexAt( unsigned int position, IndexPrecision value ) { data()[ position ] = value; }
 
@@ -74,6 +74,8 @@ namespace crimild {
 
     	//@}
 	};
+
+	using IndexBufferObjectPtr = SharedPointer< IndexBufferObject >;
 
 }
 

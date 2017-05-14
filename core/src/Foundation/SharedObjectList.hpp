@@ -89,7 +89,7 @@ namespace crimild {
             clear();
         }
             
-        std::size_t size( void ) const { return _objects.size(); }
+        unsigned int size( void ) const { return _objects.size(); }
         
         bool isEmpty( void ) const { return _objects.size() == 0; }
         

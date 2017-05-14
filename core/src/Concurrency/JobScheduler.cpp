@@ -79,16 +79,6 @@ void JobScheduler::stop( void )
 		}
 	}
 
-    size_t jobCount = 0;
-    std::stringstream ss;
-    ss << "Stats: ";
-    for ( auto &it : _workerStats ) {
-        ss << "\n\tWorker " << it.first << " executed " << it.second.jobCount << " jobs";
-        jobCount += it.second.jobCount;
-    }
-    ss << "\n\tTotal jobs: " << jobCount;
-    Log::info( CRIMILD_CURRENT_CLASS_NAME, ss.str() );
-    
 	_workers.clear();
     _workerJobQueues.clear();
 
@@ -243,5 +233,21 @@ void JobScheduler::executeDelayedJobs( void )
     _delayedSyncJobs.each( [this]( JobPtr const &j ) {
         execute( j );
     }, true );
+}
+
+void JobScheduler::eachWorkerStat( std::function< void( WorkerId, const WorkerStat & ) > const &callback ) const
+{
+	for ( const auto &it : _workerStats ) {
+		callback( it.first, it.second );
+	}
+}
+
+void JobScheduler::clearWorkerStats( void )
+{
+	std::lock_guard< std::mutex > lock( _mutex );
+
+	for ( auto &it : _workerStats ) {
+		it.second.jobCount = 0;
+	}
 }
 

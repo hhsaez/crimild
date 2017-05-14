@@ -86,7 +86,7 @@ namespace crimild {
 
 		unsigned char getVertexSize( void ) const { return _vertexSize; }
 
-		size_t getVertexSizeInBytes( void ) const { return _vertexSizeInBytes; }
+		unsigned int getVertexSizeInBytes( void ) const { return _vertexSizeInBytes; }
 
 	private:
 		unsigned char _positions;
@@ -104,7 +104,7 @@ namespace crimild {
 		unsigned char _boneWeights;
 		unsigned char _boneWeightsOffset;
 		unsigned char _vertexSize;
-		size_t _vertexSizeInBytes;
+		unsigned int _vertexSizeInBytes;
 	};
 
 	std::ostream &operator<<( std::ostream &out, const crimild::VertexFormat &vf );

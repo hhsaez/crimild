@@ -47,9 +47,9 @@ FontAtlasGenerator::~FontAtlasGenerator( void )
 	cleanup();
 }
 
-bool FontAtlasGenerator::execute( std::string text, std::string output )
+bool FontAtlasGenerator::execute( std::string output )
 {
-	_pixelSize = ( int )( std::min( _width - 2 * PADDING, _height - 7 * PADDING ) / std::ceil( std::sqrt( text.length() ) ) );
+	_pixelSize = ( int )( std::min( _width - 2 * PADDING, _height - 7 * PADDING ) / std::ceil( std::sqrt( 256 ) ) );
 	_cursorX = PADDING;
 	_cursorY = PADDING;
 
@@ -67,8 +67,9 @@ bool FontAtlasGenerator::execute( std::string text, std::string output )
 		return false;
 	}
 
-	for ( int n = 0; n < text.length(); n++ ) {
-		pushChar( text[ n ] );
+	// generate the list of characters to be processed
+	for ( int i = 0; i < 255; i++ ) {
+		pushChar( ( unsigned char ) ( 32 + i ) );
 	}
 
 	saveTexture( output + ".tga" );
@@ -109,7 +110,7 @@ void FontAtlasGenerator::cleanup( void )
 	FT_Done_FreeType( _library );
 }
 
-void FontAtlasGenerator::pushChar( char c )
+void FontAtlasGenerator::pushChar( unsigned char c )
 {
 	int error = FT_Load_Char( _face, c, FT_LOAD_RENDER );
 	if ( error ) {
@@ -173,11 +174,11 @@ void FontAtlasGenerator::writeBuffer( FT_GlyphSlot &slot, int x, int y )
 	}
 }
 
-void FontAtlasGenerator::saveTexture( std::string fileName, bool greyscale )
+void FontAtlasGenerator::saveTexture( std::string fileName )
 {
 	unsigned char identsize = 0;
     unsigned char colorMapType = 0;
-    unsigned char imageType = greyscale ? 3 : 2;	// 2 - rgb, 3 - greyscale
+    unsigned char imageType = 2;	// 2 - rgb, 3 - greyscale
     unsigned short colorMapStart = 0;
     unsigned short colorMapLength = 0;
     unsigned char colorMapBits = 0;
@@ -185,7 +186,7 @@ void FontAtlasGenerator::saveTexture( std::string fileName, bool greyscale )
     unsigned short ystart = 0;
     unsigned short width = _width;
     unsigned short height = _height;
-    unsigned char bits = greyscale ? 8 : 24;
+    unsigned char bits = 24;
     unsigned char descriptor = 0;
 
 	FILE *out = fopen( fileName.c_str(), "wb" );
@@ -203,14 +204,9 @@ void FontAtlasGenerator::saveTexture( std::string fileName, bool greyscale )
 	fwrite( &bits, sizeof( unsigned char ), 1, out );
 	fwrite( &descriptor, sizeof( unsigned char ), 1, out );
 
-	if ( greyscale ) {
-		fwrite( &_buffer[ 0 ], _width * _height, sizeof( unsigned char ), out );
-	}
-	else {
-		for ( int i = 0; i < _width * _height; i++ ) {
-			for ( int j = 0; j < 3; j++ ) {
-				fwrite( &_buffer[ i ], 1, sizeof( unsigned char ), out );
-			}
+	for ( int i = 0; i < _width * _height; i++ ) {
+		for ( int j = 0; j < 3; j++ ) {
+			fwrite( &_buffer[ i ], 1, sizeof( unsigned char ), out );
 		}
 	}
 

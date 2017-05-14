@@ -33,7 +33,7 @@
 
 namespace crimild {
     
-    template< class KEY_TYPE, class VALUE_TYPE >
+    template< typename KEY_TYPE, typename VALUE_TYPE >
     class Map {
     public:
         Map( void ) { }
@@ -44,7 +44,7 @@ namespace crimild {
 
         bool isEmpty( void ) const { return _map.size() == 0; }
 
-        size_t size( void ) const { return _map.size(); }
+        unsigned int size( void ) const { return _map.size(); }
 
         bool find( KEY_TYPE const &key )
         {
@@ -92,6 +92,9 @@ namespace crimild {
     private:
         std::map< KEY_TYPE, VALUE_TYPE > _map;
     };
+
+	template< typename KEY_TYPE, typename VALUE_TYPE >
+	using ThreadSafeMap = Map< KEY_TYPE, VALUE_TYPE >; //< TODO
 
 }
 

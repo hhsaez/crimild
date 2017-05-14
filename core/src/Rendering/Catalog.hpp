@@ -29,6 +29,7 @@
 #define CRIMILD_RENDERING_CATALOG_
 
 #include "Foundation/SharedObject.hpp"
+#include "Foundation/Types.hpp"
 
 #include <list>
 #include <functional>
@@ -98,9 +99,19 @@ namespace crimild {
             cleanup();
 		}
 
-		bool hasResources( void ) const
+		crimild::Bool hasResources( void ) const
 		{ 
 			return _resources.size() > 0;
+		}
+
+		inline crimild::Size getResourceCount( void ) const
+		{
+			return _resources.size();
+		}
+
+		inline crimild::Size getActiveResourceCount( void ) const
+		{
+			return _activeResourceCount;
 		}
 
 		virtual int getNextResourceId( void )
@@ -120,6 +131,8 @@ namespace crimild {
 			}
             
             resource->onBind();
+
+            _activeResourceCount++;
 		}
 
         virtual void bind( ShaderProgram *program, RESOURCE_TYPE *resource )
@@ -136,6 +149,9 @@ namespace crimild {
 		{
             if ( resource != nullptr ) {
                 resource->onUnbind();
+                if ( _activeResourceCount > 0 ) {
+                	_activeResourceCount--;
+                }
             }
 		}
 
@@ -178,6 +194,7 @@ namespace crimild {
 	private:
         std::list< RESOURCE_TYPE * > _resources;
         std::list< int > _cleanupList;
+        crimild::Size _activeResourceCount = 0;
 	};
 
 }

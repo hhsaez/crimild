@@ -76,6 +76,7 @@ OpenGLRenderer::OpenGLRenderer( SharedPointer< FrameBufferObject > const &screen
 	setShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_VERTEX_COLOR, crimild::alloc< UnlitVertexColorShaderProgram >() );
     
 	setShaderProgram( Renderer::SHADER_PROGRAM_PARTICLE_SYSTEM, crimild::alloc< ParticleSystemShaderProgram >() );
+	setShaderProgram( Renderer::SHADER_PROGRAM_POINT_SPRITE, crimild::alloc< ParticleSystemShaderProgram >() );
 
 #ifdef CRIMILD_PLATFORM_DESKTOP
     setShaderProgram( Renderer::SHADER_PROGRAM_TEXT_SDF, crimild::alloc< SignedDistanceFieldShaderProgram >() );
@@ -247,37 +248,7 @@ void OpenGLRenderer::drawPrimitive( ShaderProgram *program, Primitive *primitive
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
-	GLenum type;
-	switch ( primitive->getType() ) {
-		case Primitive::Type::POINTS:
-			type = GL_POINTS;
-			break;
-
-		case Primitive::Type::LINES:
-			type = GL_LINES;
-			break;
-			
-		case Primitive::Type::LINE_LOOP:
-			type = GL_LINE_LOOP;
-			break;
-			
-		case Primitive::Type::LINE_STRIP:
-			type = GL_LINE_STRIP;
-			break;
-			
-		case Primitive::Type::TRIANGLE_FAN:
-			type = GL_TRIANGLE_FAN;
-			break;
-			
-		case Primitive::Type::TRIANGLE_STRIP:
-			type = GL_TRIANGLE_STRIP;
-			break;
-			
-		case Primitive::Type::TRIANGLES:
-		default:
-			type = GL_TRIANGLES;
-			break;
-	}
+	GLenum type = OpenGLUtils::PRIMITIVE_TYPE[ ( uint8_t ) primitive->getType() ];
 
 	unsigned short *base = 0;
 	glDrawElements( type,
@@ -293,37 +264,7 @@ void OpenGLRenderer::drawBuffers( ShaderProgram *program, Primitive::Type buffer
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
-	GLenum type;
-	switch ( bufferType ) {
-		case Primitive::Type::POINTS:
-			type = GL_POINTS;
-			break;
-
-		case Primitive::Type::LINES:
-			type = GL_LINES;
-			break;
-			
-		case Primitive::Type::LINE_LOOP:
-			type = GL_LINE_LOOP;
-			break;
-			
-		case Primitive::Type::LINE_STRIP:
-			type = GL_LINE_STRIP;
-			break;
-			
-		case Primitive::Type::TRIANGLE_FAN:
-			type = GL_TRIANGLE_FAN;
-			break;
-			
-		case Primitive::Type::TRIANGLE_STRIP:
-			type = GL_TRIANGLE_STRIP;
-			break;
-			
-		case Primitive::Type::TRIANGLES:
-		default:
-			type = GL_TRIANGLES;
-			break;
-	}
+	GLenum type = OpenGLUtils::PRIMITIVE_TYPE[ ( uint8_t ) bufferType ];
 
 	bindVertexBuffer( program, vbo );
 
@@ -341,71 +282,8 @@ void OpenGLRenderer::setAlphaState( AlphaState *state )
 	if ( state->isEnabled() ) {
 		glEnable( GL_BLEND );
 
-		GLenum srcBlendFunc = GL_SRC_ALPHA;
-		switch ( state->getSrcBlendFunc() ) {
-			case AlphaState::SrcBlendFunc::ZERO:
-				srcBlendFunc = GL_ZERO;
-				break;
-			case AlphaState::SrcBlendFunc::ONE:
-				srcBlendFunc = GL_ONE;
-				break;
-			case AlphaState::SrcBlendFunc::SRC_COLOR:
-				srcBlendFunc = GL_SRC_COLOR;
-				break;
-			case AlphaState::SrcBlendFunc::ONE_MINUS_SRC_COLOR:
-				srcBlendFunc = GL_ONE_MINUS_SRC_COLOR;
-				break;
-			case AlphaState::SrcBlendFunc::DST_COLOR:
-				srcBlendFunc = GL_DST_COLOR;
-				break;
-			case AlphaState::SrcBlendFunc::ONE_MINUS_DST_COLOR:
-				srcBlendFunc = GL_ONE_MINUS_DST_COLOR;
-				break;
-			case AlphaState::SrcBlendFunc::SRC_ALPHA:
-				srcBlendFunc = GL_SRC_ALPHA;
-				break;
-			case AlphaState::SrcBlendFunc::ONE_MINUS_SRC_ALPHA:
-				srcBlendFunc = GL_ONE_MINUS_SRC_ALPHA;
-				break;
-			case AlphaState::SrcBlendFunc::DST_ALPHA:
-				srcBlendFunc = GL_DST_ALPHA;
-				break;
-			case AlphaState::SrcBlendFunc::ONE_MINUS_DST_ALPHA:
-				srcBlendFunc = GL_ONE_MINUS_DST_ALPHA;
-				break;
-			default:
-				break;
-		}
-
-		GLenum dstBlendFunc = GL_ONE_MINUS_SRC_ALPHA;
-		switch ( state->getDstBlendFunc() ) {
-			case AlphaState::DstBlendFunc::ZERO:
-				dstBlendFunc = GL_ZERO;
-				break;
-			case AlphaState::DstBlendFunc::ONE:
-				dstBlendFunc = GL_ONE;
-				break;
-			case AlphaState::DstBlendFunc::SRC_COLOR:
-				dstBlendFunc = GL_SRC_COLOR;
-				break;
-			case AlphaState::DstBlendFunc::ONE_MINUS_SRC_COLOR:
-				dstBlendFunc = GL_ONE_MINUS_SRC_COLOR;
-				break;
-			case AlphaState::DstBlendFunc::SRC_ALPHA:
-				dstBlendFunc = GL_SRC_ALPHA;
-				break;
-			case AlphaState::DstBlendFunc::ONE_MINUS_SRC_ALPHA:
-				dstBlendFunc = GL_ONE_MINUS_SRC_ALPHA;
-				break;
-			case AlphaState::DstBlendFunc::DST_ALPHA:
-				dstBlendFunc = GL_DST_ALPHA;
-				break;
-			case AlphaState::DstBlendFunc::ONE_MINUS_DST_ALPHA:
-				dstBlendFunc = GL_ONE_MINUS_DST_ALPHA;
-				break;
-			default:
-				break;
-		}
+		GLenum srcBlendFunc = OpenGLUtils::ALPHA_SRC_BLEND_FUNC[ ( uint8_t ) state->getSrcBlendFunc() ];
+		GLenum dstBlendFunc = OpenGLUtils::ALPHA_DST_BLEND_FUNC[ ( uint8_t ) state->getDstBlendFunc() ];
 
 		glBlendFunc( srcBlendFunc, dstBlendFunc );
 	}
@@ -427,33 +305,7 @@ void OpenGLRenderer::setDepthState( DepthState *state )
 		glDisable( GL_DEPTH_TEST );
 	}
     
-    GLenum compareFunc = GL_LESS;
-    switch ( state->getCompareFunc() ) {
-        case DepthState::CompareFunc::NEVER:
-            compareFunc = GL_NEVER;
-            break;
-        case DepthState::CompareFunc::LESS:
-            compareFunc = GL_LESS;
-            break;
-        case DepthState::CompareFunc::EQUAL:
-            compareFunc = GL_EQUAL;
-            break;
-        case DepthState::CompareFunc::LEQUAL:
-            compareFunc = GL_LEQUAL;
-            break;
-        case DepthState::CompareFunc::GREATER:
-            compareFunc = GL_GREATER;
-            break;
-        case DepthState::CompareFunc::NOTEQUAL:
-            compareFunc = GL_NOTEQUAL;
-            break;
-        case DepthState::CompareFunc::GEQUAL:
-            compareFunc = GL_GEQUAL;
-            break;
-        case DepthState::CompareFunc::ALWAYS:
-            compareFunc = GL_ALWAYS;
-            break;
-    }
+    GLenum compareFunc = OpenGLUtils::DEPTH_COMPARE_FUNC[ ( uint8_t ) state->getCompareFunc() ];
     glDepthFunc( compareFunc );
     
     glDepthMask( state->isWritable() ? GL_TRUE : GL_FALSE );
@@ -468,20 +320,7 @@ void OpenGLRenderer::setCullFaceState( CullFaceState *state )
 	if ( state->isEnabled() ) {
 	    glEnable( GL_CULL_FACE );
 
-	    GLenum mode = GL_BACK;
-	    switch ( state->getCullFaceMode() ) {
-	    	case CullFaceState::CullFaceMode::BACK:
-	    		mode = GL_BACK;
-	    		break;
-	    	case CullFaceState::CullFaceMode::FRONT:
-	    		mode = GL_FRONT;
-	    		break;
-    		case CullFaceState::CullFaceMode::FRONT_AND_BACK:
-    			mode = GL_FRONT_AND_BACK;
-    			break;
-			default:
-				break;
-	    }
+	    GLenum mode = OpenGLUtils::CULL_FACE_MODE[ ( uint8_t ) state->getCullFaceMode() ];
     	glCullFace( mode );
 
 	}
