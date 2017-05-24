@@ -80,6 +80,7 @@ using namespace crimild::scripting;
 #define LIGHT_ATTENUATION "attenuation"
 #define LIGHT_LIGHT_TYPE "lightType"
 #define LIGHT_COLOR "color"
+#define LIGHT_AMBIENT "ambient"
 
 #define TEXT_TYPE "crimild::Text"
 #define TEXT_FONT "font"
@@ -335,6 +336,9 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
         RGBAColorf color;
         if ( eval.getPropValue( LIGHT_COLOR, color ) ) light->setColor( color );
         
+        RGBAColorf ambient;
+        if ( eval.getPropValue( LIGHT_AMBIENT, ambient ) ) light->setAmbient( ambient );
+
         return light;
     });
 
