@@ -31,7 +31,7 @@ CRIMILD_GLSL_VARYING_IN vec3 vWorldTangent;
 CRIMILD_GLSL_VARYING_IN vec3 vWorldBiTangent;
 CRIMILD_GLSL_VARYING_IN vec3 vViewVec;
 CRIMILD_GLSL_VARYING_IN vec2 vTextureCoord;
-CRIMILD_GLSL_VARYING_IN vec4 vPosition;
+CRIMILD_GLSL_VARYING_IN vec4 vLightSpacePosition;
 
 uniform int uLightCount;
 uniform Light uLights[ 4 ];
@@ -45,17 +45,6 @@ uniform sampler2D uSpecularMap;
 uniform bool uUseSpecularMap;
 uniform sampler2D uShadowMap;
 uniform bool uUseShadowMap;
-
-uniform float uLinearDepthConstant;
-
-float unpack( vec4 color )
-{
-    const vec4 bitShifts = vec4(1.0,
-                                1.0 / 255.0,
-                                1.0 / (255.0 * 255.0),
-                                1.0 / (255.0 * 255.0 * 255.0));
-    return dot( color, bitShifts );
-}
 
 CRIMILD_GLSL_DECLARE_FRAGMENT_OUTPUT
 
@@ -89,6 +78,19 @@ void main( void )
     outColor.rgb = uMaterial.ambient.rgb;
     outColor.a = color.a;
     
+    float shadowFactor = 1.0;
+    if ( uUseShadowMap ) {
+        vec3 projCoord = vLightSpacePosition.xyz / vLightSpacePosition.w;
+        vec3 uvShadowMap = vec3( 0.5 ) + 0.5 * projCoord;
+        float d = CRIMILD_GLSL_FN_TEXTURE_2D( uShadowMap, uvShadowMap.xy ).x;
+        float z = uvShadowMap.z;
+        z *= 0.99; // fixes acne
+        z += 0.001; // fixes peter-panning
+        if ( d < z ) {
+            shadowFactor = 0.5;
+        }
+    }
+
     for ( int i = 0; i < 4; i++ ) {
         if ( i >= uLightCount ) {
             break;
@@ -142,25 +144,10 @@ void main( void )
             float d = distance( vWorldVertex.xyz, uLights[ i ].position );
             float a = 1.0 / ( uLights[ i ].attenuation.x + ( uLights[ i ].attenuation.y * d ) + ( uLights[ i ].attenuation.z * d * d ) );
             
-            outColor.rgb += ( ( color.rgb * l ) + ( specularColor.rgb * s ) ) * uLights[ i ].color.rgb * a * spotlight;
+            outColor.rgb += shadowFactor * ( ( color.rgb * l ) + ( specularColor.rgb * s ) ) * uLights[ i ].color.rgb * a * spotlight;
         }
     }
     
-    if ( uUseShadowMap ) {
-        vec3 depth = vPosition.xyz / vPosition.w;
-        depth.z = length( vWorldVertex.xyz - uLights[ 0 ].position ) * uLinearDepthConstant;
-        float shadow = 1.0;
-        float bias = 0.001;
-        vec4 shadowColor = CRIMILD_GLSL_FN_TEXTURE_2D( uShadowMap, depth.xy );
-        float shadowDepth = unpack( shadowColor );
-        if ( ( depth.z - bias ) > shadowDepth ) {
-            shadow = 0.5;
-        }
-        
-        outColor = clamp( vec4( outColor.rgb * shadow, outColor.a ), 0.0, 1.0 );
-        outColor.a = 1.0;
-    }
-
     CRIMILD_GLSL_FRAGMENT_OUTPUT = outColor;
 
 }

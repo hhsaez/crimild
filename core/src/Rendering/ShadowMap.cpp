@@ -26,35 +26,34 @@
  */
 
 #include "ShadowMap.hpp"
-#include "SceneGraph/Light.hpp"
+
+#include "Simulation/Simulation.hpp"
 
 using namespace crimild;
 
-ShadowMap::ShadowMap( Light *source )
-    : ShadowMap( source, nullptr )
+ShadowMap::ShadowMap( void )
+    : ShadowMap( nullptr )
 {
     
 }
 
-ShadowMap::ShadowMap( Light *source, FrameBufferObject *fbo )
-    : _source( source ),
-      _buffer( fbo )
+ShadowMap::ShadowMap( SharedPointer< FrameBufferObject > const &fbo )
+    : _buffer( fbo )
 {
     if ( _buffer == nullptr ) {
-        int width = 2048;
-        int height = 2048;
+        auto width = Simulation::getInstance()->getSettings()->get< crimild::Int16 >( Settings::SETTINGS_RENDERING_SHADOWS_RESOLUTION_WIDTH, 2048 );;
+        auto height = Simulation::getInstance()->getSettings()->get< crimild::Int16 >( Settings::SETTINGS_RENDERING_SHADOWS_RESOLUTION_HEIGHT, 2048 );;
+
         _buffer = crimild::alloc< FrameBufferObject >( width, height );
-        _buffer->getRenderTargets().add( "depth", crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_16, RenderTarget::Output::RENDER, width, height ) );
-        _buffer->getRenderTargets().add( "color", crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
+        _buffer->setClearColor( RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ) );
+        _buffer->getRenderTargets().add( "depth", crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER_AND_TEXTURE, width, height, true ) );
     }
     
-    _buffer->getRenderTargets().each( [&]( std::string name, RenderTarget *target ) {
-        if ( name == "color" ) {
+    _buffer->getRenderTargets().each( [ this ]( std::string name, RenderTarget *target ) {
+        if ( target->getOutput() == RenderTarget::Output::TEXTURE || target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
             _texture = target->getTexture();
         }
     });
-    
-    computeLinearDepthConstant( source->getShadowNearCoeff(), source->getShadowFarCoeff() );
 }
 
 ShadowMap::~ShadowMap( void )

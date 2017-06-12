@@ -27,7 +27,7 @@ CRIMILD_GLSL_VARYING_OUT vec3 vWorldTangent;
 CRIMILD_GLSL_VARYING_OUT vec3 vWorldBiTangent;
 CRIMILD_GLSL_VARYING_OUT vec2 vTextureCoord;
 CRIMILD_GLSL_VARYING_OUT vec3 vViewVec;
-CRIMILD_GLSL_VARYING_OUT vec4 vPosition;
+CRIMILD_GLSL_VARYING_OUT vec4 vLightSpacePosition;
 
 void main ()
 {
@@ -55,12 +55,11 @@ void main ()
     vec4 viewVertex = uVMatrix * vWorldVertex;
     gl_Position = uPMatrix * viewVertex;
        
-       
     vViewVec = normalize( -viewVertex.xyz );
        
 	vTextureCoord = aTextureCoord;
         
-    vPosition = ScaleMatrix * uLightSourceProjectionMatrix * uLightSourceViewMatrix * vWorldVertex;
+    vLightSpacePosition = uLightSourceProjectionMatrix * uLightSourceViewMatrix * vWorldVertex;
 }
 
 )"

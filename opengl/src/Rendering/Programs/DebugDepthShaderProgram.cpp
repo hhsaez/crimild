@@ -25,59 +25,56 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Settings.hpp"
-#include "FileSystem.hpp"
+#include "DebugDepthShaderProgram.hpp"
+#include "Rendering/OpenGLUtils.hpp"
 
 using namespace crimild;
+using namespace crimild::opengl;
 
-const char *Settings::SETTINGS_RENDERING_SHADOWS_ENABLED = "crimild.rendering.shadows.enabled";
-const char *Settings::SETTINGS_RENDERING_SHADOWS_RESOLUTION_WIDTH = "crimild.rendering.shadows.resolution.width";
-const char *Settings::SETTINGS_RENDERING_SHADOWS_RESOLUTION_HEIGHT = "crimild.rendering.shadows.resolution.height";
+DebugDepthShaderProgram::DebugDepthShaderProgram( void )
+{ 
+	setVertexShader( OpenGLUtils::getVertexShaderInstance(
+		R"(
+			CRIMILD_GLSL_ATTRIBUTE vec3 aPosition;
+			CRIMILD_GLSL_ATTRIBUTE vec2 aTextureCoord;
 
-Settings::Settings( void )
-{
+			CRIMILD_GLSL_VARYING_OUT vec2 vTextureCoord;
 
+			void main()
+			{
+				vTextureCoord = aTextureCoord;
+				CRIMILD_GLSL_VERTEX_OUTPUT = vec4( aPosition.x, aPosition.y, 0.0, 1.0 );
+			}
+		)"
+	));
+
+	setFragmentShader( OpenGLUtils::getFragmentShaderInstance(
+		R"(
+		    CRIMILD_GLSL_PRECISION_FLOAT_HIGH
+		                                                    
+		    CRIMILD_GLSL_VARYING_IN vec2 vTextureCoord;
+
+		    uniform sampler2D uColorMap;
+
+		    CRIMILD_GLSL_DECLARE_FRAGMENT_OUTPUT
+
+		    void main( void ) 
+		    {
+		    	float d = CRIMILD_GLSL_FN_TEXTURE_2D( uColorMap, vTextureCoord ).x;
+    			d = 1.0 - ( 1.0 - d ) * 25.0;
+		        CRIMILD_GLSL_FRAGMENT_OUTPUT = vec4( d );
+		    }
+		)"
+	));
+
+	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
+	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE, "aTextureCoord" );
+
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM, "uColorMap" );
 }
 
-Settings::Settings( int argc, char **argv )
-{
-    parseCommandLine( argc, argv );
-}
+DebugDepthShaderProgram::~DebugDepthShaderProgram( void )
+{ 
 
-Settings::~Settings( void )
-{
-
-}
-
-void Settings::parseCommandLine(int argc, char **argv)
-{
-	if (argc > 0 && argv != nullptr) {
-		FileSystem::getInstance().init(argc, argv);
-	}
-
-	if (argc > 0) {
-		_settings["__base_directory"] = FileSystem::getInstance().getBaseDirectory();
-	}
-
-	for (int i = 1; i < argc; i++) {
-		std::string option = argv[i];
-		int separatorPos = option.find_first_of("=");
-		if (separatorPos > 0) {
-			std::string key = option.substr(0, separatorPos);
-			std::string value = option.substr(separatorPos + 1);
-			set(key, value);
-		}
-	}
-
-	for (auto it : _settings) {
-		Log::debug(CRIMILD_CURRENT_CLASS_NAME, it.first, " -> ", it.second);
-	}
-}
-
-void Settings::each(std::function< void(std::string, Settings *) > callback)
-{
-	for (auto it : _settings) {
-		callback(it.first, this);
-	}
 }
 

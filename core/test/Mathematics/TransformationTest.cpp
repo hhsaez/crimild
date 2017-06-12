@@ -76,3 +76,19 @@ TEST( Transformation, constructFromMatrix )
 	EXPECT_EQ( Quaternion4f( 0.0f, 0.0f, 0.0f, 1.0f ), t.getRotate() );
 }
 
+TEST( Transformation, getInverse )
+{
+	Transformation t0;
+	t0.setTranslate( 1.0f, 2.0f, 3.0f );
+	t0.rotate().fromEulerAngles( 0.0f, 90.0f, 0.0f );
+
+	Transformation t1 = t0.getInverse();
+
+    Transformation t2;
+    t2.computeFrom( t0, t1 );
+
+    EXPECT_TRUE( Vector3f::ZERO == t2.getTranslate() );
+    EXPECT_TRUE( Quaternion4f( 0.0f, 0.0f, 0.0f, 1.0f ) == t2.getRotate() );
+    EXPECT_TRUE( Numericf::equals( 1.0f, t2.getScale() ) );
+}
+

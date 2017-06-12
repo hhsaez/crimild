@@ -44,6 +44,7 @@
 #include "Programs/ColorTintShaderProgram.hpp"
 #include "Programs/UnlitVertexColorShaderProgram.hpp"
 #include "Programs/ParticleSystemShaderProgram.hpp"
+#include "Programs/DebugDepthShaderProgram.hpp"
 
 using namespace crimild;
 using namespace crimild::opengl;
@@ -89,6 +90,8 @@ OpenGLRenderer::OpenGLRenderer( SharedPointer< FrameBufferObject > const &screen
 
 	// image effects
 	setShaderProgram( ColorTintImageEffect::COLOR_TINT_PROGRAM_NAME, crimild::alloc< ColorTintShaderProgram >() );
+
+	setShaderProgram( Renderer::SHADER_PROGRAM_DEBUG_DEPTH, crimild::alloc< DebugDepthShaderProgram >() );
 }
 
 OpenGLRenderer::~OpenGLRenderer( void )

@@ -311,7 +311,8 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
         }
 
         auto light = crimild::alloc< Light >( lightType );
-        
+
+		/*
         bool castShadows;
         if ( eval.getPropValue( LIGHT_CAST_SHADOWS, castShadows ) ) {
             light->setCastShadows( castShadows );
@@ -326,6 +327,7 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
         if ( eval.getPropValue( LIGHT_SHADOW_FAR_COEFF, shadowFarCoeff ) ) {
             light->setShadowFarCoeff( shadowFarCoeff );
         }
+		*/
         
         Vector3f attenuation;
         if ( eval.getPropValue( LIGHT_ATTENUATION, attenuation ) ) {

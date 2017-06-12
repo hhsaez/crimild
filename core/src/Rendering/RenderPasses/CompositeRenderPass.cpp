@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,59 +25,29 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Settings.hpp"
-#include "FileSystem.hpp"
+#include "CompositeRenderPass.hpp"
 
 using namespace crimild;
 
-const char *Settings::SETTINGS_RENDERING_SHADOWS_ENABLED = "crimild.rendering.shadows.enabled";
-const char *Settings::SETTINGS_RENDERING_SHADOWS_RESOLUTION_WIDTH = "crimild.rendering.shadows.resolution.width";
-const char *Settings::SETTINGS_RENDERING_SHADOWS_RESOLUTION_HEIGHT = "crimild.rendering.shadows.resolution.height";
-
-Settings::Settings( void )
+CompositeRenderPass::CompositeRenderPass( void )
 {
-
+    
 }
 
-Settings::Settings( int argc, char **argv )
+CompositeRenderPass::~CompositeRenderPass( void )
 {
-    parseCommandLine( argc, argv );
+    
 }
 
-Settings::~Settings( void )
+void CompositeRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
 {
-
+	_renderPasses.foreach( [ renderer, renderQueue, camera ]( SharedPointer< RenderPass > const &pass, unsigned int ) {
+		pass->render( renderer, renderQueue, camera );
+	});
 }
 
-void Settings::parseCommandLine(int argc, char **argv)
+void CompositeRenderPass::attachRenderPass( SharedPointer< RenderPass > const &renderPasss )
 {
-	if (argc > 0 && argv != nullptr) {
-		FileSystem::getInstance().init(argc, argv);
-	}
-
-	if (argc > 0) {
-		_settings["__base_directory"] = FileSystem::getInstance().getBaseDirectory();
-	}
-
-	for (int i = 1; i < argc; i++) {
-		std::string option = argv[i];
-		int separatorPos = option.find_first_of("=");
-		if (separatorPos > 0) {
-			std::string key = option.substr(0, separatorPos);
-			std::string value = option.substr(separatorPos + 1);
-			set(key, value);
-		}
-	}
-
-	for (auto it : _settings) {
-		Log::debug(CRIMILD_CURRENT_CLASS_NAME, it.first, " -> ", it.second);
-	}
-}
-
-void Settings::each(std::function< void(std::string, Settings *) > callback)
-{
-	for (auto it : _settings) {
-		callback(it.first, this);
-	}
+	_renderPasses.add( renderPasss );
 }
 

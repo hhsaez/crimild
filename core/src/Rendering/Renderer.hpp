@@ -188,6 +188,7 @@ namespace crimild {
         static constexpr const char *SHADER_PROGRAM_SCREEN_TEXTURE = "shaders/misc/screen";
 		static constexpr const char *SHADER_PROGRAM_DEPTH = "shaders/misc/depth";
 		static constexpr const char *SHADER_PROGRAM_POINT_SPRITE = "shaders/unlit/point_sprit";
+		static constexpr const char *SHADER_PROGRAM_DEBUG_DEPTH = "shaders/debug/depth";
         
         void setShaderProgram( std::string name, SharedPointer< ShaderProgram > const &program );
         ShaderProgram *getShaderProgram( std::string name );

@@ -38,16 +38,15 @@
 #include "Primitives/QuadPrimitive.hpp"
 #include "Foundation/Log.hpp"
 #include "Foundation/Profiler.hpp"
+
 #include "Simulation/AssetManager.hpp"
+#include "Simulation/Simulation.hpp"
 
 using namespace crimild;
 
 StandardRenderPass::StandardRenderPass( void )
 {
-#if !defined( CRIMILD_PLATFORM_DESKTOP )
-    // TODO: shadows work on desktop only for the moment
-    setShadowMappingEnabled( false );
-#endif
+
 }
 
 StandardRenderPass::~StandardRenderPass( void )
@@ -59,21 +58,15 @@ void StandardRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, C
 {
     CRIMILD_PROFILE( "Standard Render Pass" )
 
-    if ( isShadowMappingEnabled() ) {
-        computeShadowMaps( renderer, renderQueue, camera );
-    }
+    _shadowMapping = false;
+#if defined( CRIMILD_PLATFORM_DESKTOP )
+    _shadowMapping = Simulation::getInstance()->getSettings()->get< crimild::Bool >( Settings::SETTINGS_RENDERING_SHADOWS_ENABLED, true );
+#endif
 
-#if 1
+
     renderOccluders( renderer, renderQueue, camera );
     renderOpaqueObjects( renderer, renderQueue, camera );
     renderTranslucentObjects( renderer, renderQueue, camera );
-#else
-    for ( auto it : _shadowMaps ) {
-        if ( it.second != nullptr ) {
-            RenderPass::render( renderer, it.second->getTexture(), nullptr );
-        }
-    }
-#endif
 }
 
 ShaderProgram *StandardRenderPass::getStandardProgram( void )
@@ -88,70 +81,14 @@ ShaderProgram *StandardRenderPass::getStandardProgram( void )
 
 void StandardRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
 {
-    CRIMILD_PROFILE( "Compute Shadows" )
 
-    auto program = renderer->getShaderProgram( Renderer::SHADER_PROGRAM_DEPTH );
-    if ( program == nullptr ) {
-        Log::error( CRIMILD_CURRENT_CLASS_NAME, "No shader program with name '", Renderer::SHADER_PROGRAM_DEPTH, "'" );
-        return;
-    }
-    
-    // bind shader program first
-    renderer->bindProgram( program );
-    
-    renderer->setAlphaState( AlphaState::DISABLED );
-    renderer->setDepthState( DepthState::ENABLED );
-    
-    renderQueue->each( [&]( Light *light, int ) {
-        
-        if ( !light->shouldCastShadows() ) {
-            return;
-        }
-
-        auto map = _shadowMaps[ light ];
-        if ( map == nullptr ) {
-            map = crimild::alloc< ShadowMap >( light );
-            map->getBuffer()->setClearColor( RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ) );
-            map->setLightProjectionMatrix( light->computeProjectionMatrix() );
-            _shadowMaps[ light ] = map;
-        }
-        
-        map->setLightViewMatrix( light->computeViewMatrix() );
-        
-        renderer->bindFrameBuffer( map->getBuffer() );
-        
-        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LINEAR_DEPTH_CONSTANT_UNIFORM ), map->getLinearDepthConstant() );
-        
-        auto renderables = renderQueue->getRenderables( RenderQueue::RenderableType::SHADOW_CASTER );
-        
-        const auto projection = map->getLightProjectionMatrix();
-        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::PROJECTION_MATRIX_UNIFORM ), projection );
-        
-        const auto view = map->getLightViewMatrix();
-        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM ), view );
-        
-        renderQueue->each( renderables, [this, renderer, program]( RenderQueue::Renderable *renderable ) {
-            renderStandardGeometry(
-                renderer,
-                crimild::get_ptr( renderable->geometry ),
-                program,
-                nullptr, // no material
-                renderable->modelTransform );
-        });
-
-        renderer->unbindFrameBuffer( map->getBuffer() );
-    });
-    
-    // unbind the shader program
-    renderer->unbindProgram( program );
 }
 
 void StandardRenderPass::renderOccluders( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
 {
-    CRIMILD_PROFILE( "Render Translucent Objects" )
+    CRIMILD_PROFILE( "Render Occluder Objects" )
     
     auto renderables = renderQueue->getRenderables( RenderQueue::RenderableType::OCCLUDER );
-    
     if ( renderables->size() == 0 ) {
         return;
     }
@@ -182,7 +119,6 @@ void StandardRenderPass::renderOpaqueObjects( Renderer *renderer, RenderQueue *r
     CRIMILD_PROFILE( "Render Opaque Objects" )
     
     auto renderables = renderQueue->getRenderables( RenderQueue::RenderableType::OPAQUE );
-    
     if ( renderables->size() == 0 ) {
         return;
     }
@@ -202,16 +138,27 @@ void StandardRenderPass::renderOpaqueObjects( Renderer *renderer, RenderQueue *r
         auto view = renderQueue->getViewMatrix();
         renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM ), view );
         
+        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::USE_SHADOW_MAP_UNIFORM ), false );
         if ( isShadowMappingEnabled() ) {
-            renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::USE_SHADOW_MAP_UNIFORM ), _shadowMaps.size() > 0 );
-            for ( auto it : _shadowMaps ) {
-                if ( it.second != nullptr ) {
-                    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_SOURCE_PROJECTION_MATRIX_UNIFORM ), it.second->getLightProjectionMatrix() );
-                    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_SOURCE_VIEW_MATRIX_UNIFORM ), it.second->getLightViewMatrix() );
-                    renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LINEAR_DEPTH_CONSTANT_UNIFORM ), it.second->getLinearDepthConstant() );
-                    renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::SHADOW_MAP_UNIFORM ), it.second->getTexture() );
+            renderQueue->each( [ this, renderer, program, renderQueue ]( Light *light, int ) {        
+                if ( !light->castShadows() ) {
+                    return;
                 }
-            }
+
+                auto map = light->getShadowMap();
+                if ( map == nullptr ) {
+                    return;
+                }
+
+                if ( map->getTexture() == nullptr || map->getTexture()->getCatalog() == nullptr ) {
+                    return;
+                }
+
+                renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::USE_SHADOW_MAP_UNIFORM ), true );
+                renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_SOURCE_PROJECTION_MATRIX_UNIFORM ), map->getLightProjectionMatrix() );
+                renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_SOURCE_VIEW_MATRIX_UNIFORM ), map->getLightViewMatrix() );
+                renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::SHADOW_MAP_UNIFORM ), map->getTexture() );
+            });
         }
         
         if ( isLightingEnabled() ) {
@@ -229,11 +176,22 @@ void StandardRenderPass::renderOpaqueObjects( Renderer *renderer, RenderQueue *r
         }
         
         if ( isShadowMappingEnabled() ) {
-            for ( auto it : _shadowMaps ) {
-                if ( it.second != nullptr ) {
-                    renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::SHADOW_MAP_UNIFORM ), it.second->getTexture() );
+            renderQueue->each( [ this, renderer, program, renderQueue ]( Light *light, int ) {        
+                if ( !light->castShadows() ) {
+                    return;
                 }
-            }
+
+                auto map = light->getShadowMap();
+                if ( map == nullptr ) {
+                    return;
+                }
+
+                if ( map->getTexture() == nullptr || map->getTexture()->getCatalog() == nullptr ) {
+                    return;
+                }
+
+                renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::SHADOW_MAP_UNIFORM ), map->getTexture() );
+            });
         }
         
         renderer->unbindProgram( program );
@@ -245,7 +203,6 @@ void StandardRenderPass::renderTranslucentObjects( Renderer *renderer, RenderQue
     CRIMILD_PROFILE( "Render Translucent Objects" )
     
     auto renderables = renderQueue->getRenderables( RenderQueue::RenderableType::TRANSLUCENT );
-    
     if ( renderables->size() == 0 ) {
         return;
     }
