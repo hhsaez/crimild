@@ -11,6 +11,7 @@ struct Light {
     float outerCutoff;
     float innerCutoff;
     float exponent;
+    vec4 ambient;
 };
 
 const float LIGHT_TYPE_POINT = 0.0;
@@ -95,6 +96,8 @@ void main( void )
         if ( i >= uLightCount ) {
             break;
         }
+
+        outColor.rgb += uLights[ i ].ambient.rgb;
 
         vec3 lightVec;
         if ( uLights[ i ].lightType == LIGHT_TYPE_DIRECTIONAL ) {
