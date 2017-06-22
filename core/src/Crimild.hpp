@@ -167,7 +167,7 @@
 #include "Streaming/Stream.hpp"
 #include "Streaming/FileStream.hpp"
 #include "Streaming/MemoryStream.hpp"
-#include "Streaming/Scenebuilder.hpp"
+#include "Streaming/SceneBuilder.hpp"
 
 #include "Debug/DebugRenderHelper.hpp"
 #include "Debug/SceneDebugDump.hpp"

@@ -27,7 +27,7 @@
 
 #include "Camera.hpp"
 
-#include "Rendering/Renderpasses/StandardRenderPass.hpp"
+#include "Rendering/RenderPasses/StandardRenderPass.hpp"
 
 using namespace crimild;
 

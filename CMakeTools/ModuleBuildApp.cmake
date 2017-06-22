@@ -16,7 +16,11 @@ IF ( APPLE )
 
 	set(CMAKE_MACOSX_RPATH 1)
 ELSE ( APPLE )
-	SET( CMAKE_CXX_FLAGS "-std=c++11 -static-libgcc -static-libstdc++ -static -U__STRICT_ANSI__" )
+  IF ( WIN32 )
+    SET( CMAKE_CXX_FLAGS "-std=c++11 -static-libgcc -static-libstdc++ -static -U__STRICT_ANSI__" )
+  ELSE ( WIN32 )
+    SET( CMAKE_CXX_FLAGS "-std=c++11 -pthread -static-libgcc -static-libstdc++ -static -lpthread -U__STRICT_ANSI__" )
+    ENDIF ( WIN32 )
 ENDIF ( APPLE )
 
 IF ( CRIMILD_ENABLE_TESTS )
@@ -149,7 +153,9 @@ IF ( APPLE )
 		${CRIMILD_APP_LINK_LIBRARIES} 
 		"-framework Cocoa -framework OpenGL -framework IOKit -framework CoreVideo" )
 ELSE ( APPLE )
+  IF ( WIN32 )
 	SET( CRIMILD_APP_LINK_LIBRARIES ${CRIMILD_APP_LINK_LIBRARIES} opengl32 glu32 winmm )
+      ENDIF()
 ENDIF ( APPLE )
 
 ADD_EXECUTABLE( ${CRIMILD_APP_NAME}

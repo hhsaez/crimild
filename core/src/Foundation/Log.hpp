@@ -108,7 +108,7 @@ namespace crimild {
                 auto t = ( time_t )( s.count() );
                 
                 auto str = StringUtils::toString( t, " ",
-                    std::this_thread::get_id(), " ",
+						  //std::this_thread::get_id(), " ",
                     levelStr, "/", TAG, " - ",
                     std::forward< Args >( args )... );
                 
