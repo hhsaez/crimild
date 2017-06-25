@@ -202,6 +202,13 @@
 #include "Streaming/MemoryStream.hpp"
 #include "Streaming/SceneBuilder.hpp"
 
+#include "Navigation/NavigationCellEdge.hpp"
+#include "Navigation/NavigationCell.hpp"
+#include "Navigation/NavigationMesh.hpp"
+#include "Navigation/NavigationMeshOBJ.hpp"
+#include "Navigation/NavigationMeshContainer.hpp"
+#include "Navigation/NavigationController.hpp"
+
 #include "Debug/DebugRenderHelper.hpp"
 #include "Debug/SceneDebugDump.hpp"
 

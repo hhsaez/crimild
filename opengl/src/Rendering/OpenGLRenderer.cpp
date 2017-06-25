@@ -103,6 +103,7 @@ void OpenGLRenderer::configure( void )
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
+#ifndef CRIMILD_PLATFORM_MOBILE
 	Log::info( CRIMILD_CURRENT_CLASS_NAME,
                "Configuring renderer",
                "\n       OpenGL version: ", glGetString( GL_VERSION ),
@@ -110,7 +111,6 @@ void OpenGLRenderer::configure( void )
     		   "\n       Vendor: ", glGetString( GL_VENDOR ),
                "\n       Renderer: ", glGetString( GL_RENDERER ) );
 
-#ifndef CRIMILD_PLATFORM_MOBILE
 	glewExperimental = GL_TRUE; //stops glew crashing on OSX :-/
 	if ( glewInit() != GLEW_OK ) {
         Log::fatal( CRIMILD_CURRENT_CLASS_NAME, "Cannot initialize GLEW" );
