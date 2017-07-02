@@ -322,11 +322,8 @@ SharedPointer< Group > SceneImporter::import( std::string filename )
 	}
 
 	Assimp::Importer importer;
-	const aiScene* importedScene = importer.ReadFile( filename, 
-		aiProcessPreset_TargetRealtime_Quality |
-		aiProcess_GenSmoothNormals |
-		aiProcess_CalcTangentSpace |
-		aiProcess_Triangulate );
+	importer.SetPropertyInteger( AI_CONFIG_PP_SLM_VERTEX_LIMIT, 15000 );
+	const aiScene* importedScene = importer.ReadFile( filename, aiProcessPreset_TargetRealtime_MaxQuality );
 	if ( importedScene == nullptr ) {
 		Log::error( CRIMILD_CURRENT_CLASS_NAME, "Error importing file ", filename, "\n", importer.GetErrorString() );
 	 	return nullptr;
