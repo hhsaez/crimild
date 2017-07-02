@@ -27,6 +27,8 @@
 
 #include "NavigationCell.hpp"
 
+#include "Mathematics/Distance.hpp"
+
 using namespace crimild;
 using namespace crimild::navigation;
 
@@ -60,6 +62,6 @@ bool NavigationCell::containsPoint( const Vector3f &p ) const
 	auto a = _vertices[ 0 ];
 	auto b = _vertices[ 1 ];
 	auto c = _vertices[ 2 ];
-	return sameSide( p, a, b, c ) && sameSide( p, b, a, c ) && sameSide( p, c, a, b );
+	return sameSide( p, a, b, c ) && sameSide( p, b, a, c ) && sameSide( p, c, a, b ) && Numericf::fabs( Distance::compute( _plane, p ) ) <= 0.1f;
 }
 
