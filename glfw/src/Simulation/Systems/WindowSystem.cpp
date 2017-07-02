@@ -116,7 +116,7 @@ bool WindowSystem::createWindow( void )
 	
 	bool vsync = true;
 	int glMajor = 3;
-	int glMinor = 2;
+	int glMinor = 3;
 	int depthBits = 32;
 	int stencilBits = 8;
 
