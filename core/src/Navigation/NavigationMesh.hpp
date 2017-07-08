@@ -34,7 +34,9 @@ namespace crimild {
 
 	namespace navigation {
 
-        class NavigationMesh : public SharedObject {
+        class NavigationMesh : public StreamObject {
+            CRIMILD_IMPLEMENT_RTTI( crimild::navigation::NavigationMesh )
+
         public:
             NavigationMesh( void );
             virtual ~NavigationMesh( void );

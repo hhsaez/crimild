@@ -37,6 +37,8 @@ namespace crimild {
 	namespace navigation {
 
 		class NavigationMeshContainer : public NodeComponent {
+			CRIMILD_IMPLEMENT_RTTI( crimild::navigation::NavigationMeshContainer )
+			
 		public:
 			explicit NavigationMeshContainer( NavigationMeshPtr const &mesh );
 			virtual ~NavigationMeshContainer( void );
