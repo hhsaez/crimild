@@ -257,6 +257,30 @@ TEST( StreamingTest, saveFileStream )
 	}
 }
 
+TEST( StreamingTest, streamVersion )
+{
+	auto obj0 = crimild::alloc< IntMockStreamObject >( 5 );
+
+	auto v = Version();
+
+	{
+		FileStream os( "test.crimild", FileStream::OpenMode::WRITE );
+		os.addObject( obj0 );
+		EXPECT_TRUE( os.flush() );
+	}
+
+	{
+		FileStream is( "test.crimild", FileStream::OpenMode::READ );
+		EXPECT_TRUE( is.load() );
+		EXPECT_EQ( 1, is.getObjectCount() );
+		auto obj1 = is.getObjectAt< IntMockStreamObject >( 0 );
+		EXPECT_TRUE( obj1 != nullptr );
+		EXPECT_EQ( obj0->get(), obj1->get() );
+		EXPECT_EQ( v, is.getVersion() );
+		EXPECT_LE( Version( 4, 0, 0 ), is.getVersion() );
+	}
+}
+
 TEST( StreamingTest, streamVector3f )
 {
 	auto obj0 = crimild::alloc< Vector3fMockStreamObject >( Vector3f( 0.0f, 1.0f, 2.0f ) );

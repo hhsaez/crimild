@@ -25,61 +25,75 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_VERSION_
-#define CRIMILD_CORE_VERSION_
+#include "Foundation/Version.hpp"
 
-#include <string>
-#include <sstream>
+#include "gtest/gtest.h"
 
-#ifndef CRIMILD_VERSION_MAJOR
-#define CRIMILD_VERSION_MAJOR 4
-#endif
+using namespace crimild;
 
-#ifndef CRIMILD_VERSION_MINOR
-#define CRIMILD_VERSION_MINOR 5
-#endif
-
-#ifndef CRIMILD_VERSION_PATCH
-#define CRIMILD_VERSION_PATCH 0
-#endif
-
-namespace crimild {
-
-	class Version {
-	public:
-		Version( void );
-		Version( const Version &other );
-		explicit Version( int major, int minor, int patch );
-		explicit Version( std::string versionStr );
-		~Version( void );
-
-		Version &operator=( const Version &other );
-
-		inline int getMajor( void ) const { return _major; }
-		inline int getMinor( void ) const { return _minor; }
-		inline int getPatch( void ) const { return _patch; }
-
-		bool operator<( const Version &other ) const { return toInt() < other.toInt(); }
-		bool operator<=( const Version &other ) const { return toInt() <= other.toInt(); }
-		bool operator>( const Version &other ) const { return toInt() > other.toInt(); }
-		bool operator>=( const Version &other ) const { return toInt() >= other.toInt(); }
-		bool operator==( const Version &other ) const { return toInt() == other.toInt(); }
-		bool operator!=( const Version &other ) const { return toInt() != other.toInt(); }
-
-	private:
-		int _major;
-		int _minor;
-		int _patch;
-
-	public:
-		std::string getDescription( void ) const;
-
-		void fromString( std::string str );
-
-		inline int toInt( void ) const { return _major * 1000000 + _minor * 1000 + _patch; }
-	};
-
+TEST( VersionTest, defaultConstruction )
+{
+    auto v = Version();
+    
+    EXPECT_GE( 4, v.getMajor() );
+    EXPECT_GE( 5, v.getMinor() );
+    EXPECT_GE( 0, v.getPatch() );
 }
 
-#endif
+TEST( VersionTest, construction )
+{
+    auto v = Version( 1, 2, 3 );
+    
+    EXPECT_EQ( 1, v.getMajor() );
+    EXPECT_EQ( 2, v.getMinor() );
+    EXPECT_EQ( 3, v.getPatch() );
+}
+
+TEST( VersionTest, copy )
+{
+    auto v1 = Version( 1, 2, 3 );
+    auto v2 = v1;
+    
+    EXPECT_EQ( v1.getMajor(), v2.getMajor() );
+    EXPECT_EQ( v1.getMinor(), v2.getMinor() );
+    EXPECT_EQ( v1.getPatch(), v2.getPatch() );
+}
+
+TEST( VersionTest, toInt )
+{
+	auto v1 = Version( 1, 2, 3 );
+
+	auto i = v1.toInt();
+
+	EXPECT_EQ( 1002003, i );
+}
+
+TEST( VersionTest, getDescription )
+{
+    auto v = Version( 1, 2, 3 );
+    
+    EXPECT_EQ( "CRIMILD v1.2.3", v.getDescription() );
+}
+
+TEST( VersionTest, fromString )
+{
+	Version v;
+	v.fromString( "CRIMILD v1.2.3" );
+
+    EXPECT_EQ( 1, v.getMajor() );
+    EXPECT_EQ( 2, v.getMinor() );
+    EXPECT_EQ( 3, v.getPatch() );
+}
+
+TEST( VersionTest, compareGE )
+{
+	auto v1 = Version( 1, 2, 3 );
+	auto v2 = Version( 1, 2, 4 );
+	auto v3 = v2;
+	auto v4 = Version( 4, 5, 6 );
+
+	EXPECT_TRUE( v1 < v2 );
+	EXPECT_TRUE( v2 == v3 );
+	EXPECT_TRUE( v4 > v1 );
+}
 

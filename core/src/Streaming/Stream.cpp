@@ -121,7 +121,8 @@ void Stream::addObject( SharedPointer< StreamObject > const &obj )
 bool Stream::flush( void )
 {
 	write( Stream::FLAG_STREAM_START );
-	write( Version::getDescription() );
+
+	write( _version.getDescription() );
 
 	for ( auto &obj : _topLevelObjects ) {
 		if ( obj != nullptr ) {
@@ -159,8 +160,9 @@ bool Stream::load( void )
 		return false;
 	}
 
-	std::string version;
-	read( version );
+	std::string versionStr;
+	read( versionStr );
+	_version.fromString( versionStr );
 
 	while ( true ) {
 		read( flag );

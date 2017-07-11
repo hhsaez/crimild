@@ -132,6 +132,13 @@ SharedPointer< Material > buildMaterial( const aiMaterial *mtl, std::string base
 		material->getCullFaceState()->setEnabled( two_sided );
 	}
 
+	float opacity = 1.0f;
+	max = 1;
+	if ( AI_SUCCESS == aiGetMaterialFloatArray( mtl, AI_MATKEY_OPACITY, &opacity, &max ) ) {
+		material->setDiffuse( opacity * material->getDiffuse() );
+		material->setAlphaState( crimild::alloc< AlphaState >( true ) );
+	}
+
 	return material;
 }
 

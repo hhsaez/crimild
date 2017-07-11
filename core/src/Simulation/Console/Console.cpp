@@ -56,7 +56,9 @@ Console::Console( void )
 	registerCommand( crimild::alloc< SetConsoleCommand >() );
 
 	pushLine( Simulation::getInstance()->getName() );
-	pushLine( Version::getDescription() );
+
+	Version version;
+	pushLine( version.getDescription() );
 
 	setEnabled( true );
 }

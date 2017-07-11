@@ -106,7 +106,12 @@ namespace crimild {
 			unsigned int size;
 			s.read( size );
 
-			s.read( _usedCount );
+			if ( s.getVersion() >= Version( 4, 5, 0 ) ) {
+				s.read( _usedCount );
+			}
+			else { 
+				_usedCount = size;
+			}
 
 			if ( size > 0 ) {
 				_data.resize( size );

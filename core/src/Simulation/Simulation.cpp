@@ -57,7 +57,8 @@ Simulation::Simulation( std::string name, SettingsPtr const &settings )
 	: NamedObject( name ),
       _settings( settings )
 {
-    Log::info( CRIMILD_CURRENT_CLASS_NAME, Version::getDescription() );
+    Version version;
+    Log::info( CRIMILD_CURRENT_CLASS_NAME, version.getDescription() );
 
     // worker threads are disabled by default
     _jobScheduler.configure( 0 );

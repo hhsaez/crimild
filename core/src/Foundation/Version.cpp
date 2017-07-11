@@ -25,61 +25,75 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_VERSION_
-#define CRIMILD_CORE_VERSION_
+#include "Version.hpp"
+#include "StringUtils.hpp"
+#include "Log.hpp"
 
-#include <string>
-#include <sstream>
+using namespace crimild;
 
-#ifndef CRIMILD_VERSION_MAJOR
-#define CRIMILD_VERSION_MAJOR 4
-#endif
-
-#ifndef CRIMILD_VERSION_MINOR
-#define CRIMILD_VERSION_MINOR 5
-#endif
-
-#ifndef CRIMILD_VERSION_PATCH
-#define CRIMILD_VERSION_PATCH 0
-#endif
-
-namespace crimild {
-
-	class Version {
-	public:
-		Version( void );
-		Version( const Version &other );
-		explicit Version( int major, int minor, int patch );
-		explicit Version( std::string versionStr );
-		~Version( void );
-
-		Version &operator=( const Version &other );
-
-		inline int getMajor( void ) const { return _major; }
-		inline int getMinor( void ) const { return _minor; }
-		inline int getPatch( void ) const { return _patch; }
-
-		bool operator<( const Version &other ) const { return toInt() < other.toInt(); }
-		bool operator<=( const Version &other ) const { return toInt() <= other.toInt(); }
-		bool operator>( const Version &other ) const { return toInt() > other.toInt(); }
-		bool operator>=( const Version &other ) const { return toInt() >= other.toInt(); }
-		bool operator==( const Version &other ) const { return toInt() == other.toInt(); }
-		bool operator!=( const Version &other ) const { return toInt() != other.toInt(); }
-
-	private:
-		int _major;
-		int _minor;
-		int _patch;
-
-	public:
-		std::string getDescription( void ) const;
-
-		void fromString( std::string str );
-
-		inline int toInt( void ) const { return _major * 1000000 + _minor * 1000 + _patch; }
-	};
+Version::Version( void )
+	: Version( CRIMILD_VERSION_MAJOR, CRIMILD_VERSION_MINOR, CRIMILD_VERSION_PATCH )
+{
 
 }
 
-#endif
+Version::Version( const Version &other )
+	: Version( other._major, other._minor, other._patch )
+{
+
+}
+
+Version::Version( int major, int minor, int patch )
+	: _major( major ),
+	  _minor( minor ),
+	  _patch( patch )
+{
+
+}
+
+Version::Version( std::string versionStr )
+{
+	fromString( versionStr );
+}
+
+Version::~Version( void )
+{
+
+}
+
+std::string Version::getDescription( void ) const 
+{
+	std::stringstream str;
+	str << "CRIMILD "
+	    << "v" << getMajor()
+	    << "." << getMinor()
+	    << "." << getPatch();
+
+	return str.str();
+}
+
+void Version::fromString( std::string str )
+{
+	_major = 0;
+	_minor = 0;
+	_patch = 0;
+
+	const std::string VERSION_TAG( "CRIMILD v" );
+
+	auto pos = str.find( VERSION_TAG );
+	if ( pos == std::string::npos ) {
+		Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid version string" );
+		return;
+	}
+
+	auto values = StringUtils::split< int >( str.substr( pos + VERSION_TAG.length() ), '.' );
+	if ( values.size() != 3 ) {
+		Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid version string" );
+		return;
+	}
+
+	_major = values[ 0 ];
+	_minor = values[ 1 ];
+	_patch = values[ 2 ];
+}
 
