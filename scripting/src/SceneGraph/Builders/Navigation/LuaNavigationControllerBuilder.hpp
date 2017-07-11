@@ -25,41 +25,19 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_NAVIGATION_CELL_EDGE_
-#define CRIMILD_NAVIGATION_CELL_EDGE_
+#ifndef CRIMILD_SCRIPTING_BUILDER_NAVIGATION_CONTROLLER_
+#define CRIMILD_SCRIPTING_BUILDER_NAVIGATION_CONTROLLER_
 
-#include "Foundation/Memory.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/RTTI.hpp"
-
-#include "Streaming/Stream.hpp"
-
-#include "Mathematics/Vector.hpp"
+#include "Foundation/Scripted.hpp"
 
 namespace crimild {
 
-	namespace navigation {
-
-		class NavigationCell;
-
-		class NavigationCellEdge : public StreamObject {
-			CRIMILD_IMPLEMENT_RTTI( crimild::navigation::NavigationCellEdge )
-
+	namespace scripting {
+        
+		class LuaNavigationControllerBuilder {
 		public:
-			NavigationCellEdge( const Vector3f &p0, const Vector3f &p1 );
-			virtual ~NavigationCellEdge( void );
-
-			inline Vector3f getPointAt( crimild::Size index ) { return _points[ index ]; }
-
-			inline NavigationCell *getNeighbor( void ) { return _neighbor; }
-			void setNeighbor( NavigationCell *neighbor ) { _neighbor = neighbor; }
-
-		private:
-			Vector3f _points[ 2 ];
-			NavigationCell *_neighbor = nullptr;
+			static SharedPointer< navigation::NavigationController > build( ScriptEvaluator &eval );
 		};
-
-		using NavigationCellEdgePtr = SharedPointer< NavigationCellEdge >;
 
 	}
 

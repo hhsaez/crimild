@@ -26,12 +26,22 @@
  */
 
 #include "NavigationController.hpp"
+#include "NavigationMeshContainer.hpp"
 
 #include "Mathematics/Ray.hpp"
 #include "Mathematics/Intersection.hpp"
 
+#include "SceneGraph/Node.hpp"
+
+#include "Visitors/Apply.hpp"
+
 using namespace crimild;
 using namespace crimild::navigation;
+
+NavigationController::NavigationController( void )
+{
+	
+}
 
 NavigationController::NavigationController( NavigationMeshPtr const &mesh )
 	: _navigationMesh( mesh )
@@ -44,8 +54,26 @@ NavigationController::~NavigationController( void )
 
 }
 
+void NavigationController::start( void )
+{
+	if ( _navigationMesh == nullptr ) {
+		// No navigation mesh assigned. Find the first one in the scene
+		getNode()->getRootParent()->perform( Apply( [this]( Node *node ) {
+			auto nav = node->getComponent< NavigationMeshContainer >();
+			if ( nav != nullptr ) {
+				_navigationMesh = crimild::retain( nav->getNavigationMesh() );
+			}
+		}));
+	}
+}
+
 Vector3f NavigationController::move( const Vector3f &from, const Vector3f &to )
 {
+	if ( _navigationMesh == nullptr ) {
+		Log::warning( CRIMILD_CURRENT_CLASS_NAME, "No navigation mesh found" );
+		return from;
+	}
+
 	NavigationCell *cell = nullptr;
 	getNavigationMesh()->foreachCell( [&cell, to]( NavigationCellPtr const &c ) {
 		if ( c->containsPoint( to ) ) {

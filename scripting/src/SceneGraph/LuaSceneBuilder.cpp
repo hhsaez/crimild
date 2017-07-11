@@ -33,6 +33,9 @@
 #include "SceneGraph/Builders/ParticleSystem/Renderers/LuaNodeParticleRendererBuilder.hpp"
 #include "SceneGraph/Builders/ParticleSystem/Renderers/LuaAnimatedSpriteParticleRendererBuilder.hpp"
 
+#include "SceneGraph/Builders/Navigation/LuaNavigationControllerBuilder.hpp"
+#include "SceneGraph/Builders/Navigation/LuaNavigationMeshContainerBuilder.hpp"
+
 using namespace crimild;
 using namespace crimild::scripting;
 
@@ -204,6 +207,9 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::OrientedQuadParticleRenderer, LuaOrientedQuadParticleRendererBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::NodeParticleRenderer, LuaNodeParticleRendererBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::AnimatedSpriteParticleRenderer, LuaAnimatedSpriteParticleRendererBuilder::build );
+
+    CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::navigation::NavigationController, LuaNavigationControllerBuilder::build );
+    CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::navigation::NavigationMeshContainer, LuaNavigationMeshContainerBuilder::build );
 
     auto self = this;
     

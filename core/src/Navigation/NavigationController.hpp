@@ -37,9 +37,14 @@ namespace crimild {
 	namespace navigation {
 
 		class NavigationController : public NodeComponent {
+			CRIMILD_IMPLEMENT_RTTI( crimild::navigation::NavigationController )
+
 		public:
+			NavigationController( void );
 			explicit NavigationController( NavigationMeshPtr const &mesh );
 			virtual ~NavigationController( void );
+
+			virtual void start( void ) override;
 
 			inline NavigationMesh *getNavigationMesh( void ) { return crimild::get_ptr( _navigationMesh ); }
 
