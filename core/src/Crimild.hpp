@@ -211,6 +211,7 @@
 
 #include "Debug/DebugRenderHelper.hpp"
 #include "Debug/SceneDebugDump.hpp"
+#include "Debug/DebugRenderComponent.hpp"
 
 #endif
 

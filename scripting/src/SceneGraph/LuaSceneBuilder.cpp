@@ -36,6 +36,8 @@
 #include "SceneGraph/Builders/Navigation/LuaNavigationControllerBuilder.hpp"
 #include "SceneGraph/Builders/Navigation/LuaNavigationMeshContainerBuilder.hpp"
 
+#include "SceneGraph/Builders/Debug/LuaDebugRenderComponentBuilder.hpp"
+
 using namespace crimild;
 using namespace crimild::scripting;
 
@@ -210,6 +212,8 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
 
     CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::navigation::NavigationController, LuaNavigationControllerBuilder::build );
     CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::navigation::NavigationMeshContainer, LuaNavigationMeshContainerBuilder::build );
+
+	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::DebugRenderComponent, LuaDebugRenderComponentBuilder::build );
 
     auto self = this;
     
