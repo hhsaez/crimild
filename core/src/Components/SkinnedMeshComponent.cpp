@@ -146,14 +146,15 @@ void SkinnedMeshComponent::setAnimationParams(
 	float firstFrame, 
 	float lastFrame, 
 	bool loop, 
-	float timeScale, 
+	float timeScale,
+	float timeOffset,
 	SkinnedMeshComponent::AnimationProgressCallback const &callback )
 {
 	_firstFrame = firstFrame;
 	_lastFrame = lastFrame;
 	_loop = loop;
 	_timeScale = timeScale;
-	_time = 0.0f;
+	_time = timeOffset;
 	_animationProgressCallback = callback;
 }
 
