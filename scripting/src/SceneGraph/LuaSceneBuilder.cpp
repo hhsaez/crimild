@@ -57,6 +57,7 @@ using namespace crimild::scripting;
 
 #define NODE_TYPE "type"
 #define NODE_FILENAME "filename"
+#define NODE_RADIUS "radius"
 #define NODE_COMPONENTS "components"
 #define NODE_COMPONENT_TYPE "type"
 #define NODE_TRANSFORMATION "transformation"
@@ -220,7 +221,7 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
     // TODO: Use RTTI for getting class type name
     LuaNodeBuilderRegistry::getInstance()->registerCustomNodeBuilder( GROUP_TYPE, [self]( ScriptEvaluator &eval ) -> SharedPointer< Node > {
         SharedPointer< Group > group;
-        
+
         std::string filename;
         if ( eval.getPropValue( NODE_FILENAME, filename ) && filename != "" ) {
 #ifdef CRIMILD_SCRIPTING_LOG_VERBOSE
@@ -262,6 +263,12 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
 #endif
             group = std::make_shared< Group >();
         }
+
+		crimild::Real32 radius;
+		if ( eval.getPropValue( NODE_RADIUS, radius ) ) {
+			group->setLocalBound( crimild::alloc< SphereBoundingVolume >( Sphere3f( Vector3f::ZERO, radius ) ) );
+			group->setWorldBound( crimild::alloc< SphereBoundingVolume >( Sphere3f( Vector3f::ZERO, radius ) ) );
+		}
         
         eval.foreach( GROUP_NODES, [&]( ScriptEvaluator &childEval, int ) {
             self->buildNode( childEval, crimild::get_ptr( group ) );
