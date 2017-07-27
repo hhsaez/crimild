@@ -200,6 +200,13 @@ namespace crimild {
         ThreadSafeArray< ParticleRendererPtr > _renderers;
 
 		//@}
+
+	public:
+		inline void setAnimationEnabled( crimild::Bool enabled ) { _animationEnabled = enabled; }
+		inline crimild::Bool isAnimationEnabled( void ) const { return _animationEnabled; }
+
+	private:
+		crimild::Bool _animationEnabled = true;
     };
 
 }

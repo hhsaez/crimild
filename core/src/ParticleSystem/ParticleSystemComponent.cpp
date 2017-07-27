@@ -104,7 +104,9 @@ void ParticleSystemComponent::update( const Clock &c )
 	auto particles = getParticles();
 
 	updateGenerators( node, dt, particles );
-	updateUpdaters( node, dt, particles );
+	if ( isAnimationEnabled() ) {
+		updateUpdaters( node, dt, particles );
+	}
 	updateRenderers( node, dt, particles );
 }
 
