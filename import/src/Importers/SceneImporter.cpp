@@ -116,7 +116,10 @@ SharedPointer< Material > buildMaterial( const aiMaterial *mtl, std::string base
 
 	if ( AI_SUCCESS == aiGetMaterialColor( mtl, AI_MATKEY_COLOR_EMISSIVE, &color ) ) {
 		// average
-		material->setEmissive( ( color.r + color.g + color.b ) / 3.0f );
+		auto e = ( color.r + color.g + color.b ) / 3.0f;
+		if ( e > 0.0f ) {
+			material->setEmissive( e );
+		}
 	}
 
 	float shininess, strength;
@@ -130,6 +133,22 @@ SharedPointer< Material > buildMaterial( const aiMaterial *mtl, std::string base
 	max = 1;
 	if ( AI_SUCCESS == aiGetMaterialIntegerArray( mtl, AI_MATKEY_TWOSIDED, &two_sided, &max ) ) {
 		material->getCullFaceState()->setEnabled( two_sided );
+	}
+
+	crimild::Real32 opacity;
+	max = 1;
+	if ( AI_SUCCESS == aiGetMaterialFloatArray( mtl, AI_MATKEY_OPACITY, &opacity, &max ) ) {
+		std::cout << opacity << std::endl;
+		if ( opacity < 1.0f ) {
+			auto d = material->getDiffuse();
+			d[ 3 ] = opacity;
+			std::cout << d << std::endl;
+			material->setDiffuse( d );
+			material->setAlphaState( crimild::alloc< AlphaState >( true ) );
+		}
+	}
+	else {
+		std::cout << "no opacity" << std::endl;
 	}
 
 	return material;
