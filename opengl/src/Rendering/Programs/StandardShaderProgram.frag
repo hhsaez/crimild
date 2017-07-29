@@ -64,7 +64,7 @@ void main( void )
     }
 
     if ( uMaterial.emissive > 0.0 ) {
-        CRIMILD_GLSL_FRAGMENT_OUTPUT = vec4( color.rgb, 1.0 );
+        CRIMILD_GLSL_FRAGMENT_OUTPUT = color;//vec4( color.rgb, 1.0 );
         return;
     }
 
