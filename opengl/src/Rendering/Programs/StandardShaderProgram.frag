@@ -85,8 +85,8 @@ void main( void )
         vec3 uvShadowMap = vec3( 0.5 ) + 0.5 * projCoord;
         float d = CRIMILD_GLSL_FN_TEXTURE_2D( uShadowMap, uvShadowMap.xy ).x;
         float z = uvShadowMap.z;
-        //z *= 0.999; // fixes acne
-        //z += 0.0009; // fixes peter-panning
+        z *= 0.999; // fixes acne
+        //z += 0.001; // fixes peter-panning
         if ( d < z ) {
             shadowFactor = 0.5;
         }

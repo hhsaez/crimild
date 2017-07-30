@@ -90,10 +90,12 @@ void WindowSystem::update( void )
         std::this_thread::sleep_for( std::chrono::milliseconds( sleepTime ) );
     }
 
-	std::string name = Simulation::getInstance()->getName();
-	std::stringstream ss;
-	ss << name << " (" << delta << "ms)";
-	glfwSetWindowTitle( _window, ss.str().c_str() );
+	if ( Simulation::getInstance()->getSettings()->get( "video.show_frame_time", false ) ) {
+		std::string name = Simulation::getInstance()->getName();
+		std::stringstream ss;
+		ss << name << " (" << delta << "ms)";
+		glfwSetWindowTitle( _window, ss.str().c_str() );
+	}
     
     crimild::concurrency::sync_frame( std::bind( &WindowSystem::update, this ) );
 }

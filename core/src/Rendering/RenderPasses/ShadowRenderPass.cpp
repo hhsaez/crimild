@@ -113,6 +113,7 @@ void ShadowRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *rende
 	        const auto NEAR = 100.0f;
 	        const auto FAR = 100.0f;
 
+#if 0
 	    	const float top = 50;
 			const float bottom = -50;
 			const float left = -50;
@@ -126,12 +127,16 @@ void ShadowRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *rende
 				0.0f, 0.0f, -2.0f / ( far - near ), - ( far + near ) / ( far - near ),
 				0.0f, 0.0f, 0.0f, 1.0f
 			);
+#else
+			Frustumf f( 45.0f, 1.0f, 0.1f, 100.0f );
+			const auto pMatrix = f.computeProjectionMatrix();
+#endif
 
         	map->setLightProjectionMatrix( pMatrix );
 
         	// for directional lights, we only care for the rotation
-        	Transformation t;
-        	t.setRotate( light->getWorld().getRotate() );
+        	Transformation t = light->getWorld();
+        	//t.setRotate( light->getWorld().getRotate() );
 			const auto vMatrix = t.computeModelMatrix().getInverse();
         	map->setLightViewMatrix( vMatrix );
 		}

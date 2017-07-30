@@ -330,12 +330,12 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
 
         auto light = crimild::alloc< Light >( lightType );
 
-		/*
         bool castShadows;
         if ( eval.getPropValue( LIGHT_CAST_SHADOWS, castShadows ) ) {
-            light->setCastShadows( castShadows );
+			light->setShadowMap( crimild::alloc< ShadowMap >() );
         }
-        
+
+		/*
         float shadowNearCoeff;
         if ( eval.getPropValue( LIGHT_SHADOW_NEAR_COEFF, shadowNearCoeff ) ) {
             light->setShadowNearCoeff( shadowNearCoeff );
