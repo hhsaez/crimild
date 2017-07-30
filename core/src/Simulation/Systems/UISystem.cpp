@@ -35,11 +35,19 @@ bool UISystem::start( void )
 				mousePos = Vector2f( 0.5f, 0.5f );
 			}
 
-            Ray3f ray;
-            
             auto scene = Simulation::getInstance()->getScene();
-            auto camera = Simulation::getInstance()->getMainCamera();
+			if ( scene == nullptr ) {
+				Log::error( CRIMILD_CURRENT_CLASS_NAME, "No valid scene" );
+				return;
+			}
+			
+            auto camera = Camera::getMainCamera();
+			if ( camera == nullptr ) {
+				Log::error( CRIMILD_CURRENT_CLASS_NAME, "Main camera is null" );
+				return;
+			}
             
+            Ray3f ray;
             if ( camera->getPickRay( mousePos[ 0 ], mousePos[ 1 ], ray ) ) {
 
                 float minJ = -1.0f;
