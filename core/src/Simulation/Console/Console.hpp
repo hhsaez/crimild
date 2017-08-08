@@ -34,6 +34,7 @@
 #include "Foundation/Singleton.hpp"
 
 #include <map>
+#include <list>
 #include <sstream>
 
 namespace crimild {
@@ -84,6 +85,8 @@ namespace crimild {
 
 	private:
 		std::stringstream _commandBuffer;
+		std::list< std::string > _commandBufferHistory;
+		std::list< std::string >::iterator _commandBufferHistoryIt;
 
 	public:
 		std::string getOutput( crimild::UInt8 lines = 10 ) const;
