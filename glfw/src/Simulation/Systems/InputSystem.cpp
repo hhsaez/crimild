@@ -14,6 +14,10 @@ InputSystem::InputSystem( void )
         Input::getInstance()->reset( GLFW_KEY_LAST, GLFW_MOUSE_BUTTON_LAST );
         
         glfwSetKeyCallback( self->_window, []( GLFWwindow* window, int key, int scancode, int action, int mods ) {
+			if ( key == GLFW_KEY_UNKNOWN ) {
+				return;
+			}
+			
             if ( Console::getInstance()->isEnabled() ) {
                 if ( action == GLFW_PRESS ) {
                     switch ( key ) {
@@ -48,20 +52,6 @@ InputSystem::InputSystem( void )
             }
         });
         
-        /*
-        glfwSetCursorPosCallback( self->_window, []( GLFWwindow* window, double xpos, double ypos ) {
-            int windowWidth, windowHeight;
-            glfwGetWindowSize( window, &windowWidth, &windowHeight );
-            
-            MessageQueue::getInstance()->pushMessage( messaging::MouseMotion {
-                ( float ) xpos,
-                ( float ) ypos,
-                ( float ) xpos / ( float ) windowWidth,
-                ( float ) ypos / ( float ) windowHeight
-            });
-        });
-        */
-
         glfwSetMouseButtonCallback( self->_window, []( GLFWwindow* window, int button, int action, int mods ) {
             double x, y;
             glfwGetCursorPos( window, &x, &y );
