@@ -116,7 +116,10 @@ SharedPointer< Material > buildMaterial( const aiMaterial *mtl, std::string base
 
 	if ( AI_SUCCESS == aiGetMaterialColor( mtl, AI_MATKEY_COLOR_EMISSIVE, &color ) ) {
 		// average
-		material->setEmissive( ( color.r + color.g + color.b ) / 3.0f );
+		auto e = ( color.r + color.g + color.b ) / 3.0f;
+		if ( e > 0.0f ) {
+			material->setEmissive( e );
+		}
 	}
 
 	float shininess, strength;
@@ -130,6 +133,17 @@ SharedPointer< Material > buildMaterial( const aiMaterial *mtl, std::string base
 	max = 1;
 	if ( AI_SUCCESS == aiGetMaterialIntegerArray( mtl, AI_MATKEY_TWOSIDED, &two_sided, &max ) ) {
 		material->getCullFaceState()->setEnabled( two_sided );
+	}
+
+	crimild::Real32 opacity;
+	max = 1;
+	if ( AI_SUCCESS == aiGetMaterialFloatArray( mtl, AI_MATKEY_OPACITY, &opacity, &max ) ) {
+		if ( opacity < 1.0f ) {
+			auto d = material->getDiffuse();
+			d[ 3 ] = opacity;
+			material->setDiffuse( d );
+			material->setAlphaState( crimild::alloc< AlphaState >( true ) );
+		}
 	}
 
 	return material;
@@ -322,11 +336,8 @@ SharedPointer< Group > SceneImporter::import( std::string filename )
 	}
 
 	Assimp::Importer importer;
-	const aiScene* importedScene = importer.ReadFile( filename, 
-		aiProcessPreset_TargetRealtime_Quality |
-		aiProcess_GenSmoothNormals |
-		aiProcess_CalcTangentSpace |
-		aiProcess_Triangulate );
+	importer.SetPropertyInteger( AI_CONFIG_PP_SLM_VERTEX_LIMIT, 15000 );
+	const aiScene* importedScene = importer.ReadFile( filename, aiProcessPreset_TargetRealtime_MaxQuality );
 	if ( importedScene == nullptr ) {
 		Log::error( CRIMILD_CURRENT_CLASS_NAME, "Error importing file ", filename, "\n", importer.GetErrorString() );
 	 	return nullptr;

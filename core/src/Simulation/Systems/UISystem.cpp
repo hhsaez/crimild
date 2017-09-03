@@ -23,18 +23,33 @@ UISystem::~UISystem( void )
 
 bool UISystem::start( void )
 {
-    return System::start();
+    if ( !System::start() ) {
+		return false;
+	}
 
     // TODO: This should be a click, not just a mouse button up   
     registerMessageHandler< MouseButtonUp >( []( MouseButtonUp const &msg ) {
         if ( msg.button == CRIMILD_INPUT_MOUSE_BUTTON_LEFT ) {
             Vector2f mousePos = Input::getInstance()->getNormalizedMousePosition();
-            Ray3f ray;
-            
+			if ( Input::getInstance()->getMouseCursorMode() != Input::MouseCursorMode::NORMAL ) {
+				mousePos = Vector2f( 0.5f, 0.5f );
+			}
+
             auto scene = Simulation::getInstance()->getScene();
-            auto camera = Simulation::getInstance()->getMainCamera();
+			if ( scene == nullptr ) {
+				Log::error( CRIMILD_CURRENT_CLASS_NAME, "No valid scene" );
+				return;
+			}
+			
+            auto camera = Camera::getMainCamera();
+			if ( camera == nullptr ) {
+				Log::error( CRIMILD_CURRENT_CLASS_NAME, "Main camera is null" );
+				return;
+			}
             
+            Ray3f ray;
             if ( camera->getPickRay( mousePos[ 0 ], mousePos[ 1 ], ray ) ) {
+
                 float minJ = -1.0f;
                 Node *result = nullptr;
                 scene->perform( Apply( [&]( Node *node ) {
@@ -46,8 +61,9 @@ bool UISystem::start( void )
                     if ( !responder->isEnabled() ) {
                         return ;
                     }
-                    
+
                     if ( responder->getBoundingVolume()->testIntersection( ray ) ) {
+						Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Ray ", ray, " hit with object ", node->getName(), " ", responder->getBoundingVolume()->getCenter() );
                         float j = Distance::computeSquared( node->getWorldBound()->getCenter(), camera->getWorld().getTranslate() );
                         if ( minJ < 0.0f || j < minJ ) {
                             minJ = j;
@@ -64,6 +80,8 @@ bool UISystem::start( void )
             }
         }
     });
+
+	return true;
 }
 
 void UISystem::stop( void )

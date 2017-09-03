@@ -391,6 +391,23 @@ namespace crimild {
             result[ 14 ] = 0;
             return result;
         }
+
+        TransformationImpl getInverse( void ) const
+        {
+			TransformationImpl result;
+		    applyInverseToPoint( crimild::Vector3f::ZERO, result.translate() );
+		    result.setRotate( getRotate().getInverse() );
+		    result.setScale( 1.0f / getScale() );
+		    return result;
+        }
+
+        TransformationImpl &makeInverse( void ) 
+        {
+		    applyInverseToPoint( crimild::Vector3f::ZERO, translate() );
+		    setRotate( getRotate().getInverse() );
+		    setScale( 1.0f / getScale() );
+		    return *this;
+        }
         
 	private:
 		Vector3Impl _translate;

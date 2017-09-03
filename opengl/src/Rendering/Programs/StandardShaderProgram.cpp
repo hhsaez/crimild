@@ -80,6 +80,7 @@ StandardShaderProgram::StandardShaderProgram( void )
 		registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_OUTER_CUTOFF_UNIFORM + i, OpenGLUtils::buildArrayShaderLocationName( "uLights", i, "outerCutoff" ) );
 		registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_INNER_CUTOFF_UNIFORM + i, OpenGLUtils::buildArrayShaderLocationName( "uLights", i, "innerCutoff" ) );
 		registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_EXPONENT_UNIFORM + i, OpenGLUtils::buildArrayShaderLocationName( "uLights", i, "exponent" ) );
+		registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_AMBIENT_UNIFORM + i, OpenGLUtils::buildArrayShaderLocationName( "uLights", i, "ambient" ) );
 	}
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_SOURCE_PROJECTION_MATRIX_UNIFORM, "uLightSourceProjectionMatrix" );
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::LIGHT_SOURCE_VIEW_MATRIX_UNIFORM, "uLightSourceViewMatrix" );

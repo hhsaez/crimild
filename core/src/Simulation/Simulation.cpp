@@ -57,7 +57,8 @@ Simulation::Simulation( std::string name, SettingsPtr const &settings )
 	: NamedObject( name ),
       _settings( settings )
 {
-    Log::info( CRIMILD_CURRENT_CLASS_NAME, Version::getDescription() );
+    Version version;
+    Log::info( CRIMILD_CURRENT_CLASS_NAME, version.getDescription() );
 
     // worker threads are disabled by default
     _jobScheduler.configure( 0 );
@@ -95,6 +96,17 @@ void Simulation::start( void )
 bool Simulation::update( void )
 {
     auto scene = getScene();
+
+	if ( scene != nullptr && Camera::getMainCamera() == nullptr ) {
+		// fetch all cameras from the scene
+		FetchCameras fetchCameras;
+		_scene->perform( fetchCameras );
+        fetchCameras.forEachCamera( [&]( Camera *camera ) {
+			if ( Camera::getMainCamera() == nullptr || camera->isMainCamera() ) {
+				Camera::setMainCamera( camera );
+			}
+        });
+	}
     
     broadcastMessage( messaging::SimulationWillUpdate { scene } );
     

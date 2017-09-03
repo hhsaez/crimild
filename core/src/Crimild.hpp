@@ -170,11 +170,13 @@
 #include "Rendering/VertexBufferObject.hpp"
 #include "Rendering/VertexFormat.hpp"
 
+#include "Rendering/RenderPasses/CompositeRenderPass.hpp"
 #include "Rendering/RenderPasses/RenderPass.hpp"
 #include "Rendering/RenderPasses/StandardRenderPass.hpp"
 #include "Rendering/RenderPasses/PostRenderPass.hpp"
 #include "Rendering/RenderPasses/DeferredRenderPass.hpp"
 #include "Rendering/RenderPasses/OffscreenRenderPass.hpp"
+#include "Rendering/RenderPasses/ShadowRenderPass.hpp"
 
 #include "Rendering/ImageEffects/ImageEffect.hpp"
 #include "Rendering/ImageEffects/ColorTintImageEffect.hpp"
@@ -200,8 +202,16 @@
 #include "Streaming/MemoryStream.hpp"
 #include "Streaming/SceneBuilder.hpp"
 
+#include "Navigation/NavigationCellEdge.hpp"
+#include "Navigation/NavigationCell.hpp"
+#include "Navigation/NavigationMesh.hpp"
+#include "Navigation/NavigationMeshOBJ.hpp"
+#include "Navigation/NavigationMeshContainer.hpp"
+#include "Navigation/NavigationController.hpp"
+
 #include "Debug/DebugRenderHelper.hpp"
 #include "Debug/SceneDebugDump.hpp"
+#include "Debug/DebugRenderComponent.hpp"
 
 #endif
 

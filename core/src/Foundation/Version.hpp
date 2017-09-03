@@ -36,7 +36,7 @@
 #endif
 
 #ifndef CRIMILD_VERSION_MINOR
-#define CRIMILD_VERSION_MINOR 5
+#define CRIMILD_VERSION_MINOR 6
 #endif
 
 #ifndef CRIMILD_VERSION_PATCH
@@ -47,20 +47,36 @@ namespace crimild {
 
 	class Version {
 	public:
-		static constexpr int MAJOR = CRIMILD_VERSION_MAJOR;
-		static constexpr int MINOR = CRIMILD_VERSION_MINOR;
-		static constexpr int PATCH = CRIMILD_VERSION_PATCH;
+		Version( void );
+		Version( const Version &other );
+		explicit Version( int major, int minor, int patch );
+		explicit Version( std::string versionStr );
+		~Version( void );
 
-		static std::string getDescription( void ) 
-		{
-			std::stringstream str;
-			str << "CRIMILD "
-			    << "v" << Version::MAJOR
-			    << "." << Version::MINOR
-			    << "." << Version::PATCH;
-			return str.str();
-		}
+		Version &operator=( const Version &other );
 
+		inline int getMajor( void ) const { return _major; }
+		inline int getMinor( void ) const { return _minor; }
+		inline int getPatch( void ) const { return _patch; }
+
+		bool operator<( const Version &other ) const { return toInt() < other.toInt(); }
+		bool operator<=( const Version &other ) const { return toInt() <= other.toInt(); }
+		bool operator>( const Version &other ) const { return toInt() > other.toInt(); }
+		bool operator>=( const Version &other ) const { return toInt() >= other.toInt(); }
+		bool operator==( const Version &other ) const { return toInt() == other.toInt(); }
+		bool operator!=( const Version &other ) const { return toInt() != other.toInt(); }
+
+	private:
+		int _major;
+		int _minor;
+		int _patch;
+
+	public:
+		std::string getDescription( void ) const;
+
+		void fromString( std::string str );
+
+		inline int toInt( void ) const { return _major * 1000000 + _minor * 1000 + _patch; }
 	};
 
 }

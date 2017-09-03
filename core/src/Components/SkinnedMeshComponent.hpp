@@ -58,7 +58,8 @@ namespace crimild {
 			float firstFrame, 
 			float lastFrame, 
 			bool loop, 
-			float timeScale = 1.0f, 
+			float timeScale = 1.0f,
+			float timeOffset = 0.0f,
 			AnimationProgressCallback const &animationProgressCallack = nullptr );
 
 	private:

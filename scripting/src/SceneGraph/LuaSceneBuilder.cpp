@@ -33,6 +33,11 @@
 #include "SceneGraph/Builders/ParticleSystem/Renderers/LuaNodeParticleRendererBuilder.hpp"
 #include "SceneGraph/Builders/ParticleSystem/Renderers/LuaAnimatedSpriteParticleRendererBuilder.hpp"
 
+#include "SceneGraph/Builders/Navigation/LuaNavigationControllerBuilder.hpp"
+#include "SceneGraph/Builders/Navigation/LuaNavigationMeshContainerBuilder.hpp"
+
+#include "SceneGraph/Builders/Debug/LuaDebugRenderComponentBuilder.hpp"
+
 using namespace crimild;
 using namespace crimild::scripting;
 
@@ -52,6 +57,7 @@ using namespace crimild::scripting;
 
 #define NODE_TYPE "type"
 #define NODE_FILENAME "filename"
+#define NODE_RADIUS "radius"
 #define NODE_COMPONENTS "components"
 #define NODE_COMPONENT_TYPE "type"
 #define NODE_TRANSFORMATION "transformation"
@@ -80,6 +86,7 @@ using namespace crimild::scripting;
 #define LIGHT_ATTENUATION "attenuation"
 #define LIGHT_LIGHT_TYPE "lightType"
 #define LIGHT_COLOR "color"
+#define LIGHT_AMBIENT "ambient"
 
 #define TEXT_TYPE "crimild::Text"
 #define TEXT_FONT "font"
@@ -204,12 +211,17 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::NodeParticleRenderer, LuaNodeParticleRendererBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::AnimatedSpriteParticleRenderer, LuaAnimatedSpriteParticleRendererBuilder::build );
 
+    CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::navigation::NavigationController, LuaNavigationControllerBuilder::build );
+    CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::navigation::NavigationMeshContainer, LuaNavigationMeshContainerBuilder::build );
+
+	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::DebugRenderComponent, LuaDebugRenderComponentBuilder::build );
+
     auto self = this;
     
     // TODO: Use RTTI for getting class type name
     LuaNodeBuilderRegistry::getInstance()->registerCustomNodeBuilder( GROUP_TYPE, [self]( ScriptEvaluator &eval ) -> SharedPointer< Node > {
         SharedPointer< Group > group;
-        
+
         std::string filename;
         if ( eval.getPropValue( NODE_FILENAME, filename ) && filename != "" ) {
 #ifdef CRIMILD_SCRIPTING_LOG_VERBOSE
@@ -251,6 +263,12 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
 #endif
             group = std::make_shared< Group >();
         }
+
+		crimild::Real32 radius;
+		if ( eval.getPropValue( NODE_RADIUS, radius ) ) {
+			group->setLocalBound( crimild::alloc< SphereBoundingVolume >( Sphere3f( Vector3f::ZERO, radius ) ) );
+			group->setWorldBound( crimild::alloc< SphereBoundingVolume >( Sphere3f( Vector3f::ZERO, radius ) ) );
+		}
         
         eval.foreach( GROUP_NODES, [&]( ScriptEvaluator &childEval, int ) {
             self->buildNode( childEval, crimild::get_ptr( group ) );
@@ -311,12 +329,13 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
         }
 
         auto light = crimild::alloc< Light >( lightType );
-        
+
         bool castShadows;
         if ( eval.getPropValue( LIGHT_CAST_SHADOWS, castShadows ) ) {
-            light->setCastShadows( castShadows );
+			light->setShadowMap( crimild::alloc< ShadowMap >() );
         }
-        
+
+		/*
         float shadowNearCoeff;
         if ( eval.getPropValue( LIGHT_SHADOW_NEAR_COEFF, shadowNearCoeff ) ) {
             light->setShadowNearCoeff( shadowNearCoeff );
@@ -326,6 +345,7 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
         if ( eval.getPropValue( LIGHT_SHADOW_FAR_COEFF, shadowFarCoeff ) ) {
             light->setShadowFarCoeff( shadowFarCoeff );
         }
+		*/
         
         Vector3f attenuation;
         if ( eval.getPropValue( LIGHT_ATTENUATION, attenuation ) ) {
@@ -335,6 +355,9 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
         RGBAColorf color;
         if ( eval.getPropValue( LIGHT_COLOR, color ) ) light->setColor( color );
         
+        RGBAColorf ambient;
+        if ( eval.getPropValue( LIGHT_AMBIENT, ambient ) ) light->setAmbient( ambient );
+
         return light;
     });
 

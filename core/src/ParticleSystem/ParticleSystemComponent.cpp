@@ -103,14 +103,24 @@ void ParticleSystemComponent::update( const Clock &c )
 	auto node = getNode();
 	auto particles = getParticles();
 
-	updateGenerators( node, dt, particles );
-	updateUpdaters( node, dt, particles );
+	if ( isAnimationEnabled() ) {
+		updateGenerators( node, dt, particles );
+		updateUpdaters( node, dt, particles );
+	}
+	
 	updateRenderers( node, dt, particles );
 }
 
 void ParticleSystemComponent::updateGenerators( Node *node, crimild::Real64 dt, ParticleData *particles )
 {
-    const ParticleId maxNewParticles = _burst ? _emitRate : Numeric< ParticleId >::max( 1, dt * _emitRate );
+	_emitAccum += _burst ? _emitRate : dt * _emitRate;
+	if ( _emitAccum < 1.0 ) {
+		return;
+	}
+	
+    const ParticleId maxNewParticles = ( int ) _emitAccum;//_burst ? _emitRate : Numeric< ParticleId >::max( 1, dt * _emitRate );
+	_emitAccum -= maxNewParticles;
+	
     const ParticleId startId = particles->getAliveCount();            
     const ParticleId endId = Numeric< ParticleId >::min( startId + maxNewParticles, particles->getParticleCount() - 1 );
 

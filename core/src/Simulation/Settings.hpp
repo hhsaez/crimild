@@ -38,6 +38,11 @@
 namespace crimild {
 
     class Settings : public SharedObject {
+    public:
+    	static const char *SETTINGS_RENDERING_SHADOWS_ENABLED;
+    	static const char *SETTINGS_RENDERING_SHADOWS_RESOLUTION_WIDTH;
+    	static const char *SETTINGS_RENDERING_SHADOWS_RESOLUTION_HEIGHT;
+
 	public:
 		Settings( void );
         

@@ -37,9 +37,6 @@ Light::Light( Type type )
 	  _outerCutoff( 0.0f ),
 	  _innerCutoff( 0.0f ),
 	  _exponent( 0.0f ),
-      _castShadows( false ),
-      _shadowNearCoeff( 1.0f ),
-      _shadowFarCoeff( 512.0f ),
       _ambient( 0.0f, 0.0f, 0.0f, 0.0f )
 {
     
@@ -53,27 +50,5 @@ Light::~Light( void )
 void Light::accept( NodeVisitor &visitor )
 {
 	visitor.visitLight( this );
-}
-
-Matrix4f Light::computeProjectionMatrix( void ) const
-{
-	const float top = getShadowFarCoeff();
-	const float bottom = -getShadowFarCoeff();
-	const float left = -getShadowFarCoeff();
-	const float right = getShadowFarCoeff();
-	const float far = getShadowFarCoeff();
-	const float near = -getShadowFarCoeff();
-
-	return Matrix4f(
-		2.0f / ( right - left ), 0.0f, 0.0f, - ( right + left ) / ( right - left ),
-		0.0f, 2.0f / ( top - bottom ), 0.0f, - ( top + bottom ) / ( top - bottom ),
-		0.0f, 0.0f, -2.0f / ( far - near ), - ( far + near ) / ( far - near ),
-		0.0f, 0.0f, 0.0f, 1.0f
-	);
-}
-
-Matrix4f Light::computeViewMatrix( void ) const
-{
-    return getWorld().computeModelMatrix().getInverse();
 }
 

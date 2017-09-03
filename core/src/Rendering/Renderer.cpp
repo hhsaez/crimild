@@ -60,6 +60,7 @@ constexpr const char *Renderer::SHADER_PROGRAM_TEXT_SDF;
 constexpr const char *Renderer::SHADER_PROGRAM_SCREEN_TEXTURE;
 constexpr const char *Renderer::SHADER_PROGRAM_DEPTH;
 constexpr const char *Renderer::SHADER_PROGRAM_POINT_SPRITE;
+constexpr const char *Renderer::SHADER_PROGRAM_DEBUG_DEPTH;
 
 Renderer::Renderer( void )
 	: _lightCount( 0 ),

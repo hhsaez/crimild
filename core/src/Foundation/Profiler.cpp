@@ -34,6 +34,8 @@
 #include "Debug/DebugRenderHelper.hpp"
 
 #include "Rendering/Renderer.hpp"
+#include "Rendering/FrameBufferObject.hpp"
+#include "Rendering/ShaderProgram.hpp"
 
 #include "Concurrency/JobScheduler.hpp"
 
@@ -366,7 +368,7 @@ void Profiler::dump( void )
 
     const auto frameTimeCount = _frameTimeHistory.size();
 
-    Vector3f lines[ frameTimeCount * 2 ];
+    std::vector< Vector3f > lines( frameTimeCount * 2 );
 
     for ( int i = 0; i < frameTimeCount - 1; i++ ) {
         auto f0 = _frameTimeHistory[ i ];

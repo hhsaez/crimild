@@ -33,6 +33,7 @@
 #include "Foundation/Memory.hpp"
 #include "Foundation/RTTI.hpp"
 #include "Foundation/Log.hpp"
+#include "Foundation/Version.hpp"
 
 #include "Mathematics/Transformation.hpp"
 
@@ -185,6 +186,17 @@ namespace crimild {
             \brief Destructor
         */
         virtual ~Stream( void );
+
+        /**
+            \brief The version of the string
+
+            Use the version of the stream to know which features
+            are supported when loading objects
+        */
+        const Version &getVersion( void ) const { return _version; }
+
+    private:
+        Version _version;
 
         /**
             \name Saving

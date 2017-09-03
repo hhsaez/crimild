@@ -61,6 +61,11 @@ void ParticleData::generate( void )
 
 void ParticleData::kill( ParticleId pid )
 {
+	if ( !_alive[ pid ] ) {
+		// particle is already dead. do nothing
+		return;
+	}
+	
 	assert( _aliveCount > 0 );
 
 	_alive[ pid ] = false;

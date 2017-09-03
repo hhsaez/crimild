@@ -115,8 +115,8 @@ namespace crimild {
         using ParticleGeneratorPtr =  SharedPointer< ParticleGenerator >;
 
 
-		inline void setEmitRate( crimild::Size value ) { _emitRate = value; }
-		inline crimild::Size getEmitRate( void ) const { return _emitRate; }
+		inline void setEmitRate( crimild::Real32 value ) { _emitRate = value; }
+		inline crimild::Real32 getEmitRate( void ) const { return _emitRate; }
 
 		inline void addGenerator( ParticleGeneratorPtr const &gen )
 		{
@@ -131,7 +131,8 @@ namespace crimild {
 		void updateGenerators( Node *node, crimild::Real64 dt, ParticleData *particles );
 
     private:
-        crimild::Size _emitRate;
+        crimild::Real32 _emitRate;
+		crimild::Real32 _emitAccum = 1.0f;
         ThreadSafeArray< ParticleGeneratorPtr > _generators;
 		crimild::Bool _burst = false;
 		
@@ -200,6 +201,13 @@ namespace crimild {
         ThreadSafeArray< ParticleRendererPtr > _renderers;
 
 		//@}
+
+	public:
+		inline void setAnimationEnabled( crimild::Bool enabled ) { _animationEnabled = enabled; }
+		inline crimild::Bool isAnimationEnabled( void ) const { return _animationEnabled; }
+
+	private:
+		crimild::Bool _animationEnabled = true;
     };
 
 }

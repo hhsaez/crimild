@@ -44,6 +44,7 @@
 #include "Programs/ColorTintShaderProgram.hpp"
 #include "Programs/UnlitVertexColorShaderProgram.hpp"
 #include "Programs/ParticleSystemShaderProgram.hpp"
+#include "Programs/DebugDepthShaderProgram.hpp"
 
 using namespace crimild;
 using namespace crimild::opengl;
@@ -89,6 +90,8 @@ OpenGLRenderer::OpenGLRenderer( SharedPointer< FrameBufferObject > const &screen
 
 	// image effects
 	setShaderProgram( ColorTintImageEffect::COLOR_TINT_PROGRAM_NAME, crimild::alloc< ColorTintShaderProgram >() );
+
+	setShaderProgram( Renderer::SHADER_PROGRAM_DEBUG_DEPTH, crimild::alloc< DebugDepthShaderProgram >() );
 }
 
 OpenGLRenderer::~OpenGLRenderer( void )
@@ -100,6 +103,7 @@ void OpenGLRenderer::configure( void )
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
+#ifndef CRIMILD_PLATFORM_MOBILE
 	Log::info( CRIMILD_CURRENT_CLASS_NAME,
                "Configuring renderer",
                "\n       OpenGL version: ", glGetString( GL_VERSION ),
@@ -107,7 +111,6 @@ void OpenGLRenderer::configure( void )
     		   "\n       Vendor: ", glGetString( GL_VENDOR ),
                "\n       Renderer: ", glGetString( GL_RENDERER ) );
 
-#ifndef CRIMILD_PLATFORM_MOBILE
 	glewExperimental = GL_TRUE; //stops glew crashing on OSX :-/
 	if ( glewInit() != GLEW_OK ) {
         Log::fatal( CRIMILD_CURRENT_CLASS_NAME, "Cannot initialize GLEW" );

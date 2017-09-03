@@ -33,6 +33,107 @@ The easiest way to contribute is to submit pull requests with your changes again
 Release Notes
 ====================
 
+v4.6.0
+------
+
+* Math
+    * Compute inverse transformation
+
+* Core
+    * Implemented version control for streams
+    * Allow for time offsets when specifying skin animations
+    * Allow particle system to be paused and resumed
+    * Fixed UISystem
+    * Fixed invalid camera problem when picking
+    * Allow the console to use the command history
+    * Fixed particle system emition rate
+
+* Rendering
+    * Composite Render Passes
+    * Fixed ambient light calculation in standard shader
+    * Shadows improvements
+    * Use OpenGL Core Profile 3.3
+
+* Navigation
+    * Implemented Navigation Meshes
+    * Load navmeshes from OBJ files
+
+* Scripting
+    * Allow nodes to define a radius for the bounding volume in lua scripts
+
+* Debug
+    * Improved debug facilities
+
+
+v4.5.0
+------
+
+* Foundation
+    * Define platform-independent types to be used throughout the engine
+
+* Math
+    * Implemented time scales for all clocks
+    * Improved random number generator
+
+* Core
+    * Implemented modular particle system
+    * Implemented simple interactive console for simulations
+    * Improved streaming support on most classes
+    * Improved text support
+
+* Debug
+    * Improved Profiler
+    * Improved render tools
+    * Implemented debug text rendering
+
+* Rendering
+    * Implemented filters for textures
+    * Improvements on shadow mapping
+
+* Scripting
+    * Implemented generic object builder for Lua parser
+
+v4.4.1
+------
+
+* Scripting
+    * Fixed initial state for cameras in script builder
+
+* Rendering
+    * Fallback to OpenGL ES 2 on Android
+    * Fixed occluder check when computing render queue
+
+v4.4.0
+------
+
+* Math
+    * Implemented euler angle conversion for quaternions.
+    * Implemented helper methods to get world up vector in local space
+
+* SceneGraph
+    * Improved Switch
+    * Bind lights only if enabled
+
+* Simulation
+    * Update scene in main thread, nodes in parallel
+    * Dispatch mouse motion event during input's update phase
+    * Retain scene when doing update
+    * Fixed concurrency bug in AssetManager
+    * Added basic joystick support
+
+* Scripting
+    * Added helper method to get a child evaluator
+
+* Rendering
+    * Added support for render to texture using an offscreen camera
+    * Fixed light type bug in OpenGL
+    * Improved Depth of Field image effect
+    * Improved Vignette image effect
+
+* Build System
+    * Fixed CMake script for file extraction
+    * Fixed build system for Visual Studio
+
 v4.3.0
 ------
 

@@ -56,7 +56,11 @@ Console::Console( void )
 	registerCommand( crimild::alloc< SetConsoleCommand >() );
 
 	pushLine( Simulation::getInstance()->getName() );
-	pushLine( Version::getDescription() );
+
+	Version version;
+	pushLine( version.getDescription() );
+
+	_commandBufferHistoryIt = _commandBufferHistory.begin();
 
 	setEnabled( true );
 }
@@ -94,12 +98,34 @@ bool Console::handleInput( crimild::Int32 key, crimild::Int32 mod )
 	else if ( key == CRIMILD_INPUT_KEY_BACKSPACE ) {
 		popChar();
 	}
-	else if ( key == CRIMILD_INPUT_KEY_UP && mod & CRIMILD_INPUT_MOD_SHIFT ) {
-		_historyOffset++;
+	else if ( key == CRIMILD_INPUT_KEY_UP ) {
+		if ( mod & CRIMILD_INPUT_MOD_SHIFT ) {
+			_historyOffset++;
+		}
+		else {
+			if ( _commandBufferHistoryIt != _commandBufferHistory.end() ) {
+				clear();
+				_commandBuffer << *_commandBufferHistoryIt;
+				_commandBufferHistoryIt++;
+			}
+		}
 	}
-	else if ( key == CRIMILD_INPUT_KEY_DOWN && mod & CRIMILD_INPUT_MOD_SHIFT ) {
-		if ( _historyOffset > 0 ) {
-			_historyOffset--;
+	else if ( key == CRIMILD_INPUT_KEY_DOWN ) {
+		if ( mod & CRIMILD_INPUT_MOD_SHIFT ) {
+			if ( _historyOffset > 0 ) {
+				_historyOffset--;
+			}
+		}
+		else {
+			if ( _commandBufferHistoryIt != _commandBufferHistory.end() ) {
+				clear();
+				_commandBuffer << *_commandBufferHistoryIt;
+				_commandBufferHistoryIt--;
+			}
+			else {
+				clear();
+				_commandBufferHistoryIt = _commandBufferHistory.begin();
+			}
 		}
 	}
 	else if ( key >= 32 && key < 128 ) {
@@ -136,6 +162,9 @@ void Console::evaluate( void )
 	if ( line.empty() ) {
 		return;
 	}
+
+	_commandBufferHistory.push_front( line );
+	_commandBufferHistoryIt = _commandBufferHistory.begin();
 
 	pushLine( "> " + line );
 
