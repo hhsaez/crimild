@@ -35,9 +35,9 @@ TEST( VersionTest, defaultConstruction )
 {
     auto v = Version();
     
-    EXPECT_GE( 4, v.getMajor() );
-    EXPECT_GE( 5, v.getMinor() );
-    EXPECT_GE( 0, v.getPatch() );
+    EXPECT_GE( v.getMajor(), 4 );
+    EXPECT_GE( v.getMinor(), 5 );
+    EXPECT_GE( v.getPatch(), 0 );
 }
 
 TEST( VersionTest, construction )
