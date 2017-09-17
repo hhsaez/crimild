@@ -34,7 +34,7 @@
 
 #include "Streaming/Stream.hpp"
 
-#include "Mathematics/Vector.hpp"
+#include "Mathematics/LineSegment.hpp"
 
 namespace crimild {
 
@@ -46,16 +46,19 @@ namespace crimild {
 			CRIMILD_IMPLEMENT_RTTI( crimild::navigation::NavigationCellEdge )
 
 		public:
-			NavigationCellEdge( const Vector3f &p0, const Vector3f &p1 );
+			NavigationCellEdge( const LineSegment3f &line );
 			virtual ~NavigationCellEdge( void );
 
-			inline Vector3f getPointAt( crimild::Size index ) { return _points[ index ]; }
+			inline LineSegment3f &getLine( void ) { return _line; }
+			inline const LineSegment3f &getLine( void ) const { return _line; }
 
 			inline NavigationCell *getNeighbor( void ) { return _neighbor; }
 			void setNeighbor( NavigationCell *neighbor ) { _neighbor = neighbor; }
 
+			LineSegment3f projectPath( const LineSegment3f &path ) const;
+
 		private:
-			Vector3f _points[ 2 ];
+			LineSegment3f _line;
 			NavigationCell *_neighbor = nullptr;
 		};
 

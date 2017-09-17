@@ -29,6 +29,7 @@
 #include "NavigationMeshContainer.hpp"
 
 #include "Mathematics/Ray.hpp"
+#include "Mathematics/LineSegment.hpp"
 #include "Mathematics/Intersection.hpp"
 
 #include "SceneGraph/Node.hpp"
@@ -98,5 +99,120 @@ Vector3f NavigationController::move( const Vector3f &from, const Vector3f &to )
 	}
 
 	return r.getPointAt( t );
+}
+
+bool NavigationController::snap( void )
+{
+	// TODO: project current position into current cell and update position
+
+	return true;
+}
+
+bool NavigationController::teleport( const Vector3f &target )
+{
+	auto cell = findCellForPoint( target );
+	if ( cell != nullptr ) {
+		setCurrentCell( cell );
+
+		getNode()->local().setTranslate( target );
+	}
+
+	return cell != nullptr;
+}
+
+bool NavigationController::move( const Vector3f &target )
+{
+	// TODO: what about local/world conversion?
+
+	auto currentCell = getCurrentCell();
+	if ( currentCell == nullptr ) {
+		findCurrentCell();
+		currentCell = getCurrentCell();
+	}
+
+	if ( currentCell == nullptr ) {
+		// not in a cell
+		return false;
+	}
+
+	auto motionPath = LineSegment3f( getNode()->getLocal().getTranslate(), target );
+
+	bool done = false;
+
+	auto testCell = currentCell;
+
+	NavigationCellEdge *intersectionEdge = nullptr;
+	Vector3f intersectionPoint;
+
+	// Search for the cell containing the destination point
+	// or update the motion path accordingly to keep it within 
+	// the nav mesh
+	while ( !done && ( testCell != nullptr ) && ( motionPath.getOrigin() != motionPath.getDestination() ) ) {
+
+		// classify the motion path based on the test cell
+		auto result = testCell->classifyPath( motionPath, intersectionPoint, &intersectionEdge );
+
+		if ( result == NavigationCell::ClassificationResult::INSIDE ) {
+			// We found the cell containing the destination point
+			// Project that point into the cell's plane and terminate
+			motionPath.setDestination( testCell->getPlane().project( motionPath.getDestination() ) );
+			done = true;
+		}
+		else if ( result == NavigationCell::ClassificationResult::OUTSIDE ) {
+			// the motion path goes outside of the test cell
+			if ( intersectionEdge->getNeighbor() != nullptr ) {
+				// Moving to an adjacent cell. Set motion path origin
+				// to intersection point and continue with next cell
+				motionPath.setOrigin( intersectionPoint );
+				testCell = intersectionEdge->getNeighbor();
+			}
+			else {
+				// We hit a wall. 
+				// Project the motion path on the intersection edge
+				// and terminate
+				motionPath = intersectionEdge->projectPath( motionPath );
+				done = true;
+			}
+		}
+		else {
+			// this may happen if, for some reason, the start point of the motion path
+			// lies outside of the current cell (maybe due to round errors) or it
+			// coincides with one of the vertices
+			// Force the motion path to start within the cell boundaries and try again
+			motionPath.setOrigin( testCell->snapPoint( motionPath.getOrigin() ) );
+		}
+	}
+
+	if ( testCell == nullptr ) {
+		return false;
+	}
+
+	setCurrentCell( testCell );
+
+	getNode()->local().setTranslate( motionPath.getDestination() );
+
+	return true;
+}
+
+bool NavigationController::findCurrentCell( void )
+{
+	auto cell = NavigationController::findCellForPoint( getNode()->getLocal().getTranslate() );
+	if ( cell != nullptr ) {
+		setCurrentCell( cell );
+	}
+
+	return getCurrentCell();
+}
+
+NavigationCell *NavigationController::findCellForPoint( const Vector3f &point )
+{
+	NavigationCell *cell = nullptr;
+	getNavigationMesh()->foreachCell( [&cell, point]( NavigationCellPtr const &c ) {
+		if ( c->containsPoint( point ) ) {
+			cell = crimild::get_ptr( c );
+		}
+	});
+
+	return cell;
 }
 

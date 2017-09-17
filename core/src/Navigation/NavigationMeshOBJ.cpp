@@ -57,7 +57,7 @@ NavigationMeshOBJ::NavigationMeshOBJ( std::string filename )
 		ss << "e" << Numerici::min( i0, i1 ) << "-" << Numerici::max( i0, i1 );
 		auto name = ss.str();
 
-		auto e = crimild::alloc< NavigationCellEdge >( p0, p1 );
+		auto e = crimild::alloc< NavigationCellEdge >( LineSegment3f( p0, p1 ) );
 		auto other = edges[ name ].first;
 		if ( other != nullptr ) {
 			e->setNeighbor( crimild::get_ptr( other ) );
@@ -85,7 +85,9 @@ NavigationMeshOBJ::NavigationMeshOBJ( std::string filename )
 		}
 		else if ( what == "f" ) {
 			std::string f0, f1, f2;
-			line >> f0 >> f1 >> f2;
+
+			// read lines so vertices are sorted in clockwise order
+			line >> f2 >> f1 >> f0;
 			auto v0 = StringUtils::split< int >( f0, '/' );
 			auto v1 = StringUtils::split< int >( f1, '/' );
 			auto v2 = StringUtils::split< int >( f2, '/' );
@@ -94,7 +96,6 @@ NavigationMeshOBJ::NavigationMeshOBJ( std::string filename )
 			auto p1 = positions[ v1[ 0 ] - 1 ];
 			auto p2 = positions[ v2[ 0 ] - 1 ];
 
-			// TODO: not sure about the order of positions
 			auto cell = crimild::alloc< NavigationCell >( p0, p1, p2 );
 
 		    createEdge( cell, p0, v0[ 0 ], p1, v1[ 0 ] );

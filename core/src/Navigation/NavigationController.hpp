@@ -50,8 +50,20 @@ namespace crimild {
 
 			Vector3f move( const Vector3f &from, const Vector3f &to );
 
+			bool snap( void );
+			bool teleport( const Vector3f &target );
+			bool move( const Vector3f &target );
+
+			inline NavigationCell *getCurrentCell( void ) { return crimild::get_ptr( _currentCell ); }
+			void setCurrentCell( NavigationCell *cell ) { _currentCell = crimild::retain( cell ); }
+
+		private:
+			bool findCurrentCell( void );
+			NavigationCell *findCellForPoint( const Vector3f &point );
+
 		private:
 			NavigationMeshPtr _navigationMesh;
+			NavigationCellPtr _currentCell;
 		};
 
 	}

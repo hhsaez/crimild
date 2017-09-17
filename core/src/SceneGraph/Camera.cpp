@@ -121,7 +121,6 @@ void Camera::setAspectRatio( float aspect )
 void Camera::computeCullingPlanes( void )
 {
 	Vector3f normal;
-	float constant;
 
 	Vector3f position = getWorld().getTranslate();
 	Vector3f direction = getWorld().computeDirection().getNormalized();
@@ -137,26 +136,22 @@ void Camera::computeCullingPlanes( void )
 	// top plane
 	float invLengthTop = 1.0f / sqrtf( getFrustum().getDMin() * getFrustum().getDMin() + getFrustum().getUMax() * getFrustum().getUMax() );
 	normal = ( -getFrustum().getDMin() * up + getFrustum().getUMax() * direction  ) * invLengthTop;
-	constant = normal * position;
-	_cullingPlanes[ 2 ] = Plane3f( normal, constant );
+	_cullingPlanes[ 2 ] = Plane3f( normal, position );
 
 	// bottom plane
 	float invLengthBottom = 1.0f / sqrtf( getFrustum().getDMin() * getFrustum().getDMin() + getFrustum().getUMin() * getFrustum().getUMin() );
 	normal = ( getFrustum().getDMin() * up - getFrustum().getUMin() * direction ) * invLengthBottom;
-	constant = normal * position;
-	_cullingPlanes[ 3 ] = Plane3f( normal, constant );
+	_cullingPlanes[ 3 ] = Plane3f( normal, position );
 
 	// left plane
 	float invLengthLeft = 1.0f / sqrtf( getFrustum().getDMin() * getFrustum().getDMin() + getFrustum().getRMin() * getFrustum().getRMin() );
 	normal = ( getFrustum().getDMin() * right - getFrustum().getRMin() * direction ) * invLengthLeft;
-	constant = normal * position;
-	_cullingPlanes[ 4 ] = Plane3f( normal, constant );
+	_cullingPlanes[ 4 ] = Plane3f( normal, position );
 
 	// right plane
 	float invLengthRight = 1.0f / sqrtf( getFrustum().getDMin() * getFrustum().getDMin() + getFrustum().getRMax() * getFrustum().getRMax() );
 	normal = ( -getFrustum().getDMin() * right + getFrustum().getRMax() * direction ) * invLengthRight;
-	constant = normal * position;
-	_cullingPlanes[ 5 ] = Plane3f( normal, constant );
+	_cullingPlanes[ 5 ] = Plane3f( normal, position );
 }
 
 bool Camera::culled( const BoundingVolume *volume ) const

@@ -31,6 +31,7 @@
 #include "NavigationCellEdge.hpp"
 
 #include "Mathematics/Plane.hpp"
+#include "Mathematics/LineSegment.hpp"
 
 namespace crimild {
 
@@ -64,6 +65,17 @@ namespace crimild {
 			Plane3f _plane;
 
 			std::vector< NavigationCellEdgePtr > _edges;
+
+		public:
+			enum class ClassificationResult {
+				INSIDE,
+				OUTSIDE,
+				NONE
+			};
+
+			ClassificationResult classifyPath( const LineSegment3f &motionPath, Vector3f &intersectionPoint, NavigationCellEdge **intersectionEdge );
+
+			Vector3f snapPoint( const Vector3f &point );
         };
 
         using NavigationCellPtr = SharedPointer< NavigationCell >;

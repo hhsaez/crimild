@@ -30,14 +30,19 @@
 using namespace crimild;
 using namespace crimild::navigation;
 
-NavigationCellEdge::NavigationCellEdge( const Vector3f &p0, const Vector3f &p1 )
+NavigationCellEdge::NavigationCellEdge( const LineSegment3f &line )
+	: _line( line )
 {
-	_points[ 0 ] = p0;
-	_points[ 1 ] = p1;
+
 }
 
 NavigationCellEdge::~NavigationCellEdge( void )
 {
 
+}
+
+LineSegment3f NavigationCellEdge::projectPath( const LineSegment3f &path ) const
+{
+	return getLine().project( path );
 }
 
