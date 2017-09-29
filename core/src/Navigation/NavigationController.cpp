@@ -111,11 +111,9 @@ bool NavigationController::snap( void )
 bool NavigationController::teleport( const Vector3f &target )
 {
 	auto cell = findCellForPoint( target );
-	if ( cell != nullptr ) {
-		setCurrentCell( cell );
 
-		getNode()->local().setTranslate( target );
-	}
+	setCurrentCell( cell );
+	getNode()->local().setTranslate( target );
 
 	return cell != nullptr;
 }
