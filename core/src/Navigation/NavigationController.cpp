@@ -142,6 +142,8 @@ bool NavigationController::move( const Vector3f &target )
 	NavigationCellEdge *intersectionEdge = nullptr;
 	Vector3f intersectionPoint;
 
+	int attempts = 0;
+
 	// Search for the cell containing the destination point
 	// or update the motion path accordingly to keep it within 
 	// the nav mesh
@@ -163,6 +165,7 @@ bool NavigationController::move( const Vector3f &target )
 				// to intersection point and continue with next cell
 				motionPath.setOrigin( intersectionPoint );
 				testCell = intersectionEdge->getNeighbor();
+				attempts = 0;
 			}
 			else {
 				// We hit a wall. 
@@ -178,6 +181,12 @@ bool NavigationController::move( const Vector3f &target )
 			// coincides with one of the vertices
 			// Force the motion path to start within the cell boundaries and try again
 			motionPath.setOrigin( testCell->snapPoint( motionPath.getOrigin() ) );
+
+			// failsafe
+			++attempts;
+			if ( attempts > 100 ) {
+				return false;
+			}
 		}
 	}
 
