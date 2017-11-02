@@ -101,12 +101,12 @@ crimild::Real32 SFMLAudioClipSource::getPlayingOffset( void ) const
 
 void SFMLAudioClipSource::setVolume( crimild::Real32 volume )
 {
-	_sound.setVolume( volume );
+	_sound.setVolume( 100.0f * volume );
 }
 
 crimild::Real32 SFMLAudioClipSource::getVolume( void ) const 
 {
-	return _sound.getVolume();
+	return 0.01f * _sound.getVolume();
 }
 
 void SFMLAudioClipSource::setTransformation( const Transformation &t ) 

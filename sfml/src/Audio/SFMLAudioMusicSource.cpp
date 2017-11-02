@@ -99,12 +99,12 @@ crimild::Real32 SFMLAudioMusicSource::getPlayingOffset( void ) const
 
 void SFMLAudioMusicSource::setVolume( crimild::Real32 volume )
 {
-	_music.setVolume( volume );
+	_music.setVolume( 100.0f * volume );
 }
 
 crimild::Real32 SFMLAudioMusicSource::getVolume( void ) const 
 {
-	return _music.getVolume();
+	return 0.01f * _music.getVolume();
 }
 
 void SFMLAudioMusicSource::setTransformation( const Transformation &t ) 
