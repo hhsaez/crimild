@@ -25,67 +25,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "AudioManager.hpp"
-#include "Utils.hpp"
+#ifndef CRIMILD_SFML_
+#define CRIMILD_SFML_
 
-#ifdef __APPLE__
-    #import <OpenAL/al.h>
-    #import <OpenAL/alc.h>
-#else
-    #include <al.h>
-    #include <alc.h>
+#include "Audio/SFMLAudioManager.hpp"
+
 #endif
-
-using namespace crimild;
-using namespace crimild::al;
-
-AudioManager &AudioManager::getInstance( void )
-{
-    static AudioManager instance;
-    return instance;
-}
-
-AudioManager::AudioManager( void )
-{
-	CRIMILD_CHECK_AL_ERRORS_BEFORE_CURRENT_FUNCTION;
-
-    Log::info( CRIMILD_CURRENT_CLASS_NAME, "Initializing audio sub-system" );
-    
-	_device = alcOpenDevice( NULL );
-    if ( !_device ) {
-        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot open sound device" );
-        return;
-    }
-
-    _context = alcCreateContext( _device, NULL );
-    if ( !_context ) {
-        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot open sound context" );
-    }
-
-    alcMakeContextCurrent( _context );
-
-    setGeneralGain( 1.0f );
-
-	CRIMILD_CHECK_AL_ERRORS_AFTER_CURRENT_FUNCTION;
-}
-
-AudioManager::~AudioManager( void )
-{
-	CRIMILD_CHECK_AL_ERRORS_BEFORE_CURRENT_FUNCTION;
-
-    alcDestroyContext( _context );
-    alcCloseDevice( _device );
-
-	CRIMILD_CHECK_AL_ERRORS_AFTER_CURRENT_FUNCTION;
-}
-
-void AudioManager::setGeneralGain( float value )
-{
-	CRIMILD_CHECK_AL_ERRORS_BEFORE_CURRENT_FUNCTION;
-
-	_gain = value;
-    alListenerf( AL_GAIN, _gain );
-
-	CRIMILD_CHECK_AL_ERRORS_AFTER_CURRENT_FUNCTION;
-}
 

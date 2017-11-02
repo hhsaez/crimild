@@ -26,7 +26,7 @@
  */
 
 #include "AudioComponent.hpp"
-#include "Audio/AudioManager.hpp"
+#include "Audio/ALAudioManager.hpp"
 #include "Audio/Utils.hpp"
 
 #ifdef __APPLE__

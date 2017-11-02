@@ -55,6 +55,10 @@
 #include "Foundation/Profiler.hpp"
 #include "Foundation/Version.hpp"
 
+#include "Audio/AudioListener.hpp"
+#include "Audio/AudioManager.hpp"
+#include "Audio/AudioSource.hpp"
+
 #include "Boundings/BoundingVolume.hpp"
 #include "Boundings/PlaneBoundingVolume.hpp"
 #include "Boundings/SphereBoundingVolume.hpp"
@@ -74,6 +78,8 @@
 #include "SceneGraph/Text.hpp"
 
 #include "Components/AnimatorComponent.hpp"
+#include "Components/AudioListenerComponent.hpp"
+#include "Components/AudioSourceComponent.hpp"
 #include "Components/BillboardComponent.hpp"
 #include "Components/LambdaComponent.hpp"
 #include "Components/MaterialComponent.hpp"

@@ -48,6 +48,7 @@
 #include "SceneGraph/Node.hpp" 
 #include "SceneGraph/Camera.hpp"
 #include "Rendering/Renderer.hpp"
+#include "Audio/AudioManager.hpp"
 
 #include <functional>
 #include <list>
@@ -151,6 +152,13 @@ namespace crimild {
 	private:
 		SharedPointer< Node > _scene;
 		std::list< Camera * > _cameras;
+
+	public:
+		audio::AudioManager *getAudioManager( void ) { return crimild::get_ptr( _audioManager ); }
+		void setAudioManager( SharedPointer< audio::AudioManager > const &audioManager ) { _audioManager = audioManager; }
+
+	private:
+		SharedPointer< audio::AudioManager > _audioManager;
 	};
 
 }
