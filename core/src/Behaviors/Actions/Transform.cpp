@@ -1,11 +1,9 @@
 #include "Transform.hpp"
 
-#include "Navigation/NavigationController.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Mathematics/Interpolation.hpp"
 
 using namespace crimild;
-using namespace crimild::navigation;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::actions;
 
@@ -59,11 +57,6 @@ Behavior::State Transform::step( BehaviorContext *context )
 {
 	if ( _duration <= 0 ) {
 		context->getAgent()->setLocal( _end );
-		auto nav = context->getAgent()->getComponent< NavigationController >();
-		if ( nav != nullptr ) {
-			// using this behavior causes an automatic teleport
-			nav->teleport( _end.getTranslate() );
-		}
 		return Behavior::State::SUCCESS;
 	}
 
@@ -85,11 +78,7 @@ Behavior::State Transform::step( BehaviorContext *context )
 
 	_clock += ( 1.0f / _duration ) * context->getClock().getDeltaTime();
 	if ( _clock.getAccumTime() >= 1.0f ) {
-		auto nav = context->getAgent()->getComponent< NavigationController >();
-		if ( nav != nullptr ) {
-			// using this behavior causes an automatic teleport
-			nav->teleport( _end.getTranslate() );
-		}
+		context->getAgent()->setLocal( _end );
 		return Behavior::State::SUCCESS;
 	}
 

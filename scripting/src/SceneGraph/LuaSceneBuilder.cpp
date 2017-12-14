@@ -39,12 +39,14 @@
 #include "SceneGraph/Builders/Behaviors/Actions/LuaAnimateParticleSystemBuilder.hpp"
 #include "SceneGraph/Builders/Behaviors/Actions/LuaAnimateSettingValueBuilder.hpp"
 #include "SceneGraph/Builders/Behaviors/Actions/LuaClearTargetsBuilder.hpp"
+#include "SceneGraph/Builders/Behaviors/Actions/LuaCopyTransformFromTargetBuilder.hpp"
 #include "SceneGraph/Builders/Behaviors/Actions/LuaEnableNodeBuilder.hpp"
 #include "SceneGraph/Builders/Behaviors/Actions/LuaExecuteBehaviorOnTargetBuilder.hpp"
 #include "SceneGraph/Builders/Behaviors/Actions/LuaFindTargetBuilder.hpp"
 #include "SceneGraph/Builders/Behaviors/Actions/LuaLoadSceneBuilder.hpp"
 #include "SceneGraph/Builders/Behaviors/Actions/LuaLookAtBuilder.hpp"
 #include "SceneGraph/Builders/Behaviors/Actions/LuaPrintMessageBuilder.hpp"
+#include "SceneGraph/Builders/Behaviors/Actions/LuaResetNavigationBuilder.hpp"
 #include "SceneGraph/Builders/Behaviors/Actions/LuaSetContextValueBuilder.hpp"
 #include "SceneGraph/Builders/Behaviors/Actions/LuaSetSettingValueBuilder.hpp"
 #include "SceneGraph/Builders/Behaviors/Actions/LuaSuccessBuilder.hpp"
@@ -250,6 +252,8 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::behaviors::actions::AnimateParticleSystem, LuaAnimateParticleSystemBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::behaviors::actions::AnimateSettingValue, LuaAnimateSettingValueBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::behaviors::actions::ClearTargets, LuaClearTargetsBuilder::build );
+	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::behaviors::actions::CopyTransformFromTarget, LuaCopyTransformFromTargetBuilder::build );
+	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::behaviors::actions::ResetNavigation, LuaResetNavigationBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::behaviors::actions::EnableNode, LuaEnableNodeBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::behaviors::actions::ExecuteBehaviorOnTarget, LuaExecuteBehaviorOnTargetBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::behaviors::actions::FindTarget, LuaFindTargetBuilder::build );
