@@ -78,6 +78,7 @@ namespace crimild {
 
 		private:
 			std::vector< crimild::Node * > _targets;
+			crimild::Size _targetCount = 0;
 
 		public:
 			const crimild::Clock &getClock( void ) const { return _clock; }
@@ -116,8 +117,29 @@ namespace crimild {
 			
 		private:
 			std::map< std::string, std::string > _values;
+
+		public:
+			void dump( void ) const;
 		};
 
+		template<>
+		inline void BehaviorContext::setValue< Vector3f >( std::string key, Vector3f value )
+		{
+			setValue< crimild::Real32 >( key + ".x", value.x() );
+			setValue< crimild::Real32 >( key + ".y", value.y() );
+			setValue< crimild::Real32 >( key + ".z", value.z() );
+		}
+
+		template<>
+		inline crimild::Vector3f BehaviorContext::getValue( std::string key )
+		{
+			return Vector3f(
+				getValue< crimild::Real32 >( key + ".x" ),
+				getValue< crimild::Real32 >( key + ".y" ),
+				getValue< crimild::Real32 >( key + ".z" )
+			);
+		}
+		
 		template<>
 		inline crimild::Vector4f BehaviorContext::getValue( std::string key )
 		{

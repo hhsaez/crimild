@@ -29,11 +29,12 @@ void BehaviorContext::addTarget( crimild::Node *target )
 {
 	// TODO: check repetitions? use set?
 	_targets.push_back( target );
+	++_targetCount;
 }
 
 crimild::Size BehaviorContext::getTargetCount( void ) const
 {
-	return _targets.size();
+	return _targetCount;
 }
 
 crimild::Node *BehaviorContext::getTargetAt( crimild::Size index )
@@ -48,6 +49,7 @@ crimild::Node *BehaviorContext::getTargetAt( crimild::Size index )
 void BehaviorContext::removeAllTargets( void )
 {
 	_targets.clear();
+	_targetCount = 0;
 }
 
 void BehaviorContext::foreachTarget( BehaviorContext::TargetCallback const &callback )
@@ -57,5 +59,16 @@ void BehaviorContext::foreachTarget( BehaviorContext::TargetCallback const &call
 			callback( t );
 		}
 	}
+}
+
+void BehaviorContext::dump( void ) const
+{
+	std::stringstream ss;
+
+	for ( auto it : _values ) {
+		ss << "\n\t\"" << it.first << "\" = \"" << it.second << "\"";
+	}
+
+	Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Behavior context dump: ", ss.str() );
 }
 
