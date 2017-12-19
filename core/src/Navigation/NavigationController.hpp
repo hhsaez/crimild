@@ -54,6 +54,8 @@ namespace crimild {
 			bool teleport( const Vector3f &target );
 			bool move( const Vector3f &target );
 
+			std::vector< Vector3f > computePathToTarget( const Vector3f &target );
+
 			inline NavigationCell *getCurrentCell( void ) { return crimild::get_ptr( _currentCell ); }
 			void setCurrentCell( NavigationCell *cell ) { _currentCell = crimild::retain( cell ); }
 

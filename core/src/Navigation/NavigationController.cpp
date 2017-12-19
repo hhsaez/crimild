@@ -223,3 +223,88 @@ NavigationCell *NavigationController::findCellForPoint( const Vector3f &point )
 	return cell;
 }
 
+std::vector< Vector3f > NavigationController::computePathToTarget( const Vector3f &target )
+{
+	std::vector< Vector3f > result;
+
+	auto start = getCurrentCell();
+	auto end = findCellForPoint( target );
+	if ( end == nullptr ) {
+		Log::warning( CRIMILD_CURRENT_CLASS_NAME, "No cell found for target position" );
+		// no path found
+		return result;
+	}
+
+	if ( end == start ) {
+		// simplest case. both origin and target at the same cell
+		// the result is a straight line
+		result.push_back( target );
+		return result;
+	}
+
+	std::list< NavigationCell * > frontier;
+	std::list< NavigationCell * > explored;
+	std::map< NavigationCell *, crimild::Real32 > hs;
+	std::map< NavigationCell *, NavigationCell * > cameFrom;
+
+	hs[ start ] = -1;
+	frontier.push_back( start );
+	crimild::Bool pathFound = false;
+
+	while ( frontier.size() > 0 ) {
+		NavigationCell *next = nullptr;
+		crimild::Real32 minH = 0;
+		for ( auto candidate : frontier ) {
+			auto h = hs[ candidate ];
+			if ( next == nullptr || h < minH ) {
+				next = candidate;
+				minH = hs[ candidate ];
+			}
+		}
+
+		if ( next == nullptr ) {
+			// no moves left. Cannot find path
+			Log::warning( CRIMILD_CURRENT_CLASS_NAME, "No moves left. Cannot find path to target position" );
+			return result;
+		}
+
+		if ( next == end ) {
+			// found a path
+			break;
+		}
+
+		frontier.remove( next );
+		explored.push_back( next );
+
+		next->foreachEdge( [&frontier, &explored, &hs, &cameFrom, next, target]( NavigationCellEdgePtr const &e ) {
+			auto n = e->getNeighbor();
+			if ( n != nullptr ) {
+				if ( std::find( frontier.begin(), frontier.end(), n ) == frontier.end() &&
+				std::find( explored.begin(), explored.end(), n ) == explored.end() ) {
+					auto h = Distance::computeSquared( n->getCenter(), target );
+					frontier.push_back( n );
+					hs[ n ] = h;
+					cameFrom[ n ] = next;
+				}
+			}
+		});
+	}
+
+	std::list< Vector3f > path;
+	path.push_front( target );
+
+	auto current = end;
+	while ( current != nullptr && current != start ) {
+		if ( current != end ) {
+			path.push_front( current->getCenter() );
+		}
+		current = cameFrom[ current ];
+	}
+
+	for ( auto p : path ) {
+		result.push_back( p );
+	}
+
+	return result;
+}
+
