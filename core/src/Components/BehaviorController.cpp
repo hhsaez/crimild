@@ -87,7 +87,7 @@ bool BehaviorController::executeBehavior( std::string eventName )
 {
 	auto behavior = _behaviors[ eventName ];
 	if ( behavior == nullptr ) {
-		Log::warning( CRIMILD_CURRENT_CLASS_NAME, "No behavior found for event ", eventName );
+		//Log::warning( CRIMILD_CURRENT_CLASS_NAME, "No behavior found for event ", eventName );
 		return false;
 	}
 	
