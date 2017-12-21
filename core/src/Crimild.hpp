@@ -85,6 +85,7 @@
 #include "Behaviors/Actions/ClearTargets.hpp"
 #include "Behaviors/Actions/CopyTransformFromTarget.hpp"
 #include "Behaviors/Actions/EnableNode.hpp"
+#include "Behaviors/Actions/ExecuteBehavior.hpp"
 #include "Behaviors/Actions/ExecuteBehaviorOnTarget.hpp"
 #include "Behaviors/Actions/FindTarget.hpp"
 #include "Behaviors/Actions/LoadScene.hpp"

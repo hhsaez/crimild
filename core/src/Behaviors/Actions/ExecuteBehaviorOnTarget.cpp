@@ -7,8 +7,9 @@ using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::actions;
 
-ExecuteBehaviorOnTarget::ExecuteBehaviorOnTarget( std::string behaviorName )
-	: _behaviorName( behaviorName )
+ExecuteBehaviorOnTarget::ExecuteBehaviorOnTarget( std::string behaviorName, crimild::Bool overrideTarget )
+	: _behaviorName( behaviorName ),
+	  _overrideTarget( overrideTarget )
 {
 
 }
@@ -36,11 +37,16 @@ Behavior::State ExecuteBehaviorOnTarget::step( BehaviorContext *context )
 		return Behavior::State::FAILURE;
 	}
 
+	if ( _overrideTarget ) {
+		behaviors->getContext()->removeAllTargets();
+		behaviors->getContext()->addTarget( context->getAgent() );
+	}
+
 	if ( !behaviors->executeBehavior( _behaviorName ) ) {
 		Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot execute behavior on target with name ", _behaviorName );
 		return Behavior::State::FAILURE;
 	}
-	
+
 	return Behavior::State::SUCCESS;
 }
 
