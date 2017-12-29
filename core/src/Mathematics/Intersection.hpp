@@ -34,6 +34,7 @@
 #include "Ray.hpp"
 #include "Root.hpp"
 #include "Vector.hpp"
+#include "LineSegment.hpp"
 
 namespace crimild {
 
@@ -190,6 +191,30 @@ namespace crimild {
 		  	tmax = Numericf::min( tmax, Numericf::max( tz1, tz2 ) );
 
 			return tmax >= Numericf::max( 0.0, tmin );
+		}
+
+		/**
+			\brief Finds intersection between two line segments
+		*/
+		template< crimild::Size SIZE, typename PRECISION >
+		static Vector< SIZE, PRECISION > find( const LineSegment< SIZE, PRECISION > &a, const LineSegment< SIZE, PRECISION > &b )
+		{
+			auto da = a.getDestination() - a.getOrigin();
+			auto db = b.getDestination() - b.getOrigin();
+			auto dc = b.getOrigin() - a.getOrigin();
+
+			if ( dc * ( da ^ db ) != 0 ) {
+				return Vector< SIZE, PRECISION >::ZERO;
+			}
+
+			auto dab = da ^ db;
+
+			auto s = ( ( dc ^ db ) * dab ) / ( dab * dab );
+			if ( s < 0.0 && s > 1.0 ) {
+				return Vector< SIZE, PRECISION >::ZERO;
+			}
+
+			return a.getOrigin() + s * da;
 		}
 
 	};

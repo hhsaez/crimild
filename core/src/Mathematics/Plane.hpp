@@ -55,13 +55,13 @@ namespace crimild {
 		Plane( const VectorImpl &normal, const VectorImpl &point, bool forceNormalize = true )
 		{
 			setNormal( normal, forceNormalize );
-			setConstant( _normal * point );
+			setConstant( -( _normal * point ) );
 		}
 
 		Plane( const VectorImpl &p0, const VectorImpl &p1, const VectorImpl p2 )
 		{
 			setNormal( ( p2 - p1 ) ^ ( p0 - p1 ) );
-			setConstant( _normal * p0 );
+			setConstant( -( _normal * p0 ) );
 		}
 
 		Plane( const Plane &plane )
@@ -117,6 +117,34 @@ namespace crimild {
 		PRECISION getConstant( void ) const
 		{
 			return _constant;
+		}
+
+		PRECISION signedDistanceToPoint( const VectorImpl &point ) const
+		{
+			return getNormal() * point + getConstant();
+		}
+
+		PRECISION distanceToPoint( const VectorImpl &point ) const
+		{
+			return Numeric< PRECISION >::fabs( signedDistanceToPoint( point ) );
+		}
+
+		char whichSide( const VectorImpl &point ) const 
+		{
+			auto d = signedDistanceToPoint( point );
+			if ( d > 0 ) {
+				return +1;
+			}
+			else if ( d < 0 ) {
+				return -1;
+			}
+
+			return 0;
+		}
+
+		VectorImpl project( const VectorImpl &point ) const
+		{
+			return point - signedDistanceToPoint( point ) * getNormal();
 		}
 
 	private:

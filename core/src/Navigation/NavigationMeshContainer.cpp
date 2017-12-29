@@ -52,31 +52,39 @@ void NavigationMeshContainer::renderDebugInfo( Renderer *renderer, Camera *camer
 	std::vector< Vector3f > exteriorEdges;
 	std::vector< Vector3f > interiorEdges;
 	std::vector< Vector3f > normals;
+	std::vector< Vector3f > centers;
 	std::vector< Vector3f > cells;
 
 	static const auto OFFSET = Vector3f( 0.0f, 0.0f, 0.0f );
 
-	getNavigationMesh()->foreachCell( [ &exteriorEdges, &interiorEdges, &cells, &normals ]( NavigationCellPtr const &cell ) {
+	getNavigationMesh()->foreachCell( [ &exteriorEdges, &interiorEdges, &cells, &normals, &centers ]( NavigationCellPtr const &cell ) {
 		for ( int i = 0; i < 3; i++ ) {
-			cells.push_back( cell->getVertex( i ) );
+			cells.push_back( cell->getVertex( 2 - i ) );
 		}
 
 		cell->foreachEdge( [&exteriorEdges, &interiorEdges]( NavigationCellEdgePtr const &e ) {
 			if ( e->getNeighbor() != nullptr ) {
-				interiorEdges.push_back( OFFSET + e->getPointAt( 0 ) );
-				interiorEdges.push_back( OFFSET + e->getPointAt( 1 ) );
+				auto l = e->getLine();
+				interiorEdges.push_back( OFFSET + l.getOrigin() );
+				interiorEdges.push_back( OFFSET + l.getDestination() );
 			}
 			else {
-				exteriorEdges.push_back( OFFSET + e->getPointAt( 0 ) );
-				exteriorEdges.push_back( OFFSET + e->getPointAt( 1 ) );
+				auto l = e->getLine();
+				exteriorEdges.push_back( OFFSET + l.getOrigin() );
+				exteriorEdges.push_back( OFFSET + l.getDestination() );
 			}
 		});
 
 		auto n = cell->getNormal();
 		auto c = cell->getCenter();
-		n *= 0.5f;
+		n *= 2.0f;
 		normals.push_back( c );
 		normals.push_back( c + n );
+
+		centers.push_back( c + 0.1f * Vector3f( 1.0f, 0.0, 0.0 ) );
+		centers.push_back( c + 0.1f * Vector3f( -1.0f, 0.0, 0.0 ) );
+		centers.push_back( c + 0.1f * Vector3f( 0.0f, 0.0, 1.0 ) );
+		centers.push_back( c + 0.1f * Vector3f( 0.0f, 0.0, -1.0 ) );
 	});
 
 	if ( exteriorEdges.size() > 0 ) {
@@ -90,6 +98,10 @@ void NavigationMeshContainer::renderDebugInfo( Renderer *renderer, Camera *camer
 	if ( normals.size() > 0 ) {
 		DebugRenderHelper::renderLines( renderer, camera, &normals[ 0 ], normals.size(), RGBAColorf( 0.0f, 1.0f, 0.0f, 1.0f ) );
 	}		
+
+	if ( centers.size() > 0 ) {
+		DebugRenderHelper::renderLines( renderer, camera, &centers[ 0 ], centers.size(), RGBAColorf( 1.0f, 1.0f, 0.0f, 1.0f ) );
+	}
 
 	if ( cells.size() > 0 ) {
 		auto primitive = crimild::alloc< Primitive >();

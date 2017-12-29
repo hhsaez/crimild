@@ -48,24 +48,35 @@ void CameraSortParticleUpdater::configure( Node *node, ParticleData *particles )
 
 void CameraSortParticleUpdater::update( Node *node, double dt, ParticleData *particles )
 {
-	const auto camera = Camera::getMainCamera();
+	const auto camera = Camera::getMainCamera();	
 	auto cameraPos = camera->getWorld().getTranslate();
+	auto cameraDirection = camera->getWorld().computeDirection();
 	if ( !particles->shouldComputeInWorldSpace() ) {
 		// compute local camera pos only if we're not using
 		// the world space
 		node->getWorld().applyInverseToPoint( cameraPos, cameraPos );
+		node->getWorld().applyInverseToVector( cameraDirection, cameraDirection );
 	}
 
 	const auto pCount = particles->getAliveCount();
 
 	const auto ps = _positions->getData< Vector3f >();
 
+	const auto cameraPlane = Plane3f( cameraDirection, cameraPos );
+
+	// precompute distances to camera plane for each particle
+	Array< double > ds( pCount );
+	for ( crimild::Size i = 0; i < pCount; i++ ) {
+		ds[ i ] = Distance::compute( cameraPlane, ps[ i ] );
+	}
+
+	// sort partices
 	// TODO: I know, bubble sort is slow...
-	// TODO: Also, precompute distances?
 	for ( int i = 1; i < pCount; i++ ) {
 		for ( int j = 0; j < pCount - i; j++ ) {
-			if ( Distance::computeSquared( ps[ j ], cameraPos ) < Distance::computeSquared( ps[ j + 1 ], cameraPos ) ) {
+			if ( ds[ j ] < ds[ j + 1 ] ) {
 				particles->swap( j, j + 1 );
+				Numericd::swap( ds[ j ], ds[ j + 1 ] );
 			}
 		}
 	}

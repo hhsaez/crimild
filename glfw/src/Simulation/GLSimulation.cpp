@@ -41,9 +41,17 @@ using namespace crimild::concurrency;
 using namespace crimild::physics;
 #endif
 
+#ifdef CRIMILD_ENABLE_SFML
+#include <Crimild_SFML.hpp>
+#endif
+
 GLSimulation::GLSimulation( std::string name, SettingsPtr const &settings )
 	: Simulation( name, settings )
 {
+#ifdef CRIMILD_ENABLE_SFML
+	setAudioManager( crimild::alloc< sfml::SFMLAudioManager >() );
+#endif
+
 	if ( !glfwInit() ) {
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot start GLFW: glfwInit failed" );
 		throw RuntimeException( "Cannot start GLFW: glwfInit failed!" );
