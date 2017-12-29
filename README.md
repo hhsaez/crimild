@@ -33,6 +33,40 @@ The easiest way to contribute is to submit pull requests with your changes again
 Release Notes
 ====================
 
+v4.7.0
+------
+
+* Math
+    * New LineSegment class
+	* Minor fixes
+
+* Core
+    * Fixed particle sorting
+
+* Rendering
+    * Minor fixes
+
+* Audio
+    * New audio-related classes
+	* Implemented SFML audio classes
+	* Removed deprecated audio classes
+
+* Navigation
+    * Compute edge sliding vector
+	* Improved navigation component
+	* 
+
+* Behaviors
+    * Implemented Behavior Tree base classes
+	* Implemented reusable behaviors
+
+* Scripting
+    * Implemented builders for core classes
+
+* Debug
+    * Improved debug tools for navigation meshes
+	
+
 v4.6.0
 ------
 
