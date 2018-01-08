@@ -30,8 +30,14 @@
 
 #include <Crimild.hpp>
 
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+#ifdef CRIMILD_PLATFORM_EMSCRIPTEN
+    #define GLFW_INCLUDE_ES3
+    #include <GLFW/glfw3.h>
+#else
+    #define GLEW_STATIC 1
+    #include <GL/glew.h>
+    #include <GLFW/glfw3.h>
+#endif
 
 #include <string>
 

@@ -48,7 +48,7 @@ int VertexBufferObjectCatalog::getNextResourceId( void )
     
 	GLuint vaoId;
 
-#ifndef __ANDROID__
+#ifndef CRIMILD_FORCE_OPENGL_COMPATIBILITY_MODE
     glGenVertexArrays( 1, &vaoId );
   	glBindVertexArray( vaoId );
 #endif
@@ -63,7 +63,7 @@ int VertexBufferObjectCatalog::getNextResourceId( void )
 
 int VertexBufferObjectCatalog::composeId( unsigned int vaoId, unsigned int vboId )
 {
-#ifndef __ANDROID__
+#ifndef CRIMILD_FORCE_OPENGL_COMPATIBILITY_MODE
 	return vaoId * 1000 + vboId;
 #else
     return vboId;
@@ -72,7 +72,7 @@ int VertexBufferObjectCatalog::composeId( unsigned int vaoId, unsigned int vboId
 
 bool VertexBufferObjectCatalog::extractId( int compositeId, unsigned int &vaoId, unsigned int &vboId )
 {
-#ifndef __ANDROID__
+#ifndef CRIMILD_FORCE_OPENGL_COMPATIBILITY_MODE
 	vaoId = compositeId / 1000;
 	vboId = compositeId % 1000;
 #else
@@ -94,7 +94,7 @@ void VertexBufferObjectCatalog::bind( ShaderProgram *program, VertexBufferObject
 
     extractId( vbo->getCatalogId(), vaoId, vboId );
 
-#ifndef __ANDROID__
+#ifndef CRIMILD_FORCE_OPENGL_COMPATIBILITY_MODE
     glBindVertexArray( vaoId );
 #endif
 
@@ -201,7 +201,7 @@ void VertexBufferObjectCatalog::unbind( ShaderProgram *program, VertexBufferObje
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
-#ifndef __ANDROID__
+#ifndef CRIMILD_FORCE_OPENGL_COMPATIBILITY_MODE
     glBindVertexArray( 0 );
 #endif
 
@@ -221,7 +221,7 @@ void VertexBufferObjectCatalog::load( VertexBufferObject *vbo )
 	GLuint vaoId, vboId;
 	extractId( vbo->getCatalogId(), vaoId, vboId );
 
-#ifndef __ANDROID__
+#ifndef CRIMILD_FORCE_OPENGL_COMPATIBILITY_MODE
 	glBindVertexArray( vaoId );
 #endif
 
@@ -256,7 +256,7 @@ void VertexBufferObjectCatalog::cleanup( void )
         extractId( id, vaoId, vboId );
         
         glDeleteBuffers( 1, &vboId );
-#ifndef __ANDROID__
+#ifndef CRIMILD_FORCE_OPENGL_COMPATIBILITY_MODE
         glDeleteVertexArrays( 1, &vaoId );
 #endif
     }

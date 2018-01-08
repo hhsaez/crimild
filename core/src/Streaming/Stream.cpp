@@ -30,6 +30,8 @@
 #include "Foundation/Version.hpp"
 #include "Foundation/Log.hpp"
 #include "Rendering/VertexFormat.hpp"
+#include "Rendering/SkinnedMesh.hpp"
+#include "Components/SkinnedMeshComponent.hpp"
 
 #include <algorithm>
 
@@ -70,6 +72,16 @@ SharedPointer< StreamObject > StreamObjectFactory::buildObject( std::string clas
 
 Stream::Stream( void )
 {
+CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::SkinnedMeshJoint );
+CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::SkinnedMeshJointCatalog );
+CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::SkinnedMeshAnimationChannel );
+CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::SkinnedMeshAnimationClip );
+CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::SkinnedMeshSkeleton );
+CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::SkinnedMeshAnimationState );
+CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::SkinnedMesh );
+CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::SkinnedMeshComponent )
+
+
 
 }
 

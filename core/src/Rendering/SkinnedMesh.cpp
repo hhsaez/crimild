@@ -29,14 +29,6 @@
 
 #include "Foundation/Log.hpp"
 
-CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::SkinnedMeshJoint );
-CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::SkinnedMeshJointCatalog );
-CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::SkinnedMeshAnimationChannel );
-CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::SkinnedMeshAnimationClip );
-CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::SkinnedMeshSkeleton );
-CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::SkinnedMeshAnimationState );
-CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::SkinnedMesh );
-
 using namespace crimild;
 
 SkinnedMeshJoint::SkinnedMeshJoint( void )

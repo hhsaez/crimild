@@ -49,7 +49,7 @@ bool FileStream::open( void )
 
 	_file = fopen( _path.c_str(), _openMode == FileStream::OpenMode::WRITE ? "w" : "r" );
 	if ( _file == nullptr ) {
-        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid file path " );
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid file path ", _path );
 		return false;
 	}
 

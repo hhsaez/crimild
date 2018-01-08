@@ -33,8 +33,6 @@
 #include "Debug/DebugRenderHelper.hpp"
 #include "Foundation/Log.hpp"
 
-CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::SkinnedMeshComponent )
-
 using namespace crimild;
 
 SkinnedMeshComponent::SkinnedMeshComponent( void )

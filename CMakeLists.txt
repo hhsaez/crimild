@@ -2,12 +2,16 @@ CMAKE_MINIMUM_REQUIRED( VERSION 2.8.10 FATAL_ERROR )
 
 IF ( APPLE )
 	# Enable C++11 features
-	SET( CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++ -U__STRICT_ANSI__" )
+	SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -U__STRICT_ANSI__" )
 
 	set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++0x")
 	set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
 ELSE ( APPLE )
-	SET( CMAKE_CXX_FLAGS "-std=c++11 -static-libgcc -static-libstdc++ -static -U__STRICT_ANSI__" )
+	IF ( ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten" )
+		SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -static -U__STRICT_ANSI__" )
+	ELSE ()
+		SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -static-libgcc -static-libstdc++ -static -U__STRICT_ANSI__" )
+	ENDIF ()
 ENDIF ( APPLE )
 
 PROJECT( CRIMILD )
@@ -84,17 +88,26 @@ IF ( CRIMILD_ENABLE_SFML )
 	ADD_SUBDIRECTORY( sfml )
 ENDIF ( CRIMILD_ENABLE_SFML )
 
+OPTION( CRIMILD_ENABLE_OPENGL "Would you like to build the crimild-opengl extension?" OFF )
+IF ( CRIMILD_ENABLE_OPENGL )
+	ADD_DEFINITIONS( -DCRIMILD_ENABLE_OPENGL=1 )
+	ADD_SUBDIRECTORY( opengl )
+ENDIF ()
+
 OPTION( CRIMILD_ENABLE_GLFW "Would you like to build the crimild-glfw extension?" OFF )
 IF ( CRIMILD_ENABLE_GLFW )
 	ADD_DEFINITIONS( -DCRIMILD_ENABLE_GLFW=1 )
 
-	SET( GLFW_BUILD_DOCS OFF CACHE BOOL "Build the GLFW documentation" )
-	SET( GLFW_BUILD_EXAMPLES OFF CACHE BOOL "Build the GLFW example programs" )
-	SET( GLFW_BUILD_TESTS OFF CACHE BOOL "Build the GLFW test programs" )
+	IF ( NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten" )
+	   	SET( GLFW_BUILD_DOCS OFF CACHE BOOL "Build the GLFW documentation" )
+	   	SET( GLFW_BUILD_EXAMPLES OFF CACHE BOOL "Build the GLFW example programs" )
+		SET( GLFW_BUILD_TESTS OFF CACHE BOOL "Build the GLFW test programs" )
 	
-	ADD_SUBDIRECTORY( ${CRIMILD_SOURCE_DIR}/third-party/glfw )
+		ADD_SUBDIRECTORY( ${CRIMILD_SOURCE_DIR}/third-party/glfw )
+	ELSE ()
+   		 SET ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s USE_GLFW=3" )
+	ENDIF ()
 
-	ADD_SUBDIRECTORY( opengl )
 	ADD_SUBDIRECTORY( glfw )
 	
 ENDIF ( CRIMILD_ENABLE_GLFW )

@@ -9,14 +9,18 @@ MESSAGE( "Configuring ${CRIMILD_APP_NAME} app" )
 
 IF ( APPLE )
 	# Enable C++11 features
-	SET( CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++ -U__STRICT_ANSI__" )
+	SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -U__STRICT_ANSI__" )
 
 	set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++0x")
 	set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
 
 	set(CMAKE_MACOSX_RPATH 1)
 ELSE ( APPLE )
-	SET( CMAKE_CXX_FLAGS "-std=c++11 -static-libgcc -static-libstdc++ -static -U__STRICT_ANSI__" )
+	IF ( ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten" )
+		SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -static -U__STRICT_ANSI__ -s USE_GLFW=3" )
+	ELSE ()
+		SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -static-libgcc -static-libstdc++ -static -U__STRICT_ANSI__" )
+	ENDIF ()
 ENDIF ( APPLE )
 
 IF ( CRIMILD_ENABLE_TESTS )
@@ -102,30 +106,64 @@ IF ( CRIMILD_ENABLE_IMPORT )
   		${Assimp_BINARY_DIR} )
 ENDIF ( CRIMILD_ENABLE_IMPORT )
 
-IF ( CRIMILD_ENABLE_GLFW )
+IF ( CRIMILD_ENABLE_OPENGL )
 	SET( CRIMILD_APP_DEPENDENCIES 
 		 ${CRIMILD_APP_DEPENDENCIES} 
 		 crimild_opengl
-		 crimild_glfw
-		 glfw 
 	)
+	
 	SET( CRIMILD_APP_LINK_LIBRARIES 
 		 ${CRIMILD_APP_LINK_LIBRARIES} 
 		 crimild_opengl
-		 crimild_glfw
-		 glfw 
 	)
+	
 	SET( CRIMILD_APP_INCLUDE_DIRECTORIES 
 		 ${CRIMILD_APP_INCLUDE_DIRECTORIES} 
 		 ${CRIMILD_SOURCE_DIR}/opengl/src
-		 ${CRIMILD_SOURCE_DIR}/glfw/src
-		 ${CRIMILD_SOURCE_DIR}/third-party/glfw/include
-		 ${CRIMILD_SOURCE_DIR}/third-party/glew/include
  	)
-	SET( CRIMILD_APP_LINK_DIRECTORIES 
-		 ${CRIMILD_APP_LINK_DIRECTORIES} 
-		 ${CRIMILD_SOURCE_DIR}/third-party/glfw/src
+	
+	IF ( NOT ( ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten" ) )
+		SET( CRIMILD_APP_INCLUDE_DIRECTORIES 
+		 	 ${CRIMILD_APP_INCLUDE_DIRECTORIES} 
+		 	 ${CRIMILD_SOURCE_DIR}/third-party/glew/include
+ 		)
+	ENDIF ()
+	
+ENDIF ()
+
+IF ( CRIMILD_ENABLE_GLFW )
+	SET( CRIMILD_APP_DEPENDENCIES 
+		 ${CRIMILD_APP_DEPENDENCIES} 
+		 crimild_glfw
 	)
+	
+	SET( CRIMILD_APP_LINK_LIBRARIES 
+		 ${CRIMILD_APP_LINK_LIBRARIES} 
+		 crimild_glfw
+		 glfw
+	)
+	
+	SET( CRIMILD_APP_INCLUDE_DIRECTORIES 
+		 ${CRIMILD_APP_INCLUDE_DIRECTORIES} 
+		 ${CRIMILD_SOURCE_DIR}/glfw/src
+ 	)
+	
+	IF ( NOT ( ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten" ) )
+		SET( CRIMILD_APP_DEPENDENCIES 
+			 ${CRIMILD_APP_DEPENDENCIES} 
+		 	 glfw
+		)
+	
+		SET( CRIMILD_APP_INCLUDE_DIRECTORIES 
+		 	 ${CRIMILD_APP_INCLUDE_DIRECTORIES} 
+		 	 ${CRIMILD_SOURCE_DIR}/third-party/glfw/include
+ 		)
+	
+		SET( CRIMILD_APP_LINK_DIRECTORIES 
+		 	 ${CRIMILD_APP_LINK_DIRECTORIES} 
+		 	 ${CRIMILD_SOURCE_DIR}/third-party/glfw/src
+		)
+	ENDIF ()
 ENDIF ()
 
 IF ( CRIMILD_ENABLE_SFML )

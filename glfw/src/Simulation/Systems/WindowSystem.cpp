@@ -1,5 +1,16 @@
 #include "WindowSystem.hpp"
 
+#ifdef CRIMILD_PLATFORM_EMSCRIPTEN
+    #include <emscripten.h>
+    #include <emscripten/html5.h>
+
+void simulation_step( void )
+{
+	crimild::Simulation::getInstance()->update();
+}
+
+#endif
+
 using namespace crimild;
 
 WindowSystem::WindowSystem( void )
@@ -29,9 +40,14 @@ bool WindowSystem::start( void )
 		return false;
 	}
 
-    int framebufferWidth = 0;
-    int framebufferHeight = 0;
+	int framebufferWidth = Simulation::getInstance()->getSettings()->get( "video.width", 1024 );
+    int framebufferHeight = Simulation::getInstance()->getSettings()->get( "video.height", 768 );
+
+#if !defined( CRIMILD_PLATFORM_EMSCRIPTEN )
+    framebufferWidth = 0;
+    framebufferHeight = 0;
 	glfwGetFramebufferSize( _window, &framebufferWidth, &framebufferHeight);
+#endif
 
     // this is not working
 //    bool supersampling = Simulation::getInstance()->getSettings()->get( "video.supersampling", true );
@@ -50,12 +66,39 @@ bool WindowSystem::start( void )
 //    	framebufferHeight = Simulation::getInstance()->getSettings()->get( "video.height", 768 );
 //    }
 
+	Log::info( CRIMILD_CURRENT_CLASS_NAME, "Framebuffer size (", framebufferWidth, "x", framebufferHeight, ")" );
+
     auto renderer = Simulation::getInstance()->getRenderer();
     auto screenBuffer = renderer->getScreenBuffer();
  	screenBuffer->resize( framebufferWidth, framebufferHeight );
     renderer->configure();
+
+	// compute new aspect ratio for main camera, if any
+	if ( Simulation::getInstance()->getMainCamera() != nullptr ) {
+		auto aspect = ( float ) screenBuffer->getWidth() / ( float ) screenBuffer->getHeight();
+		Simulation::getInstance()->getMainCamera()->setAspectRatio( aspect );
+	}
+
+	/*
+#ifdef __EMSCRIPTEN__
+    int result = emscripten_webgl_enable_extension(emscripten_webgl_get_current_context(), "OES_texture_float");
+    if (result < 0) {
+        std::cerr << "Could not load extension \"OES_texture_float\"\n";
+        emscripten_run_script("alert('Could not load extension \"OES_texture_float\". Game will not work.')");
+    }
+    result = emscripten_webgl_enable_extension(emscripten_webgl_get_current_context(), "OES_texture_float_linear");
+    if (result < 0) {
+        std::cerr << "Could not load extension \"OES_texture_float_linear\"\n";
+        emscripten_run_script("alert('Could not load extension \"OES_texture_float_linear\". Game will not work.')");
+    }
+#endif
+	*/
     
     crimild::concurrency::sync_frame( std::bind( &WindowSystem::update, this ) );
+
+#ifdef CRIMILD_PLATFORM_EMSCRIPTEN 
+	emscripten_set_main_loop( simulation_step, 60, false );
+#endif
 
 	return true;
 }
@@ -96,7 +139,7 @@ void WindowSystem::update( void )
 		ss << name << " (" << delta << "ms)";
 		glfwSetWindowTitle( _window, ss.str().c_str() );
 	}
-    
+
     crimild::concurrency::sync_frame( std::bind( &WindowSystem::update, this ) );
 }
 
@@ -107,9 +150,28 @@ void WindowSystem::stop( void )
 
 bool WindowSystem::createWindow( void )
 {
-    int width = Simulation::getInstance()->getSettings()->get( "video.width", 1024 );
-    int height = Simulation::getInstance()->getSettings()->get( "video.height", 768 );
-    bool fullscreen = Simulation::getInstance()->getSettings()->get< bool >( "video.fullscreen", false );
+	int width = 1024;
+	int height = 768;
+	bool fullscreen = false;
+
+#if defined( CRIMILD_PLATFORM_EMSCRIPTEN )
+	// override window size based on canvas
+	if ( emscripten_get_canvas_element_size( "crimild_canvas", &width, &height ) != EMSCRIPTEN_RESULT_SUCCESS ) {
+		Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot obtain canvas size" );
+	}
+
+	Log::info( CRIMILD_CURRENT_CLASS_NAME, "Canvas size = (", width, "x", height, ")" );
+
+	Simulation::getInstance()->getSettings()->set( "video.width", width );
+	Simulation::getInstance()->getSettings()->set( "video.height", height );
+	Simulation::getInstance()->getSettings()->set( "video.fullscreen", fullscreen );	
+#endif
+	
+    width = Simulation::getInstance()->getSettings()->get( "video.width", 1024 );
+    height = Simulation::getInstance()->getSettings()->get( "video.height", 768 );
+    fullscreen = Simulation::getInstance()->getSettings()->get< bool >( "video.fullscreen", false );
+
+	Log::info( CRIMILD_CURRENT_CLASS_NAME, "Creating window of size (", width, "x", height, ")" );
 
 	std::string name = Simulation::getInstance()->getName();
 	if ( name == "" ) {
@@ -122,6 +184,7 @@ bool WindowSystem::createWindow( void )
 	int depthBits = 32;
 	int stencilBits = 8;
 
+#if !defined( CRIMILD_PLATFORM_EMSCRIPTEN )
 	glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, glMajor );
 	glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, glMinor );
 	glfwWindowHint( GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE );
@@ -129,6 +192,9 @@ bool WindowSystem::createWindow( void )
     glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
     glfwWindowHint( GLFW_DEPTH_BITS, depthBits );
     glfwWindowHint( GLFW_STENCIL_BITS, stencilBits );
+#else
+	glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
+#endif
 
 	_window = glfwCreateWindow( width, height, name.c_str(), fullscreen ? glfwGetPrimaryMonitor() : NULL, NULL );
 	if ( _window == nullptr ) {
@@ -141,6 +207,14 @@ bool WindowSystem::createWindow( void )
 	glfwSwapInterval( vsync ? 1 : 0 );
 
 	broadcastMessage( messages::WindowSystemDidCreateWindow { this } );
+
+	glfwSetWindowSizeCallback( _window, []( GLFWwindow *window, int width, int height ) {
+		Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Window resized to ", width, "x", height );
+	});
+
+	glfwSetFramebufferSizeCallback( _window, []( GLFWwindow *window, int width, int height ) {
+		Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Framebuffer resized to ", width, "x", height );
+	});
 
 	return true;
 }
