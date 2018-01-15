@@ -147,3 +147,18 @@ crimild::Real32 SFMLAudioClipSource::getAttenuation( void ) const
 	return _sound.getAttenuation();
 }
 
+void SFMLAudioClipSource::onGetData( AudioSource::GetDataCallback const & )
+{
+
+}
+
+crimild::UInt32 SFMLAudioClipSource::getChannelCount( void ) const
+{
+	return _sound.getBuffer()->getChannelCount();
+}
+
+crimild::UInt32 SFMLAudioClipSource::getSampleRate( void ) const
+{
+	return _sound.getBuffer()->getSampleRate();
+}
+

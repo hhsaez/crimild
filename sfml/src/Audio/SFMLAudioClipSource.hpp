@@ -70,6 +70,12 @@ namespace crimild {
 	    	virtual void setAttenuation( crimild::Real32 attenuation ) override;
 	    	virtual crimild::Real32 getAttenuation( void ) const override;
 
+			virtual void onGetData( AudioSource::GetDataCallback const &callback ) override;
+
+			virtual crimild::UInt32 getChannelCount( void ) const override;
+
+			virtual crimild::UInt32 getSampleRate( void ) const override;
+
 	    private:
 	    	sf::SoundBuffer _soundBuffer;
 	    	sf::Sound _sound;

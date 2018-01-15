@@ -145,3 +145,33 @@ crimild::Real32 SFMLAudioMusicSource::getAttenuation( void ) const
 	return _music.getAttenuation();
 }
 
+void SFMLAudioMusicSource::onGetData( AudioSource::GetDataCallback const &callback )
+{
+	_music.setOnGetDataCallback( callback );
+}
+
+bool SFMLAudioMusicSource::CustomMusic::onGetData( sf::SoundStream::Chunk &data )
+{
+	auto ret = sf::Music::onGetData( data );
+
+	if ( _callback != nullptr ) {
+		_callback( AudioSource::Chunk {
+			data.samples,
+			data.sampleCount
+		});
+	}
+	
+	return ret;
+}
+
+crimild::UInt32 SFMLAudioMusicSource::getChannelCount( void ) const
+{
+	return _music.getChannelCount();
+}
+
+crimild::UInt32 SFMLAudioMusicSource::getSampleRate( void ) const
+{
+	return _music.getSampleRate();
+}
+
+

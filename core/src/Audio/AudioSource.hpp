@@ -48,6 +48,11 @@ namespace crimild {
 				PAUSED
 			};
 
+			struct Chunk {
+				const crimild::Int16 *samples;
+				crimild::Size sampleCount;
+			};
+
 		protected:
 			AudioSource( void ) { }
 
@@ -87,6 +92,13 @@ namespace crimild {
 
 	    	virtual void setAttenuation( crimild::Real32 attenuation ) = 0;
 	    	virtual crimild::Real32 getAttenuation( void ) const = 0;
+
+			using GetDataCallback = std::function< void( Chunk const & ) >;
+			virtual void onGetData( GetDataCallback const &callback ) = 0;
+
+			virtual crimild::UInt32 getChannelCount( void ) const = 0;
+
+			virtual crimild::UInt32 getSampleRate( void ) const = 0;
 
 	    private:
 	    	crimild::Bool _spatializationEnabled = false;

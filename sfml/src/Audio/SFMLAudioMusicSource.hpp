@@ -70,8 +70,27 @@ namespace crimild {
 	    	virtual void setAttenuation( crimild::Real32 attenuation ) override;
 	    	virtual crimild::Real32 getAttenuation( void ) const override;
 
+			virtual void onGetData( AudioSource::GetDataCallback const &callback ) override;
+
+			virtual crimild::UInt32 getChannelCount( void ) const override;
+
+			virtual crimild::UInt32 getSampleRate( void ) const override;
+
 	    private:
-	    	sf::Music _music;
+			class CustomMusic : public sf::Music {
+			public:
+				CustomMusic( void ) { }
+				virtual ~CustomMusic( void ) { }
+
+				inline void setOnGetDataCallback( AudioSource::GetDataCallback const &callback ) { _callback = callback; }
+				
+				virtual bool onGetData( sf::SoundStream::Chunk &data ) override;
+
+			private:
+				AudioSource::GetDataCallback _callback;
+			};
+
+			CustomMusic _music;
 	    	crimild::Bool _autoplay = false;
 		};
 
