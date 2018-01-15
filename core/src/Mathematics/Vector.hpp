@@ -251,6 +251,21 @@ namespace crimild {
 			return *this;
 		}
 
+		Vector &truncate( PRECISION m )
+		{
+			auto i = m / getMagnitude();
+			i = i < 1.0 ? i : 1.0;
+			*this *= i;
+			return *this;
+		}
+
+		Vector getTruncated( PRECISION m ) const 
+		{
+			auto i = ( crimild::Real64 ) m / getMagnitude();
+			i = i < 1.0 ? i : 1.0;
+			return *this * i;
+		}
+
 		template< typename U >
 		friend Vector< SIZE, U > operator-( const Vector< SIZE, U > &u );
 

@@ -25,22 +25,23 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "LuaExecuteBehaviorOnTargetBuilder.hpp"
+#ifndef CRIMILD_SCRIPTING_BUILDER_COMPONENTS_BEHAVIORS_ACTIONS_EXECUTE_BEHAVIOR
+#define CRIMILD_SCRIPTING_BUILDER_COMPONENTS_BEHAVIORS_ACTIONS_EXECUTE_BEHAVIOR
 
-#include "SceneGraph/LuaSceneBuilder.hpp"
+#include "Foundation/Scripted.hpp"
 
-using namespace crimild;
-using namespace crimild::behaviors::actions;
-using namespace crimild::scripting;
+namespace crimild {
 
-SharedPointer< ExecuteBehaviorOnTarget > LuaExecuteBehaviorOnTargetBuilder::build( ScriptEvaluator &eval )
-{
-	std::string behaviorName;
-	eval.getPropValue( "behaviorName", behaviorName );
+	namespace scripting {
+        
+		class LuaExecuteBehaviorBuilder {
+		public:
+			static SharedPointer< behaviors::actions::ExecuteBehavior > build( ScriptEvaluator &eval );
+		};
 
-	crimild::Bool overrideTarget = false;
-	eval.getPropValue( "overrideTarget", overrideTarget );
+	}
 
-	return crimild::alloc< ExecuteBehaviorOnTarget >( behaviorName, overrideTarget );
 }
+
+#endif
 

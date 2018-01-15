@@ -34,6 +34,7 @@ void BehaviorController::onDetach( void )
 void BehaviorController::start( void )
 {
 	registerMessageHandler< BehaviorEvent >( [this]( BehaviorEvent const &m ) {
+		/*
 		// retain the behavior
 		auto behavior = _behaviors[ m.name ];
 		if ( behavior == nullptr || crimild::get_ptr( behavior ) == getCurrentBehavior() ) {
@@ -47,6 +48,11 @@ void BehaviorController::start( void )
 			if ( getCurrentBehavior() != nullptr ) {
 				getCurrentBehavior()->init( &_context );
 			}
+		});
+		*/
+		auto eventName = m.name;
+		crimild::concurrency::sync_frame( [this, eventName] {
+			executeBehavior( eventName );
 		});
 	});
 
@@ -67,6 +73,7 @@ void BehaviorController::update( const Clock &c )
 
 	if ( getCurrentBehavior() == nullptr ) {
 		setCurrentBehavior( crimild::get_ptr( _behaviors[ DEFAULT_BEHAVIOR_NAME ] ) );
+		_currentEvent = DEFAULT_BEHAVIOR_NAME;
 	}
 
 	if ( getCurrentBehavior() != nullptr ) {
@@ -85,14 +92,21 @@ void BehaviorController::attachBehavior( std::string eventName, BehaviorPtr cons
 
 bool BehaviorController::executeBehavior( std::string eventName )
 {
-	auto behavior = _behaviors[ eventName ];
-	if ( behavior == nullptr ) {
-		Log::warning( CRIMILD_CURRENT_CLASS_NAME, "No behavior found for event ", eventName );
-		return false;
+	if ( eventName == _currentEvent ) {
+		// behavior already running
+		return true;
 	}
 	
+	auto behavior = _behaviors[ eventName ];
+	if ( behavior == nullptr ) {
+		//Log::warning( CRIMILD_CURRENT_CLASS_NAME, "No behavior found for event ", eventName );
+		return false;
+	}
+
 	setCurrentBehavior( crimild::get_ptr( behavior ) );
 	getCurrentBehavior()->init( &_context );
+	
+	_currentEvent = eventName;
 	
 	return true;
 }

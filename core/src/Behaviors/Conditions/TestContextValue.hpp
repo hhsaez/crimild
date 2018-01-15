@@ -48,7 +48,9 @@ namespace crimild {
 			private:
 				std::string _key;
 				std::string _value;
-				std::string _comparator;
+
+				using Comparator = std::function< crimild::Bool ( crimild::Real32, crimild::Real32 ) >;
+				Comparator _comparator;
 			};
 
 		}

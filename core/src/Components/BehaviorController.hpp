@@ -41,6 +41,8 @@ namespace crimild {
 		 */
 		bool executeBehavior( std::string name );
 
+		inline crimild::behaviors::Behavior *getBehavior( std::string name ) { return crimild::get_ptr( _behaviors[ name ] ); }
+
 	private:
 		crimild::behaviors::Behavior *getCurrentBehavior( void ) { return _currentBehavior; }
 		void setCurrentBehavior( crimild::behaviors::Behavior *behavior ) { _currentBehavior = behavior; }
@@ -48,6 +50,7 @@ namespace crimild {
 	private:
 		std::map< std::string, crimild::behaviors::BehaviorPtr > _behaviors;
 		crimild::behaviors::Behavior *_currentBehavior = nullptr;
+		std::string _currentEvent;
 		crimild::behaviors::BehaviorContext _context;
 	};
 

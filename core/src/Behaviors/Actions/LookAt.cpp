@@ -27,13 +27,19 @@ void LookAt::init( BehaviorContext *context )
 		
 Behavior::State LookAt::step( BehaviorContext *context )
 {
-	context->getAgent()->local().lookAt( _target );
-	
-	_clock += context->getClock();
-	if ( _clock.getAccumTime() >= _duration ) {
-		return Behavior::State::SUCCESS;
+	auto agent = context->getAgent();
+
+	if ( !context->hasTargets() ) {
+		Log::error( CRIMILD_CURRENT_CLASS_NAME, "Behavior requires at least one target" );
+		return Behavior::State::FAILURE;
 	}
+
+	auto target = context->getTargetAt( 0 );
+	auto dir = target->getLocal().getTranslate() - agent->getLocal().getTranslate();
+	dir[ 1 ] = 0.0f;
+	dir.normalize();
+	agent->local().setRotate( Quaternion4f::createFromDirection( dir ) );
 	
-	return Behavior::State::RUNNING;
+	return Behavior::State::SUCCESS;
 }
 

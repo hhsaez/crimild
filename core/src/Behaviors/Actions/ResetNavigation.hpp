@@ -25,22 +25,35 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "LuaExecuteBehaviorOnTargetBuilder.hpp"
+#ifndef CRIMILD_CORE_BEHAVIORS_ACTIONS_RESET_NAVIGATION_
+#define CRIMILD_CORE_BEHAVIORS_ACTIONS_RESET_NAVIGATION_
 
-#include "SceneGraph/LuaSceneBuilder.hpp"
+#include "Behaviors/Behavior.hpp"
 
-using namespace crimild;
-using namespace crimild::behaviors::actions;
-using namespace crimild::scripting;
+namespace crimild {
 
-SharedPointer< ExecuteBehaviorOnTarget > LuaExecuteBehaviorOnTargetBuilder::build( ScriptEvaluator &eval )
-{
-	std::string behaviorName;
-	eval.getPropValue( "behaviorName", behaviorName );
+	namespace behaviors {
 
-	crimild::Bool overrideTarget = false;
-	eval.getPropValue( "overrideTarget", overrideTarget );
+		namespace actions {
 
-	return crimild::alloc< ExecuteBehaviorOnTarget >( behaviorName, overrideTarget );
+			/**
+			   \brief Updates navigation to current position
+			 */
+			class ResetNavigation : public Behavior {
+				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::ResetNavigation )
+				
+			public:
+				explicit ResetNavigation( void );
+				virtual ~ResetNavigation( void );
+				
+				virtual Behavior::State step( BehaviorContext *context ) override;
+			};
+
+		}
+
+	}
+
 }
+
+#endif
 

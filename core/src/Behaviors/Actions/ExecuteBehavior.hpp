@@ -25,22 +25,40 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "LuaExecuteBehaviorOnTargetBuilder.hpp"
+#ifndef CRIMILD_CORE_BEHAVIORS_ACTIONS_EXECUTE_BEHAVIOR_
+#define CRIMILD_CORE_BEHAVIORS_ACTIONS_EXECUTE_BEHAVIOR_
 
-#include "SceneGraph/LuaSceneBuilder.hpp"
+#include "Behaviors/Behavior.hpp"
 
-using namespace crimild;
-using namespace crimild::behaviors::actions;
-using namespace crimild::scripting;
+namespace crimild {
 
-SharedPointer< ExecuteBehaviorOnTarget > LuaExecuteBehaviorOnTargetBuilder::build( ScriptEvaluator &eval )
-{
-	std::string behaviorName;
-	eval.getPropValue( "behaviorName", behaviorName );
+	namespace behaviors {
 
-	crimild::Bool overrideTarget = false;
-	eval.getPropValue( "overrideTarget", overrideTarget );
+		namespace actions {
 
-	return crimild::alloc< ExecuteBehaviorOnTarget >( behaviorName, overrideTarget );
+			/**
+				\brief Attempts to execute a behavior on the target
+			*/
+			class ExecuteBehavior : public Behavior {
+				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::ExecuteBehavior )
+				
+			public:
+				explicit ExecuteBehavior( std::string behaviorName );
+				virtual ~ExecuteBehavior( void );
+
+				virtual void init( BehaviorContext *context ) override;
+				virtual Behavior::State step( BehaviorContext *context ) override;
+
+			private:
+				std::string _behaviorName;
+				SharedPointer< Behavior > _behavior;
+			};
+
+		}
+
+	}
+	
 }
+
+#endif
 

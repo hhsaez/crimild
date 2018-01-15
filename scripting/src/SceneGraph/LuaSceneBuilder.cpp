@@ -39,12 +39,15 @@
 #include "SceneGraph/Builders/Behaviors/Actions/LuaAnimateParticleSystemBuilder.hpp"
 #include "SceneGraph/Builders/Behaviors/Actions/LuaAnimateSettingValueBuilder.hpp"
 #include "SceneGraph/Builders/Behaviors/Actions/LuaClearTargetsBuilder.hpp"
+#include "SceneGraph/Builders/Behaviors/Actions/LuaCopyTransformFromTargetBuilder.hpp"
 #include "SceneGraph/Builders/Behaviors/Actions/LuaEnableNodeBuilder.hpp"
+#include "SceneGraph/Builders/Behaviors/Actions/LuaExecuteBehaviorBuilder.hpp"
 #include "SceneGraph/Builders/Behaviors/Actions/LuaExecuteBehaviorOnTargetBuilder.hpp"
 #include "SceneGraph/Builders/Behaviors/Actions/LuaFindTargetBuilder.hpp"
 #include "SceneGraph/Builders/Behaviors/Actions/LuaLoadSceneBuilder.hpp"
 #include "SceneGraph/Builders/Behaviors/Actions/LuaLookAtBuilder.hpp"
 #include "SceneGraph/Builders/Behaviors/Actions/LuaPrintMessageBuilder.hpp"
+#include "SceneGraph/Builders/Behaviors/Actions/LuaResetNavigationBuilder.hpp"
 #include "SceneGraph/Builders/Behaviors/Actions/LuaSetContextValueBuilder.hpp"
 #include "SceneGraph/Builders/Behaviors/Actions/LuaSetSettingValueBuilder.hpp"
 #include "SceneGraph/Builders/Behaviors/Actions/LuaSuccessBuilder.hpp"
@@ -56,6 +59,7 @@
 #include "SceneGraph/Builders/Behaviors/Composites/LuaSequenceBuilder.hpp"
 #include "SceneGraph/Builders/Behaviors/Conditions/LuaDistanceToTargetBuilder.hpp"
 #include "SceneGraph/Builders/Behaviors/Conditions/LuaHasTargetsBuilder.hpp"
+#include "SceneGraph/Builders/Behaviors/Conditions/LuaIsAtTargetBuilder.hpp"
 #include "SceneGraph/Builders/Behaviors/Conditions/LuaTestContextValueBuilder.hpp"
 #include "SceneGraph/Builders/Behaviors/Conditions/LuaTestInputAxisBuilder.hpp"
 #include "SceneGraph/Builders/Behaviors/Conditions/LuaTestSettingValueBuilder.hpp"
@@ -130,6 +134,12 @@ using namespace crimild::scripting;
 #define PHYSICS_MESH_COLLIDER_TYPE "crimild::physics::MeshCollider"
 #define PHYSICS_CAPSULE_COLLIDER_TYPE "crimild::physics::CapsuleCollider"
 #define PHYSICS_CONVEX_HULL_COLLIDER_TYPE "crimild::physics::ConvexHullCollider"
+
+#define CRIMILD_SCRIPTING_REGISTER_DEFAULT_BUILDER( X ) \
+		crimild::scripting::LuaObjectBuilderRegistry::getInstance()->registerCustomBuilder( \
+			#X,\
+			[]( ScriptEvaluator const & ) -> SharedPointer< X > { return crimild::alloc< X >(); } \
+			);
 
 LuaNodeBuilderRegistry::LuaNodeBuilderRegistry( void )
 {
@@ -250,11 +260,20 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::behaviors::actions::AnimateParticleSystem, LuaAnimateParticleSystemBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::behaviors::actions::AnimateSettingValue, LuaAnimateSettingValueBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::behaviors::actions::ClearTargets, LuaClearTargetsBuilder::build );
+	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::behaviors::actions::CopyTransformFromTarget, LuaCopyTransformFromTargetBuilder::build );
+	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::behaviors::actions::ResetNavigation, LuaResetNavigationBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::behaviors::actions::EnableNode, LuaEnableNodeBuilder::build );
+	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::behaviors::actions::ExecuteBehavior, LuaExecuteBehaviorBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::behaviors::actions::ExecuteBehaviorOnTarget, LuaExecuteBehaviorOnTargetBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::behaviors::actions::FindTarget, LuaFindTargetBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::behaviors::actions::LoadScene, LuaLoadSceneBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::behaviors::actions::LookAt, LuaLookAtBuilder::build );
+	CRIMILD_SCRIPTING_REGISTER_DEFAULT_BUILDER( crimild::behaviors::actions::MotionApply );
+	CRIMILD_SCRIPTING_REGISTER_DEFAULT_BUILDER( crimild::behaviors::actions::MotionAvoidOthers );
+	CRIMILD_SCRIPTING_REGISTER_DEFAULT_BUILDER( crimild::behaviors::actions::MotionAvoidWalls );
+	CRIMILD_SCRIPTING_REGISTER_DEFAULT_BUILDER( crimild::behaviors::actions::MotionComputePathToTarget );
+	CRIMILD_SCRIPTING_REGISTER_DEFAULT_BUILDER( crimild::behaviors::actions::MotionReset );
+	CRIMILD_SCRIPTING_REGISTER_DEFAULT_BUILDER( crimild::behaviors::actions::MotionSeek );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::behaviors::actions::PrintMessage, LuaPrintMessageBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::behaviors::actions::SetContextValue, LuaSetContextValueBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::behaviors::actions::SetSettingValue, LuaSetSettingValueBuilder::build );
@@ -267,6 +286,7 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::behaviors::composites::Sequence, LuaSequenceBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::behaviors::conditions::DistanceToTarget, LuaDistanceToTargetBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::behaviors::conditions::HasTargets, LuaHasTargetsBuilder::build );
+	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::behaviors::conditions::IsAtTarget, LuaIsAtTargetBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::behaviors::conditions::TestContextValue, LuaTestContextValueBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::behaviors::conditions::TestInputAxis, LuaTestInputAxisBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::behaviors::conditions::TestSettingValue, LuaTestSettingValueBuilder::build );

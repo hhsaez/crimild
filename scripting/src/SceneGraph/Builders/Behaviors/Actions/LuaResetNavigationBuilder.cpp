@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "LuaExecuteBehaviorOnTargetBuilder.hpp"
+#include "LuaResetNavigationBuilder.hpp"
 
 #include "SceneGraph/LuaSceneBuilder.hpp"
 
@@ -33,14 +33,8 @@ using namespace crimild;
 using namespace crimild::behaviors::actions;
 using namespace crimild::scripting;
 
-SharedPointer< ExecuteBehaviorOnTarget > LuaExecuteBehaviorOnTargetBuilder::build( ScriptEvaluator &eval )
+SharedPointer< ResetNavigation > LuaResetNavigationBuilder::build( ScriptEvaluator &eval )
 {
-	std::string behaviorName;
-	eval.getPropValue( "behaviorName", behaviorName );
-
-	crimild::Bool overrideTarget = false;
-	eval.getPropValue( "overrideTarget", overrideTarget );
-
-	return crimild::alloc< ExecuteBehaviorOnTarget >( behaviorName, overrideTarget );
+	return crimild::alloc< ResetNavigation >();
 }
 

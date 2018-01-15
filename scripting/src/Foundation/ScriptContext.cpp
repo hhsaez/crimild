@@ -50,7 +50,7 @@ bool ScriptEvaluator::foreach( const std::string &name, std::function< void( Scr
 }
 
 ScriptContext::ScriptContext( void )
-	: ScriptContext( false )
+	: ScriptContext( true )
 {
 	reset();
 }
@@ -107,6 +107,7 @@ bool ScriptContext::load( std::string fileName, bool supportCoroutines )
         std::string reason = lua_tostring( _state, -1 );
 #if CRIMILD_SCRIPTING_LOG_VERBOSE
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot execute script in file ", fileName, "\n\tReason: ", reason );
+		parse( "debug.traceback()" ); // prints stack trace
 #endif
 	    return false;
 	}
@@ -120,6 +121,7 @@ bool ScriptContext::parse( std::string text )
         std::string reason = lua_tostring( _state, -1 );
 #if CRIMILD_SCRIPTING_LOG_VERBOSE
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot parse string \"", text, "\"", "\n\tReason: ", reason );
+		parse( "debug.traceback()" ); // prints stack trace
 #endif
 	    return false;
 	}

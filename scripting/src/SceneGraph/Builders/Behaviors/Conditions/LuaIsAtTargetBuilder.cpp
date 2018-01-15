@@ -25,22 +25,19 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "LuaExecuteBehaviorOnTargetBuilder.hpp"
+#include "LuaIsAtTargetBuilder.hpp"
 
 #include "SceneGraph/LuaSceneBuilder.hpp"
 
 using namespace crimild;
-using namespace crimild::behaviors::actions;
+using namespace crimild::behaviors::conditions;
 using namespace crimild::scripting;
 
-SharedPointer< ExecuteBehaviorOnTarget > LuaExecuteBehaviorOnTargetBuilder::build( ScriptEvaluator &eval )
+SharedPointer< IsAtTarget > LuaIsAtTargetBuilder::build( ScriptEvaluator &eval )
 {
-	std::string behaviorName;
-	eval.getPropValue( "behaviorName", behaviorName );
+	crimild::Real32 minDistance = 1;
+	eval.getPropValue( "minDistance", minDistance );
 
-	crimild::Bool overrideTarget = false;
-	eval.getPropValue( "overrideTarget", overrideTarget );
-
-	return crimild::alloc< ExecuteBehaviorOnTarget >( behaviorName, overrideTarget );
+	return crimild::alloc< IsAtTarget >( minDistance );
 }
 
