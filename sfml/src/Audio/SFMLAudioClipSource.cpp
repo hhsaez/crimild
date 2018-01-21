@@ -60,6 +60,15 @@ void SFMLAudioClipSource::stop( void )
 	_sound.stop();
 }
 
+crimild::Real32 SFMLAudioClipSource::getDuration( void ) const
+{
+	if ( _sound.getBuffer() == nullptr ) {
+		return 0.0f;
+	}
+	
+	return _sound.getBuffer()->getDuration().asSeconds();
+}
+
 void SFMLAudioClipSource::setLoop( crimild::Bool loop )
 {
 	_sound.setLoop( loop );

@@ -64,6 +64,8 @@ namespace crimild {
 	    	virtual void pause( void ) = 0;
 	    	virtual void stop( void ) = 0;
 
+			virtual crimild::Real32 getDuration( void ) const = 0;
+
 	    	virtual void setLoop( crimild::Bool loop ) = 0;
 	    	virtual crimild::Bool shouldLoop( void ) const = 0;
 

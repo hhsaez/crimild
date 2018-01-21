@@ -135,6 +135,7 @@
 #include "Components/RotationComponent.hpp"
 #include "Components/RenderStateComponent.hpp"
 #include "Components/UIResponder.hpp"
+#include "Components/SingleValueComponent.hpp"
 #include "Components/SkinnedMeshComponent.hpp"
 #include "Components/FreeLookCameraComponent.hpp"
 

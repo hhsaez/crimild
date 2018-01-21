@@ -45,6 +45,8 @@ namespace crimild {
 	        virtual void pause( void ) override;
 	        virtual void stop( void ) override;
 
+			virtual crimild::Real32 getDuration( void ) const override;
+
 	        virtual void setLoop( crimild::Bool ) override;
 	        virtual crimild::Bool shouldLoop( void ) const override;
 

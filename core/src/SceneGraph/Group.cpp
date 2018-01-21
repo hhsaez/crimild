@@ -108,7 +108,7 @@ Node *Group::getNode( std::string name )
 
 void Group::forEachNode( std::function< void( Node * ) > callback )
 {
-	return _nodes.forEach( [&callback]( Node *node ) { if ( node->isEnabled() ) callback( node ); } );
+	return _nodes.forEach( [&callback]( Node *node ) { if ( node != nullptr && node->isEnabled() ) callback( node ); } );
 }
 
 void Group::accept( NodeVisitor &visitor )

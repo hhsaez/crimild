@@ -58,6 +58,11 @@ void SFMLAudioMusicSource::stop( void )
 	_music.stop();
 }
 
+crimild::Real32 SFMLAudioMusicSource::getDuration( void ) const
+{
+	return _music.getDuration().asSeconds();
+}
+
 void SFMLAudioMusicSource::setLoop( crimild::Bool loop )
 {
 	_music.setLoop( loop );
