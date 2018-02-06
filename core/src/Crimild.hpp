@@ -54,6 +54,9 @@
 #include "Foundation/Singleton.hpp"
 #include "Foundation/Profiler.hpp"
 #include "Foundation/Version.hpp"
+#include "Foundation/Collections/Array.hpp"
+#include "Foundation/Collections/PriorityQueue.hpp"
+#include "Foundation/Policies/ThreadingPolicy.hpp"
 
 #include "Audio/AudioListener.hpp"
 #include "Audio/AudioManager.hpp"

@@ -61,6 +61,14 @@ void FileSystem::init( int argc, char **argv )
 	std::string base = "";
 	if ( argc > 0 ) {
 		base = extractDirectory( argv[ 0 ] );
+
+#if !defined( CRIMILD_PLATFORM_WIN32 )
+		// this is for relative paths only
+		if ( base.length() > 0 && base[ 0 ] != '/' ) {
+			base = "";
+		}
+#endif
+
 	}
     
     int pos = base.find( "/Debug" );
@@ -125,7 +133,7 @@ std::string FileSystem::getRelativePath( std::string absolutePath )
     if ( pos == 0 ) {
         return absolutePath.substr( _baseDirectory.length() + 1 );
     }
-    
+
     return absolutePath;
 }
 

@@ -37,9 +37,7 @@
 namespace crimild {
 
 	/**
-	   \todo Implement theading policy
-	   \todo Implement checking policy
-	   \todo Remove std::vector (too slow on debug)
+	   \deprecated Use crimild::collections::Array instead
 	 */
     template< typename VALUE_TYPE >
     class Array {
