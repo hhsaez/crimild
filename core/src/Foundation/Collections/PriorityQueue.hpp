@@ -107,7 +107,10 @@ namespace crimild {
 				_size = other._size;
 				_comparator = other._comparator;
 
-				memcpy( &_elems[ 0 ], &other._elems[ 0 ], sizeof( T ) * _capacity );
+                // invoke operator= on all elements (required for smart pointers)
+                for ( crimild::Size i = 0; i <= _size; i++ ) {
+                    _elems[ i ] = other._elems[ i ];
+                }
 			}
 			
 			virtual ~PriorityQueue( void )
@@ -123,7 +126,10 @@ namespace crimild {
 				_size = other._size;
 				_comparator = other._comparator;
 
-				memcpy( &_elems[ 0 ], &other._elems[ 0 ], sizeof( T ) * _capacity );
+                // invoke operator= on all elements (required for smart pointers)
+                for ( crimild::Size i = 0; i <= _size; i++ ) {
+                    _elems[ i ] = other._elems[ i ];
+                }
 
 				return *this;
 			}
@@ -137,8 +143,14 @@ namespace crimild {
 				if ( _size != other._size ) {
 					return false;
 				}
+                
+                for ( crimild::Size i = 0; i <= _size; i++ ) {
+                    if ( _elems[ i ] != other._elems[ i ] ) {
+                        return false;
+                    }
+                }
 
-				return memcmp( &_elems, &other._elems, sizeof( T ) * _size + 1 ) == 0;
+                return true;
 			}
 			
 			inline bool empty( void )
@@ -187,8 +199,6 @@ namespace crimild {
 			{
 				LockImpl lock( this );
 
-				crimild::Size i = 0;
-				
 				T x = _elems[ 1 ];
 				
 				swap_unsafe( 1, _size-- );
@@ -253,9 +263,8 @@ namespace crimild {
 
 			void resize_unsafe( crimild::Size capacity )
 			{
-				// TODO: replace make_unique with crimild::alloc_unique for arrays
 				auto elems = std::unique_ptr< T[] >( new T[ capacity ] );
-				for ( crimild::Size i = 0; i < _capacity; i++ ) {
+                for ( crimild::Size i = 0; i < std::min( _capacity, capacity ); i++ ) {
 					elems[ i ] = _elems[ i ];
 				}
 				_elems = std::move( elems );

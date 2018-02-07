@@ -30,6 +30,7 @@
 
 #include "Foundation/Types.hpp"
 #include "Foundation/Policies/ThreadingPolicy.hpp"
+#include "Mathematics/Numeric.hpp"
 
 #include <functional>
 #include <iostream>
@@ -81,13 +82,25 @@ namespace crimild {
 			Array( const Array &other )
 				: Array( other._size )
 			{
-				memcpy( &_elems[ 0 ], &other._elems[ 0 ], sizeof( T ) * _size );
+                for ( crimild::Size i = 0; i < _size; i++ ) {
+                    _elems[ i ] = other._elems[ i ];
+                }
 			}
 			
 			virtual ~Array( void )
 			{
 				
 			}
+            
+            Array &operator=( const Array &other )
+            {
+                LockImpl lock( this );
+                
+                resize_unsafe( other._capacity );
+                for ( crimild::Size i = 0; i < _size; i++ ) {
+                    _elems[ i ] = other._elems[ i ];
+                }
+            }
 
 			/**
 			   \brief Compare two arrays up to getSize() elements
@@ -97,8 +110,14 @@ namespace crimild {
 				if ( _size != other._size ) {
 					return false;
 				}
-
-				return memcmp( &_elems[ 0 ], &other._elems[ 0 ], sizeof( T ) * _size ) == 0;
+                
+                for ( crimild::Size i = 0; i < _size; i++ ) {
+                    if ( _elems[ i ] != other._elems[ i ] ) {
+                        return false;
+                    }
+                }
+                
+                return true;
 			}
 			
 			inline bool empty( void )
@@ -196,12 +215,11 @@ namespace crimild {
 			
 			void resize_unsafe( crimild::Size capacity )
 			{
-				_capacity = capacity;
-				// TODO: replace make_unique with crimild::alloc_unique for arrays
-				auto elems = std::unique_ptr< T[] >( new T[ _capacity ] );
-				if ( _size > 0 ) {
-					memcpy( &elems, &_elems, sizeof( T ) * _size );
-				}
+				auto elems = std::unique_ptr< T[] >( new T[ capacity ] );
+                for ( crimild::Size i = 0; i < Numeric< crimild::Size >::min( capacity, _capacity ); i++ ) {
+                    elems[ i ] = _elems[ i ];
+                }
+                _capacity = capacity;
 				_elems = std::move( elems );
 			}
 
