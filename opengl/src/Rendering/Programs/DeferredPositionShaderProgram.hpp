@@ -28,7 +28,7 @@
 #ifndef CRIMILD_OPENGL_SHADER_LIBRARY_DEFERRED_POSITION_
 #define CRIMILD_OPENGL_SHADER_LIBRARY_DEFERRED_POSITION_
 
-#include <Crimild.hpp>
+#include <Rendering/ShaderProgram.hpp>
 
 namespace crimild {
     

@@ -28,9 +28,11 @@
 #ifndef CRIMILD_OPENGL_TEXTURE_CATALOG_
 #define CRIMILD_OPENGL_TEXTURE_CATALOG_
 
-#include <Crimild.hpp>
+#include <Rendering/Catalog.hpp>
 
 namespace crimild {
+    
+    class Texture;
 
 	namespace opengl {
 

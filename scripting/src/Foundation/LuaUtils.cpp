@@ -27,6 +27,12 @@
 
 #include "LuaUtils.hpp"
 
+#include <Foundation/Macros.hpp>
+#include <Foundation/Types.hpp>
+#include <Foundation/Log.hpp>
+
+#include <sstream>
+
 using namespace crimild;
 using namespace crimild::scripting;
 

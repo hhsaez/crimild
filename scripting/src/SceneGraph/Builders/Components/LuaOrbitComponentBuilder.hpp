@@ -30,6 +30,8 @@
 
 #include "Foundation/Scripted.hpp"
 
+#include <Components/OrbitComponent.hpp>
+
 namespace crimild {
 
 	namespace scripting {

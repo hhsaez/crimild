@@ -1,7 +1,7 @@
 #ifndef CRIMILD_RAYTRACING_RENDERING_MATERIAL_
 #define CRIMILD_RAYTRACING_RENDERING_MATERIAL_
 
-#include <Crimild.hpp>
+#include "Components/NodeComponent.hpp"
 
 namespace crimild {
 

@@ -28,7 +28,7 @@
 #ifndef CRIMILD_OPENGL_PROGRAMS_BLEND_
 #define CRIMILD_OPENGL_PROGRAMS_BLEND_
 
-#include <Crimild.hpp>
+#include <Rendering/ShaderProgram.hpp>
 
 namespace crimild {
     

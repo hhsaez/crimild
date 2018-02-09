@@ -28,7 +28,7 @@
 #ifndef CRIMILD_OPENGL_PROGRAMS_UNLIT_VERTEX_COLOR_
 #define CRIMILD_OPENGL_PROGRAMS_UNLIT_VERTEX_COLOR_
 
-#include <Crimild.hpp>
+#include <Rendering/ShaderProgram.hpp>
 
 namespace crimild {
 

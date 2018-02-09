@@ -48,7 +48,6 @@ namespace crimild {
 				
 			private:
 				crimild::Vector3f _target;
-				crimild::Real32 _duration;
 				crimild::Clock _clock;
 			};
 

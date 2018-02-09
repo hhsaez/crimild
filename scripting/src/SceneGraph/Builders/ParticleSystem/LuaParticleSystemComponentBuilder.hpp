@@ -30,6 +30,8 @@
 
 #include "Foundation/Scripted.hpp"
 
+#include <ParticleSystem/ParticleSystemComponent.hpp>
+
 namespace crimild {
 
 	namespace scripting {

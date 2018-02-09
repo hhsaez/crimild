@@ -27,6 +27,8 @@
 
 #include "ScriptContext.hpp"
 
+#include <Simulation/FileSystem.hpp>
+
 #include <sstream>
 
 using namespace crimild;

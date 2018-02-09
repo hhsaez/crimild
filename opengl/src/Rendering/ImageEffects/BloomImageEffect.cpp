@@ -29,6 +29,10 @@
 
 #include "Rendering/OpenGLUtils.hpp"
 
+#include <Rendering/Renderer.hpp>
+#include <Rendering/RenderPasses/RenderPass.hpp>
+#include <Rendering/FrameBufferObject.hpp>
+
 using namespace crimild;
 using namespace crimild::opengl;
 

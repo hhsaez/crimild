@@ -28,6 +28,8 @@
 #include "IndexBufferObjectCatalog.hpp"
 #include "Rendering/OpenGLUtils.hpp"
 
+#include <Rendering/IndexBufferObject.hpp>
+
 using namespace crimild;
 using namespace crimild::opengl;
 

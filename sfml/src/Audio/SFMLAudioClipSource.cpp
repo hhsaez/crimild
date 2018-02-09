@@ -27,6 +27,8 @@
 
 #include "SFMLAudioClipSource.hpp"
 
+#include "Exceptions/FileNotFoundException.hpp"
+
 using namespace crimild;
 using namespace crimild::audio;
 using namespace crimild::sfml;

@@ -28,9 +28,9 @@
 #ifndef CRIMILD_OPENGL_RENDERER_
 #define CRIMILD_OPENGL_RENDERER_
 
-#include <Crimild.hpp>
-
 #include "OpenGLUtils.hpp"
+
+#include <Rendering/Renderer.hpp>
 
 namespace crimild {
 

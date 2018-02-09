@@ -27,6 +27,8 @@
 
 #include "OpenGLUtils.hpp"
 
+#include <Foundation/Log.hpp>
+
 #include <sstream>
 
 using namespace crimild;

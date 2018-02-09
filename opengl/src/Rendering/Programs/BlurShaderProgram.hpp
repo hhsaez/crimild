@@ -28,7 +28,7 @@
 #ifndef CRIMILD_GL3_SHADER_LIBRARY_BLUR_
 #define CRIMILD_GL3_SHADER_LIBRARY_BLUR_
 
-#include <Crimild.hpp>
+#include <Rendering/ShaderProgram.hpp>
 
 namespace crimild {
     

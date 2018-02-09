@@ -1,5 +1,11 @@
 #include "WindowSystem.hpp"
 
+#include <Concurrency/Async.hpp>
+#include <Foundation/Profiler.hpp>
+#include <Simulation/Simulation.hpp>
+#include <Simulation/Systems/RenderSystem.hpp>
+#include <Rendering/FrameBufferObject.hpp>
+
 using namespace crimild;
 
 WindowSystem::WindowSystem( void )

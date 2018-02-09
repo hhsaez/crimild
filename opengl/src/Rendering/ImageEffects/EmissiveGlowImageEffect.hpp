@@ -28,7 +28,7 @@
 #ifndef CRIMILD_GL3_RENDERING_IMAGE_EMISSIVE_EFFECT_GLOW_
 #define CRIMILD_GL3_RENDERING_IMAGE_EMISSIVE_EFFECT_GLOW_
 
-#include <Crimild.hpp>
+#include <Rendering/ImageEffects/ImageEffect.hpp>
 
 namespace crimild {
     

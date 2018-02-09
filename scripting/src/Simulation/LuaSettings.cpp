@@ -28,6 +28,8 @@
 #include "LuaSettings.hpp"
 #include "Foundation/ScriptContext.hpp"
 
+#include <Simulation/FileSystem.hpp>
+
 using namespace crimild;
 using namespace crimild::scripting;
 

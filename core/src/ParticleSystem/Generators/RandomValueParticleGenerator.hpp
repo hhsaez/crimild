@@ -30,6 +30,8 @@
 
 #include "../ParticleSystemComponent.hpp"
 
+#include <Mathematics/Random.hpp>
+
 namespace crimild {
 
 	template< typename T >

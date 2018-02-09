@@ -29,6 +29,10 @@
 
 #include "Rendering/OpenGLUtils.hpp"
 
+#include <Foundation/Log.hpp>
+#include <Rendering/Texture.hpp>
+#include <Rendering/ShaderLocation.hpp>
+
 // TODO: this will cause visual artifacts in some platforms. use with care
 #ifndef GL_BGR
     #define GL_BGR GL_RGB

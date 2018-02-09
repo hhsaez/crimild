@@ -103,12 +103,12 @@ namespace crimild {
 			template< typename T >
 			T getValue( std::string key )
 			{
-				T value;
 				if ( !hasValue( key ) ) {
 					crimild::Log::warning( CRIMILD_CURRENT_CLASS_NAME, "No context value set for key ", key );
-					return value;
+                    return T();
 				}
-				
+
+                T value;
 				std::stringstream ss;
 				ss << _values[ key ];
 				ss >> value;

@@ -1,6 +1,11 @@
 #include "InputSystem.hpp"
 #include "WindowSystem.hpp"
 
+#include <Concurrency/Async.hpp>
+#include <Foundation/Profiler.hpp>
+#include <Simulation/Input.hpp>
+#include <Simulation/Console/Console.hpp>
+
 using namespace crimild;
 
 InputSystem::InputSystem( void )

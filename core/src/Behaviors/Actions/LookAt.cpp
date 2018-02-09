@@ -7,8 +7,7 @@ using namespace crimild::behaviors;
 using namespace crimild::behaviors::actions;
 
 LookAt::LookAt( const Vector3f &target, crimild::Real32 duration )
-	: _target( target ),
-	  _duration( duration )
+	: _target( target )
 {
 
 }

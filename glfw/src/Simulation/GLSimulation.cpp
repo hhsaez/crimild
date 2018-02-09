@@ -30,19 +30,20 @@
 #include "Systems/WindowSystem.hpp"
 #include "Systems/InputSystem.hpp"
 
-#include <Crimild_OpenGL.hpp>
+#include <Exceptions/RuntimeException.hpp>
+#include <Rendering/OpenGLRenderer.hpp>
 
 using namespace crimild;
 using namespace crimild::concurrency;
 
 #ifdef CRIMILD_ENABLE_PHYSICS
-#include <Crimild_Physics.hpp>
+#include <Simulation/Systems/PhysicsSystem.hpp>
 
 using namespace crimild::physics;
 #endif
 
 #ifdef CRIMILD_ENABLE_SFML
-#include <Crimild_SFML.hpp>
+#include <Audio/SFMLAudioManager.hpp>
 #endif
 
 GLSimulation::GLSimulation( std::string name, SettingsPtr const &settings )

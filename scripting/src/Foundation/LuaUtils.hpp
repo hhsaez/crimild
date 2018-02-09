@@ -28,7 +28,9 @@
 #ifndef CRIMILD_SCRIPTING_FOUNDATION_LUA_UTILS_
 #define CRIMILD_SCRIPTING_FOUNDATION_LUA_UTILS_
 
-#include <Crimild.hpp>
+#include <string>
+#include <tuple>
+#include <functional>
 
 extern "C" {
 	#include <lua.h>

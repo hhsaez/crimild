@@ -28,7 +28,9 @@
 #ifndef CRIMILD_GL3_RENDERING_IMAGE_EFFECT_DEPTH_OF_FIELD_
 #define CRIMILD_GL3_RENDERING_IMAGE_EFFECT_DEPTH_OF_FIELD_
 
-#include <Crimild.hpp>
+#include <Rendering/ImageEffects/ImageEffect.hpp>
+#include <Rendering/ShaderProgram.hpp>
+#include <Rendering/ShaderUniformImpl.hpp>
 
 namespace crimild {
     

@@ -26,8 +26,10 @@
  */
 
 #include "ShaderProgramCatalog.hpp"
-
 #include "Rendering/OpenGLUtils.hpp"
+
+#include <Foundation/Log.hpp>
+#include <Rendering/ShaderProgram.hpp>
 
 using namespace crimild;
 using namespace crimild::opengl;

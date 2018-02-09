@@ -28,9 +28,12 @@
 #ifndef CRIMILD_GL3_RENDERING_IMAGE_EFFECT_SSAO_
 #define CRIMILD_GL3_RENDERING_IMAGE_EFFECT_SSAO_
 
-#include <Crimild.hpp>
+#include <Rendering/ImageEffects/ImageEffect.hpp>
+#include <Mathematics/Vector.hpp>
 
 namespace crimild {
+    
+    class AlphaState;
     
     namespace opengl {
     

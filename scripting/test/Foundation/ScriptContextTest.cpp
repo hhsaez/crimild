@@ -27,6 +27,8 @@
 
 #include "Foundation/ScriptContext.hpp"
 
+#include <Simulation/FileSystem.hpp>
+
 #include "gtest/gtest.h"
 
 using namespace crimild;

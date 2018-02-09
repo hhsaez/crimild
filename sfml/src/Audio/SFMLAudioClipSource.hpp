@@ -28,7 +28,7 @@
 #ifndef CRIMILD_SFML_AUDIO_CLIP_SOURCE_
 #define CRIMILD_SFML_AUDIO_CLIP_SOURCE_
 
-#include <Crimild.hpp>
+#include "Audio/AudioSource.hpp"
 
 #include <SFML/Audio.hpp>
 

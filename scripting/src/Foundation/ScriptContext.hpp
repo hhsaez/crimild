@@ -30,10 +30,12 @@
 
 #include "Function.hpp"
 
-#include <Crimild.hpp>
+#include <Foundation/Log.hpp>
+#include <Mathematics/Transformation.hpp>
 
 #include <string>
 #include <tuple>
+#include <map>
 
 #ifndef CRIMILD_SCRIPTING_LOG_VERBOSE
 #define CRIMILD_SCRIPTING_LOG_VERBOSE 0

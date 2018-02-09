@@ -27,6 +27,8 @@
 
 #include "LuaSerializer.hpp"
 
+#include <Foundation/StringUtils.hpp>
+
 using namespace crimild;
 using namespace crimild::scripting;
 
