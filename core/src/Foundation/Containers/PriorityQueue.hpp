@@ -25,8 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_FOUNDATION_COLLECTIONS_ARRAY_
-#define CRIMILD_FOUNDATION_COLLECTIONS_ARRAY_
+#ifndef CRIMILD_FOUNDATION_CONTAINERS_PRIORITY_QUEUE_
+#define CRIMILD_FOUNDATION_CONTAINERS_PRIORITY_QUEUE_
 
 #include "Foundation/Types.hpp"
 #include "Foundation/Policies/ThreadingPolicy.hpp"
@@ -37,10 +37,13 @@
 
 namespace crimild {
 
-	namespace collections {
+	namespace containers {
 
 		/**
-		   \brief A resizable array implementation
+		   \brief A priority queue
+
+		   This implementation is based on the one appearing in the
+		   book Algorithms 4th Edition
 		   
 		   \todo Implement index bound checking policy
 		   \todo Implement parallel policy
@@ -49,141 +52,179 @@ namespace crimild {
 		    typename T,
 		    class ThreadingPolicy = policies::SingleThreaded
 		>
-		class Array : public ThreadingPolicy {
+		class PriorityQueue : public ThreadingPolicy {
 		private:
 			using LockImpl = typename ThreadingPolicy::Lock;
-			
+
 		public:
 			using TraverseCallback = std::function< void( T &, crimild::Size ) >;
 			using ConstTraverseCallback = std::function< void( const T &, crimild::Size ) >;
+			using Comparator = std::function< crimild::Bool( const T& a, const T &b ) >;
 			
 		public:
-			Array( void )
+			PriorityQueue( void )
+				: PriorityQueue( 1 )
 			{
 				
 			}
 			
-			explicit Array( crimild::Size size )
+			explicit PriorityQueue( crimild::Size capacity )
 			{
-				resize( size );
+				resize_unsafe( 1 + capacity );
 				
-				_size = _capacity;
+				_comparator = []( const T &a, const T &b ) { return a > b; }; // greater
 			}
 
-			Array( std::initializer_list< T > l )
-				: Array( l.size() )
+			explicit PriorityQueue( crimild::Size capacity, Comparator comparator )
+				: PriorityQueue( capacity )
 			{
-				crimild::Size i = 0;
-				for ( auto e : l ) {
-					_elems[ i++ ] = e;
+				if ( comparator != nullptr ) {
+					_comparator = comparator;
 				}
 			}
 
-			Array( const Array &other )
-				: Array( other._size )
+			explicit PriorityQueue( Comparator comparator )
+				: PriorityQueue( 1, comparator )
 			{
-                for ( crimild::Size i = 0; i < _size; i++ ) {
+
+			}
+
+			PriorityQueue( std::initializer_list< T > keys )
+				: PriorityQueue( keys.size() )
+			{
+				crimild::Size i = 0;
+				for ( auto k : keys ) {
+					_elems[ i + 1 ] = k;
+				}
+				for ( crimild::Size k = _size / 2; k >= 1; k-- ) {
+					sink( k );
+				}
+			}
+
+			PriorityQueue( const PriorityQueue &other )
+			{
+				resize_unsafe( other._capacity );
+				_size = other._size;
+				_comparator = other._comparator;
+
+                // invoke operator= on all elements (required for smart pointers)
+                for ( crimild::Size i = 0; i <= _size; i++ ) {
                     _elems[ i ] = other._elems[ i ];
                 }
 			}
 			
-			virtual ~Array( void )
+			virtual ~PriorityQueue( void )
 			{
 				
 			}
-            
-            Array &operator=( const Array &other )
-            {
-                LockImpl lock( this );
-                
-                resize_unsafe( other._capacity );
-                for ( crimild::Size i = 0; i < _size; i++ ) {
+
+			PriorityQueue &operator=( const PriorityQueue &other )
+			{
+				LockImpl lock( this );
+
+				resize_unsafe( other._capacity );
+				_size = other._size;
+				_comparator = other._comparator;
+
+                // invoke operator= on all elements (required for smart pointers)
+                for ( crimild::Size i = 0; i <= _size; i++ ) {
                     _elems[ i ] = other._elems[ i ];
                 }
-            }
+
+				return *this;
+			}
 
 			/**
-			   \brief Compare two arrays up to getSize() elements
+			   \brief Compare two priority queues up to size() elements
 			 */
-			bool operator==( const Array &other ) const
+			bool operator==( const PriorityQueue &other ) const
 			{
+				LockImpl lock( this );
 				if ( _size != other._size ) {
 					return false;
 				}
                 
-                for ( crimild::Size i = 0; i < _size; i++ ) {
+                for ( crimild::Size i = 0; i <= _size; i++ ) {
                     if ( _elems[ i ] != other._elems[ i ] ) {
                         return false;
                     }
                 }
-                
+
                 return true;
 			}
 			
 			inline bool empty( void )
 			{
 				LockImpl lock( this );
+				
 				return size_unsafe() == 0;
 			}
 			
 			inline crimild::Size size( void )
 			{
 				LockImpl lock( this );
+				
 				return size_unsafe();
 			}
-			
-			inline T &operator[]( crimild::Size index )
-			{
-				LockImpl lock( this );
-				return _elems[ index ];
-			}
-			
-			inline const T &operator[]( crimild::Size index ) const
-			{
-				LockImpl lock( this );
-				return _elems[ index ];
-			}
-			
-			void add( T const &elem )
-			{
-				LockImpl lock( this );
-				if ( _size == _capacity ) {
-					resize_unsafe( 2 * _size );
-				}
 
-				_elems[ _size++ ] = elem;
-			}
-			
-			void remove( const T &elem )
+			T &front( void )
 			{
 				LockImpl lock( this );
 
-				crimild::Size i = 0;
-				
-				while ( i < _size && _elems[ i ] != elem ) {
-					i++;
-				}
-				
-				if ( i < _size ) {
-					removeAt_unsafe( i );
-				}
+				// TODO: index bound check				
+				return _elems[ 1 ];
 			}
-			
-			void removeAt( crimild::Size index )
+
+			const T &front( void ) const
 			{
 				LockImpl lock( this );
-				removeAt_unsafe( index );
+				
+				// TODO: index bound check
+				return _elems[ 1 ];
+			}
+			
+			void enqueue( T const &elem )
+			{
+				LockImpl lock( this );
+
+				if ( _size == _capacity - 1 ) {
+					resize_unsafe( 2 * _capacity );
+				}
+
+				_elems[ ++_size ] = elem;
+				swim( _size );
+			}
+			
+			T dequeue( void )
+			{
+				LockImpl lock( this );
+
+				T x = _elems[ 1 ];
+				
+				swap_unsafe( 1, _size-- );
+				sink( 1 );
+
+				_elems[ _size + 1 ] = T(); // avoid loitering
+				
+				if ( _size > 0 && ( _size == ( _capacity - 1 ) / 4 ) ) {
+					resize_unsafe( _capacity / 2 );
+				}
+
+				return x;
 			}
 			
 			void swap( crimild::Size i, crimild::Size j )
 			{
 				LockImpl lock( this );
+
+				// todo check boundaries
 				swap_unsafe( i, j );
 			}
 			
 			void resize( crimild::Size capacity )
 			{
 				LockImpl lock( this );
+
 				resize_unsafe( capacity );
 			}
 
@@ -193,7 +234,7 @@ namespace crimild {
 
 				// implement a policy to traverse the array by creating a copy if needed
 				for ( crimild::Size i = 0; i < _size; i++ ) {
-					callback( _elems[ i ], i );
+					callback( _elems[ i + 1 ], i );
 				}
 			}
 
@@ -203,7 +244,7 @@ namespace crimild {
 
 				// implement a policy to traverse the array by creating a copy if needed
 				for ( crimild::Size i = 0; i < _size; i++ ) {
-					callback( _elems[ i ], i );
+					callback( _elems[ i + 1 ], i );
 				}
 			}
 
@@ -213,41 +254,59 @@ namespace crimild {
 				return _size;
 			}
 			
-			void resize_unsafe( crimild::Size capacity )
-			{
-				auto elems = std::unique_ptr< T[] >( new T[ capacity ] );
-                for ( crimild::Size i = 0; i < Numeric< crimild::Size >::min( capacity, _capacity ); i++ ) {
-                    elems[ i ] = _elems[ i ];
-                }
-                _capacity = capacity;
-				_elems = std::move( elems );
-			}
-
 			void swap_unsafe( crimild::Size i, crimild::Size j )
 			{
 				auto t = _elems[ i ];
 				_elems[ i ] = _elems[ j ];
 				_elems[ j ] = t;
 			}
-			
-			void removeAt_unsafe( crimild::Size index )
+
+			void resize_unsafe( crimild::Size capacity )
 			{
-				for ( crimild::Size i = index; i < _size - 1; i++ ) {
-					_elems[ i ] = _elems[ i + 1 ];
+				auto elems = std::unique_ptr< T[] >( new T[ capacity ] );
+                for ( crimild::Size i = 0; i < std::min( _capacity, capacity ); i++ ) {
+					elems[ i ] = _elems[ i ];
 				}
-				_elems[ _size - 1 ] = T(); // avoid loitering
-				--_size;
-				
-				if ( _size > 0 && _size == _capacity / 4 ) {
-					// resize the array if needed
-					resize_unsafe( _size / 2 );
-				}			
+				_elems = std::move( elems );
+				_capacity = capacity;
 			}
-			
+
+			void swim( crimild::Size k )
+			{
+				while ( k > 1 && greater( k / 2, k ) ) {
+					swap_unsafe( k, k / 2 );
+					k = k / 2;
+				}
+			}
+
+			void sink( crimild::Size k )
+			{
+				while ( 2 * k <= _size ) {
+					auto j = 2 * k;
+					if ( j < _size && greater( j, j + 1 ) ) {
+						j++;
+					}
+					if ( !greater( k, j ) ) {
+						break;
+					}
+					swap_unsafe( k, j );
+					k = j;
+				}
+			}
+
+			bool greater( crimild::Size i, crimild::Size j )
+			{
+				if ( _comparator == nullptr ) {
+					return _elems[ i ] > _elems[ j ];
+				}
+				return _comparator( _elems[ i ], _elems[ j ] );
+			}
+
 		private:
 			std::unique_ptr< T[] > _elems;
 			crimild::Size _size = 0;
 			crimild::Size _capacity = 0;
+			Comparator _comparator;
 		};
 		
 	}
@@ -258,10 +317,10 @@ template<
     typename T,
     class TP
 >
-std::ostream& operator<<( std::ostream& os, const crimild::collections::Array< T, TP > &array )  
+std::ostream& operator<<( std::ostream& os, const crimild::containers::PriorityQueue< T, TP > &pq )  
 {  
 	os << "[";
-	array.each( [&os]( const T &a, crimild::Size i ) {
+	pq.each( [&os]( const T &a, crimild::Size i ) {
 		os << ( i == 0 ? "" : ", " ) << a;
 	});
 	os << "]";

@@ -49,8 +49,12 @@ namespace crimild {
         
         class ScriptEvaluator {
         public:
+            ScriptEvaluator( void );
             ScriptEvaluator( ScriptContext *ctx, std::string prefix = "" );
+            ScriptEvaluator( const ScriptEvaluator &other );
             ~ScriptEvaluator( void );
+            
+            ScriptEvaluator &operator=( const ScriptEvaluator &other );
             
             const std::string &getPrefix( void ) const { return _prefix; }
             void setPrefix( std::string prefix ) { _prefix = prefix; }
@@ -101,7 +105,6 @@ namespace crimild {
             
             bool foreach( const std::string &name, std::function< void( ScriptEvaluator &, int ) > callback );
             
-        private:
             inline std::string expandExpression( std::string expr )
             {
                 if ( _prefix == "" ) {

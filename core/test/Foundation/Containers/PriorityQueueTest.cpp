@@ -25,12 +25,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Foundation/Collections/PriorityQueue.hpp"
+#include "Foundation/Containers/PriorityQueue.hpp"
 
 #include "gtest/gtest.h"
 
 using namespace crimild;
-using namespace crimild::collections;
+using namespace crimild::containers;
 
 TEST( PriorityQueueTest, basicConstruction )
 {

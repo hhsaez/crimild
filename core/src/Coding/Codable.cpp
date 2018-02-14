@@ -25,23 +25,23 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SCRIPTING_
-#define CRIMILD_SCRIPTING_
+#include "Codable.hpp"
 
-#include "Components/ScriptedComponent.hpp"
+using namespace crimild;
+using namespace crimild::coding;
 
-#include "Foundation/Function.hpp"
-#include "Foundation/LuaUtils.hpp"
-#include "Foundation/ScriptContext.hpp"
-#include "Foundation/Scripted.hpp"
-#include "Foundation/LuaSerializer.hpp"
+Codable::Codable( void )
+{
 
-#include "Coding/LuaEncoder.hpp"
-#include "Coding/LuaDecoder.hpp"
+}
 
-#include "SceneGraph/LuaSceneBuilder.hpp"
+void Codable::encode( Encoder &encoder )
+{
+	
+}
 
-#include "Simulation/LuaSettings.hpp"
-
-#endif
+void Codable::decode( Decoder &decoder )
+{
+    
+}
 

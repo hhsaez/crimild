@@ -25,23 +25,42 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SCRIPTING_
-#define CRIMILD_SCRIPTING_
+#ifndef CRIMILD_CORE_CODING_CODABLE_
+#define CRIMILD_CORE_CODING_CODABLE_
 
-#include "Components/ScriptedComponent.hpp"
+#include "Foundation/RTTI.hpp"
+#include "Foundation/Types.hpp"
 
-#include "Foundation/Function.hpp"
-#include "Foundation/LuaUtils.hpp"
-#include "Foundation/ScriptContext.hpp"
-#include "Foundation/Scripted.hpp"
-#include "Foundation/LuaSerializer.hpp"
+namespace crimild {
 
-#include "Coding/LuaEncoder.hpp"
-#include "Coding/LuaDecoder.hpp"
+	namespace coding {
 
-#include "SceneGraph/LuaSceneBuilder.hpp"
-
-#include "Simulation/LuaSettings.hpp"
+        class Encoder;
+        class Decoder;
+        
+        class Codable : public RTTI {
+        public:
+            using UniqueID = crimild::Size;
+                
+        protected:
+            Codable( void );
+                
+        public:
+            virtual ~Codable( void ) { }
+               
+            inline UniqueID getUniqueID( void ) const
+            {
+                return ( UniqueID ) this;
+            }
+                
+            virtual void encode( Encoder &encoder );
+            
+            virtual void decode( Decoder &decoder );
+        };
+        
+	}
+    
+}
 
 #endif
 

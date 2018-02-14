@@ -49,14 +49,24 @@
 #include "Foundation/Macros.hpp"
 #include "Foundation/NamedObject.hpp"
 #include "Foundation/Log.hpp"
+#include "Foundation/ObjectFactory.hpp"
 #include "Foundation/StringUtils.hpp"
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/Singleton.hpp"
 #include "Foundation/Profiler.hpp"
 #include "Foundation/Version.hpp"
-#include "Foundation/Collections/Array.hpp"
-#include "Foundation/Collections/PriorityQueue.hpp"
+
+#include "Foundation/Containers/Array.hpp"
+#include "Foundation/Containers/Map.hpp"
+#include "Foundation/Containers/PriorityQueue.hpp"
+#include "Foundation/Containers/Stack.hpp"
+
 #include "Foundation/Policies/ThreadingPolicy.hpp"
+
+#include "Coding/Codable.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/MemoryEncoder.hpp"
+#include "Coding/Decoder.hpp"
 
 #include "Audio/AudioListener.hpp"
 #include "Audio/AudioManager.hpp"

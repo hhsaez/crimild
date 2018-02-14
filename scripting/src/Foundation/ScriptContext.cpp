@@ -34,6 +34,12 @@
 using namespace crimild;
 using namespace crimild::scripting;
 
+ScriptEvaluator::ScriptEvaluator( void )
+    : ScriptEvaluator( nullptr, "" )
+{
+    
+}
+
 ScriptEvaluator::ScriptEvaluator( ScriptContext *ctx, std::string prefix )
     : _context( ctx ),
       _prefix( prefix )
@@ -41,9 +47,23 @@ ScriptEvaluator::ScriptEvaluator( ScriptContext *ctx, std::string prefix )
     
 }
 
+ScriptEvaluator::ScriptEvaluator( const ScriptEvaluator &other )
+    : _context( other._context ),
+      _prefix( other._prefix )
+{
+    
+}
+
 ScriptEvaluator::~ScriptEvaluator( void )
 {
     
+}
+
+ScriptEvaluator &ScriptEvaluator::operator=( const crimild::scripting::ScriptEvaluator &other )
+{
+    _context = other._context;
+    _prefix = other._prefix;
+    return *this;
 }
 
 bool ScriptEvaluator::foreach( const std::string &name, std::function< void( ScriptEvaluator &, int )> callback )

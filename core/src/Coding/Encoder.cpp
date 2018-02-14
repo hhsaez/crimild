@@ -25,95 +25,23 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Foundation/Collections/Array.hpp"
-
-#include "gtest/gtest.h"
+#include "Encoder.hpp"
 
 using namespace crimild;
-using namespace crimild::collections;
+using namespace crimild::coding;
 
-TEST( ArrayTest, construction )
+Encoder::Encoder( void )
 {
-	Array< int > a( 10 );
 
-	EXPECT_EQ( 10, a.size() );
-	EXPECT_FALSE( a.empty() );
-
-	a[ 0 ] = 1;
-
-	EXPECT_EQ( 1, a[ 0 ] );
 }
 
-TEST( ArrayTest, initializationList )
+Encoder::~Encoder( void )
 {
-	Array< int > a = { 1, 2, 3, 4, 5 };
 
-	EXPECT_EQ( 1, a[ 0 ] );
-	EXPECT_EQ( 2, a[ 1 ] );
-	EXPECT_EQ( 3, a[ 2 ] );
-	EXPECT_EQ( 4, a[ 3 ] );
-	EXPECT_EQ( 5, a[ 4 ] );
 }
 
-TEST( ArrayTest, foreach )
+void Encoder::dump( void )
 {
-	Array< int > a( 10 );
-	for ( int i = 0; i < 10; i++ ) {
-		a[ i ] = i + 1;
-	}
 
-	auto sum = 10 * 11 / 2;
-	a.each( [&sum]( int &e, crimild::Size ) {
-		sum -= e;
-	});
-
-	EXPECT_EQ( 0, sum );
-}
-
-TEST( ArrayTest, add )
-{
-	Array< int > a;
-
-	a.add( 1 );
-	EXPECT_EQ( a[ 0 ], 1 );
-	EXPECT_EQ( 1, a.size() );
-
-	a.add( 2 );
-	EXPECT_EQ( a[ 1 ], 2 );
-	EXPECT_EQ( 2, a.size() );
-
-	a.add( 3 );
-	EXPECT_EQ( a[ 2 ], 3 );
-	EXPECT_EQ( 3, a.size() );
-}
-
-TEST( ArrayTest, remove )
-{
-	Array< int > a;
-	a.add( 1 );
-	a.add( 2 );
-	a.add( 3 );
-
-	EXPECT_EQ( a[ 0 ], 1 );
-	EXPECT_EQ( a[ 1 ], 2 );
-	EXPECT_EQ( a[ 2 ], 3 );
-
-	a.remove( 1 );
-
-	EXPECT_EQ( a[ 0 ], 2 );
-	EXPECT_EQ( a[ 1 ], 3 );
-}
-
-TEST( ArrayTest, removeAt )
-{
-	auto a = Array< int >{ 0, 1, 2, 3, 4, 5 };
-	auto b = Array< int >{ 0, 1, 2, 3, 4, 5 };
-	auto c = Array< int >{ 0, 1, 2, 4, 5 };
-
-	EXPECT_EQ( b, a );
-
-	a.removeAt( 3 );
-
-	EXPECT_EQ( c, a );
 }
 

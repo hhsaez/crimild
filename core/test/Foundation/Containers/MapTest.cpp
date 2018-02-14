@@ -25,23 +25,43 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SCRIPTING_
-#define CRIMILD_SCRIPTING_
+#include "Foundation/Containers/Map.hpp"
 
-#include "Components/ScriptedComponent.hpp"
+#include "gtest/gtest.h"
 
-#include "Foundation/Function.hpp"
-#include "Foundation/LuaUtils.hpp"
-#include "Foundation/ScriptContext.hpp"
-#include "Foundation/Scripted.hpp"
-#include "Foundation/LuaSerializer.hpp"
+using namespace crimild;
+using namespace crimild::containers;
 
-#include "Coding/LuaEncoder.hpp"
-#include "Coding/LuaDecoder.hpp"
+TEST( MapTest, basicConstruction )
+{
+	Map< int, int > m;
 
-#include "SceneGraph/LuaSceneBuilder.hpp"
+	EXPECT_EQ( 0, m.size() );
+	EXPECT_TRUE( m.empty() );
+}
 
-#include "Simulation/LuaSettings.hpp"
+TEST( MapTest, initializationList )
+{
+	Map< int, int > m = { { 1, 2 }, { 2, 4 }, { 3, 6 } };
 
-#endif
+	int keys[] = { 1, 2, 3 };
+	crimild::Int32 count = 0;
+	for ( auto k : keys ) {
+		EXPECT_EQ( 2 * k, m[ k ] );
+		count++;
+	};
+
+	EXPECT_EQ( count, m.size() );
+}
+
+TEST( MapTest, keys )
+{
+	Map< int, int > m = { { 1, 2 }, { 2, 4 }, { 3, 6 } };
+
+	auto keys = m.keys();
+	EXPECT_TRUE( keys.contains( 1 ) );
+	EXPECT_TRUE( keys.contains( 2 ) );
+	EXPECT_TRUE( keys.contains( 3 ) );
+	EXPECT_EQ( 3, keys.size() );
+}
 

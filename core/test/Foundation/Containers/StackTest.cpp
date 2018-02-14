@@ -25,23 +25,64 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SCRIPTING_
-#define CRIMILD_SCRIPTING_
+#include "Foundation/Containers/Stack.hpp"
 
-#include "Components/ScriptedComponent.hpp"
+#include "gtest/gtest.h"
 
-#include "Foundation/Function.hpp"
-#include "Foundation/LuaUtils.hpp"
-#include "Foundation/ScriptContext.hpp"
-#include "Foundation/Scripted.hpp"
-#include "Foundation/LuaSerializer.hpp"
+using namespace crimild;
+using namespace crimild::containers;
 
-#include "Coding/LuaEncoder.hpp"
-#include "Coding/LuaDecoder.hpp"
+TEST( StackTest, basicConstruction )
+{
+	Stack< int > s;
 
-#include "SceneGraph/LuaSceneBuilder.hpp"
+	EXPECT_EQ( 0, s.size() );
+	EXPECT_TRUE( s.empty() );
+}
 
-#include "Simulation/LuaSettings.hpp"
+TEST( StackTest, pushPop )
+{
+	Stack< int > s;
 
-#endif
+	EXPECT_EQ( 0, s.size() );
+
+	s.push( 2 );	
+	EXPECT_EQ( 1, s.size() );
+	EXPECT_EQ( 2, s.top() );
+
+	s.push( 5 );	
+	EXPECT_EQ( 2, s.size() );
+	EXPECT_EQ( 5, s.top() );
+
+	s.pop();
+	EXPECT_EQ( 1, s.size() );
+	EXPECT_EQ( 2, s.top() );
+}
+
+TEST( StackTest, contains )
+{
+	Stack< int > s;
+	s.push( 1 );
+	s.push( 2 );
+	s.push( 3 );
+
+	EXPECT_TRUE( s.contains( 2 ) );
+	EXPECT_FALSE( s.contains( 5 ) );
+}
+
+TEST( StackTest, remove )
+{
+	Stack< int > s;
+	s.push( 1 );
+	s.push( 2 );
+	s.push( 3 );
+
+	EXPECT_EQ( 3, s.size() );
+	EXPECT_EQ( 3, s.top() );
+
+	s.remove( 2 );
+
+	EXPECT_EQ( 2, s.size() );
+	EXPECT_EQ( 3, s.top() );
+}
 
