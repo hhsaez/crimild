@@ -30,6 +30,8 @@
 
 #include "Foundation/Scripted.hpp"
 
+#include <Components/NodeComponent.hpp>
+
 namespace crimild {
 
 	namespace scripting {

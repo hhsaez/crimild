@@ -146,6 +146,18 @@ namespace crimild {
 				LockImpl lock( this );
 				return _elems[ index ];
 			}
+            
+            T *getData( void )
+            {
+                LockImpl lock( this );
+                return &_elems[ 0 ];
+            }
+            
+            const T *getData( void ) const
+            {
+                LockImpl lock( this );
+                return &_elems[ 0 ];
+            }
 			
 			void add( T const &elem )
 			{
@@ -266,6 +278,8 @@ namespace crimild {
 			crimild::Size _size = 0;
 			crimild::Size _capacity = 0;
 		};
+
+		using ByteArray = Array< crimild::Byte >;
 		
 	}
 

@@ -30,6 +30,7 @@
 
 #include "Codable.hpp"
 #include "Encoder.hpp"
+#include "EncodedData.hpp"
 
 #include "Foundation/Containers/Stack.hpp"
 #include "Foundation/Containers/Map.hpp"
@@ -40,49 +41,6 @@ namespace crimild {
 	namespace coding {
 
         class MemoryEncoder : public Encoder {
-        private:
-            class EncodedData : public Codable {
-                CRIMILD_IMPLEMENT_RTTI( crimild::coding::EncodedData )
-            public:
-                explicit EncodedData( std::string str )
-                    : _dataSize( sizeof( crimild::Char ) * str.length() ),
-                      _data( new crimild::Byte[ _dataSize ] )
-                {
-                    if ( _dataSize > 0 ) {
-                        memcpy( &_data[ 0 ], ( const void * ) &str[ 0 ], _dataSize );
-                    }
-                }
-                
-                template< typename T >
-                explicit EncodedData( const T &data )
-                    : _dataSize( sizeof( T ) ),
-                      _data( new crimild::Byte[ _dataSize ] )
-                {
-                    if ( _dataSize > 0 ) {
-                        memcpy( &_data[ 0 ], ( const void * ) &data, _dataSize );
-                    }
-                }
-                
-                virtual ~EncodedData( void )
-                {
-                    
-                }
-                
-                template< typename T >
-                T getValue( void ) const
-                {
-                    auto value = T();
-                    if ( _dataSize > 0 ) {
-                        memcpy( ( void * ) &value, &_data[ 0 ], sizeof( crimild::Byte ) * _dataSize );
-                    }
-                    return value;
-                }
-                
-            private:
-                crimild::Size _dataSize;
-                std::unique_ptr< crimild::Byte [] > _data;
-            };
-
         public:
             MemoryEncoder( void );
             virtual ~MemoryEncoder( void );
@@ -94,20 +52,36 @@ namespace crimild {
             virtual void encode( std::string key, const Transformation &value ) override;
             virtual void encode( std::string key, crimild::Size value ) override;
             virtual void encode( std::string key, crimild::Int32 value ) override;
+            virtual void encode( std::string key, crimild::Real32 value ) override;
+            virtual void encode( std::string key, crimild::Real64 value ) override;
+            virtual void encode( std::string key, const Vector3f &value ) override;
             virtual void encode( std::string key, crimild::Bool value ) override;
+            
+            containers::ByteArray getBytes( void ) const;
             
         protected:
 			virtual void encodeArrayBegin( std::string key, crimild::Size count ) override;
 			virtual void encodeArrayEnd( std::string key ) override;
             
         private:
+            template< typename T >
+            void encodeData( std::string key, const T &value )
+            {
+                auto encoded = crimild::alloc< EncodedData >( value );
+                encode( key, crimild::cast_ptr< EncodedData >( encoded ) );
+            }
+            
+            void append( containers::ByteArray &out, std::string value ) const;
+            void append( containers::ByteArray &out, Codable::UniqueID value ) const;
+            void append( containers::ByteArray &out, const containers::ByteArray &data ) const;
+            
+            void appendRawBytes( containers::ByteArray &out, crimild::Size count, const void *data ) const;
+            
+        private:
             containers::Stack< SharedPointer< Codable >> _sortedObjects;
             containers::Map< Codable::UniqueID, containers::Map< std::string, Codable::UniqueID >> _links;
             SharedPointer< Codable > _parent;
             containers::Array< SharedPointer< Codable >> _roots;
-
-        public:
-            virtual void dump( void ) override;
         };
         
 	}

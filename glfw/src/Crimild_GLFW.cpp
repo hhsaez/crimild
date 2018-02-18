@@ -25,33 +25,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SCRIPTING_
-#define CRIMILD_SCRIPTING_
+#include "Crimild_GLFW.hpp"
 
-#include "Components/ScriptedComponent.hpp"
-
-#include "Foundation/Function.hpp"
-#include "Foundation/LuaUtils.hpp"
-#include "Foundation/ScriptContext.hpp"
-#include "Foundation/Scripted.hpp"
-#include "Foundation/LuaSerializer.hpp"
-
-#include "Coding/LuaEncoder.hpp"
-#include "Coding/LuaDecoder.hpp"
-
-#include "SceneGraph/LuaSceneBuilder.hpp"
-
-#include "Simulation/LuaSettings.hpp"
-
-namespace crimild {
-
-	namespace scripting {
-
-		void init( void );
-
-	}
-
+void crimild::glfw::init( void )
+{
+	// no-op
 }
-
-#endif
 

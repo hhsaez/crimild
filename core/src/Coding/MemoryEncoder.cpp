@@ -26,6 +26,9 @@
  */
 
 #include "MemoryEncoder.hpp"
+#include "Tags.hpp"
+
+#include <Foundation/Version.hpp>
 
 using namespace crimild;
 using namespace crimild::coding;
@@ -75,33 +78,43 @@ void MemoryEncoder::encode( std::string key, std::string value )
 {
 	crimild::Size L = value.length();
 	encode( key + "_length", L );
-	
-	auto encoded = crimild::alloc< EncodedData >( value );
-	encode( key, crimild::cast_ptr< EncodedData >( encoded ) );
+    
+    encodeData( key, value );
 }
 
 void MemoryEncoder::encode( std::string key, const Transformation &value )
 {
-	auto encoded = crimild::alloc< EncodedData >( value );
-	encode( key, crimild::cast_ptr< EncodedData >( encoded ) );
+    encodeData( key, value );
 }
 
 void MemoryEncoder::encode( std::string key, crimild::Size value )
 {
-	auto encoded = crimild::alloc< EncodedData >( value );
-	encode( key, crimild::cast_ptr< EncodedData >( encoded ) );
+    encodeData( key, value );
 }
 
 void MemoryEncoder::encode( std::string key, crimild::Int32 value )
 {
-	auto encoded = crimild::alloc< EncodedData >( value );
-	encode( key, crimild::cast_ptr< EncodedData >( encoded ) );
+    encodeData( key, value );
 }
             
 void MemoryEncoder::encode( std::string key, crimild::Bool value )
 {
-	auto encoded = crimild::alloc< EncodedData >( value );
-	encode( key, crimild::cast_ptr< EncodedData >( encoded ) );
+    encodeData( key, value );
+}
+
+void MemoryEncoder::encode( std::string key, crimild::Real32 value )
+{
+    encodeData( key, value );
+}
+
+void MemoryEncoder::encode( std::string key, crimild::Real64 value )
+{
+    encodeData( key, value );
+}
+
+void MemoryEncoder::encode( std::string key, const crimild::Vector3f &value )
+{
+    encodeData( key, value );
 }
 
 void MemoryEncoder::encodeArrayBegin( std::string key, crimild::Size count )
@@ -114,29 +127,77 @@ void MemoryEncoder::encodeArrayEnd( std::string key )
 	// no-op
 }
 
-void MemoryEncoder::dump( void )
+containers::ByteArray MemoryEncoder::getBytes( void ) const
 {
-	std::cout << "Begin" << std::endl;
+    containers::ByteArray result;
     
-	std::cout << "\nObjects" << std::endl;
-	auto temp = _sortedObjects;
-	while ( !temp.empty() ) {
-		auto obj = temp.pop();
-		std::cout << obj->getUniqueID() << " " << obj->getClassName() << std::endl;
-	}
+	// TODO: reserve memory space beforehand in order to
+	// avoid resizing the resulting array
+	// result.reserve( XXX );
+	
+    append( result, Tags::TAG_DATA_START );
     
-	std::cout << "\nLinks" << std::endl;
-	_links.each( []( const Codable::UniqueID &key, containers::Map< std::string, Codable::UniqueID > &ls ) {
-		ls.each( [ key ]( const std::string &name, Codable::UniqueID &value ) {
-			std::cout << key << " " << name << " " << value << std::endl;
-		});
-	});
+    append( result, Tags::TAG_DATA_VERSION );
+    auto version = Version();
+    append( result, version.getDescription() );
     
-	std::cout << "\nTop" << std::endl;
-	_roots.each( []( const SharedPointer< Codable > &obj, crimild::Size ) {
-		std::cout << obj->getUniqueID() << " " << obj->getClassName() << std::endl;
-	});
+    auto temp = _sortedObjects;
+    while ( !temp.empty() ) {
+        auto obj = temp.pop();
+        append( result, Tags::TAG_OBJECT_BEGIN );
+        append( result, obj->getUniqueID() );
+        append( result, obj->getClassName() );
+        if ( auto data = crimild::dynamic_cast_ptr< EncodedData >( obj ) ) {
+            append( result, data->getBytes() );
+        }
+        append( result, Tags::TAG_OBJECT_END );
+    }
     
-	std::cout << "\nEnd" << std::endl;
+    _links.each( [ this, &result ]( const Codable::UniqueID &key, const containers::Map< std::string, Codable::UniqueID > &ls ) {
+        ls.each( [ this, &result, key ]( const std::string &name, const Codable::UniqueID &value ) {
+            append( result, Tags::TAG_LINK_BEGIN );
+            append( result, key );
+            append( result, name );
+            append( result, value );
+            append( result, Tags::TAG_LINK_END );
+        });
+    });
+    
+    _roots.each( [ this, &result ]( const SharedPointer< Codable > &obj, crimild::Size ) {
+        append( result, Tags::TAG_ROOT_OBJECT_BEGIN );
+        append( result, obj->getUniqueID() );
+        append( result, Tags::TAG_ROOT_OBJECT_END );
+    });
+    
+    append( result, Tags::TAG_DATA_END );
+    
+    return result;
+}
+
+void MemoryEncoder::append( containers::ByteArray &out, std::string value ) const
+{
+    containers::ByteArray bytes( value.length() + 1 );
+    memcpy( &bytes.getData()[ 0 ], value.c_str(), sizeof( crimild::Char ) * value.length() );
+    bytes[ value.length() ] = '\0';
+    append( out, bytes );
+}
+
+void MemoryEncoder::append( containers::ByteArray &out, Codable::UniqueID value ) const
+{
+    appendRawBytes( out, sizeof( Codable::UniqueID ), &value );
+}
+
+void MemoryEncoder::append( containers::ByteArray &out, const containers::ByteArray &data ) const
+{
+    crimild::Size count = data.size();
+    appendRawBytes( out, sizeof( crimild::Size ), &count );
+    appendRawBytes( out, data.size(), data.getData() );
+}
+
+void MemoryEncoder::appendRawBytes( containers::ByteArray &out, crimild::Size count, const void *data ) const
+{
+    for ( crimild::Size i = 0; i < count; i++ ) {
+        out.add( static_cast< const crimild::Byte * >( data )[ i ] );
+    }
 }
 

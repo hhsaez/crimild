@@ -65,6 +65,14 @@ namespace crimild {
 			
 			return _builders[ type ];
 		}
+        
+        SharedPointer< SharedObject > build( std::string className );
+        
+        template< typename T >
+        SharedPointer< T > build( std::string className )
+        {
+            return crimild::cast_ptr< T >( build( className ) );
+        }
 
 	private:
         containers::Map< std::string, Builder > _builders;

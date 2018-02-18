@@ -32,5 +32,15 @@
 
 #include "Simulation/Systems/InputSystem.hpp"
 
+namespace crimild {
+
+	namespace glfw {
+
+		void init( void );
+
+	}
+
+}
+
 #endif
 

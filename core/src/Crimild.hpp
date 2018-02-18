@@ -65,8 +65,11 @@
 
 #include "Coding/Codable.hpp"
 #include "Coding/Encoder.hpp"
-#include "Coding/MemoryEncoder.hpp"
 #include "Coding/Decoder.hpp"
+#include "Coding/EncodedData.hpp"
+#include "Coding/MemoryEncoder.hpp"
+#include "Coding/MemoryDecoder.hpp"
+#include "Coding/Tags.hpp"
 
 #include "Audio/AudioListener.hpp"
 #include "Audio/AudioManager.hpp"
@@ -278,6 +281,12 @@
 #include "Debug/DebugRenderHelper.hpp"
 #include "Debug/SceneDebugDump.hpp"
 #include "Debug/DebugRenderComponent.hpp"
+
+namespace crimild {
+
+	void init( void );
+
+}
 
 #endif
 

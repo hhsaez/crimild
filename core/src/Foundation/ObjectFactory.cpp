@@ -26,6 +26,7 @@
  */
 
 #include "ObjectFactory.hpp"
+#include "Log.hpp"
 
 using namespace crimild;
 
@@ -37,5 +38,16 @@ ObjectFactory::ObjectFactory( void )
 ObjectFactory::~ObjectFactory( void )
 {
 	
+}
+
+SharedPointer< SharedObject > ObjectFactory::build( std::string className )
+{
+    auto builder = getBuilder( className );
+    if ( builder == nullptr ) {
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot find builder for type: ", className );
+        return nullptr;
+    }
+    
+    return builder();
 }
 

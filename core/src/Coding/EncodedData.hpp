@@ -25,32 +25,73 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SCRIPTING_
-#define CRIMILD_SCRIPTING_
+#ifndef CRIMILD_CORE_CODING_ENCODED_DATA_
+#define CRIMILD_CORE_CODING_ENCODED_DATA_
 
-#include "Components/ScriptedComponent.hpp"
-
-#include "Foundation/Function.hpp"
-#include "Foundation/LuaUtils.hpp"
-#include "Foundation/ScriptContext.hpp"
-#include "Foundation/Scripted.hpp"
-#include "Foundation/LuaSerializer.hpp"
-
-#include "Coding/LuaEncoder.hpp"
-#include "Coding/LuaDecoder.hpp"
-
-#include "SceneGraph/LuaSceneBuilder.hpp"
-
-#include "Simulation/LuaSettings.hpp"
+#include "Codable.hpp"
+#include "Foundation/Containers/Array.hpp"
 
 namespace crimild {
 
-	namespace scripting {
+	namespace coding {
 
-		void init( void );
+		class EncodedData :
+            public SharedObject,
+            public Codable {
+			CRIMILD_IMPLEMENT_RTTI( crimild::coding::EncodedData )
+        public:
+            EncodedData( void )
+            {
+                
+            }
+                
+			explicit EncodedData( std::string str )
+			    : _bytes( sizeof( crimild::Char ) * str.length() )
+			{
+				if ( _bytes.size() > 0 ) {
+					memcpy( &_bytes[ 0 ], ( const void * ) &str[ 0 ], _bytes.size() );
+				}
+			}
+            
+			template< typename T >
+			explicit EncodedData( const T &data )
+				: _bytes( sizeof( T ) )
+			{
+				if ( _bytes.size() > 0 ) {
+					memcpy( &_bytes[ 0 ], ( const void * ) &data, _bytes.size() );
+				}
+			}
+            
+			virtual ~EncodedData( void )
+			{
+				
+			}
 
+			inline void setBytes( const containers::ByteArray &bytes ) { _bytes = bytes; }
+			inline containers::ByteArray &getBytes( void ) { return _bytes; }
+			inline const containers::ByteArray &getBytes( void ) const { return _bytes; }
+                
+            std::string getString( void ) const
+            {
+                return std::string( ( const char * ) &_bytes[ 0 ] );
+            }
+            
+			template< typename T >
+			T getValue( void ) const
+			{
+				auto value = T();
+				if ( _bytes.size() > 0 ) {
+					memcpy( ( void * ) &value, &_bytes[ 0 ], _bytes.size() );
+				}
+				return value;
+			}
+            
+		private:
+			containers::ByteArray _bytes;
+		};
+        
 	}
-
+    
 }
 
 #endif

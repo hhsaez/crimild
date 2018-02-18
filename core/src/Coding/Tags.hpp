@@ -25,32 +25,28 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SCRIPTING_
-#define CRIMILD_SCRIPTING_
-
-#include "Components/ScriptedComponent.hpp"
-
-#include "Foundation/Function.hpp"
-#include "Foundation/LuaUtils.hpp"
-#include "Foundation/ScriptContext.hpp"
-#include "Foundation/Scripted.hpp"
-#include "Foundation/LuaSerializer.hpp"
-
-#include "Coding/LuaEncoder.hpp"
-#include "Coding/LuaDecoder.hpp"
-
-#include "SceneGraph/LuaSceneBuilder.hpp"
-
-#include "Simulation/LuaSettings.hpp"
+#ifndef CRIMILD_CORE_CODING_TAGS_
+#define CRIMILD_CORE_CODING_TAGS_
 
 namespace crimild {
 
-	namespace scripting {
+	namespace coding {
 
-		void init( void );
-
+		class Tags {
+		public:
+			static const char *TAG_DATA_START;
+			static const char *TAG_DATA_VERSION;
+			static const char *TAG_OBJECT_BEGIN;
+			static const char *TAG_OBJECT_END;
+			static const char *TAG_LINK_BEGIN;
+			static const char *TAG_LINK_END;
+			static const char *TAG_ROOT_OBJECT_BEGIN;
+			static const char *TAG_ROOT_OBJECT_END;
+			static const char *TAG_DATA_END;
+		};
+        
 	}
-
+    
 }
 
 #endif
