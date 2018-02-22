@@ -227,6 +227,14 @@ namespace crimild {
 
 				resize_unsafe( capacity );
 			}
+            
+            void clear( void )
+            {
+                LockImpl lock( this );
+                
+                resize_unsafe( 2 );
+                _size = 0;
+            }
 
 			void each( TraverseCallback const &callback )
 			{
