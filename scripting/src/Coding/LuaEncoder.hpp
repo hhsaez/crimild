@@ -54,7 +54,7 @@ namespace crimild {
 
 			inline std::string getEncodedString( void ) const
 			{
-				return _ss.str();
+                return _ss.str();
 			}
             
         protected:
@@ -63,9 +63,11 @@ namespace crimild {
             
         private:
             void encodeKey( std::string key );
+            std::string getIndentSpaces( void );
             
         private:
             std::stringstream _ss;
+            crimild::Size _indentLevel = 0;
             containers::Stack< std::string > _arrayKeys;
 
         public:

@@ -45,10 +45,23 @@ LuaEncoder::~LuaEncoder( void )
 void LuaEncoder::encode( SharedPointer< Codable > const &codable ) 
 {
 	_ss << "{ ";
-	_ss << "type = '" << codable->getClassName() << "', ";
-	_ss << "id = " << codable->getUniqueID() << ", ";
+    _indentLevel++;
+    
+    encodeKey( "type" );
+	_ss <<  "'" << codable->getClassName() << "', ";
+	
+    encodeKey( "id" );
+    _ss << codable->getUniqueID() << ", ";
+    
 	codable->encode( *this );
-	_ss << "}";
+    
+    _indentLevel--;
+	
+    _ss << getIndentSpaces() << "}";
+    
+    if ( _arrayKeys.size() == 0 ) {
+        _ss << "\n";
+    }
 }
 
 void LuaEncoder::encode( std::string key, SharedPointer< Codable > const &codable ) 
@@ -105,29 +118,49 @@ void LuaEncoder::encode( std::string key, const Vector3f &value )
 void LuaEncoder::encode( std::string key, const Transformation &value ) 
 {
 	encodeKey( key );
-	_ss << "{ ";
-	_ss << "translate = { " << value.getTranslate().x() << ", " << value.getTranslate().y() << ", " << value.getTranslate().z() << " }, ";
-	_ss << "}, ";
+	
+    _ss << "{ ";
+    _indentLevel++;
+    
+    encodeKey( "translate" );
+	_ss << "{ " << value.getTranslate().x() << ", " << value.getTranslate().y() << ", " << value.getTranslate().z() << " }, ";
+    
+    _indentLevel--;
+	_ss << getIndentSpaces() << "}, ";
 }
 
 void LuaEncoder::encodeArrayBegin( std::string key, crimild::Size count ) 
 {
 	_arrayKeys.push( key );
     
-	_ss << key << " = { ";
+    _ss << getIndentSpaces() << key << " = { ";
+    
+    ++_indentLevel;
 }
 
 void LuaEncoder::encodeArrayEnd( std::string key ) 
 {
 	_arrayKeys.pop();
-	_ss << "}, ";
+    
+    --_indentLevel;
+	_ss << getIndentSpaces() << "},";
 }
 
 void LuaEncoder::encodeKey( std::string key )
 {
+    _ss << getIndentSpaces();
 	if ( _arrayKeys.empty() || key.find( _arrayKeys.top() ) != 0 ) {
 		_ss << key << " = ";
 	}
+}
+
+std::string LuaEncoder::getIndentSpaces( void )
+{
+    std::string res = "\n";
+    for ( crimild::Size i = 0; i < _indentLevel; i++ ) {
+        res += "    ";
+    }
+    return res;
 }
 
 void LuaEncoder::dump( void ) 
