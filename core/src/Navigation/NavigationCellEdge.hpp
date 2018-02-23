@@ -31,7 +31,7 @@
 #include "Foundation/Memory.hpp"
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/RTTI.hpp"
-
+#include "Coding/Codable.hpp"
 #include "Streaming/Stream.hpp"
 
 #include "Mathematics/LineSegment.hpp"
@@ -42,7 +42,7 @@ namespace crimild {
 
 		class NavigationCell;
 
-		class NavigationCellEdge : public StreamObject {
+        class NavigationCellEdge : public coding::Codable, public StreamObject {
 			CRIMILD_IMPLEMENT_RTTI( crimild::navigation::NavigationCellEdge )
 
 		public:

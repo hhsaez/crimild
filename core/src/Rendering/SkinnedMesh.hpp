@@ -31,13 +31,14 @@
 #include "Foundation/NamedObject.hpp"
 #include "Foundation/Map.hpp"
 #include "Foundation/Array.hpp"
+#include "Coding/Codable.hpp"
 #include "Streaming/Stream.hpp"
 #include "Mathematics/Transformation.hpp"
 #include "Mathematics/Interpolation.hpp"
 
 namespace crimild {
     
-	class SkinnedMeshJoint : public StreamObject, public NamedObject {
+    class SkinnedMeshJoint : public coding::Codable, public StreamObject, public NamedObject {
 		CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMeshJoint )
 
 	public:
@@ -68,7 +69,7 @@ namespace crimild {
 
 	};
 
-	class SkinnedMeshJointCatalog : public StreamObject {
+    class SkinnedMeshJointCatalog : public coding::Codable, public StreamObject {
 		CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMeshJointCatalog )
 
 	public:
@@ -98,7 +99,7 @@ namespace crimild {
 
 	};
 
-	class SkinnedMeshAnimationChannel : public NamedObject, public StreamObject {
+    class SkinnedMeshAnimationChannel : public coding::Codable, public NamedObject, public StreamObject {
 		CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMeshAnimationChannel )
 
 	public:
@@ -155,7 +156,7 @@ namespace crimild {
 		//@}		
 	};
 
-	class SkinnedMeshAnimationClip : public StreamObject {
+    class SkinnedMeshAnimationClip : public coding::Codable, public StreamObject {
 		CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMeshAnimationClip )
 
 	private:
@@ -191,7 +192,7 @@ namespace crimild {
 		//@}		
 	};
 
-	class SkinnedMeshSkeleton : public StreamObject {
+    class SkinnedMeshSkeleton : public coding::Codable, public StreamObject {
 		CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMeshSkeleton )
 
 	private:
@@ -226,7 +227,7 @@ namespace crimild {
 		//@}		
 	};
 
-	class SkinnedMeshAnimationState : public StreamObject {
+    class SkinnedMeshAnimationState : public coding::Codable, public StreamObject {
 		CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMeshAnimationState )
 
 	private:
@@ -255,7 +256,7 @@ namespace crimild {
 		//@}		
 	};
 
-	class SkinnedMesh : public StreamObject {
+    class SkinnedMesh : public coding::Codable, public StreamObject {
 		CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMesh )
 
 	public:

@@ -29,12 +29,13 @@
 #define CRIMILD_RENDERING_IMAGE_
 
 #include "Streaming/Stream.hpp"
+#include "Coding/Codable.hpp"
 
 #include <vector>
 
 namespace crimild {
     
-	class Image : public StreamObject {
+    class Image : public coding::Codable, public StreamObject {
 		CRIMILD_IMPLEMENT_RTTI( crimild::Image )
 
     public:

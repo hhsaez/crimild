@@ -41,7 +41,7 @@ namespace crimild {
 
 	class Light;
     
-	class Material : public StreamObject {
+    class Material : public coding::Codable, public StreamObject {
 		CRIMILD_IMPLEMENT_RTTI( crimild::Material )
 
 	public:

@@ -28,6 +28,7 @@
 #ifndef CRIMILD_COMPONENTS_NODE_COMPONENT_
 #define CRIMILD_COMPONENTS_NODE_COMPONENT_
 
+#include "Coding/Codable.hpp"
 #include "Streaming/Stream.hpp"
 #include "Mathematics/Clock.hpp"
 
@@ -37,7 +38,7 @@ namespace crimild {
 	class Renderer;
 	class Camera;
 
-    class NodeComponent : public StreamObject {
+    class NodeComponent : public coding::Codable, public StreamObject {
     	CRIMILD_IMPLEMENT_RTTI( crimild::NodeComponent )
         
 	protected:

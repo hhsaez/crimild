@@ -28,6 +28,7 @@
 #ifndef CRIMILD_PRIMITIVES_PRIMITIVE_
 #define CRIMILD_PRIMITIVES_PRIMITIVE_
 
+#include "Coding/Codable.hpp"
 #include "Streaming/Stream.hpp"
 #include "Rendering/VertexBufferObject.hpp"
 #include "Rendering/IndexBufferObject.hpp"
@@ -36,7 +37,7 @@
 
 namespace crimild {
 
-	class Primitive : public StreamObject {
+    class Primitive : public coding::Codable, public StreamObject {
 		CRIMILD_IMPLEMENT_RTTI( crimild::Primitive )
 
 	public:

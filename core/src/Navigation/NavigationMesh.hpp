@@ -34,7 +34,7 @@ namespace crimild {
 
 	namespace navigation {
 
-        class NavigationMesh : public StreamObject {
+        class NavigationMesh : public coding::Codable, public StreamObject {
             CRIMILD_IMPLEMENT_RTTI( crimild::navigation::NavigationMesh )
 
         public:

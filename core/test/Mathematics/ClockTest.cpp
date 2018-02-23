@@ -59,20 +59,20 @@ TEST( Clock, tick )
 	std::this_thread::sleep_for( std::chrono::milliseconds( 16 ) );
 	c.tick();
 
-	EXPECT_LE( 0.016, c.getDeltaTime() );
-	EXPECT_LE( 0.016, c.getAccumTime() );
+	EXPECT_GE( 0.020, c.getDeltaTime() );
+	EXPECT_GE( 0.020, c.getAccumTime() );
 
 	std::this_thread::sleep_for( std::chrono::milliseconds( 16 ) );
 	c.tick();
 
-	EXPECT_LE( 0.016, c.getDeltaTime() );
-	EXPECT_LE( 0.032, c.getAccumTime() );
+	EXPECT_GE( 0.020, c.getDeltaTime() );
+	EXPECT_GE( 0.040, c.getAccumTime() );
 
 	std::this_thread::sleep_for( std::chrono::milliseconds( 16 ) );
 	c.tick();
 
-	EXPECT_LE( 0.016, c.getDeltaTime() );
-	EXPECT_LE( 0.048, c.getAccumTime() );
+	EXPECT_GE( 0.025, c.getDeltaTime() );
+	EXPECT_GE( 0.060, c.getAccumTime() );
 }
 
 TEST( Clock, addDelta )

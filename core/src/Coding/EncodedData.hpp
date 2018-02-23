@@ -36,7 +36,6 @@ namespace crimild {
 	namespace coding {
 
 		class EncodedData :
-            public SharedObject,
             public Codable {
 			CRIMILD_IMPLEMENT_RTTI( crimild::coding::EncodedData )
         public:

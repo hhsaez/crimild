@@ -31,6 +31,7 @@
 #include "Foundation/Macros.hpp"
 #include "Foundation/Types.hpp"
 #include "Streaming/Stream.hpp"
+#include "Coding/Codable.hpp"
 
 #include <memory>
 #include <cstring>
@@ -39,7 +40,7 @@
 namespace crimild {
 
 	template< typename T >
-	class BufferObject : public StreamObject {
+    class BufferObject : public coding::Codable, public StreamObject {
 	protected:
 		BufferObject( unsigned int size, const T *data )
 		{

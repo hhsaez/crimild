@@ -30,6 +30,7 @@
 
 #include "Foundation/RTTI.hpp"
 #include "Foundation/Types.hpp"
+#include "Foundation/SharedObject.hpp"
 
 namespace crimild {
 
@@ -38,7 +39,9 @@ namespace crimild {
         class Encoder;
         class Decoder;
         
-        class Codable : public RTTI {
+        class Codable :
+			public SharedObject,
+			public RTTI {
         public:
             using UniqueID = crimild::Size;
                 
