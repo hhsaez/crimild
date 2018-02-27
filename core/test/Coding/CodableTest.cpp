@@ -31,6 +31,7 @@
 #include "Coding/MemoryEncoder.hpp"
 #include "Coding/MemoryDecoder.hpp"
 #include "SceneGraph/Node.hpp"
+#include "SceneGraph/Group.hpp"
 #include "Foundation/ObjectFactory.hpp"
 
 #include "gtest/gtest.h"
@@ -50,6 +51,7 @@ namespace crimild {
     private:
 		containers::Array< int > _values;
         containers::Array< SharedPointer< CodableNode >> _children;
+        SharedPointer< Group > _aGroup;
         
     public:
         virtual void encode( coding::Encoder &encoder ) override
@@ -58,6 +60,7 @@ namespace crimild {
             
             encoder.encode( "values", _values );
             encoder.encode( "children", _children );
+            encoder.encode( "group", _aGroup );
         }
         
         virtual void decode( coding::Decoder &decoder ) override
@@ -66,6 +69,7 @@ namespace crimild {
             
             decoder.decode( "values", _values );
             decoder.decode( "children", _children );
+            decoder.decode( "group", _aGroup );
         }
         
     };

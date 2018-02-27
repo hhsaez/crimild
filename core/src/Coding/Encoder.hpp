@@ -32,7 +32,7 @@
 #include "Foundation/Memory.hpp"
 #include "Foundation/Types.hpp"
 #include "Foundation/Containers/Array.hpp"
-
+#include "Rendering/VertexFormat.hpp"
 #include "Mathematics/Transformation.hpp"
 
 #include <sstream>
@@ -57,12 +57,15 @@ namespace crimild {
             // values
             virtual void encode( std::string key, std::string str ) = 0;
             virtual void encode( std::string key, crimild::Size value ) = 0;
+            virtual void encode( std::string key, crimild::UInt16 value ) = 0;
             virtual void encode( std::string key, crimild::Int32 value ) = 0;
+            virtual void encode( std::string key, crimild::UInt32 value ) = 0;
             virtual void encode( std::string key, crimild::Bool value ) = 0;
 			virtual void encode( std::string key, crimild::Real32 value ) = 0;
 			virtual void encode( std::string key, crimild::Real64 value ) = 0;
             virtual void encode( std::string key, const Vector3f & ) = 0;
             virtual void encode( std::string key, const Transformation & ) = 0;
+            virtual void encode( std::string key, const VertexFormat & ) = 0;
             
             template< typename T >
             void encode( std::string key, containers::Array< T > &a )

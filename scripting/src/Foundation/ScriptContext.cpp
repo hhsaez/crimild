@@ -139,7 +139,7 @@ bool ScriptContext::load( std::string fileName, bool supportCoroutines )
 
 bool ScriptContext::parse( std::string text )
 {
-	if ( luaL_dostring( _state, text.c_str() ) ) {
+	if ( luaL_dostring( _state, text.c_str() ) && failOnParse() ) {
         std::string reason = lua_tostring( _state, -1 );
 #if CRIMILD_SCRIPTING_LOG_VERBOSE
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot parse string \"", text, "\"", "\n\tReason: ", reason );

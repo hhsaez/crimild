@@ -28,6 +28,8 @@
 #include "SceneGraph/Group.hpp"
 #include "Exceptions/HasParentException.hpp"
 #include "Streaming/FileStream.hpp"
+#include "Coding/MemoryEncoder.hpp"
+#include "Coding/MemoryDecoder.hpp"
 
 #include "gtest/gtest.h"
 
@@ -315,5 +317,61 @@ TEST( GroupNodeTest, streaming )
 		EXPECT_EQ( 0, n4->getNodeCount() );
 	}
 
+}
+
+TEST( GroupTest, coding )
+{
+	//		node0
+	//		/   \
+	//	node1	node2
+	//			/	\
+	//		node3	node4
+
+    auto encoder = crimild::alloc< coding::MemoryEncoder >();
+
+	{
+		auto node0 = crimild::alloc< Group >( "node0" );
+		auto node1 = crimild::alloc< Group >( "node1" );
+		node0->attachNode( node1 );
+		auto node2 = crimild::alloc< Group >( "node2" );
+		node0->attachNode( node2 );
+		auto node3 = crimild::alloc< Group >( "node3" );
+		node2->attachNode( node3 );
+		auto node4 = crimild::alloc< Group >( "node4" );
+		node2->attachNode( node4 );
+
+		encoder->encode( node0 );
+	}
+		
+    auto bytes = encoder->getBytes();
+    auto decoder = crimild::alloc< coding::MemoryDecoder >();
+	decoder->fromBytes( bytes );
+
+	{
+		auto n0 = decoder->getObjectAt< Group >( 0 );
+		EXPECT_TRUE( n0 != nullptr );
+		EXPECT_EQ( "node0", n0->getName() );
+		EXPECT_EQ( 2, n0->getNodeCount() );
+
+		auto n1 = n0->getNodeAt< Group >( 0 );
+		EXPECT_TRUE( n1 != nullptr );
+		EXPECT_EQ( "node1", n1->getName() );
+		EXPECT_EQ( 0, n1->getNodeCount() );
+		
+		auto n2 = n0->getNodeAt< Group >( 1 );
+		EXPECT_TRUE( n2 != nullptr );
+		EXPECT_EQ( "node2", n2->getName() );
+		EXPECT_EQ( 2, n2->getNodeCount() );
+
+		auto n3 = n2->getNodeAt< Group >( 0 );
+		EXPECT_TRUE( n3 != nullptr );
+		EXPECT_EQ( "node3", n3->getName() );
+		EXPECT_EQ( 0, n3->getNodeCount() );
+		
+		auto n4 = n2->getNodeAt< Group >( 1 );
+		EXPECT_TRUE( n4 != nullptr );
+		EXPECT_EQ( "node4", n4->getName() );
+		EXPECT_EQ( 0, n4->getNodeCount() );
+	}
 }
 

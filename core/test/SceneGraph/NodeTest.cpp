@@ -28,6 +28,8 @@
 #include "SceneGraph/Node.hpp"
 #include "SceneGraph/Group.hpp"
 #include "Streaming/FileStream.hpp"
+#include "Coding/MemoryEncoder.hpp"
+#include "Coding/MemoryDecoder.hpp"
 
 #include "Utils/MockComponent.hpp"
 
@@ -311,5 +313,47 @@ TEST( NodeTest, streamNodeTransform )
 		EXPECT_EQ( n->getLocal().getRotate(), n1->getLocal().getRotate() );
 		EXPECT_EQ( n->getLocal().getScale(), n1->getLocal().getScale() );
 	}
+}
+
+TEST( NodeTest, coding )
+{
+	auto n1 = crimild::alloc< Node >( "Some node" );
+    n1->local().setTranslate( 10, 20, 30 );
+    n1->world().setTranslate( 50, 70, 90 );
+    n1->setWorldIsCurrent( true );
+
+    auto encoder = crimild::alloc< coding::MemoryEncoder >();
+	encoder->encode( n1 );
+    auto bytes = encoder->getBytes();
+    auto decoder = crimild::alloc< coding::MemoryDecoder >();
+	decoder->fromBytes( bytes );
+
+	auto n2 = decoder->getObjectAt< Node >( 0 );
+	EXPECT_TRUE( n2 != nullptr );
+	EXPECT_EQ( n1->getName(), n2->getName() );
+	EXPECT_EQ( n1->getLocal().getTranslate(), n2->getLocal().getTranslate() );
+	EXPECT_EQ( n1->getWorld().getTranslate(), n2->getWorld().getTranslate() );
+	EXPECT_EQ( n1->worldIsCurrent(), n2->worldIsCurrent() );
+}
+
+TEST( NodeTest, codingTransformation )
+{
+	auto n1 = crimild::alloc< Node >( "Some Node" );
+	n1->local().setTranslate( Vector3f( 0.0f, 0.0f, -5.0f ) );
+	n1->local().setRotate( Vector3f( 0.0f, 1.0f, 0.0f ), Numericf::PI );
+	n1->local().setScale( 0.5f );
+	
+    auto encoder = crimild::alloc< coding::MemoryEncoder >();
+    encoder->encode( n1 );
+    auto bytes = encoder->getBytes();
+    auto decoder = crimild::alloc< coding::MemoryDecoder >();
+    decoder->fromBytes( bytes );
+    
+    auto n2 = decoder->getObjectAt< Node >( 0 );
+	EXPECT_TRUE( n2 != nullptr );
+	EXPECT_EQ( n1->getName(), n2->getName() );
+	EXPECT_EQ( n1->getLocal().getTranslate(), n2->getLocal().getTranslate() );
+	EXPECT_EQ( n1->getLocal().getRotate(), n2->getLocal().getRotate() );
+	EXPECT_EQ( n1->getLocal().getScale(), n2->getLocal().getScale() );
 }
 

@@ -34,7 +34,7 @@
 #include "Foundation/Memory.hpp"
 #include "Foundation/Types.hpp"
 #include "Foundation/Containers/Array.hpp"
-
+#include "Rendering/VertexFormat.hpp"
 #include "Mathematics/Transformation.hpp"
 
 namespace crimild {
@@ -50,14 +50,25 @@ namespace crimild {
             
             virtual void decode( std::string key, SharedPointer< coding::Codable > &codable ) = 0;
 
+            template< class T >
+            void decode( std::string key, SharedPointer< T > &obj )
+            {
+                auto codable = crimild::cast_ptr< coding::Codable >( obj );
+                decode( key, codable );
+                obj = crimild::cast_ptr< T >( codable );
+            }
+            
             virtual void decode( std::string key, std::string &value ) = 0;
             virtual void decode( std::string key, crimild::Size &value ) = 0;
+            virtual void decode( std::string key, crimild::UInt16 &value ) = 0;
             virtual void decode( std::string key, crimild::Int32 &value ) = 0;
+            virtual void decode( std::string key, crimild::UInt32 &value ) = 0;
             virtual void decode( std::string key, crimild::Bool &value ) = 0;
 			virtual void decode( std::string key, crimild::Real32 &value ) = 0;
 			virtual void decode( std::string key, crimild::Real64 &value ) = 0;
 			virtual void decode( std::string key, crimild::Vector3f &value ) = 0;
             virtual void decode( std::string key, Transformation &value ) = 0;
+            virtual void decode( std::string key, VertexFormat &value ) = 0;
 
             template< typename T >
             void decode( std::string key, containers::Array< SharedPointer< T >> &value )

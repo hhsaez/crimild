@@ -120,12 +120,22 @@ void LuaDecoder::decode( std::string key, crimild::Size &value )
 	_evals.top().getPropValue( key, value );
 }
 
-void LuaDecoder::decode( std::string key, crimild::Int32 &value ) 
+void LuaDecoder::decode( std::string key, crimild::UInt16 &value )
 {
 	_evals.top().getPropValue( key, value );
 }
 
-void LuaDecoder::decode( std::string key, crimild::Bool &value ) 
+void LuaDecoder::decode( std::string key, crimild::Int32 &value )
+{
+    _evals.top().getPropValue( key, value );
+}
+
+void LuaDecoder::decode( std::string key, crimild::UInt32 &value )
+{
+    _evals.top().getPropValue( key, value );
+}
+
+void LuaDecoder::decode( std::string key, crimild::Bool &value )
 {
 	_evals.top().getPropValue( key, value );
 }
@@ -148,6 +158,11 @@ void LuaDecoder::decode( std::string key, Vector3f &value )
 void LuaDecoder::decode( std::string key, Transformation &value ) 
 {
 	_evals.top().getPropValue( key, value );
+}
+
+void LuaDecoder::decode( std::string key, VertexFormat &value )
+{
+    // no-op
 }
 
 crimild::Size LuaDecoder::beginDecodingArray( std::string key )

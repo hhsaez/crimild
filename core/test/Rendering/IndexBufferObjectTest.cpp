@@ -27,12 +27,14 @@
 
 #include "Rendering/IndexBufferObject.hpp"
 #include "Streaming/FileStream.hpp"
+#include "Coding/MemoryEncoder.hpp"
+#include "Coding/MemoryDecoder.hpp"
  
 #include "gtest/gtest.h"
 
 using namespace crimild;
 
-TEST( IndexBufferObject, construction )
+TEST( IndexBufferObjectTest, construction )
 {
 	IndexPrecision indices[] = { 0, 1, 2 };
 
@@ -42,7 +44,7 @@ TEST( IndexBufferObject, construction )
 	EXPECT_EQ( 0, memcmp( indices, ibo->getData(), sizeof( IndexPrecision ) * ibo->getSize() ) );
 }
 
-TEST( IndexBufferObject, setIndexAt )
+TEST( IndexBufferObjectTest, setIndexAt )
 {
 	auto ibo = crimild::alloc< IndexBufferObject >( 6 );
 	ibo->setIndexAt( 0, 0 );
@@ -73,7 +75,24 @@ TEST( IndexBufferObjectTest, testGenerateIncrementalIndices )
 	EXPECT_EQ( 5, ibo->getIndexAt( 5 ) );
 }
 
-TEST( IndexBufferObject, iboStream )
+TEST( IndexBufferObjectTest, coding )
+{
+    auto ibo = crimild::alloc< IndexBufferObject >( 6 );
+    ibo->generateIncrementalIndices();
+    
+    auto encoder = crimild::alloc< coding::MemoryEncoder >();
+    encoder->encode( ibo );
+    auto bytes = encoder->getBytes();
+    auto decoder = crimild::alloc< coding::MemoryDecoder >();
+    decoder->fromBytes( bytes );
+    
+    auto ibo1 = decoder->getObjectAt< IndexBufferObject >( 0 );
+    EXPECT_TRUE( ibo1 != nullptr );
+    EXPECT_EQ( ibo->getIndexCount(), ibo1->getIndexCount() );
+    EXPECT_EQ( 0, memcmp( ibo->getData(), ibo1->getData(), sizeof( IndexPrecision ) * ibo1->getIndexCount() ) );
+}
+
+TEST( IndexBufferObjectTest, iboStream )
 {
 	auto ibo = crimild::alloc< IndexBufferObject >( 6 );
 	ibo->generateIncrementalIndices();

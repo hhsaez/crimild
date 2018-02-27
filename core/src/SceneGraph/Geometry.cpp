@@ -26,11 +26,11 @@
  */
 
 #include "Geometry.hpp"
-
 #include "Primitives/Primitive.hpp"
-
 #include "Components/MaterialComponent.hpp"
 #include "Components/RenderStateComponent.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 #include <algorithm>
 
@@ -102,6 +102,28 @@ void Geometry::updateModelBounds( void )
 			}
 		}
 	});	
+}
+
+void Geometry::encode( coding::Encoder &encoder )
+{
+    Node::encode( encoder );
+    
+    containers::Array< SharedPointer< Primitive >> ps;
+    forEachPrimitive( [ &ps ]( Primitive *primitive ) {
+        ps.add( crimild::retain( primitive ) );
+    });
+    encoder.encode( "primitives", ps );
+}
+
+void Geometry::decode( coding::Decoder &decoder )
+{
+    Node::decode( decoder );
+    
+    containers::Array< SharedPointer< Primitive >> ps;
+    decoder.decode( "primitives", ps );
+    ps.each( [ this ]( SharedPointer< Primitive > &p, crimild::Size ) {
+        attachPrimitive( p );
+    });
 }
 
 bool Geometry::registerInStream( Stream &s )

@@ -83,13 +83,25 @@ void LuaEncoder::encode( std::string key, crimild::Size value )
 	_ss << value << ", ";
 }
 
-void LuaEncoder::encode( std::string key, crimild::Int32 value ) 
+void LuaEncoder::encode( std::string key, crimild::UInt16 value )
 {
 	encodeKey( key );
 	_ss << value << ", ";
 }
 
-void LuaEncoder::encode( std::string key, crimild::Bool value ) 
+void LuaEncoder::encode( std::string key, crimild::Int32 value )
+{
+    encodeKey( key );
+    _ss << value << ", ";
+}
+
+void LuaEncoder::encode( std::string key, crimild::UInt32 value )
+{
+    encodeKey( key );
+    _ss << value << ", ";
+}
+
+void LuaEncoder::encode( std::string key, crimild::Bool value )
 {
 	encodeKey( key );
 	_ss << ( value ? "true" : "false" ) << ", ";
@@ -122,14 +134,24 @@ void LuaEncoder::encode( std::string key, const Transformation &value )
     _ss << "{ ";
     _indentLevel++;
     
-    encodeKey( "translate" );
-	_ss << "{ " << value.getTranslate().x() << ", " << value.getTranslate().y() << ", " << value.getTranslate().z() << " }, ";
+    encode( "translate", value.getTranslate() );
+    
+    encodeKey( "rotate_q" );
+    auto q = value.getRotate().getRawData();
+    _ss << "{ " << q[ 0 ] << ", " << q[ 1 ] << ", " << q[ 2 ] << ", " << q[ 3 ] << " }, ";
+    
+    encode( "scale", value.getScale() );
     
     _indentLevel--;
 	_ss << getIndentSpaces() << "}, ";
 }
 
-void LuaEncoder::encodeArrayBegin( std::string key, crimild::Size count ) 
+void LuaEncoder::encode( std::string key, const VertexFormat &value )
+{
+    // no-op
+}
+
+void LuaEncoder::encodeArrayBegin( std::string key, crimild::Size count )
 {
 	_arrayKeys.push( key );
     

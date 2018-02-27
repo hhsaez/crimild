@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,104 +25,67 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Mathematics/Clock.hpp"
+#include "SceneGraph/Group.hpp"
+#include "Coding/LuaEncoder.hpp"
+#include "Coding/LuaDecoder.hpp"
 
 #include "gtest/gtest.h"
 
-#include <thread>
-
 using namespace crimild;
 
-TEST( Clock, construction )
+TEST( GroupTest, luaCoding )
 {
-	Clock c;
+	//		node0
+	//		/   \
+	//	node1	node2
+	//			/	\
+	//		node3	node4
 
-	EXPECT_EQ( 0, c.getDeltaTime() );
-	EXPECT_EQ( 0, c.getAccumTime() );
-}
+    auto encoder = crimild::alloc< coding::LuaEncoder >();
 
-TEST( Clock, constructionWithDelta )
-{
-	Clock c( 0.016 );
+	{
+		auto node0 = crimild::alloc< Group >( "node0" );
+		auto node1 = crimild::alloc< Group >( "node1" );
+		node0->attachNode( node1 );
+		auto node2 = crimild::alloc< Group >( "node2" );
+		node0->attachNode( node2 );
+		auto node3 = crimild::alloc< Group >( "node3" );
+		node2->attachNode( node3 );
+		auto node4 = crimild::alloc< Group >( "node4" );
+		node2->attachNode( node4 );
 
-	EXPECT_EQ( 0.016, c.getDeltaTime() );
-	EXPECT_EQ( 0, c.getAccumTime() );
-}
+		encoder->encode( node0 );
+	}
+		
+    auto encoded = "scene = " + encoder->getEncodedString();
+    auto decoder = crimild::alloc< coding::LuaDecoder >();
+    decoder->parse( encoded );
 
-TEST( Clock, addDelta )
-{
-	Clock c0;
+	{
+		auto n0 = decoder->getObjectAt< Group >( 0 );
+		EXPECT_TRUE( n0 != nullptr );
+		EXPECT_EQ( "node0", n0->getName() );
+		EXPECT_EQ( 2, n0->getNodeCount() );
 
-	EXPECT_EQ( 0, c0.getDeltaTime() );
-	EXPECT_EQ( 0, c0.getAccumTime() );
+		auto n1 = n0->getNodeAt< Group >( 0 );
+		EXPECT_TRUE( n1 != nullptr );
+		EXPECT_EQ( "node1", n1->getName() );
+		EXPECT_EQ( 0, n1->getNodeCount() );
+		
+		auto n2 = n0->getNodeAt< Group >( 1 );
+		EXPECT_TRUE( n2 != nullptr );
+		EXPECT_EQ( "node2", n2->getName() );
+		EXPECT_EQ( 2, n2->getNodeCount() );
 
-	c0 += 2.0;
-
-	EXPECT_EQ( 2, c0.getDeltaTime() );
-	EXPECT_EQ( 2, c0.getAccumTime() );
-}
-
-TEST( Clock, addClocks )
-{
-	Clock c0, c1( 1.0 );
-
-	EXPECT_EQ( 0, c0.getDeltaTime() );
-	EXPECT_EQ( 0, c0.getAccumTime() );
-
-	EXPECT_EQ( 1, c1.getDeltaTime() );
-	EXPECT_EQ( 0, c1.getAccumTime() );
-
-	c0 += c1;
-
-	EXPECT_EQ( 1, c1.getDeltaTime() );
-	EXPECT_EQ( 1, c0.getAccumTime() );
-}
-
-TEST( Clock, timeoutWithoutRepeat )
-{
-	const Clock TIMER( 0.008 );
-	
-	bool invoked = false;
-	Clock c;
-	c.setTimeout( [&]( void ) {
-		invoked = true;
-	}, 0.016, false );
-
-	c.tick();
-	EXPECT_FALSE( invoked );
-
-	c += TIMER;
-	EXPECT_FALSE( invoked );
-
-	c += TIMER;
-	EXPECT_TRUE( invoked );
-
-	invoked = false;
-	c += TIMER;
-	EXPECT_FALSE( invoked );
-}
-
-TEST( Clock, timeoutWithRepeat )
-{
-	const Clock TIMER( 0.008 );
-	
-	bool invoked = false;
-	Clock c;
-	c.setTimeout( [&]( void ) {
-		invoked = true;
-	}, 0.016, true );
-
-	c.tick();
-	EXPECT_FALSE( invoked );
-
-	c += TIMER;
-	EXPECT_FALSE( invoked );
-
-	c += TIMER;
-	EXPECT_TRUE( invoked );
-
-	invoked = false;
-	c += TIMER;
-	EXPECT_TRUE( invoked );
+		auto n3 = n2->getNodeAt< Group >( 0 );
+		EXPECT_TRUE( n3 != nullptr );
+		EXPECT_EQ( "node3", n3->getName() );
+		EXPECT_EQ( 0, n3->getNodeCount() );
+		
+		auto n4 = n2->getNodeAt< Group >( 1 );
+		EXPECT_TRUE( n4 != nullptr );
+		EXPECT_EQ( "node4", n4->getName() );
+		EXPECT_EQ( 0, n4->getNodeCount() );
+	}
 }
 

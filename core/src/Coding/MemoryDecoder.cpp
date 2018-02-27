@@ -51,6 +51,9 @@ MemoryDecoder::~MemoryDecoder( void )
 void MemoryDecoder::decode( std::string key, SharedPointer< coding::Codable > &codable )
 {
 	codable = _links[ _currentObj->getUniqueID() ][ key ];
+    if ( codable == nullptr ) {
+        return;
+    }
 	
 	auto temp = _currentObj;
 	_currentObj = codable;
@@ -63,50 +66,17 @@ void MemoryDecoder::decode( std::string key, SharedPointer< coding::Codable > &c
 
 void MemoryDecoder::decode( std::string key, std::string &value )
 {
-	auto obj = crimild::cast_ptr< EncodedData >( _links[ _currentObj->getUniqueID() ][ key ] );
-    value = obj->getString();
-}
+    crimild::Size l = 0;
+    decode( key + "_length", l );
+    
+    if ( l > 0 ) {
+        auto obj = crimild::cast_ptr< EncodedData >( _links[ _currentObj->getUniqueID() ][ key ] );
 
-void MemoryDecoder::decode( std::string key, crimild::Size &value )
-{
-	auto obj = crimild::cast_ptr< EncodedData >( _links[ _currentObj->getUniqueID() ][ key ] );
-	value = obj->getValue< crimild::Size >();
-}
-
-void MemoryDecoder::decode( std::string key, crimild::Int32 &value )
-{
-	auto obj = crimild::cast_ptr< EncodedData >( _links[ _currentObj->getUniqueID() ][ key ] );
-	value = obj->getValue< crimild::Int32 >();
-}
-
-void MemoryDecoder::decode( std::string key, crimild::Bool &value )
-{
-	auto obj = crimild::cast_ptr< EncodedData >( _links[ _currentObj->getUniqueID() ][ key ] );
-	value = obj->getValue< crimild::Bool >();
-}
-
-void MemoryDecoder::decode( std::string key, crimild::Real32 &value )
-{
-	auto obj = crimild::cast_ptr< EncodedData >( _links[ _currentObj->getUniqueID() ][ key ] );
-	value = obj->getValue< crimild::Real32 >();
-}
-
-void MemoryDecoder::decode( std::string key, crimild::Real64 &value )
-{
-	auto obj = crimild::cast_ptr< EncodedData >( _links[ _currentObj->getUniqueID() ][ key ] );
-	value = obj->getValue< crimild::Real64 >();
-}
-
-void MemoryDecoder::decode( std::string key, crimild::Vector3f &value )
-{
-	auto obj = crimild::cast_ptr< EncodedData >( _links[ _currentObj->getUniqueID() ][ key ] );
-	value = obj->getValue< crimild::Vector3f >();
-}
-
-void MemoryDecoder::decode( std::string key, Transformation &value )
-{
-	auto obj = crimild::cast_ptr< EncodedData >( _links[ _currentObj->getUniqueID() ][ key ] );
-	value = obj->getValue< Transformation >();
+        containers::ByteArray data( l + 1 );
+        memcpy( &data[ 0 ], obj->getBytes().getData(), l );
+        data[ l ] = '\0';
+        value = std::string( ( char * ) data.getData() );
+    }
 }
 
 crimild::Size MemoryDecoder::beginDecodingArray( std::string key )
@@ -251,12 +221,12 @@ crimild::Bool MemoryDecoder::fromBytes( const containers::ByteArray &bytes )
 	return true;
 }
 
-crimild::Size MemoryDecoder::read( const containers::ByteArray &bytes, Codable::UniqueID &value, crimild::Size offset ) const
+crimild::Size MemoryDecoder::read( const containers::ByteArray &bytes, Codable::UniqueID &value, crimild::Size offset )
 {
     return readRawBytes( bytes, &value, sizeof( Codable::UniqueID ), offset );
 }
 
-crimild::Size MemoryDecoder::read( const containers::ByteArray &bytes, std::string &value, crimild::Size offset ) const
+crimild::Size MemoryDecoder::read( const containers::ByteArray &bytes, std::string &value, crimild::Size offset )
 {
     containers::ByteArray buffer;
     auto readBytes = read( bytes, buffer, offset );
@@ -264,7 +234,7 @@ crimild::Size MemoryDecoder::read( const containers::ByteArray &bytes, std::stri
     return readBytes;
 }
 
-crimild::Size MemoryDecoder::read( const containers::ByteArray &bytes, containers::ByteArray &value, crimild::Size offset ) const
+crimild::Size MemoryDecoder::read( const containers::ByteArray &bytes, containers::ByteArray &value, crimild::Size offset )
 {
     crimild::Size count;
     auto readBytes = readRawBytes( bytes, &count, sizeof( crimild::Size ), offset );
@@ -273,7 +243,7 @@ crimild::Size MemoryDecoder::read( const containers::ByteArray &bytes, container
     return readBytes;
 }
 
-crimild::Size MemoryDecoder::readRawBytes( const containers::ByteArray &bytes, void *data, crimild::Size count, crimild::Size offset ) const
+crimild::Size MemoryDecoder::readRawBytes( const containers::ByteArray &bytes, void *data, crimild::Size count, crimild::Size offset )
 {
     memcpy( data, bytes.getData() + offset, sizeof( crimild::Byte ) * count );
     return count;

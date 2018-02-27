@@ -30,5 +30,14 @@
 void crimild::init( void )
 {
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::coding::EncodedData );
+    
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Node );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Group );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Geometry );
+    
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Primitive );
+    
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::VertexBufferObject );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::IndexBufferObject );
 }
 

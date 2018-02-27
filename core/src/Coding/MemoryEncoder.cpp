@@ -45,6 +45,10 @@ MemoryEncoder::~MemoryEncoder( void )
             
 void MemoryEncoder::encode( SharedPointer< Codable > const &obj )
 {
+    if ( obj == nullptr ) {
+        return;
+    }
+    
 	if ( _sortedObjects.contains( obj ) ) {
 		// object already register, remove it so it will be reinserted
 		// again with a higher priority
@@ -67,6 +71,10 @@ void MemoryEncoder::encode( SharedPointer< Codable > const &obj )
 
 void MemoryEncoder::encode( std::string key, SharedPointer< Codable > const &obj )
 {
+    if ( obj == nullptr ) {
+        return;
+    }
+    
 	auto parentID = _parent->getUniqueID();
     
 	_links[ parentID ][ key ] = obj->getUniqueID();
@@ -79,41 +87,6 @@ void MemoryEncoder::encode( std::string key, std::string value )
 	crimild::Size L = value.length();
 	encode( key + "_length", L );
     
-    encodeData( key, value );
-}
-
-void MemoryEncoder::encode( std::string key, const Transformation &value )
-{
-    encodeData( key, value );
-}
-
-void MemoryEncoder::encode( std::string key, crimild::Size value )
-{
-    encodeData( key, value );
-}
-
-void MemoryEncoder::encode( std::string key, crimild::Int32 value )
-{
-    encodeData( key, value );
-}
-            
-void MemoryEncoder::encode( std::string key, crimild::Bool value )
-{
-    encodeData( key, value );
-}
-
-void MemoryEncoder::encode( std::string key, crimild::Real32 value )
-{
-    encodeData( key, value );
-}
-
-void MemoryEncoder::encode( std::string key, crimild::Real64 value )
-{
-    encodeData( key, value );
-}
-
-void MemoryEncoder::encode( std::string key, const crimild::Vector3f &value )
-{
     encodeData( key, value );
 }
 
@@ -174,7 +147,7 @@ containers::ByteArray MemoryEncoder::getBytes( void ) const
     return result;
 }
 
-void MemoryEncoder::append( containers::ByteArray &out, std::string value ) const
+void MemoryEncoder::append( containers::ByteArray &out, std::string value )
 {
     containers::ByteArray bytes( value.length() + 1 );
     memcpy( &bytes.getData()[ 0 ], value.c_str(), sizeof( crimild::Char ) * value.length() );
@@ -182,19 +155,19 @@ void MemoryEncoder::append( containers::ByteArray &out, std::string value ) cons
     append( out, bytes );
 }
 
-void MemoryEncoder::append( containers::ByteArray &out, Codable::UniqueID value ) const
+void MemoryEncoder::append( containers::ByteArray &out, Codable::UniqueID value )
 {
     appendRawBytes( out, sizeof( Codable::UniqueID ), &value );
 }
 
-void MemoryEncoder::append( containers::ByteArray &out, const containers::ByteArray &data ) const
+void MemoryEncoder::append( containers::ByteArray &out, const containers::ByteArray &data )
 {
     crimild::Size count = data.size();
     appendRawBytes( out, sizeof( crimild::Size ), &count );
     appendRawBytes( out, data.size(), data.getData() );
 }
 
-void MemoryEncoder::appendRawBytes( containers::ByteArray &out, crimild::Size count, const void *data ) const
+void MemoryEncoder::appendRawBytes( containers::ByteArray &out, crimild::Size count, const void *data )
 {
     for ( crimild::Size i = 0; i < count; i++ ) {
         out.add( static_cast< const crimild::Byte * >( data )[ i ] );

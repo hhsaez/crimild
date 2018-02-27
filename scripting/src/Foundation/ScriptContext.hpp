@@ -138,11 +138,15 @@ namespace crimild {
 
 			bool parse( std::string text );
             
+            void setFailOnParse( crimild::Bool value ) { _failOnParse = value; };
+            crimild::Bool failOnParse( void ) const { return _failOnParse; }
+            
         public:
             ScriptEvaluator &getEvaluator( void ) { return _evaluator; }
             
         private:
             ScriptEvaluator _evaluator;
+            crimild::Bool _failOnParse = true;
 
 		public:
 			int yield( void );
@@ -279,7 +283,9 @@ namespace crimild {
             }
             else {
 #if CRIMILD_SCRIPTING_LOG_VERBOSE
-                Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot parse ", expandExpression( expr ), "\n\tReason: ", lua_tostring( state, -1 ) );
+                if ( getContext()->failOnParse() ) {
+                    Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot parse ", expandExpression( expr ), "\n\tReason: ", lua_tostring( state, -1 ) );
+                }
 #endif
             }
             
@@ -336,28 +342,28 @@ namespace crimild {
             getPropValue( name + ".translate", result.translate() );
             getPropValue( name + ".scale", result.scale() );
             
+            // avoid excesive error logging of optional values
+            getContext()->setFailOnParse( false );
+            
             Vector4f axisAngle;
+            Vector3f euler;
+            Vector3f lookAt;
+
             if ( getPropValue( name + ".rotate", axisAngle ) ) {
                 result.rotate().fromAxisAngle( Vector3f( axisAngle[ 0 ], axisAngle[ 1 ], axisAngle[ 2 ] ), Numericf::DEG_TO_RAD * axisAngle[ 3 ] );
-                return true;
             }
-
-			Vector3f euler;
-			if ( getPropValue( name + ".rotate_euler", euler ) ) {
+			else if ( getPropValue( name + ".rotate_euler", euler ) ) {
 				euler = Numericf::DEG_TO_RAD * euler;
 				result.rotate().fromEulerAngles( euler[ 0 ], euler[ 1 ], euler[ 2 ] );
-				return true;
 			}
-            
-            if ( getPropValue( name + ".rotate_q", result.rotate() ) ) {
-                return true;
-            }
-
-            Vector3f lookAt;
-            if ( getPropValue( name + ".lookAt", lookAt ) ) {
+            else if ( getPropValue( name + ".lookAt", lookAt ) ) {
                 result.lookAt( lookAt, Vector3f( 0.0f, 1.0f, 0.0f ) );
-                return true;    // redundant?
             }
+            else {
+                getPropValue( name + ".rotate_q", result.rotate() );
+            }
+            
+            getContext()->setFailOnParse( true );
             
             return true;
         }

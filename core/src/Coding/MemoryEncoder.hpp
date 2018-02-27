@@ -49,13 +49,17 @@ namespace crimild {
             virtual void encode( std::string key, SharedPointer< Codable > const &obj ) override;
             
             virtual void encode( std::string key, std::string value ) override;
-            virtual void encode( std::string key, const Transformation &value ) override;
-            virtual void encode( std::string key, crimild::Size value ) override;
-            virtual void encode( std::string key, crimild::Int32 value ) override;
-            virtual void encode( std::string key, crimild::Real32 value ) override;
-            virtual void encode( std::string key, crimild::Real64 value ) override;
-            virtual void encode( std::string key, const Vector3f &value ) override;
-            virtual void encode( std::string key, crimild::Bool value ) override;
+            
+            virtual void encode( std::string key, const Transformation &value ) override { encodeData( key, value ); }
+            virtual void encode( std::string key, crimild::Size value ) override { encodeData( key, value ); }
+            virtual void encode( std::string key, crimild::UInt16 value ) override { encodeData( key, value ); }
+            virtual void encode( std::string key, crimild::Int32 value ) override { encodeData( key, value ); }
+            virtual void encode( std::string key, crimild::UInt32 value ) override { encodeData( key, value ); }
+            virtual void encode( std::string key, crimild::Real32 value ) override { encodeData( key, value ); }
+            virtual void encode( std::string key, crimild::Real64 value ) override { encodeData( key, value ); }
+            virtual void encode( std::string key, const Vector3f &value ) override { encodeData( key, value ); }
+            virtual void encode( std::string key, crimild::Bool value ) override { encodeData( key, value ); }
+            virtual void encode( std::string key, const crimild::VertexFormat &value ) override { encodeData( key, value ); }
             
             containers::ByteArray getBytes( void ) const;
             
@@ -71,11 +75,10 @@ namespace crimild {
                 encode( key, crimild::cast_ptr< EncodedData >( encoded ) );
             }
             
-            void append( containers::ByteArray &out, std::string value ) const;
-            void append( containers::ByteArray &out, Codable::UniqueID value ) const;
-            void append( containers::ByteArray &out, const containers::ByteArray &data ) const;
-            
-            void appendRawBytes( containers::ByteArray &out, crimild::Size count, const void *data ) const;
+            static void append( containers::ByteArray &out, std::string value );
+            static void append( containers::ByteArray &out, Codable::UniqueID value );
+            static void append( containers::ByteArray &out, const containers::ByteArray &data );
+            static void appendRawBytes( containers::ByteArray &out, crimild::Size count, const void *data );
             
         private:
             containers::Stack< SharedPointer< Codable >> _sortedObjects;

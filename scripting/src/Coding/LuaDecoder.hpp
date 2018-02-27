@@ -48,12 +48,15 @@ namespace crimild {
 
             virtual void decode( std::string key, std::string &value ) override;
             virtual void decode( std::string key, crimild::Size &value ) override;
+            virtual void decode( std::string key, crimild::UInt16 &value ) override;
             virtual void decode( std::string key, crimild::Int32 &value ) override;
+            virtual void decode( std::string key, crimild::UInt32 &value ) override;
             virtual void decode( std::string key, crimild::Bool &value ) override;
             virtual void decode( std::string key, crimild::Real32 &value ) override;
             virtual void decode( std::string key, crimild::Real64 &value ) override;
             virtual void decode( std::string key, Vector3f &value ) override;
             virtual void decode( std::string key, Transformation &value ) override;
+            virtual void decode( std::string key, VertexFormat &value ) override;
 
 			void parse( std::string str );
 			void parseFile( std::string filename );

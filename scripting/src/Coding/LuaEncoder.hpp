@@ -45,12 +45,15 @@ namespace crimild {
 
             virtual void encode( std::string key, std::string value ) override;
             virtual void encode( std::string key, crimild::Size value ) override;
+            virtual void encode( std::string key, crimild::UInt16 value ) override;
             virtual void encode( std::string key, crimild::Int32 value ) override;
+            virtual void encode( std::string key, crimild::UInt32 value ) override;
             virtual void encode( std::string key, crimild::Bool value ) override;
             virtual void encode( std::string key, crimild::Real32 value ) override;
             virtual void encode( std::string key, crimild::Real64 value ) override;
             virtual void encode( std::string key, const Vector3f &value ) override;
             virtual void encode( std::string key, const Transformation &value ) override;
+            virtual void encode( std::string key, const VertexFormat &value ) override;
 
 			inline std::string getEncodedString( void ) const
 			{

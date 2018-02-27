@@ -26,6 +26,8 @@
  */
 
 #include "Primitive.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::Primitive )
 
@@ -40,6 +42,87 @@ Primitive::~Primitive( void )
 {
     _indexBuffer = nullptr;
     _vertexBuffer = nullptr;
+}
+
+void Primitive::encode( coding::Encoder &encoder )
+{
+    Codable::encode( encoder );
+    
+    int type;
+    switch ( _type ) {
+        case Primitive::Type::POINTS:
+            type = 0;
+            break;
+            
+        case Primitive::Type::LINES:
+            type = 1;
+            break;
+            
+        case Primitive::Type::LINE_LOOP:
+            type = 2;
+            break;
+            
+        case Primitive::Type::LINE_STRIP:
+            type = 3;
+            break;
+            
+        case Primitive::Type::TRIANGLES:
+            type = 4;
+            break;
+            
+        case Primitive::Type::TRIANGLE_STRIP:
+            type = 5;
+            break;
+            
+        case Primitive::Type::TRIANGLE_FAN:
+            type = 6;
+            break;
+    }
+    
+    encoder.encode( "primitiveType", type );
+    
+    encoder.encode( "vertexBuffer", _vertexBuffer );
+    encoder.encode( "indexBuffer", _indexBuffer );
+}
+
+void Primitive::decode( coding::Decoder &decoder )
+{
+    Codable::decode( decoder );
+    
+    int type;
+    decoder.decode( "primitiveType", type );
+    switch ( type ) {
+        case 0:
+            _type = Primitive::Type::POINTS;
+            break;
+            
+        case 1:
+            _type = Primitive::Type::LINES;
+            break;
+            
+        case 2:
+            _type = Primitive::Type::LINE_LOOP;
+            break;
+            
+        case 3:
+            _type = Primitive::Type::LINE_STRIP;
+            break;
+            
+        case 4:
+            _type = Primitive::Type::TRIANGLES;
+            break;
+            
+        case 5:
+            _type = Primitive::Type::TRIANGLE_STRIP;
+            break;
+            
+        case 6:
+            _type = Primitive::Type::TRIANGLE_FAN;
+            break;
+    }
+
+    decoder.decode( "vertexBuffer", _vertexBuffer );
+    decoder.decode( "indexBuffer", _indexBuffer );
 }
 
 bool Primitive::registerInStream( Stream &s )

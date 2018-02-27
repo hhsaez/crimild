@@ -29,6 +29,7 @@
 #define CRIMILD_CORE_CODING_MEMORY_DECODER_
 
 #include "Decoder.hpp"
+#include "EncodedData.hpp"
 
 #include "Foundation/Version.hpp"
 #include "Foundation/Containers/Map.hpp"
@@ -45,15 +46,27 @@ namespace crimild {
             virtual void decode( std::string key, SharedPointer< coding::Codable > &codable ) override;
 
             virtual void decode( std::string key, std::string &value ) override;
-            virtual void decode( std::string key, crimild::Size &value ) override;
-            virtual void decode( std::string key, crimild::Int32 &value ) override;
-            virtual void decode( std::string key, crimild::Bool &value ) override;
-			virtual void decode( std::string key, crimild::Real32 &value ) override;
-			virtual void decode( std::string key, crimild::Real64 &value ) override;
-			virtual void decode( std::string key, crimild::Vector3f &value ) override;
-            virtual void decode( std::string key, Transformation &value ) override;
+            
+            virtual void decode( std::string key, crimild::Size &value ) override { decodeData( key, value ); }
+            virtual void decode( std::string key, crimild::UInt16 &value ) override { decodeData( key, value ); }
+            virtual void decode( std::string key, crimild::Int32 &value ) override { decodeData( key, value ); }
+            virtual void decode( std::string key, crimild::UInt32 &value ) override { decodeData( key, value ); }
+            virtual void decode( std::string key, crimild::Bool &value ) override { decodeData( key, value ); }
+			virtual void decode( std::string key, crimild::Real32 &value ) override { decodeData( key, value ); }
+			virtual void decode( std::string key, crimild::Real64 &value ) override { decodeData( key, value ); }
+			virtual void decode( std::string key, crimild::Vector3f &value ) override { decodeData( key, value ); }
+            virtual void decode( std::string key, Transformation &value ) override { decodeData( key, value ); }
+            virtual void decode( std::string key, VertexFormat &value ) override { decodeData( key, value ); }
             
             crimild::Bool fromBytes( const containers::ByteArray &bytes );
+            
+        private:
+            template< typename T >
+            void decodeData( std::string key, T &value )
+            {
+                auto obj = crimild::cast_ptr< EncodedData >( _links[ _currentObj->getUniqueID() ][ key ] );
+                value = obj->getValue< T >();
+            }
 
 		protected:
 			virtual crimild::Size beginDecodingArray( std::string key ) override;
@@ -62,11 +75,10 @@ namespace crimild {
 			virtual void endDecodingArray( std::string key ) override;
             
         private:
-            crimild::Size read( const containers::ByteArray &bytes, Codable::UniqueID &value, crimild::Size offset ) const;
-            crimild::Size read( const containers::ByteArray &bytes, std::string &value, crimild::Size offset ) const;
-            crimild::Size read( const containers::ByteArray &bytes, containers::ByteArray &value, crimild::Size offset ) const;
-            
-            crimild::Size readRawBytes( const containers::ByteArray &bytes, void *data, crimild::Size count, crimild::Size offset ) const;
+            static crimild::Size read( const containers::ByteArray &bytes, Codable::UniqueID &value, crimild::Size offset );
+            static crimild::Size read( const containers::ByteArray &bytes, std::string &value, crimild::Size offset );
+            static crimild::Size read( const containers::ByteArray &bytes, containers::ByteArray &value, crimild::Size offset );
+            static crimild::Size readRawBytes( const containers::ByteArray &bytes, void *data, crimild::Size count, crimild::Size offset );
             
         private:
             containers::Map< Codable::UniqueID, containers::Map< std::string, SharedPointer< Codable >>> _links;

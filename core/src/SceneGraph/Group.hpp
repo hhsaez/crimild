@@ -81,9 +81,20 @@ namespace crimild {
 
 	public:
 		virtual void accept( NodeVisitor &visitor ) override;
+        
+        /**
+            \name Coding
+         */
+        //@{
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+        
+        //@}
 
 		/**
 			\name Streaming support
+            \deprecated See coding
 		*/
 		//@{
 			
