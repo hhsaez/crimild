@@ -53,6 +53,9 @@ namespace crimild {
 
 		inline bool isActive( void ) const { return _active; }
 		inline void setActive( bool active ) { _active = active; }
+        
+        void open( std::string line = "" );
+        void close( void );
 
 	private:
 		bool _enabled = false;

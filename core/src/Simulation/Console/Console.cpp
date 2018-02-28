@@ -70,6 +70,19 @@ Console::~Console( void )
 
 }
 
+void Console::open( std::string line )
+{
+    clear();
+    _commandBuffer << line;
+    setActive( true );
+}
+
+void Console::close( void )
+{
+    clear();
+    setActive( false );
+}
+
 void Console::registerCommand( ConsoleCommandPtr const &cmd )
 {
 	_commands[ cmd->getName() ] = cmd;
