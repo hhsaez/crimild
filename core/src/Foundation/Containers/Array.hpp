@@ -134,6 +134,13 @@ namespace crimild {
 				LockImpl lock( this );
 				return size_unsafe();
 			}
+            
+            inline void clear( void )
+            {
+                LockImpl lock( this );
+                resize_unsafe( 0 );
+                _size = 0;
+            }
 			
 			inline T &operator[]( crimild::Size index )
 			{
