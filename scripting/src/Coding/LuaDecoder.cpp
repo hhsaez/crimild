@@ -29,10 +29,19 @@
 
 #include <Foundation/ObjectFactory.hpp>
 #include <Coding/Codable.hpp>
+#include <Loaders/OBJLoader.hpp>
+#include <Simulation/FileSystem.hpp>
+#include <Simulation/AssetManager.hpp>
 
 using namespace crimild;
 using namespace crimild::coding;
 using namespace crimild::scripting;
+
+#ifdef CRIMILD_ENABLE_IMPORT
+    #include <Crimild_Import.hpp>
+
+    using namespace crimild::import;
+#endif
 
 LuaDecoder::LuaDecoder( std::string rootObjectName )
 	: Scripted( true ),
@@ -81,26 +90,55 @@ void LuaDecoder::parseFile( std::string filename )
 SharedPointer< SharedObject > LuaDecoder::buildObject( void )
 {
 	auto &eval = _evals.top();
-	
-	std::string type;
-	if ( !eval.getPropValue( "type", type ) ) {
-		Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot obtain 'type' member for object" );
-		return nullptr;
+
+	SharedPointer< Codable > obj;
+
+	std::string fileName;
+	if ( eval.getPropValue( "fileName", fileName ) ) {
+		auto scene = AssetManager::getInstance()->get< Group >( fileName );
+		if ( scene == nullptr ) {
+			SharedPointer< Group > tmp;
+			auto fullPath = FileSystem::getInstance().pathForResource( fileName );
+			if ( StringUtils::getFileExtension( fileName ) == ".obj" ) {
+				OBJLoader loader( fullPath );
+				tmp = loader.load();
+			}
+#ifdef CRIMILD_ENABLE_IMPORT
+			else {
+				SceneImporter importer;
+				tmp = importer.import( fullPath );
+			}
+			
+			AssetManager::getInstance()->set( fileName, tmp );
+			scene = crimild::get_ptr( tmp );
+		}
+#endif
+		// always copy assets from the cache
+		ShallowCopy shallowCopy;
+		scene->perform( shallowCopy );
+		obj = shallowCopy.getResult< Group >();
+	}
+	else {
+		std::string type;
+		if ( !eval.getPropValue( "type", type ) ) {
+			Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot obtain 'type' member for object" );
+			return nullptr;
+		}
+
+		auto builder = ObjectFactory::getInstance()->getBuilder( type );
+		if ( builder == nullptr ) {
+			Log::error( CRIMILD_CURRENT_CLASS_NAME, "No builder defined for type: ", type );
+			return nullptr;
+		}
+		
+        obj = crimild::cast_ptr< Codable >( builder () );
+		if ( obj == nullptr ) {
+			Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot build object of type: ", type );
+			return nullptr;
+		}
 	}
 
-	auto builder = ObjectFactory::getInstance()->getBuilder( type );
-	if ( builder == nullptr ) {
-		Log::error( CRIMILD_CURRENT_CLASS_NAME, "No builder defined for type: ", type );
-		return nullptr;
-	}
-
-    auto obj = builder();
-	if ( obj == nullptr ) {
-		Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot build object of type: ", type );
-		return nullptr;
-	}
-
-	crimild::dynamic_cast_ptr< Codable >( obj )->decode( *this );
+	obj->decode( *this );
 
 	return obj;
 }
