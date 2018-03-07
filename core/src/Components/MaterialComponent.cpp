@@ -55,6 +55,15 @@ void MaterialComponent::forEachMaterial( std::function< void( Material * ) > cal
     _materials.forEach( callback );
 }
 
+SharedPointer< NodeComponent > MaterialComponent::clone( void )
+{
+    auto other = crimild::alloc< MaterialComponent >();
+    forEachMaterial( [ other ]( Material *material ) {
+        other->attachMaterial( material );
+    });
+    return other;
+}
+
 bool MaterialComponent::registerInStream( Stream &s )
 {
 	if ( !NodeComponent::registerInStream( s ) ) {

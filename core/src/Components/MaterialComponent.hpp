@@ -57,6 +57,15 @@ namespace crimild {
 
 	private:
 		SharedObjectArray< Material > _materials;
+        
+        /**
+            \name Clonning
+         */
+        //@{
+    public:
+        virtual SharedPointer< NodeComponent > clone( void ) override;
+        
+        //@}
 
 		/**
 			\name Streaming support

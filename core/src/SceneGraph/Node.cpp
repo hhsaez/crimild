@@ -181,9 +181,17 @@ void Node::encode( coding::Encoder &encoder )
     Codable::encode( encoder );
     
     encoder.encode( "name", getName() );
-    encoder.encode( "transform", getLocal() );
-    encoder.encode( "worldTransform", getWorld() );
+    encoder.encode( "transformation", getLocal() );
+    encoder.encode( "worldTransformation", getWorld() );
     encoder.encode( "worldIsCurrent", worldIsCurrent() );
+    
+    containers::Array< SharedPointer< NodeComponent >> cmps;
+    for ( auto &it : _components ) {
+        if ( it.second != nullptr ) {
+            cmps.add( it.second );
+        }
+    }
+    encoder.encode( "components", cmps );
 }
 
 void Node::decode( coding::Decoder &decoder )
@@ -194,12 +202,18 @@ void Node::decode( coding::Decoder &decoder )
     decoder.decode( "name", name );
     setName( name );
     
-    decoder.decode( "transform", local() );
-    decoder.decode( "worldTransform", world() );
+    decoder.decode( "transformation", local() );
+    decoder.decode( "worldTransformation", world() );
     
     crimild::Bool worldIsCurrent = false;
     decoder.decode( "worldIsCurrent", worldIsCurrent );
     setWorldIsCurrent( worldIsCurrent );
+    
+    containers::Array< SharedPointer< NodeComponent >> cmps;
+    decoder.decode( "components", cmps );
+    cmps.each( [ this ]( SharedPointer< NodeComponent > &c, crimild::Size ) {
+        attachComponent( c );
+    });
 }
 
 bool Node::registerInStream( Stream &s )

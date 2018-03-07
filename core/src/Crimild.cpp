@@ -39,5 +39,9 @@ void crimild::init( void )
     
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::VertexBufferObject );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::IndexBufferObject );
+    
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::RenderStateComponent );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::MaterialComponent );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::RotationComponent );
 }
 

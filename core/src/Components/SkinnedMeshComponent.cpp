@@ -174,6 +174,12 @@ void SkinnedMeshComponent::renderDebugInfo( Renderer *renderer, Camera *camera )
 	DebugRenderHelper::renderLines( renderer, camera, &lines[ 0 ], lines.size(), RGBAColorf( 1.0f, 0.0f, 0.0f, 1.0f ) );
 }
 
+SharedPointer< NodeComponent > SkinnedMeshComponent::clone( void )
+{
+    auto other = crimild::alloc< SkinnedMeshComponent >( getSkinnedMesh()->clone() );
+    return other;
+}
+
 bool SkinnedMeshComponent::registerInStream( Stream &s )
 {
 	if ( !NodeComponent::registerInStream( s ) ) {

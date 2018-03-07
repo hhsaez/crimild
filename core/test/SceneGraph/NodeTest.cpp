@@ -30,7 +30,7 @@
 #include "Streaming/FileStream.hpp"
 #include "Coding/MemoryEncoder.hpp"
 #include "Coding/MemoryDecoder.hpp"
-
+#include "Components/RotationComponent.hpp"
 #include "Utils/MockComponent.hpp"
 
 #include "gtest/gtest.h"
@@ -355,5 +355,22 @@ TEST( NodeTest, codingTransformation )
 	EXPECT_EQ( n1->getLocal().getTranslate(), n2->getLocal().getTranslate() );
 	EXPECT_EQ( n1->getLocal().getRotate(), n2->getLocal().getRotate() );
 	EXPECT_EQ( n1->getLocal().getScale(), n2->getLocal().getScale() );
+}
+
+TEST( NodeTest, codingComponents )
+{
+    auto n1 = crimild::alloc< Node >( "Some Node" );
+    n1->attachComponent< RotationComponent >( Vector3f( 1.0, 2.0, 3.0 ), 3.14159f );
+    
+    auto encoder = crimild::alloc< coding::MemoryEncoder >();
+    encoder->encode( n1 );
+    auto bytes = encoder->getBytes();
+    auto decoder = crimild::alloc< coding::MemoryDecoder >();
+    decoder->fromBytes( bytes );
+    
+    auto n2 = decoder->getObjectAt< Node >( 0 );
+    EXPECT_TRUE( n2 != nullptr );
+    auto cmp = n2->getComponent< RotationComponent >();
+    EXPECT_TRUE( cmp != nullptr );
 }
 

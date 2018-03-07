@@ -73,6 +73,15 @@ namespace crimild {
 		bool _loop;
 		float _timeScale;
 		AnimationProgressCallback _animationProgressCallback;
+        
+        /**
+            \name Clonning
+         */
+        //@{
+    public:
+        virtual SharedPointer< NodeComponent > clone( void ) override;
+        
+        //@}
 
 		/**
 			\name Streaming
