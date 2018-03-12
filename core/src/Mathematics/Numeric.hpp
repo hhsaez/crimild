@@ -214,7 +214,12 @@ namespace crimild {
         
         static PRECISION ceil( double n )
         {
-            return ( PRECISION ) ::ceil( n );
+            return ( PRECISION ) std::ceil( n );
+        }
+        
+        static PRECISION floor( double n )
+        {
+            return ( PRECISION ) std::floor( n );
         }
     };
     
