@@ -127,7 +127,15 @@ void LuaEncoder::encode( std::string key, const Vector3f &value )
 	_ss << "}, ";
 }
 
-void LuaEncoder::encode( std::string key, const Transformation &value ) 
+void LuaEncoder::encode( std::string key, const Vector4f &value )
+{
+    encodeKey( key );
+    _ss << "{ ";
+    _ss << value.x() << ", " << value.y() << ", " << value.z() << ", " << value.w();
+    _ss << "}, ";
+}
+
+void LuaEncoder::encode( std::string key, const Transformation &value )
 {
 	encodeKey( key );
 	

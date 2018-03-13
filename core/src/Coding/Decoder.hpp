@@ -67,6 +67,7 @@ namespace crimild {
 			virtual void decode( std::string key, crimild::Real32 &value ) = 0;
 			virtual void decode( std::string key, crimild::Real64 &value ) = 0;
 			virtual void decode( std::string key, crimild::Vector3f &value ) = 0;
+            virtual void decode( std::string key, crimild::Vector4f &value ) = 0;
             virtual void decode( std::string key, Transformation &value ) = 0;
             virtual void decode( std::string key, VertexFormat &value ) = 0;
 

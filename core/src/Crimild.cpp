@@ -34,6 +34,8 @@ void crimild::init( void )
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Node );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Group );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Geometry );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Camera );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Light );
     
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Primitive );
     

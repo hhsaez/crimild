@@ -192,7 +192,12 @@ void LuaDecoder::decode( std::string key, Vector3f &value )
 	_evals.top().getPropValue( key, value );
 }
 
-void LuaDecoder::decode( std::string key, Transformation &value ) 
+void LuaDecoder::decode( std::string key, Vector4f &value )
+{
+    _evals.top().getPropValue( key, value );
+}
+
+void LuaDecoder::decode( std::string key, Transformation &value )
 {
 	_evals.top().getPropValue( key, value );
 }
