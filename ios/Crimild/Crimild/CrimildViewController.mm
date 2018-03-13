@@ -27,6 +27,7 @@
 
 #import "CrimildViewController.h"
 #import "CrimildView.h"
+#import "CrimildAVAudioManager.h"
 
 #include <Crimild_Scripting.hpp>
 
@@ -194,6 +195,8 @@
     
     crimild::FileSystem::getInstance().setBaseDirectory( [[self applicationBundleDirectory] UTF8String] );
     crimild::FileSystem::getInstance().setDocumentsDirectory( [[self applicationDocumentsDirectory] UTF8String] );
+    
+    [self simulation]->setAudioManager( crimild::alloc< crimild::ios::AVAudioManager >() );
     
 //#if TARGET_OS_TV
 //    crimild::TaskManager::getInstance()->setNumThreads( 2 );

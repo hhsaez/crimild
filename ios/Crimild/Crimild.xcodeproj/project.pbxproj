@@ -106,8 +106,6 @@
 		5F35E3471D4E6714001F5C7C /* lzio.c in Sources */ = {isa = PBXBuildFile; fileRef = 5F35D4E91D4E66F5001F5C7C /* lzio.c */; };
 		5F35E3481D4E6714001F5C7C /* lzio.h in Headers */ = {isa = PBXBuildFile; fileRef = 5F35D4EA1D4E66F5001F5C7C /* lzio.h */; };
 		5F35E3491D4E6714001F5C7C /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = 5F35D4EB1D4E66F5001F5C7C /* Makefile */; };
-		5F35E3A41D4E67AC001F5C7C /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F35E3A31D4E67AC001F5C7C /* Metal.framework */; };
-		5F35E3A61D4E67C4001F5C7C /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F35E3A51D4E67C4001F5C7C /* QuartzCore.framework */; };
 		5F4149342058109A00466394 /* VertexBufferObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F4147442058109800466394 /* VertexBufferObject.cpp */; };
 		5F4149352058109A00466394 /* Catalog.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F4147452058109800466394 /* Catalog.hpp */; };
 		5F4149362058109A00466394 /* RenderState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F4147462058109800466394 /* RenderState.cpp */; };
@@ -806,10 +804,21 @@
 		5F414CF9205810CD00466394 /* FrameBufferObjectCatalog.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F414CAA205810CD00466394 /* FrameBufferObjectCatalog.hpp */; };
 		5F414CFA205810CD00466394 /* TextureCatalog.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5F414CAB205810CD00466394 /* TextureCatalog.hpp */; };
 		5F414CFB205810CD00466394 /* ShaderProgramCatalog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F414CAC205810CD00466394 /* ShaderProgramCatalog.cpp */; };
+		5F414D3B2058235500466394 /* CrimildAVAudioClipSource.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5F414D392058235500466394 /* CrimildAVAudioClipSource.mm */; };
+		5F414D3C2058235500466394 /* CrimildAVAudioClipSource.h in Headers */ = {isa = PBXBuildFile; fileRef = 5F414D3A2058235500466394 /* CrimildAVAudioClipSource.h */; };
+		5F414D3F2058236400466394 /* CrimildAVAudioListener.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5F414D3D2058236400466394 /* CrimildAVAudioListener.mm */; };
+		5F414D402058236400466394 /* CrimildAVAudioListener.h in Headers */ = {isa = PBXBuildFile; fileRef = 5F414D3E2058236400466394 /* CrimildAVAudioListener.h */; };
+		5F414D432058237100466394 /* CrimildAVAudioManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5F414D412058237100466394 /* CrimildAVAudioManager.mm */; };
+		5F414D442058237100466394 /* CrimildAVAudioManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 5F414D422058237100466394 /* CrimildAVAudioManager.h */; };
+		5F414D472058238000466394 /* CrimildAVAudioMusicSource.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5F414D452058238000466394 /* CrimildAVAudioMusicSource.mm */; };
+		5F414D482058238000466394 /* CrimildAVAudioMusicSource.h in Headers */ = {isa = PBXBuildFile; fileRef = 5F414D462058238000466394 /* CrimildAVAudioMusicSource.h */; };
+		5F414D4F20582C7600466394 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F414D4E20582C7600466394 /* AVFoundation.framework */; };
+		5F414D5820582C9F00466394 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F414D5720582C9F00466394 /* Metal.framework */; };
+		5F414D5A20582CA700466394 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F414D5920582CA700466394 /* OpenAL.framework */; };
+		5F414D5C20582CB100466394 /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F414D5B20582CB100466394 /* GLKit.framework */; };
+		5F414D5E20582CB700466394 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F414D5D20582CB700466394 /* OpenGLES.framework */; };
+		5F414D602058334A00466394 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F414D5F2058334A00466394 /* AudioToolbox.framework */; };
 		5F7032241B7BB9D6001B548B /* libCrimild.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F7032181B7BB9D6001B548B /* libCrimild.a */; };
-		5F7035281B7CF467001B548B /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F7035261B7CF467001B548B /* GLKit.framework */; };
-		5F7035291B7CF467001B548B /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F7035271B7CF467001B548B /* OpenGLES.framework */; };
-		5FE67B821C04118700A944FC /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5FE67B811C04118700A944FC /* OpenAL.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -934,8 +943,6 @@
 		5F35D4E91D4E66F5001F5C7C /* lzio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lzio.c; sourceTree = "<group>"; };
 		5F35D4EA1D4E66F5001F5C7C /* lzio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lzio.h; sourceTree = "<group>"; };
 		5F35D4EB1D4E66F5001F5C7C /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
-		5F35E3A31D4E67AC001F5C7C /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
-		5F35E3A51D4E67C4001F5C7C /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		5F4147442058109800466394 /* VertexBufferObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VertexBufferObject.cpp; sourceTree = "<group>"; };
 		5F4147452058109800466394 /* Catalog.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Catalog.hpp; sourceTree = "<group>"; };
 		5F4147462058109800466394 /* RenderState.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RenderState.cpp; sourceTree = "<group>"; };
@@ -1646,12 +1653,24 @@
 		5F414CAA205810CD00466394 /* FrameBufferObjectCatalog.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = FrameBufferObjectCatalog.hpp; sourceTree = "<group>"; };
 		5F414CAB205810CD00466394 /* TextureCatalog.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = TextureCatalog.hpp; sourceTree = "<group>"; };
 		5F414CAC205810CD00466394 /* ShaderProgramCatalog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ShaderProgramCatalog.cpp; sourceTree = "<group>"; };
+		5F414D392058235500466394 /* CrimildAVAudioClipSource.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = CrimildAVAudioClipSource.mm; sourceTree = "<group>"; };
+		5F414D3A2058235500466394 /* CrimildAVAudioClipSource.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CrimildAVAudioClipSource.h; sourceTree = "<group>"; };
+		5F414D3D2058236400466394 /* CrimildAVAudioListener.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = CrimildAVAudioListener.mm; sourceTree = "<group>"; };
+		5F414D3E2058236400466394 /* CrimildAVAudioListener.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CrimildAVAudioListener.h; sourceTree = "<group>"; };
+		5F414D412058237100466394 /* CrimildAVAudioManager.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = CrimildAVAudioManager.mm; sourceTree = "<group>"; };
+		5F414D422058237100466394 /* CrimildAVAudioManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CrimildAVAudioManager.h; sourceTree = "<group>"; };
+		5F414D452058238000466394 /* CrimildAVAudioMusicSource.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = CrimildAVAudioMusicSource.mm; sourceTree = "<group>"; };
+		5F414D462058238000466394 /* CrimildAVAudioMusicSource.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CrimildAVAudioMusicSource.h; sourceTree = "<group>"; };
+		5F414D4E20582C7600466394 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		5F414D5020582C8300466394 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = QuartzCore.framework; sourceTree = "<group>"; };
+		5F414D5720582C9F00466394 /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
+		5F414D5920582CA700466394 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
+		5F414D5B20582CB100466394 /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
+		5F414D5D20582CB700466394 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
+		5F414D5F2058334A00466394 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		5F7032181B7BB9D6001B548B /* libCrimild.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libCrimild.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		5F7032231B7BB9D6001B548B /* CrimildTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CrimildTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5F7032291B7BB9D6001B548B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		5F7035261B7CF467001B548B /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
-		5F7035271B7CF467001B548B /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
-		5FE67B811C04118700A944FC /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1659,11 +1678,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5F35E3A61D4E67C4001F5C7C /* QuartzCore.framework in Frameworks */,
-				5F35E3A41D4E67AC001F5C7C /* Metal.framework in Frameworks */,
-				5FE67B821C04118700A944FC /* OpenAL.framework in Frameworks */,
-				5F7035281B7CF467001B548B /* GLKit.framework in Frameworks */,
-				5F7035291B7CF467001B548B /* OpenGLES.framework in Frameworks */,
+				5F414D602058334A00466394 /* AudioToolbox.framework in Frameworks */,
+				5F414D4F20582C7600466394 /* AVFoundation.framework in Frameworks */,
+				5F414D5E20582CB700466394 /* OpenGLES.framework in Frameworks */,
+				5F414D5C20582CB100466394 /* GLKit.framework in Frameworks */,
+				5F414D5A20582CA700466394 /* OpenAL.framework in Frameworks */,
+				5F414D5820582C9F00466394 /* Metal.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1719,6 +1739,7 @@
 		5F35AB961D4E66BB001F5C7C /* ios */ = {
 			isa = PBXGroup;
 			children = (
+				5F414D38205822B700466394 /* AV */,
 				5F35AB971D4E66BB001F5C7C /* Crimild-iOS.h */,
 				5F35AB981D4E66BB001F5C7C /* CrimildView.h */,
 				5F35AB991D4E66BB001F5C7C /* CrimildView.mm */,
@@ -3062,17 +3083,42 @@
 			path = Catalogs;
 			sourceTree = "<group>";
 		};
+		5F414D38205822B700466394 /* AV */ = {
+			isa = PBXGroup;
+			children = (
+				5F414D392058235500466394 /* CrimildAVAudioClipSource.mm */,
+				5F414D3A2058235500466394 /* CrimildAVAudioClipSource.h */,
+				5F414D3D2058236400466394 /* CrimildAVAudioListener.mm */,
+				5F414D3E2058236400466394 /* CrimildAVAudioListener.h */,
+				5F414D412058237100466394 /* CrimildAVAudioManager.mm */,
+				5F414D422058237100466394 /* CrimildAVAudioManager.h */,
+				5F414D452058238000466394 /* CrimildAVAudioMusicSource.mm */,
+				5F414D462058238000466394 /* CrimildAVAudioMusicSource.h */,
+			);
+			path = AV;
+			sourceTree = "<group>";
+		};
+		5F414D4D20582C7600466394 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				5F414D5F2058334A00466394 /* AudioToolbox.framework */,
+				5F414D5D20582CB700466394 /* OpenGLES.framework */,
+				5F414D5B20582CB100466394 /* GLKit.framework */,
+				5F414D5920582CA700466394 /* OpenAL.framework */,
+				5F414D5720582C9F00466394 /* Metal.framework */,
+				5F414D5020582C8300466394 /* QuartzCore.framework */,
+				5F414D4E20582C7600466394 /* AVFoundation.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		5F70320F1B7BB9D6001B548B = {
 			isa = PBXGroup;
 			children = (
-				5F35E3A51D4E67C4001F5C7C /* QuartzCore.framework */,
-				5F35E3A31D4E67AC001F5C7C /* Metal.framework */,
-				5FE67B811C04118700A944FC /* OpenAL.framework */,
-				5F7035261B7CF467001B548B /* GLKit.framework */,
-				5F7035271B7CF467001B548B /* OpenGLES.framework */,
 				5F70321A1B7BB9D6001B548B /* Crimild */,
 				5F7032271B7BB9D6001B548B /* CrimildTests */,
 				5F7032191B7BB9D6001B548B /* Products */,
+				5F414D4D20582C7600466394 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -3414,6 +3460,7 @@
 				5F414AF02058109B00466394 /* Sphere.hpp in Headers */,
 				5F41494C2058109A00466394 /* ShaderProgram.hpp in Headers */,
 				5F414AF42058109B00466394 /* Interpolation.hpp in Headers */,
+				5F414D482058238000466394 /* CrimildAVAudioMusicSource.h in Headers */,
 				5F4149F02058109B00466394 /* BehaviorContext.hpp in Headers */,
 				5F414BEF205810BB00466394 /* LuaBoxPositionParticleGeneratorBuilder.hpp in Headers */,
 				5F414A4F2058109B00466394 /* TrefoilKnotPrimitive.hpp in Headers */,
@@ -3475,6 +3522,7 @@
 				5F414C4A205810BB00466394 /* LuaDebugRenderComponentBuilder.hpp in Headers */,
 				5F414AD22058109B00466394 /* PositionColorParticleUpdater.hpp in Headers */,
 				5F414AAC2058109B00466394 /* AABBBoundingVolume.hpp in Headers */,
+				5F414D402058236400466394 /* CrimildAVAudioListener.h in Headers */,
 				5F414CD0205810CD00466394 /* ScreenTextureShaderProgram.hpp in Headers */,
 				5F4149942058109B00466394 /* Version.hpp in Headers */,
 				5F4149962058109B00466394 /* StringUtils.hpp in Headers */,
@@ -3503,6 +3551,7 @@
 				5F414A7A2058109B00466394 /* DebugSystem.hpp in Headers */,
 				5F4149822058109B00466394 /* InvalidFileFormatException.hpp in Headers */,
 				5F414C3A205810BB00466394 /* LuaResetNavigationBuilder.hpp in Headers */,
+				5F414D3C2058235500466394 /* CrimildAVAudioClipSource.h in Headers */,
 				5F35E3221D4E6713001F5C7C /* lgc.h in Headers */,
 				5F414BC1205810BB00466394 /* LuaSettings.hpp in Headers */,
 				5F41499D2058109B00466394 /* FixedAllocator.hpp in Headers */,
@@ -3524,6 +3573,7 @@
 				5F4149C32058109B00466394 /* SelectNodes.hpp in Headers */,
 				5F35E3261D4E6713001F5C7C /* llex.h in Headers */,
 				5F414A0E2058109B00466394 /* Transform.hpp in Headers */,
+				5F414D442058237100466394 /* CrimildAVAudioManager.h in Headers */,
 				5F41499B2058109B00466394 /* ConcurrentList.hpp in Headers */,
 				5F414BC2205810BB00466394 /* Crimild_Scripting.hpp in Headers */,
 				5F414AE02058109B00466394 /* RandomValueParticleGenerator.hpp in Headers */,
@@ -3731,6 +3781,7 @@
 				5F414CE4205810CD00466394 /* ColorTintShaderProgram.cpp in Sources */,
 				5F35E32C1D4E6714001F5C7C /* lobject.c in Sources */,
 				5F4149BD2058109B00466394 /* UpdateWorldState.cpp in Sources */,
+				5F414D3F2058236400466394 /* CrimildAVAudioListener.mm in Sources */,
 				5F4149492058109A00466394 /* Texture.cpp in Sources */,
 				5F414C1D205810BB00466394 /* LuaHasTargetsBuilder.cpp in Sources */,
 				5F414A8F2058109B00466394 /* Geometry.cpp in Sources */,
@@ -3870,6 +3921,7 @@
 				5F414AB72058109B00466394 /* OrientedQuadParticleRenderer.cpp in Sources */,
 				5F414BF8205810BB00466394 /* LuaBoxPositionParticleGeneratorBuilder.cpp in Sources */,
 				5F4149872058109B00466394 /* Profiler.cpp in Sources */,
+				5F414D3B2058235500466394 /* CrimildAVAudioClipSource.mm in Sources */,
 				5F414A6D2058109B00466394 /* Stream.cpp in Sources */,
 				5F414BD9205810BB00466394 /* LuaUniformScaleParticleUpdaterBuilder.cpp in Sources */,
 				5F414A7D2058109B00466394 /* RenderSystem.cpp in Sources */,
@@ -3893,6 +3945,7 @@
 				5F414C21205810BB00466394 /* LuaDistanceToTargetBuilder.cpp in Sources */,
 				5F414C30205810BB00466394 /* LuaPrintMessageBuilder.cpp in Sources */,
 				5F414C32205810BB00466394 /* LuaAnimateSettingValueBuilder.cpp in Sources */,
+				5F414D472058238000466394 /* CrimildAVAudioMusicSource.mm in Sources */,
 				5F414A412058109B00466394 /* NodeComponent.cpp in Sources */,
 				5F414C39205810BB00466394 /* LuaAnimateContextValueBuilder.cpp in Sources */,
 				5F414A002058109B00466394 /* MotionApply.cpp in Sources */,
@@ -3931,6 +3984,7 @@
 				5F35E31A1D4E6713001F5C7C /* ldebug.c in Sources */,
 				5F4149E82058109B00466394 /* Parallel.cpp in Sources */,
 				5F414C41205810BB00466394 /* LuaTriggerBuilder.cpp in Sources */,
+				5F414D432058237100466394 /* CrimildAVAudioManager.mm in Sources */,
 				5F35ABE81D4E66BB001F5C7C /* CrimildMetalUnlitDiffuseShaderProgram.mm in Sources */,
 				5F4149532058109A00466394 /* ShaderLocation.cpp in Sources */,
 				5F35E3491D4E6714001F5C7C /* Makefile in Sources */,
