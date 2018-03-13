@@ -108,11 +108,10 @@ SharedPointer< SharedObject > LuaDecoder::buildObject( void )
 				SceneImporter importer;
 				tmp = importer.import( fullPath );
 			}
-			
+#endif
 			AssetManager::getInstance()->set( fileName, tmp );
 			scene = crimild::get_ptr( tmp );
 		}
-#endif
 		// always copy assets from the cache
 		ShallowCopy shallowCopy;
 		scene->perform( shallowCopy );

@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "Crimild.hpp"
+#import <Crimild.hpp>
 #import <Crimild_Scripting.hpp>
 #import <Crimild_OpenGL.hpp>
 

@@ -28,6 +28,8 @@
 #import "CrimildViewController.h"
 #import "CrimildView.h"
 
+#include <Crimild_Scripting.hpp>
+
 #define CRIMILD_IOS_ENABLE_METAL 1
 
 #import "Metal/CrimildMetalView.h"
@@ -52,7 +54,7 @@
 {
     self = [super init];
     if (self) {
-        _simulation = crimild::alloc< crimild::Simulation >( "crimild", nullptr );
+        _simulation = crimild::alloc< crimild::Simulation >( "crimild", crimild::alloc< crimild::Settings >() );
         crimild::concurrency::JobScheduler::getInstance()->configure( 1 );
         _animating = FALSE;
         _animationFrameInterval = 1;
@@ -68,7 +70,7 @@
 {
     self = [super initWithCoder:aDecoder];
     if (self) {
-        _simulation = crimild::alloc< crimild::Simulation >( "crimild", nullptr );
+        _simulation = crimild::alloc< crimild::Simulation >( "crimild", crimild::alloc< crimild::Settings >() );
         crimild::concurrency::JobScheduler::getInstance()->configure( 1 );
         _animating = FALSE;
         _animationFrameInterval = 1;
@@ -83,7 +85,7 @@
 - (void) loadView
 {
     [super loadView];
-
+    
 #if !TARGET_OS_SIMULATOR
     if (self.useMetalRenderPath) {
         self.crimildView = [[CrimildMetalView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
@@ -187,6 +189,9 @@
 
 - (void) setupCrimild
 {
+    crimild::init();
+    crimild::scripting::init();
+    
     crimild::FileSystem::getInstance().setBaseDirectory( [[self applicationBundleDirectory] UTF8String] );
     crimild::FileSystem::getInstance().setDocumentsDirectory( [[self applicationDocumentsDirectory] UTF8String] );
     
