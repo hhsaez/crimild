@@ -103,13 +103,16 @@ void Font::loadGlyphs( std::string file )
 }
 
 Text::Text( void )
-    : _primitive( crimild::alloc< Primitive >( Primitive::Type::TRIANGLES ) ),
-      _material( crimild::alloc< Material >() )
 {
+    _geometry = crimild::alloc< Geometry >();
+    _primitive = crimild::alloc< Primitive >( Primitive::Type::TRIANGLES );
+    _material = crimild::alloc< Material >();
+    
 	_text = "";
 	_size = 1.0f;
-	attachPrimitive( _primitive );
-	getComponent< MaterialComponent >()->attachMaterial( _material );
+	_geometry->attachPrimitive( _primitive );
+	_geometry->getComponent< MaterialComponent >()->attachMaterial( _material );
+    attachNode( _geometry );
 }
 
 Text::~Text( void )
@@ -160,6 +163,12 @@ void Text::setFont( SharedPointer< Font > const &font )
 	_material->getAlphaState()->setEnabled( true );
     
 	updatePrimitive();
+}
+
+void Text::setHorizontalAlignment( Text::HorizontalAlignment alignment )
+{
+    _horizontalAlignment = alignment;
+    updatePrimitive();
 }
 
 void Text::updatePrimitive( void )
@@ -265,7 +274,7 @@ void Text::updatePrimitive( void )
 		horiAdvance += glyph.advance;
 	}
 
-	if (vertices.size() == 0) {
+	if ( vertices.size() == 0 ) {
 		return;
 	}
 
@@ -276,6 +285,23 @@ void Text::updatePrimitive( void )
     auto ibo = crimild::alloc< IndexBufferObject >( indices.size(), &indices[ 0 ] );
 	_primitive->setIndexBuffer( ibo );
 	
-	updateModelBounds();
+	_geometry->updateModelBounds();
+    
+    if ( _horizontalAlignment != HorizontalAlignment::LEFT ) {
+        auto bounds = _geometry->getLocalBound();
+        auto min = bounds->getMin();
+        auto max = bounds->getMax();
+        auto diff = max - min;
+        
+        if ( _horizontalAlignment == HorizontalAlignment::CENTER ) {
+            _geometry->local().setTranslate( -0.5f * diff[ 0 ], 0.0f, 0.0f );
+        }
+        else if ( _horizontalAlignment != HorizontalAlignment::RIGHT ) {
+            _geometry->local().setTranslate( -diff[ 0 ], 0.0f, 0.0f );
+        }
+    }
+    else {
+        _geometry->local().setTranslate( Vector3f::ZERO );
+    }
 }
 
