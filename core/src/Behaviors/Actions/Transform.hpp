@@ -67,6 +67,17 @@ namespace crimild {
 
 				crimild::Bool _applyTranslation = true;
 				crimild::Bool _applyRotation = true;
+
+				/**
+				   \name Coding support
+				*/
+				//@{
+				
+			public:
+				virtual void encode( coding::Encoder &encoder ) override;
+				virtual void decode( coding::Decoder &decoder ) override;
+				
+				//@}
 			};
 
 		}

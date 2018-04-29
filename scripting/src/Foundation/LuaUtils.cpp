@@ -75,6 +75,12 @@ namespace crimild {
 		}
 
 		template<>
+		unsigned char LuaUtils::get< unsigned char >( lua_State *l, const int index )
+		{
+			return lua_tounsigned( l, index );
+		}
+
+		template<>
 		crimild::UInt16 LuaUtils::get< crimild::UInt16 >( lua_State *l, const int index )
 		{
 			return lua_tounsigned( l, index );

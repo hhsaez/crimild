@@ -52,12 +52,18 @@ namespace crimild {
             
             virtual void encode( std::string key, const Transformation &value ) override { encodeData( key, value ); }
             virtual void encode( std::string key, crimild::Size value ) override { encodeData( key, value ); }
+            virtual void encode( std::string key, crimild::UInt8 value ) override { encodeData( key, value ); }
             virtual void encode( std::string key, crimild::UInt16 value ) override { encodeData( key, value ); }
+            virtual void encode( std::string key, crimild::Int16 value ) override { encodeData( key, value ); }
             virtual void encode( std::string key, crimild::Int32 value ) override { encodeData( key, value ); }
             virtual void encode( std::string key, crimild::UInt32 value ) override { encodeData( key, value ); }
             virtual void encode( std::string key, crimild::Real32 value ) override { encodeData( key, value ); }
             virtual void encode( std::string key, crimild::Real64 value ) override { encodeData( key, value ); }
             virtual void encode( std::string key, const Vector3f &value ) override { encodeData( key, value ); }
+            virtual void encode( std::string key, const Vector4f &value ) override { encodeData( key, value ); }
+            virtual void encode( std::string key, const Matrix3f &value ) override { encodeData( key, value ); }
+            virtual void encode( std::string key, const Matrix4f &value ) override { encodeData( key, value ); }
+            virtual void encode( std::string key, const Quaternion4f &value ) override { encodeData( key, value ); }
             virtual void encode( std::string key, crimild::Bool value ) override { encodeData( key, value ); }
             virtual void encode( std::string key, const crimild::VertexFormat &value ) override { encodeData( key, value ); }
             
@@ -65,8 +71,10 @@ namespace crimild {
             
         protected:
 			virtual void encodeArrayBegin( std::string key, crimild::Size count ) override;
+			virtual std::string beginEncodingArrayElement( std::string key, crimild::Size index ) override;
+			virtual void endEncodingArrayElement( std::string key, crimild::Size index ) override;
 			virtual void encodeArrayEnd( std::string key ) override;
-            
+
         private:
             template< typename T >
             void encodeData( std::string key, const T &value )

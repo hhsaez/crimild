@@ -46,11 +46,26 @@ namespace crimild {
 				virtual Behavior::State step( BehaviorContext *context ) override;
 
 			private:
+				void setComparator( std::string comparatorName );
+
+			private:
 				std::string _key;
 				std::string _value;
+				std::string _comparatorName;
 
 				using Comparator = std::function< crimild::Bool ( crimild::Real32, crimild::Real32 ) >;
 				Comparator _comparator;
+
+				/**
+				   \name Coding support
+				*/
+				//@{
+				
+			public:
+				virtual void encode( coding::Encoder &encoder ) override;
+				virtual void decode( coding::Decoder &decoder ) override;
+				
+				//@}
 			};
 
 		}

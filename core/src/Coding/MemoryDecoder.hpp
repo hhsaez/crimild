@@ -48,7 +48,9 @@ namespace crimild {
             virtual void decode( std::string key, std::string &value ) override;
             
             virtual void decode( std::string key, crimild::Size &value ) override { decodeData( key, value ); }
+            virtual void decode( std::string key, crimild::UInt8 &value ) override { decodeData( key, value ); }
             virtual void decode( std::string key, crimild::UInt16 &value ) override { decodeData( key, value ); }
+            virtual void decode( std::string key, crimild::Int16 &value ) override { decodeData( key, value ); }
             virtual void decode( std::string key, crimild::Int32 &value ) override { decodeData( key, value ); }
             virtual void decode( std::string key, crimild::UInt32 &value ) override { decodeData( key, value ); }
             virtual void decode( std::string key, crimild::Bool &value ) override { decodeData( key, value ); }
@@ -56,6 +58,9 @@ namespace crimild {
 			virtual void decode( std::string key, crimild::Real64 &value ) override { decodeData( key, value ); }
 			virtual void decode( std::string key, crimild::Vector3f &value ) override { decodeData( key, value ); }
             virtual void decode( std::string key, crimild::Vector4f &value ) override { decodeData( key, value ); }
+            virtual void decode( std::string key, crimild::Matrix3f &value ) override { decodeData( key, value ); }
+            virtual void decode( std::string key, crimild::Matrix4f &value ) override { decodeData( key, value ); }
+            virtual void decode( std::string key, crimild::Quaternion4f &value ) override { decodeData( key, value ); }
             virtual void decode( std::string key, Transformation &value ) override { decodeData( key, value ); }
             virtual void decode( std::string key, VertexFormat &value ) override { decodeData( key, value ); }
             
@@ -74,7 +79,7 @@ namespace crimild {
 			virtual std::string beginDecodingArrayElement( std::string key, crimild::Size index ) override;
 			virtual void endDecodingArrayElement( std::string key, crimild::Size index ) override;
 			virtual void endDecodingArray( std::string key ) override;
-            
+
         private:
             static crimild::Size read( const containers::ByteArray &bytes, Codable::UniqueID &value, crimild::Size offset );
             static crimild::Size read( const containers::ByteArray &bytes, std::string &value, crimild::Size offset );

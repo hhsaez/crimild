@@ -51,6 +51,17 @@ namespace crimild {
 			private:
 				std::string _behaviorName;
 				crimild::Bool _overrideTarget = false;
+
+				/**
+				   \name Coding support
+				*/
+				//@{
+				
+			public:
+				virtual void encode( coding::Encoder &encoder ) override;
+				virtual void decode( coding::Decoder &decoder ) override;
+				
+				//@}
 			};
 
 		}

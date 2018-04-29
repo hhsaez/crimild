@@ -42,3 +42,16 @@ Behavior::State FindTarget::step( BehaviorContext *context )
 	return Behavior::State::SUCCESS;
 }
 
+void FindTarget::encode( coding::Encoder &encoder )
+{
+	Behavior::encode( encoder );
+
+	encoder.encode( "target_name", _targetName );
+}
+
+void FindTarget::decode( coding::Decoder &decoder )
+{
+	Behavior::decode( decoder );
+
+	decoder.decode( "target_name", _targetName );
+}

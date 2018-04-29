@@ -77,64 +77,6 @@ void LuaEncoder::encode( std::string key, std::string value )
 	_ss << "'" << value << "', ";
 }
 
-void LuaEncoder::encode( std::string key, crimild::Size value ) 
-{
-	encodeKey( key );
-	_ss << value << ", ";
-}
-
-void LuaEncoder::encode( std::string key, crimild::UInt16 value )
-{
-	encodeKey( key );
-	_ss << value << ", ";
-}
-
-void LuaEncoder::encode( std::string key, crimild::Int32 value )
-{
-    encodeKey( key );
-    _ss << value << ", ";
-}
-
-void LuaEncoder::encode( std::string key, crimild::UInt32 value )
-{
-    encodeKey( key );
-    _ss << value << ", ";
-}
-
-void LuaEncoder::encode( std::string key, crimild::Bool value )
-{
-	encodeKey( key );
-	_ss << ( value ? "true" : "false" ) << ", ";
-}
-
-void LuaEncoder::encode( std::string key, crimild::Real32 value ) 
-{
-	encodeKey( key );
-	_ss << value << ", ";
-}
-
-void LuaEncoder::encode( std::string key, crimild::Real64 value ) 
-{
-	encodeKey( key );
-	_ss << value << ", ";
-}
-
-void LuaEncoder::encode( std::string key, const Vector3f &value ) 
-{
-	encodeKey( key );
-	_ss << "{ ";
-	_ss << value.x() << ", " << value.y() << ", " << value.z();
-	_ss << "}, ";
-}
-
-void LuaEncoder::encode( std::string key, const Vector4f &value )
-{
-    encodeKey( key );
-    _ss << "{ ";
-    _ss << value.x() << ", " << value.y() << ", " << value.z() << ", " << value.w();
-    _ss << "}, ";
-}
-
 void LuaEncoder::encode( std::string key, const Transformation &value )
 {
 	encodeKey( key );
@@ -142,12 +84,8 @@ void LuaEncoder::encode( std::string key, const Transformation &value )
     _ss << "{ ";
     _indentLevel++;
     
-    encode( "translate", value.getTranslate() );
-    
-    encodeKey( "rotate_q" );
-    auto q = value.getRotate().getRawData();
-    _ss << "{ " << q[ 0 ] << ", " << q[ 1 ] << ", " << q[ 2 ] << ", " << q[ 3 ] << " }, ";
-    
+    encode( "translate", value.getTranslate() );    
+    encode( "rotate_q", value.getRotate() );    
     encode( "scale", value.getScale() );
     
     _indentLevel--;
@@ -166,6 +104,16 @@ void LuaEncoder::encodeArrayBegin( std::string key, crimild::Size count )
     _ss << getIndentSpaces() << key << " = { ";
     
     ++_indentLevel;
+}
+
+std::string LuaEncoder::beginEncodingArrayElement( std::string key, crimild::Size index )
+{
+    return key;
+}
+
+void LuaEncoder::endEncodingArrayElement( std::string key, crimild::Size index )
+{
+	// no-op
 }
 
 void LuaEncoder::encodeArrayEnd( std::string key ) 

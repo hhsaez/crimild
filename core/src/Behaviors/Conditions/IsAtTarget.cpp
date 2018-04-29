@@ -33,3 +33,17 @@ Behavior::State IsAtTarget::step( BehaviorContext *context )
 	return d <= _minDistance ? Behavior::State::SUCCESS : Behavior::State::FAILURE;
 }
 
+void IsAtTarget::encode( coding::Encoder &encoder )
+{
+	Behavior::encode( encoder );
+
+	encoder.encode( "minDistance", _minDistance );
+}
+
+void IsAtTarget::decode( coding::Decoder &decoder )
+{
+	Behavior::decode( decoder );
+
+	decoder.decode( "minDistance", _minDistance );
+}
+

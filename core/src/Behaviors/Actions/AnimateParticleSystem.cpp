@@ -1,4 +1,6 @@
 #include "AnimateParticleSystem.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 #include "SceneGraph/Group.hpp"
 #include "ParticleSystem/ParticleSystemComponent.hpp"
@@ -31,5 +33,19 @@ Behavior::State AnimateParticleSystem::step( BehaviorContext *context )
 	ps->setAnimationEnabled( _animate );
 
 	return Behavior::State::SUCCESS;
+}
+
+void AnimateParticleSystem::encode( coding::Encoder &encoder )
+{
+	Behavior::encode( encoder );
+
+	encoder.encode( "animate", _animate );
+}
+
+void AnimateParticleSystem::decode( coding::Decoder &decoder )
+{
+	Behavior::decode( decoder );
+
+	decoder.decode( "animate", _animate );
 }
 

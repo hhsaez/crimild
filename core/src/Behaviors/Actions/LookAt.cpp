@@ -42,3 +42,16 @@ Behavior::State LookAt::step( BehaviorContext *context )
 	return Behavior::State::SUCCESS;
 }
 
+void LookAt::encode( coding::Encoder &encoder )
+{
+	Behavior::encode( encoder );
+
+	encoder.encode( "target", _target );
+}
+
+void LookAt::decode( coding::Decoder &decoder )
+{
+	Behavior::decode( decoder );
+
+	decoder.decode( "target", _target );
+}

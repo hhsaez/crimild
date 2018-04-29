@@ -52,3 +52,13 @@ Behavior::State MotionSeek::step( BehaviorContext *context )
 	return Behavior::State::SUCCESS;
 }
 
+void MotionSeek::encode( coding::Encoder &encoder )
+{
+	Behavior::encode( encoder );
+}
+
+void MotionSeek::decode( coding::Decoder &decoder )
+{
+	Behavior::decode( decoder );
+}
+

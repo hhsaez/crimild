@@ -53,6 +53,17 @@ namespace crimild {
 				crimild::Clock _clock;
 				crimild::Real32 _start;
 				crimild::Bool _ignoreGlobalTimeScale = false;
+                
+                /**
+                    \name Coding support
+                 */
+                //@{
+                
+            public:
+                virtual void encode( coding::Encoder &encoder ) override;
+                virtual void decode( coding::Decoder &decoder ) override;
+                
+                //@}
 			};
 
 		}

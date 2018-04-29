@@ -49,6 +49,17 @@ namespace crimild {
 			private:
 				crimild::Vector3f _target;
 				crimild::Clock _clock;
+
+				/**
+				   \name Coding support
+				*/
+				//@{
+				
+			public:
+				virtual void encode( coding::Encoder &encoder ) override;
+				virtual void decode( coding::Decoder &decoder ) override;
+				
+				//@}
 			};
 
 		}

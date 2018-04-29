@@ -44,15 +44,20 @@ namespace crimild {
             virtual void encode( std::string key, SharedPointer< coding::Codable > const &codable ) override;
 
             virtual void encode( std::string key, std::string value ) override;
-            virtual void encode( std::string key, crimild::Size value ) override;
-            virtual void encode( std::string key, crimild::UInt16 value ) override;
-            virtual void encode( std::string key, crimild::Int32 value ) override;
-            virtual void encode( std::string key, crimild::UInt32 value ) override;
-            virtual void encode( std::string key, crimild::Bool value ) override;
-            virtual void encode( std::string key, crimild::Real32 value ) override;
-            virtual void encode( std::string key, crimild::Real64 value ) override;
-            virtual void encode( std::string key, const Vector3f &value ) override;
-            virtual void encode( std::string key, const Vector4f &value ) override;
+            virtual void encode( std::string key, crimild::Size value ) override { encodeValue( key, value ); }
+            virtual void encode( std::string key, crimild::UInt8 value ) override { encodeValue( key, value ); }
+            virtual void encode( std::string key, crimild::UInt16 value ) override { encodeValue( key, value ); }
+            virtual void encode( std::string key, crimild::Int16 value ) override { encodeValue( key, value ); }
+            virtual void encode( std::string key, crimild::Int32 value ) override { encodeValue( key, value ); }
+            virtual void encode( std::string key, crimild::UInt32 value ) override { encodeValue( key, value ); }
+            virtual void encode( std::string key, crimild::Bool value ) override { encodeValue( key, value ); }
+            virtual void encode( std::string key, crimild::Real32 value ) override { encodeValue( key, value ); }
+            virtual void encode( std::string key, crimild::Real64 value ) override { encodeValue( key, value ); }
+            virtual void encode( std::string key, const Vector3f &value ) override { encodeValues( key, 3, value.getData() ); }
+            virtual void encode( std::string key, const Vector4f &value ) override { encodeValues( key, 4, value.getData() ); }
+            virtual void encode( std::string key, const Matrix3f &value ) override { encodeValues( key, 9, value.getData() ); }
+            virtual void encode( std::string key, const Matrix4f &value ) override { encodeValues( key, 16, value.getData() ); }
+            virtual void encode( std::string key, const Quaternion4f &value ) override { encodeValues( key, 4, value.getRawData().getData() ); }
             virtual void encode( std::string key, const Transformation &value ) override;
             virtual void encode( std::string key, const VertexFormat &value ) override;
 
@@ -62,10 +67,33 @@ namespace crimild {
 			}
             
         protected:
-            virtual void encodeArrayBegin( std::string key, crimild::Size count ) override;
-            virtual void encodeArrayEnd( std::string key ) override;
+			virtual void encodeArrayBegin( std::string key, crimild::Size count ) override;
+			virtual std::string beginEncodingArrayElement( std::string key, crimild::Size index ) override;
+			virtual void endEncodingArrayElement( std::string key, crimild::Size index ) override;
+			virtual void encodeArrayEnd( std::string key ) override;
             
         private:
+            template< typename T >
+            void encodeValue( std::string key, const T &value ) 
+            {
+	            encodeKey( key );
+	            _ss << value << ", ";
+            }
+
+            template< typename T >
+            void encodeValues( std::string key, crimild::Size count, const T *values )
+            {
+                encodeKey( key );
+                _ss << "{ ";
+                for ( crimild::Size i = 0; i < count; i++ ) {
+                    if ( i > 0 ) {
+                        _ss << ", ";
+                    }
+                    _ss << values[ i ];
+                }
+                _ss << "}, ";
+            }        
+
             void encodeKey( std::string key );
             std::string getIndentSpaces( void );
             

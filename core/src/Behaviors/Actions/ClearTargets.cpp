@@ -20,3 +20,13 @@ Behavior::State ClearTargets::step( BehaviorContext *context )
 	return Behavior::State::SUCCESS;
 }
 
+void ClearTargets::encode( coding::Encoder &encoder )
+{
+	Behavior::encode( encoder );
+}
+
+void ClearTargets::decode( coding::Decoder &decoder )
+{
+	Behavior::decode( decoder );
+}
+

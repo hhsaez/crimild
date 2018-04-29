@@ -46,12 +46,21 @@ namespace crimild {
 				explicit ExecuteBehavior( std::string behaviorName );
 				virtual ~ExecuteBehavior( void );
 
-				virtual void init( BehaviorContext *context ) override;
 				virtual Behavior::State step( BehaviorContext *context ) override;
 
 			private:
 				std::string _behaviorName;
-				SharedPointer< Behavior > _behavior;
+
+				/**
+				   \name Coding support
+				*/
+				//@{
+				
+			public:
+				virtual void encode( coding::Encoder &encoder ) override;
+				virtual void decode( coding::Decoder &decoder ) override;
+				
+				//@}
 			};
 
 		}

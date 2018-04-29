@@ -95,6 +95,8 @@
 
 #include "Behaviors/Behavior.hpp"
 #include "Behaviors/BehaviorContext.hpp"
+#include "Behaviors/BehaviorTree.hpp"
+#include "Behaviors/BehaviorController.hpp"
 #include "Behaviors/Actions/AnimateContextValue.hpp"
 #include "Behaviors/Actions/AnimateParticleSystem.hpp"
 #include "Behaviors/Actions/AnimateSettingValue.hpp"
@@ -141,7 +143,6 @@
 #include "Components/AnimatorComponent.hpp"
 #include "Components/AudioListenerComponent.hpp"
 #include "Components/AudioSourceComponent.hpp"
-#include "Components/BehaviorController.hpp"
 #include "Components/BillboardComponent.hpp"
 #include "Components/LambdaComponent.hpp"
 #include "Components/MaterialComponent.hpp"

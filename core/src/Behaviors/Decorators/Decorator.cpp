@@ -1,4 +1,6 @@
 #include "Decorator.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 using namespace crimild;
 using namespace crimild::behaviors;
@@ -30,5 +32,19 @@ Behavior::State Decorator::step( BehaviorContext *context )
 	}
 
 	return getBehavior()->step( context );
+}
+
+void Decorator::encode( coding::Encoder &encoder )
+{
+	Behavior::encode( encoder );
+
+	encoder.encode( "behavior", _decoratedBehavior );
+}
+
+void Decorator::decode( coding::Decoder &decoder )
+{
+	Behavior::decode( decoder );
+
+	decoder.decode( "behavior", _decoratedBehavior );
 }
 

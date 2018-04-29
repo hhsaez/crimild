@@ -84,6 +84,17 @@ namespace crimild {
         //@}
 
 		/**
+			 \name Coding support
+		*/
+		//@{
+		
+	public:
+		virtual void encode( coding::Encoder &encoder ) override;
+		virtual void decode( coding::Decoder &decoder ) override;
+		
+		//@}			
+		
+		/**
 			\name Streaming
 		*/
 		//@{

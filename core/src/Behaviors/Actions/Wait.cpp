@@ -1,4 +1,6 @@
 #include "Wait.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 using namespace crimild;
 using namespace crimild::behaviors;
@@ -30,5 +32,19 @@ Behavior::State Wait::step( BehaviorContext *context )
 	}
 	
 	return Behavior::State::RUNNING;
+}
+
+void Wait::encode( coding::Encoder &encoder )
+{
+	Behavior::encode( encoder );
+
+	encoder.encode( "duration", _duration );
+}
+
+void Wait::decode( coding::Decoder &decoder )
+{
+	Behavior::decode( decoder );
+
+	decoder.decode( "duration", _duration );
 }
 

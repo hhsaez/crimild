@@ -28,7 +28,7 @@
 #ifndef CRIMILD_AUDIO_SOURCE_
 #define CRIMILD_AUDIO_SOURCE_
 
-#include "Foundation/SharedObject.hpp"
+#include "Coding/Codable.hpp"
 #include "Foundation/Types.hpp"
 
 #include "Mathematics/Transformation.hpp"
@@ -40,7 +40,9 @@ namespace crimild {
 		/**
 		   \brief Abstract interface for audio sources
 		 */
-		class AudioSource : public SharedObject {
+		class AudioSource : public coding::Codable {
+			CRIMILD_IMPLEMENT_RTTI( crimild::audo::AudioSource )
+
 		public:
 			enum class Status {
 				STOPPED,
@@ -54,10 +56,10 @@ namespace crimild {
 			};
 
 		protected:
-			AudioSource( void ) { }
+			AudioSource( void );
 
 		public:
-	        virtual ~AudioSource( void ) { }
+	        virtual ~AudioSource( void );
 
 	    public:
 	    	virtual void play( void ) = 0;
@@ -105,6 +107,17 @@ namespace crimild {
 	    private:
 	    	crimild::Bool _spatializationEnabled = false;
 	    	Transformation _transformation;
+
+			/**
+			   \name Coding support
+			*/
+			//@{
+			
+		public:
+			virtual void encode( coding::Encoder &encoder ) override;
+			virtual void decode( coding::Decoder &decoder ) override;
+			
+			//@}			
 		};
 
 		using AudioSourcePtr = SharedPointer< AudioSource >;

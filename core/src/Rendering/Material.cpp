@@ -26,6 +26,8 @@
  */
 
 #include "Material.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::Material )
 
@@ -48,6 +50,36 @@ Material::Material( void )
 Material::~Material( void )
 {
 
+}
+
+void Material::encode( coding::Encoder &encoder )
+{
+	Codable::encode( encoder );
+
+	encoder.encode( "ambient", _ambient );
+	encoder.encode( "diffuse", _diffuse );
+	encoder.encode( "specular", _specular );
+	encoder.encode( "emissive", _emissive );
+	encoder.encode( "shininess", _shininess );
+	encoder.encode( "color_map", _colorMap );
+	encoder.encode( "normal_map", _normalMap );
+	encoder.encode( "specular_map", _specularMap );
+	encoder.encode( "emissive_map", _emissiveMap );
+}
+
+void Material::decode( coding::Decoder &decoder )
+{
+	Codable::decode( decoder );
+
+	decoder.decode( "ambient", _ambient );
+	decoder.decode( "diffuse", _diffuse );
+	decoder.decode( "specular", _specular );
+	decoder.decode( "emissive", _emissive );
+	decoder.decode( "shininess", _shininess );
+	decoder.decode( "color_map", _colorMap );
+	decoder.decode( "normal_map", _normalMap );
+	decoder.decode( "specular_map", _specularMap );
+	decoder.decode( "emissive_map", _emissiveMap );
 }
 
 bool Material::registerInStream( Stream &s )

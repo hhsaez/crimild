@@ -63,6 +63,17 @@ namespace crimild {
 				
 			private:
 				BehaviorPtr _decoratedBehavior;
+
+				/**
+				   \name Coding support
+				*/
+				//@{
+				
+			public:
+				virtual void encode( coding::Encoder &encoder ) override;
+				virtual void decode( coding::Decoder &decoder ) override;
+				
+				//@}
 			};
 
 		}

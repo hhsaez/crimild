@@ -46,18 +46,23 @@ namespace crimild {
 
             virtual void decode( std::string key, SharedPointer< coding::Codable > &codable ) override;
 
-            virtual void decode( std::string key, std::string &value ) override;
-            virtual void decode( std::string key, crimild::Size &value ) override;
-            virtual void decode( std::string key, crimild::UInt16 &value ) override;
-            virtual void decode( std::string key, crimild::Int32 &value ) override;
-            virtual void decode( std::string key, crimild::UInt32 &value ) override;
-            virtual void decode( std::string key, crimild::Bool &value ) override;
-            virtual void decode( std::string key, crimild::Real32 &value ) override;
-            virtual void decode( std::string key, crimild::Real64 &value ) override;
-            virtual void decode( std::string key, Vector3f &value ) override;
-            virtual void decode( std::string key, Vector4f &value ) override;
-            virtual void decode( std::string key, Transformation &value ) override;
-            virtual void decode( std::string key, VertexFormat &value ) override;
+            virtual void decode( std::string key, std::string &value ) override { decodeValue( key, value ); }
+            virtual void decode( std::string key, crimild::Size &value ) override { decodeValue( key, value ); }
+            virtual void decode( std::string key, crimild::UInt8 &value ) override { decodeValue( key, value ); }
+            virtual void decode( std::string key, crimild::UInt16 &value ) override { decodeValue( key, value ); }
+            virtual void decode( std::string key, crimild::Int16 &value ) override { decodeValue( key, value ); }
+            virtual void decode( std::string key, crimild::Int32 &value ) override { decodeValue( key, value ); }
+            virtual void decode( std::string key, crimild::UInt32 &value ) override { decodeValue( key, value ); }
+            virtual void decode( std::string key, crimild::Bool &value ) override { decodeValue( key, value ); }
+            virtual void decode( std::string key, crimild::Real32 &value ) override { decodeValue( key, value ); }
+            virtual void decode( std::string key, crimild::Real64 &value ) override { decodeValue( key, value ); }
+            virtual void decode( std::string key, Vector3f &value ) override { decodeValue( key, value ); }
+            virtual void decode( std::string key, Vector4f &value ) override { decodeValue( key, value ); }
+            virtual void decode( std::string key, crimild::Matrix3f &value ) override { decodeValue( key, value ); }
+            virtual void decode( std::string key, crimild::Matrix4f &value ) override { decodeValue( key, value ); }
+            virtual void decode( std::string key, crimild::Quaternion4f &value ) override { decodeValue( key, value ); }
+            virtual void decode( std::string key, Transformation &value ) override { decodeValue( key, value ); }
+            virtual void decode( std::string key, VertexFormat &value ) override { /* no-op */ }
 
 			void parse( std::string str );
 			void parseFile( std::string filename );
@@ -67,6 +72,13 @@ namespace crimild {
 			virtual std::string beginDecodingArrayElement( std::string key, crimild::Size index ) override;
 			virtual void endDecodingArrayElement( std::string key, crimild::Size index ) override;
 			virtual void endDecodingArray( std::string key ) override;
+
+        private:
+            template< typename T >
+            void decodeValue( std::string key, T &value )
+            {
+	            _evals.top().getPropValue( key, value );
+            }
 
 		private:
 			SharedPointer< SharedObject > buildObject( void );

@@ -88,6 +88,7 @@ namespace crimild {
             {
                 LockImpl lock( this );
 				_map = other._map;
+				return *this;
             }
 
 			/**
@@ -109,6 +110,12 @@ namespace crimild {
 			{
 				LockImpl lock( this );
 				return _map.size();
+			}
+
+			inline void clear( void )
+			{
+				LockImpl lock( this );
+				_map.clear();
 			}
 
 			inline bool contains( const KeyType &key ) const

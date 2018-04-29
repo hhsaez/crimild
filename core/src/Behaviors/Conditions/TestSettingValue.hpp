@@ -49,6 +49,17 @@ namespace crimild {
 				std::string _key;
 				std::string _value;
 				std::string _comparator;
+
+				/**
+				   \name Coding support
+				*/
+				//@{
+				
+			public:
+				virtual void encode( coding::Encoder &encoder ) override;
+				virtual void decode( coding::Decoder &decoder ) override;
+				
+				//@}
 			};
 
 		}

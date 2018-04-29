@@ -1,4 +1,6 @@
 #include "Trigger.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 using namespace crimild;
 using namespace crimild::messaging;
@@ -35,5 +37,19 @@ Behavior::State Trigger::step( BehaviorContext *context )
     Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Dispatching behavior event with name ", _triggerName );
 	broadcastMessage( BehaviorEvent { _triggerName } );
 	return Behavior::State::SUCCESS;
+}
+
+void Trigger::encode( coding::Encoder &encoder )
+{
+	Behavior::encode( encoder );
+
+	encoder.encode( "name", _triggerName );
+}
+
+void Trigger::decode( coding::Decoder &decoder )
+{
+	Behavior::decode( decoder );
+
+	decoder.decode( "name", _triggerName );
 }
 

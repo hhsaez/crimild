@@ -28,7 +28,7 @@
 #ifndef CRIMILD_AUDIO_LISTENER_
 #define CRIMILD_AUDIO_LISTENER_
 
-#include "Foundation/SharedObject.hpp"
+#include "Coding/Codable.hpp"
 
 #include "Mathematics/Transformation.hpp"
 
@@ -42,12 +42,14 @@ namespace crimild {
 		   \warning There should be only one active listener at
 		   any time in any given scene.
 		 */
-		class AudioListener : public SharedObject {
+		class AudioListener : public coding::Codable {
+			CRIMILD_IMPLEMENT_RTTI( crimild::audio::AudioListener )
+
 		protected:
-			AudioListener( void ) { }
+			AudioListener( void );
 
 		public:
-	        virtual ~AudioListener( void ) { }
+	        virtual ~AudioListener( void );
 
 	        /**
 	        	\brief Updates the listener transformation
@@ -61,6 +63,17 @@ namespace crimild {
 
 	    private:
 	    	Transformation _transformation;
+
+			/**
+			   \name Coding support
+			*/
+			//@{
+			
+		public:
+			virtual void encode( coding::Encoder &encoder ) override;
+			virtual void decode( coding::Decoder &decoder ) override;
+			
+			//@}			
 		};
 
 		using AudioListenerPtr = SharedPointer< AudioListener >;

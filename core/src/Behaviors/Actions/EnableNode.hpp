@@ -52,6 +52,17 @@ namespace crimild {
 			private:
 				crimild::Bool _enabled;
 		        std::string _node;
+				
+				/**
+				   \name Coding support
+				*/
+				//@{
+				
+			public:
+				virtual void encode( coding::Encoder &encoder ) override;
+				virtual void decode( coding::Decoder &decoder ) override;
+				
+				//@}
 			};
 
 		}

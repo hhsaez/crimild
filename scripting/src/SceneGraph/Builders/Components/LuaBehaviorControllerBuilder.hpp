@@ -30,7 +30,7 @@
 
 #include "Foundation/Scripted.hpp"
 
-#include <Components/BehaviorController.hpp>
+#include <Behaviors/BehaviorController.hpp>
 
 namespace crimild {
 
@@ -38,7 +38,7 @@ namespace crimild {
         
 		class LuaBehaviorControllerBuilder {
 		public:
-			static SharedPointer< BehaviorController > build( ScriptEvaluator &eval );
+			static SharedPointer< behaviors::BehaviorController > build( ScriptEvaluator &eval );
 		};
 
 	}

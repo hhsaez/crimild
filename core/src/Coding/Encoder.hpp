@@ -32,6 +32,7 @@
 #include "Foundation/Memory.hpp"
 #include "Foundation/Types.hpp"
 #include "Foundation/Containers/Array.hpp"
+#include "Foundation/Containers/Map.hpp"
 #include "Rendering/VertexFormat.hpp"
 #include "Mathematics/Transformation.hpp"
 
@@ -57,7 +58,9 @@ namespace crimild {
             // values
             virtual void encode( std::string key, std::string str ) = 0;
             virtual void encode( std::string key, crimild::Size value ) = 0;
+            virtual void encode( std::string key, crimild::UInt8 value ) = 0;
             virtual void encode( std::string key, crimild::UInt16 value ) = 0;
+            virtual void encode( std::string key, crimild::Int16 value ) = 0;
             virtual void encode( std::string key, crimild::Int32 value ) = 0;
             virtual void encode( std::string key, crimild::UInt32 value ) = 0;
             virtual void encode( std::string key, crimild::Bool value ) = 0;
@@ -65,6 +68,9 @@ namespace crimild {
 			virtual void encode( std::string key, crimild::Real64 value ) = 0;
             virtual void encode( std::string key, const Vector3f & ) = 0;
             virtual void encode( std::string key, const Vector4f & ) = 0;
+            virtual void encode( std::string key, const Matrix3f & ) = 0;
+            virtual void encode( std::string key, const Matrix4f & ) = 0;
+            virtual void encode( std::string key, const Quaternion4f & ) = 0;
             virtual void encode( std::string key, const Transformation & ) = 0;
             virtual void encode( std::string key, const VertexFormat & ) = 0;
             
@@ -75,18 +81,20 @@ namespace crimild {
                 encodeArrayBegin( key, N );
                 
                 a.each( [ this, key ]( T &elem, crimild::Size i ) {
-                    std::stringstream ss;
-                    ss << key << "_" << i;
-                    encode( ss.str(), elem );
+					auto itemKey = beginEncodingArrayElement( key, i );
+                    encode( itemKey, elem );
+					endEncodingArrayElement( key, i );
                 });
                 
                 encodeArrayEnd( key );
             }
-            
+
         protected:
             virtual void encodeArrayBegin( std::string key, crimild::Size count ) = 0;
+			virtual std::string beginEncodingArrayElement( std::string key, crimild::Size index ) = 0;
+			virtual void endEncodingArrayElement( std::string key, crimild::Size index ) = 0;
             virtual void encodeArrayEnd( std::string key ) = 0;
-            
+
         public:
             virtual void dump( void );
         };

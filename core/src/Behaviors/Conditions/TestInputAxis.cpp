@@ -1,4 +1,6 @@
 #include "TestInputAxis.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 #include "Simulation/Input.hpp"
 
@@ -26,5 +28,21 @@ Behavior::State TestInputAxis::step( BehaviorContext *context )
 	}
 
 	return Behavior::State::SUCCESS;
+}
+
+void TestInputAxis::encode( coding::Encoder &encoder )
+{
+	Behavior::encode( encoder );
+
+	encoder.encode( "axis", _axis );
+	encoder.encode( "value", _value );
+}
+
+void TestInputAxis::decode( coding::Decoder &decoder )
+{
+	Behavior::decode( decoder );
+
+	decoder.decode( "axis", _axis );
+	decoder.decode( "value", _value );
 }
 

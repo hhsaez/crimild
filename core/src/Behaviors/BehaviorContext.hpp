@@ -31,7 +31,8 @@
 #include "Foundation/Types.hpp"
 #include "Foundation/Log.hpp"
 #include "Foundation/RTTI.hpp"
-
+#include "Foundation/Containers/Map.hpp"
+#include "Coding/Codable.hpp"
 #include "Mathematics/Clock.hpp"
 #include "Mathematics/Vector.hpp"
 
@@ -46,11 +47,42 @@ namespace crimild {
 	namespace behaviors {
 
 		/**
+			 \brief Stores an inmutable value for the context
+		*/
+		class BehaviorContextValue : public coding::Codable {
+			CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::BehaviorContextValue )
+		public:
+			BehaviorContextValue( void );
+			explicit BehaviorContextValue( std::string key, std::string value );
+			virtual ~BehaviorContextValue( void );
+
+			const std::string &getKey( void ) const { return _key; }
+			const std::string &getValue( void ) const { return _value; }
+
+		private:
+			std::string _key;
+			std::string _value;
+
+			/**
+				\name Coding support 
+			*/
+			//@{
+
+		public:
+			virtual void encode( coding::Encoder &encoder ) override;
+			virtual void decode( coding::Decoder &decoder ) override;
+
+			//@}
+		};
+
+		/**
 		   \brief Execution context
 		   
 		   \todo Add support for value observers
 		*/
-		class BehaviorContext {
+        class BehaviorContext : public coding::Codable {
+			CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::BehaviorContext )
+
 		public:
 			BehaviorContext( void );
 			virtual ~BehaviorContext( void );
@@ -89,7 +121,7 @@ namespace crimild {
 		public:
 			bool hasValue( std::string key )
 			{
-				return _values[ key ] != "";
+				return _values.contains( key );
 			}
 			
 			template< typename T >
@@ -97,7 +129,7 @@ namespace crimild {
 			{
 				std::stringstream ss;
 				ss << value;
-				_values[ key ] = ss.str();
+				_values[ key ] = crimild::alloc< BehaviorContextValue >( key, ss.str() );
 			}
 			
 			template< typename T >
@@ -110,14 +142,25 @@ namespace crimild {
 
                 T value;
 				std::stringstream ss;
-				ss << _values[ key ];
+				ss << _values[ key ]->getValue();
 				ss >> value;
 				return value;
 			}
 			
 		private:
-			std::map< std::string, std::string > _values;
+			containers::Map< std::string, SharedPointer< BehaviorContextValue >> _values;
 
+			/**
+			   \name Coding support
+			*/
+			//@{
+			
+		public:
+			virtual void encode( coding::Encoder &encoder ) override;
+			virtual void decode( coding::Decoder &decoder ) override;
+			
+			//@}
+			
 		public:
 			void dump( void ) const;
 		};

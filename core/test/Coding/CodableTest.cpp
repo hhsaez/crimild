@@ -87,9 +87,6 @@ TEST( CodableTest, codingEncoding )
     n->local().setTranslate( 10, 20, 30 );
     n->world().setTranslate( 50, 70, 90 );
     n->setWorldIsCurrent( true );
-    n->getChildren().add( crimild::alloc< crimild::CodableNode >( "child 1" ) );
-    n->getChildren().add( crimild::alloc< crimild::CodableNode >( "child 2" ) );
-    n->getChildren().add( crimild::alloc< crimild::CodableNode >( "child 3" ) );
     
 	auto encoder = crimild::alloc< crimild::coding::MemoryEncoder >();
 	encoder->encode( n );
@@ -107,10 +104,31 @@ TEST( CodableTest, codingEncoding )
 	EXPECT_EQ( n->getLocal().getTranslate(), n2->getLocal().getTranslate() );
 	EXPECT_EQ( n->getWorld().getTranslate(), n2->getWorld().getTranslate() );
 	EXPECT_EQ( n->worldIsCurrent(), n2->worldIsCurrent() );
+}
+
+TEST( CodableTest, codingArray )
+{
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::CodableNode )
+
+    auto n = crimild::alloc< crimild::CodableNode >( "a scene" );
+    n->getChildren().add( crimild::alloc< crimild::CodableNode >( "child 1" ) );
+    n->getChildren().add( crimild::alloc< crimild::CodableNode >( "child 2" ) );
+    n->getChildren().add( crimild::alloc< crimild::CodableNode >( "child 3" ) );
+    
+	auto encoder = crimild::alloc< crimild::coding::MemoryEncoder >();
+	encoder->encode( n );
+    
+	auto bytes = encoder->getBytes();
+    
+	auto decoder = crimild::alloc< crimild::coding::MemoryDecoder >();
+	decoder->fromBytes( bytes );
+	auto n2 = decoder->getObjectAt< crimild::CodableNode >( 0 );
+
+	EXPECT_TRUE( n2 != nullptr );
 
 	EXPECT_EQ( n->getChildren().size(), n2->getChildren().size() );
 	EXPECT_EQ( n->getChildren()[ 0 ]->getName(), n2->getChildren()[ 0 ]->getName() );
 	EXPECT_EQ( n->getChildren()[ 1 ]->getName(), n2->getChildren()[ 1 ]->getName() );
-	EXPECT_EQ( n->getChildren()[ 2 ]->getName(), n2->getChildren()[ 2 ]->getName() );
+	EXPECT_EQ( n->getChildren()[ 2 ]->getName(), n2->getChildren()[ 2 ]->getName() );	
 }
 

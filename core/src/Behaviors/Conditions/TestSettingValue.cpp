@@ -1,4 +1,6 @@
 #include "TestSettingValue.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 #include "Simulation/Simulation.hpp"
 
@@ -27,5 +29,21 @@ Behavior::State TestSettingValue::step( BehaviorContext *context )
 	}
 
 	return Behavior::State::SUCCESS;
+}
+
+void TestSettingValue::encode( coding::Encoder &encoder )
+{
+	Behavior::encode( encoder );
+
+	encoder.encode( "key", _key );
+	encoder.encode( "value", _value );
+}
+
+void TestSettingValue::decode( coding::Decoder &decoder )
+{
+	Behavior::decode( decoder );
+
+	decoder.decode( "key", _key );
+	decoder.decode( "value", _value );
 }
 

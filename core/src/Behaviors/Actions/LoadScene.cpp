@@ -29,3 +29,16 @@ Behavior::State LoadScene::step( BehaviorContext *context )
 	return Behavior::State::SUCCESS;
 }
 
+void LoadScene::encode( coding::Encoder &encoder )
+{
+	Behavior::encode( encoder );
+
+	encoder.encode( "fileName", _sceneFileName );
+}
+
+void LoadScene::decode( coding::Decoder &decoder )
+{
+	Behavior::decode( decoder );
+
+	decoder.decode( "fileName", _sceneFileName );
+}

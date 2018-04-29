@@ -32,6 +32,8 @@
 #include "Visitors/Apply.hpp"
 #include "Debug/DebugRenderHelper.hpp"
 #include "Foundation/Log.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::SkinnedMeshComponent )
 
@@ -178,6 +180,20 @@ SharedPointer< NodeComponent > SkinnedMeshComponent::clone( void )
 {
     auto other = crimild::alloc< SkinnedMeshComponent >( getSkinnedMesh()->clone() );
     return other;
+}
+
+void SkinnedMeshComponent::encode( coding::Encoder &encoder )
+{
+	NodeComponent::encode( encoder );
+
+	encoder.encode( "skinnedMesh", _skinnedMesh );
+}
+
+void SkinnedMeshComponent::decode( coding::Decoder &decoder )
+{
+	NodeComponent::decode( decoder );
+
+	decoder.decode( "skinnedMesh", _skinnedMesh );
 }
 
 bool SkinnedMeshComponent::registerInStream( Stream &s )

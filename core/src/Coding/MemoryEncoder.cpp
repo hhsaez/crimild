@@ -95,6 +95,18 @@ void MemoryEncoder::encodeArrayBegin( std::string key, crimild::Size count )
 	encode( key + "_size", count );
 }
 
+std::string MemoryEncoder::beginEncodingArrayElement( std::string key, crimild::Size index )
+{
+	std::stringstream ss;
+	ss << key << "_" << index;
+	return ss.str();
+}
+
+void MemoryEncoder::endEncodingArrayElement( std::string key, crimild::Size index )
+{
+	// no-op
+}
+
 void MemoryEncoder::encodeArrayEnd( std::string key )
 {
 	// no-op
@@ -126,8 +138,8 @@ containers::ByteArray MemoryEncoder::getBytes( void ) const
         append( result, Tags::TAG_OBJECT_END );
     }
     
-    _links.each( [ this, &result ]( const Codable::UniqueID &key, const containers::Map< std::string, Codable::UniqueID > &ls ) {
-        ls.each( [ this, &result, key ]( const std::string &name, const Codable::UniqueID &value ) {
+    _links.each( [ &result ]( const Codable::UniqueID &key, const containers::Map< std::string, Codable::UniqueID > &ls ) {
+        ls.each( [ &result, key ]( const std::string &name, const Codable::UniqueID &value ) {
             append( result, Tags::TAG_LINK_BEGIN );
             append( result, key );
             append( result, name );
@@ -136,7 +148,7 @@ containers::ByteArray MemoryEncoder::getBytes( void ) const
         });
     });
     
-    _roots.each( [ this, &result ]( const SharedPointer< Codable > &obj, crimild::Size ) {
+    _roots.each( [ &result ]( const SharedPointer< Codable > &obj, crimild::Size ) {
         append( result, Tags::TAG_ROOT_OBJECT_BEGIN );
         append( result, obj->getUniqueID() );
         append( result, Tags::TAG_ROOT_OBJECT_END );

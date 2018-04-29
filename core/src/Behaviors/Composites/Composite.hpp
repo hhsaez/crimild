@@ -55,7 +55,18 @@ namespace crimild {
 				Behavior *getBehaviorAt( size_t index );
 				
 			private:
-				std::vector< BehaviorPtr > _behaviors;
+				containers::Array< BehaviorPtr > _behaviors;
+
+				/**
+				   \name Coding support
+				*/
+				//@{
+				
+			public:
+				virtual void encode( coding::Encoder &encoder ) override;
+				virtual void decode( coding::Decoder &decoder ) override;
+				
+				//@}
 			};
 
 		}

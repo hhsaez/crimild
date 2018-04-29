@@ -34,3 +34,18 @@ Behavior::State EnableNode::step( BehaviorContext *context )
 	return Behavior::State::SUCCESS;
 }
 
+void EnableNode::encode( coding::Encoder &encoder )
+{
+	Behavior::encode( encoder );
+
+	encoder.encode( "enabled", _enabled );
+	encoder.encode( "node", _node );
+}
+
+void EnableNode::decode( coding::Decoder &decoder )
+{
+	Behavior::decode( decoder );
+
+	decoder.decode( "enabled", _enabled );
+	decoder.decode( "node", _node );
+}

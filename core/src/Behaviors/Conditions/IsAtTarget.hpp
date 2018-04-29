@@ -20,6 +20,17 @@ namespace crimild {
 
 			private:
 				crimild::Real32 _minDistance = crimild::Numericf::ZERO_TOLERANCE;
+
+				/**
+				   \name Coding support
+				*/
+				//@{
+				
+			public:
+				virtual void encode( coding::Encoder &encoder ) override;
+				virtual void decode( coding::Decoder &decoder ) override;
+				
+				//@}
 			};
 
 		}

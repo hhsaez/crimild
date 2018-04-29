@@ -1,4 +1,6 @@
 #include "AnimateSettingValue.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 #include "Mathematics/Interpolation.hpp"
 #include "Simulation/Simulation.hpp"
@@ -44,5 +46,25 @@ Behavior::State AnimateSettingValue::step( BehaviorContext *context )
 	Simulation::getInstance()->getSettings()->set( _key, x );
 	
 	return Behavior::State::RUNNING;
+}
+
+void AnimateSettingValue::encode( coding::Encoder &encoder )
+{
+	Behavior::encode( encoder );
+
+	encoder.encode( "key", _key );
+	encoder.encode( "value", _value );
+	encoder.encode( "duration", _duration );
+	encoder.encode( "ignore_global_time_scale", _ignoreGlobalTimeScale );
+}
+
+void AnimateSettingValue::decode( coding::Decoder &decoder )
+{
+	Behavior::decode( decoder );
+
+	decoder.decode( "key", _key );
+	decoder.decode( "value", _value );
+	decoder.decode( "duration", _duration );
+	decoder.decode( "ignore_global_time_scale", _ignoreGlobalTimeScale );
 }
 

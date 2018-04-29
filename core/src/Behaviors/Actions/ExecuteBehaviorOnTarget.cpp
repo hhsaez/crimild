@@ -1,7 +1,7 @@
 #include "ExecuteBehaviorOnTarget.hpp"
 
 #include "SceneGraph/Node.hpp"
-#include "Components/BehaviorController.hpp"
+#include "Behaviors/BehaviorController.hpp"
 
 using namespace crimild;
 using namespace crimild::behaviors;
@@ -42,7 +42,7 @@ Behavior::State ExecuteBehaviorOnTarget::step( BehaviorContext *context )
 		behaviors->getContext()->addTarget( context->getAgent() );
 	}
 
-	if ( !behaviors->executeBehavior( _behaviorName ) ) {
+	if ( !behaviors->executeBehaviorTree( _behaviorName ) ) {
 		Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot execute behavior on target with name ", _behaviorName );
 		return Behavior::State::FAILURE;
 	}
@@ -50,3 +50,18 @@ Behavior::State ExecuteBehaviorOnTarget::step( BehaviorContext *context )
 	return Behavior::State::SUCCESS;
 }
 
+void ExecuteBehaviorOnTarget::encode( coding::Encoder &encoder )
+{
+	Behavior::encode( encoder );
+
+	encoder.encode( "behavior_name", _behaviorName );
+	encoder.encode( "override_target", _overrideTarget );
+}
+
+void ExecuteBehaviorOnTarget::decode( coding::Decoder &decoder )
+{
+	Behavior::decode( decoder );
+
+	decoder.decode( "behavior_name", _behaviorName );
+	decoder.decode( "override_target", _overrideTarget );
+}

@@ -52,6 +52,17 @@ namespace crimild {
 			private:
 				crimild::Int16 _times = -1;
 				crimild::Int16 _loopCount = 0;
+                
+                /**
+                    \name Coding support
+                 */
+                //@{
+                
+            public:
+                virtual void encode( coding::Encoder &encoder ) override;
+                virtual void decode( coding::Decoder &decoder ) override;
+                
+                //@}
 			};
 
 		}

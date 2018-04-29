@@ -38,12 +38,27 @@ void crimild::init( void )
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Light );
     
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Primitive );
-    
-    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::VertexBufferObject );
+	
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Material );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::IndexBufferObject );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::SkinnedMeshJoint );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::SkinnedMeshJointCatalog );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::SkinnedMeshAnimationChannel );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::SkinnedMeshAnimationClip );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::SkinnedMeshSkeleton );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::SkinnedMeshAnimationState );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::SkinnedMesh );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Texture );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::VertexBufferObject );
     
-    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::RenderStateComponent );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::MaterialComponent );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::RenderStateComponent );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::RotationComponent );
+
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::BehaviorController );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::BehaviorContext );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::BehaviorContextValue );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::BehaviorTree );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::SetContextValue );
 }
 

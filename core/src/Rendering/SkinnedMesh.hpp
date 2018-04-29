@@ -52,11 +52,23 @@ namespace crimild {
 		const Transformation &getOffset( void ) const { return _offset; }
 
 	private:
-		unsigned char _id;
+        crimild::UInt8 _id;
 		Transformation _offset;
 
+        /**
+            \name Coding support
+         */
+        //@{
+        
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+        
+        //@}
+        
 		/**
 			\name Streaming
+			\deprecated see crimild::Coding
 		*/
 		//@{
 
@@ -85,8 +97,20 @@ namespace crimild {
 	private:
 		Map< std::string, SharedPointer< SkinnedMeshJoint >> _joints;
 
+        /**
+            \name Coding support
+         */
+        //@{
+        
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+        
+        //@}
+        
 		/**
 			\name Streaming
+			\deprecated see crimild::Coding
 		*/
 		//@{
 
@@ -143,8 +167,20 @@ namespace crimild {
 		RotationKeyArray _rotationKeys;
 		ScaleKeyArray _scaleKeys;
 
+        /**
+            \name Coding support
+         */
+        //@{
+        
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+        
+        //@}
+        
 		/**
 			\name Streaming
+			\deprecated see crimild::Coding
 		*/
 		//@{
 
@@ -179,8 +215,20 @@ namespace crimild {
 		float _frameRate;
 		SkinnedMeshAnimationChannelMap _channels;
 
+        /**
+            \name Coding support
+         */
+        //@{
+        
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+        
+        //@}
+        
 		/**
 			\name Streaming
+			\deprecated see crimild::Coding
 		*/
 		//@{
 
@@ -214,8 +262,20 @@ namespace crimild {
 
 		Transformation _globalInverseTransform;
 
+        /**
+            \name Coding support
+         */
+        //@{
+        
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+        
+        //@}
+        
 		/**
 			\name Streaming
+			\deprecated see crimild::Coding
 		*/
 		//@{
 
@@ -243,8 +303,20 @@ namespace crimild {
 	private:
 		JointPoseArray _jointPoses;
 
+        /**
+            \name Coding support
+         */
+        //@{
+        
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+        
+        //@}
+        
 		/**
 			\name Streaming
+			\deprecated see crimild::Coding
 		*/
 		//@{
 
@@ -274,8 +346,20 @@ namespace crimild {
 		SharedPointer< SkinnedMeshSkeleton > _skeleton;
 		SharedPointer< SkinnedMeshAnimationState > _animationState;
 
+        /**
+            \name Coding support
+         */
+        //@{
+        
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+        
+        //@}
+        
 		/**
 			\name Streaming
+			\deprecated see crimild::Coding
 		*/
 		//@{
 

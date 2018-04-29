@@ -52,6 +52,17 @@ namespace crimild {
 				crimild::Real32 _duration;
 				crimild::Clock _clock;
 				crimild::Real32 _start;
+				
+				/**
+				   \name Coding support
+				*/
+				//@{
+				
+			public:
+				virtual void encode( coding::Encoder &encoder ) override;
+				virtual void decode( coding::Decoder &decoder ) override;
+				
+				//@}
 			};
 
 		}

@@ -24,3 +24,19 @@ Behavior::State SetSettingValue::step( BehaviorContext *context )
 	return Behavior::State::SUCCESS;
 }
 
+void SetSettingValue::encode( coding::Encoder &encoder )
+{
+	Behavior::encode( encoder );
+
+	encoder.encode( "key", _key );
+	encoder.encode( "value", _value );
+}
+
+void SetSettingValue::decode( coding::Decoder &decoder )
+{
+	Behavior::decode( decoder );
+
+	decoder.decode( "key", _key );
+	decoder.decode( "value", _value );
+}
+
