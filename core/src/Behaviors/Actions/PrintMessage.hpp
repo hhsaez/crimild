@@ -43,6 +43,7 @@ namespace crimild {
 				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::PrintMessage )
 				
 			public:
+				PrintMessage( void );
 				explicit PrintMessage( std::string message );
 				virtual ~PrintMessage( void );
 

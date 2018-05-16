@@ -7,6 +7,11 @@ using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::actions;
 
+LoadScene::LoadScene( void )
+{
+	
+}
+
 LoadScene::LoadScene( std::string sceneFileName )
 	: _sceneFileName( sceneFileName )
 {

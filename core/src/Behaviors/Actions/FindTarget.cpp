@@ -7,6 +7,11 @@ using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::actions;
 
+FindTarget::FindTarget( void )
+{
+
+}
+
 FindTarget::FindTarget( std::string targetName )
 	: _targetName( targetName )
 {
@@ -46,12 +51,12 @@ void FindTarget::encode( coding::Encoder &encoder )
 {
 	Behavior::encode( encoder );
 
-	encoder.encode( "target_name", _targetName );
+	encoder.encode( "targetName", _targetName );
 }
 
 void FindTarget::decode( coding::Decoder &decoder )
 {
 	Behavior::decode( decoder );
 
-	decoder.decode( "target_name", _targetName );
+	decoder.decode( "targetName", _targetName );
 }

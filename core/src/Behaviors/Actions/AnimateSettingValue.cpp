@@ -9,6 +9,11 @@ using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::actions;
 
+AnimateSettingValue::AnimateSettingValue( void )
+{
+	
+}
+
 AnimateSettingValue::AnimateSettingValue( std::string key, crimild::Real32 value, crimild::Real32 duration, crimild::Bool ignoreGlobalTimeScale )
 	: _key( key ),
 	  _value( value ),

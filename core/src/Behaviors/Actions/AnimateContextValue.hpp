@@ -40,6 +40,7 @@ namespace crimild {
 				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::AnimateContextValue )
 				
 			public:
+				AnimateContextValue( void );
 				explicit AnimateContextValue( std::string key, crimild::Real32 value, crimild::Real32 duration );
 				virtual ~AnimateContextValue( void );
 

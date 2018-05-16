@@ -8,6 +8,11 @@ using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::conditions;
 
+TestInputAxis::TestInputAxis( void )
+{
+	
+}
+
 TestInputAxis::TestInputAxis( std::string axis, crimild::Real32 value )
 	: _axis( axis ),
 	  _value( value )

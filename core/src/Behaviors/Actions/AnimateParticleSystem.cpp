@@ -9,6 +9,11 @@ using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::actions;
 
+AnimateParticleSystem::AnimateParticleSystem( void )
+{
+	
+}
+
 AnimateParticleSystem::AnimateParticleSystem( crimild::Bool animate )
 	: _animate( animate )
 {

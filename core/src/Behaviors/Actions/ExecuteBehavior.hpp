@@ -43,6 +43,7 @@ namespace crimild {
 				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::ExecuteBehavior )
 				
 			public:
+				ExecuteBehavior( void );
 				explicit ExecuteBehavior( std::string behaviorName );
 				virtual ~ExecuteBehavior( void );
 

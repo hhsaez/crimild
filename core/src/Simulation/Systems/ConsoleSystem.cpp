@@ -36,7 +36,6 @@
 using namespace crimild;
 
 ConsoleSystem::ConsoleSystem( void )
-	: System( "Console System" )
 {
     registerMessageHandler< messaging::DidRenderScene >( [ this ]( messaging::DidRenderScene const & ) {
         onDidRenderScene();

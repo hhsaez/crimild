@@ -7,6 +7,11 @@ using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::conditions;
 
+DistanceToTarget::DistanceToTarget( void )
+{
+	
+}
+
 DistanceToTarget::DistanceToTarget( crimild::Real32 value, std::string comparator )
 	: _value( value )
 {

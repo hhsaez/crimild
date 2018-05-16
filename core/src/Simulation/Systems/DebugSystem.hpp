@@ -47,6 +47,8 @@ namespace crimild {
 	}
 
 	class DebugSystem : public System {
+		CRIMILD_IMPLEMENT_RTTI( crimild::DebugSystem )
+		
 	public:
 		DebugSystem( void );
 		virtual ~DebugSystem( void );

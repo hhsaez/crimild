@@ -43,6 +43,7 @@ namespace crimild {
 				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::decorators::Repeat )
 				
 			public:
+				Repeat( void );
 				explicit Repeat( crimild::Int16 times );
 				virtual ~Repeat( void );
 

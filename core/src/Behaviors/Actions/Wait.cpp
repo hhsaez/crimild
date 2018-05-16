@@ -6,6 +6,11 @@ using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::actions;
 
+Wait::Wait( void )
+{
+	
+}
+
 Wait::Wait( crimild::Real32 duration )
 	: _duration( duration )
 {

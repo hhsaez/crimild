@@ -67,6 +67,8 @@ namespace crimild {
 	}
 
 	class WindowSystem : public System {
+		CRIMILD_IMPLEMENT_RTTI( crimild::WindowSystem )
+		
 	public:
 		WindowSystem( void );
 		virtual ~WindowSystem( void );

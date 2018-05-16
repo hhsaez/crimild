@@ -40,6 +40,7 @@ namespace crimild {
 				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::Wait )
 				
 			public:
+				Wait( void );
 				explicit Wait( crimild::Real32 duration );
 				virtual ~Wait( void );
 				

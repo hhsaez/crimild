@@ -8,6 +8,11 @@ using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::conditions;
 
+TestSettingValue::TestSettingValue( void )
+{
+	
+}
+
 TestSettingValue::TestSettingValue( std::string key, std::string value, std::string comparator )
 	: _key( key ),
 	  _value( value ),

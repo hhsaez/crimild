@@ -9,7 +9,6 @@
 using namespace crimild;
 
 WindowSystem::WindowSystem( void )
-	: System( "Window System" )
 {
 
 }

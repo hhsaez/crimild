@@ -6,6 +6,11 @@ using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::decorators;
 
+Repeat::Repeat( void )
+{
+	
+}
+
 Repeat::Repeat( crimild::Int16 times )
 	: _times( times )
 {

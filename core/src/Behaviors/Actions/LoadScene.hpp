@@ -40,6 +40,7 @@ namespace crimild {
 				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions )
 				
 			public:
+				LoadScene( void );
 				explicit LoadScene( std::string sceneFileName );
 				virtual ~LoadScene( void );
 				

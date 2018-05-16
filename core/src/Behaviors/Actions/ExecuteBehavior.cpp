@@ -7,6 +7,11 @@ using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::actions;
 
+ExecuteBehavior::ExecuteBehavior( void )
+{
+	
+}
+
 ExecuteBehavior::ExecuteBehavior( std::string behaviorName )
 	: _behaviorName( behaviorName )
 {
@@ -43,12 +48,12 @@ void ExecuteBehavior::encode( coding::Encoder &encoder )
 {
 	Behavior::encode( encoder );
 
-	encoder.encode( "behavior_name", _behaviorName );
+	encoder.encode( "behaviorName", _behaviorName );
 }
 
 void ExecuteBehavior::decode( coding::Decoder &decoder )
 {
 	Behavior::decode( decoder );
 
-	decoder.decode( "behavior_name", _behaviorName );
+	decoder.decode( "behaviorName", _behaviorName );
 }

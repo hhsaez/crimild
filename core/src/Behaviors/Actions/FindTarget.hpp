@@ -49,6 +49,7 @@ namespace crimild {
 				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions )
 				
 			public:
+				FindTarget( void );
 				explicit FindTarget( std::string targetName );
 				virtual ~FindTarget( void );
 				

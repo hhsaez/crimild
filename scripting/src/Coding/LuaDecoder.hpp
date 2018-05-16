@@ -67,6 +67,8 @@ namespace crimild {
 			void parse( std::string str );
 			void parseFile( std::string filename );
 
+            bool decodeFile( std::string fileName );
+
 		protected:
 			virtual crimild::Size beginDecodingArray( std::string key ) override;
 			virtual std::string beginDecodingArrayElement( std::string key, crimild::Size index ) override;

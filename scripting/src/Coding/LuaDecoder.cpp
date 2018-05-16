@@ -87,6 +87,24 @@ void LuaDecoder::parseFile( std::string filename )
 	}	
 }
 
+bool LuaDecoder::decodeFile( std::string fileName )
+{
+	if ( !getScriptContext().load( fileName ) ) {
+		Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot open lua file: ", fileName );
+		return false;
+	}
+
+	ScriptEvaluator eval( &getScriptContext(), _rootObjectName );
+	_evals.push( eval );
+	
+	auto obj = buildObject();
+	if ( obj != nullptr ) {
+		addRootObject( obj );
+	}	
+
+	return true;
+}
+
 SharedPointer< SharedObject > LuaDecoder::buildObject( void )
 {
 	auto &eval = _evals.top();
@@ -94,12 +112,12 @@ SharedPointer< SharedObject > LuaDecoder::buildObject( void )
 	SharedPointer< Codable > obj;
 
 	std::string fileName;
-	if ( eval.getPropValue( "fileName", fileName ) ) {
+	if ( eval.getPropValue( "sceneFile", fileName ) ) {
 		auto scene = AssetManager::getInstance()->get< Group >( fileName );
 		if ( scene == nullptr ) {
 			SharedPointer< Group > tmp;
 			auto fullPath = FileSystem::getInstance().pathForResource( fileName );
-			if ( StringUtils::getFileExtension( fileName ) == ".obj" ) {
+			if ( StringUtils::getFileExtension( fileName ) == "obj" ) {
 				OBJLoader loader( fullPath );
 				tmp = loader.load();
 			}
@@ -144,7 +162,18 @@ SharedPointer< SharedObject > LuaDecoder::buildObject( void )
 
 void LuaDecoder::decode( std::string key, SharedPointer< Codable > &codable ) 
 {
+	if ( key.length() > 0 ) {
+		std::stringstream ss;
+		ss << _evals.top().getPrefix() << "." << key;
+		ScriptEvaluator eval( &getScriptContext(), ss.str() );
+		_evals.push( eval );
+	}
+
     codable = crimild::dynamic_cast_ptr< Codable >( buildObject() );
+
+	if ( key.length() > 0 ) {
+		_evals.pop();
+	}
 }
 
 crimild::Size LuaDecoder::beginDecodingArray( std::string key )

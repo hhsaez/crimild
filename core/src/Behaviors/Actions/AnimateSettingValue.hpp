@@ -40,6 +40,7 @@ namespace crimild {
 				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::AnimateSettingValue )
 				
 			public:
+				AnimateSettingValue( void );
 				explicit AnimateSettingValue( std::string key, crimild::Real32 value, crimild::Real32 duration, crimild::Bool ignoreGlobalTimeScale );
 				virtual ~AnimateSettingValue( void );
 

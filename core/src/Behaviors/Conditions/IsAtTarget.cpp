@@ -8,6 +8,11 @@ using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::conditions;
 
+IsAtTarget::IsAtTarget( void )
+{
+	
+}
+
 IsAtTarget::IsAtTarget( crimild::Real32 minDistance )
 	: _minDistance( minDistance )
 {

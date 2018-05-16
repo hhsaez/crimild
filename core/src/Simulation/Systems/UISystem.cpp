@@ -11,7 +11,6 @@ using namespace crimild;
 using namespace crimild::messaging;
 
 UISystem::UISystem( void )
-    : System( "UI System" )
 {
 
 }

@@ -57,6 +57,8 @@ ENDIF ( CRIMILD_ENABLE_PHYSICS )
 # Add scripting sources
 OPTION( CRIMILD_ENABLE_SCRIPTING "Would you like to build the crimild-scripting extension?" OFF )
 iF ( CRIMILD_ENABLE_SCRIPTING )
+	ADD_DEFINITIONS( -DCRIMILD_ENABLE_SCRIPTING=1 )
+
 	# Extract lua sources if needed
 	EXTRACT_ARCHIVE( lua-5.2.3.tar.gz lua-5.2.3 ${CRIMILD_SOURCE_DIR}/third-party )
 

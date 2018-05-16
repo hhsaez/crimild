@@ -37,6 +37,8 @@ namespace crimild {
 	namespace physics {
 
 		class PhysicsSystem : public System { 
+			CRIMILD_IMPLEMENT_RTTI( crimild::physics::PhysicsSystem )
+		
 		public:
 			PhysicsSystem( void );
 			virtual ~PhysicsSystem( void );

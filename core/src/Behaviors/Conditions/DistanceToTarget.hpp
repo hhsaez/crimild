@@ -40,6 +40,7 @@ namespace crimild {
 				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::conditions::DistanceToTarget )
 				
 			public:
+				DistanceToTarget( void );
 				explicit DistanceToTarget( crimild::Real32 value, std::string comparator );
 				virtual ~DistanceToTarget( void );
 				

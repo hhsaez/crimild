@@ -8,6 +8,11 @@ using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::actions;
 
+AnimateContextValue::AnimateContextValue( void )
+{
+	
+}
+
 AnimateContextValue::AnimateContextValue( std::string key, crimild::Real32 value, crimild::Real32 duration )
 	: _key( key ),
 	  _value( value ),

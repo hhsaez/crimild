@@ -52,6 +52,8 @@ namespace crimild {
 	}
 
 	class UpdateSystem : public System {
+		CRIMILD_IMPLEMENT_RTTI( crimild::UpdateSystem )
+		
 	public:
 		UpdateSystem( void );
 		virtual ~UpdateSystem( void );

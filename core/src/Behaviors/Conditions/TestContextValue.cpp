@@ -6,6 +6,11 @@ using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::conditions;
 
+TestContextValue::TestContextValue( void )
+{
+	
+}
+
 TestContextValue::TestContextValue( std::string key, std::string value, std::string comparator )
 	: _key( key ),
 	  _value( value )

@@ -42,6 +42,7 @@ namespace crimild {
 				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::Transform );
 				
 			public:
+				Transform( void );
 				explicit Transform(
 					const crimild::Transformation &targetTransformation,
 					crimild::Real32 duration,

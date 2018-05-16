@@ -6,6 +6,11 @@ using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::actions;
 
+PrintMessage::PrintMessage( void )
+{
+	
+}
+
 PrintMessage::PrintMessage( std::string message )
 	: _message( message )
 {

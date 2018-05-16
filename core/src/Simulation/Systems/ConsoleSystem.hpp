@@ -35,6 +35,8 @@
 namespace crimild {
     
 	class ConsoleSystem : public System {
+		CRIMILD_IMPLEMENT_RTTI( crimild::ConsoleSystem )
+		
 	public:
 		ConsoleSystem( void );
 		virtual ~ConsoleSystem( void );

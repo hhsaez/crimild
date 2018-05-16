@@ -40,6 +40,7 @@ namespace crimild {
 				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::SetSettingValue )
 				
 			public:
+				SetSettingValue( void );
 				explicit SetSettingValue( std::string key, std::string value );
 				virtual ~SetSettingValue( void );
 				

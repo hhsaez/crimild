@@ -40,6 +40,7 @@ namespace crimild {
 				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::conditions::TestContextValue )
 				
 			public:
+				TestContextValue( void );
 				explicit TestContextValue( std::string key, std::string value, std::string comparator );
 				virtual ~TestContextValue( void );
 				

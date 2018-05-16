@@ -6,6 +6,11 @@ using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::actions;
 
+LookAt::LookAt( void )
+{
+	
+}
+
 LookAt::LookAt( const Vector3f &target, crimild::Real32 duration )
 	: _target( target )
 {

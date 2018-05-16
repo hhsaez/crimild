@@ -17,7 +17,6 @@
 using namespace crimild;
 
 UpdateSystem::UpdateSystem( void )
-	: System( "Update System" )
 {
 
 }

@@ -7,6 +7,11 @@ using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::actions;
 
+ExecuteBehaviorOnTarget::ExecuteBehaviorOnTarget( void )
+{
+	
+}
+
 ExecuteBehaviorOnTarget::ExecuteBehaviorOnTarget( std::string behaviorName, crimild::Bool overrideTarget )
 	: _behaviorName( behaviorName ),
 	  _overrideTarget( overrideTarget )

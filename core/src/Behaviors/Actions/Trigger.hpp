@@ -48,6 +48,7 @@ namespace crimild {
 				static std::list< Trigger * > _allTriggers;
 
 			public:
+				Trigger( void );
 				explicit Trigger( std::string triggerName );
 				virtual ~Trigger( void );
 

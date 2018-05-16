@@ -40,6 +40,7 @@ namespace crimild {
 			CRIMILD_IMPLEMENT_RTTI( crimild::navigation::NavigationMeshContainer )
 			
 		public:
+			NavigationMeshContainer( void );
 			explicit NavigationMeshContainer( NavigationMeshPtr const &mesh );
 			virtual ~NavigationMeshContainer( void );
 
@@ -50,6 +51,10 @@ namespace crimild {
 
 		public:
 			virtual void renderDebugInfo( Renderer *renderer, Camera *camera ) override;
+
+		public:
+			virtual void encode( coding::Encoder &encoder ) override;
+			virtual void decode( coding::Decoder &decoder ) override;
 		};
 
 	}

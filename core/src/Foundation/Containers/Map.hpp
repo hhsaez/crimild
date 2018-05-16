@@ -60,6 +60,8 @@ namespace crimild {
 		public:
 			using TraverseCallback = std::function< void( const KeyType &, ValueType & ) >;
 			using ConstTraverseCallback = std::function< void( const KeyType &, const ValueType & ) >;
+			using ValueTraverseCallback = std::function< void( ValueType & ) >;
+			using ConstValueTraverseCallback = std::function< void( const ValueType & ) >;
 			
 		public:
 			Map( void )
@@ -165,6 +167,22 @@ namespace crimild {
 				LockImpl lock( this );
 				for ( const auto &it : _map ) {
 					callback( it.first, it.second );
+				}
+			}
+
+			void eachValue( ValueTraverseCallback const &callback )
+			{
+				LockImpl lock( this );
+				for ( auto &it : _map ) {
+					callback( it.second );
+				}
+			}
+
+			void eachValue( ValueTraverseCallback const &callback ) const
+			{
+				LockImpl lock( this );
+				for ( const auto &it : _map ) {
+					callback( it.second );
 				}
 			}
 

@@ -59,6 +59,47 @@ void crimild::init( void )
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::BehaviorContext );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::BehaviorContextValue );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::BehaviorTree );
-    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::SetContextValue );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::AnimateContextValue );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::AnimateParticleSystem );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::AnimateSettingValue );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::ClearTargets );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::CopyTransformFromTarget );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::ResetNavigation );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::EnableNode );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::ExecuteBehavior );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::ExecuteBehaviorOnTarget );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::FindTarget );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::LoadScene );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::LookAt );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::MotionApply );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::MotionAvoidOthers );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::MotionAvoidWalls );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::MotionComputePathToTarget );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::MotionReset );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::MotionSeek );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::PrintMessage );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::SetContextValue );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::SetSettingValue );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::Success );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::Transform );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::Trigger );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::Wait );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::composites::Parallel );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::composites::Selector );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::composites::Sequence );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::conditions::DistanceToTarget );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::conditions::HasTargets );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::conditions::IsAtTarget );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::conditions::TestContextValue );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::conditions::TestInputAxis );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::conditions::TestSettingValue );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::decorators::Inverter );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::decorators::Repeat );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::decorators::RepeatUntilFail );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::decorators::RepeatUntilSuccess );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::decorators::Succeeder );
+
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::navigation::NavigationMeshContainer );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::navigation::NavigationController );
 }
 

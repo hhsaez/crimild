@@ -16,6 +16,11 @@ void Trigger::each( std::function< void( std::string str ) > const &callback )
 	}
 }
 
+Trigger::Trigger( void )
+{
+	
+}
+
 Trigger::Trigger( std::string triggerName )
 	: _triggerName( triggerName )
 {

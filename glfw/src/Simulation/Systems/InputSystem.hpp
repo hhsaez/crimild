@@ -36,6 +36,8 @@
 namespace crimild {
     
 	class InputSystem : public System {
+		CRIMILD_IMPLEMENT_RTTI( crimild::InputSystem )
+		
 	public:
 		InputSystem( void );
 		virtual ~InputSystem( void );

@@ -7,6 +7,11 @@ using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::actions;
 
+Transform::Transform( void )
+{
+	
+}
+
 Transform::Transform(
 	const crimild::Transformation &targetTransformation,
 	crimild::Real32 duration,

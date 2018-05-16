@@ -44,6 +44,7 @@ namespace crimild {
 				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::EnableNode )
 				
 			public:
+				EnableNode( void );
 				explicit EnableNode( crimild::Bool enabled, std::string node );
 				virtual ~EnableNode( void );
 				

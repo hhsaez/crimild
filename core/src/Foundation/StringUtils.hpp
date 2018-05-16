@@ -83,7 +83,7 @@ namespace crimild {
 				return "";
 			}
 
-			return path.substr( pos );
+			return path.substr( pos + 1 );
 		}
 
 		static std::string splitLines( std::string input, int charsPerLine )

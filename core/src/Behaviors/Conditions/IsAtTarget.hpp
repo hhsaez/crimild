@@ -13,6 +13,7 @@ namespace crimild {
 				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::IsAtTarget )
 				
 			public:
+				IsAtTarget( void );
 				explicit IsAtTarget( crimild::Real32 minDistance );
 				virtual ~IsAtTarget( void );
 				

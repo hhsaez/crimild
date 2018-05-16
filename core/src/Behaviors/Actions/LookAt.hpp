@@ -40,6 +40,7 @@ namespace crimild {
 				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::LookAt )
 				
 			public:
+				LookAt( void );
 				explicit LookAt( const crimild::Vector3f &target, crimild::Real32 duration );
 				virtual ~LookAt( void );
 				

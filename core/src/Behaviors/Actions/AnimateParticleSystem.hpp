@@ -43,6 +43,7 @@ namespace crimild {
 				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::AnimateParticleSystem )
 				
 			public:
+				AnimateParticleSystem( void );
 				explicit AnimateParticleSystem( crimild::Bool animate );
 				virtual ~AnimateParticleSystem( void );
 				

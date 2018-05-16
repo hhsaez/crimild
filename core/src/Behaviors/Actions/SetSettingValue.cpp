@@ -6,6 +6,11 @@ using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::actions;
 
+SetSettingValue::SetSettingValue( void )
+{
+	
+}
+
 SetSettingValue::SetSettingValue( std::string key, std::string value )
 	: _key( key ),
 	  _value( value )

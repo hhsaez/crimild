@@ -9,7 +9,6 @@
 using namespace crimild;
 
 InputSystem::InputSystem( void )
-	: System( "Input System" )
 {
     auto self = this;
     

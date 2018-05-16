@@ -6,6 +6,11 @@ using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::actions;
 
+EnableNode::EnableNode( void )
+{
+	
+}
+
 EnableNode::EnableNode( crimild::Bool enabled, std::string node )
 	: _enabled( enabled ),
 	  _node( node )
