@@ -28,6 +28,7 @@
 #ifndef CRIMILD_CORE_SCENE_GRAPH_TEXT_
 #define CRIMILD_CORE_SCENE_GRAPH_TEXT_
 
+#include "Group.hpp"
 #include "Geometry.hpp"
 #include "Rendering/Image.hpp"
 #include "Rendering/Material.hpp"
@@ -67,7 +68,14 @@ namespace crimild {
 		std::map< unsigned char, Glyph > _glyphs;
 	};
     
-	class Text : public Geometry {
+	class Text : public Group {
+    public:
+        enum class HorizontalAlignment {
+            LEFT,
+            RIGHT,
+            CENTER
+        };
+        
 	public:
 		Text( void );
 		virtual ~Text( void );
@@ -84,9 +92,15 @@ namespace crimild {
 
 		const RGBAColorf &getTextColor( void ) const { return _material->getDiffuse(); }
 		void setTextColor( const RGBAColorf &color ) { _material->setDiffuse( color ); }
+        
+        void setHorizontalAlignment( HorizontalAlignment alignment );
+        HorizontalAlignment getHorizontalAlignment( void ) const { return _horizontalAlignment; }
 
 		bool isDepthTestEnabled( void ) const { return _material->getDepthState()->isEnabled(); }
 		void setDepthTestEnabled( bool enabled ) { _material->getDepthState()->setEnabled( enabled ); }
+        
+        // internal use only
+        Geometry *getGeometry( void ) { return crimild::get_ptr( _geometry ); }
 
     public:
         virtual void accept( NodeVisitor &visitor ) override;
@@ -97,8 +111,10 @@ namespace crimild {
 		std::string _text;
 		float _size;
 		SharedPointer< Font > _font;
+        SharedPointer< Geometry > _geometry;
 		SharedPointer< Primitive > _primitive;
 		SharedPointer< Material > _material;
+        HorizontalAlignment _horizontalAlignment = HorizontalAlignment::LEFT;
 	};
 
 }

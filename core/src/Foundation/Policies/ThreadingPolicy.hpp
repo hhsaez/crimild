@@ -29,6 +29,7 @@
 #define CRIMILD_FOUNDATION_POLICIES_THREADING_
 
 #include <thread>
+#include <mutex>
 
 namespace crimild {
 

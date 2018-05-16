@@ -122,6 +122,13 @@ namespace crimild {
 				return size_unsafe();
 			}
 			
+            inline void clear( void )
+            {
+                LockImpl lock( this );
+                resize_unsafe( 2 );
+                _size = 0;
+            }
+            
 			void push( T const &elem )
 			{
 				LockImpl lock( this );

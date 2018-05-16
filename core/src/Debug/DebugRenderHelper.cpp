@@ -303,6 +303,6 @@ void DebugRenderHelper::renderText( std::string str, const Vector3f &position, c
 	background->getComponent< MaterialComponent >()->attachMaterial( m );
 
 	render( crimild::get_ptr( background ) );
-	render( crimild::get_ptr( text ) );
+	render( text->getGeometry() );
 }
 

@@ -67,7 +67,7 @@ namespace crimild {
 			{
 				resize_unsafe( size );
 				
-				_size = _capacity;
+				_size = size;
 			}
 
 			Array( std::initializer_list< T > l )
@@ -276,7 +276,7 @@ namespace crimild {
 				
 				if ( _size > 0 && _size == _capacity / 4 ) {
 					// resize the array if needed
-					resize_unsafe( _size / 2 );
+					resize_unsafe( _capacity / 2 );
 				}			
 			}
 			
