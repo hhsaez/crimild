@@ -51,3 +51,4 @@ tools/fontgen/Debug/
 *.sln
 *.dir/
 
+third-party/lua

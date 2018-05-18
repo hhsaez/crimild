@@ -71,19 +71,19 @@ namespace crimild {
 		template<>
 		unsigned int LuaUtils::get< unsigned int >( lua_State *l, const int index )
 		{
-			return lua_tounsigned( l, index );
+			return lua_tointeger( l, index );
 		}
 
 		template<>
 		unsigned char LuaUtils::get< unsigned char >( lua_State *l, const int index )
 		{
-			return lua_tounsigned( l, index );
+			return lua_tointeger( l, index );
 		}
 
 		template<>
 		crimild::UInt16 LuaUtils::get< crimild::UInt16 >( lua_State *l, const int index )
 		{
-			return lua_tounsigned( l, index );
+			return lua_tointeger( l, index );
 		}
 
 		template<>
@@ -95,7 +95,7 @@ namespace crimild {
 		template<>
 		crimild::Size LuaUtils::get< crimild::Size >( lua_State *l, const int index )
 		{
-			return lua_tounsigned( l, index );
+			return lua_tointeger( l, index );
 		}
 
 		template<>
@@ -131,13 +131,13 @@ namespace crimild {
 		template<>
 		int LuaUtils::checkGet< int >( lua_State *l, const int index )
 		{
-			return luaL_checkint( l, index );
+			return luaL_checkinteger( l, index );
 		}
 
 		template<>
 		unsigned int LuaUtils::checkGet< unsigned int >( lua_State *l, const int index )
 		{
-			return luaL_checkunsigned( l, index );
+			return luaL_checkinteger( l, index );
 		}
 
 		template<>
@@ -177,13 +177,14 @@ void LuaUtils::push( lua_State *l, bool &&b )
     lua_pushboolean( l, b );
 }
 
-void LuaUtils::push( lua_State *l, int &&i ) {
+void LuaUtils::push( lua_State *l, int &&i ) 
+{
     lua_pushinteger( l, i );
 }
 
 void LuaUtils::push( lua_State *l, unsigned int &&u ) 
 {
-    lua_pushunsigned( l, u );
+    lua_pushinteger( l, u );
 }
 
 void LuaUtils::push( lua_State *l, float &&f ) 
