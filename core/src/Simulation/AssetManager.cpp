@@ -56,7 +56,7 @@ namespace crimild {
 	        texture = static_cast< Texture * >( crimild::get_ptr( _assets[ name ] ) );
 	    }
 	    
-		if ( texture == nullptr && ( StringUtils::getFileExtension( name ) == ".tga" ) ) {
+		if ( texture == nullptr && ( StringUtils::getFileExtension( name ) == "tga" ) ) {
 			auto image = crimild::alloc< ImageTGA >( FileSystem::getInstance().pathForResource( name ) );
 			if ( image != nullptr ) {
 	            auto tmp = crimild::alloc< Texture >( image ) ;

@@ -284,10 +284,14 @@ void DebugRenderHelper::renderText( std::string str, const Vector3f &position, c
 	text->setFont( font );
 	text->setSize( 0.05f );
 	text->setTextColor( color );
+	text->setHorizontalAlignment( Text::HorizontalAlignment::LEFT );
 
 	text->setText( str );
 
 	text->local().setTranslate( position );
+
+	text->perform( UpdateWorldState() );
+	text->perform( UpdateRenderState() );
 
     const auto min = text->getLocalBound()->getMin();
     const auto max = text->getLocalBound()->getMax();
@@ -301,6 +305,9 @@ void DebugRenderHelper::renderText( std::string str, const Vector3f &position, c
 	auto m = crimild::alloc< Material >();
 	m->setDiffuse( RGBAColorf( 0.0f, 0.0f, 0.0f, 0.75f ) );
 	background->getComponent< MaterialComponent >()->attachMaterial( m );
+
+	background->perform( UpdateWorldState() );
+	background->perform( UpdateRenderState() );
 
 	render( crimild::get_ptr( background ) );
 	render( text->getGeometry() );
