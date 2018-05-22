@@ -59,6 +59,7 @@ void crimild::init( void )
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::RenderStateComponent );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::OrbitComponent );
 	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::RotationComponent );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::SkinnedMeshComponent );
 
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::BehaviorController );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::BehaviorContext );

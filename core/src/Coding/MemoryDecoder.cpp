@@ -64,6 +64,12 @@ void MemoryDecoder::decode( std::string key, SharedPointer< coding::Codable > &c
 	_currentObj = temp;
 }
 
+void MemoryDecoder::decode( std::string key, containers::ByteArray &value )
+{
+    auto obj = crimild::cast_ptr< EncodedData >( _links[ _currentObj->getUniqueID() ][ key ] );
+    value = obj->getBytes();
+}
+
 void MemoryDecoder::decode( std::string key, std::string &value )
 {
     crimild::Size l = 0;

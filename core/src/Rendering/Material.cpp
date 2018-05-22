@@ -80,38 +80,6 @@ void Material::decode( coding::Decoder &decoder )
 	decoder.decode( "normalMap", _normalMap );
 	decoder.decode( "specularMap", _specularMap );
 	decoder.decode( "emissiveMap", _emissiveMap );
-
-	std::string blendMode;
-	decoder.decode( "blendMode", blendMode );
-	if ( blendMode == "additive" ) {
-		setAlphaState( crimild::alloc< AlphaState >( true, AlphaState::SrcBlendFunc::SRC_ALPHA, AlphaState::DstBlendFunc::ONE ) );
-	}
-	else if ( blendMode == "color" ) {
-		setAlphaState( crimild::alloc< AlphaState >( true, AlphaState::SrcBlendFunc::SRC_COLOR, AlphaState::DstBlendFunc::ONE_MINUS_SRC_COLOR ) );
-	}
-	else if ( blendMode == "transparent" ) {
-		setAlphaState( crimild::alloc< AlphaState >( true, AlphaState::SrcBlendFunc::SRC_ALPHA, AlphaState::DstBlendFunc::ONE_MINUS_SRC_ALPHA ) );
-	}
-	else if ( blendMode == "additive_no_alpha" ) {
-		setAlphaState( crimild::alloc< AlphaState >( true, AlphaState::SrcBlendFunc::ONE, AlphaState::DstBlendFunc::ONE ) );
-	}
-	else if ( blendMode == "multiply" ) {
-		setAlphaState( crimild::alloc< AlphaState >( true, AlphaState::SrcBlendFunc::ONE, AlphaState::DstBlendFunc::ONE_MINUS_SRC_ALPHA ) );
-	}
-	else if ( blendMode == "default" ) {
-		setAlphaState( AlphaState::ENABLED );
-	}
-	else {
-		setAlphaState( AlphaState::DISABLED );
-	}
-
-	crimild::Bool cullFaceEnabled = true;
-	decoder.decode( "cullFaceEnabled", cullFaceEnabled );
-	getCullFaceState()->setEnabled( cullFaceEnabled );
-
-	crimild::Bool depthStateEnabled = true;
-	decoder.decode( "depthStateEnabled", depthStateEnabled );
-	setDepthState( depthStateEnabled ? DepthState::ENABLED : DepthState::DISABLED );
 }
 
 bool Material::registerInStream( Stream &s )

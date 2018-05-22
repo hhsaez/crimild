@@ -67,6 +67,7 @@ namespace crimild {
             virtual void encode( std::string key, const Quaternion4f &value ) override { encodeData( key, value ); }
             virtual void encode( std::string key, crimild::Bool value ) override { encodeData( key, value ); }
             virtual void encode( std::string key, const crimild::VertexFormat &value ) override { encodeData( key, value ); }
+            virtual void encode( std::string key, const containers::ByteArray &value ) override { encodeData( key, value ); }
             
             containers::ByteArray getBytes( void ) const;
             

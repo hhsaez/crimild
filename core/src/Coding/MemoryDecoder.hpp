@@ -65,6 +65,8 @@ namespace crimild {
             virtual void decode( std::string key, Transformation &value ) override { decodeData( key, value ); }
             virtual void decode( std::string key, VertexFormat &value ) override { decodeData( key, value ); }
             
+            virtual void decode( std::string key, containers::ByteArray &value ) override;
+            
             crimild::Bool fromBytes( const containers::ByteArray &bytes );
             
         private:
@@ -72,6 +74,11 @@ namespace crimild {
             void decodeData( std::string key, T &value )
             {
                 auto obj = crimild::cast_ptr< EncodedData >( _links[ _currentObj->getUniqueID() ][ key ] );
+                if ( obj == nullptr ) {
+                    value = T();
+                    return;
+                }
+                
                 value = obj->getValue< T >();
             }
 

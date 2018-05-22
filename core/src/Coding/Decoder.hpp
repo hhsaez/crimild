@@ -77,6 +77,8 @@ namespace crimild {
             virtual void decode( std::string key, crimild::Quaternion4f &value ) = 0;
             virtual void decode( std::string key, Transformation &value ) = 0;
             virtual void decode( std::string key, VertexFormat &value ) = 0;
+            
+            virtual void decode( std::string key, containers::ByteArray &value ) = 0;
 
             template< typename T >
             void decode( std::string key, containers::Array< SharedPointer< T >> &value )

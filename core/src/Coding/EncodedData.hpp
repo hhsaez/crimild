@@ -51,6 +51,14 @@ namespace crimild {
 					memcpy( &_bytes[ 0 ], ( const void * ) &str[ 0 ], _bytes.size() );
 				}
 			}
+                
+            explicit EncodedData( const containers::ByteArray &data )
+                : _bytes( data.size() )
+            {
+                if ( _bytes.size() > 0 ) {
+                    memcpy( &_bytes[ 0 ], &data[ 0 ], _bytes.size() );
+                }
+            }
             
 			template< typename T >
 			explicit EncodedData( const T &data )

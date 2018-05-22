@@ -47,7 +47,7 @@ namespace crimild {
 		BufferObject( unsigned int size, const T *data )
 		{
 			if ( size > 0 ) {
-                _data.resize( size );
+                _data.resize( size * sizeof( T ) );
                 if ( data != nullptr ) {
                     memcpy( &_data[ 0 ], data, sizeof( T ) * size );
                 }
@@ -60,20 +60,20 @@ namespace crimild {
 
 		}
 
-		inline unsigned int getSize( void ) const { return _data.size(); }
+		inline unsigned int getSize( void ) const { return _data.size() / sizeof( T ); }
         
-        inline unsigned int getSizeInBytes( void ) const { return sizeof( T ) * getSize(); }
+        inline unsigned int getSizeInBytes( void ) const { return _data.size(); }
 
-		inline T *data( void ) { return &_data[ 0 ]; }
+		inline T *data( void ) { return ( T * ) &_data[ 0 ]; }
 
-		inline const T *getData( void ) const { return &_data[ 0 ]; }
+		inline const T *getData( void ) const { return ( const T * ) &_data[ 0 ]; }
 
-		inline crimild::Size getUsedCount( void ) const { return _data.size(); }
+		inline crimild::Size getUsedCount( void ) const { return getSize(); }
 
-		inline void setUsedCount( crimild::Size count ) { _data.resize( count ); }
+		inline void setUsedCount( crimild::Size count ) { _data.resize( count * sizeof( T ) ); }
 
 	private:
-        containers::Array< T > _data;
+        containers::ByteArray _data;
         
         /**
             name Coding
@@ -115,13 +115,13 @@ namespace crimild {
 		{
 			StreamObject::save( s );
 
-			unsigned int size = getSize();
+			unsigned int size = _data.size();
 			s.write( size );
             
 			s.write( size ); // used count
 			
 			if ( size > 0 ) {
-				s.writeRawBytes( &_data[ 0 ], getSizeInBytes() );
+				s.writeRawBytes( &_data[ 0 ], size );
 			}
 		}
 
@@ -138,7 +138,7 @@ namespace crimild {
 
 			if ( size > 0 ) {
 				_data.resize( size );
-				s.readRawBytes( &_data[ 0 ], getSizeInBytes() );
+				s.readRawBytes( &_data[ 0 ], size );
 			}
 		}
         

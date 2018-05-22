@@ -95,7 +95,7 @@ void Image::encode( coding::Encoder &encoder )
 	encoder.encode( "width", _width );
 	encoder.encode( "height", _height );
 	encoder.encode( "bpp", _bpp );
-	encoder.encode( "data", _data );
+    encoder.encode( "data", _data );
 }
 
 void Image::decode( coding::Decoder &decoder )

@@ -107,7 +107,7 @@ void SkinnedMeshComponent::update( const Clock &c )
 		_animationProgressCallback( animationProgress );
 	}
 
-	getNode()->perform( Apply( [mesh, skeleton, currentClip, animationState, animationTime]( Node *node ) {
+	getNode()->perform( Apply( [ skeleton, currentClip, animationState, animationTime ]( Node *node ) {
 
 		Transformation modelTransform;
 
@@ -163,8 +163,7 @@ void SkinnedMeshComponent::setAnimationParams(
 void SkinnedMeshComponent::renderDebugInfo( Renderer *renderer, Camera *camera )
 {
 	std::vector< Vector3f > lines;
-	auto self = this;
-	getNode()->perform( Apply( [&lines, self]( Node *node ) {
+	getNode()->perform( Apply( [ &lines ]( Node *node ) {
 		if ( node->hasParent() ) {
 			// if ( self->getBones().boneMap.find( node->getName() ) != self->getBones().boneMap.end() ) {
 				lines.push_back( node->getParent()->getWorld().getTranslate() );

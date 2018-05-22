@@ -69,6 +69,8 @@
 #include "Coding/EncodedData.hpp"
 #include "Coding/MemoryEncoder.hpp"
 #include "Coding/MemoryDecoder.hpp"
+#include "Coding/FileEncoder.hpp"
+#include "Coding/FileDecoder.hpp"
 #include "Coding/Tags.hpp"
 
 #include "Audio/AudioListener.hpp"
