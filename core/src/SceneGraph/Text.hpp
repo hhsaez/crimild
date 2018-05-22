@@ -69,6 +69,8 @@ namespace crimild {
 	};
     
 	class Text : public Group {
+		CRIMILD_IMPLEMENT_RTTI( crimild::Text )
+		
     public:
         enum class HorizontalAlignment {
             LEFT,
@@ -115,6 +117,17 @@ namespace crimild {
 		SharedPointer< Primitive > _primitive;
 		SharedPointer< Material > _material;
         HorizontalAlignment _horizontalAlignment = HorizontalAlignment::LEFT;
+
+		/**
+		   \name Coding support
+		*/
+		//@{
+
+	public:
+		virtual void encode( coding::Encoder &encoder ) override;
+		virtual void decode( coding::Decoder &decoder ) override;
+
+		//@}
 	};
 
 }

@@ -56,6 +56,7 @@ namespace crimild {
             virtual void decode( std::string key, crimild::Bool &value ) override { decodeData( key, value ); }
 			virtual void decode( std::string key, crimild::Real32 &value ) override { decodeData( key, value ); }
 			virtual void decode( std::string key, crimild::Real64 &value ) override { decodeData( key, value ); }
+			virtual void decode( std::string key, crimild::Vector2f &value ) override { decodeData( key, value ); }
 			virtual void decode( std::string key, crimild::Vector3f &value ) override { decodeData( key, value ); }
             virtual void decode( std::string key, crimild::Vector4f &value ) override { decodeData( key, value ); }
             virtual void decode( std::string key, crimild::Matrix3f &value ) override { decodeData( key, value ); }

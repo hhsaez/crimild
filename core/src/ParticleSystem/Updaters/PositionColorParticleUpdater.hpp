@@ -33,11 +33,25 @@
 namespace crimild {
 
     class PositionColorParticleUpdater : public ParticleSystemComponent::ParticleUpdater {
+        CRIMILD_IMPLEMENT_RTTI( crimild::PositionColorParticleUpdater )
+        
     public:
         PositionColorParticleUpdater( void );
         virtual ~PositionColorParticleUpdater( void );
 
         virtual void update( Node *node, double dt, ParticleData *particles ) override;
+
+		/** 
+		 	\name Coding support
+		*/
+		//@{
+
+	public:
+		virtual void encode( coding::Encoder &encoder ) override;
+		virtual void decode( coding::Decoder &decoder ) override;
+
+		//@}
+        
     };
 
 }

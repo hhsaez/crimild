@@ -29,6 +29,8 @@
 #define CRIMILD_PARTICLE_GENERATOR_RANDOM_VALUE_
 
 #include "../ParticleSystemComponent.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 #include <Mathematics/Random.hpp>
 
@@ -84,11 +86,108 @@ namespace crimild {
         T _maxValue;
 
 		ParticleAttribArray *_attribs;
+
+		/** 
+		 	\name Coding support
+		*/
+		//@{
+
+	public:
+		virtual void encode( coding::Encoder &encoder ) override
+		{
+			ParticleSystemComponent::ParticleGenerator::encode( encoder );
+
+			std::string attribType;
+			switch ( _attribType ) {
+				case ParticleAttrib::UNIFORM_SCALE:
+					attribType = "uniformScale";
+					break;
+
+				case ParticleAttrib::UNIFORM_SCALE_START:
+					attribType = "uniformScaleStart";
+					break;
+
+				case ParticleAttrib::UNIFORM_SCALE_END:
+					attribType = "uniformScaleEnd";
+					break;
+
+				case ParticleAttrib::POSITION:
+					attribType = "position";
+					break;
+
+				case ParticleAttrib::VELOCITY:
+					attribType = "velocity";
+					break;
+
+				case ParticleAttrib::ACCELERATION:
+					attribType = "acceleration";
+					break;
+					
+				default:
+					break;
+			}
+			encoder.encode( "attrib", attribType );
+
+			encoder.encode( "minValue", _minValue );
+			encoder.encode( "maxValue", _maxValue );
+		}
+
+		virtual void decode( coding::Decoder &decoder ) override
+		{
+			ParticleSystemComponent::ParticleGenerator::decode( decoder );
+
+			std::string attribType;
+			decoder.decode( "attrib", attribType );
+			if ( attribType == "uniformScale" ) {
+				_attribType = ParticleAttrib::UNIFORM_SCALE;
+			}
+			else if ( attribType == "uniformScaleStart" ) {
+				setParticleAttribType( ParticleAttrib::UNIFORM_SCALE_START );
+			}
+			else if ( attribType == "uniformScaleEnd" ) {
+				setParticleAttribType( ParticleAttrib::UNIFORM_SCALE_END );
+			}
+			else if ( attribType == "position" ) {
+				setParticleAttribType( ParticleAttrib::POSITION );
+			}
+			else if ( attribType == "velocity" ) {
+				setParticleAttribType( ParticleAttrib::VELOCITY );
+			}
+			else if ( attribType == "acceleration" ) {
+				setParticleAttribType( ParticleAttrib::ACCELERATION );
+			}
+			
+			decoder.decode( "minValue", _minValue );
+			decoder.decode( "maxValue", _maxValue );
+		}
+
+		//@}
+        
     };
 
-	using RandomVector3fParticleGenerator = RandomValueParticleGenerator< Vector3f >;
-	using RandomRGBAColorfParticleGenerator = RandomValueParticleGenerator< RGBAColorf >;
-	using RandomReal32ParticleGenerator = RandomValueParticleGenerator< crimild::Real32 >;
+	class RandomVector3fParticleGenerator : public RandomValueParticleGenerator< Vector3f > {
+		CRIMILD_IMPLEMENT_RTTI( crimild::RandomVector3fParticleGenerator )
+
+	public:
+		RandomVector3fParticleGenerator( void ) { }
+		virtual ~RandomVector3fParticleGenerator( void ) { }
+	};
+
+	class RandomRGBAColorfParticleGenerator : public RandomValueParticleGenerator< RGBAColorf > {
+		CRIMILD_IMPLEMENT_RTTI( crimild::RandomRGBAColorfParticleGenerator )
+
+	public:
+		RandomRGBAColorfParticleGenerator( void ) { }
+		virtual ~RandomRGBAColorfParticleGenerator( void ) { }
+	};
+
+	class RandomReal32ParticleGenerator : public RandomValueParticleGenerator< crimild::Real32 > {
+		CRIMILD_IMPLEMENT_RTTI( crimild::RandomReal32ParticleGenerator )
+
+	public:
+		RandomReal32ParticleGenerator( void ) { }
+		virtual ~RandomReal32ParticleGenerator( void ) { }
+	};
 
 }
 

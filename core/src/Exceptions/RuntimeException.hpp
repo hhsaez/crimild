@@ -34,8 +34,12 @@ namespace crimild {
 
 	class RuntimeException : public Exception {
 	public:
-		RuntimeException( std::string message )
-			: Exception( "PROGRAM TERMINATED BECAUSE OF AN ERROR: " + message )
+		explicit RuntimeException( std::string message )
+			: Exception( message )
+		{ }
+
+		explicit RuntimeException( std::string context, std::string message )
+			: Exception( context + ": " + message )
 		{ }
 	};
 

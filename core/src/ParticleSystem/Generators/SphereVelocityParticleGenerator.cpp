@@ -28,6 +28,8 @@
 #include "SphereVelocityParticleGenerator.hpp"
 
 #include "Mathematics/Random.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 #include "SceneGraph/Node.hpp"
 
@@ -58,5 +60,19 @@ void SphereVelocityParticleGenerator::generate( Node *node, crimild::Real64 dt, 
     for ( ParticleId i = startId; i < endId; i++ ) {
         vs[ i ] = Random::generate< Vector3f >( posMin, posMax ).getNormalized().times( _magnitude );
     }
+}
+
+void SphereVelocityParticleGenerator::encode( coding::Encoder &encoder ) 
+{
+	ParticleSystemComponent::ParticleGenerator::encode( encoder );
+
+	encoder.encode( "magnitude", _magnitude );
+}
+
+void SphereVelocityParticleGenerator::decode( coding::Decoder &decoder )
+{
+	ParticleSystemComponent::ParticleGenerator::decode( decoder );
+
+	decoder.decode( "magnitude", _magnitude );
 }
 

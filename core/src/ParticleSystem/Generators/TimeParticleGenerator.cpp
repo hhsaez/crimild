@@ -28,6 +28,8 @@
 #include "TimeParticleGenerator.hpp"
 
 #include "Mathematics/Random.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 #include "SceneGraph/Node.hpp"
 
@@ -59,5 +61,21 @@ void TimeParticleGenerator::generate( Node *node, crimild::Real64 dt, ParticleDa
 		ts[ i ] = t;
 		lts[ i ] = t;
     }
+}
+
+void TimeParticleGenerator::encode( coding::Encoder &encoder ) 
+{
+	ParticleSystemComponent::ParticleGenerator::encode( encoder );
+
+	encoder.encode( "minTime", _minTime );
+	encoder.encode( "maxTime", _maxTime );
+}
+
+void TimeParticleGenerator::decode( coding::Decoder &decoder )
+{
+	ParticleSystemComponent::ParticleGenerator::decode( decoder );
+
+	decoder.decode( "minTime", _minTime );
+	decoder.decode( "maxTime", _maxTime );
 }
 

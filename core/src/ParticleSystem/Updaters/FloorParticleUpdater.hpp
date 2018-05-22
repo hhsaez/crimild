@@ -38,6 +38,8 @@ namespace crimild {
 	   \remarks Use it after a position updater
 	 */
     class FloorParticleUpdater : public ParticleSystemComponent::ParticleUpdater {
+        CRIMILD_IMPLEMENT_RTTI( crimild::FloorParticleUpdater )
+        
     public:
         FloorParticleUpdater( void );
         virtual ~FloorParticleUpdater( void );
@@ -47,6 +49,18 @@ namespace crimild {
         
     private:
         ParticleAttribArray *_positions = nullptr;
+
+		/** 
+		 	\name Coding support
+		*/
+		//@{
+
+	public:
+		virtual void encode( coding::Encoder &encoder ) override;
+		virtual void decode( coding::Decoder &decoder ) override;
+
+		//@}
+        
     };
 
 }

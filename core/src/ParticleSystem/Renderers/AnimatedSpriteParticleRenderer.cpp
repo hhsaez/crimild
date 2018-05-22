@@ -162,4 +162,28 @@ void AnimatedSpriteParticleRenderer::update( Node *node, crimild::Real64 dt, Par
     });
 }
 
+void AnimatedSpriteParticleRenderer::encode( coding::Encoder &encoder ) 
+{
+	ParticleSystemComponent::ParticleRenderer::encode( encoder );
+
+	encoder.encode( "material", _material );
+	encoder.encode( "spriteSheetSize", _spriteSheetSize );
+	encoder.encode( "useOrientedQuads", _useOrientedQuads );
+}
+
+void AnimatedSpriteParticleRenderer::decode( coding::Decoder &decoder )
+{
+	ParticleSystemComponent::ParticleRenderer::decode( decoder );
+
+	decoder.decode( "material", _material );
+	decoder.decode( "spriteSheetSize", _spriteSheetSize );
+	decoder.decode( "useOrientedQuads", _useOrientedQuads );
+
+	if ( _material == nullptr ) {
+		_material = crimild::alloc< Material >();
+	}
+	
+	auto program = crimild::retain( AssetManager::getInstance()->get< ShaderProgram >( Renderer::SHADER_PROGRAM_UNLIT_TEXTURE ) );
+    _material->setProgram( program );
+}
 

@@ -38,7 +38,7 @@ namespace crimild {
         
 		class LuaSetVector3fValueParticleUpdaterBuilder {
 		public:
-			static SharedPointer< SetAttribValueParticleUpdater< Vector3f > > build( ScriptEvaluator &eval );
+			static SharedPointer< SetVector3fValueParticleUpdater > build( ScriptEvaluator &eval );
 		};
 
 	}

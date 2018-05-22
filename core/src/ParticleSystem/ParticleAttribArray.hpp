@@ -30,8 +30,8 @@
 
 #include "Foundation/Types.hpp"
 #include "Foundation/SharedObject.hpp"
-#include "Foundation/Array.hpp"
-#include "Foundation/Map.hpp"
+#include "Foundation/Containers/Array.hpp"
+#include "Foundation/Containers/Map.hpp"
 #include "Foundation/Memory.hpp"
 #include "Mathematics/Vector.hpp"
 
@@ -191,7 +191,7 @@ namespace crimild {
 
 		   \remarks This member is NOT thread safe. 
 		 */
-        Array< T > _data;
+        containers::Array< T > _data;
     };
 
     using Vector3fParticleAttribArray = ParticleAttribArrayImpl< Vector3f >;

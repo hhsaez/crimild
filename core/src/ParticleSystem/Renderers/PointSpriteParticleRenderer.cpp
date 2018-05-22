@@ -112,4 +112,24 @@ void PointSpriteParticleRenderer::update( Node *node, crimild::Real64 dt, Partic
     });
 }
 
+void PointSpriteParticleRenderer::encode( coding::Encoder &encoder ) 
+{
+	ParticleSystemComponent::ParticleRenderer::encode( encoder );
+
+	encoder.encode( "material", _material );
+}
+
+void PointSpriteParticleRenderer::decode( coding::Decoder &decoder )
+{
+	ParticleSystemComponent::ParticleRenderer::decode( decoder );
+
+	decoder.decode( "material", _material );
+
+	if ( _material == nullptr ) {
+		_material = crimild::alloc< Material >();
+	}
+	
+	auto program = crimild::retain( AssetManager::getInstance()->get< ShaderProgram >( Renderer::SHADER_PROGRAM_POINT_SPRITE ) );
+    _material->setProgram( program );
+}
 

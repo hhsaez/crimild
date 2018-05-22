@@ -30,6 +30,9 @@
 
 #include "../ParticleSystemComponent.hpp"
 
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
+
 namespace crimild {
 
 	template< typename T >
@@ -79,11 +82,92 @@ namespace crimild {
 		T _value;
 
 		ParticleAttribArray *_attribs;
+
+		/** 
+		 	\name Coding support
+		*/
+		//@{
+
+	public:
+		virtual void encode( coding::Encoder &encoder ) override
+		{
+			ParticleSystemComponent::ParticleGenerator::encode( encoder );
+
+			std::string attribType;
+			switch ( _attribType ) {
+				case ParticleAttrib::UNIFORM_SCALE:
+					attribType = "uniformScale";
+					break;
+
+				case ParticleAttrib::POSITION:
+					attribType = "position";
+					break;
+
+				case ParticleAttrib::VELOCITY:
+					attribType = "velocity";
+					break;
+
+				case ParticleAttrib::ACCELERATION:
+					attribType = "acceleration";
+					break;
+					
+				default:
+					break;
+			}
+			encoder.encode( "attrib", attribType );
+
+			encoder.encode( "value", _value );
+		}
+
+		virtual void decode( coding::Decoder &decoder ) override
+		{
+			ParticleSystemComponent::ParticleGenerator::decode( decoder );
+
+			std::string attribType;
+			decoder.decode( "attrib", attribType );
+			if ( attribType == "uniformScale" ) {
+				_attribType = ParticleAttrib::UNIFORM_SCALE;
+			}
+			else if ( attribType == "position" ) {
+				setParticleAttribType( ParticleAttrib::POSITION );
+			}
+			else if ( attribType == "velocity" ) {
+				setParticleAttribType( ParticleAttrib::VELOCITY );
+			}
+			else if ( attribType == "acceleration" ) {
+				setParticleAttribType( ParticleAttrib::ACCELERATION );
+			}
+			
+			decoder.decode( "value", _value );
+		}
+
+		//@}
+        
     };
 
-	using DefaultVector3fParticleGenerator = DefaultValueParticleGenerator< Vector3f >;
-	using DefaultRGBAColorfParticleGenerator = DefaultValueParticleGenerator< RGBAColorf >;
-	using DefaultReal32ParticleGenerator = DefaultValueParticleGenerator< crimild::Real32 >;
+	class DefaultVector3fParticleGenerator : public DefaultValueParticleGenerator< Vector3f > {
+		CRIMILD_IMPLEMENT_RTTI( crimild::DefaultVector3fParticleGenerator )
+
+	public:
+		DefaultVector3fParticleGenerator( void ) { }
+		virtual ~DefaultVector3fParticleGenerator( void ) { }
+	};
+
+	class DefaultRGBAColorfParticleGenerator : public DefaultValueParticleGenerator< RGBAColorf > {
+		CRIMILD_IMPLEMENT_RTTI( crimild::DefaultRGBAColorfParticleGenerator )
+
+	public:
+		DefaultRGBAColorfParticleGenerator( void ) { }
+		virtual ~DefaultRGBAColorfParticleGenerator( void ) { }
+	};
+
+	class DefaultReal32ParticleGenerator : public DefaultValueParticleGenerator< crimild::Real32 > {
+		CRIMILD_IMPLEMENT_RTTI( crimild::DefaultReal32ParticleGenerator )
+
+	public:
+		DefaultReal32ParticleGenerator( void ) { }
+		virtual ~DefaultReal32ParticleGenerator( void ) { }
+	};
 
 }
 

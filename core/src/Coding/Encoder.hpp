@@ -66,6 +66,7 @@ namespace crimild {
             virtual void encode( std::string key, crimild::Bool value ) = 0;
 			virtual void encode( std::string key, crimild::Real32 value ) = 0;
 			virtual void encode( std::string key, crimild::Real64 value ) = 0;
+            virtual void encode( std::string key, const Vector2f & ) = 0;
             virtual void encode( std::string key, const Vector3f & ) = 0;
             virtual void encode( std::string key, const Vector4f & ) = 0;
             virtual void encode( std::string key, const Matrix3f & ) = 0;
@@ -74,8 +75,8 @@ namespace crimild {
             virtual void encode( std::string key, const Transformation & ) = 0;
             virtual void encode( std::string key, const VertexFormat & ) = 0;
             
-            template< typename T >
-            void encode( std::string key, containers::Array< T > &a )
+            template< typename T, typename U >
+            void encode( std::string key, containers::Array< T, U > &a )
             {
                 crimild::Size N = a.size();
                 encodeArrayBegin( key, N );

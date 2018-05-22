@@ -56,3 +56,27 @@ void OrbitComponent::update( const Clock &c )
 	_t += _speed * c.getDeltaTime();
 }
 
+void OrbitComponent::encode( coding::Encoder &encoder )
+{
+	NodeComponent::encode( encoder );
+
+	encoder.encode( "x0", _x0 );
+	encoder.encode( "y0", _y0 );
+	encoder.encode( "major", _major );
+	encoder.encode( "minor", _minor );
+	encoder.encode( "speed", _speed );
+	encoder.encode( "gamma", _gamma );
+}
+
+void OrbitComponent::decode( coding::Decoder &decoder )
+{
+	NodeComponent::decode( decoder );
+
+	decoder.decode( "x0", _x0 );
+	decoder.decode( "y0", _y0 );
+	decoder.decode( "major", _major );
+	decoder.decode( "minor", _minor );
+	decoder.decode( "speed", _speed );
+	decoder.decode( "gamma", _gamma );
+}
+

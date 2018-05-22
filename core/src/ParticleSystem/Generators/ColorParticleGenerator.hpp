@@ -33,6 +33,8 @@
 namespace crimild {
 
     class ColorParticleGenerator : public ParticleSystemComponent::ParticleGenerator {
+		CRIMILD_IMPLEMENT_RTTI( crimild::ColorParticleGenerator )
+
     public:
         ColorParticleGenerator( void );
         virtual ~ColorParticleGenerator( void );
@@ -61,6 +63,17 @@ namespace crimild {
         ParticleAttribArray *_colors = nullptr;
 		ParticleAttribArray *_startColors = nullptr;
 		ParticleAttribArray *_endColors = nullptr;
+
+		/** 
+		 	\name Coding support
+		*/
+		//@{
+
+	public:
+		virtual void encode( coding::Encoder &encoder ) override;
+		virtual void decode( coding::Decoder &decoder ) override;
+
+		//@}
     };
 
 }

@@ -28,7 +28,8 @@
 #include "BoxPositionParticleGenerator.hpp"
 
 #include "Mathematics/Random.hpp"
-
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 #include "SceneGraph/Node.hpp"
 
 using namespace crimild;
@@ -71,5 +72,21 @@ void BoxPositionParticleGenerator::generate( Node *node, crimild::Real64 dt, Par
 			ps[ i ] = Vector3f( x, y, z );
 		}
     }
+}
+
+void BoxPositionParticleGenerator::encode( coding::Encoder &encoder ) 
+{
+	ParticleSystemComponent::ParticleGenerator::encode( encoder );
+
+	encoder.encode( "origin", _origin );
+	encoder.encode( "size", _size );
+}
+
+void BoxPositionParticleGenerator::decode( coding::Decoder &decoder )
+{
+	ParticleSystemComponent::ParticleGenerator::decode( decoder );
+
+	decoder.decode( "origin", _origin );
+	decoder.decode( "size", _size );
 }
 

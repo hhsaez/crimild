@@ -36,9 +36,12 @@ void crimild::init( void )
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Geometry );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Camera );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Light );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Text );
     
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Primitive );
 	
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Image );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::ImageTGA );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Material );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::IndexBufferObject );
 	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::SkinnedMeshJoint );
@@ -51,9 +54,11 @@ void crimild::init( void )
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Texture );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::VertexBufferObject );
     
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::FreeLookCameraComponent );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::MaterialComponent );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::RenderStateComponent );
-    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::RotationComponent );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::OrbitComponent );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::RotationComponent );
 
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::BehaviorController );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::BehaviorContext );
@@ -101,5 +106,35 @@ void crimild::init( void )
 
 	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::navigation::NavigationMeshContainer );
 	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::navigation::NavigationController );
+
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::ParticleData );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::ParticleSystemComponent );
+	
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::BoxPositionParticleGenerator );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::GridPositionParticleGenerator );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::SpherePositionParticleGenerator );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::SphereVelocityParticleGenerator );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::RandomVector3fParticleGenerator );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::RandomReal32ParticleGenerator );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::DefaultVector3fParticleGenerator );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::DefaultReal32ParticleGenerator );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::ColorParticleGenerator );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::TimeParticleGenerator );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::NodePositionParticleGenerator );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::EulerParticleUpdater );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::PositionVelocityParticleUpdater );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::TimeParticleUpdater );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::FloorParticleUpdater );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::CameraSortParticleUpdater );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::ZSortParticleUpdater );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::AttractorParticleUpdater );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::SetVector3fValueParticleUpdater );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::UniformScaleParticleUpdater );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::ColorParticleUpdater );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::PointSpriteParticleRenderer );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::OrientedQuadParticleRenderer );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::NodeParticleRenderer );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::AnimatedSpriteParticleRenderer );
+
 }
 

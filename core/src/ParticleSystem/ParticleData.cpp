@@ -26,8 +26,15 @@
  */
 
 #include "ParticleData.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 using namespace crimild;
+
+ParticleData::ParticleData( void )
+{
+
+}
 
 ParticleData::ParticleData( crimild::Size count )
 	: _count( count )
@@ -46,7 +53,7 @@ void ParticleData::generate( void )
 
 	// reset all particle attributes
 	const auto count = getParticleCount();
-    _attribs.foreach( [ count ]( const ParticleAttribType &type, ParticleAttribArrayPtr &attr, unsigned int ) {
+    _attribs.each( [ count ]( const ParticleAttribType &type, ParticleAttribArrayPtr &attr ) {
 		if ( attr != nullptr ) {
 			attr->reset( count );
 		}
@@ -83,11 +90,27 @@ void ParticleData::wake( ParticleId pid )
 void ParticleData::swap( ParticleId a, ParticleId b )
 {
     if ( a != b ) {
-        _attribs.foreach( [ a, b ]( const ParticleAttribType &, ParticleAttribArrayPtr &attr, unsigned int ) {
-            attr->swap( a, b );
+        _attribs.each( [ a, b ]( const ParticleAttribType &type, ParticleAttribArrayPtr &attr ) {
+			attr->swap( a, b );
         });
 
 		std::swap( _alive[ a ], _alive[ b ] );
     }
+}
+
+void ParticleData::encode( coding::Encoder &encoder )
+{
+	Codable::encode( encoder );
+
+	encoder.encode( "maxParticles", _count );
+	encoder.encode( "computeInWorldSpace", _computeInWorldSpace );
+}
+
+void ParticleData::decode( coding::Decoder &decoder )
+{
+	Codable::decode( decoder );
+
+	decoder.decode( "maxParticles", _count );
+	decoder.decode( "computeInWorldSpace", _computeInWorldSpace );
 }
 

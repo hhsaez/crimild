@@ -54,6 +54,8 @@ namespace crimild {
 			using LockImpl = typename ThreadingPolicy::Lock;
 			
 		public:
+			using BasicTraverseCallback = std::function< void( T & ) >;
+			using ConstBasicTraverseCallback = std::function< void( const T & ) >;
 			using TraverseCallback = std::function< void( T &, crimild::Size ) >;
 			using ConstTraverseCallback = std::function< void( const T &, crimild::Size ) >;
 			
@@ -241,6 +243,26 @@ namespace crimild {
 				}
 			}
 
+			void each( BasicTraverseCallback const &callback )
+			{
+				LockImpl lock( this );
+
+				// implement a policy to traverse the array by creating a copy if needed
+				for ( crimild::Size i = 0; i < _size; i++ ) {
+					callback( _elems[ i ] );
+				}
+			}
+
+			void each( ConstBasicTraverseCallback const &callback ) const
+			{
+				LockImpl lock( this );
+
+				// implement a policy to traverse the array by creating a copy if needed
+				for ( crimild::Size i = 0; i < _size; i++ ) {
+					callback( _elems[ i ] );
+				}
+			}
+
 		private:
 			crimild::Size size_unsafe( void ) const
 			{
@@ -285,6 +307,9 @@ namespace crimild {
 			crimild::Size _size = 0;
 			crimild::Size _capacity = 0;
 		};
+
+		template< typename T >
+		using ThreadSafeArray = Array< T, policies::ObjectLevelLockable >;
 
 		using ByteArray = Array< crimild::Byte >;
 		

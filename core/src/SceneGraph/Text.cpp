@@ -39,6 +39,9 @@
 #include "Simulation/AssetManager.hpp"
 #include "Simulation/FileSystem.hpp"
 
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
+
 #include <fstream>
 
 using namespace crimild;
@@ -303,5 +306,47 @@ void Text::updatePrimitive( void )
     else {
         _geometry->local().setTranslate( Vector3f::ZERO );
     }
+}
+
+void Text::encode( coding::Encoder &encoder )
+{
+	Group::encode( encoder );
+
+	// TODO
+}
+
+void Text::decode( coding::Decoder &decoder )
+{
+	Group::decode( decoder );
+
+	std::string fontFileName;
+	decoder.decode( "font", fontFileName );
+
+	std::string fontDefFileName = FileSystem::getInstance().pathForResource( fontFileName + ".txt" );
+	auto font = crimild::alloc< Font >( fontDefFileName );
+	setFont( font );
+
+	decoder.decode( "textSize", _size );
+	decoder.decode( "text", _text );
+
+	RGBAColorf textColor;
+	decoder.decode( "textColor", textColor );
+	setTextColor( textColor );
+
+	crimild::Bool enableDepthTest;
+	decoder.decode( "enableDepthTest", enableDepthTest );
+	setDepthTestEnabled( enableDepthTest );
+
+	std::string anchor;
+	decoder.decode( "anchor", anchor );
+	if ( anchor == "left" ) {
+		setHorizontalAlignment( HorizontalAlignment::LEFT );
+	}
+	else if ( anchor == "center" ) {
+		setHorizontalAlignment( HorizontalAlignment::CENTER );
+	}
+	else if ( anchor == "right" ) {
+		setHorizontalAlignment( HorizontalAlignment::RIGHT );
+	}
 }
 

@@ -189,6 +189,9 @@ namespace crimild {
 		private:
 			MapImpl _map;
 		};
+
+		template< typename KEY_TYPE, typename VALUE_TYPE >
+		using ThreadSafeMap = Map< KEY_TYPE, VALUE_TYPE, policies::ObjectLevelLockable >;
 		
 	}
 

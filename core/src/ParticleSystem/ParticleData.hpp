@@ -29,6 +29,7 @@
 #define CRIMILD_PARTICLE_SYSTEM_DATA_
 
 #include "ParticleAttribArray.hpp"
+#include "Coding/Codable.hpp"
 
 namespace crimild {
 
@@ -43,15 +44,22 @@ namespace crimild {
 	   \warning Assumes that all attribute arrays store active elements at 
 	   the beginning of the data array. 
 	 */
-    class ParticleData : public SharedObject {
+    class ParticleData : public coding::Codable {
+		CRIMILD_IMPLEMENT_RTTI( crimild::ParticleData )
+
     public:
-        using ParticleAttribs = ThreadSafeMap< ParticleAttribType, ParticleAttribArrayPtr >;
+        using ParticleAttribs = containers::ThreadSafeMap< ParticleAttribType, ParticleAttribArrayPtr >;
 
     public:
 		/**
-		   \brief Default constructor
+			\brief Default Constructor
+		*/
+		ParticleData( void );
+
+		/**
+		   \brief Explicit constructor
 		 */
-        ParticleData( crimild::Size maxParticles );
+        explicit ParticleData( crimild::Size maxParticles );
 
 		/**
 		   \brief Destructor
@@ -140,6 +148,17 @@ namespace crimild {
 			assert( attribs != nullptr );
 			return attribs;
 		}
+
+		/** 
+		 	\name Coding support
+		*/
+		//@{
+
+	public:
+		virtual void encode( coding::Encoder &encoder ) override;
+		virtual void decode( coding::Decoder &decoder ) override;
+
+		//@}
     };
 
 	using ParticleDataPtr = SharedPointer< ParticleData >;

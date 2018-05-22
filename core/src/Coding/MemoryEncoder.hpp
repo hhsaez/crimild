@@ -59,6 +59,7 @@ namespace crimild {
             virtual void encode( std::string key, crimild::UInt32 value ) override { encodeData( key, value ); }
             virtual void encode( std::string key, crimild::Real32 value ) override { encodeData( key, value ); }
             virtual void encode( std::string key, crimild::Real64 value ) override { encodeData( key, value ); }
+            virtual void encode( std::string key, const Vector2f &value ) override { encodeData( key, value ); }
             virtual void encode( std::string key, const Vector3f &value ) override { encodeData( key, value ); }
             virtual void encode( std::string key, const Vector4f &value ) override { encodeData( key, value ); }
             virtual void encode( std::string key, const Matrix3f &value ) override { encodeData( key, value ); }

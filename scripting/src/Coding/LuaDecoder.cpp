@@ -32,6 +32,7 @@
 #include <Loaders/OBJLoader.hpp>
 #include <Simulation/FileSystem.hpp>
 #include <Simulation/AssetManager.hpp>
+#include <Exceptions/RuntimeException.hpp>
 
 using namespace crimild;
 using namespace crimild::coding;
@@ -112,7 +113,7 @@ SharedPointer< SharedObject > LuaDecoder::buildObject( void )
 	SharedPointer< Codable > obj;
 
 	std::string fileName;
-	if ( eval.getPropValue( "sceneFile", fileName ) ) {
+	if ( eval.getPropValue( "sceneFileName", fileName ) ) {
 		auto scene = AssetManager::getInstance()->get< Group >( fileName );
 		if ( scene == nullptr ) {
 			SharedPointer< Group > tmp;
@@ -138,20 +139,18 @@ SharedPointer< SharedObject > LuaDecoder::buildObject( void )
 	else {
 		std::string type;
 		if ( !eval.getPropValue( "type", type ) ) {
-			Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot obtain 'type' member for object" );
+			Log::warning( CRIMILD_CURRENT_CLASS_NAME, "Cannot obtain 'type' member for object while evaluating " + eval.getPrefix() );
 			return nullptr;
 		}
 
 		auto builder = ObjectFactory::getInstance()->getBuilder( type );
 		if ( builder == nullptr ) {
-			Log::error( CRIMILD_CURRENT_CLASS_NAME, "No builder defined for type: ", type );
-			return nullptr;
+			throw crimild::RuntimeException( CRIMILD_CURRENT_CLASS_NAME, "No builder defined for type: " + type );
 		}
 		
         obj = crimild::cast_ptr< Codable >( builder () );
 		if ( obj == nullptr ) {
-			Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot build object of type: ", type );
-			return nullptr;
+			throw crimild::RuntimeException( CRIMILD_CURRENT_CLASS_NAME, "Cannot build object of type: " + type );
 		}
 	}
 

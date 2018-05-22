@@ -29,6 +29,8 @@
 #define CRIMILD_PARTICLE_UPDATER_SET_ATTRIB_VALUE_
 
 #include "../ParticleSystemComponent.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 namespace crimild {
 
@@ -77,9 +79,92 @@ namespace crimild {
 		T _value;
 		
 		ParticleAttribArray *_attribData = nullptr;
+
+		/** 
+		 	\name Coding support
+		*/
+		//@{
+
+	public:
+		virtual void encode( coding::Encoder &encoder ) override
+		{
+			ParticleSystemComponent::ParticleUpdater::encode( encoder );
+
+			std::string attribType;
+			switch ( _attribType ) {
+				case ParticleAttrib::UNIFORM_SCALE:
+					attribType = "uniformScale";
+					break;
+
+				case ParticleAttrib::POSITION:
+					attribType = "position";
+					break;
+
+				case ParticleAttrib::VELOCITY:
+					attribType = "velocity";
+					break;
+
+				case ParticleAttrib::ACCELERATION:
+					attribType = "acceleration";
+					break;
+					
+				default:
+					break;
+			}
+			encoder.encode( "attrib", attribType );
+
+			encoder.encode( "value", _value );
+		}
+
+		virtual void decode( coding::Decoder &decoder ) override
+		{
+			ParticleSystemComponent::ParticleUpdater::decode( decoder );
+
+			std::string attribType;
+			decoder.decode( "attrib", attribType );
+			if ( attribType == "uniformScale" ) {
+				_attribType = ParticleAttrib::UNIFORM_SCALE;
+			}
+			else if ( attribType == "position" ) {
+				_attribType = ParticleAttrib::POSITION;
+			}
+			else if ( attribType == "velocity" ) {
+				_attribType = ParticleAttrib::VELOCITY;
+			}
+			else if ( attribType == "acceleration" ) {
+				_attribType = ParticleAttrib::ACCELERATION;
+			}
+			
+			decoder.decode( "value", _value );
+		}
+
+		//@}
+        
     };
 
-	using SetVector3fValueParticleUpdater = SetAttribValueParticleUpdater< Vector3f >;
+	class SetVector3fValueParticleUpdater : public SetAttribValueParticleUpdater< Vector3f > {
+		CRIMILD_IMPLEMENT_RTTI( crimild::SetVector3fValueParticleUpdater )
+
+	public:
+		SetVector3fValueParticleUpdater( void ) { }
+		virtual ~SetVector3fValueParticleUpdater( void ) { }
+	};
+
+	class SetRGBAColorValueParticleUpdater : public SetAttribValueParticleUpdater< RGBAColorf > {
+		CRIMILD_IMPLEMENT_RTTI( crimild::SetRGBAColorValueParticleUpdater )
+
+	public:
+		SetRGBAColorValueParticleUpdater( void ) { }
+		virtual ~SetRGBAColorValueParticleUpdater( void ) { }
+	};
+
+	class SetReal32ValueParticleUpdater : public SetAttribValueParticleUpdater< crimild::Real32 > {
+		CRIMILD_IMPLEMENT_RTTI( crimild::SetReal32ValueParticleUpdater )
+
+	public:
+		SetReal32ValueParticleUpdater( void ) { }
+		virtual ~SetReal32ValueParticleUpdater( void ) { }
+	};
 
 }
 

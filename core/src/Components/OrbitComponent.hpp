@@ -38,7 +38,7 @@ namespace crimild {
 		CRIMILD_IMPLEMENT_RTTI( crimild::OrbitComponent )
 
 	public:
-		OrbitComponent( float x0 = 0.0f, float y0 = 0.0f, float major = 1.0f, float minor = 1.0f, float speed = 1.0f, float gamma = 0.0f );
+		explicit OrbitComponent( float x0 = 0.0f, float y0 = 0.0f, float major = 1.0f, float minor = 1.0f, float speed = 1.0f, float gamma = 0.0f );
 		virtual ~OrbitComponent( void );
 
 		virtual void update( const Clock &c ) override;
@@ -51,6 +51,15 @@ namespace crimild {
 		float _t;
 		float _speed;
 		float _gamma;
+
+		/**
+			\name Coding Support
+		*/
+		//@{
+
+	public:
+		virtual void encode( coding::Encoder &encoder ) override;
+		virtual void decode( coding::Decoder &decoder ) override;
 	};
     
     using OrbinComponentPtr = SharedPointer< OrbitComponent >;
