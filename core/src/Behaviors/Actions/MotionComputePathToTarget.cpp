@@ -44,3 +44,13 @@ Behavior::State MotionComputePathToTarget::step( BehaviorContext *context )
 	return Behavior::State::SUCCESS;
 }
 
+void MotionComputePathToTarget::encode( coding::Encoder &encoder )
+{
+	Behavior::encode( encoder );
+}
+
+void MotionComputePathToTarget::decode( coding::Decoder &decoder )
+{
+	Behavior::decode( decoder );
+}
+

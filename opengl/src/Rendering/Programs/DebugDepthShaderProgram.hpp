@@ -28,7 +28,7 @@
 #ifndef CRIMILD_OPENGL_PROGRAMS_DEBUG_DEPTH_
 #define CRIMILD_OPENGL_PROGRAMS_DEBUG_DEPTH_
 
-#include <Crimild.hpp>
+#include <Rendering/ShaderProgram.hpp>
 
 namespace crimild {
 

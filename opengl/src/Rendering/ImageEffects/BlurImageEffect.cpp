@@ -26,8 +26,11 @@
  */
 
 #include "BlurImageEffect.hpp"
-
 #include "Rendering/OpenGLUtils.hpp"
+
+#include <Rendering/RenderPasses/RenderPass.hpp>
+#include <Rendering/FrameBufferObject.hpp>
+#include <Rendering/ShaderProgram.hpp>
 
 using namespace crimild;
 using namespace crimild::opengl;

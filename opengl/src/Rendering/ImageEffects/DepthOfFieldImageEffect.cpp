@@ -26,8 +26,11 @@
  */
 
 #include "DepthOfFieldImageEffect.hpp"
-
 #include "Rendering/OpenGLUtils.hpp"
+
+#include <Rendering/FrameBufferObject.hpp>
+#include <Rendering/RenderPasses/RenderPass.hpp>
+#include <SceneGraph/Camera.hpp>
 
 using namespace crimild;
 using namespace crimild::opengl;

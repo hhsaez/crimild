@@ -20,3 +20,13 @@ Behavior::State MotionAvoidOthers::step( BehaviorContext *context )
 	return Behavior::State::SUCCESS;
 }
 
+void MotionAvoidOthers::encode( coding::Encoder &encoder )
+{
+	Behavior::encode( encoder );
+}
+
+void MotionAvoidOthers::decode( coding::Decoder &decoder )
+{
+	Behavior::decode( decoder );
+}
+

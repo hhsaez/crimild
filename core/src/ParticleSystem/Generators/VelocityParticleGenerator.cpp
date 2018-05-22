@@ -28,6 +28,8 @@
 #include "VelocityParticleGenerator.hpp"
 
 #include "Mathematics/Random.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 #include "SceneGraph/Node.hpp"
 
@@ -58,5 +60,21 @@ void VelocityParticleGenerator::generate( Node *node, crimild::Real64 dt, Partic
         auto z = Random::generate< Real32 >( _minVelocity.z(), _maxVelocity.z() );
         vs[ i ] = Vector3f( x, y, z );
     }
+}
+
+void VelocityParticleGenerator::encode( coding::Encoder &encoder ) 
+{
+	ParticleSystemComponent::ParticleGenerator::encode( encoder );
+
+	encoder.encode( "minVelocity", _minVelocity );
+	encoder.encode( "maxVelocity", _maxVelocity );
+}
+
+void VelocityParticleGenerator::decode( coding::Decoder &decoder )
+{
+	ParticleSystemComponent::ParticleGenerator::decode( decoder );
+
+	decoder.decode( "minVelocity", _minVelocity );
+	decoder.decode( "maxVelocity", _maxVelocity );
 }
 

@@ -29,3 +29,13 @@ Behavior::State ResetNavigation::step( BehaviorContext *context )
 	return Behavior::State::SUCCESS;
 }
 
+void ResetNavigation::encode( coding::Encoder &encoder )
+{
+	Behavior::encode( encoder );
+}
+
+void ResetNavigation::decode( coding::Decoder &decoder )
+{
+	Behavior::decode( decoder );
+}
+

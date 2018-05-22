@@ -28,7 +28,7 @@
 #ifndef CRIMILD_OPENGL_PROGRAMS_UNLIT_DIFFUSE_
 #define CRIMILD_OPENGL_PROGRAMS_UNLIT_DIFFUSE_
 
-#include <Crimild.hpp>
+#include <Rendering/ShaderProgram.hpp>
 
 namespace crimild {
 

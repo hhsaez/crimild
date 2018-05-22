@@ -26,6 +26,9 @@
  */
 
 #include "ImageTGA.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
+#include "Simulation/FileSystem.hpp"
 #include "Exceptions/FileNotFoundException.hpp"
 #include "Exceptions/InvalidFileFormatException.hpp"
 
@@ -207,5 +210,21 @@ void ImageTGA::saveToFile( const std::string &path ) const
     fwrite( &getData()[ 0 ], getWidth() * getHeight() * getBpp(), sizeof( unsigned char ), out );
 
     fclose( out );
+}
+
+void ImageTGA::encode( coding::Encoder &encoder )
+{
+    Image::encode( encoder );
+}
+
+void ImageTGA::decode( coding::Decoder &decoder )
+{
+    Image::decode( decoder );
+
+    decoder.decode( "imageFileName", _filePath );
+    if ( _filePath.length() > 0 ) {
+        _filePath = FileSystem::getInstance().pathForResource( _filePath );
+        load();
+    }
 }
 

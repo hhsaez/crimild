@@ -21,3 +21,13 @@ Behavior::State MotionAvoidWalls::step( BehaviorContext *context )
 	return Behavior::State::SUCCESS;
 }
 
+void MotionAvoidWalls::encode( coding::Encoder &encoder )
+{
+	Behavior::encode( encoder );
+}
+
+void MotionAvoidWalls::decode( coding::Decoder &decoder )
+{
+	Behavior::decode( decoder );
+}
+

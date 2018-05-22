@@ -57,6 +57,9 @@ namespace crimild {
 		static const Vector< SIZE, PRECISION > ZERO;
 		static const Vector< SIZE, PRECISION > ONE;
 
+		static const Vector< SIZE, PRECISION > POSITIVE_INFINITY;
+		static const Vector< SIZE, PRECISION > NEGATIVE_INFINITY;		
+
 	public:
 		Vector( void )
 		{
@@ -661,6 +664,8 @@ namespace crimild {
 	template< crimild::Size SIZE, typename PRECISION > const Vector< SIZE, PRECISION > Vector< SIZE, PRECISION >::UNIT_W( 0, 0, 0, 1 );
 	template< crimild::Size SIZE, typename PRECISION > const Vector< SIZE, PRECISION > Vector< SIZE, PRECISION >::ZERO( static_cast< PRECISION >( 0.0f ) );
 	template< crimild::Size SIZE, typename PRECISION > const Vector< SIZE, PRECISION > Vector< SIZE, PRECISION >::ONE( 1 );
+	template< crimild::Size SIZE, typename PRECISION > const Vector< SIZE, PRECISION > Vector< SIZE, PRECISION >::POSITIVE_INFINITY( Numeric< PRECISION >::POSITIVE_INFINITY );
+	template< crimild::Size SIZE, typename PRECISION > const Vector< SIZE, PRECISION > Vector< SIZE, PRECISION >::NEGATIVE_INFINITY( Numeric< PRECISION >::NEGATIVE_INFINITY );
 
 	typedef Vector< 2, unsigned int > Vector2ui;
 	typedef Vector< 2, int > Vector2i;

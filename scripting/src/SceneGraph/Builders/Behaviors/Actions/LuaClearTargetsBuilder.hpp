@@ -30,6 +30,8 @@
 
 #include "Foundation/Scripted.hpp"
 
+#include <Behaviors/Actions/ClearTargets.hpp>
+
 namespace crimild {
 
 	namespace scripting {

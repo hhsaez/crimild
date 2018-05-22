@@ -38,6 +38,8 @@
 namespace crimild {
 
     class AnimatedSpriteParticleRenderer : public ParticleSystemComponent::ParticleRenderer {
+		CRIMILD_IMPLEMENT_RTTI( crimild::AnimatedSpriteParticleRenderer )
+		
     public:
         AnimatedSpriteParticleRenderer( void );
         virtual ~AnimatedSpriteParticleRenderer( void );
@@ -65,6 +67,18 @@ namespace crimild {
 		ParticleAttribArray *_sizes = nullptr;
 		ParticleAttribArray *_times = nullptr;
 		ParticleAttribArray *_lifetimes = nullptr;
+
+		/** 
+		 	\name Coding support
+		*/
+		//@{
+
+	public:
+		virtual void encode( coding::Encoder &encoder ) override;
+		virtual void decode( coding::Decoder &decoder ) override;
+
+		//@}
+        
     };
 
 }

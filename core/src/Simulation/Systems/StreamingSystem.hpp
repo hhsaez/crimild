@@ -30,42 +30,72 @@
 
 #include "System.hpp"
 
-#include "Streaming/SceneBuilder.hpp"
+#include "Foundation/Containers/Map.hpp"
 
 namespace crimild {
+
+	class Node;
 
 	namespace messaging {
 
 		struct LoadScene {
-			std::string filename;
-            SharedPointer< SceneBuilder > sceneBuilder;
+			std::string fileName;
+		};
+
+		struct AppendScene {
+			std::string fileName;
+			Node *parentNode;
 		};
 
 		struct ReloadScene { };
+
+		struct SceneLoadFailed {
+			std::string fileName; 
+			std::string message;
+		};
 		
 	}
 
 	class StreamingSystem : public System {
+		CRIMILD_IMPLEMENT_RTTI( crimild::StreamingSystem )
+		
 	public:
-		explicit StreamingSystem( void );
+		using Builder = std::function< SharedPointer< Node >( std::string ) >;
+
+		StreamingSystem( void );
 		virtual ~StreamingSystem( void );
 
 		virtual bool start( void ) override;
-
 		virtual void stop( void ) override;
 
-		void setSceneBuilder( SharedPointer< SceneBuilder > const &builder ) { _sceneBuilder = builder; }
-        SceneBuilder *getSceneBuilder( void ) { return crimild::get_ptr( _sceneBuilder ); }
+		void registerBuilder( std::string extension, Builder const &builder ) { _builders[ extension ] = builder; }
+
+		template< class DECODER_CLASS >
+		void registerDecoder( std::string extension ) 
+		{
+			registerBuilder( extension, []( std::string filePath ) -> SharedPointer< Node > {
+				auto decoder = crimild::alloc< DECODER_CLASS >();
+				if ( !decoder->decodeFile( filePath ) ) {
+					crimild::Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot decode file ", filePath );
+					return nullptr;
+				}
+
+				if ( decoder->getObjectCount() == 0 ) {
+					crimild::Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot decode objects from file ", filePath );
+					return nullptr;
+				}
+
+				return decoder->template getObjectAt< crimild::Node >( 0 );
+			});
+		}
 
 	private:
 		void onLoadScene( messaging::LoadScene const &message );
+		void onAppendScene( messaging::AppendScene const &message );
 		void onReloadScene( messaging::ReloadScene const &message );
         
-    private:
-        void loadScene( std::string filename, SceneBuilder *builder );
-
 	private:
-		SharedPointer< SceneBuilder > _sceneBuilder;
+		containers::Map< std::string, Builder > _builders;
 		std::string _lastSceneFileName;
 	};
 

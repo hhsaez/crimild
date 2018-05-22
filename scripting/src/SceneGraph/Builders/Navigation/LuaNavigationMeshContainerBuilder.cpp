@@ -29,6 +29,9 @@
 
 #include "SceneGraph/LuaSceneBuilder.hpp"
 
+#include <Navigation/NavigationMeshOBJ.hpp>
+#include <Simulation/FileSystem.hpp>
+
 using namespace crimild;
 using namespace crimild::navigation;
 using namespace crimild::scripting;

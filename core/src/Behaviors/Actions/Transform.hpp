@@ -42,6 +42,7 @@ namespace crimild {
 				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::Transform );
 				
 			public:
+				Transform( void );
 				explicit Transform(
 					const crimild::Transformation &targetTransformation,
 					crimild::Real32 duration,
@@ -67,6 +68,17 @@ namespace crimild {
 
 				crimild::Bool _applyTranslation = true;
 				crimild::Bool _applyRotation = true;
+
+				/**
+				   \name Coding support
+				*/
+				//@{
+				
+			public:
+				virtual void encode( coding::Encoder &encoder ) override;
+				virtual void decode( coding::Decoder &decoder ) override;
+				
+				//@}
 			};
 
 		}

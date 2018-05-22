@@ -125,7 +125,7 @@ std::string FileSystem::getRelativePath( std::string absolutePath )
     if ( pos == 0 ) {
         return absolutePath.substr( _baseDirectory.length() + 1 );
     }
-    
+
     return absolutePath;
 }
 

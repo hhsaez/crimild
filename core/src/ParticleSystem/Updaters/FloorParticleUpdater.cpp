@@ -57,3 +57,13 @@ void FloorParticleUpdater::update( Node *node, double dt, ParticleData *particle
     }
 }
 
+void FloorParticleUpdater::encode( coding::Encoder &encoder ) 
+{
+	ParticleSystemComponent::ParticleUpdater::encode( encoder );
+}
+
+void FloorParticleUpdater::decode( coding::Decoder &decoder )
+{
+	ParticleSystemComponent::ParticleUpdater::decode( decoder );
+}
+

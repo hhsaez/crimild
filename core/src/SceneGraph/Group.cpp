@@ -27,6 +27,9 @@
 
 #include "Group.hpp"
 #include "Exceptions/HasParentException.hpp"
+#include "Foundation/Containers/Array.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 #include <cassert>
 #include <algorithm>
@@ -108,12 +111,34 @@ Node *Group::getNode( std::string name )
 
 void Group::forEachNode( std::function< void( Node * ) > callback )
 {
-	return _nodes.forEach( [&callback]( Node *node ) { if ( node->isEnabled() ) callback( node ); } );
+	return _nodes.forEach( [&callback]( Node *node ) { if ( node != nullptr && node->isEnabled() ) callback( node ); } );
 }
 
 void Group::accept( NodeVisitor &visitor )
 {
 	visitor.visitGroup( this );
+}
+
+void Group::encode( coding::Encoder &encoder )
+{
+    Node::encode( encoder );
+    
+    containers::Array< SharedPointer< Node >> nodes;
+    forEachNode( [ &nodes ]( Node *n ) {
+        nodes.add( crimild::retain( n ) );
+    });
+    encoder.encode( "nodes", nodes );
+}
+
+void Group::decode( coding::Decoder &decoder )
+{
+    Node::decode( decoder );
+
+    containers::Array< SharedPointer< Node >> nodes;
+    decoder.decode( "nodes", nodes );
+    nodes.each( [ this ]( SharedPointer< Node > &n, crimild::Size ) {
+        attachNode( n );
+    });
 }
 
 bool Group::registerInStream( Stream &s )

@@ -28,7 +28,7 @@
 #ifndef CRIMILD_SCRIPTING_SIMULATION_LUA_SETTINGS_
 #define CRIMILD_SCRIPTING_SIMULATION_LUA_SETTINGS_
 
-#include <Crimild.hpp>
+#include <Simulation/Settings.hpp>
 
 #include <string>
 #include <sstream>

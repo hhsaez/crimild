@@ -28,7 +28,7 @@
 #ifndef CRIMILD_OPENGL_SHADER_LIBRARY_DEFERRED_COMPOSE_RENDER_
 #define CRIMILD_OPENGL_SHADER_LIBRARY_DEFERRED_COMPOSE_RENDER_
 
-#include <Crimild.hpp>
+#include <Rendering/ShaderProgram.hpp>
 
 namespace crimild {
     

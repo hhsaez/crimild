@@ -40,6 +40,7 @@ namespace crimild {
 				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions )
 				
 			public:
+				LoadScene( void );
 				explicit LoadScene( std::string sceneFileName );
 				virtual ~LoadScene( void );
 				
@@ -47,6 +48,17 @@ namespace crimild {
 				
 			private:
 				std::string _sceneFileName;
+
+				/**
+				   \name Coding support
+				*/
+				//@{
+				
+			public:
+				virtual void encode( coding::Encoder &encoder ) override;
+				virtual void decode( coding::Decoder &decoder ) override;
+				
+				//@}
 			};
 
 		}

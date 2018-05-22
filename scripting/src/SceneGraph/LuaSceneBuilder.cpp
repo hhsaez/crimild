@@ -71,6 +71,24 @@
 
 #include "SceneGraph/Builders/Debug/LuaDebugRenderComponentBuilder.hpp"
 
+#include <Boundings/SphereBoundingVolume.hpp>
+#include <Components/RenderStateComponent.hpp>
+#include <SceneGraph/Node.hpp>
+#include <SceneGraph/Camera.hpp>
+#include <SceneGraph/Light.hpp>
+#include <SceneGraph/Group.hpp>
+#include <Simulation/AssetManager.hpp>
+#include <Simulation/FileSystem.hpp>
+#include <Streaming/FileStream.hpp>
+#include <Loaders/OBJLoader.hpp>
+#include <Rendering/ShadowMap.hpp>
+#include <Behaviors/Actions/MotionSeek.hpp>
+#include <Behaviors/Actions/MotionApply.hpp>
+#include <Behaviors/Actions/MotionReset.hpp>
+#include <Behaviors/Actions/MotionAvoidWalls.hpp>
+#include <Behaviors/Actions/MotionAvoidOthers.hpp>
+#include <Behaviors/Actions/MotionComputePathToTarget.hpp>
+
 using namespace crimild;
 using namespace crimild::scripting;
 
@@ -479,18 +497,14 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
         
         std::string anchor;
         if ( eval.getPropValue( "textAnchor", anchor, "left" ) ) {
-            if ( anchor != "left" ) {
-                text->updateModelBounds();
-                auto min = text->getLocalBound()->getMin();
-                auto max = text->getLocalBound()->getMax();
-                auto diff = max - min;
-            
-                if ( anchor == "center" ) {
-                    text->local().translate() += Vector3f( -0.5f * diff[ 0 ], 0.0f, 0.0f );
-                }
-                else if ( anchor == "right" ) {
-                    text->local().translate() += Vector3f( -diff[ 0 ], 0.0f, 0.0f );
-                }
+            if ( anchor == "left" ) {
+                text->setHorizontalAlignment( Text::HorizontalAlignment::LEFT );
+            }
+            else if ( anchor == "center" ) {
+                text->setHorizontalAlignment( Text::HorizontalAlignment::CENTER );
+            }
+            else if ( anchor == "right" ) {
+                text->setHorizontalAlignment( Text::HorizontalAlignment::RIGHT );
             }
         }
         

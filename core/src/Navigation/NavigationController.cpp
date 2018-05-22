@@ -249,7 +249,6 @@ std::vector< Vector3f > NavigationController::computePathToTarget( const Vector3
 
 	hs[ start ] = -1;
 	frontier.push_back( start );
-	crimild::Bool pathFound = false;
 
 	while ( frontier.size() > 0 ) {
 		NavigationCell *next = nullptr;

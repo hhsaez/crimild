@@ -48,6 +48,7 @@ namespace crimild {
 				static std::list< Trigger * > _allTriggers;
 
 			public:
+				Trigger( void );
 				explicit Trigger( std::string triggerName );
 				virtual ~Trigger( void );
 
@@ -58,6 +59,17 @@ namespace crimild {
 				
 			private:
 				std::string _triggerName;
+
+				/**
+				   \name Coding support
+				*/
+				//@{
+				
+			public:
+				virtual void encode( coding::Encoder &encoder ) override;
+				virtual void decode( coding::Decoder &decoder ) override;
+				
+				//@}
 			};
 
 		}

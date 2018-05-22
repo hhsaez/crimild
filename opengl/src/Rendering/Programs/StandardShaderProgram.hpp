@@ -28,7 +28,7 @@
 #ifndef CRIMILD_OPENGL_SHADER_LIBRARY_STANDARD_
 #define CRIMILD_OPENGL_SHADER_LIBRARY_STANDARD_
 
-#include <Crimild.hpp>
+#include <Rendering/ShaderProgram.hpp>
 
 namespace crimild {
     

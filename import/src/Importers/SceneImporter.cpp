@@ -28,7 +28,15 @@
 #include "SceneImporter.hpp"
 
 #include "Components/SkinnedMeshComponent.hpp"
+#include "Components/MaterialComponent.hpp"
+#include "Exceptions/FileNotFoundException.hpp"
 #include "Rendering/SkinnedMesh.hpp"
+#include "Rendering/Material.hpp"
+#include "Primitives/Primitive.hpp"
+#include "SceneGraph/Group.hpp"
+#include "SceneGraph/Geometry.hpp"
+#include "Simulation/FileSystem.hpp"
+#include "Simulation/AssetManager.hpp"
 
 #include "assimp/Importer.hpp"
 #include "assimp/postprocess.h"

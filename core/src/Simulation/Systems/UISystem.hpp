@@ -33,6 +33,8 @@
 namespace crimild {
 
 	class UISystem : public System {
+		CRIMILD_IMPLEMENT_RTTI( crimild::UISystem )
+		
 	public:
 		UISystem( void );
 		virtual ~UISystem( void );

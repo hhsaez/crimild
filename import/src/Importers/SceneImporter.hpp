@@ -28,9 +28,11 @@
 #ifndef CRIMILD_IMPORT_SCENE_IMPORTER_
 #define CRIMILD_IMPORT_SCENE_IMPORTER_
 
-#include <Crimild.hpp>
+#include "Foundation/Memory.hpp"
 
 namespace crimild {
+    
+    class Group;
 
 	namespace import {
 

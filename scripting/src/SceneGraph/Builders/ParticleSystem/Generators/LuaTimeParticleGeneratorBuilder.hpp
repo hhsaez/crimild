@@ -30,6 +30,8 @@
 
 #include "Foundation/Scripted.hpp"
 
+#include <ParticleSystem/Generators/TimeParticleGenerator.hpp>
+
 namespace crimild {
 
 	namespace scripting {

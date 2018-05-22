@@ -37,7 +37,6 @@
 using namespace crimild;
 
 RenderSystem::RenderSystem( void )
-	: System( "Render System" )
 {
 
 }

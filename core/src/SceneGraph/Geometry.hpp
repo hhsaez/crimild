@@ -64,11 +64,29 @@ namespace crimild {
 
 	public:
 		virtual void accept( NodeVisitor &visitor ) override;
+        
+        /**
+            \name Coding
+         */
+        //@{
+    
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+        
+        //@}
 
+        /**
+            \deprecated See crimild::coding
+         */
+        //@{
+        
 	public:
 		virtual bool registerInStream( Stream &s ) override;
 		virtual void save( Stream &s ) override;
 		virtual void load( Stream &s ) override;
+        
+        //}
 	};
 
 	using GeometryPtr = SharedPointer< Geometry >;

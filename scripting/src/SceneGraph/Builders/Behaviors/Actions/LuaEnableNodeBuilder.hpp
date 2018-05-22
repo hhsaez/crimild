@@ -30,8 +30,10 @@
 
 #include "Foundation/Scripted.hpp"
 
-namespace crimild {
+#include <Behaviors/Actions/EnableNode.hpp>
 
+namespace crimild {
+    
 	namespace scripting {
         
 		class LuaEnableNodeBuilder {

@@ -29,6 +29,9 @@
 
 #include "Rendering/OpenGLUtils.hpp"
 
+#include <Rendering/ShaderProgram.hpp>
+#include <Rendering/VertexBufferObject.hpp>
+
 using namespace crimild;
 using namespace crimild::opengl;
 

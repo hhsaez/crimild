@@ -28,7 +28,7 @@
 #ifndef CRIMILD_EXCEPTION_GLFW_
 #define CRIMILD_EXCEPTION_GLFW_
 
-#include <Crimild.hpp>
+#include <Exceptions/Exception.hpp>
 
 namespace crimild {
 

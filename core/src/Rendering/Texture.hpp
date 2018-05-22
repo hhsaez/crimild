@@ -35,7 +35,7 @@
 
 namespace crimild {
     
-	class Texture : public NamedObject, public StreamObject, public Catalog< Texture >::Resource {
+    class Texture : public NamedObject, public coding::Codable, public StreamObject, public Catalog< Texture >::Resource {
         CRIMILD_IMPLEMENT_RTTI( crimild::Texture )
 
 	public:
@@ -81,6 +81,17 @@ namespace crimild {
         Filter _minFilter = Filter::LINEAR;
         Filter _magFilter = Filter::LINEAR;
 
+        /**
+            \name Coding support
+         */
+        //@{
+        
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+        
+        //@}
+        
         /**
             \name Streaming
         */

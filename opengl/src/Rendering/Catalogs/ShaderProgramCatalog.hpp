@@ -28,9 +28,12 @@
 #ifndef CRIMILD_OPENGL_SHADER_PROGRAM_CATALOG_
 #define CRIMILD_OPENGL_SHADER_PROGRAM_CATALOG_
 
-#include <Crimild.hpp>
+#include <Rendering/Catalog.hpp>
 
 namespace crimild {
+    
+    class Shader;
+    class ShaderProgram;
 
 	namespace opengl {
 

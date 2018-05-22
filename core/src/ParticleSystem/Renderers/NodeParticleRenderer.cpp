@@ -65,4 +65,13 @@ void NodeParticleRenderer::update( Node *node, crimild::Real64 dt, ParticleData 
 	}
 }
 
+void NodeParticleRenderer::encode( coding::Encoder &encoder ) 
+{
+	ParticleSystemComponent::ParticleRenderer::encode( encoder );
+}
+
+void NodeParticleRenderer::decode( coding::Decoder &decoder )
+{
+	ParticleSystemComponent::ParticleRenderer::decode( decoder );
+}
 

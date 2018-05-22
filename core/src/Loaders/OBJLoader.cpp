@@ -312,6 +312,7 @@ void OBJLoader::readMaterialFile( std::stringstream &line )
 {
     std::string mtlFileName = StringUtils::readFullString( line );
 	std::string mtlFilePath = FileSystem::getInstance().extractDirectory( _fileName ) + "/" + mtlFileName;
+
 	getMTLProcessor().readFile( mtlFilePath );
 	_currentMaterial = nullptr;
 }

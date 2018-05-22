@@ -117,12 +117,12 @@ namespace crimild {
 	public:
 		void addSystem( SystemPtr const &system );
 		
-		SystemPtr getSystem( std::string name );
+		System *getSystemWithName( std::string name ) { return crimild::get_ptr( _systems[ name ] ); }
 
 		template< class SYSTEM_CLASS >
-        SharedPointer< SYSTEM_CLASS > getSystem( std::string name )
+        SYSTEM_CLASS *getSystem( void )
 		{
-            return std::static_pointer_cast< SYSTEM_CLASS >( getSystem( name ) );
+            return static_cast< SYSTEM_CLASS * >( getSystemWithName( SYSTEM_CLASS::__CLASS_NAME ) );
 		}
 
 	private:
@@ -130,7 +130,7 @@ namespace crimild {
 		void stopSystems( void );
 
 	private:
-		using SystemMap = std::map< std::string, SystemPtr >;
+		using SystemMap = containers::Map< std::string, SystemPtr >;
 		SystemMap _systems;
         
 	public:
@@ -144,7 +144,7 @@ namespace crimild {
 		void setScene( SharedPointer< Node > const &scene );
         Node *getScene( void ) { return crimild::get_ptr( _scene ); }
             
-        void loadScene( std::string filename, SharedPointer< SceneBuilder > const &sceneBuilder = nullptr );
+        void loadScene( std::string filename );
 
         Camera *getMainCamera( void ) { return Camera::getMainCamera(); }
 		void forEachCamera( std::function< void ( Camera * ) > callback );

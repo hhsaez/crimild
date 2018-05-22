@@ -30,6 +30,8 @@
 
 #include "Foundation/Scripted.hpp"
 
+#include <Behaviors/Actions/SetContextValue.hpp>
+
 namespace crimild {
 
 	namespace scripting {

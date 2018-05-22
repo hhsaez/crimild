@@ -28,7 +28,7 @@
 #ifndef CRIMILD_OPENGL_PROGRAMS_SCREEN_TEXTURE_
 #define CRIMILD_OPENGL_PROGRAMS_SCREEN_TEXTURE_
 
-#include <Crimild.hpp>
+#include <Rendering/ShaderProgram.hpp>
 
 namespace crimild {
 

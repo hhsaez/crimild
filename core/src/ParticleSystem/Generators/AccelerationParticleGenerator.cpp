@@ -28,6 +28,8 @@
 #include "AccelerationParticleGenerator.hpp"
 
 #include "Mathematics/Random.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 using namespace crimild;
 
@@ -55,5 +57,21 @@ void AccelerationParticleGenerator::generate( Node *node, crimild::Real64 dt, Pa
     for ( ParticleId i = startId; i < endId; i++ ) {
 		as[ i ] = Random::generate< Vector3f >( _minAcceleration, _maxAcceleration );
     }
+}
+
+void AccelerationParticleGenerator::encode( coding::Encoder &encoder ) 
+{
+	ParticleSystemComponent::ParticleGenerator::encode( encoder );
+
+	encoder.encode( "minAcceleration", _minAcceleration );
+	encoder.encode( "maxAcceleration", _maxAcceleration );
+}
+
+void AccelerationParticleGenerator::decode( coding::Decoder &decoder )
+{
+	ParticleSystemComponent::ParticleGenerator::decode( decoder );
+
+	decoder.decode( "minAcceleration", _minAcceleration );
+	decoder.decode( "maxAcceleration", _maxAcceleration );
 }
 

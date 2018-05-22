@@ -33,11 +33,25 @@
 namespace crimild {
 
     class VelocityColorParticleUpdater : public ParticleSystemComponent::ParticleUpdater {
+        CRIMILD_IMPLEMENT_RTTI( crimild::VelocityColorParticleUpdater )
+        
     public:
         VelocityColorParticleUpdater( void );
         virtual ~VelocityColorParticleUpdater( void );
 
         virtual void update( Node *node, crimild::Real64 dt, ParticleData *particles ) override;
+
+		/** 
+		 	\name Coding support
+		*/
+		//@{
+
+	public:
+		virtual void encode( coding::Encoder &encoder ) override;
+		virtual void decode( coding::Decoder &decoder ) override;
+
+		//@}
+        
     };
 
 }

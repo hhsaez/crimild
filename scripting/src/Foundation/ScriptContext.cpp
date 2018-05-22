@@ -27,10 +27,18 @@
 
 #include "ScriptContext.hpp"
 
+#include <Simulation/FileSystem.hpp>
+
 #include <sstream>
 
 using namespace crimild;
 using namespace crimild::scripting;
+
+ScriptEvaluator::ScriptEvaluator( void )
+    : ScriptEvaluator( nullptr, "" )
+{
+    
+}
 
 ScriptEvaluator::ScriptEvaluator( ScriptContext *ctx, std::string prefix )
     : _context( ctx ),
@@ -39,9 +47,23 @@ ScriptEvaluator::ScriptEvaluator( ScriptContext *ctx, std::string prefix )
     
 }
 
+ScriptEvaluator::ScriptEvaluator( const ScriptEvaluator &other )
+    : _context( other._context ),
+      _prefix( other._prefix )
+{
+    
+}
+
 ScriptEvaluator::~ScriptEvaluator( void )
 {
     
+}
+
+ScriptEvaluator &ScriptEvaluator::operator=( const crimild::scripting::ScriptEvaluator &other )
+{
+    _context = other._context;
+    _prefix = other._prefix;
+    return *this;
 }
 
 bool ScriptEvaluator::foreach( const std::string &name, std::function< void( ScriptEvaluator &, int )> callback )
@@ -117,7 +139,7 @@ bool ScriptContext::load( std::string fileName, bool supportCoroutines )
 
 bool ScriptContext::parse( std::string text )
 {
-	if ( luaL_dostring( _state, text.c_str() ) ) {
+	if ( luaL_dostring( _state, text.c_str() ) && failOnParse() ) {
         std::string reason = lua_tostring( _state, -1 );
 #if CRIMILD_SCRIPTING_LOG_VERBOSE
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot parse string \"", text, "\"", "\n\tReason: ", reason );

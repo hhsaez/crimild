@@ -31,9 +31,14 @@
 #include "Foundation/Scripted.hpp"
 
 namespace crimild {
+    
+    class Group;
 
 	namespace scripting {
         
+        /**
+            \deprecated See LuaSceneBuilder
+         */
 		class LuaGroupBuilder {
 		public:
 			static SharedPointer< Group > build( ScriptEvaluator &eval );

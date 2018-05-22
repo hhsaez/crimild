@@ -38,6 +38,8 @@
 namespace crimild {
 
     class OrientedQuadParticleRenderer : public ParticleSystemComponent::ParticleRenderer {
+		CRIMILD_IMPLEMENT_RTTI( crimild::OrientedQuadParticleRenderer )
+		
     public:
         OrientedQuadParticleRenderer( void );
         virtual ~OrientedQuadParticleRenderer( void );
@@ -54,6 +56,18 @@ namespace crimild {
 		
 		ParticleAttribArray *_positions = nullptr;
 		ParticleAttribArray *_sizes = nullptr;
+
+		/** 
+		 	\name Coding support
+		*/
+		//@{
+
+	public:
+		virtual void encode( coding::Encoder &encoder ) override;
+		virtual void decode( coding::Decoder &decoder ) override;
+
+		//@}
+        
     };
 
 }

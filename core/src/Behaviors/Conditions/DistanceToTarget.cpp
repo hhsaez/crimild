@@ -7,9 +7,26 @@ using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::conditions;
 
+DistanceToTarget::DistanceToTarget( void )
+{
+	
+}
+
 DistanceToTarget::DistanceToTarget( crimild::Real32 value, std::string comparator )
 	: _value( value )
 {
+	setComparator( comparator );
+}
+
+DistanceToTarget::~DistanceToTarget( void )
+{
+
+}
+
+void DistanceToTarget::setComparator( std::string comparator )
+{
+	_comparatorName = comparator;
+	
 	if ( comparator == "greater" ) {
 		_comparator = []( crimild::Real32 a, crimild::Real32 b ) -> crimild::Bool { return a > b; };
 	}
@@ -28,11 +45,6 @@ DistanceToTarget::DistanceToTarget( crimild::Real32 value, std::string comparato
 	}
 }
 
-DistanceToTarget::~DistanceToTarget( void )
-{
-
-}
-
 Behavior::State DistanceToTarget::step( BehaviorContext *context )
 {
 	auto agent = context->getAgent();
@@ -46,5 +58,24 @@ Behavior::State DistanceToTarget::step( BehaviorContext *context )
 	const auto diff = Distance::computeSquared( target->getWorld().getTranslate(), agent->getWorld().getTranslate() );
 
 	return ( _comparator( diff, ( _value * _value ) ) ? Behavior::State::SUCCESS : Behavior::State::FAILURE );
+}
+
+void DistanceToTarget::encode( coding::Encoder &encoder )
+{
+	Behavior::encode( encoder );
+
+	encoder.encode( "value", _value );
+	encoder.encode( "comparator", _comparatorName );
+}
+
+void DistanceToTarget::decode( coding::Decoder &decoder )
+{
+	Behavior::decode( decoder );
+
+	decoder.decode( "value", _value );
+
+	std::string comparator;
+	decoder.decode( "comparator", comparator );
+	setComparator( comparator );
 }
 

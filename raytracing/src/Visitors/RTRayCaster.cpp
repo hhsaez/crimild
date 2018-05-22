@@ -1,5 +1,9 @@
 #include "RTRayCaster.hpp"
 
+#include "SceneGraph/Group.hpp"
+#include "SceneGraph/Geometry.hpp"
+#include "Mathematics/Intersection.hpp"
+
 using namespace crimild;
 using namespace crimild::raytracing;
 

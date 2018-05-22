@@ -28,9 +28,11 @@
 #ifndef CRIMILD_OPENGL_INDEX_BUFFER_OBJECT_CATALOG_
 #define CRIMILD_OPENGL_INDEX_BUFFER_OBJECT_CATALOG_
 
-#include <Crimild.hpp>
+#include <Rendering/Catalog.hpp>
 
 namespace crimild {
+    
+    class IndexBufferObject;
 
 	namespace opengl {
 

@@ -76,6 +76,16 @@ void NodeComponent::renderDebugInfo( Renderer *, Camera * )
 
 }
 
+void NodeComponent::encode( coding::Encoder &encoder )
+{
+    Codable::encode( encoder );
+}
+
+void NodeComponent::decode( coding::Decoder &decoder )
+{
+    Codable::decode( decoder );
+}
+
 bool NodeComponent::registerInStream( Stream &s )
 {
 	return StreamObject::registerInStream( s );

@@ -46,6 +46,14 @@
 #include "Programs/ParticleSystemShaderProgram.hpp"
 #include "Programs/DebugDepthShaderProgram.hpp"
 
+#include "Rendering/ImageEffects/ColorTintImageEffect.hpp"
+
+#include <Rendering/AlphaState.hpp>
+#include <Rendering/DepthState.hpp>
+#include <Rendering/ColorMaskState.hpp>
+#include <Rendering/CullFaceState.hpp>
+#include <Rendering/FrameBufferObject.hpp>
+
 using namespace crimild;
 using namespace crimild::opengl;
 

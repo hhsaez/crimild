@@ -62,3 +62,13 @@ void ZSortParticleUpdater::update( Node *node, double dt, ParticleData *particle
 	}
 }
 
+void ZSortParticleUpdater::encode( coding::Encoder &encoder ) 
+{
+	ParticleSystemComponent::ParticleUpdater::encode( encoder );
+}
+
+void ZSortParticleUpdater::decode( coding::Decoder &decoder )
+{
+	ParticleSystemComponent::ParticleUpdater::decode( decoder );
+}
+

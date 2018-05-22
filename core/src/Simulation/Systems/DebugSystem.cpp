@@ -39,7 +39,6 @@
 using namespace crimild;
 
 DebugSystem::DebugSystem( void )
-	: System( "Debug System" )
 {
     CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( messaging::DidRenderScene, DebugSystem, onDidRenderScene );
     CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( messaging::ToggleDebugInfo, DebugSystem, onToggleDebugInfo );

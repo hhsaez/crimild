@@ -40,6 +40,8 @@ namespace crimild {
 	   \remarks Use it before a position updater
 	 */
     class AttractorParticleUpdater : public ParticleSystemComponent::ParticleUpdater {
+		CRIMILD_IMPLEMENT_RTTI( crimild::AttractorParticleUpdater )
+		
     public:
         AttractorParticleUpdater( void );
         virtual ~AttractorParticleUpdater( void );
@@ -59,6 +61,18 @@ namespace crimild {
 		
 		ParticleAttribArray *_positions = nullptr;
 		ParticleAttribArray *_accelerations = nullptr;
+
+		/** 
+		 	\name Coding support
+		*/
+		//@{
+
+	public:
+		virtual void encode( coding::Encoder &encoder ) override;
+		virtual void decode( coding::Decoder &decoder ) override;
+
+		//@}
+        
     };
 
 }

@@ -40,6 +40,7 @@ namespace crimild {
 				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::LookAt )
 				
 			public:
+				LookAt( void );
 				explicit LookAt( const crimild::Vector3f &target, crimild::Real32 duration );
 				virtual ~LookAt( void );
 				
@@ -48,8 +49,18 @@ namespace crimild {
 				
 			private:
 				crimild::Vector3f _target;
-				crimild::Real32 _duration;
 				crimild::Clock _clock;
+
+				/**
+				   \name Coding support
+				*/
+				//@{
+				
+			public:
+				virtual void encode( coding::Encoder &encoder ) override;
+				virtual void decode( coding::Decoder &decoder ) override;
+				
+				//@}
 			};
 
 		}

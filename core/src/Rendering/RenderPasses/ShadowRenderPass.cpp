@@ -110,10 +110,10 @@ void ShadowRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *rende
 		if ( light->getType() == Light::Type::DIRECTIONAL ) {
 	        // TODO: near and far should be calculated automatically based
 	        // on camera frustum and the scene
-	        const auto NEAR = 100.0f;
-	        const auto FAR = 100.0f;
-
 #if 0
+            const auto NEAR = 100.0f;
+            const auto FAR = 100.0f;
+            
 	    	const float top = 50;
 			const float bottom = -50;
 			const float left = -50;

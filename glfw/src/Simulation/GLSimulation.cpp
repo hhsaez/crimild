@@ -30,19 +30,27 @@
 #include "Systems/WindowSystem.hpp"
 #include "Systems/InputSystem.hpp"
 
-#include <Crimild_OpenGL.hpp>
+#include <Exceptions/RuntimeException.hpp>
+#include <Rendering/OpenGLRenderer.hpp>
+#include <Simulation/Systems/StreamingSystem.hpp>
 
 using namespace crimild;
 using namespace crimild::concurrency;
 
+#ifdef CRIMILD_ENABLE_SCRIPTING
+#include <Coding/LuaDecoder.hpp>
+
+using namespace crimild::scripting;
+#endif
+
 #ifdef CRIMILD_ENABLE_PHYSICS
-#include <Crimild_Physics.hpp>
+#include <Simulation/Systems/PhysicsSystem.hpp>
 
 using namespace crimild::physics;
 #endif
 
 #ifdef CRIMILD_ENABLE_SFML
-#include <Crimild_SFML.hpp>
+#include <Audio/SFMLAudioManager.hpp>
 #endif
 
 GLSimulation::GLSimulation( std::string name, SettingsPtr const &settings )
@@ -61,6 +69,10 @@ GLSimulation::GLSimulation( std::string name, SettingsPtr const &settings )
 		// enable some threads if not already specified
 		JobScheduler::getInstance()->configure( 4 );
 	}
+
+#ifdef CRIMILD_ENABLE_SCRIPTING
+	getSystem< StreamingSystem >()->registerDecoder< coding::LuaDecoder >( "lua" );
+#endif
 
     addSystem( crimild::alloc< InputSystem >() );
     addSystem( crimild::alloc< WindowSystem >() );

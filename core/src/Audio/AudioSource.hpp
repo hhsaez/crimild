@@ -28,7 +28,7 @@
 #ifndef CRIMILD_AUDIO_SOURCE_
 #define CRIMILD_AUDIO_SOURCE_
 
-#include "Foundation/SharedObject.hpp"
+#include "Coding/Codable.hpp"
 #include "Foundation/Types.hpp"
 
 #include "Mathematics/Transformation.hpp"
@@ -40,7 +40,9 @@ namespace crimild {
 		/**
 		   \brief Abstract interface for audio sources
 		 */
-		class AudioSource : public SharedObject {
+		class AudioSource : public coding::Codable {
+			CRIMILD_IMPLEMENT_RTTI( crimild::audo::AudioSource )
+
 		public:
 			enum class Status {
 				STOPPED,
@@ -48,16 +50,23 @@ namespace crimild {
 				PAUSED
 			};
 
+			struct Chunk {
+				const crimild::Int16 *samples;
+				crimild::Size sampleCount;
+			};
+
 		protected:
-			AudioSource( void ) { }
+			AudioSource( void );
 
 		public:
-	        virtual ~AudioSource( void ) { }
+	        virtual ~AudioSource( void );
 
 	    public:
 	    	virtual void play( void ) = 0;
 	    	virtual void pause( void ) = 0;
 	    	virtual void stop( void ) = 0;
+
+			virtual crimild::Real32 getDuration( void ) const = 0;
 
 	    	virtual void setLoop( crimild::Bool loop ) = 0;
 	    	virtual crimild::Bool shouldLoop( void ) const = 0;
@@ -88,9 +97,27 @@ namespace crimild {
 	    	virtual void setAttenuation( crimild::Real32 attenuation ) = 0;
 	    	virtual crimild::Real32 getAttenuation( void ) const = 0;
 
+			using GetDataCallback = std::function< void( Chunk const & ) >;
+			virtual void onGetData( GetDataCallback const &callback ) = 0;
+
+			virtual crimild::UInt32 getChannelCount( void ) const = 0;
+
+			virtual crimild::UInt32 getSampleRate( void ) const = 0;
+
 	    private:
 	    	crimild::Bool _spatializationEnabled = false;
 	    	Transformation _transformation;
+
+			/**
+			   \name Coding support
+			*/
+			//@{
+			
+		public:
+			virtual void encode( coding::Encoder &encoder ) override;
+			virtual void decode( coding::Decoder &decoder ) override;
+			
+			//@}			
 		};
 
 		using AudioSourcePtr = SharedPointer< AudioSource >;

@@ -73,3 +73,13 @@ void ColorParticleUpdater::update( Node *node, double dt, ParticleData *particle
 	}
 }
 
+void ColorParticleUpdater::encode( coding::Encoder &encoder ) 
+{
+	ParticleSystemComponent::ParticleUpdater::encode( encoder );
+}
+
+void ColorParticleUpdater::decode( coding::Decoder &decoder )
+{
+	ParticleSystemComponent::ParticleUpdater::decode( decoder );
+}
+

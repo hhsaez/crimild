@@ -26,7 +26,6 @@
  */
 
 #include "BlendShaderProgram.hpp"
-
 #include "Rendering/OpenGLUtils.hpp"
 
 using namespace crimild;

@@ -46,6 +46,8 @@ namespace crimild {
 	}
 
 	class RenderSystem : public System {
+		CRIMILD_IMPLEMENT_RTTI( crimild::RenderSystem )
+		
 	public:
 		RenderSystem( void );
 		virtual ~RenderSystem( void );

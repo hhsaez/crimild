@@ -88,7 +88,7 @@ namespace crimild {
 		void setViewport( const Rectf &rect ) { _viewport = rect; }
 		const Rectf &getViewport( void ) const { return _viewport; }
 
-		bool getPickRay( float normalizedX, float normalizedY, Ray3f &result ) const;
+		virtual bool getPickRay( float normalizedX, float normalizedY, Ray3f &result ) const;
 
 		void setAspectRatio( float aspect );
 		float computeAspect( void ) const;

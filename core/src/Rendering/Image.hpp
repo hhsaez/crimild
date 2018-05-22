@@ -28,13 +28,15 @@
 #ifndef CRIMILD_RENDERING_IMAGE_
 #define CRIMILD_RENDERING_IMAGE_
 
+#include "Foundation/Containers/Array.hpp"
 #include "Streaming/Stream.hpp"
+#include "Coding/Codable.hpp"
 
 #include <vector>
 
 namespace crimild {
     
-	class Image : public StreamObject {
+    class Image : public coding::Codable, public StreamObject {
 		CRIMILD_IMPLEMENT_RTTI( crimild::Image )
 
     public:
@@ -68,8 +70,19 @@ namespace crimild {
 		int _height;
 		int _bpp;
         PixelFormat _pixelFormat;
-        std::vector< unsigned char > _data;
+        containers::ByteArray _data;
 
+		/**
+            \name Coding support
+         */
+        //@{
+        
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+        
+        //@}
+        
         /**
         	\name Streaming
         */

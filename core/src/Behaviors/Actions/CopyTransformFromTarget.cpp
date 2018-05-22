@@ -1,7 +1,6 @@
 #include "CopyTransformFromTarget.hpp"
 
 #include "SceneGraph/Node.hpp"
-#include "Components/BehaviorController.hpp"
 
 using namespace crimild;
 using namespace crimild::behaviors;
@@ -32,5 +31,15 @@ Behavior::State CopyTransformFromTarget::step( BehaviorContext *context )
 	agent->setLocal( target->getLocal() );
 	
 	return Behavior::State::SUCCESS;
+}
+
+void CopyTransformFromTarget::encode( coding::Encoder &encoder )
+{
+	Behavior::encode( encoder );
+}
+
+void CopyTransformFromTarget::decode( coding::Decoder &decoder )
+{
+	Behavior::decode( decoder );
 }
 

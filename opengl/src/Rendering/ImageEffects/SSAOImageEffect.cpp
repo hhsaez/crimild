@@ -26,8 +26,15 @@
  */
 
 #include "SSAOImageEffect.hpp"
-
 #include "Rendering/OpenGLUtils.hpp"
+
+#include <Mathematics/Random.hpp>
+#include <Rendering/Image.hpp>
+#include <Rendering/AlphaState.hpp>
+#include <Rendering/FrameBufferObject.hpp>
+#include <Rendering/Renderer.hpp>
+#include <Rendering/RenderPasses/RenderPass.hpp>
+#include <Rendering/RenderPasses/DeferredRenderPass.hpp>
 
 using namespace crimild;
 using namespace crimild::opengl;

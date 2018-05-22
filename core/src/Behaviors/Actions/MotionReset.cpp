@@ -55,3 +55,13 @@ Behavior::State MotionReset::step( BehaviorContext *context )
 	return Behavior::State::SUCCESS;
 }
 
+void MotionReset::encode( coding::Encoder &encoder )
+{
+	Behavior::encode( encoder );
+}
+
+void MotionReset::decode( coding::Decoder &decoder )
+{
+	Behavior::decode( decoder );
+}
+

@@ -33,6 +33,8 @@
 namespace crimild {
 
     class NodePositionParticleGenerator : public ParticleSystemComponent::ParticleGenerator {
+		CRIMILD_IMPLEMENT_RTTI( crimild::NodePositionParticleGenerator )
+
     public:
         NodePositionParticleGenerator( void );
         virtual ~NodePositionParticleGenerator( void );
@@ -56,6 +58,17 @@ namespace crimild {
         Vector3f _size;
 
 		ParticleAttribArray *_positions = nullptr;
+		
+		/** 
+		 	\name Coding support
+		*/
+		//@{
+
+	public:
+		virtual void encode( coding::Encoder &encoder ) override;
+		virtual void decode( coding::Decoder &decoder ) override;
+
+		//@}
     };
 
 }

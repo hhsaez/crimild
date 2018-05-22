@@ -1,9 +1,14 @@
 #ifndef CRIMILD_RAYTRACING_RENDERING_RENDERER_
 #define CRIMILD_RAYTRACING_RENDERING_RENDERER_
 
-#include <Crimild.hpp>
+#include "Rendering/Image.hpp"
+#include "Mathematics/Vector.hpp"
+#include "Mathematics/Ray.hpp"
 
 namespace crimild {
+    
+    class Node;
+    class Camera;
 
 	namespace raytracing {
 

@@ -28,6 +28,7 @@
 #ifndef CRIMILD_COMPONENTS_NODE_COMPONENT_
 #define CRIMILD_COMPONENTS_NODE_COMPONENT_
 
+#include "Coding/Codable.hpp"
 #include "Streaming/Stream.hpp"
 #include "Mathematics/Clock.hpp"
 
@@ -37,7 +38,7 @@ namespace crimild {
 	class Renderer;
 	class Camera;
 
-    class NodeComponent : public StreamObject {
+    class NodeComponent : public coding::Codable, public StreamObject {
     	CRIMILD_IMPLEMENT_RTTI( crimild::NodeComponent )
         
 	protected:
@@ -104,9 +105,29 @@ namespace crimild {
 		   \brief Invoked once when component is detached from a node
 		*/
 		virtual void onDetach( void );
+        
+        /**
+            \name Cloning
+         */
+        //@{
+    public:
+        virtual SharedPointer< NodeComponent > clone( void ) { return nullptr; }
+        
+        //@}
+        
+        /**
+            \name Coding
+         */
+        //@{
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+        
+        //@}
 
 		/**
 			\name Streaming
+            \deprecated See crimild::coding
 		*/
 		//@{
 

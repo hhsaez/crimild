@@ -75,8 +75,8 @@ void NodeVisitor::visitGeometry( Geometry *geometry )
 
 void NodeVisitor::visitText( Text *text )
 {
-    // by default, do the same as with geometries
-    visitGeometry( text );
+    // by default, do the same as with groups
+    visitGroup( text );
 }
 
 void NodeVisitor::visitCamera( Camera *camera )

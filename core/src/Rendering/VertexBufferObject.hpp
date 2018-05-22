@@ -84,10 +84,22 @@ namespace crimild {
         
 	private:
 		VertexFormat _vertexFormat;
-		unsigned int _vertexCount;
+        crimild::UInt32 _vertexCount;
+            
+        /**
+            \name Coding
+         */
+        //@{
+            
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+            
+        //@}
 
         /**
         	\name Streaming
+             \deprecated See crimild::coding
         */
         //@{
 

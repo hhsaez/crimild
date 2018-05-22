@@ -43,6 +43,7 @@ namespace crimild {
 				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::ExecuteBehaviorOnTarget )
 				
 			public:
+				ExecuteBehaviorOnTarget( void );
 				explicit ExecuteBehaviorOnTarget( std::string behaviorName, crimild::Bool overrideTarget );
 				virtual ~ExecuteBehaviorOnTarget( void );
 
@@ -51,6 +52,17 @@ namespace crimild {
 			private:
 				std::string _behaviorName;
 				crimild::Bool _overrideTarget = false;
+
+				/**
+				   \name Coding support
+				*/
+				//@{
+				
+			public:
+				virtual void encode( coding::Encoder &encoder ) override;
+				virtual void decode( coding::Decoder &decoder ) override;
+				
+				//@}
 			};
 
 		}

@@ -31,13 +31,14 @@
 #include "Foundation/NamedObject.hpp"
 #include "Foundation/Map.hpp"
 #include "Foundation/Array.hpp"
+#include "Coding/Codable.hpp"
 #include "Streaming/Stream.hpp"
 #include "Mathematics/Transformation.hpp"
 #include "Mathematics/Interpolation.hpp"
 
 namespace crimild {
     
-	class SkinnedMeshJoint : public StreamObject, public NamedObject {
+    class SkinnedMeshJoint : public coding::Codable, public StreamObject, public NamedObject {
 		CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMeshJoint )
 
 	public:
@@ -51,11 +52,23 @@ namespace crimild {
 		const Transformation &getOffset( void ) const { return _offset; }
 
 	private:
-		unsigned char _id;
+        crimild::UInt8 _id;
 		Transformation _offset;
 
+        /**
+            \name Coding support
+         */
+        //@{
+        
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+        
+        //@}
+        
 		/**
 			\name Streaming
+			\deprecated see crimild::Coding
 		*/
 		//@{
 
@@ -68,7 +81,7 @@ namespace crimild {
 
 	};
 
-	class SkinnedMeshJointCatalog : public StreamObject {
+    class SkinnedMeshJointCatalog : public coding::Codable, public StreamObject {
 		CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMeshJointCatalog )
 
 	public:
@@ -84,8 +97,20 @@ namespace crimild {
 	private:
 		Map< std::string, SharedPointer< SkinnedMeshJoint >> _joints;
 
+        /**
+            \name Coding support
+         */
+        //@{
+        
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+        
+        //@}
+        
 		/**
 			\name Streaming
+			\deprecated see crimild::Coding
 		*/
 		//@{
 
@@ -98,7 +123,7 @@ namespace crimild {
 
 	};
 
-	class SkinnedMeshAnimationChannel : public NamedObject, public StreamObject {
+    class SkinnedMeshAnimationChannel : public coding::Codable, public NamedObject, public StreamObject {
 		CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMeshAnimationChannel )
 
 	public:
@@ -142,8 +167,20 @@ namespace crimild {
 		RotationKeyArray _rotationKeys;
 		ScaleKeyArray _scaleKeys;
 
+        /**
+            \name Coding support
+         */
+        //@{
+        
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+        
+        //@}
+        
 		/**
 			\name Streaming
+			\deprecated see crimild::Coding
 		*/
 		//@{
 
@@ -155,7 +192,7 @@ namespace crimild {
 		//@}		
 	};
 
-	class SkinnedMeshAnimationClip : public StreamObject {
+    class SkinnedMeshAnimationClip : public coding::Codable, public StreamObject {
 		CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMeshAnimationClip )
 
 	private:
@@ -178,8 +215,20 @@ namespace crimild {
 		float _frameRate;
 		SkinnedMeshAnimationChannelMap _channels;
 
+        /**
+            \name Coding support
+         */
+        //@{
+        
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+        
+        //@}
+        
 		/**
 			\name Streaming
+			\deprecated see crimild::Coding
 		*/
 		//@{
 
@@ -191,7 +240,7 @@ namespace crimild {
 		//@}		
 	};
 
-	class SkinnedMeshSkeleton : public StreamObject {
+    class SkinnedMeshSkeleton : public coding::Codable, public StreamObject {
 		CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMeshSkeleton )
 
 	private:
@@ -213,8 +262,20 @@ namespace crimild {
 
 		Transformation _globalInverseTransform;
 
+        /**
+            \name Coding support
+         */
+        //@{
+        
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+        
+        //@}
+        
 		/**
 			\name Streaming
+			\deprecated see crimild::Coding
 		*/
 		//@{
 
@@ -226,7 +287,7 @@ namespace crimild {
 		//@}		
 	};
 
-	class SkinnedMeshAnimationState : public StreamObject {
+    class SkinnedMeshAnimationState : public coding::Codable, public StreamObject {
 		CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMeshAnimationState )
 
 	private:
@@ -242,8 +303,20 @@ namespace crimild {
 	private:
 		JointPoseArray _jointPoses;
 
+        /**
+            \name Coding support
+         */
+        //@{
+        
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+        
+        //@}
+        
 		/**
 			\name Streaming
+			\deprecated see crimild::Coding
 		*/
 		//@{
 
@@ -255,7 +328,7 @@ namespace crimild {
 		//@}		
 	};
 
-	class SkinnedMesh : public StreamObject {
+    class SkinnedMesh : public coding::Codable, public StreamObject {
 		CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMesh )
 
 	public:
@@ -273,8 +346,20 @@ namespace crimild {
 		SharedPointer< SkinnedMeshSkeleton > _skeleton;
 		SharedPointer< SkinnedMeshAnimationState > _animationState;
 
+        /**
+            \name Coding support
+         */
+        //@{
+        
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+        
+        //@}
+        
 		/**
 			\name Streaming
+			\deprecated see crimild::Coding
 		*/
 		//@{
 

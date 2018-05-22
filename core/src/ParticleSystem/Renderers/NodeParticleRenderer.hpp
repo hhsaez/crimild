@@ -36,6 +36,8 @@ namespace crimild {
 	   \brief Update child nodes based on particle positions
 	 */
     class NodeParticleRenderer : public ParticleSystemComponent::ParticleRenderer {
+		CRIMILD_IMPLEMENT_RTTI( crimild::NodeParticleRenderer )
+		
     public:
         NodeParticleRenderer( void );
         virtual ~NodeParticleRenderer( void );
@@ -45,6 +47,18 @@ namespace crimild {
         
 	private:
 		ParticleAttribArray *_positions = nullptr;
+
+		/** 
+		 	\name Coding support
+		*/
+		//@{
+
+	public:
+		virtual void encode( coding::Encoder &encoder ) override;
+		virtual void decode( coding::Decoder &decoder ) override;
+
+		//@}
+        
     };
 
 }

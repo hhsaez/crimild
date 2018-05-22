@@ -30,6 +30,7 @@
 
 #include "Foundation/SharedObject.hpp"
 #include "Messaging/MessageQueue.hpp"
+#include "Coding/Codable.hpp"
 
 #include "BehaviorContext.hpp"
 
@@ -54,8 +55,7 @@ namespace crimild {
 		   \brief Base class for behaviors
 		*/
 		class Behavior :
-			public SharedObject,
-			public RTTI,
+            public coding::Codable,
 			public crimild::Messenger {
 		public:
 			enum class State {
@@ -82,6 +82,17 @@ namespace crimild {
 			   \brief Invoked every update of the behavior tree
 			*/
 			virtual State step( BehaviorContext *context ) = 0;
+				
+			/**
+			   \name Coding support
+			*/
+			//@{
+			
+		public:
+			virtual void encode( coding::Encoder &encoder ) override;
+			virtual void decode( coding::Decoder &decoder ) override;
+			
+			//@}
 		};
 
 		using BehaviorPtr = crimild::SharedPointer< Behavior >;

@@ -28,6 +28,8 @@
 #include "NodePositionParticleGenerator.hpp"
 
 #include "Mathematics/Random.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 #include "SceneGraph/Node.hpp"
 
@@ -84,5 +86,21 @@ void NodePositionParticleGenerator::generate( Node *node, crimild::Real64 dt, Pa
 			ps[ i ] = Vector3f( x, y, z );
 		}
     }
+}
+
+void NodePositionParticleGenerator::encode( coding::Encoder &encoder ) 
+{
+	ParticleSystemComponent::ParticleGenerator::encode( encoder );
+
+	encoder.encode( "node", _targetNodeName );
+	encoder.encode( "size", _size );
+}
+
+void NodePositionParticleGenerator::decode( coding::Decoder &decoder )
+{
+	ParticleSystemComponent::ParticleGenerator::decode( decoder );
+
+	decoder.decode( "node", _targetNodeName );
+	decoder.decode( "size", _size );
 }
 

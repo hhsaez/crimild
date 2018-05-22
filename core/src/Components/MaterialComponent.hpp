@@ -57,9 +57,30 @@ namespace crimild {
 
 	private:
 		SharedObjectArray< Material > _materials;
+        
+        /**
+            \name Clonning
+         */
+        //@{
+    public:
+        virtual SharedPointer< NodeComponent > clone( void ) override;
+        
+        //@}
 
+        /**
+            \name Coding support
+         */
+        //@{
+        
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+        
+        //@}
+        
 		/**
 			\name Streaming support
+			\deprecated see crimild::Coding
 		*/
 		//@{
 

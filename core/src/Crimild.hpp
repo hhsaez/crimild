@@ -49,11 +49,29 @@
 #include "Foundation/Macros.hpp"
 #include "Foundation/NamedObject.hpp"
 #include "Foundation/Log.hpp"
+#include "Foundation/ObjectFactory.hpp"
 #include "Foundation/StringUtils.hpp"
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/Singleton.hpp"
 #include "Foundation/Profiler.hpp"
 #include "Foundation/Version.hpp"
+
+#include "Foundation/Containers/Array.hpp"
+#include "Foundation/Containers/Map.hpp"
+#include "Foundation/Containers/PriorityQueue.hpp"
+#include "Foundation/Containers/Stack.hpp"
+
+#include "Foundation/Policies/ThreadingPolicy.hpp"
+
+#include "Coding/Codable.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
+#include "Coding/EncodedData.hpp"
+#include "Coding/MemoryEncoder.hpp"
+#include "Coding/MemoryDecoder.hpp"
+#include "Coding/FileEncoder.hpp"
+#include "Coding/FileDecoder.hpp"
+#include "Coding/Tags.hpp"
 
 #include "Audio/AudioListener.hpp"
 #include "Audio/AudioManager.hpp"
@@ -79,6 +97,8 @@
 
 #include "Behaviors/Behavior.hpp"
 #include "Behaviors/BehaviorContext.hpp"
+#include "Behaviors/BehaviorTree.hpp"
+#include "Behaviors/BehaviorController.hpp"
 #include "Behaviors/Actions/AnimateContextValue.hpp"
 #include "Behaviors/Actions/AnimateParticleSystem.hpp"
 #include "Behaviors/Actions/AnimateSettingValue.hpp"
@@ -125,7 +145,6 @@
 #include "Components/AnimatorComponent.hpp"
 #include "Components/AudioListenerComponent.hpp"
 #include "Components/AudioSourceComponent.hpp"
-#include "Components/BehaviorController.hpp"
 #include "Components/BillboardComponent.hpp"
 #include "Components/LambdaComponent.hpp"
 #include "Components/MaterialComponent.hpp"
@@ -135,6 +154,7 @@
 #include "Components/RotationComponent.hpp"
 #include "Components/RenderStateComponent.hpp"
 #include "Components/UIResponder.hpp"
+#include "Components/SingleValueComponent.hpp"
 #include "Components/SkinnedMeshComponent.hpp"
 #include "Components/FreeLookCameraComponent.hpp"
 
@@ -264,6 +284,12 @@
 #include "Debug/DebugRenderHelper.hpp"
 #include "Debug/SceneDebugDump.hpp"
 #include "Debug/DebugRenderComponent.hpp"
+
+namespace crimild {
+
+	void init( void );
+
+}
 
 #endif
 

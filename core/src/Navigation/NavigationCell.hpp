@@ -30,6 +30,7 @@
 
 #include "NavigationCellEdge.hpp"
 
+#include "Coding/Codable.hpp"
 #include "Mathematics/Plane.hpp"
 #include "Mathematics/LineSegment.hpp"
 
@@ -37,7 +38,7 @@ namespace crimild {
 
 	namespace navigation {
 
-        class NavigationCell : public StreamObject {
+        class NavigationCell : public coding::Codable, public StreamObject {
 			CRIMILD_IMPLEMENT_RTTI( crimild::navigation::NavigationCell )
 
         public:

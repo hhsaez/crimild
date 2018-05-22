@@ -26,6 +26,8 @@
  */
 
 #include "ParticleSystemComponent.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 using namespace crimild;
 
@@ -74,26 +76,25 @@ void ParticleSystemComponent::start( void )
 
 void ParticleSystemComponent::configureGenerators( Node *node, ParticleData *particles )
 {
-	auto gCount = _generators.getCount();
-    for ( int i = 0; i < gCount; i++ ) {
-		_generators[ i ]->configure( node, particles );
-	}
+	_generators.each( [ node, particles ]( SharedPointer< ParticleGenerator > &g, crimild::Size ) {
+		g->configure( node, particles );
+	});
 }
 
 void ParticleSystemComponent::configureUpdaters( Node *node, ParticleData *particles )
 {
-	const auto uCount = _updaters.getCount();
-    for ( int i = 0; i < uCount; i++ ) {
-		_updaters[ i ]->configure( node, particles );
-	}
+	_updaters.each( [ node, particles ]( SharedPointer< ParticleUpdater > &u, crimild::Size ) {
+		u->configure( node, particles );
+	});
 }
 
 void ParticleSystemComponent::configureRenderers( Node *node, ParticleData *particles )
 {
-	const auto rCount = _renderers.getCount();
-    for ( int i = 0; i < rCount; i++ ) {
-		_renderers[ i ]->configure( node, particles );
-	}
+	_renderers.each( [ node, particles ]( SharedPointer< ParticleRenderer > &r, crimild::Size ) {
+		if ( r != nullptr ) {
+			r->configure( node, particles );
+		}
+	});
 }
 
 void ParticleSystemComponent::update( const Clock &c )
@@ -124,10 +125,9 @@ void ParticleSystemComponent::updateGenerators( Node *node, crimild::Real64 dt, 
     const ParticleId startId = particles->getAliveCount();            
     const ParticleId endId = Numeric< ParticleId >::min( startId + maxNewParticles, particles->getParticleCount() - 1 );
 
-	const auto gCount = _generators.getCount();
-	for ( int i = 0; i < gCount; i++ ) {
-		_generators[ i ]->generate( node, dt, particles, startId, endId );
-	}
+	_generators.each( [ node, dt, particles, startId, endId ]( SharedPointer< ParticleGenerator > &g ) {
+		g->generate( node, dt, particles, startId, endId );
+	});
 
     for ( ParticleId i = startId; i < endId; i++ ) {
         particles->wake( i );
@@ -136,19 +136,48 @@ void ParticleSystemComponent::updateGenerators( Node *node, crimild::Real64 dt, 
 
 void ParticleSystemComponent::updateUpdaters( Node *node, crimild::Real64 dt, ParticleData *particles )
 {
-	const auto uCount = _updaters.getCount();
-	for ( int i = 0; i < uCount; i++ ) {
-		_updaters[ i ]->update( node, dt, particles );
-	}
+	_updaters.each( [ node, dt, particles ]( SharedPointer< ParticleUpdater > &u ) {
+		u->update( node, dt, particles );
+	});
 }
 
 void ParticleSystemComponent::updateRenderers( Node *node, crimild::Real64 dt, ParticleData *particles )
 {
-	const auto rCount = _renderers.getCount();
-	for ( int i = 0; i < rCount; i++ ) {
-		_renderers[ i ]->update( node, dt, particles );
-	}
+	_renderers.each( [ node, dt, particles ]( SharedPointer< ParticleRenderer > &r ) {
+		r->update( node, dt, particles );
+	});
 }
 
+void ParticleSystemComponent::encode( coding::Encoder &encoder ) 
+{
+	NodeComponent::encode( encoder );
 
+	encoder.encode( "particles", _particles );
+	encoder.encode( "emitRate", _emitRate );
+	encoder.encode( "preWarmTime", _preWarmTime );
+	encoder.encode( "burst", _burst );
+	encoder.encode( "generators", _generators );
+	encoder.encode( "updaters", _updaters );
+	encoder.encode( "renderers", _renderers );
+}
+
+void ParticleSystemComponent::decode( coding::Decoder &decoder )
+{
+	NodeComponent::decode( decoder );
+
+	decoder.decode( "particles", _particles );
+
+	_emitRate = _particles->getParticleCount();
+	decoder.decode( "emitRate", _emitRate );
+
+	_preWarmTime = 0;
+	decoder.decode( "preWarmTime", _preWarmTime );
+
+	_burst = false;
+	decoder.decode( "burst", _burst );
+
+	decoder.decode( "generators", _generators );
+	decoder.decode( "updaters", _updaters );
+	decoder.decode( "renderers", _renderers );
+}
 

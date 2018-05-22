@@ -26,11 +26,33 @@
  */
 
 #include "Rendering/SkinnedMesh.hpp"
+#include "Coding/MemoryEncoder.hpp"
+#include "Coding/MemoryDecoder.hpp"
 #include "Streaming/FileStream.hpp"
  
 #include "gtest/gtest.h"
 
 using namespace crimild;
+
+TEST( SkinnedMeshJoint, coding )
+{
+	Transformation offset;
+	offset.setTranslate( 1.0f, 2.0f, 3.0f );
+	auto joint = crimild::alloc< SkinnedMeshJoint >( 5, offset, "aJoint" );
+
+	auto encoder = crimild::alloc< coding::MemoryEncoder >();
+	encoder->encode( joint );
+	auto bytes = encoder->getBytes();
+	auto decoder = crimild::alloc< coding::MemoryDecoder >();
+	decoder->fromBytes( bytes );
+
+	auto decodedJoint = decoder->getObjectAt< SkinnedMeshJoint >( 0 );
+	EXPECT_TRUE( decodedJoint != nullptr );
+		
+	EXPECT_EQ( joint->getId(), decodedJoint->getId() );
+	EXPECT_EQ( joint->getOffset().getTranslate(), decodedJoint->getOffset().getTranslate() );
+	EXPECT_EQ( joint->getName(), decodedJoint->getName() );
+}
 
 TEST( SkinnedMesh, streamSkinnedMeshJoint )
 {
@@ -56,6 +78,37 @@ TEST( SkinnedMesh, streamSkinnedMeshJoint )
 		EXPECT_EQ( Vector3f( 1.0f, 2.0f, 3.0f ), joint->getOffset().getTranslate() );
 		EXPECT_EQ( "aJoint", joint->getName() );
 	}
+}
+
+TEST( SkinnedMeshJointCatalog, coding )
+{
+	Transformation offset;
+	auto catalog = crimild::alloc< SkinnedMeshJointCatalog >();
+	EXPECT_EQ( 0, catalog->updateOrCreateJoint( "joint2", offset )->getId() );
+	EXPECT_EQ( 1, catalog->updateOrCreateJoint( "joint5", offset )->getId() );
+	EXPECT_EQ( 2, catalog->updateOrCreateJoint( "joint3", offset )->getId() );
+	EXPECT_EQ( 3, catalog->updateOrCreateJoint( "joint4", offset )->getId() );
+	EXPECT_EQ( 4, catalog->updateOrCreateJoint( "joint6", offset )->getId() );
+	EXPECT_EQ( 5, catalog->updateOrCreateJoint( "joint7", offset )->getId() );
+	EXPECT_EQ( 6, catalog->updateOrCreateJoint( "joint1", offset )->getId() );
+
+	auto encoder = crimild::alloc< coding::MemoryEncoder >();
+	encoder->encode( catalog );
+	auto bytes = encoder->getBytes();
+	auto decoder = crimild::alloc< coding::MemoryDecoder >();
+	decoder->fromBytes( bytes );
+	
+	auto decodedCatalog = decoder->getObjectAt< SkinnedMeshJointCatalog >( 0 );
+	EXPECT_TRUE( decodedCatalog != nullptr );
+	
+	EXPECT_EQ( 7, decodedCatalog->getJointCount() );
+	EXPECT_EQ( 6, decodedCatalog->find( "joint1" )->getId() );
+	EXPECT_EQ( 0, decodedCatalog->find( "joint2" )->getId() );
+	EXPECT_EQ( 2, decodedCatalog->find( "joint3" )->getId() );
+	EXPECT_EQ( 3, decodedCatalog->find( "joint4" )->getId() );
+	EXPECT_EQ( 1, decodedCatalog->find( "joint5" )->getId() );
+	EXPECT_EQ( 4, decodedCatalog->find( "joint6" )->getId() );
+	EXPECT_EQ( 5, decodedCatalog->find( "joint7" )->getId() );
 }
 
 TEST( SkinnedMesh, streamSkinnedMeshJointCatalog )
@@ -93,6 +146,71 @@ TEST( SkinnedMesh, streamSkinnedMeshJointCatalog )
 		EXPECT_EQ( 4, catalog->find( "joint6" )->getId() );
 		EXPECT_EQ( 5, catalog->find( "joint7" )->getId() );
 	}
+}
+
+TEST( SkinnedMeshAnimationChannel, coding )
+{
+	auto channel = crimild::alloc< SkinnedMeshAnimationChannel >();
+	channel->setName( "L_Ankle" );
+
+	channel->getPositionKeys().resize( 3 );
+	channel->getPositionKeys()[ 0 ].time = 0;
+	channel->getPositionKeys()[ 0 ].value = Vector3f( 1.0f, 0.0f, 0.0f );
+	channel->getPositionKeys()[ 1 ].time = 5;
+	channel->getPositionKeys()[ 1 ].value = Vector3f( 1.0f, 1.0f, 0.0f );
+	channel->getPositionKeys()[ 2 ].time = 10;
+	channel->getPositionKeys()[ 2 ].value = Vector3f( 1.0f, 0.0f, 1.0f );
+
+	channel->getRotationKeys().resize( 3 );
+	channel->getRotationKeys()[ 0 ].time = 0;
+	channel->getRotationKeys()[ 0 ].value = Quaternion4f( 1.0f, 2.0f, 3.0f, 4.0f );
+	channel->getRotationKeys()[ 1 ].time = 5;
+	channel->getRotationKeys()[ 1 ].value = Quaternion4f( 1.0f, 4.0f, 3.0f, 6.0f );
+	channel->getRotationKeys()[ 2 ].time = 10;
+	channel->getRotationKeys()[ 2 ].value = Quaternion4f( 1.0f, 2.0f, 3.0f, 4.0f );
+
+	channel->getScaleKeys().resize( 3 );
+	channel->getScaleKeys()[ 0 ].time = 0;
+	channel->getScaleKeys()[ 0 ].value = 1;
+	channel->getScaleKeys()[ 1 ].time = 5;
+	channel->getScaleKeys()[ 1 ].value = 2;
+	channel->getScaleKeys()[ 2 ].time = 10;
+	channel->getScaleKeys()[ 2 ].value = 3;
+	
+	auto encoder = crimild::alloc< coding::MemoryEncoder >();
+	encoder->encode( channel );
+	auto bytes = encoder->getBytes();
+	auto decoder = crimild::alloc< coding::MemoryDecoder >();
+	decoder->fromBytes( bytes );
+	
+	auto decodedChannel = decoder->getObjectAt< SkinnedMeshAnimationChannel >( 0 );
+	EXPECT_TRUE( decodedChannel != nullptr );
+
+	EXPECT_EQ( "L_Ankle", decodedChannel->getName() );
+
+	EXPECT_EQ( 3, decodedChannel->getPositionKeys().size() );
+	EXPECT_EQ( 0, decodedChannel->getPositionKeys()[ 0 ].time );
+	EXPECT_EQ( Vector3f( 1.0f, 0.0f, 0.0f ), decodedChannel->getPositionKeys()[ 0 ].value );
+	EXPECT_EQ( 5, decodedChannel->getPositionKeys()[ 1 ].time );
+	EXPECT_EQ( Vector3f( 1.0f, 1.0f, 0.0f ), decodedChannel->getPositionKeys()[ 1 ].value );
+	EXPECT_EQ( 10, decodedChannel->getPositionKeys()[ 2 ].time );
+	EXPECT_EQ( Vector3f( 1.0f, 0.0f, 1.0f ), decodedChannel->getPositionKeys()[ 2 ].value );
+
+	EXPECT_EQ( 3, decodedChannel->getRotationKeys().size() );
+	EXPECT_EQ( 0, decodedChannel->getRotationKeys()[ 0 ].time );
+	EXPECT_EQ( Quaternion4f( 1.0f, 2.0f, 3.0f, 4.0f ), decodedChannel->getRotationKeys()[ 0 ].value );
+	EXPECT_EQ( 5, decodedChannel->getRotationKeys()[ 1 ].time );
+	EXPECT_EQ( Quaternion4f( 1.0f, 4.0f, 3.0f, 6.0f ), decodedChannel->getRotationKeys()[ 1 ].value );
+	EXPECT_EQ( 10, decodedChannel->getRotationKeys()[ 2 ].time );
+	EXPECT_EQ( Quaternion4f( 1.0f, 2.0f, 3.0f, 4.0f ), decodedChannel->getRotationKeys()[ 2 ].value );
+	
+	EXPECT_EQ( 3, decodedChannel->getScaleKeys().size() );
+	EXPECT_EQ( 0, decodedChannel->getScaleKeys()[ 0 ].time );
+	EXPECT_EQ( 1, decodedChannel->getScaleKeys()[ 0 ].value );
+	EXPECT_EQ( 5, decodedChannel->getScaleKeys()[ 1 ].time );
+	EXPECT_EQ( 2, decodedChannel->getScaleKeys()[ 1 ].value );
+	EXPECT_EQ( 10, decodedChannel->getScaleKeys()[ 2 ].time );
+	EXPECT_EQ( 3, decodedChannel->getScaleKeys()[ 2 ].value );
 }
 
 TEST( SkinnedMesh, streamSkinnedMeshAnimationChannel )
@@ -166,6 +284,42 @@ TEST( SkinnedMesh, streamSkinnedMeshAnimationChannel )
 	}
 }
 
+TEST( SkinnedMeshAnimationClip, coding )
+{
+	auto clip = crimild::alloc< SkinnedMeshAnimationClip >();
+	clip->setDuration( 50.0f );
+	clip->setFrameRate( 24.0f );
+	
+	auto ankleChannel = crimild::alloc< SkinnedMeshAnimationChannel >();
+	ankleChannel->setName( "L_Ankle" );
+	clip->getChannels().add( ankleChannel->getName(), ankleChannel );
+	
+	auto armChannel = crimild::alloc< SkinnedMeshAnimationChannel >();
+	armChannel->setName( "R_Arm" );
+	clip->getChannels().add( armChannel->getName(), armChannel );
+	
+	auto bodyChannel = crimild::alloc< SkinnedMeshAnimationChannel >();
+	bodyChannel->setName( "Body" );
+	clip->getChannels().add( bodyChannel->getName(), bodyChannel );
+	
+	auto encoder = crimild::alloc< coding::MemoryEncoder >();
+	encoder->encode( clip );
+	auto bytes = encoder->getBytes();
+	auto decoder = crimild::alloc< coding::MemoryDecoder >();
+	decoder->fromBytes( bytes );
+	
+	auto decodedClip = decoder->getObjectAt< SkinnedMeshAnimationClip >( 0 );
+	EXPECT_TRUE( decodedClip != nullptr );
+	
+	EXPECT_EQ( 50.0f, decodedClip->getDuration() );
+	EXPECT_EQ( 24.0f, decodedClip->getFrameRate() );
+	
+	EXPECT_EQ( 3, decodedClip->getChannels().size() );
+	EXPECT_EQ( "L_Ankle", decodedClip->getChannels()[ "L_Ankle" ]->getName() );
+	EXPECT_EQ( "R_Arm", decodedClip->getChannels()[ "R_Arm" ]->getName() );
+	EXPECT_EQ( "Body", decodedClip->getChannels()[ "Body" ]->getName() );
+}
+
 TEST( SkinnedMesh, streamSkinnedMeshAnimationClip )
 {
 	{
@@ -208,6 +362,39 @@ TEST( SkinnedMesh, streamSkinnedMeshAnimationClip )
 	}
 }
 
+TEST( SkinnedMeshSkeleton, coding )
+{
+	auto skeleton = crimild::alloc< SkinnedMeshSkeleton >();
+
+	skeleton->getClips().add( crimild::alloc< SkinnedMeshAnimationClip >() );
+	skeleton->getClips().add( crimild::alloc< SkinnedMeshAnimationClip >() );
+	skeleton->getClips().add( crimild::alloc< SkinnedMeshAnimationClip >() );
+	
+	Transformation offset;
+	skeleton->getJoints()->updateOrCreateJoint( "joint2", offset );
+	skeleton->getJoints()->updateOrCreateJoint( "joint3", offset );
+	
+	Transformation t;
+	t.setTranslate( 0.0f, 1.0f, 3.0f );
+	skeleton->setGlobalInverseTransform( t );
+	
+	auto encoder = crimild::alloc< coding::MemoryEncoder >();
+	encoder->encode( skeleton );
+	auto bytes = encoder->getBytes();
+	auto decoder = crimild::alloc< coding::MemoryDecoder >();
+	decoder->fromBytes( bytes );
+
+	auto decodedSkeleton = decoder->getObjectAt< SkinnedMeshSkeleton >( 0 );
+	EXPECT_TRUE( decodedSkeleton != nullptr );
+
+	EXPECT_EQ( 3, decodedSkeleton->getClips().size() );
+
+	EXPECT_NE( nullptr, decodedSkeleton->getJoints() );
+	EXPECT_EQ( 2, decodedSkeleton->getJoints()->getJointCount() );
+	EXPECT_EQ( 0, decodedSkeleton->getJoints()->find( "joint2" )->getId() );
+	EXPECT_EQ( 1, decodedSkeleton->getJoints()->find( "joint3" )->getId() );
+}
+
 TEST( SkinnedMesh, streamSkinnedMeshSkeleton )
 {
 	{
@@ -247,6 +434,24 @@ TEST( SkinnedMesh, streamSkinnedMeshSkeleton )
 	}
 }
 
+TEST( SkinnedMeshAnimationState, coding )
+{
+	auto state = crimild::alloc< SkinnedMeshAnimationState >();
+	state->getJointPoses().add( Matrix4f() );
+	state->getJointPoses().add( Matrix4f() );
+	state->getJointPoses().add( Matrix4f() );
+	
+	auto encoder = crimild::alloc< coding::MemoryEncoder >();
+	encoder->encode( state );
+	auto bytes = encoder->getBytes();
+	auto decoder = crimild::alloc< coding::MemoryDecoder >();
+	decoder->fromBytes( bytes );
+
+	auto decodedState = decoder->getObjectAt< SkinnedMeshAnimationState >( 0 );
+	EXPECT_TRUE( decodedState != nullptr );
+	EXPECT_EQ( 3, decodedState->getJointPoses().size() );
+}
+
 TEST( SkinnedMesh, streamSkinnedMeshAnimationState )
 {
 	{
@@ -270,6 +475,28 @@ TEST( SkinnedMesh, streamSkinnedMeshAnimationState )
 
 		EXPECT_EQ( 3, state->getJointPoses().size() );
 	}
+}
+
+TEST( SkinnedMesh, coding )
+{
+	auto skinnedMesh = crimild::alloc< SkinnedMesh >();
+	skinnedMesh->setSkeleton( crimild::alloc< SkinnedMeshSkeleton >() );
+	
+	auto state = skinnedMesh->getAnimationState();
+	state->getJointPoses().add( Matrix4f() );
+	state->getJointPoses().add( Matrix4f() );
+	state->getJointPoses().add( Matrix4f() );
+	
+	auto encoder = crimild::alloc< coding::MemoryEncoder >();
+	encoder->encode( skinnedMesh );
+	auto bytes = encoder->getBytes();
+	auto decoder = crimild::alloc< coding::MemoryDecoder >();
+	decoder->fromBytes( bytes );
+
+	auto decodedSkinnedMesh = decoder->getObjectAt< SkinnedMesh >( 0 );
+	EXPECT_TRUE( decodedSkinnedMesh != nullptr );
+	EXPECT_NE( nullptr, decodedSkinnedMesh->getSkeleton() );
+	EXPECT_EQ( 3, decodedSkinnedMesh->getAnimationState()->getJointPoses().size() );
 }
 
 TEST( SkinnedMesh, streamSkinnedMesh )

@@ -2,6 +2,10 @@
 #include "RTMaterial.hpp"
 
 #include "Visitors/RTRayCaster.hpp"
+#include "Concurrency/Async.hpp"
+#include "SceneGraph/Camera.hpp"
+#include "Mathematics/Random.hpp"
+#include "Mathematics/Interpolation.hpp"
 
 #include <iostream>
 #include <sstream>

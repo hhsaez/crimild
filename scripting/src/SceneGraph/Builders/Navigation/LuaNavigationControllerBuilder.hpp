@@ -30,6 +30,8 @@
 
 #include "Foundation/Scripted.hpp"
 
+#include <Navigation/NavigationController.hpp>
+
 namespace crimild {
 
 	namespace scripting {

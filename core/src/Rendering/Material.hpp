@@ -41,7 +41,7 @@ namespace crimild {
 
 	class Light;
     
-	class Material : public StreamObject {
+    class Material : public coding::Codable, public StreamObject {
 		CRIMILD_IMPLEMENT_RTTI( crimild::Material )
 
 	public:
@@ -124,7 +124,19 @@ namespace crimild {
         bool _receiveShadows = true;
 
         /**
+            \name Coding support
+         */
+        //@{
+        
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+        
+        //@}
+        
+        /**
         	\name Streaming
+            \deprectated see crimild::Coding
         */
         //@{
 

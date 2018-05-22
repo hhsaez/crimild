@@ -36,11 +36,25 @@ namespace crimild {
 	   \todo Lacks implementation
 	 */
     class CirclePositionParticleGenerator : public ParticleSystemComponent::ParticleGenerator {
+        CRIMILD_IMPLEMENT_RTTI( crimild::CirclePositionParticleGenerator )
+
     public:
         CirclePositionParticleGenerator( void );
         virtual ~CirclePositionParticleGenerator( void );
 
         virtual void generate( Node *node, double dt, ParticleData *particles, ParticleId startId, ParticleId endId ) override;
+
+		/** 
+		 	\name Coding support
+		*/
+		//@{
+
+	public:
+		virtual void encode( coding::Encoder &encoder ) override;
+		virtual void decode( coding::Decoder &decoder ) override;
+
+		//@}
+                
     };
 
 }

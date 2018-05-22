@@ -1,5 +1,11 @@
 #include "WindowSystem.hpp"
 
+#include <Concurrency/Async.hpp>
+#include <Foundation/Profiler.hpp>
+#include <Simulation/Simulation.hpp>
+#include <Simulation/Systems/RenderSystem.hpp>
+#include <Rendering/FrameBufferObject.hpp>
+
 #ifdef CRIMILD_PLATFORM_EMSCRIPTEN
     #include <emscripten.h>
     #include <emscripten/html5.h>
@@ -14,7 +20,6 @@ void simulation_step( void )
 using namespace crimild;
 
 WindowSystem::WindowSystem( void )
-	: System( "Window System" )
 {
 
 }

@@ -30,6 +30,8 @@
 #include "Primitives/QuadPrimitive.hpp"
 #include "Components/MaterialComponent.hpp"
 #include "Streaming/FileStream.hpp"
+#include "Coding/MemoryEncoder.hpp"
+#include "Coding/MemoryDecoder.hpp"
  
 #include "gtest/gtest.h"
 
@@ -147,5 +149,33 @@ TEST( GeometryTest, geometryStream )
 		});
 		EXPECT_EQ( 1, primitiveCount );
 	}
+}
+
+TEST( GeometryTest, coding )
+{
+	auto geometry = crimild::alloc< Geometry >( "a geometry" );
+	geometry->attachPrimitive( crimild::alloc< QuadPrimitive >( 100.0f, 200.0f, VertexFormat::VF_P3_N3 ) );
+
+    auto encoder = crimild::alloc< coding::MemoryEncoder >();
+	encoder->encode( geometry );
+    auto bytes = encoder->getBytes();
+    auto decoder = crimild::alloc< coding::MemoryDecoder >();
+	decoder->fromBytes( bytes );
+
+	auto g = decoder->getObjectAt< Geometry >( 0 );
+	EXPECT_TRUE( g != nullptr );
+	EXPECT_EQ( geometry->getName(), geometry->getName() );
+
+	crimild::Int16 count = 0;
+	g->forEachPrimitive( [ &count ]( Primitive *p ) {
+		++count;
+		EXPECT_TRUE( p->getVertexBuffer() != nullptr );
+		EXPECT_EQ( 4, p->getVertexBuffer()->getVertexCount() );
+
+		EXPECT_TRUE( p->getIndexBuffer() != nullptr );
+		EXPECT_EQ( 4, p->getIndexBuffer()->getIndexCount() );
+	});
+
+	EXPECT_EQ( 1, count );
 }
 

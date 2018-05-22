@@ -28,7 +28,7 @@
 #ifndef CRIMILD_SFML_AUDIO_LISTENER_
 #define CRIMILD_SFML_AUDIO_LISTENER_
 
-#include <Crimild.hpp>
+#include "Audio/AudioListener.hpp"
 
 #include <SFML/Audio.hpp>
 

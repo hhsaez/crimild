@@ -30,6 +30,8 @@
 
 #include "Foundation/Scripted.hpp"
 
+#include <Behaviors/Conditions/DistanceToTarget.hpp>
+
 namespace crimild {
 
 	namespace scripting {

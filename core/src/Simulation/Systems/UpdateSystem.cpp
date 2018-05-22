@@ -17,7 +17,6 @@
 using namespace crimild;
 
 UpdateSystem::UpdateSystem( void )
-	: System( "Update System" )
 {
 
 }
@@ -77,23 +76,13 @@ void UpdateSystem::updateBehaviors( Node *scene )
     // const Clock FIXED_CLOCK( FIXED_TIME );
     const auto FIXED_CLOCK = Simulation::getInstance()->getSimulationClock();
 
-    // while ( _accumulator >= FIXED_TIME ) {
-		CRIMILD_PROFILE( "Updating Components" )
+	CRIMILD_PROFILE( "Updating Components" )
 		
-        auto job = crimild::concurrency::async();
-
-        scene->perform( Apply( [ &FIXED_CLOCK, job ]( Node *node ) {
-            node->forEachComponent( [ node, &FIXED_CLOCK, job ] ( NodeComponent *component ) {
-                crimild::concurrency::async( job, [ component, &FIXED_CLOCK ] {
-                    component->update( FIXED_CLOCK );
-                });
-            });
-        }));
-
-        crimild::concurrency::wait( job );
-
-        // _accumulator -= FIXED_TIME;
-    // }
+	scene->perform( Apply( [ &FIXED_CLOCK ]( Node *node ) {
+		node->forEachComponent( [ node, &FIXED_CLOCK ] ( NodeComponent *component ) {
+			component->update( FIXED_CLOCK );
+		});
+	}));
     
     updateWorldState( scene );
 

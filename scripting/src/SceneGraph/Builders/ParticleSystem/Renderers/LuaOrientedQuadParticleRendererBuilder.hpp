@@ -30,6 +30,8 @@
 
 #include "Foundation/Scripted.hpp"
 
+#include <ParticleSystem/Renderers/OrientedQuadParticleRenderer.hpp>
+
 namespace crimild {
 
 	namespace scripting {

@@ -22,7 +22,7 @@ IF ( NOT ( ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten" ) )
    	   	 SET( CRIMILD_INCLUDE_DIRECTORIES
 	  	 	  ${CRIMILD_INCLUDE_DIRECTORIES}
 	  	 	  ${CRIMILD_SOURCE_DIR}/scripting/src 
-	  	 	  ${CRIMILD_SOURCE_DIR}/third-party/lua-5.2.3/src )
+	  	 	  ${CRIMILD_SOURCE_DIR}/third-party/lua/src )
 
 	  	 SET( CRIMILD_LIBRARY_LINK_LIBRARIES 
 	  	   	  ${CRIMILD_LIBRARY_LINK_LIBRARIES} 

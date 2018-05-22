@@ -26,6 +26,8 @@
  */
 
 #include "AttractorParticleUpdater.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 using namespace crimild;
 
@@ -68,5 +70,31 @@ void AttractorParticleUpdater::update( Node *node, crimild::Real64 dt, ParticleD
 			as[ i ] += dt * pct * _strength * direction;
 		}
 	}
+}
+
+void AttractorParticleUpdater::encode( coding::Encoder &encoder ) 
+{
+	ParticleSystemComponent::ParticleUpdater::encode( encoder );
+
+	encoder.encode( "origin", _attractor.getCenter() );
+	encoder.encode( "radius", _attractor.getRadius() );
+	encoder.encode( "strengh", _strength );
+}
+
+void AttractorParticleUpdater::decode( coding::Decoder &decoder )
+{
+	ParticleSystemComponent::ParticleUpdater::decode( decoder );
+
+	Vector3f origin = Vector3f::ZERO;
+	decoder.decode( "origin", origin );
+
+	crimild::Real32 radius = 1.0f;
+	decoder.decode( "radius", radius );
+
+	crimild::Real32 strength = 1.0f;
+	decoder.decode( "strength", strength );
+
+	setAttractor( Sphere3f( origin, radius ) );
+	setStrength( strength );
 }
 

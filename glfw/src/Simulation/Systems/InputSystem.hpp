@@ -28,7 +28,7 @@
 #ifndef CRIMILD_GLFW_SIMULATION_SYSTEMS_INPUT_
 #define CRIMILD_GLFW_SIMULATION_SYSTEMS_INPUT_
 
-#include <Crimild.hpp>
+#include <Simulation/Systems/System.hpp>
 
 #if defined( CRIMILD_PLATFORM_EMSCRIPTEN )
     #define GLFW_INCLUDE_ES3
@@ -42,6 +42,8 @@
 namespace crimild {
     
 	class InputSystem : public System {
+		CRIMILD_IMPLEMENT_RTTI( crimild::InputSystem )
+		
 	public:
 		InputSystem( void );
 		virtual ~InputSystem( void );

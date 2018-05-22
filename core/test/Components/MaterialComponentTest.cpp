@@ -26,6 +26,8 @@
  */
 
 #include "Components/MaterialComponent.hpp"
+#include "Coding/MemoryEncoder.hpp"
+#include "Coding/MemoryDecoder.hpp"
 #include "Streaming/FileStream.hpp"
 
 #include "gtest/gtest.h"
@@ -49,6 +51,30 @@ TEST( MaterialComponent, attachMaterial )
         EXPECT_EQ( m, crimild::get_ptr( material ) );
 	});
 	EXPECT_EQ( 1, i );
+}
+
+TEST( MaterialComponent, coding )
+{
+	auto material = crimild::alloc< Material >();
+	material->setDiffuse( RGBAColorf( 0.7f, 0.7f, 0.7f, 1.0f ) );
+	material->setColorMap( crimild::alloc< Texture >() );
+
+	auto materials = crimild::alloc< MaterialComponent >();
+	materials->attachMaterial( material );
+
+	auto encoder = crimild::alloc< coding::MemoryEncoder >();
+	encoder->encode( materials );
+	auto bytes = encoder->getBytes();
+	auto decoder = crimild::alloc< coding::MemoryDecoder >();
+	decoder->fromBytes( bytes );
+
+	auto ms = decoder->getObjectAt< MaterialComponent >( 0 );
+	EXPECT_TRUE( ms != nullptr );
+
+	EXPECT_TRUE( ms->hasMaterials() );
+		
+	EXPECT_NE( nullptr, ms->first() );
+	EXPECT_EQ( RGBAColorf( 0.7f, 0.7f, 0.7f, 1.0f ), ms->first()->getDiffuse() );
 }
 
 TEST( MaterialComponent, streaming )
