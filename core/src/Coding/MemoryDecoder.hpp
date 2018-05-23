@@ -89,6 +89,7 @@ namespace crimild {
 			virtual void endDecodingArray( std::string key ) override;
 
         private:
+            static crimild::Size read( const containers::ByteArray &bytes, crimild::Int8 &value, crimild::Size offset );
             static crimild::Size read( const containers::ByteArray &bytes, Codable::UniqueID &value, crimild::Size offset );
             static crimild::Size read( const containers::ByteArray &bytes, std::string &value, crimild::Size offset );
             static crimild::Size read( const containers::ByteArray &bytes, containers::ByteArray &value, crimild::Size offset );

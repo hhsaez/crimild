@@ -85,6 +85,7 @@ namespace crimild {
                 encode( key, crimild::cast_ptr< EncodedData >( encoded ) );
             }
             
+            static void append( containers::ByteArray &out, crimild::Int8 value );
             static void append( containers::ByteArray &out, std::string value );
             static void append( containers::ByteArray &out, Codable::UniqueID value );
             static void append( containers::ByteArray &out, const containers::ByteArray &data );

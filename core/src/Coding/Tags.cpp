@@ -30,14 +30,14 @@
 using namespace crimild;
 using namespace crimild::coding;
 
-const char *Tags::TAG_DATA_START = "CRIMILD_DATA_START";
-const char *Tags::TAG_DATA_VERSION = "CRIMILD_DATA_VERSION";
-const char *Tags::TAG_OBJECT_BEGIN = "CRIMILD_OBJECT_BEGIN";
-const char *Tags::TAG_OBJECT_END = "CRIMILD_OBJECT_END";
-const char *Tags::TAG_LINK_BEGIN = "CRIMILD_LINK_BEGIN";
-const char *Tags::TAG_LINK_END = "CRIMILD_LINK_END";
-const char *Tags::TAG_ROOT_OBJECT_BEGIN = "CRIMILD_ROOT_OBJECT_BEGIN";
-const char *Tags::TAG_ROOT_OBJECT_END = "CRIMILD_ROOT_OBJECT_END";
-const char *Tags::TAG_DATA_END = "CRIMILD_DATA_END";
+const crimild::Int8 Tags::TAG_DATA_START = 100;
+const crimild::Int8 Tags::TAG_DATA_VERSION = 101;
+const crimild::Int8 Tags::TAG_OBJECT_BEGIN = 102;
+const crimild::Int8 Tags::TAG_OBJECT_END = 103;
+const crimild::Int8 Tags::TAG_LINK_BEGIN = 104;
+const crimild::Int8 Tags::TAG_LINK_END = 105;
+const crimild::Int8 Tags::TAG_ROOT_OBJECT_BEGIN = 106;
+const crimild::Int8 Tags::TAG_ROOT_OBJECT_END = 107;
+const crimild::Int8 Tags::TAG_DATA_END = 108;
 
 

@@ -48,11 +48,13 @@ void MemoryEncoder::encode( SharedPointer< Codable > const &obj )
     if ( obj == nullptr ) {
         return;
     }
-    
+
 	if ( _sortedObjects.contains( obj ) ) {
 		// object already register, remove it so it will be reinserted
 		// again with a higher priority
 		_sortedObjects.remove( obj );
+		_sortedObjects.push( obj );
+		return;
 	}
     
 	_sortedObjects.push( obj );
@@ -157,6 +159,11 @@ containers::ByteArray MemoryEncoder::getBytes( void ) const
     append( result, Tags::TAG_DATA_END );
     
     return result;
+}
+
+void MemoryEncoder::append( containers::ByteArray &out, crimild::Int8 value )
+{
+    appendRawBytes( out, sizeof( crimild::Int8 ), &value );
 }
 
 void MemoryEncoder::append( containers::ByteArray &out, std::string value )
