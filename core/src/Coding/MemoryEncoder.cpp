@@ -193,3 +193,26 @@ void MemoryEncoder::appendRawBytes( containers::ByteArray &out, crimild::Size co
     }
 }
 
+std::string MemoryEncoder::dump( void )
+{
+    std::stringstream ss;
+    
+    ss << "Sorted Objects:\n";
+    _sortedObjects.each( [ &ss ]( SharedPointer< Codable > &codable, crimild::Size ) {
+        ss << "\t" << codable->getUniqueID() << " " << codable->getClassName() << "\n";
+    });
+    
+    ss << "Links:\n";
+    _links.each( [ &ss ]( const Codable::UniqueID &key, const containers::Map< std::string, Codable::UniqueID > &ls ) {
+        ls.each( [ &ss, key ]( const std::string &name, const Codable::UniqueID &value ) {
+            ss << "\t" << key << " " << name << " " << value << "\n";
+        });
+    });
+
+    ss << "Roots:\n";
+    _roots.each( [ &ss ]( const SharedPointer< Codable > &obj, crimild::Size ) {
+        ss << "\t" << obj->getUniqueID() << "\n";
+    });
+
+    return ss.str();
+}

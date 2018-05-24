@@ -64,7 +64,14 @@ namespace crimild {
             virtual void decode( std::string key, crimild::Quaternion4f &value ) override { decodeValue( key, value ); }
             virtual void decode( std::string key, Transformation &value ) override { decodeValue( key, value ); }
             virtual void decode( std::string key, VertexFormat &value ) override { /* no-op */ }
+
             virtual void decode( std::string key, containers::ByteArray &value ) override { /* no-op */ }
+            virtual void decode( std::string key, containers::Array< crimild::Real32 > &value ) override { };
+            virtual void decode( std::string key, containers::Array< Vector3f > &value ) override { };
+            virtual void decode( std::string key, containers::Array< Vector4f > &value ) override { };
+            virtual void decode( std::string key, containers::Array< Matrix3f > &value ) override { };
+            virtual void decode( std::string key, containers::Array< Matrix4f > &value ) override { };
+            virtual void decode( std::string key, containers::Array< Quaternion4f > &value ) override { };
 
 			void parse( std::string str );
 			void parseFile( std::string filename );

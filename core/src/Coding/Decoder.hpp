@@ -79,6 +79,12 @@ namespace crimild {
             virtual void decode( std::string key, VertexFormat &value ) = 0;
             
             virtual void decode( std::string key, containers::ByteArray &value ) = 0;
+            virtual void decode( std::string key, containers::Array< crimild::Real32 > &value ) = 0;
+            virtual void decode( std::string key, containers::Array< Vector3f > &value ) = 0;
+            virtual void decode( std::string key, containers::Array< Vector4f > &value ) = 0;
+            virtual void decode( std::string key, containers::Array< Matrix3f > &value ) = 0;
+            virtual void decode( std::string key, containers::Array< Matrix4f > &value ) = 0;
+            virtual void decode( std::string key, containers::Array< Quaternion4f > &value ) = 0;
 
             template< typename T >
             void decode( std::string key, containers::Array< SharedPointer< T >> &value )

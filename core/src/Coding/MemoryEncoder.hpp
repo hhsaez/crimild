@@ -67,7 +67,14 @@ namespace crimild {
             virtual void encode( std::string key, const Quaternion4f &value ) override { encodeData( key, value ); }
             virtual void encode( std::string key, crimild::Bool value ) override { encodeData( key, value ); }
             virtual void encode( std::string key, const crimild::VertexFormat &value ) override { encodeData( key, value ); }
-            virtual void encode( std::string key, const containers::ByteArray &value ) override { encodeData( key, value ); }
+
+			virtual void encode( std::string key, containers::ByteArray &value ) override { encodeData( key, value ); }
+			virtual void encode( std::string key, containers::Array< crimild::Real32 > &value ) override { encodeData( key, value ); }
+			virtual void encode( std::string key, containers::Array< Vector3f > &value ) override { encodeData( key, value ); }
+			virtual void encode( std::string key, containers::Array< Vector4f > &value ) override { encodeData( key, value ); }
+			virtual void encode( std::string key, containers::Array< Matrix3f > &value ) override { encodeData( key, value ); }
+			virtual void encode( std::string key, containers::Array< Matrix4f > &value ) override { encodeData( key, value ); }
+			virtual void encode( std::string key, containers::Array< Quaternion4f > &value ) override { encodeData( key, value ); }
             
             containers::ByteArray getBytes( void ) const;
             
@@ -96,6 +103,9 @@ namespace crimild {
             containers::Map< Codable::UniqueID, containers::Map< std::string, Codable::UniqueID >> _links;
             SharedPointer< Codable > _parent;
             containers::Array< SharedPointer< Codable >> _roots;
+            
+        public:
+            virtual std::string dump( void ) override;
         };
         
 	}

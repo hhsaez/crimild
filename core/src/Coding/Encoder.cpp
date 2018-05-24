@@ -40,8 +40,8 @@ Encoder::~Encoder( void )
 
 }
 
-void Encoder::dump( void )
+std::string Encoder::dump( void )
 {
-
+    return "empty";
 }
 

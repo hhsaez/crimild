@@ -61,7 +61,14 @@ namespace crimild {
             virtual void encode( std::string key, const Quaternion4f &value ) override { encodeValues( key, 4, value.getRawData().getData() ); }
             virtual void encode( std::string key, const Transformation &value ) override;
             virtual void encode( std::string key, const VertexFormat &value ) override;
-            virtual void encode( std::string key, const containers::ByteArray &value ) override { encodeValues( key, value.size(), value.getData() ); }
+
+            virtual void encode( std::string key, containers::ByteArray &value ) override { encodeValues( key, value.size(), value.getData() ); }
+			virtual void encode( std::string key, containers::Array< crimild::Real32 > &value ) override { encodeValues( key, value.size(), value.getData() ); }
+			virtual void encode( std::string key, containers::Array< Vector3f > &value ) override { encodeValues( key, value.size(), value.getData() ); }
+			virtual void encode( std::string key, containers::Array< Vector4f > &value ) override { encodeValues( key, value.size(), value.getData() ); }
+			virtual void encode( std::string key, containers::Array< Matrix3f > &value ) override { encodeValues( key, value.size(), value.getData() ); }
+			virtual void encode( std::string key, containers::Array< Matrix4f > &value ) override { encodeValues( key, value.size(), value.getData() ); }
+			virtual void encode( std::string key, containers::Array< Quaternion4f > &value ) override { encodeValues( key, value.size(), value.getData() ); }
 
 			inline std::string getEncodedString( void ) const
 			{
@@ -105,7 +112,7 @@ namespace crimild {
             containers::Stack< std::string > _arrayKeys;
 
         public:
-            virtual void dump( void ) override;
+            virtual std::string dump( void ) override;
         };
 
 	}

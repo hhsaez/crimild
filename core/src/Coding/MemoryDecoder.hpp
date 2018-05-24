@@ -65,7 +65,13 @@ namespace crimild {
             virtual void decode( std::string key, Transformation &value ) override { decodeData( key, value ); }
             virtual void decode( std::string key, VertexFormat &value ) override { decodeData( key, value ); }
             
-            virtual void decode( std::string key, containers::ByteArray &value ) override;
+            virtual void decode( std::string key, containers::ByteArray &value ) override { decodeDataArray( key, value ); }
+            virtual void decode( std::string key, containers::Array< crimild::Real32 > &value ) override { decodeDataArray( key, value ); }
+            virtual void decode( std::string key, containers::Array< Vector3f > &value ) override { decodeDataArray( key, value ); }
+            virtual void decode( std::string key, containers::Array< Vector4f > &value ) override { decodeDataArray( key, value ); }
+            virtual void decode( std::string key, containers::Array< Matrix3f > &value ) override { decodeDataArray( key, value ); }
+            virtual void decode( std::string key, containers::Array< Matrix4f > &value ) override { decodeDataArray( key, value ); }
+            virtual void decode( std::string key, containers::Array< Quaternion4f > &value ) override { decodeDataArray( key, value ); }
             
             crimild::Bool fromBytes( const containers::ByteArray &bytes );
             
@@ -81,6 +87,21 @@ namespace crimild {
                 
                 value = obj->getValue< T >();
             }
+
+			template< typename T >
+			void decodeDataArray( std::string key, containers::Array< T > &value )
+			{
+                auto obj = crimild::cast_ptr< EncodedData >( _links[ _currentObj->getUniqueID() ][ key ] );
+				if ( obj == nullptr ) {
+					return;
+				}
+
+				const auto N = obj->getBytes().size() / sizeof( T );
+				value.resize( N );
+				if ( N > 0 ) {
+					memcpy( &value[ 0 ], obj->getBytes().getData(), obj->getBytes().size() );
+				}
+			}
 
 		protected:
 			virtual crimild::Size beginDecodingArray( std::string key ) override;

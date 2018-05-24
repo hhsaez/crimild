@@ -66,6 +66,10 @@ void LuaEncoder::encode( SharedPointer< Codable > const &codable )
 
 void LuaEncoder::encode( std::string key, SharedPointer< Codable > const &codable ) 
 {
+    if ( codable == nullptr ) {
+        return;
+    }
+    
 	encodeKey( key );
 	encode( codable );
 	_ss << ", ";
@@ -141,8 +145,8 @@ std::string LuaEncoder::getIndentSpaces( void )
     return res;
 }
 
-void LuaEncoder::dump( void ) 
+std::string LuaEncoder::dump( void )
 {
-	std::cout << _ss.str() << std::endl;
+    return _ss.str();
 }
 
