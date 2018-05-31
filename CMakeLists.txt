@@ -2,12 +2,12 @@ CMAKE_MINIMUM_REQUIRED( VERSION 2.8.10 FATAL_ERROR )
 
 IF ( APPLE )
 	# Enable C++11 features
-	SET( CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++ -U__STRICT_ANSI__" )
+	SET( CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++ -U__STRICT_ANSI__ -fvisibility=hidden -fvisibility-inlines-hidden" )
 
 	set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++0x")
 	set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
 ELSE ( APPLE )
-	SET( CMAKE_CXX_FLAGS "-std=c++11 -static-libgcc -static-libstdc++ -static -U__STRICT_ANSI__" )
+	SET( CMAKE_CXX_FLAGS "-std=c++11 -static-libgcc -static-libstdc++ -static -U__STRICT_ANSI__ -fvisibility=hidden -fvisibility-inlines-hidden" )
 ENDIF ( APPLE )
 
 PROJECT( CRIMILD )
@@ -41,9 +41,12 @@ ADD_SUBDIRECTORY( raytracing )
 OPTION( CRIMILD_ENABLE_IMPORT "Build importers?" OFF )
 IF ( CRIMILD_ENABLE_IMPORT )
 	ADD_DEFINITIONS( -DCRIMILD_ENABLE_IMPORT=1 )
-	SET( ASSIMP_BUILD_STATIC_LIB ON CACHE BOL "Build Shared libs" )
+
+	SET( ASSIMP_BUILD_STATIC_LIB ON CACHE BOOL "Build Static libs" )
 	SET( BUILD_SHARED_LIBS OFF CACHE BOOL "Build Shared Libs" )
-	SET( ASSIMP_BUILD_TESTS OFF CACHE BOOL "Build AssImp tests" )
+	SET( ASSIMP_BUILD_TESTS OFF CACHE BOOL "Build Assimp tests" )
+	SET( ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "Build Assimp tools" )
+	
 	ADD_SUBDIRECTORY( ${CRIMILD_SOURCE_DIR}/third-party/assimp )
 	ADD_SUBDIRECTORY( import )
 ENDIF ( CRIMILD_ENABLE_IMPORT )

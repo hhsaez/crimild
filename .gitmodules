@@ -6,3 +6,8 @@
 	path = third-party/sfml
 	url = https://github.com/SFML/SFML.git
 	ignore = dirty
+[submodule "third-party/assimp"]
+	path = third-party/assimp
+	url = https://github.com/assimp/assimp.git
+	ignore = dirty
+	

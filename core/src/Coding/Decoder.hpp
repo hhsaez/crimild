@@ -64,7 +64,12 @@ namespace crimild {
             {
                 auto codable = crimild::cast_ptr< coding::Codable >( obj );
                 decode( key, codable );
+				if ( codable == nullptr ) {
+					return false;
+				}
+				
                 obj = crimild::cast_ptr< T >( codable );
+				return true;
             }
             
             virtual crimild::Bool decode( std::string key, std::string &value ) = 0;
