@@ -42,7 +42,7 @@ LuaEncoder::~LuaEncoder( void )
 
 }
             
-void LuaEncoder::encode( SharedPointer< Codable > const &codable ) 
+crimild::Bool LuaEncoder::encode( SharedPointer< Codable > const &codable ) 
 {
 	_ss << "{ ";
     _indentLevel++;
@@ -62,26 +62,32 @@ void LuaEncoder::encode( SharedPointer< Codable > const &codable )
     if ( _arrayKeys.size() == 0 ) {
         _ss << "\n";
     }
+
+	return true;
 }
 
-void LuaEncoder::encode( std::string key, SharedPointer< Codable > const &codable ) 
+crimild::Bool LuaEncoder::encode( std::string key, SharedPointer< Codable > const &codable ) 
 {
     if ( codable == nullptr ) {
-        return;
+        return false;
     }
     
 	encodeKey( key );
 	encode( codable );
 	_ss << ", ";
+
+	return true;
 }
 
-void LuaEncoder::encode( std::string key, std::string value ) 
+crimild::Bool LuaEncoder::encode( std::string key, std::string value ) 
 {
 	encodeKey( key );
 	_ss << "'" << value << "', ";
+
+	return true;
 }
 
-void LuaEncoder::encode( std::string key, const Transformation &value )
+crimild::Bool LuaEncoder::encode( std::string key, const Transformation &value )
 {
 	encodeKey( key );
 	
@@ -94,11 +100,13 @@ void LuaEncoder::encode( std::string key, const Transformation &value )
     
     _indentLevel--;
 	_ss << getIndentSpaces() << "}, ";
+
+	return true;
 }
 
-void LuaEncoder::encode( std::string key, const VertexFormat &value )
+crimild::Bool LuaEncoder::encode( std::string key, const VertexFormat &value )
 {
-    // no-op
+    return true;
 }
 
 void LuaEncoder::encodeArrayBegin( std::string key, crimild::Size count )
@@ -128,12 +136,14 @@ void LuaEncoder::encodeArrayEnd( std::string key )
 	_ss << getIndentSpaces() << "},";
 }
 
-void LuaEncoder::encodeKey( std::string key )
+crimild::Bool LuaEncoder::encodeKey( std::string key )
 {
     _ss << getIndentSpaces();
 	if ( _arrayKeys.empty() || key.find( _arrayKeys.top() ) != 0 ) {
 		_ss << key << " = ";
 	}
+
+	return true;
 }
 
 std::string LuaEncoder::getIndentSpaces( void )

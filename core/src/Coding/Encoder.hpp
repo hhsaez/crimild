@@ -33,6 +33,7 @@
 #include "Foundation/Types.hpp"
 #include "Foundation/Containers/Array.hpp"
 #include "Foundation/Containers/Map.hpp"
+#include "Foundation/Version.hpp"            
 #include "Rendering/VertexFormat.hpp"
 #include "Mathematics/Transformation.hpp"
 
@@ -51,40 +52,47 @@ namespace crimild {
         public:
             virtual ~Encoder( void );
             
+			const Version &getVersion( void ) const { return _version; }
+			void setVersion( const Version &version ) { _version = version; }
+
+		private:
+			Version _version;
+
+		public:
             // objects
-            virtual void encode( SharedPointer< Codable > const &codable ) = 0;
-            virtual void encode( std::string key, SharedPointer< Codable > const &codable ) = 0;
+            virtual crimild::Bool encode( SharedPointer< Codable > const &codable ) = 0;
+            virtual crimild::Bool encode( std::string key, SharedPointer< Codable > const &codable ) = 0;
             
             // values
-            virtual void encode( std::string key, std::string str ) = 0;
-            virtual void encode( std::string key, crimild::Size value ) = 0;
-            virtual void encode( std::string key, crimild::UInt8 value ) = 0;
-            virtual void encode( std::string key, crimild::UInt16 value ) = 0;
-            virtual void encode( std::string key, crimild::Int16 value ) = 0;
-            virtual void encode( std::string key, crimild::Int32 value ) = 0;
-            virtual void encode( std::string key, crimild::UInt32 value ) = 0;
-            virtual void encode( std::string key, crimild::Bool value ) = 0;
-			virtual void encode( std::string key, crimild::Real32 value ) = 0;
-			virtual void encode( std::string key, crimild::Real64 value ) = 0;
-            virtual void encode( std::string key, const Vector2f & ) = 0;
-            virtual void encode( std::string key, const Vector3f & ) = 0;
-            virtual void encode( std::string key, const Vector4f & ) = 0;
-            virtual void encode( std::string key, const Matrix3f & ) = 0;
-            virtual void encode( std::string key, const Matrix4f & ) = 0;
-            virtual void encode( std::string key, const Quaternion4f & ) = 0;
-            virtual void encode( std::string key, const Transformation & ) = 0;
-            virtual void encode( std::string key, const VertexFormat & ) = 0;
+            virtual crimild::Bool encode( std::string key, std::string str ) = 0;
+            virtual crimild::Bool encode( std::string key, crimild::Size value ) = 0;
+            virtual crimild::Bool encode( std::string key, crimild::UInt8 value ) = 0;
+            virtual crimild::Bool encode( std::string key, crimild::UInt16 value ) = 0;
+            virtual crimild::Bool encode( std::string key, crimild::Int16 value ) = 0;
+            virtual crimild::Bool encode( std::string key, crimild::Int32 value ) = 0;
+            virtual crimild::Bool encode( std::string key, crimild::UInt32 value ) = 0;
+            virtual crimild::Bool encode( std::string key, crimild::Bool value ) = 0;
+			virtual crimild::Bool encode( std::string key, crimild::Real32 value ) = 0;
+			virtual crimild::Bool encode( std::string key, crimild::Real64 value ) = 0;
+            virtual crimild::Bool encode( std::string key, const Vector2f & ) = 0;
+            virtual crimild::Bool encode( std::string key, const Vector3f & ) = 0;
+            virtual crimild::Bool encode( std::string key, const Vector4f & ) = 0;
+            virtual crimild::Bool encode( std::string key, const Matrix3f & ) = 0;
+            virtual crimild::Bool encode( std::string key, const Matrix4f & ) = 0;
+            virtual crimild::Bool encode( std::string key, const Quaternion4f & ) = 0;
+            virtual crimild::Bool encode( std::string key, const Transformation & ) = 0;
+            virtual crimild::Bool encode( std::string key, const VertexFormat & ) = 0;
             
-            virtual void encode( std::string key, containers::ByteArray & ) = 0;
-			virtual void encode( std::string key, containers::Array< crimild::Real32 > & ) = 0;
-			virtual void encode( std::string key, containers::Array< Vector3f > & ) = 0;
-			virtual void encode( std::string key, containers::Array< Vector4f > & ) = 0;
-			virtual void encode( std::string key, containers::Array< Matrix3f > & ) = 0;
-			virtual void encode( std::string key, containers::Array< Matrix4f > & ) = 0;
-			virtual void encode( std::string key, containers::Array< Quaternion4f > & ) = 0;
+            virtual crimild::Bool encode( std::string key, containers::ByteArray & ) = 0;
+			virtual crimild::Bool encode( std::string key, containers::Array< crimild::Real32 > & ) = 0;
+			virtual crimild::Bool encode( std::string key, containers::Array< Vector3f > & ) = 0;
+			virtual crimild::Bool encode( std::string key, containers::Array< Vector4f > & ) = 0;
+			virtual crimild::Bool encode( std::string key, containers::Array< Matrix3f > & ) = 0;
+			virtual crimild::Bool encode( std::string key, containers::Array< Matrix4f > & ) = 0;
+			virtual crimild::Bool encode( std::string key, containers::Array< Quaternion4f > & ) = 0;
             
             template< typename T, typename U >
-            void encode( std::string key, containers::Array< T, U > &a )
+            crimild::Bool encode( std::string key, containers::Array< T, U > &a )
             {
                 crimild::Size N = a.size();
                 encodeArrayBegin( key, N );
@@ -96,6 +104,8 @@ namespace crimild {
                 });
                 
                 encodeArrayEnd( key );
+
+				return true;
             }
 
         protected:

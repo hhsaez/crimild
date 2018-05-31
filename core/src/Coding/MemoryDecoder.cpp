@@ -48,11 +48,11 @@ MemoryDecoder::~MemoryDecoder( void )
 
 }
 
-void MemoryDecoder::decode( std::string key, SharedPointer< coding::Codable > &codable )
+crimild::Bool MemoryDecoder::decode( std::string key, SharedPointer< coding::Codable > &codable )
 {
 	codable = _links[ _currentObj->getUniqueID() ][ key ];
     if ( codable == nullptr ) {
-        return;
+        return false;
     }
 	
 	auto temp = _currentObj;
@@ -62,12 +62,16 @@ void MemoryDecoder::decode( std::string key, SharedPointer< coding::Codable > &c
 	codable->decode( self );
 
 	_currentObj = temp;
+
+	return true;
 }
 
-void MemoryDecoder::decode( std::string key, std::string &value )
+crimild::Bool MemoryDecoder::decode( std::string key, std::string &value )
 {
     crimild::Size l = 0;
-    decode( key + "_length", l );
+    if ( !decode( key + "_length", l ) ) {
+		return false;
+	}
     
     if ( l > 0 ) {
         auto obj = crimild::cast_ptr< EncodedData >( _links[ _currentObj->getUniqueID() ][ key ] );
@@ -77,6 +81,8 @@ void MemoryDecoder::decode( std::string key, std::string &value )
         data[ l ] = '\0';
         value = std::string( ( char * ) data.getData() );
     }
+
+	return true;
 }
 
 crimild::Size MemoryDecoder::beginDecodingArray( std::string key )
@@ -123,7 +129,7 @@ crimild::Bool MemoryDecoder::fromBytes( const containers::ByteArray &bytes )
     
 	std::string versionStr;
 	offset += read( bytes, versionStr, offset );
-	_version.fromString( versionStr );
+	setVersion( Version( versionStr ) );
 
 	while ( true ) {
 		offset += read( bytes, flag, offset );

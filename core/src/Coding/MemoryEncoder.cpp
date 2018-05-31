@@ -43,10 +43,10 @@ MemoryEncoder::~MemoryEncoder( void )
 
 }
             
-void MemoryEncoder::encode( SharedPointer< Codable > const &obj )
+crimild::Bool MemoryEncoder::encode( SharedPointer< Codable > const &obj )
 {
     if ( obj == nullptr ) {
-        return;
+        return false;
     }
 
 	if ( _sortedObjects.contains( obj ) ) {
@@ -54,7 +54,7 @@ void MemoryEncoder::encode( SharedPointer< Codable > const &obj )
 		// again with a higher priority
 		_sortedObjects.remove( obj );
 		_sortedObjects.push( obj );
-		return;
+		return true;
 	}
     
 	_sortedObjects.push( obj );
@@ -69,27 +69,29 @@ void MemoryEncoder::encode( SharedPointer< Codable > const &obj )
 	obj->encode( *this );
     
 	_parent = temp;
+
+	return true;
 }
 
-void MemoryEncoder::encode( std::string key, SharedPointer< Codable > const &obj )
+crimild::Bool MemoryEncoder::encode( std::string key, SharedPointer< Codable > const &obj )
 {
     if ( obj == nullptr ) {
-        return;
+        return false;
     }
     
 	auto parentID = _parent->getUniqueID();
     
 	_links[ parentID ][ key ] = obj->getUniqueID();
     
-	encode( obj );
+	return encode( obj );
 }
 
-void MemoryEncoder::encode( std::string key, std::string value )
+crimild::Bool MemoryEncoder::encode( std::string key, std::string value )
 {
 	crimild::Size L = value.length();
 	encode( key + "_length", L );
     
-    encodeData( key, value );
+    return encodeData( key, value );
 }
 
 void MemoryEncoder::encodeArrayBegin( std::string key, crimild::Size count )
@@ -125,8 +127,7 @@ containers::ByteArray MemoryEncoder::getBytes( void ) const
     append( result, Tags::TAG_DATA_START );
     
     append( result, Tags::TAG_DATA_VERSION );
-    auto version = Version();
-    append( result, version.getDescription() );
+    append( result, getVersion().getDescription() );
     
     auto temp = _sortedObjects;
     while ( !temp.empty() ) {
