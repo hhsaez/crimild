@@ -35,7 +35,10 @@
 #include <functional>
 
 namespace crimild {
-    
+	
+    /**
+	   \deprecated Use containers::Map< SharedPointer< ObjectType >> instead
+	*/
     template< class ObjectType >
     class SharedObjectMap : public SharedObject {
     private:
