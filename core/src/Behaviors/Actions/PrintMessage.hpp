@@ -43,6 +43,7 @@ namespace crimild {
 				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::PrintMessage )
 				
 			public:
+				PrintMessage( void );
 				explicit PrintMessage( std::string message );
 				virtual ~PrintMessage( void );
 
@@ -50,6 +51,17 @@ namespace crimild {
 
 			private:
 				std::string _message;
+
+				/**
+				   \name Coding support
+				*/
+				//@{
+				
+			public:
+				virtual void encode( coding::Encoder &encoder ) override;
+				virtual void decode( coding::Decoder &decoder ) override;
+				
+				//@}
 			};
 
 		}

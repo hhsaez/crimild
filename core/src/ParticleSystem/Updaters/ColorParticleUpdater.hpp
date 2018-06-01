@@ -33,6 +33,8 @@
 namespace crimild {
 
     class ColorParticleUpdater : public ParticleSystemComponent::ParticleUpdater {
+        CRIMILD_IMPLEMENT_RTTI( crimild::ColorParticleUpdater )
+        
     public:
         ColorParticleUpdater( void );
         virtual ~ColorParticleUpdater( void );
@@ -46,6 +48,18 @@ namespace crimild {
 		ParticleAttribArray *_colors = nullptr;
 		ParticleAttribArray *_times = nullptr;
 		ParticleAttribArray *_lifetimes = nullptr;
+
+		/** 
+		 	\name Coding support
+		*/
+		//@{
+
+	public:
+		virtual void encode( coding::Encoder &encoder ) override;
+		virtual void decode( coding::Decoder &decoder ) override;
+
+		//@}
+        
     };
 
 }

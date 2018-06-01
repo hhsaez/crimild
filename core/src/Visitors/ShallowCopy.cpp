@@ -113,19 +113,13 @@ void ShallowCopy::copyNode( Node *src, Node *dst )
 	dst->setName( src->getName() );
     dst->setLocal( src->getLocal() );
 
-	auto srcMaterials = src->getComponent< MaterialComponent >();
-	if ( srcMaterials != nullptr ) {
-        auto dstMaterials = crimild::alloc< MaterialComponent >();
-		srcMaterials->forEachMaterial( [&]( Material *material ) {
-			dstMaterials->attachMaterial( material );
-		});
-		dst->attachComponent( dstMaterials );
-	}
-
-	auto srcSkinnedMeshComponent = src->getComponent< SkinnedMeshComponent >();
-	if ( srcSkinnedMeshComponent != nullptr ) {
-		auto dstSkinnedMeshComponent = crimild::alloc< SkinnedMeshComponent >( srcSkinnedMeshComponent->getSkinnedMesh()->clone() );
-		dst->attachComponent( dstSkinnedMeshComponent );
-	}
+    src->forEachComponent( [ dst ]( NodeComponent *srcCmp ) {
+        if ( srcCmp != nullptr ) {
+            if ( auto cmp = srcCmp->clone() ) {
+                dst->attachComponent( cmp );
+            }
+        }
+    });
+    
 }
 

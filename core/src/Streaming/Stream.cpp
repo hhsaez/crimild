@@ -49,7 +49,7 @@ bool StreamObject::registerInStream( Stream &s )
 
 void StreamObject::save( Stream &s )
 {
-	s.write( getClassName() );
+	s.write( dynamic_cast< RTTI * >( this )->getClassName() );
 	s.write( getUniqueIdentifier() );
 }
 
@@ -92,7 +92,7 @@ bool Stream::isTopLevel( SharedPointer< StreamObject > const &obj ) const
 
 bool Stream::registerObject( StreamObject *obj )
 {
-	return registerObject( obj->getUniqueIdentifier(), crimild::retain( obj ) );
+    return registerObject( obj->getUniqueIdentifier(), crimild::dynamic_cast_ptr< StreamObject >( crimild::retain( dynamic_cast< SharedObject * >( obj ) ) ) );
 }
 
 bool Stream::registerObject( StreamObject::StreamObjectId objId, SharedPointer< StreamObject > const &obj )

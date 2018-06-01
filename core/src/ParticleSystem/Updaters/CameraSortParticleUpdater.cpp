@@ -65,7 +65,7 @@ void CameraSortParticleUpdater::update( Node *node, double dt, ParticleData *par
 	const auto cameraPlane = Plane3f( cameraDirection, cameraPos );
 
 	// precompute distances to camera plane for each particle
-	Array< double > ds( pCount );
+	containers::Array< double > ds( pCount );
 	for ( crimild::Size i = 0; i < pCount; i++ ) {
 		ds[ i ] = Distance::compute( cameraPlane, ps[ i ] );
 	}
@@ -80,5 +80,15 @@ void CameraSortParticleUpdater::update( Node *node, double dt, ParticleData *par
 			}
 		}
 	}
+}
+
+void CameraSortParticleUpdater::encode( coding::Encoder &encoder ) 
+{
+	ParticleSystemComponent::ParticleUpdater::encode( encoder );
+}
+
+void CameraSortParticleUpdater::decode( coding::Decoder &decoder )
+{
+	ParticleSystemComponent::ParticleUpdater::decode( decoder );
 }
 

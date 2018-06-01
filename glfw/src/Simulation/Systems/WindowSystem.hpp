@@ -28,7 +28,7 @@
 #ifndef CRIMILD_GLFW_SIMULATION_SYSTEMS_WINDOW_
 #define CRIMILD_GLFW_SIMULATION_SYSTEMS_WINDOW_
 
-#include <Crimild.hpp>
+#include <Simulation/Systems/System.hpp>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -67,6 +67,8 @@ namespace crimild {
 	}
 
 	class WindowSystem : public System {
+		CRIMILD_IMPLEMENT_RTTI( crimild::WindowSystem )
+		
 	public:
 		WindowSystem( void );
 		virtual ~WindowSystem( void );

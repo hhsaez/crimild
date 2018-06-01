@@ -31,8 +31,7 @@
 
 using namespace crimild;
 
-System::System( std::string name )
-	: NamedObject( name )
+System::System( void )
 {
 
 }
@@ -44,7 +43,7 @@ System::~System( void )
 
 bool System::start( void )
 {
-    Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Starting ", getName() );
+    Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Starting ", getClassName() );
 	broadcastMessage( messages::SystemWillStart { this } );
 
 	return true;
@@ -52,7 +51,7 @@ bool System::start( void )
 
 void System::stop( void )
 {
-    Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Stopping ", getName() );
+    Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Stopping ", getClassName() );
 	broadcastMessage( messages::SystemWillStop { this } );
 }
 

@@ -1,10 +1,17 @@
 #include "TestInputAxis.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 #include "Simulation/Input.hpp"
 
 using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::conditions;
+
+TestInputAxis::TestInputAxis( void )
+{
+	
+}
 
 TestInputAxis::TestInputAxis( std::string axis, crimild::Real32 value )
 	: _axis( axis ),
@@ -26,5 +33,21 @@ Behavior::State TestInputAxis::step( BehaviorContext *context )
 	}
 
 	return Behavior::State::SUCCESS;
+}
+
+void TestInputAxis::encode( coding::Encoder &encoder )
+{
+	Behavior::encode( encoder );
+
+	encoder.encode( "axis", _axis );
+	encoder.encode( "value", _value );
+}
+
+void TestInputAxis::decode( coding::Decoder &decoder )
+{
+	Behavior::decode( decoder );
+
+	decoder.decode( "axis", _axis );
+	decoder.decode( "value", _value );
 }
 

@@ -30,7 +30,13 @@
 
 #include "Foundation/Scripted.hpp"
 
+#include <Streaming/SceneBuilder.hpp>
+
 namespace crimild {
+    
+    class Node;
+    class Group;
+    class NodeComponent;
 
 	namespace scripting {
         

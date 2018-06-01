@@ -11,7 +11,6 @@ using namespace crimild;
 using namespace crimild::messaging;
 
 UISystem::UISystem( void )
-    : System( "UI System" )
 {
 
 }
@@ -63,7 +62,6 @@ bool UISystem::start( void )
                     }
 
                     if ( responder->getBoundingVolume()->testIntersection( ray ) ) {
-						Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Ray ", ray, " hit with object ", node->getName(), " ", responder->getBoundingVolume()->getCenter() );
                         float j = Distance::computeSquared( node->getWorldBound()->getCenter(), camera->getWorld().getTranslate() );
                         if ( minJ < 0.0f || j < minJ ) {
                             minJ = j;

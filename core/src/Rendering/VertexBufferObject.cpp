@@ -26,6 +26,8 @@
  */
 
 #include "VertexBufferObject.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::VertexBufferObject )
 
@@ -141,6 +143,22 @@ void VertexBufferObject::setBoneWeightAt( unsigned int vIdx, unsigned int bone, 
 {
 	float *d = data();
 	d[ vIdx * getVertexFormat().getVertexSize() + getVertexFormat().getBoneWeightsOffset() + bone ] = value;
+}
+
+void VertexBufferObject::encode( coding::Encoder &encoder )
+{
+    BufferObject< VertexPrecision >::encode( encoder );
+    
+    encoder.encode( "vertexCount", _vertexCount );
+    encoder.encode( "vertexFormat", _vertexFormat );
+}
+
+void VertexBufferObject::decode( coding::Decoder &decoder )
+{
+    BufferObject< VertexPrecision >::decode( decoder );
+    
+    decoder.decode( "vertexCount", _vertexCount );
+    decoder.decode( "vertexFormat", _vertexFormat );
 }
 
 bool VertexBufferObject::registerInStream( Stream &s )

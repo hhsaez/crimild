@@ -40,6 +40,7 @@ namespace crimild {
 				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::conditions::TestInputAxis )
 				
 			public:
+				TestInputAxis( void );
 				explicit TestInputAxis( std::string axis, crimild::Real32 value );
 				virtual ~TestInputAxis( void );
 				
@@ -48,6 +49,17 @@ namespace crimild {
 			private:
 				std::string _axis;
 				crimild::Real32 _value;
+
+				/**
+				   \name Coding support
+				*/
+				//@{
+				
+			public:
+				virtual void encode( coding::Encoder &encoder ) override;
+				virtual void decode( coding::Decoder &decoder ) override;
+				
+				//@}
 			};
 
 		}

@@ -30,28 +30,27 @@
 
 #include "Foundation/Macros.hpp"
 #include "Foundation/Types.hpp"
+#include "Foundation/Containers/Array.hpp"
 #include "Streaming/Stream.hpp"
+#include "Coding/Codable.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 #include <memory>
 #include <cstring>
-#include <vector>
 
 namespace crimild {
 
 	template< typename T >
-	class BufferObject : public StreamObject {
+    class BufferObject : public coding::Codable, public StreamObject {
 	protected:
 		BufferObject( unsigned int size, const T *data )
 		{
 			if ( size > 0 ) {
-				_usedCount = size;
-				_data.resize( size );
-				if ( data != nullptr ) {
-					memcpy( &_data[ 0 ], data, sizeof( T ) * size );
-				}
-				else {
-					memset( &_data[ 0 ], 0, sizeof( T ) * size );					
-				}
+                _data.resize( size * sizeof( T ) );
+                if ( data != nullptr ) {
+                    memcpy( &_data[ 0 ], data, sizeof( T ) * size );
+                }
 			}
 		}
 
@@ -61,21 +60,48 @@ namespace crimild {
 
 		}
 
-		inline unsigned int getSize( void ) const { return _data.size(); }
+		inline unsigned int getSize( void ) const { return _data.size() / sizeof( T ); }
         
-        inline unsigned int getSizeInBytes( void ) const { return sizeof( T ) * getSize(); }
+        inline unsigned int getSizeInBytes( void ) const { return _data.size(); }
 
-		inline T *data( void ) { return &_data[ 0 ]; }
+		inline T *data( void ) { return ( T * ) &_data[ 0 ]; }
 
-		inline const T *getData( void ) const { return &_data[ 0 ]; }
+		inline const T *getData( void ) const { return ( const T * ) &_data[ 0 ]; }
 
-		inline crimild::Size getUsedCount( void ) const { return _usedCount; }
+		inline crimild::Size getUsedCount( void ) const { return getSize(); }
 
-		inline void setUsedCount( crimild::Size count ) { _usedCount = count; }
+		inline void setUsedCount( crimild::Size count ) { _data.resize( count * sizeof( T ) ); }
 
 	private:
-		std::vector< T > _data;
-		crimild::Size _usedCount;
+        containers::ByteArray _data;
+        
+        /**
+            name Coding
+         */
+        //@{
+        
+    public:
+        virtual void encode( coding::Encoder &encoder ) override
+        {
+            Codable::encode( encoder );
+            
+            encoder.encode( "data", _data );
+        }
+        
+        virtual void decode( coding::Decoder &decoder ) override
+        {
+            Codable::decode( decoder );
+            
+            decoder.decode( "data", _data );
+        }
+        
+        //@}
+        
+        /**
+            \name Streaming
+            \deprecated See crimild::coding
+         */
+        //@{
 
 	public:
 		BufferObject( void ) { }
@@ -89,13 +115,13 @@ namespace crimild {
 		{
 			StreamObject::save( s );
 
-			unsigned int size = getSize();
+			unsigned int size = _data.size();
 			s.write( size );
-
-			s.write( _usedCount );
+            
+			s.write( size ); // used count
 			
 			if ( size > 0 ) {
-				s.writeRawBytes( &_data[ 0 ], getSizeInBytes() );
+				s.writeRawBytes( &_data[ 0 ], size );
 			}
 		}
 
@@ -107,17 +133,16 @@ namespace crimild {
 			s.read( size );
 
 			if ( s.getVersion() >= Version( 4, 5, 0 ) ) {
-				s.read( _usedCount );
-			}
-			else { 
-				_usedCount = size;
+				s.read( size );
 			}
 
 			if ( size > 0 ) {
 				_data.resize( size );
-				s.readRawBytes( &_data[ 0 ], getSizeInBytes() );
+				s.readRawBytes( &_data[ 0 ], size );
 			}
 		}
+        
+        //@}
 	};
 
 }

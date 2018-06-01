@@ -40,6 +40,7 @@ namespace crimild {
 				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::Wait )
 				
 			public:
+				Wait( void );
 				explicit Wait( crimild::Real32 duration );
 				virtual ~Wait( void );
 				
@@ -49,6 +50,17 @@ namespace crimild {
 			private:
 				float _duration;
 				crimild::Clock _clock;
+
+				/**
+				   \name Coding support
+				*/
+				//@{
+				
+			public:
+				virtual void encode( coding::Encoder &encoder ) override;
+				virtual void decode( coding::Decoder &decoder ) override;
+				
+				//@}
 			};
 
 		}

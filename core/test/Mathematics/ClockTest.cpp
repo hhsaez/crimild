@@ -49,32 +49,6 @@ TEST( Clock, constructionWithDelta )
 	EXPECT_EQ( 0, c.getAccumTime() );
 }
 
-TEST( Clock, tick )
-{
-	Clock c;
-
-	EXPECT_EQ( 0, c.getDeltaTime() );
-	EXPECT_EQ( 0, c.getAccumTime() );
-
-	std::this_thread::sleep_for( std::chrono::milliseconds( 16 ) );
-	c.tick();
-
-	EXPECT_LE( 0.016, c.getDeltaTime() );
-	EXPECT_LE( 0.016, c.getAccumTime() );
-
-	std::this_thread::sleep_for( std::chrono::milliseconds( 16 ) );
-	c.tick();
-
-	EXPECT_LE( 0.016, c.getDeltaTime() );
-	EXPECT_LE( 0.032, c.getAccumTime() );
-
-	std::this_thread::sleep_for( std::chrono::milliseconds( 16 ) );
-	c.tick();
-
-	EXPECT_LE( 0.016, c.getDeltaTime() );
-	EXPECT_LE( 0.048, c.getAccumTime() );
-}
-
 TEST( Clock, addDelta )
 {
 	Clock c0;

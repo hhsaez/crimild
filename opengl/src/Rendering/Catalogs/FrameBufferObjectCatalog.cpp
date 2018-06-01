@@ -28,6 +28,9 @@
 #include "Rendering/Catalogs/FrameBufferObjectCatalog.hpp"
 #include "Rendering/OpenGLUtils.hpp"
 
+#include <Rendering/Renderer.hpp>
+#include <Rendering/FrameBufferObject.hpp>
+
 #ifndef GL_RGBA16F
 #define GL_RGBA16F 0x881A
 #endif

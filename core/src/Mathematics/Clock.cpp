@@ -105,12 +105,18 @@ void Clock::setTimeout( Clock::TimeoutCallback const &callback, double timeout, 
 
 Clock &Clock::operator+=( double dt )
 {
+	_lastTime = _currentTime;
+	_currentTime += dt;
+	
 	onTick( dt );
 	return *this;
 }
 
 Clock &Clock::operator+=( const Clock &other )
 {
+	_lastTime = _currentTime;
+	_currentTime += other.getDeltaTime();
+
 	onTick( other.getDeltaTime() );
 	return *this;
 }

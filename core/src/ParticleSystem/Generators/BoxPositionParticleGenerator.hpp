@@ -33,6 +33,7 @@
 namespace crimild {
 
     class BoxPositionParticleGenerator : public ParticleSystemComponent::ParticleGenerator {
+        CRIMILD_IMPLEMENT_RTTI( crimild::BoxPositionParticleGenerator )
     public:
         BoxPositionParticleGenerator( void );
         virtual ~BoxPositionParticleGenerator( void );
@@ -51,6 +52,17 @@ namespace crimild {
         Vector3f _size;
 
 		ParticleAttribArray *_positions = nullptr;
+        
+		/** 
+		 	\name Coding support
+		*/
+		//@{
+
+	public:
+		virtual void encode( coding::Encoder &encoder ) override;
+		virtual void decode( coding::Decoder &decoder ) override;
+
+		//@}
     };
 
 }

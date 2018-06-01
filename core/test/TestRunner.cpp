@@ -28,14 +28,14 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "Foundation/Log.hpp"
+#include "Crimild.hpp"
 
 using namespace crimild;
 
 int main( int argc, char **argv )
 {
-	// Log::setDefaultOutputHandler( crimild::alloc< Log::NullOutputHandler >() );
-
+    crimild::init();
+    
 	::testing::InitGoogleTest( &argc, argv );
 	::testing::FLAGS_gmock_verbose = "error";
   	return RUN_ALL_TESTS();

@@ -36,6 +36,8 @@ namespace crimild {
 	   Updates the time of particle. Kills it if it's time is over
 	 */
     class TimeParticleUpdater : public ParticleSystemComponent::ParticleUpdater {
+        CRIMILD_IMPLEMENT_RTTI( crimild::TimeParticleUpdater )
+        
     public:
         TimeParticleUpdater( void );
         virtual ~TimeParticleUpdater( void );
@@ -45,6 +47,18 @@ namespace crimild {
 
 	private:
 		ParticleAttribArray *_times = nullptr;
+
+		/** 
+		 	\name Coding support
+		*/
+		//@{
+
+	public:
+		virtual void encode( coding::Encoder &encoder ) override;
+		virtual void decode( coding::Decoder &decoder ) override;
+
+		//@}
+        
     };
 
 }

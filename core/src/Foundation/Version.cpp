@@ -61,6 +61,15 @@ Version::~Version( void )
 
 }
 
+Version &Version::operator=( const Version &other )
+{
+	_major = other._major;
+	_minor = other._minor;
+	_patch = other._patch;
+	
+	return *this;
+}
+
 std::string Version::getDescription( void ) const 
 {
 	std::stringstream str;

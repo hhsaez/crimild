@@ -76,6 +76,12 @@ namespace crimild {
         return std::static_pointer_cast< T >( ptr );
     }
     
+    template< class T, class U >
+    SharedPointer< T > dynamic_cast_ptr( SharedPointer< U > const &ptr )
+    {
+        return std::dynamic_pointer_cast< T >( ptr );
+    }
+    
 }
 
 #endif

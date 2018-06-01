@@ -26,6 +26,8 @@
  */
 
 #include "CirclePositionParticleGenerator.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 using namespace crimild;
 
@@ -42,5 +44,15 @@ CirclePositionParticleGenerator::~CirclePositionParticleGenerator( void )
 void CirclePositionParticleGenerator::generate( Node *node, double dt, ParticleData *particles, ParticleId startId, ParticleId endId )
 {
 
+}
+
+void CirclePositionParticleGenerator::encode( coding::Encoder &encoder ) 
+{
+	ParticleSystemComponent::ParticleGenerator::encode( encoder );
+}
+
+void CirclePositionParticleGenerator::decode( coding::Decoder &decoder )
+{
+	ParticleSystemComponent::ParticleGenerator::decode( decoder );
 }
 

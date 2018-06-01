@@ -29,6 +29,9 @@
 
 #include "SceneGraph/LuaSceneBuilder.hpp"
 
+#include <Behaviors/Behavior.hpp>
+#include <Behaviors/BehaviorTree.hpp>
+
 using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::scripting;
@@ -50,7 +53,7 @@ SharedPointer< BehaviorController > LuaBehaviorControllerBuilder::build( ScriptE
 			if ( behaviorBuilder != nullptr ) {
 				auto behavior = crimild::cast_ptr< Behavior >( behaviorBuilder( rootBehaviorEval ) );
 				if ( behavior != nullptr ) {
-					cmp->attachBehavior( eventName, behavior );
+					cmp->attachBehaviorTree( crimild::alloc< BehaviorTree >( eventName, behavior ) );
 				}
 				else {
 					Log::error( CRIMILD_CURRENT_CLASS_NAME, "Failed to build behavior wit type ", rootBehaviorType );

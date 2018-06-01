@@ -7,6 +7,11 @@ using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::actions;
 
+Transform::Transform( void )
+{
+	
+}
+
 Transform::Transform(
 	const crimild::Transformation &targetTransformation,
 	crimild::Real32 duration,
@@ -83,5 +88,29 @@ Behavior::State Transform::step( BehaviorContext *context )
 	}
 
 	return Behavior::State::RUNNING;
+}
+
+void Transform::encode( coding::Encoder &encoder )
+{
+	Behavior::encode( encoder );
+
+	encoder.encode( "transformation", _targetTransformation );
+	encoder.encode( "duration", _duration );
+	encoder.encode( "computeInTargetSpace", _computeInTargetSpace );
+	encoder.encode( "computeFromTargetPosition", _computeFromTargetPosition );
+	encoder.encode( "applyTranslation", _applyTranslation );
+	encoder.encode( "applyRotation", _applyRotation );
+}
+
+void Transform::decode( coding::Decoder &decoder )
+{
+	Behavior::decode( decoder );
+
+	decoder.decode( "transformation", _targetTransformation );
+	decoder.decode( "duration", _duration );
+	decoder.decode( "computeInTargetSpace", _computeInTargetSpace );
+	decoder.decode( "computeFromTargetPosition", _computeFromTargetPosition );
+	decoder.decode( "applyTranslation", _applyTranslation );
+	decoder.decode( "applyRotation", _applyRotation );
 }
 

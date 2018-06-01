@@ -1,10 +1,17 @@
 #include "AnimateContextValue.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 #include "Mathematics/Interpolation.hpp"
 
 using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::actions;
+
+AnimateContextValue::AnimateContextValue( void )
+{
+	
+}
 
 AnimateContextValue::AnimateContextValue( std::string key, crimild::Real32 value, crimild::Real32 duration )
 	: _key( key ),
@@ -39,5 +46,23 @@ Behavior::State AnimateContextValue::step( BehaviorContext *context )
 	context->setValue( _key, x );
 	
 	return Behavior::State::RUNNING;
+}
+
+void AnimateContextValue::encode( coding::Encoder &encoder )
+{
+	Behavior::encode( encoder );
+
+	encoder.encode( "key", _key );
+	encoder.encode( "value", _value );
+	encoder.encode( "duration", _duration );
+}
+
+void AnimateContextValue::decode( coding::Decoder &decoder )
+{
+	Behavior::decode( decoder );
+
+	decoder.decode( "key", _key );
+	decoder.decode( "value", _value );
+	decoder.decode( "duration", _duration );
 }
 

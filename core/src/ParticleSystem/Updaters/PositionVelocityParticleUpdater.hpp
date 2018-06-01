@@ -33,6 +33,8 @@
 namespace crimild {
 
     class PositionVelocityParticleUpdater : public ParticleSystemComponent::ParticleUpdater {
+        CRIMILD_IMPLEMENT_RTTI( crimild::PositionVelocityParticleUpdater )
+        
     public:
         PositionVelocityParticleUpdater( void );
         virtual ~PositionVelocityParticleUpdater( void );
@@ -43,6 +45,18 @@ namespace crimild {
 	private:
 		ParticleAttribArray *_positions = nullptr;
 		ParticleAttribArray *_velocities = nullptr;
+
+		/** 
+		 	\name Coding support
+		*/
+		//@{
+
+	public:
+		virtual void encode( coding::Encoder &encoder ) override;
+		virtual void decode( coding::Decoder &decoder ) override;
+
+		//@}
+        
     };
 
 }

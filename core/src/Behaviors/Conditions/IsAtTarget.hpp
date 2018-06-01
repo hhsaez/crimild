@@ -13,6 +13,7 @@ namespace crimild {
 				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::IsAtTarget )
 				
 			public:
+				IsAtTarget( void );
 				explicit IsAtTarget( crimild::Real32 minDistance );
 				virtual ~IsAtTarget( void );
 				
@@ -20,6 +21,17 @@ namespace crimild {
 
 			private:
 				crimild::Real32 _minDistance = crimild::Numericf::ZERO_TOLERANCE;
+
+				/**
+				   \name Coding support
+				*/
+				//@{
+				
+			public:
+				virtual void encode( coding::Encoder &encoder ) override;
+				virtual void decode( coding::Decoder &decoder ) override;
+				
+				//@}
 			};
 
 		}

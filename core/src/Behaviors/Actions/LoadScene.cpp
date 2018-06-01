@@ -7,6 +7,11 @@ using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::actions;
 
+LoadScene::LoadScene( void )
+{
+	
+}
+
 LoadScene::LoadScene( std::string sceneFileName )
 	: _sceneFileName( sceneFileName )
 {
@@ -29,3 +34,16 @@ Behavior::State LoadScene::step( BehaviorContext *context )
 	return Behavior::State::SUCCESS;
 }
 
+void LoadScene::encode( coding::Encoder &encoder )
+{
+	Behavior::encode( encoder );
+
+	encoder.encode( "fileName", _sceneFileName );
+}
+
+void LoadScene::decode( coding::Decoder &decoder )
+{
+	Behavior::decode( decoder );
+
+	decoder.decode( "fileName", _sceneFileName );
+}

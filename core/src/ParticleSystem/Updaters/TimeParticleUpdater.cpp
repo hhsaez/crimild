@@ -60,3 +60,13 @@ void TimeParticleUpdater::update( Node *node, double dt, ParticleData *particles
 	}
 }
 
+void TimeParticleUpdater::encode( coding::Encoder &encoder ) 
+{
+	ParticleSystemComponent::ParticleUpdater::encode( encoder );
+}
+
+void TimeParticleUpdater::decode( coding::Decoder &decoder )
+{
+	ParticleSystemComponent::ParticleUpdater::decode( decoder );
+}
+

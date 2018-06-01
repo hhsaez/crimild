@@ -32,7 +32,10 @@
 #include <functional>
 
 namespace crimild {
-    
+
+	/**
+	   \deprecated Use crimild::containers::Map instead
+	 */
     template< typename KEY_TYPE, typename VALUE_TYPE >
     class Map {
     public:

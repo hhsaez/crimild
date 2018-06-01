@@ -28,9 +28,12 @@
 #ifndef CRIMILD_OPENGL_CATALOG_FRAME_BUFFER_OBJECT_
 #define CRIMILD_OPENGL_CATALOG_FRAME_BUFFER_OBJECT_
 
-#include <Crimild.hpp>
+#include <Rendering/Catalog.hpp>
 
 namespace crimild {
+    
+    class FrameBufferObject;
+    class Renderer;
 
 	namespace opengl {
 

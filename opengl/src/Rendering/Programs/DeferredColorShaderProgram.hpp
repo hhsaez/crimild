@@ -28,7 +28,7 @@
 #ifndef CRIMILD_OPENGL_SHADER_LIBRARY_DEFERRED_COLOR_
 #define CRIMILD_OPENGL_SHADER_LIBRARY_DEFERRED_COLOR_
 
-#include <Crimild.hpp>
+#include <Rendering/ShaderProgram.hpp>
 
 namespace crimild {
     

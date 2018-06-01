@@ -27,6 +27,8 @@
 
 #include "SFMLAudioClipSource.hpp"
 
+#include "Exceptions/FileNotFoundException.hpp"
+
 using namespace crimild;
 using namespace crimild::audio;
 using namespace crimild::sfml;
@@ -58,6 +60,15 @@ void SFMLAudioClipSource::pause( void )
 void SFMLAudioClipSource::stop( void )
 {
 	_sound.stop();
+}
+
+crimild::Real32 SFMLAudioClipSource::getDuration( void ) const
+{
+	if ( _sound.getBuffer() == nullptr ) {
+		return 0.0f;
+	}
+	
+	return _sound.getBuffer()->getDuration().asSeconds();
 }
 
 void SFMLAudioClipSource::setLoop( crimild::Bool loop )
@@ -145,5 +156,20 @@ void SFMLAudioClipSource::setAttenuation( crimild::Real32 attenuation )
 crimild::Real32 SFMLAudioClipSource::getAttenuation( void ) const
 {
 	return _sound.getAttenuation();
+}
+
+void SFMLAudioClipSource::onGetData( AudioSource::GetDataCallback const & )
+{
+
+}
+
+crimild::UInt32 SFMLAudioClipSource::getChannelCount( void ) const
+{
+	return _sound.getBuffer()->getChannelCount();
+}
+
+crimild::UInt32 SFMLAudioClipSource::getSampleRate( void ) const
+{
+	return _sound.getBuffer()->getSampleRate();
 }
 

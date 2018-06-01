@@ -31,6 +31,9 @@
 #include <cstdint>
 
 namespace crimild {
+    
+    using Char = char;
+    using UChar = unsigned char;
 
 	using Int8 = int8_t;
 	using Int16 = int16_t;
@@ -48,6 +51,8 @@ namespace crimild {
 	using Bool = bool;
 	
 	using Size = UInt64;
+    
+    using Byte = UInt8;
 
 }
 

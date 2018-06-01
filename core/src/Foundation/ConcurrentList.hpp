@@ -34,7 +34,10 @@
 #include <condition_variable>
 
 namespace crimild {
-    
+
+	/**
+	   \deprecated Use containers::List< T, policies::ObjectLevelLockable > instead
+	 */
     template< class T >
     class ConcurrentList {
     public:

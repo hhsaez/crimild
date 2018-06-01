@@ -28,7 +28,7 @@
 #ifndef CRIMILD_OPENGL_SHADER_LIBRARY_DEFERRED_NORMAL_
 #define CRIMILD_OPENGL_SHADER_LIBRARY_DEFERRED_NORMAL_
 
-#include <Crimild.hpp>
+#include <Rendering/ShaderProgram.hpp>
 
 namespace crimild {
     

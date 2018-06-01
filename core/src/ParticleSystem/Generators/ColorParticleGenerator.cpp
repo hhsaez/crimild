@@ -28,7 +28,8 @@
 #include "ColorParticleGenerator.hpp"
 
 #include "Mathematics/Random.hpp"
-
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 #include "SceneGraph/Node.hpp"
 
 using namespace crimild;
@@ -75,5 +76,25 @@ void ColorParticleGenerator::generate( Node *node, crimild::Real64 dt, ParticleD
     for ( ParticleId i = startId; i < endId; i++ ) {
         cs[ i ] = sc[ i ];
     }
+}
+
+void ColorParticleGenerator::encode( coding::Encoder &encoder ) 
+{
+	ParticleSystemComponent::ParticleGenerator::encode( encoder );
+
+	encoder.encode( "minStartColor", _minStartColor );
+	encoder.encode( "maxStartColor", _maxStartColor );
+	encoder.encode( "minEndColor", _minEndColor );
+	encoder.encode( "maxEndColor", _maxEndColor );
+}
+
+void ColorParticleGenerator::decode( coding::Decoder &decoder )
+{
+	ParticleSystemComponent::ParticleGenerator::decode( decoder );
+
+	decoder.decode( "minStartColor", _minStartColor );
+	decoder.decode( "maxStartColor", _maxStartColor );
+	decoder.decode( "minEndColor", _minEndColor );
+	decoder.decode( "maxEndColor", _maxEndColor );
 }
 

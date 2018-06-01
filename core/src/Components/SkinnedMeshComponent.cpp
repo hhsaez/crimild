@@ -32,6 +32,8 @@
 #include "Visitors/Apply.hpp"
 #include "Debug/DebugRenderHelper.hpp"
 #include "Foundation/Log.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::SkinnedMeshComponent )
 
@@ -105,7 +107,7 @@ void SkinnedMeshComponent::update( const Clock &c )
 		_animationProgressCallback( animationProgress );
 	}
 
-	getNode()->perform( Apply( [mesh, skeleton, currentClip, animationState, animationTime]( Node *node ) {
+	getNode()->perform( Apply( [ skeleton, currentClip, animationState, animationTime ]( Node *node ) {
 
 		Transformation modelTransform;
 
@@ -161,8 +163,7 @@ void SkinnedMeshComponent::setAnimationParams(
 void SkinnedMeshComponent::renderDebugInfo( Renderer *renderer, Camera *camera )
 {
 	std::vector< Vector3f > lines;
-	auto self = this;
-	getNode()->perform( Apply( [&lines, self]( Node *node ) {
+	getNode()->perform( Apply( [ &lines ]( Node *node ) {
 		if ( node->hasParent() ) {
 			// if ( self->getBones().boneMap.find( node->getName() ) != self->getBones().boneMap.end() ) {
 				lines.push_back( node->getParent()->getWorld().getTranslate() );
@@ -172,6 +173,26 @@ void SkinnedMeshComponent::renderDebugInfo( Renderer *renderer, Camera *camera )
 	}));
 
 	DebugRenderHelper::renderLines( renderer, camera, &lines[ 0 ], lines.size(), RGBAColorf( 1.0f, 0.0f, 0.0f, 1.0f ) );
+}
+
+SharedPointer< NodeComponent > SkinnedMeshComponent::clone( void )
+{
+    auto other = crimild::alloc< SkinnedMeshComponent >( getSkinnedMesh()->clone() );
+    return other;
+}
+
+void SkinnedMeshComponent::encode( coding::Encoder &encoder )
+{
+	NodeComponent::encode( encoder );
+
+	encoder.encode( "skinnedMesh", _skinnedMesh );
+}
+
+void SkinnedMeshComponent::decode( coding::Decoder &decoder )
+{
+	NodeComponent::decode( decoder );
+
+	decoder.decode( "skinnedMesh", _skinnedMesh );
 }
 
 bool SkinnedMeshComponent::registerInStream( Stream &s )

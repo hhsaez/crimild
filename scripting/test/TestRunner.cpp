@@ -29,11 +29,15 @@
 #include "gmock/gmock.h"
 
 #include <Crimild.hpp>
+#include <Crimild_Scripting.hpp>
 
 using namespace crimild;
 
 int main( int argc, char **argv )
 {
+    crimild::init();
+    crimild::scripting::init();
+
 	FileSystem::getInstance().init( argc, argv );
 
 	::testing::InitGoogleTest( &argc, argv );

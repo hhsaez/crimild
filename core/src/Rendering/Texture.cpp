@@ -26,6 +26,8 @@
  */
 
 #include "Texture.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 #include "Foundation/Log.hpp"
 
@@ -49,6 +51,20 @@ Texture::Texture( SharedPointer< Image > const &image, std::string name )
 Texture::~Texture( void )
 {
     unload();
+}
+
+void Texture::encode( coding::Encoder &encoder )
+{
+	Codable::encode( encoder );
+
+	encoder.encode( "image", _image );
+}
+
+void Texture::decode( coding::Decoder &decoder )
+{
+	Codable::decode( decoder );
+
+	decoder.decode( "image", _image );
 }
 
 bool Texture::registerInStream( Stream &s )

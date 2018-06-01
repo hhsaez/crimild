@@ -30,6 +30,8 @@
 
 #include "Foundation/Scripted.hpp"
 
+#include <Behaviors/Conditions/TestContextValue.hpp>
+
 namespace crimild {
 
 	namespace scripting {

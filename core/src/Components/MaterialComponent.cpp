@@ -26,6 +26,8 @@
  */
 
 #include "MaterialComponent.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::MaterialComponent )
 
@@ -53,6 +55,37 @@ void MaterialComponent::detachAllMaterials( void )
 void MaterialComponent::forEachMaterial( std::function< void( Material * ) > callback )
 {
     _materials.forEach( callback );
+}
+
+SharedPointer< NodeComponent > MaterialComponent::clone( void )
+{
+    auto other = crimild::alloc< MaterialComponent >();
+    forEachMaterial( [ other ]( Material *material ) {
+        other->attachMaterial( material );
+    });
+    return other;
+}
+
+void MaterialComponent::encode( coding::Encoder &encoder )
+{
+	NodeComponent::encode( encoder );
+
+	containers::Array< SharedPointer< Material >> ms;
+	forEachMaterial( [&ms]( Material *m ) {
+		ms.add( crimild::retain( m ) );
+	});
+	encoder.encode( "materials", ms );
+}
+
+void MaterialComponent::decode( coding::Decoder &decoder )
+{
+	NodeComponent::decode( decoder );
+
+	containers::Array< SharedPointer< Material >> ms;
+	decoder.decode( "materials", ms );
+	ms.each( [ this ]( SharedPointer< Material > &m, crimild::Size ) {
+		attachMaterial( m );
+	});
 }
 
 bool MaterialComponent::registerInStream( Stream &s )

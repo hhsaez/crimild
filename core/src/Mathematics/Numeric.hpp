@@ -32,6 +32,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <random>
+#include <limits>
 
 namespace crimild {
     
@@ -53,6 +54,9 @@ namespace crimild {
         static const PRECISION COS_90;
         static const PRECISION COS_135;
         static const PRECISION COS_180;
+        
+        static const PRECISION POSITIVE_INFINITY;
+        static const PRECISION NEGATIVE_INFINITY;
         
         static bool isZero( PRECISION number )
         {
@@ -210,7 +214,12 @@ namespace crimild {
         
         static PRECISION ceil( double n )
         {
-            return ( PRECISION ) ::ceil( n );
+            return ( PRECISION ) std::ceil( n );
+        }
+        
+        static PRECISION floor( double n )
+        {
+            return ( PRECISION ) std::floor( n );
         }
     };
     
@@ -229,6 +238,9 @@ namespace crimild {
     template< typename T > const T Numeric< T >::COS_90 = static_cast< T >( 0.0 );
     template< typename T > const T Numeric< T >::COS_135 = static_cast< T >( -0.5 * Numeric< double >::sqrt( 2.0 ) );
     template< typename T > const T Numeric< T >::COS_180 = static_cast< T >( -1.0 );
+
+	template< typename T > const T Numeric< T >::POSITIVE_INFINITY = std::numeric_limits< T >::max();
+	template< typename T > const T Numeric< T >::NEGATIVE_INFINITY = std::numeric_limits< T >::min();
     
     typedef Numeric< int > Numerici;
     typedef Numeric< float > Numericf;

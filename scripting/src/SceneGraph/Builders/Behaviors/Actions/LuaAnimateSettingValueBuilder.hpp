@@ -30,6 +30,8 @@
 
 #include "Foundation/Scripted.hpp"
 
+#include <Behaviors/Actions/AnimateSettingValue.hpp>
+
 namespace crimild {
 
 	namespace scripting {

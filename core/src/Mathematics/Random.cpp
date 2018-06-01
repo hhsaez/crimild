@@ -40,8 +40,8 @@ Random::Generator::Generator( void )
 }
 
 Random::Generator::Generator( crimild::UInt32 seed )
-	: _distribution( 0, 1 ),
-	  _generator( seed )
+	: _generator( seed ),
+      _distribution( 0, 1 )
 {
 
 }

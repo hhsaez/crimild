@@ -143,4 +143,56 @@ void OrientedQuadParticleRenderer::update( Node *node, crimild::Real64 dt, Parti
     });
 }
 
+void OrientedQuadParticleRenderer::encode( coding::Encoder &encoder ) 
+{
+	ParticleSystemComponent::ParticleRenderer::encode( encoder );
+
+	encoder.encode( "material", _material );
+}
+
+void OrientedQuadParticleRenderer::decode( coding::Decoder &decoder )
+{
+	ParticleSystemComponent::ParticleRenderer::decode( decoder );
+
+	decoder.decode( "material", _material );
+
+	if ( _material == nullptr ) {
+		_material = crimild::alloc< Material >();
+	}
+	
+	auto program = crimild::retain( AssetManager::getInstance()->get< ShaderProgram >( Renderer::SHADER_PROGRAM_UNLIT_TEXTURE ) );
+    _material->setProgram( program );
+
+    std::string blendMode;
+    decoder.decode( "blendMode", blendMode );
+    if ( blendMode == "additive" ) {
+        _material->setAlphaState( crimild::alloc< AlphaState >( true, AlphaState::SrcBlendFunc::SRC_ALPHA, AlphaState::DstBlendFunc::ONE ) );
+    }
+    else if ( blendMode == "color" ) {
+        _material->setAlphaState( crimild::alloc< AlphaState >( true, AlphaState::SrcBlendFunc::SRC_COLOR, AlphaState::DstBlendFunc::ONE_MINUS_SRC_COLOR ) );
+    }
+    else if ( blendMode == "transparent" ) {
+        _material->setAlphaState( crimild::alloc< AlphaState >( true, AlphaState::SrcBlendFunc::SRC_ALPHA, AlphaState::DstBlendFunc::ONE_MINUS_SRC_ALPHA ) );
+    }
+    else if ( blendMode == "additive_no_alpha" ) {
+        _material->setAlphaState( crimild::alloc< AlphaState >( true, AlphaState::SrcBlendFunc::ONE, AlphaState::DstBlendFunc::ONE ) );
+    }
+    else if ( blendMode == "multiply" ) {
+        _material->setAlphaState( crimild::alloc< AlphaState >( true, AlphaState::SrcBlendFunc::ONE, AlphaState::DstBlendFunc::ONE_MINUS_SRC_ALPHA ) );
+    }
+    else if ( blendMode == "default" ) {
+        _material->setAlphaState( AlphaState::ENABLED );
+    }
+    else {
+        _material->setAlphaState( AlphaState::DISABLED );
+    }
+    
+    crimild::Bool cullFaceEnabled = true;
+    decoder.decode( "cullFaceEnabled", cullFaceEnabled );
+    _material->getCullFaceState()->setEnabled( cullFaceEnabled );
+    
+    crimild::Bool depthStateEnabled = true;
+    decoder.decode( "depthStateEnabled", depthStateEnabled );
+    _material->setDepthState( depthStateEnabled ? DepthState::ENABLED : DepthState::DISABLED );
+}
 

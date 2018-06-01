@@ -44,3 +44,13 @@ void VelocityColorParticleUpdater::update( Node *node, double dt, ParticleData *
 
 }
 
+void VelocityColorParticleUpdater::encode( coding::Encoder &encoder ) 
+{
+	ParticleSystemComponent::ParticleUpdater::encode( encoder );
+}
+
+void VelocityColorParticleUpdater::decode( coding::Decoder &decoder )
+{
+	ParticleSystemComponent::ParticleUpdater::decode( decoder );
+}
+

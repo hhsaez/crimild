@@ -36,6 +36,8 @@ namespace crimild {
 
 	 */
     class SphereVelocityParticleGenerator : public ParticleSystemComponent::ParticleGenerator {
+		CRIMILD_IMPLEMENT_RTTI( crimild::SphereVelocityParticleGenerator )
+
     public:
         SphereVelocityParticleGenerator( void );
         virtual ~SphereVelocityParticleGenerator( void );
@@ -50,6 +52,17 @@ namespace crimild {
 		Vector3f _magnitude;
 
 		ParticleAttribArray *_velocities = nullptr;
+
+		/** 
+		 	\name Coding support
+		*/
+		//@{
+
+	public:
+		virtual void encode( coding::Encoder &encoder ) override;
+		virtual void decode( coding::Decoder &decoder ) override;
+
+		//@}
     };
 
 }

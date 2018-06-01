@@ -29,7 +29,7 @@
 #define CRIMILD_SIMULATION_SYSTEM_
 
 #include "Foundation/SharedObject.hpp"
-#include "Foundation/NamedObject.hpp"
+#include "Foundation/RTTI.hpp"
 #include "Foundation/Memory.hpp"
 
 #include "Messaging/MessageQueue.hpp"
@@ -54,11 +54,11 @@ namespace crimild {
 
 	class System : 
 		public SharedObject,
-		public NamedObject,
+		public RTTI,
 		public Messenger {
 
 	public:
-		explicit System( std::string name );
+		explicit System( void );
 
 		virtual ~System( void );
 

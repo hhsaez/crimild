@@ -28,7 +28,7 @@
 #ifndef CRIMILD_GL_SIMULATION_
 #define CRIMILD_GL_SIMULATION_
 
-#include <Crimild.hpp>
+#include <Simulation/Simulation.hpp>
 
 namespace crimild {
 

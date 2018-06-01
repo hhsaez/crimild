@@ -36,9 +36,22 @@
 #include "Foundation/Scripted.hpp"
 #include "Foundation/LuaSerializer.hpp"
 
+#include "Coding/LuaEncoder.hpp"
+#include "Coding/LuaDecoder.hpp"
+
 #include "SceneGraph/LuaSceneBuilder.hpp"
 
 #include "Simulation/LuaSettings.hpp"
+
+namespace crimild {
+
+	namespace scripting {
+
+		void init( void );
+
+	}
+
+}
 
 #endif
 

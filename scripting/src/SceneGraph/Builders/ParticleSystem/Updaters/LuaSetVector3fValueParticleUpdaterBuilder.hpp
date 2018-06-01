@@ -30,13 +30,15 @@
 
 #include "Foundation/Scripted.hpp"
 
+#include <ParticleSystem/Updaters/SetAttribValueParticleUpdater.hpp>
+
 namespace crimild {
 
 	namespace scripting {
         
 		class LuaSetVector3fValueParticleUpdaterBuilder {
 		public:
-			static SharedPointer< SetAttribValueParticleUpdater< Vector3f > > build( ScriptEvaluator &eval );
+			static SharedPointer< SetVector3fValueParticleUpdater > build( ScriptEvaluator &eval );
 		};
 
 	}

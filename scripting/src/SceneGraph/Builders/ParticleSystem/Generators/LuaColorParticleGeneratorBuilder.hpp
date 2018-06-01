@@ -30,6 +30,8 @@
 
 #include "Foundation/Scripted.hpp"
 
+#include <ParticleSystem/Generators/ColorParticleGenerator.hpp>
+
 namespace crimild {
 
 	namespace scripting {

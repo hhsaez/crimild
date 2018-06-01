@@ -26,6 +26,8 @@
  */
 
 #include "Image.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 #include <cstring>
 
@@ -84,6 +86,26 @@ void Image::unload( void )
 	_height = 0;
 	_bpp = 0;
     _data.resize( 0 );
+}
+
+void Image::encode( coding::Encoder &encoder )
+{
+	Codable::encode( encoder );
+
+	encoder.encode( "width", _width );
+	encoder.encode( "height", _height );
+	encoder.encode( "bpp", _bpp );
+    encoder.encode( "data", _data );
+}
+
+void Image::decode( coding::Decoder &decoder )
+{
+	Codable::decode( decoder );
+
+	decoder.decode( "width", _width );
+	decoder.decode( "height", _height );
+	decoder.decode( "bpp", _bpp );
+	decoder.decode( "data", _data );
 }
 
 bool Image::registerInStream( Stream &s )

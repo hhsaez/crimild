@@ -33,6 +33,8 @@
 namespace crimild {
 
     class AccelerationParticleGenerator : public ParticleSystemComponent::ParticleGenerator {
+        CRIMILD_IMPLEMENT_RTTI( crimild::AccelerationParticleGenerator )
+
     public:
         AccelerationParticleGenerator( void );
         virtual ~AccelerationParticleGenerator( void );
@@ -51,6 +53,17 @@ namespace crimild {
         Vector3f _maxAcceleration;
 
 		ParticleAttribArray *_accelerations = nullptr;
+        
+		/** 
+		 	\name Coding support
+		*/
+		//@{
+
+	public:
+		virtual void encode( coding::Encoder &encoder ) override;
+		virtual void decode( coding::Decoder &decoder ) override;
+
+		//@}
     };
 
 }

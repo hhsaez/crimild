@@ -30,6 +30,8 @@
 
 #include "Foundation/Scripted.hpp"
 
+#include <Behaviors/Decorators/RepeatUntilSuccess.hpp>
+
 namespace crimild {
 
 	namespace scripting {

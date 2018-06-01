@@ -28,7 +28,7 @@
 #ifndef CRIMILD_SFML_AUDIO_MANAGER_
 #define CRIMILD_SFML_AUDIO_MANAGER_
 
-#include <Crimild.hpp>
+#include "Audio/AudioManager.hpp"
 
 namespace crimild {
 

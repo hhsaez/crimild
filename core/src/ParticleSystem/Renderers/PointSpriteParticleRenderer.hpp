@@ -37,6 +37,8 @@
 namespace crimild {
 
     class PointSpriteParticleRenderer : public ParticleSystemComponent::ParticleRenderer {
+		CRIMILD_IMPLEMENT_RTTI( crimild::PointSpriteParticleRenderer )
+		
     public:
         PointSpriteParticleRenderer( void );
         virtual ~PointSpriteParticleRenderer( void );
@@ -54,6 +56,18 @@ namespace crimild {
 		ParticleAttribArray *_positions = nullptr;
 		ParticleAttribArray *_colors = nullptr;
 		ParticleAttribArray *_sizes = nullptr;
+
+		/** 
+		 	\name Coding support
+		*/
+		//@{
+
+	public:
+		virtual void encode( coding::Encoder &encoder ) override;
+		virtual void decode( coding::Decoder &decoder ) override;
+
+		//@}
+        
     };
 
 }

@@ -1,4 +1,6 @@
 #include "Composite.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 using namespace crimild;
 using namespace crimild::behaviors;
@@ -21,7 +23,7 @@ void Composite::init( BehaviorContext *context )
 
 void Composite::attachBehavior( BehaviorPtr const &behavior )
 {
-	_behaviors.push_back( behavior );
+	_behaviors.add( behavior );
 }
 
 size_t Composite::getBehaviorCount( void ) const
@@ -31,6 +33,20 @@ size_t Composite::getBehaviorCount( void ) const
 
 Behavior *Composite::getBehaviorAt( size_t index )
 {
-	return _behaviors[ index ].get();
+	return crimild::get_ptr( _behaviors[ index ] );
+}
+
+void Composite::encode( coding::Encoder &encoder )
+{
+	Behavior::encode( encoder );
+
+	encoder.encode( "behaviors", _behaviors );
+}
+
+void Composite::decode( coding::Decoder &decoder )
+{
+	Behavior::decode( decoder );
+
+	decoder.decode( "behaviors", _behaviors );
 }
 

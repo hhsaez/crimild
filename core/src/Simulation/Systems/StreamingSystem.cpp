@@ -35,9 +35,9 @@
 using namespace crimild;
 
 StreamingSystem::StreamingSystem( void )
-    : System( "Streaming System" )
 {
 	CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( messaging::LoadScene, StreamingSystem, onLoadScene );
+	CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( messaging::AppendScene, StreamingSystem, onAppendScene );
 	CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( messaging::ReloadScene, StreamingSystem, onReloadScene );
 }
 
@@ -58,55 +58,73 @@ void StreamingSystem::stop( void )
 
 void StreamingSystem::onLoadScene( messaging::LoadScene const &message )
 {
-    if ( message.sceneBuilder != nullptr ) {
-        setSceneBuilder( message.sceneBuilder );
+    auto fileName = message.fileName;
+    auto fileType = StringUtils::getFileExtension( fileName );
+
+    if ( !_builders.contains( fileType ) ) {
+        std::string message = "Cannot find builder for file" + fileName;
+        crimild::Log::error( CRIMILD_CURRENT_CLASS_NAME, message );
+        broadcastMessage( messaging::SceneLoadFailed { fileName, message } );
+        return;
     }
-    
-    loadScene( message.filename, getSceneBuilder() );
+
+    _lastSceneFileName = fileName;
+    auto builder = _builders[ fileType ];
+
+    crimild::concurrency::async_frame( [ builder, fileName ] {
+        AssetManager::getInstance()->clear();
+
+        auto scene = builder( fileName );
+        if ( scene == nullptr ) {
+            std::string message = "Cannot load scene from file: " + fileName;
+            crimild::Log::error( CRIMILD_CURRENT_CLASS_NAME, message );
+            MessageQueue::getInstance()->broadcastMessage( messaging::SceneLoadFailed { fileName, message } );
+            return;
+        }
+        
+        crimild::concurrency::sync_frame( [ scene ] {
+            Simulation::getInstance()->setScene( scene );
+        });
+    });
+}
+
+void StreamingSystem::onAppendScene( messaging::AppendScene const &message )
+{
+    // TODO
 }
 
 void StreamingSystem::onReloadScene( messaging::ReloadScene const &message )
 {
-    auto sceneName = _lastSceneFileName;
-    auto builder = getSceneBuilder();
-    
-    crimild::concurrency::sync_frame( [this, sceneName, builder] {
-        Simulation::getInstance()->setScene( nullptr );
-        loadScene( sceneName, builder );
-    });
-}
+    auto fileName = _lastSceneFileName;
+    auto fileType = StringUtils::getFileExtension( fileName );
 
-void StreamingSystem::loadScene( std::string filename, SceneBuilder *builder )
-{
-    if ( builder != nullptr ) {
-        _sceneBuilder = crimild::retain( builder );
-    }
-    
-    if ( _sceneBuilder == nullptr ) {
-        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Undefined scene builder" );
+    if ( !_builders.contains( fileType ) ) {
+        std::string message = "Cannot find builder for file" + fileName;
+        crimild::Log::error( CRIMILD_CURRENT_CLASS_NAME, message );
+        broadcastMessage( messaging::SceneLoadFailed { fileName, message } );
         return;
     }
-    
-    _lastSceneFileName = filename;
-    
-    // get an owner for the builder that we can use in the lambdas below
-    auto sceneBuilder = crimild::retain( getSceneBuilder() );
 
-	// Althougth the actual loading happens in background, we trigger it
-	// in the main thread to ensure all systems are properly runnning. 
-	// Then, once the scene is completely loaded, we set it as the current 
-	// scene again in main thread to avoid changing scenes when rendering or updating
-    crimild::concurrency::async_frame( [sceneBuilder, filename] {
-        AssetManager::getInstance()->clear();
-    
-        sceneBuilder->reset();
-        auto scene = sceneBuilder->fromFile( FileSystem::getInstance().pathForResource( filename ) );
-        sceneBuilder->reset();
-        Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Scene loaded: ", filename );
-        
-        crimild::concurrency::sync_frame( [scene] {
-            Simulation::getInstance()->setScene( scene );
-        });
+    auto builder = _builders[ fileType ];
+
+    crimild::concurrency::sync_frame( [ builder, fileName ] {
+        Simulation::getInstance()->setScene( nullptr );
+
+        crimild::concurrency::async_frame( [ builder, fileName ] {
+            AssetManager::getInstance()->clear();
+
+            auto scene = builder( fileName );
+            if ( scene == nullptr ) {
+                std::string message = "Cannot load scene from file: " + fileName;
+                crimild::Log::error( CRIMILD_CURRENT_CLASS_NAME, message );
+                MessageQueue::getInstance()->broadcastMessage( messaging::SceneLoadFailed { fileName, message } );
+                return;
+            }
+            
+            crimild::concurrency::sync_frame( [ scene ] {
+                Simulation::getInstance()->setScene( scene );
+            });
+        });        
     });
 }
 

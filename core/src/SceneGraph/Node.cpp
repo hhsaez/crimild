@@ -27,8 +27,9 @@
 
 #include "Node.hpp"
 #include "Group.hpp"
-
 #include "Boundings/AABBBoundingVolume.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::Node )
 
@@ -173,6 +174,46 @@ void Node::forEachComponent( std::function< void ( NodeComponent * ) > callback 
             callback( crimild::get_ptr( cmp.second ) );
 		}
 	}
+}
+
+void Node::encode( coding::Encoder &encoder )
+{
+    Codable::encode( encoder );
+    
+    encoder.encode( "name", getName() );
+    encoder.encode( "transformation", getLocal() );
+    encoder.encode( "worldTransformation", getWorld() );
+    encoder.encode( "worldIsCurrent", worldIsCurrent() );
+    
+    containers::Array< SharedPointer< NodeComponent >> cmps;
+    for ( auto &it : _components ) {
+        if ( it.second != nullptr ) {
+            cmps.add( it.second );
+        }
+    }
+    encoder.encode( "components", cmps );
+}
+
+void Node::decode( coding::Decoder &decoder )
+{
+    Codable::decode( decoder );
+    
+    std::string name;
+    decoder.decode( "name", name );
+    setName( name );
+    
+    decoder.decode( "transformation", local() );
+    decoder.decode( "worldTransformation", world() );
+    
+    crimild::Bool worldIsCurrent = false;
+    decoder.decode( "worldIsCurrent", worldIsCurrent );
+    setWorldIsCurrent( worldIsCurrent );
+    
+    containers::Array< SharedPointer< NodeComponent >> cmps;
+    decoder.decode( "components", cmps );
+    cmps.each( [ this ]( SharedPointer< NodeComponent > &c, crimild::Size ) {
+        attachComponent( c );
+    });
 }
 
 bool Node::registerInStream( Stream &s )

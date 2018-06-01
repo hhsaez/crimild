@@ -30,6 +30,8 @@
 
 #include "Foundation/Scripted.hpp"
 
+#include <Behaviors/Conditions/TestInputAxis.hpp>
+
 namespace crimild {
 
 	namespace scripting {

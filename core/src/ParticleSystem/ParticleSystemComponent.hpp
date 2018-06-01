@@ -95,7 +95,7 @@ namespace crimild {
 		/**
 		   \brief A generator for particle attributes
 		 */
-        class ParticleGenerator : public SharedObject {
+        class ParticleGenerator : public Codable {
         public:
             virtual ~ParticleGenerator( void ) { }
 
@@ -133,7 +133,7 @@ namespace crimild {
     private:
         crimild::Real32 _emitRate;
 		crimild::Real32 _emitAccum = 1.0f;
-        ThreadSafeArray< ParticleGeneratorPtr > _generators;
+        containers::Array< ParticleGeneratorPtr > _generators;
 		crimild::Bool _burst = false;
 		
 		//@}
@@ -146,7 +146,7 @@ namespace crimild {
 		/**
 		   \brief Updates the particles of a particle system
 		*/
-        class ParticleUpdater : public SharedObject {
+        class ParticleUpdater : public Codable {
         public:
             virtual ~ParticleUpdater( void ) { }
 
@@ -166,7 +166,7 @@ namespace crimild {
 		void updateUpdaters( Node *node, crimild::Real64 dt, ParticleData *particles );
 		
     private:
-        ThreadSafeArray< ParticleUpdaterPtr > _updaters;
+        containers::Array< ParticleUpdaterPtr > _updaters;
 
 		//@}
 
@@ -178,7 +178,7 @@ namespace crimild {
 		/**
 		   \brief Generate renderables for a particle system
 		*/
-        class ParticleRenderer : public SharedObject {
+        class ParticleRenderer : public Codable {
         public:
             virtual ~ParticleRenderer( void ) { }
 
@@ -198,7 +198,7 @@ namespace crimild {
 		void updateRenderers( Node *node, crimild::Real64 dt, ParticleData *particles );
 		
     private:
-        ThreadSafeArray< ParticleRendererPtr > _renderers;
+        containers::Array< ParticleRendererPtr > _renderers;
 
 		//@}
 
@@ -208,6 +208,17 @@ namespace crimild {
 
 	private:
 		crimild::Bool _animationEnabled = true;
+
+		/**
+		 	\name Coding support
+		 */
+		//@{
+
+	public:
+		virtual void encode( coding::Encoder &encoder ) override;
+		virtual void decode( coding::Decoder &decoder ) override;
+
+		//@}
     };
 
 }

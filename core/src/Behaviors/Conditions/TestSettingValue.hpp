@@ -40,6 +40,7 @@ namespace crimild {
 				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::conditions::TestSettingValue )
 				
 			public:
+				TestSettingValue( void );
 				explicit TestSettingValue( std::string key, std::string value, std::string comparator );
 				virtual ~TestSettingValue( void );
 				
@@ -49,6 +50,17 @@ namespace crimild {
 				std::string _key;
 				std::string _value;
 				std::string _comparator;
+
+				/**
+				   \name Coding support
+				*/
+				//@{
+				
+			public:
+				virtual void encode( coding::Encoder &encoder ) override;
+				virtual void decode( coding::Decoder &decoder ) override;
+				
+				//@}
 			};
 
 		}

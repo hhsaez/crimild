@@ -6,6 +6,11 @@ using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::actions;
 
+EnableNode::EnableNode( void )
+{
+	
+}
+
 EnableNode::EnableNode( crimild::Bool enabled, std::string node )
 	: _enabled( enabled ),
 	  _node( node )
@@ -34,3 +39,18 @@ Behavior::State EnableNode::step( BehaviorContext *context )
 	return Behavior::State::SUCCESS;
 }
 
+void EnableNode::encode( coding::Encoder &encoder )
+{
+	Behavior::encode( encoder );
+
+	encoder.encode( "enabled", _enabled );
+	encoder.encode( "node", _node );
+}
+
+void EnableNode::decode( coding::Decoder &decoder )
+{
+	Behavior::decode( decoder );
+
+	decoder.decode( "enabled", _enabled );
+	decoder.decode( "node", _node );
+}

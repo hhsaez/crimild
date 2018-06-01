@@ -47,6 +47,17 @@ namespace crimild {
 				virtual ~ResetNavigation( void );
 				
 				virtual Behavior::State step( BehaviorContext *context ) override;
+
+				/**
+				   \name Coding support
+				*/
+				//@{
+				
+			public:
+				virtual void encode( coding::Encoder &encoder ) override;
+				virtual void decode( coding::Decoder &decoder ) override;
+				
+				//@}
 			};
 
 		}

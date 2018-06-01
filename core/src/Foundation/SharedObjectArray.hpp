@@ -34,7 +34,10 @@
 #include <functional>
 
 namespace crimild {
-    
+
+	/**
+	   \deprecated Use containers::Array< SharedObject< ObjectType >> instead
+	 */
     template< class ObjectType >
     class SharedObjectArray {
     private:

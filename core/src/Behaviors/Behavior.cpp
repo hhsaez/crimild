@@ -18,3 +18,13 @@ void Behavior::init( BehaviorContext *context )
 
 }
 
+void Behavior::encode( coding::Encoder &encoder )
+{
+	Codable::encode( encoder );
+}
+
+void Behavior::decode( coding::Decoder &decoder )
+{
+	Codable::decode( decoder );
+}
+

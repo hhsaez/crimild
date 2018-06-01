@@ -6,9 +6,13 @@ using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::actions;
 
+LookAt::LookAt( void )
+{
+	
+}
+
 LookAt::LookAt( const Vector3f &target, crimild::Real32 duration )
-	: _target( target ),
-	  _duration( duration )
+	: _target( target )
 {
 
 }
@@ -43,3 +47,16 @@ Behavior::State LookAt::step( BehaviorContext *context )
 	return Behavior::State::SUCCESS;
 }
 
+void LookAt::encode( coding::Encoder &encoder )
+{
+	Behavior::encode( encoder );
+
+	encoder.encode( "target", _target );
+}
+
+void LookAt::decode( coding::Decoder &decoder )
+{
+	Behavior::decode( decoder );
+
+	decoder.decode( "target", _target );
+}

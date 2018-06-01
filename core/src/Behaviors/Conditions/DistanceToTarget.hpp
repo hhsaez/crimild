@@ -40,16 +40,32 @@ namespace crimild {
 				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::conditions::DistanceToTarget )
 				
 			public:
+				DistanceToTarget( void );
 				explicit DistanceToTarget( crimild::Real32 value, std::string comparator );
 				virtual ~DistanceToTarget( void );
 				
 				virtual Behavior::State step( BehaviorContext *context ) override;
 
 			private:
+				void setComparator( std::string comparator );
+
+			private:				
+				crimild::Real32 _value;
+				std::string _comparatorName;
+				
 				using Comparator = std::function< crimild::Bool ( crimild::Real32, crimild::Real32 ) >;
 				Comparator _comparator;
+
+				/**
+				   \name Coding support
+				*/
+				//@{
 				
-				crimild::Real32 _value;
+			public:
+				virtual void encode( coding::Encoder &encoder ) override;
+				virtual void decode( coding::Decoder &decoder ) override;
+				
+				//@}
 			};
 
 		}

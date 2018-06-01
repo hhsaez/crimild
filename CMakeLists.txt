@@ -2,12 +2,12 @@ CMAKE_MINIMUM_REQUIRED( VERSION 2.8.10 FATAL_ERROR )
 
 IF ( APPLE )
 	# Enable C++11 features
-	SET( CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++ -U__STRICT_ANSI__" )
+	SET( CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++ -U__STRICT_ANSI__ -fvisibility=hidden -fvisibility-inlines-hidden" )
 
 	set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++0x")
 	set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
 ELSE ( APPLE )
-	SET( CMAKE_CXX_FLAGS "-std=c++11 -static-libgcc -static-libstdc++ -static -U__STRICT_ANSI__" )
+	SET( CMAKE_CXX_FLAGS "-std=c++11 -static-libgcc -static-libstdc++ -static -U__STRICT_ANSI__ -fvisibility=hidden -fvisibility-inlines-hidden" )
 ENDIF ( APPLE )
 
 PROJECT( CRIMILD )
@@ -18,7 +18,7 @@ SET ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CRIMILD_SOURCE_DIR}/CMakeTools" 
 INCLUDE( MacroExtractArchive )
 
 ADD_DEFINITIONS( -DCRIMILD_VERSION_MAJOR=4 )
-ADD_DEFINITIONS( -DCRIMILD_VERSION_MINOR=7 )
+ADD_DEFINITIONS( -DCRIMILD_VERSION_MINOR=8 )
 ADD_DEFINITIONS( -DCRIMILD_VERSION_PATCH=0 )
 
 # Configuration options
@@ -41,9 +41,12 @@ ADD_SUBDIRECTORY( raytracing )
 OPTION( CRIMILD_ENABLE_IMPORT "Build importers?" OFF )
 IF ( CRIMILD_ENABLE_IMPORT )
 	ADD_DEFINITIONS( -DCRIMILD_ENABLE_IMPORT=1 )
-	SET( ASSIMP_BUILD_STATIC_LIB ON CACHE BOL "Build Shared libs" )
+
+	SET( ASSIMP_BUILD_STATIC_LIB ON CACHE BOOL "Build Static libs" )
 	SET( BUILD_SHARED_LIBS OFF CACHE BOOL "Build Shared Libs" )
-	SET( ASSIMP_BUILD_TESTS OFF CACHE BOOL "Build AssImp tests" )
+	SET( ASSIMP_BUILD_TESTS OFF CACHE BOOL "Build Assimp tests" )
+	SET( ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "Build Assimp tools" )
+	
 	ADD_SUBDIRECTORY( ${CRIMILD_SOURCE_DIR}/third-party/assimp )
 	ADD_SUBDIRECTORY( import )
 ENDIF ( CRIMILD_ENABLE_IMPORT )
@@ -57,8 +60,10 @@ ENDIF ( CRIMILD_ENABLE_PHYSICS )
 # Add scripting sources
 OPTION( CRIMILD_ENABLE_SCRIPTING "Would you like to build the crimild-scripting extension?" OFF )
 iF ( CRIMILD_ENABLE_SCRIPTING )
+	ADD_DEFINITIONS( -DCRIMILD_ENABLE_SCRIPTING=1 )
+
 	# Extract lua sources if needed
-	EXTRACT_ARCHIVE( lua-5.2.3.tar.gz lua-5.2.3 ${CRIMILD_SOURCE_DIR}/third-party )
+	EXTRACT_ARCHIVE( lua-5.3.4.tar.gz lua ${CRIMILD_SOURCE_DIR}/third-party )
 
 	OPTION( CRIMILD_SCRIPTING_LOG_VERBOSE "Enable verbose logs for scripting system" OFF )
 	IF ( CRIMILD_SCRIPTING_LOG_VERBOSE )

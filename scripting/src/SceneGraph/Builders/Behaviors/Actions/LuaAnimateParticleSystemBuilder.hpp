@@ -30,6 +30,8 @@
 
 #include "Foundation/Scripted.hpp"
 
+#include <Behaviors/Actions/AnimateParticleSystem.hpp>
+
 namespace crimild {
 
 	namespace scripting {

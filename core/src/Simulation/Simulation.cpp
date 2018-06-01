@@ -144,36 +144,31 @@ int Simulation::run( void )
 
 void Simulation::addSystem( SystemPtr const &system )
 {
-    Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Adding system ", system->getName() );
+    Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Adding system ", system->getClassName() );
 
-	if ( _systems.find( system->getName() ) == _systems.end() ) {
-		_systems.insert( std::make_pair( system->getName(), system ) );
-	}
-}
-
-SystemPtr Simulation::getSystem( std::string name )
-{
-	return _systems[ name ];
+    if ( !_systems.contains( system->getClassName() ) ) {
+        _systems[ system->getClassName() ] = system;
+    }
 }
 
 void Simulation::startSystems( void )
 {
-    Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Starting systems" );
-	for ( auto s : _systems ) {
-		if ( s.second != nullptr ) {
-			s.second->start();
-		}
-	}
+    Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Starting systems" );    
+    _systems.eachValue( []( SystemPtr &s ) {
+        if ( s != nullptr ) {
+            s->start();
+        }
+    });
 }
 
 void Simulation::stopSystems( void )
 {
     Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Stopping systems" );
-	for ( auto s : _systems ) {
-		if ( s.second != nullptr ) {
-			s.second->stop();
-		}
-	}
+    _systems.eachValue( []( SystemPtr &s ) {
+        if ( s != nullptr ) {
+            s->stop();
+        }
+    });
     
     _systems.clear();
 }
@@ -228,9 +223,9 @@ void Simulation::setScene( SharedPointer< Node > const &scene )
     broadcastMessage( messaging::SceneChanged { crimild::get_ptr( _scene ) } );
 }
 
-void Simulation::loadScene( std::string filename, SharedPointer< SceneBuilder > const &builder )
+void Simulation::loadScene( std::string filename )
 {
-    broadcastMessage( messaging::LoadScene { filename, builder } );
+    broadcastMessage( messaging::LoadScene { filename } );
 }
 
 void Simulation::forEachCamera( std::function< void ( Camera * ) > callback )

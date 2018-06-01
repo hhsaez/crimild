@@ -28,7 +28,7 @@
 #ifndef CRIMILD_OPENGL_SHADER_LIBRARY_SSAO_RENDER_
 #define CRIMILD_OPENGL_SHADER_LIBRARY_SSAO_RENDER_
 
-#include <Crimild.hpp>
+#include <Rendering/ShaderProgram.hpp>
 
 namespace crimild {
     

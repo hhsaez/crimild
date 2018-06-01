@@ -44,6 +44,7 @@ namespace crimild {
 				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::EnableNode )
 				
 			public:
+				EnableNode( void );
 				explicit EnableNode( crimild::Bool enabled, std::string node );
 				virtual ~EnableNode( void );
 				
@@ -52,6 +53,17 @@ namespace crimild {
 			private:
 				crimild::Bool _enabled;
 		        std::string _node;
+				
+				/**
+				   \name Coding support
+				*/
+				//@{
+				
+			public:
+				virtual void encode( coding::Encoder &encoder ) override;
+				virtual void decode( coding::Decoder &decoder ) override;
+				
+				//@}
 			};
 
 		}

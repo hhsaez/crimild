@@ -51,7 +51,7 @@ namespace crimild {
     /**
         \brief An object that can be inserted into a stream
     */
-    class StreamObject : public SharedObject, public RTTI {
+    class StreamObject {
     public:
         /**
             \brief Alias for a stream object unique identifier
@@ -205,8 +205,9 @@ namespace crimild {
     public:
 
         void addObject( StreamObject *obj ) 
-        { 
-            addObject( crimild::retain( obj ) ); 
+        {
+            auto objPtr = crimild::retain( dynamic_cast< SharedObject * >( obj ) );
+            addObject( crimild::dynamic_cast_ptr< StreamObject >( objPtr ) );
         }
 
         void addObject( SharedPointer< StreamObject > const &obj );

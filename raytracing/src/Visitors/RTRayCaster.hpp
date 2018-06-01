@@ -1,10 +1,14 @@
 #ifndef CRIMILD_RAYTRACING_VISITORS_RAY_CASTER_
 #define CRIMILD_RAYTRACING_VISITORS_RAY_CASTER_
 
-#include <Crimild.hpp>
+#include "Mathematics/Vector.hpp"
+#include "Mathematics/Ray.hpp"
+#include "Visitors/NodeVisitor.hpp"
+
+#include <list>
 
 namespace crimild {
-
+    
 	namespace raytracing {
 
 		class RTRayCaster : public NodeVisitor {

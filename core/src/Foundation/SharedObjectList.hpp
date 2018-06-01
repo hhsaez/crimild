@@ -66,7 +66,10 @@ namespace crimild {
         CallbackType _onAddedCallback;
         CallbackType _onRemovedCallback;
     };
-    
+
+	/**
+	   \deprecated Use List< SharedPointer< ObjectType >> instead
+	 */
     template<
         class ObjectType,
         template < class > class CallbackPolicy = NoCallbacksPolicy

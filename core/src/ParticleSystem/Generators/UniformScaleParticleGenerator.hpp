@@ -33,6 +33,8 @@
 namespace crimild {
 
     class UniformScaleParticleGenerator : public ParticleSystemComponent::ParticleGenerator {
+		CRIMILD_IMPLEMENT_RTTI( crimild::UniformScaleParticleGenerator )
+
     public:
         UniformScaleParticleGenerator( void );
         virtual ~UniformScaleParticleGenerator( void );
@@ -51,6 +53,17 @@ namespace crimild {
 		crimild::Real32 _maxScale;
 
 		ParticleAttribArray *_scales = nullptr;
+
+		/** 
+		 	\name Coding support
+		*/
+		//@{
+
+	public:
+		virtual void encode( coding::Encoder &encoder ) override;
+		virtual void decode( coding::Decoder &decoder ) override;
+
+		//@}
     };
 
 }

@@ -30,6 +30,8 @@
 
 #include "Foundation/Scripted.hpp"
 
+#include <ParticleSystem/Updaters/UniformScaleParticleUpdater.hpp>
+
 namespace crimild {
 
 	namespace scripting {

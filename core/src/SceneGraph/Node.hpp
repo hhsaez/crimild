@@ -30,6 +30,7 @@
 
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/NamedObject.hpp"
+#include "Coding/Codable.hpp"
 #include "Streaming/Stream.hpp"
 #include "Visitors/NodeVisitor.hpp"
 #include "Components/NodeComponent.hpp"
@@ -44,7 +45,8 @@ namespace crimild {
 		\brief Base class for any object that can be attached to the scene graph
 	*/
 	class Node : 
-		public NamedObject, 
+		public NamedObject,
+        public coding::Codable,
 		public StreamObject {
         CRIMILD_IMPLEMENT_RTTI( crimild::Node )
 
@@ -187,9 +189,21 @@ namespace crimild {
 
 	private:
 		bool _enabled = true;
+            
+        /**
+            \name Coding support
+         */
+        //@{
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+
+        //@}
 
 		/**
 			\name Streaming support
+         
+            \deprecated See crimild::coding
 		*/
 		//@{
 

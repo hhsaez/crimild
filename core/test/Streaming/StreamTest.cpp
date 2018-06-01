@@ -27,7 +27,7 @@
 
 #include "Streaming/Stream.hpp"
 #include "Streaming/FileStream.hpp"
-
+#include "Coding/Codable.hpp"
 #include "Foundation/Memory.hpp"
 
 #include "gtest/gtest.h"
@@ -37,7 +37,7 @@ namespace crimild {
 	namespace test {
 
 		template< typename T >
-		class MockStreamObject : public StreamObject {
+        class MockStreamObject : public coding::Codable, public StreamObject {
 		public:
 			MockStreamObject( void ) { }
 			MockStreamObject( T value ) : _value( value ) { }
@@ -99,7 +99,7 @@ namespace crimild {
 			virtual ~Matrix4fMockStreamObject( void ) { }
 		};
 
-		class CompositeMockStreamObject : public StreamObject {
+        class CompositeMockStreamObject : public coding::Codable, public StreamObject {
 			CRIMILD_IMPLEMENT_RTTI( crimild::test::CompositeMockStreamObject )
 
 		public:
@@ -156,7 +156,7 @@ namespace crimild {
 			SharedPointer< IntMockStreamObject > _child;
 		};
 
-		class MockStreamObjectArray : public StreamObject {
+        class MockStreamObjectArray : public coding::Codable, public StreamObject {
 			CRIMILD_IMPLEMENT_RTTI( crimild::test::MockStreamObjectArray )
 
 		public:

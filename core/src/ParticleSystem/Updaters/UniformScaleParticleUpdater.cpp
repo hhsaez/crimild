@@ -72,3 +72,13 @@ void UniformScaleParticleUpdater::update( Node *node, crimild::Real64 dt, Partic
 	}
 }
 
+void UniformScaleParticleUpdater::encode( coding::Encoder &encoder ) 
+{
+	ParticleSystemComponent::ParticleUpdater::encode( encoder );
+}
+
+void UniformScaleParticleUpdater::decode( coding::Decoder &decoder )
+{
+	ParticleSystemComponent::ParticleUpdater::decode( decoder );
+}
+

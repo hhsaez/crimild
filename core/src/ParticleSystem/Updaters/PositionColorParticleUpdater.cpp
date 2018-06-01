@@ -44,3 +44,13 @@ void PositionColorParticleUpdater::update( Node *node, double dt, ParticleData *
 
 }
 
+void PositionColorParticleUpdater::encode( coding::Encoder &encoder ) 
+{
+	ParticleSystemComponent::ParticleUpdater::encode( encoder );
+}
+
+void PositionColorParticleUpdater::decode( coding::Decoder &decoder )
+{
+	ParticleSystemComponent::ParticleUpdater::decode( decoder );
+}
+

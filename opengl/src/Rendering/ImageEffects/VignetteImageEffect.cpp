@@ -26,8 +26,11 @@
  */
 
 #include "VignetteImageEffect.hpp"
-
 #include "Rendering/OpenGLUtils.hpp"
+
+#include <Rendering/FrameBufferObject.hpp>
+#include <Rendering/ShaderProgram.hpp>
+#include <Rendering/RenderPasses/RenderPass.hpp>
 
 using namespace crimild;
 using namespace crimild::opengl;

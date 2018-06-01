@@ -28,7 +28,7 @@
 #ifndef CRIMILD_OPENGL_SHADER_PROGRAMS_GAUSSIAN_BLUR_
 #define CRIMILD_OPENGL_SHADER_PROGRAMS_GAUSSIAN_BLUR_
 
-#include <Crimild.hpp>
+#include <Rendering/ShaderProgram.hpp>
 
 namespace crimild {
     

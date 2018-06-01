@@ -33,6 +33,8 @@
 namespace crimild {
 
     class EulerParticleUpdater : public ParticleSystemComponent::ParticleUpdater {
+		CRIMILD_IMPLEMENT_RTTI( crimild::EulerParticleUpdater )
+		
     public:
         EulerParticleUpdater( void );
         virtual ~EulerParticleUpdater( void );
@@ -49,6 +51,18 @@ namespace crimild {
 		ParticleAttribArray *_positions = nullptr;
 		ParticleAttribArray *_velocities = nullptr;
 		ParticleAttribArray *_accelerations = nullptr;
+
+		/** 
+		 	\name Coding support
+		*/
+		//@{
+
+	public:
+		virtual void encode( coding::Encoder &encoder ) override;
+		virtual void decode( coding::Decoder &decoder ) override;
+
+		//@}
+        
     };
 
 }

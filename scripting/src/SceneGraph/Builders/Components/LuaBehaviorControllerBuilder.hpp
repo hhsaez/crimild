@@ -30,13 +30,15 @@
 
 #include "Foundation/Scripted.hpp"
 
+#include <Behaviors/BehaviorController.hpp>
+
 namespace crimild {
 
 	namespace scripting {
         
 		class LuaBehaviorControllerBuilder {
 		public:
-			static SharedPointer< BehaviorController > build( ScriptEvaluator &eval );
+			static SharedPointer< behaviors::BehaviorController > build( ScriptEvaluator &eval );
 		};
 
 	}

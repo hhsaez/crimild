@@ -37,15 +37,28 @@ namespace crimild {
 		CRIMILD_IMPLEMENT_RTTI( crimild::RotationComponent )
 
 	public:
+        RotationComponent( void );
 		RotationComponent( const Vector3f &axis, float speed );
 		virtual ~RotationComponent( void );
+        
+        inline const Vector3f &getAxis( void ) const { return _axis; }
+        inline crimild::Real32 getSpeed( void ) const { return _speed; }
 
 		virtual void update( const Clock &c ) override;
 
 	private:
 		Vector3f _axis;
-		float _speed;
-		float _time;
+        crimild::Real32 _speed;
+        crimild::Real32 _time;
+        
+        /**
+            \name Coding
+         */
+        //@{
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+        //@}
 	};
 
 }

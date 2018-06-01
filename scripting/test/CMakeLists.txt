@@ -1,7 +1,7 @@
 SET ( CRIMILD_INCLUDE_DIRECTORIES 
 	${CRIMILD_INCLUDE_DIRECTORIES}
 	${CRIMILD_SOURCE_DIR}/core/src
-	${CRIMILD_SOURCE_DIR}/third-party/lua-5.2.3/src )
+	${CRIMILD_SOURCE_DIR}/third-party/lua/src )
 
 INCLUDE( ModuleBuildLibraryTest )
 

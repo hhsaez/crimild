@@ -28,6 +28,8 @@
 #include "UniformScaleParticleGenerator.hpp"
 
 #include "Mathematics/Random.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 #include "SceneGraph/Node.hpp"
 
@@ -55,5 +57,21 @@ void UniformScaleParticleGenerator::generate( Node *node, double dt, ParticleDat
     for ( ParticleId i = startId; i < endId; i++ ) {
 		ss[ i ] = Random::generate< crimild::Real32 >( _minScale, _maxScale );
     }
+}
+
+void UniformScaleParticleGenerator::encode( coding::Encoder &encoder ) 
+{
+	ParticleSystemComponent::ParticleGenerator::encode( encoder );
+
+	encoder.encode( "minScale", _minScale );
+	encoder.encode( "maxScale", _maxScale );
+}
+
+void UniformScaleParticleGenerator::decode( coding::Decoder &decoder )
+{
+	ParticleSystemComponent::ParticleGenerator::decode( decoder );
+
+	decoder.decode( "minScale", _minScale );
+	decoder.decode( "maxScale", _maxScale );
 }
 

@@ -58,3 +58,13 @@ void PositionVelocityParticleUpdater::update( Node *node, double dt, ParticleDat
 	}
 }
 
+void PositionVelocityParticleUpdater::encode( coding::Encoder &encoder ) 
+{
+	ParticleSystemComponent::ParticleUpdater::encode( encoder );
+}
+
+void PositionVelocityParticleUpdater::decode( coding::Decoder &decoder )
+{
+	ParticleSystemComponent::ParticleUpdater::decode( decoder );
+}
+

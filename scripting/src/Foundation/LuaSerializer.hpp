@@ -28,7 +28,11 @@
 #ifndef CRIMILD_SCRIPTING_FOUNDATION_LUA_SERIALIZER_
 #define CRIMILD_SCRIPTING_FOUNDATION_LUA_SERIALIZER_
 
-#include <Crimild.hpp>
+#include <Foundation/NonCopyable.hpp>
+#include <Mathematics/Vector.hpp>
+#include <Mathematics/Quaternion.hpp>
+
+#include <sstream>
 
 namespace crimild {
 

@@ -28,9 +28,12 @@
 #ifndef CRIMILD_GL3_RENDERING_IMAGE_EFFECT_VIGNETTE_
 #define CRIMILD_GL3_RENDERING_IMAGE_EFFECT_VIGNETTE_
 
-#include <Crimild.hpp>
+#include <Rendering/ImageEffects/ImageEffect.hpp>
+#include <Rendering/ShaderUniformImpl.hpp>
 
 namespace crimild {
+    
+    class ShaderProgram;
     
     namespace opengl {
         

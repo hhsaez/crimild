@@ -38,6 +38,8 @@ namespace crimild {
         \remarks Should be used with burst mode
     */
     class GridPositionParticleGenerator : public ParticleSystemComponent::ParticleGenerator {
+        CRIMILD_IMPLEMENT_RTTI( crimild::GridPositionParticleGenerator )
+
     public:
         GridPositionParticleGenerator( void );
         virtual ~GridPositionParticleGenerator( void );
@@ -56,6 +58,17 @@ namespace crimild {
         Vector3f _size;
 
 		ParticleAttribArray *_positions = nullptr;
+        
+		/** 
+		 	\name Coding support
+		*/
+		//@{
+
+	public:
+		virtual void encode( coding::Encoder &encoder ) override;
+		virtual void decode( coding::Decoder &decoder ) override;
+
+		//@}
     };
 
 }

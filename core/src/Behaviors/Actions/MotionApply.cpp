@@ -70,3 +70,13 @@ Behavior::State MotionApply::step( BehaviorContext *context )
 	return Behavior::State::SUCCESS;
 }
 
+void MotionApply::encode( coding::Encoder &encoder )
+{
+	Behavior::encode( encoder );
+}
+
+void MotionApply::decode( coding::Decoder &decoder )
+{
+	Behavior::decode( decoder );
+}
+

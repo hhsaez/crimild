@@ -28,7 +28,7 @@
 #ifndef CRIMILD_OPENGL_RENDERING_PROGRAMS_SIGNED_DISTANCE_FIELD_
 #define CRIMILD_OPENGL_RENDERING_PROGRAMS_SIGNED_DISTANCE_FIELD_
 
-#include <Crimild.hpp>
+#include <Rendering/ShaderProgram.hpp>
 
 namespace crimild {
 

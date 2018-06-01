@@ -28,7 +28,8 @@
 #ifndef CRIMILD_OPENGL_RENDERING_UTILS_
 #define CRIMILD_OPENGL_RENDERING_UTILS_
 
-#include <Crimild.hpp>
+#include <Foundation/Macros.hpp>
+#include <Rendering/Shader.hpp>
 
 #ifdef CRIMILD_PLATFORM_DESKTOP
     #define GLEW_STATIC 1
@@ -44,7 +45,7 @@
 #endif
 
 namespace crimild {
-
+    
 	namespace opengl {
 
 		class OpenGLUtils {

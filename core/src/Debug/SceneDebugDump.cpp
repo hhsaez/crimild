@@ -7,6 +7,8 @@
 #include "SceneGraph/Camera.hpp"
 #include "SceneGraph/Light.hpp"
 
+#include "Primitives/Primitive.hpp"
+
 #include "Simulation/FileSystem.hpp"
 
 #include <sstream>
@@ -56,6 +58,20 @@ void SceneDebugDump::visitGroup( Group *group )
 void SceneDebugDump::visitGeometry( Geometry *geometry )
 {
     dumpNode( geometry, "Geometry" );
+
+	
+    std::stringstream indent;
+    for ( int i = 0; i < _parentLevel + 1; i++ ) {
+        indent << " ";
+    }
+
+	geometry->forEachPrimitive( [ this, &indent ]( Primitive *primitive ) {
+		_output << "\n";
+		_output << indent.str()
+				<< "(Primitive)" << " [" << &primitive << "]"
+				<< " Vertices: " << primitive->getVertexBuffer()->getVertexCount()
+				<< " Indices: " << primitive->getIndexBuffer()->getIndexCount();
+	});
 }
 
 void SceneDebugDump::visitText( Text *text )

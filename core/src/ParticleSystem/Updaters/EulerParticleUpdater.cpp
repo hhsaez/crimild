@@ -26,6 +26,8 @@
  */
 
 #include "EulerParticleUpdater.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 using namespace crimild;
 
@@ -76,5 +78,19 @@ void EulerParticleUpdater::update( Node *node, crimild::Real64 dt, ParticleData 
 		auto v = dt * vs[ i ];
 		ps[ i ] += v;
 	}
+}
+
+void EulerParticleUpdater::encode( coding::Encoder &encoder ) 
+{
+	ParticleSystemComponent::ParticleUpdater::encode( encoder );
+
+	encoder.encode( "globalAcceleration", _globalAcceleration );
+}
+
+void EulerParticleUpdater::decode( coding::Decoder &decoder )
+{
+	ParticleSystemComponent::ParticleUpdater::decode( decoder );
+
+	decoder.decode( "globalAcceleration", _globalAcceleration );
 }
 
