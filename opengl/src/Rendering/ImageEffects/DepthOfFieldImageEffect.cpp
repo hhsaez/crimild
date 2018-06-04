@@ -282,13 +282,13 @@ void DepthOfFieldImageEffect::compute( Renderer *renderer, Camera *camera )
         return;
     }
     
-    auto colorTarget = sceneFBO->getRenderTargets().get( RenderPass::S_BUFFER_COLOR_TARGET_NAME );
+    auto colorTarget = sceneFBO->getRenderTargets()[ RenderPass::S_BUFFER_COLOR_TARGET_NAME ];
     if ( colorTarget == nullptr ) {
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot get color target from scene" );
         return;
     }
 
-    auto depthTarget = sceneFBO->getRenderTargets().get( RenderPass::S_BUFFER_DEPTH_TARGET_NAME );
+    auto depthTarget = sceneFBO->getRenderTargets()[ RenderPass::S_BUFFER_DEPTH_TARGET_NAME ];
     if ( depthTarget->getTexture() == nullptr ) {
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "Depth texture is null" );
         return;
@@ -331,7 +331,7 @@ void DepthOfFieldImageEffect::compute( Renderer *renderer, Camera *camera )
     renderer->unbindProgram( getBlurProgram() );
     renderer->unbindFrameBuffer( fboA );
 
-    auto aColorTarget = fboA->getRenderTargets().get( RenderTarget::RENDER_TARGET_NAME_COLOR );
+    auto aColorTarget = fboA->getRenderTargets()[ RenderTarget::RENDER_TARGET_NAME_COLOR ];
     if ( aColorTarget == nullptr ) {
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot get color target from scene" );
         return;
@@ -360,13 +360,13 @@ void DepthOfFieldImageEffect::apply( crimild::Renderer *renderer, crimild::Camer
         return;
     }
     
-    auto colorTarget = sceneFBO->getRenderTargets().get( RenderPass::S_BUFFER_COLOR_TARGET_NAME );
+    auto colorTarget = sceneFBO->getRenderTargets()[ RenderPass::S_BUFFER_COLOR_TARGET_NAME ];
     if ( colorTarget->getTexture() == nullptr ) {
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "Color texture is null" );
         return;
     }
 
-    auto depthTarget = sceneFBO->getRenderTargets().get( RenderPass::S_BUFFER_DEPTH_TARGET_NAME );
+    auto depthTarget = sceneFBO->getRenderTargets()[ RenderPass::S_BUFFER_DEPTH_TARGET_NAME ];
     if ( depthTarget->getTexture() == nullptr ) {
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "Depth texture is null" );
         return;
@@ -378,7 +378,7 @@ void DepthOfFieldImageEffect::apply( crimild::Renderer *renderer, crimild::Camer
         return;
     }
 
-    auto blurTarget = blurFBO->getRenderTargets().get( RenderTarget::RENDER_TARGET_NAME_COLOR );
+    auto blurTarget = blurFBO->getRenderTargets()[ RenderTarget::RENDER_TARGET_NAME_COLOR ];
     if ( blurTarget->getTexture() == nullptr || blurTarget->getTexture()->getCatalog() == nullptr ) {
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "Blur texture is null" );
         return;

@@ -83,7 +83,7 @@ namespace crimild {
 			
 			virtual ~Map( void )
 			{
-				
+                _map.clear();
 			}
             
             Map &operator=( const Map &other )

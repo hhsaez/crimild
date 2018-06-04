@@ -87,7 +87,7 @@ namespace crimild {
 
 			virtual ~List( void )
 			{
-				
+                _list.clear();
 			}
             
             List &operator=( const List &other )
@@ -131,7 +131,7 @@ namespace crimild {
             inline void clear( void )
             {
                 LockImpl lock( this );
-				return _list.clear();
+				_list.clear();
             }
 			
 			void add( T const &elem )

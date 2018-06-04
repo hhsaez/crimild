@@ -76,7 +76,8 @@ namespace crimild {
 			
 			virtual ~Stack( void )
 			{
-				
+                resize_unsafe( 2 );
+                _size = 0;
 			}
             
             Stack &operator=( const Stack &other )

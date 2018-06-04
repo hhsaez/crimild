@@ -30,7 +30,7 @@
 
 #include "Node.hpp"
 
-#include "Foundation/SharedObjectArray.hpp"
+#include "Foundation/Containers/Array.hpp"
 
 #include <functional>
 
@@ -60,7 +60,7 @@ namespace crimild {
 		void updateModelBounds( void );
 
 	private:
-        SharedObjectArray< Primitive > _primitives;
+		containers::Array< SharedPointer< Primitive >> _primitives;
 
 	public:
 		virtual void accept( NodeVisitor &visitor ) override;

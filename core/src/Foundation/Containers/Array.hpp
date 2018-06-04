@@ -100,7 +100,8 @@ namespace crimild {
 
 			virtual ~Array( void )
 			{
-				
+                resize_unsafe( 0 );
+                _size = 0;
 			}
             
             Array &operator=( const Array &other )

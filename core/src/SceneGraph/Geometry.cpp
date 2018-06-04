@@ -63,7 +63,7 @@ void Geometry::attachPrimitive( SharedPointer< Primitive > const &primitive )
 
 void Geometry::detachPrimitive( Primitive *primitive )
 {
-    _primitives.remove( primitive );
+    _primitives.remove( crimild::retain( primitive ) );
 }
 
 void Geometry::detachPrimitive( SharedPointer< Primitive > const &primitive )
@@ -73,7 +73,9 @@ void Geometry::detachPrimitive( SharedPointer< Primitive > const &primitive )
 
 void Geometry::forEachPrimitive( std::function< void( Primitive * ) > callback )
 {
-    _primitives.forEach( callback );
+	_primitives.each( [ callback ]( SharedPointer< Primitive > &p ) {
+		callback( crimild::get_ptr( p ) );
+	});
 }
 
 void Geometry::detachAllPrimitives( void )
@@ -108,11 +110,7 @@ void Geometry::encode( coding::Encoder &encoder )
 {
     Node::encode( encoder );
     
-    containers::Array< SharedPointer< Primitive >> ps;
-    forEachPrimitive( [ &ps ]( Primitive *primitive ) {
-        ps.add( crimild::retain( primitive ) );
-    });
-    encoder.encode( "primitives", ps );
+    encoder.encode( "primitives", _primitives );
 }
 
 void Geometry::decode( coding::Decoder &decoder )

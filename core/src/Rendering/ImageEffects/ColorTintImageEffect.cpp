@@ -81,7 +81,7 @@ void ColorTintImageEffect::apply( crimild::Renderer *renderer, crimild::Camera *
 		return;
 	}
     
-    auto colorTarget = sceneFBO->getRenderTargets().get( RenderPass::S_BUFFER_COLOR_TARGET_NAME );
+    auto colorTarget = sceneFBO->getRenderTargets()[ RenderPass::S_BUFFER_COLOR_TARGET_NAME ];
 	if ( colorTarget == nullptr ) {
         Log::warning( CRIMILD_CURRENT_CLASS_NAME, "Cannot find render target named '", RenderPass::S_BUFFER_COLOR_TARGET_NAME, "'" );
 		setEnabled( false );

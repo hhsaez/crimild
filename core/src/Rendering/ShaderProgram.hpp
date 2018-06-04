@@ -33,7 +33,7 @@
 #include "ShaderUniform.hpp"
 #include "Catalog.hpp"
 
-#include "Foundation/SharedObjectArray.hpp"
+#include "Foundation/Containers/Array.hpp"
 
 #include <functional>
 #include <map>
@@ -158,7 +158,7 @@ namespace crimild {
 		void forEachUniform( std::function< void( ShaderUniform * ) > callback );
 
 	private:
-        SharedObjectArray< ShaderUniform > _uniforms;
+		containers::Array< SharedPointer< ShaderUniform >> _uniforms;
 	};
 
 }

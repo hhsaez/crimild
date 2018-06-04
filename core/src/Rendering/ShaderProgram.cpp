@@ -93,12 +93,14 @@ void ShaderProgram::attachUniform( SharedPointer< ShaderUniform > const &uniform
 
 void ShaderProgram::forEachUniform( std::function< void( ShaderUniform * ) > callback )
 {
-    _uniforms.forEach( callback );
+	_uniforms.each( [ callback ]( SharedPointer< ShaderUniform > &uniform ) {
+		callback( crimild::get_ptr( uniform ) );
+	});
 }
 
 void ShaderProgram::detachAllUniforms( void )
 {
-    _uniforms.forEach( []( ShaderUniform *uniform ) {
+    _uniforms.each( []( SharedPointer< ShaderUniform > &uniform ) {
         auto location = uniform->getLocation();
         if ( location != nullptr ) {
             location->reset();
