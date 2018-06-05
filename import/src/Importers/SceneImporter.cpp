@@ -305,7 +305,14 @@ void loadAnimations( const aiScene *scene, SharedPointer< SkinnedMesh > &skinned
 			for ( int rIndex = 0; rIndex < channel->mNumRotationKeys; rIndex++ ) {
 				auto rKey = channel->mRotationKeys[ rIndex ];
 				animationChannel->getRotationKeys()[ rIndex ].time = rKey.mTime;
-				animationChannel->getRotationKeys()[ rIndex ].value = Quaternion4f( rKey.mValue.x, rKey.mValue.y, rKey.mValue.z, rKey.mValue.w );
+				auto q = Quaternion4f( rKey.mValue.x, rKey.mValue.y, rKey.mValue.z, rKey.mValue.w );
+				if ( rIndex > 0 ) {
+					auto q0 = animationChannel->getRotationKeys()[ rIndex - 1 ].value;
+					if ( q.getRawData() * q0.getRawData() < 0 ) {
+						q = -q;
+					}
+				}
+				animationChannel->getRotationKeys()[ rIndex ].value = q;
 			}
 
 			animationChannel->getScaleKeys().resize( channel->mNumScalingKeys );

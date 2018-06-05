@@ -207,6 +207,9 @@ namespace crimild {
 		}
 
 		template< typename U >
+		friend Quaternion< U > operator-( const Quaternion< U > &q );
+
+		template< typename U >
 		friend Quaternion< U > operator+( const Quaternion< U > &q, const Quaternion< U > &r );
 
 		template< typename U >
@@ -505,6 +508,12 @@ namespace crimild {
 	private:
 		Vector4Impl _data;
 	};
+
+	template< typename U >
+	Quaternion< U > operator-( const Quaternion< U > &q )
+	{
+		return Quaternion< U >( -q._data );
+	}
 
 	template< typename U >
 	Quaternion< U > operator+( const Quaternion< U > &q, const Quaternion< U > &r )
