@@ -191,6 +191,30 @@ namespace crimild {
                 LockImpl lock( this );
                 return &_elems[ 0 ];
             }
+
+			inline T &first( void )
+			{
+				LockImpl lock( this );
+				return _elems[ 0 ];
+			}
+
+			inline const T &first( void ) const
+			{
+				LockImpl lock( this );
+				return _elems[ 0 ];
+			}
+
+			inline T &last( void )
+			{
+				LockImpl lock( this );
+				return _elems[ _size - 1 ];
+			}
+
+			inline const T &last( void ) const
+			{
+				LockImpl lock( this );
+				return _elems[ _size - 1 ];
+			}
 			
 			void add( T const &elem )
 			{

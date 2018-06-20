@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,52 +25,48 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_IMPORT_SCENE_IMPORTER_
-#define CRIMILD_IMPORT_SCENE_IMPORTER_
+#ifndef CRIMILD_ANIMATION_CLIP_
+#define CRIMILD_ANIMATION_CLIP_
 
-#include "Foundation/Memory.hpp"
-#include "Foundation/Containers/Map.hpp"
-#include "Mathematics/Transformation.hpp"
-
-#include "assimp/Importer.hpp"
-#include "assimp/scene.h"
+#include "Coding/Codable.hpp"
+#include "Foundation/NamedObject.hpp"
+#include "Foundation/Containers/Array.hpp"
 
 namespace crimild {
-    
-    class Group;
-	class Material;
-	class SkinnedMesh;
 
 	namespace animation {
 
-		class Joint;
-		class Skeleton;
+		class Animation;
+		class Channel;
 
-	}
-
-	namespace import {
-
-		class SceneImporter {
+		class Clip :
+			public coding::Codable,
+			public NamedObject {
+			CRIMILD_IMPLEMENT_RTTI( crimild::animation::Clip )
+			
 		public:
-			SceneImporter( void );
-			virtual ~SceneImporter( void );
+			explicit Clip( std::string name );
+			explicit Clip( std::string name, SharedPointer< Channel > const &channel );
+			virtual ~Clip( void );
 
-			SharedPointer< Group > import( std::string filename );
+			void setDuration( crimild::Real32 duration ) { _duration = duration; }
+			crimild::Real32 getDuration( void ) const { return _duration; }
 
-		private:
-			animation::Joint *getJoint( std::string name );
-
-		private:
-			containers::Map< std::string, SharedPointer< animation::Joint >> _joints;
-			SharedPointer< animation::Skeleton > _skeleton;
+			void setFrameRate( crimild::Real32 frameRate ) { _frameRate = frameRate; }
+			crimild::Real32 getFrameRate( void ) const { return _frameRate; }
 
 		private:
-			void computeTransform( const aiMatrix4x4 &m, Transformation &t );
-			void loadMaterialTexture( SharedPointer< Material > material, const aiMaterial *input, std::string basePath, aiTextureType texType, unsigned int texIndex = 0 );
-			SharedPointer< Material > buildMaterial( const aiMaterial *mtl, std::string basePath );
-			void recursiveSceneBuilder( SharedPointer< Group > parent, const struct aiScene *s, const struct aiNode *n, std::string basePath, SharedPointer< SkinnedMesh > &skinnedMesh );
-			void loadAnimations( const aiScene *scene, SharedPointer< SkinnedMesh > &skinnedMesh );
+			crimild::Real32 _duration = 0.0f;
+			crimild::Real32 _frameRate = 1.0f;
 
+		public:
+			void addChannel( SharedPointer< Channel > const &channel );
+
+		private:
+			containers::Array< SharedPointer< Channel >> _channels;
+
+		public:
+			void evaluate( crimild::Real32 t, Animation *animation );
 		};
 
 	}

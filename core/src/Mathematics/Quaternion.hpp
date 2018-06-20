@@ -116,7 +116,9 @@ namespace crimild {
 			setting valid values for all quaternion components
 		 */
 		Quaternion( void )
+			: _data( 0, 0, 0, 1 )
 		{
+			
 		}
 
 		/**

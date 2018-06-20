@@ -31,12 +31,13 @@
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Group.hpp"
 #include "Rendering/Material.hpp"
-#include "Rendering/SkinnedMesh.hpp"
+#include "Animation/Skeleton.hpp"
 #include "Components/RenderStateComponent.hpp"
 #include "Components/MaterialComponent.hpp"
 #include "Components/SkinnedMeshComponent.hpp"
 
 using namespace crimild;
+using namespace crimild::animation;
 
 UpdateRenderState::UpdateRenderState( void )
 {
@@ -70,15 +71,15 @@ void UpdateRenderState::traverse( Node *node )
 
 void UpdateRenderState::visitGroup( Group *group )
 {
-	auto tmpSkin = _skinnedMesh;
-	auto skin = group->getComponent< SkinnedMeshComponent >();
-	if ( skin != nullptr ) {
-		_skinnedMesh = crimild::retain( skin->getSkinnedMesh() );
+	auto tempSkeleton = _skeleton;
+
+	if ( auto skeleton = group->getComponent< Skeleton >() ) {
+		_skeleton = skeleton;
 	}
 
 	NodeVisitor::visitGroup( group );
 
-	_skinnedMesh = tmpSkin;
+	_skeleton = tempSkeleton;
 }
 
 void UpdateRenderState::visitGeometry( Geometry *geometry )
@@ -101,12 +102,11 @@ void UpdateRenderState::visitGeometry( Geometry *geometry )
 		rs->attachLight( light );
 	}
 
-	auto skin = geometry->getComponent< SkinnedMeshComponent >();
-	if ( skin != nullptr ) {
-		rs->setSkinnedMesh( crimild::retain( skin->getSkinnedMesh() ) );
+	if ( auto skeleton = geometry->getComponent< Skeleton >() ) {
+		rs->setSkeleton( crimild::retain( skeleton ) );
 	}
-	else {
-		rs->setSkinnedMesh( _skinnedMesh );
+	else if ( _skeleton != nullptr ) {
+		rs->setSkeleton( crimild::retain( _skeleton ) );
 	}
 }
 

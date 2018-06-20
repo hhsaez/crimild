@@ -63,7 +63,7 @@ namespace crimild {
 	public:
 		Vector( void )
 		{
-			// vector's data is not initialized in order to avoid overhead
+			memset( &_data[ 0 ], 0, sizeof( PRECISION ) * SIZE );
 		}
 
 		/**

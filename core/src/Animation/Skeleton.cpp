@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,57 +25,69 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_IMPORT_SCENE_IMPORTER_
-#define CRIMILD_IMPORT_SCENE_IMPORTER_
+#include "Skeleton.hpp"
+#include "Animation.hpp"
+#include "SceneGraph/Node.hpp"
+#include "Visitors/Apply.hpp"
+#include "Debug/DebugRenderHelper.hpp"
 
-#include "Foundation/Memory.hpp"
-#include "Foundation/Containers/Map.hpp"
-#include "Mathematics/Transformation.hpp"
+using namespace crimild;
+using namespace crimild::animation;
 
-#include "assimp/Importer.hpp"
-#include "assimp/scene.h"
-
-namespace crimild {
-    
-    class Group;
-	class Material;
-	class SkinnedMesh;
-
-	namespace animation {
-
-		class Joint;
-		class Skeleton;
-
-	}
-
-	namespace import {
-
-		class SceneImporter {
-		public:
-			SceneImporter( void );
-			virtual ~SceneImporter( void );
-
-			SharedPointer< Group > import( std::string filename );
-
-		private:
-			animation::Joint *getJoint( std::string name );
-
-		private:
-			containers::Map< std::string, SharedPointer< animation::Joint >> _joints;
-			SharedPointer< animation::Skeleton > _skeleton;
-
-		private:
-			void computeTransform( const aiMatrix4x4 &m, Transformation &t );
-			void loadMaterialTexture( SharedPointer< Material > material, const aiMaterial *input, std::string basePath, aiTextureType texType, unsigned int texIndex = 0 );
-			SharedPointer< Material > buildMaterial( const aiMaterial *mtl, std::string basePath );
-			void recursiveSceneBuilder( SharedPointer< Group > parent, const struct aiScene *s, const struct aiNode *n, std::string basePath, SharedPointer< SkinnedMesh > &skinnedMesh );
-			void loadAnimations( const aiScene *scene, SharedPointer< SkinnedMesh > &skinnedMesh );
-
-		};
-
-	}
+Joint::Joint( void )
+{
 
 }
 
-#endif
+Joint::Joint( std::string name, crimild::UInt32 id )
+	: NamedObject( name ),
+	  _id( id )
+{
+
+}
+
+Joint::~Joint( void )
+{
+
+}
+
+Skeleton::Skeleton( void )
+{
+
+}
+
+Skeleton::~Skeleton( void )
+{
+
+}
+
+void Skeleton::animate( Animation *animation )
+{
+	getJoints().each( [ animation ]( const std::string &, SharedPointer< Joint > const &joint ) {
+		auto name = joint->getName();
+		auto node = joint->getNode();
+
+		animation->getValue( name + "[p]", node->local().translate() );
+		animation->getValue( name + "[r]", node->local().rotate() );
+		animation->getValue( name + "[s]", node->local().scale() );
+
+		Transformation pose;
+		pose.computeFrom( node->getParent()->getWorld(), node->getLocal() );
+		pose.computeFrom( pose, joint->getOffset() );
+		joint->setPoseMatrix( pose.computeModelMatrix() );
+	});
+}
+
+void Skeleton::renderDebugInfo( Renderer *renderer, Camera *camera )
+{
+	std::vector< Vector3f > lines;
+	getNode()->perform( Apply( [ &lines ]( Node *node ) {
+		if ( node->hasParent() ) {
+			lines.push_back( node->getParent()->getWorld().getTranslate() );
+			lines.push_back( node->getWorld().getTranslate() );
+		}
+	}));
+
+	DebugRenderHelper::renderLines( renderer, camera, &lines[ 0 ], lines.size(), RGBAColorf( 1.0f, 0.0f, 0.0f, 1.0f ) );	
+}
 

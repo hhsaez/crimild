@@ -41,6 +41,7 @@ namespace crimild {
 	public:
 		Matrix( void )
 		{
+			memset( &_data[ 0 ], 0, sizeof( PRECISION ) * SIZE * SIZE );
 		}
 
 		explicit Matrix( const PRECISION *data )

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,57 +25,39 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_IMPORT_SCENE_IMPORTER_
-#define CRIMILD_IMPORT_SCENE_IMPORTER_
+#include "Clip.hpp"
+#include "Channel.hpp"
 
-#include "Foundation/Memory.hpp"
-#include "Foundation/Containers/Map.hpp"
-#include "Mathematics/Transformation.hpp"
+using namespace crimild;
+using namespace crimild::animation;
 
-#include "assimp/Importer.hpp"
-#include "assimp/scene.h"
+Clip::Clip( std::string name )
+	: NamedObject( name )
+{
+	
+}
 
-namespace crimild {
-    
-    class Group;
-	class Material;
-	class SkinnedMesh;
+Clip::Clip( std::string name, SharedPointer< Channel > const &channel )
+	: NamedObject( name )
+{
+	addChannel( channel );
+}
 
-	namespace animation {
-
-		class Joint;
-		class Skeleton;
-
-	}
-
-	namespace import {
-
-		class SceneImporter {
-		public:
-			SceneImporter( void );
-			virtual ~SceneImporter( void );
-
-			SharedPointer< Group > import( std::string filename );
-
-		private:
-			animation::Joint *getJoint( std::string name );
-
-		private:
-			containers::Map< std::string, SharedPointer< animation::Joint >> _joints;
-			SharedPointer< animation::Skeleton > _skeleton;
-
-		private:
-			void computeTransform( const aiMatrix4x4 &m, Transformation &t );
-			void loadMaterialTexture( SharedPointer< Material > material, const aiMaterial *input, std::string basePath, aiTextureType texType, unsigned int texIndex = 0 );
-			SharedPointer< Material > buildMaterial( const aiMaterial *mtl, std::string basePath );
-			void recursiveSceneBuilder( SharedPointer< Group > parent, const struct aiScene *s, const struct aiNode *n, std::string basePath, SharedPointer< SkinnedMesh > &skinnedMesh );
-			void loadAnimations( const aiScene *scene, SharedPointer< SkinnedMesh > &skinnedMesh );
-
-		};
-
-	}
+Clip::~Clip( void )
+{
 
 }
 
-#endif
+void Clip::addChannel( SharedPointer< Channel > const &channel )
+{
+	_channels.add( channel );
+	_duration = Numericf::max( _duration, channel->getDuration() );
+}
+
+void Clip::evaluate( crimild::Real32 t, Animation *animation )
+{
+	_channels.each( [ t, animation ]( SharedPointer< Channel > &channel ) {
+		channel->evaluate( t, animation );
+	});
+}
 

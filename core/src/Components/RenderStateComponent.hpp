@@ -39,7 +39,11 @@
 
 namespace crimild {
 
-	class SkinnedMesh;
+	namespace animation {
+		
+		class Skeleton;
+
+	}
 
 	class RenderStateComponent : public NodeComponent {
 		CRIMILD_IMPLEMENT_RTTI( crimild::RenderStateComponent )
@@ -62,8 +66,8 @@ namespace crimild {
         void detachAllLights( void ) { _lights.clear(); }
         void forEachLight( std::function< void( Light * ) > callback );
 
-        void setSkinnedMesh( SharedPointer< SkinnedMesh > const &skinnedMesh ) { _skinnedMesh = skinnedMesh; }
-        SkinnedMesh *getSkinnedMesh( void ) { return crimild::get_ptr( _skinnedMesh ); }
+        void setSkeleton( SharedPointer< animation::Skeleton > const &skeleton ) { _skeleton = skeleton; }
+		animation::Skeleton *getSkeleton( void ) { return crimild::get_ptr( _skeleton ); }
 
 		bool renderOnScreen( void ) const { return _renderOnScreen; }
 		void setRenderOnScreen( bool value ) { _renderOnScreen = value; }
@@ -72,7 +76,7 @@ namespace crimild {
 		containers::Array< SharedPointer< Material >> _materials;
 		containers::Array< SharedPointer< Light >> _lights;
 
-		SharedPointer< SkinnedMesh > _skinnedMesh;
+		SharedPointer< animation::Skeleton > _skeleton;
 
 		bool _renderOnScreen;
 	};

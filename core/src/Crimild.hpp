@@ -281,6 +281,11 @@
 #include "Navigation/NavigationMeshContainer.hpp"
 #include "Navigation/NavigationController.hpp"
 
+#include "Animation/Clip.hpp"
+#include "Animation/Skeleton.hpp"
+#include "Animation/Animation.hpp"
+#include "Animation/ChannelImpl.hpp"
+
 #include "Debug/DebugRenderHelper.hpp"
 #include "Debug/SceneDebugDump.hpp"
 #include "Debug/DebugRenderComponent.hpp"

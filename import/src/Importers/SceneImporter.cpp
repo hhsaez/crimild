@@ -37,17 +37,78 @@
 #include "SceneGraph/Geometry.hpp"
 #include "Simulation/FileSystem.hpp"
 #include "Simulation/AssetManager.hpp"
+#include "Animation/Skeleton.hpp"
+#include "Animation/Clip.hpp"
+#include "Animation/ChannelImpl.hpp"
 
-#include "assimp/Importer.hpp"
 #include "assimp/postprocess.h"
-#include "assimp/scene.h"
 #include "assimp/DefaultLogger.hpp"
 #include "assimp/LogStream.hpp"
 
 using namespace crimild;
 using namespace crimild::import;
 
-void computeTransform( const aiMatrix4x4 &m, Transformation &t )
+SceneImporter::SceneImporter( void )
+{
+
+}
+
+SceneImporter::~SceneImporter( void )
+{
+
+}
+
+SharedPointer< Group > SceneImporter::import( std::string filename )
+{
+	// check if file exists
+	std::ifstream fin( filename );
+	bool exists = !fin.fail();
+	fin.close();
+	if ( !exists ) {
+		// Is it ok to throw exceptions?
+		throw FileNotFoundException( filename );
+	}
+
+	Assimp::Importer importer;
+	importer.SetPropertyInteger( AI_CONFIG_PP_SLM_VERTEX_LIMIT, 15000 );
+	const aiScene* importedScene = importer.ReadFile( filename, aiProcessPreset_TargetRealtime_MaxQuality );
+	if ( importedScene == nullptr ) {
+		Log::error( CRIMILD_CURRENT_CLASS_NAME, "Error importing file ", filename, "\n", importer.GetErrorString() );
+	 	return nullptr;
+	}
+
+	auto skinnedMesh = crimild::alloc< SkinnedMesh >();
+	loadAnimations( importedScene, skinnedMesh );
+
+	auto root = crimild::alloc< Group >( filename );
+	auto basePath = FileSystem::getInstance().extractDirectory( filename ) + "/";
+	recursiveSceneBuilder( root, importedScene, importedScene->mRootNode, basePath, skinnedMesh );
+
+	if ( _skeleton != nullptr ) {
+		Transformation globalInverseTransform;
+		computeTransform( importedScene->mRootNode->mTransformation.Inverse(), globalInverseTransform );
+		_skeleton->setGlobalInverseTransform( globalInverseTransform );
+		_skeleton->setJoints( _joints );
+		root->attachComponent( _skeleton );
+	}
+
+	return root;
+}
+
+animation::Joint *SceneImporter::getJoint( std::string name )
+{
+	if ( _joints.contains( name ) ) {
+		return crimild::get_ptr( _joints[ name ] );
+	}
+
+	auto jointId = _joints.size();
+	auto joint = crimild::alloc< animation::Joint >( name, jointId );
+	_joints[ name ] = joint;
+
+	return crimild::get_ptr( joint );
+}
+
+void SceneImporter::computeTransform( const aiMatrix4x4 &m, Transformation &t )
 {
 	aiVector3D position, scaling;
  	aiQuaternion rotation;
@@ -58,7 +119,7 @@ void computeTransform( const aiMatrix4x4 &m, Transformation &t )
  	t.setRotate( Quaternion4f( rotation.x, rotation.y, rotation.z, rotation.w ) );
 }
 
-void loadMaterialTexture( SharedPointer< Material > material, const aiMaterial *input, std::string basePath, aiTextureType texType, unsigned int texIndex = 0 )
+void SceneImporter::loadMaterialTexture( SharedPointer< Material > material, const aiMaterial *input, std::string basePath, aiTextureType texType, unsigned int texIndex )
 {
 	aiString texPath;
 	if ( AI_SUCCESS == input->GetTexture( texType, texIndex, &texPath ) ) {
@@ -97,7 +158,7 @@ void loadMaterialTexture( SharedPointer< Material > material, const aiMaterial *
 
 }
 
-SharedPointer< Material > buildMaterial( const aiMaterial *mtl, std::string basePath )
+SharedPointer< Material > SceneImporter::buildMaterial( const aiMaterial *mtl, std::string basePath )
 {
 	auto material = crimild::alloc< Material >();
 
@@ -157,10 +218,15 @@ SharedPointer< Material > buildMaterial( const aiMaterial *mtl, std::string base
 	return material;
 }
 
-void recursiveSceneBuilder( SharedPointer< Group > parent, const struct aiScene *s, const struct aiNode *n, std::string basePath, SharedPointer< SkinnedMesh > &skinnedMesh ) 
+void SceneImporter::recursiveSceneBuilder( SharedPointer< Group > parent, const struct aiScene *s, const struct aiNode *n, std::string basePath, SharedPointer< SkinnedMesh > &skinnedMesh ) 
 {
 	auto group = crimild::alloc< Group >( std::string( n->mName.data ) );
 	computeTransform( n->mTransformation, group->local() );
+
+	auto joint = getJoint( group->getName() );
+	if ( joint != nullptr ) {
+		group->attachComponent( joint );
+	}
 
 	for ( int i = 0; i < n->mNumMeshes; i++ ) {
 		const struct aiMesh *mesh = s->mMeshes[ n->mMeshes[ i ] ];
@@ -234,7 +300,9 @@ void recursiveSceneBuilder( SharedPointer< Group > parent, const struct aiScene 
 
 			Transformation offset;
 			computeTransform( mesh->mBones[ boneIdx ]->mOffsetMatrix, offset );
-			auto joint = skinnedMesh->getSkeleton()->getJoints()->updateOrCreateJoint( std::string( bone->mName.data ), offset );
+			auto jointName = std::string( bone->mName.data );
+			auto joint = getJoint( jointName );
+			joint->setOffset( offset );
 
 			for ( int weightIdx = 0; weightIdx < mesh->mBones[ boneIdx ]->mNumWeights; weightIdx++ ) {
 				unsigned int vertexIdx = mesh->mBones[ boneIdx ]->mWeights[ weightIdx ].mVertexId;
@@ -270,111 +338,79 @@ void recursiveSceneBuilder( SharedPointer< Group > parent, const struct aiScene 
 	parent->attachNode( group );
 }
 
-void loadAnimations( const aiScene *scene, SharedPointer< SkinnedMesh > &skinnedMesh )
+void SceneImporter::loadAnimations( const aiScene *scene, SharedPointer< SkinnedMesh > &skinnedMesh )
 {
 	if ( scene->mNumAnimations == 0 ) {
 		// nothing to load
 		return;
 	}
 
-	auto skeleton = crimild::alloc< SkinnedMeshSkeleton >();
+	_skeleton = crimild::alloc< animation::Skeleton >();
+	
+	for ( crimild::Size aIdx = 0; aIdx < scene->mNumAnimations; aIdx++ ) {
+		const auto *inAnimation = scene->mAnimations[ aIdx ];
 
-	skeleton->getClips().resize( scene->mNumAnimations );
-	for ( unsigned int aIdx = 0; aIdx < scene->mNumAnimations; aIdx++ ) {
-		const aiAnimation *animation = scene->mAnimations[ aIdx ];
+		auto clip = crimild::alloc< animation::Clip >( std::string( inAnimation->mName.data ) );
+		clip->setDuration( inAnimation->mDuration );
+		clip->setFrameRate( inAnimation->mTicksPerSecond );
 
-		auto clip = crimild::alloc< SkinnedMeshAnimationClip >();
-		clip->setDuration( animation->mDuration );
-		clip->setFrameRate( animation->mTicksPerSecond );
-		skeleton->getClips()[ aIdx ] = clip;
+		for ( unsigned int cIdx = 0; cIdx < inAnimation->mNumChannels; cIdx++ ) {
+			const aiNodeAnim *inChannel = inAnimation->mChannels[ cIdx ];
 
-		for ( unsigned int cIdx = 0; cIdx < animation->mNumChannels; cIdx++ ) {
-			const aiNodeAnim *channel = animation->mChannels[ cIdx ];
-
-			auto animationChannel = crimild::alloc< SkinnedMeshAnimationChannel >();
-			animationChannel->setName( channel->mNodeName.data );
-
-			animationChannel->getPositionKeys().resize( channel->mNumPositionKeys );
-			for ( int pIndex = 0; pIndex < channel->mNumPositionKeys; pIndex++ ) {
-				auto pKey = channel->mPositionKeys[ pIndex ];
-				animationChannel->getPositionKeys()[ pIndex ].time = pKey.mTime;
-				animationChannel->getPositionKeys()[ pIndex ].value = Vector3f( pKey.mValue.x, pKey.mValue.y, pKey.mValue.z );
+			// Positions
+			containers::Array< crimild::Real32 > pChannelTimes( inChannel->mNumPositionKeys );
+			containers::Array< Vector3f > pChannelKeys( inChannel->mNumPositionKeys );
+			for ( crimild::Size pIndex = 0; pIndex < inChannel->mNumPositionKeys; pIndex++ ) {
+				auto pKey = inChannel->mPositionKeys[ pIndex ];
+				pChannelKeys[ pIndex ] = Vector3f( pKey.mValue.x, pKey.mValue.y, pKey.mValue.z );
+				pChannelTimes[ pIndex ] = pKey.mTime;
 			}
+			auto pChannel = crimild::alloc< animation::Vector3fChannel >(
+				std::string( inChannel->mNodeName.data ) + "[p]",
+				std::move( pChannelTimes ),
+				std::move( pChannelKeys ) );
+			clip->addChannel( pChannel );
 
-			animationChannel->getRotationKeys().resize( channel->mNumRotationKeys );
-			for ( int rIndex = 0; rIndex < channel->mNumRotationKeys; rIndex++ ) {
-				auto rKey = channel->mRotationKeys[ rIndex ];
-				animationChannel->getRotationKeys()[ rIndex ].time = rKey.mTime;
-				auto q = Quaternion4f( rKey.mValue.x, rKey.mValue.y, rKey.mValue.z, rKey.mValue.w );
-				if ( rIndex > 0 ) {
-					auto q0 = animationChannel->getRotationKeys()[ rIndex - 1 ].value;
+			// Rotations
+			containers::Array< crimild::Real32 > rChannelTimes( inChannel->mNumRotationKeys );
+			containers::Array< Quaternion4f > rChannelKeys( inChannel->mNumRotationKeys );
+			for ( crimild::Size rIndex = 0; rIndex < inChannel->mNumRotationKeys; rIndex++ ) {
+				auto rKey = inChannel->mRotationKeys[ rIndex ];
+				Quaternion4f q( rKey.mValue.x, rKey.mValue.y, rKey.mValue.z, rKey.mValue.w );
+				if ( false && rIndex > 0 ) {
+					// fix orientation
+					auto &q0 = rChannelKeys[ rIndex - 1 ];
 					if ( q.getRawData() * q0.getRawData() < 0 ) {
 						q = -q;
 					}
 				}
-				animationChannel->getRotationKeys()[ rIndex ].value = q;
+				rChannelKeys[ rIndex ] = q;
+				rChannelTimes[ rIndex ] = rKey.mTime;
 			}
-
-			animationChannel->getScaleKeys().resize( channel->mNumScalingKeys );
-			for ( int sIndex = 0; sIndex < channel->mNumScalingKeys; sIndex++ ) {
-				auto sKey = channel->mScalingKeys[ sIndex ];
-				animationChannel->getScaleKeys()[ sIndex ].time = sKey.mTime;
-				animationChannel->getScaleKeys()[ sIndex ].value = ( ( sKey.mValue.x * sKey.mValue.y * sKey.mValue.z ) / 3.0f );
+			auto rChannel = crimild::alloc< animation::Quaternion4fChannel >(
+				std::string( inChannel->mNodeName.data ) + "[r]",
+				std::move( rChannelTimes ),
+				std::move( rChannelKeys ) );
+			clip->addChannel( rChannel );
+			
+			// Scaling
+			const auto INV_3 = 1.0f / 3.0f;
+			containers::Array< crimild::Real32 > sChannelTimes( inChannel->mNumScalingKeys );
+			containers::Array< crimild::Real32 > sChannelKeys( inChannel->mNumScalingKeys );
+			for ( crimild::Size sIndex = 0; sIndex < inChannel->mNumScalingKeys; sIndex++ ) {
+				auto sKey = inChannel->mScalingKeys[ sIndex ];
+				// compute uniform scaling by averaging all values
+				sChannelKeys[ sIndex ] = ( sKey.mValue.x + sKey.mValue.y + sKey.mValue.z ) * INV_3;
+				sChannelTimes[ sIndex ] = sKey.mTime;
 			}
-
-			clip->getChannels().add( animationChannel->getName(), animationChannel );
+			auto sChannel = crimild::alloc< animation::Real32Channel >(
+				std::string( inChannel->mNodeName.data ) + "[s]",
+				std::move( sChannelTimes ),
+				std::move( sChannelKeys ) );
+			clip->addChannel( sChannel );
 		}
+
+		_skeleton->getClips()[ clip->getName() ] = clip;
 	}
-
-	skinnedMesh->setSkeleton( skeleton );
-}
-
-SceneImporter::SceneImporter( void )
-{
-
-}
-
-SceneImporter::~SceneImporter( void )
-{
-
-}
-
-SharedPointer< Group > SceneImporter::import( std::string filename )
-{
-	// check if file exists
-	std::ifstream fin( filename );
-	bool exists = !fin.fail();
-	fin.close();
-	if ( !exists ) {
-		// Is it ok to throw exceptions?
-		throw FileNotFoundException( filename );
-	}
-
-	Assimp::Importer importer;
-	importer.SetPropertyInteger( AI_CONFIG_PP_SLM_VERTEX_LIMIT, 15000 );
-	const aiScene* importedScene = importer.ReadFile( filename, aiProcessPreset_TargetRealtime_MaxQuality );
-	if ( importedScene == nullptr ) {
-		Log::error( CRIMILD_CURRENT_CLASS_NAME, "Error importing file ", filename, "\n", importer.GetErrorString() );
-	 	return nullptr;
-	}
-
-	auto skinnedMesh = crimild::alloc< SkinnedMesh >();
-	loadAnimations( importedScene, skinnedMesh );
-	skinnedMesh->debugDump();
-
-	auto root = crimild::alloc< Group >( filename );
-	auto basePath = FileSystem::getInstance().extractDirectory( filename ) + "/";
-	recursiveSceneBuilder( root, importedScene, importedScene->mRootNode, basePath, skinnedMesh );
-
-	if ( skinnedMesh->getSkeleton() != nullptr && skinnedMesh->getSkeleton()->getClips().size() > 0 ) {
-		Transformation globalInverseTransform;
-		computeTransform( importedScene->mRootNode->mTransformation.Inverse(), globalInverseTransform );
-		skinnedMesh->getSkeleton()->setGlobalInverseTransform( globalInverseTransform );
-
-		auto cmp = crimild::alloc< SkinnedMeshComponent >( skinnedMesh );
-		root->attachComponent( cmp );
-	}
-
-	return root;
 }
 
