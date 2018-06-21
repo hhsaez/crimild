@@ -70,6 +70,9 @@ namespace crimild {
 			void setDuration( crimild::Real32 duration ) { _duration = duration; }
 			crimild::Real32 getDuration( void ) const { return _duration; }
 
+			void setFrameRate( crimild::Real32 frameRate ) { _frameRate = frameRate; }
+			crimild::Real32 getFrameRate( void ) const { return _frameRate; }
+
 			void setOffset( crimild::Real32 offset ) { _offset = offset; }
 			crimild::Real32 getOffset( void ) const { return _offset; }
 
@@ -79,14 +82,25 @@ namespace crimild {
 		private:
 			crimild::Clock _clock;
 			crimild::Real32 _duration = 0.0;
+			crimild::Real32 _frameRate = 1.0f;
 			crimild::Real32 _offset = 0.0;
 			PlaybackMode _playbackMode = PlaybackMode::REPEAT;
 			SharedPointer< Clip > _clip;
 
 		public:
 			Animation *update( const Clock &c );
-			Animation *lerp( Animation *other, crimild::Real32 factor );
+
+			Animation *sync( SharedPointer< Animation > const &other );
+			Animation *sync( Animation *other );
+
+			Animation *lerp( SharedPointer< Animation > const &other, crimild::Real32 factor, crimild::Bool sync = true );
+			Animation *lerp( Animation *other, crimild::Real32 factor, crimild::Bool sync = true );
+
+			Animation *add( SharedPointer< Animation > const &other, crimild::Real32 strength );
 			Animation *add( Animation *other, crimild::Real32 strength );
+
+		private:
+			void evaluate( void );
 
 		public:
 			template< typename T >

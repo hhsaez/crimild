@@ -41,7 +41,8 @@ Animation::Animation( SharedPointer< Clip > const &clip, crimild::Real32 offset,
 	: NamedObject( clip->getName() ),
 	  _clip( clip ),
 	  _offset( offset ),
-	  _duration( duration )
+	  _duration( duration ),
+	  _frameRate( clip->getFrameRate() )
 {
 	if ( _duration <= 0.0 ) {
 		setDuration( clip->getDuration() );
@@ -56,8 +57,25 @@ Animation::~Animation( void )
 Animation *Animation::update( const Clock &c )
 {
 	_clock += c;
+	evaluate();
+	return this;
+}
 
-	auto t = _clock.getAccumTime();
+Animation *Animation::sync( SharedPointer< Animation > const &other )
+{
+	return sync( crimild::get_ptr( other ) );
+}
+
+Animation *Animation::sync( Animation *other )
+{
+	_clock = other->getClock();
+	evaluate();
+	return this;
+}
+
+void Animation::evaluate( void )
+{
+	auto t = _clock.getAccumTime() * getFrameRate();
 
 	auto animationTime = _offset;
 
@@ -80,12 +98,23 @@ Animation *Animation::update( const Clock &c )
 	}
 
 	getClip()->evaluate( animationTime, this );
-
-	return this;
 }
 
-Animation *Animation::lerp( Animation *other, crimild::Real32 factor )
+Animation *Animation::lerp( SharedPointer< Animation > const &other, crimild::Real32 factor, crimild::Bool sync )
 {
+	return lerp( crimild::get_ptr( other ), factor, sync );
+}
+
+Animation *Animation::lerp( Animation *other, crimild::Real32 factor, crimild::Bool sync )
+{
+	if ( factor == 0.0f ) {
+		return this;
+	}
+
+	if ( sync ) {
+		other->sync( this );
+	}
+	
 	_accumulators.each( [ this, other, factor ]( const std::string &channelName, SharedPointer< Accumulator > &acc ) {
 		if ( other->_accumulators.contains( channelName ) ) {
 			acc->lerp( crimild::get_ptr( other->_accumulators[ channelName ] ), factor );
@@ -93,6 +122,11 @@ Animation *Animation::lerp( Animation *other, crimild::Real32 factor )
 	});
 	
 	return this;
+}
+
+Animation *Animation::add( SharedPointer< Animation > const &other, crimild::Real32 strength )
+{
+	return add( crimild::get_ptr( other ), strength );
 }
 
 Animation *Animation::add( Animation *other, crimild::Real32 strength )
