@@ -88,7 +88,6 @@ SharedPointer< Group > SceneImporter::import( std::string filename )
 		Transformation globalInverseTransform;
 		computeTransform( importedScene->mRootNode->mTransformation.Inverse(), globalInverseTransform );
 		_skeleton->setGlobalInverseTransform( globalInverseTransform );
-		_skeleton->setJoints( _joints );
 		root->attachComponent( _skeleton );
 	}
 

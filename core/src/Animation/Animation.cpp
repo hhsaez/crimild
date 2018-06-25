@@ -27,6 +27,8 @@
 
 #include "Animation.hpp"
 #include "Clip.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 using namespace crimild;
 using namespace crimild::animation;
@@ -139,3 +141,57 @@ Animation *Animation::add( Animation *other, crimild::Real32 strength )
 	
 	return this;
 }
+
+void Animation::encode( coding::Encoder &encoder )
+{
+	Codable::encode( encoder );
+
+	encoder.encode( "duration", _duration );
+	encoder.encode( "frameRate", _frameRate );
+	encoder.encode( "offset", _offset );
+
+	std::string playbackModeStr;
+	switch ( _playbackMode ) {
+	    case PlaybackMode::REPEAT: {
+			playbackModeStr = "repeat";
+			break;
+		}
+		
+	    case PlaybackMode::MIRROR_REPEAT: {
+			playbackModeStr = "mirror_repeat";
+			break;
+		}
+		
+	    default: {
+			playbackModeStr = "once";
+			break;
+		}
+	}
+	encoder.encode( "playbackMode", playbackModeStr );
+
+	encoder.encode( "clip", _clip );
+}
+
+void Animation::decode( coding::Decoder &decoder )
+{
+	Codable::decode( decoder );
+
+	decoder.decode( "duration", _duration );
+	decoder.decode( "frameRate", _frameRate );
+	decoder.decode( "offset", _offset );
+
+	std::string playbackModeStr;
+	decoder.decode( "playbackMode", playbackModeStr );
+	if ( playbackModeStr == "once" ) {
+		setPlaybackMode( PlaybackMode::ONCE );
+	}
+	else if ( playbackModeStr == "mirror_repeat" ) {
+		setPlaybackMode( PlaybackMode::MIRROR_REPEAT );
+	}
+	else {
+		setPlaybackMode( PlaybackMode::REPEAT );
+	}
+
+	decoder.decode( "clip", _clip );
+}
+

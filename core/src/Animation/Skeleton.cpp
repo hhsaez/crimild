@@ -26,10 +26,13 @@
  */
 
 #include "Skeleton.hpp"
+#include "Clip.hpp"
 #include "Animation.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Visitors/Apply.hpp"
 #include "Debug/DebugRenderHelper.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 using namespace crimild;
 using namespace crimild::animation;
@@ -51,6 +54,35 @@ Joint::~Joint( void )
 
 }
 
+void Joint::encode( coding::Encoder &encoder )
+{
+	NodeComponent::encode( encoder );
+
+	encoder.encode( "name", getName() );
+	encoder.encode( "id", _id );
+	encoder.encode( "offset", _offset );
+}
+
+void Joint::decode( coding::Decoder &decoder )
+{
+	NodeComponent::decode( decoder );
+
+	std::string name;
+	decoder.decode( "name", name );
+	setName( name );
+	
+	decoder.decode( "id", _id );
+	decoder.decode( "offset", _offset );
+}
+
+SharedPointer< NodeComponent > Joint::clone( void )
+{
+	auto other = crimild::alloc< Joint >( getName(), getId() );
+	other->setOffset( getOffset() );
+	other->setPoseMatrix( getPoseMatrix() );
+	return other;
+}
+
 Skeleton::Skeleton( void )
 {
 
@@ -59,6 +91,17 @@ Skeleton::Skeleton( void )
 Skeleton::~Skeleton( void )
 {
 
+}
+
+void Skeleton::start( void )
+{
+	NodeComponent::start();
+
+	getNode()->perform( Apply( [ this ]( Node *node ) {
+		if ( auto joint = node->getComponent< Joint >() ) {
+			getJoints().insert( joint->getName(), crimild::retain( joint ) );
+		}
+	}));
 }
 
 void Skeleton::animate( Animation *animation )
@@ -78,11 +121,43 @@ void Skeleton::animate( Animation *animation )
 	});
 }
 
+void Skeleton::encode( coding::Encoder &encoder )
+{
+	NodeComponent::encode( encoder );
+
+	auto clips = getClips().values();
+	encoder.encode( "clips", clips );
+	encoder.encode( "globalInverseTransform", _globalInverseTransform );
+}
+
+void Skeleton::decode( coding::Decoder &decoder )
+{
+	NodeComponent::decode( decoder );
+
+	containers::Array< SharedPointer< Clip >> clips;
+	decoder.decode( "clips", clips );
+	clips.each( [ this ]( SharedPointer< Clip > const &clip ) {
+		getClips()[ clip->getName() ] = clip;
+	});
+
+	decoder.decode( "globalInverseTransform", _globalInverseTransform );
+}
+
+SharedPointer< NodeComponent > Skeleton::clone( void )
+{
+	auto other = crimild::alloc< Skeleton >();
+	other->setClips( getClips() );
+	other->setGlobalInverseTransform( getGlobalInverseTransform() );
+	
+	return other;
+}
+
 void Skeleton::renderDebugInfo( Renderer *renderer, Camera *camera )
 {
 	std::vector< Vector3f > lines;
-	getNode()->perform( Apply( [ &lines ]( Node *node ) {
-		if ( node->hasParent() ) {
+	auto parent = getNode();
+	parent->perform( Apply( [ &lines, parent ]( Node *node ) {
+		if ( node != parent && node->hasParent() ) {
 			lines.push_back( node->getParent()->getWorld().getTranslate() );
 			lines.push_back( node->getWorld().getTranslate() );
 		}

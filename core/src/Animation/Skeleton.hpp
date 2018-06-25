@@ -62,6 +62,27 @@ namespace crimild {
 			crimild::UInt32 _id;
 			Transformation _offset;
 			Matrix4f _poseMatrix;
+
+			/**
+			   \name Cloning
+			*/
+			//@{
+			
+		public:
+			virtual SharedPointer< NodeComponent > clone( void ) override;
+
+			//@}
+
+			/**
+			   \name Coding
+			*/
+			//@{
+			
+		public:
+			virtual void encode( coding::Encoder &encoder ) override;
+			virtual void decode( coding::Decoder &decoder ) override;
+			
+			//@}
 		};
 		
 
@@ -85,13 +106,37 @@ namespace crimild {
 			void setClips( const ClipCatalog &clips ) { _clips = clips; }
 			ClipCatalog &getClips( void ) { return _clips; }
 
+			virtual void start( void ) override;
+
 		private:
 			JointCatalog _joints;
 			ClipCatalog _clips;
 			Transformation _globalInverseTransform;
 
 		public:
+			void animate( SharedPointer< Animation > const &animation ) { animate( crimild::get_ptr( animation ) ); }
 			void animate( Animation *animation );
+			
+			/**
+			   \name Cloning
+			*/
+			//@{
+			
+		public:
+			virtual SharedPointer< NodeComponent > clone( void ) override;
+			
+			//@}
+
+			/**
+			   \name Coding
+			*/
+			//@{
+			
+		public:
+			virtual void encode( coding::Encoder &encoder ) override;
+			virtual void decode( coding::Decoder &decoder ) override;
+			
+			//@}
 
 		public:
 			void renderDebugInfo( Renderer *renderer, Camera *camera ) override;

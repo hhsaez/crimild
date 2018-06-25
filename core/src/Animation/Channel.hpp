@@ -43,7 +43,7 @@ namespace crimild {
 			public NamedObject {
 			
 		protected:
-			Channel( std::string name );
+			explicit Channel( std::string name = "" );
 			
 		public:
 			virtual ~Channel( void );

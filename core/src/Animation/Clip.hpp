@@ -45,7 +45,7 @@ namespace crimild {
 			CRIMILD_IMPLEMENT_RTTI( crimild::animation::Clip )
 			
 		public:
-			explicit Clip( std::string name );
+			explicit Clip( std::string name = "" );
 			explicit Clip( std::string name, SharedPointer< Channel > const &channel );
 			virtual ~Clip( void );
 
@@ -67,6 +67,17 @@ namespace crimild {
 
 		public:
 			void evaluate( crimild::Real32 t, Animation *animation );
+			
+			/**
+			   \name Coding
+			*/
+			//@{
+			
+		public:
+			virtual void encode( coding::Encoder &encoder ) override;
+			virtual void decode( coding::Decoder &decoder ) override;
+			
+			//@}
 		};
 
 	}

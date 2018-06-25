@@ -55,7 +55,7 @@ namespace crimild {
 			};
 			
 		public:
-			explicit Animation( std::string name );
+			explicit Animation( std::string name = "" );
 			explicit Animation( SharedPointer< Clip > const &clip, crimild::Real32 offset = 0.0f, crimild::Real32 duration = -1 );
 			virtual ~Animation( void );
 
@@ -133,6 +133,17 @@ namespace crimild {
 
 		private:
 			containers::Map< std::string, SharedPointer< Accumulator >> _accumulators;
+			
+			/**
+			   \name Coding
+			*/
+			//@{
+			
+		public:
+			virtual void encode( coding::Encoder &encoder ) override;
+			virtual void decode( coding::Decoder &decoder ) override;
+			
+			//@}
 		};
 
 	}

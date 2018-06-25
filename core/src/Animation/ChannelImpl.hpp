@@ -31,6 +31,9 @@
 #include "Channel.hpp"
 #include "Animation.hpp"
 
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
+
 namespace crimild {
 
 	namespace animation {
@@ -42,6 +45,8 @@ namespace crimild {
 			using KeyArray = containers::Array< T >;
 			
 		public:
+			ChannelImpl( void ) { }
+			
 			ChannelImpl( std::string name, const TimeArray &times, const KeyArray &keys )
 				: Channel( name ),
 				  _times( times ),
@@ -122,12 +127,44 @@ namespace crimild {
 		private:
 			TimeArray _times;
 			KeyArray _keys;
+
+			/**
+			   \name Coding
+			*/
+			//@{
+			
+		public:
+			virtual void encode( coding::Encoder &encoder ) override
+			{
+				Codable::encode( encoder );
+
+				encoder.encode( "name", getName() );
+				encoder.encode( "times", _times );
+				encoder.encode( "keys", _keys );
+			}
+			
+			virtual void decode( coding::Decoder &decoder ) override
+			{
+				Codable::decode( decoder );
+
+				std::string name;
+				decoder.decode( "name", name );
+				setName( name );
+				
+				decoder.decode( "times", _times );
+				decoder.decode( "keys", _keys );
+			}
+			
+			//@}
+			
 		};
 
 		class Vector3fChannel : public ChannelImpl< Vector3f > {
-			CRIMILD_IMPLEMENT_RTTI( crimild::animations::Vector3fChannel )
+			CRIMILD_IMPLEMENT_RTTI( crimild::animation::Vector3fChannel )
 
 		public:
+			Vector3fChannel( void ) { }
+			
 			Vector3fChannel( std::string name, const containers::Array< crimild::Real32 > &times, const containers::Array< Vector3f > &keys )
 			    : ChannelImpl( name, times, keys )
 			{
@@ -147,9 +184,11 @@ namespace crimild {
 		};
 
 		class Quaternion4fChannel : public ChannelImpl< Quaternion4f > {
-			CRIMILD_IMPLEMENT_RTTI( crimild::animations::Quaternion4fChannel )
+			CRIMILD_IMPLEMENT_RTTI( crimild::animation::Quaternion4fChannel )
 
 		public:
+			Quaternion4fChannel( void ) { }
+			
 			Quaternion4fChannel( std::string name, const containers::Array< crimild::Real32 > &times, const containers::Array< Quaternion4f > &keys )
 			    : ChannelImpl( name, times, keys )
 			{
@@ -169,9 +208,11 @@ namespace crimild {
 		};
 
 		class Real32Channel : public ChannelImpl< Real32 > {
-			CRIMILD_IMPLEMENT_RTTI( crimild::animations::Real32Channel )
+			CRIMILD_IMPLEMENT_RTTI( crimild::animation::Real32Channel )
 
 		public:
+			Real32Channel( void ) { }
+			
 			Real32Channel( std::string name, const containers::Array< crimild::Real32 > &times, const containers::Array< Real32 > &keys )
 			    : ChannelImpl( name, times, keys )
 			{
