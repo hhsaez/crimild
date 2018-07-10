@@ -125,7 +125,7 @@ namespace crimild {
 			inline crimild::Size size( void ) const
 			{
 				LockImpl lock( this );
-				return return _list.size();
+				return _list.size();
 			}
             
             inline void clear( void )
@@ -133,6 +133,13 @@ namespace crimild {
                 LockImpl lock( this );
 				_list.clear();
             }
+
+			T &first( void )
+			{
+				LockImpl lock( this );
+
+				return _list.front();
+			}
 			
 			void add( T const &elem )
 			{
