@@ -45,10 +45,14 @@ namespace crimild {
 
 				Outlet *getScreenPosition( void ) { return _screenPosition; }
 				Outlet *getColor( void ) { return _color; }
+				Outlet *getWorldNormal( void ) { return _worldNormal; }
+				Outlet *getViewVector( void ) { return _viewVector; }
 
 			private:
 				Outlet *_screenPosition = nullptr;
 				Outlet *_color = nullptr;
+				Outlet *_worldNormal = nullptr;
+				Outlet *_viewVector = nullptr;
 			};
 
 		}

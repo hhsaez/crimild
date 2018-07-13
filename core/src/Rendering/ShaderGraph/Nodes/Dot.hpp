@@ -25,8 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_FRAGMENT_SHADER_INPUT_
-#define CRIMILD_RENDERING_SHADER_GRAPH_NODES_FRAGMENT_SHADER_INPUT_
+#ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_DOT_
+#define CRIMILD_RENDERING_SHADER_GRAPH_NODES_DOT_
 
 #include "Rendering/ShaderGraph/Node.hpp"
 
@@ -36,23 +36,22 @@ namespace crimild {
 
 		namespace nodes {
 
-			class FragmentShaderInput : public Node {
-				CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::nodes::FragmentShaderInput )
+			class Dot : public Node {
+				CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::nodes::Dot )
 
 			public:
-				FragmentShaderInput( void );
-				virtual ~FragmentShaderInput( void );
+				Dot( void );
+				virtual ~Dot( void );
 
-				Outlet *getUV( void ) { return _uv; }
-				Outlet *getColor( void ) { return _color; }
-				Outlet *getWorldNormal( void ) { return _worldNormal; }
-				Outlet *getViewVector( void ) { return _viewVector; }
+				Outlet *getA( void ) { return _a; }
+				Outlet *getB( void ) { return _b; }
+
+				Outlet *getValue( void ) { return _value; }
 
 			private:
-				Outlet *_uv = nullptr;
-				Outlet *_color = nullptr;
-				Outlet *_worldNormal = nullptr;
-				Outlet *_viewVector = nullptr;
+				Outlet *_a = nullptr;
+				Outlet *_b = nullptr;
+				Outlet *_value = nullptr;
 			};
 
 		}

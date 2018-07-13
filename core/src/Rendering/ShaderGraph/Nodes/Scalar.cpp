@@ -25,41 +25,22 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_FRAGMENT_SHADER_INPUT_
-#define CRIMILD_RENDERING_SHADER_GRAPH_NODES_FRAGMENT_SHADER_INPUT_
+#include "Scalar.hpp"
 
-#include "Rendering/ShaderGraph/Node.hpp"
+using namespace crimild;
+using namespace crimild::shadergraph;
+using namespace crimild::shadergraph::nodes;
 
-namespace crimild {
-
-	namespace shadergraph {
-
-		namespace nodes {
-
-			class FragmentShaderInput : public Node {
-				CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::nodes::FragmentShaderInput )
-
-			public:
-				FragmentShaderInput( void );
-				virtual ~FragmentShaderInput( void );
-
-				Outlet *getUV( void ) { return _uv; }
-				Outlet *getColor( void ) { return _color; }
-				Outlet *getWorldNormal( void ) { return _worldNormal; }
-				Outlet *getViewVector( void ) { return _viewVector; }
-
-			private:
-				Outlet *_uv = nullptr;
-				Outlet *_color = nullptr;
-				Outlet *_worldNormal = nullptr;
-				Outlet *_viewVector = nullptr;
-			};
-
-		}
-
-	}
-
+Scalar::Scalar( crimild::Real32 constant )
+	: _constant( constant )
+{
+	_inputValue = addInputOutlet( "value", Outlet::Type::SCALAR );
+	
+	_outputValue = addOutputOutlet( "value", Outlet::Type::SCALAR );
 }
 
-#endif
+Scalar::~Scalar( void )
+{
+
+}
 

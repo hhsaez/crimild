@@ -35,6 +35,8 @@ FragmentShaderInput::FragmentShaderInput( void )
 {
 	_uv = addOutputOutlet( "vUV", Outlet::Type::VECTOR_2 );
 	_color = addOutputOutlet( "vColor", Outlet::Type::VECTOR_4 );
+	_worldNormal = addOutputOutlet( "vWorldNormal", Outlet::Type::VECTOR_3 );
+	_viewVector = addOutputOutlet( "vViewVector", Outlet::Type::VECTOR_3 );
 }
 
 FragmentShaderInput::~FragmentShaderInput( void )

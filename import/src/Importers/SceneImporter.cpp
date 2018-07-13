@@ -48,6 +48,12 @@
 using namespace crimild;
 using namespace crimild::import;
 
+SharedPointer< Group > SceneImporter::importScene( std::string filename )
+{
+	SceneImporter importer;
+	return importer.import( filename );
+}
+
 SceneImporter::SceneImporter( void )
 {
 

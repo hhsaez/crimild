@@ -25,8 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_FRAGMENT_SHADER_INPUT_
-#define CRIMILD_RENDERING_SHADER_GRAPH_NODES_FRAGMENT_SHADER_INPUT_
+#ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_SCALAR_
+#define CRIMILD_RENDERING_SHADER_GRAPH_NODES_SCALAR_
 
 #include "Rendering/ShaderGraph/Node.hpp"
 
@@ -36,23 +36,24 @@ namespace crimild {
 
 		namespace nodes {
 
-			class FragmentShaderInput : public Node {
-				CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::nodes::FragmentShaderInput )
+			class Scalar : public Node {
+				CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::nodes::Scalar )
 
 			public:
-				FragmentShaderInput( void );
-				virtual ~FragmentShaderInput( void );
+				explicit Scalar( crimild::Real32 constant = 0 );
+				virtual ~Scalar( void );
 
-				Outlet *getUV( void ) { return _uv; }
-				Outlet *getColor( void ) { return _color; }
-				Outlet *getWorldNormal( void ) { return _worldNormal; }
-				Outlet *getViewVector( void ) { return _viewVector; }
+				crimild::Real32 getConstant( void ) const { return _constant; }
+
+				Outlet *getInputValue( void ) { return _inputValue; }
+				
+				Outlet *getOutputValue( void ) { return _outputValue; }
 
 			private:
-				Outlet *_uv = nullptr;
-				Outlet *_color = nullptr;
-				Outlet *_worldNormal = nullptr;
-				Outlet *_viewVector = nullptr;
+				crimild::Real32 _constant;
+				
+				Outlet *_inputValue = nullptr;
+				Outlet *_outputValue = nullptr;
 			};
 
 		}

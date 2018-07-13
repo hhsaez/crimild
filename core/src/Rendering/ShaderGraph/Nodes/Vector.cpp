@@ -31,14 +31,18 @@ using namespace crimild;
 using namespace crimild::shadergraph;
 using namespace crimild::shadergraph::nodes;
 
-Vector::Vector( void )
-{
+nodes::Vector::Vector( const Vector4f &constant )
+	: _constant( constant )
+{	
+	_inputW = addInputOutlet( "w", Outlet::Type::SCALAR );
 	_inputXYZ = addInputOutlet( "xyz", Outlet::Type::VECTOR_3 );
+	_inputXYZW = addInputOutlet( "xyzw", Outlet::Type::VECTOR_4 );
 
+	_outputXYZ = addOutputOutlet( "xyz", Outlet::Type::VECTOR_3 );
 	_outputXYZW = addOutputOutlet( "xyzw", Outlet::Type::VECTOR_4 );
 }
 
-Vector::~Vector( void )
+nodes::Vector::~Vector( void )
 {
 
 }

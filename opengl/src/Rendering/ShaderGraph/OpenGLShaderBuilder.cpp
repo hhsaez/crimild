@@ -36,6 +36,8 @@
 #include "Rendering/ShaderGraph/Nodes/FragmentShaderOutput.hpp"
 #include "Rendering/ShaderGraph/Nodes/Vector.hpp"
 #include "Rendering/ShaderGraph/Nodes/Multiply.hpp"
+#include "Rendering/ShaderGraph/Nodes/Scalar.hpp"
+#include "Rendering/ShaderGraph/Nodes/Dot.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/ShaderLocation.hpp"
 
@@ -187,15 +189,86 @@ OpenGLShaderBuilder::OpenGLShaderBuilder( void )
 		_mainSection.add( line );
 	};
 
-	_translators[ Vector::__CLASS_NAME ] = [ this ]( Node *node, ShaderGraph *graph, ShaderProgram *program ) {
-		auto vector = static_cast< Vector * >( node );
+	_translators[ Dot::__CLASS_NAME ] = [ this ]( Node *node, ShaderGraph *graph, ShaderProgram *program ) {
+		auto dot = static_cast< Dot * >( node );
+
+		auto a = graph->anyConnection( dot->getA() );
+		auto b = graph->anyConnection( dot->getB() );
+		auto value = dot->getValue();
+		auto valueType = getOutletTypeStr( value );
+
+		auto line = valueType + " " + value->getUniqueName() + " = dot( " + a->getUniqueName() + ", " + b->getUniqueName() + " );";
+
+		_mainSection.add( line );
+	};
+
+	_translators[ nodes::Vector::__CLASS_NAME ] = [ this ]( Node *node, ShaderGraph *graph, ShaderProgram *program ) {
+		auto vector = static_cast< nodes::Vector * >( node );
 
 		if ( graph->isConnected( vector->getOutputXYZW() ) ) {
-			if ( graph->isConnected( vector->getInputXYZ() ) ) {
-				auto inXYZ = graph->anyConnection( vector->getInputXYZ() );
-				auto line = "vec4 " + vector->getOutputXYZW()->getUniqueName() + " = vec4( " + inXYZ->getUniqueName() + ", 1.0 );";
-				_mainSection.add( line );
+			std::stringstream ss;
+			ss << "vec4 " << vector->getOutputXYZW()->getUniqueName()
+			   << " = ";
+
+			if ( graph->isConnected( vector->getInputXYZW() ) ) {
+				auto inXYZW = graph->anyConnection( vector->getInputXYZW() );
+				ss << inXYZW->getUniqueName();
 			}
+			else if ( graph->isConnected( vector->getInputXYZ() ) ) {
+				auto inXYZ = graph->anyConnection( vector->getInputXYZ() );
+				std::string w = "1.0";
+				if ( auto inW = graph->anyConnection( vector->getInputW() ) ) {
+					w = inW->getUniqueName();
+				}
+
+				ss << "vec4( " << inXYZ->getUniqueName() << ", " << w << " )";
+			}
+			else {
+				auto v = vector->getConstant();
+				ss << "vec4( " << v.x() << ", " << v.y() << ", " << v.z() << ", " << v.w() << " )";
+			}
+			
+			ss << ";";
+			_mainSection.add( ss.str() );
+		}
+		else if ( graph->isConnected( vector->getOutputXYZ() ) ) {
+			std::stringstream ss;
+			ss << "vec3 " << vector->getOutputXYZ()->getUniqueName()
+			   << " = ";
+			if ( graph->isConnected( vector->getInputXYZW() ) ) {
+				auto inXYZW = graph->anyConnection( vector->getInputXYZW() );
+				ss << inXYZW->getUniqueName() << ".xyz";
+			}
+			else if ( graph->isConnected( vector->getInputXYZ() ) ) {
+				auto inXYZ = graph->anyConnection( vector->getInputXYZ() );
+				ss << inXYZ->getUniqueName();
+			}
+			else {
+				auto v = vector->getConstant();
+				ss << "vec3( " << v.x() << ", " << v.y() << ", " << v.z() << " )";
+			}
+			ss << ";";
+			_mainSection.add( ss.str() );
+		}
+	};
+
+	_translators[ Scalar::__CLASS_NAME ] = [ this ]( Node *node, ShaderGraph *graph, ShaderProgram *program ) {
+		auto scalar = static_cast< Scalar * >( node );
+
+		if ( graph->isConnected( scalar->getOutputValue() ) ) {
+			std::stringstream ss;
+			ss << getOutletTypeStr( scalar->getOutputValue() ) << " " << scalar->getOutputValue()->getUniqueName()
+			   << " = ";
+			if ( graph->isConnected( scalar->getInputValue() ) ) {
+				auto inValue = graph->anyConnection( scalar->getInputValue() );
+				ss << inValue->getUniqueName();
+			}
+			else {
+				ss << scalar->getConstant();
+			}
+				
+			ss << ";";
+			_mainSection.add( ss.str() );
 		}
 	};
 }

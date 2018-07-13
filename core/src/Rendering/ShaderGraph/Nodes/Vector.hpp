@@ -30,6 +30,8 @@
 
 #include "Rendering/ShaderGraph/Node.hpp"
 
+#include "Mathematics/Vector.hpp"
+
 namespace crimild {
 
 	namespace shadergraph {
@@ -40,16 +42,26 @@ namespace crimild {
 				CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::nodes::Vector )
 
 			public:
-				explicit Vector( void );
+				explicit Vector( const Vector4f &constant = Vector4f::ZERO );
 				virtual ~Vector( void );
 
-				Outlet *getInputXYZ( void ) { return _inputXYZ; }
+				const Vector4f &getConstant( void ) const { return _constant; }
 
+				Outlet *getInputW( void ) { return _inputW; }
+				Outlet *getInputXYZ( void ) { return _inputXYZ; }
+				Outlet *getInputXYZW( void ) { return _inputXYZW; }
+
+				Outlet *getOutputXYZ( void ) { return _outputXYZ; }
 				Outlet *getOutputXYZW( void ) { return _outputXYZW; }
 
 			private:
+				Vector4f _constant;
+				
+				Outlet *_inputW = nullptr;
 				Outlet *_inputXYZ = nullptr;
+				Outlet *_inputXYZW = nullptr;
 
+				Outlet *_outputXYZ = nullptr;
 				Outlet *_outputXYZW = nullptr;
 			};
 

@@ -52,6 +52,9 @@ namespace crimild {
 
 		class SceneImporter {
 		public:
+			static SharedPointer< Group > importScene( std::string filename );
+			
+		public:
 			SceneImporter( void );
 			virtual ~SceneImporter( void );
 

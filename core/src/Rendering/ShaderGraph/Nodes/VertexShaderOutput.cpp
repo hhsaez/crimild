@@ -35,6 +35,8 @@ VertexShaderOutput::VertexShaderOutput( void )
 {
 	_screenPosition = addInputOutlet( "vScreenPosition", Outlet::Type::VECTOR_4 );
 	_color = addInputOutlet( "vColor", Outlet::Type::VECTOR_4 );
+	_worldNormal = addInputOutlet( "vWorldNormal", Outlet::Type::VECTOR_3 );
+	_viewVector = addInputOutlet( "vViewVector", Outlet::Type::VECTOR_3 );
 }
 
 VertexShaderOutput::~VertexShaderOutput( void )
