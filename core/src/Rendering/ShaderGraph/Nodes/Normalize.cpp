@@ -25,81 +25,30 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Node.hpp"
+#include "Normalize.hpp"
+
+#include "Rendering/ShaderGraph/ShaderGraph.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
+using namespace crimild::shadergraph::nodes;
 
-Node::Node( void )
+Normalize::Normalize( void )
 {
-	
+	_inputValue = addInputOutlet( "inputValue", Outlet::Type::ANY );
+
+	_normalized = addOutputOutlet( "norm", Outlet::Type::ANY );
 }
 
-Node::~Node( void )
+Normalize::~Normalize( void )
 {
 
 }
 
-Outlet *Node::addInputOutlet( std::string name, Outlet::Type type )
+void Normalize::prepare( ShaderGraph *graph )
 {
-	auto outlet = crimild::alloc< Outlet >( name, type );
-	setInputOutlet( outlet );
-	return crimild::get_ptr( outlet );
-}
-
-void Node::setInputOutlet( SharedPointer< Outlet > const &outlet )
-{
-	_inputs[ outlet->getName() ] = outlet;
-	outlet->setNode( this );
-}
-
-Outlet *Node::getInputOutlet( std::string name )
-{
-	if ( !_inputs.contains( name ) ) {
-		return nullptr;
+	if ( graph->isConnected( getInputValue() ) ) {
+		_normalized->setType( graph->anyConnection( getInputValue() )->getType() );
 	}
-
-	return crimild::get_ptr( _inputs[ name ] );
-}
-
-void Node::eachInputOutlet( OutletArrayCallback const &callback )
-{
-	_inputs.eachValue( [ callback ]( SharedPointer< Outlet > const &outlet ) {
-		callback( crimild::get_ptr( outlet ) );
-	});
-}
-
-Outlet *Node::addOutputOutlet( std::string name, Outlet::Type type )
-{
-	auto outlet = crimild::alloc< Outlet >( name, type );
-	setOutputOutlet( outlet );
-	return crimild::get_ptr( outlet );
-}
-
-void Node::setOutputOutlet( SharedPointer< Outlet > const &outlet )
-{
-	_outputs[ outlet->getName() ] = outlet;
-	outlet->setNode( this );
-}
-
-Outlet *Node::getOutputOutlet( std::string name )
-{
-	if ( !_outputs.contains( name ) ) {
-		return nullptr;
-	}
-
-	return crimild::get_ptr( _outputs[ name ] );
-}
-
-void Node::eachOutputOutlet( OutletArrayCallback const &callback )
-{
-	_outputs.eachValue( [ callback ]( SharedPointer< Outlet > const &outlet ) {
-		callback( crimild::get_ptr( outlet ) );
-	});
-}
-
-void Node::prepare( ShaderGraph *graph )
-{
-	
 }
 

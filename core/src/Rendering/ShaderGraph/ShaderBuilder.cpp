@@ -77,6 +77,7 @@ ShaderBuilder::NodeArray ShaderBuilder::sortNodes( ShaderGraph *graph )
 	while ( !frontier.empty() ) {
 		auto node = frontier.first();
 		frontier.remove( node );
+		node->prepare( graph );
 		sorted.add( node );
 
 		node->eachOutputOutlet( [ graph, &sorted, &frontier, &inCount ]( Outlet *outlet ) {
@@ -108,8 +109,6 @@ void ShaderBuilder::generateVertexShader( ShaderGraph *graph, ShaderProgram *pro
 
 	auto src = generateShaderSource( nodes, graph, program );
 
-	std::cout << "Vertex shader:\n" << src << "\n";
-
 	program->setVertexShader( crimild::alloc< Shader >( src ) );
 }
 
@@ -118,8 +117,6 @@ void ShaderBuilder::generateFragmentShader( ShaderGraph *graph, ShaderProgram *p
 	auto nodes = sortNodes( graph );
 
 	auto src = generateShaderSource( nodes, graph, program );
-
-	std::cout << "Fragment Shader:\n" << src << "\n";
 
 	program->setFragmentShader( crimild::alloc< Shader >( src ) );
 }

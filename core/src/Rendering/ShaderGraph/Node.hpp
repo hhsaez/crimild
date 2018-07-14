@@ -67,6 +67,16 @@ namespace crimild {
 		private:
 			OutletMap _inputs;
 			OutletMap _outputs;
+
+			/**
+			   \name Internal use only
+			*/
+			//@{
+			
+		public:
+			virtual void prepare( ShaderGraph *graph );
+
+			//}
 		};
 
 	}

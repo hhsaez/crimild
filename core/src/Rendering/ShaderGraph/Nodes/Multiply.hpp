@@ -40,7 +40,7 @@ namespace crimild {
 				CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::nodes::Multiply )
 
 			public:
-				explicit Multiply( Outlet::Type retType = Outlet::Type::ANY );
+				Multiply( void );
 				virtual ~Multiply( void );
 
 				Outlet *getA( void ) { return _a; }
@@ -52,6 +52,9 @@ namespace crimild {
 				Outlet *_a = nullptr;
 				Outlet *_b = nullptr;
 				Outlet *_output = nullptr;
+
+			protected:
+				virtual void prepare( ShaderGraph *graph ) override;
 			};
 
 		}

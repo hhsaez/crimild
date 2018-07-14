@@ -42,10 +42,6 @@ namespace crimild {
 			public coding::Codable,
 			public NamedObject {
 			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::Outlet )
-		private:
-		    friend class Node;
-			friend class ShaderGraph;
-			
 		public:
 		    enum class Type {
 				ANY,
@@ -62,6 +58,7 @@ namespace crimild {
 			explicit Outlet( std::string name, Type type );
 			virtual ~Outlet( void );
 
+			void setType( Type type ) { _type = type; }
 			Type getType( void ) const { return _type; }
 
 			crimild::Int32 getPriority( void ) const { return _priority; }
@@ -71,18 +68,13 @@ namespace crimild {
 			void setUniqueName( std::string uniqueName ) { _uniqueName = uniqueName; }
 
 		private:
-			void setType( Type type ) { _type = type; }
-
-		private:
 			Type _type;
 			crimild::Int32 _priority;
 			std::string _uniqueName;
 
 		public:
-			Node *getNode( void ) { return _node; }
-
-		private:
 			void setNode( Node *node ) { _node = node; }
+			Node *getNode( void ) { return _node; }
 
 		private:
 			Node *_node = nullptr;

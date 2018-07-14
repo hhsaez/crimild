@@ -27,20 +27,29 @@
 
 #include "Multiply.hpp"
 
+#include "Rendering/ShaderGraph/ShaderGraph.hpp"
+
 using namespace crimild;
 using namespace crimild::shadergraph;
 using namespace crimild::shadergraph::nodes;
 
-Multiply::Multiply( Outlet::Type retType )
+Multiply::Multiply( void )
 {
 	_a = addInputOutlet( "a", Outlet::Type::ANY );
 	_b = addInputOutlet( "b", Outlet::Type::ANY );
 
-	_output = addOutputOutlet( "ret", retType );
+	_output = addOutputOutlet( "mult", Outlet::Type::ANY );
 }
 
 Multiply::~Multiply( void )
 {
 
+}
+
+void Multiply::prepare( ShaderGraph *graph )
+{
+	if ( graph->isConnected( getB() ) ) {
+		_output->setType( graph->anyConnection( getB() )->getType() );
+	}
 }
 

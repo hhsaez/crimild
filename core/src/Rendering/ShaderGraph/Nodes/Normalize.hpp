@@ -25,81 +25,42 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Node.hpp"
+#ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_NORMALIZE_
+#define CRIMILD_RENDERING_SHADER_GRAPH_NODES_NORMALIZE_
 
-using namespace crimild;
-using namespace crimild::shadergraph;
+#include "Rendering/ShaderGraph/Node.hpp"
 
-Node::Node( void )
-{
-	
-}
+namespace crimild {
 
-Node::~Node( void )
-{
+	namespace shadergraph {
 
-}
+		namespace nodes {
 
-Outlet *Node::addInputOutlet( std::string name, Outlet::Type type )
-{
-	auto outlet = crimild::alloc< Outlet >( name, type );
-	setInputOutlet( outlet );
-	return crimild::get_ptr( outlet );
-}
+			class Normalize : public Node {
+				CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::nodes::Normalize )
 
-void Node::setInputOutlet( SharedPointer< Outlet > const &outlet )
-{
-	_inputs[ outlet->getName() ] = outlet;
-	outlet->setNode( this );
-}
+			public:
+				Normalize( void );
+				virtual ~Normalize( void );
 
-Outlet *Node::getInputOutlet( std::string name )
-{
-	if ( !_inputs.contains( name ) ) {
-		return nullptr;
+				Outlet *getInputValue( void ) { return _inputValue; }
+
+				Outlet *getNormalized( void ) { return _normalized; }
+
+			private:
+				Outlet *_inputValue = nullptr;
+
+				Outlet *_normalized = nullptr;
+
+			public:
+				virtual void prepare( ShaderGraph *graph ) override;
+			};
+
+		}
+
 	}
 
-	return crimild::get_ptr( _inputs[ name ] );
 }
 
-void Node::eachInputOutlet( OutletArrayCallback const &callback )
-{
-	_inputs.eachValue( [ callback ]( SharedPointer< Outlet > const &outlet ) {
-		callback( crimild::get_ptr( outlet ) );
-	});
-}
-
-Outlet *Node::addOutputOutlet( std::string name, Outlet::Type type )
-{
-	auto outlet = crimild::alloc< Outlet >( name, type );
-	setOutputOutlet( outlet );
-	return crimild::get_ptr( outlet );
-}
-
-void Node::setOutputOutlet( SharedPointer< Outlet > const &outlet )
-{
-	_outputs[ outlet->getName() ] = outlet;
-	outlet->setNode( this );
-}
-
-Outlet *Node::getOutputOutlet( std::string name )
-{
-	if ( !_outputs.contains( name ) ) {
-		return nullptr;
-	}
-
-	return crimild::get_ptr( _outputs[ name ] );
-}
-
-void Node::eachOutputOutlet( OutletArrayCallback const &callback )
-{
-	_outputs.eachValue( [ callback ]( SharedPointer< Outlet > const &outlet ) {
-		callback( crimild::get_ptr( outlet ) );
-	});
-}
-
-void Node::prepare( ShaderGraph *graph )
-{
-	
-}
+#endif
 

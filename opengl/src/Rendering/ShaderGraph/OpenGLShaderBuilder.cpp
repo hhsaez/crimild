@@ -38,6 +38,11 @@
 #include "Rendering/ShaderGraph/Nodes/Multiply.hpp"
 #include "Rendering/ShaderGraph/Nodes/Scalar.hpp"
 #include "Rendering/ShaderGraph/Nodes/Dot.hpp"
+#include "Rendering/ShaderGraph/Nodes/Max.hpp"
+#include "Rendering/ShaderGraph/Nodes/Subtract.hpp"
+#include "Rendering/ShaderGraph/Nodes/Normalize.hpp"
+#include "Rendering/ShaderGraph/Nodes/Negate.hpp"
+#include "Rendering/ShaderGraph/Nodes/Pow.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/ShaderLocation.hpp"
 
@@ -200,6 +205,75 @@ OpenGLShaderBuilder::OpenGLShaderBuilder( void )
 		auto line = valueType + " " + value->getUniqueName() + " = dot( " + a->getUniqueName() + ", " + b->getUniqueName() + " );";
 
 		_mainSection.add( line );
+	};
+
+	_translators[ Max::__CLASS_NAME ] = [ this ]( Node *node, ShaderGraph *graph, ShaderProgram *program ) {
+		auto max = static_cast< Max * >( node );
+
+		auto a = graph->anyConnection( max->getA() );
+		auto b = graph->anyConnection( max->getB() );
+		auto value = max->getValue();
+		auto valueType = getOutletTypeStr( value );
+
+		auto line = valueType + " " + value->getUniqueName() + " = max( " + a->getUniqueName() + ", " + b->getUniqueName() + " );";
+
+		_mainSection.add( line );
+	};
+
+	_translators[ Subtract::__CLASS_NAME ] = [ this ]( Node *node, ShaderGraph *graph, ShaderProgram *program ) {
+		auto sub = static_cast< Subtract * >( node );
+
+		auto a = graph->anyConnection( sub->getA() );
+		auto b = graph->anyConnection( sub->getB() );
+		auto value = sub->getValue();
+		auto valueType = getOutletTypeStr( value );
+
+		auto line = valueType + " " + value->getUniqueName() + " = " + a->getUniqueName() + " - " + b->getUniqueName() + ";";
+
+		_mainSection.add( line );
+	};
+
+	_translators[ Normalize::__CLASS_NAME ] = [ this ]( Node *node, ShaderGraph *graph, ShaderProgram *program ) {
+		auto n = static_cast< Normalize * >( node );
+
+		auto x = graph->anyConnection( n->getInputValue() );
+		auto ret = n->getNormalized();
+		auto retType = getOutletTypeStr( ret );
+
+		std::stringstream ss;
+		ss << retType << " " << ret->getUniqueName()
+		   << " = "
+		   << "normalize( " << x->getUniqueName() << " );";
+		_mainSection.add( ss.str() );
+	};
+
+	_translators[ Negate::__CLASS_NAME ] = [ this ]( Node *node, ShaderGraph *graph, ShaderProgram *program ) {
+		auto n = static_cast< Negate * >( node );
+
+		auto x = graph->anyConnection( n->getInputValue() );
+		auto ret = n->getNegated();
+		auto retType = getOutletTypeStr( ret );
+
+		std::stringstream ss;
+		ss << retType << " " << ret->getUniqueName()
+		   << " = "
+		   << "-" << x->getUniqueName() << ";";
+		_mainSection.add( ss.str() );
+	};
+
+	_translators[ Pow::__CLASS_NAME ] = [ this ]( Node *node, ShaderGraph *graph, ShaderProgram *program ) {
+		auto op = static_cast< Pow * >( node );
+
+		auto base = graph->anyConnection( op->getBase() );
+		auto exp = graph->anyConnection( op->getExponent() );
+		auto ret = op->getValue();
+		auto retType = getOutletTypeStr( ret );
+
+		std::stringstream ss;
+		ss << retType << " " << ret->getUniqueName()
+		   << " = "
+		   << "pow( " << base->getUniqueName() << ", " << exp->getUniqueName() << " );";
+		_mainSection.add( ss.str() );
 	};
 
 	_translators[ nodes::Vector::__CLASS_NAME ] = [ this ]( Node *node, ShaderGraph *graph, ShaderProgram *program ) {

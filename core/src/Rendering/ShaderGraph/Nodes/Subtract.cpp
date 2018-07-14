@@ -25,81 +25,22 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Node.hpp"
+#include "Subtract.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
+using namespace crimild::shadergraph::nodes;
 
-Node::Node( void )
+Subtract::Subtract( void )
 {
-	
+	_a = addInputOutlet( "a", Outlet::Type::ANY );
+	_b = addInputOutlet( "b", Outlet::Type::ANY );
+
+	_value = addOutputOutlet( "sub", Outlet::Type::SCALAR );
 }
 
-Node::~Node( void )
+Subtract::~Subtract( void )
 {
 
-}
-
-Outlet *Node::addInputOutlet( std::string name, Outlet::Type type )
-{
-	auto outlet = crimild::alloc< Outlet >( name, type );
-	setInputOutlet( outlet );
-	return crimild::get_ptr( outlet );
-}
-
-void Node::setInputOutlet( SharedPointer< Outlet > const &outlet )
-{
-	_inputs[ outlet->getName() ] = outlet;
-	outlet->setNode( this );
-}
-
-Outlet *Node::getInputOutlet( std::string name )
-{
-	if ( !_inputs.contains( name ) ) {
-		return nullptr;
-	}
-
-	return crimild::get_ptr( _inputs[ name ] );
-}
-
-void Node::eachInputOutlet( OutletArrayCallback const &callback )
-{
-	_inputs.eachValue( [ callback ]( SharedPointer< Outlet > const &outlet ) {
-		callback( crimild::get_ptr( outlet ) );
-	});
-}
-
-Outlet *Node::addOutputOutlet( std::string name, Outlet::Type type )
-{
-	auto outlet = crimild::alloc< Outlet >( name, type );
-	setOutputOutlet( outlet );
-	return crimild::get_ptr( outlet );
-}
-
-void Node::setOutputOutlet( SharedPointer< Outlet > const &outlet )
-{
-	_outputs[ outlet->getName() ] = outlet;
-	outlet->setNode( this );
-}
-
-Outlet *Node::getOutputOutlet( std::string name )
-{
-	if ( !_outputs.contains( name ) ) {
-		return nullptr;
-	}
-
-	return crimild::get_ptr( _outputs[ name ] );
-}
-
-void Node::eachOutputOutlet( OutletArrayCallback const &callback )
-{
-	_outputs.eachValue( [ callback ]( SharedPointer< Outlet > const &outlet ) {
-		callback( crimild::get_ptr( outlet ) );
-	});
-}
-
-void Node::prepare( ShaderGraph *graph )
-{
-	
 }
 
