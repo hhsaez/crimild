@@ -98,8 +98,8 @@ void Node::eachOutputOutlet( OutletArrayCallback const &callback )
 	});
 }
 
-void Node::prepare( ShaderGraph *graph )
+void Node::prepare( ShaderGraph *graph, ShaderProgram *program )
 {
-	
+	// no-op
 }
 

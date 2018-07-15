@@ -63,66 +63,15 @@ OpenGLShaderBuilder::OpenGLShaderBuilder( void )
 
 		auto vsInput = static_cast< VertexShaderInput * >( node );
 
-		if ( graph->isConnected( vsInput->getPosition() ) ) {
-			program->registerStandardLocation(
-				ShaderLocation::Type::ATTRIBUTE,
-				ShaderProgram::StandardLocation::POSITION_ATTRIBUTE,
-				vsInput->getPosition()->getName() );
-			attributes.add( vsInput->getPosition() );
-		}
+		if ( graph->isConnected( vsInput->getPosition() ) ) attributes.add( vsInput->getPosition() );
+		if ( graph->isConnected( vsInput->getNormal() ) ) attributes.add( vsInput->getNormal() );
+		if ( graph->isConnected( vsInput->getUV() ) ) attributes.add( vsInput->getUV() );
+		if ( graph->isConnected( vsInput->getColor() ) ) attributes.add( vsInput->getColor() );
 
-		if ( graph->isConnected( vsInput->getNormal() ) ) {
-			program->registerStandardLocation(
-				ShaderLocation::Type::ATTRIBUTE,
-				ShaderProgram::StandardLocation::NORMAL_ATTRIBUTE,
-				vsInput->getNormal()->getName() );
-			attributes.add( vsInput->getNormal() );
-		}
-		
-		if ( graph->isConnected( vsInput->getUV() ) ) {
-			program->registerStandardLocation(
-				ShaderLocation::Type::ATTRIBUTE,
-				ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE,
-				vsInput->getUV()->getName() );
-			attributes.add( vsInput->getUV() );
-		}
-		
-		if ( graph->isConnected( vsInput->getColor() ) ) {
-			program->registerStandardLocation(
-				ShaderLocation::Type::ATTRIBUTE,
-				ShaderProgram::StandardLocation::COLOR_ATTRIBUTE,
-				vsInput->getColor()->getName() );
-			attributes.add( vsInput->getColor() );
-		}
-
-		if ( graph->isConnected( vsInput->getMMatrix() ) ) {
-			program->registerStandardLocation(
-				ShaderLocation::Type::UNIFORM,
-				ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM,
-				vsInput->getMMatrix()->getName() );
-			uniforms.add( vsInput->getMMatrix() );
-		}
-		
-		if ( graph->isConnected( vsInput->getVMatrix() ) ) {
-			program->registerStandardLocation(
-				ShaderLocation::Type::UNIFORM,
-				ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM,
-				vsInput->getVMatrix()->getName() );
-			uniforms.add( vsInput->getVMatrix() );
-		}
-
-		if ( graph->isConnected( vsInput->getPMatrix() ) ) {
-			program->registerStandardLocation(
-				ShaderLocation::Type::UNIFORM,
-				ShaderProgram::StandardLocation::PROJECTION_MATRIX_UNIFORM,
-				vsInput->getPMatrix()->getName() );
-			uniforms.add( vsInput->getPMatrix() );
-		}
-		
-		if ( graph->isConnected( vsInput->getMVMatrix() ) ) {
-			uniforms.add( vsInput->getMVMatrix() );
-		}
-		
+		if ( graph->isConnected( vsInput->getMMatrix() ) ) uniforms.add( vsInput->getMMatrix() );
+		if ( graph->isConnected( vsInput->getVMatrix() ) ) uniforms.add( vsInput->getVMatrix() );
+		if ( graph->isConnected( vsInput->getPMatrix() ) ) uniforms.add( vsInput->getPMatrix() );
+		if ( graph->isConnected( vsInput->getMVMatrix() ) ) uniforms.add( vsInput->getMVMatrix() );
 		if ( graph->isConnected( vsInput->getMVPMatrix() ) ) uniforms.add( vsInput->getMVPMatrix() );
 
 		attributes.each( [ this, graph ]( Outlet *outlet ) {

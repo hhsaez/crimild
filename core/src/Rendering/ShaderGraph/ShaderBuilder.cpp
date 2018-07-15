@@ -58,7 +58,7 @@ SharedPointer< ShaderProgram > ShaderBuilder::build( SharedPointer< ShaderGraph 
 	return program;
 }
 
-ShaderBuilder::NodeArray ShaderBuilder::sortNodes( ShaderGraph *graph )
+ShaderBuilder::NodeArray ShaderBuilder::prepareNodes( ShaderGraph *graph, ShaderProgram *program )
 {
 	containers::List< Node * > frontier;
 	containers::Map< Node *, crimild::Int32 > inCount;
@@ -77,7 +77,7 @@ ShaderBuilder::NodeArray ShaderBuilder::sortNodes( ShaderGraph *graph )
 	while ( !frontier.empty() ) {
 		auto node = frontier.first();
 		frontier.remove( node );
-		node->prepare( graph );
+		node->prepare( graph, program );
 		sorted.add( node );
 
 		node->eachOutputOutlet( [ graph, &sorted, &frontier, &inCount ]( Outlet *outlet ) {
@@ -105,7 +105,7 @@ ShaderBuilder::NodeArray ShaderBuilder::sortNodes( ShaderGraph *graph )
 
 void ShaderBuilder::generateVertexShader( ShaderGraph *graph, ShaderProgram *program )
 {
-	auto nodes = sortNodes( graph );
+	auto nodes = prepareNodes( graph, program );
 
 	auto src = generateShaderSource( nodes, graph, program );
 
@@ -114,7 +114,7 @@ void ShaderBuilder::generateVertexShader( ShaderGraph *graph, ShaderProgram *pro
 
 void ShaderBuilder::generateFragmentShader( ShaderGraph *graph, ShaderProgram *program )
 {
-	auto nodes = sortNodes( graph );
+	auto nodes = prepareNodes( graph, program );
 
 	auto src = generateShaderSource( nodes, graph, program );
 

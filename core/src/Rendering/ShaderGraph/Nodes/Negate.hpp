@@ -53,7 +53,7 @@ namespace crimild {
 				Outlet *_negated = nullptr;
 
 			public:
-				virtual void prepare( ShaderGraph *graph ) override;
+				virtual void prepare( ShaderGraph *graph, ShaderProgram *program ) override;
 			};
 
 		}

@@ -45,8 +45,10 @@ Normalize::~Normalize( void )
 
 }
 
-void Normalize::prepare( ShaderGraph *graph )
+void Normalize::prepare( ShaderGraph *graph, ShaderProgram *program )
 {
+	Node::prepare( graph, program );
+	
 	if ( graph->isConnected( getInputValue() ) ) {
 		_normalized->setType( graph->anyConnection( getInputValue() )->getType() );
 	}

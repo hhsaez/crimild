@@ -27,6 +27,10 @@
 
 #include "VertexShaderInput.hpp"
 
+#include "Rendering/ShaderGraph/ShaderGraph.hpp"
+#include "Rendering/ShaderProgram.hpp"
+#include "Rendering/ShaderLocation.hpp"
+
 using namespace crimild;
 using namespace crimild::shadergraph;
 using namespace crimild::shadergraph::nodes;
@@ -48,5 +52,59 @@ VertexShaderInput::VertexShaderInput( void )
 VertexShaderInput::~VertexShaderInput( void )
 {
 
+}
+
+void VertexShaderInput::prepare( ShaderGraph *graph, ShaderProgram *program )
+{
+	Node::prepare( graph, program );
+
+	if ( graph->isConnected( getPosition() ) ) {
+		program->registerStandardLocation(
+			ShaderLocation::Type::ATTRIBUTE,
+			ShaderProgram::StandardLocation::POSITION_ATTRIBUTE,
+			getPosition()->getName() );
+	}
+	
+	if ( graph->isConnected( getNormal() ) ) {
+		program->registerStandardLocation(
+			ShaderLocation::Type::ATTRIBUTE,
+			ShaderProgram::StandardLocation::NORMAL_ATTRIBUTE,
+			getNormal()->getName() );
+	}
+	
+	if ( graph->isConnected( getUV() ) ) {
+		program->registerStandardLocation(
+			ShaderLocation::Type::ATTRIBUTE,
+			ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE,
+			getUV()->getName() );
+	}
+	
+	if ( graph->isConnected( getColor() ) ) {
+		program->registerStandardLocation(
+			ShaderLocation::Type::ATTRIBUTE,
+			ShaderProgram::StandardLocation::COLOR_ATTRIBUTE,
+			getColor()->getName() );
+	}
+	
+	if ( graph->isConnected( getMMatrix() ) ) {
+		program->registerStandardLocation(
+			ShaderLocation::Type::UNIFORM,
+			ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM,
+			getMMatrix()->getName() );
+	}
+	
+	if ( graph->isConnected( getVMatrix() ) ) {
+		program->registerStandardLocation(
+			ShaderLocation::Type::UNIFORM,
+			ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM,
+			getVMatrix()->getName() );
+	}
+	
+	if ( graph->isConnected( getPMatrix() ) ) {
+		program->registerStandardLocation(
+			ShaderLocation::Type::UNIFORM,
+			ShaderProgram::StandardLocation::PROJECTION_MATRIX_UNIFORM,
+			getPMatrix()->getName() );
+	}
 }
 

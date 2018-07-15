@@ -45,8 +45,10 @@ Negate::~Negate( void )
 
 }
 
-void Negate::prepare( ShaderGraph *graph )
+void Negate::prepare( ShaderGraph *graph, ShaderProgram *program )
 {
+	Node::prepare( graph, program );
+	
 	if ( graph->isConnected( getInputValue() ) ) {
 		_negated->setType( graph->anyConnection( getInputValue() )->getType() );
 	}

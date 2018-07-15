@@ -54,7 +54,7 @@ namespace crimild {
 				Outlet *_output = nullptr;
 
 			protected:
-				virtual void prepare( ShaderGraph *graph ) override;
+				virtual void prepare( ShaderGraph *graph, ShaderProgram *program ) override;
 			};
 
 		}

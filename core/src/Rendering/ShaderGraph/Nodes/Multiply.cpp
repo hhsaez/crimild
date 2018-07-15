@@ -46,8 +46,10 @@ Multiply::~Multiply( void )
 
 }
 
-void Multiply::prepare( ShaderGraph *graph )
+void Multiply::prepare( ShaderGraph *graph, ShaderProgram *program )	
 {
+	Node::prepare( graph, program );
+	
 	if ( graph->isConnected( getB() ) ) {
 		_output->setType( graph->anyConnection( getB() )->getType() );
 	}

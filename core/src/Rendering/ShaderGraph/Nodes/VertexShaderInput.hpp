@@ -67,6 +67,9 @@ namespace crimild {
 				Outlet *_pMatrix = nullptr;
 				Outlet *_mvMatrix = nullptr;
 				Outlet *_mvpMatrix = nullptr;
+
+			public:
+				virtual void prepare( ShaderGraph *graph, ShaderProgram *program ) override;
 			};
 
 		}

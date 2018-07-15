@@ -56,7 +56,7 @@ namespace crimild {
 		private:
 			NodeArray compile( ShaderGraph *graph );
 
-			NodeArray sortNodes( ShaderGraph *graph );
+			NodeArray prepareNodes( ShaderGraph *graph, ShaderProgram *progam );
 
 			void generateVertexShader( ShaderGraph *graph, ShaderProgram *program );
 			void generateFragmentShader( ShaderGraph *graph, ShaderProgram *program );

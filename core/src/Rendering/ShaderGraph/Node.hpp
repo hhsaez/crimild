@@ -37,6 +37,8 @@
 
 namespace crimild {
 
+	class ShaderProgram;
+
 	namespace shadergraph {
 
 		class Node : public coding::Codable {
@@ -74,7 +76,7 @@ namespace crimild {
 			//@{
 			
 		public:
-			virtual void prepare( ShaderGraph *graph );
+			virtual void prepare( ShaderGraph *graph, ShaderProgram *program );
 
 			//}
 		};
