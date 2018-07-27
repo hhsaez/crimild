@@ -70,6 +70,7 @@ Animation *Animation::sync( SharedPointer< Animation > const &other )
 
 Animation *Animation::sync( Animation *other )
 {
+	// TODO: Sync should work with time scales, not absolute values
 	_clock = other->getClock();
 	evaluate();
 	return this;

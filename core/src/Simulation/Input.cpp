@@ -35,7 +35,7 @@ using namespace crimild::messaging;
 
 Input::Input( void )
 {
-	reset( 256, 8 );
+	reset( CRIMILD_INPUT_KEY_LAST, CRIMILD_INPUT_MOUSE_BUTTON_LAST );
 
 	auto self = this;
 

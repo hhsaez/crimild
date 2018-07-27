@@ -52,3 +52,4 @@ tools/fontgen/Debug/
 *.dir/
 
 third-party/lua
+third-party/sdl

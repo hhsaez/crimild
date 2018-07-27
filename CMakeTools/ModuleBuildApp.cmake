@@ -159,6 +159,41 @@ IF ( CRIMILD_ENABLE_SFML )
 	)
 ENDIF ()
 
+IF ( CRIMILD_ENABLE_SDL )
+   SET( CRIMILD_APP_DEPENDENCIES
+   		${CRIMILD_APP_DEPENDENCIES}
+		crimild_sdl
+		SDL2-static
+   )
+
+   SET( CRIMILD_APP_LINK_LIBRARIES
+   		${CRIMILD_APP_LINK_LIBRARIES}
+		crimild_sdl
+		SDL2-static
+   )
+
+   IF ( APPLE )
+   	  SET( CRIMILD_APP_LINK_LIBRARIES
+	  	   ${CRIMILD_APP_LINK_LIBRARIES}
+		   "-framework AudioToolbox"
+		   "-framework CoreAudio"
+		   "-framework ForceFeedback"
+	  )
+   ENDIF ()
+
+   SET( CRIMILD_APP_INCLUDE_DIRECTORIES
+   		${CRIMILD_APP_INCLUDE_DIRECTORIES}
+		${CRIMILD_SOURCE_DIR}/sdl/src
+		${CRIMILD_SOURCE_DIR}/third-party/sdl/include
+   )
+
+#   SET( CRIMILD_APP_LINK_DIRECTORIES
+#   		${CRIMILD_APP_LINK_DIRECTORIES}
+#		${CRIMILD_SOURCE_DIR}/third-party/sdl/lib
+#   )
+   
+ENDIF ()
+
 INCLUDE_DIRECTORIES( ${CRIMILD_APP_INCLUDE_DIRECTORIES} )
 
 LINK_DIRECTORIES( ${CRIMILD_APP_LINK_DIRECTORIES} )

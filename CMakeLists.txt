@@ -90,6 +90,12 @@ IF ( CRIMILD_ENABLE_SFML )
 ENDIF ( CRIMILD_ENABLE_SFML )
 
 OPTION( CRIMILD_ENABLE_GLFW "Would you like to build the crimild-glfw extension?" OFF )
+OPTION( CRIMILD_ENABLE_SDL "Would you like to build the crimild-sdl extension?" OFF )
+
+IF ( CRIMILD_ENABLE_GLFW OR CRIMILD_ENABLE_SDL )
+	ADD_SUBDIRECTORY( opengl )
+ENDIF ()
+
 IF ( CRIMILD_ENABLE_GLFW )
 	ADD_DEFINITIONS( -DCRIMILD_ENABLE_GLFW=1 )
 
@@ -99,10 +105,26 @@ IF ( CRIMILD_ENABLE_GLFW )
 	
 	ADD_SUBDIRECTORY( ${CRIMILD_SOURCE_DIR}/third-party/glfw )
 
-	ADD_SUBDIRECTORY( opengl )
 	ADD_SUBDIRECTORY( glfw )
 	
 ENDIF ( CRIMILD_ENABLE_GLFW )
+
+IF ( CRIMILD_ENABLE_SDL )
+   ADD_DEFINITIONS( -DCRIMILD_ENABLE_SDL=1 )
+
+   EXTRACT_ARCHIVE( SDL2-2.0.8.zip sdl ${CRIMILD_SOURCE_DIR}/third-party )
+
+   SET( SDL_SHARED_ENABLED_BY_DEFAULT OFF CACHE BOOL "Disable SDL Shared Libraries" )
+
+   # Prevents a build error due to SDL forcing the use of a
+   # separate directory for builds.
+   # TODO: This is very error prone. 
+   FILE( COPY ${CRIMILD_SOURCE_DIR}/CMakeTools/third-party/sdl/CMakeLists.txt DESTINATION ${CRIMILD_SOURCE_DIR}/third-party/sdl )
+
+   ADD_SUBDIRECTORY( ${CRIMILD_SOURCE_DIR}/third-party/sdl )
+
+   ADD_SUBDIRECTORY( sdl )
+ENDIF ()
 
 OPTION( CRIMILD_BUILD_TOOLS "Build tools?" OFF )
 IF ( CRIMILD_BUILD_TOOLS )
