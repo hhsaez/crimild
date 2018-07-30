@@ -1,16 +1,28 @@
 SET( CRIMILD_INCLUDE_DIRECTORIES 
 	${CRIMILD_SOURCE_DIR}/core/src 
-	${CRIMILD_SOURCE_DIR}/third-party/glfw/include
-	${CRIMILD_SOURCE_DIR}/third-party/glew/include )
+	${CRIMILD_SOURCE_DIR}/third-party/glew/include
+)
 
 SET( CRIMILD_LIBRARY_LINK_LIBRARIES 
 	crimild_core
-	glfw )
+)
 
 IF ( NOT EXISTS "${CRIMILD_SOURCE_DIR}/third-party/glew/src/glew.c" )
 	MESSAGE( "EXTRACTING...." )
 	EXTRACT_ARCHIVE( glew-1.13.0.zip glew ${CRIMILD_SOURCE_DIR}/third-party )
 ENDIF()
+
+IF ( CRIMILD_ENABLE_GLFW )
+   SET( CRIMILD_INCLUDE_DIRECTORIES
+   		${CRIMILD_INCLUDE_DIRECTORIES}
+		${CRIMILD_SOURCE_DIR}/third-party/glfw/include
+   )
+		
+   SET( CRIMILD_LIBRARY_LINK_LIBRARIES
+   		${CRIMILD_LIBRARY_LINK_LIBRARIES}
+		glfw
+   )
+ENDIF ()
 
 ADD_DEFINITIONS( -DGLEW_STATIC=1 )
 
