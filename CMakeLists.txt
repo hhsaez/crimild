@@ -23,6 +23,13 @@ ADD_DEFINITIONS( -DCRIMILD_VERSION_PATCH=0 )
 
 # Configuration options
 OPTION( CRIMILD_ENABLE_TESTS "Would you like to enable unit tests?" OFF )
+OPTION( CRIMILD_ENABLE_IMPORT "Build importers?" OFF )
+OPTION( CRIMILD_ENABLE_PHYSICS "Would you like to build the crimild-physics extension?" OFF )
+OPTION( CRIMILD_ENABLE_SCRIPTING "Would you like to build the crimild-scripting extension?" OFF )
+OPTION( CRIMILD_ENABLE_SFML "Would you like to build the crimild-sfml extension" OFF )
+OPTION( CRIMILD_ENABLE_GLFW "Would you like to build the crimild-glfw extension?" OFF )
+OPTION( CRIMILD_ENABLE_SDL "Would you like to build the crimild-sdl extension?" OFF )
+
 IF ( CRIMILD_ENABLE_TESTS )
 	ENABLE_TESTING()
 
@@ -38,7 +45,6 @@ ENDIF ( CRIMILD_ENABLE_TESTS )
 ADD_SUBDIRECTORY( core )
 ADD_SUBDIRECTORY( raytracing )
 
-OPTION( CRIMILD_ENABLE_IMPORT "Build importers?" OFF )
 IF ( CRIMILD_ENABLE_IMPORT )
 	ADD_DEFINITIONS( -DCRIMILD_ENABLE_IMPORT=1 )
 
@@ -51,14 +57,12 @@ IF ( CRIMILD_ENABLE_IMPORT )
 	ADD_SUBDIRECTORY( import )
 ENDIF ( CRIMILD_ENABLE_IMPORT )
 
-OPTION( CRIMILD_ENABLE_PHYSICS "Would you like to build the crimild-physics extension?" OFF )
 IF ( CRIMILD_ENABLE_PHYSICS )
 	ADD_DEFINITIONS( -DCRIMILD_ENABLE_PHYSICS=1 )
 	ADD_SUBDIRECTORY( physics )
 ENDIF ( CRIMILD_ENABLE_PHYSICS )
 
 # Add scripting sources
-OPTION( CRIMILD_ENABLE_SCRIPTING "Would you like to build the crimild-scripting extension?" OFF )
 iF ( CRIMILD_ENABLE_SCRIPTING )
 	ADD_DEFINITIONS( -DCRIMILD_ENABLE_SCRIPTING=1 )
 
@@ -72,7 +76,6 @@ iF ( CRIMILD_ENABLE_SCRIPTING )
 	ADD_SUBDIRECTORY( scripting )
 ENDIF ()
 
-OPTION( CRIMILD_ENABLE_SFML "Would you like to build the crimild-sfml extension" OFF )
 IF ( CRIMILD_ENABLE_SFML ) 
 	ADD_DEFINITIONS( -DCRIMILD_ENABLE_SFML=1 )
 
@@ -88,9 +91,6 @@ IF ( CRIMILD_ENABLE_SFML )
 
 	ADD_SUBDIRECTORY( sfml )
 ENDIF ( CRIMILD_ENABLE_SFML )
-
-OPTION( CRIMILD_ENABLE_GLFW "Would you like to build the crimild-glfw extension?" OFF )
-OPTION( CRIMILD_ENABLE_SDL "Would you like to build the crimild-sdl extension?" OFF )
 
 IF ( CRIMILD_ENABLE_GLFW OR CRIMILD_ENABLE_SDL )
 	ADD_SUBDIRECTORY( opengl )
@@ -111,18 +111,6 @@ ENDIF ( CRIMILD_ENABLE_GLFW )
 
 IF ( CRIMILD_ENABLE_SDL )
    ADD_DEFINITIONS( -DCRIMILD_ENABLE_SDL=1 )
-
-   EXTRACT_ARCHIVE( SDL2-2.0.8.zip sdl ${CRIMILD_SOURCE_DIR}/third-party )
-
-   SET( SDL_SHARED_ENABLED_BY_DEFAULT OFF CACHE BOOL "Disable SDL Shared Libraries" )
-
-   # Prevents a build error due to SDL forcing the use of a
-   # separate directory for builds.
-   # TODO: This is very error prone. 
-   FILE( COPY ${CRIMILD_SOURCE_DIR}/CMakeTools/third-party/sdl/CMakeLists.txt DESTINATION ${CRIMILD_SOURCE_DIR}/third-party/sdl )
-
-   ADD_SUBDIRECTORY( ${CRIMILD_SOURCE_DIR}/third-party/sdl )
-
    ADD_SUBDIRECTORY( sdl )
 ENDIF ()
 
