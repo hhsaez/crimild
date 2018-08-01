@@ -47,9 +47,11 @@ tools/fontgen/Debug/
 
 # visual studio files
 *.vcxproj
-*.vcxproj.filters
+*.vcxproj.*
 *.sln
 *.dir/
 
 third-party/lua
 third-party/sdl
+third-party/sdl_mixer
+

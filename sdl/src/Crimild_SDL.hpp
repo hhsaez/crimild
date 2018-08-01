@@ -30,6 +30,8 @@
 
 #include "Simulation/SDLSimulation.hpp"
 
+#include <SDL.h>
+
 namespace crimild {
 
 	namespace sdl {

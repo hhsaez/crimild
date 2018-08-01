@@ -34,7 +34,11 @@
 #ifdef CRIMILD_PLATFORM_DESKTOP
     #define GLEW_STATIC 1
     #include <GL/glew.h>
+#ifdef CRIMILD_ENABLE_GLEW
     #include <GLFW/glfw3.h>
+#else
+	#include <GL/gl.h>
+#endif
 #else
     #ifdef __APPLE__
         #import <OpenGLES/ES3/gl.h>
