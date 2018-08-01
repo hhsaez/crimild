@@ -36,11 +36,13 @@
     #include <GL/glew.h>
     #ifdef CRIMILD_ENABLE_GLEW
         #include <GLFW/glfw3.h>
-    #elsif WIN32
-	    #include <GL/gl.h>
     #else
-        #include <OpenGL/gl.h>
-        #include <OpenGL/glext.h>
+		#if defined( CRIMILD_PLATFORM_WIN32 )
+			#include <GL/gl.h>
+		#else
+			#include <OpenGL/gl.h>
+			#include <OpenGL/glext.h>
+		#endif
     #endif
 #else
     #ifdef __APPLE__
