@@ -234,18 +234,6 @@ void SDLEventSystem::update( void )
 					Simulation::getInstance()->stop();
 				});
 				return;
-				
-			case SDL_MOUSEMOTION: {
-				auto x = event.motion.x;
-				auto y = event.motion.y;
-				MessageQueue::getInstance()->pushMessage( MouseMotion {
-					( crimild::Real32 ) x,
-					( crimild::Real32 ) y,
-					( crimild::Real32 ) x / ( crimild::Real32 ) _windowSize.x(),
-					( crimild::Real32 ) y / ( crimild::Real32 ) _windowSize.y()
-				});
-				break;
-			}
 
 			case SDL_MOUSEBUTTONDOWN: {
 				MessageQueue::getInstance()->pushMessage( MouseButtonDown { _mousecodes[ event.button.button ] } );
@@ -309,6 +297,18 @@ void SDLEventSystem::update( void )
 				break;
 		}
 	}
+
+    // trigger MouseMotion in every update to handle cases
+    // when the mouse is not moving and the delta pos should
+    // be updated 
+	int mouseX, mouseY;
+	SDL_GetMouseState( &mouseX, &mouseY );
+	MessageQueue::getInstance()->pushMessage( MouseMotion {
+		( crimild::Real32 ) mouseX,
+		( crimild::Real32 ) mouseY,
+		( crimild::Real32 ) mouseX / ( crimild::Real32 ) _windowSize.x(),
+		( crimild::Real32 ) mouseY / ( crimild::Real32 ) _windowSize.y()
+	});
 
     crimild::concurrency::sync_frame( std::bind( &SDLEventSystem::update, this ) );
 }

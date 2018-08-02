@@ -163,7 +163,8 @@ void WindowSystem::update( void )
 
 		case Input::MouseCursorMode::GRAB:
 			SDL_CaptureMouse( SDL_TRUE );
-			SDL_ShowCursor( SDL_ENABLE );
+			SDL_ShowCursor( SDL_DISABLE );
+			SDL_SetRelativeMouseMode( SDL_TRUE );
 			break;
 	}
 

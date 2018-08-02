@@ -29,6 +29,7 @@
 
 #include "Systems/WindowSystem.hpp"
 #include "Systems/SDLEventSystem.hpp"
+#include "Systems/AudioSystem.hpp"
 
 #include <Exceptions/RuntimeException.hpp>
 #include <Rendering/OpenGLRenderer.hpp>
@@ -53,17 +54,9 @@ using namespace crimild::scripting;
 using namespace crimild::physics;
 #endif
 
-//#ifdef CRIMILD_ENABLE_SFML
-//#include <Audio/SFMLAudioManager.hpp>
-//#endif
-
 SDLSimulation::SDLSimulation( std::string name, SettingsPtr const &settings )
 	: Simulation( name, settings )
 {
-//#ifdef CRIMILD_ENABLE_SFML
-//	setAudioManager( crimild::alloc< sfml::SFMLAudioManager >() );
-//#endif
-
 	if ( SDL_Init( 0 ) != 0 ) {
 		Log::fatal( CRIMILD_CURRENT_CLASS_NAME, "SDL_Init failed: ", SDL_GetError() );
 		exit( 1 );
@@ -71,6 +64,7 @@ SDLSimulation::SDLSimulation( std::string name, SettingsPtr const &settings )
 
 	char *basePath = SDL_GetBasePath();
 	if ( basePath ){
+		// TODO: fix base directory
 		//FileSystem::getInstance().setBaseDirectory( basePath );
 		SDL_free( basePath );
 	}
@@ -86,6 +80,7 @@ SDLSimulation::SDLSimulation( std::string name, SettingsPtr const &settings )
 
     addSystem( crimild::alloc< SDLEventSystem >() );
     addSystem( crimild::alloc< WindowSystem >() );
+	addSystem( crimild::alloc< AudioSystem >() );
 
 #ifdef CRIMILD_ENABLE_PHYSICS
     addSystem( crimild::alloc< PhysicsSystem >() );
