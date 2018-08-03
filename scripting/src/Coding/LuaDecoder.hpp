@@ -44,27 +44,35 @@ namespace crimild {
             explicit LuaDecoder( std::string rootObjectName = "scene" );
             virtual ~LuaDecoder( void );
 
-            virtual void decode( std::string key, SharedPointer< coding::Codable > &codable ) override;
+		public:
+            virtual crimild::Bool decode( std::string key, SharedPointer< coding::Codable > &codable ) override;
 
-            virtual void decode( std::string key, std::string &value ) override { decodeValue( key, value ); }
-            virtual void decode( std::string key, crimild::Size &value ) override { decodeValue( key, value ); }
-            virtual void decode( std::string key, crimild::UInt8 &value ) override { decodeValue( key, value ); }
-            virtual void decode( std::string key, crimild::UInt16 &value ) override { decodeValue( key, value ); }
-            virtual void decode( std::string key, crimild::Int16 &value ) override { decodeValue( key, value ); }
-            virtual void decode( std::string key, crimild::Int32 &value ) override { decodeValue( key, value ); }
-            virtual void decode( std::string key, crimild::UInt32 &value ) override { decodeValue( key, value ); }
-            virtual void decode( std::string key, crimild::Bool &value ) override { decodeValue( key, value ); }
-            virtual void decode( std::string key, crimild::Real32 &value ) override { decodeValue( key, value ); }
-            virtual void decode( std::string key, crimild::Real64 &value ) override { decodeValue( key, value ); }
-            virtual void decode( std::string key, crimild::Vector2f &value ) override { decodeValue( key, value ); }
-            virtual void decode( std::string key, crimild::Vector3f &value ) override { decodeValue( key, value ); }
-            virtual void decode( std::string key, crimild::Vector4f &value ) override { decodeValue( key, value ); }
-            virtual void decode( std::string key, crimild::Matrix3f &value ) override { decodeValue( key, value ); }
-            virtual void decode( std::string key, crimild::Matrix4f &value ) override { decodeValue( key, value ); }
-            virtual void decode( std::string key, crimild::Quaternion4f &value ) override { decodeValue( key, value ); }
-            virtual void decode( std::string key, Transformation &value ) override { decodeValue( key, value ); }
-            virtual void decode( std::string key, VertexFormat &value ) override { /* no-op */ }
-            virtual void decode( std::string key, containers::ByteArray &value ) override { /* no-op */ }
+            virtual crimild::Bool decode( std::string key, std::string &value ) override { return decodeValue( key, value ); }
+            virtual crimild::Bool decode( std::string key, crimild::Size &value ) override { return decodeValue( key, value ); }
+            virtual crimild::Bool decode( std::string key, crimild::UInt8 &value ) override { return decodeValue( key, value ); }
+            virtual crimild::Bool decode( std::string key, crimild::UInt16 &value ) override { return decodeValue( key, value ); }
+            virtual crimild::Bool decode( std::string key, crimild::Int16 &value ) override { return decodeValue( key, value ); }
+            virtual crimild::Bool decode( std::string key, crimild::Int32 &value ) override { return decodeValue( key, value ); }
+            virtual crimild::Bool decode( std::string key, crimild::UInt32 &value ) override { return decodeValue( key, value ); }
+            virtual crimild::Bool decode( std::string key, crimild::Bool &value ) override { return decodeValue( key, value ); }
+            virtual crimild::Bool decode( std::string key, crimild::Real32 &value ) override { return decodeValue( key, value ); }
+            virtual crimild::Bool decode( std::string key, crimild::Real64 &value ) override { return decodeValue( key, value ); }
+            virtual crimild::Bool decode( std::string key, crimild::Vector2f &value ) override { return decodeValue( key, value ); }
+            virtual crimild::Bool decode( std::string key, crimild::Vector3f &value ) override { return decodeValue( key, value ); }
+            virtual crimild::Bool decode( std::string key, crimild::Vector4f &value ) override { return decodeValue( key, value ); }
+            virtual crimild::Bool decode( std::string key, crimild::Matrix3f &value ) override { return decodeValue( key, value ); }
+            virtual crimild::Bool decode( std::string key, crimild::Matrix4f &value ) override { return decodeValue( key, value ); }
+            virtual crimild::Bool decode( std::string key, crimild::Quaternion4f &value ) override { return decodeValue( key, value ); }
+            virtual crimild::Bool decode( std::string key, Transformation &value ) override { return decodeValue( key, value ); }
+            virtual crimild::Bool decode( std::string key, VertexFormat &value ) override { /* no-op */ return true; }
+
+            virtual crimild::Bool decode( std::string key, containers::ByteArray &value ) override { /* no-op */ return true; }
+            virtual crimild::Bool decode( std::string key, containers::Array< crimild::Real32 > &value ) override { return true; };
+            virtual crimild::Bool decode( std::string key, containers::Array< Vector3f > &value ) override { return true; };
+            virtual crimild::Bool decode( std::string key, containers::Array< Vector4f > &value ) override { return true; };
+            virtual crimild::Bool decode( std::string key, containers::Array< Matrix3f > &value ) override { return true; };
+            virtual crimild::Bool decode( std::string key, containers::Array< Matrix4f > &value ) override { return true; };
+            virtual crimild::Bool decode( std::string key, containers::Array< Quaternion4f > &value ) override { return true; };
 
 			void parse( std::string str );
 			void parseFile( std::string filename );
@@ -79,9 +87,9 @@ namespace crimild {
 
         private:
             template< typename T >
-            void decodeValue( std::string key, T &value )
+            crimild::Bool decodeValue( std::string key, T &value )
             {
-	            _evals.top().getPropValue( key, value );
+	            return _evals.top().getPropValue( key, value );
             }
 
 		private:

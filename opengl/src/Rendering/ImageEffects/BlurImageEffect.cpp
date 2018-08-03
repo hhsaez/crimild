@@ -108,7 +108,7 @@ void BlurImageEffect::compute( crimild::Renderer *renderer, Camera *camera )
         return;
     }
     
-    auto colorTarget = sceneFBO->getRenderTargets().get( RenderPass::S_BUFFER_COLOR_TARGET_NAME );
+    auto colorTarget = sceneFBO->getRenderTargets()[ RenderPass::S_BUFFER_COLOR_TARGET_NAME ];
     if ( colorTarget == nullptr ) {
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot get color target from scene" );
         return;
@@ -139,8 +139,8 @@ void BlurImageEffect::compute( crimild::Renderer *renderer, Camera *camera )
         renderer->setFrameBuffer( "fbos/blur", tmp );
         fbo = crimild::get_ptr( tmp );
 
-        fbo->getRenderTargets().add( Renderer::FBO_AUX_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
-        fbo->getRenderTargets().add( Renderer::FBO_AUX_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
+        fbo->getRenderTargets().insert( Renderer::FBO_AUX_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
+        fbo->getRenderTargets().insert( Renderer::FBO_AUX_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
     }
 
     _direction->setValue( Vector2f::UNIT_X );
@@ -164,7 +164,7 @@ void BlurImageEffect::apply( crimild::Renderer *renderer, crimild::Camera *camer
         return;
     }
 
-    auto colorTarget = fbo->getRenderTargets().get( Renderer::FBO_AUX_COLOR_TARGET_NAME );
+    auto colorTarget = fbo->getRenderTargets()[ Renderer::FBO_AUX_COLOR_TARGET_NAME ];
     if ( colorTarget == nullptr ) {
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot get color target from scene" );
         return;

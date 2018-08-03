@@ -382,8 +382,9 @@ namespace crimild {
             PRECISION cosTheta = a.getReal() * b.getReal() + a.getImaginary() * b.getImaginary();
             Quaternion< PRECISION > b1 = b;
             if ( cosTheta < 0.0 ) {
-                b1 = b.getConjugate();
-                cosTheta = -cosTheta;
+				// fix rotation for big angles
+                b1 = -b;
+                cosTheta = a.getReal() * b1.getReal() + a.getImaginary() * b1.getImaginary();
             }
             
             PRECISION w1, w2;

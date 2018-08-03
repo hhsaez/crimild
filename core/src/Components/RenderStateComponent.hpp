@@ -32,14 +32,18 @@
 
 #include "Rendering/Material.hpp"
 #include "SceneGraph/Light.hpp"
-#include "Foundation/SharedObjectArray.hpp"
+#include "Foundation/Containers/Array.hpp"
 
 #include <functional>
 #include <list>
 
 namespace crimild {
 
-	class SkinnedMesh;
+	namespace animation {
+		
+		class Skeleton;
+
+	}
 
 	class RenderStateComponent : public NodeComponent {
 		CRIMILD_IMPLEMENT_RTTI( crimild::RenderStateComponent )
@@ -54,25 +58,25 @@ namespace crimild {
         void attachMaterial( Material *material ) { _materials.add( crimild::retain( material ) ); }
         void attachMaterial( SharedPointer< Material > const &material ) { _materials.add( material ); }
         void detachAllMaterials( void ) { _materials.clear(); }
-        void forEachMaterial( std::function< void( Material * ) > callback ) { _materials.forEach( callback ); }
+        void forEachMaterial( std::function< void( Material * ) > callback );
 
 		bool hasLights( void ) const { return _lights.size() > 0; }
         void attachLight( Light *light ) { _lights.add( crimild::retain( light ) ); }
         void attachLight( SharedPointer< Light > const &light ) { _lights.add( light ); }
         void detachAllLights( void ) { _lights.clear(); }
-        void forEachLight( std::function< void( Light * ) > callback ) { _lights.forEach( callback ); }
+        void forEachLight( std::function< void( Light * ) > callback );
 
-        void setSkinnedMesh( SharedPointer< SkinnedMesh > const &skinnedMesh ) { _skinnedMesh = skinnedMesh; }
-        SkinnedMesh *getSkinnedMesh( void ) { return crimild::get_ptr( _skinnedMesh ); }
+        void setSkeleton( SharedPointer< animation::Skeleton > const &skeleton ) { _skeleton = skeleton; }
+		animation::Skeleton *getSkeleton( void ) { return crimild::get_ptr( _skeleton ); }
 
 		bool renderOnScreen( void ) const { return _renderOnScreen; }
 		void setRenderOnScreen( bool value ) { _renderOnScreen = value; }
 
 	private:
-		SharedObjectArray< Material > _materials;
-		SharedObjectArray< Light > _lights;
+		containers::Array< SharedPointer< Material >> _materials;
+		containers::Array< SharedPointer< Light >> _lights;
 
-		SharedPointer< SkinnedMesh > _skinnedMesh;
+		SharedPointer< animation::Skeleton > _skeleton;
 
 		bool _renderOnScreen;
 	};

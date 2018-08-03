@@ -98,22 +98,22 @@ void UpdateSystem::updateWorldState( Node *scene )
 
 void UpdateSystem::computeRenderQueues( Node *scene )
 {
-	auto renderQueueCollection = crimild::alloc< RenderQueueCollection >();
+	containers::Array< SharedPointer< RenderQueue >> renderQueues;
 
 	{
 		CRIMILD_PROFILE( "Compute Render Queue" )
 	
-		Simulation::getInstance()->forEachCamera( [ this, &renderQueueCollection, scene ]( Camera *camera ) {
+		Simulation::getInstance()->forEachCamera( [ this, &renderQueues, scene ]( Camera *camera ) {
 			if ( camera != nullptr && camera->isEnabled() ) {
 				auto renderQueue = crimild::alloc< RenderQueue >();
 				scene->perform( ComputeRenderQueue( camera, crimild::get_ptr( renderQueue ) ) );
-				renderQueueCollection->add( renderQueue );
+				renderQueues.add( renderQueue );
 			}
 		});
 	}
     
-    crimild::concurrency::sync_frame( [this, renderQueueCollection]() {
-        broadcastMessage( messaging::RenderQueueAvailable { renderQueueCollection } );
+    crimild::concurrency::sync_frame( [ this, renderQueues ]() {
+        broadcastMessage( messaging::RenderQueueAvailable { renderQueues } );
     });
 }
 

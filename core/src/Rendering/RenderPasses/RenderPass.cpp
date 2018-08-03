@@ -126,11 +126,11 @@ FrameBufferObject *RenderPass::getSBuffer( Renderer *renderer )
     
     auto sBuffer = crimild::alloc< FrameBufferObject >( width, height );
 #ifdef CRIMILD_PLATFORM_DESKTOP
-    sBuffer->getRenderTargets().add( S_BUFFER_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER_AND_TEXTURE, width, height, true ) );
+    sBuffer->getRenderTargets().insert( S_BUFFER_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER_AND_TEXTURE, width, height, true ) );
 #else
-    sBuffer->getRenderTargets().add( S_BUFFER_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
+    sBuffer->getRenderTargets().insert( S_BUFFER_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
 #endif
-    sBuffer->getRenderTargets().add( S_BUFFER_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
+    sBuffer->getRenderTargets().insert( S_BUFFER_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
     renderer->setFrameBuffer( S_BUFFER_NAME, sBuffer );
     
     return crimild::get_ptr( sBuffer );
@@ -151,11 +151,11 @@ FrameBufferObject *RenderPass::getDBuffer( Renderer *renderer )
     
     auto dBuffer = crimild::alloc< FrameBufferObject >( width, height );
 #ifdef CRIMILD_PLATFORM_DESKTOP
-    dBuffer->getRenderTargets().add( D_BUFFER_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER_AND_TEXTURE, width, height, true ) );
+    dBuffer->getRenderTargets().insert( D_BUFFER_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER_AND_TEXTURE, width, height, true ) );
 #else
-    dBuffer->getRenderTargets().add( D_BUFFER_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
+    dBuffer->getRenderTargets().insert( D_BUFFER_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
 #endif
-    dBuffer->getRenderTargets().add( D_BUFFER_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
+    dBuffer->getRenderTargets().insert( D_BUFFER_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
     renderer->setFrameBuffer( D_BUFFER_NAME, dBuffer );
     
     return crimild::get_ptr( dBuffer );
@@ -164,7 +164,7 @@ FrameBufferObject *RenderPass::getDBuffer( Renderer *renderer )
 void RenderPass::applyImageEffects( Renderer *renderer, Camera *camera )
 {
 	auto self = this;
-	getImageEffects().forEach( [self, renderer, camera]( ImageEffect *effect, int ) {
+	getImageEffects().each( [ self, renderer, camera ]( SharedPointer< ImageEffect > &effect ) {
 		if ( effect->isEnabled() ) {
             auto destBuffer = self->getDBuffer( renderer );
 

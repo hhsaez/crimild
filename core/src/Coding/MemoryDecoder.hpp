@@ -31,7 +31,6 @@
 #include "Decoder.hpp"
 #include "EncodedData.hpp"
 
-#include "Foundation/Version.hpp"
 #include "Foundation/Containers/Map.hpp"
 
 namespace crimild {
@@ -42,45 +41,71 @@ namespace crimild {
         public:
             MemoryDecoder( void );
             virtual ~MemoryDecoder( void );
-            
-            virtual void decode( std::string key, SharedPointer< coding::Codable > &codable ) override;
 
-            virtual void decode( std::string key, std::string &value ) override;
+		public:
+            virtual crimild::Bool decode( std::string key, SharedPointer< coding::Codable > &codable ) override;
+
+            virtual crimild::Bool decode( std::string key, std::string &value ) override;
             
-            virtual void decode( std::string key, crimild::Size &value ) override { decodeData( key, value ); }
-            virtual void decode( std::string key, crimild::UInt8 &value ) override { decodeData( key, value ); }
-            virtual void decode( std::string key, crimild::UInt16 &value ) override { decodeData( key, value ); }
-            virtual void decode( std::string key, crimild::Int16 &value ) override { decodeData( key, value ); }
-            virtual void decode( std::string key, crimild::Int32 &value ) override { decodeData( key, value ); }
-            virtual void decode( std::string key, crimild::UInt32 &value ) override { decodeData( key, value ); }
-            virtual void decode( std::string key, crimild::Bool &value ) override { decodeData( key, value ); }
-			virtual void decode( std::string key, crimild::Real32 &value ) override { decodeData( key, value ); }
-			virtual void decode( std::string key, crimild::Real64 &value ) override { decodeData( key, value ); }
-			virtual void decode( std::string key, crimild::Vector2f &value ) override { decodeData( key, value ); }
-			virtual void decode( std::string key, crimild::Vector3f &value ) override { decodeData( key, value ); }
-            virtual void decode( std::string key, crimild::Vector4f &value ) override { decodeData( key, value ); }
-            virtual void decode( std::string key, crimild::Matrix3f &value ) override { decodeData( key, value ); }
-            virtual void decode( std::string key, crimild::Matrix4f &value ) override { decodeData( key, value ); }
-            virtual void decode( std::string key, crimild::Quaternion4f &value ) override { decodeData( key, value ); }
-            virtual void decode( std::string key, Transformation &value ) override { decodeData( key, value ); }
-            virtual void decode( std::string key, VertexFormat &value ) override { decodeData( key, value ); }
+            virtual crimild::Bool decode( std::string key, crimild::Size &value ) override { return decodeData( key, value ); }
+            virtual crimild::Bool decode( std::string key, crimild::UInt8 &value ) override { return decodeData( key, value ); }
+            virtual crimild::Bool decode( std::string key, crimild::UInt16 &value ) override { return decodeData( key, value ); }
+            virtual crimild::Bool decode( std::string key, crimild::Int16 &value ) override { return decodeData( key, value ); }
+            virtual crimild::Bool decode( std::string key, crimild::Int32 &value ) override { return decodeData( key, value ); }
+            virtual crimild::Bool decode( std::string key, crimild::UInt32 &value ) override { return decodeData( key, value ); }
+            virtual crimild::Bool decode( std::string key, crimild::Bool &value ) override { return decodeData( key, value ); }
+			virtual crimild::Bool decode( std::string key, crimild::Real32 &value ) override { return decodeData( key, value ); }
+			virtual crimild::Bool decode( std::string key, crimild::Real64 &value ) override { return decodeData( key, value ); }
+			virtual crimild::Bool decode( std::string key, crimild::Vector2f &value ) override { return decodeData( key, value ); }
+			virtual crimild::Bool decode( std::string key, crimild::Vector3f &value ) override { return decodeData( key, value ); }
+            virtual crimild::Bool decode( std::string key, crimild::Vector4f &value ) override { return decodeData( key, value ); }
+            virtual crimild::Bool decode( std::string key, crimild::Matrix3f &value ) override { return decodeData( key, value ); }
+            virtual crimild::Bool decode( std::string key, crimild::Matrix4f &value ) override { return decodeData( key, value ); }
+            virtual crimild::Bool decode( std::string key, crimild::Quaternion4f &value ) override { return decodeData( key, value ); }
+            virtual crimild::Bool decode( std::string key, Transformation &value ) override { return decodeData( key, value ); }
+            virtual crimild::Bool decode( std::string key, VertexFormat &value ) override { return decodeData( key, value ); }
             
-            virtual void decode( std::string key, containers::ByteArray &value ) override;
+            virtual crimild::Bool decode( std::string key, containers::ByteArray &value ) override { return decodeDataArray( key, value ); }
+            virtual crimild::Bool decode( std::string key, containers::Array< crimild::Real32 > &value ) override { return decodeDataArray( key, value ); }
+            virtual crimild::Bool decode( std::string key, containers::Array< Vector3f > &value ) override { return decodeDataArray( key, value ); }
+            virtual crimild::Bool decode( std::string key, containers::Array< Vector4f > &value ) override { return decodeDataArray( key, value ); }
+            virtual crimild::Bool decode( std::string key, containers::Array< Matrix3f > &value ) override { return decodeDataArray( key, value ); }
+            virtual crimild::Bool decode( std::string key, containers::Array< Matrix4f > &value ) override { return decodeDataArray( key, value ); }
+            virtual crimild::Bool decode( std::string key, containers::Array< Quaternion4f > &value ) override { return decodeDataArray( key, value ); }
             
             crimild::Bool fromBytes( const containers::ByteArray &bytes );
             
         private:
             template< typename T >
-            void decodeData( std::string key, T &value )
+            crimild::Bool decodeData( std::string key, T &value )
             {
                 auto obj = crimild::cast_ptr< EncodedData >( _links[ _currentObj->getUniqueID() ][ key ] );
                 if ( obj == nullptr ) {
                     value = T();
-                    return;
+                    return false;
                 }
                 
                 value = obj->getValue< T >();
+
+				return true;
             }
+
+			template< typename T >
+			crimild::Bool decodeDataArray( std::string key, containers::Array< T > &value )
+			{
+                auto obj = crimild::cast_ptr< EncodedData >( _links[ _currentObj->getUniqueID() ][ key ] );
+				if ( obj == nullptr ) {
+					return false;
+				}
+
+				const auto N = obj->getBytes().size() / sizeof( T );
+				value.resize( N );
+				if ( N > 0 ) {
+					memcpy( &value[ 0 ], obj->getBytes().getData(), obj->getBytes().size() );
+				}
+
+				return true;
+			}
 
 		protected:
 			virtual crimild::Size beginDecodingArray( std::string key ) override;
@@ -89,6 +114,7 @@ namespace crimild {
 			virtual void endDecodingArray( std::string key ) override;
 
         private:
+            static crimild::Size read( const containers::ByteArray &bytes, crimild::Int8 &value, crimild::Size offset );
             static crimild::Size read( const containers::ByteArray &bytes, Codable::UniqueID &value, crimild::Size offset );
             static crimild::Size read( const containers::ByteArray &bytes, std::string &value, crimild::Size offset );
             static crimild::Size read( const containers::ByteArray &bytes, containers::ByteArray &value, crimild::Size offset );
@@ -98,7 +124,6 @@ namespace crimild {
             containers::Map< Codable::UniqueID, containers::Map< std::string, SharedPointer< Codable >>> _links;
             containers::Map< Codable::UniqueID, SharedPointer< Codable >> _objects;
             SharedPointer< Codable > _currentObj;
-            Version _version;
         };
         
 	}

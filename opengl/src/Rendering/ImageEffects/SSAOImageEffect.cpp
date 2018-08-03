@@ -211,14 +211,14 @@ void SSAOImageEffect::compute( Renderer *renderer, Camera *camera )
 void SSAOImageEffect::apply( crimild::Renderer *renderer, Camera *camera )
 {
     auto scene = renderer->getFrameBuffer( RenderPass::S_BUFFER_NAME );
-    renderScreen( renderer, scene->getRenderTargets().get( RenderPass::S_BUFFER_COLOR_TARGET_NAME )->getTexture() );
+    renderScreen( renderer, scene->getRenderTargets()[ RenderPass::S_BUFFER_COLOR_TARGET_NAME ]->getTexture() );
     
     auto ssaoBlur = getSSAOBlurBuffer( renderer );
     
     renderer->setDepthState( DepthState::DISABLED );
     renderer->setAlphaState( _blendState );
     
-    renderScreen( renderer, ssaoBlur->getRenderTargets().get( "color" )->getTexture() );
+    renderScreen( renderer, ssaoBlur->getRenderTargets()[ "color" ]->getTexture() );
 
     renderer->setAlphaState( AlphaState::DISABLED );
     renderer->setDepthState( DepthState::ENABLED );
@@ -260,8 +260,8 @@ void SSAOImageEffect::computeSSAO( crimild::Renderer *renderer, Camera *camera )
     }
     
     auto gBuffer = renderer->getFrameBuffer( DeferredRenderPass::G_BUFFER_NAME );
-    auto positions = gBuffer->getRenderTargets().get( DeferredRenderPass::G_BUFFER_POSITION_TARGET_NAME );
-    auto normals = gBuffer->getRenderTargets().get( DeferredRenderPass::G_BUFFER_VIEW_SPACE_NORMAL_TARGET_NAME );
+    auto positions = gBuffer->getRenderTargets()[ DeferredRenderPass::G_BUFFER_POSITION_TARGET_NAME ];
+    auto normals = gBuffer->getRenderTargets()[ DeferredRenderPass::G_BUFFER_VIEW_SPACE_NORMAL_TARGET_NAME ];
     
     renderer->bindProgram( ssaoProgram );
     
@@ -308,13 +308,13 @@ void SSAOImageEffect::applySSAO( crimild::Renderer *renderer )
     
     renderer->bindFrameBuffer( ssaoBlurFBO );
     renderer->bindProgram( ssaoApplyProgram );
-    renderer->bindTexture( ssaoApplyProgram->getStandardLocation( ShaderProgram::StandardLocation::SSAO_MAP_UNIFORM ), ssaoBuffer->getRenderTargets().get( "color" )->getTexture() );
+    renderer->bindTexture( ssaoApplyProgram->getStandardLocation( ShaderProgram::StandardLocation::SSAO_MAP_UNIFORM ), ssaoBuffer->getRenderTargets()[ "color" ]->getTexture() );
 
     renderer->bindUniform( ssaoApplyProgram->getLocation( "uBlurSize" ), _ssaoBlurSize );
 
     renderer->drawScreenPrimitive( ssaoApplyProgram );
 
-    renderer->unbindTexture( ssaoApplyProgram->getStandardLocation( ShaderProgram::StandardLocation::SSAO_MAP_UNIFORM ), ssaoBuffer->getRenderTargets().get( "color" )->getTexture() );
+    renderer->unbindTexture( ssaoApplyProgram->getStandardLocation( ShaderProgram::StandardLocation::SSAO_MAP_UNIFORM ), ssaoBuffer->getRenderTargets()[ "color" ]->getTexture() );
     renderer->unbindProgram( ssaoApplyProgram );
     renderer->unbindFrameBuffer( ssaoBlurFBO );
 }

@@ -46,10 +46,10 @@ ShadowMap::ShadowMap( SharedPointer< FrameBufferObject > const &fbo )
 
         _buffer = crimild::alloc< FrameBufferObject >( width, height );
         _buffer->setClearColor( RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ) );
-        _buffer->getRenderTargets().add( "depth", crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER_AND_TEXTURE, width, height, true ) );
+        _buffer->getRenderTargets().insert( "depth", crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER_AND_TEXTURE, width, height, true ) );
     }
     
-    _buffer->getRenderTargets().each( [ this ]( std::string name, RenderTarget *target ) {
+    _buffer->getRenderTargets().each( [ this ]( const std::string &name, SharedPointer< RenderTarget > &target ) {
         if ( target->getOutput() == RenderTarget::Output::TEXTURE || target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
             _texture = target->getTexture();
         }

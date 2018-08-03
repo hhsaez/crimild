@@ -52,13 +52,14 @@ namespace crimild {
 				}
 			}
                 
-            explicit EncodedData( const containers::ByteArray &data )
-                : _bytes( data.size() )
-            {
-                if ( _bytes.size() > 0 ) {
-                    memcpy( &_bytes[ 0 ], &data[ 0 ], _bytes.size() );
-                }
-            }
+			template< typename T >
+			explicit EncodedData( const containers::Array< T > &data )
+				: _bytes( data.size() * sizeof( T ) )
+			{
+				if ( _bytes.size() > 0 ) {
+					memcpy( &_bytes[ 0 ], &data[ 0 ], _bytes.size() );
+				}
+			}
             
 			template< typename T >
 			explicit EncodedData( const T &data )

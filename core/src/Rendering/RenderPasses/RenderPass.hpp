@@ -29,7 +29,7 @@
 #define CRIMILD_RENDERER_RENDER_PASS_
 
 #include "Foundation/SharedObject.hpp"
-#include "Foundation/SharedObjectArray.hpp"
+#include "Foundation/Containers/Array.hpp"
 #include "Rendering/RenderQueue.hpp"
 
 #include <map>
@@ -71,7 +71,7 @@ namespace crimild {
         virtual void render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera, RenderQueue::Renderables const &objects );
         virtual void render( Renderer *renderer, Texture *texture, ShaderProgram *program );
         
-        SharedObjectArray< ImageEffect > &getImageEffects( void ) { return _imageEffects; }
+        containers::Array< SharedPointer< ImageEffect >> &getImageEffects( void ) { return _imageEffects; }
         
         FrameBufferObject *getSBuffer( Renderer *renderer );
         FrameBufferObject *getDBuffer( Renderer *renderer );
@@ -84,7 +84,7 @@ namespace crimild {
 
 	private:
 		SharedPointer< Primitive > _screen;
-        SharedObjectArray< ImageEffect > _imageEffects;
+        containers::Array< SharedPointer< ImageEffect >> _imageEffects;
 	};
 
 }

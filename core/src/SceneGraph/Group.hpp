@@ -30,7 +30,7 @@
 
 #include "Node.hpp"
 
-#include "Foundation/SharedObjectArray.hpp"
+#include "Foundation/Containers/Array.hpp"
 
 #include <functional>
 #include <thread>
@@ -77,7 +77,7 @@ namespace crimild {
 		virtual void forEachNode( std::function< void( Node * ) > callback );
 
 	protected:
-		SharedObjectArray< Node > _nodes;
+		containers::Array< SharedPointer< Node >> _nodes;
 
 	public:
 		virtual void accept( NodeVisitor &visitor ) override;

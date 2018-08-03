@@ -101,7 +101,7 @@ void VignetteImageEffect::compute( Renderer *renderer, Camera *camera )
 void VignetteImageEffect::apply( crimild::Renderer *renderer, crimild::Camera * )
 {
     auto fbo = renderer->getFrameBuffer( RenderPass::S_BUFFER_NAME );
-    auto color = fbo->getRenderTargets().get( RenderPass::S_BUFFER_COLOR_TARGET_NAME );
+    auto color = fbo->getRenderTargets()[ RenderPass::S_BUFFER_COLOR_TARGET_NAME ];
     if ( color == nullptr || color->getTexture() == nullptr ) {
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid color texture" );
         return;

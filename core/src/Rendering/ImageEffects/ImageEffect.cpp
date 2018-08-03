@@ -67,8 +67,8 @@ FrameBufferObject *ImageEffect::getFrameBuffer( Renderer *renderer, std::string 
         renderer->setFrameBuffer( name, newFBO );
         fbo = crimild::get_ptr( newFBO );
         
-        fbo->getRenderTargets().add( "depth", crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
-        fbo->getRenderTargets().add( "color", crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
+        fbo->getRenderTargets().insert( "depth", crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
+        fbo->getRenderTargets().insert( "color", crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
     }
     
     return fbo;

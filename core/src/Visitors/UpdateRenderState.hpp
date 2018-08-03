@@ -43,7 +43,11 @@
 
 namespace crimild {
 
-	class SkinnedMesh;
+	namespace animation {
+
+		class Skeleton;
+
+	}
 
 	class UpdateRenderState : public NodeVisitor {
 	public:
@@ -61,7 +65,7 @@ namespace crimild {
 	private:
 		std::list< Light * > _lights;
 		SharedPointer< Material > _defaultMaterial;
-		SharedPointer< SkinnedMesh > _skinnedMesh;
+		animation::Skeleton *_skeleton = nullptr;
 	};
 
 }

@@ -116,11 +116,11 @@ SharedPointer< FrameBufferObject > Renderer::generateAuxFBO( std::string name, i
 {
     auto fbo = crimild::alloc< FrameBufferObject >( width, height );
 #ifdef CRIMILD_PLATFORM_DESKTOP
-    fbo->getRenderTargets().add( FBO_AUX_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_32, RenderTarget::Output::RENDER_AND_TEXTURE, width, height, true ) );
+    fbo->getRenderTargets().insert( FBO_AUX_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_32, RenderTarget::Output::RENDER_AND_TEXTURE, width, height, true ) );
 #else
-    fbo->getRenderTargets().add( FBO_AUX_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
+    fbo->getRenderTargets().insert( FBO_AUX_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
 #endif
-    fbo->getRenderTargets().add( FBO_AUX_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
+    fbo->getRenderTargets().insert( FBO_AUX_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
     AssetManager::getInstance()->set( name, fbo, true );
     return fbo;
 }
@@ -144,7 +144,7 @@ void Renderer::presentFrame( void )
 {
     auto sBuffer = getFrameBuffer( RenderPass::S_BUFFER_NAME );
     if ( sBuffer != nullptr ) {
-        auto color = sBuffer->getRenderTargets().get( RenderPass::S_BUFFER_COLOR_TARGET_NAME );
+        auto color = sBuffer->getRenderTargets()[ RenderPass::S_BUFFER_COLOR_TARGET_NAME ];
         auto program = getShaderProgram( crimild::Renderer::SHADER_PROGRAM_SCREEN_TEXTURE );
         if ( program != nullptr ) {
             bindProgram( program );

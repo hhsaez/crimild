@@ -159,7 +159,7 @@ SharedPointer< SharedObject > LuaDecoder::buildObject( void )
 	return obj;
 }
 
-void LuaDecoder::decode( std::string key, SharedPointer< Codable > &codable ) 
+crimild::Bool LuaDecoder::decode( std::string key, SharedPointer< Codable > &codable ) 
 {
 	if ( key.length() > 0 ) {
 		std::stringstream ss;
@@ -173,6 +173,8 @@ void LuaDecoder::decode( std::string key, SharedPointer< Codable > &codable )
 	if ( key.length() > 0 ) {
 		_evals.pop();
 	}
+
+	return codable != nullptr;
 }
 
 crimild::Size LuaDecoder::beginDecodingArray( std::string key )

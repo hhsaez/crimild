@@ -35,6 +35,7 @@
 #include "Foundation/Types.hpp"
 #include "Foundation/Containers/Array.hpp"
 #include "Foundation/Containers/Map.hpp"
+#include "Foundation/Version.hpp"
 #include "Rendering/VertexFormat.hpp"
 #include "Mathematics/Transformation.hpp"
 
@@ -48,40 +49,58 @@ namespace crimild {
         
         public:
             virtual ~Decoder( void );
-            
-            virtual void decode( std::string key, SharedPointer< coding::Codable > &codable ) = 0;
+
+			const Version &getVersion( void ) const { return _version; }
+			void setVersion( const Version &version ) { _version = version; }
+
+		private:
+			Version _version;
+
+		public:
+            virtual crimild::Bool decode( std::string key, SharedPointer< coding::Codable > &codable ) = 0;
 
             template< class T >
-            void decode( std::string key, SharedPointer< T > &obj )
+            crimild::Bool decode( std::string key, SharedPointer< T > &obj )
             {
                 auto codable = crimild::cast_ptr< coding::Codable >( obj );
                 decode( key, codable );
+				if ( codable == nullptr ) {
+					return false;
+				}
+				
                 obj = crimild::cast_ptr< T >( codable );
+				return true;
             }
             
-            virtual void decode( std::string key, std::string &value ) = 0;
-            virtual void decode( std::string key, crimild::Size &value ) = 0;
-            virtual void decode( std::string key, crimild::UInt8 &value ) = 0;
-            virtual void decode( std::string key, crimild::UInt16 &value ) = 0;
-            virtual void decode( std::string key, crimild::Int16 &value ) = 0;
-            virtual void decode( std::string key, crimild::Int32 &value ) = 0;
-            virtual void decode( std::string key, crimild::UInt32 &value ) = 0;
-            virtual void decode( std::string key, crimild::Bool &value ) = 0;
-			virtual void decode( std::string key, crimild::Real32 &value ) = 0;
-			virtual void decode( std::string key, crimild::Real64 &value ) = 0;
-			virtual void decode( std::string key, crimild::Vector2f &value ) = 0;
-			virtual void decode( std::string key, crimild::Vector3f &value ) = 0;
-            virtual void decode( std::string key, crimild::Vector4f &value ) = 0;
-            virtual void decode( std::string key, crimild::Matrix3f &value ) = 0;
-            virtual void decode( std::string key, crimild::Matrix4f &value ) = 0;
-            virtual void decode( std::string key, crimild::Quaternion4f &value ) = 0;
-            virtual void decode( std::string key, Transformation &value ) = 0;
-            virtual void decode( std::string key, VertexFormat &value ) = 0;
+            virtual crimild::Bool decode( std::string key, std::string &value ) = 0;
+            virtual crimild::Bool decode( std::string key, crimild::Size &value ) = 0;
+            virtual crimild::Bool decode( std::string key, crimild::UInt8 &value ) = 0;
+            virtual crimild::Bool decode( std::string key, crimild::UInt16 &value ) = 0;
+            virtual crimild::Bool decode( std::string key, crimild::Int16 &value ) = 0;
+            virtual crimild::Bool decode( std::string key, crimild::Int32 &value ) = 0;
+            virtual crimild::Bool decode( std::string key, crimild::UInt32 &value ) = 0;
+            virtual crimild::Bool decode( std::string key, crimild::Bool &value ) = 0;
+			virtual crimild::Bool decode( std::string key, crimild::Real32 &value ) = 0;
+			virtual crimild::Bool decode( std::string key, crimild::Real64 &value ) = 0;
+			virtual crimild::Bool decode( std::string key, crimild::Vector2f &value ) = 0;
+			virtual crimild::Bool decode( std::string key, crimild::Vector3f &value ) = 0;
+            virtual crimild::Bool decode( std::string key, crimild::Vector4f &value ) = 0;
+            virtual crimild::Bool decode( std::string key, crimild::Matrix3f &value ) = 0;
+            virtual crimild::Bool decode( std::string key, crimild::Matrix4f &value ) = 0;
+            virtual crimild::Bool decode( std::string key, crimild::Quaternion4f &value ) = 0;
+            virtual crimild::Bool decode( std::string key, Transformation &value ) = 0;
+            virtual crimild::Bool decode( std::string key, VertexFormat &value ) = 0;
             
-            virtual void decode( std::string key, containers::ByteArray &value ) = 0;
+            virtual crimild::Bool decode( std::string key, containers::ByteArray &value ) = 0;
+            virtual crimild::Bool decode( std::string key, containers::Array< crimild::Real32 > &value ) = 0;
+            virtual crimild::Bool decode( std::string key, containers::Array< Vector3f > &value ) = 0;
+            virtual crimild::Bool decode( std::string key, containers::Array< Vector4f > &value ) = 0;
+            virtual crimild::Bool decode( std::string key, containers::Array< Matrix3f > &value ) = 0;
+            virtual crimild::Bool decode( std::string key, containers::Array< Matrix4f > &value ) = 0;
+            virtual crimild::Bool decode( std::string key, containers::Array< Quaternion4f > &value ) = 0;
 
             template< typename T >
-            void decode( std::string key, containers::Array< SharedPointer< T >> &value )
+            crimild::Bool decode( std::string key, containers::Array< SharedPointer< T >> &value )
             {
                 auto count = beginDecodingArray( key );
                 
@@ -95,10 +114,12 @@ namespace crimild {
                 }
                 
                 endDecodingArray( key );
+
+				return true;
             }
             
 			template< typename T >
-			void decode( std::string key, containers::Array< T > &value )
+			crimild::Bool decode( std::string key, containers::Array< T > &value )
 			{
 				auto count = beginDecodingArray( key );
 
@@ -111,7 +132,9 @@ namespace crimild {
 					value[ i ] = v;
 				}
 
-				endDecodingArray( key );				
+				endDecodingArray( key );
+
+				return true;
 			}
 
 			inline crimild::Size getObjectCount( void ) const

@@ -51,6 +51,8 @@ namespace crimild {
         Callback _callback;
 	};
 
+	using UpdateCallback = LambdaComponent;
+
 }
 
 #endif

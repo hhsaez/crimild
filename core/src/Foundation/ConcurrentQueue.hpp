@@ -35,6 +35,9 @@
 
 namespace crimild {
 
+	/**
+	   \deprecated Use containers::Queue< T, policies::ObjectLevelLockable > instead
+	 */
 	template< typename T >
 	class ConcurrentQueue {
 	private:

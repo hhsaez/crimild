@@ -75,7 +75,7 @@ void Group::detachNode( Node *node )
 {
     if ( node->getParent() == this ) {
         node->setParent( nullptr );
-        _nodes.remove( node );
+        _nodes.remove( crimild::retain( node ) );
     }
 }
 
@@ -86,22 +86,22 @@ void Group::detachNode( SharedPointer< Node > const &node )
 
 void Group::detachAllNodes( void )
 {
-	_nodes.forEach( []( Node *node ) { node->setParent( nullptr ); } );
+	_nodes.each( []( SharedPointer< Node > &node ) { node->setParent( nullptr ); } );
 	_nodes.clear();
 }
 
 Node *Group::getNodeAt( unsigned int index )
 {
-	return _nodes.get( index );
+	return crimild::get_ptr( _nodes[ index ] );
 }
 
 Node *Group::getNode( std::string name )
 {
     Node *result = nullptr;
 	bool found = false;
-	_nodes.forEach( [&result, &found, name]( Node *node ) {
+	_nodes.each( [ &result, &found, name ]( SharedPointer< Node > &node ) {
 		if ( !found && node->getName() == name ) {
-			result = node;
+			result = crimild::get_ptr( node );
 			found = true;
 		}
 	});
@@ -111,7 +111,11 @@ Node *Group::getNode( std::string name )
 
 void Group::forEachNode( std::function< void( Node * ) > callback )
 {
-	return _nodes.forEach( [&callback]( Node *node ) { if ( node != nullptr && node->isEnabled() ) callback( node ); } );
+	return _nodes.each( [ &callback ]( SharedPointer< Node > &node ) {
+		if ( node != nullptr && node->isEnabled() ) {
+			callback( crimild::get_ptr( node ) );
+		}
+	});
 }
 
 void Group::accept( NodeVisitor &visitor )
@@ -123,11 +127,7 @@ void Group::encode( coding::Encoder &encoder )
 {
     Node::encode( encoder );
     
-    containers::Array< SharedPointer< Node >> nodes;
-    forEachNode( [ &nodes ]( Node *n ) {
-        nodes.add( crimild::retain( n ) );
-    });
-    encoder.encode( "nodes", nodes );
+    encoder.encode( "nodes", _nodes );
 }
 
 void Group::decode( coding::Decoder &decoder )

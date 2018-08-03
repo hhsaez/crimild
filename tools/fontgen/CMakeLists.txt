@@ -1,7 +1,7 @@
 CMAKE_MINIMUM_REQUIRED( VERSION 2.8.10 FATAL_ERROR )
 
 # Enable C++11 features
-SET( CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++ -U__STRICT_ANSI__" )
+SET( CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++ -U__STRICT_ANSI__ -fvisibility=hidden -fvisibility-inlines-hidden" )
 
 PROJECT( fontgen )
 

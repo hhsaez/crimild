@@ -88,10 +88,20 @@ namespace crimild {
                     _elems[ i ] = other._elems[ i ];
                 }
 			}
-			
+
+			Array( Array &&other )
+				: _elems( std::move( other._elems ) ),
+				  _size( other._size ),
+				  _capacity( other._capacity )
+			{
+				other._size = 0;
+				other._capacity = 0;
+			}
+
 			virtual ~Array( void )
 			{
-				
+                resize_unsafe( 0 );
+                _size = 0;
 			}
             
             Array &operator=( const Array &other )
@@ -106,6 +116,20 @@ namespace crimild {
                 
                 return *this;
             }
+
+			Array &operator=( Array &&other )
+			{
+				LockImpl lock( this );
+
+				_elems = std::move( other._elems );
+				_size = other._size;
+				_capacity = other._capacity;
+				
+				other._size = 0;
+				other._capacity = 0;
+				
+				return *this;
+			}
 
 			/**
 			   \brief Compare two arrays up to getSize() elements
@@ -167,6 +191,30 @@ namespace crimild {
                 LockImpl lock( this );
                 return &_elems[ 0 ];
             }
+
+			inline T &first( void )
+			{
+				LockImpl lock( this );
+				return _elems[ 0 ];
+			}
+
+			inline const T &first( void ) const
+			{
+				LockImpl lock( this );
+				return _elems[ 0 ];
+			}
+
+			inline T &last( void )
+			{
+				LockImpl lock( this );
+				return _elems[ _size - 1 ];
+			}
+
+			inline const T &last( void ) const
+			{
+				LockImpl lock( this );
+				return _elems[ _size - 1 ];
+			}
 			
 			void add( T const &elem )
 			{

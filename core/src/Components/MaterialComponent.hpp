@@ -31,7 +31,7 @@
 #include "NodeComponent.hpp"
 
 #include "Rendering/Material.hpp"
-#include "Foundation/SharedObjectArray.hpp"
+#include "Foundation/Containers/Array.hpp"
 
 #include <functional>
 
@@ -51,12 +51,12 @@ namespace crimild {
         
 		void detachAllMaterials( void );
 
-		Material *first( void ) { return _materials.get( 0 ); }
+		Material *first( void ) { return crimild::get_ptr( _materials[ 0 ] ); }
         
 		void forEachMaterial( std::function< void( Material * ) > callback );
 
 	private:
-		SharedObjectArray< Material > _materials;
+		containers::Array< SharedPointer< Material >> _materials;
         
         /**
             \name Clonning

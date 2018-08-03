@@ -57,7 +57,7 @@ bool RenderSystem::start( void )
     });
     
     registerMessageHandler< messaging::SceneChanged >( [this]( messaging::SceneChanged const &message ) {
-        _renderQueues = nullptr;
+        _renderQueues.clear();
     });
     
     registerMessageHandler< messaging::RenderNextFrame >( [this]( messaging::RenderNextFrame const &message ) {
@@ -93,15 +93,15 @@ void RenderSystem::renderFrame( void )
 	{
 		CRIMILD_PROFILE( "Render Scene" );
 
-		if ( _renderQueues != nullptr ) {
+		if ( !_renderQueues.empty() ) {
 			RenderQueue *mainQueue = nullptr;
-			_renderQueues->each( [ this, &mainQueue, renderer ]( RenderQueue *queue, int ) {
+			_renderQueues.each( [ this, &mainQueue, renderer ]( SharedPointer< RenderQueue > &queue ) {
 				// main camera is rendered last
 				if ( queue->getCamera() != Camera::getMainCamera() ) {
-					renderer->render( queue, queue->getCamera()->getRenderPass() );
+					renderer->render( crimild::get_ptr( queue ), queue->getCamera()->getRenderPass() );
 				}
 				else {
-					mainQueue = queue;
+					mainQueue = crimild::get_ptr( queue );
 				}
 			});
 
@@ -129,9 +129,7 @@ void RenderSystem::stop( void )
 {
 	System::stop();
 
-    if ( _renderQueues != nullptr ) {
-        _renderQueues = nullptr;
-    }
+	_renderQueues.clear();
 
     unregisterMessageHandler< messaging::RenderQueueAvailable >();
     unregisterMessageHandler< messaging::SceneChanged >();

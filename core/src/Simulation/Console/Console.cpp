@@ -94,11 +94,11 @@ bool Console::handleInput( crimild::Int32 key, crimild::Int32 mod )
 		return false;
 	}
 
-	if ( key == '`' ) {
+	if ( key == CRIMILD_INPUT_KEY_GRAVE_ACCENT ) {
 		setActive( !isActive() );
 		return true;
 	}
-
+	
 	if ( !isActive() ) {
 		return false;
 	}
