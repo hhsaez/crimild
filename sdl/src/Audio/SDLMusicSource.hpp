@@ -80,6 +80,7 @@ namespace crimild {
 
 		private:
 			Mix_Music *_music = nullptr;
+			crimild::Bool _loop = false;
 			crimild::Bool _autoplay = false;			
 		};
 

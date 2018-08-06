@@ -52,12 +52,8 @@ SDLMusicSource::~SDLMusicSource( void )
 
 void SDLMusicSource::play( void )
 {
-	if ( Mix_PlayingMusic() == 0 ) {
-		Mix_PlayMusic( _music, shouldLoop() ? -1 : 1 );
-	}
-	else {
-		Mix_ResumeMusic();
-	}
+	Mix_HaltMusic();
+	Mix_PlayMusic( _music, shouldLoop() ? -1 : 1 );
 }
 
 void SDLMusicSource::pause( void )
@@ -79,12 +75,12 @@ crimild::Real32 SDLMusicSource::getDuration( void ) const
 
 void SDLMusicSource::setLoop( crimild::Bool loop )
 {
-	//_music.setLoop( loop );
+	_loop = loop;
 }
 
 crimild::Bool SDLMusicSource::shouldLoop( void ) const 
 {
-	return false;//_music.getLoop();
+	return _loop;
 }
 
 AudioSource::Status SDLMusicSource::getStatus( void ) const
