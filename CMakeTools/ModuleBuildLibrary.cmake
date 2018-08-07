@@ -8,6 +8,7 @@
 #	CRIMILD_INCLUDE_DIRECTORIES: (Optional) Additional include directories for dependencies
 #	CRIMILD_LINK_DIRECTORIES: (Optional) Additional link directories for dependencies
 
+INCLUDE( MacroConfigureSystem )
 INCLUDE( MacroAddSources )
 
 MESSAGE( "   Adding sources" )

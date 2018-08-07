@@ -235,6 +235,14 @@ void SDLEventSystem::update( void )
 				});
 				return;
 
+			case SDL_WINDOWEVENT_RESIZED:
+				crimild::Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Window resized to ", event.window.data1, "x", event.window.data2 );
+				break;
+				
+			case SDL_WINDOWEVENT_SIZE_CHANGED:
+				crimild::Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Window size changed to ", event.window.data1, "x", event.window.data2 );
+				break;
+
 			case SDL_MOUSEBUTTONDOWN: {
 				MessageQueue::getInstance()->pushMessage( MouseButtonDown { _mousecodes[ event.button.button ] } );
 				break;

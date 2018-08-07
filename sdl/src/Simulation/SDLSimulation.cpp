@@ -64,8 +64,7 @@ SDLSimulation::SDLSimulation( std::string name, SettingsPtr const &settings )
 
 	char *basePath = SDL_GetBasePath();
 	if ( basePath ){
-		// TODO: fix base directory
-		//FileSystem::getInstance().setBaseDirectory( basePath );
+		FileSystem::getInstance().setBaseDirectory( basePath );
 		SDL_free( basePath );
 	}
 

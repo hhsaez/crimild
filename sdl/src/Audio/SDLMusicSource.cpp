@@ -35,37 +35,47 @@ using namespace crimild::audio;
 
 SDLMusicSource::SDLMusicSource( std::string filename )
 {
+#if !defined( CRIMILD_PLATFORM_EMSCRIPTEN )
 	_music = Mix_LoadMUS( filename.c_str() );
 	if ( _music == nullptr ) {
 		Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot load music file: ", Mix_GetError() );
 		throw FileNotFoundException( filename );
 	}
+#endif
 }
 
 SDLMusicSource::~SDLMusicSource( void )
 {
+#if !defined( CRIMILD_PLATFORM_EMSCRIPTEN )
 	if ( _music ) {
 		Mix_FreeMusic( _music );
 		_music = nullptr;
 	}
+#endif
 }
 
 void SDLMusicSource::play( void )
 {
+#if !defined( CRIMILD_PLATFORM_EMSCRIPTEN )
 	Mix_HaltMusic();
 	Mix_PlayMusic( _music, shouldLoop() ? -1 : 1 );
+#endif
 }
 
 void SDLMusicSource::pause( void )
 {
+#if !defined( CRIMILD_PLATFORM_EMSCRIPTEN )
 	if ( Mix_PlayingMusic() ) {
 		Mix_PauseMusic();
 	}
+#endif
 }
 
 void SDLMusicSource::stop( void )
 {
+#if !defined( CRIMILD_PLATFORM_EMSCRIPTEN )
 	Mix_HaltMusic();
+#endif
 }
 
 crimild::Real32 SDLMusicSource::getDuration( void ) const
@@ -85,6 +95,7 @@ crimild::Bool SDLMusicSource::shouldLoop( void ) const
 
 AudioSource::Status SDLMusicSource::getStatus( void ) const
 {
+#if !defined( CRIMILD_PLATFORM_EMSCRIPTEN )
 	if ( Mix_PlayingMusic() ) {
 		if ( Mix_PausedMusic() ) {
 			return AudioSource::Status::PAUSED;
@@ -93,6 +104,7 @@ AudioSource::Status SDLMusicSource::getStatus( void ) const
 			return AudioSource::Status::PLAYING;
 		}
 	}
+#endif
 	return AudioSource::Status::STOPPED;
 }
 
@@ -108,12 +120,18 @@ crimild::Real32 SDLMusicSource::getPlayingOffset( void ) const
 
 void SDLMusicSource::setVolume( crimild::Real32 volume )
 {
+#if !defined( CRIMILD_PLATFORM_EMSCRIPTEN )
 	Mix_VolumeMusic( volume * MIX_MAX_VOLUME );
+#endif
 }
 
 crimild::Real32 SDLMusicSource::getVolume( void ) const 
 {
+#if !defined( CRIMILD_PLATFORM_EMSCRIPTEN )
 	return crimild::Real32( Mix_VolumeMusic( -1 ) ) / ( crimild::Real32 ) MIX_MAX_VOLUME;
+#else
+	return 0;
+#endif
 }
 
 void SDLMusicSource::setTransformation( const Transformation &t ) 

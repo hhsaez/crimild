@@ -83,6 +83,10 @@ crimild::Bool WindowSystem::createWindow( void )
 
 	if ( vsync ) SDL_GL_SetSwapInterval( 1 );
 
+#ifdef CRIMILD_PLATFORM_EMSCRIPTEN
+	flags |= SDL_WINDOW_RESIZABLE;
+#endif
+
 	_window = SDL_CreateWindow(
 		"Crimild SDL",
 		SDL_WINDOWPOS_UNDEFINED,
@@ -108,6 +112,7 @@ crimild::Bool WindowSystem::createWindow( void )
 
 crimild::Bool WindowSystem::configureRenderer( void )
 {
+#if !defined( CRIMILD_PLATFORM_EMSCRIPTEN )
 	SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE );
 	SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 3 );
 	SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 2 );
@@ -120,6 +125,7 @@ crimild::Bool WindowSystem::configureRenderer( void )
 	SDL_GL_GetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, &glContextMajorVersion );
 	SDL_GL_GetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, &glContextMinorVersion );
 	Log::info( CRIMILD_CURRENT_CLASS_NAME, "Creating GL Context with version ", glContextMajorVersion, ".", glContextMinorVersion );
+#endif
 
 	_renderContext = SDL_GL_CreateContext( _window );
 	if ( _renderContext == nullptr ) {
@@ -138,6 +144,11 @@ crimild::Bool WindowSystem::configureRenderer( void )
 	SDL_GL_GetDrawableSize( _window, &framebufferWidth, &framebufferHeight );
 	renderer->getScreenBuffer()->resize( framebufferWidth, framebufferHeight );
 	renderer->configure();
+	if ( auto mainCamera = Simulation::getInstance()->getMainCamera() ) {
+		auto screen = renderer->getScreenBuffer();
+		auto aspect = ( float ) screen->getWidth() / ( float ) screen->getHeight();
+        mainCamera->setAspectRatio( aspect );
+	}
 
 	Log::info( CRIMILD_CURRENT_CLASS_NAME, "Created screen buffer with dimensions ", framebufferWidth, "x", framebufferHeight );
 

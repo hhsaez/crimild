@@ -1,25 +1,12 @@
 CMAKE_MINIMUM_REQUIRED( VERSION 2.8.10 FATAL_ERROR )
 
-IF ( APPLE )
-	# Enable C++11 features
-	SET( CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++ -U__STRICT_ANSI__ -fvisibility=hidden -fvisibility-inlines-hidden" )
-
-	set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++0x")
-	set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
-ELSE ( APPLE )
-	IF ( ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten" )
-		SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -static -U__STRICT_ANSI__" )
-	ELSE ()
-		 SET( CMAKE_CXX_FLAGS "-std=c++11 -static-libgcc -static-libstdc++ -static -U__STRICT_ANSI__ -fvisibility=hidden -fvisibility-inlines-hidden" )
-	ENDIF ()
-ENDIF ( APPLE )
-
 PROJECT( CRIMILD )
 
 # Register custom modules
 SET ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CRIMILD_SOURCE_DIR}/CMakeTools" )
 
 INCLUDE( MacroExtractArchive )
+INCLUDE( MacroConfigureSystem )
 
 ADD_DEFINITIONS( -DCRIMILD_VERSION_MAJOR=4 )
 ADD_DEFINITIONS( -DCRIMILD_VERSION_MINOR=8 )
@@ -33,6 +20,12 @@ OPTION( CRIMILD_ENABLE_SCRIPTING "Would you like to build the crimild-scripting 
 OPTION( CRIMILD_ENABLE_SFML "Would you like to build the crimild-sfml extension" OFF )
 OPTION( CRIMILD_ENABLE_GLFW "Would you like to build the crimild-glfw extension?" OFF )
 OPTION( CRIMILD_ENABLE_SDL "Would you like to build the crimild-sdl extension?" OFF )
+
+IF ( ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten" )
+   SET( CRIMILD_ENABLE_EMSCRIPTEN ON )
+ELSE ()
+   SET( CRIMILD_ENABLE_EMSCRIPTEN OFF )
+ENDIF ()
 
 IF ( CRIMILD_ENABLE_TESTS )
 	ENABLE_TESTING()

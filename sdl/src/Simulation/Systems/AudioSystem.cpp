@@ -31,7 +31,9 @@
 #include "Audio/SDLAudioManager.hpp"
 
 #include <SDL.h>
+#if !defined( CRIMILD_PLATFORM_EMSCRIPTEN )			
 #include <SDL_mixer.h>
+#endif
 
 using namespace crimild;
 using namespace crimild::sdl;
@@ -59,6 +61,8 @@ void AudioSystem::stop( void )
 {
 	System::stop();
 
+#if !defined( CRIMILD_PLATFORM_EMSCRIPTEN )			
 	Mix_Quit();
+#endif
 }
 
