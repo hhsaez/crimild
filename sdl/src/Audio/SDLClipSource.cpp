@@ -35,28 +35,23 @@ using namespace crimild::audio;
 
 SDLClipSource::SDLClipSource( std::string filename )
 {
-#if !defined( CRIMILD_PLATFORM_EMSCRIPTEN )			
 	_chunk = Mix_LoadWAV( filename.c_str() );
 	if ( _chunk == nullptr ) {
 		Log::error( CRIMILD_CURRENT_CLASS_NAME, "Failed to load sound effect: ", Mix_GetError() );
 		throw FileNotFoundException( filename );
 	}
-#endif
 }
 
 SDLClipSource::~SDLClipSource( void )
 {
-#if !defined( CRIMILD_PLATFORM_EMSCRIPTEN )			
 	if ( _chunk ) {
 		Mix_FreeChunk( _chunk );
 		_chunk = nullptr;
 	}
-#endif
 }
 
 void SDLClipSource::play( void )
 {
-#if !defined( CRIMILD_PLATFORM_EMSCRIPTEN )			
 	switch ( getStatus() ) {
 		case AudioSource::Status::STOPPED:
 			_channel = Mix_PlayChannel( -1, _chunk, shouldLoop() ? -1 : 0 );
@@ -69,26 +64,21 @@ void SDLClipSource::play( void )
 		default:
 			break;
 	}
-#endif
 }
 
 void SDLClipSource::pause( void )
 {
-#if !defined( CRIMILD_PLATFORM_EMSCRIPTEN )			
 	if ( getStatus() == AudioSource::Status::PLAYING ) {
 		Mix_Pause( _channel );
 	}
-#endif
 }
 
 void SDLClipSource::stop( void )
 {
-#if !defined( CRIMILD_PLATFORM_EMSCRIPTEN )			
 	if ( getStatus() != AudioSource::Status::STOPPED ) {
 		Mix_HaltChannel( _channel );
 		_channel = -1;
 	}
-#endif
 }
 
 crimild::Real32 SDLClipSource::getDuration( void ) const
@@ -108,7 +98,6 @@ crimild::Bool SDLClipSource::shouldLoop( void ) const
 
 AudioSource::Status SDLClipSource::getStatus( void ) const
 {
-#if !defined( CRIMILD_PLATFORM_EMSCRIPTEN )			
 	if ( _channel >= 0 && Mix_Playing( _channel ) ) {
 		if ( Mix_Paused( _channel ) ) {
 			return AudioSource::Status::PAUSED;
@@ -117,7 +106,6 @@ AudioSource::Status SDLClipSource::getStatus( void ) const
 			return AudioSource::Status::PLAYING;
 		}
 	}
-#endif
 
 	return AudioSource::Status::STOPPED;	
 }
@@ -134,24 +122,18 @@ crimild::Real32 SDLClipSource::getPlayingOffset( void ) const
 
 void SDLClipSource::setVolume( crimild::Real32 volume )
 {
-#if !defined( CRIMILD_PLATFORM_EMSCRIPTEN )			
 	if ( _channel >= 0 ) {
 		Mix_Volume( _channel, volume * MIX_MAX_VOLUME );
 	}
-#endif
 }
 
 crimild::Real32 SDLClipSource::getVolume( void ) const 
 {
-#if !defined( CRIMILD_PLATFORM_EMSCRIPTEN )			
 	if ( _channel < 0 ) {
 		return 0;
 	}
 
 	return ( crimild::Real32 ) Mix_Volume( _channel, -1 ) / ( crimild::Real32 ) MIX_MAX_VOLUME;
-#else
-	return 0;
-#endif
 }
 
 void SDLClipSource::setTransformation( const Transformation &t ) 

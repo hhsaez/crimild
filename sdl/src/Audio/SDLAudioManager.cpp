@@ -35,21 +35,17 @@
 using namespace crimild;
 using namespace crimild::audio;
 
-#if !defined( CRIMILD_PLATFORM_EMSCRIPTEN )
 #include <SDL.h>
 #include <SDL_mixer.h>
-#endif
 
 SDLAudioManager::SDLAudioManager( void )
 	: _audioListener( crimild::alloc< SDLAudioListener >() )
 {
-#if !defined( CRIMILD_PLATFORM_EMSCRIPTEN )
 	SDL_InitSubSystem( SDL_INIT_AUDIO );
 
 	if ( Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 ) < 0 ) {
 		Log::error( CRIMILD_CURRENT_CLASS_NAME, "SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError() );
 	}
-#endif
 }
 
 SDLAudioManager::~SDLAudioManager( void )

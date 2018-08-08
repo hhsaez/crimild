@@ -30,9 +30,7 @@
 
 #include <Audio/AudioSource.hpp>
 
-#if !defined( CRIMILD_PLATFORM_EMSCRIPTEN )
 #include <SDL_mixer.h>
-#endif
 
 namespace crimild {
 
@@ -81,9 +79,7 @@ namespace crimild {
 			virtual crimild::UInt32 getSampleRate( void ) const override;
 
 		private:
-#if !defined( CRIMILD_PLATFORM_EMSCRIPTEN )
 			Mix_Music *_music = nullptr;
-#endif
 			crimild::Bool _loop = false;
 			crimild::Bool _autoplay = false;			
 		};
