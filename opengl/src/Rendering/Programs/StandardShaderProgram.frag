@@ -46,6 +46,8 @@ uniform sampler2D uSpecularMap;
 uniform bool uUseSpecularMap;
 uniform sampler2D uShadowMap;
 uniform bool uUseShadowMap;
+uniform float uShadowMapBias;
+uniform float uShadowMapOffset;
 
 CRIMILD_GLSL_DECLARE_FRAGMENT_OUTPUT
 
@@ -85,8 +87,8 @@ void main( void )
         vec3 uvShadowMap = vec3( 0.5 ) + 0.5 * projCoord;
         float d = CRIMILD_GLSL_FN_TEXTURE_2D( uShadowMap, uvShadowMap.xy ).x;
         float z = uvShadowMap.z;
-        z *= 0.999; // fixes acne
-        //z += 0.001; // fixes peter-panning
+        z *= uShadowMapBias; // fixes acne
+		z += uShadowMapOffset; // fixes peter-panning
         if ( d < z ) {
             shadowFactor = 0.5;
         }

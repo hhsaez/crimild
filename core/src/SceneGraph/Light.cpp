@@ -29,6 +29,7 @@
 #include "Mathematics/Frustum.hpp"
 #include "Coding/Encoder.hpp"
 #include "Coding/Decoder.hpp"
+#include "Rendering/ShadowMap.hpp"
 
 using namespace crimild;
 
@@ -52,6 +53,16 @@ Light::~Light( void )
 void Light::accept( NodeVisitor &visitor )
 {
 	visitor.visitLight( this );
+}
+
+void Light::setCastShadows( crimild::Bool enabled )
+{
+	if ( enabled ) {
+		setShadowMap( crimild::alloc< ShadowMap >() );
+	}
+	else {
+		setShadowMap( nullptr );
+	}
 }
 
 void Light::encode( coding::Encoder &encoder )

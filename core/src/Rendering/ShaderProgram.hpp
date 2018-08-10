@@ -83,6 +83,8 @@ namespace crimild {
                 DEPTH_MAP_UNIFORM,
                 USE_SHADOW_MAP_UNIFORM,
                 SHADOW_MAP_UNIFORM,
+				SHADOW_MAP_BIAS_UNIFORM,
+				SHADOW_MAP_OFFSET_UNIFORM,
                 USE_SSAO_MAP_UNIFORM,
                 SSAO_MAP_UNIFORM,
                 USE_GLOW_MAP_UNIFORM,

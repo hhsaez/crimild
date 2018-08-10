@@ -159,6 +159,8 @@ void StandardRenderPass::renderOpaqueObjects( Renderer *renderer, RenderQueue *r
                 renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_SOURCE_PROJECTION_MATRIX_UNIFORM ), map->getLightProjectionMatrix() );
                 renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_SOURCE_VIEW_MATRIX_UNIFORM ), map->getLightViewMatrix() );
                 renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::SHADOW_MAP_UNIFORM ), map->getTexture() );
+                renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SHADOW_MAP_BIAS_UNIFORM ), map->getBias() );
+                renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SHADOW_MAP_OFFSET_UNIFORM ), map->getOffset() );
             });
         }
         

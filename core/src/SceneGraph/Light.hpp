@@ -84,6 +84,7 @@ namespace crimild {
 		virtual void accept( NodeVisitor &visitor ) override;
 
 	public:
+		void setCastShadows( crimild::Bool enabled );
 		inline crimild::Bool castShadows( void ) const { return _shadowMap != nullptr; }
 
 		void setShadowMap( SharedPointer< ShadowMap > const &shadowMap ) { _shadowMap = shadowMap; }
