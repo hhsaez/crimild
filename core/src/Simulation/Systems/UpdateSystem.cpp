@@ -79,9 +79,7 @@ void UpdateSystem::updateBehaviors( Node *scene )
 	CRIMILD_PROFILE( "Updating Components" )
 		
 	scene->perform( Apply( [ &FIXED_CLOCK ]( Node *node ) {
-		node->forEachComponent( [ node, &FIXED_CLOCK ] ( NodeComponent *component ) {
-			component->update( FIXED_CLOCK );
-		});
+		node->updateComponents( FIXED_CLOCK );
 	}));
     
     updateWorldState( scene );
