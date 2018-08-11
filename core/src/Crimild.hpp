@@ -59,6 +59,7 @@
 #include "Foundation/Containers/Array.hpp"
 #include "Foundation/Containers/Map.hpp"
 #include "Foundation/Containers/PriorityQueue.hpp"
+#include "Foundation/Containers/Queue.hpp"
 #include "Foundation/Containers/Stack.hpp"
 
 #include "Foundation/Policies/ThreadingPolicy.hpp"
