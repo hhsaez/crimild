@@ -116,7 +116,9 @@ namespace crimild {
 			setting valid values for all quaternion components
 		 */
 		Quaternion( void )
+			: _data( 0, 0, 0, 1 )
 		{
+			
 		}
 
 		/**
@@ -205,6 +207,9 @@ namespace crimild {
 		{
 			_data[ 3 ] = value;
 		}
+
+		template< typename U >
+		friend Quaternion< U > operator-( const Quaternion< U > &q );
 
 		template< typename U >
 		friend Quaternion< U > operator+( const Quaternion< U > &q, const Quaternion< U > &r );
@@ -505,6 +510,12 @@ namespace crimild {
 	private:
 		Vector4Impl _data;
 	};
+
+	template< typename U >
+	Quaternion< U > operator-( const Quaternion< U > &q )
+	{
+		return Quaternion< U >( -q._data );
+	}
 
 	template< typename U >
 	Quaternion< U > operator+( const Quaternion< U > &q, const Quaternion< U > &r )

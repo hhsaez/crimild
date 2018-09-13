@@ -87,7 +87,7 @@ namespace crimild {
 
 			virtual ~List( void )
 			{
-				
+                _list.clear();
 			}
             
             List &operator=( const List &other )
@@ -125,14 +125,21 @@ namespace crimild {
 			inline crimild::Size size( void ) const
 			{
 				LockImpl lock( this );
-				return return _list.size();
+				return _list.size();
 			}
             
             inline void clear( void )
             {
                 LockImpl lock( this );
-				return _list.clear();
+				_list.clear();
             }
+
+			T &first( void )
+			{
+				LockImpl lock( this );
+
+				return _list.front();
+			}
 			
 			void add( T const &elem )
 			{

@@ -29,19 +29,51 @@
 #define CRIMILD_IMPORT_SCENE_IMPORTER_
 
 #include "Foundation/Memory.hpp"
+#include "Foundation/Containers/Map.hpp"
+#include "Mathematics/Transformation.hpp"
+
+#include "assimp/Importer.hpp"
+#include "assimp/scene.h"
 
 namespace crimild {
     
     class Group;
+	class Material;
+	class SkinnedMesh;
+
+	namespace animation {
+
+		class Joint;
+		class Skeleton;
+
+	}
 
 	namespace import {
 
 		class SceneImporter {
 		public:
+			static SharedPointer< Group > importScene( std::string filename );
+			
+		public:
 			SceneImporter( void );
 			virtual ~SceneImporter( void );
 
 			SharedPointer< Group > import( std::string filename );
+
+		private:
+			animation::Joint *getJoint( std::string name );
+
+		private:
+			containers::Map< std::string, SharedPointer< animation::Joint >> _joints;
+			SharedPointer< animation::Skeleton > _skeleton;
+
+		private:
+			void computeTransform( const aiMatrix4x4 &m, Transformation &t );
+			void loadMaterialTexture( SharedPointer< Material > material, const aiMaterial *input, std::string basePath, aiTextureType texType, unsigned int texIndex = 0 );
+			SharedPointer< Material > buildMaterial( const aiMaterial *mtl, std::string basePath );
+			void recursiveSceneBuilder( SharedPointer< Group > parent, const struct aiScene *s, const struct aiNode *n, std::string basePath, SharedPointer< SkinnedMesh > &skinnedMesh );
+			void loadAnimations( const aiScene *scene, SharedPointer< SkinnedMesh > &skinnedMesh );
+
 		};
 
 	}

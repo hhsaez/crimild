@@ -81,14 +81,6 @@ void ShallowCopy::visitGeometry( Geometry *geometry )
 	geometry->forEachPrimitive( [&]( Primitive *primitive ) {
 		copy->attachPrimitive( primitive );
 	});
-
-	auto rs = geometry->getComponent< RenderStateComponent >();
-	if ( rs != nullptr ) {
-		auto skin = rs->getSkinnedMesh();
-		if ( skin != nullptr ) {
-			copy->getComponent< RenderStateComponent >()->setSkinnedMesh( crimild::retain( skin ) );
-		}
-	}
 }
 
 void ShallowCopy::visitText( Text *input )

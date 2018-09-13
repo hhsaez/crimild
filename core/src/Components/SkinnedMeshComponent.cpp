@@ -35,8 +35,6 @@
 #include "Coding/Encoder.hpp"
 #include "Coding/Decoder.hpp"
 
-CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::SkinnedMeshComponent )
-
 using namespace crimild;
 
 SkinnedMeshComponent::SkinnedMeshComponent( void )

@@ -165,8 +165,8 @@ void EmissiveGlowImageEffect::compute( Renderer *renderer, Camera *camera )
     }
 
     auto gBuffer = renderer->getFrameBuffer( RenderPass::G_BUFFER_NAME );
-    auto color = gBuffer->getRenderTargets().get( RenderPass::G_BUFFER_DIFFUSE_TARGET_NAME );
-    auto emissive = gBuffer->getRenderTargets().get( RenderPass::G_BUFFER_VIEW_SPACE_NORMAL_TARGET_NAME );
+    auto color = gBuffer->getRenderTargets()[ RenderPass::G_BUFFER_DIFFUSE_TARGET_NAME ];
+    auto emissive = gBuffer->getRenderTargets()[ RenderPass::G_BUFFER_VIEW_SPACE_NORMAL_TARGET_NAME ];
 
     renderer->bindProgram( emissiveProgram );
 
@@ -200,7 +200,7 @@ void EmissiveGlowImageEffect::compute( Renderer *renderer, Camera *camera )
 
     renderer->bindProgram( glowProgram );
 
-    renderer->bindTexture( glowProgram->getLocation( "uEmissiveMap" ), emissiveBuffer->getRenderTargets().get( "color" )->getTexture() );
+    renderer->bindTexture( glowProgram->getLocation( "uEmissiveMap" ), emissiveBuffer->getRenderTargets()[ "color" ]->getTexture() );
 
     renderer->bindUniform( glowProgram->getLocation( "uOrientation" ), 0 );
     renderer->drawScreenPrimitive( glowProgram );
@@ -212,7 +212,7 @@ void EmissiveGlowImageEffect::compute( Renderer *renderer, Camera *camera )
     renderer->setAlphaState( AlphaState::DISABLED );
     renderer->setDepthState( DepthState::ENABLED );
 
-    renderer->unbindTexture( glowProgram->getLocation( "uEmissiveMap" ), emissiveBuffer->getRenderTargets().get( "color" )->getTexture() );
+    renderer->unbindTexture( glowProgram->getLocation( "uEmissiveMap" ), emissiveBuffer->getRenderTargets()[ "color" ]->getTexture() );
 
     renderer->unbindProgram( glowProgram );
 
@@ -222,12 +222,12 @@ void EmissiveGlowImageEffect::compute( Renderer *renderer, Camera *camera )
 void EmissiveGlowImageEffect::apply( crimild::Renderer *renderer, crimild::Camera *camera )
 {
     auto scene = renderer->getFrameBuffer( RenderPass::S_BUFFER_NAME );
-    renderScreen( renderer, scene->getRenderTargets().get( RenderPass::S_BUFFER_COLOR_TARGET_NAME )->getTexture() );
+    renderScreen( renderer, scene->getRenderTargets()[ RenderPass::S_BUFFER_COLOR_TARGET_NAME ]->getTexture() );
 
     auto glow = renderer->getFrameBuffer( GLOW_BUFFER_NAME );
     renderer->setAlphaState( AlphaState::ENABLED_ADDITIVE_BLEND );
     renderer->setDepthState( DepthState::DISABLED );
-    renderScreen( renderer, glow->getRenderTargets().get( "color" )->getTexture() );
+    renderScreen( renderer, glow->getRenderTargets()[ "color" ]->getTexture() );
     renderer->setAlphaState( AlphaState::DISABLED );
     renderer->setDepthState( DepthState::ENABLED );
 }

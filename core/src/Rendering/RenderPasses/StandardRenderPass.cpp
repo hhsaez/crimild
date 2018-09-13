@@ -31,7 +31,7 @@
 #include "Rendering/FrameBufferObject.hpp"
 #include "Rendering/RenderQueue.hpp"
 #include "Rendering/ShaderProgram.hpp"
-#include "Rendering/SkinnedMesh.hpp"
+#include "Animation/Skeleton.hpp"
 #include "Rendering/ImageEffects/ImageEffect.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "Components/RenderStateComponent.hpp"
@@ -43,6 +43,7 @@
 #include "Simulation/Simulation.hpp"
 
 using namespace crimild;
+using namespace crimild::animation;
 
 StandardRenderPass::StandardRenderPass( void )
 {
@@ -158,6 +159,8 @@ void StandardRenderPass::renderOpaqueObjects( Renderer *renderer, RenderQueue *r
                 renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_SOURCE_PROJECTION_MATRIX_UNIFORM ), map->getLightProjectionMatrix() );
                 renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_SOURCE_VIEW_MATRIX_UNIFORM ), map->getLightViewMatrix() );
                 renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::SHADOW_MAP_UNIFORM ), map->getTexture() );
+                renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SHADOW_MAP_BIAS_UNIFORM ), map->getBias() );
+                renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SHADOW_MAP_OFFSET_UNIFORM ), map->getOffset() );
             });
         }
         
@@ -238,13 +241,15 @@ void StandardRenderPass::renderStandardGeometry( Renderer *renderer, Geometry *g
     
     auto rc = geometry->getComponent< RenderStateComponent >();
     renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_COUNT_UNIFORM ), 0 );
-    if ( rc->getSkinnedMesh() != nullptr && rc->getSkinnedMesh()->getAnimationState() != nullptr ) {
-        auto animationState = rc->getSkinnedMesh()->getAnimationState();
-        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_COUNT_UNIFORM ), ( int ) animationState->getJointPoses().size() );
-        for ( int i = 0; i < animationState->getJointPoses().size(); i++ ) {
-            renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_POSE_UNIFORM + i ), animationState->getJointPoses()[ i ] );
-        }
-    }
+	if ( auto skeleton = rc->getSkeleton() ) {
+        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_COUNT_UNIFORM ), ( int ) skeleton->getJoints().size() );
+		skeleton->getJoints().each( [ renderer, program ]( const std::string &, SharedPointer< Joint > const &joint ) {
+			renderer->bindUniform(
+				program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_POSE_UNIFORM + joint->getId() ),
+				joint->getPoseMatrix()
+			);
+		});
+	}
     
     geometry->forEachPrimitive( [renderer, program]( Primitive *primitive ) {
 		// TODO: maybe we shound't add a geometry to the queue if it

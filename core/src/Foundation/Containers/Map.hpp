@@ -83,7 +83,7 @@ namespace crimild {
 			
 			virtual ~Map( void )
 			{
-				
+                _map.clear();
 			}
             
             Map &operator=( const Map &other )
@@ -150,6 +150,16 @@ namespace crimild {
 				crimild::Size i = 0;
 				for ( const auto &it : _map ) {
 					ret[ i++ ] = it.first;
+				}
+				return ret;
+			}
+
+			Array< ValueType > values( void ) const
+			{
+				Array< ValueType > ret( size() );
+				crimild::Size i = 0;
+				for ( const auto &it : _map ) {
+					ret[ i++ ] = it.second;
 				}
 				return ret;
 			}

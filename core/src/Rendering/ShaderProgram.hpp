@@ -33,7 +33,7 @@
 #include "ShaderUniform.hpp"
 #include "Catalog.hpp"
 
-#include "Foundation/SharedObjectArray.hpp"
+#include "Foundation/Containers/Array.hpp"
 
 #include <functional>
 #include <map>
@@ -83,6 +83,8 @@ namespace crimild {
                 DEPTH_MAP_UNIFORM,
                 USE_SHADOW_MAP_UNIFORM,
                 SHADOW_MAP_UNIFORM,
+				SHADOW_MAP_BIAS_UNIFORM,
+				SHADOW_MAP_OFFSET_UNIFORM,
                 USE_SSAO_MAP_UNIFORM,
                 SSAO_MAP_UNIFORM,
                 USE_GLOW_MAP_UNIFORM,
@@ -158,7 +160,7 @@ namespace crimild {
 		void forEachUniform( std::function< void( ShaderUniform * ) > callback );
 
 	private:
-        SharedObjectArray< ShaderUniform > _uniforms;
+		containers::Array< SharedPointer< ShaderUniform >> _uniforms;
 	};
 
 }

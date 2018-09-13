@@ -34,14 +34,25 @@
 #ifdef CRIMILD_PLATFORM_DESKTOP
     #define GLEW_STATIC 1
     #include <GL/glew.h>
-    #include <GLFW/glfw3.h>
+    #if defined( CRIMILD_ENABLE_GLEW )
+        #include <GLFW/glfw3.h>
+    #elif defined( CRIMILD_PLATFORM_WIN32 )
+		#include <GL/gl.h>
+	#else
+        #include <OpenGL/gl.h>
+		#include <OpenGL/glext.h>
+	#endif
+#elif defined( CRIMILD_PLATFORM_EMSCRIPTEN )
+    #include <GLES3/gl3.h>
+#elif defined( __APPLE__ )
+    #import <OpenGLES/ES3/gl.h>
+    #import <OpenGLES/ES3/glext.h>
 #else
-    #ifdef __APPLE__
-        #import <OpenGLES/ES3/gl.h>
-        #import <OpenGLES/ES3/glext.h>
-    #else
-        #include <GLES2/gl2.h>
-    #endif
+    #include <GLES2/gl2.h>
+#endif
+
+#if defined( __ANDROID__ ) || defined( CRIMILD_PLATFORM_EMSCRIPTEN )
+#define CRIMILD_FORCE_OPENGL_COMPATIBILITY_MODE 1
 #endif
 
 namespace crimild {

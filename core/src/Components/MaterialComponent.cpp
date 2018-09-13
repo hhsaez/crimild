@@ -54,7 +54,9 @@ void MaterialComponent::detachAllMaterials( void )
 
 void MaterialComponent::forEachMaterial( std::function< void( Material * ) > callback )
 {
-    _materials.forEach( callback );
+    _materials.each( [ callback ]( SharedPointer< Material > &m, crimild::Size ) {
+		callback( crimild::get_ptr( m ) );
+	});
 }
 
 SharedPointer< NodeComponent > MaterialComponent::clone( void )

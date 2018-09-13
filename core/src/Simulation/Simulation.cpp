@@ -53,6 +53,18 @@
 
 using namespace crimild;
 
+#ifdef CRIMILD_PLATFORM_EMSCRIPTEN
+
+#include <emscripten.h>
+#include <emscripten/html5.h>
+
+void simulation_step( void )
+{
+	crimild::Simulation::getInstance()->update();
+}
+
+#endif
+
 Simulation::Simulation( std::string name, SettingsPtr const &settings )
 	: NamedObject( name ),
       _settings( settings )
@@ -62,6 +74,24 @@ Simulation::Simulation( std::string name, SettingsPtr const &settings )
 
     // worker threads are disabled by default
     _jobScheduler.configure( 0 );
+
+#ifdef CRIMILD_PLATFORM_EMSCRIPTEN
+	if ( getSettings() == nullptr ) {
+		_settings = crimild::alloc< Settings >();
+	}
+
+	// override window size based on canvas
+	int width, height;
+	if ( emscripten_get_canvas_element_size( "crimild_canvas", &width, &height ) != EMSCRIPTEN_RESULT_SUCCESS ) {
+		Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot obtain canvas size" );
+	}
+
+	Log::info( CRIMILD_CURRENT_CLASS_NAME, "Canvas size = (", width, "x", height, ")" );
+
+	getSettings()->set( "video.width", width );
+	getSettings()->set( "video.height", height );
+	getSettings()->set( "video.fullscreen", false );
+#endif
     
     addSystem( crimild::alloc< ConsoleSystem >() );
 	addSystem( crimild::alloc< UpdateSystem >() );
@@ -88,6 +118,13 @@ Simulation::~Simulation( void )
 
 void Simulation::start( void )
 {
+#ifdef CRIMILD_PLATFORM_EMSCRIPTEN
+	// disable threads in web
+    _jobScheduler.configure( 0 );
+
+	emscripten_set_main_loop( simulation_step, 0, false );
+#endif
+
     startSystems();
 
     _jobScheduler.start();
@@ -128,16 +165,22 @@ void Simulation::stop( void )
     setScene( nullptr );
     
     _assetManager.clear( true );
+
+#ifdef CRIMILD_PLATFORM_EMSCRIPTEN
+	emscripten_cancel_main_loop();
+#endif
 }
 
 int Simulation::run( void )
 {
 	start();
 
+#if !defined( CRIMILD_PLATFORM_EMSCRIPTEN )
     bool done = false;
     while ( !done ) {
         done = !update();
     }
+#endif
     
 	return 0;
 }

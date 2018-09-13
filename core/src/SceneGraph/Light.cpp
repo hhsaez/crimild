@@ -27,6 +27,9 @@
 
 #include "Light.hpp"
 #include "Mathematics/Frustum.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
+#include "Rendering/ShadowMap.hpp"
 
 using namespace crimild;
 
@@ -50,5 +53,61 @@ Light::~Light( void )
 void Light::accept( NodeVisitor &visitor )
 {
 	visitor.visitLight( this );
+}
+
+void Light::setCastShadows( crimild::Bool enabled )
+{
+	if ( enabled ) {
+		setShadowMap( crimild::alloc< ShadowMap >() );
+	}
+	else {
+		setShadowMap( nullptr );
+	}
+}
+
+void Light::encode( coding::Encoder &encoder )
+{
+	Node::encode( encoder );
+
+	std::string lightType;
+	switch ( _type ) {
+	case Light::Type::POINT:
+		lightType = "point";
+		break;
+
+	case Light::Type::DIRECTIONAL:
+		lightType = "directional";
+		break;
+
+	case Light::Type::SPOT:
+		lightType = "spot";
+		break;
+	}
+	encoder.encode( "lightType", lightType );
+
+	encoder.encode( "attenuation", _attenuation );
+	encoder.encode( "color", _color );
+	encoder.encode( "ambient", _ambient );
+}
+
+void Light::decode( coding::Decoder &decoder )
+{
+	Node::decode( decoder );
+
+	std::string lightType;
+	decoder.decode( "lightType", lightType );
+	if ( lightType == "directional" ) {
+		_type = Light::Type::DIRECTIONAL;
+	}
+	else if ( lightType == "spot" ) {
+		_type = Light::Type::SPOT;
+	}
+	else {
+		_type = Light::Type::POINT;
+	}
+
+	decoder.decode( "attenuation", _attenuation );
+	decoder.decode( "color", _color );
+	decoder.decode( "ambient", _ambient );
 }
 

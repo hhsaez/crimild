@@ -89,7 +89,7 @@ void FrameBufferObjectCatalog::bind( FrameBufferObject *fbo )
     
     // this may be wrong. what if there is no depth buffer?
     int fboColorBufferCount = 0;
-    fbo->getRenderTargets().each( [&]( std::string, RenderTarget *target ) {
+    fbo->getRenderTargets().each( [ & ]( std::string, SharedPointer< RenderTarget > &target ) {
         if ( target->getType() == RenderTarget::Type::COLOR_RGB || target->getType() == RenderTarget::Type::COLOR_RGBA ) {
             fboColorBufferCount++;
         }
@@ -137,7 +137,7 @@ void FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
         glBindFramebuffer( GL_FRAMEBUFFER, framebufferId );
         
         int colorAttachmentOffset = 0;
-        fbo->getRenderTargets().each( [&]( std::string rtName, RenderTarget *target ) {
+        fbo->getRenderTargets().each( [ & ]( std::string rtName, SharedPointer< RenderTarget > &target ) {
             CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
             
             int targetWidth = target->getWidth();
@@ -289,7 +289,7 @@ void FrameBufferObjectCatalog::unload( FrameBufferObject *fbo )
     if ( framebufferId > 0 ) {
         _framebufferIdsToDelete.push_back( framebufferId );
         
-        fbo->getRenderTargets().each( [&]( std::string, RenderTarget *target ) {
+        fbo->getRenderTargets().each( [ this ]( std::string, SharedPointer< RenderTarget > &target ) {
             int targetId = target->getId();
             if ( targetId > 0 ) {
                 _renderbufferIdsToDelete.push_back( targetId );

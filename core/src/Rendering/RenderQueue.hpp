@@ -29,7 +29,7 @@
 #define CRIMILD_CORE_RENDERING_RENDER_QUEUE_
 
 #include "Foundation/SharedObject.hpp"
-#include "Foundation/SharedObjectList.hpp"
+#include "Foundation/Containers/Array.hpp"
 
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Camera.hpp"
@@ -105,13 +105,10 @@ namespace crimild {
         std::chrono::microseconds::rep _timestamp;
     };
 
-	using RenderQueueCollection = SharedObjectList< RenderQueue >;
-	using RenderQueueCollectionPtr = SharedPointer< RenderQueueCollection >;
-
     namespace messaging {
         
         struct RenderQueueAvailable {
-			RenderQueueCollectionPtr renderQueues;
+			containers::Array< SharedPointer< RenderQueue >> renderQueues;
         };
         
     }

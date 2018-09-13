@@ -35,7 +35,8 @@ namespace crimild {
 	class ShadowMap;
 
 	class Light : public Node {
-            
+		CRIMILD_IMPLEMENT_RTTI( crimild::Light )
+		
 	public:
 		enum class Type {
 			POINT,
@@ -83,6 +84,7 @@ namespace crimild {
 		virtual void accept( NodeVisitor &visitor ) override;
 
 	public:
+		void setCastShadows( crimild::Bool enabled );
 		inline crimild::Bool castShadows( void ) const { return _shadowMap != nullptr; }
 
 		void setShadowMap( SharedPointer< ShadowMap > const &shadowMap ) { _shadowMap = shadowMap; }
@@ -90,6 +92,18 @@ namespace crimild {
 
 	private:
 		SharedPointer< ShadowMap > _shadowMap;
+
+        /**
+            \name Coding
+         */
+        //@{
+		
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+        
+        //@}
+
 	};
 
 }

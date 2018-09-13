@@ -187,12 +187,12 @@ void BloomImageEffect::apply( crimild::Renderer *renderer, crimild::Camera *came
     renderScreen( renderer, emissiveBuffer->getRenderTargets()->get( "color" )->getTexture() );
 #else
     auto scene = renderer->getFrameBuffer( RenderPass::S_BUFFER_NAME );
-    renderScreen( renderer, scene->getRenderTargets().get( RenderPass::S_BUFFER_COLOR_TARGET_NAME )->getTexture() );
+    renderScreen( renderer, scene->getRenderTargets()[ RenderPass::S_BUFFER_COLOR_TARGET_NAME ]->getTexture() );
 
     auto glow = renderer->getFrameBuffer( GLOW_BUFFER_NAME );
     renderer->setAlphaState( AlphaState::ENABLED_ADDITIVE_BLEND );
     renderer->setDepthState( DepthState::DISABLED );
-    renderScreen( renderer, glow->getRenderTargets().get( "color" )->getTexture() );
+    renderScreen( renderer, glow->getRenderTargets()[ "color" ]->getTexture() );
     renderer->setAlphaState( AlphaState::DISABLED );
     renderer->setDepthState( DepthState::ENABLED );
 #endif
@@ -215,7 +215,7 @@ void BloomImageEffect::computeBrightPassFilter( crimild::Renderer *renderer, Cam
     }
 
     auto scene = renderer->getFrameBuffer( RenderPass::S_BUFFER_NAME );
-    auto color = scene->getRenderTargets().get( RenderPass::S_BUFFER_COLOR_TARGET_NAME );
+    auto color = scene->getRenderTargets()[ RenderPass::S_BUFFER_COLOR_TARGET_NAME ];
 
     renderer->bindFrameBuffer( emissiveBuffer );
     renderer->bindProgram( program );
@@ -254,7 +254,7 @@ void BloomImageEffect::computeGlowMap( crimild::Renderer *renderer, Camera *came
 
     renderer->bindProgram( glowProgram );
 
-    renderer->bindTexture( glowProgram->getLocation( "uEmissiveMap" ), emissiveBuffer->getRenderTargets().get( "color" )->getTexture() );
+    renderer->bindTexture( glowProgram->getLocation( "uEmissiveMap" ), emissiveBuffer->getRenderTargets()[ "color" ]->getTexture() );
 
     renderer->bindUniform( glowProgram->getLocation( "uBlurSize" ), _glowSize );
     renderer->bindUniform( glowProgram->getLocation( "uBlurStrength" ), _glowStrength );
@@ -270,7 +270,7 @@ void BloomImageEffect::computeGlowMap( crimild::Renderer *renderer, Camera *came
     renderer->setAlphaState( AlphaState::DISABLED );
     renderer->setDepthState( DepthState::ENABLED );
 
-    renderer->unbindTexture( glowProgram->getLocation( "uEmissiveMap" ), emissiveBuffer->getRenderTargets().get( "color" )->getTexture() );
+    renderer->unbindTexture( glowProgram->getLocation( "uEmissiveMap" ), emissiveBuffer->getRenderTargets()[ "color" ]->getTexture() );
 
     renderer->unbindProgram( glowProgram );
 

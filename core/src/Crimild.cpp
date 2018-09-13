@@ -137,5 +137,12 @@ void crimild::init( void )
 	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::NodeParticleRenderer );
 	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::AnimatedSpriteParticleRenderer );
 
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::animation::Animation );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::animation::Clip );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::animation::Joint );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::animation::Quaternion4fChannel );	
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::animation::Real32Channel );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::animation::Skeleton );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::animation::Vector3fChannel );
 }
 

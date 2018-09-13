@@ -115,7 +115,8 @@ namespace crimild {
 			
 			virtual ~PriorityQueue( void )
 			{
-				
+                resize_unsafe( 2 );
+                _size = 0;
 			}
 
 			PriorityQueue &operator=( const PriorityQueue &other )

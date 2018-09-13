@@ -25,73 +25,35 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_FOUNDATION_SHARED_OBJECT_MAP_
-#define CRIMILD_CORE_FOUNDATION_SHARED_OBJECT_MAP_
+#ifndef CRIMILD_ANIMATION_CHANNEL_
+#define CRIMILD_ANIMATION_CHANNEL_
 
-#include "Foundation/SharedObject.hpp"
-
-#include <map>
-#include <string>
-#include <functional>
+#include "Foundation/NamedObject.hpp"
+#include "Foundation/Types.hpp"
+#include "Coding/Codable.hpp"
 
 namespace crimild {
-	
-    /**
-	   \deprecated Use containers::Map< SharedPointer< ObjectType >> instead
-	*/
-    template< class ObjectType >
-    class SharedObjectMap : public SharedObject {
-    private:
-        typedef SharedPointer< ObjectType > ObjectPtr;
-        
-    public:
-        SharedObjectMap( void )
-        {
-            
-        }
-        
-        virtual ~SharedObjectMap( void )
-        {
-            clear();
-        }
-        
-        bool isEmpty( void ) const { return _objects.size() == 0; }
-        
-        void add( std::string key, ObjectPtr const &obj )
-        {
-            _objects[ key ] = obj;
-        }
-        
-        ObjectPtr remove( std::string key )
-        {
-            auto obj = _objects[ key ];
-            _objects[ key ] = nullptr;
-            return obj;
-        }
 
-        ObjectType *get( std::string key )
-        {
-            return crimild::get_ptr( _objects[ key ] );
-        }
-        
-        void clear( void )
-        {
-            _objects.clear();
-        }
-        
-        void each( std::function< void( std::string, ObjectType * ) > callback )
-        {
-            auto os = _objects;
-            for ( auto o : os ) {
-                if ( o.second != nullptr ) {
-                    callback( o.first, crimild::get_ptr( o.second ) );
-                }
-            }
-        }
-        
-    private:
-        std::map< std::string, ObjectPtr > _objects;
-    };
+	namespace animation {
+
+		class Animation;
+
+		class Channel :
+			public coding::Codable,
+			public NamedObject {
+			
+		protected:
+			explicit Channel( std::string name = "" );
+			
+		public:
+			virtual ~Channel( void );
+
+			virtual crimild::Real32 getDuration( void ) const = 0;
+
+			virtual void evaluate( crimild::Real32 t, Animation *animation ) = 0;
+		};
+
+	}
 
 }
 

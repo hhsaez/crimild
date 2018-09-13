@@ -79,9 +79,7 @@ void UpdateSystem::updateBehaviors( Node *scene )
 	CRIMILD_PROFILE( "Updating Components" )
 		
 	scene->perform( Apply( [ &FIXED_CLOCK ]( Node *node ) {
-		node->forEachComponent( [ node, &FIXED_CLOCK ] ( NodeComponent *component ) {
-			component->update( FIXED_CLOCK );
-		});
+		node->updateComponents( FIXED_CLOCK );
 	}));
     
     updateWorldState( scene );
@@ -98,22 +96,22 @@ void UpdateSystem::updateWorldState( Node *scene )
 
 void UpdateSystem::computeRenderQueues( Node *scene )
 {
-	auto renderQueueCollection = crimild::alloc< RenderQueueCollection >();
+	containers::Array< SharedPointer< RenderQueue >> renderQueues;
 
 	{
 		CRIMILD_PROFILE( "Compute Render Queue" )
 	
-		Simulation::getInstance()->forEachCamera( [ this, &renderQueueCollection, scene ]( Camera *camera ) {
+		Simulation::getInstance()->forEachCamera( [ this, &renderQueues, scene ]( Camera *camera ) {
 			if ( camera != nullptr && camera->isEnabled() ) {
 				auto renderQueue = crimild::alloc< RenderQueue >();
 				scene->perform( ComputeRenderQueue( camera, crimild::get_ptr( renderQueue ) ) );
-				renderQueueCollection->add( renderQueue );
+				renderQueues.add( renderQueue );
 			}
 		});
 	}
     
-    crimild::concurrency::sync_frame( [this, renderQueueCollection]() {
-        broadcastMessage( messaging::RenderQueueAvailable { renderQueueCollection } );
+    crimild::concurrency::sync_frame( [ this, renderQueues ]() {
+        broadcastMessage( messaging::RenderQueueAvailable { renderQueues } );
     });
 }
 

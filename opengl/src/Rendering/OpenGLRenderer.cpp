@@ -111,7 +111,7 @@ void OpenGLRenderer::configure( void )
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
-#ifndef CRIMILD_PLATFORM_MOBILE
+#if !defined( CRIMILD_PLATFORM_MOBILE ) && !defined( CRIMILD_PLATFORM_EMSCRIPTEN )
 	Log::info( CRIMILD_CURRENT_CLASS_NAME,
                "Configuring renderer",
                "\n       OpenGL version: ", glGetString( GL_VERSION ),

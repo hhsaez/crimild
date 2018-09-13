@@ -1,6 +1,44 @@
 Release Notes
 ====================
 
+v4.9.0
+------
+* Foundation
+    * New Queue container
+	* Removed Shared Object collections
+	* Containers improvements
+
+* Mathematics
+    * Fixed quaternion slerp interpolations
+
+* Rendering
+    * Shader Graphs support with OpenGL implementation
+
+* Animations
+    * Implemented new animation system
+	* Implemented blending and transitions for animations
+	* Implemented coding and cloning support for animations
+
+* Core
+    * Implemented coding support for Light class
+
+* Import
+    * Fixed quaternion angles when importing scenes
+
+* Audio
+    * Implement audio system using SDL_Mixer
+	* Deprecated SFML-based audio system
+
+* Simulation
+    * Implemented SDL-based simulation
+	* Deprecated GLFW-based simulation
+	* Fix component update pass 
+
+* Emscripten
+    * Enable Emscripten support using CMake
+	* Enable audio support on web export
+	* Bundle assets
+
 v4.8.0
 ------
 

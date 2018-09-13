@@ -31,7 +31,9 @@
 #include <string>
 
 // Identify known platforms
-#if defined( __APPLE__ )
+#if defined( __EMSCRIPTEN__ )
+    #define CRIMILD_PLATFORM_EMSCRIPTEN 1
+#elif defined( __APPLE__ )
     #include <TargetConditionals.h>
     #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
         #define CRIMILD_PLATFORM_IOS

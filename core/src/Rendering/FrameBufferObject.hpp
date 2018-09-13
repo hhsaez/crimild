@@ -32,7 +32,7 @@
 #include "Texture.hpp"
 
 #include "Mathematics/Vector.hpp"
-#include "Foundation/SharedObjectMap.hpp"
+#include "Foundation/Containers/Map.hpp"
 
 #include <memory>
 
@@ -85,7 +85,7 @@ namespace crimild {
         bool _useFloatTexture = false;
     };
     
-    using RenderTargetMap = SharedObjectMap< RenderTarget >;
+    using RenderTargetMap = containers::Map< std::string, SharedPointer< RenderTarget >>;
 
 	class FrameBufferObject : public SharedObject, public Catalog< FrameBufferObject >::Resource {
 	public:

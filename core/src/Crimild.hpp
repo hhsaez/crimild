@@ -59,6 +59,7 @@
 #include "Foundation/Containers/Array.hpp"
 #include "Foundation/Containers/Map.hpp"
 #include "Foundation/Containers/PriorityQueue.hpp"
+#include "Foundation/Containers/Queue.hpp"
 #include "Foundation/Containers/Stack.hpp"
 
 #include "Foundation/Policies/ThreadingPolicy.hpp"
@@ -280,6 +281,11 @@
 #include "Navigation/NavigationMeshOBJ.hpp"
 #include "Navigation/NavigationMeshContainer.hpp"
 #include "Navigation/NavigationController.hpp"
+
+#include "Animation/Clip.hpp"
+#include "Animation/Skeleton.hpp"
+#include "Animation/Animation.hpp"
+#include "Animation/ChannelImpl.hpp"
 
 #include "Debug/DebugRenderHelper.hpp"
 #include "Debug/SceneDebugDump.hpp"
