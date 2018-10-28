@@ -60,6 +60,8 @@ namespace crimild {
 		public:
 			using TraverseCallback = std::function< void( const KeyType &, ValueType & ) >;
 			using ConstTraverseCallback = std::function< void( const KeyType &, const ValueType & ) >;
+			using KeyTraverseCallback = std::function< void( KeyType const & ) >;
+			using ConstKeyTraverseCallback = std::function< void( const KeyType & ) >;
 			using ValueTraverseCallback = std::function< void( ValueType & ) >;
 			using ConstValueTraverseCallback = std::function< void( const ValueType & ) >;
 			
@@ -177,6 +179,22 @@ namespace crimild {
 				LockImpl lock( this );
 				for ( const auto &it : _map ) {
 					callback( it.first, it.second );
+				}
+			}
+
+			void eachKey( KeyTraverseCallback const &callback )
+			{
+				LockImpl lock( this );
+				for ( auto &it : _map ) {
+					callback( it.first );
+				}
+			}
+
+			void eachKey( ConstKeyTraverseCallback const &callback ) const
+			{
+				LockImpl lock( this );
+				for ( const auto &it : _map ) {
+					callback( it.first );
 				}
 			}
 
