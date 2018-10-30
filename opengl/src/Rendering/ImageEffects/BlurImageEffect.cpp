@@ -30,6 +30,7 @@
 
 #include <Rendering/RenderPasses/RenderPass.hpp>
 #include <Rendering/FrameBufferObject.hpp>
+#include <Rendering/RenderTarget.hpp>
 #include <Rendering/ShaderProgram.hpp>
 
 using namespace crimild;
@@ -140,7 +141,7 @@ void BlurImageEffect::compute( crimild::Renderer *renderer, Camera *camera )
         fbo = crimild::get_ptr( tmp );
 
         fbo->getRenderTargets().insert( Renderer::FBO_AUX_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
-        fbo->getRenderTargets().insert( Renderer::FBO_AUX_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
+        fbo->getRenderTargets().insert( Renderer::FBO_AUX_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::RENDER_AND_TEXTURE, width, height ) );
     }
 
     _direction->setValue( Vector2f::UNIT_X );

@@ -74,13 +74,13 @@ OpenGLShaderBuilder::OpenGLShaderBuilder( void )
 		if ( graph->isConnected( vsInput->getMVMatrix() ) ) uniforms.add( vsInput->getMVMatrix() );
 		if ( graph->isConnected( vsInput->getMVPMatrix() ) ) uniforms.add( vsInput->getMVPMatrix() );
 
-		attributes.each( [ this, graph ]( Outlet *outlet ) {
+		attributes.each( [ this ]( Outlet *outlet ) {
 			auto typeStr = getOutletTypeStr( outlet );
 			_inputsSection.add( "in " + typeStr + " " + outlet->getName() + ";" );
 			_mainSection.add( typeStr + " " + outlet->getUniqueName() + " = " + outlet->getName() + ";" );
 		});
 		
-		uniforms.each( [ this, graph ]( Outlet *outlet ) {
+		uniforms.each( [ this ]( Outlet *outlet ) {
 			auto typeStr = getOutletTypeStr( outlet );
 			_uniformsSection.add( "uniform " + typeStr + " " + outlet->getName() + ";" );
 			_mainSection.add( typeStr + " " + outlet->getUniqueName() + " = " + outlet->getName() + ";" );
@@ -117,9 +117,7 @@ OpenGLShaderBuilder::OpenGLShaderBuilder( void )
 	};
 
 	_translators[ FragmentShaderOutput::__CLASS_NAME ] = [ this ]( Node *node, ShaderGraph *graph, ShaderProgram *program ) {
-		auto fsOutput = static_cast< FragmentShaderOutput * >( node );
-
-		node->eachInputOutlet( [ this, graph, fsOutput ]( Outlet *outlet ) {
+		node->eachInputOutlet( [ this, graph ]( Outlet *outlet ) {
 			if ( graph->isConnected( outlet ) ) {
 				auto typeStr = getOutletTypeStr( outlet );
 				_outputsSection.add( "out " + typeStr + " " + outlet->getName() + ";" );

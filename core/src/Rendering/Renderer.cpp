@@ -29,6 +29,7 @@
 #include "Rendering/Material.hpp"
 #include "Rendering/RenderQueue.hpp"
 #include "Rendering/FrameBufferObject.hpp"
+#include "Rendering/RenderTarget.hpp"
 #include "Rendering/RenderPasses/RenderPass.hpp"
 #include "Foundation/Log.hpp"
 #include "Primitives/QuadPrimitive.hpp"
@@ -69,7 +70,8 @@ Renderer::Renderer( void )
 	  _textureCatalog( crimild::alloc< Catalog< Texture >>() ),
 	  _vertexBufferObjectCatalog( crimild::alloc< Catalog< VertexBufferObject >>() ),
 	  _indexBufferObjectCatalog( crimild::alloc< Catalog< IndexBufferObject >>() ),
-	  _frameBufferObjectCatalog( crimild::alloc< Catalog< FrameBufferObject >>() )
+	  _frameBufferObjectCatalog( crimild::alloc< Catalog< FrameBufferObject >>() ),
+	  _renderTargetCatalog( crimild::alloc< Catalog< RenderTarget >>() )
 {
 	_screenBuffer = crimild::alloc< FrameBufferObject >( 800, 600 );
 
@@ -87,6 +89,7 @@ Renderer::~Renderer( void )
     getTextureCatalog()->unloadAll();
     getVertexBufferObjectCatalog()->unloadAll();
     getIndexBufferObjectCatalog()->unloadAll();
+	getRenderTargetCatalog()->unloadAll();
     getFrameBufferObjectCatalog()->unloadAll();
 }
 
@@ -120,7 +123,7 @@ SharedPointer< FrameBufferObject > Renderer::generateAuxFBO( std::string name, i
 #else
     fbo->getRenderTargets().insert( FBO_AUX_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
 #endif
-    fbo->getRenderTargets().insert( FBO_AUX_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
+    fbo->getRenderTargets().insert( FBO_AUX_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::RENDER_AND_TEXTURE, width, height ) );
     AssetManager::getInstance()->set( name, fbo, true );
     return fbo;
 }
@@ -137,6 +140,7 @@ void Renderer::endRender( void )
     getTextureCatalog()->cleanup();
     getVertexBufferObjectCatalog()->cleanup();
     getIndexBufferObjectCatalog()->cleanup();
+	getRenderTargetCatalog()->cleanup();
     getFrameBufferObjectCatalog()->cleanup();
 }
 

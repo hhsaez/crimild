@@ -101,7 +101,7 @@ void UpdateSystem::computeRenderQueues( Node *scene )
 	{
 		CRIMILD_PROFILE( "Compute Render Queue" )
 	
-		Simulation::getInstance()->forEachCamera( [ this, &renderQueues, scene ]( Camera *camera ) {
+		Simulation::getInstance()->forEachCamera( [ &renderQueues, scene ]( Camera *camera ) {
 			if ( camera != nullptr && camera->isEnabled() ) {
 				auto renderQueue = crimild::alloc< RenderQueue >();
 				scene->perform( ComputeRenderQueue( camera, crimild::get_ptr( renderQueue ) ) );

@@ -26,6 +26,9 @@
  */
 
 #include "ShadowMap.hpp"
+#include "FrameBufferObject.hpp"
+#include "RenderTarget.hpp"
+#include "Texture.hpp"
 
 #include "Simulation/Simulation.hpp"
 
@@ -50,7 +53,7 @@ ShadowMap::ShadowMap( SharedPointer< FrameBufferObject > const &fbo )
     }
     
     _buffer->getRenderTargets().each( [ this ]( const std::string &name, SharedPointer< RenderTarget > &target ) {
-        if ( target->getOutput() == RenderTarget::Output::TEXTURE || target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
+        if ( target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
             _texture = target->getTexture();
         }
     });

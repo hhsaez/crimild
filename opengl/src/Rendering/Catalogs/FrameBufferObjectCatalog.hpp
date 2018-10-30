@@ -33,6 +33,7 @@
 namespace crimild {
     
     class FrameBufferObject;
+	class RenderTarget;
     class Renderer;
 
 	namespace opengl {
@@ -53,6 +54,9 @@ namespace crimild {
 			virtual void unload( FrameBufferObject *fbo ) override;
             
             virtual void cleanup( void ) override;
+
+		private:
+			void loadRenderTarget( RenderTarget *target );
 
 		private:
 			Renderer *_renderer = nullptr;

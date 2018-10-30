@@ -29,6 +29,7 @@
 #include "Rendering/OpenGLUtils.hpp"
 
 #include <Rendering/FrameBufferObject.hpp>
+#include <Rendering/RenderTarget.hpp>
 #include <Rendering/RenderPasses/RenderPass.hpp>
 #include <SceneGraph/Camera.hpp>
 

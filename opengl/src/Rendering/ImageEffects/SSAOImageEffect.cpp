@@ -32,6 +32,7 @@
 #include <Rendering/Image.hpp>
 #include <Rendering/AlphaState.hpp>
 #include <Rendering/FrameBufferObject.hpp>
+#include <Rendering/RenderTarget.hpp>
 #include <Rendering/Renderer.hpp>
 #include <Rendering/RenderPasses/RenderPass.hpp>
 #include <Rendering/RenderPasses/DeferredRenderPass.hpp>

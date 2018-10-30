@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2013-2018, Hernan Saez
  * All rights reserved.
- *
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,49 +25,32 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_RENDERING_SHADOW_MAP_
-#define CRIMILD_CORE_RENDERING_SHADOW_MAP_
+#include "RenderTarget.hpp"
+#include "Texture.hpp"
 
-#include "Foundation/SharedObject.hpp"
+using namespace crimild;
 
-#include "Mathematics/Matrix.hpp"
+constexpr const char *RenderTarget::RENDER_TARGET_NAME_COLOR;
+constexpr const char *RenderTarget::RENDER_TARGET_NAME_DEPTH;
 
-namespace crimild {
+RenderTarget::RenderTarget( RenderTarget::Type type, RenderTarget::Output output, int width, int height )
+    : RenderTarget( type, output, width, height, false )
+{
 
-    class FrameBufferObject;
-    class Texture;
-    
-    class ShadowMap : public SharedObject {
-    public:
-        ShadowMap( void );
-        explicit ShadowMap( SharedPointer< FrameBufferObject > const &fbo );
-        virtual ~ShadowMap( void );
-        
-        FrameBufferObject *getBuffer( void ) { return crimild::get_ptr( _buffer ); }
-        Texture *getTexture ( void ) { return _texture; }
-        
-        const Matrix4f &getLightProjectionMatrix( void ) const { return _lightProjectionMatrix; }
-        void setLightProjectionMatrix( const Matrix4f &m ) { _lightProjectionMatrix = m; }
-        
-        const Matrix4f &getLightViewMatrix( void ) const { return _lightViewMatrix; }
-        void setLightViewMatrix( const Matrix4f &m ) { _lightViewMatrix = m; }
-
-		void setBias( crimild::Real32 bias ) { _bias = bias; }
-		crimild::Real32 getBias( void ) const { return _bias; }
-
-		void setOffset( crimild::Real32 offset ) { _offset = offset; }
-		crimild::Real32 getOffset( void ) const { return _offset; }
-
-    private:
-        Matrix4f _lightProjectionMatrix;
-        Matrix4f _lightViewMatrix;
-        Texture *_texture = nullptr;
-        SharedPointer< FrameBufferObject > _buffer;
-		crimild::Real32 _bias = 0.999f;
-		crimild::Real32 _offset = 0.0f;
-    };
-    
 }
 
-#endif
+RenderTarget::RenderTarget( RenderTarget::Type type, RenderTarget::Output output, int width, int height, bool floatTextureHint )
+    : _texture( crimild::alloc< Texture >() )
+{
+    _type = type;
+    _output = output;
+    _width = width;
+    _height = height;
+    _useFloatTexture = floatTextureHint;
+}
+
+RenderTarget::~RenderTarget( void )
+{
+    
+}
 

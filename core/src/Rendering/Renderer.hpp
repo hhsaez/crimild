@@ -47,6 +47,7 @@ namespace crimild {
     class DepthState;
     class ColorMaskState;
     class FrameBufferObject;
+	class RenderTarget;
     class Geometry;
     class IndexBufferObject;
     class Light;
@@ -209,12 +210,16 @@ namespace crimild {
 		Catalog< FrameBufferObject > *getFrameBufferObjectCatalog( void ) { return crimild::get_ptr( _frameBufferObjectCatalog ); }
 		void setFrameBufferObjectCatalog( SharedPointer< Catalog< FrameBufferObject > > const &catalog ) { _frameBufferObjectCatalog = catalog; }
 
+		Catalog< RenderTarget > *getRenderTargetCatalog( void ) { return crimild::get_ptr( _renderTargetCatalog ); }
+		void setRenderTargetCatalog( SharedPointer< Catalog< RenderTarget > > const &catalog ) { _renderTargetCatalog = catalog; }
+
 	private:
-		SharedPointer< Catalog< ShaderProgram > > _shaderProgramCatalog;
-		SharedPointer< Catalog< Texture > > _textureCatalog;
-		SharedPointer< Catalog< VertexBufferObject > > _vertexBufferObjectCatalog;
-		SharedPointer< Catalog< IndexBufferObject > > _indexBufferObjectCatalog;
-		SharedPointer< Catalog< FrameBufferObject > > _frameBufferObjectCatalog;
+		SharedPointer< Catalog< ShaderProgram >> _shaderProgramCatalog;
+		SharedPointer< Catalog< Texture >> _textureCatalog;
+		SharedPointer< Catalog< VertexBufferObject >> _vertexBufferObjectCatalog;
+		SharedPointer< Catalog< IndexBufferObject >> _indexBufferObjectCatalog;
+		SharedPointer< Catalog< FrameBufferObject >> _frameBufferObjectCatalog;
+		SharedPointer< Catalog< RenderTarget >> _renderTargetCatalog;
 	};
     
 }

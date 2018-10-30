@@ -227,6 +227,7 @@
 #include "Rendering/ColorMaskState.hpp"
 #include "Rendering/CullFaceState.hpp"
 #include "Rendering/FrameBufferObject.hpp"
+#include "Rendering/RenderTarget.hpp"
 #include "Rendering/Image.hpp"
 #include "Rendering/ImageTGA.hpp"
 #include "Rendering/IndexBufferObject.hpp"

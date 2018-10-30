@@ -28,6 +28,7 @@
 #include "RenderGraphResource.hpp"
 
 #include "Rendering/Texture.hpp"
+#include "Rendering/RenderTarget.hpp"
 
 using namespace crimild::rendergraph;
 
@@ -44,6 +45,11 @@ RenderGraphResource::~RenderGraphResource( void )
 void RenderGraphResource::setTexture( Texture *texture )
 {
 	_texture = crimild::retain( texture );
+}
+
+void RenderGraphResource::setRenderTarget( RenderTarget *target )
+{
+	_renderTarget = crimild::retain( target );
 }
 
 

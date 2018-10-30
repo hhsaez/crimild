@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2013-2018, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,15 @@
 namespace crimild {
 
 	class Texture;
+	class RenderTarget;
 
 	namespace rendergraph {
 
+		/**
+		   \todo Rename to Attachment
+
+		   \brief A descriptor for a resource used for a render pass
+		 */
 		class RenderGraphResource : public RenderGraph::Node {
 			CRIMILD_IMPLEMENT_RTTI( crimild::rendergraph::RenderGraphResource )
 			
@@ -49,8 +55,12 @@ namespace crimild {
 			void setTexture( Texture *texture );
 			Texture *getTexture( void ) { return crimild::get_ptr( _texture ); }
 
+			void setRenderTarget( RenderTarget *target );
+			RenderTarget *getRenderTarget( void ) { return crimild::get_ptr( _renderTarget ); }
+
 		private:
-			SharedPointer< Texture > _texture;			
+			SharedPointer< Texture > _texture;
+			SharedPointer< RenderTarget > _renderTarget;
 		};
 
 	}

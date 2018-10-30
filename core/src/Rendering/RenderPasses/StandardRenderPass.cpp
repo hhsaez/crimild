@@ -141,7 +141,7 @@ void StandardRenderPass::renderOpaqueObjects( Renderer *renderer, RenderQueue *r
         
         renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::USE_SHADOW_MAP_UNIFORM ), false );
         if ( isShadowMappingEnabled() ) {
-            renderQueue->each( [ this, renderer, program, renderQueue ]( Light *light, int ) {        
+            renderQueue->each( [ renderer, program ]( Light *light, int ) {
                 if ( !light->castShadows() ) {
                     return;
                 }
@@ -179,7 +179,7 @@ void StandardRenderPass::renderOpaqueObjects( Renderer *renderer, RenderQueue *r
         }
         
         if ( isShadowMappingEnabled() ) {
-            renderQueue->each( [ this, renderer, program, renderQueue ]( Light *light, int ) {        
+            renderQueue->each( [ renderer, program ]( Light *light, int ) {
                 if ( !light->castShadows() ) {
                     return;
                 }

@@ -41,10 +41,10 @@ Animation::Animation( std::string name )
 
 Animation::Animation( SharedPointer< Clip > const &clip, crimild::Real32 offset, crimild::Real32 duration )
 	: NamedObject( clip->getName() ),
-	  _clip( clip ),
+      _duration( duration ),
+      _frameRate( clip->getFrameRate() ),
 	  _offset( offset ),
-	  _duration( duration ),
-	  _frameRate( clip->getFrameRate() )
+      _clip( clip )
 {
 	if ( _duration <= 0.0 ) {
 		setDuration( clip->getDuration() );
@@ -118,7 +118,7 @@ Animation *Animation::lerp( Animation *other, crimild::Real32 factor, crimild::B
 		other->sync( this );
 	}
 	
-	_accumulators.each( [ this, other, factor ]( const std::string &channelName, SharedPointer< Accumulator > &acc ) {
+	_accumulators.each( [ other, factor ]( const std::string &channelName, SharedPointer< Accumulator > &acc ) {
 		if ( other->_accumulators.contains( channelName ) ) {
 			acc->lerp( crimild::get_ptr( other->_accumulators[ channelName ] ), factor );
 		}
@@ -134,7 +134,7 @@ Animation *Animation::add( SharedPointer< Animation > const &other, crimild::Rea
 
 Animation *Animation::add( Animation *other, crimild::Real32 strength )
 {
-	_accumulators.each( [ this, other, strength ]( const std::string &channelName, SharedPointer< Accumulator > &acc ) {
+	_accumulators.each( [ other, strength ]( const std::string &channelName, SharedPointer< Accumulator > &acc ) {
 		if ( other->_accumulators.contains( channelName ) ) {
 			acc->add( crimild::get_ptr( other->_accumulators[ channelName ] ), strength );
 		}

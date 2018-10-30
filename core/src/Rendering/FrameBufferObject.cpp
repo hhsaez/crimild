@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2013-2018, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -26,32 +26,9 @@
  */
 
 #include "FrameBufferObject.hpp"
+#include "RenderTarget.hpp"
 
 using namespace crimild;
-
-constexpr const char *RenderTarget::RENDER_TARGET_NAME_COLOR;
-constexpr const char *RenderTarget::RENDER_TARGET_NAME_DEPTH;
-
-RenderTarget::RenderTarget( RenderTarget::Type type, RenderTarget::Output output, int width, int height )
-    : RenderTarget( type, output, width, height, false )
-{
-
-}
-
-RenderTarget::RenderTarget( RenderTarget::Type type, RenderTarget::Output output, int width, int height, bool floatTextureHint )
-    : _texture( crimild::alloc< Texture >() )
-{
-    _type = type;
-    _output = output;
-    _width = width;
-    _height = height;
-    _useFloatTexture = floatTextureHint;
-}
-
-RenderTarget::~RenderTarget( void )
-{
-    
-}
 
 FrameBufferObject::FrameBufferObject( int width, int height )
 	: _width( width ),
@@ -80,7 +57,7 @@ StandardFrameBufferObject::StandardFrameBufferObject( int width, int height )
 #else
     getRenderTargets().insert( RenderTarget::RENDER_TARGET_NAME_DEPTH, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
 #endif
-    getRenderTargets().insert( RenderTarget::RENDER_TARGET_NAME_COLOR, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
+    getRenderTargets().insert( RenderTarget::RENDER_TARGET_NAME_COLOR, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::RENDER_AND_TEXTURE, width, height ) );
 }
 
 StandardFrameBufferObject::~StandardFrameBufferObject( void )

@@ -32,6 +32,7 @@
 #include <Rendering/Renderer.hpp>
 #include <Rendering/RenderPasses/RenderPass.hpp>
 #include <Rendering/FrameBufferObject.hpp>
+#include <Rendering/RenderTarget.hpp>
 
 using namespace crimild;
 using namespace crimild::opengl;

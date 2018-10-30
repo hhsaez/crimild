@@ -30,6 +30,7 @@
 #include "Foundation/Log.hpp"
 #include "Rendering/Renderer.hpp"
 #include "Rendering/FrameBufferObject.hpp"
+#include "Rendering/RenderTarget.hpp"
 #include "Rendering/RenderPasses/RenderPass.hpp"
 
 using namespace crimild;

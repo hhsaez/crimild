@@ -414,7 +414,7 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
     });
     
     // TODO: Use RTTI for getting class type name
-    LuaNodeBuilderRegistry::getInstance()->registerCustomNodeBuilder( LIGHT_TYPE, [self]( ScriptEvaluator &eval ) -> SharedPointer< Node > {
+    LuaNodeBuilderRegistry::getInstance()->registerCustomNodeBuilder( LIGHT_TYPE, []( ScriptEvaluator &eval ) -> SharedPointer< Node > {
         Light::Type lightType = Light::Type::POINT;
         std::string lightTypeStr;
         if ( eval.getPropValue( LIGHT_LIGHT_TYPE, lightTypeStr ) ) {
@@ -460,7 +460,7 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
     });
 
     // TODO: Use RTTI for getting class type name
-    LuaNodeBuilderRegistry::getInstance()->registerCustomNodeBuilder( TEXT_TYPE, [self]( ScriptEvaluator &eval ) -> SharedPointer< Node > {
+    LuaNodeBuilderRegistry::getInstance()->registerCustomNodeBuilder( TEXT_TYPE, []( ScriptEvaluator &eval ) -> SharedPointer< Node > {
         auto text = crimild::alloc< Text >();
         
         std::string fontName;

@@ -29,6 +29,7 @@
 
 #include "Rendering/Renderer.hpp"
 #include "Rendering/FrameBufferObject.hpp"
+#include "Rendering/RenderTarget.hpp"
 #include "Rendering/RenderQueue.hpp"
 #include "Rendering/ImageEffects/ImageEffect.hpp"
 #include "SceneGraph/Geometry.hpp"
@@ -323,24 +324,24 @@ void DeferredRenderPass::buildBuffers( Renderer *renderer )
     if ( renderer->getFrameBuffer( G_BUFFER_NAME ) == nullptr ) {
         auto gBuffer = crimild::alloc< FrameBufferObject >( width, height );
         gBuffer->getRenderTargets().insert( RenderPass::G_BUFFER_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_32, RenderTarget::Output::RENDER_AND_TEXTURE, width, height, true ) );
-        gBuffer->getRenderTargets().insert( RenderPass::G_BUFFER_DIFFUSE_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height, true ) );
-        gBuffer->getRenderTargets().insert( RenderPass::G_BUFFER_POSITION_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height, true ) );
-        gBuffer->getRenderTargets().insert( RenderPass::G_BUFFER_NORMAL_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height, true ) );
-        gBuffer->getRenderTargets().insert( RenderPass::G_BUFFER_VIEW_SPACE_NORMAL_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height, true ) );
+        gBuffer->getRenderTargets().insert( RenderPass::G_BUFFER_DIFFUSE_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::RENDER_AND_TEXTURE, width, height, true ) );
+        gBuffer->getRenderTargets().insert( RenderPass::G_BUFFER_POSITION_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::RENDER_AND_TEXTURE, width, height, true ) );
+        gBuffer->getRenderTargets().insert( RenderPass::G_BUFFER_NORMAL_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::RENDER_AND_TEXTURE, width, height, true ) );
+        gBuffer->getRenderTargets().insert( RenderPass::G_BUFFER_VIEW_SPACE_NORMAL_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::RENDER_AND_TEXTURE, width, height, true ) );
         renderer->setFrameBuffer( G_BUFFER_NAME, gBuffer );
     }
     
     if ( renderer->getFrameBuffer( S_BUFFER_NAME ) == nullptr ) {
         auto sBuffer = crimild::alloc< FrameBufferObject >( width, height );
         sBuffer->getRenderTargets().insert( RenderPass::S_BUFFER_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER_AND_TEXTURE, width, height ) );
-        sBuffer->getRenderTargets().insert( RenderPass::S_BUFFER_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
+        sBuffer->getRenderTargets().insert( RenderPass::S_BUFFER_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::RENDER_AND_TEXTURE, width, height ) );
         renderer->setFrameBuffer( RenderPass::S_BUFFER_NAME, sBuffer );
     }
 
     if ( renderer->getFrameBuffer( D_BUFFER_NAME ) == nullptr ) {
         auto dBuffer = crimild::alloc< FrameBufferObject >( width, height );
         dBuffer->getRenderTargets().insert( RenderPass::D_BUFFER_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER_AND_TEXTURE, width, height ) );
-        dBuffer->getRenderTargets().insert( RenderPass::D_BUFFER_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
+        dBuffer->getRenderTargets().insert( RenderPass::D_BUFFER_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::RENDER_AND_TEXTURE, width, height ) );
         renderer->setFrameBuffer( RenderPass::D_BUFFER_NAME, dBuffer );
     }
 }

@@ -30,6 +30,7 @@
 
 #include <Rendering/Renderer.hpp>
 #include <Rendering/FrameBufferObject.hpp>
+#include <Rendering/RenderTarget.hpp>
 
 #ifndef GL_RGBA16F
 #define GL_RGBA16F 0x881A
@@ -104,7 +105,14 @@ void FrameBufferObjectCatalog::bind( FrameBufferObject *fbo )
 #endif
 
     glClearColor( clearColor.r(), clearColor.g(), clearColor.b(), clearColor.a() );
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+    crimild::Int32 clearFlags = fbo->getClearFlags();
+	if ( clearFlags != FrameBufferObject::ClearFlag::NONE ) {
+        GLbitfield glClearFlags = 0;
+        if ( clearFlags & FrameBufferObject::ClearFlag::COLOR ) glClearFlags |= GL_COLOR_BUFFER_BIT;
+        if ( clearFlags & FrameBufferObject::ClearFlag::DEPTH ) glClearFlags |= GL_DEPTH_BUFFER_BIT;
+        auto d = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
+        glClear( glClearFlags );
+	}
     
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
@@ -137,84 +145,33 @@ void FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
         glBindFramebuffer( GL_FRAMEBUFFER, framebufferId );
         
         int colorAttachmentOffset = 0;
-        fbo->getRenderTargets().each( [ & ]( std::string rtName, SharedPointer< RenderTarget > &target ) {
-            CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
-            
-            int targetWidth = target->getWidth();
-            int targetHeight = target->getHeight();
-            
-            GLenum internalFormat = GL_INVALID_ENUM;
-            GLenum attachment = GL_INVALID_ENUM;
-            GLenum textureType = target->useFloatTexture() ? GL_FLOAT : GL_UNSIGNED_BYTE;
-            GLenum textureFormat = GL_RGBA;
-            switch ( target->getType() ) {
-                case RenderTarget::Type::DEPTH_32:
-#ifdef CRIMILD_PLATFORM_DESKTOP
-                    internalFormat = target->useFloatTexture() ? GL_DEPTH_COMPONENT32F : GL_DEPTH_COMPONENT32;
-                    attachment = GL_DEPTH_ATTACHMENT;
-                    textureFormat = GL_DEPTH_COMPONENT;
-                    break;
-#endif
-                    
-                case RenderTarget::Type::DEPTH_24:
-#ifdef CRIMILD_PLATFORM_DESKTOP
-                    internalFormat = GL_DEPTH_COMPONENT24;
-                    attachment = GL_DEPTH_ATTACHMENT;
-                    textureFormat = GL_DEPTH_COMPONENT;
-                    break;
-#endif
-                    
-                case RenderTarget::Type::DEPTH_16:
-                    internalFormat = GL_DEPTH_COMPONENT16;
-                    attachment = GL_DEPTH_ATTACHMENT;
-                    textureFormat = GL_DEPTH_COMPONENT16;
-                    break;
+        fbo->getRenderTargets().each( [ this, &colorAttachmentOffset ]( std::string rtName, SharedPointer< RenderTarget > &target ) {
+			if ( target->getId() == 0 ) {
+                loadRenderTarget( crimild::get_ptr( target ) );
+			}
 
-                case RenderTarget::Type::COLOR_RGB:
-                    internalFormat = target->useFloatTexture() ? GL_RGB16F : GL_RGB;
-                    textureFormat = GL_RGB;
-                    attachment = GL_COLOR_ATTACHMENT0 + colorAttachmentOffset++;
-                    break;
+			GLenum attachment = GL_INVALID_ENUM;
+			switch ( target->getType() ) {
+				case RenderTarget::Type::DEPTH_32:
+				case RenderTarget::Type::DEPTH_24:
+				case RenderTarget::Type::DEPTH_16:
+					attachment = GL_DEPTH_ATTACHMENT;
+					break;
+					
+				case RenderTarget::Type::COLOR_RGB:
+				case RenderTarget::Type::COLOR_RGBA:
+					attachment = GL_COLOR_ATTACHMENT0 + colorAttachmentOffset++;
+					break;
+					
+				default:
+					Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid target type: ", ( int ) target->getType() );
+					break;
+			}
 
-                case RenderTarget::Type::COLOR_RGBA:
-                    internalFormat = target->useFloatTexture() ? GL_RGBA16F : GL_RGBA;
-                    textureFormat = GL_RGBA;
-                    attachment = GL_COLOR_ATTACHMENT0 + colorAttachmentOffset++;
-                    break;
-
-                default:
-                    Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid target type: ", ( int ) target->getType() );
-                    break;
+			glFramebufferRenderbuffer( GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, target->getId() );
+            if ( target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
+                glFramebufferTexture2D( GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, target->getTexture()->getCatalogId(), 0 );
             }
-            
-            if ( internalFormat != GL_INVALID_ENUM && attachment != GL_INVALID_ENUM ) {
-                if ( target->getOutput() == RenderTarget::Output::RENDER || target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
-                    GLuint renderBufferId;
-                    glGenRenderbuffers( 1, &renderBufferId );
-                    target->setId( renderBufferId );
-                    
-                    glBindRenderbuffer( GL_RENDERBUFFER, target->getId() );
-                    glRenderbufferStorage( GL_RENDERBUFFER, internalFormat, targetWidth, targetHeight );
-                    glFramebufferRenderbuffer( GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, target->getId() );
-                }
-
-                if ( target->getOutput() == RenderTarget::Output::TEXTURE || target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
-                    GLuint textureId;
-                    glGenTextures( 1, &textureId );
-                    target->getTexture()->setName( rtName );
-                    target->getTexture()->setCatalogInfo( getRenderer()->getTextureCatalog(), textureId );
-                    
-                    glBindTexture( GL_TEXTURE_2D, target->getTexture()->getCatalogId() );
-                    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-                    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-                    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-                    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-                    glTexImage2D( GL_TEXTURE_2D, 0, internalFormat, targetWidth, targetHeight, 0, textureFormat, textureType, 0 );
-                    glFramebufferTexture2D( GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, target->getTexture()->getCatalogId(), 0 );
-                }
-            }
-            
-            CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
         });
 
         GLenum status = glCheckFramebufferStatus( GL_FRAMEBUFFER );
@@ -295,7 +252,7 @@ void FrameBufferObjectCatalog::unload( FrameBufferObject *fbo )
                 _renderbufferIdsToDelete.push_back( targetId );
             }
 
-            if ( target->getOutput() == RenderTarget::Output::TEXTURE || target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
+            if ( target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
                 int textureId = target->getTexture()->getCatalogId();
                 _textureIdsToDelete.push_back( textureId );
                 target->getTexture()->setCatalogInfo( nullptr, 0 );
@@ -331,5 +288,80 @@ void FrameBufferObjectCatalog::cleanup( void )
     _framebufferIdsToDelete.clear();
     
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+}
+
+void FrameBufferObjectCatalog::loadRenderTarget( RenderTarget *target )
+{
+	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+    
+	int targetWidth = target->getWidth();
+	int targetHeight = target->getHeight();
+    
+	GLenum internalFormat = GL_INVALID_ENUM;
+	GLenum textureType = target->useFloatTexture() ? GL_FLOAT : GL_UNSIGNED_BYTE;
+	GLenum textureFormat = GL_RGBA;
+	switch ( target->getType() ) {
+		case RenderTarget::Type::DEPTH_32:
+#ifdef CRIMILD_PLATFORM_DESKTOP
+			internalFormat = target->useFloatTexture() ? GL_DEPTH_COMPONENT32F : GL_DEPTH_COMPONENT32;
+			textureFormat = GL_DEPTH_COMPONENT;
+			break;
+#endif
+			
+		case RenderTarget::Type::DEPTH_24:
+#ifdef CRIMILD_PLATFORM_DESKTOP
+			internalFormat = GL_DEPTH_COMPONENT24;
+			textureFormat = GL_DEPTH_COMPONENT;
+			break;
+#endif
+			
+		case RenderTarget::Type::DEPTH_16:
+			internalFormat = GL_DEPTH_COMPONENT16;
+			textureFormat = GL_DEPTH_COMPONENT16;
+			break;
+			
+		case RenderTarget::Type::COLOR_RGB:
+			internalFormat = target->useFloatTexture() ? GL_RGB16F : GL_RGB;
+			textureFormat = GL_RGB;
+			break;
+			
+		case RenderTarget::Type::COLOR_RGBA:
+			internalFormat = target->useFloatTexture() ? GL_RGBA16F : GL_RGBA;
+			textureFormat = GL_RGBA;
+			break;
+			
+		default:
+			Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid target type: ", ( int ) target->getType() );
+			break;
+	}
+    
+	if ( internalFormat != GL_INVALID_ENUM ) {
+		GLuint renderBufferId;
+		glGenRenderbuffers( 1, &renderBufferId );
+		target->setId( renderBufferId );
+
+        std::cout << "RT " << renderBufferId << std::endl;
+        
+		glBindRenderbuffer( GL_RENDERBUFFER, target->getId() );
+		glRenderbufferStorage( GL_RENDERBUFFER, internalFormat, targetWidth, targetHeight );
+        glBindRenderbuffer( GL_RENDERBUFFER, 0 );
+		
+		if ( target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
+			GLuint textureId;
+			glGenTextures( 1, &textureId );
+//            target->getTexture()->setName( rtName );
+			target->getTexture()->setCatalogInfo( getRenderer()->getTextureCatalog(), textureId );
+            
+			glBindTexture( GL_TEXTURE_2D, target->getTexture()->getCatalogId() );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+			glTexImage2D( GL_TEXTURE_2D, 0, internalFormat, targetWidth, targetHeight, 0, textureFormat, textureType, 0 );
+            glBindTexture( GL_TEXTURE_2D, 0 );
+		}
+	}
+    
+	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
