@@ -98,6 +98,7 @@ void RenderGraph::compile( void )
 
 	_sortedPasses.clear();
 	sorted.each( [ this ]( RenderGraph::Node *node ) {
+        std::cout << node->getClassName() << std::endl;
 		if ( node->getType() == RenderGraph::Node::Type::PASS ) {
 			_sortedPasses.add( static_cast< RenderGraphPass * >( node ) );
 		}

@@ -76,34 +76,6 @@ void FrameBufferObjectCatalog::bind( FrameBufferObject *fbo )
     glViewport( 0.0f, 0.0f, fbo->getWidth(), fbo->getHeight() );
     const RGBAColorf &clearColor = fbo->getClearColor();
     
-#ifdef CRIMILD_PLATFORM_DESKTOP
-    const GLenum fboBuffers[] = {
-        GL_COLOR_ATTACHMENT0,
-        GL_COLOR_ATTACHMENT1,
-        GL_COLOR_ATTACHMENT2,
-        GL_COLOR_ATTACHMENT3,
-        GL_COLOR_ATTACHMENT4,
-        GL_COLOR_ATTACHMENT5,
-        GL_COLOR_ATTACHMENT6,
-        GL_COLOR_ATTACHMENT7,
-    };
-    
-    // this may be wrong. what if there is no depth buffer?
-    int fboColorBufferCount = 0;
-    fbo->getRenderTargets().each( [ & ]( std::string, SharedPointer< RenderTarget > &target ) {
-        if ( target->getType() == RenderTarget::Type::COLOR_RGB || target->getType() == RenderTarget::Type::COLOR_RGBA ) {
-            fboColorBufferCount++;
-        }
-    });
-
-    if ( fboColorBufferCount > 0 ) {
-        glDrawBuffers( fboColorBufferCount, fboBuffers );
-    }
-    else {
-        glDrawBuffer( GL_NONE );
-    }
-#endif
-
     glClearColor( clearColor.r(), clearColor.g(), clearColor.b(), clearColor.a() );
     crimild::Int32 clearFlags = fbo->getClearFlags();
 	if ( clearFlags != FrameBufferObject::ClearFlag::NONE ) {
@@ -143,7 +115,7 @@ void FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
     int framebufferId = fbo->getCatalogId();
     if ( framebufferId > 0 ) {
         glBindFramebuffer( GL_FRAMEBUFFER, framebufferId );
-        
+
         int colorAttachmentOffset = 0;
         fbo->getRenderTargets().each( [ this, &colorAttachmentOffset ]( std::string rtName, SharedPointer< RenderTarget > &target ) {
 			if ( target->getId() == 0 ) {
@@ -222,6 +194,27 @@ void FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
                 exit( 1 );
                 break;
         }
+
+#ifdef CRIMILD_PLATFORM_DESKTOP
+		const GLenum fboBuffers[] = {
+			GL_COLOR_ATTACHMENT0,
+			GL_COLOR_ATTACHMENT1,
+			GL_COLOR_ATTACHMENT2,
+			GL_COLOR_ATTACHMENT3,
+			GL_COLOR_ATTACHMENT4,
+			GL_COLOR_ATTACHMENT5,
+			GL_COLOR_ATTACHMENT6,
+			GL_COLOR_ATTACHMENT7,
+		};
+		
+		if ( colorAttachmentOffset > 0 ) {
+			glDrawBuffers( colorAttachmentOffset, fboBuffers );
+		}
+		else {
+			glDrawBuffer( GL_NONE );
+            glReadBuffer( GL_NONE );
+		}
+#endif
 
         int defaultFBO = 0;
         if ( getRenderer()->getScreenBuffer() != nullptr ) {
@@ -336,12 +329,10 @@ void FrameBufferObjectCatalog::loadRenderTarget( RenderTarget *target )
 	}
     
 	if ( internalFormat != GL_INVALID_ENUM ) {
-		GLuint renderBufferId;
+        GLuint renderBufferId = 0;
 		glGenRenderbuffers( 1, &renderBufferId );
 		target->setId( renderBufferId );
 
-        std::cout << "RT " << renderBufferId << std::endl;
-        
 		glBindRenderbuffer( GL_RENDERBUFFER, target->getId() );
 		glRenderbufferStorage( GL_RENDERBUFFER, internalFormat, targetWidth, targetHeight );
         glBindRenderbuffer( GL_RENDERBUFFER, 0 );

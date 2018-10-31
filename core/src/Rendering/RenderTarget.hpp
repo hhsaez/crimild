@@ -76,7 +76,7 @@ namespace crimild {
         void setUseFloatTexture( bool value ) { _useFloatTexture = value; }
         
     private:
-        int _id;
+        int _id = 0;
         Type _type;
         Output _output;
         int _width;
