@@ -165,6 +165,16 @@ void Renderer::render( RenderQueue *renderQueue, RenderPass *renderPass )
     renderPass->render( this, renderQueue, renderQueue->getCamera() );
 }
 
+void Renderer::bindRenderTarget( RenderTarget *target )
+{
+	getRenderTargetCatalog()->bind( target );
+}
+
+void Renderer::unbindRenderTarget( RenderTarget *target )
+{
+	getRenderTargetCatalog()->unbind( target );
+}
+
 void Renderer::bindFrameBuffer( FrameBufferObject *fbo )
 {
 	getFrameBufferObjectCatalog()->bind( fbo );

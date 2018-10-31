@@ -183,7 +183,10 @@ namespace crimild {
 			for ( auto resource : rs ) {
                 unload( resource );
 			}
-			_resources.clear();
+
+            cleanup();
+
+            _resources.clear();
 		}
         
         virtual void cleanup( void )

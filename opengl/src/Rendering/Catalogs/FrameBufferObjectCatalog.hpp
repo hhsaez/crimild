@@ -33,7 +33,6 @@
 namespace crimild {
     
     class FrameBufferObject;
-	class RenderTarget;
     class Renderer;
 
 	namespace opengl {
@@ -56,13 +55,8 @@ namespace crimild {
             virtual void cleanup( void ) override;
 
 		private:
-			void loadRenderTarget( RenderTarget *target );
-
-		private:
 			Renderer *_renderer = nullptr;
             std::list< int > _framebufferIdsToDelete;
-            std::list< int > _renderbufferIdsToDelete;
-            std::list< int > _textureIdsToDelete;
 		};
 
 	}

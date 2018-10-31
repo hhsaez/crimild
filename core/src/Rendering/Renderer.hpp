@@ -87,6 +87,9 @@ namespace crimild {
         virtual void presentFrame( void );
 
 	public:
+		virtual void bindRenderTarget( RenderTarget *target );
+		virtual void unbindRenderTarget( RenderTarget *target );
+		
 		virtual void bindFrameBuffer( FrameBufferObject *fbo );
 		virtual void unbindFrameBuffer( FrameBufferObject *fbo );
 

@@ -65,9 +65,6 @@ namespace crimild {
         Type getType( void ) const { return _type; }
         Output getOutput( void ) const { return _output; }
         
-        int getId( void ) const { return _id; }
-        void setId( int value ) { _id = value; }
-        
         int getWidth( void ) const { return _width; }
         int getHeight( void ) const { return _height; }
         
@@ -76,7 +73,6 @@ namespace crimild {
         void setUseFloatTexture( bool value ) { _useFloatTexture = value; }
         
     private:
-        int _id = 0;
         Type _type;
         Output _output;
         int _width;
