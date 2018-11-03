@@ -68,7 +68,7 @@ namespace crimild {
 		virtual bool start( void ) override;
 		virtual void stop( void ) override;
 
-		void registerBuilder( std::string extension, Builder const &builder ) { _builders[ extension ] = builder; }
+		void registerBuilder( std::string extension, Builder const &builder ) { _builders.insert( extension, builder ); }
 
 		template< class DECODER_CLASS >
 		void registerDecoder( std::string extension ) 

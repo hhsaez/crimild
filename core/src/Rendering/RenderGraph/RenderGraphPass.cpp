@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2013-2018, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,8 @@
 
 using namespace crimild::rendergraph;
 
-RenderGraphPass::RenderGraphPass( void )
+RenderGraphPass::RenderGraphPass( std::string name )
+    : RenderGraph::Node( name )
 {
 
 }

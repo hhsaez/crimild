@@ -131,9 +131,15 @@ namespace crimild {
 			inline ValueType &operator[]( const KeyType &key )
 			{
 				LockImpl lock( this );
-				return _map[ key ];
+                return _map[ key ];
 			}
 			
+            inline const ValueType &operator[]( const KeyType &key ) const
+            {
+                LockImpl lock( this );
+                return _map.at( key );
+            }
+
 			void insert( const KeyType &key, ValueType const &value )
 			{
 				LockImpl lock( this );

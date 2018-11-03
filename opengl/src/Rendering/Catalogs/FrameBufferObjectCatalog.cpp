@@ -149,7 +149,6 @@ void FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
         GLenum status = glCheckFramebufferStatus( GL_FRAMEBUFFER );
         switch ( status ) {
             case GL_FRAMEBUFFER_COMPLETE:
-                Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Framebuffer setup complete" );
                 break;
 #ifdef GL_FRAMEBUFFER_UNDEFINED
             case GL_FRAMEBUFFER_UNDEFINED:

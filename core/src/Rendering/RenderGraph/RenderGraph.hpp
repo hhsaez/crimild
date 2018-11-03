@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2013-2018, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -29,31 +29,35 @@
 #define CRIMILD_RENDERER_RENDER_GRAPH_
 
 #include "Foundation/SharedObject.hpp"
+#include "Foundation/NamedObject.hpp"
 #include "Foundation/Containers/Digraph.hpp"
+#include "Foundation/Containers/Stack.hpp"
 #include "Coding/Codable.hpp"
+#include "Rendering/RenderTarget.hpp"
 
 namespace crimild {
 
 	class Renderer;
 	class RenderQueue;
+    class FrameBufferObject;
 
 	namespace rendergraph {
 
 		class RenderGraphPass;
-		class RenderGraphResource;
+		class RenderGraphAttachment;
 
 		class RenderGraph : public coding::Codable {
 			CRIMILD_IMPLEMENT_RTTI( crimild::rendergraph::RenderGraph )
 
 		public:
-			class Node : public Codable {
+			class Node : public Codable, public NamedObject {
 			public:
 				enum class Type {
 					PASS,
-					RESOURCE,
+					ATTACHMENT,
 				};
 
-				Node( void ) { }
+                Node( std::string name ) : NamedObject( name ) { }
 				virtual ~Node( void ) { }
 
 				virtual Type getType( void ) const = 0;
@@ -74,16 +78,29 @@ namespace crimild {
 
 			void eachPass( std::function< void( RenderGraphPass * ) > const &callback );
 
-			RenderGraphResource *createResource( void );
-			void eachResource( std::function< void( RenderGraphResource * ) > const &callback );
+            RenderGraphAttachment *createAttachment( std::string name, crimild::Int64 hints );
+			void eachAttachment( std::function< void( RenderGraphAttachment * ) > const &callback );
 
-			void read( RenderGraphPass *pass, containers::Array< RenderGraphResource * > const &resources );
-			void write( RenderGraphPass *pass, containers::Array< RenderGraphResource * > const &resources );			 
+			void read( RenderGraphPass *pass, containers::Array< RenderGraphAttachment * > const &attachments );
+			void write( RenderGraphPass *pass, containers::Array< RenderGraphAttachment * > const &attachments );			 
 
 		private:
 			containers::Digraph< Node * > _graph;
+            containers::Digraph< Node * > _reversedGraph;
 			containers::Array< SharedPointer< RenderGraphPass >> _passes;
-			containers::Array< SharedPointer< RenderGraphResource >> _resources;
+			containers::Array< SharedPointer< RenderGraphAttachment >> _attachments;
+
+		public:
+			SharedPointer< FrameBufferObject > createFBO( containers::Array< RenderGraphAttachment * > const &attachments );
+
+		private:
+            SharedPointer< RenderTarget > getRenderTarget( crimild::Int64 hints, const Vector2i &screenSize );
+
+            void resetAttachment( RenderGraphAttachment *attachment );
+            void releaseAttachment( RenderGraphAttachment *attachment );
+
+        private:
+            containers::Map< crimild::Int64, containers::Stack< SharedPointer< RenderTarget >>> _renderTargetCache;
 
 		public:
 			void compile( void );

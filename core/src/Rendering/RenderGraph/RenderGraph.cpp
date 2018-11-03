@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2013-2018, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -27,11 +27,13 @@
 
 #include "RenderGraph.hpp"
 #include "RenderGraphPass.hpp"
-#include "RenderGraphResource.hpp"
+#include "RenderGraphAttachment.hpp"
 
 #include "Foundation/Containers/List.hpp"
 #include "Foundation/Containers/Map.hpp"
 #include "Exceptions/RuntimeException.hpp"
+#include "Rendering/Renderer.hpp"
+#include "Rendering/FrameBufferObject.hpp"
 
 using namespace crimild;
 using namespace crimild::containers;
@@ -55,36 +57,109 @@ void RenderGraph::eachPass( std::function< void( RenderGraphPass * ) > const &ca
 	});
 }
 
-RenderGraphResource *RenderGraph::createResource( void )
+RenderGraphAttachment *RenderGraph::createAttachment( std::string name, crimild::Int64 hints )
 {
-	auto r = crimild::alloc< RenderGraphResource >();
-	_resources.add( r );
+	auto r = crimild::alloc< RenderGraphAttachment >( name, hints );
+	_attachments.add( r );
 	return crimild::get_ptr( r );
 }
 
-void RenderGraph::eachResource( std::function< void( RenderGraphResource * ) > const &callback )
+void RenderGraph::eachAttachment( std::function< void( RenderGraphAttachment * ) > const &callback )
 {
-	_resources.each( [ callback ]( SharedPointer< RenderGraphResource > const &r ) {
+	_attachments.each( [ callback ]( SharedPointer< RenderGraphAttachment > const &r ) {
 		callback( crimild::get_ptr( r ) );
 	});
 }
 
-void RenderGraph::read( RenderGraphPass *pass, Array< RenderGraphResource * > const &resources )
+void RenderGraph::read( RenderGraphPass *pass, Array< RenderGraphAttachment * > const &attachments )
 {
-	resources.each( [ this, pass ]( RenderGraphResource *r ) {
-		if ( r != nullptr ) {
-			_graph.addEdge( r, pass );
+	attachments.each( [ this, pass ]( RenderGraphAttachment *att ) {
+		if ( att != nullptr ) {
+			_graph.addEdge( att, pass );
 		}
 	});
 }
 
-void RenderGraph::write( RenderGraphPass *pass, Array< RenderGraphResource * > const &resources )
+void RenderGraph::write( RenderGraphPass *pass, Array< RenderGraphAttachment * > const &attachments )
 {
-	resources.each( [ this, pass ]( RenderGraphResource *r ) {
-		if ( r != nullptr ) {
-			_graph.addEdge( pass, r );
+	attachments.each( [ this, pass ]( RenderGraphAttachment *att ) {
+		if ( att != nullptr ) {
+			_graph.addEdge( pass, att );
 		}
 	});
+}
+
+SharedPointer< FrameBufferObject > RenderGraph::createFBO( containers::Array< RenderGraphAttachment * > const &attachments )
+{
+	auto renderer = Renderer::getInstance();
+	auto screenWidth = renderer->getScreenBuffer()->getWidth();
+	auto screenHeight = renderer->getScreenBuffer()->getHeight();
+	auto screenSize = Vector2i( screenWidth, screenHeight );
+	
+	crimild::Int32 fboWidth = 0;
+	crimild::Int32 fboHeight = 0;
+
+	Map< std::string, SharedPointer< RenderTarget >> targets;
+
+	attachments.each( [ this, &fboWidth, &fboHeight, &targets, screenSize ]( RenderGraphAttachment *att, crimild::Size index ) {
+		if ( att == nullptr ) {
+			return;
+		}
+
+        if ( att->getRenderTarget() == nullptr ) {
+            auto hints = att->getHints();
+            auto target = getRenderTarget( hints, screenSize );
+            att->setRenderTarget( crimild::get_ptr( target ) );
+
+            fboWidth = Numericf::max( target->getWidth(), fboWidth );
+            fboHeight = Numericf::max( target->getHeight(), fboHeight );
+        }
+
+        auto target = crimild::retain( att->getRenderTarget() );
+		std::stringstream ss;
+		ss << index;
+		targets.insert( ss.str(), target );
+
+	});
+	
+	auto fbo = crimild::alloc< FrameBufferObject >( fboWidth, fboHeight );
+	fbo->getRenderTargets() = targets;
+	return fbo;
+}
+
+SharedPointer< RenderTarget > RenderGraph::getRenderTarget( crimild::Int64 hints, const Vector2i &screenSize )
+{
+    if ( _renderTargetCache.contains( hints ) && _renderTargetCache[ hints ].size() > 0 ) {
+        return _renderTargetCache[ hints ].pop();
+    }
+
+    Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Creating render target with hints ", hints );
+
+    crimild::Bool renderOnly = hints & RenderGraphAttachment::Hint::RENDER_ONLY;
+    crimild::Bool useFloatTexture = hints & RenderGraphAttachment::Hint::HDR;
+
+    auto output = renderOnly ? RenderTarget::Output::RENDER : RenderTarget::Output::RENDER_AND_TEXTURE;
+
+    auto type = RenderTarget::Type::COLOR_RGBA;
+    if ( hints & RenderGraphAttachment::Hint::FORMAT_DEPTH ) {
+        if ( hints & RenderGraphAttachment::Hint::HDR ) {
+            type = RenderTarget::Type::DEPTH_32;
+        } else {
+            type = RenderTarget::Type::DEPTH_24;
+        }
+    }
+    else if ( hints & RenderGraphAttachment::Hint::FORMAT_RGB ) {
+        type = RenderTarget::Type::COLOR_RGB;
+    }
+
+    auto size = screenSize;
+    if ( hints & RenderGraphAttachment::Hint::SIZE_SCREEN_10 ) size = screenSize / 10;
+    else if ( hints & RenderGraphAttachment::Hint::SIZE_SCREEN_25 ) size = screenSize / 4;
+    else if ( hints & RenderGraphAttachment::Hint::SIZE_SCREEN_50 ) size = screenSize / 2;
+
+    auto target = crimild::alloc< RenderTarget >( type, output, size.x(), size.y(), useFloatTexture );
+
+    return target;
 }
 
 void RenderGraph::compile( void )
@@ -94,15 +169,35 @@ void RenderGraph::compile( void )
 		pass->setup( this );
 	});
 
+    _reversedGraph = _graph.reverse();
 	auto sorted = _graph.sort();
 
 	_sortedPasses.clear();
 	sorted.each( [ this ]( RenderGraph::Node *node ) {
-        std::cout << node->getClassName() << std::endl;
 		if ( node->getType() == RenderGraph::Node::Type::PASS ) {
 			_sortedPasses.add( static_cast< RenderGraphPass * >( node ) );
 		}
 	});
+
+    std::stringstream ss;
+
+    _sortedPasses.each( [ this, &ss ]( RenderGraphPass *pass ) {
+        ss << "Pass: " << pass->getName() << "\n";
+
+        ss << "\tInputs: ";
+        _reversedGraph.eachEdge( pass, [ &ss ]( Node *attachment ) {
+            ss << attachment->getName() << ", ";
+        });
+        ss << "\n";
+
+        ss << "\tOutputs: ";
+        _graph.eachEdge( pass, [ &ss ]( Node *attachment ) {
+            ss << attachment->getName() << ", ";
+        });
+        ss << "\n";
+    });
+
+    Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Render Graph compiled:\n", ss.str() );
 }
 
 void RenderGraph::execute( Renderer *renderer, RenderQueue *renderQueue )
@@ -111,8 +206,32 @@ void RenderGraph::execute( Renderer *renderer, RenderQueue *renderQueue )
 		compile();
 	}
 	
-	_sortedPasses.each( [ renderer, renderQueue ]( RenderGraphPass *pass ) {
-		pass->execute( renderer, renderQueue );
+	_sortedPasses.each( [ this, renderer, renderQueue ]( RenderGraphPass *pass ) {
+		pass->execute( this, renderer, renderQueue );
+
+        _graph.eachEdge( pass, [ this ]( Node *output ) {
+            resetAttachment( static_cast< RenderGraphAttachment * >( output ) );
+        });
+
+        _reversedGraph.eachEdge( pass, [ this ]( Node *input ) {
+            releaseAttachment( static_cast< RenderGraphAttachment * >( input ) );
+        });
 	});
+}
+
+void RenderGraph::resetAttachment( RenderGraphAttachment *attachment )
+{
+    attachment->setReaderCount( _graph.getEdgeCount( attachment ) );
+}
+
+void RenderGraph::releaseAttachment( RenderGraphAttachment *attachment )
+{
+    attachment->setReaderCount( attachment->getReaderCount() - 1 );
+    if ( attachment->getReaderCount() <= 0 ) {
+        auto hints = attachment->getHints();
+        auto target = crimild::retain( attachment->getRenderTarget() );
+        _renderTargetCache[ hints ].push( target );
+        attachment->setRenderTarget( nullptr );
+    }
 }
 

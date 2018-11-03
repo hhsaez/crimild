@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, H. Hernan Saez
+ * Copyright (c) 2013-2018, Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,49 +25,33 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_RENDERER_RENDER_GRAPH_RESOURCE_
-#define CRIMILD_RENDERER_RENDER_GRAPH_RESOURCE_
+#include "RenderGraphAttachment.hpp"
 
-#include "RenderGraph.hpp"
+#include "Rendering/Texture.hpp"
+#include "Rendering/RenderTarget.hpp"
 
-namespace crimild {
+using namespace crimild::rendergraph;
 
-	class Texture;
-	class RenderTarget;
-
-	namespace rendergraph {
-
-		/**
-		   \todo Rename to Attachment
-
-		   \brief A descriptor for a resource used for a render pass
-		 */
-		class RenderGraphResource : public RenderGraph::Node {
-			CRIMILD_IMPLEMENT_RTTI( crimild::rendergraph::RenderGraphResource )
-			
-		public:
-			RenderGraphResource( void );
-			virtual ~RenderGraphResource ( void );
-
-			RenderGraph::Node::Type getType( void ) const override { return RenderGraph::Node::Type::RESOURCE; }
-
-		public:
-			void setTexture( Texture *texture );
-			Texture *getTexture( void ) { return crimild::get_ptr( _texture ); }
-
-			void setRenderTarget( RenderTarget *target );
-			RenderTarget *getRenderTarget( void ) { return crimild::get_ptr( _renderTarget ); }
-
-		private:
-			SharedPointer< Texture > _texture;
-			SharedPointer< RenderTarget > _renderTarget;
-		};
-
-	}
+RenderGraphAttachment::RenderGraphAttachment( std::string name, crimild::Int64 hints )
+    : RenderGraph::Node( name ),
+      _hints( hints )
+{
 
 }
 
-#endif
+RenderGraphAttachment::~RenderGraphAttachment( void )
+{
 
+}
+
+void RenderGraphAttachment::setTexture( Texture *texture )
+{
+	_texture = crimild::retain( texture );
+}
+
+void RenderGraphAttachment::setRenderTarget( RenderTarget *target )
+{
+	_renderTarget = crimild::retain( target );
+}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2013-2018, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -38,13 +38,11 @@ namespace crimild {
 
 	namespace rendergraph {
 
-		class RenderGraphResource;
-
 		class RenderGraphPass : public RenderGraph::Node {
 			CRIMILD_IMPLEMENT_RTTI( crimild::rendergraph::RenderGraphPass )
 			
 		protected:
-			RenderGraphPass( void );
+            RenderGraphPass( std::string name );
 
 		public:
 			virtual ~RenderGraphPass( void );
@@ -53,7 +51,7 @@ namespace crimild {
 
 		public:
 			virtual void setup( RenderGraph *graph ) = 0;
-			virtual void execute( Renderer *renderer, RenderQueue *renderQueue ) = 0;
+			virtual void execute( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue ) = 0;
 		};
 
 	}
