@@ -467,7 +467,7 @@ namespace crimild {
 	template< typename PRECISION, typename V >
 	Vector< 2, PRECISION > operator/( const Vector< 2, PRECISION > &u, V scalar )
 	{
-		V invS = 1.0 / scalar;
+        crimild::Real64 invS = 1.0 / scalar;
 
 		Vector< 2, PRECISION > result;
 		result._data[ 0 ] = u._data[ 0 ] * invS;
@@ -478,7 +478,7 @@ namespace crimild {
 	template< typename PRECISION, typename V >
 	Vector< 3, PRECISION > operator/( const Vector< 3, PRECISION > &u, V scalar )
 	{
-		V invS = 1.0 / scalar;
+		crimild::Real64 invS = 1.0 / scalar;
 
 		Vector< 3, PRECISION > result;
 		result._data[ 0 ] = u._data[ 0 ] * invS;
@@ -490,7 +490,7 @@ namespace crimild {
 	template< typename PRECISION, typename V >
 	Vector< 4, PRECISION > operator/( const Vector< 4, PRECISION > &u, V scalar )
 	{
-		V invS = 1.0 / scalar;
+		crimild::Real64 invS = 1.0 / scalar;
 
 		Vector< 4, PRECISION > result;
 		result._data[ 0 ] = u._data[ 0 ] * invS;
@@ -618,7 +618,7 @@ namespace crimild {
 	template< typename PRECISION, typename U >
 	Vector< 2, PRECISION > &operator/=( Vector< 2, PRECISION > &u, U scalar )
 	{
-		U invS = 1.0 / scalar;
+		crimild::Real64 invS = 1.0 / scalar;
 		u._data[ 0 ] *= invS;
 		u._data[ 1 ] *= invS;
 		return u;
@@ -627,7 +627,7 @@ namespace crimild {
 	template< typename PRECISION, typename U >
 	Vector< 3, PRECISION > &operator/=( Vector< 3, PRECISION > &u, U scalar )
 	{
-		U invS = 1.0 / scalar;
+		crimild::Real64 invS = 1.0 / scalar;
 		u._data[ 0 ] *= invS;
 		u._data[ 1 ] *= invS;
 		u._data[ 2 ] *= invS;
@@ -637,7 +637,7 @@ namespace crimild {
 	template< typename PRECISION, typename U >
 	Vector< 4, PRECISION > &operator/=( Vector< 4, PRECISION > &u, U scalar )
 	{
-		U invS = 1.0 / scalar;
+		crimild::Real64 invS = 1.0 / scalar;
 		u._data[ 0 ] *= invS;
 		u._data[ 1 ] *= invS;
 		u._data[ 2 ] *= invS;
