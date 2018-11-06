@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2018, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -118,8 +118,6 @@ void FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
         int colorAttachmentOffset = 0;
         fbo->getRenderTargets().each( [ this, &colorAttachmentOffset ]( std::string rtName, SharedPointer< RenderTarget > &target ) {
 
-            getRenderer()->bindRenderTarget( crimild::get_ptr( target ) );
-
 			GLenum attachment = GL_INVALID_ENUM;
 			switch ( target->getType() ) {
 				case RenderTarget::Type::DEPTH_32:
@@ -138,12 +136,21 @@ void FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
 					break;
 			}
 
-			glFramebufferRenderbuffer( GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, target->getCatalogId() );
-            if ( target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
-                glFramebufferTexture2D( GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, target->getTexture()->getCatalogId(), 0 );
-            }
+			if ( target->getOutput() & RenderTarget::Output::RENDER ) {
+				if ( target->getCatalog() == nullptr ) {
+					getRenderer()->getRenderTargetCatalog()->load( crimild::get_ptr( target ) );
+				}
+				
+				glFramebufferRenderbuffer( GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, target->getCatalogId() );
+			}
 
-            getRenderer()->unbindRenderTarget( crimild::get_ptr( target ) );
+			if ( target->getOutput() & RenderTarget::Output::TEXTURE ) {
+				auto texture = target->getTexture();
+				if ( texture->getCatalog() == nullptr ) {
+					getRenderer()->getTextureCatalog()->load( texture );
+				}
+                glFramebufferTexture2D( GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, target->getTexture()->getCatalogId(), 0 );
+			}
         });
 
         GLenum status = glCheckFramebufferStatus( GL_FRAMEBUFFER );

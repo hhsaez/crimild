@@ -51,19 +51,23 @@ namespace crimild {
             DEPTH_24,
             DEPTH_32
         };
-        
-        enum class Output {
-            RENDER,
-            RENDER_AND_TEXTURE
+
+        class Output {
+        public:
+            enum {
+                RENDER = 1 << 0,
+                TEXTURE = 1 << 1,
+                RENDER_AND_TEXTURE = RENDER | TEXTURE,
+            };
         };
-        
+
     public:
-        RenderTarget( Type type, Output output, int width, int height );
-        RenderTarget( Type type, Output output, int width, int height, bool floatTextureHint );
+        RenderTarget( Type type, crimild::Int8 output, int width, int height );
+        RenderTarget( Type type, crimild::Int8 output, int width, int height, bool floatTextureHint );
         virtual ~RenderTarget( void );
         
         Type getType( void ) const { return _type; }
-        Output getOutput( void ) const { return _output; }
+        crimild::Int8 getOutput( void ) const { return _output; }
         
         int getWidth( void ) const { return _width; }
         int getHeight( void ) const { return _height; }
@@ -74,7 +78,7 @@ namespace crimild {
         
     private:
         Type _type;
-        Output _output;
+        crimild::Int8 _output;
         int _width;
         int _height;
         SharedPointer< Texture > _texture;

@@ -138,7 +138,7 @@ SharedPointer< RenderTarget > RenderGraph::getRenderTarget( crimild::Int64 hints
     crimild::Bool renderOnly = hints & RenderGraphAttachment::Hint::RENDER_ONLY;
     crimild::Bool useFloatTexture = hints & RenderGraphAttachment::Hint::HDR;
 
-    auto output = renderOnly ? RenderTarget::Output::RENDER : RenderTarget::Output::RENDER_AND_TEXTURE;
+    auto output = renderOnly ? RenderTarget::Output::RENDER : RenderTarget::Output::TEXTURE;
 
     auto type = RenderTarget::Type::COLOR_RGBA;
     if ( hints & RenderGraphAttachment::Hint::FORMAT_DEPTH ) {
@@ -156,6 +156,8 @@ SharedPointer< RenderTarget > RenderGraph::getRenderTarget( crimild::Int64 hints
     if ( hints & RenderGraphAttachment::Hint::SIZE_SCREEN_10 ) size = screenSize / 10;
     else if ( hints & RenderGraphAttachment::Hint::SIZE_SCREEN_25 ) size = screenSize / 4;
     else if ( hints & RenderGraphAttachment::Hint::SIZE_SCREEN_50 ) size = screenSize / 2;
+    else if ( hints & RenderGraphAttachment::Hint::SIZE_SCREEN_150 ) size = screenSize * 1.5;
+    else if ( hints & RenderGraphAttachment::Hint::SIZE_SCREEN_200 ) size = screenSize * 2;
 
     auto target = crimild::alloc< RenderTarget >( type, output, size.x(), size.y(), useFloatTexture );
 

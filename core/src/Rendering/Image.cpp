@@ -42,6 +42,16 @@ Image::Image( void )
 	_bpp = 0;
 }
 
+Image::Image( int width, int height, int bpp, PixelFormat format, PixelType pixelType )
+	: _width( width ),
+	  _height( height ),
+	  _bpp( bpp ),
+	  _pixelFormat( format ),
+	  _pixelType( pixelType )
+{
+
+}
+
 Image::Image( int width, int height, int bpp, const unsigned char *data, PixelFormat format )
 {
 	setData( width, height, bpp, data, format );
@@ -52,12 +62,13 @@ Image::~Image( void )
 	unload();
 }
 
-void Image::setData( int width, int height, int bpp, const unsigned char *data, PixelFormat format )
+void Image::setData( int width, int height, int bpp, const unsigned char *data, PixelFormat format, PixelType pixelType )
 {
 	_width = width;
 	_height = height;
 	_bpp = bpp;
     _pixelFormat = format;
+	_pixelType = pixelType;
 
 	int size = _width * _height * _bpp;
 	if ( size > 0 ) {

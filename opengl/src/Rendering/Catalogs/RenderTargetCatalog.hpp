@@ -58,7 +58,6 @@ namespace crimild {
 			Renderer *_renderer = nullptr;
 			
             std::list< int > _renderbufferIdsToDelete;
-            std::list< int > _textureIdsToDelete;
 		};
 
 	}

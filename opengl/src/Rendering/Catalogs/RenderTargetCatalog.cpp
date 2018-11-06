@@ -99,7 +99,6 @@ void RenderTargetCatalog::load( RenderTarget *target )
 	auto targetHeight = target->getHeight();
     
 	GLenum internalFormat = GL_INVALID_ENUM;
-	GLenum textureType = target->useFloatTexture() ? GL_FLOAT : GL_UNSIGNED_BYTE;
 	GLenum textureFormat = GL_RGBA;
 
 	switch ( target->getType() ) {
@@ -141,21 +140,6 @@ void RenderTargetCatalog::load( RenderTarget *target )
 		glBindRenderbuffer( GL_RENDERBUFFER, target->getCatalogId() );
 		glRenderbufferStorage( GL_RENDERBUFFER, internalFormat, targetWidth, targetHeight );
         glBindRenderbuffer( GL_RENDERBUFFER, 0 );
-		
-		if ( target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
-			// TODO: this should be handled by the TextureCatalog
-			GLuint textureId;
-			glGenTextures( 1, &textureId );
-			target->getTexture()->setCatalogInfo( getRenderer()->getTextureCatalog(), textureId );
-            
-			glBindTexture( GL_TEXTURE_2D, target->getTexture()->getCatalogId() );
-			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-			glTexImage2D( GL_TEXTURE_2D, 0, internalFormat, targetWidth, targetHeight, 0, textureFormat, textureType, 0 );
-            glBindTexture( GL_TEXTURE_2D, 0 );
-		}
 	}
 
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
@@ -169,12 +153,6 @@ void RenderTargetCatalog::unload( RenderTarget *rt )
 	if ( targetId > 0 ) {
 		_renderbufferIdsToDelete.push_back( targetId );
 	}
-	
-	if ( rt->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
-		int textureId = rt->getTexture()->getCatalogId();
-		_textureIdsToDelete.push_back( textureId );
-		rt->getTexture()->setCatalogInfo( nullptr, 0 );
-	}
 
 	Catalog< RenderTarget >::unload( rt );
 	
@@ -185,12 +163,6 @@ void RenderTargetCatalog::cleanup( void )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
-    for ( auto id : _textureIdsToDelete ) {
-        GLuint textureId = id;
-        glDeleteTextures( 1, &textureId );
-    }
-    _textureIdsToDelete.clear();
-    
     for ( auto id : _renderbufferIdsToDelete ) {
         GLuint renderbufferId = id;
         glDeleteRenderbuffers( 1, &renderbufferId );
