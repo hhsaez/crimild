@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, H. Hernan Saez
+ * Copyright (c) 2002-present, H. Hernán Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -110,16 +110,16 @@ SharedPointer< FrameBufferObject > RenderGraph::createFBO( containers::Array< Re
             auto hints = att->getHints();
             auto target = getRenderTarget( hints, screenSize );
             att->setRenderTarget( crimild::get_ptr( target ) );
-
-            fboWidth = Numericf::max( target->getWidth(), fboWidth );
-            fboHeight = Numericf::max( target->getHeight(), fboHeight );
         }
 
         auto target = crimild::retain( att->getRenderTarget() );
+
+        fboWidth = Numericf::max( target->getWidth(), fboWidth );
+        fboHeight = Numericf::max( target->getHeight(), fboHeight );
+
 		std::stringstream ss;
 		ss << index;
 		targets.insert( ss.str(), target );
-
 	});
 	
 	auto fbo = crimild::alloc< FrameBufferObject >( fboWidth, fboHeight );
@@ -166,6 +166,12 @@ SharedPointer< RenderTarget > RenderGraph::getRenderTarget( crimild::Int64 hints
 
 void RenderGraph::compile( void )
 {
+    auto output = getOutput();
+    if ( output == nullptr ) {
+        CRIMILD_LOG_ERROR( "No output attachment provided for render graph" );
+        return;
+    }
+
 	// make sure all connections are set
 	_passes.each( [ this ]( SharedPointer< RenderGraphPass > const &pass ) {
 		pass->setup( this );
@@ -173,9 +179,17 @@ void RenderGraph::compile( void )
 
     _reversedGraph = _graph.reverse();
 	auto sorted = _graph.sort();
+    auto connected = _reversedGraph.connected( getOutput() );
+    connected.insert( output );
 
 	_sortedPasses.clear();
-	sorted.each( [ this ]( RenderGraph::Node *node ) {
+	sorted.each( [ this, &connected ]( RenderGraph::Node *node ) {
+        if ( !connected.contains( node ) ) {
+            // Discard the node since it's not connected with the
+            // final output for this render graph.
+			CRIMILD_LOG_DEBUG( "Discarding ", node->getName() );
+            return;
+        }
 		if ( node->getType() == RenderGraph::Node::Type::PASS ) {
 			_sortedPasses.add( static_cast< RenderGraphPass * >( node ) );
 		}
@@ -223,11 +237,19 @@ void RenderGraph::execute( Renderer *renderer, RenderQueue *renderQueue )
 
 void RenderGraph::resetAttachment( RenderGraphAttachment *attachment )
 {
+    if ( getOutput() == attachment ) {
+        return;
+    }
+
     attachment->setReaderCount( _graph.getEdgeCount( attachment ) );
 }
 
 void RenderGraph::releaseAttachment( RenderGraphAttachment *attachment )
 {
+    if ( getOutput() == attachment ) {
+        return;
+    }
+
     attachment->setReaderCount( attachment->getReaderCount() - 1 );
     if ( attachment->getReaderCount() <= 0 ) {
         auto hints = attachment->getHints();
@@ -235,5 +257,10 @@ void RenderGraph::releaseAttachment( RenderGraphAttachment *attachment )
         _renderTargetCache[ hints ].push( target );
         attachment->setRenderTarget( nullptr );
     }
+}
+
+void RenderGraph::setOutput( RenderGraphAttachment *output )
+{
+	_output = crimild::retain( output );
 }
 

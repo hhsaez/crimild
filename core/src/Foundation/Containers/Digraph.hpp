@@ -32,6 +32,7 @@
 #include "Set.hpp"
 #include "List.hpp"
 #include "Array.hpp"
+#include "Queue.hpp"
 
 #include "Foundation/Types.hpp"
 #include "Exceptions/RuntimeException.hpp"
@@ -150,6 +151,33 @@ namespace crimild {
 				return result;
 			}
 
+			Set< VERTEX_TYPE > connected( VERTEX_TYPE source )
+			{
+				Set< VERTEX_TYPE > result;
+				dfs( source, result );
+				return result;
+			}
+
+			Set< VERTEX_TYPE > connected( Array< VERTEX_TYPE > const &sources )
+			{
+				Set< VERTEX_TYPE > result;
+				sources.each( [ this, &result ]( VERTEX_TYPE const &v ) {
+					if ( !result.contains( v ) ) {
+						dfs( v, result );
+					}
+				});
+				return result;
+			}
+
+			void add( Digraph &other )
+			{
+				other.eachVertex( [ this, &other ]( VERTEX_TYPE const &v ) {
+					other.eachEdge( v, [ this, &v ]( VERTEX_TYPE const &w ) {
+						addEdge( v, w );
+					});
+				});
+			}
+
 			Digraph reverse( void )
 			{
 				Digraph r;
@@ -160,6 +188,22 @@ namespace crimild {
 				});
 				
 				return r;
+			}
+
+		private:
+			void dfs( VERTEX_TYPE const &s, Set< VERTEX_TYPE > &r )
+			{
+				Queue< VERTEX_TYPE > frontier;
+				frontier.push( s );
+				while ( !frontier.empty() ) {
+					auto v = frontier.pop();
+					eachEdge( v, [ this, &frontier, &r ]( VERTEX_TYPE const &w ) {
+						if ( !r.contains( w ) && !frontier.contains( w ) ) {
+							r.insert( w );
+							frontier.push( w );
+						}
+					});
+				}
 			}
 
 		private:

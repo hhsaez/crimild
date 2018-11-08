@@ -108,6 +108,13 @@ namespace crimild {
 
 		private:
 			containers::Array< RenderGraphPass * > _sortedPasses;
+
+		public:
+			void setOutput( RenderGraphAttachment *attachment );
+			RenderGraphAttachment *getOutput( void ) { return crimild::get_ptr( _output ); }
+
+		private:
+			SharedPointer< RenderGraphAttachment > _output;
 		};
 
 	}

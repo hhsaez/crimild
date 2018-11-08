@@ -84,3 +84,93 @@ TEST( DigraphTest, sort )
 	});
 }
 
+TEST( DigraphTest, edgeCount )
+{
+	auto d = Digraph< int >();
+	d.addEdge( 1, 2 );
+	d.addEdge( 1, 3 );
+	d.addEdge( 2, 4 );
+	d.addEdge( 3, 4 );
+	d.addEdge( 5, 6 );
+
+	EXPECT_EQ( 2, d.getEdgeCount( 1 ) );
+	EXPECT_EQ( 1, d.getEdgeCount( 2 ) );
+	EXPECT_EQ( 0, d.getEdgeCount( 6 ) );
+}
+
+TEST( DigraphTest, outDegree )
+{
+	auto d = Digraph< int >();
+	d.addEdge( 1, 2 );
+	d.addEdge( 1, 3 );
+	d.addEdge( 2, 4 );
+	d.addEdge( 3, 4 );
+	d.addEdge( 5, 6 );
+
+	EXPECT_EQ( 2, d.outDegree( 1 ) );
+	EXPECT_EQ( 1, d.outDegree( 2 ) );
+	EXPECT_EQ( 0, d.outDegree( 6 ) );
+}
+
+TEST( DigraphTest, connected )
+{
+	auto d = Digraph< int >();
+	d.addEdge( 1, 2 );
+	d.addEdge( 1, 3 );
+	d.addEdge( 2, 4 );
+	d.addEdge( 3, 4 );
+	d.addEdge( 5, 6 );
+
+	auto connected = d.connected( 2 );
+
+	EXPECT_FALSE( connected.contains( 1 ) );
+	EXPECT_FALSE( connected.contains( 3 ) );
+	EXPECT_TRUE( connected.contains( 4 ) );
+	EXPECT_FALSE( connected.contains( 5 ) );
+	EXPECT_FALSE( connected.contains( 6 ) );
+
+	d.addEdge( 4, 5 );
+
+	EXPECT_TRUE( d.connected( 2 ).contains( 6 ) );
+}
+
+TEST( DigraphTest, multiConnected )
+{
+	auto d = Digraph< int >();
+	d.addEdge( 1, 2 );
+	d.addEdge( 1, 3 );
+	d.addEdge( 2, 4 );
+	d.addEdge( 3, 4 );
+	d.addEdge( 5, 6 );
+
+	auto connected = d.connected( { 2, 5 } );
+
+	EXPECT_FALSE( connected.contains( 1 ) );
+	EXPECT_FALSE( connected.contains( 2 ) );
+	EXPECT_FALSE( connected.contains( 3 ) );
+	EXPECT_TRUE( connected.contains( 4 ) );
+	EXPECT_FALSE( connected.contains( 5 ) );
+	EXPECT_TRUE( connected.contains( 6 ) );
+}
+
+TEST( DigraphTest, merge )
+{
+	auto d1 = Digraph< int >();
+	d1.addEdge( 1, 2 );
+	d1.addEdge( 1, 3 );
+
+	auto d2 = Digraph< int >();
+	d2.addEdge( 4, 5 );
+	d2.addEdge( 4, 6 );
+
+	auto merged = Digraph< int >();
+	merged.add( d1 );
+	merged.add( d2 );
+
+	EXPECT_EQ( 2, merged.getEdgeCount( 1 ) );
+	EXPECT_FALSE( merged.connected( 1 ).contains( 6 ) );
+
+	merged.addEdge( 3, 4 );
+
+	EXPECT_TRUE( merged.connected( 1 ).contains( 6 ) );
+}
