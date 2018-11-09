@@ -34,6 +34,7 @@ namespace crimild {
     
     /**
         \brief A render pass that compute shadow maps for a scene
+		\deprecated Render passes are now implemented using render graphs.
     */
 	class ShadowRenderPass : public RenderPass {
 	public:

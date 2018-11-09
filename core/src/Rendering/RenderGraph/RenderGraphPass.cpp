@@ -29,7 +29,7 @@
 
 using namespace crimild::rendergraph;
 
-RenderGraphPass::RenderGraphPass( std::string name )
+RenderGraphPass::RenderGraphPass( RenderGraph *, std::string name )
     : RenderGraph::Node( name )
 {
 

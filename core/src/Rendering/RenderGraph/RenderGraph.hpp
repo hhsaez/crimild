@@ -70,7 +70,7 @@ namespace crimild {
 			template< typename PASS_TYPE, typename... Args >
 			PASS_TYPE *createPass( Args &&... args )
 			{
-				auto pass = crimild::alloc< PASS_TYPE >( std::forward< Args >( args )... );
+				auto pass = crimild::alloc< PASS_TYPE >( this, std::forward< Args >( args )... );
 				_passes.add( pass );
 				_graph.addVertex( crimild::get_ptr( pass ) );
 				return crimild::get_ptr( pass );

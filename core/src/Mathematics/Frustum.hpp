@@ -151,13 +151,12 @@ namespace crimild {
 
 		Matrix< 4, PRECISION > computeOrthographicMatrix( void ) const
 		{
+			float left = getRMin();
+			float right = getRMax();
+			float bottom = getUMin();
+			float top = getUMax();
             float near = getDMin();
             float far = getDMax();
-            float fov = getRMax() / getUMax();
-			float right = fov;
-			float left = -fov;
-			float top = 1.0f;
-			float bottom = -1.0f;
 
             Matrix< 4, PRECISION > orthographicMatrix;
             orthographicMatrix[ 0 ] = ( 2.0f / ( right - left ) );
@@ -167,13 +166,13 @@ namespace crimild {
 
             orthographicMatrix[ 4 ] = 0;
             orthographicMatrix[ 5 ] = ( 2.0f / ( top - bottom ) );
-            orthographicMatrix[ 6 ] = - ( top + bottom ) / ( top - bottom );
-            orthographicMatrix[ 7 ] = 0;
+            orthographicMatrix[ 6 ] = 0;
+            orthographicMatrix[ 7 ] = - ( top + bottom ) / ( top - bottom );
 
             orthographicMatrix[ 8 ] = 0;
             orthographicMatrix[ 9 ] = 0;
             orthographicMatrix[ 10 ] = ( -2.0f / ( far - near ) );
-            orthographicMatrix[ 11 ] = ( far + near ) / ( far - near );
+            orthographicMatrix[ 11 ] = -( far + near ) / ( far - near );
 
             orthographicMatrix[ 12 ] = 0;
             orthographicMatrix[ 13 ] = 0;

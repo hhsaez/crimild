@@ -34,6 +34,7 @@ namespace crimild {
     
     /**
         \brief A render pass for post-processing
+		\deprecated Render passes are now implemented using render graphs.
     */
 	class PostRenderPass : public RenderPass {
 	public:

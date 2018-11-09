@@ -34,6 +34,7 @@ namespace crimild {
     
     /**
         \brief A render pass for rendering a scene in an offscreen buffer
+		\deprecated Render passes are now implemented using render graphs.
     */
 	class OffscreenRenderPass : public RenderPass {
 	public:

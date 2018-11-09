@@ -42,6 +42,9 @@
 
 namespace crimild {
     
+	/*
+	  \deprecated Render passes are now implemented using render graphs.
+	 */
 	class StandardRenderPass : public RenderPass {
 	public:
 		StandardRenderPass( void );

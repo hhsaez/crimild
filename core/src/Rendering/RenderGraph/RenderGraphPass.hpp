@@ -42,7 +42,7 @@ namespace crimild {
 			CRIMILD_IMPLEMENT_RTTI( crimild::rendergraph::RenderGraphPass )
 			
 		protected:
-            RenderGraphPass( std::string name );
+            RenderGraphPass( RenderGraph *graph, std::string name );
 
 		public:
 			virtual ~RenderGraphPass( void );

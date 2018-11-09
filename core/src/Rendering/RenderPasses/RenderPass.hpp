@@ -46,6 +46,9 @@ namespace crimild {
     class Texture;
     class FrameBufferObject;
 
+	/*
+	  \deprecated Render passes are now implemented using render graphs.
+	 */
 	class RenderPass : public SharedObject {
     public:
         static constexpr const char *G_BUFFER_NAME = "G_BUFFER";
