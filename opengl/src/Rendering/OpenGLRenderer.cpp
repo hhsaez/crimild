@@ -46,6 +46,7 @@
 #include "Programs/UnlitVertexColorShaderProgram.hpp"
 #include "Programs/ParticleSystemShaderProgram.hpp"
 #include "Programs/DebugDepthShaderProgram.hpp"
+#include "Programs/DepthPassShaderProgram.hpp"
 
 #include "Rendering/ImageEffects/ColorTintImageEffect.hpp"
 
@@ -78,6 +79,9 @@ OpenGLRenderer::OpenGLRenderer( SharedPointer< FrameBufferObject > const &screen
 	}
 
 	// TODO: Move these calls to 'configure()'?
+    setShaderProgram( Renderer::SHADER_PROGRAM_RENDER_PASS_FORWARD_LIGHTING, crimild::alloc< StandardShaderProgram >() );
+    setShaderProgram( Renderer::SHADER_PROGRAM_RENDER_PASS_DEPTH, crimild::alloc< DepthPassShaderProgram >() );
+	
     setShaderProgram( Renderer::SHADER_PROGRAM_RENDER_PASS_STANDARD, crimild::alloc< StandardShaderProgram >() );
     
     setShaderProgram( Renderer::SHADER_PROGRAM_LIT_TEXTURE, crimild::alloc< StandardShaderProgram >() );

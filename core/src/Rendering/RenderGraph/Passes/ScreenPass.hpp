@@ -25,11 +25,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_RENDER_GRAPH_PASSES_FORWARD_LIGTHING_
-#define CRIMILD_CORE_RENDER_GRAPH_PASSES_FORWARD_LIGTHING_
+#ifndef CRIMILD_CORE_RENDER_GRAPH_PASSES_SCREEN_
+#define CRIMILD_CORE_RENDER_GRAPH_PASSES_SCREEN_
 
 #include "Rendering/RenderGraph/RenderGraphPass.hpp"
-#include "Rendering/RenderQueue.hpp"
+#include "Mathematics/Matrix.hpp"
 
 namespace crimild {
 
@@ -38,45 +38,34 @@ namespace crimild {
 		namespace passes {
 
 			/**
-			   \brief Computing lighting for renderables 
+			   \brief Render objects projecting them to the screen
 
-			   This also serves as a render pass for objects that cannot be
-			   rendered on other passes.
+			   Uses an orthographic matrix to project objects onto the
+			   screen. 
 
-			   \remarks Try to avoid this pass, since it's probably not the
-			   fastest way to render objects. Other passes are more optimized.
+			   \remarks Objects should be scaled to fit the visible rect
+			   [(-aspect, aspect), (1.0, -1.0)]
+
+			   \todo We may split this into several other passes, including
+			   depth pre-pass, opaque/transparent and custom shaders.
 			 */
-			class ForwardLightingPass : public RenderGraphPass {
-				CRIMILD_IMPLEMENT_RTTI( crimild::rendergraph::ForwardLightingPass )
-
-			private:
-				using RenderableTypeArray = containers::Array< RenderQueue::RenderableType >;
+			class ScreenPass : public RenderGraphPass {
+				CRIMILD_IMPLEMENT_RTTI( crimild::rendergraph::ScreenPass )
+				
 			public:
-				ForwardLightingPass( RenderGraph *graph, RenderableTypeArray const &renderableTypes );
-				virtual ~ForwardLightingPass( void );
-				
-				void setDepthInput( RenderGraphAttachment *attachment ) { _depthInput = attachment; }
-				RenderGraphAttachment *getDepthInput( void ) { return _depthInput; }
-				
-				void setColorOutput( RenderGraphAttachment *attachment ) { _colorOutput = attachment; }
-				RenderGraphAttachment *getColorOutput( void ) { return _colorOutput; }
+				ScreenPass( RenderGraph *graph );
+				virtual ~ScreenPass( void );
+			
+				void setOutput( RenderGraphAttachment *attachment ) { _output = attachment; }
+				RenderGraphAttachment *getOutput( void ) { return _output; }
 				
 				virtual void setup( rendergraph::RenderGraph *graph ) override;
 				virtual void execute( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue ) override;
 
 			private:
-				void render( Renderer *renderer, RenderQueue *renderQueue, RenderQueue::RenderableType renderableType );
-			
-			private:
-				RenderableTypeArray _renderableTypes;
-				SharedPointer< ShaderProgram > _program;
-				crimild::Int8 _clearFlags;
-				SharedPointer< DepthState > _depthState;
-				
-				RenderGraphAttachment *_depthInput = nullptr;
-				RenderGraphAttachment *_colorOutput = nullptr;
+				RenderGraphAttachment *_depthOutput = nullptr;
+				RenderGraphAttachment *_output = nullptr;
 			};
-
 		}
 
 	}
@@ -84,3 +73,4 @@ namespace crimild {
 }
 
 #endif
+

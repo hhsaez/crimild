@@ -25,58 +25,48 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_RENDER_GRAPH_PASSES_FORWARD_LIGTHING_
-#define CRIMILD_CORE_RENDER_GRAPH_PASSES_FORWARD_LIGTHING_
+#ifndef CRIMILD_CORE_RENDER_GRAPH_PASSES_BLEND_
+#define CRIMILD_CORE_RENDER_GRAPH_PASSES_BLEND_
 
 #include "Rendering/RenderGraph/RenderGraphPass.hpp"
-#include "Rendering/RenderQueue.hpp"
+#include "Rendering/AlphaState.hpp"
 
 namespace crimild {
+
+	class AlphaState;
 
 	namespace rendergraph {
 
 		namespace passes {
 
 			/**
-			   \brief Computing lighting for renderables 
-
-			   This also serves as a render pass for objects that cannot be
-			   rendered on other passes.
-
-			   \remarks Try to avoid this pass, since it's probably not the
-			   fastest way to render objects. Other passes are more optimized.
+			   \brief Blend two or more attachments
 			 */
-			class ForwardLightingPass : public RenderGraphPass {
-				CRIMILD_IMPLEMENT_RTTI( crimild::rendergraph::ForwardLightingPass )
-
-			private:
-				using RenderableTypeArray = containers::Array< RenderQueue::RenderableType >;
+			class BlendPass : public RenderGraphPass {
+				CRIMILD_IMPLEMENT_RTTI( crimild::rendergraph::BlendPass )
+				
 			public:
-				ForwardLightingPass( RenderGraph *graph, RenderableTypeArray const &renderableTypes );
-				virtual ~ForwardLightingPass( void );
+				BlendPass( RenderGraph *graph, SharedPointer< AlphaState > const &alphaState = AlphaState::ENABLED_ADDITIVE_BLEND );
+				virtual ~BlendPass( void );
+			
+				void addInput( RenderGraphAttachment *input )
+				{
+					_inputs.add( input );
+				}
 				
-				void setDepthInput( RenderGraphAttachment *attachment ) { _depthInput = attachment; }
-				RenderGraphAttachment *getDepthInput( void ) { return _depthInput; }
-				
-				void setColorOutput( RenderGraphAttachment *attachment ) { _colorOutput = attachment; }
-				RenderGraphAttachment *getColorOutput( void ) { return _colorOutput; }
+				void setOutput( RenderGraphAttachment *attachment ) { _output = attachment; }
+				RenderGraphAttachment *getOutput( void ) { return _output; }
 				
 				virtual void setup( rendergraph::RenderGraph *graph ) override;
 				virtual void execute( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue ) override;
 
 			private:
-				void render( Renderer *renderer, RenderQueue *renderQueue, RenderQueue::RenderableType renderableType );
+				SharedPointer< AlphaState > _alphaState;
 			
-			private:
-				RenderableTypeArray _renderableTypes;
-				SharedPointer< ShaderProgram > _program;
-				crimild::Int8 _clearFlags;
-				SharedPointer< DepthState > _depthState;
+				containers::Array< RenderGraphAttachment * > _inputs;
 				
-				RenderGraphAttachment *_depthInput = nullptr;
-				RenderGraphAttachment *_colorOutput = nullptr;
+				RenderGraphAttachment *_output = nullptr;
 			};
-
 		}
 
 	}
@@ -84,3 +74,4 @@ namespace crimild {
 }
 
 #endif
+

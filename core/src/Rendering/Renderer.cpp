@@ -39,6 +39,7 @@
 #include "Simulation/AssetManager.hpp"
 #include "Components/MaterialComponent.hpp"
 #include "Components/RenderStateComponent.hpp"
+#include "Animation/Skeleton.hpp"
 
 using namespace crimild;
 
@@ -48,7 +49,9 @@ constexpr const char *Renderer::FBO_AUX_1024;
 constexpr const char *Renderer::FBO_AUX_COLOR_TARGET_NAME;
 constexpr const char *Renderer::FBO_AUX_DEPTH_TARGET_NAME;
 
-constexpr const char *Renderer::SHADER_PROGRAM_RENDER_PASS_FORWARD;
+constexpr const char *Renderer::SHADER_PROGRAM_RENDER_PASS_DEPTH;
+constexpr const char *Renderer::SHADER_PROGRAM_RENDER_PASS_FORWARD_LIGHTING;
+constexpr const char *Renderer::SHADER_PROGRAM_RENDER_PASS_SCREEN;
 constexpr const char *Renderer::SHADER_PROGRAM_RENDER_PASS_STANDARD;
 constexpr const char *Renderer::SHADER_PROGRAM_LIT_TEXTURE;
 constexpr const char *Renderer::SHADER_PROGRAM_LIT_DIFFUSE;
@@ -349,6 +352,46 @@ void Renderer::applyTransformations( ShaderProgram *program, const Matrix4f &pro
 void Renderer::restoreTransformations( ShaderProgram *program, Geometry* geometry, Camera *camera )
 {
 
+}
+
+void Renderer::drawGeometry( Geometry *geometry, ShaderProgram *program, const Matrix4f &modelMatrix )
+{
+	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM ), modelMatrix );
+	
+	auto rc = geometry->getComponent< RenderStateComponent >();
+	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_COUNT_UNIFORM ), 0 );
+	if ( auto skeleton = rc->getSkeleton() ) {
+		bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_COUNT_UNIFORM ), ( int ) skeleton->getJoints().size() );
+		skeleton->getJoints().each( [ this, program ]( const std::string &, SharedPointer< animation::Joint > const &joint ) {
+			bindUniform(
+				program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_POSE_UNIFORM + joint->getId() ),
+				joint->getPoseMatrix() );
+		});
+	}
+	
+	geometry->forEachPrimitive( [ this, program ]( Primitive *primitive ) {
+		// TODO: maybe we shound't add a geometry to the queue if it
+		// has no valid primitive instead of quering the state of the
+		// VBO and IBO while rendering
+		
+		auto vbo = primitive->getVertexBuffer();
+		if ( vbo == nullptr ) {
+			return;
+		}
+		
+		auto ibo = primitive->getIndexBuffer();
+		if ( ibo == nullptr ) {
+			return;
+		}
+		
+		bindVertexBuffer( program, vbo );
+		bindIndexBuffer( program, ibo );
+		
+		drawPrimitive( program, primitive );
+		
+		unbindVertexBuffer( program, vbo );
+		unbindIndexBuffer( program, ibo );
+	});
 }
 
 void Renderer::drawScreenPrimitive( ShaderProgram *program )

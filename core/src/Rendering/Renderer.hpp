@@ -155,6 +155,8 @@ namespace crimild {
 		 */
 		virtual void drawBuffers( ShaderProgram *program, Primitive::Type type, VertexBufferObject *vbo, unsigned int count ) { }
 
+		virtual void drawGeometry( Geometry *geometry, ShaderProgram *program, const Matrix4f &modelMatrix );
+
 		virtual void drawScreenPrimitive( ShaderProgram *program );
 
 	private:
@@ -179,7 +181,10 @@ namespace crimild {
         SharedPointer< FrameBufferObject > _screenBuffer;
         
     public:
-        static constexpr const char *SHADER_PROGRAM_RENDER_PASS_FORWARD = "shaders/render_pass/forward";
+        static constexpr const char *SHADER_PROGRAM_RENDER_PASS_DEPTH = "shaders/render_pass/depth";
+        static constexpr const char *SHADER_PROGRAM_RENDER_PASS_FORWARD_LIGHTING = "shaders/render_pass/forward_lighting";
+        static constexpr const char *SHADER_PROGRAM_RENDER_PASS_SCREEN = "shaders/render_pass/screen";
+		
         static constexpr const char *SHADER_PROGRAM_RENDER_PASS_STANDARD = "shaders/render_pass/standard";
         static constexpr const char *SHADER_PROGRAM_LIT_TEXTURE = "shaders/lighting/texture";
         static constexpr const char *SHADER_PROGRAM_LIT_DIFFUSE = "shaders/lighting/diffuse";

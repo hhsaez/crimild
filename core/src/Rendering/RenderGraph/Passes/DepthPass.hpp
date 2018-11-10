@@ -25,8 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_RENDER_GRAPH_PASSES_FORWARD_LIGTHING_
-#define CRIMILD_CORE_RENDER_GRAPH_PASSES_FORWARD_LIGTHING_
+#ifndef CRIMILD_CORE_RENDER_GRAPH_PASSES_DEPTH_
+#define CRIMILD_CORE_RENDER_GRAPH_PASSES_DEPTH_
 
 #include "Rendering/RenderGraph/RenderGraphPass.hpp"
 #include "Rendering/RenderQueue.hpp"
@@ -38,45 +38,38 @@ namespace crimild {
 		namespace passes {
 
 			/**
-			   \brief Computing lighting for renderables 
+			   \brief Render a depth buffer based on objects position
 
-			   This also serves as a render pass for objects that cannot be
-			   rendered on other passes.
+			   It also renders a normal buffer for deferred 
+			   lighting purporses.
 
-			   \remarks Try to avoid this pass, since it's probably not the
-			   fastest way to render objects. Other passes are more optimized.
+			   \todo Add support for normal mapping
 			 */
-			class ForwardLightingPass : public RenderGraphPass {
-				CRIMILD_IMPLEMENT_RTTI( crimild::rendergraph::ForwardLightingPass )
-
-			private:
-				using RenderableTypeArray = containers::Array< RenderQueue::RenderableType >;
+			class DepthPass : public RenderGraphPass {
+				CRIMILD_IMPLEMENT_RTTI( crimild::rendergraph::DepthPass )
+				
 			public:
-				ForwardLightingPass( RenderGraph *graph, RenderableTypeArray const &renderableTypes );
-				virtual ~ForwardLightingPass( void );
+				DepthPass( RenderGraph *graph );
+				virtual ~DepthPass( void );
+			
+				void setDepthOutput( RenderGraphAttachment *attachment ) { _depthOutput = attachment; }
+				RenderGraphAttachment *getDepthOutput( void ) { return _depthOutput; }
 				
-				void setDepthInput( RenderGraphAttachment *attachment ) { _depthInput = attachment; }
-				RenderGraphAttachment *getDepthInput( void ) { return _depthInput; }
-				
-				void setColorOutput( RenderGraphAttachment *attachment ) { _colorOutput = attachment; }
-				RenderGraphAttachment *getColorOutput( void ) { return _colorOutput; }
-				
+				void setNormalOutput( RenderGraphAttachment *attachment ) { _normalOutput = attachment; }
+				RenderGraphAttachment *getNormalOutput( void ) { return _normalOutput; }
+			
 				virtual void setup( rendergraph::RenderGraph *graph ) override;
 				virtual void execute( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue ) override;
 
 			private:
-				void render( Renderer *renderer, RenderQueue *renderQueue, RenderQueue::RenderableType renderableType );
-			
-			private:
-				RenderableTypeArray _renderableTypes;
-				SharedPointer< ShaderProgram > _program;
-				crimild::Int8 _clearFlags;
-				SharedPointer< DepthState > _depthState;
-				
-				RenderGraphAttachment *_depthInput = nullptr;
-				RenderGraphAttachment *_colorOutput = nullptr;
-			};
+				void renderObjects( Renderer *renderer, RenderQueue *renderQueue, RenderQueue::RenderableType renderableType );
 
+			private:
+				SharedPointer< ShaderProgram > _program;
+			
+				RenderGraphAttachment *_depthOutput = nullptr;
+				RenderGraphAttachment *_normalOutput = nullptr;
+			};
 		}
 
 	}
@@ -84,3 +77,4 @@ namespace crimild {
 }
 
 #endif
+
