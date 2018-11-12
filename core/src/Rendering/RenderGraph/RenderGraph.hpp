@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, H. Hernan Saez
+ * Copyright (c) 2013-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without

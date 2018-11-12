@@ -251,6 +251,15 @@
 #include "Rendering/RenderPasses/DeferredRenderPass.hpp"
 #include "Rendering/RenderPasses/OffscreenRenderPass.hpp"
 #include "Rendering/RenderPasses/ShadowRenderPass.hpp"
+#include "Rendering/RenderPasses/RenderGraphRenderPass.hpp"
+
+#include "Rendering/RenderGraph/RenderGraph.hpp"
+#include "Rendering/RenderGraph/RenderGraphPass.hpp"
+#include "Rendering/RenderGraph/RenderGraphAttachment.hpp"
+#include "Rendering/RenderGraph/Passes/ForwardLightingPass.hpp"
+#include "Rendering/RenderGraph/Passes/ScreenPass.hpp"
+#include "Rendering/RenderGraph/Passes/DepthPass.hpp"
+#include "Rendering/RenderGraph/Passes/BlendPass.hpp"
 
 #include "Rendering/ImageEffects/ImageEffect.hpp"
 #include "Rendering/ImageEffects/ColorTintImageEffect.hpp"

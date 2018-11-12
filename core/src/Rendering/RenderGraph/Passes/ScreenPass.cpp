@@ -98,10 +98,14 @@ void ScreenPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *r
 
 		renderer->bindMaterial( program, material );
 
+		renderer->setDepthState( DepthState::DISABLED );
+
 		renderer->drawGeometry(
 			crimild::get_ptr( renderable->geometry ),
 			program,
 			renderable->modelTransform );
+
+		renderer->setDepthState( DepthState::ENABLED );
 
 		renderer->unbindMaterial( program, material );
 		
