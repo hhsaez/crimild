@@ -25,72 +25,67 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "UIFrame.hpp"
-#include "UIFrameConstraint.hpp"
-#include "UIFrameConstraintMaker.hpp"
+#ifndef CRIMILD_UI_FRAME_CONSTRAINT_
+#define CRIMILD_UI_FRAME_CONSTRAINT_
 
-#include "SceneGraph/Node.hpp"
+#include "Coding/Codable.hpp"
+#include "Foundation/Types.hpp"
 
-using namespace crimild;
-using namespace crimild::ui;
+namespace crimild {
 
-UIFrame::UIFrame( void )
-	: UIFrame( Rectf( 0.0f, 0.0f, 1.0f, 1.0f ) )
-{
+	class Node;
 
-}
+	namespace ui {
 
-UIFrame::UIFrame( const Rectf &extensions )
-	: _extensions( extensions ),
-	  _constraintMaker( this )
-{
+		class UIFrame;
 
-}
+		class UIFrameConstraint : public coding::Codable {
+			CRIMILD_IMPLEMENT_RTTI( crimild::ui::UIFrameConstraint )
+			
+		public:
+			enum class Type {
+				LEFT,
+				RIGHT,
+				TOP,
+				BOTTOM,
+				WIDTH,
+				HEIGHT,
+				CENTER,
+				CENTER_X,
+				CENTER_Y,
+				EDGES,
+				AFTER,
+				BEFORE,
+				ABOVE,
+				BELOW,
+				MARGIN,
+				MARGIN_TOP,
+				MARGIN_RIGHT,
+				MARGIN_BOTTOM,
+				MARGIN_LEFT,
+			};
+			
+		public:
+			UIFrameConstraint( Type type, crimild::Real32 value );
+			UIFrameConstraint( Type type, UIFrame *referenceFrame );
+			virtual ~UIFrameConstraint( void );
 
-UIFrame::~UIFrame( void )
-{
+			Type getType( void ) const { return _type; }
 
-}
+		private:
+			Type _type;
 
-void UIFrame::update( const Clock & )
-{
-	UIFrame *parentFrame = nullptr;
-	if ( auto parent = getNode()->getParent() ) {
-		parentFrame = parent->getComponent< UIFrame >();
+		public:
+			void apply( UIFrame *frame, UIFrame *parentFrame ) const;
+
+		private:
+			crimild::Real32 _value = 0;
+			UIFrame *_referenceFrame = nullptr;
+		};
+		
 	}
-	
-	_constraints.each( [ this, parentFrame ]( SharedPointer< UIFrameConstraint > const &c ) {
-		c->apply( this, parentFrame );
-	});
-	
-	if ( parentFrame != nullptr ) {
-		const auto &frame = getExtensions();
-		auto w = frame.getWidth();
-		auto h = frame.getHeight();
-		auto pExtensions = parentFrame->getExtensions();
-		auto pW = pExtensions.getWidth();
-		auto pH = pExtensions.getHeight();
-		auto x = frame.getX() + 0.5f * ( -pW + w );
-		auto y = -frame.getY() + 0.5f * ( pH - h );
-		getNode()->local().setTranslate( Vector3f( x, y, _zIndex ) );
-	}
+
 }
 
-UIFrame *UIFrame::clearConstraints( void )
-{
-	_constraints.clear();
-	return this;
-}
-
-UIFrame *UIFrame::addConstraint( SharedPointer< UIFrameConstraint > const &constraint )
-{
-	_constraints.add( constraint );
-	return this;
-}
-
-UIFrameConstraintMaker *UIFrame::pin( void )
-{
-	clearConstraints();
-	return &_constraintMaker;
-}
+#endif
 

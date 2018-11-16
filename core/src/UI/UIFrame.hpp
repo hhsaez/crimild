@@ -28,31 +28,47 @@
 #ifndef CRIMILD_UI_FRAME_
 #define CRIMILD_UI_FRAME_
 
+#include "UIFrameConstraintMaker.hpp"
+
 #include "Components/NodeComponent.hpp"
 #include "Mathematics/Rect.hpp"
+#include "Foundation/Containers/Array.hpp"
 
 namespace crimild {
 
 	namespace ui {
 
+		class UIFrameConstraint;
+
 		class UIFrame : public NodeComponent {
 			CRIMILD_IMPLEMENT_RTTI( crimild::ui::UIFrame )
+			
 		public:
 			UIFrame( void );
 			UIFrame( const Rectf &extensions );
 			virtual ~UIFrame( void );
 
+			UIFrame *setExtensions( const Rectf &extensions ) { _extensions = extensions; return this; }
 			const Rectf &getExtensions( void ) const { return _extensions; }
-			void setExtensions( const Rectf &extensions ) { _extensions = extensions; }
 
-			void setZIndex( crimild::Real32 z ) { _zIndex = z; }
+			UIFrame *setZIndex( crimild::Real32 z ) { _zIndex = z; return this; }
 			crimild::Real32 getZIndex( void ) const { return _zIndex; }
 
 			virtual void update( const Clock & ) override;
 
 		private:
 			Rectf _extensions;
-			crimild::Real32 _zIndex = 0;
+			crimild::Real32 _zIndex = 1;
+
+		public:
+			UIFrame *clearConstraints( void );
+			UIFrame *addConstraint( SharedPointer< UIFrameConstraint > const &constraint );
+
+			UIFrameConstraintMaker *pin( void );
+
+		private:
+			UIFrameConstraintMaker _constraintMaker;
+			containers::Array< SharedPointer< UIFrameConstraint >> _constraints;
 		};
 
 	}

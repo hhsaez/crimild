@@ -123,22 +123,25 @@ void RenderQueue::push( Geometry *geometry )
         
         auto queue = &_renderables[ renderableType ];
         
-        if ( renderableType == RenderQueue::RenderableType::TRANSLUCENT ) {
-            // order BACK_TO_FRONT for translucent objects
+        if ( renderableType == RenderQueue::RenderableType::TRANSLUCENT ||
+		    renderableType == RenderQueue::RenderableType::TRANSLUCENT_CUSTOM ) {
+            // order BACK_TO_FRONT for translucent and screen objects
             auto it = queue->begin();
             while ( it != queue->end() && ( *it ).distanceFromCamera >= renderable.distanceFromCamera ) {
                 it++;
             }
             queue->insert( it, renderable );
         }
-        else {
-            // order FRONT_TO_BACK for everything else
+        else if ( renderableType != RenderQueue::RenderableType::SCREEN ) {
+            // order FRONT_TO_BACK for everything else, except SCREEN
             auto it = queue->begin();
             while ( it != queue->end() && ( *it ).distanceFromCamera <= renderable.distanceFromCamera ) {
                 it++;
             }
             queue->insert( it, renderable );
-        }
+        } else {
+			queue->push_back( renderable );
+		}
         
         if ( castShadows ) {
             // if the geometry is supposed to cast shadows, we also add it to that queue
