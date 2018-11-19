@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2002-preset, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,41 +25,30 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_VERTEX_SHADER_OUTPUT_
-#define CRIMILD_RENDERING_SHADER_GRAPH_NODES_VERTEX_SHADER_OUTPUT_
+#include "Convert.hpp"
 
-#include "Rendering/ShaderGraph/Node.hpp"
+#include "Rendering/ShaderGraph/ShaderGraph.hpp"
+#include "Rendering/ShaderGraph/ShaderGraphVariable.hpp"
 
-namespace crimild {
+using namespace crimild;
+using namespace crimild::shadergraph;
 
-	namespace shadergraph {
-
-		namespace nodes {
-
-			class VertexShaderOutput : public Node {
-				CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::nodes::VertexShaderOutput )
-
-			public:
-				VertexShaderOutput( void );
-				virtual ~VertexShaderOutput( void );
-
-				Outlet *getScreenPosition( void ) { return _screenPosition; }
-				Outlet *getColor( void ) { return _color; }
-				Outlet *getWorldNormal( void ) { return _worldNormal; }
-				Outlet *getViewVector( void ) { return _viewVector; }
-
-			private:
-				Outlet *_screenPosition = nullptr;
-				Outlet *_color = nullptr;
-				Outlet *_worldNormal = nullptr;
-				Outlet *_viewVector = nullptr;
-			};
-
-		}
-
-	}
-
+Convert::Convert( ShaderGraph *graph, Variable *input, Variable::Type type )
+{
+	_input = input;
+	_result = graph->addNode< Variable >(
+		Variable::Storage::DEFAULT,
+		type );
 }
 
-#endif
+Convert::~Convert( void )
+{
+	
+}
+
+void Convert::setup( ShaderGraph *graph )
+{
+	graph->read( this, { _input } );
+	graph->write( this, { _result } );
+}
 

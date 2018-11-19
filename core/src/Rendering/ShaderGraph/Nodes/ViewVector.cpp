@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002-preset, H. Hernan Saez
  * All rights reserved.
- *
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,50 +25,38 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_OPENGL_SHADER_GRAPH_SHADER_BUILDER_
-#define CRIMILD_OPENGL_SHADER_GRAPH_SHADER_BUILDER_
+#include "ViewVector.hpp"
+#include "Negate.hpp"
+#include "Normalize.hpp"
+#include "Convert.hpp"
 
-#include <Rendering/ShaderGraph/ShaderBuilder.hpp>
-#include <Rendering/ShaderGraph/Outlet.hpp>
+#include "Rendering/ShaderGraph/ShaderGraph.hpp"
+#include "Rendering/ShaderGraph/ShaderGraphVariable.hpp"
 
-#include <Foundation/Containers/Map.hpp>
-#include <Foundation/Containers/Array.hpp>
+using namespace crimild;
+using namespace crimild::shadergraph;
 
-namespace crimild {
-
-	namespace shadergraph {
-
-		class Outlet;
-
-		class OpenGLShaderBuilder : public ShaderBuilder {
-		public:
-			OpenGLShaderBuilder( void );
-			virtual ~OpenGLShaderBuilder( void );
-
-		protected:
-			virtual std::string generateShaderSource(
-				containers::Array< Node * > const &nodes,
-				ShaderGraph *graph,
-				ShaderProgram *program ) override;
-
-		private:
-			std::string getOutletTypeStr( Outlet *outlet );
-
-		private:
-			using Translator = std::function< void( Node *, ShaderGraph *, ShaderProgram * ) >;
-
-			containers::Map< std::string, Translator > _translators;
-
-			containers::Array< std::string > _inputsSection;
-			containers::Array< std::string > _uniformsSection;
-			containers::Array< std::string > _outputsSection;
-			containers::Array< std::string > _globalsSection;
-			containers::Array< std::string > _mainSection;
-		};
-        
-	}
-    
+ViewVector::ViewVector( ShaderGraph *graph, Variable *viewPosition )
+	: _viewPosition( viewPosition )
+{
+	_result = graph->addNode< Normalize >(
+		graph->addNode< Negate >(
+			graph->addNode< Convert >(
+				viewPosition,
+				Variable::Type::VECTOR_3
+			)->getResult()
+		)->getResult()
+	)->getResult();
 }
 
-#endif
+ViewVector::~ViewVector( void )
+{
+	
+}
+
+void ViewVector::setup( ShaderGraph *graph )
+{
+	graph->read( this, { _viewPosition } );
+	graph->write( this, { _result } );
+}
 

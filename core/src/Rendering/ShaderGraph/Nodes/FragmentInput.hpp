@@ -25,27 +25,35 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Max.hpp"
-#include "Rendering/ShaderGraph/ShaderGraph.hpp"
+#ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_FRAGMENT_INPUT_
+#define CRIMILD_RENDERING_SHADER_GRAPH_NODES_FRAGMENT_INPUT_
 
-using namespace crimild;
-using namespace crimild::shadergraph;
+#include "Rendering/ShaderGraph/ShaderGraphOperation.hpp"
+#include "Rendering/ShaderGraph/ShaderGraphVariable.hpp"
 
-Max::Max( ShaderGraph *graph, Variable *a, Variable *b )
-	: _a( a ),
-	  _b( b )
-{
-	_result = graph->addNode< Variable >( Variable::Type::SCALAR );
+namespace crimild {
+
+	namespace shadergraph {
+
+		class FragmentInput : public Expression {
+			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::FragmentInput )
+			
+		public:
+			FragmentInput( ShaderGraph *graph, Variable::Type type, std::string name );
+			virtual ~FragmentInput( void );
+
+			Variable *getInput( void ) { return _input; }
+
+		private:
+			Variable *_input = nullptr;
+
+		public:
+			virtual void setup( ShaderGraph *graph ) override;
+		};
+		
+	}
+
 }
 
-Max::~Max( void )
-{
-
-}
-
-void Max::setup( ShaderGraph *graph )
-{
-	graph->read( this, { _a, _b } );
-	graph->write( this, { _result } );
-}
+#endif
 

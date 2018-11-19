@@ -25,15 +25,98 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "VertexShaderInput.hpp"
+#include "VertexShaderInputs.hpp"
+#include "Multiply.hpp"
+#include "Vector.hpp"
+#include "Scalar.hpp"
+#include "Convert.hpp"
+#include "Normalize.hpp"
+#include "Negate.hpp"
 
 #include "Rendering/ShaderGraph/ShaderGraph.hpp"
+#include "Rendering/ShaderGraph/ShaderGraphVariable.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/ShaderLocation.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
-using namespace crimild::shadergraph::nodes;
+
+VertexShaderInputs::VertexShaderInputs( ShaderGraph *graph )
+{
+	_positionAttribute = graph->addInputNode< ShaderGraphVariable >(
+		ShaderGraphVariable::Storage::INPUT,
+		ShaderGraphVariable::Type::VECTOR_3,
+		"aPosition" );
+	_normalAttribute = graph->addInputNode< ShaderGraphVariable >(
+		ShaderGraphVariable::Storage::INPUT,
+		ShaderGraphVariable::Type::VECTOR_3,
+		"aNormal" );
+
+	_modelMatrixUniform = graph->addInputNode< ShaderGraphVariable >(
+		ShaderGraphVariable::Storage::UNIFORM,
+		ShaderGraphVariable::Type::MATRIX_4,
+		"uMMatrix" );
+	_viewMatrixUniform = graph->addInputNode< ShaderGraphVariable >(
+		ShaderGraphVariable::Storage::UNIFORM,
+		ShaderGraphVariable::Type::MATRIX_4,
+		"uVMatrix" );
+	_projectionMatrixUniform = graph->addInputNode< ShaderGraphVariable >(
+		ShaderGraphVariable::Storage::UNIFORM,
+		ShaderGraphVariable::Type::MATRIX_4,
+		"uPMatrix" );
+
+	auto kONE = graph->addNode< ScalarConstant >( 1.0f, "kONE" );
+	auto posXYZ = graph->addNode< VectorToScalars >( _positionAttribute );
+
+	_modelPosition = graph->addNode< ScalarsToVector >(
+		posXYZ->getX(),
+		posXYZ->getY(),
+		posXYZ->getZ(),
+		kONE->getVariable()
+	)->getVector()->setUniqueName( "modelPosition" );
+
+	_worldPosition = graph->addNode< Multiply >(
+		_modelMatrixUniform,
+		_modelPosition
+	)->getResult()->setUniqueName( "worldPosition" );
+
+	_viewPosition = graph->addNode< Multiply >(
+		_viewMatrixUniform,
+		_worldPosition
+	)->getResult()->setUniqueName( "viewPosition" );
+
+	_projectedPosition = graph->addNode< Multiply >(
+		_projectionMatrixUniform,
+		_viewPosition
+	)->getResult()->setUniqueName( "projectedPosition" );
+}
+
+VertexShaderInputs::~VertexShaderInputs( void )
+{
+	
+}
+
+void VertexShaderInputs::setup( ShaderGraph *graph )
+{
+	
+	graph->write(
+		this,
+		{
+			_positionAttribute,
+			_normalAttribute,
+			_uvAttribute,
+			_colorAttribute,
+			_modelMatrixUniform,
+			_viewMatrixUniform,
+			_projectionMatrixUniform,
+			_worldPosition,
+			_viewPosition,
+			_projectedPosition,
+		}
+	);
+}
+
+/*
 
 VertexShaderInput::VertexShaderInput( void )
 {
@@ -107,4 +190,6 @@ void VertexShaderInput::prepare( ShaderGraph *graph, ShaderProgram *program )
 			getPMatrix()->getName() );
 	}
 }
+
+*/
 

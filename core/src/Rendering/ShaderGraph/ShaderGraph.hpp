@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -28,59 +28,73 @@
 #ifndef CRIMILD_RENDERING_SHADER_GRAPH_
 #define CRIMILD_RENDERING_SHADER_GRAPH_
 
-#include "Foundation/NamedObject.hpp"
-#include "Foundation/Containers/Map.hpp"
-#include "Foundation/Containers/Array.hpp"
-#include "Coding/Codable.hpp"
+#include "ShaderGraphNode.hpp"
+
+#include "Foundation/Containers/Digraph.hpp"
+#include "Foundation/Containers/Stack.hpp"
+#include "Foundation/Containers/Set.hpp"
 
 namespace crimild {
 
 	namespace shadergraph {
 
-		class Outlet;
-		class Node;
+		class ShaderGraphNode;
+		class ShaderGraphOperation;
+		class ShaderGraphVariable;
 
 		class ShaderGraph : public coding::Codable {
 			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::ShaderGraph )
-
-		private:
-			using OutletArray = containers::Array< Outlet * >;
-			using OutletConnectionMap = containers::Map< Outlet *, OutletArray >;
-			using NodeConnectionMap = containers::Map< Node *, OutletConnectionMap >;
-			using NodeArray = containers::Array< SharedPointer< Node >>;
 			
 		public:
 			ShaderGraph( void );
 			virtual ~ShaderGraph( void );
 
-		public:
-			template< typename NODE_TYPE, typename... Args >
-			NODE_TYPE *createNode( Args &&... args )
+			template< typename NodeType, typename... Args >
+			NodeType *addInputNode( Args &&... args )
 			{
-				auto node = crimild::alloc< NODE_TYPE >( std::forward< Args >( args )... );
-				_nodes.add( node );
-				return crimild::get_ptr( node );
+				auto n = addNode< NodeType >( std::forward< Args >( args )... );
+				_inputs.add( n );
+				return n;
 			}
 
-			void eachNode( std::function< void( Node * ) > const &callback );
+			template< typename NodeType, typename... Args >
+			NodeType *addNode( Args &&... args )
+			{
+				auto n = crimild::alloc< NodeType >( this, std::forward< Args >( args )... );
+				_graph.addVertex( crimild::get_ptr( n ) );
+				_nodes.add( n );
+				return crimild::get_ptr( n );
+			}
+
+			template< typename NodeType, typename... Args >
+			NodeType *addOutputNode( Args &&... args )
+			{
+				auto n = addNode< NodeType >( std::forward< Args >( args )... );
+				_outputs.add( n );
+				return n;
+			}
+
+			void eachNode( std::function< void( ShaderGraphNode * ) > const &callback );
+
+			void read( ShaderGraphNode *node, containers::Array< ShaderGraphNode * > const &inputs );
+			void write( ShaderGraphNode *node, containers::Array< ShaderGraphNode * > const &outputs );
 
 		private:
-			NodeArray _nodes;
+			containers::Digraph< ShaderGraphNode * > _graph;
+			containers::Array< SharedPointer< ShaderGraphNode >> _nodes;
+			containers::Array< ShaderGraphNode * > _inputs;
+			containers::Array< ShaderGraphNode * > _outputs;
 
 		public:
-			void connect( Outlet *src, Outlet *dst );
+			std::string build( void );
 
-			crimild::Size inDegree( Node *node );
-
-			crimild::Size outDegree( Node *node );
-
-			crimild::Bool isConnected( Outlet *outlet );
-
-			Outlet *anyConnection( Outlet *outlet );
-			void eachConnection( Outlet *outlet, std::function< void( Outlet * ) > const &callback );
+			crimild::Bool isConnected( ShaderGraphNode *node ) const;
 
 		private:
-			NodeConnectionMap _connections;
+			containers::Set< ShaderGraphNode * > _connected;
+
+		protected:
+			virtual std::string generateShaderSource( containers::Array< ShaderGraphNode * > const &sortedNodes ) { return ""; }
 		};
 
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2002-preset, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,22 +25,31 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "VertexShaderOutput.hpp"
+#include "VertexOutput.hpp"
+
+#include "Rendering/ShaderGraph/ShaderGraph.hpp"
+#include "Rendering/ShaderGraph/ShaderGraphVariable.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
-using namespace crimild::shadergraph::nodes;
 
-VertexShaderOutput::VertexShaderOutput( void )
+VertexOutput::VertexOutput( ShaderGraph *graph, std::string name, ShaderGraphVariable *input )
 {
-	_screenPosition = addInputOutlet( "vScreenPosition", Outlet::Type::VECTOR_4 );
-	_color = addInputOutlet( "vColor", Outlet::Type::VECTOR_4 );
-	_worldNormal = addInputOutlet( "vWorldNormal", Outlet::Type::VECTOR_3 );
-	_viewVector = addInputOutlet( "vViewVector", Outlet::Type::VECTOR_3 );
+	_input = input;
+	_output = graph->addOutputNode< ShaderGraphVariable >(
+		ShaderGraphVariable::Storage::OUTPUT,
+		input->getType(),
+		name );
 }
 
-VertexShaderOutput::~VertexShaderOutput( void )
+VertexOutput::~VertexOutput( void )
 {
+	
+}
 
+void VertexOutput::setup( ShaderGraph *graph )
+{
+	graph->read( this, { _input } );
+	graph->write( this, { _output } );
 }
 

@@ -25,27 +25,34 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Max.hpp"
-#include "Rendering/ShaderGraph/ShaderGraph.hpp"
+#ifndef CRIMILD_RENDERING_SHADER_GRAPH_OPERATION_
+#define CRIMILD_RENDERING_SHADER_GRAPH_OPERATION_
 
-using namespace crimild;
-using namespace crimild::shadergraph;
+#include "ShaderGraphNode.hpp"
 
-Max::Max( ShaderGraph *graph, Variable *a, Variable *b )
-	: _a( a ),
-	  _b( b )
-{
-	_result = graph->addNode< Variable >( Variable::Type::SCALAR );
+namespace crimild {
+
+	class ShaderProgram;
+
+	namespace shadergraph {
+
+		class ShaderGraph;
+
+		class ShaderGraphOperation : public ShaderGraphNode {
+		protected:
+			ShaderGraphOperation( void );
+			
+		public:
+			virtual ~ShaderGraphOperation( void );
+
+			virtual ShaderGraphNode::NodeType getNodeType( void ) const { return ShaderGraphNode::NodeType::OPERATION; }
+		};
+
+		using Expression = ShaderGraphOperation;
+
+	}
+
 }
 
-Max::~Max( void )
-{
-
-}
-
-void Max::setup( ShaderGraph *graph )
-{
-	graph->read( this, { _a, _b } );
-	graph->write( this, { _result } );
-}
+#endif
 

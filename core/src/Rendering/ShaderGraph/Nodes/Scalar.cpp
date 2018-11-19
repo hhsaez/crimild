@@ -27,20 +27,25 @@
 
 #include "Scalar.hpp"
 
+#include "Rendering/ShaderGraph/ShaderGraph.hpp"
+#include "Rendering/ShaderGraph/ShaderGraphVariable.hpp"
+
 using namespace crimild;
 using namespace crimild::shadergraph;
-using namespace crimild::shadergraph::nodes;
 
-Scalar::Scalar( crimild::Real32 constant )
+ScalarConstant::ScalarConstant( ShaderGraph *graph, crimild::Real32 constant, std::string uniqueName )
 	: _constant( constant )
 {
-	_inputValue = addInputOutlet( "value", Outlet::Type::SCALAR );
-	
-	_outputValue = addOutputOutlet( "value", Outlet::Type::SCALAR );
+	_variable = graph->addOutputNode< ShaderGraphVariable >( ShaderGraphVariable::Type::SCALAR, uniqueName );
 }
 
-Scalar::~Scalar( void )
+ScalarConstant::~ScalarConstant( void )
 {
 
+}
+
+void ScalarConstant::setup( ShaderGraph *graph )
+{
+	graph->write( this, { _variable } );
 }
 

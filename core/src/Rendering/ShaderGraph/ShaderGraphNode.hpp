@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,22 +25,38 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "FragmentShaderInput.hpp"
+#ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODE_
+#define CRIMILD_RENDERING_SHADER_GRAPH_NODE_
 
-using namespace crimild;
-using namespace crimild::shadergraph;
-using namespace crimild::shadergraph::nodes;
+#include "Coding/Codable.hpp"
 
-FragmentShaderInput::FragmentShaderInput( void )
-{
-	_uv = addOutputOutlet( "vUV", Outlet::Type::VECTOR_2 );
-	_color = addOutputOutlet( "vColor", Outlet::Type::VECTOR_4 );
-	_worldNormal = addOutputOutlet( "vWorldNormal", Outlet::Type::VECTOR_3 );
-	_viewVector = addOutputOutlet( "vViewVector", Outlet::Type::VECTOR_3 );
+namespace crimild {
+
+	namespace shadergraph {
+
+		class ShaderGraph;
+
+		class ShaderGraphNode : public coding::Codable {
+		public:
+			enum class NodeType {
+				OPERATION,
+				VARIABLE,
+			};
+			
+		protected:
+			ShaderGraphNode( void ) { }
+			
+		public:
+			virtual ~ShaderGraphNode( void ) { }
+			
+			virtual NodeType getNodeType( void ) const = 0;
+
+			virtual void setup( ShaderGraph * ) { }
+		};
+
+	}
+
 }
 
-FragmentShaderInput::~FragmentShaderInput( void )
-{
-
-}
+#endif
 

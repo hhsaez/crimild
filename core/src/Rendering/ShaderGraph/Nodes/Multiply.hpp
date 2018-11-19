@@ -28,37 +28,35 @@
 #ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_MULTIPLY_
 #define CRIMILD_RENDERING_SHADER_GRAPH_NODES_MULTIPLY_
 
-#include "Rendering/ShaderGraph/Node.hpp"
+#include "Rendering/ShaderGraph/ShaderGraphOperation.hpp"
 
 namespace crimild {
 
 	namespace shadergraph {
 
-		namespace nodes {
+		class ShaderGraphVariable;
 
-			class Multiply : public Node {
-				CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::nodes::Multiply )
+		class Multiply : public ShaderGraphOperation {
+			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::Multiply )
 
-			public:
-				Multiply( void );
-				virtual ~Multiply( void );
+		public:
+			Multiply( ShaderGraph *, ShaderGraphVariable *a, ShaderGraphVariable *b );
+			virtual ~Multiply( void );
 
-				Outlet *getA( void ) { return _a; }
-				Outlet *getB( void ) { return _b; }
-
-				Outlet *getOutput( void ) { return _output; }
-
-			private:
-				Outlet *_a = nullptr;
-				Outlet *_b = nullptr;
-				Outlet *_output = nullptr;
-
-			protected:
-				virtual void prepare( ShaderGraph *graph, ShaderProgram *program ) override;
-			};
-
-		}
-
+			ShaderGraphVariable *getA( void ) { return _a; }
+			ShaderGraphVariable *getB( void ) { return _b; }
+			
+			ShaderGraphVariable *getResult( void ) { return _result; }
+			
+		private:
+			ShaderGraphVariable *_a = nullptr;
+			ShaderGraphVariable *_b = nullptr;
+			ShaderGraphVariable *_result = nullptr;
+			
+		protected:
+			virtual void setup( ShaderGraph *graph ) override;
+		};
+		
 	}
 
 }

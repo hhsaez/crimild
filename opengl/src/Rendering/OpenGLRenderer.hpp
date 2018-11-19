@@ -65,6 +65,8 @@ namespace crimild {
 
 			virtual void drawPrimitive( ShaderProgram *program, Primitive *primitive ) override;
 			virtual void drawBuffers( ShaderProgram *program, Primitive::Type type, VertexBufferObject *vbo, unsigned int count ) override;
+
+			virtual SharedPointer< shadergraph::ShaderGraph > createShaderGraph( void ) override;
 		};
 
 	}

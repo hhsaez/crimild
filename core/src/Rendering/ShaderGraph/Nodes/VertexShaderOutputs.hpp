@@ -25,55 +25,35 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_VERTEX_SHADER_INPUT_
-#define CRIMILD_RENDERING_SHADER_GRAPH_NODES_VERTEX_SHADER_INPUT_
+#ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_VERTEX_SHADER_OUTPUT_S
+#define CRIMILD_RENDERING_SHADER_GRAPH_NODES_VERTEX_SHADER_OUTPUT_S
 
-#include "Rendering/ShaderGraph/Node.hpp"
+#include "Rendering/ShaderGraph/ShaderGraphOperation.hpp"
 
 namespace crimild {
 
 	namespace shadergraph {
 
-		namespace nodes {
+		class ShaderGraphVariable;
 
-			class VertexShaderInput : public Node {
-				CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::nodes::VertexShaderInput )
+		class VertexShaderOutputs : public ShaderGraphOperation {
+			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::VertexShaderOutput )
+			
+		public:
+			VertexShaderOutputs( ShaderGraph *, ShaderGraphVariable *vertexPosition );
+			virtual ~VertexShaderOutputs( void );
+			
+			ShaderGraphVariable *getVertexPosition( void ) { return _vertexPosition; }
 
-			public:
-				VertexShaderInput( void );
-				virtual ~VertexShaderInput( void );
+		private:
+			ShaderGraphVariable *_vertexPosition = nullptr;
 
-				// attributes
-				Outlet *getPosition( void ) { return _position; }
-				Outlet *getNormal( void ) { return _normal; }
-				Outlet *getUV( void ) { return _uv; }
-				Outlet *getColor( void ) { return _color; }
+		public:
+			virtual void setup( ShaderGraph * ) override;
+		};
 
-				// uniforms
-				Outlet *getMMatrix( void ) { return _mMatrix; }
-				Outlet *getVMatrix( void ) { return _vMatrix; }
-				Outlet *getPMatrix( void ) { return _pMatrix; }
-				Outlet *getMVMatrix( void ) { return _mvMatrix; }
-				Outlet *getMVPMatrix( void ) { return _mvpMatrix; }
-
-			private:
-				Outlet *_position = nullptr;
-				Outlet *_normal = nullptr;
-				Outlet *_uv = nullptr;
-				Outlet *_color = nullptr;
-
-				Outlet *_mMatrix = nullptr;
-				Outlet *_vMatrix = nullptr;
-				Outlet *_pMatrix = nullptr;
-				Outlet *_mvMatrix = nullptr;
-				Outlet *_mvpMatrix = nullptr;
-
-			public:
-				virtual void prepare( ShaderGraph *graph, ShaderProgram *program ) override;
-			};
-
-		}
-
+		using StandardVertexOutputs = VertexShaderOutputs;
+		
 	}
 
 }

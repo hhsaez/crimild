@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -26,24 +26,92 @@
  */
 
 #include "Vector.hpp"
+#include "Rendering/ShaderGraph/ShaderGraph.hpp"
+#include "Rendering/ShaderGraph/ShaderGraphVariable.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
-using namespace crimild::shadergraph::nodes;
 
-nodes::Vector::Vector( const Vector4f &constant )
-	: _constant( constant )
-{	
-	_inputW = addInputOutlet( "w", Outlet::Type::SCALAR );
-	_inputXYZ = addInputOutlet( "xyz", Outlet::Type::VECTOR_3 );
-	_inputXYZW = addInputOutlet( "xyzw", Outlet::Type::VECTOR_4 );
-
-	_outputXYZ = addOutputOutlet( "xyz", Outlet::Type::VECTOR_3 );
-	_outputXYZW = addOutputOutlet( "xyzw", Outlet::Type::VECTOR_4 );
+VectorToScalars::VectorToScalars( ShaderGraph *graph, ShaderGraphVariable *vector )
+{
+	_vector = vector;
+	_x = graph->addNode< ShaderGraphVariable >( ShaderGraphVariable::Type::SCALAR );
+	_y = graph->addNode< ShaderGraphVariable >( ShaderGraphVariable::Type::SCALAR );
+	_z = graph->addNode< ShaderGraphVariable >( ShaderGraphVariable::Type::SCALAR );
+	_w = graph->addNode< ShaderGraphVariable >( ShaderGraphVariable::Type::SCALAR );
 }
 
-nodes::Vector::~Vector( void )
+VectorToScalars::~VectorToScalars( void )
 {
 
+}
+
+void VectorToScalars::setup( ShaderGraph *graph )
+{
+	graph->read( this, { _vector } );
+	graph->write( this, { _x, _y, _z, _w } );
+}
+
+ScalarsToVector::ScalarsToVector( ShaderGraph *graph, ShaderGraphVariable *x, ShaderGraphVariable *y )
+{
+	_vector = graph->addNode< ShaderGraphVariable >( ShaderGraphVariable::Type::VECTOR_2 );
+	_x = x;
+	_y = y;
+}
+
+ScalarsToVector::ScalarsToVector( ShaderGraph *graph, ShaderGraphVariable *x, ShaderGraphVariable *y, ShaderGraphVariable *z )
+{
+	_vector = graph->addNode< ShaderGraphVariable >( ShaderGraphVariable::Type::VECTOR_3 );
+	_x = x;
+	_y = y;
+	_z = z;
+}
+
+ScalarsToVector::ScalarsToVector( ShaderGraph *graph, ShaderGraphVariable *x, ShaderGraphVariable *y, ShaderGraphVariable *z, ShaderGraphVariable *w )
+{
+	_vector = graph->addNode< ShaderGraphVariable >( ShaderGraphVariable::Type::VECTOR_4 );
+	_x = x;
+	_y = y;
+	_z = z;
+	_w = w;
+}
+
+ScalarsToVector::~ScalarsToVector( void )
+{
+
+}
+
+void ScalarsToVector::setup( ShaderGraph *graph )
+{
+	graph->read( this, { _x, _y, _z, _w } );
+	graph->write( this, { _vector } );
+}
+
+VectorConstant::VectorConstant( ShaderGraph *graph, const Vector2f &v )
+	: _value( v.x(), v.y(), 0, 0 )
+{
+	_vector = graph->addNode< ShaderGraphVariable >( ShaderGraphVariable::Type::VECTOR_2 );
+}
+
+VectorConstant::VectorConstant( ShaderGraph *graph, const Vector3f &v )
+	: _value( v.x(), v.y(), v.z(), 0 )
+{
+	_vector = graph->addNode< ShaderGraphVariable >( ShaderGraphVariable::Type::VECTOR_3 );
+}
+
+VectorConstant::VectorConstant( ShaderGraph *graph, const Vector4f &v )
+	: _value( v )
+{
+	_vector = graph->addNode< ShaderGraphVariable >( ShaderGraphVariable::Type::VECTOR_4 );
+}
+
+VectorConstant::~VectorConstant( void )
+{
+
+}
+
+void VectorConstant::setup( ShaderGraph *graph )
+{
+	graph->write( this, { _vector } );
 }
 

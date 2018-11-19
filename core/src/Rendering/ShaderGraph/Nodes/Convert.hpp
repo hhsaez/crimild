@@ -25,62 +25,34 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_RENDERING_SHADER_GRAPH_OUTLET_
-#define CRIMILD_RENDERING_SHADER_GRAPH_OUTLET_
+#ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_CONVERT_
+#define CRIMILD_RENDERING_SHADER_GRAPH_NODES_CONVERT_
 
-#include "Foundation/NamedObject.hpp"
-#include "Coding/Codable.hpp"
+#include "Rendering/ShaderGraph/ShaderGraphOperation.hpp"
+#include "Rendering/ShaderGraph/ShaderGraphVariable.hpp"
 
 namespace crimild {
 
 	namespace shadergraph {
 
-		class Node;
-		class ShaderGraph;
-
-		class Outlet :
-			public coding::Codable,
-			public NamedObject {
-			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::Outlet )
-		public:
-		    enum class Type {
-				ANY,
-				SCALAR,
-				VECTOR_2,
-				VECTOR_3,
-				VECTOR_4,
-				MATRIX_3,
-				MATRIX_4,
-				SAMPLER_2D,
-			};
-
-		public:
-			explicit Outlet( std::string name, Type type );
-			virtual ~Outlet( void );
-
-			void setType( Type type ) { _type = type; }
-			Type getType( void ) const { return _type; }
-
-			crimild::Int32 getPriority( void ) const { return _priority; }
-			void setPriority( crimild::Int32 priority ) { _priority = priority; }
-
-			std::string getUniqueName( void ) const { return _uniqueName; }
-			void setUniqueName( std::string uniqueName ) { _uniqueName = uniqueName; }
-
-		private:
-			Type _type;
-			crimild::Int32 _priority;
-			std::string _uniqueName;
-
-		public:
-			void setNode( Node *node ) { _node = node; }
-			Node *getNode( void ) { return _node; }
-
-		private:
-			Node *_node = nullptr;
+		class Convert : public Expression {
+			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::Convert )
 			
-		};
+		public:
+			Convert( ShaderGraph *graph, Variable *input, Variable::Type type );
+			virtual ~Convert( void );
 
+			Variable *getInput( void ) { return _input; }
+			Variable *getResult( void ) { return _result; }
+			
+		private:
+			Variable *_input = nullptr;
+			Variable *_result = nullptr;
+			
+		public:
+			virtual void setup( ShaderGraph *graph ) override;
+		};
+		
 	}
 
 }

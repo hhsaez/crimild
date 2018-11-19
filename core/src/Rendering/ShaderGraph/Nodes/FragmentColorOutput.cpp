@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,19 +25,25 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "FragmentShaderOutput.hpp"
+#include "FragmentColorOutput.hpp"
+#include "Rendering/ShaderGraph/ShaderGraph.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
-using namespace crimild::shadergraph::nodes;
 
-FragmentShaderOutput::FragmentShaderOutput( void )
+FragmentColorOutput::FragmentColorOutput( ShaderGraph *graph, Variable *fragmentColor )
+	: _fragmentColor( fragmentColor )
 {
-	_fragColor = addInputOutlet( "vFragColor", Outlet::Type::VECTOR_4 );
+
 }
 
-FragmentShaderOutput::~FragmentShaderOutput( void )
+FragmentColorOutput::~FragmentColorOutput( void )
 {
 
+}
+
+void FragmentColorOutput::setup( ShaderGraph *graph )
+{
+	graph->read( this, { _fragmentColor } );
 }
 

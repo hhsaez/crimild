@@ -28,36 +28,32 @@
 #ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_NORMALIZE_
 #define CRIMILD_RENDERING_SHADER_GRAPH_NODES_NORMALIZE_
 
-#include "Rendering/ShaderGraph/Node.hpp"
+#include "Rendering/ShaderGraph/ShaderGraphOperation.hpp"
 
 namespace crimild {
 
 	namespace shadergraph {
 
-		namespace nodes {
+		class ShaderGraphVariable;
 
-			class Normalize : public Node {
-				CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::nodes::Normalize )
+		class Normalize : public ShaderGraphOperation {
+			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::Normalize )
+			
+		public:
+			Normalize( ShaderGraph *graph, ShaderGraphVariable *input );
+			virtual ~Normalize( void );
 
-			public:
-				Normalize( void );
-				virtual ~Normalize( void );
-
-				Outlet *getInputValue( void ) { return _inputValue; }
-
-				Outlet *getNormalized( void ) { return _normalized; }
-
-			private:
-				Outlet *_inputValue = nullptr;
-
-				Outlet *_normalized = nullptr;
-
-			public:
-				virtual void prepare( ShaderGraph *graph, ShaderProgram *program ) override;
-			};
-
-		}
-
+			ShaderGraphVariable *getInput( void ) { return _input; }
+			ShaderGraphVariable *getResult( void ) { return _result; }
+			
+		private:
+			ShaderGraphVariable *_input = nullptr;
+			ShaderGraphVariable *_result = nullptr;
+			
+		public:
+			virtual void setup( ShaderGraph *graph ) override;
+		};
+		
 	}
 
 }

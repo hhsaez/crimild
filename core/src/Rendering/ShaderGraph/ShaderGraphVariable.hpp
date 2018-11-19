@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,31 +25,64 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_FRAGMENT_SHADER_OUTPUT_
-#define CRIMILD_RENDERING_SHADER_GRAPH_NODES_FRAGMENT_SHADER_OUTPUT_
+#ifndef CRIMILD_RENDERING_SHADER_GRAPH_VARIABLE_
+#define CRIMILD_RENDERING_SHADER_GRAPH_VARIABLE_
 
-#include "Rendering/ShaderGraph/Node.hpp"
+#include "ShaderGraphNode.hpp"
 
 namespace crimild {
 
 	namespace shadergraph {
 
-		namespace nodes {
-
-			class FragmentShaderOutput : public Node {
-				CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::nodes::FragmentShaderOutput )
-
-			public:
-				FragmentShaderOutput( void );
-				virtual ~FragmentShaderOutput( void );
-
-				Outlet *getFragColor( void ) { return _fragColor; }
-
-			private:
-				Outlet *_fragColor = nullptr;
+		class ShaderGraphVariable : public ShaderGraphNode {
+			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::ShaderGraphVariable )
+			
+		public:
+			enum class Storage {
+				DEFAULT,
+				INPUT,
+				OUTPUT,
+				UNIFORM,
+				CONSTANT,
 			};
 
-		}
+			enum class Precision {
+				HIGH,
+				MEDIUM,
+				LOW,
+			};
+			
+			enum class Type {
+				ANY,
+				SCALAR,
+				VECTOR_2,
+				VECTOR_3,
+				VECTOR_4,
+				MATRIX_3,
+				MATRIX_4,
+				SAMPLER_2D,
+			};
+
+		public:
+			explicit ShaderGraphVariable( ShaderGraph *, Type type, std::string uniqueName = "" );
+			explicit ShaderGraphVariable( ShaderGraph *, Storage storage, Type type, std::string uniqueName = "" );
+			virtual ~ShaderGraphVariable( void );
+
+			virtual ShaderGraphNode::NodeType getNodeType( void ) const override { return ShaderGraphNode::NodeType::VARIABLE; }
+
+			Type getType( void ) const { return _type; }
+			Storage getStorage( void ) const { return _storage; }
+
+			ShaderGraphVariable *setUniqueName( std::string uniqueName ) { _uniqueName = uniqueName; return this; }
+			std::string getUniqueName( void ) const { return _uniqueName; }
+
+		private:
+			Type _type;
+			Storage _storage;
+			std::string _uniqueName;
+		};
+
+		using Variable = ShaderGraphVariable;
 
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,24 +25,35 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Outlet.hpp"
+#ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_FRAGMENT_COLOR_OUTPUT_
+#define CRIMILD_RENDERING_SHADER_GRAPH_NODES_FRAGMENT_COLOR_OUTPUT_
 
-#include <sstream>
+#include "Rendering/ShaderGraph/ShaderGraphOperation.hpp"
+#include "Rendering/ShaderGraph/ShaderGraphVariable.hpp"
 
-using namespace crimild;
-using namespace crimild::shadergraph;
+namespace crimild {
 
-Outlet::Outlet( std::string name, Type type )
-	: NamedObject( name ),
-	  _type( type )
-{
-    std::stringstream ss;
-    ss << name << "_" << getUniqueID();
-    setUniqueName( ss.str() );
+	namespace shadergraph {
+
+		class FragmentColorOutput : public Expression {
+			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::FragmentColorOutput )
+			
+		public:
+			FragmentColorOutput( ShaderGraph *, Variable *fragmentColor );
+			virtual ~FragmentColorOutput( void );
+			
+			Variable *getFragmentColor( void ) { return _fragmentColor; }
+
+		private:
+			Variable *_fragmentColor = nullptr;
+
+		public:
+			virtual void setup( ShaderGraph * ) override;
+		};
+		
+	}
+
 }
 
-Outlet::~Outlet( void )
-{
-
-}
+#endif
 

@@ -38,6 +38,8 @@ namespace crimild {
 
 	namespace shadergraph {
 
+		/*
+
 		class ShaderGraph;
 		class Node;
 
@@ -63,6 +65,8 @@ namespace crimild {
 
 			virtual std::string generateShaderSource( NodeArray const &nodes, ShaderGraph *graph, ShaderProgram *program ) = 0;
 		};
+
+		*/
 
 	}
 

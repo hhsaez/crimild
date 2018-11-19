@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-present, H. Hernan Saez
+ * Copyright (c) 2013-2018, Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,27 +25,28 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Max.hpp"
-#include "Rendering/ShaderGraph/ShaderGraph.hpp"
+#include "VertexShaderOutputs.hpp"
+#include "VertexOutput.hpp"
+
+#include "../ShaderGraph.hpp"
+#include "../ShaderGraphVariable.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
 
-Max::Max( ShaderGraph *graph, Variable *a, Variable *b )
-	: _a( a ),
-	  _b( b )
-{
-	_result = graph->addNode< Variable >( Variable::Type::SCALAR );
-}
-
-Max::~Max( void )
+VertexShaderOutputs::VertexShaderOutputs( ShaderGraph *graph, ShaderGraphVariable *vertexPosition )
+	: _vertexPosition( vertexPosition )
 {
 
 }
 
-void Max::setup( ShaderGraph *graph )
+VertexShaderOutputs::~VertexShaderOutputs( void )
 {
-	graph->read( this, { _a, _b } );
-	graph->write( this, { _result } );
+
+}
+
+void VertexShaderOutputs::setup( ShaderGraph *graph )
+{
+	graph->read( this, { _vertexPosition } );
 }
 

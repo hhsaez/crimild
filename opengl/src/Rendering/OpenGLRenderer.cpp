@@ -50,13 +50,18 @@
 
 #include "Rendering/ImageEffects/ColorTintImageEffect.hpp"
 
+#include "Rendering/ShaderGraph/OpenGLShaderGraph.hpp"
+
 #include <Rendering/AlphaState.hpp>
 #include <Rendering/DepthState.hpp>
 #include <Rendering/ColorMaskState.hpp>
 #include <Rendering/CullFaceState.hpp>
 #include <Rendering/FrameBufferObject.hpp>
 
+#include <Rendering/ShaderGraph/ShaderGraph.hpp>
+
 using namespace crimild;
+using namespace crimild::shadergraph;
 using namespace crimild::opengl;
 
 OpenGLRenderer::OpenGLRenderer( void )
@@ -364,5 +369,10 @@ void OpenGLRenderer::setColorMaskState( ColorMaskState *state )
 	}
 
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+}
+
+SharedPointer< ShaderGraph > OpenGLRenderer::createShaderGraph( void )
+{
+	return crimild::alloc< OpenGLShaderGraph >();
 }
 

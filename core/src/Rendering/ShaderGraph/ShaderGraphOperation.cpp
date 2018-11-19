@@ -25,27 +25,95 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Max.hpp"
-#include "Rendering/ShaderGraph/ShaderGraph.hpp"
+#include "ShaderGraphOperation.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
 
-Max::Max( ShaderGraph *graph, Variable *a, Variable *b )
-	: _a( a ),
-	  _b( b )
+ShaderGraphOperation::ShaderGraphOperation( void )
 {
-	_result = graph->addNode< Variable >( Variable::Type::SCALAR );
+	
 }
 
-Max::~Max( void )
+ShaderGraphOperation::~ShaderGraphOperation( void )
 {
 
 }
 
-void Max::setup( ShaderGraph *graph )
+/*
+
+Node::Node( void )
 {
-	graph->read( this, { _a, _b } );
-	graph->write( this, { _result } );
+	
 }
+
+Node::~Node( void )
+{
+
+}
+
+Outlet *Node::addInputOutlet( std::string name, Outlet::Type type )
+{
+	auto outlet = crimild::alloc< Outlet >( name, type );
+	setInputOutlet( outlet );
+	return crimild::get_ptr( outlet );
+}
+
+void Node::setInputOutlet( SharedPointer< Outlet > const &outlet )
+{
+	_inputs[ outlet->getName() ] = outlet;
+	outlet->setNode( this );
+}
+
+Outlet *Node::getInputOutlet( std::string name )
+{
+	if ( !_inputs.contains( name ) ) {
+		return nullptr;
+	}
+
+	return crimild::get_ptr( _inputs[ name ] );
+}
+
+void Node::eachInputOutlet( OutletArrayCallback const &callback )
+{
+	_inputs.eachValue( [ callback ]( SharedPointer< Outlet > const &outlet ) {
+		callback( crimild::get_ptr( outlet ) );
+	});
+}
+
+Outlet *Node::addOutputOutlet( std::string name, Outlet::Type type )
+{
+	auto outlet = crimild::alloc< Outlet >( name, type );
+	setOutputOutlet( outlet );
+	return crimild::get_ptr( outlet );
+}
+
+void Node::setOutputOutlet( SharedPointer< Outlet > const &outlet )
+{
+	_outputs[ outlet->getName() ] = outlet;
+	outlet->setNode( this );
+}
+
+Outlet *Node::getOutputOutlet( std::string name )
+{
+	if ( !_outputs.contains( name ) ) {
+		return nullptr;
+	}
+
+	return crimild::get_ptr( _outputs[ name ] );
+}
+
+void Node::eachOutputOutlet( OutletArrayCallback const &callback )
+{
+	_outputs.eachValue( [ callback ]( SharedPointer< Outlet > const &outlet ) {
+		callback( crimild::get_ptr( outlet ) );
+	});
+}
+
+void Node::prepare( ShaderGraph *graph, ShaderProgram *program )
+{
+	// no-op
+}
+
+*/
 

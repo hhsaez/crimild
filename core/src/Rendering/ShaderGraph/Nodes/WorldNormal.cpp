@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2002-preset, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,41 +25,45 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_FRAGMENT_SHADER_INPUT_
-#define CRIMILD_RENDERING_SHADER_GRAPH_NODES_FRAGMENT_SHADER_INPUT_
+#include "WorldNormal.hpp"
+#include "Convert.hpp"
+#include "Multiply.hpp"
+#include "Normalize.hpp"
 
-#include "Rendering/ShaderGraph/Node.hpp"
+#include "Rendering/ShaderGraph/ShaderGraph.hpp"
+#include "Rendering/ShaderGraph/ShaderGraphVariable.hpp"
 
-namespace crimild {
+using namespace crimild;
+using namespace crimild::shadergraph;
 
-	namespace shadergraph {
-
-		namespace nodes {
-
-			class FragmentShaderInput : public Node {
-				CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::nodes::FragmentShaderInput )
-
-			public:
-				FragmentShaderInput( void );
-				virtual ~FragmentShaderInput( void );
-
-				Outlet *getUV( void ) { return _uv; }
-				Outlet *getColor( void ) { return _color; }
-				Outlet *getWorldNormal( void ) { return _worldNormal; }
-				Outlet *getViewVector( void ) { return _viewVector; }
-
-			private:
-				Outlet *_uv = nullptr;
-				Outlet *_color = nullptr;
-				Outlet *_worldNormal = nullptr;
-				Outlet *_viewVector = nullptr;
-			};
-
-		}
-
+WorldNormal::WorldNormal( ShaderGraph *graph, Variable *worldMatrix, Variable *normal )
+	: _worldMatrix( worldMatrix ),
+	  _normal( normal )
+{
+	auto rotMatrix = worldMatrix;
+	if ( worldMatrix->getType() != Variable::Type::MATRIX_3 ) {
+		rotMatrix = graph->addNode< Convert >(
+			worldMatrix,
+			Variable::Type::MATRIX_3
+		)->getResult();
 	}
-
+	
+	_result = graph->addNode< Normalize >(
+		graph->addNode< Multiply >(
+			rotMatrix,
+			normal
+		)->getResult()
+	)->getResult();
 }
 
-#endif
+WorldNormal::~WorldNormal( void )
+{
+	
+}
+
+void WorldNormal::setup( ShaderGraph *graph )
+{
+	graph->read( this, { _worldMatrix, _normal } );
+	graph->write( this, { _result } );
+}
 

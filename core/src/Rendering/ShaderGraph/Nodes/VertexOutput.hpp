@@ -25,62 +25,35 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODE_
-#define CRIMILD_RENDERING_SHADER_GRAPH_NODE_
+#ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_VERTEX_OUTPUT_
+#define CRIMILD_RENDERING_SHADER_GRAPH_NODES_VERTEX_OUTPUT_
 
-#include "Foundation/NamedObject.hpp"
-#include "Foundation/Containers/Map.hpp"
-#include "Foundation/Containers/Array.hpp"
-#include "Coding/Codable.hpp"
-
-#include "Outlet.hpp"
+#include "Rendering/ShaderGraph/ShaderGraphOperation.hpp"
 
 namespace crimild {
 
-	class ShaderProgram;
-
 	namespace shadergraph {
 
-		class Node : public coding::Codable {
-		private:
-			using OutletMap = containers::Map< std::string, SharedPointer< Outlet >>;
-			using OutletArray = containers::Array< SharedPointer< Outlet >>;
-			using OutletArrayCallback = std::function< void( Outlet * ) >;
-			
-		protected:
-			Node( void );
+		class ShaderGraphVariable;
 
-		public:
-			virtual ~Node( void );
-
-		public:
-			Outlet *addInputOutlet( std::string name, Outlet::Type type );
-			void setInputOutlet( Outlet *outlet ) { setInputOutlet( crimild::retain( outlet ) ); }
-			void setInputOutlet( SharedPointer< Outlet > const &outlet );
-			Outlet *getInputOutlet( std::string name );
-			void eachInputOutlet( OutletArrayCallback const &callback );
-
-			Outlet *addOutputOutlet( std::string name, Outlet::Type type );
-			void setOutputOutlet( Outlet *outlet ) { setOutputOutlet( crimild::retain( outlet ) ); }
-			void setOutputOutlet( SharedPointer< Outlet > const &outlet );			
-			Outlet *getOutputOutlet( std::string name );
-			void eachOutputOutlet( OutletArrayCallback const &callback );
-
-		private:
-			OutletMap _inputs;
-			OutletMap _outputs;
-
-			/**
-			   \name Internal use only
-			*/
-			//@{
+		class VertexOutput : public ShaderGraphOperation {
+			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::VertexOutput )
 			
 		public:
-			virtual void prepare( ShaderGraph *graph, ShaderProgram *program );
+			VertexOutput( ShaderGraph *graph, std::string name, ShaderGraphVariable *input );
+			virtual ~VertexOutput( void );
 
-			//}
+			ShaderGraphVariable *getInput( void ) { return _input; }
+			ShaderGraphVariable *getOutput( void ) { return _output; }
+			
+		private:
+			ShaderGraphVariable *_input = nullptr;
+			ShaderGraphVariable *_output = nullptr;
+			
+		public:
+			virtual void setup( ShaderGraph *graph ) override;
 		};
-
+		
 	}
 
 }

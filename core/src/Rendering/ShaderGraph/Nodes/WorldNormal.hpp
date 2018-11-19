@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-present, H. Hernan Saez
+ * Copyright (c) 2013-2018, Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,27 +25,37 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Max.hpp"
-#include "Rendering/ShaderGraph/ShaderGraph.hpp"
+#ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_WORLD_NORMAL_
+#define CRIMILD_RENDERING_SHADER_GRAPH_NODES_WORLD_NORMAL_
 
-using namespace crimild;
-using namespace crimild::shadergraph;
+#include "Rendering/ShaderGraph/ShaderGraphOperation.hpp"
+#include "Rendering/ShaderGraph/ShaderGraphVariable.hpp"
 
-Max::Max( ShaderGraph *graph, Variable *a, Variable *b )
-	: _a( a ),
-	  _b( b )
-{
-	_result = graph->addNode< Variable >( Variable::Type::SCALAR );
+namespace crimild {
+
+	namespace shadergraph {
+
+		class WorldNormal : public Expression {
+			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::WorldNormal )
+			
+		public:
+			WorldNormal( ShaderGraph *graph, Variable *worldMatrix, Variable *normal );
+			virtual ~WorldNormal( void );
+
+			Variable *getResult( void ) { return _result; }
+			
+		private:
+			Variable *_worldMatrix = nullptr;
+			Variable *_normal = nullptr;
+			Variable *_result = nullptr;
+			
+		public:
+			virtual void setup( ShaderGraph *graph ) override;
+		};
+		
+	}
+
 }
 
-Max::~Max( void )
-{
-
-}
-
-void Max::setup( ShaderGraph *graph )
-{
-	graph->read( this, { _a, _b } );
-	graph->write( this, { _result } );
-}
+#endif
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,81 +25,33 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Node.hpp"
+#include "ShaderGraphVariable.hpp"
+
+#include <sstream>
 
 using namespace crimild;
 using namespace crimild::shadergraph;
 
-Node::Node( void )
-{
-	
-}
-
-Node::~Node( void )
+ShaderGraphVariable::ShaderGraphVariable( ShaderGraph *graph, Type type, std::string uniqueName )
+	: ShaderGraphVariable( graph, Storage::DEFAULT, type, uniqueName )
 {
 
 }
 
-Outlet *Node::addInputOutlet( std::string name, Outlet::Type type )
+ShaderGraphVariable::ShaderGraphVariable( ShaderGraph *, Storage storage, Type type, std::string uniqueName )
+	: _type( type ),
+	  _storage( storage ),
+	  _uniqueName( uniqueName )
 {
-	auto outlet = crimild::alloc< Outlet >( name, type );
-	setInputOutlet( outlet );
-	return crimild::get_ptr( outlet );
-}
-
-void Node::setInputOutlet( SharedPointer< Outlet > const &outlet )
-{
-	_inputs[ outlet->getName() ] = outlet;
-	outlet->setNode( this );
-}
-
-Outlet *Node::getInputOutlet( std::string name )
-{
-	if ( !_inputs.contains( name ) ) {
-		return nullptr;
+	if ( _uniqueName == "" ) {
+		std::stringstream ss;
+		ss << "var_" << getUniqueID();
+		_uniqueName = ss.str();
 	}
-
-	return crimild::get_ptr( _inputs[ name ] );
 }
 
-void Node::eachInputOutlet( OutletArrayCallback const &callback )
+ShaderGraphVariable::~ShaderGraphVariable( void )
 {
-	_inputs.eachValue( [ callback ]( SharedPointer< Outlet > const &outlet ) {
-		callback( crimild::get_ptr( outlet ) );
-	});
-}
 
-Outlet *Node::addOutputOutlet( std::string name, Outlet::Type type )
-{
-	auto outlet = crimild::alloc< Outlet >( name, type );
-	setOutputOutlet( outlet );
-	return crimild::get_ptr( outlet );
-}
-
-void Node::setOutputOutlet( SharedPointer< Outlet > const &outlet )
-{
-	_outputs[ outlet->getName() ] = outlet;
-	outlet->setNode( this );
-}
-
-Outlet *Node::getOutputOutlet( std::string name )
-{
-	if ( !_outputs.contains( name ) ) {
-		return nullptr;
-	}
-
-	return crimild::get_ptr( _outputs[ name ] );
-}
-
-void Node::eachOutputOutlet( OutletArrayCallback const &callback )
-{
-	_outputs.eachValue( [ callback ]( SharedPointer< Outlet > const &outlet ) {
-		callback( crimild::get_ptr( outlet ) );
-	});
-}
-
-void Node::prepare( ShaderGraph *graph, ShaderProgram *program )
-{
-	// no-op
 }
 

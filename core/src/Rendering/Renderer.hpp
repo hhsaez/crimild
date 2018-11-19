@@ -61,6 +61,12 @@ namespace crimild {
     class VertexBufferObject;
     class VisibilitySet;
 
+	namespace shadergraph {
+
+		class ShaderGraph;
+
+	}
+
 	class Renderer : 
 		public SharedObject,
 		public DynamicSingleton< Renderer > {
@@ -228,6 +234,9 @@ namespace crimild {
 		SharedPointer< Catalog< IndexBufferObject >> _indexBufferObjectCatalog;
 		SharedPointer< Catalog< FrameBufferObject >> _frameBufferObjectCatalog;
 		SharedPointer< Catalog< RenderTarget >> _renderTargetCatalog;
+
+	public:
+		virtual SharedPointer< shadergraph::ShaderGraph > createShaderGraph( void ) = 0;
 	};
     
 }

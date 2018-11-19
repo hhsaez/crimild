@@ -28,17 +28,29 @@
 #include "Multiply.hpp"
 
 #include "Rendering/ShaderGraph/ShaderGraph.hpp"
+#include "Rendering/ShaderGraph/ShaderGraphVariable.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
-using namespace crimild::shadergraph::nodes;
 
-Multiply::Multiply( void )
+Multiply::Multiply( ShaderGraph *graph, ShaderGraphVariable *a, ShaderGraphVariable *b )
 {
-	_a = addInputOutlet( "a", Outlet::Type::ANY );
-	_b = addInputOutlet( "b", Outlet::Type::ANY );
+	_a = a;
+	_b = b;
 
-	_output = addOutputOutlet( "mult", Outlet::Type::ANY );
+	ShaderGraphVariable::Type retType = _b->getType();
+	switch ( _a->getType() ) {
+		case ShaderGraphVariable::Type::VECTOR_2:
+		case ShaderGraphVariable::Type::VECTOR_3:
+		case ShaderGraphVariable::Type::VECTOR_4:
+			retType = _a->getType();
+			break;
+
+		default:
+			break;
+	}
+	
+	_result = graph->addNode< ShaderGraphVariable >( retType );
 }
 
 Multiply::~Multiply( void )
@@ -46,12 +58,9 @@ Multiply::~Multiply( void )
 
 }
 
-void Multiply::prepare( ShaderGraph *graph, ShaderProgram *program )	
+void Multiply::setup( ShaderGraph *graph )	
 {
-	Node::prepare( graph, program );
-	
-	if ( graph->isConnected( getB() ) ) {
-		_output->setType( graph->anyConnection( getB() )->getType() );
-	}
+	graph->read( this, { _a, _b } );
+	graph->write( this, { _result } );
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -28,33 +28,32 @@
 #ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_MAX_
 #define CRIMILD_RENDERING_SHADER_GRAPH_NODES_MAX_
 
-#include "Rendering/ShaderGraph/Node.hpp"
+#include "Rendering/ShaderGraph/ShaderGraphOperation.hpp"
+#include "Rendering/ShaderGraph/ShaderGraphVariable.hpp"
 
 namespace crimild {
 
 	namespace shadergraph {
 
-		namespace nodes {
+		class Max : public Expression {
+			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::Max )
 
-			class Max : public Node {
-				CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::nodes::Max )
+		public:
+			Max( ShaderGraph *graph, Variable *a, Variable *b );
+			virtual ~Max( void );
 
-			public:
-				Max( void );
-				virtual ~Max( void );
+			Variable *getA( void ) { return _a; }
+			Variable *getB( void ) { return _b; }
+			Variable *getResult( void ) { return _result; }
 
-				Outlet *getA( void ) { return _a; }
-				Outlet *getB( void ) { return _b; }
+		private:
+			Variable *_a = nullptr;
+			Variable *_b = nullptr;
+			Variable *_result = nullptr;
 
-				Outlet *getValue( void ) { return _value; }
-
-			private:
-				Outlet *_a = nullptr;
-				Outlet *_b = nullptr;
-				Outlet *_value = nullptr;
-			};
-
-		}
+		public:
+			virtual void setup( ShaderGraph *graph ) override;
+		};
 
 	}
 

@@ -27,8 +27,8 @@
 
 #include "ShaderBuilder.hpp"
 #include "ShaderGraph.hpp"
-#include "Node.hpp"
-#include "Outlet.hpp"
+//#include "Node.hpp"
+//#include "Outlet.hpp"
 
 #include "Foundation/Containers/List.hpp"
 #include "Foundation/Containers/Map.hpp"
@@ -37,6 +37,8 @@
 
 using namespace crimild;
 using namespace crimild::shadergraph;
+
+/*
 
 ShaderBuilder::ShaderBuilder( void )
 {
@@ -120,4 +122,6 @@ void ShaderBuilder::generateFragmentShader( ShaderGraph *graph, ShaderProgram *p
 
 	program->setFragmentShader( crimild::alloc< Shader >( src ) );
 }
+
+*/
 
