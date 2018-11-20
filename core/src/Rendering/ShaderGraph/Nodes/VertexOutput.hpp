@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -34,21 +34,21 @@ namespace crimild {
 
 	namespace shadergraph {
 
-		class ShaderGraphVariable;
+		class Variable;
 
 		class VertexOutput : public ShaderGraphOperation {
 			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::VertexOutput )
 			
 		public:
-			VertexOutput( ShaderGraph *graph, std::string name, ShaderGraphVariable *input );
+			VertexOutput( ShaderGraph *graph, std::string name, Variable *input );
 			virtual ~VertexOutput( void );
 
-			ShaderGraphVariable *getInput( void ) { return _input; }
-			ShaderGraphVariable *getOutput( void ) { return _output; }
+			Variable *getInput( void ) { return _input; }
+			Variable *getOutput( void ) { return _output; }
 			
 		private:
-			ShaderGraphVariable *_input = nullptr;
-			ShaderGraphVariable *_output = nullptr;
+			Variable *_input = nullptr;
+			Variable *_output = nullptr;
 			
 		public:
 			virtual void setup( ShaderGraph *graph ) override;

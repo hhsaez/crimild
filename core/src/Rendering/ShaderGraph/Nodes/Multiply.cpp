@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -28,21 +28,21 @@
 #include "Multiply.hpp"
 
 #include "Rendering/ShaderGraph/ShaderGraph.hpp"
-#include "Rendering/ShaderGraph/ShaderGraphVariable.hpp"
+#include "Rendering/ShaderGraph/Variable.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
 
-Multiply::Multiply( ShaderGraph *graph, ShaderGraphVariable *a, ShaderGraphVariable *b )
+Multiply::Multiply( ShaderGraph *graph, Variable *a, Variable *b )
 {
 	_a = a;
 	_b = b;
 
-	ShaderGraphVariable::Type retType = _b->getType();
+	Variable::Type retType = _b->getType();
 	switch ( _a->getType() ) {
-		case ShaderGraphVariable::Type::VECTOR_2:
-		case ShaderGraphVariable::Type::VECTOR_3:
-		case ShaderGraphVariable::Type::VECTOR_4:
+		case Variable::Type::VECTOR_2:
+		case Variable::Type::VECTOR_3:
+		case Variable::Type::VECTOR_4:
 			retType = _a->getType();
 			break;
 
@@ -50,7 +50,7 @@ Multiply::Multiply( ShaderGraph *graph, ShaderGraphVariable *a, ShaderGraphVaria
 			break;
 	}
 	
-	_result = graph->addNode< ShaderGraphVariable >( retType );
+	_result = graph->addNode< Variable >( retType );
 }
 
 Multiply::~Multiply( void )

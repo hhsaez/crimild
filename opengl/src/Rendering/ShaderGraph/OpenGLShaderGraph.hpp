@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,8 @@ namespace crimild {
 
 	namespace shadergraph {
 
+		class Variable;
+
 		class OpenGLShaderGraph : public ShaderGraph {
 		public:
 			OpenGLShaderGraph( void );
@@ -48,7 +50,7 @@ namespace crimild {
 			virtual std::string generateShaderSource( containers::Array< ShaderGraphNode * > const &sortedNodes ) override;
 
 		private:
-			std::string getVariableTypeString( ShaderGraphVariable *outlet );
+			std::string getVariableTypeString( Variable *outlet );
 
 		private:
 			using Translator = std::function< void( ShaderGraphNode * ) >;
@@ -64,38 +66,6 @@ namespace crimild {
 			CodeSection _mainSection;
 		};
 
-		/*
-
-		class Outlet;
-
-		class OpenGLShaderBuilder : public ShaderBuilder {
-		public:
-			OpenGLShaderBuilder( void );
-			virtual ~OpenGLShaderBuilder( void );
-
-		protected:
-			virtual std::string generateShaderSource(
-				containers::Array< Node * > const &nodes,
-				ShaderGraph *graph,
-				ShaderProgram *program ) override;
-
-		private:
-			std::string getOutletTypeStr( Outlet *outlet );
-
-		private:
-			using Translator = std::function< void( Node *, ShaderGraph *, ShaderProgram * ) >;
-
-			containers::Map< std::string, Translator > _translators;
-
-			containers::Array< std::string > _inputsSection;
-			containers::Array< std::string > _uniformsSection;
-			containers::Array< std::string > _outputsSection;
-			containers::Array< std::string > _globalsSection;
-			containers::Array< std::string > _mainSection;
-		};
-
-		*/
-        
 	}
     
 }

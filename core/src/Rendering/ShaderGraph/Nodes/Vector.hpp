@@ -36,28 +36,28 @@ namespace crimild {
 
 	namespace shadergraph {
 
-		class ShaderGraphVariable;
+		class Variable;
 
 		class VectorToScalars : public ShaderGraphOperation {
 			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::VectorToScalars )
 			
 		public:
-			VectorToScalars( ShaderGraph *, ShaderGraphVariable *vector );
+			VectorToScalars( ShaderGraph *, Variable *vector );
 			virtual ~VectorToScalars( void );
 
-			ShaderGraphVariable *getVector( void ) { return _vector; }
+			Variable *getVector( void ) { return _vector; }
 
-			ShaderGraphVariable *getX( void ) { return _x; }
-			ShaderGraphVariable *getY( void ) { return _y; }
-			ShaderGraphVariable *getZ( void ) { return _z; }
-			ShaderGraphVariable *getW( void ) { return _w; }
+			Variable *getX( void ) { return _x; }
+			Variable *getY( void ) { return _y; }
+			Variable *getZ( void ) { return _z; }
+			Variable *getW( void ) { return _w; }
 
 		private:
-			ShaderGraphVariable *_vector = nullptr;
-			ShaderGraphVariable *_x = nullptr;
-			ShaderGraphVariable *_y = nullptr;
-			ShaderGraphVariable *_z = nullptr;
-			ShaderGraphVariable *_w = nullptr;
+			Variable *_vector = nullptr;
+			Variable *_x = nullptr;
+			Variable *_y = nullptr;
+			Variable *_z = nullptr;
+			Variable *_w = nullptr;
 
 		private:
 			virtual void setup( ShaderGraph *graph ) override;
@@ -67,24 +67,24 @@ namespace crimild {
 			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::ScalarsToVector )
 			
 		public:
-			ScalarsToVector( ShaderGraph *, ShaderGraphVariable *x, ShaderGraphVariable *y );
-			ScalarsToVector( ShaderGraph *, ShaderGraphVariable *x, ShaderGraphVariable *y, ShaderGraphVariable *z );
-			ScalarsToVector( ShaderGraph *, ShaderGraphVariable *x, ShaderGraphVariable *y, ShaderGraphVariable *z, ShaderGraphVariable *w );
+			ScalarsToVector( ShaderGraph *, Variable *x, Variable *y );
+			ScalarsToVector( ShaderGraph *, Variable *x, Variable *y, Variable *z );
+			ScalarsToVector( ShaderGraph *, Variable *x, Variable *y, Variable *z, Variable *w );
 			virtual ~ScalarsToVector( void );
 
-			ShaderGraphVariable *getVector( void ) { return _vector; }
+			Variable *getVector( void ) { return _vector; }
 
-			ShaderGraphVariable *getX( void ) { return _x; }
-			ShaderGraphVariable *getY( void ) { return _y; }
-			ShaderGraphVariable *getZ( void ) { return _z; }
-			ShaderGraphVariable *getW( void ) { return _w; }
+			Variable *getX( void ) { return _x; }
+			Variable *getY( void ) { return _y; }
+			Variable *getZ( void ) { return _z; }
+			Variable *getW( void ) { return _w; }
 
 		private:
-			ShaderGraphVariable *_vector = nullptr;
-			ShaderGraphVariable *_x = nullptr;
-			ShaderGraphVariable *_y = nullptr;
-			ShaderGraphVariable *_z = nullptr;
-			ShaderGraphVariable *_w = nullptr;
+			Variable *_vector = nullptr;
+			Variable *_x = nullptr;
+			Variable *_y = nullptr;
+			Variable *_z = nullptr;
+			Variable *_w = nullptr;
 			
 		private:
 			virtual void setup( ShaderGraph *graph ) override;
@@ -100,11 +100,11 @@ namespace crimild {
 			virtual ~VectorConstant( void );
 
 			const Vector4f &getValue( void ) { return _value; }
-			ShaderGraphVariable *getVector( void ) { return _vector; }
+			Variable *getVector( void ) { return _vector; }
 
 		private:
 			Vector4f _value;
-			ShaderGraphVariable *_vector = nullptr;
+			Variable *_vector = nullptr;
 
 		public:
 			virtual void setup( ShaderGraph *graph ) override;

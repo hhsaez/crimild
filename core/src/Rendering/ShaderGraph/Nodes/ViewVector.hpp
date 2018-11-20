@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@
 #define CRIMILD_RENDERING_SHADER_GRAPH_NODES_VIEW_VECTOR_
 
 #include "Rendering/ShaderGraph/ShaderGraphOperation.hpp"
-#include "Rendering/ShaderGraph/ShaderGraphVariable.hpp"
+#include "Rendering/ShaderGraph/Variable.hpp"
 
 namespace crimild {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@ namespace crimild {
 
 	namespace shadergraph {
 
-		class ShaderGraphVariable;
+		class Variable;
 
 		class VertexShaderInputs : public ShaderGraphOperation {
 			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::VertexShaderInputs )
@@ -43,34 +43,34 @@ namespace crimild {
 			VertexShaderInputs( ShaderGraph *graph );
 			virtual ~VertexShaderInputs( void );
 			
-			ShaderGraphVariable *getPositionAttribute( void ) { return _positionAttribute; }
-			ShaderGraphVariable *getNormalAttribute( void ) { return _normalAttribute; }
-			ShaderGraphVariable *getUVAttribute( void ) { return _uvAttribute; }
-			ShaderGraphVariable *getColorAttribute( void ) { return _colorAttribute; }
+			Variable *getPositionAttribute( void ) { return _positionAttribute; }
+			Variable *getNormalAttribute( void ) { return _normalAttribute; }
+			Variable *getUVAttribute( void ) { return _uvAttribute; }
+			Variable *getColorAttribute( void ) { return _colorAttribute; }
 			
-			ShaderGraphVariable *getModelMatrixUniform( void ) { return _modelMatrixUniform; }
-			ShaderGraphVariable *getViewMatrixUniform( void ) { return _viewMatrixUniform; }
-			ShaderGraphVariable *getProjectionMatrixUniform( void ) { return _projectionMatrixUniform; }
+			Variable *getModelMatrixUniform( void ) { return _modelMatrixUniform; }
+			Variable *getViewMatrixUniform( void ) { return _viewMatrixUniform; }
+			Variable *getProjectionMatrixUniform( void ) { return _projectionMatrixUniform; }
 
-			ShaderGraphVariable *getModelPosition( void ) const { return _modelPosition; }
-			ShaderGraphVariable *getWorldPosition( void ) const { return _worldPosition; }
-			ShaderGraphVariable *getViewPosition( void ) const { return _viewPosition; }
-			ShaderGraphVariable *getProjectedPosition( void ) const { return _projectedPosition; }
+			Variable *getModelPosition( void ) const { return _modelPosition; }
+			Variable *getWorldPosition( void ) const { return _worldPosition; }
+			Variable *getViewPosition( void ) const { return _viewPosition; }
+			Variable *getProjectedPosition( void ) const { return _projectedPosition; }
 			
 		private:
-			ShaderGraphVariable *_positionAttribute = nullptr;
-			ShaderGraphVariable *_normalAttribute = nullptr;
-			ShaderGraphVariable *_uvAttribute = nullptr;
-			ShaderGraphVariable *_colorAttribute = nullptr;
+			Variable *_positionAttribute = nullptr;
+			Variable *_normalAttribute = nullptr;
+			Variable *_uvAttribute = nullptr;
+			Variable *_colorAttribute = nullptr;
 			
-			ShaderGraphVariable *_modelMatrixUniform = nullptr;
-			ShaderGraphVariable *_viewMatrixUniform = nullptr;
-			ShaderGraphVariable *_projectionMatrixUniform = nullptr;
+			Variable *_modelMatrixUniform = nullptr;
+			Variable *_viewMatrixUniform = nullptr;
+			Variable *_projectionMatrixUniform = nullptr;
 			
-			ShaderGraphVariable *_modelPosition = nullptr;
-			ShaderGraphVariable *_worldPosition = nullptr;
-			ShaderGraphVariable *_viewPosition = nullptr;
-			ShaderGraphVariable *_projectedPosition = nullptr;
+			Variable *_modelPosition = nullptr;
+			Variable *_worldPosition = nullptr;
+			Variable *_viewPosition = nullptr;
+			Variable *_projectedPosition = nullptr;
 
 		public:
 			virtual void setup( ShaderGraph *graph ) override;

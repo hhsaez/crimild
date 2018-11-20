@@ -31,7 +31,6 @@
 #include "Normalize.hpp"
 
 #include "Rendering/ShaderGraph/ShaderGraph.hpp"
-#include "Rendering/ShaderGraph/ShaderGraphVariable.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;

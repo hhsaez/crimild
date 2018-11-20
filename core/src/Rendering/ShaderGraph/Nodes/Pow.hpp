@@ -29,11 +29,12 @@
 #define CRIMILD_RENDERING_SHADER_GRAPH_NODES_POW_
 
 #include "Rendering/ShaderGraph/ShaderGraphOperation.hpp"
-#include "Rendering/ShaderGraph/ShaderGraphVariable.hpp"
 
 namespace crimild {
 
 	namespace shadergraph {
+
+		class Variable;
 
 		class Pow : public Expression {
 			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::Pow )

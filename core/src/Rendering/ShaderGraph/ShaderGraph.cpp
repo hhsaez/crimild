@@ -27,7 +27,6 @@
 
 #include "ShaderGraph.hpp"
 #include "ShaderGraphOperation.hpp"
-#include "ShaderGraphVariable.hpp"
 #include "Foundation/Log.hpp"
 
 using namespace crimild;

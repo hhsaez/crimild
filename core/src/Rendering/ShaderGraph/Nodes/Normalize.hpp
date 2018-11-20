@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -34,21 +34,21 @@ namespace crimild {
 
 	namespace shadergraph {
 
-		class ShaderGraphVariable;
+		class Variable;
 
 		class Normalize : public ShaderGraphOperation {
 			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::Normalize )
 			
 		public:
-			Normalize( ShaderGraph *graph, ShaderGraphVariable *input );
+			Normalize( ShaderGraph *graph, Variable *input );
 			virtual ~Normalize( void );
 
-			ShaderGraphVariable *getInput( void ) { return _input; }
-			ShaderGraphVariable *getResult( void ) { return _result; }
+			Variable *getInput( void ) { return _input; }
+			Variable *getResult( void ) { return _result; }
 			
 		private:
-			ShaderGraphVariable *_input = nullptr;
-			ShaderGraphVariable *_result = nullptr;
+			Variable *_input = nullptr;
+			Variable *_result = nullptr;
 			
 		public:
 			virtual void setup( ShaderGraph *graph ) override;

@@ -34,7 +34,7 @@ namespace crimild {
 
 	namespace shadergraph {
 
-		class ShaderGraphVariable;
+		class Variable;
 
 		class ScalarConstant : public ShaderGraphOperation {
 			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::ScalarConstant )
@@ -45,11 +45,11 @@ namespace crimild {
 			
 			crimild::Real32 getValue( void ) const { return _constant; }
 
-			ShaderGraphVariable *getVariable( void ) { return _variable; }
+			Variable *getVariable( void ) { return _variable; }
 
 		private:
 			crimild::Real32 _constant;
-			ShaderGraphVariable *_variable = nullptr;
+			Variable *_variable = nullptr;
 			
 		public:
 			virtual void setup( ShaderGraph *graph ) override;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 #include "Scalar.hpp"
 
 #include "Rendering/ShaderGraph/ShaderGraph.hpp"
-#include "Rendering/ShaderGraph/ShaderGraphVariable.hpp"
+#include "Rendering/ShaderGraph/Variable.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
@@ -36,7 +36,7 @@ using namespace crimild::shadergraph;
 ScalarConstant::ScalarConstant( ShaderGraph *graph, crimild::Real32 constant, std::string uniqueName )
 	: _constant( constant )
 {
-	_variable = graph->addOutputNode< ShaderGraphVariable >( ShaderGraphVariable::Type::SCALAR, uniqueName );
+	_variable = graph->addOutputNode< Variable >( Variable::Type::SCALAR, uniqueName );
 }
 
 ScalarConstant::~ScalarConstant( void )

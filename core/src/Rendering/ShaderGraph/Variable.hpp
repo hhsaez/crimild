@@ -34,8 +34,8 @@ namespace crimild {
 
 	namespace shadergraph {
 
-		class ShaderGraphVariable : public ShaderGraphNode {
-			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::ShaderGraphVariable )
+		class Variable : public ShaderGraphNode {
+			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::Variable )
 			
 		public:
 			enum class Storage {
@@ -64,16 +64,16 @@ namespace crimild {
 			};
 
 		public:
-			explicit ShaderGraphVariable( ShaderGraph *, Type type, std::string uniqueName = "" );
-			explicit ShaderGraphVariable( ShaderGraph *, Storage storage, Type type, std::string uniqueName = "" );
-			virtual ~ShaderGraphVariable( void );
+			explicit Variable( ShaderGraph *, Type type, std::string uniqueName = "" );
+			explicit Variable( ShaderGraph *, Storage storage, Type type, std::string uniqueName = "" );
+			virtual ~Variable( void );
 
 			virtual ShaderGraphNode::NodeType getNodeType( void ) const override { return ShaderGraphNode::NodeType::VARIABLE; }
 
 			Type getType( void ) const { return _type; }
 			Storage getStorage( void ) const { return _storage; }
 
-			ShaderGraphVariable *setUniqueName( std::string uniqueName ) { _uniqueName = uniqueName; return this; }
+			Variable *setUniqueName( std::string uniqueName ) { _uniqueName = uniqueName; return this; }
 			std::string getUniqueName( void ) const { return _uniqueName; }
 
 		private:
@@ -81,8 +81,6 @@ namespace crimild {
 			Storage _storage;
 			std::string _uniqueName;
 		};
-
-		using Variable = ShaderGraphVariable;
 
 	}
 

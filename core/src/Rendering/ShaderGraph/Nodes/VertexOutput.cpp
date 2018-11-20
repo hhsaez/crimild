@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-preset, H. Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -28,16 +28,16 @@
 #include "VertexOutput.hpp"
 
 #include "Rendering/ShaderGraph/ShaderGraph.hpp"
-#include "Rendering/ShaderGraph/ShaderGraphVariable.hpp"
+#include "Rendering/ShaderGraph/Variable.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
 
-VertexOutput::VertexOutput( ShaderGraph *graph, std::string name, ShaderGraphVariable *input )
+VertexOutput::VertexOutput( ShaderGraph *graph, std::string name, Variable *input )
 {
 	_input = input;
-	_output = graph->addOutputNode< ShaderGraphVariable >(
-		ShaderGraphVariable::Storage::OUTPUT,
+	_output = graph->addOutputNode< Variable >(
+		Variable::Storage::OUTPUT,
 		input->getType(),
 		name );
 }

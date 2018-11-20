@@ -34,21 +34,21 @@ namespace crimild {
 
 	namespace shadergraph {
 
-		class ShaderGraphVariable;
+		class Variable;
 
 		class Negate : public ShaderGraphOperation {
 			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::Negate )
 			
 		public:
-			Negate( ShaderGraph *graph, ShaderGraphVariable *input );
+			Negate( ShaderGraph *graph, Variable *input );
 			virtual ~Negate( void );
 
-			ShaderGraphVariable *getInput( void ) { return _input; }
-			ShaderGraphVariable *getResult( void ) { return _result; }
+			Variable *getInput( void ) { return _input; }
+			Variable *getResult( void ) { return _result; }
 			
 		private:
-			ShaderGraphVariable *_input = nullptr;
-			ShaderGraphVariable *_result = nullptr;
+			Variable *_input = nullptr;
+			Variable *_result = nullptr;
 			
 		public:
 			virtual void setup( ShaderGraph *graph ) override;

@@ -28,15 +28,15 @@
 #include "Negate.hpp"
 
 #include "Rendering/ShaderGraph/ShaderGraph.hpp"
-#include "Rendering/ShaderGraph/ShaderGraphVariable.hpp"
+#include "Rendering/ShaderGraph/Variable.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
 
-Negate::Negate( ShaderGraph *graph, ShaderGraphVariable *input )
+Negate::Negate( ShaderGraph *graph, Variable *input )
 {
 	_input = input;
-	_result = graph->addNode< ShaderGraphVariable >( input->getType(), input->getUniqueName() + "_neg" );
+	_result = graph->addNode< Variable >( input->getType(), input->getUniqueName() + "_neg" );
 }
 
 Negate::~Negate( void )

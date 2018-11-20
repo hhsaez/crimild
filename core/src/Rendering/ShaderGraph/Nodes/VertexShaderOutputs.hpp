@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -34,19 +34,19 @@ namespace crimild {
 
 	namespace shadergraph {
 
-		class ShaderGraphVariable;
+		class Variable;
 
 		class VertexShaderOutputs : public ShaderGraphOperation {
 			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::VertexShaderOutput )
 			
 		public:
-			VertexShaderOutputs( ShaderGraph *, ShaderGraphVariable *vertexPosition );
+			VertexShaderOutputs( ShaderGraph *, Variable *vertexPosition );
 			virtual ~VertexShaderOutputs( void );
 			
-			ShaderGraphVariable *getVertexPosition( void ) { return _vertexPosition; }
+			Variable *getVertexPosition( void ) { return _vertexPosition; }
 
 		private:
-			ShaderGraphVariable *_vertexPosition = nullptr;
+			Variable *_vertexPosition = nullptr;
 
 		public:
 			virtual void setup( ShaderGraph * ) override;

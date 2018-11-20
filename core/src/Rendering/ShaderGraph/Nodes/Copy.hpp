@@ -34,21 +34,21 @@ namespace crimild {
 
 	namespace shadergraph {
 
-		class ShaderGraphVariable;
+		class Variable;
 
 		class Copy : public ShaderGraphOperation {
 			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::Copy )
 			
 		public:
-			Copy( ShaderGraph *graph, ShaderGraphVariable *input, ShaderGraphVariable *output );
+			Copy( ShaderGraph *graph, Variable *input, Variable *output );
 			virtual ~Copy( void );
 
-			ShaderGraphVariable *getInput( void ) { return _input; }
-			ShaderGraphVariable *getOutput( void ) { return _output; }
+			Variable *getInput( void ) { return _input; }
+			Variable *getOutput( void ) { return _output; }
 			
 		private:
-			ShaderGraphVariable *_input = nullptr;
-			ShaderGraphVariable *_output = nullptr;
+			Variable *_input = nullptr;
+			Variable *_output = nullptr;
 			
 		public:
 			virtual void setup( ShaderGraph *graph ) override;

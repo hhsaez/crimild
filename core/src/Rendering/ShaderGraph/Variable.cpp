@@ -25,20 +25,20 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ShaderGraphVariable.hpp"
+#include "Variable.hpp"
 
 #include <sstream>
 
 using namespace crimild;
 using namespace crimild::shadergraph;
 
-ShaderGraphVariable::ShaderGraphVariable( ShaderGraph *graph, Type type, std::string uniqueName )
-	: ShaderGraphVariable( graph, Storage::DEFAULT, type, uniqueName )
+Variable::Variable( ShaderGraph *graph, Type type, std::string uniqueName )
+	: Variable( graph, Storage::DEFAULT, type, uniqueName )
 {
 
 }
 
-ShaderGraphVariable::ShaderGraphVariable( ShaderGraph *, Storage storage, Type type, std::string uniqueName )
+Variable::Variable( ShaderGraph *, Storage storage, Type type, std::string uniqueName )
 	: _type( type ),
 	  _storage( storage ),
 	  _uniqueName( uniqueName )
@@ -50,7 +50,7 @@ ShaderGraphVariable::ShaderGraphVariable( ShaderGraph *, Storage storage, Type t
 	}
 }
 
-ShaderGraphVariable::~ShaderGraphVariable( void )
+Variable::~Variable( void )
 {
 
 }

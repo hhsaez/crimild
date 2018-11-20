@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -29,12 +29,12 @@
 #include "VertexOutput.hpp"
 
 #include "../ShaderGraph.hpp"
-#include "../ShaderGraphVariable.hpp"
+#include "../Variable.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
 
-VertexShaderOutputs::VertexShaderOutputs( ShaderGraph *graph, ShaderGraphVariable *vertexPosition )
+VertexShaderOutputs::VertexShaderOutputs( ShaderGraph *graph, Variable *vertexPosition )
 	: _vertexPosition( vertexPosition )
 {
 

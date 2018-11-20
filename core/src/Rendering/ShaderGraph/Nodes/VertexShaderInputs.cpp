@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 #include "Negate.hpp"
 
 #include "Rendering/ShaderGraph/ShaderGraph.hpp"
-#include "Rendering/ShaderGraph/ShaderGraphVariable.hpp"
+#include "Rendering/ShaderGraph/Variable.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/ShaderLocation.hpp"
 
@@ -43,26 +43,26 @@ using namespace crimild::shadergraph;
 
 VertexShaderInputs::VertexShaderInputs( ShaderGraph *graph )
 {
-	_positionAttribute = graph->addInputNode< ShaderGraphVariable >(
-		ShaderGraphVariable::Storage::INPUT,
-		ShaderGraphVariable::Type::VECTOR_3,
+	_positionAttribute = graph->addInputNode< Variable >(
+		Variable::Storage::INPUT,
+		Variable::Type::VECTOR_3,
 		"aPosition" );
-	_normalAttribute = graph->addInputNode< ShaderGraphVariable >(
-		ShaderGraphVariable::Storage::INPUT,
-		ShaderGraphVariable::Type::VECTOR_3,
+	_normalAttribute = graph->addInputNode< Variable >(
+		Variable::Storage::INPUT,
+		Variable::Type::VECTOR_3,
 		"aNormal" );
 
-	_modelMatrixUniform = graph->addInputNode< ShaderGraphVariable >(
-		ShaderGraphVariable::Storage::UNIFORM,
-		ShaderGraphVariable::Type::MATRIX_4,
+	_modelMatrixUniform = graph->addInputNode< Variable >(
+		Variable::Storage::UNIFORM,
+		Variable::Type::MATRIX_4,
 		"uMMatrix" );
-	_viewMatrixUniform = graph->addInputNode< ShaderGraphVariable >(
-		ShaderGraphVariable::Storage::UNIFORM,
-		ShaderGraphVariable::Type::MATRIX_4,
+	_viewMatrixUniform = graph->addInputNode< Variable >(
+		Variable::Storage::UNIFORM,
+		Variable::Type::MATRIX_4,
 		"uVMatrix" );
-	_projectionMatrixUniform = graph->addInputNode< ShaderGraphVariable >(
-		ShaderGraphVariable::Storage::UNIFORM,
-		ShaderGraphVariable::Type::MATRIX_4,
+	_projectionMatrixUniform = graph->addInputNode< Variable >(
+		Variable::Storage::UNIFORM,
+		Variable::Type::MATRIX_4,
 		"uPMatrix" );
 
 	auto kONE = graph->addNode< ScalarConstant >( 1.0f, "kONE" );

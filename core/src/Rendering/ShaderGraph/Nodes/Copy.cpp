@@ -28,12 +28,12 @@
 #include "Copy.hpp"
 
 #include "Rendering/ShaderGraph/ShaderGraph.hpp"
-#include "Rendering/ShaderGraph/ShaderGraphVariable.hpp"
+#include "Rendering/ShaderGraph/Variable.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
 
-Copy::Copy( ShaderGraph *graph, ShaderGraphVariable *input, ShaderGraphVariable *output )
+Copy::Copy( ShaderGraph *graph, Variable *input, Variable *output )
 {
 	_input = input;
 	_output = output;

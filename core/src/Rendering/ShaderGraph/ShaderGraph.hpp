@@ -38,10 +38,6 @@ namespace crimild {
 
 	namespace shadergraph {
 
-		class ShaderGraphNode;
-		class ShaderGraphOperation;
-		class ShaderGraphVariable;
-
 		class ShaderGraph : public coding::Codable {
 			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::ShaderGraph )
 			

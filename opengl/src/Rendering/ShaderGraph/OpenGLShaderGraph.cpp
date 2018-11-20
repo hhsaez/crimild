@@ -28,7 +28,7 @@
 #include "OpenGLShaderGraph.hpp"
 
 #include "Rendering/ShaderGraph/ShaderGraph.hpp"
-#include "Rendering/ShaderGraph/ShaderGraphVariable.hpp"
+#include "Rendering/ShaderGraph/Variable.hpp"
 #include "Rendering/ShaderGraph/Nodes/VertexShaderInputs.hpp"
 #include "Rendering/ShaderGraph/Nodes/VertexOutput.hpp"
 #include "Rendering/ShaderGraph/Nodes/VertexShaderOutputs.hpp"
@@ -58,23 +58,23 @@ using namespace crimild::shadergraph;
 
 OpenGLShaderGraph::OpenGLShaderGraph( void )
 {
-	_translators[ ShaderGraphVariable::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
-		auto var = static_cast< ShaderGraphVariable * >( node );
+	_translators[ Variable::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
+		auto var = static_cast< Variable * >( node );
 
 		std::string storageQualifier;
 		CodeSection *section = &_variablesSection;
 		switch ( var->getStorage() ) {
-			case ShaderGraphVariable::Storage::INPUT:
+			case Variable::Storage::INPUT:
 				storageQualifier = "in ";
 				section = &_inputsSection;
 				break;
 
-			case ShaderGraphVariable::Storage::OUTPUT:
+			case Variable::Storage::OUTPUT:
 				storageQualifier = "out ";
 				section = &_outputsSection;
 				break;
 
-			case ShaderGraphVariable::Storage::UNIFORM:
+			case Variable::Storage::UNIFORM:
 				storageQualifier = "uniform ";
 				section = &_uniformsSection;
 				break;
@@ -176,18 +176,18 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 		auto w = vector->getW();
 
 		switch ( v->getType() ) {
-			case ShaderGraphVariable::Type::VECTOR_2:
+			case Variable::Type::VECTOR_2:
 				if ( isConnected( x ) ) _mainSection.add( x->getUniqueName() + " = " + v->getUniqueName() + ".x;" );
 				if ( isConnected( y ) ) _mainSection.add( y->getUniqueName() + " = " + v->getUniqueName() + ".y;" );
 				break;
 
-			case ShaderGraphVariable::Type::VECTOR_3:
+			case Variable::Type::VECTOR_3:
 				if ( isConnected( x ) ) _mainSection.add( x->getUniqueName() + " = " + v->getUniqueName() + ".x;" );
 				if ( isConnected( y ) ) _mainSection.add( y->getUniqueName() + " = " + v->getUniqueName() + ".y;" );
 				if ( isConnected( z ) ) _mainSection.add( z->getUniqueName() + " = " + v->getUniqueName() + ".z;" );
 				break;
 
-			case ShaderGraphVariable::Type::VECTOR_4:
+			case Variable::Type::VECTOR_4:
 				if ( isConnected( x ) ) _mainSection.add( x->getUniqueName() + " = " + v->getUniqueName() + ".x;" );
 				if ( isConnected( y ) ) _mainSection.add( y->getUniqueName() + " = " + v->getUniqueName() + ".y;" );
 				if ( isConnected( z ) ) _mainSection.add( z->getUniqueName() + " = " + v->getUniqueName() + ".z;" );
@@ -210,7 +210,7 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 		std::stringstream ss;
 		ss << v->getUniqueName() << " = ";
 		switch ( v->getType() ) {
-			case ShaderGraphVariable::Type::VECTOR_2:
+			case Variable::Type::VECTOR_2:
 				ss << "vec2( "
 				   << x->getUniqueName()
 				   << ", "
@@ -218,7 +218,7 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 				   << " );";
 				break;
 
-			case ShaderGraphVariable::Type::VECTOR_3:
+			case Variable::Type::VECTOR_3:
 				ss << "vec3( "
 				   << x->getUniqueName()
 				   << ", "
@@ -228,7 +228,7 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 				   << " );";
 				break;
 
-			case ShaderGraphVariable::Type::VECTOR_4:
+			case Variable::Type::VECTOR_4:
 				ss << "vec4( "
 				   << x->getUniqueName()
 				   << ", "
@@ -254,15 +254,15 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 		std::stringstream ss;
 		ss << v->getUniqueName() << " = ";
 		switch ( v->getType() ) {
-			case ShaderGraphVariable::Type::VECTOR_2:
+			case Variable::Type::VECTOR_2:
 				ss << "vec2( " << k.x() << ", " << k.y() << " );";
 				break;
 
-			case ShaderGraphVariable::Type::VECTOR_3:
+			case Variable::Type::VECTOR_3:
 				ss << "vec3( " << k.x() << ", " << k.y() << ", " << k.z() << " );";
 				break;
 
-			case ShaderGraphVariable::Type::VECTOR_4:
+			case Variable::Type::VECTOR_4:
 				ss << "vec4( " << k.x() << ", " << k.y() << ", " << k.z() << ", " << k.w() << " );";
 				break;
 				
@@ -413,33 +413,33 @@ std::string OpenGLShaderGraph::generateShaderSource( containers::Array< ShaderGr
 	return ss.str();
 }
 
-std::string OpenGLShaderGraph::getVariableTypeString( ShaderGraphVariable *var )
+std::string OpenGLShaderGraph::getVariableTypeString( Variable *var )
 {
 	auto type = var->getType();
 	
 	std::string typeStr;
 	switch ( type ) {
-		case ShaderGraphVariable::Type::SCALAR:
+		case Variable::Type::SCALAR:
 			typeStr = "float";
 			break;
 			
-		case ShaderGraphVariable::Type::VECTOR_2:
+		case Variable::Type::VECTOR_2:
 			typeStr = "vec2";
 			break;
 			
-		case ShaderGraphVariable::Type::VECTOR_3:
+		case Variable::Type::VECTOR_3:
 			typeStr = "vec3";
 			break;
 			
-		case ShaderGraphVariable::Type::VECTOR_4:
+		case Variable::Type::VECTOR_4:
 			typeStr = "vec4";
 			break;
 			
-		case ShaderGraphVariable::Type::MATRIX_3:
+		case Variable::Type::MATRIX_3:
 			typeStr = "mat3";
 			break;
 			
-		case ShaderGraphVariable::Type::MATRIX_4:
+		case Variable::Type::MATRIX_4:
 			typeStr = "mat4";
 			break;
 			
