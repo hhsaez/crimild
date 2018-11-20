@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-present, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 #ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_SCALAR_CONSTANT_
 #define CRIMILD_RENDERING_SHADER_GRAPH_NODES_SCALAR_CONSTANT_
 
-#include "Rendering/ShaderGraph/ShaderGraphOperation.hpp"
+#include "Rendering/ShaderGraph/Expression.hpp"
 
 namespace crimild {
 
@@ -36,7 +36,7 @@ namespace crimild {
 
 		class Variable;
 
-		class ScalarConstant : public ShaderGraphOperation {
+		class ScalarConstant : public Expression {
 			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::ScalarConstant )
 			
 		public:

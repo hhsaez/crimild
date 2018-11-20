@@ -28,7 +28,7 @@
 #ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_NORMALIZE_
 #define CRIMILD_RENDERING_SHADER_GRAPH_NODES_NORMALIZE_
 
-#include "Rendering/ShaderGraph/ShaderGraphOperation.hpp"
+#include "Rendering/ShaderGraph/Expression.hpp"
 
 namespace crimild {
 
@@ -36,7 +36,7 @@ namespace crimild {
 
 		class Variable;
 
-		class Normalize : public ShaderGraphOperation {
+		class Normalize : public Expression {
 			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::Normalize )
 			
 		public:
@@ -53,7 +53,7 @@ namespace crimild {
 		public:
 			virtual void setup( ShaderGraph *graph ) override;
 		};
-		
+
 	}
 
 }

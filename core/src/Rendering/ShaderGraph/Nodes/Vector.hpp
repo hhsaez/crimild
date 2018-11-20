@@ -28,7 +28,7 @@
 #ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_VECTOR_
 #define CRIMILD_RENDERING_SHADER_GRAPH_NODES_VECTOR_
 
-#include "Rendering/ShaderGraph/ShaderGraphOperation.hpp"
+#include "Rendering/ShaderGraph/Expression.hpp"
 
 #include "Mathematics/Vector.hpp"
 
@@ -38,7 +38,7 @@ namespace crimild {
 
 		class Variable;
 
-		class VectorToScalars : public ShaderGraphOperation {
+		class VectorToScalars : public Expression {
 			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::VectorToScalars )
 			
 		public:
@@ -63,7 +63,7 @@ namespace crimild {
 			virtual void setup( ShaderGraph *graph ) override;
 		};
 
-		class ScalarsToVector : public ShaderGraphOperation {
+		class ScalarsToVector : public Expression {
 			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::ScalarsToVector )
 			
 		public:
@@ -90,7 +90,7 @@ namespace crimild {
 			virtual void setup( ShaderGraph *graph ) override;
 		};
 
-		class VectorConstant : public ShaderGraphOperation {
+		class VectorConstant : public Expression {
 			CRIMILD_IMPLEMENT_RTTI( crimild::scenegraph::VectorConstant )
 
 		public:

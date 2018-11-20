@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-preset, H. Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,44 +25,32 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "WorldNormal.hpp"
-#include "Convert.hpp"
-#include "Multiply.hpp"
-#include "Normalize.hpp"
+#ifndef CRIMILD_RENDERING_SHADER_GRAPH_OPERATION_
+#define CRIMILD_RENDERING_SHADER_GRAPH_OPERATION_
 
-#include "Rendering/ShaderGraph/ShaderGraph.hpp"
+#include "ShaderGraphNode.hpp"
 
-using namespace crimild;
-using namespace crimild::shadergraph;
+namespace crimild {
 
-WorldNormal::WorldNormal( ShaderGraph *graph, Variable *worldMatrix, Variable *normal )
-	: _worldMatrix( worldMatrix ),
-	  _normal( normal )
-{
-	auto rotMatrix = worldMatrix;
-	if ( worldMatrix->getType() != Variable::Type::MATRIX_3 ) {
-		rotMatrix = graph->addNode< Convert >(
-			worldMatrix,
-			Variable::Type::MATRIX_3
-		)->getResult();
+	class ShaderProgram;
+
+	namespace shadergraph {
+
+		class ShaderGraph;
+
+		class Expression : public ShaderGraphNode {
+		protected:
+			Expression( void );
+			
+		public:
+			virtual ~Expression( void );
+
+			virtual ShaderGraphNode::NodeType getNodeType( void ) const { return ShaderGraphNode::NodeType::OPERATION; }
+		};
+
 	}
-	
-	_result = graph->addNode< Normalize >(
-		graph->addNode< Multiply >(
-			rotMatrix,
-			normal
-		)->getResult()
-	)->getResult();
+
 }
 
-WorldNormal::~WorldNormal( void )
-{
-	
-}
-
-void WorldNormal::setup( ShaderGraph *graph )
-{
-	graph->read( this, { _worldMatrix, _normal } );
-	graph->write( this, { _result } );
-}
+#endif
 

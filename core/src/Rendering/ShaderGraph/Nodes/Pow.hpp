@@ -28,7 +28,7 @@
 #ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_POW_
 #define CRIMILD_RENDERING_SHADER_GRAPH_NODES_POW_
 
-#include "Rendering/ShaderGraph/ShaderGraphOperation.hpp"
+#include "Rendering/ShaderGraph/Expression.hpp"
 
 namespace crimild {
 

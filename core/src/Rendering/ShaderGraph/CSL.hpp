@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-preset, H. Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,37 +25,53 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ViewVector.hpp"
-#include "Negate.hpp"
-#include "Normalize.hpp"
-#include "Convert.hpp"
+#ifndef CRIMILD_RENDERING_SHADER_GRAPH_LANGUAGE_
+#define CRIMILD_RENDERING_SHADER_GRAPH_LANGUAGE_
 
-#include "Rendering/ShaderGraph/ShaderGraph.hpp"
+#include "Foundation/Types.hpp"
+#include "Mathematics/Vector.hpp"
 
-using namespace crimild;
-using namespace crimild::shadergraph;
+#include <string>
 
-ViewVector::ViewVector( ShaderGraph *graph, Variable *viewPosition )
-	: _viewPosition( viewPosition )
-{
-	_result = graph->addNode< Normalize >(
-		graph->addNode< Negate >(
-			graph->addNode< Convert >(
-				viewPosition,
-				Variable::Type::VECTOR_3
-			)->getResult()
-		)->getResult()
-	)->getResult();
+namespace crimild {
+
+	namespace shadergraph {
+
+		class Variable;
+
+		namespace csl {
+
+			Variable *scalar( crimild::Real32 value, std::string name = "" );
+
+			Variable *vec3( Variable *vector );
+			Variable *vec3_in( std::string name );
+			Variable *vec4( Variable *vector, Variable *scalar );
+			Variable *vec4( const Vector4f &value );
+
+			Variable *mat3( Variable *matrix );
+			Variable *mat4_uniform( std::string name );
+			
+			Variable *sub( Variable *a, Variable *b );
+			Variable *mult( Variable *a, Variable *b );
+			Variable *pow( Variable *base, Variable *exp );
+			Variable *max( Variable *a, Variable *b );
+			Variable *neg( Variable *input );
+
+			Variable *dot( Variable *a, Variable *b );
+			Variable *normalize( Variable *input );
+
+			void vertexPosition( Variable *position );
+			void vertexOutput( std::string name, Variable *value );
+
+			void fragColor( Variable *color );
+
+			Variable *worldNormal( Variable *worldMatrix, Variable *normal );
+			Variable *viewVector( Variable *viewPosition );
+		}
+
+	}
+
 }
 
-ViewVector::~ViewVector( void )
-{
-	
-}
-
-void ViewVector::setup( ShaderGraph *graph )
-{
-	graph->read( this, { _viewPosition } );
-	graph->write( this, { _result } );
-}
+#endif
 

@@ -35,9 +35,14 @@ using namespace crimild::shadergraph;
 Convert::Convert( ShaderGraph *graph, Variable *input, Variable::Type type )
 {
 	_input = input;
-	_result = graph->addNode< Variable >(
-		Variable::Storage::DEFAULT,
-		type );
+	if ( input->getType() == type ) {
+		_result = input;
+	}
+	else {
+		_result = graph->addNode< Variable >(
+			Variable::Storage::DEFAULT,
+			type );
+	}
 }
 
 Convert::~Convert( void )

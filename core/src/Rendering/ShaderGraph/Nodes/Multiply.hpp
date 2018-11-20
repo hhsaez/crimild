@@ -28,7 +28,7 @@
 #ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_MULTIPLY_
 #define CRIMILD_RENDERING_SHADER_GRAPH_NODES_MULTIPLY_
 
-#include "Rendering/ShaderGraph/ShaderGraphOperation.hpp"
+#include "Rendering/ShaderGraph/Expression.hpp"
 
 namespace crimild {
 
@@ -36,7 +36,7 @@ namespace crimild {
 
 		class Variable;
 
-		class Multiply : public ShaderGraphOperation {
+		class Multiply : public Expression {
 			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::Multiply )
 
 		public:
@@ -56,7 +56,7 @@ namespace crimild {
 		protected:
 			virtual void setup( ShaderGraph *graph ) override;
 		};
-		
+
 	}
 
 }

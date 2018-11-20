@@ -28,7 +28,7 @@
 #ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_VERTEX_OUTPUT_
 #define CRIMILD_RENDERING_SHADER_GRAPH_NODES_VERTEX_OUTPUT_
 
-#include "Rendering/ShaderGraph/ShaderGraphOperation.hpp"
+#include "Rendering/ShaderGraph/Expression.hpp"
 
 namespace crimild {
 
@@ -36,7 +36,7 @@ namespace crimild {
 
 		class Variable;
 
-		class VertexOutput : public ShaderGraphOperation {
+		class VertexOutput : public Expression {
 			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::VertexOutput )
 			
 		public:

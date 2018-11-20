@@ -26,21 +26,29 @@
  */
 
 #include "ShaderGraph.hpp"
-#include "ShaderGraphOperation.hpp"
 #include "Foundation/Log.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
 using namespace crimild::containers;
 
+ShaderGraph *ShaderGraph::_currentShaderGraph = nullptr;
+
 ShaderGraph::ShaderGraph( void )
 {
-	
+	makeCurrent();
 }
 
 ShaderGraph::~ShaderGraph( void )
 {
+	if ( _currentShaderGraph == this ) {
+		_currentShaderGraph = nullptr;
+	}
+}
 
+void ShaderGraph::makeCurrent( void )
+{
+	_currentShaderGraph = this;
 }
 
 void ShaderGraph::eachNode( std::function< void( ShaderGraphNode * ) > const &callback )

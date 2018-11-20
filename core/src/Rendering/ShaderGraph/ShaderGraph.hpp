@@ -40,10 +40,18 @@ namespace crimild {
 
 		class ShaderGraph : public coding::Codable {
 			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::ShaderGraph )
+
+		public:
+			static ShaderGraph *getCurrent( void ) { return _currentShaderGraph; }
+
+		private:
+			static ShaderGraph *_currentShaderGraph;
 			
 		public:
 			ShaderGraph( void );
 			virtual ~ShaderGraph( void );
+
+			void makeCurrent( void );
 
 			template< typename NodeType, typename... Args >
 			NodeType *addInputNode( Args &&... args )

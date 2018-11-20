@@ -40,6 +40,62 @@ using namespace crimild;
 using namespace crimild::rendergraph;
 using namespace crimild::rendergraph::passes;
 
+class DepthPassProgram : public ShaderProgram {
+public:
+	DepthPassProgram( void )
+	{
+		createVertexShader();
+		createFragmentShader();
+		
+		registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
+		registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::NORMAL_ATTRIBUTE, "aNormal" );
+		
+		registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::PROJECTION_MATRIX_UNIFORM, "uPMatrix" );
+		registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM, "uVMatrix" );
+		registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM, "uMMatrix" );
+	}
+
+	virtual ~DepthPassProgram( void )
+	{
+
+	}
+
+private:
+	void createVertexShader( void )
+	{
+		/*
+		auto graph = Renderer::getInstance()->createShaderGraph();
+
+		auto inputs = graph->addInputNode< StandardVertexInputs >();
+
+		graph->addOutputNode< VertexPositionOutput >( inputs->getProjectedPosition() );
+		graph->addOutputNode< VertexOutput >(
+			"vViewNormal",
+			graph->addNode< ViewNormal >(
+				inputs->getModelMatrixUniform(),
+				inputs->getViewMatrixUniform(),
+				inputs->getNormalAttribute()
+			)->getResult()
+		);
+
+		auto src = graph->build();
+		auto shader = crimild::alloc< VertexShader >( src );
+		setVertexShader( shader );
+		*/
+	}
+
+	void createFragmentShader( void )
+	{
+		/*
+		auto graph = Renderer::getInstance()->createShaderGraph();
+
+		auto src = graph->build();
+		auto shader = crimild::alloc< FragmentShader >( src );
+		setFragmentShader( shader );
+		*/
+	}
+};
+
 DepthPass::DepthPass( RenderGraph *graph )
 	: RenderGraphPass( graph, "Depth Pass" )
 {

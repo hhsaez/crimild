@@ -25,17 +25,17 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ShaderGraphOperation.hpp"
+#include "Expression.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
 
-ShaderGraphOperation::ShaderGraphOperation( void )
+Expression::Expression( void )
 {
 	
 }
 
-ShaderGraphOperation::~ShaderGraphOperation( void )
+Expression::~Expression( void )
 {
 
 }

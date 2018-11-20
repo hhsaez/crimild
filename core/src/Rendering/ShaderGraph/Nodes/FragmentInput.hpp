@@ -28,7 +28,7 @@
 #ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_FRAGMENT_INPUT_
 #define CRIMILD_RENDERING_SHADER_GRAPH_NODES_FRAGMENT_INPUT_
 
-#include "Rendering/ShaderGraph/ShaderGraphOperation.hpp"
+#include "Rendering/ShaderGraph/Expression.hpp"
 #include "Rendering/ShaderGraph/Variable.hpp"
 
 namespace crimild {
