@@ -29,6 +29,7 @@
 #define CRIMILD_RENDERING_SHADER_GRAPH_NODE_
 
 #include "Coding/Codable.hpp"
+#include "Foundation/NamedObject.hpp"
 
 namespace crimild {
 
@@ -36,7 +37,10 @@ namespace crimild {
 
 		class ShaderGraph;
 
-		class ShaderGraphNode : public coding::Codable {
+		class ShaderGraphNode :
+			public coding::Codable,
+			public NamedObject {
+			
 		public:
 			enum class NodeType {
 				OPERATION,
@@ -44,7 +48,7 @@ namespace crimild {
 			};
 			
 		protected:
-			ShaderGraphNode( void ) { }
+			ShaderGraphNode( std::string name = "" ) : NamedObject( name ) { }
 			
 		public:
 			virtual ~ShaderGraphNode( void ) { }

@@ -36,7 +36,7 @@ using namespace crimild::shadergraph;
 Normalize::Normalize( ShaderGraph *graph, Variable *input )
 {
 	_input = input;
-	_result = graph->addNode< Variable >( input->getType(), input->getUniqueName() + "_norm" );
+	_result = graph->addNode< Variable >( input->getType(), input->getName() + "_norm" );
 }
 
 Normalize::~Normalize( void )

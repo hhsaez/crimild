@@ -73,22 +73,26 @@ VertexShaderInputs::VertexShaderInputs( ShaderGraph *graph )
 		posXYZ->getY(),
 		posXYZ->getZ(),
 		kONE->getVariable()
-	)->getVector()->setUniqueName( "modelPosition" );
+	)->getVector();
+	_modelPosition->setName( "modelPosition" );
 
 	_worldPosition = graph->addNode< Multiply >(
 		_modelMatrixUniform,
 		_modelPosition
-	)->getResult()->setUniqueName( "worldPosition" );
+	)->getResult();
+	_worldPosition->setName( "worldPosition" );
 
 	_viewPosition = graph->addNode< Multiply >(
 		_viewMatrixUniform,
 		_worldPosition
-	)->getResult()->setUniqueName( "viewPosition" );
+	)->getResult();
+	_viewPosition->setName( "viewPosition" );
 
 	_projectedPosition = graph->addNode< Multiply >(
 		_projectionMatrixUniform,
 		_viewPosition
-	)->getResult()->setUniqueName( "projectedPosition" );
+	)->getResult();
+	_projectedPosition->setName( "projectedPosition" );
 }
 
 VertexShaderInputs::~VertexShaderInputs( void )

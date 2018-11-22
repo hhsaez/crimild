@@ -65,7 +65,13 @@ namespace crimild {
 
 			void fragColor( Variable *color );
 
+			Variable *worldPosition( void );
+			Variable *viewPosition( void );
+			Variable *projectedPosition( void );
+
+			Variable *worldNormal( void );
 			Variable *worldNormal( Variable *worldMatrix, Variable *normal );
+			
 			Variable *viewVector( Variable *viewPosition );
 		}
 

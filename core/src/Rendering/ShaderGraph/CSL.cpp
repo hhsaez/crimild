@@ -66,12 +66,19 @@ Variable *csl::mat3( Variable *matrix )
 
 Variable *csl::mat4_uniform( std::string name )
 {
-	return ShaderGraph::getCurrent()
-		->addInputNode< Variable >(
-			Variable::Storage::UNIFORM,
-			Variable::Type::MATRIX_4,
-			name
-		);
+	auto graph = ShaderGraph::getCurrent();
+
+	auto ret = graph->getInput< Variable >( name );
+	if ( ret == nullptr ) {
+		ret = ShaderGraph::getCurrent()
+			->addInputNode< Variable >(
+				Variable::Storage::UNIFORM,
+				Variable::Type::MATRIX_4,
+				name
+			);
+		graph->addInputNode( ret );
+	}
+	return ret;
 }
 
 Variable *csl::vec3( Variable *input )
@@ -84,11 +91,18 @@ Variable *csl::vec3( Variable *input )
 
 Variable *csl::vec3_in( std::string name )
 {
-	return ShaderGraph::getCurrent()->addInputNode< Variable >(
-		Variable::Storage::INPUT,
-		Variable::Type::VECTOR_3,
-		name
-	);
+	auto graph = ShaderGraph::getCurrent();
+
+	auto ret = graph->getInput< Variable >( name );
+	if ( ret == nullptr ) {
+		ret = ShaderGraph::getCurrent()->addInputNode< Variable >(
+			Variable::Storage::INPUT,
+			Variable::Type::VECTOR_3,
+			name
+		);
+		graph->addInputNode( ret );
+	}
+	return ret;
 }
 
 Variable *csl::vec4( Variable *vector, Variable *scalar )
@@ -170,13 +184,82 @@ void csl::vertexOutput( std::string name, Variable *value )
 		);
 }
 
+Variable *csl::worldPosition( void )
+{
+	auto graph = ShaderGraph::getCurrent();
+
+	auto ret = graph->getInput< Variable >( "c_worldPosition" );
+	if ( ret != nullptr ) {
+		return ret;
+	}
+
+	auto aPosition = vec3_in( "aPosition" );
+	auto uMMatrix = mat4_uniform( "uMMatrix" );
+	ret = mult( uMMatrix, vec4( aPosition, scalar( 1.0 ) ) );
+	ret->setName( "c_worldPosition" );
+	graph->addInputNode( ret );
+	return ret;
+}
+
+Variable *csl::viewPosition( void )
+{
+	auto graph = ShaderGraph::getCurrent();
+
+	auto ret = graph->getInput< Variable >( "c_wiewPosition" );
+	if ( ret != nullptr ) {
+		return ret;
+	}
+
+	auto P = worldPosition();
+	auto V = mat4_uniform( "uVMatrix" );
+	ret = mult( V, P );
+	ret->setName( "c_wiewPosition" );
+	graph->addInputNode( ret );
+	return ret;
+}
+
+Variable *csl::projectedPosition( void )
+{
+	auto graph = ShaderGraph::getCurrent();
+
+	auto ret = graph->getInput< Variable >( "c_projPosition" );
+	if ( ret != nullptr ) {
+		return ret;
+	}
+
+	auto P = viewPosition();
+	auto M = mat4_uniform( "uPMatrix" );
+	ret = mult( M, P );
+	ret->setName( "c_projPosition" );
+	graph->addInputNode( ret );
+	return ret;
+}
+
 Variable *csl::worldNormal( Variable *worldMatrix, Variable *normal )
 {
 	return normalize( mult( mat3( worldMatrix ), normal ) );
+}
+
+Variable *csl::worldNormal( void )
+{
+	auto aNormal = vec3_in( "aNormal" );
+	auto uMMatrix = mat4_uniform( "uMMatrix" );
+	
+	return worldNormal( uMMatrix, aNormal );
 }
 
 Variable *csl::viewVector( Variable *viewPosition )
 {
 	return normalize( neg( vec3( viewPosition ) ) );
 }
+
+/*
+Variable *csl::viewVector( void )
+{
+	auto graph = ShaderGraph::getCurrent();
+
+	auto P = viewPosition();
+
+}
+*/
 

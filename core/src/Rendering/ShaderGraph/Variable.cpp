@@ -32,21 +32,21 @@
 using namespace crimild;
 using namespace crimild::shadergraph;
 
-Variable::Variable( ShaderGraph *graph, Type type, std::string uniqueName )
-	: Variable( graph, Storage::DEFAULT, type, uniqueName )
+Variable::Variable( ShaderGraph *graph, Type type, std::string name )
+	: Variable( graph, Storage::DEFAULT, type, name )
 {
 
 }
 
-Variable::Variable( ShaderGraph *, Storage storage, Type type, std::string uniqueName )
-	: _type( type ),
-	  _storage( storage ),
-	  _uniqueName( uniqueName )
+Variable::Variable( ShaderGraph *, Storage storage, Type type, std::string name )
+	: ShaderGraphNode( name ),
+	  _type( type ),
+	  _storage( storage )
 {
-	if ( _uniqueName == "" ) {
+	if ( getName() == "" ) {
 		std::stringstream ss;
 		ss << "var_" << getUniqueID();
-		_uniqueName = ss.str();
+		setName( ss.str() );
 	}
 }
 

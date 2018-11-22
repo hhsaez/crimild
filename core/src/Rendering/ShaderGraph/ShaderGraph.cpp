@@ -51,6 +51,16 @@ void ShaderGraph::makeCurrent( void )
 	_currentShaderGraph = this;
 }
 
+void ShaderGraph::addInputNode( ShaderGraphNode *node )
+{
+	_inputs.add( node );
+}
+
+void ShaderGraph::addOutputNode( ShaderGraphNode *node )
+{
+	_outputs.add( node );
+}
+
 void ShaderGraph::eachNode( std::function< void( ShaderGraphNode * ) > const &callback )
 {
 	_nodes.each( [ callback ]( SharedPointer< ShaderGraphNode > const &node ) {
@@ -74,6 +84,17 @@ void ShaderGraph::write( ShaderGraphNode *node, containers::Array< ShaderGraphNo
 			_graph.addEdge( node, out );
 		}
 	});
+}
+
+ShaderGraphNode *ShaderGraph::getNode( containers::Array< ShaderGraphNode * > &ns, std::string name )
+{
+	ShaderGraphNode *result = nullptr;
+	ns.each( [ name, &result ]( ShaderGraphNode *n ) {
+		if ( n->getName() == name ) {
+			result = n;
+		}
+	});
+	return result;
 }
 
 std::string ShaderGraph::build( void )

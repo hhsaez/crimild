@@ -53,11 +53,13 @@ namespace crimild {
 
 			void makeCurrent( void );
 
+			void addInputNode( ShaderGraphNode *node );
+
 			template< typename NodeType, typename... Args >
 			NodeType *addInputNode( Args &&... args )
 			{
 				auto n = addNode< NodeType >( std::forward< Args >( args )... );
-				_inputs.add( n );
+				addInputNode( n );
 				return n;
 			}
 
@@ -70,11 +72,13 @@ namespace crimild {
 				return crimild::get_ptr( n );
 			}
 
+			void addOutputNode( ShaderGraphNode *node );
+
 			template< typename NodeType, typename... Args >
 			NodeType *addOutputNode( Args &&... args )
 			{
 				auto n = addNode< NodeType >( std::forward< Args >( args )... );
-				_outputs.add( n );
+				addOutputNode( n );
 				return n;
 			}
 
@@ -82,6 +86,22 @@ namespace crimild {
 
 			void read( ShaderGraphNode *node, containers::Array< ShaderGraphNode * > const &inputs );
 			void write( ShaderGraphNode *node, containers::Array< ShaderGraphNode * > const &outputs );
+
+		public:
+			template< class NodeType >
+			NodeType *getInput( std::string name )
+			{
+				return static_cast< NodeType * >( getNode( _inputs, name ) );
+			}
+
+			template< class NodeType >
+			NodeType *getOutput( std::string name )
+			{
+				return static_cast< NodeType * >( getNode( _outputs, name ) );
+			}
+
+		private:
+			ShaderGraphNode *getNode( containers::Array< ShaderGraphNode * > &ns, std::string name );
 
 		private:
 			containers::Digraph< ShaderGraphNode * > _graph;

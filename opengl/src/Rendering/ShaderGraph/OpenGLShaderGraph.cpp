@@ -84,7 +84,7 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 		}
 
 		std::stringstream ss;
-		ss << storageQualifier << getVariableTypeString( var ) << " " << var->getUniqueName() << ";";
+		ss << storageQualifier << getVariableTypeString( var ) << " " << var->getName() << ";";
 		section->add( ss.str() );
 	};
 	
@@ -100,9 +100,9 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 		auto ret = multiply->getResult();
 
 		std::stringstream ss;
-		ss << ret->getUniqueName()
-		<< " = " << a->getUniqueName()
-		<< " * " << b->getUniqueName()
+		ss << ret->getName()
+		<< " = " << a->getName()
+		<< " * " << b->getName()
 		<< ";";
 
 		_mainSection.add( ss.str() );
@@ -111,9 +111,9 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 	_translators[ Dot::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
 		auto dot = static_cast< Dot * >( node );
 
-		auto a = dot->getA()->getUniqueName();
-		auto b = dot->getB()->getUniqueName();
-		auto ret = dot->getResult()->getUniqueName();
+		auto a = dot->getA()->getName();
+		auto b = dot->getB()->getName();
+		auto ret = dot->getResult()->getName();
 
 		std::stringstream ss;
 		ss << ret << " = dot( " << a << ", " << b << " );";
@@ -123,9 +123,9 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 	_translators[ Max::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
 		auto max = static_cast< Max * >( node );
 
-		auto a = max->getA()->getUniqueName();
-		auto b = max->getB()->getUniqueName();
-		auto ret = max->getResult()->getUniqueName();
+		auto a = max->getA()->getName();
+		auto b = max->getB()->getName();
+		auto ret = max->getResult()->getName();
 
 		std::stringstream ss;
 		ss << ret << " = max( " << a << ", " << b << " );";
@@ -135,9 +135,9 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 	_translators[ Subtract::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
 		auto subtract = static_cast< Subtract * >( node );
 
-		auto a = subtract->getA()->getUniqueName();
-		auto b = subtract->getB()->getUniqueName();
-		auto ret = subtract->getResult()->getUniqueName();
+		auto a = subtract->getA()->getName();
+		auto b = subtract->getB()->getName();
+		auto ret = subtract->getResult()->getName();
 
 		std::stringstream ss;
 		ss << ret << " = " << a << " - " << b << ";";
@@ -147,9 +147,9 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 	_translators[ Pow::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
 		auto pow = static_cast< Pow * >( node );
 
-		auto a = pow->getBase()->getUniqueName();
-		auto b = pow->getExponent()->getUniqueName();
-		auto ret = pow->getResult()->getUniqueName();
+		auto a = pow->getBase()->getName();
+		auto b = pow->getExponent()->getName();
+		auto ret = pow->getResult()->getName();
 
 		std::stringstream ss;
 		ss << ret << " = pow( " << a << ", " << b << " );";
@@ -162,7 +162,7 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 		auto v = scalar->getVariable();
 
 		std::stringstream ss;
-		ss << v->getUniqueName() << " = " << scalar->getValue() << ";";
+		ss << v->getName() << " = " << scalar->getValue() << ";";
 		_mainSection.add( ss.str() );
 	};
 
@@ -177,21 +177,21 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 
 		switch ( v->getType() ) {
 			case Variable::Type::VECTOR_2:
-				if ( isConnected( x ) ) _mainSection.add( x->getUniqueName() + " = " + v->getUniqueName() + ".x;" );
-				if ( isConnected( y ) ) _mainSection.add( y->getUniqueName() + " = " + v->getUniqueName() + ".y;" );
+				if ( isConnected( x ) ) _mainSection.add( x->getName() + " = " + v->getName() + ".x;" );
+				if ( isConnected( y ) ) _mainSection.add( y->getName() + " = " + v->getName() + ".y;" );
 				break;
 
 			case Variable::Type::VECTOR_3:
-				if ( isConnected( x ) ) _mainSection.add( x->getUniqueName() + " = " + v->getUniqueName() + ".x;" );
-				if ( isConnected( y ) ) _mainSection.add( y->getUniqueName() + " = " + v->getUniqueName() + ".y;" );
-				if ( isConnected( z ) ) _mainSection.add( z->getUniqueName() + " = " + v->getUniqueName() + ".z;" );
+				if ( isConnected( x ) ) _mainSection.add( x->getName() + " = " + v->getName() + ".x;" );
+				if ( isConnected( y ) ) _mainSection.add( y->getName() + " = " + v->getName() + ".y;" );
+				if ( isConnected( z ) ) _mainSection.add( z->getName() + " = " + v->getName() + ".z;" );
 				break;
 
 			case Variable::Type::VECTOR_4:
-				if ( isConnected( x ) ) _mainSection.add( x->getUniqueName() + " = " + v->getUniqueName() + ".x;" );
-				if ( isConnected( y ) ) _mainSection.add( y->getUniqueName() + " = " + v->getUniqueName() + ".y;" );
-				if ( isConnected( z ) ) _mainSection.add( z->getUniqueName() + " = " + v->getUniqueName() + ".z;" );
-				if ( isConnected( w ) ) _mainSection.add( w->getUniqueName() + " = " + v->getUniqueName() + ".w;" );
+				if ( isConnected( x ) ) _mainSection.add( x->getName() + " = " + v->getName() + ".x;" );
+				if ( isConnected( y ) ) _mainSection.add( y->getName() + " = " + v->getName() + ".y;" );
+				if ( isConnected( z ) ) _mainSection.add( z->getName() + " = " + v->getName() + ".z;" );
+				if ( isConnected( w ) ) _mainSection.add( w->getName() + " = " + v->getName() + ".w;" );
 				break;
 			default:
 				break;
@@ -208,35 +208,35 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 		auto v = scalars->getVector();
 
 		std::stringstream ss;
-		ss << v->getUniqueName() << " = ";
+		ss << v->getName() << " = ";
 		switch ( v->getType() ) {
 			case Variable::Type::VECTOR_2:
 				ss << "vec2( "
-				   << x->getUniqueName()
+				   << x->getName()
 				   << ", "
-				   << y->getUniqueName()
+				   << y->getName()
 				   << " );";
 				break;
 
 			case Variable::Type::VECTOR_3:
 				ss << "vec3( "
-				   << x->getUniqueName()
+				   << x->getName()
 				   << ", "
-				   << y->getUniqueName()
+				   << y->getName()
 				   << ", "
-				   << z->getUniqueName()
+				   << z->getName()
 				   << " );";
 				break;
 
 			case Variable::Type::VECTOR_4:
 				ss << "vec4( "
-				   << x->getUniqueName()
+				   << x->getName()
 				   << ", "
-				   << y->getUniqueName()
+				   << y->getName()
 				   << ", "
-				   << z->getUniqueName()
+				   << z->getName()
 				   << ", "
-				   << w->getUniqueName()
+				   << w->getName()
 				   << " );";
 				break;
 			default:
@@ -252,7 +252,7 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 		auto k = vector->getValue();
 
 		std::stringstream ss;
-		ss << v->getUniqueName() << " = ";
+		ss << v->getName() << " = ";
 		switch ( v->getType() ) {
 			case Variable::Type::VECTOR_2:
 				ss << "vec2( " << k.x() << ", " << k.y() << " );";
@@ -277,7 +277,7 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 
 		if ( auto var = outputs->getVertexPosition() ) {
 			std::stringstream ss;
-			ss << "gl_Position = " << var->getUniqueName() << ";";
+			ss << "gl_Position = " << var->getName() << ";";
 			_mainSection.add( ss.str() );
 		}
 	};
@@ -286,7 +286,7 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 		auto negate = static_cast< Negate * >( node );
 
 		std::stringstream ss;
-		ss << negate->getResult()->getUniqueName() << " = -" << negate->getInput()->getUniqueName() << ";";
+		ss << negate->getResult()->getName() << " = -" << negate->getInput()->getName() << ";";
 		_mainSection.add( ss.str() );
 	};
 
@@ -294,7 +294,7 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 		auto normalize = static_cast< Normalize * >( node );
 
 		std::stringstream ss;
-		ss << normalize->getResult()->getUniqueName() << " = normalize( " << normalize->getInput()->getUniqueName() << " );";
+		ss << normalize->getResult()->getName() << " = normalize( " << normalize->getInput()->getName() << " );";
 		_mainSection.add( ss.str() );
 	};
 
@@ -302,7 +302,7 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 		auto copy = static_cast< Copy * >( node );
 
 		std::stringstream ss;
-		ss << copy->getOutput()->getUniqueName() << " = " << copy->getInput()->getUniqueName() << ";";
+		ss << copy->getOutput()->getName() << " = " << copy->getInput()->getName() << ";";
 		_mainSection.add( ss.str() );
 	};
 
@@ -310,9 +310,9 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 		auto convert = static_cast< Convert * >( node );
 
 		std::stringstream ss;
-		ss << convert->getResult()->getUniqueName()
+		ss << convert->getResult()->getName()
 		<< " = " << getVariableTypeString( convert->getResult() ) << "( "
-		<< convert->getInput()->getUniqueName() << " );";
+		<< convert->getInput()->getName() << " );";
 		_mainSection.add( ss.str() );
 	};
 
@@ -320,7 +320,7 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 		auto out = static_cast< VertexOutput * >( node );
 
 		std::stringstream ss;
-		ss << out->getOutput()->getUniqueName() << " = " << out->getInput()->getUniqueName() << ";";
+		ss << out->getOutput()->getName() << " = " << out->getInput()->getName() << ";";
 		_mainSection.add( ss.str() );
 	};
 
@@ -328,7 +328,7 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 		auto output = static_cast< FragmentColorOutput * >( node );
 
 		std::stringstream ss;
-		ss << "vFragColor = " << output->getFragmentColor()->getUniqueName() << ";";
+		ss << "vFragColor = " << output->getFragmentColor()->getName() << ";";
 		_mainSection.add( ss.str() );
 
 		_outputsSection.add( "out vec4 vFragColor;" );

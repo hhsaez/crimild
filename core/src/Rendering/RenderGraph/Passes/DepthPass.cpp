@@ -34,11 +34,14 @@
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/Material.hpp"
 #include "Foundation/Profiler.hpp"
-#include "Simulation/AssetManager.hpp"
+#include "Rendering/ShaderGraph/ShaderGraph.hpp"
+#include "Rendering/ShaderGraph/Nodes/VertexShaderInputs.hpp"
+#include "Rendering/ShaderGraph/CSL.hpp"
 
 using namespace crimild;
 using namespace crimild::rendergraph;
 using namespace crimild::rendergraph::passes;
+using namespace crimild::shadergraph;
 
 class DepthPassProgram : public ShaderProgram {
 public:
@@ -63,36 +66,38 @@ public:
 private:
 	void createVertexShader( void )
 	{
-		/*
 		auto graph = Renderer::getInstance()->createShaderGraph();
 
 		auto inputs = graph->addInputNode< StandardVertexInputs >();
 
-		graph->addOutputNode< VertexPositionOutput >( inputs->getProjectedPosition() );
-		graph->addOutputNode< VertexOutput >(
-			"vViewNormal",
-			graph->addNode< ViewNormal >(
-				inputs->getModelMatrixUniform(),
-				inputs->getViewMatrixUniform(),
-				inputs->getNormalAttribute()
-			)->getResult()
-		);
+		auto P = inputs->getProjectedPosition();
+		auto N = inputs->getNormalAttribute();
+		auto M = inputs->getModelMatrixUniform();
+		auto V = inputs->getViewMatrixUniform();
+
+		//auto P = csl::vec3_in( "aPosition" );
+		//auto N = csl::vec3_in( "aNormal" );
+		//auto M = csl::mat4_uniform( "uMMatrix" );
+
+		auto viewNormal = csl::normalize( csl::mult( csl::mat3( csl::mult( V, M ) ), N ) );
+		csl::vertexOutput( "vViewNormal", viewNormal );
+		csl::vertexPosition( P );
 
 		auto src = graph->build();
 		auto shader = crimild::alloc< VertexShader >( src );
 		setVertexShader( shader );
-		*/
 	}
 
 	void createFragmentShader( void )
 	{
-		/*
 		auto graph = Renderer::getInstance()->createShaderGraph();
+
+		auto N = csl::vec3_in( "vViewNormal" );
+		csl::fragColor( csl::vec4( N, csl::scalar( 1.0f ) ) );
 
 		auto src = graph->build();
 		auto shader = crimild::alloc< FragmentShader >( src );
 		setFragmentShader( shader );
-		*/
 	}
 };
 
@@ -112,7 +117,7 @@ void DepthPass::setup( RenderGraph *graph )
 {
 	graph->write( this, { _depthOutput, _normalOutput } );
 
-	_program = crimild::retain( AssetManager::getInstance()->get< ShaderProgram >( Renderer::SHADER_PROGRAM_RENDER_PASS_DEPTH ) );
+	_program = crimild::alloc< DepthPassProgram >();
 }
 
 void DepthPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue )
