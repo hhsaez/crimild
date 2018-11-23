@@ -68,19 +68,9 @@ private:
 	{
 		auto graph = Renderer::getInstance()->createShaderGraph();
 
-		auto inputs = graph->addInputNode< StandardVertexInputs >();
-
-		auto P = inputs->getProjectedPosition();
-		auto N = inputs->getNormalAttribute();
-		auto M = inputs->getModelMatrixUniform();
-		auto V = inputs->getViewMatrixUniform();
-
-		//auto P = csl::vec3_in( "aPosition" );
-		//auto N = csl::vec3_in( "aNormal" );
-		//auto M = csl::mat4_uniform( "uMMatrix" );
-
-		auto viewNormal = csl::normalize( csl::mult( csl::mat3( csl::mult( V, M ) ), N ) );
-		csl::vertexOutput( "vViewNormal", viewNormal );
+		auto P = csl::projectedPosition();
+		auto N = csl::viewNormal();
+		csl::vertexOutput( "vViewNormal", N );
 		csl::vertexPosition( P );
 
 		auto src = graph->build();

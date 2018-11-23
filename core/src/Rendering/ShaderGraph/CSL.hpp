@@ -71,6 +71,7 @@ namespace crimild {
 
 			Variable *worldNormal( void );
 			Variable *worldNormal( Variable *worldMatrix, Variable *normal );
+			Variable *viewNormal( void );
 			
 			Variable *viewVector( Variable *viewPosition );
 		}
