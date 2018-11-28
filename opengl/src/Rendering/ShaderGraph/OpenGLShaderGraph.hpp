@@ -51,6 +51,7 @@ namespace crimild {
 
 		private:
 			std::string getVariableTypeString( Variable *outlet );
+			std::string writeOp( Variable *result, containers::Array< Variable * > const &inputs, std::string separator );
 
 		private:
 			using Translator = std::function< void( ShaderGraphNode * ) >;

@@ -35,7 +35,7 @@ Subtract::Subtract( ShaderGraph *graph, Variable *a, Variable *b )
 	: _a( a ),
 	  _b( b )
 {
-	_result = graph->addNode< Variable >( Variable::Type::SCALAR );
+	_result = graph->addNode< Variable >( _a->getType() );
 }
 
 Subtract::~Subtract( void )

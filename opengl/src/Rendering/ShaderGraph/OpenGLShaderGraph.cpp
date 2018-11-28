@@ -36,15 +36,18 @@
 #include "Rendering/ShaderGraph/Nodes/FragmentColorOutput.hpp"
 #include "Rendering/ShaderGraph/Nodes/Vector.hpp"
 #include "Rendering/ShaderGraph/Nodes/Multiply.hpp"
+#include "Rendering/ShaderGraph/Nodes/Divide.hpp"
 #include "Rendering/ShaderGraph/Nodes/Scalar.hpp"
 #include "Rendering/ShaderGraph/Nodes/Dot.hpp"
 #include "Rendering/ShaderGraph/Nodes/Max.hpp"
 #include "Rendering/ShaderGraph/Nodes/Subtract.hpp"
+#include "Rendering/ShaderGraph/Nodes/Add.hpp"
 #include "Rendering/ShaderGraph/Nodes/Normalize.hpp"
 #include "Rendering/ShaderGraph/Nodes/Negate.hpp"
 #include "Rendering/ShaderGraph/Nodes/Pow.hpp"
 #include "Rendering/ShaderGraph/Nodes/Copy.hpp"
 #include "Rendering/ShaderGraph/Nodes/Convert.hpp"
+#include "Rendering/ShaderGraph/Nodes/TextureColor.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/ShaderLocation.hpp"
 
@@ -79,6 +82,9 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 				section = &_uniformsSection;
 				break;
 
+			case Variable::Storage::CONSTANT:
+				return;
+
 			default:
 				break;
 		}
@@ -90,22 +96,6 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 	
 	_translators[ VertexShaderInputs::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
 		auto inputs = static_cast< VertexShaderInputs * >( node );
-	};
-
-	_translators[ Multiply::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
-		auto multiply = static_cast< Multiply * >( node );
-
-		auto a = multiply->getA();
-		auto b = multiply->getB();
-		auto ret = multiply->getResult();
-
-		std::stringstream ss;
-		ss << ret->getName()
-		<< " = " << a->getName()
-		<< " * " << b->getName()
-		<< ";";
-
-		_mainSection.add( ss.str() );
 	};
 
 	_translators[ Dot::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
@@ -132,6 +122,13 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 		_mainSection.add( ss.str() );
 	};
 
+	_translators[ Add::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
+		auto add = static_cast< Add * >( node );
+
+		auto line = writeOp( add->getResult(), add->getInputs(), " + " );
+		_mainSection.add( line );
+	};
+
 	_translators[ Subtract::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
 		auto subtract = static_cast< Subtract * >( node );
 
@@ -141,6 +138,24 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 
 		std::stringstream ss;
 		ss << ret << " = " << a << " - " << b << ";";
+		_mainSection.add( ss.str() );
+	};
+
+	_translators[ Multiply::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
+		auto op = static_cast< Multiply * >( node );
+		auto line = writeOp( op->getResult(), op->getInputs(), " * " );
+		_mainSection.add( line );
+	};
+
+	_translators[ Divide::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
+		auto divide = static_cast< Divide * >( node );
+
+		auto a = divide->getA()->getName();
+		auto b = divide->getB()->getName();
+		auto ret = divide->getResult()->getName();
+
+		std::stringstream ss;
+		ss << ret << " = " << a << " / " << b << ";";
 		_mainSection.add( ss.str() );
 	};
 
@@ -333,6 +348,18 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 
 		_outputsSection.add( "out vec4 vFragColor;" );
 	};
+
+	_translators[ TextureColor::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
+		auto op = static_cast< TextureColor * >( node );
+
+		auto t = op->getTexture();
+		auto uv = op->getTextureCoords();
+		auto ret = op->getColor();
+
+		std::stringstream ss;
+		ss << ret->getName() << " = " << "texture( " << t->getName() << ", " << uv->getName() << " );";
+		_mainSection.add( ss.str() );
+	};
 }
 
 OpenGLShaderGraph::~OpenGLShaderGraph( void )
@@ -442,6 +469,10 @@ std::string OpenGLShaderGraph::getVariableTypeString( Variable *var )
 		case Variable::Type::MATRIX_4:
 			typeStr = "mat4";
 			break;
+
+		case Variable::Type::SAMPLER_2D:
+			typeStr = "sampler2D";
+			break;
 			
 		default:
 			typeStr = "unknown";
@@ -449,5 +480,19 @@ std::string OpenGLShaderGraph::getVariableTypeString( Variable *var )
 	}
 
 	return typeStr;
+}
+
+std::string OpenGLShaderGraph::writeOp( Variable *result, containers::Array< Variable * > const &inputs, std::string separator )
+{
+	std::stringstream ss;
+	ss << result->getName() << " = ";
+	inputs.each( [ &ss, separator ]( Variable *in, crimild::Size idx ) {
+		if ( idx > 0 ) {
+			ss << separator;
+		}
+		ss << in->getName();
+	});
+	ss << ";";
+	return ss.str();
 }
 

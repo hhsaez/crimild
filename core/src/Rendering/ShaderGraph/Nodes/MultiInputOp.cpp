@@ -25,49 +25,31 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Multiply.hpp"
-
+#include "MultiInputOp.hpp"
 #include "Rendering/ShaderGraph/Variable.hpp"
 #include "Rendering/ShaderGraph/ShaderGraph.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
 
-Variable *Multiply::createResult( ShaderGraph *graph, const containers::Array< Variable * > &inputs )
+MultiInputOp::MultiInputOp( ShaderGraph *graph, MultiInputOp::VariableArray const &inputs, Variable *result )
+	: _inputs( inputs ),
+	  _result( result )
 {
-	auto retType = inputs.first()->getType();
-	inputs.each( [ &retType ]( Variable *in ) {
-		switch ( in->getType() ) {
-			case Variable::Type::VECTOR_2:
-			case Variable::Type::VECTOR_3:
-			case Variable::Type::VECTOR_4:
-				retType = in->getType();
-				break;
-				
-			default:
-				break;
-		}
-	});
-
-	return graph->addNode< Variable >( retType );
+	if ( _result == nullptr && inputs.size() > 0 ) {
+		auto first = inputs.first();
+		_result = graph->addNode< Variable >( first->getType() );
+	}
 }
 
-
-
-Multiply::Multiply( ShaderGraph *graph, Variable *a, Variable *b )
-	: Multiply( graph, { a, b } )
+MultiInputOp::~MultiInputOp( void )
 {
 
 }
 
-Multiply::Multiply( ShaderGraph *graph, containers::Array< Variable * > const &inputs )
-	: MultiInputOp( graph, inputs, createResult( graph, inputs ) )
+void MultiInputOp::setup( ShaderGraph *graph )
 {
-	
-}
-
-Multiply::~Multiply( void )
-{
-
+	graph->read( this, _inputs );
+	graph->write( this, { _result } );
 }
 

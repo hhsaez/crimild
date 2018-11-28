@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-present, H. Hernan Saez
+ * Copyright (c) 2002-present, H. Hernán Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,49 +25,47 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Multiply.hpp"
+#ifndef CRIMILD_CORE_RENDER_GRAPH_PASSES_DEPTH_TO_RGB_
+#define CRIMILD_CORE_RENDER_GRAPH_PASSES_DEPTH_TO_RGB_
 
-#include "Rendering/ShaderGraph/Variable.hpp"
-#include "Rendering/ShaderGraph/ShaderGraph.hpp"
+#include "Rendering/RenderGraph/RenderGraphPass.hpp"
 
-using namespace crimild;
-using namespace crimild::shadergraph;
+namespace crimild {
 
-Variable *Multiply::createResult( ShaderGraph *graph, const containers::Array< Variable * > &inputs )
-{
-	auto retType = inputs.first()->getType();
-	inputs.each( [ &retType ]( Variable *in ) {
-		switch ( in->getType() ) {
-			case Variable::Type::VECTOR_2:
-			case Variable::Type::VECTOR_3:
-			case Variable::Type::VECTOR_4:
-				retType = in->getType();
-				break;
+	namespace rendergraph {
+
+		namespace passes {
+
+			/**
+			   \brief Converts a depth map to RGB for visualization
+			 */
+			class DepthToRGBPass : public RenderGraphPass {
+				CRIMILD_IMPLEMENT_RTTI( crimild::rendergraph::DepthToRGBPass )
 				
-			default:
-				break;
+			public:
+				DepthToRGBPass( RenderGraph *graph );
+				virtual ~DepthToRGBPass( void );
+			
+				void setInput( RenderGraphAttachment *attachment ) { _input = attachment; }
+				RenderGraphAttachment *getInput( void ) { return _input; }
+
+				void setOutput( RenderGraphAttachment *attachment ) { _output = attachment; }
+				RenderGraphAttachment *getOutput( void ) { return _output; }
+
+				virtual void setup( rendergraph::RenderGraph *graph ) override;
+				virtual void execute( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue ) override;
+
+			private:
+				SharedPointer< ShaderProgram > _program;
+			
+				RenderGraphAttachment *_input = nullptr;
+				RenderGraphAttachment *_output = nullptr;
+			};
 		}
-	});
 
-	return graph->addNode< Variable >( retType );
-}
-
-
-
-Multiply::Multiply( ShaderGraph *graph, Variable *a, Variable *b )
-	: Multiply( graph, { a, b } )
-{
+	}
 
 }
 
-Multiply::Multiply( ShaderGraph *graph, containers::Array< Variable * > const &inputs )
-	: MultiInputOp( graph, inputs, createResult( graph, inputs ) )
-{
-	
-}
-
-Multiply::~Multiply( void )
-{
-
-}
+#endif
 

@@ -25,49 +25,27 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Multiply.hpp"
-
-#include "Rendering/ShaderGraph/Variable.hpp"
+#include "TextureColor.hpp"
 #include "Rendering/ShaderGraph/ShaderGraph.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
 
-Variable *Multiply::createResult( ShaderGraph *graph, const containers::Array< Variable * > &inputs )
+TextureColor::TextureColor( ShaderGraph *graph, Variable *texture, Variable *textureCoords )
+	: _texture( texture ),
+	  _textureCoords( textureCoords )
 {
-	auto retType = inputs.first()->getType();
-	inputs.each( [ &retType ]( Variable *in ) {
-		switch ( in->getType() ) {
-			case Variable::Type::VECTOR_2:
-			case Variable::Type::VECTOR_3:
-			case Variable::Type::VECTOR_4:
-				retType = in->getType();
-				break;
-				
-			default:
-				break;
-		}
-	});
-
-	return graph->addNode< Variable >( retType );
+	_color = graph->addNode< Variable >( Variable::Type::VECTOR_4 );
 }
 
-
-
-Multiply::Multiply( ShaderGraph *graph, Variable *a, Variable *b )
-	: Multiply( graph, { a, b } )
+TextureColor::~TextureColor( void )
 {
 
 }
 
-Multiply::Multiply( ShaderGraph *graph, containers::Array< Variable * > const &inputs )
-	: MultiInputOp( graph, inputs, createResult( graph, inputs ) )
+void TextureColor::setup( ShaderGraph *graph )
 {
-	
-}
-
-Multiply::~Multiply( void )
-{
-
+	graph->read( this, { _texture, _textureCoords } );
+	graph->write( this, { _color } );
 }
 

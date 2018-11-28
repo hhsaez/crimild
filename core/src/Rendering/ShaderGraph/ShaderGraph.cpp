@@ -26,6 +26,8 @@
  */
 
 #include "ShaderGraph.hpp"
+#include "Variable.hpp"
+#include "Expression.hpp"
 #include "Foundation/Log.hpp"
 
 using namespace crimild;
@@ -68,7 +70,7 @@ void ShaderGraph::eachNode( std::function< void( ShaderGraphNode * ) > const &ca
 	});
 }
 
-void ShaderGraph::read( ShaderGraphNode *node, containers::Array< ShaderGraphNode * > const &inputs )
+void ShaderGraph::read( Expression *node, containers::Array< Variable * > const &inputs )
 {
 	inputs.each( [ this, node ]( ShaderGraphNode *in ) {
 		if ( in != nullptr ) {
@@ -77,7 +79,7 @@ void ShaderGraph::read( ShaderGraphNode *node, containers::Array< ShaderGraphNod
 	});
 }
 
-void ShaderGraph::write( ShaderGraphNode *node, containers::Array< ShaderGraphNode * > const &outputs )
+void ShaderGraph::write( Expression *node, containers::Array< Variable * > const &outputs )
 {
 	outputs.each( [ this, node ]( ShaderGraphNode *out ) {
 		if ( out != nullptr ) {

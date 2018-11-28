@@ -38,6 +38,9 @@ namespace crimild {
 
 	namespace shadergraph {
 
+		class Variable;
+		class Expression;
+
 		class ShaderGraph : public coding::Codable {
 			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::ShaderGraph )
 
@@ -84,8 +87,8 @@ namespace crimild {
 
 			void eachNode( std::function< void( ShaderGraphNode * ) > const &callback );
 
-			void read( ShaderGraphNode *node, containers::Array< ShaderGraphNode * > const &inputs );
-			void write( ShaderGraphNode *node, containers::Array< ShaderGraphNode * > const &outputs );
+			void read( Expression *node, containers::Array< Variable * > const &inputs );
+			void write( Expression *node, containers::Array< Variable * > const &outputs );
 
 		public:
 			template< class NodeType >

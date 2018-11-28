@@ -29,6 +29,7 @@
 #define CRIMILD_RENDERING_SHADER_GRAPH_LANGUAGE_
 
 #include "Foundation/Types.hpp"
+#include "Foundation/Containers/Array.hpp"
 #include "Mathematics/Vector.hpp"
 
 #include <string>
@@ -42,38 +43,100 @@ namespace crimild {
 		namespace csl {
 
 			Variable *scalar( crimild::Real32 value, std::string name = "" );
+			Variable *scalar_uniform( std::string name );
+			Variable *scalar_constant( crimild::Real32 value );
 
+			Variable *vec2_in( std::string name );
 			Variable *vec3( Variable *vector );
 			Variable *vec3_in( std::string name );
+			Variable *vec4( Variable *scalar );
 			Variable *vec4( Variable *vector, Variable *scalar );
+			Variable *vec4( Variable *x, Variable *y, Variable *z, Variable *w );
 			Variable *vec4( const Vector4f &value );
+			Variable *vec_x( Variable *vector );
+			Variable *vec_y( Variable *vector );
+			Variable *vec_z( Variable *vector );
+			Variable *vec_w( Variable *vector );
 
 			Variable *mat3( Variable *matrix );
 			Variable *mat4_uniform( std::string name );
+
+			Variable *red( Variable *color );
+			Variable *green( Variable *color );
+			Variable *blue( Variable *color );
+			Variable *alpha( Variable *color );
+
+			/**
+			   \name Math ops
+			*/
+			//@{
 			
+			Variable *add( Variable *a, Variable *b );
+
 			Variable *sub( Variable *a, Variable *b );
+
 			Variable *mult( Variable *a, Variable *b );
+			Variable *mult( containers::Array< Variable * > const &inputs );
+			template< class ... Args >
+			Variable *mult( Args &&... args ) { return mult( { args... } ); }
+
+			Variable *div( Variable *a, Variable *b );
+
 			Variable *pow( Variable *base, Variable *exp );
+
 			Variable *max( Variable *a, Variable *b );
 			Variable *neg( Variable *input );
 
 			Variable *dot( Variable *a, Variable *b );
 			Variable *normalize( Variable *input );
 
+			//@}
+
 			void vertexPosition( Variable *position );
 			void vertexOutput( std::string name, Variable *value );
 
 			void fragColor( Variable *color );
 
+			/**
+			   \name Position
+			 */
+			//@{
+
+			Variable *modelPosition( void );
 			Variable *worldPosition( void );
 			Variable *viewPosition( void );
 			Variable *projectedPosition( void );
+			Variable *screenPosition( void );
 
+			//@}
+
+			/**
+			   \name Texture Coordinates
+			*/
+			//@{
+
+			Variable *modelTextureCoords( void );
+
+			//@}
+
+			/**
+			   \name Normals
+			*/
+			//@{
+
+			Variable *modelNormal( void );
 			Variable *worldNormal( void );
 			Variable *worldNormal( Variable *worldMatrix, Variable *normal );
 			Variable *viewNormal( void );
+
+			//@}
 			
 			Variable *viewVector( Variable *viewPosition );
+
+			Variable *linearizeDepth( Variable *input, Variable *near, Variable *far );
+
+			Variable *texture2D_uniform( std::string name );
+			Variable *textureColor( Variable *texture, Variable *uvs );
 		}
 
 	}

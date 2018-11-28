@@ -25,49 +25,41 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Multiply.hpp"
+#ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_DIVIDE_
+#define CRIMILD_RENDERING_SHADER_GRAPH_NODES_DIVIDE_
 
-#include "Rendering/ShaderGraph/Variable.hpp"
-#include "Rendering/ShaderGraph/ShaderGraph.hpp"
+#include "Rendering/ShaderGraph/Expression.hpp"
 
-using namespace crimild;
-using namespace crimild::shadergraph;
+namespace crimild {
 
-Variable *Multiply::createResult( ShaderGraph *graph, const containers::Array< Variable * > &inputs )
-{
-	auto retType = inputs.first()->getType();
-	inputs.each( [ &retType ]( Variable *in ) {
-		switch ( in->getType() ) {
-			case Variable::Type::VECTOR_2:
-			case Variable::Type::VECTOR_3:
-			case Variable::Type::VECTOR_4:
-				retType = in->getType();
-				break;
-				
-			default:
-				break;
-		}
-	});
+	namespace shadergraph {
 
-	return graph->addNode< Variable >( retType );
-}
+		class Variable;
 
+		class Divide : public Expression {
+			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::Divide )
 
+		public:
+			Divide( ShaderGraph *, Variable *a, Variable *b );
+			virtual ~Divide( void );
 
-Multiply::Multiply( ShaderGraph *graph, Variable *a, Variable *b )
-	: Multiply( graph, { a, b } )
-{
+			Variable *getA( void ) { return _a; }
+			Variable *getB( void ) { return _b; }
+			
+			Variable *getResult( void ) { return _result; }
+			
+		private:
+			Variable *_a = nullptr;
+			Variable *_b = nullptr;
+			Variable *_result = nullptr;
+			
+		protected:
+			virtual void setup( ShaderGraph *graph ) override;
+		};
 
-}
-
-Multiply::Multiply( ShaderGraph *graph, containers::Array< Variable * > const &inputs )
-	: MultiInputOp( graph, inputs, createResult( graph, inputs ) )
-{
-	
-}
-
-Multiply::~Multiply( void )
-{
+	}
 
 }
+
+#endif
 

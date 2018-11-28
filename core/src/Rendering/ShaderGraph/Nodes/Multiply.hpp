@@ -28,33 +28,22 @@
 #ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_MULTIPLY_
 #define CRIMILD_RENDERING_SHADER_GRAPH_NODES_MULTIPLY_
 
-#include "Rendering/ShaderGraph/Expression.hpp"
+#include "MultiInputOp.hpp"
 
 namespace crimild {
 
 	namespace shadergraph {
 
-		class Variable;
-
-		class Multiply : public Expression {
+		class Multiply : public MultiInputOp {
 			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::Multiply )
 
+		private:
+			static Variable *createResult( ShaderGraph *graph, const containers::Array< Variable * > &inputs );
+			
 		public:
 			Multiply( ShaderGraph *, Variable *a, Variable *b );
+			Multiply( ShaderGraph *, containers::Array< Variable * > const &inputs );
 			virtual ~Multiply( void );
-
-			Variable *getA( void ) { return _a; }
-			Variable *getB( void ) { return _b; }
-			
-			Variable *getResult( void ) { return _result; }
-			
-		private:
-			Variable *_a = nullptr;
-			Variable *_b = nullptr;
-			Variable *_result = nullptr;
-			
-		protected:
-			virtual void setup( ShaderGraph *graph ) override;
 		};
 
 	}

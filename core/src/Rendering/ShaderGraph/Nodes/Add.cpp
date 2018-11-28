@@ -25,48 +25,25 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Multiply.hpp"
-
-#include "Rendering/ShaderGraph/Variable.hpp"
+#include "Add.hpp"
 #include "Rendering/ShaderGraph/ShaderGraph.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
 
-Variable *Multiply::createResult( ShaderGraph *graph, const containers::Array< Variable * > &inputs )
-{
-	auto retType = inputs.first()->getType();
-	inputs.each( [ &retType ]( Variable *in ) {
-		switch ( in->getType() ) {
-			case Variable::Type::VECTOR_2:
-			case Variable::Type::VECTOR_3:
-			case Variable::Type::VECTOR_4:
-				retType = in->getType();
-				break;
-				
-			default:
-				break;
-		}
-	});
-
-	return graph->addNode< Variable >( retType );
-}
-
-
-
-Multiply::Multiply( ShaderGraph *graph, Variable *a, Variable *b )
-	: Multiply( graph, { a, b } )
+Add::Add( ShaderGraph *graph, Variable *a, Variable *b )
+	: Add( graph, { a, b } )
 {
 
 }
 
-Multiply::Multiply( ShaderGraph *graph, containers::Array< Variable * > const &inputs )
-	: MultiInputOp( graph, inputs, createResult( graph, inputs ) )
+Add::Add( ShaderGraph *graph, containers::Array< Variable * > const &inputs )
+	: MultiInputOp( graph, inputs )
 {
-	
+
 }
 
-Multiply::~Multiply( void )
+Add::~Add( void )
 {
 
 }
