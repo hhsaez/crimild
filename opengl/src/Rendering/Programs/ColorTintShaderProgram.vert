@@ -1,7 +1,7 @@
 R"(
 
-CRIMILD_GLSL_ATTRIBUTE vec3 aPosition;
-CRIMILD_GLSL_ATTRIBUTE vec2 aTextureCoord;
+layout ( location = 0 ) CRIMILD_GLSL_ATTRIBUTE vec3 aPosition;
+layout ( location = 4 ) CRIMILD_GLSL_ATTRIBUTE vec2 aTextureCoord;
 
 CRIMILD_GLSL_VARYING_OUT vec2 vTextureCoord;
 

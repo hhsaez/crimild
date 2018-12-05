@@ -141,6 +141,9 @@ namespace crimild {
 		int _lightCount;
 
 	public:
+		virtual void bindPrimitive( ShaderProgram *program, Primitive *primitive );
+		virtual void unbindPrimitive( ShaderProgram *program, Primitive *primitive );
+		
 		virtual void bindVertexBuffer( ShaderProgram *program, VertexBufferObject *vbo );
 		virtual void unbindVertexBuffer( ShaderProgram *program, VertexBufferObject *vbo );
 
@@ -227,6 +230,9 @@ namespace crimild {
 		Catalog< RenderTarget > *getRenderTargetCatalog( void ) { return crimild::get_ptr( _renderTargetCatalog ); }
 		void setRenderTargetCatalog( SharedPointer< Catalog< RenderTarget > > const &catalog ) { _renderTargetCatalog = catalog; }
 
+		Catalog< Primitive > *getPrimitiveCatalog( void ) { return crimild::get_ptr( _primitiveCatalog ); }
+		void setPrimitiveCatalog( SharedPointer< Catalog< Primitive >> const &catalog ) { _primitiveCatalog = catalog; }
+
 	private:
 		SharedPointer< Catalog< ShaderProgram >> _shaderProgramCatalog;
 		SharedPointer< Catalog< Texture >> _textureCatalog;
@@ -234,6 +240,7 @@ namespace crimild {
 		SharedPointer< Catalog< IndexBufferObject >> _indexBufferObjectCatalog;
 		SharedPointer< Catalog< FrameBufferObject >> _frameBufferObjectCatalog;
 		SharedPointer< Catalog< RenderTarget >> _renderTargetCatalog;
+		SharedPointer< Catalog< Primitive >> _primitiveCatalog;
 
 	public:
 		virtual SharedPointer< shadergraph::ShaderGraph > createShaderGraph( void ) = 0;

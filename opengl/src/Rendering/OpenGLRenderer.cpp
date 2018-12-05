@@ -33,6 +33,7 @@
 #include "Catalogs/FrameBufferObjectCatalog.hpp"
 #include "Catalogs/TextureCatalog.hpp"
 #include "Catalogs/RenderTargetCatalog.hpp"
+#include "Catalogs/PrimitiveCatalog.hpp"
 
 #include "Programs/StandardShaderProgram.hpp"
 #include "Programs/LitTextureShaderProgram.hpp"
@@ -78,6 +79,7 @@ OpenGLRenderer::OpenGLRenderer( SharedPointer< FrameBufferObject > const &screen
 	setFrameBufferObjectCatalog( crimild::alloc< FrameBufferObjectCatalog >( this ) );
 	setTextureCatalog( crimild::alloc< TextureCatalog >() );
 	setRenderTargetCatalog( crimild::alloc< RenderTargetCatalog >( this ) );
+	setPrimitiveCatalog( crimild::alloc< PrimitiveCatalog >() );
 
 	if ( screenBuffer != nullptr ) {
 		setScreenBuffer( screenBuffer );

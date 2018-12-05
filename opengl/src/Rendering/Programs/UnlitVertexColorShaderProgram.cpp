@@ -33,8 +33,8 @@ using namespace crimild;
 using namespace crimild::opengl;
 
 const char *unlit_vertex_color_vs = { CRIMILD_TO_STRING(
-    CRIMILD_GLSL_ATTRIBUTE vec3 aPosition;
-    CRIMILD_GLSL_ATTRIBUTE vec4 aColor;
+		layout ( location = 0 ) CRIMILD_GLSL_ATTRIBUTE vec3 aPosition;
+		layout ( location = 3 ) CRIMILD_GLSL_ATTRIBUTE vec4 aColor;
 
 	uniform mat4 uPMatrix; 
 	uniform mat4 uVMatrix; 
@@ -72,8 +72,8 @@ const char *unlit_vertex_color_fs = { CRIMILD_TO_STRING(
 UnlitVertexColorShaderProgram::UnlitVertexColorShaderProgram( void )
 	: ShaderProgram( OpenGLUtils::getVertexShaderInstance( unlit_vertex_color_vs ), OpenGLUtils::getFragmentShaderInstance( unlit_vertex_color_fs ) )
 { 
-	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
-	registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::COLOR_ATTRIBUTE, "aColor" );
+	//registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
+	//registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::COLOR_ATTRIBUTE, "aColor" );
 
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::PROJECTION_MATRIX_UNIFORM, "uPMatrix" );
 	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM, "uVMatrix" );

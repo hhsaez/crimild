@@ -48,6 +48,8 @@
 #include "Rendering/ShaderGraph/Nodes/Convert.hpp"
 #include "Rendering/ShaderGraph/Nodes/TextureColor.hpp"
 
+#include "Rendering/VertexFormat.hpp"
+
 #include <sstream>
 
 using namespace crimild;
@@ -309,7 +311,9 @@ void csl::vertexOutput( std::string name, Variable *value )
 
 Variable *csl::modelPosition( void )
 {
-	return vec3_in( "aPosition" );
+	auto var = vec3_in( "aPosition" );
+	var->setLayoutLocation( VertexFormat::LayoutLocation::POSITION );
+	return var;
 }
 
 Variable *csl::worldPosition( void )
@@ -379,12 +383,16 @@ Variable *csl::screenPosition( void )
 
 Variable *csl::modelTextureCoords( void )
 {
-	return vec2_in( "aTextureCoords" );
+	auto ret = vec2_in( "aTextureCoords" );
+	ret->setLayoutLocation( VertexFormat::LayoutLocation::TEXTURE_COORD );
+	return ret;
 }
 
 Variable *csl::modelNormal( void )
 {
-	return vec3_in( "aNormal" );
+	auto ret = vec3_in( "aNormal" );
+	ret->setLayoutLocation( VertexFormat::LayoutLocation::NORMAL );
+	return ret;
 }
 
 Variable *csl::worldNormal( Variable *worldMatrix, Variable *normal )

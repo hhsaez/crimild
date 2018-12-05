@@ -33,7 +33,8 @@ using namespace crimild;
 using namespace crimild::opengl;
 
 const char *unlit_diffuse_vs = { CRIMILD_TO_STRING(
-    CRIMILD_GLSL_ATTRIBUTE vec3 aPosition;
+		layout ( location = 0 ) CRIMILD_GLSL_ATTRIBUTE vec3 aPosition;
+		layout ( location = 1 ) CRIMILD_GLSL_ATTRIBUTE vec3 aNormal;
 
 	uniform mat4 uPMatrix; 
 	uniform mat4 uVMatrix; 

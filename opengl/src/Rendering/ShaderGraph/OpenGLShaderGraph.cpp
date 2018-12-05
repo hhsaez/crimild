@@ -90,7 +90,16 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 		}
 
 		std::stringstream ss;
-		ss << storageQualifier << getVariableTypeString( var ) << " " << var->getName() << ";";
+		auto location = var->getLayoutLocation();
+		if ( location >= 0 ) {
+			ss << "layout ( location = "
+			   << location
+			   << " ) ";
+		}
+		ss << storageQualifier
+		   << getVariableTypeString( var )
+		   << " " << var->getName()
+		   << ";";
 		section->add( ss.str() );
 	};
 	
@@ -407,7 +416,7 @@ std::string OpenGLShaderGraph::generateShaderSource( containers::Array< ShaderGr
 	
 	std::stringstream ss;
 
-	ss << "#version 400\n";
+	ss << "#version 330 core\n";
 	
 	ss << "\n// Inputs";
 	_inputsSection.each( [ &ss ]( std::string &line ) {

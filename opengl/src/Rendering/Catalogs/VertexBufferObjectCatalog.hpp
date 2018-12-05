@@ -43,18 +43,14 @@ namespace crimild {
 
 			virtual int getNextResourceId( void ) override;
 
-			virtual void bind( ShaderProgram *program, VertexBufferObject *vbo ) override;
-			virtual void unbind( ShaderProgram *program, VertexBufferObject *vbo ) override;
+			virtual void bind( VertexBufferObject *vbo ) override;
+			virtual void unbind( VertexBufferObject *vbo ) override;
 
 			virtual void load( VertexBufferObject *vbo ) override;
             virtual void unload( VertexBufferObject *vbo ) override;
             
             virtual void cleanup( void ) override;
 
-		private:
-			int composeId( unsigned int vaoId, unsigned int vboId );
-			bool extractId( int compositeId, unsigned int &vaoId, unsigned int &vboId );
-            
         private:
             std::list< int > _unusedVBOIds;
 		};

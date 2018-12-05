@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -74,7 +74,8 @@ Renderer::Renderer( void )
 	  _vertexBufferObjectCatalog( crimild::alloc< Catalog< VertexBufferObject >>() ),
 	  _indexBufferObjectCatalog( crimild::alloc< Catalog< IndexBufferObject >>() ),
 	  _frameBufferObjectCatalog( crimild::alloc< Catalog< FrameBufferObject >>() ),
-	  _renderTargetCatalog( crimild::alloc< Catalog< RenderTarget >>() )
+	  _renderTargetCatalog( crimild::alloc< Catalog< RenderTarget >>() ),
+	  _primitiveCatalog( crimild::alloc< Catalog< Primitive >>() )
 {
 	_screenBuffer = crimild::alloc< FrameBufferObject >( 800, 600 );
 
@@ -92,6 +93,7 @@ Renderer::~Renderer( void )
     getTextureCatalog()->unloadAll();
     getVertexBufferObjectCatalog()->unloadAll();
     getIndexBufferObjectCatalog()->unloadAll();
+	getPrimitiveCatalog()->unloadAll();
 	getRenderTargetCatalog()->unloadAll();
     getFrameBufferObjectCatalog()->unloadAll();
 }
@@ -143,6 +145,7 @@ void Renderer::endRender( void )
     getTextureCatalog()->cleanup();
     getVertexBufferObjectCatalog()->cleanup();
     getIndexBufferObjectCatalog()->cleanup();
+	getPrimitiveCatalog()->cleanup();
 	getRenderTargetCatalog()->cleanup();
     getFrameBufferObjectCatalog()->cleanup();
 }
@@ -297,6 +300,16 @@ void Renderer::unbindLight( ShaderProgram *program, Light *light )
 	--_lightCount;
 }
 
+void Renderer::bindPrimitive( ShaderProgram *, Primitive *primitive )
+{
+	getPrimitiveCatalog()->bind( primitive );
+}
+
+void Renderer::unbindPrimitive( ShaderProgram *, Primitive *primitive )
+{
+	getPrimitiveCatalog()->unbind( primitive );
+}
+
 void Renderer::bindVertexBuffer( ShaderProgram *program, VertexBufferObject *vbo )
 {
 	if ( vbo == nullptr ) {
@@ -370,41 +383,18 @@ void Renderer::drawGeometry( Geometry *geometry, ShaderProgram *program, const M
 	}
 	
 	geometry->forEachPrimitive( [ this, program ]( Primitive *primitive ) {
-		// TODO: maybe we shound't add a geometry to the queue if it
-		// has no valid primitive instead of quering the state of the
-		// VBO and IBO while rendering
-		
-		auto vbo = primitive->getVertexBuffer();
-		if ( vbo == nullptr ) {
-			return;
-		}
-		
-		auto ibo = primitive->getIndexBuffer();
-		if ( ibo == nullptr ) {
-			return;
-		}
-		
-		bindVertexBuffer( program, vbo );
-		bindIndexBuffer( program, ibo );
-		
+		bindPrimitive( program, primitive );
 		drawPrimitive( program, primitive );
-		
-		unbindVertexBuffer( program, vbo );
-		unbindIndexBuffer( program, ibo );
+		unbindPrimitive( program, primitive );
 	});
 }
 
 void Renderer::drawScreenPrimitive( ShaderProgram *program )
 {
-    // bind vertex and index buffers
-    bindVertexBuffer( program, _screenPrimitive->getVertexBuffer() );
-    bindIndexBuffer( program, _screenPrimitive->getIndexBuffer() );
+	auto primitive = crimild::get_ptr( _screenPrimitive );
 
-    // draw primitive
+	bindPrimitive( program, primitive );
     drawPrimitive( program, crimild::get_ptr( _screenPrimitive ) );
-     
-    // unbind primitive buffers
-    unbindVertexBuffer( program, _screenPrimitive->getVertexBuffer() );
-    unbindIndexBuffer( program, _screenPrimitive->getIndexBuffer() );     
+	unbindPrimitive( program, primitive );
 }
 

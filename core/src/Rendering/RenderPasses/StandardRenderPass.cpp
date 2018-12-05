@@ -268,13 +268,17 @@ void StandardRenderPass::renderStandardGeometry( Renderer *renderer, Geometry *g
 			return;
 		}
 		
-        renderer->bindVertexBuffer( program, vbo );
-        renderer->bindIndexBuffer( program, ibo );
+        //renderer->bindVertexBuffer( program, vbo );
+        //renderer->bindIndexBuffer( program, ibo );
+
+		renderer->bindPrimitive( program, primitive );
         
         renderer->drawPrimitive( program, primitive );
+
+		renderer->unbindPrimitive( program, primitive );
         
-        renderer->unbindVertexBuffer( program, vbo );
-        renderer->unbindIndexBuffer( program, ibo );
+        //renderer->unbindVertexBuffer( program, vbo );
+        //renderer->unbindIndexBuffer( program, ibo );
     });
     
     if ( material != nullptr ) {

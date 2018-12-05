@@ -25,61 +25,34 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_RENDERING_SHADER_GRAPH_VARIABLE_
-#define CRIMILD_RENDERING_SHADER_GRAPH_VARIABLE_
+#ifndef CRIMILD_OPENGL_PRIMITIVE_CATALOG_
+#define CRIMILD_OPENGL_PRIMITIVE_CATALOG_
 
-#include "ShaderGraphNode.hpp"
+#include <Rendering/Catalog.hpp>
 
 namespace crimild {
+    
+    class Primitive;
 
-	namespace shadergraph {
+	namespace opengl {
 
-		class Variable : public ShaderGraphNode {
-			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::Variable )
-			
+		class PrimitiveCatalog : public Catalog< Primitive > {
 		public:
-			enum class Storage {
-				DEFAULT,
-				INPUT,
-				OUTPUT,
-				UNIFORM,
-				CONSTANT,
-			};
+			PrimitiveCatalog( void );
+			virtual ~PrimitiveCatalog( void );
 
-			enum class Precision {
-				HIGH,
-				MEDIUM,
-				LOW,
-			};
-			
-			enum class Type {
-				ANY,
-				SCALAR,
-				VECTOR_2,
-				VECTOR_3,
-				VECTOR_4,
-				MATRIX_3,
-				MATRIX_4,
-				SAMPLER_2D,
-			};
+			virtual int getNextResourceId( void ) override;
 
-		public:
-			explicit Variable( ShaderGraph *, Type type, std::string name = "" );
-			explicit Variable( ShaderGraph *, Storage storage, Type type, std::string name = "" );
-			virtual ~Variable( void );
+			virtual void bind( Primitive *primitive ) override;
+			virtual void unbind( Primitive *primitive ) override;
 
-			virtual ShaderGraphNode::NodeType getNodeType( void ) const override { return ShaderGraphNode::NodeType::VARIABLE; }
-
-			Type getType( void ) const { return _type; }
-			Storage getStorage( void ) const { return _storage; }
-
-			Variable *setLayoutLocation( crimild::Int16 location ) { _layoutLocation = location; return this; }
-			crimild::Int16 getLayoutLocation( void ) const { return _layoutLocation; }
+			virtual void load( Primitive *primitive ) override;
+            virtual void unload( Primitive *primitive ) override;
+            
+            virtual void cleanup( void ) override;
 
 		private:
-			Type _type;
-			Storage _storage;
-			crimild::Int16 _layoutLocation = -1;
+            std::list< int > _primitiveIdsToDelete;
 		};
 
 	}

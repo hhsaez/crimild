@@ -37,7 +37,10 @@
 
 namespace crimild {
 
-    class Primitive : public coding::Codable, public StreamObject {
+    class Primitive :
+		public coding::Codable,
+		public Catalog< Primitive >::Resource,
+		public StreamObject {
 		CRIMILD_IMPLEMENT_RTTI( crimild::Primitive )
 
 	public:
