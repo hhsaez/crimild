@@ -2,7 +2,7 @@ R"(
 
 #version 330 core
 
-#define CRIMILD_GLSL_ATTRIBUTE in
+#define CRIMILD_GLSL_ATTRIBUTE( LOC ) layout ( location = LOC ) in
 
 #define CRIMILD_GLSL_VARYING_IN in
 #define CRIMILD_GLSL_VARYING_OUT out

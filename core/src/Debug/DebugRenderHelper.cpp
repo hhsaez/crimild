@@ -173,13 +173,15 @@ void DebugRenderHelper::render( Renderer *renderer, Camera *camera, Primitive *p
 	alphaState->setEnabled( color[ 3 ] < 1.0f );
 	renderer->setAlphaState( alphaState );
 
-	renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
-	renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
+	//renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
+	//renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
+	renderer->bindPrimitive( program, primitive );
 
 	renderer->drawPrimitive( program, primitive );
 
-	renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
-	renderer->unbindVertexBuffer( program, primitive->getVertexBuffer() );
+	//renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
+	//renderer->unbindVertexBuffer( program, primitive->getVertexBuffer() );
+	renderer->unbindPrimitive( program, primitive );
 
 	renderer->unbindProgram( program );
 }

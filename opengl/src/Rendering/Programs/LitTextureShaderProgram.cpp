@@ -32,10 +32,10 @@ using namespace crimild;
 using namespace crimild::opengl;
 
 const char *lit_texture_vs = { CRIMILD_TO_STRING(
-	CRIMILD_GLSL_ATTRIBUTE vec3 aPosition;
-	CRIMILD_GLSL_ATTRIBUTE vec3 aNormal;
-	CRIMILD_GLSL_ATTRIBUTE vec3 aTangent;
-	CRIMILD_GLSL_ATTRIBUTE vec2 aTextureCoord;
+		CRIMILD_GLSL_ATTRIBUTE( 0 ) vec3 aPosition;
+		CRIMILD_GLSL_ATTRIBUTE( 1 ) vec3 aNormal;
+		CRIMILD_GLSL_ATTRIBUTE( 2 ) vec3 aTangent;
+		CRIMILD_GLSL_ATTRIBUTE( 4 ) vec2 aTextureCoord;
 
 	uniform mat4 uPMatrix;
 	uniform mat4 uVMatrix;

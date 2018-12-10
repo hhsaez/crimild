@@ -70,6 +70,13 @@ void PrimitiveCatalog::bind( Primitive *primitive )
 
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
+	auto vbo = primitive->getVertexBuffer();
+	auto ibo = primitive->getIndexBuffer();
+	if ( vbo->getCatalog() == nullptr || ibo->getCatalog() == nullptr ) {
+		// Either vbo or ibo changed, so we need to reload the primitive
+		unload( primitive );
+	}
+
 	Catalog< Primitive >::bind( primitive );
 
 	if ( primitive->getCatalog() == nullptr ) {

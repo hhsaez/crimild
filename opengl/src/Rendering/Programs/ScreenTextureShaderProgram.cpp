@@ -32,8 +32,8 @@ using namespace crimild;
 using namespace crimild::opengl;
 
 const char *screen_texture_vs = { CRIMILD_TO_STRING(
-		layout ( location = 0 ) CRIMILD_GLSL_ATTRIBUTE vec3 aPosition;
-		layout ( location = 4 ) CRIMILD_GLSL_ATTRIBUTE vec2 aTextureCoord;
+		CRIMILD_GLSL_ATTRIBUTE( 0 ) vec3 aPosition;
+		CRIMILD_GLSL_ATTRIBUTE( 4 ) vec2 aTextureCoord;
 
 	CRIMILD_GLSL_VARYING_OUT vec2 vTextureCoord;
 

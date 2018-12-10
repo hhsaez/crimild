@@ -1,8 +1,8 @@
 R"(
 
-CRIMILD_GLSL_ATTRIBUTE vec3 aPosition;
-CRIMILD_GLSL_ATTRIBUTE vec4 aColor;
-CRIMILD_GLSL_ATTRIBUTE vec2 aTextureCoord;
+CRIMILD_GLSL_ATTRIBUTE( 0 ) vec3 aPosition;
+CRIMILD_GLSL_ATTRIBUTE( 3 ) vec4 aColor;
+CRIMILD_GLSL_ATTRIBUTE( 4 ) vec2 aTextureCoord;
 
 uniform mat4 uPMatrix; 
 uniform mat4 uVMatrix; 

@@ -33,8 +33,8 @@ using namespace crimild;
 using namespace crimild::opengl;
 
 const char *unlit_vertex_color_vs = { CRIMILD_TO_STRING(
-		layout ( location = 0 ) CRIMILD_GLSL_ATTRIBUTE vec3 aPosition;
-		layout ( location = 3 ) CRIMILD_GLSL_ATTRIBUTE vec4 aColor;
+		CRIMILD_GLSL_ATTRIBUTE( 0 ) vec3 aPosition;
+		CRIMILD_GLSL_ATTRIBUTE( 3 ) vec4 aColor;
 
 	uniform mat4 uPMatrix; 
 	uniform mat4 uVMatrix; 

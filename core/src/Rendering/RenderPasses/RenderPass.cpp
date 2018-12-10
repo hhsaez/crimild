@@ -91,8 +91,9 @@ void RenderPass::render( Renderer *renderer, Texture *texture, ShaderProgram *de
     renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM ), texture );
      
     // bind vertex and index buffers
-    renderer->bindVertexBuffer( program, _screen->getVertexBuffer() );
-    renderer->bindIndexBuffer( program, _screen->getIndexBuffer() );
+    //renderer->bindVertexBuffer( program, _screen->getVertexBuffer() );
+    //renderer->bindIndexBuffer( program, _screen->getIndexBuffer() );
+	renderer->bindPrimitive( program, crimild::get_ptr( _screen ) );
 
     Matrix4f mMatrix;
     mMatrix.makeIdentity();
@@ -102,8 +103,9 @@ void RenderPass::render( Renderer *renderer, Texture *texture, ShaderProgram *de
     renderer->drawPrimitive( program, crimild::get_ptr( _screen ) );
      
     // unbind primitive buffers
-    renderer->unbindVertexBuffer( program, _screen->getVertexBuffer() );
-    renderer->unbindIndexBuffer( program, _screen->getIndexBuffer() );
+    //renderer->unbindVertexBuffer( program, _screen->getVertexBuffer() );
+    //renderer->unbindIndexBuffer( program, _screen->getIndexBuffer() );
+	renderer->unbindPrimitive( program, crimild::get_ptr( _screen ) );
      
     // unbind framebuffer texture
     renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM ), texture );

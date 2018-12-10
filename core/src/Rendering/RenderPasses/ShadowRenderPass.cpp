@@ -202,14 +202,10 @@ void ShadowRenderPass::renderStandardGeometry( Renderer *renderer, Geometry *geo
 		if ( ibo == nullptr ) {
 			return;
 		}
-		
-        renderer->bindVertexBuffer( program, vbo );
-        renderer->bindIndexBuffer( program, ibo );
-        
+
+		renderer->bindPrimitive( program, primitive );
         renderer->drawPrimitive( program, primitive );
-        
-        renderer->unbindVertexBuffer( program, vbo );
-        renderer->unbindIndexBuffer( program, ibo );
+		renderer->unbindPrimitive( program, primitive );
     });
     
     if ( material != nullptr ) {

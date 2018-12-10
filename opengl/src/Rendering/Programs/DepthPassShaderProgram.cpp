@@ -32,8 +32,8 @@ using namespace crimild;
 using namespace crimild::opengl;
 
 const char *depth_pass_vs = R"(
-    CRIMILD_GLSL_ATTRIBUTE vec3 aPosition;
-    CRIMILD_GLSL_ATTRIBUTE vec3 aNormal;
+    CRIMILD_GLSL_ATTRIBUTE( 0 ) vec3 aPosition;
+    CRIMILD_GLSL_ATTRIBUTE( 1 ) vec3 aNormal;
 
     uniform mat4 uPMatrix;
     uniform mat4 uVMatrix;
