@@ -1,6 +1,34 @@
 Release Notes
 ====================
 
+v4.10.0
+------
+* Foundation
+    * New Digraph container
+	* Net Set container
+
+* Mathematics
+    * Fixed vector division bug
+	* Fixed orthographic matrix calculation
+	* Fixed identity flag when scaling transformations
+	
+* Rendering
+    * Render Graphs
+	* Implemented basic Render Graph passes
+	* Enhanced Shader Graphs
+	* Crimild Shading Language utility functions
+	* New render queues for screen and opaque objects
+	* Render Target catalog
+	* Shareable Render Targets
+	* Deprecate RenderPass and subclasses
+	* Primitive catalogs and bindings
+	* Use layout annotations for GLSL attributes
+	* Improve vertex array objects usage in OpenGL
+	
+* UI
+    * New UI components: UICanvas, UIFrame, UIBackground
+	* New UIFrameConstraint component for layout
+
 v4.9.0
 ------
 * Foundation
