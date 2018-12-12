@@ -33,8 +33,8 @@ using namespace crimild;
 using namespace crimild::opengl;
 
 const char *sdf_vs = { CRIMILD_TO_STRING(
-	in vec3 aPosition;
-	in vec2 aTextureCoord;
+		layout ( location = 0 ) in vec3 aPosition;
+		layout ( location = 4 ) in vec2 aTextureCoord;
 
 	uniform mat4 uPMatrix; 
 	uniform mat4 uVMatrix; 

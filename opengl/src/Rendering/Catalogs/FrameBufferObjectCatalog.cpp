@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2018, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,7 @@
 
 #include <Rendering/Renderer.hpp>
 #include <Rendering/FrameBufferObject.hpp>
+#include <Rendering/RenderTarget.hpp>
 
 #ifndef GL_RGBA16F
 #define GL_RGBA16F 0x881A
@@ -75,36 +76,14 @@ void FrameBufferObjectCatalog::bind( FrameBufferObject *fbo )
     glViewport( 0.0f, 0.0f, fbo->getWidth(), fbo->getHeight() );
     const RGBAColorf &clearColor = fbo->getClearColor();
     
-#ifdef CRIMILD_PLATFORM_DESKTOP
-    const GLenum fboBuffers[] = {
-        GL_COLOR_ATTACHMENT0,
-        GL_COLOR_ATTACHMENT1,
-        GL_COLOR_ATTACHMENT2,
-        GL_COLOR_ATTACHMENT3,
-        GL_COLOR_ATTACHMENT4,
-        GL_COLOR_ATTACHMENT5,
-        GL_COLOR_ATTACHMENT6,
-        GL_COLOR_ATTACHMENT7,
-    };
-    
-    // this may be wrong. what if there is no depth buffer?
-    int fboColorBufferCount = 0;
-    fbo->getRenderTargets().each( [ & ]( std::string, SharedPointer< RenderTarget > &target ) {
-        if ( target->getType() == RenderTarget::Type::COLOR_RGB || target->getType() == RenderTarget::Type::COLOR_RGBA ) {
-            fboColorBufferCount++;
-        }
-    });
-
-    if ( fboColorBufferCount > 0 ) {
-        glDrawBuffers( fboColorBufferCount, fboBuffers );
-    }
-    else {
-        glDrawBuffer( GL_NONE );
-    }
-#endif
-
     glClearColor( clearColor.r(), clearColor.g(), clearColor.b(), clearColor.a() );
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+    crimild::Int32 clearFlags = fbo->getClearFlags();
+	if ( clearFlags != FrameBufferObject::ClearFlag::NONE ) {
+        GLbitfield glClearFlags = 0;
+        if ( clearFlags & FrameBufferObject::ClearFlag::COLOR ) glClearFlags |= GL_COLOR_BUFFER_BIT;
+        if ( clearFlags & FrameBufferObject::ClearFlag::DEPTH ) glClearFlags |= GL_DEPTH_BUFFER_BIT;
+        glClear( glClearFlags );
+	}
     
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
@@ -135,92 +114,48 @@ void FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
     int framebufferId = fbo->getCatalogId();
     if ( framebufferId > 0 ) {
         glBindFramebuffer( GL_FRAMEBUFFER, framebufferId );
-        
+
         int colorAttachmentOffset = 0;
-        fbo->getRenderTargets().each( [ & ]( std::string rtName, SharedPointer< RenderTarget > &target ) {
-            CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
-            
-            int targetWidth = target->getWidth();
-            int targetHeight = target->getHeight();
-            
-            GLenum internalFormat = GL_INVALID_ENUM;
-            GLenum attachment = GL_INVALID_ENUM;
-            GLenum textureType = target->useFloatTexture() ? GL_FLOAT : GL_UNSIGNED_BYTE;
-            GLenum textureFormat = GL_RGBA;
-            switch ( target->getType() ) {
-                case RenderTarget::Type::DEPTH_32:
-#ifdef CRIMILD_PLATFORM_DESKTOP
-                    internalFormat = target->useFloatTexture() ? GL_DEPTH_COMPONENT32F : GL_DEPTH_COMPONENT32;
-                    attachment = GL_DEPTH_ATTACHMENT;
-                    textureFormat = GL_DEPTH_COMPONENT;
-                    break;
-#endif
-                    
-                case RenderTarget::Type::DEPTH_24:
-#ifdef CRIMILD_PLATFORM_DESKTOP
-                    internalFormat = GL_DEPTH_COMPONENT24;
-                    attachment = GL_DEPTH_ATTACHMENT;
-                    textureFormat = GL_DEPTH_COMPONENT;
-                    break;
-#endif
-                    
-                case RenderTarget::Type::DEPTH_16:
-                    internalFormat = GL_DEPTH_COMPONENT16;
-                    attachment = GL_DEPTH_ATTACHMENT;
-                    textureFormat = GL_DEPTH_COMPONENT16;
-                    break;
+        fbo->getRenderTargets().each( [ this, &colorAttachmentOffset ]( std::string rtName, SharedPointer< RenderTarget > &target ) {
 
-                case RenderTarget::Type::COLOR_RGB:
-                    internalFormat = target->useFloatTexture() ? GL_RGB16F : GL_RGB;
-                    textureFormat = GL_RGB;
-                    attachment = GL_COLOR_ATTACHMENT0 + colorAttachmentOffset++;
-                    break;
+			GLenum attachment = GL_INVALID_ENUM;
+			switch ( target->getType() ) {
+				case RenderTarget::Type::DEPTH_32:
+				case RenderTarget::Type::DEPTH_24:
+				case RenderTarget::Type::DEPTH_16:
+					attachment = GL_DEPTH_ATTACHMENT;
+					break;
+					
+				case RenderTarget::Type::COLOR_RGB:
+				case RenderTarget::Type::COLOR_RGBA:
+					attachment = GL_COLOR_ATTACHMENT0 + colorAttachmentOffset++;
+					break;
+					
+				default:
+					Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid target type: ", ( int ) target->getType() );
+					break;
+			}
 
-                case RenderTarget::Type::COLOR_RGBA:
-                    internalFormat = target->useFloatTexture() ? GL_RGBA16F : GL_RGBA;
-                    textureFormat = GL_RGBA;
-                    attachment = GL_COLOR_ATTACHMENT0 + colorAttachmentOffset++;
-                    break;
+			if ( target->getOutput() & RenderTarget::Output::RENDER ) {
+				if ( target->getCatalog() == nullptr ) {
+					getRenderer()->getRenderTargetCatalog()->load( crimild::get_ptr( target ) );
+				}
+				
+				glFramebufferRenderbuffer( GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, target->getCatalogId() );
+			}
 
-                default:
-                    Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid target type: ", ( int ) target->getType() );
-                    break;
-            }
-            
-            if ( internalFormat != GL_INVALID_ENUM && attachment != GL_INVALID_ENUM ) {
-                if ( target->getOutput() == RenderTarget::Output::RENDER || target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
-                    GLuint renderBufferId;
-                    glGenRenderbuffers( 1, &renderBufferId );
-                    target->setId( renderBufferId );
-                    
-                    glBindRenderbuffer( GL_RENDERBUFFER, target->getId() );
-                    glRenderbufferStorage( GL_RENDERBUFFER, internalFormat, targetWidth, targetHeight );
-                    glFramebufferRenderbuffer( GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, target->getId() );
-                }
-
-                if ( target->getOutput() == RenderTarget::Output::TEXTURE || target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
-                    GLuint textureId;
-                    glGenTextures( 1, &textureId );
-                    target->getTexture()->setName( rtName );
-                    target->getTexture()->setCatalogInfo( getRenderer()->getTextureCatalog(), textureId );
-                    
-                    glBindTexture( GL_TEXTURE_2D, target->getTexture()->getCatalogId() );
-                    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-                    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-                    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-                    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-                    glTexImage2D( GL_TEXTURE_2D, 0, internalFormat, targetWidth, targetHeight, 0, textureFormat, textureType, 0 );
-                    glFramebufferTexture2D( GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, target->getTexture()->getCatalogId(), 0 );
-                }
-            }
-            
-            CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+			if ( target->getOutput() & RenderTarget::Output::TEXTURE ) {
+				auto texture = target->getTexture();
+				if ( texture->getCatalog() == nullptr ) {
+					getRenderer()->getTextureCatalog()->load( texture );
+				}
+                glFramebufferTexture2D( GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, target->getTexture()->getCatalogId(), 0 );
+			}
         });
 
         GLenum status = glCheckFramebufferStatus( GL_FRAMEBUFFER );
         switch ( status ) {
             case GL_FRAMEBUFFER_COMPLETE:
-                Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Framebuffer setup complete" );
                 break;
 #ifdef GL_FRAMEBUFFER_UNDEFINED
             case GL_FRAMEBUFFER_UNDEFINED:
@@ -266,6 +201,27 @@ void FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
                 break;
         }
 
+#ifdef CRIMILD_PLATFORM_DESKTOP
+		const GLenum fboBuffers[] = {
+			GL_COLOR_ATTACHMENT0,
+			GL_COLOR_ATTACHMENT1,
+			GL_COLOR_ATTACHMENT2,
+			GL_COLOR_ATTACHMENT3,
+			GL_COLOR_ATTACHMENT4,
+			GL_COLOR_ATTACHMENT5,
+			GL_COLOR_ATTACHMENT6,
+			GL_COLOR_ATTACHMENT7,
+		};
+		
+		if ( colorAttachmentOffset > 0 ) {
+			glDrawBuffers( colorAttachmentOffset, fboBuffers );
+		}
+		else {
+			glDrawBuffer( GL_NONE );
+            glReadBuffer( GL_NONE );
+		}
+#endif
+
         int defaultFBO = 0;
         if ( getRenderer()->getScreenBuffer() != nullptr ) {
             defaultFBO = getRenderer()->getScreenBuffer()->getCatalogId();
@@ -288,20 +244,6 @@ void FrameBufferObjectCatalog::unload( FrameBufferObject *fbo )
     int framebufferId = fbo->getCatalogId();
     if ( framebufferId > 0 ) {
         _framebufferIdsToDelete.push_back( framebufferId );
-        
-        fbo->getRenderTargets().each( [ this ]( std::string, SharedPointer< RenderTarget > &target ) {
-            int targetId = target->getId();
-            if ( targetId > 0 ) {
-                _renderbufferIdsToDelete.push_back( targetId );
-            }
-
-            if ( target->getOutput() == RenderTarget::Output::TEXTURE || target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
-                int textureId = target->getTexture()->getCatalogId();
-                _textureIdsToDelete.push_back( textureId );
-                target->getTexture()->setCatalogInfo( nullptr, 0 );
-            }
-        });
-        
         Catalog< FrameBufferObject >::unload( fbo );
     }
 
@@ -311,19 +253,7 @@ void FrameBufferObjectCatalog::unload( FrameBufferObject *fbo )
 void FrameBufferObjectCatalog::cleanup( void )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
-    
-    for ( auto id : _textureIdsToDelete ) {
-        GLuint textureId = id;
-        glDeleteTextures( 1, &textureId );
-    }
-    _textureIdsToDelete.clear();
-    
-    for ( auto id : _renderbufferIdsToDelete ) {
-        GLuint renderbufferId = id;
-        glDeleteRenderbuffers( 1, &renderbufferId );
-    }
-    _renderbufferIdsToDelete.clear();
-    
+
     for ( auto id : _framebufferIdsToDelete ) {
         GLuint framebufferId = id;
         glDeleteFramebuffers( 1, &framebufferId );

@@ -44,6 +44,19 @@ namespace crimild {
 		static const VertexFormat VF_P3_N3_UV2;
 		static const VertexFormat VF_P3_N3_TG3_UV2;
 
+		class LayoutLocation {
+		public:
+			enum {
+				POSITION = 0,
+				NORMAL = 1,
+				TANGENT = 2,
+				COLOR = 3,
+				TEXTURE_COORD = 4,
+				BONE_ID = 5,
+				BONE_WEIGHT = 6,
+			};
+		};
+
 	public:
 		VertexFormat( void );
 		VertexFormat( unsigned char positions, unsigned char colors, unsigned char normals, unsigned char tangents, unsigned char textureCoords );

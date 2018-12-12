@@ -30,6 +30,7 @@
 #include "Rendering/Renderer.hpp"
 #include "Rendering/RenderQueue.hpp"
 #include "Rendering/FrameBufferObject.hpp"
+#include "Rendering/RenderTarget.hpp"
 #include "Rendering/ImageEffects/ImageEffect.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "Components/RenderStateComponent.hpp"
@@ -90,8 +91,9 @@ void RenderPass::render( Renderer *renderer, Texture *texture, ShaderProgram *de
     renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM ), texture );
      
     // bind vertex and index buffers
-    renderer->bindVertexBuffer( program, _screen->getVertexBuffer() );
-    renderer->bindIndexBuffer( program, _screen->getIndexBuffer() );
+    //renderer->bindVertexBuffer( program, _screen->getVertexBuffer() );
+    //renderer->bindIndexBuffer( program, _screen->getIndexBuffer() );
+	renderer->bindPrimitive( program, crimild::get_ptr( _screen ) );
 
     Matrix4f mMatrix;
     mMatrix.makeIdentity();
@@ -101,8 +103,9 @@ void RenderPass::render( Renderer *renderer, Texture *texture, ShaderProgram *de
     renderer->drawPrimitive( program, crimild::get_ptr( _screen ) );
      
     // unbind primitive buffers
-    renderer->unbindVertexBuffer( program, _screen->getVertexBuffer() );
-    renderer->unbindIndexBuffer( program, _screen->getIndexBuffer() );
+    //renderer->unbindVertexBuffer( program, _screen->getVertexBuffer() );
+    //renderer->unbindIndexBuffer( program, _screen->getIndexBuffer() );
+	renderer->unbindPrimitive( program, crimild::get_ptr( _screen ) );
      
     // unbind framebuffer texture
     renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM ), texture );
@@ -130,7 +133,7 @@ FrameBufferObject *RenderPass::getSBuffer( Renderer *renderer )
 #else
     sBuffer->getRenderTargets().insert( S_BUFFER_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
 #endif
-    sBuffer->getRenderTargets().insert( S_BUFFER_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
+    sBuffer->getRenderTargets().insert( S_BUFFER_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::RENDER_AND_TEXTURE, width, height ) );
     renderer->setFrameBuffer( S_BUFFER_NAME, sBuffer );
     
     return crimild::get_ptr( sBuffer );
@@ -155,7 +158,7 @@ FrameBufferObject *RenderPass::getDBuffer( Renderer *renderer )
 #else
     dBuffer->getRenderTargets().insert( D_BUFFER_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
 #endif
-    dBuffer->getRenderTargets().insert( D_BUFFER_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
+    dBuffer->getRenderTargets().insert( D_BUFFER_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::RENDER_AND_TEXTURE, width, height ) );
     renderer->setFrameBuffer( D_BUFFER_NAME, dBuffer );
     
     return crimild::get_ptr( dBuffer );

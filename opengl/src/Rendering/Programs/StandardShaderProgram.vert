@@ -3,12 +3,12 @@ R"(
 // The scale matrix is used to push the projected vertex into the 0.0 - 1.0 region.
 const mat4 ScaleMatrix = mat4( 0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.5, 0.5, 0.5, 1.0 );
                                              
-CRIMILD_GLSL_ATTRIBUTE vec3 aPosition;
-CRIMILD_GLSL_ATTRIBUTE vec3 aNormal;
-CRIMILD_GLSL_ATTRIBUTE vec3 aTangent;
-CRIMILD_GLSL_ATTRIBUTE vec2 aTextureCoord;
-CRIMILD_GLSL_ATTRIBUTE vec4 aBoneIds;
-CRIMILD_GLSL_ATTRIBUTE vec4 aBoneWeights;
+CRIMILD_GLSL_ATTRIBUTE( 0 ) vec3 aPosition;
+CRIMILD_GLSL_ATTRIBUTE( 1 ) vec3 aNormal;
+CRIMILD_GLSL_ATTRIBUTE( 2 ) vec3 aTangent;
+CRIMILD_GLSL_ATTRIBUTE( 4 ) vec2 aTextureCoord;
+CRIMILD_GLSL_ATTRIBUTE( 5 ) vec4 aBoneIds;
+CRIMILD_GLSL_ATTRIBUTE( 6 ) vec4 aBoneWeights;
    
 uniform mat4 uPMatrix;
 uniform mat4 uVMatrix;

@@ -33,7 +33,7 @@ using namespace crimild;
 using namespace crimild::opengl;
 
 const char *depth_vs = { CRIMILD_TO_STRING(
-    CRIMILD_GLSL_ATTRIBUTE vec3 aPosition;
+		CRIMILD_GLSL_ATTRIBUTE( 0 ) vec3 aPosition;
 
     uniform mat4 uPMatrix;
     uniform mat4 uVMatrix;

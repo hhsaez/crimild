@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -28,36 +28,23 @@
 #ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_MULTIPLY_
 #define CRIMILD_RENDERING_SHADER_GRAPH_NODES_MULTIPLY_
 
-#include "Rendering/ShaderGraph/Node.hpp"
+#include "MultiInputOp.hpp"
 
 namespace crimild {
 
 	namespace shadergraph {
 
-		namespace nodes {
+		class Multiply : public MultiInputOp {
+			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::Multiply )
 
-			class Multiply : public Node {
-				CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::nodes::Multiply )
-
-			public:
-				Multiply( void );
-				virtual ~Multiply( void );
-
-				Outlet *getA( void ) { return _a; }
-				Outlet *getB( void ) { return _b; }
-
-				Outlet *getOutput( void ) { return _output; }
-
-			private:
-				Outlet *_a = nullptr;
-				Outlet *_b = nullptr;
-				Outlet *_output = nullptr;
-
-			protected:
-				virtual void prepare( ShaderGraph *graph, ShaderProgram *program ) override;
-			};
-
-		}
+		private:
+			static Variable *createResult( ShaderGraph *graph, const containers::Array< Variable * > &inputs );
+			
+		public:
+			Multiply( ShaderGraph *, Variable *a, Variable *b );
+			Multiply( ShaderGraph *, containers::Array< Variable * > const &inputs );
+			virtual ~Multiply( void );
+		};
 
 	}
 

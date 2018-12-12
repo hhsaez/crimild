@@ -32,12 +32,10 @@
 
 #include "Mathematics/Matrix.hpp"
 
-#include "SceneGraph/Light.hpp"
-
-#include "FrameBufferObject.hpp"
-#include "Texture.hpp"
-
 namespace crimild {
+
+    class FrameBufferObject;
+    class Texture;
     
     class ShadowMap : public SharedObject {
     public:

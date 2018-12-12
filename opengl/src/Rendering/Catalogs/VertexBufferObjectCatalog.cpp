@@ -49,184 +49,143 @@ int VertexBufferObjectCatalog::getNextResourceId( void )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
     
-	GLuint vaoId;
-
-#ifndef CRIMILD_FORCE_OPENGL_COMPATIBILITY_MODE
-    glGenVertexArrays( 1, &vaoId );
-  	glBindVertexArray( vaoId );
-#endif
-	
 	GLuint vboId;    
     glGenBuffers( 1, &vboId );
     
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 
-    return composeId( vaoId, vboId );
-}
-
-int VertexBufferObjectCatalog::composeId( unsigned int vaoId, unsigned int vboId )
-{
-#ifndef CRIMILD_FORCE_OPENGL_COMPATIBILITY_MODE
-	return vaoId * 1000 + vboId;
-#else
     return vboId;
-#endif
 }
 
-bool VertexBufferObjectCatalog::extractId( int compositeId, unsigned int &vaoId, unsigned int &vboId )
+void VertexBufferObjectCatalog::bind( VertexBufferObject *vbo )
 {
-#ifndef CRIMILD_FORCE_OPENGL_COMPATIBILITY_MODE
-	vaoId = compositeId / 1000;
-	vboId = compositeId % 1000;
-#else
-    vaoId = 0;
-    vboId = compositeId;
-#endif
-	return true;
-}
+	if ( vbo == nullptr ) return;
 
-void VertexBufferObjectCatalog::bind( ShaderProgram *program, VertexBufferObject *vbo )
-{
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
-	GLuint vaoId, vboId;
-
 	if ( vbo->getCatalog() == nullptr ) {
-		Catalog< VertexBufferObject >::bind( program, vbo );
+		Catalog< VertexBufferObject >::bind( vbo );
     }
 
-    extractId( vbo->getCatalogId(), vaoId, vboId );
-
-#ifndef CRIMILD_FORCE_OPENGL_COMPATIBILITY_MODE
-    glBindVertexArray( vaoId );
-#endif
+    GLuint vboId = vbo->getCatalogId();
 
     glBindBuffer( GL_ARRAY_BUFFER, vboId );
     float *baseOffset = 0;
 
     const VertexFormat &format = vbo->getVertexFormat();
 
-    auto positionLocation = program->getStandardLocation( ShaderProgram::StandardLocation::POSITION_ATTRIBUTE );
-    if ( positionLocation && positionLocation->isValid() ) {
-        if ( format.hasPositions() ) {
-            glEnableVertexAttribArray( positionLocation->getLocation() );
-            glVertexAttribPointer( positionLocation->getLocation(),
-                                   format.getPositionComponents(),
-                                   GL_FLOAT,
-                                   GL_FALSE,
-                                   format.getVertexSizeInBytes(),
-                                   ( const GLvoid * )( baseOffset + format.getPositionsOffset() ) );
-        }
+	if ( format.hasPositions() ) {
+		glEnableVertexAttribArray( VertexFormat::LayoutLocation::POSITION );
+		glVertexAttribPointer(
+			VertexFormat::LayoutLocation::POSITION,
+			format.getPositionComponents(),
+			GL_FLOAT,
+			GL_FALSE,
+			format.getVertexSizeInBytes(),
+			( const GLvoid * )( baseOffset + format.getPositionsOffset() ) );
+	}
+
+	if ( format.hasNormals() ) {
+		glEnableVertexAttribArray( VertexFormat::LayoutLocation::NORMAL );
+		glVertexAttribPointer(
+			VertexFormat::LayoutLocation::NORMAL,
+			format.getNormalComponents(),
+			GL_FLOAT,
+			GL_FALSE,
+			format.getVertexSizeInBytes(),
+			( const GLvoid * )( baseOffset + format.getNormalsOffset() ) );
+	}
+
+	if ( format.hasTangents() ) {
+		glEnableVertexAttribArray( VertexFormat::LayoutLocation::TANGENT );
+		glVertexAttribPointer(
+			VertexFormat::LayoutLocation::TANGENT,
+			format.getTangentComponents(),
+			GL_FLOAT,
+			GL_FALSE,
+			format.getVertexSizeInBytes(),
+			( const GLvoid * )( baseOffset + format.getTangentsOffset() ) );
     }
 
-    auto normalLocation = program->getStandardLocation( ShaderProgram::StandardLocation::NORMAL_ATTRIBUTE );
-    if ( normalLocation && normalLocation->isValid() ) {
-        if ( format.hasNormals() ) {
-            glEnableVertexAttribArray( normalLocation->getLocation() );
-            glVertexAttribPointer( normalLocation->getLocation(),
-                                   format.getNormalComponents(),
-                                   GL_FLOAT,
-                                   GL_FALSE,
-                                   format.getVertexSizeInBytes(),
-                                   ( const GLvoid * )( baseOffset + format.getNormalsOffset() ) );
-        }
+	if ( format.hasColors() ) {
+		glEnableVertexAttribArray( VertexFormat::LayoutLocation::COLOR );
+		glVertexAttribPointer(
+			VertexFormat::LayoutLocation::COLOR,
+			format.getColorComponents(),
+			GL_FLOAT,
+			GL_FALSE,
+			format.getVertexSizeInBytes(),
+			( const GLvoid * )( baseOffset + format.getColorsOffset() ) );
     }
 
-    auto tangentLocation = program->getStandardLocation( ShaderProgram::StandardLocation::TANGENT_ATTRIBUTE );
-    if ( tangentLocation && tangentLocation->isValid() ) {
-        if ( format.hasTangents() ) {
-            glEnableVertexAttribArray( tangentLocation->getLocation() );
-            glVertexAttribPointer( tangentLocation->getLocation(),
-                                   format.getTangentComponents(),
-                                   GL_FLOAT,
-                                   GL_FALSE,
-                                   format.getVertexSizeInBytes(),
-                                   ( const GLvoid * )( baseOffset + format.getTangentsOffset() ) );
-        }
+	if ( format.hasTextureCoords() ) {
+		glEnableVertexAttribArray( VertexFormat::LayoutLocation::TEXTURE_COORD );
+		glVertexAttribPointer(
+			VertexFormat::LayoutLocation::TEXTURE_COORD,
+			format.getTextureCoordComponents(),
+			GL_FLOAT,
+			GL_FALSE,
+			format.getVertexSizeInBytes(),
+			( const GLvoid * )( baseOffset + format.getTextureCoordsOffset() ) );
+	}
+
+	if ( format.hasBoneIds() ) {
+		glEnableVertexAttribArray( VertexFormat::LayoutLocation::BONE_ID );
+		glVertexAttribPointer(
+			VertexFormat::LayoutLocation::BONE_ID,
+			format.getBoneIdComponents(),
+			GL_FLOAT,
+			GL_FALSE,
+			format.getVertexSizeInBytes(),
+			( const GLvoid * )( baseOffset + format.getBoneIdsOffset() ) );
     }
 
-    auto colorLocation = program->getStandardLocation( ShaderProgram::StandardLocation::COLOR_ATTRIBUTE );
-    if ( colorLocation && colorLocation->isValid() ) {
-        if ( format.hasColors() ) {
-            glEnableVertexAttribArray( colorLocation->getLocation() );
-            glVertexAttribPointer( colorLocation->getLocation(),
-                                   format.getColorComponents(),
-                                   GL_FLOAT,
-                                   GL_FALSE,
-                                   format.getVertexSizeInBytes(),
-                                   ( const GLvoid * )( baseOffset + format.getColorsOffset() ) );
-        }
-    }
-
-    auto uvLocation = program->getStandardLocation( ShaderProgram::StandardLocation::TEXTURE_COORD_ATTRIBUTE );
-    if ( uvLocation && uvLocation->isValid() ) {
-        if ( format.hasTextureCoords() ) {
-            glEnableVertexAttribArray( uvLocation->getLocation() );
-            glVertexAttribPointer( uvLocation->getLocation(),
-                                   format.getTextureCoordComponents(),
-                                   GL_FLOAT,
-                                   GL_FALSE,
-                                   format.getVertexSizeInBytes(),
-                                   ( const GLvoid * )( baseOffset + format.getTextureCoordsOffset() ) );
-        }
-    }
-
-    auto boneIdLocation = program->getStandardLocation( ShaderProgram::StandardLocation::BONE_IDS_ATTRIBUTE );
-    if ( boneIdLocation && boneIdLocation->isValid() ) {
-    	if ( format.hasBoneIds() ) {
-    		glEnableVertexAttribArray( boneIdLocation->getLocation() );
-    		glVertexAttribPointer( boneIdLocation->getLocation(),
-    							   format.getBoneIdComponents(),
-    							   GL_FLOAT,
-    							   GL_FALSE,
-    							   format.getVertexSizeInBytes(),
-    							   ( const GLvoid * )( baseOffset + format.getBoneIdsOffset() ) );
-    	}
-    }
-
-    auto boneWeightLocation = program->getStandardLocation( ShaderProgram::StandardLocation::BONE_WEIGHTS_ATTRIBUTE );
-    if ( boneWeightLocation && boneWeightLocation->isValid() ) {
-    	if ( format.hasBoneWeights() ) {
-    		glEnableVertexAttribArray( boneWeightLocation->getLocation() );
-    		glVertexAttribPointer( boneWeightLocation->getLocation(),
-    							   format.getBoneWeightComponents(),
-    							   GL_FLOAT,
-    							   GL_FALSE,
-    							   format.getVertexSizeInBytes(),
-    							   ( const GLvoid * )( baseOffset + format.getBoneWeightsOffset() ) );
-    	}
-    }
+	if ( format.hasBoneWeights() ) {
+		glEnableVertexAttribArray( VertexFormat::LayoutLocation::BONE_WEIGHT );
+		glVertexAttribPointer(
+			VertexFormat::LayoutLocation::BONE_WEIGHT,
+			format.getBoneWeightComponents(),
+			GL_FLOAT,
+			GL_FALSE,
+			format.getVertexSizeInBytes(),
+			( const GLvoid * )( baseOffset + format.getBoneWeightsOffset() ) );
+	}
 
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void VertexBufferObjectCatalog::unbind( ShaderProgram *program, VertexBufferObject *vbo )
+void VertexBufferObjectCatalog::unbind( VertexBufferObject *vbo )
 {
+	if ( vbo == nullptr ) return;
+	
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
-#ifndef CRIMILD_FORCE_OPENGL_COMPATIBILITY_MODE
-    glBindVertexArray( 0 );
-#endif
+    const VertexFormat &format = vbo->getVertexFormat();
+
+	if ( format.hasPositions() ) glDisableVertexAttribArray( VertexFormat::LayoutLocation::POSITION );
+	if ( format.hasNormals() ) glDisableVertexAttribArray( VertexFormat::LayoutLocation::NORMAL );
+	if ( format.hasTangents() ) glDisableVertexAttribArray( VertexFormat::LayoutLocation::TANGENT );
+	if ( format.hasColors() ) glDisableVertexAttribArray( VertexFormat::LayoutLocation::COLOR );
+	if ( format.hasTextureCoords() ) glDisableVertexAttribArray( VertexFormat::LayoutLocation::TEXTURE_COORD );
+	if ( format.hasBoneIds() ) glDisableVertexAttribArray( VertexFormat::LayoutLocation::BONE_ID );
+	if ( format.hasBoneWeights() ) glDisableVertexAttribArray( VertexFormat::LayoutLocation::BONE_WEIGHT );
 
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
     
-	Catalog< VertexBufferObject >::unbind( program, vbo );
+	Catalog< VertexBufferObject >::unbind( vbo );
 
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
 void VertexBufferObjectCatalog::load( VertexBufferObject *vbo )
 {
+	if ( vbo == nullptr ) return;
+	
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
 	Catalog< VertexBufferObject >::load( vbo );
 
-	GLuint vaoId, vboId;
-	extractId( vbo->getCatalogId(), vaoId, vboId );
-
-#ifndef CRIMILD_FORCE_OPENGL_COMPATIBILITY_MODE
-	glBindVertexArray( vaoId );
-#endif
+	GLuint vboId = vbo->getCatalogId();
 
     glBindBuffer( GL_ARRAY_BUFFER, vboId );
     glBufferData( GL_ARRAY_BUFFER,
@@ -239,6 +198,8 @@ void VertexBufferObjectCatalog::load( VertexBufferObject *vbo )
 
 void VertexBufferObjectCatalog::unload( VertexBufferObject *vbo )
 {
+	if ( vbo == nullptr ) return;
+	
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
     
     if ( vbo->getCatalogId() > 0 ) {
@@ -255,13 +216,8 @@ void VertexBufferObjectCatalog::cleanup( void )
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
     
     for ( auto id : _unusedVBOIds ) {
-        GLuint vaoId, vboId;
-        extractId( id, vaoId, vboId );
-        
+        GLuint vboId = id;
         glDeleteBuffers( 1, &vboId );
-#ifndef CRIMILD_FORCE_OPENGL_COMPATIBILITY_MODE
-        glDeleteVertexArrays( 1, &vaoId );
-#endif
     }
     
     _unusedVBOIds.clear();

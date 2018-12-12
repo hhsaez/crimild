@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -65,6 +65,8 @@ namespace crimild {
 
 			virtual void drawPrimitive( ShaderProgram *program, Primitive *primitive ) override;
 			virtual void drawBuffers( ShaderProgram *program, Primitive::Type type, VertexBufferObject *vbo, unsigned int count ) override;
+
+			virtual SharedPointer< shadergraph::ShaderGraph > createShaderGraph( void ) override;
 		};
 
 	}

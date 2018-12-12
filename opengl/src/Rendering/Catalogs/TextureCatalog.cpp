@@ -44,6 +44,13 @@
 #define GL_RED 0x1903
 #endif
 
+#ifndef GL_RGBA16F
+#define GL_RGBA16F 0x881A
+#endif
+#ifndef GL_RGB16F
+#define GL_RGB16F 0x881B
+#endif
+
 using namespace crimild;
 using namespace crimild::opengl;
 
@@ -68,6 +75,43 @@ int TextureCatalog::getNextResourceId( void )
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
     
     return textureId;
+}
+
+void TextureCatalog::bind( Texture *texture )
+{
+	if ( texture == nullptr ) {
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid texture pointer" );
+		return;
+	}
+
+	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+
+	Catalog< Texture >::bind( texture );
+	
+	if ( texture->getCatalog() == nullptr ) {
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Could not bind texture" );
+		return;
+	}
+
+	glBindTexture( GL_TEXTURE_2D, texture->getCatalogId() );
+
+	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+}
+
+void TextureCatalog::unbind( Texture *texture )
+{
+	if ( texture == nullptr ) {
+		return;
+	}
+	
+	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+
+	glBindTexture( GL_TEXTURE_2D, 0 );
+	
+	Catalog< Texture >::unbind( texture );
+
+	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+	
 }
 
 void TextureCatalog::bind( ShaderLocation *location, Texture *texture )
@@ -120,50 +164,86 @@ void TextureCatalog::load( Texture *texture )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
-    if ( texture->getImage() == nullptr ) {
-        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot load texture without image" );
-        return;
-    }
-    
 	Catalog< Texture >::load( texture );
 
 	int textureId = texture->getCatalogId();
     glBindTexture( GL_TEXTURE_2D, textureId );
+
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, OpenGLUtils::TEXTURE_FILTER_MAP[ ( uint8_t ) texture->getMinFilter() ] );
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, OpenGLUtils::TEXTURE_FILTER_MAP[ ( uint8_t ) texture->getMagFilter() ] );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, OpenGLUtils::TEXTURE_WRAP_MODE_CLAMP[ ( uint8_t ) texture->getWrapMode() ] );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, OpenGLUtils::TEXTURE_WRAP_MODE_CLAMP[ ( uint8_t ) texture->getWrapMode() ] );
 
-    GLint internalFormat = GL_RGBA;
-	GLint format = GL_BGRA;
-	if ( texture->getImage()->getBpp() == 4 ) {
-		internalFormat = GL_RGBA;
-		if ( texture->getImage()->getPixelFormat() == Image::PixelFormat::BGRA ) {
-			format = GL_BGRA;
-		}
-		else {
-			format = GL_RGBA;
-		}
-	}
-	else if ( texture->getImage()->getBpp() == 3 ) {
-		internalFormat = GL_RGB;
-		if ( texture->getImage()->getPixelFormat() == Image::PixelFormat::BGR ) {
-			format = GL_BGR;
-		}
-		else {
-			format = GL_RGB;
-		}
-	}
-	else if ( texture->getImage()->getBpp() == 1 ) {
-		internalFormat = GL_RED;
-		format = GL_RED;
-	}
+	auto image = texture->getImage();
+	auto width = image->getWidth();
+	auto height = image->getHeight();
 
-    glTexImage2D( GL_TEXTURE_2D, 0, internalFormat, 
-    	texture->getImage()->getWidth(), texture->getImage()->getHeight(), 0, 
-    	format, 
-    	GL_UNSIGNED_BYTE,
-        ( GLvoid * ) texture->getImage()->getData() );
+	GLenum internalFormat = GL_INVALID_ENUM;
+	GLenum textureFormat = GL_INVALID_ENUM;
+	crimild::Bool useFloatTexture = image->getPixelType() == Image::PixelType::FLOAT;
+	GLenum textureType = useFloatTexture ? GL_FLOAT : GL_UNSIGNED_BYTE;
+
+	switch ( image->getPixelFormat() ) {
+		case Image::PixelFormat::DEPTH_32:
+#ifdef CRIMILD_PLATFORM_DESKTOP
+			internalFormat = useFloatTexture ? GL_DEPTH_COMPONENT32F : GL_DEPTH_COMPONENT32;
+			textureFormat = GL_DEPTH_COMPONENT;
+			break;
+#endif
+			
+		case Image::PixelFormat::DEPTH_24:
+#ifdef CRIMILD_PLATFORM_DESKTOP
+			internalFormat = GL_DEPTH_COMPONENT24;
+			textureFormat = GL_DEPTH_COMPONENT;
+			break;
+#endif
+			
+		case Image::PixelFormat::DEPTH_16:
+			internalFormat = GL_DEPTH_COMPONENT16;
+			textureFormat = GL_DEPTH_COMPONENT16;
+			break;
+			
+		case Image::PixelFormat::RGB:
+			internalFormat = useFloatTexture ? GL_RGB16F : GL_RGB;
+			textureFormat = GL_RGB;
+			break;
+			
+		case Image::PixelFormat::BGR:
+			internalFormat = GL_RGB;
+			textureFormat = GL_BGR;
+			break;
+			
+		case Image::PixelFormat::RGBA:
+			internalFormat = useFloatTexture ? GL_RGBA16F : GL_RGBA;
+			textureFormat = GL_RGBA;
+			break;
+			
+		case Image::PixelFormat::BGRA:
+			internalFormat = GL_RGBA;
+			textureFormat = GL_BGRA;
+			break;
+
+		case Image::PixelFormat::RED:
+			internalFormat = GL_RED;
+			textureFormat = GL_RED;
+			
+		default:
+			Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid target type: ", ( int ) image->getPixelFormat() );
+			break;
+	}
+    
+	GLvoid *data = image->hasData() ? image->getData() : nullptr;
+
+    glTexImage2D(
+		GL_TEXTURE_2D,
+		0,
+		internalFormat, 
+    	width,
+		height,
+		0, 
+    	textureFormat, 
+    	textureType,
+        data );
     
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }

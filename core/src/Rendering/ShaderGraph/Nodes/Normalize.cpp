@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -28,29 +28,25 @@
 #include "Normalize.hpp"
 
 #include "Rendering/ShaderGraph/ShaderGraph.hpp"
+#include "Rendering/ShaderGraph/Variable.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
-using namespace crimild::shadergraph::nodes;
 
-Normalize::Normalize( void )
+Normalize::Normalize( ShaderGraph *graph, Variable *input )
 {
-	_inputValue = addInputOutlet( "inputValue", Outlet::Type::ANY );
-
-	_normalized = addOutputOutlet( "norm", Outlet::Type::ANY );
+	_input = input;
+	_result = graph->addNode< Variable >( input->getType(), input->getName() + "_norm" );
 }
 
 Normalize::~Normalize( void )
 {
-
+	
 }
 
-void Normalize::prepare( ShaderGraph *graph, ShaderProgram *program )
+void Normalize::setup( ShaderGraph *graph )
 {
-	Node::prepare( graph, program );
-	
-	if ( graph->isConnected( getInputValue() ) ) {
-		_normalized->setType( graph->anyConnection( getInputValue() )->getType() );
-	}
+	graph->read( this, { _input } );
+	graph->write( this, { _result } );
 }
 

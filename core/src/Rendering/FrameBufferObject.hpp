@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2013-2018, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -37,57 +37,26 @@
 #include <memory>
 
 namespace crimild {
-    
-    class RenderTarget : public SharedObject {
-    public:
-		static constexpr const char *RENDER_TARGET_NAME_COLOR = "fbo_color";
-		static constexpr const char *RENDER_TARGET_NAME_DEPTH = "fbo_depth";
-		
-        enum class Type {
-            COLOR_RGB,
-            COLOR_RGBA,
-            DEPTH_16,
-            DEPTH_24,
-            DEPTH_32
-        };
-        
-        enum class Output {
-            RENDER,
-            TEXTURE,
-            RENDER_AND_TEXTURE
-        };
-        
-    public:
-        RenderTarget( Type type, Output output, int width, int height );
-        RenderTarget( Type type, Output output, int width, int height, bool floatTextureHint );
-        virtual ~RenderTarget( void );
-        
-        Type getType( void ) const { return _type; }
-        Output getOutput( void ) const { return _output; }
-        
-        int getId( void ) const { return _id; }
-        void setId( int value ) { _id = value; }
-        
-        int getWidth( void ) const { return _width; }
-        int getHeight( void ) const { return _height; }
-        
-        Texture *getTexture( void ) { return crimild::get_ptr( _texture ); }
-        bool useFloatTexture( void ) const { return _useFloatTexture; }
-        void setUseFloatTexture( bool value ) { _useFloatTexture = value; }
-        
-    private:
-        int _id;
-        Type _type;
-        Output _output;
-        int _width;
-        int _height;
-        SharedPointer< Texture > _texture;
-        bool _useFloatTexture = false;
-    };
-    
-    using RenderTargetMap = containers::Map< std::string, SharedPointer< RenderTarget >>;
 
+	class RenderTarget;
+    
 	class FrameBufferObject : public SharedObject, public Catalog< FrameBufferObject >::Resource {
+	private:
+		using RenderTargetMap = containers::Map< std::string, SharedPointer< RenderTarget >>;
+
+	public:
+		class ClearFlag {
+		public:
+			enum {
+				NONE = 0,
+
+				COLOR = 1 << 0,
+				DEPTH = 1 << 1,
+
+				ALL = COLOR | DEPTH,
+			};
+		};
+
 	public:
         FrameBufferObject( int width, int height );
 		virtual ~FrameBufferObject( void );
@@ -103,12 +72,16 @@ namespace crimild {
 		const RGBAColorf &getClearColor( void ) const { return _clearColor; }
 
         RenderTargetMap &getRenderTargets( void ) { return _renderTargets; }
-        
+
+		void setClearFlags( crimild::Int8 clearFlags ) { _clearFlags = clearFlags; }
+        crimild::Int8 getClearFlags( void ) const { return _clearFlags; }
+
 	private:
 		int _width;
 		int _height;
 		RGBAColorf _clearColor;
         RenderTargetMap _renderTargets;
+		crimild::Int8 _clearFlags = ClearFlag::ALL;
 	};
 
 	/**

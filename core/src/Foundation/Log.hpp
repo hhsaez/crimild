@@ -189,5 +189,12 @@ namespace crimild {
 
 }
 
+#define CRIMILD_LOG_FATAL( ... ) ( crimild::Log::fatal( CRIMILD_CURRENT_CLASS_NAME, __VA_ARGS__ ) )
+#define CRIMILD_LOG_ERROR( ... ) ( crimild::Log::error( CRIMILD_CURRENT_CLASS_NAME, __VA_ARGS__ ) )
+#define CRIMILD_LOG_WARNING( ... ) ( crimild::Log::warning( CRIMILD_CURRENT_CLASS_NAME, __VA_ARGS__ ) )
+#define CRIMILD_LOG_INFO( ... ) ( crimild::Log::info( CRIMILD_CURRENT_CLASS_NAME, __VA_ARGS__ ) )
+#define CRIMILD_LOG_DEBUG( ... ) ( crimild::Log::debug( CRIMILD_CURRENT_CLASS_NAME, __VA_ARGS__ ) )
+#define CRIMILD_LOG_TRACE( ... ) ( crimild::Log::trace( CRIMILD_CURRENT_CLASS_NAME, __VA_ARGS__ ) )
+
 #endif
 

@@ -92,3 +92,66 @@ TEST( Transformation, getInverse )
     EXPECT_TRUE( Numericf::equals( 1.0f, t2.getScale() ) );
 }
 
+TEST( Transformation, translate )
+{
+	Transformation t;
+
+	EXPECT_TRUE( t.isIdentity() );
+	
+	t.setTranslate( 0.5f, 0.0f, 0.0f );
+
+	EXPECT_FALSE( t.isIdentity() );
+	EXPECT_EQ( Vector3f( 0.5f, 0.0f, 0.0f ), t.getTranslate() );
+
+	t.makeIdentity();
+
+	EXPECT_TRUE( t.isIdentity() );
+	EXPECT_EQ( Vector3f::ZERO, t.getTranslate() );
+	
+	t.translate() = Vector3f( 0.0f, 0.3f, 0.0f );
+
+	EXPECT_FALSE( t.isIdentity() );
+	EXPECT_EQ( Vector3f( 0.0f, 0.3f, 0.0f ), t.getTranslate() );
+}
+
+TEST( Transformation, rotate )
+{
+	Transformation t;
+
+	EXPECT_TRUE( t.isIdentity() );
+	
+	t.setRotate( Vector3f::UNIT_Y, 0.5f );
+
+	EXPECT_FALSE( t.isIdentity() );
+
+	t.makeIdentity();
+
+	EXPECT_TRUE( t.isIdentity() );
+	
+	t.rotate() = Quaternion4f::createFromAxisAngle( Vector3f::UNIT_X, 0.5f );
+
+	EXPECT_FALSE( t.isIdentity() );
+}
+
+TEST( Transformation, scale )
+{
+	Transformation t;
+
+	EXPECT_TRUE( t.isIdentity() );
+	
+	t.setScale( 0.5f );
+
+	EXPECT_FALSE( t.isIdentity() );
+	EXPECT_EQ( 0.5f, t.getScale() );
+
+	t.makeIdentity();
+
+	EXPECT_TRUE( t.isIdentity() );
+	EXPECT_EQ( 1.0f, t.getScale() );
+	
+	t.scale() = 0.3f;
+
+	EXPECT_FALSE( t.isIdentity() );
+	EXPECT_EQ( 0.3f, t.getScale() );
+}
+

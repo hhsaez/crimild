@@ -42,6 +42,9 @@
 
 namespace crimild {
     
+	/*
+	  \deprecated Render passes are now implemented using render graphs.
+	 */
 	class StandardRenderPass : public RenderPass {
 	public:
 		StandardRenderPass( void );
@@ -53,8 +56,8 @@ namespace crimild {
         void computeShadowMaps( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
         
         void renderOccluders( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
-        virtual void renderOpaqueObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
-        virtual void renderTranslucentObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera );
+        virtual void renderOpaqueObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera, RenderQueue::RenderableType opaqueType );
+        virtual void renderTranslucentObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera, RenderQueue::RenderableType translucentType );
         
         void renderStandardGeometry( Renderer *renderer, Geometry *geometry, ShaderProgram *program, Material *material, const Matrix4f &modelTransform );
 

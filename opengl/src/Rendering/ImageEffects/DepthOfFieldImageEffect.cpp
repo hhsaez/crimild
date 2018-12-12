@@ -29,6 +29,7 @@
 #include "Rendering/OpenGLUtils.hpp"
 
 #include <Rendering/FrameBufferObject.hpp>
+#include <Rendering/RenderTarget.hpp>
 #include <Rendering/RenderPasses/RenderPass.hpp>
 #include <SceneGraph/Camera.hpp>
 
@@ -36,8 +37,8 @@ using namespace crimild;
 using namespace crimild::opengl;
 
 const char *dof_generic_vs = R"(
-    CRIMILD_GLSL_ATTRIBUTE vec3 aPosition;
-    CRIMILD_GLSL_ATTRIBUTE vec2 aTextureCoord;
+    CRIMILD_GLSL_ATTRIBUTE( 0 ) vec3 aPosition;
+    CRIMILD_GLSL_ATTRIBUTE( 4 ) vec2 aTextureCoord;
 
     CRIMILD_GLSL_VARYING_OUT vec2 vTextureCoord;
 

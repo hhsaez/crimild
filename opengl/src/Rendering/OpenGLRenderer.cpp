@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,8 @@
 #include "Catalogs/IndexBufferObjectCatalog.hpp"
 #include "Catalogs/FrameBufferObjectCatalog.hpp"
 #include "Catalogs/TextureCatalog.hpp"
+#include "Catalogs/RenderTargetCatalog.hpp"
+#include "Catalogs/PrimitiveCatalog.hpp"
 
 #include "Programs/StandardShaderProgram.hpp"
 #include "Programs/LitTextureShaderProgram.hpp"
@@ -45,8 +47,11 @@
 #include "Programs/UnlitVertexColorShaderProgram.hpp"
 #include "Programs/ParticleSystemShaderProgram.hpp"
 #include "Programs/DebugDepthShaderProgram.hpp"
+#include "Programs/DepthPassShaderProgram.hpp"
 
 #include "Rendering/ImageEffects/ColorTintImageEffect.hpp"
+
+#include "Rendering/ShaderGraph/OpenGLShaderGraph.hpp"
 
 #include <Rendering/AlphaState.hpp>
 #include <Rendering/DepthState.hpp>
@@ -54,7 +59,10 @@
 #include <Rendering/CullFaceState.hpp>
 #include <Rendering/FrameBufferObject.hpp>
 
+#include <Rendering/ShaderGraph/ShaderGraph.hpp>
+
 using namespace crimild;
+using namespace crimild::shadergraph;
 using namespace crimild::opengl;
 
 OpenGLRenderer::OpenGLRenderer( void )
@@ -70,12 +78,17 @@ OpenGLRenderer::OpenGLRenderer( SharedPointer< FrameBufferObject > const &screen
 	setIndexBufferObjectCatalog( crimild::alloc< IndexBufferObjectCatalog >() );
 	setFrameBufferObjectCatalog( crimild::alloc< FrameBufferObjectCatalog >( this ) );
 	setTextureCatalog( crimild::alloc< TextureCatalog >() );
+	setRenderTargetCatalog( crimild::alloc< RenderTargetCatalog >( this ) );
+	setPrimitiveCatalog( crimild::alloc< PrimitiveCatalog >() );
 
 	if ( screenBuffer != nullptr ) {
 		setScreenBuffer( screenBuffer );
 	}
 
 	// TODO: Move these calls to 'configure()'?
+    setShaderProgram( Renderer::SHADER_PROGRAM_RENDER_PASS_FORWARD_LIGHTING, crimild::alloc< StandardShaderProgram >() );
+    setShaderProgram( Renderer::SHADER_PROGRAM_RENDER_PASS_DEPTH, crimild::alloc< DepthPassShaderProgram >() );
+	
     setShaderProgram( Renderer::SHADER_PROGRAM_RENDER_PASS_STANDARD, crimild::alloc< StandardShaderProgram >() );
     
     setShaderProgram( Renderer::SHADER_PROGRAM_LIT_TEXTURE, crimild::alloc< StandardShaderProgram >() );
@@ -358,5 +371,10 @@ void OpenGLRenderer::setColorMaskState( ColorMaskState *state )
 	}
 
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+}
+
+SharedPointer< ShaderGraph > OpenGLRenderer::createShaderGraph( void )
+{
+	return crimild::alloc< OpenGLShaderGraph >();
 }
 

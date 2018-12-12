@@ -44,11 +44,21 @@ namespace crimild {
             RGB,
             RGBA,
             BGR,
-            BGRA
+            BGRA,
+			RED,
+			DEPTH_16,
+			DEPTH_24,
+			DEPTH_32,
         };
+
+		enum class PixelType {
+			UNSIGNED_BYTE,
+			FLOAT,
+		};
         
 	public:
 		Image( void );
+		Image( int width, int height, int bpp, PixelFormat format, PixelType pixelType );
 		Image( int width, int height, int bpp, const unsigned char *data, PixelFormat format = PixelFormat::RGBA );
 		virtual ~Image( void );
 
@@ -56,10 +66,12 @@ namespace crimild {
 		int getHeight( void ) const { return _height; }
 		int getBpp( void ) const { return _bpp; }
         PixelFormat getPixelFormat( void ) const { return _pixelFormat; }
+		PixelType getPixelType( void ) const { return _pixelType; }
+		crimild::Bool hasData( void ) const { return _data.size(); }
 		unsigned char *getData( void ) { return &_data[ 0 ]; }
 		const unsigned char *getData( void ) const { return &_data[ 0 ]; }
 
-		void setData( int width, int height, int bpp, const unsigned char *data, PixelFormat format = PixelFormat::RGBA );
+		void setData( int width, int height, int bpp, const unsigned char *data, PixelFormat format = PixelFormat::RGBA, PixelType pixelType = PixelType::UNSIGNED_BYTE );
 
 		bool isLoaded( void ) const { return _data.size() > 0; }
 		virtual void load( void );
@@ -70,6 +82,7 @@ namespace crimild {
 		int _height;
 		int _bpp;
         PixelFormat _pixelFormat;
+		PixelType _pixelType;
         containers::ByteArray _data;
 
 		/**

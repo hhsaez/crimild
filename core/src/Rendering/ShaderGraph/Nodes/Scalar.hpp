@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,39 +25,36 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_SCALAR_
-#define CRIMILD_RENDERING_SHADER_GRAPH_NODES_SCALAR_
+#ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_SCALAR_CONSTANT_
+#define CRIMILD_RENDERING_SHADER_GRAPH_NODES_SCALAR_CONSTANT_
 
-#include "Rendering/ShaderGraph/Node.hpp"
+#include "Rendering/ShaderGraph/Expression.hpp"
 
 namespace crimild {
 
 	namespace shadergraph {
 
-		namespace nodes {
+		class Variable;
 
-			class Scalar : public Node {
-				CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::nodes::Scalar )
+		class ScalarConstant : public Expression {
+			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::ScalarConstant )
+			
+		public:
+			explicit ScalarConstant( ShaderGraph *graph, crimild::Real32 constant, std::string uniqueName = "" );
+			virtual ~ScalarConstant( void );
+			
+			crimild::Real32 getValue( void ) const { return _constant; }
 
-			public:
-				explicit Scalar( crimild::Real32 constant = 0 );
-				virtual ~Scalar( void );
+			Variable *getVariable( void ) { return _variable; }
 
-				crimild::Real32 getConstant( void ) const { return _constant; }
-
-				Outlet *getInputValue( void ) { return _inputValue; }
-				
-				Outlet *getOutputValue( void ) { return _outputValue; }
-
-			private:
-				crimild::Real32 _constant;
-				
-				Outlet *_inputValue = nullptr;
-				Outlet *_outputValue = nullptr;
-			};
-
-		}
-
+		private:
+			crimild::Real32 _constant;
+			Variable *_variable = nullptr;
+			
+		public:
+			virtual void setup( ShaderGraph *graph ) override;
+		};
+		
 	}
 
 }

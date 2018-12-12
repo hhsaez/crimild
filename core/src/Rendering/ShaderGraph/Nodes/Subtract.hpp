@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -28,33 +28,32 @@
 #ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_SUBTRACT_
 #define CRIMILD_RENDERING_SHADER_GRAPH_NODES_SUBTRACT_
 
-#include "Rendering/ShaderGraph/Node.hpp"
+#include "Rendering/ShaderGraph/Expression.hpp"
+#include "Rendering/ShaderGraph/Variable.hpp"
 
 namespace crimild {
 
 	namespace shadergraph {
 
-		namespace nodes {
+		class Subtract : public Expression {
+			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::Subtract )
 
-			class Subtract : public Node {
-				CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::nodes::Subtract )
+		public:
+			Subtract( ShaderGraph *graph, Variable *a, Variable *b );
+			virtual ~Subtract( void );
 
-			public:
-				Subtract( void );
-				virtual ~Subtract( void );
+			Variable *getA( void ) { return _a; }
+			Variable *getB( void ) { return _b; }
+			Variable *getResult( void ) { return _result; }
 
-				Outlet *getA( void ) { return _a; }
-				Outlet *getB( void ) { return _b; }
+		private:
+			Variable *_a = nullptr;
+			Variable *_b = nullptr;
+			Variable *_result = nullptr;
 
-				Outlet *getValue( void ) { return _value; }
-
-			private:
-				Outlet *_a = nullptr;
-				Outlet *_b = nullptr;
-				Outlet *_value = nullptr;
-			};
-
-		}
+		public:
+			virtual void setup( ShaderGraph *graph ) override;
+		};
 
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -28,35 +28,31 @@
 #ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_NORMALIZE_
 #define CRIMILD_RENDERING_SHADER_GRAPH_NODES_NORMALIZE_
 
-#include "Rendering/ShaderGraph/Node.hpp"
+#include "Rendering/ShaderGraph/Expression.hpp"
 
 namespace crimild {
 
 	namespace shadergraph {
 
-		namespace nodes {
+		class Variable;
 
-			class Normalize : public Node {
-				CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::nodes::Normalize )
+		class Normalize : public Expression {
+			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::Normalize )
+			
+		public:
+			Normalize( ShaderGraph *graph, Variable *input );
+			virtual ~Normalize( void );
 
-			public:
-				Normalize( void );
-				virtual ~Normalize( void );
-
-				Outlet *getInputValue( void ) { return _inputValue; }
-
-				Outlet *getNormalized( void ) { return _normalized; }
-
-			private:
-				Outlet *_inputValue = nullptr;
-
-				Outlet *_normalized = nullptr;
-
-			public:
-				virtual void prepare( ShaderGraph *graph, ShaderProgram *program ) override;
-			};
-
-		}
+			Variable *getInput( void ) { return _input; }
+			Variable *getResult( void ) { return _result; }
+			
+		private:
+			Variable *_input = nullptr;
+			Variable *_result = nullptr;
+			
+		public:
+			virtual void setup( ShaderGraph *graph ) override;
+		};
 
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -27,31 +27,47 @@
 
 #include "Multiply.hpp"
 
+#include "Rendering/ShaderGraph/Variable.hpp"
 #include "Rendering/ShaderGraph/ShaderGraph.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
-using namespace crimild::shadergraph::nodes;
 
-Multiply::Multiply( void )
+Variable *Multiply::createResult( ShaderGraph *graph, const containers::Array< Variable * > &inputs )
 {
-	_a = addInputOutlet( "a", Outlet::Type::ANY );
-	_b = addInputOutlet( "b", Outlet::Type::ANY );
+	auto retType = inputs.first()->getType();
+	inputs.each( [ &retType ]( Variable *in ) {
+		switch ( in->getType() ) {
+			case Variable::Type::VECTOR_2:
+			case Variable::Type::VECTOR_3:
+			case Variable::Type::VECTOR_4:
+				retType = in->getType();
+				break;
+				
+			default:
+				break;
+		}
+	});
 
-	_output = addOutputOutlet( "mult", Outlet::Type::ANY );
+	return graph->addNode< Variable >( retType );
+}
+
+
+
+Multiply::Multiply( ShaderGraph *graph, Variable *a, Variable *b )
+	: Multiply( graph, { a, b } )
+{
+
+}
+
+Multiply::Multiply( ShaderGraph *graph, containers::Array< Variable * > const &inputs )
+	: MultiInputOp( graph, inputs, createResult( graph, inputs ) )
+{
+	
 }
 
 Multiply::~Multiply( void )
 {
 
-}
-
-void Multiply::prepare( ShaderGraph *graph, ShaderProgram *program )	
-{
-	Node::prepare( graph, program );
-	
-	if ( graph->isConnected( getB() ) ) {
-		_output->setType( graph->anyConnection( getB() )->getType() );
-	}
 }
 

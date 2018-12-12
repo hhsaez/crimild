@@ -159,6 +159,7 @@ namespace crimild {
 		void setScale( PRECISION s )
 		{
 			_scale = s;
+			_isIdentity = false;
 		}
 
 		PRECISION getScale( void ) const 

@@ -190,7 +190,7 @@ void Simulation::addSystem( SystemPtr const &system )
     Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Adding system ", system->getClassName() );
 
     if ( !_systems.contains( system->getClassName() ) ) {
-        _systems[ system->getClassName() ] = system;
+        _systems.insert( system->getClassName(), system );
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -93,12 +93,22 @@ void RenderQueue::push( Geometry *geometry )
             renderableType = RenderQueue::RenderableType::OCCLUDER;
         }
         else if ( material->getAlphaState()->isEnabled() ) {
-            renderableType = RenderQueue::RenderableType::TRANSLUCENT;
+			if ( material->getProgram() != nullptr ) {
+				renderableType = RenderQueue::RenderableType::TRANSLUCENT_CUSTOM;
+			}
+			else {
+				renderableType = RenderQueue::RenderableType::TRANSLUCENT;
+			}
         }
         else {
             // only opaque objects cast shadows
             castShadows = material->castShadows();
-            renderableType = RenderQueue::RenderableType::OPAQUE;
+			if ( material->getProgram() != nullptr ) {
+				renderableType = RenderQueue::RenderableType::OPAQUE_CUSTOM;
+			}
+			else {
+				renderableType = RenderQueue::RenderableType::OPAQUE;
+			}
         }
         
         auto renderable = RenderQueue::Renderable {
@@ -113,22 +123,25 @@ void RenderQueue::push( Geometry *geometry )
         
         auto queue = &_renderables[ renderableType ];
         
-        if ( renderableType == RenderQueue::RenderableType::TRANSLUCENT ) {
-            // order BACK_TO_FRONT for translucent objects
+        if ( renderableType == RenderQueue::RenderableType::TRANSLUCENT ||
+		    renderableType == RenderQueue::RenderableType::TRANSLUCENT_CUSTOM ) {
+            // order BACK_TO_FRONT for translucent and screen objects
             auto it = queue->begin();
             while ( it != queue->end() && ( *it ).distanceFromCamera >= renderable.distanceFromCamera ) {
                 it++;
             }
             queue->insert( it, renderable );
         }
-        else {
-            // order FRONT_TO_BACK for everything else
+        else if ( renderableType != RenderQueue::RenderableType::SCREEN ) {
+            // order FRONT_TO_BACK for everything else, except SCREEN
             auto it = queue->begin();
             while ( it != queue->end() && ( *it ).distanceFromCamera <= renderable.distanceFromCamera ) {
                 it++;
             }
             queue->insert( it, renderable );
-        }
+        } else {
+			queue->push_back( renderable );
+		}
         
         if ( castShadows ) {
             // if the geometry is supposed to cast shadows, we also add it to that queue

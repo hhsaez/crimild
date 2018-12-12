@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -26,21 +26,27 @@
  */
 
 #include "Max.hpp"
+#include "Rendering/ShaderGraph/ShaderGraph.hpp"
+#include "Rendering/ShaderGraph/Variable.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
-using namespace crimild::shadergraph::nodes;
 
-Max::Max( void )
+Max::Max( ShaderGraph *graph, Variable *a, Variable *b )
+	: _a( a ),
+	  _b( b )
 {
-	_a = addInputOutlet( "a", Outlet::Type::ANY );
-	_b = addInputOutlet( "b", Outlet::Type::ANY );
-
-	_value = addOutputOutlet( "max", Outlet::Type::SCALAR );
+	_result = graph->addNode< Variable >( Variable::Type::SCALAR );
 }
 
 Max::~Max( void )
 {
 
+}
+
+void Max::setup( ShaderGraph *graph )
+{
+	graph->read( this, { _a, _b } );
+	graph->write( this, { _result } );
 }
 

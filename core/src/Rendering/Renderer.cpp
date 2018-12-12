@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,7 @@
 #include "Rendering/Material.hpp"
 #include "Rendering/RenderQueue.hpp"
 #include "Rendering/FrameBufferObject.hpp"
+#include "Rendering/RenderTarget.hpp"
 #include "Rendering/RenderPasses/RenderPass.hpp"
 #include "Foundation/Log.hpp"
 #include "Primitives/QuadPrimitive.hpp"
@@ -38,6 +39,7 @@
 #include "Simulation/AssetManager.hpp"
 #include "Components/MaterialComponent.hpp"
 #include "Components/RenderStateComponent.hpp"
+#include "Animation/Skeleton.hpp"
 
 using namespace crimild;
 
@@ -47,7 +49,9 @@ constexpr const char *Renderer::FBO_AUX_1024;
 constexpr const char *Renderer::FBO_AUX_COLOR_TARGET_NAME;
 constexpr const char *Renderer::FBO_AUX_DEPTH_TARGET_NAME;
 
-constexpr const char *Renderer::SHADER_PROGRAM_RENDER_PASS_FORWARD;
+constexpr const char *Renderer::SHADER_PROGRAM_RENDER_PASS_DEPTH;
+constexpr const char *Renderer::SHADER_PROGRAM_RENDER_PASS_FORWARD_LIGHTING;
+constexpr const char *Renderer::SHADER_PROGRAM_RENDER_PASS_SCREEN;
 constexpr const char *Renderer::SHADER_PROGRAM_RENDER_PASS_STANDARD;
 constexpr const char *Renderer::SHADER_PROGRAM_LIT_TEXTURE;
 constexpr const char *Renderer::SHADER_PROGRAM_LIT_DIFFUSE;
@@ -69,7 +73,9 @@ Renderer::Renderer( void )
 	  _textureCatalog( crimild::alloc< Catalog< Texture >>() ),
 	  _vertexBufferObjectCatalog( crimild::alloc< Catalog< VertexBufferObject >>() ),
 	  _indexBufferObjectCatalog( crimild::alloc< Catalog< IndexBufferObject >>() ),
-	  _frameBufferObjectCatalog( crimild::alloc< Catalog< FrameBufferObject >>() )
+	  _frameBufferObjectCatalog( crimild::alloc< Catalog< FrameBufferObject >>() ),
+	  _renderTargetCatalog( crimild::alloc< Catalog< RenderTarget >>() ),
+	  _primitiveCatalog( crimild::alloc< Catalog< Primitive >>() )
 {
 	_screenBuffer = crimild::alloc< FrameBufferObject >( 800, 600 );
 
@@ -87,6 +93,8 @@ Renderer::~Renderer( void )
     getTextureCatalog()->unloadAll();
     getVertexBufferObjectCatalog()->unloadAll();
     getIndexBufferObjectCatalog()->unloadAll();
+	getPrimitiveCatalog()->unloadAll();
+	getRenderTargetCatalog()->unloadAll();
     getFrameBufferObjectCatalog()->unloadAll();
 }
 
@@ -120,7 +128,7 @@ SharedPointer< FrameBufferObject > Renderer::generateAuxFBO( std::string name, i
 #else
     fbo->getRenderTargets().insert( FBO_AUX_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
 #endif
-    fbo->getRenderTargets().insert( FBO_AUX_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::TEXTURE, width, height ) );
+    fbo->getRenderTargets().insert( FBO_AUX_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::RENDER_AND_TEXTURE, width, height ) );
     AssetManager::getInstance()->set( name, fbo, true );
     return fbo;
 }
@@ -137,6 +145,8 @@ void Renderer::endRender( void )
     getTextureCatalog()->cleanup();
     getVertexBufferObjectCatalog()->cleanup();
     getIndexBufferObjectCatalog()->cleanup();
+	getPrimitiveCatalog()->cleanup();
+	getRenderTargetCatalog()->cleanup();
     getFrameBufferObjectCatalog()->cleanup();
 }
 
@@ -159,6 +169,16 @@ void Renderer::presentFrame( void )
 void Renderer::render( RenderQueue *renderQueue, RenderPass *renderPass )
 {
     renderPass->render( this, renderQueue, renderQueue->getCamera() );
+}
+
+void Renderer::bindRenderTarget( RenderTarget *target )
+{
+	getRenderTargetCatalog()->bind( target );
+}
+
+void Renderer::unbindRenderTarget( RenderTarget *target )
+{
+	getRenderTargetCatalog()->unbind( target );
 }
 
 void Renderer::bindFrameBuffer( FrameBufferObject *fbo )
@@ -280,6 +300,16 @@ void Renderer::unbindLight( ShaderProgram *program, Light *light )
 	--_lightCount;
 }
 
+void Renderer::bindPrimitive( ShaderProgram *, Primitive *primitive )
+{
+	getPrimitiveCatalog()->bind( primitive );
+}
+
+void Renderer::unbindPrimitive( ShaderProgram *, Primitive *primitive )
+{
+	getPrimitiveCatalog()->unbind( primitive );
+}
+
 void Renderer::bindVertexBuffer( ShaderProgram *program, VertexBufferObject *vbo )
 {
 	if ( vbo == nullptr ) {
@@ -337,17 +367,34 @@ void Renderer::restoreTransformations( ShaderProgram *program, Geometry* geometr
 
 }
 
+void Renderer::drawGeometry( Geometry *geometry, ShaderProgram *program, const Matrix4f &modelMatrix )
+{
+	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM ), modelMatrix );
+	
+	auto rc = geometry->getComponent< RenderStateComponent >();
+	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_COUNT_UNIFORM ), 0 );
+	if ( auto skeleton = rc->getSkeleton() ) {
+		bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_COUNT_UNIFORM ), ( int ) skeleton->getJoints().size() );
+		skeleton->getJoints().each( [ this, program ]( const std::string &, SharedPointer< animation::Joint > const &joint ) {
+			bindUniform(
+				program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_POSE_UNIFORM + joint->getId() ),
+				joint->getPoseMatrix() );
+		});
+	}
+	
+	geometry->forEachPrimitive( [ this, program ]( Primitive *primitive ) {
+		bindPrimitive( program, primitive );
+		drawPrimitive( program, primitive );
+		unbindPrimitive( program, primitive );
+	});
+}
+
 void Renderer::drawScreenPrimitive( ShaderProgram *program )
 {
-    // bind vertex and index buffers
-    bindVertexBuffer( program, _screenPrimitive->getVertexBuffer() );
-    bindIndexBuffer( program, _screenPrimitive->getIndexBuffer() );
+	auto primitive = crimild::get_ptr( _screenPrimitive );
 
-    // draw primitive
+	bindPrimitive( program, primitive );
     drawPrimitive( program, crimild::get_ptr( _screenPrimitive ) );
-     
-    // unbind primitive buffers
-    unbindVertexBuffer( program, _screenPrimitive->getVertexBuffer() );
-    unbindIndexBuffer( program, _screenPrimitive->getIndexBuffer() );     
+	unbindPrimitive( program, primitive );
 }
 

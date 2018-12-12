@@ -55,22 +55,26 @@ int IndexBufferObjectCatalog::getNextResourceId( void )
     return id;
 }
 
-void IndexBufferObjectCatalog::bind( ShaderProgram *program, IndexBufferObject *ibo )
+void IndexBufferObjectCatalog::bind( IndexBufferObject *ibo )
 {
+	if ( ibo == nullptr ) return;
+	
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
     
-	Catalog< IndexBufferObject >::bind( program, ibo );
+	Catalog< IndexBufferObject >::bind( ibo );
 
 	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, ibo->getCatalogId() );
     
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void IndexBufferObjectCatalog::unbind( ShaderProgram *program, IndexBufferObject *ibo )
+void IndexBufferObjectCatalog::unbind( IndexBufferObject *ibo )
 {
+	if ( ibo == nullptr ) return;
+	
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
     
-	Catalog< IndexBufferObject >::unbind( program, ibo );
+	Catalog< IndexBufferObject >::unbind( ibo );
 
 	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
     
@@ -79,6 +83,8 @@ void IndexBufferObjectCatalog::unbind( ShaderProgram *program, IndexBufferObject
 
 void IndexBufferObjectCatalog::load( IndexBufferObject *ibo )
 {
+	if ( ibo == nullptr ) return;
+	
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
     
 	Catalog< IndexBufferObject >::load( ibo );
@@ -95,6 +101,8 @@ void IndexBufferObjectCatalog::load( IndexBufferObject *ibo )
 
 void IndexBufferObjectCatalog::unload( IndexBufferObject *ibo )
 {
+	if ( ibo == nullptr ) return;
+	
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
     
     _unusedIBOIds.push_back( ibo->getCatalogId() );

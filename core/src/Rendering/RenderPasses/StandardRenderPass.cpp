@@ -66,8 +66,10 @@ void StandardRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, C
 
 
     renderOccluders( renderer, renderQueue, camera );
-    renderOpaqueObjects( renderer, renderQueue, camera );
-    renderTranslucentObjects( renderer, renderQueue, camera );
+    renderOpaqueObjects( renderer, renderQueue, camera, RenderQueue::RenderableType::OPAQUE );
+    renderOpaqueObjects( renderer, renderQueue, camera, RenderQueue::RenderableType::OPAQUE_CUSTOM );
+    renderTranslucentObjects( renderer, renderQueue, camera, RenderQueue::RenderableType::TRANSLUCENT );
+    renderTranslucentObjects( renderer, renderQueue, camera, RenderQueue::RenderableType::TRANSLUCENT_CUSTOM );
 }
 
 ShaderProgram *StandardRenderPass::getStandardProgram( void )
@@ -115,11 +117,11 @@ void StandardRenderPass::renderOccluders( Renderer *renderer, RenderQueue *rende
     });
 }
 
-void StandardRenderPass::renderOpaqueObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
+void StandardRenderPass::renderOpaqueObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera, RenderQueue::RenderableType opaqueType )
 {
     CRIMILD_PROFILE( "Render Opaque Objects" )
     
-    auto renderables = renderQueue->getRenderables( RenderQueue::RenderableType::OPAQUE );
+    auto renderables = renderQueue->getRenderables( opaqueType );
     if ( renderables->size() == 0 ) {
         return;
     }
@@ -141,7 +143,7 @@ void StandardRenderPass::renderOpaqueObjects( Renderer *renderer, RenderQueue *r
         
         renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::USE_SHADOW_MAP_UNIFORM ), false );
         if ( isShadowMappingEnabled() ) {
-            renderQueue->each( [ this, renderer, program, renderQueue ]( Light *light, int ) {        
+            renderQueue->each( [ renderer, program ]( Light *light, int ) {
                 if ( !light->castShadows() ) {
                     return;
                 }
@@ -179,7 +181,7 @@ void StandardRenderPass::renderOpaqueObjects( Renderer *renderer, RenderQueue *r
         }
         
         if ( isShadowMappingEnabled() ) {
-            renderQueue->each( [ this, renderer, program, renderQueue ]( Light *light, int ) {        
+            renderQueue->each( [ renderer, program ]( Light *light, int ) {
                 if ( !light->castShadows() ) {
                     return;
                 }
@@ -201,11 +203,11 @@ void StandardRenderPass::renderOpaqueObjects( Renderer *renderer, RenderQueue *r
     });
 }
 
-void StandardRenderPass::renderTranslucentObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
+void StandardRenderPass::renderTranslucentObjects( Renderer *renderer, RenderQueue *renderQueue, Camera *camera, RenderQueue::RenderableType translucentType )
 {
     CRIMILD_PROFILE( "Render Translucent Objects" )
     
-    auto renderables = renderQueue->getRenderables( RenderQueue::RenderableType::TRANSLUCENT );
+		auto renderables = renderQueue->getRenderables( translucentType );
     if ( renderables->size() == 0 ) {
         return;
     }
@@ -266,13 +268,17 @@ void StandardRenderPass::renderStandardGeometry( Renderer *renderer, Geometry *g
 			return;
 		}
 		
-        renderer->bindVertexBuffer( program, vbo );
-        renderer->bindIndexBuffer( program, ibo );
+        //renderer->bindVertexBuffer( program, vbo );
+        //renderer->bindIndexBuffer( program, ibo );
+
+		renderer->bindPrimitive( program, primitive );
         
         renderer->drawPrimitive( program, primitive );
+
+		renderer->unbindPrimitive( program, primitive );
         
-        renderer->unbindVertexBuffer( program, vbo );
-        renderer->unbindIndexBuffer( program, ibo );
+        //renderer->unbindVertexBuffer( program, vbo );
+        //renderer->unbindIndexBuffer( program, ibo );
     });
     
     if ( material != nullptr ) {

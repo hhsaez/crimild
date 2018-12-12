@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -26,106 +26,110 @@
  */
 
 #include "ShaderGraph.hpp"
-#include "Outlet.hpp"
-#include "Node.hpp"
+#include "Variable.hpp"
+#include "Expression.hpp"
+#include "Foundation/Log.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
+using namespace crimild::containers;
+
+ShaderGraph *ShaderGraph::_currentShaderGraph = nullptr;
 
 ShaderGraph::ShaderGraph( void )
 {
-	
+	makeCurrent();
 }
 
 ShaderGraph::~ShaderGraph( void )
 {
-
+	if ( _currentShaderGraph == this ) {
+		_currentShaderGraph = nullptr;
+	}
 }
 
-void ShaderGraph::eachNode( std::function< void( Node * ) > const &callback )
+void ShaderGraph::makeCurrent( void )
 {
-	_nodes.each( [ callback ]( SharedPointer< Node > const &node ) {
+	_currentShaderGraph = this;
+}
+
+void ShaderGraph::addInputNode( ShaderGraphNode *node )
+{
+	_inputs.add( node );
+}
+
+void ShaderGraph::addOutputNode( ShaderGraphNode *node )
+{
+	_outputs.add( node );
+}
+
+void ShaderGraph::eachNode( std::function< void( ShaderGraphNode * ) > const &callback )
+{
+	_nodes.each( [ callback ]( SharedPointer< ShaderGraphNode > const &node ) {
 		callback( crimild::get_ptr( node ) );
 	});
 }
 
-void ShaderGraph::connect( Outlet *src, Outlet *dst )
+void ShaderGraph::read( Expression *node, containers::Array< Variable * > const &inputs )
 {
-	assert( src != nullptr && dst != nullptr );
+	inputs.each( [ this, node ]( ShaderGraphNode *in ) {
+		if ( in != nullptr ) {
+			_graph.addEdge( in, node );
+		}
+	});
+}
 
-	auto srcNode = src->getNode();
-	auto srcNodeRef = crimild::retain( srcNode );
-	if ( !_nodes.contains( srcNodeRef ) ) {
-		_nodes.add( srcNodeRef );
-	}
+void ShaderGraph::write( Expression *node, containers::Array< Variable * > const &outputs )
+{
+	outputs.each( [ this, node ]( ShaderGraphNode *out ) {
+		if ( out != nullptr ) {
+			_graph.addEdge( node, out );
+		}
+	});
+}
+
+ShaderGraphNode *ShaderGraph::getNode( containers::Array< ShaderGraphNode * > &ns, std::string name )
+{
+	ShaderGraphNode *result = nullptr;
+	ns.each( [ name, &result ]( ShaderGraphNode *n ) {
+		if ( n->getName() == name ) {
+			result = n;
+		}
+	});
+	return result;
+}
+
+std::string ShaderGraph::build( void )
+{
+	_connected.clear();
 	
-	auto dstNode = dst->getNode();
-	auto dstNodeRef = crimild::retain( dstNode );
-	if ( !_nodes.contains( dstNodeRef ) ) {
-		_nodes.add( dstNodeRef );
-	}
-
-	auto &srcConnections = _connections[ srcNode ][ src ];	
-	if ( !srcConnections.contains( dst ) ) {
-		srcConnections.add( dst );
-	}
-
-	auto &dstConnections = _connections[ dstNode ][ dst ];
-	if ( !dstConnections.contains( src ) ) {
-		dstConnections.add( src );
-	}
-}
-
-crimild::Size ShaderGraph::inDegree( Node *node )
-{
-	crimild::Size d = 0;
-	node->eachInputOutlet( [ this, &d ]( Outlet *outlet ) {
-		if ( isConnected( outlet ) ) {
-			d++;
-		}
+	_nodes.each( [ this ]( SharedPointer< ShaderGraphNode > const &node ) {
+		node->setup( this );
 	});
-	return d;
-}
 
-crimild::Size ShaderGraph::outDegree( Node *node )
-{
-	crimild::Size d = 0;
-	node->eachOutputOutlet( [ this, &d ]( Outlet *outlet ) {
-		if ( isConnected( outlet ) ) {
-			d++;
-		}
-	});
-	return d;
-}
-
-crimild::Bool ShaderGraph::isConnected( Outlet *outlet )
-{
-	if ( !_connections.contains( outlet->getNode() ) ) {
-		return false;
-	}
-
-    if ( !_connections[ outlet->getNode() ].contains( outlet ) ) {
-        return false;
-    }
-
-    return !_connections[ outlet->getNode() ][ outlet ].empty();
-}
-
-Outlet *ShaderGraph::anyConnection( Outlet *outlet )
-{
-	if ( !isConnected( outlet ) ) {
-		return nullptr;
-	}
-
-	return _connections[ outlet->getNode() ][ outlet ].first();
-}
-
-void ShaderGraph::eachConnection( Outlet *outlet, std::function< void( Outlet * ) > const &callback )
-{
-	if ( isConnected( outlet ) ) {
-		_connections[ outlet->getNode() ][ outlet ].each( [ callback ]( Outlet *otherOutlet ) {
-			callback( otherOutlet );			
+	auto reversed = _graph.reverse();
+	_outputs.each( [ this, &reversed ]( ShaderGraphNode *output ) {
+		_connected.insert( output );
+		reversed.connected( output ).each( [ this ]( ShaderGraphNode *other ) {
+			_connected.insert( other );
 		});
-	}
+	});
+
+	containers::Array< ShaderGraphNode * > sorted;
+	_graph.sort().each( [ this, &sorted ]( ShaderGraphNode *node ) {
+		if ( _connected.contains( node ) ) {
+			sorted.add( node );
+		}
+		else {
+			CRIMILD_LOG_DEBUG( "Discarding ", node->getClassName() );
+		}
+	});
+
+	return generateShaderSource( sorted );
+}
+
+crimild::Bool ShaderGraph::isConnected( ShaderGraphNode *node ) const
+{
+	return _connected.contains( node );
 }
 

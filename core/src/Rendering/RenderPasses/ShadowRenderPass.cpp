@@ -186,17 +186,7 @@ void ShadowRenderPass::renderStandardGeometry( Renderer *renderer, Geometry *geo
     
     renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM ), modelTransform );
     
-    auto rc = geometry->getComponent< RenderStateComponent >();
     renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_COUNT_UNIFORM ), 0 );
-	/*
-    if ( rc->getSkinnedMesh() != nullptr && rc->getSkinnedMesh()->getAnimationState() != nullptr ) {
-        auto animationState = rc->getSkinnedMesh()->getAnimationState();
-        renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_COUNT_UNIFORM ), ( int ) animationState->getJointPoses().size() );
-        for ( int i = 0; i < animationState->getJointPoses().size(); i++ ) {
-            renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_POSE_UNIFORM + i ), animationState->getJointPoses()[ i ] );
-        }
-    }
-	*/
     
     geometry->forEachPrimitive( [renderer, program]( Primitive *primitive ) {
 		// TODO: maybe we shound't add a geometry to the queue if it
@@ -212,14 +202,10 @@ void ShadowRenderPass::renderStandardGeometry( Renderer *renderer, Geometry *geo
 		if ( ibo == nullptr ) {
 			return;
 		}
-		
-        renderer->bindVertexBuffer( program, vbo );
-        renderer->bindIndexBuffer( program, ibo );
-        
+
+		renderer->bindPrimitive( program, primitive );
         renderer->drawPrimitive( program, primitive );
-        
-        renderer->unbindVertexBuffer( program, vbo );
-        renderer->unbindIndexBuffer( program, ibo );
+		renderer->unbindPrimitive( program, primitive );
     });
     
     if ( material != nullptr ) {

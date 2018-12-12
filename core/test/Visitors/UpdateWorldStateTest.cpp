@@ -35,10 +35,9 @@
 
 using namespace crimild;
 
-/*
 TEST( UpdateWorldStateTest, singleNode )
 {
-	Pointer< Node > node( new Node() );
+	auto node = crimild::alloc< Node >();
 
 	EXPECT_TRUE( node->getLocal().isIdentity() );
 	EXPECT_TRUE( node->getWorld().isIdentity() );
@@ -59,11 +58,12 @@ TEST( UpdateWorldStateTest, singleNode )
 
 TEST( UpdateWorldStateTest, hierarchy )
 {
-	Pointer< Group > group1( new Group() );
-	Pointer< Group > group2( new Group() );
-	Pointer< Geometry > geometry1( new Geometry() );
-	Pointer< Geometry > geometry2( new Geometry() );
-	Pointer< Geometry > geometry3( new Geometry() );
+	
+	auto group1 = crimild::alloc< Group >();
+	auto group2 = crimild::alloc< Group >();
+	auto geometry1 = crimild::alloc< Geometry >();
+	auto geometry2 = crimild::alloc< Geometry >();
+	auto geometry3 = crimild::alloc< Geometry >();
 
 	group1->attachNode( group2.get() );
 	group1->attachNode( geometry1.get() );
@@ -99,5 +99,20 @@ TEST( UpdateWorldStateTest, hierarchy )
 
 }
 
-*/
+TEST( UpateWorldStateTest, scale )
+{
+	auto n0 = crimild::alloc< Group >();
+	auto n1 = crimild::alloc< Group >();
+
+	n0->attachNode( n1 );
+	n0->local().setScale( 0.5f );
+
+	EXPECT_FALSE( n0->getLocal().isIdentity() );
+	EXPECT_TRUE( n1->getLocal().isIdentity() );
+
+	n0->perform( UpdateWorldState() );
+
+	EXPECT_EQ( 0.5f, n0->getWorld().getScale() );
+	EXPECT_EQ( 0.5f, n1->getWorld().getScale() );
+}
 

@@ -1,6 +1,6 @@
 R"(
 
-#define CRIMILD_GLSL_ATTRIBUTE attribute
+#define CRIMILD_GLSL_ATTRIBUTE( LOC ) attribute
 #define CRIMILD_GLSL_VARYING_OUT varying
 #define CRIMILD_GLSL_VARYING_IN varying
 

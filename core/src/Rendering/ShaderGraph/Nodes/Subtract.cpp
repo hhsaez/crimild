@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -26,21 +26,26 @@
  */
 
 #include "Subtract.hpp"
+#include "Rendering/ShaderGraph/ShaderGraph.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
-using namespace crimild::shadergraph::nodes;
 
-Subtract::Subtract( void )
+Subtract::Subtract( ShaderGraph *graph, Variable *a, Variable *b )
+	: _a( a ),
+	  _b( b )
 {
-	_a = addInputOutlet( "a", Outlet::Type::ANY );
-	_b = addInputOutlet( "b", Outlet::Type::ANY );
-
-	_value = addOutputOutlet( "sub", Outlet::Type::SCALAR );
+	_result = graph->addNode< Variable >( _a->getType() );
 }
 
 Subtract::~Subtract( void )
 {
 
+}
+
+void Subtract::setup( ShaderGraph *graph )
+{
+	graph->read( this, { _a, _b } );
+	graph->write( this, { _result } );
 }
 

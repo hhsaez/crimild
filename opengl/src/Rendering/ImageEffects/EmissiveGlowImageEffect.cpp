@@ -30,6 +30,7 @@
 
 #include <Rendering/Renderer.hpp>
 #include <Rendering/FrameBufferObject.hpp>
+#include <Rendering/RenderTarget.hpp>
 #include <Rendering/ShaderProgram.hpp>
 #include <Rendering/RenderPasses/RenderPass.hpp>
 

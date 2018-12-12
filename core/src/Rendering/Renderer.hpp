@@ -47,6 +47,7 @@ namespace crimild {
     class DepthState;
     class ColorMaskState;
     class FrameBufferObject;
+	class RenderTarget;
     class Geometry;
     class IndexBufferObject;
     class Light;
@@ -59,6 +60,12 @@ namespace crimild {
     class Texture;
     class VertexBufferObject;
     class VisibilitySet;
+
+	namespace shadergraph {
+
+		class ShaderGraph;
+
+	}
 
 	class Renderer : 
 		public SharedObject,
@@ -86,6 +93,9 @@ namespace crimild {
         virtual void presentFrame( void );
 
 	public:
+		virtual void bindRenderTarget( RenderTarget *target );
+		virtual void unbindRenderTarget( RenderTarget *target );
+		
 		virtual void bindFrameBuffer( FrameBufferObject *fbo );
 		virtual void unbindFrameBuffer( FrameBufferObject *fbo );
 
@@ -131,6 +141,9 @@ namespace crimild {
 		int _lightCount;
 
 	public:
+		virtual void bindPrimitive( ShaderProgram *program, Primitive *primitive );
+		virtual void unbindPrimitive( ShaderProgram *program, Primitive *primitive );
+		
 		virtual void bindVertexBuffer( ShaderProgram *program, VertexBufferObject *vbo );
 		virtual void unbindVertexBuffer( ShaderProgram *program, VertexBufferObject *vbo );
 
@@ -150,6 +163,8 @@ namespace crimild {
 			\brief optional
 		 */
 		virtual void drawBuffers( ShaderProgram *program, Primitive::Type type, VertexBufferObject *vbo, unsigned int count ) { }
+
+		virtual void drawGeometry( Geometry *geometry, ShaderProgram *program, const Matrix4f &modelMatrix );
 
 		virtual void drawScreenPrimitive( ShaderProgram *program );
 
@@ -175,7 +190,10 @@ namespace crimild {
         SharedPointer< FrameBufferObject > _screenBuffer;
         
     public:
-        static constexpr const char *SHADER_PROGRAM_RENDER_PASS_FORWARD = "shaders/render_pass/forward";
+        static constexpr const char *SHADER_PROGRAM_RENDER_PASS_DEPTH = "shaders/render_pass/depth";
+        static constexpr const char *SHADER_PROGRAM_RENDER_PASS_FORWARD_LIGHTING = "shaders/render_pass/forward_lighting";
+        static constexpr const char *SHADER_PROGRAM_RENDER_PASS_SCREEN = "shaders/render_pass/screen";
+		
         static constexpr const char *SHADER_PROGRAM_RENDER_PASS_STANDARD = "shaders/render_pass/standard";
         static constexpr const char *SHADER_PROGRAM_LIT_TEXTURE = "shaders/lighting/texture";
         static constexpr const char *SHADER_PROGRAM_LIT_DIFFUSE = "shaders/lighting/diffuse";
@@ -209,12 +227,23 @@ namespace crimild {
 		Catalog< FrameBufferObject > *getFrameBufferObjectCatalog( void ) { return crimild::get_ptr( _frameBufferObjectCatalog ); }
 		void setFrameBufferObjectCatalog( SharedPointer< Catalog< FrameBufferObject > > const &catalog ) { _frameBufferObjectCatalog = catalog; }
 
+		Catalog< RenderTarget > *getRenderTargetCatalog( void ) { return crimild::get_ptr( _renderTargetCatalog ); }
+		void setRenderTargetCatalog( SharedPointer< Catalog< RenderTarget > > const &catalog ) { _renderTargetCatalog = catalog; }
+
+		Catalog< Primitive > *getPrimitiveCatalog( void ) { return crimild::get_ptr( _primitiveCatalog ); }
+		void setPrimitiveCatalog( SharedPointer< Catalog< Primitive >> const &catalog ) { _primitiveCatalog = catalog; }
+
 	private:
-		SharedPointer< Catalog< ShaderProgram > > _shaderProgramCatalog;
-		SharedPointer< Catalog< Texture > > _textureCatalog;
-		SharedPointer< Catalog< VertexBufferObject > > _vertexBufferObjectCatalog;
-		SharedPointer< Catalog< IndexBufferObject > > _indexBufferObjectCatalog;
-		SharedPointer< Catalog< FrameBufferObject > > _frameBufferObjectCatalog;
+		SharedPointer< Catalog< ShaderProgram >> _shaderProgramCatalog;
+		SharedPointer< Catalog< Texture >> _textureCatalog;
+		SharedPointer< Catalog< VertexBufferObject >> _vertexBufferObjectCatalog;
+		SharedPointer< Catalog< IndexBufferObject >> _indexBufferObjectCatalog;
+		SharedPointer< Catalog< FrameBufferObject >> _frameBufferObjectCatalog;
+		SharedPointer< Catalog< RenderTarget >> _renderTargetCatalog;
+		SharedPointer< Catalog< Primitive >> _primitiveCatalog;
+
+	public:
+		virtual SharedPointer< shadergraph::ShaderGraph > createShaderGraph( void ) = 0;
 	};
     
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -28,35 +28,31 @@
 #ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_NEGATE_
 #define CRIMILD_RENDERING_SHADER_GRAPH_NODES_NEGATE_
 
-#include "Rendering/ShaderGraph/Node.hpp"
+#include "Rendering/ShaderGraph/Expression.hpp"
 
 namespace crimild {
 
 	namespace shadergraph {
 
-		namespace nodes {
+		class Variable;
 
-			class Negate : public Node {
-				CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::nodes::Negate )
+		class Negate : public Expression {
+			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::Negate )
+			
+		public:
+			Negate( ShaderGraph *graph, Variable *input );
+			virtual ~Negate( void );
 
-			public:
-				Negate( void );
-				virtual ~Negate( void );
-
-				Outlet *getInputValue( void ) { return _inputValue; }
-
-				Outlet *getNegated( void ) { return _negated; }
-
-			private:
-				Outlet *_inputValue = nullptr;
-
-				Outlet *_negated = nullptr;
-
-			public:
-				virtual void prepare( ShaderGraph *graph, ShaderProgram *program ) override;
-			};
-
-		}
+			Variable *getInput( void ) { return _input; }
+			Variable *getResult( void ) { return _result; }
+			
+		private:
+			Variable *_input = nullptr;
+			Variable *_result = nullptr;
+			
+		public:
+			virtual void setup( ShaderGraph *graph ) override;
+		};
 
 	}
 

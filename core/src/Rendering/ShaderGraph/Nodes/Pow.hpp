@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -28,34 +28,33 @@
 #ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_POW_
 #define CRIMILD_RENDERING_SHADER_GRAPH_NODES_POW_
 
-#include "Rendering/ShaderGraph/Node.hpp"
+#include "Rendering/ShaderGraph/Expression.hpp"
 
 namespace crimild {
 
 	namespace shadergraph {
 
-		namespace nodes {
+		class Variable;
 
-			class Pow : public Node {
-				CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::nodes::Pow )
+		class Pow : public Expression {
+			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::Pow )
 
-			public:
-				Pow( void );
-				virtual ~Pow( void );
+		public:
+			Pow( ShaderGraph *graph, Variable *base, Variable *exponent );
+			virtual ~Pow( void );
 
-				Outlet *getBase( void ) { return _base; }
-				Outlet *getExponent( void ) { return _exponent; }
+			Variable *getBase( void ) { return _base; }
+			Variable *getExponent( void ) { return _exponent; }
+			Variable *getResult( void ) { return _result; }
 
-				Outlet *getValue( void ) { return _value; }
+		private:
+			Variable *_base = nullptr;
+			Variable *_exponent = nullptr;
+			Variable *_result = nullptr;
 
-			private:
-				Outlet *_base = nullptr;
-				Outlet *_exponent = nullptr;
-
-				Outlet *_value = nullptr;
-			};
-
-		}
+		public:
+			virtual void setup( ShaderGraph *graph ) override;
+		};
 
 	}
 

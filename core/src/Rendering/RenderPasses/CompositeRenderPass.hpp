@@ -36,6 +36,7 @@ namespace crimild {
     
     /**
         \brief A render pass composed by several render passes
+		\deprecated Render passes are now implemented using render graphs.
     */
 	class CompositeRenderPass : public RenderPass {
 	public:

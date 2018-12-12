@@ -57,11 +57,15 @@ namespace crimild {
         };
         
         enum class RenderableType {
+			BACKGROUND,
             OCCLUDER,
             SHADOW_CASTER,
             OPAQUE,
+			OPAQUE_CUSTOM,
             TRANSLUCENT,
-            SCREEN, // deprecated
+			TRANSLUCENT_CUSTOM,
+            SCREEN,
+			DEBUG,
         };
         
         using Renderables = std::list< Renderable >;

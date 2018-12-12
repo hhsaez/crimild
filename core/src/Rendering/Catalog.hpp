@@ -126,43 +126,32 @@ namespace crimild {
 
         virtual void bind( RESOURCE_TYPE *resource )
 		{
-			if ( resource->getCatalog() == nullptr ) {
-				load( resource );
-			}
-            
-            resource->onBind();
-
-            _activeResourceCount++;
+            bindResource( resource );
 		}
 
         virtual void bind( ShaderProgram *program, RESOURCE_TYPE *resource )
 		{
-			bind( resource );
+			bindResource( resource );
 		}
 
         virtual void bind( ShaderLocation *location, RESOURCE_TYPE *resource )
 		{
-			bind( resource );
+			bindResource( resource );
 		}
 
         virtual void unbind( RESOURCE_TYPE *resource )
 		{
-            if ( resource != nullptr ) {
-                resource->onUnbind();
-                if ( _activeResourceCount > 0 ) {
-                	_activeResourceCount--;
-                }
-            }
+            unbindResource( resource );
 		}
 
         virtual void unbind( ShaderProgram *program, RESOURCE_TYPE *resource )
 		{
-			unbind( resource );
+			unbindResource( resource );
 		}
 
         virtual void unbind( ShaderLocation *location, RESOURCE_TYPE *resource )
 		{
-			unbind( resource );
+			unbindResource( resource );
 		}
 
         virtual void load( RESOURCE_TYPE *resource )
@@ -183,12 +172,37 @@ namespace crimild {
 			for ( auto resource : rs ) {
                 unload( resource );
 			}
-			_resources.clear();
+
+            cleanup();
+
+            _resources.clear();
 		}
         
         virtual void cleanup( void )
         {
 
+        }
+
+    private:
+        void bindResource( RESOURCE_TYPE *resource )
+        {
+            if ( resource->getCatalog() == nullptr ) {
+                load( resource );
+            }
+
+            resource->onBind();
+
+            _activeResourceCount++;
+        }
+
+        void unbindResource( RESOURCE_TYPE *resource )
+        {
+            if ( resource != nullptr ) {
+                resource->onUnbind();
+                if ( _activeResourceCount > 0 ) {
+                    _activeResourceCount--;
+                }
+            }
         }
 
 	private:

@@ -95,7 +95,7 @@ void RenderSystem::renderFrame( void )
 
 		if ( !_renderQueues.empty() ) {
 			RenderQueue *mainQueue = nullptr;
-			_renderQueues.each( [ this, &mainQueue, renderer ]( SharedPointer< RenderQueue > &queue ) {
+			_renderQueues.each( [ &mainQueue, renderer ]( SharedPointer< RenderQueue > &queue ) {
 				// main camera is rendered last
 				if ( queue->getCamera() != Camera::getMainCamera() ) {
 					renderer->render( crimild::get_ptr( queue ), queue->getCamera()->getRenderPass() );

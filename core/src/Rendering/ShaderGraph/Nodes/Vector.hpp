@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 #ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_VECTOR_
 #define CRIMILD_RENDERING_SHADER_GRAPH_NODES_VECTOR_
 
-#include "Rendering/ShaderGraph/Node.hpp"
+#include "Rendering/ShaderGraph/Expression.hpp"
 
 #include "Mathematics/Vector.hpp"
 
@@ -36,36 +36,79 @@ namespace crimild {
 
 	namespace shadergraph {
 
-		namespace nodes {
+		class Variable;
 
-			class Vector : public Node {
-				CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::nodes::Vector )
+		class VectorToScalars : public Expression {
+			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::VectorToScalars )
+			
+		public:
+			VectorToScalars( ShaderGraph *, Variable *vector );
+			virtual ~VectorToScalars( void );
 
-			public:
-				explicit Vector( const Vector4f &constant = Vector4f::ZERO );
-				virtual ~Vector( void );
+			Variable *getVector( void ) { return _vector; }
 
-				const Vector4f &getConstant( void ) const { return _constant; }
+			Variable *getX( void ) { return _x; }
+			Variable *getY( void ) { return _y; }
+			Variable *getZ( void ) { return _z; }
+			Variable *getW( void ) { return _w; }
 
-				Outlet *getInputW( void ) { return _inputW; }
-				Outlet *getInputXYZ( void ) { return _inputXYZ; }
-				Outlet *getInputXYZW( void ) { return _inputXYZW; }
+		private:
+			Variable *_vector = nullptr;
+			Variable *_x = nullptr;
+			Variable *_y = nullptr;
+			Variable *_z = nullptr;
+			Variable *_w = nullptr;
 
-				Outlet *getOutputXYZ( void ) { return _outputXYZ; }
-				Outlet *getOutputXYZW( void ) { return _outputXYZW; }
+		private:
+			virtual void setup( ShaderGraph *graph ) override;
+		};
 
-			private:
-				Vector4f _constant;
-				
-				Outlet *_inputW = nullptr;
-				Outlet *_inputXYZ = nullptr;
-				Outlet *_inputXYZW = nullptr;
+		class ScalarsToVector : public Expression {
+			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::ScalarsToVector )
+			
+		public:
+			ScalarsToVector( ShaderGraph *, Variable *x, Variable *y );
+			ScalarsToVector( ShaderGraph *, Variable *x, Variable *y, Variable *z );
+			ScalarsToVector( ShaderGraph *, Variable *x, Variable *y, Variable *z, Variable *w );
+			virtual ~ScalarsToVector( void );
 
-				Outlet *_outputXYZ = nullptr;
-				Outlet *_outputXYZW = nullptr;
-			};
+			Variable *getVector( void ) { return _vector; }
 
-		}
+			Variable *getX( void ) { return _x; }
+			Variable *getY( void ) { return _y; }
+			Variable *getZ( void ) { return _z; }
+			Variable *getW( void ) { return _w; }
+
+		private:
+			Variable *_vector = nullptr;
+			Variable *_x = nullptr;
+			Variable *_y = nullptr;
+			Variable *_z = nullptr;
+			Variable *_w = nullptr;
+			
+		private:
+			virtual void setup( ShaderGraph *graph ) override;
+		};
+
+		class VectorConstant : public Expression {
+			CRIMILD_IMPLEMENT_RTTI( crimild::scenegraph::VectorConstant )
+
+		public:
+			VectorConstant( ShaderGraph *, const Vector2f &v );
+			VectorConstant( ShaderGraph *, const Vector3f &v );
+			VectorConstant( ShaderGraph *, const Vector4f &v );
+			virtual ~VectorConstant( void );
+
+			const Vector4f &getValue( void ) { return _value; }
+			Variable *getVector( void ) { return _vector; }
+
+		private:
+			Vector4f _value;
+			Variable *_vector = nullptr;
+
+		public:
+			virtual void setup( ShaderGraph *graph ) override;
+		};
 
 	}
 

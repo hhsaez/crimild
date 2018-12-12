@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -26,21 +26,27 @@
  */
 
 #include "Pow.hpp"
+#include "Rendering/ShaderGraph/ShaderGraph.hpp"
+#include "Rendering/ShaderGraph/Variable.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
-using namespace crimild::shadergraph::nodes;
 
-Pow::Pow( void )
+Pow::Pow( ShaderGraph *graph, Variable *base, Variable *exponent )
+	: _base( base ),
+	  _exponent( exponent )
 {
-	_base = addInputOutlet( "base", Outlet::Type::SCALAR );
-	_exponent = addInputOutlet( "exp", Outlet::Type::SCALAR );
-
-	_value = addOutputOutlet( "pow", Outlet::Type::SCALAR );
+	_result = graph->addNode< Variable >( Variable::Type::SCALAR );
 }
 
 Pow::~Pow( void )
 {
 
+}
+
+void Pow::setup( ShaderGraph *graph )
+{
+	graph->read( this, { _base, _exponent } );
+	graph->write( this, { _result } );
 }
 
