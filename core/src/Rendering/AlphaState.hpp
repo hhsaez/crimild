@@ -39,6 +39,7 @@ namespace crimild {
         static SharedPointer< AlphaState > ENABLED;
         static SharedPointer< AlphaState > ENABLED_SRC_COLOR_ONLY;
         static SharedPointer< AlphaState > ENABLED_ADDITIVE_BLEND;
+		static SharedPointer< AlphaState > ENABLED_MULTIPLY_BLEND;
         
 	public:
 		enum class SrcBlendFunc : uint8_t {

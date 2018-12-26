@@ -244,6 +244,16 @@ namespace crimild {
 
 	public:
 		virtual SharedPointer< shadergraph::ShaderGraph > createShaderGraph( void ) = 0;
+
+	public:
+		/**
+		   A 1x1 white texture used when an invalid texture pointer is provided. This
+		   is faster than querying if a texture was actually bound to shaders
+		 */
+		Texture *getFallbackTexture( void ) { return crimild::get_ptr( _fallbackTexture ); }
+
+	private:
+		SharedPointer< Texture > _fallbackTexture;
 	};
     
 }

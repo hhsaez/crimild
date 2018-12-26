@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernán Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,80 +25,47 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Texture.hpp"
-#include "Coding/Encoder.hpp"
-#include "Coding/Decoder.hpp"
+#ifndef CRIMILD_CORE_RENDER_GRAPH_PASSES_LINEARIZE_DEPTH_
+#define CRIMILD_CORE_RENDER_GRAPH_PASSES_LINEARIZE_DEPTH_
 
-#include "Foundation/Log.hpp"
+#include "Rendering/RenderGraph/RenderGraphPass.hpp"
 
-CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::Texture )
+namespace crimild {
 
-using namespace crimild;
+	namespace rendergraph {
 
-SharedPointer< Texture > Texture::ONE = crimild::alloc< Texture >(
-	crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA )
-);
+		namespace passes {
 
-SharedPointer< Texture > Texture::ZERO = crimild::alloc< Texture >(
-	crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0x00, 0x00, 0x00, 0x00 }, Image::PixelFormat::RGBA )
-);
+			/**
+			   \brief Converts a depth to linear values
+			 */
+			class LinearizeDepthPass : public RenderGraphPass {
+				CRIMILD_IMPLEMENT_RTTI( crimild::rendergraph::LinearizeDepthPass )
+				
+			public:
+				LinearizeDepthPass( RenderGraph *graph );
+				virtual ~LinearizeDepthPass( void );
+			
+				void setInput( RenderGraphAttachment *attachment ) { _input = attachment; }
+				RenderGraphAttachment *getInput( void ) { return _input; }
 
-Texture::Texture( std::string name )
-    : NamedObject( name )
-{
-    
-}
+				void setOutput( RenderGraphAttachment *attachment ) { _output = attachment; }
+				RenderGraphAttachment *getOutput( void ) { return _output; }
 
-Texture::Texture( SharedPointer< Image > const &image, std::string name )
-	: NamedObject( name ),
-	  _image( image )
-{
+				virtual void setup( rendergraph::RenderGraph *graph ) override;
+				virtual void execute( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue ) override;
 
-}
+			private:
+				SharedPointer< ShaderProgram > _program;
+			
+				RenderGraphAttachment *_input = nullptr;
+				RenderGraphAttachment *_output = nullptr;
+			};
+		}
 
-Texture::~Texture( void )
-{
-    unload();
-}
-
-void Texture::encode( coding::Encoder &encoder )
-{
-	Codable::encode( encoder );
-
-	encoder.encode( "image", _image );
-}
-
-void Texture::decode( coding::Decoder &decoder )
-{
-	Codable::decode( decoder );
-
-	decoder.decode( "image", _image );
-}
-
-bool Texture::registerInStream( Stream &s )
-{
-	if ( !StreamObject::registerInStream( s ) ) {
-		return false;
 	}
 
-	if ( getImage() != nullptr ) {
-		getImage()->registerInStream( s );
-	}
-
-	return true;
 }
 
-void Texture::save( Stream &s )
-{
-	StreamObject::save( s );
-
-	s.write( _image );
-}
-
-void Texture::load( Stream &s )
-{
-	StreamObject::load( s );
-
-	s.read( _image );
-}
+#endif
 

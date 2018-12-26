@@ -30,11 +30,14 @@
 
 #include "Foundation/Types.hpp"
 #include "Foundation/Containers/Array.hpp"
+#include "Foundation/Memory.hpp"
 #include "Mathematics/Vector.hpp"
 
 #include <string>
 
 namespace crimild {
+
+	class ShaderUniform;
 
 	namespace shadergraph {
 
@@ -49,10 +52,16 @@ namespace crimild {
 			Variable *vec2_in( std::string name );
 			Variable *vec3( Variable *vector );
 			Variable *vec3_in( std::string name );
+			Variable *vec3_uniform( std::string name );
+			Variable *vec3_uniform( SharedPointer< ShaderUniform > const &uniform );
+			Variable *vec3_uniform( ShaderUniform *uniform );
 			Variable *vec4( Variable *scalar );
 			Variable *vec4( Variable *vector, Variable *scalar );
 			Variable *vec4( Variable *x, Variable *y, Variable *z, Variable *w );
 			Variable *vec4( const Vector4f &value );
+			Variable *vec4_uniform( std::string name );
+			Variable *vec4_uniform( SharedPointer< ShaderUniform > const &uniform );
+			Variable *vec4_uniform( ShaderUniform *uniform );
 			Variable *vec_x( Variable *vector );
 			Variable *vec_y( Variable *vector );
 			Variable *vec_z( Variable *vector );
@@ -136,7 +145,9 @@ namespace crimild {
 			Variable *linearizeDepth( Variable *input, Variable *near, Variable *far );
 
 			Variable *texture2D_uniform( std::string name );
+			Variable *texture2D_uniform( SharedPointer< ShaderUniform > const &uniform );
 			Variable *textureColor( Variable *texture, Variable *uvs );
+			Variable *textureUnitVector( Variable *texture, Variable *uvs );
 		}
 
 	}

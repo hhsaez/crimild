@@ -81,7 +81,11 @@ Renderer::Renderer( void )
 
  	generateAuxFBO( FBO_AUX_256, 256, 256 );
  	generateAuxFBO( FBO_AUX_512, 512, 512 );
- 	generateAuxFBO( FBO_AUX_1024, 1024, 1024 );   
+ 	generateAuxFBO( FBO_AUX_1024, 1024, 1024 );
+
+	// Create a 1x1 fallback texture, used when we need to bind textures
+	// and no valid texture instance was passed. Look at bindMaterial()
+	_fallbackTexture = Texture::ONE;
 }
 
 Renderer::~Renderer( void )
@@ -194,11 +198,9 @@ void Renderer::unbindFrameBuffer( FrameBufferObject *fbo )
 void Renderer::bindProgram( ShaderProgram *program )
 {
 	getShaderProgramCatalog()->bind( program );
-
-    auto self = this;
-	program->forEachUniform( [self]( ShaderUniform *uniform ) {
+	program->forEachUniform( [ this ]( ShaderUniform *uniform ) {
 		if ( uniform != nullptr && uniform->getLocation() != nullptr ) {
-			uniform->onBind( self );
+			uniform->onBind( this );
 		}
 	});
 }
@@ -206,15 +208,23 @@ void Renderer::bindProgram( ShaderProgram *program )
 void Renderer::unbindProgram( ShaderProgram *program )
 {	
 	getShaderProgramCatalog()->unbind( program );
+	program->forEachUniform( [ this ]( ShaderUniform *uniform ) {
+		if ( uniform != nullptr && uniform->getLocation() != nullptr ) {
+			uniform->onUnbind( this );
+		}
+	});
 }
 
 void Renderer::bindMaterial( ShaderProgram *program, Material *material )
 {
-	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_USE_COLOR_MAP_UNIFORM ), material->getColorMap() != nullptr );
-	if ( material->getColorMap() != nullptr ) {
-		auto loc = program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM );
-		bindTexture( loc, material->getColorMap() );
-	}
+	bindUniform(
+		program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_USE_COLOR_MAP_UNIFORM ),
+		material->getColorMap() != nullptr
+	);
+	bindTexture(
+		program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM ),
+		material->getColorMap()
+	);
 	
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_USE_NORMAL_MAP_UNIFORM ), material->getNormalMap() != nullptr );
 	if ( material->getNormalMap() != nullptr ) {
@@ -248,7 +258,11 @@ void Renderer::bindMaterial( ShaderProgram *program, Material *material )
 
 void Renderer::unbindMaterial( ShaderProgram *program, Material *material )
 {
-	unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM ), material->getColorMap() );
+	unbindTexture(
+		program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM ),
+		material->getColorMap()
+	);
+	
 	unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_NORMAL_MAP_UNIFORM ), material->getNormalMap() );
 	unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_SPECULAR_MAP_UNIFORM ), material->getSpecularMap() );
 	unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_EMISSIVE_MAP_UNIFORM ), material->getEmissiveMap() );
@@ -256,12 +270,12 @@ void Renderer::unbindMaterial( ShaderProgram *program, Material *material )
 
 void Renderer::bindTexture( ShaderLocation *location, Texture *texture )
 {
-	getTextureCatalog()->bind( location, texture );
+	getTextureCatalog()->bind( location, texture != nullptr ? texture : getFallbackTexture());
 }
 
 void Renderer::unbindTexture( ShaderLocation *location, Texture *texture )
 {
-	getTextureCatalog()->unbind( location, texture );
+	getTextureCatalog()->unbind( location, texture != nullptr ? texture : getFallbackTexture() );
 }
 
 void Renderer::bindLight( ShaderProgram *program, Light *light )
@@ -278,6 +292,10 @@ void Renderer::bindLight( ShaderProgram *program, Light *light )
 
 		case Light::Type::SPOT:
 			lightType = 2;
+			break;
+
+		case Light::Type::AMBIENT:
+			lightType = 3;
 			break;
 	}
 

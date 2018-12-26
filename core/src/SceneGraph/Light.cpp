@@ -71,17 +71,21 @@ void Light::encode( coding::Encoder &encoder )
 
 	std::string lightType;
 	switch ( _type ) {
-	case Light::Type::POINT:
-		lightType = "point";
-		break;
-
-	case Light::Type::DIRECTIONAL:
-		lightType = "directional";
-		break;
-
-	case Light::Type::SPOT:
-		lightType = "spot";
-		break;
+		case Light::Type::POINT:
+			lightType = "point";
+			break;
+			
+		case Light::Type::DIRECTIONAL:
+			lightType = "directional";
+			break;
+			
+		case Light::Type::SPOT:
+			lightType = "spot";
+			break;
+			
+		case Light::Type::AMBIENT:
+			lightType = "ambient";
+			break;
 	}
 	encoder.encode( "lightType", lightType );
 
@@ -96,7 +100,10 @@ void Light::decode( coding::Decoder &decoder )
 
 	std::string lightType;
 	decoder.decode( "lightType", lightType );
-	if ( lightType == "directional" ) {
+	if ( lightType == "ambient" ) {
+		_type = Light::Type::AMBIENT;
+	}
+	else if ( lightType == "directional" ) {
 		_type = Light::Type::DIRECTIONAL;
 	}
 	else if ( lightType == "spot" ) {

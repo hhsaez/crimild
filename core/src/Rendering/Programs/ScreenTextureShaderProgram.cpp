@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,80 +25,54 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Texture.hpp"
-#include "Coding/Encoder.hpp"
-#include "Coding/Decoder.hpp"
+#include "ScreenTextureShaderProgram.hpp"
 
-#include "Foundation/Log.hpp"
-
-CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::Texture )
+#include "Rendering/Renderer.hpp"
+#include "Rendering/ShaderGraph/ShaderGraph.hpp"
+#include "Rendering/ShaderGraph/CSL.hpp"
 
 using namespace crimild;
+using namespace crimild::shadergraph;
 
-SharedPointer< Texture > Texture::ONE = crimild::alloc< Texture >(
-	crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA )
-);
-
-SharedPointer< Texture > Texture::ZERO = crimild::alloc< Texture >(
-	crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0x00, 0x00, 0x00, 0x00 }, Image::PixelFormat::RGBA )
-);
-
-Texture::Texture( std::string name )
-    : NamedObject( name )
+ScreenTextureShaderProgram::ScreenTextureShaderProgram( void )
 {
-    
+	createVertexShader();
+	createFragmentShader();
+
+	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM, "uColorMap" );
 }
 
-Texture::Texture( SharedPointer< Image > const &image, std::string name )
-	: NamedObject( name ),
-	  _image( image )
+ScreenTextureShaderProgram::~ScreenTextureShaderProgram( void )
 {
 
 }
 
-Texture::~Texture( void )
+void ScreenTextureShaderProgram::createVertexShader( void )
 {
-    unload();
+	auto graph = Renderer::getInstance()->createShaderGraph();
+
+	auto p = csl::screenPosition();
+	auto uv = csl::modelTextureCoords();
+
+	csl::vertexOutput( "vTextureCoord", uv );
+	csl::vertexPosition( p );
+
+	auto src = graph->build();
+	auto shader = crimild::alloc< VertexShader >( src );
+	setVertexShader( shader );
 }
 
-void Texture::encode( coding::Encoder &encoder )
+void ScreenTextureShaderProgram::createFragmentShader( void )
 {
-	Codable::encode( encoder );
+	auto graph = Renderer::getInstance()->createShaderGraph();
 
-	encoder.encode( "image", _image );
-}
+	auto uv = csl::vec2_in( "vTextureCoord" );
+	auto texture = csl::texture2D_uniform( "uColorMap" );
+	auto color = csl::textureColor( texture, uv );
+	csl::fragColor( color );
 
-void Texture::decode( coding::Decoder &decoder )
-{
-	Codable::decode( decoder );
-
-	decoder.decode( "image", _image );
-}
-
-bool Texture::registerInStream( Stream &s )
-{
-	if ( !StreamObject::registerInStream( s ) ) {
-		return false;
-	}
-
-	if ( getImage() != nullptr ) {
-		getImage()->registerInStream( s );
-	}
-
-	return true;
-}
-
-void Texture::save( Stream &s )
-{
-	StreamObject::save( s );
-
-	s.write( _image );
-}
-
-void Texture::load( Stream &s )
-{
-	StreamObject::load( s );
-
-	s.read( _image );
+	auto src = graph->build();
+	auto shader = crimild::alloc< FragmentShader >( src );
+	setFragmentShader( shader );
 }
 

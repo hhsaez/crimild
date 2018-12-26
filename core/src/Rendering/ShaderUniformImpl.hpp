@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,9 @@
 #include "Mathematics/Vector.hpp"
 
 namespace crimild {
-    
+
+	class Texture;
+	
 	template< typename T >
 	class ShaderUniformImpl : public ShaderUniform {
 	public:
@@ -56,6 +58,11 @@ namespace crimild {
 			renderer->bindUniform( getLocation(), getValue() );
 		}
 
+		virtual void onUnbind( Renderer *renderer ) override
+		{
+			// no-op
+		}
+
 	private:
 		T _value;
 	};
@@ -67,6 +74,23 @@ namespace crimild {
 	typedef ShaderUniformImpl< Vector2f > Vector2fUniform;
 	typedef ShaderUniformImpl< RGBAColorf > RGBAColorfUniform;
 	typedef ShaderUniformImpl< Matrix3f > Matrix3fUniform;
+
+	class TextureUniform : public ShaderUniform {
+	public:
+		TextureUniform( std::string name, Texture *value );
+		TextureUniform( std::string name, SharedPointer< Texture > const &value );
+		virtual ~TextureUniform( void );
+
+		void setValue( Texture *texture );
+		Texture *getValue( void );
+
+	private:
+		SharedPointer< Texture > _texture;
+
+	public:
+		virtual void onBind( Renderer *renderer );
+		virtual void onUnbind( Renderer *renderer );
+	};
 
 }
 
