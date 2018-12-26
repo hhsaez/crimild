@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,80 +25,40 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "ShaderUniformImpl.hpp"
 #include "Texture.hpp"
-#include "Coding/Encoder.hpp"
-#include "Coding/Decoder.hpp"
-
-#include "Foundation/Log.hpp"
-
-CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::Texture )
 
 using namespace crimild;
 
-SharedPointer< Texture > Texture::ONE = crimild::alloc< Texture >(
-	crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA )
-);
-
-SharedPointer< Texture > Texture::ZERO = crimild::alloc< Texture >(
-	crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0x00, 0x00, 0x00, 0x00 }, Image::PixelFormat::RGBA )
-);
-
-Texture::Texture( std::string name )
-    : NamedObject( name )
+TextureUniform::TextureUniform( std::string name, Texture *value )
+	: ShaderUniform( name ),
+	  _texture( crimild::retain( value ) )
 {
-    
+	
 }
 
-Texture::Texture( SharedPointer< Image > const &image, std::string name )
-	: NamedObject( name ),
-	  _image( image )
+TextureUniform::TextureUniform( std::string name, SharedPointer< Texture > const &value )
+	: ShaderUniform( name ),
+	  _texture( value )
 {
-
+	
 }
 
-Texture::~Texture( void )
+TextureUniform::~TextureUniform( void )
 {
-    unload();
+	
 }
 
-void Texture::encode( coding::Encoder &encoder )
-{
-	Codable::encode( encoder );
+void TextureUniform::setValue( Texture *texture ) { _texture = crimild::retain( texture ); }
+Texture *TextureUniform::getValue( void ) { return crimild::get_ptr( _texture ); }
 
-	encoder.encode( "image", _image );
+void TextureUniform::onBind( Renderer *renderer )
+{
+	renderer->bindTexture( getLocation(), getValue() );
 }
 
-void Texture::decode( coding::Decoder &decoder )
+void TextureUniform::onUnbind( Renderer *renderer )
 {
-	Codable::decode( decoder );
-
-	decoder.decode( "image", _image );
-}
-
-bool Texture::registerInStream( Stream &s )
-{
-	if ( !StreamObject::registerInStream( s ) ) {
-		return false;
-	}
-
-	if ( getImage() != nullptr ) {
-		getImage()->registerInStream( s );
-	}
-
-	return true;
-}
-
-void Texture::save( Stream &s )
-{
-	StreamObject::save( s );
-
-	s.write( _image );
-}
-
-void Texture::load( Stream &s )
-{
-	StreamObject::load( s );
-
-	s.read( _image );
+	renderer->unbindTexture( getLocation(), getValue() );
 }
 

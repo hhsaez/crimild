@@ -66,14 +66,16 @@ void BlendPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *re
 	
 	renderer->bindFrameBuffer( crimild::get_ptr( fbo ) );
 	
-	renderer->setAlphaState( _alphaState );
-	renderer->setDepthState( DepthState::DISABLED );
-	
 	auto program = renderer->getShaderProgram( Renderer::SHADER_PROGRAM_SCREEN_TEXTURE );
 	renderer->bindProgram( program );
 
-	_inputs.each( [ this, renderer, program ]( RenderGraphAttachment *input ) {
+	_inputs.each( [ this, renderer, program ]( RenderGraphAttachment *input, crimild::Size idx ) {
 		auto texture = input->getTexture();
+
+		if ( idx > 0 ) {
+			renderer->setAlphaState( _alphaState );
+			renderer->setDepthState( DepthState::DISABLED );
+		}
 		
 		renderer->bindTexture(
 			program->getStandardLocation( ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ),
@@ -84,10 +86,12 @@ void BlendPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *re
 		renderer->unbindTexture(
 			program->getStandardLocation( ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ),
 			texture );
+
+		if ( idx > 0 ) {
+			renderer->setAlphaState( AlphaState::DISABLED );
+			renderer->setDepthState( DepthState::ENABLED );
+		}
 	});
-	
-	renderer->setAlphaState( AlphaState::DISABLED );
-	renderer->setDepthState( DepthState::ENABLED );
 	
 	renderer->unbindProgram( program );
 	

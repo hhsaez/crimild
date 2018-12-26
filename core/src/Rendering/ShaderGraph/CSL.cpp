@@ -49,6 +49,7 @@
 #include "Rendering/ShaderGraph/Nodes/TextureColor.hpp"
 
 #include "Rendering/VertexFormat.hpp"
+#include "Rendering/ShaderUniform.hpp"
 
 #include <sstream>
 
@@ -158,6 +159,31 @@ Variable *csl::vec3_in( std::string name )
 	return ret;
 }
 
+Variable *csl::vec3_uniform( std::string name )
+{
+	auto graph = ShaderGraph::getCurrent();
+
+	auto ret = graph->getInput< Variable >( name );
+	if ( ret == nullptr ) {
+		ret = graph->addInputNode< Variable >(
+			Variable::Storage::UNIFORM,
+			Variable::Type::VECTOR_3,
+			name
+		);
+	}
+	return ret;
+}
+
+Variable *csl::vec3_uniform( SharedPointer< ShaderUniform > const &uniform )
+{
+	return vec3_uniform( uniform->getName() );
+}
+
+Variable *csl::vec3_uniform( ShaderUniform *uniform )
+{
+	return vec3_uniform( uniform->getName() );
+}
+
 Variable *csl::vec4( Variable *scalar )
 {
 	return ShaderGraph::getCurrent()->addNode< ScalarsToVector >(
@@ -193,6 +219,31 @@ Variable *csl::vec4( Variable *vector, Variable *scalar )
 Variable *csl::vec4( const Vector4f &value )
 {
 	return ShaderGraph::getCurrent()->addNode< VectorConstant >( value )->getVector();
+}
+
+Variable *csl::vec4_uniform( std::string name )
+{
+	auto graph = ShaderGraph::getCurrent();
+
+	auto ret = graph->getInput< Variable >( name );
+	if ( ret == nullptr ) {
+		ret = graph->addInputNode< Variable >(
+			Variable::Storage::UNIFORM,
+			Variable::Type::VECTOR_4,
+			name
+		);
+	}
+	return ret;
+}
+
+Variable *csl::vec4_uniform( SharedPointer< ShaderUniform > const &uniform )
+{
+	return vec4_uniform( uniform->getName() );
+}
+
+Variable *csl::vec4_uniform( ShaderUniform *uniform )
+{
+	return vec4_uniform( uniform->getName() );
 }
 
 Variable *csl::vec_x( Variable *vector )
@@ -397,6 +448,7 @@ Variable *csl::modelNormal( void )
 
 Variable *csl::worldNormal( Variable *worldMatrix, Variable *normal )
 {
+	// TODO: Normal matrix is transpose( inverse( worldMatrix ) )
 	return normalize( mult( mat3( worldMatrix ), normal ) );
 }
 
@@ -467,9 +519,22 @@ Variable *csl::texture2D_uniform( std::string name )
 	return ret;
 }
 
+Variable *csl::texture2D_uniform( SharedPointer< ShaderUniform > const &uniform )
+{
+	return texture2D_uniform( uniform->getName() );
+}
+
 Variable *csl::textureColor( Variable *texture, Variable *uvs )
 {
 	auto graph = ShaderGraph::getCurrent();
 	return graph->addNode< TextureColor >( texture, uvs )->getColor();
 }
+
+Variable *csl::textureUnitVector( Variable *texture, Variable *uvs )
+{
+	auto v = textureColor( texture, uvs );
+	v = sub( mult( scalar_constant( 2 ), v ), scalar_constant( 1 ) );
+	return normalize( v );
+}
+
 

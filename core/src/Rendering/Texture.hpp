@@ -39,6 +39,10 @@ namespace crimild {
         CRIMILD_IMPLEMENT_RTTI( crimild::Texture )
 
 	public:
+		static SharedPointer< Texture > ONE;
+		static SharedPointer< Texture > ZERO;
+
+	public:
         explicit Texture( std::string name = "ColorMap" );
 		explicit Texture( SharedPointer< Image > const &image, std::string name = "ColorMap" );
 		virtual ~Texture( void );

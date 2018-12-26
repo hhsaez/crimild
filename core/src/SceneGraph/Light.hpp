@@ -39,6 +39,7 @@ namespace crimild {
 		
 	public:
 		enum class Type {
+			AMBIENT,
 			POINT,
 			DIRECTIONAL,
 			SPOT,

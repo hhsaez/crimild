@@ -44,6 +44,7 @@ namespace crimild {
         ShaderLocation *getLocation( void ) { return crimild::get_ptr( _location ); }
 
         virtual void onBind( Renderer *renderer ) = 0;
+		virtual void onUnbind( Renderer *renderer ) = 0;
 
 	private:
 		SharedPointer< ShaderLocation > _location;

@@ -57,6 +57,11 @@ Image::Image( int width, int height, int bpp, const unsigned char *data, PixelFo
 	setData( width, height, bpp, data, format );
 }
 
+Image::Image( int width, int height, int bpp, const containers::ByteArray &data, PixelFormat format )
+{
+	setData( width, height, bpp, data.size() > 0 ? &data[ 0 ] : nullptr, format );
+}
+
 Image::~Image( void )
 {
 	unload();
