@@ -57,6 +57,7 @@ namespace crimild {
 			virtual void bindUniform( ShaderLocation *location, const Vector2f &vector ) override;
 			virtual void bindUniform( ShaderLocation *location, const RGBAColorf &color ) override;
 			virtual void bindUniform( ShaderLocation *location, const Matrix4f &matrix ) override;
+			virtual void bindUniform( ShaderLocation *location, const Matrix3f &matrix ) override;
 
 			virtual void setDepthState( DepthState *state ) override;
 			virtual void setAlphaState( AlphaState *state ) override;

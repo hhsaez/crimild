@@ -39,6 +39,10 @@ namespace crimild {
 	template< crimild::Size SIZE, typename PRECISION >
 	class Matrix {
 	public:
+		static const Matrix< SIZE, PRECISION > IDENTITY;
+		static const Matrix< SIZE, PRECISION > ZERO;
+		
+	public:
 		Matrix( void )
 		{
 			memset( &_data[ 0 ], 0, sizeof( PRECISION ) * SIZE * SIZE );
@@ -52,6 +56,21 @@ namespace crimild {
 		Matrix( const Matrix &u )
 		{
 			memcpy( _data, u._data, sizeof( PRECISION ) * SIZE * SIZE );
+		}
+
+		/**
+		   \brief Convert matrices from one rank to a lower one 
+
+		   \warning No bound checks
+		 */
+		template< crimild::Size S2, typename P2 >
+		Matrix( const Matrix< S2, P2 > &other )
+		{
+			for ( crimild::Size i = 0; i < SIZE; i++ ) {
+				for ( crimild::Size j = 0; j < SIZE; j++ ) {
+					_data[ i * SIZE + j ] = other[ i * S2 + j ];
+				}
+			}
 		}
 
 		Matrix( const Vector< SIZE, PRECISION > &axis, PRECISION angle )
@@ -761,6 +780,9 @@ namespace crimild {
 		return out;
 	}
     
+	template< crimild::Size SIZE, typename PRECISION > const Matrix< SIZE, PRECISION > Matrix< SIZE, PRECISION >::ZERO = Matrix< SIZE, PRECISION >();
+	template< crimild::Size SIZE, typename PRECISION > const Matrix< SIZE, PRECISION > Matrix< SIZE, PRECISION >::IDENTITY = Matrix< SIZE, PRECISION >().makeIdentity();
+
 	typedef Matrix< 3, int > Matrix3i;
 	typedef Matrix< 3, float > Matrix3f;
 	typedef Matrix< 3, double > Matrix3d;

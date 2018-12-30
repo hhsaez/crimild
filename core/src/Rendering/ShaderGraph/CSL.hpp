@@ -48,9 +48,13 @@ namespace crimild {
 			Variable *scalar( crimild::Real32 value, std::string name = "" );
 			Variable *scalar_uniform( std::string name );
 			Variable *scalar_constant( crimild::Real32 value );
+			Variable *scalar_one( void );
+			Variable *scalar_two( void );
+			Variable *scalar_zero( void );
 
 			Variable *vec2_in( std::string name );
 			Variable *vec3( Variable *vector );
+			Variable *vec3( const Vector3f &v );
 			Variable *vec3_in( std::string name );
 			Variable *vec3_uniform( std::string name );
 			Variable *vec3_uniform( SharedPointer< ShaderUniform > const &uniform );
@@ -68,7 +72,10 @@ namespace crimild {
 			Variable *vec_w( Variable *vector );
 
 			Variable *mat3( Variable *matrix );
+			Variable *mat3_uniform( std::string name );
+			Variable *mat3_uniform( SharedPointer< ShaderUniform > const &uniform );
 			Variable *mat4_uniform( std::string name );
+			Variable *mat4_uniform( SharedPointer< ShaderUniform > const &uniform );
 
 			Variable *red( Variable *color );
 			Variable *green( Variable *color );
@@ -98,6 +105,7 @@ namespace crimild {
 
 			Variable *dot( Variable *a, Variable *b );
 			Variable *normalize( Variable *input );
+			Variable *reflect( Variable *incident, Variable *normal );
 
 			//@}
 

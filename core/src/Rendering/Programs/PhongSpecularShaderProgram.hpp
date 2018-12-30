@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-present, H. Hernán Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,56 +25,47 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_RENDER_GRAPH_PASSES_DEPTH_
-#define CRIMILD_CORE_RENDER_GRAPH_PASSES_DEPTH_
+#ifndef CRIMILD_CORE_RENDERING_PROGRAMS_PHONG_SPECULAR_
+#define CRIMILD_CORE_RENDERING_PROGRAMS_PHONG_SPECULAR_
 
-#include "Rendering/RenderGraph/RenderGraphPass.hpp"
-#include "Rendering/RenderQueue.hpp"
+#include "Rendering/ShaderProgram.hpp"
+#include "Rendering/ShaderUniformImpl.hpp"
 
 namespace crimild {
 
-	class ViewSpaceNormalShaderProgram;
+	class PhongSpecularShaderProgram : public ShaderProgram {
+	public:
+		PhongSpecularShaderProgram( void );
+		virtual ~PhongSpecularShaderProgram( void );
 
-	namespace rendergraph {
+	public:
+		void bindLightColor( const RGBAColorf &value ) { _lightColor->setValue( value); }
 
-		namespace passes {
+		/**
+		   \remarks Light direction must be provided in view space
+		   (premultiplied by V matrix).
 
-			/**
-			   \brief Render a depth buffer based on objects position
+		   It is stored as inverted since it's the direction from 
+		   the fragment to the light source.
+		 */
+		void bindLightDirection( const Vector3f &value ) { _lightDirection->setValue( ( -value ).getNormalized() ); }
 
-			   It also renders a normal buffer for deferred 
-			   lighting purporses.
+		void bindInvProjMatrix( const Matrix4f &value ) { _invProjMatrix->setValue( value ); }
+		
+		void bindNormalTexture( Texture *value ) { _normalTexture->setValue( value ); }
+		void bindDepthTexture( Texture *value) { _depthTexture->setValue( value ); }
 
-			   \todo Add support for normal mapping
-			 */
-			class DepthPass : public RenderGraphPass {
-				CRIMILD_IMPLEMENT_RTTI( crimild::rendergraph::DepthPass )
-				
-			public:
-				DepthPass( RenderGraph *graph );
-				virtual ~DepthPass( void );
-			
-				void setDepthOutput( RenderGraphAttachment *attachment ) { _depthOutput = attachment; }
-				RenderGraphAttachment *getDepthOutput( void ) { return _depthOutput; }
-				
-				void setNormalOutput( RenderGraphAttachment *attachment ) { _normalOutput = attachment; }
-				RenderGraphAttachment *getNormalOutput( void ) { return _normalOutput; }
-			
-				virtual void setup( rendergraph::RenderGraph *graph ) override;
-				virtual void execute( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue ) override;
-
-			private:
-				void renderObjects( Renderer *renderer, RenderQueue *renderQueue, RenderQueue::RenderableType renderableType );
-
-			private:
-				SharedPointer< ViewSpaceNormalShaderProgram > _program;
-			
-				RenderGraphAttachment *_depthOutput = nullptr;
-				RenderGraphAttachment *_normalOutput = nullptr;
-			};
-		}
-
-	}
+	private:
+		SharedPointer< RGBAColorfUniform > _lightColor;
+		SharedPointer< Vector3fUniform > _lightDirection;
+		SharedPointer< Matrix4fUniform > _invProjMatrix;
+		SharedPointer< TextureUniform > _normalTexture;
+		SharedPointer< TextureUniform > _depthTexture;
+		
+	private:
+		void createVertexShader( void );
+		void createFragmentShader( void );
+	};
 
 }
 

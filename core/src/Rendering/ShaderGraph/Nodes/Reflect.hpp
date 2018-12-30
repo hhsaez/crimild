@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-present, H. Hernán Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,55 +25,40 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_RENDER_GRAPH_PASSES_DEPTH_
-#define CRIMILD_CORE_RENDER_GRAPH_PASSES_DEPTH_
+#ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_REFLECT_
+#define CRIMILD_RENDERING_SHADER_GRAPH_NODES_REFLECT_
 
-#include "Rendering/RenderGraph/RenderGraphPass.hpp"
-#include "Rendering/RenderQueue.hpp"
+#include "Rendering/ShaderGraph/Expression.hpp"
 
 namespace crimild {
 
-	class ViewSpaceNormalShaderProgram;
+	namespace shadergraph {
 
-	namespace rendergraph {
+		class Variable;
 
-		namespace passes {
-
-			/**
-			   \brief Render a depth buffer based on objects position
-
-			   It also renders a normal buffer for deferred 
-			   lighting purporses.
-
-			   \todo Add support for normal mapping
-			 */
-			class DepthPass : public RenderGraphPass {
-				CRIMILD_IMPLEMENT_RTTI( crimild::rendergraph::DepthPass )
-				
-			public:
-				DepthPass( RenderGraph *graph );
-				virtual ~DepthPass( void );
+		/**
+		   \brief Calculate reflection direction for an incident vector
+		 */
+		class Reflect : public Expression {
+			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::Reflect )
 			
-				void setDepthOutput( RenderGraphAttachment *attachment ) { _depthOutput = attachment; }
-				RenderGraphAttachment *getDepthOutput( void ) { return _depthOutput; }
-				
-				void setNormalOutput( RenderGraphAttachment *attachment ) { _normalOutput = attachment; }
-				RenderGraphAttachment *getNormalOutput( void ) { return _normalOutput; }
+		public:
+			Reflect( ShaderGraph *graph, Variable *I, Variable *N );
+			virtual ~Reflect( void );
+
+			Variable *getIncident( void ) { return _incident; }
+			Variable *getNormal( void ) { return _normal; }
+			Variable *getResult( void ) { return _result; }
 			
-				virtual void setup( rendergraph::RenderGraph *graph ) override;
-				virtual void execute( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue ) override;
-
-			private:
-				void renderObjects( Renderer *renderer, RenderQueue *renderQueue, RenderQueue::RenderableType renderableType );
-
-			private:
-				SharedPointer< ViewSpaceNormalShaderProgram > _program;
+		private:
+			Variable *_incident = nullptr;
+			Variable *_normal = nullptr;
+			Variable *_result = nullptr;
 			
-				RenderGraphAttachment *_depthOutput = nullptr;
-				RenderGraphAttachment *_normalOutput = nullptr;
-			};
-		}
-
+		public:
+			virtual void setup( ShaderGraph *graph ) override;
+		};
+		
 	}
 
 }

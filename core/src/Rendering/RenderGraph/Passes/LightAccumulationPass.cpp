@@ -33,7 +33,8 @@
 #include "Rendering/DepthState.hpp"
 #include "Rendering/Renderer.hpp"
 #include "Rendering/Programs/ScreenColorShaderProgram.hpp"
-#include "Rendering/Programs/DirectionalLightShaderProgram.hpp"
+#include "Rendering/Programs/PhongDiffuseShaderProgram.hpp"
+#include "Rendering/Programs/PhongSpecularShaderProgram.hpp"
 #include "Rendering/Programs/UnlitShaderProgram.hpp"
 #include "Foundation/Profiler.hpp"
 #include "Simulation/AssetManager.hpp"
@@ -46,11 +47,13 @@ using namespace crimild::rendergraph::passes;
 LightAccumulationPass::LightAccumulationPass( RenderGraph *graph, std::string name )
 	: RenderGraphPass( graph, name ),
 	  _ambientLightProgram( crimild::alloc< ScreenColorShaderProgram >() ),
-	  _directionalLightProgram( crimild::alloc< DirectionalLightShaderProgram >() ),
+	  _directionalLightProgram( crimild::alloc< PhongDiffuseShaderProgram >() ),
+	  _directionalSpecularProgram( crimild::alloc< PhongSpecularShaderProgram >() ),
 	  _pointLightProgram( crimild::alloc< UnlitShaderProgram >() ),
 	  _pointLightShape( crimild::alloc< SpherePrimitive >( 1.0f ) )
 {
-	_output = graph->createAttachment( getName() + " - Output", RenderGraphAttachment::Hint::FORMAT_RGBA );
+	_ambientDiffuseOutput = graph->createAttachment( getName() + " - Ambient + Diffuse Output", RenderGraphAttachment::Hint::FORMAT_RGBA );
+	_specularOutput = graph->createAttachment( getName() + " - Specular Output", RenderGraphAttachment::Hint::FORMAT_RGBA );
 }
 			
 LightAccumulationPass::~LightAccumulationPass( void )
@@ -61,12 +64,18 @@ LightAccumulationPass::~LightAccumulationPass( void )
 void LightAccumulationPass::setup( RenderGraph *graph )
 {
 	graph->read( this, { _depthInput, _normalInput } );
-	graph->write( this, { _output } );
+	graph->write( this, { _ambientDiffuseOutput, _specularOutput } );
 }
 
 void LightAccumulationPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue )
 {
-	auto gBuffer = graph->createFBO( { _depthInput, _output } );
+	accumAmbientDiffuse( graph, renderer, renderQueue );
+	accumSpecular( graph, renderer, renderQueue );
+}
+
+void LightAccumulationPass::accumAmbientDiffuse( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue )
+{
+	auto gBuffer = graph->createFBO( { _depthInput, _ambientDiffuseOutput } );
 	gBuffer->setClearFlags( FrameBufferObject::ClearFlag::COLOR );
 	
 	renderer->bindFrameBuffer( crimild::get_ptr( gBuffer ) );
@@ -89,6 +98,56 @@ void LightAccumulationPass::execute( RenderGraph *graph, Renderer *renderer, Ren
 			case Light::Type::POINT:
 				renderPointLight( renderer, light, projection, view );
 				break;
+
+			default:
+				break;
+		}
+	});
+
+	renderer->setAlphaState( AlphaState::DISABLED );
+
+	renderer->unbindFrameBuffer( crimild::get_ptr( gBuffer ) );
+}
+
+void LightAccumulationPass::accumSpecular( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue )
+{
+	auto gBuffer = graph->createFBO( { _depthInput, _specularOutput } );
+	gBuffer->setClearFlags( FrameBufferObject::ClearFlag::COLOR );
+	
+	renderer->bindFrameBuffer( crimild::get_ptr( gBuffer ) );
+
+	auto P = renderQueue->getProjectionMatrix();
+	auto invP = P.getInverse();
+	auto V = renderQueue->getViewMatrix();
+	auto invV = V.getInverse();
+	
+	renderer->setAlphaState( AlphaState::ENABLED_ADDITIVE_BLEND );
+
+	renderQueue->each( [ this, renderer, invP, invV ]( Light *light, int ) {
+		switch ( light->getType() ) {
+			case Light::Type::DIRECTIONAL: {
+				auto program = crimild::get_ptr( _directionalSpecularProgram );
+				program->bindLightColor( light->getColor() );
+
+				// compute light direction in view space
+				auto d = light->getDirection();
+				auto d4 = Vector4f( d.x(), d.y(), d.z(), 0.0f );
+				auto vd = invV * d4;
+				d = vd.xyz();
+				program->bindLightDirection( d );
+				program->bindInvProjMatrix( invP );
+				program->bindNormalTexture( getNormalInput()->getTexture() );
+				program->bindDepthTexture( getDepthInput()->getTexture() );
+				
+				renderer->setDepthState( DepthState::DISABLED );
+				
+				renderer->bindProgram( program );
+				renderer->drawScreenPrimitive( program );
+				renderer->unbindProgram( program );
+				
+				renderer->setDepthState( DepthState::ENABLED );
+				break;
+			}
 
 			default:
 				break;

@@ -268,6 +268,17 @@ void OpenGLRenderer::bindUniform( ShaderLocation *location, const Matrix4f &matr
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
+void OpenGLRenderer::bindUniform( ShaderLocation *location, const Matrix3f &matrix )
+{
+	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+
+	if ( location != nullptr && location->isValid() ) {
+		glUniformMatrix3fv( location->getLocation(), 1, GL_FALSE, static_cast< const GLfloat * >( matrix.getData() ) );
+	}
+
+	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+}
+
 void OpenGLRenderer::drawPrimitive( ShaderProgram *program, Primitive *primitive )
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;

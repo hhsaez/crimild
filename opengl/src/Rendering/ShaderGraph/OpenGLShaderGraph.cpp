@@ -48,6 +48,7 @@
 #include "Rendering/ShaderGraph/Nodes/Copy.hpp"
 #include "Rendering/ShaderGraph/Nodes/Convert.hpp"
 #include "Rendering/ShaderGraph/Nodes/TextureColor.hpp"
+#include "Rendering/ShaderGraph/Nodes/Reflect.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/ShaderLocation.hpp"
 
@@ -319,6 +320,17 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 
 		std::stringstream ss;
 		ss << normalize->getResult()->getName() << " = normalize( " << normalize->getInput()->getName() << " );";
+		_mainSection.add( ss.str() );
+	};
+
+	_translators[ Reflect::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
+		auto reflect = static_cast< Reflect * >( node );
+
+		std::stringstream ss;
+		ss << reflect->getResult()->getName() << " = reflect( "
+		   << reflect->getIncident()->getName() << ", "
+		   << reflect->getNormal()->getName()
+		   << " );";
 		_mainSection.add( ss.str() );
 	};
 

@@ -25,28 +25,34 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_RENDERING_PROGRAMS_DIRECTIONAL_LIGHT_
-#define CRIMILD_CORE_RENDERING_PROGRAMS_DIRECTIONAL_LIGHT_
+#ifndef CRIMILD_CORE_RENDERING_PROGRAMS_VIEW_SPACE_NORMAL_
+#define CRIMILD_CORE_RENDERING_PROGRAMS_VIEW_SPACE_NORMAL_
 
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/ShaderUniformImpl.hpp"
 
 namespace crimild {
 
-	class DirectionalLightShaderProgram : public ShaderProgram {
+	/**
+	   \todo Support normal mapping. Use alpha channel for specular (using
+	   a specular map).
+	 */
+	class ViewSpaceNormalShaderProgram : public ShaderProgram {
 	public:
-		DirectionalLightShaderProgram( void );
-		virtual ~DirectionalLightShaderProgram( void );
+		ViewSpaceNormalShaderProgram( void );
+		virtual ~ViewSpaceNormalShaderProgram( void );
 
 	public:
-		void bindLightColor( const RGBAColorf &value ) { _lightColor->setValue( value); }
-		void bindLightDirection( const Vector3f &value ) { _lightDirection->setValue( ( -value ).getNormalized() ); }
-		void bindNormals( Texture *value ) { _normals->setValue( value ); }
-
+		void bindPMatrix( const Matrix4f &value ) { _pMatrix->setValue( value ); }
+		void bindVMatrix( const Matrix4f &value ) { _vMatrix->setValue( value ); }
+		void bindMMatrix( const Matrix4f &value ) { _mMatrix->setValue( value ); }
+		void bindNMatrix( const Matrix3f &value ) { _nMatrix->setValue( value ); }
+		
 	private:
-		SharedPointer< RGBAColorfUniform > _lightColor;
-		SharedPointer< Vector3fUniform > _lightDirection;
-		SharedPointer< TextureUniform > _normals;
+		SharedPointer< Matrix4fUniform > _pMatrix;
+		SharedPointer< Matrix4fUniform > _vMatrix;
+		SharedPointer< Matrix4fUniform > _mMatrix;
+		SharedPointer< Matrix3fUniform > _nMatrix;
 		
 	private:
 		void createVertexShader( void );

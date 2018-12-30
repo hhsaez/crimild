@@ -37,7 +37,8 @@ namespace crimild {
 	class Primitive;
 	class UnlitShaderProgram;
 	class ScreenColorShaderProgram;
-	class DirectionalLightShaderProgram;
+	class PhongDiffuseShaderProgram;
+	class PhongSpecularShaderProgram;
 
 	namespace rendergraph {
 
@@ -59,26 +60,34 @@ namespace crimild {
 				void setNormalInput( RenderGraphAttachment *attachment ) { _normalInput = attachment; }
 				RenderGraphAttachment *getNormalInput( void ) { return _normalInput; }
 
-				void setOutput( RenderGraphAttachment *attachment ) { _output = attachment; }
-				RenderGraphAttachment *getOutput( void ) { return _output; }
+				void setAmbientDiffuseOutput( RenderGraphAttachment *attachment ) { _ambientDiffuseOutput = attachment; }
+				RenderGraphAttachment *getAmbientDiffuseOutput( void ) { return _ambientDiffuseOutput; }
+				
+				void setSpecularOutput( RenderGraphAttachment *attachment ) { _specularOutput = attachment; }
+				RenderGraphAttachment *getSpecularOutput( void ) { return _specularOutput; }
 				
 				virtual void setup( rendergraph::RenderGraph *graph ) override;
 				virtual void execute( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue ) override;
 
 			private:
+				void accumAmbientDiffuse( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue );
+				void accumSpecular( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue );
+				
 				void renderAmbientLight( Renderer *renderer, Light *light );
 				void renderDirectionalLight( Renderer *renderer, Light *light, const Matrix4f &vMatrix );
 				void renderPointLight( Renderer *renderer, Light *light, const Matrix4f &pMatrix, const Matrix4f &vMatrix );
 
 			private:
 				SharedPointer< ScreenColorShaderProgram > _ambientLightProgram;
-				SharedPointer< DirectionalLightShaderProgram > _directionalLightProgram;
-				SharedPointer< UnlitShaderProgram > _pointLightProgram;
+				SharedPointer< PhongDiffuseShaderProgram > _directionalLightProgram;
+				SharedPointer< PhongSpecularShaderProgram > _directionalSpecularProgram;
+				SharedPointer< UnlitShaderProgram > _pointLightProgram;			  
 				SharedPointer< Primitive > _pointLightShape;
 				
 				RenderGraphAttachment *_depthInput = nullptr;
 				RenderGraphAttachment *_normalInput = nullptr;
-				RenderGraphAttachment *_output = nullptr;
+				RenderGraphAttachment *_ambientDiffuseOutput = nullptr;
+				RenderGraphAttachment *_specularOutput = nullptr;
 			};
 		}
 
