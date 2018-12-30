@@ -208,3 +208,25 @@ TEST( MatrixTest, testInverse )
 	EXPECT_TRUE( N * M == I );
 }
 
+TEST( MatrixTest, convert )
+{
+	Matrix4f A(
+		1, 2, 3, 4,
+		5, 6, 7, 8,
+		9, 10, 11, 12,
+		13, 14, 15, 16
+	);
+
+	Matrix3f B( A );
+
+	EXPECT_EQ( A[ 0 ], B[ 0 ] );
+	EXPECT_EQ( A[ 1 ], B[ 1 ] );
+	EXPECT_EQ( A[ 2 ], B[ 2 ] );
+	EXPECT_EQ( A[ 4 ], B[ 3 ] );
+	EXPECT_EQ( A[ 5 ], B[ 4 ] );
+	EXPECT_EQ( A[ 6 ], B[ 5 ] );
+	EXPECT_EQ( A[ 8 ], B[ 6 ] );
+	EXPECT_EQ( A[ 9 ], B[ 7 ] );
+	EXPECT_EQ( A[ 10 ], B[ 8 ] );
+}
+

@@ -32,6 +32,8 @@
 #include "Rendering/FrameBufferObject.hpp"
 #include "Rendering/RenderQueue.hpp"
 #include "Rendering/ShaderProgram.hpp"
+#include "Rendering/ShaderUniformImpl.hpp"
+#include "Rendering/Programs/ViewSpaceNormalShaderProgram.hpp"
 #include "Rendering/Material.hpp"
 #include "Foundation/Profiler.hpp"
 #include "Rendering/ShaderGraph/ShaderGraph.hpp"
@@ -43,71 +45,23 @@ using namespace crimild::rendergraph;
 using namespace crimild::rendergraph::passes;
 using namespace crimild::shadergraph;
 
-class DepthPassProgram : public ShaderProgram {
-public:
-	DepthPassProgram( void )
-	{
-		createVertexShader();
-		createFragmentShader();
-		
-		registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::POSITION_ATTRIBUTE, "aPosition" );
-		registerStandardLocation( ShaderLocation::Type::ATTRIBUTE, ShaderProgram::StandardLocation::NORMAL_ATTRIBUTE, "aNormal" );
-		
-		registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::PROJECTION_MATRIX_UNIFORM, "uPMatrix" );
-		registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM, "uVMatrix" );
-		registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM, "uMMatrix" );
-	}
-
-	virtual ~DepthPassProgram( void )
-	{
-
-	}
-
-private:
-	void createVertexShader( void )
-	{
-		auto graph = Renderer::getInstance()->createShaderGraph();
-
-		auto P = csl::projectedPosition();
-		auto N = csl::viewNormal();
-		csl::vertexOutput( "vViewNormal", N );
-		csl::vertexPosition( P );
-
-		auto src = graph->build();
-		auto shader = crimild::alloc< VertexShader >( src );
-		setVertexShader( shader );
-	}
-
-	void createFragmentShader( void )
-	{
-		auto graph = Renderer::getInstance()->createShaderGraph();
-
-		auto N = csl::vec3_in( "vViewNormal" );
-		csl::fragColor( csl::vec4( N, csl::scalar( 1.0f ) ) );
-
-		auto src = graph->build();
-		auto shader = crimild::alloc< FragmentShader >( src );
-		setFragmentShader( shader );
-	}
-};
-
 DepthPass::DepthPass( RenderGraph *graph )
 	: RenderGraphPass( graph, "Depth Pass" )
 {
 	_depthOutput = graph->createAttachment( getName() + " - Depth", RenderGraphAttachment::Hint::FORMAT_DEPTH_HDR );
 	_normalOutput = graph->createAttachment( getName() + " - Normal", RenderGraphAttachment::Hint::FORMAT_RGBA_HDR );
 }
-			
+
 DepthPass::~DepthPass( void )
 {
 	
 }
-			
+
 void DepthPass::setup( RenderGraph *graph )
 {
 	graph->write( this, { _depthOutput, _normalOutput } );
-
-	_program = crimild::alloc< DepthPassProgram >();
+	
+	_program = crimild::alloc< ViewSpaceNormalShaderProgram >();
 }
 
 void DepthPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue )
@@ -136,21 +90,28 @@ void DepthPass::renderObjects( Renderer *renderer, RenderQueue *renderQueue, Ren
 	}
 	
 	auto program = crimild::get_ptr( _program );
-	auto pMatrix = renderQueue->getProjectionMatrix();
-	auto vMatrix = renderQueue->getViewMatrix();
 	
-	renderQueue->each( renderables, [this, renderer, renderQueue, program, &pMatrix, &vMatrix ]( RenderQueue::Renderable *renderable ) {
-		auto material = crimild::get_ptr( renderable->material );
-		
+	auto pMatrix = renderQueue->getProjectionMatrix();
+	program->bindPMatrix( pMatrix );
+	
+	auto vMatrix = renderQueue->getViewMatrix();
+	program->bindVMatrix( vMatrix );
+	
+	renderQueue->each( renderables, [this, renderer, renderQueue, program ]( RenderQueue::Renderable *renderable ) {
+
+		const auto &mMatrix = renderable->modelTransform;
+		program->bindMMatrix( mMatrix );
+
+		const auto nMatrix = Matrix3f( mMatrix ).getInverse().getTranspose();
+		program->bindNMatrix( nMatrix );
+
 		renderer->bindProgram( program );
 		
-		renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::PROJECTION_MATRIX_UNIFORM ), pMatrix );
-		renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM ), vMatrix );
-		
-		renderer->drawGeometry(
-			crimild::get_ptr( renderable->geometry ),
-			program,
-			renderable->modelTransform );
+		renderable->geometry->forEachPrimitive( [ program, renderer ]( Primitive *primitive ) {
+			renderer->bindPrimitive( program, primitive );
+			renderer->drawPrimitive( program, primitive );
+			renderer->unbindPrimitive( program, primitive );
+		});
 		
 		renderer->unbindProgram( program );
 	});

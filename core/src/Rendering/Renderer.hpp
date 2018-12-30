@@ -111,6 +111,7 @@ namespace crimild {
 		virtual void bindUniform( ShaderLocation *location, const Vector2f &vector ) = 0;
 		virtual void bindUniform( ShaderLocation *location, const RGBAColorf &color ) = 0;
 		virtual void bindUniform( ShaderLocation *location, const Matrix4f &matrix ) = 0;
+		virtual void bindUniform( ShaderLocation *location, const Matrix3f &matrix ) = 0;
 
 	public:
         virtual void bindMaterial( ShaderProgram *program, Material *material );

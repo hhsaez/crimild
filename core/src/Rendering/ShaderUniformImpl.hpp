@@ -74,6 +74,7 @@ namespace crimild {
 	typedef ShaderUniformImpl< Vector2f > Vector2fUniform;
 	typedef ShaderUniformImpl< RGBAColorf > RGBAColorfUniform;
 	typedef ShaderUniformImpl< Matrix3f > Matrix3fUniform;
+	typedef ShaderUniformImpl< Matrix4f > Matrix4fUniform;
 
 	class TextureUniform : public ShaderUniform {
 	public:

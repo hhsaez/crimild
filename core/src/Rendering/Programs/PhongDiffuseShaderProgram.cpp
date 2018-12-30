@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "DirectionalLightShaderProgram.hpp"
+#include "PhongDiffuseShaderProgram.hpp"
 
 #include "Rendering/Renderer.hpp"
 #include "Rendering/ShaderGraph/ShaderGraph.hpp"
@@ -36,7 +36,7 @@
 using namespace crimild;
 using namespace crimild::shadergraph;
 
-DirectionalLightShaderProgram::DirectionalLightShaderProgram( void )
+PhongDiffuseShaderProgram::PhongDiffuseShaderProgram( void )
 	: _lightColor( crimild::alloc< RGBAColorfUniform >( "uLightColor", RGBAColorf::ONE ) ),
 	  _lightDirection( crimild::alloc< Vector3fUniform >( "uLightDirection", Vector3f::UNIT_Z ) ),
 	  _normals( crimild::alloc< TextureUniform >( "uNormalTexture", Texture::ZERO ) )
@@ -49,12 +49,12 @@ DirectionalLightShaderProgram::DirectionalLightShaderProgram( void )
 	attachUniform( _normals );
 }
 
-DirectionalLightShaderProgram::~DirectionalLightShaderProgram( void )
+PhongDiffuseShaderProgram::~PhongDiffuseShaderProgram( void )
 {
 
 }
 
-void DirectionalLightShaderProgram::createVertexShader( void )
+void PhongDiffuseShaderProgram::createVertexShader( void )
 {
 	auto graph = Renderer::getInstance()->createShaderGraph();
 
@@ -69,18 +69,24 @@ void DirectionalLightShaderProgram::createVertexShader( void )
 	setVertexShader( shader );
 }
 
-void DirectionalLightShaderProgram::createFragmentShader( void )
+void PhongDiffuseShaderProgram::createFragmentShader( void )
 {
+	using namespace crimild::shadergraph::csl;
+	
 	auto graph = Renderer::getInstance()->createShaderGraph();
 
-	auto uv = csl::vec2_in( "vTextureCoord" );
-	auto lc = csl::vec4_uniform( _lightColor );
-	auto ld = csl::vec3_uniform( _lightDirection );
-	auto ns = csl::texture2D_uniform( _normals );
-	auto N = csl::vec3( csl::textureColor( ns, uv ) );
-	auto diff = csl::max( csl::scalar( 0 ), csl::dot( N, ld ) );
-	auto c = csl::mult( diff, lc );
-	csl::fragColor( csl::vec4( csl::vec3( c ), csl::scalar( 1 ) ) );
+	auto uv = vec2_in( "vTextureCoord" );
+	
+	auto lc = vec4_uniform( _lightColor );
+	auto ld = vec3_uniform( _lightDirection );
+	auto ns = texture2D_uniform( _normals );
+	
+	auto N = normalize( vec3( textureColor( ns, uv ) ) );
+	
+	auto diff = max( scalar_zero(), dot( N, ld ) );
+	auto cDiff = vec3( mult( diff, lc ) );
+
+	fragColor( vec4( cDiff, scalar_one() ) );
 	
 	auto src = graph->build();
 	auto shader = crimild::alloc< FragmentShader >( src );

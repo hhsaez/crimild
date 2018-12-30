@@ -47,6 +47,7 @@
 #include "Rendering/ShaderGraph/Nodes/Copy.hpp"
 #include "Rendering/ShaderGraph/Nodes/Convert.hpp"
 #include "Rendering/ShaderGraph/Nodes/TextureColor.hpp"
+#include "Rendering/ShaderGraph/Nodes/Reflect.hpp"
 
 #include "Rendering/VertexFormat.hpp"
 #include "Rendering/ShaderUniform.hpp"
@@ -89,7 +90,7 @@ Variable *csl::scalar_constant( crimild::Real32 value )
 
 	auto ret = graph->getInput< Variable >( name );
 	if ( ret == nullptr ) {
-		ret = graph->addNode< Variable >(
+		ret = graph->addInputNode< Variable >(
 			Variable::Storage::CONSTANT,
 			Variable::Type::SCALAR,
 			name
@@ -98,12 +99,72 @@ Variable *csl::scalar_constant( crimild::Real32 value )
 	return ret;
 }
 
+Variable *csl::scalar_one( void )
+{
+	auto graph = ShaderGraph::getCurrent();
+
+	auto ret = graph->getInput< Variable >( "kOne" );
+	if ( ret == nullptr ) {
+		ret = graph->addNode< ScalarConstant >( 1, "kOne" )->getVariable();
+		graph->addInputNode( ret );
+	}
+	return ret;
+}
+
+Variable *csl::scalar_two( void )
+{
+	auto graph = ShaderGraph::getCurrent();
+
+	auto ret = graph->getInput< Variable >( "kTwo" );
+	if ( ret == nullptr ) {
+		ret = graph->addNode< ScalarConstant >( 2, "kTwo" )->getVariable();
+		graph->addInputNode( ret );
+	}
+	return ret;
+}
+
+Variable *csl::scalar_zero( void )
+{
+	auto graph = ShaderGraph::getCurrent();
+
+	auto ret = graph->getInput< Variable >( "kZero" );
+	if ( ret == nullptr ) {
+		ret = graph->addNode< ScalarConstant >( 0, "kZero" )->getVariable();
+		graph->addInputNode( ret );
+	}
+	return ret;
+}
+
 Variable *csl::mat3( Variable *matrix )
 {
+	if ( matrix->getType() == Variable::Type::MATRIX_3 ) {
+		return matrix;
+	}
+	
 	return ShaderGraph::getCurrent()->addNode< Convert >(
 		matrix,
 		Variable::Type::MATRIX_3
 	)->getResult();
+}
+
+Variable *csl::mat3_uniform( std::string name )
+{
+	auto graph = ShaderGraph::getCurrent();
+
+	auto ret = graph->getInput< Variable >( name );
+	if ( ret == nullptr ) {
+		ret = graph->addInputNode< Variable >(
+			Variable::Storage::UNIFORM,
+			Variable::Type::MATRIX_3,
+			name
+		);
+	}
+	return ret;
+}
+
+Variable *csl::mat3_uniform( SharedPointer< ShaderUniform > const &uniform )
+{
+	return mat3_uniform( uniform->getName() );
 }
 
 Variable *csl::mat4_uniform( std::string name )
@@ -119,6 +180,11 @@ Variable *csl::mat4_uniform( std::string name )
 		);
 	}
 	return ret;
+}
+
+Variable *csl::mat4_uniform( SharedPointer< ShaderUniform > const &uniform )
+{
+	return mat4_uniform( uniform->getName() );
 }
 
 Variable *csl::vec2_in( std::string name )
@@ -138,10 +204,19 @@ Variable *csl::vec2_in( std::string name )
 
 Variable *csl::vec3( Variable *input )
 {
+	if ( input->getType() == Variable::Type::VECTOR_3 ) {
+		return input;
+	}
+	
 	return ShaderGraph::getCurrent()->addNode< Convert >(
 		input,
 		Variable::Type::VECTOR_3
 	)->getResult();
+}
+
+Variable *csl::vec3( const Vector3f &value )
+{
+	return ShaderGraph::getCurrent()->addNode< VectorConstant >( value )->getVector();
 }
 
 Variable *csl::vec3_in( std::string name )
@@ -326,10 +401,17 @@ Variable *csl::neg( Variable *input )
 	return ShaderGraph::getCurrent()->addNode< Negate >( input )->getResult();
 }
 
+Variable *csl::reflect( Variable *incident, Variable *normal )
+{
+	return ShaderGraph::getCurrent()
+	    ->addNode< Reflect >( incident, normal )
+	    ->getResult();
+}
+
 Variable *csl::normalize( Variable *input )
 {
 	return ShaderGraph::getCurrent()
-		->addNode< Normalize >( input )
+	    ->addNode< Normalize >( input )
 		->getResult();
 }
 
@@ -446,10 +528,9 @@ Variable *csl::modelNormal( void )
 	return ret;
 }
 
-Variable *csl::worldNormal( Variable *worldMatrix, Variable *normal )
+Variable *csl::worldNormal( Variable *normalMatrix, Variable *normal )
 {
-	// TODO: Normal matrix is transpose( inverse( worldMatrix ) )
-	return normalize( mult( mat3( worldMatrix ), normal ) );
+	return normalize( mult( mat3( normalMatrix ), normal ) );
 }
 
 Variable *csl::worldNormal( void )
@@ -459,9 +540,9 @@ Variable *csl::worldNormal( void )
 	auto ret = graph->getInput< Variable >( "c_worldNormal" );
 	if ( ret == nullptr ) {
 		auto aNormal = modelNormal();
-		auto uMMatrix = mat4_uniform( "uMMatrix" );
+		auto uNMatrix = mat3_uniform( "uNMatrix" );
 	
-		ret = worldNormal( uMMatrix, aNormal );
+		ret = worldNormal( uNMatrix, aNormal );
 		ret->setName( "c_worldNormal" );
 		graph->addInputNode( ret );
 	}
@@ -497,7 +578,7 @@ Variable *csl::linearizeDepth( Variable *z, Variable *N, Variable *F )
 	// z = 2.0 * z - 1.0;
 	// z = ( 2.0 * N * F ) / ( F + N - z * ( F - N ) );
 	
-	z = sub( mult( scalar_constant( 2 ), z ), scalar_constant( 1 ) );
+	//z = sub( mult( scalar_constant( 2 ), z ), scalar_constant( 1 ) );
 	return div(
 		mult( scalar_constant( 2 ), N, F ),
 		sub( add( F, N ), mult( z, sub( F, N ) ) )
