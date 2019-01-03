@@ -52,7 +52,8 @@ LightAccumulationPass::LightAccumulationPass( RenderGraph *graph, std::string na
 	  _pointLightProgram( crimild::alloc< UnlitShaderProgram >() ),
 	  _pointLightShape( crimild::alloc< SpherePrimitive >( 1.0f ) )
 {
-	_ambientDiffuseOutput = graph->createAttachment( getName() + " - Ambient + Diffuse Output", RenderGraphAttachment::Hint::FORMAT_RGBA );
+	_ambientOutput = graph->createAttachment( getName() + " - Ambient Output", RenderGraphAttachment::Hint::FORMAT_RGBA );
+	_diffuseOutput = graph->createAttachment( getName() + " - Diffuse Output", RenderGraphAttachment::Hint::FORMAT_RGBA );
 	_specularOutput = graph->createAttachment( getName() + " - Specular Output", RenderGraphAttachment::Hint::FORMAT_RGBA );
 }
 			
@@ -64,46 +65,80 @@ LightAccumulationPass::~LightAccumulationPass( void )
 void LightAccumulationPass::setup( RenderGraph *graph )
 {
 	graph->read( this, { _depthInput, _normalInput } );
-	graph->write( this, { _ambientDiffuseOutput, _specularOutput } );
+	graph->write( this, { _ambientOutput, _diffuseOutput, _specularOutput } );
 }
 
 void LightAccumulationPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue )
 {
-	accumAmbientDiffuse( graph, renderer, renderQueue );
+	accumAmbient( graph, renderer, renderQueue );
+	accumDiffuse( graph, renderer, renderQueue );
 	accumSpecular( graph, renderer, renderQueue );
 }
 
-void LightAccumulationPass::accumAmbientDiffuse( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue )
+void LightAccumulationPass::accumAmbient( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue )
 {
-	auto gBuffer = graph->createFBO( { _depthInput, _ambientDiffuseOutput } );
+	auto gBuffer = graph->createFBO( { _depthInput, _ambientOutput } );
+	gBuffer->setClearFlags( FrameBufferObject::ClearFlag::COLOR );
+	
+	auto program = crimild::get_ptr( _ambientLightProgram );
+
+	renderer->bindFrameBuffer( crimild::get_ptr( gBuffer ) );
+
+	renderer->setAlphaState( AlphaState::ENABLED_ADDITIVE_BLEND );
+	renderer->setDepthState( DepthState::DISABLED );
+			
+	renderQueue->each( [ this, renderer, program ]( Light *light, int ) {
+		if ( light->getType() == Light::Type::AMBIENT ) {
+			program->setColor( light->getAmbient() );
+			
+			renderer->bindProgram( program );
+			renderer->drawScreenPrimitive( program );
+			renderer->unbindProgram( program );
+			
+		}
+	});
+
+	renderer->setDepthState( DepthState::ENABLED );
+	renderer->setAlphaState( AlphaState::DISABLED );
+
+	renderer->unbindFrameBuffer( crimild::get_ptr( gBuffer ) );
+}
+
+void LightAccumulationPass::accumDiffuse( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue )
+{
+	auto gBuffer = graph->createFBO( { _depthInput, _diffuseOutput } );
 	gBuffer->setClearFlags( FrameBufferObject::ClearFlag::COLOR );
 	
 	renderer->bindFrameBuffer( crimild::get_ptr( gBuffer ) );
 
-	auto projection = renderQueue->getProjectionMatrix();
-	auto view = renderQueue->getViewMatrix();
+	auto vMatrix = renderQueue->getViewMatrix();
+	
+	auto program = crimild::get_ptr( _directionalLightProgram );
+	
+	program->bindNormals( getNormalInput()->getTexture() );
 	
 	renderer->setAlphaState( AlphaState::ENABLED_ADDITIVE_BLEND );
+	renderer->setDepthState( DepthState::DISABLED );
 
-	renderQueue->each( [ this, renderer, projection, view ]( Light *light, int ) {
-		switch ( light->getType() ) {
-			case Light::Type::AMBIENT:
-				renderAmbientLight( renderer, light );
-				break;
-
-			case Light::Type::DIRECTIONAL:
-				renderDirectionalLight( renderer, light, view );
-				break;
-
-			case Light::Type::POINT:
-				renderPointLight( renderer, light, projection, view );
-				break;
-
-			default:
-				break;
+	renderQueue->each( [ this, renderer, program, vMatrix ]( Light *light, int ) {
+		if ( light->getType() == Light::Type::DIRECTIONAL ) {
+			// TODO: point/spot lights
+			program->bindLightColor( light->getColor() );
+			
+			// compute light direction in view space
+			auto d = light->getDirection();
+			auto d4 = Vector4f( d.x(), d.y(), d.z(), 0.0f );
+			auto vd = vMatrix.getInverse() * d4;
+			d = vd.xyz();
+			program->bindLightDirection( d );
+			
+			renderer->bindProgram( program );
+			renderer->drawScreenPrimitive( program );
+			renderer->unbindProgram( program );
 		}
 	});
 
+	renderer->setDepthState( DepthState::ENABLED );
 	renderer->setAlphaState( AlphaState::DISABLED );
 
 	renderer->unbindFrameBuffer( crimild::get_ptr( gBuffer ) );
@@ -157,42 +192,6 @@ void LightAccumulationPass::accumSpecular( RenderGraph *graph, Renderer *rendere
 	renderer->setAlphaState( AlphaState::DISABLED );
 
 	renderer->unbindFrameBuffer( crimild::get_ptr( gBuffer ) );
-}
-
-void LightAccumulationPass::renderAmbientLight( Renderer *renderer, Light *light )
-{
-	auto program = crimild::get_ptr( _ambientLightProgram );
-	program->setColor( light->getAmbient() );
-
-	renderer->setDepthState( DepthState::DISABLED );
-
-	renderer->bindProgram( program );
-	renderer->drawScreenPrimitive( program );
-	renderer->unbindProgram( program );
-
-	renderer->setDepthState( DepthState::ENABLED );
-}
-
-void LightAccumulationPass::renderDirectionalLight( Renderer *renderer, Light *light, const Matrix4f &vMatrix )
-{
-	auto program = crimild::get_ptr( _directionalLightProgram );
-	program->bindLightColor( light->getColor() );
-
-	// compute light direction in view space
-	auto d = light->getDirection();
-	auto d4 = Vector4f( d.x(), d.y(), d.z(), 0.0f );
-	auto vd = vMatrix.getInverse() * d4;
-	d = vd.xyz();
-	program->bindLightDirection( d );
-	program->bindNormals( getNormalInput()->getTexture() );
-
-	renderer->setDepthState( DepthState::DISABLED );
-
-	renderer->bindProgram( program );
-	renderer->drawScreenPrimitive( program );
-	renderer->unbindProgram( program );
-
-	renderer->setDepthState( DepthState::ENABLED );
 }
 
 void LightAccumulationPass::renderPointLight( Renderer *renderer, Light *light, const Matrix4f &pMatrix, const Matrix4f &vMatrix )

@@ -53,12 +53,18 @@ namespace crimild {
 			Variable *scalar_zero( void );
 
 			Variable *vec2_in( std::string name );
+			Variable *vec2( Variable *vector );
+			Variable *vec2_uniform( std::string name );
+			Variable *vec2_uniform( SharedPointer< ShaderUniform > const &uniform );
+			
 			Variable *vec3( Variable *vector );
 			Variable *vec3( const Vector3f &v );
 			Variable *vec3_in( std::string name );
 			Variable *vec3_uniform( std::string name );
 			Variable *vec3_uniform( SharedPointer< ShaderUniform > const &uniform );
 			Variable *vec3_uniform( ShaderUniform *uniform );
+			
+			Variable *vec4_in( std::string name );
 			Variable *vec4( Variable *scalar );
 			Variable *vec4( Variable *vector, Variable *scalar );
 			Variable *vec4( Variable *x, Variable *y, Variable *z, Variable *w );
@@ -66,6 +72,7 @@ namespace crimild {
 			Variable *vec4_uniform( std::string name );
 			Variable *vec4_uniform( SharedPointer< ShaderUniform > const &uniform );
 			Variable *vec4_uniform( ShaderUniform *uniform );
+			
 			Variable *vec_x( Variable *vector );
 			Variable *vec_y( Variable *vector );
 			Variable *vec_z( Variable *vector );
@@ -88,6 +95,9 @@ namespace crimild {
 			//@{
 			
 			Variable *add( Variable *a, Variable *b );
+			Variable *add( containers::Array< Variable * > const &inputs );
+			template< class ... Args >
+			Variable *add( Args &&... args ) { return add( { args... } ); }
 
 			Variable *sub( Variable *a, Variable *b );
 
@@ -112,7 +122,23 @@ namespace crimild {
 			void vertexPosition( Variable *position );
 			void vertexOutput( std::string name, Variable *value );
 
+			/**
+			   \name Fragment inputs
+			 */
+			//@{
+
+			Variable *fragCoord( void );
+
+			//@}
+
+			/**
+			   \name Fragment outputs
+			 */
+			//@{
+
 			void fragColor( Variable *color );
+
+			//@}
 
 			/**
 			   \name Position

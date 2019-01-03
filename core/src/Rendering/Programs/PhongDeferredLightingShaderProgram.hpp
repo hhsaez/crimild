@@ -25,41 +25,45 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_RENDERING_PROGRAMS_VIEW_SPACE_NORMAL_
-#define CRIMILD_CORE_RENDERING_PROGRAMS_VIEW_SPACE_NORMAL_
+#ifndef CRIMILD_CORE_RENDERING_PROGRAMS_PHONG_DEFERRED_LIGHTING_
+#define CRIMILD_CORE_RENDERING_PROGRAMS_PHONG_DEFERRED_LIGHTING_
 
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/ShaderUniformImpl.hpp"
 
 namespace crimild {
 
-	/**
-	   \todo Support normal mapping. Use alpha channel for specular (using
-	   a specular map).
-	 */
-	class ViewSpaceNormalShaderProgram : public ShaderProgram {
+	class PhongDeferredLightingShaderProgram : public ShaderProgram {
 	public:
-		ViewSpaceNormalShaderProgram( void );
-		virtual ~ViewSpaceNormalShaderProgram( void );
+		PhongDeferredLightingShaderProgram( void );
+		virtual ~PhongDeferredLightingShaderProgram( void );
 
-	public:
-		void bindRoughness( crimild::Real32 value ) { _roughness->setValue( value ); }
-		void bindShininess( crimild::Real32 value ) { _roughness->setValue( value ); }
-		void bindPMatrix( const Matrix4f &value ) { _pMatrix->setValue( value ); }
-		void bindVMatrix( const Matrix4f &value ) { _vMatrix->setValue( value ); }
-		void bindMMatrix( const Matrix4f &value ) { _mMatrix->setValue( value ); }
-		void bindNMatrix( const Matrix3f &value ) { _nMatrix->setValue( value ); }
-		
-	private:
-		SharedPointer< FloatUniform > _roughness;
-		SharedPointer< Matrix4fUniform > _pMatrix;
-		SharedPointer< Matrix4fUniform > _vMatrix;
-		SharedPointer< Matrix4fUniform > _mMatrix;
-		SharedPointer< Matrix3fUniform > _nMatrix;
+		void bindModelMatrix( const Matrix4f &value ) { _modelMatrix->setValue( value ); }
+		void bindViewMatrix( const Matrix4f &value ) { _viewMatrix->setValue( value ); }
+		void bindProjMatrix( const Matrix4f &value ) { _projMatrix->setValue( value ); }
+		void bindLightAmbientTexture( Texture *value ) { _lightAmbientTexture->setValue( value ); }
+		void bindLightDiffuseTexture( Texture *value ) { _lightDiffuseTexture->setValue( value ); }
+		void bindLightSpecularTexture( Texture *value ) { _lightSpecularTexture->setValue( value ); }
+		void bindMaterialAmbient( const RGBAColorf &value ) { _materialAmbient->setValue( value ); }
+		void bindMaterialDiffuse( const RGBAColorf &value ) { _materialDiffuse->setValue( value ); }
+		void bindMaterialSpecular( const RGBAColorf &value ) { _materialSpecular->setValue( value ); }
+		void bindScreenSize( const Vector2f &value ) { _screenSize->setValue( value ); }
 		
 	private:
 		void createVertexShader( void );
 		void createFragmentShader( void );
+
+	private:
+		SharedPointer< Matrix4fUniform > _modelMatrix;
+		SharedPointer< Matrix4fUniform > _viewMatrix;
+		SharedPointer< Matrix4fUniform > _projMatrix;
+		SharedPointer< TextureUniform > _lightAmbientTexture;
+		SharedPointer< TextureUniform > _lightDiffuseTexture;
+		SharedPointer< TextureUniform > _lightSpecularTexture;
+		SharedPointer< RGBAColorfUniform > _materialAmbient;
+		SharedPointer< RGBAColorfUniform > _materialDiffuse;
+		SharedPointer< RGBAColorfUniform > _materialSpecular;
+		SharedPointer< Vector2fUniform > _screenSize;		
 	};
 
 }

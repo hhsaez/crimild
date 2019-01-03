@@ -78,7 +78,7 @@ void main( void )
     vec4 specularColor = uUseSpecularMap ? CRIMILD_GLSL_FN_TEXTURE_2D( uSpecularMap, vTextureCoord ) : vec4( 1.0, 1.0, 1.0, 1.0 );
     specularColor *= uMaterial.specular;
     
-    outColor.rgb = uMaterial.ambient.rgb;
+    outColor.rgb = vec3( 0 );
     outColor.a = color.a;
     
     float shadowFactor = 1.0;
@@ -99,7 +99,7 @@ void main( void )
             break;
         }
 
-        outColor.rgb += uLights[ i ].ambient.rgb;
+        outColor.rgb += uMaterial.ambient.rgb * uLights[ i ].ambient.rgb;
 
         vec3 lightVec;
         if ( uLights[ i ].lightType == LIGHT_TYPE_DIRECTIONAL ) {

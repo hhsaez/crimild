@@ -25,34 +25,56 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ScreenTextureShaderProgram.hpp"
+#include "PhongDeferredLightingShaderProgram.hpp"
 
 #include "Rendering/Renderer.hpp"
 #include "Rendering/ShaderGraph/ShaderGraph.hpp"
 #include "Rendering/ShaderGraph/CSL.hpp"
+#include "Rendering/Texture.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
+using namespace crimild::shadergraph::csl;
 
-ScreenTextureShaderProgram::ScreenTextureShaderProgram( Mode mode )
-	: _mode( mode )
+PhongDeferredLightingShaderProgram::PhongDeferredLightingShaderProgram( void )
+	: _modelMatrix( crimild::alloc< Matrix4fUniform >( "uMMatrix", Matrix4f::IDENTITY ) ),
+	  _viewMatrix( crimild::alloc< Matrix4fUniform >( "uVMatrix", Matrix4f::IDENTITY ) ),
+	  _projMatrix( crimild::alloc< Matrix4fUniform >( "uPMatrix", Matrix4f::IDENTITY ) ),
+	  _lightAmbientTexture( crimild::alloc< TextureUniform >( "uLightAmbientTexture", Texture::ZERO ) ),
+	  _lightDiffuseTexture( crimild::alloc< TextureUniform >( "uLightDiffuseTexture", Texture::ZERO ) ),
+	  _lightSpecularTexture( crimild::alloc< TextureUniform >( "uLightSpecularTexture", Texture::ZERO ) ),
+	  _materialAmbient( crimild::alloc< RGBAColorfUniform >( "uMaterialAmbient", RGBAColorf::ZERO ) ),
+	  _materialDiffuse( crimild::alloc< RGBAColorfUniform >( "uMaterialDiffuse", RGBAColorf::ZERO ) ),
+	  _materialSpecular( crimild::alloc< RGBAColorfUniform >( "uMaterialSpecular", RGBAColorf::ZERO ) ),
+	  _screenSize( crimild::alloc< Vector2fUniform >( "uScreenSize", Vector2f::ONE ) )
 {
 	createVertexShader();
 	createFragmentShader();
 
-	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM, "uColorMap" );
+	attachUniforms({
+		_modelMatrix,
+		_viewMatrix,
+		_projMatrix,
+		_lightAmbientTexture,
+		_lightDiffuseTexture,
+		_lightSpecularTexture,
+		_materialAmbient,
+		_materialDiffuse,
+		_materialSpecular,
+		_screenSize,
+	});
 }
 
-ScreenTextureShaderProgram::~ScreenTextureShaderProgram( void )
+PhongDeferredLightingShaderProgram::~PhongDeferredLightingShaderProgram( void )
 {
 
 }
 
-void ScreenTextureShaderProgram::createVertexShader( void )
+void PhongDeferredLightingShaderProgram::createVertexShader( void )
 {
 	auto graph = Renderer::getInstance()->createShaderGraph();
 
-	auto p = csl::screenPosition();
+	auto p = csl::projectedPosition();
 	auto uv = csl::modelTextureCoords();
 
 	csl::vertexOutput( "vTextureCoord", uv );
@@ -63,42 +85,27 @@ void ScreenTextureShaderProgram::createVertexShader( void )
 	setVertexShader( shader );
 }
 
-void ScreenTextureShaderProgram::createFragmentShader( void )
+void PhongDeferredLightingShaderProgram::createFragmentShader( void )
 {
 	auto graph = Renderer::getInstance()->createShaderGraph();
 
 	auto uv = csl::vec2_in( "vTextureCoord" );
-	auto texture = csl::texture2D_uniform( "uColorMap" );
-	auto color = csl::textureColor( texture, uv );
+	auto fragCoord = csl::vec2( csl::fragCoord() );
+	auto screenSize = vec2_uniform( _screenSize );
+	fragCoord = div( fragCoord, screenSize );
+	
+	auto lA = csl::textureColor( csl::texture2D_uniform( _lightAmbientTexture ), fragCoord );
+	auto lD = csl::textureColor( csl::texture2D_uniform( _lightDiffuseTexture ), fragCoord );
+	auto lS = csl::textureColor( csl::texture2D_uniform( _lightSpecularTexture ), fragCoord );
+	auto mA = csl::vec4_uniform( _materialAmbient );
+	auto mD = csl::vec4_uniform( _materialDiffuse );
+	auto mS = csl::vec4_uniform( _materialSpecular );
 
-	switch ( _mode ) {
-		case Mode::RED: {
-			auto r = csl::vec_x( color );
-			color = csl::vec4( r, r, r, csl::scalar_one() );
-			break;
-		}
-
-		case Mode::GREEN: {
-			auto g = csl::vec_y( color );
-			color = csl::vec4( g, g, g, csl::scalar_one() );
-			break;
-		}
-
-		case Mode::BLUE: {
-			auto b = csl::vec_z( color );
-			color = csl::vec4( b, b, b, csl::scalar_one() );
-			break;
-		}
-
-		case Mode::ALPHA: {
-			auto a = csl::vec_w( color );
-			color = csl::vec4( a, a, a, csl::scalar_one() );
-			break;
-		}
-			
-		default:
-			break;
-	}
+	auto color = add(
+		mult( lA, mA ),
+		mult( lD, mD ),
+		mult( lS, mS )
+	);
 	
 	csl::fragColor( color );
 

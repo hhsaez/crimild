@@ -34,8 +34,23 @@ namespace crimild {
 
 	class ScreenTextureShaderProgram : public ShaderProgram {
 	public:
-		ScreenTextureShaderProgram( void );
+		enum class Mode {
+			RGBA,
+			RGB,
+			RED,
+			GREEN,
+			BLUE,
+			ALPHA,
+		};
+		
+	public:
+		explicit ScreenTextureShaderProgram( Mode mode = Mode::RGBA );
 		virtual ~ScreenTextureShaderProgram( void );
+
+		Mode getMode( void ) const { return _mode; }
+
+	private:
+		Mode _mode = Mode::RGBA;
 
 	private:
 		void createVertexShader( void );

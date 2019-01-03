@@ -49,6 +49,7 @@
 #include "Rendering/ShaderGraph/Nodes/Convert.hpp"
 #include "Rendering/ShaderGraph/Nodes/TextureColor.hpp"
 #include "Rendering/ShaderGraph/Nodes/Reflect.hpp"
+#include "Rendering/ShaderGraph/Nodes/FragmentCoordInput.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/ShaderLocation.hpp"
 
@@ -368,6 +369,16 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 		_mainSection.add( ss.str() );
 
 		_outputsSection.add( "out vec4 vFragColor;" );
+	};
+
+	_translators[ FragmentCoordInput::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
+		auto fragCoord = static_cast< FragmentCoordInput * >( node );
+
+		std::stringstream ss;
+		ss << fragCoord->getInput()->getName() << " = gl_FragCoord;";
+		_mainSection.add( ss.str() );
+
+		_inputsSection.add( "in vec4 gl_FragCoord;" );
 	};
 
 	_translators[ TextureColor::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
