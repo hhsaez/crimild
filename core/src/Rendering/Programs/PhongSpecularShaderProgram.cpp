@@ -90,7 +90,6 @@ void PhongSpecularShaderProgram::createVertexShader( void )
 	vertexPosition( p );
 
 	auto src = graph->build();
-	std::cout << src << std::endl;
 	auto shader = crimild::alloc< VertexShader >( src );
 	setVertexShader( shader );
 }
@@ -105,20 +104,20 @@ void PhongSpecularShaderProgram::createFragmentShader( void )
 	auto lc = vec4_uniform( _lightColor );
 	auto ld = vec3_uniform( _lightDirection );
 	auto ns = texture2D_uniform( _normalTexture );
-	
-	auto N = normalize( vec3( textureColor( ns, uv ) ) );
+
+	auto NR = textureColor( ns, uv );
+	auto N = normalize( vec3( NR ) );
 	auto viewDir = normalize( fragPos );
 	auto reflectDir = reflect( neg( ld ), N );
 	
 	auto specStrength = scalar( 1.0 );
-	auto shininess = scalar( 32 );
+	auto shininess = scalar( 32 );//vec_x( NR );
 	auto spec = pow( max( dot( viewDir, reflectDir ), scalar_zero() ), shininess );
 	auto cSpecular = vec3( mult( specStrength, spec, lc ) );
 	
 	fragColor( vec4( cSpecular, scalar_one() ) );
 	
 	auto src = graph->build();
-	std::cout << src << std::endl;
 	auto shader = crimild::alloc< FragmentShader >( src );
 	setFragmentShader( shader );
 }

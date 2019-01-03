@@ -105,6 +105,8 @@ void DepthPass::renderObjects( Renderer *renderer, RenderQueue *renderQueue, Ren
 		const auto nMatrix = Matrix3f( mMatrix ).getInverse().getTranspose();
 		program->bindNMatrix( nMatrix );
 
+		program->bindRoughness( 100.0f );
+
 		renderer->bindProgram( program );
 		
 		renderable->geometry->forEachPrimitive( [ program, renderer ]( Primitive *primitive ) {

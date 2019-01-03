@@ -25,52 +25,60 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_RENDER_GRAPH_PASSES_DEPTH_
-#define CRIMILD_CORE_RENDER_GRAPH_PASSES_DEPTH_
+#ifndef CRIMILD_CORE_RENDER_GRAPH_PASSES_PHONG_OPAQUE_
+#define CRIMILD_CORE_RENDER_GRAPH_PASSES_PHONG_OPAQUE_
 
 #include "Rendering/RenderGraph/RenderGraphPass.hpp"
-#include "Rendering/RenderQueue.hpp"
 
 namespace crimild {
 
-	class ViewSpaceNormalShaderProgram;
+	class DepthState;
+	class PhongDeferredLightingShaderProgram;
 
 	namespace rendergraph {
 
 		namespace passes {
 
 			/**
-			   \brief Render a depth buffer based on objects position
+			   \brief Render opaque objects based on a deferred version of the Phong lighting model
 
-			   It also renders a normal buffer for deferred 
-			   lighting purporses.
-
-			   \todo Add support for normal mapping
+			   \todo Handle skinned meshes, textured, diffuse-only separatelly
 			 */
-			class DepthPass : public RenderGraphPass {
-				CRIMILD_IMPLEMENT_RTTI( crimild::rendergraph::DepthPass )
+			class DeferredLightingPass : public RenderGraphPass {
+				CRIMILD_IMPLEMENT_RTTI( crimild::rendergraph::DeferredLightingPass )
 				
 			public:
-				DepthPass( RenderGraph *graph );
-				virtual ~DepthPass( void );
-			
-				void setDepthOutput( RenderGraphAttachment *attachment ) { _depthOutput = attachment; }
-				RenderGraphAttachment *getDepthOutput( void ) { return _depthOutput; }
-				
-				void setNormalOutput( RenderGraphAttachment *attachment ) { _normalOutput = attachment; }
-				RenderGraphAttachment *getNormalOutput( void ) { return _normalOutput; }
+				DeferredLightingPass( RenderGraph *graph, std::string name = "Deferred Lighting" );
+				virtual ~DeferredLightingPass( void );
 
+				void setDepthInput( RenderGraphAttachment *attachment ) { _depthInput = attachment; }
+				RenderGraphAttachment *getDepthInput( void ) { return _depthInput; }
+
+				void setAmbientAccumInput( RenderGraphAttachment *attachment ) { _ambientAccumInput = attachment; }
+				RenderGraphAttachment *getAmbientAccumInput( void ) { return _ambientAccumInput; }
+				
+				void setDiffuseAccumInput( RenderGraphAttachment *attachment ) { _diffuseAccumInput = attachment; }
+				RenderGraphAttachment *getDiffuseAccumInput( void ) { return _diffuseAccumInput; }
+				
+				void setSpecularAccumInput( RenderGraphAttachment *attachment ) { _specularAccumInput = attachment; }
+				RenderGraphAttachment *getSpecularAccumInput( void ) { return _specularAccumInput; }
+				
+				void setColorOutput( RenderGraphAttachment *attachment ) { _colorOutput = attachment; }
+				RenderGraphAttachment *getColorOutput( void ) { return _colorOutput; }
+				
 				virtual void setup( rendergraph::RenderGraph *graph ) override;
 				virtual void execute( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue ) override;
 
 			private:
-				void renderObjects( Renderer *renderer, RenderQueue *renderQueue, RenderQueue::RenderableType renderableType );
-
-			private:
-				SharedPointer< ViewSpaceNormalShaderProgram > _program;
-			
-				RenderGraphAttachment *_depthOutput = nullptr;
-				RenderGraphAttachment *_normalOutput = nullptr;
+				SharedPointer< PhongDeferredLightingShaderProgram > _program;
+				crimild::Int8 _clearFlags;
+				SharedPointer< DepthState > _depthState;
+				
+				RenderGraphAttachment *_depthInput = nullptr;
+				RenderGraphAttachment *_ambientAccumInput = nullptr;
+				RenderGraphAttachment *_diffuseAccumInput = nullptr;
+				RenderGraphAttachment *_specularAccumInput = nullptr;
+				RenderGraphAttachment *_colorOutput = nullptr;
 			};
 		}
 

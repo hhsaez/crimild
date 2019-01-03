@@ -44,6 +44,9 @@
 namespace crimild {
     
 	class ShaderProgram : public SharedObject, public Catalog< ShaderProgram >::Resource {
+	private:
+		using UniformArray = containers::Array< SharedPointer< ShaderUniform >>;
+		
 	public:
 		class StandardLocation {
 		public:
@@ -155,6 +158,7 @@ namespace crimild {
 		std::map< unsigned int, std::string > _standardLocations;
 
 	public:
+		void attachUniforms( UniformArray const &uniforms );
 		void attachUniform( SharedPointer< ShaderUniform > const &uniform );
 		void detachAllUniforms( void );
 		void forEachUniform( std::function< void( ShaderUniform * ) > callback );

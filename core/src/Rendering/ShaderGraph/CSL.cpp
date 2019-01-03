@@ -48,6 +48,7 @@
 #include "Rendering/ShaderGraph/Nodes/Convert.hpp"
 #include "Rendering/ShaderGraph/Nodes/TextureColor.hpp"
 #include "Rendering/ShaderGraph/Nodes/Reflect.hpp"
+#include "Rendering/ShaderGraph/Nodes/FragmentCoordInput.hpp"
 
 #include "Rendering/VertexFormat.hpp"
 #include "Rendering/ShaderUniform.hpp"
@@ -202,6 +203,38 @@ Variable *csl::vec2_in( std::string name )
 	return ret;
 }
 
+Variable *csl::vec2( Variable *input )
+{
+	if ( input->getType() == Variable::Type::VECTOR_2 ) {
+		return input;
+	}
+	
+	return ShaderGraph::getCurrent()->addNode< Convert >(
+		input,
+		Variable::Type::VECTOR_2
+	)->getResult();
+}
+
+Variable *csl::vec2_uniform( std::string name )
+{
+	auto graph = ShaderGraph::getCurrent();
+
+	auto ret = graph->getInput< Variable >( name );
+	if ( ret == nullptr ) {
+		ret = graph->addInputNode< Variable >(
+			Variable::Storage::UNIFORM,
+			Variable::Type::VECTOR_2,
+			name
+		);
+	}
+	return ret;
+}
+
+Variable *csl::vec2_uniform( SharedPointer< ShaderUniform > const &uniform )
+{
+	return vec2_uniform( uniform->getName() );
+}
+
 Variable *csl::vec3( Variable *input )
 {
 	if ( input->getType() == Variable::Type::VECTOR_3 ) {
@@ -257,6 +290,21 @@ Variable *csl::vec3_uniform( SharedPointer< ShaderUniform > const &uniform )
 Variable *csl::vec3_uniform( ShaderUniform *uniform )
 {
 	return vec3_uniform( uniform->getName() );
+}
+
+Variable *csl::vec4_in( std::string name )
+{
+	auto graph = ShaderGraph::getCurrent();
+
+	auto ret = graph->getInput< Variable >( name );
+	if ( ret == nullptr ) {
+		ret = graph->addInputNode< Variable >(
+			Variable::Storage::INPUT,
+			Variable::Type::VECTOR_4,
+			name
+		);
+	}
+	return ret;
 }
 
 Variable *csl::vec4( Variable *scalar )
@@ -369,6 +417,11 @@ Variable *csl::dot( Variable *a, Variable *b )
 Variable *csl::add( Variable *a, Variable *b )
 {
 	return ShaderGraph::getCurrent()->addNode< Add >( a, b )->getResult();
+}
+
+Variable *csl::add( containers::Array< Variable * > const &inputs )
+{
+	return ShaderGraph::getCurrent()->addNode< Add >( inputs )->getResult();
 }
 
 Variable *csl::sub( Variable *a, Variable *b )
@@ -618,4 +671,9 @@ Variable *csl::textureUnitVector( Variable *texture, Variable *uvs )
 	return normalize( v );
 }
 
+
+Variable *csl::fragCoord( void )
+{
+	return ShaderGraph::getCurrent()->addNode< FragmentCoordInput >()->getInput();
+}
 

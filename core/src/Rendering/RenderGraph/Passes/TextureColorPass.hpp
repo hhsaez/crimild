@@ -25,52 +25,43 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_RENDER_GRAPH_PASSES_DEPTH_
-#define CRIMILD_CORE_RENDER_GRAPH_PASSES_DEPTH_
+#ifndef CRIMILD_CORE_RENDER_GRAPH_PASSES_TEXTURE_COLOR_
+#define CRIMILD_CORE_RENDER_GRAPH_PASSES_TEXTURE_COLOR_
 
 #include "Rendering/RenderGraph/RenderGraphPass.hpp"
-#include "Rendering/RenderQueue.hpp"
 
 namespace crimild {
 
-	class ViewSpaceNormalShaderProgram;
+	class ScreenTextureShaderProgram;
 
 	namespace rendergraph {
 
 		namespace passes {
 
 			/**
-			   \brief Render a depth buffer based on objects position
-
-			   It also renders a normal buffer for deferred 
-			   lighting purporses.
-
-			   \todo Add support for normal mapping
+			   \brief Renders the color values of a texture
 			 */
-			class DepthPass : public RenderGraphPass {
-				CRIMILD_IMPLEMENT_RTTI( crimild::rendergraph::DepthPass )
+			class TextureColorPass : public RenderGraphPass {
+				CRIMILD_IMPLEMENT_RTTI( crimild::rendergraph::TextureColorPass )
 				
 			public:
-				DepthPass( RenderGraph *graph );
-				virtual ~DepthPass( void );
+				TextureColorPass( RenderGraph *graph );
+				virtual ~TextureColorPass( void );
 			
-				void setDepthOutput( RenderGraphAttachment *attachment ) { _depthOutput = attachment; }
-				RenderGraphAttachment *getDepthOutput( void ) { return _depthOutput; }
-				
-				void setNormalOutput( RenderGraphAttachment *attachment ) { _normalOutput = attachment; }
-				RenderGraphAttachment *getNormalOutput( void ) { return _normalOutput; }
+				void setInput( RenderGraphAttachment *attachment ) { _input = attachment; }
+				RenderGraphAttachment *getInput( void ) { return _input; }
+
+				void setOutput( RenderGraphAttachment *attachment ) { _output = attachment; }
+				RenderGraphAttachment *getOutput( void ) { return _output; }
 
 				virtual void setup( rendergraph::RenderGraph *graph ) override;
 				virtual void execute( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue ) override;
 
 			private:
-				void renderObjects( Renderer *renderer, RenderQueue *renderQueue, RenderQueue::RenderableType renderableType );
-
-			private:
-				SharedPointer< ViewSpaceNormalShaderProgram > _program;
+				SharedPointer< ScreenTextureShaderProgram > _program;
 			
-				RenderGraphAttachment *_depthOutput = nullptr;
-				RenderGraphAttachment *_normalOutput = nullptr;
+				RenderGraphAttachment *_input = nullptr;
+				RenderGraphAttachment *_output = nullptr;
 			};
 		}
 

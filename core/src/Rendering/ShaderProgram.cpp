@@ -82,6 +82,13 @@ ShaderLocation *ShaderProgram::getStandardLocation( unsigned int standardLocatio
     return crimild::get_ptr( _locations[ _standardLocations[ standardLocationId ] ] );
 }
 
+void ShaderProgram::attachUniforms( ShaderProgram::UniformArray const &uniforms )
+{
+	uniforms.each( [ this ]( SharedPointer< ShaderUniform > const &uniform ) {
+		attachUniform( uniform );
+	});
+}
+
 void ShaderProgram::attachUniform( SharedPointer< ShaderUniform > const &uniform )
 {
 	_uniforms.add( uniform );

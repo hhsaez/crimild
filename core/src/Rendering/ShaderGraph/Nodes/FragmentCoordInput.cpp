@@ -25,61 +25,24 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ViewSpaceNormalShaderProgram.hpp"
-
+#include "FragmentCoordInput.hpp"
 #include "Rendering/ShaderGraph/ShaderGraph.hpp"
-#include "Rendering/ShaderGraph/CSL.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
 
-ViewSpaceNormalShaderProgram::ViewSpaceNormalShaderProgram( void )
-	: _roughness( crimild::alloc< FloatUniform >( "uRoughness", 1.0f ) ),
-	  _pMatrix( crimild::alloc< Matrix4fUniform >( "uPMatrix", Matrix4f::IDENTITY ) ),
-	  _vMatrix( crimild::alloc< Matrix4fUniform >( "uVMatrix", Matrix4f::IDENTITY ) ),
-	  _mMatrix( crimild::alloc< Matrix4fUniform >( "uMMatrix", Matrix4f::IDENTITY ) ),
-	  _nMatrix( crimild::alloc< Matrix3fUniform >( "uNMatrix", Matrix3f::IDENTITY ) )
+FragmentCoordInput::FragmentCoordInput( ShaderGraph *graph )
 {
-	createVertexShader();
-	createFragmentShader();
-
-	attachUniform( _roughness );
-	attachUniform( _pMatrix );
-	attachUniform( _vMatrix );
-	attachUniform( _mMatrix );
-	attachUniform( _nMatrix );
+	_input = graph->addNode< Variable >( Variable::Type::VECTOR_4 );
 }
 
-ViewSpaceNormalShaderProgram::~ViewSpaceNormalShaderProgram( void )
+FragmentCoordInput::~FragmentCoordInput( void )
 {
-	
+
 }
 
-void ViewSpaceNormalShaderProgram::createVertexShader( void )
+void FragmentCoordInput::setup( ShaderGraph *graph )
 {
-	auto graph = Renderer::getInstance()->createShaderGraph();
-
-	auto P = csl::projectedPosition();
-	auto N = csl::viewNormal();
-	
-	csl::vertexOutput( "vViewNormal", N );
-	csl::vertexPosition( P );
-	
-	auto src = graph->build();
-	auto shader = crimild::alloc< VertexShader >( src );
-	setVertexShader( shader );
-}
-
-void ViewSpaceNormalShaderProgram::createFragmentShader( void )
-{
-	auto graph = Renderer::getInstance()->createShaderGraph();
-	
-	auto N = csl::vec3_in( "vViewNormal" );
-	auto R = csl::scalar_uniform( "uRoughness" );
-	csl::fragColor( csl::vec4( N, R ) );
-	
-	auto src = graph->build();
-	auto shader = crimild::alloc< FragmentShader >( src );
-	setFragmentShader( shader );
+	graph->write( this, { _input } );
 }
 

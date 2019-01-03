@@ -60,8 +60,11 @@ namespace crimild {
 				void setNormalInput( RenderGraphAttachment *attachment ) { _normalInput = attachment; }
 				RenderGraphAttachment *getNormalInput( void ) { return _normalInput; }
 
-				void setAmbientDiffuseOutput( RenderGraphAttachment *attachment ) { _ambientDiffuseOutput = attachment; }
-				RenderGraphAttachment *getAmbientDiffuseOutput( void ) { return _ambientDiffuseOutput; }
+				void setAmbientOutput( RenderGraphAttachment *attachment ) { _ambientOutput = attachment; }
+				RenderGraphAttachment *getAmbientOutput( void ) { return _ambientOutput; }
+				
+				void setDiffuseOutput( RenderGraphAttachment *attachment ) { _diffuseOutput = attachment; }
+				RenderGraphAttachment *getDiffuseOutput( void ) { return _diffuseOutput; }
 				
 				void setSpecularOutput( RenderGraphAttachment *attachment ) { _specularOutput = attachment; }
 				RenderGraphAttachment *getSpecularOutput( void ) { return _specularOutput; }
@@ -70,11 +73,10 @@ namespace crimild {
 				virtual void execute( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue ) override;
 
 			private:
-				void accumAmbientDiffuse( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue );
+				void accumAmbient( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue );
+				void accumDiffuse( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue );
 				void accumSpecular( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue );
 				
-				void renderAmbientLight( Renderer *renderer, Light *light );
-				void renderDirectionalLight( Renderer *renderer, Light *light, const Matrix4f &vMatrix );
 				void renderPointLight( Renderer *renderer, Light *light, const Matrix4f &pMatrix, const Matrix4f &vMatrix );
 
 			private:
@@ -86,7 +88,8 @@ namespace crimild {
 				
 				RenderGraphAttachment *_depthInput = nullptr;
 				RenderGraphAttachment *_normalInput = nullptr;
-				RenderGraphAttachment *_ambientDiffuseOutput = nullptr;
+				RenderGraphAttachment *_ambientOutput = nullptr;
+				RenderGraphAttachment *_diffuseOutput = nullptr;
 				RenderGraphAttachment *_specularOutput = nullptr;
 			};
 		}
