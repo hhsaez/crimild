@@ -47,6 +47,8 @@ namespace crimild {
 		void bindMaterialAmbient( const RGBAColorf &value ) { _materialAmbient->setValue( value ); }
 		void bindMaterialDiffuse( const RGBAColorf &value ) { _materialDiffuse->setValue( value ); }
 		void bindMaterialSpecular( const RGBAColorf &value ) { _materialSpecular->setValue( value ); }
+		void bindMaterialColorMap( Texture *value ) { _materialColorMap->setValue( value ); }
+		void bindMaterialSpecularMap( Texture *value ) { _materialSpecularMap->setValue( value ); }
 		void bindScreenSize( const Vector2f &value ) { _screenSize->setValue( value ); }
 		
 	private:
@@ -63,6 +65,8 @@ namespace crimild {
 		SharedPointer< RGBAColorfUniform > _materialAmbient;
 		SharedPointer< RGBAColorfUniform > _materialDiffuse;
 		SharedPointer< RGBAColorfUniform > _materialSpecular;
+		SharedPointer< TextureUniform > _materialColorMap;
+		SharedPointer< TextureUniform > _materialSpecularMap;
 		SharedPointer< Vector2fUniform > _screenSize;		
 	};
 

@@ -46,6 +46,8 @@ PhongDeferredLightingShaderProgram::PhongDeferredLightingShaderProgram( void )
 	  _materialAmbient( crimild::alloc< RGBAColorfUniform >( "uMaterialAmbient", RGBAColorf::ZERO ) ),
 	  _materialDiffuse( crimild::alloc< RGBAColorfUniform >( "uMaterialDiffuse", RGBAColorf::ZERO ) ),
 	  _materialSpecular( crimild::alloc< RGBAColorfUniform >( "uMaterialSpecular", RGBAColorf::ZERO ) ),
+	  _materialColorMap( crimild::alloc< TextureUniform >( "uMaterialColorMap", Texture::ONE ) ),
+	  _materialSpecularMap( crimild::alloc< TextureUniform >( "uMaterialSpecularMap", Texture::ONE ) ),
 	  _screenSize( crimild::alloc< Vector2fUniform >( "uScreenSize", Vector2f::ONE ) )
 {
 	createVertexShader();
@@ -61,6 +63,8 @@ PhongDeferredLightingShaderProgram::PhongDeferredLightingShaderProgram( void )
 		_materialAmbient,
 		_materialDiffuse,
 		_materialSpecular,
+		_materialColorMap,
+		_materialSpecularMap,
 		_screenSize,
 	});
 }
@@ -100,11 +104,13 @@ void PhongDeferredLightingShaderProgram::createFragmentShader( void )
 	auto mA = csl::vec4_uniform( _materialAmbient );
 	auto mD = csl::vec4_uniform( _materialDiffuse );
 	auto mS = csl::vec4_uniform( _materialSpecular );
+	auto mColorMap = csl::textureColor( csl::texture2D_uniform( _materialColorMap ), uv );
+	auto mSpecularMap = csl::textureColor( csl::texture2D_uniform( _materialSpecularMap ), uv );
 
 	auto color = add(
 		mult( lA, mA ),
-		mult( lD, mD ),
-		mult( lS, mS )
+		mult( lD, mD, mColorMap ),
+		mult( lS, mS, mSpecularMap )
 	);
 	
 	csl::fragColor( color );

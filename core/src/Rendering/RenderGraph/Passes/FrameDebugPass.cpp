@@ -42,7 +42,7 @@ FrameDebugPass::FrameDebugPass( RenderGraph *graph, std::string name )
 	: RenderGraphPass( graph, name ),
 	  _program( crimild::alloc< ScreenTextureShaderProgram >() )
 {
-
+	_output = graph->createAttachment( getName() + " - Output", RenderGraphAttachment::Hint::FORMAT_RGBA );
 }
 			
 FrameDebugPass::~FrameDebugPass( void )

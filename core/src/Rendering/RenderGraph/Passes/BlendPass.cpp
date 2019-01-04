@@ -40,7 +40,7 @@ BlendPass::BlendPass( RenderGraph *graph, SharedPointer< AlphaState > const &alp
 	: RenderGraphPass( graph, "Blend Pass" ),
 	  _alphaState( alphaState )
 {
-
+	_output = graph->createAttachment( getName() + " - Output", RenderGraphAttachment::Hint::FORMAT_RGBA );
 }
 			
 BlendPass::~BlendPass( void )

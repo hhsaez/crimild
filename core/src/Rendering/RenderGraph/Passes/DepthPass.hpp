@@ -46,6 +46,7 @@ namespace crimild {
 			   lighting purporses.
 
 			   \todo Add support for normal mapping
+			   \todo Use a flag for Roughness/Shininess on alpha-channel
 			 */
 			class DepthPass : public RenderGraphPass {
 				CRIMILD_IMPLEMENT_RTTI( crimild::rendergraph::DepthPass )

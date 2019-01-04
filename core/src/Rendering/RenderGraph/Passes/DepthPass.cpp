@@ -105,7 +105,10 @@ void DepthPass::renderObjects( Renderer *renderer, RenderQueue *renderQueue, Ren
 		const auto nMatrix = Matrix3f( mMatrix ).getInverse().getTranspose();
 		program->bindNMatrix( nMatrix );
 
-		program->bindRoughness( 100.0f );
+		auto material = renderable->material;
+		if ( material != nullptr ) {
+			program->bindShininess( material->getShininess() );
+		}
 
 		renderer->bindProgram( program );
 		
