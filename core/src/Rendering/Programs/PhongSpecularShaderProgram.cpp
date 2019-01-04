@@ -111,7 +111,7 @@ void PhongSpecularShaderProgram::createFragmentShader( void )
 	auto reflectDir = reflect( neg( ld ), N );
 	
 	auto specStrength = scalar( 1.0 );
-	auto shininess = scalar( 32 );//vec_x( NR );
+	auto shininess = vec_w( NR );
 	auto spec = pow( max( dot( viewDir, reflectDir ), scalar_zero() ), shininess );
 	auto cSpecular = vec3( mult( specStrength, spec, lc ) );
 	

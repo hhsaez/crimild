@@ -44,7 +44,7 @@ DeferredLightingPass::DeferredLightingPass( RenderGraph *graph, std::string name
 	: RenderGraphPass( graph, name ),
 	  _program( crimild::alloc< PhongDeferredLightingShaderProgram >() )
 {
-
+	_colorOutput = graph->createAttachment( getName() + " - Color Output", RenderGraphAttachment::Hint::FORMAT_RGBA );
 }
 			
 DeferredLightingPass::~DeferredLightingPass( void )
@@ -111,10 +111,15 @@ void DeferredLightingPass::execute( RenderGraph *graph, Renderer *renderer, Rend
 			program->bindMaterialAmbient( material->getAmbient() );
 			program->bindMaterialDiffuse( material->getDiffuse() );
 			program->bindMaterialSpecular( material->getSpecular() );
+
+			program->bindMaterialColorMap( material->getColorMap() != nullptr ? material->getColorMap() : crimild::get_ptr( Texture::ONE ) );
+			program->bindMaterialSpecularMap( material->getSpecularMap() != nullptr ? material->getSpecularMap() : crimild::get_ptr( Texture::ONE ) );
 		} else {
 			program->bindMaterialAmbient( RGBAColorf::ZERO );
 			program->bindMaterialDiffuse( RGBAColorf::ZERO );
 			program->bindMaterialSpecular( RGBAColorf::ZERO );
+			program->bindMaterialColorMap( crimild::get_ptr( Texture::ONE ) );
+			program->bindMaterialSpecularMap( crimild::get_ptr( Texture::ONE ) );
 		}
 
 		const auto &mMatrix = renderable->modelTransform;

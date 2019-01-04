@@ -81,6 +81,11 @@ Variable *csl::scalar_uniform( std::string name )
 	return ret;
 }
 
+Variable *csl::scalar_uniform( SharedPointer< ShaderUniform > const &uniform )
+{
+	return scalar_uniform( uniform->getName() );
+}
+
 Variable *csl::scalar_constant( crimild::Real32 value )
 {
 	auto graph = ShaderGraph::getCurrent();

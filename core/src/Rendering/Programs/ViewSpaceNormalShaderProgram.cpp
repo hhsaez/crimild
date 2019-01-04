@@ -34,7 +34,7 @@ using namespace crimild;
 using namespace crimild::shadergraph;
 
 ViewSpaceNormalShaderProgram::ViewSpaceNormalShaderProgram( void )
-	: _roughness( crimild::alloc< FloatUniform >( "uRoughness", 1.0f ) ),
+	: _roughness( crimild::alloc< FloatUniform >( "uRoughness", 32.0f ) ),
 	  _pMatrix( crimild::alloc< Matrix4fUniform >( "uPMatrix", Matrix4f::IDENTITY ) ),
 	  _vMatrix( crimild::alloc< Matrix4fUniform >( "uVMatrix", Matrix4f::IDENTITY ) ),
 	  _mMatrix( crimild::alloc< Matrix4fUniform >( "uMMatrix", Matrix4f::IDENTITY ) ),
@@ -75,7 +75,7 @@ void ViewSpaceNormalShaderProgram::createFragmentShader( void )
 	auto graph = Renderer::getInstance()->createShaderGraph();
 	
 	auto N = csl::vec3_in( "vViewNormal" );
-	auto R = csl::scalar_uniform( "uRoughness" );
+	auto R = csl::scalar_uniform( _roughness );
 	csl::fragColor( csl::vec4( N, R ) );
 	
 	auto src = graph->build();

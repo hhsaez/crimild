@@ -47,6 +47,7 @@ namespace crimild {
 
 			Variable *scalar( crimild::Real32 value, std::string name = "" );
 			Variable *scalar_uniform( std::string name );
+			Variable *scalar_uniform( SharedPointer< ShaderUniform > const &uniform );
 			Variable *scalar_constant( crimild::Real32 value );
 			Variable *scalar_one( void );
 			Variable *scalar_two( void );
