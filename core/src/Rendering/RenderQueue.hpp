@@ -89,6 +89,8 @@ namespace crimild {
         Renderables *getRenderables( RenderableType type ) { return &_renderables[ type ]; }
         
         void each( Renderables *renderables, std::function< void( Renderable * ) > callback );
+
+		crimild::Size getLightCount( void ) const { return _lights.size(); }
         void each( std::function< void( Light *, int ) > callback );
 
     private:

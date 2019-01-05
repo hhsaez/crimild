@@ -33,6 +33,8 @@
 
 namespace crimild {
 
+	class ForwardShadingShaderProgram;
+
 	namespace rendergraph {
 
 		namespace passes {
@@ -51,8 +53,10 @@ namespace crimild {
 
 			private:
 				using RenderableTypeArray = containers::Array< RenderQueue::RenderableType >;
+				
 			public:
-				ForwardLightingPass( RenderGraph *graph, RenderableTypeArray const &renderableTypes );
+				ForwardLightingPass( RenderGraph *graph, crimild::Size maxLights = 10 );
+				ForwardLightingPass( RenderGraph *graph, RenderableTypeArray const &renderableTypes, crimild::Size maxLights = 10 );
 				virtual ~ForwardLightingPass( void );
 				
 				void setDepthInput( RenderGraphAttachment *attachment ) { _depthInput = attachment; }
@@ -69,7 +73,7 @@ namespace crimild {
 			
 			private:
 				RenderableTypeArray _renderableTypes;
-				SharedPointer< ShaderProgram > _program;
+				containers::Array< SharedPointer< ForwardShadingShaderProgram >> _programs;
 				crimild::Int8 _clearFlags;
 				SharedPointer< DepthState > _depthState;
 				

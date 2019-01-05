@@ -31,6 +31,7 @@
 #include "Rendering/FrameBufferObject.hpp"
 #include "Rendering/Renderer.hpp"
 #include "Rendering/ShaderProgram.hpp"
+#include "Rendering/Programs/ForwardShadingShaderProgram.hpp"
 #include "Simulation/AssetManager.hpp"
 #include "Foundation/Profiler.hpp"
 
@@ -38,15 +39,26 @@ using namespace crimild;
 using namespace crimild::rendergraph;
 using namespace crimild::rendergraph::passes;
 
-ForwardLightingPass::ForwardLightingPass( RenderGraph *graph, ForwardLightingPass::RenderableTypeArray const &renderableTypes )
+ForwardLightingPass::ForwardLightingPass( RenderGraph *graph, crimild::Size maxLights )
+	: ForwardLightingPass( graph, { RenderQueue::RenderableType::OPAQUE }, maxLights )
+{
+	
+}
+
+ForwardLightingPass::ForwardLightingPass( RenderGraph *graph, ForwardLightingPass::RenderableTypeArray const &renderableTypes, crimild::Size maxLights )
 	: RenderGraphPass( graph, "Forward Lighting" ),
-	  _renderableTypes( renderableTypes )
+	  _renderableTypes( renderableTypes ),
+	  _programs( maxLights + 1 )
 {
     _colorOutput = graph->createAttachment(
 		getName() + " - Color",
 		RenderGraphAttachment::Hint::FORMAT_RGBA );
 	_clearFlags = FrameBufferObject::ClearFlag::COLOR;
 	_depthState = crimild::alloc< DepthState >( true, DepthState::CompareFunc::LEQUAL, false );
+
+	for ( crimild::Size i = 0; i <= maxLights; i++ ) {
+		_programs[ i ] = crimild::alloc< ForwardShadingShaderProgram >( i );
+	}
 }
 
 ForwardLightingPass::~ForwardLightingPass( void )
@@ -67,8 +79,6 @@ void ForwardLightingPass::setup( rendergraph::RenderGraph *graph )
 	
 	graph->read( this, { _depthInput } );
 	graph->write( this, { _colorOutput } );
-	
-	_program = crimild::retain( AssetManager::getInstance()->get< ShaderProgram >( Renderer::SHADER_PROGRAM_RENDER_PASS_FORWARD_LIGHTING ) );
 }
 
 void ForwardLightingPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue )
@@ -96,43 +106,35 @@ void ForwardLightingPass::render( Renderer *renderer, RenderQueue *renderQueue, 
 	
 	const auto pMatrix = renderQueue->getProjectionMatrix();
 	const auto vMatrix = renderQueue->getViewMatrix();
-	
-	renderQueue->each( renderables, [ this, renderer, renderQueue, pMatrix, vMatrix ]( RenderQueue::Renderable *renderable ) {
-		auto material = crimild::get_ptr( renderable->material );
-		auto program = material->getProgram();
-		if ( program == nullptr ) {
-			program = get_ptr( _program );
-		}
-		
+
+	auto lightCount = Numerici::min( _programs.size() - 1, renderQueue->getLightCount() );
+	auto program = crimild::get_ptr( _programs[ lightCount ] );
+
+	program->bindProjMatrix( pMatrix );
+	program->bindViewMatrix( vMatrix );
+
+	renderQueue->each( [ program ]( Light *light, int index ) {
+		program->bindLight( light, index );
+	});
+
+	renderQueue->each( renderables, [ this, renderer, program ]( RenderQueue::Renderable *renderable ) {
+		const auto &mMatrix = renderable->modelTransform;
+		program->bindModelMatrix( mMatrix );
+
+		const auto nMatrix = Matrix3f( mMatrix ).getInverse().getTranspose();
+		program->bindNormalMatrix( mMatrix );
+
+		program->bindMaterial( crimild::get_ptr( renderable->material ) );
+
 		renderer->bindProgram( program );
 		
-		renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::PROJECTION_MATRIX_UNIFORM ), pMatrix );
-		renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM ), vMatrix );
-		renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::USE_SHADOW_MAP_UNIFORM ), false );
-		
-		renderQueue->each( [ renderer, program ]( Light *light, int ) {
-			renderer->bindLight( program, light );
+		renderable->geometry->forEachPrimitive( [ renderer ]( Primitive *primitive ) {
+			renderer->bindPrimitive( nullptr, primitive );
+			renderer->drawPrimitive( nullptr, primitive );
+			renderer->unbindPrimitive( nullptr, primitive );
 		});
 
-		renderer->bindMaterial( program, material );
-
-		renderer->setDepthState( _depthState );
-
-		renderer->drawGeometry(
-			crimild::get_ptr( renderable->geometry ),
-			program,
-			renderable->modelTransform );
-		
-		renderer->setDepthState( DepthState::ENABLED );
-
-		renderer->unbindMaterial( program, material );
-
-		renderQueue->each( [ renderer, program ]( Light *light, int ) {
-			renderer->unbindLight( program, light );
-		});
-		
 		renderer->unbindProgram( program );
 	});
-	
 }
 

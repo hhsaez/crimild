@@ -43,9 +43,19 @@ namespace crimild {
 			 */
 			class TextureColorPass : public RenderGraphPass {
 				CRIMILD_IMPLEMENT_RTTI( crimild::rendergraph::TextureColorPass )
+
+			public:
+				enum class Mode {
+					RGBA,
+					RGB,
+					RED,
+					GREEN,
+					BLUE,
+					ALPHA,
+				};
 				
 			public:
-				TextureColorPass( RenderGraph *graph );
+				TextureColorPass( RenderGraph *graph, Mode mode = Mode::RGBA );
 				virtual ~TextureColorPass( void );
 			
 				void setInput( RenderGraphAttachment *attachment ) { _input = attachment; }
