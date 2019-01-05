@@ -43,7 +43,7 @@ using namespace crimild::rendergraph::passes;
 OpaquePass::OpaquePass( RenderGraph *graph, std::string name )
 	: RenderGraphPass( graph, name )
 {
-
+	_colorOutput = graph->createAttachment( getName() + " - Color Output", RenderGraphAttachment::Hint::FORMAT_RGBA );
 }
 			
 OpaquePass::~OpaquePass( void )

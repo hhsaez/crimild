@@ -625,11 +625,25 @@ Variable *csl::viewNormal( void )
 	return ret;
 }
 
+Variable *csl::worldEyeVector( void )
+{
+	return normalize( neg( vec3( worldPosition() ) ) );
+}
+
+Variable *csl::viewEyeVector( void )
+{
+	return normalize( neg( vec3( viewPosition() ) ) );
+}
+
+Variable *csl::viewVector( void )
+{
+	return normalize( neg( vec3( viewPosition() ) ) );
+}
+
 Variable *csl::viewVector( Variable *viewPosition )
 {
 	return normalize( neg( vec3( viewPosition ) ) );
 }
-
 
 Variable *csl::linearizeDepth( Variable *z, Variable *N, Variable *F )
 {

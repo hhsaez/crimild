@@ -41,11 +41,37 @@ using namespace crimild::rendergraph;
 using namespace crimild::rendergraph::passes;
 using namespace crimild::shadergraph;
 
-TextureColorPass::TextureColorPass( RenderGraph *graph )
-	: RenderGraphPass( graph, "Show texture color" ),
-	  _program( crimild::alloc< ScreenTextureShaderProgram >( ScreenTextureShaderProgram::Mode::ALPHA ) )
+TextureColorPass::TextureColorPass( RenderGraph *graph, TextureColorPass::Mode mode )
+	: RenderGraphPass( graph, "Show texture color" )
 {
+	auto programMode = ScreenTextureShaderProgram::Mode::RGBA;
+	switch ( mode ) {
+		case TextureColorPass::Mode::RGB:
+			programMode = ScreenTextureShaderProgram::Mode::RGB;
+			break;
 
+		case TextureColorPass::Mode::RED:
+			programMode = ScreenTextureShaderProgram::Mode::RED;
+			break;
+
+		case TextureColorPass::Mode::GREEN:
+			programMode = ScreenTextureShaderProgram::Mode::GREEN;
+			break;
+
+		case TextureColorPass::Mode::BLUE:
+			programMode = ScreenTextureShaderProgram::Mode::BLUE;
+			break;
+
+		case TextureColorPass::Mode::ALPHA:
+			programMode = ScreenTextureShaderProgram::Mode::ALPHA;
+			break;
+
+		default:
+			break;
+	}
+	
+	_program = crimild::alloc< ScreenTextureShaderProgram >( programMode );
+	_output = graph->createAttachment( getName() + " - Output", RenderGraphAttachment::Hint::FORMAT_RGBA );
 }
 			
 TextureColorPass::~TextureColorPass( void )

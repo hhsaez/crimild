@@ -173,9 +173,21 @@ namespace crimild {
 			Variable *worldNormal( Variable *worldMatrix, Variable *normal );
 			Variable *viewNormal( void );
 
+
 			//@}
+
+			/**
+			   \name Eye vectors
+			 */
+			//@{
+
+			Variable *worldEyeVector( void );
+			Variable *viewEyeVector( void );
 			
+			Variable *viewVector( void );
 			Variable *viewVector( Variable *viewPosition );
+
+			//@}
 
 			Variable *linearizeDepth( Variable *input, Variable *near, Variable *far );
 
