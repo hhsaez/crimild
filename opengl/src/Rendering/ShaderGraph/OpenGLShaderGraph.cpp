@@ -44,6 +44,8 @@
 #include "Rendering/ShaderGraph/Nodes/Add.hpp"
 #include "Rendering/ShaderGraph/Nodes/Normalize.hpp"
 #include "Rendering/ShaderGraph/Nodes/Negate.hpp"
+#include "Rendering/ShaderGraph/Nodes/Inverse.hpp"
+#include "Rendering/ShaderGraph/Nodes/Length.hpp"
 #include "Rendering/ShaderGraph/Nodes/Pow.hpp"
 #include "Rendering/ShaderGraph/Nodes/Copy.hpp"
 #include "Rendering/ShaderGraph/Nodes/Convert.hpp"
@@ -313,6 +315,22 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 
 		std::stringstream ss;
 		ss << negate->getResult()->getName() << " = -" << negate->getInput()->getName() << ";";
+		_mainSection.add( ss.str() );
+	};
+
+	_translators[ Inverse::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
+		auto inverse = static_cast< Inverse * >( node );
+
+		std::stringstream ss;
+		ss << inverse->getResult()->getName() << " = inverse( " << inverse->getInput()->getName() << " );";
+		_mainSection.add( ss.str() );
+	};
+
+	_translators[ Length::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
+		auto length = static_cast< Length * >( node );
+
+		std::stringstream ss;
+		ss << length->getResult()->getName() << " = length( " << length->getInput()->getName() << " );";
 		_mainSection.add( ss.str() );
 	};
 

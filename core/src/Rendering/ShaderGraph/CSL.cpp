@@ -40,6 +40,8 @@
 #include "Rendering/ShaderGraph/Nodes/Multiply.hpp"
 #include "Rendering/ShaderGraph/Nodes/Divide.hpp"
 #include "Rendering/ShaderGraph/Nodes/Negate.hpp"
+#include "Rendering/ShaderGraph/Nodes/Inverse.hpp"
+#include "Rendering/ShaderGraph/Nodes/Length.hpp"
 #include "Rendering/ShaderGraph/Nodes/Normalize.hpp"
 #include "Rendering/ShaderGraph/Nodes/Vector.hpp"
 #include "Rendering/ShaderGraph/Nodes/Scalar.hpp"
@@ -466,6 +468,20 @@ Variable *csl::reflect( Variable *incident, Variable *normal )
 	    ->getResult();
 }
 
+Variable *csl::length( Variable *input )
+{
+	return ShaderGraph::getCurrent()
+	    ->addNode< Length >( input )
+	    ->getResult();
+}
+
+Variable *csl::inverse( Variable *input )
+{
+	return ShaderGraph::getCurrent()
+	    ->addNode< Inverse >( input )
+	    ->getResult();
+}
+
 Variable *csl::normalize( Variable *input )
 {
 	return ShaderGraph::getCurrent()
@@ -625,9 +641,31 @@ Variable *csl::viewNormal( void )
 	return ret;
 }
 
+Variable *csl::worldCameraPos( void )
+{
+	auto graph = ShaderGraph::getCurrent();
+
+	auto ret = graph->getInput< Variable >( "c_worldCameraPos" );
+	if ( ret == nullptr ) {
+		auto vMatrix = mat4_uniform( "uVMatrix" );
+		ret = vec3(
+			mult(
+				inverse( vMatrix ),
+				vec4( Vector4f( 0.0f, 0.0f, 0.0f, 1.0f ) )
+			)
+		);
+		ret->setName( "c_worldCameraPos" );
+		graph->addInputNode( ret );
+	}
+
+	return ret;
+}
+
 Variable *csl::worldEyeVector( void )
 {
-	return normalize( neg( vec3( worldPosition() ) ) );
+	auto p = vec3( worldPosition() );
+	auto cameraPos = worldCameraPos();
+	return normalize( sub( cameraPos, p ) );
 }
 
 Variable *csl::viewEyeVector( void )

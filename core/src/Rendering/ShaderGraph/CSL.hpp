@@ -117,6 +117,8 @@ namespace crimild {
 			Variable *dot( Variable *a, Variable *b );
 			Variable *normalize( Variable *input );
 			Variable *reflect( Variable *incident, Variable *normal );
+			Variable *length( Variable *input );
+			Variable *inverse( Variable *matrix );
 
 			//@}
 
@@ -177,10 +179,11 @@ namespace crimild {
 			//@}
 
 			/**
-			   \name Eye vectors
+			   \name Camera vectors
 			 */
 			//@{
 
+			Variable *worldCameraPos( void );
 			Variable *worldEyeVector( void );
 			Variable *viewEyeVector( void );
 			

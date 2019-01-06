@@ -70,6 +70,7 @@ namespace crimild {
 	typedef ShaderUniformImpl< bool > BoolUniform;
 	typedef ShaderUniformImpl< int > IntUniform;
 	typedef ShaderUniformImpl< float > FloatUniform;
+	typedef ShaderUniformImpl< Vector4f > Vector4fUniform;
 	typedef ShaderUniformImpl< Vector3f > Vector3fUniform;
 	typedef ShaderUniformImpl< Vector2f > Vector2fUniform;
 	typedef ShaderUniformImpl< RGBAColorf > RGBAColorfUniform;

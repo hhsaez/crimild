@@ -36,12 +36,39 @@ namespace crimild {
 	class Material;
 	class Light;
 
+	/**
+	   \brief Compute lighting for a scene using a forward shading pipeline
+
+	   As a rule, we avoid using loops by creating a shader that deals with 
+	   a constant number of lights (passed in as argument in the construction).
+
+	   In addition, conditional expressions (if) are avoided by computing both
+	   branches and then adding them togheter using a flag multiplier to discard
+	   one result or the other. Since computations are simple, this should be
+	   more efficient than conditional expressions. So, this 
+	   \code
+	   vec3 lightVec = vec3( 0 );
+	   if ( lightType == DIRECTIONAL ) {
+	       lightVec = -light.direction;
+	   } else {
+	       lightVec = light.position - vertexPos;
+	   }
+	   \endcode
+
+	   becomes this (with lightIsPoint == 1 for point lights and 0 for directional lights
+
+	   \code
+	   lightVec = lightIsPoint * (light.position - vertexPos) + (1 - lightIsPoint) * -light.direction;
+	   \endcode
+
+	 */
 	class ForwardShadingShaderProgram : public ShaderProgram {
 	private:
 		struct LightUniforms {
 			SharedPointer< RGBAColorfUniform > ambientColor;
 			SharedPointer< RGBAColorfUniform > diffuseColor;
-			SharedPointer< Vector3fUniform > direction;
+			SharedPointer< Vector4fUniform > vector; // either position (w=1) or direction (w=0)
+			SharedPointer< Vector4fUniform > attenuation; // w=enabled(1)/disabled(0)
 		};
 
 		using LightArray = containers::Array< Light * >;
