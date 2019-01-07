@@ -45,6 +45,7 @@
 #include "Rendering/ShaderGraph/Nodes/Normalize.hpp"
 #include "Rendering/ShaderGraph/Nodes/Negate.hpp"
 #include "Rendering/ShaderGraph/Nodes/Inverse.hpp"
+#include "Rendering/ShaderGraph/Nodes/Clamp.hpp"
 #include "Rendering/ShaderGraph/Nodes/Length.hpp"
 #include "Rendering/ShaderGraph/Nodes/Pow.hpp"
 #include "Rendering/ShaderGraph/Nodes/Copy.hpp"
@@ -323,6 +324,18 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 
 		std::stringstream ss;
 		ss << inverse->getResult()->getName() << " = inverse( " << inverse->getInput()->getName() << " );";
+		_mainSection.add( ss.str() );
+	};
+
+	_translators[ Clamp::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
+		auto clamp = static_cast< Clamp * >( node );
+
+		std::stringstream ss;
+		ss << clamp->getResult()->getName()
+		   << " = clamp( " << clamp->getValue()->getName()
+		   << ", " << clamp->getMin()->getName()
+		   << ", " << clamp->getMax()->getName()
+		   << " );";
 		_mainSection.add( ss.str() );
 	};
 

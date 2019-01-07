@@ -119,6 +119,7 @@ namespace crimild {
 			Variable *reflect( Variable *incident, Variable *normal );
 			Variable *length( Variable *input );
 			Variable *inverse( Variable *matrix );
+			Variable *clamp( Variable *value, Variable *lowerBound, Variable *upperBound );
 
 			//@}
 

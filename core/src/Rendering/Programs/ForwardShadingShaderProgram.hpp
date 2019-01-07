@@ -67,8 +67,11 @@ namespace crimild {
 		struct LightUniforms {
 			SharedPointer< RGBAColorfUniform > ambientColor;
 			SharedPointer< RGBAColorfUniform > diffuseColor;
-			SharedPointer< Vector4fUniform > vector; // either position (w=1) or direction (w=0)
+			SharedPointer< Vector4fUniform > direction; // w=enabled/disabled
+			SharedPointer< Vector4fUniform > position; // w=enabled/disabled
 			SharedPointer< Vector4fUniform > attenuation; // w=enabled(1)/disabled(0)
+			SharedPointer< FloatUniform > innerCutOff;
+			SharedPointer< FloatUniform > outerCutOff;
 		};
 
 		using LightArray = containers::Array< Light * >;

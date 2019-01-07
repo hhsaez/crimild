@@ -31,6 +31,7 @@
 #include "Rendering/Material.hpp"
 #include "Rendering/Texture.hpp"
 #include "Rendering/ShaderGraph/ShaderGraph.hpp"
+#include "Rendering/ShaderGraph/Variable.hpp"
 #include "Rendering/ShaderGraph/CSL.hpp"
 #include "SceneGraph/Light.hpp"
 
@@ -63,8 +64,11 @@ ForwardShadingShaderProgram::ForwardShadingShaderProgram( crimild::Size maxLight
 		attachUniforms({
 			light.ambientColor = crimild::alloc< RGBAColorfUniform >( lightName + "_ambient", RGBAColorf::ZERO ),
 			light.diffuseColor = crimild::alloc< RGBAColorfUniform >( lightName + "_diffuse", RGBAColorf::ZERO ),
-			light.vector = crimild::alloc< Vector4fUniform >( lightName + "_vector", Vector4f::ZERO ),
+			light.position = crimild::alloc< Vector4fUniform >( lightName + "_position", Vector4f::ZERO ),
+			light.direction = crimild::alloc< Vector4fUniform >( lightName + "_direction", Vector4f::ZERO ),
 			light.attenuation = crimild::alloc< Vector4fUniform >( lightName + "_attenuation", Vector4f::ZERO ),
+			light.innerCutOff = crimild::alloc< FloatUniform >( lightName + "_innerCutOFF", 0.0f ),
+			light.outerCutOff = crimild::alloc< FloatUniform >( lightName + "_outerCutOFF", 0.0f ),
 		});
 	}
 	
@@ -104,8 +108,9 @@ void ForwardShadingShaderProgram::bindLight( Light *light, crimild::Size index )
 			case Light::Type::DIRECTIONAL: {
 				uniforms.ambientColor->setValue( RGBAColorf::ZERO );
 				uniforms.diffuseColor->setValue( light->getColor() );
+				uniforms.position->setValue( Vector4f::ZERO );
 				auto d = light->getDirection();
-				uniforms.vector->setValue( Vector4f( -d.x(), -d.y(), -d.z(), 0.0f ) );
+				uniforms.direction->setValue( Vector4f( -d.x(), -d.y(), -d.z(), 0.0f ) );
 				uniforms.attenuation->setValue( Vector4f( 1.0f, 0.0f, 0.0f, 0.0f ) );
 				break;
 			}
@@ -114,9 +119,24 @@ void ForwardShadingShaderProgram::bindLight( Light *light, crimild::Size index )
 				uniforms.ambientColor->setValue( RGBAColorf::ZERO );
 				uniforms.diffuseColor->setValue( light->getColor() );
 				auto p = light->getWorld().getTranslate();
-				uniforms.vector->setValue( Vector4f( p.x(), p.y(), p.z(), 1.0f ) );
+				uniforms.position->setValue( Vector4f( p.x(), p.y(), p.z(), 1.0f ) );
+				uniforms.direction->setValue( Vector4f::ZERO );
 				auto a = light->getAttenuation();
 				uniforms.attenuation->setValue( Vector4f( a.x(), a.y(), a.z(), 1.0f ) );
+				break;
+			}
+
+			case Light::Type::SPOT: {
+				uniforms.ambientColor->setValue( RGBAColorf::ZERO );
+				uniforms.diffuseColor->setValue( light->getColor() );
+				auto p = light->getWorld().getTranslate();
+				uniforms.position->setValue( Vector4f( p.x(), p.y(), p.z(), 1.0f ) );
+				auto d = light->getDirection();
+				uniforms.direction->setValue( Vector4f( d.x(), d.y(), d.z(), 1.0f ) );
+				auto a = light->getAttenuation();
+				uniforms.attenuation->setValue( Vector4f( a.x(), a.y(), a.z(), 1.0f ) );
+				uniforms.innerCutOff->setValue( Numericf::cos( light->getInnerCutoff() ) );
+				uniforms.outerCutOff->setValue( Numericf::cos( light->getOuterCutoff() ) );
 				break;
 			}
 
@@ -165,48 +185,58 @@ void ForwardShadingShaderProgram::createFragmentShader( void )
 	auto matSpecular = vec4_uniform( _matSpecular );
 	auto matShininess = scalar_uniform( _matShininess );
 
-	auto ambient = vec3( scalar_zero() );
-	auto diffuse = vec3( scalar_zero() );
-	auto specular = vec3( scalar_zero() );
+	auto accumAmbient = vec3( scalar_zero() );
+	auto accumDiffuse = vec3( scalar_zero() );
+	auto accumSpecular = vec3( scalar_zero() );
 
-	_lights.each( [ this, &ambient, &diffuse, &specular, N, E, P, matShininess ]( LightUniforms &light ) {
+	_lights.each( [ this, &accumAmbient, &accumDiffuse, &accumSpecular, N, E, P, matShininess ]( LightUniforms &light, crimild::Size lightIndex ) {
 		auto lAmbient = vec3( vec4_uniform( light.ambientColor ) );
 		auto lDiffuse = vec3( vec4_uniform( light.diffuseColor ) );
-		auto lVector = vec4_uniform( light.vector );
-		auto lXYZ = vec3( lVector );
-		auto lW = vec_w( lVector );
+		auto lDirectionXYZW = vec4_uniform( light.direction );
+		auto lDirection = vec3( lDirectionXYZW );
+		auto lHasDirection = vec_w( lDirectionXYZW );		
+		auto lPositionXYZW = vec4_uniform( light.position );
+		auto lPosition = vec3( lPositionXYZW );
+		auto lHasPosition = vec_w( lPositionXYZW );
 		auto lAttenuation = vec4_uniform( light.attenuation );
 		auto lAttConstant = vec_x( lAttenuation );
 		auto lAttLinear = vec_y( lAttenuation );
 		auto lAttQuadratic = vec_y( lAttenuation );
 		auto lAttEnabled = vec_w( lAttenuation );
+		auto lInnerCutOff = scalar_uniform( light.innerCutOff );
+		auto lOuterCutOff = scalar_uniform( light.outerCutOff );
+		
+		auto lVector = add(
+			mult( sub( scalar_one(), lHasPosition ), lDirection ),
+			mult( lHasPosition, sub( lPosition, P ) )
+		);
+		auto lUnitVector = normalize( lVector );
+		auto lDistance = length( lVector );
+		auto R = reflect( neg( lUnitVector ), N );
 
-		auto lDirection = add(
-			mult( sub( scalar_one(), lW ), lXYZ ),
-			mult( lW, sub( lXYZ, P ) )
+		auto ambient = lAmbient;
+
+		auto diffuse = mult( 
+			max( scalar_zero(), dot( N, lUnitVector ) ),
+			lDiffuse
 		);
 
-		auto lUnitDirection = normalize( lDirection );
-		auto lDistance = length( lDirection );
-		auto R = reflect( neg( lUnitDirection ), N );
-
-		ambient = add( ambient, lAmbient );
-
-		diffuse = add(
-			diffuse,
-			mult( 
-				max( scalar_zero(), dot( N, lUnitDirection ) ),
-				lDiffuse
-			)
+		auto specular = mult(
+			pow( max( dot( E, R ), scalar_zero() ), matShininess ),
+			lDiffuse
 		);
 
-		specular = add(
-			specular,
-			mult(
-				pow( max( dot( E, R ), scalar_zero() ), matShininess ),
-				lDiffuse
-			)
+		// spotlight
+		auto isSpotlight = mult( lHasPosition, lHasDirection );
+		auto theta = dot( lUnitVector, normalize( neg( lDirection ) ) );
+		auto epsilon = sub( lInnerCutOff, lOuterCutOff );
+		auto intensity = clamp( div( sub( theta, lOuterCutOff ), epsilon ), scalar_zero(), scalar_one() );
+		intensity = add(
+			mult( isSpotlight, intensity ),
+			sub( scalar_one(), isSpotlight )
 		);
+		diffuse = mult( diffuse, intensity );
+		specular = mult( specular, intensity );
 
 		auto attenuation = div(
 			scalar_one(),
@@ -225,29 +255,34 @@ void ForwardShadingShaderProgram::createFragmentShader( void )
 		ambient = mult( ambient, attenuation );
 		diffuse = mult( diffuse, attenuation );
 		specular = mult( specular, attenuation );
+
+		// accumulate
+		accumAmbient = add( accumAmbient, ambient );
+		accumDiffuse = add( accumDiffuse, diffuse );
+		accumSpecular = add( accumSpecular, specular );
 	});
 
-	ambient = mult(
-		ambient,
+	accumAmbient = mult(
+		accumAmbient,
 		vec3( matAmbient )
 	);
 
-	diffuse = mult(
-		diffuse,
+	accumDiffuse = mult(
+		accumDiffuse,
 		vec3( matDiffuse ),
 		vec3( textureColor( texture2D_uniform( _matDiffuseMap ), uv ) )
 	);
 
-	specular = mult(
-		specular,
+	accumSpecular = mult(
+		accumSpecular,
 		vec3( matSpecular ),
 		vec3( textureColor( texture2D_uniform( _matSpecularMap ), uv ) )
 	);
 
 	auto color = add(
-		ambient,
-		diffuse,
-		specular
+		accumAmbient,
+		accumDiffuse,
+		accumSpecular
 	);
 
 	csl::fragColor( vec4( color, scalar_one() ) );
