@@ -41,6 +41,7 @@
 #include "Rendering/ShaderGraph/Nodes/Divide.hpp"
 #include "Rendering/ShaderGraph/Nodes/Negate.hpp"
 #include "Rendering/ShaderGraph/Nodes/Inverse.hpp"
+#include "Rendering/ShaderGraph/Nodes/Clamp.hpp"
 #include "Rendering/ShaderGraph/Nodes/Length.hpp"
 #include "Rendering/ShaderGraph/Nodes/Normalize.hpp"
 #include "Rendering/ShaderGraph/Nodes/Vector.hpp"
@@ -479,6 +480,13 @@ Variable *csl::inverse( Variable *input )
 {
 	return ShaderGraph::getCurrent()
 	    ->addNode< Inverse >( input )
+	    ->getResult();
+}
+
+Variable *csl::clamp( Variable *value, Variable *lowerBound, Variable *upperBound )
+{
+	return ShaderGraph::getCurrent()
+	    ->addNode< Clamp >( value, lowerBound, upperBound )
 	    ->getResult();
 }
 

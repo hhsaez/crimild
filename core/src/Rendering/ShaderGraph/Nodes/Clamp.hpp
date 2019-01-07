@@ -25,63 +25,37 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_RENDERING_SHADER_GRAPH_VARIABLE_
-#define CRIMILD_RENDERING_SHADER_GRAPH_VARIABLE_
+#ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_CLAMP_
+#define CRIMILD_RENDERING_SHADER_GRAPH_NODES_CLAMP_
 
-#include "ShaderGraphNode.hpp"
+#include "Rendering/ShaderGraph/Expression.hpp"
 
 namespace crimild {
 
 	namespace shadergraph {
 
-		class Variable : public ShaderGraphNode {
-			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::Variable )
+		class Variable;
+
+		class Clamp : public Expression {
+			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::Clamp )
 			
 		public:
-			enum class Storage {
-				DEFAULT,
-				INPUT,
-				OUTPUT,
-				UNIFORM,
-				CONSTANT,
-			};
+			Clamp( ShaderGraph *graph, Variable *value, Variable *min, Variable *max );
+			virtual ~Clamp( void );
 
-			enum class Precision {
-				HIGH,
-				MEDIUM,
-				LOW,
-			};
+			Variable *getValue( void ) { return _value; }
+			Variable *getMin( void ) { return _min; }
+			Variable *getMax( void ) { return _max; }
+			Variable *getResult( void ) { return _result; }
 			
-			enum class Type {
-				ANY,
-				SCALAR,
-				VECTOR_2,
-				VECTOR_3,
-				VECTOR_4,
-				MATRIX_3,
-				MATRIX_4,
-				SAMPLER_2D,
-			};
-
-		public:
-			explicit Variable( ShaderGraph *, Type type, std::string name = "" );
-			explicit Variable( ShaderGraph *, Storage storage, Type type, std::string name = "" );
-			virtual ~Variable( void );
-
-			virtual ShaderGraphNode::NodeType getNodeType( void ) const override { return ShaderGraphNode::NodeType::VARIABLE; }
-
-			Type getType( void ) const { return _type; }
-			Storage getStorage( void ) const { return _storage; }
-
-			Variable *setVariableName( std::string name ) { setName( name ); return this; }
-
-			Variable *setLayoutLocation( crimild::Int16 location ) { _layoutLocation = location; return this; }
-			crimild::Int16 getLayoutLocation( void ) const { return _layoutLocation; }
-
 		private:
-			Type _type;
-			Storage _storage;
-			crimild::Int16 _layoutLocation = -1;
+			Variable *_value = nullptr;
+			Variable *_min = nullptr;
+			Variable *_max = nullptr;
+			Variable *_result = nullptr;
+			
+		public:
+			virtual void setup( ShaderGraph *graph ) override;
 		};
 
 	}
