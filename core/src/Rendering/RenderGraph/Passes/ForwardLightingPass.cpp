@@ -40,7 +40,13 @@ using namespace crimild::rendergraph;
 using namespace crimild::rendergraph::passes;
 
 ForwardLightingPass::ForwardLightingPass( RenderGraph *graph, crimild::Size maxLights )
-	: ForwardLightingPass( graph, { RenderQueue::RenderableType::OPAQUE }, maxLights )
+	: ForwardLightingPass(
+		graph,
+		{
+			RenderQueue::RenderableType::OPAQUE,
+			RenderQueue::RenderableType::TRANSLUCENT,
+		},
+		maxLights )
 {
 	
 }
@@ -124,7 +130,12 @@ void ForwardLightingPass::render( Renderer *renderer, RenderQueue *renderQueue, 
 		const auto nMatrix = Matrix3f( mMatrix ).getInverse().getTranspose();
 		program->bindNormalMatrix( mMatrix );
 
-		program->bindMaterial( crimild::get_ptr( renderable->material ) );
+		if ( auto material = crimild::get_ptr( renderable->material ) ) {
+			program->bindMaterial( material );
+
+			renderer->setAlphaState( material->getAlphaState() );
+			renderer->setDepthState( material->getDepthState() );
+		}
 
 		renderer->bindProgram( program );
 		
@@ -133,6 +144,9 @@ void ForwardLightingPass::render( Renderer *renderer, RenderQueue *renderQueue, 
 			renderer->drawPrimitive( nullptr, primitive );
 			renderer->unbindPrimitive( nullptr, primitive );
 		});
+
+		renderer->setAlphaState( AlphaState::DISABLED );
+		renderer->setDepthState( DepthState::ENABLED );
 
 		renderer->unbindProgram( program );
 	});

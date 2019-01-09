@@ -111,7 +111,7 @@ private:
 DepthToRGBPass::DepthToRGBPass( RenderGraph *graph )
 	: RenderGraphPass( graph, "Convert Depth to RGB" )
 {
-
+	_output = graph->createAttachment( getName() + " - Linear Depth", RenderGraphAttachment::Hint::FORMAT_RGBA );
 }
 			
 DepthToRGBPass::~DepthToRGBPass( void )

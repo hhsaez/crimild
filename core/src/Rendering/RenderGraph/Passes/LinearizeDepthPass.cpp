@@ -111,7 +111,7 @@ private:
 LinearizeDepthPass::LinearizeDepthPass( RenderGraph *graph )
 	: RenderGraphPass( graph, "Convert Depth to linear values" )
 {
-
+	_output = graph->createAttachment( getName() + " - Linear Depth", RenderGraphAttachment::Hint::FORMAT_RGBA );
 }
 			
 LinearizeDepthPass::~LinearizeDepthPass( void )
