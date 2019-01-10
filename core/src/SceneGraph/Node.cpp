@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -192,6 +192,8 @@ void Node::encode( coding::Encoder &encoder )
         }
     }
     encoder.encode( "components", cmps );
+
+	encoder.encode( "layer", _layer );
 }
 
 void Node::decode( coding::Decoder &decoder )
@@ -214,52 +216,7 @@ void Node::decode( coding::Decoder &decoder )
     cmps.each( [ this ]( SharedPointer< NodeComponent > &c, crimild::Size ) {
         attachComponent( c );
     });
-}
 
-bool Node::registerInStream( Stream &s )
-{
-    if ( !StreamObject::registerInStream( s ) ) {
-        return false;
-    }
-
-    forEachComponent( [&s]( NodeComponent *cmp ) {
-        cmp->registerInStream( s );
-    });
-
-    return true;
-}
-
-void Node::save( Stream &s )
-{
-    StreamObject::save( s );
-
-    s.write( getName() );
-
-    s.write( _local );
-
-    std::vector< SharedPointer< NodeComponent >> cs;
-    for ( auto &it : _components ) {
-        if ( it.second != nullptr ) {
-            cs.push_back( it.second );
-        }
-    }
-    s.write( cs );
-}
-
-void Node::load( Stream &s )
-{
-    StreamObject::load( s );
-
-    std::string name;
-    s.read( name );
-    setName( name );
-
-    s.read( _local );
-
-    std::vector< SharedPointer< NodeComponent >> cmps;
-    s.read( cmps );
-    for ( auto &cmp : cmps ) {
-        attachComponent( cmp );
-    }
+	decoder.decode( "layer", _layer );
 }
 

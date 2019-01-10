@@ -73,6 +73,7 @@ namespace crimild {
 
         public:
             static const GLenum PRIMITIVE_TYPE[];
+			static const GLenum TEXTURE_TARGET[];
             static const GLenum TEXTURE_WRAP_MODE_CLAMP[];
             static const GLenum TEXTURE_FILTER_MAP[];
             static const GLenum ALPHA_SRC_BLEND_FUNC[];
@@ -86,7 +87,7 @@ namespace crimild {
 }
 
 #ifndef CRIMILD_ENABLE_CHECK_GL_ERRORS
-#define CRIMILD_ENABLE_CHECK_GL_ERRORS 0
+#define CRIMILD_ENABLE_CHECK_GL_ERRORS 1
 #endif
 
 #if CRIMILD_ENABLE_CHECK_GL_ERRORS

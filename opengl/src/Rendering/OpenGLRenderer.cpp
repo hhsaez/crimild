@@ -138,8 +138,8 @@ void OpenGLRenderer::configure( void )
 		exit( 1 );
 	}
 
-	if ( !GLEW_VERSION_3_2 ) {
-        Log::fatal( CRIMILD_CURRENT_CLASS_NAME, "OpenGL 3.2 API is not available" );
+	if ( !GLEW_VERSION_3_3 ) {
+        Log::fatal( CRIMILD_CURRENT_CLASS_NAME, "OpenGL 3.3 API is not available" );
 		exit( 1 );
     }
 #endif

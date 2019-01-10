@@ -176,6 +176,18 @@ Variable *csl::mat3_uniform( SharedPointer< ShaderUniform > const &uniform )
 	return mat3_uniform( uniform->getName() );
 }
 
+Variable *csl::mat4( Variable *matrix )
+{
+	if ( matrix->getType() == Variable::Type::MATRIX_4 ) {
+		return matrix;
+	}
+	
+	return ShaderGraph::getCurrent()->addNode< Convert >(
+		matrix,
+		Variable::Type::MATRIX_4
+	)->getResult();
+}
+
 Variable *csl::mat4_uniform( std::string name )
 {
 	auto graph = ShaderGraph::getCurrent();
@@ -721,6 +733,26 @@ Variable *csl::texture2D_uniform( std::string name )
 Variable *csl::texture2D_uniform( SharedPointer< ShaderUniform > const &uniform )
 {
 	return texture2D_uniform( uniform->getName() );
+}
+
+Variable *csl::textureCube_uniform( std::string name )
+{
+	auto graph = ShaderGraph::getCurrent();
+
+	auto ret = graph->getInput< Variable >( name );
+	if ( ret == nullptr ) {
+		ret = graph->addInputNode< Variable >(
+			Variable::Storage::UNIFORM,
+			Variable::Type::SAMPLER_CUBE_MAP,
+			name
+		);
+	}
+	return ret;
+}
+
+Variable *csl::textureCube_uniform( SharedPointer< ShaderUniform > const &uniform )
+{
+	return textureCube_uniform( uniform->getName() );
 }
 
 Variable *csl::textureColor( Variable *texture, Variable *uvs )

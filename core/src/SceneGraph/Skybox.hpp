@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,63 +25,30 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Texture.hpp"
-#include "Coding/Encoder.hpp"
-#include "Coding/Decoder.hpp"
+#ifndef CRIMILD_SCENE_GRAPH_SKYBOX_NODE_
+#define CRIMILD_SCENE_GRAPH_SKYBOX_NODE_
 
-#include "Foundation/Log.hpp"
+#include "Geometry.hpp"
 
-CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::Texture )
+namespace crimild {
 
-using namespace crimild;
+	class Image;
+    
+	class Skybox : public Geometry {
+		CRIMILD_IMPLEMENT_RTTI( crimild::Skybox )
 
-SharedPointer< Texture > Texture::ONE = crimild::alloc< Texture >(
-	crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA )
-);
-
-SharedPointer< Texture > Texture::ZERO = crimild::alloc< Texture >(
-	crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0x00, 0x00, 0x00, 0x00 }, Image::PixelFormat::RGBA )
-);
-
-Texture::Texture( std::string name )
-    : NamedObject( name )
-{
+	private:
+		using ImageArray = containers::Array< SharedPointer< Image >>;
+		
+	public:
+		explicit Skybox( ImageArray const &faces );
+		virtual ~Skybox( void );
+        
+    private:
+		ImageArray _faces;
+	};
     
 }
 
-Texture::Texture( SharedPointer< Image > const &image, std::string name )
-	: NamedObject( name ),
-	  _images( { image } )
-{
-
-}
-
-Texture::Texture( Texture::ImageArray const &images )
-	: NamedObject( "CubeMap" ),
-	  _target( Texture::Target::CUBE_MAP ),
-	  _images( images )
-{
-	
-}
-
-Texture::~Texture( void )
-{
-    unload();
-}
-
-void Texture::encode( coding::Encoder &encoder )
-{
-	Codable::encode( encoder );
-
-	encoder.encode( "target", _target );
-	encoder.encode( "images", _images );
-}
-
-void Texture::decode( coding::Decoder &decoder )
-{
-	Codable::decode( decoder );
-
-	decoder.decode( "target", _target );
-	decoder.decode( "images", _images );
-}
+#endif
 

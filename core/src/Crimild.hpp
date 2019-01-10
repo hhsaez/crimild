@@ -95,6 +95,7 @@
 #include "SceneGraph/Node.hpp"
 #include "SceneGraph/Switch.hpp"
 #include "SceneGraph/Text.hpp"
+#include "SceneGraph/Skybox.hpp"
 
 #include "Behaviors/Behavior.hpp"
 #include "Behaviors/BehaviorContext.hpp"
@@ -260,6 +261,7 @@
 #include "Rendering/RenderGraph/Passes/ScreenPass.hpp"
 #include "Rendering/RenderGraph/Passes/DepthPass.hpp"
 #include "Rendering/RenderGraph/Passes/BlendPass.hpp"
+#include "Rendering/RenderGraph/Passes/SkyboxPass.hpp"
 
 #include "Rendering/ImageEffects/ImageEffect.hpp"
 #include "Rendering/ImageEffects/ColorTintImageEffect.hpp"

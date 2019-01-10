@@ -93,7 +93,7 @@ void TextureCatalog::bind( Texture *texture )
 		return;
 	}
 
-	glBindTexture( GL_TEXTURE_2D, texture->getCatalogId() );
+	glBindTexture( OpenGLUtils::TEXTURE_TARGET[ texture->getTarget() ], texture->getCatalogId() );
 
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
@@ -106,7 +106,7 @@ void TextureCatalog::unbind( Texture *texture )
 	
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
-	glBindTexture( GL_TEXTURE_2D, 0 );
+	glBindTexture( OpenGLUtils::TEXTURE_TARGET[ texture->getTarget() ], 0 );
 	
 	Catalog< Texture >::unbind( texture );
 
@@ -132,7 +132,7 @@ void TextureCatalog::bind( ShaderLocation *location, Texture *texture )
 
 	if ( location && location->isValid() ) {
 		glActiveTexture( GL_TEXTURE0 + _boundTextureCount );
-		glBindTexture( GL_TEXTURE_2D, texture->getCatalogId() );
+		glBindTexture( OpenGLUtils::TEXTURE_TARGET[ texture->getTarget() ], texture->getCatalogId() );
 		glUniform1i( location->getLocation(), _boundTextureCount );
 
 		++_boundTextureCount;
@@ -152,7 +152,7 @@ void TextureCatalog::unbind( ShaderLocation *location, Texture *texture )
 	if ( _boundTextureCount > 0 ) {
 		--_boundTextureCount;
 		glActiveTexture( GL_TEXTURE0 + _boundTextureCount );
-		glBindTexture( GL_TEXTURE_2D, 0 );
+		glBindTexture( OpenGLUtils::TEXTURE_TARGET[ texture->getTarget() ], 0 );
 	}
 	
 	Catalog< Texture >::unbind( location, texture );
@@ -166,13 +166,18 @@ void TextureCatalog::load( Texture *texture )
 
 	Catalog< Texture >::load( texture );
 
-	int textureId = texture->getCatalogId();
-    glBindTexture( GL_TEXTURE_2D, textureId );
+	auto textureId = texture->getCatalogId();
+	auto textureTarget = OpenGLUtils::TEXTURE_TARGET[ texture->getTarget() ];
 
-    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, OpenGLUtils::TEXTURE_FILTER_MAP[ ( uint8_t ) texture->getMinFilter() ] );
-    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, OpenGLUtils::TEXTURE_FILTER_MAP[ ( uint8_t ) texture->getMagFilter() ] );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, OpenGLUtils::TEXTURE_WRAP_MODE_CLAMP[ ( uint8_t ) texture->getWrapMode() ] );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, OpenGLUtils::TEXTURE_WRAP_MODE_CLAMP[ ( uint8_t ) texture->getWrapMode() ] );
+    glBindTexture( textureTarget, textureId );
+
+    glTexParameterf( textureTarget, GL_TEXTURE_MIN_FILTER, OpenGLUtils::TEXTURE_FILTER_MAP[ ( uint8_t ) texture->getMinFilter() ] );
+    glTexParameterf( textureTarget, GL_TEXTURE_MAG_FILTER, OpenGLUtils::TEXTURE_FILTER_MAP[ ( uint8_t ) texture->getMagFilter() ] );
+    glTexParameteri( textureTarget, GL_TEXTURE_WRAP_S, OpenGLUtils::TEXTURE_WRAP_MODE_CLAMP[ ( uint8_t ) texture->getWrapMode() ] );
+    glTexParameteri( textureTarget, GL_TEXTURE_WRAP_T, OpenGLUtils::TEXTURE_WRAP_MODE_CLAMP[ ( uint8_t ) texture->getWrapMode() ] );
+	if ( textureTarget == GL_TEXTURE_CUBE_MAP ) {
+		glTexParameteri( textureTarget, GL_TEXTURE_WRAP_R, OpenGLUtils::TEXTURE_WRAP_MODE_CLAMP[ ( uint8_t ) texture->getWrapMode() ] );
+	}
 
 	auto image = texture->getImage();
 	auto width = image->getWidth();
@@ -231,19 +236,41 @@ void TextureCatalog::load( Texture *texture )
 			Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid target type: ", ( int ) image->getPixelFormat() );
 			break;
 	}
-    
-	GLvoid *data = image->hasData() ? image->getData() : nullptr;
 
-    glTexImage2D(
-		GL_TEXTURE_2D,
-		0,
-		internalFormat, 
-    	width,
-		height,
-		0, 
-    	textureFormat, 
-    	textureType,
-        data );
+	if ( textureTarget == GL_TEXTURE_CUBE_MAP ) {
+		for ( GLuint i = 0; i < 6; i++ ) {
+			auto image = texture->getFace( i );
+			GLvoid *data = image->hasData() ? image->getData() : nullptr;
+
+			glTexImage2D(
+				GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+				0,
+				internalFormat,
+				width,
+				height,
+				0,
+				textureFormat,
+				textureType,
+				data
+			);
+		}
+	}
+	else {
+		GLvoid *data = image->hasData() ? image->getData() : nullptr;
+		
+		glTexImage2D(
+			GL_TEXTURE_2D,
+			0,
+			internalFormat, 
+			width,
+			height,
+			0, 
+			textureFormat, 
+			textureType,
+			data
+		);
+	}
+    
     
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }

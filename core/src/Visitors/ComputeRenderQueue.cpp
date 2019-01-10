@@ -68,11 +68,25 @@ void ComputeRenderQueue::visitGroup( Group *group )
 
 void ComputeRenderQueue::visitGeometry( Geometry *geometry )
 {
-    if ( _camera != nullptr && _camera->culled( geometry->getWorldBound() ) ) {
-        return;
-    }
+	auto culled = false;
+	auto cullMode = geometry->getCullMode();
+	switch ( cullMode ) {
+		case Node::CullMode::NEVER:
+			culled = false;
+			break;
 
-    _result->push( geometry );
+		case Node::CullMode::ALWAYS:
+			culled = true;
+			break;
+			
+		default:
+			culled = _camera != nullptr && _camera->culled( geometry->getWorldBound() );
+			break;
+	}
+
+	if ( !culled ) {
+		_result->push( geometry );
+	}
 }
 
 void ComputeRenderQueue::visitLight( Light *light )

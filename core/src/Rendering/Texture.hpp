@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -35,23 +35,91 @@
 
 namespace crimild {
     
-    class Texture : public NamedObject, public coding::Codable, public StreamObject, public Catalog< Texture >::Resource {
+    class Texture :
+		public NamedObject,
+		public coding::Codable,
+		public StreamObject, // TODO: remove this
+		public Catalog< Texture >::Resource {
         CRIMILD_IMPLEMENT_RTTI( crimild::Texture )
 
 	public:
 		static SharedPointer< Texture > ONE;
 		static SharedPointer< Texture > ZERO;
 
+		struct Target {
+			enum {
+				TEXTURE_2D,
+				CUBE_MAP,
+			};
+
+			using Impl = crimild::UInt8;
+		};
+
+		struct CubeMapFace {
+			enum {
+				RIGHT,
+				LEFT,
+				TOP,
+				BOTTOM,
+				BACK,
+				FRONT
+			};
+
+			using Impl = crimild::UInt8;
+		};
+
+	private:
+		using ImageArray = containers::Array< SharedPointer< Image >>;
+
 	public:
+		/**
+		   \brief Construct an empty TEXTURE_2D texture
+		 */
         explicit Texture( std::string name = "ColorMap" );
+
+		/**
+		   \brief Construct a TEXTURE_2D texture with an image
+		 */
 		explicit Texture( SharedPointer< Image > const &image, std::string name = "ColorMap" );
+
+		/**
+		   \brief Construct a CUBE_MAP texture
+
+		   \remarks Faces: Right, Left, Top, Bottom, Back, Front
+		 */
+		explicit Texture( ImageArray const &faces );
+
+		/**
+		   \brief Destructor
+		 */
 		virtual ~Texture( void );
 
+		inline Target::Impl getTarget( void ) const { return _target; }
+
+	private:
+		Target::Impl _target = Target::TEXTURE_2D;
+
     public:
-        Image *getImage( void ) { return crimild::get_ptr( _image ); }
+        inline Image *getImage( void )
+		{
+			if ( _images.empty() ) {
+				return nullptr;
+			}
+			
+			return crimild::get_ptr( _images[ 0 ] );
+		}
+
+		inline Image *getFace( CubeMapFace::Impl faceId )
+		{
+			if ( faceId >= _images.size() ) {
+				return nullptr;
+			}
+
+			return crimild::get_ptr( _images[ faceId ] );
+		}
         
 	private:
-		SharedPointer< Image > _image;
+		ImageArray _images;
 
     public:
         enum class WrapMode : uint8_t {
@@ -96,17 +164,6 @@ namespace crimild {
         
         //@}
         
-        /**
-            \name Streaming
-        */
-        //@{
-
-    public:
-        virtual bool registerInStream( Stream &s ) override;
-        virtual void save( Stream &s ) override;
-        virtual void load( Stream &s ) override;
-
-        //@}
     };
 	
 }

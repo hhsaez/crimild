@@ -64,6 +64,7 @@ namespace crimild {
 			OPAQUE_CUSTOM,
             TRANSLUCENT,
 			TRANSLUCENT_CUSTOM,
+			SKYBOX,
             SCREEN,
 			DEBUG,
         };
