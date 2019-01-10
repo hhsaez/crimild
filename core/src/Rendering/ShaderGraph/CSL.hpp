@@ -82,6 +82,8 @@ namespace crimild {
 			Variable *mat3( Variable *matrix );
 			Variable *mat3_uniform( std::string name );
 			Variable *mat3_uniform( SharedPointer< ShaderUniform > const &uniform );
+
+			Variable *mat4( Variable *matrix );
 			Variable *mat4_uniform( std::string name );
 			Variable *mat4_uniform( SharedPointer< ShaderUniform > const &uniform );
 
@@ -195,10 +197,19 @@ namespace crimild {
 
 			Variable *linearizeDepth( Variable *input, Variable *near, Variable *far );
 
+			/**
+			   \name Texture
+			 */
+			//@{
+			
 			Variable *texture2D_uniform( std::string name );
 			Variable *texture2D_uniform( SharedPointer< ShaderUniform > const &uniform );
+			Variable *textureCube_uniform( std::string name );
+			Variable *textureCube_uniform( SharedPointer< ShaderUniform > const &uniform );
 			Variable *textureColor( Variable *texture, Variable *uvs );
 			Variable *textureUnitVector( Variable *texture, Variable *uvs );
+
+			//@}
 		}
 
 	}

@@ -537,6 +537,10 @@ std::string OpenGLShaderGraph::getVariableTypeString( Variable *var )
 			typeStr = "sampler2D";
 			break;
 			
+		case Variable::Type::SAMPLER_CUBE_MAP:
+			typeStr = "samplerCube";
+			break;
+			
 		default:
 			typeStr = "unknown";
 			break;

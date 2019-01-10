@@ -79,8 +79,11 @@ void RenderQueue::push( Geometry *geometry )
     rs->forEachMaterial( [this, geometry, renderOnScreen]( Material *material ) {
         auto renderableType = RenderQueue::RenderableType::OPAQUE;
         bool castShadows = false;
-        
-        if ( renderOnScreen ) {
+
+		if ( geometry->getLayer() == Node::Layer::SKYBOX ) {
+			renderableType = RenderQueue::RenderableType::SKYBOX;
+		}
+        else if ( renderOnScreen || geometry->getLayer() == Node::Layer::SCREEN ) {
             renderableType = RenderQueue::RenderableType::SCREEN;
         }
         else if ( material->getColorMaskState()->isEnabled() &&

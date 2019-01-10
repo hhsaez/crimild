@@ -25,63 +25,36 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Texture.hpp"
-#include "Coding/Encoder.hpp"
-#include "Coding/Decoder.hpp"
+#ifndef CRIMILD_CORE_RENDERING_PROGRAMS_SKYBOX_
+#define CRIMILD_CORE_RENDERING_PROGRAMS_SKYBOX_
 
-#include "Foundation/Log.hpp"
+#include "Rendering/ShaderProgram.hpp"
+#include "Rendering/ShaderUniformImpl.hpp"
 
-CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::Texture )
+namespace crimild {
 
-using namespace crimild;
+	class SkyboxShaderProgram : public ShaderProgram {
+	public:
+		SkyboxShaderProgram( void );
+		virtual ~SkyboxShaderProgram( void );
 
-SharedPointer< Texture > Texture::ONE = crimild::alloc< Texture >(
-	crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA )
-);
+		void bindProjMatrix( const Matrix4f &value ) { _projMatrix->setValue( value ); }
+		void bindViewMatrix( const Matrix4f &value ) { _viewMatrix->setValue( value ); }
+		void bindDiffuse( const RGBAColorf &value ) { _diffuse->setValue( value ); }
+		void bindCubeMap( Texture *value ) { _cubeMap->setValue( value ); }
 
-SharedPointer< Texture > Texture::ZERO = crimild::alloc< Texture >(
-	crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0x00, 0x00, 0x00, 0x00 }, Image::PixelFormat::RGBA )
-);
+	private:
+		void createVertexShader( void );
+		void createFragmentShader( void );
 
-Texture::Texture( std::string name )
-    : NamedObject( name )
-{
-    
+	private:
+		SharedPointer< Matrix4fUniform > _projMatrix;
+		SharedPointer< Matrix4fUniform > _viewMatrix;
+		SharedPointer< RGBAColorfUniform > _diffuse;
+		SharedPointer< TextureUniform > _cubeMap;
+	};
+
 }
 
-Texture::Texture( SharedPointer< Image > const &image, std::string name )
-	: NamedObject( name ),
-	  _images( { image } )
-{
-
-}
-
-Texture::Texture( Texture::ImageArray const &images )
-	: NamedObject( "CubeMap" ),
-	  _target( Texture::Target::CUBE_MAP ),
-	  _images( images )
-{
-	
-}
-
-Texture::~Texture( void )
-{
-    unload();
-}
-
-void Texture::encode( coding::Encoder &encoder )
-{
-	Codable::encode( encoder );
-
-	encoder.encode( "target", _target );
-	encoder.encode( "images", _images );
-}
-
-void Texture::decode( coding::Decoder &decoder )
-{
-	Codable::decode( decoder );
-
-	decoder.decode( "target", _target );
-	decoder.decode( "images", _images );
-}
+#endif
 

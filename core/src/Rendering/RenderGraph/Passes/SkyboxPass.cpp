@@ -25,13 +25,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ForwardLightingPass.hpp"
+#include "SkyboxPass.hpp"
 
 #include "Rendering/RenderGraph/RenderGraphAttachment.hpp"
 #include "Rendering/FrameBufferObject.hpp"
 #include "Rendering/Renderer.hpp"
-#include "Rendering/ShaderProgram.hpp"
-#include "Rendering/Programs/ForwardShadingShaderProgram.hpp"
+#include "Rendering/RenderQueue.hpp"
+#include "Rendering/Programs/SkyboxShaderProgram.hpp"
 #include "Simulation/AssetManager.hpp"
 #include "Foundation/Profiler.hpp"
 
@@ -39,40 +39,26 @@ using namespace crimild;
 using namespace crimild::rendergraph;
 using namespace crimild::rendergraph::passes;
 
-ForwardLightingPass::ForwardLightingPass( RenderGraph *graph, crimild::Size maxLights )
-	: ForwardLightingPass(
-		graph,
-		{
-			RenderQueue::RenderableType::OPAQUE,
-			RenderQueue::RenderableType::TRANSLUCENT,
-		},
-		maxLights )
-{
-	
-}
-
-ForwardLightingPass::ForwardLightingPass( RenderGraph *graph, ForwardLightingPass::RenderableTypeArray const &renderableTypes, crimild::Size maxLights )
-	: RenderGraphPass( graph, "Forward Lighting" ),
-	  _renderableTypes( renderableTypes ),
-	  _programs( maxLights + 1 )
+SkyboxPass::SkyboxPass( RenderGraph *graph )
+	: RenderGraphPass( graph, "Skybox" )
 {
     _colorOutput = graph->createAttachment(
 		getName() + " - Color",
 		RenderGraphAttachment::Hint::FORMAT_RGBA );
+	
 	_clearFlags = FrameBufferObject::ClearFlag::COLOR;
+
 	_depthState = crimild::alloc< DepthState >( true, DepthState::CompareFunc::LEQUAL, false );
 
-	for ( crimild::Size i = 0; i <= maxLights; i++ ) {
-		_programs[ i ] = crimild::alloc< ForwardShadingShaderProgram >( i );
-	}
+	_program = crimild::alloc< SkyboxShaderProgram >();
 }
 
-ForwardLightingPass::~ForwardLightingPass( void )
+SkyboxPass::~SkyboxPass( void )
 {
 	
 }
 
-void ForwardLightingPass::setup( rendergraph::RenderGraph *graph )
+void SkyboxPass::setup( rendergraph::RenderGraph *graph )
 {
 	if ( _depthInput == nullptr ) {
 		_depthInput = graph->createAttachment(
@@ -80,32 +66,22 @@ void ForwardLightingPass::setup( rendergraph::RenderGraph *graph )
 			RenderGraphAttachment::Hint::FORMAT_DEPTH |
 			RenderGraphAttachment::Hint::RENDER_ONLY );
 		_clearFlags = FrameBufferObject::ClearFlag::ALL;
-		_depthState = DepthState::ENABLED;
 	}
 	
 	graph->read( this, { _depthInput } );
 	graph->write( this, { _colorOutput } );
 }
 
-void ForwardLightingPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue )
+void SkyboxPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue )
 {
-	CRIMILD_PROFILE( "Forward Lighting Pass" )
+	CRIMILD_PROFILE( getName() )
 	
 	auto fbo = graph->createFBO( { _depthInput, _colorOutput } );
 	fbo->setClearFlags( _clearFlags );
 	
 	renderer->bindFrameBuffer( crimild::get_ptr( fbo ) );
 
-	_renderableTypes.each( [ this, renderer, renderQueue ]( RenderQueue::RenderableType const &type ) {
-		render( renderer, renderQueue, type );
-	});
-	
-	renderer->unbindFrameBuffer( crimild::get_ptr( fbo ) );
-}
-
-void ForwardLightingPass::render( Renderer *renderer, RenderQueue *renderQueue, RenderQueue::RenderableType renderableType )
-{
-	auto renderables = renderQueue->getRenderables( renderableType );
+	auto renderables = renderQueue->getRenderables( RenderQueue::RenderableType::SKYBOX );
 	if ( renderables->size() == 0 ) {
 		return;
 	}
@@ -113,30 +89,17 @@ void ForwardLightingPass::render( Renderer *renderer, RenderQueue *renderQueue, 
 	const auto pMatrix = renderQueue->getProjectionMatrix();
 	const auto vMatrix = renderQueue->getViewMatrix();
 
-	auto lightCount = Numerici::min( _programs.size() - 1, renderQueue->getLightCount() );
-	auto program = crimild::get_ptr( _programs[ lightCount ] );
+	auto program = crimild::get_ptr( _program );
 
 	program->bindProjMatrix( pMatrix );
 	program->bindViewMatrix( vMatrix );
 
-	renderQueue->each( [ program ]( Light *light, int index ) {
-		program->bindLight( light, index );
-	});
-
 	renderer->setDepthState( _depthState );
 
 	renderQueue->each( renderables, [ this, renderer, program ]( RenderQueue::Renderable *renderable ) {
-		const auto &mMatrix = renderable->modelTransform;
-		program->bindModelMatrix( mMatrix );
-
-		const auto nMatrix = Matrix3f( mMatrix ).getInverse().getTranspose();
-		program->bindNormalMatrix( mMatrix );
-
 		if ( auto material = crimild::get_ptr( renderable->material ) ) {
-			program->bindMaterial( material );
-
-			// TODO: Some materials might need to set the depth state too...
-			renderer->setAlphaState( material->getAlphaState() );
+			program->bindCubeMap( material->getColorMap() );
+			program->bindDiffuse( material->getDiffuse() );
 		}
 
 		renderer->bindProgram( program );
@@ -147,10 +110,11 @@ void ForwardLightingPass::render( Renderer *renderer, RenderQueue *renderQueue, 
 			renderer->unbindPrimitive( nullptr, primitive );
 		});
 
-		renderer->setAlphaState( AlphaState::DISABLED );
-		renderer->setDepthState( DepthState::ENABLED );
-
 		renderer->unbindProgram( program );
 	});
+
+	renderer->setDepthState( DepthState::ENABLED );
+	
+	renderer->unbindFrameBuffer( crimild::get_ptr( fbo ) );
 }
 

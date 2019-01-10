@@ -44,6 +44,11 @@ const GLenum OpenGLUtils::PRIMITIVE_TYPE[] = {
 	GL_TRIANGLE_FAN
 };
 
+const GLenum OpenGLUtils::TEXTURE_TARGET[] = {
+	GL_TEXTURE_2D,
+	GL_TEXTURE_CUBE_MAP
+};
+
 const GLenum OpenGLUtils::TEXTURE_WRAP_MODE_CLAMP[] = {
 	GL_REPEAT,
 	GL_CLAMP_TO_EDGE,

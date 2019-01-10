@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-present, H. Hernan Saez
+ * Copyright (c) 2002-present, H. Hernán Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,63 +25,52 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Texture.hpp"
-#include "Coding/Encoder.hpp"
-#include "Coding/Decoder.hpp"
+#ifndef CRIMILD_CORE_RENDER_GRAPH_PASSES_SKYBOX_
+#define CRIMILD_CORE_RENDER_GRAPH_PASSES_SKYBOX_
 
-#include "Foundation/Log.hpp"
+#include "Rendering/RenderGraph/RenderGraphPass.hpp"
 
-CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::Texture )
+namespace crimild {
 
-using namespace crimild;
+	class DepthState;
+	class SkyboxShaderProgram;
 
-SharedPointer< Texture > Texture::ONE = crimild::alloc< Texture >(
-	crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA )
-);
+	namespace rendergraph {
 
-SharedPointer< Texture > Texture::ZERO = crimild::alloc< Texture >(
-	crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0x00, 0x00, 0x00, 0x00 }, Image::PixelFormat::RGBA )
-);
+		namespace passes {
 
-Texture::Texture( std::string name )
-    : NamedObject( name )
-{
-    
+			/**
+			   \brief Render a skybox
+			 */
+			class SkyboxPass : public RenderGraphPass {
+				CRIMILD_IMPLEMENT_RTTI( crimild::rendergraph::SkyboxPass )
+
+			public:
+				SkyboxPass( RenderGraph *graph );
+				virtual ~SkyboxPass( void );
+				
+				void setDepthInput( RenderGraphAttachment *attachment ) { _depthInput = attachment; }
+				RenderGraphAttachment *getDepthInput( void ) { return _depthInput; }
+				
+				void setColorOutput( RenderGraphAttachment *attachment ) { _colorOutput = attachment; }
+				RenderGraphAttachment *getColorOutput( void ) { return _colorOutput; }
+				
+				virtual void setup( rendergraph::RenderGraph *graph ) override;
+				virtual void execute( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue ) override;
+
+			private:
+				SharedPointer< SkyboxShaderProgram > _program;
+				crimild::Int8 _clearFlags;
+				SharedPointer< DepthState > _depthState;
+				
+				RenderGraphAttachment *_depthInput = nullptr;
+				RenderGraphAttachment *_colorOutput = nullptr;
+			};
+
+		}
+
+	}
+
 }
 
-Texture::Texture( SharedPointer< Image > const &image, std::string name )
-	: NamedObject( name ),
-	  _images( { image } )
-{
-
-}
-
-Texture::Texture( Texture::ImageArray const &images )
-	: NamedObject( "CubeMap" ),
-	  _target( Texture::Target::CUBE_MAP ),
-	  _images( images )
-{
-	
-}
-
-Texture::~Texture( void )
-{
-    unload();
-}
-
-void Texture::encode( coding::Encoder &encoder )
-{
-	Codable::encode( encoder );
-
-	encoder.encode( "target", _target );
-	encoder.encode( "images", _images );
-}
-
-void Texture::decode( coding::Decoder &decoder )
-{
-	Codable::decode( decoder );
-
-	decoder.decode( "target", _target );
-	decoder.decode( "images", _images );
-}
-
+#endif

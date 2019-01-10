@@ -61,6 +61,7 @@ namespace crimild {
 				MATRIX_3,
 				MATRIX_4,
 				SAMPLER_2D,
+				SAMPLER_CUBE_MAP,
 			};
 
 		public:

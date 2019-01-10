@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -46,8 +46,8 @@ namespace crimild {
 	*/
 	class Node : 
 		public NamedObject,
-        public coding::Codable,
-		public StreamObject {
+		public StreamObject, // TODO: remove this
+        public coding::Codable {
         CRIMILD_IMPLEMENT_RTTI( crimild::Node )
 
 	public:
@@ -189,7 +189,60 @@ namespace crimild {
 
 	private:
 		bool _enabled = true;
-            
+
+		/**
+		   \name Layers
+		*/
+		//@{
+		
+	public:
+		/**
+		   \brief Node layers
+
+		   Layers are defined as integers so users can create their own in between 
+		   the default ones.
+		 */
+		struct Layer {
+			enum {
+				DEFAULT = 0,
+				SKYBOX = 1 << 10,
+				SCREEN = 1 << 12
+			};
+
+			using Impl = crimild::Int32;
+		};
+
+		inline Layer::Impl getLayer( void ) const { return _layer; }
+		void setLayer( Layer::Impl value ) { _layer = value; }
+
+	private:
+		Layer::Impl _layer = Layer::DEFAULT;
+
+		//@}
+
+		/**
+		   \name Cull flag
+		 */
+		//@{
+	public:
+		struct CullMode {
+			enum {
+				NEVER,
+				DEFAULT,
+				ALWAYS,
+			};
+
+			using Impl = crimild::Int32;
+		};
+
+		inline CullMode::Impl getCullMode( void ) const { return _cullMode; }
+		void setCullMode( CullMode::Impl value ) { _cullMode = value; }
+
+	private:
+		CullMode::Impl _cullMode = CullMode::DEFAULT;
+
+		//@}
+
         /**
             \name Coding support
          */
@@ -200,19 +253,6 @@ namespace crimild {
 
         //@}
 
-		/**
-			\name Streaming support
-         
-            \deprecated See crimild::coding
-		*/
-		//@{
-
-	public:
-		bool registerInStream( Stream &s ) override;
-		void save( Stream &s ) override;
-		void load( Stream &s ) override;
-
-		//@}
 	};
 
 }
