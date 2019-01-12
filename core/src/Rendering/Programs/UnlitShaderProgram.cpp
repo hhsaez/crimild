@@ -30,6 +30,8 @@
 #include "Rendering/Renderer.hpp"
 #include "Rendering/ShaderGraph/ShaderGraph.hpp"
 #include "Rendering/ShaderGraph/CSL.hpp"
+#include "Rendering/ShaderGraph/Nodes/MeshVertexMaster.hpp"
+#include "Rendering/ShaderGraph/Nodes/UnlitFragmentMaster.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
@@ -38,15 +40,6 @@ UnlitShaderProgram::UnlitShaderProgram( void )
 {
 	createVertexShader();
 	createFragmentShader();
-
-	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::PROJECTION_MATRIX_UNIFORM, "uPMatrix" );
-	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM, "uVMatrix" );
-	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM, "uMMatrix" );
-
-    registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_DIFFUSE_UNIFORM, "uMatDiffuse" );
-    
-    registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_USE_COLOR_MAP_UNIFORM, "uUseColorMap" );
-	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM, "uColorMap" );
 }
 
 UnlitShaderProgram::~UnlitShaderProgram( void )
@@ -58,32 +51,17 @@ void UnlitShaderProgram::createVertexShader( void )
 {
 	auto graph = Renderer::getInstance()->createShaderGraph();
 
-	auto p = csl::projectedPosition();
-	auto uv = csl::modelTextureCoords();
+	auto master = graph->addOutputNode< MeshVertexMaster >();
 
-	csl::vertexOutput( "vTextureCoord", uv );
-	csl::vertexPosition( p );
-
-	auto src = graph->build();
-	auto shader = crimild::alloc< VertexShader >( src );
-	setVertexShader( shader );
+	buildVertexShader( graph );
 }
 
 void UnlitShaderProgram::createFragmentShader( void )
 {
 	auto graph = Renderer::getInstance()->createShaderGraph();
 
-	auto uv = csl::vec2_in( "vTextureCoord" );
-	auto texture = csl::texture2D_uniform( "uColorMap" );
-	auto diffuse = csl::vec4_uniform( "uMatDiffuse" );
-	auto color = csl::mult(
-		csl::textureColor( texture, uv ),
-		diffuse
-	);
-	csl::fragColor( color );
+	auto master = graph->addOutputNode< UnlitFragmentMaster >();
 
-	auto src = graph->build();
-	auto shader = crimild::alloc< FragmentShader >( src );
-	setFragmentShader( shader );
+	buildFragmentShader( graph );
 }
 

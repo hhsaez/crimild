@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,47 +25,40 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_RENDERING_SHADER_LOCATION_
-#define CRIMILD_RENDERING_SHADER_LOCATION_
+#ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_ALPHACLIP_
+#define CRIMILD_RENDERING_SHADER_GRAPH_NODES_ALPHACLIP_
 
-#include "Foundation/Macros.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/NamedObject.hpp"
+#include "Rendering/ShaderGraph/Expression.hpp"
 
 namespace crimild {
 
-	class ShaderProgram;
-    
-	class ShaderLocation : public NamedObject, public SharedObject {
-	public:
-		enum class Type {
-			ATTRIBUTE,
-			UNIFORM,
-			MAX
+	namespace shadergraph {
+
+		class Variable;
+
+		/**
+		   \remarks This is an output node
+		 */
+		class AlphaClip : public Expression {
+			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::AlphaClip )
+			
+		public:
+			AlphaClip( ShaderGraph *graph, Variable *alpha, Variable *threshold );
+			virtual ~AlphaClip( void );
+
+			Variable *getAlphaInput( void ) { return _alphaInput; }
+			Variable *getThresholdInput( void ) { return _thresholdInput; }
+			
+		private:
+			Variable *_alphaInput = nullptr;
+			Variable *_thresholdInput = nullptr;
+			
+		public:
+			virtual void setup( ShaderGraph *graph ) override;
 		};
 
-	public:
-		explicit ShaderLocation( Type type, std::string name );
-		virtual ~ShaderLocation( void );
+	}
 
-		Type getType( void ) const { return _type; }
-
-		void reset( void ) { _location = -1; }
-
-		bool isValid( void ) const { return _location >= 0; }
-
-		int getLocation( void ) const { return _location; }
-		void setLocation( int location ) { _location = location; }
-
-		void setProgram( ShaderProgram *program ) { _program = program; }
-		ShaderProgram *getProgram( void ) { return _program; }
-
-	private:
-		Type _type;
-		int _location;
-		ShaderProgram *_program = nullptr;
-	};
-    
 }
 
 #endif

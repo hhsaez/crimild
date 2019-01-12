@@ -73,7 +73,7 @@ namespace crimild {
 			
 			private:
 				RenderableTypeArray _renderableTypes;
-				containers::Array< SharedPointer< ForwardShadingShaderProgram >> _programs;
+				SharedPointer< ShaderProgram > _program;
 				crimild::Int8 _clearFlags;
 				SharedPointer< DepthState > _depthState;
 				

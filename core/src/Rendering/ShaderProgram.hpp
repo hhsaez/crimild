@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,9 @@
 #include "Catalog.hpp"
 
 #include "Foundation/Containers/Array.hpp"
+#include "Foundation/Containers/Map.hpp"
+#include "Mathematics/Vector.hpp"
+#include "Mathematics/Matrix.hpp"
 
 #include <functional>
 #include <map>
@@ -42,10 +45,20 @@
 #include <list>
 
 namespace crimild {
+
+	class Texture;
+	class Light;
+
+	namespace shadergraph {
+
+		class ShaderGraph;
+
+	}
     
 	class ShaderProgram : public SharedObject, public Catalog< ShaderProgram >::Resource {
 	private:
 		using UniformArray = containers::Array< SharedPointer< ShaderUniform >>;
+		using UniformMap = containers::Map< std::string, SharedPointer< ShaderUniform >>;
 		
 	public:
 		class StandardLocation {
@@ -146,6 +159,7 @@ namespace crimild {
 
 	public:
 		void registerLocation( SharedPointer< ShaderLocation > const &location );
+		void registerUniformLocation( std::string name );
         ShaderLocation *getLocation( std::string name ) { return crimild::get_ptr( _locations[ name ] ); }
 		void resetLocations( void );
 		void forEachLocation( std::function< void( ShaderLocation * ) > callback );
@@ -160,11 +174,51 @@ namespace crimild {
 	public:
 		void attachUniforms( UniformArray const &uniforms );
 		void attachUniform( SharedPointer< ShaderUniform > const &uniform );
+
+		template< class ShaderUniformType >
+		ShaderUniformType *getUniform( std::string name )
+		{
+			return static_cast< ShaderUniformType * >(
+				_uniforms.contains( name )
+				    ? crimild::get_ptr( _uniforms[ name ] )
+				    : nullptr 
+			);
+		}
+
 		void detachAllUniforms( void );
 		void forEachUniform( std::function< void( ShaderUniform * ) > callback );
 
+		void bindUniform( std::string name, crimild::Int32 value );
+		void bindUniform( std::string name, crimild::Real32 value );
+		void bindUniform( std::string name, const Matrix3f &value );
+		void bindUniform( std::string name, const Matrix4f &value );
+		void bindUniform( std::string name, const RGBAColorf &value );
+		void bindUniform( std::string name, const RGBColorf &value );
+		void bindUniform( std::string name, Texture *value );
+		void bindUniform( std::string name, Light *light );
+
 	private:
-		containers::Array< SharedPointer< ShaderUniform >> _uniforms;
+		UniformMap _uniforms;
+
+	public:
+		/**
+		   \remarks Override to perform operations before binding uniforms
+		   (like computing uniform values from other uniforms)
+		*/
+		virtual void willBind( Renderer *renderer );
+
+		virtual void didBind( Renderer *renderer );
+
+		virtual void willUnbind( Renderer *renderer );
+
+		virtual void didUnbind( Renderer *renderer );
+
+	public:
+		void buildVertexShader( shadergraph::ShaderGraph *graph );
+		void buildVertexShader( SharedPointer< shadergraph::ShaderGraph > const &graph );
+
+		void buildFragmentShader( shadergraph::ShaderGraph *graph );
+		void buildFragmentShader( SharedPointer< shadergraph::ShaderGraph > const &graph );
 	};
 
 }

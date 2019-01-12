@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,47 +25,52 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_RENDERING_SHADER_LOCATION_
-#define CRIMILD_RENDERING_SHADER_LOCATION_
+#ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_MESH_VERTEX_MASTER_
+#define CRIMILD_RENDERING_SHADER_GRAPH_NODES_MESH_VERTEX_MASTER_
 
-#include "Foundation/Macros.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/NamedObject.hpp"
+#include "Rendering/ShaderGraph/Expression.hpp"
 
 namespace crimild {
 
-	class ShaderProgram;
-    
-	class ShaderLocation : public NamedObject, public SharedObject {
-	public:
-		enum class Type {
-			ATTRIBUTE,
-			UNIFORM,
-			MAX
+	namespace shadergraph {
+
+		class Variable;
+
+		class MeshVertexMaster : public Expression {
+			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::MeshVertexMaster )
+			
+		public:
+			MeshVertexMaster( ShaderGraph *graph );
+			virtual ~MeshVertexMaster( void );
+
+			void setTextureCoords( Variable *var ) { _textureCoords = var; }
+			Variable *getTextureCoords( void ) { return _textureCoords; }
+
+			void setWorldNormal( Variable *var ) { _worldNormal = var; }
+			Variable *getWorldNormal( void ) { return _worldNormal; }
+			
+			void setWorldEye( Variable *var ) { _worldEye = var; }
+			Variable *getWorldEye( void ) { return _worldEye; }
+			
+			void setWorldPosition( Variable *var ) { _worldPosition = var; }
+			Variable *getWorldPosition( void ) { return _worldPosition; }
+			
+			void setClipPosition( Variable *var ) { _clipPosition = var; }
+			Variable *getClipPosition( void ) { return _clipPosition; }
+			
+		private:
+			Variable *_textureCoords = nullptr;
+			Variable *_worldNormal = nullptr;
+			Variable *_worldEye = nullptr;
+			Variable *_worldPosition = nullptr;
+			Variable *_clipPosition = nullptr;
+			
+		public:
+			virtual void setup( ShaderGraph *graph ) override;
 		};
+		
+	}
 
-	public:
-		explicit ShaderLocation( Type type, std::string name );
-		virtual ~ShaderLocation( void );
-
-		Type getType( void ) const { return _type; }
-
-		void reset( void ) { _location = -1; }
-
-		bool isValid( void ) const { return _location >= 0; }
-
-		int getLocation( void ) const { return _location; }
-		void setLocation( int location ) { _location = location; }
-
-		void setProgram( ShaderProgram *program ) { _program = program; }
-		ShaderProgram *getProgram( void ) { return _program; }
-
-	private:
-		Type _type;
-		int _location;
-		ShaderProgram *_program = nullptr;
-	};
-    
 }
 
 #endif

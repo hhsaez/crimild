@@ -197,22 +197,16 @@ void Renderer::unbindFrameBuffer( FrameBufferObject *fbo )
 
 void Renderer::bindProgram( ShaderProgram *program )
 {
+	program->willBind( this );
 	getShaderProgramCatalog()->bind( program );
-	program->forEachUniform( [ this ]( ShaderUniform *uniform ) {
-		if ( uniform != nullptr && uniform->getLocation() != nullptr ) {
-			uniform->onBind( this );
-		}
-	});
+	program->didBind( this );
 }
 
 void Renderer::unbindProgram( ShaderProgram *program )
-{	
+{
+	program->willUnbind( this );
 	getShaderProgramCatalog()->unbind( program );
-	program->forEachUniform( [ this ]( ShaderUniform *uniform ) {
-		if ( uniform != nullptr && uniform->getLocation() != nullptr ) {
-			uniform->onUnbind( this );
-		}
-	});
+	program->didUnbind( this );
 }
 
 void Renderer::bindMaterial( ShaderProgram *program, Material *material )

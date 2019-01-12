@@ -138,6 +138,9 @@ namespace crimild {
 		virtual void bindLight( ShaderProgram *program, Light *light );
 		virtual void unbindLight( ShaderProgram *program, Light *light );
 
+		virtual void bindLight( ShaderLocation *location, crimild::Size index, Light *light ) = 0;
+		virtual void unbindLight( ShaderLocation *location, crimild::Size index, Light *light ) = 0;
+		
 	private:
 		int _lightCount;
 

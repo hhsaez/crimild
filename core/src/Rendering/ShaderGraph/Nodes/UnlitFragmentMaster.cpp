@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002-preset, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,48 +25,51 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_RENDERING_SHADER_LOCATION_
-#define CRIMILD_RENDERING_SHADER_LOCATION_
+#include "UnlitFragmentMaster.hpp"
 
-#include "Foundation/Macros.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/NamedObject.hpp"
+#include "Rendering/ShaderGraph/ShaderGraph.hpp"
+#include "Rendering/ShaderGraph/CSL.hpp"
+#include "Rendering/ShaderGraph/Constants.hpp"
 
-namespace crimild {
+using namespace crimild;
+using namespace crimild::shadergraph;
 
-	class ShaderProgram;
-    
-	class ShaderLocation : public NamedObject, public SharedObject {
-	public:
-		enum class Type {
-			ATTRIBUTE,
-			UNIFORM,
-			MAX
-		};
+UnlitFragmentMaster::UnlitFragmentMaster( ShaderGraph *graph )
+{
 
-	public:
-		explicit ShaderLocation( Type type, std::string name );
-		virtual ~ShaderLocation( void );
-
-		Type getType( void ) const { return _type; }
-
-		void reset( void ) { _location = -1; }
-
-		bool isValid( void ) const { return _location >= 0; }
-
-		int getLocation( void ) const { return _location; }
-		void setLocation( int location ) { _location = location; }
-
-		void setProgram( ShaderProgram *program ) { _program = program; }
-		ShaderProgram *getProgram( void ) { return _program; }
-
-	private:
-		Type _type;
-		int _location;
-		ShaderProgram *_program = nullptr;
-	};
-    
 }
 
-#endif
+UnlitFragmentMaster::~UnlitFragmentMaster( void )
+{
+	
+}
+
+void UnlitFragmentMaster::setup( ShaderGraph *graph )
+{
+	if ( _textureCoords == nullptr ) _textureCoords = csl::vec2_in( variants::MODEL_TEXTURE_COORDS_VARIANT );
+	
+	auto color = csl::colorUniform();
+	auto colorMap = csl::colorMapUniform();
+	color = csl::mult(
+		color,
+		csl::textureColor( colorMap, _textureCoords )
+	);
+
+	if ( _color == nullptr ) _color = csl::vec3( color );
+	if ( _alpha == nullptr ) _alpha = csl::vec_w( color );
+	if ( _alphaClipThreshold == nullptr ) _alphaClipThreshold = csl::scalar( 0.0f );
+
+	csl::alphaClip( _alpha, _alphaClipThreshold );
+	csl::fragColor( csl::vec4( _color, _alpha ) );
+	
+	graph->read(
+		this,
+		{
+			_textureCoords,
+			_color,
+			_alpha,
+			_alphaClipThreshold,
+		}
+	);
+}
 

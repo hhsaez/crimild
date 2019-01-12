@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,13 @@
  */
 
 #include "ShaderProgram.hpp"
+#include "Shader.hpp"
+#include "ShaderUniformImpl.hpp"
+
+#include "Rendering/ShaderGraph/ShaderGraph.hpp"
 
 using namespace crimild;
+using namespace crimild::shadergraph;
 
 ShaderProgram::ShaderProgram( void )
 {
@@ -49,6 +54,12 @@ ShaderProgram::~ShaderProgram( void )
 void ShaderProgram::registerLocation( SharedPointer< ShaderLocation > const &location )
 {
 	_locations[ location->getName() ] = location;
+	location->setProgram( this );
+}
+
+void ShaderProgram::registerUniformLocation( std::string name )
+{
+	registerLocation( crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, name ) );
 }
 
 void ShaderProgram::resetLocations( void )
@@ -91,7 +102,7 @@ void ShaderProgram::attachUniforms( ShaderProgram::UniformArray const &uniforms 
 
 void ShaderProgram::attachUniform( SharedPointer< ShaderUniform > const &uniform )
 {
-	_uniforms.add( uniform );
+	_uniforms[ uniform->getName() ] = uniform;
     
     auto location = crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, uniform->getName() );
 	uniform->setLocation( location );
@@ -100,21 +111,134 @@ void ShaderProgram::attachUniform( SharedPointer< ShaderUniform > const &uniform
 
 void ShaderProgram::forEachUniform( std::function< void( ShaderUniform * ) > callback )
 {
-	_uniforms.each( [ callback ]( SharedPointer< ShaderUniform > &uniform ) {
-		callback( crimild::get_ptr( uniform ) );
+	_uniforms.eachValue( [ callback ]( SharedPointer< ShaderUniform > const &uniform ) {
+		if ( auto u = crimild::get_ptr( uniform ) ) {
+			callback( u );
+		}
 	});
 }
 
 void ShaderProgram::detachAllUniforms( void )
 {
-    _uniforms.each( []( SharedPointer< ShaderUniform > &uniform ) {
-        auto location = uniform->getLocation();
-        if ( location != nullptr ) {
-            location->reset();
-            uniform->setLocation( nullptr );
-        }
-    });
+	forEachUniform( []( ShaderUniform *uniform ) {
+		if ( auto location = uniform->getLocation() ) {
+			location->reset();
+			uniform->setLocation( nullptr );
+		}
+	});
 
 	_uniforms.clear();
+}
+
+void ShaderProgram::bindUniform( std::string name, crimild::Int32 value )
+{
+	if ( auto uniform = getUniform< IntUniform >( name ) ) {
+		uniform->setValue( value );
+	}
+}
+
+void ShaderProgram::bindUniform( std::string name, crimild::Real32 value )
+{
+	if ( auto uniform = getUniform< FloatUniform >( name ) ) {
+		uniform->setValue( value );
+	}
+}
+
+void ShaderProgram::bindUniform( std::string name, const Matrix3f &value )
+{
+	if ( auto uniform = getUniform< Matrix3fUniform >( name ) ) {
+		uniform->setValue( value );
+	}
+}
+
+void ShaderProgram::bindUniform( std::string name, const Matrix4f &value )
+{
+	if ( auto uniform = getUniform< Matrix4fUniform >( name ) ) {
+		uniform->setValue( value );
+	}
+}
+
+void ShaderProgram::bindUniform( std::string name, const RGBAColorf &value )
+{
+	if ( auto uniform = getUniform< RGBAColorfUniform >( name ) ) {
+		uniform->setValue( value );
+	}	
+}
+
+void ShaderProgram::bindUniform( std::string name, const RGBColorf &value )
+{
+	if ( auto uniform = getUniform< RGBColorfUniform >( name ) ) {
+		uniform->setValue( value );
+	}	
+}
+
+void ShaderProgram::bindUniform( std::string name, Texture *value )
+{
+	if ( auto uniform = getUniform< TextureUniform >( name ) ) {
+		uniform->setValue( value );
+	}	
+}
+
+void ShaderProgram::bindUniform( std::string name, Light *value )
+{
+	if ( auto uniform = getUniform< LightUniform >( name ) ) {
+		uniform->setValue( value );
+	}	
+}
+
+void ShaderProgram::willBind( Renderer *renderer )
+{
+	// no-op
+}
+
+void ShaderProgram::didBind( Renderer *renderer )
+{
+	forEachUniform( [ renderer ]( ShaderUniform *uniform ) {
+		if ( uniform->getLocation() != nullptr ) {
+			uniform->onBind( renderer );
+		}
+	});
+}
+
+void ShaderProgram::willUnbind( Renderer *renderer )
+{
+	// no-op
+}
+
+void ShaderProgram::didUnbind( Renderer *renderer )
+{
+	forEachUniform( [ renderer ]( ShaderUniform *uniform ) {
+		if ( uniform->getLocation() != nullptr ) {
+			uniform->onUnbind( renderer );
+		}
+	});
+}
+
+void ShaderProgram::buildVertexShader( ShaderGraph *graph )
+{
+	auto src = graph->build();
+	setVertexShader( crimild::alloc< VertexShader >( src ) );
+	graph->eachUniform( [ this ]( ShaderUniform *uniform ) {
+		attachUniform( crimild::retain( uniform ) );
+	});
+}
+
+void ShaderProgram::buildVertexShader( SharedPointer< ShaderGraph > const &graph )
+{
+	buildVertexShader( crimild::get_ptr( graph ) );
+}
+
+void ShaderProgram::buildFragmentShader( ShaderGraph *graph )
+{
+	auto src = graph->build();
+	setFragmentShader( crimild::alloc< FragmentShader >( src ) );
+	graph->eachUniform( [ this ]( ShaderUniform *uniform ) {
+		attachUniform( crimild::retain( uniform ) );
+	});
+}
+
+void ShaderProgram::buildFragmentShader( SharedPointer< ShaderGraph > const &graph )
+{
+	buildFragmentShader( crimild::get_ptr( graph ) );
 }
 

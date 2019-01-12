@@ -36,6 +36,7 @@
 namespace crimild {
 
 	class Texture;
+	class Light;
 	
 	template< typename T >
 	class ShaderUniformImpl : public ShaderUniform {
@@ -74,6 +75,7 @@ namespace crimild {
 	typedef ShaderUniformImpl< Vector3f > Vector3fUniform;
 	typedef ShaderUniformImpl< Vector2f > Vector2fUniform;
 	typedef ShaderUniformImpl< RGBAColorf > RGBAColorfUniform;
+	typedef ShaderUniformImpl< RGBColorf > RGBColorfUniform;
 	typedef ShaderUniformImpl< Matrix3f > Matrix3fUniform;
 	typedef ShaderUniformImpl< Matrix4f > Matrix4fUniform;
 
@@ -88,6 +90,26 @@ namespace crimild {
 
 	private:
 		SharedPointer< Texture > _texture;
+
+	public:
+		virtual void onBind( Renderer *renderer );
+		virtual void onUnbind( Renderer *renderer );
+	};
+
+	class LightUniform : public ShaderUniform {
+	public:
+		LightUniform( std::string name, crimild::Size index, Light *value );
+		LightUniform( std::string name, crimild::Size index, SharedPointer< Light > const &value );
+		virtual ~LightUniform( void );
+
+		crimild::Size getIndex( void ) const { return _index; }
+
+		void setValue( Light *light );
+		Light *getValue( void );
+
+	private:
+		crimild::Size _index = 0;
+		SharedPointer< Light > _light;
 
 	public:
 		virtual void onBind( Renderer *renderer );

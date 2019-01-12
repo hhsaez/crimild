@@ -39,10 +39,7 @@ namespace crimild {
 	/**
 	   \brief Compute lighting for a scene using a forward shading pipeline
 
-	   As a rule, we avoid using loops by creating a shader that deals with 
-	   a constant number of lights (passed in as argument in the construction).
-
-	   In addition, conditional expressions (if) are avoided by computing both
+	   Conditional expressions (if) are avoided by computing both
 	   branches and then adding them togheter using a flag multiplier to discard
 	   one result or the other. Since computations are simple, this should be
 	   more efficient than conditional expressions. So, this 
@@ -63,53 +60,13 @@ namespace crimild {
 
 	 */
 	class ForwardShadingShaderProgram : public ShaderProgram {
-	private:
-		struct LightUniforms {
-			SharedPointer< RGBAColorfUniform > ambientColor;
-			SharedPointer< RGBAColorfUniform > diffuseColor;
-			SharedPointer< Vector4fUniform > direction; // w=enabled/disabled
-			SharedPointer< Vector4fUniform > position; // w=enabled/disabled
-			SharedPointer< Vector4fUniform > attenuation; // w=enabled(1)/disabled(0)
-			SharedPointer< FloatUniform > innerCutOff;
-			SharedPointer< FloatUniform > outerCutOff;
-		};
-
-		using LightArray = containers::Array< Light * >;
-		using LightUniformArray = containers::Array< LightUniforms >;
-		
 	public:
-		ForwardShadingShaderProgram( crimild::Size maxLights = 4 );
+		ForwardShadingShaderProgram( void );
 		virtual ~ForwardShadingShaderProgram( void );
-
-		void bindModelMatrix( const Matrix4f &value ) { _modelMatrix->setValue( value ); }
-		void bindNormalMatrix( const Matrix3f &value ) { _normalMatrix->setValue( value ); }
-		void bindViewMatrix( const Matrix4f &value ) { _viewMatrix->setValue( value ); }
-		void bindProjMatrix( const Matrix4f &value ) { _projMatrix->setValue( value ); }
-
-		void bindMaterial( Material *material );
-
-		void bindLight( Light *light, crimild::Size index );
 
 	private:
 		void createVertexShader( void );
 		void createFragmentShader( void );
-
-	private:
-		SharedPointer< Matrix4fUniform > _modelMatrix;
-		SharedPointer< Matrix3fUniform > _normalMatrix;
-		SharedPointer< Matrix4fUniform > _viewMatrix;
-		SharedPointer< Matrix4fUniform > _projMatrix;
-
-		SharedPointer< RGBAColorfUniform > _matAmbient;
-
-		SharedPointer< RGBAColorfUniform > _matDiffuse;
-		SharedPointer< TextureUniform > _matDiffuseMap;
-		
-		SharedPointer< RGBAColorfUniform > _matSpecular;
-		SharedPointer< TextureUniform > _matSpecularMap;
-		SharedPointer< FloatUniform > _matShininess;
-
-		containers::Array< LightUniforms > _lights;
 	};
 
 }
