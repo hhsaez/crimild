@@ -59,7 +59,7 @@ void ViewSpaceNormalShaderProgram::createVertexShader( void )
 {
 	auto graph = Renderer::getInstance()->createShaderGraph();
 
-	auto P = csl::projectedPosition();
+	auto P = csl::clipPosition();
 	auto N = csl::viewNormal();
 	
 	csl::vertexOutput( "vViewNormal", N );

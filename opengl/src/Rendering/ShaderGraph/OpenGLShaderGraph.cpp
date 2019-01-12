@@ -52,7 +52,11 @@
 #include "Rendering/ShaderGraph/Nodes/Convert.hpp"
 #include "Rendering/ShaderGraph/Nodes/TextureColor.hpp"
 #include "Rendering/ShaderGraph/Nodes/Reflect.hpp"
+#include "Rendering/ShaderGraph/Nodes/AlphaClip.hpp"
 #include "Rendering/ShaderGraph/Nodes/FragmentCoordInput.hpp"
+#include "Rendering/ShaderGraph/Nodes/MeshVertexMaster.hpp"
+#include "Rendering/ShaderGraph/Nodes/PhongFragmentMaster.hpp"
+#include "Rendering/ShaderGraph/Nodes/UnlitFragmentMaster.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/ShaderLocation.hpp"
 
@@ -423,6 +427,67 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 		ss << ret->getName() << " = " << "texture( " << t->getName() << ", " << uv->getName() << " );";
 		_mainSection.add( ss.str() );
 	};
+
+	_translators[ AlphaClip::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
+		auto alphaClip = static_cast< AlphaClip * >( node );
+
+		auto alpha = alphaClip->getAlphaInput()->getName();
+		auto threshold = alphaClip->getThresholdInput()->getName();
+
+		std::stringstream ss;
+		ss << "if ( " << alpha << " < " << threshold << " ) discard;";
+		_mainSection.add( ss.str() );
+	};
+
+	_translators[ MeshVertexMaster::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
+		// no-op (avoid warnings)
+	};
+		
+	_translators[ UnlitFragmentMaster::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
+		// no-op (avoid warnings)
+	};
+		
+	_translators[ PhongFragmentMaster::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
+		auto master = static_cast< PhongFragmentMaster * >( node );
+
+		auto P = master->getWorldPosition()->getName();
+		auto N = master->getWorldNormal()->getName();
+		auto E = master->getWorldEye()->getName();
+		auto ambient = master->getAmbient()->getName();
+		auto diffuse = master->getDiffuse()->getName();
+		auto specular = master->getSpecular()->getName();
+		auto shininess = master->getShininess()->getName();
+		auto alpha = master->getAlpha()->getName();
+		auto alphaClip = master->getAlphaClipThreshold()->getName();
+
+		std::stringstream ss;
+
+		_outputsSection.add( "out vec4 vFragColor;" );
+
+		ss.str( "" );
+		ss << "#define MAX_LIGHTS " << master->getMaxLights();
+		_globalsSection.add( ss.str() );
+		
+		_globalsSection.add(
+			#include "calcPhongLighting.glsl"
+		);
+
+		ss.str( "" );
+		ss << "if ( " << alpha << " < " << alphaClip << " ) discard;";
+		_mainSection.add( ss.str() );
+
+		ss.str( "" );
+		ss << "vFragColor = vec4( calcPhongLighting( "
+		<< P << ", "
+		<< N << ", "
+		<< E << ", "
+		<< ambient << ", "
+		<< diffuse << ", "
+		<< specular << ", "
+		<< shininess << " ), "
+		<< alpha << " );";
+		_mainSection.add( ss.str() );
+	};
 }
 
 OpenGLShaderGraph::~OpenGLShaderGraph( void )
@@ -486,6 +551,12 @@ std::string OpenGLShaderGraph::generateShaderSource( containers::Array< ShaderGr
 	
 	ss << "\n// Outputs";
 	_outputsSection.each( [ &ss ]( std::string &line ) {
+		ss << "\n" << line;
+	});
+	ss << "\n";
+	
+	ss << "\n// Globals";
+	_globalsSection.each( [ &ss ]( std::string &line ) {
 		ss << "\n" << line;
 	});
 	ss << "\n";

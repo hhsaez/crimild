@@ -32,19 +32,25 @@
 #include "Rendering/Renderer.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/Programs/ForwardShadingShaderProgram.hpp"
+#include "Rendering/Programs/UnlitShaderProgram.hpp"
 #include "Simulation/AssetManager.hpp"
 #include "Foundation/Profiler.hpp"
+#include "Rendering/ShaderGraph/Constants.hpp"
 
 using namespace crimild;
 using namespace crimild::rendergraph;
 using namespace crimild::rendergraph::passes;
+using namespace crimild::shadergraph;
+using namespace crimild::shadergraph::locations;
 
 ForwardLightingPass::ForwardLightingPass( RenderGraph *graph, crimild::Size maxLights )
 	: ForwardLightingPass(
 		graph,
 		{
 			RenderQueue::RenderableType::OPAQUE,
+			RenderQueue::RenderableType::OPAQUE_CUSTOM,
 			RenderQueue::RenderableType::TRANSLUCENT,
+			RenderQueue::RenderableType::TRANSLUCENT_CUSTOM,
 		},
 		maxLights )
 {
@@ -53,8 +59,7 @@ ForwardLightingPass::ForwardLightingPass( RenderGraph *graph, crimild::Size maxL
 
 ForwardLightingPass::ForwardLightingPass( RenderGraph *graph, ForwardLightingPass::RenderableTypeArray const &renderableTypes, crimild::Size maxLights )
 	: RenderGraphPass( graph, "Forward Lighting" ),
-	  _renderableTypes( renderableTypes ),
-	  _programs( maxLights + 1 )
+	  _renderableTypes( renderableTypes )
 {
     _colorOutput = graph->createAttachment(
 		getName() + " - Color",
@@ -62,9 +67,7 @@ ForwardLightingPass::ForwardLightingPass( RenderGraph *graph, ForwardLightingPas
 	_clearFlags = FrameBufferObject::ClearFlag::COLOR;
 	_depthState = crimild::alloc< DepthState >( true, DepthState::CompareFunc::LEQUAL, false );
 
-	for ( crimild::Size i = 0; i <= maxLights; i++ ) {
-		_programs[ i ] = crimild::alloc< ForwardShadingShaderProgram >( i );
-	}
+	_program = crimild::alloc< ForwardShadingShaderProgram >(); 
 }
 
 ForwardLightingPass::~ForwardLightingPass( void )
@@ -109,38 +112,60 @@ void ForwardLightingPass::render( Renderer *renderer, RenderQueue *renderQueue, 
 	if ( renderables->size() == 0 ) {
 		return;
 	}
-	
+
 	const auto pMatrix = renderQueue->getProjectionMatrix();
 	const auto vMatrix = renderQueue->getViewMatrix();
 
-	auto lightCount = Numerici::min( _programs.size() - 1, renderQueue->getLightCount() );
-	auto program = crimild::get_ptr( _programs[ lightCount ] );
-
-	program->bindProjMatrix( pMatrix );
-	program->bindViewMatrix( vMatrix );
-
-	renderQueue->each( [ program ]( Light *light, int index ) {
-		program->bindLight( light, index );
-	});
-
 	renderer->setDepthState( _depthState );
 
-	renderQueue->each( renderables, [ this, renderer, program ]( RenderQueue::Renderable *renderable ) {
-		const auto &mMatrix = renderable->modelTransform;
-		program->bindModelMatrix( mMatrix );
+	renderQueue->each( renderables, [ this, renderer, renderQueue, pMatrix, vMatrix ]( RenderQueue::Renderable *renderable ) {
+		auto program = crimild::get_ptr( _program );
 
-		const auto nMatrix = Matrix3f( mMatrix ).getInverse().getTranspose();
-		program->bindNormalMatrix( mMatrix );
+		auto color = RGBAColorf::ONE;
+		auto colorMap = crimild::get_ptr( Texture::ONE );
+		auto specular = RGBAColorf::ONE;
+		auto specularMap = crimild::get_ptr( Texture::ONE );
+		auto shininess = 1.0f;
+		auto alphaState = crimild::get_ptr( AlphaState::DISABLED );
 
-		if ( auto material = crimild::get_ptr( renderable->material ) ) {
-			program->bindMaterial( material );
+		if ( auto material = renderable->material ) {
+			color = material->getDiffuse();
+			specular = material->getSpecular();
+			shininess = material->getShininess();
 
-			// TODO: Some materials might need to set the depth state too...
-			renderer->setAlphaState( material->getAlphaState() );
+			if ( material->getProgram() ) program = material->getProgram();
+			if ( material->getColorMap() ) colorMap = material->getColorMap();
+			if ( material->getSpecularMap() ) specularMap = material->getSpecularMap();
+			if ( material->getAlphaState() ) alphaState = material->getAlphaState();
 		}
 
+		program->bindUniform( PROJECTION_MATRIX_UNIFORM, pMatrix );
+		program->bindUniform( VIEW_MATRIX_UNIFORM, vMatrix );
+		const auto &mMatrix = renderable->modelTransform;
+		program->bindUniform( MODEL_MATRIX_UNIFORM, mMatrix );
+		const auto nMatrix = Matrix3f( mMatrix ).getInverse().getTranspose();
+		program->bindUniform( NORMAL_MATRIX_UNIFORM, nMatrix );
+
+		program->bindUniform( LIGHT_ARRAY_COUNT_UNIFORM, ( crimild::Int32 ) renderQueue->getLightCount() );
+		renderQueue->each( [ program ]( Light *light, int index ) {
+			if ( light == nullptr ) {
+				return;
+			}
+
+			std::stringstream ss;
+			ss << LIGHT_UNIFORM << "_" << index;
+			program->bindUniform( ss.str(), light );
+		});
+
+		program->bindUniform( COLOR_UNIFORM, color );
+		program->bindUniform( COLOR_MAP_UNIFORM, colorMap );
+		program->bindUniform( SPECULAR_UNIFORM, specular );
+		program->bindUniform( SPECULAR_MAP_UNIFORM, specularMap );
+		program->bindUniform( SHININESS_UNIFORM, shininess );
+
 		renderer->bindProgram( program );
-		
+		renderer->setAlphaState( alphaState );
+
 		renderable->geometry->forEachPrimitive( [ renderer ]( Primitive *primitive ) {
 			renderer->bindPrimitive( nullptr, primitive );
 			renderer->drawPrimitive( nullptr, primitive );
@@ -148,9 +173,9 @@ void ForwardLightingPass::render( Renderer *renderer, RenderQueue *renderQueue, 
 		});
 
 		renderer->setAlphaState( AlphaState::DISABLED );
-		renderer->setDepthState( DepthState::ENABLED );
-
 		renderer->unbindProgram( program );
 	});
+
+	renderer->setDepthState( DepthState::ENABLED );
 }
 

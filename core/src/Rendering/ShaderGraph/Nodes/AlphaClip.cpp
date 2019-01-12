@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,48 +25,28 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_RENDERING_SHADER_LOCATION_
-#define CRIMILD_RENDERING_SHADER_LOCATION_
+#include "AlphaClip.hpp"
 
-#include "Foundation/Macros.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/NamedObject.hpp"
+#include "Rendering/ShaderGraph/ShaderGraph.hpp"
+#include "Rendering/ShaderGraph/Variable.hpp"
 
-namespace crimild {
+using namespace crimild;
+using namespace crimild::shadergraph;
 
-	class ShaderProgram;
-    
-	class ShaderLocation : public NamedObject, public SharedObject {
-	public:
-		enum class Type {
-			ATTRIBUTE,
-			UNIFORM,
-			MAX
-		};
+AlphaClip::AlphaClip( ShaderGraph *graph, Variable *alpha, Variable *threshold )
+	: _alphaInput( alpha ),
+	  _thresholdInput( threshold )
+{
 
-	public:
-		explicit ShaderLocation( Type type, std::string name );
-		virtual ~ShaderLocation( void );
-
-		Type getType( void ) const { return _type; }
-
-		void reset( void ) { _location = -1; }
-
-		bool isValid( void ) const { return _location >= 0; }
-
-		int getLocation( void ) const { return _location; }
-		void setLocation( int location ) { _location = location; }
-
-		void setProgram( ShaderProgram *program ) { _program = program; }
-		ShaderProgram *getProgram( void ) { return _program; }
-
-	private:
-		Type _type;
-		int _location;
-		ShaderProgram *_program = nullptr;
-	};
-    
 }
 
-#endif
+AlphaClip::~AlphaClip( void )
+{
+	
+}
+
+void AlphaClip::setup( ShaderGraph *graph )
+{
+	graph->read( this, { _alphaInput, _thresholdInput } );
+}
 

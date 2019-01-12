@@ -28,7 +28,9 @@
 #include "ShaderGraph.hpp"
 #include "Variable.hpp"
 #include "Expression.hpp"
+
 #include "Foundation/Log.hpp"
+#include "Rendering/ShaderUniform.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
@@ -97,6 +99,20 @@ ShaderGraphNode *ShaderGraph::getNode( containers::Array< ShaderGraphNode * > &n
 		}
 	});
 	return result;
+}
+
+void ShaderGraph::attachUniform( SharedPointer< ShaderUniform > const &uniform )
+{
+	_uniforms[ uniform->getName() ] = uniform;
+}
+
+void ShaderGraph::eachUniform( std::function< void( ShaderUniform * ) > const &callback )
+{
+	_uniforms.eachValue( [ callback ]( SharedPointer< ShaderUniform > const &uniform ) {
+		if ( auto u = crimild::get_ptr( uniform ) ) {
+			callback( u );
+		}
+	});
 }
 
 std::string ShaderGraph::build( void )

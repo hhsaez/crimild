@@ -28,11 +28,13 @@
 #include "CSL.hpp"
 
 #include "Rendering/ShaderGraph/ShaderGraph.hpp"
+#include "Rendering/ShaderGraph/Constants.hpp"
 #include "Rendering/ShaderGraph/Nodes/VertexShaderInputs.hpp"
 #include "Rendering/ShaderGraph/Nodes/VertexShaderOutputs.hpp"
 #include "Rendering/ShaderGraph/Nodes/VertexOutput.hpp"
 #include "Rendering/ShaderGraph/Nodes/FragmentInput.hpp"
 #include "Rendering/ShaderGraph/Nodes/FragmentColorOutput.hpp"
+#include "Rendering/ShaderGraph/Nodes/AlphaClip.hpp"
 #include "Rendering/ShaderGraph/Nodes/Dot.hpp"
 #include "Rendering/ShaderGraph/Nodes/Max.hpp"
 #include "Rendering/ShaderGraph/Nodes/Add.hpp"
@@ -54,12 +56,14 @@
 #include "Rendering/ShaderGraph/Nodes/FragmentCoordInput.hpp"
 
 #include "Rendering/VertexFormat.hpp"
-#include "Rendering/ShaderUniform.hpp"
+#include "Rendering/ShaderUniformImpl.hpp"
+#include "Rendering/Texture.hpp"
 
 #include <sstream>
 
 using namespace crimild;
 using namespace crimild::shadergraph;
+using namespace crimild::shadergraph::locations;
 
 Variable *csl::scalar( crimild::Real32 value, std::string name )
 {
@@ -514,6 +518,11 @@ Variable *csl::pow( Variable *base, Variable *exp )
 	return ShaderGraph::getCurrent()->addNode< Pow >( base, exp )->getResult();
 }
 
+void csl::alphaClip( Variable *alpha, Variable *threshold )
+{
+	ShaderGraph::getCurrent()->addOutputNode< AlphaClip >( alpha, threshold );
+}
+
 void csl::fragColor( Variable *color )
 {
 	ShaderGraph::getCurrent()->addOutputNode< FragmentColorOutput >( color );
@@ -553,7 +562,7 @@ Variable *csl::worldPosition( void )
 	}
 
 	auto aPosition = modelPosition();
-	auto uMMatrix = mat4_uniform( "uMMatrix" );
+	auto uMMatrix = modelMatrix();
 	ret = mult( uMMatrix, vec4( aPosition, scalar_constant( 1.0 ) ) );
 	ret->setName( "c_worldPosition" );
 	graph->addInputNode( ret );
@@ -570,14 +579,14 @@ Variable *csl::viewPosition( void )
 	}
 
 	auto P = worldPosition();
-	auto V = mat4_uniform( "uVMatrix" );
+	auto V = viewMatrix();
 	ret = mult( V, P );
 	ret->setName( "c_wiewPosition" );
 	graph->addInputNode( ret );
 	return ret;
 }
 
-Variable *csl::projectedPosition( void )
+Variable *csl::clipPosition( void )
 {
 	auto graph = ShaderGraph::getCurrent();
 
@@ -587,7 +596,7 @@ Variable *csl::projectedPosition( void )
 	}
 
 	auto P = viewPosition();
-	auto M = mat4_uniform( "uPMatrix" );
+	auto M = projectionMatrix();
 	ret = mult( M, P );
 	ret->setName( "c_projPosition" );
 	graph->addInputNode( ret );
@@ -634,7 +643,7 @@ Variable *csl::worldNormal( void )
 	auto ret = graph->getInput< Variable >( "c_worldNormal" );
 	if ( ret == nullptr ) {
 		auto aNormal = modelNormal();
-		auto uNMatrix = mat3_uniform( "uNMatrix" );
+		auto uNMatrix = normalMatrix();
 	
 		ret = worldNormal( uNMatrix, aNormal );
 		ret->setName( "c_worldNormal" );
@@ -651,7 +660,7 @@ Variable *csl::viewNormal( void )
 	auto ret = graph->getInput< Variable >( "c_viewNormal" );
 	if ( ret == nullptr ) {
 		auto N = worldNormal();
-		auto V = mat4_uniform( "uVMatrix" );
+		auto V = viewMatrix();
 	
 		ret = normalize( mult( mat3( V ), N ) );
 		ret->setName( "c_viewNormal" );
@@ -667,7 +676,7 @@ Variable *csl::worldCameraPos( void )
 
 	auto ret = graph->getInput< Variable >( "c_worldCameraPos" );
 	if ( ret == nullptr ) {
-		auto vMatrix = mat4_uniform( "uVMatrix" );
+		auto vMatrix = viewMatrix();
 		ret = vec3(
 			mult(
 				inverse( vMatrix ),
@@ -772,5 +781,173 @@ Variable *csl::textureUnitVector( Variable *texture, Variable *uvs )
 Variable *csl::fragCoord( void )
 {
 	return ShaderGraph::getCurrent()->addNode< FragmentCoordInput >()->getInput();
+}
+
+Variable *csl::projectionMatrix( void )
+{
+	auto graph = ShaderGraph::getCurrent();
+
+	auto ret = graph->getInput< Variable >( PROJECTION_MATRIX_UNIFORM );
+	if ( ret == nullptr ) {
+		ret = graph->addInputNode< Variable >(
+			Variable::Storage::UNIFORM,
+			Variable::Type::MATRIX_4,
+			PROJECTION_MATRIX_UNIFORM
+		);
+		graph->attachUniform(
+			crimild::alloc< Matrix4fUniform >(
+				PROJECTION_MATRIX_UNIFORM,
+				Matrix4f::IDENTITY
+			)
+		);
+	}
+	return ret;
+}
+
+Variable *csl::viewMatrix( void )
+{
+	auto graph = ShaderGraph::getCurrent();
+
+	auto ret = graph->getInput< Variable >( VIEW_MATRIX_UNIFORM );
+	if ( ret == nullptr ) {
+		ret = graph->addInputNode< Variable >(
+			Variable::Storage::UNIFORM,
+			Variable::Type::MATRIX_4,
+			VIEW_MATRIX_UNIFORM
+		);
+		graph->attachUniform(
+			crimild::alloc< Matrix4fUniform >(
+				VIEW_MATRIX_UNIFORM,
+				Matrix4f::IDENTITY
+			)
+		);
+	}
+	return ret;
+}
+
+Variable *csl::modelMatrix( void )
+{
+	auto graph = ShaderGraph::getCurrent();
+
+	auto ret = graph->getInput< Variable >( MODEL_MATRIX_UNIFORM );
+	if ( ret == nullptr ) {
+		ret = graph->addInputNode< Variable >(
+			Variable::Storage::UNIFORM,
+			Variable::Type::MATRIX_4,
+			MODEL_MATRIX_UNIFORM
+		);
+		graph->attachUniform(
+			crimild::alloc< Matrix4fUniform >(
+				MODEL_MATRIX_UNIFORM,
+				Matrix4f::IDENTITY
+			)
+		);
+	}
+	return ret;
+}
+
+Variable *csl::normalMatrix( void )
+{
+	auto graph = ShaderGraph::getCurrent();
+
+	auto ret = graph->getInput< Variable >( NORMAL_MATRIX_UNIFORM );
+	if ( ret == nullptr ) {
+		ret = graph->addInputNode< Variable >(
+			Variable::Storage::UNIFORM,
+			Variable::Type::MATRIX_3,
+			NORMAL_MATRIX_UNIFORM
+		);
+		graph->attachUniform(
+			crimild::alloc< Matrix3fUniform >(
+				NORMAL_MATRIX_UNIFORM,
+				Matrix3f::IDENTITY
+			)
+		);
+	}
+	return ret;
+}
+
+Variable *csl::colorUniform( void )
+{
+	auto graph = ShaderGraph::getCurrent();
+
+	auto ret = graph->getInput< Variable >( COLOR_UNIFORM );
+	if ( ret == nullptr ) {
+		ret = graph->addInputNode< Variable >(
+			Variable::Storage::UNIFORM,
+			Variable::Type::VECTOR_4,
+			COLOR_UNIFORM
+		);
+		graph->attachUniform(
+			crimild::alloc< RGBAColorfUniform >(
+				COLOR_UNIFORM,
+				RGBAColorf::ONE
+			)
+		);
+	}
+	return ret;
+}
+
+Variable *csl::colorMapUniform( void )
+{
+	auto graph = ShaderGraph::getCurrent();
+
+	auto ret = graph->getInput< Variable >( COLOR_MAP_UNIFORM );
+	if ( ret == nullptr ) {
+		ret = graph->addInputNode< Variable >(
+			Variable::Storage::UNIFORM,
+			Variable::Type::SAMPLER_2D,
+			COLOR_MAP_UNIFORM
+		);
+		graph->attachUniform(
+			crimild::alloc< TextureUniform >(
+				COLOR_MAP_UNIFORM,
+				Texture::ONE
+			)
+		);
+	}
+	return ret;
+}
+
+Variable *csl::specularUniform( void )
+{
+	auto graph = ShaderGraph::getCurrent();
+
+	auto ret = graph->getInput< Variable >( SPECULAR_UNIFORM );
+	if ( ret == nullptr ) {
+		ret = graph->addInputNode< Variable >(
+			Variable::Storage::UNIFORM,
+			Variable::Type::VECTOR_4,
+			SPECULAR_UNIFORM
+		);
+		graph->attachUniform(
+			crimild::alloc< RGBAColorfUniform >(
+				SPECULAR_UNIFORM,
+				RGBAColorf::ONE
+			)
+		);
+	}
+	return ret;
+}
+
+Variable *csl::specularMapUniform( void )
+{
+	auto graph = ShaderGraph::getCurrent();
+
+	auto ret = graph->getInput< Variable >( SPECULAR_MAP_UNIFORM );
+	if ( ret == nullptr ) {
+		ret = graph->addInputNode< Variable >(
+			Variable::Storage::UNIFORM,
+			Variable::Type::SAMPLER_2D,
+			SPECULAR_MAP_UNIFORM
+		);
+		graph->attachUniform(
+			crimild::alloc< TextureUniform >(
+				SPECULAR_MAP_UNIFORM,
+				Texture::ONE
+			)
+		);
+	}
+	return ret;
 }
 

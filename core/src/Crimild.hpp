@@ -263,6 +263,9 @@
 #include "Rendering/RenderGraph/Passes/BlendPass.hpp"
 #include "Rendering/RenderGraph/Passes/SkyboxPass.hpp"
 
+#include "Rendering/Programs/UnlitShaderProgram.hpp"
+#include "Rendering/Programs/ForwardShadingShaderProgram.hpp"
+
 #include "Rendering/ImageEffects/ImageEffect.hpp"
 #include "Rendering/ImageEffects/ColorTintImageEffect.hpp"
 

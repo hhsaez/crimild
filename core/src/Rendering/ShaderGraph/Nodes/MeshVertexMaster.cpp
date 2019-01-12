@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002-preset, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,48 +25,51 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_RENDERING_SHADER_LOCATION_
-#define CRIMILD_RENDERING_SHADER_LOCATION_
+#include "MeshVertexMaster.hpp"
 
-#include "Foundation/Macros.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/NamedObject.hpp"
+#include "Rendering/ShaderGraph/ShaderGraph.hpp"
+#include "Rendering/ShaderGraph/Variable.hpp"
+#include "Rendering/ShaderGraph/CSL.hpp"
+#include "Rendering/ShaderGraph/Constants.hpp"
+#include "Rendering/ShaderUniformImpl.hpp"
 
-namespace crimild {
+using namespace crimild;
+using namespace crimild::shadergraph;
 
-	class ShaderProgram;
-    
-	class ShaderLocation : public NamedObject, public SharedObject {
-	public:
-		enum class Type {
-			ATTRIBUTE,
-			UNIFORM,
-			MAX
-		};
+MeshVertexMaster::MeshVertexMaster( ShaderGraph *graph )
+{
 
-	public:
-		explicit ShaderLocation( Type type, std::string name );
-		virtual ~ShaderLocation( void );
-
-		Type getType( void ) const { return _type; }
-
-		void reset( void ) { _location = -1; }
-
-		bool isValid( void ) const { return _location >= 0; }
-
-		int getLocation( void ) const { return _location; }
-		void setLocation( int location ) { _location = location; }
-
-		void setProgram( ShaderProgram *program ) { _program = program; }
-		ShaderProgram *getProgram( void ) { return _program; }
-
-	private:
-		Type _type;
-		int _location;
-		ShaderProgram *_program = nullptr;
-	};
-    
 }
 
-#endif
+MeshVertexMaster::~MeshVertexMaster( void )
+{
+	
+}
+
+void MeshVertexMaster::setup( ShaderGraph *graph )
+{
+	if ( _textureCoords == nullptr ) _textureCoords = csl::modelTextureCoords();
+	if ( _worldPosition == nullptr ) _worldPosition = csl::vec3( csl::worldPosition() );
+	if ( _clipPosition == nullptr ) _clipPosition = csl::clipPosition();
+	if ( _worldNormal == nullptr ) _worldNormal = csl::worldNormal();
+	if ( _worldEye == nullptr ) _worldEye = csl::worldEyeVector();
+
+	csl::vertexOutput( variants::MODEL_TEXTURE_COORDS_VARIANT, _textureCoords );
+	csl::vertexOutput( variants::WORLD_POSITION_VARIANT, _worldPosition );
+	csl::vertexOutput( variants::WORLD_NORMAL_VARIANT, _worldNormal );
+	csl::vertexOutput( variants::WORLD_EYE_VARIANT, _worldEye );
+
+	csl::vertexPosition( _clipPosition );
+	
+	graph->read(
+		this,
+		{
+			_textureCoords,
+			_worldPosition,
+			_clipPosition,
+			_worldNormal,
+			_worldEye,
+		}
+	);
+}
 

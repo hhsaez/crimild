@@ -61,6 +61,8 @@
 
 #include <Rendering/ShaderGraph/ShaderGraph.hpp>
 
+#include <SceneGraph/Light.hpp>
+
 using namespace crimild;
 using namespace crimild::shadergraph;
 using namespace crimild::opengl;
@@ -277,6 +279,161 @@ void OpenGLRenderer::bindUniform( ShaderLocation *location, const Matrix3f &matr
 	}
 
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+}
+
+void OpenGLRenderer::bindLight( ShaderLocation *location, crimild::Size index, Light *light )
+{
+	if ( location == nullptr || light == nullptr ) {
+		return;
+	}
+
+	auto program = location->getProgram();
+	if ( program == nullptr ) {
+		return;
+	}
+
+	auto lightType = light->getType();
+	
+	auto ambient = RGBColorf::ZERO;
+	auto diffuse = RGBColorf::ZERO;
+	auto hasDirection = 0.0f;
+	auto direction = -Vector3f::ZERO;
+	auto hasPosition = 0.0f;
+	auto position = Vector3f::ZERO;
+	auto hasAttenuation = 0.0f;
+	auto attenuation = Vector3f::ZERO;
+	auto innerCutOff = 0.0f;
+	auto outerCutOff = 0.0f;
+
+	switch ( lightType ) {
+		case Light::Type::AMBIENT:
+			ambient = light->getAmbient().rgb();
+			break;
+
+		case Light::Type::DIRECTIONAL:
+			diffuse = light->getColor().rgb();
+			hasDirection = 1.0f;
+			direction = -light->getDirection();
+			break;
+
+		case Light::Type::POINT:
+			diffuse = light->getColor().rgb();
+			hasPosition = 1.0f;
+			position = light->getWorld().getTranslate();
+			hasAttenuation = 1.0f;
+			attenuation = light->getAttenuation();
+			break;
+
+		case Light::Type::SPOT:
+			diffuse = light->getColor().rgb();
+			hasDirection = 1.0f;
+			direction = light->getDirection();
+			hasPosition = 1.0f;
+			position = light->getWorld().getTranslate();
+			hasAttenuation = 1.0f;
+			attenuation = light->getAttenuation();
+			innerCutOff = Numericf::cos( light->getInnerCutoff() );
+			outerCutOff = Numericf::cos( light->getOuterCutoff() );
+			break;
+
+		default:
+			break;
+	}
+
+	{
+		auto locName = OpenGLUtils::buildArrayShaderLocationName( "uLights", index, "ambient" );
+		auto loc = glGetUniformLocation( program->getCatalogId(), locName.c_str() );
+		if ( loc >= 0 ) {
+			glUniform3fv( loc, 1, static_cast< const GLfloat * >( ambient.getData() ) );
+		}
+	}
+
+	{
+		auto loc = glGetUniformLocation(
+			program->getCatalogId(),
+			OpenGLUtils::buildArrayShaderLocationName( "uLights", index, "diffuse" ).c_str() );
+		if ( loc >= 0 ) {
+			glUniform3fv( loc, 1, static_cast< const GLfloat * >( diffuse.getData() ) );
+		}
+	}
+
+	{
+		auto loc = glGetUniformLocation(
+			program->getCatalogId(),
+			OpenGLUtils::buildArrayShaderLocationName( "uLights", index, "hasDirection" ).c_str() );
+		if ( loc >= 0 ) {
+			glUniform1f( loc, hasDirection );
+		}
+	}
+
+	{
+		auto loc = glGetUniformLocation(
+			program->getCatalogId(),
+			OpenGLUtils::buildArrayShaderLocationName( "uLights", index, "direction" ).c_str() );
+		if ( loc >= 0 ) {
+			glUniform3fv( loc, 1, static_cast< const GLfloat * >( direction.getData() ) );
+		}
+	}
+
+	{
+		auto loc = glGetUniformLocation(
+			program->getCatalogId(),
+			OpenGLUtils::buildArrayShaderLocationName( "uLights", index, "hasPosition" ).c_str() );
+		if ( loc >= 0 ) {
+			glUniform1f( loc, hasPosition );
+		}
+	}
+
+	{
+		auto loc = glGetUniformLocation(
+			program->getCatalogId(),
+			OpenGLUtils::buildArrayShaderLocationName( "uLights", index, "position" ).c_str() );
+		if ( loc >= 0 ) {
+			glUniform3fv( loc, 1, static_cast< const GLfloat * >( position.getData() ) );
+		}
+	}
+
+	{
+		auto loc = glGetUniformLocation(
+			program->getCatalogId(),
+			OpenGLUtils::buildArrayShaderLocationName( "uLights", index, "hasAttenuation" ).c_str() );
+		if ( loc >= 0 ) {
+			glUniform1f( loc, hasAttenuation );
+		}
+	}
+
+	{
+		auto loc = glGetUniformLocation(
+			program->getCatalogId(),
+			OpenGLUtils::buildArrayShaderLocationName( "uLights", index, "attenuation" ).c_str() );
+		if ( loc >= 0 ) {
+			glUniform3fv( loc, 1, static_cast< const GLfloat * >( attenuation.getData() ) );
+		}
+	}
+
+	{
+		auto loc = glGetUniformLocation(
+			program->getCatalogId(),
+			OpenGLUtils::buildArrayShaderLocationName( "uLights", index, "innerCutOff" ).c_str() );
+		if ( loc >= 0 ) {
+			glUniform1f( loc, innerCutOff );
+		}
+	}
+
+	{
+		auto loc = glGetUniformLocation(
+			program->getCatalogId(),
+			OpenGLUtils::buildArrayShaderLocationName( "uLights", index, "outerCutOff" ).c_str() );
+		if ( loc >= 0 ) {
+			glUniform1f( loc, outerCutOff );
+		}
+	}
+
+}
+
+void OpenGLRenderer::unbindLight( ShaderLocation *location, crimild::Size index, Light *light )
+{
+	// no-op
 }
 
 void OpenGLRenderer::drawPrimitive( ShaderProgram *program, Primitive *primitive )

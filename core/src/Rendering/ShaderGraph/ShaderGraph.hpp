@@ -36,6 +36,8 @@
 
 namespace crimild {
 
+	class ShaderUniform;
+
 	namespace shadergraph {
 
 		class Variable;
@@ -111,6 +113,16 @@ namespace crimild {
 			containers::Array< SharedPointer< ShaderGraphNode >> _nodes;
 			containers::Array< ShaderGraphNode * > _inputs;
 			containers::Array< ShaderGraphNode * > _outputs;
+
+		public:
+			void attachUniform( SharedPointer< ShaderUniform > const &uniform );
+
+			void eachUniform( std::function< void( ShaderUniform * ) > const &callback );
+
+		private:
+			using UniformMap = containers::Map< std::string, SharedPointer< ShaderUniform >>;
+			
+			UniformMap _uniforms;
 
 		public:
 			std::string build( void );

@@ -78,7 +78,7 @@ void PhongDeferredLightingShaderProgram::createVertexShader( void )
 {
 	auto graph = Renderer::getInstance()->createShaderGraph();
 
-	auto p = csl::projectedPosition();
+	auto p = csl::clipPosition();
 	auto uv = csl::modelTextureCoords();
 
 	csl::vertexOutput( "vTextureCoord", uv );

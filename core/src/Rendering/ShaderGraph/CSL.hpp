@@ -142,6 +142,7 @@ namespace crimild {
 			 */
 			//@{
 
+			void alphaClip( Variable *alpha, Variable *threshold );
 			void fragColor( Variable *color );
 
 			//@}
@@ -154,7 +155,7 @@ namespace crimild {
 			Variable *modelPosition( void );
 			Variable *worldPosition( void );
 			Variable *viewPosition( void );
-			Variable *projectedPosition( void );
+			Variable *clipPosition( void );
 			Variable *screenPosition( void );
 
 			//@}
@@ -208,6 +209,23 @@ namespace crimild {
 			Variable *textureCube_uniform( SharedPointer< ShaderUniform > const &uniform );
 			Variable *textureColor( Variable *texture, Variable *uvs );
 			Variable *textureUnitVector( Variable *texture, Variable *uvs );
+
+			//@}
+
+			/**
+			   \name Standard uniforms
+			 */
+			//@{
+
+			Variable *projectionMatrix( void );
+			Variable *viewMatrix( void );
+			Variable *modelMatrix( void );
+			Variable *normalMatrix( void );
+
+			Variable *colorUniform( void );
+			Variable *colorMapUniform( void );
+			Variable *specularUniform( void );
+			Variable *specularMapUniform( void );
 
 			//@}
 		}
