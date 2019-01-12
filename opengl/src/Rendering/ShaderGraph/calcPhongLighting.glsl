@@ -39,11 +39,11 @@ vec3 calcPhongLighting( vec3 P, vec3 N, vec3 E, vec3 MA, vec3 MD, vec3 MS, float
 		float lDistance = length( lVector );
 
 		vec3 L = normalize( lVector );
-		vec3 R = reflect( -L, N );
+		vec3 H = normalize( L + E );
 
 		vec3 CA = uLights[ i ].ambient;
 		vec3 CD = lDiffuse * max( 0.0, dot( N, L ) );
-		vec3 CS = lDiffuse * pow( max( dot( E, R ), 0.0 ), MSh );
+		vec3 CS = lDiffuse * pow( max( dot( N, H ), 0.0 ), MSh );
 
 		// spotlight
 		float isSpotlight = hasPosition * hasDirection;
