@@ -53,6 +53,7 @@
 #include "Rendering/ShaderGraph/Nodes/Convert.hpp"
 #include "Rendering/ShaderGraph/Nodes/TextureColor.hpp"
 #include "Rendering/ShaderGraph/Nodes/Reflect.hpp"
+#include "Rendering/ShaderGraph/Nodes/Refract.hpp"
 #include "Rendering/ShaderGraph/Nodes/FragmentCoordInput.hpp"
 
 #include "Rendering/VertexFormat.hpp"
@@ -83,6 +84,27 @@ Variable *csl::scalar_uniform( std::string name )
 			Variable::Storage::UNIFORM,
 			Variable::Type::SCALAR,
 			name
+		);
+	}
+	return ret;
+}
+
+Variable *csl::scalar_uniform( std::string name, crimild::Real32 defaultValue )
+{
+	auto graph = ShaderGraph::getCurrent();
+
+	auto ret = graph->getInput< Variable >( name );
+	if ( ret == nullptr ) {
+		ret = graph->addInputNode< Variable >(
+			Variable::Storage::UNIFORM,
+			Variable::Type::SCALAR,
+			name
+		);
+		graph->attachUniform(
+			crimild::alloc< FloatUniform >(
+				name,
+				defaultValue
+			)
 		);
 	}
 	return ret;
@@ -506,6 +528,13 @@ Variable *csl::reflect( Variable *incident, Variable *normal )
 	    ->getResult();
 }
 
+Variable *csl::refract( Variable *incident, Variable *normal, Variable *ratio )
+{
+	return ShaderGraph::getCurrent()
+	    ->addNode< Refract >( incident, normal, ratio )
+	    ->getResult();
+}
+
 Variable *csl::length( Variable *input )
 {
 	return ShaderGraph::getCurrent()
@@ -715,7 +744,7 @@ Variable *csl::worldEyeVector( void )
 {
 	auto p = vec3( worldPosition() );
 	auto cameraPos = worldCameraPos();
-	return normalize( sub( cameraPos, p ) );
+	return sub( cameraPos, p );
 }
 
 Variable *csl::viewEyeVector( void )
@@ -760,6 +789,27 @@ Variable *csl::texture2D_uniform( std::string name )
 	return ret;
 }
 
+Variable *csl::texture2D_uniform( std::string name, SharedPointer< Texture > const &defaultValue )
+{
+	auto graph = ShaderGraph::getCurrent();
+
+	auto ret = graph->getInput< Variable >( name );
+	if ( ret == nullptr ) {
+		ret = graph->addInputNode< Variable >(
+			Variable::Storage::UNIFORM,
+			Variable::Type::SAMPLER_2D,
+			name
+		);
+		graph->attachUniform(
+			crimild::alloc< TextureUniform >(
+				name,
+				defaultValue
+			)
+		);
+	}
+	return ret;
+}
+
 Variable *csl::texture2D_uniform( SharedPointer< ShaderUniform > const &uniform )
 {
 	return texture2D_uniform( uniform->getName() );
@@ -780,7 +830,7 @@ Variable *csl::textureCube_uniform( std::string name )
 	return ret;
 }
 
-Variable *csl::textureCube_uniform( std::string name, Texture *defaultValue )
+Variable *csl::textureCube_uniform( std::string name, SharedPointer< Texture > const &defaultValue )
 {
 	auto graph = ShaderGraph::getCurrent();
 

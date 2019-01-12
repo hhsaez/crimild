@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Normalize.hpp"
+#include "Refract.hpp"
 
 #include "Rendering/ShaderGraph/ShaderGraph.hpp"
 #include "Rendering/ShaderGraph/Variable.hpp"
@@ -33,20 +33,22 @@
 using namespace crimild;
 using namespace crimild::shadergraph;
 
-Normalize::Normalize( ShaderGraph *graph, Variable *input )
+Refract::Refract( ShaderGraph *graph, Variable *incident, Variable *normal, Variable *ratio )
+	: _incident( incident ),
+	  _normal( normal ),
+	  _ratio( ratio )
 {
-	_input = input;
-	_result = graph->addNode< Variable >( input->getType() );
+	_result = graph->addNode< Variable >( incident->getType() );
 }
 
-Normalize::~Normalize( void )
+Refract::~Refract( void )
 {
 	
 }
 
-void Normalize::setup( ShaderGraph *graph )
+void Refract::setup( ShaderGraph *graph )
 {
-	graph->read( this, { _input } );
+	graph->read( this, { _incident, _normal, _ratio } );
 	graph->write( this, { _result } );
 }
 

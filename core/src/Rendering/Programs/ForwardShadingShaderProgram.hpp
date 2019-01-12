@@ -29,12 +29,8 @@
 #define CRIMILD_CORE_RENDERING_PROGRAMS_FORWARD_SHADING_
 
 #include "Rendering/ShaderProgram.hpp"
-#include "Rendering/ShaderUniformImpl.hpp"
 
 namespace crimild {
-
-	class Material;
-	class Light;
 
 	/**
 	   \brief Compute lighting for a scene using a forward shading pipeline

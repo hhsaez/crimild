@@ -116,9 +116,19 @@ void ForwardLightingPass::render( Renderer *renderer, RenderQueue *renderQueue, 
 	const auto pMatrix = renderQueue->getProjectionMatrix();
 	const auto vMatrix = renderQueue->getViewMatrix();
 
+	auto skybox = crimild::get_ptr( Texture::CUBE_ONE );
+	renderQueue->each(
+		renderQueue->getRenderables( RenderQueue::RenderableType::SKYBOX ),
+		[ &skybox ]( RenderQueue::Renderable *renderable ) {
+			if ( auto material = renderable->material ) {
+				skybox = material->getColorMap();
+			}
+		}
+	);
+
 	renderer->setDepthState( _depthState );
 
-	renderQueue->each( renderables, [ this, renderer, renderQueue, pMatrix, vMatrix ]( RenderQueue::Renderable *renderable ) {
+	renderQueue->each( renderables, [ this, renderer, renderQueue, pMatrix, vMatrix, skybox ]( RenderQueue::Renderable *renderable ) {
 		auto program = crimild::get_ptr( _program );
 
 		auto color = RGBAColorf::ONE;
@@ -127,15 +137,29 @@ void ForwardLightingPass::render( Renderer *renderer, RenderQueue *renderQueue, 
 		auto specularMap = crimild::get_ptr( Texture::ONE );
 		auto shininess = 1.0f;
 		auto alphaState = crimild::get_ptr( AlphaState::DISABLED );
+		auto reflection = 0.0f;
+		auto reflectionMap = crimild::get_ptr( Texture::ONE );
+		auto refraction = 1.0f;
+		auto refractionMap = crimild::get_ptr( Texture::ONE );
+		auto environmentMap = skybox;
 
 		if ( auto material = renderable->material ) {
+			if ( material->getProgram() ) program = material->getProgram();
+
 			color = material->getDiffuse();
+			if ( material->getColorMap() ) colorMap = material->getColorMap();
+
 			specular = material->getSpecular();
+			if ( material->getSpecularMap() ) specularMap = material->getSpecularMap();
+
 			shininess = material->getShininess();
 
-			if ( material->getProgram() ) program = material->getProgram();
-			if ( material->getColorMap() ) colorMap = material->getColorMap();
-			if ( material->getSpecularMap() ) specularMap = material->getSpecularMap();
+			reflection = material->getReflection();
+			if ( material->getReflectionMap() ) reflectionMap = material->getReflectionMap();
+
+			refraction = material->getRefraction();
+			if ( material->getRefractionMap() ) reflectionMap = material->getRefractionMap();
+
 			if ( material->getAlphaState() ) alphaState = material->getAlphaState();
 		}
 
@@ -162,6 +186,11 @@ void ForwardLightingPass::render( Renderer *renderer, RenderQueue *renderQueue, 
 		program->bindUniform( SPECULAR_UNIFORM, specular );
 		program->bindUniform( SPECULAR_MAP_UNIFORM, specularMap );
 		program->bindUniform( SHININESS_UNIFORM, shininess );
+		program->bindUniform( REFLECTION_UNIFORM, reflection );
+		program->bindUniform( REFLECTION_MAP_UNIFORM, reflectionMap );
+		program->bindUniform( REFRACTION_UNIFORM, refraction );
+		program->bindUniform( REFRACTION_MAP_UNIFORM, refractionMap );
+		program->bindUniform( ENVIRONMENT_MAP_UNIFORM, environmentMap );
 
 		renderer->bindProgram( program );
 		renderer->setAlphaState( alphaState );

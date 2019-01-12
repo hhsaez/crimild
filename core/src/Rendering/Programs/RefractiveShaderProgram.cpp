@@ -25,28 +25,68 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Normalize.hpp"
+#include "RefractiveShaderProgram.hpp"
 
+#include "Rendering/Renderer.hpp"
+#include "Rendering/Texture.hpp"
 #include "Rendering/ShaderGraph/ShaderGraph.hpp"
-#include "Rendering/ShaderGraph/Variable.hpp"
+#include "Rendering/ShaderGraph/CSL.hpp"
+#include "Rendering/ShaderGraph/Constants.hpp"
+#include "Rendering/ShaderGraph/Nodes/MeshVertexMaster.hpp"
+#include "Rendering/ShaderGraph/Nodes/UnlitFragmentMaster.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
+using namespace crimild::shadergraph::locations;
+using namespace crimild::shadergraph::variants;
+using namespace crimild::shadergraph::csl;
 
-Normalize::Normalize( ShaderGraph *graph, Variable *input )
+RefractiveShaderProgram::RefractiveShaderProgram( void )
 {
-	_input = input;
-	_result = graph->addNode< Variable >( input->getType() );
+	createVertexShader();
+	createFragmentShader();
 }
 
-Normalize::~Normalize( void )
+RefractiveShaderProgram::~RefractiveShaderProgram( void )
 {
+
+}
+
+void RefractiveShaderProgram::createVertexShader( void )
+{
+	auto graph = Renderer::getInstance()->createShaderGraph();
+
+	auto master = graph->addOutputNode< MeshVertexMaster >();
+
+	buildVertexShader( graph );
+}
+
+void RefractiveShaderProgram::createFragmentShader( void )
+{
+	auto graph = Renderer::getInstance()->createShaderGraph();
+
+	auto uv = vec2_in( MODEL_TEXTURE_COORDS_VARIANT );
+
+	auto I = normalize( neg( vec3_in( WORLD_EYE_VARIANT ) ) );
+	auto N = normalize( vec3_in( WORLD_NORMAL_VARIANT ) );
+
+	auto refraction = scalar_uniform( REFRACTION_UNIFORM, 1.0f );
+	auto refractionMap = texture2D_uniform( REFRACTION_MAP_UNIFORM, Texture::ONE );
+	refraction = mult(
+		refraction,
+		vec_x( textureColor( refractionMap, uv ) )
+	);
+
+	auto R = refract( I, N, refraction );
+
+	auto envMap = textureCube_uniform( ENVIRONMENT_MAP_UNIFORM, Texture::CUBE_ONE );
+	auto envMapColor = vec3( textureColor( envMap, R ) );
+
+	auto color = envMapColor;
 	
-}
+	auto master = graph->addOutputNode< UnlitFragmentMaster >();
+	master->setColor( color );
 
-void Normalize::setup( ShaderGraph *graph )
-{
-	graph->read( this, { _input } );
-	graph->write( this, { _result } );
+	buildFragmentShader( graph );
 }
 

@@ -25,28 +25,45 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Normalize.hpp"
+#ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_REFRACT_
+#define CRIMILD_RENDERING_SHADER_GRAPH_NODES_REFRACT_
 
-#include "Rendering/ShaderGraph/ShaderGraph.hpp"
-#include "Rendering/ShaderGraph/Variable.hpp"
+#include "Rendering/ShaderGraph/Expression.hpp"
 
-using namespace crimild;
-using namespace crimild::shadergraph;
+namespace crimild {
 
-Normalize::Normalize( ShaderGraph *graph, Variable *input )
-{
-	_input = input;
-	_result = graph->addNode< Variable >( input->getType() );
+	namespace shadergraph {
+
+		class Variable;
+
+		/**
+		   \brief Calculate refraction direction for an incident vector
+		 */
+		class Refract : public Expression {
+			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::Refract )
+			
+		public:
+			Refract( ShaderGraph *graph, Variable *I, Variable *N, Variable *ratio );
+			virtual ~Refract( void );
+
+			Variable *getIncident( void ) { return _incident; }
+			Variable *getNormal( void ) { return _normal; }
+			Variable *getRatio( void ) { return _ratio; }
+			Variable *getResult( void ) { return _result; }
+			
+		private:
+			Variable *_incident = nullptr;
+			Variable *_normal = nullptr;
+			Variable *_ratio = nullptr;
+			Variable *_result = nullptr;
+			
+		public:
+			virtual void setup( ShaderGraph *graph ) override;
+		};
+		
+	}
+
 }
 
-Normalize::~Normalize( void )
-{
-	
-}
-
-void Normalize::setup( ShaderGraph *graph )
-{
-	graph->read( this, { _input } );
-	graph->write( this, { _result } );
-}
+#endif
 
