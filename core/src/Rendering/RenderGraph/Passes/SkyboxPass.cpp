@@ -31,13 +31,18 @@
 #include "Rendering/FrameBufferObject.hpp"
 #include "Rendering/Renderer.hpp"
 #include "Rendering/RenderQueue.hpp"
+#include "Rendering/ShaderGraph/Constants.hpp"
 #include "Rendering/Programs/SkyboxShaderProgram.hpp"
 #include "Simulation/AssetManager.hpp"
 #include "Foundation/Profiler.hpp"
 
+#include "Rendering/Texture.hpp"
+#include "Rendering/Image.hpp"
+
 using namespace crimild;
 using namespace crimild::rendergraph;
 using namespace crimild::rendergraph::passes;
+using namespace crimild::shadergraph::locations;
 
 SkyboxPass::SkyboxPass( RenderGraph *graph )
 	: RenderGraphPass( graph, "Skybox" )
@@ -75,7 +80,7 @@ void SkyboxPass::setup( rendergraph::RenderGraph *graph )
 void SkyboxPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue )
 {
 	CRIMILD_PROFILE( getName() )
-	
+
 	auto fbo = graph->createFBO( { _depthInput, _colorOutput } );
 	fbo->setClearFlags( _clearFlags );
 	
@@ -89,18 +94,25 @@ void SkyboxPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *r
 	const auto pMatrix = renderQueue->getProjectionMatrix();
 	const auto vMatrix = renderQueue->getViewMatrix();
 
-	auto program = crimild::get_ptr( _program );
-
-	program->bindProjMatrix( pMatrix );
-	program->bindViewMatrix( vMatrix );
-
 	renderer->setDepthState( _depthState );
 
-	renderQueue->each( renderables, [ this, renderer, program ]( RenderQueue::Renderable *renderable ) {
+	renderQueue->each( renderables, [ this, renderer, pMatrix, vMatrix ]( RenderQueue::Renderable *renderable ) {
+		auto color = RGBAColorf::ONE;
+		auto colorMap = crimild::get_ptr( Texture::CUBE_ONE );
+		auto program = crimild::get_ptr( _program );
+
 		if ( auto material = crimild::get_ptr( renderable->material ) ) {
-			program->bindCubeMap( material->getColorMap() );
-			program->bindDiffuse( material->getDiffuse() );
+			color = material->getDiffuse();
+			
+			if ( material->getProgram() ) program = material->getProgram();
+			if ( material->getColorMap() ) colorMap = material->getColorMap();
 		}
+
+		program->bindUniform( PROJECTION_MATRIX_UNIFORM, pMatrix );
+		program->bindUniform( VIEW_MATRIX_UNIFORM, vMatrix );
+
+		program->bindUniform( COLOR_UNIFORM, color );
+		program->bindUniform( COLOR_MAP_UNIFORM, colorMap );
 
 		renderer->bindProgram( program );
 		

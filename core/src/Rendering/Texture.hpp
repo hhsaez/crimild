@@ -44,6 +44,7 @@ namespace crimild {
 
 	public:
 		static SharedPointer< Texture > ONE;
+		static SharedPointer< Texture > CUBE_ONE;
 		static SharedPointer< Texture > ZERO;
 
 		struct Target {

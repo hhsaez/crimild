@@ -38,6 +38,7 @@
 namespace crimild {
 
 	class ShaderUniform;
+	class Texture;
 
 	namespace shadergraph {
 
@@ -71,6 +72,7 @@ namespace crimild {
 			Variable *vec4( Variable *x, Variable *y, Variable *z, Variable *w );
 			Variable *vec4( const Vector4f &value );
 			Variable *vec4_uniform( std::string name );
+			Variable *vec4_uniform( std::string name, const Vector4f &defaultValue );
 			Variable *vec4_uniform( SharedPointer< ShaderUniform > const &uniform );
 			Variable *vec4_uniform( ShaderUniform *uniform );
 			
@@ -205,9 +207,13 @@ namespace crimild {
 			
 			Variable *texture2D_uniform( std::string name );
 			Variable *texture2D_uniform( SharedPointer< ShaderUniform > const &uniform );
+
 			Variable *textureCube_uniform( std::string name );
+			Variable *textureCube_uniform( std::string name, Texture *defaultValue );
 			Variable *textureCube_uniform( SharedPointer< ShaderUniform > const &uniform );
+
 			Variable *textureColor( Variable *texture, Variable *uvs );
+
 			Variable *textureUnitVector( Variable *texture, Variable *uvs );
 
 			//@}

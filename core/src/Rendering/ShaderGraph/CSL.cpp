@@ -383,6 +383,27 @@ Variable *csl::vec4_uniform( std::string name )
 	return ret;
 }
 
+Variable *csl::vec4_uniform( std::string name, const Vector4f &defaultValue )
+{
+	auto graph = ShaderGraph::getCurrent();
+
+	auto ret = graph->getInput< Variable >( name );
+	if ( ret == nullptr ) {
+		ret = graph->addInputNode< Variable >(
+			Variable::Storage::UNIFORM,
+			Variable::Type::VECTOR_4,
+			name
+		);
+		graph->attachUniform(
+			crimild::alloc< Vector4fUniform >(
+				name,
+				defaultValue
+			)
+		);
+	}
+	return ret;
+}
+
 Variable *csl::vec4_uniform( SharedPointer< ShaderUniform > const &uniform )
 {
 	return vec4_uniform( uniform->getName() );
@@ -754,6 +775,27 @@ Variable *csl::textureCube_uniform( std::string name )
 			Variable::Storage::UNIFORM,
 			Variable::Type::SAMPLER_CUBE_MAP,
 			name
+		);
+	}
+	return ret;
+}
+
+Variable *csl::textureCube_uniform( std::string name, Texture *defaultValue )
+{
+	auto graph = ShaderGraph::getCurrent();
+
+	auto ret = graph->getInput< Variable >( name );
+	if ( ret == nullptr ) {
+		ret = graph->addInputNode< Variable >(
+			Variable::Storage::UNIFORM,
+			Variable::Type::SAMPLER_CUBE_MAP,
+			name
+		);
+		graph->attachUniform(
+			crimild::alloc< TextureUniform >(
+				name,
+				defaultValue
+			)
 		);
 	}
 	return ret;
