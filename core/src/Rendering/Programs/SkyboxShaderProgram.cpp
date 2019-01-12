@@ -30,22 +30,18 @@
 #include "Rendering/Renderer.hpp"
 #include "Rendering/ShaderGraph/ShaderGraph.hpp"
 #include "Rendering/ShaderGraph/CSL.hpp"
+#include "Rendering/ShaderGraph/Constants.hpp"
 #include "Rendering/Image.hpp"
 #include "Rendering/Texture.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
+using namespace crimild::shadergraph::locations;
+using namespace crimild::shadergraph::variants;
 using namespace crimild::shadergraph::csl;
 
 SkyboxShaderProgram::SkyboxShaderProgram( void )
 {
-	attachUniforms({
-		_viewMatrix = crimild::alloc< Matrix4fUniform >( "uVMatrix", Matrix4f::IDENTITY ),
-		_projMatrix = crimild::alloc< Matrix4fUniform >( "uPMatrix", Matrix4f::IDENTITY ),
-		_diffuse = crimild::alloc< RGBAColorfUniform >( "uDiffuse", RGBAColorf::ONE ),
-		_cubeMap = crimild::alloc< TextureUniform >( "uCubeMap", nullptr ),
-	});
-	
 	createVertexShader();
 	createFragmentShader();
 }
@@ -59,8 +55,8 @@ void SkyboxShaderProgram::createVertexShader( void )
 {
 	auto graph = Renderer::getInstance()->createShaderGraph();
 
-	auto pMatrix = mat4_uniform( _projMatrix );
-	auto vMatrix = mat4( mat3( mat4_uniform( _viewMatrix ) ) );
+	auto pMatrix = projectionMatrix();
+	auto vMatrix = mat4( mat3( viewMatrix() ) );
 	auto p = modelPosition();
 	auto uv = p;
 	p = mult( pMatrix, vMatrix, vec4( p, scalar_one() ) );
@@ -72,30 +68,26 @@ void SkyboxShaderProgram::createVertexShader( void )
 		vec_w( p )
 	);
 
-	csl::vertexOutput( "vTextureCoord", uv );
-	csl::vertexPosition( p );
+	vertexOutput( MODEL_TEXTURE_COORDS_VARIANT, uv );
+	vertexPosition( p );
 
-	auto src = graph->build();
-	auto shader = crimild::alloc< VertexShader >( src );
-	setVertexShader( shader );
+	buildVertexShader( graph );
 }
 
 void SkyboxShaderProgram::createFragmentShader( void )
 {
 	auto graph = Renderer::getInstance()->createShaderGraph();
 
-	auto uv = vec3_in( "vTextureCoord" );
-	auto texture = textureCube_uniform( _cubeMap );
-	auto diffuse = vec4_uniform( _diffuse );
+	auto uv = vec3_in( MODEL_TEXTURE_COORDS_VARIANT );
+	auto texture = textureCube_uniform( COLOR_MAP_UNIFORM, nullptr );
+	auto diffuse = vec4_uniform( COLOR_UNIFORM, Vector4f::ONE );
 
 	auto color = mult(
 		textureColor( texture, uv ),
 		diffuse
 	);
-	fragColor( color );
+	fragColor( vec4( vec3( color ), scalar_one() ) );
 
-	auto src = graph->build();
-	auto shader = crimild::alloc< FragmentShader >( src );
-	setFragmentShader( shader );
+	buildFragmentShader( graph );
 }
 

@@ -30,6 +30,7 @@
 #include "Rendering/IndexBufferObject.hpp"
 #include "Rendering/Texture.hpp"
 #include "Rendering/Material.hpp"
+#include "Rendering/Programs/SkyboxShaderProgram.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Components/MaterialComponent.hpp"
 
@@ -96,7 +97,9 @@ Skybox::Skybox( ImageArray const &faces )
 	
 	auto texture = crimild::alloc< Texture >( _faces );
 	texture->setWrapMode( Texture::WrapMode::CLAMP_TO_EDGE );
-	m->setColorMap( crimild::alloc< Texture >( _faces ) );
+	m->setColorMap( texture );
+
+	m->setProgram( crimild::alloc< SkyboxShaderProgram >() );
 	
 	getComponent< MaterialComponent >()->attachMaterial( m );
 	

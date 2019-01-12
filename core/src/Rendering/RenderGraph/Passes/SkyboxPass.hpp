@@ -33,7 +33,6 @@
 namespace crimild {
 
 	class DepthState;
-	class SkyboxShaderProgram;
 
 	namespace rendergraph {
 
@@ -59,7 +58,7 @@ namespace crimild {
 				virtual void execute( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue ) override;
 
 			private:
-				SharedPointer< SkyboxShaderProgram > _program;
+				SharedPointer< ShaderProgram > _program;
 				crimild::Int8 _clearFlags;
 				SharedPointer< DepthState > _depthState;
 				

@@ -38,20 +38,9 @@ namespace crimild {
 		SkyboxShaderProgram( void );
 		virtual ~SkyboxShaderProgram( void );
 
-		void bindProjMatrix( const Matrix4f &value ) { _projMatrix->setValue( value ); }
-		void bindViewMatrix( const Matrix4f &value ) { _viewMatrix->setValue( value ); }
-		void bindDiffuse( const RGBAColorf &value ) { _diffuse->setValue( value ); }
-		void bindCubeMap( Texture *value ) { _cubeMap->setValue( value ); }
-
 	private:
 		void createVertexShader( void );
 		void createFragmentShader( void );
-
-	private:
-		SharedPointer< Matrix4fUniform > _projMatrix;
-		SharedPointer< Matrix4fUniform > _viewMatrix;
-		SharedPointer< RGBAColorfUniform > _diffuse;
-		SharedPointer< TextureUniform > _cubeMap;
 	};
 
 }
