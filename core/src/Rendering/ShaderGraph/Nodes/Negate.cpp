@@ -36,7 +36,7 @@ using namespace crimild::shadergraph;
 Negate::Negate( ShaderGraph *graph, Variable *input )
 {
 	_input = input;
-	_result = graph->addNode< Variable >( input->getType(), input->getName() + "_neg" );
+	_result = graph->addNode< Variable >( input->getType() );
 }
 
 Negate::~Negate( void )

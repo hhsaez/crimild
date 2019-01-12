@@ -167,8 +167,8 @@ void OBJLoader::generateGeometry( void )
 	                     ( useTangents > 0 ? 3 : 0 ),
 						 ( useTextureCoords > 0 ? 2 : 0 ) );
 
-	std::vector< float > vertexData;
-	std::vector< unsigned short > indexData;
+	std::vector< VertexPrecision > vertexData;
+	std::vector< IndexPrecision > indexData;
     
     Vector3f p0, p1, p2;
     Vector3f n0, n1, n2;

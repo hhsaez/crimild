@@ -52,6 +52,7 @@
 #include "Rendering/ShaderGraph/Nodes/Convert.hpp"
 #include "Rendering/ShaderGraph/Nodes/TextureColor.hpp"
 #include "Rendering/ShaderGraph/Nodes/Reflect.hpp"
+#include "Rendering/ShaderGraph/Nodes/Refract.hpp"
 #include "Rendering/ShaderGraph/Nodes/AlphaClip.hpp"
 #include "Rendering/ShaderGraph/Nodes/FragmentCoordInput.hpp"
 #include "Rendering/ShaderGraph/Nodes/MeshVertexMaster.hpp"
@@ -366,6 +367,18 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 		ss << reflect->getResult()->getName() << " = reflect( "
 		   << reflect->getIncident()->getName() << ", "
 		   << reflect->getNormal()->getName()
+		   << " );";
+		_mainSection.add( ss.str() );
+	};
+
+	_translators[ Refract::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
+		auto refract = static_cast< Refract * >( node );
+
+		std::stringstream ss;
+		ss << refract->getResult()->getName() << " = refract( "
+		   << refract->getIncident()->getName() << ", "
+		   << refract->getNormal()->getName() << ", "
+		   << refract->getRatio()->getName()
 		   << " );";
 		_mainSection.add( ss.str() );
 	};

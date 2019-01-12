@@ -46,9 +46,19 @@ namespace crimild {
 
 			const char * const COLOR_UNIFORM = "uColor";
 			const char * const COLOR_MAP_UNIFORM = "uColorMap";
+
 			const char * const SPECULAR_UNIFORM = "uSpecular";
 			const char * const SPECULAR_MAP_UNIFORM = "uSpecularMap";
+
 			const char * const SHININESS_UNIFORM = "uShininess";
+
+			const char * const REFLECTION_UNIFORM = "uReflection";
+			const char * const REFLECTION_MAP_UNIFORM = "uReflectionMap";
+
+			const char * const REFRACTION_UNIFORM = "uRefraction";
+			const char * const REFRACTION_MAP_UNIFORM = "uRefractionMap";
+
+			const char * const ENVIRONMENT_MAP_UNIFORM = "uEnvironmentMap";
 
 			const char * const LIGHT_UNIFORM = "uLight";
 			const char * const LIGHT_AMBIENT_UNIFORM = "ambient";

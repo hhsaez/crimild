@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ForwardShadingShaderProgram.hpp"
+#include "ReflectiveShaderProgram.hpp"
 
 #include "Rendering/Renderer.hpp"
 #include "Rendering/Texture.hpp"
@@ -33,23 +33,26 @@
 #include "Rendering/ShaderGraph/CSL.hpp"
 #include "Rendering/ShaderGraph/Constants.hpp"
 #include "Rendering/ShaderGraph/Nodes/MeshVertexMaster.hpp"
-#include "Rendering/ShaderGraph/Nodes/PhongFragmentMaster.hpp"
+#include "Rendering/ShaderGraph/Nodes/UnlitFragmentMaster.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
+using namespace crimild::shadergraph::locations;
+using namespace crimild::shadergraph::variants;
+using namespace crimild::shadergraph::csl;
 
-ForwardShadingShaderProgram::ForwardShadingShaderProgram( void )
+ReflectiveShaderProgram::ReflectiveShaderProgram( void )
 {
 	createVertexShader();
 	createFragmentShader();
 }
 
-ForwardShadingShaderProgram::~ForwardShadingShaderProgram( void )
+ReflectiveShaderProgram::~ReflectiveShaderProgram( void )
 {
 
 }
 
-void ForwardShadingShaderProgram::createVertexShader( void )
+void ReflectiveShaderProgram::createVertexShader( void )
 {
 	auto graph = Renderer::getInstance()->createShaderGraph();
 
@@ -58,11 +61,40 @@ void ForwardShadingShaderProgram::createVertexShader( void )
 	buildVertexShader( graph );
 }
 
-void ForwardShadingShaderProgram::createFragmentShader( void )
+void ReflectiveShaderProgram::createFragmentShader( void )
 {
 	auto graph = Renderer::getInstance()->createShaderGraph();
 
-	auto master = graph->addOutputNode< PhongFragmentMaster >();
+	auto I = normalize( neg( vec3_in( WORLD_EYE_VARIANT ) ) );
+	auto N = normalize( vec3_in( WORLD_NORMAL_VARIANT ) );
+	auto R = reflect( I, N );
+
+	auto uv = vec2_in( MODEL_TEXTURE_COORDS_VARIANT );
+
+	auto reflection = scalar_uniform( REFLECTION_UNIFORM, 0.0f );
+	auto reflectionMap = texture2D_uniform( REFLECTION_MAP_UNIFORM, Texture::ONE );
+	reflection = mult(
+		reflection,
+		vec_x( textureColor( reflectionMap, uv ) )
+	);
+
+	auto envMap = textureCube_uniform( ENVIRONMENT_MAP_UNIFORM, Texture::CUBE_ONE );
+	auto envMapColor = vec3( textureColor( envMap, R ) );
+
+	auto color = vec3( csl::colorUniform() );
+	auto colorMap = csl::colorMapUniform();
+	color = csl::mult(
+		color,
+		vec3( csl::textureColor( colorMap, uv ) )
+	);
+
+	color = add(
+		mult( sub( scalar_one(), reflection ), color ),
+		mult( reflection, envMapColor )
+	);
+	
+	auto master = graph->addOutputNode< UnlitFragmentMaster >();
+	master->setColor( color );
 
 	buildFragmentShader( graph );
 }

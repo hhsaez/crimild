@@ -265,6 +265,8 @@
 
 #include "Rendering/Programs/UnlitShaderProgram.hpp"
 #include "Rendering/Programs/ForwardShadingShaderProgram.hpp"
+#include "Rendering/Programs/ReflectiveShaderProgram.hpp"
+#include "Rendering/Programs/RefractiveShaderProgram.hpp"
 
 #include "Rendering/ImageEffects/ImageEffect.hpp"
 #include "Rendering/ImageEffects/ColorTintImageEffect.hpp"

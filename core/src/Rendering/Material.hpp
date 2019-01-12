@@ -123,6 +123,46 @@ namespace crimild {
         bool _castShadows = true;
         bool _receiveShadows = true;
 
+		/**
+		   \name Reflection
+
+		   In order for the reflection map to work, set reflection value to 1.0
+		*/
+		//@{
+		
+	public:
+		void setReflection( crimild::Real32 value ) { _reflection = value; }
+		crimild::Real32 getReflection( void ) const { return _reflection; }
+
+		void setReflectionMap( SharedPointer< Texture > const &map ) { _reflectionMap = map; }
+		Texture *getReflectionMap( void ) { return crimild::get_ptr( _reflectionMap ); }
+
+	private:
+		crimild::Real32 _reflection = 0.0f;
+		SharedPointer< Texture > _reflectionMap;
+		
+		//@}
+
+		/**
+		   \name Refraction
+
+		   In order for the refraction map to work, set refraction value to 1.0
+		*/
+		//@{
+		
+	public:
+		void setRefraction( crimild::Real32 value ) { _refraction = value; }
+		crimild::Real32 getRefraction( void ) const { return _refraction; }
+
+		void setRefractionMap( SharedPointer< Texture > const &map ) { _refractionMap = map; }
+		Texture *getRefractionMap( void ) { return crimild::get_ptr( _refractionMap ); }
+
+	private:
+		crimild::Real32 _refraction = 0.0f;
+		SharedPointer< Texture > _refractionMap;
+		
+		//@}
+
         /**
             \name Coding support
          */

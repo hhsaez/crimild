@@ -48,6 +48,7 @@ namespace crimild {
 
 			Variable *scalar( crimild::Real32 value, std::string name = "" );
 			Variable *scalar_uniform( std::string name );
+			Variable *scalar_uniform( std::string name, crimild::Real32 defaultValue );
 			Variable *scalar_uniform( SharedPointer< ShaderUniform > const &uniform );
 			Variable *scalar_constant( crimild::Real32 value );
 			Variable *scalar_one( void );
@@ -121,6 +122,7 @@ namespace crimild {
 			Variable *dot( Variable *a, Variable *b );
 			Variable *normalize( Variable *input );
 			Variable *reflect( Variable *incident, Variable *normal );
+			Variable *refract( Variable *incident, Variable *normal, Variable *ratio );
 			Variable *length( Variable *input );
 			Variable *inverse( Variable *matrix );
 			Variable *clamp( Variable *value, Variable *lowerBound, Variable *upperBound );
@@ -206,10 +208,11 @@ namespace crimild {
 			//@{
 			
 			Variable *texture2D_uniform( std::string name );
+			Variable *texture2D_uniform( std::string name, SharedPointer< Texture > const &defaultValue );
 			Variable *texture2D_uniform( SharedPointer< ShaderUniform > const &uniform );
 
 			Variable *textureCube_uniform( std::string name );
-			Variable *textureCube_uniform( std::string name, Texture *defaultValue );
+			Variable *textureCube_uniform( std::string name, SharedPointer< Texture > const &defaultValue );
 			Variable *textureCube_uniform( SharedPointer< ShaderUniform > const &uniform );
 
 			Variable *textureColor( Variable *texture, Variable *uvs );

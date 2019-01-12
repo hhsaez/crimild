@@ -25,28 +25,24 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Normalize.hpp"
+#ifndef CRIMILD_CORE_RENDERING_PROGRAMS_REFLECTIVE_
+#define CRIMILD_CORE_RENDERING_PROGRAMS_REFLECTIVE_
 
-#include "Rendering/ShaderGraph/ShaderGraph.hpp"
-#include "Rendering/ShaderGraph/Variable.hpp"
+#include "Rendering/ShaderProgram.hpp"
 
-using namespace crimild;
-using namespace crimild::shadergraph;
+namespace crimild {
 
-Normalize::Normalize( ShaderGraph *graph, Variable *input )
-{
-	_input = input;
-	_result = graph->addNode< Variable >( input->getType() );
+	class ReflectiveShaderProgram : public ShaderProgram {
+	public:
+		ReflectiveShaderProgram( void );
+		virtual ~ReflectiveShaderProgram( void );
+
+	private:
+		void createVertexShader( void );
+		void createFragmentShader( void );
+	};
+
 }
 
-Normalize::~Normalize( void )
-{
-	
-}
-
-void Normalize::setup( ShaderGraph *graph )
-{
-	graph->read( this, { _input } );
-	graph->write( this, { _result } );
-}
+#endif
 
