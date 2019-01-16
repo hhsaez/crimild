@@ -172,8 +172,8 @@ int ShaderProgramCatalog::compileShader( Shader *shader, int type )
                     glGetShaderInfoLog( shaderId, infoLen, NULL, buf );
                     Log::fatal( CRIMILD_CURRENT_CLASS_NAME, "Could not compile ",
                                ( type == GL_VERTEX_SHADER ? "vertex" : "fragment" ), " shader. ",
-                               "Reason: ", buf,
-                               "\nSource: ", src );
+					            "\nSource: ", src,
+					            "\nReason: ", buf );
                     free( buf );
                     exit( 1 );
                 }

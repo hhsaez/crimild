@@ -86,7 +86,7 @@ void ForwardLightingPass::setup( rendergraph::RenderGraph *graph )
 		_depthState = DepthState::ENABLED;
 	}
 	
-	graph->read( this, { _depthInput } );
+	graph->read( this, { _depthInput, _shadowInput } );
 	graph->write( this, { _colorOutput } );
 }
 
@@ -126,9 +126,16 @@ void ForwardLightingPass::render( Renderer *renderer, RenderQueue *renderQueue, 
 		}
 	);
 
+	auto shadowAtlas = crimild::get_ptr( Texture::ONE );
+	if ( auto input = getShadowInput() ) {
+		if ( auto texture = input->getTexture() ) {
+			shadowAtlas = texture;
+		}
+	}
+
 	renderer->setDepthState( _depthState );
 
-	renderQueue->each( renderables, [ this, renderer, renderQueue, pMatrix, vMatrix, skybox ]( RenderQueue::Renderable *renderable ) {
+	renderQueue->each( renderables, [ this, renderer, renderQueue, pMatrix, vMatrix, skybox, shadowAtlas ]( RenderQueue::Renderable *renderable ) {
 		auto program = crimild::get_ptr( _program );
 
 		auto color = RGBAColorf::ONE;
@@ -191,6 +198,7 @@ void ForwardLightingPass::render( Renderer *renderer, RenderQueue *renderQueue, 
 		program->bindUniform( REFRACTION_UNIFORM, refraction );
 		program->bindUniform( REFRACTION_MAP_UNIFORM, refractionMap );
 		program->bindUniform( ENVIRONMENT_MAP_UNIFORM, environmentMap );
+		program->bindUniform( SHADOW_ATLAS_UNIFORM, shadowAtlas );
 
 		renderer->bindProgram( program );
 		renderer->setAlphaState( alphaState );

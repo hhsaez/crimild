@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
- *
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,42 +25,27 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ShadowMap.hpp"
-#include "FrameBufferObject.hpp"
-#include "RenderTarget.hpp"
-#include "Texture.hpp"
+#ifndef CRIMILD_CORE_RENDERING_PROGRAMS_DEPTH_
+#define CRIMILD_CORE_RENDERING_PROGRAMS_DEPTH_
 
-#include "Simulation/Simulation.hpp"
+#include "Rendering/ShaderProgram.hpp"
 
-using namespace crimild;
+namespace crimild {
 
-ShadowMap::ShadowMap( void )
-    : ShadowMap( nullptr )
-{
-    
+	/**
+	   \brief A simple shader program that draws nothing to the fragment
+	 */
+	class DepthShaderProgram : public ShaderProgram {
+	public:
+		DepthShaderProgram( void );
+		virtual ~DepthShaderProgram( void );
+
+	private:
+		void createVertexShader( void );
+		void createFragmentShader( void );
+	};
+
 }
 
-ShadowMap::ShadowMap( SharedPointer< FrameBufferObject > const &fbo )
-    : _buffer( fbo )
-{
-    if ( _buffer == nullptr ) {
-        auto width = Simulation::getInstance()->getSettings()->get< crimild::Int16 >( Settings::SETTINGS_RENDERING_SHADOWS_RESOLUTION_WIDTH, 1024 );
-        auto height = Simulation::getInstance()->getSettings()->get< crimild::Int16 >( Settings::SETTINGS_RENDERING_SHADOWS_RESOLUTION_HEIGHT, 1024 );
-
-        _buffer = crimild::alloc< FrameBufferObject >( width, height );
-        _buffer->setClearColor( RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ) );
-        _buffer->getRenderTargets().insert( "depth", crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER_AND_TEXTURE, width, height, true ) );
-    }
-    
-    _buffer->getRenderTargets().each( [ this ]( const std::string &name, SharedPointer< RenderTarget > &target ) {
-        if ( target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
-            _texture = target->getTexture();
-        }
-    });
-}
-
-ShadowMap::~ShadowMap( void )
-{
-    
-}
+#endif
 

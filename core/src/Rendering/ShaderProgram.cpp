@@ -57,9 +57,11 @@ void ShaderProgram::registerLocation( SharedPointer< ShaderLocation > const &loc
 	location->setProgram( this );
 }
 
-void ShaderProgram::registerUniformLocation( std::string name )
+ShaderLocation *ShaderProgram::registerUniformLocation( std::string name )
 {
-	registerLocation( crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, name ) );
+	auto loc = crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, name );
+	registerLocation( loc );
+	return crimild::get_ptr( loc );
 }
 
 void ShaderProgram::resetLocations( void )

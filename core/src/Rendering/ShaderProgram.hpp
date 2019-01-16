@@ -159,7 +159,7 @@ namespace crimild {
 
 	public:
 		void registerLocation( SharedPointer< ShaderLocation > const &location );
-		void registerUniformLocation( std::string name );
+		ShaderLocation *registerUniformLocation( std::string name );
         ShaderLocation *getLocation( std::string name ) { return crimild::get_ptr( _locations[ name ] ); }
 		void resetLocations( void );
 		void forEachLocation( std::function< void( ShaderLocation * ) > callback );
