@@ -161,6 +161,10 @@ SharedPointer< RenderTarget > RenderGraph::getRenderTarget( crimild::Int64 hints
 
     auto target = crimild::alloc< RenderTarget >( type, output, size.x(), size.y(), useFloatTexture );
 
+	if ( hints & RenderGraphAttachment::Hint::WRAP_REPEAT ) {
+		target->getTexture()->setWrapMode( Texture::WrapMode::REPEAT );
+	}
+
     return target;
 }
 
@@ -251,8 +255,13 @@ void RenderGraph::releaseAttachment( RenderGraphAttachment *attachment )
     }
 
     attachment->setReaderCount( attachment->getReaderCount() - 1 );
+
+	auto hints = attachment->getHints();
+	if ( hints & RenderGraphAttachment::Hint::PERSISTENT ) {
+		return;
+	}
+	
     if ( attachment->getReaderCount() <= 0 ) {
-        auto hints = attachment->getHints();
         auto target = crimild::retain( attachment->getRenderTarget() );
         _renderTargetCache[ hints ].push( target );
         attachment->setRenderTarget( nullptr );

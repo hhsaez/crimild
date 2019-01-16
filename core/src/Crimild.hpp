@@ -260,7 +260,9 @@
 #include "Rendering/RenderGraph/Passes/ForwardLightingPass.hpp"
 #include "Rendering/RenderGraph/Passes/ScreenPass.hpp"
 #include "Rendering/RenderGraph/Passes/DepthPass.hpp"
+#include "Rendering/RenderGraph/Passes/LinearizeDepthPass.hpp"
 #include "Rendering/RenderGraph/Passes/BlendPass.hpp"
+#include "Rendering/RenderGraph/Passes/FrameDebugPass.hpp"
 #include "Rendering/RenderGraph/Passes/SkyboxPass.hpp"
 
 #include "Rendering/Programs/UnlitShaderProgram.hpp"

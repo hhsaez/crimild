@@ -74,6 +74,8 @@ namespace crimild {
 			const char * const LIGHT_ARRAY_COUNT_UNIFORM = "uLightCount";
 			const char * const LIGHT_ARRAY_UNIFORM = "uLights";
 
+			const char * const SHADOW_ATLAS_UNIFORM = "uShadowAtlas";
+
 		}
 
 		namespace variants {

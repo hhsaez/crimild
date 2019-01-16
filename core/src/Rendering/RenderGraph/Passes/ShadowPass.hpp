@@ -25,66 +25,43 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_RENDER_GRAPH_PASSES_FORWARD_LIGTHING_
-#define CRIMILD_CORE_RENDER_GRAPH_PASSES_FORWARD_LIGTHING_
+#ifndef CRIMILD_CORE_RENDER_GRAPH_PASSES_SHADOW_
+#define CRIMILD_CORE_RENDER_GRAPH_PASSES_SHADOW_
 
 #include "Rendering/RenderGraph/RenderGraphPass.hpp"
-#include "Rendering/RenderQueue.hpp"
 
 namespace crimild {
 
-	class ForwardShadingShaderProgram;
+	class Light;
 
 	namespace rendergraph {
 
 		namespace passes {
 
 			/**
-			   \brief Computing lighting for renderables 
-
-			   This also serves as a render pass for objects that cannot be
-			   rendered on other passes.
-
-			   \remarks Try to avoid this pass, since it's probably not the
-			   fastest way to render objects. Other passes are more optimized.
+			   \brief Compute the shadow atlas for all casters
 			 */
-			class ForwardLightingPass : public RenderGraphPass {
-				CRIMILD_IMPLEMENT_RTTI( crimild::rendergraph::ForwardLightingPass )
-
-			private:
-				using RenderableTypeArray = containers::Array< RenderQueue::RenderableType >;
+			class ShadowPass : public RenderGraphPass {
+				CRIMILD_IMPLEMENT_RTTI( crimild::rendergraph::ShadowPass )
 				
 			public:
-				ForwardLightingPass( RenderGraph *graph, crimild::Size maxLights = 10 );
-				ForwardLightingPass( RenderGraph *graph, RenderableTypeArray const &renderableTypes, crimild::Size maxLights = 10 );
-				virtual ~ForwardLightingPass( void );
-				
-				void setDepthInput( RenderGraphAttachment *attachment ) { _depthInput = attachment; }
-				RenderGraphAttachment *getDepthInput( void ) { return _depthInput; }
-
-				void setShadowInput( RenderGraphAttachment *attachment ) { _shadowInput = attachment; }
-				RenderGraphAttachment *getShadowInput( void ) { return _shadowInput; }				
-				
-				void setColorOutput( RenderGraphAttachment *attachment ) { _colorOutput = attachment; }
-				RenderGraphAttachment *getColorOutput( void ) { return _colorOutput; }
+				ShadowPass( RenderGraph *graph );
+				virtual ~ShadowPass( void );
+			
+				void setShadowOutput( RenderGraphAttachment *attachment ) { _shadowOutput = attachment; }
+				RenderGraphAttachment *getShadowOutput( void ) { return _shadowOutput; }
 				
 				virtual void setup( rendergraph::RenderGraph *graph ) override;
 				virtual void execute( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue ) override;
 
 			private:
-				void render( Renderer *renderer, RenderQueue *renderQueue, RenderQueue::RenderableType renderableType );
-			
-			private:
-				RenderableTypeArray _renderableTypes;
-				SharedPointer< ShaderProgram > _program;
-				crimild::Int8 _clearFlags;
-				SharedPointer< DepthState > _depthState;
-				
-				RenderGraphAttachment *_depthInput = nullptr;
-				RenderGraphAttachment *_shadowInput = nullptr;
-				RenderGraphAttachment *_colorOutput = nullptr;
-			};
+				void renderShadowMap( Renderer *renderer, RenderQueue *renderQueue, Light *light );
 
+			private:
+				SharedPointer< ShaderProgram > _program;
+			
+				RenderGraphAttachment *_shadowOutput = nullptr;
+			};
 		}
 
 	}
@@ -92,3 +69,4 @@ namespace crimild {
 }
 
 #endif
+

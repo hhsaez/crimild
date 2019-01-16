@@ -697,18 +697,27 @@ namespace crimild {
 	template< typename U >
 	Matrix< 4, U > operator*( const Matrix< 4, U > &a, const Matrix< 4, U > &b )
 	{
-		Matrix< 4, U > result;
-		memset( &result[ 0 ], 0, sizeof( U ) * 16 );
+		Matrix< 4, U > ret;
+		memset( &ret[ 0 ], 0, sizeof( U ) * 16 );
 
-		for ( crimild::Size i = 0; i < 4; i++ ) {
-			for ( crimild::Size j = 0; j < 4; j++ ) {
-				for ( crimild::Size k = 0; k < 4; k++ ) {
-					result[ i * 4 + j ] += a[ i * 4 + k ] * b[ k * 4 + j ];
-				}
-			}
-		}
+		ret[ 0 ] = a[ 0 ] * b[ 0 ] + a[ 1 ] * b[ 4 ] + a[ 2 ] * b[ 8 ] + a[ 3 ] * b[ 12 ];
+		ret[ 1 ] = a[ 0 ] * b[ 1 ] + a[ 1 ] * b[ 5 ] + a[ 2 ] * b[ 9 ] + a[ 3 ] * b[ 13 ];
+		ret[ 2 ] = a[ 0 ] * b[ 2 ] + a[ 1 ] * b[ 6 ] + a[ 2 ] * b[ 10 ] + a[ 3 ] * b[ 14 ];
+		ret[ 3 ] = a[ 0 ] * b[ 3 ] + a[ 1 ] * b[ 7 ] + a[ 2 ] * b[ 11 ] + a[ 3 ] * b[ 15 ];
+		ret[ 4 ] = a[ 4 ] * b[ 0 ] + a[ 5 ] * b[ 4 ] + a[ 6 ] * b[ 8 ] + a[ 7 ] * b[ 12 ];
+		ret[ 5 ] = a[ 4 ] * b[ 1 ] + a[ 5 ] * b[ 5 ] + a[ 6 ] * b[ 9 ] + a[ 7 ] * b[ 13 ];
+		ret[ 6 ] = a[ 4 ] * b[ 2 ] + a[ 5 ] * b[ 6 ] + a[ 6 ] * b[ 10 ] + a[ 7 ] * b[ 14 ];
+		ret[ 7 ] = a[ 4 ] * b[ 3 ] + a[ 5 ] * b[ 7 ] + a[ 6 ] * b[ 11 ] + a[ 7 ] * b[ 15 ];
+		ret[ 8 ] = a[ 8 ] * b[ 0 ] + a[ 9 ] * b[ 4 ] + a[ 10 ] * b[ 8 ] + a[ 11 ] * b[ 12 ];
+		ret[ 9 ] = a[ 8 ] * b[ 1 ] + a[ 9 ] * b[ 5 ] + a[ 10 ] * b[ 9 ] + a[ 11 ] * b[ 13 ];
+		ret[ 10 ] = a[ 8 ] * b[ 2 ] + a[ 9 ] * b[ 6 ] + a[ 10 ] * b[ 10 ] + a[ 11 ] * b[ 14 ];
+		ret[ 11 ] = a[ 8 ] * b[ 3 ] + a[ 9 ] * b[ 7 ] + a[ 10 ] * b[ 11 ] + a[ 11 ] * b[ 15 ];
+		ret[ 12 ] = a[ 12 ] * b[ 0 ] + a[ 13 ] * b[ 4 ] + a[ 14 ] * b[ 8 ] + a[ 15 ] * b[ 12 ];
+		ret[ 13 ] = a[ 12 ] * b[ 1 ] + a[ 13 ] * b[ 5 ] + a[ 14 ] * b[ 9 ] + a[ 15 ] * b[ 13 ];
+		ret[ 14 ] = a[ 12 ] * b[ 2 ] + a[ 13 ] * b[ 6 ] + a[ 14 ] * b[ 10 ] + a[ 15 ] * b[ 14 ];
+		ret[ 15 ] = a[ 12 ] * b[ 3 ] + a[ 13 ] * b[ 7 ] + a[ 14 ] * b[ 11 ] + a[ 15 ] * b[ 15 ];
 
-		return result;
+		return ret;
 	}
 
 	template< typename U >

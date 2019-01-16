@@ -32,6 +32,7 @@
 #include "Rendering/ShaderGraph/CSL.hpp"
 #include "Rendering/ShaderGraph/Constants.hpp"
 #include "Rendering/ShaderUniformImpl.hpp"
+#include "Rendering/Texture.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
@@ -45,6 +46,8 @@ PhongFragmentMaster::PhongFragmentMaster( ShaderGraph *graph, crimild::Size maxL
 		ss << locations::LIGHT_UNIFORM << "_" << i;
 		graph->attachUniform( crimild::alloc< LightUniform >( ss.str(), i, nullptr ) );
 	}
+
+	graph->attachUniform( crimild::alloc< TextureUniform >( locations::SHADOW_ATLAS_UNIFORM, Texture::ONE ) );
 }
 
 PhongFragmentMaster::~PhongFragmentMaster( void )

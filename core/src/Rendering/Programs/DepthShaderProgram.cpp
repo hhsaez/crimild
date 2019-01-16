@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
- *
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,42 +25,40 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ShadowMap.hpp"
-#include "FrameBufferObject.hpp"
-#include "RenderTarget.hpp"
-#include "Texture.hpp"
+#include "DepthShaderProgram.hpp"
 
-#include "Simulation/Simulation.hpp"
+#include "Rendering/Renderer.hpp"
+#include "Rendering/ShaderGraph/ShaderGraph.hpp"
+#include "Rendering/ShaderGraph/CSL.hpp"
+#include "Rendering/ShaderGraph/Nodes/MeshVertexMaster.hpp"
 
 using namespace crimild;
+using namespace crimild::shadergraph;
 
-ShadowMap::ShadowMap( void )
-    : ShadowMap( nullptr )
+DepthShaderProgram::DepthShaderProgram( void )
 {
-    
+	createVertexShader();
+	createFragmentShader();
 }
 
-ShadowMap::ShadowMap( SharedPointer< FrameBufferObject > const &fbo )
-    : _buffer( fbo )
+DepthShaderProgram::~DepthShaderProgram( void )
 {
-    if ( _buffer == nullptr ) {
-        auto width = Simulation::getInstance()->getSettings()->get< crimild::Int16 >( Settings::SETTINGS_RENDERING_SHADOWS_RESOLUTION_WIDTH, 1024 );
-        auto height = Simulation::getInstance()->getSettings()->get< crimild::Int16 >( Settings::SETTINGS_RENDERING_SHADOWS_RESOLUTION_HEIGHT, 1024 );
 
-        _buffer = crimild::alloc< FrameBufferObject >( width, height );
-        _buffer->setClearColor( RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ) );
-        _buffer->getRenderTargets().insert( "depth", crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER_AND_TEXTURE, width, height, true ) );
-    }
-    
-    _buffer->getRenderTargets().each( [ this ]( const std::string &name, SharedPointer< RenderTarget > &target ) {
-        if ( target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
-            _texture = target->getTexture();
-        }
-    });
 }
 
-ShadowMap::~ShadowMap( void )
+void DepthShaderProgram::createVertexShader( void )
 {
-    
+	auto graph = Renderer::getInstance()->createShaderGraph();
+
+	auto master = graph->addOutputNode< MeshVertexMaster >();
+
+	buildVertexShader( graph );
+}
+
+void DepthShaderProgram::createFragmentShader( void )
+{
+	auto graph = Renderer::getInstance()->createShaderGraph();
+
+	buildFragmentShader( graph );
 }
 
