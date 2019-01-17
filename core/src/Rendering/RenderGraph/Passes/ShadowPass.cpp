@@ -50,7 +50,7 @@ ShadowPass::ShadowPass( RenderGraph *graph )
 		getName() + " - Shadow",
 		RenderGraphAttachment::Hint::FORMAT_DEPTH_HDR |
 		RenderGraphAttachment::Hint::WRAP_REPEAT |
-		RenderGraphAttachment::Hint::SIZE_1024 |
+		RenderGraphAttachment::Hint::SIZE_2048 |
 		RenderGraphAttachment::Hint::PERSISTENT );
 }
 
@@ -69,14 +69,30 @@ void ShadowPass::setup( RenderGraph *graph )
 void ShadowPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue )
 {
 	CRIMILD_PROFILE( getName() )
+
+	static const auto VIEWPORTS = containers::Array< Vector4f > {
+		Vector4f( 0.0f, 0.0f, 0.5f, 0.5f ),
+		Vector4f( 0.5f, 0.0f, 0.5f, 0.5f ),
+		Vector4f( 0.5f, 0.5f, 0.5f, 0.5f ),
+		Vector4f( 0.0f, 0.5f, 0.5f, 0.5f ),
+	};
+
+	crimild::Size lightCount = 0;
 	
 	auto fbo = graph->createFBO( { _shadowOutput } );
 	
 	renderer->bindFrameBuffer( crimild::get_ptr( fbo ) );
 
-	renderQueue->each( [ this, renderer, renderQueue ]( Light *light, int ) {
-		if ( light != nullptr && light->castShadows() ) {
+	renderQueue->each( [ this, renderer, renderQueue, &lightCount ]( Light *light, int ) {
+		if ( light != nullptr && light->castShadows() && lightCount < VIEWPORTS.size() ) {
+			auto vp = VIEWPORTS[ lightCount++ ];
+			renderer->setViewport( Rectf( vp.x(), vp.y(), vp.z(), vp.w() ) );
+			
 			renderShadowMap( renderer, renderQueue, light );
+			
+			if ( auto shadowMap = light->getShadowMap() ) {
+				shadowMap->setViewport( vp );
+			}
 		}
 	});
 	
@@ -91,12 +107,19 @@ void ShadowPass::renderShadowMap( Renderer *renderer, RenderQueue *renderQueue, 
 	}
 
 	auto program = crimild::get_ptr( _program );
-	
-	Frustumf f( -2.0f, 2.0f, -2.0f, 2.0f, 0.01f, 10.0f );
+
+	// TODO: compute a frustrum based on what the camera is looking at
+	auto fFactor = 0.25f;
+	Frustumf f( -fFactor, fFactor, -fFactor, fFactor, 1.0f, 10.0f );
 	const auto pMatrix = f.computeOrthographicMatrix();
 	program->bindUniform( PROJECTION_MATRIX_UNIFORM, pMatrix );
 
-	const auto vMatrix = light->getWorld().computeModelMatrix().getInverse();
+	// TODO: for diretional lights, get only the rotation of light's transform
+	// and apply and offset to get a valid posistion
+	Transformation lightTransform;
+	lightTransform.setRotate( light->getWorld().getRotate() );
+	lightTransform.setTranslate( -100.0f * lightTransform.computeDirection() );
+	const auto vMatrix = lightTransform.computeModelMatrix().getInverse();
 	program->bindUniform( VIEW_MATRIX_UNIFORM, vMatrix );
 
 	if ( auto shadowMap = light->getShadowMap() ) {

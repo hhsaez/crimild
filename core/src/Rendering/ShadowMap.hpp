@@ -52,6 +52,9 @@ namespace crimild {
         const Matrix4f &getLightViewMatrix( void ) const { return _lightViewMatrix; }
         void setLightViewMatrix( const Matrix4f &m ) { _lightViewMatrix = m; }
 
+		const Vector4f &getViewport( void ) const { return _viewport; }
+		void setViewport( const Vector4f &viewport ) { _viewport = viewport; }
+
 		void setBias( crimild::Real32 bias ) { _bias = bias; }
 		crimild::Real32 getBias( void ) const { return _bias; }
 
@@ -61,6 +64,7 @@ namespace crimild {
     private:
         Matrix4f _lightProjectionMatrix;
         Matrix4f _lightViewMatrix;
+		Vector4f _viewport;
         Texture *_texture = nullptr;
         SharedPointer< FrameBufferObject > _buffer;
 		crimild::Real32 _bias = 0.999f;

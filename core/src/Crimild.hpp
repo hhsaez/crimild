@@ -264,6 +264,8 @@
 #include "Rendering/RenderGraph/Passes/BlendPass.hpp"
 #include "Rendering/RenderGraph/Passes/FrameDebugPass.hpp"
 #include "Rendering/RenderGraph/Passes/SkyboxPass.hpp"
+#include "Rendering/RenderGraph/Passes/ShadowPass.hpp"
+#include "Rendering/RenderGraph/Passes/TextureColorPass.hpp"
 
 #include "Rendering/Programs/UnlitShaderProgram.hpp"
 #include "Rendering/Programs/ForwardShadingShaderProgram.hpp"

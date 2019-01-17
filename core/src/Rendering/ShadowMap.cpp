@@ -41,7 +41,8 @@ ShadowMap::ShadowMap( void )
 }
 
 ShadowMap::ShadowMap( SharedPointer< FrameBufferObject > const &fbo )
-    : _buffer( fbo )
+    : _buffer( fbo ),
+	  _viewport( Vector4f::ZERO )
 {
     if ( _buffer == nullptr ) {
         auto width = Simulation::getInstance()->getSettings()->get< crimild::Int16 >( Settings::SETTINGS_RENDERING_SHADOWS_RESOLUTION_WIDTH, 1024 );

@@ -384,6 +384,7 @@ void OpenGLRenderer::unbindAmbientLight( ShaderProgram *program, Light *light )
 void OpenGLRenderer::bindDirectionalLight( ShaderProgram *program, Light *light )
 {
 	auto index = _directionalLightCount - 1;
+	auto shadowMap = light->getShadowMap();
 
 	{
 		auto loc = glGetUniformLocation( program->getCatalogId(), "uDirectionalLightCount" );
@@ -425,7 +426,7 @@ void OpenGLRenderer::bindDirectionalLight( ShaderProgram *program, Light *light 
 			program->getCatalogId(),
 			OpenGLUtils::buildArrayShaderLocationName( "uDirectionalLights", index, "hasShadowMap" ).c_str() );
 		if ( loc >= 0 ) {
-			glUniform1i( loc, light->getShadowMap() != nullptr ? 1 : 0 );
+			glUniform1i( loc, shadowMap != nullptr ? 1 : 0 );
 		}
 	}
 
@@ -435,12 +436,26 @@ void OpenGLRenderer::bindDirectionalLight( ShaderProgram *program, Light *light 
 			OpenGLUtils::buildArrayShaderLocationName( "uDirectionalLights", index, "lightSpaceMatrix" ).c_str() );
 		if ( loc >= 0 ) {
 			auto lsm = Matrix4f::IDENTITY;
-			if ( auto shadowMap = light->getShadowMap() ) {
+			if ( shadowMap != nullptr ) {
 				// TODO: why reversing the order? P*V seems more natural!!
 				lsm = shadowMap->getLightViewMatrix() * shadowMap->getLightProjectionMatrix();
 			}
 			glUniformMatrix4fv( loc, 1, GL_FALSE, static_cast< const GLfloat * >( lsm.getData() ) );
 		}
+	}
+
+	{
+		auto loc = glGetUniformLocation(
+			program->getCatalogId(),
+			OpenGLUtils::buildArrayShaderLocationName( "uDirectionalLights", index, "shadowMapViewport" ).c_str() );
+		if ( loc >= 0 ) {
+			auto viewport = Vector4f::ZERO;
+			if ( shadowMap != nullptr ) {
+				viewport = shadowMap->getViewport();
+			}
+			glUniform4fv( loc, 1, static_cast< const GLfloat * >( viewport.getData() ) );
+		}
+		
 	}
 }
 
