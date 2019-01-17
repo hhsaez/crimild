@@ -13,6 +13,7 @@ struct DirectionalLight {
 	vec3 direction;
 	bool hasShadowMap;
 	mat4 lightSpaceMatrix;
+	vec4 shadowMapViewport;
 };
 
 uniform int uDirectionalLightCount;
@@ -82,8 +83,12 @@ vec3 calcPhongDirectionalLighting( vec3 P, vec3 N, vec3 E, vec3 MA, vec3 MD, vec
 		    vec4 lsPos = uDirectionalLights[ i ].lightSpaceMatrix * vec4( P, 1.0 );
 			vec3 projPos = lsPos.xyz / lsPos.w;
 			projPos = projPos * 0.5 + vec3( 0.5 );
-			float d = texture( uShadowAtlas, projPos.xy ).x;
-			float shadow = projPos.z < d ? 1.0 : 0.0;
+			vec4 viewport = uDirectionalLights[ i ].shadowMapViewport;
+			vec2 shadowUV = vec2( viewport.x + viewport.z * projPos.x, viewport.y + viewport.w * projPos.y );
+			float d = texture( uShadowAtlas, shadowUV ).x;
+			float z = projPos.z;
+			z *= 0.99999;
+			float shadow = z < d ? 1.0 : 0.0;
 			CD *= shadow;
 			CS *= shadow;
 		}
