@@ -64,6 +64,7 @@
 #include "Foundation/Log.hpp"
 
 #include <sstream>
+#include <iomanip>
 
 using namespace crimild;
 using namespace crimild::containers;
@@ -196,7 +197,9 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 		auto v = scalar->getVariable();
 
 		std::stringstream ss;
-		ss << v->getName() << " = " << scalar->getValue() << ";";
+		ss << v->getName() << " = "
+		   << std::fixed
+		   << scalar->getValue() << ";";
 		_mainSection.add( ss.str() );
 	};
 
@@ -548,7 +551,12 @@ std::string OpenGLShaderGraph::generateShaderSource( containers::Array< ShaderGr
 	
 	std::stringstream ss;
 
+#ifdef CRIMILD_PLATFORM_EMSCRIPTEN
+	ss << "#version 300 es\n"
+	   << "precision highp float;\n";
+#else
 	ss << "#version 330 core\n";
+#endif
 	
 	ss << "\n// Inputs";
 	_inputsSection.each( [ &ss ]( std::string &line ) {

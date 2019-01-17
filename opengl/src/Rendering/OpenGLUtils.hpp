@@ -51,7 +51,7 @@
     #include <GLES2/gl2.h>
 #endif
 
-#if defined( __ANDROID__ ) || defined( CRIMILD_PLATFORM_EMSCRIPTEN )
+#if defined( __ANDROID__ ) 
 #define CRIMILD_FORCE_OPENGL_COMPATIBILITY_MODE 1
 #endif
 

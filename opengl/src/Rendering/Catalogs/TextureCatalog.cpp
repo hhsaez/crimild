@@ -190,14 +190,14 @@ void TextureCatalog::load( Texture *texture )
 
 	switch ( image->getPixelFormat() ) {
 		case Image::PixelFormat::DEPTH_32:
-#ifdef CRIMILD_PLATFORM_DESKTOP
+#ifdef GL_DEPTH_COMPONENT32
 			internalFormat = useFloatTexture ? GL_DEPTH_COMPONENT32F : GL_DEPTH_COMPONENT32;
 			textureFormat = GL_DEPTH_COMPONENT;
 			break;
 #endif
 			
 		case Image::PixelFormat::DEPTH_24:
-#ifdef CRIMILD_PLATFORM_DESKTOP
+#ifdef GL_DEPTH_COMPONENT24
 			internalFormat = GL_DEPTH_COMPONENT24;
 			textureFormat = GL_DEPTH_COMPONENT;
 			break;
