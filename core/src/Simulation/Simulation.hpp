@@ -54,6 +54,12 @@
 #include <list>
 #include <thread>
 
+#ifdef CRIMILD_PLATFORM_EMSCRIPTEN
+#define CRIMILD_SIMULATION_LIFETIME static
+#else
+#define CRIMILD_SIMULATION_LIFETIME
+#endif
+
 namespace crimild {
     
     namespace messaging {

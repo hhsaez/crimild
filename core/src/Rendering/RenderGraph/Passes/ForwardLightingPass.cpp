@@ -144,6 +144,7 @@ void ForwardLightingPass::render( Renderer *renderer, RenderQueue *renderQueue, 
 		auto specularMap = crimild::get_ptr( Texture::ONE );
 		auto shininess = 1.0f;
 		auto alphaState = crimild::get_ptr( AlphaState::DISABLED );
+		auto cullFaceState = crimild::get_ptr( CullFaceState::ENABLED_BACK );
 		auto reflection = 0.0f;
 		auto reflectionMap = crimild::get_ptr( Texture::ONE );
 		auto refraction = 1.0f;
@@ -168,6 +169,7 @@ void ForwardLightingPass::render( Renderer *renderer, RenderQueue *renderQueue, 
 			if ( material->getRefractionMap() ) reflectionMap = material->getRefractionMap();
 
 			if ( material->getAlphaState() ) alphaState = material->getAlphaState();
+			if ( material->getCullFaceState() ) cullFaceState = material->getCullFaceState();
 		}
 
 		program->bindUniform( PROJECTION_MATRIX_UNIFORM, pMatrix );
@@ -201,7 +203,9 @@ void ForwardLightingPass::render( Renderer *renderer, RenderQueue *renderQueue, 
 		program->bindUniform( SHADOW_ATLAS_UNIFORM, shadowAtlas );
 
 		renderer->bindProgram( program );
+
 		renderer->setAlphaState( alphaState );
+		renderer->setCullFaceState( cullFaceState );
 
 		renderable->geometry->forEachPrimitive( [ renderer ]( Primitive *primitive ) {
 			renderer->bindPrimitive( nullptr, primitive );
@@ -210,6 +214,8 @@ void ForwardLightingPass::render( Renderer *renderer, RenderQueue *renderQueue, 
 		});
 
 		renderer->setAlphaState( AlphaState::DISABLED );
+		renderer->setCullFaceState( CullFaceState::ENABLED_BACK );
+
 		renderer->unbindProgram( program );
 	});
 
