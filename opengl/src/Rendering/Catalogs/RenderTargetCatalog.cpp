@@ -32,13 +32,6 @@
 #include <Rendering/RenderTarget.hpp>
 #include <Rendering/Texture.hpp>
 
-#ifndef GL_RGBA16F
-#define GL_RGBA16F 0x881A
-#endif
-#ifndef GL_RGB16F
-#define GL_RGB16F 0x881B
-#endif
-
 using namespace crimild;
 using namespace crimild::opengl;
 

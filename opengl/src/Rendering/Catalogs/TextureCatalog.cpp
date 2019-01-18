@@ -33,24 +33,6 @@
 #include <Rendering/Texture.hpp>
 #include <Rendering/ShaderLocation.hpp>
 
-// TODO: this will cause visual artifacts in some platforms. use with care
-#ifndef GL_BGR
-    #define GL_BGR GL_RGB
-#endif
-#ifndef GL_BGRA
-	#define GL_BGRA GL_RGBA
-#endif
-#ifndef GL_RED
-#define GL_RED 0x1903
-#endif
-
-#ifndef GL_RGBA16F
-#define GL_RGBA16F 0x881A
-#endif
-#ifndef GL_RGB16F
-#define GL_RGB16F 0x881B
-#endif
-
 using namespace crimild;
 using namespace crimild::opengl;
 
@@ -209,23 +191,39 @@ void TextureCatalog::load( Texture *texture )
 			break;
 			
 		case Image::PixelFormat::RGB:
+#ifdef GL_RGB16F
 			internalFormat = useFloatTexture ? GL_RGB16F : GL_RGB;
+#else
+			internalFormat = GL_RGB;
+#endif
 			textureFormat = GL_RGB;
 			break;
 			
 		case Image::PixelFormat::BGR:
 			internalFormat = GL_RGB;
+#ifdef GL_BGR
 			textureFormat = GL_BGR;
+#else
+			textureFormat = GL_RGB;
+#endif
 			break;
 			
 		case Image::PixelFormat::RGBA:
+#ifdef GL_RGBA16F
 			internalFormat = useFloatTexture ? GL_RGBA16F : GL_RGBA;
+#else
+			internalFormat = GL_RGBA;
+#endif
 			textureFormat = GL_RGBA;
 			break;
 			
 		case Image::PixelFormat::BGRA:
 			internalFormat = GL_RGBA;
+#ifdef GL_BGRA
 			textureFormat = GL_BGRA;
+#else
+			textureFormat = GL_RGBA;
+#endif
 			break;
 
 		case Image::PixelFormat::RED:
@@ -257,7 +255,6 @@ void TextureCatalog::load( Texture *texture )
 	}
 	else {
 		GLvoid *data = image->hasData() ? image->getData() : nullptr;
-		
 		glTexImage2D(
 			GL_TEXTURE_2D,
 			0,

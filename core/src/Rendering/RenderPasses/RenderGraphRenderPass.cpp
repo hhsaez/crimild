@@ -50,7 +50,8 @@ RenderGraphRenderPass::~RenderGraphRenderPass( void )
 void RenderGraphRenderPass::render( Renderer *renderer, RenderQueue *renderQueue, Camera *camera )
 {
 	_renderGraph->execute( renderer, renderQueue );
-	
+
+#ifndef CRIMILD_PLATFORM_EMSCRIPTEN
 	auto output = _renderGraph->getOutput();
 	if ( output == nullptr ) {
 		CRIMILD_LOG_ERROR( "No output provided for render graph" );
@@ -79,5 +80,6 @@ void RenderGraphRenderPass::render( Renderer *renderer, RenderQueue *renderQueue
 		texture );
 	
 	renderer->unbindProgram( program );
+#endif
 }
 

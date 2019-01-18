@@ -32,13 +32,6 @@
 #include <Rendering/FrameBufferObject.hpp>
 #include <Rendering/RenderTarget.hpp>
 
-#ifndef GL_RGBA16F
-#define GL_RGBA16F 0x881A
-#endif
-#ifndef GL_RGB16F
-#define GL_RGB16F 0x881B
-#endif
-
 using namespace crimild;
 using namespace crimild::opengl;
 
@@ -82,7 +75,7 @@ void FrameBufferObjectCatalog::bind( FrameBufferObject *fbo )
         GLbitfield glClearFlags = 0;
         if ( clearFlags & FrameBufferObject::ClearFlag::COLOR ) glClearFlags |= GL_COLOR_BUFFER_BIT;
         if ( clearFlags & FrameBufferObject::ClearFlag::DEPTH ) glClearFlags |= GL_DEPTH_BUFFER_BIT;
-        glClear( glClearFlags );
+		glClear( glClearFlags );
 	}
     
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;

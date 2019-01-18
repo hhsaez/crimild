@@ -158,6 +158,14 @@ SharedPointer< RenderTarget > RenderGraph::getRenderTarget( crimild::Int64 hints
     else if ( hints & RenderGraphAttachment::Hint::SIZE_SCREEN_50 ) size = screenSize / 2;
     else if ( hints & RenderGraphAttachment::Hint::SIZE_SCREEN_150 ) size = screenSize * 1.5;
     else if ( hints & RenderGraphAttachment::Hint::SIZE_SCREEN_200 ) size = screenSize * 2;
+    else if ( hints & RenderGraphAttachment::Hint::SIZE_32 ) size = Vector2i( 32, 32 );
+    else if ( hints & RenderGraphAttachment::Hint::SIZE_64 ) size = Vector2i( 64, 64 );
+    else if ( hints & RenderGraphAttachment::Hint::SIZE_128 ) size = Vector2i( 128, 128 );
+    else if ( hints & RenderGraphAttachment::Hint::SIZE_256 ) size = Vector2i( 256, 256 );
+	else if ( hints & RenderGraphAttachment::Hint::SIZE_512 ) size = Vector2i( 512, 512 );
+    else if ( hints & RenderGraphAttachment::Hint::SIZE_1024 ) size = Vector2i( 1024, 1024 );
+	else if ( hints & RenderGraphAttachment::Hint::SIZE_2048 ) size = Vector2i( 2048, 2048 );
+	else if ( hints & RenderGraphAttachment::Hint::SIZE_4096 ) size = Vector2i( 4096, 4096 );
 
     auto target = crimild::alloc< RenderTarget >( type, output, size.x(), size.y(), useFloatTexture );
 

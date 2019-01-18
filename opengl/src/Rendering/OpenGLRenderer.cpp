@@ -126,14 +126,16 @@ void OpenGLRenderer::configure( void )
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
-#if !defined( CRIMILD_PLATFORM_MOBILE ) && !defined( CRIMILD_PLATFORM_EMSCRIPTEN )
+#if !defined( CRIMILD_PLATFORM_MOBILE )
 	Log::info( CRIMILD_CURRENT_CLASS_NAME,
                "Configuring renderer",
                "\n       OpenGL version: ", glGetString( GL_VERSION ),
     		   "\n       GLSL version: ", glGetString( GL_SHADING_LANGUAGE_VERSION ),
     		   "\n       Vendor: ", glGetString( GL_VENDOR ),
                "\n       Renderer: ", glGetString( GL_RENDERER ) );
+#endif
 
+#if !defined( CRIMILD_PLATFORM_MOBILE ) && !defined( CRIMILD_PLATFORM_EMSCRIPTEN )
 	glewExperimental = GL_TRUE; //stops glew crashing on OSX :-/
 	if ( glewInit() != GLEW_OK ) {
         Log::fatal( CRIMILD_CURRENT_CLASS_NAME, "Cannot initialize GLEW" );
@@ -157,7 +159,7 @@ void OpenGLRenderer::configure( void )
     
     if ( getScreenBuffer() != nullptr ) {
         // default FBO is not always 0
-        int defaultFBO;
+        int defaultFBO = 0;
         glGetIntegerv( GL_FRAMEBUFFER_BINDING, &defaultFBO );
         getScreenBuffer()->setCatalogInfo( getFrameBufferObjectCatalog(), defaultFBO );
     }
