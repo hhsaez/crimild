@@ -123,11 +123,13 @@ void OpenGLUtils::checkErrors( std::string prefix )
 				errorDescription += "GL_INVALID_OPERATION";
 				break;
 
-#ifdef CRIMILD_PLATFORM_DESKTOP
+#ifdef GL_STACK_OVERFLOW
 			case GL_STACK_OVERFLOW:
 				errorDescription += "GL_STACK_OVERFLOW";  
 				break;
+#endif
 
+#ifdef GL_STACK_UNDERFLOW
 			case GL_STACK_UNDERFLOW: 
 				errorDescription += "GL_STACK_UNDERFLOW";
 				break;

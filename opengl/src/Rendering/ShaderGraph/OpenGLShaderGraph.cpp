@@ -553,7 +553,8 @@ std::string OpenGLShaderGraph::generateShaderSource( containers::Array< ShaderGr
 
 #ifdef CRIMILD_PLATFORM_EMSCRIPTEN
 	ss << "#version 300 es\n"
-	   << "precision highp float;\n";
+	   << "precision highp int;\n"
+	   << "precision mediump float;\n";
 #else
 	ss << "#version 330 core\n";
 #endif

@@ -88,22 +88,27 @@ void ForwardLightingPass::setup( rendergraph::RenderGraph *graph )
 	
 	graph->read( this, { _depthInput, _shadowInput } );
 	graph->write( this, { _colorOutput } );
+
 }
 
 void ForwardLightingPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue )
 {
-	CRIMILD_PROFILE( "Forward Lighting Pass" )
-	
+	CRIMILD_PROFILE( getName() )
+
+#ifndef CRIMILD_PLATFORM_EMSCRIPTEN
 	auto fbo = graph->createFBO( { _depthInput, _colorOutput } );
 	fbo->setClearFlags( _clearFlags );
 	
 	renderer->bindFrameBuffer( crimild::get_ptr( fbo ) );
+#endif
 
 	_renderableTypes.each( [ this, renderer, renderQueue ]( RenderQueue::RenderableType const &type ) {
 		render( renderer, renderQueue, type );
 	});
-	
+
+#ifndef CRIMILD_PLATFORM_EMSCRIPTEN
 	renderer->unbindFrameBuffer( crimild::get_ptr( fbo ) );
+#endif
 }
 
 void ForwardLightingPass::render( Renderer *renderer, RenderQueue *renderQueue, RenderQueue::RenderableType renderableType )
