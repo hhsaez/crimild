@@ -674,6 +674,13 @@ Variable *csl::modelTextureCoords( void )
 	return ret;
 }
 
+Variable *csl::modelColor( void )
+{
+    auto ret = vec4_in( "aColor" );
+    ret->setLayoutLocation( VertexFormat::LayoutLocation::COLOR );
+    return ret;
+}
+
 Variable *csl::modelNormal( void )
 {
 	auto ret = vec3_in( "aNormal" );

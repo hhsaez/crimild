@@ -268,6 +268,7 @@
 #include "Rendering/RenderGraph/Passes/TextureColorPass.hpp"
 
 #include "Rendering/Programs/UnlitShaderProgram.hpp"
+#include "Rendering/Programs/VertexColorShaderProgram.hpp"
 #include "Rendering/Programs/ForwardShadingShaderProgram.hpp"
 #include "Rendering/Programs/ReflectiveShaderProgram.hpp"
 #include "Rendering/Programs/RefractiveShaderProgram.hpp"
