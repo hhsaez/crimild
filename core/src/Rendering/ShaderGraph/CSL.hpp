@@ -164,6 +164,14 @@ namespace crimild {
 
 			//@}
 
+            /**
+                \name Color
+             */
+            //@{
+            Variable *modelColor( void );
+
+            //@}
+
 			/**
 			   \name Texture Coordinates
 			*/
