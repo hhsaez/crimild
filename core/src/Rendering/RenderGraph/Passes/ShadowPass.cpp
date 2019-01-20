@@ -50,7 +50,7 @@ ShadowPass::ShadowPass( RenderGraph *graph )
 		getName() + " - Shadow",
 		RenderGraphAttachment::Hint::FORMAT_DEPTH_HDR |
 		RenderGraphAttachment::Hint::WRAP_REPEAT |
-		RenderGraphAttachment::Hint::SIZE_2048 |
+//        RenderGraphAttachment::Hint::SIZE_1024 |
 		RenderGraphAttachment::Hint::PERSISTENT );
 }
 
@@ -127,7 +127,7 @@ void ShadowPass::renderShadowMap( Renderer *renderer, RenderQueue *renderQueue, 
 		shadowMap->setLightViewMatrix( vMatrix );
 	}
 	
-	renderQueue->each( renderables, [ this, renderer, program ]( RenderQueue::Renderable *renderable ) {
+	renderQueue->each( renderables, [ renderer, program ]( RenderQueue::Renderable *renderable ) {
 
 		const auto &mMatrix = renderable->modelTransform;
 		program->bindUniform( MODEL_MATRIX_UNIFORM, mMatrix );

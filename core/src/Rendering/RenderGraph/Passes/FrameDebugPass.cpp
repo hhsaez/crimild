@@ -29,14 +29,16 @@
 
 #include "Rendering/RenderGraph/RenderGraphAttachment.hpp"
 #include "Rendering/Renderer.hpp"
+#include "Rendering/ShaderGraph/Constants.hpp"
 #include "Rendering/FrameBufferObject.hpp"
+#include "Rendering/Programs/ScreenTextureShaderProgram.hpp"
 #include "Foundation/Profiler.hpp"
 #include "Simulation/AssetManager.hpp"
-#include "Rendering/Programs/ScreenTextureShaderProgram.hpp"
 
 using namespace crimild;
 using namespace crimild::rendergraph;
 using namespace crimild::rendergraph::passes;
+using namespace crimild::shadergraph::locations;
 
 FrameDebugPass::FrameDebugPass( RenderGraph *graph, std::string name )
 	: RenderGraphPass( graph, name ),
@@ -129,18 +131,12 @@ void FrameDebugPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueu
 void FrameDebugPass::render( Renderer *renderer, Texture *texture )
 {
 	auto program = crimild::get_ptr( _program );
-	
+
+    program->bindUniform( COLOR_MAP_UNIFORM, texture );
+
 	renderer->bindProgram( program );
-	
-	renderer->bindTexture(
-		program->getStandardLocation( ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ),
-		texture );
-	
+
 	renderer->drawScreenPrimitive( program );
-	
-	renderer->unbindTexture(
-		program->getStandardLocation( ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ),
-		texture );
-	
+
 	renderer->unbindProgram( program );				
 }

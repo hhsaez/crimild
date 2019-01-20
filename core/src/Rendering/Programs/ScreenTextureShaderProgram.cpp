@@ -30,17 +30,17 @@
 #include "Rendering/Renderer.hpp"
 #include "Rendering/ShaderGraph/ShaderGraph.hpp"
 #include "Rendering/ShaderGraph/CSL.hpp"
+#include "Rendering/ShaderGraph/Nodes/UnlitFragmentMaster.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
+using namespace crimild::shadergraph::csl;
 
 ScreenTextureShaderProgram::ScreenTextureShaderProgram( Mode mode )
 	: _mode( mode )
 {
 	createVertexShader();
 	createFragmentShader();
-
-	registerStandardLocation( ShaderLocation::Type::UNIFORM, ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM, "uColorMap" );
 }
 
 ScreenTextureShaderProgram::~ScreenTextureShaderProgram( void )
@@ -58,17 +58,17 @@ void ScreenTextureShaderProgram::createVertexShader( void )
 	csl::vertexOutput( "vTextureCoord", uv );
 	csl::vertexPosition( p );
 
-	auto src = graph->build();
-	auto shader = crimild::alloc< VertexShader >( src );
-	setVertexShader( shader );
+	buildVertexShader( graph );
 }
 
 void ScreenTextureShaderProgram::createFragmentShader( void )
 {
 	auto graph = Renderer::getInstance()->createShaderGraph();
 
+	auto master = graph->addNode< UnlitFragmentMaster >();
+
 	auto uv = csl::vec2_in( "vTextureCoord" );
-	auto texture = csl::texture2D_uniform( "uColorMap" );
+	auto texture = csl::colorMapUniform();
 	auto color = csl::textureColor( texture, uv );
 
 	switch ( _mode ) {
@@ -99,11 +99,10 @@ void ScreenTextureShaderProgram::createFragmentShader( void )
 		default:
 			break;
 	}
-	
-	csl::fragColor( color );
 
-	auto src = graph->build();
-	auto shader = crimild::alloc< FragmentShader >( src );
-	setFragmentShader( shader );
+	master->setColor( vec3( color ) );
+	master->setAlpha( alpha( color ) );
+
+	buildFragmentShader( graph );
 }
 
