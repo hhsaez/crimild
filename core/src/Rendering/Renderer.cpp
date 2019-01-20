@@ -137,10 +137,26 @@ SharedPointer< FrameBufferObject > Renderer::generateAuxFBO( std::string name, i
     return fbo;
 }
 
+void Renderer::setScreenViewport( const Rectf &viewport )
+{
+    auto screen = getScreenBuffer();
+    auto w = screen->getWidth();
+    auto h = screen->getHeight();
+
+    setViewport(
+        Rectf(
+            w * viewport.getX(),
+            h * viewport.getY(),
+            w * viewport.getWidth(),
+            h * viewport.getHeight()
+        )
+    );
+}
+
 void Renderer::beginRender( void )
 {
     static const Rectf VIEWPORT( 0.0f, 0.0f, 1.0f, 1.0f );
-    setViewport( VIEWPORT );
+    setScreenViewport( VIEWPORT );
 }
 
 void Renderer::endRender( void )

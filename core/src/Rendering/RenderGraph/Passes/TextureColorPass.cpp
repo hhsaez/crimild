@@ -34,12 +34,14 @@
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/Material.hpp"
 #include "Foundation/Profiler.hpp"
+#include "Rendering/ShaderGraph/Constants.hpp"
 #include "Rendering/Programs/ScreenTextureShaderProgram.hpp"
 
 using namespace crimild;
 using namespace crimild::rendergraph;
 using namespace crimild::rendergraph::passes;
 using namespace crimild::shadergraph;
+using namespace crimild::shadergraph::locations;
 
 TextureColorPass::TextureColorPass( RenderGraph *graph, TextureColorPass::Mode mode )
 	: RenderGraphPass( graph, "Show texture color" )
@@ -100,18 +102,12 @@ void TextureColorPass::execute( RenderGraph *graph, Renderer *renderer, RenderQu
 	auto program = crimild::get_ptr( _program );
 	auto texture = _input->getTexture();
 
+    program->bindUniform( COLOR_MAP_UNIFORM, texture );
+
 	renderer->bindProgram( program );
 	
-	renderer->bindTexture(
-		program->getStandardLocation( ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ),
-		texture );
-	
 	renderer->drawScreenPrimitive( program );
-	
-	renderer->unbindTexture(
-		program->getStandardLocation( ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ),
-		texture );
-	
+
 	renderer->unbindProgram( program );				
 	
 	renderer->unbindFrameBuffer( crimild::get_ptr( fbo ) );
