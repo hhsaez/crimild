@@ -44,6 +44,7 @@
 #include "Rendering/ShaderGraph/Nodes/Negate.hpp"
 #include "Rendering/ShaderGraph/Nodes/Inverse.hpp"
 #include "Rendering/ShaderGraph/Nodes/Clamp.hpp"
+#include "Rendering/ShaderGraph/Nodes/Fract.hpp"
 #include "Rendering/ShaderGraph/Nodes/Length.hpp"
 #include "Rendering/ShaderGraph/Nodes/Normalize.hpp"
 #include "Rendering/ShaderGraph/Nodes/Vector.hpp"
@@ -456,6 +457,15 @@ Variable *csl::vec_w( Variable *vector )
 	return ShaderGraph::getCurrent()->addNode< VectorToScalars >( vector )->getW();
 }
 
+Variable *csl::vec_yzww( Variable *vector )
+{
+	auto y = vec_y( vector );
+	auto z = vec_z( vector );
+	auto w = vec_w( vector );
+
+	return vec4( y, z, w, w );
+}
+
 Variable *csl::red( Variable *color )
 {
 	return vec_x( color );
@@ -553,6 +563,13 @@ Variable *csl::clamp( Variable *value, Variable *lowerBound, Variable *upperBoun
 {
 	return ShaderGraph::getCurrent()
 	    ->addNode< Clamp >( value, lowerBound, upperBound )
+	    ->getResult();
+}
+
+Variable *csl::fract( Variable *value )
+{
+	return ShaderGraph::getCurrent()
+	    ->addNode< Fract >( value )
 	    ->getResult();
 }
 
@@ -1048,5 +1065,28 @@ Variable *csl::specularMapUniform( void )
 		);
 	}
 	return ret;
+}
+
+Variable *csl::encodeFloatToRGBA( Variable *value )
+{
+	auto bias = vec4( Vector4f( 1.0f, 255.0f, 65025.0f, 16581375.0f ) );
+	auto enc = mult( bias, value );
+	enc = fract( enc );
+	enc = sub(
+		enc,
+		mult(
+			vec_yzww( enc ),
+			vec4( Vector4f( 1.0f / 255.0f, 1.0f / 255.0f, 1.0f / 255.0f, 0.0f )	)
+		)
+	);
+	return enc;
+}
+
+Variable *csl::decodeFloatFromRGBA( Variable *rgba )
+{
+	return dot (
+		rgba,
+		vec4( Vector4f( 1.0f, 1.0f / 255.0f, 1.0f / 65025.0f, 1.0f / 16581375.0f ) )
+	);
 }
 

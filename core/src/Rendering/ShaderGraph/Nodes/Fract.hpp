@@ -25,47 +25,38 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "DepthShaderProgram.hpp"
+#ifndef CRIMILD_RENDERING_SHADER_GRAPH_NODES_FRACT_
+#define CRIMILD_RENDERING_SHADER_GRAPH_NODES_FRACT_
 
-#include "Rendering/Renderer.hpp"
-#include "Rendering/ShaderGraph/ShaderGraph.hpp"
-#include "Rendering/ShaderGraph/CSL.hpp"
-#include "Rendering/ShaderGraph/Nodes/MeshVertexMaster.hpp"
+#include "Rendering/ShaderGraph/Expression.hpp"
 
-using namespace crimild;
-using namespace crimild::shadergraph;
-using namespace crimild::shadergraph::csl;
+namespace crimild {
 
-DepthShaderProgram::DepthShaderProgram( void )
-{
-	createVertexShader();
-	createFragmentShader();
+	namespace shadergraph {
+
+		class Variable;
+
+		class Fract : public Expression {
+			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::Fract )
+			
+		public:
+			Fract( ShaderGraph *graph, Variable *input );
+			virtual ~Fract( void );
+
+			Variable *getInput( void ) { return _input; }
+			Variable *getResult( void ) { return _result; }
+			
+		private:
+			Variable *_input = nullptr;
+			Variable *_result = nullptr;
+			
+		public:
+			virtual void setup( ShaderGraph *graph ) override;
+		};
+
+	}
+
 }
 
-DepthShaderProgram::~DepthShaderProgram( void )
-{
-
-}
-
-void DepthShaderProgram::createVertexShader( void )
-{
-	auto graph = Renderer::getInstance()->createShaderGraph();
-
-	graph->addOutputNode< MeshVertexMaster >();
-
-	buildVertexShader( graph );
-}
-
-void DepthShaderProgram::createFragmentShader( void )
-{
-	auto graph = Renderer::getInstance()->createShaderGraph();
-
-#ifdef CRIMILD_PLATFORM_EMSCRIPTEN
-	auto depth = vec_z( fragCoord() );
-	auto color = encodeFloatToRGBA( depth );
-	fragColor( color );
 #endif
-
-	buildFragmentShader( graph );
-}
 

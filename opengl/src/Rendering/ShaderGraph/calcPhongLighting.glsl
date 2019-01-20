@@ -85,7 +85,12 @@ vec3 calcPhongDirectionalLighting( vec3 P, vec3 N, vec3 E, vec3 MA, vec3 MD, vec
 			projPos = projPos * 0.5 + vec3( 0.5 );
 			vec4 viewport = uDirectionalLights[ i ].shadowMapViewport;
 			vec2 shadowUV = vec2( viewport.x + viewport.z * projPos.x, viewport.y + viewport.w * projPos.y );
+#ifdef CRIMILD_PACK_FlOAT_TO_RGBA
 			float d = texture( uShadowAtlas, shadowUV ).x;
+#else
+			vec4 depthRGBA = texture( uShadowAtlas, shadowUV );
+			float d = dot( depthRGBA, vec4( 1.0, 1.0 / 255.0, 1.0 / 65025.0, 1.0 / 16581375.0 ) );
+#endif
 			float z = projPos.z;
 			z *= 0.99999;
 			float shadow = z < d ? 1.0 : 0.0;

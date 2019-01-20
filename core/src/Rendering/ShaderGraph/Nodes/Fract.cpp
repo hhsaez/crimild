@@ -25,47 +25,28 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "DepthShaderProgram.hpp"
+#include "Fract.hpp"
 
-#include "Rendering/Renderer.hpp"
 #include "Rendering/ShaderGraph/ShaderGraph.hpp"
-#include "Rendering/ShaderGraph/CSL.hpp"
-#include "Rendering/ShaderGraph/Nodes/MeshVertexMaster.hpp"
+#include "Rendering/ShaderGraph/Variable.hpp"
 
 using namespace crimild;
 using namespace crimild::shadergraph;
-using namespace crimild::shadergraph::csl;
 
-DepthShaderProgram::DepthShaderProgram( void )
+Fract::Fract( ShaderGraph *graph, Variable *input )
 {
-	createVertexShader();
-	createFragmentShader();
+	_input = input;
+	_result = graph->addNode< Variable >( input->getType() );
 }
 
-DepthShaderProgram::~DepthShaderProgram( void )
+Fract::~Fract( void )
 {
-
+	
 }
 
-void DepthShaderProgram::createVertexShader( void )
+void Fract::setup( ShaderGraph *graph )
 {
-	auto graph = Renderer::getInstance()->createShaderGraph();
-
-	graph->addOutputNode< MeshVertexMaster >();
-
-	buildVertexShader( graph );
-}
-
-void DepthShaderProgram::createFragmentShader( void )
-{
-	auto graph = Renderer::getInstance()->createShaderGraph();
-
-#ifdef CRIMILD_PLATFORM_EMSCRIPTEN
-	auto depth = vec_z( fragCoord() );
-	auto color = encodeFloatToRGBA( depth );
-	fragColor( color );
-#endif
-
-	buildFragmentShader( graph );
+	graph->read( this, { _input } );
+	graph->write( this, { _result } );
 }
 

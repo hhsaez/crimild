@@ -81,6 +81,7 @@ namespace crimild {
 			Variable *vec_y( Variable *vector );
 			Variable *vec_z( Variable *vector );
 			Variable *vec_w( Variable *vector );
+			Variable *vec_yzww( Variable *vector );
 
 			Variable *mat3( Variable *matrix );
 			Variable *mat3_uniform( std::string name );
@@ -126,6 +127,7 @@ namespace crimild {
 			Variable *length( Variable *input );
 			Variable *inverse( Variable *matrix );
 			Variable *clamp( Variable *value, Variable *lowerBound, Variable *upperBound );
+			Variable *fract( Variable *value );
 
 			//@}
 
@@ -191,6 +193,16 @@ namespace crimild {
 			Variable *worldNormal( Variable *worldMatrix, Variable *normal );
 			Variable *viewNormal( void );
 
+
+			//@}
+
+			/**
+			   \name Encoding
+			*/
+			//@{
+			
+			Variable *encodeFloatToRGBA( Variable *value );
+			Variable *decodeFloatFromRGBA( Variable *rgba );
 
 			//@}
 
