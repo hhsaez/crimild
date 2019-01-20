@@ -141,7 +141,7 @@ void LinearizeDepthPass::execute( RenderGraph *graph, Renderer *renderer, Render
 	
 	auto program = crimild::get_ptr( _program );
 	assert( program && "No valid program to render texture" );
-	
+
 	renderer->bindProgram( program );
 
 	renderer->bindTexture(

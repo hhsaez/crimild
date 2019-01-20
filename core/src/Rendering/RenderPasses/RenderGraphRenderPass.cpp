@@ -29,17 +29,21 @@
 
 #include "Rendering/Renderer.hpp"
 #include "Rendering/ShaderProgram.hpp"
+#include "Rendering/ShaderGraph/Constants.hpp"
 #include "Rendering/RenderGraph/RenderGraph.hpp"
 #include "Rendering/RenderGraph/RenderGraphAttachment.hpp"
+#include "Rendering/Programs/ScreenTextureShaderProgram.hpp"
 #include "Simulation/AssetManager.hpp"
 
 using namespace crimild;
-using namespace rendergraph;
+using namespace crimild::rendergraph;
+using namespace crimild::shadergraph::locations;
 
 RenderGraphRenderPass::RenderGraphRenderPass( SharedPointer< rendergraph::RenderGraph > const &renderGraph )
-	: _renderGraph( renderGraph )
+	: _renderGraph( renderGraph ),
+	  _program( crimild::alloc< ScreenTextureShaderProgram >() )
 {
-	_program = crimild::retain( AssetManager::getInstance()->get< ShaderProgram >( Renderer::SHADER_PROGRAM_SCREEN_TEXTURE ) );
+
 }
 	
 RenderGraphRenderPass::~RenderGraphRenderPass( void )
@@ -51,7 +55,6 @@ void RenderGraphRenderPass::render( Renderer *renderer, RenderQueue *renderQueue
 {
 	_renderGraph->execute( renderer, renderQueue );
 
-#ifndef CRIMILD_PLATFORM_EMSCRIPTEN
 	auto output = _renderGraph->getOutput();
 	if ( output == nullptr ) {
 		CRIMILD_LOG_ERROR( "No output provided for render graph" );
@@ -66,20 +69,13 @@ void RenderGraphRenderPass::render( Renderer *renderer, RenderQueue *renderQueue
 	
 	auto program = crimild::get_ptr( _program );
 	assert( program && "No valid program to render texture" );
+
+	program->bindUniform( COLOR_MAP_UNIFORM, texture );
 	
 	renderer->bindProgram( program );
 	
-	renderer->bindTexture(
-		program->getStandardLocation( ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ),
-		texture );
-	
 	renderer->drawScreenPrimitive( program );
-	
-	renderer->unbindTexture(
-		program->getStandardLocation( ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ),
-		texture );
-	
+
 	renderer->unbindProgram( program );
-#endif
 }
 

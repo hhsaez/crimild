@@ -96,14 +96,14 @@ void RenderTargetCatalog::load( RenderTarget *target )
 
 	switch ( target->getType() ) {
 		case RenderTarget::Type::DEPTH_32:
-#ifdef GL_DEPTH_COMPONENT32
+#if defined( GL_DEPTH_COMPONENT32 ) && !defined( CRIMILD_PLATFORM_EMSCRIPTEN )
 			internalFormat = target->useFloatTexture() ? GL_DEPTH_COMPONENT32F : GL_DEPTH_COMPONENT32;
 			textureFormat = GL_DEPTH_COMPONENT;
 			break;
 #endif
 			
 		case RenderTarget::Type::DEPTH_24:
-#ifdef GL_DEPTH_COMPONENT24
+#if defined( GL_DEPTH_COMPONENT24 ) && !defined( CRIMILD_PLATFORM_EMSCRIPTEN )
 			internalFormat = GL_DEPTH_COMPONENT24;
 			textureFormat = GL_DEPTH_COMPONENT;
 			break;

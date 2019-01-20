@@ -97,7 +97,7 @@ void DepthPass::renderObjects( Renderer *renderer, RenderQueue *renderQueue, Ren
 	auto vMatrix = renderQueue->getViewMatrix();
 	program->bindVMatrix( vMatrix );
 	
-	renderQueue->each( renderables, [this, renderer, renderQueue, program ]( RenderQueue::Renderable *renderable ) {
+	renderQueue->each( renderables, [ renderer, program ]( RenderQueue::Renderable *renderable ) {
 
 		const auto &mMatrix = renderable->modelTransform;
 		program->bindMMatrix( mMatrix );
