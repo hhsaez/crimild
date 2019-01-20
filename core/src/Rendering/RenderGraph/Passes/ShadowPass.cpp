@@ -46,12 +46,26 @@ using namespace crimild::shadergraph::locations;
 ShadowPass::ShadowPass( RenderGraph *graph )
 	: RenderGraphPass( graph, "Shadow Pass" )
 {
+#ifdef CRIMILD_PLATFORM_EMSCRIPTEN
+	_depthAttachment = graph->createAttachment(
+		getName() + " - Depth",
+		RenderGraphAttachment::Hint::FORMAT_DEPTH |
+        RenderGraphAttachment::Hint::SIZE_2048 |
+		RenderGraphAttachment::Hint::RENDER_ONLY );
 	_shadowOutput = graph->createAttachment(
 		getName() + " - Shadow",
-		RenderGraphAttachment::Hint::FORMAT_DEPTH_HDR |
+		RenderGraphAttachment::Hint::FORMAT_RGBA |
 		RenderGraphAttachment::Hint::WRAP_REPEAT |
         RenderGraphAttachment::Hint::SIZE_2048 |
 		RenderGraphAttachment::Hint::PERSISTENT );
+#else
+    _shadowOutput = graph->createAttachment(
+        getName() + " - Shadow",
+        RenderGraphAttachment::Hint::FORMAT_DEPTH_HDR |
+        RenderGraphAttachment::Hint::WRAP_REPEAT |
+        RenderGraphAttachment::Hint::SIZE_2048 |
+        RenderGraphAttachment::Hint::PERSISTENT );
+#endif
 }
 
 ShadowPass::~ShadowPass( void )
@@ -61,7 +75,7 @@ ShadowPass::~ShadowPass( void )
 
 void ShadowPass::setup( RenderGraph *graph )
 {
-	graph->write( this, { _shadowOutput } );
+	graph->write( this, { _depthAttachment, _shadowOutput } );
 	
 	_program = crimild::alloc< DepthShaderProgram >();
 }
@@ -79,7 +93,7 @@ void ShadowPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *r
 
 	crimild::Size lightCount = 0;
 	
-	auto fbo = graph->createFBO( { _shadowOutput } );
+	auto fbo = graph->createFBO( { _depthAttachment, _shadowOutput } );
 	
 	renderer->bindFrameBuffer( crimild::get_ptr( fbo ) );
 

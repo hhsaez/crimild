@@ -61,6 +61,7 @@ namespace crimild {
 				SharedPointer< ShaderProgram > _program;
 			
 				RenderGraphAttachment *_shadowOutput = nullptr;
+                RenderGraphAttachment *_depthAttachment = nullptr;
 			};
 		}
 

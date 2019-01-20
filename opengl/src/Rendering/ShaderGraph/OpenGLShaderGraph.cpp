@@ -46,6 +46,7 @@
 #include "Rendering/ShaderGraph/Nodes/Negate.hpp"
 #include "Rendering/ShaderGraph/Nodes/Inverse.hpp"
 #include "Rendering/ShaderGraph/Nodes/Clamp.hpp"
+#include "Rendering/ShaderGraph/Nodes/Fract.hpp"
 #include "Rendering/ShaderGraph/Nodes/Length.hpp"
 #include "Rendering/ShaderGraph/Nodes/Pow.hpp"
 #include "Rendering/ShaderGraph/Nodes/Copy.hpp"
@@ -347,6 +348,14 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 		_mainSection.add( ss.str() );
 	};
 
+	_translators[ Fract::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
+		auto fract = static_cast< Fract * >( node );
+
+		std::stringstream ss;
+		ss << fract->getResult()->getName() << " = fract( " << fract->getInput()->getName() << " );";
+		_mainSection.add( ss.str() );
+	};
+
 	_translators[ Length::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
 		auto length = static_cast< Length * >( node );
 
@@ -429,7 +438,9 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 		ss << fragCoord->getInput()->getName() << " = gl_FragCoord;";
 		_mainSection.add( ss.str() );
 
+#ifndef CRIMILD_PLATFORM_EMSCRIPTEN
 		_inputsSection.add( "in vec4 gl_FragCoord;" );
+#endif
 	};
 
 	_translators[ TextureColor::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
@@ -558,6 +569,12 @@ std::string OpenGLShaderGraph::generateShaderSource( containers::Array< ShaderGr
 #else
 	ss << "#version 330 core\n";
 #endif
+
+	ss << "\n// Macros";
+#ifdef CRIMILD_PLATFORM_EMSCRIPTEN
+	ss << "\n#define CRIMILD_PACK_FLOAT_TO_RGBA 1";
+#endif
+	ss << "\n";
 	
 	ss << "\n// Inputs";
 	_inputsSection.each( [ &ss ]( std::string &line ) {
@@ -592,6 +609,8 @@ std::string OpenGLShaderGraph::generateShaderSource( containers::Array< ShaderGr
 		ss << "\n\t" << line;
 	});
 	ss << "\n}\n";
+
+	std:: cout << ss.str() << std::endl;
 	
 	return ss.str();
 }
