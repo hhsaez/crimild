@@ -50,7 +50,7 @@ ShadowPass::ShadowPass( RenderGraph *graph )
 		getName() + " - Shadow",
 		RenderGraphAttachment::Hint::FORMAT_DEPTH_HDR |
 		RenderGraphAttachment::Hint::WRAP_REPEAT |
-//        RenderGraphAttachment::Hint::SIZE_1024 |
+        RenderGraphAttachment::Hint::SIZE_2048 |
 		RenderGraphAttachment::Hint::PERSISTENT );
 }
 
@@ -83,10 +83,19 @@ void ShadowPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *r
 	
 	renderer->bindFrameBuffer( crimild::get_ptr( fbo ) );
 
-	renderQueue->each( [ this, renderer, renderQueue, &lightCount ]( Light *light, int ) {
+    const auto SHADOW_ATLAS_SIZE = Vector2f( fbo->getWidth(), fbo->getHeight() );
+
+	renderQueue->each( [ this, renderer, renderQueue, &lightCount, SHADOW_ATLAS_SIZE ]( Light *light, int ) {
 		if ( light != nullptr && light->castShadows() && lightCount < VIEWPORTS.size() ) {
 			auto vp = VIEWPORTS[ lightCount++ ];
-			renderer->setViewport( Rectf( vp.x(), vp.y(), vp.z(), vp.w() ) );
+			renderer->setViewport(
+                Rectf(
+                    SHADOW_ATLAS_SIZE.x() * vp.x(),
+                    SHADOW_ATLAS_SIZE.y() * vp.y(),
+                    SHADOW_ATLAS_SIZE.x() * vp.z(),
+                    SHADOW_ATLAS_SIZE.y() * vp.w()
+                )
+            );
 			
 			renderShadowMap( renderer, renderQueue, light );
 			

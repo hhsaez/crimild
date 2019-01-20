@@ -171,12 +171,11 @@ void OpenGLRenderer::setViewport( const Rectf &viewport )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
     
-    auto screen = getScreenBuffer();
     glViewport(
-        screen->getWidth() * viewport.getX(),
-        screen->getHeight() * viewport.getY(),
-        screen->getWidth() * viewport.getWidth(),
-        screen->getHeight() * viewport.getHeight() );
+        viewport.getX(),
+        viewport.getY(),
+        viewport.getWidth(),
+        viewport.getHeight() );
     
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }

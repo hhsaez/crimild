@@ -114,10 +114,18 @@ void FrameDebugPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueu
 	auto layout = LAYOUT_12;
 	if ( _inputs.size() <= 4 ) layout = LAYOUT_4;
 	else if ( _inputs.size() <= 8 ) layout = LAYOUT_8;
+
+    const auto BUFFER_SIZE = Vector2f( gBuffer->getWidth(), gBuffer->getHeight() );
 	
-	_inputs.each( [ this, renderer, &layout ]( RenderGraphAttachment *input, crimild::Size idx ) {
+	_inputs.each( [ this, renderer, &layout, BUFFER_SIZE ]( RenderGraphAttachment *input, crimild::Size idx ) {
 		if ( idx < layout.size() ) {
-			renderer->setViewport( layout[ idx ] );
+            auto viewport = layout[ idx ];
+            viewport.x() *= BUFFER_SIZE.x();
+            viewport.y() *= BUFFER_SIZE.y();
+            viewport.width() *= BUFFER_SIZE.x();
+            viewport.height() *= BUFFER_SIZE.y();
+
+			renderer->setViewport( viewport );
 			render( renderer, input->getTexture() );
 		}
 	});
@@ -125,7 +133,7 @@ void FrameDebugPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueu
 	renderer->unbindFrameBuffer( crimild::get_ptr( gBuffer ) );
 	
 	// reset viewport
-	renderer->setViewport( Rectf( 0.0f, 0.0f, 1.0f, 1.0f ) );
+    renderer->setScreenViewport();
 }
 
 void FrameDebugPass::render( Renderer *renderer, Texture *texture )

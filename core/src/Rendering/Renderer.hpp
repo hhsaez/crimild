@@ -80,8 +80,17 @@ namespace crimild {
 		virtual void configure( void ) = 0;
 
 	public:
+        /**
+            \brief Set the rendering viewport in absolute values
+         */
         virtual void setViewport( const Rectf &viewport ) { }
-        
+
+        /**
+            \brief Set the rendering viewport relative to the
+             screen buffer's resolution
+         */
+        virtual void setScreenViewport( const Rectf &viewport = Rectf( 0.0f, 0.0f, 1.0f, 1.0f ) );
+
         virtual void beginRender( void );
 		
 		virtual void clearBuffers( void ) = 0;
