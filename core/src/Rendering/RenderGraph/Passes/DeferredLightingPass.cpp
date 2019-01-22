@@ -105,7 +105,7 @@ void DeferredLightingPass::execute( RenderGraph *graph, Renderer *renderer, Rend
 
 	renderer->setDepthState( _depthState );
 
-	renderQueue->each( renderables, [ this, renderer, program ]( RenderQueue::Renderable *renderable ) {
+	renderQueue->each( renderables, [ renderer, program ]( RenderQueue::Renderable *renderable ) {
 		auto material = renderable->material;
 		if ( material != nullptr ) {
 			program->bindMaterialAmbient( material->getAmbient() );

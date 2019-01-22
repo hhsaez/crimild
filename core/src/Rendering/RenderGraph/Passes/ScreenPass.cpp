@@ -73,13 +73,12 @@ void ScreenPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *r
 	crimild::Real32 width = renderer->getScreenBuffer()->getWidth();
 	crimild::Real32 height = renderer->getScreenBuffer()->getHeight();
 	auto aspect = width / height;
-	auto halfAspect = 0.5f * aspect;
 	auto f = Frustumf( -aspect, aspect, -1.0, 1.0, -100.0, 100.0 );
 	auto pMatrix = f.computeOrthographicMatrix();
 	auto vMatrix = Matrix4f();
 	vMatrix.makeIdentity();
 	
-	renderQueue->each( renderables, [ this, renderer, renderQueue, pMatrix, vMatrix ]( RenderQueue::Renderable *renderable ) {
+	renderQueue->each( renderables, [ renderer, pMatrix, vMatrix ]( RenderQueue::Renderable *renderable ) {
 		auto material = crimild::get_ptr( renderable->material );
 		auto program = material->getProgram();
 		if ( program == nullptr ) {

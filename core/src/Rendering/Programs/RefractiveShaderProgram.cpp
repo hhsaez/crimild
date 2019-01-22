@@ -55,8 +55,7 @@ RefractiveShaderProgram::~RefractiveShaderProgram( void )
 void RefractiveShaderProgram::createVertexShader( void )
 {
 	auto graph = Renderer::getInstance()->createShaderGraph();
-
-	auto master = graph->addOutputNode< MeshVertexMaster >();
+    graph->addOutputNode< MeshVertexMaster >();
 
 	buildVertexShader( graph );
 }

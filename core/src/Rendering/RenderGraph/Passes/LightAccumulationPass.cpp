@@ -87,7 +87,7 @@ void LightAccumulationPass::accumAmbient( RenderGraph *graph, Renderer *renderer
 	renderer->setAlphaState( AlphaState::ENABLED_ADDITIVE_BLEND );
 	renderer->setDepthState( DepthState::DISABLED );
 			
-	renderQueue->each( [ this, renderer, program ]( Light *light, int ) {
+	renderQueue->each( [ renderer, program ]( Light *light, int ) {
 		if ( light->getType() == Light::Type::AMBIENT ) {
 			program->setColor( light->getAmbient() );
 			
@@ -120,7 +120,7 @@ void LightAccumulationPass::accumDiffuse( RenderGraph *graph, Renderer *renderer
 	renderer->setAlphaState( AlphaState::ENABLED_ADDITIVE_BLEND );
 	renderer->setDepthState( DepthState::DISABLED );
 
-	renderQueue->each( [ this, renderer, program, vMatrix ]( Light *light, int ) {
+	renderQueue->each( [ renderer, program, vMatrix ]( Light *light, int ) {
 		if ( light->getType() == Light::Type::DIRECTIONAL ) {
 			// TODO: point/spot lights
 			program->bindLightColor( light->getColor() );

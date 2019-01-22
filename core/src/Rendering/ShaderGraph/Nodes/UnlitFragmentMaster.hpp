@@ -56,8 +56,6 @@ namespace crimild {
 			Variable *getAlphaClipThreshold( void ) { return _alphaClipThreshold; }
 			
 		private:
-			crimild::Size _maxLights;
-
 			Variable *_textureCoords = nullptr;
 			Variable *_color = nullptr;
 			Variable *_alpha = nullptr;

@@ -34,17 +34,12 @@
 
 namespace crimild {
 
-    class FrameBufferObject;
-    class Texture;
-    
+    class CullFaceState;
+
     class ShadowMap : public SharedObject {
     public:
         ShadowMap( void );
-        explicit ShadowMap( SharedPointer< FrameBufferObject > const &fbo );
         virtual ~ShadowMap( void );
-        
-        FrameBufferObject *getBuffer( void ) { return crimild::get_ptr( _buffer ); }
-        Texture *getTexture ( void ) { return _texture; }
         
         const Matrix4f &getLightProjectionMatrix( void ) const { return _lightProjectionMatrix; }
         void setLightProjectionMatrix( const Matrix4f &m ) { _lightProjectionMatrix = m; }
@@ -55,20 +50,22 @@ namespace crimild {
 		const Vector4f &getViewport( void ) const { return _viewport; }
 		void setViewport( const Vector4f &viewport ) { _viewport = viewport; }
 
-		void setBias( crimild::Real32 bias ) { _bias = bias; }
-		crimild::Real32 getBias( void ) const { return _bias; }
+		void setMinBias( crimild::Real32 minBias ) { _minBias = minBias; }
+		crimild::Real32 getMinBias( void ) const { return _minBias; }
 
-		void setOffset( crimild::Real32 offset ) { _offset = offset; }
-		crimild::Real32 getOffset( void ) const { return _offset; }
+		void setMaxBias( crimild::Real32 maxBias ) { _maxBias = maxBias; }
+		crimild::Real32 getMaxBias( void ) const { return _maxBias; }
+
+        void setCullFaceState( SharedPointer< CullFaceState > const &cullFace ) { _cullFaceState = cullFace; }
+        CullFaceState *getCullFaceState( void ) { return crimild::get_ptr( _cullFaceState ); }
 
     private:
         Matrix4f _lightProjectionMatrix;
         Matrix4f _lightViewMatrix;
 		Vector4f _viewport;
-        Texture *_texture = nullptr;
-        SharedPointer< FrameBufferObject > _buffer;
-		crimild::Real32 _bias = 0.999f;
-		crimild::Real32 _offset = 0.0f;
+		crimild::Real32 _minBias = 0.0001f;
+		crimild::Real32 _maxBias = 0.001f;
+        SharedPointer< CullFaceState > _cullFaceState;
     };
     
 }

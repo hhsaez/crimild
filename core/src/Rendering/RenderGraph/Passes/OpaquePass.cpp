@@ -95,7 +95,7 @@ void OpaquePass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *r
 	auto view = renderQueue->getViewMatrix();
 	renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM ), view );
 		
-	renderQueue->each( renderables, [ this, renderer, renderQueue, &program ]( RenderQueue::Renderable *renderable ) {
+	renderQueue->each( renderables, [ this, renderer, &program ]( RenderQueue::Renderable *renderable ) {
 		auto material = crimild::get_ptr( renderable->material );
 		
 		if ( material != nullptr ) {
