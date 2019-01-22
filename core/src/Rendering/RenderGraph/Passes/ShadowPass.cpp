@@ -62,8 +62,9 @@ ShadowPass::ShadowPass( RenderGraph *graph )
     _shadowOutput = graph->createAttachment(
         getName() + " - Shadow",
         RenderGraphAttachment::Hint::FORMAT_DEPTH_HDR |
-        RenderGraphAttachment::Hint::WRAP_REPEAT |
-        RenderGraphAttachment::Hint::SIZE_2048 |
+        RenderGraphAttachment::Hint::WRAP_CLAMP_TO_EDGES |
+        RenderGraphAttachment::Hint::SIZE_4096 |
+        RenderGraphAttachment::Hint::BORDER_ONE |
         RenderGraphAttachment::Hint::PERSISTENT );
 #endif
 }

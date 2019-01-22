@@ -86,19 +86,30 @@ vec3 calcPhongDirectionalLighting( vec3 P, vec3 N, vec3 E, vec3 MA, vec3 MD, vec
 			projPos = projPos * 0.5 + vec3( 0.5 );
 			vec4 viewport = uDirectionalLights[ i ].shadowMapViewport;
 			vec2 shadowUV = vec2( viewport.x + viewport.z * projPos.x, viewport.y + viewport.w * projPos.y );
-#ifdef CRIMILD_PACK_FlOAT_TO_RGBA
-			float d = texture( uShadowAtlas, shadowUV ).x;
-#else
-			vec4 depthRGBA = texture( uShadowAtlas, shadowUV );
-			float d = dot( depthRGBA, vec4( 1.0, 1.0 / 255.0, 1.0 / 65025.0, 1.0 / 16581375.0 ) );
-#endif
 			float z = projPos.z;
-			vec2 minMaxBias = uDirectionalLights[ i ].shadowMinMaxBias;
-			float bias = minMaxBias.x * tan( acos( dot( N, L ) ) ); 
-			bias = clamp( bias, 0.0, minMaxBias.y );
-			float shadow = z - bias > d ? 1.0 : 0.0;
-			CD *= ( 1.0 - shadow );
-			CS *= ( 1.0 - shadow );
+			if ( z < 1.0 ) {
+			   vec2 minMaxBias = uDirectionalLights[ i ].shadowMinMaxBias;
+			   //float bias = minMaxBias.x * tan( acos( dot( N, L ) ) ); 
+			   //bias = clamp( bias, 0.0, minMaxBias.y );
+			   float bias = max( minMaxBias.x * ( 1.0 - dot( N, L ) ), minMaxBias.x );
+			   float shadow = 0.0f;
+			   vec2 texelSize = 1.0f / textureSize( uShadowAtlas, 0 );
+			   for ( float x = -1.0; x <= 1.0; x += 1.0 ) {
+			   	   for ( float y = -1.0; y <= 1.0; y += 1.0 ) {
+				   	   	vec2 uv = shadowUV + vec2( x, y ) * texelSize;
+#ifdef CRIMILD_PACK_FlOAT_TO_RGBA
+						float d = texture( uShadowAtlas, uv ).r;
+#else
+						vec4 depthRGBA = texture( uShadowAtlas, uv );
+						float d = dot( depthRGBA, vec4( 1.0, 1.0 / 255.0, 1.0 / 65025.0, 1.0 / 16581375.0 ) );
+#endif
+						shadow += z - bias > d ? 1.0 : 0.0;
+				   }
+			   }
+			   shadow /= 9.0f;
+			   CD *= ( 1.0 - shadow );
+			   CS *= ( 1.0 - shadow );
+			}
 		}
 
 		accumAmbient += CA;
