@@ -201,6 +201,7 @@ void DeferredRenderPass::composeFrame( Renderer *renderer, RenderQueue *renderQu
     renderer->bindProgram( program );
     
     renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::USE_SHADOW_MAP_UNIFORM ), _shadowMaps.size() > 0 );
+    /*
     for ( auto it : _shadowMaps ) {
         if ( it.second != nullptr ) {
             renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_SOURCE_PROJECTION_MATRIX_UNIFORM ), it.second->getLightProjectionMatrix() );
@@ -210,6 +211,7 @@ void DeferredRenderPass::composeFrame( Renderer *renderer, RenderQueue *renderQu
             renderer->bindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::SHADOW_MAP_UNIFORM ), it.second->getTexture() );
         }
     }
+     */
     
     // bind lights
     renderQueue->each( [&]( Light *light, int ) {
@@ -240,11 +242,13 @@ void DeferredRenderPass::composeFrame( Renderer *renderer, RenderQueue *renderQu
         renderer->unbindLight( program, light );
     });
     
+/*
     for ( auto it : _shadowMaps ) {
         if ( it.second != nullptr ) {
             renderer->unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::SHADOW_MAP_UNIFORM ), it.second->getTexture() );
         }
     }
+ */
     
     renderer->unbindProgram( program );
     

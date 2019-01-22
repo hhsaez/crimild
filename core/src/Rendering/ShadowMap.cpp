@@ -29,35 +29,16 @@
 #include "FrameBufferObject.hpp"
 #include "RenderTarget.hpp"
 #include "Texture.hpp"
+#include "CullFaceState.hpp"
 
 #include "Simulation/Simulation.hpp"
 
 using namespace crimild;
 
 ShadowMap::ShadowMap( void )
-    : ShadowMap( nullptr )
+    : _cullFaceState( crimild::alloc< CullFaceState >( true, CullFaceState::CullFaceMode::FRONT ) )
 {
     
-}
-
-ShadowMap::ShadowMap( SharedPointer< FrameBufferObject > const &fbo )
-    : _buffer( fbo ),
-	  _viewport( Vector4f::ZERO )
-{
-    if ( _buffer == nullptr ) {
-        auto width = Simulation::getInstance()->getSettings()->get< crimild::Int16 >( Settings::SETTINGS_RENDERING_SHADOWS_RESOLUTION_WIDTH, 1024 );
-        auto height = Simulation::getInstance()->getSettings()->get< crimild::Int16 >( Settings::SETTINGS_RENDERING_SHADOWS_RESOLUTION_HEIGHT, 1024 );
-
-        _buffer = crimild::alloc< FrameBufferObject >( width, height );
-        _buffer->setClearColor( RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ) );
-        _buffer->getRenderTargets().insert( "depth", crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER_AND_TEXTURE, width, height, true ) );
-    }
-    
-    _buffer->getRenderTargets().each( [ this ]( const std::string &name, SharedPointer< RenderTarget > &target ) {
-        if ( target->getOutput() == RenderTarget::Output::RENDER_AND_TEXTURE ) {
-            _texture = target->getTexture();
-        }
-    });
 }
 
 ShadowMap::~ShadowMap( void )

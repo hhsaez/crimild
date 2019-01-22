@@ -132,28 +132,29 @@ void ShadowPass::renderShadowMap( Renderer *renderer, RenderQueue *renderQueue, 
 	auto program = crimild::get_ptr( _program );
 
 	// TODO: compute a frustrum based on what the camera is looking at
-	auto fFactor = 0.25f;
-	Frustumf f( -fFactor, fFactor, -fFactor, fFactor, 1.0f, 10.0f );
-	const auto pMatrix = f.computeOrthographicMatrix();
-	program->bindUniform( PROJECTION_MATRIX_UNIFORM, pMatrix );
+    Frustumf f( -50.0f, 50.0f, -50.0f, 50.0f, 1.0f, 100.0f );
+    const auto pMatrix = f.computeOrthographicMatrix().getTranspose();
+    program->bindUniform( PROJECTION_MATRIX_UNIFORM, pMatrix );
 
 	// TODO: for diretional lights, get only the rotation of light's transform
 	// and apply and offset to get a valid posistion
 	Transformation lightTransform;
 	lightTransform.setRotate( light->getWorld().getRotate() );
-	lightTransform.setTranslate( -100.0f * lightTransform.computeDirection() );
-	const auto vMatrix = lightTransform.computeModelMatrix().getInverse();
-	program->bindUniform( VIEW_MATRIX_UNIFORM, vMatrix );
+    lightTransform.setTranslate( -50.0f * lightTransform.computeDirection() );
+    const auto vMatrix = lightTransform.computeModelMatrix().getInverse();
+    program->bindUniform( VIEW_MATRIX_UNIFORM, vMatrix );
 
 	if ( auto shadowMap = light->getShadowMap() ) {
 		shadowMap->setLightProjectionMatrix( pMatrix );
-		shadowMap->setLightViewMatrix( vMatrix );
+        shadowMap->setLightViewMatrix( vMatrix );
+
+        renderer->setCullFaceState( shadowMap->getCullFaceState() );
 	}
-	
+
 	renderQueue->each( renderables, [ renderer, program ]( RenderQueue::Renderable *renderable ) {
 
 		const auto &mMatrix = renderable->modelTransform;
-		program->bindUniform( MODEL_MATRIX_UNIFORM, mMatrix );
+        program->bindUniform( MODEL_MATRIX_UNIFORM, mMatrix );
 
 		renderer->bindProgram( program );
 		
@@ -166,5 +167,7 @@ void ShadowPass::renderShadowMap( Renderer *renderer, RenderQueue *renderQueue, 
 		renderer->unbindProgram( program );
 	});
 	
+    renderer->setCullFaceState( CullFaceState::ENABLED_BACK );
+
 }
 

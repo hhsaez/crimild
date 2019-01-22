@@ -46,9 +46,9 @@ using namespace crimild::shadergraph;
 
 class LinearizeDepthPassProgram : public ShaderProgram {
 public:
-	LinearizeDepthPassProgram( void )
-		: _uNear( crimild::alloc< FloatUniform >( "uNear", 0.1f ) ),
-		  _uFar( crimild::alloc< FloatUniform >( "uFar", 1024.0f ) )
+    LinearizeDepthPassProgram( crimild::Real32 near, crimild::Real32 far )
+		: _uNear( crimild::alloc< FloatUniform >( "uNear", near ) ),
+		  _uFar( crimild::alloc< FloatUniform >( "uFar", far ) )
 	{
 		createVertexShader();
 		createFragmentShader();
@@ -109,11 +109,18 @@ private:
 };
 
 LinearizeDepthPass::LinearizeDepthPass( RenderGraph *graph )
-	: RenderGraphPass( graph, "Convert Depth to linear values" )
+	: LinearizeDepthPass( graph, 0.1f, 1024.0f )
 {
-	_output = graph->createAttachment( getName() + " - Linear Depth", RenderGraphAttachment::Hint::FORMAT_RGBA );
+
 }
 			
+LinearizeDepthPass::LinearizeDepthPass( RenderGraph *graph, crimild::Real32 near, crimild::Real32 far )
+    : RenderGraphPass( graph, "Convert Depth to linear values" ),
+      _program( crimild::alloc< LinearizeDepthPassProgram >( near, far ) )
+{
+    _output = graph->createAttachment( getName() + " - Linear Depth", RenderGraphAttachment::Hint::FORMAT_RGBA );
+}
+
 LinearizeDepthPass::~LinearizeDepthPass( void )
 {
 	
@@ -123,8 +130,6 @@ void LinearizeDepthPass::setup( RenderGraph *graph )
 {
 	graph->read( this, { _input } );
 	graph->write( this, { _output } );
-
-	_program = crimild::alloc< LinearizeDepthPassProgram >();
 }
 
 void LinearizeDepthPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue )

@@ -50,8 +50,7 @@ UnlitShaderProgram::~UnlitShaderProgram( void )
 void UnlitShaderProgram::createVertexShader( void )
 {
 	auto graph = Renderer::getInstance()->createShaderGraph();
-
-	auto master = graph->addOutputNode< MeshVertexMaster >();
+    graph->addOutputNode< MeshVertexMaster >();
 
 	buildVertexShader( graph );
 }
@@ -59,8 +58,7 @@ void UnlitShaderProgram::createVertexShader( void )
 void UnlitShaderProgram::createFragmentShader( void )
 {
 	auto graph = Renderer::getInstance()->createShaderGraph();
-
-	auto master = graph->addOutputNode< UnlitFragmentMaster >();
+    graph->addOutputNode< UnlitFragmentMaster >();
 
 	buildFragmentShader( graph );
 }

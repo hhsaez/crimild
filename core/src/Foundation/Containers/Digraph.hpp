@@ -197,7 +197,7 @@ namespace crimild {
 				frontier.push( s );
 				while ( !frontier.empty() ) {
 					auto v = frontier.pop();
-					eachEdge( v, [ this, &frontier, &r ]( VERTEX_TYPE const &w ) {
+					eachEdge( v, [ &frontier, &r ]( VERTEX_TYPE const &w ) {
 						if ( !r.contains( w ) && !frontier.contains( w ) ) {
 							r.insert( w );
 							frontier.push( w );

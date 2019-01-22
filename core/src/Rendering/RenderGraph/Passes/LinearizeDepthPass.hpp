@@ -44,6 +44,7 @@ namespace crimild {
 				
 			public:
 				LinearizeDepthPass( RenderGraph *graph );
+                LinearizeDepthPass( RenderGraph *graph, crimild::Real32 near, crimild::Real32 far );
 				virtual ~LinearizeDepthPass( void );
 			
 				void setInput( RenderGraphAttachment *attachment ) { _input = attachment; }

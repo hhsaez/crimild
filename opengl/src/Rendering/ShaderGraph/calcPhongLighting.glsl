@@ -14,6 +14,7 @@ struct DirectionalLight {
 	bool hasShadowMap;
 	mat4 lightSpaceMatrix;
 	vec4 shadowMapViewport;
+	vec2 shadowMinMaxBias;
 };
 
 uniform int uDirectionalLightCount;
@@ -92,10 +93,12 @@ vec3 calcPhongDirectionalLighting( vec3 P, vec3 N, vec3 E, vec3 MA, vec3 MD, vec
 			float d = dot( depthRGBA, vec4( 1.0, 1.0 / 255.0, 1.0 / 65025.0, 1.0 / 16581375.0 ) );
 #endif
 			float z = projPos.z;
-			z *= 0.99999;
-			float shadow = z < d ? 1.0 : 0.0;
-			CD *= shadow;
-			CS *= shadow;
+			vec2 minMaxBias = uDirectionalLights[ i ].shadowMinMaxBias;
+			float bias = minMaxBias.x * tan( acos( dot( N, L ) ) ); 
+			bias = clamp( bias, 0.0, minMaxBias.y );
+			float shadow = z - bias > d ? 1.0 : 0.0;
+			CD *= ( 1.0 - shadow );
+			CS *= ( 1.0 - shadow );
 		}
 
 		accumAmbient += CA;

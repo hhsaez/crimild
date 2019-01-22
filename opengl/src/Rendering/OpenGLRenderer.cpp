@@ -438,10 +438,23 @@ void OpenGLRenderer::bindDirectionalLight( ShaderProgram *program, Light *light 
 		if ( loc >= 0 ) {
 			auto lsm = Matrix4f::IDENTITY;
 			if ( shadowMap != nullptr ) {
-				// TODO: why reversing the order? P*V seems more natural!!
+				// Why reversing the order? P*V seems more natural. But ViewMatrix is inverted!!
 				lsm = shadowMap->getLightViewMatrix() * shadowMap->getLightProjectionMatrix();
 			}
 			glUniformMatrix4fv( loc, 1, GL_FALSE, static_cast< const GLfloat * >( lsm.getData() ) );
+		}
+	}
+
+	{
+		auto loc = glGetUniformLocation(
+			program->getCatalogId(),
+			OpenGLUtils::buildArrayShaderLocationName( "uDirectionalLights", index, "shadowMinMaxBias" ).c_str() );
+		if ( loc >= 0 ) {
+			auto bias = Vector2f::ZERO;
+			if ( shadowMap != nullptr ) {
+				bias = Vector2f( shadowMap->getMinBias(), shadowMap->getMaxBias() );
+			}
+			glUniform2fv( loc, 1, static_cast< const GLfloat * >( bias.getData() ) );
 		}
 	}
 

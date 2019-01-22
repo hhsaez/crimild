@@ -156,8 +156,8 @@ void ShadowRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *rende
 	        map->setLightViewMatrix( vMatrix );
 		}
 
-        renderer->bindFrameBuffer( map->getBuffer() );
-        
+//        renderer->bindFrameBuffer( map->getBuffer() );
+
         renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::PROJECTION_MATRIX_UNIFORM ), map->getLightProjectionMatrix() );
         renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM ), map->getLightViewMatrix() );
         
@@ -172,7 +172,7 @@ void ShadowRenderPass::computeShadowMaps( Renderer *renderer, RenderQueue *rende
                 renderable->modelTransform );
         });
 
-        renderer->unbindFrameBuffer( map->getBuffer() );
+//        renderer->unbindFrameBuffer( map->getBuffer() );
     });
     
     renderer->unbindProgram( program );

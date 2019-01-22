@@ -52,8 +52,7 @@ ForwardShadingShaderProgram::~ForwardShadingShaderProgram( void )
 void ForwardShadingShaderProgram::createVertexShader( void )
 {
 	auto graph = Renderer::getInstance()->createShaderGraph();
-
-	auto master = graph->addOutputNode< MeshVertexMaster >();
+	graph->addOutputNode< MeshVertexMaster >();
 
 	buildVertexShader( graph );
 }
@@ -61,8 +60,7 @@ void ForwardShadingShaderProgram::createVertexShader( void )
 void ForwardShadingShaderProgram::createFragmentShader( void )
 {
 	auto graph = Renderer::getInstance()->createShaderGraph();
-
-	auto master = graph->addOutputNode< PhongFragmentMaster >();
+	graph->addOutputNode< PhongFragmentMaster >();
 
 	buildFragmentShader( graph );
 }

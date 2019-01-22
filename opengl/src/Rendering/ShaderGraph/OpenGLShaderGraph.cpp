@@ -115,8 +115,8 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 		section->add( ss.str() );
 	};
 	
-	_translators[ VertexShaderInputs::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
-		auto inputs = static_cast< VertexShaderInputs * >( node );
+	_translators[ VertexShaderInputs::__CLASS_NAME ] = []( ShaderGraphNode *node ) {
+		// no-op
 	};
 
 	_translators[ Dot::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
@@ -466,11 +466,11 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 		_mainSection.add( ss.str() );
 	};
 
-	_translators[ MeshVertexMaster::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
+	_translators[ MeshVertexMaster::__CLASS_NAME ] = []( ShaderGraphNode *node ) {
 		// no-op (avoid warnings)
 	};
 		
-	_translators[ UnlitFragmentMaster::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
+	_translators[ UnlitFragmentMaster::__CLASS_NAME ] = []( ShaderGraphNode *node ) {
 		// no-op (avoid warnings)
 	};
 		
@@ -567,7 +567,9 @@ std::string OpenGLShaderGraph::generateShaderSource( containers::Array< ShaderGr
 	   << "precision highp int;\n"
 	   << "precision mediump float;\n";
 #else
-	ss << "#version 330 core\n";
+	ss << "#version 330 core\n"
+       << "precision highp int;\n"
+       << "precision highp float;\n";
 #endif
 
 	ss << "\n// Macros";
