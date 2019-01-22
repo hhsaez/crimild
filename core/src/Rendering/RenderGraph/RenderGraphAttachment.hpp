@@ -58,6 +58,7 @@ namespace crimild {
                     FORMAT_RGB_HDR          = FORMAT_RGB | HDR,
 					FORMAT_RGBA_HDR         = FORMAT_RGBA | HDR,
 
+                    BORDER_ONE              = 1 << 17,
 					WRAP_CLAMP_TO_EDGES     = 1 << 18,
 					WRAP_REPEAT             = 1 << 19,
 					

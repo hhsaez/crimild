@@ -155,6 +155,18 @@ namespace crimild {
         Filter _magFilter = Filter::LINEAR;
 
         /**
+            \name Border color
+         */
+        //@{
+
+    public:
+        void setBorderColor( const RGBAColorf &color ) { _borderColor = color; }
+        const RGBAColorf &getBorderColor( void ) const { return _borderColor; }
+
+    private:
+        RGBAColorf _borderColor;
+
+        /**
             \name Coding support
          */
         //@{
