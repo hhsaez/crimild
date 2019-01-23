@@ -534,6 +534,7 @@ void OpenGLRenderer::unbindPointLight( ShaderProgram *program, Light *light )
 void OpenGLRenderer::bindSpotLight( ShaderProgram *program, Light *light )
 {
 	auto index = _spotLightCount - 1;
+	auto shadowMap = light->getShadowMap();
 
 	{
 		auto loc = glGetUniformLocation( program->getCatalogId(), "uSpotLightCount" );
@@ -603,6 +604,56 @@ void OpenGLRenderer::bindSpotLight( ShaderProgram *program, Light *light )
 		if ( loc >= 0 ) {
 			glUniform1f( loc, Numericf::cos( light->getOuterCutoff() ) );
 		}
+	}
+
+	{
+		auto loc = glGetUniformLocation(
+			program->getCatalogId(),
+			OpenGLUtils::buildArrayShaderLocationName( "uSpotLights", index, "hasShadowMap" ).c_str() );
+		if ( loc >= 0 ) {
+			glUniform1i( loc, shadowMap != nullptr ? 1 : 0 );
+		}
+	}
+
+	{
+		auto loc = glGetUniformLocation(
+			program->getCatalogId(),
+			OpenGLUtils::buildArrayShaderLocationName( "uSpotLights", index, "lightSpaceMatrix" ).c_str() );
+		if ( loc >= 0 ) {
+			auto lsm = Matrix4f::IDENTITY;
+			if ( shadowMap != nullptr ) {
+				// Why reversing the order? P*V seems more natural. But ViewMatrix is inverted!!
+				lsm = shadowMap->getLightViewMatrix() * shadowMap->getLightProjectionMatrix();
+			}
+			glUniformMatrix4fv( loc, 1, GL_FALSE, static_cast< const GLfloat * >( lsm.getData() ) );
+		}
+	}
+
+	{
+		auto loc = glGetUniformLocation(
+			program->getCatalogId(),
+			OpenGLUtils::buildArrayShaderLocationName( "uSpotLights", index, "shadowMinMaxBias" ).c_str() );
+		if ( loc >= 0 ) {
+			auto bias = Vector2f::ZERO;
+			if ( shadowMap != nullptr ) {
+				bias = Vector2f( shadowMap->getMinBias(), shadowMap->getMaxBias() );
+			}
+			glUniform2fv( loc, 1, static_cast< const GLfloat * >( bias.getData() ) );
+		}
+	}
+
+	{
+		auto loc = glGetUniformLocation(
+			program->getCatalogId(),
+			OpenGLUtils::buildArrayShaderLocationName( "uSpotLights", index, "shadowMapViewport" ).c_str() );
+		if ( loc >= 0 ) {
+			auto viewport = Vector4f::ZERO;
+			if ( shadowMap != nullptr ) {
+				viewport = shadowMap->getViewport();
+			}
+			glUniform4fv( loc, 1, static_cast< const GLfloat * >( viewport.getData() ) );
+		}
+		
 	}
 }
 

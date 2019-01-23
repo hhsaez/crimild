@@ -38,6 +38,10 @@ struct SpotLight {
 	vec3 attenuation;
 	float innerCutOff;
 	float outerCutOff;
+    bool hasShadowMap;
+    mat4 lightSpaceMatrix;
+    vec4 shadowMapViewport;
+    vec2 shadowMinMaxBias;
 };
 
 uniform int uSpotLightCount;
@@ -55,6 +59,36 @@ vec3 calcPhongAmbientLighting( vec3 MA )
 	}
 
 	return accumAmbient * MA;
+}
+
+float calcDirectionalShadow( mat4 lightSpaceMatrix, vec3 P, vec3 N, vec3 L, vec4 viewport, vec2 minMaxBias, sampler2D shadowAtlas )
+{
+    vec4 lsPos = lightSpaceMatrix * vec4( P, 1.0 );
+    vec3 projPos = lsPos.xyz / lsPos.w;
+    projPos = projPos * 0.5 + vec3( 0.5 );
+    vec2 shadowUV = vec2( viewport.x + viewport.z * projPos.x, viewport.y + viewport.w * projPos.y );
+    float z = projPos.z;
+    if ( z >= 1.0 ) {
+        return 0.0;
+    }
+
+    float bias = max( minMaxBias.x * ( 1.0 - dot( N, L ) ), minMaxBias.x );
+    float shadow = 0.0f;
+    vec2 texelSize = 1.0f / textureSize( shadowAtlas, 0 );
+    for ( float x = -1.0; x <= 1.0; x += 1.0 ) {
+        for ( float y = -1.0; y <= 1.0; y += 1.0 ) {
+            vec2 uv = shadowUV + vec2( x, y ) * texelSize;
+#ifdef CRIMILD_PACK_FlOAT_TO_RGBA
+            float d = texture( shadowAtlas, uv ).r;
+#else
+            vec4 depthRGBA = texture( shadowAtlas, uv );
+            float d = dot( depthRGBA, vec4( 1.0, 1.0 / 255.0, 1.0 / 65025.0, 1.0 / 16581375.0 ) );
+#endif
+            shadow += z - bias > d ? 1.0 : 0.0;
+        }
+    }
+    shadow /= 9.0;
+    return shadow;
 }
 
 vec3 calcPhongDirectionalLighting( vec3 P, vec3 N, vec3 E, vec3 MA, vec3 MD, vec3 MS, float MSh )
@@ -81,35 +115,17 @@ vec3 calcPhongDirectionalLighting( vec3 P, vec3 N, vec3 E, vec3 MA, vec3 MD, vec
 
 		// shadow
 		if ( uDirectionalLights[ i ].hasShadowMap ) {
-		    vec4 lsPos = uDirectionalLights[ i ].lightSpaceMatrix * vec4( P, 1.0 );
-			vec3 projPos = lsPos.xyz / lsPos.w;
-			projPos = projPos * 0.5 + vec3( 0.5 );
-			vec4 viewport = uDirectionalLights[ i ].shadowMapViewport;
-			vec2 shadowUV = vec2( viewport.x + viewport.z * projPos.x, viewport.y + viewport.w * projPos.y );
-			float z = projPos.z;
-			if ( z < 1.0 ) {
-			   vec2 minMaxBias = uDirectionalLights[ i ].shadowMinMaxBias;
-			   //float bias = minMaxBias.x * tan( acos( dot( N, L ) ) ); 
-			   //bias = clamp( bias, 0.0, minMaxBias.y );
-			   float bias = max( minMaxBias.x * ( 1.0 - dot( N, L ) ), minMaxBias.x );
-			   float shadow = 0.0f;
-			   vec2 texelSize = 1.0f / textureSize( uShadowAtlas, 0 );
-			   for ( float x = -1.0; x <= 1.0; x += 1.0 ) {
-			   	   for ( float y = -1.0; y <= 1.0; y += 1.0 ) {
-				   	   	vec2 uv = shadowUV + vec2( x, y ) * texelSize;
-#ifdef CRIMILD_PACK_FlOAT_TO_RGBA
-						float d = texture( uShadowAtlas, uv ).r;
-#else
-						vec4 depthRGBA = texture( uShadowAtlas, uv );
-						float d = dot( depthRGBA, vec4( 1.0, 1.0 / 255.0, 1.0 / 65025.0, 1.0 / 16581375.0 ) );
-#endif
-						shadow += z - bias > d ? 1.0 : 0.0;
-				   }
-			   }
-			   shadow /= 9.0f;
-			   CD *= ( 1.0 - shadow );
-			   CS *= ( 1.0 - shadow );
-			}
+            float shadow = calcDirectionalShadow(
+                uDirectionalLights[ i ].lightSpaceMatrix,
+                P,
+                N,
+                L,
+                uDirectionalLights[ i ].shadowMapViewport,
+                uDirectionalLights[ i ].shadowMinMaxBias,
+                uShadowAtlas
+            );
+            CD *= ( 1.0 - shadow );
+            CS *= ( 1.0 - shadow );
 		}
 
 		accumAmbient += CA;
@@ -196,6 +212,21 @@ vec3 calcPhongSpotLighting( vec3 P, vec3 N, vec3 E, vec3 MA, vec3 MD, vec3 MS, f
 		CD *= a;
 		CS *= a;
 		
+        // shadow
+        if ( uSpotLights[ i ].hasShadowMap ) {
+            float shadow = calcDirectionalShadow(
+                uSpotLights[ i ].lightSpaceMatrix,
+                P,
+                N,
+                L,
+                uSpotLights[ i ].shadowMapViewport,
+                uSpotLights[ i ].shadowMinMaxBias,
+                uShadowAtlas
+            );
+            CD *= ( 1.0 - shadow );
+            CS *= ( 1.0 - shadow );
+        }
+
 		accumAmbient += CA;
 		accumDiffuse += CD;
 		accumSpecular += CS;
