@@ -132,17 +132,36 @@ void ShadowPass::renderShadowMap( Renderer *renderer, RenderQueue *renderQueue, 
 
 	auto program = crimild::get_ptr( _program );
 
-	// TODO: compute a frustrum based on what the camera is looking at
-    Frustumf f( -50.0f, 50.0f, -50.0f, 50.0f, 1.0f, 100.0f );
-    const auto pMatrix = f.computeOrthographicMatrix().getTranspose();
-    program->bindUniform( PROJECTION_MATRIX_UNIFORM, pMatrix );
+    auto pMatrix = Matrix4f::IDENTITY;
+    auto vMatrix = Matrix4f::IDENTITY;
 
-	// TODO: for diretional lights, get only the rotation of light's transform
-	// and apply and offset to get a valid posistion
-	Transformation lightTransform;
-	lightTransform.setRotate( light->getWorld().getRotate() );
-    lightTransform.setTranslate( -50.0f * lightTransform.computeDirection() );
-    const auto vMatrix = lightTransform.computeModelMatrix().getInverse();
+    switch ( light->getType() ) {
+        case Light::Type::DIRECTIONAL: {
+            // TODO: compute a frustrum based on what the camera is looking at
+            Frustumf f( -50.0f, 50.0f, -50.0f, 50.0f, 1.0f, 100.0f );
+            pMatrix = f.computeOrthographicMatrix().getTranspose();
+
+            // TODO: for diretional lights, get only the rotation of light's transform
+            // and apply and offset to get a valid posistion
+            Transformation lightTransform;
+            lightTransform.setRotate( light->getWorld().getRotate() );
+            lightTransform.setTranslate( -50.0f * lightTransform.computeDirection() );
+            vMatrix = lightTransform.computeModelMatrix().getInverse();
+            break;
+        }
+
+        case Light::Type::SPOT: {
+            auto f = Frustumf( 2.0f * light->getOuterCutoff() * Numericf::RAD_TO_DEG, 1.0f, 1.0f, 100.0f );
+            pMatrix = f.computeProjectionMatrix();
+            vMatrix = light->getWorld().computeModelMatrix().getInverse();
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    program->bindUniform( PROJECTION_MATRIX_UNIFORM, pMatrix );
     program->bindUniform( VIEW_MATRIX_UNIFORM, vMatrix );
 
 	if ( auto shadowMap = light->getShadowMap() ) {
