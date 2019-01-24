@@ -161,7 +161,9 @@ void TextureCatalog::load( Texture *texture )
 		glTexParameteri( textureTarget, GL_TEXTURE_WRAP_R, OpenGLUtils::TEXTURE_WRAP_MODE_CLAMP[ ( uint8_t ) texture->getWrapMode() ] );
 	}
 
+#if defined( GL_TEXTURE_BORDER_COLOR ) && !defined( CRIMILD_PLATFORM_EMSCRIPTEN )
     glTexParameterfv( textureTarget, GL_TEXTURE_BORDER_COLOR, texture->getBorderColor().getData() );
+#endif
 
 	auto image = texture->getImage();
 	auto width = image->getWidth();

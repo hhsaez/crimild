@@ -73,8 +73,9 @@ float calcDirectionalShadow( mat4 lightSpaceMatrix, vec3 P, vec3 N, vec3 L, vec4
     }
 
     float bias = max( minMaxBias.x * ( 1.0 - dot( N, L ) ), minMaxBias.x );
-    float shadow = 0.0f;
-    vec2 texelSize = 1.0f / textureSize( shadowAtlas, 0 );
+    float shadow = 0.0;
+	ivec2 shadowTextureSize = textureSize( shadowAtlas, 0 );
+    vec2 texelSize = vec2( 1.0 / float( shadowTextureSize.x ), 1.0 / float( shadowTextureSize.y ) );
     for ( float x = -1.0; x <= 1.0; x += 1.0 ) {
         for ( float y = -1.0; y <= 1.0; y += 1.0 ) {
             vec2 uv = shadowUV + vec2( x, y ) * texelSize;
