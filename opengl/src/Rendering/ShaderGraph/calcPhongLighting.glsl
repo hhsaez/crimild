@@ -196,26 +196,23 @@ vec3 calcPhongSpotLighting( vec3 P, vec3 N, vec3 E, vec3 MA, vec3 MD, vec3 MS, f
 		vec3 L = normalize( lVector );
 		vec3 H = normalize( L + E );
 
-		vec3 CA = lAmbient;
-		vec3 CD = lDiffuse * max( 0.0, dot( N, L ) );
-		vec3 CS = lDiffuse * pow( max( dot( N, H ), 0.0 ), MSh );
+        // attenuation
+        float a = 1.0 / ( lAttenuation.x + lDistance * lAttenuation.y + ( lDistance * lDistance ) * lAttenuation.z );
+        if ( a <= 0.1 ) {
+            // early cut
+            continue;
+        }
 
-		// spotlight
-		float theta = dot( L, normalize( -lDirection ) );
-		float epsilon = lInnerCutOff - lOuterCutOff;
-		float intensity = clamp( ( theta - lOuterCutOff ) / epsilon, 0.0, 1.0 );
-		CD *= intensity;
-		CS *= intensity;
+        float dNL = dot( N, L );
+        if ( dNL <= 0.0 ) {
+            // early cut
+            continue;
+        }
 
-		// attenuation
-		float a = 1.0 / ( lAttenuation.x + lDistance * lAttenuation.y + ( lDistance * lDistance ) * lAttenuation.z );
-		CA *= a;
-		CD *= a;
-		CS *= a;
-		
         // shadow
+        float shadow = 0.0;
         if ( uSpotLights[ i ].hasShadowMap ) {
-            float shadow = calcDirectionalShadow(
+            shadow = calcDirectionalShadow(
                 uSpotLights[ i ].lightSpaceMatrix,
                 P,
                 N,
@@ -224,9 +221,30 @@ vec3 calcPhongSpotLighting( vec3 P, vec3 N, vec3 E, vec3 MA, vec3 MD, vec3 MS, f
                 uSpotLights[ i ].shadowMinMaxBias,
                 uShadowAtlas
             );
-            CD *= ( 1.0 - shadow );
-            CS *= ( 1.0 - shadow );
         }
+
+        if ( shadow == 1.0 ) {
+            // early cut
+            continue;
+        }
+
+        vec3 CA = lAmbient;
+        vec3 CD = lDiffuse * max( 0.0, dNL );
+        vec3 CS = lDiffuse * pow( max( dot( N, H ), 0.0 ), MSh );
+
+        CA *= a;
+        CD *= a;
+        CS *= a;
+
+        CD *= ( 1.0 - shadow );
+        CS *= ( 1.0 - shadow );
+
+        // spotlight
+        float theta = dot( L, normalize( -lDirection ) );
+        float epsilon = lInnerCutOff - lOuterCutOff;
+        float intensity = clamp( ( theta - lOuterCutOff ) / epsilon, 0.0, 1.0 );
+        CD *= intensity;
+        CS *= intensity;
 
 		accumAmbient += CA;
 		accumDiffuse += CD;
