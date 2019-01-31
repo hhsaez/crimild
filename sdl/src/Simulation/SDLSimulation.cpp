@@ -70,7 +70,10 @@ SDLSimulation::SDLSimulation( std::string name, SettingsPtr const &settings )
 
 	if ( JobScheduler::getInstance()->getNumWorkers() == 0 ) {
 		// enable some threads if not already specified
-		JobScheduler::getInstance()->configure( 4 );
+        if ( settings != nullptr ) {
+            auto workerCount = settings->get< crimild::Int32 >( "simulation.threading.workers", 0 );
+            JobScheduler::getInstance()->configure( workerCount );
+        }
 	}
 
 #ifdef CRIMILD_ENABLE_SCRIPTING

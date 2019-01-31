@@ -65,6 +65,10 @@ void simulation_step( void )
 
 #endif
 
+#ifndef CRIMILD_SIMULATION_FORCE_SLEEP_ON_UPDATE
+#define CRIMILD_SIMULATION_FORCE_SLEEP_ON_UPDATE 1
+#endif
+
 Simulation::Simulation( std::string name, SettingsPtr const &settings )
 	: NamedObject( name ),
       _settings( settings )
@@ -132,6 +136,12 @@ void Simulation::start( void )
 
 bool Simulation::update( void )
 {
+#if CRIMILD_SIMULATION_FORCE_SLEEP_ON_UPDATE
+    constexpr auto MIN_FRAME_TIME = std::chrono::milliseconds( 16 );
+    using clock = std::chrono::high_resolution_clock;
+    auto frameStartTime = clock::now();
+#endif
+
     auto scene = getScene();
 
 	if ( scene != nullptr && Camera::getMainCamera() == nullptr ) {
@@ -151,7 +161,21 @@ bool Simulation::update( void )
     
     broadcastMessage( messaging::SimulationDidUpdate { scene } );
     
-	return _jobScheduler.isRunning();
+    if ( !_jobScheduler.isRunning() ) {
+        return false;
+    }
+
+#if CRIMILD_SIMULATION_FORCE_SLEEP_ON_UPDATE
+    auto frameEndTime = clock::now();
+    auto delta = frameEndTime - frameStartTime;
+    auto t = std::max(
+      1ll,
+      ( MIN_FRAME_TIME - std::chrono::duration_cast< std::chrono::nanoseconds>( delta ) ).count()
+      );
+    std::this_thread::sleep_for( std::chrono::nanoseconds( t ) );
+#endif
+
+    return true;
 }
 
 void Simulation::stop( void )
@@ -177,6 +201,7 @@ int Simulation::run( void )
 
 #if !defined( CRIMILD_PLATFORM_EMSCRIPTEN )
     bool done = false;
+
     while ( !done ) {
         done = !update();
     }
