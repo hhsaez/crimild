@@ -225,7 +225,7 @@ bool SDLEventSystem::start( void )
 void SDLEventSystem::update( void )
 {
     CRIMILD_PROFILE( "Update Input" )
-
+	
 	SDL_Event event;
 	while ( SDL_PollEvent( &event ) ) {
 		switch( event.type ) {

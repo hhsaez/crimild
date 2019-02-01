@@ -255,6 +255,7 @@ namespace crimild {
 		const Vector2f &getMouseDelta( void ) const { return _mouseDelta; }
 		const Vector2f &getNormalizedMousePosition( void ) const { return _normalizedMousePos; }
 		const Vector2f &getNormalizedMouseDelta( void ) const { return _normalizedMouseDelta; }
+        const Vector2f &getMouseScrollDelta( void ) const { return _mouseScrollDelta; }
 
         MouseCursorMode getMouseCursorMode( void ) const { return _mouseCursorMode; }
         void setMouseCursorMode( MouseCursorMode mode ) { _mouseCursorMode = mode; }
@@ -267,6 +268,7 @@ namespace crimild {
 		Vector2f _mouseDelta;
 		Vector2f _normalizedMousePos;
 		Vector2f _normalizedMouseDelta;
+        Vector2f _mouseScrollDelta;
 
 		MouseCursorMode _mouseCursorMode;
 
