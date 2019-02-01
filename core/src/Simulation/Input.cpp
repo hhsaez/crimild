@@ -69,6 +69,10 @@ Input::Input( void )
         self->_normalizedMousePos = npos;
 	});
 
+    registerMessageHandler< MouseScroll >( [ this ]( MouseScroll const &msg ) {
+        _mouseScrollDelta = Vector2f( msg.dx, msg.dy );
+    });
+
 	setAxis( AXIS_HORIZONTAL, 0.0f );
 	setAxis( AXIS_VERTICAL, 0.0f );
 }
@@ -94,6 +98,7 @@ void Input::reset( int keyCount, int mouseButtonCount )
 	_mouseDelta = Vector2f( 0.0f, 0.0f );
 	_normalizedMousePos = Vector2f( 0.0f, 0.0f );
 	_normalizedMouseDelta = Vector2f( 0.0f, 0.0f );
+    _mouseScrollDelta = Vector2f::ZERO;
 
 	_mouseButtons.resize( mouseButtonCount );
 	for ( int i = 0; i < mouseButtonCount; i++ ) {
