@@ -41,11 +41,25 @@ namespace crimild {
 		using ImageArray = containers::Array< SharedPointer< Image >>;
 		
 	public:
+		Skybox( void );
 		explicit Skybox( ImageArray const &faces );
 		virtual ~Skybox( void );
+
+		void configure( ImageArray const &faces );
         
     private:
 		ImageArray _faces;
+
+        /**
+		   \name Coding
+		*/
+        //@{
+		
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+
+        //@}
 	};
     
 }
