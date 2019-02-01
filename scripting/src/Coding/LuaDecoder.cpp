@@ -29,6 +29,7 @@
 
 #include <Foundation/ObjectFactory.hpp>
 #include <Coding/Codable.hpp>
+#include <Coding/FileDecoder.hpp>
 #include <Loaders/OBJLoader.hpp>
 #include <Simulation/FileSystem.hpp>
 #include <Simulation/AssetManager.hpp>
@@ -118,7 +119,16 @@ SharedPointer< SharedObject > LuaDecoder::buildObject( void )
 		if ( scene == nullptr ) {
 			SharedPointer< Group > tmp;
 			auto fullPath = FileSystem::getInstance().pathForResource( fileName );
-			if ( StringUtils::getFileExtension( fileName ) == "obj" ) {
+            auto fileExtension = StringUtils::getFileExtension( fullPath );
+            if ( fileExtension == "crimild" ) {
+                coding::FileDecoder decoder;
+                if ( decoder.read( fullPath ) ) {
+                    if ( decoder.getObjectCount() > 0 ) {
+                        tmp = decoder.getObjectAt< Group >( 0 );
+                    }
+                }
+            }
+			else if ( fileExtension == "obj" ) {
 				OBJLoader loader( fullPath );
 				tmp = loader.load();
 			}
