@@ -266,6 +266,7 @@
 #include "Rendering/RenderGraph/Passes/SkyboxPass.hpp"
 #include "Rendering/RenderGraph/Passes/ShadowPass.hpp"
 #include "Rendering/RenderGraph/Passes/TextureColorPass.hpp"
+#include "Rendering/RenderGraph/Passes/GizmosPass.hpp"
 
 #include "Rendering/Programs/UnlitShaderProgram.hpp"
 #include "Rendering/Programs/VertexColorShaderProgram.hpp"
