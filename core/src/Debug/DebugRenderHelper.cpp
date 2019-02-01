@@ -54,7 +54,6 @@ void DebugRenderHelper::renderLines( Renderer *renderer, Camera *camera, const V
 {
     auto depthState = AssetManager::getInstance()->get< DepthState >( CRIMILD_DEBUG_RENDER_HELPER_DEPTH_STATE );
     auto alphaState = AssetManager::getInstance()->get< AlphaState >( CRIMILD_DEBUG_RENDER_HELPER_ALPHA_STATE );
-    auto linesVBO = AssetManager::getInstance()->get< VertexBufferObject >( CRIMILD_DEBUG_RENDER_HELPER_VBO_LINES );
     
     auto program = renderer->getShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_DIFFUSE );
 	if ( program == nullptr ) {
@@ -78,20 +77,21 @@ void DebugRenderHelper::renderLines( Renderer *renderer, Camera *camera, const V
 	alphaState->setEnabled( color[ 3 ] < 1.0f );
 	renderer->setAlphaState( alphaState );
 
-	if ( linesVBO->getVertexCount() < count ) {
-        auto vbo = crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3, count, ( const float * ) &data[ 0 ] );
-        AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_HELPER_VBO_LINES, vbo );
-        linesVBO = crimild::get_ptr( vbo );
-	}
-	else {
-		for ( int i = 0; i < count; i++ ) {
-			linesVBO->setPositionAt( i, data[ i ] );
-		}
-	}
+    auto vbo = crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3, count );
+    auto ibo = crimild::alloc< IndexBufferObject >( count );
+    for ( int i = 0; i < count; i++ ) {
+        vbo->setPositionAt( i, data[ i ] );
+        ibo->setIndexAt( i, i );
+    }
 
-	renderer->drawBuffers( program, Primitive::Type::LINES, linesVBO, count );
+    auto primitive = crimild::alloc< Primitive >( Primitive::Type::LINES );
+    primitive->setVertexBuffer( vbo );
+    primitive->setIndexBuffer( ibo );
 
-	linesVBO->unload();
+    auto p = crimild::get_ptr( primitive );
+    renderer->bindPrimitive( nullptr, p );
+    renderer->drawPrimitive( nullptr, p );
+    renderer->unbindPrimitive( nullptr, p );
 
 	renderer->unbindProgram( program );
 }
