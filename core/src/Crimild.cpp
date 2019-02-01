@@ -37,6 +37,7 @@ void crimild::init( void )
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Camera );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Light );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Text );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Skybox );
     
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Primitive );
 	

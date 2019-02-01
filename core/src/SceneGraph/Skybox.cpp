@@ -29,16 +29,35 @@
 
 #include "Rendering/IndexBufferObject.hpp"
 #include "Rendering/Texture.hpp"
+#include "Rendering/ImageTGA.hpp"
 #include "Rendering/Material.hpp"
 #include "Rendering/Programs/SkyboxShaderProgram.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Components/MaterialComponent.hpp"
+#include "Simulation/FileSystem.hpp"
 
 using namespace crimild;
+
+Skybox::Skybox( void )
+{
+	
+}
 
 Skybox::Skybox( ImageArray const &faces )
 	: _faces( faces )
 {
+
+}
+
+Skybox::~Skybox( void )
+{
+	
+}
+
+void Skybox::configure( Skybox::ImageArray const &images )
+{
+	_faces = images;
+	
 	float vertices[] = {
 		-1.0f,  1.0f, -1.0f,
 		-1.0f, -1.0f, -1.0f,
@@ -107,7 +126,22 @@ Skybox::Skybox( ImageArray const &faces )
 	setCullMode( Node::CullMode::NEVER );
 }
 
-Skybox::~Skybox( void )
+void Skybox::encode( coding::Encoder &encoder )
 {
-	
+	Geometry::encode( encoder );
 }
+
+void Skybox::decode( coding::Decoder &decoder )
+{
+	Geometry::decode( decoder );
+
+    containers::Array< std::string > images;
+	decoder.decode( "images", images );
+
+	ImageArray faces;
+	images.each( [ &faces ]( std::string fileName ) {
+        faces.add( crimild::alloc< ImageTGA >( FileSystem::getInstance().pathForResource( fileName ) ) );
+	});
+	configure( faces );
+}
+
