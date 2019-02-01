@@ -612,8 +612,6 @@ std::string OpenGLShaderGraph::generateShaderSource( containers::Array< ShaderGr
 	});
 	ss << "\n}\n";
 
-	std:: cout << ss.str() << std::endl;
-	
 	return ss.str();
 }
 

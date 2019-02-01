@@ -147,6 +147,12 @@ void JobScheduler::schedule( JobPtr const &job )
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot schedule new jobs since the scheduler is not running" );
         return;
     }
+
+    if ( getNumWorkers() == 0 ) {
+        // no workers. execute it
+        execute( job );
+        return;
+    }
     
 	auto queue = getWorkerJobQueue();
 	queue->push( job );
@@ -225,7 +231,7 @@ void JobScheduler::executeDelayedJobs( void )
 {
     // Schedule async jobs first since we don't need to wait for them
     // Flush lists afterwards
-    
+
     _delayedAsyncJobs.each( [this]( JobPtr const &j ) {
         schedule( j );
     }, true );
