@@ -73,6 +73,7 @@ namespace crimild {
 
 			private:
 				void render( Renderer *renderer, RenderQueue *renderQueue, RenderQueue::RenderableType renderableType );
+				void renderCustom( Renderer *renderer, RenderQueue *renderQueue, RenderQueue::RenderableType renderableType );
 			
 			private:
 				RenderableTypeArray _renderableTypes;
