@@ -169,7 +169,7 @@ namespace crimild {
 				// implement a policy to traverse the array by creating a copy if needed
 				crimild::Size i = 0;
 				for ( auto e : _list ) {
-					callback( e, i );
+					callback( e, i++ );
 				}
 			}
 
@@ -180,7 +180,7 @@ namespace crimild {
 				// implement a policy to traverse the array by creating a copy if needed
 				crimild::Size i = 0;
 				for ( auto e : _list ) {
-					callback( e, i );
+					callback( e, i++ );
 				}
 			}
 
