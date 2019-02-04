@@ -29,8 +29,10 @@
 
 #include "Simulation/Simulation.hpp"
 #include "Simulation/FileSystem.hpp"
- 
 #include "Concurrency/Async.hpp"
+#include "Visitors/UpdateWorldState.hpp"
+#include "Visitors/UpdateRenderState.hpp"
+#include "Visitors/StartComponents.hpp"
 
 using namespace crimild;
 
@@ -90,7 +92,45 @@ void StreamingSystem::onLoadScene( messaging::LoadScene const &message )
 
 void StreamingSystem::onAppendScene( messaging::AppendScene const &message )
 {
-    // TODO
+    auto fileName = message.fileName;
+    auto fileType = StringUtils::getFileExtension( fileName );
+    auto onLoadSceneCallback = message.onLoadSceneCallback;
+
+    if ( !_builders.contains( fileType ) ) {
+        std::string message = "Cannot find builder for file" + fileName;
+        crimild::Log::error( CRIMILD_CURRENT_CLASS_NAME, message );
+        broadcastMessage( messaging::SceneLoadFailed { fileName, message } );
+        return;
+    }
+
+    auto builder = _builders[ fileType ];
+
+    crimild::concurrency::async_frame( [ builder, fileName, onLoadSceneCallback ] {
+        auto scene = builder( fileName );
+        if ( scene == nullptr ) {
+            std::string message = "Cannot load scene from file: " + fileName;
+            crimild::Log::error( CRIMILD_CURRENT_CLASS_NAME, message );
+            MessageQueue::getInstance()->broadcastMessage( messaging::SceneLoadFailed { fileName, message } );
+            return;
+        }
+        
+        crimild::concurrency::sync_frame( [ scene, onLoadSceneCallback ] {
+            auto parentNode = static_cast< Group * >( Simulation::getInstance()->getScene() );
+
+			parentNode->attachNode( scene );
+
+			scene->perform( UpdateWorldState() );
+			scene->perform( UpdateRenderState() );
+			scene->perform( StartComponents() );
+			// update state one more time after starting components
+			scene->perform( UpdateWorldState() );
+			scene->perform( UpdateRenderState() );
+
+            if ( onLoadSceneCallback != nullptr ) {
+                onLoadSceneCallback( crimild::get_ptr( scene ) );
+            }
+        });
+    });
 }
 
 void StreamingSystem::onReloadScene( messaging::ReloadScene const &message )
