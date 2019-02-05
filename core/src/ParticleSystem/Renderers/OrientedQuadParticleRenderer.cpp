@@ -44,7 +44,7 @@ OrientedQuadParticleRenderer::OrientedQuadParticleRenderer( void )
 	// create the material here so it can be modified later
 	_material = crimild::alloc< Material >();
 
-    _material->setProgram( crimild::alloc< UnlitShaderProgram >() );
+    _material->setProgram( AssetManager::getInstance()->get< UnlitShaderProgram >() );
 }
 
 OrientedQuadParticleRenderer::~OrientedQuadParticleRenderer( void )
@@ -159,7 +159,7 @@ void OrientedQuadParticleRenderer::decode( coding::Decoder &decoder )
 		_material = crimild::alloc< Material >();
 	}
 	
-    _material->setProgram( crimild::alloc< UnlitShaderProgram >() );
+    _material->setProgram( AssetManager::getInstance()->get< UnlitShaderProgram >() );
 
     std::string blendMode;
     decoder.decode( "blendMode", blendMode );
