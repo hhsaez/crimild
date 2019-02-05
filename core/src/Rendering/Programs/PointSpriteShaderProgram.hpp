@@ -33,6 +33,8 @@
 namespace crimild {
 
 	class PointSpriteShaderProgram : public ShaderProgram {
+        CRIMILD_IMPLEMENT_RTTI( crimild::PointSpriteShaderProgram )
+
 	public:
 		PointSpriteShaderProgram( void );
 		virtual ~PointSpriteShaderProgram( void );

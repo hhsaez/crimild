@@ -59,8 +59,6 @@ void PointSpriteShaderProgram::createVertexShader( void )
 	csl::vertexPointSize( csl::vec_x( UV ) );
 
 	buildVertexShader( graph );
-
-	std::cout << getVertexShader()->getSource() << std::endl;
 }
 
 void PointSpriteShaderProgram::createFragmentShader( void )
@@ -83,7 +81,5 @@ void PointSpriteShaderProgram::createFragmentShader( void )
 	master->setTextureCoords( UV );
 
 	buildFragmentShader( graph );
-
-	std::cout << getFragmentShader()->getSource() << std::endl;
 }
 
