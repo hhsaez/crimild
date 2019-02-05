@@ -33,6 +33,8 @@
 namespace crimild {
 
 	class UnlitShaderProgram : public ShaderProgram {
+        CRIMILD_IMPLEMENT_RTTI( crimild::UnlitShaderProgram )
+
 	public:
 		UnlitShaderProgram( void );
 		virtual ~UnlitShaderProgram( void );

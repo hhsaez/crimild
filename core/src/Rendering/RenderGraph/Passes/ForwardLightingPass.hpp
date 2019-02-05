@@ -72,9 +72,9 @@ namespace crimild {
 				virtual void execute( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue ) override;
 
 			private:
-				void render( Renderer *renderer, RenderQueue *renderQueue, RenderQueue::RenderableType renderableType );
-				void renderCustom( Renderer *renderer, RenderQueue *renderQueue, RenderQueue::RenderableType renderableType );
-			
+                void render( Renderer *renderer, RenderQueue *renderQueue, RenderQueue::RenderableType renderableType );
+                void render( Renderer *renderer, RenderQueue *renderQueue, ShaderProgram *program, containers::List< RenderQueue::Renderable * > &renderables );
+
 			private:
 				RenderableTypeArray _renderableTypes;
 				SharedPointer< ShaderProgram > _program;

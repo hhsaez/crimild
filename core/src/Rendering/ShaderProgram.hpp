@@ -35,6 +35,7 @@
 
 #include "Foundation/Containers/Array.hpp"
 #include "Foundation/Containers/Map.hpp"
+#include "Foundation/RTTI.hpp"
 #include "Mathematics/Vector.hpp"
 #include "Mathematics/Matrix.hpp"
 
@@ -55,7 +56,9 @@ namespace crimild {
 
 	}
     
-	class ShaderProgram : public SharedObject, public Catalog< ShaderProgram >::Resource {
+	class ShaderProgram : public SharedObject, public RTTI, public Catalog< ShaderProgram >::Resource {
+        CRIMILD_IMPLEMENT_RTTI( crimild::ShaderProgram )
+
 	private:
 		using UniformArray = containers::Array< SharedPointer< ShaderUniform >>;
 		using UniformMap = containers::Map< std::string, SharedPointer< ShaderUniform >>;
