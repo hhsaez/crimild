@@ -35,6 +35,7 @@
 namespace crimild {
 
 	class Node;
+    class Group;
 
 	namespace messaging {
 
@@ -44,7 +45,12 @@ namespace crimild {
 
 		struct AppendScene {
 			std::string fileName;
-			Node *parentNode;
+			Group *parentNode;
+
+			/**
+			   \remarks Called before starting components
+			 */
+			std::function< void( Node * ) > onLoadSceneCallback;
 		};
 
 		struct ReloadScene { };

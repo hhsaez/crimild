@@ -116,5 +116,9 @@ void Light::decode( coding::Decoder &decoder )
 	decoder.decode( "attenuation", _attenuation );
 	decoder.decode( "color", _color );
 	decoder.decode( "ambient", _ambient );
+
+	crimild::Bool shadows = false;
+	decoder.decode( "shadows", shadows );
+	setCastShadows( shadows );
 }
 
