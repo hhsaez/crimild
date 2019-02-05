@@ -59,24 +59,31 @@ void EulerParticleUpdater::update( Node *node, crimild::Real64 dt, ParticleData 
 	auto vs = _velocities->getData< Vector3f >();
 	auto ps = _positions->getData< Vector3f >();
 
+    crimild::Size itemsPerCacheLine = 64 / sizeof( crimild::Real32 );
+
 	// TODO: all the accelerations are the same value
 	// I think this could be optimized, but other
 	// updaters may need separated values
 	// Also, accelerations are handled in the same way
 	// regardless of the computation space (world or local)
-	for ( int i = 0; i < count; i++ ) {
-		as[ i ] += g;
+    for ( crimild::Size i = 0; i < count; i += itemsPerCacheLine ) {
+        for ( crimild::Size j = i; j < std::min( count, i + itemsPerCacheLine ); j++ ) {
+            as[ j ] += g;
+        }
 	}
 
 	// Velocities are handled in the same way
 	// regardless of the computation space (world or local)
-	for ( int i = 0; i < count; i++ ) {
-		vs[ i ] += dt * as[ i ];
+    for ( crimild::Size i = 0; i < count; i += itemsPerCacheLine ) {
+        for ( crimild::Size j = i; j < std::min( count, i + itemsPerCacheLine ); j++ ) {
+            vs[ j ] += dt * as[ j ];
+        }
 	}
 	
-	for ( int i = 0; i < count; i++ ) {
-		auto v = dt * vs[ i ];
-		ps[ i ] += v;
+    for ( crimild::Size i = 0; i < count; i += itemsPerCacheLine ) {
+        for ( crimild::Size j = i; j < std::min( count, i + itemsPerCacheLine ); j++ ) {
+            ps[ j ] += dt * vs[ j ];
+        }
 	}
 }
 
