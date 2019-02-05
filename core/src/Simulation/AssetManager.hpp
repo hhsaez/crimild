@@ -81,6 +81,24 @@ namespace crimild {
             return static_cast< T * >( crimild::get_ptr( asset ) );
         }
 
+        /**
+            \brief Get or create an asset
+
+            Uses RTTI to create a new instance if needed
+         */
+        template< class T >
+        T *get( void )
+        {
+            ScopedLock lock( _mutex );
+
+            auto name = T::__CLASS_NAME;
+            if ( _assets[ name ] == nullptr ) {
+                _assets[ name ] = crimild::alloc< T >();
+            }
+
+            return static_cast< T * >( crimild::get_ptr( _assets[ name ] ) );
+        }
+
         template< class T >
         SharedPointer< T > clone( std::string filename )
         {
@@ -105,6 +123,7 @@ namespace crimild {
         }
 
     private:
+        // TODO: replace with containers
         std::map< std::string, SharedPointer< SharedObject > > _assets;
         std::map< std::string, SharedPointer< SharedObject > > _persistentAssets;
         
