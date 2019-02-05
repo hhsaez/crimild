@@ -54,8 +54,10 @@
 #include "Rendering/ShaderGraph/Nodes/Convert.hpp"
 #include "Rendering/ShaderGraph/Nodes/TextureColor.hpp"
 #include "Rendering/ShaderGraph/Nodes/Reflect.hpp"
+#include "Rendering/ShaderGraph/Nodes/PointSize.hpp"
 #include "Rendering/ShaderGraph/Nodes/Refract.hpp"
 #include "Rendering/ShaderGraph/Nodes/FragmentCoordInput.hpp"
+#include "Rendering/ShaderGraph/Nodes/PointCoordInput.hpp"
 
 #include "Rendering/VertexFormat.hpp"
 #include "Rendering/ShaderUniformImpl.hpp"
@@ -603,6 +605,11 @@ void csl::vertexPosition( Variable *position )
 		);
 }
 
+void csl::vertexPointSize( Variable *pointSize )
+{
+	ShaderGraph::getCurrent()->addOutputNode< VertexPointSize >( pointSize );
+}
+
 void csl::vertexOutput( std::string name, Variable *value )
 {
 	ShaderGraph::getCurrent()
@@ -897,6 +904,11 @@ Variable *csl::textureUnitVector( Variable *texture, Variable *uvs )
 Variable *csl::fragCoord( void )
 {
 	return ShaderGraph::getCurrent()->addNode< FragmentCoordInput >()->getInput();
+}
+
+Variable *csl::pointCoord( void )
+{
+	return ShaderGraph::getCurrent()->addNode< PointCoordInput >()->getInput();
 }
 
 Variable *csl::projectionMatrix( void )

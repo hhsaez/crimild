@@ -92,7 +92,15 @@ void Texture::decode( coding::Decoder &decoder )
 {
 	Codable::decode( decoder );
 
+    _images.clear();
+
 	decoder.decode( "target", _target );
 	decoder.decode( "images", _images );
+
+    SharedPointer< Image > image;
+    decoder.decode( "image", image );
+    if ( image != nullptr ) {
+        _images.add( image );
+    }
 }
 

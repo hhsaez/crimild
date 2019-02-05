@@ -177,7 +177,7 @@ void ParticleSystemComponent::decode( coding::Decoder &decoder )
 	decoder.decode( "burst", _burst );
 
 	decoder.decode( "generators", _generators );
-	decoder.decode( "updaters", _updaters );
-	decoder.decode( "renderers", _renderers );
+    decoder.decode( "updaters", _updaters );
+    decoder.decode( "renderers", _renderers );
 }
 

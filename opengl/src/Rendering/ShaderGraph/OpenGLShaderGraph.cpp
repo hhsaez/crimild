@@ -55,7 +55,9 @@
 #include "Rendering/ShaderGraph/Nodes/Reflect.hpp"
 #include "Rendering/ShaderGraph/Nodes/Refract.hpp"
 #include "Rendering/ShaderGraph/Nodes/AlphaClip.hpp"
+#include "Rendering/ShaderGraph/Nodes/PointSize.hpp"
 #include "Rendering/ShaderGraph/Nodes/FragmentCoordInput.hpp"
+#include "Rendering/ShaderGraph/Nodes/PointCoordInput.hpp"
 #include "Rendering/ShaderGraph/Nodes/MeshVertexMaster.hpp"
 #include "Rendering/ShaderGraph/Nodes/PhongFragmentMaster.hpp"
 #include "Rendering/ShaderGraph/Nodes/UnlitFragmentMaster.hpp"
@@ -320,6 +322,16 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 		}
 	};
 
+	_translators[ VertexPointSize::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
+		auto pointSize = static_cast< VertexPointSize * >( node );
+
+		if ( auto var = pointSize->getPointSize() ) {
+			std::stringstream ss;
+			ss << "gl_PointSize = " << var->getName() << ";";
+			_mainSection.add( ss.str() );
+		}
+	};
+
 	_translators[ Negate::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
 		auto negate = static_cast< Negate * >( node );
 
@@ -441,6 +453,14 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 #ifndef CRIMILD_PLATFORM_EMSCRIPTEN
 		_inputsSection.add( "in vec4 gl_FragCoord;" );
 #endif
+	};
+
+	_translators[ PointCoordInput::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
+		auto pointCoord = static_cast< PointCoordInput * >( node );
+
+		std::stringstream ss;
+		ss << pointCoord->getInput()->getName() << " = gl_PointCoord;";
+		_mainSection.add( ss.str() );
 	};
 
 	_translators[ TextureColor::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {

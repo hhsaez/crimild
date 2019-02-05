@@ -132,6 +132,7 @@ namespace crimild {
 			//@}
 
 			void vertexPosition( Variable *position );
+			void vertexPointSize( Variable *pointSize );
 			void vertexOutput( std::string name, Variable *value );
 
 			/**
@@ -140,6 +141,7 @@ namespace crimild {
 			//@{
 
 			Variable *fragCoord( void );
+			Variable *pointCoord( void );
 
 			//@}
 

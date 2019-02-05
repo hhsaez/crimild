@@ -76,7 +76,7 @@ void Material::decode( coding::Decoder &decoder )
 	decoder.decode( "specular", _specular );
 	decoder.decode( "emissive", _emissive );
 	decoder.decode( "shininess", _shininess );
-	decoder.decode( "colorMap", _colorMap );
+    decoder.decode( "colorMap", _colorMap );
 	decoder.decode( "normalMap", _normalMap );
 	decoder.decode( "specularMap", _specularMap );
 	decoder.decode( "emissiveMap", _emissiveMap );
