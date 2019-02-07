@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernán Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,51 +25,42 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_COMPONENTS_UI_RESPONDER_
-#define CRIMILD_CORE_COMPONENTS_UI_RESPONDER_
+#ifndef CRIMILD_UI_LABEL_
+#define CRIMILD_UI_LABEL_
 
-#include "NodeComponent.hpp"
-
-#include "SceneGraph/Node.hpp"
-
-#include "Mathematics/Ray.hpp"
+#include "Components/NodeComponent.hpp"
 
 namespace crimild {
 
-	class BoundingVolume;
+	class Text;
+	
+	namespace ui {
 
-	class UIResponder : public NodeComponent {
-		CRIMILD_IMPLEMENT_RTTI( crimild::UIResponder )
+		class UIFrame;
 
-	private:
-		using CallbackType = std::function< bool( Node * ) >;
+		class UILabel : public NodeComponent {
+			CRIMILD_IMPLEMENT_RTTI( crimild::ui::UILabel )
 
-	public:
-		explicit UIResponder( CallbackType callback );
-		UIResponder( CallbackType callback, BoundingVolume *boundingVolume );
-		virtual ~UIResponder( void );
+		public:
+			UILabel( void );
+			UILabel( std::string text, const RGBAColorf &color = RGBAColorf::ONE );
+			virtual ~UILabel( void );
 
-		virtual void onAttach( void ) override;
-		virtual void onDetach( void ) override;
+			virtual void onAttach( void ) override;
+			virtual void start( void ) override;
+			virtual void update( const Clock & ) override;
 
-		virtual void start( void ) override;
+			void setText( std::string text );
 
-        BoundingVolume *getBoundingVolume( void );
-        void setBoundingVolume( SharedPointer< BoundingVolume > const &bv );
-        void setBoundingVolume( BoundingVolume *boundingVolume );
+		private:
+			UIFrame *_frame = nullptr;
+			SharedPointer< Text > _text = nullptr;
+		};
 
-		bool testIntersection( const Ray3f &ray );
-
-		bool invoke( void );
-
-		virtual void renderDebugInfo( Renderer *renderer, Camera *camera ) override;
-
-	private:
-		CallbackType _callback;
-        SharedPointer< BoundingVolume > _boundingVolume;
-	};
+	}
 
 }
 
 #endif
+
 

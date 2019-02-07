@@ -42,9 +42,7 @@ AnimatedSpriteParticleRenderer::AnimatedSpriteParticleRenderer( void )
 	// create the material here so it can be modified later
 	_material = crimild::alloc< Material >();
 
-//    auto program = crimild::retain( AssetManager::getInstance()->get< ShaderProgram >( Renderer::SHADER_PROGRAM_UNLIT_TEXTURE ) );
-    auto program = crimild::alloc< UnlitShaderProgram >();
-//    _material->setProgram( program );
+    _material->setProgram( AssetManager::getInstance()->get< UnlitShaderProgram >() );
 }
 
 AnimatedSpriteParticleRenderer::~AnimatedSpriteParticleRenderer( void )
@@ -181,7 +179,7 @@ void AnimatedSpriteParticleRenderer::decode( coding::Decoder &decoder )
 		_material = crimild::alloc< Material >();
 	}
 	
-    _material->setProgram( crimild::alloc< UnlitShaderProgram >() );
+    _material->setProgram( AssetManager::getInstance()->get< UnlitShaderProgram >() );
 
     std::string blendMode;
     decoder.decode( "blendMode", blendMode );

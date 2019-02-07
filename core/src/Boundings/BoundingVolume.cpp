@@ -39,3 +39,8 @@ BoundingVolume::~BoundingVolume( void )
 
 }
 
+void BoundingVolume::renderDebugInfo( Renderer *, Camera * )
+{
+
+}
+

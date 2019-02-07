@@ -39,7 +39,7 @@ PointSpriteParticleRenderer::PointSpriteParticleRenderer( void )
 	// create the material here so it can be modified later
 	_material = crimild::alloc< Material >();
 
-    _material->setProgram( crimild::alloc< PointSpriteShaderProgram >() );
+    _material->setProgram( AssetManager::getInstance()->get< PointSpriteShaderProgram >() );
 }
 
 PointSpriteParticleRenderer::~PointSpriteParticleRenderer( void )
@@ -128,8 +128,8 @@ void PointSpriteParticleRenderer::decode( coding::Decoder &decoder )
 		_material = crimild::alloc< Material >();
 	}
 	
-    _material->setProgram( crimild::alloc< PointSpriteShaderProgram >() );
-    
+    _material->setProgram( AssetManager::getInstance()->get< PointSpriteShaderProgram >() );
+
     std::string blendMode;
     decoder.decode( "blendMode", blendMode );
     if ( blendMode == "additive" ) {

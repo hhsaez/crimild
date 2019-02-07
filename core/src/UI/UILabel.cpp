@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernán Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,51 +25,61 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_COMPONENTS_UI_RESPONDER_
-#define CRIMILD_CORE_COMPONENTS_UI_RESPONDER_
+#include "UILabel.hpp"
+#include "UIFrame.hpp"
 
-#include "NodeComponent.hpp"
+#include "Components/UIResponder.hpp"
+#include "SceneGraph/Text.hpp"
+#include "Simulation/AssetManager.hpp"
+#include "Boundings/Box2DBoundingVolume.hpp"
 
-#include "SceneGraph/Node.hpp"
+using namespace crimild;
+using namespace crimild::ui;
 
-#include "Mathematics/Ray.hpp"
-
-namespace crimild {
-
-	class BoundingVolume;
-
-	class UIResponder : public NodeComponent {
-		CRIMILD_IMPLEMENT_RTTI( crimild::UIResponder )
-
-	private:
-		using CallbackType = std::function< bool( Node * ) >;
-
-	public:
-		explicit UIResponder( CallbackType callback );
-		UIResponder( CallbackType callback, BoundingVolume *boundingVolume );
-		virtual ~UIResponder( void );
-
-		virtual void onAttach( void ) override;
-		virtual void onDetach( void ) override;
-
-		virtual void start( void ) override;
-
-        BoundingVolume *getBoundingVolume( void );
-        void setBoundingVolume( SharedPointer< BoundingVolume > const &bv );
-        void setBoundingVolume( BoundingVolume *boundingVolume );
-
-		bool testIntersection( const Ray3f &ray );
-
-		bool invoke( void );
-
-		virtual void renderDebugInfo( Renderer *renderer, Camera *camera ) override;
-
-	private:
-		CallbackType _callback;
-        SharedPointer< BoundingVolume > _boundingVolume;
-	};
+UILabel::UILabel( void )
+	: UILabel( "Label" )
+{
 
 }
 
-#endif
+UILabel::UILabel( std::string str, const RGBAColorf &color )
+{
+    auto font = AssetManager::getInstance()->get< Font >( AssetManager::FONT_DEFAULT );
+	
+    _text = crimild::alloc< Text >();
+    _text->setFont( font );
+    _text->setSize( 1.0f );
+    _text->setText( str );
+    _text->setTextColor( color );
+}
+
+UILabel::~UILabel( void )
+{
+	
+}
+
+void UILabel::onAttach( void )
+{
+	getNode< Group >()->attachNode( _text );
+}
+
+void UILabel::start( void )
+{
+    _frame = getComponent< UIFrame >();
+}
+
+void UILabel::update( const Clock & )
+{
+    const auto &rect = _frame->getExtensions();
+	auto w = rect.getWidth();
+	auto h = rect.getHeight();
+
+    _text->local().setTranslate( -0.5f * w, -0.5f * h, 0.5f );
+    _text->local().setScale( h );
+}
+
+void UILabel::setText( std::string text )
+{
+	_text->setText( text );
+}
 

@@ -32,8 +32,10 @@
 #include "Primitives/QuadPrimitive.hpp"
 #include "Rendering/DepthState.hpp"
 #include "Rendering/Material.hpp"
+#include "Rendering/Programs/UnlitShaderProgram.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Group.hpp"
+#include "Simulation/AssetManager.hpp"
 
 using namespace crimild;
 using namespace crimild::ui;
@@ -46,6 +48,7 @@ UIBackground::UIBackground( const RGBAColorf &color )
 	auto m = crimild::alloc< Material >();
 	m->setDiffuse( color );
 	m->setDepthState( DepthState::DISABLED );
+    m->setProgram( AssetManager::getInstance()->get< UnlitShaderProgram >() );
 	_geometry->getComponent< MaterialComponent >()->attachMaterial( m );
 }
 
@@ -68,7 +71,7 @@ void UIBackground::update( const Clock & )
 	if ( _knownExtensions.getWidth() != w ||
 	_knownExtensions.getHeight() != h ) {
 		_geometry->detachAllPrimitives();
-		_geometry->attachPrimitive( crimild::alloc< QuadPrimitive >( w, h ) );
+        _geometry->attachPrimitive( crimild::alloc< QuadPrimitive >( w, h, VertexFormat::VF_P3_UV2 ) );
 		
 		_knownExtensions = frame;
 	}

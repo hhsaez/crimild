@@ -31,6 +31,7 @@
 
 #include "Rendering/ImageTGA.hpp"
 #include "Rendering/Renderer.hpp"
+#include "Rendering/Programs/UnlitShaderProgram.hpp"
 
 #include "Foundation/Log.hpp"
 
@@ -151,17 +152,20 @@ void Text::setFont( SharedPointer< Font > const &font )
 
 	_font = font;
 
-	auto sdfProgram = AssetManager::getInstance()->get< ShaderProgram >( Renderer::SHADER_PROGRAM_TEXT_SDF );
-	if ( sdfProgram != nullptr ) {
-		// SDF Supported
-		_material->setColorMap( _font->getSDFTexture() );
-		_material->setProgram( sdfProgram );
-	}
-	else {
-		// SDF not supported by renderer
-		_material->setColorMap( _font->getTexture() );
-		_material->setProgram( AssetManager::getInstance()->get< ShaderProgram >( Renderer::SHADER_PROGRAM_TEXT_BASIC ) );
-	}
+//    auto sdfProgram = AssetManager::getInstance()->get< ShaderProgram >( Renderer::SHADER_PROGRAM_TEXT_SDF );
+//    if ( false && sdfProgram != nullptr ) {
+//        // SDF Supported
+//        _material->setColorMap( _font->getSDFTexture() );
+//        _material->setProgram( sdfProgram );
+//    }
+//    else {
+//        // SDF not supported by renderer
+//        _material->setColorMap( _font->getSDFTexture() );
+//        _material->setProgram( AssetManager::getInstance()->get< ShaderProgram >( Renderer::SHADER_PROGRAM_TEXT_BASIC ) );
+//    }
+
+    _material->setColorMap( _font->getTexture() );
+    _material->setProgram( AssetManager::getInstance()->get< UnlitShaderProgram >() );
 
 	_material->getAlphaState()->setEnabled( true );
     

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernán Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,51 +25,51 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_COMPONENTS_UI_RESPONDER_
-#define CRIMILD_CORE_COMPONENTS_UI_RESPONDER_
+#include "UIButton.hpp"
+#include "UIFrame.hpp"
 
-#include "NodeComponent.hpp"
-
+#include "Components/UIResponder.hpp"
 #include "SceneGraph/Node.hpp"
+#include "Boundings/Box2DBoundingVolume.hpp"
 
-#include "Mathematics/Ray.hpp"
+using namespace crimild;
+using namespace crimild::ui;
 
-namespace crimild {
-
-	class BoundingVolume;
-
-	class UIResponder : public NodeComponent {
-		CRIMILD_IMPLEMENT_RTTI( crimild::UIResponder )
-
-	private:
-		using CallbackType = std::function< bool( Node * ) >;
-
-	public:
-		explicit UIResponder( CallbackType callback );
-		UIResponder( CallbackType callback, BoundingVolume *boundingVolume );
-		virtual ~UIResponder( void );
-
-		virtual void onAttach( void ) override;
-		virtual void onDetach( void ) override;
-
-		virtual void start( void ) override;
-
-        BoundingVolume *getBoundingVolume( void );
-        void setBoundingVolume( SharedPointer< BoundingVolume > const &bv );
-        void setBoundingVolume( BoundingVolume *boundingVolume );
-
-		bool testIntersection( const Ray3f &ray );
-
-		bool invoke( void );
-
-		virtual void renderDebugInfo( Renderer *renderer, Camera *camera ) override;
-
-	private:
-		CallbackType _callback;
-        SharedPointer< BoundingVolume > _boundingVolume;
-	};
+UIButton::UIButton( void )
+{
 
 }
 
-#endif
+UIButton::UIButton( UIButton::Callback const &callback )
+	: _callback( callback )
+{
+
+}
+
+UIButton::~UIButton( void )
+{
+	
+}
+
+void UIButton::onAttach( void )
+{
+    _node = getNode();
+	_node->attachComponent< UIResponder >( _callback );
+    _node->setLocalBound( crimild::alloc< Box2DBoundingVolume >() );
+    _node->setWorldBound( crimild::alloc< Box2DBoundingVolume >() );
+}
+
+void UIButton::start( void )
+{
+	_frame = getComponent< UIFrame >();
+}
+
+void UIButton::update( const Clock & )
+{
+    const auto &rect = _frame->getExtensions();
+	auto w = rect.getWidth();
+	auto h = rect.getHeight();
+
+    _node->setLocalBound( crimild::alloc< Box2DBoundingVolume >( 0.5f * w, 0.5f * h ) );
+}
 
