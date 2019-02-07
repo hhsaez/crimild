@@ -55,6 +55,7 @@ namespace crimild {
 		virtual void start( void ) override;
 
         BoundingVolume *getBoundingVolume( void );
+        void setBoundingVolume( SharedPointer< BoundingVolume > const &bv );
         void setBoundingVolume( BoundingVolume *boundingVolume );
 
 		bool testIntersection( const Ray3f &ray );
