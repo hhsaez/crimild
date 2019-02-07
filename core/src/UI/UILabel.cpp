@@ -74,7 +74,7 @@ void UILabel::update( const Clock & )
 	auto w = rect.getWidth();
 	auto h = rect.getHeight();
 
-    _text->local().setTranslate( -0.5f * w, -0.5f * h, 0.0f );
+    _text->local().setTranslate( -0.5f * w, -0.5f * h, 0.5f );
     _text->local().setScale( h );
 }
 

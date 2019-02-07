@@ -62,11 +62,13 @@ void UICanvas::update( const Clock & )
 	
 	if ( getRenderSpace() == RenderSpace::CAMERA ) {
         if ( auto camera = Camera::getMainCamera() ) {
+            // TODO: this isn't perfect, but it's good enough
             auto cWorld = camera->getWorld();
             auto t = Transformation();
             auto size = Numericf::max( _size.x(), _size.y() );
+            auto aspect = camera->computeAspect();
             t.setScale( 1.0f / size );
-            t.setTranslate( 0.0f, 0.0f, -1.0f );
+            t.setTranslate( 0.0f, 0.0f, -0.5f * aspect );
             node->world().computeFrom( cWorld, t );
             node->setWorldIsCurrent( true );
         }
