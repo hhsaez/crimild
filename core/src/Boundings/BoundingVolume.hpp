@@ -38,6 +38,9 @@
 #include "Rendering/VertexBufferObject.hpp"
 
 namespace crimild {
+
+	class Renderer;
+	class Camera;
     
 	class BoundingVolume : public SharedObject {
 	protected:
@@ -61,6 +64,21 @@ namespace crimild {
 	private:
 		Vector3f _min;
 		Vector3f _max;
+
+	public:
+		void setRAxis( const Vector3f &r ) { _r = r; }
+		const Vector3f &getRAxis( void ) const { return _r; }
+
+		void setSAxis( const Vector3f &s ) { _s = s; }
+		const Vector3f &getSAxis( void ) const { return _s; }
+
+		void setTAxis( const Vector3f &t ) { _t = t; }
+		const Vector3f &getTAxis( void ) const { return _t; }
+
+	private:
+		Vector3f _r;
+		Vector3f _s;
+		Vector3f _t;
 
 	public:
 		virtual void computeFrom( const BoundingVolume *volume ) = 0;
@@ -88,8 +106,18 @@ namespace crimild {
 		virtual void resolveIntersection( const BoundingVolume *other, Transformation &result ) const = 0;
 		virtual void resolveIntersection( const Sphere3f &sphere, Transformation &result ) const = 0;
 		virtual void resolveIntersection( const Plane3f &plane, Transformation &result ) const = 0;
+
+		/*
+		  \name Debug
+		 */
+		//@{
+		
+	public:
+		virtual void renderDebugInfo( Renderer *, Camera * );
+
+		//@}
 	};
-    
+
 }
 
 #endif

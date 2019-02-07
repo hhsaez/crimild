@@ -29,6 +29,8 @@
 #include "UIFrame.hpp"
 
 #include "SceneGraph/Group.hpp"
+#include "SceneGraph/Camera.hpp"
+#include "Visitors/UpdateWorldState.hpp"
 
 using namespace crimild;
 using namespace crimild::ui;
@@ -55,9 +57,19 @@ void UICanvas::onAttach( void )
 
 void UICanvas::update( const Clock & )
 {
-	auto size = Numericf::min( _size.x(), _size.y() );
-	auto scale = 2.0f / size;
+	auto node = getNode();
+	node->setWorldIsCurrent( false );
 	
-	getNode()->local().setScale( scale );
+	if ( getRenderSpace() == RenderSpace::CAMERA ) {
+        if ( auto camera = Camera::getMainCamera() ) {
+            auto cWorld = camera->getWorld();
+            auto t = Transformation();
+            auto size = Numericf::max( _size.x(), _size.y() );
+            t.setScale( 1.0f / size );
+            t.setTranslate( 0.0f, 0.0f, -1.0f );
+            node->world().computeFrom( cWorld, t );
+            node->setWorldIsCurrent( true );
+        }
+    }
 }
 

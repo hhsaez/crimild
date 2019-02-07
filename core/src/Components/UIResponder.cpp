@@ -79,6 +79,10 @@ void UIResponder::setBoundingVolume( crimild::BoundingVolume *boundingVolume )
     _boundingVolume = crimild::retain( boundingVolume );
 }
 
+void UIResponder::setBoundingVolume( const SharedPointer<BoundingVolume> &volume )
+{
+    _boundingVolume = volume;
+}
 
 bool UIResponder::testIntersection( const Ray3f &ray )
 {
@@ -100,8 +104,11 @@ bool UIResponder::invoke( void )
 
 void UIResponder::renderDebugInfo( Renderer *renderer, Camera *camera )
 {
-    auto bounds = getBoundingVolume();
-	
+    if ( auto bounds = getBoundingVolume() ) {
+        bounds->renderDebugInfo( renderer, camera );
+    }
+
+    /*
 	const Vector3f &c = bounds->getCenter();
 	auto min = bounds->getMin();
 	auto max = bounds->getMax();
@@ -124,5 +131,6 @@ void UIResponder::renderDebugInfo( Renderer *renderer, Camera *camera )
 	};
 
 	DebugRenderHelper::renderLines( renderer, camera, lines, 12 * 2, RGBAColorf( 1.0f, 1.0f, 0.0f, 1.0f ) );
+     */
 }
 

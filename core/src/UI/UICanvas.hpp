@@ -36,6 +36,12 @@ namespace crimild {
 
 		class UICanvas : public NodeComponent {
 			CRIMILD_IMPLEMENT_RTTI( crimild::ui::UICanvas )
+
+		public:
+			enum class RenderSpace {
+				WORLD,
+				CAMERA,
+			};
 			
 		public:
 			UICanvas( crimild::Int32 width, crimild::Int32 height );
@@ -45,8 +51,12 @@ namespace crimild {
 			
 			virtual void update( const Clock & ) override;
 
+			void setRenderSpace( RenderSpace value ) { _renderSpace = value; }
+			RenderSpace getRenderSpace( void ) const { return _renderSpace; }
+
 		private:
 			Vector2i _size;
+			RenderSpace _renderSpace = RenderSpace::CAMERA;
 		};
 
 	}
