@@ -30,6 +30,7 @@
 #include "UIFrameConstraintMaker.hpp"
 
 #include "SceneGraph/Node.hpp"
+#include "SceneGraph/Group.hpp"
 
 using namespace crimild;
 using namespace crimild::ui;
