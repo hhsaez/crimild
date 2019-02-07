@@ -25,55 +25,42 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "UIBackground.hpp"
-#include "UIFrame.hpp"
+#ifndef CRIMILD_UI_LABEL_
+#define CRIMILD_UI_LABEL_
 
-#include "Components/MaterialComponent.hpp"
-#include "Primitives/QuadPrimitive.hpp"
-#include "Rendering/DepthState.hpp"
-#include "Rendering/Material.hpp"
-#include "Rendering/Programs/UnlitShaderProgram.hpp"
-#include "SceneGraph/Geometry.hpp"
-#include "SceneGraph/Group.hpp"
-#include "Simulation/AssetManager.hpp"
+#include "Components/NodeComponent.hpp"
 
-using namespace crimild;
-using namespace crimild::ui;
+namespace crimild {
 
-UIBackground::UIBackground( const RGBAColorf &color )
-	: _knownExtensions( 0, 0, 0, 0 )
-{
-	_geometry = crimild::alloc< Geometry >();
+	class Text;
 	
-	auto m = crimild::alloc< Material >();
-	m->setDiffuse( color );
-	m->setDepthState( DepthState::DISABLED );
-    m->setProgram( AssetManager::getInstance()->get< UnlitShaderProgram >() );
-	_geometry->getComponent< MaterialComponent >()->attachMaterial( m );
-}
+	namespace ui {
 
-UIBackground::~UIBackground( void )
-{
-	
-}
+		class UIFrame;
 
-void UIBackground::onAttach( void )
-{
-	getNode< Group >()->attachNode( _geometry );
-}
+		class UILabel : public NodeComponent {
+			CRIMILD_IMPLEMENT_RTTI( crimild::ui::UILabel )
 
-void UIBackground::update( const Clock & )
-{
-	auto frame = getComponent< UIFrame >()->getExtensions();
-	auto w = frame.getWidth();
-	auto h = frame.getHeight();
-	
-	if ( _knownExtensions.getWidth() != w ||
-	_knownExtensions.getHeight() != h ) {
-		_geometry->detachAllPrimitives();
-        _geometry->attachPrimitive( crimild::alloc< QuadPrimitive >( w, h, VertexFormat::VF_P3_UV2 ) );
-		
-		_knownExtensions = frame;
+		public:
+			UILabel( void );
+			UILabel( std::string text, const RGBAColorf &color = RGBAColorf::ONE );
+			virtual ~UILabel( void );
+
+			virtual void onAttach( void ) override;
+			virtual void start( void ) override;
+			virtual void update( const Clock & ) override;
+
+			void setText( std::string text );
+
+		private:
+			UIFrame *_frame = nullptr;
+			SharedPointer< Text > _text = nullptr;
+		};
+
 	}
+
 }
+
+#endif
+
 
