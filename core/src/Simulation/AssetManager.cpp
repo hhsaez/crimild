@@ -27,6 +27,8 @@
 
 #include "AssetManager.hpp"
 #include "FileSystem.hpp"
+#include "Settings.hpp"
+#include "Simulation.hpp"
 
 #include "Foundation/StringUtils.hpp"
 #include "Rendering/Texture.hpp"
@@ -36,7 +38,19 @@ using namespace crimild;
 
 AssetManager::AssetManager( void )
 {
+    if ( auto sim = Simulation::getInstance() ) {
+        if ( auto settings = sim->getSettings() ) {
+            auto defaultFont = settings->get< std::string >( "fonts.default", "" );
+            if ( defaultFont != "" ) {
+                loadFont( FONT_DEFAULT, defaultFont );
+            }
 
+            auto systemFont = settings->get< std::string >( "fonts.system", "" );
+            if ( systemFont != "" ) {
+                loadFont( FONT_SYSTEM, systemFont );
+            }
+        }
+    }
 }
 
 AssetManager::~AssetManager( void )

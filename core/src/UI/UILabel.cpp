@@ -25,55 +25,61 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "UIBackground.hpp"
+#include "UILabel.hpp"
 #include "UIFrame.hpp"
 
-#include "Components/MaterialComponent.hpp"
-#include "Primitives/QuadPrimitive.hpp"
-#include "Rendering/DepthState.hpp"
-#include "Rendering/Material.hpp"
-#include "Rendering/Programs/UnlitShaderProgram.hpp"
-#include "SceneGraph/Geometry.hpp"
-#include "SceneGraph/Group.hpp"
+#include "Components/UIResponder.hpp"
+#include "SceneGraph/Text.hpp"
 #include "Simulation/AssetManager.hpp"
+#include "Boundings/Box2DBoundingVolume.hpp"
 
 using namespace crimild;
 using namespace crimild::ui;
 
-UIBackground::UIBackground( const RGBAColorf &color )
-	: _knownExtensions( 0, 0, 0, 0 )
+UILabel::UILabel( void )
+	: UILabel( "Label" )
 {
-	_geometry = crimild::alloc< Geometry >();
-	
-	auto m = crimild::alloc< Material >();
-	m->setDiffuse( color );
-	m->setDepthState( DepthState::DISABLED );
-    m->setProgram( AssetManager::getInstance()->get< UnlitShaderProgram >() );
-	_geometry->getComponent< MaterialComponent >()->attachMaterial( m );
+
 }
 
-UIBackground::~UIBackground( void )
+UILabel::UILabel( std::string str, const RGBAColorf &color )
+{
+    auto font = AssetManager::getInstance()->get< Font >( AssetManager::FONT_DEFAULT );
+	
+    _text = crimild::alloc< Text >();
+    _text->setFont( font );
+    _text->setSize( 1.0f );
+    _text->setText( str );
+    _text->setTextColor( color );
+}
+
+UILabel::~UILabel( void )
 {
 	
 }
 
-void UIBackground::onAttach( void )
+void UILabel::onAttach( void )
 {
-	getNode< Group >()->attachNode( _geometry );
+	getNode< Group >()->attachNode( _text );
 }
 
-void UIBackground::update( const Clock & )
+void UILabel::start( void )
 {
-	auto frame = getComponent< UIFrame >()->getExtensions();
-	auto w = frame.getWidth();
-	auto h = frame.getHeight();
-	
-	if ( _knownExtensions.getWidth() != w ||
-	_knownExtensions.getHeight() != h ) {
-		_geometry->detachAllPrimitives();
-        _geometry->attachPrimitive( crimild::alloc< QuadPrimitive >( w, h, VertexFormat::VF_P3_UV2 ) );
-		
-		_knownExtensions = frame;
-	}
+    _frame = getComponent< UIFrame >();
+}
+
+void UILabel::update( const Clock & )
+{
+    const auto &rect = _frame->getExtensions();
+	auto w = rect.getWidth();
+	auto h = rect.getHeight();
+
+    _text->local().setTranslate( -0.5f * w, -0.5f * h, 0.0f );
+    _text->local().setScale( h );
+}
+
+void UILabel::setText( std::string text )
+{
+	_text->setText( text );
 }
 
