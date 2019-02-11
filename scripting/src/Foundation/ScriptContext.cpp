@@ -28,6 +28,8 @@
 #include "ScriptContext.hpp"
 
 #include <Simulation/FileSystem.hpp>
+#include <Simulation/Simulation.hpp>
+#include <Simulation/Settings.hpp>
 
 #include <sstream>
 
@@ -112,7 +114,26 @@ void ScriptContext::reset( void )
 	// path for external modules
 	auto baseDir = FileSystem::getInstance().getBaseDirectory();
 	baseDir = StringUtils::replaceAll(baseDir, "\\", "/");
-	parse( "package.path = '" + baseDir + "' .. '/?.lua;' .. package.path" );
+
+    std::stringstream ss;
+    ss << "package.path = '"
+        << baseDir << "/?.lua;"
+        << baseDir << "/assets/?.lua;"
+        << baseDir << "/assets/scripts/?.lua;";
+
+    if ( auto settings = Simulation::getInstance()->getSettings() ) {
+        auto searchDirs = settings->get< std::string >( "scripting.additional_search_dirs", "" );
+        if ( searchDirs != "" ) {
+            auto dirs = StringUtils::split< std::string >( searchDirs, ';' );
+            for ( auto d : dirs ) {
+                if ( d.length() == 0 ) continue;
+                ss << baseDir << "/" << d << "/?.lua;";
+            }
+        }
+    }
+
+    ss << "package.path'";
+    parse( ss.str() );
 }
 
 bool ScriptContext::load( std::string fileName, bool supportCoroutines )
