@@ -52,6 +52,7 @@ namespace crimild {
         
     private:
         ParticleAttribArray *_positions = nullptr;
+        ParticleAttribArray *_distances = nullptr;
 
 		/** 
 		 	\name Coding support

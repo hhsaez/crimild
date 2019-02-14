@@ -58,6 +58,7 @@ namespace crimild {
 			using ConstBasicTraverseCallback = std::function< void( const T & ) >;
 			using TraverseCallback = std::function< void( T &, crimild::Size ) >;
 			using ConstTraverseCallback = std::function< void( const T &, crimild::Size ) >;
+            using SortCallback = std::function< bool( const T &a, const T &b ) >;
 			
 		public:
 			Array( void )
@@ -270,6 +271,16 @@ namespace crimild {
 				}
 				return false;
 			}
+
+            void sort( SortCallback const &callback )
+            {
+                LockImpl lock( this );
+                if ( _size == 0 ) {
+                    return;
+                }
+
+                std::sort( &_elems[ 0 ], &_elems[ _size ], callback );
+            }
 
 			void each( TraverseCallback const &callback )
 			{

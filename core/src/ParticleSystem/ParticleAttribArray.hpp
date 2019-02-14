@@ -59,6 +59,7 @@ namespace crimild {
 			UNIFORM_SCALE_END,
 			TIME,
 			LIFE_TIME,
+            SORT_REFERENCE,
 			USER_DEFINED = 1000,
 			USER_DEFINED_MAX,
 		};

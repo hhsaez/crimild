@@ -44,6 +44,7 @@ CameraSortParticleUpdater::~CameraSortParticleUpdater( void )
 void CameraSortParticleUpdater::configure( Node *node, ParticleData *particles )
 {
 	_positions = particles->createAttribArray< Vector3f >( ParticleAttrib::POSITION );
+    _distances = particles->createAttribArray< Vector2f >( ParticleAttrib::SORT_REFERENCE );
 }
 
 void CameraSortParticleUpdater::update( Node *node, double dt, ParticleData *particles )
@@ -61,25 +62,30 @@ void CameraSortParticleUpdater::update( Node *node, double dt, ParticleData *par
 	const auto pCount = particles->getAliveCount();
 
 	const auto ps = _positions->getData< Vector3f >();
+    auto ds = _distances->getData< Vector2f >();
 
 	const auto cameraPlane = Plane3f( cameraDirection, cameraPos );
 
-	// precompute distances to camera plane for each particle
-	containers::Array< double > ds( pCount );
-	for ( crimild::Size i = 0; i < pCount; i++ ) {
-		ds[ i ] = Distance::compute( cameraPlane, ps[ i ] );
-	}
+    // Step 1: Precompute distances to camera plane for each particle
+    for ( crimild::Size i = 0; i < pCount; ++i ) {
+        ds[ i ] = Vector2f( Distance::compute( cameraPlane, ps[ i ] ), i );
+    }
 
-	// sort partices
-	// TODO: I know, bubble sort is slow...
-	for ( int i = 1; i < pCount; i++ ) {
-		for ( int j = 0; j < pCount - i; j++ ) {
-			if ( ds[ j ] < ds[ j + 1 ] ) {
-				particles->swap( j, j + 1 );
-				Numericd::swap( ds[ j ], ds[ j + 1 ] );
-			}
-		}
-	}
+    // Step 2: Sort particle indices using distances
+    std::sort( ds, ds + pCount, []( const Vector2f &a, const Vector2f &b ) {
+        return a.x() > b.x();
+    });
+
+    // Step 3: reorder
+    for ( crimild::Size i = 0; i < pCount; ++i ) {
+        crimild::Size d = ds[ i ].y();
+        // The trick here is that we only need to swap if the index is
+        // greater than the current one, since it only need to reorder
+        // half of the collection.
+        if ( d > i ) {
+            particles->swap( d, i );
+        }
+    }
 }
 
 void CameraSortParticleUpdater::encode( coding::Encoder &encoder ) 

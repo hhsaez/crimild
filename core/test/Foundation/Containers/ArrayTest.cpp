@@ -117,3 +117,47 @@ TEST( ArrayTest, removeAt )
 	EXPECT_EQ( c, a );
 }
 
+TEST( ArrayTest, sort )
+{
+    auto a = Array< int >{ 0, 3, 1, 2, 5, 4 };
+    auto sorted = Array< int >{ 0, 1, 2, 3, 4, 5 };
+    auto reversed = Array< int >{ 5, 4, 3, 2, 1, 0 };
+
+    a.sort( []( int a, int b ) -> bool {
+        return a < b;
+    });
+
+    EXPECT_EQ( sorted, a );
+
+    a.sort( []( int a, int b ) -> bool {
+        return a > b;
+    });
+
+    EXPECT_EQ( reversed, a );
+}
+
+TEST( ArrayTest, sortAdvanced )
+{
+    using Element = std::pair< double, int >;
+
+    auto es = Array< Element > {
+        { 0.2, 0 },
+        { 0.1, 1 },
+        { 0.9, 2 },
+        { 0.0, 3 },
+    };
+
+    auto sorted = Array< Element > {
+        { 0.0, 3 },
+        { 0.1, 1 },
+        { 0.2, 0 },
+        { 0.9, 2 }
+    };
+
+    es.sort( []( const Element &a, const Element &b ) -> bool {
+        return a.first < b.first;
+    });
+
+    EXPECT_TRUE( sorted == es );
+}
+
