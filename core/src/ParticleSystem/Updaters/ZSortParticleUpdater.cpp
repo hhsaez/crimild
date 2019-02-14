@@ -44,6 +44,7 @@ ZSortParticleUpdater::~ZSortParticleUpdater( void )
 void ZSortParticleUpdater::configure( Node *node, ParticleData *particles )
 {
 	_positions = particles->createAttribArray< Vector3f >( ParticleAttrib::POSITION );
+    _distances = particles->createAttribArray< Vector2f >( ParticleAttrib::SORT_REFERENCE );
 }
 
 void ZSortParticleUpdater::update( Node *node, double dt, ParticleData *particles )
@@ -51,15 +52,28 @@ void ZSortParticleUpdater::update( Node *node, double dt, ParticleData *particle
 	const auto pCount = particles->getAliveCount();
 
 	const auto ps = _positions->getData< Vector3f >();
+    const auto ds = _distances->getData< Vector2f >();
 
-	// TODO: I know, bubble sort is slow...
-	for ( int i = 1; i < pCount; i++ ) {
-		for ( int j = 0; j < pCount - i; j++ ) {
-			if ( ps[ j ].z() > ps[ j + 1 ].z() ) {
-				particles->swap( j, j + 1 );
-			}
-		}
-	}
+    // Step 1: Get z values form particles
+    for ( crimild::Size i = 0; i < pCount; ++i ) {
+        ds[ i ] = Vector2f( ps[ i ].z(), i );
+    }
+
+    // Step 2: Sort particle indices using distances
+    std::sort( ds, ds + pCount, []( const Vector2f &a, const Vector2f &b ) {
+        return a.x() < b.x();
+    });
+
+    // Step 3: reorder
+    for ( crimild::Size i = 0; i < pCount; ++i ) {
+        crimild::Size d = ds[ i ].y();
+        // The trick here is that we only need to swap if the index is
+        // greater than the current one, since it only need to reorder
+        // half of the collection.
+        if ( d > i ) {
+            particles->swap( d, i );
+        }
+    }
 }
 
 void ZSortParticleUpdater::encode( coding::Encoder &encoder ) 
