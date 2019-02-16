@@ -27,7 +27,6 @@
 
 #include "RenderSystem.hpp"
 
-#include "Rendering/RenderPasses/RenderPass.hpp"
 #include "Rendering/FrameBufferObject.hpp"
 
 #include "Simulation/Simulation.hpp"
@@ -97,8 +96,11 @@ void RenderSystem::renderFrame( void )
 			RenderQueue *mainQueue = nullptr;
 			_renderQueues.each( [ &mainQueue, renderer ]( SharedPointer< RenderQueue > &queue ) {
 				// main camera is rendered last
-				if ( queue->getCamera() != Camera::getMainCamera() ) {
-					renderer->render( crimild::get_ptr( queue ), queue->getCamera()->getRenderPass() );
+                auto camera = queue->getCamera();
+				if ( camera != Camera::getMainCamera() ) {
+                    if ( auto renderGraph = camera->getRenderGraph() ) {
+                        renderer->render( mainQueue, renderGraph );
+                    }
 				}
 				else {
 					mainQueue = crimild::get_ptr( queue );
@@ -106,7 +108,9 @@ void RenderSystem::renderFrame( void )
 			});
 
 			if ( mainQueue != nullptr ) {
-				renderer->render( mainQueue, mainQueue->getCamera()->getRenderPass() );
+                if ( auto renderGraph = mainQueue->getCamera()->getRenderGraph() ) {
+                    renderer->render( mainQueue, renderGraph );
+                }
 			}
 	    }
 	}

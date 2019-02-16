@@ -52,7 +52,6 @@ namespace crimild {
     class IndexBufferObject;
     class Light;
     class Material;
-    class RenderPass;
     class RenderQueue;
     class ShaderLocation;
     class ShaderProgram;
@@ -60,6 +59,12 @@ namespace crimild {
     class Texture;
     class VertexBufferObject;
     class VisibilitySet;
+
+    namespace rendergraph {
+
+        class RenderGraph;
+
+    }
 
 	namespace shadergraph {
 
@@ -94,8 +99,8 @@ namespace crimild {
         virtual void beginRender( void );
 		
 		virtual void clearBuffers( void ) = 0;
-        
-        virtual void render( RenderQueue *renderQueue, RenderPass *renderPass );
+
+        virtual void render( RenderQueue *renderQueue, rendergraph::RenderGraph *renderGraph );
 
         virtual void endRender( void );
             
@@ -188,42 +193,9 @@ namespace crimild {
         void setScreenBuffer( SharedPointer< FrameBufferObject > const &screenBuffer ) { _screenBuffer = screenBuffer; }
         FrameBufferObject *getScreenBuffer( void ) { return crimild::get_ptr( _screenBuffer ); }
         
-        static constexpr const char *FBO_AUX_256 = "framebuffers/aux_256";
-        static constexpr const char *FBO_AUX_512 = "framebuffers/aux_512";
-        static constexpr const char *FBO_AUX_1024 = "framebuffers/aux_1024";
-        static constexpr const char *FBO_AUX_COLOR_TARGET_NAME = "framebuffers/aux_color";
-        static constexpr const char *FBO_AUX_DEPTH_TARGET_NAME = "framebuffers/aux_depth";
-
-        void setFrameBuffer( std::string name, SharedPointer< FrameBufferObject > const &fbo );
-        FrameBufferObject *getFrameBuffer( std::string name );
-
-        SharedPointer< FrameBufferObject > generateAuxFBO( std::string name, int width, int height );
-        
     private:
         SharedPointer< FrameBufferObject > _screenBuffer;
         
-    public:
-        static constexpr const char *SHADER_PROGRAM_RENDER_PASS_DEPTH = "shaders/render_pass/depth";
-        static constexpr const char *SHADER_PROGRAM_RENDER_PASS_FORWARD_LIGHTING = "shaders/render_pass/forward_lighting";
-        static constexpr const char *SHADER_PROGRAM_RENDER_PASS_SCREEN = "shaders/render_pass/screen";
-		
-        static constexpr const char *SHADER_PROGRAM_RENDER_PASS_STANDARD = "shaders/render_pass/standard";
-        static constexpr const char *SHADER_PROGRAM_LIT_TEXTURE = "shaders/lighting/texture";
-        static constexpr const char *SHADER_PROGRAM_LIT_DIFFUSE = "shaders/lighting/diffuse";
-        static constexpr const char *SHADER_PROGRAM_UNLIT_TEXTURE = "shaders/unlit/texture";
-        static constexpr const char *SHADER_PROGRAM_UNLIT_DIFFUSE = "shaders/unlit/diffuse";
-        static constexpr const char *SHADER_PROGRAM_UNLIT_VERTEX_COLOR = "shaders/unlit/vertex_color";
-        static constexpr const char *SHADER_PROGRAM_PARTICLE_SYSTEM = "shaders/unlit/particle_system";
-        static constexpr const char *SHADER_PROGRAM_TEXT_BASIC = "shaders/text/basic";
-        static constexpr const char *SHADER_PROGRAM_TEXT_SDF = "shaders/text/sdf";
-        static constexpr const char *SHADER_PROGRAM_SCREEN_TEXTURE = "shaders/misc/screen";
-		static constexpr const char *SHADER_PROGRAM_DEPTH = "shaders/misc/depth";
-		static constexpr const char *SHADER_PROGRAM_POINT_SPRITE = "shaders/unlit/point_sprit";
-		static constexpr const char *SHADER_PROGRAM_DEBUG_DEPTH = "shaders/debug/depth";
-        
-        void setShaderProgram( std::string name, SharedPointer< ShaderProgram > const &program );
-        ShaderProgram *getShaderProgram( std::string name );
-
 	public:
         Catalog< ShaderProgram > *getShaderProgramCatalog( void ) { return crimild::get_ptr( _shaderProgramCatalog ); }
 		void setShaderProgramCatalog( SharedPointer< Catalog< ShaderProgram > > const &catalog ) { _shaderProgramCatalog = catalog; }
@@ -257,16 +229,6 @@ namespace crimild {
 
 	public:
 		virtual SharedPointer< shadergraph::ShaderGraph > createShaderGraph( void ) = 0;
-
-	public:
-		/**
-		   A 1x1 white texture used when an invalid texture pointer is provided. This
-		   is faster than querying if a texture was actually bound to shaders
-		 */
-		Texture *getFallbackTexture( void ) { return crimild::get_ptr( _fallbackTexture ); }
-
-	private:
-		SharedPointer< Texture > _fallbackTexture;
 	};
     
 }

@@ -27,9 +27,11 @@
 
 #include "Camera.hpp"
 
-#include "Rendering/RenderPasses/StandardRenderPass.hpp"
+#include "Rendering/RenderGraph/RenderGraph.hpp"
+#include "Rendering/RenderGraph/Passes/ForwardLightingPass.hpp"
 
 using namespace crimild;
+using namespace crimild::rendergraph;
 
 Camera *Camera::_mainCamera = nullptr;
 
@@ -42,9 +44,12 @@ Camera::Camera( void )
 Camera::Camera( float fov, float aspect, float near, float far )
 	: _frustum( fov, aspect, near, far ),
 	  _viewport( 0.0f, 0.0f, 1.0f, 1.0f ),
-      _viewMatrixIsCurrent( false ),
-      _renderPass( crimild::alloc< StandardRenderPass >() )
+      _viewMatrixIsCurrent( false )
 {
+    _renderGraph = crimild::alloc< RenderGraph >();
+    auto scenePass = _renderGraph->createPass< passes::ForwardLightingPass >();
+    _renderGraph->setOutput( scenePass->getColorOutput() );
+
 	_projectionMatrix = _frustum.computeProjectionMatrix();
 	_orthographicMatrix = _frustum.computeOrthographicMatrix();
 	_viewMatrix.makeIdentity();

@@ -39,7 +39,11 @@
 
 namespace crimild {
     
-    class RenderPass;
+    namespace rendergraph {
+
+        class RenderGraph;
+
+    }
 
 	class Camera : public Group {
 	public:
@@ -104,12 +108,18 @@ namespace crimild {
 	public:
 		virtual void accept( NodeVisitor &visitor ) override;
 
-	public:
-        void setRenderPass( SharedPointer< RenderPass > const &renderPass ) { _renderPass = renderPass; }
-        RenderPass *getRenderPass( void ) { return crimild::get_ptr( _renderPass ); }
+        /**
+            \name Render graph
+         */
+        //@{
+    public:
+        void setRenderGraph( SharedPointer< rendergraph::RenderGraph > const &rg ) { _renderGraph = rg; }
+        rendergraph::RenderGraph *getRenderGraph( void ) { return crimild::get_ptr( _renderGraph ); }
 
-	private:
-		SharedPointer< RenderPass > _renderPass;
+    private:
+        SharedPointer< rendergraph::RenderGraph > _renderGraph;
+
+        //@}
 
 	public:
 		void computeCullingPlanes( void );

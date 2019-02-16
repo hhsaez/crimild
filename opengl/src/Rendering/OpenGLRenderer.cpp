@@ -35,22 +35,6 @@
 #include "Catalogs/RenderTargetCatalog.hpp"
 #include "Catalogs/PrimitiveCatalog.hpp"
 
-#include "Programs/StandardShaderProgram.hpp"
-#include "Programs/LitTextureShaderProgram.hpp"
-#include "Programs/UnlitTextureShaderProgram.hpp"
-#include "Programs/UnlitDiffuseShaderProgram.hpp"
-#include "Programs/ScreenTextureShaderProgram.hpp"
-#include "Programs/SignedDistanceFieldShaderProgram.hpp"
-#include "Programs/TextShaderProgram.hpp"
-#include "Programs/DepthShaderProgram.hpp"
-#include "Programs/ColorTintShaderProgram.hpp"
-#include "Programs/UnlitVertexColorShaderProgram.hpp"
-#include "Programs/ParticleSystemShaderProgram.hpp"
-#include "Programs/DebugDepthShaderProgram.hpp"
-#include "Programs/DepthPassShaderProgram.hpp"
-
-#include "Rendering/ImageEffects/ColorTintImageEffect.hpp"
-
 #include "Rendering/ShaderGraph/OpenGLShaderGraph.hpp"
 
 #include <Rendering/AlphaState.hpp>
@@ -59,6 +43,7 @@
 #include <Rendering/CullFaceState.hpp>
 #include <Rendering/FrameBufferObject.hpp>
 #include <Rendering/ShadowMap.hpp>
+#include <Rendering/ShaderProgram.hpp>
 #include <Rendering/ShaderGraph/ShaderGraph.hpp>
 
 #include <SceneGraph/Light.hpp>
@@ -86,35 +71,6 @@ OpenGLRenderer::OpenGLRenderer( SharedPointer< FrameBufferObject > const &screen
 	if ( screenBuffer != nullptr ) {
 		setScreenBuffer( screenBuffer );
 	}
-
-	// TODO: Move these calls to 'configure()'?
-    setShaderProgram( Renderer::SHADER_PROGRAM_RENDER_PASS_FORWARD_LIGHTING, crimild::alloc< StandardShaderProgram >() );
-    setShaderProgram( Renderer::SHADER_PROGRAM_RENDER_PASS_DEPTH, crimild::alloc< DepthPassShaderProgram >() );
-	
-    setShaderProgram( Renderer::SHADER_PROGRAM_RENDER_PASS_STANDARD, crimild::alloc< StandardShaderProgram >() );
-    
-    setShaderProgram( Renderer::SHADER_PROGRAM_LIT_TEXTURE, crimild::alloc< StandardShaderProgram >() );
-    
-    setShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_TEXTURE, crimild::alloc< UnlitTextureShaderProgram >() );
-	setShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_DIFFUSE, crimild::alloc< UnlitDiffuseShaderProgram >() );
-	setShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_VERTEX_COLOR, crimild::alloc< UnlitVertexColorShaderProgram >() );
-    
-	setShaderProgram( Renderer::SHADER_PROGRAM_PARTICLE_SYSTEM, crimild::alloc< ParticleSystemShaderProgram >() );
-	setShaderProgram( Renderer::SHADER_PROGRAM_POINT_SPRITE, crimild::alloc< ParticleSystemShaderProgram >() );
-
-#ifdef CRIMILD_PLATFORM_DESKTOP
-    setShaderProgram( Renderer::SHADER_PROGRAM_TEXT_SDF, crimild::alloc< SignedDistanceFieldShaderProgram >() );
-#endif
-    setShaderProgram( Renderer::SHADER_PROGRAM_TEXT_BASIC, crimild::alloc< TextShaderProgram >() );
-
-	setShaderProgram( Renderer::SHADER_PROGRAM_SCREEN_TEXTURE, crimild::alloc< ScreenTextureShaderProgram >() );
-
-	setShaderProgram( Renderer::SHADER_PROGRAM_DEPTH, crimild::alloc< DepthShaderProgram >() );
-
-	// image effects
-	setShaderProgram( ColorTintImageEffect::COLOR_TINT_PROGRAM_NAME, crimild::alloc< ColorTintShaderProgram >() );
-
-	setShaderProgram( Renderer::SHADER_PROGRAM_DEBUG_DEPTH, crimild::alloc< DebugDepthShaderProgram >() );
 }
 
 OpenGLRenderer::~OpenGLRenderer( void )

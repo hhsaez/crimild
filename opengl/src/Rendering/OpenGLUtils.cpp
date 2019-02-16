@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -151,32 +151,6 @@ void OpenGLUtils::checkErrors( std::string prefix )
 #endif
                    );
     }
-}
-
-SharedPointer< VertexShader > OpenGLUtils::getVertexShaderInstance( std::string source )
-{
-	std::string prefix =
-#ifdef CRIMILD_PLATFORM_DESKTOP
-	#include "Rendering/Programs/_ShaderPrefixDesktop.txt"
-#else
-	#include "Rendering/Programs/_ShaderPrefixMobile.txt"
-#endif
-	;
-
-    return crimild::alloc< VertexShader >( prefix + source );
-}
-
-SharedPointer< FragmentShader > OpenGLUtils::getFragmentShaderInstance( std::string source )
-{
-	std::string prefix =
-#ifdef CRIMILD_PLATFORM_DESKTOP
-	#include "Rendering/Programs/_ShaderPrefixDesktop.txt"
-#else
-	#include "Rendering/Programs/_ShaderPrefixMobile.txt"
-#endif
-	;
-
-    return crimild::alloc< FragmentShader >( prefix + source );
 }
 
 std::string OpenGLUtils::buildArrayShaderLocationName( std::string variable, int index )

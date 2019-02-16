@@ -87,10 +87,7 @@ void SkyboxPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *r
 	renderer->bindFrameBuffer( crimild::get_ptr( fbo ) );
 
 	auto renderables = renderQueue->getRenderables( RenderQueue::RenderableType::SKYBOX );
-	if ( renderables->size() == 0 ) {
-		return;
-	}
-	
+
 	const auto pMatrix = renderQueue->getProjectionMatrix();
 	const auto vMatrix = renderQueue->getViewMatrix();
 
@@ -104,7 +101,7 @@ void SkyboxPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *r
 		if ( auto material = crimild::get_ptr( renderable->material ) ) {
 			color = material->getDiffuse();
 			
-			if ( material->getProgram() ) program = material->getProgram();
+            if ( material->getProgram() ) program = material->getProgram();
 			if ( material->getColorMap() ) colorMap = material->getColorMap();
 		}
 
@@ -126,7 +123,7 @@ void SkyboxPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *r
 	});
 
 	renderer->setDepthState( DepthState::ENABLED );
-	
+
 	renderer->unbindFrameBuffer( crimild::get_ptr( fbo ) );
 }
 

@@ -30,7 +30,10 @@
 #include "Rendering/RenderQueue.hpp"
 #include "Rendering/FrameBufferObject.hpp"
 #include "Rendering/RenderTarget.hpp"
-#include "Rendering/RenderPasses/RenderPass.hpp"
+#include "Rendering/RenderGraph/RenderGraph.hpp"
+#include "Rendering/RenderGraph/RenderGraphAttachment.hpp"
+#include "Rendering/ShaderGraph/Constants.hpp"
+#include "Rendering/Programs/ScreenTextureShaderProgram.hpp"
 #include "Foundation/Log.hpp"
 #include "Primitives/QuadPrimitive.hpp"
 #include "SceneGraph/Geometry.hpp"
@@ -42,29 +45,8 @@
 #include "Animation/Skeleton.hpp"
 
 using namespace crimild;
-
-constexpr const char *Renderer::FBO_AUX_256;
-constexpr const char *Renderer::FBO_AUX_512;
-constexpr const char *Renderer::FBO_AUX_1024;
-constexpr const char *Renderer::FBO_AUX_COLOR_TARGET_NAME;
-constexpr const char *Renderer::FBO_AUX_DEPTH_TARGET_NAME;
-
-constexpr const char *Renderer::SHADER_PROGRAM_RENDER_PASS_DEPTH;
-constexpr const char *Renderer::SHADER_PROGRAM_RENDER_PASS_FORWARD_LIGHTING;
-constexpr const char *Renderer::SHADER_PROGRAM_RENDER_PASS_SCREEN;
-constexpr const char *Renderer::SHADER_PROGRAM_RENDER_PASS_STANDARD;
-constexpr const char *Renderer::SHADER_PROGRAM_LIT_TEXTURE;
-constexpr const char *Renderer::SHADER_PROGRAM_LIT_DIFFUSE;
-constexpr const char *Renderer::SHADER_PROGRAM_UNLIT_TEXTURE;
-constexpr const char *Renderer::SHADER_PROGRAM_UNLIT_DIFFUSE;
-constexpr const char *Renderer::SHADER_PROGRAM_UNLIT_VERTEX_COLOR;
-constexpr const char *Renderer::SHADER_PROGRAM_PARTICLE_SYSTEM;
-constexpr const char *Renderer::SHADER_PROGRAM_TEXT_BASIC;
-constexpr const char *Renderer::SHADER_PROGRAM_TEXT_SDF;
-constexpr const char *Renderer::SHADER_PROGRAM_SCREEN_TEXTURE;
-constexpr const char *Renderer::SHADER_PROGRAM_DEPTH;
-constexpr const char *Renderer::SHADER_PROGRAM_POINT_SPRITE;
-constexpr const char *Renderer::SHADER_PROGRAM_DEBUG_DEPTH;
+using namespace crimild::rendergraph;
+using namespace crimild::shadergraph::locations;
 
 Renderer::Renderer( void )
 	: _lightCount( 0 ),
@@ -78,14 +60,6 @@ Renderer::Renderer( void )
 	  _primitiveCatalog( crimild::alloc< Catalog< Primitive >>() )
 {
 	_screenBuffer = crimild::alloc< FrameBufferObject >( 800, 600 );
-
- 	generateAuxFBO( FBO_AUX_256, 256, 256 );
- 	generateAuxFBO( FBO_AUX_512, 512, 512 );
- 	generateAuxFBO( FBO_AUX_1024, 1024, 1024 );
-
-	// Create a 1x1 fallback texture, used when we need to bind textures
-	// and no valid texture instance was passed. Look at bindMaterial()
-	_fallbackTexture = Texture::ONE;
 }
 
 Renderer::~Renderer( void )
@@ -100,41 +74,6 @@ Renderer::~Renderer( void )
 	getPrimitiveCatalog()->unloadAll();
 	getRenderTargetCatalog()->unloadAll();
     getFrameBufferObjectCatalog()->unloadAll();
-}
-
-ShaderProgram *Renderer::getShaderProgram( std::string name )
-{
-    return AssetManager::getInstance()->get< ShaderProgram >( name );
-}
-
-void Renderer::setShaderProgram( std::string name, SharedPointer< ShaderProgram > const &program )
-{
-    // assets stored by the renderer are assumed to be persistent
-    AssetManager::getInstance()->set( name, program, true );
-}
-
-void Renderer::setFrameBuffer( std::string name, SharedPointer< FrameBufferObject > const &fbo )
-{
-    // assets stored by the renderer are assumed to be persistent
-    AssetManager::getInstance()->set( name, fbo );
-}
-
-FrameBufferObject *Renderer::getFrameBuffer( std::string name )
-{
-    return AssetManager::getInstance()->get< FrameBufferObject >( name );
-}
-
-SharedPointer< FrameBufferObject > Renderer::generateAuxFBO( std::string name, int width, int height )
-{
-    auto fbo = crimild::alloc< FrameBufferObject >( width, height );
-#ifdef CRIMILD_PLATFORM_DESKTOP
-    fbo->getRenderTargets().insert( FBO_AUX_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_32, RenderTarget::Output::RENDER_AND_TEXTURE, width, height, true ) );
-#else
-    fbo->getRenderTargets().insert( FBO_AUX_DEPTH_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::DEPTH_24, RenderTarget::Output::RENDER, width, height ) );
-#endif
-    fbo->getRenderTargets().insert( FBO_AUX_COLOR_TARGET_NAME, crimild::alloc< RenderTarget >( RenderTarget::Type::COLOR_RGBA, RenderTarget::Output::RENDER_AND_TEXTURE, width, height ) );
-    AssetManager::getInstance()->set( name, fbo, true );
-    return fbo;
 }
 
 void Renderer::setScreenViewport( const Rectf &viewport )
@@ -172,23 +111,33 @@ void Renderer::endRender( void )
 
 void Renderer::presentFrame( void )
 {
-    auto sBuffer = getFrameBuffer( RenderPass::S_BUFFER_NAME );
-    if ( sBuffer != nullptr ) {
-        auto color = sBuffer->getRenderTargets()[ RenderPass::S_BUFFER_COLOR_TARGET_NAME ];
-        auto program = getShaderProgram( crimild::Renderer::SHADER_PROGRAM_SCREEN_TEXTURE );
-        if ( program != nullptr ) {
-            bindProgram( program );
-            bindTexture( program->getStandardLocation( crimild::ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ), color->getTexture() );
-            drawScreenPrimitive( program );
-            unbindTexture( program->getStandardLocation( crimild::ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ), color->getTexture() );
-            unbindProgram( program );
-        }
-    }
+
 }
 
-void Renderer::render( RenderQueue *renderQueue, RenderPass *renderPass )
+void Renderer::render( RenderQueue *renderQueue, RenderGraph *renderGraph )
 {
-    renderPass->render( this, renderQueue, renderQueue->getCamera() );
+    renderGraph->execute( this, renderQueue );
+
+    auto output = renderGraph->getOutput();
+    if ( output == nullptr ) {
+        CRIMILD_LOG_ERROR( "No output provided for render graph" );
+        return;
+    }
+
+    auto texture = output->getTexture();
+    if ( texture == nullptr ) {
+        CRIMILD_LOG_ERROR( "No valid texture for render graph output" );
+        return;
+    }
+
+    auto program = AssetManager::getInstance()->get< ScreenTextureShaderProgram >();
+    assert( program && "No valid program to render texture" );
+
+    program->bindUniform( COLOR_MAP_UNIFORM, texture );
+
+    bindProgram( program );
+    drawScreenPrimitive( program );
+    unbindProgram( program );
 }
 
 void Renderer::bindRenderTarget( RenderTarget *target )
@@ -280,12 +229,12 @@ void Renderer::unbindMaterial( ShaderProgram *program, Material *material )
 
 void Renderer::bindTexture( ShaderLocation *location, Texture *texture )
 {
-	getTextureCatalog()->bind( location, texture != nullptr ? texture : getFallbackTexture());
+	getTextureCatalog()->bind( location, texture );
 }
 
 void Renderer::unbindTexture( ShaderLocation *location, Texture *texture )
 {
-	getTextureCatalog()->unbind( location, texture != nullptr ? texture : getFallbackTexture() );
+	getTextureCatalog()->unbind( location, texture );
 }
 
 void Renderer::bindLight( ShaderProgram *program, Light *light )

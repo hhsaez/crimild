@@ -5,6 +5,7 @@
 #include "Rendering/DepthState.hpp"
 #include "Rendering/Renderer.hpp"
 #include "Rendering/FrameBufferObject.hpp"
+#include "Rendering/Programs/UnlitShaderProgram.hpp"
 
 #include "Primitives/BoxPrimitive.hpp"
 #include "Primitives/SpherePrimitive.hpp"
@@ -55,7 +56,7 @@ void DebugRenderHelper::renderLines( Renderer *renderer, Camera *camera, const V
     auto depthState = AssetManager::getInstance()->get< DepthState >( CRIMILD_DEBUG_RENDER_HELPER_DEPTH_STATE );
     auto alphaState = AssetManager::getInstance()->get< AlphaState >( CRIMILD_DEBUG_RENDER_HELPER_ALPHA_STATE );
     
-    auto program = renderer->getShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_DIFFUSE );
+    auto program = AssetManager::getInstance()->get< UnlitShaderProgram >();
 	if ( program == nullptr ) {
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "No program found for debug rendering" );
 		return;
@@ -154,7 +155,7 @@ void DebugRenderHelper::render( Renderer *renderer, Camera *camera, Primitive *p
     auto depthState = AssetManager::getInstance()->get< DepthState >( CRIMILD_DEBUG_RENDER_HELPER_DEPTH_STATE );
     auto alphaState = AssetManager::getInstance()->get< AlphaState >( CRIMILD_DEBUG_RENDER_HELPER_ALPHA_STATE );
 
-    auto program = renderer->getShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_DIFFUSE );
+    auto program = AssetManager::getInstance()->get< UnlitShaderProgram >();
 	if ( program == nullptr ) {
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "No program found for debug rendering" );
 		return;
@@ -222,13 +223,10 @@ void DebugRenderHelper::render( Geometry *geometry )
 	auto ms = geometry->getComponent< MaterialComponent >();
 	if ( ms != nullptr ) {
 		ms->forEachMaterial( [renderer, geometry]( Material *material ) {
-		    auto program = renderer->getShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_TEXTURE );
+		    ShaderProgram *program = AssetManager::getInstance()->get< UnlitShaderProgram >();
 
 			if ( material->getProgram() != nullptr ) {
 				program = material->getProgram();
-			}
-			else if ( material->getColorMap() == nullptr ) {
-				program = renderer->getShaderProgram( Renderer::SHADER_PROGRAM_UNLIT_DIFFUSE );
 			}
 
 			if ( program == nullptr ) {

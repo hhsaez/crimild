@@ -217,7 +217,7 @@ void LightAccumulationPass::renderPointLight( Renderer *renderer, Light *light, 
 	);
 	renderer->bindTexture(
 		program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM ),
-		renderer->getFallbackTexture()
+        crimild::get_ptr( Texture::ONE )
 	);
 	renderer->bindUniform(
 		program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_DIFFUSE_UNIFORM ),
@@ -236,7 +236,7 @@ void LightAccumulationPass::renderPointLight( Renderer *renderer, Light *light, 
 
 	renderer->unbindTexture(
 		program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM ),
-		renderer->getFallbackTexture()
+		crimild::get_ptr( Texture::ONE )
 	);
 
 	renderer->unbindProgram( program );

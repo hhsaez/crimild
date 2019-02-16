@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -62,10 +62,6 @@ namespace crimild {
 		class OpenGLUtils {
 		public:
 			static void checkErrors( std::string prefix );
-
-			static SharedPointer< VertexShader > getVertexShaderInstance( std::string source );
-			
-			static SharedPointer< FragmentShader > getFragmentShaderInstance( std::string source );
 
 			static std::string buildArrayShaderLocationName( std::string variable, int index );
 

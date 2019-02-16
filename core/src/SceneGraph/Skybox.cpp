@@ -44,9 +44,8 @@ Skybox::Skybox( void )
 }
 
 Skybox::Skybox( ImageArray const &faces )
-	: _faces( faces )
 {
-
+    configure( faces );
 }
 
 Skybox::~Skybox( void )
