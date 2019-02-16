@@ -240,19 +240,11 @@
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/ShaderUniform.hpp"
 #include "Rendering/ShaderUniformImpl.hpp"
+#include "Rendering/ShadowMap.hpp"
 #include "Rendering/SkinnedMesh.hpp"
 #include "Rendering/Texture.hpp"
 #include "Rendering/VertexBufferObject.hpp"
 #include "Rendering/VertexFormat.hpp"
-
-#include "Rendering/RenderPasses/CompositeRenderPass.hpp"
-#include "Rendering/RenderPasses/RenderPass.hpp"
-#include "Rendering/RenderPasses/StandardRenderPass.hpp"
-#include "Rendering/RenderPasses/PostRenderPass.hpp"
-#include "Rendering/RenderPasses/DeferredRenderPass.hpp"
-#include "Rendering/RenderPasses/OffscreenRenderPass.hpp"
-#include "Rendering/RenderPasses/ShadowRenderPass.hpp"
-#include "Rendering/RenderPasses/RenderGraphRenderPass.hpp"
 
 #include "Rendering/RenderGraph/RenderGraph.hpp"
 #include "Rendering/RenderGraph/RenderGraphPass.hpp"
@@ -273,9 +265,6 @@
 #include "Rendering/Programs/ForwardShadingShaderProgram.hpp"
 #include "Rendering/Programs/ReflectiveShaderProgram.hpp"
 #include "Rendering/Programs/RefractiveShaderProgram.hpp"
-
-#include "Rendering/ImageEffects/ImageEffect.hpp"
-#include "Rendering/ImageEffects/ColorTintImageEffect.hpp"
 
 #include "Messaging/MessageQueue.hpp"
 

@@ -29,12 +29,15 @@
 
 #include "Rendering/RenderGraph/RenderGraphAttachment.hpp"
 #include "Rendering/Renderer.hpp"
+#include "Rendering/Programs/ScreenTextureShaderProgram.hpp"
 #include "Foundation/Profiler.hpp"
 #include "Simulation/AssetManager.hpp"
+#include "Rendering/ShaderGraph/Constants.hpp"
 
 using namespace crimild;
 using namespace crimild::rendergraph;
 using namespace crimild::rendergraph::passes;
+using namespace crimild::shadergraph::locations;
 
 BlendPass::BlendPass( RenderGraph *graph, SharedPointer< AlphaState > const &alphaState )
 	: RenderGraphPass( graph, "Blend Pass" ),
@@ -66,7 +69,7 @@ void BlendPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *re
 	
 	renderer->bindFrameBuffer( crimild::get_ptr( fbo ) );
 	
-	auto program = renderer->getShaderProgram( Renderer::SHADER_PROGRAM_SCREEN_TEXTURE );
+    auto program = AssetManager::getInstance()->get< ScreenTextureShaderProgram >();
 	renderer->bindProgram( program );
 
 	_inputs.each( [ this, renderer, program ]( RenderGraphAttachment *input, crimild::Size idx ) {
@@ -78,13 +81,13 @@ void BlendPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *re
 		}
 		
 		renderer->bindTexture(
-			program->getStandardLocation( ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ),
+			program->getLocation( COLOR_MAP_UNIFORM ),
 			texture );
 		
 		renderer->drawScreenPrimitive( program );
 		
 		renderer->unbindTexture(
-			program->getStandardLocation( ShaderProgram::StandardLocation::COLOR_MAP_UNIFORM ),
+			program->getLocation( COLOR_MAP_UNIFORM ),
 			texture );
 
 		if ( idx > 0 ) {

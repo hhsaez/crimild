@@ -38,6 +38,7 @@
 #include "Rendering/Material.hpp"
 #include "Rendering/ImageTGA.hpp"
 #include "Rendering/ShaderProgram.hpp"
+#include "Rendering/Programs/UnlitShaderProgram.hpp"
 #include "Components/MaterialComponent.hpp"
 
 using namespace crimild;
@@ -375,11 +376,11 @@ void OBJLoader::readMaterialShaderProgram( std::stringstream &line )
 
 	switch ( illumLevel ) {
 	    case 0:
-            _currentMaterial->setProgram( AssetManager::getInstance()->get< ShaderProgram >( Renderer::SHADER_PROGRAM_UNLIT_TEXTURE ) );
+            _currentMaterial->setProgram( AssetManager::getInstance()->get< UnlitShaderProgram >() );
 			break;
 
         case 1:
-            _currentMaterial->setProgram( AssetManager::getInstance()->get< ShaderProgram >( Renderer::SHADER_PROGRAM_UNLIT_DIFFUSE ) );
+            _currentMaterial->setProgram( AssetManager::getInstance()->get< UnlitShaderProgram >() );
             break;
 
         case 3:
