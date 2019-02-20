@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -35,39 +35,8 @@
 
 namespace crimild {
 
-	class Font : public SharedObject {
-	public:
-		struct Glyph {
-			unsigned char symbol;
-			float width;
-			float height;
-			float bearingX;
-			float bearingY;
-			float advance;
-			float uOffset;
-			float vOffset;
-			float u;		
-			float v;
-		};
+	class Font;
 
-	public:
-		explicit Font( std::string defFileName );
-		virtual ~Font( void );
-
-		Texture *getTexture( void );
-		Texture *getSDFTexture( void );
-
-		Glyph getGlyph( unsigned char c ) { return _glyphs[ c ]; }
-
-	private:
-		void loadGlyphs( std::string file );
-
-		std::string _textureFileName;
-		std::string _sdfTextureFileName;
-
-		std::map< unsigned char, Glyph > _glyphs;
-	};
-    
 	class Text : public Group {
 		CRIMILD_IMPLEMENT_RTTI( crimild::Text )
 		
@@ -89,7 +58,7 @@ namespace crimild {
 		void setSize( float size );
 
         Font *getFont( void ) { return crimild::get_ptr( _font ); }
-        void setFont( Font *font ) { setFont( std::move( crimild::retain( font ) ) ); }
+        void setFont( Font *font );
 		void setFont( SharedPointer< Font > const &font );
 
 		const RGBAColorf &getTextColor( void ) const { return _material->getDiffuse(); }

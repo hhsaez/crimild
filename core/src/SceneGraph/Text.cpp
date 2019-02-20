@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002 - present, Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,7 @@
 
 #include "Primitives/Primitive.hpp"
 
+#include "Rendering/Font.hpp"
 #include "Rendering/ImageTGA.hpp"
 #include "Rendering/Renderer.hpp"
 #include "Rendering/Programs/UnlitShaderProgram.hpp"
@@ -47,65 +48,6 @@
 
 using namespace crimild;
 
-Font::Font( std::string fontDefFile )
-{
-	loadGlyphs( fontDefFile );
-}
-
-Font::~Font( void )
-{
-
-}
-
-Texture *Font::getTexture( void )
-{
-	return AssetManager::getInstance()->get< Texture >( _textureFileName );
-}
-
-Texture *Font::getSDFTexture( void )
-{
-	return AssetManager::getInstance()->get< Texture >( _sdfTextureFileName );
-}
-
-void Font::loadGlyphs( std::string file )
-{
-	_glyphs.clear();
-
-	auto fontNamePrefix = file.substr( 0, file.find_last_of( "." ) );
-	fontNamePrefix = FileSystem::getInstance().getRelativePath( fontNamePrefix );
-	_textureFileName = fontNamePrefix + ".tga";
-	_sdfTextureFileName = fontNamePrefix + "_sdf.tga";
-
-	std::ifstream input;
-	input.open( file );
-	if ( !input.is_open() ) {
-        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot open glyph file ", file );
-		return;
-	}
-
-	char buffer[ 1024 ];
-	while ( !input.eof() ) {
-		input.getline( buffer, 1024 );
-		std::stringstream line;
-		line << buffer;
-
-		Font::Glyph glyph;
-		int symbol;
-		line >> symbol
-			 >> glyph.width
-			 >> glyph.height
-			 >> glyph.bearingX
-			 >> glyph.bearingY
-			 >> glyph.advance
-			 >> glyph.uOffset
-			 >> glyph.vOffset
-			 >> glyph.u
-			 >> glyph.v;
-		glyph.symbol = ( unsigned char ) symbol;
-		_glyphs[ glyph.symbol ] = glyph;
-	}
-}
-
 Text::Text( void )
 {
     _geometry = crimild::alloc< Geometry >();
@@ -117,6 +59,8 @@ Text::Text( void )
 	_geometry->attachPrimitive( _primitive );
 	_geometry->getComponent< MaterialComponent >()->attachMaterial( _material );
     attachNode( _geometry );
+
+    setFont( AssetManager::getInstance()->get< Font >( AssetManager::FONT_SYSTEM ) );
 }
 
 Text::~Text( void )
@@ -127,6 +71,11 @@ Text::~Text( void )
 void Text::accept( NodeVisitor &visitor )
 {
     visitor.visitText( this );
+}
+
+void Text::setFont( Font *font )
+{
+    setFont( crimild::retain( font ) );
 }
 
 void Text::setText( std::string text )

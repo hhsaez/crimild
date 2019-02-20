@@ -28,6 +28,7 @@
 #include "ConsoleSystem.hpp"
 #include "RenderSystem.hpp"
 
+#include "Rendering/Font.hpp"
 #include "Components/MaterialComponent.hpp"
 #include "Primitives/BoxPrimitive.hpp"
 #include "Simulation/Simulation.hpp"

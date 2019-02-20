@@ -6,6 +6,7 @@
 #include "Rendering/Renderer.hpp"
 #include "Rendering/FrameBufferObject.hpp"
 #include "Rendering/Programs/UnlitShaderProgram.hpp"
+#include "Rendering/Font.hpp"
 
 #include "Primitives/BoxPrimitive.hpp"
 #include "Primitives/SpherePrimitive.hpp"

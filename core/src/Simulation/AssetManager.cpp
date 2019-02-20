@@ -33,6 +33,8 @@
 #include "Foundation/StringUtils.hpp"
 #include "Rendering/Texture.hpp"
 #include "Rendering/ImageTGA.hpp"
+#include "Rendering/Font.hpp"
+#include "Rendering/SystemFont.hpp"
 
 using namespace crimild;
 
@@ -40,14 +42,20 @@ AssetManager::AssetManager( void )
 {
     if ( auto sim = Simulation::getInstance() ) {
         if ( auto settings = sim->getSettings() ) {
+            auto systemFont = settings->get< std::string >( "fonts.system", "" );
+            if ( systemFont != "" ) {
+                loadFont( FONT_SYSTEM, systemFont );
+            }
+            else {
+                set( FONT_SYSTEM, crimild::alloc< SystemFont >() );
+            }
+
             auto defaultFont = settings->get< std::string >( "fonts.default", "" );
             if ( defaultFont != "" ) {
                 loadFont( FONT_DEFAULT, defaultFont );
             }
-
-            auto systemFont = settings->get< std::string >( "fonts.system", "" );
-            if ( systemFont != "" ) {
-                loadFont( FONT_SYSTEM, systemFont );
+            else {
+                set( FONT_DEFAULT, crimild::retain( get< Font >( FONT_SYSTEM ) ), true );
             }
         }
     }
