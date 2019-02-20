@@ -6,6 +6,87 @@
 using namespace crimild;
 using namespace crimild::tools::fontgen;
 
+std::ostream &operator<<( std::ostream &out, Texture &texture )
+{
+
+	return out;
+	
+}
+
+void buildHeaderFile( std::string fontName )
+{
+    std::ofstream out( "texture.hpp" );
+    out << "#include <Rendering/Image.hpp>";
+    out << "\n";
+    out << "\nusing namespace crimild;";
+    out << "\n";
+
+	auto texture = crimild::alloc< Texture >( crimild::alloc< ImageTGA >( fontName + ".tga" ) );
+    auto image = texture->getImage();
+    out << "\nSharedPointer< Image > buildSystemFontTexture( void )";
+    out << "\n{";
+    out << "\n\tauto image = crimild::alloc< Image >( "
+        << image->getWidth()
+        << ", "
+        << image->getHeight()
+        << ", "
+        << image->getBpp()
+        << ", "
+        << "nullptr"
+        << ", "
+        << ( image->getBpp() == 4 ? "Image::PixelFormat::RGBA" : "Image::PixelFormat::RGB" )
+        << " );";
+    out << "\n\tauto *data = image->getData();";
+    crimild::Size count = image->getWidth() * image->getHeight() * image->getBpp();
+    auto data = image->getData();
+    for ( crimild::Size i = 0; i < count; ++i ) {
+        if ( data[ i ] != 0 ) {
+            out << "\n\tdata[ " << i << " ] = " << ( int ) data[ i ] << ";";
+        }
+    }
+    out << "\n\treturn image;";
+    out << "\n}\n";
+
+	// build glyphs
+	out << "\nstd::map< unsigned char, Font::Glyph > buildSystemFontGlyphs( void )";
+	out << "\n{";
+	out << "\n\tstd::map< unsigned char, Font::Glyph > glyphs;";
+
+	std::ifstream glyphs( fontName + ".txt" );
+	char buffer[ 1024 ];
+	while ( !glyphs.eof() ) {
+		glyphs.getline( buffer, 1024 );
+		std::stringstream line;
+		line << buffer;
+		Font::Glyph glyph;
+		int symbol;
+		line >> symbol
+			 >> glyph.width
+			 >> glyph.height
+			 >> glyph.bearingX
+			 >> glyph.bearingY
+			 >> glyph.advance
+			 >> glyph.uOffset
+			 >> glyph.vOffset
+			 >> glyph.u
+			 >> glyph.v;
+		out << "\n\tglyphs[ " << symbol << " ] = { "
+			<< symbol << ", "
+			<< glyph.width << ", "
+			<< glyph.height << ", "
+			<< glyph.bearingX << ", "
+			<< glyph.bearingY << ", "
+			<< glyph.advance << ", "
+			<< glyph.uOffset << ", "
+			<< glyph.vOffset << ", "
+			<< glyph.u << ", "
+			<< glyph.v << " };";
+	}
+	
+	out << "\n\treturn glyphs;";
+	out << "\n}\n";
+}
+
 std::string extractFontName( std::string input )
 {
 	std::string filename = input.substr( input.find_last_of( "/" ) + 1 );
@@ -36,6 +117,8 @@ int main( int argc, char **argv )
 		system( ( std::string( "open \"" ) + fontName + ".txt\"" ).c_str() );
 #endif
 	}
+
+    buildHeaderFile( fontName );
 
 	SDFGenerator sdfGenerator;
 	sdfGenerator.execute( fontName + ".tga" );

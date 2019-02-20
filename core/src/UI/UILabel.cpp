@@ -29,6 +29,7 @@
 #include "UIFrame.hpp"
 
 #include "Components/UIResponder.hpp"
+#include "Rendering/Font.hpp"
 #include "SceneGraph/Text.hpp"
 #include "Simulation/AssetManager.hpp"
 #include "Boundings/Box2DBoundingVolume.hpp"

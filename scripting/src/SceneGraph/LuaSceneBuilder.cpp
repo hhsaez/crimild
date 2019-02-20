@@ -82,6 +82,7 @@
 #include <Streaming/FileStream.hpp>
 #include <Loaders/OBJLoader.hpp>
 #include <Rendering/ShadowMap.hpp>
+#include <Rendering/Font.hpp>
 #include <Behaviors/Actions/MotionSeek.hpp>
 #include <Behaviors/Actions/MotionApply.hpp>
 #include <Behaviors/Actions/MotionReset.hpp>
