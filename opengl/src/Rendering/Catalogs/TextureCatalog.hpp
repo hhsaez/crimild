@@ -55,8 +55,6 @@ namespace crimild {
             virtual void cleanup( void ) override;
 
 		private:
-			int _boundTextureCount;
-            
             std::list< int > _textureIdsToDelete;
 		};
 
