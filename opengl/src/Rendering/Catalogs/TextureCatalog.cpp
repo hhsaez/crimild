@@ -37,7 +37,6 @@ using namespace crimild;
 using namespace crimild::opengl;
 
 TextureCatalog::TextureCatalog( void )
-	: _boundTextureCount( 0 )
 {
 
 }
@@ -75,8 +74,6 @@ void TextureCatalog::bind( Texture *texture )
 		return;
 	}
 
-	glBindTexture( OpenGLUtils::TEXTURE_TARGET[ texture->getTarget() ], texture->getCatalogId() );
-
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
@@ -88,8 +85,6 @@ void TextureCatalog::unbind( Texture *texture )
 	
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
-	glBindTexture( OpenGLUtils::TEXTURE_TARGET[ texture->getTarget() ], 0 );
-	
 	Catalog< Texture >::unbind( texture );
 
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
@@ -113,12 +108,8 @@ void TextureCatalog::bind( ShaderLocation *location, Texture *texture )
 	}
 
 	if ( location && location->isValid() ) {
-		glActiveTexture( GL_TEXTURE0 + _boundTextureCount );
-		glBindTexture( OpenGLUtils::TEXTURE_TARGET[ texture->getTarget() ], texture->getCatalogId() );
-		glUniform1i( location->getLocation(), _boundTextureCount );
-
-		++_boundTextureCount;
-	} 
+		glUniform1i( location->getLocation(), texture->getCatalogId() );
+	}
 
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
@@ -131,12 +122,6 @@ void TextureCatalog::unbind( ShaderLocation *location, Texture *texture )
 	
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
-	if ( _boundTextureCount > 0 ) {
-		--_boundTextureCount;
-		glActiveTexture( GL_TEXTURE0 + _boundTextureCount );
-		glBindTexture( OpenGLUtils::TEXTURE_TARGET[ texture->getTarget() ], 0 );
-	}
-	
 	Catalog< Texture >::unbind( location, texture );
 
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
@@ -151,6 +136,7 @@ void TextureCatalog::load( Texture *texture )
 	auto textureId = texture->getCatalogId();
 	auto textureTarget = OpenGLUtils::TEXTURE_TARGET[ texture->getTarget() ];
 
+    glActiveTexture( GL_TEXTURE0 + textureId );
     glBindTexture( textureTarget, textureId );
 
     glTexParameterf( textureTarget, GL_TEXTURE_MIN_FILTER, OpenGLUtils::TEXTURE_FILTER_MAP[ ( uint8_t ) texture->getMinFilter() ] );
