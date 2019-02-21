@@ -37,6 +37,7 @@
 
 #include "Rendering/ShaderGraph/OpenGLShaderGraph.hpp"
 
+#include <Foundation/Profiler.hpp>
 #include <Rendering/AlphaState.hpp>
 #include <Rendering/DepthState.hpp>
 #include <Rendering/ColorMaskState.hpp>
@@ -620,6 +621,8 @@ void OpenGLRenderer::unbindSpotLight( ShaderProgram *program, Light *light )
 
 void OpenGLRenderer::drawPrimitive( ShaderProgram *program, Primitive *primitive )
 {
+    CRIMILD_PROFILE( "OpenGLRenderer: Draw Call" );
+
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
 	GLenum type = OpenGLUtils::PRIMITIVE_TYPE[ ( uint8_t ) primitive->getType() ];
