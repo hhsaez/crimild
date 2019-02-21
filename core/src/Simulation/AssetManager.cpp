@@ -47,7 +47,7 @@ AssetManager::AssetManager( void )
                 loadFont( FONT_SYSTEM, systemFont );
             }
             else {
-                set( FONT_SYSTEM, crimild::alloc< SystemFont >() );
+                set( FONT_SYSTEM, crimild::alloc< SystemFont >(), true );
             }
 
             auto defaultFont = settings->get< std::string >( "fonts.default", "" );

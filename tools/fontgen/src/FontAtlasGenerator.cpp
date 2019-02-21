@@ -130,13 +130,16 @@ void FontAtlasGenerator::pushChar( unsigned char c )
 		_cursorY += _pixelSize + PADDING;
 	}
 
+    const float inv64 = 1.0f / 64.0f;
+    const float invPixelSize = 1.0f / ( float ) _pixelSize;
+
 	_glyphs 
 		<< ( int ) c 
-		<< " " << ( float ) ( metrics.width / 64 ) / ( float ) _pixelSize	
-		<< " " << ( float ) ( metrics.height / 64 ) / ( float ) _pixelSize
-		<< " " << ( float ) ( metrics.horiBearingX / 64 ) / ( float ) _pixelSize
-		<< " " << ( float ) ( metrics.horiBearingY / 64 ) / ( float ) _pixelSize
-		<< " " << ( float ) ( metrics.horiAdvance / 64 ) / ( float ) _pixelSize
+		<< " " << ( float ) metrics.width * inv64 * invPixelSize
+		<< " " << ( float ) metrics.height * inv64 * invPixelSize
+		<< " " << ( float ) metrics.horiBearingX * inv64 * invPixelSize
+		<< " " << ( float ) metrics.horiBearingY * inv64 * invPixelSize
+		<< " " << ( float ) metrics.horiAdvance * inv64 * invPixelSize
 		<< " " << ( float ) _cursorX / ( float ) _width
 		<< " " << ( float ) _cursorY / ( float ) _height
 		<< " " << ( float ) _face->glyph->bitmap.width / ( float ) _width

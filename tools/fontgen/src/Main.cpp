@@ -15,7 +15,12 @@ std::ostream &operator<<( std::ostream &out, Texture &texture )
 
 void buildHeaderFile( std::string fontName )
 {
-    std::ofstream out( "texture.hpp" );
+    std::ofstream out( fontName + ".hpp", std::ios::out );
+    if ( !out.is_open() ) {
+        CRIMILD_LOG_ERROR( "Cannot open file for writing: ", fontName, ".hpp" );
+        return;
+    }
+
     out << "#include <Rendering/Image.hpp>";
     out << "\n";
     out << "\nusing namespace crimild;";

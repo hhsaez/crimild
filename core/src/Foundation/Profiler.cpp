@@ -62,7 +62,7 @@ void ProfilerOutputHandler::beginOutput( crimild::Size fps, crimild::Real64 avgF
             << "MIN: " << std::setw( 10 ) << minFrameTime
             << "AVG: " << std::setw( 10 ) << avgFrameTime
             << "MAX: " << std::setw( 10 ) << maxFrameTime
-            << "\n--------------------------------------------------------------------------------------------\n";
+            << "\n----------------------------------------------------------------------------------------\n";
           
     // Rendering  
     _output << std::setiosflags( std::ios::fixed )
@@ -84,7 +84,7 @@ void ProfilerOutputHandler::beginOutput( crimild::Size fps, crimild::Real64 avgF
             << "\n   Programs:" 
                 << " Loaded: " << Renderer::getInstance()->getShaderProgramCatalog()->getResourceCount()
                 << " Active: " << Renderer::getInstance()->getShaderProgramCatalog()->getActiveResourceCount()
-            << "\n--------------------------------------------------------------------------------------------\n";
+            << "\n----------------------------------------------------------------------------------------\n";
 
     // Job system
     _output << "Job count (" << ( JobScheduler::getInstance()->getNumWorkers() + 1 ) << " workers): ";
@@ -93,7 +93,7 @@ void ProfilerOutputHandler::beginOutput( crimild::Size fps, crimild::Real64 avgF
     });
     JobScheduler::getInstance()->clearWorkerStats();
     _output << std::left 
-            << "\n--------------------------------------------------------------------------------------------\n";
+            << "\n----------------------------------------------------------------------------------------\n";
 
     // profilers
     _output << std::setiosflags( std::ios::fixed )
@@ -104,7 +104,7 @@ void ProfilerOutputHandler::beginOutput( crimild::Size fps, crimild::Real64 avgF
             << std::setw( 10 ) << std::right << "TIME | "
             << std::setw( 10 ) << std::right << "COUNT | "
             << std::left << "NAME"
-            << "\n--------------------------------------------------------------------------------------------\n";
+            << "\n----------------------------------------------------------------------------------------\n";
 }
 
 void ProfilerOutputHandler::sample( float minPc, float avgPc, float maxPc, unsigned int totalTime, unsigned int callCount, std::string name, unsigned int parentCount )
@@ -156,7 +156,10 @@ void ProfilerScreenOutputHandler::endOutput( void )
 {
     ProfilerOutputHandler::endOutput();
 
-    DebugRenderHelper::renderText( getOutput(), Vector3f( -0.9f, 0.9f, 0.0f ), RGBAColorf( 1.0f, 1.0f, 0.0f, 1.0f ) );
+    auto screen = Renderer::getInstance()->getScreenBuffer();
+    auto aspect = ( crimild::Real32 ) screen->getWidth() / ( crimild::Real32 ) screen->getHeight();
+
+    DebugRenderHelper::renderText( getOutput(), Vector3f( -aspect + 0.01f, 0.95f, 0.0f ), RGBAColorf( 1.0f, 1.0f, 0.0f, 1.0f ) );
 }
 
 ProfilerSample::ProfilerSample( std::string name )
@@ -172,6 +175,7 @@ ProfilerSample::~ProfilerSample( void )
 
 Profiler::Profiler( void )
 {
+    setOutputHandler( crimild::alloc< ProfilerScreenOutputHandler >() );
 	resetAll();
 }
 

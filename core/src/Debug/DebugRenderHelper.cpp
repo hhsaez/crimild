@@ -7,6 +7,7 @@
 #include "Rendering/FrameBufferObject.hpp"
 #include "Rendering/Programs/UnlitShaderProgram.hpp"
 #include "Rendering/Font.hpp"
+#include "Rendering/ShaderGraph/Constants.hpp"
 
 #include "Primitives/BoxPrimitive.hpp"
 #include "Primitives/SpherePrimitive.hpp"
@@ -24,6 +25,7 @@
 #include "Components/MaterialComponent.hpp"
 
 using namespace crimild;
+using namespace crimild::shadergraph::locations;
 
 #define CRIMILD_DEBUG_RENDER_HELPER_DEPTH_STATE "debug/render_helper/depth_state"
 #define CRIMILD_DEBUG_RENDER_HELPER_ALPHA_STATE "debug/render_helper/alpha_state"
@@ -195,40 +197,13 @@ void DebugRenderHelper::render( Geometry *geometry )
 	const auto SCREEN_HEIGHT = renderer->getScreenBuffer()->getHeight();
 	const auto SCREEN_ASPECT = ( crimild::Real32 ) SCREEN_WIDTH / ( crimild::Real32 ) SCREEN_HEIGHT;
 
-	geometry->local().translate().x() *= SCREEN_ASPECT;
-
-	geometry->perform( UpdateWorldState() );
-	geometry->perform( UpdateRenderState() );
-
-	const float top = 1.0f;
-	const float bottom = -1.0f;
-	const float right = SCREEN_ASPECT;
-	const float left = -SCREEN_ASPECT;
-	const float far = 1.0f;
-	const float near = -1.0f;
-
-	static const auto P_MATRIX = Matrix4f( 
-		2.0f / ( right - left ), 0.0f, 0.0f, - ( right + left ) / ( right - left ),
-		0.0f, 2.0f / ( top - bottom ), 0.0f, - ( top + bottom ) / ( top - bottom ),
-		0.0f, 0.0f, -2.0f / ( far - near ), - ( far + near ) / ( far - near ),
-		0.0f, 0.0f, 0.0f, 1.0f
-	);
-
-	static const auto V_MATRIX = Matrix4f(
-		1.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f
-	);
+    static const auto P_MATRIX = Frustumf( -SCREEN_ASPECT, SCREEN_ASPECT, -1.0f, 1.0f, 0.01f, 100.0f ).computeOrthographicMatrix();
+    static const auto V_MATRIX = Matrix4f::IDENTITY;
 
 	auto ms = geometry->getComponent< MaterialComponent >();
 	if ( ms != nullptr ) {
 		ms->forEachMaterial( [renderer, geometry]( Material *material ) {
 		    ShaderProgram *program = AssetManager::getInstance()->get< UnlitShaderProgram >();
-
-			if ( material->getProgram() != nullptr ) {
-				program = material->getProgram();
-			}
 
 			if ( program == nullptr ) {
 		        Log::error( CRIMILD_CURRENT_CLASS_NAME, "No program found for debug rendering" );
@@ -237,40 +212,36 @@ void DebugRenderHelper::render( Geometry *geometry )
 
 			renderer->bindProgram( program );
 
-			renderer->bindMaterial( program, material );
+            renderer->bindUniform( program->getLocation( PROJECTION_MATRIX_UNIFORM ), P_MATRIX );
+            renderer->bindUniform( program->getLocation( VIEW_MATRIX_UNIFORM ), V_MATRIX );
+            renderer->bindUniform( program->getLocation( MODEL_MATRIX_UNIFORM ), geometry->getWorld().computeModelMatrix() );
 
-			renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::PROJECTION_MATRIX_UNIFORM ), P_MATRIX );
-			renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM ), V_MATRIX );
-			renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM ), geometry->getWorld().computeModelMatrix() );
+            auto color = material->getDiffuse();
+            auto colorMap = material->getColorMap();
+            if ( colorMap == nullptr ) {
+                colorMap = crimild::get_ptr( Texture::ZERO );
+            }
+
+            renderer->bindUniform( program->getLocation( COLOR_UNIFORM ), color );
+            renderer->bindTexture( program->getLocation( COLOR_MAP_UNIFORM ), colorMap );
 
 			renderer->setDepthState( DepthState::DISABLED );
 			renderer->setAlphaState( AlphaState::ENABLED );
 
-			geometry->forEachPrimitive( [renderer, program]( Primitive *primitive ) {
-				auto vbo = primitive->getVertexBuffer();
-				if ( vbo == nullptr ) {
-					return;
-				}
-
-				auto ibo = primitive->getIndexBuffer();
-				if ( ibo == nullptr ) {
-					return;
-				}
-				
-		        renderer->bindVertexBuffer( program, vbo );
-		        renderer->bindIndexBuffer( program, ibo );
-		        
-		        renderer->drawPrimitive( program, primitive );
-		        
-		        renderer->unbindVertexBuffer( program, vbo );
-		        renderer->unbindIndexBuffer( program, ibo );
+			geometry->forEachPrimitive( [ renderer ]( Primitive *primitive ) {
+                renderer->bindPrimitive( nullptr, primitive );
+                renderer->drawPrimitive( nullptr, primitive );
+                renderer->unbindPrimitive( nullptr, primitive );
 			});
 
-			renderer->unbindMaterial( program, material );
+            renderer->unbindTexture( program->getLocation( COLOR_MAP_UNIFORM ), colorMap );
 
 			renderer->unbindProgram( program );
 		});
-	}	
+	}
+
+    renderer->setDepthState( DepthState::ENABLED );
+    renderer->setAlphaState( AlphaState::DISABLED );
 }
 
 void DebugRenderHelper::renderText( std::string str, const Vector3f &position, const RGBAColorf &color )
@@ -289,10 +260,10 @@ void DebugRenderHelper::renderText( std::string str, const Vector3f &position, c
 
 	text->setText( str );
 
-	text->local().setTranslate( position );
+    text->local().setTranslate( position );
 
-	text->perform( UpdateWorldState() );
-	text->perform( UpdateRenderState() );
+    text->perform( UpdateWorldState() );
+    text->perform( UpdateRenderState() );
 
 	render( text->getGeometry() );
 }
