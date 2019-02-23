@@ -52,52 +52,46 @@ TextureUniform::~TextureUniform( void )
 	
 }
 
-void TextureUniform::setValue( Texture *texture ) { _texture = crimild::retain( texture ); }
+void TextureUniform::setValue( Texture *texture )
+{
+    if ( crimild::get_ptr( _texture ) != texture ) {
+		_texture = crimild::retain( texture );
+		_needsBinding = true;
+	}
+}
+
 Texture *TextureUniform::getValue( void ) { return crimild::get_ptr( _texture ); }
 
 void TextureUniform::onBind( Renderer *renderer )
 {
-	renderer->bindTexture( getLocation(), getValue() );
+	if ( _needsBinding ) {
+        CRIMILD_PROFILE( "Bind Texture" );
+		renderer->bindTexture( getLocation(), getValue() );
+		_needsBinding = false;
+	}
 }
 
 void TextureUniform::onUnbind( Renderer *renderer )
 {
-	renderer->unbindTexture( getLocation(), getValue() );
+    renderer->unbindTexture( getLocation(), getValue() );
 }
 
-// light uniform
+// block uniform
 
-LightUniform::LightUniform( std::string name, crimild::Size index, Light *value )
-	: ShaderUniform( name ),
-	  _index( index ),
-	  _light( crimild::retain( value ) )
+BlockUniform::BlockUniform( std::string name, crimild::UInt32 blockId )
+    : ShaderUniform( name ),
+      _blockId( blockId )
 {
-	
+    setLocation( crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM_BLOCK, name ) );
 }
 
-LightUniform::LightUniform( std::string name, crimild::Size index, SharedPointer< Light > const &value )
-	: ShaderUniform( name ),
-	  _index( index ),
-	  _light( value )
+void BlockUniform::onBind( Renderer *renderer )
 {
-	
+    renderer->bindUniformBlock( getLocation(), _blockId );
 }
 
-LightUniform::~LightUniform( void )
+void BlockUniform::onUnbind( Renderer * )
 {
-	
-}
 
-void LightUniform::setValue( Light *light ) { _light = crimild::retain( light ); }
-Light *LightUniform::getValue( void ) { return crimild::get_ptr( _light ); }
-
-void LightUniform::onBind( Renderer *renderer )
-{
-	renderer->bindLight( getLocation(), getIndex(), getValue() );
-}
-
-void LightUniform::onUnbind( Renderer *renderer )
-{
-	renderer->unbindLight( getLocation(), getIndex(), getValue() );
 }
 

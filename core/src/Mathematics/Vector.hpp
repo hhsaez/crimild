@@ -133,10 +133,6 @@ namespace crimild {
             }
         }
 
-		~Vector( void )
-		{
-		}
-
 		Vector &operator=( const Vector &u )
 		{
 			memcpy( _data, u._data, sizeof( PRECISION ) * SIZE );

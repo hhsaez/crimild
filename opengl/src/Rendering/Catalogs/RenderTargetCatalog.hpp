@@ -44,7 +44,7 @@ namespace crimild {
 
 			Renderer *getRenderer( void ) { return _renderer; }
 
-			virtual int getNextResourceId( void ) override;
+			virtual int getNextResourceId( RenderTarget * ) override;
 
 			virtual void bind( RenderTarget *fbo ) override;
 			virtual void unbind( RenderTarget *fbo ) override;

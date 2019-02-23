@@ -41,7 +41,7 @@ namespace crimild {
 			PrimitiveCatalog( void );
 			virtual ~PrimitiveCatalog( void );
 
-			virtual int getNextResourceId( void ) override;
+			virtual int getNextResourceId( Primitive * ) override;
 
 			virtual void bind( Primitive *primitive ) override;
 			virtual void unbind( Primitive *primitive ) override;

@@ -41,7 +41,7 @@ namespace crimild {
 			IndexBufferObjectCatalog( void );
 			virtual ~IndexBufferObjectCatalog( void );
 
-			virtual int getNextResourceId( void ) override;
+			virtual int getNextResourceId( IndexBufferObject * ) override;
 
 			virtual void bind( IndexBufferObject *ibo ) override;
 			virtual void unbind( IndexBufferObject *ibo ) override;

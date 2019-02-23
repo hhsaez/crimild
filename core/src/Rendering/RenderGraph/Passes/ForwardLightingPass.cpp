@@ -33,8 +33,10 @@
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/Programs/ForwardShadingShaderProgram.hpp"
 #include "Rendering/Programs/UnlitShaderProgram.hpp"
+#include "SceneGraph/Light.hpp"
 #include "Simulation/AssetManager.hpp"
 #include "Foundation/Profiler.hpp"
+#include "Foundation/Containers/Map.hpp"
 #include "Rendering/ShaderGraph/Constants.hpp"
 
 using namespace crimild;
@@ -113,49 +115,39 @@ void ForwardLightingPass::render( Renderer *renderer, RenderQueue *renderQueue, 
         return;
     }
 
-    containers::Map< ShaderProgram *, containers::List< RenderQueue::Renderable * >> sorted;
+    const auto pMatrix = renderQueue->getProjectionMatrix();
+    const auto vMatrix = renderQueue->getViewMatrix();
 
-    renderQueue->each( renderables, [ this, &sorted ]( RenderQueue::Renderable *renderable ) {
-        auto program = crimild::get_ptr( _program );
-        if ( auto material = renderable->material ) {
-            if ( material->getProgram() != nullptr ) program = material->getProgram();
+    containers::Array< crimild::Int32 > ambientLightIndices;
+    containers::Array< crimild::Int32 > directionalLightIndices;
+    containers::Array< crimild::Int32 > pointLightIndices;
+    containers::Array< crimild::Int32 > spotLightIndices;
+	renderQueue->each( [ &ambientLightIndices, &directionalLightIndices, &pointLightIndices, &spotLightIndices ]( Light *light, crimild::Size ) {
+        auto lightId = light->getCatalogId();
+        switch ( light->getType() ) {
+            case Light::Type::AMBIENT:
+                ambientLightIndices.add( lightId );
+                break;
+
+            case Light::Type::DIRECTIONAL:
+                directionalLightIndices.add( lightId );
+                break;
+
+            case Light::Type::POINT:
+                pointLightIndices.add( lightId );
+                break;
+
+            case Light::Type::SPOT:
+                spotLightIndices.add( lightId );
+                break;
+
+            default:
+                break;
         }
-
-        sorted[ program ].add( renderable );
     });
 
-    sorted.each( [ this, renderer, renderQueue ]( ShaderProgram *program, containers::List< RenderQueue::Renderable * > &renderables ) {
-        render( renderer, renderQueue, program, renderables );
-    });
-}
-
-void ForwardLightingPass::render( Renderer *renderer, RenderQueue *renderQueue, ShaderProgram *program, containers::List< RenderQueue::Renderable * > &renderables )
-{
-	renderer->setDepthState( _depthState );
-	renderer->setAlphaState( AlphaState::DISABLED );
-	renderer->setCullFaceState( CullFaceState::ENABLED_BACK );
-
-	const auto pMatrix = renderQueue->getProjectionMatrix();
-	program->bindUniform( PROJECTION_MATRIX_UNIFORM, pMatrix );
-
-	const auto vMatrix = renderQueue->getViewMatrix();
-	program->bindUniform( VIEW_MATRIX_UNIFORM, vMatrix );
-
-	program->bindUniform( MODEL_MATRIX_UNIFORM, Matrix4f::IDENTITY );
-	program->bindUniform( NORMAL_MATRIX_UNIFORM, Matrix3f::IDENTITY );
-	
-	program->bindUniform( COLOR_UNIFORM, RGBAColorf::ONE );
-	program->bindUniform( COLOR_MAP_UNIFORM, crimild::get_ptr( Texture::ONE ) );
-	program->bindUniform( SPECULAR_UNIFORM, RGBAColorf::ONE );
-	program->bindUniform( SPECULAR_MAP_UNIFORM, crimild::get_ptr( Texture::ONE ) );
-	program->bindUniform( SHININESS_UNIFORM, 1.0f );
-	program->bindUniform( REFLECTION_UNIFORM, 0.0f );
-	program->bindUniform( REFLECTION_MAP_UNIFORM, crimild::get_ptr( Texture::ONE ) );
-	program->bindUniform( REFRACTION_UNIFORM, 1.0f );
-	program->bindUniform( REFRACTION_MAP_UNIFORM, crimild::get_ptr( Texture::ONE ) );
-
-	auto skybox = crimild::get_ptr( Texture::CUBE_ONE );
-	renderQueue->each(
+    auto skybox = crimild::get_ptr( Texture::CUBE_ONE );
+    renderQueue->each(
 		renderQueue->getRenderables( RenderQueue::RenderableType::SKYBOX ),
 		[ &skybox ]( RenderQueue::Renderable *renderable ) {
 			if ( auto material = renderable->material ) {
@@ -163,93 +155,73 @@ void ForwardLightingPass::render( Renderer *renderer, RenderQueue *renderQueue, 
 			}
 		}
 	);
-	program->bindUniform( ENVIRONMENT_MAP_UNIFORM, skybox );
-
+	
 	auto shadowAtlas = crimild::get_ptr( Texture::ONE );
 	if ( auto input = getShadowInput() ) {
 		if ( auto texture = input->getTexture() ) {
 			shadowAtlas = texture;
 		}
 	}
-	program->bindUniform( SHADOW_ATLAS_UNIFORM, shadowAtlas );
+	
+    renderQueue->each( renderables, [ renderer, pMatrix, vMatrix, skybox, shadowAtlas, ambientLightIndices, directionalLightIndices, pointLightIndices, spotLightIndices ]( RenderQueue::Renderable *renderable ) {
 
-	program->bindUniform( LIGHT_ARRAY_COUNT_UNIFORM, ( crimild::Int32 ) renderQueue->getLightCount() );
-	renderQueue->each( [ program ]( Light *light, int index ) {
-		if ( light == nullptr ) {
-			return;
+		auto material = renderable->material;
+		auto program = material->getProgram();
+		if ( program == nullptr ) {
+			material->setProgram( crimild::alloc< ForwardShadingShaderProgram >() );
+			program = material->getProgram();
 		}
 		
-		std::stringstream ss;
-		ss << LIGHT_UNIFORM << "_" << index;
-		program->bindUniform( ss.str(), light );
-	});
+		program->bindUniform( PROJECTION_MATRIX_UNIFORM, pMatrix );
+		program->bindUniform( VIEW_MATRIX_UNIFORM, vMatrix );
 
-	renderer->bindProgram( program );
-
-    renderables.each( [ renderer, program ]( RenderQueue::Renderable *renderable ) {
+        program->bindUniform( ENVIRONMENT_MAP_UNIFORM, skybox );
+        program->bindUniform( SHADOW_ATLAS_UNIFORM, shadowAtlas );
 
 		const auto &mMatrix = renderable->modelTransform;
-		renderer->bindUniform( program->getLocation( MODEL_MATRIX_UNIFORM ), mMatrix );
+		program->bindUniform( MODEL_MATRIX_UNIFORM, mMatrix );
 		const auto nMatrix = Matrix3f( mMatrix ).getInverse().getTranspose();
-        renderer->bindUniform( program->getLocation( NORMAL_MATRIX_UNIFORM ), nMatrix );
+        program->bindUniform( NORMAL_MATRIX_UNIFORM, nMatrix );
 
-		if ( auto material = renderable->material ) {
-			renderer->bindUniform( program->getLocation( COLOR_UNIFORM ), material->getDiffuse() );
-			if ( material->getColorMap() ) {
-				renderer->bindTexture( program->getLocation( COLOR_MAP_UNIFORM ), material->getColorMap() );
-			}
+		program->bindUniform( COLOR_UNIFORM, material->getDiffuse() );
+		if ( material->getColorMap() ) program->bindUniform( COLOR_MAP_UNIFORM, material->getColorMap() );
 
-			renderer->bindUniform( program->getLocation( SPECULAR_UNIFORM ), material->getSpecular() );
-			if ( material->getSpecularMap() ) {
-				renderer->bindTexture( program->getLocation( SPECULAR_MAP_UNIFORM ), material->getSpecularMap() );
-			}
+		program->bindUniform( SPECULAR_UNIFORM, material->getSpecular() );
+		if ( material->getSpecularMap() ) program->bindUniform( SPECULAR_MAP_UNIFORM, material->getSpecularMap() );
 
-			renderer->bindUniform( program->getLocation( SHININESS_UNIFORM ), material->getShininess() );
+		program->bindUniform( SHININESS_UNIFORM, material->getShininess() );
 
-			renderer->bindUniform( program->getLocation( REFLECTION_UNIFORM ), material->getReflection() );
-			if ( material->getReflectionMap() ) {
-				renderer->bindTexture( program->getLocation( REFLECTION_MAP_UNIFORM ), material->getReflectionMap() );
-			}
+		program->bindUniform( REFLECTION_UNIFORM, material->getReflection() );
+		if ( material->getReflectionMap() ) program->bindUniform( REFLECTION_MAP_UNIFORM, material->getReflectionMap() );
 			
-			renderer->bindUniform( program->getLocation( REFRACTION_UNIFORM ), material->getRefraction() );
-			if ( material->getRefractionMap() ) {
-				renderer->bindTexture( program->getLocation( REFRACTION_MAP_UNIFORM ), material->getRefractionMap() );
-			}
+		program->bindUniform( REFRACTION_UNIFORM, material->getRefraction() );
+		if ( material->getRefractionMap() ) program->bindUniform( REFRACTION_MAP_UNIFORM, material->getRefractionMap() );
 
-			if ( material->getAlphaState() ) renderer->setAlphaState( material->getAlphaState() );
-			if ( material->getCullFaceState() ) renderer->setCullFaceState( material->getCullFaceState() );
-		}
-		
+		if ( material->getAlphaState() ) renderer->setAlphaState( material->getAlphaState() );
+		if ( material->getCullFaceState() ) renderer->setCullFaceState( material->getCullFaceState() );
+
+        program->bindUniform( AMBIENT_LIGHT_COUNT_UNIFORM, ( crimild::Int32 ) ambientLightIndices.size() );
+        program->bindUniform( AMBIENT_LIGHT_INDICES_UNIFORM, ambientLightIndices );
+        program->bindUniform( DIRECTIONAL_LIGHT_COUNT_UNIFORM, ( crimild::Int32 ) directionalLightIndices.size() );
+        program->bindUniform( DIRECTIONAL_LIGHT_INDICES_UNIFORM, directionalLightIndices );
+        program->bindUniform( POINT_LIGHT_COUNT_UNIFORM, ( crimild::Int32 ) pointLightIndices.size() );
+        program->bindUniform( POINT_LIGHT_INDICES_UNIFORM, pointLightIndices );
+        program->bindUniform( SPOT_LIGHT_COUNT_UNIFORM, ( crimild::Int32 ) spotLightIndices.size() );
+        program->bindUniform( SPOT_LIGHT_INDICES_UNIFORM, spotLightIndices );
+
+		renderer->bindProgram( program );
+
 		renderable->geometry->forEachPrimitive( [ renderer ]( Primitive *primitive ) {
 			renderer->bindPrimitive( nullptr, primitive );
 			renderer->drawPrimitive( nullptr, primitive );
 			renderer->unbindPrimitive( nullptr, primitive );
 		});
+
+		renderer->unbindProgram( program );
 		
-		if ( auto material = renderable->material ) {
-			if ( material->getColorMap() ) {
-				renderer->unbindTexture( program->getLocation( COLOR_MAP_UNIFORM ), material->getColorMap() );
-			}
-			if ( material->getSpecularMap() ) {
-				renderer->unbindTexture( program->getLocation( SPECULAR_MAP_UNIFORM ), material->getSpecularMap() );
-			}
-			if ( material->getReflectionMap() ) {
-				renderer->unbindTexture( program->getLocation( REFLECTION_MAP_UNIFORM ), material->getReflectionMap() );
-			}
-			if ( material->getRefractionMap() ) {
-				renderer->unbindTexture( program->getLocation( REFRACTION_MAP_UNIFORM ), material->getRefractionMap() );
-			}
-
-			if ( material->getAlphaState() ) renderer->setAlphaState( AlphaState::DISABLED );
-			if ( material->getCullFaceState() ) renderer->setCullFaceState( CullFaceState::ENABLED_BACK );
-		}
-
+		renderer->setDepthState( DepthState::ENABLED );
+		renderer->setAlphaState( AlphaState::DISABLED );
+		renderer->setCullFaceState( CullFaceState::ENABLED_BACK );
 	});
-
-	renderer->unbindProgram( program );
-
-	renderer->setDepthState( DepthState::ENABLED );
-	renderer->setAlphaState( AlphaState::DISABLED );
-	renderer->setCullFaceState( CullFaceState::ENABLED_BACK );
 }
 

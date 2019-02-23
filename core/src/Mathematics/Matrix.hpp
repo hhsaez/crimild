@@ -125,10 +125,6 @@ namespace crimild {
 			_data[ 15 ] = a33;
 		}
 
-		~Matrix( void )
-		{
-		}
-
 		Matrix &operator=( const Matrix &u )
 		{
 			memcpy( _data, u._data, sizeof( PRECISION ) * SIZE * SIZE );

@@ -114,7 +114,7 @@ void Text::setFont( SharedPointer< Font > const &font )
 //    }
 
     _material->setColorMap( _font->getTexture() );
-    _material->setProgram( AssetManager::getInstance()->get< UnlitShaderProgram >() );
+    _material->setProgram( crimild::alloc< UnlitShaderProgram >() );
 
 	_material->getAlphaState()->setEnabled( true );
     

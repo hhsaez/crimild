@@ -46,7 +46,7 @@ RenderTargetCatalog::~RenderTargetCatalog( void )
 
 }
 
-int RenderTargetCatalog::getNextResourceId( void )
+int RenderTargetCatalog::getNextResourceId( RenderTarget * )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
     

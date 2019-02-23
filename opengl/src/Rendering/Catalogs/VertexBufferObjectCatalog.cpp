@@ -45,7 +45,7 @@ VertexBufferObjectCatalog::~VertexBufferObjectCatalog( void )
 
 }
 
-int VertexBufferObjectCatalog::getNextResourceId( void )
+int VertexBufferObjectCatalog::getNextResourceId( VertexBufferObject * )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
     

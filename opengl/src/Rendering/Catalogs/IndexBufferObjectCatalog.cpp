@@ -43,7 +43,7 @@ IndexBufferObjectCatalog::~IndexBufferObjectCatalog( void )
 
 }
 
-int IndexBufferObjectCatalog::getNextResourceId( void )
+int IndexBufferObjectCatalog::getNextResourceId( IndexBufferObject * )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
     

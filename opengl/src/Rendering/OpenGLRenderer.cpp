@@ -34,6 +34,7 @@
 #include "Catalogs/TextureCatalog.hpp"
 #include "Catalogs/RenderTargetCatalog.hpp"
 #include "Catalogs/PrimitiveCatalog.hpp"
+#include "Catalogs/LightCatalog.hpp"
 
 #include "Rendering/ShaderGraph/OpenGLShaderGraph.hpp"
 
@@ -68,6 +69,7 @@ OpenGLRenderer::OpenGLRenderer( SharedPointer< FrameBufferObject > const &screen
 	setTextureCatalog( crimild::alloc< TextureCatalog >() );
 	setRenderTargetCatalog( crimild::alloc< RenderTargetCatalog >( this ) );
 	setPrimitiveCatalog( crimild::alloc< PrimitiveCatalog >() );
+    setLightCatalog( crimild::alloc< LightCatalog >() );
 
 	if ( screenBuffer != nullptr ) {
 		setScreenBuffer( screenBuffer );
@@ -104,6 +106,9 @@ void OpenGLRenderer::configure( void )
 		exit( 1 );
     }
 #endif
+
+    // Call base class after GLEW has started (if needed)
+    Renderer::configure();
 
     glEnable( GL_DEPTH_TEST );
     glDepthFunc( GL_LEQUAL );
@@ -173,6 +178,17 @@ void OpenGLRenderer::bindUniform( ShaderLocation *location, int value )
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
+void OpenGLRenderer::bindUniform( ShaderLocation *location, const containers::Array< crimild::Int32 > &value )
+{
+    CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+
+    if ( location != nullptr && location->isValid() ) {
+        glUniform1iv( location->getLocation(), value.size(), value.getData() );
+    }
+
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+}
+
 void OpenGLRenderer::bindUniform( ShaderLocation *location, float value )
 {
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
@@ -239,384 +255,10 @@ void OpenGLRenderer::bindUniform( ShaderLocation *location, const Matrix3f &matr
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void OpenGLRenderer::bindLight( ShaderLocation *location, crimild::Size index, Light *light )
+void OpenGLRenderer::bindUniformBlock( ShaderLocation *location, crimild::Int32 blockId )
 {
-	if ( location == nullptr || light == nullptr ) {
-		return;
-	}
-
-	auto program = location->getProgram();
-	if ( program == nullptr ) {
-		return;
-	}
-
-	auto lightType = light->getType();
-	switch ( lightType ) {
-		case Light::Type::AMBIENT:
-			++_ambientLightCount;
-			bindAmbientLight( program, light );
-			break;
-
-		case Light::Type::DIRECTIONAL:
-			++_directionalLightCount;
-			bindDirectionalLight( program, light );
-			break;
-
-		case Light::Type::POINT:
-			++_pointLightCount;
-			bindPointLight( program, light );
-			break;
-
-		case Light::Type::SPOT:
-			++_spotLightCount;
-			bindSpotLight( program, light );
-			break;
-
-		default:
-			break;
-	}
-}
-
-void OpenGLRenderer::unbindLight( ShaderLocation *location, crimild::Size index, Light *light )
-{
-	if ( light == nullptr ) {
-		return;
-	}
-
-	auto program = location->getProgram();
-	if ( program == nullptr ) {
-		return;
-	}
-	
-	switch ( light->getType() ) {
-		case Light::Type::AMBIENT:
-			unbindAmbientLight( program, light );
-			--_ambientLightCount;
-			break;
-
-		case Light::Type::DIRECTIONAL:
-			unbindDirectionalLight( program, light );
-			--_directionalLightCount;
-			break;
-
-		case Light::Type::POINT:
-			unbindPointLight( program, light );
-			--_pointLightCount;
-			break;
-
-		case Light::Type::SPOT:
-			unbindSpotLight( program, light );
-			--_spotLightCount;
-			break;
-
-		default:
-			break;
-	}
-}
-
-void OpenGLRenderer::bindAmbientLight( ShaderProgram *program, Light *light )
-{
-	auto index = _ambientLightCount - 1;
-
-	{
-		auto loc = glGetUniformLocation( program->getCatalogId(), "uAmbientLightCount" );
-		if ( loc >= 0 ) {
-			glUniform1i( loc, _ambientLightCount );
-		}
-	}
-
-	{
-		auto locName = OpenGLUtils::buildArrayShaderLocationName( "uAmbientLights", index, "ambient" );
-		auto loc = glGetUniformLocation( program->getCatalogId(), locName.c_str() );
-		if ( loc >= 0 ) {
-			glUniform3fv( loc, 1, static_cast< const GLfloat * >( light->getAmbient().getData() ) );
-		}
-	}
-}
-
-void OpenGLRenderer::unbindAmbientLight( ShaderProgram *program, Light *light )
-{
-
-}
-
-void OpenGLRenderer::bindDirectionalLight( ShaderProgram *program, Light *light )
-{
-	auto index = _directionalLightCount - 1;
-	auto shadowMap = light->getShadowMap();
-
-	{
-		auto loc = glGetUniformLocation( program->getCatalogId(), "uDirectionalLightCount" );
-		if ( loc >= 0 ) {
-			glUniform1i( loc, _directionalLightCount );
-		}
-	}
-
-	{
-		auto loc = glGetUniformLocation(
-			program->getCatalogId(),
-			OpenGLUtils::buildArrayShaderLocationName( "uDirectionalLights", index, "ambient" ).c_str() );
-		if ( loc >= 0 ) {
-			glUniform3fv( loc, 1, static_cast< const GLfloat * >( light->getAmbient().getData() ) );
-		}
-	}
-
-	{
-		auto loc = glGetUniformLocation(
-			program->getCatalogId(),
-			OpenGLUtils::buildArrayShaderLocationName( "uDirectionalLights", index, "diffuse" ).c_str() );
-		if ( loc >= 0 ) {
-			glUniform3fv( loc, 1, static_cast< const GLfloat * >( light->getColor().getData() ) );
-		}
-	}
-
-	{
-		auto loc = glGetUniformLocation(
-			program->getCatalogId(),
-			OpenGLUtils::buildArrayShaderLocationName( "uDirectionalLights", index, "direction" ).c_str() );
-		if ( loc >= 0 ) {
-			auto direction = -light->getDirection();
-			glUniform3fv( loc, 1, static_cast< const GLfloat * >( direction.getData() ) );
-		}
-	}
-
-	{
-		auto loc = glGetUniformLocation(
-			program->getCatalogId(),
-			OpenGLUtils::buildArrayShaderLocationName( "uDirectionalLights", index, "hasShadowMap" ).c_str() );
-		if ( loc >= 0 ) {
-			glUniform1i( loc, shadowMap != nullptr ? 1 : 0 );
-		}
-	}
-
-	{
-		auto loc = glGetUniformLocation(
-			program->getCatalogId(),
-			OpenGLUtils::buildArrayShaderLocationName( "uDirectionalLights", index, "lightSpaceMatrix" ).c_str() );
-		if ( loc >= 0 ) {
-			auto lsm = Matrix4f::IDENTITY;
-			if ( shadowMap != nullptr ) {
-				// Why reversing the order? P*V seems more natural. But ViewMatrix is inverted!!
-				lsm = shadowMap->getLightViewMatrix() * shadowMap->getLightProjectionMatrix();
-			}
-			glUniformMatrix4fv( loc, 1, GL_FALSE, static_cast< const GLfloat * >( lsm.getData() ) );
-		}
-	}
-
-	{
-		auto loc = glGetUniformLocation(
-			program->getCatalogId(),
-			OpenGLUtils::buildArrayShaderLocationName( "uDirectionalLights", index, "shadowMinMaxBias" ).c_str() );
-		if ( loc >= 0 ) {
-			auto bias = Vector2f::ZERO;
-			if ( shadowMap != nullptr ) {
-				bias = Vector2f( shadowMap->getMinBias(), shadowMap->getMaxBias() );
-			}
-			glUniform2fv( loc, 1, static_cast< const GLfloat * >( bias.getData() ) );
-		}
-	}
-
-	{
-		auto loc = glGetUniformLocation(
-			program->getCatalogId(),
-			OpenGLUtils::buildArrayShaderLocationName( "uDirectionalLights", index, "shadowMapViewport" ).c_str() );
-		if ( loc >= 0 ) {
-			auto viewport = Vector4f::ZERO;
-			if ( shadowMap != nullptr ) {
-				viewport = shadowMap->getViewport();
-			}
-			glUniform4fv( loc, 1, static_cast< const GLfloat * >( viewport.getData() ) );
-		}
-		
-	}
-}
-
-void OpenGLRenderer::unbindDirectionalLight( ShaderProgram *program, Light *light )
-{
-
-}
-
-void OpenGLRenderer::bindPointLight( ShaderProgram *program, Light *light )
-{
-	auto index = _pointLightCount - 1;
-
-	{
-		auto loc = glGetUniformLocation( program->getCatalogId(), "uPointLightCount" );
-		if ( loc >= 0 ) {
-			glUniform1i( loc, _pointLightCount );
-		}
-	}
-
-	{
-		auto loc = glGetUniformLocation(
-			program->getCatalogId(),
-			OpenGLUtils::buildArrayShaderLocationName( "uPointLights", index, "ambient" ).c_str() );
-		if ( loc >= 0 ) {
-			glUniform3fv( loc, 1, static_cast< const GLfloat * >( light->getAmbient().getData() ) );
-		}
-	}
-
-	{
-		auto loc = glGetUniformLocation(
-			program->getCatalogId(),
-			OpenGLUtils::buildArrayShaderLocationName( "uPointLights", index, "diffuse" ).c_str() );
-		if ( loc >= 0 ) {
-			glUniform3fv( loc, 1, static_cast< const GLfloat * >( light->getColor().getData() ) );
-		}
-	}
-
-	{
-		auto loc = glGetUniformLocation(
-			program->getCatalogId(),
-			OpenGLUtils::buildArrayShaderLocationName( "uPointLights", index, "position" ).c_str() );
-		if ( loc >= 0 ) {
-			glUniform3fv( loc, 1, static_cast< const GLfloat * >( light->getWorld().getTranslate().getData() ) );
-		}
-	}
-
-	{
-		auto loc = glGetUniformLocation(
-			program->getCatalogId(),
-			OpenGLUtils::buildArrayShaderLocationName( "uPointLights", index, "attenuation" ).c_str() );
-		if ( loc >= 0 ) {
-			glUniform3fv( loc, 1, static_cast< const GLfloat * >( light->getAttenuation().getData() ) );
-		}
-	}
-}
-
-void OpenGLRenderer::unbindPointLight( ShaderProgram *program, Light *light )
-{
-
-}
-
-void OpenGLRenderer::bindSpotLight( ShaderProgram *program, Light *light )
-{
-	auto index = _spotLightCount - 1;
-	auto shadowMap = light->getShadowMap();
-
-	{
-		auto loc = glGetUniformLocation( program->getCatalogId(), "uSpotLightCount" );
-		if ( loc >= 0 ) {
-			glUniform1i( loc, _spotLightCount );
-		}
-	}
-
-	{
-		auto loc = glGetUniformLocation(
-			program->getCatalogId(),
-			OpenGLUtils::buildArrayShaderLocationName( "uSpotLights", index, "ambient" ).c_str() );
-		if ( loc >= 0 ) {
-			glUniform3fv( loc, 1, static_cast< const GLfloat * >( light->getAmbient().getData() ) );
-		}
-	}
-
-	{
-		auto loc = glGetUniformLocation(
-			program->getCatalogId(),
-			OpenGLUtils::buildArrayShaderLocationName( "uSpotLights", index, "diffuse" ).c_str() );
-		if ( loc >= 0 ) {
-			glUniform3fv( loc, 1, static_cast< const GLfloat * >( light->getColor().getData() ) );
-		}
-	}
-
-	{
-		auto loc = glGetUniformLocation(
-			program->getCatalogId(),
-			OpenGLUtils::buildArrayShaderLocationName( "uSpotLights", index, "direction" ).c_str() );
-		if ( loc >= 0 ) {
-			glUniform3fv( loc, 1, static_cast< const GLfloat * >( light->getDirection().getData() ) );
-		}
-	}
-
-	{
-		auto loc = glGetUniformLocation(
-			program->getCatalogId(),
-			OpenGLUtils::buildArrayShaderLocationName( "uSpotLights", index, "position" ).c_str() );
-		if ( loc >= 0 ) {
-			glUniform3fv( loc, 1, static_cast< const GLfloat * >( light->getWorld().getTranslate().getData() ) );
-		}
-	}
-
-	{
-		auto loc = glGetUniformLocation(
-			program->getCatalogId(),
-			OpenGLUtils::buildArrayShaderLocationName( "uSpotLights", index, "attenuation" ).c_str() );
-		if ( loc >= 0 ) {
-			glUniform3fv( loc, 1, static_cast< const GLfloat * >( light->getAttenuation().getData() ) );
-		}
-	}
-
-	{
-		auto loc = glGetUniformLocation(
-			program->getCatalogId(),
-			OpenGLUtils::buildArrayShaderLocationName( "uSpotLights", index, "innerCutOff" ).c_str() );
-		if ( loc >= 0 ) {
-			glUniform1f( loc, Numericf::cos( light->getInnerCutoff() ) );
-		}
-	}
-
-	{
-		auto loc = glGetUniformLocation(
-			program->getCatalogId(),
-			OpenGLUtils::buildArrayShaderLocationName( "uSpotLights", index, "outerCutOff" ).c_str() );
-		if ( loc >= 0 ) {
-			glUniform1f( loc, Numericf::cos( light->getOuterCutoff() ) );
-		}
-	}
-
-	{
-		auto loc = glGetUniformLocation(
-			program->getCatalogId(),
-			OpenGLUtils::buildArrayShaderLocationName( "uSpotLights", index, "hasShadowMap" ).c_str() );
-		if ( loc >= 0 ) {
-			glUniform1i( loc, shadowMap != nullptr ? 1 : 0 );
-		}
-	}
-
-	{
-		auto loc = glGetUniformLocation(
-			program->getCatalogId(),
-			OpenGLUtils::buildArrayShaderLocationName( "uSpotLights", index, "lightSpaceMatrix" ).c_str() );
-		if ( loc >= 0 ) {
-			auto lsm = Matrix4f::IDENTITY;
-			if ( shadowMap != nullptr ) {
-				// Why reversing the order? P*V seems more natural. But ViewMatrix is inverted!!
-				lsm = shadowMap->getLightViewMatrix() * shadowMap->getLightProjectionMatrix();
-			}
-			glUniformMatrix4fv( loc, 1, GL_FALSE, static_cast< const GLfloat * >( lsm.getData() ) );
-		}
-	}
-
-	{
-		auto loc = glGetUniformLocation(
-			program->getCatalogId(),
-			OpenGLUtils::buildArrayShaderLocationName( "uSpotLights", index, "shadowMinMaxBias" ).c_str() );
-		if ( loc >= 0 ) {
-			auto bias = Vector2f::ZERO;
-			if ( shadowMap != nullptr ) {
-				bias = Vector2f( shadowMap->getMinBias(), shadowMap->getMaxBias() );
-			}
-			glUniform2fv( loc, 1, static_cast< const GLfloat * >( bias.getData() ) );
-		}
-	}
-
-	{
-		auto loc = glGetUniformLocation(
-			program->getCatalogId(),
-			OpenGLUtils::buildArrayShaderLocationName( "uSpotLights", index, "shadowMapViewport" ).c_str() );
-		if ( loc >= 0 ) {
-			auto viewport = Vector4f::ZERO;
-			if ( shadowMap != nullptr ) {
-				viewport = shadowMap->getViewport();
-			}
-			glUniform4fv( loc, 1, static_cast< const GLfloat * >( viewport.getData() ) );
-		}
-		
-	}
-}
-
-void OpenGLRenderer::unbindSpotLight( ShaderProgram *program, Light *light )
-{
-
+    auto program = location->getProgram();
+    glUniformBlockBinding( program->getCatalogId(), location->getLocation(), blockId );
 }
 
 void OpenGLRenderer::drawPrimitive( ShaderProgram *program, Primitive *primitive )

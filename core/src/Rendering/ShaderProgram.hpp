@@ -192,13 +192,13 @@ namespace crimild {
 		void forEachUniform( std::function< void( ShaderUniform * ) > callback );
 
 		void bindUniform( std::string name, crimild::Int32 value );
+        void bindUniform( std::string name, const containers::Array< crimild::Int32 > &value );
 		void bindUniform( std::string name, crimild::Real32 value );
 		void bindUniform( std::string name, const Matrix3f &value );
 		void bindUniform( std::string name, const Matrix4f &value );
 		void bindUniform( std::string name, const RGBAColorf &value );
 		void bindUniform( std::string name, const RGBColorf &value );
 		void bindUniform( std::string name, Texture *value );
-		void bindUniform( std::string name, Light *light );
 
 	private:
 		UniformMap _uniforms;

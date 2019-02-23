@@ -47,7 +47,7 @@ PrimitiveCatalog::~PrimitiveCatalog( void )
 
 }
 
-int PrimitiveCatalog::getNextResourceId( void )
+int PrimitiveCatalog::getNextResourceId( Primitive * )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 

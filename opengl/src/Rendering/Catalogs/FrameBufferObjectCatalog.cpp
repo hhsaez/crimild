@@ -46,7 +46,7 @@ FrameBufferObjectCatalog::~FrameBufferObjectCatalog( void )
 
 }
 
-int FrameBufferObjectCatalog::getNextResourceId( void )
+int FrameBufferObjectCatalog::getNextResourceId( FrameBufferObject * )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
     

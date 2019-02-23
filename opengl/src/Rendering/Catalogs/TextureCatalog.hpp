@@ -41,7 +41,7 @@ namespace crimild {
 			TextureCatalog( void );
 			virtual ~TextureCatalog( void );
 
-			virtual int getNextResourceId( void ) override;
+			virtual int getNextResourceId( Texture * ) override;
 
 			virtual void bind( Texture *texture ) override;
 			virtual void unbind( Texture *texture ) override;

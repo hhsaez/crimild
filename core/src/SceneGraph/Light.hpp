@@ -29,12 +29,13 @@
 #define CRIMILD_SCENEGRAPH_LIGHT_
 
 #include "Node.hpp"
+#include "Rendering/Catalog.hpp"
 
 namespace crimild {
 
 	class ShadowMap;
 
-	class Light : public Node {
+	class Light : public Node, public Catalog< Light >::Resource {
 		CRIMILD_IMPLEMENT_RTTI( crimild::Light )
 		
 	public:

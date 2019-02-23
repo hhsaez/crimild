@@ -376,11 +376,11 @@ void OBJLoader::readMaterialShaderProgram( std::stringstream &line )
 
 	switch ( illumLevel ) {
 	    case 0:
-            _currentMaterial->setProgram( AssetManager::getInstance()->get< UnlitShaderProgram >() );
+            _currentMaterial->setProgram( crimild::alloc< UnlitShaderProgram >() );
 			break;
 
         case 1:
-            _currentMaterial->setProgram( AssetManager::getInstance()->get< UnlitShaderProgram >() );
+            _currentMaterial->setProgram( crimild::alloc< UnlitShaderProgram >() );
             break;
 
         case 3:

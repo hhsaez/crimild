@@ -48,7 +48,7 @@ UIBackground::UIBackground( const RGBAColorf &color )
 	auto m = crimild::alloc< Material >();
 	m->setDiffuse( color );
 	m->setDepthState( DepthState::DISABLED );
-    m->setProgram( AssetManager::getInstance()->get< UnlitShaderProgram >() );
+    m->setProgram( crimild::alloc< UnlitShaderProgram >() );
 	_geometry->getComponent< MaterialComponent >()->attachMaterial( m );
 }
 

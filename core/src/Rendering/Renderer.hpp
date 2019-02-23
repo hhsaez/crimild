@@ -37,6 +37,8 @@
 #include "Mathematics/Matrix.hpp"
 #include "Mathematics/Rect.hpp"
 
+#include "SceneGraph/Light.hpp"
+
 #include <map>
 
 namespace crimild {
@@ -50,7 +52,6 @@ namespace crimild {
 	class RenderTarget;
     class Geometry;
     class IndexBufferObject;
-    class Light;
     class Material;
     class RenderQueue;
     class ShaderLocation;
@@ -82,7 +83,9 @@ namespace crimild {
 		virtual ~Renderer( void );
 
 	public:
-		virtual void configure( void ) = 0;
+        virtual void configure( void );
+
+        virtual crimild::Size getMaxLights( Light::Type lightType ) const { return 10; }
 
 	public:
         /**
@@ -120,12 +123,15 @@ namespace crimild {
 		virtual void bindUniform( ShaderLocation *location, bool value ) { bindUniform( location, value ? 1 : 0 ); }
 		virtual void bindUniform( ShaderLocation *location, size_t value ) { bindUniform( location, ( int ) value ); }
 		virtual void bindUniform( ShaderLocation *location, int value ) = 0;
+        virtual void bindUniform( ShaderLocation *location, const containers::Array< crimild::Int32 > &value ) = 0;
 		virtual void bindUniform( ShaderLocation *location, float value ) = 0;
 		virtual void bindUniform( ShaderLocation *location, const Vector3f &vector ) = 0;
 		virtual void bindUniform( ShaderLocation *location, const Vector2f &vector ) = 0;
 		virtual void bindUniform( ShaderLocation *location, const RGBAColorf &color ) = 0;
 		virtual void bindUniform( ShaderLocation *location, const Matrix4f &matrix ) = 0;
 		virtual void bindUniform( ShaderLocation *location, const Matrix3f &matrix ) = 0;
+
+        virtual void bindUniformBlock( ShaderLocation *location, crimild::Int32 blockId ) = 0;
 
 	public:
         virtual void bindMaterial( ShaderProgram *program, Material *material );
@@ -149,14 +155,8 @@ namespace crimild {
 		virtual void unbindTexture( ShaderLocation *location, Texture *texture );
 
 	public:
-		virtual void bindLight( ShaderProgram *program, Light *light );
-		virtual void unbindLight( ShaderProgram *program, Light *light );
-
-		virtual void bindLight( ShaderLocation *location, crimild::Size index, Light *light ) = 0;
-		virtual void unbindLight( ShaderLocation *location, crimild::Size index, Light *light ) = 0;
-		
-	private:
-		int _lightCount;
+		virtual void bindLight( Light *light );
+		virtual void unbindLight( Light *light );
 
 	public:
 		virtual void bindPrimitive( ShaderProgram *program, Primitive *primitive );
@@ -218,6 +218,9 @@ namespace crimild {
 		Catalog< Primitive > *getPrimitiveCatalog( void ) { return crimild::get_ptr( _primitiveCatalog ); }
 		void setPrimitiveCatalog( SharedPointer< Catalog< Primitive >> const &catalog ) { _primitiveCatalog = catalog; }
 
+        Catalog< Light > *getLightCatalog( void ) { return crimild::get_ptr( _lightCatalog ); }
+        void setLightCatalog( SharedPointer< Catalog< Light >> const &catalog ) { _lightCatalog = catalog; }
+
 	private:
 		SharedPointer< Catalog< ShaderProgram >> _shaderProgramCatalog;
 		SharedPointer< Catalog< Texture >> _textureCatalog;
@@ -226,6 +229,7 @@ namespace crimild {
 		SharedPointer< Catalog< FrameBufferObject >> _frameBufferObjectCatalog;
 		SharedPointer< Catalog< RenderTarget >> _renderTargetCatalog;
 		SharedPointer< Catalog< Primitive >> _primitiveCatalog;
+        SharedPointer< Catalog< Light >> _lightCatalog;
 
 	public:
 		virtual SharedPointer< shadergraph::ShaderGraph > createShaderGraph( void ) = 0;

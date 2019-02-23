@@ -47,7 +47,7 @@ Light::Light( Type type )
 
 Light::~Light( void )
 {
-
+	unload();
 }
 
 void Light::accept( NodeVisitor &visitor )

@@ -46,7 +46,7 @@ TextureCatalog::~TextureCatalog( void )
 
 }
 
-int TextureCatalog::getNextResourceId( void )
+int TextureCatalog::getNextResourceId( Texture * )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
     

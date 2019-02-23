@@ -105,10 +105,14 @@ void ShaderProgram::attachUniforms( ShaderProgram::UniformArray const &uniforms 
 void ShaderProgram::attachUniform( SharedPointer< ShaderUniform > const &uniform )
 {
 	_uniforms[ uniform->getName() ] = uniform;
-    
-    auto location = crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, uniform->getName() );
-	uniform->setLocation( location );
-	registerLocation( location );
+
+    auto location = crimild::retain( uniform->getLocation() );
+    if ( location == nullptr ) {
+        location = crimild::alloc< ShaderLocation >( ShaderLocation::Type::UNIFORM, uniform->getName() );
+        uniform->setLocation( location );
+    }
+
+    registerLocation( location );
 }
 
 void ShaderProgram::forEachUniform( std::function< void( ShaderUniform * ) > callback )
@@ -137,6 +141,13 @@ void ShaderProgram::bindUniform( std::string name, crimild::Int32 value )
 	if ( auto uniform = getUniform< IntUniform >( name ) ) {
 		uniform->setValue( value );
 	}
+}
+
+void ShaderProgram::bindUniform( std::string name, const containers::Array< crimild::Int32 > &value )
+{
+    if ( auto uniform = getUniform< Int32ArrayUniform >( name ) ) {
+        uniform->setValue( value );
+    }
 }
 
 void ShaderProgram::bindUniform( std::string name, crimild::Real32 value )
@@ -177,13 +188,6 @@ void ShaderProgram::bindUniform( std::string name, const RGBColorf &value )
 void ShaderProgram::bindUniform( std::string name, Texture *value )
 {
 	if ( auto uniform = getUniform< TextureUniform >( name ) ) {
-		uniform->setValue( value );
-	}	
-}
-
-void ShaderProgram::bindUniform( std::string name, Light *value )
-{
-	if ( auto uniform = getUniform< LightUniform >( name ) ) {
 		uniform->setValue( value );
 	}	
 }
