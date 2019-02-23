@@ -41,7 +41,7 @@ namespace crimild {
 			VertexBufferObjectCatalog( void );
 			virtual ~VertexBufferObjectCatalog( void );
 
-			virtual int getNextResourceId( void ) override;
+			virtual int getNextResourceId( VertexBufferObject * ) override;
 
 			virtual void bind( VertexBufferObject *vbo ) override;
 			virtual void unbind( VertexBufferObject *vbo ) override;

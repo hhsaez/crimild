@@ -1,51 +1,69 @@
 R"(
 
 struct AmbientLight {
-	vec3 ambient;
+	vec4 ambient;
+};
+
+layout ( std140 ) uniform uAmbientLightsBlock {
+	AmbientLight uAmbientLights[ MAX_LIGHTS ];
 };
 
 uniform int uAmbientLightCount;
-uniform AmbientLight uAmbientLights[ MAX_LIGHTS ];
+uniform int uAmbientLightIndices[ MAX_LIGHTS ];
 
 struct DirectionalLight {
-    vec3 ambient;
-    vec3 diffuse;
-	vec3 direction;
-	bool hasShadowMap;
+    vec4 ambient;
+    vec4 diffuse;
+	vec4 direction;
 	mat4 lightSpaceMatrix;
 	vec4 shadowMapViewport;
 	vec2 shadowMinMaxBias;
+	bool castShadows;
+	float padding;
+};
+
+layout ( std140 ) uniform uDirectionalLightsBlock {
+	DirectionalLight uDirectionalLights[ MAX_LIGHTS ];
 };
 
 uniform int uDirectionalLightCount;
-uniform DirectionalLight uDirectionalLights[ MAX_LIGHTS ];
+uniform int uDirectionalLightIndices[ MAX_LIGHTS ];
 
 struct PointLight {
-    vec3 ambient;
-    vec3 diffuse;
-	vec3 position;
-	vec3 attenuation;
+    vec4 ambient;
+    vec4 diffuse;
+	vec4 position;
+	vec4 attenuation;
+};
+
+layout ( std140 ) uniform uPointLightsBlock {
+	PointLight uPointLights[ MAX_LIGHTS ];
 };
 
 uniform int uPointLightCount;
-uniform PointLight uPointLights[ MAX_LIGHTS ];
+uniform int uPointLightIndices[ MAX_LIGHTS ];
 
 struct SpotLight {
-    vec3 ambient;
-    vec3 diffuse;
-	vec3 direction;
-	vec3 position;
-	vec3 attenuation;
-	float innerCutOff;
-	float outerCutOff;
-    bool hasShadowMap;
+    vec4 ambient;
+    vec4 diffuse;
+	vec4 direction;
+	vec4 position;
+	vec4 attenuation;
     mat4 lightSpaceMatrix;
     vec4 shadowMapViewport;
     vec2 shadowMinMaxBias;
+	float innerCutOff;
+	float outerCutOff;
+    bool castShadows;
+	float padding[ 3 ];
+};
+
+layout ( std140 ) uniform uSpotLightsBlock {
+	SpotLight uSpotLights[ MAX_LIGHTS ];
 };
 
 uniform int uSpotLightCount;
-uniform SpotLight uSpotLights[ MAX_LIGHTS ];
+uniform int uSpotLightIndices[ MAX_LIGHTS ];
 
 uniform sampler2D uShadowAtlas;
 
@@ -55,7 +73,8 @@ vec3 calcPhongAmbientLighting( vec3 MA )
 	
 	int lightCount = min( uAmbientLightCount, MAX_LIGHTS );
 	for ( int i = 0; i < lightCount; i++ ) {
-		accumAmbient += uAmbientLights[ i ].ambient;
+		int lightIdx = uAmbientLightIndices[ i ];
+		accumAmbient += uAmbientLights[ lightIdx ].ambient.rgb;
 	}
 
 	return accumAmbient * MA;
@@ -100,9 +119,10 @@ vec3 calcPhongDirectionalLighting( vec3 P, vec3 N, vec3 E, vec3 MA, vec3 MD, vec
 
 	int lightCount = min( uDirectionalLightCount, MAX_LIGHTS );
 	for ( int i = 0; i < lightCount; i++ ) {
-		vec3 lAmbient = uDirectionalLights[ i ].ambient;
-		vec3 lDiffuse = uDirectionalLights[ i ].diffuse;
-		vec3 lDirection = uDirectionalLights[ i ].direction;
+		int lightIdx = uDirectionalLightIndices[ i ];
+		vec3 lAmbient = uDirectionalLights[ lightIdx ].ambient.rgb;
+		vec3 lDiffuse = uDirectionalLights[ lightIdx ].diffuse.rgb;
+		vec3 lDirection = uDirectionalLights[ lightIdx ].direction.xyz;
 
 		vec3 lVector = lDirection;
 		float lDistance = length( lVector );
@@ -115,14 +135,14 @@ vec3 calcPhongDirectionalLighting( vec3 P, vec3 N, vec3 E, vec3 MA, vec3 MD, vec
 		vec3 CS = lDiffuse * pow( max( dot( N, H ), 0.0 ), MSh );
 
 		// shadow
-		if ( uDirectionalLights[ i ].hasShadowMap ) {
+		if ( uDirectionalLights[ lightIdx ].castShadows ) {
             float shadow = calcDirectionalShadow(
-                uDirectionalLights[ i ].lightSpaceMatrix,
+                uDirectionalLights[ lightIdx ].lightSpaceMatrix,
                 P,
                 N,
                 L,
-                uDirectionalLights[ i ].shadowMapViewport,
-                uDirectionalLights[ i ].shadowMinMaxBias,
+                uDirectionalLights[ lightIdx ].shadowMapViewport,
+                uDirectionalLights[ lightIdx ].shadowMinMaxBias,
                 uShadowAtlas
             );
             CD *= ( 1.0 - shadow );
@@ -145,10 +165,11 @@ vec3 calcPhongPointLighting( vec3 P, vec3 N, vec3 E, vec3 MA, vec3 MD, vec3 MS, 
 
 	int lightCount = min( uPointLightCount, MAX_LIGHTS );
 	for ( int i = 0; i < lightCount; i++ ) {
-		vec3 lAmbient = uPointLights[ i ].ambient;
-		vec3 lDiffuse = uPointLights[ i ].diffuse;
-		vec3 lPosition = uPointLights[ i ].position;
-		vec3 lAttenuation = uPointLights[ i ].attenuation;
+		int lightIdx = uPointLightIndices[ i ];
+		vec3 lAmbient = uPointLights[ lightIdx ].ambient.rgb;
+		vec3 lDiffuse = uPointLights[ lightIdx ].diffuse.rgb;
+		vec3 lPosition = uPointLights[ lightIdx ].position.rgb;
+		vec3 lAttenuation = uPointLights[ lightIdx ].attenuation.xyz;
 
 		vec3 lVector = lPosition - P;
 		float lDistance = length( lVector );
@@ -182,13 +203,14 @@ vec3 calcPhongSpotLighting( vec3 P, vec3 N, vec3 E, vec3 MA, vec3 MD, vec3 MS, f
 
 	int lightCount = min( uSpotLightCount, MAX_LIGHTS );
 	for ( int i = 0; i < lightCount; i++ ) {
-		vec3 lAmbient = uSpotLights[ i ].ambient;
-		vec3 lDiffuse = uSpotLights[ i ].diffuse;
-		vec3 lDirection = uSpotLights[ i ].direction;
-		vec3 lPosition = uSpotLights[ i ].position;
-		vec3 lAttenuation = uSpotLights[ i ].attenuation;
-		float lInnerCutOff = uSpotLights[ i ].innerCutOff;
-		float lOuterCutOff = uSpotLights[ i ].outerCutOff;
+		int lightIdx = uSpotLightIndices[ i ];
+		vec3 lAmbient = uSpotLights[ lightIdx ].ambient.rgb;
+		vec3 lDiffuse = uSpotLights[ lightIdx ].diffuse.rgb;
+		vec3 lDirection = uSpotLights[ lightIdx ].direction.xyz;
+		vec3 lPosition = uSpotLights[ lightIdx ].position.xyz;
+		vec3 lAttenuation = uSpotLights[ lightIdx ].attenuation.xyz;
+		float lInnerCutOff = uSpotLights[ lightIdx ].innerCutOff;
+		float lOuterCutOff = uSpotLights[ lightIdx ].outerCutOff;
 
 		vec3 lVector = lPosition - P;
 		float lDistance = length( lVector );
@@ -211,14 +233,14 @@ vec3 calcPhongSpotLighting( vec3 P, vec3 N, vec3 E, vec3 MA, vec3 MD, vec3 MS, f
 
         // shadow
         float shadow = 0.0;
-        if ( uSpotLights[ i ].hasShadowMap ) {
+        if ( uSpotLights[ lightIdx ].castShadows ) {
             shadow = calcDirectionalShadow(
-                uSpotLights[ i ].lightSpaceMatrix,
+                uSpotLights[ lightIdx ].lightSpaceMatrix,
                 P,
                 N,
                 L,
-                uSpotLights[ i ].shadowMapViewport,
-                uSpotLights[ i ].shadowMinMaxBias,
+                uSpotLights[ lightIdx ].shadowMapViewport,
+                uSpotLights[ lightIdx ].shadowMinMaxBias,
                 uShadowAtlas
             );
         }

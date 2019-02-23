@@ -42,7 +42,7 @@ namespace crimild {
 			ShaderProgramCatalog( void );
 			virtual ~ShaderProgramCatalog( void );
 
-			virtual int getNextResourceId( void ) override;
+			virtual int getNextResourceId( ShaderProgram * ) override;
 
 			virtual void bind( ShaderProgram *program ) override;
 			virtual void unbind( ShaderProgram *program ) override;
@@ -57,6 +57,7 @@ namespace crimild {
 
 			void fetchAttributeLocation( ShaderProgram *program, ShaderLocation *location );
 			void fetchUniformLocation( ShaderProgram *program, ShaderLocation *location );
+			void fetchUniformBlockLocation( ShaderProgram *program, ShaderLocation *location );
             
         private:
             std::list< int > _shaderIdsToDelete;

@@ -41,6 +41,7 @@ namespace crimild {
 		enum class Type {
 			ATTRIBUTE,
 			UNIFORM,
+            UNIFORM_BLOCK,
 			MAX
 		};
 

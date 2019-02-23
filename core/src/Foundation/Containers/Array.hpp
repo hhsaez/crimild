@@ -149,6 +149,11 @@ namespace crimild {
                 
                 return true;
 			}
+
+            bool operator!=( const Array &other ) const
+            {
+                return !( *this == other );
+            }
 			
 			inline bool empty( void ) const
 			{

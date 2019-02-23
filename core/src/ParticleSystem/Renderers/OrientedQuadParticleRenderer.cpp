@@ -44,7 +44,7 @@ OrientedQuadParticleRenderer::OrientedQuadParticleRenderer( void )
 	// create the material here so it can be modified later
 	_material = crimild::alloc< Material >();
 
-    _material->setProgram( AssetManager::getInstance()->get< UnlitShaderProgram >() );
+    _material->setProgram( crimild::alloc< UnlitShaderProgram >() );
 }
 
 OrientedQuadParticleRenderer::~OrientedQuadParticleRenderer( void )
@@ -75,7 +75,8 @@ void OrientedQuadParticleRenderer::update( Node *node, crimild::Real64 dt, Parti
     if ( pCount == 0 ) {
         return;
     }
-    
+
+    // TODO: this ends up allocating too many VBOs/IBOs. We should reuse them instead
     auto vbo = crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3_UV2, 4 * pCount );
 	auto ibo = crimild::alloc< IndexBufferObject >( 6 * pCount );
 
@@ -136,9 +137,10 @@ void OrientedQuadParticleRenderer::update( Node *node, crimild::Real64 dt, Parti
 		ibo->setIndexAt( idx + 5, vdx + 3 );
 	}
 
-    crimild::concurrency::sync_frame( [this, vbo, ibo] {
-        _primitive->setVertexBuffer( vbo );
-        _primitive->setIndexBuffer( ibo );
+    auto primitive = _primitive;
+    crimild::concurrency::sync_frame( [ primitive, vbo, ibo ] {
+        primitive->setVertexBuffer( vbo );
+        primitive->setIndexBuffer( ibo );
     });
 }
 
@@ -159,7 +161,7 @@ void OrientedQuadParticleRenderer::decode( coding::Decoder &decoder )
 		_material = crimild::alloc< Material >();
 	}
 	
-    _material->setProgram( AssetManager::getInstance()->get< UnlitShaderProgram >() );
+    _material->setProgram( crimild::alloc< UnlitShaderProgram >() );
 
     std::string blendMode;
     decoder.decode( "blendMode", blendMode );

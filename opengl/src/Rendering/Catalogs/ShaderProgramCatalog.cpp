@@ -44,7 +44,7 @@ ShaderProgramCatalog::~ShaderProgramCatalog( void )
 
 }
 
-int ShaderProgramCatalog::getNextResourceId( void )
+int ShaderProgramCatalog::getNextResourceId( ShaderProgram * )
 {
 	return glCreateProgram();
 }
@@ -114,12 +114,22 @@ void ShaderProgramCatalog::load( ShaderProgram *program )
             }
 
             program->forEachLocation( [&]( ShaderLocation *loc ) mutable {
-            	if ( loc->getType() == ShaderLocation::Type::ATTRIBUTE ) {
-            		fetchAttributeLocation( program, loc );
-            	}
-            	else {
-            		fetchUniformLocation( program, loc );
-            	}
+                switch ( loc->getType() ) {
+					case ShaderLocation::Type::ATTRIBUTE:
+						fetchAttributeLocation( program, loc );
+						break;
+
+					case ShaderLocation::Type::UNIFORM:
+						fetchUniformLocation( program, loc );
+						break;
+
+					case ShaderLocation::Type::UNIFORM_BLOCK:
+						fetchUniformBlockLocation( program, loc );
+						break;
+
+					default:
+						break;
+				}
             });
         }
 	}
@@ -197,5 +207,11 @@ void ShaderProgramCatalog::fetchAttributeLocation( ShaderProgram *program, Shade
 void ShaderProgramCatalog::fetchUniformLocation( ShaderProgram *program, ShaderLocation *location )
 {
 	location->setLocation( glGetUniformLocation( program->getCatalogId(), location->getName().c_str() ) );
+}
+
+void ShaderProgramCatalog::fetchUniformBlockLocation( ShaderProgram *program, ShaderLocation *location )
+{
+    auto value = glGetUniformBlockIndex( program->getCatalogId(), location->getName().c_str() );
+	location->setLocation( value );
 }
 

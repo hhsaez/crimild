@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002 - present, Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -114,7 +114,7 @@ namespace crimild {
 			return _activeResourceCount;
 		}
 
-		virtual int getNextResourceId( void )
+		virtual int getNextResourceId( RESOURCE_TYPE *resource )
 		{
 			return _resources.size();
 		}
@@ -156,7 +156,7 @@ namespace crimild {
 
         virtual void load( RESOURCE_TYPE *resource )
 		{
-			resource->setCatalogInfo( this, getNextResourceId() );
+			resource->setCatalogInfo( this, getNextResourceId( resource ) );
 			_resources.push_back( resource );
 		}
 
@@ -180,7 +180,12 @@ namespace crimild {
         
         virtual void cleanup( void )
         {
+            // no-op
+        }
 
+        virtual void configure( void )
+        {
+            // no-op
         }
 
     private:

@@ -49,15 +49,15 @@ using namespace crimild::rendergraph;
 using namespace crimild::shadergraph::locations;
 
 Renderer::Renderer( void )
-	: _lightCount( 0 ),
-	  _screenPrimitive( crimild::alloc< QuadPrimitive >( 2.0f, 2.0f, VertexFormat::VF_P3_N3_UV2, Vector2f( 0.0f, 1.0f ), Vector2f( 1.0f, -1.0f ) ) ),
+	: _screenPrimitive( crimild::alloc< QuadPrimitive >( 2.0f, 2.0f, VertexFormat::VF_P3_N3_UV2, Vector2f( 0.0f, 1.0f ), Vector2f( 1.0f, -1.0f ) ) ),
       _shaderProgramCatalog( crimild::alloc< Catalog< ShaderProgram >>() ),
 	  _textureCatalog( crimild::alloc< Catalog< Texture >>() ),
 	  _vertexBufferObjectCatalog( crimild::alloc< Catalog< VertexBufferObject >>() ),
 	  _indexBufferObjectCatalog( crimild::alloc< Catalog< IndexBufferObject >>() ),
 	  _frameBufferObjectCatalog( crimild::alloc< Catalog< FrameBufferObject >>() ),
 	  _renderTargetCatalog( crimild::alloc< Catalog< RenderTarget >>() ),
-	  _primitiveCatalog( crimild::alloc< Catalog< Primitive >>() )
+	  _primitiveCatalog( crimild::alloc< Catalog< Primitive >>() ),
+      _lightCatalog( crimild::alloc< Catalog< Light >>() )
 {
 	_screenBuffer = crimild::alloc< FrameBufferObject >( 800, 600 );
 }
@@ -69,11 +69,24 @@ Renderer::~Renderer( void )
     
     getShaderProgramCatalog()->unloadAll();
     getTextureCatalog()->unloadAll();
+    getLightCatalog()->unloadAll();
     getVertexBufferObjectCatalog()->unloadAll();
     getIndexBufferObjectCatalog()->unloadAll();
 	getPrimitiveCatalog()->unloadAll();
 	getRenderTargetCatalog()->unloadAll();
     getFrameBufferObjectCatalog()->unloadAll();
+}
+
+void Renderer::configure( void )
+{
+    getShaderProgramCatalog()->configure();
+    getTextureCatalog()->configure();
+    getLightCatalog()->configure();
+    getVertexBufferObjectCatalog()->configure();
+    getIndexBufferObjectCatalog()->configure();
+    getPrimitiveCatalog()->configure();
+    getRenderTargetCatalog()->configure();
+    getFrameBufferObjectCatalog()->configure();
 }
 
 void Renderer::setScreenViewport( const Rectf &viewport )
@@ -102,6 +115,7 @@ void Renderer::endRender( void )
 {
     getShaderProgramCatalog()->cleanup();
     getTextureCatalog()->cleanup();
+    getLightCatalog()->cleanup();
     getVertexBufferObjectCatalog()->cleanup();
     getIndexBufferObjectCatalog()->cleanup();
 	getPrimitiveCatalog()->cleanup();
@@ -116,6 +130,11 @@ void Renderer::presentFrame( void )
 
 void Renderer::render( RenderQueue *renderQueue, RenderGraph *renderGraph )
 {
+    auto lightCatalog = getLightCatalog();
+    renderQueue->each( [ lightCatalog ]( Light *light, crimild::Size ) {
+        lightCatalog->bind( light );
+    });
+
     renderGraph->execute( this, renderQueue );
 
     auto output = renderGraph->getOutput();
@@ -237,44 +256,14 @@ void Renderer::unbindTexture( ShaderLocation *location, Texture *texture )
 	getTextureCatalog()->unbind( location, texture );
 }
 
-void Renderer::bindLight( ShaderProgram *program, Light *light )
+void Renderer::bindLight( Light *light )
 {
-	float lightType = 0;
-	switch ( light->getType() ) {
-		case Light::Type::POINT:
-			lightType = 0;
-			break;
-
-		case Light::Type::DIRECTIONAL:
-			lightType = 1;
-			break;
-
-		case Light::Type::SPOT:
-			lightType = 2;
-			break;
-
-		case Light::Type::AMBIENT:
-			lightType = 3;
-			break;
-	}
-
-	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_TYPE_UNIFORM + _lightCount ), lightType );
-	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_POSITION_UNIFORM + _lightCount ), light->getPosition() );
-	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_ATTENUATION_UNIFORM + _lightCount ), light->getAttenuation() );
-	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_DIRECTION_UNIFORM + _lightCount ), light->getDirection() );
-	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_COLOR_UNIFORM + _lightCount ), light->getColor() );
-	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_OUTER_CUTOFF_UNIFORM + _lightCount ), light->getOuterCutoff() );
-	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_INNER_CUTOFF_UNIFORM + _lightCount ), light->getInnerCutoff() );
-	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_EXPONENT_UNIFORM + _lightCount ), light->getExponent() );
-	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_AMBIENT_UNIFORM + _lightCount ), light->getAmbient() );
-
-	++_lightCount;
-	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::LIGHT_COUNT_UNIFORM ), _lightCount );
+    getLightCatalog()->bind( light );
 }
 
-void Renderer::unbindLight( ShaderProgram *program, Light *light )
+void Renderer::unbindLight( Light *light )
 {
-	--_lightCount;
+    // no-op
 }
 
 void Renderer::bindPrimitive( ShaderProgram *, Primitive *primitive )

@@ -27,6 +27,7 @@
 
 #include "OpenGLShaderGraph.hpp"
 
+#include "Rendering/Renderer.hpp"
 #include "Rendering/ShaderGraph/ShaderGraph.hpp"
 #include "Rendering/ShaderGraph/Variable.hpp"
 #include "Rendering/ShaderGraph/Nodes/VertexShaderInputs.hpp"
@@ -512,7 +513,7 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 		_outputsSection.add( "out vec4 vFragColor;" );
 
 		ss.str( "" );
-		ss << "#define MAX_LIGHTS " << master->getMaxLights();
+        ss << "#define MAX_LIGHTS " << Renderer::getInstance()->getMaxLights( Light::Type::DIRECTIONAL );
 		_globalsSection.add( ss.str() );
 		
 		_globalsSection.add(

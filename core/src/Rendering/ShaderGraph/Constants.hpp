@@ -74,6 +74,18 @@ namespace crimild {
 			const char * const LIGHT_ARRAY_COUNT_UNIFORM = "uLightCount";
 			const char * const LIGHT_ARRAY_UNIFORM = "uLights";
 
+			const char * const AMBIENT_LIGHT_COUNT_UNIFORM = "uAmbientLightCount";
+			const char * const AMBIENT_LIGHT_INDICES_UNIFORM = "uAmbientLightIndices";
+
+			const char * const DIRECTIONAL_LIGHT_COUNT_UNIFORM = "uDirectionalLightCount";
+			const char * const DIRECTIONAL_LIGHT_INDICES_UNIFORM = "uDirectionalLightIndices";
+
+			const char * const POINT_LIGHT_COUNT_UNIFORM = "uPointLightCount";
+			const char * const POINT_LIGHT_INDICES_UNIFORM = "uPointLightIndices";
+
+			const char * const SPOT_LIGHT_COUNT_UNIFORM = "uSpotLightCount";
+			const char * const SPOT_LIGHT_INDICES_UNIFORM = "uSpotLightIndices";
+
 			const char * const SHADOW_ATLAS_UNIFORM = "uShadowAtlas";
 
 		}
@@ -87,6 +99,22 @@ namespace crimild {
 			const char * const WORLD_EYE_VARIANT = "vWorldEye";
 
 			const char * const CLIP_POSITION_VARIANT = "vClipPosition";
+
+		}
+
+		namespace blocks {
+
+			const char * const AMBIENT_LIGHT_UNIFORM_BLOCK = "uAmbientLightsBlock";
+			const crimild::UInt32 AMBIENT_LIGHT_UNIFORM_BLOCK_BINDING_POINT = 0;
+			
+			const char * const DIRECTIONAL_LIGHT_UNIFORM_BLOCK = "uDirectionalLightsBlock";
+			const crimild::UInt32 DIRECTIONAL_LIGHT_UNIFORM_BLOCK_BINDING_POINT = 1;
+			
+			const char * const POINT_LIGHT_UNIFORM_BLOCK = "uPointLightsBlock";
+			const crimild::UInt32 POINT_LIGHT_UNIFORM_BLOCK_BINDING_POINT = 2;
+			
+			const char * const SPOT_LIGHT_UNIFORM_BLOCK = "uSpotLightsBlock";
+			const crimild::UInt32 SPOT_LIGHT_UNIFORM_BLOCK_BINDING_POINT = 3;
 
 		}
 

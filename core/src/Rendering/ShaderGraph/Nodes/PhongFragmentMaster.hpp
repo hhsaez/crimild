@@ -40,10 +40,8 @@ namespace crimild {
 			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::PhongFragmentMaster )
 			
 		public:
-			PhongFragmentMaster( ShaderGraph *graph, crimild::Size maxLights = 4 );
+			PhongFragmentMaster( ShaderGraph *graph );
 			virtual ~PhongFragmentMaster( void );
-
-			crimild::Size getMaxLights( void ) const { return _maxLights; }
 
 			void setTextureCoords( Variable *var ) { _textureCoords = var; }
 			Variable *getTextureCoords( void ) { return _textureCoords; }
@@ -76,8 +74,6 @@ namespace crimild {
 			Variable *getAlphaClipThreshold( void ) { return _alphaClipThreshold; }
 			
 		private:
-			crimild::Size _maxLights;
-
 			Variable *_textureCoords = nullptr;
 			Variable *_worldNormal = nullptr;
 			Variable *_worldEye = nullptr;
