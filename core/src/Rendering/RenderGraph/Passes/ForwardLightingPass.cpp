@@ -162,7 +162,9 @@ void ForwardLightingPass::render( Renderer *renderer, RenderQueue *renderQueue, 
 			shadowAtlas = texture;
 		}
 	}
-	
+
+    renderer->setDepthState( _depthState );
+
     renderQueue->each( renderables, [ renderer, pMatrix, vMatrix, skybox, shadowAtlas, ambientLightIndices, directionalLightIndices, pointLightIndices, spotLightIndices ]( RenderQueue::Renderable *renderable ) {
 
 		auto material = renderable->material;
@@ -219,9 +221,10 @@ void ForwardLightingPass::render( Renderer *renderer, RenderQueue *renderQueue, 
 
 		renderer->unbindProgram( program );
 		
-		renderer->setDepthState( DepthState::ENABLED );
 		renderer->setAlphaState( AlphaState::DISABLED );
 		renderer->setCullFaceState( CullFaceState::ENABLED_BACK );
 	});
+
+    renderer->setDepthState( DepthState::ENABLED );
 }
 
