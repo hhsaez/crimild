@@ -44,6 +44,7 @@ BlendPass::BlendPass( RenderGraph *graph, SharedPointer< AlphaState > const &alp
 	  _alphaState( alphaState )
 {
 	_output = graph->createAttachment( getName() + " - Output", RenderGraphAttachment::Hint::FORMAT_RGBA );
+    _program = crimild::alloc< ScreenTextureShaderProgram >();
 }
 			
 BlendPass::~BlendPass( void )
@@ -69,8 +70,7 @@ void BlendPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *re
 	
 	renderer->bindFrameBuffer( crimild::get_ptr( fbo ) );
 	
-    auto program = AssetManager::getInstance()->get< ScreenTextureShaderProgram >();
-	renderer->bindProgram( program );
+    auto program = crimild::get_ptr( _program );
 
 	_inputs.each( [ this, renderer, program ]( RenderGraphAttachment *input, crimild::Size idx ) {
 		auto texture = input->getTexture();
@@ -79,25 +79,21 @@ void BlendPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *re
 			renderer->setAlphaState( _alphaState );
 			renderer->setDepthState( DepthState::DISABLED );
 		}
-		
-		renderer->bindTexture(
-			program->getLocation( COLOR_MAP_UNIFORM ),
-			texture );
-		
-		renderer->drawScreenPrimitive( program );
-		
-		renderer->unbindTexture(
-			program->getLocation( COLOR_MAP_UNIFORM ),
-			texture );
 
-		if ( idx > 0 ) {
+        program->bindUniform( COLOR_MAP_UNIFORM, texture );
+		
+        renderer->bindProgram( program );
+
+		renderer->drawScreenPrimitive( program );
+
+        renderer->unbindProgram( program );
+
+        if ( idx > 0 ) {
 			renderer->setAlphaState( AlphaState::DISABLED );
 			renderer->setDepthState( DepthState::ENABLED );
 		}
 	});
-	
-	renderer->unbindProgram( program );
-	
+
 	renderer->unbindFrameBuffer( crimild::get_ptr( fbo ) );
 }
 
