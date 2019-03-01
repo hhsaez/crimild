@@ -94,17 +94,19 @@ void RenderSystem::renderFrame( void )
 
 		if ( !_renderQueues.empty() ) {
 			RenderQueue *mainQueue = nullptr;
-			_renderQueues.each( [ &mainQueue, renderer ]( SharedPointer< RenderQueue > &queue ) {
-				// main camera is rendered last
-                auto camera = queue->getCamera();
-				if ( camera != Camera::getMainCamera() ) {
-                    if ( auto renderGraph = camera->getRenderGraph() ) {
-                        renderer->render( mainQueue, renderGraph );
+			_renderQueues.each( [ &mainQueue, renderer ]( SharedPointer< RenderQueue > &renderQueue ) {
+                if ( auto queue = crimild::get_ptr( renderQueue ) ) {
+                    // main camera is rendered last
+                    auto camera = queue->getCamera();
+                    if ( camera != Camera::getMainCamera() ) {
+                        if ( auto renderGraph = camera->getRenderGraph() ) {
+                            renderer->render( queue, renderGraph );
+                        }
                     }
-				}
-				else {
-					mainQueue = crimild::get_ptr( queue );
-				}
+                    else {
+                        mainQueue = queue;
+                    }
+                }
 			});
 
 			if ( mainQueue != nullptr ) {

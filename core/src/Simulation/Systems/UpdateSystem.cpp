@@ -72,13 +72,14 @@ void UpdateSystem::updateBehaviors( Node *scene )
 {
     broadcastMessage( messaging::WillUpdateScene { scene } );
 
-	// const double FIXED_TIME = Clock::getScaledTickTime();
-    // const Clock FIXED_CLOCK( FIXED_TIME );
-    const auto FIXED_CLOCK = Simulation::getInstance()->getSimulationClock();
+    // So, we're updating with a fixed time which may seem wrong
+    // BUT! We're either sleeping on WindowSystem or waiting for OS display callback
+    // TODO: This should be configurable.
+    static const auto FIXED_CLOCK = Clock( Clock::DEFAULT_TICK_TIME );
 
 	CRIMILD_PROFILE( "Updating Components" )
 		
-	scene->perform( Apply( [ &FIXED_CLOCK ]( Node *node ) {
+	scene->perform( Apply( []( Node *node ) {
 		node->updateComponents( FIXED_CLOCK );
 	}));
     
