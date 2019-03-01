@@ -32,16 +32,16 @@ using namespace crimild::shadergraph::locations;
 #define CRIMILD_DEBUG_RENDER_HELPER_PRIMITIVE_BOX "debug/render_helper/primitive/box"
 #define CRIMILD_DEBUG_RENDER_HELPER_PRIMITIVE_SPHERE "debug/render_helper/primitive/sphere"
 #define CRIMILD_DEBUG_RENDER_HELPER_VBO_LINES "debug/render_helper/vbo/lines"
+#define CRIMILD_DEBUG_RENDER_UNLIT_SHADER_PROGRAM "debug/render/programs/unlit"
 
 void DebugRenderHelper::init( void )
 {
     AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_HELPER_DEPTH_STATE, crimild::alloc< DepthState >( false ), true );
     AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_HELPER_ALPHA_STATE, crimild::alloc< AlphaState >( false ), true );
-
     AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_HELPER_PRIMITIVE_BOX, crimild::alloc< BoxPrimitive >( 1.0f, 1.0f, 1.0f ), true );
     AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_HELPER_PRIMITIVE_SPHERE, crimild::alloc< SpherePrimitive >( 1.0f ), true );
-
     AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_HELPER_VBO_LINES, crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3, 10, nullptr ), true );
+    AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_UNLIT_SHADER_PROGRAM, crimild::alloc< UnlitShaderProgram >(), true );
 }
 
 void DebugRenderHelper::renderLine( Renderer *renderer, Camera *camera, const Vector3f &from, const Vector3f &to, const RGBAColorf &color )
@@ -59,7 +59,7 @@ void DebugRenderHelper::renderLines( Renderer *renderer, Camera *camera, const V
     auto depthState = AssetManager::getInstance()->get< DepthState >( CRIMILD_DEBUG_RENDER_HELPER_DEPTH_STATE );
     auto alphaState = AssetManager::getInstance()->get< AlphaState >( CRIMILD_DEBUG_RENDER_HELPER_ALPHA_STATE );
     
-    auto program = AssetManager::getInstance()->get< UnlitShaderProgram >();
+    auto program = AssetManager::getInstance()->get< ShaderProgram >( CRIMILD_DEBUG_RENDER_UNLIT_SHADER_PROGRAM );
 	if ( program == nullptr ) {
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "No program found for debug rendering" );
 		return;
@@ -98,6 +98,9 @@ void DebugRenderHelper::renderLines( Renderer *renderer, Camera *camera, const V
     renderer->unbindPrimitive( nullptr, p );
 
 	renderer->unbindProgram( program );
+
+    renderer->setDepthState( DepthState::ENABLED );
+    renderer->setAlphaState( AlphaState::DISABLED );
 }
 
 void DebugRenderHelper::renderLines( const Vector3f *data, unsigned int count, const RGBAColorf &color )
@@ -158,7 +161,7 @@ void DebugRenderHelper::render( Renderer *renderer, Camera *camera, Primitive *p
     auto depthState = AssetManager::getInstance()->get< DepthState >( CRIMILD_DEBUG_RENDER_HELPER_DEPTH_STATE );
     auto alphaState = AssetManager::getInstance()->get< AlphaState >( CRIMILD_DEBUG_RENDER_HELPER_ALPHA_STATE );
 
-    auto program = AssetManager::getInstance()->get< UnlitShaderProgram >();
+    auto program = AssetManager::getInstance()->get< ShaderProgram >( CRIMILD_DEBUG_RENDER_UNLIT_SHADER_PROGRAM );
 	if ( program == nullptr ) {
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "No program found for debug rendering" );
 		return;
@@ -177,17 +180,14 @@ void DebugRenderHelper::render( Renderer *renderer, Camera *camera, Primitive *p
 	alphaState->setEnabled( color[ 3 ] < 1.0f );
 	renderer->setAlphaState( alphaState );
 
-	//renderer->bindVertexBuffer( program, primitive->getVertexBuffer() );
-	//renderer->bindIndexBuffer( program, primitive->getIndexBuffer() );
 	renderer->bindPrimitive( program, primitive );
-
 	renderer->drawPrimitive( program, primitive );
-
-	//renderer->unbindIndexBuffer( program, primitive->getIndexBuffer() );
-	//renderer->unbindVertexBuffer( program, primitive->getVertexBuffer() );
 	renderer->unbindPrimitive( program, primitive );
 
 	renderer->unbindProgram( program );
+
+    renderer->setDepthState( DepthState::ENABLED );
+    renderer->setAlphaState( AlphaState::DISABLED );
 }
 
 void DebugRenderHelper::render( Geometry *geometry )
@@ -203,8 +203,7 @@ void DebugRenderHelper::render( Geometry *geometry )
 	auto ms = geometry->getComponent< MaterialComponent >();
 	if ( ms != nullptr ) {
 		ms->forEachMaterial( [renderer, geometry]( Material *material ) {
-		    ShaderProgram *program = AssetManager::getInstance()->get< UnlitShaderProgram >();
-
+            auto program = AssetManager::getInstance()->get< ShaderProgram >( CRIMILD_DEBUG_RENDER_UNLIT_SHADER_PROGRAM );
 			if ( program == nullptr ) {
 		        Log::error( CRIMILD_CURRENT_CLASS_NAME, "No program found for debug rendering" );
 				return;
@@ -237,11 +236,11 @@ void DebugRenderHelper::render( Geometry *geometry )
             renderer->unbindTexture( program->getLocation( COLOR_MAP_UNIFORM ), colorMap );
 
 			renderer->unbindProgram( program );
+
+            renderer->setDepthState( DepthState::ENABLED );
+            renderer->setAlphaState( AlphaState::DISABLED );
 		});
 	}
-
-    renderer->setDepthState( DepthState::ENABLED );
-    renderer->setAlphaState( AlphaState::DISABLED );
 }
 
 void DebugRenderHelper::renderText( std::string str, const Vector3f &position, const RGBAColorf &color )

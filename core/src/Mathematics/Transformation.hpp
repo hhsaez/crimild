@@ -345,6 +345,10 @@ namespace crimild {
 				float z = getRotate().getImaginary()[2];
 				float w = getRotate().getReal();
 				float s = getScale();
+				if ( s == 0.0f ) {
+					// prevents division by 0
+					s = Numericf::ZERO_TOLERANCE;
+				}
 
 		        float x2 = x + x;
 		        float y2 = y + y;
