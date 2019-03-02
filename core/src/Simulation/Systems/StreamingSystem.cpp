@@ -93,6 +93,7 @@ void StreamingSystem::onLoadScene( messaging::LoadScene const &message )
 void StreamingSystem::onAppendScene( messaging::AppendScene const &message )
 {
     auto fileName = message.fileName;
+    auto parent = message.parentNode;
     auto fileType = StringUtils::getFileExtension( fileName );
     auto onLoadSceneCallback = message.onLoadSceneCallback;
 
@@ -105,7 +106,7 @@ void StreamingSystem::onAppendScene( messaging::AppendScene const &message )
 
     auto builder = _builders[ fileType ];
 
-    crimild::concurrency::async_frame( [ builder, fileName, onLoadSceneCallback ] {
+    crimild::concurrency::async_frame( [ builder, fileName, onLoadSceneCallback, parent ] {
         auto scene = builder( fileName );
         if ( scene == nullptr ) {
             std::string message = "Cannot load scene from file: " + fileName;
@@ -114,8 +115,11 @@ void StreamingSystem::onAppendScene( messaging::AppendScene const &message )
             return;
         }
         
-        crimild::concurrency::sync_frame( [ scene, onLoadSceneCallback ] {
-            auto parentNode = static_cast< Group * >( Simulation::getInstance()->getScene() );
+        crimild::concurrency::sync_frame( [ scene, onLoadSceneCallback, parent ] {
+            auto parentNode = parent;
+            if ( parentNode == nullptr ) {
+                parentNode = static_cast< Group * >( Simulation::getInstance()->getScene() );
+            }
 
 			parentNode->attachNode( scene );
 

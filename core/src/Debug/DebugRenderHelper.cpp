@@ -11,6 +11,7 @@
 
 #include "Primitives/BoxPrimitive.hpp"
 #include "Primitives/SpherePrimitive.hpp"
+#include "Primitives/ParametricSpherePrimitive.hpp"
 
 #include "SceneGraph/Camera.hpp"
 
@@ -31,6 +32,7 @@ using namespace crimild::shadergraph::locations;
 #define CRIMILD_DEBUG_RENDER_HELPER_ALPHA_STATE "debug/render_helper/alpha_state"
 #define CRIMILD_DEBUG_RENDER_HELPER_PRIMITIVE_BOX "debug/render_helper/primitive/box"
 #define CRIMILD_DEBUG_RENDER_HELPER_PRIMITIVE_SPHERE "debug/render_helper/primitive/sphere"
+#define CRIMILD_DEBUG_RENDER_HELPER_PRIMITIVE_WIREFRAME_SPHERE "debug/render_helper/primitive/wireframe_sphere"
 #define CRIMILD_DEBUG_RENDER_HELPER_VBO_LINES "debug/render_helper/vbo/lines"
 #define CRIMILD_DEBUG_RENDER_UNLIT_SHADER_PROGRAM "debug/render/programs/unlit"
 
@@ -40,6 +42,7 @@ void DebugRenderHelper::init( void )
     AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_HELPER_ALPHA_STATE, crimild::alloc< AlphaState >( false ), true );
     AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_HELPER_PRIMITIVE_BOX, crimild::alloc< BoxPrimitive >( 1.0f, 1.0f, 1.0f ), true );
     AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_HELPER_PRIMITIVE_SPHERE, crimild::alloc< SpherePrimitive >( 1.0f ), true );
+    AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_HELPER_PRIMITIVE_SPHERE, crimild::alloc< ParametricSpherePrimitive >( Primitive::Type::LINES, 1.0f, VertexFormat::VF_P3, Vector2i( 8, 12 ) ), true );
     AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_HELPER_VBO_LINES, crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3, 10, nullptr ), true );
     AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_UNLIT_SHADER_PROGRAM, crimild::alloc< UnlitShaderProgram >(), true );
 }
@@ -156,29 +159,33 @@ void DebugRenderHelper::renderSphere( Renderer *renderer, Camera *camera, const 
 	render( renderer, camera, sphere, model, color );
 }
 
+void DebugRenderHelper::renderWireframeSphere( Renderer *renderer, Camera *camera, const Vector3f &position, float scale, const RGBAColorf &color )
+{
+    Transformation model;
+    model.setTranslate( position );
+    model.setScale( scale );
+
+    auto sphere = AssetManager::getInstance()->get< Primitive >( CRIMILD_DEBUG_RENDER_HELPER_PRIMITIVE_SPHERE );
+    render( renderer, camera, sphere, model, color );
+}
+
 void DebugRenderHelper::render( Renderer *renderer, Camera *camera, Primitive *primitive, const Transformation &model, const RGBAColorf &color )
 {
-    auto depthState = AssetManager::getInstance()->get< DepthState >( CRIMILD_DEBUG_RENDER_HELPER_DEPTH_STATE );
-    auto alphaState = AssetManager::getInstance()->get< AlphaState >( CRIMILD_DEBUG_RENDER_HELPER_ALPHA_STATE );
-
     auto program = AssetManager::getInstance()->get< ShaderProgram >( CRIMILD_DEBUG_RENDER_UNLIT_SHADER_PROGRAM );
 	if ( program == nullptr ) {
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "No program found for debug rendering" );
 		return;
 	}
 
+    program->bindUniform( PROJECTION_MATRIX_UNIFORM, camera->getProjectionMatrix() );
+    program->bindUniform( VIEW_MATRIX_UNIFORM, camera->getViewMatrix() );
+    program->bindUniform( MODEL_MATRIX_UNIFORM, model.computeModelMatrix() );
+    program->bindUniform( COLOR_UNIFORM, color );
+
 	renderer->bindProgram( program );
 
-	renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::PROJECTION_MATRIX_UNIFORM ), camera->getProjectionMatrix() );
-	renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::VIEW_MATRIX_UNIFORM ), camera->getViewMatrix() );
-	renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM ), model.computeModelMatrix() );
-
-	renderer->bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_DIFFUSE_UNIFORM ), color );
-
-	renderer->setDepthState( depthState );
-
-	alphaState->setEnabled( color[ 3 ] < 1.0f );
-	renderer->setAlphaState( alphaState );
+    renderer->setDepthState( DepthState::DISABLED );
+    renderer->setAlphaState( AlphaState::ENABLED );
 
 	renderer->bindPrimitive( program, primitive );
 	renderer->drawPrimitive( program, primitive );
