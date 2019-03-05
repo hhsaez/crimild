@@ -288,6 +288,14 @@
 #include "Streaming/MemoryStream.hpp"
 #include "Streaming/SceneBuilder.hpp"
 
+#include "UI/UIFrame.hpp"
+#include "UI/UICanvas.hpp"
+#include "UI/UIBackground.hpp"
+#include "UI/UIButton.hpp"
+#include "UI/UILabel.hpp"
+#include "UI/UIFrameConstraint.hpp"
+#include "UI/UIFrameConstraintMaker.hpp"
+
 #include "Navigation/NavigationCellEdge.hpp"
 #include "Navigation/NavigationCell.hpp"
 #include "Navigation/NavigationMesh.hpp"
