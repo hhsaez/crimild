@@ -63,6 +63,8 @@ namespace crimild {
 				MARGIN_RIGHT,
 				MARGIN_BOTTOM,
 				MARGIN_LEFT,
+				BEHIND,
+				INFRONT,
 			};
 			
 		public:
@@ -71,6 +73,9 @@ namespace crimild {
 			virtual ~UIFrameConstraint( void );
 
 			Type getType( void ) const { return _type; }
+
+			void setValue( crimild::Real32 value ) { _value = value; }
+			crimild::Real32 getValue( void ) const { return _value; }
 
 		private:
 			Type _type;

@@ -55,8 +55,10 @@ UIFrameConstraint::~UIFrameConstraint( void )
 void UIFrameConstraint::apply( UIFrame *frame, UIFrame *parentFrame ) const
 {
 	auto rect = frame->getExtensions();
+	auto z = frame->getZIndex();
 
 	auto ref = _referenceFrame != nullptr ? _referenceFrame->getExtensions() : parentFrame->getExtensions();
+	auto refZ = _referenceFrame != nullptr ? _referenceFrame->getZIndex() : parentFrame->getZIndex();
 
 	crimild::Real32 x = rect.getX();
 	crimild::Real32 y = rect.getY();
@@ -147,10 +149,19 @@ void UIFrameConstraint::apply( UIFrame *frame, UIFrame *parentFrame ) const
 			x += _value;
 			break;
 
+		case Type::BEHIND:
+			z = refZ - 0.001f;
+			break;
+
+		case Type::INFRONT:
+			z = refZ + 0.001f;
+			break;
+
 		default:
 			break;
 	}
 
 	frame->setExtensions( Rectf( x, y, w, h ) );
+	frame->setZIndex( z );
 }
 

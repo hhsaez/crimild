@@ -29,6 +29,7 @@
 #define CRIMILD_UI_FRAME_
 
 #include "UIFrameConstraintMaker.hpp"
+#include "UIFrameConstraint.hpp"
 
 #include "Components/NodeComponent.hpp"
 #include "Mathematics/Rect.hpp"
@@ -37,8 +38,6 @@
 namespace crimild {
 
 	namespace ui {
-
-		class UIFrameConstraint;
 
 		class UIFrame : public NodeComponent {
 			CRIMILD_IMPLEMENT_RTTI( crimild::ui::UIFrame )
@@ -63,6 +62,7 @@ namespace crimild {
 		public:
 			UIFrame *clearConstraints( void );
 			UIFrame *addConstraint( SharedPointer< UIFrameConstraint > const &constraint );
+			UIFrameConstraint *getConstraint( UIFrameConstraint::Type type );
 
 			UIFrameConstraintMaker *pin( void );
 

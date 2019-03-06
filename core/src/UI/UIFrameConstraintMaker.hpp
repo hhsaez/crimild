@@ -72,6 +72,8 @@ namespace crimild {
 			UIFrameConstraintMaker *before( SharedPointer< Node > const &other );
 			UIFrameConstraintMaker *above( SharedPointer< Node > const &other );
 			UIFrameConstraintMaker *below( SharedPointer< Node > const &other );
+			UIFrameConstraintMaker *behindOf( SharedPointer< Node > const &other );
+			UIFrameConstraintMaker *inFrontOf( SharedPointer< Node > const &other );
 
 			UIFrameConstraintMaker *margin( crimild::Real32 value );
 			UIFrameConstraintMaker *marginLeft( crimild::Real32 value );

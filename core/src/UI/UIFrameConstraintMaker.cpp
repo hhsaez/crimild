@@ -167,6 +167,16 @@ UIFrameConstraintMaker *UIFrameConstraintMaker::below( SharedPointer< Node > con
 	return addConstraint( UIFrameConstraint::Type::BELOW, other );
 }
 
+UIFrameConstraintMaker *UIFrameConstraintMaker::behindOf( SharedPointer< Node > const &other )
+{
+	return addConstraint( UIFrameConstraint::Type::BEHIND, other );
+}
+
+UIFrameConstraintMaker *UIFrameConstraintMaker::inFrontOf( SharedPointer< Node > const &other )
+{
+	return addConstraint( UIFrameConstraint::Type::INFRONT, other );
+}
+
 UIFrameConstraintMaker *UIFrameConstraintMaker::margin( crimild::Real32 value )
 {
 	return addConstraint( UIFrameConstraint::Type::MARGIN, value );
