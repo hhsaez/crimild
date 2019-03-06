@@ -89,6 +89,19 @@ UIFrame *UIFrame::addConstraint( SharedPointer< UIFrameConstraint > const &const
 	return this;
 }
 
+UIFrameConstraint *UIFrame::getConstraint( UIFrameConstraint::Type type )
+{
+	UIFrameConstraint *ret = nullptr;
+	
+	_constraints.each( [ &ret, type ]( SharedPointer< UIFrameConstraint > const &c ) {
+		if ( c->getType() == type ) {
+            ret = crimild::get_ptr( c );
+		}
+	});
+
+	return ret;
+}
+
 UIFrameConstraintMaker *UIFrame::pin( void )
 {
 	clearConstraints();
