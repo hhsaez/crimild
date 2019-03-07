@@ -67,11 +67,17 @@ void UIFrameConstraint::apply( UIFrame *frame, UIFrame *parentFrame ) const
 
 	switch ( _type ) {
 		case Type::TOP:
-			y = ref.getY() + _value;
+			y = _value;
+			if ( _referenceFrame != nullptr ) {
+				y = ref.getY() + y;
+			}
 			break;
 
 		case Type::LEFT:
-			x = ref.getX() + _value;
+			x = _value;
+			if ( _referenceFrame != nullptr ) {
+				x = ref.getX() + x;
+			}
 			break;
 
 		case Type::RIGHT:
@@ -109,7 +115,7 @@ void UIFrameConstraint::apply( UIFrame *frame, UIFrame *parentFrame ) const
 
 		case Type::CENTER:
 			break;
-
+			
 		case Type::CENTER_X:
 			x = ref.getX() + 0.5f * ( ref.getWidth() - w );
 			break;
