@@ -44,7 +44,7 @@ namespace crimild {
 		public:
 			UILabel( void );
 			UILabel( std::string text, const RGBAColorf &color = RGBAColorf::ONE );
-			virtual ~UILabel( void );
+			~UILabel( void ) = default;
 
 			virtual void onAttach( void ) override;
 			virtual void start( void ) override;
@@ -55,6 +55,9 @@ namespace crimild {
 		private:
 			UIFrame *_frame = nullptr;
 			SharedPointer< Text > _text = nullptr;
+
+		public:
+			void decode( coding::Decoder &decoder ) override;
 		};
 
 	}

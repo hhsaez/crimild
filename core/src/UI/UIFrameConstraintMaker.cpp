@@ -100,9 +100,19 @@ UIFrameConstraintMaker *UIFrameConstraintMaker::width( crimild::Real32 constant 
 	return addConstraint( UIFrameConstraint::Type::WIDTH, constant );
 }
 
+UIFrameConstraintMaker *UIFrameConstraintMaker::widthToParent( crimild::Real32 percent )
+{
+	return addConstraint( UIFrameConstraint::Type::WIDTH_TO_PARENT, percent );
+}
+
 UIFrameConstraintMaker *UIFrameConstraintMaker::height( crimild::Real32 constant )
 {
 	return addConstraint( UIFrameConstraint::Type::HEIGHT, constant );
+}
+
+UIFrameConstraintMaker *UIFrameConstraintMaker::heightToParent( crimild::Real32 percent )
+{
+	return addConstraint( UIFrameConstraint::Type::HEIGHT_TO_PARENT, percent );
 }
 
 UIFrameConstraintMaker *UIFrameConstraintMaker::size( crimild::Real32 width, crimild::Real32 height )
@@ -142,7 +152,7 @@ UIFrameConstraintMaker *UIFrameConstraintMaker::centerY( SharedPointer< Node > c
 	return addConstraint( UIFrameConstraint::Type::CENTER_Y, other );
 }
 
-UIFrameConstraintMaker *UIFrameConstraintMaker::fillParent( void )
+UIFrameConstraintMaker *UIFrameConstraintMaker::all( void )
 {
 	return addConstraint( UIFrameConstraint::Type::EDGES, 0 );
 }

@@ -45,7 +45,7 @@ namespace crimild {
 		public:
 			UIFrame( void );
 			UIFrame( const Rectf &extensions );
-			virtual ~UIFrame( void );
+			~UIFrame( void ) = default;
 
 			UIFrame *setExtensions( const Rectf &extensions ) { _extensions = extensions; return this; }
 			const Rectf &getExtensions( void ) const { return _extensions; }
@@ -57,7 +57,7 @@ namespace crimild {
 
 		private:
 			Rectf _extensions;
-			crimild::Real32 _zIndex = 1;
+			crimild::Real32 _zIndex = 0;
 
 		public:
 			UIFrame *clearConstraints( void );
@@ -69,6 +69,9 @@ namespace crimild {
 		private:
 			UIFrameConstraintMaker _constraintMaker;
 			containers::Array< SharedPointer< UIFrameConstraint >> _constraints;
+
+		public:
+			void decode( coding::Decoder & ) override;
 		};
 
 	}

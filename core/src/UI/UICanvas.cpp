@@ -30,6 +30,7 @@
 
 #include "SceneGraph/Group.hpp"
 #include "SceneGraph/Camera.hpp"
+#include "Simulation/Simulation.hpp"
 #include "Visitors/UpdateWorldState.hpp"
 
 using namespace crimild;
@@ -37,11 +38,6 @@ using namespace crimild::ui;
 
 UICanvas::UICanvas( crimild::Int32 width, crimild::Int32 height )
 	: _size( width, height )
-{
-	
-}
-
-UICanvas::~UICanvas( void )
 {
 	
 }
@@ -62,16 +58,37 @@ void UICanvas::update( const Clock & )
 	
 	if ( getRenderSpace() == RenderSpace::CAMERA ) {
         if ( auto camera = Camera::getMainCamera() ) {
-            // TODO: this isn't perfect, but it's good enough
+            // Scale the UI so its height is 1.0
+            // Then, translate it back based on Near/Up planes in camera's frustum
             auto cWorld = camera->getWorld();
             auto t = Transformation();
-            auto size = Numericf::max( _size.x(), _size.y() );
-            auto aspect = camera->computeAspect();
-            t.setScale( 1.0f / size );
-            t.setTranslate( 0.0f, 0.0f, -0.5f * aspect );
+            auto size = _size.y();
+            auto up = camera->getFrustum().getUMax();
+            auto near = camera->getFrustum().getDMin();
+            t.setScale( 2.0f / size );
+            t.setTranslate( 0.0f, 0.0f, -near / up );
             node->world().computeFrom( cWorld, t );
             node->setWorldIsCurrent( true );
         }
     }
+}
+
+void UICanvas::decode( coding::Decoder &decoder )
+{
+	NodeComponent::decode( decoder );
+
+	// Grab canvas size from settings first
+	auto settings = Simulation::getInstance()->getSettings();
+	auto width = settings->get< crimild::Int32 >( "video.width", 800 );
+	auto height = settings->get< crimild::Int32 >( "video.height", 600 );
+
+	decoder.decode( "width", width );
+	decoder.decode( "height", height );
+
+	_size = Vector2i { width, height };
+
+	int renderSpace;
+	decoder.decode( "renderSpace", renderSpace );
+	_renderSpace = static_cast< RenderSpace >( renderSpace );
 }
 

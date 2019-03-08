@@ -27,8 +27,12 @@
 
 #include "UIFrameConstraint.hpp"
 #include "UIFrame.hpp"
+#include "UICanvas.hpp"
 
 #include "SceneGraph/Node.hpp"
+#include "Concurrency/Async.hpp"
+#include "Simulation/Simulation.hpp"
+#include "Visitors/Apply.hpp"
 
 using namespace crimild;
 using namespace ui;
@@ -47,13 +51,19 @@ UIFrameConstraint::UIFrameConstraint( Type type, UIFrame *referenceFrame )
 	
 }
 
-UIFrameConstraint::~UIFrameConstraint( void )
+void UIFrameConstraint::apply( UIFrame *frame, UIFrame *parentFrame )
 {
+    if ( _referenceFrame == nullptr && _referenceFrameName != "" ) {
+        // TODO: not sure about this. But its better than doing it on apply
+        auto scene = Simulation::getInstance()->getScene();
+        scene->perform( Apply( [ this ]( Node *n ) {
+            if ( n->getName() == _referenceFrameName ) {
+                _referenceFrame = n->getComponent< UIFrame >();
+            }
+        }));
+    }
 
-}
 
-void UIFrameConstraint::apply( UIFrame *frame, UIFrame *parentFrame ) const
-{
 	auto rect = frame->getExtensions();
 	auto z = frame->getZIndex();
 
@@ -68,25 +78,14 @@ void UIFrameConstraint::apply( UIFrame *frame, UIFrame *parentFrame ) const
 	switch ( _type ) {
 		case Type::TOP:
 			y = _value;
-			if ( _referenceFrame != nullptr ) {
-				y = ref.getY() + y;
-			}
 			break;
 
 		case Type::LEFT:
 			x = _value;
-			if ( _referenceFrame != nullptr ) {
-				x = ref.getX() + x;
-			}
 			break;
 
 		case Type::RIGHT:
-			if ( _referenceFrame == nullptr ) {
-				x = ref.getX() + ref.getWidth() - w - _value;
-			}
-			else {
-				w = ref.getX() + ref.getWidth() - x;
-			}
+			x = ref.getWidth() - w - _value;
 			break;
 
 		case Type::BOTTOM:
@@ -102,8 +101,16 @@ void UIFrameConstraint::apply( UIFrame *frame, UIFrame *parentFrame ) const
 			w = _value;
 			break;
 
+		case Type::WIDTH_TO_PARENT:
+			w = _value / 100.0f * ref.getWidth();
+			break;
+
 		case Type::HEIGHT:
 			h = _value;
+			break;
+
+		case Type::HEIGHT_TO_PARENT:
+			h = _value / 100.0f * ref.getHeight();
 			break;
 
 		case Type::EDGES:
@@ -117,11 +124,11 @@ void UIFrameConstraint::apply( UIFrame *frame, UIFrame *parentFrame ) const
 			break;
 			
 		case Type::CENTER_X:
-			x = ref.getX() + 0.5f * ( ref.getWidth() - w );
+			x = 0.5f * ( ref.getWidth() - w );
 			break;
 
 		case Type::CENTER_Y:
-			y = ref.getY() + 0.5f * ( ref.getHeight() - h );
+			y = 0.5f * ( ref.getHeight() - h );
 			break;
 
 		case Type::AFTER:
@@ -169,5 +176,17 @@ void UIFrameConstraint::apply( UIFrame *frame, UIFrame *parentFrame ) const
 
 	frame->setExtensions( Rectf( x, y, w, h ) );
 	frame->setZIndex( z );
+}
+
+void UIFrameConstraint::decode( coding::Decoder &decoder )
+{
+	coding::Codable::decode( decoder );
+
+	crimild::Int32 constraintType;
+	decoder.decode( "constraintType", constraintType );
+	_type = static_cast< Type >( constraintType );
+
+	decoder.decode( "value", _value );
+	decoder.decode( "reference", _referenceFrameName );
 }
 
