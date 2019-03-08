@@ -44,8 +44,9 @@ namespace crimild {
 			};
 			
 		public:
+			UICanvas( void ) = default;
 			UICanvas( crimild::Int32 width, crimild::Int32 height );
-			virtual ~UICanvas( void );
+			~UICanvas( void ) = default;
 
 			virtual void onAttach( void ) override;
 			
@@ -57,6 +58,9 @@ namespace crimild {
 		private:
 			Vector2i _size;
 			RenderSpace _renderSpace = RenderSpace::CAMERA;
+
+		public:
+			void decode( coding::Decoder &decoder ) override;
 		};
 
 	}

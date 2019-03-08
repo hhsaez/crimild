@@ -56,7 +56,9 @@ namespace crimild {
 			UIFrameConstraintMaker *bottom( SharedPointer< Node > const &other );
 
 			UIFrameConstraintMaker *width( crimild::Real32 constant = 0 );
+			UIFrameConstraintMaker *widthToParent( crimild::Real32 percent = 100 );
 			UIFrameConstraintMaker *height( crimild::Real32 constant = 0 );
+			UIFrameConstraintMaker *heightToParent( crimild::Real32 percent = 100 );
 			UIFrameConstraintMaker *size( crimild::Real32 width, crimild::Real32 height );
 
 			UIFrameConstraintMaker *center( crimild::Real32 offset = 0 );
@@ -66,7 +68,7 @@ namespace crimild {
 			UIFrameConstraintMaker *centerY( crimild::Real32 offset = 0 );
 			UIFrameConstraintMaker *centerY( SharedPointer< Node > const &other );
 
-			UIFrameConstraintMaker *fillParent( void );
+			UIFrameConstraintMaker *all( void );
 			
 			UIFrameConstraintMaker *after( SharedPointer< Node > const &other );
 			UIFrameConstraintMaker *before( SharedPointer< Node > const &other );

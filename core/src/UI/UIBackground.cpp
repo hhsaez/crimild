@@ -44,17 +44,13 @@ UIBackground::UIBackground( const RGBAColorf &color )
 	: _knownExtensions( 0, 0, 0, 0 )
 {
 	_geometry = crimild::alloc< Geometry >();
+    _geometry->setCullMode( Node::CullMode::NEVER );
 	
-	auto m = crimild::alloc< Material >();
-	m->setDiffuse( color );
-	m->setDepthState( DepthState::DISABLED );
-    m->setProgram( crimild::alloc< UnlitShaderProgram >() );
-	_geometry->getComponent< MaterialComponent >()->attachMaterial( m );
-}
-
-UIBackground::~UIBackground( void )
-{
-	
+	_material = crimild::alloc< Material >();
+	_material->setDiffuse( color );
+	_material->setDepthState( DepthState::DISABLED );
+    _material->setProgram( crimild::alloc< UnlitShaderProgram >() );
+	_geometry->getComponent< MaterialComponent >()->attachMaterial( _material );
 }
 
 void UIBackground::onAttach( void )
@@ -68,8 +64,7 @@ void UIBackground::update( const Clock & )
 	auto w = frame.getWidth();
 	auto h = frame.getHeight();
 	
-	if ( _knownExtensions.getWidth() != w ||
-	_knownExtensions.getHeight() != h ) {
+	if ( _knownExtensions.getWidth() != w || _knownExtensions.getHeight() != h ) {
 		_geometry->detachAllPrimitives();
         _geometry->attachPrimitive( crimild::alloc< QuadPrimitive >( w, h, VertexFormat::VF_P3_UV2 ) );
 		
@@ -77,3 +72,12 @@ void UIBackground::update( const Clock & )
 	}
 }
 
+void UIBackground::decode( coding::Decoder &decoder )
+{
+	NodeComponent::decode( decoder );
+
+	RGBAColorf color;
+	decoder.decode( "color", color );
+	_material->setDiffuse( color );
+}
+	

@@ -48,11 +48,6 @@ UIFrame::UIFrame( const Rectf &extensions )
 
 }
 
-UIFrame::~UIFrame( void )
-{
-
-}
-
 void UIFrame::update( const Clock & )
 {
 	UIFrame *parentFrame = nullptr;
@@ -73,7 +68,7 @@ void UIFrame::update( const Clock & )
 		auto pH = pExtensions.getHeight();
 		auto x = frame.getX() + 0.5f * ( -pW + w );
 		auto y = -frame.getY() + 0.5f * ( pH - h );
-		getNode()->local().setTranslate( Vector3f( x, y, _zIndex ) );
+		getNode()->local().setTranslate( Vector3f( x, y, 0.01f + _zIndex ) );
 	}
 }
 
@@ -106,5 +101,16 @@ UIFrameConstraintMaker *UIFrame::pin( void )
 {
 	clearConstraints();
 	return &_constraintMaker;
+}
+
+void UIFrame::decode( coding::Decoder &decoder )
+{
+	NodeComponent::decode( decoder );
+
+	auto frame = Vector4f::ZERO;
+	decoder.decode( "extensions", frame );
+	_extensions = Rectf { frame.x(), frame.y(), frame.z(), frame.w() };
+
+	decoder.decode( "constraints", _constraints );
 }
 

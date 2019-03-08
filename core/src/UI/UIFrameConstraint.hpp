@@ -49,7 +49,9 @@ namespace crimild {
 				TOP,
 				BOTTOM,
 				WIDTH,
+				WIDTH_TO_PARENT,
 				HEIGHT,
+				HEIGHT_TO_PARENT,
 				CENTER,
 				CENTER_X,
 				CENTER_Y,
@@ -68,9 +70,10 @@ namespace crimild {
 			};
 			
 		public:
+			UIFrameConstraint( void ) = default;
 			UIFrameConstraint( Type type, crimild::Real32 value );
 			UIFrameConstraint( Type type, UIFrame *referenceFrame );
-			virtual ~UIFrameConstraint( void );
+			~UIFrameConstraint( void ) = default;
 
 			Type getType( void ) const { return _type; }
 
@@ -81,11 +84,15 @@ namespace crimild {
 			Type _type;
 
 		public:
-			void apply( UIFrame *frame, UIFrame *parentFrame ) const;
+			void apply( UIFrame *frame, UIFrame *parentFrame );
 
 		private:
 			crimild::Real32 _value = 0;
 			UIFrame *_referenceFrame = nullptr;
+            std::string _referenceFrameName;
+
+		public:
+			void decode( coding::Decoder &decoder ) override;
 		};
 		
 	}

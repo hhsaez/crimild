@@ -145,5 +145,11 @@ void crimild::init( void )
 	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::animation::Real32Channel );
 	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::animation::Skeleton );
 	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::animation::Vector3fChannel );
+
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::ui::UIBackground );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::ui::UICanvas );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::ui::UIFrame );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::ui::UIFrameConstraint );
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::ui::UILabel );
 }
 

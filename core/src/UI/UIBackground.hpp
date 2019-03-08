@@ -34,6 +34,7 @@
 namespace crimild {
 
 	class Geometry;
+	class Material;
 
 	namespace ui {
 
@@ -41,15 +42,19 @@ namespace crimild {
 			CRIMILD_IMPLEMENT_RTTI( crimild::ui::UIBackground )
 		public:
 			UIBackground( const RGBAColorf &color = RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ) );
-			virtual ~UIBackground( void );
+			~UIBackground( void ) = default;
 
-			virtual void onAttach( void ) override;
+			void onAttach( void ) override;
 
-			virtual void update( const Clock & ) override;
+			void update( const Clock & ) override;
 
 		private:
 			SharedPointer< Geometry > _geometry;
+			SharedPointer< Material > _material;
 			Rectf _knownExtensions;
+
+		public:
+			void decode( coding::Decoder &decoder ) override;
 		};
 
 	}

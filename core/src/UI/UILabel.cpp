@@ -33,14 +33,15 @@
 #include "SceneGraph/Text.hpp"
 #include "Simulation/AssetManager.hpp"
 #include "Boundings/Box2DBoundingVolume.hpp"
+#include "Debug/DebugRenderHelper.hpp"
 
 using namespace crimild;
 using namespace crimild::ui;
 
 UILabel::UILabel( void )
-	: UILabel( "Label" )
+	: UILabel( "asd" )
 {
-
+	
 }
 
 UILabel::UILabel( std::string str, const RGBAColorf &color )
@@ -52,11 +53,6 @@ UILabel::UILabel( std::string str, const RGBAColorf &color )
     _text->setSize( 1.0f );
     _text->setText( str );
     _text->setTextColor( color );
-}
-
-UILabel::~UILabel( void )
-{
-	
 }
 
 void UILabel::onAttach( void )
@@ -72,15 +68,30 @@ void UILabel::start( void )
 void UILabel::update( const Clock & )
 {
     const auto &rect = _frame->getExtensions();
-	auto w = rect.getWidth();
-	auto h = rect.getHeight();
+	auto scale = rect.getHeight();
+    auto geo = _text->getNodeAt( 0 );
+	auto bounds = geo->getLocalBound();
+    auto center = bounds->getCenter();
 
-    _text->local().setTranslate( -0.5f * w, -0.5f * h, 0.5f );
-    _text->local().setScale( h );
+    _text->local().setTranslate( Vector3f( 0, 0.0f, 0.05f ) - scale * center );
+    _text->local().setScale( scale );
 }
 
 void UILabel::setText( std::string text )
 {
 	_text->setText( text );
+}
+
+void UILabel::decode( coding::Decoder &decoder )
+{
+	NodeComponent::decode( decoder );
+
+	std::string text;
+	decoder.decode( "text", text );
+	setText( text );
+
+    auto color = RGBAColorf::ONE;
+	decoder.decode( "color", color );
+	_text->setTextColor( color );
 }
 
