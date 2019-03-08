@@ -35,26 +35,18 @@
 using namespace crimild;
 using namespace crimild::ui;
 
-UIButton::UIButton( void )
-{
-
-}
-
 UIButton::UIButton( UIButton::Callback const &callback )
 	: _callback( callback )
 {
 
 }
 
-UIButton::~UIButton( void )
-{
-	
-}
-
 void UIButton::onAttach( void )
 {
     _node = getNode();
-	_node->attachComponent< UIResponder >( _callback );
+    _node->attachComponent< UIResponder >( [ this ]( Node *node ) -> crimild::Bool {
+        return _callback != nullptr && _callback( node );
+    });
     _node->setLocalBound( crimild::alloc< Box2DBoundingVolume >() );
     _node->setWorldBound( crimild::alloc< Box2DBoundingVolume >() );
 }

@@ -45,9 +45,11 @@ namespace crimild {
 			using Callback = std::function< bool( Node * ) >;
 			
 		public:
-			UIButton( void );
+			UIButton( void ) = default;
 			UIButton( Callback const &callback );
-			virtual ~UIButton( void );
+			~UIButton( void ) = default;
+
+			void setAction( Callback const &callback ) { _callback = callback; }
 
 			virtual void onAttach( void ) override;
 			virtual void start( void ) override;
