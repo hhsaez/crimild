@@ -6,6 +6,7 @@
 #include "Rendering/Renderer.hpp"
 #include "Rendering/FrameBufferObject.hpp"
 #include "Rendering/Programs/UnlitShaderProgram.hpp"
+#include "Rendering/Programs/VertexColorShaderProgram.hpp"
 #include "Rendering/Font.hpp"
 #include "Rendering/ShaderGraph/Constants.hpp"
 
@@ -35,6 +36,7 @@ using namespace crimild::shadergraph::locations;
 #define CRIMILD_DEBUG_RENDER_HELPER_PRIMITIVE_WIREFRAME_SPHERE "debug/render_helper/primitive/wireframe_sphere"
 #define CRIMILD_DEBUG_RENDER_HELPER_VBO_LINES "debug/render_helper/vbo/lines"
 #define CRIMILD_DEBUG_RENDER_UNLIT_SHADER_PROGRAM "debug/render/programs/unlit"
+#define CRIMILD_DEBUG_RENDER_VERTEX_COLOR_SHADER_PROGRAM "debug/render/programs/vertexColor"
 
 void DebugRenderHelper::init( void )
 {
@@ -44,7 +46,9 @@ void DebugRenderHelper::init( void )
     AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_HELPER_PRIMITIVE_SPHERE, crimild::alloc< SpherePrimitive >( 1.0f ), true );
     AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_HELPER_PRIMITIVE_SPHERE, crimild::alloc< ParametricSpherePrimitive >( Primitive::Type::LINES, 1.0f, VertexFormat::VF_P3, Vector2i( 8, 12 ) ), true );
     AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_HELPER_VBO_LINES, crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3, 10, nullptr ), true );
+
     AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_UNLIT_SHADER_PROGRAM, crimild::alloc< UnlitShaderProgram >(), true );
+    AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_VERTEX_COLOR_SHADER_PROGRAM, crimild::alloc< VertexColorShaderProgram >(), true );
 }
 
 void DebugRenderHelper::renderLine( Renderer *renderer, Camera *camera, const Vector3f &from, const Vector3f &to, const RGBAColorf &color )
@@ -192,6 +196,65 @@ void DebugRenderHelper::render( Renderer *renderer, Camera *camera, Primitive *p
 	renderer->unbindPrimitive( program, primitive );
 
 	renderer->unbindProgram( program );
+
+    renderer->setDepthState( DepthState::ENABLED );
+    renderer->setAlphaState( AlphaState::DISABLED );
+}
+
+void DebugRenderHelper::render( const Transformation &transform, crimild::Real32 axisSize )
+{
+    auto p0 = transform.getTranslate();
+    auto up = p0 + axisSize * transform.computeUp();
+    auto direction = p0 + axisSize * transform.computeDirection();
+    auto right = p0 + axisSize * transform.computeRight();
+    auto mMatrix = Matrix4f::IDENTITY;
+
+    VertexPrecision vertices[] = {
+        // right axis
+        p0.x(), p0.y(), p0.z(), 1.0f, 0.0f, 0.0f, 1.0f,
+        right.x(), right.y(), right.z(), 1.0f, 0.0f, 0.0f, 1.0f,
+
+        // up axis
+        p0.x(), p0.y(), p0.z(), 0.0f, 1.0f, 0.0f, 1.0f,
+        up.x(), up.y(), up.z(), 0.0f, 1.0f, 0.0f, 1.0f,
+
+        // direction axis
+        p0.x(), p0.y(), p0.z(), 0.0f, 0.0f, 1.0f, 1.0f,
+        direction.x(), direction.y(), direction.z(), 0.0f, 0.0f, 1.0f, 1.0f,
+    };
+
+    auto vbo = crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3_C4, 6, vertices );
+    auto ibo = crimild::alloc< IndexBufferObject >( 6 );
+    ibo->generateIncrementalIndices();
+
+    auto primitive = crimild::alloc< Primitive >( Primitive::Type::LINES );
+    primitive->setVertexBuffer( vbo );
+    primitive->setIndexBuffer( ibo );
+
+    auto renderer = Simulation::getInstance()->getRenderer();
+    auto camera = Camera::getMainCamera();
+
+    auto program = AssetManager::getInstance()->get< ShaderProgram >( CRIMILD_DEBUG_RENDER_VERTEX_COLOR_SHADER_PROGRAM );
+    if ( program == nullptr ) {
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "No program found for debug rendering" );
+        return;
+    }
+
+    program->bindUniform( PROJECTION_MATRIX_UNIFORM, camera->getProjectionMatrix() );
+    program->bindUniform( VIEW_MATRIX_UNIFORM, camera->getViewMatrix() );
+    program->bindUniform( MODEL_MATRIX_UNIFORM, mMatrix );
+    program->bindUniform( COLOR_UNIFORM, RGBAColorf::ONE );
+
+    renderer->bindProgram( program );
+
+    renderer->setDepthState( DepthState::DISABLED );
+    renderer->setAlphaState( AlphaState::ENABLED );
+
+    renderer->bindPrimitive( program, crimild::get_ptr( primitive ) );
+    renderer->drawPrimitive( program, crimild::get_ptr( primitive ) );
+    renderer->unbindPrimitive( program, crimild::get_ptr( primitive ) );
+
+    renderer->unbindProgram( program );
 
     renderer->setDepthState( DepthState::ENABLED );
     renderer->setAlphaState( AlphaState::DISABLED );

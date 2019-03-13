@@ -26,6 +26,8 @@ namespace crimild {
 
 		static void render( Renderer *renderer, Camera *camera, Primitive *primitive, const Transformation &model, const RGBAColorf &color );
 
+        static void render( const Transformation &transform, crimild::Real32 axisSize = 1.0f );
+
 		/** 
 			\brief Renders a geometry on screen space
 		*/

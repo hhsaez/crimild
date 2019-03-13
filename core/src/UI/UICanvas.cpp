@@ -67,8 +67,7 @@ void UICanvas::update( const Clock & )
             auto near = camera->getFrustum().getDMin();
             t.setScale( 2.0f / size );
             t.setTranslate( 0.0f, 0.0f, -near / up );
-            node->world().computeFrom( cWorld, t );
-            node->setWorldIsCurrent( true );
+            node->setLocal( t );
         }
     }
 }
