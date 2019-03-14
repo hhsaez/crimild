@@ -226,6 +226,8 @@ void SDLEventSystem::update( void )
 {
     CRIMILD_PROFILE( "Update Input" )
 	
+    MessageQueue::getInstance()->broadcastMessage( MouseScroll { 0, 0 } );
+
 	SDL_Event event;
 	while ( SDL_PollEvent( &event ) ) {
 		switch( event.type ) {
