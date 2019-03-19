@@ -45,6 +45,7 @@ UILabel::UILabel( void )
 }
 
 UILabel::UILabel( std::string str, const RGBAColorf &color )
+	: _textColor( color )
 {
     auto font = AssetManager::getInstance()->get< Font >( AssetManager::FONT_DEFAULT );
 	
@@ -52,7 +53,7 @@ UILabel::UILabel( std::string str, const RGBAColorf &color )
     _text->setFont( font );
     _text->setSize( 1.0f );
     _text->setText( str );
-    _text->setTextColor( color );
+    _text->setTextColor( _textColor );
 }
 
 void UILabel::onAttach( void )
@@ -73,8 +74,40 @@ void UILabel::update( const Clock & )
 	auto bounds = geo->getLocalBound();
     auto center = bounds->getCenter();
 
-    _text->local().setTranslate( Vector3f( 0, 0.0f, 0.05f ) - scale * center );
-    _text->local().setScale( scale );
+    auto x = 0.0f;
+    auto y = 0.0f;
+
+    switch ( _textHorizontalAlignment ) {
+		case TextHorizontalAlignment::Left:
+            x = -0.5f * rect.getWidth();
+			break;
+
+		case TextHorizontalAlignment::Center:
+			x = -_textSize * center.x();
+			break;
+
+		case TextHorizontalAlignment::Right:
+            x = 0.5f * rect.getWidth() - _textSize * ( bounds->getMax().x() - bounds->getMin().x() );
+			break;
+    }
+
+    switch ( _textVerticalAlignment ) {
+		case TextVerticalAlignment::Top:
+            y = 0.5f * rect.getHeight() - _textSize * ( bounds->getMax().y() - bounds->getMin().y() );
+			break;
+
+		case TextVerticalAlignment::Center:
+			y = -_textSize * center.y();
+			break;
+
+		case TextVerticalAlignment::Bottom:
+            y = -0.5f * rect.getHeight() - _textSize * bounds->getMin().y();
+			break;
+    }
+
+	_text->setTextColor( _textColor );
+    _text->local().setTranslate( x, y, 0.05f );
+    _text->local().setScale( _textSize );
 }
 
 void UILabel::setText( std::string text )
@@ -90,8 +123,18 @@ void UILabel::decode( coding::Decoder &decoder )
 	decoder.decode( "text", text );
 	setText( text );
 
-    auto color = RGBAColorf::ONE;
-	decoder.decode( "color", color );
-	_text->setTextColor( color );
+    _textColor = RGBAColorf::ONE;
+	decoder.decode( "textColor", _textColor );
+
+    _textSize = 10;
+    decoder.decode( "textSize", _textSize );
+
+	auto textHorizontalAlignment = static_cast< int >( TextHorizontalAlignment::Left );
+	decoder.decode( "textHorizontalAlignment", textHorizontalAlignment );
+	_textHorizontalAlignment = static_cast< TextHorizontalAlignment >( textHorizontalAlignment );
+
+	auto textVerticalAlignment = static_cast< int >( TextVerticalAlignment::Center );
+	decoder.decode( "textVerticalAlignment", textVerticalAlignment );
+	_textVerticalAlignment = static_cast< TextVerticalAlignment >( textVerticalAlignment );
 }
 

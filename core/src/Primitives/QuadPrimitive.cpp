@@ -51,7 +51,7 @@ QuadPrimitive::QuadPrimitive( float width, float height, const VertexFormat &for
     
     if ( format.hasTextureCoords() ) {
         vertex[ format.getTextureCoordsOffset() + 0 ] = textureOffset[ 0 ] + textureScale[ 0 ] * 0.0f;
-        vertex[ format.getTextureCoordsOffset() + 1 ] = textureOffset[ 1 ] + textureScale[ 1 ] * 1.0f;
+        vertex[ format.getTextureCoordsOffset() + 1 ] = textureOffset[ 1 ] + textureScale[ 1 ] * 0.0f;
     }
     
     vertex += format.getVertexSize();
@@ -69,7 +69,7 @@ QuadPrimitive::QuadPrimitive( float width, float height, const VertexFormat &for
     
     if ( format.hasTextureCoords() ) {
         vertex[ format.getTextureCoordsOffset() + 0 ] = textureOffset[ 0 ] + textureScale[ 0 ] * 1.0f;
-        vertex[ format.getTextureCoordsOffset() + 1 ] = textureOffset[ 1 ] + textureScale[ 1 ] * 1.0f;
+        vertex[ format.getTextureCoordsOffset() + 1 ] = textureOffset[ 1 ] + textureScale[ 1 ] * 0.0f;
     }
     
     vertex += format.getVertexSize();
@@ -87,7 +87,7 @@ QuadPrimitive::QuadPrimitive( float width, float height, const VertexFormat &for
     
     if ( format.hasTextureCoords() ) {
         vertex[ format.getTextureCoordsOffset() + 0 ] = textureOffset[ 0 ] + textureScale[ 0 ] * 0.0f;
-        vertex[ format.getTextureCoordsOffset() + 1 ] = textureOffset[ 1 ] + textureScale[ 1 ] * 0.0f;
+        vertex[ format.getTextureCoordsOffset() + 1 ] = textureOffset[ 1 ] + textureScale[ 1 ] * 1.0f;
     }
     
     vertex += format.getVertexSize();
@@ -105,7 +105,7 @@ QuadPrimitive::QuadPrimitive( float width, float height, const VertexFormat &for
     
     if ( format.hasTextureCoords() ) {
         vertex[ format.getTextureCoordsOffset() + 0 ] = textureOffset[ 0 ] + textureScale[ 0 ] * 1.0f;
-        vertex[ format.getTextureCoordsOffset() + 1 ] = textureOffset[ 1 ] + textureScale[ 1 ] * 0.0f;
+        vertex[ format.getTextureCoordsOffset() + 1 ] = textureOffset[ 1 ] + textureScale[ 1 ] * 1.0f;
     }
     
     vertex += format.getVertexSize();

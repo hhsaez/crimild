@@ -44,14 +44,14 @@ namespace crimild {
 			
 		public:
 			enum class Type {
-				LEFT,
-				RIGHT,
-				TOP,
-				BOTTOM,
 				WIDTH,
 				WIDTH_TO_PARENT,
 				HEIGHT,
 				HEIGHT_TO_PARENT,
+				LEFT,
+				RIGHT,
+				TOP,
+				BOTTOM,
 				CENTER,
 				CENTER_X,
 				CENTER_Y,

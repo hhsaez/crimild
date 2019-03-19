@@ -51,7 +51,13 @@ ForwardShadingShaderProgram::~ForwardShadingShaderProgram( void )
 
 void ForwardShadingShaderProgram::createVertexShader( void )
 {
-	auto graph = Renderer::getInstance()->createShaderGraph();
+    auto renderer = Renderer::getInstance();
+    if ( renderer == nullptr ) {
+        CRIMILD_LOG_ERROR( "No valid renderer instance" );
+        return;
+    }
+
+	auto graph = renderer->createShaderGraph();
 	graph->addOutputNode< MeshVertexMaster >();
 
 	buildVertexShader( graph );
@@ -59,7 +65,13 @@ void ForwardShadingShaderProgram::createVertexShader( void )
 
 void ForwardShadingShaderProgram::createFragmentShader( void )
 {
-	auto graph = Renderer::getInstance()->createShaderGraph();
+    auto renderer = Renderer::getInstance();
+    if ( renderer == nullptr ) {
+        CRIMILD_LOG_ERROR( "No valid renderer instance" );
+        return;
+    }
+
+    auto graph = renderer->createShaderGraph();
 	graph->addOutputNode< PhongFragmentMaster >();
 
 	buildFragmentShader( graph );

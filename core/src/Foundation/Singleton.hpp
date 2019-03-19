@@ -59,7 +59,6 @@ namespace crimild {
 	public:
 		static ObjectType *getInstance( void )
 		{
-			assert( _instance != nullptr && "Singleton instance not set" );
 			return _instance;
 		}
 
