@@ -37,7 +37,7 @@ using namespace crimild;
 
 TEST( CameraTest, construction )
 {
-	auto camera = crimild::alloc< Camera >();
+    auto camera = crimild::alloc< Camera >();
 }
 
 TEST( CameraTest, viewMatrix )

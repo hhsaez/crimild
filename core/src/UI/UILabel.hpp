@@ -42,6 +42,19 @@ namespace crimild {
 			CRIMILD_IMPLEMENT_RTTI( crimild::ui::UILabel )
 
 		public:
+			enum class TextHorizontalAlignment {
+				Left,
+				Center,
+				Right,
+			};
+
+			enum class TextVerticalAlignment {
+				Top,
+				Center,
+				Bottom,
+			};
+
+		public:
 			UILabel( void );
 			UILabel( std::string text, const RGBAColorf &color = RGBAColorf::ONE );
 			~UILabel( void ) = default;
@@ -52,9 +65,25 @@ namespace crimild {
 
 			void setText( std::string text );
 
+			void setTextHorizontalAlignment( TextHorizontalAlignment value ) { _textHorizontalAlignment = value; }
+			TextHorizontalAlignment getTextHorizontalAlignment( void ) const { return _textHorizontalAlignment; }
+
+			void setTextVerticalAlignment( TextVerticalAlignment value ) { _textVerticalAlignment = value; }
+			TextVerticalAlignment getTextVerticalAlignment( void ) const { return _textVerticalAlignment; }
+
+			void setTextColor( const RGBAColorf &value ) { _textColor = value; }
+			const RGBAColorf &getTextColor( void ) const { return _textColor; }
+			
+			void setTextSize( crimild::Real32 value ) { _textSize = value; }
+			crimild::Real32 getTextSize( void ) const { return _textSize; }
+
 		private:
 			UIFrame *_frame = nullptr;
 			SharedPointer< Text > _text = nullptr;
+			TextHorizontalAlignment _textHorizontalAlignment = TextHorizontalAlignment::Left;
+			TextVerticalAlignment _textVerticalAlignment = TextVerticalAlignment::Center;
+			RGBAColorf _textColor;
+			crimild::Real32 _textSize = 10.0f;
 
 		public:
 			void decode( coding::Decoder &decoder ) override;

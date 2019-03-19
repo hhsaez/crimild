@@ -76,8 +76,14 @@ void UIBackground::decode( coding::Decoder &decoder )
 {
 	NodeComponent::decode( decoder );
 
-	RGBAColorf color;
+	auto color = RGBAColorf::ONE;
 	decoder.decode( "color", color );
 	_material->setDiffuse( color );
+
+	std::string image;
+	decoder.decode( "image", image );
+	if ( image.size() > 0 ) {
+		_material->setColorMap( AssetManager::getInstance()->get< Texture >( image ) );
+	}
 }
 	

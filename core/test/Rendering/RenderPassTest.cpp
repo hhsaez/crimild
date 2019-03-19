@@ -27,12 +27,13 @@
 
 #include "SceneGraph/Camera.hpp"
 #include "Rendering/Renderer.hpp"
-#include "Rendering/RenderPasses/RenderPass.hpp"
+//#include "Rendering/RenderPasses/RenderPass.hpp"
 
 #include "gtest/gtest.h"
 
 using namespace crimild;
 
+/*
 TEST( RenderPassTest, construction )
 {
 	auto renderPass = crimild::alloc< RenderPass >();
@@ -45,4 +46,4 @@ TEST( RenderPassTest, construction )
 
 	ASSERT_EQ( crimild::get_ptr( renderPass ), camera->getRenderPass() );
 }
-
+*/

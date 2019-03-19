@@ -46,18 +46,18 @@ namespace crimild {
 
 	private:
 		struct TGAHeader {
-			unsigned char identsize;
-		    unsigned char colorMapType;
-		    unsigned char imageType;	// 2 - rgb, 3 - greyscale
-		    unsigned short colorMapStart;
-		    unsigned short colorMapLength;
-		    unsigned char colorMapBits;
-		    unsigned short xstart;
-		    unsigned short ystart;
-		    unsigned short width;
-		    unsigned short height;
-		    unsigned char bits;
-		    unsigned char descriptor;
+            crimild::UInt8 idLength;
+            crimild::UInt8 colorMapType;
+            crimild::UInt8 imageType;
+		    crimild::UInt16 colorMapStart;
+		    crimild::UInt16 colorMapLength;
+		    crimild::UInt8 colorMapBits;
+		    crimild::UInt16 xStart;
+		    crimild::UInt16 yStart;
+		    crimild::UInt16 width;
+		    crimild::UInt16 height;
+		    crimild::UInt8 bits;
+		    crimild::UInt8 descriptor;
 		};
 
 		std::string _filePath;

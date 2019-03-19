@@ -75,28 +75,14 @@ void UIFrameConstraint::apply( UIFrame *frame, UIFrame *parentFrame )
 	crimild::Real32 w = rect.getWidth();
 	crimild::Real32 h = rect.getHeight();
 
+	auto rx = ref.getX();
+	auto ry = ref.getY();
+	auto rw = ref.getWidth();
+	auto rh = ref.getHeight();
+
+	auto v = _value;
+
 	switch ( _type ) {
-		case Type::TOP:
-			y = _value;
-			break;
-
-		case Type::LEFT:
-			x = _value;
-			break;
-
-		case Type::RIGHT:
-			x = ref.getWidth() - w - _value;
-			break;
-
-		case Type::BOTTOM:
-			if ( _referenceFrame == nullptr ) {
-				y = ref.getY() + ref.getHeight() - h - _value;
-			}
-			else {
-				h = ref.getY() + ref.getHeight() - y;
-			}
-			break;
-
 		case Type::WIDTH:
 			w = _value;
 			break;
@@ -111,6 +97,36 @@ void UIFrameConstraint::apply( UIFrame *frame, UIFrame *parentFrame )
 
 		case Type::HEIGHT_TO_PARENT:
 			h = _value / 100.0f * ref.getHeight();
+			break;
+
+		case Type::TOP:
+			y = _value;
+			break;
+
+		case Type::LEFT:
+			x = _value;
+			break;
+
+		case Type::RIGHT:
+			if ( x == 0 && w != rw ) {
+				// width was modified. apply offset, but keep width value
+				x = rw - w - v;
+			}
+			else {
+				// left edge was modified. so, this changes right edge
+				w = rw - x - v;
+			}
+			break;
+
+		case Type::BOTTOM:
+			if ( y == 0 && h != rw ) {
+				// height was modified. apply offset, but keep height value
+				y = rh - h - v;
+			}
+			else {
+				// top edge was modified. Change bottom edge
+				h = rh - y - v;
+			}
 			break;
 
 		case Type::EDGES:

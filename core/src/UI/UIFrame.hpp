@@ -53,6 +53,7 @@ namespace crimild {
 			UIFrame *setZIndex( crimild::Real32 z ) { _zIndex = z; return this; }
 			crimild::Real32 getZIndex( void ) const { return _zIndex; }
 
+            void start( void ) override;
 			virtual void update( const Clock & ) override;
 
 		private:

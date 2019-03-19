@@ -94,23 +94,32 @@ TEST( PriorityQueueTest, enqueue )
 
 TEST( PriorityQueueTest, dequeue )
 {
-	PriorityQueue< int > pq;
+    PriorityQueue< int > pq;
+    pq.enqueue( 5 );
+    pq.enqueue( 6 );
+    pq.enqueue( 1 );
+    pq.enqueue( 8 );
+    pq.enqueue( 4 );
 
-	EXPECT_EQ( 0, pq.size() );
-	EXPECT_TRUE( pq.empty() );
+    EXPECT_FALSE( pq.empty() );
+    EXPECT_EQ( 1, pq.dequeue() );
+    EXPECT_EQ( 4, pq.front() );
 
-	pq.enqueue( 5 );
+    EXPECT_FALSE( pq.empty() );
+    EXPECT_EQ( 4, pq.dequeue() );
+    EXPECT_EQ( 5, pq.front() );
 
-	EXPECT_EQ( 1, pq.size() );
-	EXPECT_FALSE( pq.empty() );
-	EXPECT_EQ( 5, pq.front() );
+    EXPECT_FALSE( pq.empty() );
+    EXPECT_EQ( 5, pq.dequeue() );
+    EXPECT_EQ( 6, pq.front() );
 
-	auto k = pq.dequeue();
+    EXPECT_FALSE( pq.empty() );
+    EXPECT_EQ( 6, pq.dequeue() );
+    EXPECT_EQ( 8, pq.front() );
 
-	EXPECT_EQ( 0, pq.size() );
-	EXPECT_TRUE( pq.empty() );
-
-	EXPECT_EQ( 5, k );
+    EXPECT_FALSE( pq.empty() );
+    EXPECT_EQ( 8, pq.dequeue() );
+    EXPECT_TRUE( pq.empty() );
 }
 
 TEST( PriorityQueueTest, dequeueLockable )

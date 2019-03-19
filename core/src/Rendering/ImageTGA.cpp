@@ -33,6 +33,7 @@
 #include "Exceptions/InvalidFileFormatException.hpp"
 
 #include <vector>
+#include <algorithm>
 
 #define TGA_RGB 2
 #define TGA_A 3
@@ -58,42 +59,44 @@ ImageTGA::~ImageTGA( void )
 
 void ImageTGA::load( void )
 {
-	int width = 0;
-	int height = 0;
-	int bpp = 0;
-	unsigned char length = 0;
-    unsigned char imageType = 0;
-    unsigned char bits = 0;
     FILE *file = NULL;
-    int stride = 0;
-    std::vector< unsigned char > data;
-
     if ( ( file = fopen( _filePath.c_str(), "rb" ) ) == NULL ) {
-    	throw FileNotFoundException( _filePath );
+        throw FileNotFoundException( _filePath );
     }
 
-    fread( &length, sizeof( unsigned char ), 1, file );
+    TGAHeader header;
 
-    fseek( file, 1, SEEK_CUR );
+    // Read components one-by-one to avoid alignment issues
+    fread( &header.idLength, sizeof( crimild::UInt8 ), 1, file );
+    fread( &header.colorMapType, sizeof( crimild::UInt8 ), 1, file );
+    fread( &header.imageType, sizeof( crimild::UInt8 ), 1, file );
+    fread( &header.colorMapStart, sizeof( crimild::UInt16 ), 1, file );
+    fread( &header.colorMapLength, sizeof( crimild::UInt16 ), 1, file );
+    fread( &header.colorMapBits, sizeof( crimild::UInt8 ), 1, file );
+    fread( &header.xStart, sizeof( crimild::UInt16 ), 1, file );
+    fread( &header.yStart, sizeof( crimild::UInt16 ), 1, file );
+    fread( &header.width, sizeof( crimild::UInt16 ), 1, file );
+    fread( &header.height, sizeof( crimild::UInt16 ), 1, file );
+    fread( &header.bits, sizeof( crimild::UInt8 ), 1, file );
+    fread( &header.descriptor, sizeof( crimild::UInt8 ), 1, file );
 
-    fread( &imageType, sizeof( unsigned char ), 1, file );
+    auto width = header.width;
+    auto height = header.height;
+    auto bits = header.bits;
+    int bpp = 0;
+    std::vector< crimild::UInt8 > data;
 
-    fseek( file, 9, SEEK_CUR );
+    fseek( file, header.idLength, SEEK_CUR );
 
-    fread( &width, sizeof( unsigned short ), 1, file );
-    fread( &height, sizeof( unsigned short ), 1, file );
-    fread( &bits, sizeof( unsigned char ), 1, file );
-
-    fseek( file, length + 1, SEEK_CUR );
-
-    if( imageType != TGA_RLE ) {
+    if( header.imageType != TGA_RLE ) {
         if( bits == 24 || bits == 32 ) {
             bpp = bits / 8;
-            stride = bpp * width;
+            auto stride = bpp * width;
 			data.resize( stride * height );
 
             for( unsigned int y = 0; y < height; y++ ) {
-                unsigned char *line = &data[ stride * y ];
+                auto dataIdx = stride * y;
+                crimild::UInt8 *line = &data[ dataIdx ];
 
                 fread( line, stride, 1, file );
 
@@ -118,23 +121,23 @@ void ImageTGA::load( void )
     }
     else
     {
-        unsigned char rleID = 0;
+        crimild::UInt8 rleID = 0;
         int colorsRead = 0;
         bpp = bits / 8;
-        stride = bpp * width;
+        auto stride = bpp * width;
 
 		data.resize( stride * height );
-		std::vector< unsigned char > colors( bpp );
+		std::vector< crimild::UInt8 > colors( bpp );
 
         int i = 0;
         while ( i < static_cast< int >( width * height ) ) {
-            fread( &rleID, sizeof( unsigned char ), 1, file );
+            fread( &rleID, sizeof( crimild::UInt8 ), 1, file );
 
             if ( rleID < 128 ) {
                 rleID++;
 
                 while ( rleID ) {
-                    fread( &colors[ 0 ], sizeof( unsigned char ) * bpp, 1, file );
+                    fread( &colors[ 0 ], sizeof( crimild::UInt8 ) * bpp, 1, file );
 
                     data[ colorsRead + 0 ] = colors[ 2 ];
                     data[ colorsRead + 1 ] = colors[ 1 ];
@@ -152,7 +155,7 @@ void ImageTGA::load( void )
             else {
                 rleID -= 127;
 
-                fread( &colors[ 0 ], sizeof( unsigned char ) * bpp, 1, file );
+                fread( &colors[ 0 ], sizeof( crimild::UInt8 ) * bpp, 1, file );
 
                 while ( rleID ) {
                     data[ colorsRead + 0 ] = colors[ 2 ];
@@ -173,20 +176,33 @@ void ImageTGA::load( void )
 
     fclose( file );
 
+    if ( header.yStart > 0 ) {
+        // Force image's vertical origin to be bottom left
+        auto halfHeight = height / 2;
+        auto lineLength = width * bpp;
+        for ( crimild::UInt16 y = 0; y < halfHeight; y++ ) {
+            for ( crimild::UInt16 x = 0; x < lineLength; x++ ) {
+                auto idx0 = y * lineLength + x;
+                auto idx1 = ( height - y - 1 ) * lineLength + x;
+                std::swap( data[ idx0 ], data[ idx1 ] );
+            }
+        }
+    }
+
     setData( width, height, bpp, &data[ 0 ], bpp == 3 ? PixelFormat::RGB : PixelFormat::RGBA );
 }
 
 void ImageTGA::saveToFile( const std::string &path ) const
 {
     TGAHeader header;
-    header.identsize = 0;
+    header.idLength = sizeof( header );
     header.colorMapType = 0;
     header.imageType = getBpp() == 1 ? 3 : 2;
     header.colorMapStart = 0;
     header.colorMapLength = 0;
     header.colorMapBits = 0;
-    header.xstart = 0;
-    header.ystart = 0;
+    header.xStart = 0;
+    header.yStart = 0;
     header.width = getWidth();
     header.height = getHeight();
     header.bits = getBpp() * 8;
@@ -194,20 +210,20 @@ void ImageTGA::saveToFile( const std::string &path ) const
 
     FILE *out = fopen( path.c_str(), "wb" );
 
-    fwrite( &header.identsize, sizeof( unsigned char ), 1, out );
-    fwrite( &header.colorMapType, sizeof( unsigned char ), 1, out );
-    fwrite( &header.imageType, sizeof( unsigned char ), 1, out );
-    fwrite( &header.colorMapStart, sizeof( unsigned short ), 1, out );
-    fwrite( &header.colorMapLength, sizeof( unsigned short ), 1, out );
-    fwrite( &header.colorMapBits, sizeof( unsigned char ), 1, out );
-    fwrite( &header.xstart, sizeof( unsigned short ), 1, out );
-    fwrite( &header.ystart, sizeof( unsigned short ), 1, out );
-    fwrite( &header.width, sizeof( unsigned short ), 1, out );
-    fwrite( &header.height, sizeof( unsigned short ), 1, out );
-    fwrite( &header.bits, sizeof( unsigned char ), 1, out );
-    fwrite( &header.descriptor, sizeof( unsigned char ), 1, out );
+    fwrite( &header.idLength, sizeof( crimild::UInt8 ), 1, out );
+    fwrite( &header.colorMapType, sizeof( crimild::UInt8 ), 1, out );
+    fwrite( &header.imageType, sizeof( crimild::UInt8 ), 1, out );
+    fwrite( &header.colorMapStart, sizeof( crimild::UInt16 ), 1, out );
+    fwrite( &header.colorMapLength, sizeof( crimild::UInt16 ), 1, out );
+    fwrite( &header.colorMapBits, sizeof( crimild::UInt8 ), 1, out );
+    fwrite( &header.xStart, sizeof( crimild::UInt16 ), 1, out );
+    fwrite( &header.yStart, sizeof( crimild::UInt16 ), 1, out );
+    fwrite( &header.width, sizeof( crimild::UInt16 ), 1, out );
+    fwrite( &header.height, sizeof( crimild::UInt16 ), 1, out );
+    fwrite( &header.bits, sizeof( crimild::UInt8 ), 1, out );
+    fwrite( &header.descriptor, sizeof( crimild::UInt8 ), 1, out );
 
-    fwrite( &getData()[ 0 ], getWidth() * getHeight() * getBpp(), sizeof( unsigned char ), out );
+    fwrite( &getData()[ 0 ], getWidth() * getHeight() * getBpp(), sizeof( crimild::UInt8 ), out );
 
     fclose( out );
 }

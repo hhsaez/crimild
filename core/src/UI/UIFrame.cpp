@@ -48,14 +48,28 @@ UIFrame::UIFrame( const Rectf &extensions )
 
 }
 
+void UIFrame::start( void )
+{
+    NodeComponent::start();
+
+    // sort constraints by priority/type
+    _constraints.sort( []( const SharedPointer< UIFrameConstraint > &lhs, const SharedPointer< UIFrameConstraint > &rhs ) {
+        return static_cast< int >( lhs->getType() ) < static_cast< int >( rhs->getType() );
+    });
+}
+
 void UIFrame::update( const Clock & )
 {
 	UIFrame *parentFrame = nullptr;
 	if ( auto parent = getNode()->getParent() ) {
 		parentFrame = parent->getComponent< UIFrame >();
 	}
-	
-	_constraints.each( [ this, parentFrame ]( SharedPointer< UIFrameConstraint > const &c ) {
+
+    if ( auto pf = parentFrame ) {
+        _extensions = Rectf( 0, 0, pf->getExtensions().getWidth(), pf->getExtensions().getHeight() );
+    }
+
+    _constraints.each( [ this, parentFrame ]( SharedPointer< UIFrameConstraint > const &c ) {
 		c->apply( this, parentFrame );
 	});
 	
@@ -80,7 +94,7 @@ UIFrame *UIFrame::clearConstraints( void )
 
 UIFrame *UIFrame::addConstraint( SharedPointer< UIFrameConstraint > const &constraint )
 {
-	_constraints.add( constraint );
+    _constraints.add( constraint );
 	return this;
 }
 
@@ -88,7 +102,7 @@ UIFrameConstraint *UIFrame::getConstraint( UIFrameConstraint::Type type )
 {
 	UIFrameConstraint *ret = nullptr;
 	
-	_constraints.each( [ &ret, type ]( SharedPointer< UIFrameConstraint > const &c ) {
+    _constraints.each( [ &ret, type ]( SharedPointer< UIFrameConstraint > const &c ) {
 		if ( c->getType() == type ) {
             ret = crimild::get_ptr( c );
 		}
