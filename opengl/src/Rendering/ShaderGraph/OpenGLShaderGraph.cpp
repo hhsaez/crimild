@@ -451,7 +451,7 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 		ss << fragCoord->getInput()->getName() << " = gl_FragCoord;";
 		_mainSection.add( ss.str() );
 
-#ifndef CRIMILD_PLATFORM_EMSCRIPTEN
+#if !defined( CRIMILD_PLATFORM_EMSCRIPTEN ) && !defined( CRIMILD_PLATFORM_MOBILE )
 		_inputsSection.add( "in vec4 gl_FragCoord;" );
 #endif
 	};
@@ -583,18 +583,18 @@ std::string OpenGLShaderGraph::generateShaderSource( containers::Array< ShaderGr
 	
 	std::stringstream ss;
 
-#ifdef CRIMILD_PLATFORM_EMSCRIPTEN
-	ss << "#version 300 es\n"
-	   << "precision highp int;\n"
-	   << "precision mediump float;\n";
-#else
+#ifdef CRIMILD_PLATFORM_DESKTOP
 	ss << "#version 330 core\n"
+	   << "precision highp int;\n"
+	   << "precision highp float;\n";
+#else
+	ss << "#version 300 es\n"
        << "precision highp int;\n"
        << "precision highp float;\n";
 #endif
 
 	ss << "\n// Macros";
-#ifdef CRIMILD_PLATFORM_EMSCRIPTEN
+#if defined( CRIMILD_PLATFORM_EMSCRIPTEN ) || defined( CRIMILD_PLATFORM_MOBILE )
 	ss << "\n#define CRIMILD_PACK_FLOAT_TO_RGBA 1";
 #endif
 	ss << "\n";

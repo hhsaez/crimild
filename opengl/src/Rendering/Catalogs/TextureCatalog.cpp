@@ -147,7 +147,7 @@ void TextureCatalog::load( Texture *texture )
 		glTexParameteri( textureTarget, GL_TEXTURE_WRAP_R, OpenGLUtils::TEXTURE_WRAP_MODE_CLAMP[ ( uint8_t ) texture->getWrapMode() ] );
 	}
 
-#if defined( GL_TEXTURE_BORDER_COLOR ) && !defined( CRIMILD_PLATFORM_EMSCRIPTEN )
+#if defined( GL_TEXTURE_BORDER_COLOR ) && !defined( CRIMILD_PLATFORM_EMSCRIPTEN ) && !defined( CRIMILD_PLATFORM_MOBILE )
     glTexParameterfv( textureTarget, GL_TEXTURE_BORDER_COLOR, texture->getBorderColor().getData() );
 #endif
 
@@ -158,7 +158,14 @@ void TextureCatalog::load( Texture *texture )
 	GLenum internalFormat = GL_INVALID_ENUM;
 	GLenum textureFormat = GL_INVALID_ENUM;
 	crimild::Bool useFloatTexture = image->getPixelType() == Image::PixelType::FLOAT;
-	GLenum textureType = useFloatTexture ? GL_FLOAT : GL_UNSIGNED_BYTE;
+    GLenum textureType = GL_UNSIGNED_BYTE;
+    if ( useFloatTexture ) {
+#ifdef CRIMILD_PLATFORM_MOBILE
+        textureType = GL_HALF_FLOAT;
+#else
+        textureType = GL_FLOAT;
+#endif
+    }
 
 	switch ( image->getPixelFormat() ) {
 		case Image::PixelFormat::DEPTH_32:
@@ -176,7 +183,7 @@ void TextureCatalog::load( Texture *texture )
 #endif
 			
 		case Image::PixelFormat::DEPTH_16:
-			internalFormat = GL_DEPTH_COMPONENT16;
+            internalFormat = useFloatTexture ? GL_RGBA16F : GL_DEPTH_COMPONENT16;
 			textureFormat = GL_DEPTH_COMPONENT16;
 			break;
 			
