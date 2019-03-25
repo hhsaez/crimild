@@ -46,7 +46,7 @@ using namespace crimild::shadergraph::locations;
 ShadowPass::ShadowPass( RenderGraph *graph )
 	: RenderGraphPass( graph, "Shadow Pass" )
 {
-#ifdef CRIMILD_PLATFORM_EMSCRIPTEN
+#if defined( CRIMILD_PLATFORM_EMSCRIPTEN ) || defined( CRIMILD_PLATFORM_MOBILE )
 	_depthAttachment = graph->createAttachment(
 		getName() + " - Depth",
 		RenderGraphAttachment::Hint::FORMAT_DEPTH |

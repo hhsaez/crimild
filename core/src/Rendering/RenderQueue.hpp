@@ -66,7 +66,7 @@ namespace crimild {
 			TRANSLUCENT_CUSTOM,
 			SKYBOX,
             SCREEN,
-			DEBUG,
+//            DEBUG,
         };
         
         using Renderables = std::list< Renderable >;

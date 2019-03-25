@@ -48,7 +48,15 @@ using namespace crimild::shadergraph;
 DepthPass::DepthPass( RenderGraph *graph )
 	: RenderGraphPass( graph, "Depth Pass" )
 {
+#if defined( CRIMILD_PLATFORM_MOBILE )
+	_depthOutput = graph->createAttachment(
+		getName() + " - Depth",
+		RenderGraphAttachment::Hint::FORMAT_DEPTH |
+		RenderGraphAttachment::Hint::RENDER_ONLY
+	);
+#else
 	_depthOutput = graph->createAttachment( getName() + " - Depth", RenderGraphAttachment::Hint::FORMAT_DEPTH_HDR );
+#endif
 	_normalOutput = graph->createAttachment( getName() + " - Normal", RenderGraphAttachment::Hint::FORMAT_RGBA_HDR );
 }
 

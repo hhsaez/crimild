@@ -49,7 +49,7 @@ using namespace crimild::rendergraph;
 using namespace crimild::shadergraph::locations;
 
 Renderer::Renderer( void )
-	: _screenPrimitive( crimild::alloc< QuadPrimitive >( 2.0f, 2.0f, VertexFormat::VF_P3_N3_UV2, Vector2f( 0.0f, 1.0f ), Vector2f( 1.0f, -1.0f ) ) ),
+	: _screenPrimitive( crimild::alloc< QuadPrimitive >( 2.0f, 2.0f, VertexFormat::VF_P3_UV2 ) ),
       _shaderProgramCatalog( crimild::alloc< Catalog< ShaderProgram >>() ),
 	  _textureCatalog( crimild::alloc< Catalog< Texture >>() ),
 	  _vertexBufferObjectCatalog( crimild::alloc< Catalog< VertexBufferObject >>() ),
