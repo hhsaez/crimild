@@ -56,3 +56,4 @@ third-party/sdl
 third-party/sdl_mixer
 
 third-party/sdl_mixer-ems
+tools/sceneEncoder/Debug

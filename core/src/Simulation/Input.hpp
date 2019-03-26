@@ -198,10 +198,18 @@ namespace crimild {
 
 		struct MouseButtonDown {
 			int button;
+			float x;
+			float y;
+            float nx;
+            float ny;
 		};
 
 		struct MouseButtonUp {
 			int button;
+			float x;
+			float y;
+            float nx;
+            float ny;
 		};
 
 		struct MouseMotion {

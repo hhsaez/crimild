@@ -246,12 +246,61 @@ void SDLEventSystem::update( void )
 				break;
 
 			case SDL_MOUSEBUTTONDOWN: {
-				MessageQueue::getInstance()->pushMessage( MouseButtonDown { _mousecodes[ event.button.button ] } );
+				int mouseX, mouseY;
+				SDL_GetMouseState( &mouseX, &mouseY );
+				auto x = ( crimild::Real32 ) mouseX;
+				auto y = ( crimild::Real32 ) mouseY;
+				auto nx = ( crimild::Real32 ) mouseX / ( crimild::Real32 ) _windowSize.x();
+				auto ny = ( crimild::Real32 ) mouseY / ( crimild::Real32 ) _windowSize.y();
+
+				MessageQueue::getInstance()->pushMessage(
+					MouseButtonDown {
+						.button = _mousecodes[ event.button.button ],
+						.x = x,
+						.y = y,
+						.nx = nx,
+						.ny = ny,
+					}
+				);
+				
 				break;
 			}
 
 			case SDL_MOUSEBUTTONUP: {
-				MessageQueue::getInstance()->pushMessage( MouseButtonUp { _mousecodes[ event.button.button ] } );
+				int mouseX, mouseY;
+				SDL_GetMouseState( &mouseX, &mouseY );
+				auto x = ( crimild::Real32 ) mouseX;
+				auto y = ( crimild::Real32 ) mouseY;
+				auto nx = ( crimild::Real32 ) mouseX / ( crimild::Real32 ) _windowSize.x();
+				auto ny = ( crimild::Real32 ) mouseY / ( crimild::Real32 ) _windowSize.y();
+
+				MessageQueue::getInstance()->pushMessage(
+					MouseButtonUp {
+						.button = _mousecodes[ event.button.button ],
+						.x = x,
+						.y = y,
+						.nx = nx,
+						.ny = ny,
+					}
+				);
+
+				break;
+			}
+
+			case SDL_MOUSEMOTION: {
+				auto x = ( crimild::Real32 ) event.motion.x;
+				auto y = ( crimild::Real32 ) event.motion.y;
+				auto nx = x / _windowSize.x();
+				auto ny = y / _windowSize.y();
+				
+				MessageQueue::getInstance()->pushMessage(
+					MouseMotion {
+						.x = x,
+						.y = y,
+						.nx = nx,
+						.ny = ny,
+					}
+				);
 				break;
 			}
 
@@ -307,7 +356,7 @@ void SDLEventSystem::update( void )
 				break;
 		}
 	}
-
+#if 0
     // trigger MouseMotion in every update to handle cases
     // when the mouse is not moving and the delta pos should
     // be updated 
@@ -319,6 +368,7 @@ void SDLEventSystem::update( void )
 		( crimild::Real32 ) mouseX / ( crimild::Real32 ) _windowSize.x(),
 		( crimild::Real32 ) mouseY / ( crimild::Real32 ) _windowSize.y()
 	});
+#endif
 
     crimild::concurrency::sync_frame( std::bind( &SDLEventSystem::update, this ) );
 }
