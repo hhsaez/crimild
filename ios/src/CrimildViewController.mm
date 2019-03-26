@@ -41,14 +41,10 @@
     crimild::SharedPointer< crimild::Simulation > _simulation;
     
     CADisplayLink *_displayLink;
-    NSInteger _animationFrameInterval;
-    crimild::Vector2f _lastTouchPos;
-    crimild::Vector2f _lastTouchNormalizedPos;
 }
 
 @property (strong, nonatomic) CrimildView *crimildView;
 @property (readonly, nonatomic, getter=isAnimating) BOOL animating;
-@property (nonatomic) NSInteger animationFrameInterval;
 
 @end
 
@@ -61,7 +57,6 @@
         _simulation = crimild::alloc< crimild::Simulation >( "crimild", crimild::alloc< crimild::Settings >() );
 //        crimild::concurrency::JobScheduler::getInstance()->configure( 1 );
         _animating = FALSE;
-        _animationFrameInterval = 1;
         _displayLink = nil;
         
 //        self.useMetalRenderPath = NO;
@@ -77,7 +72,6 @@
         _simulation = crimild::alloc< crimild::Simulation >( "crimild", crimild::alloc< crimild::Settings >() );
 //        crimild::concurrency::JobScheduler::getInstance()->configure( 1 );
         _animating = FALSE;
-        _animationFrameInterval = 1;
         _displayLink = nil;
         
 //        self.useMetalRenderPath = NO;
@@ -105,7 +99,6 @@
     if (self.crimildView == nil) {
 //        self.useMetalRenderPath = NO;
         self.crimildView = [[CrimildEAGLView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-        self.animationFrameInterval = 2;
     }
     
     self.view = self.crimildView;
@@ -227,28 +220,11 @@
 
 #pragma mark - Animation
 
-- (NSInteger) animationFrameInterval
-{
-    return _animationFrameInterval;
-}
-
-- (void) setAnimationFrameInterval:(NSInteger)frameInterval
-{
-    if (frameInterval >= 1) {
-        _animationFrameInterval = frameInterval;
-        
-        if (_animating) {
-            [self stopAnimation];
-            [self startAnimation];
-        }
-    }
-}
-
 - (void) startAnimation
 {
     if (!_animating) {
         _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(simulationStep:)];
-        [_displayLink setFrameInterval:_animationFrameInterval];
+        _displayLink.preferredFramesPerSecond = 60;
         [_displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
         
         _animating = TRUE;
@@ -266,15 +242,6 @@
 
 - (void) simulationStep: (id) sender
 {
-    crimild::MessageQueue::getInstance()->pushMessage(
-        crimild::messaging::MouseMotion {
-            _lastTouchPos.x(),
-            _lastTouchPos.y(),
-            _lastTouchNormalizedPos.x(),
-            _lastTouchNormalizedPos.y(),
-        }
-    );
-
     if ( _simulation != nullptr ) {
         _simulation->update();
         
@@ -282,8 +249,6 @@
             [self.crimildView render];
         }
     }
-        crimild::MessageQueue::getInstance()->broadcastMessage( crimild::messaging::MouseScroll { 0, 0 } );
-
 }
 
 #pragma mark - Event handling
@@ -300,11 +265,7 @@
     float nx = x / self.view.bounds.size.width;
     float ny = y / self.view.bounds.size.height;
 
-    _lastTouchPos = crimild::Vector2f( x, y );
-    _lastTouchNormalizedPos = crimild::Vector2f( nx, ny );
-    
-    crimild::MessageQueue::getInstance()->pushMessage( crimild::messaging::MouseMotion { x, y, nx, ny } );
-    crimild::MessageQueue::getInstance()->pushMessage( crimild::messaging::MouseButtonDown { CRIMILD_INPUT_MOUSE_BUTTON_LEFT } );
+    crimild::MessageQueue::getInstance()->pushMessage( crimild::messaging::MouseButtonDown { CRIMILD_INPUT_MOUSE_BUTTON_LEFT, x, y, nx, ny } );
 #endif
 }
 
@@ -336,8 +297,7 @@
     float nx = x / self.view.bounds.size.width;
     float ny = y / self.view.bounds.size.height;
     
-    crimild::MessageQueue::getInstance()->pushMessage( crimild::messaging::MouseMotion { x, y, nx, ny } );
-    crimild::MessageQueue::getInstance()->pushMessage( crimild::messaging::MouseButtonUp { CRIMILD_INPUT_MOUSE_BUTTON_LEFT } );
+    crimild::MessageQueue::getInstance()->pushMessage( crimild::messaging::MouseButtonUp { CRIMILD_INPUT_MOUSE_BUTTON_LEFT, x, y, nx, ny } );
 #endif
 }
 
