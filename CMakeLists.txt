@@ -19,6 +19,7 @@ OPTION( CRIMILD_ENABLE_PHYSICS "Would you like to build the crimild-physics exte
 OPTION( CRIMILD_ENABLE_SCRIPTING "Would you like to build the crimild-scripting extension?" OFF )
 OPTION( CRIMILD_ENABLE_SFML "Would you like to build the crimild-sfml extension" OFF )
 OPTION( CRIMILD_ENABLE_GLFW "Would you like to build the crimild-glfw extension?" OFF )
+OPTION( CRIMILD_ENABLE_VULKAN "Would you like to build the crimild-vulkan extension?" OFF )
 OPTION( CRIMILD_ENABLE_SDL "Would you like to build the crimild-sdl extension?" OFF )
 
 IF ( ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten" )
@@ -110,6 +111,11 @@ IF ( CRIMILD_ENABLE_GLFW )
 	ADD_SUBDIRECTORY( glfw )
 	
 ENDIF ( CRIMILD_ENABLE_GLFW )
+
+IF ( CRIMILD_ENABLE_VULKAN )
+   ADD_DEFINITIONS( -DCRIMILD_ENABLE_VULKAN=1 )
+   ADD_SUBDIRECTORY( vulkan )
+ENDIF ()
 
 IF ( CRIMILD_ENABLE_SDL )
    ADD_DEFINITIONS( -DCRIMILD_ENABLE_SDL=1 )
