@@ -58,3 +58,4 @@ third-party/sdl_mixer
 third-party/sdl_mixer-ems
 tools/sceneEncoder/Debug
 tools/sceneEncoder/sceneEncoder
+third-party/vulkansdk

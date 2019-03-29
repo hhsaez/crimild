@@ -185,6 +185,43 @@ IF ( CRIMILD_ENABLE_SFML )
 	)
 ENDIF ()
 
+IF ( CRIMILD_ENABLE_VULKAN )
+
+   SET( CRIMILD_APP_INCLUDE_DIRECTORIES
+   		${CRIMILD_APP_INCLUDE_DIRECTORIES}
+		${CRIMILD_SOURCE_DIR}/vulkan/src
+		${CRIMILD_SOURCE_DIR}/third-party/vulkansdk/macOS/include
+   )
+
+   # Link directly with the dylib libraries
+   
+	SET( CRIMILD_APP_LINK_DIRECTORIES
+		 ${CRIMILD_APP_LINK_DIRECTORIES}
+		 ${CRIMILD_SOURCE_DIR}/third-party/vulkansdk/macOS/lib
+	)
+
+   SET( CRIMILD_APP_LINK_LIBRARIES
+   		${CRIMILD_APP_LINK_LIBRARIES}
+		crimild_vulkan
+		libvulkan.1.dylib
+   )
+
+   # This is not workign on Xcode
+   SET( ENV{VK_ICD_FILENAMES} ${CRIMILD_SOURCE_DIR}/third-party/vulkansdk/macOS/etc/vulkan/icd.d/MultekVK_icd.json )
+   SET( ENV{VK_LAYER_PATH} ${CRIMILD_SOURCE_DIR}/third-party/vulkansdk/macOS/etc/vulkan/explicit_layer.d )
+
+   CONFIGURE_FILE(
+		${CRIMILD_SOURCE_DIR}/third-party/vulkansdk/macOS/lib/libvulkan.1.1.101.dylib
+		${CMAKE_CURRENT_BINARY_DIR} COPYONLY
+   )
+
+   CONFIGURE_FILE(
+		${CRIMILD_SOURCE_DIR}/third-party/vulkansdk/macOS/lib/libvulkan.1.dylib
+		${CMAKE_CURRENT_BINARY_DIR} COPYONLY
+   )
+
+ENDIF ()
+
 IF ( CRIMILD_ENABLE_SDL )
 	IF ( WIN32 ) 
 		SET( SDL2_INCLUDE_DIR ${CRIMILD_SOURCE_DIR}/third-party/sdl/include )
@@ -260,6 +297,9 @@ ENDIF( CRIMILD_BUNDLE_APPS )
 IF ( DEFINED CRIMILD_APP_TARGET_PROPERTIES )
    SET_TARGET_PROPERTIES( ${CRIMILD_APP_NAME} PROPERTIES ${CRIMILD_APP_TARGET_PROPERTIES} )
 ENDIF ()
+
+#SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_BINARY_DIR} )
+#SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_BINARY_DIR} )
 
 TARGET_LINK_LIBRARIES( ${CRIMILD_APP_NAME} ${CRIMILD_APP_LINK_LIBRARIES} )
 
