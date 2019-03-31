@@ -12,12 +12,11 @@ SET( CRIMILD_LIBRARY_LINK_LIBRARIES
 
 IF ( APPLE )
    EXTRACT_ARCHIVE( vulkansdk-macos.zip vulkansdk ${CRIMILD_SOURCE_DIR}/third-party )
-   CRIMILD_INSTALL_FRAMEWORK( "vulkan-osx.zip" "vulkan" )
 
    SET(
 		CRIMILD_INCLUDE_DIRECTORIES
 		${CRIMILD_INCLUDE_DIRECTORIES}
-		${CRIMILD_SOURCE_DIR}/third-party/vulkan/macOS/include
+		${CRIMILD_SOURCE_DIR}/third-party/vulkansdk/include
    )
 ENDIF ()
 
