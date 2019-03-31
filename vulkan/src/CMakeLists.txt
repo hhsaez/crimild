@@ -10,15 +10,7 @@ SET( CRIMILD_LIBRARY_LINK_LIBRARIES
 	 crimild_core
 )
 
-IF ( APPLE )
-   EXTRACT_ARCHIVE( vulkansdk-macos.zip vulkansdk ${CRIMILD_SOURCE_DIR}/third-party )
-
-   SET(
-		CRIMILD_INCLUDE_DIRECTORIES
-		${CRIMILD_INCLUDE_DIRECTORIES}
-		${CRIMILD_SOURCE_DIR}/third-party/vulkansdk/include
-   )
-ENDIF ()
+FIND_PACKAGE( Vulkan REQUIRED )
 
 INCLUDE( ModuleBuildLibrary )
 

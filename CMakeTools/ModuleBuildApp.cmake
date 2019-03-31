@@ -187,44 +187,22 @@ ENDIF ()
 
 IF ( CRIMILD_ENABLE_VULKAN )
 
+   FIND_PACKAGE( Vulkan REQUIRED )
+
    SET( CRIMILD_APP_INCLUDE_DIRECTORIES
    		${CRIMILD_APP_INCLUDE_DIRECTORIES}
 		${CRIMILD_SOURCE_DIR}/vulkan/src
-		${CRIMILD_SOURCE_DIR}/third-party/vulkansdk/include
+		${Vulkan_INCLUDE_DIRS}
    )
-
-   # Link directly with the dylib libraries
-   
-	SET( CRIMILD_APP_LINK_DIRECTORIES
-		 ${CRIMILD_APP_LINK_DIRECTORIES}
-		 ${CRIMILD_SOURCE_DIR}/third-party/vulkansdk/lib/
-	)
 
    SET( CRIMILD_APP_LINK_LIBRARIES
    		${CRIMILD_APP_LINK_LIBRARIES}
 		crimild_vulkan
-		${CRIMILD_SOURCE_DIR}/third-party/vulkansdk/lib/libvulkan.dylib
-		"-framework Metal"
-		"-framework IOSurface"
-		"-framework QuartzCore"
+		${Vulkan_LIBRARIES}
+		#"-framework Metal"
+		#"-framework IOSurface"
+		#"-framework QuartzCore"
    )
-
-   # This is not workign on Xcode
-   SET( $ENV{VK_ICD_FILENAMES} ${CRIMILD_SOURCE_DIR}/third-party/vulkansdk/etc/vulkan/icd.d/MultekVK_icd.json )
-   SET( $ENV{VK_LAYER_PATH} ${CRIMILD_SOURCE_DIR}/third-party/vulkansdk/etc/vulkan/explicit_layer.d )
-   
-   IF ( FALSE )
-
-   CONFIGURE_FILE(
-		${CRIMILD_SOURCE_DIR}/third-party/vulkansdk/macOS/lib/libvulkan.1.1.101.dylib
-		${CMAKE_CURRENT_BINARY_DIR} COPYONLY
-   )
-
-   CONFIGURE_FILE(
-		${CRIMILD_SOURCE_DIR}/third-party/vulkansdk/macOS/lib/libvulkan.1.dylib
-		${CMAKE_CURRENT_BINARY_DIR} COPYONLY
-   )
-   ENDIF ()
 
 ENDIF ()
 
