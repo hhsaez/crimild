@@ -959,17 +959,28 @@ Variable *csl::modelMatrix( void )
 
 	auto ret = graph->getInput< Variable >( MODEL_MATRIX_UNIFORM );
 	if ( ret == nullptr ) {
-		ret = graph->addInputNode< Variable >(
-			Variable::Storage::UNIFORM,
-			Variable::Type::MATRIX_4,
-			MODEL_MATRIX_UNIFORM
-		);
-		graph->attachUniform(
-			crimild::alloc< Matrix4fUniform >(
-				MODEL_MATRIX_UNIFORM,
-				Matrix4f::IDENTITY
-			)
-		);
+		if ( graph->isInstancingEnabled() ) {
+			// if instancing is enabled, model matrix is an attribute
+			ret = graph->addInputNode< Variable >(
+				Variable::Storage::INPUT,
+				Variable::Type::MATRIX_4,
+				MODEL_MATRIX_UNIFORM
+			);
+			ret->setLayoutLocation( VertexFormat::LayoutLocation::INSTANCED_ATTRIBUTE );
+		}
+		else {
+			ret = graph->addInputNode< Variable >(
+				Variable::Storage::UNIFORM,
+				Variable::Type::MATRIX_4,
+				MODEL_MATRIX_UNIFORM
+			);
+			graph->attachUniform(
+				crimild::alloc< Matrix4fUniform >(
+					MODEL_MATRIX_UNIFORM,
+					Matrix4f::IDENTITY
+				)
+			);
+		}
 	}
 	return ret;
 }
@@ -980,17 +991,22 @@ Variable *csl::normalMatrix( void )
 
 	auto ret = graph->getInput< Variable >( NORMAL_MATRIX_UNIFORM );
 	if ( ret == nullptr ) {
-		ret = graph->addInputNode< Variable >(
-			Variable::Storage::UNIFORM,
-			Variable::Type::MATRIX_3,
-			NORMAL_MATRIX_UNIFORM
-		);
-		graph->attachUniform(
-			crimild::alloc< Matrix3fUniform >(
-				NORMAL_MATRIX_UNIFORM,
-				Matrix3f::IDENTITY
-			)
-		);
+		if ( graph->isInstancingEnabled() ) {
+			ret = mat3( inverse( modelMatrix() ) );
+		}
+		else {
+			ret = graph->addInputNode< Variable >(
+				Variable::Storage::UNIFORM,
+				Variable::Type::MATRIX_3,
+				NORMAL_MATRIX_UNIFORM
+			);
+			graph->attachUniform(
+				crimild::alloc< Matrix3fUniform >(
+					NORMAL_MATRIX_UNIFORM,
+					Matrix3f::IDENTITY
+				)
+			);
+		}
 	}
 	return ret;
 }

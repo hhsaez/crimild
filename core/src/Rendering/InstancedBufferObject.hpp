@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-present, H. Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,37 +25,29 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "UnlitShaderProgram.hpp"
+#ifndef CRIMILD_RENDERING_INSTANCED_BUFFER_OBJECT_
+#define CRIMILD_RENDERING_INSTANCED_BUFFER_OBJECT_
 
-#include "Rendering/Renderer.hpp"
-#include "Rendering/ShaderGraph/ShaderGraph.hpp"
-#include "Rendering/ShaderGraph/CSL.hpp"
-#include "Rendering/ShaderGraph/Nodes/MeshVertexMaster.hpp"
-#include "Rendering/ShaderGraph/Nodes/UnlitFragmentMaster.hpp"
+#include "BufferObject.hpp"
+#include "Catalog.hpp"
 
-using namespace crimild;
-using namespace crimild::shadergraph;
+namespace crimild {
 
-UnlitShaderProgram::UnlitShaderProgram( crimild::Bool instancingEnabled )
-{
-	createVertexShader( instancingEnabled );
-	createFragmentShader();
+	class InstancedBufferObject : 
+		public BufferObject< crimild::Byte >, 
+		public Catalog< InstancedBufferObject >::Resource {
+		CRIMILD_IMPLEMENT_RTTI( crimild::InstancedBufferObject )
+
+	public:
+		InstancedBufferObject( void ) = default;
+		InstancedBufferObject( unsigned int size, const crimild::Byte *data );
+		virtual ~InstancedBufferObject( void ) = default;
+
+		virtual crimild::Size getInstanceSize( void ) const { return 0; }
+		virtual unsigned int getInstanceCount( void ) const { return getSize(); }
+	};
+
 }
 
-void UnlitShaderProgram::createVertexShader( crimild::Bool instancingEnabled )
-{
-	auto graph = Renderer::getInstance()->createShaderGraph();
-	graph->setInstancingEnabled( instancingEnabled );
-    graph->addOutputNode< MeshVertexMaster >();
-
-	buildVertexShader( graph );
-}
-
-void UnlitShaderProgram::createFragmentShader( void )
-{
-	auto graph = Renderer::getInstance()->createShaderGraph();
-    graph->addOutputNode< UnlitFragmentMaster >();
-
-	buildFragmentShader( graph );
-}
+#endif
 

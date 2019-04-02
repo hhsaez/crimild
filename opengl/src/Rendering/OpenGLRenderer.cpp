@@ -30,6 +30,7 @@
 #include "Catalogs/ShaderProgramCatalog.hpp"
 #include "Catalogs/VertexBufferObjectCatalog.hpp"
 #include "Catalogs/IndexBufferObjectCatalog.hpp"
+#include "Catalogs/InstancedBufferObjectCatalog.hpp"
 #include "Catalogs/FrameBufferObjectCatalog.hpp"
 #include "Catalogs/TextureCatalog.hpp"
 #include "Catalogs/RenderTargetCatalog.hpp"
@@ -65,6 +66,7 @@ OpenGLRenderer::OpenGLRenderer( SharedPointer< FrameBufferObject > const &screen
     setShaderProgramCatalog( crimild::alloc< ShaderProgramCatalog >() );
 	setVertexBufferObjectCatalog( crimild::alloc< VertexBufferObjectCatalog >() );
 	setIndexBufferObjectCatalog( crimild::alloc< IndexBufferObjectCatalog >() );
+	setInstancedBufferObjectCatalog( crimild::alloc< InstancedBufferObjectCatalog >() );
 	setFrameBufferObjectCatalog( crimild::alloc< FrameBufferObjectCatalog >( this ) );
 	setTextureCatalog( crimild::alloc< TextureCatalog >() );
 	setRenderTargetCatalog( crimild::alloc< RenderTargetCatalog >( this ) );
@@ -269,12 +271,24 @@ void OpenGLRenderer::drawPrimitive( ShaderProgram *program, Primitive *primitive
 
 	GLenum type = OpenGLUtils::PRIMITIVE_TYPE[ ( uint8_t ) primitive->getType() ];
 
-	unsigned short *base = 0;
-	glDrawElements( type,
-				   primitive->getIndexBuffer()->getIndexCount(),
-				   GL_UNSIGNED_SHORT,
-				   ( const GLvoid * ) base );
-	
+	if ( auto instancedBO = primitive->getInstancedBuffer() ) {
+		glDrawElementsInstanced(
+			type,
+			primitive->getIndexBuffer()->getIndexCount(),
+			GL_UNSIGNED_SHORT,
+			0,
+			instancedBO->getInstanceCount()
+		);
+	}
+	else {
+		unsigned short *base = 0;
+		glDrawElements(
+			type,
+			primitive->getIndexBuffer()->getIndexCount(),
+			GL_UNSIGNED_SHORT,
+			( const GLvoid * ) base
+		);
+	}
 
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }

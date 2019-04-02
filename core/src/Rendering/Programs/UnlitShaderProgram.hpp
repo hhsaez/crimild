@@ -36,11 +36,11 @@ namespace crimild {
         CRIMILD_IMPLEMENT_RTTI( crimild::UnlitShaderProgram )
 
 	public:
-		UnlitShaderProgram( void );
-		virtual ~UnlitShaderProgram( void );
+		explicit UnlitShaderProgram( crimild::Bool instancingEnabled = false );
+		~UnlitShaderProgram( void ) = default;
 
 	private:
-		void createVertexShader( void );
+		void createVertexShader( crimild::Bool instancingEnabled );
 		void createFragmentShader( void );
 	};
 

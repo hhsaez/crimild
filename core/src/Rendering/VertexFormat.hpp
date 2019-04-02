@@ -54,6 +54,8 @@ namespace crimild {
 				TEXTURE_COORD = 4,
 				BONE_ID = 5,
 				BONE_WEIGHT = 6,
+
+				INSTANCED_ATTRIBUTE = 10,
 			};
 		};
 
