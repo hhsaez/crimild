@@ -125,6 +125,13 @@ namespace crimild {
 			UniformMap _uniforms;
 
 		public:
+			void setInstancingEnabled( crimild::Bool enabled ) { _instancingEnabled = enabled; }
+			crimild::Bool isInstancingEnabled( void ) const { return _instancingEnabled; }
+
+		private:
+			crimild::Bool _instancingEnabled = false;
+
+		public:
 			std::string build( void );
 
 			crimild::Bool isConnected( ShaderGraphNode *node ) const;

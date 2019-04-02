@@ -59,11 +59,11 @@ namespace crimild {
         CRIMILD_IMPLEMENT_RTTI( crimild::ForwardShadingShaderProgram )
 
 	public:
-		ForwardShadingShaderProgram( void );
-		virtual ~ForwardShadingShaderProgram( void );
+		explicit ForwardShadingShaderProgram( crimild::Bool instancingEnabled = false );
+		~ForwardShadingShaderProgram( void ) = default;
 
 	private:
-		void createVertexShader( void );
+		void createVertexShader( crimild::Bool instancingEnabled );
 		void createFragmentShader( void );
 	};
 

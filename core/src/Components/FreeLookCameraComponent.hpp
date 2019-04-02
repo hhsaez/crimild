@@ -30,10 +30,13 @@
 
 #include "NodeComponent.hpp"
 #include "Mathematics/Vector.hpp"
+#include "Messaging/MessageQueue.hpp"
 
 namespace crimild {
 
-	class FreeLookCameraComponent : public NodeComponent {
+	class FreeLookCameraComponent :
+		public NodeComponent,
+		public Messenger {
 		CRIMILD_IMPLEMENT_RTTI( crimild::FreeLookCameraComponent )
 
 	public:
@@ -42,6 +45,9 @@ namespace crimild {
 
 		virtual void start( void ) override;
 		virtual void update( const Clock &c ) override;
+
+	private:
+		Vector2f _lastMousePos;
 	};
 
 }

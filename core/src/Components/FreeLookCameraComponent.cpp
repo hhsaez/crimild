@@ -44,9 +44,9 @@ FreeLookCameraComponent::~FreeLookCameraComponent( void )
 
 void FreeLookCameraComponent::start( void )
 {
-	auto sim = Simulation::getInstance();
-    
-	sim->registerMessageHandler< crimild::messaging::KeyPressed >( []( crimild::messaging::KeyPressed const &msg ) {
+	_lastMousePos = Vector2f::ZERO;
+	
+	registerMessageHandler< crimild::messaging::KeyPressed >( []( crimild::messaging::KeyPressed const &msg ) {
 		float cameraAxisCoeff = 5.0f;
 			
 		if ( Input::getInstance()->isKeyDown( CRIMILD_INPUT_KEY_LEFT_SHIFT ) || Input::getInstance()->isKeyDown( CRIMILD_INPUT_KEY_RIGHT_SHIFT ) ) {
@@ -76,7 +76,7 @@ void FreeLookCameraComponent::start( void )
 		}
 	});
     
-	sim->registerMessageHandler< crimild::messaging::KeyReleased >( []( crimild::messaging::KeyReleased const &msg ) {
+	registerMessageHandler< crimild::messaging::KeyReleased >( []( crimild::messaging::KeyReleased const &msg ) {
 		switch ( msg.key ) {
 		case 'A':
 		case 'D':
@@ -93,7 +93,21 @@ void FreeLookCameraComponent::start( void )
 			break;
 		}
 	});
-	
+
+	registerMessageHandler< crimild::messaging::MouseMotion >( [ this ]( crimild::messaging::MouseMotion const &msg ) {
+		auto currentPos = Vector2f( msg.nx, msg.ny );
+		auto mouseDelta = currentPos - _lastMousePos;
+		_lastMousePos = currentPos;
+		
+		auto root = getNode();
+		
+		// apply pitch
+		root->local().rotate() *= Quaternion4f::createFromAxisAngle( Vector3f::UNIT_X, -mouseDelta[ 1 ] );
+    
+		// apply yaw
+		auto up = root->getLocal().computeWorldUp();
+		root->local().rotate() *= Quaternion4f::createFromAxisAngle( up.getNormalized(), -mouseDelta[ 0 ] );
+	});
 }
 
 void FreeLookCameraComponent::update( const Clock &c )
@@ -104,22 +118,13 @@ void FreeLookCameraComponent::update( const Clock &c )
 	float rSpeed = Input::getInstance()->getAxis( Input::AXIS_HORIZONTAL );
 	float roll = 0.0f;//Input::getInstance()->getAxis( "CameraAxisRoll" );
         
-	auto mouseDelta = Input::getInstance()->getNormalizedMouseDelta();
-        
 	auto root = getNode();
         
 	// apply roll first
 	root->local().rotate() *= Quaternion4f::createFromAxisAngle( Vector3f::UNIT_Z, c.getDeltaTime() * roll );
         
-	// apply pitch
-	auto right = root->getLocal().computeRight();
-	root->local().rotate() *= Quaternion4f::createFromAxisAngle( Vector3f::UNIT_X, -mouseDelta[ 1 ] );
-    
-	// apply yaw
-	auto up = root->getLocal().computeWorldUp();
-	root->local().rotate() *= Quaternion4f::createFromAxisAngle( up.getNormalized(), -mouseDelta[ 0 ] );
-    
 	auto direction = root->getLocal().computeDirection();
+	auto right = root->getLocal().computeRight();
     
 	root->local().translate() += c.getDeltaTime() * ( dSpeed * direction + rSpeed * right );
 }

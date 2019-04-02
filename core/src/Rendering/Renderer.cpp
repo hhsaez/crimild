@@ -54,6 +54,7 @@ Renderer::Renderer( void )
 	  _textureCatalog( crimild::alloc< Catalog< Texture >>() ),
 	  _vertexBufferObjectCatalog( crimild::alloc< Catalog< VertexBufferObject >>() ),
 	  _indexBufferObjectCatalog( crimild::alloc< Catalog< IndexBufferObject >>() ),
+	  _instancedBufferObjectCatalog( crimild::alloc< Catalog< InstancedBufferObject >>() ),
 	  _frameBufferObjectCatalog( crimild::alloc< Catalog< FrameBufferObject >>() ),
 	  _renderTargetCatalog( crimild::alloc< Catalog< RenderTarget >>() ),
 	  _primitiveCatalog( crimild::alloc< Catalog< Primitive >>() ),
@@ -72,6 +73,7 @@ Renderer::~Renderer( void )
     getLightCatalog()->unloadAll();
     getVertexBufferObjectCatalog()->unloadAll();
     getIndexBufferObjectCatalog()->unloadAll();
+    getInstancedBufferObjectCatalog()->unloadAll();
 	getPrimitiveCatalog()->unloadAll();
 	getRenderTargetCatalog()->unloadAll();
     getFrameBufferObjectCatalog()->unloadAll();
@@ -84,6 +86,7 @@ void Renderer::configure( void )
     getLightCatalog()->configure();
     getVertexBufferObjectCatalog()->configure();
     getIndexBufferObjectCatalog()->configure();
+    getInstancedBufferObjectCatalog()->configure();
     getPrimitiveCatalog()->configure();
     getRenderTargetCatalog()->configure();
     getFrameBufferObjectCatalog()->configure();
@@ -118,6 +121,7 @@ void Renderer::endRender( void )
     getLightCatalog()->cleanup();
     getVertexBufferObjectCatalog()->cleanup();
     getIndexBufferObjectCatalog()->cleanup();
+    getInstancedBufferObjectCatalog()->cleanup();
 	getPrimitiveCatalog()->cleanup();
 	getRenderTargetCatalog()->cleanup();
     getFrameBufferObjectCatalog()->cleanup();
@@ -298,6 +302,16 @@ void Renderer::bindIndexBuffer( ShaderProgram *program, IndexBufferObject *ibo )
 void Renderer::unbindIndexBuffer( ShaderProgram *program, IndexBufferObject *ibo )
 {
 	getIndexBufferObjectCatalog()->unbind( program, ibo );
+}
+
+void Renderer::bindInstancedBuffer( ShaderProgram *program, InstancedBufferObject *ibo )
+{
+	getInstancedBufferObjectCatalog()->bind( program, ibo );
+}
+
+void Renderer::unbindInstancedBuffer( ShaderProgram *program, InstancedBufferObject *ibo )
+{
+	getInstancedBufferObjectCatalog()->unbind( program, ibo );
 }
 
 void Renderer::applyTransformations( ShaderProgram *program, Geometry *geometry, Camera *camera )

@@ -32,6 +32,7 @@
 #include "Streaming/Stream.hpp"
 #include "Rendering/VertexBufferObject.hpp"
 #include "Rendering/IndexBufferObject.hpp"
+#include "Rendering/InstancedBufferObject.hpp"
 
 #include <functional>
 
@@ -68,10 +69,15 @@ namespace crimild {
         void setIndexBuffer( SharedPointer< IndexBufferObject > const &ibo ) { _indexBuffer = ibo; }
         IndexBufferObject *getIndexBuffer( void ) { return crimild::get_ptr( _indexBuffer ); }
 
+		void setInstancedBuffer( InstancedBufferObject *buffer ) { _instancedBuffer = crimild::retain( buffer ); }
+		void setInstancedBuffer( SharedPointer< InstancedBufferObject > const &buffer ) { _instancedBuffer = buffer; }
+		InstancedBufferObject *getInstancedBuffer( void ) { return crimild::get_ptr( _instancedBuffer ); }
+
 	private:
 		Primitive::Type _type;
 		SharedPointer< VertexBufferObject > _vertexBuffer;
 		SharedPointer< IndexBufferObject > _indexBuffer;
+		SharedPointer< InstancedBufferObject > _instancedBuffer;
         
         /**
          */

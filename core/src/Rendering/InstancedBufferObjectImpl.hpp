@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-present, H. Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,37 +25,57 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "UnlitShaderProgram.hpp"
+#ifndef CRIMILD_RENDERING_INSTANCED_BUFFER_OBJECT_IMPL_
+#define CRIMILD_RENDERING_INSTANCED_BUFFER_OBJECT_IMPL_
 
-#include "Rendering/Renderer.hpp"
-#include "Rendering/ShaderGraph/ShaderGraph.hpp"
-#include "Rendering/ShaderGraph/CSL.hpp"
-#include "Rendering/ShaderGraph/Nodes/MeshVertexMaster.hpp"
-#include "Rendering/ShaderGraph/Nodes/UnlitFragmentMaster.hpp"
+#include "InstancedBufferObject.hpp"
+#include "Mathematics/Matrix.hpp"
 
-using namespace crimild;
-using namespace crimild::shadergraph;
+namespace crimild {
 
-UnlitShaderProgram::UnlitShaderProgram( crimild::Bool instancingEnabled )
-{
-	createVertexShader( instancingEnabled );
-	createFragmentShader();
+	template< typename T >
+	class InstancedBufferObjectImpl : public InstancedBufferObject {
+	public:
+		InstancedBufferObjectImpl( void ) = default;
+
+		InstancedBufferObjectImpl( unsigned int count, const T *data )
+			: InstancedBufferObject(
+				count * sizeof( T ),
+				static_cast< const crimild::Byte * >( static_cast< const void * >( data ) ) ),
+			  _instanceCount( count )
+		{
+			
+		}
+		
+		~InstancedBufferObjectImpl( void ) = default;
+
+		void set( unsigned int index, const T &value )
+		{
+			static_cast< T * >( static_cast< void * > ( data() ) )[ index ] = value;
+		}
+
+		const T &getValue( unsigned int index ) const
+		{
+			return static_cast< T * >( getData() )[ index ];
+		}
+
+		crimild::Size getInstanceSize( void ) const override
+		{
+			return sizeof( T );
+		}
+
+		unsigned int getInstanceCount( void ) const override
+		{
+			return _instanceCount;
+		}
+
+	private:
+		unsigned int _instanceCount;
+	};
+
+	using Matrix4fInstancedBufferObject = InstancedBufferObjectImpl< Matrix4f >;
+
 }
 
-void UnlitShaderProgram::createVertexShader( crimild::Bool instancingEnabled )
-{
-	auto graph = Renderer::getInstance()->createShaderGraph();
-	graph->setInstancingEnabled( instancingEnabled );
-    graph->addOutputNode< MeshVertexMaster >();
-
-	buildVertexShader( graph );
-}
-
-void UnlitShaderProgram::createFragmentShader( void )
-{
-	auto graph = Renderer::getInstance()->createShaderGraph();
-    graph->addOutputNode< UnlitFragmentMaster >();
-
-	buildFragmentShader( graph );
-}
+#endif
 

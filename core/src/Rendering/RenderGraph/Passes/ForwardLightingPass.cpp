@@ -228,3 +228,8 @@ void ForwardLightingPass::render( Renderer *renderer, RenderQueue *renderQueue, 
     renderer->setDepthState( DepthState::ENABLED );
 }
 
+void ForwardLightingPass::renderInstanced( Renderer *renderer, RenderQueue *renderQueue, RenderQueue::RenderableType renderableType )
+{
+
+}
+

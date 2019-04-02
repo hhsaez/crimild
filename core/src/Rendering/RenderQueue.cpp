@@ -96,7 +96,10 @@ void RenderQueue::push( Geometry *geometry )
             renderableType = RenderQueue::RenderableType::OCCLUDER;
         }
         else if ( material->getAlphaState()->isEnabled() ) {
-			if ( material->getProgram() != nullptr ) {
+			if ( geometry->isInstancingEnabled() ) {
+				renderableType = RenderQueue::RenderableType::TRANSLUCENT_INSTANCED;
+			}
+			else if ( material->getProgram() != nullptr ) {
 				renderableType = RenderQueue::RenderableType::TRANSLUCENT_CUSTOM;
 			}
 			else {
@@ -106,7 +109,10 @@ void RenderQueue::push( Geometry *geometry )
         else {
             // only opaque objects cast shadows
             castShadows = material->castShadows();
-			if ( material->getProgram() != nullptr ) {
+			if ( geometry->isInstancingEnabled() ) {
+				renderableType = RenderQueue::RenderableType::OPAQUE_INSTANCED;
+			}
+			else if ( material->getProgram() != nullptr ) {
 				renderableType = RenderQueue::RenderableType::OPAQUE_CUSTOM;
 			}
 			else {
