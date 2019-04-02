@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-present, H. Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,37 +25,39 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "UnlitShaderProgram.hpp"
+#ifndef CRIMILD_OPENGL_INSTANCED_BUFFER_OBJECT_CATALOG_
+#define CRIMILD_OPENGL_INSTANCED_BUFFER_OBJECT_CATALOG_
 
-#include "Rendering/Renderer.hpp"
-#include "Rendering/ShaderGraph/ShaderGraph.hpp"
-#include "Rendering/ShaderGraph/CSL.hpp"
-#include "Rendering/ShaderGraph/Nodes/MeshVertexMaster.hpp"
-#include "Rendering/ShaderGraph/Nodes/UnlitFragmentMaster.hpp"
+#include <Rendering/Catalog.hpp>
 
-using namespace crimild;
-using namespace crimild::shadergraph;
+namespace crimild {
+    
+    class InstancedBufferObject;    
 
-UnlitShaderProgram::UnlitShaderProgram( crimild::Bool instancingEnabled )
-{
-	createVertexShader( instancingEnabled );
-	createFragmentShader();
+	namespace opengl {
+
+		class InstancedBufferObjectCatalog : public Catalog< InstancedBufferObject > {
+		public:
+			InstancedBufferObjectCatalog( void );
+			virtual ~InstancedBufferObjectCatalog( void );
+
+			virtual int getNextResourceId( InstancedBufferObject * ) override;
+
+			virtual void bind( InstancedBufferObject *buffer ) override;
+			virtual void unbind( InstancedBufferObject *buffer ) override;
+
+			virtual void load( InstancedBufferObject *buffer ) override;
+            virtual void unload( InstancedBufferObject *buffer ) override;
+            
+            virtual void cleanup( void ) override;
+
+        private:
+            std::list< int > _unusedBufferIds;
+		};
+
+	}
+
 }
 
-void UnlitShaderProgram::createVertexShader( crimild::Bool instancingEnabled )
-{
-	auto graph = Renderer::getInstance()->createShaderGraph();
-	graph->setInstancingEnabled( instancingEnabled );
-    graph->addOutputNode< MeshVertexMaster >();
-
-	buildVertexShader( graph );
-}
-
-void UnlitShaderProgram::createFragmentShader( void )
-{
-	auto graph = Renderer::getInstance()->createShaderGraph();
-    graph->addOutputNode< UnlitFragmentMaster >();
-
-	buildFragmentShader( graph );
-}
+#endif
 

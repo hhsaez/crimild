@@ -38,18 +38,13 @@
 using namespace crimild;
 using namespace crimild::shadergraph;
 
-ForwardShadingShaderProgram::ForwardShadingShaderProgram( void )
+ForwardShadingShaderProgram::ForwardShadingShaderProgram( crimild::Bool instancingEnabled )
 {
-	createVertexShader();
+	createVertexShader( instancingEnabled );
 	createFragmentShader();
 }
 
-ForwardShadingShaderProgram::~ForwardShadingShaderProgram( void )
-{
-
-}
-
-void ForwardShadingShaderProgram::createVertexShader( void )
+void ForwardShadingShaderProgram::createVertexShader( crimild::Bool instancingEnabled )
 {
     auto renderer = Renderer::getInstance();
     if ( renderer == nullptr ) {
@@ -58,6 +53,7 @@ void ForwardShadingShaderProgram::createVertexShader( void )
     }
 
 	auto graph = renderer->createShaderGraph();
+	graph->setInstancingEnabled( instancingEnabled );
 	graph->addOutputNode< MeshVertexMaster >();
 
 	buildVertexShader( graph );

@@ -233,6 +233,8 @@
 #include "Rendering/Image.hpp"
 #include "Rendering/ImageTGA.hpp"
 #include "Rendering/IndexBufferObject.hpp"
+#include "Rendering/InstancedBufferObject.hpp"
+#include "Rendering/InstancedBufferObjectImpl.hpp"
 #include "Rendering/Material.hpp"
 #include "Rendering/RenderState.hpp"
 #include "Rendering/Renderer.hpp"

@@ -132,6 +132,10 @@ void PrimitiveCatalog::load( Primitive *primitive )
 	renderer->getVertexBufferObjectCatalog()->bind( primitive->getVertexBuffer() );
 	renderer->getIndexBufferObjectCatalog()->bind( primitive->getIndexBuffer() );
 
+	if ( auto instancedBO = primitive->getInstancedBuffer() ) {
+		renderer->getInstancedBufferObjectCatalog()->bind( instancedBO );
+	}
+
 #ifndef CRIMILD_FORCE_OPENGL_COMPATIBILITY_MODE
 	glBindVertexArray( 0 );
 #endif
@@ -147,6 +151,10 @@ void PrimitiveCatalog::unload( Primitive *primitive )
 	renderer->getVertexBufferObjectCatalog()->unload( primitive->getVertexBuffer() );
 	renderer->getIndexBufferObjectCatalog()->unload( primitive->getIndexBuffer() );
 
+	if ( auto instancedBO = primitive->getInstancedBuffer() ) {
+		renderer->getInstancedBufferObjectCatalog()->unbind( instancedBO );
+	}
+	
     if ( primitive->getCatalogId() > 0 ) {
         _primitiveIdsToDelete.push_back( primitive->getCatalogId() );
     }

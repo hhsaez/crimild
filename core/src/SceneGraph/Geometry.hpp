@@ -64,6 +64,20 @@ namespace crimild {
 
 	public:
 		virtual void accept( NodeVisitor &visitor ) override;
+
+		/**
+		   \name Instancing
+		 */
+		//@{
+
+	public:
+		void setInstancingEnabled( crimild::Bool enabled ) { _instancingEnabled = enabled; }
+		crimild::Bool isInstancingEnabled( void ) const { return _instancingEnabled; }
+
+	private:
+		crimild::Bool _instancingEnabled = false;
+		
+		//@}
         
         /**
             \name Coding

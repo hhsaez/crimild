@@ -29,6 +29,7 @@
 
 #include "Rendering/RenderGraph/RenderGraph.hpp"
 #include "Rendering/RenderGraph/Passes/ForwardLightingPass.hpp"
+#include "Rendering/RenderGraph/Passes/DepthPass.hpp"
 
 using namespace crimild;
 using namespace crimild::rendergraph;
@@ -48,6 +49,10 @@ Camera::Camera( float fov, float aspect, float near, float far )
 {
     _renderGraph = crimild::alloc< RenderGraph >();
     auto scenePass = _renderGraph->createPass< passes::ForwardLightingPass >();
+#ifdef CRIMILD_PLATFORM_DESKTOP
+	auto depthPass = _renderGraph->createPass< passes::DepthPass >();
+	scenePass->setDepthInput( depthPass->getDepthOutput() );
+#endif
     _renderGraph->setOutput( scenePass->getColorOutput() );
 
 	_projectionMatrix = _frustum.computeProjectionMatrix();

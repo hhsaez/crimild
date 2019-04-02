@@ -52,6 +52,7 @@ namespace crimild {
 	class RenderTarget;
     class Geometry;
     class IndexBufferObject;
+	class InstancedBufferObject;
     class Material;
     class RenderQueue;
     class ShaderLocation;
@@ -168,6 +169,9 @@ namespace crimild {
         virtual void bindIndexBuffer( ShaderProgram *program, IndexBufferObject *ibo );
 		virtual void unbindIndexBuffer( ShaderProgram *program, IndexBufferObject *ibo );
 
+		virtual void bindInstancedBuffer( ShaderProgram *program, InstancedBufferObject *buffer );
+		virtual void unbindInstancedBuffer( ShaderProgram *program, InstancedBufferObject *buffer );
+
 	public:
 		virtual void applyTransformations( ShaderProgram *program, Geometry *geometry, Camera *camera );
         virtual void applyTransformations( ShaderProgram *program, const Matrix4f &projection, const Matrix4f &view, const Matrix4f &model, const Matrix4f &normal );
@@ -209,6 +213,9 @@ namespace crimild {
 		Catalog< IndexBufferObject > *getIndexBufferObjectCatalog( void ) { return crimild::get_ptr( _indexBufferObjectCatalog ); }
 		void setIndexBufferObjectCatalog( SharedPointer< Catalog< IndexBufferObject > > const &catalog ) { _indexBufferObjectCatalog = catalog; }
 
+		Catalog< InstancedBufferObject > *getInstancedBufferObjectCatalog( void ) { return crimild::get_ptr( _instancedBufferObjectCatalog ); }
+		void setInstancedBufferObjectCatalog( SharedPointer< Catalog< InstancedBufferObject > > const &catalog ) { _instancedBufferObjectCatalog = catalog; }
+
 		Catalog< FrameBufferObject > *getFrameBufferObjectCatalog( void ) { return crimild::get_ptr( _frameBufferObjectCatalog ); }
 		void setFrameBufferObjectCatalog( SharedPointer< Catalog< FrameBufferObject > > const &catalog ) { _frameBufferObjectCatalog = catalog; }
 
@@ -226,6 +233,7 @@ namespace crimild {
 		SharedPointer< Catalog< Texture >> _textureCatalog;
 		SharedPointer< Catalog< VertexBufferObject >> _vertexBufferObjectCatalog;
 		SharedPointer< Catalog< IndexBufferObject >> _indexBufferObjectCatalog;
+		SharedPointer< Catalog< InstancedBufferObject >> _instancedBufferObjectCatalog;
 		SharedPointer< Catalog< FrameBufferObject >> _frameBufferObjectCatalog;
 		SharedPointer< Catalog< RenderTarget >> _renderTargetCatalog;
 		SharedPointer< Catalog< Primitive >> _primitiveCatalog;
