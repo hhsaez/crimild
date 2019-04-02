@@ -98,8 +98,8 @@ Simulation::Simulation( std::string name, SettingsPtr const &settings )
 #endif
     
     addSystem( crimild::alloc< ConsoleSystem >() );
-	addSystem( crimild::alloc< UpdateSystem >() );
-	addSystem( crimild::alloc< RenderSystem >() );
+    addSystem( crimild::alloc< UpdateSystem >() );
+    addSystem( crimild::alloc< RenderSystem >() );
     addSystem( crimild::alloc< DebugSystem >() );
     addSystem( crimild::alloc< StreamingSystem >() );
     addSystem( crimild::alloc< UISystem >() );
@@ -154,10 +154,18 @@ bool Simulation::update( void )
 			}
         });
 	}
-    
+
     broadcastMessage( messaging::SimulationWillUpdate { scene } );
-    
+
+	_simulationClock.tick();
+
     _jobScheduler.executeDelayedJobs();
+	
+    MessageQueue::getInstance()->dispatchDeferredMessages();
+
+	_sortedSystems.each( []( System *s ) {
+		s->update();
+	});
     
     broadcastMessage( messaging::SimulationDidUpdate { scene } );
     
@@ -222,11 +230,18 @@ void Simulation::addSystem( SystemPtr const &system )
 void Simulation::startSystems( void )
 {
     Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Starting systems" );    
-    _systems.eachValue( []( SystemPtr &s ) {
+    _systems.eachValue( [ this ]( SystemPtr &s ) {
         if ( s != nullptr ) {
             s->start();
+			if ( s->getPriority() != System::PriorityType::NO_UPDATE ) {
+				_sortedSystems.add( crimild::get_ptr( s ) );
+			}
         }
     });
+
+	_sortedSystems.sort( []( const System *lhs, const System *rhs ) {
+		return lhs->getPriority() < rhs->getPriority();
+	});
 }
 
 void Simulation::stopSystems( void )

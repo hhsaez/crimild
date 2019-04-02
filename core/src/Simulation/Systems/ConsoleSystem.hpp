@@ -38,17 +38,13 @@ namespace crimild {
 		CRIMILD_IMPLEMENT_RTTI( crimild::ConsoleSystem )
 		
 	public:
-		ConsoleSystem( void );
-		virtual ~ConsoleSystem( void );
+		System::Priority getPriority( void ) const override { return System::PriorityType::POST_RENDER; }
 
 		virtual bool start( void ) override;
-
+		virtual void update( void ) override;
 		virtual void stop( void ) override;
 
         inline Console *getConsole( void ) { return &_console; }
-        
-    private:
-        void onDidRenderScene( void );
         
     private:
         Console _console;

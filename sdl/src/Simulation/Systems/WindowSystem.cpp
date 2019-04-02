@@ -28,22 +28,11 @@
 #include "WindowSystem.hpp"
 
 #include <Rendering/FrameBufferObject.hpp>
-#include <Concurrency/Async.hpp>
 #include <Simulation/Simulation.hpp>
 #include <Simulation/Systems/RenderSystem.hpp>
 
 using namespace crimild;
 using namespace crimild::sdl;
-
-WindowSystem::WindowSystem( void )
-{
-
-}
-
-WindowSystem::~WindowSystem( void )
-{
-	
-}
 
 bool WindowSystem::start( void )
 {
@@ -56,10 +45,6 @@ bool WindowSystem::start( void )
 	if ( !createWindow() || !configureRenderer() ) {
 		return false;
 	}
-
-	broadcastMessage( messaging::WindowSystemDidStart { _window } );
-
-    crimild::concurrency::sync_frame( std::bind( &WindowSystem::update, this ) );
 
 	broadcastMessage( messaging::WindowSystemDidStart { _window } );
 
@@ -104,6 +89,8 @@ crimild::Bool WindowSystem::createWindow( void )
 	Log::info( CRIMILD_CURRENT_CLASS_NAME, "Created SDL window with dimensions ", width, "x", height );
 
 	SDL_SetWindowTitle( _window, Simulation::getInstance()->getName().c_str() );
+
+	SDL_GL_SwapWindow( _window );
 
 	broadcastMessage( messaging::WindowSystemDidCreateWindow { _window } );
 
@@ -161,6 +148,7 @@ void WindowSystem::update( void )
 
 	_clock.tick();
 
+	// Move to event handlers?
 	switch ( Input::getInstance()->getMouseCursorMode() ) {
 		case Input::MouseCursorMode::NORMAL:
 			SDL_CaptureMouse( SDL_FALSE );
@@ -179,9 +167,6 @@ void WindowSystem::update( void )
 			break;
 	}
 
-    broadcastMessage( crimild::messaging::RenderNextFrame {} );
-	broadcastMessage( crimild::messaging::PresentNextFrame {} );
-
 	SDL_GL_SwapWindow( _window );
 
 	if ( Simulation::getInstance()->getSettings()->get( "video.show_frame_time", false ) ) {
@@ -190,8 +175,6 @@ void WindowSystem::update( void )
 		ss << name << " (" << _clock.getDeltaTime() << "ms)";
 		SDL_SetWindowTitle( _window, ss.str().c_str() );
 	}
-
-    crimild::concurrency::sync_frame( std::bind( &WindowSystem::update, this ) );
 }
 
 void WindowSystem::stop( void )

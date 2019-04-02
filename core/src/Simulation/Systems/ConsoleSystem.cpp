@@ -40,18 +40,6 @@
 
 using namespace crimild;
 
-ConsoleSystem::ConsoleSystem( void )
-{
-    registerMessageHandler< messaging::DidRenderScene >( [ this ]( messaging::DidRenderScene const & ) {
-        onDidRenderScene();
-    });
-}
-
-ConsoleSystem::~ConsoleSystem( void )
-{
-
-}
-
 bool ConsoleSystem::start( void )
 {	
 	if ( !System::start() ) {
@@ -65,12 +53,7 @@ bool ConsoleSystem::start( void )
 	return true;
 }
 
-void ConsoleSystem::stop( void )
-{
-	System::stop();
-}
-
-void ConsoleSystem::onDidRenderScene( void )
+void ConsoleSystem::update( void )
 {
     auto console = getConsole();
     if ( console->isEnabled() && console->isActive() ) {
@@ -93,5 +76,10 @@ void ConsoleSystem::onDidRenderScene( void )
 
         DebugRenderHelper::renderText( output, Vector3f( -aspect + 0.01f, 0.95f, 0.0f ), RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ) );
     }
+}
+
+void ConsoleSystem::stop( void )
+{
+	System::stop();
 }
 

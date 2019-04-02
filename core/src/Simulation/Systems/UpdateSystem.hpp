@@ -55,18 +55,13 @@ namespace crimild {
 		CRIMILD_IMPLEMENT_RTTI( crimild::UpdateSystem )
 		
 	public:
-		UpdateSystem( void );
-		virtual ~UpdateSystem( void );
-
-		virtual bool start( void ) override;
-
-		virtual void update( void );
-
-		virtual void stop( void ) override;
+		System::Priority getPriority( void ) const override { return System::PriorityType::UPDATE; }
+		
+		bool start( void ) override;
+		void update( void ) override;
         
     private:
         void updateBehaviors( Node *scene );
-        void updateWorldState( Node *scene );
         void computeRenderQueues( Node *scene );
 
 	private:

@@ -31,22 +31,17 @@
 
 using namespace crimild;
 
-System::System( void )
-{
-
-}
-
-System::~System( void )
-{
-
-}
-
 bool System::start( void )
 {
     Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Starting ", getClassName() );
 	broadcastMessage( messages::SystemWillStart { this } );
 
 	return true;
+}
+
+void System::update( void )
+{
+	
 }
 
 void System::stop( void )

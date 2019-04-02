@@ -27,8 +27,8 @@
 
 #include "SDLEventSystem.hpp"
 #include "WindowSystem.hpp"
+#include "Concurrency/Async.hpp"
 
-#include <Concurrency/Async.hpp>
 #include <Foundation/Profiler.hpp>
 #include <Simulation/Simulation.hpp>
 #include <Simulation/Input.hpp>
@@ -45,14 +45,7 @@ SDLEventSystem::SDLEventSystem( void )
     registerMessageHandler< messaging::WindowSystemDidCreateWindow >( [ this ]( messaging::WindowSystemDidCreateWindow const &m ) {
 		auto window = m.window;
 		SDL_GetWindowSize( window, &_windowSize[ 0 ], &_windowSize[ 1 ] );
-		
-		crimild::concurrency::sync_frame( std::bind( &SDLEventSystem::update, this ) );
     });
-}
-
-SDLEventSystem::~SDLEventSystem( void )
-{
-
 }
 
 bool SDLEventSystem::start( void )
@@ -253,7 +246,7 @@ void SDLEventSystem::update( void )
 				auto nx = ( crimild::Real32 ) mouseX / ( crimild::Real32 ) _windowSize.x();
 				auto ny = ( crimild::Real32 ) mouseY / ( crimild::Real32 ) _windowSize.y();
 
-				MessageQueue::getInstance()->pushMessage(
+				MessageQueue::getInstance()->broadcastMessage(
 					MouseButtonDown {
 						.button = _mousecodes[ event.button.button ],
 						.x = x,
@@ -274,7 +267,7 @@ void SDLEventSystem::update( void )
 				auto nx = ( crimild::Real32 ) mouseX / ( crimild::Real32 ) _windowSize.x();
 				auto ny = ( crimild::Real32 ) mouseY / ( crimild::Real32 ) _windowSize.y();
 
-				MessageQueue::getInstance()->pushMessage(
+				MessageQueue::getInstance()->broadcastMessage(
 					MouseButtonUp {
 						.button = _mousecodes[ event.button.button ],
 						.x = x,
@@ -293,7 +286,7 @@ void SDLEventSystem::update( void )
 				auto nx = x / _windowSize.x();
 				auto ny = y / _windowSize.y();
 				
-				MessageQueue::getInstance()->pushMessage(
+				MessageQueue::getInstance()->broadcastMessage(
 					MouseMotion {
 						.x = x,
 						.y = y,
@@ -305,7 +298,12 @@ void SDLEventSystem::update( void )
 			}
 
 			case SDL_MOUSEWHEEL: {
-				MessageQueue::getInstance()->pushMessage( MouseScroll { ( crimild::Real32 ) event.wheel.x, ( crimild::Real32 ) event.wheel.y } );
+				MessageQueue::getInstance()->broadcastMessage(
+					MouseScroll {
+						( crimild::Real32 ) event.wheel.x,
+						( crimild::Real32 ) event.wheel.y
+					}
+				);
 				break;
 			}
 
@@ -328,7 +326,7 @@ void SDLEventSystem::update( void )
 					}
 
 					if ( !Console::getInstance()->isActive() ) {
-						MessageQueue::getInstance()->pushMessage( KeyPressed { key } );
+						MessageQueue::getInstance()->broadcastMessage( KeyPressed { key } );
 					}
 				}
 
@@ -337,7 +335,7 @@ void SDLEventSystem::update( void )
 
 			case SDL_KEYUP: {
 				if ( !Console::getInstance()->isActive() ) {
-					MessageQueue::getInstance()->pushMessage( KeyReleased { _keycodes[ event.key.keysym.sym ] } );
+					MessageQueue::getInstance()->broadcastMessage( KeyReleased { _keycodes[ event.key.keysym.sym ] } );
 				}
 				break;
 			}
@@ -369,12 +367,5 @@ void SDLEventSystem::update( void )
 		( crimild::Real32 ) mouseY / ( crimild::Real32 ) _windowSize.y()
 	});
 #endif
-
-    crimild::concurrency::sync_frame( std::bind( &SDLEventSystem::update, this ) );
-}
-
-void SDLEventSystem::stop( void )
-{
-	System::stop();
 }
 

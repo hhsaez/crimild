@@ -40,11 +40,12 @@ namespace crimild {
 			CRIMILD_IMPLEMENT_RTTI( crimild::sdl::AudioSystem )
 			
 		public:
+			System::Priority getPriority( void ) const override { return System::PriorityType::NO_UPDATE; }
+
 			AudioSystem( void );
-			virtual ~AudioSystem( void );
+			~AudioSystem( void ) = default;
 			
-			virtual bool start( void ) override;
-			virtual void stop( void ) override;
+			void stop( void ) override;
 		};
 
 	}

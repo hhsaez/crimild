@@ -41,20 +41,6 @@ AudioSystem::AudioSystem( void )
 	Simulation::getInstance()->setAudioManager( crimild::alloc< audio::SDLAudioManager >() );
 }
 
-AudioSystem::~AudioSystem( void )
-{
-
-}
-
-bool AudioSystem::start( void )
-{	
-	if ( !System::start() ) {
-		return false;
-	}
-
-	return true;
-}
-
 void AudioSystem::stop( void )
 {
 	System::stop();

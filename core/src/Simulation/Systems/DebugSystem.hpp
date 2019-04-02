@@ -50,16 +50,13 @@ namespace crimild {
 		CRIMILD_IMPLEMENT_RTTI( crimild::DebugSystem )
 		
 	public:
-		DebugSystem( void );
-		virtual ~DebugSystem( void );
-
+		System::Priority getPriority( void ) const { return System::PriorityType::POST_RENDER; }
+		
 		virtual bool start( void ) override;
-
+		virtual void update( void ) override;
 		virtual void stop( void ) override;
         
     private:
-        void onDidRenderScene( messaging::DidRenderScene const & );
-        
         void onToggleDebugInfo( messaging::ToggleDebugInfo const & );
         void onToggleProfilerInfo( messaging::ToggleProfilerInfo const & );
         

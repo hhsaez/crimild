@@ -66,13 +66,13 @@ namespace crimild {
 		CRIMILD_IMPLEMENT_RTTI( crimild::StreamingSystem )
 		
 	public:
-		using Builder = std::function< SharedPointer< Node >( std::string ) >;
+		System::Priority getPriority( void ) const { return System::PriorityType::NO_UPDATE; }
 
 		StreamingSystem( void );
-		virtual ~StreamingSystem( void );
+		~StreamingSystem( void ) = default;
 
-		virtual bool start( void ) override;
-		virtual void stop( void ) override;
+	public:
+		using Builder = std::function< SharedPointer< Node >( std::string ) >;
 
 		void registerBuilder( std::string extension, Builder const &builder ) { _builders.insert( extension, builder ); }
 
