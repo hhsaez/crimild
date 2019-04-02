@@ -31,19 +31,7 @@
 
 #include "Simulation/Simulation.hpp"
 
-#include "Concurrency/Async.hpp"
-
 using namespace crimild;
-
-RenderSystem::RenderSystem( void )
-{
-
-}
-
-RenderSystem::~RenderSystem( void )
-{
-
-}
 
 bool RenderSystem::start( void )
 {	
@@ -59,18 +47,10 @@ bool RenderSystem::start( void )
         _renderQueues.clear();
     });
     
-    registerMessageHandler< messaging::RenderNextFrame >( [this]( messaging::RenderNextFrame const &message ) {
-        renderFrame();
-    });
-
-    registerMessageHandler< messaging::PresentNextFrame >( [this]( messaging::PresentNextFrame const &message ) {
-        presentFrame();
-    });
-    
 	return true;
 }
 
-void RenderSystem::renderFrame( void )
+void RenderSystem::update( void )
 {
 	CRIMILD_PROFILE( "Render System" );
 
@@ -122,23 +102,11 @@ void RenderSystem::renderFrame( void )
         renderer->endRender();
     }
 
+	{
+		CRIMILD_PROFILE( "Present Frame" );
+		renderer->presentFrame();
+	}
+	
     broadcastMessage( messaging::DidRenderScene {} );
-}
-
-void RenderSystem::presentFrame( void )
-{
-    auto renderer = Simulation::getInstance()->getRenderer();
-    renderer->presentFrame();
-}
-
-void RenderSystem::stop( void )
-{
-	System::stop();
-
-	_renderQueues.clear();
-
-    unregisterMessageHandler< messaging::RenderQueueAvailable >();
-    unregisterMessageHandler< messaging::SceneChanged >();
-    unregisterMessageHandler< messaging::RenderNextFrame >();
 }
 

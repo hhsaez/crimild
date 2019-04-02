@@ -40,15 +40,14 @@ namespace crimild {
 			CRIMILD_IMPLEMENT_RTTI( crimild::sdl::SDLEventSystem )
 			
 		public:
-			SDLEventSystem( void );
-			virtual ~SDLEventSystem( void );
-			
-			virtual bool start( void ) override;
-			virtual void stop( void ) override;
-			
-		private:
-			void update( void );
+			System::Priority getPriority( void ) const override { return System::PriorityType::INPUT; }
 
+			SDLEventSystem( void );
+			~SDLEventSystem( void ) = default;
+			
+			bool start( void ) override;
+			void update( void ) override;
+			
 		private:
 			containers::Map< crimild::Int32, crimild::Int32 > _keycodes;
 			containers::Map< crimild::Int32, crimild::Int32 > _mousecodes;

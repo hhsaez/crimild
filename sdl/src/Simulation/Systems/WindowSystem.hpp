@@ -73,15 +73,11 @@ namespace crimild {
 			CRIMILD_IMPLEMENT_RTTI( crimild::sdl::WindowSystem )
 			
 		public:
-			WindowSystem( void );
-
-			virtual ~WindowSystem( void );
+			System::Priority getPriority( void ) const override { return System::PriorityType::FRAME_END; }
 			
-			virtual crimild::Bool start( void ) override;
-			
-			virtual void update( void );
-			
-			virtual void stop( void ) override;
+			crimild::Bool start( void ) override;
+			void update( void ) override;
+			void stop( void ) override;
 
 		private:
 			crimild::Bool createWindow( void );

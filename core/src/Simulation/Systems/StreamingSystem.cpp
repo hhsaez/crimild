@@ -43,21 +43,6 @@ StreamingSystem::StreamingSystem( void )
 	CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( messaging::ReloadScene, StreamingSystem, onReloadScene );
 }
 
-StreamingSystem::~StreamingSystem( void )
-{
-
-}
-
-bool StreamingSystem::start( void )
-{
-    return System::start();
-}
-
-void StreamingSystem::stop( void )
-{
-
-}
-
 void StreamingSystem::onLoadScene( messaging::LoadScene const &message )
 {
     auto fileName = message.fileName;

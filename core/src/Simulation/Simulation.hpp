@@ -138,6 +138,9 @@ namespace crimild {
 	private:
 		using SystemMap = containers::Map< std::string, SystemPtr >;
 		SystemMap _systems;
+		
+		using SystemArray = containers::Array< System * >;
+		SystemArray _sortedSystems;
         
 	public:
 		void setRenderer( SharedPointer< Renderer > const &renderer ) { _renderer = renderer; }

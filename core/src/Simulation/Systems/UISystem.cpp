@@ -10,16 +10,6 @@
 using namespace crimild;
 using namespace crimild::messaging;
 
-UISystem::UISystem( void )
-{
-
-}
-
-UISystem::~UISystem( void )
-{
-
-}
-
 bool UISystem::start( void )
 {
     if ( !System::start() ) {
@@ -80,12 +70,5 @@ bool UISystem::start( void )
     });
 
 	return true;
-}
-
-void UISystem::stop( void )
-{
-    System::stop();
-
-    unregisterMessageHandler< MouseButtonUp >();
 }
 

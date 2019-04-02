@@ -49,15 +49,10 @@ namespace crimild {
 		CRIMILD_IMPLEMENT_RTTI( crimild::RenderSystem )
 		
 	public:
-		RenderSystem( void );
-		virtual ~RenderSystem( void );
-
-		virtual bool start( void ) override;
-
-		virtual void renderFrame( void );
-        virtual void presentFrame( void );
-
-		virtual void stop( void ) override;
+		System::Priority getPriority( void ) const override { return System::PriorityType::RENDER; }
+		
+		bool start( void ) override;
+		void update( void ) override;
 
 	private:
 		void onRenderQueueAvailable( messaging::RenderQueueAvailable const &message );

@@ -38,18 +38,6 @@
 
 using namespace crimild;
 
-DebugSystem::DebugSystem( void )
-{
-    CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( messaging::DidRenderScene, DebugSystem, onDidRenderScene );
-    CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( messaging::ToggleDebugInfo, DebugSystem, onToggleDebugInfo );
-    CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( messaging::ToggleProfilerInfo, DebugSystem, onToggleProfilerInfo );
-}
-
-DebugSystem::~DebugSystem( void )
-{
-
-}
-
 bool DebugSystem::start( void )
 {	
 	if ( !System::start() ) {
@@ -60,15 +48,13 @@ bool DebugSystem::start( void )
 
 	_profilerInfoEnabled = Simulation::getInstance()->getSettings()->get< crimild::Bool >( "profiler.enabled", false );
     
+    CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( messaging::ToggleDebugInfo, DebugSystem, onToggleDebugInfo );
+    CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( messaging::ToggleProfilerInfo, DebugSystem, onToggleProfilerInfo );
+	
 	return true;
 }
 
-void DebugSystem::stop( void )
-{
-	System::stop();
-}
-
-void DebugSystem::onDidRenderScene( messaging::DidRenderScene const & )
+void DebugSystem::update( void )
 {
     auto renderer = Simulation::getInstance()->getRenderer();
     auto scene = Simulation::getInstance()->getScene();
@@ -102,6 +88,11 @@ void DebugSystem::onDidRenderScene( messaging::DidRenderScene const & )
             accum = 0.0;
         }
     }
+}
+
+void DebugSystem::stop( void )
+{
+	System::stop();
 }
 
 void DebugSystem::onToggleDebugInfo( messaging::ToggleDebugInfo const & )
