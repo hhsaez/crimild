@@ -55,15 +55,19 @@ void UpdateSystem::update( void )
     // update simulation time
     // TODO: Should this system have its own clock?
     auto &c = Simulation::getInstance()->getSimulationClock();
-    c.tick();
-    
-    // prevent integration errors when delta is too big (i.e. after loading a new scene)
-    _accumulator += Numericd::min( 4 * Clock::getScaledTickTime(), c.getDeltaTime() );
+
+    _accumulator += c.getDeltaTime();
+    if ( _accumulator > 2 * Clock::DEFAULT_TICK_TIME ) {
+        _accumulator = Clock::DEFAULT_TICK_TIME;
+    }
 
 	updateBehaviors( crimild::get_ptr( scene ) );
 
     computeRenderQueues( crimild::get_ptr( scene ) );
-    
+
+    // tick after update
+    c.tick();
+
     // schedule next update
     crimild::concurrency::sync_frame( std::bind( &UpdateSystem::update, this ) );
 }
@@ -72,18 +76,19 @@ void UpdateSystem::updateBehaviors( Node *scene )
 {
     broadcastMessage( messaging::WillUpdateScene { scene } );
 
-    // So, we're updating with a fixed time which may seem wrong
-    // BUT! We're either sleeping on WindowSystem or waiting for OS display callback
-    // TODO: This should be configurable.
     static const auto FIXED_CLOCK = Clock( Clock::DEFAULT_TICK_TIME );
 
-	CRIMILD_PROFILE( "Updating Components" )
+    while ( _accumulator >= Clock::DEFAULT_TICK_TIME ) {
+        CRIMILD_PROFILE( "Updating Components" )
 		
-	scene->perform( Apply( []( Node *node ) {
-		node->updateComponents( FIXED_CLOCK );
-	}));
+        scene->perform( Apply( []( Node *node ) {
+            node->updateComponents( FIXED_CLOCK );
+        }));
     
-    updateWorldState( scene );
+        updateWorldState( scene );
+
+        _accumulator -= Clock::DEFAULT_TICK_TIME;
+    }
 
     broadcastMessage( messaging::DidUpdateScene { scene } );	
 }
