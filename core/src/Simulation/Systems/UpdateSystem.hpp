@@ -65,6 +65,7 @@ namespace crimild {
         void computeRenderQueues( Node *scene );
 
 	private:
+        double _targetFrameTime = 1.0 / 60.0;
 		double _accumulator = 0.0;
 	};
     

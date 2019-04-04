@@ -19,7 +19,9 @@ bool UpdateSystem::start( void )
 	if ( !System::start() ) {
 		return false;
 	}
-    
+
+    auto settings = Simulation::getInstance()->getSettings();
+    _targetFrameTime = settings->get< crimild::Real64 >( "simulation.targetFrameRate", 1.0 / 60.0 );
     _accumulator = 0.0;
     
 	return true;
@@ -36,7 +38,7 @@ void UpdateSystem::update( void )
     
     auto &c = Simulation::getInstance()->getSimulationClock();
     _accumulator += c.getDeltaTime();
-    if ( _accumulator > 2 * Clock::DEFAULT_TICK_TIME ) {
+    if ( _accumulator > 2 * _targetFrameTime ) {
 		_accumulator = 0;
     }
 
@@ -50,9 +52,9 @@ void UpdateSystem::updateBehaviors( Node *scene )
 {
     broadcastMessage( messaging::WillUpdateScene { scene } );
 
-    static const auto FIXED_CLOCK = Clock( Clock::DEFAULT_TICK_TIME );
+    static const auto FIXED_CLOCK = Clock( _targetFrameTime );
 
-    while ( _accumulator >= Clock::DEFAULT_TICK_TIME ) {
+    while ( _accumulator >= _targetFrameTime ) {
         CRIMILD_PROFILE( "Updating Components" )
 		
         scene->perform( Apply( []( Node *node ) {
@@ -64,7 +66,7 @@ void UpdateSystem::updateBehaviors( Node *scene )
 			scene->perform( UpdateWorldState() );
 		}			
 
-        _accumulator -= Clock::DEFAULT_TICK_TIME;
+        _accumulator -= _targetFrameTime;
     }
 
     broadcastMessage( messaging::DidUpdateScene { scene } );	
