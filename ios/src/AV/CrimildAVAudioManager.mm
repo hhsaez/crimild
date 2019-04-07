@@ -37,7 +37,8 @@ using namespace crimild::ios;
 AVAudioManager::AVAudioManager( void )
     : _audioListener( crimild::alloc< AVAudioListener >() )
 {
-    
+    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
+    [[AVAudioSession sharedInstance] setActive: YES error: nil];
 }
 
 AVAudioManager::~AVAudioManager( void )

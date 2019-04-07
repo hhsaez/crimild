@@ -38,7 +38,6 @@ AVAudioMusicSource::AVAudioMusicSource( std::string filename )
     NSString* file = [NSString stringWithCString:filename.c_str() encoding:[NSString defaultCStringEncoding]];
     // make sure the file is mp3
     file = [file stringByReplacingOccurrencesOfString:@".ogg" withString:@".mp3"];
-
     
     _fileURL = [NSURL fileURLWithPath: file];
     
