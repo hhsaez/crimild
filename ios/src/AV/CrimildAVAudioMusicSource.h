@@ -81,7 +81,7 @@ namespace crimild {
             
         private:
             crimild::Bool _autoplay = false;
-            AVAudioPlayer *_localAudioPlayer = nil;
+            __strong AVAudioPlayer *_localAudioPlayer = nil;
             NSURL *_fileURL = nil;
             bool _isReleasing = false;
         };
