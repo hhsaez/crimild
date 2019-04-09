@@ -151,6 +151,10 @@ void UIFrameConstraint::apply( UIFrame *frame, UIFrame *parentFrame )
 			x = ref.getX() + ref.getWidth();
 			break;
 
+		case Type::ABOVE:
+			y = ref.getY() - ref.getHeight();
+			break;
+
 		case Type::BELOW:
 			y = ref.getY() + ref.getHeight();
 			break;

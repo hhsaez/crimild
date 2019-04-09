@@ -35,6 +35,7 @@ namespace crimild {
 
 	class Geometry;
 	class Material;
+	class Texture;
 
 	namespace ui {
 
@@ -47,6 +48,8 @@ namespace crimild {
 			void onAttach( void ) override;
 
 			void update( const Clock & ) override;
+
+			void setBackgroundImage( SharedPointer< Texture > const &texture );
 
 		private:
 			SharedPointer< Geometry > _geometry;

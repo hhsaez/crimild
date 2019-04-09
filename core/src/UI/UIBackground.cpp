@@ -53,6 +53,11 @@ UIBackground::UIBackground( const RGBAColorf &color )
 	_geometry->getComponent< MaterialComponent >()->attachMaterial( _material );
 }
 
+void UIBackground::setBackgroundImage( SharedPointer< Texture > const &texture )
+{
+	_material->setColorMap( texture );
+}
+
 void UIBackground::onAttach( void )
 {
 	getNode< Group >()->attachNode( _geometry );
