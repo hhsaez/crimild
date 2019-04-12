@@ -96,8 +96,16 @@ bool LuaDecoder::decodeFile( std::string fileName )
 		return false;
 	}
 
-    auto requirePath = StringUtils::replaceAll( fileName, FileSystem::getInstance().getBaseDirectory(), "" );
-    getScriptContext().parse( "SceneBuilder = require '" + StringUtils::replaceAll( requirePath, ".lua", "" ) + "'" );
+	auto baseDir = FileSystem::getInstance().getBaseDirectory();
+
+	auto requirePath = fileName;
+	auto pos = requirePath.find( baseDir );
+	if ( pos != std::string::npos ) {
+		requirePath.erase( pos, baseDir.length() );
+	}
+	requirePath = StringUtils::replaceAll( requirePath, ".lua", "" );
+
+    getScriptContext().parse( "SceneBuilder = require '" + requirePath + "'" );
     getScriptContext().parse( "scene = SceneBuilder()" );
 
 	ScriptEvaluator eval( &getScriptContext(), _rootObjectName );
