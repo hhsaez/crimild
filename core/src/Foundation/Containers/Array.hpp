@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -325,6 +325,18 @@ namespace crimild {
 				for ( crimild::Size i = 0; i < _size; i++ ) {
 					callback( _elems[ i ] );
 				}
+			}
+
+			template< typename Fn >
+			Array filter( Fn selector ) const
+			{
+				Array ret;
+				for ( crimild::Size i = 0; i < _size; ++i ) {
+					if ( selector( _elems[ i ] ) ) {
+						ret.add( _elems[ i ] );
+					}
+				}
+				return ret;
 			}
 
 		private:
