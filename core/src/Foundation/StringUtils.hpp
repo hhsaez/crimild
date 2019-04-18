@@ -159,6 +159,11 @@ namespace crimild {
             return ss.str();
         }
 
+		static bool startsWith( const std::string &str, const std::string &prefix )
+		{
+			return str.length() >= prefix.length() && str.compare( 0, prefix.length(), prefix ) == 0;
+		}
+
 	};
 
 }
