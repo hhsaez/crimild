@@ -25,7 +25,7 @@ namespace crimild {
 			  _end( end ),
 			  _result( result ),
 			  _timeMult( 1.0f / duration ),
-			  _interpolator( Interpolation::linear< Vector3f, float  > )
+			  _interpolator( Interpolation::linear< T, float  > )
 		{
 
 		}
