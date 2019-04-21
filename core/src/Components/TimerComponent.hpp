@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,51 +25,30 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SIMULATION_SYSTEMS_UPDATE_
-#define CRIMILD_SIMULATION_SYSTEMS_UPDATE_
+#ifndef CRIMILD_CORE_COMPONENTS_TIMER_
+#define CRIMILD_CORE_COMPONENTS_TIMER_
 
-#include "System.hpp"
-
-#include "SceneGraph/Node.hpp"
-#include "SceneGraph/Camera.hpp"
+#include "NodeComponent.hpp"
 
 namespace crimild {
-    
-	class UpdateSystem;
 
-	namespace messaging {
-
-		struct WillUpdateScene { 
-			Node *scene;
-			Camera *mainCamera;
-		};
-
-		struct DidUpdateScene {
-			Node *scene;
-			Camera *mainCamera;
-		};
-
-	}
-
-	class UpdateSystem : public System {
-		CRIMILD_IMPLEMENT_RTTI( crimild::UpdateSystem )
+	class TimerComponent : public NodeComponent {
+		CRIMILD_IMPLEMENT_RTTI( crimild::TimerComponent )
+		
+	private:
+		using Callback = std::function< void( void ) >;
 		
 	public:
-		System::Priority getPriority( void ) const override { return System::PriorityType::UPDATE; }
+		TimerComponent( crimild::Real64 timeout, Callback callback );
+		~TimerComponent( void ) = default;
 		
-		bool start( void ) override;
-		void update( void ) override;
-        
-    private:
-        void updateBehaviors( Node *scene );
-        void computeRenderQueues( Node *scene );
-
+		void update( const Clock &c ) override;
+		
 	private:
-        double _targetFrameTime = 1.0 / 60.0;
-		double _accumulator = 0.0;
-		crimild::Int32 _skipFrames = 0;
+		crimild::Real64 m_timeout = 0;
+		Callback m_callback;
 	};
-    
+
 }
 
 #endif
