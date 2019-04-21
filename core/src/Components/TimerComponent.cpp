@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,52 +25,24 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SIMULATION_SYSTEMS_UPDATE_
-#define CRIMILD_SIMULATION_SYSTEMS_UPDATE_
-
-#include "System.hpp"
+#include "TimerComponent.hpp"
 
 #include "SceneGraph/Node.hpp"
-#include "SceneGraph/Camera.hpp"
 
-namespace crimild {
-    
-	class UpdateSystem;
+using namespace crimild;
 
-	namespace messaging {
-
-		struct WillUpdateScene { 
-			Node *scene;
-			Camera *mainCamera;
-		};
-
-		struct DidUpdateScene {
-			Node *scene;
-			Camera *mainCamera;
-		};
-
-	}
-
-	class UpdateSystem : public System {
-		CRIMILD_IMPLEMENT_RTTI( crimild::UpdateSystem )
-		
-	public:
-		System::Priority getPriority( void ) const override { return System::PriorityType::UPDATE; }
-		
-		bool start( void ) override;
-		void update( void ) override;
-        
-    private:
-        void updateBehaviors( Node *scene );
-        void computeRenderQueues( Node *scene );
-
-	private:
-        double _targetFrameTime = 1.0 / 60.0;
-		double _accumulator = 0.0;
-		crimild::Int32 _skipFrames = 0;
-	};
-    
+TimerComponent::TimerComponent( crimild::Real64 timeout, Callback callback )
+	: m_timeout( timeout ),
+	  m_callback( callback )
+{
+			
 }
-
-#endif
-
+		
+void TimerComponent::update( const Clock &c )
+{
+	m_timeout -= c.getDeltaTime();
+	if ( m_timeout <= 0 ) {
+		if ( m_callback ) m_callback();
+		getNode()->detachComponent( this );
+	}
+}
