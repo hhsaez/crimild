@@ -37,7 +37,8 @@ using namespace crimild;
 using namespace crimild::ui;
 
 UICanvas::UICanvas( crimild::Int32 width, crimild::Int32 height )
-	: _size( width, height )
+	: _size( width, height ),
+      _safeArea( 0, 0 )
 {
 	
 }
@@ -47,7 +48,7 @@ void UICanvas::onAttach( void )
 	NodeComponent::onAttach();
 	
 	if ( getComponent< UIFrame >() == nullptr ) {
-		getNode()->attachComponent< UIFrame >( Rectf( 0, 0, _size.x(), _size.y() ) );
+		getNode()->attachComponent< UIFrame >( Rectf( 0, 0, _size.x() - _safeArea.x(), _size.y() - _safeArea.y() ) );
 	}
 }
 
@@ -80,6 +81,9 @@ void UICanvas::decode( coding::Decoder &decoder )
 	auto settings = Simulation::getInstance()->getSettings();
 	auto width = settings->get< crimild::Int32 >( "video.width", 800 );
 	auto height = settings->get< crimild::Int32 >( "video.height", 600 );
+    auto safeArea = settings->get< crimild::Int32 >( "video.safeArea", 0 );
+
+    _safeArea = Vector2i { 0, safeArea };
 
 	decoder.decode( "width", width );
 	decoder.decode( "height", height );
