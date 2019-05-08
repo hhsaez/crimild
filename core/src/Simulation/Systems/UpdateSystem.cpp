@@ -23,6 +23,12 @@ bool UpdateSystem::start( void )
     auto settings = Simulation::getInstance()->getSettings();
     _targetFrameTime = settings->get< crimild::Real64 >( "simulation.targetFrameRate", 1.0 / 60.0 );
     _accumulator = 0.0;
+
+	registerMessageHandler< messaging::SceneChanged >(
+		[ this ]( messaging::SceneChanged const & ) {
+			_skipFrames = 2;
+		}
+	);
     
 	return true;
 }
@@ -35,29 +41,35 @@ void UpdateSystem::update( void )
     if ( scene == nullptr ) {
         return;
     }
-    
-    auto &c = Simulation::getInstance()->getSimulationClock();
-    _accumulator += c.getDeltaTime();
-    if ( _accumulator > 2 * _targetFrameTime ) {
+
+	if ( _skipFrames > 0 ) {
 		_accumulator = 0;
-    }
+	}
+	else {
+		auto &c = Simulation::getInstance()->getSimulationClock();
+		_accumulator += c.getDeltaTime();
+	}
 
 	updateBehaviors( crimild::get_ptr( scene ) );
 
 	// TODO: move to another system
     computeRenderQueues( crimild::get_ptr( scene ) );
+
+	if ( _skipFrames > 0 ) {
+		--_skipFrames;
+	}
 }
 
 void UpdateSystem::updateBehaviors( Node *scene )
 {
     broadcastMessage( messaging::WillUpdateScene { scene } );
-
-    static const auto FIXED_CLOCK = Clock( _targetFrameTime );
+    
+    const auto FIXED_CLOCK = Clock( _targetFrameTime );
 
     while ( _accumulator >= _targetFrameTime ) {
         CRIMILD_PROFILE( "Updating Components" )
 		
-        scene->perform( Apply( []( Node *node ) {
+        scene->perform( Apply( [ FIXED_CLOCK ]( Node *node ) {
             node->updateComponents( FIXED_CLOCK );
         }));
 
@@ -78,9 +90,12 @@ void UpdateSystem::computeRenderQueues( Node *scene )
 
 	{
 		CRIMILD_PROFILE( "Compute Render Queue" )
+
+		auto enableCulling = _skipFrames <= 0;
 	
-		Simulation::getInstance()->forEachCamera( [ &renderQueues, scene ]( Camera *camera ) {
+		Simulation::getInstance()->forEachCamera( [ &renderQueues, scene, enableCulling ]( Camera *camera ) {
 			if ( camera != nullptr && camera->isEnabled() ) {
+				camera->setCullingEnabled( enableCulling );
 				auto renderQueue = crimild::alloc< RenderQueue >();
 				scene->perform( ComputeRenderQueue( camera, crimild::get_ptr( renderQueue ) ) );
 				renderQueues.add( renderQueue );

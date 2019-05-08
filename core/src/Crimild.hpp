@@ -158,6 +158,7 @@
 #include "Components/UIResponder.hpp"
 #include "Components/SingleValueComponent.hpp"
 #include "Components/SkinnedMeshComponent.hpp"
+#include "Components/TimerComponent.hpp"
 #include "Components/FreeLookCameraComponent.hpp"
 
 #include "Concurrency/Async.hpp"

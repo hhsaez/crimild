@@ -212,6 +212,7 @@
     auto settings = self.simulation->getSettings();
     settings->set( "video.width", framebufferRect.size.width );
     settings->set( "video.height", framebufferRect.size.height );
+    settings->set( "simulation.targetFrameRate", 1.0 / 30.0 );
 
     self.simulation->getSystem< crimild::StreamingSystem >()->registerDecoder< crimild::coding::LuaDecoder >( "lua" );
 
@@ -224,7 +225,7 @@
 {
     if (!_animating) {
         _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(simulationStep:)];
-        _displayLink.preferredFramesPerSecond = 60;
+        _displayLink.preferredFramesPerSecond = 30;
         [_displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
         
         _animating = TRUE;
