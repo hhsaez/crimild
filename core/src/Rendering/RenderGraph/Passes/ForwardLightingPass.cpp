@@ -51,8 +51,10 @@ ForwardLightingPass::ForwardLightingPass( RenderGraph *graph, crimild::Size maxL
 		{
             RenderQueue::RenderableType::OPAQUE,
 			RenderQueue::RenderableType::OPAQUE_CUSTOM,
+            RenderQueue::RenderableType::OPAQUE_INSTANCED,
             RenderQueue::RenderableType::TRANSLUCENT,
             RenderQueue::RenderableType::TRANSLUCENT_CUSTOM,
+            RenderQueue::RenderableType::TRANSLUCENT_INSTANCED,
 		},
 		maxLights )
 {

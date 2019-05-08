@@ -49,14 +49,24 @@ namespace crimild {
 		
 		~InstancedBufferObjectImpl( void ) = default;
 
+		T *values( void )
+		{
+			return static_cast< T * >( static_cast< void * >( data() ) );
+		}
+
+		const T *getValues( void ) const
+		{
+			return static_cast< T * >( static_cast< void * >( data() ) );
+		}
+
 		void set( unsigned int index, const T &value )
 		{
-			static_cast< T * >( static_cast< void * > ( data() ) )[ index ] = value;
+			values()[ index ] = value;
 		}
 
 		const T &getValue( unsigned int index ) const
 		{
-			return static_cast< T * >( getData() )[ index ];
+			return values()[ index ];
 		}
 
 		crimild::Size getInstanceSize( void ) const override

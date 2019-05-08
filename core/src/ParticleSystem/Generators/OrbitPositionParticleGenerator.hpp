@@ -25,35 +25,43 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_OPENGL_INSTANCED_BUFFER_OBJECT_CATALOG_
-#define CRIMILD_OPENGL_INSTANCED_BUFFER_OBJECT_CATALOG_
+#ifndef CRIMILD_PARTICLE_GENERATOR_POSITION_ORBIT_
+#define CRIMILD_PARTICLE_GENERATOR_POSITION_ORBIT_
 
-#include <Rendering/Catalog.hpp>
+#include "ParticleSystem/ParticleSystemComponent.hpp"
 
 namespace crimild {
-    
-    class InstancedBufferObject;    
 
-	namespace opengl {
+    class OrbitPositionParticleGenerator : public ParticleSystemComponent::ParticleGenerator {
+        CRIMILD_IMPLEMENT_RTTI( crimild::OrbitPositionParticleGenerator )
+		
+    public:
+        OrbitPositionParticleGenerator( void );
+		OrbitPositionParticleGenerator( crimild::Real32 radius, crimild::Real32 height, crimild::Real32 offset, const Vector3f &scale );
+		~OrbitPositionParticleGenerator( void ) = default;
 
-		class InstancedBufferObjectCatalog : public Catalog< InstancedBufferObject > {
-		public:
-			int getNextResourceId( InstancedBufferObject * ) override;
+		virtual void configure( Node *node, ParticleData *particles ) override;
+        virtual void generate( Node *node, crimild::Real64 dt, ParticleData *particles, ParticleId startId, ParticleId endId ) override;
 
-			void bind( InstancedBufferObject *buffer ) override;
-			void unbind( InstancedBufferObject *buffer ) override;
+    private:
+		crimild::Real32 m_radius;
+		crimild::Real32 m_height;
+		crimild::Real32 m_offset;
+		Vector3f m_scale;
 
-			void load( InstancedBufferObject *buffer ) override;
-			void update( InstancedBufferObject *buffer ) override;
-            void unload( InstancedBufferObject *buffer ) override;
-            
-            void cleanup( void ) override;
+		ParticleAttribArray *m_positions = nullptr;
+        
+		/** 
+		 	\name Coding support
+		*/
+		//@{
 
-        private:
-            std::list< int > _unusedBufferIds;
-		};
+	public:
+		virtual void encode( coding::Encoder &encoder ) override;
+		virtual void decode( coding::Decoder &decoder ) override;
 
-	}
+		//@}
+    };
 
 }
 

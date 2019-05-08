@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,55 +25,64 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "UniformScaleParticleGenerator.hpp"
+#include "EulerAnglesParticleGenerator.hpp"
 
 #include "Mathematics/Random.hpp"
 #include "Coding/Encoder.hpp"
 #include "Coding/Decoder.hpp"
-
 #include "SceneGraph/Node.hpp"
 
 using namespace crimild;
 
-UniformScaleParticleGenerator::UniformScaleParticleGenerator( crimild::Real32 minScale, crimild::Real32 maxScale )
-	: _minScale( minScale ),
-	  _maxScale( maxScale )
+EulerAnglesParticleGenerator::EulerAnglesParticleGenerator( void )
+	: EulerAnglesParticleGenerator( 0.0f, Numericf::TWO_PI, Vector3f::ONE )
 {
 
 }
 
-UniformScaleParticleGenerator::~UniformScaleParticleGenerator( void )
+EulerAnglesParticleGenerator::EulerAnglesParticleGenerator( crimild::Real32 min, crimild::Real32 max, const Vector3f &axis )
+	: m_min( min ),
+	  m_max( max ),
+	  m_axis( axis )
 {
-
+	
 }
 
-void UniformScaleParticleGenerator::configure( Node *node, ParticleData *particles )
+void EulerAnglesParticleGenerator::configure( Node *node, ParticleData *particles )
 {
-	_scales = particles->createAttribArray< crimild::Real32 >( ParticleAttrib::UNIFORM_SCALE );
+	m_angles = particles->createAttribArray< Vector3f >( ParticleAttrib::EULER_ANGLES );
+	assert( m_angles != nullptr );
 }
 
-void UniformScaleParticleGenerator::generate( Node *node, double dt, ParticleData *particles, ParticleId startId, ParticleId endId )
+void EulerAnglesParticleGenerator::generate( Node *node, crimild::Real64 dt, ParticleData *particles, ParticleId startId, ParticleId endId )
 {
-	auto ss = _scales->getData< crimild::Real32 >();
-
-    for ( ParticleId i = startId; i < endId; i++ ) {
-		ss[ i ] = Random::generate< crimild::Real32 >( _minScale, _maxScale );
-    }
+	auto count = endId - startId;
+	if ( count == 0 ) {
+		return;
+	}
+    
+	auto angles = m_angles->getData< Vector3f >();
+	for ( auto i = startId; i < endId; ++i ) {
+		auto angle = Random::generate< crimild::Real32 >( m_min, m_max );
+		angles[ i ] = angle * m_axis;
+	}
 }
 
-void UniformScaleParticleGenerator::encode( coding::Encoder &encoder ) 
+void EulerAnglesParticleGenerator::encode( coding::Encoder &encoder ) 
 {
 	ParticleSystemComponent::ParticleGenerator::encode( encoder );
 
-	encoder.encode( "minScale", _minScale );
-	encoder.encode( "maxScale", _maxScale );
+	encoder.encode( "min", m_min );
+	encoder.encode( "max", m_max );
+	encoder.encode( "axis", m_axis );
 }
 
-void UniformScaleParticleGenerator::decode( coding::Decoder &decoder )
+void EulerAnglesParticleGenerator::decode( coding::Decoder &decoder )
 {
 	ParticleSystemComponent::ParticleGenerator::decode( decoder );
 
-	decoder.decode( "minScale", _minScale );
-	decoder.decode( "maxScale", _maxScale );
+	decoder.decode( "min", m_min );
+	decoder.decode( "max", m_max );
+	decoder.decode( "axis", m_axis );
 }
 

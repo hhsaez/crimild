@@ -50,7 +50,7 @@ namespace crimild {
 		CRIMILD_IMPLEMENT_RTTI( crimild::DebugSystem )
 		
 	public:
-		System::Priority getPriority( void ) const { return System::PriorityType::POST_RENDER; }
+		System::Priority getPriority( void ) const override { return System::PriorityType::POST_RENDER; }
 		
 		virtual bool start( void ) override;
 		virtual void update( void ) override;

@@ -79,6 +79,7 @@ void RenderQueue::push( Geometry *geometry )
     rs->forEachMaterial( [this, geometry, renderOnScreen]( Material *material ) {
         auto renderableType = RenderQueue::RenderableType::OPAQUE;
         bool castShadows = false;
+		bool isInstanced = geometry->isInstancingEnabled();
 
 		if ( geometry->getLayer() == Node::Layer::SKYBOX ) {
 			renderableType = RenderQueue::RenderableType::SKYBOX;
@@ -96,7 +97,7 @@ void RenderQueue::push( Geometry *geometry )
             renderableType = RenderQueue::RenderableType::OCCLUDER;
         }
         else if ( material->getAlphaState()->isEnabled() ) {
-			if ( geometry->isInstancingEnabled() ) {
+			if ( isInstanced ) {
 				renderableType = RenderQueue::RenderableType::TRANSLUCENT_INSTANCED;
 			}
 			else if ( material->getProgram() != nullptr ) {
@@ -109,7 +110,7 @@ void RenderQueue::push( Geometry *geometry )
         else {
             // only opaque objects cast shadows
             castShadows = material->castShadows();
-			if ( geometry->isInstancingEnabled() ) {
+			if ( isInstanced ) {
 				renderableType = RenderQueue::RenderableType::OPAQUE_INSTANCED;
 			}
 			else if ( material->getProgram() != nullptr ) {
@@ -155,7 +156,8 @@ void RenderQueue::push( Geometry *geometry )
         if ( castShadows ) {
             // if the geometry is supposed to cast shadows, we also add it to that queue
             // order FRONT_TO_BACK
-            auto casters = &_renderables[ RenderQueue::RenderableType::SHADOW_CASTER ];
+			auto type = isInstanced ? RenderableType::SHADOW_CASTER_INSTANCED : RenderableType::SHADOW_CASTER;
+            auto casters = &_renderables[ type ];
             auto it = casters->begin();
             while ( it != casters->end() && ( *it ).distanceFromCamera <= renderable.distanceFromCamera ) {
                 it++;

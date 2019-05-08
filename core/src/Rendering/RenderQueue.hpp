@@ -60,6 +60,7 @@ namespace crimild {
 			BACKGROUND,
             OCCLUDER,
             SHADOW_CASTER,
+            SHADOW_CASTER_INSTANCED,
             OPAQUE,
 			OPAQUE_CUSTOM,
 			OPAQUE_INSTANCED,

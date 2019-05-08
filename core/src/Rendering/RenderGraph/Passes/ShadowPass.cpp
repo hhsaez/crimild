@@ -79,6 +79,7 @@ void ShadowPass::setup( RenderGraph *graph )
 	graph->write( this, { _depthAttachment, _shadowOutput } );
 	
 	_program = crimild::alloc< DepthShaderProgram >();
+    _programInstanced = crimild::alloc< DepthShaderProgram >( true );
 }
 
 void ShadowPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue )
@@ -112,7 +113,8 @@ void ShadowPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *r
                 )
             );
 			
-			renderShadowMap( renderer, renderQueue, light );
+            renderShadowMap( renderer, renderQueue, RenderQueue::RenderableType::SHADOW_CASTER, light, crimild::get_ptr( _program ) );
+            renderShadowMap( renderer, renderQueue, RenderQueue::RenderableType::SHADOW_CASTER_INSTANCED, light, crimild::get_ptr( _programInstanced ) );
 			
 			if ( auto shadowMap = light->getShadowMap() ) {
 				shadowMap->setViewport( vp );
@@ -123,14 +125,12 @@ void ShadowPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *r
 	renderer->unbindFrameBuffer( crimild::get_ptr( fbo ) );	
 }
 
-void ShadowPass::renderShadowMap( Renderer *renderer, RenderQueue *renderQueue, Light *light )
+void ShadowPass::renderShadowMap( Renderer *renderer, RenderQueue *renderQueue, RenderQueue::RenderableType renderableType, Light *light, ShaderProgram *program )
 {
-	auto renderables = renderQueue->getRenderables( RenderQueue::RenderableType::SHADOW_CASTER );
+	auto renderables = renderQueue->getRenderables( renderableType );
 	if ( renderables->size() == 0 ) {
 		return;
 	}
-
-	auto program = crimild::get_ptr( _program );
 
     auto pMatrix = Matrix4f::IDENTITY;
     auto vMatrix = Matrix4f::IDENTITY;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002 - present, H. Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,35 +25,24 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_OPENGL_INSTANCED_BUFFER_OBJECT_CATALOG_
-#define CRIMILD_OPENGL_INSTANCED_BUFFER_OBJECT_CATALOG_
+#ifndef CRIMILD_CORE_RENDERING_PROGRAMS_WORLD_NORMALS_
+#define CRIMILD_CORE_RENDERING_PROGRAMS_WORLD_NORMALS_
 
-#include <Rendering/Catalog.hpp>
+#include "Rendering/ShaderProgram.hpp"
 
 namespace crimild {
-    
-    class InstancedBufferObject;    
 
-	namespace opengl {
+	class WorldNormalsShaderProgram : public ShaderProgram {
+        CRIMILD_IMPLEMENT_RTTI( crimild::WorldNormalsShaderProgram )
 
-		class InstancedBufferObjectCatalog : public Catalog< InstancedBufferObject > {
-		public:
-			int getNextResourceId( InstancedBufferObject * ) override;
+	public:
+		explicit WorldNormalsShaderProgram( crimild::Bool instancingEnabled = false );
+		~WorldNormalsShaderProgram( void ) = default;
 
-			void bind( InstancedBufferObject *buffer ) override;
-			void unbind( InstancedBufferObject *buffer ) override;
-
-			void load( InstancedBufferObject *buffer ) override;
-			void update( InstancedBufferObject *buffer ) override;
-            void unload( InstancedBufferObject *buffer ) override;
-            
-            void cleanup( void ) override;
-
-        private:
-            std::list< int > _unusedBufferIds;
-		};
-
-	}
+	private:
+		void createVertexShader( crimild::Bool instancingEnabled );
+		void createFragmentShader( void );
+	};
 
 }
 

@@ -125,6 +125,10 @@ void ParticleSystemComponent::updateGenerators( Node *node, crimild::Real64 dt, 
     const ParticleId startId = particles->getAliveCount();            
     const ParticleId endId = Numeric< ParticleId >::min( startId + maxNewParticles, particles->getParticleCount() - 1 );
 
+	if ( endId - startId == 0 ) {
+		return;
+	}
+
 	_generators.each( [ node, dt, particles, startId, endId ]( SharedPointer< ParticleGenerator > &g ) {
 		g->generate( node, dt, particles, startId, endId );
 	});
