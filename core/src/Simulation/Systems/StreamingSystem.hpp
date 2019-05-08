@@ -66,7 +66,7 @@ namespace crimild {
 		CRIMILD_IMPLEMENT_RTTI( crimild::StreamingSystem )
 		
 	public:
-		System::Priority getPriority( void ) const { return System::PriorityType::NO_UPDATE; }
+		System::Priority getPriority( void ) const override { return System::PriorityType::NO_UPDATE; }
 
 		StreamingSystem( void );
 		~StreamingSystem( void ) = default;

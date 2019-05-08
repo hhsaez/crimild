@@ -39,6 +39,15 @@ namespace crimild {
 
 	class ShaderProgram;
 	class ShaderLocation;
+	
+	/*
+	  \brief Usage hint
+	  \todo Move to policy?
+	*/
+	enum class ResourceUsage {
+		Static, //< Data is modified once and never changed
+		Dynamic //< Data can be modified multiple times
+	};
 
 	template< class RESOURCE_TYPE >
 	class Catalog : public SharedObject {
@@ -85,6 +94,20 @@ namespace crimild {
 		private:
             Catalog< RESOURCE_TYPE > *_catalog = nullptr;
 			int _catalogId;
+
+			/**
+			   \name Usage
+			*/
+			//@{
+
+		public:
+			inline void setUsage( ResourceUsage value ) { m_usage = value; }
+			inline ResourceUsage getUsage( void ) const { return m_usage; }
+
+		private:
+			ResourceUsage m_usage = ResourceUsage::Static;
+
+			//@}
 		};
 
 	public:
@@ -152,6 +175,11 @@ namespace crimild {
         virtual void unbind( ShaderLocation *location, RESOURCE_TYPE *resource )
 		{
 			unbindResource( resource );
+		}
+
+		virtual void update( RESOURCE_TYPE *resource )
+		{
+
 		}
 
         virtual void load( RESOURCE_TYPE *resource )

@@ -37,11 +37,11 @@ namespace crimild {
 	 */
 	class DepthShaderProgram : public ShaderProgram {
 	public:
-		DepthShaderProgram( void );
-		virtual ~DepthShaderProgram( void );
+        explicit DepthShaderProgram( crimild::Bool instancingEnabled = false );
+        ~DepthShaderProgram( void ) = default;
 
 	private:
-		void createVertexShader( void );
+        void createVertexShader( crimild::Bool instacingEnabled );
 		void createFragmentShader( void );
 	};
 

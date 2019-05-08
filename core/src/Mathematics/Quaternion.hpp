@@ -100,6 +100,11 @@ namespace crimild {
         	q.lookAt( direction, up );
         	return q;
 		}
+
+		static Quaternion createFromEulerAngles( const Vector3f &angles )
+		{
+			return createFromEulerAngles( angles[ 0 ], angles[ 1 ], angles[ 2 ] );
+		}
         
         static Quaternion createFromEulerAngles( PRECISION pitch, PRECISION yaw, PRECISION roll )
         {

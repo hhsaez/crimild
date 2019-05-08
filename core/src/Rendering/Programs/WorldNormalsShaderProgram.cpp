@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002 - present, H. Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,37 +25,42 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_OPENGL_INSTANCED_BUFFER_OBJECT_CATALOG_
-#define CRIMILD_OPENGL_INSTANCED_BUFFER_OBJECT_CATALOG_
+#include "WorldNormalsShaderProgram.hpp"
 
-#include <Rendering/Catalog.hpp>
+#include "Rendering/Renderer.hpp"
+#include "Rendering/ShaderGraph/ShaderGraph.hpp"
+#include "Rendering/ShaderGraph/CSL.hpp"
+#include "Rendering/ShaderGraph/Nodes/MeshVertexMaster.hpp"
 
-namespace crimild {
-    
-    class InstancedBufferObject;    
+using namespace crimild;
+using namespace crimild::shadergraph;
 
-	namespace opengl {
-
-		class InstancedBufferObjectCatalog : public Catalog< InstancedBufferObject > {
-		public:
-			int getNextResourceId( InstancedBufferObject * ) override;
-
-			void bind( InstancedBufferObject *buffer ) override;
-			void unbind( InstancedBufferObject *buffer ) override;
-
-			void load( InstancedBufferObject *buffer ) override;
-			void update( InstancedBufferObject *buffer ) override;
-            void unload( InstancedBufferObject *buffer ) override;
-            
-            void cleanup( void ) override;
-
-        private:
-            std::list< int > _unusedBufferIds;
-		};
-
-	}
-
+WorldNormalsShaderProgram::WorldNormalsShaderProgram( crimild::Bool instancingEnabled )
+{
+	createVertexShader( instancingEnabled );
+	createFragmentShader();
 }
 
-#endif
+void WorldNormalsShaderProgram::createVertexShader( crimild::Bool instancingEnabled )
+{
+	auto graph = Renderer::getInstance()->createShaderGraph();
+	graph->setInstancingEnabled( instancingEnabled );
+    graph->addOutputNode< MeshVertexMaster >();
+
+	auto N = csl::worldNormal();
+	
+	csl::vertexOutput( "vViewNormal", N );
+
+	buildVertexShader( graph );
+}
+
+void WorldNormalsShaderProgram::createFragmentShader( void )
+{
+	auto graph = Renderer::getInstance()->createShaderGraph();
+
+	auto N = csl::vec3_in( "vViewNormal" );
+	csl::fragColor( csl::vec4( N, csl::scalar_one() ) );
+
+	buildFragmentShader( graph );
+}
 

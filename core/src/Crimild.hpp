@@ -187,6 +187,9 @@
 #include "ParticleSystem/Generators/VelocityParticleGenerator.hpp"
 #include "ParticleSystem/Generators/SphereVelocityParticleGenerator.hpp"
 #include "ParticleSystem/Generators/SpherePositionParticleGenerator.hpp"
+#include "ParticleSystem/Generators/EulerAnglesParticleGenerator.hpp"
+#include "ParticleSystem/Generators/OrbitPositionParticleGenerator.hpp"
+#include "ParticleSystem/Generators/SpherePositionParticleGenerator.hpp"
 #include "ParticleSystem/Generators/AccelerationParticleGenerator.hpp"
 #include "ParticleSystem/Generators/ColorParticleGenerator.hpp"
 #include "ParticleSystem/Generators/UniformScaleParticleGenerator.hpp"
@@ -204,6 +207,7 @@
 #include "ParticleSystem/Updaters/SetAttribValueParticleUpdater.hpp"
 #include "ParticleSystem/Updaters/UniformScaleParticleUpdater.hpp"
 #include "ParticleSystem/Updaters/ColorParticleUpdater.hpp"
+#include "ParticleSystem/Renderers/InstancedParticleRenderer.hpp"
 #include "ParticleSystem/Renderers/PointSpriteParticleRenderer.hpp"
 #include "ParticleSystem/Renderers/OrientedQuadParticleRenderer.hpp"
 #include "ParticleSystem/Renderers/NodeParticleRenderer.hpp"
@@ -269,6 +273,7 @@
 #include "Rendering/Programs/ForwardShadingShaderProgram.hpp"
 #include "Rendering/Programs/ReflectiveShaderProgram.hpp"
 #include "Rendering/Programs/RefractiveShaderProgram.hpp"
+#include "Rendering/Programs/WorldNormalsShaderProgram.hpp"
 
 #include "Messaging/MessageQueue.hpp"
 

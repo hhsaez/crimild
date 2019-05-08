@@ -84,14 +84,19 @@ void PrimitiveCatalog::bind( Primitive *primitive )
 		return;
 	}
 
+    auto renderer = Renderer::getInstance();
+
 #ifndef CRIMILD_FORCE_OPENGL_COMPATIBILITY_MODE
 	glBindVertexArray( primitive->getCatalogId() );
 #else
 	// Bind buffers here in compat mode
-	auto renderer = Renderer::getInstance();
 	renderer->getVertexBufferObjectCatalog()->bind( primitive->getVertexBuffer() );
 	renderer->getIndexBufferObjectCatalog()->bind( primitive->getIndexBuffer() );
 #endif
+
+	if ( auto ibo = primitive->getInstancedBuffer() ) {
+		renderer->getInstancedBufferObjectCatalog()->update( ibo );
+	}
 
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }

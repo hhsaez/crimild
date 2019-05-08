@@ -25,35 +25,42 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_OPENGL_INSTANCED_BUFFER_OBJECT_CATALOG_
-#define CRIMILD_OPENGL_INSTANCED_BUFFER_OBJECT_CATALOG_
+#ifndef CRIMILD_PARTICLE_GENERATOR_EULER_ANGLES_
+#define CRIMILD_PARTICLE_GENERATOR_EULER_ANGLES_
 
-#include <Rendering/Catalog.hpp>
+#include "ParticleSystem/ParticleSystemComponent.hpp"
 
 namespace crimild {
-    
-    class InstancedBufferObject;    
 
-	namespace opengl {
+    class EulerAnglesParticleGenerator : public ParticleSystemComponent::ParticleGenerator {
+        CRIMILD_IMPLEMENT_RTTI( crimild::EulerAnglesParticleGenerator )
+		
+    public:
+        EulerAnglesParticleGenerator( void );
+		EulerAnglesParticleGenerator( crimild::Real32 min, crimild::Real32 max, const Vector3f &axis );
+		~EulerAnglesParticleGenerator( void ) = default;
 
-		class InstancedBufferObjectCatalog : public Catalog< InstancedBufferObject > {
-		public:
-			int getNextResourceId( InstancedBufferObject * ) override;
+		virtual void configure( Node *node, ParticleData *particles ) override;
+        virtual void generate( Node *node, crimild::Real64 dt, ParticleData *particles, ParticleId startId, ParticleId endId ) override;
 
-			void bind( InstancedBufferObject *buffer ) override;
-			void unbind( InstancedBufferObject *buffer ) override;
+    private:
+		crimild::Real32 m_min;
+		crimild::Real32 m_max;
+		Vector3f m_axis;
 
-			void load( InstancedBufferObject *buffer ) override;
-			void update( InstancedBufferObject *buffer ) override;
-            void unload( InstancedBufferObject *buffer ) override;
-            
-            void cleanup( void ) override;
+		ParticleAttribArray *m_angles = nullptr;
+        
+		/** 
+		 	\name Coding support
+		*/
+		//@{
 
-        private:
-            std::list< int > _unusedBufferIds;
-		};
+	public:
+		virtual void encode( coding::Encoder &encoder ) override;
+		virtual void decode( coding::Decoder &decoder ) override;
 
-	}
+		//@}
+    };
 
 }
 

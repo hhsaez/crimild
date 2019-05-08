@@ -32,12 +32,12 @@
 #include "Rendering/RenderGraph/Passes/DepthPass.hpp"
 
 using namespace crimild;
-using namespace crimild::rendergraph;
+using namespace crimild::rendergraph; 
 
 Camera *Camera::_mainCamera = nullptr;
 
 Camera::Camera( void )
-	: Camera( 60.0, 4.0f / 3.0f, 0.1f, 1000.0f )
+	: Camera( 45.0, 4.0f / 3.0f, 0.1f, 1000.0f )
 {
 
 }
