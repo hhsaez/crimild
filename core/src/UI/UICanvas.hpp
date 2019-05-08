@@ -57,6 +57,7 @@ namespace crimild {
 
 		private:
 			Vector2i _size;
+            Vector2i _safeArea;
 			RenderSpace _renderSpace = RenderSpace::CAMERA;
 
 		public:
