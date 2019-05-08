@@ -29,10 +29,12 @@
 #define CRIMILD_CORE_RENDER_GRAPH_PASSES_SHADOW_
 
 #include "Rendering/RenderGraph/RenderGraphPass.hpp"
+#include "Rendering/RenderQueue.hpp"
 
 namespace crimild {
 
 	class Light;
+    class Renderables;
 
 	namespace rendergraph {
 
@@ -55,10 +57,11 @@ namespace crimild {
 				virtual void execute( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue ) override;
 
 			private:
-				void renderShadowMap( Renderer *renderer, RenderQueue *renderQueue, Light *light );
+                void renderShadowMap( Renderer *renderer, RenderQueue *renderQueue, RenderQueue::RenderableType renderableType, Light *light, ShaderProgram *program );
 
 			private:
 				SharedPointer< ShaderProgram > _program;
+                SharedPointer< ShaderProgram > _programInstanced;
 			
 				RenderGraphAttachment *_shadowOutput = nullptr;
                 RenderGraphAttachment *_depthAttachment = nullptr;

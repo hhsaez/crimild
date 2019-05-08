@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -47,12 +47,14 @@ namespace crimild {
 		BufferObject( unsigned int size, const T *data )
 		{
 			if ( size > 0 ) {
-                _data.resize( size * sizeof( T ) );
+                m_data.resize( size * sizeof( T ) );
                 if ( data != nullptr ) {
-                    memcpy( &_data[ 0 ], data, sizeof( T ) * size );
+                    memcpy( &m_data[ 0 ], data, sizeof( T ) * size );
                 }
 			}
 		}
+
+	public:
 
 	public:
 		virtual ~BufferObject( void )
@@ -60,20 +62,20 @@ namespace crimild {
 
 		}
 
-		inline unsigned int getSize( void ) const { return _data.size() / sizeof( T ); }
+		inline unsigned int getSize( void ) const { return m_data.size() / sizeof( T ); }
         
-        inline unsigned int getSizeInBytes( void ) const { return _data.size(); }
+        inline unsigned int getSizeInBytes( void ) const { return m_data.size(); }
 
-		inline T *data( void ) { return ( T * ) &_data[ 0 ]; }
+		inline T *data( void ) { return ( T * ) &m_data[ 0 ]; }
 
-		inline const T *getData( void ) const { return ( const T * ) &_data[ 0 ]; }
+		inline const T *getData( void ) const { return ( const T * ) &m_data[ 0 ]; }
 
 		inline crimild::Size getUsedCount( void ) const { return getSize(); }
 
-		inline void setUsedCount( crimild::Size count ) { _data.resize( count * sizeof( T ) ); }
+		inline void setUsedCount( crimild::Size count ) { m_data.resize( count * sizeof( T ) ); }
 
 	private:
-        containers::ByteArray _data;
+        containers::ByteArray m_data;
         
         /**
             name Coding
@@ -85,14 +87,14 @@ namespace crimild {
         {
             Codable::encode( encoder );
             
-            encoder.encode( "data", _data );
+            encoder.encode( "data", m_data );
         }
         
         virtual void decode( coding::Decoder &decoder ) override
         {
             Codable::decode( decoder );
             
-            decoder.decode( "data", _data );
+            decoder.decode( "data", m_data );
         }
         
         //@}
@@ -115,13 +117,13 @@ namespace crimild {
 		{
 			StreamObject::save( s );
 
-			unsigned int size = _data.size();
+			unsigned int size = m_data.size();
 			s.write( size );
             
 			s.write( size ); // used count
 			
 			if ( size > 0 ) {
-				s.writeRawBytes( &_data[ 0 ], size );
+				s.writeRawBytes( &m_data[ 0 ], size );
 			}
 		}
 
@@ -137,8 +139,8 @@ namespace crimild {
 			}
 
 			if ( size > 0 ) {
-				_data.resize( size );
-				s.readRawBytes( &_data[ 0 ], size );
+				m_data.resize( size );
+				s.readRawBytes( &m_data[ 0 ], size );
 			}
 		}
         

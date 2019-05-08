@@ -36,7 +36,7 @@ namespace crimild {
 		CRIMILD_IMPLEMENT_RTTI( crimild::UniformScaleParticleGenerator )
 
     public:
-        UniformScaleParticleGenerator( void );
+        UniformScaleParticleGenerator( crimild::Real32 minScale = 1.0f, crimild::Real32 maxScale = 1.0f );
         virtual ~UniformScaleParticleGenerator( void );
 
 		void setMinScale( crimild::Real32 value ) { _minScale = value; }

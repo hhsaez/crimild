@@ -33,8 +33,6 @@
 
 namespace crimild {
 
-	class ViewSpaceNormalShaderProgram;
-
 	namespace rendergraph {
 
 		namespace passes {
@@ -65,10 +63,11 @@ namespace crimild {
 				virtual void execute( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue ) override;
 
 			private:
-				void renderObjects( Renderer *renderer, RenderQueue *renderQueue, RenderQueue::RenderableType renderableType );
+				void renderObjects( Renderer *renderer, RenderQueue *renderQueue, RenderQueue::RenderableType renderableType, ShaderProgram *program );
 
 			private:
-				SharedPointer< ViewSpaceNormalShaderProgram > _program;
+				SharedPointer< ShaderProgram > _program;
+                SharedPointer< ShaderProgram > _programInstanced;
 			
 				RenderGraphAttachment *_depthOutput = nullptr;
 				RenderGraphAttachment *_normalOutput = nullptr;

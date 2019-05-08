@@ -33,17 +33,19 @@
 #include "Rendering/RenderQueue.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/ShaderUniformImpl.hpp"
-#include "Rendering/Programs/ViewSpaceNormalShaderProgram.hpp"
+#include "Rendering/Programs/DepthShaderProgram.hpp"
 #include "Rendering/Material.hpp"
 #include "Foundation/Profiler.hpp"
 #include "Rendering/ShaderGraph/ShaderGraph.hpp"
 #include "Rendering/ShaderGraph/Nodes/VertexShaderInputs.hpp"
 #include "Rendering/ShaderGraph/CSL.hpp"
+#include "Rendering/ShaderGraph/Constants.hpp"
 
 using namespace crimild;
 using namespace crimild::rendergraph;
 using namespace crimild::rendergraph::passes;
 using namespace crimild::shadergraph;
+using namespace crimild::shadergraph::locations;
 
 DepthPass::DepthPass( RenderGraph *graph )
 	: RenderGraphPass( graph, "Depth Pass" )
@@ -69,7 +71,8 @@ void DepthPass::setup( RenderGraph *graph )
 {
 	graph->write( this, { _depthOutput, _normalOutput } );
 	
-	_program = crimild::alloc< ViewSpaceNormalShaderProgram >();
+	_program = crimild::alloc< DepthShaderProgram >();
+    _programInstanced = crimild::alloc< DepthShaderProgram >( true );
 }
 
 void DepthPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue )
@@ -81,49 +84,48 @@ void DepthPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *re
 	renderer->bindFrameBuffer( crimild::get_ptr( fbo ) );
 	
 	renderer->setColorMaskState( ColorMaskState::DISABLED );
-	renderObjects( renderer, renderQueue, RenderQueue::RenderableType::OCCLUDER );
+    renderObjects( renderer, renderQueue, RenderQueue::RenderableType::OCCLUDER, crimild::get_ptr( _program ) );
 	renderer->setColorMaskState( ColorMaskState::ENABLED );
 	
-	renderObjects( renderer, renderQueue, RenderQueue::RenderableType::OPAQUE );
-	renderObjects( renderer, renderQueue, RenderQueue::RenderableType::OPAQUE_CUSTOM );
-	
+	renderObjects( renderer, renderQueue, RenderQueue::RenderableType::OPAQUE, crimild::get_ptr( _program ) );
+	renderObjects( renderer, renderQueue, RenderQueue::RenderableType::OPAQUE_CUSTOM, crimild::get_ptr( _program ) );
+    renderObjects( renderer, renderQueue, RenderQueue::RenderableType::OPAQUE_INSTANCED, crimild::get_ptr( _programInstanced ) );
+
 	renderer->unbindFrameBuffer( crimild::get_ptr( fbo ) );	
 }
 
-void DepthPass::renderObjects( Renderer *renderer, RenderQueue *renderQueue, RenderQueue::RenderableType renderableType )
+void DepthPass::renderObjects( Renderer *renderer, RenderQueue *renderQueue, RenderQueue::RenderableType renderableType, ShaderProgram *program )
 {
 	auto renderables = renderQueue->getRenderables( renderableType );
 	if ( renderables->size() == 0 ) {
 		return;
 	}
 	
-	auto program = crimild::get_ptr( _program );
-	
 	auto pMatrix = renderQueue->getProjectionMatrix();
-	program->bindPMatrix( pMatrix );
-	
+    program->bindUniform( PROJECTION_MATRIX_UNIFORM, pMatrix );
+
 	auto vMatrix = renderQueue->getViewMatrix();
-	program->bindVMatrix( vMatrix );
-	
+    program->bindUniform( VIEW_MATRIX_UNIFORM, vMatrix );
+
 	renderQueue->each( renderables, [ renderer, program ]( RenderQueue::Renderable *renderable ) {
 
 		const auto &mMatrix = renderable->modelTransform;
-		program->bindMMatrix( mMatrix );
+        program->bindUniform( MODEL_MATRIX_UNIFORM, mMatrix );
 
 		const auto nMatrix = Matrix3f( mMatrix ).getInverse().getTranspose();
-		program->bindNMatrix( nMatrix );
+        program->bindUniform( NORMAL_MATRIX_UNIFORM, nMatrix );
 
-		auto material = renderable->material;
-		if ( material != nullptr ) {
-			program->bindShininess( material->getShininess() );
-		}
+//        auto material = renderable->material;
+//        if ( material != nullptr ) {
+//            program->bindShininess( material->getShininess() );
+//        }
 
 		renderer->bindProgram( program );
 		
-		renderable->geometry->forEachPrimitive( [ program, renderer ]( Primitive *primitive ) {
-			renderer->bindPrimitive( program, primitive );
-			renderer->drawPrimitive( program, primitive );
-			renderer->unbindPrimitive( program, primitive );
+		renderable->geometry->forEachPrimitive( [ renderer ]( Primitive *primitive ) {
+			renderer->bindPrimitive( nullptr, primitive );
+			renderer->drawPrimitive( nullptr, primitive );
+			renderer->unbindPrimitive( nullptr, primitive );
 		});
 		
 		renderer->unbindProgram( program );

@@ -992,7 +992,7 @@ Variable *csl::normalMatrix( void )
 	auto ret = graph->getInput< Variable >( NORMAL_MATRIX_UNIFORM );
 	if ( ret == nullptr ) {
 		if ( graph->isInstancingEnabled() ) {
-			ret = mat3( inverse( modelMatrix() ) );
+			ret = mat3( modelMatrix() );
 		}
 		else {
 			ret = graph->addInputNode< Variable >(

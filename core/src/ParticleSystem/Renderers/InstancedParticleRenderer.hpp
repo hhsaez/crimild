@@ -25,35 +25,26 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_OPENGL_INSTANCED_BUFFER_OBJECT_CATALOG_
-#define CRIMILD_OPENGL_INSTANCED_BUFFER_OBJECT_CATALOG_
+#ifndef CRIMILD_PARTICLE_RENDERER_INSTANCED_
+#define CRIMILD_PARTICLE_RENDERER_INSTANCED_
 
-#include <Rendering/Catalog.hpp>
+#include "../ParticleSystemComponent.hpp"
+
+#include "Rendering/InstancedBufferObjectImpl.hpp"
 
 namespace crimild {
-    
-    class InstancedBufferObject;    
 
-	namespace opengl {
-
-		class InstancedBufferObjectCatalog : public Catalog< InstancedBufferObject > {
-		public:
-			int getNextResourceId( InstancedBufferObject * ) override;
-
-			void bind( InstancedBufferObject *buffer ) override;
-			void unbind( InstancedBufferObject *buffer ) override;
-
-			void load( InstancedBufferObject *buffer ) override;
-			void update( InstancedBufferObject *buffer ) override;
-            void unload( InstancedBufferObject *buffer ) override;
-            
-            void cleanup( void ) override;
-
-        private:
-            std::list< int > _unusedBufferIds;
-		};
-
-	}
+    class InstancedParticleRenderer : public ParticleSystemComponent::ParticleRenderer {
+		CRIMILD_IMPLEMENT_RTTI( crimild::InstancedParticleRenderer )
+		
+    public:
+		void configure( Node *node, ParticleData *particles ) override;
+		void update( Node *node, crimild::Real64 dt, ParticleData *particles ) override;
+        
+	private:
+		SharedPointer< Matrix4fInstancedBufferObject > _modelBO;
+        
+    };
 
 }
 

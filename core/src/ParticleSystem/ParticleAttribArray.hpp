@@ -57,6 +57,7 @@ namespace crimild {
 			UNIFORM_SCALE,
 			UNIFORM_SCALE_START,
 			UNIFORM_SCALE_END,
+			EULER_ANGLES,
 			TIME,
 			LIFE_TIME,
             SORT_REFERENCE,

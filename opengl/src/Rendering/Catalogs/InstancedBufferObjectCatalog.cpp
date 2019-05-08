@@ -35,16 +35,6 @@
 using namespace crimild;
 using namespace crimild::opengl;
 
-InstancedBufferObjectCatalog::InstancedBufferObjectCatalog( void )
-{
-
-}
-
-InstancedBufferObjectCatalog::~InstancedBufferObjectCatalog( void )
-{
-
-}
-
 int InstancedBufferObjectCatalog::getNextResourceId( InstancedBufferObject * )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
@@ -88,90 +78,6 @@ void InstancedBufferObjectCatalog::bind( InstancedBufferObject *buffer )
 		glVertexAttribDivisor( layoutLocation + i, 1 );
 	}
 
-	/*
-    glBindBuffer( GL_ARRAY_BUFFER, bufferId );
-    float *baseOffset = 0;
-
-    const InstancedFormat &format = buffer->getInstancedFormat();
-
-	if ( format.hasPositions() ) {
-		glEnableInstancedAttribArray( InstancedFormat::LayoutLocation::POSITION );
-		glInstancedAttribPointer(
-			InstancedFormat::LayoutLocation::POSITION,
-			format.getPositionComponents(),
-			GL_FLOAT,
-			GL_FALSE,
-			format.getInstancedSizeInBytes(),
-			( const GLvoid * )( baseOffset + format.getPositionsOffset() ) );
-	}
-
-	if ( format.hasNormals() ) {
-		glEnableInstancedAttribArray( InstancedFormat::LayoutLocation::NORMAL );
-		glVertexAttribPointer(
-			VertexFormat::LayoutLocation::NORMAL,
-			format.getNormalComponents(),
-			GL_FLOAT,
-			GL_FALSE,
-			format.getVertexSizeInBytes(),
-			( const GLvoid * )( baseOffset + format.getNormalsOffset() ) );
-	}
-
-	if ( format.hasTangents() ) {
-		glEnableVertexAttribArray( VertexFormat::LayoutLocation::TANGENT );
-		glVertexAttribPointer(
-			VertexFormat::LayoutLocation::TANGENT,
-			format.getTangentComponents(),
-			GL_FLOAT,
-			GL_FALSE,
-			format.getVertexSizeInBytes(),
-			( const GLvoid * )( baseOffset + format.getTangentsOffset() ) );
-    }
-
-	if ( format.hasColors() ) {
-		glEnableVertexAttribArray( VertexFormat::LayoutLocation::COLOR );
-		glVertexAttribPointer(
-			VertexFormat::LayoutLocation::COLOR,
-			format.getColorComponents(),
-			GL_FLOAT,
-			GL_FALSE,
-			format.getVertexSizeInBytes(),
-			( const GLvoid * )( baseOffset + format.getColorsOffset() ) );
-    }
-
-	if ( format.hasTextureCoords() ) {
-		glEnableVertexAttribArray( VertexFormat::LayoutLocation::TEXTURE_COORD );
-		glVertexAttribPointer(
-			VertexFormat::LayoutLocation::TEXTURE_COORD,
-			format.getTextureCoordComponents(),
-			GL_FLOAT,
-			GL_FALSE,
-			format.getVertexSizeInBytes(),
-			( const GLvoid * )( baseOffset + format.getTextureCoordsOffset() ) );
-	}
-
-	if ( format.hasBoneIds() ) {
-		glEnableVertexAttribArray( VertexFormat::LayoutLocation::BONE_ID );
-		glVertexAttribPointer(
-			VertexFormat::LayoutLocation::BONE_ID,
-			format.getBoneIdComponents(),
-			GL_FLOAT,
-			GL_FALSE,
-			format.getVertexSizeInBytes(),
-			( const GLvoid * )( baseOffset + format.getBoneIdsOffset() ) );
-    }
-
-	if ( format.hasBoneWeights() ) {
-		glEnableVertexAttribArray( VertexFormat::LayoutLocation::BONE_WEIGHT );
-		glVertexAttribPointer(
-			VertexFormat::LayoutLocation::BONE_WEIGHT,
-			format.getBoneWeightComponents(),
-			GL_FLOAT,
-			GL_FALSE,
-			format.getVertexSizeInBytes(),
-			( const GLvoid * )( baseOffset + format.getBoneWeightsOffset() ) );
-	}
-	*/
-
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
@@ -187,18 +93,6 @@ void InstancedBufferObjectCatalog::unbind( InstancedBufferObject *buffer )
 	for ( crimild::Size i = 0; i < 4; i++ ) {
 		glDisableVertexAttribArray( layoutLocation + i );
 	}
-	/*
-	
-    const VertexFormat &format = buffer->getVertexFormat();
-
-	if ( format.hasPositions() ) glDisableVertexAttribArray( VertexFormat::LayoutLocation::POSITION );
-	if ( format.hasNormals() ) glDisableVertexAttribArray( VertexFormat::LayoutLocation::NORMAL );
-	if ( format.hasTangents() ) glDisableVertexAttribArray( VertexFormat::LayoutLocation::TANGENT );
-	if ( format.hasColors() ) glDisableVertexAttribArray( VertexFormat::LayoutLocation::COLOR );
-	if ( format.hasTextureCoords() ) glDisableVertexAttribArray( VertexFormat::LayoutLocation::TEXTURE_COORD );
-	if ( format.hasBoneIds() ) glDisableVertexAttribArray( VertexFormat::LayoutLocation::BONE_ID );
-	if ( format.hasBoneWeights() ) glDisableVertexAttribArray( VertexFormat::LayoutLocation::BONE_WEIGHT );
-	*/
 
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
     
@@ -221,6 +115,23 @@ void InstancedBufferObjectCatalog::load( InstancedBufferObject *buffer )
     glBufferData( GL_ARRAY_BUFFER, buffer->getSizeInBytes(), buffer->getData(), GL_STATIC_DRAW );
 
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+}
+
+void InstancedBufferObjectCatalog::update( InstancedBufferObject *buffer )
+{
+	if ( buffer == nullptr ) return;
+	if ( buffer->getUsage() != ResourceUsage::Dynamic ) return;
+
+	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
+
+	Catalog< InstancedBufferObject >::update( buffer );
+
+	GLuint bufferId = buffer->getCatalogId();
+
+    glBindBuffer( GL_ARRAY_BUFFER, bufferId );
+    glBufferData( GL_ARRAY_BUFFER, buffer->getSizeInBytes(), buffer->getData(), GL_DYNAMIC_DRAW );
+
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;	
 }
 
 void InstancedBufferObjectCatalog::unload( InstancedBufferObject *buffer )

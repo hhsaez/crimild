@@ -36,20 +36,16 @@ using namespace crimild;
 using namespace crimild::shadergraph;
 using namespace crimild::shadergraph::csl;
 
-DepthShaderProgram::DepthShaderProgram( void )
+DepthShaderProgram::DepthShaderProgram( crimild::Bool instancingEnabled )
 {
-	createVertexShader();
+	createVertexShader( instancingEnabled );
 	createFragmentShader();
 }
 
-DepthShaderProgram::~DepthShaderProgram( void )
-{
-
-}
-
-void DepthShaderProgram::createVertexShader( void )
+void DepthShaderProgram::createVertexShader( crimild::Bool instancingEnabled )
 {
 	auto graph = Renderer::getInstance()->createShaderGraph();
+    graph->setInstancingEnabled( instancingEnabled );
 
 	graph->addOutputNode< MeshVertexMaster >();
 
