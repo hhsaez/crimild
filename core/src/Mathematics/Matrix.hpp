@@ -73,7 +73,7 @@ namespace crimild {
 			}
 		}
 
-		Matrix( const Vector< SIZE, PRECISION > &axis, PRECISION angle )
+		Matrix( const Vector< 3, PRECISION > &axis, PRECISION angle )
 		{
 			fromAxisAngle( axis, angle );
 		}
