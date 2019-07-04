@@ -1,3 +1,30 @@
+/*
+ * Copyright (c) 2002 - present, H. Hernan Saez
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the <organization> nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include "WindowSystem.hpp"
 
 #include <Concurrency/Async.hpp>
@@ -6,44 +33,21 @@
 #include <Simulation/Systems/RenderSystem.hpp>
 #include <Rendering/FrameBufferObject.hpp>
 
-#ifdef CRIMILD_PLATFORM_EMSCRIPTEN
-    #include <emscripten.h>
-    #include <emscripten/html5.h>
-
-void simulation_step( void )
-{
-	crimild::Simulation::getInstance()->update();
-}
-
-#endif
-
 using namespace crimild;
-
-WindowSystem::WindowSystem( void )
-{
-
-}
-
-WindowSystem::~WindowSystem( void )
-{
-
-}
+using namespace crimild::glfw;
 
 bool WindowSystem::start( void )
-{	
+{
 	if ( !System::start() ) {
 		return false;
 	}
 
-	int versionMajor;
-	int versionMinor;
-	int versionRevision;
-	glfwGetVersion( &versionMajor, &versionMinor, &versionRevision );
-    Log::info( CRIMILD_CURRENT_CLASS_NAME, "Initialized GLFW ", versionMajor, ".", versionMinor, " rev. ", versionRevision );
-
 	if ( !createWindow() ) {
 		return false;
 	}
+	/*
+    Log::info( CRIMILD_CURRENT_CLASS_NAME, "Initialized GLFW ", versionMajor, ".", versionMinor, " rev. ", versionRevision );
+
 
 	int framebufferWidth = Simulation::getInstance()->getSettings()->get( "video.width", 1024 );
     int framebufferHeight = Simulation::getInstance()->getSettings()->get( "video.height", 768 );
@@ -84,7 +88,7 @@ bool WindowSystem::start( void )
 		Simulation::getInstance()->getMainCamera()->setAspectRatio( aspect );
 	}
 
-	/*
+#if 0
 #ifdef __EMSCRIPTEN__
     int result = emscripten_webgl_enable_extension(emscripten_webgl_get_current_context(), "OES_texture_float");
     if (result < 0) {
@@ -97,19 +101,21 @@ bool WindowSystem::start( void )
         emscripten_run_script("alert('Could not load extension \"OES_texture_float_linear\". Game will not work.')");
     }
 #endif
-	*/
+#endif
     
     crimild::concurrency::sync_frame( std::bind( &WindowSystem::update, this ) );
 
 #ifdef CRIMILD_PLATFORM_EMSCRIPTEN 
 	emscripten_set_main_loop( simulation_step, 60, false );
 #endif
+	*/
 
 	return true;
 }
 
 void WindowSystem::update( void )
 {
+	/*
     CRIMILD_PROFILE( "Window System - Update" )
     
 	static double accumTime = 0.0;
@@ -119,7 +125,7 @@ void WindowSystem::update( void )
 
 	glfwPollEvents();
     
-	if ( glfwWindowShouldClose( _window ) ) {
+	if ( glfwWindowShouldClose( m_window ) ) {
         crimild::concurrency::sync_frame( [] {
             Simulation::getInstance()->stop();
         });
@@ -146,50 +152,39 @@ void WindowSystem::update( void )
 	}
 
     crimild::concurrency::sync_frame( std::bind( &WindowSystem::update, this ) );
+	*/
 }
 
 void WindowSystem::stop( void )
 {
-	System::stop();
+	destroyWindow();
 }
 
 bool WindowSystem::createWindow( void )
 {
-	int width = 1024;
-	int height = 768;
-	bool fullscreen = false;
+	auto settings = Simulation::getInstance()->getSettings();
+
+	auto width = settings->get< crimild::Int32 >( "video.width", 1024 );
+	auto height = settings->get< crimild::Int32 >( "video.height", 768 );
+	auto fullscreen = settings->get< crimild::Bool >( "video.fullscreen", false );
+	auto simName = Simulation::getInstance()->getName();
+	if ( simName == "" ) {
+		simName = "Crimild";
+	}
+
+	CRIMILD_LOG_DEBUG( "Creating window of size (", width, "x", height, ")" );
 
 #if defined( CRIMILD_PLATFORM_EMSCRIPTEN )
-	// override window size based on canvas
-	if ( emscripten_get_canvas_element_size( "crimild_canvas", &width, &height ) != EMSCRIPTEN_RESULT_SUCCESS ) {
-		Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot obtain canvas size" );
-	}
-
-	Log::info( CRIMILD_CURRENT_CLASS_NAME, "Canvas size = (", width, "x", height, ")" );
-
-	Simulation::getInstance()->getSettings()->set( "video.width", width );
-	Simulation::getInstance()->getSettings()->set( "video.height", height );
-	Simulation::getInstance()->getSettings()->set( "video.fullscreen", fullscreen );	
-#endif
-	
-    width = Simulation::getInstance()->getSettings()->get( "video.width", 1024 );
-    height = Simulation::getInstance()->getSettings()->get( "video.height", 768 );
-    fullscreen = Simulation::getInstance()->getSettings()->get< bool >( "video.fullscreen", false );
-
-	Log::info( CRIMILD_CURRENT_CLASS_NAME, "Creating window of size (", width, "x", height, ")" );
-
-	std::string name = Simulation::getInstance()->getName();
-	if ( name == "" ) {
-		name = "Crimild";
-	}
-	
+	glfwWindowHint( GLFW_RESIZABLE, GLFW_TRUE );
+#elsif defined( CRIMILD_ENABLE_VULKAN )
+	glfwWindowHint( GLFW_CLIENT_API, GLFW_NO_API );
+	glfwWindowHint( GLFW_RESIZABLE, GLFW_TRUE );
+#else
 	bool vsync = true;
 	int glMajor = 3;
 	int glMinor = 3;
 	int depthBits = 32;
 	int stencilBits = 8;
-
-#if !defined( CRIMILD_PLATFORM_EMSCRIPTEN )
 	glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, glMajor );
 	glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, glMinor );
 	glfwWindowHint( GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE );
@@ -197,29 +192,40 @@ bool WindowSystem::createWindow( void )
     glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
     glfwWindowHint( GLFW_DEPTH_BITS, depthBits );
     glfwWindowHint( GLFW_STENCIL_BITS, stencilBits );
-#else
-	glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 #endif
 
-	_window = glfwCreateWindow( width, height, name.c_str(), fullscreen ? glfwGetPrimaryMonitor() : NULL, NULL );
-	if ( _window == nullptr ) {
-        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Failed to create window" );
-		return false;
+	m_window = glfwCreateWindow(
+		width,
+		height,
+		simName.c_str(),
+		fullscreen ? glfwGetPrimaryMonitor() : NULL, NULL
+	);
+	if ( m_window == nullptr ) {
+        CRIMILD_LOG_FATAL( "Failed to create window" );
+		exit( 1 );
 	}
 
+	glfwSetWindowSizeCallback(
+		m_window,
+		[]( GLFWwindow *window, int width, int height ) {
+			Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Window resized to ", width, "x", height );
+		}
+	);
+
+	glfwSetFramebufferSizeCallback(
+		m_window,
+		[]( GLFWwindow *window, int width, int height ) {
+			Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Framebuffer resized to ", width, "x", height );
+		}
+	);
+	
+	broadcastMessage( messages::WindowSystemDidCreateWindow { this } );
+
+#if !defined( CRIMILD_ENABLE_VULKAN )
   	glfwMakeContextCurrent( _window );
 
 	glfwSwapInterval( vsync ? 1 : 0 );
-
-	broadcastMessage( messages::WindowSystemDidCreateWindow { this } );
-
-	glfwSetWindowSizeCallback( _window, []( GLFWwindow *window, int width, int height ) {
-		Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Window resized to ", width, "x", height );
-	});
-
-	glfwSetFramebufferSizeCallback( _window, []( GLFWwindow *window, int width, int height ) {
-		Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Framebuffer resized to ", width, "x", height );
-	});
+#endif	
 
 	return true;
 }
@@ -227,5 +233,7 @@ bool WindowSystem::createWindow( void )
 void WindowSystem::destroyWindow( void )
 {
 	broadcastMessage( messages::WindowSystemWillDestroyWindow { this } );
+
+	glfwDestroyWindow( m_window );
 }
 

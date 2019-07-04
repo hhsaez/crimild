@@ -30,6 +30,10 @@
 
 using namespace crimild;
 
+const char *Settings::SETTINGS_APP_NAME = "application.name";
+const char *Settings::SETTINGS_APP_VERSION_MAJOR = "application.version.major";
+const char *Settings::SETTINGS_APP_VERSION_MINOR = "application.version.minor";
+const char *Settings::SETTINGS_APP_VERSION_PATCH = "application.version.patch";
 const char *Settings::SETTINGS_RENDERING_SHADOWS_ENABLED = "crimild.rendering.shadows.enabled";
 const char *Settings::SETTINGS_RENDERING_SHADOWS_RESOLUTION_WIDTH = "crimild.rendering.shadows.resolution.width";
 const char *Settings::SETTINGS_RENDERING_SHADOWS_RESOLUTION_HEIGHT = "crimild.rendering.shadows.resolution.height";

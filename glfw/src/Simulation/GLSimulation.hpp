@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002 - present, Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,18 +25,22 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_GL_SIMULATION_
-#define CRIMILD_GL_SIMULATION_
+#ifndef CRIMILD_GLFW_SIMULATION_
+#define CRIMILD_GLFW_SIMULATION_
 
 #include <Simulation/Simulation.hpp>
 
 namespace crimild {
 
-	class GLSimulation : public Simulation {
-	public:
-		GLSimulation( std::string name, SettingsPtr const &settings );
-		virtual ~GLSimulation( void );
-	};
+	namespace glfw {
+
+		class GLSimulation : public Simulation {
+		public:
+			GLSimulation( std::string name, SettingsPtr const &settings );
+			virtual ~GLSimulation( void );
+		};
+
+	}
 
 }
 

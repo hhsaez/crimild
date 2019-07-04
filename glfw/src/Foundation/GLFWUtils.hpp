@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,28 +25,21 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_GLFW_SIMULATION_SYSTEMS_INPUT_
-#define CRIMILD_GLFW_SIMULATION_SYSTEMS_INPUT_
+#ifndef CRIMILD_GLFW_UTILS_
+#define CRIMILD_GLFW_UTILS_
 
-#include "Foundation/GLFWUtils.hpp"
-#include "Simulation/Systems/System.hpp"
-
-namespace crimild {
-    
-	class InputSystem : public System {
-		CRIMILD_IMPLEMENT_RTTI( crimild::InputSystem )
-		
-	public:
-		InputSystem( void );
-		~InputSystem( void ) = default;
-
-		void update( void ) override;
-
-    private:
-        GLFWwindow *_window = nullptr;
-	};
-    
-}
+#if defined( CRIMILD_PLATFORM_EMSCRIPTEN )
+    #define GLFW_INCLUDE_ES3
+    #include <GLFW/glfw3.h>
+#else
+    #if defined( CRIMILD_ENABLE_VULKAN )
+        #define GLFW_INCLUDE_VULKAN
+    #else
+        #define GLEW_STATIC 1
+        #include <GL/glew.h>
+    #endif
+    #include <GLFW/glfw3.h>
+#endif
 
 #endif
 

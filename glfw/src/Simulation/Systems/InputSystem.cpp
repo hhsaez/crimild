@@ -1,15 +1,15 @@
 #include "InputSystem.hpp"
 #include "WindowSystem.hpp"
-
-#include <Concurrency/Async.hpp>
-#include <Foundation/Profiler.hpp>
-#include <Simulation/Input.hpp>
-#include <Simulation/Console/Console.hpp>
+#include "Concurrency/Async.hpp"
+#include "Foundation/Profiler.hpp"
+#include "Simulation/Input.hpp"
+#include "Simulation/Console/Console.hpp"
 
 using namespace crimild;
 
 InputSystem::InputSystem( void )
 {
+	/*
     auto self = this;
     
     registerMessageHandler< messages::WindowSystemDidCreateWindow >( [self]( messages::WindowSystemDidCreateWindow const &message ) {
@@ -78,24 +78,12 @@ InputSystem::InputSystem( void )
     registerMessageHandler< messages::WindowSystemWillDestroyWindow >( [&]( messages::WindowSystemWillDestroyWindow const &message ) {
         _window = nullptr;
     });
-}
-
-InputSystem::~InputSystem( void )
-{
-
-}
-
-bool InputSystem::start( void )
-{	
-	if ( !System::start() ) {
-		return false;
-	}
-    
-    return true;
+	*/
 }
 
 void InputSystem::update( void )
 {
+	/*
     CRIMILD_PROFILE( "Update Input" )
     
     if ( _window == nullptr ) {
@@ -146,10 +134,6 @@ void InputSystem::update( void )
 	Input::getInstance()->resetJoystickAxes( axes );
     
     crimild::concurrency::sync_frame( std::bind( &InputSystem::update, this ) );
-}
-
-void InputSystem::stop( void )
-{
-	System::stop();
+	*/
 }
 

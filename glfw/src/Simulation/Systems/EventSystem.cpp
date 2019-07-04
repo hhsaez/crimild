@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -25,28 +25,31 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_GLFW_SIMULATION_SYSTEMS_INPUT_
-#define CRIMILD_GLFW_SIMULATION_SYSTEMS_INPUT_
+#include "EventSystem.hpp"
+#include "WindowSystem.hpp"
+#include "Concurrency/Async.hpp"
+#include "Simulation/Simulation.hpp"
 
-#include "Foundation/GLFWUtils.hpp"
-#include "Simulation/Systems/System.hpp"
+using namespace crimild;
+using namespace crimild::glfw;
 
-namespace crimild {
-    
-	class InputSystem : public System {
-		CRIMILD_IMPLEMENT_RTTI( crimild::InputSystem )
-		
-	public:
-		InputSystem( void );
-		~InputSystem( void ) = default;
-
-		void update( void ) override;
-
-    private:
-        GLFWwindow *_window = nullptr;
-	};
-    
+EventSystem::EventSystem( void )
+{
+	registerMessageHandler< messages::WindowSystemDidCreateWindow >(
+		[ this ]( messages::WindowSystemDidCreateWindow const &msg ) {
+			m_window = msg.video->getWindowHandler();
+		}
+	);
 }
 
-#endif
+void EventSystem::update( void )
+{
+	glfwPollEvents();
+	if ( glfwWindowShouldClose( m_window ) ) {
+        crimild::concurrency::sync_frame( [] {
+            Simulation::getInstance()->stop();
+        });
+		return;
+	}
+}
 
