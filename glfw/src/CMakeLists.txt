@@ -56,6 +56,27 @@ IF ( NOT ( ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten" ) )
 			  
 	ENDIF ( CRIMILD_ENABLE_SFML )
 
+	IF ( CRIMILD_ENABLE_VULKAN )
+   
+		FIND_PACKAGE( Vulkan REQUIRED )
+
+   		SET( CRIMILD_INCLUDE_DIRECTORIES
+   			  ${CRIMILD_INCLUDE_DIRECTORIES}
+			  ${CRIMILD_SOURCE_DIR}/vulkan/src
+			  ${Vulkan_INCLUDE_DIRS}
+		)
+
+   		SET( CRIMILD_LIBRARY_LINK_LIBRARIES
+   		 	 ${CRIMILD_LIBRARY_LINK_LIBRARIES}
+		 	 crimild_vulkan
+		 	 ${Vulkan_LIBRARIES}
+		 	 #"-framework Metal"
+		 	 #"-framework IOSurface"
+		 	 #"-framework QuartzCore"
+   		)
+
+	ENDIF ()
+
 ENDIF ()
 
 INCLUDE( ModuleBuildLibrary )

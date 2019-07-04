@@ -28,6 +28,8 @@
 #ifndef CRIMILD_VULKAN_
 #define CRIMILD_VULKAN_
 
+#include "Simulation/Systems/VulkanSystem.hpp"
+
 namespace crimild {
 
 	namespace vulkan {

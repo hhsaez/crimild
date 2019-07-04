@@ -39,6 +39,10 @@ namespace crimild {
 
     class Settings : public SharedObject {
     public:
+		static const char *SETTINGS_APP_NAME;
+		static const char *SETTINGS_APP_VERSION_MAJOR;
+		static const char *SETTINGS_APP_VERSION_MINOR;
+		static const char *SETTINGS_APP_VERSION_PATCH;
     	static const char *SETTINGS_RENDERING_SHADOWS_ENABLED;
     	static const char *SETTINGS_RENDERING_SHADOWS_RESOLUTION_WIDTH;
     	static const char *SETTINGS_RENDERING_SHADOWS_RESOLUTION_HEIGHT;

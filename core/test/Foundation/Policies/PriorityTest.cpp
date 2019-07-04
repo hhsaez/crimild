@@ -25,28 +25,62 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_GLFW_SIMULATION_SYSTEMS_INPUT_
-#define CRIMILD_GLFW_SIMULATION_SYSTEMS_INPUT_
+#include "Foundation/Types.hpp"
+#include "Foundation/Version.hpp"
 
-#include "Foundation/GLFWUtils.hpp"
-#include "Simulation/Systems/System.hpp"
+#include "gtest/gtest.h"
 
 namespace crimild {
-    
-	class InputSystem : public System {
-		CRIMILD_IMPLEMENT_RTTI( crimild::InputSystem )
-		
-	public:
-		InputSystem( void );
-		~InputSystem( void ) = default;
 
-		void update( void ) override;
+	namespace policies {
 
-    private:
-        GLFWwindow *_window = nullptr;
-	};
-    
+		struct Priority {
+			crimild::Real32 value;
+		};
+
+		/*
+		class Prioritable {
+		public:
+			virtual Priority getPriority
+		};
+		*/
+
+	}
+
 }
 
+using namespace crimild;
+
+TEST( Priority, after )
+{
+#if 0
+	auto p0 = Priority();
+	auto p1 = Priority::after( p0 );
+
+	class Foo : public Prioritable {
+	public:
+		Priority getPriority( void ) const noexcept { return Priority(); }
+	}:
+
+	class Bar : public Prioritable {
+	public:
+		Priority getPriority( void ) const noexcept { return Priority::after< Foo >(); }
+	};
+
+	Foo f;
+	Bar b( Priority::after( f->getPriority() ) );
+
+	EXCEPT_GE( Bar::getPriority(), Foo::getPriority() );
+
+
+	auto s0 = crimild::alloc< MockSystem >( "s0", Priority::DEFAULT );
+	auto s1 = crimild::alloc< MockSystem >( "s1", Priority::after( s0 ) );
+	auto s2 = crimild::alloc< MockSystem >( "s2", Priority::before( s1 ) );
+
+	auto updates = std::vector< std::string > { "s0", "s1", "s2" };
+	
 #endif
+}
+
+
 

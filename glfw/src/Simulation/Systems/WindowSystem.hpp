@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -30,74 +30,70 @@
 
 #include <Simulation/Systems/System.hpp>
 
-#ifdef CRIMILD_PLATFORM_EMSCRIPTEN
-    #define GLFW_INCLUDE_ES3
-    #include <GLFW/glfw3.h>
-#else
-    #define GLEW_STATIC 1
-    #include <GL/glew.h>
-    #include <GLFW/glfw3.h>
-#endif
+#include "Foundation/GLFWUtils.hpp"
 
 #include <string>
 
 namespace crimild {
+
+	namespace glfw {
     
-	class WindowSystem;
+		class WindowSystem;
+		
+		namespace messages {
+			
+			struct WindowSystemDidStart { 
+				WindowSystem *video;
+			};
+			
+			struct WindowSystemWillStop { 
+				WindowSystem *video;
+			};
+			
+			struct WindowSystemWillUpdate { 
+				WindowSystem *video;
+			};
+			
+			struct WindowSystemDidUpdate { 
+				WindowSystem *video;
+			};
+			
+			struct WindowSystemDidCreateWindow { 
+				WindowSystem *video;
+			};
+			
+			struct WindowSystemWillDestroyWindow { 
+				WindowSystem *video;
+			};
+		}
 
-	namespace messages {
-
-		struct WindowSystemDidStart { 
-			WindowSystem *video;
+		/**
+		   \brief Handle window creation
+		 */
+		class WindowSystem : public System {
+			CRIMILD_IMPLEMENT_RTTI( crimild::WindowSystem )
+			
+		public:
+			System::Priority getPriority( void ) const noexcept override { return System::PriorityType::FRAME_END; }
+			
+			bool start( void ) override;
+			void update( void ) override;
+			void stop( void ) override;
+			
+		public:
+			GLFWwindow *getWindowHandler( void ) { return m_window; }
+			
+		private:
+			bool createWindow( void );
+			void destroyWindow( void );
+			
+		private:
+			GLFWwindow *m_window = nullptr;
 		};
-
-		struct WindowSystemWillStop { 
-			WindowSystem *video;
-		};
-
-		struct WindowSystemWillUpdate { 
-			WindowSystem *video;
-		};
-
-		struct WindowSystemDidUpdate { 
-			WindowSystem *video;
-		};
-
-		struct WindowSystemDidCreateWindow { 
-			WindowSystem *video;
-		};
-
-		struct WindowSystemWillDestroyWindow { 
-			WindowSystem *video;
-		};
+		
 	}
 
-	class WindowSystem : public System {
-		CRIMILD_IMPLEMENT_RTTI( crimild::WindowSystem )
-		
-	public:
-		WindowSystem( void );
-		virtual ~WindowSystem( void );
-
-		virtual bool start( void ) override;
-
-		virtual void update( void );
-
-		virtual void stop( void ) override;
-
-	public:
-		GLFWwindow *getWindowHandler( void ) { return _window; }
-
-	private:
-		bool createWindow( void );
-
-		void destroyWindow( void );
-
-	private:
-		GLFWwindow *_window = nullptr;
-	};
-
 }
-
+	
 #endif
-
+	
