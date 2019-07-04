@@ -76,8 +76,15 @@ Simulation::Simulation( std::string name, SettingsPtr const &settings )
     Version version;
     Log::info( CRIMILD_CURRENT_CLASS_NAME, version.getDescription() );
 
-    // worker threads are disabled by default
-    _jobScheduler.configure( 0 );
+	// enable some threads if not already specified
+	if ( settings != nullptr ) {
+		auto workerCount = settings->get< crimild::Int32 >( "simulation.threading.workers", 0 );
+		_jobScheduler.configure( workerCount );
+	}
+    else {
+		// Disable worker threads
+		_jobScheduler.configure( 0 );
+	}
 
 #ifdef CRIMILD_PLATFORM_EMSCRIPTEN
 	if ( getSettings() == nullptr ) {
@@ -96,13 +103,15 @@ Simulation::Simulation( std::string name, SettingsPtr const &settings )
 	getSettings()->set( "video.height", height );
 	getSettings()->set( "video.fullscreen", false );
 #endif
-    
+
     addSystem( crimild::alloc< ConsoleSystem >() );
+	/*
     addSystem( crimild::alloc< UpdateSystem >() );
     addSystem( crimild::alloc< RenderSystem >() );
     addSystem( crimild::alloc< DebugSystem >() );
     addSystem( crimild::alloc< StreamingSystem >() );
     addSystem( crimild::alloc< UISystem >() );
+	*/
 
     Console::getInstance()->registerCommand( crimild::alloc< SimpleConsoleCommand >( "quit", []( Console *console, ConsoleCommand::ConsoleCommandArgs const & ) {
         // we need to disable the console so no further commands are triggered

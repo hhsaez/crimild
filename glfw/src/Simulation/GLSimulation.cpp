@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -27,15 +27,16 @@
 
 #include "GLSimulation.hpp"
 
+#include "Systems/EventSystem.hpp"
 #include "Systems/WindowSystem.hpp"
 #include "Systems/InputSystem.hpp"
 
-#include <Exceptions/RuntimeException.hpp>
-#include <Rendering/OpenGLRenderer.hpp>
+//#include <Rendering/OpenGLRenderer.hpp>
 #include <Simulation/Systems/StreamingSystem.hpp>
 
 using namespace crimild;
 using namespace crimild::concurrency;
+using namespace crimild::glfw;
 
 #ifdef CRIMILD_ENABLE_SCRIPTING
 #include <Coding/LuaDecoder.hpp>
@@ -62,26 +63,28 @@ GLSimulation::GLSimulation( std::string name, SettingsPtr const &settings )
 
 	if ( !glfwInit() ) {
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot start GLFW: glfwInit failed" );
-		throw RuntimeException( "Cannot start GLFW: glwfInit failed!" );
+		exit( 1 );
 	}
 
-	if ( JobScheduler::getInstance()->getNumWorkers() == 0 ) {
-		// enable some threads if not already specified
-		JobScheduler::getInstance()->configure( 4 );
-	}
+	int versionMajor;
+	int versionMinor;
+	int versionRevision;
+	glfwGetVersion( &versionMajor, &versionMinor, &versionRevision );
+	CRIMILD_LOG_INFO( "Initializing GLFW v", versionMajor, ".", versionMinor, " rev. ", versionRevision );
 
 #ifdef CRIMILD_ENABLE_SCRIPTING
-	getSystem< StreamingSystem >()->registerDecoder< coding::LuaDecoder >( "lua" );
+	//getSystem< StreamingSystem >()->registerDecoder< coding::LuaDecoder >( "lua" );
 #endif
 
+	addSystem( crimild::alloc< EventSystem >() );
     addSystem( crimild::alloc< InputSystem >() );
     addSystem( crimild::alloc< WindowSystem >() );
 
 #ifdef CRIMILD_ENABLE_PHYSICS
-    addSystem( crimild::alloc< PhysicsSystem >() );
+    //addSystem( crimild::alloc< PhysicsSystem >() );
 #endif
     
-    setRenderer( crimild::alloc< opengl::OpenGLRenderer >() );
+    //setRenderer( crimild::alloc< opengl::OpenGLRenderer >() );
 }
 
 GLSimulation::~GLSimulation( void )

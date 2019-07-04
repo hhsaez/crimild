@@ -30,6 +30,10 @@
 
 #include <string>
 
+#if !defined( NDEBUG )
+#define CRIMILD_DEBUG 1
+#endif
+
 // Identify known platforms
 #if defined( __EMSCRIPTEN__ )
     #define CRIMILD_PLATFORM_EMSCRIPTEN 1
