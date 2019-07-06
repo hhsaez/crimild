@@ -96,6 +96,7 @@ namespace crimild {
 		virtual void update( void );
 		virtual void stop( void );
 
+		virtual Priority getInitPriority( void ) const noexcept { return PriorityType::MEDIUM; }
 		virtual Priority getPriority( void ) const { return PriorityType::UPDATE; }
 	};
     

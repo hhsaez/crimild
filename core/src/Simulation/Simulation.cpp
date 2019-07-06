@@ -73,6 +73,8 @@ Simulation::Simulation( std::string name, SettingsPtr const &settings )
 	: NamedObject( name ),
       _settings( settings )
 {
+	CRIMILD_LOG_INFO( "Initializing simulation ", name );
+	
     Version version;
     Log::info( CRIMILD_CURRENT_CLASS_NAME, version.getDescription() );
 
@@ -127,6 +129,8 @@ Simulation::~Simulation( void )
 {
     stop();
     stopSystems();
+
+	CRIMILD_LOG_INFO( "Simulation terminated" );
 }
 
 void Simulation::start( void )
@@ -238,29 +242,40 @@ void Simulation::addSystem( SystemPtr const &system )
 
 void Simulation::startSystems( void )
 {
-    Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Starting systems" );    
-    _systems.eachValue( [ this ]( SystemPtr &s ) {
-        if ( s != nullptr ) {
-            s->start();
-			if ( s->getPriority() != System::PriorityType::NO_UPDATE ) {
-				_sortedSystems.add( crimild::get_ptr( s ) );
-			}
-        }
-    });
+	SystemArray allSystems;
+	
+    Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Starting systems" );
 
-	_sortedSystems.sort( []( const System *lhs, const System *rhs ) {
-		return lhs->getPriority() < rhs->getPriority();
-	});
+	// Sort systems by priority order and start them
+	_systems
+		.values()
+		.sort(
+			[]( const SystemPtr &lhs, const SystemPtr &rhs ) {
+				return lhs->getInitPriority() < rhs->getInitPriority();
+			}
+		).each(
+			[ this ]( SystemPtr &s ) {
+				s->start();
+				if ( s->getPriority() != System::PriorityType::NO_UPDATE ) {
+					_sortedSystems.add( crimild::get_ptr( s ) );
+				}
+			}
+		);
 }
 
 void Simulation::stopSystems( void )
 {
     Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Stopping systems" );
-    _systems.eachValue( []( SystemPtr &s ) {
-        if ( s != nullptr ) {
-            s->stop();
-        }
-    });
+
+	// Sort systems in reverse init priority order and stop them
+	_systems
+		.values()
+		.sort( []( const SystemPtr &lhs, const SystemPtr &rhs ) {
+			return lhs->getInitPriority() > rhs->getInitPriority();
+		})
+		.each( []( SystemPtr &s ) {
+			s->stop();
+		});
     
     _systems.clear();
 }

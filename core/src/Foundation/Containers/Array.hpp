@@ -277,14 +277,15 @@ namespace crimild {
 				return false;
 			}
 
-            void sort( SortCallback const &callback )
+            Array &sort( SortCallback const &callback )
             {
                 LockImpl lock( this );
                 if ( _size == 0 ) {
-                    return;
+                    return *this;
                 }
 
                 std::sort( &_elems[ 0 ], &_elems[ _size ], callback );
+				return *this;
             }
 
 			void each( TraverseCallback const &callback )
