@@ -54,6 +54,11 @@ using namespace crimild::physics;
 #include <Audio/SFMLAudioManager.hpp>
 #endif
 
+void errorCallback( int error, const char* description )
+{
+	std::cerr << "GLFW Error: (" << error << ") " << description << std::endl;
+}
+
 GLSimulation::GLSimulation( std::string name, SettingsPtr const &settings )
 	: Simulation( name, settings )
 {
@@ -65,6 +70,8 @@ GLSimulation::GLSimulation( std::string name, SettingsPtr const &settings )
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot start GLFW: glfwInit failed" );
 		exit( 1 );
 	}
+
+	glfwSetErrorCallback( errorCallback );
 
 	int versionMajor;
 	int versionMinor;

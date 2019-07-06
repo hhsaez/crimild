@@ -1,10 +1,12 @@
 SET( CRIMILD_INCLUDE_DIRECTORIES 
 	${CRIMILD_SOURCE_DIR}/core/src 
-	${CRIMILD_SOURCE_DIR}/opengl/src )
+	${CRIMILD_SOURCE_DIR}/opengl/src
+	${CRIMILD_SOURCE_DIR}/vulkan/src )
 
 SET( CRIMILD_LIBRARY_LINK_LIBRARIES 
 	crimild_core
-	crimild_opengl )
+	crimild_opengl
+	crimild_vulkan )
 
 IF ( NOT ( ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten" ) )
 

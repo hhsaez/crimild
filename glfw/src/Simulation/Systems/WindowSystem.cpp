@@ -27,14 +27,39 @@
 
 #include "WindowSystem.hpp"
 
-#include <Concurrency/Async.hpp>
-#include <Foundation/Profiler.hpp>
-#include <Simulation/Simulation.hpp>
-#include <Simulation/Systems/RenderSystem.hpp>
-#include <Rendering/FrameBufferObject.hpp>
+#include "Concurrency/Async.hpp"
+#include "Foundation/Profiler.hpp"
+#include "Simulation/Simulation.hpp"
+#include "Simulation/Systems/RenderSystem.hpp"
+#include "Rendering/FrameBufferObject.hpp"
 
 using namespace crimild;
 using namespace crimild::glfw;
+
+#if defined( CRIMILD_ENABLE_VULKAN )
+
+#include "Rendering/VulkanInstance.hpp"
+#include "Rendering/VulkanSurface.hpp"
+
+using namespace crimild::vulkan;
+
+crimild::Bool VulkanSurface::create( void ) noexcept
+{
+	auto sim = Simulation::getInstance();
+	auto windowSystem = sim->getSystem< WindowSystem >();
+	auto window = windowSystem->getWindowHandler();
+	
+	CRIMILD_LOG_TRACE( "Creating Vulkan surface" );
+	auto result = glfwCreateWindowSurface( VulkanInstance::get(), window, nullptr, &VulkanSurface::get() );
+	if ( result != VK_SUCCESS ) {
+		CRIMILD_LOG_FATAL( "Failed to create window surface for Vulkan. Error: ", result );
+		return false;
+	}
+
+	return true;
+}
+
+#endif
 
 bool WindowSystem::start( void )
 {
@@ -157,6 +182,8 @@ void WindowSystem::update( void )
 
 void WindowSystem::stop( void )
 {
+	System::stop();
+	
 	destroyWindow();
 }
 
@@ -176,7 +203,7 @@ bool WindowSystem::createWindow( void )
 
 #if defined( CRIMILD_PLATFORM_EMSCRIPTEN )
 	glfwWindowHint( GLFW_RESIZABLE, GLFW_TRUE );
-#elsif defined( CRIMILD_ENABLE_VULKAN )
+#elif defined( CRIMILD_ENABLE_VULKAN )
 	glfwWindowHint( GLFW_CLIENT_API, GLFW_NO_API );
 	glfwWindowHint( GLFW_RESIZABLE, GLFW_TRUE );
 #else
@@ -234,6 +261,10 @@ void WindowSystem::destroyWindow( void )
 {
 	broadcastMessage( messages::WindowSystemWillDestroyWindow { this } );
 
-	glfwDestroyWindow( m_window );
+	// TODO: window is automatically destroyed when terminating simulator
+	// Calling this function here may result in an error if the window was
+	// already closed by the user (i.e. by pressing the "X" button) instead
+	// of triggering a termination by other means (i.e. pressing ESC).
+	//glfwDestroyWindow( m_window );
 }
 
