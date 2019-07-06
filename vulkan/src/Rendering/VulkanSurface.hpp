@@ -25,73 +25,37 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_GLFW_SIMULATION_SYSTEMS_WINDOW_
-#define CRIMILD_GLFW_SIMULATION_SYSTEMS_WINDOW_
+#ifndef CRIMILD_VULKAN_RENDERING_SURFACE_
+#define CRIMILD_VULKAN_RENDERING_SURFACE_
 
-#include <Simulation/Systems/System.hpp>
-
-#include "Foundation/GLFWUtils.hpp"
-
-#include <string>
+#include "Foundation/Types.hpp"
+#include "Foundation/VulkanUtils.hpp"
 
 namespace crimild {
 
-	namespace glfw {
-    
-		class WindowSystem;
-		
-		namespace messages {
-			
-			struct WindowSystemDidStart { 
-				WindowSystem *video;
-			};
-			
-			struct WindowSystemWillStop { 
-				WindowSystem *video;
-			};
-			
-			struct WindowSystemWillUpdate { 
-				WindowSystem *video;
-			};
-			
-			struct WindowSystemDidUpdate { 
-				WindowSystem *video;
-			};
-			
-			struct WindowSystemDidCreateWindow { 
-				WindowSystem *video;
-			};
-			
-			struct WindowSystemWillDestroyWindow { 
-				WindowSystem *video;
-			};
-		}
+	namespace vulkan {
 
 		/**
-		   \brief Handle window creation
+		   \brief Handles the Vulkan surface
+
+		   \remarks The surface must be created by each platform
 		 */
-		class WindowSystem : public System {
-			CRIMILD_IMPLEMENT_RTTI( crimild::WindowSystem )
-			
+		class VulkanSurface {
 		public:
-			System::Priority getInitPriority( void ) const noexcept override { return System::PriorityType::HIGHEST; }
-			System::Priority getPriority( void ) const noexcept override { return System::PriorityType::NO_UPDATE; }
+			/**
+			   \brief Creates the Vulkan surface
+			   \remarks This method must be implemented on platform specific code
+			 */
+			static crimild::Bool create( void ) noexcept;
 			
-			bool start( void ) override;
-			void update( void ) override;
-			void stop( void ) override;
+			static void destroy( void ) noexcept;
 			
-		public:
-			GLFWwindow *getWindowHandler( void ) { return m_window; }
-			
+			static VkSurfaceKHR &get( void ) noexcept { return s_surface; }
+
 		private:
-			bool createWindow( void );
-			void destroyWindow( void );
-			
-		private:
-			GLFWwindow *m_window = nullptr;
+			static VkSurfaceKHR s_surface;
 		};
-		
+
 	}
 
 }

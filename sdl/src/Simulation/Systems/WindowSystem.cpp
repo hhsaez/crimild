@@ -53,6 +53,8 @@ bool WindowSystem::start( void )
 
 crimild::Bool WindowSystem::createWindow( void )
 {
+	CRIMILD_LOG_TRACE( "Creating window" );
+	
 	auto settings = Simulation::getInstance()->getSettings();
 
 	crimild::Int32 width = settings->get( "video.width", 1024 );
@@ -187,6 +189,7 @@ void WindowSystem::stop( void )
 
 void WindowSystem::destroyWindow( void )
 {
+	CRIMILD_LOG_TRACE( "Destroying window" );
 	if ( _window != nullptr ) {
 		SDL_DestroyWindow( _window );
 		_window = nullptr;
