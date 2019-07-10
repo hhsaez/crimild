@@ -33,7 +33,7 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
-VkInstance VulkanInstance::s_instance;
+VkInstance VulkanInstance::s_instance = VK_NULL_HANDLE;
 crimild::Bool VulkanInstance::s_enableValidationLayers = false;
 VulkanInstance::ValidationLayerArray VulkanInstance::s_validationLayers;
 VkDebugUtilsMessengerEXT s_debugMessenger;
@@ -174,6 +174,7 @@ void VulkanInstance::destroyInstance( void ) noexcept
 	CRIMILD_LOG_TRACE( "Destroying Vulkan instance" );
 	
 	vkDestroyInstance( s_instance, nullptr );
+	s_instance = VK_NULL_HANDLE;
 }
 
 VKAPI_ATTR VkBool32 VKAPI_CALL VulkanInstance::debugCallback(

@@ -29,20 +29,35 @@
 
 #include "Rendering/VulkanInstance.hpp"
 #include "Rendering/VulkanSurface.hpp"
+#include "Rendering/VulkanRenderDevice.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;
 
 crimild::Bool VulkanSystem::start( void )
 {
-	return System::start() &&
-		VulkanInstance::create() &&
-		VulkanSurface::create();
+	if ( !System::start() ||
+		!VulkanInstance::create() ||
+	    !VulkanSurface::create() ) {
+		return false;
+	}
+
+	m_device = crimild::alloc< VulkanRenderDevice >();
+	if ( !m_device->configure() ) {
+		return false;
+	}
+
+	return true;
 }
 
 void VulkanSystem::stop( void )
 {
 	System::stop();
+
+	if ( m_device != nullptr ) {
+		m_device->cleanup();
+		m_device = nullptr;
+	}
 
 	VulkanSurface::destroy();
 	VulkanInstance::destroy();
