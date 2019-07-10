@@ -50,6 +50,9 @@ namespace crimild {
 			static void destroy( void ) noexcept;
 			static VkInstance &get( void ) noexcept { return s_instance; }
 
+			static crimild::Bool enableValidationLayers( void ) noexcept { return s_enableValidationLayers; }
+			static ValidationLayerArray &getValidationLayers( void ) noexcept { return s_validationLayers; }
+			
 		private:
 			static crimild::Bool createInstance( void ) noexcept;
 			static crimild::Bool checkValidationLayerSupport( const ValidationLayerArray &validationLayers ) noexcept;

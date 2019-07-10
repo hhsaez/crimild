@@ -25,34 +25,65 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_VULKAN_SIMULATION_SYSTEMS_VULKAN_
-#define CRIMILD_VULKAN_SIMULATION_SYSTEMS_VULKAN_
+#ifndef CRIMILD_VULKAN_RENDERING_RENDER_DEVICE_
+#define CRIMILD_VULKAN_RENDERING_RENDER_DEVICE_
 
-#include "Simulation/Systems/System.hpp"
+#include "Foundation/Types.hpp"
+#include "Foundation/VulkanUtils.hpp"
+
+#include <vector>
 
 namespace crimild {
 
 	namespace vulkan {
 
-		class VulkanRenderDevice;
-
 		/**
-		   \brief Handle Vulkan initialization & cleanup
+		   \brief Implements a render device for Vulkan
+
+		   For simplicity, we're picking only one physical device and creating
+		   only one logical device. 
 		 */
-		class VulkanSystem : public System {
-			CRIMILD_IMPLEMENT_RTTI( crimild::VulkanSystem )
-
+		class VulkanRenderDevice {
 		public:
-			System::Priority getInitPriority( void ) const noexcept override { return System::PriorityType::HIGH; }
-			System::Priority getPriority( void ) const noexcept override { return System::PriorityType::NO_UPDATE; }
+			crimild::Bool configure( void ) noexcept;
 
-			crimild::Bool start( void ) override;
-			void stop( void ) override;
+			/**
+			   This method destroys the logical device. 
+			   The physical device is destroy along with the Vulkan instance
+			 */
+			void cleanup( void ) noexcept;
 
 		private:
-			SharedPointer< VulkanRenderDevice > m_device;		 
+			crimild::Bool pickPhysicalDevice( void ) noexcept;
+			crimild::Bool isDeviceSuitable( VkPhysicalDevice device ) const noexcept;
+			crimild::Bool checkDeviceExtensionSupport( VkPhysicalDevice device ) const noexcept;
+			VkSampleCountFlagBits getMaxUsableSampleCount( void ) const noexcept;
+
+			struct QueueFamilyIndices {
+				std::vector< crimild::UInt32 > graphicsFamily;
+				std::vector< crimild::UInt32 > presentFamily;
+
+				bool isComplete( void )
+				{
+					return graphicsFamily.size() > 0 && presentFamily.size() > 0;
+				}
+			};
+			
+			QueueFamilyIndices findQueueFamilies( VkPhysicalDevice device ) const noexcept;
+			
+			crimild::Bool createLogicalDevice( void ) noexcept;
+			
+		private:
+			VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
+			VkSampleCountFlagBits m_msaaSamples = VK_SAMPLE_COUNT_1_BIT;
+			VkDevice m_device = VK_NULL_HANDLE;
+			VkQueue m_graphicsQueue;
+			VkQueue m_presentQueue;
+			const std::vector< const char * > m_deviceExtensions {
+				VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+			};
 		};
-		
+
 	}
 
 }
