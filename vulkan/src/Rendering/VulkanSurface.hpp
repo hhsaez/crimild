@@ -29,31 +29,32 @@
 #define CRIMILD_VULKAN_RENDERING_SURFACE_
 
 #include "Foundation/Types.hpp"
+#include "Foundation/SharedObject.hpp"
 #include "Foundation/VulkanUtils.hpp"
 
 namespace crimild {
 
 	namespace vulkan {
 
+		class VulkanInstance;
+
 		/**
 		   \brief Handles the Vulkan surface
 
-		   \remarks The surface must be created by each platform
+		   \remarks The surface must be implemented by each platform
 		 */
-		class VulkanSurface {
+		class VulkanSurface : public SharedObject {
 		public:
-			/**
-			   \brief Creates the Vulkan surface
-			   \remarks This method must be implemented on platform specific code
-			 */
-			static crimild::Bool create( void ) noexcept;
+			VulkanSurface( VulkanInstance *instance, VkSurfaceKHR surfaceHandler );
+			virtual ~VulkanSurface( void );
+
+			VulkanInstance *getInstance( void ) noexcept { return m_instance; }
 			
-			static void destroy( void ) noexcept;
-			
-			static VkSurfaceKHR &get( void ) noexcept { return s_surface; }
+			const VkSurfaceKHR &getSurfaceHandler( void ) const noexcept { return m_surfaceHandler; }
 
 		private:
-			static VkSurfaceKHR s_surface;
+			VulkanInstance *m_instance = nullptr;
+			VkSurfaceKHR m_surfaceHandler = VK_NULL_HANDLE;
 		};
 
 	}
