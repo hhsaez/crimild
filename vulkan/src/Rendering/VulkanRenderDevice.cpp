@@ -35,59 +35,71 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
-crimild::Bool VulkanRenderDevice::configure( void ) noexcept
+SharedPointer< VulkanRenderDevice > VulkanRenderDevice::create( VulkanInstance *instance, VulkanSurface *surface ) noexcept
 {
-	CRIMILD_LOG_TRACE( "Configuring Vulkan rendering device" );
-	
-	return pickPhysicalDevice() && createLogicalDevice();
+	CRIMILD_LOG_TRACE( "Creating Vulkan rendering device" );
+
+	auto physicalDevice = pickPhysicalDevice(
+		instance->getInstanceHandler(),
+		surface->getSurfaceHandler()
+	);
+	if ( physicalDevice == VK_NULL_HANDLE ) {
+		return nullptr;
+	}
+
+	auto logicalDevice = createLogicalDevice(
+		physicalDevice,
+		surface->getSurfaceHandler()
+	);
+	if ( logicalDevice == VK_NULL_HANDLE ) {
+		// No need to destroy the physical device
+		return nullptr;
+	}
+
+	return crimild::alloc< VulkanRenderDevice >(
+		instance,
+		surface,
+		physicalDevice,
+		logicalDevice
+	);
 }
 
-crimild::Bool VulkanRenderDevice::pickPhysicalDevice( void ) noexcept
+VkPhysicalDevice VulkanRenderDevice::pickPhysicalDevice( const VkInstance &instance, const VkSurfaceKHR &surface ) noexcept
 {
 	CRIMILD_LOG_TRACE( "Picking physical device" );
-	
+
 	crimild::UInt32 deviceCount = 0;
-	vkEnumeratePhysicalDevices( VulkanInstance::get(), &deviceCount, nullptr );
+	vkEnumeratePhysicalDevices( instance, &deviceCount, nullptr );
 	if ( deviceCount == 0 ) {
 		CRIMILD_LOG_ERROR( "Failed to find GPUs with Vulkan support" );
-		return false;
+		return VK_NULL_HANDLE;
 	}
 
 	std::vector< VkPhysicalDevice > devices( deviceCount );
-	vkEnumeratePhysicalDevices( VulkanInstance::get(), &deviceCount, devices.data() );
+	vkEnumeratePhysicalDevices( instance, &deviceCount, devices.data() );
 	for ( const auto &device : devices ) {
-		if ( isDeviceSuitable( device ) ) {
-			m_physicalDevice = device;
-			m_msaaSamples = getMaxUsableSampleCount();
-			break;
+		if ( isDeviceSuitable( device, surface ) ) {
+			CRIMILD_LOG_INFO( "Vulkan physical device found" );
+			return device;
 		}
 	}
 	
-	if ( m_physicalDevice == VK_NULL_HANDLE ) {
-		CRIMILD_LOG_ERROR( "Failed to find a suitable GPU" );
-		return false;
-	}
-
-	CRIMILD_LOG_INFO( "Vulkan physical device found" );
-
-	return true;
+	CRIMILD_LOG_ERROR( "Failed to find a suitable GPU" );
+	return VK_NULL_HANDLE;
 }
 
-crimild::Bool VulkanRenderDevice::isDeviceSuitable( VkPhysicalDevice device ) const noexcept
+crimild::Bool VulkanRenderDevice::isDeviceSuitable( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept
 {
 	CRIMILD_LOG_TRACE( "Checking device properties" );
 	
-	auto indices = findQueueFamilies( device );
+	auto indices = findQueueFamilies( device, surface );
 	auto extensionsSupported = checkDeviceExtensionSupport( device );
 
-	/*
 	auto swapChainAdequate = false;
 	if ( extensionsSupported ) {
-		auto swapChainSupport = querySwapChainSupport( device );
+		auto swapChainSupport = querySwapchainSupport( device, surface );
 		swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
 	}
-	*/
-	auto swapChainAdequate = true;
 	
 	VkPhysicalDeviceFeatures supportedFeatures;
 	vkGetPhysicalDeviceFeatures( device, &supportedFeatures );
@@ -101,10 +113,12 @@ crimild::Bool VulkanRenderDevice::isDeviceSuitable( VkPhysicalDevice device ) co
 /**
    \brief Check if a given device met all required extensions
 */
-crimild::Bool VulkanRenderDevice::checkDeviceExtensionSupport( VkPhysicalDevice device ) const noexcept
+crimild::Bool VulkanRenderDevice::checkDeviceExtensionSupport( const VkPhysicalDevice &device ) noexcept
 {
 	CRIMILD_LOG_TRACE( "Checking device extension support" );
-	
+
+	auto &deviceExtensions = getDeviceExtensions();
+
 	crimild::UInt32 extensionCount;
 	vkEnumerateDeviceExtensionProperties( device, nullptr, &extensionCount, nullptr );
 	
@@ -112,8 +126,8 @@ crimild::Bool VulkanRenderDevice::checkDeviceExtensionSupport( VkPhysicalDevice 
 	vkEnumerateDeviceExtensionProperties( device, nullptr, &extensionCount, availableExtensions.data() );
 
 	std::set< std::string > requiredExtensions(
-		std::begin( m_deviceExtensions ),
-		std::end( m_deviceExtensions )
+		std::begin( deviceExtensions ),
+		std::end( deviceExtensions )
 	);
 
 	for ( const auto &extension : availableExtensions ) {
@@ -134,26 +148,7 @@ crimild::Bool VulkanRenderDevice::checkDeviceExtensionSupport( VkPhysicalDevice 
 	return true;
 }
 
-VkSampleCountFlagBits VulkanRenderDevice::getMaxUsableSampleCount( void ) const noexcept
-{
-	VkPhysicalDeviceProperties physicalDeviceProperties;
-	vkGetPhysicalDeviceProperties( m_physicalDevice, &physicalDeviceProperties );
-	
-	auto counts = std::min(
-		physicalDeviceProperties.limits.framebufferColorSampleCounts,
-		physicalDeviceProperties.limits.framebufferDepthSampleCounts
-	);
-	
-	if ( counts & VK_SAMPLE_COUNT_64_BIT ) return VK_SAMPLE_COUNT_64_BIT;
-	if ( counts & VK_SAMPLE_COUNT_32_BIT ) return VK_SAMPLE_COUNT_32_BIT;
-	if ( counts & VK_SAMPLE_COUNT_16_BIT ) return VK_SAMPLE_COUNT_16_BIT;
-	if ( counts & VK_SAMPLE_COUNT_8_BIT ) return VK_SAMPLE_COUNT_8_BIT;
-	if ( counts & VK_SAMPLE_COUNT_4_BIT ) return VK_SAMPLE_COUNT_4_BIT;
-	if ( counts & VK_SAMPLE_COUNT_2_BIT ) return VK_SAMPLE_COUNT_2_BIT;
-	return VK_SAMPLE_COUNT_1_BIT;
-}
-
-VulkanRenderDevice::QueueFamilyIndices VulkanRenderDevice::findQueueFamilies( VkPhysicalDevice device ) const noexcept
+VulkanRenderDevice::QueueFamilyIndices VulkanRenderDevice::findQueueFamilies( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept
 {
 	CRIMILD_LOG_TRACE( "Finding device queue families" );
 	
@@ -173,7 +168,7 @@ VulkanRenderDevice::QueueFamilyIndices VulkanRenderDevice::findQueueFamilies( Vk
 
 		// Find a queue family that supports presenting to the Vulkan surface
 		VkBool32 presentSupport = false;
-		vkGetPhysicalDeviceSurfaceSupportKHR( device, i, VulkanSurface::get(), &presentSupport );
+		vkGetPhysicalDeviceSurfaceSupportKHR( device, i, surface, &presentSupport );
 		if ( queueFamily.queueCount > 0 && presentSupport ) {
 			// This might probably be same as the graphics queue, though.
 			indices.presentFamily.push_back( i );
@@ -189,13 +184,64 @@ VulkanRenderDevice::QueueFamilyIndices VulkanRenderDevice::findQueueFamilies( Vk
 	return indices;
 }
 
-crimild::Bool VulkanRenderDevice::createLogicalDevice( void ) noexcept
+VulkanRenderDevice::SwapchainSupportDetails VulkanRenderDevice::querySwapchainSupport( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept
 {
-	QueueFamilyIndices indices = findQueueFamilies( m_physicalDevice );
+	CRIMILD_LOG_TRACE( "Querying swapchain support" );
+	
+	SwapchainSupportDetails details;
+
+	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
+		device,
+		surface,
+		&details.capabilities
+	);
+	
+	crimild::UInt32 formatCount;
+	vkGetPhysicalDeviceSurfaceFormatsKHR(
+		device,
+		surface,
+		&formatCount,
+		nullptr
+	);
+	if ( formatCount > 0 ) {
+		details.formats.resize( formatCount );
+		vkGetPhysicalDeviceSurfaceFormatsKHR(
+			device,
+			surface,
+			&formatCount,
+			details.formats.data()
+		);
+	}
+	
+	crimild::UInt32 presentModeCount;
+	vkGetPhysicalDeviceSurfacePresentModesKHR(
+		device,
+		surface,
+		&presentModeCount,
+		nullptr
+	);
+	if ( presentModeCount > 0 ) {
+		details.presentModes.resize( presentModeCount );
+		vkGetPhysicalDeviceSurfacePresentModesKHR(
+			device,
+			surface,
+			&presentModeCount,
+			details.presentModes.data()
+		);
+	}
+	
+	return details;
+}
+
+VkDevice VulkanRenderDevice::createLogicalDevice( const VkPhysicalDevice &physicalDevice, const VkSurfaceKHR &surface ) noexcept
+{
+	CRIMILD_LOG_TRACE( "Creating vulkan logical device" );
+	
+	QueueFamilyIndices indices = findQueueFamilies( physicalDevice, surface );
 	if ( !indices.isComplete() ) {
 		// should never happen
 		CRIMILD_LOG_ERROR( "Invalid physical device" );
-		return false;
+		return VK_NULL_HANDLE;
 	}
 
 	// Make sure we're creating queues for unique families,
@@ -205,7 +251,7 @@ crimild::Bool VulkanRenderDevice::createLogicalDevice( void ) noexcept
 		indices.graphicsFamily[ 0 ],
 		indices.presentFamily[ 0 ],
 	};
-	
+
 	// Required even if there's only one queue
 	auto queuePriority = 1.0f;
 	
@@ -223,6 +269,8 @@ crimild::Bool VulkanRenderDevice::createLogicalDevice( void ) noexcept
 	VkPhysicalDeviceFeatures deviceFeatures = {
 		.samplerAnisotropy = VK_TRUE,
 	};
+
+	auto &deviceExtensions = getDeviceExtensions();
 	
 	VkDeviceCreateInfo createInfo = {
 		.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
@@ -230,8 +278,8 @@ crimild::Bool VulkanRenderDevice::createLogicalDevice( void ) noexcept
 		.pQueueCreateInfos = queueCreateInfos.data(),
 		.pEnabledFeatures = &deviceFeatures,
 		.enabledLayerCount = 0,
-		.enabledExtensionCount = static_cast< crimild::UInt32 >( m_deviceExtensions.size() ),
-		.ppEnabledExtensionNames = m_deviceExtensions.data(),
+		.enabledExtensionCount = static_cast< crimild::UInt32 >( deviceExtensions.size() ),
+		.ppEnabledExtensionNames = deviceExtensions.data(),
 	};
 	
 	if ( VulkanInstance::enableValidationLayers() ) {
@@ -241,22 +289,51 @@ crimild::Bool VulkanRenderDevice::createLogicalDevice( void ) noexcept
 		createInfo.enabledLayerCount = static_cast< crimild::UInt32 >( validationLayers.size() );
 		createInfo.ppEnabledLayerNames = validationLayers.data();
 	}
-	
-	if ( vkCreateDevice( m_physicalDevice, &createInfo, nullptr, &m_device ) != VK_SUCCESS ) {
+
+	VkDevice device;
+	if ( vkCreateDevice( physicalDevice, &createInfo, nullptr, &device ) != VK_SUCCESS ) {
 		CRIMILD_LOG_ERROR( "Failed to create logical device" );
-		return false;
+		return VK_NULL_HANDLE;
 	}
+
+	return device;
+}
+
+VulkanRenderDevice::VulkanRenderDevice( VulkanInstance *instance, VulkanSurface *surface, const VkPhysicalDevice &physicalDevice, const VkDevice &device )
+	: m_physicalDevice( physicalDevice ),
+	  m_device( device )
+{
+	m_msaaSamples = getMaxUsableSampleCount();
+
+	QueueFamilyIndices indices = findQueueFamilies( physicalDevice, surface->getSurfaceHandler() );
 	
 	// Get queue handles
 	vkGetDeviceQueue( m_device, indices.graphicsFamily[ 0 ], 0, &m_graphicsQueue );
 	vkGetDeviceQueue( m_device, indices.presentFamily[ 0 ], 0, &m_presentQueue );
-
-	return true;
 }
 
-void VulkanRenderDevice::cleanup( void ) noexcept
+VulkanRenderDevice::~VulkanRenderDevice( void )
 {
 	vkDestroyDevice( m_device, nullptr );
 	m_device = VK_NULL_HANDLE;
+}
+
+VkSampleCountFlagBits VulkanRenderDevice::getMaxUsableSampleCount( void ) const noexcept
+{
+	VkPhysicalDeviceProperties physicalDeviceProperties;
+	vkGetPhysicalDeviceProperties( m_physicalDevice, &physicalDeviceProperties );
+	
+	auto counts = std::min(
+		physicalDeviceProperties.limits.framebufferColorSampleCounts,
+		physicalDeviceProperties.limits.framebufferDepthSampleCounts
+	);
+	
+	if ( counts & VK_SAMPLE_COUNT_64_BIT ) return VK_SAMPLE_COUNT_64_BIT;
+	if ( counts & VK_SAMPLE_COUNT_32_BIT ) return VK_SAMPLE_COUNT_32_BIT;
+	if ( counts & VK_SAMPLE_COUNT_16_BIT ) return VK_SAMPLE_COUNT_16_BIT;
+	if ( counts & VK_SAMPLE_COUNT_8_BIT ) return VK_SAMPLE_COUNT_8_BIT;
+	if ( counts & VK_SAMPLE_COUNT_4_BIT ) return VK_SAMPLE_COUNT_4_BIT;
+	if ( counts & VK_SAMPLE_COUNT_2_BIT ) return VK_SAMPLE_COUNT_2_BIT;
+	return VK_SAMPLE_COUNT_1_BIT;
 }
 

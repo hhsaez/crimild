@@ -31,6 +31,7 @@
 #include "Simulation/GLSimulation.hpp"
 
 #include "Simulation/Systems/InputSystem.hpp"
+#include "Simulation/Systems/GLFWVulkanSystem.hpp"
 
 namespace crimild {
 

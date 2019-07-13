@@ -29,6 +29,7 @@
 #define CRIMILD_VULKAN_RENDERING_RENDER_DEVICE_
 
 #include "Foundation/Types.hpp"
+#include "Foundation/SharedObject.hpp"
 #include "Foundation/VulkanUtils.hpp"
 
 #include <vector>
@@ -37,28 +38,35 @@ namespace crimild {
 
 	namespace vulkan {
 
+		class VulkanInstance;
+		class VulkanSurface;
+
 		/**
 		   \brief Implements a render device for Vulkan
 
 		   For simplicity, we're picking only one physical device and creating
 		   only one logical device. 
 		 */
-		class VulkanRenderDevice {
+		class VulkanRenderDevice : public SharedObject {
 		public:
-			crimild::Bool configure( void ) noexcept;
-
-			/**
-			   This method destroys the logical device. 
-			   The physical device is destroy along with the Vulkan instance
-			 */
-			void cleanup( void ) noexcept;
+			static SharedPointer< VulkanRenderDevice > create( VulkanInstance *instance, VulkanSurface *surface ) noexcept;
 
 		private:
-			crimild::Bool pickPhysicalDevice( void ) noexcept;
-			crimild::Bool isDeviceSuitable( VkPhysicalDevice device ) const noexcept;
-			crimild::Bool checkDeviceExtensionSupport( VkPhysicalDevice device ) const noexcept;
-			VkSampleCountFlagBits getMaxUsableSampleCount( void ) const noexcept;
+			static VkPhysicalDevice pickPhysicalDevice( const VkInstance &instance, const VkSurfaceKHR &surface ) noexcept;
+			static crimild::Bool pickPhysicalDevice( void ) noexcept;
+			static crimild::Bool isDeviceSuitable( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept;
 
+			using DeviceExtensionArray = std::vector< const char * >;
+			static const DeviceExtensionArray &getDeviceExtensions( void ) noexcept
+			{
+				static DeviceExtensionArray deviceExtensions = {
+					VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+				};
+				return deviceExtensions;
+			}
+
+			static crimild::Bool checkDeviceExtensionSupport( const VkPhysicalDevice &device ) noexcept;
+			
 			struct QueueFamilyIndices {
 				std::vector< crimild::UInt32 > graphicsFamily;
 				std::vector< crimild::UInt32 > presentFamily;
@@ -69,19 +77,40 @@ namespace crimild {
 				}
 			};
 			
-			QueueFamilyIndices findQueueFamilies( VkPhysicalDevice device ) const noexcept;
+			static QueueFamilyIndices findQueueFamilies( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept;
 			
-			crimild::Bool createLogicalDevice( void ) noexcept;
+			struct SwapchainSupportDetails {
+				VkSurfaceCapabilitiesKHR capabilities;
+				std::vector< VkSurfaceFormatKHR > formats;
+				std::vector< VkPresentModeKHR > presentModes;
+			};
+
+			static SwapchainSupportDetails querySwapchainSupport( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept;
 			
+			static VkDevice createLogicalDevice( const VkPhysicalDevice &physicalDevice, const VkSurfaceKHR &surface ) noexcept;
+
+		public:
+			VulkanRenderDevice( VulkanInstance *instance, VulkanSurface *surface, const VkPhysicalDevice &physicalDevice, const VkDevice &deivv );
+
+			/**
+			   This method destroys the logical device. 
+			   The physical device is destroy along with the Vulkan instance
+			 */
+			~VulkanRenderDevice( void );
+
+		private:
+			VulkanInstance *m_instance = nullptr;
+			VulkanSurface *m_surface = nullptr;
+			
+		private:
+			VkSampleCountFlagBits getMaxUsableSampleCount( void ) const noexcept;
+
 		private:
 			VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
 			VkSampleCountFlagBits m_msaaSamples = VK_SAMPLE_COUNT_1_BIT;
 			VkDevice m_device = VK_NULL_HANDLE;
 			VkQueue m_graphicsQueue;
 			VkQueue m_presentQueue;
-			const std::vector< const char * > m_deviceExtensions {
-				VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-			};
 		};
 
 	}

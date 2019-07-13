@@ -30,6 +30,7 @@
 
 #include "Foundation/Types.hpp"
 #include "Foundation/VulkanUtils.hpp"
+#include "Foundation/SharedObject.hpp"
 
 #include <vector>
 
@@ -37,32 +38,87 @@ namespace crimild {
 
 	namespace vulkan {
 
+		class VulkanSurface;
+		class VulkanRenderDevice;
+
 		/**
 		   \brief Handles creation and setup for the Vulkan instance
 		 */
-		class VulkanInstance {
+		class VulkanInstance : public SharedObject {
 		private:
 			using ValidationLayerArray = std::vector< const char * >;
 			using ExtensionArray = std::vector< const char * >;
 
 		public:
-			static crimild::Bool create( void ) noexcept;
-			static void destroy( void ) noexcept;
-			static VkInstance &get( void ) noexcept { return s_instance; }
+			/**
+			   \brief Creates a VulkanInstance object holding the VkInstance reference
+			 */
+			static SharedPointer< VulkanInstance > create( void ) noexcept;
 
-			static crimild::Bool enableValidationLayers( void ) noexcept { return s_enableValidationLayers; }
-			static ValidationLayerArray &getValidationLayers( void ) noexcept { return s_validationLayers; }
-			
+			/**
+			   \brief Used for checking if validation layers should be enabled
+			 */
+			static crimild::Bool enableValidationLayers( void ) noexcept
+			{
+#if defined( CRIMILD_DEBUG )
+				return true;
+#else
+				return false;
+#endif
+			}
+
+			/**
+			   \brief The list of validation layers (only valid if they're enabled)
+			   \see enableValidationLayers()
+			 */
+			static const ValidationLayerArray &getValidationLayers( void ) noexcept
+			{
+				static ValidationLayerArray validationLayers = {
+					"VK_LAYER_LUNARG_standard_validation",					
+				};
+				return validationLayers;
+			}
+
+		public:
+			explicit VulkanInstance( VkInstance instance );
+			~VulkanInstance( void );
+
+			const VkInstance &getInstanceHandler( void ) const noexcept { return m_instanceHandler; }
+
 		private:
-			static crimild::Bool createInstance( void ) noexcept;
+			VkInstance m_instanceHandler;			
+
+		private:
 			static crimild::Bool checkValidationLayerSupport( const ValidationLayerArray &validationLayers ) noexcept;
 			static ExtensionArray getRequiredExtensions( void ) noexcept;
-			static void destroyInstance( void ) noexcept;
+
+			/**
+			   \name Surface
+			 */
+			//@{
+
+		public:
+			void setSurface( SharedPointer< VulkanSurface > const &surface ) noexcept { m_surface = surface; }
+			VulkanSurface *getSurface( void ) noexcept { return crimild::get_ptr( m_surface ); }
 
 		private:
-			static VkInstance s_instance;
-			static crimild::Bool s_enableValidationLayers;
-			static ValidationLayerArray s_validationLayers;
+			SharedPointer< VulkanSurface > m_surface;
+
+			//@}
+
+			/**
+			   \name Render Device			   
+			 */
+			//@{
+
+		public:
+			void setRenderDevice( SharedPointer< VulkanRenderDevice > const &renderDevice ) noexcept { m_renderDevice = renderDevice; }
+			VulkanRenderDevice *getRenderDevice( void ) noexcept { return crimild::get_ptr( m_renderDevice ); }
+
+		private:
+			SharedPointer< VulkanRenderDevice > m_renderDevice;
+
+			//@}
 
 			/**
 			   \name Debugging
@@ -96,11 +152,11 @@ namespace crimild {
 			   \brief Creates a debug messenger for validation layers
 			   \see createInstance for another usage
 			 */
-			static crimild::Bool createDebugMessenger( void ) noexcept;
-			static void destroyDebugMessenger( void ) noexcept;
+			crimild::Bool createDebugMessenger( void ) noexcept;
+			void destroyDebugMessenger( void ) noexcept;
 			
 		private:
-			static VkDebugUtilsMessengerEXT m_debugMessenger;
+			VkDebugUtilsMessengerEXT m_debugMessenger;
 
 			//@}
 		};

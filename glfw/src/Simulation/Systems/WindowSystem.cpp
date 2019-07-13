@@ -43,22 +43,6 @@ using namespace crimild::glfw;
 
 using namespace crimild::vulkan;
 
-crimild::Bool VulkanSurface::create( void ) noexcept
-{
-	auto sim = Simulation::getInstance();
-	auto windowSystem = sim->getSystem< WindowSystem >();
-	auto window = windowSystem->getWindowHandler();
-	
-	CRIMILD_LOG_TRACE( "Creating Vulkan surface" );
-	auto result = glfwCreateWindowSurface( VulkanInstance::get(), window, nullptr, &VulkanSurface::get() );
-	if ( result != VK_SUCCESS ) {
-		CRIMILD_LOG_FATAL( "Failed to create window surface for Vulkan. Error: ", result );
-		return false;
-	}
-
-	return true;
-}
-
 #endif
 
 bool WindowSystem::start( void )
