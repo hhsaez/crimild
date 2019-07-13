@@ -9,14 +9,14 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
+ *     * Neither the name of the copyright holders nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -25,41 +25,81 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "VulkanSystem.hpp"
-
+#include "GLFWVulkanSystem.hpp"
+#include "WindowSystem.hpp"
+#include "Simulation/Simulation.hpp"
 #include "Rendering/VulkanInstance.hpp"
 #include "Rendering/VulkanSurface.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 
 using namespace crimild;
+using namespace crimild::glfw;
 using namespace crimild::vulkan;
 
-crimild::Bool VulkanSystem::start( void )
+crimild::Bool GLFWVulkanSystem::start( void )
 {
-	if ( !System::start() ||
-		!VulkanInstance::create() ||
-	    !VulkanSurface::create() ) {
+	return System::start()
+		&& createInstance()
+		&& createSurface()
+		&& createRenderDevice();
+}
+
+void GLFWVulkanSystem::stop( void )
+{
+	System::stop();
+
+	m_instance = nullptr;
+}
+
+crimild::Bool GLFWVulkanSystem::createInstance( void ) noexcept
+{
+	CRIMILD_LOG_TRACE( "Creating Vulkan instance" );
+
+	m_instance = VulkanInstance::create();	
+	return m_instance != nullptr;
+}
+
+crimild::Bool GLFWVulkanSystem::createSurface( void ) noexcept
+{
+	CRIMILD_LOG_TRACE( "Creating Vulkan surface" );
+
+	auto sim = Simulation::getInstance();
+	auto windowSystem = sim->getSystem< WindowSystem >();
+	auto window = windowSystem->getWindowHandler();
+	
+	VkSurfaceKHR surfaceHandler;
+	auto result = glfwCreateWindowSurface(
+		m_instance->getInstanceHandler(),
+		window,
+		nullptr,
+		&surfaceHandler
+	);
+	if ( result != VK_SUCCESS ) {
+		CRIMILD_LOG_FATAL( "Failed to create window surface for Vulkan. Error: ", result );
 		return false;
 	}
 
-	m_device = crimild::alloc< VulkanRenderDevice >();
-	if ( !m_device->configure() ) {
-		return false;
-	}
+	auto surface = crimild::alloc< VulkanSurface >( crimild::get_ptr( m_instance ), surfaceHandler );
+	m_instance->setSurface( surface );
 
 	return true;
 }
 
-void VulkanSystem::stop( void )
+crimild::Bool GLFWVulkanSystem::createRenderDevice( void ) noexcept
 {
-	System::stop();
+	CRIMILD_LOG_TRACE( "Creating Vulkan render device" );
+	
+	auto renderDevice = VulkanRenderDevice::create(
+		getInstance(),
+		getInstance()->getSurface()
+	);
 
-	if ( m_device != nullptr ) {
-		m_device->cleanup();
-		m_device = nullptr;
+	if ( renderDevice == nullptr ) {
+		return false;
 	}
 
-	VulkanSurface::destroy();
-	VulkanInstance::destroy();
+	getInstance()->setRenderDevice( renderDevice );
+
+	return true;
 }
 

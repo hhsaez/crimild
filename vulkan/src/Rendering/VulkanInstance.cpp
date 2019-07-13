@@ -9,14 +9,14 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
+ *     * Neither the name of the copyright holders nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -33,35 +33,16 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
-VkInstance VulkanInstance::s_instance = VK_NULL_HANDLE;
-crimild::Bool VulkanInstance::s_enableValidationLayers = false;
-VulkanInstance::ValidationLayerArray VulkanInstance::s_validationLayers;
-VkDebugUtilsMessengerEXT s_debugMessenger;
-
-crimild::Bool VulkanInstance::create( void ) noexcept
-{
-#if defined( CRIMILD_DEBUG )
-	s_enableValidationLayers = true;
-	s_validationLayers.push_back( "VK_LAYER_LUNARG_standard_validation" );
-#endif
-	
-	return createInstance() &&
-		createDebugMessenger();
-}
-
-void VulkanInstance::destroy( void ) noexcept
-{
-	destroyDebugMessenger();
-	destroyInstance();
-}
-
-crimild::Bool VulkanInstance::createInstance( void ) noexcept
+SharedPointer< VulkanInstance > VulkanInstance::create( void ) noexcept
 {
 	CRIMILD_LOG_TRACE( "Creating Vulkan instance" );
 
-	if ( s_enableValidationLayers && !checkValidationLayerSupport( s_validationLayers ) ) {
+	auto validationLayersEnabled = enableValidationLayers();
+	auto validationLayers = getValidationLayers();
+
+	if ( validationLayersEnabled && !checkValidationLayerSupport( validationLayers ) ) {
 		CRIMILD_LOG_ERROR( "Validation layers requested, but not available" );
-		return false;
+		return nullptr;
 	}
 	
 	auto settings = Simulation::getInstance()->getSettings();
@@ -91,21 +72,43 @@ crimild::Bool VulkanInstance::createInstance( void ) noexcept
 
 	// Keep it outside the block so it's not destroyed before calling vkCreateInstance
 	VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo;
-	if ( s_enableValidationLayers ) {
-		createInfo.enabledLayerCount = static_cast< crimild::UInt32 >( s_validationLayers.size() );
-		createInfo.ppEnabledLayerNames = s_validationLayers.data();
+	if ( validationLayersEnabled ) {
+		createInfo.enabledLayerCount = static_cast< crimild::UInt32 >( validationLayers.size() );
+		createInfo.ppEnabledLayerNames = validationLayers.data();
 
 		// Enable debug messenger specifically for create/destroy instance
 		populateDebugMessengerCreateInfo( debugCreateInfo );
 		createInfo.pNext = ( VkDebugUtilsMessengerCreateInfoEXT * ) &debugCreateInfo;
 	}
 
-	if ( vkCreateInstance( &createInfo, nullptr, &s_instance ) != VK_SUCCESS ) {
+	VkInstance instanceHandler;
+	if ( vkCreateInstance( &createInfo, nullptr, &instanceHandler ) != VK_SUCCESS ) {
 		CRIMILD_LOG_ERROR( "Failed to create Vulkan instance" );
-		return false;
+		return nullptr;
 	}
 
-	return true;
+	return crimild::alloc< VulkanInstance >( instanceHandler );
+}
+
+VulkanInstance::VulkanInstance( VkInstance instanceHandler )
+	: m_instanceHandler( instanceHandler )
+{
+
+}
+
+VulkanInstance::~VulkanInstance( void )
+{
+	m_renderDevice = nullptr;
+	
+	destroyDebugMessenger();
+
+	m_surface = nullptr;
+	
+	if ( m_instanceHandler != VK_NULL_HANDLE ) {
+		CRIMILD_LOG_TRACE( "Destroying Vulkan instance" );
+		vkDestroyInstance( m_instanceHandler, nullptr );
+		m_instanceHandler = VK_NULL_HANDLE;
+	}
 }
 
 crimild::Bool VulkanInstance::checkValidationLayerSupport( const ValidationLayerArray &validationLayers ) noexcept
@@ -141,7 +144,7 @@ VulkanInstance::ExtensionArray VulkanInstance::getRequiredExtensions( void ) noe
 {
 	CRIMILD_LOG_TRACE( "Getting required extensions" );
 	
-	if ( s_enableValidationLayers ) {
+	if ( enableValidationLayers() ) {
 		// list all available extensions
 		crimild::UInt32 extensionCount = 0;
 		vkEnumerateInstanceExtensionProperties( nullptr, &extensionCount, nullptr );
@@ -162,19 +165,11 @@ VulkanInstance::ExtensionArray VulkanInstance::getRequiredExtensions( void ) noe
 	extensions.push_back( "VK_MVK_macos_surface" );
 #endif
 
-	if ( s_enableValidationLayers ) {
+	if ( enableValidationLayers() ) {
 		extensions.push_back( VK_EXT_DEBUG_UTILS_EXTENSION_NAME );
 	}
 
 	return extensions;
-}
-
-void VulkanInstance::destroyInstance( void ) noexcept
-{
-	CRIMILD_LOG_TRACE( "Destroying Vulkan instance" );
-	
-	vkDestroyInstance( s_instance, nullptr );
-	s_instance = VK_NULL_HANDLE;
 }
 
 VKAPI_ATTR VkBool32 VKAPI_CALL VulkanInstance::debugCallback(
@@ -232,16 +227,20 @@ void VulkanInstance::populateDebugMessengerCreateInfo( VkDebugUtilsMessengerCrea
 
 crimild::Bool VulkanInstance::createDebugMessenger( void ) noexcept
 {
-	if ( !s_enableValidationLayers ) {
+	if ( !enableValidationLayers() ) {
 		return true;
 	}
 
-	CRIMILD_LOG_TRACE( "Setting up debug messenger" );
+	CRIMILD_LOG_TRACE( "Setting up vulkan debug messenger" );
 
 	VkDebugUtilsMessengerCreateInfoEXT createInfo;
 	populateDebugMessengerCreateInfo( createInfo );
 	
-	if ( createDebugUtilsMessengerEXT( s_instance, &createInfo, nullptr, &s_debugMessenger ) != VK_SUCCESS ) {
+	if ( createDebugUtilsMessengerEXT(
+		m_instanceHandler,
+		&createInfo,
+		nullptr,
+		&m_debugMessenger ) != VK_SUCCESS ) {
 		CRIMILD_LOG_ERROR( "Failed to setup debug messenger" );
 		return false;
 	}
@@ -251,8 +250,15 @@ crimild::Bool VulkanInstance::createDebugMessenger( void ) noexcept
 
 void VulkanInstance::destroyDebugMessenger( void ) noexcept
 {
-	if ( s_enableValidationLayers ) {
-		destroyDebugUtilsMessengerEXT( s_instance, s_debugMessenger, nullptr );
+	CRIMILD_LOG_TRACE( "Destroying vulkan debug messenger" );
+	
+	if ( !enableValidationLayers() ) {
+		return;
+	}
+
+	if ( m_debugMessenger != VK_NULL_HANDLE ) {
+		destroyDebugUtilsMessengerEXT( m_instanceHandler, m_debugMessenger, nullptr );
+		m_debugMessenger = VK_NULL_HANDLE;
 	}
 }
 
