@@ -16,7 +16,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -25,46 +25,42 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_GLFW_SIMULATION_SYSTEMS_VULKAN_SYSTEM_
-#define CRIMILD_GLFW_SIMULATION_SYSTEMS_VULKAN_SYSTEM_
+#ifndef CRIMILD_VULKAN_RENDERING_FENCE_
+#define CRIMILD_VULKAN_RENDERING_FENCE_
 
-#include <Simulation/Systems/System.hpp>
-
-#include "Foundation/GLFWUtils.hpp"
+#include "Foundation/Types.hpp"
+#include "Foundation/SharedObject.hpp"
+#include "Foundation/VulkanUtils.hpp"
 
 namespace crimild {
 
 	namespace vulkan {
 
-		class VulkanInstance;
+		class VulkanRenderDevice;
 
-	}
+		/**
+		   \brief Implements a Vulkan fence
 
-	namespace glfw {
-
-		class GLFWVulkanSystem : public System {
-			CRIMILD_IMPLEMENT_RTTI( crimild::glfw::GLFWVulkanSystem )
-			
+		   Fences are used to inform the application about some work being finished. An
+		   application can acquire the state of a fence and, based on the acquired 
+		   information, check whether some commands are still being processed or whether
+		   they have finished the assigned tasks.
+		 */
+		class Fence : public SharedObject {
 		public:
-			System::Priority getInitPriority( void ) const noexcept override { return System::PriorityType::HIGH; }
-			System::Priority getPriority( void ) const noexcept override { return System::PriorityType::RENDER; }
+			Fence( VulkanRenderDevice *device, const VkFence &fenceHandler ) noexcept;
+			~Fence( void ) noexcept;
+			
+			const VkFence &getFenceHandler( void ) const noexcept { return m_fenceHandler; }
 
-			crimild::Bool start( void ) override;
-			void update( void ) override;
-			void stop( void ) override;
-
-			vulkan::VulkanInstance *getInstance( void ) noexcept { return crimild::get_ptr( m_instance ); }
-
-		private:
-			crimild::Bool createInstance( void ) noexcept;
-			crimild::Bool createSurface( void ) noexcept;
-			crimild::Bool createRenderDevice( void ) noexcept;
-			crimild::Bool createSwapchain( void ) noexcept;			
+			void wait( crimild::UInt64 timeout = std::numeric_limits< crimild::UInt64 >::max() ) const noexcept;
+			void reset( void ) const noexcept;
 
 		private:
-			SharedPointer< vulkan::VulkanInstance > m_instance;
+			VulkanRenderDevice *m_device = nullptr;
+			VkFence m_fenceHandler = VK_NULL_HANDLE;
 		};
-    
+
 	}
 
 }

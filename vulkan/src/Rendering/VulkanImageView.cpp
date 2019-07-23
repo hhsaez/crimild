@@ -16,7 +16,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -25,49 +25,50 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_GLFW_SIMULATION_SYSTEMS_VULKAN_SYSTEM_
-#define CRIMILD_GLFW_SIMULATION_SYSTEMS_VULKAN_SYSTEM_
+#include "VulkanImageView.hpp"
+#include "VulkanImage.hpp"
+#include "VulkanRenderDevice.hpp"
+#include "Exceptions/VulkanException.hpp"
+#include "Foundation/Log.hpp"
 
-#include <Simulation/Systems/System.hpp>
+using namespace crimild::vulkan;
 
-#include "Foundation/GLFWUtils.hpp"
+ImageView::ImageView( VulkanRenderDevice *device, SharedPointer< Image > const &image, VkFormat format, VkImageAspectFlags aspectFlags, crimild::UInt32 mipLevels )
+	: m_device( device ),
+	  m_image( image )
+{
+	CRIMILD_LOG_TRACE( "Creating image view" );
+	
+	auto viewInfo = VkImageViewCreateInfo {
+		.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+		.image = m_image->getImageHandler(),
+		.viewType = VK_IMAGE_VIEW_TYPE_2D,
+		.format = format,
+		.subresourceRange.aspectMask = aspectFlags,
+		.subresourceRange.levelCount = mipLevels,
+		.subresourceRange.baseArrayLayer = 0,
+		.subresourceRange.layerCount = 1,
+	};
 
-namespace crimild {
-
-	namespace vulkan {
-
-		class VulkanInstance;
-
+	if ( vkCreateImageView( device->getDeviceHandler(), &viewInfo, nullptr, &m_imageViewHandler ) != VK_SUCCESS ) {
+		throw VulkanException( "Failed to create image view" );
 	}
-
-	namespace glfw {
-
-		class GLFWVulkanSystem : public System {
-			CRIMILD_IMPLEMENT_RTTI( crimild::glfw::GLFWVulkanSystem )
-			
-		public:
-			System::Priority getInitPriority( void ) const noexcept override { return System::PriorityType::HIGH; }
-			System::Priority getPriority( void ) const noexcept override { return System::PriorityType::RENDER; }
-
-			crimild::Bool start( void ) override;
-			void update( void ) override;
-			void stop( void ) override;
-
-			vulkan::VulkanInstance *getInstance( void ) noexcept { return crimild::get_ptr( m_instance ); }
-
-		private:
-			crimild::Bool createInstance( void ) noexcept;
-			crimild::Bool createSurface( void ) noexcept;
-			crimild::Bool createRenderDevice( void ) noexcept;
-			crimild::Bool createSwapchain( void ) noexcept;			
-
-		private:
-			SharedPointer< vulkan::VulkanInstance > m_instance;
-		};
-    
-	}
-
 }
+
+ImageView::~ImageView( void ) noexcept
+{
+	CRIMILD_LOG_TRACE( "Destroying image view" );
 	
-#endif
-	
+	if ( m_device != nullptr && m_imageViewHandler != VK_NULL_HANDLE ) {
+		vkDestroyImageView(
+			m_device->getDeviceHandler(),
+			m_imageViewHandler,
+			nullptr
+		);
+	}
+
+	m_device = nullptr;
+	m_image = nullptr;
+	m_imageViewHandler = VK_NULL_HANDLE;
+}
+

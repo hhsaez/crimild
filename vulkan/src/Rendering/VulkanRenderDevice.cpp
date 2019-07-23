@@ -9,14 +9,14 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
+ *     * Neither the name of the copyright holder nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -28,6 +28,11 @@
 #include "VulkanRenderDevice.hpp"
 #include "VulkanInstance.hpp"
 #include "VulkanSurface.hpp"
+#include "VulkanSwapchain.hpp"
+#include "VulkanSemaphore.hpp"
+#include "VulkanFence.hpp"
+#include "VulkanImage.hpp"
+#include "VulkanImageView.hpp"
 #include "Foundation/Log.hpp"
 
 #include <set>
@@ -97,8 +102,7 @@ crimild::Bool VulkanRenderDevice::isDeviceSuitable( const VkPhysicalDevice &devi
 
 	auto swapChainAdequate = false;
 	if ( extensionsSupported ) {
-		auto swapChainSupport = querySwapchainSupport( device, surface );
-		swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
+		swapChainAdequate = Swapchain::swapchainSupported( device, surface );
 	}
 	
 	VkPhysicalDeviceFeatures supportedFeatures;
@@ -151,17 +155,22 @@ crimild::Bool VulkanRenderDevice::checkDeviceExtensionSupport( const VkPhysicalD
 VulkanRenderDevice::QueueFamilyIndices VulkanRenderDevice::findQueueFamilies( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept
 {
 	CRIMILD_LOG_TRACE( "Finding device queue families" );
-	
+
 	QueueFamilyIndices indices;
 	
 	crimild::UInt32 queueFamilyCount = 0;
 	vkGetPhysicalDeviceQueueFamilyProperties( device, &queueFamilyCount, nullptr );
+	if ( queueFamilyCount == 0 ) {
+		CRIMILD_LOG_ERROR( "No queue family found for device" );
+		return indices;
+	}
 	
 	std::vector< VkQueueFamilyProperties > queueFamilies( queueFamilyCount );
 	vkGetPhysicalDeviceQueueFamilyProperties( device, &queueFamilyCount, queueFamilies.data() );
 	
 	crimild::UInt32 i = 0;
 	for ( const auto &queueFamily : queueFamilies ) {
+
 		if ( queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT ) {
 			indices.graphicsFamily.push_back( i );
 		}
@@ -182,55 +191,6 @@ VulkanRenderDevice::QueueFamilyIndices VulkanRenderDevice::findQueueFamilies( co
 	}
 	
 	return indices;
-}
-
-VulkanRenderDevice::SwapchainSupportDetails VulkanRenderDevice::querySwapchainSupport( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept
-{
-	CRIMILD_LOG_TRACE( "Querying swapchain support" );
-	
-	SwapchainSupportDetails details;
-
-	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
-		device,
-		surface,
-		&details.capabilities
-	);
-	
-	crimild::UInt32 formatCount;
-	vkGetPhysicalDeviceSurfaceFormatsKHR(
-		device,
-		surface,
-		&formatCount,
-		nullptr
-	);
-	if ( formatCount > 0 ) {
-		details.formats.resize( formatCount );
-		vkGetPhysicalDeviceSurfaceFormatsKHR(
-			device,
-			surface,
-			&formatCount,
-			details.formats.data()
-		);
-	}
-	
-	crimild::UInt32 presentModeCount;
-	vkGetPhysicalDeviceSurfacePresentModesKHR(
-		device,
-		surface,
-		&presentModeCount,
-		nullptr
-	);
-	if ( presentModeCount > 0 ) {
-		details.presentModes.resize( presentModeCount );
-		vkGetPhysicalDeviceSurfacePresentModesKHR(
-			device,
-			surface,
-			&presentModeCount,
-			details.presentModes.data()
-		);
-	}
-	
-	return details;
 }
 
 VkDevice VulkanRenderDevice::createLogicalDevice( const VkPhysicalDevice &physicalDevice, const VkSurfaceKHR &surface ) noexcept
@@ -300,7 +260,9 @@ VkDevice VulkanRenderDevice::createLogicalDevice( const VkPhysicalDevice &physic
 }
 
 VulkanRenderDevice::VulkanRenderDevice( VulkanInstance *instance, VulkanSurface *surface, const VkPhysicalDevice &physicalDevice, const VkDevice &device )
-	: m_physicalDevice( physicalDevice ),
+	: m_instance( instance ),
+	  m_surface( surface ),
+	  m_physicalDevice( physicalDevice ),
 	  m_device( device )
 {
 	m_msaaSamples = getMaxUsableSampleCount();
@@ -335,5 +297,73 @@ VkSampleCountFlagBits VulkanRenderDevice::getMaxUsableSampleCount( void ) const 
 	if ( counts & VK_SAMPLE_COUNT_4_BIT ) return VK_SAMPLE_COUNT_4_BIT;
 	if ( counts & VK_SAMPLE_COUNT_2_BIT ) return VK_SAMPLE_COUNT_2_BIT;
 	return VK_SAMPLE_COUNT_1_BIT;
+}
+
+VulkanRenderDevice::QueueFamilyIndices VulkanRenderDevice::getQueueFamilies( void ) const noexcept
+{
+	return findQueueFamilies(
+		m_physicalDevice,
+		m_surface->getSurfaceHandler()
+	);
+}
+
+void VulkanRenderDevice::waitIdle( void ) const noexcept
+{
+	if ( m_device == VK_NULL_HANDLE ) {
+		return;
+	}
+
+	vkDeviceWaitIdle( m_device );
+}
+
+SharedPointer< Semaphore > VulkanRenderDevice::createSemaphore( void ) noexcept
+{
+	CRIMILD_LOG_TRACE( "Creating semaphore" );
+	
+	auto semaphoreInfo = VkSemaphoreCreateInfo {
+		.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+	};
+
+	VkSemaphore semaphoreHandler;
+	if ( vkCreateSemaphore( m_device, &semaphoreInfo, nullptr, &semaphoreHandler ) != VK_SUCCESS ) {
+		CRIMILD_LOG_ERROR( "Failed to create semaphore" );
+		return nullptr;
+	}
+
+	return crimild::alloc< Semaphore >( this, semaphoreHandler );
+}
+
+SharedPointer< Fence > VulkanRenderDevice::createFence( void ) noexcept
+{
+	CRIMILD_LOG_TRACE( "Creating fence" );
+	
+	auto fenceInfo = VkFenceCreateInfo {
+		.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+		.flags = VK_FENCE_CREATE_SIGNALED_BIT,
+	};
+
+	VkFence fenceHandler;
+	if ( vkCreateFence( m_device, &fenceInfo, nullptr, &fenceHandler ) != VK_SUCCESS ) {
+		CRIMILD_LOG_ERROR( "Failed to create fence" );
+		return nullptr;
+	}
+
+	return crimild::alloc< Fence >( this, fenceHandler );
+}
+
+SharedPointer< Image > VulkanRenderDevice::createImage( void )
+{
+	return nullptr;
+}
+
+SharedPointer< ImageView > VulkanRenderDevice::createImageView( Image *image, VkFormat format, VkImageAspectFlags aspectFlags, crimild::UInt32 mipLevels )
+{
+	return crimild::alloc< ImageView >(
+		this,
+		crimild::retain( image ),
+		format,
+		aspectFlags,
+		mipLevels
+	);
 }
 

@@ -16,7 +16,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -25,46 +25,41 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_GLFW_SIMULATION_SYSTEMS_VULKAN_SYSTEM_
-#define CRIMILD_GLFW_SIMULATION_SYSTEMS_VULKAN_SYSTEM_
+#ifndef CRIMILD_VULKAN_RENDERING_SEMAPHORE_
+#define CRIMILD_VULKAN_RENDERING_SEMAPHORE_
 
-#include <Simulation/Systems/System.hpp>
-
-#include "Foundation/GLFWUtils.hpp"
+#include "Foundation/Types.hpp"
+#include "Foundation/RTTI.hpp"
+#include "Foundation/SharedObject.hpp"
+#include "Foundation/VulkanUtils.hpp"
 
 namespace crimild {
 
 	namespace vulkan {
 
-		class VulkanInstance;
+		class VulkanRenderDevice;
 
-	}
+		/**
+		   \brief Implements a Vulkan semaphore
 
-	namespace glfw {
-
-		class GLFWVulkanSystem : public System {
-			CRIMILD_IMPLEMENT_RTTI( crimild::glfw::GLFWVulkanSystem )
+		   Semaphores are used to synchronize device's queues. When commands are submitted
+		   for processing, they may require other jobs to be finished first. We can specify that
+		   the former ones wait for them to complete before they're executed by using semaphores.
+		 */
+		class Semaphore : public SharedObject, public RTTI {
+			CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::Semaphore );
 			
 		public:
-			System::Priority getInitPriority( void ) const noexcept override { return System::PriorityType::HIGH; }
-			System::Priority getPriority( void ) const noexcept override { return System::PriorityType::RENDER; }
-
-			crimild::Bool start( void ) override;
-			void update( void ) override;
-			void stop( void ) override;
-
-			vulkan::VulkanInstance *getInstance( void ) noexcept { return crimild::get_ptr( m_instance ); }
+			explicit Semaphore( VulkanRenderDevice *device, const VkSemaphore &semaphoreHandler );
+			~Semaphore( void );
+			
+			const VkSemaphore &getSemaphoreHandler( void ) const noexcept { return m_semaphoreHandler; }
 
 		private:
-			crimild::Bool createInstance( void ) noexcept;
-			crimild::Bool createSurface( void ) noexcept;
-			crimild::Bool createRenderDevice( void ) noexcept;
-			crimild::Bool createSwapchain( void ) noexcept;			
-
-		private:
-			SharedPointer< vulkan::VulkanInstance > m_instance;
+			VulkanRenderDevice *m_renderDevice = nullptr;
+			VkSemaphore m_semaphoreHandler = VK_NULL_HANDLE;
 		};
-    
+
 	}
 
 }
