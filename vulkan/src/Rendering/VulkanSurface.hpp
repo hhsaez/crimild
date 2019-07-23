@@ -39,9 +39,13 @@ namespace crimild {
 		class VulkanInstance;
 
 		/**
-		   \brief Handles the Vulkan surface
+		   \brief Handles a Vulkan presentation surface
 
-		   \remarks The surface must be implemented by each platform
+		   The presentation surface represents an application's window. It's purpose is to 
+		   acquire window's paramenters like dimensions, supported color formats or presentation
+		   modes. 
+
+		   \remarks The surface must be created by each platform
 		 */
 		class VulkanSurface : public SharedObject {
 		public:

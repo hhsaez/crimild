@@ -31,6 +31,7 @@
 #include "Rendering/VulkanInstance.hpp"
 #include "Rendering/VulkanSurface.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
+#include "Rendering/VulkanSwapchain.hpp"
 
 using namespace crimild;
 using namespace crimild::glfw;
@@ -41,7 +42,27 @@ crimild::Bool GLFWVulkanSystem::start( void )
 	return System::start()
 		&& createInstance()
 		&& createSurface()
-		&& createRenderDevice();
+		&& createRenderDevice()
+		&& createSwapchain();
+}
+
+void GLFWVulkanSystem::update( void )
+{
+	/*
+	auto swapchain = m_instance->getSwapchain();
+	if ( swapchain == nullptr ) {
+		return;
+	}
+
+	// Acquire the next image available image from the swapchain
+	auto imageIndex = swapchain->acquireNextImage();
+	if ( imageIndex == std::numeric_limits< crimild::UInt32 >::max() ) {
+		// No image available
+		return;
+	}
+
+	swapchain->presentImage( imageIndex );
+	*/
 }
 
 void GLFWVulkanSystem::stop( void )
@@ -55,7 +76,7 @@ crimild::Bool GLFWVulkanSystem::createInstance( void ) noexcept
 {
 	CRIMILD_LOG_TRACE( "Creating Vulkan instance" );
 
-	m_instance = VulkanInstance::create();	
+	m_instance = VulkanInstance::create();
 	return m_instance != nullptr;
 }
 
@@ -99,7 +120,16 @@ crimild::Bool GLFWVulkanSystem::createRenderDevice( void ) noexcept
 	}
 
 	getInstance()->setRenderDevice( renderDevice );
-
 	return true;
 }
 
+crimild::Bool GLFWVulkanSystem::createSwapchain( void ) noexcept
+{
+	auto swapchain = Swapchain::create( getInstance()->getRenderDevice(), getInstance()->getSurface() );
+	if ( swapchain == nullptr ) {
+		return false;
+	}
+	
+	getInstance()->setSwapchain( swapchain );
+	return true;
+}

@@ -40,6 +40,7 @@ namespace crimild {
 
 		class VulkanSurface;
 		class VulkanRenderDevice;
+		class Swapchain;
 
 		/**
 		   \brief Handles creation and setup for the Vulkan instance
@@ -118,6 +119,20 @@ namespace crimild {
 		private:
 			SharedPointer< VulkanRenderDevice > m_renderDevice;
 
+			//@}
+
+			/**
+			   \name Swapchain
+			 */
+			//@{
+			
+		public:
+			void setSwapchain( SharedPointer< Swapchain > const &swapchain ) noexcept { m_swapchain = swapchain; }
+			Swapchain *getSwapchain( void ) noexcept { return crimild::get_ptr( m_swapchain ); }
+
+		private:
+			SharedPointer< Swapchain > m_swapchain;
+			
 			//@}
 
 			/**
