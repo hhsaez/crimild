@@ -26,6 +26,7 @@
  */
 
 #include "VulkanInstance.hpp"
+#include "VulkanRenderDevice.hpp"
 
 #include "Foundation/Log.hpp"
 #include "Simulation/Simulation.hpp"
@@ -93,11 +94,19 @@ SharedPointer< VulkanInstance > VulkanInstance::create( void ) noexcept
 VulkanInstance::VulkanInstance( VkInstance instanceHandler )
 	: m_instanceHandler( instanceHandler )
 {
-
+	CRIMILD_LOG_TRACE( "Vulkan instance created" );
 }
 
 VulkanInstance::~VulkanInstance( void )
 {
+	CRIMILD_LOG_TRACE( "Destroying instance" );
+	
+	if ( m_renderDevice != nullptr ) {
+		CRIMILD_LOG_TRACE( "Waiting for pending operations" );
+		m_renderDevice->waitIdle();
+	}
+	
+	m_swapchain = nullptr;
 	m_renderDevice = nullptr;
 	
 	destroyDebugMessenger();
@@ -155,6 +164,9 @@ VulkanInstance::ExtensionArray VulkanInstance::getRequiredExtensions( void ) noe
 		}
 	}
 
+	// Add extensions to create a presentation surface
+	// TODO: It would be great to support "headless" Vulkan. Not only for
+	// compute, but also for testing. This is definitely something to try.
 	auto extensions = ExtensionArray {
 		VK_KHR_SURFACE_EXTENSION_NAME,
 	};

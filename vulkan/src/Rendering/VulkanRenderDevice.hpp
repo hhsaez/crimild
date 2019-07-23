@@ -40,6 +40,10 @@ namespace crimild {
 
 		class VulkanInstance;
 		class VulkanSurface;
+		class Semaphore;
+		class Fence;
+		class Image;
+		class ImageView;
 
 		/**
 		   \brief Implements a render device for Vulkan
@@ -76,7 +80,10 @@ namespace crimild {
 					return graphicsFamily.size() > 0 && presentFamily.size() > 0;
 				}
 			};
-			
+
+			/**
+			   TODO: How do we handle the case of an option surface param? 
+			 */
 			static QueueFamilyIndices findQueueFamilies( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept;
 			
 			struct SwapchainSupportDetails {
@@ -98,19 +105,51 @@ namespace crimild {
 			 */
 			~VulkanRenderDevice( void );
 
-		private:
-			VulkanInstance *m_instance = nullptr;
-			VulkanSurface *m_surface = nullptr;
-			
+			const VkPhysicalDevice &getPhysicalDeviceHandler( void ) const noexcept { return m_physicalDevice; }
+			const VkDevice &getDeviceHandler( void ) const noexcept { return m_device; }
+
+			QueueFamilyIndices getQueueFamilies( void ) const noexcept;
+
+
+			/**
+			   \brief Wait for the device to complete any pending operation
+
+			   \remarks This blocks the current thread until completion
+			 */
+			void waitIdle( void ) const noexcept;
+
 		private:
 			VkSampleCountFlagBits getMaxUsableSampleCount( void ) const noexcept;
 
 		private:
+			VulkanInstance *m_instance = nullptr;
+			VulkanSurface *m_surface = nullptr;
 			VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
 			VkSampleCountFlagBits m_msaaSamples = VK_SAMPLE_COUNT_1_BIT;
 			VkDevice m_device = VK_NULL_HANDLE;
 			VkQueue m_graphicsQueue;
 			VkQueue m_presentQueue;
+
+			/**
+			   \name Synchronization objects
+			 */
+			//@{
+			
+		public:
+			SharedPointer< Semaphore > createSemaphore( void ) noexcept;
+			SharedPointer< Fence > createFence( void ) noexcept;
+
+			//@}
+
+			/**
+			   \name Images and Image Views
+			*/
+			//@{
+		public:
+			SharedPointer< Image > createImage( void );
+			SharedPointer< ImageView > createImageView( Image *image, VkFormat format, VkImageAspectFlags aspectFlags, crimild::UInt32 mipLevels );
+
+			//@}
 		};
 
 	}
