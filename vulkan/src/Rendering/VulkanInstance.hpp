@@ -122,20 +122,6 @@ namespace crimild {
 			//@}
 
 			/**
-			   \name Swapchain
-			 */
-			//@{
-			
-		public:
-			void setSwapchain( SharedPointer< Swapchain > const &swapchain ) noexcept { m_swapchain = swapchain; }
-			Swapchain *getSwapchain( void ) noexcept { return crimild::get_ptr( m_swapchain ); }
-
-		private:
-			SharedPointer< Swapchain > m_swapchain;
-			
-			//@}
-
-			/**
 			   \name Debugging
 			*/
 			//@{

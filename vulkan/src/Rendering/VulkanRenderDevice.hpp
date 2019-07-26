@@ -44,6 +44,7 @@ namespace crimild {
 		class Fence;
 		class Image;
 		class ImageView;
+		class Swapchain;
 
 		/**
 		   \brief Implements a render device for Vulkan
@@ -129,6 +130,20 @@ namespace crimild {
 			VkDevice m_device = VK_NULL_HANDLE;
 			VkQueue m_graphicsQueue;
 			VkQueue m_presentQueue;
+
+			/**
+			   \name Swapchain
+			 */
+			//@{
+			
+		public:
+			void setSwapchain( SharedPointer< Swapchain > const &swapchain ) noexcept { m_swapchain = swapchain; }
+			Swapchain *getSwapchain( void ) noexcept { return crimild::get_ptr( m_swapchain ); }
+
+		private:
+			SharedPointer< Swapchain > m_swapchain;
+			
+			//@}
 
 			/**
 			   \name Synchronization objects

@@ -276,6 +276,8 @@ VulkanRenderDevice::VulkanRenderDevice( VulkanInstance *instance, VulkanSurface 
 
 VulkanRenderDevice::~VulkanRenderDevice( void )
 {
+	m_swapchain = nullptr;
+	
 	vkDestroyDevice( m_device, nullptr );
 	m_device = VK_NULL_HANDLE;
 }
