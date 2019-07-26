@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-present, H. Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -9,14 +9,14 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
+ *     * Neither the name of the copyright holder nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -56,8 +56,28 @@ namespace crimild {
 
 	}
     
-	class ShaderProgram : public SharedObject, public RTTI, public Catalog< ShaderProgram >::Resource {
+	class ShaderProgram :
+		public SharedObject,
+		public RTTI,
+		public Catalog< ShaderProgram >::Resource {
         CRIMILD_IMPLEMENT_RTTI( crimild::ShaderProgram )
+
+	public:
+		using ShaderArray = containers::Array< SharedPointer< Shader >>;
+
+	public:
+		explicit ShaderProgram( const ShaderArray &shaders ) noexcept;
+		virtual ~ShaderProgram( void ) = default;
+
+		ShaderArray &getShaders( void ) noexcept { return m_shaders; }
+
+	private:
+		ShaderArray m_shaders;
+
+		/**
+		   \deprecated
+		 */
+		//@{
 
 	private:
 		using UniformArray = containers::Array< SharedPointer< ShaderUniform >>;
@@ -146,9 +166,8 @@ namespace crimild {
 		};
 
 	public:
-		ShaderProgram( void );
+		ShaderProgram( void ) = default;
 		ShaderProgram( SharedPointer< VertexShader > const &vs, SharedPointer< FragmentShader > const &fs );
-		virtual ~ShaderProgram( void );
 
 		void setVertexShader( SharedPointer< VertexShader > const &vs ) { _vertexShader = vs; }
         VertexShader *getVertexShader( void ) { return crimild::get_ptr( _vertexShader ); }
@@ -222,6 +241,8 @@ namespace crimild {
 
 		void buildFragmentShader( shadergraph::ShaderGraph *graph );
 		void buildFragmentShader( SharedPointer< shadergraph::ShaderGraph > const &graph );
+
+		//@}
 	};
 
 }

@@ -129,7 +129,7 @@ crimild::Bool GLFWVulkanSystem::createSwapchain( void ) noexcept
 	if ( swapchain == nullptr ) {
 		return false;
 	}
-	
-	getInstance()->setSwapchain( swapchain );
+
+	getInstance()->getRenderDevice()->setSwapchain( swapchain );
 	return true;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -9,14 +9,14 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
+ *     * Neither the name of the copyright holder nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -28,7 +28,7 @@
 #include "FileSystem.hpp"
 
 #include "Foundation/Log.hpp"
-
+#include "Exceptions/FileNotFoundException.hpp"
 #include "Mathematics/Numeric.hpp"
 
 using namespace crimild;
@@ -107,17 +107,17 @@ std::string FileSystem::extractDirectory( std::string path )
 	return dir;
 }
 
-std::string FileSystem::pathForResource( std::string filePath )
+std::string FileSystem::pathForResource( std::string filePath ) const
 {
 	return getBaseDirectory() + "/" + getRelativePath( filePath );
 }
 
-std::string FileSystem::pathForDocument( std::string filePath )
+std::string FileSystem::pathForDocument( std::string filePath ) const 
 {
 	return getDocumentsDirectory() + "/" + filePath;
 }
 
-std::string FileSystem::getRelativePath( std::string absolutePath )
+std::string FileSystem::getRelativePath( std::string absolutePath ) const
 {
 	// check if the absolute path includes the base 
 	// directory at the very beginning
@@ -144,5 +144,30 @@ std::string FileSystem::getFileName( std::string path, bool includeExtension )
 	}
 
 	return path;
+}
+
+std::vector< char > FileSystem::readResourceFile( std::string relativePath ) const
+{
+	auto filePath = pathForResource( relativePath );
+	return readFile( filePath );
+}
+
+std::vector< char > FileSystem::readFile( std::string absolutePath ) const
+{
+	std::ifstream file( absolutePath, std::ios::ate | std::ios::binary );
+	if ( !file.is_open() ) {
+		throw FileNotFoundException( "Failed to open file: " + absolutePath );
+	}
+
+	auto fileSize = ( size_t ) file.tellg();
+	std::vector< char > buffer( fileSize );
+
+	file.seekg( 0 );
+	file.read( buffer.data(), fileSize );
+	file.close();
+
+	CRIMILD_LOG_DEBUG( "File ", absolutePath, " loaded (", fileSize, " bytes)" );
+	
+	return buffer;
 }
 
