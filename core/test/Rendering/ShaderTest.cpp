@@ -25,47 +25,37 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_VULKAN_UTILS_
-#define CRIMILD_VULKAN_UTILS_
+#include "Rendering/Shader.hpp"
 
-#include <vulkan/vulkan.h>
+#include "gtest/gtest.h"
 
-namespace crimild {
+using namespace crimild;
 
-	namespace vulkan {
+TEST( Shader, basicConstruction )
+{
+	auto shader = crimild::alloc< Shader >(
+		Shader::Stage::FRAGMENT
+	);
 
-		namespace utils {
-
-			static const VkShaderStageFlagBits VULKAN_SHADER_STAGES[] = {
-				VK_SHADER_STAGE_VERTEX_BIT,
-				VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT,
-				VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
-				VK_SHADER_STAGE_GEOMETRY_BIT,
-				VK_SHADER_STAGE_FRAGMENT_BIT,
-				VK_SHADER_STAGE_COMPUTE_BIT,
-				VK_SHADER_STAGE_ALL_GRAPHICS,
-				VK_SHADER_STAGE_ALL,
-			};
-			
-			static const VkPrimitiveTopology VULKAN_PRIMITIVE_TOPOLOGIES[] = {
-				VK_PRIMITIVE_TOPOLOGY_POINT_LIST,
-				VK_PRIMITIVE_TOPOLOGY_LINE_LIST,
-				VK_PRIMITIVE_TOPOLOGY_LINE_STRIP,
-				VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
-				VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP,
-				VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN,
-				VK_PRIMITIVE_TOPOLOGY_LINE_LIST_WITH_ADJACENCY,
-				VK_PRIMITIVE_TOPOLOGY_LINE_STRIP_WITH_ADJACENCY,
-				VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST_WITH_ADJACENCY,
-				VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP_WITH_ADJACENCY,
-				VK_PRIMITIVE_TOPOLOGY_PATCH_LIST,
-			};
-
-		}
-
-	}
-
+	EXPECT_EQ( Shader::Stage::FRAGMENT, shader->getStage() );
+	EXPECT_EQ( 0, shader->getData().size() );
+	EXPECT_EQ( "main", shader->getEntryPointName() );
 }
 
-#endif
-	
+TEST( Shader, explicitConstruction )
+{
+	auto data = Shader::Data {
+		0, 1, 2, 3, 4
+	};
+
+	auto shader = crimild::alloc< Shader >(
+		Shader::Stage::VERTEX,
+		data,
+		"entry"
+	);
+
+	EXPECT_EQ( Shader::Stage::VERTEX, shader->getStage() );
+	EXPECT_EQ( data, shader->getData() );
+	EXPECT_EQ( "entry", shader->getEntryPointName() );
+}
+

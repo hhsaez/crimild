@@ -106,7 +106,6 @@ VulkanInstance::~VulkanInstance( void )
 		m_renderDevice->waitIdle();
 	}
 	
-	m_swapchain = nullptr;
 	m_renderDevice = nullptr;
 	
 	destroyDebugMessenger();

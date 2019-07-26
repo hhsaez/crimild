@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -9,14 +9,14 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
+ *     * Neither the name of the copyright holder nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -33,16 +33,68 @@
 #include <string>
 
 namespace crimild {
-    
+
+	/**
+	   \todo There's no point in keeping the data after the shader has been used
+	   in a rendering pipeline. We should clean it.
+	 */
 	class Shader : public SharedObject {
 	public:
-		explicit Shader( std::string source );
-		virtual ~Shader( void );
+		enum class Stage {
+			VERTEX,
+			TESSELLATION_CONTROL,
+			TESSELLATION_EVALUATION,
+			GEOMETRY,
+			FRAGMENT,
+			COMPUTE,
+			ALL_GRAPHICS,
+			ALL,
+		};
 
-        const std::string &getSource( void ) const { return _source; }
+		static std::string getStageDescription( const Stage &stage ) noexcept;
+		
+		using Data = std::vector< char >;
+		
+	public:
+		explicit Shader( Stage stage, const Data &data = Data(), std::string entryPointName = "main" );
+		virtual ~Shader( void ) = default;
+
+		inline const Stage &getStage( void ) const noexcept { return m_stage; }
+
+		/**
+		   \brief Returns a printable version of the shader stage
+
+		   This is mostly for debugging purposes.
+		 */
+		inline std::string getStageDescription( void ) const noexcept
+		{
+			return getStageDescription( getStage() );
+		}
+		
+		inline const Data &getData( void ) const noexcept { return m_data; }
+
+		inline const std::string &getEntryPointName( void ) const noexcept { return m_entryPointName; }
 
 	private:
-		std::string _source;
+		Stage m_stage;
+		Data m_data;
+		std::string m_entryPointName;
+
+		/**
+		   \deprecated
+		 */
+		//@{
+		
+	public:
+		explicit Shader( std::string source );
+
+		inline void setSource( std::string source ) noexcept { m_source = source; }
+        inline const std::string &getSource( void ) const noexcept { return m_source; }
+
+	private:
+		std::string m_source;
+
+		//@}
 	};
     
     using VertexShader = Shader;

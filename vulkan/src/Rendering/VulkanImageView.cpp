@@ -42,12 +42,28 @@ ImageView::ImageView( VulkanRenderDevice *device, SharedPointer< Image > const &
 	auto viewInfo = VkImageViewCreateInfo {
 		.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
 		.image = m_image->getImageHandler(),
+
+		// We're dealing with 2D images
 		.viewType = VK_IMAGE_VIEW_TYPE_2D,
+
+		// Match the specified format
 		.format = format,
+
+		// We don't need to swizzle (swap around) any of the color components
+		.components.r = VK_COMPONENT_SWIZZLE_R,
+		.components.g = VK_COMPONENT_SWIZZLE_G,
+		.components.b = VK_COMPONENT_SWIZZLE_B,
+		.components.a = VK_COMPONENT_SWIZZLE_A,
+
+		// Determine what is affected by the image operations (color, depth, stencil, etc)
 		.subresourceRange.aspectMask = aspectFlags,
+		
 		.subresourceRange.levelCount = mipLevels,
 		.subresourceRange.baseArrayLayer = 0,
 		.subresourceRange.layerCount = 1,
+
+		// optional
+		.flags = 0
 	};
 
 	if ( vkCreateImageView( device->getDeviceHandler(), &viewInfo, nullptr, &m_imageViewHandler ) != VK_SUCCESS ) {
