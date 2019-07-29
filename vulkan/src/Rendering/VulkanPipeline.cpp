@@ -28,6 +28,7 @@
 #include "VulkanPipeline.hpp"
 #include "VulkanRenderDevice.hpp"
 #include "VulkanSwapchain.hpp"
+#include "VulkanRenderPass.hpp"
 #include "Exceptions/VulkanException.hpp"
 #include "Rendering/Shader.hpp"
 #include "Rendering/ShaderProgram.hpp"
@@ -35,7 +36,7 @@
 
 using namespace crimild::vulkan;
 
-Pipeline::Pipeline( VulkanRenderDevice *renderDevice, const crimild::PipelineDescriptor *descriptor )
+Pipeline::Pipeline( VulkanRenderDevice *renderDevice, const RenderPass *renderPass, const crimild::PipelineDescriptor &descriptor )
 	: m_renderDevice( renderDevice )
 {
 	CRIMILD_LOG_TRACE( "Creating pipeline" );
@@ -44,7 +45,7 @@ Pipeline::Pipeline( VulkanRenderDevice *renderDevice, const crimild::PipelineDes
 
 	// WARNING: all of these config params are used when creating the pipeline and
 	// they must be alive when vkCreatePipeline is called. Beware of scopes!
-	auto shaderModules = createShaderModules( crimild::get_ptr( descriptor->program ) );
+	auto shaderModules = createShaderModules( crimild::get_ptr( descriptor.program ) );
 	auto shaderStages = createShaderStages( shaderModules );
 	auto vertexInputInfo = createVertexInput();
 	auto inputAssembly = createInputAssemby();
@@ -58,7 +59,29 @@ Pipeline::Pipeline( VulkanRenderDevice *renderDevice, const crimild::PipelineDes
 	auto colorBlending = createColorBlending( colorBlendAttachment );
 
 	createPipelineLayout();
-	createPipeline();
+
+	auto createInfo = VkGraphicsPipelineCreateInfo {
+		.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
+		.stageCount = static_cast< uint32_t >( shaderStages.size() ),
+		.pStages = shaderStages.data(),
+		.pVertexInputState = &vertexInputInfo,
+		.pInputAssemblyState = &inputAssembly,
+		.pViewportState = &viewportState,
+		.pRasterizationState = &rasterizer,
+		.pMultisampleState = &multisampleState,
+		.pDepthStencilState = nullptr, // Optional
+		.pColorBlendState = &colorBlending,
+		.pDynamicState = nullptr, // Optional
+		.layout = m_pipelineLayout,
+		.renderPass = renderPass->getRenderPassHandler(),
+		.subpass = 0,
+		.basePipelineHandle = VK_NULL_HANDLE, // Optional
+		.basePipelineIndex = -1, // Optional
+	};
+
+	if ( vkCreateGraphicsPipelines( m_renderDevice->getDeviceHandler(), VK_NULL_HANDLE, 1, &createInfo, nullptr, &m_graphicsPipeline ) != VK_SUCCESS ) {
+		throw VulkanException( "Failed to create graphics pipeline" );
+	}
 	
 	// Cleanup
 	for ( const auto &module : shaderModules ) {
@@ -72,16 +95,9 @@ Pipeline::Pipeline( VulkanRenderDevice *renderDevice, const crimild::PipelineDes
 
 Pipeline::~Pipeline( void )
 {
+	CRIMILD_LOG_TRACE( "Destroying pipeline" );
+	
 	if ( m_renderDevice != nullptr ) {
-		if ( m_pipelineLayout != VK_NULL_HANDLE ) {
-			vkDestroyPipelineLayout(
-				m_renderDevice->getDeviceHandler(),
-				m_pipelineLayout,
-				nullptr
-			);
-			m_pipelineLayout = VK_NULL_HANDLE;
-		}
-
 		if ( m_graphicsPipeline != VK_NULL_HANDLE ) {
 			vkDestroyPipeline(
 				m_renderDevice->getDeviceHandler(),
@@ -89,6 +105,15 @@ Pipeline::~Pipeline( void )
 				nullptr
 			);
 			m_graphicsPipeline = VK_NULL_HANDLE;
+		}
+		
+		if ( m_pipelineLayout != VK_NULL_HANDLE ) {
+			vkDestroyPipelineLayout(
+				m_renderDevice->getDeviceHandler(),
+				m_pipelineLayout,
+				nullptr
+			);
+			m_pipelineLayout = VK_NULL_HANDLE;
 		}
 	}
 }
@@ -142,7 +167,7 @@ Pipeline::ShaderStageArray Pipeline::createShaderStages( const ShaderModuleArray
 
 VkPipelineShaderStageCreateInfo Pipeline::createShaderStage( const ShaderModule &module ) const noexcept
 {
-	CRIMILD_LOG_TRACE( "Creating shader stages" );
+	CRIMILD_LOG_TRACE( "Creating shader stage" );
 
 	return VkPipelineShaderStageCreateInfo {
 		.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
