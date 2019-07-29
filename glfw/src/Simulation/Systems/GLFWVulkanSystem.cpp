@@ -33,17 +33,74 @@
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "Rendering/VulkanSwapchain.hpp"
 
+#include "Rendering/VulkanRenderPass.hpp"
+#include "Rendering/VulkanPipeline.hpp"
+#include "Rendering/VulkanFramebuffer.hpp"
+#include "Foundation/Containers/Array.hpp"
+#include "Rendering/ShaderProgram.hpp"
+#include "Simulation/FileSystem.hpp"
+
 using namespace crimild;
 using namespace crimild::glfw;
 using namespace crimild::vulkan;
 
 crimild::Bool GLFWVulkanSystem::start( void )
 {
-	return System::start()
+	auto ret = System::start()
 		&& createInstance()
 		&& createSurface()
 		&& createRenderDevice()
 		&& createSwapchain();
+
+	auto renderDevice = m_instance->getRenderDevice();
+	auto swapchain = renderDevice->getSwapchain();
+
+	auto renderPass = crimild::alloc< RenderPass >( m_instance->getRenderDevice(), m_instance->getRenderDevice()->getSwapchain() );
+
+	auto pipeline = crimild::alloc< vulkan::Pipeline >(
+		m_instance->getRenderDevice(),
+		crimild::get_ptr( renderPass ),
+		PipelineDescriptor {
+			.program = crimild::alloc< ShaderProgram >(
+				containers::Array< SharedPointer< Shader >> {
+					crimild::alloc< Shader >(
+						Shader::Stage::VERTEX,
+						FileSystem::getInstance().readResourceFile( "assets/shaders/triangle.vert.spv" )
+					),
+					crimild::alloc< Shader >(
+						Shader::Stage::FRAGMENT,
+						FileSystem::getInstance().readResourceFile( "assets/shaders/triangle.frag.spv" )
+					),
+				}
+			),
+		}
+	);
+
+	std::vector< SharedPointer< vulkan::Framebuffer >> framebuffers;
+
+	swapchain->getImageViews().each(
+		[ &framebuffers, swapchain, renderDevice, renderPass ]( SharedPointer< ImageView > const &iv ) {
+			
+			auto framebuffer = crimild::alloc< vulkan::Framebuffer >(
+				renderDevice,
+				vulkan::FramebufferDescriptor {
+					.attachments = {
+						crimild::get_ptr( iv )
+					},
+					.renderPass = crimild::get_ptr( renderPass ),
+				  	.extent = swapchain->getExtent(),
+		   		}
+			);
+			framebuffers.push_back( framebuffer );
+		}
+	);
+
+	framebuffers.clear();
+
+	pipeline = nullptr;
+	renderPass = nullptr;
+
+	return ret;
 }
 
 void GLFWVulkanSystem::update( void )

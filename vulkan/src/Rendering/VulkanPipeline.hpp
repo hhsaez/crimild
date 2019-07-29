@@ -55,6 +55,7 @@ namespace crimild {
 
 		class VulkanRenderDevice;
 		class Swapchain;
+		class RenderPass;
 
 		/**
 		 */
@@ -70,7 +71,7 @@ namespace crimild {
 			using ShaderStageArray = std::vector< VkPipelineShaderStageCreateInfo >;
 			
 		public:
-			Pipeline( VulkanRenderDevice *device, const PipelineDescriptor *descriptor );
+			Pipeline( VulkanRenderDevice *device, const RenderPass *renderPass, const PipelineDescriptor &descriptor );
 			~Pipeline( void );
 
 			const VkPipelineLayout &getPipelineLayout( void ) const noexcept { return m_pipelineLayout; }

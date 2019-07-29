@@ -80,6 +80,8 @@ namespace crimild {
 			const VkSwapchainKHR &getSwapchainHandler( void ) const noexcept { return m_swapchainHandler; }
 			const VkFormat &getFormat( void ) const noexcept { return m_format; }
 			const VkExtent2D &getExtent( void ) const noexcept { return m_extent; }
+			const ImageArray &getImages( void ) const { return m_images; }
+			const ImageViewArray &getImageViews( void ) const { return m_imageViews; }
 
 			crimild::UInt32 acquireNextImage( void ) const noexcept;
 			void presentImage( crimild::UInt32 imageIndex ) const noexcept;
