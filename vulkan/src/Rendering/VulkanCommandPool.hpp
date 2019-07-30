@@ -25,8 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_VULKAN_RENDERING_FRAMEBUFFER_
-#define CRIMILD_VULKAN_RENDERING_FRAMEBUFFER_
+#ifndef CRIMILD_VULKAN_RENDERING_COMMAND_POOL_
+#define CRIMILD_VULKAN_RENDERING_COMMAND_POOL_
 
 #include "Foundation/Types.hpp"
 #include "Foundation/SharedObject.hpp"
@@ -37,29 +37,22 @@ namespace crimild {
 	namespace vulkan {
 
 		class VulkanRenderDevice;
-		class ImageView;
-		class RenderPass;
-
-		struct FramebufferDescriptor {
-			std::vector< ImageView * > attachments;
-			RenderPass *renderPass;
-			VkExtent2D extent;
-		};
+		class CommandBuffer;
 
 		/**
 		 */
-		class Framebuffer : public SharedObject {
+		class CommandPool : public SharedObject {
 		public:
-			Framebuffer( VulkanRenderDevice *device, const FramebufferDescriptor &descriptor );
-			~Framebuffer( void ) noexcept;
+			CommandPool( const VulkanRenderDevice *device, crimild::UInt32 queueFamilyIndex );
+			~CommandPool( void );
 			
-			const VkFramebuffer &getFramebufferHandler( void ) const noexcept { return m_framebufferHandler; }
-			const VkExtent2D &getExtent( void ) const noexcept { return m_extent; }
+			const VkCommandPool &getCommandPoolHandler( void ) const noexcept { return m_commandPoolHandler; }
+
+			SharedPointer< CommandBuffer > createCommandBuffer( void ) const;
 
 		private:
-			VulkanRenderDevice *m_device = nullptr;
-			VkFramebuffer m_framebufferHandler = VK_NULL_HANDLE;
-			VkExtent2D m_extent;
+			const VulkanRenderDevice *m_renderDevice = nullptr;
+			VkCommandPool m_commandPoolHandler = VK_NULL_HANDLE;
 		};
 
 	}

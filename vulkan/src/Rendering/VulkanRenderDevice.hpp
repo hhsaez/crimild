@@ -45,6 +45,7 @@ namespace crimild {
 		class Image;
 		class ImageView;
 		class Swapchain;
+		class CommandPool;
 
 		/**
 		   \brief Implements a render device for Vulkan
@@ -163,6 +164,15 @@ namespace crimild {
 		public:
 			SharedPointer< Image > createImage( void );
 			SharedPointer< ImageView > createImageView( Image *image, VkFormat format, VkImageAspectFlags aspectFlags, crimild::UInt32 mipLevels );
+
+			//@}
+
+			/**
+			 */
+			//@{
+			
+		public:
+			SharedPointer< CommandPool > createGraphicsCommandPool( void ) const;
 
 			//@}
 		};
