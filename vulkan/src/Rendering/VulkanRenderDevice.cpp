@@ -33,6 +33,7 @@
 #include "VulkanFence.hpp"
 #include "VulkanImage.hpp"
 #include "VulkanImageView.hpp"
+#include "VulkanCommandPool.hpp"
 #include "Foundation/Log.hpp"
 
 #include <set>
@@ -367,5 +368,12 @@ SharedPointer< ImageView > VulkanRenderDevice::createImageView( Image *image, Vk
 		aspectFlags,
 		mipLevels
 	);
+}
+
+SharedPointer< CommandPool > VulkanRenderDevice::createGraphicsCommandPool( void ) const
+{
+	auto queueFamilyIndices = findQueueFamilies( m_physicalDevice, m_surface->getSurfaceHandler() );
+	
+	return crimild::alloc< CommandPool >( this, queueFamilyIndices.graphicsFamily[ 0 ] );
 }
 

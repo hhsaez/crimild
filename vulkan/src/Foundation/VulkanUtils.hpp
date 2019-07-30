@@ -28,6 +28,9 @@
 #ifndef CRIMILD_VULKAN_UTILS_
 #define CRIMILD_VULKAN_UTILS_
 
+#include "Exceptions/VulkanException.hpp"
+#include "Foundation/Log.hpp"
+
 #include <vulkan/vulkan.h>
 
 namespace crimild {
@@ -61,10 +64,33 @@ namespace crimild {
 				VK_PRIMITIVE_TOPOLOGY_PATCH_LIST,
 			};
 
+			static const VkCommandBufferUsageFlagBits VULKAN_COMMAND_BUFFER_USAGE[] = {
+				VkCommandBufferUsageFlagBits(),
+				VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
+				VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT,
+				VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT,
+			};
+
+			const char *errorToString( VkResult result ) noexcept;
+
 		}
 
 	}
 
+}
+
+#define CRIMILD_VULKAN_CHECK( x ) {\
+	VkResult ret = x; \
+	if ( ret != VK_SUCCESS ) {\
+	    auto errorStr = crimild::vulkan::utils::errorToString( ret ); \
+		std::stringstream ss; \
+		ss << "Vulkan Error:" \
+		   << "\n\tFile: " << __FILE__ \
+		   << "\n\tLine: " << __LINE__ \
+		   << "\n\tResult: " << errorStr \
+		   << "\n\tCaller: " << #x; \
+		throw VulkanException( ss.str() ); \
+	}\
 }
 
 #endif

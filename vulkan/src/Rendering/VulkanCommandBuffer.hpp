@@ -25,41 +25,56 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_VULKAN_RENDERING_FRAMEBUFFER_
-#define CRIMILD_VULKAN_RENDERING_FRAMEBUFFER_
+#ifndef CRIMILD_VULKAN_RENDERING_COMMAND_BUFFER_
+#define CRIMILD_VULKAN_RENDERING_COMMAND_BUFFER_
 
 #include "Foundation/Types.hpp"
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/VulkanUtils.hpp"
+#include "Mathematics/Vector.hpp"
 
 namespace crimild {
 
 	namespace vulkan {
 
 		class VulkanRenderDevice;
-		class ImageView;
+		class CommandPool;
 		class RenderPass;
-
-		struct FramebufferDescriptor {
-			std::vector< ImageView * > attachments;
-			RenderPass *renderPass;
-			VkExtent2D extent;
-		};
+		class Framebuffer;
+		class Pipeline;
 
 		/**
 		 */
-		class Framebuffer : public SharedObject {
+		class CommandBuffer : public SharedObject {
 		public:
-			Framebuffer( VulkanRenderDevice *device, const FramebufferDescriptor &descriptor );
-			~Framebuffer( void ) noexcept;
+			struct Descriptor {
+				const CommandPool *commandPool;
+			};
+
+			enum class Usage {
+				DEFAULT,
+				ONE_TIME_SUBMIT,
+				RENDER_PASS_CONTINUE,
+				SIMULTANEOUS_USE,
+			};
 			
-			const VkFramebuffer &getFramebufferHandler( void ) const noexcept { return m_framebufferHandler; }
-			const VkExtent2D &getExtent( void ) const noexcept { return m_extent; }
+		public:
+			CommandBuffer( const VulkanRenderDevice *device, const Descriptor &descriptor );
+			~CommandBuffer( void ) noexcept;
+			
+			const VkCommandBuffer &getCommandBufferHandler( void ) const noexcept { return m_commandBufferHandler; }
+
+			void begin( Usage usage = Usage::DEFAULT ) const;
+			void beginRenderPass( const RenderPass *renderPass, const Framebuffer *framebuffer, const RGBAColorf &clearColor ) const noexcept;
+			void bindGraphicsPipeline( const Pipeline *pipeline ) const noexcept;
+			void draw( void ) const noexcept;
+			void endRenderPass( void ) const noexcept;
+			void end( void ) const;
 
 		private:
-			VulkanRenderDevice *m_device = nullptr;
-			VkFramebuffer m_framebufferHandler = VK_NULL_HANDLE;
-			VkExtent2D m_extent;
+			const VulkanRenderDevice *m_renderDevice = nullptr;
+			const CommandPool *m_commandPool = nullptr;
+			VkCommandBuffer m_commandBufferHandler = VK_NULL_HANDLE;
 		};
 
 	}

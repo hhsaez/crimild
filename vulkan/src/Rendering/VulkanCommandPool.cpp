@@ -25,46 +25,53 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_VULKAN_RENDERING_FRAMEBUFFER_
-#define CRIMILD_VULKAN_RENDERING_FRAMEBUFFER_
+#include "VulkanCommandPool.hpp"
+#include "VulkanRenderDevice.hpp"
+#include "VulkanCommandBuffer.hpp"
+#include "Exceptions/VulkanException.hpp"
+#include "Foundation/Log.hpp"
 
-#include "Foundation/Types.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/VulkanUtils.hpp"
+using namespace crimild::vulkan;
 
-namespace crimild {
+CommandPool::CommandPool( const VulkanRenderDevice *device, crimild::UInt32 queueFamilyIndex )
+	: m_renderDevice( device )
+{
+	CRIMILD_LOG_TRACE( "Creating Vulkan Command Pool" );
 
-	namespace vulkan {
+	auto createInfo = VkCommandPoolCreateInfo {
+		.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+		.queueFamilyIndex = queueFamilyIndex,
+		.flags = 0,
+	};
 
-		class VulkanRenderDevice;
-		class ImageView;
-		class RenderPass;
+	if ( vkCreateCommandPool( m_renderDevice->getDeviceHandler(), &createInfo, nullptr, &m_commandPoolHandler ) != VK_SUCCESS ) {
+		throw VulkanException( "Failed to create command pool" );
+	}
+}
 
-		struct FramebufferDescriptor {
-			std::vector< ImageView * > attachments;
-			RenderPass *renderPass;
-			VkExtent2D extent;
-		};
-
-		/**
-		 */
-		class Framebuffer : public SharedObject {
-		public:
-			Framebuffer( VulkanRenderDevice *device, const FramebufferDescriptor &descriptor );
-			~Framebuffer( void ) noexcept;
-			
-			const VkFramebuffer &getFramebufferHandler( void ) const noexcept { return m_framebufferHandler; }
-			const VkExtent2D &getExtent( void ) const noexcept { return m_extent; }
-
-		private:
-			VulkanRenderDevice *m_device = nullptr;
-			VkFramebuffer m_framebufferHandler = VK_NULL_HANDLE;
-			VkExtent2D m_extent;
-		};
-
+CommandPool::~CommandPool( void )
+{
+	CRIMILD_LOG_TRACE( "Destroying Vulkan Command Pool" );
+	
+	if ( m_renderDevice != nullptr && m_commandPoolHandler != VK_NULL_HANDLE ) {
+		vkDestroyCommandPool(
+			m_renderDevice->getDeviceHandler(),
+			m_commandPoolHandler,
+			nullptr
+		);
 	}
 
+	m_renderDevice = nullptr;
+	m_commandPoolHandler = VK_NULL_HANDLE;
 }
-	
-#endif
-	
+
+crimild::SharedPointer< CommandBuffer > CommandPool::createCommandBuffer( void ) const
+{
+	return crimild::alloc< CommandBuffer >(
+		m_renderDevice,
+		CommandBuffer::Descriptor {
+			.commandPool = this,
+		}
+	);
+}
+
