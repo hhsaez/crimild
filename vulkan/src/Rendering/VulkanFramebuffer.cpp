@@ -35,7 +35,8 @@
 using namespace crimild::vulkan;
 
 Framebuffer::Framebuffer( VulkanRenderDevice *device, const FramebufferDescriptor &descriptor )
-	: m_device( device )
+	: m_device( device ),
+	  m_extent( descriptor.extent )
 {
 	CRIMILD_LOG_TRACE( "Creating framebuffer" );
 
@@ -49,8 +50,8 @@ Framebuffer::Framebuffer( VulkanRenderDevice *device, const FramebufferDescripto
 		.renderPass = descriptor.renderPass->getRenderPassHandler(),
 		.attachmentCount = static_cast< uint32_t >( attachments.size() ),
 		.pAttachments = attachments.data(),
-		.width = descriptor.extent.width,
-		.height = descriptor.extent.height,
+		.width = m_extent.width,
+		.height = m_extent.height,
 		.layers = 1,
 	};
 

@@ -36,6 +36,7 @@
 #include "Rendering/VulkanRenderPass.hpp"
 #include "Rendering/VulkanPipeline.hpp"
 #include "Rendering/VulkanFramebuffer.hpp"
+#include "Rendering/VulkanCommandPool.hpp"
 #include "Foundation/Containers/Array.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Simulation/FileSystem.hpp"
@@ -94,6 +95,12 @@ crimild::Bool GLFWVulkanSystem::start( void )
 			framebuffers.push_back( framebuffer );
 		}
 	);
+
+	auto commandPool = renderDevice->createGraphicsCommandPool();
+	auto commandBuffer = commandPool->createCommandBuffer();
+
+	commandBuffer = nullptr;
+	commandPool = nullptr;
 
 	framebuffers.clear();
 
