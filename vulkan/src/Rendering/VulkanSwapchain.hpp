@@ -43,6 +43,7 @@ namespace crimild {
 		class VulkanSurface;
 		class Image;
 		class ImageView;
+		class Semaphore;
 
 		class Swapchain : public SharedObject {
 		private:
@@ -83,8 +84,8 @@ namespace crimild {
 			const ImageArray &getImages( void ) const { return m_images; }
 			const ImageViewArray &getImageViews( void ) const { return m_imageViews; }
 
-			crimild::UInt32 acquireNextImage( void ) const noexcept;
-			void presentImage( crimild::UInt32 imageIndex ) const noexcept;
+			crimild::UInt32 acquireNextImage( const Semaphore *imageAvailableSemaphore ) const noexcept;
+			void presentImage( crimild::UInt32 imageIndex, const Semaphore *signal ) const noexcept;
 
 		private:
 			void retrieveSwapchainImages( void ) noexcept;

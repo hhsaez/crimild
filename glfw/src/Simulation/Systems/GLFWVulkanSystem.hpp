@@ -37,6 +37,12 @@ namespace crimild {
 	namespace vulkan {
 
 		class VulkanInstance;
+		class Semaphore;
+		class RenderPass;
+		class Pipeline;
+		class CommandPool;
+		class CommandBuffer;
+		class Framebuffer;
 
 	}
 
@@ -63,6 +69,13 @@ namespace crimild {
 
 		private:
 			SharedPointer< vulkan::VulkanInstance > m_instance;
+			SharedPointer< vulkan::RenderPass > m_renderPass;
+			SharedPointer< vulkan::Pipeline > m_pipeline;
+			std::vector< SharedPointer< vulkan::Framebuffer >> m_framebuffers;
+			SharedPointer< vulkan::CommandPool > m_commandPool;
+			std::vector< SharedPointer< vulkan::CommandBuffer >> m_commandBuffers;
+			SharedPointer< vulkan::Semaphore > m_imageAvailableSemaphore;
+			SharedPointer< vulkan::Semaphore > m_renderFinishedSemaphore;
 		};
     
 	}

@@ -36,7 +36,7 @@
 
 using namespace crimild::vulkan;
 
-Pipeline::Pipeline( VulkanRenderDevice *renderDevice, const RenderPass *renderPass, const crimild::PipelineDescriptor &descriptor )
+Pipeline::Pipeline( const VulkanRenderDevice *renderDevice, const Descriptor &descriptor )
 	: m_renderDevice( renderDevice )
 {
 	CRIMILD_LOG_TRACE( "Creating pipeline" );
@@ -73,7 +73,7 @@ Pipeline::Pipeline( VulkanRenderDevice *renderDevice, const RenderPass *renderPa
 		.pColorBlendState = &colorBlending,
 		.pDynamicState = nullptr, // Optional
 		.layout = m_pipelineLayout,
-		.renderPass = renderPass->getRenderPassHandler(),
+		.renderPass = descriptor.renderPass->getRenderPassHandler(),
 		.subpass = 0,
 		.basePipelineHandle = VK_NULL_HANDLE, // Optional
 		.basePipelineIndex = -1, // Optional

@@ -40,24 +40,25 @@ namespace crimild {
 		class ImageView;
 		class RenderPass;
 
-		struct FramebufferDescriptor {
-			std::vector< ImageView * > attachments;
-			RenderPass *renderPass;
-			VkExtent2D extent;
-		};
-
 		/**
 		 */
 		class Framebuffer : public SharedObject {
 		public:
-			Framebuffer( VulkanRenderDevice *device, const FramebufferDescriptor &descriptor );
+			struct Descriptor {
+				std::vector< ImageView * > attachments;
+				RenderPass *renderPass;
+				VkExtent2D extent;
+			};
+
+		public:
+			Framebuffer( const VulkanRenderDevice *device, const Descriptor &descriptor );
 			~Framebuffer( void ) noexcept;
 			
 			const VkFramebuffer &getFramebufferHandler( void ) const noexcept { return m_framebufferHandler; }
 			const VkExtent2D &getExtent( void ) const noexcept { return m_extent; }
 
 		private:
-			VulkanRenderDevice *m_device = nullptr;
+			const VulkanRenderDevice *m_device = nullptr;
 			VkFramebuffer m_framebufferHandler = VK_NULL_HANDLE;
 			VkExtent2D m_extent;
 		};

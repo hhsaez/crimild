@@ -43,13 +43,13 @@ namespace crimild {
 		 */
 		class RenderPass : public SharedObject {
 		public:
-			RenderPass( VulkanRenderDevice *device, const Swapchain *swapchain );
+			RenderPass( const VulkanRenderDevice *device, const Swapchain *swapchain );
 			~RenderPass( void ) noexcept;
 			
 			const VkRenderPass &getRenderPassHandler( void ) const noexcept { return m_renderPassHandler; }
 
 		private:
-			VulkanRenderDevice *m_device = nullptr;
+			const VulkanRenderDevice *m_device = nullptr;
 			VkRenderPass m_renderPassHandler = VK_NULL_HANDLE;
 		};
 
