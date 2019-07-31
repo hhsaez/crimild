@@ -36,20 +36,6 @@ namespace crimild {
 
 	class Shader;
 	class ShaderProgram;
-	class Pipeline;
-
-	/**
-	   TODO:
-	   - Primitive type
-	   - VBO
-	   - IBO
-	   - Cull Mode
-	   - Polygon Mode (fill, line, point)
-	   - Line Width
-	 */
-	struct PipelineDescriptor {
-		SharedPointer< ShaderProgram > program;
-	};
 
 	namespace vulkan {
 
@@ -61,6 +47,20 @@ namespace crimild {
 		 */
 		class Pipeline : public SharedObject {
 		public:
+			/**
+			   TODO:
+			   - Primitive type
+			   - VBO
+			   - IBO
+			   - Cull Mode
+			   - Polygon Mode (fill, line, point)
+			   - Line Width
+			*/
+			struct Descriptor {
+				SharedPointer< ShaderProgram > program;
+				const RenderPass *renderPass;
+			};
+			
 			struct ShaderModule {
 				VkShaderStageFlagBits stage;
 				VkShaderModule handler;
@@ -71,7 +71,7 @@ namespace crimild {
 			using ShaderStageArray = std::vector< VkPipelineShaderStageCreateInfo >;
 			
 		public:
-			Pipeline( VulkanRenderDevice *device, const RenderPass *renderPass, const PipelineDescriptor &descriptor );
+			Pipeline( const VulkanRenderDevice *device, const Descriptor &descriptor );
 			~Pipeline( void );
 
 			const VkPipelineLayout &getPipelineLayout( void ) const noexcept { return m_pipelineLayout; }
@@ -97,7 +97,7 @@ namespace crimild {
 			void createPipeline( void );
 
 		private:
-			VulkanRenderDevice *m_renderDevice = nullptr;
+			const VulkanRenderDevice *m_renderDevice = nullptr;
 			VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
 			VkPipeline m_graphicsPipeline = VK_NULL_HANDLE;			
 		};

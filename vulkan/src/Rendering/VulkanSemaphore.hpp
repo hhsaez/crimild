@@ -50,13 +50,13 @@ namespace crimild {
 			CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::Semaphore );
 			
 		public:
-			explicit Semaphore( VulkanRenderDevice *device, const VkSemaphore &semaphoreHandler );
+			explicit Semaphore( const VulkanRenderDevice *device );
 			~Semaphore( void );
 			
 			const VkSemaphore &getSemaphoreHandler( void ) const noexcept { return m_semaphoreHandler; }
 
 		private:
-			VulkanRenderDevice *m_renderDevice = nullptr;
+			const VulkanRenderDevice *m_renderDevice = nullptr;
 			VkSemaphore m_semaphoreHandler = VK_NULL_HANDLE;
 		};
 

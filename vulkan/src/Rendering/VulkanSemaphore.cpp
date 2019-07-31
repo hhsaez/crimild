@@ -30,11 +30,23 @@
 
 using namespace crimild::vulkan;
 
-Semaphore::Semaphore( VulkanRenderDevice *renderDevice, const VkSemaphore &semaphoreHandler )
-	: m_renderDevice( renderDevice ),
-	  m_semaphoreHandler( semaphoreHandler )
+Semaphore::Semaphore( const VulkanRenderDevice *renderDevice )
+	: m_renderDevice( renderDevice )
 {
+	CRIMILD_LOG_TRACE( "Creating vulkan semaphore" );
 	
+	auto createInfo = VkSemaphoreCreateInfo {
+		.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+	};
+
+	CRIMILD_VULKAN_CHECK(
+		vkCreateSemaphore(
+			m_renderDevice->getDeviceHandler(),
+			&createInfo,
+			nullptr,
+			&m_semaphoreHandler
+		)
+	);
 }
 
 Semaphore::~Semaphore( void )

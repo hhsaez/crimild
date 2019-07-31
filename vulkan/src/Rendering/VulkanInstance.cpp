@@ -95,6 +95,8 @@ VulkanInstance::VulkanInstance( VkInstance instanceHandler )
 	: m_instanceHandler( instanceHandler )
 {
 	CRIMILD_LOG_TRACE( "Vulkan instance created" );
+
+	createDebugMessenger();
 }
 
 VulkanInstance::~VulkanInstance( void )

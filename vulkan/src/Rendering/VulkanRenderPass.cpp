@@ -28,12 +28,10 @@
 #include "VulkanRenderPass.hpp"
 #include "VulkanRenderDevice.hpp"
 #include "VulkanSwapchain.hpp"
-#include "Foundation/Log.hpp"
-#include "Exceptions/VulkanException.hpp"
 
 using namespace crimild::vulkan;
 
-RenderPass::RenderPass( VulkanRenderDevice *device, const Swapchain *swapchain )
+RenderPass::RenderPass( const VulkanRenderDevice *device, const Swapchain *swapchain )
 	: m_device( device )
 {
 	CRIMILD_LOG_TRACE( "Creating render pass" );
@@ -70,17 +68,37 @@ RenderPass::RenderPass( VulkanRenderDevice *device, const Swapchain *swapchain )
 		.pColorAttachments = &colorAttachmentRef,
 	};
 
+	auto subpassDependency = VkSubpassDependency {
+		// Which subpass to wait on
+		.srcSubpass = VK_SUBPASS_EXTERNAL, // any previous subpass
+		.dstSubpass = 0,
+
+		// Operations to wait on and the stage in which they occur
+		.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		.srcAccessMask = 0,
+
+		.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+	};	
+
 	auto createInfo = VkRenderPassCreateInfo {
 		.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
 		.attachmentCount = 1,
 		.pAttachments = &colorAttachment,
 		.subpassCount = 1,
 		.pSubpasses = &subpass,
+		.dependencyCount = 1,
+		.pDependencies = &subpassDependency,
 	};
 
-	if ( vkCreateRenderPass( device->getDeviceHandler(), &createInfo, nullptr, &m_renderPassHandler ) != VK_SUCCESS ) {
-		throw VulkanException( "Failed to create render pass!" );
-	}
+	CRIMILD_VULKAN_CHECK(
+		vkCreateRenderPass(
+			device->getDeviceHandler(),
+			&createInfo,
+			nullptr,
+			&m_renderPassHandler
+		)
+	);
 }
 
 RenderPass::~RenderPass( void ) noexcept

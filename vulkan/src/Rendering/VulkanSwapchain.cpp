@@ -29,6 +29,7 @@
 #include "VulkanRenderDevice.hpp"
 #include "VulkanSurface.hpp"
 #include "VulkanImage.hpp"
+#include "VulkanSemaphore.hpp"
 #include "Simulation/Simulation.hpp"
 
 using namespace crimild;
@@ -302,14 +303,45 @@ Swapchain::~Swapchain( void ) noexcept
 	}
 }
 
-crimild::UInt32 Swapchain::acquireNextImage( void ) const noexcept
+crimild::UInt32 Swapchain::acquireNextImage( const Semaphore *imageAvailableSemaphore ) const noexcept
 {
-	return 0;
+	crimild::UInt32 imageIndex;
+	vkAcquireNextImageKHR(
+		m_device->getDeviceHandler(),
+		m_swapchainHandler,
+		std::numeric_limits< uint64_t >::max(), // disable timeout
+		imageAvailableSemaphore->getSemaphoreHandler(),
+		VK_NULL_HANDLE,
+		&imageIndex		
+	);
+
+	return imageIndex;
 }
 
-void Swapchain::presentImage( crimild::UInt32 imageIndex ) const noexcept
+void Swapchain::presentImage( crimild::UInt32 imageIndex, const Semaphore *signal ) const noexcept
 {
+	VkSemaphore signalSemaphores[] = {
+		signal->getSemaphoreHandler(),
+	};
 
+	VkSwapchainKHR swapchains[] = {
+		m_swapchainHandler,
+	};
+	
+	auto presentInfo = VkPresentInfoKHR {
+		.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+		.waitSemaphoreCount = 1,
+		.pWaitSemaphores = signalSemaphores,
+		.swapchainCount = 1,
+		.pSwapchains = swapchains,
+		.pImageIndices = &imageIndex,
+		.pResults = nullptr,
+	};
+
+	vkQueuePresentKHR(
+		m_device->getPresentQueueHandler(),
+		&presentInfo
+	);
 }
 
 void Swapchain::retrieveSwapchainImages( void ) noexcept

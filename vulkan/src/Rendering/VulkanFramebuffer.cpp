@@ -29,12 +29,10 @@
 #include "VulkanRenderDevice.hpp"
 #include "VulkanRenderPass.hpp"
 #include "VulkanImageView.hpp"
-#include "Exceptions/VulkanException.hpp"
-#include "Foundation/Log.hpp"
 
 using namespace crimild::vulkan;
 
-Framebuffer::Framebuffer( VulkanRenderDevice *device, const FramebufferDescriptor &descriptor )
+Framebuffer::Framebuffer( const VulkanRenderDevice *device, const Descriptor &descriptor )
 	: m_device( device ),
 	  m_extent( descriptor.extent )
 {
@@ -55,9 +53,14 @@ Framebuffer::Framebuffer( VulkanRenderDevice *device, const FramebufferDescripto
 		.layers = 1,
 	};
 
-	if ( vkCreateFramebuffer( m_device->getDeviceHandler(), &createInfo, nullptr, &m_framebufferHandler ) != VK_SUCCESS ) {
-		throw VulkanException( "Failed to create framebuffer" );
-	}
+	CRIMILD_VULKAN_CHECK(
+		vkCreateFramebuffer(
+			m_device->getDeviceHandler(),
+			&createInfo,
+			nullptr,
+			&m_framebufferHandler
+		)
+	);
 }
 
 Framebuffer::~Framebuffer( void ) noexcept
