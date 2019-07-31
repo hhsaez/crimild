@@ -32,11 +32,9 @@
 #include "Rendering/VulkanSurface.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "Rendering/VulkanSwapchain.hpp"
-
-#include "Rendering/VulkanRenderPass.hpp"
-#include "Rendering/VulkanPipeline.hpp"
-#include "Rendering/VulkanFramebuffer.hpp"
 #include "Rendering/VulkanCommandPool.hpp"
+#include "Rendering/VulkanCommandBuffer.hpp"
+
 #include "Foundation/Containers/Array.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Simulation/FileSystem.hpp"
@@ -56,12 +54,10 @@ crimild::Bool GLFWVulkanSystem::start( void )
 	auto renderDevice = m_instance->getRenderDevice();
 	auto swapchain = renderDevice->getSwapchain();
 
-	auto renderPass = crimild::alloc< RenderPass >( m_instance->getRenderDevice(), m_instance->getRenderDevice()->getSwapchain() );
+	m_renderPass = renderDevice->createRenderPass();
 
-	auto pipeline = crimild::alloc< vulkan::Pipeline >(
-		m_instance->getRenderDevice(),
-		crimild::get_ptr( renderPass ),
-		PipelineDescriptor {
+	m_pipeline = renderDevice->createPipeline(
+		Pipeline::Descriptor {
 			.program = crimild::alloc< ShaderProgram >(
 				containers::Array< SharedPointer< Shader >> {
 					crimild::alloc< Shader >(
@@ -74,65 +70,94 @@ crimild::Bool GLFWVulkanSystem::start( void )
 					),
 				}
 			),
+			.renderPass = crimild::get_ptr( m_renderPass ),
 		}
 	);
 
-	std::vector< SharedPointer< vulkan::Framebuffer >> framebuffers;
+	m_commandPool = renderDevice->createGraphicsCommandPool();
 
-	swapchain->getImageViews().each(
-		[ &framebuffers, swapchain, renderDevice, renderPass ]( SharedPointer< ImageView > const &iv ) {
-			
-			auto framebuffer = crimild::alloc< vulkan::Framebuffer >(
-				renderDevice,
-				vulkan::FramebufferDescriptor {
-					.attachments = {
-						crimild::get_ptr( iv )
-					},
-					.renderPass = crimild::get_ptr( renderPass ),
-				  	.extent = swapchain->getExtent(),
-		   		}
-			);
-			framebuffers.push_back( framebuffer );
-		}
-	);
+	auto imageCount = swapchain->getImageViews().size();
 
-	auto commandPool = renderDevice->createGraphicsCommandPool();
-	auto commandBuffer = commandPool->createCommandBuffer();
+	for ( auto i = 0l; i < imageCount; i++ ) {
+		auto imageView = swapchain->getImageViews()[ i ];
+		
+		auto framebuffer = renderDevice->createFramebuffer(				
+			Framebuffer::Descriptor {
+				.attachments = {
+					crimild::get_ptr( imageView )
+				},
+				.renderPass = crimild::get_ptr( m_renderPass ),
+				.extent = swapchain->getExtent(),
+			}
+		);
+		m_framebuffers.push_back( framebuffer );
 
-	commandBuffer = nullptr;
-	commandPool = nullptr;
+		m_commandBuffers.push_back(
+			[ this, framebuffer ]() {
+				auto commandBuffer = m_commandPool->createCommandBuffer();
+				commandBuffer->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
+				commandBuffer->beginRenderPass(
+					crimild::get_ptr( m_renderPass ),
+					crimild::get_ptr( framebuffer ),
+					RGBAColorf( 0.0f, 0.0f, 0.0f, 1.0f )
+				);
+				commandBuffer->bindGraphicsPipeline(
+					crimild::get_ptr( m_pipeline )
+				);
+				commandBuffer->draw();
+				commandBuffer->endRenderPass();
+				commandBuffer->end();
+				return commandBuffer;
+			}()
+		);
+	}
 
-	framebuffers.clear();
-
-	pipeline = nullptr;
-	renderPass = nullptr;
+	m_imageAvailableSemaphore = renderDevice->createSemaphore();
+	m_renderFinishedSemaphore = renderDevice->createSemaphore();
 
 	return ret;
 }
 
 void GLFWVulkanSystem::update( void )
 {
-	/*
-	auto swapchain = m_instance->getSwapchain();
-	if ( swapchain == nullptr ) {
-		return;
-	}
+	// 1. Acquire an image from the swapchain
+	// 2. Execute command buffer with that image as attachment in the framebuffer
+	// 3. Return the image to the swapchain for presentation
+
+	auto renderDevice = getInstance()->getRenderDevice();
+	auto swapchain = renderDevice->getSwapchain();
 
 	// Acquire the next image available image from the swapchain
-	auto imageIndex = swapchain->acquireNextImage();
+	auto imageIndex = swapchain->acquireNextImage( crimild::get_ptr( m_imageAvailableSemaphore ) );
 	if ( imageIndex == std::numeric_limits< crimild::UInt32 >::max() ) {
 		// No image available
 		return;
 	}
 
-	swapchain->presentImage( imageIndex );
-	*/
+	renderDevice->submitGraphicsCommands(
+		crimild::get_ptr( m_imageAvailableSemaphore ),
+		crimild::get_ptr( m_commandBuffers[ imageIndex ] ),
+		crimild::get_ptr( m_renderFinishedSemaphore )
+	);
+
+	swapchain->presentImage( imageIndex, crimild::get_ptr( m_renderFinishedSemaphore ) );
 }
 
 void GLFWVulkanSystem::stop( void )
 {
 	System::stop();
 
+	if ( auto device = m_instance->getRenderDevice() ) {
+		device->waitIdle();
+	}
+
+	m_imageAvailableSemaphore = nullptr;
+	m_renderFinishedSemaphore = nullptr;
+	m_commandBuffers.clear();
+	m_commandPool = nullptr;
+	m_framebuffers.clear();
+	m_pipeline = nullptr;
+	m_renderPass = nullptr;
 	m_instance = nullptr;
 }
 

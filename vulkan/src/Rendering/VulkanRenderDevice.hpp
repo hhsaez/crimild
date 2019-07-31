@@ -9,14 +9,14 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
+ *     * Neither the name of the copyright holder nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -32,6 +32,9 @@
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/VulkanUtils.hpp"
 
+#include "VulkanPipeline.hpp"
+#include "VulkanFramebuffer.hpp"
+
 #include <vector>
 
 namespace crimild {
@@ -46,6 +49,7 @@ namespace crimild {
 		class ImageView;
 		class Swapchain;
 		class CommandPool;
+		class CommandBuffer;
 
 		/**
 		   \brief Implements a render device for Vulkan
@@ -109,6 +113,8 @@ namespace crimild {
 
 			const VkPhysicalDevice &getPhysicalDeviceHandler( void ) const noexcept { return m_physicalDevice; }
 			const VkDevice &getDeviceHandler( void ) const noexcept { return m_device; }
+			const VkQueue &getGraphicsQueueHandler( void ) const noexcept { return m_graphicsQueue; }
+			const VkQueue &getPresentQueueHandler( void ) const noexcept { return m_presentQueue; }
 
 			QueueFamilyIndices getQueueFamilies( void ) const noexcept;
 
@@ -140,6 +146,7 @@ namespace crimild {
 		public:
 			void setSwapchain( SharedPointer< Swapchain > const &swapchain ) noexcept { m_swapchain = swapchain; }
 			Swapchain *getSwapchain( void ) noexcept { return crimild::get_ptr( m_swapchain ); }
+			const Swapchain *getSwapchain( void ) const noexcept { return crimild::get_ptr( m_swapchain ); }
 
 		private:
 			SharedPointer< Swapchain > m_swapchain;
@@ -152,7 +159,7 @@ namespace crimild {
 			//@{
 			
 		public:
-			SharedPointer< Semaphore > createSemaphore( void ) noexcept;
+			SharedPointer< Semaphore > createSemaphore( void ) const noexcept;
 			SharedPointer< Fence > createFence( void ) noexcept;
 
 			//@}
@@ -168,11 +175,34 @@ namespace crimild {
 			//@}
 
 			/**
+			   \name Pipelines
+			*/
+			//@{
+
+		public:
+			SharedPointer< Pipeline > createPipeline( const Pipeline::Descriptor &descriptor ) const noexcept;
+
+			//@}
+
+			/**
+			   \name Render passes and framebuffers
+			 */
+			//@{
+
+		public:
+			SharedPointer< RenderPass > createRenderPass( void ) const noexcept;
+			SharedPointer< Framebuffer > createFramebuffer( const Framebuffer::Descriptor &descriptor ) const noexcept;
+
+			//@}
+
+			/**
+			   \name Command Pools and Buffers
 			 */
 			//@{
 			
 		public:
-			SharedPointer< CommandPool > createGraphicsCommandPool( void ) const;
+			SharedPointer< CommandPool > createGraphicsCommandPool( void ) const noexcept;
+			void submitGraphicsCommands( const Semaphore *wait, const CommandBuffer *commandBuffer, const Semaphore *signal ) const;
 
 			//@}
 		};
