@@ -34,6 +34,7 @@
 #include "Rendering/VulkanSwapchain.hpp"
 #include "Rendering/VulkanCommandPool.hpp"
 #include "Rendering/VulkanCommandBuffer.hpp"
+#include "Rendering/VulkanFence.hpp"
 
 #include "Foundation/Containers/Array.hpp"
 #include "Rendering/ShaderProgram.hpp"
@@ -99,7 +100,7 @@ crimild::Bool GLFWVulkanSystem::start( void )
 				commandBuffer->beginRenderPass(
 					crimild::get_ptr( m_renderPass ),
 					crimild::get_ptr( framebuffer ),
-					RGBAColorf( 0.0f, 0.0f, 0.0f, 1.0f )
+					RGBAColorf( 1.0f, 0.0f, 0.0f, 1.0f )
 				);
 				commandBuffer->bindGraphicsPipeline(
 					crimild::get_ptr( m_pipeline )
@@ -112,8 +113,11 @@ crimild::Bool GLFWVulkanSystem::start( void )
 		);
 	}
 
-	m_imageAvailableSemaphore = renderDevice->createSemaphore();
-	m_renderFinishedSemaphore = renderDevice->createSemaphore();
+	for ( auto i = 0l; i < MAX_FRAMES_IN_FLIGHT; i++ ) {
+		m_imageAvailableSemaphores.push_back( renderDevice->createSemaphore() );
+		m_renderFinishedSemaphores.push_back( renderDevice->createSemaphore() );
+		m_inFlightFences.push_back( renderDevice->createFence() );
+	}
 
 	return ret;
 }
@@ -127,20 +131,30 @@ void GLFWVulkanSystem::update( void )
 	auto renderDevice = getInstance()->getRenderDevice();
 	auto swapchain = renderDevice->getSwapchain();
 
+	auto wait = crimild::get_ptr( m_imageAvailableSemaphores[ m_currentFrame ] );
+	auto signal = crimild::get_ptr( m_renderFinishedSemaphores[ m_currentFrame ] );
+	auto fence = crimild::get_ptr( m_inFlightFences[ m_currentFrame ] );
+
+	fence->wait();
+	fence->reset();
+
 	// Acquire the next image available image from the swapchain
-	auto imageIndex = swapchain->acquireNextImage( crimild::get_ptr( m_imageAvailableSemaphore ) );
+	auto imageIndex = swapchain->acquireNextImage( wait );
 	if ( imageIndex == std::numeric_limits< crimild::UInt32 >::max() ) {
-		// No image available
+		CRIMILD_LOG_WARNING( "No image available" );
 		return;
 	}
 
 	renderDevice->submitGraphicsCommands(
-		crimild::get_ptr( m_imageAvailableSemaphore ),
+		wait,
 		crimild::get_ptr( m_commandBuffers[ imageIndex ] ),
-		crimild::get_ptr( m_renderFinishedSemaphore )
+		signal,
+		fence
 	);
 
-	swapchain->presentImage( imageIndex, crimild::get_ptr( m_renderFinishedSemaphore ) );
+	swapchain->presentImage( imageIndex, signal );
+
+	m_currentFrame = ( m_currentFrame + 1 ) % MAX_FRAMES_IN_FLIGHT;
 }
 
 void GLFWVulkanSystem::stop( void )
@@ -151,8 +165,9 @@ void GLFWVulkanSystem::stop( void )
 		device->waitIdle();
 	}
 
-	m_imageAvailableSemaphore = nullptr;
-	m_renderFinishedSemaphore = nullptr;
+	m_inFlightFences.clear();
+	m_imageAvailableSemaphores.clear();
+	m_renderFinishedSemaphores.clear();
 	m_commandBuffers.clear();
 	m_commandPool = nullptr;
 	m_framebuffers.clear();

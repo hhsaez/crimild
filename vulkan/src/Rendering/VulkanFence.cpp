@@ -30,15 +30,32 @@
 
 using namespace crimild::vulkan;
 
-Fence::Fence( VulkanRenderDevice *device, const VkFence &fenceHandler ) noexcept
-	: m_device( device ),
-	  m_fenceHandler( fenceHandler )
+Fence::Fence( const VulkanRenderDevice *device )
+	: m_device( device )
 {
+	CRIMILD_LOG_TRACE( "Creating vulkan fence" );
 	
+	auto fenceInfo = VkFenceCreateInfo {
+		.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+
+		// Initialize fence in signal state so we can wait for it from the beginning
+		.flags = VK_FENCE_CREATE_SIGNALED_BIT,
+	};
+
+	CRIMILD_VULKAN_CHECK(
+		vkCreateFence(
+			m_device->getDeviceHandler(),
+			&fenceInfo,
+			nullptr,
+			&m_fenceHandler
+		)
+	);
 }
 
 Fence::~Fence( void ) noexcept
 {
+	CRIMILD_LOG_TRACE( "Destroying vulkan fence" );
+	
 	if ( m_fenceHandler != VK_NULL_HANDLE ) {
 		vkDestroyFence(
 			m_device->getDeviceHandler(),

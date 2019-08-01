@@ -202,7 +202,7 @@ namespace crimild {
 			
 		public:
 			SharedPointer< CommandPool > createGraphicsCommandPool( void ) const noexcept;
-			void submitGraphicsCommands( const Semaphore *wait, const CommandBuffer *commandBuffer, const Semaphore *signal ) const;
+			void submitGraphicsCommands( const Semaphore *wait, const CommandBuffer *commandBuffer, const Semaphore *signal, const Fence *fence ) const;
 
 			//@}
 		};

@@ -112,7 +112,11 @@ void CommandBuffer::beginRenderPass( const RenderPass *renderPass, const Framebu
 
 void CommandBuffer::bindGraphicsPipeline( const Pipeline *pipeline ) const noexcept
 {
-	vkCmdBindPipeline( m_commandBufferHandler, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getGraphicsPipelineHandler() );
+	vkCmdBindPipeline(
+		m_commandBufferHandler,
+		VK_PIPELINE_BIND_POINT_GRAPHICS,
+		pipeline->getGraphicsPipelineHandler()
+	);
 }
 
 void CommandBuffer::draw( void ) const noexcept

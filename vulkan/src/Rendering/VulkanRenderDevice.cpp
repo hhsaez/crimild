@@ -330,20 +330,7 @@ SharedPointer< Semaphore > VulkanRenderDevice::createSemaphore( void ) const noe
 
 SharedPointer< Fence > VulkanRenderDevice::createFence( void ) noexcept
 {
-	CRIMILD_LOG_TRACE( "Creating fence" );
-	
-	auto fenceInfo = VkFenceCreateInfo {
-		.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
-		.flags = VK_FENCE_CREATE_SIGNALED_BIT,
-	};
-
-	VkFence fenceHandler;
-	if ( vkCreateFence( m_device, &fenceInfo, nullptr, &fenceHandler ) != VK_SUCCESS ) {
-		CRIMILD_LOG_ERROR( "Failed to create fence" );
-		return nullptr;
-	}
-
-	return crimild::alloc< Fence >( this, fenceHandler );
+	return crimild::alloc< Fence >( this );
 }
 
 SharedPointer< Image > VulkanRenderDevice::createImage( void )
@@ -384,7 +371,7 @@ SharedPointer< CommandPool > VulkanRenderDevice::createGraphicsCommandPool( void
 	return crimild::alloc< CommandPool >( this, queueFamilyIndices.graphicsFamily[ 0 ] );
 }
 
-void VulkanRenderDevice::submitGraphicsCommands( const Semaphore *wait, const CommandBuffer *commandBuffer, const Semaphore *signal ) const
+void VulkanRenderDevice::submitGraphicsCommands( const Semaphore *wait, const CommandBuffer *commandBuffer, const Semaphore *signal, const Fence *fence ) const
 {
 	VkSemaphore waitSemaphores[] = {
 		wait->getSemaphoreHandler(),
@@ -419,7 +406,7 @@ void VulkanRenderDevice::submitGraphicsCommands( const Semaphore *wait, const Co
 			m_graphicsQueue,
 			1,
 			&submitInfo,
-			VK_NULL_HANDLE
+			fence != nullptr ? fence->getFenceHandler() : VK_NULL_HANDLE
 		)
 	);
 }
