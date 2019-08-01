@@ -94,7 +94,6 @@ namespace crimild {
 			VkPipelineColorBlendStateCreateInfo createColorBlending( const VkPipelineColorBlendAttachmentState &colorBlendAttachment ) const noexcept;
 
 			void createPipelineLayout( void );
-			void createPipeline( void );
 
 		private:
 			const VulkanRenderDevice *m_renderDevice = nullptr;

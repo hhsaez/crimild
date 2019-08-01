@@ -69,19 +69,26 @@ Pipeline::Pipeline( const VulkanRenderDevice *renderDevice, const Descriptor &de
 		.pViewportState = &viewportState,
 		.pRasterizationState = &rasterizer,
 		.pMultisampleState = &multisampleState,
-		.pDepthStencilState = nullptr, // Optional
+		//.pDepthStencilState = nullptr, // Optional
 		.pColorBlendState = &colorBlending,
-		.pDynamicState = nullptr, // Optional
+		//.pDynamicState = nullptr, // Optional
 		.layout = m_pipelineLayout,
 		.renderPass = descriptor.renderPass->getRenderPassHandler(),
 		.subpass = 0,
 		.basePipelineHandle = VK_NULL_HANDLE, // Optional
-		.basePipelineIndex = -1, // Optional
+		//.basePipelineIndex = -1, // Optional
 	};
 
-	if ( vkCreateGraphicsPipelines( m_renderDevice->getDeviceHandler(), VK_NULL_HANDLE, 1, &createInfo, nullptr, &m_graphicsPipeline ) != VK_SUCCESS ) {
-		throw VulkanException( "Failed to create graphics pipeline" );
-	}
+	CRIMILD_VULKAN_CHECK(
+		vkCreateGraphicsPipelines(
+			m_renderDevice->getDeviceHandler(),
+			VK_NULL_HANDLE,
+			1,
+			&createInfo,
+			nullptr,
+			&m_graphicsPipeline
+		)
+	);
 	
 	// Cleanup
 	for ( const auto &module : shaderModules ) {
@@ -320,9 +327,5 @@ void Pipeline::createPipelineLayout( void )
 	if ( vkCreatePipelineLayout( m_renderDevice->getDeviceHandler(), &pipelineLayoutInfo, nullptr, &m_pipelineLayout ) != VK_SUCCESS ) {
 		throw VulkanException( "Failed to create pipeline layout" );
 	}
-}
-
-void Pipeline::createPipeline( void )
-{
 }
 

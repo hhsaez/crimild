@@ -48,7 +48,7 @@ namespace crimild {
 		 */
 		class Fence : public SharedObject {
 		public:
-			Fence( VulkanRenderDevice *device, const VkFence &fenceHandler ) noexcept;
+			Fence( const VulkanRenderDevice *device );
 			~Fence( void ) noexcept;
 			
 			const VkFence &getFenceHandler( void ) const noexcept { return m_fenceHandler; }
@@ -57,7 +57,7 @@ namespace crimild {
 			void reset( void ) const noexcept;
 
 		private:
-			VulkanRenderDevice *m_device = nullptr;
+			const VulkanRenderDevice *m_device = nullptr;
 			VkFence m_fenceHandler = VK_NULL_HANDLE;
 		};
 
