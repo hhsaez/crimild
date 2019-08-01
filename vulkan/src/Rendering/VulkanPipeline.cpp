@@ -324,8 +324,13 @@ void Pipeline::createPipelineLayout( void )
 		.pPushConstantRanges = nullptr,
 	};
 
-	if ( vkCreatePipelineLayout( m_renderDevice->getDeviceHandler(), &pipelineLayoutInfo, nullptr, &m_pipelineLayout ) != VK_SUCCESS ) {
-		throw VulkanException( "Failed to create pipeline layout" );
-	}
+	CRIMILD_VULKAN_CHECK(
+		vkCreatePipelineLayout(
+			m_renderDevice->getDeviceHandler(),
+			&pipelineLayoutInfo,
+			nullptr,
+			&m_pipelineLayout
+		)
+	);
 }
 
