@@ -100,7 +100,7 @@ crimild::Bool GLFWVulkanSystem::start( void )
 				commandBuffer->beginRenderPass(
 					crimild::get_ptr( m_renderPass ),
 					crimild::get_ptr( framebuffer ),
-					RGBAColorf( 1.0f, 0.0f, 0.0f, 1.0f )
+					RGBAColorf( 0.0f, 0.0f, 0.0f, 1.0f )
 				);
 				commandBuffer->bindGraphicsPipeline(
 					crimild::get_ptr( m_pipeline )

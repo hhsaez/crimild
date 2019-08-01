@@ -50,14 +50,14 @@ ImageView::ImageView( VulkanRenderDevice *device, SharedPointer< Image > const &
 		.format = format,
 
 		// We don't need to swizzle (swap around) any of the color components
-		.components.r = VK_COMPONENT_SWIZZLE_R,
-		.components.g = VK_COMPONENT_SWIZZLE_G,
-		.components.b = VK_COMPONENT_SWIZZLE_B,
-		.components.a = VK_COMPONENT_SWIZZLE_A,
+		.components.r = VK_COMPONENT_SWIZZLE_IDENTITY,
+		.components.g = VK_COMPONENT_SWIZZLE_IDENTITY,
+		.components.b = VK_COMPONENT_SWIZZLE_IDENTITY,
+		.components.a = VK_COMPONENT_SWIZZLE_IDENTITY,
 
 		// Determine what is affected by the image operations (color, depth, stencil, etc)
 		.subresourceRange.aspectMask = aspectFlags,
-		
+		.subresourceRange.baseMipLevel = 0,
 		.subresourceRange.levelCount = mipLevels,
 		.subresourceRange.baseArrayLayer = 0,
 		.subresourceRange.layerCount = 1,
@@ -66,9 +66,14 @@ ImageView::ImageView( VulkanRenderDevice *device, SharedPointer< Image > const &
 		.flags = 0
 	};
 
-	if ( vkCreateImageView( device->getDeviceHandler(), &viewInfo, nullptr, &m_imageViewHandler ) != VK_SUCCESS ) {
-		throw VulkanException( "Failed to create image view" );
-	}
+	CRIMILD_VULKAN_CHECK(
+		vkCreateImageView(
+			device->getDeviceHandler(),
+			&viewInfo,
+			nullptr,
+			&m_imageViewHandler
+		)
+	);
 }
 
 ImageView::~ImageView( void ) noexcept
