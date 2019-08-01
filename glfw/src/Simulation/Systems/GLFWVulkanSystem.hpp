@@ -32,12 +32,15 @@
 
 #include "Foundation/GLFWUtils.hpp"
 
+#define MAX_FRAMES_IN_FLIGHT 2
+
 namespace crimild {
 
 	namespace vulkan {
 
 		class VulkanInstance;
 		class Semaphore;
+		class Fence;
 		class RenderPass;
 		class Pipeline;
 		class CommandPool;
@@ -74,8 +77,10 @@ namespace crimild {
 			std::vector< SharedPointer< vulkan::Framebuffer >> m_framebuffers;
 			SharedPointer< vulkan::CommandPool > m_commandPool;
 			std::vector< SharedPointer< vulkan::CommandBuffer >> m_commandBuffers;
-			SharedPointer< vulkan::Semaphore > m_imageAvailableSemaphore;
-			SharedPointer< vulkan::Semaphore > m_renderFinishedSemaphore;
+			std::vector< SharedPointer< vulkan::Semaphore >> m_imageAvailableSemaphores;
+			std::vector< SharedPointer< vulkan::Semaphore >> m_renderFinishedSemaphores;
+			std::vector< SharedPointer< vulkan::Fence >> m_inFlightFences;
+			crimild::UInt32 m_currentFrame = 0;
 		};
     
 	}
