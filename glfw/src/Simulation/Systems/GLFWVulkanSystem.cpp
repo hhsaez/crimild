@@ -28,6 +28,7 @@
 #include "GLFWVulkanSystem.hpp"
 #include "WindowSystem.hpp"
 #include "Simulation/Simulation.hpp"
+#include "Foundation/VulkanUtils.hpp"
 #include "Rendering/VulkanInstance.hpp"
 #include "Rendering/VulkanSurface.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
@@ -122,12 +123,13 @@ crimild::Bool GLFWVulkanSystem::start( void )
 	return ret;
 }
 
+/*
+  1. Acquire an image from the swapchain
+  2. Execute command buffer with that image as attachment in the framebuffer
+  3. Return the image to the swapchain for presentation
+ */
 void GLFWVulkanSystem::update( void )
 {
-	// 1. Acquire an image from the swapchain
-	// 2. Execute command buffer with that image as attachment in the framebuffer
-	// 3. Return the image to the swapchain for presentation
-
 	auto renderDevice = getInstance()->getRenderDevice();
 	auto swapchain = renderDevice->getSwapchain();
 
@@ -135,16 +137,21 @@ void GLFWVulkanSystem::update( void )
 	auto signal = crimild::get_ptr( m_renderFinishedSemaphores[ m_currentFrame ] );
 	auto fence = crimild::get_ptr( m_inFlightFences[ m_currentFrame ] );
 
+	// Wait for any pending operations to complete
 	fence->wait();
 	fence->reset();
 
 	// Acquire the next image available image from the swapchain
+	// Execution of command buffers is asynchrounous. It must be set up to
+	// wait on image adquisition to finish
 	auto imageIndex = swapchain->acquireNextImage( wait );
 	if ( imageIndex == std::numeric_limits< crimild::UInt32 >::max() ) {
 		CRIMILD_LOG_WARNING( "No image available" );
 		return;
 	}
 
+	// Submit graphic commands to the render device, with the selected
+	// image as attachment in the framebuffer
 	renderDevice->submitGraphicsCommands(
 		wait,
 		crimild::get_ptr( m_commandBuffers[ imageIndex ] ),
@@ -152,6 +159,7 @@ void GLFWVulkanSystem::update( void )
 		fence
 	);
 
+	// Return the image to the swapchain so it can be presented
 	swapchain->presentImage( imageIndex, signal );
 
 	m_currentFrame = ( m_currentFrame + 1 ) % MAX_FRAMES_IN_FLIGHT;
@@ -180,8 +188,64 @@ crimild::Bool GLFWVulkanSystem::createInstance( void ) noexcept
 {
 	CRIMILD_LOG_TRACE( "Creating Vulkan instance" );
 
-	m_instance = VulkanInstance::create();
-	return m_instance != nullptr;
+    auto validationLayersEnabled = utils::areValidationLayersEnabled();
+    auto validationLayers = utils::getValidationLayers();
+    if ( validationLayersEnabled && !utils::checkValidationLayerSupport( validationLayers ) ) {
+        CRIMILD_LOG_ERROR( "Validation layers requested, but not available" );
+        return false;
+    }
+
+    auto settings = Simulation::getInstance()->getSettings();
+    auto appName = settings->get< std::string >( Settings::SETTINGS_APP_NAME, "Crimild" );
+    auto appVersionMajor = settings->get< crimild::UInt32 >( Settings::SETTINGS_APP_VERSION_MAJOR, 1 );
+    auto appVersionMinor = settings->get< crimild::UInt32 >( Settings::SETTINGS_APP_VERSION_MINOR, 0 );
+    auto appVersionPatch = settings->get< crimild::UInt32 >( Settings::SETTINGS_APP_VERSION_PATCH, 0 );
+
+    auto appInfo = VkApplicationInfo {
+    	.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
+    	.pApplicationName = appName.c_str(),
+    	.applicationVersion = VK_MAKE_VERSION(
+        	appVersionMajor,
+     		appVersionMinor,
+     		appVersionPatch
+    	),
+    	.pEngineName = "Crimild",
+    	.engineVersion = VK_MAKE_VERSION(
+        	CRIMILD_VERSION_MAJOR,
+        	CRIMILD_VERSION_MINOR,
+        	CRIMILD_VERSION_PATCH
+    	),
+    };
+
+    auto extensions = utils::getRequiredExtensions();
+
+    auto createInfo = VkInstanceCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+        .pApplicationInfo = &appInfo,
+        .enabledExtensionCount = static_cast< crimild::UInt32 >( extensions.size() ),
+        .ppEnabledExtensionNames = extensions.data(),
+        .enabledLayerCount = 0,
+    };
+
+    // Keep reference outside block to it is not automatically destroyed before calling VkCreateInstance
+    VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo;
+    if ( validationLayersEnabled ) {
+        createInfo.enabledLayerCount = static_cast< crimild::UInt32 >( validationLayers.size() );
+        createInfo.ppEnabledLayerNames = validationLayers.data();
+
+        // Enable debug messenger specifically for create/destroy instance
+        utils::populateDebugMessengerCreateInfo( debugCreateInfo );
+        createInfo.pNext = ( VkDebugUtilsMessengerCreateInfoEXT * ) &debugCreateInfo;
+    }
+
+    VkInstance instance;
+    if ( vkCreateInstance( &createInfo, nullptr, &instance ) != VK_SUCCESS ) {
+        CRIMILD_LOG_ERROR( "Failed to create Vulkan instance" );
+        return false;
+    }
+
+    m_instance = crimild::alloc< VulkanInstance >( instance );
+    return true;
 }
 
 crimild::Bool GLFWVulkanSystem::createSurface( void ) noexcept

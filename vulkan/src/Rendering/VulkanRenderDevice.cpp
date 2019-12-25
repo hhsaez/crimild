@@ -247,10 +247,10 @@ VkDevice VulkanRenderDevice::createLogicalDevice( const VkPhysicalDevice &physic
 		.ppEnabledExtensionNames = deviceExtensions.data(),
 	};
 	
-	if ( VulkanInstance::enableValidationLayers() ) {
+	if ( utils::areValidationLayersEnabled() ) {
 		// New Vulkan implementations seem to be ignoring validation layers per device
 		// Still, it might be a good idea to register them here.
-		auto &validationLayers = VulkanInstance::getValidationLayers();
+		auto &validationLayers = utils::getValidationLayers();
 		createInfo.enabledLayerCount = static_cast< crimild::UInt32 >( validationLayers.size() );
 		createInfo.ppEnabledLayerNames = validationLayers.data();
 	}

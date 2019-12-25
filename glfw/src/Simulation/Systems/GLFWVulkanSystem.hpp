@@ -51,6 +51,19 @@ namespace crimild {
 
 	namespace glfw {
 
+		/**
+		   What it takes to work with Vulkan:
+		   1. Create an instance
+		   2. Select a supported phisical device
+		   3. Create logical devices and queues for drawing and presentation
+		   4. Create a window, a window surface and a swapchain
+		   5. Keep track of swapchain images
+		   6. Create a render pass that specifies render targets and usage
+		   7. Create framebuffers for the render pass
+		   8. Set up the graphics pipeline
+		   9. Allocate and record a command buffer with the draw commands for every possible swapchain image
+		   10. Draw frames by acquiring images, submitting the right draw command buffer and returing the images back to the swapchain
+		 */
 		class GLFWVulkanSystem : public System {
 			CRIMILD_IMPLEMENT_RTTI( crimild::glfw::GLFWVulkanSystem )
 			
@@ -65,8 +78,20 @@ namespace crimild {
 			vulkan::VulkanInstance *getInstance( void ) noexcept { return crimild::get_ptr( m_instance ); }
 
 		private:
+			/**
+			   \brief Instance creation and physical device selection
+
+			   An instance is created by describing the application and any API
+			   extensions will be using. Then, we query for Vulkan supported
+			   hardware and select at least one VkPhysicalDevice for our operations.
+			 */
 			crimild::Bool createInstance( void ) noexcept;
+
 			crimild::Bool createSurface( void ) noexcept;
+			
+			/**
+			   \brief Logical devices and queue families
+			 */
 			crimild::Bool createRenderDevice( void ) noexcept;
 			crimild::Bool createSwapchain( void ) noexcept;			
 
