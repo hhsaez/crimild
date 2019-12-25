@@ -30,6 +30,7 @@
 
 #include "Exceptions/VulkanException.hpp"
 #include "Foundation/Log.hpp"
+#include "Foundation/Types.hpp"
 
 #include <vulkan/vulkan.h>
 
@@ -73,6 +74,26 @@ namespace crimild {
 
 			const char *errorToString( VkResult result ) noexcept;
 
+            /**
+               \brief Used for checking if validation layers should be enabled
+             */
+            crimild::Bool areValidationLayersEnabled( void ) noexcept;
+
+            using ValidationLayerArray = std::vector< const char * >;
+
+            /**
+               \brief The list of validation layers (only valid if they're enabled)
+               \see areValidationLayersEnabled()
+             */
+            const ValidationLayerArray &getValidationLayers( void ) noexcept;
+
+            crimild::Bool checkValidationLayerSupport( const ValidationLayerArray &validationLayers ) noexcept;
+
+            using ExtensionArray = std::vector< const char * >;
+            ExtensionArray getRequiredExtensions( void ) noexcept;
+
+            void populateDebugMessengerCreateInfo( VkDebugUtilsMessengerCreateInfoEXT &createInfo ) noexcept;
+
 		}
 
 	}
@@ -94,4 +115,3 @@ namespace crimild {
 }
 
 #endif
-	

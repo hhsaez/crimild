@@ -46,40 +46,6 @@ namespace crimild {
 		   \brief Handles creation and setup for the Vulkan instance
 		 */
 		class VulkanInstance : public SharedObject {
-		private:
-			using ValidationLayerArray = std::vector< const char * >;
-			using ExtensionArray = std::vector< const char * >;
-
-		public:
-			/**
-			   \brief Creates a VulkanInstance object holding the VkInstance reference
-			 */
-			static SharedPointer< VulkanInstance > create( void ) noexcept;
-
-			/**
-			   \brief Used for checking if validation layers should be enabled
-			 */
-			static crimild::Bool enableValidationLayers( void ) noexcept
-			{
-#if defined( CRIMILD_DEBUG )
-				return true;
-#else
-				return false;
-#endif
-			}
-
-			/**
-			   \brief The list of validation layers (only valid if they're enabled)
-			   \see enableValidationLayers()
-			 */
-			static const ValidationLayerArray &getValidationLayers( void ) noexcept
-			{
-				static ValidationLayerArray validationLayers = {
-					"VK_LAYER_LUNARG_standard_validation",					
-				};
-				return validationLayers;
-			}
-
 		public:
 			explicit VulkanInstance( VkInstance instance );
 			~VulkanInstance( void );
@@ -88,10 +54,6 @@ namespace crimild {
 
 		private:
 			VkInstance m_instanceHandler;			
-
-		private:
-			static crimild::Bool checkValidationLayerSupport( const ValidationLayerArray &validationLayers ) noexcept;
-			static ExtensionArray getRequiredExtensions( void ) noexcept;
 
 			/**
 			   \name Surface
@@ -127,28 +89,6 @@ namespace crimild {
 			//@{
 
 		private:
-			static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
-				VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-				VkDebugUtilsMessageTypeFlagsEXT messageType,
-				const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
-				void *pUserData
-			) noexcept;
-
-			static VkResult createDebugUtilsMessengerEXT(
-				VkInstance instance,
-				const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
-				const VkAllocationCallbacks *pAllocator,
-				VkDebugUtilsMessengerEXT *pDebugMessenger
-			) noexcept;
-
-			static void destroyDebugUtilsMessengerEXT(
-				VkInstance instance,
-				VkDebugUtilsMessengerEXT debugMessenger,
-				const VkAllocationCallbacks *pAllocator
-			) noexcept;
-
-			static void populateDebugMessengerCreateInfo( VkDebugUtilsMessengerCreateInfoEXT &createInfo ) noexcept;
-
 			/**
 			   \brief Creates a debug messenger for validation layers
 			   \see createInstance for another usage

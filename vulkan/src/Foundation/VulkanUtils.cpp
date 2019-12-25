@@ -62,3 +62,108 @@ const char *crimild::vulkan::utils::errorToString( VkResult result ) noexcept
 	};	
 }
 
+crimild::Bool crimild::vulkan::utils::areValidationLayersEnabled( void ) noexcept
+{
+#if defined( CRIMILD_DEBUG )
+	return true;
+#else
+    return false;
+#endif
+}
+
+const crimild::vulkan::utils::ValidationLayerArray &crimild::vulkan::utils::getValidationLayers( void ) noexcept
+{
+    static ValidationLayerArray validationLayers = {
+        "VK_LAYER_LUNARG_standard_validation",
+    };
+    return validationLayers;
+}
+
+crimild::Bool crimild::vulkan::utils::checkValidationLayerSupport( const crimild::vulkan::utils::ValidationLayerArray &validationLayers ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Checking validation layer support" );
+
+    crimild::UInt32 layerCount;
+    vkEnumerateInstanceLayerProperties( &layerCount, nullptr );
+
+    std::vector< VkLayerProperties > availableLayers( layerCount );
+    vkEnumerateInstanceLayerProperties( &layerCount, availableLayers.data() );
+
+    for ( const auto &layerName : validationLayers ) {
+        auto layerFound = false;
+        for ( const auto &layerProperties : availableLayers ) {
+            if ( strcmp( layerName, layerProperties.layerName ) == 0 ) {
+                CRIMILD_LOG_DEBUG( "Found validation layer: ", layerName );
+                layerFound = true;
+                break;
+            }
+        }
+
+        if ( !layerFound ) {
+            CRIMILD_LOG_ERROR( "Validation layer not found: ", layerName );
+            return false;
+        }
+    }
+
+    return true;
+}
+
+crimild::vulkan::utils::ExtensionArray crimild::vulkan::utils::getRequiredExtensions( void ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Getting required extensions" );
+
+    if ( areValidationLayersEnabled() ) {
+        // list all available extensions
+        crimild::UInt32 extensionCount = 0;
+        vkEnumerateInstanceExtensionProperties( nullptr, &extensionCount, nullptr );
+        std::vector< VkExtensionProperties > extensions( extensionCount );
+        vkEnumerateInstanceExtensionProperties( nullptr, &extensionCount, extensions.data() );
+        for ( const auto &extension : extensions ) {
+            CRIMILD_LOG_DEBUG( "Found extension: ", extension.extensionName );
+        }
+    }
+
+    // Add extensions to create a presentation surface
+    // TODO: It would be great to support "headless" Vulkan in the future. Not
+    // only for compute operations, but also for testing. This is definitely something
+    // I should try
+    auto extensions = ExtensionArray {
+        VK_KHR_SURFACE_EXTENSION_NAME,
+    };
+
+#if defined( CRIMILD_PLATFORM_OSX )
+    // TODO: no macro for platform extensions?
+    extensions.push_back( "VK_MVK_macos_surface" );
+#endif
+
+    if ( areValidationLayersEnabled() ) {
+        extensions.push_back( VK_EXT_DEBUG_UTILS_EXTENSION_NAME );
+    }
+
+    return extensions;
+}
+
+static VKAPI_ATTR VkBool32 VKAPI_CALL crimild_vulkan_debug_callback(
+	VkDebugUtilsMessageSeverityFlagBitsEXT severity,
+	VkDebugUtilsMessageTypeFlagsEXT type,
+	const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
+	void *pUserData )
+{
+    std::cerr << "Validation layer: " << pCallbackData->pMessage << std::endl;
+    return VK_FALSE;
+}
+
+void crimild::vulkan::utils::populateDebugMessengerCreateInfo( VkDebugUtilsMessengerCreateInfoEXT &createInfo ) noexcept
+{
+    createInfo = {};
+    createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+    createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT
+    	| VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT
+        | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+    createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT
+    	| VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT
+        | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+    createInfo.pfnUserCallback = crimild_vulkan_debug_callback;
+    createInfo.pUserData = nullptr;
+}
+
