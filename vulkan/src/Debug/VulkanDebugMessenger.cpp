@@ -44,11 +44,6 @@ VulkanDebugMessengerManager::VulkanDebugMessengerManager( VulkanInstance *instan
 
 }
 
-VulkanDebugMessengerManager::~VulkanDebugMessengerManager( void )
-{
-    cleanup();
-}
-
 SharedPointer< VulkanDebugMessenger > VulkanDebugMessengerManager::create( VulkanDebugMessenger::Descriptor const &descriptor ) noexcept
 {
     if ( !utils::checkValidationLayersEnabled() ) {
@@ -84,7 +79,7 @@ SharedPointer< VulkanDebugMessenger > VulkanDebugMessengerManager::create( Vulka
     auto debugMessenger = crimild::alloc< VulkanDebugMessenger >();
     debugMessenger->handler = debugMessengerHandler;
     debugMessenger->instance = m_instance;
-    m_debugMessengers.insert( crimild::get_ptr( debugMessenger ) );
+    insert( crimild::get_ptr( debugMessenger ) );
     return debugMessenger;
 }
 
@@ -108,13 +103,6 @@ void VulkanDebugMessengerManager::destroy( VulkanDebugMessenger *debugMessenger 
     }
     debugMessenger->instance = nullptr;
     debugMessenger->handler = VK_NULL_HANDLE;
-    m_debugMessengers.erase( debugMessenger );
+    erase( debugMessenger );
 }
 
-void VulkanDebugMessengerManager::cleanup( void ) noexcept
-{
-    for ( auto debugMessenger : m_debugMessengers ) {
-        destroy( debugMessenger );
-    }
-    m_debugMessengers.clear();
-}

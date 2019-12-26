@@ -31,6 +31,7 @@
 #include <Simulation/Systems/System.hpp>
 
 #include "Foundation/GLFWUtils.hpp"
+#include "Rendering/VulkanInstance.hpp"
 
 #define MAX_FRAMES_IN_FLIGHT 2
 
@@ -38,7 +39,6 @@ namespace crimild {
 
 	namespace vulkan {
 
-		class VulkanInstance;
         class VulkanDebugMessenger;
         class VulkanRenderDevice;
         class VulkanSurface;
@@ -67,7 +67,9 @@ namespace crimild {
 		   9. Allocate and record a command buffer with the draw commands for every possible swapchain image
 		   10. Draw frames by acquiring images, submitting the right draw command buffer and returing the images back to the swapchain
 		 */
-		class GLFWVulkanSystem : public System {
+		class GLFWVulkanSystem :
+        	public System,
+            public vulkan::VulkanInstanceManager {
 			CRIMILD_IMPLEMENT_RTTI( crimild::glfw::GLFWVulkanSystem )
 			
 		public:

@@ -9,7 +9,7 @@
 *     * Redistributions in binary form must reproduce the above copyright
 *       notice, this list of conditions and the following disclaimer in the
 *       documentation and/or other materials provided with the distribution.
-*     * Neither the name of the copyright holder nor the
+*     * Neither the name of the copyright holders nor the
 *       names of its contributors may be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
@@ -25,10 +25,13 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CRIMILD_VULKAN_DEBUG_MESSENGER_
-#define CRIMILD_VULKAN_DEBUG_MESSENGER_
+#ifndef CRIMILD_VULKAN_FOUNDATION_OBJECT_
+#define CRIMILD_VULKAN_FOUNDATION_OBJECT_
 
-#include "Foundation/VulkanObject.hpp"
+#include "Foundation/SharedObject.hpp"
+#include "Foundation/RTTI.hpp"
+#include "Foundation/Types.hpp"
+#include "Foundation/VulkanUtils.hpp"
 
 #include <unordered_set>
 
@@ -36,33 +39,44 @@ namespace crimild {
 
     namespace vulkan {
 
-        class VulkanInstance;
-
-        class VulkanDebugMessenger : public VulkanObject {
-            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::VulkanDebugMessenger )
-
+        class VulkanObject :
+        	public SharedObject,
+            public RTTI {
         public:
-            struct Descriptor {
-                // Nothing to describe.
-            };
-
-        public:
-            ~VulkanDebugMessenger( void );
-
-            VulkanInstance *instance = nullptr;
-            VkDebugUtilsMessengerEXT handler = VK_NULL_HANDLE;
+            virtual ~VulkanObject( void ) { }
         };
 
-        class VulkanDebugMessengerManager : public VulkanObjectManager< VulkanDebugMessenger > {
+        template< class T >
+        class VulkanObjectManager {
         public:
-            VulkanDebugMessengerManager( VulkanInstance *instance );
-            virtual ~VulkanDebugMessengerManager( void ) = default;
+            virtual ~VulkanObjectManager( void )
+            {
+                cleanup();
+            }
 
-            SharedPointer< VulkanDebugMessenger > create( VulkanDebugMessenger::Descriptor const &descriptor ) noexcept;
-            void destroy( VulkanDebugMessenger *debugMessenger ) noexcept override;
+            virtual void destroy( T * ) noexcept { }
+
+            void cleanup( void )
+            {
+                for ( auto obj : m_objects ) {
+                    destroy( obj );
+                }
+                m_objects.clear();
+            }
+
+        protected:
+            void insert( T *obj ) noexcept
+            {
+                m_objects.insert( obj );
+            }
+
+            void erase( T *obj ) noexcept
+            {
+                m_objects.erase( obj );
+            }
 
         private:
-            VulkanInstance *m_instance = nullptr;
+            std::unordered_set< T * > m_objects;
         };
 
     }
