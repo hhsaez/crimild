@@ -39,6 +39,9 @@ namespace crimild {
 	namespace vulkan {
 
 		class VulkanInstance;
+        class VulkanDebugMessenger;
+        class VulkanRenderDevice;
+        class VulkanSurface;
 		class Semaphore;
 		class Fence;
 		class RenderPass;
@@ -76,6 +79,8 @@ namespace crimild {
 			void stop( void ) override;
 
 			vulkan::VulkanInstance *getInstance( void ) noexcept { return crimild::get_ptr( m_instance ); }
+            vulkan::VulkanRenderDevice *getRenderDevice( void ) noexcept { return crimild::get_ptr( m_renderDevice ); }
+            vulkan::VulkanSurface *getSurface( void ) noexcept { return crimild::get_ptr( m_surface ); }
 
 		private:
 			/**
@@ -86,7 +91,7 @@ namespace crimild {
 			   hardware and select at least one VkPhysicalDevice for our operations.
 			 */
 			crimild::Bool createInstance( void ) noexcept;
-
+            crimild::Bool createDebugMessenger( void ) noexcept;
 			crimild::Bool createSurface( void ) noexcept;
 			
 			/**
@@ -97,6 +102,9 @@ namespace crimild {
 
 		private:
 			SharedPointer< vulkan::VulkanInstance > m_instance;
+            SharedPointer< vulkan::VulkanDebugMessenger > m_debugMessenger;
+            SharedPointer< vulkan::VulkanRenderDevice > m_renderDevice;
+            SharedPointer< vulkan::VulkanSurface > m_surface;
 			SharedPointer< vulkan::RenderPass > m_renderPass;
 			SharedPointer< vulkan::Pipeline > m_pipeline;
 			std::vector< SharedPointer< vulkan::Framebuffer >> m_framebuffers;

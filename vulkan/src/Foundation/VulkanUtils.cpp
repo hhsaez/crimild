@@ -27,9 +27,14 @@
 
 #include "VulkanUtils.hpp"
 
+#include <set>
+
+using namespace crimild;
+using namespace crimild::vulkan;
+
 #define CRIMILD_VULKAN_ERROR_STRING( x ) case static_cast< int >( x ): return #x
 
-const char *crimild::vulkan::utils::errorToString( VkResult result ) noexcept
+const char *utils::errorToString( VkResult result ) noexcept
 {
 	switch ( result ) {
 		CRIMILD_VULKAN_ERROR_STRING( VK_SUCCESS );
@@ -62,7 +67,7 @@ const char *crimild::vulkan::utils::errorToString( VkResult result ) noexcept
 	};	
 }
 
-crimild::Bool crimild::vulkan::utils::areValidationLayersEnabled( void ) noexcept
+crimild::Bool utils::checkValidationLayersEnabled( void ) noexcept
 {
 #if defined( CRIMILD_DEBUG )
 	return true;
@@ -71,7 +76,7 @@ crimild::Bool crimild::vulkan::utils::areValidationLayersEnabled( void ) noexcep
 #endif
 }
 
-const crimild::vulkan::utils::ValidationLayerArray &crimild::vulkan::utils::getValidationLayers( void ) noexcept
+const utils::ValidationLayerArray &utils::getValidationLayers( void ) noexcept
 {
     static ValidationLayerArray validationLayers = {
         "VK_LAYER_LUNARG_standard_validation",
@@ -79,7 +84,7 @@ const crimild::vulkan::utils::ValidationLayerArray &crimild::vulkan::utils::getV
     return validationLayers;
 }
 
-crimild::Bool crimild::vulkan::utils::checkValidationLayerSupport( const crimild::vulkan::utils::ValidationLayerArray &validationLayers ) noexcept
+crimild::Bool utils::checkValidationLayerSupport( const utils::ValidationLayerArray &validationLayers ) noexcept
 {
     CRIMILD_LOG_TRACE( "Checking validation layer support" );
 
@@ -108,11 +113,13 @@ crimild::Bool crimild::vulkan::utils::checkValidationLayerSupport( const crimild
     return true;
 }
 
-crimild::vulkan::utils::ExtensionArray crimild::vulkan::utils::getRequiredExtensions( void ) noexcept
+utils::ExtensionArray utils::getRequiredExtensions( void ) noexcept
 {
     CRIMILD_LOG_TRACE( "Getting required extensions" );
 
-    if ( areValidationLayersEnabled() ) {
+    auto validationLayersEnabled = checkValidationLayersEnabled();
+
+    if ( validationLayersEnabled ) {
         // list all available extensions
         crimild::UInt32 extensionCount = 0;
         vkEnumerateInstanceExtensionProperties( nullptr, &extensionCount, nullptr );
@@ -136,7 +143,7 @@ crimild::vulkan::utils::ExtensionArray crimild::vulkan::utils::getRequiredExtens
     extensions.push_back( "VK_MVK_macos_surface" );
 #endif
 
-    if ( areValidationLayersEnabled() ) {
+    if ( validationLayersEnabled ) {
         extensions.push_back( VK_EXT_DEBUG_UTILS_EXTENSION_NAME );
     }
 
@@ -153,7 +160,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL crimild_vulkan_debug_callback(
     return VK_FALSE;
 }
 
-void crimild::vulkan::utils::populateDebugMessengerCreateInfo( VkDebugUtilsMessengerCreateInfoEXT &createInfo ) noexcept
+void utils::populateDebugMessengerCreateInfo( VkDebugUtilsMessengerCreateInfoEXT &createInfo ) noexcept
 {
     createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
@@ -167,3 +174,120 @@ void crimild::vulkan::utils::populateDebugMessengerCreateInfo( VkDebugUtilsMesse
     createInfo.pUserData = nullptr;
 }
 
+VkPhysicalDevice utils::pickPhysicalDevice( const VkInstance &instance, const VkSurfaceKHR &surface ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Picking physical device" );
+
+    crimild::UInt32 deviceCount = 0;
+    vkEnumeratePhysicalDevices( instance, &deviceCount, nullptr );
+    if ( deviceCount == 0 ) {
+        CRIMILD_LOG_ERROR( "Failed to find GPUs with Vulkan support" );
+        return VK_NULL_HANDLE;
+    }
+
+    std::vector< VkPhysicalDevice > devices( deviceCount );
+    vkEnumeratePhysicalDevices( instance, &deviceCount, devices.data() );
+    for ( const auto &device : devices ) {
+        if ( isDeviceSuitable( device, surface ) ) {
+            CRIMILD_LOG_INFO( "Vulkan physical device found" );
+            return device;
+        }
+    }
+
+    CRIMILD_LOG_ERROR( "Failed to find a suitable GPU" );
+    return VK_NULL_HANDLE;
+}
+
+crimild::Bool utils::isDeviceSuitable( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept
+{
+    /*
+    CRIMILD_LOG_TRACE( "Checking device properties" );
+
+    auto indices = findQueueFamilies( device, surface );
+    auto extensionsSupported = checkDeviceExtensionSupport( device );
+    auto swapchainAdequate = false;
+    if ( extensionsSupported ) {
+        swapchainAdequate = checkSwapchainSupport( device, surface );
+    }
+
+    VkPhysicalDeviceFeatures supportedFeatures;
+    vkGetPhysicalDeviceFeatures( device, &supportedFeatures );
+
+    return indices.isComplete()
+    	&& extensionsSupported
+    	&& swapchainAdequate
+        && supportedFeatures.samplerAnisotropy;
+     */
+    return false;
+}
+
+crimild::Bool utils::checkDeviceExtensionSupport( const VkPhysicalDevice &device ) noexcept
+{
+    /*
+    CRIMILD_LOG_TRACE( "Checking device extension support" );
+
+    const auto &deviceExtensions = getDeviceExtensions();
+
+    crimild::UInt32 extensionCount;
+    vkEnumerateDeviceExtensionProperties( device, nullptr, &extensionCount, nullptr );
+    std::vector< VkExtensionProperties > availableExtensions( extensionCount );
+    vkEnumerateDeviceExtensionProperties( device, nullptr, &extensionCount, availableExtensions.data() );
+
+    std::set< std::string > requiredExtensions( std::begin( deviceExtensions ), std::end( deviceExtensions ) );
+
+    for ( const auto &extension : availableExtensions ) {
+        requiredExtensions.erase( extension.extensionName );
+    }
+
+    if ( !requiredExtensions.empty() ) {
+        std::stringstream ss;
+        for ( const auto &name : requiredExtensions ) {
+            ss << "\n\t" << name;
+        }
+        CRIMILD_LOG_ERROR( "Required extensions not met: ", ss.str() );
+        return false;
+    }
+*/
+    CRIMILD_LOG_DEBUG( "All required extensions met" );
+    return true;
+}
+
+utils::QueueFamilyIndices utils::findQueueFamilies( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Finding device queue families" );
+
+    QueueFamilyIndices indices;
+
+    crimild::UInt32 queueFamilyCount = 0;
+    vkGetPhysicalDeviceQueueFamilyProperties( device, &queueFamilyCount, nullptr );
+    if ( queueFamilyCount == 0 ) {
+        CRIMILD_LOG_ERROR( "No queue family found for device" );
+        return indices;
+    }
+
+    std::vector< VkQueueFamilyProperties > queueFamilies( queueFamilyCount );
+    vkGetPhysicalDeviceQueueFamilyProperties( device, &queueFamilyCount, queueFamilies.data() );
+
+    crimild::UInt32 i = 0;
+    for ( const auto &queueFamily : queueFamilies ) {
+        if ( queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT ) {
+            indices.graphicsFamily.push_back( i );
+        }
+
+        // Find a queue family that supports presenting to the VUlkan surface
+        VkBool32 presentSupport = false;
+        vkGetPhysicalDeviceSurfaceSupportKHR( device, i, surface, &presentSupport );
+        if ( queueFamily.queueCount > 0 && presentSupport ) {
+            // This might probably be same as the graphics queue in most cases
+            indices.presentFamily.push_back( i );
+        }
+
+        if ( indices.isComplete() ) {
+            break;
+        }
+
+        ++i;
+    }
+
+    return indices;
+}

@@ -75,9 +75,14 @@ namespace crimild {
 			const char *errorToString( VkResult result ) noexcept;
 
             /**
+             	\name Validation layers
+             */
+            //{
+
+            /**
                \brief Used for checking if validation layers should be enabled
              */
-            crimild::Bool areValidationLayersEnabled( void ) noexcept;
+            crimild::Bool checkValidationLayersEnabled( void ) noexcept;
 
             using ValidationLayerArray = std::vector< const char * >;
 
@@ -89,10 +94,59 @@ namespace crimild {
 
             crimild::Bool checkValidationLayerSupport( const ValidationLayerArray &validationLayers ) noexcept;
 
+            //@}
+
+            /**
+             	\name Extensions
+             */
+            //@{
+
             using ExtensionArray = std::vector< const char * >;
+
             ExtensionArray getRequiredExtensions( void ) noexcept;
 
             void populateDebugMessengerCreateInfo( VkDebugUtilsMessengerCreateInfoEXT &createInfo ) noexcept;
+
+            //@}
+
+            /**
+             	\name Physical device creation
+             */
+            //@{
+
+            // TODO: How to handle an optional surface param?
+            VkPhysicalDevice pickPhysicalDevice( const VkInstance &instance, const VkSurfaceKHR &surface ) noexcept;
+
+            // TODO: How to handle an optional surface param?
+            crimild::Bool isDeviceSuitable( const VkPhysicalDevice &physicalDevice, const VkSurfaceKHR &surface ) noexcept;
+
+            /**
+             	\brief Check if a given device meets all of the required extensions
+             */
+            crimild::Bool checkDeviceExtensionSupport( const VkPhysicalDevice &device ) noexcept;
+
+            //@}
+
+            /**
+             	\name Queue family queries
+             */
+            //@{
+
+            struct QueueFamilyIndices {
+                std::vector< crimild::UInt32 > graphicsFamily;
+                std::vector< crimild::UInt32 > presentFamily;
+
+                bool isComplete( void ) const noexcept
+                {
+                    return graphicsFamily.size() > 0
+                        && presentFamily.size() > 0;
+                }
+            };
+
+            // TODO: How to handle an optional surface param?
+            QueueFamilyIndices findQueueFamilies( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept;
+
+            //@}
 
 		}
 

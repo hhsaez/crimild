@@ -27,47 +27,47 @@
 
 #include "VulkanInstance.hpp"
 #include "VulkanRenderDevice.hpp"
-
+#include "Debug/VulkanDebugMessenger.hpp"
 #include "Foundation/Log.hpp"
 #include "Simulation/Simulation.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;
 
-VulkanInstance::VulkanInstance( VkInstance instanceHandler )
-	: m_instanceHandler( instanceHandler )
-{
-	CRIMILD_LOG_TRACE( "Vulkan instance created" );
-
-	createDebugMessenger();
-}
-
+//VulkanInstance::VulkanInstance( VkInstance instanceHandler )
+//	: m_instanceHandler( instanceHandler )
+//{
+//	CRIMILD_LOG_TRACE( "Vulkan instance created" );
+//
+////	createDebugMessenger();
+//}
+//
 VulkanInstance::~VulkanInstance( void )
 {
 	CRIMILD_LOG_TRACE( "Destroying instance" );
 	
-	if ( m_renderDevice != nullptr ) {
-		CRIMILD_LOG_TRACE( "Waiting for pending operations" );
-		m_renderDevice->waitIdle();
-	}
-	
-	m_renderDevice = nullptr;
-	
-	destroyDebugMessenger();
-
-	m_surface = nullptr;
-	
-	if ( m_instanceHandler != VK_NULL_HANDLE ) {
+//	if ( m_renderDevice != nullptr ) {
+//		CRIMILD_LOG_TRACE( "Waiting for pending operations" );
+//		m_renderDevice->waitIdle();
+//	}
+//
+//	m_renderDevice = nullptr;
+//
+//	destroyDebugMessenger();
+//
+//	m_surface = nullptr;
+//
+	if ( handler != VK_NULL_HANDLE ) {
 		CRIMILD_LOG_TRACE( "Destroying Vulkan instance" );
-		vkDestroyInstance( m_instanceHandler, nullptr );
-		m_instanceHandler = VK_NULL_HANDLE;
+		vkDestroyInstance( handler, nullptr );
+		handler = VK_NULL_HANDLE;
 	}
 }
 
-crimild::Bool VulkanInstance::createDebugMessenger( void ) noexcept
+SharedPointer< VulkanDebugMessenger > VulkanInstance::createDebugMessenger( void ) noexcept
 {
-	if ( !utils::areValidationLayersEnabled() ) {
-		return true;
+	if ( !utils::checkValidationLayersEnabled() ) {
+		return nullptr;
 	}
 
 	CRIMILD_LOG_TRACE( "Setting up vulkan debug messenger" );
@@ -86,23 +86,27 @@ crimild::Bool VulkanInstance::createDebugMessenger( void ) noexcept
         return VK_ERROR_EXTENSION_NOT_PRESENT;
     };
 
+    VkDebugUtilsMessengerEXT debugMessengerHandler = VK_NULL_HANDLE;
 	if ( createDebugUtilsMessengerEXT(
-		m_instanceHandler,
+		handler,
 		&createInfo,
 		nullptr,
-		&m_debugMessenger ) != VK_SUCCESS ) {
+		&debugMessengerHandler ) != VK_SUCCESS ) {
 		CRIMILD_LOG_ERROR( "Failed to setup debug messenger" );
-		return false;
+		return nullptr;
 	}
 
-	return true;
+    auto ret = crimild::alloc< VulkanDebugMessenger >();
+    ret->handler = debugMessengerHandler;
+    ret->instance = this;
+    return ret;
 }
 
-void VulkanInstance::destroyDebugMessenger( void ) noexcept
+void VulkanInstance::destroyDebugMessenger( VulkanDebugMessenger *debugMessenger ) noexcept
 {
 	CRIMILD_LOG_TRACE( "Destroying vulkan debug messenger" );
 	
-	if ( !utils::areValidationLayersEnabled() ) {
+	if ( !utils::checkValidationLayersEnabled() ) {
 		return;
 	}
 
@@ -112,9 +116,32 @@ void VulkanInstance::destroyDebugMessenger( void ) noexcept
         }
     };
 
-	if ( m_debugMessenger != VK_NULL_HANDLE ) {
-		destroyDebugUtilsMessengerEXT( m_instanceHandler, m_debugMessenger, nullptr );
-		m_debugMessenger = VK_NULL_HANDLE;
+	if ( debugMessenger->handler != VK_NULL_HANDLE ) {
+		destroyDebugUtilsMessengerEXT( handler, debugMessenger->handler, nullptr );
+		debugMessenger->handler = VK_NULL_HANDLE;
 	}
+    debugMessenger->instance = nullptr;
+    debugMessenger->handler = VK_NULL_HANDLE;
 }
+
+/*
+VulkanRenderDevice *VulkanInstance::createRenderDevice( void ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Creating Vulkan Physical Device" );
+
+    auto physicalDevice = utils::pickPhysicalDevice( m_instanceHandler, m_surface->getInstanceHandler() );
+    if ( physicalDevice == VK_NULL_HANDLE ) {
+        return nullptr;
+    }
+
+    auto logicalDevice = utils::createLogicalDevice( physicalDevice, m_surface->getInstanceHandler() );
+    if ( logicalDevice == VK_NULL_HANDLE ) {
+        // no need to destroy physical device?
+        return nullptr;
+    }
+
+    m_renderDevice = crimild::alloc< VulkanRenderDevice >( this, getSurface(), physicalDevice, logicalDevice );
+    return crimild::get_ptr( m_renderDevice );
+}
+ */
 

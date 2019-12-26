@@ -43,7 +43,7 @@ VulkanSurface::~VulkanSurface( void )
 	CRIMILD_LOG_TRACE( "Destroying Vulkan surface" );
 	
 	if ( m_surfaceHandler != VK_NULL_HANDLE ) {
-		vkDestroySurfaceKHR( getInstance()->getInstanceHandler(), m_surfaceHandler, nullptr );
+		vkDestroySurfaceKHR( getInstance()->handler, m_surfaceHandler, nullptr );
 		m_surfaceHandler = VK_NULL_HANDLE;
 	}
 }
