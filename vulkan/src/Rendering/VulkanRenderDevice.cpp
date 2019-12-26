@@ -50,7 +50,7 @@ SharedPointer< VulkanRenderDevice > VulkanRenderDevice::create( VulkanInstance *
 	CRIMILD_LOG_TRACE( "Creating Vulkan rendering device" );
 
 	auto physicalDevice = pickPhysicalDevice(
-		instance->getInstanceHandler(),
+		instance->handler,
 		surface->getSurfaceHandler()
 	);
 	if ( physicalDevice == VK_NULL_HANDLE ) {
@@ -247,7 +247,7 @@ VkDevice VulkanRenderDevice::createLogicalDevice( const VkPhysicalDevice &physic
 		.ppEnabledExtensionNames = deviceExtensions.data(),
 	};
 	
-	if ( utils::areValidationLayersEnabled() ) {
+	if ( utils::checkValidationLayersEnabled() ) {
 		// New Vulkan implementations seem to be ignoring validation layers per device
 		// Still, it might be a good idea to register them here.
 		auto &validationLayers = utils::getValidationLayers();

@@ -38,6 +38,7 @@ namespace crimild {
 
 	namespace vulkan {
 
+        class VulkanDebugMessenger;
 		class VulkanSurface;
 		class VulkanRenderDevice;
 		class Swapchain;
@@ -47,25 +48,21 @@ namespace crimild {
 		 */
 		class VulkanInstance : public SharedObject {
 		public:
-			explicit VulkanInstance( VkInstance instance );
 			~VulkanInstance( void );
 
-			const VkInstance &getInstanceHandler( void ) const noexcept { return m_instanceHandler; }
-
-		private:
-			VkInstance m_instanceHandler;			
+            VkInstance handler = VK_NULL_HANDLE;
 
 			/**
 			   \name Surface
 			 */
 			//@{
 
-		public:
-			void setSurface( SharedPointer< VulkanSurface > const &surface ) noexcept { m_surface = surface; }
-			VulkanSurface *getSurface( void ) noexcept { return crimild::get_ptr( m_surface ); }
+//		public:
+//			void setSurface( SharedPointer< VulkanSurface > const &surface ) noexcept { m_surface = surface; }
+//			VulkanSurface *getSurface( void ) noexcept { return crimild::get_ptr( m_surface ); }
 
-		private:
-			SharedPointer< VulkanSurface > m_surface;
+//		private:
+//			SharedPointer< VulkanSurface > m_surface;
 
 			//@}
 
@@ -74,12 +71,12 @@ namespace crimild {
 			 */
 			//@{
 
-		public:
-			void setRenderDevice( SharedPointer< VulkanRenderDevice > const &renderDevice ) noexcept { m_renderDevice = renderDevice; }
-			VulkanRenderDevice *getRenderDevice( void ) noexcept { return crimild::get_ptr( m_renderDevice ); }
+//		public:
+//			void setRenderDevice( SharedPointer< VulkanRenderDevice > const &renderDevice ) noexcept { m_renderDevice = renderDevice; }
+//			VulkanRenderDevice *getRenderDevice( void ) noexcept { return crimild::get_ptr( m_renderDevice ); }
 
-		private:
-			SharedPointer< VulkanRenderDevice > m_renderDevice;
+//		private:
+//			SharedPointer< VulkanRenderDevice > m_renderDevice;
 
 			//@}
 
@@ -88,16 +85,12 @@ namespace crimild {
 			*/
 			//@{
 
-		private:
+		public:
 			/**
 			   \brief Creates a debug messenger for validation layers
-			   \see createInstance for another usage
 			 */
-			crimild::Bool createDebugMessenger( void ) noexcept;
-			void destroyDebugMessenger( void ) noexcept;
-			
-		private:
-			VkDebugUtilsMessengerEXT m_debugMessenger;
+			SharedPointer< VulkanDebugMessenger > createDebugMessenger( void ) noexcept;
+			void destroyDebugMessenger( VulkanDebugMessenger * ) noexcept;
 
 			//@}
 		};
