@@ -47,13 +47,16 @@ using namespace crimild::vulkan;
 
 crimild::Bool GLFWVulkanSystem::start( void )
 {
-	auto ret = System::start()
-		&& createInstance()
-		&& createSurface()
-		&& createRenderDevice()
-		&& createSwapchain();
+	if ( !System::start()
+		|| !createInstance()
+        || !createDebugMessenger()
+		|| !createSurface()
+		|| !createRenderDevice()
+        || !createSwapchain() ) {
+        return false;
+    }
 
-	auto renderDevice = m_instance->getRenderDevice();
+	auto renderDevice = getRenderDevice();
 	auto swapchain = renderDevice->getSwapchain();
 
 	m_renderPass = renderDevice->createRenderPass();
@@ -120,7 +123,7 @@ crimild::Bool GLFWVulkanSystem::start( void )
 		m_inFlightFences.push_back( renderDevice->createFence() );
 	}
 
-	return ret;
+	return true;
 }
 
 /*
@@ -130,7 +133,7 @@ crimild::Bool GLFWVulkanSystem::start( void )
  */
 void GLFWVulkanSystem::update( void )
 {
-	auto renderDevice = getInstance()->getRenderDevice();
+	auto renderDevice = getRenderDevice();
 	auto swapchain = renderDevice->getSwapchain();
 
 	auto wait = crimild::get_ptr( m_imageAvailableSemaphores[ m_currentFrame ] );
@@ -169,7 +172,8 @@ void GLFWVulkanSystem::stop( void )
 {
 	System::stop();
 
-	if ( auto device = m_instance->getRenderDevice() ) {
+	if ( auto device = getRenderDevice() ) {
+        CRIMILD_LOG_TRACE( "Waiting for pending operations" );
 		device->waitIdle();
 	}
 
@@ -181,6 +185,9 @@ void GLFWVulkanSystem::stop( void )
 	m_framebuffers.clear();
 	m_pipeline = nullptr;
 	m_renderPass = nullptr;
+    m_renderDevice = nullptr;
+    m_debugMessenger = nullptr;
+    m_surface = nullptr;
 	m_instance = nullptr;
 }
 
@@ -188,7 +195,7 @@ crimild::Bool GLFWVulkanSystem::createInstance( void ) noexcept
 {
 	CRIMILD_LOG_TRACE( "Creating Vulkan instance" );
 
-    auto validationLayersEnabled = utils::areValidationLayersEnabled();
+    auto validationLayersEnabled = utils::checkValidationLayersEnabled();
     auto validationLayers = utils::getValidationLayers();
     if ( validationLayersEnabled && !utils::checkValidationLayerSupport( validationLayers ) ) {
         CRIMILD_LOG_ERROR( "Validation layers requested, but not available" );
@@ -244,8 +251,14 @@ crimild::Bool GLFWVulkanSystem::createInstance( void ) noexcept
         return false;
     }
 
-    m_instance = crimild::alloc< VulkanInstance >( instance );
+    m_instance = crimild::alloc< VulkanInstance >();
+    m_instance->handler = instance;
     return true;
+}
+
+crimild::Bool GLFWVulkanSystem::createDebugMessenger( void ) noexcept
+{
+    return ( m_debugMessenger = getInstance()->createDebugMessenger() ) != nullptr;
 }
 
 crimild::Bool GLFWVulkanSystem::createSurface( void ) noexcept
@@ -258,7 +271,7 @@ crimild::Bool GLFWVulkanSystem::createSurface( void ) noexcept
 	
 	VkSurfaceKHR surfaceHandler;
 	auto result = glfwCreateWindowSurface(
-		m_instance->getInstanceHandler(),
+		m_instance->handler,
 		window,
 		nullptr,
 		&surfaceHandler
@@ -268,36 +281,29 @@ crimild::Bool GLFWVulkanSystem::createSurface( void ) noexcept
 		return false;
 	}
 
-	auto surface = crimild::alloc< VulkanSurface >( crimild::get_ptr( m_instance ), surfaceHandler );
-	m_instance->setSurface( surface );
-
+	m_surface = crimild::alloc< VulkanSurface >( crimild::get_ptr( m_instance ), surfaceHandler );
 	return true;
 }
 
 crimild::Bool GLFWVulkanSystem::createRenderDevice( void ) noexcept
 {
 	CRIMILD_LOG_TRACE( "Creating Vulkan render device" );
-	
-	auto renderDevice = VulkanRenderDevice::create(
+
+	m_renderDevice = VulkanRenderDevice::create(
 		getInstance(),
-		getInstance()->getSurface()
+		getSurface()
 	);
 
-	if ( renderDevice == nullptr ) {
-		return false;
-	}
-
-	getInstance()->setRenderDevice( renderDevice );
-	return true;
+    return m_renderDevice != nullptr;
 }
 
 crimild::Bool GLFWVulkanSystem::createSwapchain( void ) noexcept
 {
-	auto swapchain = Swapchain::create( getInstance()->getRenderDevice(), getInstance()->getSurface() );
+	auto swapchain = Swapchain::create( getRenderDevice(), getSurface() );
 	if ( swapchain == nullptr ) {
 		return false;
 	}
 
-	getInstance()->getRenderDevice()->setSwapchain( swapchain );
+	m_renderDevice->setSwapchain( swapchain );
 	return true;
 }
