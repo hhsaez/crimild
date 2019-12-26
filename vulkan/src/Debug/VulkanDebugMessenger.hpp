@@ -31,6 +31,8 @@
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/VulkanUtils.hpp"
 
+#include <unordered_set>
+
 namespace crimild {
 
     namespace vulkan {
@@ -39,10 +41,30 @@ namespace crimild {
 
         class VulkanDebugMessenger : public SharedObject {
         public:
+            struct Descriptor {
+                // Nothing to describe.
+            };
+
+        public:
             ~VulkanDebugMessenger( void );
 
             VulkanInstance *instance = nullptr;
             VkDebugUtilsMessengerEXT handler = VK_NULL_HANDLE;
+        };
+
+        class VulkanDebugMessengerManager {
+        public:
+            VulkanDebugMessengerManager( VulkanInstance *instance );
+            virtual ~VulkanDebugMessengerManager( void );
+
+            SharedPointer< VulkanDebugMessenger > create( VulkanDebugMessenger::Descriptor const &descriptor ) noexcept;
+            void destroy( VulkanDebugMessenger *debugMessenger ) noexcept;
+
+            void cleanup( void ) noexcept;
+
+        private:
+            VulkanInstance *m_instance = nullptr;
+            std::unordered_set< VulkanDebugMessenger * > m_debugMessengers;
         };
 
     }

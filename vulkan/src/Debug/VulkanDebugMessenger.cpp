@@ -34,7 +34,87 @@ using namespace crimild::vulkan;
 VulkanDebugMessenger::~VulkanDebugMessenger( void )
 {
     if ( instance != nullptr ) {
-        instance->destroyDebugMessenger( this );
+        instance->destroy( this );
     }
 }
 
+VulkanDebugMessengerManager::VulkanDebugMessengerManager( VulkanInstance *instance )
+    : m_instance( instance )
+{
+
+}
+
+VulkanDebugMessengerManager::~VulkanDebugMessengerManager( void )
+{
+    cleanup();
+}
+
+SharedPointer< VulkanDebugMessenger > VulkanDebugMessengerManager::create( VulkanDebugMessenger::Descriptor const &descriptor ) noexcept
+{
+    if ( !utils::checkValidationLayersEnabled() ) {
+        return nullptr;
+    }
+
+    CRIMILD_LOG_TRACE( "Setting up vulkan debug messenger" );
+
+    VkDebugUtilsMessengerCreateInfoEXT createInfo;
+    utils::populateDebugMessengerCreateInfo( createInfo );
+
+    auto createDebugUtilsMessengerEXT = [](
+        VkInstance instance,
+        const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
+        const VkAllocationCallbacks *pAllocator,
+        VkDebugUtilsMessengerEXT *pDebugMessenger ) {
+        if ( auto func = ( PFN_vkCreateDebugUtilsMessengerEXT ) vkGetInstanceProcAddr( instance, "vkCreateDebugUtilsMessengerEXT" ) ) {
+            return func( instance, pCreateInfo, pAllocator, pDebugMessenger );
+        }
+        return VK_ERROR_EXTENSION_NOT_PRESENT;
+    };
+
+    VkDebugUtilsMessengerEXT debugMessengerHandler = VK_NULL_HANDLE;
+    if ( createDebugUtilsMessengerEXT(
+        m_instance->handler,
+        &createInfo,
+        nullptr,
+        &debugMessengerHandler ) != VK_SUCCESS ) {
+        CRIMILD_LOG_ERROR( "Failed to setup debug messenger" );
+        return nullptr;
+    }
+
+    auto debugMessenger = crimild::alloc< VulkanDebugMessenger >();
+    debugMessenger->handler = debugMessengerHandler;
+    debugMessenger->instance = m_instance;
+    m_debugMessengers.insert( crimild::get_ptr( debugMessenger ) );
+    return debugMessenger;
+}
+
+void VulkanDebugMessengerManager::destroy( VulkanDebugMessenger *debugMessenger ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Destroying vulkan debug messenger" );
+
+    if ( !utils::checkValidationLayersEnabled() ) {
+        return;
+    }
+
+    auto destroyDebugUtilsMessengerEXT = []( VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks *pAllocator ) {
+        if ( auto func = ( PFN_vkDestroyDebugUtilsMessengerEXT ) vkGetInstanceProcAddr( instance, "vkDestroyDebugUtilsMessengerEXT" ) ) {
+            func( instance, debugMessenger, pAllocator );
+        }
+    };
+
+    if ( debugMessenger->handler != VK_NULL_HANDLE ) {
+        destroyDebugUtilsMessengerEXT( m_instance->handler, debugMessenger->handler, nullptr );
+        debugMessenger->handler = VK_NULL_HANDLE;
+    }
+    debugMessenger->instance = nullptr;
+    debugMessenger->handler = VK_NULL_HANDLE;
+    m_debugMessengers.erase( debugMessenger );
+}
+
+void VulkanDebugMessengerManager::cleanup( void ) noexcept
+{
+    for ( auto debugMessenger : m_debugMessengers ) {
+        destroy( debugMessenger );
+    }
+    m_debugMessengers.clear();
+}

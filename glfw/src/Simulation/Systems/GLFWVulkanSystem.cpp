@@ -258,7 +258,7 @@ crimild::Bool GLFWVulkanSystem::createInstance( void ) noexcept
 
 crimild::Bool GLFWVulkanSystem::createDebugMessenger( void ) noexcept
 {
-    return ( m_debugMessenger = getInstance()->createDebugMessenger() ) != nullptr;
+    return ( m_debugMessenger = getInstance()->create( { } ) ) != nullptr;
 }
 
 crimild::Bool GLFWVulkanSystem::createSurface( void ) noexcept
