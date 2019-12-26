@@ -28,6 +28,8 @@
 #ifndef CRIMILD_VULKAN_RENDERING_INSTANCE_
 #define CRIMILD_VULKAN_RENDERING_INSTANCE_
 
+#include "Debug/VulkanDebugMessenger.hpp"
+
 #include "Foundation/Types.hpp"
 #include "Foundation/VulkanUtils.hpp"
 #include "Foundation/SharedObject.hpp"
@@ -38,7 +40,6 @@ namespace crimild {
 
 	namespace vulkan {
 
-        class VulkanDebugMessenger;
 		class VulkanSurface;
 		class VulkanRenderDevice;
 		class Swapchain;
@@ -46,8 +47,12 @@ namespace crimild {
 		/**
 		   \brief Handles creation and setup for the Vulkan instance
 		 */
-		class VulkanInstance : public SharedObject {
-		public:
+		class VulkanInstance :
+			public SharedObject,
+			public VulkanDebugMessengerManager {
+
+        public:
+            VulkanInstance( void );
 			~VulkanInstance( void );
 
             VkInstance handler = VK_NULL_HANDLE;
@@ -77,20 +82,6 @@ namespace crimild {
 
 //		private:
 //			SharedPointer< VulkanRenderDevice > m_renderDevice;
-
-			//@}
-
-			/**
-			   \name Debugging
-			*/
-			//@{
-
-		public:
-			/**
-			   \brief Creates a debug messenger for validation layers
-			 */
-			SharedPointer< VulkanDebugMessenger > createDebugMessenger( void ) noexcept;
-			void destroyDebugMessenger( VulkanDebugMessenger * ) noexcept;
 
 			//@}
 		};
