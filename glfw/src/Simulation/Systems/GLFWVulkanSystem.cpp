@@ -186,74 +186,29 @@ void GLFWVulkanSystem::stop( void )
 	m_pipeline = nullptr;
 	m_renderPass = nullptr;
     m_renderDevice = nullptr;
-    m_debugMessenger = nullptr;
+//    m_debugMessenger = nullptr;
     m_surface = nullptr;
-	m_instance = nullptr;
+//	m_instance = nullptr;
 }
 
 crimild::Bool GLFWVulkanSystem::createInstance( void ) noexcept
 {
-	CRIMILD_LOG_TRACE( "Creating Vulkan instance" );
-
-    auto validationLayersEnabled = utils::checkValidationLayersEnabled();
-    auto validationLayers = utils::getValidationLayers();
-    if ( validationLayersEnabled && !utils::checkValidationLayerSupport( validationLayers ) ) {
-        CRIMILD_LOG_ERROR( "Validation layers requested, but not available" );
-        return false;
-    }
-
     auto settings = Simulation::getInstance()->getSettings();
     auto appName = settings->get< std::string >( Settings::SETTINGS_APP_NAME, "Crimild" );
     auto appVersionMajor = settings->get< crimild::UInt32 >( Settings::SETTINGS_APP_VERSION_MAJOR, 1 );
     auto appVersionMinor = settings->get< crimild::UInt32 >( Settings::SETTINGS_APP_VERSION_MINOR, 0 );
     auto appVersionPatch = settings->get< crimild::UInt32 >( Settings::SETTINGS_APP_VERSION_PATCH, 0 );
 
-    auto appInfo = VkApplicationInfo {
-    	.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
-    	.pApplicationName = appName.c_str(),
-    	.applicationVersion = VK_MAKE_VERSION(
-        	appVersionMajor,
-     		appVersionMinor,
-     		appVersionPatch
-    	),
-    	.pEngineName = "Crimild",
-    	.engineVersion = VK_MAKE_VERSION(
-        	CRIMILD_VERSION_MAJOR,
-        	CRIMILD_VERSION_MINOR,
-        	CRIMILD_VERSION_PATCH
-    	),
-    };
+    m_instance = create(
+        VulkanInstance::Descriptor {
+            .appName = appName,
+            .appVersionMajor = appVersionMajor,
+            .appVersionMinor = appVersionMinor,
+            .appVersionPatch = appVersionPatch
+        }
+    );
 
-    auto extensions = utils::getRequiredExtensions();
-
-    auto createInfo = VkInstanceCreateInfo {
-        .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-        .pApplicationInfo = &appInfo,
-        .enabledExtensionCount = static_cast< crimild::UInt32 >( extensions.size() ),
-        .ppEnabledExtensionNames = extensions.data(),
-        .enabledLayerCount = 0,
-    };
-
-    // Keep reference outside block to it is not automatically destroyed before calling VkCreateInstance
-    VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo;
-    if ( validationLayersEnabled ) {
-        createInfo.enabledLayerCount = static_cast< crimild::UInt32 >( validationLayers.size() );
-        createInfo.ppEnabledLayerNames = validationLayers.data();
-
-        // Enable debug messenger specifically for create/destroy instance
-        utils::populateDebugMessengerCreateInfo( debugCreateInfo );
-        createInfo.pNext = ( VkDebugUtilsMessengerCreateInfoEXT * ) &debugCreateInfo;
-    }
-
-    VkInstance instance;
-    if ( vkCreateInstance( &createInfo, nullptr, &instance ) != VK_SUCCESS ) {
-        CRIMILD_LOG_ERROR( "Failed to create Vulkan instance" );
-        return false;
-    }
-
-    m_instance = crimild::alloc< VulkanInstance >();
-    m_instance->handler = instance;
-    return true;
+    return m_instance != nullptr;
 }
 
 crimild::Bool GLFWVulkanSystem::createDebugMessenger( void ) noexcept
