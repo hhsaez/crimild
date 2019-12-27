@@ -28,10 +28,7 @@
 #ifndef CRIMILD_VULKAN_RENDERING_RENDER_DEVICE_
 #define CRIMILD_VULKAN_RENDERING_RENDER_DEVICE_
 
-#include "Foundation/Types.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/VulkanUtils.hpp"
-
+#include "Foundation/VulkanObject.hpp"
 #include "VulkanPipeline.hpp"
 #include "VulkanFramebuffer.hpp"
 
@@ -41,15 +38,43 @@ namespace crimild {
 
 	namespace vulkan {
 
+        class CommandBuffer;
+        class CommandPool;
+        class Fence;
+        class Image;
+        class ImageView;
+        class PhysicalDevice;
+        class RenderDeviceManager;
+        class Semaphore;
+        class Swapchain;
 		class VulkanInstance;
 		class VulkanSurface;
-		class Semaphore;
-		class Fence;
-		class Image;
-		class ImageView;
-		class Swapchain;
-		class CommandPool;
-		class CommandBuffer;
+
+        class RenderDevice : public VulkanObject {
+            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::RenderDevice )
+
+        public:
+            struct Descriptor {
+                PhysicalDevice *physicalDevice;
+            };
+
+        public:
+            ~RenderDevice( void );
+
+            VkDevice handler = VK_NULL_HANDLE;
+            PhysicalDevice *physicalDevice = nullptr;
+            RenderDeviceManager *manager = nullptr;
+            VkQueue graphicsQueue;
+            VkQueue presentQueue;
+        };
+
+        class RenderDeviceManager : public VulkanObjectManager< RenderDevice > {
+        public:
+            virtual ~RenderDeviceManager( void ) = default;
+
+            SharedPointer< RenderDevice > create( RenderDevice::Descriptor const &descriptor ) noexcept;
+            void destroy( RenderDevice *renderDevice ) noexcept override;
+        };
 
 		/**
 		   \brief Implements a render device for Vulkan

@@ -9,14 +9,14 @@
 *     * Redistributions in binary form must reproduce the above copyright
 *       notice, this list of conditions and the following disclaimer in the
 *       documentation and/or other materials provided with the distribution.
-*     * Neither the name of the copyright holder nor the
+*     * Neither the name of the copyright holders nor the
 *       names of its contributors may be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
 * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE FOR ANY
+* DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
 * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -25,42 +25,47 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CRIMILD_VULKAN_DEBUG_MESSENGER_
-#define CRIMILD_VULKAN_DEBUG_MESSENGER_
+#ifndef CRIMILD_VULKAN_RENDERING_PHYSICAL_DEVICE_
+#define CRIMILD_VULKAN_RENDERING_PHYSICAL_DEVICE_
 
 #include "Foundation/VulkanObject.hpp"
-
-#include <unordered_set>
 
 namespace crimild {
 
     namespace vulkan {
 
         class VulkanInstance;
-        class VulkanDebugMessengerManager;
+        class VulkanSurface;
+        class PhysicalDeviceManager;
 
-        class VulkanDebugMessenger : public VulkanObject {
-            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::VulkanDebugMessenger )
-
+        class PhysicalDevice : public VulkanObject {
+            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::PhysicalDevice )
         public:
             struct Descriptor {
                 VulkanInstance *instance;
+                VulkanSurface *surface;
             };
 
         public:
-            ~VulkanDebugMessenger( void );
+            ~PhysicalDevice( void );
 
-            VulkanDebugMessengerManager *manager = nullptr;
+            VkPhysicalDevice handler = VK_NULL_HANDLE;
             VulkanInstance *instance = nullptr;
-            VkDebugUtilsMessengerEXT handler = VK_NULL_HANDLE;
+            VulkanSurface *surface = nullptr;
+            PhysicalDeviceManager *manager = nullptr;
         };
 
-        class VulkanDebugMessengerManager : public VulkanObjectManager< VulkanDebugMessenger > {
+        // TODO: How to handle an optional surface param?
+        class PhysicalDeviceManager : public VulkanObjectManager< PhysicalDevice > {
         public:
-            virtual ~VulkanDebugMessengerManager( void ) = default;
+            virtual ~PhysicalDeviceManager( void ) = default;
 
-            SharedPointer< VulkanDebugMessenger > create( VulkanDebugMessenger::Descriptor const &descriptor ) noexcept;
-            void destroy( VulkanDebugMessenger *debugMessenger ) noexcept override;
+            SharedPointer< PhysicalDevice > create( PhysicalDevice::Descriptor const &descriptor ) noexcept;
+            void destroy( PhysicalDevice *physicalDevice ) noexcept override;
+
+        private:
+            VkPhysicalDevice pickPhysicalDevice( const VkInstance &instance, const VkSurfaceKHR &surface ) noexcept;
+            crimild::Bool isDeviceSuitable( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept;
         };
 
     }
@@ -68,4 +73,5 @@ namespace crimild {
 }
 
 #endif
+
 

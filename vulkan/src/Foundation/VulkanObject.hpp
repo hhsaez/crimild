@@ -43,7 +43,7 @@ namespace crimild {
         	public SharedObject,
             public RTTI {
         public:
-            virtual ~VulkanObject( void ) { }
+            virtual ~VulkanObject( void ) = default;
         };
 
         template< class T >
