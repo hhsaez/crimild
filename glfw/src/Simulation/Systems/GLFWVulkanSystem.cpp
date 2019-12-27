@@ -45,6 +45,7 @@ using namespace crimild;
 using namespace crimild::glfw;
 using namespace crimild::vulkan;
 
+/*
 crimild::Bool GLFWVulkanSystem::start( void )
 {
 	if ( !System::start()
@@ -125,12 +126,14 @@ crimild::Bool GLFWVulkanSystem::start( void )
 
 	return true;
 }
+ */
 
 /*
   1. Acquire an image from the swapchain
   2. Execute command buffer with that image as attachment in the framebuffer
   3. Return the image to the swapchain for presentation
  */
+/*
 void GLFWVulkanSystem::update( void )
 {
 	auto renderDevice = getRenderDevice();
@@ -186,11 +189,14 @@ void GLFWVulkanSystem::stop( void )
 	m_pipeline = nullptr;
 	m_renderPass = nullptr;
     m_renderDevice = nullptr;
-//    m_debugMessenger = nullptr;
-    m_surface = nullptr;
-//	m_instance = nullptr;
-}
 
+    VulkanDebugMessengerManager::cleanup();
+    VulkanSurfaceManager::cleanup();
+    VulkanInstanceManager::cleanup();
+}
+ */
+
+/*
 crimild::Bool GLFWVulkanSystem::createInstance( void ) noexcept
 {
     auto settings = Simulation::getInstance()->getSettings();
@@ -213,31 +219,22 @@ crimild::Bool GLFWVulkanSystem::createInstance( void ) noexcept
 
 crimild::Bool GLFWVulkanSystem::createDebugMessenger( void ) noexcept
 {
-    return ( m_debugMessenger = getInstance()->create( { } ) ) != nullptr;
+    m_debugMessenger = create(
+		VulkanDebugMessenger::Descriptor {
+			.instance = crimild::get_ptr( m_instance )
+    	}
+   	);
+	return m_debugMessenger != nullptr;
 }
 
 crimild::Bool GLFWVulkanSystem::createSurface( void ) noexcept
 {
-	CRIMILD_LOG_TRACE( "Creating Vulkan surface" );
-
-	auto sim = Simulation::getInstance();
-	auto windowSystem = sim->getSystem< WindowSystem >();
-	auto window = windowSystem->getWindowHandler();
-	
-	VkSurfaceKHR surfaceHandler;
-	auto result = glfwCreateWindowSurface(
-		m_instance->handler,
-		window,
-		nullptr,
-		&surfaceHandler
-	);
-	if ( result != VK_SUCCESS ) {
-		CRIMILD_LOG_FATAL( "Failed to create window surface for Vulkan. Error: ", result );
-		return false;
-	}
-
-	m_surface = crimild::alloc< VulkanSurface >( crimild::get_ptr( m_instance ), surfaceHandler );
-	return true;
+    m_surface = create(
+        VulkanSurface::Descriptor {
+            .instance = crimild::get_ptr( m_instance )
+        }
+    );
+    return m_surface != nullptr;
 }
 
 crimild::Bool GLFWVulkanSystem::createRenderDevice( void ) noexcept
@@ -262,3 +259,32 @@ crimild::Bool GLFWVulkanSystem::createSwapchain( void ) noexcept
 	m_renderDevice->setSwapchain( swapchain );
 	return true;
 }
+*/
+
+SharedPointer< VulkanSurface > GLFWVulkanSystem::create( VulkanSurface::Descriptor const &descriptor ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Creating GLFW Vulkan Surface" );
+
+    auto sim = Simulation::getInstance();
+    auto windowSystem = sim->getSystem< WindowSystem >();
+    auto window = windowSystem->getWindowHandler();
+
+    VkSurfaceKHR surfaceHandler;
+
+    auto result = glfwCreateWindowSurface(
+        descriptor.instance->handler,
+        window,
+        nullptr,
+        &surfaceHandler
+    );
+    if ( result != VK_SUCCESS ) {
+        CRIMILD_LOG_FATAL( "Failed to create window surface for Vulkan. Error: ", result );
+        return nullptr;
+    }
+
+    auto surface = crimild::alloc< VulkanSurface >();
+    surface->handler = surfaceHandler;
+    surface->instance = descriptor.instance;
+    return surface;
+}
+

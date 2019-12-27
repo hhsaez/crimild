@@ -174,51 +174,12 @@ void utils::populateDebugMessengerCreateInfo( VkDebugUtilsMessengerCreateInfoEXT
     createInfo.pUserData = nullptr;
 }
 
-VkPhysicalDevice utils::pickPhysicalDevice( const VkInstance &instance, const VkSurfaceKHR &surface ) noexcept
+const utils::ExtensionArray &utils::getDeviceExtensions( void ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Picking physical device" );
-
-    crimild::UInt32 deviceCount = 0;
-    vkEnumeratePhysicalDevices( instance, &deviceCount, nullptr );
-    if ( deviceCount == 0 ) {
-        CRIMILD_LOG_ERROR( "Failed to find GPUs with Vulkan support" );
-        return VK_NULL_HANDLE;
-    }
-
-    std::vector< VkPhysicalDevice > devices( deviceCount );
-    vkEnumeratePhysicalDevices( instance, &deviceCount, devices.data() );
-    for ( const auto &device : devices ) {
-        if ( isDeviceSuitable( device, surface ) ) {
-            CRIMILD_LOG_INFO( "Vulkan physical device found" );
-            return device;
-        }
-    }
-
-    CRIMILD_LOG_ERROR( "Failed to find a suitable GPU" );
-    return VK_NULL_HANDLE;
-}
-
-crimild::Bool utils::isDeviceSuitable( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept
-{
-    /*
-    CRIMILD_LOG_TRACE( "Checking device properties" );
-
-    auto indices = findQueueFamilies( device, surface );
-    auto extensionsSupported = checkDeviceExtensionSupport( device );
-    auto swapchainAdequate = false;
-    if ( extensionsSupported ) {
-        swapchainAdequate = checkSwapchainSupport( device, surface );
-    }
-
-    VkPhysicalDeviceFeatures supportedFeatures;
-    vkGetPhysicalDeviceFeatures( device, &supportedFeatures );
-
-    return indices.isComplete()
-    	&& extensionsSupported
-    	&& swapchainAdequate
-        && supportedFeatures.samplerAnisotropy;
-     */
-    return false;
+    static ExtensionArray deviceExtensions = {
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+    };
+    return deviceExtensions;
 }
 
 crimild::Bool utils::checkDeviceExtensionSupport( const VkPhysicalDevice &device ) noexcept

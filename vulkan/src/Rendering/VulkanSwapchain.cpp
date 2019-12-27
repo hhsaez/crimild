@@ -178,7 +178,7 @@ SharedPointer< Swapchain > Swapchain::create( VulkanRenderDevice *device, Vulkan
 	CRIMILD_LOG_TRACE( "Creating swapchain" );
 
 	const auto &physicalDeviceHandler = device->getPhysicalDeviceHandler();
-	const auto &surfaceHandler = surface->getSurfaceHandler();
+	const auto &surfaceHandler = surface->handler;
 	
 	auto swapchainSupport = querySupportDetails( physicalDeviceHandler, surfaceHandler );
 	auto surfaceFormat = chooseSurfaceFormat( swapchainSupport.formats );

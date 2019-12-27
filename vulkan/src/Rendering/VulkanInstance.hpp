@@ -28,6 +28,7 @@
 #ifndef CRIMILD_VULKAN_RENDERING_INSTANCE_
 #define CRIMILD_VULKAN_RENDERING_INSTANCE_
 
+#include "VulkanPhysicalDevice.hpp"
 #include "Debug/VulkanDebugMessenger.hpp"
 #include "Foundation/VulkanObject.hpp"
 
@@ -45,9 +46,7 @@ namespace crimild {
 		/**
 		   \brief Handles creation and setup for the Vulkan instance
 		 */
-		class VulkanInstance :
-			public VulkanObject,
-			public VulkanDebugMessengerManager {
+        class VulkanInstance : public VulkanObject {
             CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::VulkanInstance )
 
         public:
@@ -59,7 +58,6 @@ namespace crimild {
             };
 
         public:
-            VulkanInstance( void );
 			~VulkanInstance( void );
 
             VkInstance handler = VK_NULL_HANDLE;

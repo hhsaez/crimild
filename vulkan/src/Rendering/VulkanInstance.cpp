@@ -32,17 +32,9 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
-VulkanInstance::VulkanInstance( void )
-    : VulkanDebugMessengerManager( this )
-{
-
-}
-
 VulkanInstance::~VulkanInstance( void )
 {
 	CRIMILD_LOG_TRACE( "Destroying instance" );
-
-    VulkanDebugMessengerManager::cleanup();
 	
 //	if ( m_renderDevice != nullptr ) {
 //		CRIMILD_LOG_TRACE( "Waiting for pending operations" );

@@ -29,93 +29,21 @@
 #define CRIMILD_GLFW_SIMULATION_SYSTEMS_VULKAN_SYSTEM_
 
 #include <Simulation/Systems/System.hpp>
-
+#include "Simulation/Systems/VulkanSystem.hpp"
 #include "Foundation/GLFWUtils.hpp"
-#include "Rendering/VulkanInstance.hpp"
-
-#define MAX_FRAMES_IN_FLIGHT 2
 
 namespace crimild {
-
-	namespace vulkan {
-
-        class VulkanDebugMessenger;
-        class VulkanRenderDevice;
-        class VulkanSurface;
-		class Semaphore;
-		class Fence;
-		class RenderPass;
-		class Pipeline;
-		class CommandPool;
-		class CommandBuffer;
-		class Framebuffer;
-
-	}
 
 	namespace glfw {
 
 		/**
-		   What it takes to work with Vulkan:
-		   1. Create an instance
-		   2. Select a supported phisical device
-		   3. Create logical devices and queues for drawing and presentation
-		   4. Create a window, a window surface and a swapchain
-		   5. Keep track of swapchain images
-		   6. Create a render pass that specifies render targets and usage
-		   7. Create framebuffers for the render pass
-		   8. Set up the graphics pipeline
-		   9. Allocate and record a command buffer with the draw commands for every possible swapchain image
-		   10. Draw frames by acquiring images, submitting the right draw command buffer and returing the images back to the swapchain
+         	Implmements Vulkan system for GLFW
 		 */
-		class GLFWVulkanSystem :
-        	public System,
-            public vulkan::VulkanInstanceManager {
+		class GLFWVulkanSystem : public vulkan::VulkanSystem {
 			CRIMILD_IMPLEMENT_RTTI( crimild::glfw::GLFWVulkanSystem )
-			
-		public:
-			System::Priority getInitPriority( void ) const noexcept override { return System::PriorityType::HIGH; }
-			System::Priority getPriority( void ) const noexcept override { return System::PriorityType::RENDER; }
 
-			crimild::Bool start( void ) override;
-			void update( void ) override;
-			void stop( void ) override;
-
-			vulkan::VulkanInstance *getInstance( void ) noexcept { return crimild::get_ptr( m_instance ); }
-            vulkan::VulkanRenderDevice *getRenderDevice( void ) noexcept { return crimild::get_ptr( m_renderDevice ); }
-            vulkan::VulkanSurface *getSurface( void ) noexcept { return crimild::get_ptr( m_surface ); }
-
-		private:
-			/**
-			   \brief Instance creation and physical device selection
-
-			   An instance is created by describing the application and any API
-			   extensions will be using. Then, we query for Vulkan supported
-			   hardware and select at least one VkPhysicalDevice for our operations.
-			 */
-			crimild::Bool createInstance( void ) noexcept;
-            crimild::Bool createDebugMessenger( void ) noexcept;
-			crimild::Bool createSurface( void ) noexcept;
-			
-			/**
-			   \brief Logical devices and queue families
-			 */
-			crimild::Bool createRenderDevice( void ) noexcept;
-			crimild::Bool createSwapchain( void ) noexcept;			
-
-		private:
-			SharedPointer< vulkan::VulkanInstance > m_instance;
-            SharedPointer< vulkan::VulkanDebugMessenger > m_debugMessenger;
-            SharedPointer< vulkan::VulkanRenderDevice > m_renderDevice;
-            SharedPointer< vulkan::VulkanSurface > m_surface;
-			SharedPointer< vulkan::RenderPass > m_renderPass;
-			SharedPointer< vulkan::Pipeline > m_pipeline;
-			std::vector< SharedPointer< vulkan::Framebuffer >> m_framebuffers;
-			SharedPointer< vulkan::CommandPool > m_commandPool;
-			std::vector< SharedPointer< vulkan::CommandBuffer >> m_commandBuffers;
-			std::vector< SharedPointer< vulkan::Semaphore >> m_imageAvailableSemaphores;
-			std::vector< SharedPointer< vulkan::Semaphore >> m_renderFinishedSemaphores;
-			std::vector< SharedPointer< vulkan::Fence >> m_inFlightFences;
-			crimild::UInt32 m_currentFrame = 0;
+        protected:
+            SharedPointer< vulkan::VulkanSurface > create( vulkan::VulkanSurface::Descriptor const &descriptor ) noexcept override;
 		};
     
 	}

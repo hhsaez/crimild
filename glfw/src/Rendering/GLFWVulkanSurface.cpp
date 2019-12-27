@@ -16,7 +16,7 @@
 * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE FOR ANY
+* DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
 * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -25,36 +25,40 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "VulkanSurface.hpp"
-#include "VulkanInstance.hpp"
-#include "Foundation/Log.hpp"
+#include "GLFWVulkanSurface.hpp"
+#include "Simulation/Simulation.hpp"
+#include "Simulation/Systems/WindowSystem.hpp"
+#include "Rendering/VulkanInstance.hpp"
 
+using namespace crimild;
+using namespace crimild::glfw;
 using namespace crimild::vulkan;
 
-VulkanSurface::~VulkanSurface( void )
+SharedPointer< VulkanSurface > GLFWVulkanSurfaceManager::create( VulkanSurface::Descriptor const &descriptor ) noexcept
 {
-    if ( manager != nullptr ) {
-        manager->destroy( this );
-    }
-}
+    CRIMILD_LOG_TRACE( "Creating GLFW Vulkan Surface" );
 
-void VulkanSurfaceManager::attach( VulkanSurface *surface ) noexcept
-{
+    auto sim = Simulation::getInstance();
+    auto windowSystem = sim->getSystem< WindowSystem >();
+    auto window = windowSystem->getWindowHandler();
+
+    VkSurfaceKHR surfaceHandler;
+
+    auto result = glfwCreateWindowSurface(
+        descriptor.instance->handler,
+        window,
+        nullptr,
+        &surfaceHandler
+    );
+    if ( result != VK_SUCCESS ) {
+        CRIMILD_LOG_FATAL( "Failed to create window surface for Vulkan. Error: ", result );
+        return nullptr;
+    }
+
+    auto surface = crimild::alloc< VulkanSurface >();
+    surface->handler = surfaceHandler;
+    surface->instance = descriptor.instance;
     surface->manager = this;
-    insert( surface );
+    insert( crimild::get_ptr( surface ) );
+    return surface;
 }
-
-void VulkanSurfaceManager::destroy( VulkanSurface *surface ) noexcept
-{
-    CRIMILD_LOG_TRACE( "Destroying Vulkan surface" );
-
-    if ( surface->handler != VK_NULL_HANDLE ) {
-        vkDestroySurfaceKHR( surface->instance->handler, surface->handler, nullptr );
-    }
-
-    surface->handler = VK_NULL_HANDLE;
-    surface->instance = nullptr;
-    surface->manager = nullptr;
-    erase( surface );
-}
-

@@ -33,15 +33,9 @@ using namespace crimild::vulkan;
 
 VulkanDebugMessenger::~VulkanDebugMessenger( void )
 {
-    if ( instance != nullptr ) {
-        instance->destroy( this );
+    if ( manager != nullptr ) {
+        manager->destroy( this );
     }
-}
-
-VulkanDebugMessengerManager::VulkanDebugMessengerManager( VulkanInstance *instance )
-    : m_instance( instance )
-{
-
 }
 
 SharedPointer< VulkanDebugMessenger > VulkanDebugMessengerManager::create( VulkanDebugMessenger::Descriptor const &descriptor ) noexcept
@@ -68,7 +62,7 @@ SharedPointer< VulkanDebugMessenger > VulkanDebugMessengerManager::create( Vulka
 
     VkDebugUtilsMessengerEXT debugMessengerHandler = VK_NULL_HANDLE;
     if ( createDebugUtilsMessengerEXT(
-        m_instance->handler,
+        descriptor.instance->handler,
         &createInfo,
         nullptr,
         &debugMessengerHandler ) != VK_SUCCESS ) {
@@ -78,7 +72,8 @@ SharedPointer< VulkanDebugMessenger > VulkanDebugMessengerManager::create( Vulka
 
     auto debugMessenger = crimild::alloc< VulkanDebugMessenger >();
     debugMessenger->handler = debugMessengerHandler;
-    debugMessenger->instance = m_instance;
+    debugMessenger->instance = descriptor.instance;
+    debugMessenger->manager = this;
     insert( crimild::get_ptr( debugMessenger ) );
     return debugMessenger;
 }
@@ -98,10 +93,11 @@ void VulkanDebugMessengerManager::destroy( VulkanDebugMessenger *debugMessenger 
     };
 
     if ( debugMessenger->handler != VK_NULL_HANDLE ) {
-        destroyDebugUtilsMessengerEXT( m_instance->handler, debugMessenger->handler, nullptr );
+        destroyDebugUtilsMessengerEXT( debugMessenger->instance->handler, debugMessenger->handler, nullptr );
         debugMessenger->handler = VK_NULL_HANDLE;
     }
     debugMessenger->instance = nullptr;
+    debugMessenger->manager = nullptr;
     debugMessenger->handler = VK_NULL_HANDLE;
     erase( debugMessenger );
 }
