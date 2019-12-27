@@ -16,7 +16,7 @@
 * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE FOR ANY
+* DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS BE LIABLE FOR ANY
 * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -25,36 +25,25 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "VulkanSurface.hpp"
-#include "VulkanInstance.hpp"
-#include "Foundation/Log.hpp"
+#ifndef CRIMILD_GLFW_RENDERING_VULKAN_SURFACE_
+#define CRIMILD_GLFW_RENDERING_VULKAN_SURFACE_
 
-using namespace crimild::vulkan;
+#include "Rendering/VulkanSurface.hpp"
 
-VulkanSurface::~VulkanSurface( void )
-{
-    if ( manager != nullptr ) {
-        manager->destroy( this );
-    }
-}
+namespace crimild {
 
-void VulkanSurfaceManager::attach( VulkanSurface *surface ) noexcept
-{
-    surface->manager = this;
-    insert( surface );
-}
+    namespace glfw {
 
-void VulkanSurfaceManager::destroy( VulkanSurface *surface ) noexcept
-{
-    CRIMILD_LOG_TRACE( "Destroying Vulkan surface" );
+        class GLFWVulkanSurfaceManager : public vulkan::VulkanSurfaceManager {
+        public:
+            virtual ~GLFWVulkanSurfaceManager( void ) = default;
 
-    if ( surface->handler != VK_NULL_HANDLE ) {
-        vkDestroySurfaceKHR( surface->instance->handler, surface->handler, nullptr );
+            SharedPointer< vulkan::VulkanSurface > create( vulkan::VulkanSurface::Descriptor const &descriptor ) noexcept;
+        };
+
     }
 
-    surface->handler = VK_NULL_HANDLE;
-    surface->instance = nullptr;
-    surface->manager = nullptr;
-    erase( surface );
 }
+
+#endif
 

@@ -105,20 +105,7 @@ namespace crimild {
 
             ExtensionArray getRequiredExtensions( void ) noexcept;
 
-            void populateDebugMessengerCreateInfo( VkDebugUtilsMessengerCreateInfoEXT &createInfo ) noexcept;
-
-            //@}
-
-            /**
-             	\name Physical device creation
-             */
-            //@{
-
-            // TODO: How to handle an optional surface param?
-            VkPhysicalDevice pickPhysicalDevice( const VkInstance &instance, const VkSurfaceKHR &surface ) noexcept;
-
-            // TODO: How to handle an optional surface param?
-            crimild::Bool isDeviceSuitable( const VkPhysicalDevice &physicalDevice, const VkSurfaceKHR &surface ) noexcept;
+            const ExtensionArray &getDeviceExtensions( void ) noexcept;
 
             /**
              	\brief Check if a given device meets all of the required extensions
@@ -147,6 +134,8 @@ namespace crimild {
             QueueFamilyIndices findQueueFamilies( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept;
 
             //@}
+
+            void populateDebugMessengerCreateInfo( VkDebugUtilsMessengerCreateInfoEXT &createInfo ) noexcept;
 
 		}
 
