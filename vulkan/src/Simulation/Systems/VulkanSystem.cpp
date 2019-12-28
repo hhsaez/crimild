@@ -253,24 +253,21 @@ crimild::Bool VulkanSystem::createPhysicalDevice( void ) noexcept
 
 crimild::Bool VulkanSystem::createRenderDevice( void ) noexcept
 {
-    m_renderDevice = create(
-        RenderDevice::Descriptor {
-        	.physicalDevice = crimild::get_ptr( m_physicalDevice ),
-    	}
-    );
+    m_renderDevice = m_physicalDevice->create( RenderDevice::Descriptor { } );
     return m_renderDevice != nullptr;
 }
 
 crimild::Bool VulkanSystem::createSwapchain( void ) noexcept
 {
-    /*
-    auto swapchain = Swapchain::create( crimild::get_ptr( m_renderDevice ), crimild::get_ptr( m_surface ) );
-    if ( swapchain == nullptr ) {
-        return false;
-    }
+    auto settings = Simulation::getInstance()->getSettings();
+    auto width = settings->get< crimild::Int32 >( "video.width", 0 );
+    auto height = settings->get< crimild::Int32 >( "video.height", 0 );
 
-    m_renderDevice->setSwapchain( swapchain );
-    return true;
-     */
-    return false;
+    m_swapchain = m_renderDevice->create(
+        Swapchain::Descriptor {
+            .extent = Vector2i( width, height )
+        }
+    );
+
+    return m_swapchain != nullptr;
 }

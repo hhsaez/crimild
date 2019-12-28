@@ -52,27 +52,6 @@ VulkanInstance::~VulkanInstance( void )
     }
 }
 
-/*
-VulkanRenderDevice *VulkanInstance::createRenderDevice( void ) noexcept
-{
-    CRIMILD_LOG_TRACE( "Creating Vulkan Physical Device" );
-
-    auto physicalDevice = utils::pickPhysicalDevice( m_instanceHandler, m_surface->getInstanceHandler() );
-    if ( physicalDevice == VK_NULL_HANDLE ) {
-        return nullptr;
-    }
-
-    auto logicalDevice = utils::createLogicalDevice( physicalDevice, m_surface->getInstanceHandler() );
-    if ( logicalDevice == VK_NULL_HANDLE ) {
-        // no need to destroy physical device?
-        return nullptr;
-    }
-
-    m_renderDevice = crimild::alloc< VulkanRenderDevice >( this, getSurface(), physicalDevice, logicalDevice );
-    return crimild::get_ptr( m_renderDevice );
-}
- */
-
 SharedPointer< VulkanInstance > VulkanInstanceManager::create( VulkanInstance::Descriptor const &descriptor ) noexcept
 {
     CRIMILD_LOG_TRACE( "Creating Vulkan instance" );
