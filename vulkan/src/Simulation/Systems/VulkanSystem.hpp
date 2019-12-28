@@ -39,13 +39,14 @@ namespace crimild {
 
     namespace vulkan {
 
-        class RenderPass;
-        class Pipeline;
-        class Semaphore;
-        class CommandPool;
         class CommandBuffer;
-        class Framebuffer;
+        class CommandPool;
         class Fence;
+        class Framebuffer;
+        class Pipeline;
+        class RenderPass;
+        class Semaphore;
+        class Swapchain;
 
         /**
            What it takes to work with Vulkan:
@@ -102,6 +103,7 @@ namespace crimild {
             SharedPointer< VulkanSurface > m_surface;
             SharedPointer< PhysicalDevice > m_physicalDevice;
             SharedPointer< RenderDevice > m_renderDevice;
+            SharedPointer< Swapchain > m_swapchain;
 
             SharedPointer< vulkan::RenderPass > m_renderPass;
             SharedPointer< vulkan::Pipeline > m_pipeline;

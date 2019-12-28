@@ -31,65 +31,79 @@
 #include "Exceptions/VulkanException.hpp"
 #include "Foundation/Log.hpp"
 
+using namespace crimild;
 using namespace crimild::vulkan;
-
-ImageView::ImageView( VulkanRenderDevice *device, SharedPointer< Image > const &image, VkFormat format, VkImageAspectFlags aspectFlags, crimild::UInt32 mipLevels )
-	: m_device( device ),
-	  m_image( image )
-{
-	CRIMILD_LOG_TRACE( "Creating image view" );
-	
-	auto viewInfo = VkImageViewCreateInfo {
-		.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-		.image = m_image->getImageHandler(),
-
-		// We're dealing with 2D images
-		.viewType = VK_IMAGE_VIEW_TYPE_2D,
-
-		// Match the specified format
-		.format = format,
-
-		// We don't need to swizzle (swap around) any of the color components
-		.components.r = VK_COMPONENT_SWIZZLE_IDENTITY,
-		.components.g = VK_COMPONENT_SWIZZLE_IDENTITY,
-		.components.b = VK_COMPONENT_SWIZZLE_IDENTITY,
-		.components.a = VK_COMPONENT_SWIZZLE_IDENTITY,
-
-		// Determine what is affected by the image operations (color, depth, stencil, etc)
-		.subresourceRange.aspectMask = aspectFlags,
-		.subresourceRange.baseMipLevel = 0,
-		.subresourceRange.levelCount = mipLevels,
-		.subresourceRange.baseArrayLayer = 0,
-		.subresourceRange.layerCount = 1,
-
-		// optional
-		.flags = 0
-	};
-
-	CRIMILD_VULKAN_CHECK(
-		vkCreateImageView(
-			device->getDeviceHandler(),
-			&viewInfo,
-			nullptr,
-			&m_imageViewHandler
-		)
-	);
-}
 
 ImageView::~ImageView( void ) noexcept
 {
-	CRIMILD_LOG_TRACE( "Destroying image view" );
-	
-	if ( m_device != nullptr && m_imageViewHandler != VK_NULL_HANDLE ) {
-		vkDestroyImageView(
-			m_device->getDeviceHandler(),
-			m_imageViewHandler,
-			nullptr
-		);
-	}
-
-	m_device = nullptr;
-	m_image = nullptr;
-	m_imageViewHandler = VK_NULL_HANDLE;
+    if ( manager != nullptr ) {
+        manager->destroy( this );
+    }
 }
 
+SharedPointer< ImageView > ImageViewManager::create( ImageView::Descriptor const &descriptor ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Creating image view" );
+
+    auto renderDevice = m_renderDevice;
+    if ( renderDevice == nullptr ) {
+        renderDevice = descriptor.renderDevice;
+    }
+
+    auto viewInfo = VkImageViewCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+        .image = descriptor.image->handler,
+
+        // We're dealing with 2D images
+        .viewType = VK_IMAGE_VIEW_TYPE_2D,
+
+        // Match the specified format
+        .format = descriptor.format,
+
+        // We don't need to swizzle (swap around) any of the color components
+        .components.r = VK_COMPONENT_SWIZZLE_IDENTITY,
+        .components.g = VK_COMPONENT_SWIZZLE_IDENTITY,
+        .components.b = VK_COMPONENT_SWIZZLE_IDENTITY,
+        .components.a = VK_COMPONENT_SWIZZLE_IDENTITY,
+
+        // Determine what is affected by the image operations (color, depth, stencil, etc)
+        .subresourceRange.aspectMask = descriptor.aspectFlags,
+        .subresourceRange.baseMipLevel = 0,
+        .subresourceRange.levelCount = descriptor.mipLevels,
+        .subresourceRange.baseArrayLayer = 0,
+        .subresourceRange.layerCount = 1,
+
+        // optional
+        .flags = 0
+    };
+
+    VkImageView imageViewHandler;
+    if ( vkCreateImageView( renderDevice->handler, &viewInfo, nullptr, &imageViewHandler ) != VK_SUCCESS ) {
+        CRIMILD_LOG_ERROR( "Failed to create image view" );
+        return nullptr;
+    }
+
+    auto imageView = crimild::alloc< ImageView >();
+    imageView->handler = imageViewHandler;
+    imageView->renderDevice = renderDevice;
+    imageView->image = descriptor.image;
+    imageView->manager = this;
+    insert( crimild::get_ptr( imageView ) );
+
+    return imageView;
+}
+
+void ImageViewManager::destroy( ImageView *imageView ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Destroying image view" );
+
+    if ( imageView->renderDevice != nullptr && imageView->handler != VK_NULL_HANDLE ) {
+        vkDestroyImageView( imageView->renderDevice->handler, imageView->handler, nullptr );
+    }
+
+    imageView->handler = nullptr;
+    imageView->image = nullptr;
+    imageView->manager = nullptr;
+    imageView->renderDevice = nullptr;
+    erase( imageView );
+}

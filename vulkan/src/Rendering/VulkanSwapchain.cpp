@@ -26,6 +26,7 @@
  */
 
 #include "VulkanSwapchain.hpp"
+#include "VulkanPhysicalDevice.hpp"
 #include "VulkanRenderDevice.hpp"
 #include "VulkanSurface.hpp"
 #include "VulkanImage.hpp"
@@ -35,280 +36,19 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
-crimild::Bool Swapchain::swapchainSupported( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept
-{
-	CRIMILD_LOG_TRACE( "Check swapchain support" );
-	
-	auto swapchainSupport = querySupportDetails(
-		device,
-		surface
-	);
-	
-	return !swapchainSupport.formats.empty() && !swapchainSupport.presentModes.empty();
-}
-
-Swapchain::SwapchainSupportDetails Swapchain::querySupportDetails( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept
-{
-	CRIMILD_LOG_TRACE( "Query swapchain support details" );
-	
-	SwapchainSupportDetails details;   
-	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
-		device,
-		surface,
-		&details.capabilities
-	);
-	
-	crimild::UInt32 formatCount;
-	vkGetPhysicalDeviceSurfaceFormatsKHR(
-		device,
-		surface,
-		&formatCount,
-		nullptr
-	);
-	if ( formatCount > 0 ) {
-		details.formats.resize( formatCount );
-		vkGetPhysicalDeviceSurfaceFormatsKHR(
-			device,
-			surface,
-			&formatCount,
-			details.formats.data()
-		);
-	}
-	
-	crimild::UInt32 presentModeCount;
-	vkGetPhysicalDeviceSurfacePresentModesKHR(
-		device,
-		surface,
-		&presentModeCount,
-		nullptr
-	);
-	if ( presentModeCount > 0 ) {
-		details.presentModes.resize( presentModeCount );
-		vkGetPhysicalDeviceSurfacePresentModesKHR(
-			device,
-			surface,
-			&presentModeCount,
-			details.presentModes.data()
-		);
-	}
-	
-	return details;
-}
-
-VkSurfaceFormatKHR Swapchain::chooseSurfaceFormat( const std::vector< VkSurfaceFormatKHR > &availableFormats ) noexcept
-{
-	CRIMILD_LOG_TRACE( "Choosing swapchain surface format" );
-
-	// If no format is available, force what we need
-	if ( availableFormats.size() == 1 && availableFormats[ 0 ].format == VK_FORMAT_UNDEFINED ) {
-		return {
-			VK_FORMAT_B8G8R8A8_UNORM,
-			VK_COLOR_SPACE_SRGB_NONLINEAR_KHR,
-		};
-	}
-
-	// Favor 32-bit RGBA and sRGBA non-linear colorspace
-	for ( const auto &availableFormat : availableFormats ) {
-		if ( availableFormat.format == VK_FORMAT_B8G8R8A8_UNORM && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR ) {
-			return availableFormat;
-		}
-	}
-
-	// If nothing is found matching what we need, return whatever is available
-	return availableFormats[ 0 ];
-}
-
-VkPresentModeKHR Swapchain::choosePresentationMode( const std::vector< VkPresentModeKHR > &availablePresentModes ) noexcept
-{
-	CRIMILD_LOG_TRACE( "Choosing swapchain presentation mode" );
-	
-	// VSync by default, but may introduce latency
-	// FIFO mode is always available (defined in standard)
-	VkPresentModeKHR bestMode = VK_PRESENT_MODE_FIFO_KHR;
-	
-	for ( const auto &availablePresentMode : availablePresentModes ) {
-		if ( availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR ) {
-			// Triple buffer
-			return availablePresentMode;
-		}
-		else if ( availablePresentMode == VK_PRESENT_MODE_IMMEDIATE_KHR ) {
-			// Double buffer. May produce tearing
-			bestMode = availablePresentMode;
-		}
-	}
-	
-	return bestMode;
-}
-
-VkExtent2D Swapchain::chooseExtent( const VkSurfaceCapabilitiesKHR &capabilities ) noexcept
-{
-	CRIMILD_LOG_TRACE( "Choosing swapchain extent" );
-	
-	if ( capabilities.currentExtent.width != std::numeric_limits< uint32_t >::max() ) {
-		// Capabilites are enforcing a given extent. Return that one
-		return capabilities.currentExtent;
-	}
-
-	// If there's no extent limit, compute one based on current settings
-	// Keep width/heigth values within the allowed ones, though.
-
-	auto settings = Simulation::getInstance()->getSettings();
-	auto width = settings->get< crimild::Int32 >( "video.width", 0 );
-	auto height = settings->get< crimild::Int32 >( "video.height", 0 );
-	
-	VkExtent2D actualExtent = {
-		static_cast< uint32_t >( width ),
-		static_cast< uint32_t >( height ),
-	};
-	
-	actualExtent.width = std::max(
-		capabilities.minImageExtent.width,
-		std::min( capabilities.maxImageExtent.width, actualExtent.width )
-	);
-	actualExtent.height = std::max(
-		capabilities.minImageExtent.height,
-		std::min( capabilities.maxImageExtent.height, actualExtent.height )
-	);
-	
-	return actualExtent;
-}
-
-SharedPointer< Swapchain > Swapchain::create( VulkanRenderDevice *device, VulkanSurface *surface ) noexcept
-{
-	CRIMILD_LOG_TRACE( "Creating swapchain" );
-
-	const auto &physicalDeviceHandler = device->getPhysicalDeviceHandler();
-	const auto &surfaceHandler = surface->handler;
-	
-	auto swapchainSupport = querySupportDetails( physicalDeviceHandler, surfaceHandler );
-	auto surfaceFormat = chooseSurfaceFormat( swapchainSupport.formats );
-	auto presentMode = choosePresentationMode( swapchainSupport.presentModes );
-	auto extent = chooseExtent( swapchainSupport.capabilities );
-
-	// The Vulkan implementation defines a minimum number of images to work with.
-	// We request one more image than the minimum. Also, make sure not to exceed the
-	// maximum number of images (a value of 0 means there's no maximum)
-	auto imageCount = swapchainSupport.capabilities.minImageCount + 1;
-	if ( swapchainSupport.capabilities.maxImageCount > 0 ) {
-		imageCount = std::min(
-			swapchainSupport.capabilities.maxImageCount,
-			imageCount
-		);
-	}
-	
-	auto createInfo = VkSwapchainCreateInfoKHR {
-		.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
-		.surface = surfaceHandler,
-		.minImageCount = imageCount,
-		.imageFormat = surfaceFormat.format,
-		.imageColorSpace = surfaceFormat.colorSpace,
-		.imageExtent = extent,
-		.imageArrayLayers = 1, // This may change for stereoscopic rendering (VR)
-	};
-
-	// Images created by the swapchain are usually used as color attachments
-	// It might be possible to used the for other purposes, like sampling or
-	// to copy to or from them to other surfaces.
-	// TODO: add VK_IMAGE_USAGE_TRANSFER_SRC_BIT maybe? That can be used for screenshots
-	createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-	
-	auto indices = device->getQueueFamilies();
-	uint32_t queueFamilyIndices[] = {
-		indices.graphicsFamily[ 0 ],
-		indices.presentFamily[ 0 ],
-	};
-
-	if ( indices.graphicsFamily != indices.presentFamily ) {
-		// If the graphics and present families don't match we need to
-		// share images since they're not exclusive to queues
-		createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-		createInfo.queueFamilyIndexCount = 2;
-		createInfo.pQueueFamilyIndices = queueFamilyIndices;
-	}
-	else {
-		// If they are the same, the queue can have exclusive access to images
-		createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-		createInfo.queueFamilyIndexCount = 0;
-		createInfo.pQueueFamilyIndices = nullptr;
-	}
-
-	// This can be used to rotate images or flip them horizontally
-	createInfo.preTransform = swapchainSupport.capabilities.currentTransform;
-
-	// Use for blending with other windows in the window system
-	createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-	
-	createInfo.presentMode = presentMode;
-
-	// Ignore pixels that are obscured by other windows
-	createInfo.clipped = VK_TRUE;
-
-	// This is used during the recreation of a swapchain (maybe due to window is resized)
-	createInfo.oldSwapchain = VK_NULL_HANDLE;
-
-	VkSwapchainKHR swapchainHandler;
-	if ( vkCreateSwapchainKHR(
-		device->getDeviceHandler(),
-		&createInfo,
-		nullptr,
-		&swapchainHandler ) != VK_SUCCESS ) {
-		CRIMILD_LOG_ERROR( "Failed to create swapchain" );
-		return nullptr;
-	}
-
-	return crimild::alloc< Swapchain >(
-		device,
-		surface,
-		swapchainHandler,
-		surfaceFormat.format,
-		extent
-	);
-}
-
-Swapchain::Swapchain(
-	VulkanRenderDevice *device,
-	VulkanSurface *surface,
-	const VkSwapchainKHR &swapchain,
-	const VkFormat &format,
-	const VkExtent2D &extent ) noexcept
-	: m_device( device ),
-	  m_surface( surface ),
-	  m_swapchainHandler( swapchain ),
-	  m_format( format ),
-	  m_extent( extent )
-{
-	CRIMILD_LOG_TRACE( "Swapchain created" );
-
-	retrieveSwapchainImages();
-	createImageViews();
-}
-
 Swapchain::~Swapchain( void ) noexcept
 {
-	CRIMILD_LOG_TRACE( "Destroying swapchain" );
-
-	CRIMILD_LOG_DEBUG( "Destroying image views" );
-	m_imageViews.clear();
-
-	CRIMILD_LOG_DEBUG( "Destroying images" );
-	m_images.clear();
-
-	if ( m_swapchainHandler != VK_NULL_HANDLE ) {
-		vkDestroySwapchainKHR(
-			m_device->getDeviceHandler(),
-			m_swapchainHandler,
-			nullptr
-		);
-		m_swapchainHandler = VK_NULL_HANDLE;
-	}
+    if ( manager != nullptr ) {
+        manager->destroy( this );
+    }
 }
 
 crimild::UInt32 Swapchain::acquireNextImage( const Semaphore *imageAvailableSemaphore ) const noexcept
 {
 	crimild::UInt32 imageIndex;
 	vkAcquireNextImageKHR(
-		m_device->getDeviceHandler(),
-		m_swapchainHandler,
+		renderDevice->handler,
+		handler,
 		std::numeric_limits< uint64_t >::max(), // disable timeout
 		imageAvailableSemaphore->getSemaphoreHandler(),
 		VK_NULL_HANDLE,
@@ -325,7 +65,7 @@ void Swapchain::presentImage( crimild::UInt32 imageIndex, const Semaphore *signa
 	};
 
 	VkSwapchainKHR swapchains[] = {
-		m_swapchainHandler,
+		handler,
 	};
 	
 	auto presentInfo = VkPresentInfoKHR {
@@ -339,7 +79,7 @@ void Swapchain::presentImage( crimild::UInt32 imageIndex, const Semaphore *signa
 	};
 
 	vkQueuePresentKHR(
-		m_device->getPresentQueueHandler(),
+		renderDevice->presentQueue,
 		&presentInfo
 	);
 }
@@ -350,39 +90,44 @@ void Swapchain::retrieveSwapchainImages( void ) noexcept
 	
 	crimild::UInt32 imageCount;
 	vkGetSwapchainImagesKHR(
-		m_device->getDeviceHandler(),
-		m_swapchainHandler,
+		renderDevice->handler,
+		handler,
 		&imageCount,
 		nullptr
 	);
-	std::vector< VkImage > images( imageCount );
+	std::vector< VkImage > imagesHandlers( imageCount );
 	vkGetSwapchainImagesKHR(
-		m_device->getDeviceHandler(),
-		m_swapchainHandler,
+		renderDevice->handler,
+		handler,
 		&imageCount,
-		images.data()
+		imagesHandlers.data()
 	);
 
-	for ( const auto &imageHandler : images ) {
-		// Create images without 
-		m_images.add( crimild::alloc< Image >( nullptr, imageHandler ) );
+	for ( const auto &imageHandler : imagesHandlers ) {
+		// Create images without render device so they're properly destroyed
+        auto image = crimild::alloc< Image >();
+        image->handler = imageHandler;
+        attach( crimild::get_ptr( image ) );
+        images.add( image );
 	}
 }
 
 void Swapchain::createImageViews( void ) noexcept
 {
 	CRIMILD_LOG_TRACE( "Creating image views" );
-	
-	m_images.each( [ this ]( SharedPointer< Image > &image ) {
-		m_imageViews.add(
-			m_device->createImageView(
-				crimild::get_ptr( image ),
-				m_format,
-				VK_IMAGE_ASPECT_COLOR_BIT,
-				1
-			)
-		);
-	});
+
+    images.each(
+        [ this ]( SharedPointer< Image > &image ) {
+			auto imageView = renderDevice->create(
+                ImageView::Descriptor {
+					.image = image,
+                	.format = format,
+                	.aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT,
+                	.mipLevels = 1,
+                }
+            );
+        }
+    );
 }
 
 /*
@@ -452,4 +197,187 @@ void recreateSwapChain( void )
 }
 */
 
+
+SharedPointer< Swapchain > SwapchainManager::create( Swapchain::Descriptor const &descriptor ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Creating Vulkan swapchain" );
+    auto renderDevice = m_renderDevice;
+    if ( renderDevice == nullptr ) {
+        renderDevice = descriptor.renderDevice;
+    }
+
+    auto physicalDevice = renderDevice->physicalDevice;
+    auto surface = renderDevice->surface;
+
+    auto swapchainSupport = utils::querySwapchainSupportDetails( physicalDevice->handler, surface->handler );
+    auto surfaceFormat = chooseSurfaceFormat( swapchainSupport.formats );
+    auto presentMode = choosePresentationMode( swapchainSupport.presentModes );
+    auto extent = chooseExtent( swapchainSupport.capabilities, VkExtent2D { descriptor.extent.x(), descriptor.extent.y() } );
+
+    // The Vulkan implementation defines a minimum number of images to work with.
+    // We request one more image than the minimum. Also, make sure not to exceed the
+    // maximum number of images (a value of 0 means there's no maximum)
+    auto imageCount = swapchainSupport.capabilities.minImageCount + 1;
+    if ( swapchainSupport.capabilities.maxImageCount > 0 ) {
+        imageCount = std::min(
+            swapchainSupport.capabilities.maxImageCount,
+            imageCount
+        );
+    }
+
+    auto createInfo = VkSwapchainCreateInfoKHR {
+        .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
+        .surface = surface->handler,
+        .minImageCount = imageCount,
+        .imageFormat = surfaceFormat.format,
+        .imageColorSpace = surfaceFormat.colorSpace,
+        .imageExtent = extent,
+        .imageArrayLayers = 1, // This may change for stereoscopic rendering (VR)
+    };
+
+    // Images created by the swapchain are usually used as color attachments
+    // It might be possible to used the for other purposes, like sampling or
+    // to copy to or from them to other surfaces.
+    // TODO: add VK_IMAGE_USAGE_TRANSFER_SRC_BIT maybe? That can be used for screenshots
+    createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+
+    auto indices = utils::findQueueFamilies( physicalDevice->handler, surface->handler );
+    uint32_t queueFamilyIndices[] = {
+        indices.graphicsFamily[ 0 ],
+        indices.presentFamily[ 0 ],
+    };
+
+    if ( indices.graphicsFamily != indices.presentFamily ) {
+        // If the graphics and present families don't match we need to
+        // share images since they're not exclusive to queues
+        createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+        createInfo.queueFamilyIndexCount = 2;
+        createInfo.pQueueFamilyIndices = queueFamilyIndices;
+    }
+    else {
+        // If they are the same, the queue can have exclusive access to images
+        createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        createInfo.queueFamilyIndexCount = 0;
+        createInfo.pQueueFamilyIndices = nullptr;
+    }
+
+    // This can be used to rotate images or flip them horizontally
+    createInfo.preTransform = swapchainSupport.capabilities.currentTransform;
+
+    // Use for blending with other windows in the window system
+    createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+
+    createInfo.presentMode = presentMode;
+
+    // Ignore pixels that are obscured by other windows
+    createInfo.clipped = VK_TRUE;
+
+    // This is used during the recreation of a swapchain (maybe due to window is resized)
+    createInfo.oldSwapchain = VK_NULL_HANDLE;
+
+    VkSwapchainKHR swapchainHandler;
+    if ( vkCreateSwapchainKHR(
+        renderDevice->handler,
+        &createInfo,
+        nullptr,
+        &swapchainHandler ) != VK_SUCCESS ) {
+        CRIMILD_LOG_ERROR( "Failed to create swapchain" );
+        return nullptr;
+    }
+
+    auto swapchain = crimild::alloc< Swapchain >();
+    swapchain->handler = swapchainHandler;
+    swapchain->renderDevice = renderDevice;
+    swapchain->manager = this;
+    swapchain->extent = extent;
+    swapchain->format = surfaceFormat.format;
+    insert( crimild::get_ptr( swapchain ) );
+    swapchain->retrieveSwapchainImages();
+    swapchain->createImageViews();
+    return swapchain;
+}
+
+void SwapchainManager::destroy( Swapchain *swapchain ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Destroying swapchain" );
+
+    swapchain->imageViews.clear();
+    swapchain->images.clear();
+
+    if ( swapchain->handler != VK_NULL_HANDLE ) {
+        vkDestroySwapchainKHR( swapchain->renderDevice->handler, swapchain->handler, nullptr );
+    }
+
+    swapchain->handler = VK_NULL_HANDLE;
+    swapchain->renderDevice = nullptr;
+    swapchain->manager = nullptr;
+    erase( swapchain );
+}
+
+VkSurfaceFormatKHR SwapchainManager::chooseSurfaceFormat( const std::vector< VkSurfaceFormatKHR > &availableFormats ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Choosing swapchain surface format" );
+
+    // If no format is available, force what we need
+    if ( availableFormats.size() == 1 && availableFormats[ 0 ].format == VK_FORMAT_UNDEFINED ) {
+        return {
+            VK_FORMAT_B8G8R8A8_UNORM,
+            VK_COLOR_SPACE_SRGB_NONLINEAR_KHR,
+        };
+    }
+
+    // Favor 32-bit RGBA and sRGBA non-linear colorspace
+    for ( const auto &availableFormat : availableFormats ) {
+        if ( availableFormat.format == VK_FORMAT_B8G8R8A8_UNORM && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR ) {
+            return availableFormat;
+        }
+    }
+
+    // If nothing is found matching what we need, return whatever is available
+    return availableFormats[ 0 ];
+}
+
+VkPresentModeKHR SwapchainManager::choosePresentationMode( const std::vector< VkPresentModeKHR > &availablePresentModes ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Choosing swapchain presentation mode" );
+
+    // VSync by default, but may introduce latency
+    // FIFO mode is always available (defined in standard)
+    VkPresentModeKHR bestMode = VK_PRESENT_MODE_FIFO_KHR;
+
+    for ( const auto &availablePresentMode : availablePresentModes ) {
+        if ( availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR ) {
+            // Triple buffer
+            return availablePresentMode;
+        }
+        else if ( availablePresentMode == VK_PRESENT_MODE_IMMEDIATE_KHR ) {
+            // Double buffer. May produce tearing
+            bestMode = availablePresentMode;
+        }
+    }
+
+    return bestMode;
+}
+
+VkExtent2D SwapchainManager::chooseExtent( const VkSurfaceCapabilitiesKHR &capabilities, VkExtent2D requestedExtent ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Choosing swapchain extent" );
+
+    if ( capabilities.currentExtent.width != std::numeric_limits< uint32_t >::max() ) {
+        // Capabilites are enforcing a given extent. Return that one
+        return capabilities.currentExtent;
+    }
+
+    // Keep width/heigth values within the allowed ones, though.
+    requestedExtent.width = std::max(
+        capabilities.minImageExtent.width,
+        std::min( capabilities.maxImageExtent.width, requestedExtent.width )
+    );
+    requestedExtent.height = std::max(
+        capabilities.minImageExtent.height,
+        std::min( capabilities.maxImageExtent.height, requestedExtent.height )
+    );
+
+    return requestedExtent;
+}
 

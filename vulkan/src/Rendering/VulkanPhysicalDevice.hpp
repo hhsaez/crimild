@@ -29,6 +29,7 @@
 #define CRIMILD_VULKAN_RENDERING_PHYSICAL_DEVICE_
 
 #include "Foundation/VulkanObject.hpp"
+#include "Rendering/VulkanRenderDevice.hpp"
 
 namespace crimild {
 
@@ -38,15 +39,18 @@ namespace crimild {
         class VulkanSurface;
         class PhysicalDeviceManager;
 
-        class PhysicalDevice : public VulkanObject {
+        class PhysicalDevice : public VulkanObject, public RenderDeviceManager {
             CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::PhysicalDevice )
         public:
+            using RenderDeviceManager::create;
+
             struct Descriptor {
                 VulkanInstance *instance;
                 VulkanSurface *surface;
             };
 
         public:
+            PhysicalDevice( void );
             ~PhysicalDevice( void );
 
             VkPhysicalDevice handler = VK_NULL_HANDLE;

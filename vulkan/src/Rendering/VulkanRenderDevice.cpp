@@ -45,6 +45,14 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
+RenderDevice::RenderDevice( void )
+    : SwapchainManager( this ),
+      ImageManager( this ),
+	  ImageViewManager( this )
+{
+
+}
+
 RenderDevice::~RenderDevice( void )
 {
     if ( manager != nullptr ) {
@@ -56,7 +64,14 @@ SharedPointer< RenderDevice > RenderDeviceManager::create( RenderDevice::Descrip
 {
     CRIMILD_LOG_TRACE( "Creating Vulkan logical device" );
 
-    auto indices = utils::findQueueFamilies( descriptor.physicalDevice->handler, descriptor.physicalDevice->surface->handler );
+    auto physicalDevice = m_physicalDevice;
+    if ( physicalDevice == nullptr ) {
+        physicalDevice = descriptor.physicalDevice;
+    }
+
+    auto surface = physicalDevice->surface;
+
+    auto indices = utils::findQueueFamilies( physicalDevice->handler, surface->handler );
     if ( !indices.isComplete() ) {
         // Should never happen
         CRIMILD_LOG_ERROR( "Invalid physical device" );
@@ -111,14 +126,15 @@ SharedPointer< RenderDevice > RenderDeviceManager::create( RenderDevice::Descrip
     }
 
     VkDevice deviceHandler;
-    if ( vkCreateDevice( descriptor.physicalDevice->handler, &createInfo, nullptr, &deviceHandler ) != VK_SUCCESS ) {
+    if ( vkCreateDevice( physicalDevice->handler, &createInfo, nullptr, &deviceHandler ) != VK_SUCCESS ) {
         CRIMILD_LOG_ERROR( "Failed to create logical device" );
         return nullptr;
     }
 
     auto renderDevice = crimild::alloc< RenderDevice >();
     renderDevice->handler = deviceHandler;
-    renderDevice->physicalDevice = descriptor.physicalDevice;
+    renderDevice->physicalDevice = physicalDevice;
+    renderDevice->surface = surface;
     renderDevice->manager = this;
     insert( crimild::get_ptr( renderDevice ) );
 
@@ -131,12 +147,19 @@ SharedPointer< RenderDevice > RenderDeviceManager::create( RenderDevice::Descrip
 
 void RenderDeviceManager::destroy( RenderDevice *renderDevice ) noexcept
 {
+    CRIMILD_LOG_TRACE( "Destroying Vulkan logical device" );
+
+    static_cast< ImageViewManager * >( renderDevice )->cleanup();
+    static_cast< ImageManager * >( renderDevice )->cleanup();
+    static_cast< SwapchainManager * >( renderDevice )->cleanup();
+
     if ( renderDevice->handler != VK_NULL_HANDLE ) {
         vkDestroyDevice( renderDevice->handler, nullptr );
     }
 
     renderDevice->handler = VK_NULL_HANDLE;
     renderDevice->physicalDevice = nullptr;
+    renderDevice->surface = nullptr;
     renderDevice->manager = nullptr;
     erase( renderDevice );
 }
@@ -165,225 +188,6 @@ void RenderDeviceManager::destroy( RenderDevice *renderDevice ) noexcept
 
 
 
-SharedPointer< VulkanRenderDevice > VulkanRenderDevice::create( VulkanInstance *instance, VulkanSurface *surface ) noexcept
-{
-	CRIMILD_LOG_TRACE( "Creating Vulkan rendering device" );
-
-	auto physicalDevice = pickPhysicalDevice(
-		instance->handler,
-		surface->handler
-	);
-	if ( physicalDevice == VK_NULL_HANDLE ) {
-		return nullptr;
-	}
-
-	auto logicalDevice = createLogicalDevice(
-		physicalDevice,
-		surface->handler
-	);
-	if ( logicalDevice == VK_NULL_HANDLE ) {
-		// No need to destroy the physical device
-		return nullptr;
-	}
-
-	return crimild::alloc< VulkanRenderDevice >(
-		instance,
-		surface,
-		physicalDevice,
-		logicalDevice
-	);
-}
-
-VkPhysicalDevice VulkanRenderDevice::pickPhysicalDevice( const VkInstance &instance, const VkSurfaceKHR &surface ) noexcept
-{
-	CRIMILD_LOG_TRACE( "Picking physical device" );
-
-	crimild::UInt32 deviceCount = 0;
-	vkEnumeratePhysicalDevices( instance, &deviceCount, nullptr );
-	if ( deviceCount == 0 ) {
-		CRIMILD_LOG_ERROR( "Failed to find GPUs with Vulkan support" );
-		return VK_NULL_HANDLE;
-	}
-
-	std::vector< VkPhysicalDevice > devices( deviceCount );
-	vkEnumeratePhysicalDevices( instance, &deviceCount, devices.data() );
-	for ( const auto &device : devices ) {
-		if ( isDeviceSuitable( device, surface ) ) {
-			CRIMILD_LOG_INFO( "Vulkan physical device found" );
-			return device;
-		}
-	}
-	
-	CRIMILD_LOG_ERROR( "Failed to find a suitable GPU" );
-	return VK_NULL_HANDLE;
-}
-
-crimild::Bool VulkanRenderDevice::isDeviceSuitable( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept
-{
-	CRIMILD_LOG_TRACE( "Checking device properties" );
-	
-	auto indices = findQueueFamilies( device, surface );
-	auto extensionsSupported = checkDeviceExtensionSupport( device );
-
-	auto swapChainAdequate = false;
-	if ( extensionsSupported ) {
-		swapChainAdequate = Swapchain::swapchainSupported( device, surface );
-	}
-	
-	VkPhysicalDeviceFeatures supportedFeatures;
-	vkGetPhysicalDeviceFeatures( device, &supportedFeatures );
-	
-	return indices.isComplete()
-		&& extensionsSupported
-		&& swapChainAdequate
-		&& supportedFeatures.samplerAnisotropy;
-}
-
-/**
-   \brief Check if a given device met all required extensions
-*/
-crimild::Bool VulkanRenderDevice::checkDeviceExtensionSupport( const VkPhysicalDevice &device ) noexcept
-{
-	CRIMILD_LOG_TRACE( "Checking device extension support" );
-
-	auto &deviceExtensions = getDeviceExtensions();
-
-	crimild::UInt32 extensionCount;
-	vkEnumerateDeviceExtensionProperties( device, nullptr, &extensionCount, nullptr );
-	
-	std::vector< VkExtensionProperties > availableExtensions( extensionCount );
-	vkEnumerateDeviceExtensionProperties( device, nullptr, &extensionCount, availableExtensions.data() );
-
-	std::set< std::string > requiredExtensions(
-		std::begin( deviceExtensions ),
-		std::end( deviceExtensions )
-	);
-
-	for ( const auto &extension : availableExtensions ) {
-		requiredExtensions.erase( extension.extensionName );
-	}
-	
-	if ( !requiredExtensions.empty() ) {
-		std::stringstream ss;
-		for ( const auto &name : requiredExtensions ) {
-			ss << "\n\t" << name;
-		}
-		CRIMILD_LOG_ERROR( "Required extensions not met: ", ss.str() );
-		return false;
-	}
-	
-	CRIMILD_LOG_DEBUG( "All required extensions met" );
-	
-	return true;
-}
-
-VulkanRenderDevice::QueueFamilyIndices VulkanRenderDevice::findQueueFamilies( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept
-{
-	CRIMILD_LOG_TRACE( "Finding device queue families" );
-
-	QueueFamilyIndices indices;
-	
-	crimild::UInt32 queueFamilyCount = 0;
-	vkGetPhysicalDeviceQueueFamilyProperties( device, &queueFamilyCount, nullptr );
-	if ( queueFamilyCount == 0 ) {
-		CRIMILD_LOG_ERROR( "No queue family found for device" );
-		return indices;
-	}
-	
-	std::vector< VkQueueFamilyProperties > queueFamilies( queueFamilyCount );
-	vkGetPhysicalDeviceQueueFamilyProperties( device, &queueFamilyCount, queueFamilies.data() );
-	
-	crimild::UInt32 i = 0;
-	for ( const auto &queueFamily : queueFamilies ) {
-
-		if ( queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT ) {
-			indices.graphicsFamily.push_back( i );
-		}
-
-		// Find a queue family that supports presenting to the Vulkan surface
-		VkBool32 presentSupport = false;
-		vkGetPhysicalDeviceSurfaceSupportKHR( device, i, surface, &presentSupport );
-		if ( queueFamily.queueCount > 0 && presentSupport ) {
-			// This might probably be same as the graphics queue, though.
-			indices.presentFamily.push_back( i );
-		}
-		
-		if ( indices.isComplete() ) {
-			break;
-		}
-		
-		i++;
-	}
-	
-	return indices;
-}
-
-VkDevice VulkanRenderDevice::createLogicalDevice( const VkPhysicalDevice &physicalDevice, const VkSurfaceKHR &surface ) noexcept
-{
-	CRIMILD_LOG_TRACE( "Creating vulkan logical device" );
-	
-	QueueFamilyIndices indices = findQueueFamilies( physicalDevice, surface );
-	if ( !indices.isComplete() ) {
-		// should never happen
-		CRIMILD_LOG_ERROR( "Invalid physical device" );
-		return VK_NULL_HANDLE;
-	}
-
-	// Make sure we're creating queues for unique families,
-	// since both graphics and presentation might be same family
-	// \see findQueueFamilies()
-	std::set< crimild::UInt32 > uniqueQueueFamilies = {
-		indices.graphicsFamily[ 0 ],
-		indices.presentFamily[ 0 ],
-	};
-
-	// Required even if there's only one queue
-	auto queuePriority = 1.0f;
-	
-	std::vector< VkDeviceQueueCreateInfo > queueCreateInfos;
-	for ( auto queueFamily : uniqueQueueFamilies ) {
-		auto queueCreateInfo = VkDeviceQueueCreateInfo {
-			.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-			.queueFamilyIndex = queueFamily,
-			.queueCount = 1,
-			.pQueuePriorities = &queuePriority,
-		};
-		queueCreateInfos.push_back( queueCreateInfo );
-	}
-	
-	VkPhysicalDeviceFeatures deviceFeatures = {
-		.samplerAnisotropy = VK_TRUE,
-	};
-
-	auto &deviceExtensions = getDeviceExtensions();
-	
-	VkDeviceCreateInfo createInfo = {
-		.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
-		.queueCreateInfoCount = static_cast< crimild::UInt32 >( queueCreateInfos.size() ),
-		.pQueueCreateInfos = queueCreateInfos.data(),
-		.pEnabledFeatures = &deviceFeatures,
-		.enabledLayerCount = 0,
-		.enabledExtensionCount = static_cast< crimild::UInt32 >( deviceExtensions.size() ),
-		.ppEnabledExtensionNames = deviceExtensions.data(),
-	};
-	
-	if ( utils::checkValidationLayersEnabled() ) {
-		// New Vulkan implementations seem to be ignoring validation layers per device
-		// Still, it might be a good idea to register them here.
-		auto &validationLayers = utils::getValidationLayers();
-		createInfo.enabledLayerCount = static_cast< crimild::UInt32 >( validationLayers.size() );
-		createInfo.ppEnabledLayerNames = validationLayers.data();
-	}
-
-	VkDevice device;
-	if ( vkCreateDevice( physicalDevice, &createInfo, nullptr, &device ) != VK_SUCCESS ) {
-		CRIMILD_LOG_ERROR( "Failed to create logical device" );
-		return VK_NULL_HANDLE;
-	}
-
-	return device;
-}
-
 VulkanRenderDevice::VulkanRenderDevice( VulkanInstance *instance, VulkanSurface *surface, const VkPhysicalDevice &physicalDevice, const VkDevice &device )
 	: m_instance( instance ),
 	  m_surface( surface ),
@@ -392,11 +196,11 @@ VulkanRenderDevice::VulkanRenderDevice( VulkanInstance *instance, VulkanSurface 
 {
 	m_msaaSamples = getMaxUsableSampleCount();
 
-	QueueFamilyIndices indices = findQueueFamilies( physicalDevice, surface->handler );
-	
+//	QueueFamilyIndices indices = findQueueFamilies( physicalDevice, surface->handler );
+
 	// Get queue handles
-	vkGetDeviceQueue( m_device, indices.graphicsFamily[ 0 ], 0, &m_graphicsQueue );
-	vkGetDeviceQueue( m_device, indices.presentFamily[ 0 ], 0, &m_presentQueue );
+//	vkGetDeviceQueue( m_device, indices.graphicsFamily[ 0 ], 0, &m_graphicsQueue );
+//	vkGetDeviceQueue( m_device, indices.presentFamily[ 0 ], 0, &m_presentQueue );
 }
 
 VulkanRenderDevice::~VulkanRenderDevice( void )
@@ -428,10 +232,11 @@ VkSampleCountFlagBits VulkanRenderDevice::getMaxUsableSampleCount( void ) const 
 
 VulkanRenderDevice::QueueFamilyIndices VulkanRenderDevice::getQueueFamilies( void ) const noexcept
 {
-	return findQueueFamilies(
-		m_physicalDevice,
-		m_surface->handler
-	);
+//	return findQueueFamilies(
+//		m_physicalDevice,
+//		m_surface->handler
+//	);
+    return {};
 }
 
 void VulkanRenderDevice::waitIdle( void ) const noexcept
@@ -460,6 +265,7 @@ SharedPointer< Image > VulkanRenderDevice::createImage( void )
 
 SharedPointer< ImageView > VulkanRenderDevice::createImageView( Image *image, VkFormat format, VkImageAspectFlags aspectFlags, crimild::UInt32 mipLevels )
 {
+    /*
 	return crimild::alloc< ImageView >(
 		this,
 		crimild::retain( image ),
@@ -467,6 +273,8 @@ SharedPointer< ImageView > VulkanRenderDevice::createImageView( Image *image, Vk
 		aspectFlags,
 		mipLevels
 	);
+     */
+    return nullptr;
 }
 
 SharedPointer< Pipeline > VulkanRenderDevice::createPipeline( const Pipeline::Descriptor &descriptor ) const noexcept
@@ -486,9 +294,10 @@ SharedPointer< Framebuffer > VulkanRenderDevice::createFramebuffer( const Frameb
 
 SharedPointer< CommandPool > VulkanRenderDevice::createGraphicsCommandPool( void ) const noexcept
 {
-	auto queueFamilyIndices = findQueueFamilies( m_physicalDevice, m_surface->handler );
+//	auto queueFamilyIndices = findQueueFamilies( m_physicalDevice, m_surface->handler );
 	
-	return crimild::alloc< CommandPool >( this, queueFamilyIndices.graphicsFamily[ 0 ] );
+//	return crimild::alloc< CommandPool >( this, queueFamilyIndices.graphicsFamily[ 0 ] );
+    return nullptr;
 }
 
 void VulkanRenderDevice::submitGraphicsCommands( const Semaphore *wait, const CommandBuffer *commandBuffer, const Semaphore *signal, const Fence *fence ) const

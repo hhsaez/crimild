@@ -38,7 +38,7 @@ RenderPass::RenderPass( const VulkanRenderDevice *device, const Swapchain *swapc
 	
 	auto colorAttachment = VkAttachmentDescription {
 		// Format must match the one in the swapchain
-		.format = swapchain->getFormat(),
+		.format = swapchain->format,
 
 		// No multisampling for now
 		.samples = VK_SAMPLE_COUNT_1_BIT,

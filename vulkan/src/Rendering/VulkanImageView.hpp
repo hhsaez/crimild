@@ -28,43 +28,50 @@
 #ifndef CRIMILD_VULKAN_RENDERING_IMAGE_VIEW_
 #define CRIMILD_VULKAN_RENDERING_IMAGE_VIEW_
 
-#include "Foundation/Types.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/VulkanUtils.hpp"
+#include "Foundation/VulkanObject.hpp"
 
 namespace crimild {
 
 	namespace vulkan {
 
-		class VulkanRenderDevice;
+		class RenderDevice;
 		class Image;
+        class ImageViewManager;
 
 		/**
 		 */
-		class ImageView : public SharedObject {
+		class ImageView : public VulkanObject {
+            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::ImageView )
+
+        public:
+            struct Descriptor {
+                RenderDevice *renderDevice;
+                SharedPointer< Image > image;
+                VkFormat format;
+                VkImageAspectFlags aspectFlags;
+                crimild::UInt32 mipLevels;
+            };
+
 		public:
-			/**
-			   \brief Creates and image view
+            ~ImageView( void ) noexcept;
 
-			   \throws VulkanException on error
-			 */
-			explicit ImageView(
-				VulkanRenderDevice *device,
-				SharedPointer< Image > const &image,
-				VkFormat format,
-				VkImageAspectFlags aspectFlags,
-				crimild::UInt32 mipLevels
-			);
-			
-			~ImageView( void ) noexcept;
-			
-			const VkImageView &getImageViewHandler( void ) const noexcept { return m_imageViewHandler; }
-
-		private:
-			VulkanRenderDevice *m_device = nullptr;
-			SharedPointer< Image > m_image;
-			VkImageView m_imageViewHandler = VK_NULL_HANDLE;
+            RenderDevice *renderDevice = nullptr;
+            SharedPointer< Image > image;
+            VkImageView handler = VK_NULL_HANDLE;
+            ImageViewManager *manager = nullptr;
 		};
+
+        class ImageViewManager : public VulkanObjectManager< ImageView > {
+        public:
+            explicit ImageViewManager( RenderDevice *renderDevice = nullptr ) noexcept : m_renderDevice( renderDevice ) { }
+            virtual ~ImageViewManager( void ) noexcept = default;
+
+            SharedPointer< ImageView > create( ImageView::Descriptor const &descriptor ) noexcept;
+            void destroy( ImageView *imageView ) noexcept override;
+
+        private:
+            RenderDevice *m_renderDevice = nullptr;
+        };
 
 	}
 
