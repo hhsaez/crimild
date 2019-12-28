@@ -40,7 +40,7 @@ Framebuffer::Framebuffer( const VulkanRenderDevice *device, const Descriptor &de
 
 	std::vector< VkImageView > attachments;
 	for ( const auto &att : descriptor.attachments ) {
-		attachments.push_back( att->getImageViewHandler() );
+		attachments.push_back( att->handler );
 	}
 	
 	auto createInfo = VkFramebufferCreateInfo {

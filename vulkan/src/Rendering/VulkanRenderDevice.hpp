@@ -29,6 +29,8 @@
 #define CRIMILD_VULKAN_RENDERING_RENDER_DEVICE_
 
 #include "Foundation/VulkanObject.hpp"
+#include "VulkanSwapchain.hpp"
+#include "VulkanImageView.hpp"
 #include "VulkanPipeline.hpp"
 #include "VulkanFramebuffer.hpp"
 
@@ -41,8 +43,6 @@ namespace crimild {
         class CommandBuffer;
         class CommandPool;
         class Fence;
-        class Image;
-        class ImageView;
         class PhysicalDevice;
         class RenderDeviceManager;
         class Semaphore;
@@ -50,19 +50,29 @@ namespace crimild {
 		class VulkanInstance;
 		class VulkanSurface;
 
-        class RenderDevice : public VulkanObject {
+        class RenderDevice :
+        	public VulkanObject,
+        	public SwapchainManager,
+        	public ImageManager,
+        	public ImageViewManager {
             CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::RenderDevice )
 
         public:
+            using SwapchainManager::create;
+            using ImageManager::create;
+            using ImageViewManager::create;
+
             struct Descriptor {
                 PhysicalDevice *physicalDevice;
             };
 
         public:
+            RenderDevice( void );
             ~RenderDevice( void );
 
             VkDevice handler = VK_NULL_HANDLE;
             PhysicalDevice *physicalDevice = nullptr;
+            VulkanSurface *surface = nullptr;
             RenderDeviceManager *manager = nullptr;
             VkQueue graphicsQueue;
             VkQueue presentQueue;
@@ -70,10 +80,14 @@ namespace crimild {
 
         class RenderDeviceManager : public VulkanObjectManager< RenderDevice > {
         public:
+            explicit RenderDeviceManager( PhysicalDevice *physicalDevice = nullptr ) noexcept : m_physicalDevice( physicalDevice ) { }
             virtual ~RenderDeviceManager( void ) = default;
 
             SharedPointer< RenderDevice > create( RenderDevice::Descriptor const &descriptor ) noexcept;
             void destroy( RenderDevice *renderDevice ) noexcept override;
+
+        private:
+            PhysicalDevice *m_physicalDevice = nullptr;
         };
 
 		/**
@@ -115,7 +129,7 @@ namespace crimild {
 			/**
 			   TODO: How do we handle the case of an option surface param? 
 			 */
-			static QueueFamilyIndices findQueueFamilies( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept;
+//			static QueueFamilyIndices findQueueFamilies( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept;
 			
 			struct SwapchainSupportDetails {
 				VkSurfaceCapabilitiesKHR capabilities;

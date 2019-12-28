@@ -41,7 +41,7 @@ Pipeline::Pipeline( const VulkanRenderDevice *renderDevice, const Descriptor &de
 {
 	CRIMILD_LOG_TRACE( "Creating pipeline" );
 
-	auto device = m_renderDevice->getDeviceHandler();
+    auto device = VK_NULL_HANDLE;// m_renderDevice->handler;
 
 	// WARNING: all of these config params are used when creating the pipeline and
 	// they must be alive when vkCreatePipeline is called. Beware of scopes!
@@ -211,8 +211,8 @@ VkViewport Pipeline::createViewport( void ) const noexcept
 	return VkViewport {
 		.x = 0,
 		.y = 0,
-		.width = ( float ) swapchain->getExtent().width,
-		.height = ( float ) swapchain->getExtent().height,
+		.width = ( float ) swapchain->extent.width,
+		.height = ( float ) swapchain->extent.height,
 		.minDepth = 0,
 		.maxDepth = 1,
 	};
@@ -224,7 +224,7 @@ VkRect2D Pipeline::createScissor( void ) const noexcept
 	
 	return VkRect2D {
 		.offset = { 0, 0 },
-		.extent = swapchain->getExtent(),
+		.extent = swapchain->extent,
 	};
 }
 

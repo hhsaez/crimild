@@ -184,7 +184,6 @@ const utils::ExtensionArray &utils::getDeviceExtensions( void ) noexcept
 
 crimild::Bool utils::checkDeviceExtensionSupport( const VkPhysicalDevice &device ) noexcept
 {
-    /*
     CRIMILD_LOG_TRACE( "Checking device extension support" );
 
     const auto &deviceExtensions = getDeviceExtensions();
@@ -208,7 +207,7 @@ crimild::Bool utils::checkDeviceExtensionSupport( const VkPhysicalDevice &device
         CRIMILD_LOG_ERROR( "Required extensions not met: ", ss.str() );
         return false;
     }
-*/
+
     CRIMILD_LOG_DEBUG( "All required extensions met" );
     return true;
 }
@@ -252,3 +251,65 @@ utils::QueueFamilyIndices utils::findQueueFamilies( const VkPhysicalDevice &devi
 
     return indices;
 }
+
+utils::SwapchainSupportDetails utils::querySwapchainSupportDetails( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Query swapchain support details" );
+
+    SwapchainSupportDetails details;
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
+        device,
+        surface,
+        &details.capabilities
+    );
+
+    crimild::UInt32 formatCount;
+    vkGetPhysicalDeviceSurfaceFormatsKHR(
+        device,
+        surface,
+        &formatCount,
+        nullptr
+    );
+    if ( formatCount > 0 ) {
+        details.formats.resize( formatCount );
+        vkGetPhysicalDeviceSurfaceFormatsKHR(
+            device,
+            surface,
+            &formatCount,
+            details.formats.data()
+        );
+    }
+
+    crimild::UInt32 presentModeCount;
+    vkGetPhysicalDeviceSurfacePresentModesKHR(
+        device,
+        surface,
+        &presentModeCount,
+        nullptr
+    );
+    if ( presentModeCount > 0 ) {
+        details.presentModes.resize( presentModeCount );
+        vkGetPhysicalDeviceSurfacePresentModesKHR(
+            device,
+            surface,
+            &presentModeCount,
+            details.presentModes.data()
+        );
+    }
+
+    return details;
+}
+
+crimild::Bool utils::checkSwapchainSupport( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Check swapchain support" );
+
+    auto swapchainSupport = querySwapchainSupportDetails(
+        device,
+        surface
+    );
+
+    return !swapchainSupport.formats.empty()
+    	&& !swapchainSupport.presentModes.empty();
+}
+

@@ -133,6 +133,22 @@ namespace crimild {
             // TODO: How to handle an optional surface param?
             QueueFamilyIndices findQueueFamilies( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept;
 
+            /**
+             	\name Swapchain
+             */
+            //@{
+
+            struct SwapchainSupportDetails {
+                VkSurfaceCapabilitiesKHR capabilities;
+                std::vector< VkSurfaceFormatKHR > formats;
+                std::vector< VkPresentModeKHR > presentModes;
+            };
+
+            SwapchainSupportDetails querySwapchainSupportDetails( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept;
+            crimild::Bool checkSwapchainSupport( const VkPhysicalDevice &physicalDevice, const VkSurfaceKHR &surface ) noexcept;
+
+            //@}
+
             //@}
 
             void populateDebugMessengerCreateInfo( VkDebugUtilsMessengerCreateInfoEXT &createInfo ) noexcept;

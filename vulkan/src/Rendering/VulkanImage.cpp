@@ -29,29 +29,42 @@
 #include "VulkanRenderDevice.hpp"
 #include "Foundation/Log.hpp"
 
+using namespace crimild;
 using namespace crimild::vulkan;
-
-Image::Image( VulkanRenderDevice *device, const VkImage &imageHandler )
-	: m_renderDevice( device ),
-	  m_imageHandler( imageHandler )
-{
-	CRIMILD_LOG_TRACE( "Creating Vulkan image" );
-}
 
 Image::~Image( void )
 {
-	CRIMILD_LOG_TRACE( "Destroying Vulkan image" );
-	
-	if ( m_renderDevice != nullptr && m_imageHandler != VK_NULL_HANDLE ) {
-		CRIMILD_LOG_DEBUG( "Destroying Vulkan image handler" );
-		vkDestroyImage(
-			m_renderDevice->getDeviceHandler(),
-			m_imageHandler,
-			nullptr
-		);
-	}
-
-	m_renderDevice = nullptr;
-	m_imageHandler = VK_NULL_HANDLE;
+    if ( manager != nullptr ) {
+        manager->destroy( this );
+    }
 }
 
+SharedPointer< Image > ImageManager::create( Image::Descriptor const &descriptor ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Creating Vulkan image" );
+
+    auto renderDevice = m_renderDevice;
+    if ( renderDevice == nullptr ) {
+        renderDevice = descriptor.renderDevice;
+    }
+
+    return nullptr;
+}
+
+void ImageManager::attach( Image *image ) noexcept
+{
+    image->manager = this;
+    insert( image );
+}
+
+void ImageManager::destroy( Image *image ) noexcept
+{
+    CRIMILD_LOG_DEBUG( "Destroying Vulkan image" );
+
+    if ( image->renderDevice != nullptr && image->handler != VK_NULL_HANDLE ) {
+        vkDestroyImage( image->renderDevice->handler, image->handler, nullptr );
+    }
+
+    image->handler = VK_NULL_HANDLE;
+    image->renderDevice = nullptr;
+}

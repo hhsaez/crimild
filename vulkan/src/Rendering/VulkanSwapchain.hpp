@@ -28,9 +28,10 @@
 #ifndef CRIMILD_VULKAN_RENDERING_SWAPCHAIN_
 #define CRIMILD_VULKAN_RENDERING_SWAPCHAIN_
 
-#include "Foundation/Types.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/VulkanUtils.hpp"
+#include "Foundation/VulkanObject.hpp"
+#include "Rendering/VulkanImage.hpp"
+#include "Rendering/VulkanImageView.hpp"
+#include "Mathematics/Vector.hpp"
 #include "Foundation/Containers/Array.hpp"
 
 #include <vector>
@@ -39,68 +40,62 @@ namespace crimild {
 
 	namespace vulkan {
 
-		class VulkanRenderDevice;
+		class RenderDevice;
 		class VulkanSurface;
 		class Image;
 		class ImageView;
 		class Semaphore;
+        class SwapchainManager;
 
-		class Swapchain : public SharedObject {
+		class Swapchain : public VulkanObject, public ImageManager {
+            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::Swapchain )
+
+        public:
+            struct Descriptor {
+                RenderDevice *renderDevice;
+                crimild::Vector2ui extent;
+            };
+
 		private:
 			using ImageArray = containers::Array< SharedPointer< Image >>;
 			using ImageViewArray = containers::Array< SharedPointer< ImageView >>;
 			
 		public:
-			static crimild::Bool swapchainSupported( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept;
-
-			static SharedPointer< Swapchain > create( VulkanRenderDevice *device, VulkanSurface *surface ) noexcept;
-
-		private:
-			struct SwapchainSupportDetails {
-				VkSurfaceCapabilitiesKHR capabilities;
-				std::vector< VkSurfaceFormatKHR > formats;
-				std::vector< VkPresentModeKHR > presentModes;
-			};
-
-			static SwapchainSupportDetails querySupportDetails( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept;
-			static VkSurfaceFormatKHR chooseSurfaceFormat( const std::vector< VkSurfaceFormatKHR > &availableFormats ) noexcept;
-			static VkPresentModeKHR choosePresentationMode( const std::vector< VkPresentModeKHR > &availablePresentModes ) noexcept;
-			static VkExtent2D chooseExtent( const VkSurfaceCapabilitiesKHR &capabilities ) noexcept;
-			
-		public:
-			Swapchain(
-				VulkanRenderDevice *device,
-				VulkanSurface *surface,
-				const VkSwapchainKHR &swapchainHandler,
-				const VkFormat &format,
-				const VkExtent2D &extent
-			) noexcept;
-
 			~Swapchain( void ) noexcept;
 
-			const VkSwapchainKHR &getSwapchainHandler( void ) const noexcept { return m_swapchainHandler; }
-			const VkFormat &getFormat( void ) const noexcept { return m_format; }
-			const VkExtent2D &getExtent( void ) const noexcept { return m_extent; }
-			const ImageArray &getImages( void ) const { return m_images; }
-			const ImageViewArray &getImageViews( void ) const { return m_imageViews; }
+            RenderDevice *renderDevice = nullptr;
+            VulkanSurface *surface = nullptr;
+            VkSwapchainKHR handler = VK_NULL_HANDLE;
+            VkFormat format;
+            VkExtent2D extent;
+            crimild::UInt32 maxFramesInFlight = 2;
+            SwapchainManager *manager = nullptr;
+            containers::Array< SharedPointer< Image >> images;
+            containers::Array< SharedPointer< ImageView >> imageViews;
 
 			crimild::UInt32 acquireNextImage( const Semaphore *imageAvailableSemaphore ) const noexcept;
 			void presentImage( crimild::UInt32 imageIndex, const Semaphore *signal ) const noexcept;
 
-		private:
-			void retrieveSwapchainImages( void ) noexcept;
-			void createImageViews( void ) noexcept;
-
-		private:
-			VulkanRenderDevice *m_device = nullptr;
-			VulkanSurface *m_surface = nullptr;
-			VkSwapchainKHR m_swapchainHandler = VK_NULL_HANDLE;
-			VkFormat m_format;
-			VkExtent2D m_extent;
-			crimild::UInt32 m_maxFramesInFlight = 2;
-			containers::Array< SharedPointer< Image >> m_images;
-			containers::Array< SharedPointer< ImageView >> m_imageViews;			
+            void retrieveSwapchainImages( void ) noexcept;
+            void createImageViews( void ) noexcept;
 		};
+
+        class SwapchainManager : public VulkanObjectManager< Swapchain > {
+        public:
+            explicit SwapchainManager( RenderDevice *renderDevice ) noexcept : m_renderDevice( renderDevice ) { }
+            virtual ~SwapchainManager( void ) = default;
+
+            SharedPointer< Swapchain > create( Swapchain::Descriptor const &descriptor ) noexcept;
+            void destroy( Swapchain *swapchain ) noexcept override;
+
+        private:
+            VkSurfaceFormatKHR chooseSurfaceFormat( const std::vector< VkSurfaceFormatKHR > &availableFormats ) noexcept;
+            VkPresentModeKHR choosePresentationMode( const std::vector< VkPresentModeKHR > &availablePresentModes ) noexcept;
+            VkExtent2D chooseExtent( const VkSurfaceCapabilitiesKHR &capabilities, VkExtent2D requestedExtent ) noexcept;
+
+        private:
+            RenderDevice *m_renderDevice = nullptr;
+        };
 
 	}
 

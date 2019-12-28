@@ -32,6 +32,12 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
+PhysicalDevice::PhysicalDevice( void )
+    : RenderDeviceManager( this )
+{
+
+}
+
 PhysicalDevice::~PhysicalDevice( void )
 {
     if ( manager != nullptr ) {
@@ -63,6 +69,8 @@ SharedPointer< PhysicalDevice > PhysicalDeviceManager::create( PhysicalDevice::D
 void PhysicalDeviceManager::destroy( PhysicalDevice *physicalDevice ) noexcept
 {
     CRIMILD_LOG_TRACE( "Destroying Vulkan physical device" );
+
+    static_cast< RenderDeviceManager * >( physicalDevice )->cleanup();
 
     // No need to destroy anything. Just reset members
     physicalDevice->handler = VK_NULL_HANDLE;
@@ -104,7 +112,7 @@ crimild::Bool PhysicalDeviceManager::isDeviceSuitable( const VkPhysicalDevice &d
     auto extensionsSupported = utils::checkDeviceExtensionSupport( device );
     auto swapchainAdequate = false;
     if ( extensionsSupported ) {
-//        swapchainAdequate = checkSwapchainSupport( device, surface );
+        swapchainAdequate = utils::checkSwapchainSupport( device, surface );
     }
 
     VkPhysicalDeviceFeatures supportedFeatures;
@@ -117,4 +125,3 @@ crimild::Bool PhysicalDeviceManager::isDeviceSuitable( const VkPhysicalDevice &d
 
     return false;
 }
-

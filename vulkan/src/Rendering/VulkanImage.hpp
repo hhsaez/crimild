@@ -28,36 +28,48 @@
 #ifndef CRIMILD_VULKAN_RENDERING_IMAGE_
 #define CRIMILD_VULKAN_RENDERING_IMAGE_
 
-#include "Foundation/Types.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/VulkanUtils.hpp"
+#include "Foundation/VulkanObject.hpp"
 
 namespace crimild {
 
 	namespace vulkan {
 
-		class VulkanRenderDevice;
+		class RenderDevice;
+        class ImageManager;
 
-		/**
-		 */
-		class Image : public SharedObject {
+		class Image : public VulkanObject {
+            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::Image )
+
+        public:
+            struct Descriptor {
+                RenderDevice *renderDevice;
+            };
+
 		public:
-			/**
-			   \brief Creates an image from a device and a handler
-
-			   It migth be possible to create an image with a null device, in which
-			   case the image handler won't be destroyed since the image is managed
-			   elsewhere (\see Swapchain)
-			 */
-			Image( VulkanRenderDevice *device, const VkImage &imageHandler );
 			~Image( void );
-			
-			const VkImage &getImageHandler( void ) const noexcept { return m_imageHandler; }
 
-		private:
-			VulkanRenderDevice *m_renderDevice = nullptr;
-			VkImage m_imageHandler = VK_NULL_HANDLE;
+            VkImage handler = VK_NULL_HANDLE;
+            RenderDevice *renderDevice = nullptr;
+            ImageManager *manager = nullptr;
 		};
+
+        /**
+           It migth be possible to create an image with a null device, in which
+           case the image handler won't be destroyed since the image is managed
+           elsewhere (\see Swapchain)
+         */
+        class ImageManager : public VulkanObjectManager< Image > {
+        public:
+            explicit ImageManager( RenderDevice *renderDevice = nullptr ) noexcept : m_renderDevice( renderDevice ) { }
+            virtual ~ImageManager( void ) noexcept = default;
+
+            SharedPointer< Image > create( Image::Descriptor const &descriptor ) noexcept;
+            void attach( Image *image ) noexcept;
+            void destroy( Image *image ) noexcept override;
+
+        private:
+            RenderDevice *m_renderDevice = nullptr;
+        };
 
 	}
 
