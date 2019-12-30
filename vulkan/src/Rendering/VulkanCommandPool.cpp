@@ -41,17 +41,6 @@ CommandPool::~CommandPool( void )
     }
 }
 
-//crimild::SharedPointer< CommandBuffer > CommandPool::createCommandBuffer( void ) const
-//{
-//	return crimild::alloc< CommandBuffer >(
-//		m_renderDevice,
-//		CommandBuffer::Descriptor {
-//			.commandPool = this,
-//		}
-//	);
-//    return nullptr;
-//}
-
 SharedPointer< CommandPool > CommandPoolManager::create( CommandPool::Descriptor const &descriptor ) noexcept
 {
     CRIMILD_LOG_TRACE( "Creating Vulkan Command Pool" );
@@ -68,10 +57,14 @@ SharedPointer< CommandPool > CommandPoolManager::create( CommandPool::Descriptor
     };
 
     VkCommandPool commandPoolHandler;
-    if ( vkCreateCommandPool( renderDevice->handler, &createInfo, nullptr, &commandPoolHandler ) != VK_SUCCESS ) {
-        CRIMILD_LOG_ERROR( "Failed to create command pool" );
-        return nullptr;
-    }
+    CRIMILD_VULKAN_CHECK(
+     	vkCreateCommandPool(
+        	renderDevice->handler,
+            &createInfo,
+            nullptr,
+        	&commandPoolHandler
+        )
+ 	);
 
     auto commandPool = crimild::alloc< CommandPool >();
     commandPool->handler = commandPoolHandler;

@@ -50,7 +50,7 @@ crimild::UInt32 Swapchain::acquireNextImage( const Semaphore *imageAvailableSema
 		renderDevice->handler,
 		handler,
 		std::numeric_limits< uint64_t >::max(), // disable timeout
-		imageAvailableSemaphore->getSemaphoreHandler(),
+		imageAvailableSemaphore->handler,
 		VK_NULL_HANDLE,
 		&imageIndex		
 	);
@@ -61,7 +61,7 @@ crimild::UInt32 Swapchain::acquireNextImage( const Semaphore *imageAvailableSema
 void Swapchain::presentImage( crimild::UInt32 imageIndex, const Semaphore *signal ) const noexcept
 {
 	VkSemaphore signalSemaphores[] = {
-		signal->getSemaphoreHandler(),
+		signal->handler,
 	};
 
 	VkSwapchainKHR swapchains[] = {
@@ -126,6 +126,9 @@ void Swapchain::createImageViews( void ) noexcept
                 	.mipLevels = 1,
                 }
             );
+        	if ( imageView != nullptr ) {
+                imageViews.add( imageView );
+        	}
         }
     );
 }
@@ -201,6 +204,7 @@ void recreateSwapChain( void )
 SharedPointer< Swapchain > SwapchainManager::create( Swapchain::Descriptor const &descriptor ) noexcept
 {
     CRIMILD_LOG_TRACE( "Creating Vulkan swapchain" );
+
     auto renderDevice = m_renderDevice;
     if ( renderDevice == nullptr ) {
         renderDevice = descriptor.renderDevice;
@@ -276,14 +280,14 @@ SharedPointer< Swapchain > SwapchainManager::create( Swapchain::Descriptor const
     createInfo.oldSwapchain = VK_NULL_HANDLE;
 
     VkSwapchainKHR swapchainHandler;
-    if ( vkCreateSwapchainKHR(
-        renderDevice->handler,
-        &createInfo,
-        nullptr,
-        &swapchainHandler ) != VK_SUCCESS ) {
-        CRIMILD_LOG_ERROR( "Failed to create swapchain" );
-        return nullptr;
-    }
+    CRIMILD_VULKAN_CHECK(
+     	vkCreateSwapchainKHR(
+            renderDevice->handler,
+            &createInfo,
+            nullptr,
+            &swapchainHandler
+     	)
+	);
 
     auto swapchain = crimild::alloc< Swapchain >();
     swapchain->handler = swapchainHandler;

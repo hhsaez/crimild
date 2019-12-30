@@ -29,12 +29,15 @@
 #define CRIMILD_VULKAN_RENDERING_RENDER_DEVICE_
 
 #include "Foundation/VulkanObject.hpp"
+#include "Rendering/VulkanCommandBuffer.hpp"
 #include "Rendering/VulkanCommandPool.hpp"
+#include "Rendering/VulkanFence.hpp"
 #include "Rendering/VulkanFramebuffer.hpp"
 #include "Rendering/VulkanImageView.hpp"
 #include "Rendering/VulkanPipeline.hpp"
 #include "Rendering/VulkanPipelineLayout.hpp"
 #include "Rendering/VulkanRenderPass.hpp"
+#include "Rendering/VulkanSemaphore.hpp"
 #include "Rendering/VulkanShaderModule.hpp"
 #include "Rendering/VulkanSwapchain.hpp"
 
@@ -44,37 +47,39 @@ namespace crimild {
 
 	namespace vulkan {
 
-        class CommandBuffer;
-        class Fence;
         class PhysicalDevice;
         class RenderDeviceManager;
-        class Semaphore;
-        class Swapchain;
 		class VulkanInstance;
 		class VulkanSurface;
 
         class RenderDevice :
         	public VulkanObject,
+        	public CommandBufferManager,
         	public CommandPoolManager,
         	public SwapchainManager,
+            public FenceManager,
         	public FramebufferManager,
         	public ImageManager,
         	public ImageViewManager,
         	public PipelineManager,
         	public PipelineLayoutManager,
             public RenderPassManager,
+        	public SemaphoreManager,
         	public ShaderModuleManager {
             CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::RenderDevice )
 
         public:
+            using CommandBufferManager::create;
             using CommandPoolManager::create;
             using SwapchainManager::create;
+            using FenceManager::create;
             using FramebufferManager::create;
             using ImageManager::create;
             using ImageViewManager::create;
             using PipelineManager::create;
             using PipelineLayoutManager::create;
             using RenderPassManager::create;
+            using SemaphoreManager::create;
             using ShaderModuleManager::create;
 
             struct Descriptor {
@@ -91,6 +96,10 @@ namespace crimild {
             RenderDeviceManager *manager = nullptr;
             VkQueue graphicsQueue;
             VkQueue presentQueue;
+
+        public:
+            void submitGraphicsCommands( const Semaphore *wait, const CommandBuffer *commandBuffer, const Semaphore *signal, const Fence *fence ) const noexcept;
+            void waitIdle( void ) const noexcept;
         };
 
         class RenderDeviceManager : public VulkanObjectManager< RenderDevice > {

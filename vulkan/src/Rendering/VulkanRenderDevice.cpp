@@ -46,14 +46,17 @@ using namespace crimild;
 using namespace crimild::vulkan;
 
 RenderDevice::RenderDevice( void )
-    : SwapchainManager( this ),
-	  CommandPoolManager( this ),
+    : CommandBufferManager( this ),
+      CommandPoolManager( this ),
+	  SwapchainManager( this ),
+      FenceManager( this ),
       FramebufferManager( this ),
       ImageManager( this ),
 	  ImageViewManager( this ),
       PipelineManager( this ),
       PipelineLayoutManager( this ),
       RenderPassManager( this ),
+      SemaphoreManager( this ),
 	  ShaderModuleManager( this )
 {
 
@@ -64,6 +67,55 @@ RenderDevice::~RenderDevice( void )
     if ( manager != nullptr ) {
         manager->destroy( this );
     }
+}
+
+void RenderDevice::submitGraphicsCommands( const Semaphore *wait, const CommandBuffer *commandBuffer, const Semaphore *signal, const Fence *fence ) const noexcept
+{
+    VkSemaphore waitSemaphores[] = {
+        wait->handler,
+    };
+
+    VkSemaphore signalSemaphores[] = {
+        signal->handler,
+    };
+
+    VkPipelineStageFlags waitStages[] = {
+        // Ensure that render passes don't begin until there's an image available
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+    };
+
+    VkCommandBuffer commandBuffers[] = {
+        commandBuffer->handler,
+    };
+
+    auto submitInfo = VkSubmitInfo {
+        .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+        .waitSemaphoreCount = 1,
+        .pWaitSemaphores = waitSemaphores,
+        .pWaitDstStageMask = waitStages,
+        .commandBufferCount = 1,
+        .pCommandBuffers = commandBuffers,
+        .signalSemaphoreCount = 1,
+        .pSignalSemaphores = signalSemaphores,
+    };
+
+    CRIMILD_VULKAN_CHECK(
+        vkQueueSubmit(
+            graphicsQueue,
+            1,
+            &submitInfo,
+            fence != nullptr ? fence->handler : VK_NULL_HANDLE
+        )
+    );
+}
+
+void RenderDevice::waitIdle( void ) const noexcept
+{
+    if ( handler == VK_NULL_HANDLE ) {
+        return;
+    }
+
+    vkDeviceWaitIdle( handler );
 }
 
 SharedPointer< RenderDevice > RenderDeviceManager::create( RenderDevice::Descriptor const &descriptor ) noexcept
@@ -132,21 +184,28 @@ SharedPointer< RenderDevice > RenderDeviceManager::create( RenderDevice::Descrip
     }
 
     VkDevice deviceHandler;
-    if ( vkCreateDevice( physicalDevice->handler, &createInfo, nullptr, &deviceHandler ) != VK_SUCCESS ) {
-        CRIMILD_LOG_ERROR( "Failed to create logical device" );
-        return nullptr;
-    }
+    CRIMILD_VULKAN_CHECK(
+		vkCreateDevice(
+       		physicalDevice->handler,
+           	&createInfo,
+           	nullptr,
+           	&deviceHandler
+       	)
+	);
+
+    // Fetch device queues
+    VkQueue graphisQueueHandler, presentQueueHandler;
+    vkGetDeviceQueue( deviceHandler, indices.graphicsFamily[ 0 ], 0, &graphisQueueHandler );
+    vkGetDeviceQueue( deviceHandler, indices.presentFamily[ 0 ], 0, &presentQueueHandler );
 
     auto renderDevice = crimild::alloc< RenderDevice >();
     renderDevice->handler = deviceHandler;
     renderDevice->physicalDevice = physicalDevice;
     renderDevice->surface = surface;
     renderDevice->manager = this;
+    renderDevice->graphicsQueue = graphisQueueHandler;
+    renderDevice->presentQueue = presentQueueHandler;
     insert( crimild::get_ptr( renderDevice ) );
-
-    // Fetch device queues
-    vkGetDeviceQueue( deviceHandler, indices.graphicsFamily[ 0 ], 0, &( renderDevice->graphicsQueue ) );
-    vkGetDeviceQueue( deviceHandler, indices.presentFamily[ 0 ], 0, &( renderDevice->presentQueue ) );
 
     return renderDevice;
 }
@@ -155,6 +214,9 @@ void RenderDeviceManager::destroy( RenderDevice *renderDevice ) noexcept
 {
     CRIMILD_LOG_TRACE( "Destroying Vulkan logical device" );
 
+    static_cast< FenceManager * >( renderDevice )->cleanup();
+    static_cast< SemaphoreManager * >( renderDevice )->cleanup();
+    static_cast< CommandBufferManager * >( renderDevice )->cleanup();
     static_cast< CommandPoolManager * >( renderDevice )->cleanup();
     static_cast< FramebufferManager * >( renderDevice )->cleanup();
     static_cast< ShaderModuleManager * >( renderDevice )->cleanup();
@@ -173,6 +235,8 @@ void RenderDeviceManager::destroy( RenderDevice *renderDevice ) noexcept
     renderDevice->physicalDevice = nullptr;
     renderDevice->surface = nullptr;
     renderDevice->manager = nullptr;
+    renderDevice->graphicsQueue = VK_NULL_HANDLE;
+    renderDevice->presentQueue = VK_NULL_HANDLE;
     erase( renderDevice );
 }
 
@@ -241,115 +305,3 @@ VkSampleCountFlagBits VulkanRenderDevice::getMaxUsableSampleCount( void ) const 
 	if ( counts & VK_SAMPLE_COUNT_2_BIT ) return VK_SAMPLE_COUNT_2_BIT;
 	return VK_SAMPLE_COUNT_1_BIT;
 }
-
-VulkanRenderDevice::QueueFamilyIndices VulkanRenderDevice::getQueueFamilies( void ) const noexcept
-{
-//	return findQueueFamilies(
-//		m_physicalDevice,
-//		m_surface->handler
-//	);
-    return {};
-}
-
-void VulkanRenderDevice::waitIdle( void ) const noexcept
-{
-	if ( m_device == VK_NULL_HANDLE ) {
-		return;
-	}
-
-	vkDeviceWaitIdle( m_device );
-}
-
-SharedPointer< Semaphore > VulkanRenderDevice::createSemaphore( void ) const noexcept
-{
-    return nullptr;//crimild::alloc< Semaphore >( this );
-}
-
-SharedPointer< Fence > VulkanRenderDevice::createFence( void ) noexcept
-{
-    return nullptr;//crimild::alloc< Fence >( this );
-}
-
-SharedPointer< Image > VulkanRenderDevice::createImage( void )
-{
-	return nullptr;
-}
-
-SharedPointer< ImageView > VulkanRenderDevice::createImageView( Image *image, VkFormat format, VkImageAspectFlags aspectFlags, crimild::UInt32 mipLevels )
-{
-    /*
-	return crimild::alloc< ImageView >(
-		this,
-		crimild::retain( image ),
-		format,
-		aspectFlags,
-		mipLevels
-	);
-     */
-    return nullptr;
-}
-
-SharedPointer< Pipeline > VulkanRenderDevice::createPipeline( const Pipeline::Descriptor &descriptor ) const noexcept
-{
-//	return crimild::alloc< Pipeline >( this, descriptor );
-    return nullptr;
-}
-
-SharedPointer< RenderPass > VulkanRenderDevice::createRenderPass( void ) const noexcept
-{
-    return nullptr;//crimild::alloc< RenderPass >( this, getSwapchain() );
-}
-
-SharedPointer< Framebuffer > VulkanRenderDevice::createFramebuffer( const Framebuffer::Descriptor &descriptor ) const noexcept
-{
-    return nullptr;//crimild::alloc< Framebuffer >( this, descriptor );
-}
-
-SharedPointer< CommandPool > VulkanRenderDevice::createGraphicsCommandPool( void ) const noexcept
-{
-//	auto queueFamilyIndices = findQueueFamilies( m_physicalDevice, m_surface->handler );
-	
-//	return crimild::alloc< CommandPool >( this, queueFamilyIndices.graphicsFamily[ 0 ] );
-    return nullptr;
-}
-
-void VulkanRenderDevice::submitGraphicsCommands( const Semaphore *wait, const CommandBuffer *commandBuffer, const Semaphore *signal, const Fence *fence ) const
-{
-	VkSemaphore waitSemaphores[] = {
-		wait->getSemaphoreHandler(),
-	};
-
-	VkSemaphore signalSemaphores[] = {
-		signal->getSemaphoreHandler(),
-	};
-
-	VkPipelineStageFlags waitStages[] = {
-		// Ensure that render passes don't begin until there's an image available
-		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-	};
-
-	VkCommandBuffer commandBuffers[] = {
-		commandBuffer->getCommandBufferHandler(),
-	};
-	
-	auto submitInfo = VkSubmitInfo {
-		.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-		.waitSemaphoreCount = 1,
-		.pWaitSemaphores = waitSemaphores,
-		.pWaitDstStageMask = waitStages,
-		.commandBufferCount = 1,
-		.pCommandBuffers = commandBuffers,
-		.signalSemaphoreCount = 1,
-		.pSignalSemaphores = signalSemaphores,
-	};
-
-	CRIMILD_VULKAN_CHECK(
-		vkQueueSubmit(
-			m_graphicsQueue,
-			1,
-			&submitInfo,
-			fence != nullptr ? fence->getFenceHandler() : VK_NULL_HANDLE
-		)
-	);
-}
-

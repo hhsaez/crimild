@@ -65,15 +65,20 @@ SharedPointer< Framebuffer > FramebufferManager::create( Framebuffer::Descriptor
     };
 
     VkFramebuffer framebufferHandler;
-    if ( vkCreateFramebuffer( renderDevice->handler, &createInfo, nullptr, &framebufferHandler ) != VK_SUCCESS ) {
-        CRIMILD_LOG_ERROR( "Failed to create Vulkan framebuffer" );
-        return nullptr;
-    }
+    CRIMILD_VULKAN_CHECK(
+     	vkCreateFramebuffer(
+    		renderDevice->handler,
+            &createInfo,
+        	nullptr,
+            &framebufferHandler
+    	)
+ 	);
 
     auto framebuffer = crimild::alloc< Framebuffer >();
     framebuffer->handler = framebufferHandler;
     framebuffer->manager = this;
     framebuffer->renderDevice = renderDevice;
+    framebuffer->extent = descriptor.extent;
     insert( crimild::get_ptr( framebuffer ) );
     return framebuffer;
 }

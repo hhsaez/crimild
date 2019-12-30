@@ -78,10 +78,14 @@ SharedPointer< ImageView > ImageViewManager::create( ImageView::Descriptor const
     };
 
     VkImageView imageViewHandler;
-    if ( vkCreateImageView( renderDevice->handler, &viewInfo, nullptr, &imageViewHandler ) != VK_SUCCESS ) {
-        CRIMILD_LOG_ERROR( "Failed to create image view" );
-        return nullptr;
-    }
+    CRIMILD_VULKAN_CHECK(
+     	vkCreateImageView(
+      		renderDevice->handler,
+          	&viewInfo,
+          	nullptr,
+          	&imageViewHandler
+		)
+ 	);
 
     auto imageView = crimild::alloc< ImageView >();
     imageView->handler = imageViewHandler;
@@ -98,7 +102,11 @@ void ImageViewManager::destroy( ImageView *imageView ) noexcept
     CRIMILD_LOG_TRACE( "Destroying image view" );
 
     if ( imageView->renderDevice != nullptr && imageView->handler != VK_NULL_HANDLE ) {
-        vkDestroyImageView( imageView->renderDevice->handler, imageView->handler, nullptr );
+        vkDestroyImageView(
+       		imageView->renderDevice->handler,
+           	imageView->handler,
+       		nullptr
+       	);
     }
 
     imageView->handler = nullptr;

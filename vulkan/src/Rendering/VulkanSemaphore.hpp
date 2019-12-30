@@ -28,16 +28,14 @@
 #ifndef CRIMILD_VULKAN_RENDERING_SEMAPHORE_
 #define CRIMILD_VULKAN_RENDERING_SEMAPHORE_
 
-#include "Foundation/Types.hpp"
-#include "Foundation/RTTI.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/VulkanUtils.hpp"
+#include "Foundation/VulkanObject.hpp"
 
 namespace crimild {
 
 	namespace vulkan {
 
-		class VulkanRenderDevice;
+		class RenderDevice;
+        class SemaphoreManager;
 
 		/**
 		   \brief Implements a Vulkan semaphore
@@ -46,19 +44,33 @@ namespace crimild {
 		   for processing, they may require other jobs to be finished first. We can specify that
 		   the former ones wait for them to complete before they're executed by using semaphores.
 		 */
-		class Semaphore : public SharedObject, public RTTI {
+		class Semaphore : public VulkanObject {
 			CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::Semaphore );
-			
-		public:
-			explicit Semaphore( const VulkanRenderDevice *device );
-			~Semaphore( void );
-			
-			const VkSemaphore &getSemaphoreHandler( void ) const noexcept { return m_semaphoreHandler; }
 
-		private:
-			const VulkanRenderDevice *m_renderDevice = nullptr;
-			VkSemaphore m_semaphoreHandler = VK_NULL_HANDLE;
+        public:
+            struct Descriptor {
+                RenderDevice *renderDevice;
+            };
+
+		public:
+			~Semaphore( void );
+
+            RenderDevice *renderDevice = nullptr;
+            VkSemaphore handler = VK_NULL_HANDLE;
+            SemaphoreManager *manager = nullptr;
 		};
+
+        class SemaphoreManager : public VulkanObjectManager< Semaphore > {
+        public:
+            explicit SemaphoreManager( RenderDevice *renderDevice = nullptr ) noexcept : m_renderDevice( renderDevice ) { }
+            virtual ~SemaphoreManager( void ) noexcept = default;
+
+            SharedPointer< Semaphore > create( Semaphore::Descriptor const &descriptor ) noexcept;
+            void destroy( Semaphore *semaphore ) noexcept override;
+
+        private:
+            RenderDevice *m_renderDevice = nullptr;
+        };
 
 	}
 

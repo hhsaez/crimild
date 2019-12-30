@@ -28,50 +28,22 @@
 #include "VulkanFence.hpp"
 #include "VulkanRenderDevice.hpp"
 
+using namespace crimild;
 using namespace crimild::vulkan;
-
-Fence::Fence( const VulkanRenderDevice *device )
-	: m_device( device )
-{
-	CRIMILD_LOG_TRACE( "Creating vulkan fence" );
-	
-	auto fenceInfo = VkFenceCreateInfo {
-		.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
-
-		// Initialize fence in signal state so we can wait for it from the beginning
-		.flags = VK_FENCE_CREATE_SIGNALED_BIT,
-	};
-
-	CRIMILD_VULKAN_CHECK(
-		vkCreateFence(
-			m_device->getDeviceHandler(),
-			&fenceInfo,
-			nullptr,
-			&m_fenceHandler
-		)
-	);
-}
 
 Fence::~Fence( void ) noexcept
 {
-	CRIMILD_LOG_TRACE( "Destroying vulkan fence" );
-	
-	if ( m_fenceHandler != VK_NULL_HANDLE ) {
-		vkDestroyFence(
-			m_device->getDeviceHandler(),
-			m_fenceHandler,
-			nullptr
-		);
-		m_fenceHandler = VK_NULL_HANDLE;
-	}
+    if ( manager != nullptr ) {
+        manager->destroy( this );
+    }
 }
 
 void Fence::wait( crimild::UInt64 timeout ) const noexcept
 {
 	vkWaitForFences(
-		m_device->getDeviceHandler(),
+		renderDevice->handler,
 		1,
-		&m_fenceHandler,
+		&handler,
 		VK_TRUE,
 		timeout
 	);
@@ -80,9 +52,60 @@ void Fence::wait( crimild::UInt64 timeout ) const noexcept
 void Fence::reset( void ) const noexcept
 {
 	vkResetFences(
-		m_device->getDeviceHandler(),
+		renderDevice->handler,
 		1,
-		&m_fenceHandler
+		&handler
 	);
 }
 
+SharedPointer< Fence > FenceManager::create( Fence::Descriptor const &descriptor ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Creating vulkan fence" );
+
+    auto renderDevice = m_renderDevice;
+    if ( renderDevice == nullptr ) {
+        renderDevice = descriptor.renderDevice;
+    }
+
+    auto fenceInfo = VkFenceCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+
+        // Initialize fence in signal state so we can wait for it from the beginning
+        .flags = VK_FENCE_CREATE_SIGNALED_BIT,
+    };
+
+    VkFence fenceHandler;
+    CRIMILD_VULKAN_CHECK(
+        vkCreateFence(
+            renderDevice->handler,
+            &fenceInfo,
+            nullptr,
+            &fenceHandler
+        )
+    );
+
+    auto fence = crimild::alloc< Fence >();
+    fence->manager = this;
+    fence->renderDevice = renderDevice;
+    fence->handler = fenceHandler;
+    insert( crimild::get_ptr( fence ) );
+    return fence;
+}
+
+void FenceManager::destroy( Fence *fence ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Destroying vulkan fence" );
+
+    if ( fence->renderDevice != nullptr && fence->handler != VK_NULL_HANDLE ) {
+        vkDestroyFence(
+            fence->renderDevice->handler,
+            fence->handler,
+            nullptr
+        );
+    }
+
+    fence->handler = VK_NULL_HANDLE;
+    fence->renderDevice = nullptr;
+    fence->manager = nullptr;
+    erase( fence );
+}
