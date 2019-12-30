@@ -28,32 +28,46 @@
 #ifndef CRIMILD_VULKAN_RENDERING_COMMAND_POOL_
 #define CRIMILD_VULKAN_RENDERING_COMMAND_POOL_
 
-#include "Foundation/Types.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/VulkanUtils.hpp"
+#include "Foundation/VulkanObject.hpp"
 
 namespace crimild {
 
 	namespace vulkan {
 
-		class VulkanRenderDevice;
 		class CommandBuffer;
+        class CommandPoolManager;
+        class RenderDevice;
 
 		/**
 		 */
-		class CommandPool : public SharedObject {
+		class CommandPool : public VulkanObject {
+            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::CommandPool )
+
+        public:
+            struct Descriptor {
+                RenderDevice *renderDevice;
+                crimild::UInt32 queueFamilyIndex;
+            };
+
 		public:
-			CommandPool( const VulkanRenderDevice *device, crimild::UInt32 queueFamilyIndex );
 			~CommandPool( void );
-			
-			const VkCommandPool &getCommandPoolHandler( void ) const noexcept { return m_commandPoolHandler; }
 
-			SharedPointer< CommandBuffer > createCommandBuffer( void ) const;
-
-		private:
-			const VulkanRenderDevice *m_renderDevice = nullptr;
-			VkCommandPool m_commandPoolHandler = VK_NULL_HANDLE;
+            VkCommandPool handler = VK_NULL_HANDLE;
+            RenderDevice *renderDevice = nullptr;
+            CommandPoolManager *manager = nullptr;
 		};
+
+        class CommandPoolManager : public VulkanObjectManager< CommandPool > {
+        public:
+            explicit CommandPoolManager( RenderDevice *renderDevice = nullptr ) noexcept : m_renderDevice( renderDevice ) { }
+            virtual ~CommandPoolManager( void ) noexcept = default;
+
+            SharedPointer< CommandPool > create( CommandPool::Descriptor const &descriptor ) noexcept;
+            void destroy( CommandPool *commandPool ) noexcept override;
+
+        private:
+            RenderDevice *m_renderDevice = nullptr;
+        };
 
 	}
 

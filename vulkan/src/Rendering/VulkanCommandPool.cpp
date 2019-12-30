@@ -31,47 +31,71 @@
 #include "Exceptions/VulkanException.hpp"
 #include "Foundation/Log.hpp"
 
+using namespace crimild;
 using namespace crimild::vulkan;
-
-CommandPool::CommandPool( const VulkanRenderDevice *device, crimild::UInt32 queueFamilyIndex )
-	: m_renderDevice( device )
-{
-	CRIMILD_LOG_TRACE( "Creating Vulkan Command Pool" );
-
-	auto createInfo = VkCommandPoolCreateInfo {
-		.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-		.queueFamilyIndex = queueFamilyIndex,
-		.flags = 0,
-	};
-
-	if ( vkCreateCommandPool( m_renderDevice->getDeviceHandler(), &createInfo, nullptr, &m_commandPoolHandler ) != VK_SUCCESS ) {
-		throw VulkanException( "Failed to create command pool" );
-	}
-}
 
 CommandPool::~CommandPool( void )
 {
-	CRIMILD_LOG_TRACE( "Destroying Vulkan Command Pool" );
-	
-	if ( m_renderDevice != nullptr && m_commandPoolHandler != VK_NULL_HANDLE ) {
-		vkDestroyCommandPool(
-			m_renderDevice->getDeviceHandler(),
-			m_commandPoolHandler,
-			nullptr
-		);
-	}
-
-	m_renderDevice = nullptr;
-	m_commandPoolHandler = VK_NULL_HANDLE;
+    if ( manager != nullptr ) {
+        manager->destroy( this );
+    }
 }
 
-crimild::SharedPointer< CommandBuffer > CommandPool::createCommandBuffer( void ) const
+//crimild::SharedPointer< CommandBuffer > CommandPool::createCommandBuffer( void ) const
+//{
+//	return crimild::alloc< CommandBuffer >(
+//		m_renderDevice,
+//		CommandBuffer::Descriptor {
+//			.commandPool = this,
+//		}
+//	);
+//    return nullptr;
+//}
+
+SharedPointer< CommandPool > CommandPoolManager::create( CommandPool::Descriptor const &descriptor ) noexcept
 {
-	return crimild::alloc< CommandBuffer >(
-		m_renderDevice,
-		CommandBuffer::Descriptor {
-			.commandPool = this,
-		}
-	);
+    CRIMILD_LOG_TRACE( "Creating Vulkan Command Pool" );
+
+    auto renderDevice = m_renderDevice;
+    if ( renderDevice == nullptr ) {
+        renderDevice = descriptor.renderDevice;
+    }
+
+    auto createInfo = VkCommandPoolCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+        .queueFamilyIndex = descriptor.queueFamilyIndex,
+        .flags = 0,
+    };
+
+    VkCommandPool commandPoolHandler;
+    if ( vkCreateCommandPool( renderDevice->handler, &createInfo, nullptr, &commandPoolHandler ) != VK_SUCCESS ) {
+        CRIMILD_LOG_ERROR( "Failed to create command pool" );
+        return nullptr;
+    }
+
+    auto commandPool = crimild::alloc< CommandPool >();
+    commandPool->handler = commandPoolHandler;
+    commandPool->manager = this;
+    commandPool->renderDevice = renderDevice;
+    insert( crimild::get_ptr( commandPool ) );
+    return commandPool;
+}
+
+void CommandPoolManager::destroy( CommandPool *commandPool ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Destroying Vulkan Command Pool" );
+
+    if ( commandPool->renderDevice != nullptr && commandPool->handler != VK_NULL_HANDLE ) {
+        vkDestroyCommandPool(
+            commandPool->renderDevice->handler,
+            commandPool->handler,
+            nullptr
+        );
+    }
+
+    commandPool->renderDevice = nullptr;
+    commandPool->handler = VK_NULL_HANDLE;
+    commandPool->manager = nullptr;
+    erase( commandPool );
 }
 

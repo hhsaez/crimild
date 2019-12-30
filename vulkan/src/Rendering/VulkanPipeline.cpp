@@ -69,7 +69,6 @@ SharedPointer< Pipeline > PipelineManager::create( Pipeline::Descriptor const &d
     auto colorBlending = createColorBlending( colorBlendAttachment );
 
     auto pipelineLayout = renderDevice->create( PipelineLayout::Descriptor { } );
-    /*
 
     auto createInfo = VkGraphicsPipelineCreateInfo {
         .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
@@ -80,28 +79,33 @@ SharedPointer< Pipeline > PipelineManager::create( Pipeline::Descriptor const &d
         .pViewportState = &viewportState,
         .pRasterizationState = &rasterizer,
         .pMultisampleState = &multisampleState,
-        //.pDepthStencilState = nullptr, // Optional
+        .pDepthStencilState = nullptr, // Optional
         .pColorBlendState = &colorBlending,
-        //.pDynamicState = nullptr, // Optional
-        .layout = m_pipelineLayout,
-        .renderPass = descriptor.renderPass->getRenderPassHandler(),
+        .pDynamicState = nullptr, // Optional
+        .layout = pipelineLayout->handler,
+        .renderPass = descriptor.renderPass->handler,
         .subpass = 0,
         .basePipelineHandle = VK_NULL_HANDLE, // Optional
-        //.basePipelineIndex = -1, // Optional
+        .basePipelineIndex = -1, // Optional
     };
 
     VkPipeline pipelineHander;
-    if ( vkCreateGraphicsPipelines( renderDevice->handler, VK_NULL_HANDLE, 1, &createInfo, nullptr, &pipelineHander ) ) {
+    if ( vkCreateGraphicsPipelines(
+            renderDevice->handler,
+           	VK_NULL_HANDLE,
+           	1,
+           	&createInfo,
+           	nullptr,
+           	&pipelineHander
+       	) != VK_SUCCESS ) {
         CRIMILD_LOG_ERROR( "Failed to create Vulkan pipeline" );
         return nullptr;
-    )
-
-     */
+    }
 
     auto pipeline = crimild::alloc< Pipeline >();
-//    pipeline->handler = pipelineHander;
-//    pipeline->layout = pipelineLayout;
-//    pipeline->renderDevice = renderDevice;
+    pipeline->handler = pipelineHander;
+    pipeline->layout = pipelineLayout;
+    pipeline->renderDevice = renderDevice;
     pipeline->manager = this;
     insert( crimild::get_ptr( pipeline ) );
     return pipeline;
@@ -111,7 +115,6 @@ SharedPointer< Pipeline > PipelineManager::create( Pipeline::Descriptor const &d
 void PipelineManager::destroy( Pipeline *pipeline ) noexcept
 {
     CRIMILD_LOG_TRACE( "Destroy Vulkan pipeline" );
-
 
     if ( pipeline->renderDevice != nullptr ) {
         if ( pipeline->handler != VK_NULL_HANDLE ) {

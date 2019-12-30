@@ -64,7 +64,7 @@ namespace crimild {
 			struct Descriptor {
                 RenderDevice *renderDevice;
 				SharedPointer< ShaderProgram > program;
-				const RenderPass *renderPass;
+				RenderPass *renderPass;
                 Primitive::Type primitiveType;
                 Rectf viewport;
                 Rectf scissor;

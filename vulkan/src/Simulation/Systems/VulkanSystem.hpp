@@ -104,10 +104,10 @@ namespace crimild {
             SharedPointer< PhysicalDevice > m_physicalDevice;
             SharedPointer< RenderDevice > m_renderDevice;
             SharedPointer< Swapchain > m_swapchain;
+            SharedPointer< RenderPass > m_renderPass;
+            SharedPointer< Pipeline > m_pipeline;
+            std::vector< SharedPointer< Framebuffer >> m_framebuffers;
 
-            SharedPointer< vulkan::RenderPass > m_renderPass;
-            SharedPointer< vulkan::Pipeline > m_pipeline;
-            std::vector< SharedPointer< vulkan::Framebuffer >> m_framebuffers;
             SharedPointer< vulkan::CommandPool > m_commandPool;
             std::vector< SharedPointer< vulkan::CommandBuffer >> m_commandBuffers;
             std::vector< SharedPointer< vulkan::Semaphore >> m_imageAvailableSemaphores;

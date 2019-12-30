@@ -99,10 +99,10 @@ void CommandBuffer::beginRenderPass( const RenderPass *renderPass, const Framebu
 	
 	auto renderPassInfo = VkRenderPassBeginInfo {
 		.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-		.renderPass = renderPass->getRenderPassHandler(),
-		.framebuffer = framebuffer->getFramebufferHandler(),
+		.renderPass = renderPass->handler,
+		.framebuffer = framebuffer->handler,
 		.renderArea.offset = { 0, 0 },
-		.renderArea.extent = framebuffer->getExtent(),
+		.renderArea.extent = framebuffer->extent,
 		.clearValueCount = 1,
 		.pClearValues = &clearValue,
 	};

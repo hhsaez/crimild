@@ -47,10 +47,13 @@ using namespace crimild::vulkan;
 
 RenderDevice::RenderDevice( void )
     : SwapchainManager( this ),
+	  CommandPoolManager( this ),
+      FramebufferManager( this ),
       ImageManager( this ),
 	  ImageViewManager( this ),
       PipelineManager( this ),
       PipelineLayoutManager( this ),
+      RenderPassManager( this ),
 	  ShaderModuleManager( this )
 {
 
@@ -152,9 +155,12 @@ void RenderDeviceManager::destroy( RenderDevice *renderDevice ) noexcept
 {
     CRIMILD_LOG_TRACE( "Destroying Vulkan logical device" );
 
+    static_cast< CommandPoolManager * >( renderDevice )->cleanup();
+    static_cast< FramebufferManager * >( renderDevice )->cleanup();
     static_cast< ShaderModuleManager * >( renderDevice )->cleanup();
     static_cast< PipelineManager * >( renderDevice )->cleanup();
     static_cast< PipelineLayoutManager * >( renderDevice )->cleanup();
+    static_cast< RenderPassManager * >( renderDevice )->cleanup();
     static_cast< ImageViewManager * >( renderDevice )->cleanup();
     static_cast< ImageManager * >( renderDevice )->cleanup();
     static_cast< SwapchainManager * >( renderDevice )->cleanup();
@@ -256,12 +262,12 @@ void VulkanRenderDevice::waitIdle( void ) const noexcept
 
 SharedPointer< Semaphore > VulkanRenderDevice::createSemaphore( void ) const noexcept
 {
-	return crimild::alloc< Semaphore >( this );
+    return nullptr;//crimild::alloc< Semaphore >( this );
 }
 
 SharedPointer< Fence > VulkanRenderDevice::createFence( void ) noexcept
 {
-	return crimild::alloc< Fence >( this );
+    return nullptr;//crimild::alloc< Fence >( this );
 }
 
 SharedPointer< Image > VulkanRenderDevice::createImage( void )
@@ -291,12 +297,12 @@ SharedPointer< Pipeline > VulkanRenderDevice::createPipeline( const Pipeline::De
 
 SharedPointer< RenderPass > VulkanRenderDevice::createRenderPass( void ) const noexcept
 {
-	return crimild::alloc< RenderPass >( this, getSwapchain() );
+    return nullptr;//crimild::alloc< RenderPass >( this, getSwapchain() );
 }
 
 SharedPointer< Framebuffer > VulkanRenderDevice::createFramebuffer( const Framebuffer::Descriptor &descriptor ) const noexcept
 {
-	return crimild::alloc< Framebuffer >( this, descriptor );
+    return nullptr;//crimild::alloc< Framebuffer >( this, descriptor );
 }
 
 SharedPointer< CommandPool > VulkanRenderDevice::createGraphicsCommandPool( void ) const noexcept
