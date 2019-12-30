@@ -28,27 +28,29 @@
 #ifndef CRIMILD_VULKAN_RENDERING_COMMAND_BUFFER_
 #define CRIMILD_VULKAN_RENDERING_COMMAND_BUFFER_
 
-#include "Foundation/Types.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/VulkanUtils.hpp"
+#include "Foundation/VulkanObject.hpp"
 #include "Mathematics/Vector.hpp"
 
 namespace crimild {
 
 	namespace vulkan {
 
-		class VulkanRenderDevice;
+        class CommandBufferManager;
 		class CommandPool;
 		class RenderPass;
 		class Framebuffer;
 		class Pipeline;
+        class RenderDevice;
 
 		/**
 		 */
-		class CommandBuffer : public SharedObject {
+		class CommandBuffer : public VulkanObject {
+            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::CommandBuffer )
+
 		public:
 			struct Descriptor {
-				const CommandPool *commandPool;
+                RenderDevice *renderDevice;
+				CommandPool *commandPool;
 			};
 
 			enum class Usage {
@@ -59,23 +61,33 @@ namespace crimild {
 			};
 			
 		public:
-			CommandBuffer( const VulkanRenderDevice *device, const Descriptor &descriptor );
 			~CommandBuffer( void ) noexcept;
 			
-			const VkCommandBuffer &getCommandBufferHandler( void ) const noexcept { return m_commandBufferHandler; }
+            RenderDevice *renderDevice = nullptr;
+            CommandPool *commandPool = nullptr;
+            VkCommandBuffer handler = VK_NULL_HANDLE;
+            CommandBufferManager *manager = nullptr;
 
-			void begin( Usage usage = Usage::DEFAULT ) const;
+        public:
+			void begin( Usage usage = Usage::DEFAULT ) const noexcept;
 			void beginRenderPass( const RenderPass *renderPass, const Framebuffer *framebuffer, const RGBAColorf &clearColor ) const noexcept;
 			void bindGraphicsPipeline( const Pipeline *pipeline ) const noexcept;
 			void draw( void ) const noexcept;
 			void endRenderPass( void ) const noexcept;
 			void end( void ) const;
-
-		private:
-			const VulkanRenderDevice *m_renderDevice = nullptr;
-			const CommandPool *m_commandPool = nullptr;
-			VkCommandBuffer m_commandBufferHandler = VK_NULL_HANDLE;
 		};
+
+        class CommandBufferManager : public VulkanObjectManager< CommandBuffer > {
+        public:
+            explicit CommandBufferManager( RenderDevice *renderDevice = nullptr ) noexcept : m_renderDevice( renderDevice ) { }
+            virtual ~CommandBufferManager( void ) noexcept = default;
+
+            SharedPointer< CommandBuffer > create( CommandBuffer::Descriptor const &descriptor ) noexcept;
+            void destroy( CommandBuffer *commandBuffer ) noexcept override;
+
+        private:
+            RenderDevice *m_renderDevice = nullptr;
+        };
 
 	}
 

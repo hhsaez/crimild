@@ -28,15 +28,14 @@
 #ifndef CRIMILD_VULKAN_RENDERING_FENCE_
 #define CRIMILD_VULKAN_RENDERING_FENCE_
 
-#include "Foundation/Types.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/VulkanUtils.hpp"
+#include "Foundation/VulkanObject.hpp"
 
 namespace crimild {
 
 	namespace vulkan {
 
-		class VulkanRenderDevice;
+        class FenceManager;
+		class RenderDevice;
 
 		/**
 		   \brief Implements a Vulkan fence
@@ -46,20 +45,37 @@ namespace crimild {
 		   information, check whether some commands are still being processed or whether
 		   they have finished the assigned tasks.
 		 */
-		class Fence : public SharedObject {
-		public:
-			Fence( const VulkanRenderDevice *device );
-			~Fence( void ) noexcept;
-			
-			const VkFence &getFenceHandler( void ) const noexcept { return m_fenceHandler; }
+		class Fence : public VulkanObject {
+            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::Fence )
 
+        public:
+            struct Descriptor {
+                RenderDevice *renderDevice;
+            };
+
+		public:
+			~Fence( void ) noexcept;
+
+            VkFence handler = VK_NULL_HANDLE;
+            RenderDevice *renderDevice = nullptr;
+            FenceManager *manager = nullptr;
+
+        public:
 			void wait( crimild::UInt64 timeout = std::numeric_limits< crimild::UInt64 >::max() ) const noexcept;
 			void reset( void ) const noexcept;
-
-		private:
-			const VulkanRenderDevice *m_device = nullptr;
-			VkFence m_fenceHandler = VK_NULL_HANDLE;
 		};
+
+        class FenceManager : public VulkanObjectManager< Fence > {
+        public:
+            explicit FenceManager( RenderDevice *renderDevice = nullptr ) noexcept : m_renderDevice( renderDevice ) { }
+            virtual ~FenceManager( void ) noexcept = default;
+
+            SharedPointer< Fence > create( Fence::Descriptor const &descriptor ) noexcept;
+            void destroy( Fence *fence ) noexcept override;
+
+        private:
+            RenderDevice *m_renderDevice = nullptr;
+        };
 
 	}
 

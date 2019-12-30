@@ -92,7 +92,8 @@ SharedPointer< RenderPass > RenderPassManager::create( RenderPass::Descriptor co
         .srcAccessMask = 0,
 
         .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-        .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+        .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
+        	| VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
     };
 
     auto createInfo = VkRenderPassCreateInfo {
@@ -106,10 +107,14 @@ SharedPointer< RenderPass > RenderPassManager::create( RenderPass::Descriptor co
     };
 
     VkRenderPass renderPassHandler;
-    if ( vkCreateRenderPass( renderDevice->handler, &createInfo, nullptr, &renderPassHandler ) != VK_SUCCESS ) {
-        CRIMILD_LOG_ERROR( "Failed to create Vulkan render pass" );
-        return nullptr;
-    }
+    CRIMILD_VULKAN_CHECK(
+     	vkCreateRenderPass(
+       		renderDevice->handler,
+           	&createInfo,
+           	nullptr,
+           	&renderPassHandler
+   		)
+ 	);
 
     auto renderPass = crimild::alloc< RenderPass >();
     renderPass->handler = renderPassHandler;

@@ -90,17 +90,16 @@ SharedPointer< Pipeline > PipelineManager::create( Pipeline::Descriptor const &d
     };
 
     VkPipeline pipelineHander;
-    if ( vkCreateGraphicsPipelines(
+    CRIMILD_VULKAN_CHECK(
+ 		vkCreateGraphicsPipelines(
             renderDevice->handler,
            	VK_NULL_HANDLE,
            	1,
            	&createInfo,
            	nullptr,
            	&pipelineHander
-       	) != VK_SUCCESS ) {
-        CRIMILD_LOG_ERROR( "Failed to create Vulkan pipeline" );
-        return nullptr;
-    }
+       	)
+    );
 
     auto pipeline = crimild::alloc< Pipeline >();
     pipeline->handler = pipelineHander;
@@ -109,7 +108,6 @@ SharedPointer< Pipeline > PipelineManager::create( Pipeline::Descriptor const &d
     pipeline->manager = this;
     insert( crimild::get_ptr( pipeline ) );
     return pipeline;
-     
 }
 
 void PipelineManager::destroy( Pipeline *pipeline ) noexcept
