@@ -163,13 +163,12 @@ namespace crimild {
 	VkResult ret = x; \
 	if ( ret != VK_SUCCESS ) {\
 	    auto errorStr = crimild::vulkan::utils::errorToString( ret ); \
-		std::stringstream ss; \
-		ss << "Vulkan Error:" \
-		   << "\n\tFile: " << __FILE__ \
-		   << "\n\tLine: " << __LINE__ \
-		   << "\n\tResult: " << errorStr \
-		   << "\n\tCaller: " << #x; \
-		throw VulkanException( ss.str() ); \
+		std::cerr << "Vulkan Error:" \
+		   		  << "\n\tFile: " << __FILE__ \
+                  << "\n\tLine: " << __LINE__ \
+                  << "\n\tResult: " << errorStr \
+                  << "\n\tCaller: " << #x; \
+		exit( -1 ); \
 	}\
 }
 

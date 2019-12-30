@@ -107,12 +107,11 @@ namespace crimild {
             SharedPointer< RenderPass > m_renderPass;
             SharedPointer< Pipeline > m_pipeline;
             std::vector< SharedPointer< Framebuffer >> m_framebuffers;
-
-            SharedPointer< vulkan::CommandPool > m_commandPool;
-            std::vector< SharedPointer< vulkan::CommandBuffer >> m_commandBuffers;
-            std::vector< SharedPointer< vulkan::Semaphore >> m_imageAvailableSemaphores;
-            std::vector< SharedPointer< vulkan::Semaphore >> m_renderFinishedSemaphores;
-            std::vector< SharedPointer< vulkan::Fence >> m_inFlightFences;
+            SharedPointer< CommandPool > m_commandPool;
+            std::vector< SharedPointer< CommandBuffer >> m_commandBuffers;
+            std::vector< SharedPointer< Semaphore >> m_imageAvailableSemaphores;
+            std::vector< SharedPointer< Semaphore >> m_renderFinishedSemaphores;
+            std::vector< SharedPointer< Fence >> m_inFlightFences;
             crimild::UInt32 m_currentFrame = 0;
         };
 

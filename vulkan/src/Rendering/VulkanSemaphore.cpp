@@ -28,36 +28,62 @@
 #include "VulkanSemaphore.hpp"
 #include "VulkanRenderDevice.hpp"
 
+using namespace crimild;
 using namespace crimild::vulkan;
-
-Semaphore::Semaphore( const VulkanRenderDevice *renderDevice )
-	: m_renderDevice( renderDevice )
-{
-	CRIMILD_LOG_TRACE( "Creating vulkan semaphore" );
-	
-	auto createInfo = VkSemaphoreCreateInfo {
-		.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-	};
-
-	CRIMILD_VULKAN_CHECK(
-		vkCreateSemaphore(
-			m_renderDevice->getDeviceHandler(),
-			&createInfo,
-			nullptr,
-			&m_semaphoreHandler
-		)
-	);
-}
 
 Semaphore::~Semaphore( void )
 {
-	if ( m_semaphoreHandler != VK_NULL_HANDLE ) {
-		vkDestroySemaphore(
-			m_renderDevice->getDeviceHandler(),
-			m_semaphoreHandler,
-			nullptr
-		);
-		m_semaphoreHandler = VK_NULL_HANDLE;
-	}
+    if ( manager != nullptr ) {
+        manager->destroy( this );
+    }
+}
+
+SharedPointer< Semaphore > SemaphoreManager::create( Semaphore::Descriptor const &descriptor ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Creating vulkan semaphore" );
+
+    auto renderDevice = m_renderDevice;
+    if ( renderDevice == nullptr ) {
+        renderDevice = descriptor.renderDevice;
+    }
+
+    auto createInfo = VkSemaphoreCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+    };
+
+    VkSemaphore semaphoreHandler;
+    CRIMILD_VULKAN_CHECK(
+ 		vkCreateSemaphore(
+      		renderDevice->handler,
+          	&createInfo,
+          	nullptr,
+          	&semaphoreHandler
+      	)
+ 	);
+
+    auto semaphore = crimild::alloc< Semaphore >();
+    semaphore->renderDevice = renderDevice;
+    semaphore->handler = semaphoreHandler;
+    semaphore->manager = this;
+    insert( crimild::get_ptr( semaphore ) );
+    return semaphore;
+}
+
+void SemaphoreManager::destroy( Semaphore *semaphore ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Destroying Vulkan semaphore" );
+
+    if ( semaphore->renderDevice != nullptr && semaphore->handler != VK_NULL_HANDLE ) {
+        vkDestroySemaphore(
+            semaphore->renderDevice->handler,
+            semaphore->handler,
+            nullptr
+        );
+    }
+
+    semaphore->handler = VK_NULL_HANDLE;
+    semaphore->renderDevice = nullptr;
+    semaphore->manager = nullptr;
+    erase( semaphore );
 }
 

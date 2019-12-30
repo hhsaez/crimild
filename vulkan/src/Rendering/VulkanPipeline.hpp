@@ -70,49 +70,13 @@ namespace crimild {
                 Rectf scissor;
 			};
 			
-//			struct ShaderModule {
-//				VkShaderStageFlagBits stage;
-//				VkShaderModule handler;
-//				std::string entryPointName;
-//			};
-//
-//			using ShaderModuleArray = std::vector< ShaderModule >;
-//			using ShaderStageArray = std::vector< VkPipelineShaderStageCreateInfo >;
-//
 		public:
-//			Pipeline( const VulkanRenderDevice *device, const Descriptor &descriptor );
 			~Pipeline( void );
 
             RenderDevice *renderDevice = nullptr;
             VkPipeline handler = VK_NULL_HANDLE;
             PipelineManager *manager = nullptr;
             SharedPointer< PipelineLayout > layout;
-
-//			const VkPipelineLayout &getPipelineLayout( void ) const noexcept { return m_pipelineLayout; }
-//			const VkPipeline &getGraphicsPipelineHandler( void ) const noexcept { return m_graphicsPipeline; }
-
-		private:
-//			ShaderModuleArray createShaderModules( ShaderProgram *program ) const;
-//			ShaderModule createShaderModule( Shader *shader ) const;
-//			ShaderStageArray createShaderStages( const ShaderModuleArray &modules ) const noexcept;
-//			VkPipelineShaderStageCreateInfo createShaderStage( const ShaderModule &module ) const noexcept;
-//			VkPipelineVertexInputStateCreateInfo createVertexInput( void ) const noexcept;
-//			VkPipelineInputAssemblyStateCreateInfo createInputAssemby( void ) const noexcept;
-//			VkViewport createViewport( void ) const noexcept;
-//			VkRect2D createScissor( void ) const noexcept;
-//			VkPipelineViewportStateCreateInfo createViewportState( const VkViewport &viewport, const VkRect2D &scissor ) const noexcept;
-//			VkPipelineRasterizationStateCreateInfo createRasterizer( void ) const noexcept;
-//			VkPipelineMultisampleStateCreateInfo createMultiplesampleState( void ) const noexcept;
-//			VkPipelineDepthStencilStateCreateInfo createDepthStencilState( void ) const noexcept;
-//			VkPipelineColorBlendAttachmentState createColorBlendAttachment( void ) const noexcept;
-//			VkPipelineColorBlendStateCreateInfo createColorBlending( const VkPipelineColorBlendAttachmentState &colorBlendAttachment ) const noexcept;
-
-			void createPipelineLayout( void );
-
-		private:
-//			const VulkanRenderDevice *m_renderDevice = nullptr;
-//			VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
-//			VkPipeline m_graphicsPipeline = VK_NULL_HANDLE;
 		};
 
         class PipelineManager : public VulkanObjectManager< Pipeline > {
@@ -140,7 +104,6 @@ namespace crimild {
             VkPipelineDepthStencilStateCreateInfo createDepthStencilState( void ) const noexcept;
             VkPipelineColorBlendAttachmentState createColorBlendAttachment( void ) const noexcept;
             VkPipelineColorBlendStateCreateInfo createColorBlending( const VkPipelineColorBlendAttachmentState &colorBlendAttachment ) const noexcept;
-            void createPipelineLayout( void );
 
         private:
             RenderDevice *m_renderDevice = nullptr;

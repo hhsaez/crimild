@@ -56,17 +56,20 @@ SharedPointer< PipelineLayout > PipelineLayoutManager::create( PipelineLayout::D
     };
 
     VkPipelineLayout pipelineLayoutHandler;
-    if ( vkCreatePipelineLayout( renderDevice->handler, &createInfo, nullptr, &pipelineLayoutHandler ) != VK_SUCCESS ) {
-        CRIMILD_LOG_ERROR( "Failed to create Vulkan pipeline layout" );
-        return nullptr;
-    }
+    CRIMILD_VULKAN_CHECK(
+     	vkCreatePipelineLayout(
+       		renderDevice->handler,
+           	&createInfo,
+           	nullptr,
+           	&pipelineLayoutHandler
+       	)
+ 	);
 
     auto pipelineLayout = crimild::alloc< PipelineLayout >();
     pipelineLayout->manager = this;
     pipelineLayout->renderDevice = renderDevice;
     pipelineLayout->handler = pipelineLayoutHandler;
     insert( crimild::get_ptr( pipelineLayout ) );
-
     return pipelineLayout;
 }
 
