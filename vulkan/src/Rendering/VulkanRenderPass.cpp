@@ -29,89 +29,109 @@
 #include "VulkanRenderDevice.hpp"
 #include "VulkanSwapchain.hpp"
 
+using namespace crimild;
 using namespace crimild::vulkan;
-
-RenderPass::RenderPass( const VulkanRenderDevice *device, const Swapchain *swapchain )
-	: m_device( device )
-{
-	CRIMILD_LOG_TRACE( "Creating render pass" );
-	
-	auto colorAttachment = VkAttachmentDescription {
-		// Format must match the one in the swapchain
-		.format = swapchain->format,
-
-		// No multisampling for now
-		.samples = VK_SAMPLE_COUNT_1_BIT,
-		
-		.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
-		.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-
-		// We don't need stencil right now
-		.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-		.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-
-		// We don't care what the previous image was and we're going to clear it anyway
-		.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-
-		// We want the image ready for presentation after rendering
-		.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-	};
-
-	auto colorAttachmentRef = VkAttachmentReference {
-		.attachment = 0,
-		.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-	};
-
-	auto subpass = VkSubpassDescription {
-		.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
-		.colorAttachmentCount = 1,
-		.pColorAttachments = &colorAttachmentRef,
-	};
-
-	auto subpassDependency = VkSubpassDependency {
-		// Which subpass to wait on
-		.srcSubpass = VK_SUBPASS_EXTERNAL, // any previous subpass
-		.dstSubpass = 0,
-
-		// Operations to wait on and the stage in which they occur
-		.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-		.srcAccessMask = 0,
-
-		.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-		.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-	};	
-
-	auto createInfo = VkRenderPassCreateInfo {
-		.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
-		.attachmentCount = 1,
-		.pAttachments = &colorAttachment,
-		.subpassCount = 1,
-		.pSubpasses = &subpass,
-		.dependencyCount = 1,
-		.pDependencies = &subpassDependency,
-	};
-
-	CRIMILD_VULKAN_CHECK(
-		vkCreateRenderPass(
-			device->getDeviceHandler(),
-			&createInfo,
-			nullptr,
-			&m_renderPassHandler
-		)
-	);
-}
 
 RenderPass::~RenderPass( void ) noexcept
 {
-	CRIMILD_LOG_TRACE( "Destroying render pass" );
-	
-	if ( m_device != nullptr && m_renderPassHandler != VK_NULL_HANDLE ) {
-		vkDestroyRenderPass(
-			m_device->getDeviceHandler(),
-			m_renderPassHandler,
-			nullptr
-		);
-		m_renderPassHandler = VK_NULL_HANDLE;
-	}
+    if ( manager != nullptr ) {
+        manager->destroy( this );
+    }
 }
 
+SharedPointer< RenderPass > RenderPassManager::create( RenderPass::Descriptor const &descriptor ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Creating render pass" );
+
+    auto renderDevice = m_renderDevice;
+    if ( renderDevice == nullptr ) {
+        renderDevice = descriptor.renderDevice;
+    }
+
+    auto swapchain = descriptor.swapchain;
+
+    auto colorAttachment = VkAttachmentDescription {
+        // Format must match the one in the swapchain
+        .format = swapchain->format,
+
+        // No multisampling for now
+        .samples = VK_SAMPLE_COUNT_1_BIT,
+
+        .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+        .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+
+        // We don't need stencil right now
+        .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+        .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+
+        // We don't care what the previous image was and we're going to clear it anyway
+        .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+
+        // We want the image ready for presentation after rendering
+        .finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+    };
+
+    auto colorAttachmentRef = VkAttachmentReference {
+        .attachment = 0,
+        .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+    };
+
+    auto subpass = VkSubpassDescription {
+        .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
+        .colorAttachmentCount = 1,
+        .pColorAttachments = &colorAttachmentRef,
+    };
+
+    auto subpassDependency = VkSubpassDependency {
+        // Which subpass to wait on
+        .srcSubpass = VK_SUBPASS_EXTERNAL, // any previous subpass
+        .dstSubpass = 0,
+
+        // Operations to wait on and the stage in which they occur
+        .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+        .srcAccessMask = 0,
+
+        .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+        .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+    };
+
+    auto createInfo = VkRenderPassCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
+        .attachmentCount = 1,
+        .pAttachments = &colorAttachment,
+        .subpassCount = 1,
+        .pSubpasses = &subpass,
+        .dependencyCount = 1,
+        .pDependencies = &subpassDependency,
+    };
+
+    VkRenderPass renderPassHandler;
+    if ( vkCreateRenderPass( renderDevice->handler, &createInfo, nullptr, &renderPassHandler ) != VK_SUCCESS ) {
+        CRIMILD_LOG_ERROR( "Failed to create Vulkan render pass" );
+        return nullptr;
+    }
+
+    auto renderPass = crimild::alloc< RenderPass >();
+    renderPass->handler = renderPassHandler;
+    renderPass->manager = this;
+    renderPass->renderDevice = renderDevice;
+    insert( crimild::get_ptr( renderPass ) );
+    return renderPass;
+}
+
+void RenderPassManager::destroy( RenderPass *renderPass ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Destroying Vulkan render pass" );
+
+    if ( renderPass->renderDevice != nullptr && renderPass->handler != VK_NULL_HANDLE ) {
+        vkDestroyRenderPass(
+            renderPass->renderDevice->handler,
+            renderPass->handler,
+            nullptr
+        );
+    }
+    renderPass->manager = nullptr;
+    renderPass->renderDevice = nullptr;
+    renderPass->handler = VK_NULL_HANDLE;
+    erase( renderPass );
+}

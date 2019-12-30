@@ -28,40 +28,50 @@
 #ifndef CRIMILD_VULKAN_RENDERING_FRAMEBUFFER_
 #define CRIMILD_VULKAN_RENDERING_FRAMEBUFFER_
 
-#include "Foundation/Types.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/VulkanUtils.hpp"
+#include "Foundation/VulkanObject.hpp"
 
 namespace crimild {
 
 	namespace vulkan {
 
-		class VulkanRenderDevice;
+        class FramebufferManager;
 		class ImageView;
+        class RenderDevice;
 		class RenderPass;
 
 		/**
 		 */
-		class Framebuffer : public SharedObject {
+		class Framebuffer : public VulkanObject {
+            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::Framebuffer )
+
 		public:
 			struct Descriptor {
+                RenderDevice *renderDevice;
 				std::vector< ImageView * > attachments;
 				RenderPass *renderPass;
 				VkExtent2D extent;
 			};
 
 		public:
-			Framebuffer( const VulkanRenderDevice *device, const Descriptor &descriptor );
 			~Framebuffer( void ) noexcept;
-			
-			const VkFramebuffer &getFramebufferHandler( void ) const noexcept { return m_framebufferHandler; }
-			const VkExtent2D &getExtent( void ) const noexcept { return m_extent; }
 
-		private:
-			const VulkanRenderDevice *m_device = nullptr;
-			VkFramebuffer m_framebufferHandler = VK_NULL_HANDLE;
-			VkExtent2D m_extent;
+            RenderDevice *renderDevice = nullptr;
+            VkFramebuffer handler = nullptr;
+            VkExtent2D extent;
+            FramebufferManager *manager = nullptr;
 		};
+
+        class FramebufferManager : public VulkanObjectManager< Framebuffer > {
+        public:
+            explicit FramebufferManager( RenderDevice *renderDevice = nullptr ) noexcept : m_renderDevice( renderDevice ) { }
+            virtual ~FramebufferManager( void ) noexcept = default;
+
+            SharedPointer< Framebuffer > create( Framebuffer::Descriptor const &descriptor ) noexcept;
+            void destroy( Framebuffer *framebuffer ) noexcept override;
+
+        private:
+            RenderDevice *m_renderDevice = nullptr;
+        };
 
 	}
 

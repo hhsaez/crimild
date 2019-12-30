@@ -29,12 +29,14 @@
 #define CRIMILD_VULKAN_RENDERING_RENDER_DEVICE_
 
 #include "Foundation/VulkanObject.hpp"
-#include "VulkanSwapchain.hpp"
-#include "VulkanImageView.hpp"
-#include "VulkanPipeline.hpp"
-#include "VulkanPipelineLayout.hpp"
-#include "VulkanFramebuffer.hpp"
-#include "VulkanShaderModule.hpp"
+#include "Rendering/VulkanCommandPool.hpp"
+#include "Rendering/VulkanFramebuffer.hpp"
+#include "Rendering/VulkanImageView.hpp"
+#include "Rendering/VulkanPipeline.hpp"
+#include "Rendering/VulkanPipelineLayout.hpp"
+#include "Rendering/VulkanRenderPass.hpp"
+#include "Rendering/VulkanShaderModule.hpp"
+#include "Rendering/VulkanSwapchain.hpp"
 
 #include <vector>
 
@@ -43,7 +45,6 @@ namespace crimild {
 	namespace vulkan {
 
         class CommandBuffer;
-        class CommandPool;
         class Fence;
         class PhysicalDevice;
         class RenderDeviceManager;
@@ -54,20 +55,26 @@ namespace crimild {
 
         class RenderDevice :
         	public VulkanObject,
+        	public CommandPoolManager,
         	public SwapchainManager,
+        	public FramebufferManager,
         	public ImageManager,
         	public ImageViewManager,
         	public PipelineManager,
         	public PipelineLayoutManager,
+            public RenderPassManager,
         	public ShaderModuleManager {
             CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::RenderDevice )
 
         public:
+            using CommandPoolManager::create;
             using SwapchainManager::create;
+            using FramebufferManager::create;
             using ImageManager::create;
             using ImageViewManager::create;
             using PipelineManager::create;
             using PipelineLayoutManager::create;
+            using RenderPassManager::create;
             using ShaderModuleManager::create;
 
             struct Descriptor {
