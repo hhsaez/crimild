@@ -115,7 +115,7 @@ void CommandBuffer::bindGraphicsPipeline( const Pipeline *pipeline ) const noexc
 	vkCmdBindPipeline(
 		m_commandBufferHandler,
 		VK_PIPELINE_BIND_POINT_GRAPHICS,
-		pipeline->getGraphicsPipelineHandler()
+		pipeline->handler
 	);
 }
 
