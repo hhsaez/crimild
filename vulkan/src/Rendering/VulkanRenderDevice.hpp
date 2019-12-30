@@ -32,7 +32,9 @@
 #include "VulkanSwapchain.hpp"
 #include "VulkanImageView.hpp"
 #include "VulkanPipeline.hpp"
+#include "VulkanPipelineLayout.hpp"
 #include "VulkanFramebuffer.hpp"
+#include "VulkanShaderModule.hpp"
 
 #include <vector>
 
@@ -54,13 +56,19 @@ namespace crimild {
         	public VulkanObject,
         	public SwapchainManager,
         	public ImageManager,
-        	public ImageViewManager {
+        	public ImageViewManager,
+        	public PipelineManager,
+        	public PipelineLayoutManager,
+        	public ShaderModuleManager {
             CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::RenderDevice )
 
         public:
             using SwapchainManager::create;
             using ImageManager::create;
             using ImageViewManager::create;
+            using PipelineManager::create;
+            using PipelineLayoutManager::create;
+            using ShaderModuleManager::create;
 
             struct Descriptor {
                 PhysicalDevice *physicalDevice;

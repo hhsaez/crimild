@@ -28,9 +28,9 @@
 #ifndef CRIMILD_VULKAN_RENDERING_PIPELINE_
 #define CRIMILD_VULKAN_RENDERING_PIPELINE_
 
-#include "Foundation/Types.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/VulkanUtils.hpp"
+#include "Foundation/VulkanObject.hpp"
+#include "Primitives/Primitive.hpp"
+#include "Mathematics/Rect.hpp"
 
 namespace crimild {
 
@@ -39,13 +39,18 @@ namespace crimild {
 
 	namespace vulkan {
 
-		class VulkanRenderDevice;
-		class Swapchain;
-		class RenderPass;
+        class PipelineLayout;
+        class PipelineManager;
+		class RenderDevice;
+        class RenderPass;
+        class ShaderModule;
+        class Swapchain;
 
 		/**
 		 */
-		class Pipeline : public SharedObject {
+		class Pipeline : public VulkanObject {
+            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::Pipeline )
+
 		public:
 			/**
 			   TODO:
@@ -57,49 +62,89 @@ namespace crimild {
 			   - Line Width
 			*/
 			struct Descriptor {
+                RenderDevice *renderDevice;
 				SharedPointer< ShaderProgram > program;
 				const RenderPass *renderPass;
+                Primitive::Type primitiveType;
+                Rectf viewport;
+                Rectf scissor;
 			};
 			
-			struct ShaderModule {
-				VkShaderStageFlagBits stage;
-				VkShaderModule handler;
-				std::string entryPointName;
-			};
-
-			using ShaderModuleArray = std::vector< ShaderModule >;
-			using ShaderStageArray = std::vector< VkPipelineShaderStageCreateInfo >;
-			
+//			struct ShaderModule {
+//				VkShaderStageFlagBits stage;
+//				VkShaderModule handler;
+//				std::string entryPointName;
+//			};
+//
+//			using ShaderModuleArray = std::vector< ShaderModule >;
+//			using ShaderStageArray = std::vector< VkPipelineShaderStageCreateInfo >;
+//
 		public:
-			Pipeline( const VulkanRenderDevice *device, const Descriptor &descriptor );
+//			Pipeline( const VulkanRenderDevice *device, const Descriptor &descriptor );
 			~Pipeline( void );
 
-			const VkPipelineLayout &getPipelineLayout( void ) const noexcept { return m_pipelineLayout; }
-			const VkPipeline &getGraphicsPipelineHandler( void ) const noexcept { return m_graphicsPipeline; }
+            RenderDevice *renderDevice = nullptr;
+            VkPipeline handler = VK_NULL_HANDLE;
+            PipelineManager *manager = nullptr;
+            SharedPointer< PipelineLayout > layout;
+
+//			const VkPipelineLayout &getPipelineLayout( void ) const noexcept { return m_pipelineLayout; }
+//			const VkPipeline &getGraphicsPipelineHandler( void ) const noexcept { return m_graphicsPipeline; }
 
 		private:
-			ShaderModuleArray createShaderModules( ShaderProgram *program ) const;
-			ShaderModule createShaderModule( Shader *shader ) const;
-			ShaderStageArray createShaderStages( const ShaderModuleArray &modules ) const noexcept;
-			VkPipelineShaderStageCreateInfo createShaderStage( const ShaderModule &module ) const noexcept;
-			VkPipelineVertexInputStateCreateInfo createVertexInput( void ) const noexcept;
-			VkPipelineInputAssemblyStateCreateInfo createInputAssemby( void ) const noexcept;
-			VkViewport createViewport( void ) const noexcept;
-			VkRect2D createScissor( void ) const noexcept;
-			VkPipelineViewportStateCreateInfo createViewportState( const VkViewport &viewport, const VkRect2D &scissor ) const noexcept;
-			VkPipelineRasterizationStateCreateInfo createRasterizer( void ) const noexcept;
-			VkPipelineMultisampleStateCreateInfo createMultiplesampleState( void ) const noexcept;
-			VkPipelineDepthStencilStateCreateInfo createDepthStencilState( void ) const noexcept;
-			VkPipelineColorBlendAttachmentState createColorBlendAttachment( void ) const noexcept;
-			VkPipelineColorBlendStateCreateInfo createColorBlending( const VkPipelineColorBlendAttachmentState &colorBlendAttachment ) const noexcept;
+//			ShaderModuleArray createShaderModules( ShaderProgram *program ) const;
+//			ShaderModule createShaderModule( Shader *shader ) const;
+//			ShaderStageArray createShaderStages( const ShaderModuleArray &modules ) const noexcept;
+//			VkPipelineShaderStageCreateInfo createShaderStage( const ShaderModule &module ) const noexcept;
+//			VkPipelineVertexInputStateCreateInfo createVertexInput( void ) const noexcept;
+//			VkPipelineInputAssemblyStateCreateInfo createInputAssemby( void ) const noexcept;
+//			VkViewport createViewport( void ) const noexcept;
+//			VkRect2D createScissor( void ) const noexcept;
+//			VkPipelineViewportStateCreateInfo createViewportState( const VkViewport &viewport, const VkRect2D &scissor ) const noexcept;
+//			VkPipelineRasterizationStateCreateInfo createRasterizer( void ) const noexcept;
+//			VkPipelineMultisampleStateCreateInfo createMultiplesampleState( void ) const noexcept;
+//			VkPipelineDepthStencilStateCreateInfo createDepthStencilState( void ) const noexcept;
+//			VkPipelineColorBlendAttachmentState createColorBlendAttachment( void ) const noexcept;
+//			VkPipelineColorBlendStateCreateInfo createColorBlending( const VkPipelineColorBlendAttachmentState &colorBlendAttachment ) const noexcept;
 
 			void createPipelineLayout( void );
 
 		private:
-			const VulkanRenderDevice *m_renderDevice = nullptr;
-			VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
-			VkPipeline m_graphicsPipeline = VK_NULL_HANDLE;			
+//			const VulkanRenderDevice *m_renderDevice = nullptr;
+//			VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
+//			VkPipeline m_graphicsPipeline = VK_NULL_HANDLE;
 		};
+
+        class PipelineManager : public VulkanObjectManager< Pipeline > {
+        public:
+            explicit PipelineManager( RenderDevice *renderDevice ) noexcept : m_renderDevice( renderDevice ) { }
+            virtual ~PipelineManager( void ) noexcept = default;
+
+            SharedPointer< Pipeline > create( Pipeline::Descriptor const &descriptor ) noexcept;
+            void destroy( Pipeline *pipeline ) noexcept;
+
+        private:
+            using ShaderModuleArray = std::vector< SharedPointer< ShaderModule >>;
+            using ShaderStageArray = std::vector< VkPipelineShaderStageCreateInfo >;
+
+            ShaderModuleArray createShaderModules( RenderDevice *renderDevice, ShaderProgram *program ) const noexcept;
+            ShaderStageArray createShaderStages( const ShaderModuleArray &modules ) const noexcept;
+            VkPipelineShaderStageCreateInfo createShaderStage( const ShaderModule &module ) const noexcept;
+            VkPipelineVertexInputStateCreateInfo createVertexInput( void ) const noexcept;
+            VkPipelineInputAssemblyStateCreateInfo createInputAssemby( Primitive::Type primitiveType ) const noexcept;
+            VkViewport createViewport( const Rectf &viewport ) const noexcept;
+            VkRect2D createScissor( const Rectf &scissor ) const noexcept;
+            VkPipelineViewportStateCreateInfo createViewportState( const VkViewport &viewport, const VkRect2D &scissor ) const noexcept;
+            VkPipelineRasterizationStateCreateInfo createRasterizer( void ) const noexcept;
+            VkPipelineMultisampleStateCreateInfo createMultiplesampleState( void ) const noexcept;
+            VkPipelineDepthStencilStateCreateInfo createDepthStencilState( void ) const noexcept;
+            VkPipelineColorBlendAttachmentState createColorBlendAttachment( void ) const noexcept;
+            VkPipelineColorBlendStateCreateInfo createColorBlending( const VkPipelineColorBlendAttachmentState &colorBlendAttachment ) const noexcept;
+            void createPipelineLayout( void );
+
+        private:
+            RenderDevice *m_renderDevice = nullptr;
+        };
 
 	}
 

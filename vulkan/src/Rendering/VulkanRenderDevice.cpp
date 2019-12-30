@@ -48,7 +48,10 @@ using namespace crimild::vulkan;
 RenderDevice::RenderDevice( void )
     : SwapchainManager( this ),
       ImageManager( this ),
-	  ImageViewManager( this )
+	  ImageViewManager( this ),
+      PipelineManager( this ),
+      PipelineLayoutManager( this ),
+	  ShaderModuleManager( this )
 {
 
 }
@@ -149,6 +152,9 @@ void RenderDeviceManager::destroy( RenderDevice *renderDevice ) noexcept
 {
     CRIMILD_LOG_TRACE( "Destroying Vulkan logical device" );
 
+    static_cast< ShaderModuleManager * >( renderDevice )->cleanup();
+    static_cast< PipelineManager * >( renderDevice )->cleanup();
+    static_cast< PipelineLayoutManager * >( renderDevice )->cleanup();
     static_cast< ImageViewManager * >( renderDevice )->cleanup();
     static_cast< ImageManager * >( renderDevice )->cleanup();
     static_cast< SwapchainManager * >( renderDevice )->cleanup();
@@ -279,7 +285,8 @@ SharedPointer< ImageView > VulkanRenderDevice::createImageView( Image *image, Vk
 
 SharedPointer< Pipeline > VulkanRenderDevice::createPipeline( const Pipeline::Descriptor &descriptor ) const noexcept
 {
-	return crimild::alloc< Pipeline >( this, descriptor );
+//	return crimild::alloc< Pipeline >( this, descriptor );
+    return nullptr;
 }
 
 SharedPointer< RenderPass > VulkanRenderDevice::createRenderPass( void ) const noexcept

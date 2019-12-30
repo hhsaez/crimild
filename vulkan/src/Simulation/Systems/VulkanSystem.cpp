@@ -54,13 +54,12 @@ crimild::Bool VulkanSystem::start( void )
         return false;
     }
 
-    /*
     auto renderDevice = crimild::get_ptr( m_renderDevice );
-    auto swapchain = renderDevice->getSwapchain();
+    auto swapchain = crimild::get_ptr( m_swapchain );
 
-    m_renderPass = renderDevice->createRenderPass();
+//    m_renderPass = renderDevice->createRenderPass();
 
-    m_pipeline = renderDevice->createPipeline(
+    m_pipeline = renderDevice->create(
         Pipeline::Descriptor {
             .program = crimild::alloc< ShaderProgram >(
                 containers::Array< SharedPointer< Shader >> {
@@ -74,10 +73,14 @@ crimild::Bool VulkanSystem::start( void )
                     ),
                 }
             ),
-            .renderPass = crimild::get_ptr( m_renderPass ),
+//            .renderPass = crimild::get_ptr( m_renderPass ),
+            .primitiveType = Primitive::Type::TRIANGLES,
+        	.viewport = Rectf( 0, 0, swapchain->extent.width, swapchain->extent.height ),
+        	.scissor = Rectf( 0, 0, swapchain->extent.width, swapchain->extent.height ),
         }
     );
 
+    /*
     m_commandPool = renderDevice->createGraphicsCommandPool();
 
     auto imageCount = swapchain->getImageViews().size();
