@@ -28,30 +28,46 @@
 #ifndef CRIMILD_VULKAN_RENDERING_RENDER_PASS_
 #define CRIMILD_VULKAN_RENDERING_RENDER_PASS_
 
-#include "Foundation/Types.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/VulkanUtils.hpp"
+#include "Foundation/VulkanObject.hpp"
 
 namespace crimild {
 
 	namespace vulkan {
 
-		class VulkanRenderDevice;
+		class RenderDevice;
+        class RenderPassManager;
 		class Swapchain;
 
 		/**
 		 */
-		class RenderPass : public SharedObject {
-		public:
-			RenderPass( const VulkanRenderDevice *device, const Swapchain *swapchain );
-			~RenderPass( void ) noexcept;
-			
-			const VkRenderPass &getRenderPassHandler( void ) const noexcept { return m_renderPassHandler; }
+		class RenderPass : public VulkanObject {
+            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::RenderPass )
 
-		private:
-			const VulkanRenderDevice *m_device = nullptr;
-			VkRenderPass m_renderPassHandler = VK_NULL_HANDLE;
+        public:
+            struct Descriptor {
+                RenderDevice *renderDevice;
+                Swapchain *swapchain;
+            };
+
+		public:
+			~RenderPass( void ) noexcept;
+
+            RenderDevice *renderDevice = nullptr;
+            VkRenderPass handler = VK_NULL_HANDLE;
+            RenderPassManager *manager = nullptr;
 		};
+
+        class RenderPassManager : public VulkanObjectManager< RenderPass > {
+        public:
+            RenderPassManager( RenderDevice *renderDevice = nullptr ) noexcept : m_renderDevice( renderDevice ) { }
+            virtual ~RenderPassManager( void ) = default;
+
+            SharedPointer< RenderPass > create( RenderPass::Descriptor const &descriptor ) noexcept;
+            void destroy( RenderPass *renderPass ) noexcept override;
+
+        private:
+            RenderDevice *m_renderDevice = nullptr;
+        };
 
 	}
 

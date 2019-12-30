@@ -30,50 +30,68 @@
 #include "VulkanRenderPass.hpp"
 #include "VulkanImageView.hpp"
 
+using namespace crimild;
 using namespace crimild::vulkan;
-
-Framebuffer::Framebuffer( const VulkanRenderDevice *device, const Descriptor &descriptor )
-	: m_device( device ),
-	  m_extent( descriptor.extent )
-{
-	CRIMILD_LOG_TRACE( "Creating framebuffer" );
-
-	std::vector< VkImageView > attachments;
-	for ( const auto &att : descriptor.attachments ) {
-		attachments.push_back( att->handler );
-	}
-	
-	auto createInfo = VkFramebufferCreateInfo {
-		.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
-		.renderPass = descriptor.renderPass->getRenderPassHandler(),
-		.attachmentCount = static_cast< uint32_t >( attachments.size() ),
-		.pAttachments = attachments.data(),
-		.width = m_extent.width,
-		.height = m_extent.height,
-		.layers = 1,
-	};
-
-	CRIMILD_VULKAN_CHECK(
-		vkCreateFramebuffer(
-			m_device->getDeviceHandler(),
-			&createInfo,
-			nullptr,
-			&m_framebufferHandler
-		)
-	);
-}
 
 Framebuffer::~Framebuffer( void ) noexcept
 {
-	CRIMILD_LOG_TRACE( "Destroying framebuffer" );
-	
-	if ( m_device != nullptr && m_framebufferHandler != VK_NULL_HANDLE ) {
-		vkDestroyFramebuffer(
-			m_device->getDeviceHandler(),
-			m_framebufferHandler,
-			nullptr
-		);
-		m_framebufferHandler = VK_NULL_HANDLE;
-	}
+    if ( manager != nullptr ) {
+        manager->destroy( this );
+    }
 }
 
+SharedPointer< Framebuffer > FramebufferManager::create( Framebuffer::Descriptor const &descriptor ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Creating framebuffer" );
+
+    auto renderDevice = m_renderDevice;
+    if ( renderDevice == nullptr ) {
+        renderDevice = descriptor.renderDevice;
+    }
+
+    std::vector< VkImageView > attachments;
+    for ( const auto &att : descriptor.attachments ) {
+        attachments.push_back( att->handler );
+    }
+
+    auto createInfo = VkFramebufferCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
+        .renderPass = descriptor.renderPass->handler,
+        .attachmentCount = static_cast< uint32_t >( attachments.size() ),
+        .pAttachments = attachments.data(),
+        .width = descriptor.extent.width,
+        .height = descriptor.extent.height,
+        .layers = 1,
+    };
+
+    VkFramebuffer framebufferHandler;
+    if ( vkCreateFramebuffer( renderDevice->handler, &createInfo, nullptr, &framebufferHandler ) != VK_SUCCESS ) {
+        CRIMILD_LOG_ERROR( "Failed to create Vulkan framebuffer" );
+        return nullptr;
+    }
+
+    auto framebuffer = crimild::alloc< Framebuffer >();
+    framebuffer->handler = framebufferHandler;
+    framebuffer->manager = this;
+    framebuffer->renderDevice = renderDevice;
+    insert( crimild::get_ptr( framebuffer ) );
+    return framebuffer;
+}
+
+void FramebufferManager::destroy( Framebuffer *framebuffer ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Destroying framebuffer" );
+
+    if ( framebuffer->renderDevice != nullptr && framebuffer->handler != VK_NULL_HANDLE ) {
+        vkDestroyFramebuffer(
+            framebuffer->renderDevice->handler,
+            framebuffer->handler,
+            nullptr
+        );
+    }
+
+    framebuffer->handler = VK_NULL_HANDLE;
+    framebuffer->manager = nullptr;
+    framebuffer->renderDevice = nullptr;
+    erase( framebuffer );
+}

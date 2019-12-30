@@ -57,7 +57,11 @@ crimild::Bool VulkanSystem::start( void )
     auto renderDevice = crimild::get_ptr( m_renderDevice );
     auto swapchain = crimild::get_ptr( m_swapchain );
 
-//    m_renderPass = renderDevice->createRenderPass();
+    m_renderPass = renderDevice->create(
+        RenderPass::Descriptor {
+			.swapchain = swapchain,
+        }
+    );
 
     m_pipeline = renderDevice->create(
         Pipeline::Descriptor {
@@ -73,58 +77,61 @@ crimild::Bool VulkanSystem::start( void )
                     ),
                 }
             ),
-//            .renderPass = crimild::get_ptr( m_renderPass ),
+            .renderPass = crimild::get_ptr( m_renderPass ),
             .primitiveType = Primitive::Type::TRIANGLES,
         	.viewport = Rectf( 0, 0, swapchain->extent.width, swapchain->extent.height ),
         	.scissor = Rectf( 0, 0, swapchain->extent.width, swapchain->extent.height ),
         }
     );
 
-    /*
-    m_commandPool = renderDevice->createGraphicsCommandPool();
+    auto queueFamilyIndices = utils::findQueueFamilies( m_physicalDevice->handler, m_surface->handler );
+    m_commandPool = renderDevice->create(
+        CommandPool::Descriptor {
+			.queueFamilyIndex = queueFamilyIndices.graphicsFamily[ 0 ],
+        }
+    );
 
-    auto imageCount = swapchain->getImageViews().size();
+    auto imageCount = swapchain->imageViews.size();
 
     for ( auto i = 0l; i < imageCount; i++ ) {
-        auto imageView = swapchain->getImageViews()[ i ];
+        auto imageView = swapchain->imageViews[ i ];
 
-        auto framebuffer = renderDevice->createFramebuffer(
+        auto framebuffer = renderDevice->create(
             Framebuffer::Descriptor {
                 .attachments = {
                     crimild::get_ptr( imageView )
                 },
                 .renderPass = crimild::get_ptr( m_renderPass ),
-                .extent = swapchain->getExtent(),
+                .extent = swapchain->extent,
             }
         );
         m_framebuffers.push_back( framebuffer );
 
-        m_commandBuffers.push_back(
-            [ this, framebuffer ]() {
-                auto commandBuffer = m_commandPool->createCommandBuffer();
-                commandBuffer->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
-                commandBuffer->beginRenderPass(
-                    crimild::get_ptr( m_renderPass ),
-                    crimild::get_ptr( framebuffer ),
-                    RGBAColorf( 0.0f, 0.0f, 0.0f, 1.0f )
-                );
-                commandBuffer->bindGraphicsPipeline(
-                    crimild::get_ptr( m_pipeline )
-                );
-                commandBuffer->draw();
-                commandBuffer->endRenderPass();
-                commandBuffer->end();
-                return commandBuffer;
-            }()
-        );
+//        m_commandBuffers.push_back(
+//            [ this, framebuffer ]() {
+//                auto commandBuffer = m_commandPool->createCommandBuffer();
+//                commandBuffer->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
+//                commandBuffer->beginRenderPass(
+//                    crimild::get_ptr( m_renderPass ),
+//                    crimild::get_ptr( framebuffer ),
+//                    RGBAColorf( 0.0f, 0.0f, 0.0f, 1.0f )
+//                );
+//                commandBuffer->bindGraphicsPipeline(
+//                    crimild::get_ptr( m_pipeline )
+//                );
+//                commandBuffer->draw();
+//                commandBuffer->endRenderPass();
+//                commandBuffer->end();
+//                return commandBuffer;
+//            }()
+//        );
     }
 
-    for ( auto i = 0l; i < CRIMILD_VULKAN_MAX_FRAMES_IN_FLIGHT; i++ ) {
-        m_imageAvailableSemaphores.push_back( renderDevice->createSemaphore() );
-        m_renderFinishedSemaphores.push_back( renderDevice->createSemaphore() );
-        m_inFlightFences.push_back( renderDevice->createFence() );
-    }
-     */
+//    for ( auto i = 0l; i < CRIMILD_VULKAN_MAX_FRAMES_IN_FLIGHT; i++ ) {
+//        m_imageAvailableSemaphores.push_back( renderDevice->createSemaphore() );
+//        m_renderFinishedSemaphores.push_back( renderDevice->createSemaphore() );
+//        m_inFlightFences.push_back( renderDevice->createFence() );
+//    }
 
     return true;
 }
@@ -274,3 +281,4 @@ crimild::Bool VulkanSystem::createSwapchain( void ) noexcept
 
     return m_swapchain != nullptr;
 }
+
