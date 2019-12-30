@@ -34,303 +34,298 @@
 #include "Rendering/ShaderProgram.hpp"
 #include "Foundation/Log.hpp"
 
+using namespace crimild;
 using namespace crimild::vulkan;
-
-Pipeline::Pipeline( const VulkanRenderDevice *renderDevice, const Descriptor &descriptor )
-	: m_renderDevice( renderDevice )
-{
-	CRIMILD_LOG_TRACE( "Creating pipeline" );
-
-    auto device = VK_NULL_HANDLE;// m_renderDevice->handler;
-
-	// WARNING: all of these config params are used when creating the pipeline and
-	// they must be alive when vkCreatePipeline is called. Beware of scopes!
-	auto shaderModules = createShaderModules( crimild::get_ptr( descriptor.program ) );
-	auto shaderStages = createShaderStages( shaderModules );
-	auto vertexInputInfo = createVertexInput();
-	auto inputAssembly = createInputAssemby();
-	auto viewport = createViewport();
-	auto scissor = createScissor();
-	auto viewportState = createViewportState( viewport, scissor );
-	auto rasterizer = createRasterizer();
-	auto multisampleState = createMultiplesampleState();
-	//auto depthStencilState = createDepthStencilState();
-	auto colorBlendAttachment = createColorBlendAttachment();
-	auto colorBlending = createColorBlending( colorBlendAttachment );
-
-	createPipelineLayout();
-
-	auto createInfo = VkGraphicsPipelineCreateInfo {
-		.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
-		.stageCount = static_cast< uint32_t >( shaderStages.size() ),
-		.pStages = shaderStages.data(),
-		.pVertexInputState = &vertexInputInfo,
-		.pInputAssemblyState = &inputAssembly,
-		.pViewportState = &viewportState,
-		.pRasterizationState = &rasterizer,
-		.pMultisampleState = &multisampleState,
-		//.pDepthStencilState = nullptr, // Optional
-		.pColorBlendState = &colorBlending,
-		//.pDynamicState = nullptr, // Optional
-		.layout = m_pipelineLayout,
-		.renderPass = descriptor.renderPass->getRenderPassHandler(),
-		.subpass = 0,
-		.basePipelineHandle = VK_NULL_HANDLE, // Optional
-		//.basePipelineIndex = -1, // Optional
-	};
-
-	CRIMILD_VULKAN_CHECK(
-		vkCreateGraphicsPipelines(
-			m_renderDevice->getDeviceHandler(),
-			VK_NULL_HANDLE,
-			1,
-			&createInfo,
-			nullptr,
-			&m_graphicsPipeline
-		)
-	);
-	
-	// Cleanup
-	for ( const auto &module : shaderModules ) {
-		vkDestroyShaderModule(
-			renderDevice->getDeviceHandler(),
-			module.handler,
-			nullptr
-		);
-	};
-}
 
 Pipeline::~Pipeline( void )
 {
-	CRIMILD_LOG_TRACE( "Destroying pipeline" );
-	
-	if ( m_renderDevice != nullptr ) {
-		if ( m_graphicsPipeline != VK_NULL_HANDLE ) {
-			vkDestroyPipeline(
-				m_renderDevice->getDeviceHandler(),
-				m_graphicsPipeline,
-				nullptr
-			);
-			m_graphicsPipeline = VK_NULL_HANDLE;
-		}
-		
-		if ( m_pipelineLayout != VK_NULL_HANDLE ) {
-			vkDestroyPipelineLayout(
-				m_renderDevice->getDeviceHandler(),
-				m_pipelineLayout,
-				nullptr
-			);
-			m_pipelineLayout = VK_NULL_HANDLE;
-		}
-	}
+    if ( manager != nullptr ) {
+        manager->destroy( this );
+    }
 }
 
-Pipeline::ShaderModuleArray Pipeline::createShaderModules( ShaderProgram *program ) const
+SharedPointer< Pipeline > PipelineManager::create( Pipeline::Descriptor const &descriptor ) noexcept
 {
-	CRIMILD_LOG_TRACE( "Creating shader modules" );
-	
-	ShaderModuleArray modules;
-	program->getShaders().each( [ this, &modules ]( SharedPointer< Shader > &shader ) {
-		modules.push_back( createShaderModule( crimild::get_ptr( shader ) ) );
-	});
+    CRIMILD_LOG_TRACE( "Creating Vulkan pripeline" );
 
-	return modules;
+    auto renderDevice = m_renderDevice;
+    if ( renderDevice == nullptr ) {
+        renderDevice = descriptor.renderDevice;
+    }
+
+    // WARNING: all of these config params are used when creating the pipeline and
+    // they must be alive when vkCreatePipeline is called. Beware of scopes!
+    auto shaderModules = createShaderModules( renderDevice, crimild::get_ptr( descriptor.program ) );
+    auto shaderStages = createShaderStages( shaderModules );
+    auto vertexInputInfo = createVertexInput();
+    auto inputAssembly = createInputAssemby( descriptor.primitiveType );
+    auto viewport = createViewport( descriptor.viewport );
+    auto scissor = createScissor( descriptor.scissor );
+    auto viewportState = createViewportState( viewport, scissor );
+    auto rasterizer = createRasterizer();
+    auto multisampleState = createMultiplesampleState();
+    auto depthStencilState = createDepthStencilState();
+    auto colorBlendAttachment = createColorBlendAttachment();
+    auto colorBlending = createColorBlending( colorBlendAttachment );
+
+    auto pipelineLayout = renderDevice->create( PipelineLayout::Descriptor { } );
+    /*
+
+    auto createInfo = VkGraphicsPipelineCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
+        .stageCount = static_cast< uint32_t >( shaderStages.size() ),
+        .pStages = shaderStages.data(),
+        .pVertexInputState = &vertexInputInfo,
+        .pInputAssemblyState = &inputAssembly,
+        .pViewportState = &viewportState,
+        .pRasterizationState = &rasterizer,
+        .pMultisampleState = &multisampleState,
+        //.pDepthStencilState = nullptr, // Optional
+        .pColorBlendState = &colorBlending,
+        //.pDynamicState = nullptr, // Optional
+        .layout = m_pipelineLayout,
+        .renderPass = descriptor.renderPass->getRenderPassHandler(),
+        .subpass = 0,
+        .basePipelineHandle = VK_NULL_HANDLE, // Optional
+        //.basePipelineIndex = -1, // Optional
+    };
+
+    VkPipeline pipelineHander;
+    if ( vkCreateGraphicsPipelines( renderDevice->handler, VK_NULL_HANDLE, 1, &createInfo, nullptr, &pipelineHander ) ) {
+        CRIMILD_LOG_ERROR( "Failed to create Vulkan pipeline" );
+        return nullptr;
+    )
+
+     */
+
+    auto pipeline = crimild::alloc< Pipeline >();
+//    pipeline->handler = pipelineHander;
+//    pipeline->layout = pipelineLayout;
+//    pipeline->renderDevice = renderDevice;
+    pipeline->manager = this;
+    insert( crimild::get_ptr( pipeline ) );
+    return pipeline;
+     
 }
 
-Pipeline::ShaderModule Pipeline::createShaderModule( crimild::Shader *shader ) const
+void PipelineManager::destroy( Pipeline *pipeline ) noexcept
 {
-	CRIMILD_LOG_TRACE( "Creating shader module for stage ", shader->getStageDescription() );
-	
-	const auto &code = shader->getData();
+    CRIMILD_LOG_TRACE( "Destroy Vulkan pipeline" );
 
-	auto createInfo = VkShaderModuleCreateInfo {
-		.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
-		.codeSize = code.size(),
-		.pCode = reinterpret_cast< const uint32_t * >( code.data() ),
-	};
 
-	VkShaderModule shaderModuleHandler;
-	if ( vkCreateShaderModule( m_renderDevice->getDeviceHandler(), &createInfo, nullptr, &shaderModuleHandler ) != VK_SUCCESS ) {
-		throw VulkanException( "Failed to create shader module" );
-	}
+    if ( pipeline->renderDevice != nullptr ) {
+        if ( pipeline->handler != VK_NULL_HANDLE ) {
+            vkDestroyPipeline(
+                pipeline->renderDevice->handler,
+                pipeline->handler,
+                nullptr
+            );
+        }
+    }
 
-	return ShaderModule {
-		.stage = utils::VULKAN_SHADER_STAGES[ static_cast< crimild::UInt32 >( shader->getStage() ) ],
-		.handler = shaderModuleHandler,
-		.entryPointName = shader->getEntryPointName(),
-	};
+    pipeline->layout = nullptr;
+    pipeline->handler = VK_NULL_HANDLE;
+    pipeline->manager = nullptr;
+    pipeline->renderDevice = nullptr;
+    erase( pipeline );
 }
 
-Pipeline::ShaderStageArray Pipeline::createShaderStages( const ShaderModuleArray &modules ) const noexcept
+PipelineManager::ShaderModuleArray PipelineManager::createShaderModules( RenderDevice *renderDevice, ShaderProgram *program ) const noexcept
 {
-	CRIMILD_LOG_TRACE( "Creating shader stages" );
-	
-	ShaderStageArray shaderStages;
-	for ( const auto &module : modules ) {
-		shaderStages.push_back( createShaderStage( module ) );
-	}
-	return shaderStages;
+    CRIMILD_LOG_TRACE( "Creating shader modules" );
+
+    ShaderModuleArray modules;
+    program->getShaders().each( [ &modules, renderDevice ]( SharedPointer< Shader > &shader ) {
+        auto module = renderDevice->create(
+			ShaderModule::Descriptor {
+        		.shader = crimild::get_ptr( shader )
+        	}
+       	);
+        if ( module != nullptr ) {
+        	modules.push_back( module );
+        }
+    });
+
+    return modules;
 }
 
-VkPipelineShaderStageCreateInfo Pipeline::createShaderStage( const ShaderModule &module ) const noexcept
+PipelineManager::ShaderStageArray PipelineManager::createShaderStages( const ShaderModuleArray &modules ) const noexcept
 {
-	CRIMILD_LOG_TRACE( "Creating shader stage" );
+    CRIMILD_LOG_TRACE( "Creating shader stages" );
 
-	return VkPipelineShaderStageCreateInfo {
-		.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-		.stage = module.stage,
-		.module = module.handler,
-		.pName = module.entryPointName.c_str(),
-	};
+    ShaderStageArray shaderStages;
+    for ( const auto &module : modules ) {
+        auto stage = VkPipelineShaderStageCreateInfo {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+            .stage = module->stage,
+            .module = module->handler,
+            .pName = module->entryPointName.c_str(),
+        };
+        shaderStages.push_back( stage );
+    }
+    return shaderStages;
 }
 
-VkPipelineVertexInputStateCreateInfo Pipeline::createVertexInput( void ) const noexcept
+VkPipelineVertexInputStateCreateInfo PipelineManager::createVertexInput( void ) const noexcept
 {
-	return VkPipelineVertexInputStateCreateInfo {
-		.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
-		.vertexBindingDescriptionCount = 0,
-		.pVertexBindingDescriptions = nullptr,
-		.vertexAttributeDescriptionCount = 0,
-		.pVertexAttributeDescriptions = nullptr,
-	};
+    return VkPipelineVertexInputStateCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
+        .vertexBindingDescriptionCount = 0,
+        .pVertexBindingDescriptions = nullptr,
+        .vertexAttributeDescriptionCount = 0,
+        .pVertexAttributeDescriptions = nullptr,
+    };
 }
 
-VkPipelineInputAssemblyStateCreateInfo Pipeline::createInputAssemby( void ) const noexcept
+VkPipelineInputAssemblyStateCreateInfo PipelineManager::createInputAssemby( Primitive::Type primitiveType ) const noexcept
 {
-	return VkPipelineInputAssemblyStateCreateInfo {
-		.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
-		.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
-		.primitiveRestartEnable = VK_FALSE,
-	};
+    VkPrimitiveTopology topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    VkBool32 restartEnable = VK_FALSE;
+
+    switch ( primitiveType ) {
+        case Primitive::Type::POINTS:
+            topology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
+            break;
+        case Primitive::Type::LINES:
+            topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+            break;
+        case Primitive::Type::LINE_LOOP:
+            topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+            restartEnable = VK_TRUE;
+            break;
+        case Primitive::Type::LINE_STRIP:
+            topology = VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
+            break;
+        case Primitive::Type::TRIANGLES:
+            topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+            break;
+        case Primitive::Type::TRIANGLE_STRIP:
+            topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+            break;
+        case Primitive::Type::TRIANGLE_FAN:
+            topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP_WITH_ADJACENCY;
+            restartEnable = VK_TRUE;
+            break;
+        default:
+            break;
+    }
+
+    return VkPipelineInputAssemblyStateCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
+        .topology = topology,
+        .primitiveRestartEnable = restartEnable,
+    };
 }
 
-VkViewport Pipeline::createViewport( void ) const noexcept
+VkViewport PipelineManager::createViewport( const Rectf &viewport ) const noexcept
 {
-	auto swapchain = m_renderDevice->getSwapchain();
-	
-	return VkViewport {
-		.x = 0,
-		.y = 0,
-		.width = ( float ) swapchain->extent.width,
-		.height = ( float ) swapchain->extent.height,
-		.minDepth = 0,
-		.maxDepth = 1,
-	};
+    return VkViewport {
+        .x = viewport.getX(),
+        .y = viewport.getY(),
+        .width = viewport.getWidth(),
+        .height = viewport.getHeight(),
+        .minDepth = 0,
+        .maxDepth = 1,
+    };
 }
 
-VkRect2D Pipeline::createScissor( void ) const noexcept
+VkRect2D PipelineManager::createScissor( const Rectf &scissor ) const noexcept
 {
-	auto swapchain = m_renderDevice->getSwapchain();
-	
-	return VkRect2D {
-		.offset = { 0, 0 },
-		.extent = swapchain->extent,
-	};
+    return VkRect2D {
+        .offset = {
+            static_cast< crimild::Int32 >( scissor.getX() ),
+            static_cast< crimild::Int32 >( scissor.getY() ),
+        },
+        .extent = VkExtent2D {
+            static_cast< crimild::UInt32 >( scissor.getWidth() ),
+            static_cast< crimild::UInt32 >( scissor.getHeight() ),
+        },
+    };
 }
 
-VkPipelineViewportStateCreateInfo Pipeline::createViewportState( const VkViewport &viewport, const VkRect2D &scissor ) const noexcept
+VkPipelineViewportStateCreateInfo PipelineManager::createViewportState( const VkViewport &viewport, const VkRect2D &scissor ) const noexcept
 {
-	return VkPipelineViewportStateCreateInfo {
-		.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
-		.viewportCount = 1,
-		.pViewports = &viewport,
-		.scissorCount = 1,
-		.pScissors = &scissor,
-	};
+    return VkPipelineViewportStateCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
+        .viewportCount = 1,
+        .pViewports = &viewport,
+        .scissorCount = 1,
+        .pScissors = &scissor,
+    };
 }
 
-VkPipelineRasterizationStateCreateInfo Pipeline::createRasterizer( void ) const noexcept
+VkPipelineRasterizationStateCreateInfo PipelineManager::createRasterizer( void ) const noexcept
 {
-	return VkPipelineRasterizationStateCreateInfo {
-		.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
-		.depthClampEnable = VK_FALSE, // VK_TRUE might be required for shadow maps
-		.rasterizerDiscardEnable = VK_FALSE, // VK_TRUE disables output to the framebuffer
-		.polygonMode = VK_POLYGON_MODE_FILL,
-		.lineWidth = 1.0f,
-		.cullMode = VK_CULL_MODE_BACK_BIT,
-		.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE,
-		.depthBiasEnable = VK_FALSE, // Might be needed for shadow mapping
-		.depthBiasConstantFactor = 0,
-		.depthBiasClamp = 0,
-		.depthBiasSlopeFactor = 0,
-	};
+    return VkPipelineRasterizationStateCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
+        .depthClampEnable = VK_FALSE, // VK_TRUE might be required for shadow maps
+        .rasterizerDiscardEnable = VK_FALSE, // VK_TRUE disables output to the framebuffer
+        .polygonMode = VK_POLYGON_MODE_FILL,
+        .lineWidth = 1.0f,
+        .cullMode = VK_CULL_MODE_BACK_BIT,
+        .frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE,
+        .depthBiasEnable = VK_FALSE, // Might be needed for shadow mapping
+        .depthBiasConstantFactor = 0,
+        .depthBiasClamp = 0,
+        .depthBiasSlopeFactor = 0,
+    };
 }
 
-VkPipelineMultisampleStateCreateInfo Pipeline::createMultiplesampleState( void ) const noexcept
+VkPipelineMultisampleStateCreateInfo PipelineManager::createMultiplesampleState( void ) const noexcept
 {
-	return VkPipelineMultisampleStateCreateInfo {
-		.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
-		.sampleShadingEnable = VK_FALSE,
-		.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT,
-		.minSampleShading = 1.0f,
-		.pSampleMask = nullptr,
-		.alphaToCoverageEnable = VK_FALSE,
-		.alphaToOneEnable = VK_FALSE,
-	};
+    return VkPipelineMultisampleStateCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
+        .sampleShadingEnable = VK_FALSE,
+        .rasterizationSamples = VK_SAMPLE_COUNT_1_BIT,
+        .minSampleShading = 1.0f,
+        .pSampleMask = nullptr,
+        .alphaToCoverageEnable = VK_FALSE,
+        .alphaToOneEnable = VK_FALSE,
+    };
 }
 
-VkPipelineDepthStencilStateCreateInfo Pipeline::createDepthStencilState( void ) const noexcept
+VkPipelineDepthStencilStateCreateInfo PipelineManager::createDepthStencilState( void ) const noexcept
 {
-	return VkPipelineDepthStencilStateCreateInfo {
-		.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
-		.depthTestEnable = VK_TRUE,
-		.depthWriteEnable = VK_TRUE,
-		.depthCompareOp = VK_COMPARE_OP_LESS,
-		.depthBoundsTestEnable = VK_FALSE,
-		.minDepthBounds = 0.0f,
-		.maxDepthBounds = 1.0f,
-		.stencilTestEnable = VK_FALSE,
-		.front = {},
-		.back = {},
-	};
+    return VkPipelineDepthStencilStateCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
+        .depthTestEnable = VK_TRUE,
+        .depthWriteEnable = VK_TRUE,
+        .depthCompareOp = VK_COMPARE_OP_LESS,
+        .depthBoundsTestEnable = VK_FALSE,
+        .minDepthBounds = 0.0f,
+        .maxDepthBounds = 1.0f,
+        .stencilTestEnable = VK_FALSE,
+        .front = {},
+        .back = {},
+    };
 }
 
-VkPipelineColorBlendAttachmentState Pipeline::createColorBlendAttachment( void ) const noexcept
+VkPipelineColorBlendAttachmentState PipelineManager::createColorBlendAttachment( void ) const noexcept
 {
-	return VkPipelineColorBlendAttachmentState {
-		.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT,
-		.blendEnable = VK_FALSE,
-		.srcColorBlendFactor = VK_BLEND_FACTOR_ONE,
-		.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO,
-		.colorBlendOp = VK_BLEND_OP_ADD,
-		.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE,
-		.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO,
-		.alphaBlendOp = VK_BLEND_OP_ADD,
-	};
+    return VkPipelineColorBlendAttachmentState {
+        .colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT,
+        .blendEnable = VK_FALSE,
+        .srcColorBlendFactor = VK_BLEND_FACTOR_ONE,
+        .dstColorBlendFactor = VK_BLEND_FACTOR_ZERO,
+        .colorBlendOp = VK_BLEND_OP_ADD,
+        .srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE,
+        .dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO,
+        .alphaBlendOp = VK_BLEND_OP_ADD,
+    };
 }
 
-VkPipelineColorBlendStateCreateInfo Pipeline::createColorBlending( const VkPipelineColorBlendAttachmentState &colorBlendAttachment ) const noexcept
+VkPipelineColorBlendStateCreateInfo PipelineManager::createColorBlending( const VkPipelineColorBlendAttachmentState &colorBlendAttachment ) const noexcept
 {
-	return VkPipelineColorBlendStateCreateInfo {
-		.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
-		.logicOpEnable = VK_FALSE,
-		.logicOp = VK_LOGIC_OP_COPY,
-		.attachmentCount = 1,
-		.pAttachments = &colorBlendAttachment,
-		.blendConstants[ 0 ] = 0.0f,
-		.blendConstants[ 1 ] = 0.0f,
-		.blendConstants[ 2 ] = 0.0f,
-		.blendConstants[ 3 ] = 0.0f,
-	};
-}
-
-void Pipeline::createPipelineLayout( void )
-{
-	auto pipelineLayoutInfo = VkPipelineLayoutCreateInfo {
-		.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-		.setLayoutCount = 0,
-		.pSetLayouts = nullptr,
-		.pushConstantRangeCount = 0,
-		.pPushConstantRanges = nullptr,
-	};
-
-	CRIMILD_VULKAN_CHECK(
-		vkCreatePipelineLayout(
-			m_renderDevice->getDeviceHandler(),
-			&pipelineLayoutInfo,
-			nullptr,
-			&m_pipelineLayout
-		)
-	);
+    return VkPipelineColorBlendStateCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
+        .logicOpEnable = VK_FALSE,
+        .logicOp = VK_LOGIC_OP_COPY,
+        .attachmentCount = 1,
+        .pAttachments = &colorBlendAttachment,
+        .blendConstants[ 0 ] = 0.0f,
+        .blendConstants[ 1 ] = 0.0f,
+        .blendConstants[ 2 ] = 0.0f,
+        .blendConstants[ 3 ] = 0.0f,
+    };
 }
 
