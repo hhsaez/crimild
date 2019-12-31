@@ -55,87 +55,15 @@ crimild::Bool VulkanSystem::start( void )
     }
 
     auto renderDevice = crimild::get_ptr( m_renderDevice );
-    auto swapchain = crimild::get_ptr( m_swapchain );
-
-    m_renderPass = renderDevice->create(
-        RenderPass::Descriptor {
-			.swapchain = swapchain,
-        }
-    );
-
-    m_pipeline = renderDevice->create(
-        Pipeline::Descriptor {
-            .program = crimild::alloc< ShaderProgram >(
-                containers::Array< SharedPointer< Shader >> {
-                    crimild::alloc< Shader >(
-                        Shader::Stage::VERTEX,
-                        FileSystem::getInstance().readResourceFile( "assets/shaders/triangle.vert.spv" )
-                    ),
-                    crimild::alloc< Shader >(
-                        Shader::Stage::FRAGMENT,
-                        FileSystem::getInstance().readResourceFile( "assets/shaders/triangle.frag.spv" )
-                    ),
-                }
-            ),
-            .renderPass = crimild::get_ptr( m_renderPass ),
-            .primitiveType = Primitive::Type::TRIANGLES,
-        	.viewport = Rectf( 0, 0, swapchain->extent.width, swapchain->extent.height ),
-        	.scissor = Rectf( 0, 0, swapchain->extent.width, swapchain->extent.height ),
-        }
-    );
 
     auto queueFamilyIndices = utils::findQueueFamilies( m_physicalDevice->handler, m_surface->handler );
     m_commandPool = renderDevice->create(
         CommandPool::Descriptor {
-			.queueFamilyIndex = queueFamilyIndices.graphicsFamily[ 0 ],
+            .queueFamilyIndex = queueFamilyIndices.graphicsFamily[ 0 ],
         }
     );
 
-    auto imageCount = swapchain->imageViews.size();
-
-    for ( auto i = 0l; i < imageCount; i++ ) {
-        auto imageView = swapchain->imageViews[ i ];
-
-        auto framebuffer = renderDevice->create(
-            Framebuffer::Descriptor {
-                .attachments = {
-                    crimild::get_ptr( imageView )
-                },
-                .renderPass = crimild::get_ptr( m_renderPass ),
-                .extent = swapchain->extent,
-            }
-        );
-        m_framebuffers.push_back( framebuffer );
-
-        m_commandBuffers.push_back(
-            [ this, framebuffer, renderDevice ]() {
-                auto commandBuffer = renderDevice->create(
-					CommandBuffer::Descriptor {
-                    	.commandPool = crimild::get_ptr( m_commandPool ),
-                	}
-				);
-                commandBuffer->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
-                commandBuffer->beginRenderPass(
-                    crimild::get_ptr( m_renderPass ),
-                    crimild::get_ptr( framebuffer ),
-                    RGBAColorf( 0.0f, 0.0f, 0.0f, 1.0f )
-                );
-                commandBuffer->bindGraphicsPipeline(
-                    crimild::get_ptr( m_pipeline )
-                );
-                commandBuffer->draw();
-                commandBuffer->endRenderPass();
-                commandBuffer->end();
-                return commandBuffer;
-            }()
-        );
-    }
-
-    for ( auto i = 0l; i < CRIMILD_VULKAN_MAX_FRAMES_IN_FLIGHT; i++ ) {
-        m_imageAvailableSemaphores.push_back( renderDevice->create( Semaphore::Descriptor { } ) );
-        m_renderFinishedSemaphores.push_back( renderDevice->create( Semaphore::Descriptor { } ) );
-        m_inFlightFences.push_back( renderDevice->create( Fence::Descriptor { } ) );
-    }
+    recreate();
 
     return true;
 }
@@ -161,11 +89,23 @@ void VulkanSystem::update( void )
     // Acquire the next image available image from the swapchain
     // Execution of command buffers is asynchrounous. It must be set up to
     // wait on image adquisition to finish
-    auto imageIndex = swapchain->acquireNextImage( wait );
-    if ( imageIndex == std::numeric_limits< crimild::UInt32 >::max() ) {
-        CRIMILD_LOG_WARNING( "No image available" );
-        return;
+    auto result = swapchain->acquireNextImage( wait );
+    if ( !result.success ) {
+        if ( result.outOfDate ) {
+            // No image is available since environemnt has changed
+            // Maybe window was resized.
+            // Recreate swapchain and related objects
+            cleanup();
+            recreate();
+            return;
+        }
+        else {
+            CRIMILD_LOG_ERROR( "No image available" );
+            exit( -1 );
+        }
     }
+
+    auto imageIndex = result.imageIndex;
 
     // Submit graphic commands to the render device, with the selected
     // image as attachment in the framebuffer
@@ -177,7 +117,18 @@ void VulkanSystem::update( void )
     );
 
     // Return the image to the swapchain so it can be presented
-    swapchain->presentImage( imageIndex, signal );
+    auto presentationResult = swapchain->presentImage( imageIndex, signal );
+    if ( !presentationResult.success ) {
+        if ( presentationResult.outOfDate ) {
+            cleanup();
+            recreate();
+            return;
+        }
+        else {
+            CRIMILD_LOG_ERROR( "Failed to present image" );
+            exit( -1 );
+        }
+    }
 
     m_currentFrame = ( m_currentFrame + 1 ) % CRIMILD_VULKAN_MAX_FRAMES_IN_FLIGHT;
 }
@@ -185,21 +136,9 @@ void VulkanSystem::update( void )
 void VulkanSystem::stop( void )
 {
     System::stop();
+    cleanup();
 
-    if ( m_renderDevice != nullptr ) {
-        CRIMILD_LOG_TRACE( "Waiting for pending operations" );
-        m_renderDevice->waitIdle();
-    }
-
-    m_inFlightFences.clear();
-    m_imageAvailableSemaphores.clear();
-    m_renderFinishedSemaphores.clear();
-    m_commandBuffers.clear();
     m_commandPool = nullptr;
-    m_framebuffers.clear();
-    m_pipeline = nullptr;
-    m_renderPass = nullptr;
-    m_swapchain = nullptr;
     m_renderDevice = nullptr;
     m_physicalDevice = nullptr;
     m_debugMessenger = nullptr;
@@ -288,5 +227,105 @@ crimild::Bool VulkanSystem::createSwapchain( void ) noexcept
     );
 
     return m_swapchain != nullptr;
+}
+
+void VulkanSystem::cleanup( void ) noexcept
+{
+    if ( m_renderDevice != nullptr ) {
+        CRIMILD_LOG_TRACE( "Waiting for pending operations" );
+        m_renderDevice->waitIdle();
+    }
+
+    m_inFlightFences.clear();
+    m_imageAvailableSemaphores.clear();
+    m_renderFinishedSemaphores.clear();
+    m_commandBuffers.clear();
+    m_framebuffers.clear();
+    m_pipeline = nullptr;
+    m_renderPass = nullptr;
+    m_swapchain = nullptr;
+}
+
+void VulkanSystem::recreate( void ) noexcept
+{
+    if ( !createSwapchain() ) {
+        return;
+    }
+
+    auto renderDevice = crimild::get_ptr( m_renderDevice );
+    auto swapchain = crimild::get_ptr( m_swapchain );
+
+    m_renderPass = renderDevice->create(
+        RenderPass::Descriptor {
+            .swapchain = swapchain,
+        }
+    );
+
+    m_pipeline = renderDevice->create(
+        Pipeline::Descriptor {
+            .program = crimild::alloc< ShaderProgram >(
+                containers::Array< SharedPointer< Shader >> {
+                    crimild::alloc< Shader >(
+                        Shader::Stage::VERTEX,
+                        FileSystem::getInstance().readResourceFile( "assets/shaders/triangle.vert.spv" )
+                    ),
+                    crimild::alloc< Shader >(
+                        Shader::Stage::FRAGMENT,
+                        FileSystem::getInstance().readResourceFile( "assets/shaders/triangle.frag.spv" )
+                    ),
+                }
+            ),
+            .renderPass = crimild::get_ptr( m_renderPass ),
+            .primitiveType = Primitive::Type::TRIANGLES,
+            .viewport = Rectf( 0, 0, swapchain->extent.width, swapchain->extent.height ),
+            .scissor = Rectf( 0, 0, swapchain->extent.width, swapchain->extent.height ),
+        }
+    );
+
+    auto imageCount = swapchain->imageViews.size();
+
+    for ( auto i = 0l; i < imageCount; i++ ) {
+        auto imageView = swapchain->imageViews[ i ];
+
+        auto framebuffer = renderDevice->create(
+            Framebuffer::Descriptor {
+                .attachments = {
+                    crimild::get_ptr( imageView )
+                },
+                .renderPass = crimild::get_ptr( m_renderPass ),
+                .extent = swapchain->extent,
+            }
+        );
+        m_framebuffers.push_back( framebuffer );
+
+        m_commandBuffers.push_back(
+            [ this, framebuffer, renderDevice ]() {
+                auto commandBuffer = renderDevice->create(
+                    CommandBuffer::Descriptor {
+                        .commandPool = crimild::get_ptr( m_commandPool ),
+                    }
+                );
+                commandBuffer->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
+                commandBuffer->beginRenderPass(
+                    crimild::get_ptr( m_renderPass ),
+                    crimild::get_ptr( framebuffer ),
+                    RGBAColorf( 0.0f, 0.0f, 0.0f, 1.0f )
+                );
+                commandBuffer->bindGraphicsPipeline(
+                    crimild::get_ptr( m_pipeline )
+                );
+                commandBuffer->draw();
+                commandBuffer->endRenderPass();
+                commandBuffer->end();
+                return commandBuffer;
+            }()
+        );
+    }
+
+    for ( auto i = 0l; i < CRIMILD_VULKAN_MAX_FRAMES_IN_FLIGHT; i++ ) {
+        m_imageAvailableSemaphores.push_back( renderDevice->create( Semaphore::Descriptor { } ) );
+        m_renderFinishedSemaphores.push_back( renderDevice->create( Semaphore::Descriptor { } ) );
+        m_inFlightFences.push_back( renderDevice->create( Fence::Descriptor { } ) );
+    }
 }
 
