@@ -97,6 +97,9 @@ namespace crimild {
             crimild::Bool createRenderDevice( void ) noexcept;
             crimild::Bool createSwapchain( void ) noexcept;
 
+            void cleanup( void ) noexcept;
+            void recreate( void ) noexcept;
+
         private:
             SharedPointer< VulkanInstance > m_instance;
             SharedPointer< VulkanDebugMessenger > m_debugMessenger;
