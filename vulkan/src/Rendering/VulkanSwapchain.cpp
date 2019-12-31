@@ -43,22 +43,26 @@ Swapchain::~Swapchain( void ) noexcept
     }
 }
 
-crimild::UInt32 Swapchain::acquireNextImage( const Semaphore *imageAvailableSemaphore ) const noexcept
+Swapchain::AcquireImageResult Swapchain::acquireNextImage( const Semaphore *imageAvailableSemaphore ) const noexcept
 {
-	crimild::UInt32 imageIndex;
-	vkAcquireNextImageKHR(
+    crimild::UInt32 imageIndex;
+	auto ret = vkAcquireNextImageKHR(
 		renderDevice->handler,
 		handler,
 		std::numeric_limits< uint64_t >::max(), // disable timeout
 		imageAvailableSemaphore->handler,
 		VK_NULL_HANDLE,
-		&imageIndex		
+		&imageIndex
 	);
 
-	return imageIndex;
+    return AcquireImageResult {
+        .success = ( ret == VK_SUCCESS ),
+        .imageIndex = imageIndex,
+        .outOfDate = ( ret == VK_ERROR_OUT_OF_DATE_KHR ),
+    };
 }
 
-void Swapchain::presentImage( crimild::UInt32 imageIndex, const Semaphore *signal ) const noexcept
+Swapchain::PresentImageResult Swapchain::presentImage( crimild::UInt32 imageIndex, const Semaphore *signal ) const noexcept
 {
 	VkSemaphore signalSemaphores[] = {
 		signal->handler,
@@ -78,10 +82,15 @@ void Swapchain::presentImage( crimild::UInt32 imageIndex, const Semaphore *signa
 		.pResults = nullptr,
 	};
 
-	vkQueuePresentKHR(
+	auto ret = vkQueuePresentKHR(
 		renderDevice->presentQueue,
 		&presentInfo
 	);
+
+    return PresentImageResult {
+        .success = ( ret == VK_SUCCESS ),
+        .outOfDate = ( ret == VK_ERROR_OUT_OF_DATE_KHR || VK_SUBOPTIMAL_KHR ),
+    };
 }
 
 void Swapchain::retrieveSwapchainImages( void ) noexcept
@@ -132,74 +141,6 @@ void Swapchain::createImageViews( void ) noexcept
         }
     );
 }
-
-/*
-void cleanupSwapChain( void )
-{
-	vkDestroyImageView( m_device, m_colorImageView, nullptr );
-	vkDestroyImage( m_device, m_colorImage, nullptr );
-	vkFreeMemory( m_device, m_colorImageMemory, nullptr );
-	
-	vkDestroyImageView( m_device, m_depthImageView, nullptr );
-	vkDestroyImage( m_device, m_depthImage, nullptr );
-	vkFreeMemory( m_device, m_depthImageMemory, nullptr );
-	
-	for ( auto i = 0l; i < m_swapChainFramebuffers.size(); i++ ) {
-		vkDestroyFramebuffer( m_device, m_swapChainFramebuffers[ i ], nullptr );
-	}
-	
-	vkFreeCommandBuffers(
-		m_device,
-		m_commandPool,
-		static_cast< uint32_t >( m_commandBuffers.size() ),
-		m_commandBuffers.data()
-	);
-	
-	vkDestroyPipeline( m_device, m_graphicsPipeline, nullptr );
-	vkDestroyPipelineLayout( m_device, m_pipelineLayout, nullptr );
-	vkDestroyRenderPass( m_device, m_renderPass, nullptr );
-	
-	for ( auto i = 0l; i < m_swapChainImageViews.size(); ++i ) {
-		vkDestroyImageView( m_device, m_swapChainImageViews[ i ], nullptr );
-	}
-	
-	vkDestroySwapchainKHR( m_device, m_swapChain, nullptr );
-	
-	for ( auto i = 0l; i < m_swapChainImages.size(); ++i ) {
-		vkDestroyBuffer( m_device, m_uniformBuffers[ i ], nullptr );
-		vkFreeMemory( m_device, m_uniformBuffersMemory[ i ], nullptr );
-	}
-	
-	vkDestroyDescriptorPool( m_device, m_descriptorPool, nullptr );
-}
-
-void recreateSwapChain( void )
-{
-	int width = 0;
-	int height = 0;
-	while ( width == 0 || height == 0 ) {
-		glfwGetFramebufferSize( _window, &width, &height );
-		glfwWaitEvents();
-	}
-	
-	vkDeviceWaitIdle( m_device );
-	
-	cleanupSwapChain();
-	
-	createSwapChain();
-	createImageViews();
-	createRenderPass();
-	createGraphicsPipeline();
-	createColorResources();
-	createDepthResources();
-	createFramebuffers();
-	createUniformBuffers();
-	createDescriptorPool();
-	createDescriptorSets();
-	createCommandBuffers();
-}
-*/
-
 
 SharedPointer< Swapchain > SwapchainManager::create( Swapchain::Descriptor const &descriptor ) noexcept
 {

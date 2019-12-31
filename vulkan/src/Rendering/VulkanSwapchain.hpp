@@ -73,8 +73,18 @@ namespace crimild {
             containers::Array< SharedPointer< Image >> images;
             containers::Array< SharedPointer< ImageView >> imageViews;
 
-			crimild::UInt32 acquireNextImage( const Semaphore *imageAvailableSemaphore ) const noexcept;
-			void presentImage( crimild::UInt32 imageIndex, const Semaphore *signal ) const noexcept;
+            struct AcquireImageResult {
+                crimild::UInt32 imageIndex;
+                crimild::Bool success;
+                crimild::Bool outOfDate;
+            };
+			AcquireImageResult acquireNextImage( const Semaphore *imageAvailableSemaphore ) const noexcept;
+
+            struct PresentImageResult {
+                crimild::Bool success;
+                crimild::Bool outOfDate;
+            };
+			PresentImageResult presentImage( crimild::UInt32 imageIndex, const Semaphore *signal ) const noexcept;
 
             void retrieveSwapchainImages( void ) noexcept;
             void createImageViews( void ) noexcept;
