@@ -57,7 +57,7 @@ SharedPointer< Pipeline > PipelineManager::create( Pipeline::Descriptor const &d
     // they must be alive when vkCreatePipeline is called. Beware of scopes!
     auto shaderModules = createShaderModules( renderDevice, crimild::get_ptr( descriptor.program ) );
     auto shaderStages = createShaderStages( shaderModules );
-    auto vertexInputInfo = createVertexInput();
+    auto vertexInputInfo = createVertexInput( descriptor.bindingDescription, descriptor.attributeDescriptions );
     auto inputAssembly = createInputAssemby( descriptor.primitiveType );
     auto viewport = createViewport( descriptor.viewport );
     auto scissor = createScissor( descriptor.scissor );
@@ -167,14 +167,14 @@ PipelineManager::ShaderStageArray PipelineManager::createShaderStages( const Sha
     return shaderStages;
 }
 
-VkPipelineVertexInputStateCreateInfo PipelineManager::createVertexInput( void ) const noexcept
+VkPipelineVertexInputStateCreateInfo PipelineManager::createVertexInput( const std::vector< VkVertexInputBindingDescription > &bindingDescription, const std::vector< VkVertexInputAttributeDescription > &attributeDescriptions ) const noexcept
 {
     return VkPipelineVertexInputStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
-        .vertexBindingDescriptionCount = 0,
-        .pVertexBindingDescriptions = nullptr,
-        .vertexAttributeDescriptionCount = 0,
-        .pVertexAttributeDescriptions = nullptr,
+        .vertexBindingDescriptionCount = static_cast< crimild::UInt32 >( bindingDescription.size() ),
+        .pVertexBindingDescriptions = bindingDescription.data(),
+        .vertexAttributeDescriptionCount = static_cast< crimild::UInt32 >( attributeDescriptions.size() ),
+        .pVertexAttributeDescriptions = attributeDescriptions.data(),
     };
 }
 
