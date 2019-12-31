@@ -1,0 +1,175 @@
+/*
+* Copyright (c) 2002 - present, H. Hernan Saez
+* All rights reserved.
+*
+* Redistribution and use in source and binary forms, with or without
+* modification, are permitted provided that the following conditions are met:
+*     * Redistributions of source code must retain the above copyright
+*       notice, this list of conditions and the following disclaimer.
+*     * Redistributions in binary form must reproduce the above copyright
+*       notice, this list of conditions and the following disclaimer in the
+*       documentation and/or other materials provided with the distribution.
+*     * Neither the name of the copyright holders nor the
+*       names of its contributors may be used to endorse or promote products
+*       derived from this software without specific prior written permission.
+*
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+* ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+* WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+* DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE FOR ANY
+* DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+* (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+* LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+* ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+* (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+* SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+#include "Rendering/VulkanBuffer.hpp"
+#include "Rendering/VulkanRenderDevice.hpp"
+#include "Rendering/VulkanPhysicalDevice.hpp"
+
+using namespace crimild;
+using namespace crimild::vulkan;
+
+Buffer::~Buffer( void ) noexcept
+{
+    if ( manager != nullptr ) {
+        manager->destroy( this );
+    }
+}
+
+SharedPointer< Buffer > BufferManager::create( Buffer::Descriptor const &descriptor ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Creating Vulkan buffer" );
+
+    auto renderDevice = m_renderDevice;
+    if ( renderDevice == nullptr ) {
+        renderDevice = descriptor.renderDevice;
+    }
+
+    auto createInfo = VkBufferCreateInfo {
+		.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+        .size = descriptor.size,
+        .usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, // TODO
+        .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+        .flags = 0,
+    };
+
+    VkBuffer bufferHandler;
+    CRIMILD_VULKAN_CHECK(
+ 		vkCreateBuffer(
+       		renderDevice->handler,
+           	&createInfo,
+           	nullptr,
+           	&bufferHandler
+       	)
+ 	);
+
+    VkMemoryRequirements memRequirements;
+    vkGetBufferMemoryRequirements( renderDevice->handler, bufferHandler, &memRequirements );
+
+    auto allocInfo = VkMemoryAllocateInfo {
+		.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+        .allocationSize = memRequirements.size,
+        .memoryTypeIndex = findMemoryType(
+      		renderDevice,
+			memRequirements.memoryTypeBits,
+          	VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
+            	| VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+      	),
+    };
+
+    VkDeviceMemory bufferMemory;
+    CRIMILD_VULKAN_CHECK(
+		vkAllocateMemory(
+      		renderDevice->handler,
+         	&allocInfo,
+         	nullptr,
+         	&bufferMemory
+		)
+ 	);
+
+    CRIMILD_VULKAN_CHECK(
+     	vkBindBufferMemory(
+        	renderDevice->handler,
+           	bufferHandler,
+           	bufferMemory,
+           	0
+       	)
+ 	);
+
+    void *data = nullptr;
+    CRIMILD_VULKAN_CHECK(
+ 		vkMapMemory(
+			renderDevice->handler,
+			bufferMemory,
+			0,
+			createInfo.size,
+			0,
+			&data
+		)
+	);
+
+	memcpy( data, descriptor.data, ( size_t ) createInfo.size );
+
+    vkUnmapMemory( renderDevice->handler, bufferMemory );
+
+    auto buffer = crimild::alloc< Buffer >();
+    buffer->renderDevice = renderDevice;
+    buffer->manager = this;
+    buffer->handler = bufferHandler;
+    buffer->memory = bufferMemory;
+    buffer->size = descriptor.size;
+    insert( crimild::get_ptr( buffer ) );
+    return buffer;
+}
+
+void BufferManager::destroy( Buffer *buffer ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Destroying Vulkan buffer" );
+
+    if ( buffer->renderDevice != nullptr ) {
+        if ( buffer->handler != VK_NULL_HANDLE ) {
+        	vkDestroyBuffer(
+            	buffer->renderDevice->handler,
+        		buffer->handler,
+            	nullptr
+        	);
+        }
+        if ( buffer->memory != VK_NULL_HANDLE ) {
+			vkFreeMemory(
+         		buffer->renderDevice->handler,
+             	buffer->memory,
+             	nullptr
+         	);
+        }
+    }
+
+    buffer->renderDevice = nullptr;
+    buffer->handler = VK_NULL_HANDLE;
+    buffer->memory = VK_NULL_HANDLE;
+    buffer->manager = nullptr;
+    buffer->size = 0;
+    erase( buffer );
+}
+
+crimild::UInt32 BufferManager::findMemoryType( RenderDevice *renderDevice, crimild::UInt32 typeFilter, VkMemoryPropertyFlags properties ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Finding memory type device" );
+
+    auto physicalDevice = renderDevice->physicalDevice;
+
+    VkPhysicalDeviceMemoryProperties memProperties;
+    vkGetPhysicalDeviceMemoryProperties( physicalDevice->handler, &memProperties );
+
+    for ( crimild::UInt32 i = 0; i < memProperties.memoryTypeCount; ++i ) {
+        if ( typeFilter & ( 1 << i )
+             && ( memProperties.memoryTypes[ i ].propertyFlags & properties ) == properties ) {
+            return i;
+        }
+    }
+
+    CRIMILD_LOG_ERROR( "Failed to find suitable memory type" );
+    return -1;
+}

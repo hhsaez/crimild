@@ -46,7 +46,8 @@ using namespace crimild;
 using namespace crimild::vulkan;
 
 RenderDevice::RenderDevice( void )
-    : CommandBufferManager( this ),
+    : BufferManager( this ),
+      CommandBufferManager( this ),
       CommandPoolManager( this ),
 	  SwapchainManager( this ),
       FenceManager( this ),
@@ -214,6 +215,7 @@ void RenderDeviceManager::destroy( RenderDevice *renderDevice ) noexcept
 {
     CRIMILD_LOG_TRACE( "Destroying Vulkan logical device" );
 
+    static_cast< BufferManager * >( renderDevice )->cleanup();
     static_cast< FenceManager * >( renderDevice )->cleanup();
     static_cast< SemaphoreManager * >( renderDevice )->cleanup();
     static_cast< CommandBufferManager * >( renderDevice )->cleanup();

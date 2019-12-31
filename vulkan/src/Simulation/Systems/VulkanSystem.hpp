@@ -39,6 +39,7 @@ namespace crimild {
 
     namespace vulkan {
 
+        class Buffer;
         class CommandBuffer;
         class CommandPool;
         class Fence;
@@ -96,9 +97,11 @@ namespace crimild {
             crimild::Bool createPhysicalDevice( void ) noexcept;
             crimild::Bool createRenderDevice( void ) noexcept;
             crimild::Bool createSwapchain( void ) noexcept;
+            crimild::Bool recreateSwapchain( void ) noexcept;
+            crimild::Bool createCommandPool( void ) noexcept;
+            crimild::Bool createVertexBuffer( void ) noexcept;
 
-            void cleanup( void ) noexcept;
-            void recreate( void ) noexcept;
+            void cleanSwapchain( void ) noexcept;
 
         private:
             SharedPointer< VulkanInstance > m_instance;
@@ -116,6 +119,8 @@ namespace crimild {
             std::vector< SharedPointer< Semaphore >> m_renderFinishedSemaphores;
             std::vector< SharedPointer< Fence >> m_inFlightFences;
             crimild::UInt32 m_currentFrame = 0;
+
+            SharedPointer< Buffer > m_vertexBuffer;
         };
 
     }

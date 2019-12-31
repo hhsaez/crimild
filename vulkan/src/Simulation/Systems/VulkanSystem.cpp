@@ -32,6 +32,7 @@
 #include "Rendering/VulkanCommandPool.hpp"
 #include "Rendering/VulkanCommandBuffer.hpp"
 #include "Rendering/VulkanFence.hpp"
+#include "Rendering/VulkanBuffer.hpp"
 
 #include "Foundation/Containers/Array.hpp"
 #include "Rendering/ShaderProgram.hpp"
@@ -42,30 +43,71 @@ using namespace crimild::vulkan;
 
 #define CRIMILD_VULKAN_MAX_FRAMES_IN_FLIGHT 2
 
-crimild::Bool VulkanSystem::start( void )
-{
-    if ( !System::start()
-        || !createInstance()
-        || !createDebugMessenger()
-        || !createSurface()
-        || !createPhysicalDevice()
-        || !createRenderDevice()
-        || !createSwapchain() ) {
-        return false;
+struct Vertex {
+    Vector2f pos;
+    RGBColorf color;
+
+    static VkVertexInputBindingDescription getBindingDescription( void )
+    {
+        auto bindingDescription = VkVertexInputBindingDescription {
+            .binding = 0,
+            .stride = sizeof( Vertex ),
+            .inputRate = VK_VERTEX_INPUT_RATE_VERTEX,
+        };
+        return bindingDescription;
     }
 
-    auto renderDevice = crimild::get_ptr( m_renderDevice );
+    static std::vector< VkVertexInputAttributeDescription > getAttributeDescriptions( void )
+    {
+        return {
+            VkVertexInputAttributeDescription {
+                .binding = 0,
+                .location = 0,
+                .format = VK_FORMAT_R32G32_SFLOAT,
+                .offset = offsetof( Vertex, pos ),
+            },
+            VkVertexInputAttributeDescription {
+                .binding = 0,
+                .location = 1,
+                .format = VK_FORMAT_R32G32B32_SFLOAT,
+                .offset = offsetof( Vertex, color )
+            }
+        };
+    }
+};
 
-    auto queueFamilyIndices = utils::findQueueFamilies( m_physicalDevice->handler, m_surface->handler );
-    m_commandPool = renderDevice->create(
-        CommandPool::Descriptor {
-            .queueFamilyIndex = queueFamilyIndices.graphicsFamily[ 0 ],
-        }
-    );
+namespace crimild {
 
-    recreate();
+    namespace vulkan {
 
-    return true;
+        template< typename VertexType >
+        class VertexBuffer : public VulkanObject {
+        public:
+            static VkVertexInputBindingDescription getBindingDescription( void )
+            {
+                return VkVertexInputBindingDescription {
+                    .binding = 0,
+                    .stride = sizeof( VertexType ),
+                    .inputRate = VK_VERTEX_INPUT_RATE_VERTEX,
+                };
+            }
+        };
+
+    }
+
+}
+
+crimild::Bool VulkanSystem::start( void )
+{
+    return System::start()
+        && createInstance()
+        && createDebugMessenger()
+        && createSurface()
+        && createPhysicalDevice()
+        && createRenderDevice()
+        && createCommandPool()
+        && createVertexBuffer()
+        && recreateSwapchain();
 }
 
 /*
@@ -95,8 +137,8 @@ void VulkanSystem::update( void )
             // No image is available since environemnt has changed
             // Maybe window was resized.
             // Recreate swapchain and related objects
-            cleanup();
-            recreate();
+            cleanSwapchain();
+            recreateSwapchain();
             return;
         }
         else {
@@ -120,8 +162,8 @@ void VulkanSystem::update( void )
     auto presentationResult = swapchain->presentImage( imageIndex, signal );
     if ( !presentationResult.success ) {
         if ( presentationResult.outOfDate ) {
-            cleanup();
-            recreate();
+            cleanSwapchain();
+            recreateSwapchain();
             return;
         }
         else {
@@ -136,7 +178,10 @@ void VulkanSystem::update( void )
 void VulkanSystem::stop( void )
 {
     System::stop();
-    cleanup();
+
+    cleanSwapchain();
+
+    m_vertexBuffer = nullptr;
 
     m_commandPool = nullptr;
     m_renderDevice = nullptr;
@@ -229,7 +274,7 @@ crimild::Bool VulkanSystem::createSwapchain( void ) noexcept
     return m_swapchain != nullptr;
 }
 
-void VulkanSystem::cleanup( void ) noexcept
+void VulkanSystem::cleanSwapchain( void ) noexcept
 {
     if ( m_renderDevice != nullptr ) {
         CRIMILD_LOG_TRACE( "Waiting for pending operations" );
@@ -246,10 +291,10 @@ void VulkanSystem::cleanup( void ) noexcept
     m_swapchain = nullptr;
 }
 
-void VulkanSystem::recreate( void ) noexcept
+crimild::Bool VulkanSystem::recreateSwapchain( void ) noexcept
 {
     if ( !createSwapchain() ) {
-        return;
+        return false;
     }
 
     auto renderDevice = crimild::get_ptr( m_renderDevice );
@@ -279,6 +324,8 @@ void VulkanSystem::recreate( void ) noexcept
             .primitiveType = Primitive::Type::TRIANGLES,
             .viewport = Rectf( 0, 0, swapchain->extent.width, swapchain->extent.height ),
             .scissor = Rectf( 0, 0, swapchain->extent.width, swapchain->extent.height ),
+            .bindingDescription = { Vertex::getBindingDescription() },
+        	.attributeDescriptions = Vertex::getAttributeDescriptions(),
         }
     );
 
@@ -314,7 +361,10 @@ void VulkanSystem::recreate( void ) noexcept
                 commandBuffer->bindGraphicsPipeline(
                     crimild::get_ptr( m_pipeline )
                 );
-                commandBuffer->draw();
+                commandBuffer->bindVertexBuffer(
+                    crimild::get_ptr( m_vertexBuffer )
+                );
+                commandBuffer->draw( static_cast< crimild::UInt32 >( m_vertexBuffer->size / sizeof( Vertex ) ) );
                 commandBuffer->endRenderPass();
                 commandBuffer->end();
                 return commandBuffer;
@@ -327,5 +377,39 @@ void VulkanSystem::recreate( void ) noexcept
         m_renderFinishedSemaphores.push_back( renderDevice->create( Semaphore::Descriptor { } ) );
         m_inFlightFences.push_back( renderDevice->create( Fence::Descriptor { } ) );
     }
+
+    return true;
 }
 
+crimild::Bool VulkanSystem::createCommandPool( void ) noexcept
+{
+    auto renderDevice = crimild::get_ptr( m_renderDevice );
+    auto queueFamilyIndices = utils::findQueueFamilies( m_physicalDevice->handler, m_surface->handler );
+    m_commandPool = renderDevice->create(
+        CommandPool::Descriptor {
+            .queueFamilyIndex = queueFamilyIndices.graphicsFamily[ 0 ],
+        }
+    );
+
+    return true;
+}
+
+crimild::Bool VulkanSystem::createVertexBuffer( void ) noexcept
+{
+    const std::vector< Vertex > vertices = {
+        { Vector2f( -0.5f, 0.5f ), RGBColorf( 0.0f, 0.0f, 1.0f ) },
+        { Vector2f( 0.5f, 0.0f ), RGBColorf( 0.0f, 1.0f, 0.0f ) },
+        { Vector2f( 0.0f, -0.5f ), RGBColorf( 1.0f, 0.0f, 0.0f ) },
+    };
+
+    auto renderDevice = crimild::get_ptr( m_renderDevice );
+
+    m_vertexBuffer = renderDevice->create(
+		Buffer::Descriptor {
+			.size = sizeof( vertices[ 0 ] ) * vertices.size(),
+        	.data = vertices.data(),
+    	}
+    );
+
+    return true;
+}

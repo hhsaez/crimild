@@ -68,6 +68,8 @@ namespace crimild {
                 Primitive::Type primitiveType;
                 Rectf viewport;
                 Rectf scissor;
+                std::vector< VkVertexInputBindingDescription > bindingDescription;
+                std::vector< VkVertexInputAttributeDescription > attributeDescriptions;
 			};
 			
 		public:
@@ -94,7 +96,7 @@ namespace crimild {
             ShaderModuleArray createShaderModules( RenderDevice *renderDevice, ShaderProgram *program ) const noexcept;
             ShaderStageArray createShaderStages( const ShaderModuleArray &modules ) const noexcept;
             VkPipelineShaderStageCreateInfo createShaderStage( const ShaderModule &module ) const noexcept;
-            VkPipelineVertexInputStateCreateInfo createVertexInput( void ) const noexcept;
+            VkPipelineVertexInputStateCreateInfo createVertexInput( const std::vector< VkVertexInputBindingDescription > &bindingDescription, const std::vector< VkVertexInputAttributeDescription > &attributeDescriptions ) const noexcept;
             VkPipelineInputAssemblyStateCreateInfo createInputAssemby( Primitive::Type primitiveType ) const noexcept;
             VkViewport createViewport( const Rectf &viewport ) const noexcept;
             VkRect2D createScissor( const Rectf &scissor ) const noexcept;

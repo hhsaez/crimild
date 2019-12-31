@@ -35,6 +35,7 @@ namespace crimild {
 
 	namespace vulkan {
 
+        class Buffer;
         class CommandBufferManager;
 		class CommandPool;
 		class RenderPass;
@@ -72,7 +73,8 @@ namespace crimild {
 			void begin( Usage usage = Usage::DEFAULT ) const noexcept;
 			void beginRenderPass( const RenderPass *renderPass, const Framebuffer *framebuffer, const RGBAColorf &clearColor ) const noexcept;
 			void bindGraphicsPipeline( const Pipeline *pipeline ) const noexcept;
-			void draw( void ) const noexcept;
+            void bindVertexBuffer( const Buffer *buffer ) const noexcept;
+			void draw( crimild::UInt32 vertexCount ) const noexcept;
 			void endRenderPass( void ) const noexcept;
 			void end( void ) const;
 		};

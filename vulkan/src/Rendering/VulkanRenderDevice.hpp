@@ -29,6 +29,7 @@
 #define CRIMILD_VULKAN_RENDERING_RENDER_DEVICE_
 
 #include "Foundation/VulkanObject.hpp"
+#include "Rendering/VulkanBuffer.hpp"
 #include "Rendering/VulkanCommandBuffer.hpp"
 #include "Rendering/VulkanCommandPool.hpp"
 #include "Rendering/VulkanFence.hpp"
@@ -54,6 +55,7 @@ namespace crimild {
 
         class RenderDevice :
         	public VulkanObject,
+            public BufferManager,
         	public CommandBufferManager,
         	public CommandPoolManager,
         	public SwapchainManager,
@@ -69,6 +71,7 @@ namespace crimild {
             CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::RenderDevice )
 
         public:
+            using BufferManager::create;
             using CommandBufferManager::create;
             using CommandPoolManager::create;
             using SwapchainManager::create;

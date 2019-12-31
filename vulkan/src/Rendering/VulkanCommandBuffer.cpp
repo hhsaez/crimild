@@ -89,9 +89,26 @@ void CommandBuffer::bindGraphicsPipeline( const Pipeline *pipeline ) const noexc
 	);
 }
 
-void CommandBuffer::draw( void ) const noexcept
+void CommandBuffer::bindVertexBuffer( const Buffer *buffer ) const noexcept
 {
-	vkCmdDraw( handler, 3, 1, 0, 0 );
+    VkBuffer vertexBuffers[] = {
+        buffer->handler
+    };
+    VkDeviceSize offsets[] = {
+        0
+    };
+    vkCmdBindVertexBuffers(
+   		handler,
+       	0,
+   		1,
+   		vertexBuffers,
+       	offsets
+   	);
+}
+
+void CommandBuffer::draw( crimild::UInt32 vertexCount ) const noexcept
+{
+	vkCmdDraw( handler, vertexCount, 1, 0, 0 );
 }
 
 void CommandBuffer::endRenderPass( void ) const noexcept
