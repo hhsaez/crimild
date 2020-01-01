@@ -48,72 +48,83 @@ SharedPointer< Buffer > BufferManager::create( Buffer::Descriptor const &descrip
         renderDevice = descriptor.renderDevice;
     }
 
-    auto createInfo = VkBufferCreateInfo {
-		.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-        .size = descriptor.size,
-        .usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, // TODO
-        .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-        .flags = 0,
-    };
+    VkDeviceSize bufferSize = descriptor.size;
 
-    VkBuffer bufferHandler;
-    CRIMILD_VULKAN_CHECK(
- 		vkCreateBuffer(
-       		renderDevice->handler,
-           	&createInfo,
-           	nullptr,
-           	&bufferHandler
-       	)
- 	);
+//    VkBuffer bufferHandler;
+//    VkDeviceMemory bufferMemory;
+//    createBuffer(
+//        renderDevice,
+//        bufferSize,
+//        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+//        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+//        bufferHandler,
+//        bufferMemory
+//    );
+//
+//    void *data = nullptr;
+//    CRIMILD_VULKAN_CHECK(
+//        vkMapMemory(
+//            renderDevice->handler,
+//            bufferMemory,
+//            0,
+//            bufferSize,
+//            0,
+//            &data
+//        )
+//    );
+//
+//    memcpy( data, descriptor.data, bufferSize );
+//
+//    vkUnmapMemory( renderDevice->handler, bufferMemory );
 
-    VkMemoryRequirements memRequirements;
-    vkGetBufferMemoryRequirements( renderDevice->handler, bufferHandler, &memRequirements );
-
-    auto allocInfo = VkMemoryAllocateInfo {
-		.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-        .allocationSize = memRequirements.size,
-        .memoryTypeIndex = findMemoryType(
-      		renderDevice,
-			memRequirements.memoryTypeBits,
-          	VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
-            	| VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-      	),
-    };
-
-    VkDeviceMemory bufferMemory;
-    CRIMILD_VULKAN_CHECK(
-		vkAllocateMemory(
-      		renderDevice->handler,
-         	&allocInfo,
-         	nullptr,
-         	&bufferMemory
-		)
- 	);
-
-    CRIMILD_VULKAN_CHECK(
-     	vkBindBufferMemory(
-        	renderDevice->handler,
-           	bufferHandler,
-           	bufferMemory,
-           	0
-       	)
- 	);
+    VkBuffer stagingBufferHandler;
+    VkDeviceMemory stagingBufferMemory;
+    createBuffer(
+     	renderDevice,
+     	bufferSize,
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        stagingBufferHandler,
+     	stagingBufferMemory
+    );
 
     void *data = nullptr;
     CRIMILD_VULKAN_CHECK(
  		vkMapMemory(
 			renderDevice->handler,
-			bufferMemory,
+			stagingBufferMemory,
 			0,
-			createInfo.size,
+			bufferSize,
 			0,
 			&data
 		)
 	);
 
-	memcpy( data, descriptor.data, ( size_t ) createInfo.size );
+	memcpy( data, descriptor.data, ( size_t ) bufferSize );
 
-    vkUnmapMemory( renderDevice->handler, bufferMemory );
+    vkUnmapMemory( renderDevice->handler, stagingBufferMemory );
+
+    VkBuffer bufferHandler;
+    VkDeviceMemory bufferMemory;
+    createBuffer(
+        renderDevice,
+        bufferSize,
+        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, // TODO
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        bufferHandler,
+        bufferMemory
+     );
+
+    copyBuffer(
+        renderDevice,
+        descriptor.commandPool,
+        stagingBufferHandler,
+        bufferHandler,
+        bufferSize
+    );
+
+    vkDestroyBuffer( renderDevice->handler, stagingBufferHandler, nullptr );
+    vkFreeMemory( renderDevice->handler, stagingBufferMemory, nullptr );
 
     auto buffer = crimild::alloc< Buffer >();
     buffer->renderDevice = renderDevice;
@@ -172,4 +183,76 @@ crimild::UInt32 BufferManager::findMemoryType( RenderDevice *renderDevice, crimi
 
     CRIMILD_LOG_ERROR( "Failed to find suitable memory type" );
     return -1;
+}
+
+crimild::Bool BufferManager::createBuffer( RenderDevice *renderDevice, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer &bufferHandler, VkDeviceMemory &bufferMemory ) noexcept
+{
+    auto createInfo = VkBufferCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+        .size = size,
+        .usage = usage,
+        .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+    };
+
+    CRIMILD_VULKAN_CHECK(
+ 		vkCreateBuffer(
+        	renderDevice->handler,
+            &createInfo,
+            nullptr,
+            &bufferHandler
+       	)
+ 	);
+
+    VkMemoryRequirements memRequirements;
+    vkGetBufferMemoryRequirements( renderDevice->handler, bufferHandler, &memRequirements );
+
+    auto allocInfo = VkMemoryAllocateInfo {
+        .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+        .allocationSize = memRequirements.size,
+        .memoryTypeIndex = findMemoryType( renderDevice, memRequirements.memoryTypeBits, properties ),
+    };
+
+    CRIMILD_VULKAN_CHECK(
+    	vkAllocateMemory(
+     		renderDevice->handler,
+         	&allocInfo,
+         	nullptr,
+         	&bufferMemory
+     	)
+ 	);
+
+    CRIMILD_VULKAN_CHECK(
+    	vkBindBufferMemory(
+       		renderDevice->handler,
+           	bufferHandler,
+       		bufferMemory,
+       		0
+       	)
+   	);
+
+    return true;
+}
+
+void BufferManager::copyBuffer( RenderDevice *renderDevice, CommandPool *commandPool, VkBuffer srcBufferHandler, VkBuffer dstBufferHandler, VkDeviceSize size ) const noexcept
+{
+	auto commandBuffer = renderDevice->create(
+        CommandBuffer::Descriptor {
+        	.commandPool = commandPool,
+    	}
+    );
+
+    commandBuffer->begin( CommandBuffer::Usage::ONE_TIME_SUBMIT );
+
+    auto src = crimild::alloc< Buffer >();
+    src->handler = srcBufferHandler;
+    auto dst = crimild::alloc< Buffer >();
+    dst->handler = dstBufferHandler;
+    commandBuffer->copy( crimild::get_ptr( src ), 0, crimild::get_ptr( dst ), 0, size );
+
+    commandBuffer->end();
+
+    renderDevice->submit(
+        crimild::get_ptr( commandBuffer ),
+    	true
+    );
 }

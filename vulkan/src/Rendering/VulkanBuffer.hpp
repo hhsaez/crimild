@@ -36,6 +36,7 @@ namespace crimild {
 
         class BufferManager;
         class RenderDevice;
+        class CommandPool;
 
         class Buffer : public VulkanObject {
             CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::Buffer )
@@ -43,6 +44,7 @@ namespace crimild {
         public:
             struct Descriptor {
                 RenderDevice *renderDevice;
+                CommandPool *commandPool;
                 const void *data;
                 crimild::Size size;
             };
@@ -75,6 +77,8 @@ namespace crimild {
 
         private:
             crimild::UInt32 findMemoryType( RenderDevice *renderDevice, crimild::UInt32 typeFilter, VkMemoryPropertyFlags properties ) noexcept;
+            crimild::Bool createBuffer( RenderDevice *renderDevice, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer &bufferBuffer, VkDeviceMemory &bufferMemory ) noexcept;
+            void copyBuffer( RenderDevice *renderDevice, CommandPool *commandPool, VkBuffer srcBufferHandler, VkBuffer dstBufferHandler, VkDeviceSize size ) const noexcept;
 
         private:
             RenderDevice *m_renderDevice = nullptr;
