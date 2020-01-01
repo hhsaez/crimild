@@ -71,12 +71,17 @@ namespace crimild {
 
         public:
 			void begin( Usage usage = Usage::DEFAULT ) const noexcept;
-			void beginRenderPass( const RenderPass *renderPass, const Framebuffer *framebuffer, const RGBAColorf &clearColor ) const noexcept;
-			void bindGraphicsPipeline( const Pipeline *pipeline ) const noexcept;
+            void end( void ) const noexcept;
+
+            void beginRenderPass( const RenderPass *renderPass, const Framebuffer *framebuffer, const RGBAColorf &clearColor ) const noexcept;
+            void endRenderPass( void ) const noexcept;
+
+            void bindGraphicsPipeline( const Pipeline *pipeline ) const noexcept;
             void bindVertexBuffer( const Buffer *buffer ) const noexcept;
-			void draw( crimild::UInt32 vertexCount ) const noexcept;
-			void endRenderPass( void ) const noexcept;
-			void end( void ) const;
+
+            void draw( crimild::UInt32 vertexCount ) const noexcept;
+
+            void copy( Buffer *src, crimild::Size srcOffset, Buffer *dst, crimild::Size dstOffset, crimild::Size size ) const noexcept;
 		};
 
         class CommandBufferManager : public VulkanObjectManager< CommandBuffer > {

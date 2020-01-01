@@ -403,13 +403,16 @@ crimild::Bool VulkanSystem::createVertexBuffer( void ) noexcept
     };
 
     auto renderDevice = crimild::get_ptr( m_renderDevice );
+    auto commandPool = crimild::get_ptr( m_commandPool );
 
     m_vertexBuffer = renderDevice->create(
 		Buffer::Descriptor {
 			.size = sizeof( vertices[ 0 ] ) * vertices.size(),
         	.data = vertices.data(),
+        	.commandPool = commandPool,
     	}
     );
 
     return true;
 }
+

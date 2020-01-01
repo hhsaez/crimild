@@ -110,6 +110,34 @@ void RenderDevice::submitGraphicsCommands( const Semaphore *wait, const CommandB
     );
 }
 
+void RenderDevice::submit( const CommandBuffer *commands, crimild::Bool wait ) const noexcept
+{
+    auto commandBufferHandler = commands->handler;
+
+    auto submitInfo = VkSubmitInfo {
+        .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+        .commandBufferCount = 1,
+        .pCommandBuffers = &commandBufferHandler,
+    };
+
+    CRIMILD_VULKAN_CHECK(
+        vkQueueSubmit(
+            graphicsQueue,
+            1,
+            &submitInfo,
+            VK_NULL_HANDLE
+        )
+    );
+
+    if ( wait ) {
+    	CRIMILD_VULKAN_CHECK(
+        	vkQueueWaitIdle(
+        		graphicsQueue
+        	)
+    	);
+    }
+}
+
 void RenderDevice::waitIdle( void ) const noexcept
 {
     if ( handler == VK_NULL_HANDLE ) {
@@ -265,6 +293,7 @@ void RenderDeviceManager::destroy( RenderDevice *renderDevice ) noexcept
 
 
 
+/*
 
 VulkanRenderDevice::VulkanRenderDevice( VulkanInstance *instance, VulkanSurface *surface, const VkPhysicalDevice &physicalDevice, const VkDevice &device )
 	: m_instance( instance ),
@@ -307,3 +336,4 @@ VkSampleCountFlagBits VulkanRenderDevice::getMaxUsableSampleCount( void ) const 
 	if ( counts & VK_SAMPLE_COUNT_2_BIT ) return VK_SAMPLE_COUNT_2_BIT;
 	return VK_SAMPLE_COUNT_1_BIT;
 }
+*/
