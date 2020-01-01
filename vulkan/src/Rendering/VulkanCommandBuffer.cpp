@@ -116,13 +116,24 @@ void CommandBuffer::endRenderPass( void ) const noexcept
 	vkCmdEndRenderPass( handler );
 }
 
-void CommandBuffer::end( void ) const
+void CommandBuffer::end( void ) const noexcept
 {
     CRIMILD_VULKAN_CHECK(
      	vkEndCommandBuffer(
        		handler
         )
     );
+}
+
+void CommandBuffer::copy( Buffer *src, crimild::Size srcOffset, Buffer *dst, crimild::Size dstOffset, crimild::Size size ) const noexcept
+{
+    auto copyRegion = VkBufferCopy {
+		.srcOffset = srcOffset,
+        .dstOffset = dstOffset,
+        .size = size,
+    };
+
+    vkCmdCopyBuffer( handler, src->handler, dst->handler, 1, &copyRegion );
 }
 
 SharedPointer< CommandBuffer > CommandBufferManager::create( CommandBuffer::Descriptor const &descriptor ) noexcept
@@ -136,8 +147,8 @@ SharedPointer< CommandBuffer > CommandBufferManager::create( CommandBuffer::Desc
 
     auto allocInfo = VkCommandBufferAllocateInfo {
         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-        .commandPool = descriptor.commandPool->handler,
         .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+        .commandPool = descriptor.commandPool->handler,
         .commandBufferCount = 1,
     };
 
@@ -178,3 +189,4 @@ void CommandBufferManager::destroy( CommandBuffer *commandBuffer ) noexcept
     commandBuffer->manager = nullptr;
     erase( commandBuffer );
 }
+
