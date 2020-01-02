@@ -78,8 +78,10 @@ namespace crimild {
 
             void bindGraphicsPipeline( const Pipeline *pipeline ) const noexcept;
             void bindVertexBuffer( const Buffer *buffer ) const noexcept;
+            void bindIndexBuffer( const Buffer *buffer ) const noexcept;
 
             void draw( crimild::UInt32 vertexCount ) const noexcept;
+            void drawIndexed( crimild::UInt32 indexCount ) const noexcept;
 
             void copy( Buffer *src, crimild::Size srcOffset, Buffer *dst, crimild::Size dstOffset, crimild::Size size ) const noexcept;
 		};

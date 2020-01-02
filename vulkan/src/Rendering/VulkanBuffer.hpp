@@ -42,15 +42,19 @@ namespace crimild {
             CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::Buffer )
 
         public:
+            enum class Usage {
+                VERTEX_BUFFER,
+                INDEX_BUFFER,
+                TRANSFER_SRC,
+                TRANSFER_DST,
+            };
+
             struct Descriptor {
                 RenderDevice *renderDevice;
                 CommandPool *commandPool;
                 const void *data;
                 crimild::Size size;
-            };
-
-            enum class Usage {
-
+                Usage usage;
             };
 
             enum class SharingMode {

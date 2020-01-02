@@ -50,33 +50,6 @@ SharedPointer< Buffer > BufferManager::create( Buffer::Descriptor const &descrip
 
     VkDeviceSize bufferSize = descriptor.size;
 
-//    VkBuffer bufferHandler;
-//    VkDeviceMemory bufferMemory;
-//    createBuffer(
-//        renderDevice,
-//        bufferSize,
-//        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-//        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-//        bufferHandler,
-//        bufferMemory
-//    );
-//
-//    void *data = nullptr;
-//    CRIMILD_VULKAN_CHECK(
-//        vkMapMemory(
-//            renderDevice->handler,
-//            bufferMemory,
-//            0,
-//            bufferSize,
-//            0,
-//            &data
-//        )
-//    );
-//
-//    memcpy( data, descriptor.data, bufferSize );
-//
-//    vkUnmapMemory( renderDevice->handler, bufferMemory );
-
     VkBuffer stagingBufferHandler;
     VkDeviceMemory stagingBufferMemory;
     createBuffer(
@@ -104,12 +77,24 @@ SharedPointer< Buffer > BufferManager::create( Buffer::Descriptor const &descrip
 
     vkUnmapMemory( renderDevice->handler, stagingBufferMemory );
 
+    VkBufferUsageFlags usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+    switch ( descriptor.usage ) {
+        case Buffer::Usage::VERTEX_BUFFER:
+            usage |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+            break;
+        case Buffer::Usage::INDEX_BUFFER:
+            usage |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+            break;
+        default:
+            break;
+    }
+
     VkBuffer bufferHandler;
     VkDeviceMemory bufferMemory;
     createBuffer(
         renderDevice,
         bufferSize,
-        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, // TODO
+        usage,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         bufferHandler,
         bufferMemory

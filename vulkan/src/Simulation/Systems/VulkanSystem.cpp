@@ -107,6 +107,7 @@ crimild::Bool VulkanSystem::start( void )
         && createRenderDevice()
         && createCommandPool()
         && createVertexBuffer()
+        && createIndexBuffer()
         && recreateSwapchain();
 }
 
@@ -182,6 +183,7 @@ void VulkanSystem::stop( void )
     cleanSwapchain();
 
     m_vertexBuffer = nullptr;
+    m_indexBuffer = nullptr;
 
     m_commandPool = nullptr;
     m_renderDevice = nullptr;
@@ -364,7 +366,10 @@ crimild::Bool VulkanSystem::recreateSwapchain( void ) noexcept
                 commandBuffer->bindVertexBuffer(
                     crimild::get_ptr( m_vertexBuffer )
                 );
-                commandBuffer->draw( static_cast< crimild::UInt32 >( m_vertexBuffer->size / sizeof( Vertex ) ) );
+                commandBuffer->bindIndexBuffer(
+               		crimild::get_ptr( m_indexBuffer )
+               	);
+                commandBuffer->drawIndexed( static_cast< crimild::UInt32 >( m_indexBuffer->size / sizeof( crimild::UInt32 ) ) );
                 commandBuffer->endRenderPass();
                 commandBuffer->end();
                 return commandBuffer;
@@ -396,10 +401,11 @@ crimild::Bool VulkanSystem::createCommandPool( void ) noexcept
 
 crimild::Bool VulkanSystem::createVertexBuffer( void ) noexcept
 {
-    const std::vector< Vertex > vertices = {
-        { Vector2f( -0.5f, 0.5f ), RGBColorf( 0.0f, 0.0f, 1.0f ) },
-        { Vector2f( 0.5f, 0.0f ), RGBColorf( 0.0f, 1.0f, 0.0f ) },
-        { Vector2f( 0.0f, -0.5f ), RGBColorf( 1.0f, 0.0f, 0.0f ) },
+    const auto vertices = std::vector< Vertex > {
+        { Vector2f( -0.5f, -0.5f ), RGBColorf( 1.0f, 0.0f, 0.0f ) },
+        { Vector2f( -0.5f, 0.5f ), RGBColorf( 1.0f, 1.0f, 1.0f ) },
+        { Vector2f( 0.5f, 0.5f ), RGBColorf( 0.0f, 0.0f, 1.0f ) },
+        { Vector2f( 0.5f, -0.5f ), RGBColorf( 0.0f, 1.0f, 0.0f ) },
     };
 
     auto renderDevice = crimild::get_ptr( m_renderDevice );
@@ -409,8 +415,31 @@ crimild::Bool VulkanSystem::createVertexBuffer( void ) noexcept
 		Buffer::Descriptor {
 			.size = sizeof( vertices[ 0 ] ) * vertices.size(),
         	.data = vertices.data(),
+        	.usage = Buffer::Usage::VERTEX_BUFFER,
         	.commandPool = commandPool,
     	}
+    );
+
+    return true;
+}
+
+crimild::Bool VulkanSystem::createIndexBuffer( void ) noexcept
+{
+    const auto indices = std::vector< crimild::UInt32 > {
+		0, 1, 2,
+        2, 3, 0,
+    };
+
+    auto renderDevice = crimild::get_ptr( m_renderDevice );
+    auto commandPool = crimild::get_ptr( m_commandPool );
+
+    m_indexBuffer = renderDevice->create(
+        Buffer::Descriptor {
+        	.size = sizeof( indices[ 0 ] ) * indices.size(),
+        	.data = indices.data(),
+        	.usage = Buffer::Usage::INDEX_BUFFER,
+        	.commandPool = commandPool,
+        }
     );
 
     return true;

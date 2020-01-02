@@ -100,6 +100,7 @@ namespace crimild {
             crimild::Bool recreateSwapchain( void ) noexcept;
             crimild::Bool createCommandPool( void ) noexcept;
             crimild::Bool createVertexBuffer( void ) noexcept;
+            crimild::Bool createIndexBuffer( void ) noexcept;
 
             void cleanSwapchain( void ) noexcept;
 
@@ -121,6 +122,7 @@ namespace crimild {
             crimild::UInt32 m_currentFrame = 0;
 
             SharedPointer< Buffer > m_vertexBuffer;
+            SharedPointer< Buffer > m_indexBuffer;
         };
 
     }

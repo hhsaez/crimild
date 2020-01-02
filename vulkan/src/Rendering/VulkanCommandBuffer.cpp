@@ -106,9 +106,24 @@ void CommandBuffer::bindVertexBuffer( const Buffer *buffer ) const noexcept
    	);
 }
 
+void CommandBuffer::bindIndexBuffer( const Buffer *buffer ) const noexcept
+{
+    vkCmdBindIndexBuffer(
+    	handler,
+        buffer->handler,
+        0,
+    	VK_INDEX_TYPE_UINT32
+    );
+}
+
 void CommandBuffer::draw( crimild::UInt32 vertexCount ) const noexcept
 {
 	vkCmdDraw( handler, vertexCount, 1, 0, 0 );
+}
+
+void CommandBuffer::drawIndexed( crimild::UInt32 indexCount ) const noexcept
+{
+    vkCmdDrawIndexed( handler, indexCount, 1, 0, 0, 0 );
 }
 
 void CommandBuffer::endRenderPass( void ) const noexcept
