@@ -76,6 +76,12 @@ struct Vertex {
     }
 };
 
+struct UniformBufferObject {
+    Matrix4f model;
+    Matrix4f view;
+    Matrix4f proj;
+};
+
 namespace crimild {
 
     namespace vulkan {
@@ -108,6 +114,7 @@ crimild::Bool VulkanSystem::start( void )
         && createCommandPool()
         && createVertexBuffer()
         && createIndexBuffer()
+        && createDescriptorSetLayout()
         && recreateSwapchain();
 }
 
@@ -150,6 +157,8 @@ void VulkanSystem::update( void )
 
     auto imageIndex = result.imageIndex;
 
+    updateUniformBuffer( imageIndex );
+
     // Submit graphic commands to the render device, with the selected
     // image as attachment in the framebuffer
     renderDevice->submitGraphicsCommands(
@@ -184,6 +193,7 @@ void VulkanSystem::stop( void )
 
     m_vertexBuffer = nullptr;
     m_indexBuffer = nullptr;
+    m_descriptorSetLayout = nullptr;
 
     m_commandPool = nullptr;
     m_renderDevice = nullptr;
@@ -283,6 +293,9 @@ void VulkanSystem::cleanSwapchain( void ) noexcept
         m_renderDevice->waitIdle();
     }
 
+    m_descriptorSets.clear();
+    m_descriptorPool = nullptr;
+    m_uniformBuffers.clear();
     m_inFlightFences.clear();
     m_imageAvailableSemaphores.clear();
     m_renderFinishedSemaphores.clear();
@@ -328,8 +341,15 @@ crimild::Bool VulkanSystem::recreateSwapchain( void ) noexcept
             .scissor = Rectf( 0, 0, swapchain->extent.width, swapchain->extent.height ),
             .bindingDescription = { Vertex::getBindingDescription() },
         	.attributeDescriptions = Vertex::getAttributeDescriptions(),
+            .setLayouts = {
+                crimild::get_ptr( m_descriptorSetLayout ),
+            },
         }
     );
+
+    createUniformBuffers();
+    createDescriptorPool();
+    createDescriptorSets();
 
     auto imageCount = swapchain->imageViews.size();
 
@@ -348,7 +368,7 @@ crimild::Bool VulkanSystem::recreateSwapchain( void ) noexcept
         m_framebuffers.push_back( framebuffer );
 
         m_commandBuffers.push_back(
-            [ this, framebuffer, renderDevice ]() {
+            [ this, framebuffer, renderDevice, i ]() {
                 auto commandBuffer = renderDevice->create(
                     CommandBuffer::Descriptor {
                         .commandPool = crimild::get_ptr( m_commandPool ),
@@ -369,6 +389,10 @@ crimild::Bool VulkanSystem::recreateSwapchain( void ) noexcept
                 commandBuffer->bindIndexBuffer(
                		crimild::get_ptr( m_indexBuffer )
                	);
+                commandBuffer->bindDescriptorSets(
+                    crimild::get_ptr( m_descriptorSets[ i ] ),
+                    crimild::get_ptr( m_pipeline->layout )
+              	);
                 commandBuffer->drawIndexed( static_cast< crimild::UInt32 >( m_indexBuffer->size / sizeof( crimild::UInt32 ) ) );
                 commandBuffer->endRenderPass();
                 commandBuffer->end();
@@ -396,16 +420,16 @@ crimild::Bool VulkanSystem::createCommandPool( void ) noexcept
         }
     );
 
-    return true;
+    return m_commandPool != nullptr;
 }
 
 crimild::Bool VulkanSystem::createVertexBuffer( void ) noexcept
 {
     const auto vertices = std::vector< Vertex > {
-        { Vector2f( -0.5f, -0.5f ), RGBColorf( 1.0f, 0.0f, 0.0f ) },
-        { Vector2f( -0.5f, 0.5f ), RGBColorf( 1.0f, 1.0f, 1.0f ) },
-        { Vector2f( 0.5f, 0.5f ), RGBColorf( 0.0f, 0.0f, 1.0f ) },
-        { Vector2f( 0.5f, -0.5f ), RGBColorf( 0.0f, 1.0f, 0.0f ) },
+        { Vector2f( -0.5f, 0.5f ), RGBColorf( 1.0f, 0.0f, 0.0f ) },
+        { Vector2f( -0.5f, -0.5f ), RGBColorf( 1.0f, 1.0f, 1.0f ) },
+        { Vector2f( 0.5f, -0.5f ), RGBColorf( 0.0f, 0.0f, 1.0f ) },
+        { Vector2f( 0.5f, 0.5f ), RGBColorf( 0.0f, 1.0f, 0.0f ) },
     };
 
     auto renderDevice = crimild::get_ptr( m_renderDevice );
@@ -420,14 +444,14 @@ crimild::Bool VulkanSystem::createVertexBuffer( void ) noexcept
     	}
     );
 
-    return true;
+    return m_vertexBuffer != nullptr;
 }
 
 crimild::Bool VulkanSystem::createIndexBuffer( void ) noexcept
 {
     const auto indices = std::vector< crimild::UInt32 > {
 		0, 1, 2,
-        2, 3, 0,
+        0, 2, 3,
     };
 
     auto renderDevice = crimild::get_ptr( m_renderDevice );
@@ -442,6 +466,124 @@ crimild::Bool VulkanSystem::createIndexBuffer( void ) noexcept
         }
     );
 
-    return true;
+    return m_indexBuffer != nullptr;
+}
+
+crimild::Bool VulkanSystem::createDescriptorSetLayout( void ) noexcept
+{
+    m_descriptorSetLayout = m_renderDevice->create(
+        DescriptorSetLayout::Descriptor {
+
+        }
+   	);
+
+    return m_descriptorSetLayout != nullptr;
+}
+
+crimild::Bool VulkanSystem::createUniformBuffers( void ) noexcept
+{
+    auto renderDevice = crimild::get_ptr( m_renderDevice );
+    auto commandPool = crimild::get_ptr( m_commandPool );
+    auto swapchain = crimild::get_ptr( m_swapchain );
+
+    auto bufferSize = sizeof( UniformBufferObject );
+    m_uniformBuffers.resize( swapchain->images.size() );
+
+    for ( crimild::Size i = 0; i < swapchain->images.size(); ++i ) {
+		auto ubo = renderDevice->create(
+            Buffer::Descriptor {
+				.size = bufferSize,
+            	.usage = Buffer::Usage::UNIFORM_BUFFER,
+            	.commandPool = commandPool,
+            	.data = nullptr,
+            }
+        );
+        m_uniformBuffers[ i ] = ubo;
+    }
+
+    return m_uniformBuffers.size() > 0;
+}
+
+void VulkanSystem::updateUniformBuffer( crimild::UInt32 currentImage ) noexcept
+{
+    static const bool ENABLE_ROTATION = true;
+    static auto startTime = std::chrono::high_resolution_clock::now();
+
+    auto currentTime = std::chrono::high_resolution_clock::now();
+    auto time = ENABLE_ROTATION * std::chrono::duration< float, std::chrono::seconds::period >( currentTime - startTime ).count();
+
+    auto ubo = UniformBufferObject {
+        .model = []( crimild::Real32 time ) {
+            Transformation t;
+            t.rotate().fromAxisAngle( Vector3f::UNIT_Z, time * -90.0f * Numericf::DEG_TO_RAD );
+            return t.computeModelMatrix();
+        }( time ),
+        .view = [] {
+            Transformation t;
+            t.setTranslate( 4.0f, 4.0f, 4.0f );
+            t.lookAt( Vector3f::ZERO, Vector3f::UNIT_Y );
+            return t.computeModelMatrix().getInverse();
+        }(),
+        .proj = []( float width, float height ) {
+            auto frustum = Frustumf( 45.0f, width / height, 0.1f, 100.0f );
+            auto proj = frustum.computeProjectionMatrix();
+
+            // Invert Y-axis
+            // This also needs to set front face as counter-clockwise for culling
+            // when creating pipeline. In addition, we need to use a depth range
+            // of [0, 1] for Vulkan
+            // Check: https://matthewwellings.com/blog/the-new-vulkan-coordinate-system/
+            static const auto CLIP_CORRECTION = Matrix4f(
+                1.0f, 0.0f, 0.0f, 0.0f,
+                0.0f, -1.0f, 0.0f, 0.0f,
+                0.0f, 0.0f, 0.5f, 0.5f,
+                0.0f, 0.0f, 0.0f, 1.0f
+            ).getTranspose(); // TODO: why do I need to transpose this matrix?
+
+            return CLIP_CORRECTION * proj;
+        }( m_swapchain->extent.width, m_swapchain->extent.height ),
+    };
+
+    m_uniformBuffers[ currentImage ]->update( &ubo );
+}
+
+crimild::Bool VulkanSystem::createDescriptorPool( void ) noexcept
+{
+    auto renderDevice = crimild::get_ptr( m_renderDevice );
+    auto swapchain = crimild::get_ptr( m_swapchain );
+
+    m_descriptorPool = renderDevice->create(
+        DescriptorPool::Descriptor {
+            .swapchain = swapchain
+        }
+    );
+
+    return m_descriptorPool != nullptr;
+}
+
+crimild::Bool VulkanSystem::createDescriptorSets( void ) noexcept
+{
+    auto renderDevice = crimild::get_ptr( m_renderDevice );
+    auto swapchain = crimild::get_ptr( m_swapchain );
+    auto descriptorPool = crimild::get_ptr( m_descriptorPool );
+    auto layout = crimild::get_ptr( m_descriptorSetLayout );
+
+    m_descriptorSets.resize( swapchain->images.size() );
+    for ( crimild::Size i = 0; i < m_descriptorSets.size(); ++i ) {
+        auto descriptorSet = renderDevice->create(
+            DescriptorSet::Descriptor {
+            	.descriptorPool = descriptorPool,
+            	.layout = layout
+        	}
+      	);
+        descriptorSet->write(
+			crimild::get_ptr( m_uniformBuffers[ i ] ),
+         	0,
+         	sizeof( UniformBufferObject )
+     	);
+        m_descriptorSets[ i ] = descriptorSet;
+    }
+
+    return m_descriptorSets.size() > 0;
 }
 

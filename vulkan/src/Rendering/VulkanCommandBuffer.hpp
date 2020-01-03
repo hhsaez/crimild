@@ -38,9 +38,11 @@ namespace crimild {
         class Buffer;
         class CommandBufferManager;
 		class CommandPool;
+        class DescriptorSet;
+        class PipelineLayout;
+        class Pipeline;
 		class RenderPass;
 		class Framebuffer;
-		class Pipeline;
         class RenderDevice;
 
 		/**
@@ -79,6 +81,7 @@ namespace crimild {
             void bindGraphicsPipeline( const Pipeline *pipeline ) const noexcept;
             void bindVertexBuffer( const Buffer *buffer ) const noexcept;
             void bindIndexBuffer( const Buffer *buffer ) const noexcept;
+            void bindDescriptorSets( const DescriptorSet *descriptorSet, const PipelineLayout *pipelineLayout ) const noexcept;
 
             void draw( crimild::UInt32 vertexCount ) const noexcept;
             void drawIndexed( crimild::UInt32 indexCount ) const noexcept;

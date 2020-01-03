@@ -25,74 +25,71 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Rendering/VulkanPipelineLayout.hpp"
+#include "Rendering/VulkanDescriptorSetLayout.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;
 
-PipelineLayout::~PipelineLayout( void )
+DescriptorSetLayout::~DescriptorSetLayout( void ) noexcept
 {
     if ( manager != nullptr ) {
         manager->destroy( this );
     }
 }
 
-SharedPointer< PipelineLayout > PipelineLayoutManager::create( PipelineLayout::Descriptor const &descriptor ) noexcept
+SharedPointer< DescriptorSetLayout > DescriptorSetLayoutManager::create( DescriptorSetLayout::Descriptor const &descriptor ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Creating Vulkan pipeline layout" );
+    CRIMILD_LOG_TRACE( "Creating Vulkan descriptor set layout" );
 
     auto renderDevice = m_renderDevice;
     if ( renderDevice == nullptr ) {
         renderDevice = descriptor.renderDevice;
     }
 
-    std::vector< VkDescriptorSetLayout > setLayouts;
-    for ( const auto setLayout : descriptor.setLayouts ) {
-        setLayouts.push_back( setLayout->handler );
-    }
-
-    auto createInfo = VkPipelineLayoutCreateInfo {
-        .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-        .setLayoutCount = static_cast< crimild::UInt32 >( setLayouts.size() ),
-        .pSetLayouts = setLayouts.data(),
-        .pushConstantRangeCount = 0,
-        .pPushConstantRanges = nullptr,
+    auto uboLayoutBinding = VkDescriptorSetLayoutBinding {
+        .binding = 0,
+        .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+        .descriptorCount = 1,
+        .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+        .pImmutableSamplers = nullptr, // Optional
     };
 
-    VkPipelineLayout pipelineLayoutHandler;
-    CRIMILD_VULKAN_CHECK(
-     	vkCreatePipelineLayout(
-       		renderDevice->handler,
-           	&createInfo,
-           	nullptr,
-           	&pipelineLayoutHandler
-       	)
- 	);
+    auto createInfo = VkDescriptorSetLayoutCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+        .bindingCount = 1,
+        .pBindings = &uboLayoutBinding,
+    };
 
-    auto pipelineLayout = crimild::alloc< PipelineLayout >();
-    pipelineLayout->manager = this;
-    pipelineLayout->renderDevice = renderDevice;
-    pipelineLayout->handler = pipelineLayoutHandler;
-    insert( crimild::get_ptr( pipelineLayout ) );
-    return pipelineLayout;
+    VkDescriptorSetLayout descriptorSetLayoutHandler;
+    CRIMILD_VULKAN_CHECK(
+        vkCreateDescriptorSetLayout(
+            renderDevice->handler,
+            &createInfo,
+            nullptr,
+            &descriptorSetLayoutHandler
+        )
+	);
+
+    auto descriptorSetLayout = crimild::alloc< DescriptorSetLayout >();
+    descriptorSetLayout->renderDevice = renderDevice;
+    descriptorSetLayout->manager = this;
+    descriptorSetLayout->handler = descriptorSetLayoutHandler;
+    insert( crimild::get_ptr( descriptorSetLayout ) );
+    return descriptorSetLayout;
 }
 
-void PipelineLayoutManager::destroy( PipelineLayout *pipelineLayout ) noexcept
+void DescriptorSetLayoutManager::destroy( DescriptorSetLayout *descriptorSetLayout ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Destroying Vulkan pipeline layout" );
+    CRIMILD_LOG_TRACE( "Destroying Vulkan descriptor set layout" );
 
-    if ( pipelineLayout->renderDevice != nullptr
-         && pipelineLayout->handler != VK_NULL_HANDLE ) {
-        vkDestroyPipelineLayout(
-        	pipelineLayout->renderDevice->handler,
-            pipelineLayout->handler,
-        	nullptr
-        );
+    if ( descriptorSetLayout->renderDevice != nullptr && descriptorSetLayout->handler != VK_NULL_HANDLE ) {
+        vkDestroyDescriptorSetLayout( descriptorSetLayout->renderDevice->handler, descriptorSetLayout->handler, nullptr );
     }
 
-    pipelineLayout->handler = VK_NULL_HANDLE;
-    pipelineLayout->manager = nullptr;
-    pipelineLayout->renderDevice = nullptr;
-    erase( pipelineLayout );
+    descriptorSetLayout->manager = nullptr;
+    descriptorSetLayout->renderDevice = nullptr;
+    descriptorSetLayout->handler = VK_NULL_HANDLE;
+    erase( descriptorSetLayout );
 }
+

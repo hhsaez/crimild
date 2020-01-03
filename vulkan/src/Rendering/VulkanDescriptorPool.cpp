@@ -25,74 +25,75 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Rendering/VulkanPipelineLayout.hpp"
+#include "VulkanDescriptorPool.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;
 
-PipelineLayout::~PipelineLayout( void )
+DescriptorPool::~DescriptorPool( void ) noexcept
 {
     if ( manager != nullptr ) {
         manager->destroy( this );
     }
 }
 
-SharedPointer< PipelineLayout > PipelineLayoutManager::create( PipelineLayout::Descriptor const &descriptor ) noexcept
+SharedPointer< DescriptorPool > DescriptorPoolManager::create( DescriptorPool::Descriptor const &descriptor ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Creating Vulkan pipeline layout" );
+    CRIMILD_LOG_TRACE( "Creating Vulkan descriptor pool" );
 
     auto renderDevice = m_renderDevice;
     if ( renderDevice == nullptr ) {
         renderDevice = descriptor.renderDevice;
     }
 
-    std::vector< VkDescriptorSetLayout > setLayouts;
-    for ( const auto setLayout : descriptor.setLayouts ) {
-        setLayouts.push_back( setLayout->handler );
-    }
+    auto swapchain = descriptor.swapchain;
 
-    auto createInfo = VkPipelineLayoutCreateInfo {
-        .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-        .setLayoutCount = static_cast< crimild::UInt32 >( setLayouts.size() ),
-        .pSetLayouts = setLayouts.data(),
-        .pushConstantRangeCount = 0,
-        .pPushConstantRanges = nullptr,
+    auto poolSize = VkDescriptorPoolSize {
+        .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+        .descriptorCount = static_cast< crimild::UInt32 >( swapchain->images.size() ),
     };
 
-    VkPipelineLayout pipelineLayoutHandler;
-    CRIMILD_VULKAN_CHECK(
-     	vkCreatePipelineLayout(
-       		renderDevice->handler,
-           	&createInfo,
-           	nullptr,
-           	&pipelineLayoutHandler
-       	)
- 	);
+    auto createInfo = VkDescriptorPoolCreateInfo {
+		.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .poolSizeCount = 1,
+        .pPoolSizes = &poolSize,
+        .maxSets = static_cast< crimild::UInt32 >( swapchain->images.size() ),
+        .flags = 0,
+    };
 
-    auto pipelineLayout = crimild::alloc< PipelineLayout >();
-    pipelineLayout->manager = this;
-    pipelineLayout->renderDevice = renderDevice;
-    pipelineLayout->handler = pipelineLayoutHandler;
-    insert( crimild::get_ptr( pipelineLayout ) );
-    return pipelineLayout;
+    VkDescriptorPool handler;
+    CRIMILD_VULKAN_CHECK(
+        vkCreateDescriptorPool(
+       		renderDevice->handler,
+            &createInfo,
+            nullptr,
+            &handler
+       	)
+    );
+
+    auto descriptorPool = crimild::alloc< DescriptorPool >();
+    descriptorPool->renderDevice = renderDevice;
+    descriptorPool->manager = this;
+    descriptorPool->handler = handler;
+    insert( crimild::get_ptr( descriptorPool ) );
+    return descriptorPool;
 }
 
-void PipelineLayoutManager::destroy( PipelineLayout *pipelineLayout ) noexcept
+void DescriptorPoolManager::destroy( DescriptorPool *descriptorPool ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Destroying Vulkan pipeline layout" );
+    CRIMILD_LOG_TRACE( "Destroying Vulkan descriptor pool" );
 
-    if ( pipelineLayout->renderDevice != nullptr
-         && pipelineLayout->handler != VK_NULL_HANDLE ) {
-        vkDestroyPipelineLayout(
-        	pipelineLayout->renderDevice->handler,
-            pipelineLayout->handler,
-        	nullptr
+    if ( descriptorPool->renderDevice != nullptr && descriptorPool->handler != VK_NULL_HANDLE ) {
+        vkDestroyDescriptorPool(
+            descriptorPool->renderDevice->handler,
+            descriptorPool->handler,
+            nullptr
         );
     }
 
-    pipelineLayout->handler = VK_NULL_HANDLE;
-    pipelineLayout->manager = nullptr;
-    pipelineLayout->renderDevice = nullptr;
-    erase( pipelineLayout );
+    descriptorPool->renderDevice = nullptr;
+    descriptorPool->manager = nullptr;
+    descriptorPool->handler = VK_NULL_HANDLE;
+    erase( descriptorPool );
 }

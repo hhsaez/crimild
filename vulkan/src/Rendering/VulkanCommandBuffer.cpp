@@ -116,6 +116,24 @@ void CommandBuffer::bindIndexBuffer( const Buffer *buffer ) const noexcept
     );
 }
 
+void CommandBuffer::bindDescriptorSets( const DescriptorSet *descriptorSet, const PipelineLayout *pipelineLayout ) const noexcept
+{
+    VkDescriptorSet descriptorSets[] = {
+        descriptorSet->handler,
+    };
+
+    vkCmdBindDescriptorSets(
+    	handler,
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        pipelineLayout->handler,
+        0,
+        1,
+        descriptorSets,
+        0,
+        nullptr
+	);
+}
+
 void CommandBuffer::draw( crimild::UInt32 vertexCount ) const noexcept
 {
 	vkCmdDraw( handler, vertexCount, 1, 0, 0 );

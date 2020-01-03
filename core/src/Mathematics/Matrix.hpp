@@ -41,6 +41,22 @@ namespace crimild {
 	public:
 		static const Matrix< SIZE, PRECISION > IDENTITY;
 		static const Matrix< SIZE, PRECISION > ZERO;
+
+        static Matrix< 4, PRECISION > lookAt( const Vector< 3, PRECISION > &eye, const Vector< 3, PRECISION > &target, const Vector< 3, PRECISION > &up )
+        {
+            auto z = ( target - eye ).getNormalized();
+            auto y = up.getNormalized();
+            auto x = ( z ^ y ).getNormalized();
+            y = ( x ^ z ).getNormalized();
+            z *= -1;
+
+            return Matrix< 4, PRECISION >(
+                x.x(), y.x(), z.x(), 0.0f,
+                x.y(), y.y(), z.y(), 0.0f,
+                x.z(), y.z(), z.z(), 0.0f,
+                -( x * eye ), -( y * eye ), -( z * eye ), 1.0f
+            );
+        };
 		
 	public:
 		Matrix( void )
