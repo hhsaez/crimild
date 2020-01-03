@@ -39,6 +39,25 @@ Buffer::~Buffer( void ) noexcept
     }
 }
 
+void Buffer::update( const void *newData ) noexcept
+{
+    void *data = nullptr;
+    CRIMILD_VULKAN_CHECK(
+         vkMapMemory(
+            renderDevice->handler,
+            memory,
+            0,
+            size,
+            0,
+            &data
+        )
+    );
+
+    memcpy( data, newData, size );
+
+    vkUnmapMemory( renderDevice->handler, memory );
+}
+
 SharedPointer< Buffer > BufferManager::create( Buffer::Descriptor const &descriptor ) noexcept
 {
     CRIMILD_LOG_TRACE( "Creating Vulkan buffer" );
@@ -50,34 +69,7 @@ SharedPointer< Buffer > BufferManager::create( Buffer::Descriptor const &descrip
 
     VkDeviceSize bufferSize = descriptor.size;
 
-    VkBuffer stagingBufferHandler;
-    VkDeviceMemory stagingBufferMemory;
-    createBuffer(
-     	renderDevice,
-     	bufferSize,
-        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-        stagingBufferHandler,
-     	stagingBufferMemory
-    );
-
-    void *data = nullptr;
-    CRIMILD_VULKAN_CHECK(
- 		vkMapMemory(
-			renderDevice->handler,
-			stagingBufferMemory,
-			0,
-			bufferSize,
-			0,
-			&data
-		)
-	);
-
-	memcpy( data, descriptor.data, ( size_t ) bufferSize );
-
-    vkUnmapMemory( renderDevice->handler, stagingBufferMemory );
-
-    VkBufferUsageFlags usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+    VkBufferUsageFlags usage = 0;
     switch ( descriptor.usage ) {
         case Buffer::Usage::VERTEX_BUFFER:
             usage |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
@@ -85,31 +77,80 @@ SharedPointer< Buffer > BufferManager::create( Buffer::Descriptor const &descrip
         case Buffer::Usage::INDEX_BUFFER:
             usage |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
             break;
+        case Buffer::Usage::UNIFORM_BUFFER:
+            usage |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+            break;
         default:
+            return nullptr;
             break;
     }
 
     VkBuffer bufferHandler;
     VkDeviceMemory bufferMemory;
-    createBuffer(
-        renderDevice,
-        bufferSize,
-        usage,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-        bufferHandler,
-        bufferMemory
-     );
 
-    copyBuffer(
-        renderDevice,
-        descriptor.commandPool,
-        stagingBufferHandler,
-        bufferHandler,
-        bufferSize
-    );
+    if ( descriptor.data == nullptr ) {
+        // No data. No need to create staging buffer
+        createBuffer(
+            renderDevice,
+            bufferSize,
+            usage,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+            bufferHandler,
+            bufferMemory
+         );
+    }
+    else {
+        usage |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
-    vkDestroyBuffer( renderDevice->handler, stagingBufferHandler, nullptr );
-    vkFreeMemory( renderDevice->handler, stagingBufferMemory, nullptr );
+        VkBuffer stagingBufferHandler;
+        VkDeviceMemory stagingBufferMemory;
+        createBuffer(
+            renderDevice,
+            bufferSize,
+            VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+            stagingBufferHandler,
+            stagingBufferMemory
+        );
+
+        void *data = nullptr;
+        CRIMILD_VULKAN_CHECK(
+            vkMapMemory(
+                renderDevice->handler,
+                stagingBufferMemory,
+                0,
+                bufferSize,
+                0,
+                &data
+            )
+        );
+
+        if ( descriptor.data != nullptr ) {
+            memcpy( data, descriptor.data, ( size_t ) bufferSize );
+        }
+
+        vkUnmapMemory( renderDevice->handler, stagingBufferMemory );
+
+        createBuffer(
+            renderDevice,
+            bufferSize,
+            usage,
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+            bufferHandler,
+            bufferMemory
+         );
+
+        copyBuffer(
+            renderDevice,
+            descriptor.commandPool,
+            stagingBufferHandler,
+            bufferHandler,
+            bufferSize
+        );
+
+        vkDestroyBuffer( renderDevice->handler, stagingBufferHandler, nullptr );
+        vkFreeMemory( renderDevice->handler, stagingBufferMemory, nullptr );
+    }
 
     auto buffer = crimild::alloc< Buffer >();
     buffer->renderDevice = renderDevice;

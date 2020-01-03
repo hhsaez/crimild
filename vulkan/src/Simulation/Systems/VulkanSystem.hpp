@@ -42,6 +42,8 @@ namespace crimild {
         class Buffer;
         class CommandBuffer;
         class CommandPool;
+        class DescriptorSetLayout;
+        class DescriptorPool;
         class Fence;
         class Framebuffer;
         class Pipeline;
@@ -101,6 +103,12 @@ namespace crimild {
             crimild::Bool createCommandPool( void ) noexcept;
             crimild::Bool createVertexBuffer( void ) noexcept;
             crimild::Bool createIndexBuffer( void ) noexcept;
+            crimild::Bool createDescriptorSetLayout( void ) noexcept;
+            crimild::Bool createUniformBuffers( void ) noexcept;
+            crimild::Bool createDescriptorPool( void ) noexcept;
+            crimild::Bool createDescriptorSets( void ) noexcept;
+
+            void updateUniformBuffer( crimild::UInt32 currentImage ) noexcept;
 
             void cleanSwapchain( void ) noexcept;
 
@@ -123,6 +131,10 @@ namespace crimild {
 
             SharedPointer< Buffer > m_vertexBuffer;
             SharedPointer< Buffer > m_indexBuffer;
+            SharedPointer< DescriptorSetLayout > m_descriptorSetLayout;
+            std::vector< SharedPointer< Buffer >> m_uniformBuffers;
+            SharedPointer< DescriptorPool > m_descriptorPool;
+            std::vector< SharedPointer< DescriptorSet >> m_descriptorSets;
         };
 
     }

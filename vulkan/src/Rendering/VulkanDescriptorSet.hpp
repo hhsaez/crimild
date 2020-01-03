@@ -25,8 +25,8 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CRIMILD_VULKAN_RENDERING_BUFFER_
-#define CRIMILD_VULKAN_RENDERING_BUFFER_
+#ifndef CRIMILD_VULKAN_RENDERING_DESCRIPTOR_SET_
+#define CRIMILD_VULKAN_RENDERING_DESCRIPTOR_SET_
 
 #include "Foundation/VulkanObject.hpp"
 
@@ -34,59 +34,39 @@ namespace crimild {
 
     namespace vulkan {
 
-        class BufferManager;
+        class Buffer;
+        class DescriptorPool;
+        class DescriptorSetLayout;
+        class DescriptorSetManager;
         class RenderDevice;
-        class CommandPool;
 
-        class Buffer : public VulkanObject {
-            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::Buffer )
+        class DescriptorSet : public VulkanObject {
+            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::DescriptorSet )
 
         public:
-            enum class Usage {
-                VERTEX_BUFFER,
-                INDEX_BUFFER,
-                UNIFORM_BUFFER,
-                TRANSFER_SRC,
-                TRANSFER_DST,
-            };
-
             struct Descriptor {
                 RenderDevice *renderDevice;
-                CommandPool *commandPool;
-                const void *data;
-                crimild::Size size;
-                Usage usage;
-            };
-
-            enum class SharingMode {
-
+                DescriptorPool *descriptorPool;
+                DescriptorSetLayout *layout;
             };
 
         public:
-            ~Buffer( void ) noexcept;
+            ~DescriptorSet( void ) noexcept;
 
-            VkBuffer handler = VK_NULL_HANDLE;
-            VkDeviceMemory memory = VK_NULL_HANDLE;
+            VkDescriptorSet handler = VK_NULL_HANDLE;
+            DescriptorSetManager *manager = nullptr;
             RenderDevice *renderDevice = nullptr;
-            BufferManager *manager = nullptr;
-            crimild::Size size = 0;
 
-            // TODO: offset, range?
-            void update( const void *newData ) noexcept;
+            void write( Buffer *buffer, crimild::Size offset, crimild::Size size ) noexcept;
         };
 
-        class BufferManager : public VulkanObjectManager< Buffer > {
+        class DescriptorSetManager : public VulkanObjectManager< DescriptorSet > {
         public:
-            explicit BufferManager( RenderDevice *renderDevice = nullptr ) noexcept : m_renderDevice( renderDevice ) { }
-            virtual ~BufferManager( void ) noexcept = default;
+            explicit DescriptorSetManager( RenderDevice *renderDevice = nullptr ) noexcept : m_renderDevice( renderDevice ) { }
+            virtual ~DescriptorSetManager( void ) noexcept = default;
 
-            SharedPointer< Buffer > create( Buffer::Descriptor const &descriptor ) noexcept;
-            void destroy( Buffer *buffer ) noexcept override;
-
-        private:
-            crimild::UInt32 findMemoryType( RenderDevice *renderDevice, crimild::UInt32 typeFilter, VkMemoryPropertyFlags properties ) noexcept;
-            crimild::Bool createBuffer( RenderDevice *renderDevice, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer &bufferBuffer, VkDeviceMemory &bufferMemory ) noexcept;
-            void copyBuffer( RenderDevice *renderDevice, CommandPool *commandPool, VkBuffer srcBufferHandler, VkBuffer dstBufferHandler, VkDeviceSize size ) const noexcept;
+            SharedPointer< DescriptorSet > create( DescriptorSet::Descriptor const &descriptor ) noexcept;
+            void destroy( DescriptorSet *descriptorSet ) noexcept override;
 
         private:
             RenderDevice *m_renderDevice = nullptr;
@@ -97,5 +77,3 @@ namespace crimild {
 }
 
 #endif
-
-

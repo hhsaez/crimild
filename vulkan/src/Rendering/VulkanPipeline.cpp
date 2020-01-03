@@ -68,7 +68,11 @@ SharedPointer< Pipeline > PipelineManager::create( Pipeline::Descriptor const &d
     auto colorBlendAttachment = createColorBlendAttachment();
     auto colorBlending = createColorBlending( colorBlendAttachment );
 
-    auto pipelineLayout = renderDevice->create( PipelineLayout::Descriptor { } );
+    auto pipelineLayout = renderDevice->create(
+        PipelineLayout::Descriptor {
+			.setLayouts = descriptor.setLayouts,
+        }
+    );
 
     auto createInfo = VkGraphicsPipelineCreateInfo {
         .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
