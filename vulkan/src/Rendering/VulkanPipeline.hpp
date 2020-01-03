@@ -39,6 +39,7 @@ namespace crimild {
 
 	namespace vulkan {
 
+        class DescriptorSetLayout;
         class PipelineLayout;
         class PipelineManager;
 		class RenderDevice;
@@ -70,6 +71,7 @@ namespace crimild {
                 Rectf scissor;
                 std::vector< VkVertexInputBindingDescription > bindingDescription;
                 std::vector< VkVertexInputAttributeDescription > attributeDescriptions;
+                std::vector< DescriptorSetLayout * > setLayouts;
 			};
 			
 		public:

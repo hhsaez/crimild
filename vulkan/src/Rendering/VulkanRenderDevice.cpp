@@ -49,6 +49,9 @@ RenderDevice::RenderDevice( void )
     : BufferManager( this ),
       CommandBufferManager( this ),
       CommandPoolManager( this ),
+      DescriptorPoolManager( this ),
+      DescriptorSetManager( this ),
+      DescriptorSetLayoutManager( this ),
 	  SwapchainManager( this ),
       FenceManager( this ),
       FramebufferManager( this ),
@@ -243,6 +246,9 @@ void RenderDeviceManager::destroy( RenderDevice *renderDevice ) noexcept
 {
     CRIMILD_LOG_TRACE( "Destroying Vulkan logical device" );
 
+    static_cast< DescriptorPoolManager * >( renderDevice )->cleanup();
+    static_cast< DescriptorSetManager * >( renderDevice )->cleanup();
+    static_cast< DescriptorSetLayoutManager * >( renderDevice )->cleanup();
     static_cast< BufferManager * >( renderDevice )->cleanup();
     static_cast< FenceManager * >( renderDevice )->cleanup();
     static_cast< SemaphoreManager * >( renderDevice )->cleanup();

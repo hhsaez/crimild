@@ -34,6 +34,7 @@ namespace crimild {
 
     namespace vulkan {
 
+        class DescriptorSetLayout;
         class RenderDevice;
         class PipelineLayoutManager;
 
@@ -43,6 +44,7 @@ namespace crimild {
         public:
             struct Descriptor {
                 RenderDevice *renderDevice;
+                std::vector< DescriptorSetLayout * > setLayouts;
             };
 
         public:

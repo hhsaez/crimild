@@ -32,6 +32,9 @@
 #include "Rendering/VulkanBuffer.hpp"
 #include "Rendering/VulkanCommandBuffer.hpp"
 #include "Rendering/VulkanCommandPool.hpp"
+#include "Rendering/VulkanDescriptorPool.hpp"
+#include "Rendering/VulkanDescriptorSet.hpp"
+#include "Rendering/VulkanDescriptorSetLayout.hpp"
 #include "Rendering/VulkanFence.hpp"
 #include "Rendering/VulkanFramebuffer.hpp"
 #include "Rendering/VulkanImageView.hpp"
@@ -58,6 +61,9 @@ namespace crimild {
             public BufferManager,
         	public CommandBufferManager,
         	public CommandPoolManager,
+            public DescriptorPoolManager,
+            public DescriptorSetManager,
+            public DescriptorSetLayoutManager,
         	public SwapchainManager,
             public FenceManager,
         	public FramebufferManager,
@@ -74,6 +80,9 @@ namespace crimild {
             using BufferManager::create;
             using CommandBufferManager::create;
             using CommandPoolManager::create;
+            using DescriptorPoolManager::create;
+            using DescriptorSetManager::create;
+            using DescriptorSetLayoutManager::create;
             using SwapchainManager::create;
             using FenceManager::create;
             using FramebufferManager::create;
