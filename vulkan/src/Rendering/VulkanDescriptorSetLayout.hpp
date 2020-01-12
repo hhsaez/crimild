@@ -36,42 +36,14 @@ namespace crimild {
 
     namespace vulkan {
 
-        class RenderDevice;
-//        class DescriptorSetLayoutManager;
-
-        /*
-        class DescriptorSetLayout : public VulkanObject {
-            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::DescriptorSetLayout )
+        class DescriptorSetLayoutManager : public SingleHandlerRenderResourceManagerImpl< DescriptorSetLayout, VkDescriptorSetLayout > {
+            using ManagerImpl = SingleHandlerRenderResourceManagerImpl< DescriptorSetLayout, VkDescriptorSetLayout >;
 
         public:
-            struct Descriptor {
-                RenderDevice *renderDevice;
-            };
-
-        public:
-            ~DescriptorSetLayout( void ) noexcept;
-
-            VkDescriptorSetLayout handler = VK_NULL_HANDLE;
-            DescriptorSetLayoutManager *manager = nullptr;
-            RenderDevice *renderDevice = nullptr;
-        };
-         */
-
-        class DescriptorSetLayoutManager : public VulkanRenderResourceManager< DescriptorSetLayout > {
-        public:
-            explicit DescriptorSetLayoutManager( RenderDevice *renderDevice = nullptr ) noexcept : VulkanRenderResourceManager< DescriptorSetLayout >( renderDevice ) { }
             virtual ~DescriptorSetLayoutManager( void ) noexcept = default;
-
-            VkDescriptorSetLayout getHandler( DescriptorSetLayout *descriptorSetLayout ) noexcept;
 
             crimild::Bool bind( DescriptorSetLayout *descriptorSetLayout ) noexcept override;
             crimild::Bool unbind( DescriptorSetLayout *descriptorSetLayout ) noexcept override;
-
-//            SharedPointer< DescriptorSetLayout > create( DescriptorSetLayout::Descriptor const &descriptor ) noexcept;
-//            void destroy( DescriptorSetLayout *descriptorSetLayout ) noexcept override;
-
-        private:
-            containers::Map< DescriptorSetLayout *, VkDescriptorSetLayout > m_handlers;
         };
 
     }

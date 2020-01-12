@@ -31,87 +31,12 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
-/*
-
-DescriptorPool::~DescriptorPool( void ) noexcept
-{
-    if ( manager != nullptr ) {
-        manager->destroy( this );
-    }
-}
-
-SharedPointer< DescriptorPool > DescriptorPoolManager::create( DescriptorPool::Descriptor const &descriptor ) noexcept
-{
-    CRIMILD_LOG_TRACE( "Creating Vulkan descriptor pool" );
-
-    auto renderDevice = m_renderDevice;
-    if ( renderDevice == nullptr ) {
-        renderDevice = descriptor.renderDevice;
-    }
-
-    auto swapchain = descriptor.swapchain;
-
-    auto poolSize = VkDescriptorPoolSize {
-        .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        .descriptorCount = static_cast< crimild::UInt32 >( swapchain->images.size() ),
-    };
-
-    auto createInfo = VkDescriptorPoolCreateInfo {
-		.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-        .poolSizeCount = 1,
-        .pPoolSizes = &poolSize,
-        .maxSets = static_cast< crimild::UInt32 >( swapchain->images.size() ),
-        .flags = 0,
-    };
-
-    VkDescriptorPool handler;
-    CRIMILD_VULKAN_CHECK(
-        vkCreateDescriptorPool(
-       		renderDevice->handler,
-            &createInfo,
-            nullptr,
-            &handler
-       	)
-    );
-
-    auto descriptorPool = crimild::alloc< DescriptorPool >();
-    descriptorPool->renderDevice = renderDevice;
-    descriptorPool->manager = this;
-    descriptorPool->handler = handler;
-    insert( crimild::get_ptr( descriptorPool ) );
-    return descriptorPool;
-}
-
-void DescriptorPoolManager::destroy( DescriptorPool *descriptorPool ) noexcept
-{
-    CRIMILD_LOG_TRACE( "Destroying Vulkan descriptor pool" );
-
-    if ( descriptorPool->renderDevice != nullptr && descriptorPool->handler != VK_NULL_HANDLE ) {
-        vkDestroyDescriptorPool(
-            descriptorPool->renderDevice->handler,
-            descriptorPool->handler,
-            nullptr
-        );
-    }
-
-    descriptorPool->renderDevice = nullptr;
-    descriptorPool->manager = nullptr;
-    descriptorPool->handler = VK_NULL_HANDLE;
-    erase( descriptorPool );
-}
-
- */
-
-VkDescriptorPool DescriptorPoolManager::getHandler( DescriptorPool *descriptorPool ) noexcept
-{
-    if ( !m_handlers.contains( descriptorPool ) && !bind( descriptorPool ) ) {
-        return VK_NULL_HANDLE;
-    }
-    return m_handlers[ descriptorPool ];
-}
-
 crimild::Bool DescriptorPoolManager::bind( DescriptorPool *descriptorPool ) noexcept
 {
+    if ( validate( descriptorPool ) ) {
+        return true;
+    }
+
     CRIMILD_LOG_TRACE( "Binding Vulkan descriptor pool" );
 
     auto renderDevice = getRenderDevice();
@@ -144,13 +69,17 @@ crimild::Bool DescriptorPoolManager::bind( DescriptorPool *descriptorPool ) noex
            )
     );
 
-    m_handlers[ descriptorPool ] = handler;
+    setHandler( descriptorPool, handler );
 
-    return VulkanRenderResourceManager< DescriptorPool >::bind( descriptorPool );
+    return ManagerImpl::bind( descriptorPool );
 }
 
 crimild::Bool DescriptorPoolManager::unbind( DescriptorPool *descriptorPool ) noexcept
 {
+    if ( !validate( descriptorPool ) ) {
+        return false;
+    }
+
     CRIMILD_LOG_TRACE( "Unbinding Vulkan descriptor pool" );
 
     auto renderDevice = getRenderDevice();
@@ -168,7 +97,8 @@ crimild::Bool DescriptorPoolManager::unbind( DescriptorPool *descriptorPool ) no
         );
     }
 
-    m_handlers.remove( descriptorPool );
-    return VulkanRenderResourceManager< DescriptorPool >::unbind( descriptorPool );
+    removeHandlers( descriptorPool );
+
+    return ManagerImpl::unbind( descriptorPool );
 }
 

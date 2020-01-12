@@ -34,20 +34,13 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
-VkPipeline PipelineManager::getHandler( Pipeline *pipeline ) noexcept
-{
-    if ( !m_handlers.contains( pipeline ) && !bind( pipeline ) ) {
-        return VK_NULL_HANDLE;
-    }
-    return m_handlers[ pipeline ];
-}
-
 crimild::Bool PipelineManager::bind( Pipeline *pipeline ) noexcept
 {
-    if ( m_handlers.contains( pipeline ) ) {
+    if ( validate( pipeline ) ) {
         // Pipeline already bound
         return true;
     }
+
     CRIMILD_LOG_TRACE( "Binding Vulkan pripeline" );
 
     auto renderDevice = getRenderDevice();
@@ -111,15 +104,16 @@ crimild::Bool PipelineManager::bind( Pipeline *pipeline ) noexcept
        	)
     );
 
-    m_handlers[ pipeline ] = pipelineHander;
+    setHandler( pipeline, pipelineHander );
+
     m_pipelineLayouts[ pipeline ] = pipelineLayout;
 
-    return VulkanRenderResourceManager< Pipeline >::bind( pipeline );
+    return ManagerImpl::bind( pipeline );
 }
 
 crimild::Bool PipelineManager::unbind( Pipeline *pipeline ) noexcept
 {
-    if ( !m_handlers.contains( pipeline ) ) {
+    if ( !validate( pipeline ) ) {
         return false;
     }
 
@@ -131,7 +125,7 @@ crimild::Bool PipelineManager::unbind( Pipeline *pipeline ) noexcept
         return false;
     }
 
-    auto handler = m_handlers[ pipeline ];
+    auto handler = getHandler( pipeline );
 
     vkDestroyPipeline(
         renderDevice->handler,
@@ -139,10 +133,11 @@ crimild::Bool PipelineManager::unbind( Pipeline *pipeline ) noexcept
         nullptr
     );
 
-    m_handlers.remove( pipeline );
+    removeHandlers( pipeline );
+
     m_pipelineLayouts.remove( pipeline );
 
-    return VulkanRenderResourceManager< Pipeline >::unbind( pipeline );
+    return ManagerImpl::unbind( pipeline );
 }
 
 PipelineManager::ShaderModuleArray PipelineManager::createShaderModules( RenderDevice *renderDevice, ShaderProgram *program ) const noexcept

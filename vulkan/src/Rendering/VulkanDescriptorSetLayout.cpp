@@ -31,17 +31,9 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
-VkDescriptorSetLayout DescriptorSetLayoutManager::getHandler( DescriptorSetLayout *descriptorSetLayout ) noexcept
-{
-    if ( !m_handlers.contains( descriptorSetLayout ) && !bind( descriptorSetLayout ) ) {
-        return VK_NULL_HANDLE;
-    }
-    return m_handlers[ descriptorSetLayout ];
-}
-
 crimild::Bool DescriptorSetLayoutManager::bind( DescriptorSetLayout *descriptorSetLayout ) noexcept
 {
-    if ( m_handlers.contains( descriptorSetLayout ) ) {
+    if ( validate( descriptorSetLayout ) ) {
         return true;
     }
 
@@ -76,14 +68,14 @@ crimild::Bool DescriptorSetLayoutManager::bind( DescriptorSetLayout *descriptorS
         )
     );
 
-    m_handlers[ descriptorSetLayout ] = descriptorSetLayoutHandler;
+    setHandler( descriptorSetLayout, descriptorSetLayoutHandler );
 
-    return RenderResourceManager< DescriptorSetLayout >::bind( descriptorSetLayout );
+    return ManagerImpl::bind( descriptorSetLayout );
 }
 
 crimild::Bool DescriptorSetLayoutManager::unbind( DescriptorSetLayout *descriptorSetLayout ) noexcept
 {
-    if ( !m_handlers.contains( descriptorSetLayout ) ) {
+    if ( !validate( descriptorSetLayout ) ) {
         return false;
     }
 
@@ -103,8 +95,8 @@ crimild::Bool DescriptorSetLayoutManager::unbind( DescriptorSetLayout *descripto
         );
     }
 
-    m_handlers.remove( descriptorSetLayout );
+    removeHandlers( descriptorSetLayout );
 
-    return RenderResourceManager< DescriptorSetLayout >::unbind( descriptorSetLayout );
+    return ManagerImpl::unbind( descriptorSetLayout );
 }
 
