@@ -120,7 +120,16 @@ crimild::Bool CommandBufferManager::unbind( CommandBuffer *commandBuffer ) noexc
     CRIMILD_LOG_TRACE( "Unbinding Vulkan commandBuffer" );
 
     auto renderDevice = getRenderDevice();
+    if ( renderDevice == nullptr ) {
+        CRIMILD_LOG_ERROR( "No valid render device instance" );
+        return false;
+    }
+
     auto commandPool = renderDevice->getCommandPool();
+    if ( commandPool == nullptr ) {
+        CRIMILD_LOG_ERROR( "No valid command pool instance" );
+        return false;
+    }
 
     m_handlers[ commandBuffer ].each( [ renderDevice, commandPool ]( VkCommandBuffer handler ) {
         vkFreeCommandBuffers(
