@@ -34,7 +34,6 @@ namespace crimild {
 
 	namespace vulkan {
 
-		class CommandBuffer;
         class CommandPoolManager;
         class RenderDevice;
 
@@ -61,6 +60,8 @@ namespace crimild {
         public:
             explicit CommandPoolManager( RenderDevice *renderDevice = nullptr ) noexcept : m_renderDevice( renderDevice ) { }
             virtual ~CommandPoolManager( void ) noexcept = default;
+
+            CommandPool *getCommandPool( void ) noexcept { return first(); }
 
             SharedPointer< CommandPool > create( CommandPool::Descriptor const &descriptor ) noexcept;
             void destroy( CommandPool *commandPool ) noexcept override;

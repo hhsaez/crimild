@@ -73,7 +73,7 @@ RenderDevice::~RenderDevice( void )
     }
 }
 
-void RenderDevice::submitGraphicsCommands( const Semaphore *wait, const CommandBuffer *commandBuffer, const Semaphore *signal, const Fence *fence ) const noexcept
+void RenderDevice::submitGraphicsCommands( const Semaphore *wait, CommandBuffer *commandBuffer, crimild::UInt32 imageIndex, const Semaphore *signal, const Fence *fence ) noexcept
 {
     VkSemaphore waitSemaphores[] = {
         wait->handler,
@@ -89,7 +89,7 @@ void RenderDevice::submitGraphicsCommands( const Semaphore *wait, const CommandB
     };
 
     VkCommandBuffer commandBuffers[] = {
-        commandBuffer->handler,
+        getHandler( commandBuffer, imageIndex ),
     };
 
     auto submitInfo = VkSubmitInfo {
@@ -113,9 +113,9 @@ void RenderDevice::submitGraphicsCommands( const Semaphore *wait, const CommandB
     );
 }
 
-void RenderDevice::submit( const CommandBuffer *commands, crimild::Bool wait ) const noexcept
+void RenderDevice::submit( CommandBuffer *commands, crimild::Bool wait ) noexcept
 {
-    auto commandBufferHandler = commands->handler;
+    auto commandBufferHandler = getHandler( commands, 0 );
 
     auto submitInfo = VkSubmitInfo {
         .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
@@ -246,17 +246,17 @@ void RenderDeviceManager::destroy( RenderDevice *renderDevice ) noexcept
 {
     CRIMILD_LOG_TRACE( "Destroying Vulkan logical device" );
 
-    static_cast< DescriptorPoolManager * >( renderDevice )->cleanup();
-    static_cast< DescriptorSetManager * >( renderDevice )->cleanup();
-    static_cast< DescriptorSetLayoutManager * >( renderDevice )->cleanup();
-    static_cast< BufferManager * >( renderDevice )->cleanup();
+    static_cast< DescriptorPoolManager * >( renderDevice )->clear();
+    static_cast< DescriptorSetManager * >( renderDevice )->clear();
+    static_cast< DescriptorSetLayoutManager * >( renderDevice )->clear();
+    static_cast< BufferManager * >( renderDevice )->clear();
     static_cast< FenceManager * >( renderDevice )->cleanup();
     static_cast< SemaphoreManager * >( renderDevice )->cleanup();
-    static_cast< CommandBufferManager * >( renderDevice )->cleanup();
+    static_cast< CommandBufferManager * >( renderDevice )->clear();
     static_cast< CommandPoolManager * >( renderDevice )->cleanup();
     static_cast< FramebufferManager * >( renderDevice )->cleanup();
     static_cast< ShaderModuleManager * >( renderDevice )->cleanup();
-    static_cast< PipelineManager * >( renderDevice )->cleanup();
+    static_cast< PipelineManager * >( renderDevice )->clear();
     static_cast< PipelineLayoutManager * >( renderDevice )->cleanup();
     static_cast< RenderPassManager * >( renderDevice )->cleanup();
     static_cast< ImageViewManager * >( renderDevice )->cleanup();

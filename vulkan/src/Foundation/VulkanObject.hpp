@@ -64,6 +64,14 @@ namespace crimild {
                 m_objects.clear();
             }
 
+            T *first( void ) noexcept
+            {
+                if ( m_objects.empty() ) {
+                    return nullptr;
+                }                
+                return *std::begin( m_objects );
+            }
+
         protected:
             void insert( T *obj ) noexcept
             {

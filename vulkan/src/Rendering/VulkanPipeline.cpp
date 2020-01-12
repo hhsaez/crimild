@@ -27,9 +27,6 @@
 
 #include "VulkanPipeline.hpp"
 #include "VulkanRenderDevice.hpp"
-#include "VulkanSwapchain.hpp"
-#include "VulkanRenderPass.hpp"
-#include "Exceptions/VulkanException.hpp"
 #include "Rendering/Shader.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Foundation/Log.hpp"
@@ -37,30 +34,37 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
-Pipeline::~Pipeline( void )
+VkPipeline PipelineManager::getHandler( Pipeline *pipeline ) noexcept
 {
-    if ( manager != nullptr ) {
-        manager->destroy( this );
+    if ( !m_handlers.contains( pipeline ) && !bind( pipeline ) ) {
+        return VK_NULL_HANDLE;
     }
+    return m_handlers[ pipeline ];
 }
 
-SharedPointer< Pipeline > PipelineManager::create( Pipeline::Descriptor const &descriptor ) noexcept
+crimild::Bool PipelineManager::bind( Pipeline *pipeline ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Creating Vulkan pripeline" );
+    if ( m_handlers.contains( pipeline ) ) {
+        // Pipeline already bound
+        return true;
+    }
+    CRIMILD_LOG_TRACE( "Binding Vulkan pripeline" );
 
-    auto renderDevice = m_renderDevice;
+    auto renderDevice = getRenderDevice();
     if ( renderDevice == nullptr ) {
-        renderDevice = descriptor.renderDevice;
+        return false;
     }
 
     // WARNING: all of these config params are used when creating the pipeline and
     // they must be alive when vkCreatePipeline is called. Beware of scopes!
-    auto shaderModules = createShaderModules( renderDevice, crimild::get_ptr( descriptor.program ) );
+    auto shaderModules = createShaderModules( renderDevice, crimild::get_ptr( pipeline->program ) );
     auto shaderStages = createShaderStages( shaderModules );
-    auto vertexInputInfo = createVertexInput( descriptor.bindingDescription, descriptor.attributeDescriptions );
-    auto inputAssembly = createInputAssemby( descriptor.primitiveType );
-    auto viewport = createViewport( descriptor.viewport );
-    auto scissor = createScissor( descriptor.scissor );
+    auto vertexBindingDescriptions = getVertexInputBindingDescriptions( pipeline );
+    auto vertexAttributeDescriptions = getVertexInputAttributeDescriptions( pipeline );
+    auto vertexInputInfo = createVertexInput( vertexBindingDescriptions, vertexAttributeDescriptions );
+    auto inputAssembly = createInputAssemby( pipeline->primitiveType );
+    auto viewport = createViewport( pipeline->viewport );
+    auto scissor = createScissor( pipeline->scissor );
     auto viewportState = createViewportState( viewport, scissor );
     auto rasterizer = createRasterizer();
     auto multisampleState = createMultiplesampleState();
@@ -70,9 +74,11 @@ SharedPointer< Pipeline > PipelineManager::create( Pipeline::Descriptor const &d
 
     auto pipelineLayout = renderDevice->create(
         PipelineLayout::Descriptor {
-			.setLayouts = descriptor.setLayouts,
+            .setLayouts = { crimild::get_ptr( pipeline->descriptorSetLayout ) },
         }
     );
+
+    auto renderPass = renderDevice->getRenderPass();
 
     auto createInfo = VkGraphicsPipelineCreateInfo {
         .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
@@ -87,7 +93,7 @@ SharedPointer< Pipeline > PipelineManager::create( Pipeline::Descriptor const &d
         .pColorBlendState = &colorBlending,
         .pDynamicState = nullptr, // Optional
         .layout = pipelineLayout->handler,
-        .renderPass = descriptor.renderPass->handler,
+        .renderPass = renderPass->handler,
         .subpass = 0,
         .basePipelineHandle = VK_NULL_HANDLE, // Optional
         .basePipelineIndex = -1, // Optional
@@ -105,34 +111,37 @@ SharedPointer< Pipeline > PipelineManager::create( Pipeline::Descriptor const &d
        	)
     );
 
-    auto pipeline = crimild::alloc< Pipeline >();
-    pipeline->handler = pipelineHander;
-    pipeline->layout = pipelineLayout;
-    pipeline->renderDevice = renderDevice;
-    pipeline->manager = this;
-    insert( crimild::get_ptr( pipeline ) );
-    return pipeline;
+    m_handlers[ pipeline ] = pipelineHander;
+    m_pipelineLayouts[ pipeline ] = pipelineLayout;
+
+    return VulkanRenderResourceManager< Pipeline >::bind( pipeline );
 }
 
-void PipelineManager::destroy( Pipeline *pipeline ) noexcept
+crimild::Bool PipelineManager::unbind( Pipeline *pipeline ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Destroy Vulkan pipeline" );
-
-    if ( pipeline->renderDevice != nullptr ) {
-        if ( pipeline->handler != VK_NULL_HANDLE ) {
-            vkDestroyPipeline(
-                pipeline->renderDevice->handler,
-                pipeline->handler,
-                nullptr
-            );
-        }
+    if ( !m_handlers.contains( pipeline ) ) {
+        return false;
     }
 
-    pipeline->layout = nullptr;
-    pipeline->handler = VK_NULL_HANDLE;
-    pipeline->manager = nullptr;
-    pipeline->renderDevice = nullptr;
-    erase( pipeline );
+    CRIMILD_LOG_TRACE( "Unbind Vulkan pipeline" );
+
+    auto renderDevice = getRenderDevice();
+    if ( renderDevice != nullptr ) {
+        return false;
+    }
+
+    auto handler = m_handlers[ pipeline ];
+
+    vkDestroyPipeline(
+        renderDevice->handler,
+        handler,
+        nullptr
+    );
+
+    m_handlers.remove( pipeline );
+    m_pipelineLayouts.remove( pipeline );
+
+    return VulkanRenderResourceManager< Pipeline >::bind( pipeline );
 }
 
 PipelineManager::ShaderModuleArray PipelineManager::createShaderModules( RenderDevice *renderDevice, ShaderProgram *program ) const noexcept
@@ -171,12 +180,63 @@ PipelineManager::ShaderStageArray PipelineManager::createShaderStages( const Sha
     return shaderStages;
 }
 
-VkPipelineVertexInputStateCreateInfo PipelineManager::createVertexInput( const std::vector< VkVertexInputBindingDescription > &bindingDescription, const std::vector< VkVertexInputAttributeDescription > &attributeDescriptions ) const noexcept
+std::vector< VkVertexInputBindingDescription > PipelineManager::getVertexInputBindingDescriptions( Pipeline *pipeline ) const noexcept
+{
+    return std::vector< VkVertexInputBindingDescription > {
+        [ pipeline ] {
+            return VkVertexInputBindingDescription {
+                .binding = pipeline->bindingDescription.binding,
+                .stride = pipeline->bindingDescription.stride,
+                .inputRate = VK_VERTEX_INPUT_RATE_VERTEX,
+            };
+        }(),
+    };
+}
+
+std::vector< VkVertexInputAttributeDescription > PipelineManager::getVertexInputAttributeDescriptions( Pipeline *pipeline ) const noexcept
+{
+    std::vector< VkVertexInputAttributeDescription > attributeDescriptions;
+    for ( auto &attr : pipeline->attributeDescriptions ) {
+        attributeDescriptions.push_back( [ &attr ] {
+            auto format = VK_FORMAT_UNDEFINED;
+            switch ( attr.format ) {
+                case VertexInputAttributeDescription::Format::R32: {
+                    format = VK_FORMAT_R32_SFLOAT;
+                    break;
+                }
+                case VertexInputAttributeDescription::Format::R32G32: {
+                    format = VK_FORMAT_R32G32_SFLOAT;
+                    break;
+                }
+                case VertexInputAttributeDescription::Format::R32G32B32: {
+                    format = VK_FORMAT_R32G32B32_SFLOAT;
+                    break;
+                }
+                case VertexInputAttributeDescription::Format::R32G32B32A32: {
+                    format = VK_FORMAT_R32G32B32A32_SFLOAT;
+                    break;
+                }
+                default:
+                    break;
+            }
+            return VkVertexInputAttributeDescription {
+                .binding = attr.binding,
+                .location = attr.location,
+                .format = format,
+                .offset = attr.offset,
+            };
+        }());
+    }
+
+    return attributeDescriptions;
+}
+
+VkPipelineVertexInputStateCreateInfo PipelineManager::createVertexInput( const std::vector< VkVertexInputBindingDescription > &bindingDescriptions, const std::vector< VkVertexInputAttributeDescription > &attributeDescriptions ) const noexcept
 {
     return VkPipelineVertexInputStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
-        .vertexBindingDescriptionCount = static_cast< crimild::UInt32 >( bindingDescription.size() ),
-        .pVertexBindingDescriptions = bindingDescription.data(),
+        .vertexBindingDescriptionCount = static_cast< crimild::UInt32 >( bindingDescriptions.size() ),
+        .pVertexBindingDescriptions = bindingDescriptions.data(),
         .vertexAttributeDescriptionCount = static_cast< crimild::UInt32 >( attributeDescriptions.size() ),
         .pVertexAttributeDescriptions = attributeDescriptions.data(),
     };

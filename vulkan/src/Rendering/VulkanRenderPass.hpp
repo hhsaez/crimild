@@ -62,6 +62,8 @@ namespace crimild {
             RenderPassManager( RenderDevice *renderDevice = nullptr ) noexcept : m_renderDevice( renderDevice ) { }
             virtual ~RenderPassManager( void ) = default;
 
+            RenderPass *getRenderPass( void ) noexcept { return first(); }
+
             SharedPointer< RenderPass > create( RenderPass::Descriptor const &descriptor ) noexcept;
             void destroy( RenderPass *renderPass ) noexcept override;
 

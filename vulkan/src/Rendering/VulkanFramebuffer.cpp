@@ -80,6 +80,7 @@ SharedPointer< Framebuffer > FramebufferManager::create( Framebuffer::Descriptor
     framebuffer->renderDevice = renderDevice;
     framebuffer->extent = descriptor.extent;
     insert( crimild::get_ptr( framebuffer ) );
+    m_framebuffers.add( crimild::get_ptr( framebuffer ) );
     return framebuffer;
 }
 
@@ -94,6 +95,8 @@ void FramebufferManager::destroy( Framebuffer *framebuffer ) noexcept
             nullptr
         );
     }
+
+    m_framebuffers.remove( framebuffer );
 
     framebuffer->handler = VK_NULL_HANDLE;
     framebuffer->manager = nullptr;

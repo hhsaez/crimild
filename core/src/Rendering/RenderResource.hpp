@@ -9,7 +9,7 @@
 *     * Redistributions in binary form must reproduce the above copyright
 *       notice, this list of conditions and the following disclaimer in the
 *       documentation and/or other materials provided with the distribution.
-*     * Neither the name of the copyright holders nor the
+*     * Neither the name of the copyright holder nor the
 *       names of its contributors may be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
@@ -25,54 +25,65 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CRIMILD_RENDERING_VULKAN_DESCRIPTOR_POOL_
-#define CRIMILD_RENDERING_VULKAN_DESCRIPTOR_POOL_
+#ifndef CRIMILD_RENDERING_RENDER_RESOURCE_
+#define CRIMILD_RENDERING_RENDER_RESOURCE_
 
-#include "Rendering/VulkanRenderResource.hpp"
-#include "Rendering/DescriptorSet.hpp"
-#include "Foundation/Containers/Map.hpp"
+#include "Foundation/Containers/Set.hpp"
 
 namespace crimild {
 
-    namespace vulkan {
+    template< typename RenderResourceType >
+    class RenderResourceManager {
+    public:
+        virtual ~RenderResourceManager( void ) noexcept
+        {
+            clear();
+        }
 
-        /*
-        class DescriptorPool : public VulkanObject {
-            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::DescriptorPool )
+        virtual crimild::Bool bind( RenderResourceType *resource ) noexcept
+        {
+            m_resources.insert( resource );
+            resource->manager = this;
+            return true;
+        }
 
-        public:
-            struct Descriptor {
-                RenderDevice *renderDevice;
-                Swapchain *swapchain;
-            };
+        virtual crimild::Bool unbind( RenderResourceType *resource ) noexcept
+        {
+            m_resources.remove( resource );
+            resource->manager = nullptr;
+            return true;
+        }
 
-        public:
-            ~DescriptorPool( void ) noexcept;
+        virtual void clear( void ) noexcept
+        {
+            m_resources.each( [ this ](
+           		RenderResourceType *resource ) {
+                	unbind( resource );
+            	}
+            );
+            m_resources.clear();
+        }
 
-            RenderDevice *renderDevice = nullptr;
-            DescriptorPoolManager *manager = nullptr;
-            VkDescriptorPool handler = VK_NULL_HANDLE;
-        };
-         */
+        inline RenderResourceType *first( void ) noexcept { return m_resources.first(); }
 
-        class DescriptorPoolManager : public VulkanRenderResourceManager< DescriptorPool > {
-        public:
-            explicit DescriptorPoolManager( RenderDevice *renderDevice ) noexcept : VulkanRenderResourceManager< DescriptorPool >( renderDevice ) { }
-            virtual ~DescriptorPoolManager( void ) noexcept = default;
+    private:
+        containers::Set< RenderResourceType * > m_resources;
+    };
 
-            VkDescriptorPool getHandler( DescriptorPool *descriptorPool ) noexcept;
+    template< typename T >
+    class RenderResourceImpl {
+    public:
+        virtual ~RenderResourceImpl( void ) noexcept
+        {
+            if ( manager != nullptr ) {
+                manager->unbind( static_cast< T * >( this ) );
+            }
+        }
 
-            crimild::Bool bind( DescriptorPool *descriptorPool ) noexcept override;
-            crimild::Bool unbind( DescriptorPool *descriptorPool ) noexcept override;
-
-        private:
-            containers::Map< DescriptorPool *, VkDescriptorPool > m_handlers;
-        };
-
-    }
+        RenderResourceManager< T > *manager = nullptr;
+    };
 
 }
 
 #endif
-
 

@@ -29,7 +29,7 @@
 #include "VulkanRenderDevice.hpp"
 #include "VulkanSwapchain.hpp"
 
-using namespace crimild;
+//using namespace crimild;
 using namespace crimild::vulkan;
 
 RenderPass::~RenderPass( void ) noexcept
@@ -39,7 +39,7 @@ RenderPass::~RenderPass( void ) noexcept
     }
 }
 
-SharedPointer< RenderPass > RenderPassManager::create( RenderPass::Descriptor const &descriptor ) noexcept
+crimild::SharedPointer< RenderPass > RenderPassManager::create( RenderPass::Descriptor const &descriptor ) noexcept
 {
     CRIMILD_LOG_TRACE( "Creating render pass" );
 

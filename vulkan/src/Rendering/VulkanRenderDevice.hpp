@@ -77,18 +77,23 @@ namespace crimild {
             CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::RenderDevice )
 
         public:
-            using BufferManager::create;
-            using CommandBufferManager::create;
+            using BufferManager::getHandler;
+            using BufferManager::bind;
+            using CommandBufferManager::getHandler;
+            using CommandBufferManager::bind;
             using CommandPoolManager::create;
-            using DescriptorPoolManager::create;
-            using DescriptorSetManager::create;
-            using DescriptorSetLayoutManager::create;
+            using DescriptorPoolManager::getHandler;
+            using DescriptorSetManager::getHandler;
+            using DescriptorSetManager::bind;
+            using DescriptorSetLayoutManager::getHandler;
+            using DescriptorSetLayoutManager::bind;
             using SwapchainManager::create;
             using FenceManager::create;
             using FramebufferManager::create;
             using ImageManager::create;
             using ImageViewManager::create;
-            using PipelineManager::create;
+            using PipelineManager::getHandler;
+            using PipelineManager::bind;
             using PipelineLayoutManager::create;
             using RenderPassManager::create;
             using SemaphoreManager::create;
@@ -110,8 +115,8 @@ namespace crimild {
             VkQueue presentQueue;
 
         public:
-            void submitGraphicsCommands( const Semaphore *wait, const CommandBuffer *commandBuffer, const Semaphore *signal, const Fence *fence ) const noexcept;
-            void submit( const CommandBuffer *commands, crimild::Bool wait ) const noexcept;
+            void submitGraphicsCommands( const Semaphore *wait, CommandBuffer *commandBuffer, crimild::UInt32 imageIndex, const Semaphore *signal, const Fence *fence ) noexcept;
+            void submit( CommandBuffer *commands, crimild::Bool wait ) noexcept;
             void waitIdle( void ) const noexcept;
         };
 

@@ -32,14 +32,8 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
-Buffer::~Buffer( void ) noexcept
-{
-    if ( manager != nullptr ) {
-        manager->destroy( this );
-    }
-}
-
-void Buffer::update( const void *newData ) noexcept
+/*
+void vulkan::Buffer::update( const void *newData ) noexcept
 {
     void *data = nullptr;
     CRIMILD_VULKAN_CHECK(
@@ -57,8 +51,120 @@ void Buffer::update( const void *newData ) noexcept
 
     vkUnmapMemory( renderDevice->handler, memory );
 }
+*/
 
-SharedPointer< Buffer > BufferManager::create( Buffer::Descriptor const &descriptor ) noexcept
+crimild::Bool BufferManager::bind( Buffer *buffer ) noexcept
+{
+    if ( m_bufferHandlers.contains( buffer ) ) {
+        return true;
+    }
+
+    CRIMILD_LOG_TRACE( "Binding Vulkan Buffer" );
+
+    auto renderDevice = getRenderDevice();
+    auto swapchain = renderDevice->getSwapchain();
+
+    VkDeviceSize bufferSize = buffer->getSize();
+    crimild::Size count = 1;
+
+    VkBufferUsageFlags usage = 0;
+    switch ( buffer->getUsage() ) {
+        case Buffer::Usage::VERTEX_BUFFER:
+            usage |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+            break;
+        case Buffer::Usage::INDEX_BUFFER:
+            usage |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+            break;
+        case Buffer::Usage::UNIFORM_BUFFER:
+            usage |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+            count = swapchain->images.size();
+            break;
+        default:
+            CRIMILD_LOG_ERROR( "Invalid buffer usage value" );
+            return false;
+    }
+
+    for ( auto i = 0l; i < count; i++ ) {
+        VkBuffer bufferHandler;
+        VkDeviceMemory bufferMemory;
+
+        createBuffer(
+            renderDevice,
+            bufferSize,
+            usage,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+            bufferHandler,
+            bufferMemory
+        );
+
+        if ( buffer->getRawData() != nullptr ) {
+            void *data = nullptr;
+            CRIMILD_VULKAN_CHECK(
+                vkMapMemory(
+                    renderDevice->handler,
+                    bufferMemory,
+                    0,
+                    bufferSize,
+                    0,
+                    &data
+                )
+            );
+
+            memcpy( data, buffer->getRawData(), ( size_t ) bufferSize );
+
+            vkUnmapMemory( renderDevice->handler, bufferMemory );
+        }
+
+        m_bufferHandlers[ buffer ].add( bufferHandler );
+        m_bufferMemoryHandlers[ buffer ].add( bufferMemory );
+    }
+
+    return RenderResourceManager< crimild::Buffer >::bind( buffer );
+}
+
+crimild::Bool BufferManager::unbind( Buffer *buffer ) noexcept
+{
+    if ( !m_bufferHandlers.contains( buffer ) ) {
+        return false;
+    }
+
+    CRIMILD_LOG_TRACE( "Unbinding Vulkan buffer" );
+
+    auto renderDevice = getRenderDevice();
+
+    m_bufferHandlers[ buffer ].each( [ renderDevice ]( VkBuffer handler ) {
+        vkDestroyBuffer( renderDevice->handler, handler, nullptr );
+    });
+    m_bufferHandlers.remove( buffer );
+
+    m_bufferMemoryHandlers[ buffer ].each( [ renderDevice ]( VkDeviceMemory memoryHandler ) {
+        vkFreeMemory( renderDevice->handler, memoryHandler, nullptr );
+    });
+    m_bufferMemoryHandlers.remove( buffer );
+
+    return RenderResourceManager< crimild::Buffer >::unbind( buffer );
+}
+
+VkBuffer BufferManager::getHandler( Buffer *buffer, crimild::Size index ) noexcept
+{
+    if ( !m_bufferHandlers.contains( buffer ) && !bind( buffer ) ) {
+        return VK_NULL_HANDLE;
+    }
+    return m_bufferHandlers[ buffer ][ index ];
+}
+
+VkDeviceMemory BufferManager::getMemory( Buffer *buffer, crimild::Size index ) noexcept
+{
+    if ( !m_bufferMemoryHandlers.contains( buffer ) && !bind( buffer ) ) {
+        return VK_NULL_HANDLE;
+    }
+    return m_bufferMemoryHandlers[ buffer ][ index ];
+}
+
+
+/*
+
+SharedPointer< vulkan::Buffer > vulkan::BufferManager::create( vulkan::Buffer::Descriptor const &descriptor ) noexcept
 {
     CRIMILD_LOG_TRACE( "Creating Vulkan buffer" );
 
@@ -152,7 +258,7 @@ SharedPointer< Buffer > BufferManager::create( Buffer::Descriptor const &descrip
         vkFreeMemory( renderDevice->handler, stagingBufferMemory, nullptr );
     }
 
-    auto buffer = crimild::alloc< Buffer >();
+    auto buffer = crimild::alloc< vulkan::Buffer >();
     buffer->renderDevice = renderDevice;
     buffer->manager = this;
     buffer->handler = bufferHandler;
@@ -162,7 +268,7 @@ SharedPointer< Buffer > BufferManager::create( Buffer::Descriptor const &descrip
     return buffer;
 }
 
-void BufferManager::destroy( Buffer *buffer ) noexcept
+void vulkan::BufferManager::destroy( vulkan::Buffer *buffer ) noexcept
 {
     CRIMILD_LOG_TRACE( "Destroying Vulkan buffer" );
 
@@ -190,6 +296,7 @@ void BufferManager::destroy( Buffer *buffer ) noexcept
     buffer->size = 0;
     erase( buffer );
 }
+ */
 
 crimild::UInt32 BufferManager::findMemoryType( RenderDevice *renderDevice, crimild::UInt32 typeFilter, VkMemoryPropertyFlags properties ) noexcept
 {
@@ -261,6 +368,7 @@ crimild::Bool BufferManager::createBuffer( RenderDevice *renderDevice, VkDeviceS
 
 void BufferManager::copyBuffer( RenderDevice *renderDevice, CommandPool *commandPool, VkBuffer srcBufferHandler, VkBuffer dstBufferHandler, VkDeviceSize size ) const noexcept
 {
+    /*
 	auto commandBuffer = renderDevice->create(
         CommandBuffer::Descriptor {
         	.commandPool = commandPool,
@@ -281,4 +389,6 @@ void BufferManager::copyBuffer( RenderDevice *renderDevice, CommandPool *command
         crimild::get_ptr( commandBuffer ),
     	true
     );
+     */
 }
+

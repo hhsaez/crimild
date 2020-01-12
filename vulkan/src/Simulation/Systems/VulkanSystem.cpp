@@ -112,9 +112,9 @@ crimild::Bool VulkanSystem::start( void )
         && createPhysicalDevice()
         && createRenderDevice()
         && createCommandPool()
-        && createVertexBuffer()
-        && createIndexBuffer()
-        && createDescriptorSetLayout()
+//        && createVertexBuffer()
+//        && createIndexBuffer()
+//        && createDescriptorSetLayout()
         && recreateSwapchain();
 }
 
@@ -157,13 +157,16 @@ void VulkanSystem::update( void )
 
     auto imageIndex = result.imageIndex;
 
-    updateUniformBuffer( imageIndex );
+//    updateUniformBuffer( imageIndex );
+
+    auto commandBuffer = crimild::get_ptr( m_commandBuffers[ 0 ] );//[ imageIndex ];
 
     // Submit graphic commands to the render device, with the selected
     // image as attachment in the framebuffer
     renderDevice->submitGraphicsCommands(
         wait,
-        crimild::get_ptr( m_commandBuffers[ imageIndex ] ),
+        commandBuffer,
+        imageIndex,
         signal,
         fence
     );
@@ -191,9 +194,9 @@ void VulkanSystem::stop( void )
 
     cleanSwapchain();
 
-    m_vertexBuffer = nullptr;
-    m_indexBuffer = nullptr;
-    m_descriptorSetLayout = nullptr;
+//    m_vertexBuffer = nullptr;
+//    m_indexBuffer = nullptr;
+//    m_descriptorSetLayout = nullptr;
 
     m_commandPool = nullptr;
     m_renderDevice = nullptr;
@@ -293,25 +296,34 @@ void VulkanSystem::cleanSwapchain( void ) noexcept
         m_renderDevice->waitIdle();
     }
 
-    m_descriptorSets.clear();
-    m_descriptorPool = nullptr;
-    m_uniformBuffers.clear();
+//    m_descriptorSets.clear();
+//    m_descriptorPool = nullptr;
+//    m_uniformBuffers.clear();
     m_inFlightFences.clear();
     m_imageAvailableSemaphores.clear();
     m_renderFinishedSemaphores.clear();
     m_commandBuffers.clear();
     m_framebuffers.clear();
-    m_pipeline = nullptr;
+//    m_pipeline = nullptr;
     m_renderPass = nullptr;
     m_swapchain = nullptr;
 }
 
 crimild::Bool VulkanSystem::recreateSwapchain( void ) noexcept
 {
-    if ( !createSwapchain() ) {
-        return false;
-    }
+    return createSwapchain()
+    	&& createRenderPass()
+//    	&& createPipeline()
+//    	&& createUniformBuffers()
+//    	&& createDescriptorPool()
+//    	&& createDescriptorSets()
+        && createFramebuffers()
+//        && createCommandBuffers()
+        && createSyncObjects();
+}
 
+crimild::Bool VulkanSystem::createRenderPass( void ) noexcept
+{
     auto renderDevice = crimild::get_ptr( m_renderDevice );
     auto swapchain = crimild::get_ptr( m_swapchain );
 
@@ -320,6 +332,15 @@ crimild::Bool VulkanSystem::recreateSwapchain( void ) noexcept
             .swapchain = swapchain,
         }
     );
+
+    return m_renderPass != nullptr;
+}
+
+/*
+crimild::Bool VulkanSystem::createPipeline( void ) noexcept
+{
+    auto renderDevice = crimild::get_ptr( m_renderDevice );
+    auto swapchain = crimild::get_ptr( m_swapchain );
 
     m_pipeline = renderDevice->create(
         Pipeline::Descriptor {
@@ -340,17 +361,21 @@ crimild::Bool VulkanSystem::recreateSwapchain( void ) noexcept
             .viewport = Rectf( 0, 0, swapchain->extent.width, swapchain->extent.height ),
             .scissor = Rectf( 0, 0, swapchain->extent.width, swapchain->extent.height ),
             .bindingDescription = { Vertex::getBindingDescription() },
-        	.attributeDescriptions = Vertex::getAttributeDescriptions(),
+            .attributeDescriptions = Vertex::getAttributeDescriptions(),
             .setLayouts = {
                 crimild::get_ptr( m_descriptorSetLayout ),
             },
         }
     );
 
-    createUniformBuffers();
-    createDescriptorPool();
-    createDescriptorSets();
+    return m_pipeline != nullptr;
+}
+     */
 
+crimild::Bool VulkanSystem::createFramebuffers( void ) noexcept
+{
+    auto renderDevice = crimild::get_ptr( m_renderDevice );
+    auto swapchain = crimild::get_ptr( m_swapchain );
     auto imageCount = swapchain->imageViews.size();
 
     for ( auto i = 0l; i < imageCount; i++ ) {
@@ -366,8 +391,22 @@ crimild::Bool VulkanSystem::recreateSwapchain( void ) noexcept
             }
         );
         m_framebuffers.push_back( framebuffer );
+    }
 
-        m_commandBuffers.push_back(
+    return m_framebuffers.size() > 0;
+}
+
+crimild::Bool VulkanSystem::createCommandBuffers( void ) noexcept
+{
+    /*
+    auto renderDevice = crimild::get_ptr( m_renderDevice );
+    auto swapchain = crimild::get_ptr( m_swapchain );
+    auto imageCount = swapchain->imageViews.size();
+
+    for ( auto i = 0l; i < imageCount; i++ ) {
+        auto framebuffer = m_framebuffers[ i ];
+
+        m_commandBuffers[ i ].push_back(
             [ this, framebuffer, renderDevice, i ]() {
                 auto commandBuffer = renderDevice->create(
                     CommandBuffer::Descriptor {
@@ -387,12 +426,12 @@ crimild::Bool VulkanSystem::recreateSwapchain( void ) noexcept
                     crimild::get_ptr( m_vertexBuffer )
                 );
                 commandBuffer->bindIndexBuffer(
-               		crimild::get_ptr( m_indexBuffer )
-               	);
+                       crimild::get_ptr( m_indexBuffer )
+                   );
                 commandBuffer->bindDescriptorSets(
                     crimild::get_ptr( m_descriptorSets[ i ] ),
                     crimild::get_ptr( m_pipeline->layout )
-              	);
+                  );
                 commandBuffer->drawIndexed( static_cast< crimild::UInt32 >( m_indexBuffer->size / sizeof( crimild::UInt32 ) ) );
                 commandBuffer->endRenderPass();
                 commandBuffer->end();
@@ -400,6 +439,14 @@ crimild::Bool VulkanSystem::recreateSwapchain( void ) noexcept
             }()
         );
     }
+
+     */
+    return m_commandBuffers.size() > 0;
+}
+
+crimild::Bool VulkanSystem::createSyncObjects( void ) noexcept
+{
+    auto renderDevice = crimild::get_ptr( m_renderDevice );
 
     for ( auto i = 0l; i < CRIMILD_VULKAN_MAX_FRAMES_IN_FLIGHT; i++ ) {
         m_imageAvailableSemaphores.push_back( renderDevice->create( Semaphore::Descriptor { } ) );
@@ -423,6 +470,7 @@ crimild::Bool VulkanSystem::createCommandPool( void ) noexcept
     return m_commandPool != nullptr;
 }
 
+/*
 crimild::Bool VulkanSystem::createVertexBuffer( void ) noexcept
 {
     const auto vertices = std::vector< Vertex > {
@@ -443,10 +491,11 @@ crimild::Bool VulkanSystem::createVertexBuffer( void ) noexcept
         	.commandPool = commandPool,
     	}
     );
-
     return m_vertexBuffer != nullptr;
 }
+ */
 
+/*
 crimild::Bool VulkanSystem::createIndexBuffer( void ) noexcept
 {
     const auto indices = std::vector< crimild::UInt32 > {
@@ -465,10 +514,11 @@ crimild::Bool VulkanSystem::createIndexBuffer( void ) noexcept
         	.commandPool = commandPool,
         }
     );
-
     return m_indexBuffer != nullptr;
 }
+ */
 
+/*
 crimild::Bool VulkanSystem::createDescriptorSetLayout( void ) noexcept
 {
     m_descriptorSetLayout = m_renderDevice->create(
@@ -476,10 +526,11 @@ crimild::Bool VulkanSystem::createDescriptorSetLayout( void ) noexcept
 
         }
    	);
-
     return m_descriptorSetLayout != nullptr;
 }
+ */
 
+/*
 crimild::Bool VulkanSystem::createUniformBuffers( void ) noexcept
 {
     auto renderDevice = crimild::get_ptr( m_renderDevice );
@@ -500,9 +551,9 @@ crimild::Bool VulkanSystem::createUniformBuffers( void ) noexcept
         );
         m_uniformBuffers[ i ] = ubo;
     }
-
     return m_uniformBuffers.size() > 0;
 }
+ */
 
 void VulkanSystem::updateUniformBuffer( crimild::UInt32 currentImage ) noexcept
 {
@@ -544,9 +595,10 @@ void VulkanSystem::updateUniformBuffer( crimild::UInt32 currentImage ) noexcept
         }( m_swapchain->extent.width, m_swapchain->extent.height ),
     };
 
-    m_uniformBuffers[ currentImage ]->update( &ubo );
+//    m_uniformBuffers[ currentImage ]->update( &ubo );
 }
 
+/*
 crimild::Bool VulkanSystem::createDescriptorPool( void ) noexcept
 {
     auto renderDevice = crimild::get_ptr( m_renderDevice );
@@ -557,12 +609,13 @@ crimild::Bool VulkanSystem::createDescriptorPool( void ) noexcept
             .swapchain = swapchain
         }
     );
-
     return m_descriptorPool != nullptr;
 }
+ */
 
 crimild::Bool VulkanSystem::createDescriptorSets( void ) noexcept
 {
+    /*
     auto renderDevice = crimild::get_ptr( m_renderDevice );
     auto swapchain = crimild::get_ptr( m_swapchain );
     auto descriptorPool = crimild::get_ptr( m_descriptorPool );
@@ -585,5 +638,6 @@ crimild::Bool VulkanSystem::createDescriptorSets( void ) noexcept
     }
 
     return m_descriptorSets.size() > 0;
+     */
 }
 
