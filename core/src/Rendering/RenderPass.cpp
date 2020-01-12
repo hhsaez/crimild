@@ -9,7 +9,7 @@
 *     * Redistributions in binary form must reproduce the above copyright
 *       notice, this list of conditions and the following disclaimer in the
 *       documentation and/or other materials provided with the distribution.
-*     * Neither the name of the copyright holders nor the
+*     * Neither the name of the copyright holder nor the
 *       names of its contributors may be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
@@ -25,53 +25,40 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CRIMILD_RENDERING_VULKAN_PIPELINE_LAYOUT_
-#define CRIMILD_RENDERING_VULKAN_PIPELINE_LAYOUT_
+#include "Rendering/RenderPass.hpp"
 
-#include "Foundation/VulkanObject.hpp"
+using namespace crimild;
 
-namespace crimild {
-
-    class DescriptorSetLayout;
-
-    namespace vulkan {
-
-        class RenderDevice;
-        class PipelineLayoutManager;
-
-        class PipelineLayout : public VulkanObject {
-            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::PipelineLayout )
-
-        public:
-            struct Descriptor {
-                RenderDevice *renderDevice;
-                std::vector< DescriptorSetLayout * > setLayouts;
-            };
-
-        public:
-            ~PipelineLayout( void );
-
-            RenderDevice *renderDevice = nullptr;
-            PipelineLayoutManager *manager = nullptr;
-            VkPipelineLayout handler = VK_NULL_HANDLE;
-        };
-
-        class PipelineLayoutManager : public VulkanObjectManager< PipelineLayout > {
-        public:
-            explicit PipelineLayoutManager( RenderDevice *renderDevice = nullptr ) noexcept : m_renderDevice( renderDevice ) { }
-            virtual ~PipelineLayoutManager( void ) noexcept = default;
-
-            SharedPointer< PipelineLayout > create( PipelineLayout::Descriptor const &descriptor ) noexcept;
-            void destroy( PipelineLayout *pipelineLayout ) noexcept;
-
-        private:
-            RenderDevice *m_renderDevice = nullptr;
-        };
-
+CommandBuffer *RenderPass::getCommandBuffer( void ) noexcept
+{
+    /*
+    if ( m_commandBuffer != nullptr ) {
+        return crimild::get_ptr( m_commandBuffer );
     }
 
+    m_commandBuffer = crimild::alloc< CommandBuffer >();
+
+    m_commandBuffer->begin();
+    m_commandBuffer->beginRenderPass( this );
+
+    recordCommands( crimild::get_ptr( m_commandBuffer ) );
+
+    m_commandBuffer->endRenderPass( this );
+    m_commandBuffer->end();
+     */
+
+    return crimild::get_ptr( m_commandBuffer );
 }
 
-#endif
-
+void RenderPass::recordCommands( CommandBuffer *commandBuffer ) noexcept
+{
+    /*
+    auto scene = Simulation::getInstance()->getScene();
+    scene->perform( Apply( [ commandBuffer ]( Node *node ) {
+        if ( auto renderable = node->getComponent< Renderable >() ) {
+            renderable->recordCommands( commandBuffer );
+        }
+    }));
+     */
+}
 

@@ -37,17 +37,18 @@
 
 namespace crimild {
 
+    class Buffer;
+    class CommandBuffer;
+    class DescriptorSetLayout;
+
     namespace vulkan {
 
-        class Buffer;
-        class CommandBuffer;
         class CommandPool;
-        class DescriptorSetLayout;
-        class DescriptorPool;
+//        class DescriptorPool;
         class Fence;
         class Framebuffer;
-        class Pipeline;
-        class RenderPass;
+//        class Pipeline;
+//        class RenderPass;
         class Semaphore;
         class Swapchain;
 
@@ -89,6 +90,16 @@ namespace crimild {
             void update( void ) override;
             void stop( void ) override;
 
+            RenderDevice *getRenderDevice( void ) noexcept { return crimild::get_ptr( m_renderDevice ); }
+            Swapchain *getSwapchain( void ) noexcept { return crimild::get_ptr( m_swapchain ); }
+            RenderPass *getRenderPass( void ) noexcept { return crimild::get_ptr( m_renderPass ); }
+            CommandPool *getCommandPool( void ) noexcept { return crimild::get_ptr( m_commandPool ); }
+            Framebuffer *getFramebuffer( crimild::Size index ) noexcept { return crimild::get_ptr( m_framebuffers[ index ] ); }
+//            DescriptorPool *getDescriptorPool( void ) noexcept { return crimild::get_ptr( m_descriptorPool ); }
+
+            void setCommandBuffers( std::vector< SharedPointer< CommandBuffer >> &cmds ) noexcept { m_commandBuffers = cmds; }
+//            void setUniformBuffers( std::vector< SharedPointer< Buffer >> &ubos ) noexcept { m_uniformBuffers = ubos; }
+
         protected:
             virtual SharedPointer< VulkanSurface > create( VulkanSurface::Descriptor const &descriptor ) noexcept { return nullptr; }
 
@@ -100,6 +111,11 @@ namespace crimild {
             crimild::Bool createRenderDevice( void ) noexcept;
             crimild::Bool createSwapchain( void ) noexcept;
             crimild::Bool recreateSwapchain( void ) noexcept;
+            crimild::Bool createRenderPass( void ) noexcept;
+            crimild::Bool createPipeline( void ) noexcept;
+            crimild::Bool createFramebuffers( void ) noexcept;
+            crimild::Bool createCommandBuffers( void ) noexcept;
+            crimild::Bool createSyncObjects( void ) noexcept;
             crimild::Bool createCommandPool( void ) noexcept;
             crimild::Bool createVertexBuffer( void ) noexcept;
             crimild::Bool createIndexBuffer( void ) noexcept;
@@ -120,7 +136,7 @@ namespace crimild {
             SharedPointer< RenderDevice > m_renderDevice;
             SharedPointer< Swapchain > m_swapchain;
             SharedPointer< RenderPass > m_renderPass;
-            SharedPointer< Pipeline > m_pipeline;
+//            SharedPointer< Pipeline > m_pipeline;
             std::vector< SharedPointer< Framebuffer >> m_framebuffers;
             SharedPointer< CommandPool > m_commandPool;
             std::vector< SharedPointer< CommandBuffer >> m_commandBuffers;
@@ -129,12 +145,12 @@ namespace crimild {
             std::vector< SharedPointer< Fence >> m_inFlightFences;
             crimild::UInt32 m_currentFrame = 0;
 
-            SharedPointer< Buffer > m_vertexBuffer;
-            SharedPointer< Buffer > m_indexBuffer;
-            SharedPointer< DescriptorSetLayout > m_descriptorSetLayout;
-            std::vector< SharedPointer< Buffer >> m_uniformBuffers;
-            SharedPointer< DescriptorPool > m_descriptorPool;
-            std::vector< SharedPointer< DescriptorSet >> m_descriptorSets;
+//            SharedPointer< Buffer > m_vertexBuffer;
+//            SharedPointer< Buffer > m_indexBuffer;
+//            SharedPointer< DescriptorSetLayout > m_descriptorSetLayout;
+//            std::vector< SharedPointer< Buffer >> m_uniformBuffers;
+//            SharedPointer< DescriptorPool > m_descriptorPool;
+//            std::vector< SharedPointer< DescriptorSet >> m_descriptorSets;
         };
 
     }

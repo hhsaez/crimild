@@ -32,91 +32,14 @@
 #include "VulkanFramebuffer.hpp"
 #include "VulkanPipeline.hpp"
 
+#include "Rendering/CommandBuffer.hpp"
+
 using namespace crimild;
 using namespace crimild::vulkan;
 
-CommandBuffer::~CommandBuffer( void ) noexcept
-{
-    if ( manager != nullptr ) {
-        manager->destroy( this );
-    }
-}
+/*
 
-void CommandBuffer::begin( Usage usage ) const noexcept
-{
-	auto beginInfo = VkCommandBufferBeginInfo {
-		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-		.flags = vulkan::utils::VULKAN_COMMAND_BUFFER_USAGE[ static_cast< uint32_t >( usage ) ],
-		.pInheritanceInfo = nullptr, // optional
-	};
-
-    CRIMILD_VULKAN_CHECK(
-     	vkBeginCommandBuffer(
-     		handler,
-         	&beginInfo
-     	)
- 	);
-}
-
-void CommandBuffer::beginRenderPass( const RenderPass *renderPass, const Framebuffer *framebuffer, const RGBAColorf &clearColor ) const noexcept
-{
-	auto clearValue = VkClearValue {
-		clearColor.r(),
-		clearColor.g(),
-		clearColor.b(),
-		clearColor.a(),
-	};
-	
-	auto renderPassInfo = VkRenderPassBeginInfo {
-		.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-		.renderPass = renderPass->handler,
-		.framebuffer = framebuffer->handler,
-		.renderArea.offset = { 0, 0 },
-		.renderArea.extent = framebuffer->extent,
-		.clearValueCount = 1,
-		.pClearValues = &clearValue,
-	};
-
-	vkCmdBeginRenderPass( handler, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
-}
-
-void CommandBuffer::bindGraphicsPipeline( const Pipeline *pipeline ) const noexcept
-{
-	vkCmdBindPipeline(
-		handler,
-		VK_PIPELINE_BIND_POINT_GRAPHICS,
-		pipeline->handler
-	);
-}
-
-void CommandBuffer::bindVertexBuffer( const Buffer *buffer ) const noexcept
-{
-    VkBuffer vertexBuffers[] = {
-        buffer->handler
-    };
-    VkDeviceSize offsets[] = {
-        0
-    };
-    vkCmdBindVertexBuffers(
-   		handler,
-       	0,
-   		1,
-   		vertexBuffers,
-       	offsets
-   	);
-}
-
-void CommandBuffer::bindIndexBuffer( const Buffer *buffer ) const noexcept
-{
-    vkCmdBindIndexBuffer(
-    	handler,
-        buffer->handler,
-        0,
-    	VK_INDEX_TYPE_UINT32
-    );
-}
-
-void CommandBuffer::bindDescriptorSets( const DescriptorSet *descriptorSet, const PipelineLayout *pipelineLayout ) const noexcept
+void vulkan::CommandBuffer::bindDescriptorSets( const DescriptorSet *descriptorSet, const PipelineLayout *pipelineLayout ) const noexcept
 {
     VkDescriptorSet descriptorSets[] = {
         descriptorSet->handler,
@@ -134,31 +57,7 @@ void CommandBuffer::bindDescriptorSets( const DescriptorSet *descriptorSet, cons
 	);
 }
 
-void CommandBuffer::draw( crimild::UInt32 vertexCount ) const noexcept
-{
-	vkCmdDraw( handler, vertexCount, 1, 0, 0 );
-}
-
-void CommandBuffer::drawIndexed( crimild::UInt32 indexCount ) const noexcept
-{
-    vkCmdDrawIndexed( handler, indexCount, 1, 0, 0, 0 );
-}
-
-void CommandBuffer::endRenderPass( void ) const noexcept
-{
-	vkCmdEndRenderPass( handler );
-}
-
-void CommandBuffer::end( void ) const noexcept
-{
-    CRIMILD_VULKAN_CHECK(
-     	vkEndCommandBuffer(
-       		handler
-        )
-    );
-}
-
-void CommandBuffer::copy( Buffer *src, crimild::Size srcOffset, Buffer *dst, crimild::Size dstOffset, crimild::Size size ) const noexcept
+void vulkan::CommandBuffer::copy( Buffer *src, crimild::Size srcOffset, Buffer *dst, crimild::Size dstOffset, crimild::Size size ) const noexcept
 {
     auto copyRegion = VkBufferCopy {
 		.srcOffset = srcOffset,
@@ -169,57 +68,225 @@ void CommandBuffer::copy( Buffer *src, crimild::Size srcOffset, Buffer *dst, cri
     vkCmdCopyBuffer( handler, src->handler, dst->handler, 1, &copyRegion );
 }
 
-SharedPointer< CommandBuffer > CommandBufferManager::create( CommandBuffer::Descriptor const &descriptor ) noexcept
-{
-    CRIMILD_LOG_TRACE( "Creating Vulkan Command Buffer" );
+ */
 
-    auto renderDevice = m_renderDevice;
-    if ( renderDevice == nullptr ) {
-        renderDevice = descriptor.renderDevice;
+crimild::Bool CommandBufferManager::bind( CommandBuffer *commandBuffer ) noexcept
+{
+    if ( m_handlers.contains( commandBuffer ) ) {
+        return true;
     }
+
+    CRIMILD_LOG_TRACE( "Binding Vulkan Command Buffer" );
+
+    auto renderDevice = getRenderDevice();
+    if ( renderDevice == nullptr ) {
+        return nullptr;
+    }
+
+    auto commandPool = renderDevice->getCommandPool();
+    auto swapchain = renderDevice->getSwapchain();
 
     auto allocInfo = VkCommandBufferAllocateInfo {
         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
         .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-        .commandPool = descriptor.commandPool->handler,
+        .commandPool = commandPool->handler,
         .commandBufferCount = 1,
     };
 
-    VkCommandBuffer commandBufferHandler;
-    CRIMILD_VULKAN_CHECK(
- 		vkAllocateCommandBuffers(
-            renderDevice->handler,
-            &allocInfo,
-            &commandBufferHandler
-        )
- 	);
-
-    auto commandBuffer = crimild::alloc< CommandBuffer >();
-    commandBuffer->handler = commandBufferHandler;
-    commandBuffer->renderDevice = renderDevice;
-    commandBuffer->commandPool = descriptor.commandPool;
-    commandBuffer->manager = this;
-    insert( crimild::get_ptr( commandBuffer ) );
-    return commandBuffer;
-}
-
-void CommandBufferManager::destroy( CommandBuffer *commandBuffer ) noexcept
-{
-    CRIMILD_LOG_TRACE( "Destroying Vulkan commandBuffer" );
-
-    if ( commandBuffer->renderDevice != nullptr && commandBuffer->handler != VK_NULL_HANDLE ) {
-        vkFreeCommandBuffers(
-            commandBuffer->renderDevice->handler,
-            commandBuffer->commandPool->handler,
-            1,
-            &commandBuffer->handler
+    auto imageCount = swapchain->images.size();
+    m_handlers[ commandBuffer ].resize( imageCount );
+    for ( auto i = 0l; i < imageCount; ++i ) {
+        VkCommandBuffer commandBufferHandler;
+        CRIMILD_VULKAN_CHECK(
+             vkAllocateCommandBuffers(
+                renderDevice->handler,
+                &allocInfo,
+                &commandBufferHandler
+            )
         );
-    };
+        m_handlers[ commandBuffer ][ i ] = commandBufferHandler;
+        recordCommands( renderDevice, commandBuffer, i );
+    }
 
-    commandBuffer->handler = nullptr;
-    commandBuffer->renderDevice = nullptr;
-    commandBuffer->commandPool = nullptr;
-    commandBuffer->manager = nullptr;
-    erase( commandBuffer );
+    return VulkanRenderResourceManager< crimild::CommandBuffer >::bind( commandBuffer );
 }
 
+crimild::Bool CommandBufferManager::unbind( CommandBuffer *commandBuffer ) noexcept
+{
+    if ( m_handlers.contains( commandBuffer ) ) {
+        return true;
+    }
+
+    CRIMILD_LOG_TRACE( "Unbinding Vulkan commandBuffer" );
+
+    auto renderDevice = getRenderDevice();
+    auto commandPool = renderDevice->getCommandPool();
+
+    m_handlers[ commandBuffer ].each( [ renderDevice, commandPool ]( VkCommandBuffer handler ) {
+        vkFreeCommandBuffers(
+            renderDevice->handler,
+            commandPool->handler,
+            1,
+            &handler
+        );
+    });
+    m_handlers.remove( commandBuffer );
+
+    return VulkanRenderResourceManager< crimild::CommandBuffer >::unbind( commandBuffer );
+}
+
+void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBuffer *commandBuffer, crimild::Size index ) noexcept
+{
+    auto handler = renderDevice->getHandler( commandBuffer, index );
+    if ( handler == VK_NULL_HANDLE ) {
+        CRIMILD_LOG_ERROR( "Invalid command buffer" );
+        return;
+    }
+
+    commandBuffer->each(
+        [ this, handler, commandBuffer, renderDevice, index ]( CommandBuffer::Command &cmd ) {
+        	switch ( cmd.type ) {
+                case CommandBuffer::Command::Type::BEGIN: {
+                    auto beginInfo = VkCommandBufferBeginInfo {
+                        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+                        .flags = vulkan::utils::VULKAN_COMMAND_BUFFER_USAGE[ static_cast< uint32_t >( cmd.usage ) ],
+                        .pInheritanceInfo = nullptr, // optional
+                    };
+
+                    CRIMILD_VULKAN_CHECK(
+                        vkBeginCommandBuffer(
+                            handler,
+                            &beginInfo
+                        )
+                    );
+                    break;
+                }
+
+                case CommandBuffer::Command::Type::BEGIN_RENDER_PASS: {
+                    auto clearColor = RGBAColorf::ZERO;
+                    auto renderPass = renderDevice->getRenderPass();
+                    auto framebuffer = renderDevice->getFramebuffer( index );
+
+                    auto clearValue = VkClearValue {
+                        clearColor.r(),
+                        clearColor.g(),
+                        clearColor.b(),
+                        clearColor.a(),
+                    };
+
+                    auto renderPassInfo = VkRenderPassBeginInfo {
+                        .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
+                        .renderPass = renderPass->handler,
+                        .framebuffer = framebuffer->handler,
+                        .renderArea.offset = { 0, 0 },
+                        .renderArea.extent = framebuffer->extent,
+                        .clearValueCount = 1,
+                        .pClearValues = &clearValue,
+                    };
+
+                    vkCmdBeginRenderPass( handler, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
+                    break;
+                }
+
+                case CommandBuffer::Command::Type::BIND_GRAPHICS_PIPELINE: {
+                    auto pipeline = cmd.pipeline;
+                    auto pipelineHandler = renderDevice->getHandler( pipeline );
+
+                    vkCmdBindPipeline(
+                        handler,
+                        VK_PIPELINE_BIND_POINT_GRAPHICS,
+                        pipelineHandler
+                    );
+                    break;
+                }
+
+                case CommandBuffer::Command::Type::BIND_VERTEX_BUFFER: {
+                    auto buffer = cmd.buffer;
+                    auto bufferHandler = renderDevice->getHandler( buffer, 0 );
+
+                    VkBuffer vertexBuffers[] = {
+                        bufferHandler,
+                    };
+                    VkDeviceSize offsets[] = {
+                        0
+                    };
+                    vkCmdBindVertexBuffers(
+                        handler,
+                        0,
+                        1,
+                        vertexBuffers,
+                        offsets
+                    );
+                    break;
+                }
+
+                case CommandBuffer::Command::Type::BIND_INDEX_BUFFER: {
+                    auto buffer = cmd.buffer;
+                    auto bufferHandler = renderDevice->getHandler( buffer, 0 );
+
+                    vkCmdBindIndexBuffer(
+                        handler,
+                        bufferHandler,
+                        0,
+                        VK_INDEX_TYPE_UINT32
+                    );
+                    break;
+                }
+
+                case CommandBuffer::Command::Type::BIND_DESCRIPTOR_SET: {
+                    auto descriptorSet = cmd.descriptorSet;
+                    auto descriptorSetHandler = renderDevice->getHandler( descriptorSet, index );
+
+                    auto pipeline = crimild::get_ptr( descriptorSet->pipeline );
+                    auto pipelineLayout = renderDevice->getPipelineLayout( pipeline );
+
+                    VkDescriptorSet descriptorSets[] = {
+                        descriptorSetHandler,
+                    };
+
+                    vkCmdBindDescriptorSets(
+                        handler,
+                        VK_PIPELINE_BIND_POINT_GRAPHICS,
+                        pipelineLayout->handler,
+                        0,
+                        1,
+                        descriptorSets,
+                        0,
+                        nullptr
+                    );
+                    break;
+                }
+
+                case CommandBuffer::Command::Type::DRAW: {
+                    auto count = cmd.count;
+                    vkCmdDraw( handler, count, 1, 0, 0 );
+                    break;
+                }
+
+                case CommandBuffer::Command::Type::DRAW_INDEXED: {
+                    auto count = cmd.count;
+                    vkCmdDrawIndexed( handler, count, 1, 0, 0, 0 );
+                    break;
+                }
+
+                case CommandBuffer::Command::Type::END_RENDER_PASS: {
+                    vkCmdEndRenderPass( handler );
+                    break;
+                }
+
+                case CommandBuffer::Command::Type::END: {
+                    CRIMILD_VULKAN_CHECK(
+                        vkEndCommandBuffer(
+                            handler
+                        )
+                    );
+                    break;
+                }
+
+            	default:
+                	CRIMILD_LOG_DEBUG( "Ignoring command of type ", static_cast< uint32_t >( cmd.type ) );
+                    break;
+        	}
+    	}
+    );
+}

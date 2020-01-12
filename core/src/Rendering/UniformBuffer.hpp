@@ -9,7 +9,7 @@
 *     * Redistributions in binary form must reproduce the above copyright
 *       notice, this list of conditions and the following disclaimer in the
 *       documentation and/or other materials provided with the distribution.
-*     * Neither the name of the copyright holders nor the
+*     * Neither the name of the copyright holder nor the
 *       names of its contributors may be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
@@ -25,54 +25,52 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CRIMILD_RENDERING_VULKAN_DESCRIPTOR_POOL_
-#define CRIMILD_RENDERING_VULKAN_DESCRIPTOR_POOL_
+#ifndef CRIMILD_RENDERING_UNIFORM_BUFFER_
+#define CRIMILD_RENDERING_UNIFORM_BUFFER_
 
-#include "Rendering/VulkanRenderResource.hpp"
-#include "Rendering/DescriptorSet.hpp"
-#include "Foundation/Containers/Map.hpp"
+#include "Rendering/Buffer.hpp"
+#include "Mathematics/Matrix.hpp"
 
 namespace crimild {
 
-    namespace vulkan {
+    class UniformBuffer : public Buffer {
+    public:
+        virtual ~UniformBuffer( void ) noexcept = default;
+    };
 
-        /*
-        class DescriptorPool : public VulkanObject {
-            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::DescriptorPool )
+    template< typename T >
+    class UniformBufferImpl : public UniformBuffer {
+    public:
+        explicit UniformBufferImpl( T const &data = T() ) noexcept { setData( data ); }
+        virtual ~UniformBufferImpl( void ) noexcept = default;
 
-        public:
-            struct Descriptor {
-                RenderDevice *renderDevice;
-                Swapchain *swapchain;
-            };
+        Usage getUsage( void ) const noexcept override { return Buffer::Usage::UNIFORM_BUFFER; }
 
-        public:
-            ~DescriptorPool( void ) noexcept;
+        crimild::Size getSize( void ) const noexcept override { return sizeof( T ); }
+        crimild::Size getStride( void ) const noexcept override { return sizeof( T ); }
 
-            RenderDevice *renderDevice = nullptr;
-            DescriptorPoolManager *manager = nullptr;
-            VkDescriptorPool handler = VK_NULL_HANDLE;
-        };
-         */
+        void *getRawData( void ) noexcept override { return static_cast< void * >( &m_data ); }
+        const void *getRawData( void ) const noexcept override { return static_cast< const void * >( &m_data ); }
 
-        class DescriptorPoolManager : public VulkanRenderResourceManager< DescriptorPool > {
-        public:
-            explicit DescriptorPoolManager( RenderDevice *renderDevice ) noexcept : VulkanRenderResourceManager< DescriptorPool >( renderDevice ) { }
-            virtual ~DescriptorPoolManager( void ) noexcept = default;
+        T &getData( void ) noexcept { return m_data; }
+        const T &getData( void ) const noexcept { return m_data; }
+        void setData( T const &data ) noexcept { m_data = data; }
 
-            VkDescriptorPool getHandler( DescriptorPool *descriptorPool ) noexcept;
+    private:
+        T m_data;
+    };
 
-            crimild::Bool bind( DescriptorPool *descriptorPool ) noexcept override;
-            crimild::Bool unbind( DescriptorPool *descriptorPool ) noexcept override;
+    struct ModelViewProjUniform {
+        Matrix4f model;
+        Matrix4f view;
+        Matrix4f proj;
+    };
 
-        private:
-            containers::Map< DescriptorPool *, VkDescriptorPool > m_handlers;
-        };
-
-    }
+    using ModelViewProjUniformBuffer = UniformBufferImpl< ModelViewProjUniform >;
 
 }
 
 #endif
+
 
 

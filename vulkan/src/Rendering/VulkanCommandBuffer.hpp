@@ -28,25 +28,30 @@
 #ifndef CRIMILD_VULKAN_RENDERING_COMMAND_BUFFER_
 #define CRIMILD_VULKAN_RENDERING_COMMAND_BUFFER_
 
-#include "Foundation/VulkanObject.hpp"
-#include "Mathematics/Vector.hpp"
+//#include "Foundation/VulkanObject.hpp"
+//#include "Mathematics/Vector.hpp"
+#include "Rendering/VulkanRenderResource.hpp"
+#include "Rendering/CommandBuffer.hpp"
+#include "Foundation/Containers/Array.hpp"
+#include "Foundation/Containers/Map.hpp"
 
 namespace crimild {
 
+    class Buffer;
+    class DescriptorSet;
+    class Pipeline;
+    class RenderPass;
+
 	namespace vulkan {
 
-        class Buffer;
+        /*
+
         class CommandBufferManager;
 		class CommandPool;
-        class DescriptorSet;
-        class PipelineLayout;
-        class Pipeline;
-		class RenderPass;
+//        class PipelineLayout;
 		class Framebuffer;
         class RenderDevice;
 
-		/**
-		 */
 		class CommandBuffer : public VulkanObject {
             CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::CommandBuffer )
 
@@ -88,17 +93,29 @@ namespace crimild {
 
             void copy( Buffer *src, crimild::Size srcOffset, Buffer *dst, crimild::Size dstOffset, crimild::Size size ) const noexcept;
 		};
+         */
 
-        class CommandBufferManager : public VulkanObjectManager< CommandBuffer > {
+        class CommandBufferManager : public VulkanRenderResourceManager< CommandBuffer > {
         public:
-            explicit CommandBufferManager( RenderDevice *renderDevice = nullptr ) noexcept : m_renderDevice( renderDevice ) { }
+            explicit CommandBufferManager( RenderDevice *renderDevice = nullptr ) noexcept : VulkanRenderResourceManager< CommandBuffer >( renderDevice ) { }
             virtual ~CommandBufferManager( void ) noexcept = default;
 
-            SharedPointer< CommandBuffer > create( CommandBuffer::Descriptor const &descriptor ) noexcept;
-            void destroy( CommandBuffer *commandBuffer ) noexcept override;
+            inline VkCommandBuffer getHandler( CommandBuffer *commandBuffer, crimild::Size index ) noexcept
+            {
+                if ( !m_handlers.contains( commandBuffer ) && !bind( commandBuffer ) ) {
+                    return VK_NULL_HANDLE;
+                }
+                return m_handlers[ commandBuffer ][ index ];
+            }
+
+            crimild::Bool bind( CommandBuffer *commandBuffer ) noexcept override;
+            crimild::Bool unbind( CommandBuffer *commandBuffer ) noexcept override;
 
         private:
-            RenderDevice *m_renderDevice = nullptr;
+            void recordCommands( RenderDevice *renderDevice, CommandBuffer *commandBuffer, crimild::Size index ) noexcept;
+
+        private:
+            containers::Map< CommandBuffer *, containers::Array< VkCommandBuffer >> m_handlers;
         };
 
 	}

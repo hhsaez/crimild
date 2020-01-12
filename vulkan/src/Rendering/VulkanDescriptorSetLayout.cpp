@@ -31,20 +31,25 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
-DescriptorSetLayout::~DescriptorSetLayout( void ) noexcept
+VkDescriptorSetLayout DescriptorSetLayoutManager::getHandler( DescriptorSetLayout *descriptorSetLayout ) noexcept
 {
-    if ( manager != nullptr ) {
-        manager->destroy( this );
+    if ( !m_handlers.contains( descriptorSetLayout ) && !bind( descriptorSetLayout ) ) {
+        return VK_NULL_HANDLE;
     }
+    return m_handlers[ descriptorSetLayout ];
 }
 
-SharedPointer< DescriptorSetLayout > DescriptorSetLayoutManager::create( DescriptorSetLayout::Descriptor const &descriptor ) noexcept
+crimild::Bool DescriptorSetLayoutManager::bind( DescriptorSetLayout *descriptorSetLayout ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Creating Vulkan descriptor set layout" );
+    if ( m_handlers.contains( descriptorSetLayout ) ) {
+        return true;
+    }
 
-    auto renderDevice = m_renderDevice;
+    CRIMILD_LOG_TRACE( "Binding Vulkan descriptor set layout" );
+
+    auto renderDevice = getRenderDevice();
     if ( renderDevice == nullptr ) {
-        renderDevice = descriptor.renderDevice;
+        return false;
     }
 
     auto uboLayoutBinding = VkDescriptorSetLayoutBinding {
@@ -69,27 +74,37 @@ SharedPointer< DescriptorSetLayout > DescriptorSetLayoutManager::create( Descrip
             nullptr,
             &descriptorSetLayoutHandler
         )
-	);
+    );
 
-    auto descriptorSetLayout = crimild::alloc< DescriptorSetLayout >();
-    descriptorSetLayout->renderDevice = renderDevice;
-    descriptorSetLayout->manager = this;
-    descriptorSetLayout->handler = descriptorSetLayoutHandler;
-    insert( crimild::get_ptr( descriptorSetLayout ) );
-    return descriptorSetLayout;
+    m_handlers[ descriptorSetLayout ] = descriptorSetLayoutHandler;
+
+    return RenderResourceManager< DescriptorSetLayout >::bind( descriptorSetLayout );
 }
 
-void DescriptorSetLayoutManager::destroy( DescriptorSetLayout *descriptorSetLayout ) noexcept
+crimild::Bool DescriptorSetLayoutManager::unbind( DescriptorSetLayout *descriptorSetLayout ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Destroying Vulkan descriptor set layout" );
-
-    if ( descriptorSetLayout->renderDevice != nullptr && descriptorSetLayout->handler != VK_NULL_HANDLE ) {
-        vkDestroyDescriptorSetLayout( descriptorSetLayout->renderDevice->handler, descriptorSetLayout->handler, nullptr );
+    if ( !m_handlers.contains( descriptorSetLayout ) ) {
+        return false;
     }
 
-    descriptorSetLayout->manager = nullptr;
-    descriptorSetLayout->renderDevice = nullptr;
-    descriptorSetLayout->handler = VK_NULL_HANDLE;
-    erase( descriptorSetLayout );
+    CRIMILD_LOG_TRACE( "Unbinding Vulkan descriptor set layout" );
+
+    auto handler = getHandler( descriptorSetLayout );
+    if ( handler == VK_NULL_HANDLE ) {
+        return false;
+    }
+
+    auto renderDevice = getRenderDevice();
+    if ( renderDevice != nullptr ) {
+        vkDestroyDescriptorSetLayout(
+            renderDevice->handler,
+            handler,
+            nullptr
+        );
+    }
+
+    m_handlers.remove( descriptorSetLayout );
+
+    return RenderResourceManager< DescriptorSetLayout >::unbind( descriptorSetLayout );
 }
 
