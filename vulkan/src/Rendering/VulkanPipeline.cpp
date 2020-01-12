@@ -126,7 +126,8 @@ crimild::Bool PipelineManager::unbind( Pipeline *pipeline ) noexcept
     CRIMILD_LOG_TRACE( "Unbind Vulkan pipeline" );
 
     auto renderDevice = getRenderDevice();
-    if ( renderDevice != nullptr ) {
+    if ( renderDevice == nullptr ) {
+        CRIMILD_LOG_ERROR( "No valid render device instance" );
         return false;
     }
 
@@ -141,7 +142,7 @@ crimild::Bool PipelineManager::unbind( Pipeline *pipeline ) noexcept
     m_handlers.remove( pipeline );
     m_pipelineLayouts.remove( pipeline );
 
-    return VulkanRenderResourceManager< Pipeline >::bind( pipeline );
+    return VulkanRenderResourceManager< Pipeline >::unbind( pipeline );
 }
 
 PipelineManager::ShaderModuleArray PipelineManager::createShaderModules( RenderDevice *renderDevice, ShaderProgram *program ) const noexcept
