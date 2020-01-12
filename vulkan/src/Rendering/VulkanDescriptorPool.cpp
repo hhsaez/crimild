@@ -155,6 +155,7 @@ crimild::Bool DescriptorPoolManager::unbind( DescriptorPool *descriptorPool ) no
 
     auto renderDevice = getRenderDevice();
     if ( renderDevice == nullptr ) {
+        CRIMILD_LOG_ERROR( "No valid render device instance" );
         return false;
     }
 

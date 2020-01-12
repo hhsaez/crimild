@@ -131,6 +131,10 @@ crimild::Bool BufferManager::unbind( Buffer *buffer ) noexcept
     CRIMILD_LOG_TRACE( "Unbinding Vulkan buffer" );
 
     auto renderDevice = getRenderDevice();
+    if ( renderDevice == nullptr ) {
+        CRIMILD_LOG_ERROR( "No valid render device instance" );
+        return false;
+    }
 
     m_bufferHandlers[ buffer ].each( [ renderDevice ]( VkBuffer handler ) {
         vkDestroyBuffer( renderDevice->handler, handler, nullptr );

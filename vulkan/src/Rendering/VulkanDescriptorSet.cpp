@@ -104,7 +104,7 @@ crimild::Bool DescriptorSetManager::unbind( DescriptorSet *descriptorSet ) noexc
 
     m_handlers[ descriptorSet ].clear();
 
-    return VulkanRenderResourceManager< DescriptorSet >::bind( descriptorSet );
+    return VulkanRenderResourceManager< DescriptorSet >::unbind( descriptorSet );
 }
 
 void DescriptorSetManager::write( VkDescriptorSet handler, VkBuffer bufferHandler, crimild::Size offset, crimild::Size size ) noexcept
