@@ -36,37 +36,14 @@ namespace crimild {
 
     namespace vulkan {
 
-        /*
-        class DescriptorPool : public VulkanObject {
-            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::DescriptorPool )
+        class DescriptorPoolManager : public SingleHandlerRenderResourceManagerImpl< DescriptorPool, VkDescriptorPool > {
+            using ManagerImpl = SingleHandlerRenderResourceManagerImpl< DescriptorPool, VkDescriptorPool >;
 
         public:
-            struct Descriptor {
-                RenderDevice *renderDevice;
-                Swapchain *swapchain;
-            };
-
-        public:
-            ~DescriptorPool( void ) noexcept;
-
-            RenderDevice *renderDevice = nullptr;
-            DescriptorPoolManager *manager = nullptr;
-            VkDescriptorPool handler = VK_NULL_HANDLE;
-        };
-         */
-
-        class DescriptorPoolManager : public VulkanRenderResourceManager< DescriptorPool > {
-        public:
-            explicit DescriptorPoolManager( RenderDevice *renderDevice ) noexcept : VulkanRenderResourceManager< DescriptorPool >( renderDevice ) { }
             virtual ~DescriptorPoolManager( void ) noexcept = default;
-
-            VkDescriptorPool getHandler( DescriptorPool *descriptorPool ) noexcept;
 
             crimild::Bool bind( DescriptorPool *descriptorPool ) noexcept override;
             crimild::Bool unbind( DescriptorPool *descriptorPool ) noexcept override;
-
-        private:
-            containers::Map< DescriptorPool *, VkDescriptorPool > m_handlers;
         };
 
     }
