@@ -9,7 +9,7 @@
 *     * Redistributions in binary form must reproduce the above copyright
 *       notice, this list of conditions and the following disclaimer in the
 *       documentation and/or other materials provided with the distribution.
-*     * Neither the name of the copyright holders nor the
+*     * Neither the name of the copyright holder nor the
 *       names of its contributors may be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
@@ -25,51 +25,34 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CRIMILD_RENDERING_VULKAN_DESCRIPTOR_POOL_
-#define CRIMILD_RENDERING_VULKAN_DESCRIPTOR_POOL_
+#ifndef CRIMILD_RENDERING_PIPELINE_
+#define CRIMILD_RENDERING_PIPELINE_
 
-#include "Rendering/VulkanRenderResource.hpp"
-#include "Rendering/DescriptorSet.hpp"
-#include "Foundation/Containers/Map.hpp"
+#include "Rendering/RenderResource.hpp"
+#include "Rendering/VertexBuffer.hpp"
+#include "Foundation/SharedObject.hpp"
+#include "Primitives/Primitive.hpp"
+#include "Mathematics/Rect.hpp"
 
 namespace crimild {
 
-    namespace vulkan {
+    class ShaderProgram;
+    class DescriptorSetLayout;
+    class RenderPass;
 
-        /*
-        class DescriptorPool : public VulkanObject {
-            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::DescriptorPool )
+    class Pipeline : public SharedObject, public RenderResourceImpl< Pipeline > {
+    public:
+        virtual ~Pipeline( void ) noexcept = default;
 
-        public:
-            struct Descriptor {
-                RenderDevice *renderDevice;
-                Swapchain *swapchain;
-            };
-
-        public:
-            ~DescriptorPool( void ) noexcept;
-
-            RenderDevice *renderDevice = nullptr;
-            DescriptorPoolManager *manager = nullptr;
-            VkDescriptorPool handler = VK_NULL_HANDLE;
-        };
-         */
-
-        class DescriptorPoolManager : public VulkanRenderResourceManager< DescriptorPool > {
-        public:
-            explicit DescriptorPoolManager( RenderDevice *renderDevice ) noexcept : VulkanRenderResourceManager< DescriptorPool >( renderDevice ) { }
-            virtual ~DescriptorPoolManager( void ) noexcept = default;
-
-            VkDescriptorPool getHandler( DescriptorPool *descriptorPool ) noexcept;
-
-            crimild::Bool bind( DescriptorPool *descriptorPool ) noexcept override;
-            crimild::Bool unbind( DescriptorPool *descriptorPool ) noexcept override;
-
-        private:
-            containers::Map< DescriptorPool *, VkDescriptorPool > m_handlers;
-        };
-
-    }
+        SharedPointer< ShaderProgram > program;
+        RenderPass *renderPass;
+        Primitive::Type primitiveType;
+        Rectf viewport;
+        Rectf scissor;
+        std::vector< VertexInputAttributeDescription > attributeDescriptions;
+        VertexInputBindingDescription bindingDescription;
+        SharedPointer< DescriptorSetLayout > descriptorSetLayout;
+    };
 
 }
 

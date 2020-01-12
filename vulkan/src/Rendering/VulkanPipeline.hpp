@@ -28,40 +28,33 @@
 #ifndef CRIMILD_VULKAN_RENDERING_PIPELINE_
 #define CRIMILD_VULKAN_RENDERING_PIPELINE_
 
-#include "Foundation/VulkanObject.hpp"
-#include "Primitives/Primitive.hpp"
-#include "Mathematics/Rect.hpp"
+#include "Rendering/VulkanRenderResource.hpp"
+#include "Rendering/Pipeline.hpp"
+#include "Rendering/VulkanShaderModule.hpp"
+#include "Foundation/Containers/Map.hpp"
 
 namespace crimild {
 
+    class DescriptorSetLayout;
 	class Shader;
 	class ShaderProgram;
 
 	namespace vulkan {
 
-        class DescriptorSetLayout;
         class PipelineLayout;
+
+        /*
+
         class PipelineManager;
 		class RenderDevice;
         class RenderPass;
         class ShaderModule;
         class Swapchain;
 
-		/**
-		 */
 		class Pipeline : public VulkanObject {
             CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::Pipeline )
 
 		public:
-			/**
-			   TODO:
-			   - Primitive type
-			   - VBO
-			   - IBO
-			   - Cull Mode
-			   - Polygon Mode (fill, line, point)
-			   - Line Width
-			*/
 			struct Descriptor {
                 RenderDevice *renderDevice;
 				SharedPointer< ShaderProgram > program;
@@ -82,14 +75,25 @@ namespace crimild {
             PipelineManager *manager = nullptr;
             SharedPointer< PipelineLayout > layout;
 		};
+         */
 
-        class PipelineManager : public VulkanObjectManager< Pipeline > {
+        class PipelineManager : public VulkanRenderResourceManager< Pipeline > {
         public:
-            explicit PipelineManager( RenderDevice *renderDevice ) noexcept : m_renderDevice( renderDevice ) { }
+            explicit PipelineManager( RenderDevice *renderDevice ) noexcept : VulkanRenderResourceManager< Pipeline >( renderDevice ) { }
             virtual ~PipelineManager( void ) noexcept = default;
 
-            SharedPointer< Pipeline > create( Pipeline::Descriptor const &descriptor ) noexcept;
-            void destroy( Pipeline *pipeline ) noexcept;
+            VkPipeline getHandler( Pipeline *pipeline ) noexcept;
+
+            PipelineLayout *getPipelineLayout( Pipeline *pipeline )
+            {
+                if ( !m_pipelineLayouts.contains( pipeline ) && !bind( pipeline ) ) {
+                    return nullptr;
+                }
+                return crimild::get_ptr( m_pipelineLayouts[ pipeline ] );
+            }
+
+            crimild::Bool bind( Pipeline *pipeline ) noexcept override;
+            crimild::Bool unbind( Pipeline *pipeline ) noexcept override;
 
         private:
             using ShaderModuleArray = std::vector< SharedPointer< ShaderModule >>;
@@ -98,7 +102,9 @@ namespace crimild {
             ShaderModuleArray createShaderModules( RenderDevice *renderDevice, ShaderProgram *program ) const noexcept;
             ShaderStageArray createShaderStages( const ShaderModuleArray &modules ) const noexcept;
             VkPipelineShaderStageCreateInfo createShaderStage( const ShaderModule &module ) const noexcept;
-            VkPipelineVertexInputStateCreateInfo createVertexInput( const std::vector< VkVertexInputBindingDescription > &bindingDescription, const std::vector< VkVertexInputAttributeDescription > &attributeDescriptions ) const noexcept;
+            std::vector< VkVertexInputBindingDescription > getVertexInputBindingDescriptions( Pipeline *pipeline ) const noexcept;
+            std::vector< VkVertexInputAttributeDescription > getVertexInputAttributeDescriptions( Pipeline *pipeline ) const noexcept;
+            VkPipelineVertexInputStateCreateInfo createVertexInput( const std::vector< VkVertexInputBindingDescription > &bindingDescriptions, const std::vector< VkVertexInputAttributeDescription > &attributeDescriptions ) const noexcept;
             VkPipelineInputAssemblyStateCreateInfo createInputAssemby( Primitive::Type primitiveType ) const noexcept;
             VkViewport createViewport( const Rectf &viewport ) const noexcept;
             VkRect2D createScissor( const Rectf &scissor ) const noexcept;
@@ -110,7 +116,8 @@ namespace crimild {
             VkPipelineColorBlendStateCreateInfo createColorBlending( const VkPipelineColorBlendAttachmentState &colorBlendAttachment ) const noexcept;
 
         private:
-            RenderDevice *m_renderDevice = nullptr;
+            containers::Map< Pipeline *, VkPipeline > m_handlers;
+            containers::Map< Pipeline *, SharedPointer< PipelineLayout >> m_pipelineLayouts;
         };
 
 	}

@@ -28,15 +28,19 @@
 #ifndef CRIMILD_VULKAN_RENDERING_DESCRIPTOR_SET_
 #define CRIMILD_VULKAN_RENDERING_DESCRIPTOR_SET_
 
-#include "Foundation/VulkanObject.hpp"
+#include "Rendering/VulkanRenderResource.hpp"
+#include "Rendering/DescriptorSet.hpp"
+#include "Foundation/Containers/Map.hpp"
+#include "Foundation/Containers/Array.hpp"
 
 namespace crimild {
 
+    class Buffer;
+
     namespace vulkan {
 
-        class Buffer;
+        /*
         class DescriptorPool;
-        class DescriptorSetLayout;
         class DescriptorSetManager;
         class RenderDevice;
 
@@ -60,16 +64,27 @@ namespace crimild {
             void write( Buffer *buffer, crimild::Size offset, crimild::Size size ) noexcept;
         };
 
-        class DescriptorSetManager : public VulkanObjectManager< DescriptorSet > {
+         */
+
+        class DescriptorSetManager : public VulkanRenderResourceManager< DescriptorSet > {
         public:
-            explicit DescriptorSetManager( RenderDevice *renderDevice = nullptr ) noexcept : m_renderDevice( renderDevice ) { }
+            explicit DescriptorSetManager( RenderDevice *renderDevice = nullptr ) noexcept : VulkanRenderResourceManager< DescriptorSet >( renderDevice ) { }
             virtual ~DescriptorSetManager( void ) noexcept = default;
 
-            SharedPointer< DescriptorSet > create( DescriptorSet::Descriptor const &descriptor ) noexcept;
-            void destroy( DescriptorSet *descriptorSet ) noexcept override;
+            VkDescriptorSet getHandler( DescriptorSet *descriptorSet, crimild::Size index ) noexcept;
+
+            crimild::Bool bind( DescriptorSet *descriptorSet ) noexcept override;
+            crimild::Bool unbind( DescriptorSet *descriptorSet ) noexcept override;
 
         private:
-            RenderDevice *m_renderDevice = nullptr;
+            void write( VkDescriptorSet handler, VkBuffer buffer, crimild::Size offset, crimild::Size size ) noexcept;
+
+//            SharedPointer< DescriptorSet > create( DescriptorSet::Descriptor const &descriptor ) noexcept;
+//            void destroy( DescriptorSet *descriptorSet ) noexcept override;
+
+        private:
+            containers::Map< DescriptorSet *, containers::Array< VkDescriptorSet >> m_handlers;
+//            RenderDevice *m_renderDevice = nullptr;
         };
 
     }

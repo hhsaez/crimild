@@ -29,6 +29,7 @@
 #define CRIMILD_VULKAN_RENDERING_FRAMEBUFFER_
 
 #include "Foundation/VulkanObject.hpp"
+#include "Foundation/Containers/Array.hpp"
 
 namespace crimild {
 
@@ -37,7 +38,7 @@ namespace crimild {
         class FramebufferManager;
 		class ImageView;
         class RenderDevice;
-		class RenderPass;
+        class RenderPass;
 
 		/**
 		 */
@@ -66,11 +67,17 @@ namespace crimild {
             explicit FramebufferManager( RenderDevice *renderDevice = nullptr ) noexcept : m_renderDevice( renderDevice ) { }
             virtual ~FramebufferManager( void ) noexcept = default;
 
+            Framebuffer *getFramebuffer( crimild::Size index ) noexcept
+            {
+                return m_framebuffers[ index ];
+            }
+
             SharedPointer< Framebuffer > create( Framebuffer::Descriptor const &descriptor ) noexcept;
             void destroy( Framebuffer *framebuffer ) noexcept override;
 
         private:
             RenderDevice *m_renderDevice = nullptr;
+            containers::Array< Framebuffer * > m_framebuffers;
         };
 
 	}

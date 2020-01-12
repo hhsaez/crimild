@@ -28,15 +28,18 @@
 #ifndef CRIMILD_VULKAN_RENDERING_DESCRIPTOR_SET_LAYOUT_
 #define CRIMILD_VULKAN_RENDERING_DESCRIPTOR_SET_LAYOUT_
 
-#include "Foundation/VulkanObject.hpp"
+#include "Rendering/VulkanRenderResource.hpp"
+#include "Rendering/DescriptorSet.hpp"
+#include "Foundation/Containers/Map.hpp"
 
 namespace crimild {
 
     namespace vulkan {
 
         class RenderDevice;
-        class DescriptorSetLayoutManager;
+//        class DescriptorSetLayoutManager;
 
+        /*
         class DescriptorSetLayout : public VulkanObject {
             CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::DescriptorSetLayout )
 
@@ -52,17 +55,23 @@ namespace crimild {
             DescriptorSetLayoutManager *manager = nullptr;
             RenderDevice *renderDevice = nullptr;
         };
+         */
 
-        class DescriptorSetLayoutManager : public VulkanObjectManager< DescriptorSetLayout > {
+        class DescriptorSetLayoutManager : public VulkanRenderResourceManager< DescriptorSetLayout > {
         public:
-            explicit DescriptorSetLayoutManager( RenderDevice *renderDevice = nullptr ) noexcept : m_renderDevice( renderDevice ) { }
+            explicit DescriptorSetLayoutManager( RenderDevice *renderDevice = nullptr ) noexcept : VulkanRenderResourceManager< DescriptorSetLayout >( renderDevice ) { }
             virtual ~DescriptorSetLayoutManager( void ) noexcept = default;
 
-            SharedPointer< DescriptorSetLayout > create( DescriptorSetLayout::Descriptor const &descriptor ) noexcept;
-            void destroy( DescriptorSetLayout *descriptorSetLayout ) noexcept override;
+            VkDescriptorSetLayout getHandler( DescriptorSetLayout *descriptorSetLayout ) noexcept;
+
+            crimild::Bool bind( DescriptorSetLayout *descriptorSetLayout ) noexcept override;
+            crimild::Bool unbind( DescriptorSetLayout *descriptorSetLayout ) noexcept override;
+
+//            SharedPointer< DescriptorSetLayout > create( DescriptorSetLayout::Descriptor const &descriptor ) noexcept;
+//            void destroy( DescriptorSetLayout *descriptorSetLayout ) noexcept override;
 
         private:
-            RenderDevice *m_renderDevice = nullptr;
+            containers::Map< DescriptorSetLayout *, VkDescriptorSetLayout > m_handlers;
         };
 
     }

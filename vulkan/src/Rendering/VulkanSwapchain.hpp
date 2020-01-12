@@ -95,6 +95,8 @@ namespace crimild {
             explicit SwapchainManager( RenderDevice *renderDevice ) noexcept : m_renderDevice( renderDevice ) { }
             virtual ~SwapchainManager( void ) = default;
 
+            Swapchain *getSwapchain( void ) noexcept { return VulkanObjectManager< Swapchain >::first(); }
+
             SharedPointer< Swapchain > create( Swapchain::Descriptor const &descriptor ) noexcept;
             void destroy( Swapchain *swapchain ) noexcept override;
 

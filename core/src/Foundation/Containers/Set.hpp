@@ -148,6 +148,9 @@ namespace crimild {
 				}
 			}
 
+            ValueType &first( void ) noexcept { return std::begin( _set ); }
+            const ValueType &first( void ) const noexcept { return std::begin( _set ); }
+
 		private:
 			SetImpl _set;
 		};

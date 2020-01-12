@@ -25,48 +25,29 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CRIMILD_RENDERING_VULKAN_DESCRIPTOR_POOL_
-#define CRIMILD_RENDERING_VULKAN_DESCRIPTOR_POOL_
+#ifndef CRIMILD_VULKAN_RENDERING_RENDER_RESOURCE_
+#define CRIMILD_VULKAN_RENDERING_RENDER_RESOURCE_
 
-#include "Rendering/VulkanRenderResource.hpp"
-#include "Rendering/DescriptorSet.hpp"
-#include "Foundation/Containers/Map.hpp"
+#include "Foundation/VulkanUtils.hpp"
+#include "Rendering/RenderResource.hpp"
 
 namespace crimild {
 
     namespace vulkan {
 
-        /*
-        class DescriptorPool : public VulkanObject {
-            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::DescriptorPool )
+        class RenderDevice;
 
+        template< typename T >
+        class VulkanRenderResourceManager : public RenderResourceManager< T > {
+        protected:
+            VulkanRenderResourceManager( RenderDevice *renderDevice = nullptr ) noexcept : m_renderDevice( renderDevice ) { }
         public:
-            struct Descriptor {
-                RenderDevice *renderDevice;
-                Swapchain *swapchain;
-            };
+            virtual ~VulkanRenderResourceManager( void ) noexcept = default;
 
-        public:
-            ~DescriptorPool( void ) noexcept;
-
-            RenderDevice *renderDevice = nullptr;
-            DescriptorPoolManager *manager = nullptr;
-            VkDescriptorPool handler = VK_NULL_HANDLE;
-        };
-         */
-
-        class DescriptorPoolManager : public VulkanRenderResourceManager< DescriptorPool > {
-        public:
-            explicit DescriptorPoolManager( RenderDevice *renderDevice ) noexcept : VulkanRenderResourceManager< DescriptorPool >( renderDevice ) { }
-            virtual ~DescriptorPoolManager( void ) noexcept = default;
-
-            VkDescriptorPool getHandler( DescriptorPool *descriptorPool ) noexcept;
-
-            crimild::Bool bind( DescriptorPool *descriptorPool ) noexcept override;
-            crimild::Bool unbind( DescriptorPool *descriptorPool ) noexcept override;
+            RenderDevice *getRenderDevice( void ) noexcept { return m_renderDevice; }
 
         private:
-            containers::Map< DescriptorPool *, VkDescriptorPool > m_handlers;
+            RenderDevice *m_renderDevice = nullptr;
         };
 
     }
@@ -74,5 +55,4 @@ namespace crimild {
 }
 
 #endif
-
 
