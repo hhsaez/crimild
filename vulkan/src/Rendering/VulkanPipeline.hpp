@@ -77,12 +77,11 @@ namespace crimild {
 		};
          */
 
-        class PipelineManager : public VulkanRenderResourceManager< Pipeline > {
-        public:
-            explicit PipelineManager( RenderDevice *renderDevice ) noexcept : VulkanRenderResourceManager< Pipeline >( renderDevice ) { }
-            virtual ~PipelineManager( void ) noexcept = default;
+        class PipelineManager : public SingleHandlerRenderResourceManagerImpl< Pipeline, VkPipeline > {
+            using ManagerImpl = SingleHandlerRenderResourceManagerImpl< Pipeline, VkPipeline >;
 
-            VkPipeline getHandler( Pipeline *pipeline ) noexcept;
+        public:
+            virtual ~PipelineManager( void ) noexcept = default;
 
             PipelineLayout *getPipelineLayout( Pipeline *pipeline )
             {
@@ -116,7 +115,6 @@ namespace crimild {
             VkPipelineColorBlendStateCreateInfo createColorBlending( const VkPipelineColorBlendAttachmentState &colorBlendAttachment ) const noexcept;
 
         private:
-            containers::Map< Pipeline *, VkPipeline > m_handlers;
             containers::Map< Pipeline *, SharedPointer< PipelineLayout >> m_pipelineLayouts;
         };
 
