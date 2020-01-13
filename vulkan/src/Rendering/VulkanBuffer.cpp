@@ -32,27 +32,6 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
-/*
-void vulkan::Buffer::update( const void *newData ) noexcept
-{
-    void *data = nullptr;
-    CRIMILD_VULKAN_CHECK(
-         vkMapMemory(
-            renderDevice->handler,
-            memory,
-            0,
-            size,
-            0,
-            &data
-        )
-    );
-
-    memcpy( data, newData, size );
-
-    vkUnmapMemory( renderDevice->handler, memory );
-}
-*/
-
 crimild::Bool BufferManager::bind( Buffer *buffer ) noexcept
 {
     if ( m_bufferHandlers.contains( buffer ) ) {
@@ -396,3 +375,31 @@ void BufferManager::copyBuffer( RenderDevice *renderDevice, CommandPool *command
      */
 }
 
+void BufferManager::updateUniformBuffers( crimild::Size index ) noexcept
+{
+    auto renderDevice = getRenderDevice();
+    m_bufferMemoryHandlers.each( [ this, renderDevice, index ]( const Buffer *buffer, const containers::Array< VkDeviceMemory > &bufferMemory ) {
+        if ( buffer->getUsage() == Buffer::Usage::UNIFORM_BUFFER ) {
+        	updateBuffer( renderDevice, bufferMemory[ index ], buffer->getRawData(), buffer->getSize() );
+        }
+    });
+}
+
+void BufferManager::updateBuffer( RenderDevice *renderDevice, VkDeviceMemory bufferMemory, const void *srcData, crimild::Size size ) noexcept
+{
+    void *dstData = nullptr;
+    CRIMILD_VULKAN_CHECK(
+         vkMapMemory(
+            renderDevice->handler,
+            bufferMemory,
+            0,
+            size,
+            0,
+            &dstData
+        )
+    );
+
+    memcpy( dstData, srcData, size );
+
+    vkUnmapMemory( renderDevice->handler, bufferMemory );
+}
