@@ -37,48 +37,8 @@ namespace crimild {
 
     namespace vulkan {
 
-//        class BufferManager;
         class RenderDevice;
         class CommandPool;
-
-        /*
-        class Buffer : public VulkanObject {
-            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::Buffer )
-
-        public:
-            enum class Usage {
-                VERTEX_BUFFER,
-                INDEX_BUFFER,
-                UNIFORM_BUFFER,
-                TRANSFER_SRC,
-                TRANSFER_DST,
-            };
-
-            struct Descriptor {
-                RenderDevice *renderDevice;
-                CommandPool *commandPool;
-                const void *data;
-                crimild::Size size;
-                Usage usage;
-            };
-
-            enum class SharingMode {
-
-            };
-
-        public:
-            ~Buffer( void ) noexcept;
-
-            VkBuffer handler = VK_NULL_HANDLE;
-            VkDeviceMemory memory = VK_NULL_HANDLE;
-            RenderDevice *renderDevice = nullptr;
-            BufferManager *manager = nullptr;
-            crimild::Size size = 0;
-
-            // TODO: offset, range?
-            void update( const void *newData ) noexcept;
-        };
-         */
 
         class BufferManager : public VulkanRenderResourceManager< Buffer > {
         public:
@@ -91,18 +51,17 @@ namespace crimild {
             VkBuffer getHandler( Buffer *buffer, crimild::Size index ) noexcept;
             VkDeviceMemory getMemory( Buffer *buffer, crimild::Size index ) noexcept;
 
+            void updateUniformBuffers( crimild::Size index ) noexcept;
+
         private:
             containers::Map< Buffer *, containers::Array< VkBuffer >> m_bufferHandlers;
             containers::Map< Buffer *, containers::Array< VkDeviceMemory >> m_bufferMemoryHandlers;
 
-//        public:
-//            SharedPointer< Buffer > create( Buffer::Descriptor const &descriptor ) noexcept;
-//            void destroy( Buffer *buffer ) noexcept override;
-//
         private:
             crimild::UInt32 findMemoryType( RenderDevice *renderDevice, crimild::UInt32 typeFilter, VkMemoryPropertyFlags properties ) noexcept;
             crimild::Bool createBuffer( RenderDevice *renderDevice, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer &bufferBuffer, VkDeviceMemory &bufferMemory ) noexcept;
             void copyBuffer( RenderDevice *renderDevice, CommandPool *commandPool, VkBuffer srcBufferHandler, VkBuffer dstBufferHandler, VkDeviceSize size ) const noexcept;
+            void updateBuffer( RenderDevice *renderDevice, VkDeviceMemory bufferMemory, const void *data, crimild::Size size ) noexcept;
         };
 
     }

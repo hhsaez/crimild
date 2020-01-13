@@ -157,7 +157,7 @@ void VulkanSystem::update( void )
 
     auto imageIndex = result.imageIndex;
 
-//    updateUniformBuffer( imageIndex );
+    updateUniformBuffer( imageIndex );
 
     auto commandBuffer = crimild::get_ptr( m_commandBuffers[ 0 ] );//[ imageIndex ];
 
@@ -557,6 +557,7 @@ crimild::Bool VulkanSystem::createUniformBuffers( void ) noexcept
 
 void VulkanSystem::updateUniformBuffer( crimild::UInt32 currentImage ) noexcept
 {
+    /*
     static const bool ENABLE_ROTATION = true;
     static auto startTime = std::chrono::high_resolution_clock::now();
 
@@ -596,6 +597,8 @@ void VulkanSystem::updateUniformBuffer( crimild::UInt32 currentImage ) noexcept
     };
 
 //    m_uniformBuffers[ currentImage ]->update( &ubo );
+     */
+    getRenderDevice()->updateUniformBuffers( currentImage );
 }
 
 /*
