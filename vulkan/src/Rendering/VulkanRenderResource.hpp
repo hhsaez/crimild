@@ -32,6 +32,7 @@
 #include "Rendering/RenderResource.hpp"
 #include "Foundation/Containers/Array.hpp"
 #include "Foundation/Containers/Map.hpp"
+#include "Mathematics/Numeric.hpp"
 
 namespace crimild {
 
@@ -129,8 +130,11 @@ namespace crimild {
                 if ( !validate( resource ) && !this->bind( resource ) ) {
                     return VK_NULL_HANDLE;
                 }
+                // Handlers always have at least one element at this point
+                // (otherwise, validate() fails) and then there'll be no overflow
+                // when doing size() - 1
                 auto &handlers = m_handlers[ resource ];
-                if ( index < handlers.size() ) {
+                if ( index >= handlers.size() ) {
                     index = handlers.size() - 1;
                 }
                 return m_handlers[ resource ][ index ];
