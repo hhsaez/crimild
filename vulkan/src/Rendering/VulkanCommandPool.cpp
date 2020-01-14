@@ -53,7 +53,7 @@ SharedPointer< CommandPool > CommandPoolManager::create( CommandPool::Descriptor
     auto createInfo = VkCommandPoolCreateInfo {
         .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
         .queueFamilyIndex = descriptor.queueFamilyIndex,
-        .flags = 0,
+        .flags = 0,//VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
     };
 
     VkCommandPool commandPoolHandler;
@@ -90,5 +90,18 @@ void CommandPoolManager::destroy( CommandPool *commandPool ) noexcept
     commandPool->handler = VK_NULL_HANDLE;
     commandPool->manager = nullptr;
     erase( commandPool );
+}
+
+void CommandPoolManager::reset( CommandPool *commandPool ) noexcept
+{
+    auto renderDevice = m_renderDevice;
+    auto flags = VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT;
+    CRIMILD_VULKAN_CHECK(
+		vkResetCommandPool(
+        	renderDevice->handler,
+        	commandPool->handler,
+        	flags
+        )
+    );
 }
 

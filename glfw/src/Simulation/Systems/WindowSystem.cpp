@@ -236,7 +236,12 @@ bool WindowSystem::createWindow( void )
   	glfwMakeContextCurrent( _window );
 
 	glfwSwapInterval( vsync ? 1 : 0 );
-#endif	
+#endif
+
+    // Make sure we have proper windows settings defined
+    settings->set( "video.width", width );
+    settings->set( "video.height", height );
+    settings->set( "video.fullscreen", fullscreen );
 
 	return true;
 }

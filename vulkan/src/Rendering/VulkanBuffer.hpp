@@ -40,21 +40,20 @@ namespace crimild {
         class RenderDevice;
         class CommandPool;
 
-        class BufferManager : public VulkanRenderResourceManager< Buffer > {
+        class BufferManager : public MultiHandlerRenderResourceManagerImpl< Buffer, VkBuffer > {
+            using ManagerImpl = MultiHandlerRenderResourceManagerImpl< Buffer, VkBuffer >;
+
         public:
-            explicit BufferManager( RenderDevice *renderDevice = nullptr ) noexcept : VulkanRenderResourceManager< Buffer >( renderDevice ) { }
             virtual ~BufferManager( void ) noexcept = default;
 
             crimild::Bool bind( Buffer *buffer ) noexcept override;
             crimild::Bool unbind( Buffer *buffer ) noexcept override;
 
-            VkBuffer getHandler( Buffer *buffer, crimild::Size index ) noexcept;
             VkDeviceMemory getMemory( Buffer *buffer, crimild::Size index ) noexcept;
 
             void updateUniformBuffers( crimild::Size index ) noexcept;
 
         private:
-            containers::Map< Buffer *, containers::Array< VkBuffer >> m_bufferHandlers;
             containers::Map< Buffer *, containers::Array< VkDeviceMemory >> m_bufferMemoryHandlers;
 
         private:

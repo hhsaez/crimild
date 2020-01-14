@@ -44,78 +44,17 @@ namespace crimild {
 
 	namespace vulkan {
 
-        /*
-
-        class CommandBufferManager;
-		class CommandPool;
-//        class PipelineLayout;
-		class Framebuffer;
-        class RenderDevice;
-
-		class CommandBuffer : public VulkanObject {
-            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::CommandBuffer )
-
-		public:
-			struct Descriptor {
-                RenderDevice *renderDevice;
-				CommandPool *commandPool;
-			};
-
-			enum class Usage {
-				DEFAULT,
-				ONE_TIME_SUBMIT,
-				RENDER_PASS_CONTINUE,
-				SIMULTANEOUS_USE,
-			};
-			
-		public:
-			~CommandBuffer( void ) noexcept;
-			
-            RenderDevice *renderDevice = nullptr;
-            CommandPool *commandPool = nullptr;
-            VkCommandBuffer handler = VK_NULL_HANDLE;
-            CommandBufferManager *manager = nullptr;
+        class CommandBufferManager : public MultiHandlerRenderResourceManagerImpl< CommandBuffer, VkCommandBuffer > {
+            using ManagerImpl = MultiHandlerRenderResourceManagerImpl< CommandBuffer, VkCommandBuffer >;
 
         public:
-			void begin( Usage usage = Usage::DEFAULT ) const noexcept;
-            void end( void ) const noexcept;
-
-            void beginRenderPass( const RenderPass *renderPass, const Framebuffer *framebuffer, const RGBAColorf &clearColor ) const noexcept;
-            void endRenderPass( void ) const noexcept;
-
-            void bindGraphicsPipeline( const Pipeline *pipeline ) const noexcept;
-            void bindVertexBuffer( const Buffer *buffer ) const noexcept;
-            void bindIndexBuffer( const Buffer *buffer ) const noexcept;
-            void bindDescriptorSets( const DescriptorSet *descriptorSet, const PipelineLayout *pipelineLayout ) const noexcept;
-
-            void draw( crimild::UInt32 vertexCount ) const noexcept;
-            void drawIndexed( crimild::UInt32 indexCount ) const noexcept;
-
-            void copy( Buffer *src, crimild::Size srcOffset, Buffer *dst, crimild::Size dstOffset, crimild::Size size ) const noexcept;
-		};
-         */
-
-        class CommandBufferManager : public VulkanRenderResourceManager< CommandBuffer > {
-        public:
-            explicit CommandBufferManager( RenderDevice *renderDevice = nullptr ) noexcept : VulkanRenderResourceManager< CommandBuffer >( renderDevice ) { }
             virtual ~CommandBufferManager( void ) noexcept = default;
-
-            inline VkCommandBuffer getHandler( CommandBuffer *commandBuffer, crimild::Size index ) noexcept
-            {
-                if ( !m_handlers.contains( commandBuffer ) && !bind( commandBuffer ) ) {
-                    return VK_NULL_HANDLE;
-                }
-                return m_handlers[ commandBuffer ][ index ];
-            }
 
             crimild::Bool bind( CommandBuffer *commandBuffer ) noexcept override;
             crimild::Bool unbind( CommandBuffer *commandBuffer ) noexcept override;
 
         private:
             void recordCommands( RenderDevice *renderDevice, CommandBuffer *commandBuffer, crimild::Size index ) noexcept;
-
-        private:
-            containers::Map< CommandBuffer *, containers::Array< VkCommandBuffer >> m_handlers;
         };
 
 	}

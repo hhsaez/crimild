@@ -43,66 +43,6 @@ using namespace crimild::vulkan;
 
 #define CRIMILD_VULKAN_MAX_FRAMES_IN_FLIGHT 2
 
-struct Vertex {
-    Vector2f pos;
-    RGBColorf color;
-
-    static VkVertexInputBindingDescription getBindingDescription( void )
-    {
-        auto bindingDescription = VkVertexInputBindingDescription {
-            .binding = 0,
-            .stride = sizeof( Vertex ),
-            .inputRate = VK_VERTEX_INPUT_RATE_VERTEX,
-        };
-        return bindingDescription;
-    }
-
-    static std::vector< VkVertexInputAttributeDescription > getAttributeDescriptions( void )
-    {
-        return {
-            VkVertexInputAttributeDescription {
-                .binding = 0,
-                .location = 0,
-                .format = VK_FORMAT_R32G32_SFLOAT,
-                .offset = offsetof( Vertex, pos ),
-            },
-            VkVertexInputAttributeDescription {
-                .binding = 0,
-                .location = 1,
-                .format = VK_FORMAT_R32G32B32_SFLOAT,
-                .offset = offsetof( Vertex, color )
-            }
-        };
-    }
-};
-
-struct UniformBufferObject {
-    Matrix4f model;
-    Matrix4f view;
-    Matrix4f proj;
-};
-
-namespace crimild {
-
-    namespace vulkan {
-
-        template< typename VertexType >
-        class VertexBuffer : public VulkanObject {
-        public:
-            static VkVertexInputBindingDescription getBindingDescription( void )
-            {
-                return VkVertexInputBindingDescription {
-                    .binding = 0,
-                    .stride = sizeof( VertexType ),
-                    .inputRate = VK_VERTEX_INPUT_RATE_VERTEX,
-                };
-            }
-        };
-
-    }
-
-}
-
 crimild::Bool VulkanSystem::start( void )
 {
     return System::start()
@@ -112,9 +52,6 @@ crimild::Bool VulkanSystem::start( void )
         && createPhysicalDevice()
         && createRenderDevice()
         && createCommandPool()
-//        && createVertexBuffer()
-//        && createIndexBuffer()
-//        && createDescriptorSetLayout()
         && recreateSwapchain();
 }
 
@@ -159,17 +96,22 @@ void VulkanSystem::update( void )
 
     updateUniformBuffer( imageIndex );
 
-    auto commandBuffer = crimild::get_ptr( m_commandBuffers[ 0 ] );//[ imageIndex ];
+    if ( m_commandBuffers.size() > 0 ) {
+        auto commandBuffer = crimild::get_ptr( m_commandBuffers[ 0 ] );
 
-    // Submit graphic commands to the render device, with the selected
-    // image as attachment in the framebuffer
-    renderDevice->submitGraphicsCommands(
-        wait,
-        commandBuffer,
-        imageIndex,
-        signal,
-        fence
-    );
+        // Submit graphic commands to the render device, with the selected
+        // image as attachment in the framebuffer
+        renderDevice->submitGraphicsCommands(
+            wait,
+            commandBuffer,
+            imageIndex,
+            signal,
+            fence
+        );
+    }
+    else {
+        CRIMILD_LOG_DEBUG( "No command buffers provided" );
+    }
 
     // Return the image to the swapchain so it can be presented
     auto presentationResult = swapchain->presentImage( imageIndex, signal );
@@ -193,10 +135,6 @@ void VulkanSystem::stop( void )
     System::stop();
 
     cleanSwapchain();
-
-//    m_vertexBuffer = nullptr;
-//    m_indexBuffer = nullptr;
-//    m_descriptorSetLayout = nullptr;
 
     m_commandPool = nullptr;
     m_renderDevice = nullptr;
@@ -286,7 +224,14 @@ crimild::Bool VulkanSystem::createSwapchain( void ) noexcept
         }
     );
 
-    return m_swapchain != nullptr;
+    if ( m_swapchain == nullptr ) {
+        return false;
+    }
+
+    settings->set( "video.width", m_swapchain->extent.width );
+    settings->set( "video.height", m_swapchain->extent.height );
+
+    return true;
 }
 
 void VulkanSystem::cleanSwapchain( void ) noexcept
@@ -296,29 +241,31 @@ void VulkanSystem::cleanSwapchain( void ) noexcept
         m_renderDevice->waitIdle();
     }
 
-//    m_descriptorSets.clear();
-//    m_descriptorPool = nullptr;
-//    m_uniformBuffers.clear();
+    static_cast< DescriptorSetManager * >( getRenderDevice() )->clear();
+    static_cast< DescriptorSetLayoutManager * >( getRenderDevice() )->clear();
+    static_cast< DescriptorPoolManager * >( getRenderDevice() )->clear();
+    static_cast< BufferManager * >( getRenderDevice() )->clear();
+    static_cast< CommandBufferManager * >( getRenderDevice() )->clear();
+    static_cast< PipelineManager * >( getRenderDevice() )->clear();
+
     m_inFlightFences.clear();
     m_imageAvailableSemaphores.clear();
     m_renderFinishedSemaphores.clear();
-    m_commandBuffers.clear();
     m_framebuffers.clear();
-//    m_pipeline = nullptr;
     m_renderPass = nullptr;
     m_swapchain = nullptr;
+
+    getRenderDevice()->reset( crimild::get_ptr( m_commandPool ) );
+
+    m_currentFrame = 0;
 }
 
 crimild::Bool VulkanSystem::recreateSwapchain( void ) noexcept
 {
+    cleanSwapchain();
     return createSwapchain()
     	&& createRenderPass()
-//    	&& createPipeline()
-//    	&& createUniformBuffers()
-//    	&& createDescriptorPool()
-//    	&& createDescriptorSets()
         && createFramebuffers()
-//        && createCommandBuffers()
         && createSyncObjects();
 }
 
@@ -335,42 +282,6 @@ crimild::Bool VulkanSystem::createRenderPass( void ) noexcept
 
     return m_renderPass != nullptr;
 }
-
-/*
-crimild::Bool VulkanSystem::createPipeline( void ) noexcept
-{
-    auto renderDevice = crimild::get_ptr( m_renderDevice );
-    auto swapchain = crimild::get_ptr( m_swapchain );
-
-    m_pipeline = renderDevice->create(
-        Pipeline::Descriptor {
-            .program = crimild::alloc< ShaderProgram >(
-                containers::Array< SharedPointer< Shader >> {
-                    crimild::alloc< Shader >(
-                        Shader::Stage::VERTEX,
-                        FileSystem::getInstance().readResourceFile( "assets/shaders/triangle.vert.spv" )
-                    ),
-                    crimild::alloc< Shader >(
-                        Shader::Stage::FRAGMENT,
-                        FileSystem::getInstance().readResourceFile( "assets/shaders/triangle.frag.spv" )
-                    ),
-                }
-            ),
-            .renderPass = crimild::get_ptr( m_renderPass ),
-            .primitiveType = Primitive::Type::TRIANGLES,
-            .viewport = Rectf( 0, 0, swapchain->extent.width, swapchain->extent.height ),
-            .scissor = Rectf( 0, 0, swapchain->extent.width, swapchain->extent.height ),
-            .bindingDescription = { Vertex::getBindingDescription() },
-            .attributeDescriptions = Vertex::getAttributeDescriptions(),
-            .setLayouts = {
-                crimild::get_ptr( m_descriptorSetLayout ),
-            },
-        }
-    );
-
-    return m_pipeline != nullptr;
-}
-     */
 
 crimild::Bool VulkanSystem::createFramebuffers( void ) noexcept
 {
@@ -394,54 +305,6 @@ crimild::Bool VulkanSystem::createFramebuffers( void ) noexcept
     }
 
     return m_framebuffers.size() > 0;
-}
-
-crimild::Bool VulkanSystem::createCommandBuffers( void ) noexcept
-{
-    /*
-    auto renderDevice = crimild::get_ptr( m_renderDevice );
-    auto swapchain = crimild::get_ptr( m_swapchain );
-    auto imageCount = swapchain->imageViews.size();
-
-    for ( auto i = 0l; i < imageCount; i++ ) {
-        auto framebuffer = m_framebuffers[ i ];
-
-        m_commandBuffers[ i ].push_back(
-            [ this, framebuffer, renderDevice, i ]() {
-                auto commandBuffer = renderDevice->create(
-                    CommandBuffer::Descriptor {
-                        .commandPool = crimild::get_ptr( m_commandPool ),
-                    }
-                );
-                commandBuffer->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
-                commandBuffer->beginRenderPass(
-                    crimild::get_ptr( m_renderPass ),
-                    crimild::get_ptr( framebuffer ),
-                    RGBAColorf( 0.0f, 0.0f, 0.0f, 1.0f )
-                );
-                commandBuffer->bindGraphicsPipeline(
-                    crimild::get_ptr( m_pipeline )
-                );
-                commandBuffer->bindVertexBuffer(
-                    crimild::get_ptr( m_vertexBuffer )
-                );
-                commandBuffer->bindIndexBuffer(
-                       crimild::get_ptr( m_indexBuffer )
-                   );
-                commandBuffer->bindDescriptorSets(
-                    crimild::get_ptr( m_descriptorSets[ i ] ),
-                    crimild::get_ptr( m_pipeline->layout )
-                  );
-                commandBuffer->drawIndexed( static_cast< crimild::UInt32 >( m_indexBuffer->size / sizeof( crimild::UInt32 ) ) );
-                commandBuffer->endRenderPass();
-                commandBuffer->end();
-                return commandBuffer;
-            }()
-        );
-    }
-
-     */
-    return m_commandBuffers.size() > 0;
 }
 
 crimild::Bool VulkanSystem::createSyncObjects( void ) noexcept
@@ -470,177 +333,8 @@ crimild::Bool VulkanSystem::createCommandPool( void ) noexcept
     return m_commandPool != nullptr;
 }
 
-/*
-crimild::Bool VulkanSystem::createVertexBuffer( void ) noexcept
-{
-    const auto vertices = std::vector< Vertex > {
-        { Vector2f( -0.5f, 0.5f ), RGBColorf( 1.0f, 0.0f, 0.0f ) },
-        { Vector2f( -0.5f, -0.5f ), RGBColorf( 1.0f, 1.0f, 1.0f ) },
-        { Vector2f( 0.5f, -0.5f ), RGBColorf( 0.0f, 0.0f, 1.0f ) },
-        { Vector2f( 0.5f, 0.5f ), RGBColorf( 0.0f, 1.0f, 0.0f ) },
-    };
-
-    auto renderDevice = crimild::get_ptr( m_renderDevice );
-    auto commandPool = crimild::get_ptr( m_commandPool );
-
-    m_vertexBuffer = renderDevice->create(
-		Buffer::Descriptor {
-			.size = sizeof( vertices[ 0 ] ) * vertices.size(),
-        	.data = vertices.data(),
-        	.usage = Buffer::Usage::VERTEX_BUFFER,
-        	.commandPool = commandPool,
-    	}
-    );
-    return m_vertexBuffer != nullptr;
-}
- */
-
-/*
-crimild::Bool VulkanSystem::createIndexBuffer( void ) noexcept
-{
-    const auto indices = std::vector< crimild::UInt32 > {
-		0, 1, 2,
-        0, 2, 3,
-    };
-
-    auto renderDevice = crimild::get_ptr( m_renderDevice );
-    auto commandPool = crimild::get_ptr( m_commandPool );
-
-    m_indexBuffer = renderDevice->create(
-        Buffer::Descriptor {
-        	.size = sizeof( indices[ 0 ] ) * indices.size(),
-        	.data = indices.data(),
-        	.usage = Buffer::Usage::INDEX_BUFFER,
-        	.commandPool = commandPool,
-        }
-    );
-    return m_indexBuffer != nullptr;
-}
- */
-
-/*
-crimild::Bool VulkanSystem::createDescriptorSetLayout( void ) noexcept
-{
-    m_descriptorSetLayout = m_renderDevice->create(
-        DescriptorSetLayout::Descriptor {
-
-        }
-   	);
-    return m_descriptorSetLayout != nullptr;
-}
- */
-
-/*
-crimild::Bool VulkanSystem::createUniformBuffers( void ) noexcept
-{
-    auto renderDevice = crimild::get_ptr( m_renderDevice );
-    auto commandPool = crimild::get_ptr( m_commandPool );
-    auto swapchain = crimild::get_ptr( m_swapchain );
-
-    auto bufferSize = sizeof( UniformBufferObject );
-    m_uniformBuffers.resize( swapchain->images.size() );
-
-    for ( crimild::Size i = 0; i < swapchain->images.size(); ++i ) {
-		auto ubo = renderDevice->create(
-            Buffer::Descriptor {
-				.size = bufferSize,
-            	.usage = Buffer::Usage::UNIFORM_BUFFER,
-            	.commandPool = commandPool,
-            	.data = nullptr,
-            }
-        );
-        m_uniformBuffers[ i ] = ubo;
-    }
-    return m_uniformBuffers.size() > 0;
-}
- */
-
 void VulkanSystem::updateUniformBuffer( crimild::UInt32 currentImage ) noexcept
 {
-    /*
-    static const bool ENABLE_ROTATION = true;
-    static auto startTime = std::chrono::high_resolution_clock::now();
-
-    auto currentTime = std::chrono::high_resolution_clock::now();
-    auto time = ENABLE_ROTATION * std::chrono::duration< float, std::chrono::seconds::period >( currentTime - startTime ).count();
-
-    auto ubo = UniformBufferObject {
-        .model = []( crimild::Real32 time ) {
-            Transformation t;
-            t.rotate().fromAxisAngle( Vector3f::UNIT_Z, time * -90.0f * Numericf::DEG_TO_RAD );
-            return t.computeModelMatrix();
-        }( time ),
-        .view = [] {
-            Transformation t;
-            t.setTranslate( 4.0f, 4.0f, 4.0f );
-            t.lookAt( Vector3f::ZERO, Vector3f::UNIT_Y );
-            return t.computeModelMatrix().getInverse();
-        }(),
-        .proj = []( float width, float height ) {
-            auto frustum = Frustumf( 45.0f, width / height, 0.1f, 100.0f );
-            auto proj = frustum.computeProjectionMatrix();
-
-            // Invert Y-axis
-            // This also needs to set front face as counter-clockwise for culling
-            // when creating pipeline. In addition, we need to use a depth range
-            // of [0, 1] for Vulkan
-            // Check: https://matthewwellings.com/blog/the-new-vulkan-coordinate-system/
-            static const auto CLIP_CORRECTION = Matrix4f(
-                1.0f, 0.0f, 0.0f, 0.0f,
-                0.0f, -1.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, 0.5f, 0.5f,
-                0.0f, 0.0f, 0.0f, 1.0f
-            ).getTranspose(); // TODO: why do I need to transpose this matrix?
-
-            return CLIP_CORRECTION * proj;
-        }( m_swapchain->extent.width, m_swapchain->extent.height ),
-    };
-
-//    m_uniformBuffers[ currentImage ]->update( &ubo );
-     */
     getRenderDevice()->updateUniformBuffers( currentImage );
-}
-
-/*
-crimild::Bool VulkanSystem::createDescriptorPool( void ) noexcept
-{
-    auto renderDevice = crimild::get_ptr( m_renderDevice );
-    auto swapchain = crimild::get_ptr( m_swapchain );
-
-    m_descriptorPool = renderDevice->create(
-        DescriptorPool::Descriptor {
-            .swapchain = swapchain
-        }
-    );
-    return m_descriptorPool != nullptr;
-}
- */
-
-crimild::Bool VulkanSystem::createDescriptorSets( void ) noexcept
-{
-    /*
-    auto renderDevice = crimild::get_ptr( m_renderDevice );
-    auto swapchain = crimild::get_ptr( m_swapchain );
-    auto descriptorPool = crimild::get_ptr( m_descriptorPool );
-    auto layout = crimild::get_ptr( m_descriptorSetLayout );
-
-    m_descriptorSets.resize( swapchain->images.size() );
-    for ( crimild::Size i = 0; i < m_descriptorSets.size(); ++i ) {
-        auto descriptorSet = renderDevice->create(
-            DescriptorSet::Descriptor {
-            	.descriptorPool = descriptorPool,
-            	.layout = layout
-        	}
-      	);
-        descriptorSet->write(
-			crimild::get_ptr( m_uniformBuffers[ i ] ),
-         	0,
-         	sizeof( UniformBufferObject )
-     	);
-        m_descriptorSets[ i ] = descriptorSet;
-    }
-
-    return m_descriptorSets.size() > 0;
-     */
 }
 

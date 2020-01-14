@@ -31,17 +31,9 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
-VkDescriptorSet DescriptorSetManager::getHandler( DescriptorSet *descriptorSet, crimild::Size index ) noexcept
-{
-    if ( !m_handlers.contains( descriptorSet ) && !bind( descriptorSet ) ) {
-        return VK_NULL_HANDLE;
-    }
-    return m_handlers[ descriptorSet ][ index ];
-}
-
 crimild::Bool DescriptorSetManager::bind( DescriptorSet *descriptorSet ) noexcept
 {
-    if ( m_handlers.contains( descriptorSet ) ) {
+    if ( validate( descriptorSet ) ) {
         return true;
     }
 
@@ -56,6 +48,7 @@ crimild::Bool DescriptorSetManager::bind( DescriptorSet *descriptorSet ) noexcep
     auto descriptorPool = crimild::get_ptr( descriptorSet->descriptorPool );
     auto layout = crimild::get_ptr( descriptorSet->descriptorSetLayout );
     auto buffer = crimild::get_ptr( descriptorSet->buffer );
+    auto count = swapchain->images.size();
 
     VkDescriptorSetLayout layouts[] = {
         renderDevice->getHandler( layout ),
@@ -68,9 +61,9 @@ crimild::Bool DescriptorSetManager::bind( DescriptorSet *descriptorSet ) noexcep
         .pSetLayouts = layouts,
     };
 
-    auto count = swapchain->images.size();
-    m_handlers[ descriptorSet ].resize( count );
-    for ( auto i = 0l; i < count; ++i ) {
+    containers::Array< VkDescriptorSet > handlers( count );
+
+    for ( int i = 0; i < count; i++ ) {
         VkDescriptorSet handler;
         CRIMILD_VULKAN_CHECK(
             vkAllocateDescriptorSets(
@@ -79,32 +72,35 @@ crimild::Bool DescriptorSetManager::bind( DescriptorSet *descriptorSet ) noexcep
                 &handler
              )
         );
-
-        if ( buffer != nullptr ) {
-            auto bufferHandler = renderDevice->getHandler( buffer, i );
-            write( handler, bufferHandler, 0, buffer->getSize() );
-        }
-
-        m_handlers[ descriptorSet ][ i ] = handler;
+        handlers[ i ] = handler;
     }
 
-    return VulkanRenderResourceManager< DescriptorSet >::bind( descriptorSet );
+    setHandlers( descriptorSet, handlers );
+
+    if ( buffer != nullptr ) {
+	    for ( auto i = 0l; i < count; ++i ) {
+            auto bufferHandler = renderDevice->getHandler( buffer, i );
+            write( handlers[ i ], bufferHandler, 0, buffer->getSize() );
+        }
+    }
+
+    return ManagerImpl::bind( descriptorSet );
 
 }
 
 crimild::Bool DescriptorSetManager::unbind( DescriptorSet *descriptorSet ) noexcept
 {
-    if ( m_handlers.contains( descriptorSet ) ) {
-        return true;
+    if ( !validate( descriptorSet ) ) {
+        return false;
     }
 
     CRIMILD_LOG_TRACE( "Unbinding Vulkan descriptor set" );
 
     // No need to explicitly delete descriptor sets
 
-    m_handlers[ descriptorSet ].clear();
+    removeHandlers( descriptorSet );
 
-    return VulkanRenderResourceManager< DescriptorSet >::unbind( descriptorSet );
+    return ManagerImpl::unbind( descriptorSet );
 }
 
 void DescriptorSetManager::write( VkDescriptorSet handler, VkBuffer bufferHandler, crimild::Size offset, crimild::Size size ) noexcept
@@ -137,98 +133,4 @@ void DescriptorSetManager::write( VkDescriptorSet handler, VkBuffer bufferHandle
         nullptr
        );
 }
-
-
-/*
-
-DescriptorSet::~DescriptorSet( void ) noexcept
-{
-    if ( manager != nullptr ) {
-        manager->destroy( this );
-    }
-}
-
-void DescriptorSet::write( Buffer *buffer, crimild::Size offset, crimild::Size size ) noexcept
-{    
-    auto bufferInfo = VkDescriptorBufferInfo {
-		.buffer = buffer->handler,
-        .offset = offset,
-        .range = size,
-    };
-
-    auto descriptorWrite = VkWriteDescriptorSet {
-		.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-        .dstSet = handler,
-        .dstBinding = 0,
-        .dstArrayElement = 0,
-        .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, // TODO: type can change based on uniform usage?
-        .descriptorCount = 1,
-        .pBufferInfo = &bufferInfo,
-        .pImageInfo = nullptr,
-        .pTexelBufferView = nullptr,
-    };
-
-    vkUpdateDescriptorSets(
-        renderDevice->handler,
-        1,
-        &descriptorWrite,
-        0,
-        nullptr
-   	);
-}
-
-SharedPointer< DescriptorSet > DescriptorSetManager::create( DescriptorSet::Descriptor const &descriptor ) noexcept
-{
-    CRIMILD_LOG_TRACE( "Creating Vulkan descriptor set" );
-
-    auto renderDevice = m_renderDevice;
-    if ( renderDevice == nullptr ) {
-        renderDevice = descriptor.renderDevice;
-    }
-
-    auto descriptorPool = descriptor.descriptorPool;
-    auto layout = descriptor.layout;
-
-    VkDescriptorSetLayout layouts[] = {
-        layout->handler
-    };
-
-    auto allocInfo = VkDescriptorSetAllocateInfo {
-        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
-        .descriptorPool = descriptorPool->handler,
-        .descriptorSetCount = 1,
-        .pSetLayouts = layouts,
-    };
-
-    VkDescriptorSet handler;
-    CRIMILD_VULKAN_CHECK(
-        vkAllocateDescriptorSets(
-        	renderDevice->handler,
-        	&allocInfo,
-            &handler
-     	)
-    );
-
-    auto descriptorSet = crimild::alloc< DescriptorSet >();
-    descriptorSet->renderDevice = renderDevice;
-    descriptorSet->manager = this;
-    descriptorSet->handler = handler;
-    insert( crimild::get_ptr( descriptorSet ) );
-    return descriptorSet;
-}
-
-void DescriptorSetManager::destroy( DescriptorSet *descriptorSet ) noexcept
-{
-    CRIMILD_LOG_TRACE( "Destroying Vulkan descriptor set" );
-
-    // No need to explicitly delete descriptor sets
-
-    descriptorSet->manager = nullptr;
-    descriptorSet->renderDevice = nullptr;
-    descriptorSet->handler = VK_NULL_HANDLE;
-    erase( descriptorSet );
-}
-
-*/
-
 

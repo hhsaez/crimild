@@ -35,56 +35,19 @@
 
 namespace crimild {
 
-    class Buffer;
-
     namespace vulkan {
 
-        /*
-        class DescriptorPool;
-        class DescriptorSetManager;
-        class RenderDevice;
-
-        class DescriptorSet : public VulkanObject {
-            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::DescriptorSet )
+        class DescriptorSetManager : public MultiHandlerRenderResourceManagerImpl< DescriptorSet, VkDescriptorSet > {
+            using ManagerImpl = MultiHandlerRenderResourceManagerImpl< DescriptorSet, VkDescriptorSet >;
 
         public:
-            struct Descriptor {
-                RenderDevice *renderDevice;
-                DescriptorPool *descriptorPool;
-                DescriptorSetLayout *layout;
-            };
-
-        public:
-            ~DescriptorSet( void ) noexcept;
-
-            VkDescriptorSet handler = VK_NULL_HANDLE;
-            DescriptorSetManager *manager = nullptr;
-            RenderDevice *renderDevice = nullptr;
-
-            void write( Buffer *buffer, crimild::Size offset, crimild::Size size ) noexcept;
-        };
-
-         */
-
-        class DescriptorSetManager : public VulkanRenderResourceManager< DescriptorSet > {
-        public:
-            explicit DescriptorSetManager( RenderDevice *renderDevice = nullptr ) noexcept : VulkanRenderResourceManager< DescriptorSet >( renderDevice ) { }
             virtual ~DescriptorSetManager( void ) noexcept = default;
-
-            VkDescriptorSet getHandler( DescriptorSet *descriptorSet, crimild::Size index ) noexcept;
 
             crimild::Bool bind( DescriptorSet *descriptorSet ) noexcept override;
             crimild::Bool unbind( DescriptorSet *descriptorSet ) noexcept override;
 
         private:
             void write( VkDescriptorSet handler, VkBuffer buffer, crimild::Size offset, crimild::Size size ) noexcept;
-
-//            SharedPointer< DescriptorSet > create( DescriptorSet::Descriptor const &descriptor ) noexcept;
-//            void destroy( DescriptorSet *descriptorSet ) noexcept override;
-
-        private:
-            containers::Map< DescriptorSet *, containers::Array< VkDescriptorSet >> m_handlers;
-//            RenderDevice *m_renderDevice = nullptr;
         };
 
     }
