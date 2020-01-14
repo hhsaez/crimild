@@ -46,10 +46,7 @@ using namespace crimild;
 using namespace crimild::vulkan;
 
 RenderDevice::RenderDevice( void )
-    : BufferManager( this ),
-      CommandBufferManager( this ),
-      CommandPoolManager( this ),
-      DescriptorSetManager( this ),
+    : CommandPoolManager( this ),
 	  SwapchainManager( this ),
       FenceManager( this ),
       FramebufferManager( this ),
@@ -145,6 +142,7 @@ void RenderDevice::waitIdle( void ) const noexcept
     }
 
     vkDeviceWaitIdle( handler );
+    vkQueueWaitIdle( graphicsQueue );
 }
 
 SharedPointer< RenderDevice > RenderDeviceManager::create( RenderDevice::Descriptor const &descriptor ) noexcept

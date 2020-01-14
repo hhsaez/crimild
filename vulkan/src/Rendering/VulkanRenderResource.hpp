@@ -114,6 +114,8 @@ namespace crimild {
 
         template< typename ResourceType, typename HandlerType >
         class MultiHandlerRenderResourceManagerImpl : public VulkanRenderResourceManagerImpl< ResourceType, HandlerType > {
+            using HandlerArray = containers::Array< HandlerType >;
+
         public:
             virtual ~MultiHandlerRenderResourceManagerImpl( void ) noexcept = default;
 
@@ -135,12 +137,15 @@ namespace crimild {
             }
 
         protected:
-            void setHandler( ResourceType *resource, HandlerType handler, crimild::Size index, crimild::Size handlerCount ) noexcept
+            void setHandlers( ResourceType *resource, const HandlerArray &handlers ) noexcept
             {
-                if ( !validate( resource ) ) {
-                    m_handlers[ resource ].resize( handlerCount );
-                }
-                m_handlers[ resource ][ index ] = handler;
+                m_handlers[ resource ] = handlers;
+            }
+
+            template< typename Fn >
+            void eachHandler( ResourceType *resource, Fn const &fn )
+            {
+                m_handlers[ resource ].each( fn );
             }
 
             void removeHandlers( ResourceType *resource ) noexcept
@@ -148,11 +153,12 @@ namespace crimild {
                 if ( !validate( resource ) ) {
                     return;
                 }
+                m_handlers[ resource ].clear();
                 m_handlers.remove( resource );
             }
 
         private:
-            containers::Map< ResourceType *, containers::Array< HandlerType >> m_handlers;
+            containers::Map< ResourceType *, HandlerArray > m_handlers;
         };
 
     }

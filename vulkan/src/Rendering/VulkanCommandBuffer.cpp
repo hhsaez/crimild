@@ -37,42 +37,9 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
-/*
-
-void vulkan::CommandBuffer::bindDescriptorSets( const DescriptorSet *descriptorSet, const PipelineLayout *pipelineLayout ) const noexcept
-{
-    VkDescriptorSet descriptorSets[] = {
-        descriptorSet->handler,
-    };
-
-    vkCmdBindDescriptorSets(
-    	handler,
-        VK_PIPELINE_BIND_POINT_GRAPHICS,
-        pipelineLayout->handler,
-        0,
-        1,
-        descriptorSets,
-        0,
-        nullptr
-	);
-}
-
-void vulkan::CommandBuffer::copy( Buffer *src, crimild::Size srcOffset, Buffer *dst, crimild::Size dstOffset, crimild::Size size ) const noexcept
-{
-    auto copyRegion = VkBufferCopy {
-		.srcOffset = srcOffset,
-        .dstOffset = dstOffset,
-        .size = size,
-    };
-
-    vkCmdCopyBuffer( handler, src->handler, dst->handler, 1, &copyRegion );
-}
-
- */
-
 crimild::Bool CommandBufferManager::bind( CommandBuffer *commandBuffer ) noexcept
 {
-    if ( m_handlers.contains( commandBuffer ) ) {
+    if ( validate( commandBuffer ) ) {
         return true;
     }
 
@@ -85,36 +52,37 @@ crimild::Bool CommandBufferManager::bind( CommandBuffer *commandBuffer ) noexcep
 
     auto commandPool = renderDevice->getCommandPool();
     auto swapchain = renderDevice->getSwapchain();
+    auto imageCount = swapchain->images.size();
 
     auto allocInfo = VkCommandBufferAllocateInfo {
         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
         .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
         .commandPool = commandPool->handler,
-        .commandBufferCount = 1,
+        .commandBufferCount = static_cast< crimild::UInt32 >( imageCount ),
     };
 
-    auto imageCount = swapchain->images.size();
-    m_handlers[ commandBuffer ].resize( imageCount );
-    for ( auto i = 0l; i < imageCount; ++i ) {
-        VkCommandBuffer commandBufferHandler;
-        CRIMILD_VULKAN_CHECK(
-             vkAllocateCommandBuffers(
-                renderDevice->handler,
-                &allocInfo,
-                &commandBufferHandler
-            )
-        );
-        m_handlers[ commandBuffer ][ i ] = commandBufferHandler;
+    containers::Array< VkCommandBuffer > handlers( imageCount );
+    CRIMILD_VULKAN_CHECK(
+         vkAllocateCommandBuffers(
+            renderDevice->handler,
+            &allocInfo,
+            &handlers[ 0 ]
+        )
+    );
+
+    setHandlers( commandBuffer, handlers );
+
+    for ( auto i = 0l; i < imageCount; i++ ) {
         recordCommands( renderDevice, commandBuffer, i );
     }
 
-    return VulkanRenderResourceManager< crimild::CommandBuffer >::bind( commandBuffer );
+    return ManagerImpl::bind( commandBuffer );
 }
 
 crimild::Bool CommandBufferManager::unbind( CommandBuffer *commandBuffer ) noexcept
 {
-    if ( m_handlers.contains( commandBuffer ) ) {
-        return true;
+    if ( !validate( commandBuffer ) ) {
+        return false;
     }
 
     CRIMILD_LOG_TRACE( "Unbinding Vulkan commandBuffer" );
@@ -131,7 +99,7 @@ crimild::Bool CommandBufferManager::unbind( CommandBuffer *commandBuffer ) noexc
         return false;
     }
 
-    m_handlers[ commandBuffer ].each( [ renderDevice, commandPool ]( VkCommandBuffer handler ) {
+    eachHandler( commandBuffer, [ renderDevice, commandPool ]( VkCommandBuffer handler ) {
         vkFreeCommandBuffers(
             renderDevice->handler,
             commandPool->handler,
@@ -139,9 +107,9 @@ crimild::Bool CommandBufferManager::unbind( CommandBuffer *commandBuffer ) noexc
             &handler
         );
     });
-    m_handlers.remove( commandBuffer );
+    removeHandlers( commandBuffer );
 
-    return VulkanRenderResourceManager< crimild::CommandBuffer >::unbind( commandBuffer );
+    return ManagerImpl::unbind( commandBuffer );
 }
 
 void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBuffer *commandBuffer, crimild::Size index ) noexcept
@@ -153,7 +121,7 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
     }
 
     commandBuffer->each(
-        [ this, handler, commandBuffer, renderDevice, index ]( CommandBuffer::Command &cmd ) {
+        [ handler, renderDevice, index ]( CommandBuffer::Command &cmd ) {
         	switch ( cmd.type ) {
                 case CommandBuffer::Command::Type::BEGIN: {
                     auto beginInfo = VkCommandBufferBeginInfo {

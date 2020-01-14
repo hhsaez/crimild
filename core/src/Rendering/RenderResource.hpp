@@ -56,8 +56,8 @@ namespace crimild {
 
         virtual void clear( void ) noexcept
         {
-            m_resources.each( [ this ](
-           		RenderResourceType *resource ) {
+            m_resources.each(
+                [ this ]( RenderResourceType *resource ) {
                 	unbind( resource );
             	}
             );

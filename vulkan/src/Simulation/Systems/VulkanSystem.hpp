@@ -44,11 +44,8 @@ namespace crimild {
     namespace vulkan {
 
         class CommandPool;
-//        class DescriptorPool;
         class Fence;
         class Framebuffer;
-//        class Pipeline;
-//        class RenderPass;
         class Semaphore;
         class Swapchain;
 
@@ -95,10 +92,8 @@ namespace crimild {
             RenderPass *getRenderPass( void ) noexcept { return crimild::get_ptr( m_renderPass ); }
             CommandPool *getCommandPool( void ) noexcept { return crimild::get_ptr( m_commandPool ); }
             Framebuffer *getFramebuffer( crimild::Size index ) noexcept { return crimild::get_ptr( m_framebuffers[ index ] ); }
-//            DescriptorPool *getDescriptorPool( void ) noexcept { return crimild::get_ptr( m_descriptorPool ); }
 
             void setCommandBuffers( std::vector< SharedPointer< CommandBuffer >> &cmds ) noexcept { m_commandBuffers = cmds; }
-//            void setUniformBuffers( std::vector< SharedPointer< Buffer >> &ubos ) noexcept { m_uniformBuffers = ubos; }
 
         protected:
             virtual SharedPointer< VulkanSurface > create( VulkanSurface::Descriptor const &descriptor ) noexcept { return nullptr; }
