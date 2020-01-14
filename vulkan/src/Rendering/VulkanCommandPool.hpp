@@ -66,6 +66,8 @@ namespace crimild {
             SharedPointer< CommandPool > create( CommandPool::Descriptor const &descriptor ) noexcept;
             void destroy( CommandPool *commandPool ) noexcept override;
 
+            void reset( CommandPool *commandPool ) noexcept;
+
         private:
             RenderDevice *m_renderDevice = nullptr;
         };

@@ -34,7 +34,7 @@ using namespace crimild::vulkan;
 
 crimild::Bool BufferManager::bind( Buffer *buffer ) noexcept
 {
-    if ( m_bufferHandlers.contains( buffer ) ) {
+    if ( validate( buffer ) ) {
         return true;
     }
 
@@ -63,9 +63,12 @@ crimild::Bool BufferManager::bind( Buffer *buffer ) noexcept
             return false;
     }
 
+    containers::Array< VkBuffer > bufferHandlers( count );
+    containers::Array< VkDeviceMemory > bufferMemories( count );
+
     for ( auto i = 0l; i < count; i++ ) {
-        VkBuffer bufferHandler;
-        VkDeviceMemory bufferMemory;
+        VkBuffer bufferHandler;// = bufferHandlers[ i ];
+        VkDeviceMemory bufferMemory;// = bufferMemories[ i ];
 
         createBuffer(
             renderDevice,
@@ -94,16 +97,19 @@ crimild::Bool BufferManager::bind( Buffer *buffer ) noexcept
             vkUnmapMemory( renderDevice->handler, bufferMemory );
         }
 
-        m_bufferHandlers[ buffer ].add( bufferHandler );
-        m_bufferMemoryHandlers[ buffer ].add( bufferMemory );
+        bufferHandlers[ i ] = bufferHandler;
+        bufferMemories[ i ] = bufferMemory;
     }
 
-    return RenderResourceManager< crimild::Buffer >::bind( buffer );
+    setHandlers( buffer, bufferHandlers );
+    m_bufferMemoryHandlers[ buffer ] = bufferMemories;
+
+    return ManagerImpl::bind( buffer );
 }
 
 crimild::Bool BufferManager::unbind( Buffer *buffer ) noexcept
 {
-    if ( !m_bufferHandlers.contains( buffer ) ) {
+    if ( !validate( buffer ) ) {
         return false;
     }
 
@@ -115,10 +121,10 @@ crimild::Bool BufferManager::unbind( Buffer *buffer ) noexcept
         return false;
     }
 
-    m_bufferHandlers[ buffer ].each( [ renderDevice ]( VkBuffer handler ) {
+    eachHandler( buffer, [ renderDevice ]( VkBuffer handler ) {
         vkDestroyBuffer( renderDevice->handler, handler, nullptr );
     });
-    m_bufferHandlers.remove( buffer );
+    removeHandlers( buffer );
 
     m_bufferMemoryHandlers[ buffer ].each( [ renderDevice ]( VkDeviceMemory memoryHandler ) {
         vkFreeMemory( renderDevice->handler, memoryHandler, nullptr );
@@ -128,17 +134,9 @@ crimild::Bool BufferManager::unbind( Buffer *buffer ) noexcept
     return RenderResourceManager< crimild::Buffer >::unbind( buffer );
 }
 
-VkBuffer BufferManager::getHandler( Buffer *buffer, crimild::Size index ) noexcept
-{
-    if ( !m_bufferHandlers.contains( buffer ) && !bind( buffer ) ) {
-        return VK_NULL_HANDLE;
-    }
-    return m_bufferHandlers[ buffer ][ index ];
-}
-
 VkDeviceMemory BufferManager::getMemory( Buffer *buffer, crimild::Size index ) noexcept
 {
-    if ( !m_bufferMemoryHandlers.contains( buffer ) && !bind( buffer ) ) {
+    if ( !validate( buffer ) && !bind( buffer ) ) {
         return VK_NULL_HANDLE;
     }
     return m_bufferMemoryHandlers[ buffer ][ index ];

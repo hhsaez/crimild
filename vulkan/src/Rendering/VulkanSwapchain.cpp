@@ -96,6 +96,8 @@ Swapchain::PresentImageResult Swapchain::presentImage( crimild::UInt32 imageInde
 void Swapchain::retrieveSwapchainImages( void ) noexcept
 {
 	CRIMILD_LOG_TRACE( "Retrieving swapchain images" );
+
+    images.clear();
 	
 	crimild::UInt32 imageCount;
 	vkGetSwapchainImagesKHR(
@@ -124,6 +126,8 @@ void Swapchain::retrieveSwapchainImages( void ) noexcept
 void Swapchain::createImageViews( void ) noexcept
 {
 	CRIMILD_LOG_TRACE( "Creating image views" );
+
+    imageViews.clear();
 
     images.each(
         [ this ]( SharedPointer< Image > &image ) {
