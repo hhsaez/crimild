@@ -30,11 +30,139 @@
 
 #include "Rendering/Buffer.hpp"
 #include "Mathematics/Vector.hpp"
+#include "Foundation/RTTI.hpp"
 
 namespace crimild {
 
-    template< typename T >
-    using VertexBuffer = BufferImpl< T, Buffer::Usage::VERTEX_BUFFER >;
+    class VertexBuffer : public Buffer, public RTTI {
+    public:
+        virtual ~VertexBuffer( void ) noexcept = default;
+
+        Buffer::Usage getUsage( void ) const noexcept { return Buffer::Usage::VERTEX_BUFFER; }
+
+        virtual crimild::Bool getExtent( Vector3f &min, Vector3f &max ) const noexcept { return false; }
+    };
+
+    namespace policies {
+
+        template< typename VertexType >
+        class VertexBufferNoExtentPolicy {
+        public:
+            static crimild::Bool getExtent( const containers::Array< VertexType > &vertices, Vector3f &min, Vector3f &max ) noexcept
+            {
+                return false;
+            }
+        };
+
+        template< typename VertexType >
+        class VertexBuffer2DExtentPolicy {
+        public:
+            static crimild::Bool getExtent( const containers::Array< VertexType > &vertices, Vector3f &min, Vector3f &max ) noexcept
+            {
+                const auto N = vertices.size();
+                if ( N == 0 ) {
+                    return false;
+                }
+
+                min.x() = max.y() = vertices[ 0 ].position.x();
+                min.y() = max.y() = vertices[ 0 ].position.y();
+                min.z() = max.z() = 0.0f;
+
+                for ( auto i = 1l; i < N; i++ ) {
+                    const auto &P = vertices[ i ].position;
+
+                    min.x() = Numericf::min( min.x(), P.x() );
+                    min.y() = Numericf::min( min.y(), P.y() );
+
+                    max.x() = Numericf::max( max.x(), P.x() );
+                    max.y() = Numericf::max( max.y(), P.y() );
+                }
+
+                return true;
+
+            }
+        };
+
+        template< typename VertexType >
+        class VertexBuffer3DExtentPolicy {
+        public:
+            static crimild::Bool getExtent( const containers::Array< VertexType > &vertices, Vector3f &min, Vector3f &max ) noexcept
+            {
+                const auto N = vertices.size();
+                if ( N == 0 ) {
+                    return false;
+                }
+
+                min = vertices[ 0 ].position;
+                max = vertices[ 0 ].position;
+                for ( auto i = 1l; i < N; i++ ) {
+                    const auto &P = vertices[ i ].position;
+
+                    min.x() = Numericf::min( min.x(), P.x() );
+                    min.y() = Numericf::min( min.y(), P.y() );
+                    min.z() = Numericf::min( min.z(), P.z() );
+
+                    max.x() = Numericf::max( max.x(), P.x() );
+                    max.y() = Numericf::max( max.y(), P.y() );
+                    max.z() = Numericf::max( max.z(), P.z() );
+                }
+
+                return true;
+            }
+        };
+
+    }
+
+    template<
+    	typename VertexType,
+    	template < typename > class ExtentPolicy
+    >
+    class VertexBufferImpl : public VertexBuffer {
+    public:
+        /**
+			\remarks When implementing custom vertex formats, don't
+         	forget to implement a scecialization for getClassName()
+         	so RTTI works. 
+         */
+        virtual const char *getClassName( void ) const override;
+
+    private:
+        using ExtentPolicyImpl = ExtentPolicy< VertexType >;
+
+    public:
+        explicit VertexBufferImpl( crimild::Size count ) noexcept
+        	: m_vertices( count )
+        {
+            // nothing to do
+        }
+
+        explicit VertexBufferImpl( const containers::Array< VertexType > &vertices ) noexcept
+            : m_vertices( vertices )
+        {
+            // nothing to do
+        }
+
+        virtual ~VertexBufferImpl( void ) noexcept = default;
+
+        crimild::Size getSize( void ) const noexcept override { return m_vertices.size() * sizeof( VertexType ); }
+        crimild::Size getStride( void ) const noexcept override { return sizeof( VertexType ); }
+
+        void *getRawData( void ) noexcept override { return ( void * ) m_vertices.getData(); }
+        const void *getRawData( void ) const noexcept override { return ( void * ) m_vertices.getData(); }
+
+        crimild::Size getCount( void ) const noexcept { return getSize() / getStride(); }
+
+        VertexType *getData( void ) noexcept { return m_vertices.getData(); }
+        const VertexType *getData( void ) const noexcept { return m_vertices.getData(); }
+
+        crimild::Bool getExtent( Vector3f &min, Vector3f &max ) const noexcept override
+        {
+            return ExtentPolicyImpl::getExtent( m_vertices, min, max );
+        }
+
+    private:
+        containers::Array< VertexType > m_vertices;
+    };
 
     struct VertexInputAttributeDescription {
         enum class Format {
@@ -79,7 +207,7 @@ namespace crimild {
         }
     };
 
-    using VertexP2Buffer = VertexBuffer< VertexP2 >;
+    using VertexP2Buffer = VertexBufferImpl< VertexP2, policies::VertexBuffer2DExtentPolicy >;
 
     struct VertexP2C3 {
         crimild::Vector2f position;
@@ -112,7 +240,7 @@ namespace crimild {
         }
     };
 
-    using VertexP2C3Buffer = VertexBuffer< VertexP2C3 >;
+    using VertexP2C3Buffer = VertexBufferImpl< VertexP2C3, policies::VertexBuffer2DExtentPolicy >;
 
     struct VertexP3 {
         crimild::Vector3f position;
@@ -138,7 +266,7 @@ namespace crimild {
         }
     };
 
-    using VertexP3Buffer = VertexBuffer< VertexP3 >;
+    using VertexP3Buffer = VertexBufferImpl< VertexP3, policies::VertexBuffer3DExtentPolicy >;
 
     struct VertexP3C3 {
         crimild::Vector3f position;
@@ -171,7 +299,7 @@ namespace crimild {
         }
     };
 
-    using VertexP3C3Buffer = VertexBuffer< VertexP3C3 >;
+    using VertexP3C3Buffer = VertexBufferImpl< VertexP3C3, policies::VertexBuffer3DExtentPolicy >;
 
 }
 
