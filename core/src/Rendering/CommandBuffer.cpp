@@ -79,12 +79,12 @@ void CommandBuffer::bindIndexBuffer( Buffer *indexBuffer ) noexcept
     );
 }
 
-void CommandBuffer::bindVertexBuffer( Buffer *vertexBuffer ) noexcept
+void CommandBuffer::bindVertexBuffer( VertexBuffer *vertexBuffer ) noexcept
 {
     m_commands.push_back(
         Command {
             .type = Command::Type::BIND_VERTEX_BUFFER,
-            .buffer = vertexBuffer,
+            .vertexBuffer = vertexBuffer,
         }
     );
 }

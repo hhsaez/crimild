@@ -35,11 +35,12 @@
 namespace crimild {
 
     class Buffer;
+    class DescriptorSet;
     class Pipeline;
     class Primitive;
     class RenderPass;
     class UniformBuffer;
-    class DescriptorSet;
+    class VertexBuffer;
 
     class CommandBuffer :
     	public SharedObject,
@@ -78,6 +79,7 @@ namespace crimild {
                 Primitive *primitive;
                 RenderPass *renderPass;
                 Buffer *buffer;
+                VertexBuffer *vertexBuffer;
                 UniformBuffer *uniformBuffer;
                 DescriptorSet *descriptorSet;
                 crimild::UInt32 count;
@@ -91,7 +93,7 @@ namespace crimild {
         void bindGraphicsPipeline( Pipeline *pipeline ) noexcept;
         void bindPrimitive( Primitive *primitive ) noexcept;
         void bindIndexBuffer( Buffer *indexBuffer ) noexcept;
-        void bindVertexBuffer( Buffer *vertexBuffer ) noexcept;
+        void bindVertexBuffer( VertexBuffer *vertexBuffer ) noexcept;
         void bindUniformBuffer( UniformBuffer *uniformBuffer ) noexcept;
         void bindDescriptorSet( DescriptorSet *descriptorSet ) noexcept;
         void drawIndexed( crimild::UInt32 count ) noexcept;
