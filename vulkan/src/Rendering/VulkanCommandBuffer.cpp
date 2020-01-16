@@ -178,11 +178,11 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                 }
 
                 case CommandBuffer::Command::Type::BIND_VERTEX_BUFFER: {
-                    auto buffer = cmd.buffer;
-                    auto bufferHandler = renderDevice->getHandler( buffer, 0 );
+                    auto vbo = cmd.buffer;
+                    auto vboHandler = renderDevice->getHandler( vbo, 0 );
 
                     VkBuffer vertexBuffers[] = {
-                        bufferHandler,
+                        vboHandler,
                     };
                     VkDeviceSize offsets[] = {
                         0
