@@ -15,6 +15,7 @@ ADD_DEFINITIONS( -DCRIMILD_VERSION_PATCH=0 )
 # Configuration options
 OPTION( CRIMILD_ENABLE_TESTS "Would you like to enable unit tests?" OFF )
 OPTION( CRIMILD_ENABLE_IMPORT "Build importers?" OFF )
+OPTION( CRIMILD_ENABLE_STB "Would you like to build the crimild-stb extension" OFF )
 OPTION( CRIMILD_ENABLE_PHYSICS "Would you like to build the crimild-physics extension?" OFF )
 OPTION( CRIMILD_ENABLE_SCRIPTING "Would you like to build the crimild-scripting extension?" OFF )
 OPTION( CRIMILD_ENABLE_SFML "Would you like to build the crimild-sfml extension" OFF )
@@ -42,6 +43,10 @@ ENDIF ( CRIMILD_ENABLE_TESTS )
 # Add core sources
 ADD_SUBDIRECTORY( core )
 ADD_SUBDIRECTORY( raytracing )
+
+IF ( CRIMILD_ENABLE_STB )
+   ADD_SUBDIRECTORY( stb )
+ENDIF ()
 
 IF ( CRIMILD_ENABLE_IMPORT )
 	ADD_DEFINITIONS( -DCRIMILD_ENABLE_IMPORT=1 )
