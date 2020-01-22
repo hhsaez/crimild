@@ -25,35 +25,38 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CRIMILD_RENDERING_RENDER_PASS_
-#define CRIMILD_RENDERING_RENDER_PASS_
+#ifndef CRIMILD_VULKAN_RENDERING_TEXTURE_
+#define CRIMILD_VULKAN_RENDERING_TEXTURE_
 
-#include "Rendering/RenderResource.hpp"
-#include "Foundation/SharedObject.hpp"
+#include "Rendering/VulkanRenderResource.hpp"
+#include "Rendering/Texture.hpp"
+#include "Foundation/Containers/Array.hpp"
+#include "Foundation/Containers/Map.hpp"
 
 namespace crimild {
 
-    class CommandBuffer;
+    namespace vulkan {
 
-    class RenderPass :
-    	public SharedObject,
-    	public RenderResourceImpl< RenderPass > {
+        class ImageView;
 
-    private:
-        using RenderPassMainCallback = std::function< void( CommandBuffer * ) >;
+        struct TextureBindInfo {
+            VkImage textureImage = VK_NULL_HANDLE;
+            VkDeviceMemory textureImageMemory = VK_NULL_HANDLE;
+            SharedPointer< ImageView > imageView;
+            VkSampler sampler = VK_NULL_HANDLE;
+        };
 
-    public:
-        virtual ~RenderPass( void ) noexcept = default;
+        class TextureManager : public BasicRenderResourceManagerImpl< Texture, TextureBindInfo > {
+            using ManagerImpl = BasicRenderResourceManagerImpl< Texture, TextureBindInfo >;
 
-        CommandBuffer *getCommandBuffer( void ) noexcept;
+        public:
+            virtual ~TextureManager( void ) = default;
 
-        virtual void recordCommands( CommandBuffer *commandBuffer ) noexcept;
+            crimild::Bool bind( Texture *texture ) noexcept override;
+            crimild::Bool unbind( Texture *texture ) noexcept override;
+        };
 
-        RenderPassMainCallback buildCallback;
-
-    private:
-        SharedPointer< CommandBuffer > m_commandBuffer;
-    };
+    }
 
 }
 

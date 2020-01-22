@@ -43,15 +43,41 @@ SharedPointer< Texture > Texture::ZERO = crimild::alloc< Texture >(
 	crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0x00, 0x00, 0x00, 0x00 }, Image::PixelFormat::RGBA )
 );
 
-SharedPointer< Texture > Texture::CUBE_ONE = crimild::alloc< Texture >(
-	containers::Array< SharedPointer< Image >> {
-		crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ),
-		crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ),
-		crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ),
-		crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ),
-		crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ),
-		crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA )
-	}
+SharedPointer< Texture > Texture::CUBE_ONE = [] {
+    return crimild::alloc< Texture >(
+        containers::Array< SharedPointer< Image >> {
+            crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ),
+            crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ),
+            crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ),
+            crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ),
+            crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ),
+            crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA )
+        }
+    );
+}();
+
+SharedPointer< Texture > Texture::CHECKERBOARD = [] {
+    auto texture = crimild::alloc< Texture >(
+        crimild::alloc< Image >(
+            4,
+            4,
+            4,
+            containers::ByteArray {
+                0x00, 0x00, 0x00, 0xFF,    0xFF, 0xFF, 0xFF, 0xFF,    0x00, 0x00, 0x00, 0xFF,    0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF,    0x00, 0x00, 0x00, 0xFF,    0xFF, 0xFF, 0xFF, 0xFF,    0x00, 0x00, 0x00, 0xFF,
+                0x00, 0x00, 0x00, 0xFF,    0xFF, 0xFF, 0xFF, 0xFF,    0x00, 0x00, 0x00, 0xFF,    0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF,    0x00, 0x00, 0x00, 0xFF,    0xFF, 0xFF, 0xFF, 0xFF,    0x00, 0x00, 0x00, 0xFF,
+            },
+            Image::PixelFormat::RGBA
+        )
+    );
+    texture->setMagFilter( Texture::Filter::NEAREST );
+    texture->setMinFilter( Texture::Filter::NEAREST );
+    return texture;
+}();
+
+SharedPointer< Texture > Texture::INVALID = crimild::alloc< Texture >(
+    crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0xFF, 0x00, 0xFF, 0xFF }, Image::PixelFormat::RGBA )
 );
 
 Texture::Texture( std::string name )

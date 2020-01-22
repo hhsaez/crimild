@@ -25,37 +25,56 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CRIMILD_RENDERING_RENDER_PASS_
-#define CRIMILD_RENDERING_RENDER_PASS_
-
-#include "Rendering/RenderResource.hpp"
-#include "Foundation/SharedObject.hpp"
+#ifndef CRIMILD_CORE_FOUNDATION_POLICIES_CACHE_
+#define CRIMILD_CORE_FOUNDATION_POLICIES_CACHE_
 
 namespace crimild {
 
-    class CommandBuffer;
+    /**
+     	\brief Define how objects should be cached and keep alive.
+     */
+    enum class CachePolicy {
+        /**
+             \brief No caching policy
 
-    class RenderPass :
-    	public SharedObject,
-    	public RenderResourceImpl< RenderPass > {
+             Resource will not be cached
+         */
+        NONE,
 
-    private:
-        using RenderPassMainCallback = std::function< void( CommandBuffer * ) >;
+        /**
+            \brief Temporal caching policy
 
-    public:
-        virtual ~RenderPass( void ) noexcept = default;
+             The resource will be cached by a short amount of time. It will be
+             removed from cache at some point in the near future.
+             For example, when loading a new scene, we may want to keep some
+             resources cached (i.e. images, materials, meshes, etc) so they can
+             be reused by different objects. Once the scene is loaded, there's no
+             point in keeping them in the cache.
+         */
+        TRANSIENT,
 
-        CommandBuffer *getCommandBuffer( void ) noexcept;
+        /**
+             \brief Scene caching policy
 
-        virtual void recordCommands( CommandBuffer *commandBuffer ) noexcept;
+             Resources will be kept in cache as long as the scene does not changes.
+             This is useful when we know we'll need some resources later when
+             executing the scene. For example, we may spawn new objects reusing
+             some of the existing resources.
+         */
+        SCENE,
 
-        RenderPassMainCallback buildCallback;
+        /**
+             \brief Persistent caching policy
 
-    private:
-        SharedPointer< CommandBuffer > m_commandBuffer;
+             Resources will be kept alive for the duration of the program. Useful for
+             shared resources like shaders or materials that will be used several times
+             by different scenes.
+         */
+        PERSISTENT,
     };
 
 }
 
 #endif
+
 

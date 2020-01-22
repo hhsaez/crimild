@@ -46,15 +46,19 @@ crimild::Bool DescriptorPoolManager::bind( DescriptorPool *descriptorPool ) noex
 
     auto swapchain = renderDevice->getSwapchain();
 
-    auto poolSize = VkDescriptorPoolSize {
-        .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        .descriptorCount = static_cast< crimild::UInt32 >( swapchain->images.size() ),
-    };
+    std::vector< VkDescriptorPoolSize > poolSizes( descriptorPool->descriptorSetLayout->bindings.size() );
+    for ( auto i = 0l; i < poolSizes.size(); ++i ) {
+        auto &binding = descriptorPool->descriptorSetLayout->bindings[ i ];
+        poolSizes[ i ] = {
+            .type = utils::getVulkanDescriptorType( binding.descriptorType ),
+            .descriptorCount = static_cast< crimild::UInt32 >( swapchain->images.size() ),
+        };
+    }
 
     auto createInfo = VkDescriptorPoolCreateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-        .poolSizeCount = 1,
-        .pPoolSizes = &poolSize,
+        .poolSizeCount = static_cast< crimild::UInt32 >( poolSizes.size() ),
+        .pPoolSizes = poolSizes.data(),
         .maxSets = static_cast< crimild::UInt32 >( swapchain->images.size() ),
         .flags = 0,
     };

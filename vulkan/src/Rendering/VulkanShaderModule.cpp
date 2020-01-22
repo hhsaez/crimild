@@ -66,7 +66,7 @@ SharedPointer< ShaderModule > ShaderModuleManager::create( ShaderModule::Descrip
     shaderModule->renderDevice = renderDevice;
     shaderModule->handler = shaderModuleHandler;
     shaderModule->manager = this;
-    shaderModule->stage = utils::VULKAN_SHADER_STAGES[ static_cast< crimild::UInt32 >( descriptor.shader->getStage() ) ];
+    shaderModule->stage = utils::getVulkanShaderStageFlag( descriptor.shader->getStage() );
     shaderModule->entryPointName = descriptor.shader->getEntryPointName();
     insert( crimild::get_ptr( shaderModule ) );
     return shaderModule;
