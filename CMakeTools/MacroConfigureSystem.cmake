@@ -7,8 +7,8 @@ ELSE ()
 ENDIF ()
   
 IF ( APPLE )
-  	 # Enable C++11 features
-	 SET( CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++ -U__STRICT_ANSI__ -fvisibility=hidden -fvisibility-inlines-hidden" )
+  	 # Enable C++14 features
+	 SET( CMAKE_CXX_FLAGS "-std=c++14 -stdlib=libc++ -U__STRICT_ANSI__ -fvisibility=hidden -fvisibility-inlines-hidden" )
 
 	 SET( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++0x" )
 	 SET( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++" )
@@ -18,6 +18,6 @@ ELSE ( APPLE )
   	   IF ( CRIMILD_ENABLE_EMSCRIPTEN )
 		  SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -static -U__STRICT_ANSI__" )
 	   ELSE ()
-		  SET( CMAKE_CXX_FLAGS "-std=c++11 -static-libgcc -static-libstdc++ -static -U__STRICT_ANSI__ -fvisibility=hidden -fvisibility-inlines-hidden" )
+		  SET( CMAKE_CXX_FLAGS "-std=c++14 -static-libgcc -static-libstdc++ -static -U__STRICT_ANSI__ -fvisibility=hidden -fvisibility-inlines-hidden" )
 	   ENDIF ()
 ENDIF ( APPLE )
