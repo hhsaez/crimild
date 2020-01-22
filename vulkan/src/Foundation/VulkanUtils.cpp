@@ -26,6 +26,8 @@
  */
 
 #include "VulkanUtils.hpp"
+#include "Rendering/VulkanPhysicalDevice.hpp"
+#include "Rendering/VulkanRenderDevice.hpp"
 
 #include <set>
 
@@ -65,6 +67,53 @@ const char *utils::errorToString( VkResult result ) noexcept
 		CRIMILD_VULKAN_ERROR_STRING( VK_RESULT_RANGE_SIZE );
 		default: return "UNKNOWN";
 	};	
+}
+
+VkShaderStageFlagBits utils::getVulkanShaderStageFlag( Shader::Stage stage ) noexcept
+{
+    switch ( stage ) {
+        case Shader::Stage::VERTEX:
+            return VK_SHADER_STAGE_VERTEX_BIT;
+        case Shader::Stage::TESSELLATION_CONTROL:
+            return VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT;
+        case Shader::Stage::TESSELLATION_EVALUATION:
+            return VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
+        case Shader::Stage::GEOMETRY:
+            return VK_SHADER_STAGE_GEOMETRY_BIT;
+        case Shader::Stage::FRAGMENT:
+            return VK_SHADER_STAGE_FRAGMENT_BIT;
+        case Shader::Stage::COMPUTE:
+            return VK_SHADER_STAGE_COMPUTE_BIT;
+        case Shader::Stage::ALL_GRAPHICS:
+            return VK_SHADER_STAGE_ALL_GRAPHICS;
+        case Shader::Stage::ALL:
+            return VK_SHADER_STAGE_ALL;
+        default:
+            return VK_SHADER_STAGE_FLAG_BITS_MAX_ENUM;
+    }
+}
+
+VkDescriptorType utils::getVulkanDescriptorType( DescriptorType type ) noexcept
+{
+    switch ( type ) {
+        case DescriptorType::UNIFORM_BUFFER:
+            return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        case DescriptorType::COMBINED_IMAGE_SAMPLER:
+            return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        default:
+            return VK_DESCRIPTOR_TYPE_MAX_ENUM;
+    }
+}
+
+VkFilter utils::getVulkanFilter( Texture::Filter filter ) noexcept
+{
+    // TODO: This is not complete
+    switch ( filter ) {
+        case Texture::Filter::NEAREST:
+            return VK_FILTER_NEAREST;
+        default:
+            return VK_FILTER_LINEAR;
+    }
 }
 
 crimild::Bool utils::checkValidationLayersEnabled( void ) noexcept
@@ -311,5 +360,328 @@ crimild::Bool utils::checkSwapchainSupport( const VkPhysicalDevice &device, cons
 
     return !swapchainSupport.formats.empty()
     	&& !swapchainSupport.presentModes.empty();
+}
+
+crimild::UInt32 utils::findMemoryType( const VkPhysicalDevice &physicalDevice, crimild::UInt32 typeFilter, VkMemoryPropertyFlags properties ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Finding memory type device" );
+
+    VkPhysicalDeviceMemoryProperties memProperties;
+    vkGetPhysicalDeviceMemoryProperties( physicalDevice, &memProperties );
+
+    for ( crimild::UInt32 i = 0; i < memProperties.memoryTypeCount; ++i ) {
+        if ( typeFilter & ( 1 << i )
+             && ( memProperties.memoryTypes[ i ].propertyFlags & properties ) == properties ) {
+            return i;
+        }
+    }
+
+    CRIMILD_LOG_ERROR( "Failed to find suitable memory type" );
+    return -1;
+}
+
+crimild::Bool utils::createBuffer( RenderDevice *renderDevice, BufferDescriptor const &descriptor, VkBuffer &bufferHandler, VkDeviceMemory &bufferMemory ) noexcept
+{
+    auto createInfo = VkBufferCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+        .size = descriptor.size,
+        .usage = descriptor.usage,
+        .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+    };
+
+    CRIMILD_VULKAN_CHECK(
+         vkCreateBuffer(
+            renderDevice->handler,
+            &createInfo,
+            nullptr,
+            &bufferHandler
+           )
+     );
+
+    VkMemoryRequirements memRequirements;
+    vkGetBufferMemoryRequirements( renderDevice->handler, bufferHandler, &memRequirements );
+
+    auto allocInfo = VkMemoryAllocateInfo {
+        .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+        .allocationSize = memRequirements.size,
+        .memoryTypeIndex = findMemoryType(
+            renderDevice->physicalDevice->handler,
+            memRequirements.memoryTypeBits,
+            descriptor.properties
+        ),
+    };
+
+    CRIMILD_VULKAN_CHECK(
+        vkAllocateMemory(
+             renderDevice->handler,
+             &allocInfo,
+             nullptr,
+             &bufferMemory
+         )
+     );
+
+    CRIMILD_VULKAN_CHECK(
+        vkBindBufferMemory(
+               renderDevice->handler,
+               bufferHandler,
+               bufferMemory,
+               0
+           )
+       );
+
+    return true;
+}
+
+crimild::Bool utils::copyToBuffer( const VkDevice &device, VkDeviceMemory &bufferMemory, const void *data, VkDeviceSize size ) noexcept
+{
+    void *dstData = nullptr;
+
+    CRIMILD_VULKAN_CHECK(
+        vkMapMemory(
+            device,
+            bufferMemory,
+            0,
+            size,
+            0,
+            &dstData
+        )
+    );
+
+    memcpy( dstData, data, ( size_t ) size );
+
+    vkUnmapMemory( device, bufferMemory );
+
+    return true;
+}
+
+crimild::Bool utils::copyBuffer( RenderDevice *renderDevice, VkBuffer src, VkBuffer dst, VkDeviceSize size ) noexcept
+{
+    auto commandBuffer = beginSingleTimeCommands( renderDevice );
+
+    auto copyRegion = VkBufferCopy {
+        .size = size
+    };
+
+    vkCmdCopyBuffer( commandBuffer, src, dst, 1, &copyRegion );
+
+    endSingleTimeCommands( renderDevice, commandBuffer );
+
+    return true;
+}
+
+crimild::Bool utils::createImage( RenderDevice *renderDevice, ImageDescriptor const &descriptor, VkImage &image, VkDeviceMemory &imageMemory ) noexcept
+{
+    auto createInfo = VkImageCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+        .imageType = VK_IMAGE_TYPE_2D,
+        .extent = {
+            .width = descriptor.width,
+            .height = descriptor.height,
+            .depth = 1,
+        },
+        .mipLevels = 1,
+        .arrayLayers = 1,
+        .format = descriptor.format,
+        .tiling = descriptor.tiling,
+        .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+        .usage = descriptor.usage,
+        .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+        .samples = VK_SAMPLE_COUNT_1_BIT,
+        .flags = 0,
+    };
+
+    CRIMILD_VULKAN_CHECK(
+        vkCreateImage(
+            renderDevice->handler,
+            &createInfo,
+            nullptr,
+            &image
+          )
+     );
+
+    VkMemoryRequirements memRequirements;
+    vkGetImageMemoryRequirements( renderDevice->handler, image, &memRequirements );
+
+    auto allocInfo = VkMemoryAllocateInfo {
+        .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+        .allocationSize = memRequirements.size,
+        .memoryTypeIndex = utils::findMemoryType(
+            renderDevice->physicalDevice->handler,
+            memRequirements.memoryTypeBits,
+            VK_MEMORY_HEAP_DEVICE_LOCAL_BIT
+        ),
+    };
+
+    CRIMILD_VULKAN_CHECK(
+        vkAllocateMemory(
+            renderDevice->handler,
+            &allocInfo,
+            nullptr,
+            &imageMemory
+        )
+    );
+
+    CRIMILD_VULKAN_CHECK(
+        vkBindImageMemory(
+            renderDevice->handler,
+            image,
+            imageMemory,
+            0
+        )
+    );
+
+    return true;
+}
+
+void utils::transitionImageLayout( RenderDevice *renderDevice, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout ) noexcept
+{
+    auto commandBuffer = beginSingleTimeCommands( renderDevice );
+
+    auto barrier = VkImageMemoryBarrier {
+		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+        .oldLayout = oldLayout,
+        .newLayout = newLayout,
+        .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+        .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+        .image = image,
+        .subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+        .subresourceRange.baseMipLevel = 0,
+        .subresourceRange.levelCount = 1,
+        .subresourceRange.baseArrayLayer = 0,
+        .subresourceRange.layerCount = 1,
+        .srcAccessMask = 0, // See below
+        .dstAccessMask = 0, // See below
+    };
+
+    VkPipelineStageFlags sourceStage = 0;
+    VkPipelineStageFlags destinationStage = 0;
+
+    if ( oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL ) {
+        barrier.srcAccessMask = 0;
+        barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+        destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+    }
+    else if ( oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL ) {
+        barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+        sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+        destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+    }
+    else {
+        CRIMILD_LOG_ERROR( "Unsupported Vulkan Layout Transition" );
+        CRIMILD_VULKAN_CHECK( VK_ERROR_FORMAT_NOT_SUPPORTED );
+    }
+
+    vkCmdPipelineBarrier(
+    	commandBuffer,
+        sourceStage, destinationStage,
+        0,
+        0, nullptr,
+        0, nullptr,
+        1,
+        &barrier
+    );
+
+    endSingleTimeCommands( renderDevice, commandBuffer );
+}
+
+void utils::copyBufferToImage( RenderDevice *renderDevice, VkBuffer buffer, VkImage image, crimild::UInt32 width, crimild::UInt32 height ) noexcept
+{
+    auto commandBuffer = beginSingleTimeCommands( renderDevice );
+
+    auto region = VkBufferImageCopy {
+		.bufferOffset = 0,
+        .bufferRowLength = 0,
+        .bufferImageHeight = 0,
+        .imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+        .imageSubresource.mipLevel = 0,
+        .imageSubresource.baseArrayLayer = 0,
+        .imageSubresource.layerCount = 1,
+        .imageOffset = { 0, 0 },
+        .imageExtent = {
+            .width = width,
+            .height = height,
+            .depth = 1,
+        },
+    };
+
+    vkCmdCopyBufferToImage(
+        commandBuffer,
+        buffer,
+        image,
+        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        1,
+        &region
+    );
+
+    endSingleTimeCommands( renderDevice, commandBuffer );
+}
+
+VkCommandBuffer utils::beginSingleTimeCommands( RenderDevice *renderDevice ) noexcept
+{
+    auto commandPool = renderDevice->getCommandPool();
+
+    auto allocInfo = VkCommandBufferAllocateInfo {
+		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+        .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+        .commandPool = commandPool->handler,
+        .commandBufferCount = 1,
+    };
+
+    VkCommandBuffer commandBuffer;
+
+    CRIMILD_VULKAN_CHECK(
+		vkAllocateCommandBuffers(
+            renderDevice->handler,
+            &allocInfo,
+            &commandBuffer
+        )
+    );
+
+    auto beginInfo = VkCommandBufferBeginInfo {
+		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+        .flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
+    };
+
+    vkBeginCommandBuffer( commandBuffer, &beginInfo );
+
+    return commandBuffer;
+}
+
+void utils::endSingleTimeCommands( RenderDevice *renderDevice, VkCommandBuffer commandBuffer ) noexcept
+{
+    vkEndCommandBuffer( commandBuffer );
+
+    auto submitInfo = VkSubmitInfo {
+		.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+        .commandBufferCount = 1,
+        .pCommandBuffers = &commandBuffer,
+    };
+
+    auto graphicsQueue = renderDevice->graphicsQueue;
+    auto commandPool = renderDevice->getCommandPool();
+
+    CRIMILD_VULKAN_CHECK(
+    	vkQueueSubmit(
+            graphicsQueue,
+            1,
+            &submitInfo,
+            nullptr
+        )
+    );
+
+    CRIMILD_VULKAN_CHECK(
+    	vkQueueWaitIdle(
+			graphicsQueue
+        )
+    );
+
+    vkFreeCommandBuffers(
+        renderDevice->handler,
+        commandPool->handler,
+        1,
+        &commandBuffer
+    );
 }
 

@@ -47,7 +47,6 @@ crimild::Bool DescriptorSetManager::bind( DescriptorSet *descriptorSet ) noexcep
     auto swapchain = renderDevice->getSwapchain();
     auto descriptorPool = crimild::get_ptr( descriptorSet->descriptorPool );
     auto layout = crimild::get_ptr( descriptorSet->descriptorSetLayout );
-    auto buffer = crimild::get_ptr( descriptorSet->buffer );
     auto count = swapchain->images.size();
 
     VkDescriptorSetLayout layouts[] = {
@@ -77,10 +76,48 @@ crimild::Bool DescriptorSetManager::bind( DescriptorSet *descriptorSet ) noexcep
 
     setHandlers( descriptorSet, handlers );
 
-    if ( buffer != nullptr ) {
-	    for ( auto i = 0l; i < count; ++i ) {
-            auto bufferHandler = renderDevice->getHandler( buffer, i );
-            write( handlers[ i ], bufferHandler, 0, buffer->getSize() );
+    // Keep these alive until all operations are completed
+    VkDescriptorBufferInfo bufferInfo;
+    VkDescriptorImageInfo imageInfo;
+
+    for ( auto i = 0l; i < count; ++i ) {
+        std::vector< VkWriteDescriptorSet > writes( descriptorSet->writes.size() );
+        for ( auto j = 0l; j < writes.size(); ++j ) {
+            auto &write = descriptorSet->writes[ j ];
+            writes[ j ] = {
+                .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+                .dstSet = handlers[ i ],
+                .dstBinding = static_cast< crimild::UInt32 >( j ),
+                .dstArrayElement = 0,
+                .descriptorType = utils::getVulkanDescriptorType( write.descriptorType ),
+                .descriptorCount = 1,
+            };
+
+            if ( write.descriptorType == DescriptorType::UNIFORM_BUFFER ) {
+                auto buffer = write.buffer;
+                auto bindInfo = renderDevice->getBindInfo( buffer );
+                auto bufferHandler = bindInfo.bufferHandlers[ i ];
+                bufferInfo.buffer = bufferHandler;
+                bufferInfo.offset = 0;
+                bufferInfo.range = write.buffer->getSize();
+                writes[ j ].pBufferInfo = &bufferInfo;
+            }
+            else if ( write.descriptorType == DescriptorType::COMBINED_IMAGE_SAMPLER ) {
+                auto texture = write.texture;
+                auto bindInfo = renderDevice->getBindInfo( texture );
+                imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                imageInfo.imageView = bindInfo.imageView->handler;
+                imageInfo.sampler = bindInfo.sampler;
+                writes[ j ].pImageInfo = &imageInfo;
+            }
+
+            vkUpdateDescriptorSets(
+                renderDevice->handler,
+                1,
+                &writes[ j ],
+                0,
+                nullptr
+            );
         }
     }
 
@@ -101,36 +138,5 @@ crimild::Bool DescriptorSetManager::unbind( DescriptorSet *descriptorSet ) noexc
     removeHandlers( descriptorSet );
 
     return ManagerImpl::unbind( descriptorSet );
-}
-
-void DescriptorSetManager::write( VkDescriptorSet handler, VkBuffer bufferHandler, crimild::Size offset, crimild::Size size ) noexcept
-{
-    auto renderDevice = getRenderDevice();
-
-    auto bufferInfo = VkDescriptorBufferInfo {
-        .buffer = bufferHandler,
-        .offset = offset,
-        .range = size,
-    };
-
-    auto descriptorWrite = VkWriteDescriptorSet {
-        .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-        .dstSet = handler,
-        .dstBinding = 0,
-        .dstArrayElement = 0,
-        .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, // TODO: type can change based on uniform usage?
-        .descriptorCount = 1,
-        .pBufferInfo = &bufferInfo,
-        .pImageInfo = nullptr,
-        .pTexelBufferView = nullptr,
-    };
-
-    vkUpdateDescriptorSets(
-        renderDevice->handler,
-        1,
-        &descriptorWrite,
-        0,
-        nullptr
-       );
 }
 

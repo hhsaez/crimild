@@ -43,53 +43,20 @@ namespace crimild {
 
         class PipelineLayout;
 
-        /*
+        struct PipelineBindInfo {
+            VkPipeline pipelineHandler = VK_NULL_HANDLE;
+            SharedPointer< PipelineLayout > pipelineLayout;
+        };
 
-        class PipelineManager;
-		class RenderDevice;
-        class RenderPass;
-        class ShaderModule;
-        class Swapchain;
-
-		class Pipeline : public VulkanObject {
-            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::Pipeline )
-
-		public:
-			struct Descriptor {
-                RenderDevice *renderDevice;
-				SharedPointer< ShaderProgram > program;
-				RenderPass *renderPass;
-                Primitive::Type primitiveType;
-                Rectf viewport;
-                Rectf scissor;
-                std::vector< VkVertexInputBindingDescription > bindingDescription;
-                std::vector< VkVertexInputAttributeDescription > attributeDescriptions;
-                std::vector< DescriptorSetLayout * > setLayouts;
-			};
-			
-		public:
-			~Pipeline( void );
-
-            RenderDevice *renderDevice = nullptr;
-            VkPipeline handler = VK_NULL_HANDLE;
-            PipelineManager *manager = nullptr;
-            SharedPointer< PipelineLayout > layout;
-		};
+        /**
+			\TODO: Pipelines might be bound by render pass. If so, pipelines might have multiple handlers
+         	(one for each render pass)
          */
-
-        class PipelineManager : public SingleHandlerRenderResourceManagerImpl< Pipeline, VkPipeline > {
-            using ManagerImpl = SingleHandlerRenderResourceManagerImpl< Pipeline, VkPipeline >;
+        class PipelineManager : public BasicRenderResourceManagerImpl< Pipeline, PipelineBindInfo > {
+            using ManagerImpl = BasicRenderResourceManagerImpl< Pipeline, PipelineBindInfo >;
 
         public:
             virtual ~PipelineManager( void ) noexcept = default;
-
-            PipelineLayout *getPipelineLayout( Pipeline *pipeline )
-            {
-                if ( !m_pipelineLayouts.contains( pipeline ) && !bind( pipeline ) ) {
-                    return nullptr;
-                }
-                return crimild::get_ptr( m_pipelineLayouts[ pipeline ] );
-            }
 
             crimild::Bool bind( Pipeline *pipeline ) noexcept override;
             crimild::Bool unbind( Pipeline *pipeline ) noexcept override;
@@ -113,9 +80,6 @@ namespace crimild {
             VkPipelineDepthStencilStateCreateInfo createDepthStencilState( void ) const noexcept;
             VkPipelineColorBlendAttachmentState createColorBlendAttachment( void ) const noexcept;
             VkPipelineColorBlendStateCreateInfo createColorBlending( const VkPipelineColorBlendAttachmentState &colorBlendAttachment ) const noexcept;
-
-        private:
-            containers::Map< Pipeline *, SharedPointer< PipelineLayout >> m_pipelineLayouts;
         };
 
 	}

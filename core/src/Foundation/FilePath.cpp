@@ -25,37 +25,29 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CRIMILD_RENDERING_RENDER_PASS_
-#define CRIMILD_RENDERING_RENDER_PASS_
+#include "Foundation/FilePath.hpp"
+#include "Foundation/StringUtils.hpp"
+#include "Simulation/FileSystem.hpp"
 
-#include "Rendering/RenderResource.hpp"
-#include "Foundation/SharedObject.hpp"
+using namespace crimild;
 
-namespace crimild {
-
-    class CommandBuffer;
-
-    class RenderPass :
-    	public SharedObject,
-    	public RenderResourceImpl< RenderPass > {
-
-    private:
-        using RenderPassMainCallback = std::function< void( CommandBuffer * ) >;
-
-    public:
-        virtual ~RenderPass( void ) noexcept = default;
-
-        CommandBuffer *getCommandBuffer( void ) noexcept;
-
-        virtual void recordCommands( CommandBuffer *commandBuffer ) noexcept;
-
-        RenderPassMainCallback buildCallback;
-
-    private:
-        SharedPointer< CommandBuffer > m_commandBuffer;
-    };
-
+std::string FilePath::getExtension( void ) const noexcept
+{
+    return StringUtils::getFileExtension( path );
 }
 
-#endif
+std::string FilePath::getAbsolutePath( void ) const noexcept
+{
+    if ( pathType == PathType::RELATIVE ) {
+    	if ( fileType == FileType::RESOURCE ) {
+        	return FileSystem::getInstance().pathForResource( path );
+    	}
+
+    	if ( fileType == FileType::RESOURCE ) {
+        	return FileSystem::getInstance().pathForResource( path );
+    	}
+    }
+
+    return path;
+}
 

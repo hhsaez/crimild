@@ -167,22 +167,22 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
 
                 case CommandBuffer::Command::Type::BIND_GRAPHICS_PIPELINE: {
                     auto pipeline = cmd.pipeline;
-                    auto pipelineHandler = renderDevice->getHandler( pipeline );
+                    auto pipelineBindInfo = renderDevice->getBindInfo( pipeline );
 
                     vkCmdBindPipeline(
                         handler,
                         VK_PIPELINE_BIND_POINT_GRAPHICS,
-                        pipelineHandler
+                        pipelineBindInfo.pipelineHandler
                     );
                     break;
                 }
 
                 case CommandBuffer::Command::Type::BIND_VERTEX_BUFFER: {
                     auto vbo = cmd.buffer;
-                    auto vboHandler = renderDevice->getHandler( vbo, 0 );
+                    auto bindInfo = renderDevice->getBindInfo( vbo );
 
                     VkBuffer vertexBuffers[] = {
-                        vboHandler,
+                        bindInfo.bufferHandlers[ 0 ],
                     };
                     VkDeviceSize offsets[] = {
                         0
@@ -198,12 +198,12 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                 }
 
                 case CommandBuffer::Command::Type::BIND_INDEX_BUFFER: {
-                    auto buffer = cmd.buffer;
-                    auto bufferHandler = renderDevice->getHandler( buffer, 0 );
+                    auto ibo = cmd.buffer;
+                    auto bindInfo = renderDevice->getBindInfo( ibo );
 
                     vkCmdBindIndexBuffer(
                         handler,
-                        bufferHandler,
+                        bindInfo.bufferHandlers[ 0 ],
                         0,
                         VK_INDEX_TYPE_UINT32
                     );
@@ -215,7 +215,7 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                     auto descriptorSetHandler = renderDevice->getHandler( descriptorSet, index );
 
                     auto pipeline = crimild::get_ptr( descriptorSet->pipeline );
-                    auto pipelineLayout = renderDevice->getPipelineLayout( pipeline );
+                    auto pipelineBindInfo = renderDevice->getBindInfo( pipeline );
 
                     VkDescriptorSet descriptorSets[] = {
                         descriptorSetHandler,
@@ -224,7 +224,7 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                     vkCmdBindDescriptorSets(
                         handler,
                         VK_PIPELINE_BIND_POINT_GRAPHICS,
-                        pipelineLayout->handler,
+                        pipelineBindInfo.pipelineLayout->handler,
                         0,
                         1,
                         descriptorSets,

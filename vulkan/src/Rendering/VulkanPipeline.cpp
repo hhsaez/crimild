@@ -104,9 +104,13 @@ crimild::Bool PipelineManager::bind( Pipeline *pipeline ) noexcept
        	)
     );
 
-    setHandler( pipeline, pipelineHander );
-
-    m_pipelineLayouts[ pipeline ] = pipelineLayout;
+    setBindInfo(
+    	pipeline,
+       	{
+        	.pipelineHandler = pipelineHander,
+        	.pipelineLayout = pipelineLayout,
+    	}
+    );
 
     return ManagerImpl::bind( pipeline );
 }
@@ -125,17 +129,15 @@ crimild::Bool PipelineManager::unbind( Pipeline *pipeline ) noexcept
         return false;
     }
 
-    auto handler = getHandler( pipeline );
+    auto bindInfo = getBindInfo( pipeline );
 
     vkDestroyPipeline(
         renderDevice->handler,
-        handler,
+        bindInfo.pipelineHandler,
         nullptr
     );
 
-    removeHandlers( pipeline );
-
-    m_pipelineLayouts.remove( pipeline );
+    removeBindInfo( pipeline );
 
     return ManagerImpl::unbind( pipeline );
 }

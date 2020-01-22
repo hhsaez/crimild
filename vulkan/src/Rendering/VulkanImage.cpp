@@ -32,14 +32,14 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
-Image::~Image( void )
+crimild::vulkan::Image::~Image( void )
 {
     if ( manager != nullptr ) {
         manager->destroy( this );
     }
 }
 
-SharedPointer< Image > ImageManager::create( Image::Descriptor const &descriptor ) noexcept
+SharedPointer< crimild::vulkan::Image > ImageManager::create( Image::Descriptor const &descriptor ) noexcept
 {
     CRIMILD_LOG_TRACE( "Creating Vulkan image" );
 

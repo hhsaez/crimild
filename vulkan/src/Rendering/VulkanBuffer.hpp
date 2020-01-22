@@ -40,8 +40,13 @@ namespace crimild {
         class RenderDevice;
         class CommandPool;
 
-        class BufferManager : public MultiHandlerRenderResourceManagerImpl< Buffer, VkBuffer > {
-            using ManagerImpl = MultiHandlerRenderResourceManagerImpl< Buffer, VkBuffer >;
+        struct BufferBindInfo {
+            containers::Array< VkBuffer > bufferHandlers;
+            containers::Array< VkDeviceMemory > bufferMemories;
+        };
+
+        class BufferManager : public BasicRenderResourceManagerImpl< Buffer, BufferBindInfo > {
+            using ManagerImpl = BasicRenderResourceManagerImpl< Buffer, BufferBindInfo >;
 
         public:
             virtual ~BufferManager( void ) noexcept = default;
@@ -49,16 +54,9 @@ namespace crimild {
             crimild::Bool bind( Buffer *buffer ) noexcept override;
             crimild::Bool unbind( Buffer *buffer ) noexcept override;
 
-            VkDeviceMemory getMemory( Buffer *buffer, crimild::Size index ) noexcept;
-
             void updateUniformBuffers( crimild::Size index ) noexcept;
 
         private:
-            containers::Map< Buffer *, containers::Array< VkDeviceMemory >> m_bufferMemoryHandlers;
-
-        private:
-            crimild::UInt32 findMemoryType( RenderDevice *renderDevice, crimild::UInt32 typeFilter, VkMemoryPropertyFlags properties ) noexcept;
-            crimild::Bool createBuffer( RenderDevice *renderDevice, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer &bufferBuffer, VkDeviceMemory &bufferMemory ) noexcept;
             void copyBuffer( RenderDevice *renderDevice, CommandPool *commandPool, VkBuffer srcBufferHandler, VkBuffer dstBufferHandler, VkDeviceSize size ) const noexcept;
             void updateBuffer( RenderDevice *renderDevice, VkDeviceMemory bufferMemory, const void *data, crimild::Size size ) noexcept;
         };
