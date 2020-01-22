@@ -77,6 +77,50 @@ namespace crimild {
             RenderDevice *m_renderDevice = nullptr;
         };
 
+        template< typename ResourceType, typename BindInfoType >
+        class BasicRenderResourceManagerImpl : public VulkanRenderResourceManagerImpl< ResourceType, BindInfoType > {
+        public:
+            virtual ~BasicRenderResourceManagerImpl( void ) noexcept = default;
+
+            crimild::Bool validate( ResourceType *resource ) const noexcept
+            {
+                return m_infos.contains( resource );
+            }
+
+            BindInfoType getBindInfo( ResourceType *resource ) noexcept
+            {
+                if ( !validate( resource ) && !this->bind( resource ) ) {
+                    return BindInfoType { };
+                }
+                return m_infos[ resource ];
+            }
+
+            template< typename Fn >
+            void each( Fn const &fn )
+            {
+                m_infos.each( fn );
+            }
+
+        protected:
+            void setBindInfo( ResourceType *resource, BindInfoType bindInfo ) noexcept
+            {
+                m_infos[ resource ] = bindInfo;
+            }
+
+            void removeBindInfo( ResourceType *resource ) noexcept
+            {
+                if ( !validate( resource ) ) {
+                    return;
+                }
+                m_infos.remove( resource );
+            }
+
+        private:
+            containers::Map< ResourceType *, BindInfoType > m_infos;
+        };
+
+
+
         template< typename ResourceType, typename HandlerType >
         class SingleHandlerRenderResourceManagerImpl : public VulkanRenderResourceManagerImpl< ResourceType, HandlerType > {
         public:

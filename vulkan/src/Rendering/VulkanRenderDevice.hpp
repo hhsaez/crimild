@@ -44,6 +44,7 @@
 #include "Rendering/VulkanSemaphore.hpp"
 #include "Rendering/VulkanShaderModule.hpp"
 #include "Rendering/VulkanSwapchain.hpp"
+#include "Rendering/VulkanTexture.hpp"
 
 #include <vector>
 
@@ -73,11 +74,12 @@ namespace crimild {
         	public PipelineLayoutManager,
             public RenderPassManager,
         	public SemaphoreManager,
-        	public ShaderModuleManager {
+        	public ShaderModuleManager,
+            public TextureManager {
             CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::RenderDevice )
 
         public:
-            using BufferManager::getHandler;
+            using BufferManager::getBindInfo;
             using BufferManager::bind;
             using CommandBufferManager::getHandler;
             using CommandBufferManager::bind;
@@ -92,12 +94,14 @@ namespace crimild {
             using FramebufferManager::create;
             using ImageManager::create;
             using ImageViewManager::create;
-            using PipelineManager::getHandler;
+            using PipelineManager::getBindInfo;
             using PipelineManager::bind;
             using PipelineLayoutManager::create;
             using RenderPassManager::create;
             using SemaphoreManager::create;
             using ShaderModuleManager::create;
+            using TextureManager::bind;
+            using TextureManager::getBindInfo;
 
             struct Descriptor {
                 PhysicalDevice *physicalDevice;

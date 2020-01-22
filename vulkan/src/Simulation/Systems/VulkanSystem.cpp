@@ -142,7 +142,7 @@ void VulkanSystem::stop( void )
     m_debugMessenger = nullptr;
     m_surface = nullptr;
     m_instance = nullptr;
-
+    
     RenderDeviceManager::cleanup();
     PhysicalDeviceManager::cleanup();
     VulkanDebugMessengerManager::cleanup();

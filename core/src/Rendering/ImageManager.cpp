@@ -25,37 +25,20 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CRIMILD_RENDERING_RENDER_PASS_
-#define CRIMILD_RENDERING_RENDER_PASS_
+#include "Rendering/ImageManager.hpp"
+#include "Foundation/StringUtils.hpp"
+#include "Foundation/Log.hpp"
+#include "Rendering/ImageTGA.hpp"
 
-#include "Rendering/RenderResource.hpp"
-#include "Foundation/SharedObject.hpp"
+using namespace crimild;
 
-namespace crimild {
+SharedPointer< Image > ImageManager::loadImage( ImageDescriptor const &descriptor ) const noexcept
+{
+    if ( descriptor.filePath.getExtension() != "tga" ) {
+        CRIMILD_LOG_WARNING( "Invalid image file ", descriptor.filePath.path );
+        return nullptr;
+    }
 
-    class CommandBuffer;
-
-    class RenderPass :
-    	public SharedObject,
-    	public RenderResourceImpl< RenderPass > {
-
-    private:
-        using RenderPassMainCallback = std::function< void( CommandBuffer * ) >;
-
-    public:
-        virtual ~RenderPass( void ) noexcept = default;
-
-        CommandBuffer *getCommandBuffer( void ) noexcept;
-
-        virtual void recordCommands( CommandBuffer *commandBuffer ) noexcept;
-
-        RenderPassMainCallback buildCallback;
-
-    private:
-        SharedPointer< CommandBuffer > m_commandBuffer;
-    };
-
+    return crimild::alloc< ImageTGA >( descriptor.filePath.getAbsolutePath() );
 }
-
-#endif
 

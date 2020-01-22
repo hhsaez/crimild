@@ -25,34 +25,37 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CRIMILD_RENDERING_RENDER_PASS_
-#define CRIMILD_RENDERING_RENDER_PASS_
+#ifndef CRIMILD_CORE_RENDERING_IMAGE_MANAGER_
+#define CRIMILD_CORE_RENDERING_IMAGE_MANAGER_
 
-#include "Rendering/RenderResource.hpp"
 #include "Foundation/SharedObject.hpp"
+#include "Foundation/Singleton.hpp"
+#include "Foundation/FilePath.hpp"
+#include "Foundation/Policies/CachePolicy.hpp"
 
 namespace crimild {
 
-    class CommandBuffer;
+    class Image;
 
-    class RenderPass :
+	/**
+		\todo Enable cache using CachePolicy
+     */
+    class ImageManager :
     	public SharedObject,
-    	public RenderResourceImpl< RenderPass > {
-
-    private:
-        using RenderPassMainCallback = std::function< void( CommandBuffer * ) >;
+    	public DynamicSingleton< ImageManager > {
 
     public:
-        virtual ~RenderPass( void ) noexcept = default;
+        struct ImageDescriptor {
+            FilePath filePath;
+            CachePolicy cachePolicy;
+        };
 
-        CommandBuffer *getCommandBuffer( void ) noexcept;
+    public:
+        ImageManager( void ) = default;
+        virtual ~ImageManager( void ) = default;
 
-        virtual void recordCommands( CommandBuffer *commandBuffer ) noexcept;
-
-        RenderPassMainCallback buildCallback;
-
-    private:
-        SharedPointer< CommandBuffer > m_commandBuffer;
+    public:
+        virtual SharedPointer< Image > loadImage( ImageDescriptor const &descriptor ) const noexcept;
     };
 
 }

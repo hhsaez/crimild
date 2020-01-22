@@ -45,9 +45,6 @@ namespace crimild {
 
             crimild::Bool bind( DescriptorSet *descriptorSet ) noexcept override;
             crimild::Bool unbind( DescriptorSet *descriptorSet ) noexcept override;
-
-        private:
-            void write( VkDescriptorSet handler, VkBuffer buffer, crimild::Size offset, crimild::Size size ) noexcept;
         };
 
     }

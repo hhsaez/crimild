@@ -44,18 +44,22 @@ crimild::Bool DescriptorSetLayoutManager::bind( DescriptorSetLayout *descriptorS
         return false;
     }
 
-    auto uboLayoutBinding = VkDescriptorSetLayoutBinding {
-        .binding = 0,
-        .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        .descriptorCount = 1,
-        .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
-        .pImmutableSamplers = nullptr, // Optional
-    };
+    std::vector< VkDescriptorSetLayoutBinding > bindings( descriptorSetLayout->bindings.size() );
+    for ( auto i = 0l; i < bindings.size(); i++ ) {
+        auto binding = descriptorSetLayout->bindings[ i ];
+		bindings[ i ] = VkDescriptorSetLayoutBinding {
+        	.binding = static_cast< crimild::UInt32 >( i ),
+        	.descriptorType = utils::getVulkanDescriptorType( binding.descriptorType ),
+            .descriptorCount = 1,
+            .stageFlags = utils::getVulkanShaderStageFlag( binding.stage ),
+            .pImmutableSamplers = nullptr // optional
+        };
+    }
 
     auto createInfo = VkDescriptorSetLayoutCreateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-        .bindingCount = 1,
-        .pBindings = &uboLayoutBinding,
+        .bindingCount = static_cast< crimild::UInt32 >( bindings.size() ),
+        .pBindings = bindings.data(),
     };
 
     VkDescriptorSetLayout descriptorSetLayoutHandler;

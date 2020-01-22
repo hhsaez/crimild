@@ -67,42 +67,40 @@ crimild::Bool BufferManager::bind( Buffer *buffer ) noexcept
     containers::Array< VkDeviceMemory > bufferMemories( count );
 
     for ( auto i = 0l; i < count; i++ ) {
-        VkBuffer bufferHandler;// = bufferHandlers[ i ];
-        VkDeviceMemory bufferMemory;// = bufferMemories[ i ];
+        VkBuffer bufferHandler;
+        VkDeviceMemory bufferMemory;
 
-        createBuffer(
+        utils::createBuffer(
             renderDevice,
-            bufferSize,
-            usage,
-            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+            utils::BufferDescriptor {
+            	.size = bufferSize,
+            	.usage = usage,
+            	.properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        	},
             bufferHandler,
             bufferMemory
         );
 
         if ( buffer->getRawData() != nullptr ) {
-            void *data = nullptr;
-            CRIMILD_VULKAN_CHECK(
-                vkMapMemory(
-                    renderDevice->handler,
-                    bufferMemory,
-                    0,
-                    bufferSize,
-                    0,
-                    &data
-                )
+            utils::copyToBuffer(
+                renderDevice->handler,
+                bufferMemory,
+                buffer->getRawData(),
+                bufferSize
             );
-
-            memcpy( data, buffer->getRawData(), ( size_t ) bufferSize );
-
-            vkUnmapMemory( renderDevice->handler, bufferMemory );
         }
 
         bufferHandlers[ i ] = bufferHandler;
         bufferMemories[ i ] = bufferMemory;
     }
 
-    setHandlers( buffer, bufferHandlers );
-    m_bufferMemoryHandlers[ buffer ] = bufferMemories;
+    setBindInfo(
+    	buffer,
+        {
+        	.bufferHandlers = bufferHandlers,
+        	.bufferMemories = bufferMemories,
+    	}
+    );
 
     return ManagerImpl::bind( buffer );
 }
@@ -121,27 +119,17 @@ crimild::Bool BufferManager::unbind( Buffer *buffer ) noexcept
         return false;
     }
 
-    eachHandler( buffer, [ renderDevice ]( VkBuffer handler ) {
-        vkDestroyBuffer( renderDevice->handler, handler, nullptr );
-    });
-    removeHandlers( buffer );
+    auto bindInfo = getBindInfo( buffer );
+    auto N = bindInfo.bufferHandlers.size();
+    for ( int i = 0; i < N; i++ ) {
+        vkDestroyBuffer( renderDevice->handler, bindInfo.bufferHandlers[ i ], nullptr );
+        vkFreeMemory( renderDevice->handler, bindInfo.bufferMemories[ i ], nullptr );
+    }
 
-    m_bufferMemoryHandlers[ buffer ].each( [ renderDevice ]( VkDeviceMemory memoryHandler ) {
-        vkFreeMemory( renderDevice->handler, memoryHandler, nullptr );
-    });
-    m_bufferMemoryHandlers.remove( buffer );
+    removeBindInfo( buffer );
 
     return RenderResourceManager< crimild::Buffer >::unbind( buffer );
 }
-
-VkDeviceMemory BufferManager::getMemory( Buffer *buffer, crimild::Size index ) noexcept
-{
-    if ( !validate( buffer ) && !bind( buffer ) ) {
-        return VK_NULL_HANDLE;
-    }
-    return m_bufferMemoryHandlers[ buffer ][ index ];
-}
-
 
 /*
 
@@ -279,74 +267,6 @@ void vulkan::BufferManager::destroy( vulkan::Buffer *buffer ) noexcept
 }
  */
 
-crimild::UInt32 BufferManager::findMemoryType( RenderDevice *renderDevice, crimild::UInt32 typeFilter, VkMemoryPropertyFlags properties ) noexcept
-{
-    CRIMILD_LOG_TRACE( "Finding memory type device" );
-
-    auto physicalDevice = renderDevice->physicalDevice;
-
-    VkPhysicalDeviceMemoryProperties memProperties;
-    vkGetPhysicalDeviceMemoryProperties( physicalDevice->handler, &memProperties );
-
-    for ( crimild::UInt32 i = 0; i < memProperties.memoryTypeCount; ++i ) {
-        if ( typeFilter & ( 1 << i )
-             && ( memProperties.memoryTypes[ i ].propertyFlags & properties ) == properties ) {
-            return i;
-        }
-    }
-
-    CRIMILD_LOG_ERROR( "Failed to find suitable memory type" );
-    return -1;
-}
-
-crimild::Bool BufferManager::createBuffer( RenderDevice *renderDevice, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer &bufferHandler, VkDeviceMemory &bufferMemory ) noexcept
-{
-    auto createInfo = VkBufferCreateInfo {
-        .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-        .size = size,
-        .usage = usage,
-        .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-    };
-
-    CRIMILD_VULKAN_CHECK(
- 		vkCreateBuffer(
-        	renderDevice->handler,
-            &createInfo,
-            nullptr,
-            &bufferHandler
-       	)
- 	);
-
-    VkMemoryRequirements memRequirements;
-    vkGetBufferMemoryRequirements( renderDevice->handler, bufferHandler, &memRequirements );
-
-    auto allocInfo = VkMemoryAllocateInfo {
-        .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-        .allocationSize = memRequirements.size,
-        .memoryTypeIndex = findMemoryType( renderDevice, memRequirements.memoryTypeBits, properties ),
-    };
-
-    CRIMILD_VULKAN_CHECK(
-    	vkAllocateMemory(
-     		renderDevice->handler,
-         	&allocInfo,
-         	nullptr,
-         	&bufferMemory
-     	)
- 	);
-
-    CRIMILD_VULKAN_CHECK(
-    	vkBindBufferMemory(
-       		renderDevice->handler,
-           	bufferHandler,
-       		bufferMemory,
-       		0
-       	)
-   	);
-
-    return true;
-}
-
 void BufferManager::copyBuffer( RenderDevice *renderDevice, CommandPool *commandPool, VkBuffer srcBufferHandler, VkBuffer dstBufferHandler, VkDeviceSize size ) const noexcept
 {
     /*
@@ -376,9 +296,11 @@ void BufferManager::copyBuffer( RenderDevice *renderDevice, CommandPool *command
 void BufferManager::updateUniformBuffers( crimild::Size index ) noexcept
 {
     auto renderDevice = getRenderDevice();
-    m_bufferMemoryHandlers.each( [ this, renderDevice, index ]( const Buffer *buffer, const containers::Array< VkDeviceMemory > &bufferMemory ) {
+    each( [ this, renderDevice, index ]( const Buffer *buffer, const BufferBindInfo &bindInfo ) {
         if ( buffer->getUsage() == Buffer::Usage::UNIFORM_BUFFER ) {
-        	updateBuffer( renderDevice, bufferMemory[ index ], buffer->getRawData(), buffer->getSize() );
+            if ( bindInfo.bufferMemories.size() > index ) {
+            	updateBuffer( renderDevice, bindInfo.bufferMemories[ index ], buffer->getRawData(), buffer->getSize() );
+            }
         }
     });
 }

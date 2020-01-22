@@ -32,25 +32,20 @@
 #include "Foundation/Log.hpp"
 #include "Foundation/Types.hpp"
 
+#include "Rendering/DescriptorSet.hpp"
+#include "Rendering/Shader.hpp"
+#include "Rendering/Texture.hpp"
+
 #include <vulkan/vulkan.h>
 
 namespace crimild {
 
 	namespace vulkan {
 
+        class RenderDevice;
+
 		namespace utils {
 
-			static const VkShaderStageFlagBits VULKAN_SHADER_STAGES[] = {
-				VK_SHADER_STAGE_VERTEX_BIT,
-				VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT,
-				VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
-				VK_SHADER_STAGE_GEOMETRY_BIT,
-				VK_SHADER_STAGE_FRAGMENT_BIT,
-				VK_SHADER_STAGE_COMPUTE_BIT,
-				VK_SHADER_STAGE_ALL_GRAPHICS,
-				VK_SHADER_STAGE_ALL,
-			};
-			
 			static const VkPrimitiveTopology VULKAN_PRIMITIVE_TOPOLOGIES[] = {
 				VK_PRIMITIVE_TOPOLOGY_POINT_LIST,
 				VK_PRIMITIVE_TOPOLOGY_LINE_LIST,
@@ -73,6 +68,17 @@ namespace crimild {
 			};
 
 			const char *errorToString( VkResult result ) noexcept;
+
+            /**
+             	\name Translation
+             */
+            //@{
+
+            VkShaderStageFlagBits getVulkanShaderStageFlag( Shader::Stage stage ) noexcept;
+            VkDescriptorType getVulkanDescriptorType( DescriptorType type ) noexcept;
+            VkFilter getVulkanFilter( Texture::Filter filter ) noexcept;
+
+            //@}
 
             /**
              	\name Validation layers
@@ -133,6 +139,8 @@ namespace crimild {
             // TODO: How to handle an optional surface param?
             QueueFamilyIndices findQueueFamilies( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept;
 
+            //@}
+
             /**
              	\name Swapchain
              */
@@ -149,9 +157,67 @@ namespace crimild {
 
             //@}
 
+            /**
+             	\name Buffers
+             */
+            //@{
+
+            crimild::UInt32 findMemoryType( const VkPhysicalDevice &physicalDevice, crimild::UInt32 typeFilter, VkMemoryPropertyFlags properties ) noexcept;
+
+            struct BufferDescriptor {
+                VkDeviceSize size;
+                VkBufferUsageFlags usage;
+                VkMemoryPropertyFlags properties;
+            };
+
+            crimild::Bool createBuffer( RenderDevice *renderDevice, BufferDescriptor const &descriptor, VkBuffer &bufferHandler, VkDeviceMemory &bufferMemory ) noexcept;
+
+            crimild::Bool copyToBuffer( const VkDevice &device, VkDeviceMemory &bufferMemory, const void *data, VkDeviceSize size ) noexcept;
+
+            crimild::Bool copyBuffer( RenderDevice *renderDevice, VkBuffer src, VkBuffer dst, VkDeviceSize size ) noexcept;
+
             //@}
 
+            /**
+             	\name Images
+             */
+            //@{
+
+            struct ImageDescriptor {
+                crimild::UInt32 width;
+                crimild::UInt32 height;
+                VkFormat format;
+                VkImageTiling tiling;
+                VkImageUsageFlags usage;
+                VkMemoryPropertyFlags properties;
+            };
+
+            crimild::Bool createImage( RenderDevice *renderDevice, ImageDescriptor const &descriptor, VkImage &image, VkDeviceMemory &imageMemory ) noexcept;
+
+            void transitionImageLayout( RenderDevice *renderDevice, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout ) noexcept;
+
+            void copyBufferToImage( RenderDevice *renderDevice, VkBuffer buffer, VkImage image, crimild::UInt32 width, crimild::UInt32 height ) noexcept;
+
+            //@}
+
+            /**
+             	\name Commands
+             */
+            //@{
+
+            VkCommandBuffer beginSingleTimeCommands( RenderDevice *renderDevice ) noexcept;
+            void endSingleTimeCommands( RenderDevice *renderDevice, VkCommandBuffer commandBuffer ) noexcept;
+
+            //@}
+
+            /**
+             	\name Debug
+             */
+            //@{
+
             void populateDebugMessengerCreateInfo( VkDebugUtilsMessengerCreateInfoEXT &createInfo ) noexcept;
+
+            //@}
 
 		}
 

@@ -32,12 +32,14 @@
 #include "Catalog.hpp"
 
 #include "Foundation/NamedObject.hpp"
+#include "Rendering/RenderResource.hpp"
 
 namespace crimild {
     
     class Texture :
 		public NamedObject,
 		public coding::Codable,
+    	public RenderResourceImpl< Texture >,
 		public StreamObject, // TODO: remove this
 		public Catalog< Texture >::Resource {
         CRIMILD_IMPLEMENT_RTTI( crimild::Texture )
@@ -46,6 +48,8 @@ namespace crimild {
 		static SharedPointer< Texture > ONE;
 		static SharedPointer< Texture > CUBE_ONE;
 		static SharedPointer< Texture > ZERO;
+        static SharedPointer< Texture > CHECKERBOARD;
+        static SharedPointer< Texture > INVALID;
 
 		struct Target {
 			enum {
