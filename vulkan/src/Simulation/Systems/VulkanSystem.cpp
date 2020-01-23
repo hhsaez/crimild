@@ -263,6 +263,7 @@ void VulkanSystem::cleanSwapchain( void ) noexcept
 crimild::Bool VulkanSystem::recreateSwapchain( void ) noexcept
 {
     cleanSwapchain();
+
     return createSwapchain()
     	&& createRenderPass()
         && createFramebuffers()
