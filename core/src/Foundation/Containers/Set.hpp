@@ -135,9 +135,13 @@ namespace crimild {
 			void each( TraverseCallback const &callback )
 			{
 				LockImpl lock( this );
-				for ( auto &v : _set ) {
-					callback( v );
-				}
+                auto it = std::begin( _set );
+                while ( it != std::end( _set ) ) {
+                    auto &elem = *it;
+                    // Increase iterator first to allow element removal on callback
+                    ++it;
+                    callback( elem );
+                }
 			}
 
 			void each( ConstTraverseCallback const &callback ) const
