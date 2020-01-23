@@ -107,17 +107,9 @@ namespace crimild {
             crimild::Bool createSwapchain( void ) noexcept;
             crimild::Bool recreateSwapchain( void ) noexcept;
             crimild::Bool createRenderPass( void ) noexcept;
-            crimild::Bool createPipeline( void ) noexcept;
             crimild::Bool createFramebuffers( void ) noexcept;
-            crimild::Bool createCommandBuffers( void ) noexcept;
             crimild::Bool createSyncObjects( void ) noexcept;
             crimild::Bool createCommandPool( void ) noexcept;
-            crimild::Bool createVertexBuffer( void ) noexcept;
-            crimild::Bool createIndexBuffer( void ) noexcept;
-            crimild::Bool createDescriptorSetLayout( void ) noexcept;
-            crimild::Bool createUniformBuffers( void ) noexcept;
-            crimild::Bool createDescriptorPool( void ) noexcept;
-            crimild::Bool createDescriptorSets( void ) noexcept;
 
             void updateUniformBuffer( crimild::UInt32 currentImage ) noexcept;
 
@@ -131,7 +123,6 @@ namespace crimild {
             SharedPointer< RenderDevice > m_renderDevice;
             SharedPointer< Swapchain > m_swapchain;
             SharedPointer< RenderPass > m_renderPass;
-//            SharedPointer< Pipeline > m_pipeline;
             std::vector< SharedPointer< Framebuffer >> m_framebuffers;
             SharedPointer< CommandPool > m_commandPool;
             std::vector< SharedPointer< CommandBuffer >> m_commandBuffers;
@@ -139,13 +130,6 @@ namespace crimild {
             std::vector< SharedPointer< Semaphore >> m_renderFinishedSemaphores;
             std::vector< SharedPointer< Fence >> m_inFlightFences;
             crimild::UInt32 m_currentFrame = 0;
-
-//            SharedPointer< Buffer > m_vertexBuffer;
-//            SharedPointer< Buffer > m_indexBuffer;
-//            SharedPointer< DescriptorSetLayout > m_descriptorSetLayout;
-//            std::vector< SharedPointer< Buffer >> m_uniformBuffers;
-//            SharedPointer< DescriptorPool > m_descriptorPool;
-//            std::vector< SharedPointer< DescriptorSet >> m_descriptorSets;
         };
 
     }
