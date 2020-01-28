@@ -107,6 +107,7 @@ namespace crimild {
             crimild::Bool createSwapchain( void ) noexcept;
             crimild::Bool recreateSwapchain( void ) noexcept;
             crimild::Bool createRenderPass( void ) noexcept;
+            crimild::Bool createDepthResources( void ) noexcept;
             crimild::Bool createFramebuffers( void ) noexcept;
             crimild::Bool createSyncObjects( void ) noexcept;
             crimild::Bool createCommandPool( void ) noexcept;
@@ -130,6 +131,13 @@ namespace crimild {
             std::vector< SharedPointer< Semaphore >> m_renderFinishedSemaphores;
             std::vector< SharedPointer< Fence >> m_inFlightFences;
             crimild::UInt32 m_currentFrame = 0;
+
+            struct DepthAttachment {
+                SharedPointer< Image > image;
+                SharedPointer< ImageView > imageView;
+            };
+            DepthAttachment m_depthAttachment;
+
         };
 
     }

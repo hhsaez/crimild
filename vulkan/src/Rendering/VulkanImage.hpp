@@ -43,12 +43,19 @@ namespace crimild {
         public:
             struct Descriptor {
                 RenderDevice *renderDevice;
+                crimild::UInt32 width;
+                crimild::UInt32 height;
+                VkFormat format;
+                VkImageTiling tiling;
+                VkImageUsageFlags usage;
+                VkMemoryPropertyFlags properties;
             };
 
 		public:
 			~Image( void );
 
             VkImage handler = VK_NULL_HANDLE;
+            VkDeviceMemory memoryHandler = VK_NULL_HANDLE;
             RenderDevice *renderDevice = nullptr;
             ImageManager *manager = nullptr;
 		};

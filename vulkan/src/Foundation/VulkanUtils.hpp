@@ -198,6 +198,12 @@ namespace crimild {
 
             void copyBufferToImage( RenderDevice *renderDevice, VkBuffer buffer, VkImage image, crimild::UInt32 width, crimild::UInt32 height ) noexcept;
 
+            VkFormat findSupportedFormat( RenderDevice *renderDevice, const std::vector< VkFormat > &candidates, VkImageTiling tiling, VkFormatFeatureFlags features ) noexcept;
+
+            VkFormat findDepthFormat( RenderDevice *renderDevice ) noexcept;
+
+            crimild::Bool hasStencilComponent( VkFormat format ) noexcept;
+
             //@}
 
             /**
