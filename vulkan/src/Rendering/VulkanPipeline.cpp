@@ -61,7 +61,7 @@ crimild::Bool PipelineManager::bind( Pipeline *pipeline ) noexcept
     auto viewportState = createViewportState( viewport, scissor );
     auto rasterizer = createRasterizer();
     auto multisampleState = createMultiplesampleState();
-//    auto depthStencilState = createDepthStencilState();
+    auto depthStencilState = createDepthStencilState();
     auto colorBlendAttachment = createColorBlendAttachment();
     auto colorBlending = createColorBlending( colorBlendAttachment );
 
@@ -82,7 +82,7 @@ crimild::Bool PipelineManager::bind( Pipeline *pipeline ) noexcept
         .pViewportState = &viewportState,
         .pRasterizationState = &rasterizer,
         .pMultisampleState = &multisampleState,
-        .pDepthStencilState = nullptr, // Optional
+        .pDepthStencilState = &depthStencilState,
         .pColorBlendState = &colorBlending,
         .pDynamicState = nullptr, // Optional
         .layout = pipelineLayout->handler,

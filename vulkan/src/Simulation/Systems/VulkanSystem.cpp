@@ -251,6 +251,8 @@ void VulkanSystem::cleanSwapchain( void ) noexcept
     m_inFlightFences.clear();
     m_imageAvailableSemaphores.clear();
     m_renderFinishedSemaphores.clear();
+    m_depthAttachment.imageView = nullptr;
+    m_depthAttachment.image = nullptr;
     m_framebuffers.clear();
     m_renderPass = nullptr;
     m_swapchain = nullptr;
@@ -266,6 +268,7 @@ crimild::Bool VulkanSystem::recreateSwapchain( void ) noexcept
 
     return createSwapchain()
     	&& createRenderPass()
+    	&& createDepthResources()
         && createFramebuffers()
         && createSyncObjects();
 }
@@ -284,6 +287,43 @@ crimild::Bool VulkanSystem::createRenderPass( void ) noexcept
     return m_renderPass != nullptr;
 }
 
+crimild::Bool VulkanSystem::createDepthResources( void ) noexcept
+{
+    auto renderDevice = crimild::get_ptr( m_renderDevice );
+    auto swapchain = crimild::get_ptr( m_swapchain );
+
+    auto depthFormat = utils::findDepthFormat( renderDevice );
+
+    m_depthAttachment.image = renderDevice->create( Image::Descriptor {
+        .width = swapchain->extent.width,
+        .height = swapchain->extent.height,
+        .format = depthFormat,
+        .tiling = VK_IMAGE_TILING_OPTIMAL,
+        .usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+        .properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+    });
+
+    m_depthAttachment.imageView = renderDevice->create(
+        ImageView::Descriptor {
+            .image = m_depthAttachment.image,
+            .format = depthFormat,
+            .aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT,
+            .mipLevels = 1,
+    	}
+    );
+
+    // optional
+    utils::transitionImageLayout(
+        renderDevice,
+        m_depthAttachment.image->handler,
+        depthFormat,
+        VK_IMAGE_LAYOUT_UNDEFINED,
+        VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+    );
+
+    return true;
+}
+
 crimild::Bool VulkanSystem::createFramebuffers( void ) noexcept
 {
     auto renderDevice = crimild::get_ptr( m_renderDevice );
@@ -296,7 +336,8 @@ crimild::Bool VulkanSystem::createFramebuffers( void ) noexcept
         auto framebuffer = renderDevice->create(
             Framebuffer::Descriptor {
                 .attachments = {
-                    crimild::get_ptr( imageView )
+                    crimild::get_ptr( imageView ),
+                    crimild::get_ptr( m_depthAttachment.imageView ),
                 },
                 .renderPass = crimild::get_ptr( m_renderPass ),
                 .extent = swapchain->extent,
