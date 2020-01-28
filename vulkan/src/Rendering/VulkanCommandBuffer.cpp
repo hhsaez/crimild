@@ -141,14 +141,25 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
 
                 case CommandBuffer::Command::Type::BEGIN_RENDER_PASS: {
                     auto clearColor = RGBAColorf::ZERO;
+                    auto clearDepth = Vector2f( 1, 0 );
                     auto renderPass = renderDevice->getRenderPass();
                     auto framebuffer = renderDevice->getFramebuffer( index );
 
-                    auto clearValue = VkClearValue {
-                        clearColor.r(),
-                        clearColor.g(),
-                        clearColor.b(),
-                        clearColor.a(),
+                    auto clearValues = std::vector< VkClearValue > {
+                        {
+                            .color = {
+                                clearColor.r(),
+                                clearColor.g(),
+                                clearColor.b(),
+                                clearColor.a(),
+                            },
+                        },
+                        {
+                            .depthStencil = {
+                                clearDepth.r(),
+                                static_cast< crimild::UInt32 >( clearDepth.g() ),
+                            },
+                        },
                     };
 
                     auto renderPassInfo = VkRenderPassBeginInfo {
@@ -157,8 +168,8 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                         .framebuffer = framebuffer->handler,
                         .renderArea.offset = { 0, 0 },
                         .renderArea.extent = framebuffer->extent,
-                        .clearValueCount = 1,
-                        .pClearValues = &clearValue,
+                        .clearValueCount = static_cast< crimild::UInt32 >( clearValues.size() ),
+                        .pClearValues = clearValues.data(),
                     };
 
                     vkCmdBeginRenderPass( handler, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );

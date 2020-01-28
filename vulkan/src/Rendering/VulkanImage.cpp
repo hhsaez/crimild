@@ -48,7 +48,30 @@ SharedPointer< crimild::vulkan::Image > ImageManager::create( Image::Descriptor 
         renderDevice = descriptor.renderDevice;
     }
 
-    return nullptr;
+    VkImage imageHandler;
+    VkDeviceMemory imageMemoryHandler;
+
+    utils::createImage(
+        renderDevice,
+        utils::ImageDescriptor {
+            .width = descriptor.width,
+            .height = descriptor.height,
+            .format = descriptor.format,
+            .tiling = descriptor.tiling,
+            .usage = descriptor.usage,
+            .properties = descriptor.properties,
+    	},
+        imageHandler,
+        imageMemoryHandler
+    );
+
+    auto image = crimild::alloc< Image >();
+    image->renderDevice = renderDevice;
+    image->handler = imageHandler;
+    image->memoryHandler = imageMemoryHandler;
+    image->manager = this;
+    insert( crimild::get_ptr( image ) );
+    return image;
 }
 
 void ImageManager::attach( Image *image ) noexcept
@@ -61,10 +84,20 @@ void ImageManager::destroy( Image *image ) noexcept
 {
     CRIMILD_LOG_DEBUG( "Destroying Vulkan image" );
 
-    if ( image->renderDevice != nullptr && image->handler != VK_NULL_HANDLE ) {
-        vkDestroyImage( image->renderDevice->handler, image->handler, nullptr );
+    if ( image->renderDevice != nullptr ) {
+
+    	if ( image->handler != VK_NULL_HANDLE ) {
+        	vkDestroyImage( image->renderDevice->handler, image->handler, nullptr );
+        }
+
+        if ( image->memoryHandler != VK_NULL_HANDLE ) {
+            vkFreeMemory( image->renderDevice->handler, image->memoryHandler, nullptr );
+        }
     }
 
     image->handler = VK_NULL_HANDLE;
+    image->memoryHandler = VK_NULL_HANDLE;
+    image->manager = nullptr;
     image->renderDevice = nullptr;
+    erase( image );
 }

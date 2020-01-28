@@ -76,10 +76,32 @@ crimild::SharedPointer< RenderPass > RenderPassManager::create( RenderPass::Desc
         .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
     };
 
+    auto depthAttachment = VkAttachmentDescription {
+        .format = utils::findDepthFormat( renderDevice ),
+        .samples = VK_SAMPLE_COUNT_1_BIT,
+        .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+        .storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+        .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+        .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+        .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+        .finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+    };
+
+    auto depthAttachmentRef = VkAttachmentReference {
+        .attachment = 1,
+        .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+    };
+
     auto subpass = VkSubpassDescription {
         .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
         .colorAttachmentCount = 1,
         .pColorAttachments = &colorAttachmentRef,
+        .pDepthStencilAttachment = &depthAttachmentRef,
+    };
+
+    auto attachments = std::vector< VkAttachmentDescription > {
+        colorAttachment,
+        depthAttachment,
     };
 
     auto subpassDependency = VkSubpassDependency {
@@ -98,8 +120,8 @@ crimild::SharedPointer< RenderPass > RenderPassManager::create( RenderPass::Desc
 
     auto createInfo = VkRenderPassCreateInfo {
         .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
-        .attachmentCount = 1,
-        .pAttachments = &colorAttachment,
+        .attachmentCount = static_cast< crimild::UInt32 >( attachments.size() ),
+        .pAttachments = attachments.data(),
         .subpassCount = 1,
         .pSubpasses = &subpass,
         .dependencyCount = 1,
