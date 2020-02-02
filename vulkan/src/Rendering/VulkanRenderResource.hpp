@@ -48,6 +48,7 @@ namespace crimild {
             virtual ~VulkanRenderResourceManager( void ) noexcept = default;
 
             RenderDevice *getRenderDevice( void ) noexcept { return m_renderDevice; }
+            const RenderDevice *getRenderDevice( void ) const noexcept { return m_renderDevice; }
 
         private:
             RenderDevice *m_renderDevice = nullptr;
@@ -72,6 +73,7 @@ namespace crimild {
             virtual ~VulkanRenderResourceManagerImpl( void ) noexcept = default;
 
             RenderDevice *getRenderDevice( void ) noexcept { return m_renderDevice; }
+            const RenderDevice *getRenderDevice( void ) const noexcept { return m_renderDevice; }
 
         private:
             RenderDevice *m_renderDevice = nullptr;

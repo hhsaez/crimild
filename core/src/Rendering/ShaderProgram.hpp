@@ -28,10 +28,12 @@
 #ifndef CRIMILD_RENDERING_SHADER_PROGRAM_
 #define CRIMILD_RENDERING_SHADER_PROGRAM_
 
-#include "Shader.hpp"
-#include "ShaderLocation.hpp"
-#include "ShaderUniform.hpp"
-#include "Catalog.hpp"
+#include "Rendering/Shader.hpp"
+#include "Rendering/VertexBuffer.hpp"
+
+#include "Rendering/ShaderLocation.hpp"
+#include "Rendering/ShaderUniform.hpp"
+#include "Rendering/Catalog.hpp"
 
 #include "Foundation/Containers/Array.hpp"
 #include "Foundation/Containers/Map.hpp"
@@ -47,8 +49,9 @@
 
 namespace crimild {
 
+    class DescriptorSetLayout;
+    class Light;
 	class Texture;
-	class Light;
 
 	namespace shadergraph {
 
@@ -71,7 +74,11 @@ namespace crimild {
 
 		ShaderArray &getShaders( void ) noexcept { return m_shaders; }
 
-	private:
+        std::vector< VertexInputAttributeDescription > attributeDescriptions;
+        VertexInputBindingDescription bindingDescription;
+        SharedPointer< DescriptorSetLayout > descriptorSetLayout;
+
+    private:
 		ShaderArray m_shaders;
 
 		/**

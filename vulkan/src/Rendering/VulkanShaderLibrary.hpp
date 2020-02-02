@@ -25,32 +25,13 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CRIMILD_CORE_FOUNDATION_FILE_PATH_
-#define CRIMILD_CORE_FOUNDATION_FILE_PATH_
+#ifndef CRIMILD_VULKAN_RENDERING_SHADER_LIBRARY_
+#define CRIMILD_VULKAN_RENDERING_SHADER_LIBRARY_
 
-#include <string>
+#include "Rendering/ShaderLibrary.hpp"
 
-namespace crimild {
-
-    struct FilePath {
-        std::string path;
-
-        enum class PathType {
-            RELATIVE,
-            ABSOLUTE,
-        } pathType = PathType::RELATIVE;
-
-        enum class FileType {
-            RESOURCE,
-            DOCUMENT,
-        } fileType = FileType::RESOURCE;
-
-        std::string getExtension( void ) const noexcept;
-        std::string getAbsolutePath( void ) const noexcept;
-
-    };
-
-}
+namespace crimild { }
 
 #endif
+
 

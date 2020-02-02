@@ -96,6 +96,7 @@ namespace crimild {
             virtual ~SwapchainManager( void ) = default;
 
             Swapchain *getSwapchain( void ) noexcept { return VulkanObjectManager< Swapchain >::first(); }
+            const Swapchain *getSwapchain( void ) const noexcept { return VulkanObjectManager< Swapchain >::first(); }
 
             SharedPointer< Swapchain > create( Swapchain::Descriptor const &descriptor ) noexcept;
             void destroy( Swapchain *swapchain ) noexcept override;

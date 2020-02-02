@@ -25,29 +25,29 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CRIMILD_CORE_FOUNDATION_FILE_PATH_
-#define CRIMILD_CORE_FOUNDATION_FILE_PATH_
+#ifndef CRIMILD_RENDERING_UNIFORMS_MODEL_VIEW_PROJECTION_
+#define CRIMILD_RENDERING_UNIFORMS_MODEL_VIEW_PROJECTION_
 
-#include <string>
+#include "Rendering/UniformBuffer.hpp"
+#include "Mathematics/Matrix.hpp"
 
 namespace crimild {
 
-    struct FilePath {
-        std::string path;
+    class Node;
+    class Camera;
 
-        enum class PathType {
-            RELATIVE,
-            ABSOLUTE,
-        } pathType = PathType::RELATIVE;
+    struct ModelViewProjectionUniform {
+        Matrix4f model;
+        Matrix4f view;
+        Matrix4f proj;
+    };
 
-        enum class FileType {
-            RESOURCE,
-            DOCUMENT,
-        } fileType = FileType::RESOURCE;
+    class ModelViewProjectionUniformBuffer : public UniformBufferImpl< ModelViewProjectionUniform > {
+    public:
+        Node *node = nullptr;
+        Camera *camera = nullptr;
 
-        std::string getExtension( void ) const noexcept;
-        std::string getAbsolutePath( void ) const noexcept;
-
+        void updateIfNeeded( void ) noexcept override;
     };
 
 }

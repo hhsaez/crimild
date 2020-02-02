@@ -45,12 +45,39 @@ namespace crimild {
 
 	}
 
+    class Buffer;
+    class CommandBuffer;
+    class DescriptorPool;
+    class DescriptorSet;
+    class DescriptorSetLayout;
+    class Pipeline;
+    class Texture;
+    class UniformBuffer;
+    class VertexBuffer;
+
 	class RenderStateComponent : public NodeComponent {
 		CRIMILD_IMPLEMENT_RTTI( crimild::RenderStateComponent )
 
 	public:
 		RenderStateComponent( void );
 		virtual ~RenderStateComponent( void );
+
+        SharedPointer< Pipeline > pipeline;
+        SharedPointer< VertexBuffer > vbo;
+        SharedPointer< Buffer > ibo;
+        containers::Array< SharedPointer< UniformBuffer >> uniforms;
+        containers::Array< SharedPointer< Texture >> textures;
+        SharedPointer< DescriptorSetLayout > descriptorSetLayout;
+        SharedPointer< DescriptorPool > descriptorPool;
+        SharedPointer< DescriptorSet > descriptorSet;
+
+        std::function< void( CommandBuffer * ) > commandRecorder;
+
+    private:
+        void prepare( void ) noexcept;
+
+        // Deprecated
+    public:
 
 		void reset( void );
 

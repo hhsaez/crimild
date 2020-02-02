@@ -1,0 +1,16 @@
+CMAKE_MINIMUM_REQUIRED( VERSION 2.8.10 FATAL_ERROR )
+
+# Enable C++14 features
+SET( CMAKE_CXX_FLAGS "-std=c++14 -stdlib=libc++ -U__STRICT_ANSI__ -fvisibility=hidden -fvisibility-inlines-hidden" )
+
+PROJECT( resourceEncoder )
+
+FILE( GLOB_RECURSE SOURCE_FILES "${PROJECT_SOURCE_DIR}/src/*.cpp" )
+FILE( GLOB_RECURSE HEADER_FILES "${PROJECT_SOURCE_DIR}/src/*.hpp" ) 
+
+INCLUDE_DIRECTORIES(
+	src
+)
+
+ADD_EXECUTABLE( ${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES} )
+

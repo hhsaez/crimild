@@ -29,6 +29,9 @@
 #define CRIMILD_RENDERING_RENDER_RESOURCE_
 
 #include "Foundation/Containers/Set.hpp"
+#include "Foundation/Containers/Map.hpp"
+#include "Foundation/Singleton.hpp"
+#include "Foundation/SharedObject.hpp"
 
 namespace crimild {
 
@@ -81,6 +84,29 @@ namespace crimild {
         }
 
         RenderResourceManager< T > *manager = nullptr;
+    };
+
+    template< typename RenderResourceType >
+    class RenderResourceLibrary : public StaticSingleton< RenderResourceLibrary< RenderResourceType >> {
+    public:
+        RenderResourceLibrary( void ) noexcept { }
+        virtual ~RenderResourceLibrary( void ) = default;
+
+        void add( std::string name, SharedPointer< RenderResourceType > const &shader )
+        {
+            m_resources[ name ] = shader;
+        }
+
+        RenderResourceType *get( std::string name )
+        {
+            if ( !m_resources.contains( name ) ) {
+                return nullptr;
+            }
+            return crimild::get_ptr( m_resources[ name ] );
+        }
+
+    private:
+        containers::Map< std::string, SharedPointer< RenderResourceType >> m_resources;
     };
 
 }

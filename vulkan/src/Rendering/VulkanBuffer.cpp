@@ -28,6 +28,7 @@
 #include "Rendering/VulkanBuffer.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "Rendering/VulkanPhysicalDevice.hpp"
+#include "Rendering/UniformBuffer.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;
@@ -296,10 +297,12 @@ void BufferManager::copyBuffer( RenderDevice *renderDevice, CommandPool *command
 void BufferManager::updateUniformBuffers( crimild::Size index ) noexcept
 {
     auto renderDevice = getRenderDevice();
-    each( [ this, renderDevice, index ]( const Buffer *buffer, const BufferBindInfo &bindInfo ) {
+    each( [ this, renderDevice, index ]( Buffer *buffer, BufferBindInfo &bindInfo ) {
         if ( buffer->getUsage() == Buffer::Usage::UNIFORM_BUFFER ) {
+            auto ubo = static_cast< UniformBuffer * >( buffer );
+            ubo->updateIfNeeded();
             if ( bindInfo.bufferMemories.size() > index ) {
-            	updateBuffer( renderDevice, bindInfo.bufferMemories[ index ], buffer->getRawData(), buffer->getSize() );
+            	updateBuffer( renderDevice, bindInfo.bufferMemories[ index ], ubo->getRawData(), ubo->getSize() );
             }
         }
     });

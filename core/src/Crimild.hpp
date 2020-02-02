@@ -249,11 +249,14 @@
 #include "Rendering/Material.hpp"
 #include "Rendering/Pipeline.hpp"
 #include "Rendering/RenderPass.hpp"
+#include "Rendering/RenderResource.hpp"
 #include "Rendering/RenderState.hpp"
 #include "Rendering/Renderer.hpp"
 #include "Rendering/Shader.hpp"
+#include "Rendering/ShaderLibrary.hpp"
 #include "Rendering/ShaderLocation.hpp"
 #include "Rendering/ShaderProgram.hpp"
+#include "Rendering/ShaderProgramLibrary.hpp"
 #include "Rendering/ShaderUniform.hpp"
 #include "Rendering/ShaderUniformImpl.hpp"
 #include "Rendering/ShadowMap.hpp"
@@ -284,6 +287,8 @@
 #include "Rendering/Programs/ReflectiveShaderProgram.hpp"
 #include "Rendering/Programs/RefractiveShaderProgram.hpp"
 #include "Rendering/Programs/WorldNormalsShaderProgram.hpp"
+
+#include "Rendering/Uniforms/ModelViewProjectionUniformBuffer.hpp"
 
 #include "Messaging/MessageQueue.hpp"
 

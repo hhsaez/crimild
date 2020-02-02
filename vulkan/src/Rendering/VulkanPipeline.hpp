@@ -72,8 +72,8 @@ namespace crimild {
             std::vector< VkVertexInputAttributeDescription > getVertexInputAttributeDescriptions( Pipeline *pipeline ) const noexcept;
             VkPipelineVertexInputStateCreateInfo createVertexInput( const std::vector< VkVertexInputBindingDescription > &bindingDescriptions, const std::vector< VkVertexInputAttributeDescription > &attributeDescriptions ) const noexcept;
             VkPipelineInputAssemblyStateCreateInfo createInputAssemby( Primitive::Type primitiveType ) const noexcept;
-            VkViewport createViewport( const Rectf &viewport ) const noexcept;
-            VkRect2D createScissor( const Rectf &scissor ) const noexcept;
+            VkViewport createViewport( const ViewportDimensions &viewport ) const noexcept;
+            VkRect2D createScissor( const ViewportDimensions &scissor ) const noexcept;
             VkPipelineViewportStateCreateInfo createViewportState( const VkViewport &viewport, const VkRect2D &scissor ) const noexcept;
             VkPipelineRasterizationStateCreateInfo createRasterizer( void ) const noexcept;
             VkPipelineMultisampleStateCreateInfo createMultiplesampleState( void ) const noexcept;
