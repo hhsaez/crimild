@@ -25,30 +25,26 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CRIMILD_CORE_FOUNDATION_FILE_PATH_
-#define CRIMILD_CORE_FOUNDATION_FILE_PATH_
+#ifndef CRIMILD_CORE_RENDERING_SHADER_PROGRAM_LIBRARY_
+#define CRIMILD_CORE_RENDERING_SHADER_PROGRAM_LIBRARY_
 
-#include <string>
+#include "Rendering/RenderResource.hpp"
 
 namespace crimild {
 
-    struct FilePath {
-        std::string path;
+    namespace constants {
 
-        enum class PathType {
-            RELATIVE,
-            ABSOLUTE,
-        } pathType = PathType::RELATIVE;
+        static const char *SHADER_PROGRAM_UNLIT_P2C3_COLOR = "shader_programs/unlit/P2C3_color";
+        static const char *SHADER_PROGRAM_UNLIT_P2C3TC2_TEXTURE_COLOR = "shader_programs/unlit/P2C3TC2_texture_color";
 
-        enum class FileType {
-            RESOURCE,
-            DOCUMENT,
-        } fileType = FileType::RESOURCE;
+    }
 
-        std::string getExtension( void ) const noexcept;
-        std::string getAbsolutePath( void ) const noexcept;
+    class ShaderProgram;
 
-    };
+    // Required for specialization
+    template<> RenderResourceLibrary< ShaderProgram >::RenderResourceLibrary( void ) noexcept;
+
+    using ShaderProgramLibrary = RenderResourceLibrary< ShaderProgram >;
 
 }
 

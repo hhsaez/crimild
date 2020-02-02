@@ -36,6 +36,8 @@ namespace crimild {
     class UniformBuffer : public Buffer {
     public:
         virtual ~UniformBuffer( void ) noexcept = default;
+
+        virtual void updateIfNeeded( void ) noexcept { }
     };
 
     template< typename T >
@@ -60,17 +62,7 @@ namespace crimild {
         T m_data;
     };
 
-    struct ModelViewProjUniform {
-        Matrix4f model;
-        Matrix4f view;
-        Matrix4f proj;
-    };
-
-    using ModelViewProjUniformBuffer = UniformBufferImpl< ModelViewProjUniform >;
-
 }
 
 #endif
-
-
 

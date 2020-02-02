@@ -144,6 +144,8 @@ SharedPointer< Group > OBJLoader::load( void )
 	return generateScene();
 }
 
+//void generateVertexBuffer( )
+
 void OBJLoader::generateGeometry( void )
 {
 	if ( _faces.size() == 0 || _positions.size() == 0 ) {
@@ -161,6 +163,18 @@ void OBJLoader::generateGeometry( void )
     bool useNormals = _normals.size() > 0;
     bool useTangents = _currentMaterial != nullptr && _currentMaterial->getNormalMap() != nullptr;
     bool useTextureCoords = _textureCoords.size() > 0;
+
+    if ( _normals.size() > 0 ) {
+        if ( _textureCoords.size() > 0 ) {
+            // VertexP3N3TC2
+        }
+        else {
+            // VertexP3TC2
+        }
+    }
+    else if ( _textureCoords.size() > 0 ) {
+        // VertexP3TC2
+    }
 
 	VertexFormat format( 3,
 						 0,

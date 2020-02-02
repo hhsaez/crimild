@@ -280,28 +280,48 @@ VkPipelineInputAssemblyStateCreateInfo PipelineManager::createInputAssemby( Prim
     };
 }
 
-VkViewport PipelineManager::createViewport( const Rectf &viewport ) const noexcept
+VkViewport PipelineManager::createViewport( const ViewportDimensions &viewport ) const noexcept
 {
+    Rectf rect = viewport.dimensions;
+    if ( viewport.scalingMode == ViewportDimensions::ScalingMode::SWAPCHAIN_RELATIVE ) {
+        auto renderDevice = getRenderDevice();
+        auto swapchain = renderDevice->getSwapchain();
+        rect.x() *= swapchain->extent.width;
+        rect.y() *= swapchain->extent.height;
+        rect.width() *= swapchain->extent.width;
+        rect.height() *= swapchain->extent.height;
+    }
+
     return VkViewport {
-        .x = viewport.getX(),
-        .y = viewport.getY(),
-        .width = viewport.getWidth(),
-        .height = viewport.getHeight(),
+        .x = rect.getX(),
+        .y = rect.getY(),
+        .width = rect.getWidth(),
+        .height = rect.getHeight(),
         .minDepth = 0,
         .maxDepth = 1,
     };
 }
 
-VkRect2D PipelineManager::createScissor( const Rectf &scissor ) const noexcept
+VkRect2D PipelineManager::createScissor( const ViewportDimensions &scissor ) const noexcept
 {
+    Rectf rect = scissor.dimensions;
+    if ( scissor.scalingMode == ViewportDimensions::ScalingMode::SWAPCHAIN_RELATIVE ) {
+        auto renderDevice = getRenderDevice();
+        auto swapchain = renderDevice->getSwapchain();
+        rect.x() *= swapchain->extent.width;
+        rect.y() *= swapchain->extent.height;
+        rect.width() *= swapchain->extent.width;
+        rect.height() *= swapchain->extent.height;
+    }
+
     return VkRect2D {
         .offset = {
-            static_cast< crimild::Int32 >( scissor.getX() ),
-            static_cast< crimild::Int32 >( scissor.getY() ),
+            static_cast< crimild::Int32 >( rect.getX() ),
+            static_cast< crimild::Int32 >( rect.getY() ),
         },
         .extent = VkExtent2D {
-            static_cast< crimild::UInt32 >( scissor.getWidth() ),
-            static_cast< crimild::UInt32 >( scissor.getHeight() ),
+            static_cast< crimild::UInt32 >( rect.getWidth() ),
+            static_cast< crimild::UInt32 >( rect.getHeight() ),
         },
     };
 }
