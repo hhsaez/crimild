@@ -26,6 +26,13 @@
  */
 
 #include "RenderStateComponent.hpp"
+#include "Rendering/Buffer.hpp"
+#include "Rendering/CommandBuffer.hpp"
+#include "Rendering/DescriptorSet.hpp"
+#include "Rendering/Pipeline.hpp"
+#include "Rendering/ShaderProgram.hpp"
+#include "Rendering/UniformBuffer.hpp"
+#include "Rendering/VertexBuffer.hpp"
 
 CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::RenderStateComponent )
 
@@ -34,6 +41,26 @@ using namespace crimild;
 RenderStateComponent::RenderStateComponent( void )
     : _renderOnScreen( false )
 {
+    commandRecorder = [ this ]( CommandBuffer *commandBuffer ) {
+        prepare();
+
+        commandBuffer->bindGraphicsPipeline(
+            crimild::get_ptr( pipeline )
+        );
+        commandBuffer->bindVertexBuffer(
+            crimild::get_ptr( vbo )
+        );
+        commandBuffer->bindIndexBuffer(
+            crimild::get_ptr( ibo )
+        );
+        commandBuffer->bindDescriptorSet(
+            crimild::get_ptr( descriptorSet )
+        );
+        crimild::UInt32 indexCount = ibo->getSize() /  ibo->getStride();
+        commandBuffer->drawIndexed(
+            indexCount
+        );
+    };
 }
 
 RenderStateComponent::~RenderStateComponent( void )
@@ -41,6 +68,59 @@ RenderStateComponent::~RenderStateComponent( void )
 	detachAllMaterials();
 	detachAllLights();
 }
+
+void RenderStateComponent::prepare( void ) noexcept
+{
+    if ( pipeline->descriptorSetLayout == nullptr ) {
+        pipeline->descriptorSetLayout = pipeline->program->descriptorSetLayout;
+    }
+
+    if ( pipeline->attributeDescriptions.empty() ) {
+    	pipeline->attributeDescriptions = pipeline->program->attributeDescriptions;
+        pipeline->bindingDescription = pipeline->program->bindingDescription;
+    }
+
+    if ( descriptorSetLayout == nullptr ) {
+        descriptorSetLayout = pipeline->descriptorSetLayout;
+    }
+
+    if ( descriptorPool == nullptr ) {
+        descriptorPool = crimild::alloc< DescriptorPool >();
+        descriptorPool->descriptorSetLayout = descriptorSetLayout;
+    }
+
+    if ( descriptorSet == nullptr ) {
+        descriptorSet = crimild::alloc< DescriptorSet >();
+        descriptorSet->descriptorSetLayout = descriptorSetLayout;
+        descriptorSet->descriptorPool = descriptorPool;
+        descriptorSet->pipeline = pipeline;
+
+        size_t uniformIdx = 0;
+        size_t textureIdx = 0;
+
+        descriptorSetLayout->bindings.each( [&]( DescriptorSetLayout::Binding &binding ) {
+            auto write = DescriptorSet::Write {
+                .descriptorType = binding.descriptorType,
+            };
+
+            switch ( write.descriptorType ) {
+                case DescriptorType::UNIFORM_BUFFER:
+                    write.buffer = crimild::get_ptr( uniforms[ uniformIdx++ ] );
+                    break;
+                case DescriptorType::COMBINED_IMAGE_SAMPLER:
+                    write.texture = crimild::get_ptr( textures[ textureIdx++ ] );
+                    break;
+                default:
+                    CRIMILD_LOG_FATAL( "Invalid descriptor type" );
+                    exit( -1 );
+                    break;
+            };
+
+            descriptorSet->writes.add( write );
+        });
+    }
+}
+
 
 void RenderStateComponent::forEachMaterial( std::function< void( Material * ) > callback )
 {

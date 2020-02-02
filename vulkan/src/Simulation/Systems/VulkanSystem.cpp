@@ -33,6 +33,7 @@
 #include "Rendering/VulkanCommandBuffer.hpp"
 #include "Rendering/VulkanFence.hpp"
 #include "Rendering/VulkanBuffer.hpp"
+#include "SceneGraph/Camera.hpp"
 
 #include "Foundation/Containers/Array.hpp"
 #include "Rendering/ShaderProgram.hpp"
@@ -230,6 +231,10 @@ crimild::Bool VulkanSystem::createSwapchain( void ) noexcept
 
     settings->set( "video.width", m_swapchain->extent.width );
     settings->set( "video.height", m_swapchain->extent.height );
+
+    if ( auto mainCamera = Camera::getMainCamera() ) {
+        mainCamera->setAspectRatio( ( crimild::Real32 ) m_swapchain->extent.width / ( crimild::Real32 ) m_swapchain->extent.height );
+    }
 
     return true;
 }

@@ -93,7 +93,7 @@ namespace crimild {
             CommandPool *getCommandPool( void ) noexcept { return crimild::get_ptr( m_commandPool ); }
             Framebuffer *getFramebuffer( crimild::Size index ) noexcept { return crimild::get_ptr( m_framebuffers[ index ] ); }
 
-            void setCommandBuffers( std::vector< SharedPointer< CommandBuffer >> &cmds ) noexcept { m_commandBuffers = cmds; }
+            void setCommandBuffers( std::vector< SharedPointer< CommandBuffer >> const &cmds ) noexcept { m_commandBuffers = cmds; }
 
         protected:
             virtual SharedPointer< VulkanSurface > create( VulkanSurface::Descriptor const &descriptor ) noexcept { return nullptr; }

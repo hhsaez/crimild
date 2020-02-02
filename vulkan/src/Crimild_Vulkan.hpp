@@ -28,6 +28,8 @@
 #ifndef CRIMILD_VULKAN_
 #define CRIMILD_VULKAN_
 
+#include "Rendering/VulkanShaderLibrary.hpp"
+
 namespace crimild {
 
 	namespace vulkan {

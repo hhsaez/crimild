@@ -40,15 +40,26 @@ namespace crimild {
     class DescriptorSetLayout;
     class RenderPass;
 
+    struct ViewportDimensions {
+        enum class ScalingMode {
+            FIXED,
+            RELATIVE,
+            SWAPCHAIN_RELATIVE,
+        };
+
+        ScalingMode scalingMode = ScalingMode::SWAPCHAIN_RELATIVE;
+        Rectf dimensions = Rectf( 0, 0, 1, 1 );
+    };
+
     class Pipeline : public SharedObject, public RenderResourceImpl< Pipeline > {
     public:
         virtual ~Pipeline( void ) noexcept = default;
 
         SharedPointer< ShaderProgram > program;
-        RenderPass *renderPass;
-        Primitive::Type primitiveType;
-        Rectf viewport;
-        Rectf scissor;
+        RenderPass *renderPass = nullptr;
+        Primitive::Type primitiveType = Primitive::Type::TRIANGLES;
+        ViewportDimensions viewport;
+        ViewportDimensions scissor;
         std::vector< VertexInputAttributeDescription > attributeDescriptions;
         VertexInputBindingDescription bindingDescription;
         SharedPointer< DescriptorSetLayout > descriptorSetLayout;

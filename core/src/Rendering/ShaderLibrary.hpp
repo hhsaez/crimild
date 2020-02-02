@@ -25,30 +25,30 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CRIMILD_CORE_FOUNDATION_FILE_PATH_
-#define CRIMILD_CORE_FOUNDATION_FILE_PATH_
+#ifndef CRIMILD_CORE_RENDERING_SHADER_LIBRARY_
+#define CRIMILD_CORE_RENDERING_SHADER_LIBRARY_
 
-#include <string>
+#include "Rendering/RenderResource.hpp"
 
 namespace crimild {
 
-    struct FilePath {
-        std::string path;
+    namespace constants {
 
-        enum class PathType {
-            RELATIVE,
-            ABSOLUTE,
-        } pathType = PathType::RELATIVE;
+        static const char *SHADER_UNLIT_VERTEX_P2C3 = "shaders/unlit/vertex_P2C3";
+        static const char *SHADER_UNLIT_VERTEX_P2C3TC2 = "shaders/unlit/vertex_P2C3TC2";
 
-        enum class FileType {
-            RESOURCE,
-            DOCUMENT,
-        } fileType = FileType::RESOURCE;
+        static const char *SHADER_UNLIT_FRAGMENT_COLOR = "shaders/unlit/frag_color";
+        static const char *SHADER_UNLIT_FRAGMENT_TEXTURE_COLOR = "shaders/unlit/frag_texture_color";
 
-        std::string getExtension( void ) const noexcept;
-        std::string getAbsolutePath( void ) const noexcept;
+    }
 
-    };
+    class Shader;
+
+    // Required for specialization
+    // Platform-dependent libraries (i.e. OpenGL, Vulkan, etc) must implement this
+    template<> RenderResourceLibrary< Shader >::RenderResourceLibrary( void ) noexcept;
+
+    using ShaderLibrary = RenderResourceLibrary< Shader >;
 
 }
 
