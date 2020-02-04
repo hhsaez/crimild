@@ -49,6 +49,14 @@ namespace crimild {
 		static SharedPointer< Texture > CUBE_ONE;
 		static SharedPointer< Texture > ZERO;
         static SharedPointer< Texture > CHECKERBOARD;
+        static SharedPointer< Texture > CHECKERBOARD_4;
+        static SharedPointer< Texture > CHECKERBOARD_8;
+        static SharedPointer< Texture > CHECKERBOARD_16;
+        static SharedPointer< Texture > CHECKERBOARD_32;
+        static SharedPointer< Texture > CHECKERBOARD_64;
+        static SharedPointer< Texture > CHECKERBOARD_128;
+        static SharedPointer< Texture > CHECKERBOARD_256;
+        static SharedPointer< Texture > CHECKERBOARD_512;
         static SharedPointer< Texture > INVALID;
 
 		struct Target {

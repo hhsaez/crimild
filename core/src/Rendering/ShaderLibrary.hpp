@@ -35,10 +35,16 @@ namespace crimild {
     namespace constants {
 
         static const char *SHADER_UNLIT_VERTEX_P2C3 = "shaders/unlit/vertex_P2C3";
-        static const char *SHADER_UNLIT_VERTEX_P2C3TC2 = "shaders/unlit/vertex_P2C3TC2";
-
         static const char *SHADER_UNLIT_FRAGMENT_COLOR = "shaders/unlit/frag_color";
+
+        static const char *SHADER_UNLIT_VERTEX_P2C3TC2 = "shaders/unlit/vertex_P2C3TC2";
         static const char *SHADER_UNLIT_FRAGMENT_TEXTURE_COLOR = "shaders/unlit/frag_texture_color";
+
+        static const char *SHADER_UNLIT_TEXTURE_P3N3TC2_VERT = "shaders/unlit/texture_P3N3TC2.vert";
+        static const char *SHADER_UNLIT_TEXTURE_P3N3TC2_FRAG = "shaders/unlit/texture_P3N3TC2.frag";
+
+        static const char *SHADER_DEBUG_POSITION_P3N3TC2_VERT = "shaders/debug/position_N3C3TC2.vert";
+        static const char *SHADER_DEBUG_POSITION_P3N3TC2_FRAG = "shaders/debug/position_N3C3TC2.frag";
 
     }
 

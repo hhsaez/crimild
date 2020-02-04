@@ -27,6 +27,7 @@
 
 #include "OBJLoader.hpp"
 
+#include "Components/RenderStateComponent.hpp"
 #include "SceneGraph/Group.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "Foundation/StringUtils.hpp"
@@ -39,7 +40,66 @@
 #include "Rendering/ImageTGA.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/Programs/UnlitShaderProgram.hpp"
+#include "Rendering/VertexBuffer.hpp"
+#include "Rendering/IndexBuffer.hpp"
+#include "Rendering/Pipeline.hpp"
+#include "Rendering/ShaderLibrary.hpp"
+#include "Rendering/ShaderProgramLibrary.hpp"
+#include "Rendering/Uniforms/ModelViewProjectionUniformBuffer.hpp"
 #include "Components/MaterialComponent.hpp"
+
+namespace crimild {
+
+    namespace utils {
+
+        /**
+           \see https://stackoverflow.com/a/35991300
+        */
+        template< typename T >
+        inline void hash_combine( std::size_t &seed, const T &v )
+        {
+            std::hash< T > hasher;
+            seed ^= hasher( v ) + 0x934779b9 + ( seed << 6 ) + ( seed >> 2 );
+        }
+
+    }
+
+}
+
+namespace std {
+
+    template<> struct hash< crimild::Vector3f > {
+        size_t operator()( crimild::Vector3f const &v ) const {
+            size_t seed = 0;
+            std::hash< float > hasher;
+            crimild::utils::hash_combine( seed, hasher( v.x() ) );
+            crimild::utils::hash_combine( seed, hasher( v.y() ) );
+            crimild::utils::hash_combine( seed, hasher( v.z() ) );
+            return seed;
+        }
+    };
+
+    template<> struct hash< crimild::Vector2f > {
+        size_t operator()( crimild::Vector2f const &v ) const {
+            size_t seed = 0;
+            std::hash< float > hasher;
+            crimild::utils::hash_combine( seed, hasher( v.x() ) );
+            crimild::utils::hash_combine( seed, hasher( v.y() ) );
+            return seed;
+        }
+    };
+
+    template<> struct hash< crimild::VertexP3N3TC2 > {
+        size_t operator()( crimild::VertexP3N3TC2 const &vertex ) const {
+            size_t seed = 0;
+            crimild::utils::hash_combine( seed, std::hash< crimild::Vector3f >()( vertex.position ) );
+            crimild::utils::hash_combine( seed, std::hash< crimild::Vector3f >()( vertex.normal ) );
+            crimild::utils::hash_combine( seed, std::hash< crimild::Vector2f >()( vertex.texCoord ) );
+            return seed;
+        }
+    };
+
+}
 
 using namespace crimild;
 
@@ -137,14 +197,17 @@ void OBJLoader::reset( void )
 
 SharedPointer< Group > OBJLoader::load( void )
 {
+    if ( pipeline == nullptr ) {
+        pipeline = crimild::alloc< Pipeline >();
+        pipeline->program = crimild::retain( ShaderProgramLibrary::getInstance()->get( constants::SHADER_PROGRAM_UNLIT_TEXTURE_P3N3TC2 ) );
+    }
+
 	reset();
 
 	getOBJProcessor().readFile( getFileName() );
 
 	return generateScene();
 }
-
-//void generateVertexBuffer( )
 
 void OBJLoader::generateGeometry( void )
 {
@@ -160,106 +223,61 @@ void OBJLoader::generateGeometry( void )
                            
 	}
     
-    bool useNormals = _normals.size() > 0;
-    bool useTangents = _currentMaterial != nullptr && _currentMaterial->getNormalMap() != nullptr;
-    bool useTextureCoords = _textureCoords.size() > 0;
+    std::vector< VertexP3N3TC2 > vertices;
+    std::vector< crimild::UInt32 > indices;
+    std::unordered_map< VertexP3N3TC2, crimild::UInt32 > uniqueVertices;
 
-    if ( _normals.size() > 0 ) {
-        if ( _textureCoords.size() > 0 ) {
-            // VertexP3N3TC2
-        }
-        else {
-            // VertexP3TC2
+    for ( auto f = 0l; f < _faces.size(); f += 3 ) {
+        for ( int i = 0; i < 3; i++ ) {
+            auto faceIndices = StringUtils::split< crimild::Int32 >( _faces[ f + i ], '/' );
+
+            auto v = VertexP3N3TC2 {
+                .position = _positions[ faceIndices[ 0 ] - 1 ],
+                .normal = !_normals.empty() ? _normals[ faceIndices[ 2 ] - 1 ] : Vector3f::ZERO,
+                .texCoord = !_textureCoords.empty() ? _textureCoords[ faceIndices[ 1 ] - 1 ] : Vector2f::ZERO,
+            };
+
+            if ( uniqueVertices.count( v ) == 0 ) {
+                uniqueVertices[ v ] = vertices.size();
+                vertices.push_back( v );
+            }
+
+            indices.push_back( uniqueVertices[ v ] );
         }
     }
-    else if ( _textureCoords.size() > 0 ) {
-        // VertexP3TC2
-    }
 
-	VertexFormat format( 3,
-						 0,
-						 ( useNormals > 0 ? 3 : 0 ),
-	                     ( useTangents > 0 ? 3 : 0 ),
-						 ( useTextureCoords > 0 ? 2 : 0 ) );
+    auto vbo = crimild::alloc< VertexP3N3TC2Buffer >( containers::Array< VertexP3N3TC2 >( vertices.size(), vertices.data() ) );
+    auto ibo = crimild::alloc< IndexBuffer< crimild::UInt32 >>( containers::Array< crimild::UInt32 >( indices.size(), indices.data() ) );
 
-	std::vector< VertexPrecision > vertexData;
-	std::vector< IndexPrecision > indexData;
-    
-    Vector3f p0, p1, p2;
-    Vector3f n0, n1, n2;
-    Vector2f uv0, uv1, uv2;
-    Vector3f tangent;
-    
-    const int VERTEX_COUNT = _faces.size();
-    auto vbo = crimild::alloc< VertexBufferObject >( format, VERTEX_COUNT, nullptr );
-    
-    for ( unsigned int i = 0; i < _faces.size(); i += 3 ) {
-        std::vector< int > v0 = StringUtils::split< int >( _faces[ i + 0 ], '/' );
-        std::vector< int > v1 = StringUtils::split< int >( _faces[ i + 1 ], '/' );
-        std::vector< int > v2 = StringUtils::split< int >( _faces[ i + 2 ], '/' );
-        
-        // this is redundant
-        if ( format.hasPositions() ) {
-            p0 = _positions[ v0[ 0 ] - 1 ];
-            p1 = _positions[ v1[ 0 ] - 1 ];
-            p2 = _positions[ v2[ 0 ] - 1 ];
-        }
+    _currentObject->attachNode( [&] {
+        auto geometry = crimild::alloc< Geometry >( "geometry" );
+        geometry->attachComponent( [&] {
+            auto renderState = crimild::alloc< RenderStateComponent >();
+            renderState->pipeline = pipeline;
+            renderState->vbo = vbo;
+            renderState->ibo = ibo;
+            renderState->uniforms = {
+                [&] {
+                    auto ubo = crimild::alloc< ModelViewProjectionUniformBuffer >();
+                    ubo->node = crimild::get_ptr( geometry );
+                    return ubo;
+                }(),
+            };
+            renderState->textures = {
+                [&] {
+                    if ( _currentMaterial == nullptr || _currentMaterial->getColorMap() == nullptr ) {
+                        return Texture::INVALID;
+                    }
+                    return crimild::retain( _currentMaterial->getColorMap() );
+                }(),
+            };
+            return renderState;
+        }());
 
-        if ( format.hasNormals() ) {
-            n0 = _normals[ v0[ 2 ] - 1 ];
-            n1 = _normals[ v1[ 2 ] - 1 ];
-            n2 = _normals[ v2[ 2 ] - 1 ];
-        }
-        
-        if ( format.hasTextureCoords() ) {
-            uv0 = _textureCoords[ v0[ 1 ] - 1 ];
-            uv1 = _textureCoords[ v1[ 1 ] - 1 ];
-            uv2 = _textureCoords[ v2[ 1 ] - 1 ];
-        }
-        
-        if ( format.hasTangents() ) {
-            Vector3f dP1 = p1 - p0;
-            Vector3f dP2 = p2 - p0;
-            Vector2f dUV1 = uv1 - uv0;
-            Vector2f dUV2 = uv2 - uv0;
-            
-            float r = 1.0f / ( dUV1[ 0 ] * dUV2[ 1 ] - dUV1[ 1 ] * dUV2[ 0 ] );
-            tangent = ( dP1 * dUV2[ 1 ] - dP2 * dUV1[ 1 ] ) * r;
-        }
-        
-        if ( format.hasPositions() ) vbo->setPositionAt( i + 0, p0 );
-        if ( format.hasNormals() ) vbo->setNormalAt( i + 0, n0 );
-        if ( format.hasTangents() ) vbo->setTangentAt( i + 0, tangent );
-        if ( format.hasTextureCoords() ) vbo->setTextureCoordAt( i + 0, uv0 );
+        return geometry;
+    }());
 
-        if ( format.hasPositions() ) vbo->setPositionAt( i + 1, p1 );
-        if ( format.hasNormals() ) vbo->setNormalAt( i + 1, n1 );
-        if ( format.hasTangents() ) vbo->setTangentAt( i + 1, tangent );
-        if ( format.hasTextureCoords() ) vbo->setTextureCoordAt( i + 1, uv1 );
-
-        if ( format.hasPositions() ) vbo->setPositionAt( i + 2, p2 );
-        if ( format.hasNormals() ) vbo->setNormalAt( i + 2, n2 );
-        if ( format.hasTangents() ) vbo->setTangentAt( i + 2, tangent );
-        if ( format.hasTextureCoords() ) vbo->setTextureCoordAt( i + 2, uv2 );
-    }
-    
-    auto ibo = crimild::alloc< IndexBufferObject >( VERTEX_COUNT, nullptr );
-    ibo->generateIncrementalIndices();
-
-    auto primitive = crimild::alloc< Primitive >( Primitive::Type::TRIANGLES );
-    primitive->setVertexBuffer( vbo );
-    primitive->setIndexBuffer( ibo );
-
-	auto geometry = crimild::alloc< Geometry >( "geometry" );
-	geometry->attachPrimitive( primitive );
-
-	if ( _currentMaterial ) {
-		geometry->getComponent< MaterialComponent >()->attachMaterial( _currentMaterial );	
-	}
-
-	_currentObject->attachNode( geometry );
-
-	_faces.clear();
+    _faces.clear();
 }
 
 SharedPointer< Group > OBJLoader::generateScene( void )

@@ -97,5 +97,66 @@ RenderResourceLibrary< ShaderProgram >::RenderResourceLibrary( void ) noexcept
         }()
     );
 
+    add(
+        constants::SHADER_PROGRAM_UNLIT_TEXTURE_P3N3TC2,
+        [] {
+            auto program = crimild::alloc< ShaderProgram >(
+                containers::Array< SharedPointer< Shader >> {
+                    crimild::retain( ShaderLibrary::getInstance()->get( constants::SHADER_UNLIT_TEXTURE_P3N3TC2_VERT ) ),
+                    crimild::retain( ShaderLibrary::getInstance()->get( constants::SHADER_UNLIT_TEXTURE_P3N3TC2_FRAG ) ),
+                }
+            );
+
+            program->attributeDescriptions = VertexP3N3TC2::getAttributeDescriptions( 0 );
+            program->bindingDescription = VertexP3N3TC2::getBindingDescription( 0 );
+            program->descriptorSetLayout = [] {
+                auto layout = crimild::alloc< DescriptorSetLayout >();
+                layout->bindings = {
+                    {
+                        .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                        .descriptorCount = 1,
+                        .stage = Shader::Stage::VERTEX,
+                    },
+                    {
+                        .descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+                        .descriptorCount = 1,
+                        .stage = Shader::Stage::FRAGMENT,
+                    }
+                };
+                return layout;
+            }();
+
+            return program;
+        }()
+    );
+
+    add(
+        constants::SHADER_PROGRAM_DEBUG_POSITION_P3N3TC2,
+        [] {
+            auto program = crimild::alloc< ShaderProgram >(
+                containers::Array< SharedPointer< Shader >> {
+                    crimild::retain( ShaderLibrary::getInstance()->get( constants::SHADER_DEBUG_POSITION_P3N3TC2_VERT ) ),
+                    crimild::retain( ShaderLibrary::getInstance()->get( constants::SHADER_DEBUG_POSITION_P3N3TC2_FRAG ) ),
+                }
+            );
+
+            program->attributeDescriptions = VertexP3N3TC2::getAttributeDescriptions( 0 );
+            program->bindingDescription = VertexP3N3TC2::getBindingDescription( 0 );
+            program->descriptorSetLayout = [] {
+                auto layout = crimild::alloc< DescriptorSetLayout >();
+                layout->bindings = {
+                    {
+                        .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                        .descriptorCount = 1,
+                        .stage = Shader::Stage::VERTEX,
+                    },
+                };
+                return layout;
+            }();
+
+            return program;
+        }()
+    );
+
 }
 

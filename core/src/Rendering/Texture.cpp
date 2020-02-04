@@ -56,25 +56,43 @@ SharedPointer< Texture > Texture::CUBE_ONE = [] {
     );
 }();
 
-SharedPointer< Texture > Texture::CHECKERBOARD = [] {
-    auto texture = crimild::alloc< Texture >(
-        crimild::alloc< Image >(
-            4,
-            4,
-            4,
-            containers::ByteArray {
-                0x00, 0x00, 0x00, 0xFF,    0xFF, 0xFF, 0xFF, 0xFF,    0x00, 0x00, 0x00, 0xFF,    0xFF, 0xFF, 0xFF, 0xFF,
-                0xFF, 0xFF, 0xFF, 0xFF,    0x00, 0x00, 0x00, 0xFF,    0xFF, 0xFF, 0xFF, 0xFF,    0x00, 0x00, 0x00, 0xFF,
-                0x00, 0x00, 0x00, 0xFF,    0xFF, 0xFF, 0xFF, 0xFF,    0x00, 0x00, 0x00, 0xFF,    0xFF, 0xFF, 0xFF, 0xFF,
-                0xFF, 0xFF, 0xFF, 0xFF,    0x00, 0x00, 0x00, 0xFF,    0xFF, 0xFF, 0xFF, 0xFF,    0x00, 0x00, 0x00, 0xFF,
-            },
-            Image::PixelFormat::RGBA
-        )
-    );
+SharedPointer< Texture > createCheckerBoardTexture( crimild::Int32 size )
+{
+    crimild::Byte colors[] = {
+        0x00, 0x00, 0x00, 0xFF, // black
+        0xFF, 0xFF, 0xFF, 0xFF, // white
+    };
+
+    crimild::Int32 width = size;
+    crimild::Int32 height = size;
+    crimild::Int32 bpp = 4;
+
+    auto data = containers::ByteArray( width * height * bpp );
+    for ( int y = 0; y < width; y++ ) {
+        for ( int x = 0; x < width; x++ ) {
+            auto colorIdx = ( y % 2 + x % 2 ) % 2;
+            for ( int i = 0; i < bpp; i++ ) {
+                data[ y * width * bpp + x * bpp + i ] = colors[ colorIdx * bpp + i ];
+            }
+        }
+    }
+
+    auto image = crimild::alloc< Image >( width, width, bpp, data, Image::PixelFormat::RGBA );
+    auto texture = crimild::alloc< Texture >( image );
     texture->setMagFilter( Texture::Filter::NEAREST );
     texture->setMinFilter( Texture::Filter::NEAREST );
     return texture;
-}();
+}
+
+SharedPointer< Texture > Texture::CHECKERBOARD = createCheckerBoardTexture( 2 );
+SharedPointer< Texture > Texture::CHECKERBOARD_4 = createCheckerBoardTexture( 4 );
+SharedPointer< Texture > Texture::CHECKERBOARD_8 = createCheckerBoardTexture( 8 );
+SharedPointer< Texture > Texture::CHECKERBOARD_16 = createCheckerBoardTexture( 16 );
+SharedPointer< Texture > Texture::CHECKERBOARD_32 = createCheckerBoardTexture( 32 );
+SharedPointer< Texture > Texture::CHECKERBOARD_64 = createCheckerBoardTexture( 64 );
+SharedPointer< Texture > Texture::CHECKERBOARD_128 = createCheckerBoardTexture( 128 );
+SharedPointer< Texture > Texture::CHECKERBOARD_256 = createCheckerBoardTexture( 256 );
+SharedPointer< Texture > Texture::CHECKERBOARD_512 = createCheckerBoardTexture( 512 );
 
 SharedPointer< Texture > Texture::INVALID = crimild::alloc< Texture >(
     crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0xFF, 0x00, 0xFF, 0xFF }, Image::PixelFormat::RGBA )

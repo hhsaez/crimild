@@ -34,6 +34,7 @@ namespace crimild {
     template <> const char *VertexP2C3TC2Buffer::getClassName( void ) const { return "crimild::VertexP2C3TC2Buffer"; }
     template <> const char *VertexP3Buffer::getClassName( void ) const { return "crimild::VertexP3Buffer"; }
     template <> const char *VertexP3C3Buffer::getClassName( void ) const { return "crimild::VertexP3C3Buffer"; }
+    template <> const char *VertexP3N3TC2Buffer::getClassName( void ) const { return "crimild::VertexP3N3TC2Buffer"; }
 
 }
 
