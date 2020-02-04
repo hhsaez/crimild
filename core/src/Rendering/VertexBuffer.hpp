@@ -341,6 +341,51 @@ namespace crimild {
 
     using VertexP3C3Buffer = VertexBufferImpl< VertexP3C3, policies::VertexBuffer3DExtentPolicy >;
 
+    struct VertexP3N3TC2 {
+        crimild::Vector3f position;
+        crimild::Vector3f normal;
+        crimild::Vector2f texCoord;
+
+        static std::vector< VertexInputAttributeDescription > getAttributeDescriptions( crimild::UInt32 binding ) noexcept
+        {
+            return {
+                {
+                    .location = 0,
+                    .binding = binding,
+                    .format = VertexInputAttributeDescription::Format::R32G32B32,
+                    .offset = offsetof( VertexP3N3TC2, position ),
+                },
+                {
+                    .location = 1,
+                    .binding = binding,
+                    .format = VertexInputAttributeDescription::Format::R32G32B32,
+                    .offset = offsetof( VertexP3N3TC2, normal ),
+                },
+                {
+                    .location = 2,
+                    .binding = binding,
+                    .format = VertexInputAttributeDescription::Format::R32G32,
+                    .offset = offsetof( VertexP3N3TC2, texCoord ),
+                }
+            };
+        }
+
+        static VertexInputBindingDescription getBindingDescription( crimild::UInt32 binding ) noexcept
+        {
+            return {
+                .binding = binding,
+                .stride = sizeof( VertexP3N3TC2 ),
+            };
+        }
+
+        bool operator==( const crimild::VertexP3N3TC2 &other ) const {
+            return position == other.position && normal == other.normal && texCoord == other.texCoord;
+        }
+
+    };
+
+    using VertexP3N3TC2Buffer = VertexBufferImpl< VertexP3N3TC2, policies::VertexBuffer3DExtentPolicy >;
+
 }
 
 #endif

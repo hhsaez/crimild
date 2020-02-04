@@ -43,6 +43,8 @@
 
 namespace crimild {
 
+    class Pipeline;
+
 	class OBJLoader : public NonCopyable {
 	private:
 		class FileProcessor {
@@ -76,6 +78,9 @@ namespace crimild {
 
 		FileProcessor &getOBJProcessor( void ) { return _objProcessor; }
 		FileProcessor &getMTLProcessor( void ) { return _mtlProcessor; }
+
+        // Pipeline override point
+        SharedPointer< Pipeline > pipeline;
 
 		void reset( void );
 		SharedPointer< Group > generateScene( void );
