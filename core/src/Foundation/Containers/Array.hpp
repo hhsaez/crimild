@@ -66,11 +66,17 @@ namespace crimild {
                 resize_unsafe( 1 );
 			}
 			
-			explicit Array( crimild::Size size )
+			explicit Array( crimild::Size size, T *data = nullptr )
 			{
 				resize_unsafe( size );
 				
 				_size = size;
+
+                if ( data != nullptr ) {
+                    for ( crimild::Size i = 0; i < _size; i++ ) {
+                        _elems[ i ] = data[ i ];
+                    }
+                }
 			}
 
 			Array( std::initializer_list< T > l )

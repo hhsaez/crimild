@@ -72,5 +72,45 @@ RenderResourceLibrary< Shader >::RenderResourceLibrary( void ) noexcept
            return shader;
         }()
     );
+
+    add(
+        constants::SHADER_UNLIT_TEXTURE_P3N3TC2_VERT,
+        [] {
+           #include "Shaders/unlit/texture_P3N3TC2.vert.cpp"
+           std::vector< char > data( RESOURCE_BYTES, RESOURCE_BYTES + sizeof( RESOURCE_BYTES ) );
+           auto shader = crimild::alloc< Shader >( Shader::Stage::VERTEX, data );
+           return shader;
+        }()
+    );
+
+    add(
+        constants::SHADER_UNLIT_TEXTURE_P3N3TC2_FRAG,
+        [] {
+           #include "Shaders/unlit/texture_P3N3TC2.frag.cpp"
+           std::vector< char > data( RESOURCE_BYTES, RESOURCE_BYTES + sizeof( RESOURCE_BYTES ) );
+           auto shader = crimild::alloc< Shader >( Shader::Stage::FRAGMENT, data );
+           return shader;
+        }()
+    );
+
+    add(
+        constants::SHADER_DEBUG_POSITION_P3N3TC2_VERT,
+        [] {
+           #include "Shaders/debug/position_P3N3TC2.vert.cpp"
+           std::vector< char > data( RESOURCE_BYTES, RESOURCE_BYTES + sizeof( RESOURCE_BYTES ) );
+           auto shader = crimild::alloc< Shader >( Shader::Stage::VERTEX, data );
+           return shader;
+        }()
+    );
+
+    add(
+        constants::SHADER_DEBUG_POSITION_P3N3TC2_FRAG,
+        [] {
+           #include "Shaders/debug/position_P3N3TC2.frag.cpp"
+           std::vector< char > data( RESOURCE_BYTES, RESOURCE_BYTES + sizeof( RESOURCE_BYTES ) );
+           auto shader = crimild::alloc< Shader >( Shader::Stage::FRAGMENT, data );
+           return shader;
+        }()
+    );
 }
 
