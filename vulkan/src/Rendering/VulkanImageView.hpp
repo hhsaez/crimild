@@ -49,7 +49,7 @@ namespace crimild {
                 SharedPointer< Image > image;
                 VkFormat format;
                 VkImageAspectFlags aspectFlags;
-                crimild::UInt32 mipLevels;
+                crimild::UInt32 mipLevels = 1;
             };
 
 		public:

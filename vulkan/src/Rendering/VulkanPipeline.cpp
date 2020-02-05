@@ -27,6 +27,7 @@
 
 #include "VulkanPipeline.hpp"
 #include "VulkanRenderDevice.hpp"
+#include "VulkanPhysicalDevice.hpp"
 #include "Rendering/Shader.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Foundation/Log.hpp"
@@ -356,10 +357,14 @@ VkPipelineRasterizationStateCreateInfo PipelineManager::createRasterizer( void )
 
 VkPipelineMultisampleStateCreateInfo PipelineManager::createMultiplesampleState( void ) const noexcept
 {
+    auto renderDevice = getRenderDevice();
+    auto physicalDevice = renderDevice->physicalDevice;
+    auto msaaSamples = physicalDevice->msaaSamples;
+
     return VkPipelineMultisampleStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
         .sampleShadingEnable = VK_FALSE,
-        .rasterizationSamples = VK_SAMPLE_COUNT_1_BIT,
+        .rasterizationSamples = msaaSamples,
         .minSampleShading = 1.0f,
         .pSampleMask = nullptr,
         .alphaToCoverageEnable = VK_FALSE,

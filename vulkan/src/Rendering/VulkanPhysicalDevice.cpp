@@ -57,8 +57,11 @@ SharedPointer< PhysicalDevice > PhysicalDeviceManager::create( PhysicalDevice::D
         return nullptr;
     }
 
+    auto msaaSamples = utils::getMaxUsableSampleCount( physicalDeviceHandler );
+
     auto physicalDevice = crimild::alloc< PhysicalDevice >();
     physicalDevice->handler = physicalDeviceHandler;
+    physicalDevice->msaaSamples = msaaSamples;
     physicalDevice->instance = descriptor.instance;
     physicalDevice->surface = descriptor.surface;
     physicalDevice->manager = this;

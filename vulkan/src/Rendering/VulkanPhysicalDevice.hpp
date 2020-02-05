@@ -54,6 +54,7 @@ namespace crimild {
             ~PhysicalDevice( void );
 
             VkPhysicalDevice handler = VK_NULL_HANDLE;
+            VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT;
             VulkanInstance *instance = nullptr;
             VulkanSurface *surface = nullptr;
             PhysicalDeviceManager *manager = nullptr;
