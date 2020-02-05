@@ -107,6 +107,7 @@ namespace crimild {
             crimild::Bool createSwapchain( void ) noexcept;
             crimild::Bool recreateSwapchain( void ) noexcept;
             crimild::Bool createRenderPass( void ) noexcept;
+            crimild::Bool createColorResources( void ) noexcept;
             crimild::Bool createDepthResources( void ) noexcept;
             crimild::Bool createFramebuffers( void ) noexcept;
             crimild::Bool createSyncObjects( void ) noexcept;
@@ -137,6 +138,12 @@ namespace crimild {
                 SharedPointer< ImageView > imageView;
             };
             DepthAttachment m_depthAttachment;
+
+            struct ColorAttachment {
+                SharedPointer< Image > image;
+                SharedPointer< ImageView > imageView;
+            };
+            ColorAttachment m_colorAttachment;
 
         };
 

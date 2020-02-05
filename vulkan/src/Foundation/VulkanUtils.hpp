@@ -190,13 +190,33 @@ namespace crimild {
                 VkImageTiling tiling;
                 VkImageUsageFlags usage;
                 VkMemoryPropertyFlags properties;
+                crimild::UInt32 mipLevels = 1;
+                VkSampleCountFlagBits numSamples = VK_SAMPLE_COUNT_1_BIT;
             };
 
             crimild::Bool createImage( RenderDevice *renderDevice, ImageDescriptor const &descriptor, VkImage &image, VkDeviceMemory &imageMemory ) noexcept;
 
-            void transitionImageLayout( RenderDevice *renderDevice, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout ) noexcept;
+            void transitionImageLayout( RenderDevice *renderDevice, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, crimild::UInt32 mipLevels ) noexcept;
 
             void copyBufferToImage( RenderDevice *renderDevice, VkBuffer buffer, VkImage image, crimild::UInt32 width, crimild::UInt32 height ) noexcept;
+
+            void generateMipmaps( RenderDevice *renderDevice, VkImage image, VkFormat format, crimild::Int32 width, crimild::Int32 height, crimild::UInt32 mipLevels ) noexcept;
+
+            //@}
+
+            /**
+             	\name Multisampling
+             */
+            //@{
+
+            VkSampleCountFlagBits getMaxUsableSampleCount( VkPhysicalDevice physicalDevice ) noexcept;
+
+            //@}
+
+            /**
+             	\name Depth and Stencil
+             */
+            //@{
 
             VkFormat findSupportedFormat( RenderDevice *renderDevice, const std::vector< VkFormat > &candidates, VkImageTiling tiling, VkFormatFeatureFlags features ) noexcept;
 

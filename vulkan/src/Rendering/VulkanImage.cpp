@@ -60,6 +60,8 @@ SharedPointer< crimild::vulkan::Image > ImageManager::create( Image::Descriptor 
             .tiling = descriptor.tiling,
             .usage = descriptor.usage,
             .properties = descriptor.properties,
+        	.mipLevels = descriptor.mipLevels,
+        	.numSamples = descriptor.numSamples,
     	},
         imageHandler,
         imageMemoryHandler

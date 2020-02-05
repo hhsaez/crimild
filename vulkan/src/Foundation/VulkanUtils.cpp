@@ -479,14 +479,14 @@ crimild::Bool utils::createImage( RenderDevice *renderDevice, ImageDescriptor co
             .height = descriptor.height,
             .depth = 1,
         },
-        .mipLevels = 1,
+        .mipLevels = descriptor.mipLevels,
         .arrayLayers = 1,
         .format = descriptor.format,
         .tiling = descriptor.tiling,
         .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
         .usage = descriptor.usage,
         .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-        .samples = VK_SAMPLE_COUNT_1_BIT,
+        .samples = descriptor.numSamples,
         .flags = 0,
     };
 
@@ -533,7 +533,7 @@ crimild::Bool utils::createImage( RenderDevice *renderDevice, ImageDescriptor co
     return true;
 }
 
-void utils::transitionImageLayout( RenderDevice *renderDevice, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout ) noexcept
+void utils::transitionImageLayout( RenderDevice *renderDevice, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, crimild::UInt32 mipLevels ) noexcept
 {
     auto commandBuffer = beginSingleTimeCommands( renderDevice );
 
@@ -546,7 +546,7 @@ void utils::transitionImageLayout( RenderDevice *renderDevice, VkImage image, Vk
         .image = image,
         .subresourceRange.aspectMask = 0, // Defined below
         .subresourceRange.baseMipLevel = 0,
-        .subresourceRange.levelCount = 1,
+        .subresourceRange.levelCount = mipLevels,
         .subresourceRange.baseArrayLayer = 0,
         .subresourceRange.layerCount = 1,
         .srcAccessMask = 0, // See below
@@ -631,6 +631,142 @@ void utils::copyBufferToImage( RenderDevice *renderDevice, VkBuffer buffer, VkIm
     );
 
     endSingleTimeCommands( renderDevice, commandBuffer );
+}
+
+void utils::generateMipmaps( RenderDevice *renderDevice, VkImage image, VkFormat imageFormat, crimild::Int32 width, crimild::Int32 height, crimild::UInt32 mipLevels ) noexcept
+{
+    // Check if image format supports linear blitting
+    auto physicalDevice = renderDevice->physicalDevice->handler;
+    VkFormatProperties formatProperties;
+    vkGetPhysicalDeviceFormatProperties( physicalDevice, imageFormat, &formatProperties );
+    if ( !( formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT ) ) {
+        CRIMILD_LOG_FATAL( "Texture image format does not support linear blitting!" );
+        exit( -1 );
+    }
+
+    auto commandBuffer = beginSingleTimeCommands( renderDevice );
+
+    auto barrier = VkImageMemoryBarrier {
+		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+        .image = image,
+        .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+        .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+        .subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+        .subresourceRange.baseArrayLayer = 0,
+        .subresourceRange.layerCount = 1,
+		.subresourceRange.levelCount = 1,
+    };
+
+    auto mipWidth = width;
+    auto mipHeight = height;
+
+    for ( crimild::UInt32 i = 1; i < mipLevels; i++ ) {
+        barrier.subresourceRange.baseMipLevel = i - 1;
+        barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+        barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+
+        vkCmdPipelineBarrier(
+            commandBuffer,
+            VK_PIPELINE_STAGE_TRANSFER_BIT,
+            VK_PIPELINE_STAGE_TRANSFER_BIT,
+            0,
+            0,
+            nullptr,
+            0,
+            nullptr,
+            1,
+            &barrier
+        );
+
+        auto blit = VkImageBlit {
+            .srcOffsets[ 0 ] = { 0, 0, 0 },
+            .srcOffsets[ 1 ] = { mipWidth, mipHeight, 1 },
+            .srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+            .srcSubresource.mipLevel = i - 1,
+            .srcSubresource.baseArrayLayer = 0,
+            .srcSubresource.layerCount = 1,
+            .dstOffsets[ 0 ] = { 0, 0, 0 },
+            .dstOffsets[ 1 ] = {
+                mipWidth > 1 ? mipWidth / 2 : 1,
+                mipHeight > 1 ? mipHeight / 2 : 1,
+                1
+            },
+            .dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+            .dstSubresource.mipLevel = i,
+            .dstSubresource.baseArrayLayer = 0,
+            .dstSubresource.layerCount = 1,
+        };
+
+        vkCmdBlitImage(
+            commandBuffer,
+            image,
+            VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+            image,
+            VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+            1,
+            &blit,
+            VK_FILTER_LINEAR
+        );
+
+        barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+        barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+        barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+        vkCmdPipelineBarrier(
+            commandBuffer,
+            VK_PIPELINE_STAGE_TRANSFER_BIT,
+            VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+            0,
+            0,
+            nullptr,
+            0,
+            nullptr,
+            1,
+            &barrier
+        );
+
+        if ( mipWidth > 1 ) mipWidth /= 2;
+        if ( mipHeight > 1 ) mipHeight /= 2;
+    }
+
+    barrier.subresourceRange.baseMipLevel = mipLevels - 1;
+    barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+    vkCmdPipelineBarrier(
+        commandBuffer,
+        VK_PIPELINE_STAGE_TRANSFER_BIT,
+        VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+        0,
+        0,
+        nullptr,
+        0,
+        nullptr,
+        1,
+        &barrier
+    );
+
+    endSingleTimeCommands( renderDevice, commandBuffer );
+}
+
+VkSampleCountFlagBits utils::getMaxUsableSampleCount( VkPhysicalDevice physicalDevice ) noexcept
+{
+    VkPhysicalDeviceProperties physicalDeviceProperties;
+    vkGetPhysicalDeviceProperties( physicalDevice, &physicalDeviceProperties );
+
+    auto counts = physicalDeviceProperties.limits.framebufferColorSampleCounts & physicalDeviceProperties.limits.framebufferDepthSampleCounts;
+    if ( counts & VK_SAMPLE_COUNT_64_BIT ) return VK_SAMPLE_COUNT_64_BIT;
+    if ( counts & VK_SAMPLE_COUNT_32_BIT ) return VK_SAMPLE_COUNT_32_BIT;
+    if ( counts & VK_SAMPLE_COUNT_16_BIT ) return VK_SAMPLE_COUNT_16_BIT;
+    if ( counts & VK_SAMPLE_COUNT_8_BIT ) return VK_SAMPLE_COUNT_8_BIT;
+    if ( counts & VK_SAMPLE_COUNT_4_BIT ) return VK_SAMPLE_COUNT_4_BIT;
+    if ( counts & VK_SAMPLE_COUNT_2_BIT ) return VK_SAMPLE_COUNT_2_BIT;
+    return VK_SAMPLE_COUNT_1_BIT;
 }
 
 VkFormat utils::findSupportedFormat( RenderDevice *renderDevice, const std::vector< VkFormat > &candidates, VkImageTiling tiling, VkFormatFeatureFlags features ) noexcept

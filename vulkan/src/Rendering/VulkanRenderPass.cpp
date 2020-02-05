@@ -26,6 +26,7 @@
  */
 
 #include "VulkanRenderPass.hpp"
+#include "VulkanPhysicalDevice.hpp"
 #include "VulkanRenderDevice.hpp"
 #include "VulkanSwapchain.hpp"
 
@@ -48,14 +49,16 @@ crimild::SharedPointer< RenderPass > RenderPassManager::create( RenderPass::Desc
         renderDevice = descriptor.renderDevice;
     }
 
+    auto physicalDevice = renderDevice->physicalDevice;
+    auto msaaSamples = physicalDevice->msaaSamples;
     auto swapchain = descriptor.swapchain;
 
     auto colorAttachment = VkAttachmentDescription {
         // Format must match the one in the swapchain
         .format = swapchain->format,
 
-        // No multisampling for now
-        .samples = VK_SAMPLE_COUNT_1_BIT,
+        // Configure multisampling based on device
+        .samples = msaaSamples,
 
         .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
         .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
@@ -78,7 +81,7 @@ crimild::SharedPointer< RenderPass > RenderPassManager::create( RenderPass::Desc
 
     auto depthAttachment = VkAttachmentDescription {
         .format = utils::findDepthFormat( renderDevice ),
-        .samples = VK_SAMPLE_COUNT_1_BIT,
+        .samples = msaaSamples,
         .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
         .storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
         .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
@@ -92,6 +95,22 @@ crimild::SharedPointer< RenderPass > RenderPassManager::create( RenderPass::Desc
         .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
     };
 
+    auto colorAttachmentResolve = VkAttachmentDescription {
+		.format = swapchain->format,
+        .samples = VK_SAMPLE_COUNT_1_BIT,
+        .loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+        .storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+        .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+        .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+        .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+        .finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+    };
+
+    auto colorAttachmentResolveRef = VkAttachmentReference {
+        .attachment = 2,
+        .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+    };
+
     auto subpass = VkSubpassDescription {
         .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
         .colorAttachmentCount = 1,
@@ -103,6 +122,13 @@ crimild::SharedPointer< RenderPass > RenderPassManager::create( RenderPass::Desc
         colorAttachment,
         depthAttachment,
     };
+
+    if ( msaaSamples != VK_SAMPLE_COUNT_1_BIT ) {
+        // Setup for multisampling
+        colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        subpass.pResolveAttachments = &colorAttachmentResolveRef;
+        attachments.push_back( colorAttachmentResolve );
+    }
 
     auto subpassDependency = VkSubpassDependency {
         // Which subpass to wait on
