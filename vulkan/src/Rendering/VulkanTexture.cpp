@@ -50,6 +50,10 @@ crimild::Bool TextureManager::bind( Texture *texture ) noexcept
     crimild::UInt32 imageWidth = image->getWidth();
     crimild::UInt32 imageHeight = image->getHeight();
 
+    // Each mipmap level is half the size of the previous one
+    // At the very least, we'll have 1 mip level (the original size)
+    auto mipLevels = 1 + static_cast< crimild::UInt32 >( Numericf::floor( Numericf::log2( Numericf::max( imageWidth, imageHeight ) ) ) );
+
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
     VkDeviceSize imageSize = image->getWidth() * image->getHeight() * image->getBpp();
@@ -93,8 +97,9 @@ crimild::Bool TextureManager::bind( Texture *texture ) noexcept
         	.height = imageHeight,
         	.format = textureFormat,
         	.tiling = VK_IMAGE_TILING_OPTIMAL,
-        	.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+        	.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
         	.properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        	.mipLevels = mipLevels,
         },
         textureImage,
         textureImageMemory
@@ -109,7 +114,8 @@ crimild::Bool TextureManager::bind( Texture *texture ) noexcept
         textureImage,
         textureFormat,
         VK_IMAGE_LAYOUT_UNDEFINED,
-        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
+        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        mipLevels
     );
 
     utils::copyBufferToImage(
@@ -120,13 +126,7 @@ crimild::Bool TextureManager::bind( Texture *texture ) noexcept
         imageHeight
     );
 
-    utils::transitionImageLayout(
-        renderDevice,
-        textureImage,
-        textureFormat,
-        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-    );
+    utils::generateMipmaps( renderDevice, textureImage, VK_FORMAT_R8G8B8A8_UNORM, imageWidth, imageHeight, mipLevels );
 
     vkDestroyBuffer( renderDevice->handler, stagingBuffer, nullptr );
     vkFreeMemory( renderDevice->handler, stagingBufferMemory, nullptr );
@@ -139,7 +139,7 @@ crimild::Bool TextureManager::bind( Texture *texture ) noexcept
         }(),
         .format = textureFormat,
         .aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT,
-        .mipLevels = 1,
+        .mipLevels = mipLevels,
     });
 
     auto samplerInfo = VkSamplerCreateInfo {
@@ -158,7 +158,7 @@ crimild::Bool TextureManager::bind( Texture *texture ) noexcept
         .mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
         .mipLodBias = 0,
         .minLod = 0,
-        .maxLod = 0,
+        .maxLod = static_cast< float >( mipLevels ),
     };
 
     VkSampler textureSampler;

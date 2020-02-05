@@ -256,6 +256,8 @@ void VulkanSystem::cleanSwapchain( void ) noexcept
     m_inFlightFences.clear();
     m_imageAvailableSemaphores.clear();
     m_renderFinishedSemaphores.clear();
+    m_colorAttachment.imageView = nullptr;
+    m_colorAttachment.image = nullptr;
     m_depthAttachment.imageView = nullptr;
     m_depthAttachment.image = nullptr;
     m_framebuffers.clear();
@@ -273,6 +275,7 @@ crimild::Bool VulkanSystem::recreateSwapchain( void ) noexcept
 
     return createSwapchain()
     	&& createRenderPass()
+        && createColorResources()
     	&& createDepthResources()
         && createFramebuffers()
         && createSyncObjects();
@@ -292,9 +295,39 @@ crimild::Bool VulkanSystem::createRenderPass( void ) noexcept
     return m_renderPass != nullptr;
 }
 
+crimild::Bool VulkanSystem::createColorResources( void ) noexcept
+{
+    auto renderDevice = crimild::get_ptr( m_renderDevice );
+    auto msaaSamples = renderDevice->physicalDevice->msaaSamples;
+    auto swapchain = crimild::get_ptr( m_swapchain );
+
+    auto colorFormat = swapchain->format;
+
+    m_colorAttachment.image = renderDevice->create( Image::Descriptor {
+		.width = swapchain->extent.width,
+        .height = swapchain->extent.height,
+        .mipLevels = 1,
+        .numSamples = msaaSamples,
+        .format = colorFormat,
+        .tiling = VK_IMAGE_TILING_OPTIMAL,
+        .usage = VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+        .properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+    });
+
+    m_colorAttachment.imageView = renderDevice->create( ImageView::Descriptor {
+		.image = m_colorAttachment.image,
+        .format = colorFormat,
+        .aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT,
+        .mipLevels = 1,
+    });
+
+    return true;
+}
+
 crimild::Bool VulkanSystem::createDepthResources( void ) noexcept
 {
     auto renderDevice = crimild::get_ptr( m_renderDevice );
+    auto msaaSamples = renderDevice->physicalDevice->msaaSamples;
     auto swapchain = crimild::get_ptr( m_swapchain );
 
     auto depthFormat = utils::findDepthFormat( renderDevice );
@@ -306,13 +339,15 @@ crimild::Bool VulkanSystem::createDepthResources( void ) noexcept
         .tiling = VK_IMAGE_TILING_OPTIMAL,
         .usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
         .properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        .mipLevels = 1,
+        .numSamples = msaaSamples,
     });
 
     m_depthAttachment.imageView = renderDevice->create(
         ImageView::Descriptor {
             .image = m_depthAttachment.image,
             .format = depthFormat,
-            .aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT,
+            .aspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT,
             .mipLevels = 1,
     	}
     );
@@ -323,7 +358,8 @@ crimild::Bool VulkanSystem::createDepthResources( void ) noexcept
         m_depthAttachment.image->handler,
         depthFormat,
         VK_IMAGE_LAYOUT_UNDEFINED,
-        VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+        VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+        1
     );
 
     return true;
@@ -332,18 +368,34 @@ crimild::Bool VulkanSystem::createDepthResources( void ) noexcept
 crimild::Bool VulkanSystem::createFramebuffers( void ) noexcept
 {
     auto renderDevice = crimild::get_ptr( m_renderDevice );
+    auto physicalDevice = renderDevice->physicalDevice;
+    auto msaaSamples = physicalDevice->msaaSamples;
     auto swapchain = crimild::get_ptr( m_swapchain );
     auto imageCount = swapchain->imageViews.size();
 
     for ( auto i = 0l; i < imageCount; i++ ) {
         auto imageView = swapchain->imageViews[ i ];
 
+        std::vector< ImageView * > attachments;
+        if ( msaaSamples == VK_SAMPLE_COUNT_1_BIT ) {
+            // Warning: Order must match the one defined by the render pass attachments
+            attachments = {
+                crimild::get_ptr( imageView ),
+                crimild::get_ptr( m_depthAttachment.imageView ),
+            };
+        }
+        else {
+            // Warning: Order must match the one defined by the render pass attachments
+            attachments = {
+                crimild::get_ptr( m_colorAttachment.imageView ),
+                crimild::get_ptr( m_depthAttachment.imageView ),
+                crimild::get_ptr( imageView ),
+            };
+        }
+
         auto framebuffer = renderDevice->create(
             Framebuffer::Descriptor {
-                .attachments = {
-                    crimild::get_ptr( imageView ),
-                    crimild::get_ptr( m_depthAttachment.imageView ),
-                },
+                .attachments = attachments,
                 .renderPass = crimild::get_ptr( m_renderPass ),
                 .extent = swapchain->extent,
             }

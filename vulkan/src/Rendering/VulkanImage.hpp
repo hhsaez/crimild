@@ -49,6 +49,8 @@ namespace crimild {
                 VkImageTiling tiling;
                 VkImageUsageFlags usage;
                 VkMemoryPropertyFlags properties;
+                crimild::UInt32 mipLevels = 1;
+                VkSampleCountFlagBits numSamples = VK_SAMPLE_COUNT_1_BIT;
             };
 
 		public:
