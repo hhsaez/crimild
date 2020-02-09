@@ -88,6 +88,9 @@ namespace crimild {
 
     template< typename RenderResourceType >
     class RenderResourceLibrary : public StaticSingleton< RenderResourceLibrary< RenderResourceType >> {
+    private:
+        using Builder = std::function< SharedPointer< RenderResourceType >( void ) >;
+
     public:
         RenderResourceLibrary( void ) noexcept { }
         virtual ~RenderResourceLibrary( void ) = default;
@@ -97,16 +100,30 @@ namespace crimild {
             m_resources[ name ] = shader;
         }
 
+        void add( std::string name, Builder const &builder )
+        {
+            m_builders[ name ] = builder;
+        }
+
         RenderResourceType *get( std::string name )
         {
+            if ( !m_resources.contains( name ) && m_builders.contains( name ) ) {
+                // Lazy create and add a new resource instance
+                // if the resource does not exist but there's a builder registered
+                add( name, m_builders[ name ]() );
+            }
+
+            // Check again, because we may have just added the resource
             if ( !m_resources.contains( name ) ) {
                 return nullptr;
             }
+
             return crimild::get_ptr( m_resources[ name ] );
         }
 
     private:
         containers::Map< std::string, SharedPointer< RenderResourceType >> m_resources;
+        containers::Map< std::string, Builder > m_builders;
     };
 
 }
