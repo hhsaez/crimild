@@ -40,7 +40,7 @@ RenderResourceLibrary< Shader >::RenderResourceLibrary( void ) noexcept
            	std::vector< char > data( RESOURCE_BYTES, RESOURCE_BYTES + sizeof( RESOURCE_BYTES ) );
            	auto shader = crimild::alloc< Shader >( Shader::Stage::VERTEX, data );
            	return shader;
-        }()
+        }
     );
 
     add(
@@ -50,7 +50,7 @@ RenderResourceLibrary< Shader >::RenderResourceLibrary( void ) noexcept
                std::vector< char > data( RESOURCE_BYTES, RESOURCE_BYTES + sizeof( RESOURCE_BYTES ) );
                auto shader = crimild::alloc< Shader >( Shader::Stage::VERTEX, data );
                return shader;
-        }()
+        }
     );
 
     add(
@@ -60,7 +60,7 @@ RenderResourceLibrary< Shader >::RenderResourceLibrary( void ) noexcept
            std::vector< char > data( RESOURCE_BYTES, RESOURCE_BYTES + sizeof( RESOURCE_BYTES ) );
            auto shader = crimild::alloc< Shader >( Shader::Stage::FRAGMENT, data );
            return shader;
-        }()
+        }
     );
 
     add(
@@ -70,7 +70,7 @@ RenderResourceLibrary< Shader >::RenderResourceLibrary( void ) noexcept
            std::vector< char > data( RESOURCE_BYTES, RESOURCE_BYTES + sizeof( RESOURCE_BYTES ) );
            auto shader = crimild::alloc< Shader >( Shader::Stage::FRAGMENT, data );
            return shader;
-        }()
+        }
     );
 
     add(
@@ -80,7 +80,7 @@ RenderResourceLibrary< Shader >::RenderResourceLibrary( void ) noexcept
            std::vector< char > data( RESOURCE_BYTES, RESOURCE_BYTES + sizeof( RESOURCE_BYTES ) );
            auto shader = crimild::alloc< Shader >( Shader::Stage::VERTEX, data );
            return shader;
-        }()
+        }
     );
 
     add(
@@ -90,7 +90,7 @@ RenderResourceLibrary< Shader >::RenderResourceLibrary( void ) noexcept
            std::vector< char > data( RESOURCE_BYTES, RESOURCE_BYTES + sizeof( RESOURCE_BYTES ) );
            auto shader = crimild::alloc< Shader >( Shader::Stage::FRAGMENT, data );
            return shader;
-        }()
+        }
     );
 
     add(
@@ -100,7 +100,7 @@ RenderResourceLibrary< Shader >::RenderResourceLibrary( void ) noexcept
            std::vector< char > data( RESOURCE_BYTES, RESOURCE_BYTES + sizeof( RESOURCE_BYTES ) );
            auto shader = crimild::alloc< Shader >( Shader::Stage::VERTEX, data );
            return shader;
-        }()
+        }
     );
 
     add(
@@ -110,7 +110,7 @@ RenderResourceLibrary< Shader >::RenderResourceLibrary( void ) noexcept
            std::vector< char > data( RESOURCE_BYTES, RESOURCE_BYTES + sizeof( RESOURCE_BYTES ) );
            auto shader = crimild::alloc< Shader >( Shader::Stage::FRAGMENT, data );
            return shader;
-        }()
+        }
     );
 }
 
