@@ -61,7 +61,7 @@ RenderResourceLibrary< ShaderProgram >::RenderResourceLibrary( void ) noexcept
             }();
 
             return program;
-        }()
+    	}
     );
 
     add(
@@ -94,7 +94,7 @@ RenderResourceLibrary< ShaderProgram >::RenderResourceLibrary( void ) noexcept
             }();
 
             return program;
-        }()
+        }
     );
 
     add(
@@ -127,7 +127,7 @@ RenderResourceLibrary< ShaderProgram >::RenderResourceLibrary( void ) noexcept
             }();
 
             return program;
-        }()
+        }
     );
 
     add(
@@ -155,7 +155,7 @@ RenderResourceLibrary< ShaderProgram >::RenderResourceLibrary( void ) noexcept
             }();
 
             return program;
-        }()
+        }
     );
 
 }
