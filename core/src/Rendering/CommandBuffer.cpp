@@ -29,122 +29,185 @@
 
 using namespace crimild;
 
+CommandBuffer::Command::Command( const Command &other ) noexcept
+    : type( other.type )
+{
+    switch ( type ) {
+        case Command::Type::BEGIN:
+            usage = other.usage;
+            break;
+
+        case Command::Type::BEGIN_RENDER_PASS:
+            renderPass = other.renderPass;
+            break;
+
+        case Command::Type::SET_VIEWPORT:
+            viewport = other.viewport;
+            break;
+
+        case Command::Type::BIND_GRAPHICS_PIPELINE:
+            pipeline = other.pipeline;
+            break;
+
+        case Command::Type::BIND_PRIMITIVE:
+            primitive = other.primitive;
+            break;
+
+        case Command::Type::BIND_INDEX_BUFFER:
+            buffer = other.buffer;
+            break;
+
+        case Command::Type::BIND_UNIFORM_BUFFER:
+            uniformBuffer = other.uniformBuffer;
+            break;
+
+        case Command::Type::BIND_VERTEX_BUFFER:
+            buffer = other.buffer;
+            break;
+
+        case Command::Type::BIND_COMMAND_BUFFER:
+            commandBuffer = other.commandBuffer;
+            break;
+
+        case Command::Type::BIND_DESCRIPTOR_SET:
+            descriptorSet = other.descriptorSet;
+            break;
+
+        case Command::Type::DRAW:
+            count = other.count;
+            break;
+
+        case Command::Type::DRAW_INDEXED:
+            count = other.count;
+            break;
+
+        case Command::Type::END_RENDER_PASS:
+            renderPass = other.renderPass;
+            break;
+
+        case Command::Type::END:
+            break;
+
+        default:
+            break;
+    }
+}
+
+CommandBuffer::Command::~Command( void ) noexcept
+{
+    switch ( type ) {
+        case Command::Type::SET_VIEWPORT:
+            viewport.~ViewportDimensions();
+            break;
+        case Command::Type::BIND_GRAPHICS_PIPELINE:
+            pipeline = nullptr;
+            break;
+
+        default:
+            break;
+    }
+}
+
 void CommandBuffer::begin( CommandBuffer::Usage usage ) noexcept
 {
-    m_commands.push_back(
-         Command {
-            .type = Command::Type::BEGIN,
-            .usage = usage,
-        }
-    );
+    Command cmd;
+    cmd.type = Command::Type::BEGIN,
+    cmd.usage = usage;
+    m_commands.push_back( cmd );
 }
 
 void CommandBuffer::beginRenderPass( RenderPass *renderPass ) noexcept
 {
-    m_commands.push_back(
-         Command {
-            .type = Command::Type::BEGIN_RENDER_PASS,
-            .renderPass = renderPass,
-        }
-    );
+    Command cmd;
+    cmd.type = Command::Type::BEGIN_RENDER_PASS;
+    cmd.renderPass = renderPass;
+    m_commands.push_back( cmd );
+}
+
+void CommandBuffer::setViewport( const ViewportDimensions &viewport ) noexcept
+{
+    Command cmd;
+    cmd.type = Command::Type::SET_VIEWPORT;
+    cmd.viewport = viewport;
+    m_commands.push_back( cmd );
 }
 
 void CommandBuffer::bindGraphicsPipeline( Pipeline *pipeline ) noexcept
 {
-    m_commands.push_back(
- 		Command {
-			.type = Command::Type::BIND_GRAPHICS_PIPELINE,
-            .pipeline = pipeline,
-    	}
-	);
+    Command cmd;
+    cmd.type = Command::Type::BIND_GRAPHICS_PIPELINE;
+    cmd.pipeline = pipeline;
+    m_commands.push_back( cmd );
 }
 
 void CommandBuffer::bindPrimitive( Primitive *primitive ) noexcept
 {
-	m_commands.push_back(
-        Command {
-			.type = Command::Type::BIND_PRIMITIVE,
-        	.primitive = primitive,
-    	}
-    );
+    Command cmd;
+    cmd.type = Command::Type::BIND_PRIMITIVE;
+    cmd.primitive = primitive;
+    m_commands.push_back( cmd );
 }
 
 void CommandBuffer::bindIndexBuffer( Buffer *indexBuffer ) noexcept
 {
-    m_commands.push_back(
-        Command {
-            .type = Command::Type::BIND_INDEX_BUFFER,
-            .buffer = indexBuffer,
-        }
-    );
+    Command cmd;
+    cmd.type = Command::Type::BIND_INDEX_BUFFER;
+    cmd.buffer = indexBuffer;
+    m_commands.push_back( cmd );
 }
 
 void CommandBuffer::bindVertexBuffer( VertexBuffer *vertexBuffer ) noexcept
 {
-    m_commands.push_back(
-        Command {
-            .type = Command::Type::BIND_VERTEX_BUFFER,
-            .vertexBuffer = vertexBuffer,
-        }
-    );
+    Command cmd;
+    cmd.type = Command::Type::BIND_VERTEX_BUFFER;
+    cmd.vertexBuffer = vertexBuffer;
+    m_commands.push_back( cmd );
 }
 
 void CommandBuffer::bindUniformBuffer( UniformBuffer *uniformBuffer ) noexcept
 {
-    m_commands.push_back(
-        Command {
-            .type = Command::Type::BIND_UNIFORM_BUFFER,
-            .uniformBuffer = uniformBuffer,
-        }
-    );
+    Command cmd;
+    cmd.type = Command::Type::BIND_UNIFORM_BUFFER,
+    cmd.uniformBuffer = uniformBuffer,
+    m_commands.push_back( cmd );
 }
 
 void CommandBuffer::bindDescriptorSet( DescriptorSet *descriptorSet ) noexcept
 {
-    m_commands.push_back(
-    	Command {
-        	.type = Command::Type::BIND_DESCRIPTOR_SET,
-        	.descriptorSet = descriptorSet,
-    	}
-    );
+    Command cmd;
+    cmd.type = Command::Type::BIND_DESCRIPTOR_SET,
+    cmd.descriptorSet = descriptorSet,
+    m_commands.push_back( cmd );
 }
 
 void CommandBuffer::bindCommandBuffer( CommandBuffer *commandBuffer ) noexcept
 {
-    m_commands.push_back(
-        Command {
-            .type = Command::Type::BIND_COMMAND_BUFFER,
-            .commandBuffer = commandBuffer,
-        }
-    );
+    Command cmd;
+    cmd.type = Command::Type::BIND_COMMAND_BUFFER;
+    cmd.commandBuffer = commandBuffer;
+    m_commands.push_back( cmd );
 }
 
 void CommandBuffer::drawIndexed( crimild::UInt32 count ) noexcept
 {
-    m_commands.push_back(
-        Command {
-            .type = Command::Type::DRAW_INDEXED,
-            .count = count,
-        }
-    );
+    Command cmd;
+    cmd.type = Command::Type::DRAW_INDEXED;
+    cmd.count = count;
+    m_commands.push_back( cmd );
 }
 
 void CommandBuffer::endRenderPass( RenderPass *renderPass ) noexcept
 {
-    m_commands.push_back(
-         Command {
-            .type = Command::Type::END_RENDER_PASS,
-            .renderPass = renderPass,
-        }
-    );
+    Command cmd;
+    cmd.type = Command::Type::END_RENDER_PASS,
+    cmd.renderPass = renderPass,
+    m_commands.push_back( cmd );
 }
 
 void CommandBuffer::end( void ) noexcept
 {
-    m_commands.push_back(
-         Command {
-            .type = Command::Type::END,
-        }
-    );
+    Command cmd;
+    cmd.type = Command::Type::END,
+    m_commands.push_back( cmd );
 }
 

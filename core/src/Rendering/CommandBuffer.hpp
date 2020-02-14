@@ -29,6 +29,7 @@
 #define CRIMILD_RENDERING_COMMAND_BUFFER_
 
 #include "Rendering/RenderResource.hpp"
+#include "Rendering/ViewportDimensions.hpp"
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/Types.hpp"
 
@@ -54,9 +55,14 @@ namespace crimild {
         };
 
         struct Command {
+            Command( void ) { };
+            Command( const Command &other ) noexcept;
+            ~Command( void ) noexcept;
+
             enum class Type {
 				BEGIN,
                 BEGIN_RENDER_PASS,
+                SET_VIEWPORT,
                 BIND_GRAPHICS_PIPELINE,
                 BIND_PRIMITIVE,
                 BIND_INDEX_BUFFER,
@@ -75,6 +81,7 @@ namespace crimild {
             union {
                 Usage usage;
                 CommandBuffer *commandBuffer;
+                ViewportDimensions viewport;
                 Pipeline *pipeline;
                 Primitive *primitive;
                 RenderPass *renderPass;
@@ -89,6 +96,7 @@ namespace crimild {
     public:
         void begin( Usage usage ) noexcept;
         void beginRenderPass( RenderPass *renderPass ) noexcept;
+        void setViewport( const ViewportDimensions &viewport ) noexcept;
         void bindCommandBuffer( CommandBuffer *commandBuffer ) noexcept;
         void bindGraphicsPipeline( Pipeline *pipeline ) noexcept;
         void bindPrimitive( Primitive *primitive ) noexcept;

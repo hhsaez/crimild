@@ -121,7 +121,7 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
     }
 
     commandBuffer->each(
-        [ handler, renderDevice, index ]( CommandBuffer::Command &cmd ) {
+        [&]( CommandBuffer::Command &cmd ) {
         	switch ( cmd.type ) {
                 case CommandBuffer::Command::Type::BEGIN: {
                     auto beginInfo = VkCommandBufferBeginInfo {
@@ -176,9 +176,26 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                     break;
                 }
 
+                case CommandBuffer::Command::Type::SET_VIEWPORT: {
+                    auto swapchain = renderDevice->getSwapchain();
+
+                    auto viewport = VkViewport {
+						.x = cmd.viewport.dimensions.x() * swapchain->extent.width,
+                        .y = cmd.viewport.dimensions.y() * swapchain->extent.height,
+                        .width = cmd.viewport.dimensions.width() * swapchain->extent.width,
+                        .height = cmd.viewport.dimensions.height() * swapchain->extent.height,
+                    };
+
+                    vkCmdSetViewport( handler, 0, 1, &viewport );
+
+                    break;
+                }
+
                 case CommandBuffer::Command::Type::BIND_GRAPHICS_PIPELINE: {
                     auto pipeline = cmd.pipeline;
                     auto pipelineBindInfo = renderDevice->getBindInfo( pipeline );
+
+                    m_currentPipeline = pipeline;
 
                     vkCmdBindPipeline(
                         handler,
@@ -225,7 +242,7 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                     auto descriptorSet = cmd.descriptorSet;
                     auto descriptorSetHandler = renderDevice->getHandler( descriptorSet, index );
 
-                    auto pipeline = crimild::get_ptr( descriptorSet->pipeline );
+                    auto pipeline = m_currentPipeline;
                     auto pipelineBindInfo = renderDevice->getBindInfo( pipeline );
 
                     VkDescriptorSet descriptorSets[] = {
