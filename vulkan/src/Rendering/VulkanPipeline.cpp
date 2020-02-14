@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the copyright holders nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,6 +28,7 @@
 #include "VulkanPipeline.hpp"
 #include "VulkanRenderDevice.hpp"
 #include "VulkanPhysicalDevice.hpp"
+#include "Rendering/PolygonState.hpp"
 #include "Rendering/Shader.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Foundation/Log.hpp"
@@ -59,12 +60,16 @@ crimild::Bool PipelineManager::bind( Pipeline *pipeline ) noexcept
     auto inputAssembly = createInputAssemby( pipeline->primitiveType );
     auto viewport = createViewport( pipeline->viewport );
     auto scissor = createScissor( pipeline->scissor );
-    auto viewportState = createViewportState( viewport, scissor );
-    auto rasterizer = createRasterizer();
+    auto viewportState = pipeline->viewport.scalingMode != ViewportDimensions::ScalingMode::DYNAMIC
+    	? createViewportState( viewport, scissor )
+    	: createDynamicViewportState( true, true );
+    auto rasterizer = createRasterizer( pipeline );
     auto multisampleState = createMultiplesampleState();
     auto depthStencilState = createDepthStencilState();
     auto colorBlendAttachment = createColorBlendAttachment();
     auto colorBlending = createColorBlending( colorBlendAttachment );
+    auto dynamicStates = getDynamicStates( pipeline );
+    auto dynamicState = createDynamicState( dynamicStates );
 
     auto pipelineLayout = renderDevice->create(
         PipelineLayout::Descriptor {
@@ -85,7 +90,7 @@ crimild::Bool PipelineManager::bind( Pipeline *pipeline ) noexcept
         .pMultisampleState = &multisampleState,
         .pDepthStencilState = &depthStencilState,
         .pColorBlendState = &colorBlending,
-        .pDynamicState = nullptr, // Optional
+        .pDynamicState = &dynamicState,
         .layout = pipelineLayout->handler,
         .renderPass = renderPass->handler,
         .subpass = 0,
@@ -95,22 +100,22 @@ crimild::Bool PipelineManager::bind( Pipeline *pipeline ) noexcept
 
     VkPipeline pipelineHander;
     CRIMILD_VULKAN_CHECK(
- 		vkCreateGraphicsPipelines(
+         vkCreateGraphicsPipelines(
             renderDevice->handler,
-           	VK_NULL_HANDLE,
-           	1,
-           	&createInfo,
-           	nullptr,
-           	&pipelineHander
-       	)
+               VK_NULL_HANDLE,
+               1,
+               &createInfo,
+               nullptr,
+               &pipelineHander
+           )
     );
 
     setBindInfo(
-    	pipeline,
-       	{
-        	.pipelineHandler = pipelineHander,
-        	.pipelineLayout = pipelineLayout,
-    	}
+        pipeline,
+           {
+            .pipelineHandler = pipelineHander,
+            .pipelineLayout = pipelineLayout,
+        }
     );
 
     return ManagerImpl::bind( pipeline );
@@ -150,12 +155,12 @@ PipelineManager::ShaderModuleArray PipelineManager::createShaderModules( RenderD
     ShaderModuleArray modules;
     program->getShaders().each( [ &modules, renderDevice ]( SharedPointer< Shader > &shader ) {
         auto module = renderDevice->create(
-			ShaderModule::Descriptor {
-        		.shader = crimild::get_ptr( shader )
-        	}
-       	);
+            ShaderModule::Descriptor {
+                .shader = crimild::get_ptr( shader )
+            }
+           );
         if ( module != nullptr ) {
-        	modules.push_back( module );
+            modules.push_back( module );
         }
     });
 
@@ -335,17 +340,37 @@ VkPipelineViewportStateCreateInfo PipelineManager::createViewportState( const Vk
         .pViewports = &viewport,
         .scissorCount = 1,
         .pScissors = &scissor,
+        .flags = 0,
     };
 }
 
-VkPipelineRasterizationStateCreateInfo PipelineManager::createRasterizer( void ) const noexcept
+VkPipelineViewportStateCreateInfo PipelineManager::createDynamicViewportState( crimild::Bool hasViewport, crimild::Bool hasScissor ) const noexcept
 {
+    return VkPipelineViewportStateCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
+        .viewportCount = hasViewport ? 1u : 0,
+        .pViewports = nullptr,
+        .scissorCount = hasScissor ? 1u : 0,
+        .pScissors = nullptr,
+        .flags = 0,
+    };
+}
+
+VkPipelineRasterizationStateCreateInfo PipelineManager::createRasterizer( Pipeline *pipeline ) const noexcept
+{
+    auto polygonMode = VK_POLYGON_MODE_FILL;
+    auto lineWidth = 1.0f;
+    if ( auto polygonState = crimild::get_ptr( pipeline->polygonState ) ) {
+        polygonMode = utils::getPolygonMode( polygonState );
+        lineWidth = polygonState->lineWidth;
+    }
+
     return VkPipelineRasterizationStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
         .depthClampEnable = VK_FALSE, // VK_TRUE might be required for shadow maps
         .rasterizerDiscardEnable = VK_FALSE, // VK_TRUE disables output to the framebuffer
-        .polygonMode = VK_POLYGON_MODE_FILL,
-        .lineWidth = 1.0f,
+        .polygonMode = polygonMode,
+        .lineWidth = lineWidth,
         .cullMode = VK_CULL_MODE_BACK_BIT,
         .frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE,
         .depthBiasEnable = VK_FALSE, // Might be needed for shadow mapping
@@ -378,13 +403,15 @@ VkPipelineDepthStencilStateCreateInfo PipelineManager::createDepthStencilState( 
         .sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
         .depthTestEnable = VK_TRUE,
         .depthWriteEnable = VK_TRUE,
-        .depthCompareOp = VK_COMPARE_OP_LESS,
+        .depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL,
         .depthBoundsTestEnable = VK_FALSE,
         .minDepthBounds = 0.0f,
         .maxDepthBounds = 1.0f,
         .stencilTestEnable = VK_FALSE,
         .front = {},
-        .back = {},
+        .back = {
+            .compareOp = VK_COMPARE_OP_ALWAYS
+        },
     };
 }
 
@@ -414,6 +441,31 @@ VkPipelineColorBlendStateCreateInfo PipelineManager::createColorBlending( const 
         .blendConstants[ 1 ] = 0.0f,
         .blendConstants[ 2 ] = 0.0f,
         .blendConstants[ 3 ] = 0.0f,
+    };
+}
+
+PipelineManager::DynamicStates PipelineManager::getDynamicStates( Pipeline *pipeline ) const noexcept
+{
+    std::vector< VkDynamicState > dynamicStates;
+
+    if ( pipeline->viewport.scalingMode == ViewportDimensions::ScalingMode::DYNAMIC ) {
+        dynamicStates.push_back( VK_DYNAMIC_STATE_VIEWPORT );
+    }
+
+    if ( pipeline->scissor.scalingMode == ViewportDimensions::ScalingMode::DYNAMIC ) {
+        dynamicStates.push_back( VK_DYNAMIC_STATE_SCISSOR );
+    }
+
+    return dynamicStates;
+}
+
+VkPipelineDynamicStateCreateInfo PipelineManager::createDynamicState( DynamicStates &dynamicStates ) const noexcept
+{
+    return VkPipelineDynamicStateCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
+        .pDynamicStates = dynamicStates.data(),
+        .dynamicStateCount = static_cast< crimild::UInt32 >( dynamicStates.size() ),
+        .flags = 0,
     };
 }
 

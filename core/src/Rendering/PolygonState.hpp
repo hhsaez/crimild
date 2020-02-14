@@ -9,7 +9,7 @@
 *     * Redistributions in binary form must reproduce the above copyright
 *       notice, this list of conditions and the following disclaimer in the
 *       documentation and/or other materials provided with the distribution.
-*     * Neither the name of the copyright holder nor the
+*     * Neither the name of the copyright holders nor the
 *       names of its contributors may be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
@@ -25,28 +25,37 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CRIMILD_RENDERING_VIEWPORT_DIMENSIONS_
-#define CRIMILD_RENDERING_VIEWPORT_DIMENSIONS_
+#ifndef CRIMILD_RENDERING_POLYGON_STATE_
+#define CRIMILD_RENDERING_POLYGON_STATE_
 
-#include "Mathematics/Rect.hpp"
+#include "RenderState.hpp"
 
 namespace crimild {
 
-    struct ViewportDimensions {
-        enum class ScalingMode {
-            FIXED,
-            RELATIVE,
-            SWAPCHAIN_RELATIVE,
-            DYNAMIC,
+    class PolygonState : public RenderState {
+    public:
+        // TODO: these should be const
+        static SharedPointer< PolygonState > FILL;
+        static SharedPointer< PolygonState > LINE;
+        static SharedPointer< PolygonState > POINT;
+
+    public:
+        enum class PolygonMode : uint8_t {
+            FILL,
+            LINE,
+            POINT,
         };
 
-        ScalingMode scalingMode = ScalingMode::SWAPCHAIN_RELATIVE;
-        Rectf dimensions = Rectf( 0, 0, 1, 1 );
+    public:
+        PolygonState( crimild::Bool enabled = false,
+                      PolygonMode polygonMode = PolygonMode::FILL );
+        virtual ~PolygonState( void ) = default;
+
+        PolygonMode polygonMode = PolygonMode::FILL;
+        crimild::Real32 lineWidth = 1.0f;
     };
 
 }
 
 #endif
-
-
 

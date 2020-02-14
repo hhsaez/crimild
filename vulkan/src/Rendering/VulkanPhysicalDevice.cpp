@@ -124,7 +124,6 @@ crimild::Bool PhysicalDeviceManager::isDeviceSuitable( const VkPhysicalDevice &d
     return indices.isComplete()
         && extensionsSupported
         && swapchainAdequate
+    	&& supportedFeatures.fillModeNonSolid
         && supportedFeatures.samplerAnisotropy;
-
-    return false;
 }
