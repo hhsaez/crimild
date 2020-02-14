@@ -80,49 +80,51 @@ void RenderStateComponent::prepare( void ) noexcept
         pipeline->bindingDescription = pipeline->program->bindingDescription;
     }
 
-    prepare( crimild::get_ptr( pipeline->descriptorSetLayout ) );
+    if ( descriptorSet == nullptr ) {
+        descriptorSet = createDescriptorSet( crimild::get_ptr( pipeline->descriptorSetLayout ) );
+        descriptorSetLayout = descriptorSet->descriptorSetLayout;
+        descriptorPool = descriptorSet->descriptorPool;
+    }
 }
 
-void RenderStateComponent::prepare( DescriptorSetLayout *layout ) noexcept
+SharedPointer< DescriptorSet > RenderStateComponent::createDescriptorSet( DescriptorSetLayout *descriptorSetLayout ) noexcept
 {
     if ( descriptorSetLayout == nullptr ) {
-        descriptorSetLayout = crimild::retain( layout );
+        return nullptr;
     }
 
-    if ( descriptorPool == nullptr ) {
-        descriptorPool = crimild::alloc< DescriptorPool >();
-        descriptorPool->descriptorSetLayout = descriptorSetLayout;
-    }
+    auto descriptorPool = crimild::alloc< DescriptorPool >();
+    descriptorPool->descriptorSetLayout = crimild::retain( descriptorSetLayout );
 
-    if ( descriptorSet == nullptr ) {
-        descriptorSet = crimild::alloc< DescriptorSet >();
-        descriptorSet->descriptorSetLayout = descriptorSetLayout;
-        descriptorSet->descriptorPool = descriptorPool;
+    auto descriptorSet = crimild::alloc< DescriptorSet >();
+    descriptorSet->descriptorSetLayout = crimild::retain( descriptorSetLayout );
+    descriptorSet->descriptorPool = descriptorPool;
 
-        size_t uniformIdx = 0;
-        size_t textureIdx = 0;
+    size_t uniformIdx = 0;
+    size_t textureIdx = 0;
 
-        descriptorSetLayout->bindings.each( [&]( DescriptorSetLayout::Binding &binding ) {
-            auto write = DescriptorSet::Write {
-                .descriptorType = binding.descriptorType,
-            };
+    descriptorSetLayout->bindings.each( [&]( DescriptorSetLayout::Binding &binding ) {
+        auto write = DescriptorSet::Write {
+            .descriptorType = binding.descriptorType,
+        };
 
-            switch ( write.descriptorType ) {
-                case DescriptorType::UNIFORM_BUFFER:
-                    write.buffer = crimild::get_ptr( uniforms[ uniformIdx++ ] );
-                    break;
-                case DescriptorType::COMBINED_IMAGE_SAMPLER:
-                    write.texture = crimild::get_ptr( textures[ textureIdx++ ] );
-                    break;
-                default:
-                    CRIMILD_LOG_FATAL( "Invalid descriptor type" );
-                    exit( -1 );
-                    break;
-            };
+        switch ( write.descriptorType ) {
+            case DescriptorType::UNIFORM_BUFFER:
+                write.buffer = crimild::get_ptr( uniforms[ uniformIdx++ ] );
+                break;
+            case DescriptorType::COMBINED_IMAGE_SAMPLER:
+                write.texture = crimild::get_ptr( textures[ textureIdx++ ] );
+                break;
+            default:
+                CRIMILD_LOG_FATAL( "Invalid descriptor type" );
+                exit( -1 );
+                break;
+        };
 
-            descriptorSet->writes.add( write );
-        });
-    }
+        descriptorSet->writes.add( write );
+    });
+
+    return descriptorSet;
 }
 
 void RenderStateComponent::forEachMaterial( std::function< void( Material * ) > callback )

@@ -55,7 +55,7 @@ namespace crimild {
         };
 
         struct Command {
-            Command( void ) { };
+            Command( void ) noexcept;
             Command( const Command &other ) noexcept;
             ~Command( void ) noexcept;
 
@@ -63,6 +63,7 @@ namespace crimild {
 				BEGIN,
                 BEGIN_RENDER_PASS,
                 SET_VIEWPORT,
+                SET_SCISSOR,
                 BIND_GRAPHICS_PIPELINE,
                 BIND_PRIMITIVE,
                 BIND_INDEX_BUFFER,
@@ -81,14 +82,14 @@ namespace crimild {
             union {
                 Usage usage;
                 CommandBuffer *commandBuffer;
-                ViewportDimensions viewport;
+                ViewportDimensions viewportDimensions;
                 Pipeline *pipeline;
                 Primitive *primitive;
                 RenderPass *renderPass;
                 Buffer *buffer;
                 VertexBuffer *vertexBuffer;
                 UniformBuffer *uniformBuffer;
-                DescriptorSet *descriptorSet;
+                SharedPointer< DescriptorSet > descriptorSet;
                 crimild::UInt32 count;
             };
         };
@@ -97,6 +98,7 @@ namespace crimild {
         void begin( Usage usage ) noexcept;
         void beginRenderPass( RenderPass *renderPass ) noexcept;
         void setViewport( const ViewportDimensions &viewport ) noexcept;
+        void setScissor( const ViewportDimensions &scissor ) noexcept;
         void bindCommandBuffer( CommandBuffer *commandBuffer ) noexcept;
         void bindGraphicsPipeline( Pipeline *pipeline ) noexcept;
         void bindPrimitive( Primitive *primitive ) noexcept;

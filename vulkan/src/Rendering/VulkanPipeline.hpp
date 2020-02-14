@@ -75,11 +75,16 @@ namespace crimild {
             VkViewport createViewport( const ViewportDimensions &viewport ) const noexcept;
             VkRect2D createScissor( const ViewportDimensions &scissor ) const noexcept;
             VkPipelineViewportStateCreateInfo createViewportState( const VkViewport &viewport, const VkRect2D &scissor ) const noexcept;
-            VkPipelineRasterizationStateCreateInfo createRasterizer( void ) const noexcept;
+            VkPipelineViewportStateCreateInfo createDynamicViewportState( crimild::Bool hasViewport, crimild::Bool hasScissor ) const noexcept;
+            VkPipelineRasterizationStateCreateInfo createRasterizer( Pipeline *pipeline ) const noexcept;
             VkPipelineMultisampleStateCreateInfo createMultiplesampleState( void ) const noexcept;
             VkPipelineDepthStencilStateCreateInfo createDepthStencilState( void ) const noexcept;
             VkPipelineColorBlendAttachmentState createColorBlendAttachment( void ) const noexcept;
             VkPipelineColorBlendStateCreateInfo createColorBlending( const VkPipelineColorBlendAttachmentState &colorBlendAttachment ) const noexcept;
+
+            using DynamicStates = std::vector< VkDynamicState >;
+            DynamicStates getDynamicStates( Pipeline *pipeline ) const noexcept;
+            VkPipelineDynamicStateCreateInfo createDynamicState( DynamicStates &dynamicStates ) const noexcept;
         };
 
 	}

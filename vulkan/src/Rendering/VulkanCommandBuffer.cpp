@@ -180,13 +180,39 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                     auto swapchain = renderDevice->getSwapchain();
 
                     auto viewport = VkViewport {
-						.x = cmd.viewport.dimensions.x() * swapchain->extent.width,
-                        .y = cmd.viewport.dimensions.y() * swapchain->extent.height,
-                        .width = cmd.viewport.dimensions.width() * swapchain->extent.width,
-                        .height = cmd.viewport.dimensions.height() * swapchain->extent.height,
+						.x = cmd.viewportDimensions.dimensions.x() * swapchain->extent.width,
+                        .y = cmd.viewportDimensions.dimensions.y() * swapchain->extent.height,
+                        .width = cmd.viewportDimensions.dimensions.width() * swapchain->extent.width,
+                        .height = cmd.viewportDimensions.dimensions.height() * swapchain->extent.height,
+                        .minDepth = 0,
+                        .maxDepth = 1,
                     };
 
                     vkCmdSetViewport( handler, 0, 1, &viewport );
+
+                    break;
+                }
+
+                case CommandBuffer::Command::Type::SET_SCISSOR: {
+                    auto swapchain = renderDevice->getSwapchain();
+                    Rectf rect = cmd.viewportDimensions.dimensions;
+                    rect.x() *= swapchain->extent.width;
+                    rect.y() *= swapchain->extent.height;
+                    rect.width() *= swapchain->extent.width;
+                    rect.height() *= swapchain->extent.height;
+
+                    auto scissor = VkRect2D {
+                        .offset = {
+                            static_cast< crimild::Int32 >( rect.getX() ),
+                            static_cast< crimild::Int32 >( rect.getY() ),
+                        },
+                        .extent = VkExtent2D {
+                            static_cast< crimild::UInt32 >( rect.getWidth() ),
+                            static_cast< crimild::UInt32 >( rect.getHeight() ),
+                        },
+                    };
+
+                    vkCmdSetScissor( handler, 0, 1, &scissor );
 
                     break;
                 }
@@ -239,7 +265,7 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                 }
 
                 case CommandBuffer::Command::Type::BIND_DESCRIPTOR_SET: {
-                    auto descriptorSet = cmd.descriptorSet;
+                    auto descriptorSet = crimild::get_ptr( cmd.descriptorSet );
                     auto descriptorSetHandler = renderDevice->getHandler( descriptorSet, index );
 
                     auto pipeline = m_currentPipeline;

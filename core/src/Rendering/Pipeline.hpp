@@ -37,9 +37,13 @@
 
 namespace crimild {
 
-    class ShaderProgram;
+    class AlphaState;
+    class CullFaceState;
+    class DepthState;
     class DescriptorSetLayout;
+    class PolygonState;
     class RenderPass;
+    class ShaderProgram;
 
     class Pipeline : public SharedObject, public RenderResourceImpl< Pipeline > {
     public:
@@ -53,6 +57,10 @@ namespace crimild {
         std::vector< VertexInputAttributeDescription > attributeDescriptions;
         VertexInputBindingDescription bindingDescription;
         SharedPointer< DescriptorSetLayout > descriptorSetLayout;
+        SharedPointer< AlphaState > alphaState;
+        SharedPointer< CullFaceState > cullFaceState;
+        SharedPointer< DepthState > depthState;
+        SharedPointer< PolygonState > polygonState;
     };
 
 }

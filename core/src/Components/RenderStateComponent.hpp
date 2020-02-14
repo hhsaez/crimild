@@ -74,7 +74,8 @@ namespace crimild {
         std::function< void( CommandBuffer * ) > commandRecorder;
 
         void prepare( void ) noexcept;
-        void prepare( DescriptorSetLayout *descriptorSetLayout ) noexcept;
+
+        SharedPointer< DescriptorSet > createDescriptorSet( DescriptorSetLayout *descriptorSetLayout ) noexcept;
         
         // Deprecated
     public:

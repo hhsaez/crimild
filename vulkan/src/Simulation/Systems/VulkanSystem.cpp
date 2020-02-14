@@ -64,6 +64,11 @@ crimild::Bool VulkanSystem::start( void )
 void VulkanSystem::update( void )
 {
     auto renderDevice = crimild::get_ptr( m_renderDevice );
+    if ( renderDevice == nullptr ) {
+        CRIMILD_LOG_ERROR( "No valid render device instance" );
+        return;
+    }
+
     auto swapchain = crimild::get_ptr( m_swapchain );
 
     auto wait = crimild::get_ptr( m_imageAvailableSemaphores[ m_currentFrame ] );
@@ -241,17 +246,19 @@ crimild::Bool VulkanSystem::createSwapchain( void ) noexcept
 
 void VulkanSystem::cleanSwapchain( void ) noexcept
 {
-    if ( m_renderDevice != nullptr ) {
+    if ( auto renderDevice = crimild::get_ptr( m_renderDevice ) ) {
         CRIMILD_LOG_TRACE( "Waiting for pending operations" );
         m_renderDevice->waitIdle();
-    }
 
-    static_cast< DescriptorSetManager * >( getRenderDevice() )->clear();
-    static_cast< DescriptorSetLayoutManager * >( getRenderDevice() )->clear();
-    static_cast< DescriptorPoolManager * >( getRenderDevice() )->clear();
-    static_cast< BufferManager * >( getRenderDevice() )->clear();
-    static_cast< CommandBufferManager * >( getRenderDevice() )->clear();
-    static_cast< PipelineManager * >( getRenderDevice() )->clear();
+        static_cast< DescriptorSetManager * >( renderDevice )->clear();
+        static_cast< DescriptorSetLayoutManager * >( renderDevice )->clear();
+        static_cast< DescriptorPoolManager * >( renderDevice )->clear();
+        static_cast< BufferManager * >( renderDevice )->clear();
+        static_cast< CommandBufferManager * >( renderDevice )->clear();
+        static_cast< PipelineManager * >( renderDevice )->clear();
+
+        renderDevice->reset( crimild::get_ptr( m_commandPool ) );
+    }
 
     m_inFlightFences.clear();
     m_imageAvailableSemaphores.clear();
@@ -263,9 +270,6 @@ void VulkanSystem::cleanSwapchain( void ) noexcept
     m_framebuffers.clear();
     m_renderPass = nullptr;
     m_swapchain = nullptr;
-
-    getRenderDevice()->reset( crimild::get_ptr( m_commandPool ) );
-
     m_currentFrame = 0;
 }
 

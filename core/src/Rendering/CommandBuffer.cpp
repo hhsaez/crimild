@@ -26,11 +26,19 @@
 */
 
 #include "Rendering/CommandBuffer.hpp"
+#include "Rendering/DescriptorSet.hpp"
 
 using namespace crimild;
 
+CommandBuffer::Command::Command( void ) noexcept
+	: descriptorSet { }
+{
+    
+}
+
 CommandBuffer::Command::Command( const Command &other ) noexcept
-    : type( other.type )
+    : type( other.type ),
+	  descriptorSet { }
 {
     switch ( type ) {
         case Command::Type::BEGIN:
@@ -42,7 +50,8 @@ CommandBuffer::Command::Command( const Command &other ) noexcept
             break;
 
         case Command::Type::SET_VIEWPORT:
-            viewport = other.viewport;
+        case Command::Type::SET_SCISSOR:
+            viewportDimensions = other.viewportDimensions;
             break;
 
         case Command::Type::BIND_GRAPHICS_PIPELINE:
@@ -97,8 +106,10 @@ CommandBuffer::Command::~Command( void ) noexcept
 {
     switch ( type ) {
         case Command::Type::SET_VIEWPORT:
-            viewport.~ViewportDimensions();
+        case Command::Type::SET_SCISSOR:
+            viewportDimensions.~ViewportDimensions();
             break;
+
         case Command::Type::BIND_GRAPHICS_PIPELINE:
             pipeline = nullptr;
             break;
@@ -128,7 +139,15 @@ void CommandBuffer::setViewport( const ViewportDimensions &viewport ) noexcept
 {
     Command cmd;
     cmd.type = Command::Type::SET_VIEWPORT;
-    cmd.viewport = viewport;
+    cmd.viewportDimensions = viewport;
+    m_commands.push_back( cmd );
+}
+
+void CommandBuffer::setScissor( const ViewportDimensions &scissor ) noexcept
+{
+    Command cmd;
+    cmd.type = Command::Type::SET_SCISSOR;
+    cmd.viewportDimensions = scissor;
     m_commands.push_back( cmd );
 }
 
@@ -176,7 +195,7 @@ void CommandBuffer::bindDescriptorSet( DescriptorSet *descriptorSet ) noexcept
 {
     Command cmd;
     cmd.type = Command::Type::BIND_DESCRIPTOR_SET,
-    cmd.descriptorSet = descriptorSet,
+    cmd.descriptorSet = crimild::retain( descriptorSet ),
     m_commands.push_back( cmd );
 }
 
