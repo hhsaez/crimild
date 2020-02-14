@@ -95,6 +95,10 @@ void CommandPoolManager::destroy( CommandPool *commandPool ) noexcept
 void CommandPoolManager::reset( CommandPool *commandPool ) noexcept
 {
     auto renderDevice = m_renderDevice;
+    if ( renderDevice == nullptr ) {
+        return;
+    }
+
     auto flags = VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT;
     CRIMILD_VULKAN_CHECK(
 		vkResetCommandPool(

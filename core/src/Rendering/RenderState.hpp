@@ -29,6 +29,7 @@
 #define CRIMILD_RENDERER_RENDER_STATE_
 
 #include "Foundation/SharedObject.hpp"
+#include "Foundation/Types.hpp"
 
 namespace crimild {
     

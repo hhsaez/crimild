@@ -40,6 +40,8 @@
 
 namespace crimild {
 
+    class PolygonState;
+
 	namespace vulkan {
 
         class RenderDevice;
@@ -77,6 +79,7 @@ namespace crimild {
             VkShaderStageFlagBits getVulkanShaderStageFlag( Shader::Stage stage ) noexcept;
             VkDescriptorType getVulkanDescriptorType( DescriptorType type ) noexcept;
             VkFilter getVulkanFilter( Texture::Filter filter ) noexcept;
+            VkPolygonMode getPolygonMode( PolygonState *polygonState ) noexcept;
 
             //@}
 

@@ -9,7 +9,7 @@
 *     * Redistributions in binary form must reproduce the above copyright
 *       notice, this list of conditions and the following disclaimer in the
 *       documentation and/or other materials provided with the distribution.
-*     * Neither the name of the copyright holder nor the
+*     * Neither the name of the copyright holders nor the
 *       names of its contributors may be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
@@ -25,28 +25,18 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CRIMILD_RENDERING_VIEWPORT_DIMENSIONS_
-#define CRIMILD_RENDERING_VIEWPORT_DIMENSIONS_
+#include "Rendering/PolygonState.hpp"
 
-#include "Mathematics/Rect.hpp"
+using namespace crimild;
 
-namespace crimild {
+SharedPointer< PolygonState > PolygonState::FILL( crimild::alloc< PolygonState >( true, PolygonMode::FILL ) );
+SharedPointer< PolygonState > PolygonState::LINE( crimild::alloc< PolygonState >( true, PolygonMode::LINE ) );
+SharedPointer< PolygonState > PolygonState::POINT( crimild::alloc< PolygonState >( true, PolygonMode::POINT ) );
 
-    struct ViewportDimensions {
-        enum class ScalingMode {
-            FIXED,
-            RELATIVE,
-            SWAPCHAIN_RELATIVE,
-            DYNAMIC,
-        };
-
-        ScalingMode scalingMode = ScalingMode::SWAPCHAIN_RELATIVE;
-        Rectf dimensions = Rectf( 0, 0, 1, 1 );
-    };
+PolygonState::PolygonState( crimild::Bool enabled, PolygonMode polygonMode )
+	: RenderState( enabled ),
+      polygonMode( polygonMode )
+{
 
 }
-
-#endif
-
-
 

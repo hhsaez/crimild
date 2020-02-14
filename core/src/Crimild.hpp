@@ -248,6 +248,7 @@
 #include "Rendering/InstancedBufferObjectImpl.hpp"
 #include "Rendering/Material.hpp"
 #include "Rendering/Pipeline.hpp"
+#include "Rendering/PolygonState.hpp"
 #include "Rendering/RenderPass.hpp"
 #include "Rendering/RenderResource.hpp"
 #include "Rendering/RenderState.hpp"

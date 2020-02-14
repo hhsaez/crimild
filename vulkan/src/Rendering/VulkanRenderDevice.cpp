@@ -188,6 +188,7 @@ SharedPointer< RenderDevice > RenderDeviceManager::create( RenderDevice::Descrip
     // Set the requried device features
     auto deviceFeatures = VkPhysicalDeviceFeatures {
         .samplerAnisotropy = VK_TRUE,
+        .fillModeNonSolid = VK_TRUE,
     };
 
     const auto &deviceExtensions = utils::getDeviceExtensions();
