@@ -30,6 +30,7 @@
 
 #include "Rendering/RenderResource.hpp"
 #include "Rendering/Shader.hpp"
+#include "Foundation/SharedObject.hpp"
 
 namespace crimild {
 
@@ -42,7 +43,7 @@ namespace crimild {
 		UNIFORM_BUFFER,
     };
 
-    class DescriptorSetLayout : public RenderResourceImpl< DescriptorSetLayout > {
+    class DescriptorSetLayout : public SharedObject, public RenderResourceImpl< DescriptorSetLayout > {
     public:
         struct Binding {
             DescriptorType descriptorType;
@@ -54,12 +55,12 @@ namespace crimild {
         containers::Array< Binding > bindings;
     };
 
-    class DescriptorPool : public RenderResourceImpl< DescriptorPool > {
+    class DescriptorPool : public SharedObject, public RenderResourceImpl< DescriptorPool > {
     public:
         SharedPointer< DescriptorSetLayout > descriptorSetLayout;
     };
 
-    class DescriptorSet : public RenderResourceImpl< DescriptorSet > {
+    class DescriptorSet : public SharedObject, public RenderResourceImpl< DescriptorSet > {
     public:
         struct Write {
             DescriptorType descriptorType;
@@ -73,7 +74,6 @@ namespace crimild {
     public:
         SharedPointer< DescriptorPool > descriptorPool;
         SharedPointer< DescriptorSetLayout > descriptorSetLayout;
-        SharedPointer< Pipeline > pipeline;
         containers::Array< Write > writes;
     };
 

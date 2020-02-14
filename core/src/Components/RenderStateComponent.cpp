@@ -80,8 +80,13 @@ void RenderStateComponent::prepare( void ) noexcept
         pipeline->bindingDescription = pipeline->program->bindingDescription;
     }
 
+    prepare( crimild::get_ptr( pipeline->descriptorSetLayout ) );
+}
+
+void RenderStateComponent::prepare( DescriptorSetLayout *layout ) noexcept
+{
     if ( descriptorSetLayout == nullptr ) {
-        descriptorSetLayout = pipeline->descriptorSetLayout;
+        descriptorSetLayout = crimild::retain( layout );
     }
 
     if ( descriptorPool == nullptr ) {
@@ -93,7 +98,6 @@ void RenderStateComponent::prepare( void ) noexcept
         descriptorSet = crimild::alloc< DescriptorSet >();
         descriptorSet->descriptorSetLayout = descriptorSetLayout;
         descriptorSet->descriptorPool = descriptorPool;
-        descriptorSet->pipeline = pipeline;
 
         size_t uniformIdx = 0;
         size_t textureIdx = 0;
@@ -120,7 +124,6 @@ void RenderStateComponent::prepare( void ) noexcept
         });
     }
 }
-
 
 void RenderStateComponent::forEachMaterial( std::function< void( Material * ) > callback )
 {

@@ -25,38 +25,27 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CRIMILD_RENDERING_PIPELINE_
-#define CRIMILD_RENDERING_PIPELINE_
+#ifndef CRIMILD_RENDERING_VIEWPORT_DIMENSIONS_
+#define CRIMILD_RENDERING_VIEWPORT_DIMENSIONS_
 
-#include "Rendering/RenderResource.hpp"
-#include "Rendering/VertexBuffer.hpp"
-#include "Rendering/ViewportDimensions.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Primitives/Primitive.hpp"
 #include "Mathematics/Rect.hpp"
 
 namespace crimild {
 
-    class ShaderProgram;
-    class DescriptorSetLayout;
-    class RenderPass;
+    struct ViewportDimensions {
+        enum class ScalingMode {
+            FIXED,
+            RELATIVE,
+            SWAPCHAIN_RELATIVE,
+        };
 
-    class Pipeline : public SharedObject, public RenderResourceImpl< Pipeline > {
-    public:
-        virtual ~Pipeline( void ) noexcept = default;
-
-        SharedPointer< ShaderProgram > program;
-        RenderPass *renderPass = nullptr;
-        Primitive::Type primitiveType = Primitive::Type::TRIANGLES;
-        ViewportDimensions viewport;
-        ViewportDimensions scissor;
-        std::vector< VertexInputAttributeDescription > attributeDescriptions;
-        VertexInputBindingDescription bindingDescription;
-        SharedPointer< DescriptorSetLayout > descriptorSetLayout;
+        ScalingMode scalingMode = ScalingMode::SWAPCHAIN_RELATIVE;
+        Rectf dimensions = Rectf( 0, 0, 1, 1 );
     };
 
 }
 
 #endif
+
 
 
