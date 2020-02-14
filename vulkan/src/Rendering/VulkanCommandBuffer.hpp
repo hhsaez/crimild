@@ -55,6 +55,9 @@ namespace crimild {
 
         private:
             void recordCommands( RenderDevice *renderDevice, CommandBuffer *commandBuffer, crimild::Size index ) noexcept;
+
+        private:
+            Pipeline *m_currentPipeline = nullptr;
         };
 
 	}
