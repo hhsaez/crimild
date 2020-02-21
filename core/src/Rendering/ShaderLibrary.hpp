@@ -43,8 +43,13 @@ namespace crimild {
         static const char *SHADER_UNLIT_TEXTURE_P3N3TC2_VERT = "shaders/unlit/texture_P3N3TC2.vert";
         static const char *SHADER_UNLIT_TEXTURE_P3N3TC2_FRAG = "shaders/unlit/texture_P3N3TC2.frag";
 
-        static const char *SHADER_DEBUG_POSITION_P3N3TC2_VERT = "shaders/debug/position_N3C3TC2.vert";
-        static const char *SHADER_DEBUG_POSITION_P3N3TC2_FRAG = "shaders/debug/position_N3C3TC2.frag";
+        static const char *SHADER_UNLIT_SKYBOX_P3_VERT = "shaders/unlit/skybox_P3.vert";
+        static const char *SHADER_UNLIT_SKYBOX_P3_FRAG = "shaders/unlit/skybox_P3.frag";
+
+        static const char *SHADER_DEBUG_POSITION_P3_VERT = "shaders/debug/position_P3.vert";
+        static const char *SHADER_DEBUG_POSITION_P3_FRAG = "shaders/debug/position_P3.frag";
+        static const char *SHADER_DEBUG_POSITION_P3N3TC2_VERT = "shaders/debug/position_P3N3TC2.vert";
+        static const char *SHADER_DEBUG_POSITION_P3N3TC2_FRAG = "shaders/debug/position_P3N3TC2.frag";
 
     }
 

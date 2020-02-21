@@ -36,10 +36,6 @@ using namespace crimild;
 
 SharedPointer< Image > crimild::stb::ImageManager::loadImage( ImageDescriptor const &descriptor ) const noexcept
 {
-    if ( auto image = crimild::ImageManager::loadImage( descriptor ) ) {
-        return image;
-    }
-
     int width, height, channels;
 
     // Fix image orientation if needed
@@ -50,7 +46,7 @@ SharedPointer< Image > crimild::stb::ImageManager::loadImage( ImageDescriptor co
     	&width,
         &height,
         &channels,
-        STBI_rgb_alpha
+        STBI_rgb_alpha // Force loaded image to be RGBA
     );
 
     if ( pixels == nullptr ) {
@@ -59,17 +55,11 @@ SharedPointer< Image > crimild::stb::ImageManager::loadImage( ImageDescriptor co
     }
 
     auto format = Image::PixelFormat::RGBA;
-    if ( channels == 1 ) {
-		format = Image::PixelFormat::RED;
-    }
-    else if ( channels == 3 ) {
-		format = Image::PixelFormat::RGB;
-    }
 
     auto image = crimild::alloc< Image >(
         width,
         height,
-        channels,
+        4,
         pixels,
         format
     );
