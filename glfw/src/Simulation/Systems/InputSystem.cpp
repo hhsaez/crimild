@@ -6,18 +6,17 @@
 #include "Simulation/Console/Console.hpp"
 
 using namespace crimild;
+using namespace crimild::glfw;
+using namespace crimild::glfw::messages;
 
 InputSystem::InputSystem( void )
 {
-	/*
-    auto self = this;
-    
-    registerMessageHandler< messages::WindowSystemDidCreateWindow >( [self]( messages::WindowSystemDidCreateWindow const &message ) {
-        self->_window = message.video->getWindowHandler();
+    registerMessageHandler< WindowSystemDidCreateWindow >( [ this ]( WindowSystemDidCreateWindow const &message ) {
+        _window = message.video->getWindowHandler();
         
         Input::getInstance()->reset( GLFW_KEY_LAST, GLFW_MOUSE_BUTTON_LAST );
         
-        glfwSetKeyCallback( self->_window, []( GLFWwindow* window, int key, int scancode, int action, int mods ) {
+        glfwSetKeyCallback( _window, []( GLFWwindow* window, int key, int scancode, int action, int mods ) {
 			if ( key == GLFW_KEY_UNKNOWN ) {
 				return;
 			}
@@ -50,13 +49,13 @@ InputSystem::InputSystem( void )
             }
         });
 
-        glfwSetCharCallback( self->_window, []( GLFWwindow *window, unsigned int codepoint ) {
+        glfwSetCharCallback( _window, []( GLFWwindow *window, unsigned int codepoint ) {
             if ( Console::getInstance()->isEnabled() ) {
                 Console::getInstance()->handleInput( codepoint, 0 );
             }
         });
         
-        glfwSetMouseButtonCallback( self->_window, []( GLFWwindow* window, int button, int action, int mods ) {
+        glfwSetMouseButtonCallback( _window, []( GLFWwindow* window, int button, int action, int mods ) {
             double x, y;
             glfwGetCursorPos( window, &x, &y );
             
@@ -68,22 +67,20 @@ InputSystem::InputSystem( void )
             }
         });
         
-        glfwSetScrollCallback( self->_window, []( GLFWwindow* window, double xoffset, double yoffset ) {
+        glfwSetScrollCallback( _window, []( GLFWwindow* window, double xoffset, double yoffset ) {
             MessageQueue::getInstance()->pushMessage( messaging::MouseScroll { ( float ) xoffset, ( float ) yoffset } );
         });
         
-        crimild::concurrency::sync_frame( std::bind( &InputSystem::update, self ) );
+//        crimild::concurrency::sync_frame( std::bind( &InputSystem::update, this ) );
     });
     
-    registerMessageHandler< messages::WindowSystemWillDestroyWindow >( [&]( messages::WindowSystemWillDestroyWindow const &message ) {
+    registerMessageHandler< WindowSystemWillDestroyWindow >( [ this ]( WindowSystemWillDestroyWindow const &message ) {
         _window = nullptr;
     });
-	*/
 }
 
 void InputSystem::update( void )
 {
-	/*
     CRIMILD_PROFILE( "Update Input" )
     
     if ( _window == nullptr ) {
@@ -133,7 +130,6 @@ void InputSystem::update( void )
 	}
 	Input::getInstance()->resetJoystickAxes( axes );
     
-    crimild::concurrency::sync_frame( std::bind( &InputSystem::update, this ) );
-	*/
+//    crimild::concurrency::sync_frame( std::bind( &InputSystem::update, this ) );
 }
 

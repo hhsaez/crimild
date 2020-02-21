@@ -98,6 +98,39 @@ RenderResourceLibrary< ShaderProgram >::RenderResourceLibrary( void ) noexcept
     );
 
     add(
+        constants::SHADER_PROGRAM_UNLIT_SKYBOX_P3,
+        [] {
+            auto program = crimild::alloc< ShaderProgram >(
+                containers::Array< SharedPointer< Shader >> {
+                    crimild::retain( ShaderLibrary::getInstance()->get( constants::SHADER_UNLIT_SKYBOX_P3_VERT ) ),
+                    crimild::retain( ShaderLibrary::getInstance()->get( constants::SHADER_UNLIT_SKYBOX_P3_FRAG ) ),
+                }
+            );
+
+            program->attributeDescriptions = VertexP3::getAttributeDescriptions( 0 );
+            program->bindingDescription = VertexP3::getBindingDescription( 0 );
+            program->descriptorSetLayout = [] {
+                auto layout = crimild::alloc< DescriptorSetLayout >();
+                layout->bindings = {
+                    {
+                        .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                        .descriptorCount = 1,
+                        .stage = Shader::Stage::VERTEX,
+                    },
+                    {
+                        .descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+                        .descriptorCount = 1,
+                        .stage = Shader::Stage::FRAGMENT,
+                    }
+                };
+                return layout;
+            }();
+
+            return program;
+        }
+    );
+
+    add(
         constants::SHADER_PROGRAM_UNLIT_TEXTURE_P3N3TC2,
         [] {
             auto program = crimild::alloc< ShaderProgram >(
@@ -122,6 +155,34 @@ RenderResourceLibrary< ShaderProgram >::RenderResourceLibrary( void ) noexcept
                         .descriptorCount = 1,
                         .stage = Shader::Stage::FRAGMENT,
                     }
+                };
+                return layout;
+            }();
+
+            return program;
+        }
+    );
+
+    add(
+        constants::SHADER_PROGRAM_DEBUG_POSITION_P3,
+        [] {
+            auto program = crimild::alloc< ShaderProgram >(
+                containers::Array< SharedPointer< Shader >> {
+                    crimild::retain( ShaderLibrary::getInstance()->get( constants::SHADER_DEBUG_POSITION_P3_VERT ) ),
+                    crimild::retain( ShaderLibrary::getInstance()->get( constants::SHADER_DEBUG_POSITION_P3_FRAG ) ),
+                }
+            );
+
+            program->attributeDescriptions = VertexP3::getAttributeDescriptions( 0 );
+            program->bindingDescription = VertexP3::getBindingDescription( 0 );
+            program->descriptorSetLayout = [] {
+                auto layout = crimild::alloc< DescriptorSetLayout >();
+                layout->bindings = {
+                    {
+                        .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                        .descriptorCount = 1,
+                        .stage = Shader::Stage::VERTEX,
+                    },
                 };
                 return layout;
             }();
@@ -157,6 +218,5 @@ RenderResourceLibrary< ShaderProgram >::RenderResourceLibrary( void ) noexcept
             return program;
         }
     );
-
 }
 

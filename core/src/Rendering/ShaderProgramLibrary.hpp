@@ -36,8 +36,10 @@ namespace crimild {
 
         static const char *SHADER_PROGRAM_UNLIT_P2C3_COLOR = "shader_programs/unlit/P2C3_color";
         static const char *SHADER_PROGRAM_UNLIT_P2C3TC2_TEXTURE_COLOR = "shader_programs/unlit/P2C3TC2_texture_color";
+        static const char *SHADER_PROGRAM_UNLIT_SKYBOX_P3 = "shader_programs/unlit/skybox_P3";
         static const char *SHADER_PROGRAM_UNLIT_TEXTURE_P3N3TC2 = "shader_programs/unlit/texture_P3N3TC2";
 
+        static const char *SHADER_PROGRAM_DEBUG_POSITION_P3 = "shader_programs/debug/position_P3";
         static const char *SHADER_PROGRAM_DEBUG_POSITION_P3N3TC2 = "shader_programs/debug/position_P3N3TC2";
 
     }

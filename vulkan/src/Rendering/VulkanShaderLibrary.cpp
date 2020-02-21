@@ -94,6 +94,46 @@ RenderResourceLibrary< Shader >::RenderResourceLibrary( void ) noexcept
     );
 
     add(
+        constants::SHADER_UNLIT_SKYBOX_P3_VERT,
+        [] {
+           #include "Shaders/unlit/skybox_P3.vert.cpp"
+           std::vector< char > data( RESOURCE_BYTES, RESOURCE_BYTES + sizeof( RESOURCE_BYTES ) );
+           auto shader = crimild::alloc< Shader >( Shader::Stage::VERTEX, data );
+           return shader;
+        }
+    );
+
+    add(
+        constants::SHADER_UNLIT_SKYBOX_P3_FRAG,
+        [] {
+           #include "Shaders/unlit/skybox_P3.frag.cpp"
+           std::vector< char > data( RESOURCE_BYTES, RESOURCE_BYTES + sizeof( RESOURCE_BYTES ) );
+           auto shader = crimild::alloc< Shader >( Shader::Stage::FRAGMENT, data );
+           return shader;
+        }
+    );
+
+    add(
+        constants::SHADER_DEBUG_POSITION_P3_VERT,
+        [] {
+           #include "Shaders/debug/position_P3.vert.cpp"
+           std::vector< char > data( RESOURCE_BYTES, RESOURCE_BYTES + sizeof( RESOURCE_BYTES ) );
+           auto shader = crimild::alloc< Shader >( Shader::Stage::VERTEX, data );
+           return shader;
+        }
+    );
+
+    add(
+        constants::SHADER_DEBUG_POSITION_P3_FRAG,
+        [] {
+           #include "Shaders/debug/position_P3.frag.cpp"
+           std::vector< char > data( RESOURCE_BYTES, RESOURCE_BYTES + sizeof( RESOURCE_BYTES ) );
+           auto shader = crimild::alloc< Shader >( Shader::Stage::FRAGMENT, data );
+           return shader;
+        }
+    );
+
+    add(
         constants::SHADER_DEBUG_POSITION_P3N3TC2_VERT,
         [] {
            #include "Shaders/debug/position_P3N3TC2.vert.cpp"
