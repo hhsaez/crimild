@@ -28,6 +28,7 @@
 #include "VulkanPipeline.hpp"
 #include "VulkanRenderDevice.hpp"
 #include "VulkanPhysicalDevice.hpp"
+#include "Rendering/DepthState.hpp"
 #include "Rendering/PolygonState.hpp"
 #include "Rendering/Shader.hpp"
 #include "Rendering/ShaderProgram.hpp"
@@ -65,7 +66,7 @@ crimild::Bool PipelineManager::bind( Pipeline *pipeline ) noexcept
     	: createDynamicViewportState( true, true );
     auto rasterizer = createRasterizer( pipeline );
     auto multisampleState = createMultiplesampleState();
-    auto depthStencilState = createDepthStencilState();
+    auto depthStencilState = createDepthStencilState( pipeline );
     auto colorBlendAttachment = createColorBlendAttachment();
     auto colorBlending = createColorBlending( colorBlendAttachment );
     auto dynamicStates = getDynamicStates( pipeline );
@@ -397,12 +398,16 @@ VkPipelineMultisampleStateCreateInfo PipelineManager::createMultiplesampleState(
     };
 }
 
-VkPipelineDepthStencilStateCreateInfo PipelineManager::createDepthStencilState( void ) const noexcept
+VkPipelineDepthStencilStateCreateInfo PipelineManager::createDepthStencilState( Pipeline *pipeline ) const noexcept
 {
+    VkBool32 enabled = VK_TRUE;
+    if ( auto depthState = crimild::get_ptr( pipeline->depthState ) ) {
+        enabled = depthState->isEnabled() ? VK_TRUE : VK_FALSE;
+    }
     return VkPipelineDepthStencilStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
-        .depthTestEnable = VK_TRUE,
-        .depthWriteEnable = VK_TRUE,
+        .depthTestEnable = enabled,
+        .depthWriteEnable = enabled,
         .depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL,
         .depthBoundsTestEnable = VK_FALSE,
         .minDepthBounds = 0.0f,

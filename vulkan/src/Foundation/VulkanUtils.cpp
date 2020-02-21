@@ -473,6 +473,34 @@ crimild::Bool utils::copyToBuffer( const VkDevice &device, VkDeviceMemory &buffe
     return true;
 }
 
+crimild::Bool utils::copyToBuffer( const VkDevice &device, VkDeviceMemory &bufferMemory, const void **data, crimild::UInt32 count, VkDeviceSize size ) noexcept
+{
+    void *dstData = nullptr;
+
+    CRIMILD_VULKAN_CHECK(
+        vkMapMemory(
+            device,
+            bufferMemory,
+            0,
+            size,
+            0,
+            &dstData
+        )
+    );
+
+    for ( auto i = 0l; i < count; i++ ) {
+        memcpy(
+        	static_cast< crimild::UChar * >( dstData ) + i * size,
+            data[ i ],
+            size
+        );
+    }
+
+    vkUnmapMemory( device, bufferMemory );
+
+    return true;
+}
+
 crimild::Bool utils::copyBuffer( RenderDevice *renderDevice, VkBuffer src, VkBuffer dst, VkDeviceSize size ) noexcept
 {
     auto commandBuffer = beginSingleTimeCommands( renderDevice );
@@ -499,14 +527,14 @@ crimild::Bool utils::createImage( RenderDevice *renderDevice, ImageDescriptor co
             .depth = 1,
         },
         .mipLevels = descriptor.mipLevels,
-        .arrayLayers = 1,
+        .arrayLayers = descriptor.arrayLayers,
         .format = descriptor.format,
         .tiling = descriptor.tiling,
         .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
         .usage = descriptor.usage,
         .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
         .samples = descriptor.numSamples,
-        .flags = 0,
+        .flags = descriptor.flags,
     };
 
     CRIMILD_VULKAN_CHECK(
@@ -552,7 +580,7 @@ crimild::Bool utils::createImage( RenderDevice *renderDevice, ImageDescriptor co
     return true;
 }
 
-void utils::transitionImageLayout( RenderDevice *renderDevice, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, crimild::UInt32 mipLevels ) noexcept
+void utils::transitionImageLayout( RenderDevice *renderDevice, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, crimild::UInt32 mipLevels, crimild::UInt32 layerCount ) noexcept
 {
     auto commandBuffer = beginSingleTimeCommands( renderDevice );
 
@@ -567,7 +595,7 @@ void utils::transitionImageLayout( RenderDevice *renderDevice, VkImage image, Vk
         .subresourceRange.baseMipLevel = 0,
         .subresourceRange.levelCount = mipLevels,
         .subresourceRange.baseArrayLayer = 0,
-        .subresourceRange.layerCount = 1,
+        .subresourceRange.layerCount = layerCount,
         .srcAccessMask = 0, // See below
         .dstAccessMask = 0, // See below
     };
@@ -647,6 +675,41 @@ void utils::copyBufferToImage( RenderDevice *renderDevice, VkBuffer buffer, VkIm
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
         1,
         &region
+    );
+
+    endSingleTimeCommands( renderDevice, commandBuffer );
+}
+
+void utils::copyBufferToLayeredImage( RenderDevice *renderDevice, VkBuffer buffer, VkImage image, crimild::Size layerCount, crimild::Size layerSize, crimild::UInt32 layerWidth, crimild::UInt32 layerHeight ) noexcept
+{
+    auto commandBuffer = beginSingleTimeCommands( renderDevice );
+
+    std::vector< VkBufferImageCopy > bufferCopyRegions( layerCount );
+    for ( auto i = 0l; i < layerCount; i++ ) {
+        bufferCopyRegions[ i ] = {
+			.bufferOffset = i * layerSize,
+            .bufferRowLength = 0,
+            .bufferImageHeight = 0,
+            .imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+            .imageSubresource.mipLevel = 0,
+            .imageSubresource.baseArrayLayer = static_cast< crimild::UInt32 >( i ),
+            .imageSubresource.layerCount = 1,
+            .imageOffset = { 0, 0 },
+            .imageExtent = {
+                .width = layerWidth,
+                .height = layerHeight,
+                .depth = 1,
+            },
+        };
+    }
+
+    vkCmdCopyBufferToImage(
+        commandBuffer,
+        buffer,
+        image,
+        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        static_cast< crimild::UInt32 >( bufferCopyRegions.size() ),
+        bufferCopyRegions.data()
     );
 
     endSingleTimeCommands( renderDevice, commandBuffer );

@@ -47,9 +47,11 @@ namespace crimild {
             struct Descriptor {
                 RenderDevice *renderDevice;
                 SharedPointer< Image > image;
+                VkImageViewType imageType = VK_IMAGE_VIEW_TYPE_2D;
                 VkFormat format;
                 VkImageAspectFlags aspectFlags;
                 crimild::UInt32 mipLevels = 1;
+                crimild::UInt32 layerCount = 1;
             };
 
 		public:

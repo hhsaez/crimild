@@ -55,7 +55,7 @@ SharedPointer< ImageView > ImageViewManager::create( ImageView::Descriptor const
         .image = descriptor.image->handler,
 
         // We're dealing with 2D images
-        .viewType = VK_IMAGE_VIEW_TYPE_2D,
+        .viewType = descriptor.imageType,
 
         // Match the specified format
         .format = descriptor.format,
@@ -71,7 +71,7 @@ SharedPointer< ImageView > ImageViewManager::create( ImageView::Descriptor const
         .subresourceRange.baseMipLevel = 0,
         .subresourceRange.levelCount = descriptor.mipLevels,
         .subresourceRange.baseArrayLayer = 0,
-        .subresourceRange.layerCount = 1,
+        .subresourceRange.layerCount = descriptor.layerCount,
 
         // optional
         .flags = 0

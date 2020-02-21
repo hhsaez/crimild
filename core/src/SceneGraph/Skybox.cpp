@@ -27,100 +27,119 @@
 
 #include "Skybox.hpp"
 
-#include "Rendering/IndexBufferObject.hpp"
+#include "Components/RenderStateComponent.hpp"
+#include "Rendering/DepthState.hpp"
+#include "Rendering/IndexBuffer.hpp"
+#include "Rendering/VertexBuffer.hpp"
 #include "Rendering/Texture.hpp"
 #include "Rendering/ImageTGA.hpp"
-#include "Rendering/Material.hpp"
-#include "Rendering/Programs/SkyboxShaderProgram.hpp"
-#include "Primitives/Primitive.hpp"
-#include "Components/MaterialComponent.hpp"
+#include "Rendering/Pipeline.hpp"
+#include "Rendering/ShaderProgramLibrary.hpp"
+#include "Rendering/Uniforms/ModelViewProjectionUniformBuffer.hpp"
 #include "Simulation/FileSystem.hpp"
 
 using namespace crimild;
 
-Skybox::Skybox( void )
-{
-	
-}
-
-Skybox::Skybox( ImageArray const &faces )
+Skybox::Skybox( ImageArray const &faces ) noexcept
 {
     configure( faces );
 }
 
-Skybox::~Skybox( void )
+void Skybox::configure( Skybox::ImageArray const &images ) noexcept
 {
-	
-}
+	m_faces = images;
 
-void Skybox::configure( Skybox::ImageArray const &images )
-{
-	_faces = images;
-	
-	float vertices[] = {
-        -1.0f,  1.0f, -1.0f,
-        -1.0f, -1.0f, -1.0f,
-        1.0f, -1.0f, -1.0f,
-        1.0f, -1.0f, -1.0f,
-        1.0f,  1.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f,
+    auto texture = crimild::alloc< Texture >( images );
 
-        -1.0f, -1.0f,  1.0f,
-        -1.0f, -1.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f,
-        -1.0f,  1.0f,  1.0f,
-        -1.0f, -1.0f,  1.0f,
+    auto const SKYBOX_SIZE = 5.0f;
 
-        1.0f, -1.0f, -1.0f,
-        1.0f, -1.0f,  1.0f,
-        1.0f,  1.0f,  1.0f,
-        1.0f,  1.0f,  1.0f,
-        1.0f,  1.0f, -1.0f,
-        1.0f, -1.0f, -1.0f,
+    auto vbo = crimild::alloc< VertexP3Buffer >(
+        containers::Array< VertexP3 > {
+            { .position = Vector3f( -SKYBOX_SIZE,  SKYBOX_SIZE, -SKYBOX_SIZE ) },
+            { .position = Vector3f( -SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE ) },
+            { .position = Vector3f( SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE ) },
+            { .position = Vector3f( SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE ) },
+            { .position = Vector3f( SKYBOX_SIZE,  SKYBOX_SIZE, -SKYBOX_SIZE ) },
+            { .position = Vector3f( -SKYBOX_SIZE,  SKYBOX_SIZE, -SKYBOX_SIZE ) },
 
-        -1.0f, -1.0f,  1.0f,
-        -1.0f,  1.0f,  1.0f,
-        1.0f,  1.0f,  1.0f,
-        1.0f,  1.0f,  1.0f,
-        1.0f, -1.0f,  1.0f,
-        -1.0f, -1.0f,  1.0f,
+            { .position = Vector3f( -SKYBOX_SIZE, -SKYBOX_SIZE,  SKYBOX_SIZE ) },
+            { .position = Vector3f( -SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE ) },
+            { .position = Vector3f( -SKYBOX_SIZE,  SKYBOX_SIZE, -SKYBOX_SIZE ) },
+            { .position = Vector3f( -SKYBOX_SIZE,  SKYBOX_SIZE, -SKYBOX_SIZE ) },
+            { .position = Vector3f( -SKYBOX_SIZE,  SKYBOX_SIZE,  SKYBOX_SIZE ) },
+            { .position = Vector3f( -SKYBOX_SIZE, -SKYBOX_SIZE,  SKYBOX_SIZE ) },
 
-        -1.0f,  1.0f, -1.0f,
-        1.0f,  1.0f, -1.0f,
-        1.0f,  1.0f,  1.0f,
-        1.0f,  1.0f,  1.0f,
-        -1.0f,  1.0f,  1.0f,
-        -1.0f,  1.0f, -1.0f,
+            { .position = Vector3f( SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE ) },
+            { .position = Vector3f( SKYBOX_SIZE, -SKYBOX_SIZE,  SKYBOX_SIZE ) },
+            { .position = Vector3f( SKYBOX_SIZE,  SKYBOX_SIZE,  SKYBOX_SIZE ) },
+            { .position = Vector3f( SKYBOX_SIZE,  SKYBOX_SIZE,  SKYBOX_SIZE ) },
+            { .position = Vector3f( SKYBOX_SIZE,  SKYBOX_SIZE, -SKYBOX_SIZE ) },
+            { .position = Vector3f( SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE ) },
 
-        -1.0f, -1.0f, -1.0f,
-        -1.0f, -1.0f,  1.0f,
-        1.0f, -1.0f, -1.0f,
-        1.0f, -1.0f, -1.0f,
-        -1.0f, -1.0f,  1.0f,
-        1.0f, -1.0f,  1.0f,
-	};
-	
-	auto vbo = crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3, 36, vertices );
-	auto ibo = crimild::alloc< IndexBufferObject >( 36, nullptr );
-	ibo->generateIncrementalIndices();
-	
-	auto p = crimild::alloc< Primitive >( Primitive::Type::TRIANGLES );
-	p->setVertexBuffer( vbo );
-	p->setIndexBuffer( ibo );
-	attachPrimitive( p );
-	
-	auto m = crimild::alloc< Material >();
-	m->setDiffuse( RGBAColorf::ONE );
-	
-	auto texture = crimild::alloc< Texture >( _faces );
-	texture->setWrapMode( Texture::WrapMode::CLAMP_TO_EDGE );
-	m->setColorMap( texture );
+            { .position = Vector3f( -SKYBOX_SIZE, -SKYBOX_SIZE,  SKYBOX_SIZE ) },
+            { .position = Vector3f( -SKYBOX_SIZE,  SKYBOX_SIZE,  SKYBOX_SIZE ) },
+            { .position = Vector3f( SKYBOX_SIZE,  SKYBOX_SIZE,  SKYBOX_SIZE ) },
+            { .position = Vector3f( SKYBOX_SIZE,  SKYBOX_SIZE,  SKYBOX_SIZE ) },
+            { .position = Vector3f( SKYBOX_SIZE, -SKYBOX_SIZE,  SKYBOX_SIZE ) },
+            { .position = Vector3f( -SKYBOX_SIZE, -SKYBOX_SIZE,  SKYBOX_SIZE ) },
 
-	m->setProgram( crimild::alloc< SkyboxShaderProgram >() );
-	
-	getComponent< MaterialComponent >()->attachMaterial( m );
-	
+            { .position = Vector3f( -SKYBOX_SIZE,  SKYBOX_SIZE, -SKYBOX_SIZE ) },
+            { .position = Vector3f( SKYBOX_SIZE,  SKYBOX_SIZE, -SKYBOX_SIZE ) },
+            { .position = Vector3f( SKYBOX_SIZE,  SKYBOX_SIZE,  SKYBOX_SIZE ) },
+            { .position = Vector3f( SKYBOX_SIZE,  SKYBOX_SIZE,  SKYBOX_SIZE ) },
+            { .position = Vector3f( -SKYBOX_SIZE,  SKYBOX_SIZE,  SKYBOX_SIZE ) },
+            { .position = Vector3f( -SKYBOX_SIZE,  SKYBOX_SIZE, -SKYBOX_SIZE ) },
+
+            { .position = Vector3f( -SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE ) },
+            { .position = Vector3f( -SKYBOX_SIZE, -SKYBOX_SIZE,  SKYBOX_SIZE ) },
+            { .position = Vector3f( SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE ) },
+            { .position = Vector3f( SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE ) },
+            { .position = Vector3f( -SKYBOX_SIZE, -SKYBOX_SIZE,  SKYBOX_SIZE ) },
+            { .position = Vector3f( SKYBOX_SIZE, -SKYBOX_SIZE,  SKYBOX_SIZE ) },
+        }
+    );
+
+    auto ibo = crimild::alloc< IndexBuffer< crimild::UInt32 >>(
+        containers::Array< crimild::UInt32 > {
+            0, 1, 2,
+            3, 4, 5,
+            6, 7, 8,
+            9, 10, 11,
+            12, 13, 14,
+            15, 16, 17,
+            18, 19, 20,
+            21, 22, 23,
+            24, 25, 26,
+            27, 28, 29,
+            30, 31, 32,
+            33, 34, 35,
+        }
+    );
+
+    auto program = ShaderProgramLibrary::getInstance()->get( constants::SHADER_PROGRAM_UNLIT_SKYBOX_P3 );
+    auto pipeline = [&] {
+        auto pipeline = crimild::alloc< Pipeline >();
+        pipeline->program = crimild::retain( program );
+        pipeline->depthState = DepthState::DISABLED;
+        return pipeline;
+    }();
+
+    attachComponent( [&] {
+        auto renderable = crimild::alloc< RenderStateComponent >();
+        renderable->pipeline = pipeline;
+        renderable->vbo = vbo;
+        renderable->ibo = ibo;
+        renderable->uniforms = {
+            [&] {
+                auto ubo = crimild::alloc< ModelViewProjectionUniformBuffer >();
+                ubo->node = this;
+                return ubo;
+            }(),
+        };
+        renderable->textures = { texture };
+        return renderable;
+    }());
+
 	setLayer( Node::Layer::SKYBOX );
 	setCullMode( Node::CullMode::NEVER );
 }

@@ -363,6 +363,7 @@ crimild::Bool VulkanSystem::createDepthResources( void ) noexcept
         depthFormat,
         VK_IMAGE_LAYOUT_UNDEFINED,
         VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+        1,
         1
     );
 

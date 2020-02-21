@@ -49,14 +49,23 @@ crimild::Bool TextureManager::bind( Texture *texture ) noexcept
 
     crimild::UInt32 imageWidth = image->getWidth();
     crimild::UInt32 imageHeight = image->getHeight();
+    auto isCubemap = texture->getTarget() == Texture::Target::CUBE_MAP;
 
-    // Each mipmap level is half the size of the previous one
-    // At the very least, we'll have 1 mip level (the original size)
-    auto mipLevels = 1 + static_cast< crimild::UInt32 >( Numericf::floor( Numericf::log2( Numericf::max( imageWidth, imageHeight ) ) ) );
+    // Assume no layers excepts in the case where we're dealing with cubemaps
+    crimild::Size layerCount = isCubemap ? 6 : 1;
+
+    auto mipLevels = crimild::UInt32( 1 );
+    // Enable mipmapping only for regular textures
+    if ( !isCubemap ) {
+        // Each mipmap level is half the size of the previous one
+        // At the very least, we'll have 1 mip level (the original size)
+    	mipLevels += static_cast< crimild::UInt32 >( Numericf::floor( Numericf::log2( Numericf::max( imageWidth, imageHeight ) ) ) );
+    }
 
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
-    VkDeviceSize imageSize = image->getWidth() * image->getHeight() * image->getBpp();
+    VkDeviceSize layerSize = image->getWidth() * image->getHeight() * image->getBpp();
+    VkDeviceSize imageSize = layerSize * layerCount;
 
     auto success = utils::createBuffer(
         renderDevice,
@@ -73,11 +82,24 @@ crimild::Bool TextureManager::bind( Texture *texture ) noexcept
         return false;
     }
 
+    std::vector< const void * > layers;
+    if ( isCubemap ) {
+        layers.push_back( texture->getFace( Texture::CubeMapFace::RIGHT )->getData() );
+        layers.push_back( texture->getFace( Texture::CubeMapFace::LEFT )->getData() );
+        layers.push_back( texture->getFace( Texture::CubeMapFace::BOTTOM )->getData() );
+        layers.push_back( texture->getFace( Texture::CubeMapFace::TOP )->getData() );
+        layers.push_back( texture->getFace( Texture::CubeMapFace::BACK )->getData() );
+        layers.push_back( texture->getFace( Texture::CubeMapFace::FRONT )->getData() );
+    } else {
+        layers.push_back( image->getData() );
+    }
+
     utils::copyToBuffer(
         renderDevice->handler,
-        stagingBufferMemory,
-        image->getData(),
-        imageSize
+    	stagingBufferMemory,
+        layers.data(),
+        layers.size(),
+        layerSize
     );
 
     VkImage textureImage;
@@ -100,6 +122,8 @@ crimild::Bool TextureManager::bind( Texture *texture ) noexcept
         	.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
         	.properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         	.mipLevels = mipLevels,
+        	.arrayLayers = ( isCubemap ? 6u : 1u ),
+        	.flags = ( isCubemap ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0u ),
         },
         textureImage,
         textureImageMemory
@@ -115,46 +139,77 @@ crimild::Bool TextureManager::bind( Texture *texture ) noexcept
         textureFormat,
         VK_IMAGE_LAYOUT_UNDEFINED,
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-        mipLevels
+        mipLevels,
+     	layerCount
     );
 
-    utils::copyBufferToImage(
-        renderDevice,
-        stagingBuffer,
-        textureImage,
-        imageWidth,
-        imageHeight
-    );
+    if ( isCubemap ) {
+        utils::copyBufferToLayeredImage(
+            renderDevice,
+            stagingBuffer,
+            textureImage,
+            layerCount,
+            layerSize,
+            imageWidth,
+            imageHeight
+        );
 
-    utils::generateMipmaps( renderDevice, textureImage, VK_FORMAT_R8G8B8A8_UNORM, imageWidth, imageHeight, mipLevels );
+        utils::transitionImageLayout(
+            renderDevice,
+            textureImage,
+            textureFormat,
+            VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            mipLevels,
+            layerCount
+        );
+    }
+    else {
+        utils::copyBufferToImage(
+            renderDevice,
+            stagingBuffer,
+            textureImage,
+            imageWidth,
+            imageHeight
+        );
+
+        utils::generateMipmaps( renderDevice, textureImage, VK_FORMAT_R8G8B8A8_UNORM, imageWidth, imageHeight, mipLevels );
+    }
 
     vkDestroyBuffer( renderDevice->handler, stagingBuffer, nullptr );
     vkFreeMemory( renderDevice->handler, stagingBufferMemory, nullptr );
 
-    auto imageView = renderDevice->create( ImageView::Descriptor {
-        .image = [ textureImage ] {
-            auto image = crimild::alloc< vulkan::Image >();
-            image->handler = textureImage;
-            return image;
-        }(),
-        .format = textureFormat,
-        .aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT,
-        .mipLevels = mipLevels,
-    });
+    auto imageView = renderDevice->create(
+        ImageView::Descriptor {
+            .imageType = ( isCubemap ? VK_IMAGE_VIEW_TYPE_CUBE : VK_IMAGE_VIEW_TYPE_2D ),
+            .image = [ textureImage ] {
+                auto image = crimild::alloc< vulkan::Image >();
+                image->handler = textureImage;
+                return image;
+            }(),
+            .format = textureFormat,
+            .aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT,
+            .mipLevels = mipLevels,
+            .layerCount = ( isCubemap ? 6u : 1u ),
+    	}
+    );
+
+    auto addressMode = isCubemap ? VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE : VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    auto compareOp = isCubemap ? VK_COMPARE_OP_NEVER : VK_COMPARE_OP_ALWAYS;
 
     auto samplerInfo = VkSamplerCreateInfo {
 		.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
         .magFilter = utils::getVulkanFilter( texture->getMagFilter() ),
         .minFilter = utils::getVulkanFilter( texture->getMinFilter() ),
-        .addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT,
-        .addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT,
-        .addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT,
+        .addressModeU = addressMode,
+        .addressModeV = addressMode,
+        .addressModeW = addressMode,
         .anisotropyEnable = VK_TRUE,
         .maxAnisotropy = 16,
         .borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK,
         .unnormalizedCoordinates = VK_FALSE,
         .compareEnable = VK_FALSE,
-        .compareOp = VK_COMPARE_OP_ALWAYS,
+        .compareOp = compareOp,
         .mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
         .mipLodBias = 0,
         .minLod = 0,
