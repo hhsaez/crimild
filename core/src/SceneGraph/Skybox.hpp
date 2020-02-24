@@ -33,6 +33,7 @@
 namespace crimild {
 
 	class Image;
+    class Texture;
     
 	class Skybox : public Geometry {
 		CRIMILD_IMPLEMENT_RTTI( crimild::Skybox )
@@ -46,8 +47,11 @@ namespace crimild {
 		virtual ~Skybox( void ) = default;
 
 		void configure( ImageArray const &faces ) noexcept;
+
+        Texture *getTexture( void ) noexcept { return crimild::get_ptr( m_texture ); }
         
     private:
+        SharedPointer< Texture > m_texture;
 		ImageArray m_faces;
 
         /**
