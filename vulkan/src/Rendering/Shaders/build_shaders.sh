@@ -1,12 +1,23 @@
 #!/bin/bash
-echo "Compiling shaders"
-VULKAN_COMPILER=$VULKAN_SDK/bin/glslc
-$VULKAN_COMPILER $1.vert -o $1.vert.spv
-$VULKAN_COMPILER $1.frag -o $1.frag.spv
+# Usage: sh build_shaders.sh [SHADERS_DIR]
 
-echo "Encoding resources"
-CRIMILD_RESOURCE_ENCODER=../../../../../tools/resourceEncoder/resourceEncoder
-$CRIMILD_RESOURCE_ENCODER $1.vert.spv $1.vert.cpp
-$CRIMILD_RESOURCE_ENCODER $1.frag.spv $1.frag.cpp
+#echo "Compiling shaders"
+VULKAN_COMPILER=$VULKAN_SDK/bin/glslc
+
+#echo "Encoding resources"
+CRIMILD_RESOURCE_ENCODER=$CRIMILD_HOME/tools/resourceEncoder/resourceEncoder
+
+WORK_DIR=$1
+pushd $WORK_DIR > /dev/null
+
+for file in `ls ./*.{vert,frag}`; do
+	echo "Compiling $file"
+	$VULKAN_COMPILER $file -o "$file.spv"
+	
+	echo "Encoding $file"
+	$CRIMILD_RESOURCE_ENCODER $file "$file.cpp"
+done
+
+popd > /dev/null
 
 echo "Done"
