@@ -73,14 +73,14 @@ namespace crimild {
 
 		SharedPointer< Group > load( void );
 
+        // Pipeline override point
+        SharedPointer< Pipeline > pipeline;
+
 	private:
 		const std::string &getFileName( void ) const { return _fileName; }
 
 		FileProcessor &getOBJProcessor( void ) { return _objProcessor; }
 		FileProcessor &getMTLProcessor( void ) { return _mtlProcessor; }
-
-        // Pipeline override point
-        SharedPointer< Pipeline > pipeline;
 
 		void reset( void );
 		SharedPointer< Group > generateScene( void );
