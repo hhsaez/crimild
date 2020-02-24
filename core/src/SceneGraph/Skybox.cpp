@@ -49,9 +49,9 @@ void Skybox::configure( Skybox::ImageArray const &images ) noexcept
 {
 	m_faces = images;
 
-    auto texture = crimild::alloc< Texture >( images );
+    m_texture = crimild::alloc< Texture >( images );
 
-    auto const SKYBOX_SIZE = 5.0f;
+    auto const SKYBOX_SIZE = 10.0f;
 
     auto vbo = crimild::alloc< VertexP3Buffer >(
         containers::Array< VertexP3 > {
@@ -101,9 +101,9 @@ void Skybox::configure( Skybox::ImageArray const &images ) noexcept
 
     auto ibo = crimild::alloc< IndexBuffer< crimild::UInt32 >>(
         containers::Array< crimild::UInt32 > {
-            0, 1, 2,
-            3, 4, 5,
-            6, 7, 8,
+        	0, 1, 2,
+        	3, 4, 5,
+        	6, 7, 8,
             9, 10, 11,
             12, 13, 14,
             15, 16, 17,
@@ -121,6 +121,7 @@ void Skybox::configure( Skybox::ImageArray const &images ) noexcept
         auto pipeline = crimild::alloc< Pipeline >();
         pipeline->program = crimild::retain( program );
         pipeline->depthState = DepthState::DISABLED;
+        pipeline->cullFaceState = CullFaceState::DISABLED;
         return pipeline;
     }();
 
@@ -136,7 +137,7 @@ void Skybox::configure( Skybox::ImageArray const &images ) noexcept
                 return ubo;
             }(),
         };
-        renderable->textures = { texture };
+        renderable->textures = { m_texture };
         return renderable;
     }());
 

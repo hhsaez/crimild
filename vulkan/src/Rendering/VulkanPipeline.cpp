@@ -28,6 +28,7 @@
 #include "VulkanPipeline.hpp"
 #include "VulkanRenderDevice.hpp"
 #include "VulkanPhysicalDevice.hpp"
+#include "Rendering/CullFaceState.hpp"
 #include "Rendering/DepthState.hpp"
 #include "Rendering/PolygonState.hpp"
 #include "Rendering/Shader.hpp"
@@ -366,13 +367,20 @@ VkPipelineRasterizationStateCreateInfo PipelineManager::createRasterizer( Pipeli
         lineWidth = polygonState->lineWidth;
     }
 
+    auto cullMode = VK_CULL_MODE_BACK_BIT;
+    if ( auto cullFaceState = crimild::get_ptr( pipeline->cullFaceState ) ) {
+        if ( !cullFaceState->isEnabled() ) {
+            cullMode = VK_CULL_MODE_NONE;
+        }
+    }
+
     return VkPipelineRasterizationStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
         .depthClampEnable = VK_FALSE, // VK_TRUE might be required for shadow maps
         .rasterizerDiscardEnable = VK_FALSE, // VK_TRUE disables output to the framebuffer
         .polygonMode = polygonMode,
         .lineWidth = lineWidth,
-        .cullMode = VK_CULL_MODE_BACK_BIT,
+        .cullMode = cullMode,
         .frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE,
         .depthBiasEnable = VK_FALSE, // Might be needed for shadow mapping
         .depthBiasConstantFactor = 0,
