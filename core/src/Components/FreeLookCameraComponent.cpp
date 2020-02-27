@@ -96,7 +96,8 @@ void FreeLookCameraComponent::start( void )
 
 	registerMessageHandler< crimild::messaging::MouseMotion >( [ this ]( crimild::messaging::MouseMotion const &msg ) {
 		auto currentPos = Vector2f( msg.nx, msg.ny );
-		auto mouseDelta = currentPos - _lastMousePos;
+		auto mouseDelta = _initialized ? currentPos - _lastMousePos : Vector2f::ZERO;
+        _initialized = true;
 		_lastMousePos = currentPos;
 		
 		auto root = getNode();
