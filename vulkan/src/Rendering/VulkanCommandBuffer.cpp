@@ -177,43 +177,14 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                 }
 
                 case CommandBuffer::Command::Type::SET_VIEWPORT: {
-                    auto swapchain = renderDevice->getSwapchain();
-
-                    auto viewport = VkViewport {
-						.x = cmd.viewportDimensions.dimensions.x() * swapchain->extent.width,
-                        .y = cmd.viewportDimensions.dimensions.y() * swapchain->extent.height,
-                        .width = cmd.viewportDimensions.dimensions.width() * swapchain->extent.width,
-                        .height = cmd.viewportDimensions.dimensions.height() * swapchain->extent.height,
-                        .minDepth = 0,
-                        .maxDepth = 1,
-                    };
-
+                    auto viewport = utils::getViewport( &cmd.viewportDimensions, renderDevice );
                     vkCmdSetViewport( handler, 0, 1, &viewport );
-
                     break;
                 }
 
                 case CommandBuffer::Command::Type::SET_SCISSOR: {
-                    auto swapchain = renderDevice->getSwapchain();
-                    Rectf rect = cmd.viewportDimensions.dimensions;
-                    rect.x() *= swapchain->extent.width;
-                    rect.y() *= swapchain->extent.height;
-                    rect.width() *= swapchain->extent.width;
-                    rect.height() *= swapchain->extent.height;
-
-                    auto scissor = VkRect2D {
-                        .offset = {
-                            static_cast< crimild::Int32 >( rect.getX() ),
-                            static_cast< crimild::Int32 >( rect.getY() ),
-                        },
-                        .extent = VkExtent2D {
-                            static_cast< crimild::UInt32 >( rect.getWidth() ),
-                            static_cast< crimild::UInt32 >( rect.getHeight() ),
-                        },
-                    };
-
+                    auto scissor = utils::getScissor( &cmd.viewportDimensions, renderDevice );
                     vkCmdSetScissor( handler, 0, 1, &scissor );
-
                     break;
                 }
 
