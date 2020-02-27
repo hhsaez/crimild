@@ -37,7 +37,7 @@
 #include "Primitives/Primitive.hpp"
 #include "Rendering/Renderer.hpp"
 #include "Rendering/Material.hpp"
-#include "Rendering/ImageTGA.hpp"
+#include "Rendering/ImageManager.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/Programs/UnlitShaderProgram.hpp"
 #include "Rendering/VertexBuffer.hpp"
@@ -447,8 +447,18 @@ SharedPointer< Texture > OBJLoader::loadTexture( std::string textureFileName )
 	if ( textureFileName == "" ) {
 		return nullptr;
 	}
-    auto image = crimild::alloc< ImageTGA >( FileSystem::getInstance().extractDirectory( _fileName ) + "/" + textureFileName );
+
+    auto image = ImageManager::getInstance()->loadImage(
+    	{
+        	.filePath = {
+                .path = FileSystem::getInstance().extractDirectory( _fileName ) + "/" + textureFileName,
+                .pathType = FilePath::PathType::ABSOLUTE,
+    		}
+    	}
+    );
+
     auto texture = crimild::alloc< Texture >( image );
+
     return texture;
 }
 
