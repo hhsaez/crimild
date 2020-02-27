@@ -33,123 +33,105 @@ using namespace crimild;
 template<>
 RenderResourceLibrary< Shader >::RenderResourceLibrary( void ) noexcept
 {
+    auto createShader = []( Shader::Stage stage, const unsigned char *rawData, crimild::Size size ) {
+        std::vector< char > data( size + ( size % 4 ) );
+        memcpy( &data[ 0 ], rawData, size );
+        return crimild::alloc< Shader >( stage, data );
+    };
+
     add(
         constants::SHADER_UNLIT_VERTEX_P2C3,
-        [] {
+        [&] {
 			#include "Shaders/unlit/vert_P2C3.cpp"
-           	std::vector< char > data( RESOURCE_BYTES, RESOURCE_BYTES + sizeof( RESOURCE_BYTES ) );
-           	auto shader = crimild::alloc< Shader >( Shader::Stage::VERTEX, data );
-           	return shader;
+            return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
         }
     );
 
     add(
         constants::SHADER_UNLIT_VERTEX_P2C3TC2,
-        [] {
-            #include "Shaders/unlit/vert_P2C3TC2.cpp"
-               std::vector< char > data( RESOURCE_BYTES, RESOURCE_BYTES + sizeof( RESOURCE_BYTES ) );
-               auto shader = crimild::alloc< Shader >( Shader::Stage::VERTEX, data );
-               return shader;
+        [&] {
+			#include "Shaders/unlit/vert_P2C3TC2.cpp"
+           	return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
         }
     );
 
     add(
         constants::SHADER_UNLIT_FRAGMENT_COLOR,
-        [] {
+        [&] {
            #include "Shaders/unlit/frag_color.cpp"
-           std::vector< char > data( RESOURCE_BYTES, RESOURCE_BYTES + sizeof( RESOURCE_BYTES ) );
-           auto shader = crimild::alloc< Shader >( Shader::Stage::FRAGMENT, data );
-           return shader;
+           return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
         }
     );
 
     add(
         constants::SHADER_UNLIT_FRAGMENT_TEXTURE_COLOR,
-        [] {
+        [&] {
            #include "Shaders/unlit/frag_texture_color.cpp"
-           std::vector< char > data( RESOURCE_BYTES, RESOURCE_BYTES + sizeof( RESOURCE_BYTES ) );
-           auto shader = crimild::alloc< Shader >( Shader::Stage::FRAGMENT, data );
-           return shader;
+           return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
         }
     );
 
     add(
         constants::SHADER_UNLIT_TEXTURE_P3N3TC2_VERT,
-        [] {
+        [&] {
            #include "Shaders/unlit/texture_P3N3TC2.vert.cpp"
-           std::vector< char > data( RESOURCE_BYTES, RESOURCE_BYTES + sizeof( RESOURCE_BYTES ) );
-           auto shader = crimild::alloc< Shader >( Shader::Stage::VERTEX, data );
-           return shader;
+           return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
         }
     );
 
     add(
         constants::SHADER_UNLIT_TEXTURE_P3N3TC2_FRAG,
-        [] {
+        [&] {
            #include "Shaders/unlit/texture_P3N3TC2.frag.cpp"
-           std::vector< char > data( RESOURCE_BYTES, RESOURCE_BYTES + sizeof( RESOURCE_BYTES ) );
-           auto shader = crimild::alloc< Shader >( Shader::Stage::FRAGMENT, data );
-           return shader;
+           return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
         }
     );
 
     add(
         constants::SHADER_UNLIT_SKYBOX_P3_VERT,
-        [] {
+        [&] {
            #include "Shaders/unlit/skybox_P3.vert.cpp"
-           std::vector< char > data( RESOURCE_BYTES, RESOURCE_BYTES + sizeof( RESOURCE_BYTES ) );
-           auto shader = crimild::alloc< Shader >( Shader::Stage::VERTEX, data );
-           return shader;
+           return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
         }
     );
 
     add(
         constants::SHADER_UNLIT_SKYBOX_P3_FRAG,
-        [] {
+        [&] {
            #include "Shaders/unlit/skybox_P3.frag.cpp"
-           std::vector< char > data( RESOURCE_BYTES, RESOURCE_BYTES + sizeof( RESOURCE_BYTES ) );
-           auto shader = crimild::alloc< Shader >( Shader::Stage::FRAGMENT, data );
-           return shader;
+           return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
         }
     );
 
     add(
         constants::SHADER_DEBUG_POSITION_P3_VERT,
-        [] {
+        [&] {
            #include "Shaders/debug/position_P3.vert.cpp"
-           std::vector< char > data( RESOURCE_BYTES, RESOURCE_BYTES + sizeof( RESOURCE_BYTES ) );
-           auto shader = crimild::alloc< Shader >( Shader::Stage::VERTEX, data );
-           return shader;
+           return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
         }
     );
 
     add(
         constants::SHADER_DEBUG_POSITION_P3_FRAG,
-        [] {
+        [&] {
            #include "Shaders/debug/position_P3.frag.cpp"
-           std::vector< char > data( RESOURCE_BYTES, RESOURCE_BYTES + sizeof( RESOURCE_BYTES ) );
-           auto shader = crimild::alloc< Shader >( Shader::Stage::FRAGMENT, data );
-           return shader;
+           return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
         }
     );
 
     add(
         constants::SHADER_DEBUG_POSITION_P3N3TC2_VERT,
-        [] {
+        [&] {
            #include "Shaders/debug/position_P3N3TC2.vert.cpp"
-           std::vector< char > data( RESOURCE_BYTES, RESOURCE_BYTES + sizeof( RESOURCE_BYTES ) );
-           auto shader = crimild::alloc< Shader >( Shader::Stage::VERTEX, data );
-           return shader;
+           return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
         }
     );
 
     add(
         constants::SHADER_DEBUG_POSITION_P3N3TC2_FRAG,
-        [] {
+        [&] {
            #include "Shaders/debug/position_P3N3TC2.frag.cpp"
-           std::vector< char > data( RESOURCE_BYTES, RESOURCE_BYTES + sizeof( RESOURCE_BYTES ) );
-           auto shader = crimild::alloc< Shader >( Shader::Stage::FRAGMENT, data );
-           return shader;
+           return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
         }
     );
 }

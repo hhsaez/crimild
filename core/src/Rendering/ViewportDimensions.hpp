@@ -42,6 +42,7 @@ namespace crimild {
 
         ScalingMode scalingMode = ScalingMode::SWAPCHAIN_RELATIVE;
         Rectf dimensions = Rectf( 0, 0, 1, 1 );
+        Vector2f depthRange = Vector2f( 0.0f, 1.0f );
     };
 
 }

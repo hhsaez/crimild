@@ -16,6 +16,9 @@ void main()
 	gl_Position = ubo.proj * mat4( mat3( ubo.view ) ) * ubo.model * vec4( inPosition, 1.0 );
 	gl_Position = gl_Position.xyww;
 	fragPosition = inPosition;
-	fragPosition.y *= -1.0;
+
+	// Cubemaps are always computed on NDC, so we need to flip the Y-coordinate
+	// for Vulkan in order to render it correctly
+	fragPosition.y *= -1.0; 
 }
 

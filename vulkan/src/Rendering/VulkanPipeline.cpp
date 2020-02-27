@@ -290,48 +290,12 @@ VkPipelineInputAssemblyStateCreateInfo PipelineManager::createInputAssemby( Prim
 
 VkViewport PipelineManager::createViewport( const ViewportDimensions &viewport ) const noexcept
 {
-    Rectf rect = viewport.dimensions;
-    if ( viewport.scalingMode == ViewportDimensions::ScalingMode::SWAPCHAIN_RELATIVE ) {
-        auto renderDevice = getRenderDevice();
-        auto swapchain = renderDevice->getSwapchain();
-        rect.x() *= swapchain->extent.width;
-        rect.y() *= swapchain->extent.height;
-        rect.width() *= swapchain->extent.width;
-        rect.height() *= swapchain->extent.height;
-    }
-
-    return VkViewport {
-        .x = rect.getX(),
-        .y = rect.getY(),
-        .width = rect.getWidth(),
-        .height = rect.getHeight(),
-        .minDepth = 0,
-        .maxDepth = 1,
-    };
+    return utils::getViewport( &viewport, getRenderDevice() );
 }
 
 VkRect2D PipelineManager::createScissor( const ViewportDimensions &scissor ) const noexcept
 {
-    Rectf rect = scissor.dimensions;
-    if ( scissor.scalingMode == ViewportDimensions::ScalingMode::SWAPCHAIN_RELATIVE ) {
-        auto renderDevice = getRenderDevice();
-        auto swapchain = renderDevice->getSwapchain();
-        rect.x() *= swapchain->extent.width;
-        rect.y() *= swapchain->extent.height;
-        rect.width() *= swapchain->extent.width;
-        rect.height() *= swapchain->extent.height;
-    }
-
-    return VkRect2D {
-        .offset = {
-            static_cast< crimild::Int32 >( rect.getX() ),
-            static_cast< crimild::Int32 >( rect.getY() ),
-        },
-        .extent = VkExtent2D {
-            static_cast< crimild::UInt32 >( rect.getWidth() ),
-            static_cast< crimild::UInt32 >( rect.getHeight() ),
-        },
-    };
+    return utils::getScissor( &scissor, getRenderDevice() );
 }
 
 VkPipelineViewportStateCreateInfo PipelineManager::createViewportState( const VkViewport &viewport, const VkRect2D &scissor ) const noexcept
@@ -368,6 +332,7 @@ VkPipelineRasterizationStateCreateInfo PipelineManager::createRasterizer( Pipeli
     }
 
     auto cullMode = VK_CULL_MODE_BACK_BIT;
+    auto frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     if ( auto cullFaceState = crimild::get_ptr( pipeline->cullFaceState ) ) {
         if ( !cullFaceState->isEnabled() ) {
             cullMode = VK_CULL_MODE_NONE;
@@ -381,7 +346,7 @@ VkPipelineRasterizationStateCreateInfo PipelineManager::createRasterizer( Pipeli
         .polygonMode = polygonMode,
         .lineWidth = lineWidth,
         .cullMode = cullMode,
-        .frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE,
+        .frontFace = frontFace,
         .depthBiasEnable = VK_FALSE, // Might be needed for shadow mapping
         .depthBiasConstantFactor = 0,
         .depthBiasClamp = 0,
