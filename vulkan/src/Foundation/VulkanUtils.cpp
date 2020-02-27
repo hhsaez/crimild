@@ -27,6 +27,7 @@
 
 #include "VulkanUtils.hpp"
 #include "Rendering/PolygonState.hpp"
+#include "Rendering/ViewportDimensions.hpp"
 #include "Rendering/VulkanPhysicalDevice.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 
@@ -134,6 +135,81 @@ VkPolygonMode utils::getPolygonMode( PolygonState *polygonState ) noexcept
     }
 }
 
+VkViewport utils::getViewport( const ViewportDimensions *viewport, const RenderDevice *renderDevice ) noexcept
+{
+    auto x = viewport->dimensions.getX();
+    auto y = viewport->dimensions.getY();
+    auto w = viewport->dimensions.getWidth();
+    auto h = viewport->dimensions.getHeight();
+    auto minD = viewport->depthRange.x();
+    auto maxD = viewport->depthRange.y();
+
+    if ( viewport->scalingMode == ViewportDimensions::ScalingMode::SWAPCHAIN_RELATIVE ) {
+        if ( renderDevice != nullptr ) {
+            if ( auto swapchain = renderDevice->getSwapchain() ) {
+                // Scale viewport if needed
+                x *= swapchain->extent.width;
+                y *= swapchain->extent.height;
+                w *= swapchain->extent.width;
+                h *= swapchain->extent.height;
+            }
+        }
+    }
+
+    // Because Vulkan's coordinate system is different from Crimild's one,
+    // we need to specify the viewport in a different way than usual.
+    // WARNING: This trick requires VK_KHR_maintenance1 support (which should
+    // be part of the core spec at the time of this writing).
+    // See: https://www.saschawillems.de/blog/2019/03/29/flipping-the-vulkan-viewport/
+    //
+    // Hernan: I tried the trick specified here:
+    // https://matthewwellings.com/blog/the-new-vulkan-coordinate-system/
+    // but didn't really worked for me. On one hand, things like computing
+    // reflection or refraction required me to reverse the resulting vector
+    // which is very error prone. On the other, the view is zoomed with respect
+    // to other platforms like OpenGL (this might be a bug, though).
+    // Also, don't forget to reverse face culling (see createRasterizer below)
+
+    return VkViewport {
+		.x = x,
+        .y = h + y,
+        .width = w,
+        .height = -h,
+        .minDepth = minD,
+        .maxDepth = maxD,
+    };
+}
+
+VkRect2D utils::getScissor( const ViewportDimensions *viewport, const RenderDevice *renderDevice ) noexcept
+{
+    auto x = viewport->dimensions.getX();
+    auto y = viewport->dimensions.getY();
+    auto w = viewport->dimensions.getWidth();
+    auto h = viewport->dimensions.getHeight();
+
+    if ( viewport->scalingMode == ViewportDimensions::ScalingMode::SWAPCHAIN_RELATIVE ) {
+        if ( renderDevice != nullptr ) {
+            if ( auto swapchain = renderDevice->getSwapchain() ) {
+                // Scale viewport if needed
+                x *= swapchain->extent.width;
+                y *= swapchain->extent.height;
+                w *= swapchain->extent.width;
+                h *= swapchain->extent.height;
+            }
+        }
+    }
+
+    return VkRect2D {
+        .offset = {
+            static_cast< crimild::Int32 >( x ),
+            static_cast< crimild::Int32 >( y ),
+        },
+        .extent = VkExtent2D {
+            static_cast< crimild::UInt32 >( w ),
+            static_cast< crimild::UInt32 >( h ),
+        },
+    };
+}
 
 crimild::Bool utils::checkValidationLayersEnabled( void ) noexcept
 {
@@ -246,6 +322,9 @@ const utils::ExtensionArray &utils::getDeviceExtensions( void ) noexcept
 {
     static ExtensionArray deviceExtensions = {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+
+        // This is required to flip the viewport (see getViewport() above)
+        VK_KHR_MAINTENANCE1_EXTENSION_NAME,
     };
     return deviceExtensions;
 }
@@ -260,6 +339,9 @@ crimild::Bool utils::checkDeviceExtensionSupport( const VkPhysicalDevice &device
     vkEnumerateDeviceExtensionProperties( device, nullptr, &extensionCount, nullptr );
     std::vector< VkExtensionProperties > availableExtensions( extensionCount );
     vkEnumerateDeviceExtensionProperties( device, nullptr, &extensionCount, availableExtensions.data() );
+    for ( const auto &extension : availableExtensions ) {
+        CRIMILD_LOG_DEBUG( "Found device extension: ", extension.extensionName );
+    }
 
     std::set< std::string > requiredExtensions( std::begin( deviceExtensions ), std::end( deviceExtensions ) );
 

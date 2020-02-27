@@ -59,24 +59,7 @@ void ModelViewProjectionUniformBuffer::updateIfNeeded( void ) noexcept
             else if ( auto camera = Camera::getMainCamera() ) {
                 proj = camera->getProjectionMatrix();
             }
-            else {
-                // no camera available
-                return proj;
-            }
-
-            // Invert Y-axis
-            // This also needs to set front face as counter-clockwise for culling
-            // when creating pipeline. In addition, we need to use a depth range
-            // of [0, 1] for Vulkan
-            // Check: https://matthewwellings.com/blog/the-new-vulkan-coordinate-system/
-            static const auto CLIP_CORRECTION = Matrix4f(
-                1.0f, 0.0f, 0.0f, 0.0f,
-                0.0f, -1.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, 0.5f, 0.5f,
-                0.0f, 0.0f, 0.0f, 1.0f
-            ).getTranspose(); // TODO: why do I need to transpose this matrix?
-
-            return CLIP_CORRECTION * proj;
+            return proj;
         }(),
     });
 }

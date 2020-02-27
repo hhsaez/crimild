@@ -41,6 +41,7 @@
 namespace crimild {
 
     class PolygonState;
+    class ViewportDimensions;
 
 	namespace vulkan {
 
@@ -80,6 +81,8 @@ namespace crimild {
             VkDescriptorType getVulkanDescriptorType( DescriptorType type ) noexcept;
             VkFilter getVulkanFilter( Texture::Filter filter ) noexcept;
             VkPolygonMode getPolygonMode( PolygonState *polygonState ) noexcept;
+            VkViewport getViewport( const ViewportDimensions *viewport, const RenderDevice *renderDevice ) noexcept;
+            VkRect2D getScissor( const ViewportDimensions *scissor, const RenderDevice *renderDevice ) noexcept;
 
             //@}
 
