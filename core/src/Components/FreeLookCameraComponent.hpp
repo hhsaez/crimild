@@ -48,6 +48,7 @@ namespace crimild {
 
 	private:
 		Vector2f _lastMousePos;
+        crimild::Bool _initialized = false;
 	};
 
 }
