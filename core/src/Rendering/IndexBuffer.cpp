@@ -25,17 +25,13 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Rendering/VertexBuffer.hpp"
+#include "Rendering/IndexBuffer.hpp"
 
 namespace crimild {
 
-    template <> const char *VertexP2Buffer::getClassName( void ) const { return "crimild::VertexP2Buffer"; }
-    template <> const char *VertexP2C3Buffer::getClassName( void ) const { return "crimild::VertexP2C3Buffer"; }
-    template <> const char *VertexP2C3TC2Buffer::getClassName( void ) const { return "crimild::VertexP2C3TC2Buffer"; }
-    template <> const char *VertexP2TC2C4Buffer::getClassName( void ) const { return "crimild::VertexP2TC2C4Buffer"; }
-    template <> const char *VertexP3Buffer::getClassName( void ) const { return "crimild::VertexP3Buffer"; }
-    template <> const char *VertexP3C3Buffer::getClassName( void ) const { return "crimild::VertexP3C3Buffer"; }
-    template <> const char *VertexP3N3TC2Buffer::getClassName( void ) const { return "crimild::VertexP3N3TC2Buffer"; }
+    template <> IndexBuffer::IndexType IndexBufferImpl< crimild::UInt16 >::getIndexType( void ) const noexcept { return IndexBuffer::IndexType::UINT_16; }
+    template <> const char *IndexBufferImpl< crimild::UInt16 >::getClassName( void ) const { return "crimild::IndexUInt16Buffer"; }
 
+    template <> IndexBuffer::IndexType IndexBufferImpl< crimild::UInt32 >::getIndexType( void ) const noexcept { return IndexBuffer::IndexType::UINT_32; }
+    template <> const char *IndexBufferImpl< crimild::UInt32 >::getClassName( void ) const { return "crimild::IndexUInt32Buffer"; }
 }
-

@@ -22,6 +22,7 @@ OPTION( CRIMILD_ENABLE_SFML "Would you like to build the crimild-sfml extension"
 OPTION( CRIMILD_ENABLE_GLFW "Would you like to build the crimild-glfw extension?" OFF )
 OPTION( CRIMILD_ENABLE_VULKAN "Would you like to build the crimild-vulkan extension?" OFF )
 OPTION( CRIMILD_ENABLE_SDL "Would you like to build the crimild-sdl extension?" OFF )
+OPTION( CRIMILD_ENABLE_IMGUI "Would you like to build the crimild-imgui extension?" OFF )
 
 IF ( ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten" )
    SET( CRIMILD_ENABLE_EMSCRIPTEN ON )
@@ -46,6 +47,10 @@ ADD_SUBDIRECTORY( raytracing )
 
 IF ( CRIMILD_ENABLE_STB )
    ADD_SUBDIRECTORY( stb )
+ENDIF ()
+
+IF ( CRIMILD_ENABLE_IMGUI )
+   ADD_SUBDIRECTORY( imgui )
 ENDIF ()
 
 IF ( CRIMILD_ENABLE_IMPORT )

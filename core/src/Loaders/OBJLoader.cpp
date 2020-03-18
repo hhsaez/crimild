@@ -247,7 +247,7 @@ void OBJLoader::generateGeometry( void )
     }
 
     auto vbo = crimild::alloc< VertexP3N3TC2Buffer >( containers::Array< VertexP3N3TC2 >( vertices.size(), vertices.data() ) );
-    auto ibo = crimild::alloc< IndexBuffer< crimild::UInt32 >>( containers::Array< crimild::UInt32 >( indices.size(), indices.data() ) );
+    auto ibo = crimild::alloc< IndexUInt32Buffer >( containers::Array< crimild::UInt32 >( indices.size(), indices.data() ) );
 
     _currentObject->attachNode( [&] {
         auto geometry = crimild::alloc< Geometry >( "geometry" );

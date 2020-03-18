@@ -58,6 +58,8 @@ namespace crimild {
 
         private:
             Pipeline *m_currentPipeline = nullptr;
+            crimild::Size m_vertexOffset = 0;
+            crimild::Size m_indexOffset = 0;
         };
 
 	}

@@ -36,6 +36,7 @@ namespace crimild {
     public:
         // TODO: these should be 'const'
         static SharedPointer< CullFaceState > DISABLED;
+        static SharedPointer< CullFaceState > DISABLED_CLOCKWISE;
         static SharedPointer< CullFaceState > ENABLED_BACK;
         static SharedPointer< CullFaceState > ENABLED_FRONT;
 
@@ -45,16 +46,25 @@ namespace crimild {
         	FRONT,
         	FRONT_AND_BACK
 		};
+
+        enum class FrontFace : uint8_t {
+			COUNTER_CLOCKWISE,
+            CLOCKWISE,
+        };
         
 	public:
-		CullFaceState( bool enabled = true, CullFaceMode mode = CullFaceMode::BACK );
+		CullFaceState( bool enabled = true, CullFaceMode mode = CullFaceMode::BACK, FrontFace frontFace = FrontFace::COUNTER_CLOCKWISE );
 		virtual ~CullFaceState( void );
 
 		CullFaceMode getCullFaceMode( void ) const { return _cullFaceMode; }
 		void setCullFaceMode( CullFaceMode value ) { _cullFaceMode = value; }
 
+        FrontFace getFrontFace( void ) const { return _frontFace; }
+        void setFrontFace( FrontFace value ) { _frontFace = value; }
+
 	private:
 		CullFaceMode _cullFaceMode = CullFaceMode::BACK;
+        FrontFace _frontFace = FrontFace::COUNTER_CLOCKWISE;
 	};
 
 }
