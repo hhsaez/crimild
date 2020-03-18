@@ -99,7 +99,7 @@ void Skybox::configure( Skybox::ImageArray const &images ) noexcept
         }
     );
 
-    auto ibo = crimild::alloc< IndexBuffer< crimild::UInt32 >>(
+    auto ibo = crimild::alloc< IndexUInt32Buffer >(
         containers::Array< crimild::UInt32 > {
         	0, 1, 2,
         	3, 4, 5,

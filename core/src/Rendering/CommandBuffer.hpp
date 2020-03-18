@@ -35,8 +35,8 @@
 
 namespace crimild {
 
-    class Buffer;
     class DescriptorSet;
+    class IndexBuffer;
     class Pipeline;
     class Primitive;
     class RenderPass;
@@ -74,6 +74,8 @@ namespace crimild {
                 DRAW,
                 DRAW_INDEXED,
                 END_RENDER_PASS,
+                SET_VERTEX_OFFSET,
+                SET_INDEX_OFFSET,
                 END,
             };
 
@@ -86,27 +88,33 @@ namespace crimild {
                 Pipeline *pipeline;
                 Primitive *primitive;
                 RenderPass *renderPass;
-                Buffer *buffer;
-                VertexBuffer *vertexBuffer;
                 UniformBuffer *uniformBuffer;
-                SharedPointer< DescriptorSet > descriptorSet;
+                SharedPointer< SharedObject > obj;
                 crimild::UInt32 count;
+                crimild::Size size;
             };
         };
 
     public:
         void begin( Usage usage ) noexcept;
         void beginRenderPass( RenderPass *renderPass ) noexcept;
-        void setViewport( const ViewportDimensions &viewport ) noexcept;
-        void setScissor( const ViewportDimensions &scissor ) noexcept;
+
         void bindCommandBuffer( CommandBuffer *commandBuffer ) noexcept;
         void bindGraphicsPipeline( Pipeline *pipeline ) noexcept;
         void bindPrimitive( Primitive *primitive ) noexcept;
-        void bindIndexBuffer( Buffer *indexBuffer ) noexcept;
+        void bindIndexBuffer( IndexBuffer *indexBuffer ) noexcept;
         void bindVertexBuffer( VertexBuffer *vertexBuffer ) noexcept;
         void bindUniformBuffer( UniformBuffer *uniformBuffer ) noexcept;
         void bindDescriptorSet( DescriptorSet *descriptorSet ) noexcept;
+
+        void setIndexOffset( crimild::Size offset ) noexcept;
+        void setScissor( const ViewportDimensions &scissor ) noexcept;
+        void setVertexOffset( crimild::Size offset ) noexcept;
+        void setViewport( const ViewportDimensions &viewport ) noexcept;
+
         void drawIndexed( crimild::UInt32 count ) noexcept;
+        void drawIndexed( crimild::UInt32 count, crimild::Size indexOffset, crimild::Size vertexOffset ) noexcept;
+
         void endRenderPass( RenderPass *renderPass ) noexcept;
         void end( void ) noexcept;
 

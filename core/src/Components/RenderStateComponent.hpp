@@ -45,11 +45,11 @@ namespace crimild {
 
 	}
 
-    class Buffer;
     class CommandBuffer;
     class DescriptorPool;
     class DescriptorSet;
     class DescriptorSetLayout;
+    class IndexBuffer;
     class Pipeline;
     class Texture;
     class UniformBuffer;
@@ -64,7 +64,7 @@ namespace crimild {
 
         SharedPointer< Pipeline > pipeline;
         SharedPointer< VertexBuffer > vbo;
-        SharedPointer< Buffer > ibo;
+        SharedPointer< IndexBuffer > ibo;
         containers::Array< SharedPointer< UniformBuffer >> uniforms;
         containers::Array< SharedPointer< Texture >> textures;
         SharedPointer< DescriptorSetLayout > descriptorSetLayout;

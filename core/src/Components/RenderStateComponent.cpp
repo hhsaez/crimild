@@ -29,6 +29,7 @@
 #include "Rendering/Buffer.hpp"
 #include "Rendering/CommandBuffer.hpp"
 #include "Rendering/DescriptorSet.hpp"
+#include "Rendering/IndexBuffer.hpp"
 #include "Rendering/Pipeline.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/UniformBuffer.hpp"
@@ -56,9 +57,8 @@ RenderStateComponent::RenderStateComponent( void )
         commandBuffer->bindDescriptorSet(
             crimild::get_ptr( descriptorSet )
         );
-        crimild::UInt32 indexCount = ibo->getSize() /  ibo->getStride();
         commandBuffer->drawIndexed(
-            indexCount
+            ibo->getCount()
         );
     };
 }

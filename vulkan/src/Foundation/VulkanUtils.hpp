@@ -40,8 +40,9 @@
 
 namespace crimild {
 
+    class IndexBuffer;
     class PolygonState;
-    class ViewportDimensions;
+    struct ViewportDimensions;
 
 	namespace vulkan {
 
@@ -83,6 +84,7 @@ namespace crimild {
             VkPolygonMode getPolygonMode( PolygonState *polygonState ) noexcept;
             VkViewport getViewport( const ViewportDimensions *viewport, const RenderDevice *renderDevice ) noexcept;
             VkRect2D getScissor( const ViewportDimensions *scissor, const RenderDevice *renderDevice ) noexcept;
+            VkIndexType getIndexType( const IndexBuffer *indexBuffer ) noexcept;
 
             //@}
 

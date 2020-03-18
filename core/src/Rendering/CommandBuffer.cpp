@@ -27,18 +27,20 @@
 
 #include "Rendering/CommandBuffer.hpp"
 #include "Rendering/DescriptorSet.hpp"
+#include "Rendering/IndexBuffer.hpp"
+#include "Rendering/VertexBuffer.hpp"
 
 using namespace crimild;
 
 CommandBuffer::Command::Command( void ) noexcept
-	: descriptorSet { }
+    : obj { }
 {
     
 }
 
 CommandBuffer::Command::Command( const Command &other ) noexcept
     : type( other.type ),
-	  descriptorSet { }
+	  obj { }
 {
     switch ( type ) {
         case Command::Type::BEGIN:
@@ -62,24 +64,18 @@ CommandBuffer::Command::Command( const Command &other ) noexcept
             primitive = other.primitive;
             break;
 
-        case Command::Type::BIND_INDEX_BUFFER:
-            buffer = other.buffer;
-            break;
-
         case Command::Type::BIND_UNIFORM_BUFFER:
             uniformBuffer = other.uniformBuffer;
-            break;
-
-        case Command::Type::BIND_VERTEX_BUFFER:
-            buffer = other.buffer;
             break;
 
         case Command::Type::BIND_COMMAND_BUFFER:
             commandBuffer = other.commandBuffer;
             break;
 
+        case Command::Type::BIND_INDEX_BUFFER:
+        case Command::Type::BIND_VERTEX_BUFFER:
         case Command::Type::BIND_DESCRIPTOR_SET:
-            descriptorSet = other.descriptorSet;
+            obj = other.obj;
             break;
 
         case Command::Type::DRAW:
@@ -151,6 +147,22 @@ void CommandBuffer::setScissor( const ViewportDimensions &scissor ) noexcept
     m_commands.push_back( cmd );
 }
 
+void CommandBuffer::setIndexOffset( crimild::Size offset ) noexcept
+{
+    Command cmd;
+    cmd.type = Command::Type::SET_INDEX_OFFSET;
+    cmd.size = offset;
+    m_commands.push_back( cmd );
+}
+
+void CommandBuffer::setVertexOffset( crimild::Size offset ) noexcept
+{
+    Command cmd;
+    cmd.type = Command::Type::SET_VERTEX_OFFSET;
+    cmd.size = offset;
+    m_commands.push_back( cmd );
+}
+
 void CommandBuffer::bindGraphicsPipeline( Pipeline *pipeline ) noexcept
 {
     Command cmd;
@@ -167,11 +179,11 @@ void CommandBuffer::bindPrimitive( Primitive *primitive ) noexcept
     m_commands.push_back( cmd );
 }
 
-void CommandBuffer::bindIndexBuffer( Buffer *indexBuffer ) noexcept
+void CommandBuffer::bindIndexBuffer( IndexBuffer *indexBuffer ) noexcept
 {
     Command cmd;
     cmd.type = Command::Type::BIND_INDEX_BUFFER;
-    cmd.buffer = indexBuffer;
+    cmd.obj = crimild::retain( indexBuffer );
     m_commands.push_back( cmd );
 }
 
@@ -179,7 +191,7 @@ void CommandBuffer::bindVertexBuffer( VertexBuffer *vertexBuffer ) noexcept
 {
     Command cmd;
     cmd.type = Command::Type::BIND_VERTEX_BUFFER;
-    cmd.vertexBuffer = vertexBuffer;
+    cmd.obj = crimild::retain( vertexBuffer );
     m_commands.push_back( cmd );
 }
 
@@ -195,7 +207,7 @@ void CommandBuffer::bindDescriptorSet( DescriptorSet *descriptorSet ) noexcept
 {
     Command cmd;
     cmd.type = Command::Type::BIND_DESCRIPTOR_SET,
-    cmd.descriptorSet = crimild::retain( descriptorSet ),
+    cmd.obj = crimild::retain( descriptorSet ),
     m_commands.push_back( cmd );
 }
 
@@ -209,6 +221,17 @@ void CommandBuffer::bindCommandBuffer( CommandBuffer *commandBuffer ) noexcept
 
 void CommandBuffer::drawIndexed( crimild::UInt32 count ) noexcept
 {
+    Command cmd;
+    cmd.type = Command::Type::DRAW_INDEXED;
+    cmd.count = count;
+    m_commands.push_back( cmd );
+}
+
+void CommandBuffer::drawIndexed( crimild::UInt32 count, crimild::Size indexOffset, crimild::Size vertexOffset ) noexcept
+{
+    setIndexOffset( indexOffset );
+    setVertexOffset( vertexOffset );
+
     Command cmd;
     cmd.type = Command::Type::DRAW_INDEXED;
     cmd.count = count;
@@ -230,3 +253,10 @@ void CommandBuffer::end( void ) noexcept
     m_commands.push_back( cmd );
 }
 
+void CommandBuffer::clear( void ) noexcept
+{
+    if ( manager != nullptr ) {
+        manager->unbind( this );
+    }
+    m_commands.clear();
+}

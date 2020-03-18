@@ -32,6 +32,7 @@
 #include "VulkanFramebuffer.hpp"
 #include "VulkanPipeline.hpp"
 
+#include "Rendering/IndexBuffer.hpp"
 #include "Rendering/CommandBuffer.hpp"
 
 using namespace crimild;
@@ -99,6 +100,8 @@ crimild::Bool CommandBufferManager::unbind( CommandBuffer *commandBuffer ) noexc
         return false;
     }
 
+    renderDevice->waitIdle();
+
     eachHandler( commandBuffer, [ renderDevice, commandPool ]( VkCommandBuffer handler ) {
         vkFreeCommandBuffers(
             renderDevice->handler,
@@ -148,10 +151,12 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                     auto clearValues = std::vector< VkClearValue > {
                         {
                             .color = {
-                                clearColor.r(),
-                                clearColor.g(),
-                                clearColor.b(),
-                                clearColor.a(),
+                                .float32 = {
+                                	clearColor.r(),
+                                	clearColor.g(),
+                                	clearColor.b(),
+                                	clearColor.a(),
+                                },
                             },
                         },
                         {
@@ -188,6 +193,16 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                     break;
                 }
 
+                case CommandBuffer::Command::Type::SET_INDEX_OFFSET: {
+                    m_indexOffset = cmd.size;
+                    break;
+                }
+
+                case CommandBuffer::Command::Type::SET_VERTEX_OFFSET: {
+                    m_vertexOffset = cmd.size;
+                    break;
+                }
+
                 case CommandBuffer::Command::Type::BIND_GRAPHICS_PIPELINE: {
                     auto pipeline = cmd.pipeline;
                     auto pipelineBindInfo = renderDevice->getBindInfo( pipeline );
@@ -203,8 +218,11 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                 }
 
                 case CommandBuffer::Command::Type::BIND_VERTEX_BUFFER: {
-                    auto vbo = cmd.buffer;
-                    auto bindInfo = renderDevice->getBindInfo( vbo );
+                    auto vbo = crimild::cast_ptr< VertexBuffer >( cmd.obj );
+                    auto bindInfo = renderDevice->getBindInfo( crimild::get_ptr( vbo ) );
+
+                    // reset vertex offset
+                    m_vertexOffset = 0;
 
                     VkBuffer vertexBuffers[] = {
                         bindInfo.bufferHandlers[ 0 ],
@@ -223,21 +241,24 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                 }
 
                 case CommandBuffer::Command::Type::BIND_INDEX_BUFFER: {
-                    auto ibo = cmd.buffer;
-                    auto bindInfo = renderDevice->getBindInfo( ibo );
+                    auto ibo = crimild::cast_ptr< IndexBuffer >( cmd.obj );
+                    auto bindInfo = renderDevice->getBindInfo( crimild::get_ptr( ibo ) );
+
+                    // reset index offset
+                    m_indexOffset = 0;
 
                     vkCmdBindIndexBuffer(
                         handler,
                         bindInfo.bufferHandlers[ 0 ],
                         0,
-                        VK_INDEX_TYPE_UINT32
+                        utils::getIndexType( crimild::get_ptr( ibo ) )
                     );
                     break;
                 }
 
                 case CommandBuffer::Command::Type::BIND_DESCRIPTOR_SET: {
-                    auto descriptorSet = crimild::get_ptr( cmd.descriptorSet );
-                    auto descriptorSetHandler = renderDevice->getHandler( descriptorSet, index );
+                    auto descriptorSet = crimild::cast_ptr< DescriptorSet >( cmd.obj );
+                    auto descriptorSetHandler = renderDevice->getHandler( crimild::get_ptr( descriptorSet ), index );
 
                     auto pipeline = m_currentPipeline;
                     auto pipelineBindInfo = renderDevice->getBindInfo( pipeline );
@@ -267,7 +288,7 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
 
                 case CommandBuffer::Command::Type::DRAW_INDEXED: {
                     auto count = cmd.count;
-                    vkCmdDrawIndexed( handler, count, 1, 0, 0, 0 );
+                    vkCmdDrawIndexed( handler, count, 1, m_indexOffset, m_vertexOffset, 0 );
                     break;
                 }
 
