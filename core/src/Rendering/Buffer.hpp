@@ -36,7 +36,7 @@
 
 namespace crimild {
 
-    class Buffer : public RenderResourceImpl< Buffer > {
+    class Buffer : public RenderResourceImpl< Buffer >, public SharedObject {
     public:
         enum class Usage {
             DONT_CARE,

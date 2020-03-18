@@ -30,12 +30,14 @@
 using namespace crimild;
 
 SharedPointer< CullFaceState > CullFaceState::DISABLED( crimild::alloc< CullFaceState >( false ) );
+SharedPointer< CullFaceState > CullFaceState::DISABLED_CLOCKWISE( crimild::alloc< CullFaceState >( false, CullFaceState::CullFaceMode::BACK, CullFaceState::FrontFace::CLOCKWISE ) );
 SharedPointer< CullFaceState > CullFaceState::ENABLED_BACK( crimild::alloc< CullFaceState >( true, CullFaceState::CullFaceMode::BACK ) );
 SharedPointer< CullFaceState > CullFaceState::ENABLED_FRONT( crimild::alloc< CullFaceState >( true, CullFaceState::CullFaceMode::FRONT ) );
 
-CullFaceState::CullFaceState( bool enabled, CullFaceState::CullFaceMode cullFaceMode )
+CullFaceState::CullFaceState( bool enabled, CullFaceState::CullFaceMode cullFaceMode, CullFaceState::FrontFace frontFace )
 	: RenderState( enabled ),
-	  _cullFaceMode( cullFaceMode )
+	  _cullFaceMode( cullFaceMode ),
+	  _frontFace( frontFace )
 {
 
 }

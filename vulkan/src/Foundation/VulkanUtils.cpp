@@ -26,6 +26,7 @@
  */
 
 #include "VulkanUtils.hpp"
+#include "Rendering/IndexBuffer.hpp"
 #include "Rendering/PolygonState.hpp"
 #include "Rendering/ViewportDimensions.hpp"
 #include "Rendering/VulkanPhysicalDevice.hpp"
@@ -209,6 +210,16 @@ VkRect2D utils::getScissor( const ViewportDimensions *viewport, const RenderDevi
             static_cast< crimild::UInt32 >( h ),
         },
     };
+}
+
+VkIndexType utils::getIndexType( const IndexBuffer *indexBuffer ) noexcept
+{
+    switch ( indexBuffer->getIndexType() ) {
+        case IndexBuffer::IndexType::UINT_16:
+            return VK_INDEX_TYPE_UINT16;
+        default:
+            return VK_INDEX_TYPE_UINT32;
+    }
 }
 
 crimild::Bool utils::checkValidationLayersEnabled( void ) noexcept
