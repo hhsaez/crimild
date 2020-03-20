@@ -85,6 +85,8 @@ namespace crimild {
             VkViewport getViewport( const ViewportDimensions *viewport, const RenderDevice *renderDevice ) noexcept;
             VkRect2D getScissor( const ViewportDimensions *scissor, const RenderDevice *renderDevice ) noexcept;
             VkIndexType getIndexType( const IndexBuffer *indexBuffer ) noexcept;
+            VkSamplerAddressMode getSamplerAddressMode( Texture::WrapMode wrapMode ) noexcept;
+            VkBorderColor getBorderColor( Texture::BorderColor borderColor ) noexcept;
 
             //@}
 

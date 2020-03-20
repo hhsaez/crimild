@@ -194,8 +194,15 @@ crimild::Bool TextureManager::bind( Texture *texture ) noexcept
     	}
     );
 
-    auto addressMode = isCubemap ? VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE : VK_SAMPLER_ADDRESS_MODE_REPEAT;
-    auto compareOp = isCubemap ? VK_COMPARE_OP_NEVER : VK_COMPARE_OP_ALWAYS;
+    auto addressMode = utils::getSamplerAddressMode( texture->getWrapMode() );
+    auto compareOp = VK_COMPARE_OP_ALWAYS;
+    auto borderColor = utils::getBorderColor( texture->getBorderColor() );
+
+    // overrides for cubemap
+    if ( isCubemap ) {
+        addressMode = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        compareOp = VK_COMPARE_OP_NEVER;
+    }
 
     auto samplerInfo = VkSamplerCreateInfo {
 		.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
@@ -206,7 +213,7 @@ crimild::Bool TextureManager::bind( Texture *texture ) noexcept
         .addressModeW = addressMode,
         .anisotropyEnable = VK_TRUE,
         .maxAnisotropy = 16,
-        .borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK,
+        .borderColor = borderColor,
         .unnormalizedCoordinates = VK_FALSE,
         .compareEnable = VK_FALSE,
         .compareOp = compareOp,
