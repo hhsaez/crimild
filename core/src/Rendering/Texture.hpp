@@ -137,7 +137,9 @@ namespace crimild {
     public:
         enum class WrapMode : uint8_t {
             REPEAT,         //< Default
-            CLAMP_TO_EDGE   
+			MIRRORED_REPEAT,
+            CLAMP_TO_EDGE,
+			CLAMP_TO_BORDER,
         };
         
         WrapMode getWrapMode( void ) const { return _wrapMode; }
@@ -172,11 +174,19 @@ namespace crimild {
         //@{
 
     public:
-        void setBorderColor( const RGBAColorf &color ) { _borderColor = color; }
-        const RGBAColorf &getBorderColor( void ) const { return _borderColor; }
+        enum class BorderColor {
+			FLOAT_TRANSPARENT_BLACK,
+            INT_TRANSPARENT_BLACK,
+            FLOAT_OPAQUE_BLACK,
+            INT_OPAQUE_BLACK,
+            FLOAT_OPAQUE_WHITE,
+            INT_OPAQUE_WHITE,
+        };
+        void setBorderColor( BorderColor color ) { _borderColor = color; }
+        BorderColor getBorderColor( void ) const { return _borderColor; }
 
     private:
-        RGBAColorf _borderColor;
+        BorderColor _borderColor = BorderColor::INT_OPAQUE_BLACK;
 
         /**
             \name Coding support

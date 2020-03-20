@@ -148,7 +148,7 @@ void TextureCatalog::load( Texture *texture )
 	}
 
 #if defined( GL_TEXTURE_BORDER_COLOR ) && !defined( CRIMILD_PLATFORM_EMSCRIPTEN ) && !defined( CRIMILD_PLATFORM_MOBILE )
-    glTexParameterfv( textureTarget, GL_TEXTURE_BORDER_COLOR, texture->getBorderColor().getData() );
+//    glTexParameterfv( textureTarget, GL_TEXTURE_BORDER_COLOR, texture->getBorderColor().getData() );
 #endif
 
 	auto image = texture->getImage();
