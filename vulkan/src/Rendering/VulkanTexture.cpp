@@ -56,7 +56,7 @@ crimild::Bool TextureManager::bind( Texture *texture ) noexcept
 
     auto mipLevels = crimild::UInt32( 1 );
     // Enable mipmapping only for regular textures
-    if ( !isCubemap ) {
+    if ( !isCubemap && texture->isMipmappingEnabled() ) {
         // Each mipmap level is half the size of the previous one
         // At the very least, we'll have 1 mip level (the original size)
     	mipLevels += static_cast< crimild::UInt32 >( Numericf::floor( Numericf::log2( Numericf::max( imageWidth, imageHeight ) ) ) );

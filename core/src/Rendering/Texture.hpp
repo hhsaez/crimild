@@ -189,6 +189,19 @@ namespace crimild {
         BorderColor _borderColor = BorderColor::INT_OPAQUE_BLACK;
 
         /**
+            \name Mipmapping
+         */
+        //@{
+    public:
+        void setMipmappingEnabled( crimild::Bool enabled ) noexcept { m_mipmappingEnabled = enabled; }
+        crimild::Bool isMipmappingEnabled( void ) const noexcept { return m_mipmappingEnabled; }
+
+    private:
+        crimild::Bool m_mipmappingEnabled = true;
+
+        //@}
+
+        /**
             \name Coding support
          */
         //@{
