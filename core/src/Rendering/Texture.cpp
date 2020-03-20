@@ -101,14 +101,14 @@ SharedPointer< Texture > Texture::INVALID = crimild::alloc< Texture >(
 Texture::Texture( std::string name )
     : NamedObject( name )
 {
-    _borderColor = RGBAColorf::ZERO;
+
 }
 
 Texture::Texture( SharedPointer< Image > const &image, std::string name )
 	: NamedObject( name ),
 	  _images( { image } )
 {
-    _borderColor = RGBAColorf::ZERO;
+
 }
 
 Texture::Texture( Texture::ImageArray const &images )
@@ -116,7 +116,7 @@ Texture::Texture( Texture::ImageArray const &images )
 	  _target( Texture::Target::CUBE_MAP ),
 	  _images( images )
 {
-    _borderColor = RGBAColorf::ZERO;
+
 }
 
 Texture::~Texture( void )

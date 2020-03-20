@@ -222,6 +222,41 @@ VkIndexType utils::getIndexType( const IndexBuffer *indexBuffer ) noexcept
     }
 }
 
+VkSamplerAddressMode utils::getSamplerAddressMode( Texture::WrapMode wrapMode ) noexcept
+{
+    switch ( wrapMode ) {
+        case Texture::WrapMode::MIRRORED_REPEAT:
+            return VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
+        case Texture::WrapMode::CLAMP_TO_EDGE:
+            return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        case Texture::WrapMode::CLAMP_TO_BORDER:
+            return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+        case Texture::WrapMode::REPEAT:
+        default:
+            return VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    }
+}
+
+VkBorderColor utils::getBorderColor( Texture::BorderColor borderColor ) noexcept
+{
+    switch ( borderColor ) {
+        case Texture::BorderColor::FLOAT_TRANSPARENT_BLACK:
+            return VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
+        case Texture::BorderColor::INT_TRANSPARENT_BLACK:
+            return VK_BORDER_COLOR_INT_TRANSPARENT_BLACK;
+        case Texture::BorderColor::FLOAT_OPAQUE_BLACK:
+            return VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK;
+        case Texture::BorderColor::INT_OPAQUE_BLACK:
+            return VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+        case Texture::BorderColor::FLOAT_OPAQUE_WHITE:
+            return VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
+        case Texture::BorderColor::INT_OPAQUE_WHITE:
+            return VK_BORDER_COLOR_INT_OPAQUE_WHITE;
+        default:
+            return VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+    }
+}
+
 crimild::Bool utils::checkValidationLayersEnabled( void ) noexcept
 {
 #if defined( CRIMILD_DEBUG )

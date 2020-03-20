@@ -170,7 +170,7 @@ SharedPointer< RenderTarget > RenderGraph::getRenderTarget( crimild::Int64 hints
     auto target = crimild::alloc< RenderTarget >( type, output, size.x(), size.y(), useFloatTexture );
 
     if ( hints & RenderGraphAttachment::Hint::BORDER_ONE ) {
-        target->getTexture()->setBorderColor( RGBAColorf::ONE );
+//        target->getTexture()->setBorderColor( RGBAColorf::ONE );
     }
 
 	if ( hints & RenderGraphAttachment::Hint::WRAP_REPEAT ) {
