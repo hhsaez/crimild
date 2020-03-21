@@ -1,6 +1,18 @@
 #!/bin/bash
 # Usage: sh build_shaders.sh [SHADERS_DIR]
 
+if [ -z "$VULKAN_SDK" ]
+then
+	# Fallback fro $VULKAN_SDK
+	VULKAN_SDK=~/Development/bin/vulkansdk-macos/macOS
+fi
+
+if [ -z "$CRIMILD_HOME" ]
+then
+	# Fallback for $CRIMILD_HOME
+	CRIMILD_HOME=~/Development/Crimild/crimild
+fi
+
 #echo "Compiling shaders"
 VULKAN_COMPILER=$VULKAN_SDK/bin/glslc
 
