@@ -27,7 +27,7 @@ for file in `ls ./*.{vert,frag}`; do
 	$VULKAN_COMPILER $file -o "$file.spv"
 	
 	echo "Encoding $file"
-	$CRIMILD_RESOURCE_ENCODER "$file.spv" "$file.cpp"
+	$CRIMILD_RESOURCE_ENCODER "$file.spv" "$file.inl"
 done
 
 popd > /dev/null

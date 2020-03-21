@@ -42,7 +42,7 @@ RenderResourceLibrary< Shader >::RenderResourceLibrary( void ) noexcept
     add(
         constants::SHADER_UNLIT_VERTEX_P2C3,
         [&] {
-			#include "Shaders/unlit/vert_P2C3.cpp"
+			#include "Shaders/unlit/vert_P2C3.inl"
             return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
         }
     );
@@ -50,7 +50,7 @@ RenderResourceLibrary< Shader >::RenderResourceLibrary( void ) noexcept
     add(
         constants::SHADER_UNLIT_VERTEX_P2C3TC2,
         [&] {
-			#include "Shaders/unlit/vert_P2C3TC2.cpp"
+			#include "Shaders/unlit/vert_P2C3TC2.inl"
            	return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
         }
     );
@@ -58,7 +58,7 @@ RenderResourceLibrary< Shader >::RenderResourceLibrary( void ) noexcept
     add(
         constants::SHADER_UNLIT_FRAGMENT_COLOR,
         [&] {
-           #include "Shaders/unlit/frag_color.cpp"
+           #include "Shaders/unlit/frag_color.inl"
            return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
         }
     );
@@ -66,7 +66,7 @@ RenderResourceLibrary< Shader >::RenderResourceLibrary( void ) noexcept
     add(
         constants::SHADER_UNLIT_FRAGMENT_TEXTURE_COLOR,
         [&] {
-           #include "Shaders/unlit/frag_texture_color.cpp"
+           #include "Shaders/unlit/frag_texture_color.inl"
            return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
         }
     );
@@ -74,7 +74,7 @@ RenderResourceLibrary< Shader >::RenderResourceLibrary( void ) noexcept
     add(
         constants::SHADER_UNLIT_TEXTURE_P3N3TC2_VERT,
         [&] {
-           #include "Shaders/unlit/texture_P3N3TC2.vert.cpp"
+           #include "Shaders/unlit/texture_P3N3TC2.vert.inl"
            return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
         }
     );
@@ -82,7 +82,7 @@ RenderResourceLibrary< Shader >::RenderResourceLibrary( void ) noexcept
     add(
         constants::SHADER_UNLIT_TEXTURE_P3N3TC2_FRAG,
         [&] {
-           #include "Shaders/unlit/texture_P3N3TC2.frag.cpp"
+           #include "Shaders/unlit/texture_P3N3TC2.frag.inl"
            return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
         }
     );
@@ -90,7 +90,7 @@ RenderResourceLibrary< Shader >::RenderResourceLibrary( void ) noexcept
     add(
         constants::SHADER_UNLIT_SKYBOX_P3_VERT,
         [&] {
-           #include "Shaders/unlit/skybox_P3.vert.cpp"
+           #include "Shaders/unlit/skybox_P3.vert.inl"
            return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
         }
     );
@@ -98,7 +98,7 @@ RenderResourceLibrary< Shader >::RenderResourceLibrary( void ) noexcept
     add(
         constants::SHADER_UNLIT_SKYBOX_P3_FRAG,
         [&] {
-           #include "Shaders/unlit/skybox_P3.frag.cpp"
+           #include "Shaders/unlit/skybox_P3.frag.inl"
            return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
         }
     );
@@ -106,7 +106,7 @@ RenderResourceLibrary< Shader >::RenderResourceLibrary( void ) noexcept
     add(
         constants::SHADER_DEBUG_POSITION_P3_VERT,
         [&] {
-           #include "Shaders/debug/position_P3.vert.cpp"
+           #include "Shaders/debug/position_P3.vert.inl"
            return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
         }
     );
@@ -114,7 +114,7 @@ RenderResourceLibrary< Shader >::RenderResourceLibrary( void ) noexcept
     add(
         constants::SHADER_DEBUG_POSITION_P3_FRAG,
         [&] {
-           #include "Shaders/debug/position_P3.frag.cpp"
+           #include "Shaders/debug/position_P3.frag.inl"
            return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
         }
     );
@@ -122,7 +122,7 @@ RenderResourceLibrary< Shader >::RenderResourceLibrary( void ) noexcept
     add(
         constants::SHADER_DEBUG_POSITION_P3N3TC2_VERT,
         [&] {
-           #include "Shaders/debug/position_P3N3TC2.vert.cpp"
+           #include "Shaders/debug/position_P3N3TC2.vert.inl"
            return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
         }
     );
@@ -130,7 +130,7 @@ RenderResourceLibrary< Shader >::RenderResourceLibrary( void ) noexcept
     add(
         constants::SHADER_DEBUG_POSITION_P3N3TC2_FRAG,
         [&] {
-           #include "Shaders/debug/position_P3N3TC2.frag.cpp"
+           #include "Shaders/debug/position_P3N3TC2.frag.inl"
            return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
         }
     );
