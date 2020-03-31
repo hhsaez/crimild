@@ -26,89 +26,10 @@
  */
 
 #include "Rendering/RenderPass.hpp"
-
-#include "VulkanFramebuffer.hpp"
-#include "VulkanRenderDevice.hpp"
-#include "VulkanRenderPass.hpp"
-#include "VulkanImageView.hpp"
+#include "Rendering/VulkanRenderDevice.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;
-
-#if 0
-
-Framebuffer::~Framebuffer( void ) noexcept
-{
-    if ( manager != nullptr ) {
-        manager->destroy( this );
-    }
-}
-
-SharedPointer< Framebuffer > FramebufferManager::create( Framebuffer::Descriptor const &descriptor ) noexcept
-{
-    CRIMILD_LOG_TRACE( "Creating framebuffer" );
-
-    auto renderDevice = m_renderDevice;
-    if ( renderDevice == nullptr ) {
-        renderDevice = descriptor.renderDevice;
-    }
-
-    std::vector< VkImageView > attachments;
-    for ( const auto &att : descriptor.attachments ) {
-        attachments.push_back( att->handler );
-    }
-
-    auto createInfo = VkFramebufferCreateInfo {
-        .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
-        .renderPass = descriptor.renderPass->handler,
-        .attachmentCount = static_cast< uint32_t >( attachments.size() ),
-        .pAttachments = attachments.data(),
-        .width = descriptor.extent.width,
-        .height = descriptor.extent.height,
-        .layers = 1,
-    };
-
-    VkFramebuffer framebufferHandler;
-    CRIMILD_VULKAN_CHECK(
-     	vkCreateFramebuffer(
-    		renderDevice->handler,
-            &createInfo,
-        	nullptr,
-            &framebufferHandler
-    	)
- 	);
-
-    auto framebuffer = crimild::alloc< Framebuffer >();
-    framebuffer->handler = framebufferHandler;
-    framebuffer->manager = this;
-    framebuffer->renderDevice = renderDevice;
-    framebuffer->extent = descriptor.extent;
-    insert( crimild::get_ptr( framebuffer ) );
-    m_framebuffers.add( crimild::get_ptr( framebuffer ) );
-    return framebuffer;
-}
-
-void FramebufferManager::destroy( Framebuffer *framebuffer ) noexcept
-{
-    CRIMILD_LOG_TRACE( "Destroying framebuffer" );
-
-    if ( framebuffer->renderDevice != nullptr && framebuffer->handler != VK_NULL_HANDLE ) {
-        vkDestroyFramebuffer(
-            framebuffer->renderDevice->handler,
-            framebuffer->handler,
-            nullptr
-        );
-    }
-
-    m_framebuffers.remove( framebuffer );
-
-    framebuffer->handler = VK_NULL_HANDLE;
-    framebuffer->manager = nullptr;
-    framebuffer->renderDevice = nullptr;
-    erase( framebuffer );
-}
-
-#endif
 
 crimild::Bool FramebufferManager::bind( Framebuffer *framebuffer ) noexcept
 {
