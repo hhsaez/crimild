@@ -269,51 +269,51 @@ TEST( NodeTest, getRootParent )
 	EXPECT_EQ( crimild::get_ptr( g1 ), g3->getRootParent() );
 }
 
-TEST( NodeTest, streamNode )
-{
-	auto n = crimild::alloc< Node >( "Some Node" );
+//TEST( NodeTest, streamNode )
+//{
+//	auto n = crimild::alloc< Node >( "Some Node" );
+//
+//	{
+//		FileStream os( "node.crimild", FileStream::OpenMode::WRITE );
+//		os.addObject( n );
+//		EXPECT_TRUE( os.flush() );
+//	}
+//
+//	{
+//		FileStream is( "node.crimild", FileStream::OpenMode::READ );
+//		EXPECT_TRUE( is.load() );
+//		EXPECT_EQ( 1, is.getObjectCount() );
+//		auto n1 = is.getObjectAt< Node >( 0 );
+//		EXPECT_TRUE( n1 != nullptr );
+//		EXPECT_EQ( "Some Node", n1->getName() );
+//	}
+//}
 
-	{
-		FileStream os( "node.crimild", FileStream::OpenMode::WRITE );
-		os.addObject( n );
-		EXPECT_TRUE( os.flush() );
-	}
-
-	{
-		FileStream is( "node.crimild", FileStream::OpenMode::READ );
-		EXPECT_TRUE( is.load() );
-		EXPECT_EQ( 1, is.getObjectCount() );
-		auto n1 = is.getObjectAt< Node >( 0 );
-		EXPECT_TRUE( n1 != nullptr );
-		EXPECT_EQ( "Some Node", n1->getName() );
-	}
-}
-
-TEST( NodeTest, streamNodeTransform )
-{
-	auto n = crimild::alloc< Node >( "Some Node" );
-	n->local().setTranslate( Vector3f( 0.0f, 0.0f, -5.0f ) );
-	n->local().setRotate( Vector3f( 0.0f, 1.0f, 0.0f ), Numericf::PI );
-	n->local().setScale( 0.5f );
-
-	{
-		FileStream os( "node.crimild", FileStream::OpenMode::WRITE );
-		os.addObject( n );
-		EXPECT_TRUE( os.flush() );
-	}
-
-	{
-		FileStream is( "node.crimild", FileStream::OpenMode::READ );
-		EXPECT_TRUE( is.load() );
-		EXPECT_EQ( 1, is.getObjectCount() );
-		auto n1 = is.getObjectAt< Node >( 0 );
-		EXPECT_TRUE( n1 != nullptr );
-		EXPECT_EQ( "Some Node", n1->getName() );
-		EXPECT_EQ( n->getLocal().getTranslate(), n1->getLocal().getTranslate() );
-		EXPECT_EQ( n->getLocal().getRotate(), n1->getLocal().getRotate() );
-		EXPECT_EQ( n->getLocal().getScale(), n1->getLocal().getScale() );
-	}
-}
+//TEST( NodeTest, streamNodeTransform )
+//{
+//	auto n = crimild::alloc< Node >( "Some Node" );
+//	n->local().setTranslate( Vector3f( 0.0f, 0.0f, -5.0f ) );
+//	n->local().setRotate( Vector3f( 0.0f, 1.0f, 0.0f ), Numericf::PI );
+//	n->local().setScale( 0.5f );
+//
+//	{
+//		FileStream os( "node.crimild", FileStream::OpenMode::WRITE );
+//		os.addObject( n );
+//		EXPECT_TRUE( os.flush() );
+//	}
+//
+//	{
+//		FileStream is( "node.crimild", FileStream::OpenMode::READ );
+//		EXPECT_TRUE( is.load() );
+//		EXPECT_EQ( 1, is.getObjectCount() );
+//		auto n1 = is.getObjectAt< Node >( 0 );
+//		EXPECT_TRUE( n1 != nullptr );
+//		EXPECT_EQ( "Some Node", n1->getName() );
+//		EXPECT_EQ( n->getLocal().getTranslate(), n1->getLocal().getTranslate() );
+//		EXPECT_EQ( n->getLocal().getRotate(), n1->getLocal().getRotate() );
+//		EXPECT_EQ( n->getLocal().getScale(), n1->getLocal().getScale() );
+//	}
+//}
 
 TEST( NodeTest, coding )
 {

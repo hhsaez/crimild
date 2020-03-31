@@ -36,6 +36,7 @@
 namespace crimild {
 
     class DescriptorSet;
+    class Framebuffer;
     class IndexBuffer;
     class Pipeline;
     class Primitive;
@@ -62,8 +63,6 @@ namespace crimild {
             enum class Type {
 				BEGIN,
                 BEGIN_RENDER_PASS,
-                SET_VIEWPORT,
-                SET_SCISSOR,
                 BIND_GRAPHICS_PIPELINE,
                 BIND_PRIMITIVE,
                 BIND_INDEX_BUFFER,
@@ -74,8 +73,11 @@ namespace crimild {
                 DRAW,
                 DRAW_INDEXED,
                 END_RENDER_PASS,
-                SET_VERTEX_OFFSET,
+                SET_FRAMEBUFFER,
                 SET_INDEX_OFFSET,
+                SET_SCISSOR,
+                SET_VERTEX_OFFSET,
+                SET_VIEWPORT,
                 END,
             };
 
@@ -87,7 +89,6 @@ namespace crimild {
                 ViewportDimensions viewportDimensions;
                 Pipeline *pipeline;
                 Primitive *primitive;
-                RenderPass *renderPass;
                 UniformBuffer *uniformBuffer;
                 SharedPointer< SharedObject > obj;
                 crimild::UInt32 count;
@@ -97,7 +98,7 @@ namespace crimild {
 
     public:
         void begin( Usage usage ) noexcept;
-        void beginRenderPass( RenderPass *renderPass ) noexcept;
+        void beginRenderPass( RenderPass *renderPass, Framebuffer *framebuffer ) noexcept;
 
         void bindCommandBuffer( CommandBuffer *commandBuffer ) noexcept;
         void bindGraphicsPipeline( Pipeline *pipeline ) noexcept;

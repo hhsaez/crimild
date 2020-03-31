@@ -33,6 +33,8 @@
 #include "Foundation/Types.hpp"
 
 #include "Rendering/DescriptorSet.hpp"
+#include "Rendering/Format.hpp"
+#include "Rendering/Image.hpp"
 #include "Rendering/Shader.hpp"
 #include "Rendering/Texture.hpp"
 
@@ -87,6 +89,10 @@ namespace crimild {
             VkIndexType getIndexType( const IndexBuffer *indexBuffer ) noexcept;
             VkSamplerAddressMode getSamplerAddressMode( Texture::WrapMode wrapMode ) noexcept;
             VkBorderColor getBorderColor( Texture::BorderColor borderColor ) noexcept;
+            VkFormat getFormat( RenderDevice *renderDevice, Format format ) noexcept;
+            Format getFormat( VkFormat format ) noexcept; //< Reversed
+            VkImageUsageFlags getImageUsage( Image::Usage usage ) noexcept;
+            VkExtent2D getExtent( Extent2D extent, const RenderDevice *renderDevice ) noexcept;
 
             //@}
 

@@ -28,15 +28,19 @@
 #ifndef CRIMILD_VULKAN_RENDERING_RENDER_PASS_
 #define CRIMILD_VULKAN_RENDERING_RENDER_PASS_
 
-#include "Foundation/VulkanObject.hpp"
+#include "Rendering/RenderPass.hpp"
+#include "Rendering/VulkanRenderResource.hpp"
 
 namespace crimild {
 
+	class RenderPass;
+
 	namespace vulkan {
 
-		class RenderDevice;
+#if 0
+        class RenderDevice;
         class RenderPassManager;
-		class Swapchain;
+        class Swapchain;
 
 		/**
 		 */
@@ -70,6 +74,24 @@ namespace crimild {
         private:
             RenderDevice *m_renderDevice = nullptr;
         };
+
+#endif
+
+		class RenderPassManager : public BasicRenderResourceManagerImpl< RenderPass, VkRenderPass > {
+			using ManagerImpl = BasicRenderResourceManagerImpl< RenderPass, VkRenderPass >;
+
+		public:
+			virtual ~RenderPassManager( void ) = default;
+
+			crimild::Bool bind( RenderPass *renderPass ) noexcept override;
+			crimild::Bool unbind( RenderPass *renderPass ) noexcept override;
+
+            inline void setCurrentRenderPass( RenderPass *renderPass ) noexcept { m_currentRenderPass = renderPass; }
+            inline RenderPass *getCurrentRenderPass( void ) noexcept { return m_currentRenderPass; }
+
+        private:
+            RenderPass *m_currentRenderPass = nullptr;
+		};
 
 	}
 

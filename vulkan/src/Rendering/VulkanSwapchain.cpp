@@ -115,10 +115,13 @@ void Swapchain::retrieveSwapchainImages( void ) noexcept
 	);
 
 	for ( const auto &imageHandler : imagesHandlers ) {
-		// Create images without render device so they're properly destroyed
         auto image = crimild::alloc< Image >();
-        image->handler = imageHandler;
-        attach( crimild::get_ptr( image ) );
+        image->usage = Image::Usage::PRESENTATION;
+        image->format = utils::getFormat( format );
+        image->extent.scalingMode = ScalingMode::SWAPCHAIN_RELATIVE;
+        if ( auto img = crimild::get_ptr( image ) ) {
+            renderDevice->setBindInfo( img, { .imageHandler = imageHandler } );
+        }
         images.add( image );
 	}
 }
@@ -130,18 +133,13 @@ void Swapchain::createImageViews( void ) noexcept
     imageViews.clear();
 
     images.each(
-        [ this ]( SharedPointer< Image > &image ) {
-			auto imageView = renderDevice->create(
-                ImageView::Descriptor {
-					.image = image,
-                	.format = format,
-                	.aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT,
-                	.mipLevels = 1,
-                }
-            );
-        	if ( imageView != nullptr ) {
-                imageViews.add( imageView );
-        	}
+        [&]( auto &image ) {
+            auto imageView = crimild::alloc< ImageView >();
+            imageView->type = ImageView::Type::IMAGE_VIEW_SWAPCHAIN;
+            imageView->image = image;
+            imageView->format = image->format;
+            renderDevice->bind( crimild::get_ptr( imageView ) );
+            imageViews.add( imageView );
         }
     );
 }

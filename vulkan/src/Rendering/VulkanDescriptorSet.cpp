@@ -103,12 +103,12 @@ crimild::Bool DescriptorSetManager::bind( DescriptorSet *descriptorSet ) noexcep
                 writes[ j ].pBufferInfo = &bufferInfo;
             }
             else if ( write.descriptorType == DescriptorType::COMBINED_IMAGE_SAMPLER ) {
-                auto texture = write.texture;
-                auto bindInfo = renderDevice->getBindInfo( texture );
-                imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                imageInfo.imageView = bindInfo.imageView->handler;
-                imageInfo.sampler = bindInfo.sampler;
-                writes[ j ].pImageInfo = &imageInfo;
+//                auto texture = write.texture;
+//                auto bindInfo = renderDevice->getBindInfo( texture );
+//                imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+//                imageInfo.imageView = bindInfo.imageView->handler;
+//                imageInfo.sampler = bindInfo.sampler;
+//                writes[ j ].pImageInfo = &imageInfo;
             }
 
             vkUpdateDescriptorSets(

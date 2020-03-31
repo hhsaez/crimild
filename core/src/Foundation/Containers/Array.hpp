@@ -346,6 +346,16 @@ namespace crimild {
 				return ret;
 			}
 
+            template< typename Fn >
+            auto map( Fn fn ) const noexcept
+            {
+                Array< decltype( fn( _elems[ 0 ] ) ) > ret( _size );
+                for ( auto i = 0l ; i < _size; i++ ) {
+                    ret[ i ] = fn( _elems[ i ] );
+                }
+                return ret;
+            }
+
 		private:
 			crimild::Size size_unsafe( void ) const
 			{
@@ -384,7 +394,7 @@ namespace crimild {
 					resize_unsafe( _capacity / 2 );
 				}			
 			}
-			
+
 		private:
 			std::unique_ptr< T[] > _elems;
 			crimild::Size _size = 0;

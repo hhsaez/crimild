@@ -25,38 +25,37 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CRIMILD_VULKAN_RENDERING_TEXTURE_
-#define CRIMILD_VULKAN_RENDERING_TEXTURE_
-
-#include "Rendering/VulkanRenderResource.hpp"
-#include "Rendering/Texture.hpp"
-#include "Foundation/Containers/Array.hpp"
-#include "Foundation/Containers/Map.hpp"
+#ifndef CRIMILD_CORE_RENDERING_FORMAT_
+#define CRIMILD_CORE_RENDERING_FORMAT_
 
 namespace crimild {
 
-    class ImageView;
-
-    namespace vulkan {
-
-        struct TextureBindInfo {
-            VkImage textureImage = VK_NULL_HANDLE;
-            VkDeviceMemory textureImageMemory = VK_NULL_HANDLE;
-            SharedPointer< ImageView > imageView;
-            VkSampler sampler = VK_NULL_HANDLE;
-        };
-
-        class TextureManager : public BasicRenderResourceManagerImpl< Texture, TextureBindInfo > {
-            using ManagerImpl = BasicRenderResourceManagerImpl< Texture, TextureBindInfo >;
-
-        public:
-            virtual ~TextureManager( void ) = default;
-
-            crimild::Bool bind( Texture *texture ) noexcept override;
-            crimild::Bool unbind( Texture *texture ) noexcept override;
-        };
-
-    }
+    enum class Format {
+        UNDEFINED,
+        R8_UNORM,
+        R8_SNORM,
+        R8_UINT,
+        R8_SINT,
+        R32_UINT,
+        R32_SINT,
+        R32_SFLOAT,
+        R64_UINT,
+        R64_SINT,
+        R64_SFLOAT,
+        R8G8B8_UINT,
+        R8G8B8A8_UINT,
+        R8G8B8_UNORM,
+        R8G8B8A8_UNORM,
+        B8G8R8A8_UNORM,
+        R32G32B32A32_SFLOAT,
+        DEPTH_16_UNORM,
+        DEPTH_32_SFLOAT,
+        DEPTH_16_UNORM_STENCIL_8_UINT,
+        DEPTH_24_UNORM_STENCIL_8_UINT,
+        DEPTH_32_SFLOAT_STENCIL_8_UINT,
+        DEPTH_STENCIL_DEVICE_OPTIMAL, //< Whatever depth/stencil format is supported
+        COLOR_SWAPCHAIN_OPTIMAL, //< Whatever format the swapchain has
+    };
 
 }
 

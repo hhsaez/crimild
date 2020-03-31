@@ -29,36 +29,3 @@
 
 using namespace crimild;
 
-CommandBuffer *RenderPass::getCommandBuffer( void ) noexcept
-{
-    /*
-    if ( m_commandBuffer != nullptr ) {
-        return crimild::get_ptr( m_commandBuffer );
-    }
-
-    m_commandBuffer = crimild::alloc< CommandBuffer >();
-
-    m_commandBuffer->begin();
-    m_commandBuffer->beginRenderPass( this );
-
-    recordCommands( crimild::get_ptr( m_commandBuffer ) );
-
-    m_commandBuffer->endRenderPass( this );
-    m_commandBuffer->end();
-     */
-
-    return crimild::get_ptr( m_commandBuffer );
-}
-
-void RenderPass::recordCommands( CommandBuffer *commandBuffer ) noexcept
-{
-    /*
-    auto scene = Simulation::getInstance()->getScene();
-    scene->perform( Apply( [ commandBuffer ]( Node *node ) {
-        if ( auto renderable = node->getComponent< Renderable >() ) {
-            renderable->recordCommands( commandBuffer );
-        }
-    }));
-     */
-}
-

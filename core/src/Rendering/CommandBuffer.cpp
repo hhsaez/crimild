@@ -27,7 +27,9 @@
 
 #include "Rendering/CommandBuffer.hpp"
 #include "Rendering/DescriptorSet.hpp"
+#include "Rendering/Framebuffer.hpp"
 #include "Rendering/IndexBuffer.hpp"
+#include "Rendering/RenderPass.hpp"
 #include "Rendering/VertexBuffer.hpp"
 
 using namespace crimild;
@@ -45,10 +47,6 @@ CommandBuffer::Command::Command( const Command &other ) noexcept
     switch ( type ) {
         case Command::Type::BEGIN:
             usage = other.usage;
-            break;
-
-        case Command::Type::BEGIN_RENDER_PASS:
-            renderPass = other.renderPass;
             break;
 
         case Command::Type::SET_VIEWPORT:
@@ -72,12 +70,6 @@ CommandBuffer::Command::Command( const Command &other ) noexcept
             commandBuffer = other.commandBuffer;
             break;
 
-        case Command::Type::BIND_INDEX_BUFFER:
-        case Command::Type::BIND_VERTEX_BUFFER:
-        case Command::Type::BIND_DESCRIPTOR_SET:
-            obj = other.obj;
-            break;
-
         case Command::Type::DRAW:
             count = other.count;
             break;
@@ -86,14 +78,8 @@ CommandBuffer::Command::Command( const Command &other ) noexcept
             count = other.count;
             break;
 
-        case Command::Type::END_RENDER_PASS:
-            renderPass = other.renderPass;
-            break;
-
-        case Command::Type::END:
-            break;
-
         default:
+            obj = other.obj;
             break;
     }
 }
@@ -123,12 +109,24 @@ void CommandBuffer::begin( CommandBuffer::Usage usage ) noexcept
     m_commands.push_back( cmd );
 }
 
-void CommandBuffer::beginRenderPass( RenderPass *renderPass ) noexcept
+void CommandBuffer::beginRenderPass( RenderPass *renderPass, Framebuffer *framebuffer ) noexcept
 {
-    Command cmd;
-    cmd.type = Command::Type::BEGIN_RENDER_PASS;
-    cmd.renderPass = renderPass;
-    m_commands.push_back( cmd );
+    m_commands.push_back(
+        [&] {
+        	Command cmd;
+        	cmd.type = Command::Type::SET_FRAMEBUFFER;
+        	cmd.obj = crimild::retain( framebuffer );
+            return cmd;
+        }()
+    );
+    m_commands.push_back(
+		[&] {
+            Command cmd;
+            cmd.type = Command::Type::BEGIN_RENDER_PASS;
+            cmd.obj = crimild::retain( renderPass );
+            return cmd;
+    	}()
+    );
 }
 
 void CommandBuffer::setViewport( const ViewportDimensions &viewport ) noexcept
@@ -240,10 +238,14 @@ void CommandBuffer::drawIndexed( crimild::UInt32 count, crimild::Size indexOffse
 
 void CommandBuffer::endRenderPass( RenderPass *renderPass ) noexcept
 {
-    Command cmd;
-    cmd.type = Command::Type::END_RENDER_PASS,
-    cmd.renderPass = renderPass,
-    m_commands.push_back( cmd );
+    m_commands.push_back(
+        [&] {
+            Command cmd;
+            cmd.type = Command::Type::END_RENDER_PASS;
+            cmd.obj = crimild::retain( renderPass );
+            return cmd;
+        }()
+    );
 }
 
 void CommandBuffer::end( void ) noexcept

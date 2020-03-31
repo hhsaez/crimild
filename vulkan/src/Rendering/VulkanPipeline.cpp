@@ -31,6 +31,7 @@
 #include "Rendering/CullFaceState.hpp"
 #include "Rendering/DepthState.hpp"
 #include "Rendering/PolygonState.hpp"
+#include "Rendering/RenderPass.hpp"
 #include "Rendering/Shader.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Foundation/Log.hpp"
@@ -79,7 +80,7 @@ crimild::Bool PipelineManager::bind( Pipeline *pipeline ) noexcept
         }
     );
 
-    auto renderPass = renderDevice->getRenderPass();
+    auto renderPass = renderDevice->getBindInfo( renderDevice->getCurrentRenderPass() );
 
     auto createInfo = VkGraphicsPipelineCreateInfo {
         .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
@@ -94,7 +95,7 @@ crimild::Bool PipelineManager::bind( Pipeline *pipeline ) noexcept
         .pColorBlendState = &colorBlending,
         .pDynamicState = &dynamicState,
         .layout = pipelineLayout->handler,
-        .renderPass = renderPass->handler,
+        .renderPass = renderPass,
         .subpass = 0,
         .basePipelineHandle = VK_NULL_HANDLE, // Optional
         .basePipelineIndex = -1, // Optional
@@ -358,7 +359,7 @@ VkPipelineMultisampleStateCreateInfo PipelineManager::createMultiplesampleState(
 {
     auto renderDevice = getRenderDevice();
     auto physicalDevice = renderDevice->physicalDevice;
-    auto msaaSamples = physicalDevice->msaaSamples;
+    auto msaaSamples = VK_SAMPLE_COUNT_1_BIT; //physicalDevice->msaaSamples;
 
     return VkPipelineMultisampleStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
