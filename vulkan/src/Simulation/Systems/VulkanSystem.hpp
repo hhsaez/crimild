@@ -88,9 +88,7 @@ namespace crimild {
 
             RenderDevice *getRenderDevice( void ) noexcept { return crimild::get_ptr( m_renderDevice ); }
             Swapchain *getSwapchain( void ) noexcept { return crimild::get_ptr( m_swapchain ); }
-            RenderPass *getRenderPass( void ) noexcept { return crimild::get_ptr( m_renderPass ); }
             CommandPool *getCommandPool( void ) noexcept { return crimild::get_ptr( m_commandPool ); }
-            Framebuffer *getFramebuffer( crimild::Size index ) noexcept { return crimild::get_ptr( m_framebuffers[ index ] ); }
 
             void setCommandBuffers( std::vector< SharedPointer< CommandBuffer >> const &cmds ) noexcept { m_commandBuffers = cmds; }
 
@@ -105,10 +103,6 @@ namespace crimild {
             crimild::Bool createRenderDevice( void ) noexcept;
             crimild::Bool createSwapchain( void ) noexcept;
             crimild::Bool recreateSwapchain( void ) noexcept;
-            crimild::Bool createRenderPass( void ) noexcept;
-            crimild::Bool createColorResources( void ) noexcept;
-            crimild::Bool createDepthResources( void ) noexcept;
-            crimild::Bool createFramebuffers( void ) noexcept;
             crimild::Bool createSyncObjects( void ) noexcept;
             crimild::Bool createCommandPool( void ) noexcept;
 
@@ -123,27 +117,12 @@ namespace crimild {
             SharedPointer< PhysicalDevice > m_physicalDevice;
             SharedPointer< RenderDevice > m_renderDevice;
             SharedPointer< Swapchain > m_swapchain;
-            SharedPointer< RenderPass > m_renderPass;
-            std::vector< SharedPointer< Framebuffer >> m_framebuffers;
             SharedPointer< CommandPool > m_commandPool;
             std::vector< SharedPointer< CommandBuffer >> m_commandBuffers;
             std::vector< SharedPointer< Semaphore >> m_imageAvailableSemaphores;
             std::vector< SharedPointer< Semaphore >> m_renderFinishedSemaphores;
             std::vector< SharedPointer< Fence >> m_inFlightFences;
             crimild::UInt32 m_currentFrame = 0;
-
-            struct DepthAttachment {
-                SharedPointer< Image > image;
-                SharedPointer< ImageView > imageView;
-            };
-            DepthAttachment m_depthAttachment;
-
-            struct ColorAttachment {
-                SharedPointer< Image > image;
-                SharedPointer< ImageView > imageView;
-            };
-            ColorAttachment m_colorAttachment;
-
         };
 
     }

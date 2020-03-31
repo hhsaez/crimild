@@ -37,53 +37,6 @@ namespace crimild {
 
 	namespace vulkan {
 
-#if 0
-        class FramebufferManager;
-        class ImageView;
-        class RenderDevice;
-        class RenderPass;
-
-		/**
-		 */
-		class Framebuffer : public VulkanObject {
-            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::Framebuffer )
-
-		public:
-			struct Descriptor {
-                RenderDevice *renderDevice;
-				std::vector< ImageView * > attachments;
-				RenderPass *renderPass;
-				VkExtent2D extent;
-			};
-
-		public:
-			~Framebuffer( void ) noexcept;
-
-            RenderDevice *renderDevice = nullptr;
-            VkFramebuffer handler = nullptr;
-            VkExtent2D extent;
-            FramebufferManager *manager = nullptr;
-		};
-
-        class FramebufferManager : public VulkanObjectManager< Framebuffer > {
-        public:
-            explicit FramebufferManager( RenderDevice *renderDevice = nullptr ) noexcept : m_renderDevice( renderDevice ) { }
-            virtual ~FramebufferManager( void ) noexcept = default;
-
-            Framebuffer *getFramebuffer( crimild::Size index ) noexcept
-            {
-                return m_framebuffers[ index ];
-            }
-
-            SharedPointer< Framebuffer > create( Framebuffer::Descriptor const &descriptor ) noexcept;
-            void destroy( Framebuffer *framebuffer ) noexcept override;
-
-        private:
-            RenderDevice *m_renderDevice = nullptr;
-            containers::Array< Framebuffer * > m_framebuffers;
-        };
-#endif
-
 		class FramebufferManager : public MultiHandlerRenderResourceManagerImpl< Framebuffer, VkFramebuffer > {
 			using ManagerImpl = MultiHandlerRenderResourceManagerImpl< Framebuffer, VkFramebuffer >;
 
