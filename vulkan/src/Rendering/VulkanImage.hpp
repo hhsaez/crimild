@@ -35,55 +35,6 @@ namespace crimild {
 
 	namespace vulkan {
 
-#if 0
-
-		class RenderDevice;
-        class ImageManager;
-
-		class Image : public VulkanObject {
-            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::Image )
-
-        public:
-            struct Descriptor {
-                RenderDevice *renderDevice;
-                crimild::UInt32 width;
-                crimild::UInt32 height;
-                VkFormat format;
-                VkImageTiling tiling;
-                VkImageUsageFlags usage;
-                VkMemoryPropertyFlags properties;
-                crimild::UInt32 mipLevels = 1;
-                VkSampleCountFlagBits numSamples = VK_SAMPLE_COUNT_1_BIT;
-            };
-
-		public:
-			~Image( void );
-
-            VkImage handler = VK_NULL_HANDLE;
-            VkDeviceMemory memoryHandler = VK_NULL_HANDLE;
-            RenderDevice *renderDevice = nullptr;
-            ImageManager *manager = nullptr;
-		};
-
-        /**
-           It migth be possible to create an image with a null device, in which
-           case the image handler won't be destroyed since the image is managed
-           elsewhere (\see Swapchain)
-         */
-        class ImageManager : public VulkanObjectManager< Image > {
-        public:
-            explicit ImageManager( RenderDevice *renderDevice = nullptr ) noexcept : m_renderDevice( renderDevice ) { }
-            virtual ~ImageManager( void ) noexcept = default;
-
-            SharedPointer< Image > create( Image::Descriptor const &descriptor ) noexcept;
-            void attach( Image *image ) noexcept;
-            void destroy( Image *image ) noexcept override;
-
-        private:
-            RenderDevice *m_renderDevice = nullptr;
-        };
-
-#endif
         struct ImageBindInfo {
             VkImage imageHandler = VK_NULL_HANDLE;
             VkDeviceMemory imageMemoryHandler = VK_NULL_HANDLE;

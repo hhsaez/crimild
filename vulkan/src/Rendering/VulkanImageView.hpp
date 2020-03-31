@@ -35,51 +35,6 @@ namespace crimild {
 
 	namespace vulkan {
 
-#if 0
-
-		class RenderDevice;
-		class Image;
-        class ImageViewManager;
-
-		/**
-		 */
-		class ImageView : public VulkanObject {
-            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::ImageView )
-
-        public:
-            struct Descriptor {
-                RenderDevice *renderDevice;
-                SharedPointer< Image > image;
-                VkImageViewType imageType = VK_IMAGE_VIEW_TYPE_2D;
-                VkFormat format;
-                VkImageAspectFlags aspectFlags;
-                crimild::UInt32 mipLevels = 1;
-                crimild::UInt32 layerCount = 1;
-            };
-
-		public:
-            ~ImageView( void ) noexcept;
-
-            RenderDevice *renderDevice = nullptr;
-            SharedPointer< Image > image;
-            VkImageView handler = VK_NULL_HANDLE;
-            ImageViewManager *manager = nullptr;
-		};
-
-        class ImageViewManager : public VulkanObjectManager< ImageView > {
-        public:
-            explicit ImageViewManager( RenderDevice *renderDevice = nullptr ) noexcept : m_renderDevice( renderDevice ) { }
-            virtual ~ImageViewManager( void ) noexcept = default;
-
-            SharedPointer< ImageView > create( ImageView::Descriptor const &descriptor ) noexcept;
-            void destroy( ImageView *imageView ) noexcept override;
-
-        private:
-            RenderDevice *m_renderDevice = nullptr;
-        };
-
-#endif
-
         class ImageViewManager : public BasicRenderResourceManagerImpl< ImageView, VkImageView > {
             using ManagerImpl = BasicRenderResourceManagerImpl< ImageView, VkImageView >;
 

@@ -37,46 +37,6 @@ namespace crimild {
 
 	namespace vulkan {
 
-#if 0
-        class RenderDevice;
-        class RenderPassManager;
-        class Swapchain;
-
-		/**
-		 */
-		class RenderPass : public VulkanObject {
-            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::RenderPass )
-
-        public:
-            struct Descriptor {
-                RenderDevice *renderDevice;
-                Swapchain *swapchain;
-            };
-
-		public:
-			~RenderPass( void ) noexcept;
-
-            RenderDevice *renderDevice = nullptr;
-            VkRenderPass handler = VK_NULL_HANDLE;
-            RenderPassManager *manager = nullptr;
-		};
-
-        class RenderPassManager : public VulkanObjectManager< RenderPass > {
-        public:
-            RenderPassManager( RenderDevice *renderDevice = nullptr ) noexcept : m_renderDevice( renderDevice ) { }
-            virtual ~RenderPassManager( void ) = default;
-
-            RenderPass *getRenderPass( void ) noexcept { return first(); }
-
-            SharedPointer< RenderPass > create( RenderPass::Descriptor const &descriptor ) noexcept;
-            void destroy( RenderPass *renderPass ) noexcept override;
-
-        private:
-            RenderDevice *m_renderDevice = nullptr;
-        };
-
-#endif
-
 		class RenderPassManager : public BasicRenderResourceManagerImpl< RenderPass, VkRenderPass > {
 			using ManagerImpl = BasicRenderResourceManagerImpl< RenderPass, VkRenderPass >;
 
