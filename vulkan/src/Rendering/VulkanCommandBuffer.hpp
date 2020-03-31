@@ -39,6 +39,7 @@ namespace crimild {
 
     class Buffer;
     class DescriptorSet;
+    class Framebuffer;
     class Pipeline;
     class RenderPass;
 
@@ -54,10 +55,12 @@ namespace crimild {
             crimild::Bool unbind( CommandBuffer *commandBuffer ) noexcept override;
 
         private:
-            void recordCommands( RenderDevice *renderDevice, CommandBuffer *commandBuffer, crimild::Size index ) noexcept;
+            void recordCommands( RenderDevice *renderDevice, CommandBuffer *parent, CommandBuffer *commandBuffer, crimild::Size index ) noexcept;
 
         private:
             Pipeline *m_currentPipeline = nullptr;
+            SharedPointer< Framebuffer > m_currentFramebuffer;
+            SharedPointer< RenderPass > m_currentRenderPass;
             crimild::Size m_vertexOffset = 0;
             crimild::Size m_indexOffset = 0;
         };

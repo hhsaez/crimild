@@ -25,40 +25,33 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CRIMILD_VULKAN_RENDERING_TEXTURE_
-#define CRIMILD_VULKAN_RENDERING_TEXTURE_
+#ifndef CRIMILD_CORE_RENDERING_FRAMEBUFFER_
+#define CRIMILD_CORE_RENDERING_FRAMEBUFFER_
 
-#include "Rendering/VulkanRenderResource.hpp"
-#include "Rendering/Texture.hpp"
+#include "Foundation/Types.hpp"
+#include "Foundation/SharedObject.hpp"
+#include "Foundation/RTTI.hpp"
 #include "Foundation/Containers/Array.hpp"
-#include "Foundation/Containers/Map.hpp"
+#include "Rendering/RenderResource.hpp"
+#include "Rendering/Extent.hpp"
 
 namespace crimild {
 
     class ImageView;
 
-    namespace vulkan {
+    class Framebuffer :
+        public RenderResourceImpl< Framebuffer >,
+        public SharedObject,
+        public RTTI {
+        CRIMILD_IMPLEMENT_RTTI( crimild::Framebuffer )
 
-        struct TextureBindInfo {
-            VkImage textureImage = VK_NULL_HANDLE;
-            VkDeviceMemory textureImageMemory = VK_NULL_HANDLE;
-            SharedPointer< ImageView > imageView;
-            VkSampler sampler = VK_NULL_HANDLE;
-        };
-
-        class TextureManager : public BasicRenderResourceManagerImpl< Texture, TextureBindInfo > {
-            using ManagerImpl = BasicRenderResourceManagerImpl< Texture, TextureBindInfo >;
-
-        public:
-            virtual ~TextureManager( void ) = default;
-
-            crimild::Bool bind( Texture *texture ) noexcept override;
-            crimild::Bool unbind( Texture *texture ) noexcept override;
-        };
-
-    }
+    public:
+        Extent2D extent = { .scalingMode = ScalingMode::SWAPCHAIN_RELATIVE };
+        containers::Array< SharedPointer< ImageView >> attachments;
+    };
 
 }
 
 #endif
+
 

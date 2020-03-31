@@ -257,6 +257,140 @@ VkBorderColor utils::getBorderColor( Texture::BorderColor borderColor ) noexcept
     }
 }
 
+VkFormat utils::getFormat( RenderDevice *renderDevice, Format format ) noexcept
+{
+    switch ( format ) {
+        case Format::R8_UNORM:
+            return VK_FORMAT_R8_UNORM;
+        case Format::R8_SNORM:
+            return VK_FORMAT_R8_SNORM;
+        case Format::R8_UINT:
+            return VK_FORMAT_R8_UINT;
+        case Format::R8_SINT:
+            return VK_FORMAT_R8_SINT;
+        case Format::R32_UINT:
+            return VK_FORMAT_R32_UINT;
+        case Format::R32_SINT:
+            return VK_FORMAT_R32_SINT;
+        case Format::R32_SFLOAT:
+            return VK_FORMAT_R32_SFLOAT;
+        case Format::R64_UINT:
+            return VK_FORMAT_R64_UINT;
+        case Format::R64_SINT:
+            return VK_FORMAT_R64_SINT;
+        case Format::R64_SFLOAT:
+            return VK_FORMAT_R64_SFLOAT;
+        case Format::R8G8B8_UINT:
+            return VK_FORMAT_R8G8B8_UINT;
+        case Format::R8G8B8A8_UINT:
+            return VK_FORMAT_R8G8B8A8_UINT;
+        case Format::R8G8B8_UNORM:
+            return VK_FORMAT_R8G8B8_UNORM;
+        case Format::R8G8B8A8_UNORM:
+            return VK_FORMAT_R8G8B8A8_UNORM;
+        case Format::B8G8R8A8_UNORM:
+            return VK_FORMAT_B8G8R8A8_UNORM;
+        case Format::R32G32B32A32_SFLOAT:
+            return VK_FORMAT_R32G32B32A32_SFLOAT;
+        case Format::DEPTH_16_UNORM:
+            return VK_FORMAT_D16_UNORM;
+        case Format::DEPTH_32_SFLOAT:
+            return VK_FORMAT_D32_SFLOAT;
+        case Format::DEPTH_16_UNORM_STENCIL_8_UINT:
+            return VK_FORMAT_D16_UNORM_S8_UINT;
+        case Format::DEPTH_24_UNORM_STENCIL_8_UINT:
+            return VK_FORMAT_D24_UNORM_S8_UINT;
+        case Format::DEPTH_32_SFLOAT_STENCIL_8_UINT:
+            return VK_FORMAT_D32_SFLOAT_S8_UINT;
+        case Format::COLOR_SWAPCHAIN_OPTIMAL:
+            return renderDevice->getSwapchain()->format;
+        case Format::DEPTH_STENCIL_DEVICE_OPTIMAL:
+            return utils::findDepthFormat( renderDevice );
+        default:
+            return VK_FORMAT_UNDEFINED;
+    }
+}
+
+Format utils::getFormat( VkFormat format ) noexcept
+{
+    switch ( format ) {
+        case VK_FORMAT_R8_UNORM:
+            return Format::R8_UNORM;
+        case VK_FORMAT_R8_SNORM:
+            return Format::R8_SNORM;
+        case VK_FORMAT_R8_UINT:
+            return Format::R8_UINT;
+        case VK_FORMAT_R8_SINT:
+            return Format::R8_SINT;
+        case VK_FORMAT_R32_UINT:
+            return Format::R32_UINT;
+        case VK_FORMAT_R32_SINT:
+            return Format::R32_SINT;
+        case VK_FORMAT_R32_SFLOAT:
+            return Format::R32_SFLOAT;
+        case VK_FORMAT_R64_UINT:
+            return Format::R64_UINT;
+        case VK_FORMAT_R64_SINT:
+            return Format::R64_SINT;
+        case VK_FORMAT_R64_SFLOAT:
+            return Format::R64_SFLOAT;
+        case VK_FORMAT_R8G8B8_UINT:
+            return Format::R8G8B8_UINT;
+        case VK_FORMAT_R8G8B8A8_UINT:
+            return Format::R8G8B8A8_UINT;
+        case VK_FORMAT_R8G8B8_UNORM:
+            return Format::R8G8B8_UNORM;
+        case VK_FORMAT_R8G8B8A8_UNORM:
+            return Format::R8G8B8A8_UNORM;
+        case VK_FORMAT_B8G8R8A8_UNORM:
+            return Format::B8G8R8A8_UNORM;
+        case VK_FORMAT_R32G32B32A32_SFLOAT:
+            return Format::R32G32B32A32_SFLOAT;
+        case VK_FORMAT_D16_UNORM:
+            return Format::DEPTH_16_UNORM;
+        case VK_FORMAT_D32_SFLOAT:
+            return Format::DEPTH_32_SFLOAT;
+        case VK_FORMAT_D16_UNORM_S8_UINT:
+            return Format::DEPTH_16_UNORM_STENCIL_8_UINT;
+        case VK_FORMAT_D24_UNORM_S8_UINT:
+            return Format::DEPTH_24_UNORM_STENCIL_8_UINT;
+        case VK_FORMAT_D32_SFLOAT_S8_UINT:
+            return Format::DEPTH_32_SFLOAT_STENCIL_8_UINT;
+        default:
+            return Format::UNDEFINED;
+    }
+}
+
+VkImageUsageFlags utils::getImageUsage( Image::Usage usage ) noexcept
+{
+    VkImageUsageFlags imageUsage = 0;
+    if ( usage & Image::Usage::TRANSFER_SRC ) imageUsage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+    if ( usage & Image::Usage::TRANSFER_DST ) imageUsage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+    if ( usage & Image::Usage::SAMPLED ) imageUsage |= VK_IMAGE_USAGE_SAMPLED_BIT;
+    if ( usage & Image::Usage::STORAGE ) imageUsage |= VK_IMAGE_USAGE_STORAGE_BIT;
+    if ( usage & Image::Usage::COLOR_ATTACHMENT ) imageUsage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    if ( usage & Image::Usage::DEPTH_STENCIL_ATTACHMENT ) imageUsage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+    if ( usage & Image::Usage::TRANSIENT_ATTACHMENT ) imageUsage |= VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT;
+    if ( usage & Image::Usage::INPUT_ATTACHMENT ) imageUsage |= VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
+    return imageUsage;
+}
+
+VkExtent2D utils::getExtent( Extent2D extent, const RenderDevice *renderDevice ) noexcept
+{
+    auto width = extent.width;
+    auto height = extent.height;
+    if ( extent.scalingMode == ScalingMode::SWAPCHAIN_RELATIVE ) {
+        auto swapchain = renderDevice->getSwapchain();
+        width *= swapchain->extent.width;
+        height *= swapchain->extent.height;
+    }
+
+    return VkExtent2D {
+        .width = crimild::UInt32( width ),
+        .height = crimild::UInt32( height ),
+    };
+}
+
 crimild::Bool utils::checkValidationLayersEnabled( void ) noexcept
 {
 #if defined( CRIMILD_DEBUG )

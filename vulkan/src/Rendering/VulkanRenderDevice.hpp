@@ -37,6 +37,7 @@
 #include "Rendering/VulkanDescriptorSetLayout.hpp"
 #include "Rendering/VulkanFence.hpp"
 #include "Rendering/VulkanFramebuffer.hpp"
+#include "Rendering/VulkanImage.hpp"
 #include "Rendering/VulkanImageView.hpp"
 #include "Rendering/VulkanPipeline.hpp"
 #include "Rendering/VulkanPipelineLayout.hpp"
@@ -68,7 +69,7 @@ namespace crimild {
         	public SwapchainManager,
             public FenceManager,
         	public FramebufferManager,
-        	public ImageManager,
+            public ImageManager,
         	public ImageViewManager,
         	public PipelineManager,
         	public PipelineLayoutManager,
@@ -91,13 +92,18 @@ namespace crimild {
             using DescriptorSetLayoutManager::bind;
             using SwapchainManager::create;
             using FenceManager::create;
-            using FramebufferManager::create;
-            using ImageManager::create;
-            using ImageViewManager::create;
+            using FramebufferManager::getHandler;
+            using FramebufferManager::bind;
+            using ImageManager::bind;
+            using ImageManager::getBindInfo;
+            using ImageManager::setBindInfo;
+            using ImageViewManager::bind;
+            using ImageViewManager::getBindInfo;
             using PipelineManager::getBindInfo;
             using PipelineManager::bind;
             using PipelineLayoutManager::create;
-            using RenderPassManager::create;
+            using RenderPassManager::bind;
+            using RenderPassManager::getBindInfo;
             using SemaphoreManager::create;
             using ShaderModuleManager::create;
             using TextureManager::bind;

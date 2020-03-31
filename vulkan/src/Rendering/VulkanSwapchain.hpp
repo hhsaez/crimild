@@ -29,25 +29,22 @@
 #define CRIMILD_VULKAN_RENDERING_SWAPCHAIN_
 
 #include "Foundation/VulkanObject.hpp"
-#include "Rendering/VulkanImage.hpp"
-#include "Rendering/VulkanImageView.hpp"
 #include "Mathematics/Vector.hpp"
 #include "Foundation/Containers/Array.hpp"
 
-#include <vector>
-
 namespace crimild {
+
+    class Image;
+    class ImageView;
 
 	namespace vulkan {
 
 		class RenderDevice;
 		class VulkanSurface;
-		class Image;
-		class ImageView;
 		class Semaphore;
         class SwapchainManager;
 
-		class Swapchain : public VulkanObject, public ImageManager {
+		class Swapchain : public VulkanObject {
             CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::Swapchain )
 
         public:
@@ -70,8 +67,8 @@ namespace crimild {
             VkExtent2D extent;
             crimild::UInt32 maxFramesInFlight = 2;
             SwapchainManager *manager = nullptr;
-            containers::Array< SharedPointer< Image >> images;
-            containers::Array< SharedPointer< ImageView >> imageViews;
+            ImageArray images;
+            ImageViewArray imageViews;
 
             struct AcquireImageResult {
                 crimild::UInt32 imageIndex;

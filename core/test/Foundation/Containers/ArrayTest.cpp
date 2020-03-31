@@ -25,6 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "Foundation/Types.hpp"
 #include "Foundation/Containers/Array.hpp"
 
 #include "gtest/gtest.h"
@@ -159,5 +160,33 @@ TEST( ArrayTest, sortAdvanced )
     });
 
     EXPECT_TRUE( sorted == es );
+}
+
+TEST( ArrayTest, mapSimple )
+{
+    using Element = crimild::UInt32;
+
+    auto es = Array< Element > { 0, 1, 2, 3, 4 };
+    auto doubles = Array< Element > { 0, 2, 4, 6, 8 };
+    auto mapped = es.map( []( auto e ) { return 2 * e; } );
+
+    EXPECT_TRUE( doubles == mapped );
+}
+
+TEST( ArrayTest, mapString )
+{
+    using Element = crimild::UInt32;
+
+    auto es = Array< Element > { 0, 1, 2, 3, 4 };
+    auto expected = Array< std::string > { "0", "1", "2", "3", "4" };
+    auto ret = es.map(
+        []( auto e ) {
+        	std::stringstream ss;
+            ss << e;
+            return ss.str();
+    	}
+    );
+
+    EXPECT_EQ( expected, ret );
 }
 
