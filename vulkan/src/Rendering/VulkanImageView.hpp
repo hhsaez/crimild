@@ -28,11 +28,14 @@
 #ifndef CRIMILD_VULKAN_RENDERING_IMAGE_VIEW_
 #define CRIMILD_VULKAN_RENDERING_IMAGE_VIEW_
 
-#include "Foundation/VulkanObject.hpp"
+#include "Rendering/ImageView.hpp"
+#include "Rendering/VulkanRenderResource.hpp"
 
 namespace crimild {
 
 	namespace vulkan {
+
+#if 0
 
 		class RenderDevice;
 		class Image;
@@ -73,6 +76,18 @@ namespace crimild {
 
         private:
             RenderDevice *m_renderDevice = nullptr;
+        };
+
+#endif
+
+        class ImageViewManager : public BasicRenderResourceManagerImpl< ImageView, VkImageView > {
+            using ManagerImpl = BasicRenderResourceManagerImpl< ImageView, VkImageView >;
+
+        public:
+            virtual ~ImageViewManager( void ) = default;
+
+            crimild::Bool bind( ImageView *imageView ) noexcept override;
+            crimild::Bool unbind( ImageView *imageView ) noexcept override;
         };
 
 	}

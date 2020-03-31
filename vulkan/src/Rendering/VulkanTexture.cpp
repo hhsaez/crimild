@@ -33,6 +33,8 @@ using namespace crimild::vulkan;
 
 crimild::Bool TextureManager::bind( Texture *texture ) noexcept
 {
+    return false;
+    /*
     if ( validate( texture ) ) {
         return true;
     }
@@ -244,10 +246,13 @@ crimild::Bool TextureManager::bind( Texture *texture ) noexcept
     );
 
     return ManagerImpl::bind( texture );
+     */
 }
 
 crimild::Bool TextureManager::unbind( Texture *texture ) noexcept
 {
+    return false;
+    /*
     if ( !validate( texture ) ) {
         return false;
     }
@@ -268,5 +273,6 @@ crimild::Bool TextureManager::unbind( Texture *texture ) noexcept
     removeBindInfo( texture );
 
     return ManagerImpl::unbind( texture );
+     */
 }
 

@@ -25,38 +25,19 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CRIMILD_VULKAN_RENDERING_TEXTURE_
-#define CRIMILD_VULKAN_RENDERING_TEXTURE_
+#ifndef CRIMILD_CORE_RENDERING_SCALING_MODE_
+#define CRIMILD_CORE_RENDERING_SCALING_MODE_
 
-#include "Rendering/VulkanRenderResource.hpp"
-#include "Rendering/Texture.hpp"
-#include "Foundation/Containers/Array.hpp"
-#include "Foundation/Containers/Map.hpp"
+#include "Foundation/Types.hpp"
 
 namespace crimild {
 
-    class ImageView;
-
-    namespace vulkan {
-
-        struct TextureBindInfo {
-            VkImage textureImage = VK_NULL_HANDLE;
-            VkDeviceMemory textureImageMemory = VK_NULL_HANDLE;
-            SharedPointer< ImageView > imageView;
-            VkSampler sampler = VK_NULL_HANDLE;
-        };
-
-        class TextureManager : public BasicRenderResourceManagerImpl< Texture, TextureBindInfo > {
-            using ManagerImpl = BasicRenderResourceManagerImpl< Texture, TextureBindInfo >;
-
-        public:
-            virtual ~TextureManager( void ) = default;
-
-            crimild::Bool bind( Texture *texture ) noexcept override;
-            crimild::Bool unbind( Texture *texture ) noexcept override;
-        };
-
-    }
+    enum class ScalingMode {
+        FIXED,
+        RELATIVE,
+        SWAPCHAIN_RELATIVE,
+        DYNAMIC,
+    };
 
 }
 

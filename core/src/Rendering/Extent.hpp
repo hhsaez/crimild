@@ -25,38 +25,26 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CRIMILD_VULKAN_RENDERING_TEXTURE_
-#define CRIMILD_VULKAN_RENDERING_TEXTURE_
+#ifndef CRIMILD_CORE_RENDERING_EXTENT_
+#define CRIMILD_CORE_RENDERING_EXTENT_
 
-#include "Rendering/VulkanRenderResource.hpp"
-#include "Rendering/Texture.hpp"
-#include "Foundation/Containers/Array.hpp"
-#include "Foundation/Containers/Map.hpp"
+#include "Foundation/Types.hpp"
+#include "Rendering/ScalingMode.hpp"
 
 namespace crimild {
 
-    class ImageView;
+    struct Extent2D {
+        ScalingMode scalingMode = { ScalingMode::FIXED };
+        crimild::Real32 width = 1.0f;
+        crimild::Real32 height = 1.0f;
+    };
 
-    namespace vulkan {
-
-        struct TextureBindInfo {
-            VkImage textureImage = VK_NULL_HANDLE;
-            VkDeviceMemory textureImageMemory = VK_NULL_HANDLE;
-            SharedPointer< ImageView > imageView;
-            VkSampler sampler = VK_NULL_HANDLE;
-        };
-
-        class TextureManager : public BasicRenderResourceManagerImpl< Texture, TextureBindInfo > {
-            using ManagerImpl = BasicRenderResourceManagerImpl< Texture, TextureBindInfo >;
-
-        public:
-            virtual ~TextureManager( void ) = default;
-
-            crimild::Bool bind( Texture *texture ) noexcept override;
-            crimild::Bool unbind( Texture *texture ) noexcept override;
-        };
-
-    }
+    struct Extent3D {
+        ScalingMode scalingMode = { ScalingMode::FIXED };
+        crimild::Real32 width = 1.0f;
+        crimild::Real32 height = 1.0f;
+        crimild::Real32 depth = 1.0f;
+    };
 
 }
 

@@ -32,8 +32,10 @@
 #include "VulkanFramebuffer.hpp"
 #include "VulkanPipeline.hpp"
 
-#include "Rendering/IndexBuffer.hpp"
 #include "Rendering/CommandBuffer.hpp"
+#include "Rendering/Framebuffer.hpp"
+#include "Rendering/IndexBuffer.hpp"
+#include "Rendering/RenderPass.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;
@@ -74,7 +76,7 @@ crimild::Bool CommandBufferManager::bind( CommandBuffer *commandBuffer ) noexcep
     setHandlers( commandBuffer, handlers );
 
     for ( auto i = 0l; i < imageCount; i++ ) {
-        recordCommands( renderDevice, commandBuffer, i );
+        recordCommands( renderDevice, nullptr, commandBuffer, i );
     }
 
     return ManagerImpl::bind( commandBuffer );
@@ -115,9 +117,9 @@ crimild::Bool CommandBufferManager::unbind( CommandBuffer *commandBuffer ) noexc
     return ManagerImpl::unbind( commandBuffer );
 }
 
-void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBuffer *commandBuffer, crimild::Size index ) noexcept
+void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBuffer *parent, CommandBuffer *commandBuffer, crimild::Size index ) noexcept
 {
-    auto handler = renderDevice->getHandler( commandBuffer, index );
+    auto handler = renderDevice->getHandler( parent != nullptr ? parent : commandBuffer, index );
     if ( handler == VK_NULL_HANDLE ) {
         CRIMILD_LOG_ERROR( "Invalid command buffer" );
         return;
@@ -143,11 +145,15 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                 }
 
                 case CommandBuffer::Command::Type::BEGIN_RENDER_PASS: {
+                    m_currentRenderPass = crimild::cast_ptr< RenderPass >( cmd.obj );
+                    renderDevice->setCurrentRenderPass( crimild::get_ptr( m_currentRenderPass ) );
+
+                    // Bind renderpass first
+                    auto renderPass = renderDevice->getBindInfo( crimild::get_ptr( m_currentRenderPass ) );
+                    auto framebuffer = renderDevice->getHandler( crimild::get_ptr( m_currentFramebuffer ), index );
+
                     auto clearColor = RGBAColorf::ZERO;
                     auto clearDepth = Vector2f( 1, 0 );
-                    auto renderPass = renderDevice->getRenderPass();
-                    auto framebuffer = renderDevice->getFramebuffer( index );
-
                     auto clearValues = std::vector< VkClearValue > {
                         {
                             .color = {
@@ -169,10 +175,10 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
 
                     auto renderPassInfo = VkRenderPassBeginInfo {
                         .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-                        .renderPass = renderPass->handler,
-                        .framebuffer = framebuffer->handler,
+                        .renderPass = renderPass,
+                        .framebuffer = framebuffer,
                         .renderArea.offset = { 0, 0 },
-                        .renderArea.extent = framebuffer->extent,
+                        .renderArea.extent = utils::getExtent( m_currentFramebuffer->extent, renderDevice ),
                         .clearValueCount = static_cast< crimild::UInt32 >( clearValues.size() ),
                         .pClearValues = clearValues.data(),
                     };
@@ -193,6 +199,11 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                     break;
                 }
 
+                case CommandBuffer::Command::Type::SET_FRAMEBUFFER: {
+                    m_currentFramebuffer = crimild::cast_ptr< Framebuffer >( cmd.obj );
+                    break;
+                }
+
                 case CommandBuffer::Command::Type::SET_INDEX_OFFSET: {
                     m_indexOffset = cmd.size;
                     break;
@@ -200,6 +211,13 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
 
                 case CommandBuffer::Command::Type::SET_VERTEX_OFFSET: {
                     m_vertexOffset = cmd.size;
+                    break;
+                }
+
+                case CommandBuffer::Command::Type::BIND_COMMAND_BUFFER: {
+                    if ( auto child = cmd.commandBuffer ) {
+                        recordCommands( renderDevice, parent != nullptr ? parent : commandBuffer, child, index );
+                    }
                     break;
                 }
 
@@ -294,6 +312,9 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
 
                 case CommandBuffer::Command::Type::END_RENDER_PASS: {
                     vkCmdEndRenderPass( handler );
+                    renderDevice->setCurrentRenderPass( nullptr );
+                    m_currentRenderPass = nullptr;
+                    m_currentFramebuffer = nullptr;
                     break;
                 }
 

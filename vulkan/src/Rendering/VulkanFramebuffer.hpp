@@ -28,15 +28,18 @@
 #ifndef CRIMILD_VULKAN_RENDERING_FRAMEBUFFER_
 #define CRIMILD_VULKAN_RENDERING_FRAMEBUFFER_
 
-#include "Foundation/VulkanObject.hpp"
-#include "Foundation/Containers/Array.hpp"
+#include "Rendering/Framebuffer.hpp"
+#include "Rendering/VulkanRenderResource.hpp"
 
 namespace crimild {
 
+	class Framebuffer;
+
 	namespace vulkan {
 
+#if 0
         class FramebufferManager;
-		class ImageView;
+        class ImageView;
         class RenderDevice;
         class RenderPass;
 
@@ -79,6 +82,17 @@ namespace crimild {
             RenderDevice *m_renderDevice = nullptr;
             containers::Array< Framebuffer * > m_framebuffers;
         };
+#endif
+
+		class FramebufferManager : public MultiHandlerRenderResourceManagerImpl< Framebuffer, VkFramebuffer > {
+			using ManagerImpl = MultiHandlerRenderResourceManagerImpl< Framebuffer, VkFramebuffer >;
+
+		public:
+			virtual ~FramebufferManager( void ) = default;
+
+			crimild::Bool bind( Framebuffer *framebuffer ) noexcept override;
+			crimild::Bool unbind( Framebuffer *framebuffer ) noexcept override;
+		};
 
 	}
 

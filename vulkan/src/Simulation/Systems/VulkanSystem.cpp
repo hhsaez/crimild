@@ -256,6 +256,10 @@ void VulkanSystem::cleanSwapchain( void ) noexcept
         static_cast< BufferManager * >( renderDevice )->clear();
         static_cast< CommandBufferManager * >( renderDevice )->clear();
         static_cast< PipelineManager * >( renderDevice )->clear();
+        static_cast< FramebufferManager * >( renderDevice )->clear();
+        static_cast< RenderPassManager * >( renderDevice )->clear();
+        static_cast< ImageViewManager * >( renderDevice )->clear();
+        static_cast< ImageManager * >( renderDevice )->clear();
 
         renderDevice->reset( crimild::get_ptr( m_commandPool ) );
     }
@@ -287,6 +291,7 @@ crimild::Bool VulkanSystem::recreateSwapchain( void ) noexcept
 
 crimild::Bool VulkanSystem::createRenderPass( void ) noexcept
 {
+    /*
     auto renderDevice = crimild::get_ptr( m_renderDevice );
     auto swapchain = crimild::get_ptr( m_swapchain );
 
@@ -297,10 +302,13 @@ crimild::Bool VulkanSystem::createRenderPass( void ) noexcept
     );
 
     return m_renderPass != nullptr;
+     */
+    return true;
 }
 
 crimild::Bool VulkanSystem::createColorResources( void ) noexcept
 {
+    /*
     auto renderDevice = crimild::get_ptr( m_renderDevice );
     auto msaaSamples = renderDevice->physicalDevice->msaaSamples;
     auto swapchain = crimild::get_ptr( m_swapchain );
@@ -324,12 +332,14 @@ crimild::Bool VulkanSystem::createColorResources( void ) noexcept
         .aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT,
         .mipLevels = 1,
     });
+     */
 
     return true;
 }
 
 crimild::Bool VulkanSystem::createDepthResources( void ) noexcept
 {
+    /*
     auto renderDevice = crimild::get_ptr( m_renderDevice );
     auto msaaSamples = renderDevice->physicalDevice->msaaSamples;
     auto swapchain = crimild::get_ptr( m_swapchain );
@@ -366,12 +376,14 @@ crimild::Bool VulkanSystem::createDepthResources( void ) noexcept
         1,
         1
     );
+     */
 
     return true;
 }
 
 crimild::Bool VulkanSystem::createFramebuffers( void ) noexcept
 {
+    /*
     auto renderDevice = crimild::get_ptr( m_renderDevice );
     auto physicalDevice = renderDevice->physicalDevice;
     auto msaaSamples = physicalDevice->msaaSamples;
@@ -409,6 +421,8 @@ crimild::Bool VulkanSystem::createFramebuffers( void ) noexcept
     }
 
     return m_framebuffers.size() > 0;
+     */
+    return true;
 }
 
 crimild::Bool VulkanSystem::createSyncObjects( void ) noexcept

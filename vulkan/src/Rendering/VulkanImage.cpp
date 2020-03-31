@@ -32,6 +32,8 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
+#if 0
+
 crimild::vulkan::Image::~Image( void )
 {
     if ( manager != nullptr ) {
@@ -103,3 +105,72 @@ void ImageManager::destroy( Image *image ) noexcept
     image->renderDevice = nullptr;
     erase( image );
 }
+
+#endif
+
+crimild::Bool vulkan::ImageManager::bind( Image *image ) noexcept
+{
+    if ( validate( image ) ) {
+        return true;
+    }
+
+    CRIMILD_LOG_TRACE( "Binding Vulkan Image" );
+
+    auto renderDevice = getRenderDevice();
+
+    auto width = image->extent.width;
+    auto height = image->extent.height;
+    if ( image->extent.scalingMode == ScalingMode::SWAPCHAIN_RELATIVE ) {
+        auto swapchain = renderDevice->getSwapchain();
+        width *= swapchain->extent.width;
+        height *= swapchain->extent.height;
+    }
+
+    ImageBindInfo handler;
+
+    utils::createImage(
+        renderDevice,
+        utils::ImageDescriptor {
+            .width = crimild::UInt32( width ),
+            .height = crimild::UInt32( height ),
+            .format = utils::getFormat( renderDevice, image->format ),
+            .tiling = VK_IMAGE_TILING_OPTIMAL,
+            .usage = utils::getImageUsage( image->usage ),
+            .properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+//            .mipLevels = 1,
+//            .numSamples = descriptor.numSamples,
+        },
+       	handler.imageHandler,
+       	handler.imageMemoryHandler
+    );
+
+    setBindInfo( image, handler );
+
+    return ManagerImpl::bind( image );
+}
+
+crimild::Bool vulkan::ImageManager::unbind( Image *image ) noexcept
+{
+    if ( !validate( image ) ) {
+        return false;
+    }
+
+    CRIMILD_LOG_TRACE( "Unbind Vulkan Image" );
+
+    auto renderDevice = getRenderDevice();
+    auto handler = renderDevice->getBindInfo( image );
+
+    if ( renderDevice != nullptr ) {
+        if ( handler.imageHandler != VK_NULL_HANDLE ) {
+            vkDestroyImage( renderDevice->handler, handler.imageHandler, nullptr );
+        }
+        if ( handler.imageMemoryHandler != VK_NULL_HANDLE ) {
+            vkFreeMemory( renderDevice->handler, handler.imageMemoryHandler, nullptr );
+        }
+    }
+
+    removeBindInfo( image );
+
+    return ManagerImpl::unbind( image );
+}
+

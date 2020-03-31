@@ -25,13 +25,17 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "Rendering/Image.hpp"
+
 #include "VulkanRenderPass.hpp"
 #include "VulkanPhysicalDevice.hpp"
 #include "VulkanRenderDevice.hpp"
 #include "VulkanSwapchain.hpp"
 
-//using namespace crimild;
+using namespace crimild;
 using namespace crimild::vulkan;
+
+#if 0
 
 RenderPass::~RenderPass( void ) noexcept
 {
@@ -188,3 +192,136 @@ void RenderPassManager::destroy( RenderPass *renderPass ) noexcept
     renderPass->handler = VK_NULL_HANDLE;
     erase( renderPass );
 }
+
+#endif
+
+crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
+{
+	if ( validate( renderPass ) ) {
+		return true;
+	}
+
+	CRIMILD_LOG_TRACE( "Binding Vulkan Render Pass" );
+
+	auto renderDevice = getRenderDevice();
+
+	auto getImageLayout = [&]( const crimild::Image::Usage &usage ) -> VkImageLayout {
+		if ( usage & crimild::Image::Usage::COLOR_ATTACHMENT ) {
+			return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		}
+		else if ( usage & crimild::Image::Usage::DEPTH_STENCIL_ATTACHMENT ) {
+			return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		}
+		else {
+			return VK_IMAGE_LAYOUT_UNDEFINED;
+		}
+	};
+
+    std::map< Attachment *, VkAttachmentReference > attachmentReferences;
+    auto attachments = renderPass->attachments.map(
+       	[ &, idx = 0l ]( auto const &attachment ) mutable {
+            attachmentReferences[ crimild::get_ptr( attachment ) ] = {
+                .attachment = crimild::UInt32( idx++ ),
+                .layout = getImageLayout( attachment->usage ),
+            };
+            return VkAttachmentDescription {
+                .format = utils::getFormat( renderDevice, attachment->format ),
+                .samples = VK_SAMPLE_COUNT_1_BIT,
+                .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+                .storeOp = ( attachment->usage & crimild::Image::Usage::PRESENTATION ) ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE,
+                .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+                .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+                .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+                .finalLayout = ( attachment->usage & crimild::Image::Usage::PRESENTATION ) ? VK_IMAGE_LAYOUT_PRESENT_SRC_KHR : getImageLayout( attachment->usage ),
+            };
+    	}
+   	);
+
+	std::vector< VkSubpassDescription > subpasses;
+	std::vector< VkSubpassDependency > subpassDependencies;
+    std::vector< std::vector< VkAttachmentReference >> subpassColorAttachments( renderPass->subpasses.size() );
+    std::vector< std::vector< VkAttachmentReference >> subpassDepthStencilAttachments( renderPass->subpasses.size() );
+
+	renderPass->subpasses.each(
+		[&]( auto const &subpass, auto idx ) {
+			auto &colorAttachments = subpassColorAttachments[ idx ];
+			subpass->colorAttachments.each(
+				[&]( const auto &attachment ) {
+					colorAttachments.push_back( attachmentReferences[ crimild::get_ptr( attachment ) ] );
+				}
+			);
+			auto &depthStencilAttachments = subpassDepthStencilAttachments[ idx ];
+			if ( auto att = crimild::get_ptr( subpass->depthStencilAttachment ) ) {
+				depthStencilAttachments.push_back( attachmentReferences[ att ] );
+			}
+			subpasses.push_back(
+				VkSubpassDescription {
+					.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
+					.colorAttachmentCount = crimild::UInt32( colorAttachments.size() ),
+					.pColorAttachments = colorAttachments.data(),
+					.pDepthStencilAttachment = depthStencilAttachments.data(),
+				}
+			);
+			subpassDependencies.push_back(
+				VkSubpassDependency {
+					.srcSubpass = VK_SUBPASS_EXTERNAL,
+					.dstSubpass = crimild::UInt32( idx ),
+					.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+					.srcAccessMask = 0,
+					.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+					.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+				}
+			);
+		}
+	);
+
+	auto createInfo = VkRenderPassCreateInfo {
+		.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
+		.attachmentCount = static_cast< crimild::UInt32 >( attachments.size() ),
+        .pAttachments = attachments.getData(),
+		.subpassCount = static_cast< crimild::UInt32 >( subpasses.size() ),
+		.pSubpasses = subpasses.data(),
+		.dependencyCount = static_cast< crimild::UInt32 >( subpassDependencies.size() ),
+		.pDependencies = subpassDependencies.data(),
+	};
+
+	VkRenderPass handler;
+	CRIMILD_VULKAN_CHECK(
+		vkCreateRenderPass(
+			renderDevice->handler,
+			&createInfo,
+			nullptr,
+			&handler
+		)
+	);
+
+	setBindInfo( renderPass, handler );		
+
+	return ManagerImpl::bind( renderPass );
+}
+
+crimild::Bool vulkan::RenderPassManager::unbind( RenderPass *renderPass ) noexcept
+{
+	if ( !validate( renderPass ) ) {
+		return false;
+	}
+
+	CRIMILD_LOG_TRACE( "Unbidn Vulkan Render Pass" );
+
+	auto renderDevice = getRenderDevice();
+
+	auto handler = getBindInfo( renderPass );
+
+	if ( renderDevice != nullptr && handler != VK_NULL_HANDLE ) {
+		vkDestroyRenderPass(
+			renderDevice->handler,
+			handler,
+			nullptr
+		);
+	}
+
+	removeBindInfo( renderPass );
+
+	return ManagerImpl::unbind( renderPass );
+}
+

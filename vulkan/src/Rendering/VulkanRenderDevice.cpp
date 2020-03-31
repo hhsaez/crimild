@@ -49,11 +49,7 @@ RenderDevice::RenderDevice( void )
     : CommandPoolManager( this ),
 	  SwapchainManager( this ),
       FenceManager( this ),
-      FramebufferManager( this ),
-      ImageManager( this ),
-	  ImageViewManager( this ),
       PipelineLayoutManager( this ),
-      RenderPassManager( this ),
       SemaphoreManager( this ),
 	  ShaderModuleManager( this )
 {
@@ -251,13 +247,13 @@ void RenderDeviceManager::destroy( RenderDevice *renderDevice ) noexcept
     static_cast< SemaphoreManager * >( renderDevice )->cleanup();
     static_cast< CommandBufferManager * >( renderDevice )->clear();
     static_cast< CommandPoolManager * >( renderDevice )->cleanup();
-    static_cast< FramebufferManager * >( renderDevice )->cleanup();
+    static_cast< FramebufferManager * >( renderDevice )->clear();
     static_cast< ShaderModuleManager * >( renderDevice )->cleanup();
     static_cast< PipelineManager * >( renderDevice )->clear();
     static_cast< PipelineLayoutManager * >( renderDevice )->cleanup();
-    static_cast< RenderPassManager * >( renderDevice )->cleanup();
-    static_cast< ImageViewManager * >( renderDevice )->cleanup();
-    static_cast< ImageManager * >( renderDevice )->cleanup();
+    static_cast< RenderPassManager * >( renderDevice )->clear();
+    static_cast< ImageViewManager * >( renderDevice )->clear();
+    static_cast< ImageManager * >( renderDevice )->clear();
     static_cast< SwapchainManager * >( renderDevice )->cleanup();
 
     if ( renderDevice->handler != VK_NULL_HANDLE ) {

@@ -45,7 +45,6 @@ namespace crimild {
 
         class CommandPool;
         class Fence;
-        class Framebuffer;
         class Semaphore;
         class Swapchain;
 
