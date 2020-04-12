@@ -129,6 +129,42 @@ void CommandBuffer::beginRenderPass( RenderPass *renderPass, Framebuffer *frameb
     );
 }
 
+void CommandBuffer::endRenderPass( RenderPass *renderPass ) noexcept
+{
+    m_commands.push_back(
+        [&] {
+            Command cmd;
+            cmd.type = Command::Type::END_RENDER_PASS;
+            cmd.obj = crimild::retain( renderPass );
+            return cmd;
+        }()
+    );
+}
+
+void CommandBuffer::beginRenderSubpass( RenderSubpass *subpass ) noexcept
+{
+    m_commands.push_back(
+        [&] {
+            Command cmd;
+            cmd.type = Command::Type::BEGIN_RENDER_SUBPASS;
+            cmd.obj = crimild::retain( subpass );
+            return cmd;
+        }()
+    );
+}
+
+void CommandBuffer::endRenderSubpass( RenderSubpass *subpass ) noexcept
+{
+    m_commands.push_back(
+        [&] {
+            Command cmd;
+            cmd.type = Command::Type::END_RENDER_SUBPASS;
+            cmd.obj = crimild::retain( subpass );
+            return cmd;
+        }()
+    );
+}
+
 void CommandBuffer::setViewport( const ViewportDimensions &viewport ) noexcept
 {
     Command cmd;
@@ -234,18 +270,6 @@ void CommandBuffer::drawIndexed( crimild::UInt32 count, crimild::Size indexOffse
     cmd.type = Command::Type::DRAW_INDEXED;
     cmd.count = count;
     m_commands.push_back( cmd );
-}
-
-void CommandBuffer::endRenderPass( RenderPass *renderPass ) noexcept
-{
-    m_commands.push_back(
-        [&] {
-            Command cmd;
-            cmd.type = Command::Type::END_RENDER_PASS;
-            cmd.obj = crimild::retain( renderPass );
-            return cmd;
-        }()
-    );
 }
 
 void CommandBuffer::end( void ) noexcept

@@ -54,6 +54,11 @@ namespace crimild {
 
 			}
 
+            void hasVertex( VERTEX_TYPE const &v )
+            {
+                return _adj.contains( v );
+            }
+
 			void addVertex( VERTEX_TYPE const &v )
 			{
 				_adj.insert( v, Set< VERTEX_TYPE >() );

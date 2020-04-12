@@ -35,6 +35,7 @@
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Format.hpp"
 #include "Rendering/Image.hpp"
+#include "Rendering/RenderPass.hpp"
 #include "Rendering/Shader.hpp"
 #include "Rendering/Texture.hpp"
 
@@ -84,6 +85,7 @@ namespace crimild {
             VkDescriptorType getVulkanDescriptorType( DescriptorType type ) noexcept;
             VkFilter getVulkanFilter( Texture::Filter filter ) noexcept;
             VkPolygonMode getPolygonMode( PolygonState *polygonState ) noexcept;
+            VkRect2D getViewportRect( const ViewportDimensions *viewport, const RenderDevice *renderDevice ) noexcept;
             VkViewport getViewport( const ViewportDimensions *viewport, const RenderDevice *renderDevice ) noexcept;
             VkRect2D getScissor( const ViewportDimensions *scissor, const RenderDevice *renderDevice ) noexcept;
             VkIndexType getIndexType( const IndexBuffer *indexBuffer ) noexcept;
@@ -91,8 +93,13 @@ namespace crimild {
             VkBorderColor getBorderColor( Texture::BorderColor borderColor ) noexcept;
             VkFormat getFormat( RenderDevice *renderDevice, Format format ) noexcept;
             Format getFormat( VkFormat format ) noexcept; //< Reversed
+            crimild::Bool formatIsColor( Format format ) noexcept;
+            crimild::Bool formatIsDepthStencil( Format format ) noexcept;
             VkImageUsageFlags getImageUsage( Image::Usage usage ) noexcept;
+            VkImageLayout getImageLayout( Image::Layout layout ) noexcept;
             VkExtent2D getExtent( Extent2D extent, const RenderDevice *renderDevice ) noexcept;
+            VkAttachmentLoadOp getLoadOp( Attachment::LoadOp loadOp ) noexcept;
+            VkAttachmentStoreOp getStoreOp( Attachment::StoreOp storeOp ) noexcept;
 
             //@}
 

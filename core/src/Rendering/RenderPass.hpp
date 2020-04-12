@@ -31,7 +31,9 @@
 #include "Foundation/SharedObject.hpp"
 #include "Rendering/Format.hpp"
 #include "Rendering/Image.hpp"
+#include "Rendering/ImageView.hpp"
 #include "Rendering/RenderResource.hpp"
+#include "Rendering/ViewportDimensions.hpp"
 
 namespace crimild {
 
@@ -52,19 +54,30 @@ namespace crimild {
 		
     public:
         Format format;
-        Image::Usage usage = Image::Usage::PRESENTATION;
+        Image::Usage usage = Image::Usage::SAMPLED;
 		LoadOp loadOp = LoadOp::DONT_CARE;
 		StoreOp storeOp = StoreOp::DONT_CARE;
 		LoadOp stencilLoadOp = LoadOp::DONT_CARE;
 		StoreOp stencilStoreOp = StoreOp::DONT_CARE;
-		//Image::Layout initialLayout = Image::Layout::UNDEFINED;
-		//Image::Layout finalLayout = Image::Layout::UNDEFINED;
+		Image::Layout initialLayout = Image::Layout::UNDEFINED;
+		Image::Layout finalLayout = Image::Layout::UNDEFINED;
+
+        // TODO
+        SharedPointer< ImageView > imageView;
+    };
+
+    struct AttachmentReference {
+        SharedPointer< Attachment > attachment;
+        Image::Layout layout;
     };
 
     class RenderSubpass : public SharedObject {
     public:
-        containers::Array< SharedPointer< Attachment >> colorAttachments;
-        SharedPointer< Attachment > depthStencilAttachment;
+        containers::Array< AttachmentReference > colorAttachments;
+        containers::Array< AttachmentReference > depthStencilAttachments;
+
+        containers::Array< SharedPointer< Attachment >> inputs;
+        containers::Array< SharedPointer< Attachment >> outputs;
 
         SharedPointer< CommandBuffer > commands;
     };
@@ -76,6 +89,7 @@ namespace crimild {
     public:
 		containers::Array< SharedPointer< Attachment >> attachments;
 		containers::Array< SharedPointer< RenderSubpass >> subpasses;
+        ViewportDimensions viewport;
     };
 
 }

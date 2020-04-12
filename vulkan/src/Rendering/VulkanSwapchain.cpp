@@ -116,7 +116,8 @@ void Swapchain::retrieveSwapchainImages( void ) noexcept
 
 	for ( const auto &imageHandler : imagesHandlers ) {
         auto image = crimild::alloc< Image >();
-        image->usage = Image::Usage::PRESENTATION;
+//        image->usage = Image::Usage::COLOR_ATTACHMENT;
+//        image->layout
         image->format = utils::getFormat( format );
         image->extent.scalingMode = ScalingMode::SWAPCHAIN_RELATIVE;
         if ( auto img = crimild::get_ptr( image ) ) {

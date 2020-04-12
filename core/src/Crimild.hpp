@@ -237,6 +237,7 @@
 #include "Rendering/CullFaceState.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/FrameBufferObject.hpp"
+#include "Rendering/FrameGraph.hpp"
 #include "Rendering/RenderTarget.hpp"
 #include "Rendering/Font.hpp"
 #include "Rendering/Image.hpp"
