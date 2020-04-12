@@ -63,7 +63,7 @@ crimild::Bool PipelineManager::bind( Pipeline *pipeline ) noexcept
     auto inputAssembly = createInputAssemby( pipeline->primitiveType );
     auto viewport = createViewport( pipeline->viewport );
     auto scissor = createScissor( pipeline->scissor );
-    auto viewportState = pipeline->viewport.scalingMode != ViewportDimensions::ScalingMode::DYNAMIC
+    auto viewportState = pipeline->viewport.scalingMode != ScalingMode::DYNAMIC
     	? createViewportState( viewport, scissor )
     	: createDynamicViewportState( true, true );
     auto rasterizer = createRasterizer( pipeline );
@@ -95,7 +95,7 @@ crimild::Bool PipelineManager::bind( Pipeline *pipeline ) noexcept
         .pColorBlendState = &colorBlending,
         .pDynamicState = &dynamicState,
         .layout = pipelineLayout->handler,
-        .renderPass = renderPass,
+        .renderPass = renderPass.handler,
         .subpass = 0,
         .basePipelineHandle = VK_NULL_HANDLE, // Optional
         .basePipelineIndex = -1, // Optional
@@ -427,11 +427,11 @@ PipelineManager::DynamicStates PipelineManager::getDynamicStates( Pipeline *pipe
 {
     std::vector< VkDynamicState > dynamicStates;
 
-    if ( pipeline->viewport.scalingMode == ViewportDimensions::ScalingMode::DYNAMIC ) {
+    if ( pipeline->viewport.scalingMode == ScalingMode::DYNAMIC ) {
         dynamicStates.push_back( VK_DYNAMIC_STATE_VIEWPORT );
     }
 
-    if ( pipeline->scissor.scalingMode == ViewportDimensions::ScalingMode::DYNAMIC ) {
+    if ( pipeline->scissor.scalingMode == ScalingMode::DYNAMIC ) {
         dynamicStates.push_back( VK_DYNAMIC_STATE_SCISSOR );
     }
 

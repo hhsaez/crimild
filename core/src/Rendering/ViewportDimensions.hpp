@@ -29,16 +29,11 @@
 #define CRIMILD_RENDERING_VIEWPORT_DIMENSIONS_
 
 #include "Mathematics/Rect.hpp"
+#include "Rendering/ScalingMode.hpp"
 
 namespace crimild {
 
     struct ViewportDimensions {
-        enum class ScalingMode {
-            FIXED,
-            RELATIVE,
-            SWAPCHAIN_RELATIVE,
-            DYNAMIC,
-        };
 
         ScalingMode scalingMode = ScalingMode::SWAPCHAIN_RELATIVE;
         Rectf dimensions = Rectf( 0, 0, 1, 1 );

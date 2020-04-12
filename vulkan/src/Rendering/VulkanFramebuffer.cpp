@@ -33,6 +33,8 @@ using namespace crimild::vulkan;
 
 crimild::Bool FramebufferManager::bind( Framebuffer *framebuffer ) noexcept
 {
+    return false;
+    /*
 	if ( validate( framebuffer ) ) {
 		return true;
 	}
@@ -88,6 +90,7 @@ crimild::Bool FramebufferManager::bind( Framebuffer *framebuffer ) noexcept
     setHandlers( framebuffer, handlers );
 
 	return ManagerImpl::bind( framebuffer );
+     */
 }
 
 crimild::Bool FramebufferManager::unbind( Framebuffer *framebuffer ) noexcept
