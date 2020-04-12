@@ -90,7 +90,7 @@ namespace crimild {
             Swapchain *getSwapchain( void ) noexcept { return crimild::get_ptr( m_swapchain ); }
             CommandPool *getCommandPool( void ) noexcept { return crimild::get_ptr( m_commandPool ); }
 
-            void setCommandBuffers( std::vector< SharedPointer< CommandBuffer >> const &cmds ) noexcept { m_commandBuffers = cmds; }
+            void setCommandBuffers( containers::Array< SharedPointer< CommandBuffer >> const &cmds ) noexcept { m_commandBuffers = cmds; }
 
         protected:
             virtual SharedPointer< VulkanSurface > create( VulkanSurface::Descriptor const &descriptor ) noexcept { return nullptr; }
@@ -118,7 +118,7 @@ namespace crimild {
             SharedPointer< RenderDevice > m_renderDevice;
             SharedPointer< Swapchain > m_swapchain;
             SharedPointer< CommandPool > m_commandPool;
-            std::vector< SharedPointer< CommandBuffer >> m_commandBuffers;
+            containers::Array< SharedPointer< CommandBuffer >> m_commandBuffers;
             std::vector< SharedPointer< Semaphore >> m_imageAvailableSemaphores;
             std::vector< SharedPointer< Semaphore >> m_renderFinishedSemaphores;
             std::vector< SharedPointer< Fence >> m_inFlightFences;

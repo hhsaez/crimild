@@ -149,8 +149,9 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                     renderDevice->setCurrentRenderPass( crimild::get_ptr( m_currentRenderPass ) );
 
                     // Bind renderpass first
-                    auto renderPass = renderDevice->getBindInfo( crimild::get_ptr( m_currentRenderPass ) );
-                    auto framebuffer = renderDevice->getHandler( crimild::get_ptr( m_currentFramebuffer ), index );
+                    auto bindInfo = renderDevice->getBindInfo( crimild::get_ptr( m_currentRenderPass ) );
+                    auto renderPass = bindInfo.handler;
+                    auto framebuffer = bindInfo.framebuffers[ index ];
 
                     auto clearColor = RGBAColorf::ZERO;
                     auto clearDepth = Vector2f( 1, 0 );
@@ -173,12 +174,14 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                         },
                     };
 
+                    auto rect = utils::getViewportRect( &m_currentRenderPass->viewport, renderDevice );
+
                     auto renderPassInfo = VkRenderPassBeginInfo {
                         .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
                         .renderPass = renderPass,
                         .framebuffer = framebuffer,
-                        .renderArea.offset = { 0, 0 },
-                        .renderArea.extent = utils::getExtent( m_currentFramebuffer->extent, renderDevice ),
+                        .renderArea.offset = rect.offset,
+                        .renderArea.extent = rect.extent,
                         .clearValueCount = static_cast< crimild::UInt32 >( clearValues.size() ),
                         .pClearValues = clearValues.data(),
                     };

@@ -145,7 +145,7 @@ VkViewport utils::getViewport( const ViewportDimensions *viewport, const RenderD
     auto minD = viewport->depthRange.x();
     auto maxD = viewport->depthRange.y();
 
-    if ( viewport->scalingMode == ViewportDimensions::ScalingMode::SWAPCHAIN_RELATIVE ) {
+    if ( viewport->scalingMode == ScalingMode::SWAPCHAIN_RELATIVE ) {
         if ( renderDevice != nullptr ) {
             if ( auto swapchain = renderDevice->getSwapchain() ) {
                 // Scale viewport if needed
@@ -181,14 +181,14 @@ VkViewport utils::getViewport( const ViewportDimensions *viewport, const RenderD
     };
 }
 
-VkRect2D utils::getScissor( const ViewportDimensions *viewport, const RenderDevice *renderDevice ) noexcept
+VkRect2D utils::getViewportRect( const ViewportDimensions *viewport, const RenderDevice *renderDevice ) noexcept
 {
     auto x = viewport->dimensions.getX();
     auto y = viewport->dimensions.getY();
     auto w = viewport->dimensions.getWidth();
     auto h = viewport->dimensions.getHeight();
 
-    if ( viewport->scalingMode == ViewportDimensions::ScalingMode::SWAPCHAIN_RELATIVE ) {
+    if ( viewport->scalingMode == ScalingMode::SWAPCHAIN_RELATIVE ) {
         if ( renderDevice != nullptr ) {
             if ( auto swapchain = renderDevice->getSwapchain() ) {
                 // Scale viewport if needed
@@ -210,6 +210,11 @@ VkRect2D utils::getScissor( const ViewportDimensions *viewport, const RenderDevi
             static_cast< crimild::UInt32 >( h ),
         },
     };
+}
+
+VkRect2D utils::getScissor( const ViewportDimensions *viewport, const RenderDevice *renderDevice ) noexcept
+{
+    return getViewportRect( viewport, renderDevice );
 }
 
 VkIndexType utils::getIndexType( const IndexBuffer *indexBuffer ) noexcept
@@ -361,6 +366,47 @@ Format utils::getFormat( VkFormat format ) noexcept
     }
 }
 
+crimild::Bool utils::formatIsColor( Format format ) noexcept
+{
+    switch ( format ) {
+        case Format::R8_UNORM:
+        case Format::R8_SNORM:
+        case Format::R8_UINT:
+        case Format::R8_SINT:
+        case Format::R32_UINT:
+        case Format::R32_SINT:
+        case Format::R32_SFLOAT:
+        case Format::R64_UINT:
+        case Format::R64_SINT:
+        case Format::R64_SFLOAT:
+        case Format::R8G8B8_UINT:
+        case Format::R8G8B8A8_UINT:
+        case Format::R8G8B8_UNORM:
+        case Format::R8G8B8A8_UNORM:
+        case Format::B8G8R8A8_UNORM:
+        case Format::R32G32B32A32_SFLOAT:
+        case Format::COLOR_SWAPCHAIN_OPTIMAL:
+            return true;
+        default:
+            return false;
+    }
+}
+
+crimild::Bool utils::formatIsDepthStencil( Format format ) noexcept
+{
+    switch ( format ) {
+        case Format::DEPTH_16_UNORM:
+        case Format::DEPTH_32_SFLOAT:
+        case Format::DEPTH_16_UNORM_STENCIL_8_UINT:
+        case Format::DEPTH_24_UNORM_STENCIL_8_UINT:
+        case Format::DEPTH_32_SFLOAT_STENCIL_8_UINT:
+        case Format::DEPTH_STENCIL_DEVICE_OPTIMAL:
+            return true;
+        default:
+            return false;
+    }
+}
+
 VkImageUsageFlags utils::getImageUsage( Image::Usage usage ) noexcept
 {
     VkImageUsageFlags imageUsage = 0;
@@ -373,6 +419,38 @@ VkImageUsageFlags utils::getImageUsage( Image::Usage usage ) noexcept
     if ( usage & Image::Usage::TRANSIENT_ATTACHMENT ) imageUsage |= VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT;
     if ( usage & Image::Usage::INPUT_ATTACHMENT ) imageUsage |= VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
     return imageUsage;
+}
+
+VkImageLayout utils::getImageLayout( Image::Layout layout ) noexcept
+{
+    switch ( layout ) {
+        case Image::Layout::GENERAL:
+            return VK_IMAGE_LAYOUT_GENERAL;
+        case Image::Layout::COLOR_ATTACHMENT_OPTIMAL:
+            return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        case Image::Layout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
+            return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        case Image::Layout::DEPTH_STENCIL_READ_ONLY_OPTIMAL:
+            return VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+        case Image::Layout::SHADER_READ_ONLY_OPTIMAL:
+            return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        case Image::Layout::TRANSFER_SRC_OPTIMAL:
+            return VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+        case Image::Layout::TRANSFER_DST_OPTIMAL:
+            return VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        case Image::Layout::PREINITIALIZED:
+            return VK_IMAGE_LAYOUT_PREINITIALIZED;
+        case Image::Layout::DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL:
+            return VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL;
+        case Image::Layout::DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL:
+            return VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL;
+        case Image::Layout::PRESENT_SRC:
+            return VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+        case Image::Layout::SHARED_PRESENT:
+            return VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR;
+        default:
+            return VK_IMAGE_LAYOUT_UNDEFINED;
+    }
 }
 
 VkExtent2D utils::getExtent( Extent2D extent, const RenderDevice *renderDevice ) noexcept
@@ -389,6 +467,30 @@ VkExtent2D utils::getExtent( Extent2D extent, const RenderDevice *renderDevice )
         .width = crimild::UInt32( width ),
         .height = crimild::UInt32( height ),
     };
+}
+
+VkAttachmentLoadOp utils::getLoadOp( Attachment::LoadOp loadOp ) noexcept
+{
+    switch ( loadOp ) {
+        case Attachment::LoadOp::LOAD:
+            return VK_ATTACHMENT_LOAD_OP_LOAD;
+        case Attachment::LoadOp::CLEAR:
+            return VK_ATTACHMENT_LOAD_OP_CLEAR;
+        case Attachment::LoadOp::DONT_CARE:
+        default:
+            return VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    }
+}
+
+VkAttachmentStoreOp utils::getStoreOp( Attachment::StoreOp storeOp ) noexcept
+{
+    switch ( storeOp ) {
+        case Attachment::StoreOp::STORE:
+            return VK_ATTACHMENT_STORE_OP_STORE;
+        case Attachment::StoreOp::DONT_CARE:
+        default:
+            return VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    }
 }
 
 crimild::Bool utils::checkValidationLayersEnabled( void ) noexcept

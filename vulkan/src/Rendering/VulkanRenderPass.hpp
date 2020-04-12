@@ -37,8 +37,13 @@ namespace crimild {
 
 	namespace vulkan {
 
-		class RenderPassManager : public BasicRenderResourceManagerImpl< RenderPass, VkRenderPass > {
-			using ManagerImpl = BasicRenderResourceManagerImpl< RenderPass, VkRenderPass >;
+        struct RenderPassBindInfo {
+            containers::Array< VkFramebuffer > framebuffers;
+            VkRenderPass handler;
+        };
+
+		class RenderPassManager : public BasicRenderResourceManagerImpl< RenderPass, RenderPassBindInfo > {
+			using ManagerImpl = BasicRenderResourceManagerImpl< RenderPass, RenderPassBindInfo >;
 
 		public:
 			virtual ~RenderPassManager( void ) = default;

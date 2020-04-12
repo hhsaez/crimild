@@ -56,14 +56,30 @@ namespace crimild {
                 DEPTH_STENCIL_ATTACHMENT = 1 << 5,
                 TRANSIENT_ATTACHMENT = 1 << 6,
                 INPUT_ATTACHMENT = 1 << 7,
-				PRESENTATION = 1 << 31,
             };
 
-            Usage( crimild::UInt32 v ) : value( v ) { }
-            operator crimild::UInt32( void ) { return value; }
-            crimild::Int32 operator&( crimild::Int32 other ) const { return value & other; }
+            Usage( crimild::UInt32 v ) : m_value( v ) { }
+            operator crimild::UInt32( void ) { return m_value; }
+            crimild::Int32 operator&( crimild::Int32 other ) const { return m_value & other; }
 
-            crimild::UInt32 value;
+        private:
+            crimild::UInt32 m_value;
+        };
+
+        enum class Layout {
+			UNDEFINED,
+            GENERAL,
+            COLOR_ATTACHMENT_OPTIMAL,
+            DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+            DEPTH_STENCIL_READ_ONLY_OPTIMAL,
+            SHADER_READ_ONLY_OPTIMAL,
+            TRANSFER_SRC_OPTIMAL,
+            TRANSFER_DST_OPTIMAL,
+            PREINITIALIZED,
+            DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL,
+            DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL,
+            PRESENT_SRC,
+            SHARED_PRESENT,
         };
 
     public:
