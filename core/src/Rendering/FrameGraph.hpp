@@ -40,6 +40,7 @@ namespace crimild {
 
 	class Attachment;
     class CommandBuffer;
+    class PresentPass;
 	class RenderPass;	
 	class RenderSubpass;
 
@@ -60,6 +61,7 @@ namespace crimild {
 				ATTACHMENT,
 				RENDER_PASS,
 				RENDER_SUBPASS,
+                PRESENT_PASS,
 
                 CUSTOM_OPERATION,
                 CUSTOM_RESOURCE,
@@ -77,6 +79,7 @@ namespace crimild {
 		Node::Type getNodeType( RenderPass * ) { return Node::Type::RENDER_PASS; }
 		Node::Type getNodeType( RenderSubpass * ) { return Node::Type::RENDER_SUBPASS; }		
 		Node::Type getNodeType( Attachment * ) { return Node::Type::ATTACHMENT; }
+        Node::Type getNodeType( PresentPass * ) { return Node::Type::PRESENT_PASS; }
 
         template< typename NodeObjectType >
         void add( SharedPointer< NodeObjectType > const objPtr ) noexcept
@@ -93,6 +96,7 @@ namespace crimild {
 
             m_graph.addVertex( weakNode );
             m_invertedIndex[ obj ] = weakNode;
+            m_nodesByType[ node->type ].add( weakNode );
 
             // Retain the new node
             m_nodes.insert( node );
@@ -105,6 +109,12 @@ namespace crimild {
             add( obj );
             return obj;
 		}
+
+        template< typename T >
+        inline crimild::Bool contains( SharedPointer< T > const &ptr ) noexcept
+        {
+            return contains( crimild::get_ptr( ptr ) );
+        }
 
         inline crimild::Bool contains( SharedObject *obj ) noexcept
         {
@@ -121,9 +131,10 @@ namespace crimild {
 			return getNode( crimild::get_ptr( obj ) );
 		}
 
-		inline Node *getOutput( void ) noexcept { return m_output; }
-		inline void setOutput( Node *node ) noexcept { m_output = node; }
-		inline void setOutput( SharedObject *obj ) noexcept { setOutput( getNode( obj ) ); }
+        inline const containers::Array< Node * > &getSorted( void ) const
+        {
+            return m_sorted;
+        }
 
         template< typename T, typename Fn >
         void each( Fn fn )
@@ -144,21 +155,12 @@ namespace crimild {
         template< typename T >
         T *getNodeObject( Node *node ) noexcept
         {
-            if ( node == nullptr ) {
-                return nullptr;
+            T *ret = nullptr;
+            if ( node != nullptr && getNodeType( ret ) == node->type ) {
+                ret = static_cast< T * >( crimild::get_ptr( node->obj ) );
             }
-            return static_cast< T * >( crimild::get_ptr( node->obj ) );
+            return ret;
         }
-
-		template< typename T >
-		void verifyConnections( Node *node ) noexcept
-		{
-			verifyConnections( getNodeObject< T >( node ) );
-		}
-		
-		void verifyConnections( Attachment *attachment ) noexcept;
-		void verifyConnections( RenderPass *renderPass ) noexcept;
-		void verifyConnections( RenderSubpass *subpass ) noexcept;
 
 		void connect( Node *src, Node *dst ) noexcept;
 
@@ -169,8 +171,15 @@ namespace crimild {
         containers::Array< Node * > m_sorted;
 		containers::Map< Node::Type, containers::Array< Node * >> m_sortedByType;
         containers::Set< SharedPointer< Node >> m_nodes;
-		Node *m_output = nullptr;
+        containers::Map< Node::Type, containers::Array< Node * >> m_nodesByType;
 	};
+
+    class PresentPass : public SharedObject {
+    public:
+        virtual ~PresentPass( void ) = default;
+
+        SharedPointer< Attachment > colorAttachment;
+    };
 
 }
 
