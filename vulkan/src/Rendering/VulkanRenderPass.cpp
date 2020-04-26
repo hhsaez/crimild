@@ -85,6 +85,11 @@ crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
             else {
                 isPresent = true;
             }
+
+            // 1. Write only: LoadOp::CLEAR or LoadOp::DONT_CARE
+        	// 2. Read-Write: LoadOp::LOAD
+        	// 3. Read only: LoadOp::LOAD?
+
             return VkAttachmentDescription {
                 .format = utils::getFormat( renderDevice, attachment->format ),
                 .samples = VK_SAMPLE_COUNT_1_BIT,
@@ -133,7 +138,7 @@ crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
                 .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
                 .colorAttachmentCount = crimild::UInt32( colorReferences.size() ),
                 .pColorAttachments = colorReferences.getData(),
-                .pDepthStencilAttachment = depthStencilReferences.getData(),
+                .pDepthStencilAttachment = !depthStencilReferences.empty() ? depthStencilReferences.getData() : nullptr,
             };
     	}
     );

@@ -38,30 +38,32 @@ crimild::Bool FrameGraph::compile( void ) noexcept
 {
     CRIMILD_LOG_TRACE( "Compiling frame graph" );
 
-	auto output = getOutput();
-	if ( output == nullptr ) {
-		CRIMILD_LOG_ERROR( "Cannot compile frame graph: No output provided" );
-		return false;
-	}
-
 	verifyAllConnections();
 
     m_reversedGraph = m_graph.reverse();
 
     auto sorted = m_graph.sort();
-//    auto connected = m_reversedGraph.connected( output );
-//    connected.insert( output );
+    sorted.each( []( auto &node ) { std::cout << int( node->type ) << std::endl; });
+
+    auto presentPass = getNodeObject< PresentPass >( sorted.last() );
+    if ( presentPass == nullptr ) {
+        CRIMILD_LOG_ERROR( "Cannot obtain present pass node" );
+        return false;
+    }
+
+    auto connected = m_reversedGraph.connected( getNode( presentPass ) );
+    connected.insert( getNode( presentPass ) );
 
     m_sorted.clear();
     m_sortedByType.clear();
     sorted.each(
-    	[ &/*, connected*/ ]( auto node ) {
-//        	if ( connected.contains( node ) ) {
-//                // Discard the node since it's not connected with the
-//                // final output for this render graph.
-//                CRIMILD_LOG_DEBUG( "Discarding ", node->getName() );
-//                return;
-//        	}
+    	[ &, connected ]( auto node ) {
+        	if ( !connected.contains( node ) ) {
+                // Discard the node since it's not connected with the
+                // final output for this render graph.
+                CRIMILD_LOG_DEBUG( "Discarding (", int( node->type ), "): ", node->getName() );
+                return;
+        	}
             m_sorted.add( node );
         	m_sortedByType[ node->type ].add( node );
     	}
@@ -72,52 +74,72 @@ crimild::Bool FrameGraph::compile( void ) noexcept
 
 void FrameGraph::verifyAllConnections( void ) noexcept
 {
-	m_graph.eachVertex(
-		[&]( auto node ) {
-			switch ( node->type ) {
-				case Node::Type::ATTACHMENT:
-					verifyConnections< Attachment >( node );
-					break;
+    // Start with render passes since they hold all the information already
+    m_nodesByType[ Node::Type::RENDER_PASS ].each(
+       	[&]( auto &node ) {
+            auto renderPass = getNodeObject< RenderPass >( node );
+        	// A render pass depends on all of its subpasses and attachments
+            renderPass->attachments.each( [&]( auto &att ) {
+                connect( getNode( att ), getNode( renderPass ) );
+            });
+            renderPass->subpasses.each( [&]( auto &subpass ) {
+                connect( getNode( subpass ), getNode( renderPass ) );
+            });
+    	}
+   	);
 
-				case Node::Type::RENDER_PASS:
-					verifyConnections< RenderPass >( node );
-					break;
+    // Next, subpasses
+    m_nodesByType[ Node::Type::RENDER_SUBPASS ].each(
+        [&]( auto &node ) {
+            auto subpass = getNodeObject< RenderSubpass >( node );
+            subpass->inputs.each( [&]( auto &attachment ) {
+                // An input attachment is read by a subpass
+                connect( getNode( attachment ), getNode( subpass ) );
+//                Node *origin = nullptr;
+//                m_graph.eachEdge(
+//                	getNode( attachment ),
+//                    [&]( auto &node ) {
+//                        if ( node->type == Node::Type::RENDER_PASS ) {
+//                            origin = node;
+//                        }
+//                	}
+//                );
+//                if ( origin != nullptr ) {
+//                    connect( origin, getNode( subpass ) );
+//                }
+            });
+            subpass->outputs.each( [&]( auto &attachment ) {
+                // A subpass writes into an output attachment
+                connect( getNode( subpass ), getNode( attachment ) );
+            });
+    	}
+    );
 
-				case Node::Type::RENDER_SUBPASS:
-					verifyConnections< RenderSubpass >( node );
-					break;
-
-				default:
-					break;
-			}
-		}
-	);
-}
-
-void FrameGraph::verifyConnections( Attachment *attachment ) noexcept
-{
-	// An attachment has no dependencies?
-}
-
-void FrameGraph::verifyConnections( RenderPass *renderPass ) noexcept
-{
-	renderPass->attachments.each( [&]( auto &attachment ) {
-		// The render pass depends on the attachment
-		connect( getNode( attachment ), getNode( renderPass ) );
-	});
-	
-	renderPass->subpasses.each( [&]( auto &subpass ) {
-		// The render pass depends on each subpass
-		connect( getNode( subpass ), getNode( renderPass ) );
-	});
-}
-
-void FrameGraph::verifyConnections( RenderSubpass *subpass ) noexcept
-{
-	subpass->colorAttachments.each( [&]( auto &ref ) {
-		// A subpass writes into color attachments
-        connect( getNode( subpass ), getNode( ref.attachment ) );
-	});
+    // Finally, presentation pass
+    m_nodesByType[ Node::Type::PRESENT_PASS ].each(
+        [&]( auto &node ) {
+            auto presentPass = getNodeObject< PresentPass >( node );
+        	if ( auto color = crimild::get_ptr( presentPass->colorAttachment ) ) {
+                // A color attachment is presented by a present pass
+                connect( getNode( color ), getNode( presentPass ) );
+                Node *origin = nullptr;
+                m_graph.eachEdge(
+                    getNode( color ),
+                    [&]( auto &node ) {
+                        if ( node->type == Node::Type::RENDER_PASS ) {
+                            origin = node;
+                        }
+                    }
+                );
+                if ( origin != nullptr ) {
+                    connect( origin, getNode( presentPass ) );
+                }
+                else {
+                    CRIMILD_LOG_ERROR( "Color attachment has no origin" );
+                }
+        	}
+        }
+    );
 }
 
 void FrameGraph::connect( Node *src, Node *dst ) noexcept
@@ -134,62 +156,7 @@ FrameGraph::CommandBufferArray FrameGraph::recordCommands( void ) noexcept
         	auto commands = crimild::alloc< CommandBuffer >();
             commands->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
 
-//        	auto getNextRenderPass = [ &, idx = 0 ]() mutable {
-//                return getNodeObject< RenderPass >( m_sortedByType[ Node::Type::RENDER_PASS ][ idx++ ] );
-//        	};
-//
-//            auto getNextRenderSubpass = [ &, idx = 0 ]() mutable {
-//                return getNodeObject< RenderSubpass >( m_sortedByType[ Node::Type::RENDER_SUBPASS ][ idx++ ] );
-//            };
-//
-//            auto currentRenderPass = getNextRenderPass();
-//            auto currentRenderSubpass = getNextRenderSubpass();
-//
-//            commands->beginRenderPass( currentRenderPass, nullptr );
-//            commands->beginRenderSubpass( currentRenderSubpass );
-//
-//        	m_sorted.each( [&]( auto &node ) {
-//                switch ( node->type ) {
-//                    case Node::Type::RENDER_PASS: {
-//                        if ( currentRenderPass != nullptr ) {
-//                            commands->endRenderPass( currentRenderPass );
-//                        }
-//                        currentRenderPass = getNextRenderPass();
-//                        if ( currentRenderPass != nullptr ) {
-//                            commands->beginRenderPass( currentRenderPass, nullptr );
-//                        }
-//                        break;
-//                    }
-//
-//                    case Node::Type::RENDER_SUBPASS: {
-//                        if ( currentRenderSubpass != nullptr ) {
-//                            commands->endRenderSubpass( currentRenderSubpass );
-//                        }
-//                        currentRenderSubpass = getNextRenderSubpass();
-//                        if ( currentRenderSubpass != nullptr ) {
-//                            commands->beginRenderSubpass( currentRenderSubpass );
-//                        }
-////                        auto subpass = getNodeObject< RenderSubpass >( node );
-////                        commands->beginRenderSubpass( subpass );
-////                        if ( auto cmds = crimild::get_ptr( subpass->commands ) ) {
-////                            commands->bindCommandBuffer( cmds );
-////                        }
-////                        commands->endRenderSubpass( subpass );
-//                        break;
-//                    }
-//
-//                    default:
-//                        // ignored
-//                        break;
-//                }
-//            });
-//
-//        	if ( renderPass != nullptr ) {
-//                commands->endRenderPass( renderPass );
-//                renderPass = nullptr;
-//        	}
-
-            m_sortedByType[ Node::Type::RENDER_PASS ].each( [&]( auto node ) {
+        	m_sortedByType[ Node::Type::RENDER_PASS ].each( [&]( auto node ) {
                 if ( auto renderPass = getNodeObject< RenderPass >( node ) ) {
                 	commands->beginRenderPass( renderPass, nullptr );
 
@@ -214,3 +181,4 @@ FrameGraph::CommandBufferArray FrameGraph::recordCommands( void ) noexcept
 
     return ret;
 }
+
