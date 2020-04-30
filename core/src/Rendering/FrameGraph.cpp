@@ -27,8 +27,13 @@
 
 #include "Rendering/FrameGraph.hpp"
 
+#include "Rendering/Buffer.hpp"
 #include "Rendering/CommandBuffer.hpp"
+#include "Rendering/DescriptorSet.hpp"
+#include "Rendering/IndexBuffer.hpp"
+#include "Rendering/Pipeline.hpp"
 #include "Rendering/RenderPass.hpp"
+#include "Rendering/VertexBuffer.hpp"
 
 #include "Foundation/Log.hpp"
 
@@ -43,16 +48,15 @@ crimild::Bool FrameGraph::compile( void ) noexcept
     m_reversedGraph = m_graph.reverse();
 
     auto sorted = m_graph.sort();
-    sorted.each( []( auto &node ) { std::cout << int( node->type ) << std::endl; });
 
-    auto presentPass = getNodeObject< PresentPass >( sorted.last() );
-    if ( presentPass == nullptr ) {
+    auto presentationMaster = getNodeObject< PresentationMaster >( sorted.last() );
+    if ( presentationMaster == nullptr ) {
         CRIMILD_LOG_ERROR( "Cannot obtain present pass node" );
         return false;
     }
 
-    auto connected = m_reversedGraph.connected( getNode( presentPass ) );
-    connected.insert( getNode( presentPass ) );
+    auto connected = m_reversedGraph.connected( getNode( presentationMaster ) );
+    connected.insert( getNode( presentationMaster ) );
 
     m_sorted.clear();
     m_sortedByType.clear();
@@ -74,77 +78,133 @@ crimild::Bool FrameGraph::compile( void ) noexcept
 
 void FrameGraph::verifyAllConnections( void ) noexcept
 {
-    // Start with render passes since they hold all the information already
-    m_nodesByType[ Node::Type::RENDER_PASS ].each(
-       	[&]( auto &node ) {
-            auto renderPass = getNodeObject< RenderPass >( node );
-        	// A render pass depends on all of its subpasses and attachments
-            renderPass->attachments.each( [&]( auto &att ) {
-                connect( getNode( att ), getNode( renderPass ) );
-            });
-            renderPass->subpasses.each( [&]( auto &subpass ) {
-                connect( getNode( subpass ), getNode( renderPass ) );
-            });
-    	}
-   	);
+	// Start with presentation masters
+	m_nodesByType[ Node::Type::PRESENTATION_MASTER ].each(
+		[&]( auto &node ) {
+			auto present = getNodeObject< PresentationMaster >( node );
+			if ( auto color = crimild::get_ptr( present->colorAttachment ) ) {
+				// Add an edge from the color attachment to the master node
+				// since latter depends on the former.
+				connect(
+					color,
+					present
+				);
+			}
+		}
+	);
 
-    // Next, subpasses
-    m_nodesByType[ Node::Type::RENDER_SUBPASS ].each(
-        [&]( auto &node ) {
-            auto subpass = getNodeObject< RenderSubpass >( node );
-            subpass->inputs.each( [&]( auto &attachment ) {
-                // An input attachment is read by a subpass
-                connect( getNode( attachment ), getNode( subpass ) );
-//                Node *origin = nullptr;
-//                m_graph.eachEdge(
-//                	getNode( attachment ),
-//                    [&]( auto &node ) {
-//                        if ( node->type == Node::Type::RENDER_PASS ) {
-//                            origin = node;
-//                        }
-//                	}
-//                );
-//                if ( origin != nullptr ) {
-//                    connect( origin, getNode( subpass ) );
-//                }
-            });
-            subpass->outputs.each( [&]( auto &attachment ) {
-                // A subpass writes into an output attachment
-                connect( getNode( subpass ), getNode( attachment ) );
-            });
-    	}
-    );
+	// Next, render passes
+	m_nodesByType[ Node::Type::RENDER_PASS ].each(
+		[&]( auto &node ) {
+			auto renderPass = getNodeObject< RenderPass >( node );
+			renderPass->attachments.each(
+				[&]( auto &attachmentPtr ) {
+					// Render passes create new attachments, so add edges
+					// from the former to the latter.
+					if ( auto attachment = crimild::get_ptr( attachmentPtr ) ) {
+						connect(
+							renderPass,
+							attachment
+						);
+					}
+				}
+			);
 
-    // Finally, presentation pass
-    m_nodesByType[ Node::Type::PRESENT_PASS ].each(
-        [&]( auto &node ) {
-            auto presentPass = getNodeObject< PresentPass >( node );
-        	if ( auto color = crimild::get_ptr( presentPass->colorAttachment ) ) {
-                // A color attachment is presented by a present pass
-                connect( getNode( color ), getNode( presentPass ) );
-                Node *origin = nullptr;
-                m_graph.eachEdge(
-                    getNode( color ),
-                    [&]( auto &node ) {
-                        if ( node->type == Node::Type::RENDER_PASS ) {
-                            origin = node;
-                        }
-                    }
-                );
-                if ( origin != nullptr ) {
-                    connect( origin, getNode( presentPass ) );
-                }
-                else {
-                    CRIMILD_LOG_ERROR( "Color attachment has no origin" );
-                }
-        	}
-        }
-    );
+			// A render pass depends on its command buffers, so add
+			// an edge going from the command buffer to the render pass
+			if ( auto commands = crimild::get_ptr( renderPass->commands ) ) {
+				connect(
+					commands,
+					renderPass
+				);
+			}
+		}
+	);
+
+	// Like command buffers
+	m_nodesByType[ Node::Type::COMMAND_BUFFER ].each(
+		[&]( auto &node ) {
+			auto commands = getNodeObject< CommandBuffer >( node );
+			commands->each(
+				[&]( auto &cmd ) {
+					switch ( cmd.type ) {
+						case CommandBuffer::Command::Type::BIND_GRAPHICS_PIPELINE:
+							connect(
+								cmd.pipeline,
+								commands
+							);
+							break;
+
+						case CommandBuffer::Command::Type::BIND_VERTEX_BUFFER:
+							connect(
+								crimild::get_ptr(
+									crimild::cast_ptr< VertexBuffer >( cmd.obj )
+								),								
+								commands
+							);
+							break;
+							
+						case CommandBuffer::Command::Type::BIND_INDEX_BUFFER:
+							connect(
+								crimild::get_ptr(
+									crimild::cast_ptr< IndexBuffer >( cmd.obj )
+								),								
+								commands
+							);
+							break;
+							
+						case CommandBuffer::Command::Type::BIND_DESCRIPTOR_SET:
+							connect(
+								crimild::get_ptr(
+									crimild::cast_ptr< DescriptorSet >( cmd.obj )
+								),								
+								commands
+							);
+							break;
+							
+						default:
+							// ignore
+							break;
+					}
+				}
+			);
+		}
+	);
+
+	// Link descriptor sets
+	m_nodesByType[ Node::Type::DESCRIPTOR_SET ].each(
+		[&]( auto &node ) {
+			auto ds = getNodeObject< DescriptorSet >( node );
+			ds->writes.each(
+				[&]( auto &write ) {
+					switch ( write.descriptorType ) {
+						case DescriptorType::UNIFORM_BUFFER:
+							connect(
+								write.buffer,
+								ds
+							);
+							break;
+
+						default:
+							// ignore
+							break;
+					}
+				}
+			);
+		}
+	);
+
+	// TODO: add edges from attachments to image views
+	
 }
 
-void FrameGraph::connect( Node *src, Node *dst ) noexcept
+crimild::Bool FrameGraph::isPresentation( SharedPointer< Attachment > const &attachment ) const noexcept
 {
-	m_graph.addEdge( src, dst );
+	auto master = getPresentationMaster();
+	if ( master == nullptr ) {
+		return false;
+	}
+	return master->colorAttachment == attachment;
 }
 
 FrameGraph::CommandBufferArray FrameGraph::recordCommands( void ) noexcept
@@ -159,17 +219,9 @@ FrameGraph::CommandBufferArray FrameGraph::recordCommands( void ) noexcept
         	m_sortedByType[ Node::Type::RENDER_PASS ].each( [&]( auto node ) {
                 if ( auto renderPass = getNodeObject< RenderPass >( node ) ) {
                 	commands->beginRenderPass( renderPass, nullptr );
-
-                    renderPass->subpasses.each( [&]( auto &ptr ) {
-                        if ( auto subpass = crimild::get_ptr( ptr ) ) {
-                            commands->beginRenderSubpass( subpass );
-                            if ( auto cmds = crimild::get_ptr( subpass->commands ) ) {
-                                commands->bindCommandBuffer( cmds );
-                            }
-                            commands->endRenderSubpass( subpass );
-                        }
-                    });
-
+					if ( auto cmds = crimild::get_ptr( renderPass->commands ) ) {
+						commands->bindCommandBuffer( cmds );
+					}
                 	commands->endRenderPass( renderPass );
                 }
             });
@@ -180,5 +232,14 @@ FrameGraph::CommandBufferArray FrameGraph::recordCommands( void ) noexcept
     );
 
     return ret;
+}
+
+const PresentationMaster *FrameGraph::getPresentationMaster( void ) const noexcept
+{
+	auto &masters = m_nodesByType[ Node::Type::PRESENTATION_MASTER ];
+	if ( masters.empty() ) {
+		return nullptr;
+	}
+	return getNodeObject< PresentationMaster >( masters.first() );
 }
 
