@@ -41,7 +41,6 @@ namespace crimild {
     class Pipeline;
     class Primitive;
     class RenderPass;
-    class RenderSubpass;
     class UniformBuffer;
     class VertexBuffer;
 
@@ -65,8 +64,6 @@ namespace crimild {
 				BEGIN,
                 BEGIN_RENDER_PASS,
                 END_RENDER_PASS,
-                BEGIN_RENDER_SUBPASS,
-                END_RENDER_SUBPASS,
                 BIND_GRAPHICS_PIPELINE,
                 BIND_PRIMITIVE,
                 BIND_INDEX_BUFFER,
@@ -105,9 +102,6 @@ namespace crimild {
 
         void beginRenderPass( RenderPass *renderPass, Framebuffer *framebuffer ) noexcept;
         void endRenderPass( RenderPass *renderPass ) noexcept;
-
-        void beginRenderSubpass( RenderSubpass *subpass ) noexcept;
-        void endRenderSubpass( RenderSubpass *subpass ) noexcept;
 
         void bindCommandBuffer( CommandBuffer *commandBuffer ) noexcept;
         void bindGraphicsPipeline( Pipeline *pipeline ) noexcept;

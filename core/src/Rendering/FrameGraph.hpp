@@ -28,6 +28,7 @@
 #ifndef CRIMILD_CORE_RENDERING_FRAME_GRAPH_
 #define CRIMILD_CORE_RENDERING_FRAME_GRAPH_
 
+#include "Rendering/FrameGraphObject.hpp"
 #include "Foundation/NamedObject.hpp"
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/Containers/Array.hpp"
@@ -39,10 +40,14 @@
 namespace crimild {
 
 	class Attachment;
+	class Buffer;
     class CommandBuffer;
-    class PresentPass;
+	class DescriptorSet;
+	class Image;
+	class ImageView;
+	class Pipeline;
+    class PresentationMaster;
 	class RenderPass;	
-	class RenderSubpass;
 
     class CustomOperation : public SharedObject {
     public:
@@ -58,16 +63,24 @@ namespace crimild {
 
         public:
 			enum class Type {
+				PIPELINE,
+				BUFFER,
+				IMAGE,
+				IMAGE_VIEW,
+				DESCRIPTOR_SET,
+				COMMAND_BUFFER,
 				ATTACHMENT,
 				RENDER_PASS,
-				RENDER_SUBPASS,
-                PRESENT_PASS,
+
+                PRESENTATION_MASTER,
 
                 CUSTOM_OPERATION,
                 CUSTOM_RESOURCE,
 			};
 
 			Type type;
+
+			// obj should inherit from FrameGraphObject
 			SharedPointer< SharedObject > obj;
 		};
 
@@ -76,22 +89,34 @@ namespace crimild {
 	public:
 		virtual ~FrameGraph( void ) = default;
 
-		Node::Type getNodeType( RenderPass * ) { return Node::Type::RENDER_PASS; }
-		Node::Type getNodeType( RenderSubpass * ) { return Node::Type::RENDER_SUBPASS; }		
-		Node::Type getNodeType( Attachment * ) { return Node::Type::ATTACHMENT; }
-        Node::Type getNodeType( PresentPass * ) { return Node::Type::PRESENT_PASS; }
+		Node::Type getNodeType( Pipeline * ) const { return Node::Type::PIPELINE; }
+		Node::Type getNodeType( Buffer * ) const { return Node::Type::BUFFER; }
+		Node::Type getNodeType( Image * ) const { return Node::Type::IMAGE; }
+		Node::Type getNodeType( ImageView * ) const { return Node::Type::IMAGE_VIEW; }
+		Node::Type getNodeType( DescriptorSet * ) const { return Node::Type::DESCRIPTOR_SET; }
+		Node::Type getNodeType( CommandBuffer * ) const { return Node::Type::COMMAND_BUFFER; }
+		Node::Type getNodeType( RenderPass * ) const { return Node::Type::RENDER_PASS; }
+		Node::Type getNodeType( Attachment * ) const { return Node::Type::ATTACHMENT; }
+        Node::Type getNodeType( PresentationMaster * ) const { return Node::Type::PRESENTATION_MASTER; }
 
         template< typename NodeObjectType >
         void add( SharedPointer< NodeObjectType > const objPtr ) noexcept
         {
-            auto obj = crimild::get_ptr( objPtr );
+			add( crimild::get_ptr( objPtr ) );
+        }
+		
+        template< typename NodeObjectType >
+        void add( NodeObjectType *obj ) noexcept
+        {
             if ( contains( obj ) ) {
                 return;
             }
 
+			obj->frameGraph = this;
+
             auto node = crimild::alloc< Node >();
             node->type = getNodeType( obj );
-            node->obj = objPtr;
+            node->obj = crimild::retain( obj );
             auto weakNode = crimild::get_ptr( node );
 
             m_graph.addVertex( weakNode );
@@ -102,10 +127,10 @@ namespace crimild {
             m_nodes.insert( node );
         }
 		
-		template< typename NodeObjectType >
-		SharedPointer< NodeObjectType > create( void ) noexcept
+		template< typename NodeObjectType, typename... Args >
+		SharedPointer< NodeObjectType > create( Args &&... args ) noexcept
 		{
-			auto obj = crimild::alloc< NodeObjectType >();
+			auto obj = crimild::alloc< NodeObjectType >( std::forward< Args >( args )... );
             add( obj );
             return obj;
 		}
@@ -116,17 +141,20 @@ namespace crimild {
             return contains( crimild::get_ptr( ptr ) );
         }
 
-        inline crimild::Bool contains( SharedObject *obj ) noexcept
+		template< typename T >
+        inline crimild::Bool contains( T *obj ) noexcept
         {
             return m_invertedIndex[ obj ] != nullptr;
         }
 
-        inline Node *getNode( SharedObject *obj ) noexcept
+		template< typename T >
+        inline Node *getNode( T *obj ) noexcept
         {
             return m_invertedIndex[ obj ];
         }
 
-		inline Node *getNode( SharedPointer< SharedObject > const &obj ) noexcept
+		template< typename T >
+		inline Node *getNode( SharedPointer< T > const &obj ) noexcept
 		{
 			return getNode( crimild::get_ptr( obj ) );
 		}
@@ -145,6 +173,8 @@ namespace crimild {
             });
         }
 
+		crimild::Bool isPresentation( SharedPointer< Attachment > const &attachment ) const noexcept;			
+
         crimild::Bool compile( void ) noexcept;
 
         CommandBufferArray recordCommands( void ) noexcept;
@@ -162,7 +192,35 @@ namespace crimild {
             return ret;
         }
 
-		void connect( Node *src, Node *dst ) noexcept;
+		template< typename T >
+		const T *getNodeObject( Node *node ) const noexcept
+		{
+            T *ret = nullptr;
+            if ( node != nullptr && getNodeType( ret ) == node->type ) {
+                ret = static_cast< T * >( crimild::get_ptr( node->obj ) );
+            }
+            return ret;
+		}
+
+		template< typename T, typename U >
+		void connect( T *src, U *dst ) noexcept
+		{
+			auto srcNode = getNode( src );
+			if ( srcNode == nullptr ) {
+				add( src );
+				srcNode = getNode( src );
+			}
+
+			auto dstNode = getNode( dst );
+			if ( dstNode == nullptr ) {
+				add( dst );
+				dstNode = getNode( dst );
+			}
+
+			m_graph.addEdge( srcNode, dstNode );
+		}
+
+		const PresentationMaster *getPresentationMaster( void ) const noexcept;
 
 	private:
 		containers::Digraph< Node * > m_graph;
@@ -174,9 +232,11 @@ namespace crimild {
         containers::Map< Node::Type, containers::Array< Node * >> m_nodesByType;
 	};
 
-    class PresentPass : public SharedObject {
+    class PresentationMaster :
+		public SharedObject,
+		public FrameGraphObject {
     public:
-        virtual ~PresentPass( void ) = default;
+        virtual ~PresentationMaster( void ) = default;
 
         SharedPointer< Attachment > colorAttachment;
     };
