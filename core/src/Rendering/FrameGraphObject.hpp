@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
- *
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -9,10 +9,10 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the copyright holder nor the
+ *     * Neither the name of the copyright holders nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,59 +25,34 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_RENDERING_RENDER_PASS_
-#define CRIMILD_CORE_RENDERING_RENDER_PASS_
-
-#include "Foundation/SharedObject.hpp"
-#include "Rendering/Format.hpp"
-#include "Rendering/FrameGraphObject.hpp"
-#include "Rendering/Image.hpp"
-#include "Rendering/ImageView.hpp"
-#include "Rendering/RenderResource.hpp"
-#include "Rendering/ViewportDimensions.hpp"
+#ifndef CRIMILD_CORE_RENDERING_FRAME_GRAPH_OBJECT_
+#define CRIMILD_CORE_RENDERING_FRAME_GRAPH_OBJECT_
 
 namespace crimild {
 
-    class CommandBuffer;
+	class FrameGraph;
 
-    class Attachment :
-		public SharedObject,
-		public FrameGraphObject {
+	/**
+	   \brief An object that can be added to a frame graph
+	 */
+	class FrameGraphObject {
+	protected:
+		/**
+		   \brief Class destructor
+
+		   It's protected so we cannot instantiate this class.
+		 */
+		virtual ~FrameGraphObject( void ) = default;
+
 	public:
-		enum class LoadOp {
-			LOAD,
-			CLEAR,
-			DONT_CARE,
-		};
+		/**
+		   \brief Reference to a frame graph
 
-		enum class StoreOp {
-			STORE,
-			DONT_CARE,
-		};
-		
-    public:
-        Format format;
-        Image::Usage usage = Image::Usage::SAMPLED;
-		LoadOp loadOp = LoadOp::DONT_CARE;
-		StoreOp storeOp = StoreOp::DONT_CARE;
-		LoadOp stencilLoadOp = LoadOp::DONT_CARE;
-		StoreOp stencilStoreOp = StoreOp::DONT_CARE;
-		Image::Layout initialLayout = Image::Layout::UNDEFINED;
-		Image::Layout finalLayout = Image::Layout::UNDEFINED;
-
-        // TODO
-        SharedPointer< ImageView > imageView;
-    };
-
-    class RenderPass :
-    	public SharedObject,
-    	public RenderResourceImpl< RenderPass > {
-
-    public:
-		containers::Array< SharedPointer< Attachment >> attachments;
-		SharedPointer< CommandBuffer > commands;
-        ViewportDimensions viewport;
-    };
+		   This reference is set whenever the object is added to
+		   a frame graph. 
+		 */
+		FrameGraph *frameGraph;
+	};
 
 }
 

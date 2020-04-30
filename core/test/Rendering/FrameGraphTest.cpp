@@ -25,8 +25,14 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Rendering/RenderPass.hpp"
+#include "Rendering/CommandBuffer.hpp"
+#include "Rendering/DescriptorSet.hpp"
 #include "Rendering/FrameGraph.hpp"
+#include "Rendering/IndexBuffer.hpp"
+#include "Rendering/Pipeline.hpp"
+#include "Rendering/RenderPass.hpp"
+#include "Rendering/VertexBuffer.hpp"
+#include "Rendering/UniformBuffer.hpp"
 
 #include "gtest/gtest.h"
 
@@ -43,21 +49,13 @@ TEST( FrameGraph, simple )
         return attachment;
     }();
 
-    auto subpass = [&] {
-        auto subpass = graph->create< RenderSubpass >();
-        subpass->outputs = { color };
-        return subpass;
-    }();
-
     auto renderPass = graph->create< RenderPass >();
     renderPass->attachments = { color };
-    renderPass->subpasses = { subpass };
 
-    auto present = graph->create< PresentPass >();
+    auto present = graph->create< PresentationMaster >();
     present->colorAttachment = color;
 
     EXPECT_TRUE( graph->contains( color ) );
-    EXPECT_TRUE( graph->contains( subpass ) );
     EXPECT_TRUE( graph->contains( renderPass ) );
     EXPECT_TRUE( graph->contains( present ) );
 }
@@ -73,25 +71,17 @@ TEST( FrameGraph, compile )
         return attachment;
     }();
 
-    auto subpass = [&] {
-        auto subpass = graph->create< RenderSubpass >();
-        subpass->outputs = { color };
-        return subpass;
-    }();
-
     auto renderPass = graph->create< RenderPass >();
     renderPass->attachments = { color };
-    renderPass->subpasses = { subpass };
 
-    auto present = graph->create< PresentPass >();
+    auto present = graph->create< PresentationMaster >();
     present->colorAttachment = color;
 
     EXPECT_TRUE( graph->compile() );
 
     auto expected = containers::Array< FrameGraph::Node * > {
-        graph->getNode( subpass ),
-        graph->getNode( color ),
         graph->getNode( renderPass ),
+        graph->getNode( color ),
         graph->getNode( present ),
     };
     EXPECT_EQ( expected, graph->getSorted() );
@@ -108,83 +98,17 @@ TEST( FrameGraph, compileFailNoPresent )
         return attachment;
     }();
 
-    auto subpass = [&] {
-        auto subpass = graph->create< RenderSubpass >();
-        subpass->outputs = { color };
-        return subpass;
-    }();
-
     auto renderPass = graph->create< RenderPass >();
     renderPass->attachments = { color };
-    renderPass->subpasses = { subpass };
 
     EXPECT_TRUE( graph->contains( color ) );
-    EXPECT_TRUE( graph->contains( subpass ) );
     EXPECT_TRUE( graph->contains( renderPass ) );
 
     // Compile fails because there's no PresentPass node in the graph
     EXPECT_FALSE( graph->compile() );
 }
 
-TEST( FrameGraph, inputAttachments )
-{
-    auto graph = crimild::alloc< FrameGraph >();
-
-    auto color = [&] {
-        auto attachment = graph->create< Attachment >();
-        attachment->usage = Image::Usage::COLOR_ATTACHMENT;
-        attachment->format = Format::R8G8B8A8_UNORM;
-        return attachment;
-    }();
-
-    auto depth = [&] {
-        auto attachment = graph->create< Attachment >();
-        attachment->usage = Image::Usage::DEPTH_STENCIL_ATTACHMENT;
-        attachment->format = Format::DEPTH_STENCIL_DEVICE_OPTIMAL;
-        return attachment;
-    }();
-
-    auto resolve = [&] {
-        auto attachment = graph->create< Attachment >();
-        attachment->usage = Image::Usage::COLOR_ATTACHMENT;
-        attachment->format = Format::COLOR_SWAPCHAIN_OPTIMAL;
-        return attachment;
-    }();
-
-    auto gBufferSubpass = [&] {
-        auto subpass = graph->create< RenderSubpass >();
-        subpass->outputs = { color, depth };
-        return subpass;
-    }();
-
-    auto resolveSubpass = [&] {
-        auto subpass = graph->create< RenderSubpass >();
-        subpass->inputs = { color, depth };
-        subpass->outputs = { resolve };
-        return subpass;
-    }();
-
-    auto renderPass = graph->create< RenderPass >();
-    renderPass->attachments = { color, depth, resolve };
-    renderPass->subpasses = { gBufferSubpass, resolveSubpass };
-
-    auto present = graph->create< PresentPass >();
-    present->colorAttachment = resolve;
-
-    EXPECT_TRUE( graph->compile() );
-
-    // While attachments can be in different order between subpasses,
-    // all render passes, subpasses the and present pass must
-    // be in a specific order.
-    auto &sorted = graph->getSorted();
-    EXPECT_EQ( 7, sorted.size() );
-    EXPECT_EQ( gBufferSubpass, sorted[ 0 ]->obj );
-    EXPECT_EQ( resolveSubpass, sorted[ 3 ]->obj );
-    EXPECT_EQ( renderPass, sorted[ 5 ]->obj );
-    EXPECT_EQ( present, sorted[ 6 ]->obj );
-}
-
-TEST( FrameGraph, renderPasses )
+TEST( FrameGraph, renderPassesNotConnected )
 {
     auto graph = crimild::alloc< FrameGraph >();
 
@@ -195,16 +119,9 @@ TEST( FrameGraph, renderPasses )
         return attachment;
     }();
 
-    auto shadowSubpass = [&] {
-        auto subpass = graph->create< RenderSubpass >();
-        subpass->outputs = { shadowDepth };
-        return subpass;
-    }();
-
     auto shadowPass = [&] {
         auto pass = graph->create< RenderPass >();
         pass->attachments = { shadowDepth };
-        pass->subpasses = { shadowSubpass };
         return pass;
     }();
 
@@ -229,36 +146,140 @@ TEST( FrameGraph, renderPasses )
         return attachment;
     }();
 
-    auto gBufferSubpass = [&] {
-        auto subpass = graph->create< RenderSubpass >();
-        subpass->outputs = { color, depth };
-        return subpass;
-    }();
-
-    auto resolveSubpass = [&] {
-        auto subpass = graph->create< RenderSubpass >();
-        subpass->inputs = { color, depth };
-        subpass->outputs = { resolve };
-        return subpass;
-    }();
-
     auto renderPass = graph->create< RenderPass >();
     renderPass->attachments = { color, depth, resolve };
-    renderPass->subpasses = { gBufferSubpass, resolveSubpass };
 
-    auto present = graph->create< PresentPass >();
+    auto present = graph->create< PresentationMaster >();
     present->colorAttachment = resolve;
 
     EXPECT_TRUE( graph->compile() );
 
-    // While attachments can be in different order between subpasses,
-    // all render passes, subpasses the and present pass must
-    // be in a specific order.
+	// Since renderPass is not really connected with shadowPass
+	// most nodes are discarded by the frame graph
     auto &sorted = graph->getSorted();
-    EXPECT_EQ( 7, sorted.size() );
-    EXPECT_EQ( gBufferSubpass, sorted[ 0 ]->obj );
-    EXPECT_EQ( resolveSubpass, sorted[ 3 ]->obj );
-    EXPECT_EQ( renderPass, sorted[ 5 ]->obj );
-    EXPECT_EQ( present, sorted[ 6 ]->obj );
+    EXPECT_EQ( 3, sorted.size() );
+    EXPECT_EQ( renderPass, sorted[ 0 ]->obj );
+    EXPECT_EQ( resolve, sorted[ 1 ]->obj );
+    EXPECT_EQ( present, sorted[ 2 ]->obj );
+}
+
+TEST( FrameGraph, simpleFrameGraph )
+{
+	auto graph = crimild::alloc< FrameGraph >();
+
+	auto pipeline = graph->create< Pipeline >();
+	auto vbo = graph->create< VertexP2C3Buffer >( 0 );
+	auto ibo = graph->create< IndexUInt32Buffer >( 0 );
+	auto ubo = graph->create< UniformBufferImpl< crimild::Vector4f >>();
+	auto descriptorSet = [&] {
+		auto ds = graph->create< DescriptorSet >();
+		ds->writes = {
+			{
+				.descriptorType = DescriptorType::UNIFORM_BUFFER,
+				.buffer = crimild::get_ptr( ubo ),
+			},
+		};
+		return ds;
+	}();
+
+	auto color = graph->create< Attachment >();
+
+	auto renderPass = graph->create< RenderPass >();
+	renderPass->attachments = { color };
+	renderPass->commands = [&] {
+		auto commands = graph->create< CommandBuffer >();
+		commands->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
+		commands->bindVertexBuffer( crimild::get_ptr( vbo ) );
+		commands->bindIndexBuffer( crimild::get_ptr( ibo ) );
+		commands->bindDescriptorSet( crimild::get_ptr( descriptorSet ) );
+		commands->drawIndexed( ibo->getCount() );
+		return commands;
+	}();
+
+	auto present = graph->create< PresentationMaster >();
+	present->colorAttachment = { color };
+
+	EXPECT_TRUE( graph->compile() );
+
+	auto sorted = graph->getSorted();
+	EXPECT_EQ( 9, sorted.size() );
+
+	// The first nodes contains basic resources in any order
+	auto resources = containers::Array< SharedPointer< SharedObject >> {
+		pipeline,
+		vbo,
+		ibo,
+		ubo,
+	};
+	EXPECT_TRUE( resources.contains( sorted[ 0 ]->obj ) );
+	EXPECT_TRUE( resources.contains( sorted[ 1 ]->obj ) );
+	EXPECT_TRUE( resources.contains( sorted[ 2 ]->obj ) );
+	EXPECT_TRUE( resources.contains( sorted[ 3 ]->obj ) );
+
+	EXPECT_EQ( descriptorSet, sorted[ 4 ]->obj );
+	EXPECT_EQ( renderPass->commands, sorted[ 5 ]->obj );
+	EXPECT_EQ( renderPass, sorted[ 6 ]->obj );
+	EXPECT_EQ( color, sorted[ 7 ]->obj );
+	EXPECT_EQ( present, sorted[ 8 ]->obj );
+}
+
+TEST( FrameGraph, simpleAutoAddNodes )
+{
+	auto graph = crimild::alloc< FrameGraph >();
+
+	auto pipeline = crimild::alloc< Pipeline >();
+	auto vbo = crimild::alloc< VertexP2C3Buffer >( 0 );
+	auto ibo = crimild::alloc< IndexUInt32Buffer >( 0 );
+	auto ubo = crimild::alloc< UniformBufferImpl< crimild::Vector4f >>();
+	auto descriptorSet = [&] {
+		auto ds = crimild::alloc< DescriptorSet >();
+		ds->writes = {
+			{
+				.descriptorType = DescriptorType::UNIFORM_BUFFER,
+				.buffer = crimild::get_ptr( ubo ),
+			},
+		};
+		return ds;
+	}();
+
+	auto color = graph->create< Attachment >();
+
+	auto renderPass = graph->create< RenderPass >();
+	renderPass->attachments = { color };
+	renderPass->commands = [&] {
+		auto commands = crimild::alloc< CommandBuffer >();
+		commands->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
+		commands->bindVertexBuffer( crimild::get_ptr( vbo ) );
+		commands->bindIndexBuffer( crimild::get_ptr( ibo ) );
+		commands->bindDescriptorSet( crimild::get_ptr( descriptorSet ) );
+		commands->drawIndexed( ibo->getCount() );
+		return commands;
+	}();
+
+	auto present = graph->create< PresentationMaster >();
+	present->colorAttachment = { color };
+
+	EXPECT_TRUE( graph->compile() );
+
+	auto sorted = graph->getSorted();
+	EXPECT_EQ( 9, sorted.size() );
+
+	// The first nodes contains basic resources in any order
+	auto resources = containers::Array< SharedPointer< SharedObject >> {
+		pipeline,
+		vbo,
+		ibo,
+		ubo,
+	};
+	EXPECT_TRUE( resources.contains( sorted[ 0 ]->obj ) );
+	EXPECT_TRUE( resources.contains( sorted[ 1 ]->obj ) );
+	EXPECT_TRUE( resources.contains( sorted[ 2 ]->obj ) );
+	EXPECT_TRUE( resources.contains( sorted[ 3 ]->obj ) );
+
+	EXPECT_EQ( descriptorSet, sorted[ 4 ]->obj );
+	EXPECT_EQ( renderPass->commands, sorted[ 5 ]->obj );
+	EXPECT_EQ( renderPass, sorted[ 6 ]->obj );
+	EXPECT_EQ( color, sorted[ 7 ]->obj );
+	EXPECT_EQ( present, sorted[ 8 ]->obj );
 }
 

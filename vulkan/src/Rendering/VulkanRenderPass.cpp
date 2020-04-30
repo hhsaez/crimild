@@ -26,6 +26,7 @@
  */
 
 #include "Rendering/Image.hpp"
+#include "Rendering/FrameGraph.hpp"
 #include "Rendering/VulkanRenderPass.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 
@@ -71,21 +72,41 @@ crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
         return imageView;
     };
 
-    std::map< Attachment *, crimild::UInt32 > attachmentReferences;
+	auto colorReferences = containers::Array< VkAttachmentReference >();
+	auto depthStencilReferences = containers::Array< VkAttachmentReference >();
+
     auto attachments = renderPass->attachments.map(
-       	[ &, idx = 0l ]( auto const &attachment ) mutable {
-        	attachmentReferences[ crimild::get_ptr( attachment ) ] = idx++;
+       	[ &, idx = 0u ]( auto const &attachment ) mutable {
             auto format = attachment->format;
-            auto isPresent = false;
         	if ( format != Format::COLOR_SWAPCHAIN_OPTIMAL ) {
 				// Create an image view for this attachemnt
                 // TODO: Have a pool of image views instead?
                 attachment->imageView = createAttachmentImageView( crimild::get_ptr( attachment ) );
         	}
-            else {
-                isPresent = true;
-            }
 
+			auto initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			auto finalLayout = VK_IMAGE_LAYOUT_GENERAL;
+			
+			if ( utils::formatIsDepthStencil( format ) ) {
+				depthStencilReferences.add(
+					VkAttachmentReference {
+						.attachment = idx++,
+						.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+					}
+				);
+				finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+			}
+			else {
+				colorReferences.add(
+					VkAttachmentReference {
+						.attachment = idx++,
+						.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+					}
+				);
+				auto isPresentation = attachment->frameGraph->isPresentation( attachment );
+				finalLayout = isPresentation ? VK_IMAGE_LAYOUT_PRESENT_SRC_KHR : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+			}
+			
             // 1. Write only: LoadOp::CLEAR or LoadOp::DONT_CARE
         	// 2. Read-Write: LoadOp::LOAD
         	// 3. Read only: LoadOp::LOAD?
@@ -97,60 +118,32 @@ crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
                 .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
                 .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
                 .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-                .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-                .finalLayout = isPresent ? VK_IMAGE_LAYOUT_PRESENT_SRC_KHR : VK_IMAGE_LAYOUT_GENERAL,
+                .initialLayout = initialLayout,
+                .finalLayout = finalLayout,
             };
     	}
    	);
 
-    auto subpassCount = renderPass->subpasses.size();
-
-    // These must be kept alive for render pass creation
-    containers::Array< VkSubpassDescription > subpasses( subpassCount );
-    containers::Array< containers::Array< VkAttachmentReference >> subpassColorReferences( subpassCount );
-    containers::Array< containers::Array< VkAttachmentReference >> subpassDepthStencilReferences( subpassCount );
-    containers::Array< VkSubpassDependency > subpassDependencies;
-
-    renderPass->subpasses.each(
-        [&]( auto &subpass, auto index ) {
-            auto &colorReferences = subpassColorReferences[ index ];
-            auto &depthStencilReferences = subpassDepthStencilReferences[ index ];
-        	subpass->outputs.each( [&]( auto &att ) {
-                auto attIdx = attachmentReferences[ crimild::get_ptr( att ) ];
-                if ( utils::formatIsColor( att->format ) ) {
-                    colorReferences.add({
-                        .attachment = attIdx,
-                        .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-                    });
-                }
-                else if ( utils::formatIsDepthStencil( att->format ) ) {
-                    depthStencilReferences.add({
-                        .attachment = attIdx,
-                        .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-                    });
-                }
-                else {
-                    CRIMILD_LOG_ERROR( "Invalid attachment format: ", crimild::UInt32( att->format ) );
-                    return;
-                }
-            });
-            subpasses[ index ] = {
-                .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
-                .colorAttachmentCount = crimild::UInt32( colorReferences.size() ),
-                .pColorAttachments = colorReferences.getData(),
-                .pDepthStencilAttachment = !depthStencilReferences.empty() ? depthStencilReferences.getData() : nullptr,
-            };
-    	}
-    );
+	auto subpass = VkSubpassDescription {
+		.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
+		.colorAttachmentCount = crimild::UInt32( colorReferences.size() ),
+		.pColorAttachments = colorReferences.getData(),
+		.pDepthStencilAttachment = !depthStencilReferences.empty() ? depthStencilReferences.getData() : nullptr,
+		.inputAttachmentCount = 0,
+		.pInputAttachments = nullptr,
+		.preserveAttachmentCount = 0,
+		.pPreserveAttachments = nullptr,
+		.pResolveAttachments = nullptr,
+	};
 
 	auto createInfo = VkRenderPassCreateInfo {
 		.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
 		.attachmentCount = static_cast< crimild::UInt32 >( attachments.size() ),
         .pAttachments = attachments.getData(),
-		.subpassCount = static_cast< crimild::UInt32 >( subpasses.size() ),
-		.pSubpasses = subpasses.getData(),
-		.dependencyCount = static_cast< crimild::UInt32 >( subpassDependencies.size() ),
-		.pDependencies = subpassDependencies.getData(),
+		.subpassCount = 1,
+		.pSubpasses = &subpass,
+		.dependencyCount = 0,
+		.pDependencies = nullptr,
 	};
 
 	RenderPassBindInfo bindInfo;

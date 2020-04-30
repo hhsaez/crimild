@@ -141,30 +141,6 @@ void CommandBuffer::endRenderPass( RenderPass *renderPass ) noexcept
     );
 }
 
-void CommandBuffer::beginRenderSubpass( RenderSubpass *subpass ) noexcept
-{
-    m_commands.push_back(
-        [&] {
-            Command cmd;
-            cmd.type = Command::Type::BEGIN_RENDER_SUBPASS;
-            cmd.obj = crimild::retain( subpass );
-            return cmd;
-        }()
-    );
-}
-
-void CommandBuffer::endRenderSubpass( RenderSubpass *subpass ) noexcept
-{
-    m_commands.push_back(
-        [&] {
-            Command cmd;
-            cmd.type = Command::Type::END_RENDER_SUBPASS;
-            cmd.obj = crimild::retain( subpass );
-            return cmd;
-        }()
-    );
-}
-
 void CommandBuffer::setViewport( const ViewportDimensions &viewport ) noexcept
 {
     Command cmd;
