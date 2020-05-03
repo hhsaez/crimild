@@ -42,48 +42,23 @@ crimild::Bool vulkan::ImageViewManager::bind( ImageView *imageView ) noexcept
 
     auto renderDevice = getRenderDevice();
 
-    auto getImageViewType = []( ImageView::Type type ) {
-        switch ( type ) {
-            case ImageView::Type::IMAGE_VIEW_1D:
-                return VK_IMAGE_VIEW_TYPE_1D;
-            case ImageView::Type::IMAGE_VIEW_2D:
-                return VK_IMAGE_VIEW_TYPE_2D;
-            case ImageView::Type::IMAGE_VIEW_3D:
-                return VK_IMAGE_VIEW_TYPE_3D;
-            case ImageView::Type::IMAGE_VIEW_CUBE:
-                return VK_IMAGE_VIEW_TYPE_CUBE;
-            default:
-                return VK_IMAGE_VIEW_TYPE_2D;
-        }
-    };
-
-    auto getAspectFlags = []( Image::Usage usage ) {
-        if ( usage & Image::Usage::DEPTH_STENCIL_ATTACHMENT ) {
-            return VK_IMAGE_ASPECT_DEPTH_BIT;
-        }
-        return VK_IMAGE_ASPECT_COLOR_BIT;
-    };
+    auto mipLevels = imageView->mipLevels;
+    if ( mipLevels == 0 ) {
+        mipLevels = Numerici::max( 1, imageView->image->getMipLevels() );
+    }
 
     auto viewInfo = VkImageViewCreateInfo {
         .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
         .image = renderDevice->getBindInfo( crimild::get_ptr( imageView->image ) ).imageHandler,
-
-        // We're dealing with 2D images
-        .viewType = getImageViewType( imageView->type ),
-
-        // Match the specified format
-        .format = utils::getFormat( renderDevice, imageView->format ),
-
-        // We don't need to swizzle (swap around) any of the color components
+        .viewType = utils::getImageViewType( imageView ),
+        .format = utils::getImageViewFormat( renderDevice, imageView ),
         .components.r = VK_COMPONENT_SWIZZLE_IDENTITY,
         .components.g = VK_COMPONENT_SWIZZLE_IDENTITY,
         .components.b = VK_COMPONENT_SWIZZLE_IDENTITY,
         .components.a = VK_COMPONENT_SWIZZLE_IDENTITY,
-
-        // Determine what is affected by the image operations (color, depth, stencil, etc)
-        .subresourceRange.aspectMask = getAspectFlags( imageView->image->usage ),
+        .subresourceRange.aspectMask = utils::getImageViewAspectFlags( imageView ),
         .subresourceRange.baseMipLevel = 0,
-        .subresourceRange.levelCount = imageView->mipLevels,
+        .subresourceRange.levelCount = mipLevels,
         .subresourceRange.baseArrayLayer = 0,
         .subresourceRange.layerCount = imageView->layerCount,
 

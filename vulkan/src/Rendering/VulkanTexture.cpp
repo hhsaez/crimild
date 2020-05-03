@@ -33,8 +33,6 @@ using namespace crimild::vulkan;
 
 crimild::Bool TextureManager::bind( Texture *texture ) noexcept
 {
-    return false;
-    /*
     if ( validate( texture ) ) {
         return true;
     }
@@ -43,7 +41,19 @@ crimild::Bool TextureManager::bind( Texture *texture ) noexcept
 
     auto renderDevice = getRenderDevice();
 
-    auto image = texture->getImage();
+#if 1
+
+	if ( auto imageView = crimild::get_ptr( texture->imageView ) ) {
+		renderDevice->bind( imageView );
+	}
+
+	if ( auto sampler = crimild::get_ptr( texture->sampler ) ) {
+		renderDevice->bind( sampler );
+	}
+
+#else
+
+	auto image = texture->getImage();
     if ( image == nullptr ) {
         CRIMILD_LOG_ERROR( "Texture does not contain a valid image" );
         return false;
@@ -245,14 +255,14 @@ crimild::Bool TextureManager::bind( Texture *texture ) noexcept
     	}
     );
 
+#endif
+
     return ManagerImpl::bind( texture );
-     */
+
 }
 
 crimild::Bool TextureManager::unbind( Texture *texture ) noexcept
 {
-    return false;
-    /*
     if ( !validate( texture ) ) {
         return false;
     }
@@ -261,6 +271,20 @@ crimild::Bool TextureManager::unbind( Texture *texture ) noexcept
 
     auto renderDevice = getRenderDevice();
 
+#if 1
+
+	if ( auto sampler = crimild::get_ptr( texture->sampler ) ) {
+		renderDevice->unbind( sampler );
+	}
+
+	if ( auto imageView = crimild::get_ptr( texture->imageView ) ) {
+		renderDevice->unbind( imageView );
+	}
+
+    return ManagerImpl::unbind( texture );
+
+#else
+	
     auto bindInfo = getBindInfo( texture );
 
     vkDestroySampler( renderDevice->handler, bindInfo.sampler, nullptr );
@@ -270,9 +294,8 @@ crimild::Bool TextureManager::unbind( Texture *texture ) noexcept
     vkDestroyImage( renderDevice->handler, bindInfo.textureImage, nullptr );
     vkFreeMemory( renderDevice->handler, bindInfo.textureImageMemory, nullptr );
 
-    removeBindInfo( texture );
+#endif
 
-    return ManagerImpl::unbind( texture );
-     */
+    removeBindInfo( texture );
 }
 

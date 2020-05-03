@@ -59,7 +59,6 @@ crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
             .width = fbWidth,
             .height = fbHeight,
         };
-        image->usage = attachment->usage;
         image->format = attachment->format;
         return image;
     };

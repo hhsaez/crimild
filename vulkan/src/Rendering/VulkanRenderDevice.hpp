@@ -42,6 +42,7 @@
 #include "Rendering/VulkanPipeline.hpp"
 #include "Rendering/VulkanPipelineLayout.hpp"
 #include "Rendering/VulkanRenderPass.hpp"
+#include "Rendering/VulkanSampler.hpp"
 #include "Rendering/VulkanSemaphore.hpp"
 #include "Rendering/VulkanShaderModule.hpp"
 #include "Rendering/VulkanSwapchain.hpp"
@@ -74,6 +75,7 @@ namespace crimild {
         	public PipelineManager,
         	public PipelineLayoutManager,
             public RenderPassManager,
+			public SamplerManager,
         	public SemaphoreManager,
         	public ShaderModuleManager,
             public TextureManager {
@@ -99,11 +101,15 @@ namespace crimild {
             using ImageManager::setBindInfo;
             using ImageViewManager::bind;
             using ImageViewManager::getBindInfo;
+			using ImageViewManager::unbind;
             using PipelineManager::getBindInfo;
             using PipelineManager::bind;
             using PipelineLayoutManager::create;
             using RenderPassManager::bind;
             using RenderPassManager::getBindInfo;
+			using SamplerManager::bind;
+			using SamplerManager::getBindInfo;
+			using SamplerManager::unbind;
             using SemaphoreManager::create;
             using ShaderModuleManager::create;
             using TextureManager::bind;

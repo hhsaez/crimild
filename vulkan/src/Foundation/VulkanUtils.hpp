@@ -36,6 +36,7 @@
 #include "Rendering/Format.hpp"
 #include "Rendering/Image.hpp"
 #include "Rendering/RenderPass.hpp"
+#include "Rendering/Sampler.hpp"
 #include "Rendering/Shader.hpp"
 #include "Rendering/Texture.hpp"
 
@@ -83,20 +84,22 @@ namespace crimild {
 
             VkShaderStageFlagBits getVulkanShaderStageFlag( Shader::Stage stage ) noexcept;
             VkDescriptorType getVulkanDescriptorType( DescriptorType type ) noexcept;
-            VkFilter getVulkanFilter( Texture::Filter filter ) noexcept;
+            VkFilter getVulkanFilter( Texture::Filter filter ) noexcept; //< Deprecated
             VkPolygonMode getPolygonMode( PolygonState *polygonState ) noexcept;
             VkRect2D getViewportRect( const ViewportDimensions *viewport, const RenderDevice *renderDevice ) noexcept;
             VkViewport getViewport( const ViewportDimensions *viewport, const RenderDevice *renderDevice ) noexcept;
             VkRect2D getScissor( const ViewportDimensions *scissor, const RenderDevice *renderDevice ) noexcept;
             VkIndexType getIndexType( const IndexBuffer *indexBuffer ) noexcept;
-            VkSamplerAddressMode getSamplerAddressMode( Texture::WrapMode wrapMode ) noexcept;
-            VkBorderColor getBorderColor( Texture::BorderColor borderColor ) noexcept;
+            VkSamplerAddressMode getSamplerAddressMode( Texture::WrapMode wrapMode ) noexcept; //< Deprecated
+            VkSamplerAddressMode getSamplerAddressMode( Sampler::WrapMode wrapMode ) noexcept;
+            VkBorderColor getBorderColor( Texture::BorderColor borderColor ) noexcept; //< Deprecated
+            VkBorderColor getBorderColor( Sampler::BorderColor borderColor ) noexcept;
+            VkFilter getSamplerFilter( Sampler::Filter filter ) noexcept;
             VkFormat getFormat( RenderDevice *renderDevice, Format format ) noexcept;
             Format getFormat( VkFormat format ) noexcept; //< Reversed
             crimild::Bool formatIsColor( Format format ) noexcept;
             crimild::Bool formatIsDepthStencil( Format format ) noexcept;
-            VkImageUsageFlags getImageUsage( Image::Usage usage ) noexcept;
-            VkImageLayout getImageLayout( Image::Layout layout ) noexcept;
+            VkImageUsageFlags getAttachmentUsage( Attachment::Usage usage ) noexcept;
             VkExtent2D getExtent( Extent2D extent, const RenderDevice *renderDevice ) noexcept;
             VkAttachmentLoadOp getLoadOp( Attachment::LoadOp loadOp ) noexcept;
             VkAttachmentStoreOp getStoreOp( Attachment::StoreOp storeOp ) noexcept;
@@ -228,6 +231,21 @@ namespace crimild {
             void copyBufferToLayeredImage( RenderDevice *renderDevice, VkBuffer buffer, VkImage image, crimild::Size layerCount, crimild::Size layerSize, crimild::UInt32 layerWidth, crimild::UInt32 layerHeight ) noexcept;
 
             void generateMipmaps( RenderDevice *renderDevice, VkImage image, VkFormat format, crimild::Int32 width, crimild::Int32 height, crimild::UInt32 mipLevels ) noexcept;
+
+			VkImageType getImageType( Image *image ) noexcept;
+			VkImageAspectFlags getImageAspectFlags( Image *image ) noexcept;
+
+			//@}
+
+			/**
+			   \name ImageView
+			*/
+			//@{
+			
+			VkImageViewType getImageViewType( ImageView *imageView ) noexcept;
+			VkFormat getImageViewFormat( RenderDevice *renderDevice, ImageView *imageView ) noexcept;
+			VkImageAspectFlags getImageViewAspectFlags( ImageView *imageView ) noexcept;
+
 
             //@}
 

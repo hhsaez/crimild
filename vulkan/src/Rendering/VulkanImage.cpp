@@ -50,7 +50,19 @@ crimild::Bool vulkan::ImageManager::bind( Image *image ) noexcept
         height *= swapchain->extent.height;
     }
 
-    ImageBindInfo handler;
+    ImageBindInfo bindInfo;
+
+	auto channels = crimild::UInt32( 4 ); //< TODO: Fetch channels from image format
+	auto mipLevels = image->getMipLevels();
+	auto layerCount = crimild::UInt32( 1 );
+
+	// TODO: use frame graph to set usage?
+	VkImageUsageFlags usage = VK_IMAGE_USAGE_SAMPLED_BIT;
+	if ( image->data.size() > 0 ) {
+		// If image has data, it will be used for transfer operations
+		usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+		usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+	}
 
     utils::createImage(
         renderDevice,
@@ -59,16 +71,96 @@ crimild::Bool vulkan::ImageManager::bind( Image *image ) noexcept
             .height = crimild::UInt32( height ),
             .format = utils::getFormat( renderDevice, image->format ),
             .tiling = VK_IMAGE_TILING_OPTIMAL,
-            .usage = utils::getImageUsage( image->usage ),
+            .usage = usage,
             .properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-//            .mipLevels = 1,
+            .mipLevels = mipLevels,
 //            .numSamples = descriptor.numSamples,
         },
-       	handler.imageHandler,
-       	handler.imageMemoryHandler
+       	bindInfo.imageHandler,
+       	bindInfo.imageMemoryHandler
     );
 
-    setBindInfo( image, handler );
+	if ( image->data.size() > 0 ) {
+		// Image has pixel data. Upload it
+
+		// TODO: Cubemap
+
+		VkBuffer stagingBuffer;
+		VkDeviceMemory stagingBufferMemory;
+		VkDeviceSize layerSize = width * height * channels;
+		VkDeviceSize imageSize = layerSize * layerCount;
+
+		auto success = utils::createBuffer(
+			renderDevice,
+			utils::BufferDescriptor {
+				.size = imageSize,
+				.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+				.properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+			},
+			stagingBuffer,
+			stagingBufferMemory
+		);
+		if ( !success ) {
+			CRIMILD_LOG_ERROR( "Failed to create image staging buffer" );
+			return false;
+		}
+
+		std::vector< const void * > layers;
+		// TODO: cubemap
+		layers.push_back( image->data.getData() );
+
+		utils::copyToBuffer(
+			renderDevice->handler,
+			stagingBufferMemory,
+			layers.data(),
+			layers.size(),
+			layerSize
+		);
+		
+		utils::transitionImageLayout(
+			renderDevice,
+			bindInfo.imageHandler,
+			utils::getFormat( renderDevice, image->format ),
+			VK_IMAGE_LAYOUT_UNDEFINED,
+			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			mipLevels,
+			layerCount
+		);
+
+		// TODO: handle cubemaps
+
+		utils::copyBufferToImage(
+			renderDevice,
+			stagingBuffer,
+			bindInfo.imageHandler,
+			width,
+			height
+		);
+
+		// Automatically transitions to SHADER_READ_OPTIMAL layout
+		utils::generateMipmaps(
+			renderDevice,
+			bindInfo.imageHandler,
+			VK_FORMAT_R8G8B8A8_UNORM,
+			width,
+			height,
+			mipLevels
+		);
+
+		vkDestroyBuffer(
+			renderDevice->handler,
+			stagingBuffer,
+			nullptr
+		);
+
+		vkFreeMemory(
+			renderDevice->handler,
+			stagingBufferMemory,
+			nullptr
+		);
+	}
+
+    setBindInfo( image, bindInfo );
 
     return ManagerImpl::bind( image );
 }

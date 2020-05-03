@@ -35,6 +35,9 @@
 #include "Rendering/RenderResource.hpp"
 
 namespace crimild {
+
+	class ImageView;
+	class Sampler;
     
     class Texture :
 		public NamedObject,
@@ -43,6 +46,17 @@ namespace crimild {
 		public StreamObject, // TODO: remove this
 		public Catalog< Texture >::Resource {
         CRIMILD_IMPLEMENT_RTTI( crimild::Texture )
+
+	public:
+		/**
+		   \brief Destructor
+		 */
+		virtual ~Texture( void );
+
+		SharedPointer< ImageView > imageView;
+		SharedPointer< Sampler > sampler;
+
+		// DEPRECATED FROM HERE?
 
 	public:
 		static SharedPointer< Texture > ONE;
@@ -101,11 +115,6 @@ namespace crimild {
 		   \remarks Faces: Right, Left, Top, Bottom, Back, Front
 		 */
 		explicit Texture( ImageArray const &faces );
-
-		/**
-		   \brief Destructor
-		 */
-		virtual ~Texture( void );
 
 		inline Target::Impl getTarget( void ) const { return _target; }
 
