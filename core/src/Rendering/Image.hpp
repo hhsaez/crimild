@@ -46,6 +46,22 @@ namespace crimild {
 		CRIMILD_IMPLEMENT_RTTI( crimild::Image )
 
     public:
+        static SharedPointer< Image > ONE;
+        static SharedPointer< Image > CUBE_ONE;
+        static SharedPointer< Image > ZERO;
+        static SharedPointer< Image > CHECKERBOARD;
+        static SharedPointer< Image > CHECKERBOARD_4;
+        static SharedPointer< Image > CHECKERBOARD_8;
+        static SharedPointer< Image > CHECKERBOARD_16;
+        static SharedPointer< Image > CHECKERBOARD_32;
+        static SharedPointer< Image > CHECKERBOARD_64;
+        static SharedPointer< Image > CHECKERBOARD_128;
+        static SharedPointer< Image > CHECKERBOARD_256;
+        static SharedPointer< Image > CHECKERBOARD_512;
+        static SharedPointer< Image > INVALID;
+
+    public:
+		/*
         struct Usage {
             enum {
                 TRANSFER_SRC = 1 << 0,
@@ -81,11 +97,42 @@ namespace crimild {
             PRESENT_SRC,
             SHARED_PRESENT,
         };
+		*/
+
+		enum class Type {
+			IMAGE_1D,
+			IMAGE_2D,
+			IMAGE_3D,
+		};
 
     public:
         Format format = Format::UNDEFINED;
-        Extent2D extent;
-        Usage usage = Usage::SAMPLED;
+		Type type = Type::IMAGE_2D;
+
+		/**
+		   \brief image size
+
+		   For 1D image, height and depth must be 1
+		   For 2D image, depth must be 1
+		 */
+		Extent3D extent;
+
+		containers::ByteArray data;
+
+        /**
+         	\name Mipmapping
+
+         	Auto generated mipmapping is enabled by default (mipLevels = 0)
+         */
+        //@{
+
+        void setMipLevels( crimild::UInt32 mipLevels ) noexcept;
+        crimild::UInt32 getMipLevels( void ) const noexcept;
+
+    private:
+        crimild::UInt32 m_mipLevels = 0;
+
+        //@}
 
     /**
         \name Coding support
@@ -132,10 +179,10 @@ namespace crimild {
 		int getBpp( void ) const { return _bpp; }
         PixelFormat getPixelFormat( void ) const { return _pixelFormat; }
 		PixelType getPixelType( void ) const { return _pixelType; }
-		crimild::Bool hasData( void ) const { return _data.size(); }
-		unsigned char *getData( void ) { return &_data[ 0 ]; }
-		const unsigned char *getData( void ) const { return &_data[ 0 ]; }
 
+		crimild::Bool hasData( void ) const { return _data.size(); }
+		unsigned char *getData( void ) { return _data.getData(); }
+		const unsigned char *getData( void ) const { return _data.getData(); }
 		void setData( int width, int height, int bpp, const unsigned char *data, PixelFormat format = PixelFormat::RGBA, PixelType pixelType = PixelType::UNSIGNED_BYTE );
 
 		bool isLoaded( void ) const { return _data.size() > 0; }

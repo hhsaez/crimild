@@ -46,6 +46,7 @@ namespace crimild {
 		
 	public:
 		enum class Type {
+			UNDEFINED, //< Default.
 			IMAGE_VIEW_1D,
 			IMAGE_VIEW_2D,
 			IMAGE_VIEW_3D,
@@ -54,10 +55,10 @@ namespace crimild {
 		};
 
     public:
-        Type type;
+        Type type = Type::UNDEFINED; //< Default to same type as image
         SharedPointer< Image > image;
-        Format format;
-        crimild::UInt32 mipLevels = 1;
+        Format format = Format::UNDEFINED; //< Fallbacks to same format as image
+        crimild::UInt32 mipLevels = 0; //< Fallbacks to same mipLevels as image
         crimild::UInt32 layerCount = 1;
     };
 

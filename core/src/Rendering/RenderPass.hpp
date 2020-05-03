@@ -44,6 +44,12 @@ namespace crimild {
 		public SharedObject,
 		public FrameGraphObject {
 	public:
+		enum class Usage {
+			UNDEFINED,
+            COLOR_ATTACHMENT,
+            DEPTH_STENCIL_ATTACHMENT,
+		};
+		
 		enum class LoadOp {
 			LOAD,
 			CLEAR,
@@ -56,14 +62,12 @@ namespace crimild {
 		};
 		
     public:
-        Format format;
-        Image::Usage usage = Image::Usage::SAMPLED;
+        Format format = Format::UNDEFINED;
+        Usage usage = Usage::UNDEFINED;
 		LoadOp loadOp = LoadOp::DONT_CARE;
 		StoreOp storeOp = StoreOp::DONT_CARE;
 		LoadOp stencilLoadOp = LoadOp::DONT_CARE;
 		StoreOp stencilStoreOp = StoreOp::DONT_CARE;
-		Image::Layout initialLayout = Image::Layout::UNDEFINED;
-		Image::Layout finalLayout = Image::Layout::UNDEFINED;
 
         // TODO
         SharedPointer< ImageView > imageView;

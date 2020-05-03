@@ -44,7 +44,7 @@ TEST( FrameGraph, simple )
 
     auto color = [&] {
         auto attachment = graph->create< Attachment >();
-        attachment->usage = Image::Usage::COLOR_ATTACHMENT;
+        attachment->usage = Attachment::Usage::COLOR_ATTACHMENT;
         attachment->format = Format::R8G8B8A8_UNORM;
         return attachment;
     }();
@@ -66,7 +66,7 @@ TEST( FrameGraph, compile )
 
     auto color = [&] {
         auto attachment = graph->create< Attachment >();
-        attachment->usage = Image::Usage::COLOR_ATTACHMENT;
+        attachment->usage = Attachment::Usage::COLOR_ATTACHMENT;
         attachment->format = Format::R8G8B8A8_UNORM;
         return attachment;
     }();
@@ -93,7 +93,7 @@ TEST( FrameGraph, compileFailNoPresent )
 
     auto color = [&] {
         auto attachment = graph->create< Attachment >();
-        attachment->usage = Image::Usage::COLOR_ATTACHMENT;
+        attachment->usage = Attachment::Usage::COLOR_ATTACHMENT;
         attachment->format = Format::R8G8B8A8_UNORM;
         return attachment;
     }();
@@ -114,7 +114,7 @@ TEST( FrameGraph, renderPassesNotConnected )
 
     auto shadowDepth = [&] {
         auto attachment = graph->create< Attachment >();
-        attachment->usage = Image::Usage::DEPTH_STENCIL_ATTACHMENT;
+        attachment->usage = Attachment::Usage::DEPTH_STENCIL_ATTACHMENT;
         attachment->format = Format::DEPTH_STENCIL_DEVICE_OPTIMAL;
         return attachment;
     }();
@@ -127,21 +127,21 @@ TEST( FrameGraph, renderPassesNotConnected )
 
     auto color = [&] {
         auto attachment = graph->create< Attachment >();
-        attachment->usage = Image::Usage::COLOR_ATTACHMENT;
+        attachment->usage = Attachment::Usage::COLOR_ATTACHMENT;
         attachment->format = Format::R8G8B8A8_UNORM;
         return attachment;
     }();
 
     auto depth = [&] {
         auto attachment = graph->create< Attachment >();
-        attachment->usage = Image::Usage::DEPTH_STENCIL_ATTACHMENT;
+        attachment->usage = Attachment::Usage::DEPTH_STENCIL_ATTACHMENT;
         attachment->format = Format::DEPTH_STENCIL_DEVICE_OPTIMAL;
         return attachment;
     }();
 
     auto resolve = [&] {
         auto attachment = graph->create< Attachment >();
-        attachment->usage = Image::Usage::COLOR_ATTACHMENT;
+        attachment->usage = Attachment::Usage::COLOR_ATTACHMENT;
         attachment->format = Format::COLOR_SWAPCHAIN_OPTIMAL;
         return attachment;
     }();
@@ -281,5 +281,54 @@ TEST( FrameGraph, simpleAutoAddNodes )
 	EXPECT_EQ( renderPass, sorted[ 6 ]->obj );
 	EXPECT_EQ( color, sorted[ 7 ]->obj );
 	EXPECT_EQ( present, sorted[ 8 ]->obj );
+}
+
+TEST( FrameGraph, imageUsage )
+{
+	auto graph = crimild::alloc< FrameGraph >();
+
+	auto color = graph->create< Attachment >();
+	color->usage = Attachment::Usage::COLOR_ATTACHMENT;
+	color->format = Format::COLOR_SWAPCHAIN_OPTIMAL;
+	color->imageView = [&] {
+		auto imageView = crimild::alloc< ImageView >();
+		imageView->image = [&] {
+			auto image = crimild::alloc< Image >();
+			return image;
+		}();
+		return imageView;
+	}();
+
+	auto depth = graph->create< Attachment >();
+	depth->usage = Attachment::Usage::DEPTH_STENCIL_ATTACHMENT;
+	depth->format = Format::DEPTH_STENCIL_DEVICE_OPTIMAL;
+	depth->imageView = [&] {
+		auto imageView = crimild::alloc< ImageView >();
+		imageView->image = [&] {
+			auto image = crimild::alloc< Image >();
+			return image;
+		}();
+		return imageView;
+	}();
+
+	auto renderPass = graph->create< RenderPass >();
+	renderPass->attachments = { color, depth };
+
+	auto master = graph->create< PresentationMaster >();
+	master->colorAttachment = color;
+
+	EXPECT_TRUE( graph->compile() );
+
+	{
+		auto res = graph->connected< Attachment >( color->imageView->image );
+		EXPECT_EQ( 1, res.size() );
+		EXPECT_EQ( Attachment::Usage::COLOR_ATTACHMENT, res.first()->usage );
+	}
+
+	{
+		auto res = graph->connected< Attachment >( depth->imageView->image );
+		EXPECT_EQ( 1, res.size() );
+		EXPECT_EQ( Attachment::Usage::DEPTH_STENCIL_ATTACHMENT, res.first()->usage );
+	}
 }
 

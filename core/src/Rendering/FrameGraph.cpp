@@ -49,7 +49,7 @@ crimild::Bool FrameGraph::compile( void ) noexcept
 
     auto sorted = m_graph.sort();
 
-    auto presentationMaster = getNodeObject< PresentationMaster >( sorted.last() );
+    auto presentationMaster = getPresentationMaster();
     if ( presentationMaster == nullptr ) {
         CRIMILD_LOG_ERROR( "Cannot obtain present pass node" );
         return false;
@@ -194,7 +194,27 @@ void FrameGraph::verifyAllConnections( void ) noexcept
 		}
 	);
 
-	// TODO: add edges from attachments to image views
+	// Link attachments with images
+	m_nodesByType[ Node::Type::ATTACHMENT ].each (
+		[&]( auto &node ) {
+			auto attachment = getNodeObject< Attachment >( node );
+			if ( auto imageView = crimild::get_ptr( attachment->imageView ) ) {
+				if ( auto image = crimild::get_ptr( imageView->image ) ) {
+					// This seems odd, but in order to keep correct dependecies
+					// an attachment must be connected directly to the image
+					// Then, the image is connected with its image view
+					connect(
+						attachment,
+						image
+					);
+					connect(
+						image,
+						imageView
+					);
+				}
+			}
+		}
+	);
 	
 }
 
@@ -235,6 +255,15 @@ FrameGraph::CommandBufferArray FrameGraph::recordCommands( void ) noexcept
 }
 
 const PresentationMaster *FrameGraph::getPresentationMaster( void ) const noexcept
+{
+	auto &masters = m_nodesByType[ Node::Type::PRESENTATION_MASTER ];
+	if ( masters.empty() ) {
+		return nullptr;
+	}
+	return getNodeObject< PresentationMaster >( masters.first() );
+}
+
+PresentationMaster *FrameGraph::getPresentationMaster( void ) noexcept
 {
 	auto &masters = m_nodesByType[ Node::Type::PRESENTATION_MASTER ];
 	if ( masters.empty() ) {

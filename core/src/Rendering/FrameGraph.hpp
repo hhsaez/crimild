@@ -179,6 +179,35 @@ namespace crimild {
 
         CommandBufferArray recordCommands( void ) noexcept;
 
+		/**
+		   \brief Get all nodes connected to the current one matching the given type
+
+		   \warning Requires frame graph to be compiled first
+		   \todo Should this be const'd?
+		 */
+		template< typename T, typename U >
+		containers::Set< T * > connected( U const &obj ) noexcept
+		{
+			auto node = getNode( obj );
+			if ( node == nullptr ) {
+				return {};
+			}
+			
+			auto retType = getNodeType( static_cast< T * >( nullptr ) );
+			auto conn = m_reversedGraph.connected( node );
+			return m_reversedGraph
+			.connected( node )
+			.filter(
+				[&]( auto &node ) {
+					return node->type == retType;
+				}
+			).map(
+				[&]( auto &node ) {
+					return crimild::get_ptr( crimild::cast_ptr< T >( node->obj ) );
+				}
+			);
+		}
+
 	private:
 		void verifyAllConnections( void ) noexcept;
 
@@ -220,6 +249,8 @@ namespace crimild {
 			m_graph.addEdge( srcNode, dstNode );
 		}
 
+
+		PresentationMaster *getPresentationMaster( void ) noexcept;
 		const PresentationMaster *getPresentationMaster( void ) const noexcept;
 
 	private:
