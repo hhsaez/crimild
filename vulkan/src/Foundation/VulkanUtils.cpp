@@ -119,6 +119,17 @@ VkFilter utils::getVulkanFilter( Texture::Filter filter ) noexcept
     }
 }
 
+VkFilter utils::getSamplerFilter( Sampler::Filter filter ) noexcept
+{
+    // TODO: This is not complete
+    switch ( filter ) {
+        case Sampler::Filter::NEAREST:
+            return VK_FILTER_NEAREST;
+        default:
+            return VK_FILTER_LINEAR;
+    }
+}
+
 VkPolygonMode utils::getPolygonMode( PolygonState *polygonState ) noexcept
 {
     if ( polygonState == nullptr ) {
@@ -256,6 +267,41 @@ VkBorderColor utils::getBorderColor( Texture::BorderColor borderColor ) noexcept
         case Texture::BorderColor::FLOAT_OPAQUE_WHITE:
             return VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
         case Texture::BorderColor::INT_OPAQUE_WHITE:
+            return VK_BORDER_COLOR_INT_OPAQUE_WHITE;
+        default:
+            return VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+    }
+}
+
+VkSamplerAddressMode utils::getSamplerAddressMode( Sampler::WrapMode wrapMode ) noexcept
+{
+    switch ( wrapMode ) {
+        case Sampler::WrapMode::MIRRORED_REPEAT:
+            return VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
+        case Sampler::WrapMode::CLAMP_TO_EDGE:
+            return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        case Sampler::WrapMode::CLAMP_TO_BORDER:
+            return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+        case Sampler::WrapMode::REPEAT:
+        default:
+            return VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    }
+}
+
+VkBorderColor utils::getBorderColor( Sampler::BorderColor borderColor ) noexcept
+{
+    switch ( borderColor ) {
+        case Sampler::BorderColor::FLOAT_TRANSPARENT_BLACK:
+            return VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
+        case Sampler::BorderColor::INT_TRANSPARENT_BLACK:
+            return VK_BORDER_COLOR_INT_TRANSPARENT_BLACK;
+        case Sampler::BorderColor::FLOAT_OPAQUE_BLACK:
+            return VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK;
+        case Sampler::BorderColor::INT_OPAQUE_BLACK:
+            return VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+        case Sampler::BorderColor::FLOAT_OPAQUE_WHITE:
+            return VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
+        case Sampler::BorderColor::INT_OPAQUE_WHITE:
             return VK_BORDER_COLOR_INT_OPAQUE_WHITE;
         default:
             return VK_BORDER_COLOR_INT_OPAQUE_BLACK;
@@ -407,20 +453,21 @@ crimild::Bool utils::formatIsDepthStencil( Format format ) noexcept
     }
 }
 
-VkImageUsageFlags utils::getImageUsage( Image::Usage usage ) noexcept
+VkImageUsageFlags utils::getAttachmentUsage( Attachment::Usage usage ) noexcept
 {
-    VkImageUsageFlags imageUsage = 0;
-    if ( usage & Image::Usage::TRANSFER_SRC ) imageUsage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
-    if ( usage & Image::Usage::TRANSFER_DST ) imageUsage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-    if ( usage & Image::Usage::SAMPLED ) imageUsage |= VK_IMAGE_USAGE_SAMPLED_BIT;
-    if ( usage & Image::Usage::STORAGE ) imageUsage |= VK_IMAGE_USAGE_STORAGE_BIT;
-    if ( usage & Image::Usage::COLOR_ATTACHMENT ) imageUsage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-    if ( usage & Image::Usage::DEPTH_STENCIL_ATTACHMENT ) imageUsage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-    if ( usage & Image::Usage::TRANSIENT_ATTACHMENT ) imageUsage |= VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT;
-    if ( usage & Image::Usage::INPUT_ATTACHMENT ) imageUsage |= VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
-    return imageUsage;
+	switch ( usage ) {
+		case Attachment::Usage::COLOR_ATTACHMENT:
+			return VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+
+		case Attachment::Usage::DEPTH_STENCIL_ATTACHMENT:
+			return VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+
+		default:
+			return 0;
+	}
 }
 
+/*
 VkImageLayout utils::getImageLayout( Image::Layout layout ) noexcept
 {
     switch ( layout ) {
@@ -452,6 +499,7 @@ VkImageLayout utils::getImageLayout( Image::Layout layout ) noexcept
             return VK_IMAGE_LAYOUT_UNDEFINED;
     }
 }
+*/
 
 VkExtent2D utils::getExtent( Extent2D extent, const RenderDevice *renderDevice ) noexcept
 {
@@ -1198,6 +1246,78 @@ void utils::generateMipmaps( RenderDevice *renderDevice, VkImage image, VkFormat
     );
 
     endSingleTimeCommands( renderDevice, commandBuffer );
+}
+
+VkImageType utils::getImageType( Image *image ) noexcept
+{
+	switch ( image->type ) {
+		case Image::Type::IMAGE_1D:
+			return VK_IMAGE_TYPE_1D;
+		case Image::Type::IMAGE_2D:
+			return VK_IMAGE_TYPE_2D;
+		case Image::Type::IMAGE_3D:
+			return VK_IMAGE_TYPE_3D;
+		default:
+			return VK_IMAGE_TYPE_2D;		
+	}
+}
+
+VkImageAspectFlags utils::getImageAspectFlags( Image *image ) noexcept
+{
+	if ( utils::formatIsDepthStencil( image->format ) ) {
+		return VK_IMAGE_ASPECT_DEPTH_BIT;
+	}
+	return VK_IMAGE_ASPECT_COLOR_BIT;
+}
+
+VkImageViewType utils::getImageViewType( ImageView *imageView ) noexcept
+{
+	switch ( imageView->type ) {
+		case ImageView::Type::IMAGE_VIEW_1D:
+			return VK_IMAGE_VIEW_TYPE_1D;
+		case ImageView::Type::IMAGE_VIEW_2D:
+			return VK_IMAGE_VIEW_TYPE_2D;
+		case ImageView::Type::IMAGE_VIEW_3D:
+			return VK_IMAGE_VIEW_TYPE_3D;
+		case ImageView::Type::IMAGE_VIEW_CUBE:
+			return VK_IMAGE_VIEW_TYPE_CUBE;
+		default: 
+			break;
+	}
+
+	// Match image style
+	switch ( imageView->image->type ) {
+		case Image::Type::IMAGE_1D:
+			return VK_IMAGE_VIEW_TYPE_1D;
+		case Image::Type::IMAGE_2D:
+			return VK_IMAGE_VIEW_TYPE_2D;
+		case Image::Type::IMAGE_3D:
+			return VK_IMAGE_VIEW_TYPE_3D;
+		default:
+			return VK_IMAGE_VIEW_TYPE_2D;		
+	}
+}
+
+VkFormat utils::getImageViewFormat( RenderDevice *renderDevice, ImageView *imageView ) noexcept
+{
+	auto format = imageView->format;
+	if ( format == Format::UNDEFINED ) {
+		format = imageView->image->format;
+	}
+	return getFormat( renderDevice, format );
+}
+
+VkImageAspectFlags utils::getImageViewAspectFlags( ImageView *imageView ) noexcept
+{
+	auto format = imageView->format;
+	if ( format == Format::UNDEFINED ) {
+		format = imageView->image->format;
+	}
+	
+	if ( utils::formatIsDepthStencil( format ) ) {
+		return VK_IMAGE_ASPECT_DEPTH_BIT;
+	}
+	return VK_IMAGE_ASPECT_COLOR_BIT;
 }
 
 VkSampleCountFlagBits utils::getMaxUsableSampleCount( VkPhysicalDevice physicalDevice ) noexcept

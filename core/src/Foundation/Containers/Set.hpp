@@ -152,8 +152,35 @@ namespace crimild {
 				}
 			}
 
-            ValueType &first( void ) noexcept { return std::begin( _set ); }
-            const ValueType &first( void ) const noexcept { return std::begin( _set ); }
+            ValueType first( void ) noexcept { return *std::begin( _set ); }
+            const ValueType &first( void ) const noexcept { return *std::begin( _set ); }
+
+			template< typename Fn >
+			Set filter( Fn selector ) const
+			{
+				Set ret;
+				each(
+					[&]( const auto &elem ) {
+						if ( selector( elem ) ) {
+							ret.insert( elem );
+						}
+					}
+				);
+				return ret;
+			}
+
+            template< typename Fn >
+            auto map( Fn fn ) const noexcept
+            {
+				ValueType dummy;
+                Set< decltype( fn( dummy ) ) > ret { };
+				each(
+					[&]( const auto &elem ) {
+						ret.insert( fn( elem ) );
+					}
+				);
+                return ret;
+            }
 
 		private:
 			SetImpl _set;

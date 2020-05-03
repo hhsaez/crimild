@@ -239,6 +239,7 @@ void RenderDeviceManager::destroy( RenderDevice *renderDevice ) noexcept
     CRIMILD_LOG_TRACE( "Destroying Vulkan logical device" );
 
     static_cast< TextureManager * >( renderDevice )->clear();
+	static_cast< SamplerManager * >( renderDevice )->clear();
     static_cast< DescriptorPoolManager * >( renderDevice )->clear();
     static_cast< DescriptorSetManager * >( renderDevice )->clear();
     static_cast< DescriptorSetLayoutManager * >( renderDevice )->clear();
