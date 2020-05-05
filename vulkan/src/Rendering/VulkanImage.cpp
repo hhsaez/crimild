@@ -63,6 +63,10 @@ crimild::Bool vulkan::ImageManager::bind( Image *image ) noexcept
 		usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
 		usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 	}
+    else {
+        usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+//        usage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+    }
 
     utils::createImage(
         renderDevice,

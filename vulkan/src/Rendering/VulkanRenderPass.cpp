@@ -54,17 +54,23 @@ crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
 
     auto createAttachmentImage = [&]( Attachment *attachment ) {
         auto image = crimild::alloc< Image >();
+        if ( attachment->imageView != nullptr ) {
+            if ( attachment->imageView->image != nullptr ) {
+                image = attachment->imageView->image;
+            }
+        }
         image->extent = {
             .scalingMode = ScalingMode::FIXED,
             .width = fbWidth,
             .height = fbHeight,
         };
         image->format = attachment->format;
+        image->setMipLevels( 1 ); // only 1 mip level is allowed for framebuffer's images
         return image;
     };
 
     auto createAttachmentImageView = [&]( Attachment *attachment ) {
-        auto imageView = crimild::alloc< ImageView >();
+        auto imageView = attachment->imageView != nullptr ? attachment->imageView : crimild::alloc< ImageView >();
         imageView->type = ImageView::Type::IMAGE_VIEW_2D;
         imageView->image = createAttachmentImage( attachment );
         imageView->format = imageView->image->format;
@@ -73,6 +79,8 @@ crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
 
 	auto colorReferences = containers::Array< VkAttachmentReference >();
 	auto depthStencilReferences = containers::Array< VkAttachmentReference >();
+
+    bool hasPresentation = false;
 
     auto attachments = renderPass->attachments.map(
        	[ &, idx = 0u ]( auto const &attachment ) mutable {
@@ -103,6 +111,7 @@ crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
 					}
 				);
 				auto isPresentation = attachment->frameGraph->isPresentation( attachment );
+                hasPresentation |= isPresentation;
 				finalLayout = isPresentation ? VK_IMAGE_LAYOUT_PRESENT_SRC_KHR : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 			}
 			
@@ -135,14 +144,35 @@ crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
 		.pResolveAttachments = nullptr,
 	};
 
+    auto dependencies = std::vector< VkSubpassDependency > {
+        {
+            .srcSubpass = VK_SUBPASS_EXTERNAL,
+            .dstSubpass = 0,
+            .srcStageMask = hasPresentation ? VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT : VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+            .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+            .srcAccessMask = hasPresentation ? VK_ACCESS_MEMORY_READ_BIT : VK_ACCESS_SHADER_READ_BIT,
+            .dstAccessMask = hasPresentation ? VkAccessFlags( VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT ) : VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            .dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT,
+        },
+        {
+            .srcSubpass = 0,
+            .dstSubpass = VK_SUBPASS_EXTERNAL,
+            .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+            .dstStageMask = hasPresentation ? VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT : VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+            .srcAccessMask = hasPresentation ? VkAccessFlags( VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT ) : VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            .dstAccessMask = hasPresentation ? VK_ACCESS_MEMORY_READ_BIT : VK_ACCESS_SHADER_READ_BIT,
+            .dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT,
+        }
+    };
+
 	auto createInfo = VkRenderPassCreateInfo {
 		.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
 		.attachmentCount = static_cast< crimild::UInt32 >( attachments.size() ),
         .pAttachments = attachments.getData(),
 		.subpassCount = 1,
 		.pSubpasses = &subpass,
-		.dependencyCount = 0,
-		.pDependencies = nullptr,
+        .dependencyCount = crimild::UInt32( dependencies.size() ),
+        .pDependencies = dependencies.data(),
 	};
 
 	RenderPassBindInfo bindInfo;

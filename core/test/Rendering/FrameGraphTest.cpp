@@ -31,6 +31,7 @@
 #include "Rendering/IndexBuffer.hpp"
 #include "Rendering/Pipeline.hpp"
 #include "Rendering/RenderPass.hpp"
+#include "Rendering/Texture.hpp"
 #include "Rendering/VertexBuffer.hpp"
 #include "Rendering/UniformBuffer.hpp"
 
@@ -330,5 +331,102 @@ TEST( FrameGraph, imageUsage )
 		EXPECT_EQ( 1, res.size() );
 		EXPECT_EQ( Attachment::Usage::DEPTH_STENCIL_ATTACHMENT, res.first()->usage );
 	}
+}
+
+TEST( FrameGraph, offscreen )
+{
+	auto graph = crimild::alloc< FrameGraph >();
+
+	auto texture = [&] {
+		auto texture = graph->create< Texture >();
+		texture->imageView = [&] {
+			auto imageView = graph->create< ImageView >();
+			imageView->image = crimild::alloc< Image >();
+			return imageView;
+		}();
+		return texture;
+	}();
+
+	{
+		// Offscreen
+
+		auto pipeline = crimild::alloc< Pipeline >();
+		auto vbo = crimild::alloc< VertexP2C3Buffer >( 0 );
+		auto ibo = crimild::alloc< IndexUInt32Buffer >( 0 );
+		auto ubo = crimild::alloc< UniformBufferImpl< crimild::Vector4f >>();
+		auto descriptorSet = [&] {
+			auto ds = crimild::alloc< DescriptorSet >();
+			ds->writes = {
+				{
+					.descriptorType = DescriptorType::UNIFORM_BUFFER,
+					.buffer = crimild::get_ptr( ubo ),
+				},
+			};
+			return ds;
+		}();
+		
+		auto color = graph->create< Attachment >();
+		color->imageView = texture->imageView;
+		
+		auto renderPass = graph->create< RenderPass >();
+		renderPass->attachments = { color };
+		renderPass->commands = [&] {
+			auto commands = crimild::alloc< CommandBuffer >();
+			commands->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
+			commands->bindVertexBuffer( crimild::get_ptr( vbo ) );
+			commands->bindIndexBuffer( crimild::get_ptr( ibo ) );
+			commands->bindDescriptorSet( crimild::get_ptr( descriptorSet ) );
+			commands->drawIndexed( ibo->getCount() );
+			return commands;
+		}();
+	}
+
+	{
+		// Screen
+
+		auto pipeline = crimild::alloc< Pipeline >();
+		auto vbo = crimild::alloc< VertexP2C3Buffer >( 0 );
+		auto ibo = crimild::alloc< IndexUInt32Buffer >( 0 );
+		auto ubo = crimild::alloc< UniformBufferImpl< crimild::Vector4f >>();
+		auto descriptorSet = [&] {
+			auto ds = crimild::alloc< DescriptorSet >();
+			ds->writes = {
+				{
+					.descriptorType = DescriptorType::UNIFORM_BUFFER,
+					.buffer = crimild::get_ptr( ubo ),
+				},
+				{
+					.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+					.texture = crimild::get_ptr( texture ),
+				},
+			};
+			return ds;
+		}();
+		
+		auto color = graph->create< Attachment >();
+		
+		auto renderPass = graph->create< RenderPass >();
+		renderPass->attachments = { color };
+		renderPass->commands = [&] {
+			auto commands = crimild::alloc< CommandBuffer >();
+			commands->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
+			commands->bindVertexBuffer( crimild::get_ptr( vbo ) );
+			commands->bindIndexBuffer( crimild::get_ptr( ibo ) );
+			commands->bindDescriptorSet( crimild::get_ptr( descriptorSet ) );
+			commands->drawIndexed( ibo->getCount() );
+			return commands;
+		}();
+
+		auto master = graph->create< PresentationMaster >();
+		master->colorAttachment = color;
+	}
+
+	EXPECT_TRUE( graph->compile() );
+
+	graph->getSorted().each(
+		[]( auto &node ) {
+			std::cout << node->type << std::endl;
+		}
+	);
 }
 
