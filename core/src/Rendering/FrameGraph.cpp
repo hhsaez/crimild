@@ -33,6 +33,7 @@
 #include "Rendering/IndexBuffer.hpp"
 #include "Rendering/Pipeline.hpp"
 #include "Rendering/RenderPass.hpp"
+#include "Rendering/Texture.hpp"
 #include "Rendering/VertexBuffer.hpp"
 
 #include "Foundation/Log.hpp"
@@ -65,7 +66,7 @@ crimild::Bool FrameGraph::compile( void ) noexcept
         	if ( !connected.contains( node ) ) {
                 // Discard the node since it's not connected with the
                 // final output for this render graph.
-                CRIMILD_LOG_DEBUG( "Discarding (", int( node->type ), "): ", node->getName() );
+                CRIMILD_LOG_DEBUG( "Discarding (", node->type, "): ", node->getName() );
                 return;
         	}
             m_sorted.add( node );
@@ -185,6 +186,12 @@ void FrameGraph::verifyAllConnections( void ) noexcept
 							);
 							break;
 
+						case DescriptorType::COMBINED_IMAGE_SAMPLER:
+							connect(
+								write.texture,
+								ds
+							);
+
 						default:
 							// ignore
 							break;
@@ -195,7 +202,7 @@ void FrameGraph::verifyAllConnections( void ) noexcept
 	);
 
 	// Link attachments with images
-	m_nodesByType[ Node::Type::ATTACHMENT ].each (
+	m_nodesByType[ Node::Type::ATTACHMENT ].each(
 		[&]( auto &node ) {
 			auto attachment = getNodeObject< Attachment >( node );
 			if ( auto imageView = crimild::get_ptr( attachment->imageView ) ) {
@@ -212,6 +219,19 @@ void FrameGraph::verifyAllConnections( void ) noexcept
 						imageView
 					);
 				}
+			}
+		}
+	);
+
+	// Link textures
+	m_nodesByType[ Node::Type::TEXTURE ].each(
+		[&]( auto &node ) {
+			auto texture = getNodeObject< Texture >( node );
+			if ( auto imageView = crimild::get_ptr( texture->imageView ) ) {
+				connect(
+					imageView,
+					texture
+				);
 			}
 		}
 	);
@@ -270,5 +290,56 @@ PresentationMaster *FrameGraph::getPresentationMaster( void ) noexcept
 		return nullptr;
 	}
 	return getNodeObject< PresentationMaster >( masters.first() );
+}
+
+std::ostream &crimild::operator<<( std::ostream &out, FrameGraph::Node::Type type )
+{
+	switch ( type ) {
+		case FrameGraph::Node::Type::PIPELINE:
+			out << "PIPELINE";
+			break;
+
+		case FrameGraph::Node::Type::BUFFER:
+			out << "BUFFER";
+			break;
+
+		case FrameGraph::Node::Type::IMAGE:
+			out << "IMAGE";
+			break;			
+
+		case FrameGraph::Node::Type::IMAGE_VIEW:
+			out << "IMAGE_VIEW";
+			break;			
+
+		case FrameGraph::Node::Type::DESCRIPTOR_SET:
+			out << "DESCRIPTION_SET";
+			break;			
+
+		case FrameGraph::Node::Type::TEXTURE:
+			out << "TEXTURE";
+			break;			
+
+		case FrameGraph::Node::Type::COMMAND_BUFFER:
+			out << "COMMAND_BUFFER";
+			break;			
+
+		case FrameGraph::Node::Type::ATTACHMENT:
+			out << "ATTACHMENT";
+			break;			
+
+		case FrameGraph::Node::Type::RENDER_PASS:
+			out << "RENDER_PASS";
+			break;			
+
+		case FrameGraph::Node::Type::PRESENTATION_MASTER:
+			out << "PRESENTATION_MASTER";
+			break;			
+
+		default:
+			out << "UNKNOWN";
+			break;
+	}
+
+	return out;
 }
 

@@ -47,7 +47,8 @@ namespace crimild {
 	class ImageView;
 	class Pipeline;
     class PresentationMaster;
-	class RenderPass;	
+	class RenderPass;
+	class Texture;
 
     class CustomOperation : public SharedObject {
     public:
@@ -67,6 +68,7 @@ namespace crimild {
 				BUFFER,
 				IMAGE,
 				IMAGE_VIEW,
+				TEXTURE,
 				DESCRIPTOR_SET,
 				COMMAND_BUFFER,
 				ATTACHMENT,
@@ -93,6 +95,7 @@ namespace crimild {
 		Node::Type getNodeType( Buffer * ) const { return Node::Type::BUFFER; }
 		Node::Type getNodeType( Image * ) const { return Node::Type::IMAGE; }
 		Node::Type getNodeType( ImageView * ) const { return Node::Type::IMAGE_VIEW; }
+		Node::Type getNodeType( Texture * ) const { return Node::Type::TEXTURE; }
 		Node::Type getNodeType( DescriptorSet * ) const { return Node::Type::DESCRIPTOR_SET; }
 		Node::Type getNodeType( CommandBuffer * ) const { return Node::Type::COMMAND_BUFFER; }
 		Node::Type getNodeType( RenderPass * ) const { return Node::Type::RENDER_PASS; }
@@ -262,6 +265,8 @@ namespace crimild {
         containers::Set< SharedPointer< Node >> m_nodes;
         containers::Map< Node::Type, containers::Array< Node * >> m_nodesByType;
 	};
+
+	std::ostream &operator<<( std::ostream &out, FrameGraph::Node::Type node );
 
     class PresentationMaster :
 		public SharedObject,
