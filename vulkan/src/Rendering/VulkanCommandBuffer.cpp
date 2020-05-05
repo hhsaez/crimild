@@ -153,8 +153,8 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                     auto renderPass = bindInfo.handler;
                     auto framebuffer = bindInfo.framebuffers[ index ];
 
-                    auto clearColor = RGBAColorf::ZERO;
-                    auto clearDepth = Vector2f( 1, 0 );
+                    auto clearColor = m_currentRenderPass->clearValue.color;
+                    auto clearDepth = m_currentRenderPass->clearValue.depthStencil;
                     auto clearValues = std::vector< VkClearValue > {
                         {
                             .color = {

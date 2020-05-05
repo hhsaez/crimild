@@ -81,6 +81,12 @@ namespace crimild {
 		containers::Array< SharedPointer< Attachment >> attachments;
 		SharedPointer< CommandBuffer > commands;
         ViewportDimensions viewport;
+
+        struct ClearValue {
+        	RGBAColorf color = RGBAColorf::ZERO;
+        	Vector2f depthStencil = Vector2f::UNIT_X;
+        };
+        ClearValue clearValue;
     };
 
 }
