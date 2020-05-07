@@ -55,6 +55,20 @@ namespace crimild {
         std::function< void( void ) > callback;
     };
 
+    /**
+     	\todo Do not keep strong references to resources. Otherwise, they won't be
+     	properly released and unloaded.
+
+     	\todo Keep a global frame graph using dynamic singletons? Like I did before
+     	for the shader graph. That way resources can register themselves and we
+     	don't need to worry about it.
+
+     	\todo merge render passes.
+
+     	\todo reuse image resources.
+
+     	\todo update uniform buffers only when needed. 
+     */
 	class FrameGraph : public coding::Codable {
 		CRIMILD_IMPLEMENT_RTTI( crimild::FrameGraph )
 		
