@@ -426,6 +426,46 @@ namespace crimild {
 
     using VertexP3N3TC2Buffer = VertexBufferImpl< VertexP3N3TC2, policies::VertexBuffer3DExtentPolicy >;
 
+    struct VertexP3C3TC2 {
+        crimild::Vector3f position;
+        crimild::RGBColorf color;
+        crimild::Vector2f texCoord;
+
+        static std::vector< VertexInputAttributeDescription > getAttributeDescriptions( crimild::UInt32 binding ) noexcept
+        {
+            return {
+                {
+                    .location = 0,
+                    .binding = binding,
+                    .format = VertexInputAttributeDescription::Format::R32G32B32,
+                    .offset = offsetof( VertexP3C3TC2, position ),
+                },
+                {
+                    .location = 1,
+                    .binding = binding,
+                    .format = VertexInputAttributeDescription::Format::R32G32B32,
+                    .offset = offsetof( VertexP3C3TC2, color ),
+                },
+                {
+                    .location = 2,
+                    .binding = binding,
+                    .format = VertexInputAttributeDescription::Format::R32G32,
+                    .offset = offsetof( VertexP3C3TC2, texCoord ),
+                },
+            };
+        }
+
+        static VertexInputBindingDescription getBindingDescription( crimild::UInt32 binding ) noexcept
+        {
+            return {
+                .binding = binding,
+                .stride = sizeof( VertexP3C3TC2 ),
+            };
+        }
+    };
+
+    using VertexP3C3TC2Buffer = VertexBufferImpl< VertexP3C3TC2, policies::VertexBuffer3DExtentPolicy >;
+
 }
 
 #endif
