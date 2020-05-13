@@ -97,7 +97,7 @@ namespace crimild {
 			Type type;
 
 			// obj should inherit from FrameGraphObject
-			SharedPointer< SharedObject > obj;
+            FrameGraphObject *obj = nullptr;
 		};
 
         using CommandBufferArray = containers::Array< SharedPointer< CommandBuffer >>;
@@ -133,7 +133,7 @@ namespace crimild {
 
             auto node = crimild::alloc< Node >();
             node->type = getNodeType( obj );
-            node->obj = crimild::retain( obj );
+            node->obj = obj;
             auto weakNode = crimild::get_ptr( node );
 
             m_graph.addVertex( weakNode );
@@ -220,7 +220,7 @@ namespace crimild {
 				}
 			).map(
 				[&]( auto &node ) {
-					return crimild::get_ptr( crimild::cast_ptr< T >( node->obj ) );
+					return static_cast< T * >( node->obj );
 				}
 			);
 		}
@@ -233,7 +233,7 @@ namespace crimild {
         {
             T *ret = nullptr;
             if ( node != nullptr && getNodeType( ret ) == node->type ) {
-                ret = static_cast< T * >( crimild::get_ptr( node->obj ) );
+                ret = static_cast< T * >( node->obj );
             }
             return ret;
         }
@@ -243,7 +243,7 @@ namespace crimild {
 		{
             T *ret = nullptr;
             if ( node != nullptr && getNodeType( ret ) == node->type ) {
-                ret = static_cast< T * >( crimild::get_ptr( node->obj ) );
+                ret = static_cast< T * >( node->obj );
             }
             return ret;
 		}
