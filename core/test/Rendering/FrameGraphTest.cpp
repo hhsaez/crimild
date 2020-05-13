@@ -159,9 +159,9 @@ TEST( FrameGraph, renderPassesNotConnected )
 	// most nodes are discarded by the frame graph
     auto &sorted = graph->getSorted();
     EXPECT_EQ( 3, sorted.size() );
-    EXPECT_EQ( renderPass, sorted[ 0 ]->obj );
-    EXPECT_EQ( resolve, sorted[ 1 ]->obj );
-    EXPECT_EQ( present, sorted[ 2 ]->obj );
+    EXPECT_EQ( crimild::get_ptr( renderPass ), sorted[ 0 ]->obj );
+    EXPECT_EQ( crimild::get_ptr( resolve ), sorted[ 1 ]->obj );
+    EXPECT_EQ( crimild::get_ptr( present ), sorted[ 2 ]->obj );
 }
 
 TEST( FrameGraph, simpleFrameGraph )
@@ -206,22 +206,22 @@ TEST( FrameGraph, simpleFrameGraph )
 	EXPECT_EQ( 9, sorted.size() );
 
 	// The first nodes contains basic resources in any order
-	auto resources = containers::Array< SharedPointer< SharedObject >> {
-		pipeline,
-		vbo,
-		ibo,
-		ubo,
+	auto resources = containers::Array< FrameGraphObject * > {
+		crimild::get_ptr( pipeline ),
+		crimild::get_ptr( vbo ),
+		crimild::get_ptr( ibo ),
+		crimild::get_ptr( ubo ),
 	};
 	EXPECT_TRUE( resources.contains( sorted[ 0 ]->obj ) );
 	EXPECT_TRUE( resources.contains( sorted[ 1 ]->obj ) );
 	EXPECT_TRUE( resources.contains( sorted[ 2 ]->obj ) );
 	EXPECT_TRUE( resources.contains( sorted[ 3 ]->obj ) );
 
-	EXPECT_EQ( descriptorSet, sorted[ 4 ]->obj );
-	EXPECT_EQ( renderPass->commands, sorted[ 5 ]->obj );
-	EXPECT_EQ( renderPass, sorted[ 6 ]->obj );
-	EXPECT_EQ( color, sorted[ 7 ]->obj );
-	EXPECT_EQ( present, sorted[ 8 ]->obj );
+	EXPECT_EQ( crimild::get_ptr( descriptorSet ), sorted[ 4 ]->obj );
+	EXPECT_EQ( crimild::get_ptr( renderPass->commands ), sorted[ 5 ]->obj );
+	EXPECT_EQ( crimild::get_ptr( renderPass ), sorted[ 6 ]->obj );
+	EXPECT_EQ( crimild::get_ptr( color ), sorted[ 7 ]->obj );
+	EXPECT_EQ( crimild::get_ptr( present ), sorted[ 8 ]->obj );
 }
 
 TEST( FrameGraph, simpleAutoAddNodes )
@@ -266,22 +266,22 @@ TEST( FrameGraph, simpleAutoAddNodes )
 	EXPECT_EQ( 9, sorted.size() );
 
 	// The first nodes contains basic resources in any order
-	auto resources = containers::Array< SharedPointer< SharedObject >> {
-		pipeline,
-		vbo,
-		ibo,
-		ubo,
+	auto resources = containers::Array< FrameGraphObject * > {
+		crimild::get_ptr( pipeline ),
+		crimild::get_ptr( vbo ),
+		crimild::get_ptr( ibo ),
+		crimild::get_ptr( ubo ),
 	};
 	EXPECT_TRUE( resources.contains( sorted[ 0 ]->obj ) );
 	EXPECT_TRUE( resources.contains( sorted[ 1 ]->obj ) );
 	EXPECT_TRUE( resources.contains( sorted[ 2 ]->obj ) );
 	EXPECT_TRUE( resources.contains( sorted[ 3 ]->obj ) );
 
-	EXPECT_EQ( descriptorSet, sorted[ 4 ]->obj );
-	EXPECT_EQ( renderPass->commands, sorted[ 5 ]->obj );
-	EXPECT_EQ( renderPass, sorted[ 6 ]->obj );
-	EXPECT_EQ( color, sorted[ 7 ]->obj );
-	EXPECT_EQ( present, sorted[ 8 ]->obj );
+	EXPECT_EQ( crimild::get_ptr( descriptorSet ), sorted[ 4 ]->obj );
+	EXPECT_EQ( crimild::get_ptr( renderPass->commands ), sorted[ 5 ]->obj );
+	EXPECT_EQ( crimild::get_ptr( renderPass ), sorted[ 6 ]->obj );
+	EXPECT_EQ( crimild::get_ptr( color ), sorted[ 7 ]->obj );
+	EXPECT_EQ( crimild::get_ptr( present ), sorted[ 8 ]->obj );
 }
 
 TEST( FrameGraph, imageUsage )
@@ -347,79 +347,76 @@ TEST( FrameGraph, offscreen )
 		return texture;
 	}();
 
-	{
-		// Offscreen
-
-		auto pipeline = crimild::alloc< Pipeline >();
-		auto vbo = crimild::alloc< VertexP2C3Buffer >( 0 );
-		auto ibo = crimild::alloc< IndexUInt32Buffer >( 0 );
-		auto ubo = crimild::alloc< UniformBufferImpl< crimild::Vector4f >>();
-		auto descriptorSet = [&] {
-			auto ds = crimild::alloc< DescriptorSet >();
-			ds->writes = {
-				{
-					.descriptorType = DescriptorType::UNIFORM_BUFFER,
-					.buffer = crimild::get_ptr( ubo ),
-				},
-			};
-			return ds;
-		}();
-		
-		auto color = graph->create< Attachment >();
-		color->imageView = texture->imageView;
-		
+	auto offPipeline = crimild::alloc< Pipeline >();
+	auto offVbo = crimild::alloc< VertexP2C3Buffer >( 0 );
+	auto offIbo = crimild::alloc< IndexUInt32Buffer >( 0 );
+	auto offUbo = crimild::alloc< UniformBufferImpl< crimild::Vector4f >>();
+	auto offDescriptorSet = [&] {
+		auto ds = crimild::alloc< DescriptorSet >();
+		ds->writes = {
+			{
+				.descriptorType = DescriptorType::UNIFORM_BUFFER,
+				.buffer = crimild::get_ptr( offUbo ),
+			},
+		};
+		return ds;
+	}();
+	
+	auto offColor = graph->create< Attachment >();
+	offColor->imageView = texture->imageView;
+	
+	auto offRenderPass = [&] {
 		auto renderPass = graph->create< RenderPass >();
-		renderPass->attachments = { color };
+		renderPass->attachments = { offColor };
 		renderPass->commands = [&] {
 			auto commands = crimild::alloc< CommandBuffer >();
-			commands->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
-			commands->bindVertexBuffer( crimild::get_ptr( vbo ) );
-			commands->bindIndexBuffer( crimild::get_ptr( ibo ) );
-			commands->bindDescriptorSet( crimild::get_ptr( descriptorSet ) );
-			commands->drawIndexed( ibo->getCount() );
+			commands->bindGraphicsPipeline( crimild::get_ptr( offPipeline ) );
+			commands->bindVertexBuffer( crimild::get_ptr( offVbo ) );
+			commands->bindIndexBuffer( crimild::get_ptr( offIbo ) );
+			commands->bindDescriptorSet( crimild::get_ptr( offDescriptorSet ) );
+			commands->drawIndexed( offIbo->getCount() );
 			return commands;
 		}();
-	}
+		return renderPass;
+	}();
+	
+    // Screen
 
-	{
-		// Screen
-
-		auto pipeline = crimild::alloc< Pipeline >();
-		auto vbo = crimild::alloc< VertexP2C3Buffer >( 0 );
-		auto ibo = crimild::alloc< IndexUInt32Buffer >( 0 );
-		auto ubo = crimild::alloc< UniformBufferImpl< crimild::Vector4f >>();
-		auto descriptorSet = [&] {
-			auto ds = crimild::alloc< DescriptorSet >();
-			ds->writes = {
-				{
-					.descriptorType = DescriptorType::UNIFORM_BUFFER,
-					.buffer = crimild::get_ptr( ubo ),
-				},
-				{
-					.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
-					.texture = crimild::get_ptr( texture ),
-				},
-			};
-			return ds;
-		}();
-		
-		auto color = graph->create< Attachment >();
-		
-		auto renderPass = graph->create< RenderPass >();
-		renderPass->attachments = { color };
-		renderPass->commands = [&] {
-			auto commands = crimild::alloc< CommandBuffer >();
-			commands->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
-			commands->bindVertexBuffer( crimild::get_ptr( vbo ) );
-			commands->bindIndexBuffer( crimild::get_ptr( ibo ) );
-			commands->bindDescriptorSet( crimild::get_ptr( descriptorSet ) );
-			commands->drawIndexed( ibo->getCount() );
-			return commands;
-		}();
-
-		auto master = graph->create< PresentationMaster >();
-		master->colorAttachment = color;
-	}
+	auto pipeline = crimild::alloc< Pipeline >();
+	auto vbo = crimild::alloc< VertexP2C3Buffer >( 0 );
+	auto ibo = crimild::alloc< IndexUInt32Buffer >( 0 );
+	auto ubo = crimild::alloc< UniformBufferImpl< crimild::Vector4f >>();
+	auto descriptorSet = [&] {
+		auto ds = crimild::alloc< DescriptorSet >();
+		ds->writes = {
+			{
+				.descriptorType = DescriptorType::UNIFORM_BUFFER,
+				.buffer = crimild::get_ptr( ubo ),
+			},
+			{
+				.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+				.texture = crimild::get_ptr( texture ),
+			},
+		};
+		return ds;
+	}();
+	
+	auto color = graph->create< Attachment >();
+	
+	auto renderPass = graph->create< RenderPass >();
+	renderPass->attachments = { color };
+	renderPass->commands = [&] {
+		auto commands = crimild::alloc< CommandBuffer >();
+		commands->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
+		commands->bindVertexBuffer( crimild::get_ptr( vbo ) );
+		commands->bindIndexBuffer( crimild::get_ptr( ibo ) );
+		commands->bindDescriptorSet( crimild::get_ptr( descriptorSet ) );
+		commands->drawIndexed( ibo->getCount() );
+		return commands;
+	}();
+	
+	auto master = graph->create< PresentationMaster >();
+	master->colorAttachment = color;
 
 	EXPECT_TRUE( graph->compile() );
 
