@@ -38,6 +38,23 @@ namespace crimild {
     class Pipeline;
     class Texture;
 
+    struct Descriptor {
+        enum class Type {
+            UNIFORM_BUFFER,
+            TEXTURE,
+            VIEW_PROJECTION_UNIFORM_BUFFER,
+        };
+
+        Type type;
+
+        union {
+            Buffer *buffer;
+            Texture *texture;
+        };
+    };
+
+    using DescriptorArray = containers::Array< Descriptor >;
+
     enum class DescriptorType {
         COMBINED_IMAGE_SAMPLER,
 		UNIFORM_BUFFER,
