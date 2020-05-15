@@ -28,7 +28,7 @@
 #ifndef CRIMILD_RENDERING_RENDER_RESOURCE_
 #define CRIMILD_RENDERING_RENDER_RESOURCE_
 
-#include "Rendering/FrameGraphObject.hpp"
+#include "Rendering/FrameGraphObjectImpl.hpp"
 #include "Foundation/Containers/Set.hpp"
 #include "Foundation/Containers/Map.hpp"
 #include "Foundation/Singleton.hpp"
@@ -75,7 +75,7 @@ namespace crimild {
     };
 
     template< typename T >
-    class RenderResourceImpl : public FrameGraphObject {
+    class RenderResourceImpl : public FrameGraphObjectImpl< T > {
     public:
         virtual ~RenderResourceImpl( void ) noexcept
         {

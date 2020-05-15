@@ -25,23 +25,23 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Rendering/RenderPass.hpp"
+#include "Rendering/IndexBuffer.hpp"
 #include "Rendering/FrameGraph.hpp"
 
 #include "gtest/gtest.h"
 
 using namespace crimild;
 
-TEST( RenderPass, autoAddToFrameGraph )
+TEST( IndexBuffer, autoAddToFrameGraph )
 {
 	auto graph = crimild::alloc< FrameGraph >();
 
 	EXPECT_FALSE( graph->hasNodes() );
 
 	{
-		auto renderPass = crimild::alloc< RenderPass >();
+		auto indexBuffer = crimild::alloc< IndexUInt32Buffer >( 0 );
 
-		EXPECT_TRUE( graph->contains( renderPass ) );
+		EXPECT_TRUE( graph->contains( indexBuffer ) );
 		EXPECT_TRUE( graph->hasNodes() );
 	}
 
