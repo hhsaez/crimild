@@ -32,6 +32,7 @@
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/IndexBuffer.hpp"
 #include "Rendering/Pipeline.hpp"
+#include "Rendering/PresentationMaster.hpp"
 #include "Rendering/RenderPass.hpp"
 #include "Rendering/Texture.hpp"
 #include "Rendering/VertexBuffer.hpp"
@@ -39,6 +40,14 @@
 #include "Foundation/Log.hpp"
 
 using namespace crimild;
+
+void FrameGraph::remove( FrameGraphObject *obj ) noexcept
+{
+	if ( auto node = getNode( obj ) ) {
+		auto nodePtr = crimild::retain( node );
+		m_nodes.remove( nodePtr );
+	}
+}
 
 crimild::Bool FrameGraph::compile( void ) noexcept
 {

@@ -30,6 +30,7 @@
 #include "Rendering/FrameGraph.hpp"
 #include "Rendering/IndexBuffer.hpp"
 #include "Rendering/Pipeline.hpp"
+#include "Rendering/PresentationMaster.hpp"
 #include "Rendering/RenderPass.hpp"
 #include "Rendering/Texture.hpp"
 #include "Rendering/VertexBuffer.hpp"
@@ -44,16 +45,16 @@ TEST( FrameGraph, simple )
     auto graph = crimild::alloc< FrameGraph >();
 
     auto color = [&] {
-        auto attachment = graph->create< Attachment >();
+        auto attachment = crimild::alloc< Attachment >();
         attachment->usage = Attachment::Usage::COLOR_ATTACHMENT;
         attachment->format = Format::R8G8B8A8_UNORM;
         return attachment;
     }();
 
-    auto renderPass = graph->create< RenderPass >();
+    auto renderPass = crimild::alloc< RenderPass >();
     renderPass->attachments = { color };
 
-    auto present = graph->create< PresentationMaster >();
+    auto present = crimild::alloc< PresentationMaster >();
     present->colorAttachment = color;
 
     EXPECT_TRUE( graph->contains( color ) );
@@ -66,16 +67,16 @@ TEST( FrameGraph, compile )
     auto graph = crimild::alloc< FrameGraph >();
 
     auto color = [&] {
-        auto attachment = graph->create< Attachment >();
+        auto attachment = crimild::alloc< Attachment >();
         attachment->usage = Attachment::Usage::COLOR_ATTACHMENT;
         attachment->format = Format::R8G8B8A8_UNORM;
         return attachment;
     }();
 
-    auto renderPass = graph->create< RenderPass >();
+    auto renderPass = crimild::alloc< RenderPass >();
     renderPass->attachments = { color };
 
-    auto present = graph->create< PresentationMaster >();
+    auto present = crimild::alloc< PresentationMaster >();
     present->colorAttachment = color;
 
     EXPECT_TRUE( graph->compile() );
@@ -93,13 +94,13 @@ TEST( FrameGraph, compileFailNoPresent )
     auto graph = crimild::alloc< FrameGraph >();
 
     auto color = [&] {
-        auto attachment = graph->create< Attachment >();
+        auto attachment = crimild::alloc< Attachment >();
         attachment->usage = Attachment::Usage::COLOR_ATTACHMENT;
         attachment->format = Format::R8G8B8A8_UNORM;
         return attachment;
     }();
 
-    auto renderPass = graph->create< RenderPass >();
+    auto renderPass = crimild::alloc< RenderPass >();
     renderPass->attachments = { color };
 
     EXPECT_TRUE( graph->contains( color ) );
@@ -114,43 +115,43 @@ TEST( FrameGraph, renderPassesNotConnected )
     auto graph = crimild::alloc< FrameGraph >();
 
     auto shadowDepth = [&] {
-        auto attachment = graph->create< Attachment >();
+        auto attachment = crimild::alloc< Attachment >();
         attachment->usage = Attachment::Usage::DEPTH_STENCIL_ATTACHMENT;
         attachment->format = Format::DEPTH_STENCIL_DEVICE_OPTIMAL;
         return attachment;
     }();
 
     auto shadowPass = [&] {
-        auto pass = graph->create< RenderPass >();
+        auto pass = crimild::alloc< RenderPass >();
         pass->attachments = { shadowDepth };
         return pass;
     }();
 
     auto color = [&] {
-        auto attachment = graph->create< Attachment >();
+        auto attachment = crimild::alloc< Attachment >();
         attachment->usage = Attachment::Usage::COLOR_ATTACHMENT;
         attachment->format = Format::R8G8B8A8_UNORM;
         return attachment;
     }();
 
     auto depth = [&] {
-        auto attachment = graph->create< Attachment >();
+        auto attachment = crimild::alloc< Attachment >();
         attachment->usage = Attachment::Usage::DEPTH_STENCIL_ATTACHMENT;
         attachment->format = Format::DEPTH_STENCIL_DEVICE_OPTIMAL;
         return attachment;
     }();
 
     auto resolve = [&] {
-        auto attachment = graph->create< Attachment >();
+        auto attachment = crimild::alloc< Attachment >();
         attachment->usage = Attachment::Usage::COLOR_ATTACHMENT;
         attachment->format = Format::COLOR_SWAPCHAIN_OPTIMAL;
         return attachment;
     }();
 
-    auto renderPass = graph->create< RenderPass >();
+    auto renderPass = crimild::alloc< RenderPass >();
     renderPass->attachments = { color, depth, resolve };
 
-    auto present = graph->create< PresentationMaster >();
+    auto present = crimild::alloc< PresentationMaster >();
     present->colorAttachment = resolve;
 
     EXPECT_TRUE( graph->compile() );
@@ -168,12 +169,12 @@ TEST( FrameGraph, simpleFrameGraph )
 {
 	auto graph = crimild::alloc< FrameGraph >();
 
-	auto pipeline = graph->create< Pipeline >();
-	auto vbo = graph->create< VertexP2C3Buffer >( 0 );
-	auto ibo = graph->create< IndexUInt32Buffer >( 0 );
-	auto ubo = graph->create< UniformBufferImpl< crimild::Vector4f >>();
+	auto pipeline = crimild::alloc< Pipeline >();
+	auto vbo = crimild::alloc< VertexP2C3Buffer >( 0 );
+	auto ibo = crimild::alloc< IndexUInt32Buffer >( 0 );
+	auto ubo = crimild::alloc< UniformBufferImpl< crimild::Vector4f >>();
 	auto descriptorSet = [&] {
-		auto ds = graph->create< DescriptorSet >();
+		auto ds = crimild::alloc< DescriptorSet >();
 		ds->writes = {
 			{
 				.descriptorType = DescriptorType::UNIFORM_BUFFER,
@@ -183,12 +184,12 @@ TEST( FrameGraph, simpleFrameGraph )
 		return ds;
 	}();
 
-	auto color = graph->create< Attachment >();
+	auto color = crimild::alloc< Attachment >();
 
-	auto renderPass = graph->create< RenderPass >();
+	auto renderPass = crimild::alloc< RenderPass >();
 	renderPass->attachments = { color };
 	renderPass->commands = [&] {
-		auto commands = graph->create< CommandBuffer >();
+		auto commands = crimild::alloc< CommandBuffer >();
 		commands->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
 		commands->bindVertexBuffer( crimild::get_ptr( vbo ) );
 		commands->bindIndexBuffer( crimild::get_ptr( ibo ) );
@@ -197,7 +198,7 @@ TEST( FrameGraph, simpleFrameGraph )
 		return commands;
 	}();
 
-	auto present = graph->create< PresentationMaster >();
+	auto present = crimild::alloc< PresentationMaster >();
 	present->colorAttachment = { color };
 
 	EXPECT_TRUE( graph->compile() );
@@ -243,9 +244,9 @@ TEST( FrameGraph, simpleAutoAddNodes )
 		return ds;
 	}();
 
-	auto color = graph->create< Attachment >();
+	auto color = crimild::alloc< Attachment >();
 
-	auto renderPass = graph->create< RenderPass >();
+	auto renderPass = crimild::alloc< RenderPass >();
 	renderPass->attachments = { color };
 	renderPass->commands = [&] {
 		auto commands = crimild::alloc< CommandBuffer >();
@@ -257,7 +258,7 @@ TEST( FrameGraph, simpleAutoAddNodes )
 		return commands;
 	}();
 
-	auto present = graph->create< PresentationMaster >();
+	auto present = crimild::alloc< PresentationMaster >();
 	present->colorAttachment = { color };
 
 	EXPECT_TRUE( graph->compile() );
@@ -288,7 +289,7 @@ TEST( FrameGraph, imageUsage )
 {
 	auto graph = crimild::alloc< FrameGraph >();
 
-	auto color = graph->create< Attachment >();
+	auto color = crimild::alloc< Attachment >();
 	color->usage = Attachment::Usage::COLOR_ATTACHMENT;
 	color->format = Format::COLOR_SWAPCHAIN_OPTIMAL;
 	color->imageView = [&] {
@@ -300,7 +301,7 @@ TEST( FrameGraph, imageUsage )
 		return imageView;
 	}();
 
-	auto depth = graph->create< Attachment >();
+	auto depth = crimild::alloc< Attachment >();
 	depth->usage = Attachment::Usage::DEPTH_STENCIL_ATTACHMENT;
 	depth->format = Format::DEPTH_STENCIL_DEVICE_OPTIMAL;
 	depth->imageView = [&] {
@@ -312,10 +313,10 @@ TEST( FrameGraph, imageUsage )
 		return imageView;
 	}();
 
-	auto renderPass = graph->create< RenderPass >();
+	auto renderPass = crimild::alloc< RenderPass >();
 	renderPass->attachments = { color, depth };
 
-	auto master = graph->create< PresentationMaster >();
+	auto master = crimild::alloc< PresentationMaster >();
 	master->colorAttachment = color;
 
 	EXPECT_TRUE( graph->compile() );
@@ -338,9 +339,9 @@ TEST( FrameGraph, offscreen )
 	auto graph = crimild::alloc< FrameGraph >();
 
 	auto texture = [&] {
-		auto texture = graph->create< Texture >();
+		auto texture = crimild::alloc< Texture >();
 		texture->imageView = [&] {
-			auto imageView = graph->create< ImageView >();
+			auto imageView = crimild::alloc< ImageView >();
 			imageView->image = crimild::alloc< Image >();
 			return imageView;
 		}();
@@ -362,11 +363,11 @@ TEST( FrameGraph, offscreen )
 		return ds;
 	}();
 	
-	auto offColor = graph->create< Attachment >();
+	auto offColor = crimild::alloc< Attachment >();
 	offColor->imageView = texture->imageView;
 	
 	auto offRenderPass = [&] {
-		auto renderPass = graph->create< RenderPass >();
+		auto renderPass = crimild::alloc< RenderPass >();
 		renderPass->attachments = { offColor };
 		renderPass->commands = [&] {
 			auto commands = crimild::alloc< CommandBuffer >();
@@ -401,9 +402,9 @@ TEST( FrameGraph, offscreen )
 		return ds;
 	}();
 	
-	auto color = graph->create< Attachment >();
+	auto color = crimild::alloc< Attachment >();
 	
-	auto renderPass = graph->create< RenderPass >();
+	auto renderPass = crimild::alloc< RenderPass >();
 	renderPass->attachments = { color };
 	renderPass->commands = [&] {
 		auto commands = crimild::alloc< CommandBuffer >();
@@ -414,8 +415,8 @@ TEST( FrameGraph, offscreen )
 		commands->drawIndexed( ibo->getCount() );
 		return commands;
 	}();
-	
-	auto master = graph->create< PresentationMaster >();
+
+	auto master = crimild::alloc< PresentationMaster >();
 	master->colorAttachment = color;
 
 	EXPECT_TRUE( graph->compile() );

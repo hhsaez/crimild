@@ -26,17 +26,26 @@
  */
 
 #include "Rendering/Texture.hpp"
+#include "Rendering/FrameGraph.hpp"
 
 #include "gtest/gtest.h"
 
 using namespace crimild;
 
-TEST( TextureTest, construction )
+TEST( Texture, autoAddToFrameGraph )
 {
-	auto image = crimild::alloc< Image >( 0, 0, 0, nullptr );
-	auto texture = crimild::alloc< Texture >( image );
+	auto graph = crimild::alloc< FrameGraph >();
 
-    EXPECT_EQ( crimild::get_ptr( image ), texture->getImage() );
-	EXPECT_EQ( "ColorMap", texture->getName() );
+	EXPECT_FALSE( graph->hasNodes() );
+
+	{
+		auto texture = crimild::alloc< Texture >();
+
+		EXPECT_TRUE( graph->contains( texture ) );
+		EXPECT_TRUE( graph->hasNodes() );
+	}
+
+	EXPECT_FALSE( graph->hasNodes() );
+	
 }
 

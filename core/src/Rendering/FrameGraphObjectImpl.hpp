@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
- *
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -9,10 +9,10 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the copyright holder nor the
+ *     * Neither the name of the copyright holders nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,69 +25,47 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_RENDERING_RENDER_PASS_
-#define CRIMILD_CORE_RENDERING_RENDER_PASS_
+#ifndef CRIMILD_CORE_RENDERING_FRAME_GRAPH_OBJECT_IMPL_
+#define CRIMILD_CORE_RENDERING_FRAME_GRAPH_OBJECT_IMPL_
 
-#include "Foundation/SharedObject.hpp"
-#include "Rendering/Format.hpp"
-#include "Rendering/FrameGraphObjectImpl.hpp"
-#include "Rendering/Image.hpp"
-#include "Rendering/ImageView.hpp"
-#include "Rendering/RenderResource.hpp"
-#include "Rendering/ViewportDimensions.hpp"
+#include "Rendering/FrameGraphObject.hpp"
+#include "Rendering/FrameGraph.hpp"
 
 namespace crimild {
 
-    class CommandBuffer;
+	/**
+	   \brief Implementes automatic registration for objects 
 
-    class Attachment :
-		public SharedObject,
-		public FrameGraphObjectImpl< Attachment > {
-	public:
-		enum class Usage {
-			UNDEFINED,
-            COLOR_ATTACHMENT,
-            DEPTH_STENCIL_ATTACHMENT,
-		};
-		
-		enum class LoadOp {
-			LOAD,
-			CLEAR,
-			DONT_CARE,
-		};
+	   Classes should inherit from this one in order to support
+	   automatic registration of instances into a frame graph. 
 
-		enum class StoreOp {
-			STORE,
-			DONT_CARE,
-		};
-		
-    public:
-        Format format = Format::UNDEFINED;
-        Usage usage = Usage::UNDEFINED;
-		LoadOp loadOp = LoadOp::DONT_CARE;
-		StoreOp storeOp = StoreOp::DONT_CARE;
-		LoadOp stencilLoadOp = LoadOp::DONT_CARE;
-		StoreOp stencilStoreOp = StoreOp::DONT_CARE;
+	   \remarks Right now there can be only one frame graph instance since
+	   we're using singletons, but that might change in the future.
+	 */
+	template< typename T >
+	class FrameGraphObjectImpl : public FrameGraphObject {
+	protected:
+		/**
+		   \brief Default constructor
 
-        // TODO
-        SharedPointer< ImageView > imageView;
-    };
+		   New objects will automatically register themselves to a frame
+		   graph, if one is available.
+		 */
+		FrameGraphObjectImpl( void ) noexcept
+		{
+			if ( auto frameGraph = FrameGraph::getInstance() ) {
+				frameGraph->add( static_cast< T * >( this ) );
+			}
+		}
 
-    class RenderPass :
-    	public SharedObject,
-    	public RenderResourceImpl< RenderPass > {
+		/**
+		   \brief Destructor
 
-    public:
-		containers::Array< SharedPointer< Attachment >> attachments;
-		SharedPointer< CommandBuffer > commands;
-        ViewportDimensions viewport;
-
-        struct ClearValue {
-        	RGBAColorf color = RGBAColorf::ZERO;
-        	Vector2f depthStencil = Vector2f::UNIT_X;
-        };
-        ClearValue clearValue;
-    };
+		   Remove the object from the frame graph is done by the base
+		   class' destructor.
+		 */
+		virtual ~FrameGraphObjectImpl( void ) = default;
+	};
 
 }
 
