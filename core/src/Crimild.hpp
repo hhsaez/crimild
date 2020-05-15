@@ -250,6 +250,7 @@
 #include "Rendering/Material.hpp"
 #include "Rendering/Pipeline.hpp"
 #include "Rendering/PolygonState.hpp"
+#include "Rendering/PresentationMaster.hpp"
 #include "Rendering/RenderPass.hpp"
 #include "Rendering/RenderResource.hpp"
 #include "Rendering/RenderState.hpp"

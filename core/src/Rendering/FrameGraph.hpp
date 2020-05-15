@@ -29,6 +29,7 @@
 #define CRIMILD_CORE_RENDERING_FRAME_GRAPH_
 
 #include "Rendering/FrameGraphObject.hpp"
+#include "Foundation/Singleton.hpp"
 #include "Foundation/NamedObject.hpp"
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/Containers/Array.hpp"
@@ -55,21 +56,23 @@ namespace crimild {
         std::function< void( void ) > callback;
     };
 
+	class FrameGraph;
+
     /**
-     	\todo Do not keep strong references to resources. Otherwise, they won't be
-     	properly released and unloaded.
-
-     	\todo Keep a global frame graph using dynamic singletons? Like I did before
-     	for the shader graph. That way resources can register themselves and we
-     	don't need to worry about it.
-
-     	\todo merge render passes.
-
-     	\todo reuse image resources.
-
-     	\todo update uniform buffers only when needed. 
-     */
-	class FrameGraph : public coding::Codable {
+	   \brief Frame Graph
+	   
+	   [Hernan] I'm not sure if making this a singleton is a good idea. It might
+	   be possible that we create a new frame graph for a different scene and then
+	   switch them. What we might need is something more like an 'active' singleton.
+	   
+	   \todo This class is not thread safe (yet);
+	   \todo merge render passes.
+	   \todo reuse image resources.
+	   \todo update uniform buffers only when needed. 
+	*/
+	class FrameGraph :
+		public coding::Codable,
+		public DynamicSingleton< FrameGraph > {
 		CRIMILD_IMPLEMENT_RTTI( crimild::FrameGraph )
 		
 	public:
@@ -90,6 +93,7 @@ namespace crimild {
 
                 PRESENTATION_MASTER,
 
+				CUSTOM,
                 CUSTOM_OPERATION,
                 CUSTOM_RESOURCE,
 			};
@@ -115,6 +119,7 @@ namespace crimild {
 		Node::Type getNodeType( RenderPass * ) const { return Node::Type::RENDER_PASS; }
 		Node::Type getNodeType( Attachment * ) const { return Node::Type::ATTACHMENT; }
         Node::Type getNodeType( PresentationMaster * ) const { return Node::Type::PRESENTATION_MASTER; }
+		Node::Type getNodeType( FrameGraphObject * ) const { return Node::Type::CUSTOM; }
 
         template< typename NodeObjectType >
         void add( SharedPointer< NodeObjectType > const objPtr ) noexcept
@@ -129,8 +134,6 @@ namespace crimild {
                 return;
             }
 
-			obj->frameGraph = this;
-
             auto node = crimild::alloc< Node >();
             node->type = getNodeType( obj );
             node->obj = obj;
@@ -143,15 +146,15 @@ namespace crimild {
             // Retain the new node
             m_nodes.insert( node );
         }
-		
-		template< typename NodeObjectType, typename... Args >
-		SharedPointer< NodeObjectType > create( Args &&... args ) noexcept
-		{
-			auto obj = crimild::alloc< NodeObjectType >( std::forward< Args >( args )... );
-            add( obj );
-            return obj;
-		}
 
+		/**
+		   \brief Removes an object from the graph
+
+		   \todo This should trigger a frame graph compilation. Maybe I should use
+		   a kind of dirty flag or similar.
+		 */
+		void remove( FrameGraphObject *obj ) noexcept;
+		
         template< typename T >
         inline crimild::Bool contains( SharedPointer< T > const &ptr ) noexcept
         {
@@ -180,6 +183,11 @@ namespace crimild {
         {
             return m_sorted;
         }
+
+		crimild::Bool hasNodes( void ) const noexcept
+		{
+			return !m_nodes.empty();
+		}
 
         template< typename T, typename Fn >
         void each( Fn fn )
@@ -273,7 +281,7 @@ namespace crimild {
 	private:
 		containers::Digraph< Node * > m_graph;
 		containers::Digraph< Node * > m_reversedGraph;
-		containers::Map< SharedObject *, Node * > m_invertedIndex;
+		containers::Map< FrameGraphObject *, Node * > m_invertedIndex;
         containers::Array< Node * > m_sorted;
 		containers::Map< Node::Type, containers::Array< Node * >> m_sortedByType;
         containers::Set< SharedPointer< Node >> m_nodes;
@@ -281,15 +289,6 @@ namespace crimild {
 	};
 
 	std::ostream &operator<<( std::ostream &out, FrameGraph::Node::Type node );
-
-    class PresentationMaster :
-		public SharedObject,
-		public FrameGraphObject {
-    public:
-        virtual ~PresentationMaster( void ) = default;
-
-        SharedPointer< Attachment > colorAttachment;
-    };
 
 }
 

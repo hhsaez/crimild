@@ -34,25 +34,37 @@ namespace crimild {
 
 	/**
 	   \brief An object that can be added to a frame graph
+
+	   This is supposed to be a base class for any object that can 
+	   be added to a frame graph. In practice, it would be better
+	   to inherit from FrameGraphObjectImpl instead, since this class
+	   also automatically adds the object to the frame graph.
+
+	   \see FrameGraphObjectImpl
 	 */
 	class FrameGraphObject {
 	protected:
 		/**
 		   \brief Class destructor
 
-		   It's protected so we cannot instantiate this class.
+		   Whenever an instance of this class is destroyed, we automatically
+		   remove it from the frame graph.
+
+		   \remarks It's protected so we cannot instantiate this class.
 		 */
-		virtual ~FrameGraphObject( void ) = default;
+		virtual ~FrameGraphObject( void ) noexcept;
 
 	public:
 		/**
-		   \brief Reference to a frame graph
+		   \brief Gets a pointer to a frame graph
 
-		   This reference is set whenever the object is added to
-		   a frame graph. 
+		   As it is right now, this is a helper method to get 
+		   the global frame graph. It might be more helpful later
+		   if multiple frame graphs are allowed. 
 		 */
-		FrameGraph *frameGraph;
+		FrameGraph *getFrameGraph( void ) const noexcept;
 	};
+
 
 }
 

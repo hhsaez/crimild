@@ -110,7 +110,7 @@ crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
 						.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
 					}
 				);
-				auto isPresentation = attachment->frameGraph->isPresentation( attachment );
+				auto isPresentation = attachment->getFrameGraph()->isPresentation( attachment );
                 hasPresentation |= isPresentation;
 				finalLayout = isPresentation ? VK_IMAGE_LAYOUT_PRESENT_SRC_KHR : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 			}
