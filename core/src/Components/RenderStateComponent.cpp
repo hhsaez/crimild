@@ -71,8 +71,8 @@ RenderStateComponent::~RenderStateComponent( void )
 
 void RenderStateComponent::prepare( void ) noexcept
 {
-    if ( pipeline->descriptorSetLayout == nullptr ) {
-        pipeline->descriptorSetLayout = pipeline->program->descriptorSetLayout;
+    if ( pipeline->descriptorSetLayouts.empty() ) {
+        pipeline->descriptorSetLayouts = pipeline->program->descriptorSetLayouts;
     }
 
     if ( pipeline->attributeDescriptions.empty() ) {
@@ -81,7 +81,7 @@ void RenderStateComponent::prepare( void ) noexcept
     }
 
     if ( descriptorSet == nullptr ) {
-        descriptorSet = createDescriptorSet( crimild::get_ptr( pipeline->descriptorSetLayout ) );
+        descriptorSet = createDescriptorSet( crimild::get_ptr( pipeline->descriptorSetLayouts.first() ) );
         descriptorSetLayout = descriptorSet->descriptorSetLayout;
         descriptorPool = descriptorSet->descriptorPool;
     }

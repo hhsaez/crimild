@@ -56,7 +56,7 @@ namespace crimild {
         ViewportDimensions scissor;
         std::vector< VertexInputAttributeDescription > attributeDescriptions;
         VertexInputBindingDescription bindingDescription;
-        SharedPointer< DescriptorSetLayout > descriptorSetLayout;
+        containers::Array< SharedPointer< DescriptorSetLayout >> descriptorSetLayouts;
         SharedPointer< AlphaState > alphaState;
         SharedPointer< CullFaceState > cullFaceState;
         SharedPointer< DepthState > depthState;

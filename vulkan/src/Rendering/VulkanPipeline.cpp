@@ -76,7 +76,11 @@ crimild::Bool PipelineManager::bind( Pipeline *pipeline ) noexcept
 
     auto pipelineLayout = renderDevice->create(
         PipelineLayout::Descriptor {
-            .setLayouts = { crimild::get_ptr( pipeline->descriptorSetLayout ) },
+            .setLayouts = pipeline->descriptorSetLayouts.map(
+            	[]( auto &layout ) {
+                	return crimild::get_ptr( layout );
+            	}
+            ),
         }
     );
 
