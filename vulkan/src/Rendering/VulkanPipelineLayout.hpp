@@ -29,6 +29,7 @@
 #define CRIMILD_RENDERING_VULKAN_PIPELINE_LAYOUT_
 
 #include "Foundation/VulkanObject.hpp"
+#include "Foundation/Containers/Array.hpp"
 
 namespace crimild {
 
@@ -45,7 +46,7 @@ namespace crimild {
         public:
             struct Descriptor {
                 RenderDevice *renderDevice;
-                std::vector< DescriptorSetLayout * > setLayouts;
+                containers::Array< DescriptorSetLayout * > setLayouts;
             };
 
         public:

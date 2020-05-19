@@ -229,6 +229,7 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                     auto pipelineBindInfo = renderDevice->getBindInfo( pipeline );
 
                     m_currentPipeline = pipeline;
+                    m_boundDescriptorSets = 0;
 
                     vkCmdBindPipeline(
                         handler,
@@ -292,7 +293,7 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                         handler,
                         VK_PIPELINE_BIND_POINT_GRAPHICS,
                         pipelineBindInfo.pipelineLayout->handler,
-                        0,
+                        m_boundDescriptorSets++,
                         1,
                         descriptorSets,
                         0,
