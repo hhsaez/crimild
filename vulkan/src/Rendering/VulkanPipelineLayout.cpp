@@ -48,10 +48,12 @@ SharedPointer< PipelineLayout > PipelineLayoutManager::create( PipelineLayout::D
     }
 
     std::vector< VkDescriptorSetLayout > setLayouts;
-    for ( const auto setLayout : descriptor.setLayouts ) {
-        renderDevice->bind( setLayout );
-        setLayouts.push_back( renderDevice->getHandler( setLayout ) );
-    }
+    descriptor.setLayouts.each(
+   		[&]( auto &layout ) {
+            renderDevice->bind( layout );
+            setLayouts.push_back( renderDevice->getHandler( layout ) );
+    	}
+   	);
 
     auto createInfo = VkPipelineLayoutCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,

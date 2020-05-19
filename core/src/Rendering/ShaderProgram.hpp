@@ -76,7 +76,7 @@ namespace crimild {
 
         std::vector< VertexInputAttributeDescription > attributeDescriptions;
         VertexInputBindingDescription bindingDescription;
-        SharedPointer< DescriptorSetLayout > descriptorSetLayout;
+        containers::Array< SharedPointer< DescriptorSetLayout >> descriptorSetLayouts;
 
     private:
 		ShaderArray m_shaders;
