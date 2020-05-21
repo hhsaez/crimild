@@ -43,12 +43,15 @@ namespace crimild {
 	class Attachment;
 	class Buffer;
     class CommandBuffer;
+    class DescriptorPool;
 	class DescriptorSet;
+    class DescriptorSetLayout;
 	class Image;
 	class ImageView;
 	class Pipeline;
     class PresentationMaster;
 	class RenderPass;
+    class Sampler;
 	class Texture;
 
     class CustomOperation : public SharedObject {
@@ -86,10 +89,13 @@ namespace crimild {
 				IMAGE,
 				IMAGE_VIEW,
 				TEXTURE,
+                DESCRIPTOR_POOL,
 				DESCRIPTOR_SET,
+                DESCRIPTOR_SET_LAYOUT,
 				COMMAND_BUFFER,
 				ATTACHMENT,
 				RENDER_PASS,
+                SAMPLER,
 
                 PRESENTATION_MASTER,
 
@@ -115,9 +121,12 @@ namespace crimild {
 		Node::Type getNodeType( ImageView * ) const { return Node::Type::IMAGE_VIEW; }
 		Node::Type getNodeType( Texture * ) const { return Node::Type::TEXTURE; }
 		Node::Type getNodeType( DescriptorSet * ) const { return Node::Type::DESCRIPTOR_SET; }
+        Node::Type getNodeType( DescriptorSetLayout * ) const { return Node::Type::DESCRIPTOR_SET_LAYOUT; }
+        Node::Type getNodeType( DescriptorPool * ) const { return Node::Type::DESCRIPTOR_POOL; }
 		Node::Type getNodeType( CommandBuffer * ) const { return Node::Type::COMMAND_BUFFER; }
 		Node::Type getNodeType( RenderPass * ) const { return Node::Type::RENDER_PASS; }
 		Node::Type getNodeType( Attachment * ) const { return Node::Type::ATTACHMENT; }
+        Node::Type getNodeType( Sampler * ) const { return Node::Type::SAMPLER; }
         Node::Type getNodeType( PresentationMaster * ) const { return Node::Type::PRESENTATION_MASTER; }
 		Node::Type getNodeType( FrameGraphObject * ) const { return Node::Type::CUSTOM; }
 
