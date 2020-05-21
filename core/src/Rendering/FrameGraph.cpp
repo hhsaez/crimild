@@ -321,8 +321,16 @@ std::ostream &crimild::operator<<( std::ostream &out, FrameGraph::Node::Type typ
 			break;			
 
 		case FrameGraph::Node::Type::DESCRIPTOR_SET:
-			out << "DESCRIPTION_SET";
+			out << "DESCRIPTOR_SET";
 			break;			
+
+        case FrameGraph::Node::Type::DESCRIPTOR_SET_LAYOUT:
+            out << "DESCRIPTOR_SET_LAYOUT";
+            break;
+
+        case FrameGraph::Node::Type::DESCRIPTOR_POOL:
+            out << "DESCRIPTOR_POOL";
+            break;
 
 		case FrameGraph::Node::Type::TEXTURE:
 			out << "TEXTURE";
@@ -340,12 +348,16 @@ std::ostream &crimild::operator<<( std::ostream &out, FrameGraph::Node::Type typ
 			out << "RENDER_PASS";
 			break;			
 
+        case FrameGraph::Node::Type::SAMPLER:
+            out << "SAMPLER";
+            break;
+
 		case FrameGraph::Node::Type::PRESENTATION_MASTER:
 			out << "PRESENTATION_MASTER";
 			break;			
 
 		default:
-			out << "UNKNOWN";
+			out << "UNKNOWN (" << int( type ) << ")";
 			break;
 	}
 

@@ -78,6 +78,8 @@ namespace crimild {
     	public RenderResourceImpl< RenderPass > {
 
     public:
+        virtual ~RenderPass( void ) = default;
+
 		containers::Array< SharedPointer< Attachment >> attachments;
 		SharedPointer< CommandBuffer > commands;
         ViewportDimensions viewport;
