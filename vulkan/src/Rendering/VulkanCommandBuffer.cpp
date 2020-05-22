@@ -174,14 +174,19 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                         },
                     };
 
-                    auto rect = utils::getViewportRect( &m_currentRenderPass->viewport, renderDevice );
-
                     auto renderPassInfo = VkRenderPassBeginInfo {
                         .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
                         .renderPass = renderPass,
                         .framebuffer = framebuffer,
-                        .renderArea.offset = rect.offset,
-                        .renderArea.extent = rect.extent,
+                        .renderArea = {
+                            // Render passes always render to the full extent of
+                            // the associated framebuffer
+                            .offset = { 0, 0 },
+                            .extent = utils::getExtent(
+                            	m_currentRenderPass->extent,
+                                renderDevice
+                            ),
+                        },
                         .clearValueCount = static_cast< crimild::UInt32 >( clearValues.size() ),
                         .pClearValues = clearValues.data(),
                     };
@@ -191,13 +196,27 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                 }
 
                 case CommandBuffer::Command::Type::SET_VIEWPORT: {
-                    auto viewport = utils::getViewport( &cmd.viewportDimensions, renderDevice );
+                    auto viewport = [&] {
+                        auto viewport = cmd.viewportDimensions;
+                        if ( viewport.scalingMode == ScalingMode::RELATIVE ) {
+                            viewport.scalingMode = m_currentRenderPass->extent.scalingMode;
+                            viewport.dimensions = Rectf( 0.0f, 0.0f, m_currentRenderPass->extent.width, m_currentRenderPass->extent.height );
+                        }
+                        return utils::getViewport( &viewport, renderDevice );
+                    }();
                     vkCmdSetViewport( handler, 0, 1, &viewport );
                     break;
                 }
 
                 case CommandBuffer::Command::Type::SET_SCISSOR: {
-                    auto scissor = utils::getScissor( &cmd.viewportDimensions, renderDevice );
+                    auto scissor = [&] {
+                        auto viewport = cmd.viewportDimensions;
+                        if ( viewport.scalingMode == ScalingMode::RELATIVE ) {
+                            viewport.scalingMode = m_currentRenderPass->extent.scalingMode;
+                            viewport.dimensions = Rectf( 0.0f, 0.0f, m_currentRenderPass->extent.width, m_currentRenderPass->extent.height );
+                        }
+                        return utils::getScissor( &viewport, renderDevice );
+                    }();
                     vkCmdSetScissor( handler, 0, 1, &scissor );
                     break;
                 }

@@ -82,7 +82,9 @@ namespace crimild {
 
 		containers::Array< SharedPointer< Attachment >> attachments;
 		SharedPointer< CommandBuffer > commands;
-        ViewportDimensions viewport;
+        Extent2D extent = Extent2D {
+            .scalingMode = ScalingMode::SWAPCHAIN_RELATIVE,
+        };
 
         struct ClearValue {
         	RGBAColorf color = RGBAColorf::ZERO;

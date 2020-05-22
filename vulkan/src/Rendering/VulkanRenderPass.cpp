@@ -44,13 +44,7 @@ crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
 	auto renderDevice = getRenderDevice();
     auto swapchain = renderDevice->getSwapchain();
     auto imageCount = swapchain->images.size();
-    auto viewport = renderPass->viewport;
-    auto fbWidth = viewport.dimensions.getWidth();
-    auto fbHeight = viewport.dimensions.getHeight();
-    if ( viewport.scalingMode == ScalingMode::SWAPCHAIN_RELATIVE ) {
-        fbWidth *= swapchain->extent.width;
-        fbHeight *= swapchain->extent.height;
-    }
+    auto extent = utils::getExtent( renderPass->extent, renderDevice );
 
     auto createAttachmentImage = [&]( Attachment *attachment ) {
         auto image = crimild::alloc< Image >();
@@ -61,8 +55,8 @@ crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
         }
         image->extent = {
             .scalingMode = ScalingMode::FIXED,
-            .width = fbWidth,
-            .height = fbHeight,
+            .width = crimild::Real32( extent.width ),
+            .height = crimild::Real32( extent.height ),
         };
         image->format = attachment->format;
         image->setMipLevels( 1 ); // only 1 mip level is allowed for framebuffer's images
@@ -199,8 +193,8 @@ crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
             .renderPass = bindInfo.handler,
             .attachmentCount = crimild::UInt32( fbAttachments.size() ),
             .pAttachments = fbAttachments.getData(),
-            .width = crimild::UInt32( fbWidth ),
-            .height = crimild::UInt32( fbHeight ),
+            .width = extent.width,
+            .height = extent.height,
             .layers = 1,
         };
 
