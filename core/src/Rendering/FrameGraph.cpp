@@ -46,12 +46,21 @@ void FrameGraph::remove( FrameGraphObject *obj ) noexcept
 	if ( auto node = getNode( obj ) ) {
 		auto nodePtr = crimild::retain( node );
 		m_nodes.remove( nodePtr );
+
+		// Notify that the frame graph needs rebuilding
+		m_dirty = true;
 	}
 }
 
 crimild::Bool FrameGraph::compile( void ) noexcept
 {
     CRIMILD_LOG_TRACE( "Compiling frame graph" );
+
+	if ( !isDirty() ) {
+		// The frame graph did not change, so there's no need to recompile it
+		// Returns true because this is not an error
+		return true;
+	}
 
 	verifyAllConnections();
 
