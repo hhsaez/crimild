@@ -154,6 +154,9 @@ namespace crimild {
 
             // Retain the new node
             m_nodes.insert( node );
+
+			// Notify that the frame graph needs rebuilding
+			m_dirty = true;
         }
 
 		/**
@@ -207,7 +210,9 @@ namespace crimild {
             });
         }
 
-		crimild::Bool isPresentation( SharedPointer< Attachment > const &attachment ) const noexcept;			
+		crimild::Bool isPresentation( SharedPointer< Attachment > const &attachment ) const noexcept;
+
+		crimild::Bool isDirty( void ) const noexcept { return m_dirty; }
 
         crimild::Bool compile( void ) noexcept;
 
@@ -295,6 +300,20 @@ namespace crimild {
 		containers::Map< Node::Type, containers::Array< Node * >> m_sortedByType;
         containers::Set< SharedPointer< Node >> m_nodes;
         containers::Map< Node::Type, containers::Array< Node * >> m_nodesByType;
+
+
+		/**
+		   \brief Keep tracks of changes in the graph
+
+		   Whenever the frame graph is modified (i.e. adding or removing objects),
+		   we might need to recompile it. 
+
+		   \todo Instead of a flag, we might keep track of what objects actually changed.
+		   For example, new objects that were added or objects that were connected with
+		   other ones that were removed. That way we know for sure which connections
+		   have to be made and which passes need to recreate their command buffers.
+		 */
+		crimild::Bool m_dirty = false;
 	};
 
 	std::ostream &operator<<( std::ostream &out, FrameGraph::Node::Type node );
