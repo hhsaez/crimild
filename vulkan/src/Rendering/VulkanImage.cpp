@@ -64,8 +64,13 @@ crimild::Bool vulkan::ImageManager::bind( Image *image ) noexcept
 		usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 	}
     else {
-        usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-//        usage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+        // If image has no data, then it's used as an attachment
+        if ( utils::formatIsColor( image->format ) ) {
+        	usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+        }
+        else if ( utils::formatIsDepthStencil( image->format ) ) {
+        	usage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+        }
     }
 
     utils::createImage(
