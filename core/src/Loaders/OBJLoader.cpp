@@ -35,17 +35,20 @@
 #include "Simulation/AssetManager.hpp"
 #include "Simulation/FileSystem.hpp"
 #include "Primitives/Primitive.hpp"
+#include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Renderer.hpp"
 #include "Rendering/Material.hpp"
 #include "Rendering/ImageManager.hpp"
+#include "Rendering/ImageView.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/Programs/UnlitShaderProgram.hpp"
 #include "Rendering/VertexBuffer.hpp"
 #include "Rendering/IndexBuffer.hpp"
 #include "Rendering/Pipeline.hpp"
+#include "Rendering/Sampler.hpp"
 #include "Rendering/ShaderLibrary.hpp"
 #include "Rendering/ShaderProgramLibrary.hpp"
-#include "Rendering/Uniforms/ModelViewProjectionUniformBuffer.hpp"
+#include "Rendering/Uniforms/ModelUniformBuffer.hpp"
 #include "Components/MaterialComponent.hpp"
 
 namespace crimild {
@@ -258,7 +261,7 @@ void OBJLoader::generateGeometry( void )
             renderState->ibo = ibo;
             renderState->uniforms = {
                 [&] {
-                    auto ubo = crimild::alloc< ModelViewProjectionUniformBuffer >();
+                    auto ubo = crimild::alloc< ModelUniformBuffer >();
                     ubo->node = crimild::get_ptr( geometry );
                     return ubo;
                 }(),
@@ -271,6 +274,23 @@ void OBJLoader::generateGeometry( void )
                     return crimild::retain( _currentMaterial->getColorMap() );
                 }(),
             };
+            renderState->descriptorSet = [&] {
+                auto descriptorSet = crimild::alloc< DescriptorSet >();
+                descriptorSet->descriptorSetLayout = pipeline->program->descriptorSetLayouts[ 1 ];
+                descriptorSet->descriptorPool = crimild::alloc< DescriptorPool >();
+                descriptorSet->descriptorPool->descriptorSetLayout = descriptorSet->descriptorSetLayout;
+                descriptorSet->writes = {
+                    {
+                        .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                        .buffer = crimild::get_ptr( renderState->uniforms[ 0 ] ),
+                    },
+                    {
+                        .descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+                        .texture = crimild::get_ptr( renderState->textures[ 0 ] ),
+                    },
+                };
+                return descriptorSet;
+            }();
             return renderState;
         }());
 
@@ -457,7 +477,16 @@ SharedPointer< Texture > OBJLoader::loadTexture( std::string textureFileName )
     	}
     );
 
-    auto texture = crimild::alloc< Texture >( image );
+    auto texture = crimild::alloc< Texture >();
+    texture->imageView = crimild::alloc< ImageView >();
+    texture->imageView->image = image;
+    texture->sampler = [] {
+        auto sampler = crimild::alloc< Sampler >();
+        sampler->setMinFilter( Sampler::Filter::NEAREST );
+        sampler->setMagFilter( Sampler::Filter::NEAREST );
+        return sampler;
+    }();
+    return texture;
 
     return texture;
 }
