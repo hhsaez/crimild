@@ -179,8 +179,8 @@ namespace crimild {
     };
 
     struct VertexInputBindingDescription {
-        crimild::UInt32 binding;
-        crimild::UInt32 stride;
+        crimild::UInt32 binding = 0;
+        crimild::UInt32 stride = 0;
     };
 
     struct VertexP2 {

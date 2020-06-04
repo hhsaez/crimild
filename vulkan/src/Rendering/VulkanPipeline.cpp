@@ -344,6 +344,8 @@ VkPipelineRasterizationStateCreateInfo PipelineManager::createRasterizer( Pipeli
         }
     }
 
+    auto depthState = pipeline->depthState;
+
     return VkPipelineRasterizationStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
         .depthClampEnable = VK_FALSE, // VK_TRUE might be required for shadow maps
@@ -352,10 +354,10 @@ VkPipelineRasterizationStateCreateInfo PipelineManager::createRasterizer( Pipeli
         .lineWidth = lineWidth,
         .cullMode = cullMode,
         .frontFace = frontFace,
-        .depthBiasEnable = VK_FALSE, // Might be needed for shadow mapping
-        .depthBiasConstantFactor = 0,
-        .depthBiasClamp = 0,
-        .depthBiasSlopeFactor = 0,
+        .depthBiasEnable = VkBool32( depthState != nullptr ? depthState->isBiasEnabled() : VK_FALSE ),
+        .depthBiasConstantFactor = depthState != nullptr ? depthState->getBiasConstantFactor() : 0,
+        .depthBiasClamp = depthState != nullptr ? depthState->getBiasClamp() : 0,
+        .depthBiasSlopeFactor = depthState != nullptr ? depthState->getBiasSlopeFactor() : 0,
     };
 }
 

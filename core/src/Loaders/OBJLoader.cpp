@@ -265,11 +265,28 @@ void OBJLoader::generateGeometry( void )
                     ubo->node = crimild::get_ptr( geometry );
                     return ubo;
                 }(),
+                [&] {
+                    auto color = RGBAColorf::ONE;
+                    if ( _currentMaterial != nullptr ) {
+                        color = _currentMaterial->getDiffuse();
+                    }
+                    auto ubo = crimild::alloc< UniformBufferImpl< RGBAColorf >>( color );
+                    return ubo;
+                }(),
             };
             renderState->textures = {
                 [&] {
                     if ( _currentMaterial == nullptr || _currentMaterial->getColorMap() == nullptr ) {
-                        return Texture::INVALID;
+                        auto texture = crimild::alloc< Texture >();
+                        texture->imageView = crimild::alloc< ImageView >();
+                        texture->imageView->image = Image::ONE;
+                        texture->sampler = [] {
+                            auto sampler = crimild::alloc< Sampler >();
+                            sampler->setMinFilter( Sampler::Filter::NEAREST );
+                            sampler->setMagFilter( Sampler::Filter::NEAREST );
+                            return sampler;
+                        }();
+                        return texture;
                     }
                     return crimild::retain( _currentMaterial->getColorMap() );
                 }(),
@@ -283,6 +300,10 @@ void OBJLoader::generateGeometry( void )
                     {
                         .descriptorType = DescriptorType::UNIFORM_BUFFER,
                         .buffer = crimild::get_ptr( renderState->uniforms[ 0 ] ),
+                    },
+                    {
+                        .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                        .buffer = crimild::get_ptr( renderState->uniforms[ 1 ] ),
                     },
                     {
                         .descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
@@ -486,8 +507,6 @@ SharedPointer< Texture > OBJLoader::loadTexture( std::string textureFileName )
         sampler->setMagFilter( Sampler::Filter::NEAREST );
         return sampler;
     }();
-    return texture;
-
     return texture;
 }
 
