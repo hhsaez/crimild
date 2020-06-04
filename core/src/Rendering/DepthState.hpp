@@ -67,6 +67,25 @@ namespace crimild {
         
     private:
         bool _writable = true;
+
+	public:
+		inline void setBiasEnabled( bool enabled ) noexcept { _biasEnabled = enabled; }
+		inline bool isBiasEnabled( void ) const noexcept { return _biasEnabled; }
+
+		inline void setBiasConstantFactor( float factor ) noexcept { _biasConstantFactor = factor; }
+		inline float getBiasConstantFactor( void ) const noexcept { return _biasConstantFactor; }
+
+		inline void setBiasClamp( float clamp ) noexcept { _biasClamp = clamp; }
+		inline float getBiasClamp( void ) const noexcept { return _biasClamp; }
+
+		inline void setBiasSlopeFactor( float factor ) noexcept { _biasSlopeFactor = factor; }
+		inline float getBiasSlopeFactor( void ) const noexcept { return _biasSlopeFactor; }
+		
+	private:
+		bool _biasEnabled = false;
+		float _biasConstantFactor = 0.0f;
+		float _biasClamp = 0.0f;
+		float _biasSlopeFactor = 0.0f;
 	};
 
 }

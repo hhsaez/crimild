@@ -116,6 +116,7 @@ namespace crimild {
         void setVertexOffset( crimild::Size offset ) noexcept;
         void setViewport( const ViewportDimensions &viewport ) noexcept;
 
+		void draw( crimild::UInt32 count ) noexcept;
         void drawIndexed( crimild::UInt32 count ) noexcept;
         void drawIndexed( crimild::UInt32 count, crimild::Size indexOffset, crimild::Size vertexOffset ) noexcept;
 

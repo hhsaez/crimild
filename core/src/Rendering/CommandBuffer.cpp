@@ -229,6 +229,14 @@ void CommandBuffer::bindCommandBuffer( CommandBuffer *commandBuffer ) noexcept
     m_commands.push_back( cmd );
 }
 
+void CommandBuffer::draw( crimild::UInt32 count ) noexcept
+{
+    Command cmd;
+    cmd.type = Command::Type::DRAW;
+    cmd.count = count;
+    m_commands.push_back( cmd );
+}
+
 void CommandBuffer::drawIndexed( crimild::UInt32 count ) noexcept
 {
     Command cmd;
