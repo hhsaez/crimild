@@ -60,3 +60,8 @@ void FetchCameras::forEachCamera( std::function< void( Camera * ) > callback )
 	_cameras.clear();
 }
 
+Camera *FetchCameras::anyCamera( void ) noexcept
+{
+	return hasCameras() ? _cameras[ 0 ] : nullptr;
+}
+

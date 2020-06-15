@@ -50,6 +50,8 @@ namespace crimild {
 
         void forEachCamera( std::function< void( Camera * ) > callback );
 
+		Camera *anyCamera( void ) noexcept;
+
 	private:
         std::vector< Camera * > _cameras;
 	};

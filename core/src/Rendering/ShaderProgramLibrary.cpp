@@ -88,7 +88,7 @@ RenderResourceLibrary< ShaderProgram >::RenderResourceLibrary( void ) noexcept
 							.stage = Shader::Stage::VERTEX,
 						},
 						{
-							.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+							.descriptorType = DescriptorType::TEXTURE,
 							.descriptorCount = 1,
 							.stage = Shader::Stage::FRAGMENT,
 						}
@@ -123,7 +123,7 @@ RenderResourceLibrary< ShaderProgram >::RenderResourceLibrary( void ) noexcept
 							.stage = Shader::Stage::VERTEX,
 						},
 						{
-							.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+							.descriptorType = DescriptorType::TEXTURE,
 							.descriptorCount = 1,
 							.stage = Shader::Stage::FRAGMENT,
 						}
@@ -158,7 +158,7 @@ RenderResourceLibrary< ShaderProgram >::RenderResourceLibrary( void ) noexcept
 							.stage = Shader::Stage::VERTEX,
 						},
 						{
-							.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+							.descriptorType = DescriptorType::TEXTURE,
 							.descriptorCount = 1,
 							.stage = Shader::Stage::FRAGMENT,
 						}

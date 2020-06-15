@@ -81,29 +81,29 @@ crimild::Bool DescriptorSetManager::bind( DescriptorSet *descriptorSet ) noexcep
     VkDescriptorImageInfo imageInfo;
 
     for ( auto i = 0l; i < count; ++i ) {
-        std::vector< VkWriteDescriptorSet > writes( descriptorSet->writes.size() );
+        std::vector< VkWriteDescriptorSet > writes( descriptorSet->descriptors.size() );
         for ( auto j = 0l; j < writes.size(); ++j ) {
-            auto &write = descriptorSet->writes[ j ];
+            auto &descriptor = descriptorSet->descriptors[ j ];
             writes[ j ] = {
                 .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
                 .dstSet = handlers[ i ],
                 .dstBinding = static_cast< crimild::UInt32 >( j ),
                 .dstArrayElement = 0,
-                .descriptorType = utils::getVulkanDescriptorType( write.descriptorType ),
+                .descriptorType = utils::getVulkanDescriptorType( descriptor.descriptorType ),
                 .descriptorCount = 1,
             };
 
-            if ( write.descriptorType == DescriptorType::UNIFORM_BUFFER ) {
-                auto buffer = write.buffer;
+            if ( descriptor.descriptorType == DescriptorType::UNIFORM_BUFFER ) {
+                auto buffer = descriptor.get< Buffer >();
                 auto bindInfo = renderDevice->getBindInfo( buffer );
                 auto bufferHandler = bindInfo.bufferHandlers[ i ];
                 bufferInfo.buffer = bufferHandler;
                 bufferInfo.offset = 0;
-                bufferInfo.range = write.buffer->getSize();
+                bufferInfo.range = buffer->getSize();
                 writes[ j ].pBufferInfo = &bufferInfo;
             }
-            else if ( write.descriptorType == DescriptorType::COMBINED_IMAGE_SAMPLER ) {
-                auto texture = write.texture;
+            else if ( descriptor.descriptorType == DescriptorType::TEXTURE ) {
+                auto texture = descriptor.get< Texture >();
 				auto imageView = crimild::get_ptr( texture->imageView );
 				auto sampler = crimild::get_ptr( texture->sampler );
                 imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;

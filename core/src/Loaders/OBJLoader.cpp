@@ -296,6 +296,7 @@ void OBJLoader::generateGeometry( void )
                 descriptorSet->descriptorSetLayout = pipeline->program->descriptorSetLayouts[ 1 ];
                 descriptorSet->descriptorPool = crimild::alloc< DescriptorPool >();
                 descriptorSet->descriptorPool->descriptorSetLayout = descriptorSet->descriptorSetLayout;
+				/*
                 descriptorSet->writes = {
                     {
                         .descriptorType = DescriptorType::UNIFORM_BUFFER,
@@ -310,6 +311,9 @@ void OBJLoader::generateGeometry( void )
                         .texture = crimild::get_ptr( renderState->textures[ 0 ] ),
                     },
                 };
+				*/
+
+				
                 return descriptorSet;
             }();
             return renderState;
