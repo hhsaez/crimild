@@ -101,7 +101,7 @@ VkDescriptorType utils::getVulkanDescriptorType( DescriptorType type ) noexcept
     switch ( type ) {
         case DescriptorType::UNIFORM_BUFFER:
             return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        case DescriptorType::COMBINED_IMAGE_SAMPLER:
+        case DescriptorType::TEXTURE:
             return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         default:
             return VK_DESCRIPTOR_TYPE_MAX_ENUM;

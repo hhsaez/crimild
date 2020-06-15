@@ -194,19 +194,19 @@ void FrameGraph::verifyAllConnections( void ) noexcept
 	m_nodesByType[ Node::Type::DESCRIPTOR_SET ].each(
 		[&]( auto &node ) {
 			auto ds = getNodeObject< DescriptorSet >( node );
-			ds->writes.each(
-				[&]( auto &write ) {
-					switch ( write.descriptorType ) {
+			ds->descriptors.each(
+				[&]( Descriptor &descriptor ) {
+					switch ( descriptor.descriptorType ) {
 						case DescriptorType::UNIFORM_BUFFER:
 							connect(
-								write.buffer,
+								static_cast< Buffer * >( crimild::get_ptr( descriptor.obj ) ),
 								ds
 							);
 							break;
 
-						case DescriptorType::COMBINED_IMAGE_SAMPLER:
+						case DescriptorType::TEXTURE:
 							connect(
-								write.texture,
+								descriptor.get< Texture >(),
 								ds
 							);
 

@@ -72,6 +72,48 @@ TEST( PrimitiveTest, setIndexBuffer )
     EXPECT_EQ( p->getIndexBuffer(), crimild::get_ptr( ibo ) );
 }
 
+TEST( Primitive, vertexBuffer )
+{
+	/*
+	auto p = crimild::alloc< Primitive >();
+
+	p->vertexBuffers = containers::Array< SharedPointer< VertexBuffer >> {
+		[] {
+			return crimild::alloc< VertexP3Buffer >(
+				containers::Array< VertexP3 > {
+					{
+						.position = Vector3f( 1.0f, 2.0f, 3.0f ),
+					},
+				}
+			);
+		}(),
+	};
+
+	EXPECT_FALSE( p->vertexBuffers.empty() );
+	EXPECT_EQ( Vector3f( 1.0f, 2.0f, 3.0f ), p->vertexBuffers[ 0 ]->getData()[ 0 ] );
+	*/
+}
+
+TEST( Primitive, indexBuffer )
+{
+	/*
+	auto p = crimild::alloc< Primitive >();
+
+	p->indexBuffer = [] {
+		auto indices = crimild::alloc< IndexUInt32Buffer >(
+			containers::Array< crimild::UInt32 > {
+				0, 1, 2,
+			}
+		);
+	}();
+
+	EXPECT_EQ( 3, p->indexBuffers->getCount() );
+	EXPECT_EQ( 0, p->indexBuffer->getData()[ 0 ] );
+	EXPECT_EQ( 1, p->indexBuffer->getData()[ 1 ] );
+	EXPECT_EQ( 2, p->indexBuffer->getData()[ 2 ] );
+	*/
+}
+
 TEST( PrimitiveTest, coding )
 {
 	auto primitive = crimild::alloc< Primitive >( Primitive::Type::POINTS );
