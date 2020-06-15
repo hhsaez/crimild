@@ -28,6 +28,7 @@
 #include "SceneGraph/Geometry.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Primitives/QuadPrimitive.hpp"
+#include "Rendering/DescriptorSet.hpp"
 #include "Components/MaterialComponent.hpp"
 #include "Streaming/FileStream.hpp"
 #include "Coding/MemoryEncoder.hpp"
@@ -150,6 +151,20 @@ TEST( GeometryTest, detachAllPrimitives )
 //		EXPECT_EQ( 1, primitiveCount );
 //	}
 //}
+
+TEST( Geometry, getDescriptors )
+{
+	auto geometry = crimild::alloc< Geometry >();
+
+	auto ds = geometry->getDescriptors();
+
+	EXPECT_NE( nullptr, ds );
+	EXPECT_NE( nullptr, ds->descriptorSetLayout );
+	EXPECT_NE( nullptr, ds->descriptorPool );
+	EXPECT_EQ( 1, ds->descriptors.size() );
+	EXPECT_EQ( DescriptorType::UNIFORM_BUFFER, ds->descriptors[ 0 ].descriptorType );
+	EXPECT_NE( nullptr, ds->descriptors[ 0 ].obj );
+}
 
 TEST( GeometryTest, coding )
 {

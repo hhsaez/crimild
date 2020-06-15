@@ -25,50 +25,26 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CRIMILD_CORE_RENDERING_FORMAT_
-#define CRIMILD_CORE_RENDERING_FORMAT_
+#ifndef CRIMILD_RENDERING_UNIFORMS_CAMERA_VIEW_PROJECTION_
+#define CRIMILD_RENDERING_UNIFORMS_CAMERA_VIEW_PROJECTION_
+
+#include "Rendering/UniformBuffer.hpp"
+#include "Mathematics/Matrix.hpp"
 
 namespace crimild {
 
-	/**
-	   \brief Different format values
+    class Camera;
 
-	   Suffixes:
-	   - UNORM: Unsigned values normalized to [0.0, 1.0]
-	   - SNORM: Signed values normalized to [-1.0, 1.0]
-	   - UINT: Unsigned integers. No conversion perfomed
-	   - SINT: Signed integers. No conversion performed
-	   - UFLOAT: Unsigned float values. No conversion performed
-	   - SFLOAT: Signed float values. No conversion performed
-	   - SRGB: Same as UNORM. The value is interpreted to be in sRGB color space
-	 */
-    enum class Format {
-        UNDEFINED,
-        R8_UNORM,
-        R8_SNORM,
-        R8_UINT,
-        R8_SINT,
-        R8G8B8_UINT,
-        R8G8B8A8_UINT,
-        R8G8B8_UNORM,
-        R8G8B8A8_UNORM,
-        B8G8R8A8_UNORM,
-        R32_UINT,
-        R32_SINT,
-        R32_SFLOAT,
-        R32G32_SFLOAT,
-        R32G32B32_SFLOAT,
-        R32G32B32A32_SFLOAT,
-        R64_UINT,
-        R64_SINT,
-        R64_SFLOAT,
-        DEPTH_16_UNORM,
-        DEPTH_32_SFLOAT,
-        DEPTH_16_UNORM_STENCIL_8_UINT,
-        DEPTH_24_UNORM_STENCIL_8_UINT,
-        DEPTH_32_SFLOAT_STENCIL_8_UINT,
-        DEPTH_STENCIL_DEVICE_OPTIMAL, //< Whatever depth/stencil format is supported
-        COLOR_SWAPCHAIN_OPTIMAL, //< Whatever format the swapchain has
+    struct CameraViewProjectionUniform {
+        Matrix4f view;
+        Matrix4f proj;
+    };
+
+    class CameraViewProjectionUniformBuffer : public UniformBufferImpl< CameraViewProjectionUniform > {
+    public:
+        Camera *camera = nullptr;
+
+        void updateIfNeeded( void ) noexcept override;
     };
 
 }

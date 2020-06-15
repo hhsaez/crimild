@@ -103,6 +103,7 @@ SharedPointer< DescriptorSet > RenderStateComponent::createDescriptorSet( Descri
     size_t uniformIdx = 0;
     size_t textureIdx = 0;
 
+	/*
     descriptorSetLayout->bindings.each( [&]( DescriptorSetLayout::Binding &binding ) {
         auto write = DescriptorSet::Write {
             .descriptorType = binding.descriptorType,
@@ -123,6 +124,7 @@ SharedPointer< DescriptorSet > RenderStateComponent::createDescriptorSet( Descri
 
         descriptorSet->writes.add( write );
     });
+	*/
 
     return descriptorSet;
 }

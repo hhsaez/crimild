@@ -38,25 +38,8 @@ namespace crimild {
     class Pipeline;
     class Texture;
 
-    struct Descriptor {
-        enum class Type {
-            UNIFORM_BUFFER,
-            TEXTURE,
-            VIEW_PROJECTION_UNIFORM_BUFFER,
-        };
-
-        Type type;
-
-        union {
-            Buffer *buffer;
-            Texture *texture;
-        };
-    };
-
-    using DescriptorArray = containers::Array< Descriptor >;
-
     enum class DescriptorType {
-        COMBINED_IMAGE_SAMPLER,
+        TEXTURE,
 		UNIFORM_BUFFER,
     };
 
@@ -77,21 +60,25 @@ namespace crimild {
         SharedPointer< DescriptorSetLayout > descriptorSetLayout;
     };
 
-    class DescriptorSet : public SharedObject, public RenderResourceImpl< DescriptorSet > {
-    public:
-        struct Write {
-            DescriptorType descriptorType;
+    struct Descriptor {
+        DescriptorType descriptorType;
+		SharedPointer< SharedObject > obj;
 
-            union {
-                Buffer *buffer;
-                Texture *texture;
-            };
-        };
+		template< typename T >
+		T *get( void ) noexcept
+		{
+			return static_cast< T * >( crimild::get_ptr( obj ) );
+		}
+    };
+
+    class DescriptorSet : public SharedObject, public RenderResourceImpl< DescriptorSet > {
+	private:
+		using DescriptorArray = containers::Array< Descriptor >;
 
     public:
         SharedPointer< DescriptorPool > descriptorPool;
         SharedPointer< DescriptorSetLayout > descriptorSetLayout;
-        containers::Array< Write > writes;
+		DescriptorArray descriptors;
     };
 
 

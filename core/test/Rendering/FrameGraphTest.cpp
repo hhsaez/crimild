@@ -175,10 +175,10 @@ TEST( FrameGraph, simpleFrameGraph )
 	auto ubo = crimild::alloc< UniformBufferImpl< crimild::Vector4f >>();
 	auto descriptorSet = [&] {
 		auto ds = crimild::alloc< DescriptorSet >();
-		ds->writes = {
+		ds->descriptors = {
 			{
 				.descriptorType = DescriptorType::UNIFORM_BUFFER,
-				.buffer = crimild::get_ptr( ubo ),
+				.obj = ubo,
 			},
 		};
 		return ds;
@@ -235,10 +235,10 @@ TEST( FrameGraph, simpleAutoAddNodes )
 	auto ubo = crimild::alloc< UniformBufferImpl< crimild::Vector4f >>();
 	auto descriptorSet = [&] {
 		auto ds = crimild::alloc< DescriptorSet >();
-		ds->writes = {
+		ds->descriptors = {
 			{
 				.descriptorType = DescriptorType::UNIFORM_BUFFER,
-				.buffer = crimild::get_ptr( ubo ),
+				.obj = ubo,
 			},
 		};
 		return ds;
@@ -354,10 +354,10 @@ TEST( FrameGraph, offscreen )
 	auto offUbo = crimild::alloc< UniformBufferImpl< crimild::Vector4f >>();
 	auto offDescriptorSet = [&] {
 		auto ds = crimild::alloc< DescriptorSet >();
-		ds->writes = {
+		ds->descriptors = {
 			{
 				.descriptorType = DescriptorType::UNIFORM_BUFFER,
-				.buffer = crimild::get_ptr( offUbo ),
+				.obj = offUbo,
 			},
 		};
 		return ds;
@@ -389,14 +389,14 @@ TEST( FrameGraph, offscreen )
 	auto ubo = crimild::alloc< UniformBufferImpl< crimild::Vector4f >>();
 	auto descriptorSet = [&] {
 		auto ds = crimild::alloc< DescriptorSet >();
-		ds->writes = {
+		ds->descriptors = {
 			{
 				.descriptorType = DescriptorType::UNIFORM_BUFFER,
-				.buffer = crimild::get_ptr( ubo ),
+				.obj = ubo,
 			},
 			{
-				.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
-				.texture = crimild::get_ptr( texture ),
+				.descriptorType = DescriptorType::TEXTURE,
+				.obj = texture,
 			},
 		};
 		return ds;

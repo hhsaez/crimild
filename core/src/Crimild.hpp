@@ -291,6 +291,7 @@
 #include "Rendering/Programs/RefractiveShaderProgram.hpp"
 #include "Rendering/Programs/WorldNormalsShaderProgram.hpp"
 
+#include "Rendering/Uniforms/CameraViewProjectionUniformBuffer.hpp"
 #include "Rendering/Uniforms/ModelUniformBuffer.hpp"
 #include "Rendering/Uniforms/ModelViewProjectionUniformBuffer.hpp"
 
