@@ -28,6 +28,8 @@
 #ifndef CRIMILD_CORE_RENDERING_FORMAT_
 #define CRIMILD_CORE_RENDERING_FORMAT_
 
+#include "Mathematics/Vector.hpp"
+
 namespace crimild {
 
 	/**
@@ -70,6 +72,31 @@ namespace crimild {
         DEPTH_STENCIL_DEVICE_OPTIMAL, //< Whatever depth/stencil format is supported
         COLOR_SWAPCHAIN_OPTIMAL, //< Whatever format the swapchain has
     };
+
+	namespace utils {
+
+		template< typename T >
+		static Format getFormat( void ) noexcept { return Format::UNDEFINED; }
+
+		template<> Format getFormat< crimild::Real32 >( void ) noexcept { return Format::R32_SFLOAT; }
+		template<> Format getFormat< Vector2f >( void ) noexcept { return Format::R32G32_SFLOAT; }
+		template<> Format getFormat< Vector3f >( void ) noexcept { return Format::R32G32B32_SFLOAT; }
+		
+		static crimild::UInt32 getFormatSize( Format format ) noexcept
+		{
+			switch ( format ) {
+				case Format::R32_SFLOAT:
+					return 1 * sizeof( crimild::Real32 );
+				case Format::R32G32_SFLOAT:
+					return 2 * sizeof( crimild::Real32 );
+				case Format::R32G32B32_SFLOAT:
+					return 3 * sizeof( crimild::Real32 );
+				default:
+					return 0;
+			};
+		}
+
+	}
 
 }
 
