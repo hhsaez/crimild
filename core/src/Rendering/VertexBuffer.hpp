@@ -29,6 +29,9 @@
 #define CRIMILD_RENDERING_VERTEX_BUFFER_
 
 #include "Rendering/Buffer.hpp"
+#include "Rendering/BufferView.hpp"
+#include "Rendering/BufferAccessor.hpp"
+#include "Rendering/VertexLayout.hpp"
 #include "Mathematics/Vector.hpp"
 #include "Foundation/RTTI.hpp"
 
@@ -122,7 +125,7 @@ namespace crimild {
         /**
 			\remarks When implementing custom vertex formats, don't
          	forget to implement a scecialization for getClassName()
-         	so RTTI works. 
+         	so RTTI works.
          */
         virtual const char *getClassName( void ) const override;
 
@@ -466,7 +469,104 @@ namespace crimild {
 
     using VertexP3C3TC2Buffer = VertexBufferImpl< VertexP3C3TC2, policies::VertexBuffer3DExtentPolicy >;
 
+	class VertexBuffer2 : public Buffer {
+	public:
+        template< typename DATA_TYPE >
+		VertexBuffer2( const VertexLayout &vertexLayout, const containers::Array< DATA_TYPE > &data ) noexcept
+            : VertexBuffer2(
+                vertexLayout,
+                [&] {
+                    return crimild::alloc< BufferView >(
+                        BufferView::Target::VERTEX,
+                        crimild::alloc< Buffer2 >( data ),
+                        0,
+                        vertexLayout.getSize()
+                    );
+                }()
+            )
+		{
+            // no-op
+		}
+
+        // Compute data size based on the vertex layout and the count
+		VertexBuffer2( const VertexLayout &vertexLayout, crimild::Size count ) noexcept
+            : VertexBuffer2(
+                vertexLayout,
+                [&] {
+                    return crimild::alloc< BufferView >(
+                        BufferView::Target::VERTEX,
+                        crimild::alloc< Buffer2 >( containers::Array< crimild::Byte >( count * vertexLayout.getSize() ) ),
+                        0,
+                        vertexLayout.getSize()
+                    );
+                }()
+            )
+		{
+            // no-op
+		}
+
+        /**
+           \brief Creates a vertex buffer from a buffer view
+
+           \remarks The buffer view must enclose the full buffer
+         */
+        VertexBuffer2( const VertexLayout &vertexLayout, SharedPointer< BufferView > const &bufferView ) noexcept
+            : m_vertexLayout( vertexLayout ),
+              m_bufferView( bufferView )
+        {
+            assert( bufferView->getTarget() == BufferView::Target::VERTEX && "Invalid buffer view" );
+
+            vertexLayout.eachAttribute(
+                [&]( const auto &attrib ) {
+                    auto accessor = crimild::alloc< BufferAccessor >(
+                        bufferView,
+                        attrib.offset,
+                        utils::getFormatSize( attrib.format )
+                    );
+                    m_accessors[ attrib.name ] = accessor;
+                }
+            );
+        }
+
+        VertexBuffer2( const VertexLayout &vertexLayout, BufferView *bufferView ) noexcept
+            : VertexBuffer2( vertexLayout, crimild::retain( bufferView ) )
+        {
+            // no-op
+        }
+
+		virtual ~VertexBuffer2( void ) = default;
+
+		inline const VertexLayout &getVertexLayout( void ) const noexcept { return m_vertexLayout; }
+
+        inline BufferView *getBufferView( void ) noexcept { return crimild::get_ptr( m_bufferView ); }
+        inline const BufferView *getBufferView( void ) const noexcept { return crimild::get_ptr( m_bufferView ); }
+
+		inline Usage getUsage( void ) const noexcept override { return Buffer::Usage::VERTEX_BUFFER; }
+
+        inline crimild::Size getSize( void ) const noexcept override { return m_bufferView->getLength(); }
+        inline crimild::Size getStride( void ) const noexcept override { return m_vertexLayout.getSize(); }
+
+        inline void *getRawData( void ) noexcept override { return ( void * ) m_bufferView->getData(); }
+        inline const void *getRawData( void ) const noexcept override { return ( void * ) m_bufferView->getData(); }
+
+        inline crimild::Size getCount( void ) const noexcept { return m_bufferView->getCount(); }
+
+        BufferAccessor *get( VertexAttribute::Name name ) noexcept
+        {
+            return m_accessors.contains( name ) ? crimild::get_ptr( m_accessors[ name ] ) : nullptr;
+        }
+
+        const BufferAccessor *get( VertexAttribute::Name name ) const noexcept
+        {
+            return m_accessors.contains( name ) ? crimild::get_ptr( m_accessors[ name ] ) : nullptr;
+        }
+
+    private:
+		VertexLayout m_vertexLayout;
+        SharedPointer< BufferView > m_bufferView;
+        containers::Map< VertexAttribute::Name, SharedPointer< BufferAccessor >> m_accessors;
+	};
+
 }
 
 #endif
-

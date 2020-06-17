@@ -12,7 +12,7 @@
  *     * Neither the name of the copyright holder nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- *																							
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -36,535 +36,7 @@
 
 #include "gtest/gtest.h"
 
-namespace crimild {
-
-	namespace utils {
-
-		template< typename T >
-		Format getFormat( void ) noexcept { return Format::UNDEFINED; }
-
-		template<> Format getFormat< crimild::Real32 >( void ) noexcept { return Format::R32_SFLOAT; }
-		template<> Format getFormat< Vector2f >( void ) noexcept { return Format::R32G32_SFLOAT; }
-		template<> Format getFormat< Vector3f >( void ) noexcept { return Format::R32G32B32_SFLOAT; }
-		
-		crimild::UInt32 getFormatSize( Format format ) noexcept
-		{
-			switch ( format ) {
-				case Format::R32_SFLOAT:
-					return 1 * sizeof( crimild::Real32 );
-				case Format::R32G32_SFLOAT:
-					return 2 * sizeof( crimild::Real32 );
-				case Format::R32G32B32_SFLOAT:
-					return 3 * sizeof( crimild::Real32 );
-				default:
-					return 0;
-			};
-		}
-
-	}
-
-	struct VertexAttribute {
-		enum Name {
-			POSITION,
-			NORMAL,
-			TANGENT,
-			COLOR,
-			TEX_COORD,
-			TEX_COORD_1,
-			TEX_COORD_2,
-			TEX_COORD_3,
-			BLEND_INDICES,
-			BLEND_WEIGHT,
-			USER_ATTRIBUTE = 100,
-		};
-
-		Name name;
-		Format format;
-		crimild::UInt32 offset = 0;
-
-		crimild::Bool operator==( const VertexAttribute &other ) const noexcept
-		{
-			return name == other.name && format == other.format && offset == other.offset;
-		}
-	};
-
-	class VertexLayout {
-	public:
-		static const VertexLayout P3;
-		static const VertexLayout P3_N3;
-		static const VertexLayout P3_TC2;
-		static const VertexLayout P3_N3_TC2;
-		
-	public:
-		VertexLayout( void ) noexcept
-			: m_size( 0 )
-		{
-			
-		}
-		
-		VertexLayout( std::initializer_list< VertexAttribute > attribs ) noexcept
-			: m_size( 0 )
-		{
-			for ( const auto &attrib : attribs ) {
-				m_attributes[ attrib.name ] = {
-					.name = attrib.name,
-					.format = attrib.format,
-					.offset = m_size,
-				};
-                m_sorted.add( attrib.name );
-				m_size += utils::getFormatSize( attrib.format );
-			}
-		}
-
-		VertexLayout( const containers::Array< VertexAttribute > &attribs ) noexcept
-			: m_size( 0 )
-		{
-            attribs.each(
-                [&] ( const auto &attrib ) {
-                    m_attributes[ attrib.name ] = {
-                        .name = attrib.name,
-                        .format = attrib.format,
-                        .offset = m_size,
-                    };
-                    m_sorted.add( attrib.name );
-                    m_size += utils::getFormatSize( attrib.format );
-                }
-            );
-		}
-
-		~VertexLayout( void ) = default;
-
-		crimild::Bool operator==( const VertexLayout &other ) const noexcept
-		{
-			return m_size == other.m_size && m_attributes == other.m_attributes;
-		}
-
-		crimild::UInt32 getSize( void ) const noexcept { return m_size; }
-
-		inline crimild::UInt32 getAttributeOffset( VertexAttribute::Name name ) const noexcept
-		{
-			return m_attributes[ name ].offset;
-		}
-		
-		inline Format getAttributeFormat( VertexAttribute::Name attrib ) const noexcept
-		{
-			return m_attributes[ attrib ].format;
-		}
-
-		inline crimild::Size getAttributeSize( VertexAttribute::Name attrib ) const noexcept
-		{
-			return utils::getFormatSize( m_attributes[ attrib ].format );
-		}
-
-        template< typename Fn >
-        void eachAttribute( Fn fn ) const
-        {
-            m_sorted.each(
-                [&]( const auto &name ) {
-                    fn( m_attributes[ name ] );
-                }
-            );
-        }
-
-		/**
-		   \brief Append a new attribute
-
-		   Allows construction of vertex descriptors like:
-		   auto vertex = VertexLayout()
-		       .withAttribute< Vector3f >( "position" )
-			   .withAttribute< Vector3f >( "normal" )
-			   .withAttribute< Vector2f >( "texCoord" );
-		 */
-		template< typename AttributeType >
-		VertexLayout &withAttribute( VertexAttribute::Name attrib ) noexcept
-		{
-			auto format = utils::getFormat< AttributeType >();
-			m_attributes[ attrib ] = {
-				.format = format,
-				.offset = m_size,
-			};
-
-            m_sorted.add( attrib );
-			
-			// What if there is already another attrib with the same name?
-			// This will increase the final vector size, which is wrong.
-			// But recalculating the vector size every time might be too
-			// expensive. 
-			m_size += utils::getFormatSize( format );
-
-			// Return this pointer so we can keep adding attribs
-			return *this;
-		}
-
-	private:
-		crimild::UInt32 m_size = 0;
-		containers::Map< VertexAttribute::Name, VertexAttribute > m_attributes;
-        containers::Array< VertexAttribute::Name > m_sorted;
-	};
-
-	class VertexBuffer2 : public Buffer {
-	public:
-        template< typename DATA_TYPE >
-		VertexBuffer2( const VertexLayout &vertexLayout, const containers::Array< DATA_TYPE > &data ) noexcept
-            : VertexBuffer2(
-                vertexLayout,
-                [&] {
-                    return crimild::alloc< BufferView >(
-                        BufferView::Target::VERTEX,
-                        crimild::alloc< Buffer2 >( data ),
-                        0,
-                        vertexLayout.getSize()
-                    );
-                }()
-            )
-		{
-            // no-op
-		}
-
-        // Compute data size based on the vertex layout and the count
-		VertexBuffer2( const VertexLayout &vertexLayout, crimild::Size count ) noexcept
-            : VertexBuffer2(
-                vertexLayout,
-                [&] {
-                    return crimild::alloc< BufferView >(
-                        BufferView::Target::VERTEX,
-                        crimild::alloc< Buffer2 >( containers::Array< crimild::Byte >( count * vertexLayout.getSize() ) ),
-                        0,
-                        vertexLayout.getSize()
-                    );
-                }()
-            )
-		{
-            // no-op
-		}
-
-        VertexBuffer2( const VertexLayout &vertexLayout, SharedPointer< BufferView > const &bufferView ) noexcept
-            : m_vertexLayout( vertexLayout ),
-              m_bufferView( bufferView )
-        {
-            assert( bufferView->getTarget() == BufferView::Target::VERTEX && "Invalid buffer view" );
-            
-            vertexLayout.eachAttribute(
-                [&]( const auto &attrib ) {
-                    auto accessor = crimild::alloc< BufferAccessor >(
-                        bufferView,
-                        attrib.offset,
-                        utils::getFormatSize( attrib.format )
-                    );
-                    m_accessors[ attrib.name ] = accessor;
-                }
-            );
-        }
-        
-        VertexBuffer2( const VertexLayout &vertexLayout, BufferView *bufferView ) noexcept
-            : VertexBuffer2( vertexLayout, crimild::retain( bufferView ) )
-        {
-            // no-op
-        }
-        
-		virtual ~VertexBuffer2( void ) = default;
-
-		inline const VertexLayout &getVertexLayout( void ) const noexcept { return m_vertexLayout; }
-
-		inline Usage getUsage( void ) const noexcept override { return Buffer::Usage::VERTEX_BUFFER; }
-
-        inline crimild::Size getSize( void ) const noexcept override { return m_bufferView->getLength(); }
-        inline crimild::Size getStride( void ) const noexcept override { return m_vertexLayout.getSize(); }
-
-        inline void *getRawData( void ) noexcept override { return ( void * ) m_bufferView->getData(); }
-        inline const void *getRawData( void ) const noexcept override { return ( void * ) m_bufferView->getData(); }
-
-        inline crimild::Size getCount( void ) const noexcept { return m_bufferView->getCount(); }
-
-        BufferAccessor *get( VertexAttribute::Name name ) noexcept
-        {
-            return m_accessors.contains( name ) ? crimild::get_ptr( m_accessors[ name ] ) : nullptr;
-        }
-
-        const BufferAccessor *get( VertexAttribute::Name name ) const noexcept
-        {
-            return m_accessors.contains( name ) ? crimild::get_ptr( m_accessors[ name ] ) : nullptr;
-        }
-
-        /*
-		template< typename T >
-		T get( VertexAttribute::Name attribute, crimild::Size index ) const noexcept
-		{
-			assert( utils::getFormat< T >() == m_vertexLayout.getAttributeFormat( attribute ) && "Invalid attribute format" );
-			auto offset = m_vertexLayout.getAttributeOffset( attribute );
-			auto stride = getStride();
-			return *static_cast< const T * >( static_cast< const void * >( &m_data[ index * stride + offset ] ) );
-		}
-
-		template< typename T >
-		void set( VertexAttribute::Name attribute, crimild::Size index, const T &value ) noexcept
-		{
-			assert( utils::getFormat< T >() == m_vertexLayout.getAttributeFormat( attribute ) && "Invalid attribute format" );
-			auto offset = m_vertexLayout.getAttributeOffset( attribute );
-			auto size = m_vertexLayout.getAttributeSize( attribute );
-			auto stride = getStride();
-			memcpy( &m_data[ index * stride + offset ], static_cast< const void * >( &value ), size );
-		}
-
-		void set( VertexAttribute::Name attribute, containers::Array< crimild::Real32 > const &data ) noexcept
-		{
-			auto offset = m_vertexLayout.getAttributeOffset( attribute );
-			auto size = m_vertexLayout.getAttributeSize( attribute );
-			auto S = getStride();
-			auto N = getCount();
-
-			assert( data.size() * sizeof( crimild::Real32 ) / size == N && "Invalid data size" );
-
-			for ( auto i = 0l; i < N; i++ ) {
-				memcpy( &m_data[ i * S + offset ], &data[ i * size / sizeof( crimild::Real32 ) ], size );
-			}
-		}
-
-		template< typename AttributeType, typename Fn >
-		void each( VertexAttribute::Name attribute, Fn fn ) const noexcept
-		{
-			assert( utils::getFormat< AttributeType >() == m_vertexLayout.getAttributeFormat( attribute ) && "Invalid attribute format" );
-			auto offset = m_vertexLayout.getAttributeOffset( attribute );
-			auto stride = getStride();
-			auto N = getCount();
-
-			for ( auto index = 0l; index < N; index++ ) {
-				AttributeType val = *static_cast< const AttributeType * >( static_cast< const void * >( &m_data[ index * stride + offset ] ) );
-				fn( val, index );
-			}
-		}
-        */
-
-    private:
-		VertexLayout m_vertexLayout;
-        SharedPointer< BufferView > m_bufferView;
-        containers::Map< VertexAttribute::Name, SharedPointer< BufferAccessor >> m_accessors;
-	};
-
-}
-
 using namespace crimild;
-
-const VertexLayout VertexLayout::P3 = {
-	{ VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() },
-};
-
-const VertexLayout VertexLayout::P3_N3 = {
-	{ VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() },
-	{ VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() },
-};
-
-const VertexLayout VertexLayout::P3_TC2 = {
-	{ VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() },
-	{ VertexAttribute::Name::TEX_COORD, utils::getFormat< Vector2f >() },
-};
-
-const VertexLayout VertexLayout::P3_N3_TC2 = {
-	{ VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() },
-	{ VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() },
-	{ VertexAttribute::Name::TEX_COORD, utils::getFormat< Vector2f >() },
-};
-
-TEST( VertexLayout, P3 )
-{
-	auto v = VertexLayout::P3;
-
-	ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getSize() );
-	ASSERT_EQ( 0, v.getAttributeOffset( VertexAttribute::Name::POSITION ) );
-	ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::POSITION ) );
-}
-
-TEST( VertexLayout, positionsOnly )
-{
-	auto v = VertexLayout {
-		{ VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() },
-	};
-
-	ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getSize() );
-	ASSERT_EQ( 0, v.getAttributeOffset( VertexAttribute::Name::POSITION ) );
-	ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::POSITION ) );
-}
-
-TEST( VertexLayout, positionsAndNormals )
-{
-	auto v = VertexLayout()
-	    .withAttribute< Vector3f >( VertexAttribute::Name::POSITION )
-	    .withAttribute< Vector3f >( VertexAttribute::Name::NORMAL );
-
-	ASSERT_EQ( sizeof( crimild::Real32 ) * 6, v.getSize() );
-
-	ASSERT_EQ( 0, v.getAttributeOffset( VertexAttribute::Name::POSITION ) );
-	ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::POSITION ) );
-	
-	ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeOffset( VertexAttribute::Name::NORMAL ) );
-	ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::NORMAL ) );
-}
-
-TEST( VertexLayout, multipleAttributes )
-{
-	auto v = VertexLayout {
-		{ VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() },
-		{ VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() },
-		{ VertexAttribute::Name::COLOR, utils::getFormat< RGBColorf >() },
-		{ VertexAttribute::Name::TEX_COORD, utils::getFormat< Vector2f >() },
-	};
-
-	ASSERT_EQ( sizeof( crimild::Real32 ) * 11, v.getSize() );
-
-	ASSERT_EQ( 0, v.getAttributeOffset( VertexAttribute::Name::POSITION ) );
-	ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::POSITION ) );
-	ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::POSITION ) );
-
-	ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeOffset( VertexAttribute::Name::NORMAL ) );
-	ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::NORMAL ) );
-	ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::NORMAL ) );
-
-	ASSERT_EQ( sizeof( crimild::Real32 ) * 6, v.getAttributeOffset( VertexAttribute::Name::COLOR ) );
-	ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::COLOR ) );
-	ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::COLOR ) );
-
-	ASSERT_EQ( sizeof( crimild::Real32 ) * 9, v.getAttributeOffset( VertexAttribute::Name::TEX_COORD ) );
-	ASSERT_EQ( Format::R32G32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::TEX_COORD ) );
-	ASSERT_EQ( sizeof( crimild::Real32 ) * 2, v.getAttributeSize( VertexAttribute::Name::TEX_COORD ) );
-}
-
-TEST( VertexLayout, multipleAttributesDifferentOrder )
-{
-	auto v = VertexLayout {
-		{ VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() },
-		{ VertexAttribute::Name::TEX_COORD, utils::getFormat< Vector2f >() },
-		{ VertexAttribute::Name::COLOR, utils::getFormat< RGBColorf >() },
-		{ VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() },
-	};
-
-	ASSERT_EQ( sizeof( crimild::Real32 ) * 11, v.getSize() );
-
-	ASSERT_EQ( 0, v.getAttributeOffset( VertexAttribute::Name::POSITION ) );
-	ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::POSITION ) );
-	ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::POSITION ) );
-	
-	ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeOffset( VertexAttribute::Name::TEX_COORD ) );
-	ASSERT_EQ( Format::R32G32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::TEX_COORD ) );
-	ASSERT_EQ( sizeof( crimild::Real32 ) * 2, v.getAttributeSize( VertexAttribute::Name::TEX_COORD ) );
-
-	ASSERT_EQ( sizeof( crimild::Real32 ) * 5, v.getAttributeOffset( VertexAttribute::Name::COLOR ) );
-	ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::COLOR ) );
-	ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::COLOR ) );
-
- 	ASSERT_EQ( sizeof( crimild::Real32 ) * 8, v.getAttributeOffset( VertexAttribute::Name::NORMAL ) );
-	ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::NORMAL ) );
-	ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::NORMAL ) );
-}
-
-TEST( VertexLayout, fromArray )
-{
-    auto attribs = containers::Array< VertexAttribute > {
-		{ VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() },
-		{ VertexAttribute::Name::TEX_COORD, utils::getFormat< Vector2f >() },
-		{ VertexAttribute::Name::COLOR, utils::getFormat< RGBColorf >() },
-		{ VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() },
-    };
-
-    auto v = VertexLayout( attribs );
-
-	ASSERT_EQ( sizeof( crimild::Real32 ) * 11, v.getSize() );
-
-	ASSERT_EQ( 0, v.getAttributeOffset( VertexAttribute::Name::POSITION ) );
-	ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::POSITION ) );
-	ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::POSITION ) );
-	
-	ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeOffset( VertexAttribute::Name::TEX_COORD ) );
-	ASSERT_EQ( Format::R32G32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::TEX_COORD ) );
-	ASSERT_EQ( sizeof( crimild::Real32 ) * 2, v.getAttributeSize( VertexAttribute::Name::TEX_COORD ) );
-
-	ASSERT_EQ( sizeof( crimild::Real32 ) * 5, v.getAttributeOffset( VertexAttribute::Name::COLOR ) );
-	ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::COLOR ) );
-	ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::COLOR ) );
-
- 	ASSERT_EQ( sizeof( crimild::Real32 ) * 8, v.getAttributeOffset( VertexAttribute::Name::NORMAL ) );
-	ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::NORMAL ) );
-	ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::NORMAL ) );
-}
-
-TEST( VertexLayout, eachAttribute )
-{
-    auto attribs = containers::Array< VertexAttribute > {
-		{ VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() },
-		{ VertexAttribute::Name::TEX_COORD, utils::getFormat< Vector2f >() },
-		{ VertexAttribute::Name::COLOR, utils::getFormat< RGBColorf >() },
-		{ VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() },
-    };
-
-    auto v = VertexLayout( attribs );
-
-	ASSERT_EQ( sizeof( crimild::Real32 ) * 11, v.getSize() );
-
-    auto callCount = 0;
-    v.eachAttribute(
-        [&]( auto &attrib ) {
-            ASSERT_EQ( attribs[ callCount++ ].name, attrib.name );
-        }
-    );
-    ASSERT_EQ( 4, callCount );
-}
-
-TEST( VertexLayout, withAttribute )
-{
-	auto v = VertexLayout()
-	    .withAttribute< Vector3f >( VertexAttribute::Name::POSITION )
-	    .withAttribute< Vector2f >( VertexAttribute::Name::TEX_COORD )
-	    .withAttribute< RGBColorf >( VertexAttribute::Name::COLOR )
-	    .withAttribute< Vector3f >( VertexAttribute::Name::NORMAL );
-
-	ASSERT_EQ( sizeof( crimild::Real32 ) * 11, v.getSize() );
-
-	ASSERT_EQ( 0, v.getAttributeOffset( VertexAttribute::Name::POSITION ) );
-	ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::POSITION ) );
-	ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::POSITION ) );
-    
-	ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeOffset( VertexAttribute::Name::TEX_COORD ) );
-    ASSERT_EQ( Format::R32G32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::TEX_COORD ) );
-	ASSERT_EQ( sizeof( crimild::Real32 ) * 2, v.getAttributeSize( VertexAttribute::Name::TEX_COORD ) );
-
-	ASSERT_EQ( sizeof( crimild::Real32 ) * 5, v.getAttributeOffset( VertexAttribute::Name::COLOR ) );
-	ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::COLOR ) );
-	ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::COLOR ) );
-
- 	ASSERT_EQ( sizeof( crimild::Real32 ) * 8, v.getAttributeOffset( VertexAttribute::Name::NORMAL ) );
-	ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::NORMAL ) );
-	ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::NORMAL ) );
-}
-
-TEST( VertexLayout, equality )
-{
-	auto v1 = VertexLayout {
-		{ VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() },
-		{ VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() },
-		{ VertexAttribute::Name::COLOR, utils::getFormat< RGBColorf >() },
-	};
-
-	auto v2 = VertexLayout {
-		{ VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() },
-		{ VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() },
-		{ VertexAttribute::Name::COLOR, utils::getFormat< RGBColorf >() },
-	};
-
-	ASSERT_EQ( v1, v2 );
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 TEST( VertexBuffer, construction )
 {
@@ -617,7 +89,7 @@ TEST( VertexBuffer, setMultipleValues )
 			0.0f, 0.5f, 0.0f,
 		}
 	);
-	
+
 	ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 0 ) );
 	ASSERT_EQ( Vector3f( 0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 1 ) );
 	ASSERT_EQ( Vector3f( 0.0f, 0.5f, 0.0f ), positions->get< Vector3f >( 2 ) );
@@ -639,7 +111,7 @@ TEST( VertexBuffer, setPositionsInterleaved )
 			0.0f, 0.5f, 0.0f,
 		}
 	);
-	
+
 	ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 0 ) );
 	ASSERT_EQ( Vector3f( 0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 1 ) );
 	ASSERT_EQ( Vector3f( 0.0f, 0.5f, 0.0f ), positions->get< Vector3f >( 2 ) );
@@ -661,7 +133,7 @@ TEST( VertexBuffer, setTexCoordsInterleaved )
 			1.0, 1.0,
 		}
 	);
-	
+
 	ASSERT_EQ( Vector2f( 0.0f, 0.0f ), texCoords->get< Vector2f >( 0 ) );
 	ASSERT_EQ( Vector2f( 0.f, 1.0f ), texCoords->get< Vector2f >( 1 ) );
 	ASSERT_EQ( Vector2f( 1.0f, 1.0f ), texCoords->get< Vector2f >( 2 ) );
@@ -683,7 +155,7 @@ TEST( VertexBuffer, setInterleaved )
 			0.0f, 0.5f, 0.0f,
 		}
 	);
-	
+
     auto texCoords = vertices->get( VertexAttribute::Name::TEX_COORD );
 
 	texCoords->set(
@@ -693,7 +165,7 @@ TEST( VertexBuffer, setInterleaved )
 			1.0, 1.0,
 		}
 	);
-	
+
 	ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 0 ) );
 	ASSERT_EQ( Vector3f( 0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 1 ) );
 	ASSERT_EQ( Vector3f( 0.0f, 0.5f, 0.0f ), positions->get< Vector3f >( 2 ) );
@@ -719,7 +191,7 @@ TEST( VertexBuffer, eachPosition )
     auto positions = vertices->get( VertexAttribute::Name::POSITION );
 
 	positions->set( data );
-	
+
 	positions->each< Vector3f >(
 		[&]( auto &v, auto i ) {
 			ASSERT_EQ( data[ i * 3 + 0 ], v[ 0 ] );
@@ -774,7 +246,7 @@ TEST( VertexBuffer, sparseData )
 	auto vertices = crimild::alloc< VertexBuffer2 >(
 		layout,
 		containers::Array< VertexType > {
-			
+
 		}
 	);
 	*/
@@ -799,7 +271,7 @@ TEST( VertexBuffer, autoAddToFrameGraph )
 	}
 
 	ASSERT_FALSE( graph->hasNodes() );
-	
+
 }
 
 TEST( VertexBuffer, construction_old )
@@ -894,7 +366,7 @@ TEST( VertexBuffer, coding )
 
     auto decoder = crimild::alloc< coding::MemoryDecoder >();
     decoder->fromBytes( bytes );
-    
+
     auto vbo1 = decoder->getObjectAt< VertexP3Buffer >( 0 );
     ASSERT_TRUE( vbo1 != nullptr );
 	ASSERT_EQ( data.size(), vbo->getCount() );
@@ -902,4 +374,3 @@ TEST( VertexBuffer, coding )
 	ASSERT_EQ( 0, memcmp( data.getData(), vbo->getData(), sizeof( VertexP3 ) * vbo->getCount() ) );
 	*/
 }
-
