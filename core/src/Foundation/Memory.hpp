@@ -65,9 +65,25 @@ namespace crimild {
     }
     
     template< typename T >
+    inline SharedPointer< T > &retain( SharedPointer< T > &ptr ) noexcept
+    {
+        // Returns the same pointer.
+        // This is a helper function that comes in handy for templates and generic code
+        return ptr;
+    }
+
+    template< typename T >
     T *get_ptr( SharedPointer< T > const &ptr )
     {
         return ptr.get();
+    }
+
+    template< typename T >
+    inline T *get_ptr( T *ptr ) noexcept
+    {
+        // Returns the same pointer.
+        // This is a helper function that comes in handy for templates and generic code
+        return ptr;
     }
     
     template< class T, class U >
