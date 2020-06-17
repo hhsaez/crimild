@@ -26,6 +26,9 @@
  */
 
 #include "Rendering/VertexBuffer.hpp"
+#include "Rendering/Buffer.hpp"
+#include "Rendering/BufferView.hpp"
+#include "Rendering/BufferAccessor.hpp"
 #include "Rendering/Format.hpp"
 #include "Rendering/FrameGraph.hpp"
 #include "Coding/MemoryEncoder.hpp"
@@ -108,8 +111,25 @@ namespace crimild {
 					.format = attrib.format,
 					.offset = m_size,
 				};
+                m_sorted.add( attrib.name );
 				m_size += utils::getFormatSize( attrib.format );
 			}
+		}
+
+		VertexLayout( const containers::Array< VertexAttribute > &attribs ) noexcept
+			: m_size( 0 )
+		{
+            attribs.each(
+                [&] ( const auto &attrib ) {
+                    m_attributes[ attrib.name ] = {
+                        .name = attrib.name,
+                        .format = attrib.format,
+                        .offset = m_size,
+                    };
+                    m_sorted.add( attrib.name );
+                    m_size += utils::getFormatSize( attrib.format );
+                }
+            );
 		}
 
 		~VertexLayout( void ) = default;
@@ -136,6 +156,16 @@ namespace crimild {
 			return utils::getFormatSize( m_attributes[ attrib ].format );
 		}
 
+        template< typename Fn >
+        void eachAttribute( Fn fn ) const
+        {
+            m_sorted.each(
+                [&]( const auto &name ) {
+                    fn( m_attributes[ name ] );
+                }
+            );
+        }
+
 		/**
 		   \brief Append a new attribute
 
@@ -153,6 +183,8 @@ namespace crimild {
 				.format = format,
 				.offset = m_size,
 			};
+
+            m_sorted.add( attrib );
 			
 			// What if there is already another attrib with the same name?
 			// This will increase the final vector size, which is wrong.
@@ -167,50 +199,94 @@ namespace crimild {
 	private:
 		crimild::UInt32 m_size = 0;
 		containers::Map< VertexAttribute::Name, VertexAttribute > m_attributes;
+        containers::Array< VertexAttribute::Name > m_sorted;
 	};
 
 	class VertexBuffer2 : public Buffer {
 	public:
-		VertexBuffer2( const VertexLayout &vertexLayout, const containers::Array< crimild::Real32 > &data ) noexcept
-			: m_vertexLayout( vertexLayout ),
-			  m_data( data.size() * sizeof( crimild::Real32 ) )
+        template< typename DATA_TYPE >
+		VertexBuffer2( const VertexLayout &vertexLayout, const containers::Array< DATA_TYPE > &data ) noexcept
+            : VertexBuffer2(
+                vertexLayout,
+                [&] {
+                    return crimild::alloc< BufferView >(
+                        BufferView::Target::VERTEX,
+                        crimild::alloc< Buffer2 >( data ),
+                        0,
+                        vertexLayout.getSize()
+                    );
+                }()
+            )
 		{
-			memcpy( m_data.getData(), data.getData(), m_data.size() );
+            // no-op
 		}
 
-		// TODO add support for sparse data
-		/*
-		template< typename T >
-		VertexBuffer2( const VertexLayout &vertexLayout, const containers::Array< T > &data ) noexcept
-			: m_vertexLayout( vertexLayout )
-		{
-			
-		}
-		*/
-
+        // Compute data size based on the vertex layout and the count
 		VertexBuffer2( const VertexLayout &vertexLayout, crimild::Size count ) noexcept
-			: m_vertexLayout( vertexLayout ),
-			  // Compute data size based on the vertex layout and the count. Divide by sizeof(Real32)
-			  // to get the actual number
-			  m_data( count * vertexLayout.getSize() )
+            : VertexBuffer2(
+                vertexLayout,
+                [&] {
+                    return crimild::alloc< BufferView >(
+                        BufferView::Target::VERTEX,
+                        crimild::alloc< Buffer2 >( containers::Array< crimild::Byte >( count * vertexLayout.getSize() ) ),
+                        0,
+                        vertexLayout.getSize()
+                    );
+                }()
+            )
 		{
-			
+            // no-op
 		}
 
+        VertexBuffer2( const VertexLayout &vertexLayout, SharedPointer< BufferView > const &bufferView ) noexcept
+            : m_vertexLayout( vertexLayout ),
+              m_bufferView( bufferView )
+        {
+            assert( bufferView->getTarget() == BufferView::Target::VERTEX && "Invalid buffer view" );
+            
+            vertexLayout.eachAttribute(
+                [&]( const auto &attrib ) {
+                    auto accessor = crimild::alloc< BufferAccessor >(
+                        bufferView,
+                        attrib.offset,
+                        utils::getFormatSize( attrib.format )
+                    );
+                    m_accessors[ attrib.name ] = accessor;
+                }
+            );
+        }
+        
+        VertexBuffer2( const VertexLayout &vertexLayout, BufferView *bufferView ) noexcept
+            : VertexBuffer2( vertexLayout, crimild::retain( bufferView ) )
+        {
+            // no-op
+        }
+        
 		virtual ~VertexBuffer2( void ) = default;
 
 		inline const VertexLayout &getVertexLayout( void ) const noexcept { return m_vertexLayout; }
 
 		inline Usage getUsage( void ) const noexcept override { return Buffer::Usage::VERTEX_BUFFER; }
 
-        inline crimild::Size getSize( void ) const noexcept override { return m_data.size(); }
+        inline crimild::Size getSize( void ) const noexcept override { return m_bufferView->getLength(); }
         inline crimild::Size getStride( void ) const noexcept override { return m_vertexLayout.getSize(); }
 
-        inline void *getRawData( void ) noexcept override { return ( void * ) m_data.getData(); }
-        inline const void *getRawData( void ) const noexcept override { return ( void * ) m_data.getData(); }
+        inline void *getRawData( void ) noexcept override { return ( void * ) m_bufferView->getData(); }
+        inline const void *getRawData( void ) const noexcept override { return ( void * ) m_bufferView->getData(); }
 
-        inline crimild::Size getCount( void ) const noexcept { return getSize() / getStride(); }
+        inline crimild::Size getCount( void ) const noexcept { return m_bufferView->getCount(); }
 
+        BufferAccessor *get( VertexAttribute::Name name ) noexcept
+        {
+            return m_accessors.contains( name ) ? crimild::get_ptr( m_accessors[ name ] ) : nullptr;
+        }
+
+        const BufferAccessor *get( VertexAttribute::Name name ) const noexcept
+        {
+            return m_accessors.contains( name ) ? crimild::get_ptr( m_accessors[ name ] ) : nullptr;
+        }
+
+        /*
 		template< typename T >
 		T get( VertexAttribute::Name attribute, crimild::Size index ) const noexcept
 		{
@@ -257,11 +333,12 @@ namespace crimild {
 				fn( val, index );
 			}
 		}
+        */
 
     private:
 		VertexLayout m_vertexLayout;
-        containers::Array< crimild::Byte > m_data;
-
+        SharedPointer< BufferView > m_bufferView;
+        containers::Map< VertexAttribute::Name, SharedPointer< BufferAccessor >> m_accessors;
 	};
 
 }
@@ -337,7 +414,7 @@ TEST( VertexLayout, multipleAttributes )
 	ASSERT_EQ( 0, v.getAttributeOffset( VertexAttribute::Name::POSITION ) );
 	ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::POSITION ) );
 	ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::POSITION ) );
-	
+
 	ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeOffset( VertexAttribute::Name::NORMAL ) );
 	ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::NORMAL ) );
 	ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::NORMAL ) );
@@ -377,6 +454,58 @@ TEST( VertexLayout, multipleAttributesDifferentOrder )
  	ASSERT_EQ( sizeof( crimild::Real32 ) * 8, v.getAttributeOffset( VertexAttribute::Name::NORMAL ) );
 	ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::NORMAL ) );
 	ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::NORMAL ) );
+}
+
+TEST( VertexLayout, fromArray )
+{
+    auto attribs = containers::Array< VertexAttribute > {
+		{ VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() },
+		{ VertexAttribute::Name::TEX_COORD, utils::getFormat< Vector2f >() },
+		{ VertexAttribute::Name::COLOR, utils::getFormat< RGBColorf >() },
+		{ VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() },
+    };
+
+    auto v = VertexLayout( attribs );
+
+	ASSERT_EQ( sizeof( crimild::Real32 ) * 11, v.getSize() );
+
+	ASSERT_EQ( 0, v.getAttributeOffset( VertexAttribute::Name::POSITION ) );
+	ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::POSITION ) );
+	ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::POSITION ) );
+	
+	ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeOffset( VertexAttribute::Name::TEX_COORD ) );
+	ASSERT_EQ( Format::R32G32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::TEX_COORD ) );
+	ASSERT_EQ( sizeof( crimild::Real32 ) * 2, v.getAttributeSize( VertexAttribute::Name::TEX_COORD ) );
+
+	ASSERT_EQ( sizeof( crimild::Real32 ) * 5, v.getAttributeOffset( VertexAttribute::Name::COLOR ) );
+	ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::COLOR ) );
+	ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::COLOR ) );
+
+ 	ASSERT_EQ( sizeof( crimild::Real32 ) * 8, v.getAttributeOffset( VertexAttribute::Name::NORMAL ) );
+	ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::NORMAL ) );
+	ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::NORMAL ) );
+}
+
+TEST( VertexLayout, eachAttribute )
+{
+    auto attribs = containers::Array< VertexAttribute > {
+		{ VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() },
+		{ VertexAttribute::Name::TEX_COORD, utils::getFormat< Vector2f >() },
+		{ VertexAttribute::Name::COLOR, utils::getFormat< RGBColorf >() },
+		{ VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() },
+    };
+
+    auto v = VertexLayout( attribs );
+
+	ASSERT_EQ( sizeof( crimild::Real32 ) * 11, v.getSize() );
+
+    auto callCount = 0;
+    v.eachAttribute(
+        [&]( auto &attrib ) {
+            ASSERT_EQ( attribs[ callCount++ ].name, attrib.name );
+        }
+    );
+    ASSERT_EQ( 4, callCount );
 }
 
 TEST( VertexLayout, withAttribute )
@@ -452,19 +581,25 @@ TEST( VertexBuffer, construction )
 		}
 	);
 
+    auto positions = vertices->get( VertexAttribute::Name::POSITION );
+
 	ASSERT_EQ( 3, vertices->getCount() );
 	ASSERT_EQ( layout, vertices->getVertexLayout() );
-	ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), vertices->get< Vector3f >( VertexAttribute::Name::POSITION, 0 ) );
+    ASSERT_NE( nullptr, positions );
+	ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 0 ) );
 }
 
 TEST( VertexBuffer, setSingleValue )
 {
 	auto vertices = crimild::alloc< VertexBuffer2 >( VertexLayout::P3, 3 );
 
+    ASSERT_EQ( 3 * sizeof( crimild::Real32 ), vertices->getStride() );
 	ASSERT_EQ( 3, vertices->getCount() );
 
-	vertices->set( VertexAttribute::Name::POSITION, 0, Vector3f( -0.5f, -0.5f, 0.0f ) );
-	ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), vertices->get< Vector3f >( VertexAttribute::Name::POSITION, 0 ) );
+    auto positions = vertices->get( VertexAttribute::Name::POSITION );
+
+    positions->set( 0, Vector3f( -0.5f, -0.5f, 0.0f ) );
+	ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 0 ) );
 }
 
 TEST( VertexBuffer, setMultipleValues )
@@ -473,18 +608,19 @@ TEST( VertexBuffer, setMultipleValues )
 
 	ASSERT_EQ( 3, vertices->getCount() );
 
-	vertices->set(
-		VertexAttribute::Name::POSITION,
-		{
+    auto positions = vertices->get( VertexAttribute::Name::POSITION );
+
+	positions->set(
+		containers::Array< crimild::Real32 > {
 			-0.5f, -0.5f, 0.0f,
 			0.5f, -0.5f, 0.0f,
 			0.0f, 0.5f, 0.0f,
 		}
 	);
 	
-	ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), vertices->get< Vector3f >( VertexAttribute::Name::POSITION, 0 ) );
-	ASSERT_EQ( Vector3f( 0.5f, -0.5f, 0.0f ), vertices->get< Vector3f >( VertexAttribute::Name::POSITION, 1 ) );
-	ASSERT_EQ( Vector3f( 0.0f, 0.5f, 0.0f ), vertices->get< Vector3f >( VertexAttribute::Name::POSITION, 2 ) );
+	ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 0 ) );
+	ASSERT_EQ( Vector3f( 0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 1 ) );
+	ASSERT_EQ( Vector3f( 0.0f, 0.5f, 0.0f ), positions->get< Vector3f >( 2 ) );
 }
 
 TEST( VertexBuffer, setPositionsInterleaved )
@@ -494,39 +630,41 @@ TEST( VertexBuffer, setPositionsInterleaved )
 	ASSERT_EQ( 3, vertices->getCount() );
 	ASSERT_EQ( 3 * sizeof( crimild::Real32 ) * 5, vertices->getSize() );
 
-	vertices->set(
-		VertexAttribute::Name::POSITION,
-		{
+    auto positions = vertices->get( VertexAttribute::Name::POSITION );
+
+	positions->set(
+		containers::Array< crimild::Real32 > {
 			-0.5f, -0.5f, 0.0f,
 			0.5f, -0.5f, 0.0f,
 			0.0f, 0.5f, 0.0f,
 		}
 	);
 	
-	ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), vertices->get< Vector3f >( VertexAttribute::Name::POSITION, 0 ) );
-	ASSERT_EQ( Vector3f( 0.5f, -0.5f, 0.0f ), vertices->get< Vector3f >( VertexAttribute::Name::POSITION, 1 ) );
-	ASSERT_EQ( Vector3f( 0.0f, 0.5f, 0.0f ), vertices->get< Vector3f >( VertexAttribute::Name::POSITION, 2 ) );
+	ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 0 ) );
+	ASSERT_EQ( Vector3f( 0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 1 ) );
+	ASSERT_EQ( Vector3f( 0.0f, 0.5f, 0.0f ), positions->get< Vector3f >( 2 ) );
 }
 
 TEST( VertexBuffer, setTexCoordsInterleaved )
 {
 	auto vertices = crimild::alloc< VertexBuffer2 >( VertexLayout::P3_TC2, 3 );
 
-	ASSERT_EQ( 3, vertices->getCount() );
 	ASSERT_EQ( 3 * sizeof( crimild::Real32 ) * 5, vertices->getSize() );
+	ASSERT_EQ( 3, vertices->getCount() );
 
-	vertices->set(
-		VertexAttribute::Name::TEX_COORD,
-		{
+    auto texCoords = vertices->get( VertexAttribute::Name::TEX_COORD );
+
+	texCoords->set(
+		containers::Array< crimild::Real32 > {
 			0.0, 0.0,
 			0.0, 1.0,
 			1.0, 1.0,
 		}
 	);
 	
-	ASSERT_EQ( Vector2f( 0.0f, 0.0f ), vertices->get< Vector2f >( VertexAttribute::Name::TEX_COORD, 0 ) );
-	ASSERT_EQ( Vector2f( 0.f, 1.0f ), vertices->get< Vector2f >( VertexAttribute::Name::TEX_COORD, 1 ) );
-	ASSERT_EQ( Vector2f( 1.0f, 1.0f ), vertices->get< Vector2f >( VertexAttribute::Name::TEX_COORD, 2 ) );
+	ASSERT_EQ( Vector2f( 0.0f, 0.0f ), texCoords->get< Vector2f >( 0 ) );
+	ASSERT_EQ( Vector2f( 0.f, 1.0f ), texCoords->get< Vector2f >( 1 ) );
+	ASSERT_EQ( Vector2f( 1.0f, 1.0f ), texCoords->get< Vector2f >( 2 ) );
 }
 
 TEST( VertexBuffer, setInterleaved )
@@ -536,31 +674,33 @@ TEST( VertexBuffer, setInterleaved )
 	ASSERT_EQ( 3, vertices->getCount() );
 	ASSERT_EQ( 3 * sizeof( crimild::Real32 ) * 5, vertices->getSize() );
 
-	vertices->set(
-		VertexAttribute::Name::POSITION,
-		{
+    auto positions = vertices->get( VertexAttribute::Name::POSITION );
+
+	positions->set(
+		containers::Array< crimild::Real32 > {
 			-0.5f, -0.5f, 0.0f,
 			0.5f, -0.5f, 0.0f,
 			0.0f, 0.5f, 0.0f,
 		}
 	);
 	
-	vertices->set(
-		VertexAttribute::Name::TEX_COORD,
-		{
+    auto texCoords = vertices->get( VertexAttribute::Name::TEX_COORD );
+
+	texCoords->set(
+		containers::Array< crimild::Real32 > {
 			0.0, 0.0,
 			0.0, 1.0,
 			1.0, 1.0,
 		}
 	);
 	
-	ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), vertices->get< Vector3f >( VertexAttribute::Name::POSITION, 0 ) );
-	ASSERT_EQ( Vector3f( 0.5f, -0.5f, 0.0f ), vertices->get< Vector3f >( VertexAttribute::Name::POSITION, 1 ) );
-	ASSERT_EQ( Vector3f( 0.0f, 0.5f, 0.0f ), vertices->get< Vector3f >( VertexAttribute::Name::POSITION, 2 ) );
+	ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 0 ) );
+	ASSERT_EQ( Vector3f( 0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 1 ) );
+	ASSERT_EQ( Vector3f( 0.0f, 0.5f, 0.0f ), positions->get< Vector3f >( 2 ) );
 
-	ASSERT_EQ( Vector2f( 0.0f, 0.0f ), vertices->get< Vector2f >( VertexAttribute::Name::TEX_COORD, 0 ) );
-	ASSERT_EQ( Vector2f( 0.f, 1.0f ), vertices->get< Vector2f >( VertexAttribute::Name::TEX_COORD, 1 ) );
-	ASSERT_EQ( Vector2f( 1.0f, 1.0f ), vertices->get< Vector2f >( VertexAttribute::Name::TEX_COORD, 2 ) );
+	ASSERT_EQ( Vector2f( 0.0f, 0.0f ), texCoords->get< Vector2f >( 0 ) );
+	ASSERT_EQ( Vector2f( 0.f, 1.0f ), texCoords->get< Vector2f >( 1 ) );
+	ASSERT_EQ( Vector2f( 1.0f, 1.0f ), texCoords->get< Vector2f >( 2 ) );
 }
 
 TEST( VertexBuffer, eachPosition )
@@ -576,10 +716,11 @@ TEST( VertexBuffer, eachPosition )
 		0.0f, 0.5f, 0.0f,
 	};
 
-	vertices->set( VertexAttribute::Name::POSITION, data );
+    auto positions = vertices->get( VertexAttribute::Name::POSITION );
+
+	positions->set( data );
 	
-	vertices->each< Vector3f >(
-		VertexAttribute::Name::POSITION,
+	positions->each< Vector3f >(
 		[&]( auto &v, auto i ) {
 			ASSERT_EQ( data[ i * 3 + 0 ], v[ 0 ] );
 			ASSERT_EQ( data[ i * 3 + 1 ], v[ 1 ] );
@@ -601,10 +742,11 @@ TEST( VertexBuffer, eachTexCoord )
 		1.0, 1.0,
 	};
 
-	vertices->set( VertexAttribute::Name::TEX_COORD, data );
+    auto texCoords = vertices->get( VertexAttribute::Name::TEX_COORD );
 
-	vertices->each< Vector2f >(
-		VertexAttribute::Name::TEX_COORD,
+	texCoords->set( data );
+
+	texCoords->each< Vector2f >(
 		[&]( auto &v, auto i ) {
 			ASSERT_EQ( data[ i * 2 + 0 ], v[ 0 ] );
 			ASSERT_EQ( data[ i * 2 + 1 ], v[ 1 ] );

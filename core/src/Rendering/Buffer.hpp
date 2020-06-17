@@ -32,6 +32,7 @@
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/RTTI.hpp"
 #include "Foundation/Containers/Array.hpp"
+#include "Coding/Codable.hpp"
 #include "Rendering/RenderResource.hpp"
 
 namespace crimild {
@@ -95,6 +96,58 @@ namespace crimild {
 
     private:
         containers::Array< T > m_data;
+    };
+
+    /**
+       \brief A buffer of linear data
+     */
+    class Buffer2 : public coding::Codable {
+        CRIMILD_IMPLEMENT_RTTI( crimild::Buffer )
+        
+    public:
+        /**
+           \brief Initialize buffer with array of data
+
+           This is usually used for vertex or index buffers
+         */
+        template< typename DATA_TYPE >
+        explicit Buffer2( containers::Array< DATA_TYPE > const &data )
+            : m_data( sizeof( DATA_TYPE ) * data.size() )
+        {
+            memcpy( &m_data[ 0 ], &data[ 0 ], m_data.size() );
+        }
+
+        /**
+           \brief Initialize buffer for a single value
+
+           This is usually used with uniform buffers
+         */
+        template< typename DATA_TYPE >
+        explicit Buffer2( DATA_TYPE const &data )
+            : m_data( sizeof( DATA_TYPE ) )
+        {
+            memcpy( &m_data[ 0 ], &data, m_data.size() );
+        }
+        
+        virtual ~Buffer2( void ) = default;
+
+        /**
+           \brief Get size of buffer in bytes
+         */
+        inline crimild::Size getSize( void ) const noexcept { return m_data.size(); }
+
+        /**
+           \brief Get raw data
+         */
+        inline crimild::Byte *getData( void ) noexcept { return m_data.getData(); }
+        
+        /**
+           \brief Get raw data
+         */
+        inline const crimild::Byte *getData( void ) const noexcept { return m_data.getData(); }
+
+    private:
+        containers::ByteArray m_data;
     };
 
 }
