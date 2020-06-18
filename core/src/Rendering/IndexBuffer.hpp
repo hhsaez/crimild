@@ -29,6 +29,9 @@
 #define CRIMILD_RENDERING_INDEX_BUFFER_
 
 #include "Rendering/Buffer.hpp"
+#include "Rendering/BufferView.hpp"
+#include "Rendering/BufferAccessor.hpp"
+#include "Rendering/Format.hpp"
 
 namespace crimild {
 
@@ -95,6 +98,90 @@ namespace crimild {
 
     using IndexUInt32 = crimild::UInt32;
     using IndexUInt32Buffer = IndexBufferImpl< crimild::UInt32 >;
+
+    class IndexBuffer2
+        : public coding::Codable,
+          public RenderResourceImpl< IndexBuffer2 > {
+        CRIMILD_IMPLEMENT_RTTI( crimild::IndexBuffer2 )
+        
+    public:
+        IndexBuffer2( Format format, crimild::Size count ) noexcept;
+
+        template< typename T >
+        IndexBuffer2( Format format, containers::Array< T > const &data ) noexcept
+            : m_format( format )
+        {
+            auto stride = utils::getFormatSize( format );
+
+            auto buffer = crimild::alloc< Buffer2 >( data );
+    
+            m_bufferView = crimild::alloc< BufferView >(
+                BufferView::Target::INDEX,
+                buffer,
+                0,
+                stride
+            );
+            
+            m_accessor = crimild::alloc< BufferAccessor >(
+                m_bufferView,
+                0,
+                stride
+            );
+        }
+        
+        virtual ~IndexBuffer2( void ) = default;
+
+        inline Format getFormat( void ) const noexcept
+        {
+            return m_format;
+        }
+
+        inline crimild::Size getIndexCount( void ) const noexcept
+        {
+            return m_bufferView->getCount();
+        }
+
+        inline BufferView *getBufferView( void ) const noexcept
+        {
+            return crimild::get_ptr( m_bufferView );
+        }
+        
+        crimild::UInt32 getIndex( crimild::Size i ) const noexcept
+        {
+            if ( m_format == Format::INDEX_16_UINT ) {
+                return m_accessor->get< crimild::UInt16 >( i );
+            }
+            return m_accessor->get< crimild::UInt32 >( i );
+        }
+
+        template< typename Fn >
+        void each( Fn fn ) const noexcept
+        {
+            if ( m_format == Format::INDEX_16_UINT ) {
+                m_accessor->each< crimild::UInt16 >( fn );
+            }
+            else {
+                m_accessor->each< crimild::UInt32 >( fn );
+            }
+        }
+
+        template< typename T >
+        void setIndex( crimild::Size i, T value ) noexcept
+        {
+            m_accessor->set< T >( i, value );
+        }
+
+        template< typename T >
+        void setIndices( containers::Array< T > const &data ) noexcept
+        {
+            m_accessor->set( data );
+        }
+        
+    private:
+        Format m_format;
+        SharedPointer< BufferView > m_bufferView;
+        SharedPointer< BufferAccessor > m_accessor;
+    };
 
 }
 

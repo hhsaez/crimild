@@ -55,6 +55,7 @@ namespace crimild {
         R8G8B8_UNORM,
         R8G8B8A8_UNORM,
         B8G8R8A8_UNORM,
+        R16_UINT,
         R32_UINT,
         R32_SINT,
         R32_SFLOAT,
@@ -71,6 +72,8 @@ namespace crimild {
         DEPTH_32_SFLOAT_STENCIL_8_UINT,
         DEPTH_STENCIL_DEVICE_OPTIMAL, //< Whatever depth/stencil format is supported
         COLOR_SWAPCHAIN_OPTIMAL, //< Whatever format the swapchain has
+        INDEX_16_UINT = R16_UINT,
+        INDEX_32_UINT = R32_UINT,
     };
 
 	namespace utils {
@@ -78,6 +81,8 @@ namespace crimild {
 		template< typename T >
 		static Format getFormat( void ) noexcept { return Format::UNDEFINED; }
 
+        template<> Format getFormat< crimild::UInt16 >( void ) noexcept { return Format::R16_UINT; }
+        template<> Format getFormat< crimild::UInt32 >( void ) noexcept { return Format::R32_UINT; }
 		template<> Format getFormat< crimild::Real32 >( void ) noexcept { return Format::R32_SFLOAT; }
 		template<> Format getFormat< Vector2f >( void ) noexcept { return Format::R32G32_SFLOAT; }
 		template<> Format getFormat< Vector3f >( void ) noexcept { return Format::R32G32B32_SFLOAT; }
@@ -85,6 +90,10 @@ namespace crimild {
 		static crimild::UInt32 getFormatSize( Format format ) noexcept
 		{
 			switch ( format ) {
+                case Format::R16_UINT:
+                    return 1 * sizeof( crimild::UInt16 );
+                case Format::R32_UINT:
+                    return 1 * sizeof( crimild::UInt32 );
 				case Format::R32_SFLOAT:
 					return 1 * sizeof( crimild::Real32 );
 				case Format::R32G32_SFLOAT:
