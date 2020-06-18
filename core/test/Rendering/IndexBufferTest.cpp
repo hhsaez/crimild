@@ -26,11 +26,128 @@
  */
 
 #include "Rendering/IndexBuffer.hpp"
+#include "Rendering/Buffer.hpp"
+#include "Rendering/BufferView.hpp"
+#include "Rendering/BufferAccessor.hpp"
+#include "Rendering/Format.hpp"
 #include "Rendering/FrameGraph.hpp"
 
 #include "gtest/gtest.h"
 
 using namespace crimild;
+
+TEST( IndexBuffer, constructionUInt32 )
+{
+    auto indices = crimild::alloc< IndexBuffer2 >(
+        Format::INDEX_32_UINT,
+        containers::Array< crimild::UInt32 > {
+            0, 1, 2,
+            0, 2, 3,
+        }
+    );
+
+    ASSERT_NE( nullptr, indices->getBufferView() );
+	ASSERT_EQ( 6, indices->getIndexCount() );
+	ASSERT_EQ( Format::INDEX_32_UINT, indices->getFormat() );
+	ASSERT_EQ( 0, indices->getIndex( 0 ) );
+	ASSERT_EQ( 1, indices->getIndex( 1 ) );
+	ASSERT_EQ( 2, indices->getIndex( 2 ) );
+	ASSERT_EQ( 0, indices->getIndex( 3 ) );
+	ASSERT_EQ( 2, indices->getIndex( 4 ) );
+	ASSERT_EQ( 3, indices->getIndex( 5 ) );
+}
+
+TEST( IndexBuffer, constructionUInt16 )
+{
+    auto indices = crimild::alloc< IndexBuffer2 >(
+        Format::INDEX_16_UINT,
+        containers::Array< crimild::UInt16 > {
+            0, 1, 2,
+            0, 2, 3,
+        }
+    );
+
+    ASSERT_NE( nullptr, indices->getBufferView() );
+	ASSERT_EQ( 6, indices->getIndexCount() );
+	ASSERT_EQ( Format::INDEX_16_UINT, indices->getFormat() );
+	ASSERT_EQ( 0, indices->getIndex( 0 ) );
+	ASSERT_EQ( 1, indices->getIndex( 1 ) );
+	ASSERT_EQ( 2, indices->getIndex( 2 ) );
+	ASSERT_EQ( 0, indices->getIndex( 3 ) );
+	ASSERT_EQ( 2, indices->getIndex( 4 ) );
+	ASSERT_EQ( 3, indices->getIndex( 5 ) );
+}
+
+TEST( IndexBuffer, setIndex )
+{
+    auto indices = crimild::alloc< IndexBuffer2 >( Format::INDEX_32_UINT, 6 );
+
+    ASSERT_NE( nullptr, indices->getBufferView() );
+	ASSERT_EQ( 6, indices->getIndexCount() );
+	ASSERT_EQ( Format::INDEX_32_UINT, indices->getFormat() );
+
+    indices->setIndex( 0, 0 );
+    indices->setIndex( 1, 1 );
+    indices->setIndex( 2, 2 );
+    indices->setIndex( 3, 0 );
+    indices->setIndex( 4, 2 );
+    indices->setIndex( 5, 3 );
+    
+	ASSERT_EQ( 0, indices->getIndex( 0 ) );
+	ASSERT_EQ( 1, indices->getIndex( 1 ) );
+	ASSERT_EQ( 2, indices->getIndex( 2 ) );
+	ASSERT_EQ( 0, indices->getIndex( 3 ) );
+	ASSERT_EQ( 2, indices->getIndex( 4 ) );
+	ASSERT_EQ( 3, indices->getIndex( 5 ) );
+}
+
+TEST( IndexBuffer, setIndices )
+{
+    auto indices = crimild::alloc< IndexBuffer2 >( Format::INDEX_32_UINT, 6 );
+
+    ASSERT_NE( nullptr, indices->getBufferView() );
+	ASSERT_EQ( 6, indices->getIndexCount() );
+	ASSERT_EQ( Format::INDEX_32_UINT, indices->getFormat() );
+
+    auto data = containers::Array< crimild::UInt32 > {
+        0, 1, 2,
+        0, 2, 3,
+    };
+
+    indices->setIndices( data );
+    
+	ASSERT_EQ( 0, indices->getIndex( 0 ) );
+	ASSERT_EQ( 1, indices->getIndex( 1 ) );
+	ASSERT_EQ( 2, indices->getIndex( 2 ) );
+	ASSERT_EQ( 0, indices->getIndex( 3 ) );
+	ASSERT_EQ( 2, indices->getIndex( 4 ) );
+	ASSERT_EQ( 3, indices->getIndex( 5 ) );
+}
+
+TEST( IndexBuffer, eachIndex )
+{
+    auto indices = crimild::alloc< IndexBuffer2 >( Format::INDEX_32_UINT, 6 );
+
+    ASSERT_NE( nullptr, indices->getBufferView() );
+	ASSERT_EQ( 6, indices->getIndexCount() );
+	ASSERT_EQ( Format::INDEX_32_UINT, indices->getFormat() );
+
+    auto data = containers::Array< crimild::UInt32 > {
+        0, 1, 2,
+        0, 2, 3,
+    };
+
+    indices->setIndices( data );
+
+    auto callCount = 0;
+    indices->each(
+        [&]( auto val, auto i ) {
+            ASSERT_EQ( data[ i ], val );
+            callCount++;
+        }
+    );
+    ASSERT_EQ( 6, callCount );
+}
 
 TEST( IndexBuffer, autoAddToFrameGraph )
 {

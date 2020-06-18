@@ -28,9 +28,90 @@
 #include "Rendering/UniformBuffer.hpp"
 #include "Rendering/FrameGraph.hpp"
 
+#include "Rendering/BufferView.hpp"
+
 #include "gtest/gtest.h"
 
+namespace crimild {
+
+    class UniformBuffer2 : public coding::Codable, public RenderResourceImpl< UniformBuffer2 > {
+        CRIMILD_IMPLEMENT_RTTI( crimild::UniformBuffer2 )
+        
+    public:
+        template< typename T >
+        UniformBuffer2( const T &value ) noexcept
+        {
+            m_bufferView = crimild::alloc< BufferView >(
+                BufferView::Target::UNIFORM,
+                crimild::alloc< Buffer2 >( value )
+            );
+        }
+        
+        virtual ~UniformBuffer2( void ) = default;
+
+        inline BufferView *getBufferView( void ) noexcept { return crimild::get_ptr( m_bufferView ); }
+        inline const BufferView *getBufferView( void ) const noexcept { return crimild::get_ptr( m_bufferView ); }
+
+        template< typename T >
+        T &getValue( void ) noexcept
+        {
+            return *reinterpret_cast< T * >( getBufferView()->getData() );
+        }
+
+        template< typename T >
+        const T &getValue( void ) const noexcept
+        {
+            return *reinterpret_cast< T * >( getBufferView()->getData() );
+        }
+
+        template< typename T >
+        void setValue( const T &value ) noexcept
+        {
+            assert( sizeof( T ) == getBufferView()->getLength() && "Invalid data type" );
+            getValue< T >() = value;
+        }
+
+    private:
+        SharedPointer< BufferView > m_bufferView;
+    };
+
+}
+
 using namespace crimild;
+
+TEST( UniformBuffer, withSingleValue )
+{
+    auto uniform = crimild::alloc< UniformBuffer2 >( Vector3f::ZERO );
+
+    ASSERT_NE( nullptr, uniform->getBufferView() );
+    ASSERT_EQ( 3 * sizeof( crimild::Real32 ), uniform->getBufferView()->getLength() );
+
+    ASSERT_EQ( Vector3f::ZERO, uniform->getValue< Vector3f >() );
+
+    uniform->setValue( Vector3f( 1.0f, 2.0f, 3.0f ) );
+
+    ASSERT_EQ( Vector3f( 1.0f, 2.0f, 3.0f ), uniform->getValue< Vector3f >() );
+}
+
+TEST( UniformBuffer, withStruct )
+{
+    struct Data {
+        Matrix4f proj;
+        Matrix4f view;
+        RGBAColorf color;
+        float weights;
+        Vector2i indices;
+    };
+    
+    auto uniform = crimild::alloc< UniformBuffer2 >( Data {} );
+
+    ASSERT_NE( nullptr, uniform->getBufferView() );
+    ASSERT_EQ( sizeof( Data ), uniform->getBufferView()->getLength() );
+
+    uniform->getValue< Data >().color = RGBAColorf( 1.0f, 0.0f, 1.0f, 0.5f );
+
+    ASSERT_EQ( RGBAColorf( 1.0f, 0.0f, 1.0f, 0.5f ), uniform->getValue< Data >().color );
+}
 
 TEST( UniformBuffer, autoAddToFrameGraph )
 {
