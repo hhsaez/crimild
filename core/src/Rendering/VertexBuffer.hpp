@@ -469,7 +469,11 @@ namespace crimild {
 
     using VertexP3C3TC2Buffer = VertexBufferImpl< VertexP3C3TC2, policies::VertexBuffer3DExtentPolicy >;
 
-	class VertexBuffer2 : public Buffer {
+	class VertexBuffer2
+        : public coding::Codable,
+          public RenderResourceImpl< VertexBuffer2 > {
+        CRIMILD_IMPLEMENT_RTTI( crimild::VertexBuffer2 )
+        
 	public:
         template< typename DATA_TYPE >
 		VertexBuffer2( const VertexLayout &vertexLayout, const containers::Array< DATA_TYPE > &data ) noexcept
@@ -541,15 +545,7 @@ namespace crimild {
         inline BufferView *getBufferView( void ) noexcept { return crimild::get_ptr( m_bufferView ); }
         inline const BufferView *getBufferView( void ) const noexcept { return crimild::get_ptr( m_bufferView ); }
 
-		inline Usage getUsage( void ) const noexcept override { return Buffer::Usage::VERTEX_BUFFER; }
-
-        inline crimild::Size getSize( void ) const noexcept override { return m_bufferView->getLength(); }
-        inline crimild::Size getStride( void ) const noexcept override { return m_vertexLayout.getSize(); }
-
-        inline void *getRawData( void ) noexcept override { return ( void * ) m_bufferView->getData(); }
-        inline const void *getRawData( void ) const noexcept override { return ( void * ) m_bufferView->getData(); }
-
-        inline crimild::Size getCount( void ) const noexcept { return m_bufferView->getCount(); }
+        inline crimild::Size getVertexCount( void ) const noexcept { return m_bufferView->getCount(); }
 
         BufferAccessor *get( VertexAttribute::Name name ) noexcept
         {
