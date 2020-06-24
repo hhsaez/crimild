@@ -116,18 +116,6 @@ DescriptorSet *Geometry::getDescriptors( void ) noexcept
 
 	m_descriptors = [&] {
 		auto descriptorSet = crimild::alloc< DescriptorSet >();
-		descriptorSet->descriptorSetLayout = [&] {
-			// TODO: share a unique instance of this layout since
-			// all geometry objects have the same one
-			auto layout = crimild::alloc< DescriptorSetLayout >();
-			layout->bindings = {
-				{
-					.descriptorType = DescriptorType::UNIFORM_BUFFER,
-					.stage = Shader::Stage::VERTEX,
-				},
-			};
-			return layout;
-		}();
 		descriptorSet->descriptors = {
 			Descriptor {
 				.descriptorType = DescriptorType::UNIFORM_BUFFER,

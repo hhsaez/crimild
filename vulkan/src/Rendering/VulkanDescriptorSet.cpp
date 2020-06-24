@@ -45,13 +45,8 @@ crimild::Bool DescriptorSetManager::bind( DescriptorSet *descriptorSet ) noexcep
     }
 
     auto swapchain = renderDevice->getSwapchain();
-    auto layout = crimild::get_ptr( descriptorSet->descriptorSetLayout );
-    auto descriptorPool = crimild::get_ptr( descriptorSet->descriptorPool );
-    if ( descriptorPool == nullptr ) {
-        descriptorSet->descriptorPool = crimild::alloc< DescriptorPool >();
-        descriptorSet->descriptorPool->descriptorSetLayout = descriptorSet->descriptorSetLayout;
-        descriptorPool = crimild::get_ptr( descriptorSet->descriptorPool );
-    }
+    auto layout = crimild::get_ptr( descriptorSet->layout );
+    auto descriptorPool = layout->descriptorPool;
     auto count = swapchain->images.size();
 
     VkDescriptorSetLayout layouts[] = {
@@ -60,7 +55,7 @@ crimild::Bool DescriptorSetManager::bind( DescriptorSet *descriptorSet ) noexcep
 
     auto allocInfo = VkDescriptorSetAllocateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
-        .descriptorPool = renderDevice->getHandler( descriptorPool ),
+        .descriptorPool = renderDevice->getHandler( crimild::get_ptr( descriptorPool ) ),
         .descriptorSetCount = 1,
         .pSetLayouts = layouts,
     };
