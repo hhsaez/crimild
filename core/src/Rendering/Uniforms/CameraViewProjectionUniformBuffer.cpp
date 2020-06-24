@@ -26,38 +26,47 @@
 */
 
 #include "Rendering/Uniforms/CameraViewProjectionUniformBuffer.hpp"
-#include "SceneGraph/Node.hpp"
 #include "SceneGraph/Camera.hpp"
 
 using namespace crimild;
 
-void CameraViewProjectionUniformBuffer::updateIfNeeded( void ) noexcept
+CameraViewProjectionUniform::CameraViewProjectionUniform( Camera *camera ) noexcept
+    : UniformBuffer( Props { } ),
+      m_camera( camera )
 {
-    setData({
-        .view = [&] {
-            if ( camera != nullptr ) {
-                // if a camera has been specified, we use that one to get the view matrix
-                return camera->getViewMatrix();
-            }
-
-            if ( auto camera = Camera::getMainCamera() ) {
-                // if no camera has been set, let's use whatever's the main one
-                return camera->getViewMatrix();
-            }
-
-            // no camera
-            return Matrix4f::IDENTITY;
-        }(),
-        .proj = [&] {
-            auto proj = Matrix4f::IDENTITY;
-            if ( camera != nullptr ) {
-                proj = camera->getProjectionMatrix();
-            }
-            else if ( auto camera = Camera::getMainCamera() ) {
-                proj = camera->getProjectionMatrix();
-            }
-            return proj;
-        }(),
-    });
+    
 }
+
+void CameraViewProjectionUniform::onPreRender( void ) noexcept
+{
+    setValue(
+        Props {
+            .view = [&] {
+                if ( m_camera != nullptr ) {
+                    // if a camera has been specified, we use that one to get the view matrix
+                    return m_camera->getViewMatrix();
+                }
+                
+                if ( auto camera = Camera::getMainCamera() ) {
+                    // if no camera has been set, let's use whatever's the main one
+                    return camera->getViewMatrix();
+                }
+                
+                // no camera
+                return Matrix4f::IDENTITY;
+            }(),
+            .proj = [&] {
+                auto proj = Matrix4f::IDENTITY;
+                if ( m_camera != nullptr ) {
+                    proj = m_camera->getProjectionMatrix();
+                }
+                else if ( auto camera = Camera::getMainCamera() ) {
+                    proj = camera->getProjectionMatrix();
+                }
+                return proj;
+            }(),
+        }
+    );
+}
+
 

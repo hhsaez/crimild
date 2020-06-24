@@ -37,6 +37,8 @@ namespace crimild {
 
     namespace vulkan {
 
+#if 0
+
         class RenderDevice;
         class CommandPool;
 
@@ -60,6 +62,8 @@ namespace crimild {
             void copyBuffer( RenderDevice *renderDevice, CommandPool *commandPool, VkBuffer srcBufferHandler, VkBuffer dstBufferHandler, VkDeviceSize size ) const noexcept;
             void updateBuffer( RenderDevice *renderDevice, VkDeviceMemory bufferMemory, const void *data, crimild::Size size ) noexcept;
         };
+
+#endif
 
     }
 

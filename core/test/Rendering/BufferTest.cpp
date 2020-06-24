@@ -26,6 +26,7 @@
  */
 
 #include "Rendering/Buffer.hpp"
+#include "Rendering/FrameGraph.hpp"
 
 #include "Mathematics/Vector.hpp"
 #include "Mathematics/Matrix.hpp"
@@ -42,7 +43,7 @@ TEST( Buffer, constructionWithValueArray )
         0.0f, 0.5f, 0.0f,
     };
 
-    auto buffer = crimild::alloc< Buffer2 >( data );
+    auto buffer = crimild::alloc< Buffer >( data );
 
     ASSERT_EQ( 9 * sizeof( crimild::Real32 ), buffer->getSize() );
     ASSERT_NE( nullptr, buffer->getData() );
@@ -50,7 +51,7 @@ TEST( Buffer, constructionWithValueArray )
 
 TEST( Buffer, withEmptyData )
 {
-    auto buffer = crimild::alloc< Buffer2 >( containers::Array< crimild::Real32 >( 3 ) );
+    auto buffer = crimild::alloc< Buffer >( containers::Array< crimild::Real32 >( 3 ) );
 
     ASSERT_EQ( 3 * sizeof( crimild::Real32 ), buffer->getSize() );
 }
@@ -67,7 +68,7 @@ TEST( Buffer, constructionWithStructArray )
         { .position = { 0.0f, 0.5f, 0.0f } },
     };
 
-    auto buffer = crimild::alloc< Buffer2 >( data );
+    auto buffer = crimild::alloc< Buffer >( data );
 
     ASSERT_EQ( 9 * sizeof( crimild::Real32 ), buffer->getSize() );
     ASSERT_NE( nullptr, buffer->getData() );
@@ -85,7 +86,7 @@ TEST( Buffer, constructionWithStruct )
         crimild::Real32 metalness;
     };
 
-    auto buffer = crimild::alloc< Buffer2 >(
+    auto buffer = crimild::alloc< Buffer >(
         Uniform {
             .color = RGBAColorf( 0.5f, 0.75f, 0.95f, 1.0f ),
             .metalness = 0.5f,
@@ -96,5 +97,22 @@ TEST( Buffer, constructionWithStruct )
     ASSERT_NE( nullptr, buffer->getData() );
     ASSERT_EQ( RGBAColorf( 0.5f, 0.75f, 0.95f, 1.0f ), static_cast< Uniform * >( static_cast< void * >( buffer->getData() ) )->color );
     ASSERT_EQ( 0.5f, static_cast< Uniform * >( static_cast< void * >( buffer->getData() ) )->metalness );
+}
+
+TEST( Buffer, autoAddToFrameGraph )
+{
+	auto graph = crimild::alloc< FrameGraph >();
+
+	ASSERT_FALSE( graph->hasNodes() );
+
+	{
+        auto buffer = crimild::alloc< Buffer >( containers::Array< crimild::Real32 >( 3 ) );
+
+        ASSERT_TRUE( graph->contains( buffer ) );
+		ASSERT_TRUE( graph->hasNodes() );
+	}
+
+	ASSERT_FALSE( graph->hasNodes() );
+
 }
 

@@ -33,6 +33,11 @@ const VertexLayout VertexLayout::P3 = {
     { VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() },
 };
 
+const VertexLayout VertexLayout::P3_C3 = {
+    { VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() },
+    { VertexAttribute::Name::COLOR, utils::getFormat< RGBColorf >() },
+};
+
 const VertexLayout VertexLayout::P3_N3 = {
     { VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() },
     { VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() },

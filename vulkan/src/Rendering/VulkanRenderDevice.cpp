@@ -243,7 +243,9 @@ void RenderDeviceManager::destroy( RenderDevice *renderDevice ) noexcept
     static_cast< DescriptorPoolManager * >( renderDevice )->clear();
     static_cast< DescriptorSetManager * >( renderDevice )->clear();
     static_cast< DescriptorSetLayoutManager * >( renderDevice )->clear();
-    static_cast< BufferManager * >( renderDevice )->clear();
+    static_cast< IndexBufferManager * >( renderDevice )->clear();
+    static_cast< VertexBufferManager * >( renderDevice )->clear();
+    static_cast< UniformBufferManager * >( renderDevice )->clear();
     static_cast< FenceManager * >( renderDevice )->cleanup();
     static_cast< SemaphoreManager * >( renderDevice )->cleanup();
     static_cast< CommandBufferManager * >( renderDevice )->clear();

@@ -36,7 +36,9 @@ namespace crimild {
     /**
        \brief A subset of data in a buffer
      */
-    class BufferView : public coding::Codable {
+    class BufferView
+        : public coding::Codable,
+          public RenderResourceImpl< BufferView > {
         CRIMILD_IMPLEMENT_RTTI( crimild::BufferView )
 
     public:
@@ -74,8 +76,8 @@ namespace crimild {
         
         virtual ~BufferView( void ) = default;
 
-        inline Buffer2 *getBuffer( void ) noexcept { return crimild::get_ptr( m_buffer ); }
-        inline const Buffer2 *getBuffer( void ) const noexcept { return crimild::get_ptr( m_buffer ); }
+        inline Buffer *getBuffer( void ) noexcept { return crimild::get_ptr( m_buffer ); }
+        inline const Buffer *getBuffer( void ) const noexcept { return crimild::get_ptr( m_buffer ); }
 
         /**
            \brief Get target usage for this view
@@ -108,7 +110,7 @@ namespace crimild {
 
     private:
         Target m_target;
-        SharedPointer< Buffer2 > m_buffer;
+        SharedPointer< Buffer > m_buffer;
         crimild::Size m_offset;
         crimild::Size m_stride;
         crimild::Size m_length;

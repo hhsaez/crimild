@@ -36,6 +36,7 @@ using namespace crimild;
 template<>
 RenderResourceLibrary< ShaderProgram >::RenderResourceLibrary( void ) noexcept
 {
+#if 0
     add(
         constants::SHADER_PROGRAM_UNLIT_P2C3_COLOR,
         [] {
@@ -230,5 +231,7 @@ RenderResourceLibrary< ShaderProgram >::RenderResourceLibrary( void ) noexcept
             return program;
         }
     );
+
+#endif
 }
 

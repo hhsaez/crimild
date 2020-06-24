@@ -58,7 +58,7 @@ crimild::Bool PipelineManager::bind( Pipeline *pipeline ) noexcept
     auto shaderModules = createShaderModules( renderDevice, crimild::get_ptr( pipeline->program ) );
     auto shaderStages = createShaderStages( shaderModules );
     auto vertexBindingDescriptions = getVertexInputBindingDescriptions( pipeline );
-    auto vertexAttributeDescriptions = getVertexInputAttributeDescriptions( pipeline );
+    auto vertexAttributeDescriptions = getVertexInputAttributeDescriptions( renderDevice, pipeline );
     auto vertexInputInfo = createVertexInput( vertexBindingDescriptions, vertexAttributeDescriptions );
     auto inputAssembly = createInputAssemby( pipeline->primitiveType );
     auto viewport = createViewport( pipeline->viewport );
@@ -76,7 +76,7 @@ crimild::Bool PipelineManager::bind( Pipeline *pipeline ) noexcept
 
     auto pipelineLayout = renderDevice->create(
         PipelineLayout::Descriptor {
-            .setLayouts = pipeline->descriptorSetLayouts.map(
+            .setLayouts = pipeline->program->descriptorSetLayouts.map(
             	[]( auto &layout ) {
                 	return crimild::get_ptr( layout );
             	}
@@ -191,65 +191,49 @@ PipelineManager::ShaderStageArray PipelineManager::createShaderStages( const Sha
     return shaderStages;
 }
 
-std::vector< VkVertexInputBindingDescription > PipelineManager::getVertexInputBindingDescriptions( Pipeline *pipeline ) const noexcept
+containers::Array< VkVertexInputBindingDescription > PipelineManager::getVertexInputBindingDescriptions( Pipeline *pipeline ) const noexcept
 {
-    return std::vector< VkVertexInputBindingDescription > {
-        [ pipeline ] {
+    return pipeline->program->vertexLayouts.map(
+        [&, binding = 0]( const auto &layout ) mutable {
             return VkVertexInputBindingDescription {
-                .binding = pipeline->bindingDescription.binding,
-                .stride = pipeline->bindingDescription.stride,
+                .binding = uint32_t( binding++ ),
+                .stride = layout.getSize(),
                 .inputRate = VK_VERTEX_INPUT_RATE_VERTEX,
             };
-        }(),
-    };
+        }
+    );
 }
 
-std::vector< VkVertexInputAttributeDescription > PipelineManager::getVertexInputAttributeDescriptions( Pipeline *pipeline ) const noexcept
+containers::Array< VkVertexInputAttributeDescription > PipelineManager::getVertexInputAttributeDescriptions( RenderDevice *renderDevice, Pipeline *pipeline ) const noexcept
 {
-    std::vector< VkVertexInputAttributeDescription > attributeDescriptions;
-    for ( auto &attr : pipeline->attributeDescriptions ) {
-        attributeDescriptions.push_back( [ &attr ] {
-            auto format = VK_FORMAT_UNDEFINED;
-            switch ( attr.format ) {
-                case VertexInputAttributeDescription::Format::R32: {
-                    format = VK_FORMAT_R32_SFLOAT;
-                    break;
+    containers::Array< VkVertexInputAttributeDescription > attributeDescriptions;
+    pipeline->program->vertexLayouts.each(
+        [&]( const auto &layout, auto binding ) {
+            layout.eachAttribute(
+                [&, location = 0]( const auto &attrib ) mutable {
+                    attributeDescriptions.add(
+                        VkVertexInputAttributeDescription {
+                            .binding = crimild::UInt32( binding ),
+                            .location = crimild::UInt32( location++ ),
+                            .format = utils::getFormat( renderDevice, attrib.format ),
+                            .offset = attrib.offset,
+                        }
+                    );
                 }
-                case VertexInputAttributeDescription::Format::R32G32: {
-                    format = VK_FORMAT_R32G32_SFLOAT;
-                    break;
-                }
-                case VertexInputAttributeDescription::Format::R32G32B32: {
-                    format = VK_FORMAT_R32G32B32_SFLOAT;
-                    break;
-                }
-                case VertexInputAttributeDescription::Format::R32G32B32A32: {
-                    format = VK_FORMAT_R32G32B32A32_SFLOAT;
-                    break;
-                }
-                default:
-                    break;
-            }
-            return VkVertexInputAttributeDescription {
-                .binding = attr.binding,
-                .location = attr.location,
-                .format = format,
-                .offset = attr.offset,
-            };
-        }());
-    }
-
+            );
+        }
+    );
     return attributeDescriptions;
 }
 
-VkPipelineVertexInputStateCreateInfo PipelineManager::createVertexInput( const std::vector< VkVertexInputBindingDescription > &bindingDescriptions, const std::vector< VkVertexInputAttributeDescription > &attributeDescriptions ) const noexcept
+VkPipelineVertexInputStateCreateInfo PipelineManager::createVertexInput( const containers::Array< VkVertexInputBindingDescription > &bindingDescriptions, const containers::Array< VkVertexInputAttributeDescription > &attributeDescriptions ) const noexcept
 {
     return VkPipelineVertexInputStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
         .vertexBindingDescriptionCount = static_cast< crimild::UInt32 >( bindingDescriptions.size() ),
-        .pVertexBindingDescriptions = bindingDescriptions.data(),
+        .pVertexBindingDescriptions = bindingDescriptions.getData(),
         .vertexAttributeDescriptionCount = static_cast< crimild::UInt32 >( attributeDescriptions.size() ),
-        .pVertexAttributeDescriptions = attributeDescriptions.data(),
+        .pVertexAttributeDescriptions = attributeDescriptions.getData(),
     };
 }
 

@@ -170,9 +170,9 @@ TEST( FrameGraph, simpleFrameGraph )
 	auto graph = crimild::alloc< FrameGraph >();
 
 	auto pipeline = crimild::alloc< Pipeline >();
-	auto vbo = crimild::alloc< VertexP2C3Buffer >( 0 );
-	auto ibo = crimild::alloc< IndexUInt32Buffer >( 0 );
-	auto ubo = crimild::alloc< UniformBufferImpl< crimild::Vector4f >>();
+	auto vbo = crimild::alloc< VertexBuffer >( VertexLayout::P3, 0 );
+	auto ibo = crimild::alloc< IndexBuffer >( Format::INDEX_32_UINT, 0 );
+	auto ubo = crimild::alloc< UniformBuffer >( Vector4f() );
 	auto descriptorSet = [&] {
 		auto ds = crimild::alloc< DescriptorSet >();
 		ds->descriptors = {
@@ -194,7 +194,7 @@ TEST( FrameGraph, simpleFrameGraph )
 		commands->bindVertexBuffer( crimild::get_ptr( vbo ) );
 		commands->bindIndexBuffer( crimild::get_ptr( ibo ) );
 		commands->bindDescriptorSet( crimild::get_ptr( descriptorSet ) );
-		commands->drawIndexed( ibo->getCount() );
+		commands->drawIndexed( ibo->getIndexCount() );
 		return commands;
 	}();
 
@@ -230,9 +230,9 @@ TEST( FrameGraph, simpleAutoAddNodes )
 	auto graph = crimild::alloc< FrameGraph >();
 
 	auto pipeline = crimild::alloc< Pipeline >();
-	auto vbo = crimild::alloc< VertexP2C3Buffer >( 0 );
-	auto ibo = crimild::alloc< IndexUInt32Buffer >( 0 );
-	auto ubo = crimild::alloc< UniformBufferImpl< crimild::Vector4f >>();
+	auto vbo = crimild::alloc< VertexBuffer >( VertexLayout::P3, 0 );
+	auto ibo = crimild::alloc< IndexBuffer >( Format::INDEX_32_UINT, 0 );
+	auto ubo = crimild::alloc< UniformBuffer >( Vector4f() );
 	auto descriptorSet = [&] {
 		auto ds = crimild::alloc< DescriptorSet >();
 		ds->descriptors = {
@@ -254,7 +254,7 @@ TEST( FrameGraph, simpleAutoAddNodes )
 		commands->bindVertexBuffer( crimild::get_ptr( vbo ) );
 		commands->bindIndexBuffer( crimild::get_ptr( ibo ) );
 		commands->bindDescriptorSet( crimild::get_ptr( descriptorSet ) );
-		commands->drawIndexed( ibo->getCount() );
+		commands->drawIndexed( ibo->getIndexCount() );
 		return commands;
 	}();
 
@@ -349,9 +349,9 @@ TEST( FrameGraph, offscreen )
 	}();
 
 	auto offPipeline = crimild::alloc< Pipeline >();
-	auto offVbo = crimild::alloc< VertexP2C3Buffer >( 0 );
-	auto offIbo = crimild::alloc< IndexUInt32Buffer >( 0 );
-	auto offUbo = crimild::alloc< UniformBufferImpl< crimild::Vector4f >>();
+	auto offVbo = crimild::alloc< VertexBuffer >( VertexLayout::P3, 0 );
+	auto offIbo = crimild::alloc< IndexBuffer >( Format::INDEX_32_UINT, 0 );
+	auto offUbo = crimild::alloc< UniformBuffer >( Vector4f() );
 	auto offDescriptorSet = [&] {
 		auto ds = crimild::alloc< DescriptorSet >();
 		ds->descriptors = {
@@ -375,7 +375,7 @@ TEST( FrameGraph, offscreen )
 			commands->bindVertexBuffer( crimild::get_ptr( offVbo ) );
 			commands->bindIndexBuffer( crimild::get_ptr( offIbo ) );
 			commands->bindDescriptorSet( crimild::get_ptr( offDescriptorSet ) );
-			commands->drawIndexed( offIbo->getCount() );
+			commands->drawIndexed( offIbo->getIndexCount() );
 			return commands;
 		}();
 		return renderPass;
@@ -384,9 +384,9 @@ TEST( FrameGraph, offscreen )
     // Screen
 
 	auto pipeline = crimild::alloc< Pipeline >();
-	auto vbo = crimild::alloc< VertexP2C3Buffer >( 0 );
-	auto ibo = crimild::alloc< IndexUInt32Buffer >( 0 );
-	auto ubo = crimild::alloc< UniformBufferImpl< crimild::Vector4f >>();
+	auto vbo = crimild::alloc< VertexBuffer >( VertexLayout::P3, 0 );
+	auto ibo = crimild::alloc< IndexBuffer >( Format::INDEX_32_UINT, 0 );
+	auto ubo = crimild::alloc< UniformBuffer >( Vector4f() );
 	auto descriptorSet = [&] {
 		auto ds = crimild::alloc< DescriptorSet >();
 		ds->descriptors = {
@@ -412,7 +412,7 @@ TEST( FrameGraph, offscreen )
 		commands->bindVertexBuffer( crimild::get_ptr( vbo ) );
 		commands->bindIndexBuffer( crimild::get_ptr( ibo ) );
 		commands->bindDescriptorSet( crimild::get_ptr( descriptorSet ) );
-		commands->drawIndexed( ibo->getCount() );
+		commands->drawIndexed( ibo->getIndexCount() );
 		return commands;
 	}();
 

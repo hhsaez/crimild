@@ -35,6 +35,7 @@
 
 namespace crimild {
 
+#if 0
     class IndexBuffer : public Buffer, public RTTI {
     public:
         enum class IndexType {
@@ -99,21 +100,23 @@ namespace crimild {
     using IndexUInt32 = crimild::UInt32;
     using IndexUInt32Buffer = IndexBufferImpl< crimild::UInt32 >;
 
-    class IndexBuffer2
+#endif
+
+    class IndexBuffer
         : public coding::Codable,
-          public RenderResourceImpl< IndexBuffer2 > {
-        CRIMILD_IMPLEMENT_RTTI( crimild::IndexBuffer2 )
+          public RenderResourceImpl< IndexBuffer > {
+        CRIMILD_IMPLEMENT_RTTI( crimild::IndexBuffer )
         
     public:
-        IndexBuffer2( Format format, crimild::Size count ) noexcept;
+        IndexBuffer( Format format, crimild::Size count ) noexcept;
 
         template< typename T >
-        IndexBuffer2( Format format, containers::Array< T > const &data ) noexcept
+        IndexBuffer( Format format, containers::Array< T > const &data ) noexcept
             : m_format( format )
         {
             auto stride = utils::getFormatSize( format );
 
-            auto buffer = crimild::alloc< Buffer2 >( data );
+            auto buffer = crimild::alloc< Buffer >( data );
     
             m_bufferView = crimild::alloc< BufferView >(
                 BufferView::Target::INDEX,
@@ -129,7 +132,7 @@ namespace crimild {
             );
         }
         
-        virtual ~IndexBuffer2( void ) = default;
+        virtual ~IndexBuffer( void ) = default;
 
         inline Format getFormat( void ) const noexcept
         {

@@ -38,7 +38,7 @@ using namespace crimild;
 
 TEST( IndexBuffer, constructionUInt32 )
 {
-    auto indices = crimild::alloc< IndexBuffer2 >(
+    auto indices = crimild::alloc< IndexBuffer >(
         Format::INDEX_32_UINT,
         containers::Array< crimild::UInt32 > {
             0, 1, 2,
@@ -59,7 +59,7 @@ TEST( IndexBuffer, constructionUInt32 )
 
 TEST( IndexBuffer, constructionUInt16 )
 {
-    auto indices = crimild::alloc< IndexBuffer2 >(
+    auto indices = crimild::alloc< IndexBuffer >(
         Format::INDEX_16_UINT,
         containers::Array< crimild::UInt16 > {
             0, 1, 2,
@@ -80,7 +80,7 @@ TEST( IndexBuffer, constructionUInt16 )
 
 TEST( IndexBuffer, setIndex )
 {
-    auto indices = crimild::alloc< IndexBuffer2 >( Format::INDEX_32_UINT, 6 );
+    auto indices = crimild::alloc< IndexBuffer >( Format::INDEX_32_UINT, 6 );
 
     ASSERT_NE( nullptr, indices->getBufferView() );
 	ASSERT_EQ( 6, indices->getIndexCount() );
@@ -103,7 +103,7 @@ TEST( IndexBuffer, setIndex )
 
 TEST( IndexBuffer, setIndices )
 {
-    auto indices = crimild::alloc< IndexBuffer2 >( Format::INDEX_32_UINT, 6 );
+    auto indices = crimild::alloc< IndexBuffer >( Format::INDEX_32_UINT, 6 );
 
     ASSERT_NE( nullptr, indices->getBufferView() );
 	ASSERT_EQ( 6, indices->getIndexCount() );
@@ -126,7 +126,7 @@ TEST( IndexBuffer, setIndices )
 
 TEST( IndexBuffer, eachIndex )
 {
-    auto indices = crimild::alloc< IndexBuffer2 >( Format::INDEX_32_UINT, 6 );
+    auto indices = crimild::alloc< IndexBuffer >( Format::INDEX_32_UINT, 6 );
 
     ASSERT_NE( nullptr, indices->getBufferView() );
 	ASSERT_EQ( 6, indices->getIndexCount() );
@@ -153,16 +153,17 @@ TEST( IndexBuffer, autoAddToFrameGraph )
 {
 	auto graph = crimild::alloc< FrameGraph >();
 
-	EXPECT_FALSE( graph->hasNodes() );
+	ASSERT_FALSE( graph->hasNodes() );
 
 	{
-		auto indexBuffer = crimild::alloc< IndexUInt32Buffer >( 0 );
+		auto indexBuffer = crimild::alloc< IndexBuffer >( Format::INDEX_32_UINT, 0 );
 
-		EXPECT_TRUE( graph->contains( indexBuffer ) );
-		EXPECT_TRUE( graph->hasNodes() );
+		ASSERT_TRUE( graph->contains( indexBuffer ) );
+        ASSERT_TRUE( graph->contains( indexBuffer->getBufferView() ) );
+        ASSERT_TRUE( graph->contains( indexBuffer->getBufferView()->getBuffer() ) );
+		ASSERT_TRUE( graph->hasNodes() );
 	}
 
-	EXPECT_FALSE( graph->hasNodes() );
-	
+    ASSERT_FALSE( graph->hasNodes() );
 }
 

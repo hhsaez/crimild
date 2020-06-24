@@ -253,7 +253,7 @@ void VulkanSystem::cleanSwapchain( void ) noexcept
         static_cast< DescriptorSetManager * >( renderDevice )->clear();
         static_cast< DescriptorSetLayoutManager * >( renderDevice )->clear();
         static_cast< DescriptorPoolManager * >( renderDevice )->clear();
-        static_cast< BufferManager * >( renderDevice )->clear();
+        static_cast< UniformBufferManager * >( renderDevice )->clear();
         static_cast< CommandBufferManager * >( renderDevice )->clear();
         static_cast< PipelineManager * >( renderDevice )->clear();
         static_cast< FramebufferManager * >( renderDevice )->clear();

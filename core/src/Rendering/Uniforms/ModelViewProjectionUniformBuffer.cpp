@@ -31,6 +31,13 @@
 
 using namespace crimild;
 
+ModelViewProjectionUniform::ModelViewProjectionUniform( void ) noexcept
+    : UniformBuffer( Props { } )
+{
+    // no-op
+}
+
+/*
 void ModelViewProjectionUniformBuffer::updateIfNeeded( void ) noexcept
 {
     setData({
@@ -63,4 +70,5 @@ void ModelViewProjectionUniformBuffer::updateIfNeeded( void ) noexcept
         }(),
     });
 }
+*/
 

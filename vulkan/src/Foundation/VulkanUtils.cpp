@@ -34,7 +34,6 @@
 
 #include <set>
 
-using namespace crimild;
 using namespace crimild::vulkan;
 
 #define CRIMILD_VULKAN_ERROR_STRING( x ) case static_cast< int >( x ): return #x
@@ -230,8 +229,8 @@ VkRect2D utils::getScissor( const ViewportDimensions *viewport, const RenderDevi
 
 VkIndexType utils::getIndexType( const IndexBuffer *indexBuffer ) noexcept
 {
-    switch ( indexBuffer->getIndexType() ) {
-        case IndexBuffer::IndexType::UINT_16:
+    switch ( indexBuffer->getFormat() ) {
+        case Format::INDEX_16_UINT:
             return VK_INDEX_TYPE_UINT16;
         default:
             return VK_INDEX_TYPE_UINT32;
@@ -341,6 +340,8 @@ VkFormat utils::getFormat( RenderDevice *renderDevice, Format format ) noexcept
             return VK_FORMAT_R8G8B8A8_UNORM;
         case Format::B8G8R8A8_UNORM:
             return VK_FORMAT_B8G8R8A8_UNORM;
+        case Format::R32G32B32_SFLOAT:
+            return VK_FORMAT_R32G32B32_SFLOAT;
         case Format::R32G32B32A32_SFLOAT:
             return VK_FORMAT_R32G32B32A32_SFLOAT;
         case Format::DEPTH_16_UNORM:
@@ -362,7 +363,7 @@ VkFormat utils::getFormat( RenderDevice *renderDevice, Format format ) noexcept
     }
 }
 
-Format utils::getFormat( VkFormat format ) noexcept
+crimild::Format utils::getFormat( VkFormat format ) noexcept
 {
     switch ( format ) {
         case VK_FORMAT_R8_UNORM:
