@@ -28,8 +28,6 @@
 #ifndef CRIMILD_VULKAN_RENDERING_COMMAND_BUFFER_
 #define CRIMILD_VULKAN_RENDERING_COMMAND_BUFFER_
 
-//#include "Foundation/VulkanObject.hpp"
-//#include "Mathematics/Vector.hpp"
 #include "Rendering/VulkanRenderResource.hpp"
 #include "Rendering/CommandBuffer.hpp"
 #include "Foundation/Containers/Array.hpp"

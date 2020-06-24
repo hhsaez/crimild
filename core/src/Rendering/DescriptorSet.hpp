@@ -35,12 +35,18 @@
 namespace crimild {
 
     class Buffer;
+    class DescriptorSet;
     class Pipeline;
     class Texture;
 
     enum class DescriptorType {
         TEXTURE,
 		UNIFORM_BUFFER,
+    };
+
+    class DescriptorPool : public SharedObject, public RenderResourceImpl< DescriptorPool > {
+    public:
+        DescriptorSetLayout *descriptorSetLayout = nullptr;
     };
 
     class DescriptorSetLayout : public SharedObject, public RenderResourceImpl< DescriptorSetLayout > {
@@ -51,12 +57,20 @@ namespace crimild {
         };
 
     public:
-        containers::Array< Binding > bindings;
-    };
+        virtual ~DescriptorSetLayout( void ) = default;
 
-    class DescriptorPool : public SharedObject, public RenderResourceImpl< DescriptorPool > {
-    public:
-        SharedPointer< DescriptorSetLayout > descriptorSetLayout;
+        containers::Array< Binding > bindings;
+
+        /**
+           \brief A pool for descriptors
+
+           This is optional.
+         */
+        SharedPointer< DescriptorPool > descriptorPool = [&] {
+            auto pool = crimild::alloc< DescriptorPool >();
+            pool->descriptorSetLayout = this;
+            return pool;
+        }();
     };
 
     struct Descriptor {
@@ -75,8 +89,16 @@ namespace crimild {
 		using DescriptorArray = containers::Array< Descriptor >;
 
     public:
-        SharedPointer< DescriptorPool > descriptorPool;
-        SharedPointer< DescriptorSetLayout > descriptorSetLayout;
+        virtual ~DescriptorSet( void ) = default;
+
+        /**
+           Descriptor set layout
+
+           This is optional. If no layout is provided, we'll assign one automatically
+           when resolving command buffers based on the current binding point.
+         */
+        SharedPointer< DescriptorSetLayout > layout;
+
 		DescriptorArray descriptors;
     };
 
@@ -84,5 +106,3 @@ namespace crimild {
 }
 
 #endif
-
-

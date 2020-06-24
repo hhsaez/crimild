@@ -105,4 +105,3 @@ crimild::Bool DescriptorPoolManager::unbind( DescriptorPool *descriptorPool ) no
 
     return ManagerImpl::unbind( descriptorPool );
 }
-

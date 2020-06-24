@@ -96,16 +96,18 @@ SharedPointer< DescriptorSet > RenderStateComponent::createDescriptorSet( Descri
     if ( descriptorSetLayout == nullptr ) {
         return nullptr;
     }
+    auto descriptorSet = crimild::alloc< DescriptorSet >();
+    /*
 
     auto descriptorPool = crimild::alloc< DescriptorPool >();
     descriptorPool->descriptorSetLayout = crimild::retain( descriptorSetLayout );
 
-    auto descriptorSet = crimild::alloc< DescriptorSet >();
     descriptorSet->descriptorSetLayout = crimild::retain( descriptorSetLayout );
     descriptorSet->descriptorPool = descriptorPool;
 
     size_t uniformIdx = 0;
     size_t textureIdx = 0;
+    */
 
 	/*
     descriptorSetLayout->bindings.each( [&]( DescriptorSetLayout::Binding &binding ) {
