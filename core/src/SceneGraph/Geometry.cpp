@@ -128,17 +128,10 @@ DescriptorSet *Geometry::getDescriptors( void ) noexcept
 			};
 			return layout;
 		}();
-		// TODO: the pool should be shared
-		descriptorSet->descriptorPool = crimild::alloc< DescriptorPool >();
-		descriptorSet->descriptorPool->descriptorSetLayout = descriptorSet->descriptorSetLayout;
 		descriptorSet->descriptors = {
 			Descriptor {
 				.descriptorType = DescriptorType::UNIFORM_BUFFER,
-				.obj = [&] {
-                    auto ubo = crimild::alloc< ModelUniformBuffer >();
-                    ubo->node = this;
-                    return ubo;
-				}(),
+				.obj = crimild::alloc< ModelUniform >( this ),
 			},
 		};
 		return descriptorSet;

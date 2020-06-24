@@ -27,6 +27,7 @@
 
 #include "Rendering/VertexBuffer.hpp"
 
+/*
 namespace crimild {
 
     template <> const char *VertexP2Buffer::getClassName( void ) const { return "crimild::VertexP2Buffer"; }
@@ -38,5 +39,48 @@ namespace crimild {
     template <> const char *VertexP3N3TC2Buffer::getClassName( void ) const { return "crimild::VertexP3N3TC2Buffer"; }
     template <> const char *VertexP3C3TC2Buffer::getClassName( void ) const { return "crimild::VertexP3C3TC2Buffer"; }
 
+}
+*/
+
+using namespace crimild;
+
+VertexBuffer::VertexBuffer( const VertexLayout &vertexLayout, crimild::Size count ) noexcept
+    : VertexBuffer(
+        vertexLayout,
+        [&] {
+            return crimild::alloc< BufferView >(
+                BufferView::Target::VERTEX,
+                crimild::alloc< Buffer >( containers::Array< crimild::Byte >( count * vertexLayout.getSize() ) ),
+                0,
+                vertexLayout.getSize()
+            );
+        }()
+    )
+{
+    // no-op
+}
+
+VertexBuffer::VertexBuffer( const VertexLayout &vertexLayout, SharedPointer< BufferView > const &bufferView ) noexcept
+    : m_vertexLayout( vertexLayout ),
+      m_bufferView( bufferView )
+{
+    assert( bufferView->getTarget() == BufferView::Target::VERTEX && "Invalid buffer view" );
+    
+    vertexLayout.eachAttribute(
+        [&]( const auto &attrib ) {
+            auto accessor = crimild::alloc< BufferAccessor >(
+                bufferView,
+                attrib.offset,
+                utils::getFormatSize( attrib.format )
+            );
+            m_accessors[ attrib.name ] = accessor;
+        }
+    );
+}
+
+VertexBuffer::VertexBuffer( const VertexLayout &vertexLayout, BufferView *bufferView ) noexcept
+    : VertexBuffer( vertexLayout, crimild::retain( bufferView ) )
+{
+    // no-op
 }
 

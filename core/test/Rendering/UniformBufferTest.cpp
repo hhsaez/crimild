@@ -32,56 +32,11 @@
 
 #include "gtest/gtest.h"
 
-namespace crimild {
-
-    class UniformBuffer2 : public coding::Codable, public RenderResourceImpl< UniformBuffer2 > {
-        CRIMILD_IMPLEMENT_RTTI( crimild::UniformBuffer2 )
-        
-    public:
-        template< typename T >
-        UniformBuffer2( const T &value ) noexcept
-        {
-            m_bufferView = crimild::alloc< BufferView >(
-                BufferView::Target::UNIFORM,
-                crimild::alloc< Buffer2 >( value )
-            );
-        }
-        
-        virtual ~UniformBuffer2( void ) = default;
-
-        inline BufferView *getBufferView( void ) noexcept { return crimild::get_ptr( m_bufferView ); }
-        inline const BufferView *getBufferView( void ) const noexcept { return crimild::get_ptr( m_bufferView ); }
-
-        template< typename T >
-        T &getValue( void ) noexcept
-        {
-            return *reinterpret_cast< T * >( getBufferView()->getData() );
-        }
-
-        template< typename T >
-        const T &getValue( void ) const noexcept
-        {
-            return *reinterpret_cast< T * >( getBufferView()->getData() );
-        }
-
-        template< typename T >
-        void setValue( const T &value ) noexcept
-        {
-            assert( sizeof( T ) == getBufferView()->getLength() && "Invalid data type" );
-            getValue< T >() = value;
-        }
-
-    private:
-        SharedPointer< BufferView > m_bufferView;
-    };
-
-}
-
 using namespace crimild;
 
 TEST( UniformBuffer, withSingleValue )
 {
-    auto uniform = crimild::alloc< UniformBuffer2 >( Vector3f::ZERO );
+    auto uniform = crimild::alloc< UniformBuffer >( Vector3f::ZERO );
 
     ASSERT_NE( nullptr, uniform->getBufferView() );
     ASSERT_EQ( 3 * sizeof( crimild::Real32 ), uniform->getBufferView()->getLength() );
@@ -103,7 +58,7 @@ TEST( UniformBuffer, withStruct )
         Vector2i indices;
     };
     
-    auto uniform = crimild::alloc< UniformBuffer2 >( Data {} );
+    auto uniform = crimild::alloc< UniformBuffer >( Data {} );
 
     ASSERT_NE( nullptr, uniform->getBufferView() );
     ASSERT_EQ( sizeof( Data ), uniform->getBufferView()->getLength() );
@@ -120,7 +75,7 @@ TEST( UniformBuffer, autoAddToFrameGraph )
 	EXPECT_FALSE( graph->hasNodes() );
 
 	{
-		auto uniformBuffer = crimild::alloc< UniformBufferImpl< Vector3f > >();
+		auto uniformBuffer = crimild::alloc< UniformBuffer >( Vector3f() );
 
 		EXPECT_TRUE( graph->contains( uniformBuffer ) );
 		EXPECT_TRUE( graph->hasNodes() );

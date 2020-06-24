@@ -37,6 +37,7 @@ namespace crimild {
     class VertexLayout {
 	public:
 		static const VertexLayout P3;
+        static const VertexLayout P3_C3;
 		static const VertexLayout P3_N3;
 		static const VertexLayout P3_TC2;
 		static const VertexLayout P3_N3_TC2;

@@ -37,6 +37,8 @@
 
 namespace crimild {
 
+#if 0
+
     class Buffer : public RenderResourceImpl< Buffer >, public SharedObject {
     public:
         enum class Usage {
@@ -98,10 +100,14 @@ namespace crimild {
         containers::Array< T > m_data;
     };
 
+#endif
+
     /**
        \brief A buffer of linear data
      */
-    class Buffer2 : public coding::Codable {
+    class Buffer
+        : public coding::Codable,
+          public RenderResourceImpl< Buffer > {
         CRIMILD_IMPLEMENT_RTTI( crimild::Buffer )
         
     public:
@@ -111,7 +117,7 @@ namespace crimild {
            This is usually used for vertex or index buffers
          */
         template< typename DATA_TYPE >
-        explicit Buffer2( containers::Array< DATA_TYPE > const &data )
+        explicit Buffer( containers::Array< DATA_TYPE > const &data )
             : m_data( sizeof( DATA_TYPE ) * data.size() )
         {
             memcpy( &m_data[ 0 ], &data[ 0 ], m_data.size() );
@@ -123,13 +129,13 @@ namespace crimild {
            This is usually used with uniform buffers
          */
         template< typename DATA_TYPE >
-        explicit Buffer2( DATA_TYPE const &data )
+        explicit Buffer( DATA_TYPE const &data )
             : m_data( sizeof( DATA_TYPE ) )
         {
             memcpy( &m_data[ 0 ], &data, m_data.size() );
         }
         
-        virtual ~Buffer2( void ) = default;
+        virtual ~Buffer( void ) = default;
 
         /**
            \brief Get size of buffer in bytes

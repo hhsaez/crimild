@@ -36,18 +36,22 @@ namespace crimild {
     class Node;
     class Camera;
 
-    struct ModelViewProjectionUniform {
-        Matrix4f model;
-        Matrix4f view;
-        Matrix4f proj;
-    };
-
-    class ModelViewProjectionUniformBuffer : public UniformBufferImpl< ModelViewProjectionUniform > {
+    class ModelViewProjectionUniform : public UniformBuffer {
     public:
+        struct Props {
+            Matrix4f model;
+            Matrix4f view;
+            Matrix4f proj;
+        };
+        
+    public:
+        ModelViewProjectionUniform( void ) noexcept;
+        ~ModelViewProjectionUniform( void ) = default;
+        
         Node *node = nullptr;
         Camera *camera = nullptr;
 
-        void updateIfNeeded( void ) noexcept override;
+        //void updateIfNeeded( void ) noexcept override;
     };
 
 }

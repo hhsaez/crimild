@@ -40,6 +40,17 @@ TEST( VertexLayout, P3 )
 	ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::POSITION ) );
 }
 
+TEST( VertexLayout, P3_C3 )
+{
+	auto v = VertexLayout::P3_C3;
+
+	ASSERT_EQ( sizeof( crimild::Real32 ) * 6, v.getSize() );
+	ASSERT_EQ( 0, v.getAttributeOffset( VertexAttribute::Name::POSITION ) );
+	ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::POSITION ) );
+	ASSERT_EQ( 3 * sizeof( crimild::Real32, v.getAttributeOffset( VertexAttribute::Name::COLOR ) );
+	ASSERT_EQ( Format::R32G32B32_UNORM, v.getAttributeFormat( VertexAttribute::Name::COLOR ) );
+}
+
 TEST( VertexLayout, positionsOnly )
 {
 	auto v = VertexLayout {

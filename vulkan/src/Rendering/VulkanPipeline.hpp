@@ -68,9 +68,9 @@ namespace crimild {
             ShaderModuleArray createShaderModules( RenderDevice *renderDevice, ShaderProgram *program ) const noexcept;
             ShaderStageArray createShaderStages( const ShaderModuleArray &modules ) const noexcept;
             VkPipelineShaderStageCreateInfo createShaderStage( const ShaderModule &module ) const noexcept;
-            std::vector< VkVertexInputBindingDescription > getVertexInputBindingDescriptions( Pipeline *pipeline ) const noexcept;
-            std::vector< VkVertexInputAttributeDescription > getVertexInputAttributeDescriptions( Pipeline *pipeline ) const noexcept;
-            VkPipelineVertexInputStateCreateInfo createVertexInput( const std::vector< VkVertexInputBindingDescription > &bindingDescriptions, const std::vector< VkVertexInputAttributeDescription > &attributeDescriptions ) const noexcept;
+            containers::Array< VkVertexInputBindingDescription > getVertexInputBindingDescriptions( Pipeline *pipeline ) const noexcept;
+            containers::Array< VkVertexInputAttributeDescription > getVertexInputAttributeDescriptions( RenderDevice *renderDevice, Pipeline *pipeline ) const noexcept;
+            VkPipelineVertexInputStateCreateInfo createVertexInput( const containers::Array< VkVertexInputBindingDescription > &bindingDescriptions, const containers::Array< VkVertexInputAttributeDescription > &attributeDescriptions ) const noexcept;
             VkPipelineInputAssemblyStateCreateInfo createInputAssemby( Primitive::Type primitiveType ) const noexcept;
             VkViewport createViewport( const ViewportDimensions &viewport ) const noexcept;
             VkRect2D createScissor( const ViewportDimensions &scissor ) const noexcept;

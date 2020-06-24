@@ -92,6 +92,7 @@ namespace std {
         }
     };
 
+    /*
     template<> struct hash< crimild::VertexP3N3TC2 > {
         size_t operator()( crimild::VertexP3N3TC2 const &vertex ) const {
             size_t seed = 0;
@@ -101,6 +102,7 @@ namespace std {
             return seed;
         }
     };
+    */
 
 }
 
@@ -225,6 +227,8 @@ void OBJLoader::generateGeometry( void )
         _currentObject = crimild::get_ptr( _objects.back() );
                            
 	}
+
+#if 0
     
     std::vector< VertexP3N3TC2 > vertices;
     std::vector< crimild::UInt32 > indices;
@@ -321,6 +325,8 @@ void OBJLoader::generateGeometry( void )
 
         return geometry;
     }());
+
+#endif
 
     _faces.clear();
 }

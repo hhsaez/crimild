@@ -9,7 +9,7 @@
 *     * Redistributions in binary form must reproduce the above copyright
 *       notice, this list of conditions and the following disclaimer in the
 *       documentation and/or other materials provided with the distribution.
-*     * Neither the name of the copyright holder nor the
+*     * Neither the name of the copyright holders nor the
 *       names of its contributors may be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
@@ -25,26 +25,40 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Rendering/Uniforms/ModelUniformBuffer.hpp"
-#include "SceneGraph/Node.hpp"
+#ifndef CRIMILD_VULKAN_RENDERING_VERTEX_BUFFER_
+#define CRIMILD_VULKAN_RENDERING_VERTEX_BUFFER_
 
-using namespace crimild;
+#include "Rendering/VulkanRenderResource.hpp"
+#include "Rendering/VertexBuffer.hpp"
+#include "Foundation/Containers/Map.hpp"
+#include "Foundation/Containers/Array.hpp"
 
-ModelUniform::ModelUniform( Node *node ) noexcept
-    : UniformBuffer( Props { } ),
-      m_node( node )
-{
-    // no-op
+namespace crimild {
+
+    namespace vulkan {
+
+        class RenderDevice;
+        class CommandPool;
+
+        struct VertexBufferBindInfo {
+            containers::Array< VkBuffer > bufferHandlers;
+            containers::Array< VkDeviceMemory > bufferMemories;
+        };
+
+        class VertexBufferManager : public BasicRenderResourceManagerImpl< VertexBuffer, VertexBufferBindInfo > {
+            using ManagerImpl = BasicRenderResourceManagerImpl< VertexBuffer, VertexBufferBindInfo >;
+
+        public:
+            virtual ~VertexBufferManager( void ) noexcept = default;
+
+            crimild::Bool bind( VertexBuffer *verterBuffer ) noexcept override;
+            crimild::Bool unbind( VertexBuffer *vertexBuffer ) noexcept override;
+        };
+
+    }
+
 }
 
-void ModelUniform::onPreRender( void ) noexcept
-{
-    setValue(
-        Props {
-            .model = [&] {
-                return m_node != nullptr ? m_node->getWorld().computeModelMatrix() : Matrix4f::IDENTITY;
-            }(),
-        }
-    );
-}
+#endif
+
 

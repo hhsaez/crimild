@@ -35,15 +35,20 @@ namespace crimild {
 
     class Node;
 
-    struct ModelUniform {
-        Matrix4f model;
-    };
-
-    class ModelUniformBuffer : public UniformBufferImpl< ModelUniform > {
+    class ModelUniform : public UniformBuffer {
+    private:
+        struct Props {
+            Matrix4f model;
+        };
+        
     public:
-        Node *node = nullptr;
+        explicit ModelUniform( Node *node ) noexcept;
+        ~ModelUniform( void ) = default;
 
-        void updateIfNeeded( void ) noexcept override;
+        void onPreRender( void ) noexcept override;
+        
+    private:
+        Node *m_node = nullptr;
     };
 
 }

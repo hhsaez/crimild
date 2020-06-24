@@ -43,7 +43,7 @@ TEST( BufferAccessor, vertexData )
         0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
     };
 
-    auto buffer = crimild::alloc< Buffer2 >( data );
+    auto buffer = crimild::alloc< Buffer >( data );
     auto view = crimild::alloc< BufferView >( BufferView::Target::VERTEX, buffer, 0, 5 * sizeof( crimild::Real32 ) );
 
     auto positions = crimild::alloc< BufferAccessor >( view, 0, 3 * sizeof( crimild::Real32 ) );
@@ -101,7 +101,7 @@ TEST( BufferAccessor, vertexFromStruct )
         },
     };
 
-    auto buffer = crimild::alloc< Buffer2 >( data );
+    auto buffer = crimild::alloc< Buffer >( data );
     auto view = crimild::alloc< BufferView >( BufferView::Target::VERTEX, buffer, 0, sizeof( Vertex ) );
     auto vertices = crimild::alloc< BufferAccessor >( view, 0 );
 
@@ -135,7 +135,7 @@ TEST( BufferAccessor, uniformData )
         .color = RGBAColorf::ONE,
     };
 
-    auto buffer = crimild::alloc< Buffer2 >( data );
+    auto buffer = crimild::alloc< Buffer >( data );
     auto view = crimild::alloc< BufferView >( BufferView::Target::UNIFORM, buffer, 0, sizeof( Uniform ) );
     auto accessor = crimild::alloc< BufferAccessor >( view );
 
@@ -149,7 +149,7 @@ TEST( BufferAccessor, uniformData )
 
 TEST( BufferAccessor, setSingleValue )
 {
-    auto buffer = crimild::alloc< Buffer2 >( containers::Array< Vector3f >( 3 ) );
+    auto buffer = crimild::alloc< Buffer >( containers::Array< Vector3f >( 3 ) );
     auto view = crimild::alloc< BufferView >( BufferView::Target::VERTEX, buffer, 0, sizeof( Vector3f ) );
     auto positions = crimild::alloc< BufferAccessor >( view );
 
@@ -161,7 +161,7 @@ TEST( BufferAccessor, setSingleValue )
 
 TEST( BufferAccessor, setMultipleValues )
 {
-    auto buffer = crimild::alloc< Buffer2 >( containers::Array< Vector3f >( 3 ) );
+    auto buffer = crimild::alloc< Buffer >( containers::Array< Vector3f >( 3 ) );
     auto view = crimild::alloc< BufferView >( BufferView::Target::VERTEX, buffer, 0, sizeof( Vector3f ) );
     auto positions = crimild::alloc< BufferAccessor >( view );
 
@@ -187,7 +187,7 @@ TEST( BufferAccessor, setInterleavedMultipleValues )
         Vector2f texCoord;
     };
 
-    auto buffer = crimild::alloc< Buffer2 >( containers::Array< Vertex >( 3 ) );
+    auto buffer = crimild::alloc< Buffer >( containers::Array< Vertex >( 3 ) );
     auto view = crimild::alloc< BufferView >( BufferView::Target::VERTEX, buffer, 0, sizeof( Vertex ) );
     auto positions = crimild::alloc< BufferAccessor >( view, offsetof( Vertex, position ), sizeof( Vector3f ) );
     auto texCoords = crimild::alloc< BufferAccessor >( view, offsetof( Vertex, texCoord ), sizeof( Vector2f ) );
@@ -226,7 +226,7 @@ TEST( BufferAccessor, eachPosition )
         Vector2f texCoord;
     };
 
-    auto buffer = crimild::alloc< Buffer2 >( containers::Array< Vertex >( 3 ) );
+    auto buffer = crimild::alloc< Buffer >( containers::Array< Vertex >( 3 ) );
     auto view = crimild::alloc< BufferView >( BufferView::Target::VERTEX, buffer, 0, sizeof( Vertex ) );
     auto positions = crimild::alloc< BufferAccessor >( view, offsetof( Vertex, position ), sizeof( Vector3f ) );
     auto texCoords = crimild::alloc< BufferAccessor >( view, offsetof( Vertex, texCoord ), sizeof( Vector2f ) );

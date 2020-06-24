@@ -44,7 +44,7 @@ TEST( VertexBuffer, construction )
 		{ VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() },
 	};
 
-	auto vertices = crimild::alloc< VertexBuffer2 >(
+	auto vertices = crimild::alloc< VertexBuffer >(
 		layout,
 		containers::Array< crimild::Real32 > {
 			-0.5f, -0.5f, 0.0f,
@@ -63,7 +63,7 @@ TEST( VertexBuffer, construction )
 
 TEST( VertexBuffer, setSingleValue )
 {
-	auto vertices = crimild::alloc< VertexBuffer2 >( VertexLayout::P3, 3 );
+	auto vertices = crimild::alloc< VertexBuffer >( VertexLayout::P3, 3 );
 
 	ASSERT_EQ( 3, vertices->getVertexCount() );
 
@@ -75,7 +75,7 @@ TEST( VertexBuffer, setSingleValue )
 
 TEST( VertexBuffer, setMultipleValues )
 {
-	auto vertices = crimild::alloc< VertexBuffer2 >( VertexLayout::P3, 3 );
+	auto vertices = crimild::alloc< VertexBuffer >( VertexLayout::P3, 3 );
 
 	ASSERT_EQ( 3, vertices->getVertexCount() );
 
@@ -96,7 +96,7 @@ TEST( VertexBuffer, setMultipleValues )
 
 TEST( VertexBuffer, setPositionsInterleaved )
 {
-	auto vertices = crimild::alloc< VertexBuffer2 >( VertexLayout::P3_TC2, 3 );
+	auto vertices = crimild::alloc< VertexBuffer >( VertexLayout::P3_TC2, 3 );
 
 	ASSERT_EQ( 3, vertices->getVertexCount() );
 
@@ -117,7 +117,7 @@ TEST( VertexBuffer, setPositionsInterleaved )
 
 TEST( VertexBuffer, setTexCoordsInterleaved )
 {
-	auto vertices = crimild::alloc< VertexBuffer2 >( VertexLayout::P3_TC2, 3 );
+	auto vertices = crimild::alloc< VertexBuffer >( VertexLayout::P3_TC2, 3 );
 
 	ASSERT_EQ( 3, vertices->getVertexCount() );
 
@@ -138,7 +138,7 @@ TEST( VertexBuffer, setTexCoordsInterleaved )
 
 TEST( VertexBuffer, setInterleaved )
 {
-	auto vertices = crimild::alloc< VertexBuffer2 >( VertexLayout::P3_TC2, 3 );
+	auto vertices = crimild::alloc< VertexBuffer >( VertexLayout::P3_TC2, 3 );
 
 	ASSERT_EQ( 3, vertices->getVertexCount() );
 
@@ -173,7 +173,7 @@ TEST( VertexBuffer, setInterleaved )
 
 TEST( VertexBuffer, eachPosition )
 {
-	auto vertices = crimild::alloc< VertexBuffer2 >( VertexLayout::P3_TC2, 3 );
+	auto vertices = crimild::alloc< VertexBuffer >( VertexLayout::P3_TC2, 3 );
 
 	ASSERT_EQ( 3, vertices->getVertexCount() );
 
@@ -198,7 +198,7 @@ TEST( VertexBuffer, eachPosition )
 
 TEST( VertexBuffer, eachTexCoord )
 {
-	auto vertices = crimild::alloc< VertexBuffer2 >( VertexLayout::P3_TC2, 3 );
+	auto vertices = crimild::alloc< VertexBuffer >( VertexLayout::P3_TC2, 3 );
 
 	ASSERT_EQ( 3, vertices->getVertexCount() );
 
@@ -237,7 +237,7 @@ TEST( VertexBuffer, sparseData )
 		{ VertexAttribute::Name::INDEX, utils::getFormat< crimild::Size >() },
 	};
 
-	auto vertices = crimild::alloc< VertexBuffer2 >(
+	auto vertices = crimild::alloc< VertexBuffer >(
 		layout,
 		containers::Array< VertexType > {
 
@@ -246,11 +246,6 @@ TEST( VertexBuffer, sparseData )
 	*/
 }
 
-
-
-
-
-
 TEST( VertexBuffer, autoAddToFrameGraph )
 {
 	auto graph = crimild::alloc< FrameGraph >();
@@ -258,113 +253,14 @@ TEST( VertexBuffer, autoAddToFrameGraph )
 	ASSERT_FALSE( graph->hasNodes() );
 
 	{
-		auto vertexBuffer = crimild::alloc< VertexP3C3TC2Buffer >( 0 );
+		auto vertexBuffer = crimild::alloc< VertexBuffer >( VertexLayout::P3, 0 );
 
 		ASSERT_TRUE( graph->contains( vertexBuffer ) );
+        ASSERT_TRUE( graph->contains( vertexBuffer->getBufferView() ) );
+        ASSERT_TRUE( graph->contains( vertexBuffer->getBufferView()->getBuffer() ) );
 		ASSERT_TRUE( graph->hasNodes() );
 	}
 
 	ASSERT_FALSE( graph->hasNodes() );
-
 }
 
-TEST( VertexBuffer, construction_old )
-{
-	auto data = containers::Array< VertexP3 > {
-		{
-			.position = Vector3f( 1.0f, 2.0f, 3.0f ),
-		}
-	};
-
-	auto vbo = crimild::alloc< VertexP3Buffer >( data );
-
-	ASSERT_EQ( 1, vbo->getCount() );
-	ASSERT_EQ( 3 * sizeof( float ), vbo->getSize() );
-	ASSERT_EQ( 0, memcmp( data.getData(), vbo->getData(), sizeof( VertexP3 ) * vbo->getCount() ) );
-}
-
-TEST( VertexBuffer, extent )
-{
-	auto data = containers::Array< VertexP3 > {
-		{
-			.position = Vector3f( 1.0f, 2.0f, 3.0f ),
-		},
-		{
-			.position = Vector3f( -10.0f, 0.0f, 5.0f ),
-		},
-	};
-
-	auto vbo = crimild::alloc< VertexP3Buffer >( data );
-
-	Vector3f min, max;
-	ASSERT_TRUE( vbo->getExtent( min, max ) );
-	ASSERT_EQ( Vector3f( -10.0f, 0.0f, 3.0f ), min );
-	ASSERT_EQ( Vector3f( 1.0f, 2.0f, 5.0f ), max );
-}
-
-TEST( VertexBuffer, positions )
-{
-	/*
-	auto data = containers::Array< VertexP3 > {
-		{
-			.position = Vector3f( 1.0f, 2.0f, 3.0f ),
-		},
-		{
-			.position = Vector3f( -10.0f, 0.0f, 5.0f ),
-		},
-	};
-
-	auto vbo = crimild::alloc< VertexP3Buffer >( data );
-
-	ASSERT_EQ( data[ 0 ].position, vbo->getData()[ 0 ].position );
-	ASSERT_EQ( data[ 1 ].position, vbo->getData()[ 1 ].position );
-	*/
-
-	/*
-	auto vbo = crimild::alloc< VertexBuffer2 >(
-		{
-			{ Attribute::POSITION, Format::R32G32B32 },
-		},
-		3
-	);
-
-	auto p0 = Vector3f( 1.0f, 2.0f, 3.0f );
-	vbo->set( Attribute::POSITION, 0, p0 );
-
-	Vector3f p1;
-	vbo->get( Attribute::POSITION, 0, p1 );
-
-	vbo->set( Attribute::POSITION, { p0 } );
-
-	ASSERT_EQ( p0, p1 );
-	*/
-}
-
-TEST( VertexBuffer, coding )
-{
-	/*
-	auto data = containers::Array< VertexP3 > {
-		{
-			.position = Vector3f( 1.0f, 2.0f, 3.0f ),
-		},
-		{
-			.position = Vector3f( -10.0f, 0.0f, 5.0f ),
-		},
-	};
-
-	auto vbo = crimild::alloc< VertexP3Buffer >( data );
-
-    auto encoder = crimild::alloc< coding::MemoryEncoder >();
-    encoder->encode( vbo );
-    auto bytes = encoder->getBytes();
-
-    auto decoder = crimild::alloc< coding::MemoryDecoder >();
-    decoder->fromBytes( bytes );
-
-    auto vbo1 = decoder->getObjectAt< VertexP3Buffer >( 0 );
-    ASSERT_TRUE( vbo1 != nullptr );
-	ASSERT_EQ( data.size(), vbo->getCount() );
-	ASSERT_EQ( data.size() * sizeof( VertexP3 ), vbo->getSize() );
-	ASSERT_EQ( 0, memcmp( data.getData(), vbo->getData(), sizeof( VertexP3 ) * vbo->getCount() ) );
-	*/
-}
