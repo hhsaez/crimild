@@ -42,17 +42,21 @@ namespace crimild {
 
 	class Attachment;
 	class Buffer;
+    class BufferView;
     class CommandBuffer;
     class DescriptorPool;
 	class DescriptorSet;
     class DescriptorSetLayout;
 	class Image;
 	class ImageView;
+    class IndexBuffer;
 	class Pipeline;
     class PresentationMaster;
 	class RenderPass;
     class Sampler;
 	class Texture;
+    class UniformBuffer;
+    class VertexBuffer;
 
     class CustomOperation : public SharedObject {
     public:
@@ -86,9 +90,10 @@ namespace crimild {
 			enum class Type {
 				PIPELINE,
 				BUFFER,
+                BUFFER_VIEW,
 				IMAGE,
 				IMAGE_VIEW,
-				TEXTURE,
+                INDEX_BUFFER,
                 DESCRIPTOR_POOL,
 				DESCRIPTOR_SET,
                 DESCRIPTOR_SET_LAYOUT,
@@ -96,6 +101,9 @@ namespace crimild {
 				ATTACHMENT,
 				RENDER_PASS,
                 SAMPLER,
+                TEXTURE,
+                UNIFORM_BUFFER,
+                VERTEX_BUFFER,
 
                 PRESENTATION_MASTER,
 
@@ -117,8 +125,10 @@ namespace crimild {
 
 		Node::Type getNodeType( Pipeline * ) const { return Node::Type::PIPELINE; }
 		Node::Type getNodeType( Buffer * ) const { return Node::Type::BUFFER; }
+        Node::Type getNodeType( BufferView * ) const { return Node::Type::BUFFER_VIEW; }
 		Node::Type getNodeType( Image * ) const { return Node::Type::IMAGE; }
 		Node::Type getNodeType( ImageView * ) const { return Node::Type::IMAGE_VIEW; }
+        Node::Type getNodeType( IndexBuffer * ) const { return Node::Type::INDEX_BUFFER; }
 		Node::Type getNodeType( Texture * ) const { return Node::Type::TEXTURE; }
 		Node::Type getNodeType( DescriptorSet * ) const { return Node::Type::DESCRIPTOR_SET; }
         Node::Type getNodeType( DescriptorSetLayout * ) const { return Node::Type::DESCRIPTOR_SET_LAYOUT; }
@@ -129,6 +139,8 @@ namespace crimild {
         Node::Type getNodeType( Sampler * ) const { return Node::Type::SAMPLER; }
         Node::Type getNodeType( PresentationMaster * ) const { return Node::Type::PRESENTATION_MASTER; }
 		Node::Type getNodeType( FrameGraphObject * ) const { return Node::Type::CUSTOM; }
+        Node::Type getNodeType( UniformBuffer * ) const { return Node::Type::UNIFORM_BUFFER; }
+        Node::Type getNodeType( VertexBuffer * ) const { return Node::Type::VERTEX_BUFFER; }
 
         template< typename NodeObjectType >
         void add( SharedPointer< NodeObjectType > const objPtr ) noexcept
