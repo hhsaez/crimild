@@ -29,9 +29,12 @@
 #define CRIMILD_RENDERING_UNIFORM_BUFFER_
 
 #include "Rendering/Buffer.hpp"
+#include "Rendering/BufferView.hpp"
 #include "Mathematics/Matrix.hpp"
 
 namespace crimild {
+
+    /*
 
     class UniformBuffer : public Buffer {
     public:
@@ -61,6 +64,60 @@ namespace crimild {
     private:
         T m_data;
     };
+
+    */
+
+    class UniformBuffer
+        : public coding::Codable,
+          public RenderResourceImpl< UniformBuffer > {
+        CRIMILD_IMPLEMENT_RTTI( crimild::UniformBuffer )
+        
+    public:
+        template< typename T >
+        UniformBuffer( const T &value ) noexcept
+        {
+            m_bufferView = crimild::alloc< BufferView >(
+                BufferView::Target::UNIFORM,
+                crimild::alloc< Buffer >( value )
+            );
+        }
+        
+        virtual ~UniformBuffer( void ) = default;
+
+        inline BufferView *getBufferView( void ) noexcept { return crimild::get_ptr( m_bufferView ); }
+        inline const BufferView *getBufferView( void ) const noexcept { return crimild::get_ptr( m_bufferView ); }
+
+        template< typename T >
+        T &getValue( void ) noexcept
+        {
+            return *reinterpret_cast< T * >( getBufferView()->getData() );
+        }
+
+        template< typename T >
+        const T &getValue( void ) const noexcept
+        {
+            return *reinterpret_cast< T * >( getBufferView()->getData() );
+        }
+
+        template< typename T >
+        void setValue( const T &value ) noexcept
+        {
+            assert( sizeof( T ) == getBufferView()->getLength() && "Invalid data type" );
+            getValue< T >() = value;
+        }
+
+        /**
+           \brief Invoked when a frame is about to be rendered
+
+           Derived classes can use this function to update the state of the uniform buffer if needed
+         */
+        virtual void onPreRender( void ) noexcept { }
+
+    private:
+        SharedPointer< BufferView > m_bufferView;
+    };
+
+
 
 }
 

@@ -45,8 +45,13 @@ crimild::Bool DescriptorSetManager::bind( DescriptorSet *descriptorSet ) noexcep
     }
 
     auto swapchain = renderDevice->getSwapchain();
-    auto descriptorPool = crimild::get_ptr( descriptorSet->descriptorPool );
     auto layout = crimild::get_ptr( descriptorSet->descriptorSetLayout );
+    auto descriptorPool = crimild::get_ptr( descriptorSet->descriptorPool );
+    if ( descriptorPool == nullptr ) {
+        descriptorSet->descriptorPool = crimild::alloc< DescriptorPool >();
+        descriptorSet->descriptorPool->descriptorSetLayout = descriptorSet->descriptorSetLayout;
+        descriptorPool = crimild::get_ptr( descriptorSet->descriptorPool );
+    }
     auto count = swapchain->images.size();
 
     VkDescriptorSetLayout layouts[] = {
@@ -94,12 +99,13 @@ crimild::Bool DescriptorSetManager::bind( DescriptorSet *descriptorSet ) noexcep
             };
 
             if ( descriptor.descriptorType == DescriptorType::UNIFORM_BUFFER ) {
-                auto buffer = descriptor.get< Buffer >();
-                auto bindInfo = renderDevice->getBindInfo( buffer );
+                auto ubo = descriptor.get< UniformBuffer >();
+                auto bufferView = ubo->getBufferView();
+                auto bindInfo = renderDevice->getBindInfo( ubo );
                 auto bufferHandler = bindInfo.bufferHandlers[ i ];
                 bufferInfo.buffer = bufferHandler;
-                bufferInfo.offset = 0;
-                bufferInfo.range = buffer->getSize();
+                bufferInfo.offset = bufferView->getOffset();
+                bufferInfo.range = bufferView->getLength();
                 writes[ j ].pBufferInfo = &bufferInfo;
             }
             else if ( descriptor.descriptorType == DescriptorType::TEXTURE ) {

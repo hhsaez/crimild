@@ -33,6 +33,8 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
+#if 0
+
 crimild::Bool BufferManager::bind( Buffer *buffer ) noexcept
 {
     if ( validate( buffer ) ) {
@@ -326,3 +328,6 @@ void BufferManager::updateBuffer( RenderDevice *renderDevice, VkDeviceMemory buf
 
     vkUnmapMemory( renderDevice->handler, bufferMemory );
 }
+
+#endif
+

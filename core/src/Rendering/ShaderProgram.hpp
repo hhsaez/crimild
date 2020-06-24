@@ -74,8 +74,7 @@ namespace crimild {
 
 		ShaderArray &getShaders( void ) noexcept { return m_shaders; }
 
-        std::vector< VertexInputAttributeDescription > attributeDescriptions;
-        VertexInputBindingDescription bindingDescription;
+        containers::Array< VertexLayout > vertexLayouts;
         containers::Array< SharedPointer< DescriptorSetLayout >> descriptorSetLayouts;
 
     private:

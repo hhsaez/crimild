@@ -54,9 +54,6 @@ namespace crimild {
         Primitive::Type primitiveType = Primitive::Type::TRIANGLES;
         ViewportDimensions viewport;
         ViewportDimensions scissor;
-        std::vector< VertexInputAttributeDescription > attributeDescriptions;
-        VertexInputBindingDescription bindingDescription;
-        containers::Array< SharedPointer< DescriptorSetLayout >> descriptorSetLayouts;
         SharedPointer< AlphaState > alphaState;
         SharedPointer< CullFaceState > cullFaceState;
         SharedPointer< DepthState > depthState;

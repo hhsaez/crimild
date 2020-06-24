@@ -47,7 +47,6 @@ namespace crimild {
     public:
         struct Binding {
             DescriptorType descriptorType;
-            crimild::Size descriptorCount = 1;
             Shader::Stage stage;
         };
 

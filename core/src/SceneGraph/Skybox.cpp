@@ -47,6 +47,7 @@ Skybox::Skybox( ImageArray const &faces ) noexcept
 
 void Skybox::configure( Skybox::ImageArray const &images ) noexcept
 {
+#if 0
 	m_faces = images;
 
     m_texture = crimild::alloc< Texture >( images );
@@ -143,6 +144,7 @@ void Skybox::configure( Skybox::ImageArray const &images ) noexcept
 
 	setLayer( Node::Layer::SKYBOX );
 	setCullMode( Node::CullMode::NEVER );
+#endif
 }
 
 void Skybox::encode( coding::Encoder &encoder )

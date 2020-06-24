@@ -42,6 +42,7 @@ using namespace crimild;
 RenderStateComponent::RenderStateComponent( void )
     : _renderOnScreen( false )
 {
+    /*
     commandRecorder = [ this ]( CommandBuffer *commandBuffer ) {
         prepare();
 
@@ -61,6 +62,7 @@ RenderStateComponent::RenderStateComponent( void )
             ibo->getCount()
         );
     };
+    */
 }
 
 RenderStateComponent::~RenderStateComponent( void )
@@ -71,6 +73,7 @@ RenderStateComponent::~RenderStateComponent( void )
 
 void RenderStateComponent::prepare( void ) noexcept
 {
+    /*
     if ( pipeline->descriptorSetLayouts.empty() ) {
         pipeline->descriptorSetLayouts = pipeline->program->descriptorSetLayouts;
     }
@@ -85,6 +88,7 @@ void RenderStateComponent::prepare( void ) noexcept
         descriptorSetLayout = descriptorSet->descriptorSetLayout;
         descriptorPool = descriptorSet->descriptorPool;
     }
+    */
 }
 
 SharedPointer< DescriptorSet > RenderStateComponent::createDescriptorSet( DescriptorSetLayout *descriptorSetLayout ) noexcept

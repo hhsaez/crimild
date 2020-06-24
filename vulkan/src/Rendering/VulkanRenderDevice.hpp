@@ -29,7 +29,6 @@
 #define CRIMILD_VULKAN_RENDERING_RENDER_DEVICE_
 
 #include "Foundation/VulkanObject.hpp"
-#include "Rendering/VulkanBuffer.hpp"
 #include "Rendering/VulkanCommandBuffer.hpp"
 #include "Rendering/VulkanCommandPool.hpp"
 #include "Rendering/VulkanDescriptorPool.hpp"
@@ -39,6 +38,7 @@
 #include "Rendering/VulkanFramebuffer.hpp"
 #include "Rendering/VulkanImage.hpp"
 #include "Rendering/VulkanImageView.hpp"
+#include "Rendering/VulkanIndexBuffer.hpp"
 #include "Rendering/VulkanPipeline.hpp"
 #include "Rendering/VulkanPipelineLayout.hpp"
 #include "Rendering/VulkanRenderPass.hpp"
@@ -47,6 +47,8 @@
 #include "Rendering/VulkanShaderModule.hpp"
 #include "Rendering/VulkanSwapchain.hpp"
 #include "Rendering/VulkanTexture.hpp"
+#include "Rendering/VulkanVertexBuffer.hpp"
+#include "Rendering/VulkanUniformBuffer.hpp"
 
 #include <vector>
 
@@ -61,7 +63,6 @@ namespace crimild {
 
         class RenderDevice :
         	public VulkanObject,
-            public BufferManager,
         	public CommandBufferManager,
         	public CommandPoolManager,
             public DescriptorPoolManager,
@@ -72,18 +73,19 @@ namespace crimild {
         	public FramebufferManager,
             public ImageManager,
         	public ImageViewManager,
+            public IndexBufferManager,
         	public PipelineManager,
         	public PipelineLayoutManager,
             public RenderPassManager,
 			public SamplerManager,
         	public SemaphoreManager,
         	public ShaderModuleManager,
-            public TextureManager {
+            public TextureManager,
+            public UniformBufferManager,
+            public VertexBufferManager {
             CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::RenderDevice )
 
         public:
-            using BufferManager::getBindInfo;
-            using BufferManager::bind;
             using CommandBufferManager::getHandler;
             using CommandBufferManager::bind;
             using CommandPoolManager::create;
@@ -102,6 +104,8 @@ namespace crimild {
             using ImageViewManager::bind;
             using ImageViewManager::getBindInfo;
 			using ImageViewManager::unbind;
+            using IndexBufferManager::getBindInfo;
+            using IndexBufferManager::bind;
             using PipelineManager::getBindInfo;
             using PipelineManager::bind;
             using PipelineLayoutManager::create;
@@ -114,6 +118,10 @@ namespace crimild {
             using ShaderModuleManager::create;
             using TextureManager::bind;
             using TextureManager::getBindInfo;
+            using UniformBufferManager::getBindInfo;
+            using UniformBufferManager::bind;
+            using VertexBufferManager::getBindInfo;
+            using VertexBufferManager::bind;
 
             struct Descriptor {
                 PhysicalDevice *physicalDevice;
