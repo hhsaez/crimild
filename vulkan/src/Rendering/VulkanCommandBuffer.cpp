@@ -36,6 +36,7 @@
 #include "Rendering/Framebuffer.hpp"
 #include "Rendering/IndexBuffer.hpp"
 #include "Rendering/RenderPass.hpp"
+#include "Rendering/ShaderProgram.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;
@@ -298,11 +299,17 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                 }
 
                 case CommandBuffer::Command::Type::BIND_DESCRIPTOR_SET: {
-                    auto descriptorSet = crimild::cast_ptr< DescriptorSet >( cmd.obj );
-                    auto descriptorSetHandler = renderDevice->getHandler( crimild::get_ptr( descriptorSet ), index );
-
                     auto pipeline = m_currentPipeline;
                     auto pipelineBindInfo = renderDevice->getBindInfo( pipeline );
+
+                    auto descriptorSet = crimild::cast_ptr< DescriptorSet >( cmd.obj );
+                    if ( descriptorSet->layout == nullptr ) {
+                        // Get a layout corresponding to the same binding point
+                        // If there's a mismatch, Vulkan validation layers will complain about it
+                        // TODO: Maybe we can do this in an early stage, like the frame graph?
+                        descriptorSet->layout = pipeline->program->descriptorSetLayouts[ m_boundDescriptorSets ];
+                    }
+                    auto descriptorSetHandler = renderDevice->getHandler( crimild::get_ptr( descriptorSet ), index );
 
                     VkDescriptorSet descriptorSets[] = {
                         descriptorSetHandler,
