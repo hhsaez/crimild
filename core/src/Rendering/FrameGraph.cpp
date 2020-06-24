@@ -27,7 +27,7 @@
 
 #include "Rendering/FrameGraph.hpp"
 
-#include "Rendering/Buffer.hpp"
+#include "Rendering/UniformBuffer.hpp"
 #include "Rendering/CommandBuffer.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/IndexBuffer.hpp"
@@ -190,6 +190,34 @@ void FrameGraph::verifyAllConnections( void ) noexcept
 		}
 	);
 
+    m_nodesByType[ Node::Type::VERTEX_BUFFER ].each(
+        [&]( auto &node ) {
+            auto vbo = getNodeObject< VertexBuffer >( node );
+            connect( vbo->getBufferView(), vbo );
+        }
+    );
+
+    m_nodesByType[ Node::Type::UNIFORM_BUFFER ].each(
+        [&]( auto &node ) {
+            auto ubo = getNodeObject< UniformBuffer >( node );
+            connect( ubo->getBufferView(), ubo );
+        }
+    );
+
+    m_nodesByType[ Node::Type::INDEX_BUFFER ].each(
+        [&]( auto &node ) {
+            auto ibo = getNodeObject< IndexBuffer >( node );
+            connect( ibo->getBufferView(), ibo );
+        }
+    );
+
+    m_nodesByType[ Node::Type::BUFFER_VIEW ].each(
+        [&]( auto &node ) {
+            auto view = getNodeObject< BufferView >( node );
+            connect( view->getBuffer(), view );
+        }
+    );
+
 	// Link descriptor sets
 	m_nodesByType[ Node::Type::DESCRIPTOR_SET ].each(
 		[&]( auto &node ) {
@@ -321,6 +349,10 @@ std::ostream &crimild::operator<<( std::ostream &out, FrameGraph::Node::Type typ
 			out << "BUFFER";
 			break;
 
+        case FrameGraph::Node::Type::BUFFER_VIEW:
+            out << "BUFFER_VIEW";
+            break;
+
 		case FrameGraph::Node::Type::IMAGE:
 			out << "IMAGE";
 			break;			
@@ -328,6 +360,10 @@ std::ostream &crimild::operator<<( std::ostream &out, FrameGraph::Node::Type typ
 		case FrameGraph::Node::Type::IMAGE_VIEW:
 			out << "IMAGE_VIEW";
 			break;			
+
+        case FrameGraph::Node::Type::INDEX_BUFFER:
+            out << "INDEX_BUFFER";
+            break;
 
 		case FrameGraph::Node::Type::DESCRIPTOR_SET:
 			out << "DESCRIPTOR_SET";

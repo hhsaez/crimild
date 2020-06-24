@@ -46,9 +46,9 @@ crimild::Bool DescriptorPoolManager::bind( DescriptorPool *descriptorPool ) noex
 
     auto swapchain = renderDevice->getSwapchain();
 
-    std::vector< VkDescriptorPoolSize > poolSizes( descriptorPool->descriptorSetLayout->bindings.size() );
+    std::vector< VkDescriptorPoolSize > poolSizes( descriptorPool->layout->bindings.size() );
     for ( auto i = 0l; i < poolSizes.size(); ++i ) {
-        auto &binding = descriptorPool->descriptorSetLayout->bindings[ i ];
+        auto &binding = descriptorPool->layout->bindings[ i ];
         poolSizes[ i ] = {
             .type = utils::getVulkanDescriptorType( binding.descriptorType ),
             .descriptorCount = static_cast< crimild::UInt32 >( swapchain->images.size() ),
