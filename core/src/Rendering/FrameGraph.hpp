@@ -282,6 +282,12 @@ namespace crimild {
             return ret;
 		}
 
+        /**
+           \brief Connect two nodes with a directed edge from src to dst
+
+           Connecting nodes this way means that src preceeds dst or that dst
+           has a dependency on src. 
+         */
 		template< typename T, typename U >
 		void connect( T *src, U *dst ) noexcept
 		{
