@@ -137,6 +137,24 @@ void FrameGraph::verifyAllConnections( void ) noexcept
 					renderPass
 				);
 			}
+
+            // Add a dependency to the render pass' pipeline, if one is available
+            // It's probable there's already a dependency between these two if the
+            // pipeline is bound to a command buffer above
+            if ( auto pipeline = crimild::get_ptr( renderPass->pipeline ) ) {
+                connect(
+                    pipeline,
+                    renderPass
+                );
+            }
+
+            // Add a dependency to the render pass' descriptor set, if one is provided
+            if ( auto descriptors = crimild::get_ptr( renderPass->descriptors ) ) {
+                connect(
+                    descriptors,
+                    renderPass
+                );
+            }
 		}
 	);
 

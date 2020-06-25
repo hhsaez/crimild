@@ -39,6 +39,8 @@
 namespace crimild {
 
     class CommandBuffer;
+    class DescriptorSet;
+    class Pipeline;
 
     class Attachment :
 		public SharedObject,
@@ -91,6 +93,21 @@ namespace crimild {
         	Vector2f depthStencil = Vector2f::UNIT_X;
         };
         ClearValue clearValue;
+
+        /**
+           \brief Pipeline associated with this render pass, if any.
+
+           This is optional.
+         */
+        SharedPointer< Pipeline > pipeline;
+
+        /**
+           \brief Descriptors associated with this render pass, if any.
+
+           This is optional.
+         */
+        SharedPointer< DescriptorSet > descriptors;
+        
     };
 
 }
