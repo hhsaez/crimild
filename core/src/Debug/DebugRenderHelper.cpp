@@ -63,9 +63,10 @@ void DebugRenderHelper::renderLine( Renderer *renderer, Camera *camera, const Ve
 
 void DebugRenderHelper::renderLines( Renderer *renderer, Camera *camera, const Vector3f *data, unsigned int count, const RGBAColorf &color )
 {
+    /*
     auto depthState = AssetManager::getInstance()->get< DepthState >( CRIMILD_DEBUG_RENDER_HELPER_DEPTH_STATE );
     auto alphaState = AssetManager::getInstance()->get< AlphaState >( CRIMILD_DEBUG_RENDER_HELPER_ALPHA_STATE );
-    
+
     auto program = AssetManager::getInstance()->get< ShaderProgram >( CRIMILD_DEBUG_RENDER_UNLIT_SHADER_PROGRAM );
 	if ( program == nullptr ) {
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "No program found for debug rendering" );
@@ -108,6 +109,7 @@ void DebugRenderHelper::renderLines( Renderer *renderer, Camera *camera, const V
 
     renderer->setDepthState( DepthState::ENABLED );
     renderer->setAlphaState( AlphaState::DISABLED );
+    */
 }
 
 void DebugRenderHelper::renderLines( const Vector3f *data, unsigned int count, const RGBAColorf &color )
@@ -336,4 +338,3 @@ void DebugRenderHelper::renderText( std::string str, const Vector3f &position, c
 
 	render( text->getGeometry() );
 }
-
