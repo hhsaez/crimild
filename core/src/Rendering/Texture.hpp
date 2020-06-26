@@ -96,7 +96,7 @@ namespace crimild {
 		};
 
 	private:
-		using ImageArray = containers::Array< SharedPointer< Image >>;
+		using ImageArray = Array< SharedPointer< Image >>;
 
 	public:
 		/**

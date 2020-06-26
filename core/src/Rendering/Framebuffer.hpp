@@ -47,7 +47,7 @@ namespace crimild {
 
     public:
         Extent2D extent = { .scalingMode = ScalingMode::SWAPCHAIN_RELATIVE };
-        containers::Array< SharedPointer< ImageView >> attachments;
+        Array< SharedPointer< ImageView >> attachments;
     };
 
 }

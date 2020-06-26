@@ -60,14 +60,14 @@ void FrameDebugPass::setup( RenderGraph *graph )
 
 void FrameDebugPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *renderQueue )
 {
-	const static auto LAYOUT_4 = containers::Array< Rectf > {
+	const static auto LAYOUT_4 = Array< Rectf > {
 		Rectf( 0.0f, 0.5f, 0.5f, 0.5f ),
 		Rectf( 0.5f, 0.5f, 0.5f, 0.5f ),
 		Rectf( 0.0f, 0.0f, 0.5f, 0.5f ),
 		Rectf( 0.5f, 0.0f, 0.5f, 0.5f ),
 	};
 	
-	const static auto LAYOUT_8 = containers::Array< Rectf > {
+	const static auto LAYOUT_8 = Array< Rectf > {
 		Rectf( 0.25f, 0.0f, 0.75f, 0.75f ),
 		
 		Rectf( 0.005f, 0.755f, 0.24f, 0.24f ),
@@ -80,7 +80,7 @@ void FrameDebugPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueu
 		Rectf( 0.005f, 0.005f, 0.24f, 0.24f ),
 	};
 	
-	const static auto LAYOUT_12 = containers::Array< Rectf > {
+	const static auto LAYOUT_12 = Array< Rectf > {
 		Rectf( 0.25f, 0.25f, 0.5f, 0.5f ),
 		
 		Rectf( 0.0f, 0.75f, 0.25f, 0.25f ),
@@ -117,7 +117,7 @@ void FrameDebugPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueu
 
     const auto BUFFER_SIZE = Vector2f( gBuffer->getWidth(), gBuffer->getHeight() );
 	
-	_inputs.each( [ this, renderer, &layout, BUFFER_SIZE ]( RenderGraphAttachment *input, crimild::Size idx ) {
+	_inputs.each( [ this, renderer, &layout, BUFFER_SIZE, idx = 0 ]( RenderGraphAttachment *input ) mutable {
 		if ( idx < layout.size() ) {
             auto viewport = layout[ idx ];
             viewport.x() *= BUFFER_SIZE.x();

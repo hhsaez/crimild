@@ -33,7 +33,7 @@
 using namespace crimild;
 using namespace crimild::shadergraph;
 
-Variable *Multiply::createResult( ShaderGraph *graph, const containers::Array< Variable * > &inputs )
+Variable *Multiply::createResult( ShaderGraph *graph, const Array< Variable * > &inputs )
 {
 	auto retType = inputs.first()->getType();
 	inputs.each( [ &retType ]( Variable *in ) {
@@ -60,7 +60,7 @@ Multiply::Multiply( ShaderGraph *graph, Variable *a, Variable *b )
 
 }
 
-Multiply::Multiply( ShaderGraph *graph, containers::Array< Variable * > const &inputs )
+Multiply::Multiply( ShaderGraph *graph, Array< Variable * > const &inputs )
 	: MultiInputOp( graph, inputs, createResult( graph, inputs ) )
 {
 	

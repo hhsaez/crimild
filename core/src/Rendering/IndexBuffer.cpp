@@ -27,22 +27,10 @@
 
 #include "Rendering/IndexBuffer.hpp"
 
-/*
-namespace crimild {
-
-    template <> IndexBuffer::IndexType IndexBufferImpl< crimild::UInt16 >::getIndexType( void ) const noexcept { return IndexBuffer::IndexType::UINT_16; }
-    template <> const char *IndexBufferImpl< crimild::UInt16 >::getClassName( void ) const { return "crimild::IndexUInt16Buffer"; }
-
-    template <> IndexBuffer::IndexType IndexBufferImpl< crimild::UInt32 >::getIndexType( void ) const noexcept { return IndexBuffer::IndexType::UINT_32; }
-    template <> const char *IndexBufferImpl< crimild::UInt32 >::getClassName( void ) const { return "crimild::IndexUInt32Buffer"; }
-
-}
-*/
-
 using namespace crimild;
 
 IndexBuffer::IndexBuffer( Format format, crimild::Size count ) noexcept
-    : IndexBuffer( format, containers::Array< crimild::Byte >( count * utils::getFormatSize( format ) ) )
+    : IndexBuffer( format, Array< crimild::Byte >( count * utils::getFormatSize( format ) ) )
 {
 
 }

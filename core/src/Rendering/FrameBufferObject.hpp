@@ -42,7 +42,7 @@ namespace crimild {
     
 	class FrameBufferObject : public SharedObject, public Catalog< FrameBufferObject >::Resource {
 	private:
-		using RenderTargetMap = containers::Map< std::string, SharedPointer< RenderTarget >>;
+		using RenderTargetMap = Map< std::string, SharedPointer< RenderTarget >>;
 
 	public:
 		class ClearFlag {

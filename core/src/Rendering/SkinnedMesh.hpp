@@ -29,8 +29,8 @@
 #define CRIMILD_RENDERING_SKINNED_MESH_
 
 #include "Foundation/NamedObject.hpp"
-#include "Foundation/Map.hpp"
-#include "Foundation/Array.hpp"
+#include "Foundation/Containers/Map.hpp"
+#include "Foundation/Containers/Array.hpp"
 #include "Coding/Codable.hpp"
 #include "Streaming/Stream.hpp"
 #include "Mathematics/Transformation.hpp"

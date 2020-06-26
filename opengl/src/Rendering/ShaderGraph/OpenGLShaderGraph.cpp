@@ -71,7 +71,6 @@
 #include <iomanip>
 
 using namespace crimild;
-using namespace crimild::containers;
 using namespace crimild::shadergraph;
 
 OpenGLShaderGraph::OpenGLShaderGraph( void )
@@ -543,7 +542,7 @@ OpenGLShaderGraph::~OpenGLShaderGraph( void )
 
 }
 
-std::string OpenGLShaderGraph::generateShaderSource( containers::Array< ShaderGraphNode * > const &sortedNodes )
+std::string OpenGLShaderGraph::generateShaderSource( Array< ShaderGraphNode * > const &sortedNodes )
 {
 	Array< ShaderGraphNode * > variables;
 	Array< ShaderGraphNode * > operations;
@@ -682,11 +681,11 @@ std::string OpenGLShaderGraph::getVariableTypeString( Variable *var )
 	return typeStr;
 }
 
-std::string OpenGLShaderGraph::writeOp( Variable *result, containers::Array< Variable * > const &inputs, std::string separator )
+std::string OpenGLShaderGraph::writeOp( Variable *result, Array< Variable * > const &inputs, std::string separator )
 {
 	std::stringstream ss;
 	ss << result->getName() << " = ";
-	inputs.each( [ &ss, separator ]( Variable *in, crimild::Size idx ) {
+	inputs.each( [ &ss, separator, idx = 0 ]( Variable *in ) mutable {
 		if ( idx > 0 ) {
 			ss << separator;
 		}

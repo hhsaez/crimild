@@ -27,5 +27,12 @@
 
 #include "Rendering/RenderPass.hpp"
 
+#include "Rendering/DescriptorSet.hpp"
+#include "Rendering/Pipeline.hpp"
+
 using namespace crimild;
+
+void RenderPass::setPipeline( Pipeline *pipeline ) noexcept { m_pipeline = retain( pipeline ); }
+
+void RenderPass::setDescriptors( DescriptorSet *descriptors ) noexcept { m_descriptors = retain( descriptors ); }
 

@@ -136,10 +136,10 @@ namespace crimild {
 		void stopSystems( void );
 
 	private:
-		using SystemMap = containers::Map< std::string, SystemPtr >;
+		using SystemMap = Map< std::string, SystemPtr >;
 		SystemMap _systems;
 		
-		using SystemArray = containers::Array< System * >;
+		using SystemArray = Array< System * >;
 		SystemArray _sortedSystems;
         
 	public:

@@ -134,9 +134,9 @@ void Group::decode( coding::Decoder &decoder )
 {
     Node::decode( decoder );
 
-    containers::Array< SharedPointer< Node >> nodes;
+    Array< SharedPointer< Node >> nodes;
     decoder.decode( "nodes", nodes );
-    nodes.each( [ this ]( SharedPointer< Node > &n, crimild::Size ) {
+    nodes.each( [ this ]( SharedPointer< Node > &n ) {
         attachNode( n );
     });
 }

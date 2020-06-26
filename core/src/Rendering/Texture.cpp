@@ -36,22 +36,22 @@ CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::Texture )
 using namespace crimild;
 
 SharedPointer< Texture > Texture::ONE = crimild::alloc< Texture >(
-	crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA )
+	crimild::alloc< Image >( 1, 1, 4, ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA )
 );
 
 SharedPointer< Texture > Texture::ZERO = crimild::alloc< Texture >(
-	crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0x00, 0x00, 0x00, 0x00 }, Image::PixelFormat::RGBA )
+	crimild::alloc< Image >( 1, 1, 4, ByteArray { 0x00, 0x00, 0x00, 0x00 }, Image::PixelFormat::RGBA )
 );
 
 SharedPointer< Texture > Texture::CUBE_ONE = [] {
     return crimild::alloc< Texture >(
-        containers::Array< SharedPointer< Image >> {
-            crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ),
-            crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ),
-            crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ),
-            crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ),
-            crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ),
-            crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA )
+        Array< SharedPointer< Image >> {
+            crimild::alloc< Image >( 1, 1, 4, ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ),
+            crimild::alloc< Image >( 1, 1, 4, ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ),
+            crimild::alloc< Image >( 1, 1, 4, ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ),
+            crimild::alloc< Image >( 1, 1, 4, ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ),
+            crimild::alloc< Image >( 1, 1, 4, ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ),
+            crimild::alloc< Image >( 1, 1, 4, ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA )
         }
     );
 }();
@@ -67,7 +67,7 @@ SharedPointer< Texture > createCheckerBoardTexture( crimild::Int32 size )
     crimild::Int32 height = size;
     crimild::Int32 bpp = 4;
 
-    auto data = containers::ByteArray( width * height * bpp );
+    auto data = ByteArray( width * height * bpp );
     for ( int y = 0; y < width; y++ ) {
         for ( int x = 0; x < width; x++ ) {
             auto colorIdx = ( y % 2 + x % 2 ) % 2;
@@ -95,7 +95,7 @@ SharedPointer< Texture > Texture::CHECKERBOARD_256 = createCheckerBoardTexture( 
 SharedPointer< Texture > Texture::CHECKERBOARD_512 = createCheckerBoardTexture( 512 );
 
 SharedPointer< Texture > Texture::INVALID = crimild::alloc< Texture >(
-    crimild::alloc< Image >( 1, 1, 4, containers::ByteArray { 0xFF, 0x00, 0xFF, 0xFF }, Image::PixelFormat::RGBA )
+    crimild::alloc< Image >( 1, 1, 4, ByteArray { 0xFF, 0x00, 0xFF, 0xFF }, Image::PixelFormat::RGBA )
 );
 
 Texture::Texture( std::string name )

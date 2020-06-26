@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,176 +39,166 @@
 
 namespace crimild {
 
-	namespace containers {
+    /**
+       \brief A set implementation
 
-		/**
-		   \brief A set implementation
-		   
-		   \todo Implement index bound checking policy
-		   \todo Implement parallel policy
-		*/
-		template<
-		    typename ValueType,
-		    class ThreadingPolicy = policies::SingleThreaded,
-		    class SetImpl = std::unordered_set< ValueType >
-		>
-		class Set : public ThreadingPolicy {
-		private:
-			using LockImpl = typename ThreadingPolicy::Lock;
-			
-		public:
-			using TraverseCallback = std::function< void( ValueType const & ) >;
-			using ConstTraverseCallback = std::function< void( const ValueType & ) >;
-			
-		public:
-			Set( void )
-			{
-				
-			}
-			
-			Set( std::initializer_list< ValueType > l )
-				: _set( l )
-			{
+       \todo Implement index bound checking policy
+       \todo Implement parallel policy
+    */
+    template<
+        typename ValueType,
+        class ThreadingPolicy = policies::SingleThreaded,
+        class SetImpl = std::unordered_set< ValueType >
+    >
+    class Set : public ThreadingPolicy {
+    private:
+        using LockImpl = typename ThreadingPolicy::Lock;
 
-			}
+    public:
+        Set( void ) = default;
 
-			Set( const Set &other )
-				: _set( other._set )
-			{
+        Set( std::initializer_list< ValueType > l ) noexcept
+            : _set( l )
+        {
 
-			}
-			
-			virtual ~Set( void )
-			{
-                _set.clear();
-			}
-            
-            Set &operator=( const Set &other )
-            {
-                LockImpl lock( this );
-				_set = other._set;
-				return *this;
+        }
+
+        Set( const Set &other ) noexcept
+            : _set( other._set )
+        {
+
+        }
+
+        virtual ~Set( void ) noexcept
+        {
+            _set.clear();
+        }
+
+        Set &operator=( const Set &other ) noexcept
+        {
+            LockImpl lock( this );
+            _set = other._set;
+            return *this;
+        }
+
+        Bool operator==( const Set &other ) const noexcept
+        {
+            LockImpl lock( this );
+            return _set == other._set;
+        }
+
+        inline Bool empty( void ) const noexcept
+        {
+            LockImpl lock( this );
+            return _set.empty();
+        }
+
+        inline Size size( void ) const noexcept
+        {
+            LockImpl lock( this );
+            return _set.size();
+        }
+
+        inline void clear( void ) noexcept
+        {
+            LockImpl lock( this );
+            _set.clear();
+        }
+
+        inline bool contains( const ValueType &value ) const noexcept
+        {
+            LockImpl lock( this );
+            return _set.count( value ) > 0;
+        }
+
+        void insert( ValueType const &value ) noexcept
+        {
+            LockImpl lock( this );
+            _set.insert( value );
+        }
+
+        void remove( ValueType const &value ) noexcept
+        {
+            LockImpl lock( this );
+            _set.erase( value );
+        }
+
+        template< typename Callback >
+        void each( Callback callback ) noexcept
+        {
+            LockImpl lock( this );
+            auto it = std::begin( _set );
+            while ( it != std::end( _set ) ) {
+                auto &elem = *it;
+                // Increase iterator first to allow element removal on callback
+                ++it;
+                callback( elem );
             }
+        }
 
-			crimild::Bool operator==( const Set &other ) const
-			{
-				LockImpl lock( this );
-				return _set == other._set;
-			}
-			
-			inline crimild::Bool empty( void ) const
-			{
-				LockImpl lock( this );
-				return _set.empty();
-			}
-			
-			inline crimild::Size size( void ) const
-			{
-				LockImpl lock( this );
-				return _set.size();
-			}
+        template< typename Callback >
+        void each( Callback const &callback ) const noexcept
+        {
+            LockImpl lock( this );
+            for ( const auto &v : _set ) {
+                callback( v );
+            }
+        }
 
-			inline void clear( void )
-			{
-				LockImpl lock( this );
-				_set.clear();
-			}
+        inline ValueType first( void ) noexcept { return *std::begin( _set ); }
+        inline const ValueType &first( void ) const noexcept { return *std::begin( _set ); }
 
-			inline bool contains( const ValueType &value ) const
-			{
-				LockImpl lock( this );
-				return _set.count( value ) > 0;
-			}
-			
-			void insert( ValueType const &value )
-			{
-				LockImpl lock( this );
-				_set.insert( value );
-			}
-			
-			void remove( ValueType const &value )
-			{
-				LockImpl lock( this );
-				_set.erase( value );
-			}
-
-			void each( TraverseCallback const &callback )
-			{
-				LockImpl lock( this );
-                auto it = std::begin( _set );
-                while ( it != std::end( _set ) ) {
-                    auto &elem = *it;
-                    // Increase iterator first to allow element removal on callback
-                    ++it;
-                    callback( elem );
+        template< typename Fn >
+        Set filter( Fn selector ) const noexcept
+        {
+            Set ret;
+            each(
+                [&]( const auto &elem ) {
+                    if ( selector( elem ) ) {
+                        ret.insert( elem );
+                    }
                 }
-			}
+            );
+            return ret;
+        }
 
-			void each( ConstTraverseCallback const &callback ) const
-			{
-				LockImpl lock( this );
-				for ( const auto &v : _set ) {
-					callback( v );
-				}
-			}
+        template< typename Fn >
+        auto map( Fn fn ) const noexcept
+        {
+            ValueType dummy;
+            Set< decltype( fn( dummy ) ) > ret { };
+            each(
+                [&]( const auto &elem ) {
+                    ret.insert( fn( elem ) );
+                }
+            );
+            return ret;
+        }
 
-            ValueType first( void ) noexcept { return *std::begin( _set ); }
-            const ValueType &first( void ) const noexcept { return *std::begin( _set ); }
+    private:
+        SetImpl _set;
 
-			template< typename Fn >
-			Set filter( Fn selector ) const
-			{
-				Set ret;
-				each(
-					[&]( const auto &elem ) {
-						if ( selector( elem ) ) {
-							ret.insert( elem );
-						}
-					}
-				);
-				return ret;
-			}
+    public:
+        template<
+            typename VT,
+            class TP
+        >
+        friend std::ostream& operator<<( std::ostream& os, const Set< VT, TP > &set ) noexcept
+        {
+            os << "[";
+            Bool first = true;
+            set.each( [ &os, &first ]( const VT &v ) {
+                os << ( first == 0 ? "" : ", " ) << v;
+                first = false;
+            });
+            os << "]";
+            return os;
+        }
+    };
 
-            template< typename Fn >
-            auto map( Fn fn ) const noexcept
-            {
-				ValueType dummy;
-                Set< decltype( fn( dummy ) ) > ret { };
-				each(
-					[&]( const auto &elem ) {
-						ret.insert( fn( elem ) );
-					}
-				);
-                return ret;
-            }
-
-		private:
-			SetImpl _set;
-		};
-
-		template< typename VALUE_TYPE >
-		using ThreadSafeSet = Set< VALUE_TYPE, policies::ObjectLevelLockable >;
-		
-	}
+    template< typename VALUE_TYPE >
+    using ThreadSafeSet = Set< VALUE_TYPE, policies::ObjectLevelLockable >;
 
 }
 
-template<
-    typename VT,
-    class TP
->
-std::ostream& operator<<( std::ostream& os, const crimild::containers::Set< VT, TP > &set )  
-{  
-	os << "[";
-	crimild::Bool first = true;
-	set.each( [ &os, &first ]( const VT &v ) {
-		os << ( first == 0 ? "" : ", " ) << v;
-		first = false;
-	});
-	os << "]";
-	return os;
-}  
-	
 #endif
-	
-	

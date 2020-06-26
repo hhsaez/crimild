@@ -69,7 +69,7 @@ namespace crimild {
 
 		private:
 			UIFrameConstraintMaker _constraintMaker;
-			containers::Array< SharedPointer< UIFrameConstraint >> _constraints;
+			Array< SharedPointer< UIFrameConstraint >> _constraints;
 
 		public:
 			void decode( coding::Decoder & ) override;

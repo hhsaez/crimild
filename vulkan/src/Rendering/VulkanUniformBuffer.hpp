@@ -41,8 +41,8 @@ namespace crimild {
         class CommandPool;
 
         struct UniformBufferBindInfo {
-            containers::Array< VkBuffer > bufferHandlers;
-            containers::Array< VkDeviceMemory > bufferMemories;
+            Array< VkBuffer > bufferHandlers;
+            Array< VkDeviceMemory > bufferMemories;
         };
 
         class UniformBufferManager : public BasicRenderResourceManagerImpl< UniformBuffer, UniformBufferBindInfo > {

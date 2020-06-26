@@ -65,7 +65,7 @@ crimild::Bool DescriptorSetManager::bind( DescriptorSet *descriptorSet ) noexcep
         .pSetLayouts = layouts,
     };
 
-    containers::Array< VkDescriptorSet > handlers( count );
+    Array< VkDescriptorSet > handlers( count );
 
     for ( int i = 0; i < count; i++ ) {
         VkDescriptorSet handler;

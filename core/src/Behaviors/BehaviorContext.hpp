@@ -148,7 +148,7 @@ namespace crimild {
 			}
 			
 		private:
-			containers::Map< std::string, SharedPointer< BehaviorContextValue >> _values;
+			Map< std::string, SharedPointer< BehaviorContextValue >> _values;
 
 			/**
 			   \name Coding support

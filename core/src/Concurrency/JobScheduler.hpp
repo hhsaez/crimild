@@ -32,7 +32,7 @@
 #include "WorkStealingDeque.hpp"
 
 #include "Foundation/Singleton.hpp"
-#include "Foundation/ConcurrentList.hpp"
+#include "Foundation/Containers/List.hpp"
 
 #include <vector>
 #include <thread>
@@ -155,8 +155,8 @@ namespace crimild {
             void executeDelayedJobs( void );
 
         private:
-            ConcurrentList< JobPtr > _delayedSyncJobs;
-            ConcurrentList< JobPtr > _delayedAsyncJobs;
+            ThreadSafeList< JobPtr > _delayedSyncJobs;
+            ThreadSafeList< JobPtr > _delayedAsyncJobs;
 		};
 
 	}

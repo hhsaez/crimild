@@ -41,8 +41,8 @@ namespace crimild {
         class CommandPool;
 
         struct VertexBufferBindInfo {
-            containers::Array< VkBuffer > bufferHandlers;
-            containers::Array< VkDeviceMemory > bufferMemories;
+            Array< VkBuffer > bufferHandlers;
+            Array< VkDeviceMemory > bufferMemories;
         };
 
         class VertexBufferManager : public BasicRenderResourceManagerImpl< VertexBuffer, VertexBufferBindInfo > {

@@ -46,7 +46,7 @@ TEST( VertexBuffer, construction )
 
 	auto vertices = crimild::alloc< VertexBuffer >(
 		layout,
-		containers::Array< crimild::Real32 > {
+		Array< crimild::Real32 > {
 			-0.5f, -0.5f, 0.0f,
 			0.5f, -0.5f, 0.0f,
 			0.0f, 0.5f, 0.0f,
@@ -82,7 +82,7 @@ TEST( VertexBuffer, setMultipleValues )
     auto positions = vertices->get( VertexAttribute::Name::POSITION );
 
 	positions->set(
-		containers::Array< crimild::Real32 > {
+		Array< crimild::Real32 > {
 			-0.5f, -0.5f, 0.0f,
 			0.5f, -0.5f, 0.0f,
 			0.0f, 0.5f, 0.0f,
@@ -103,7 +103,7 @@ TEST( VertexBuffer, setPositionsInterleaved )
     auto positions = vertices->get( VertexAttribute::Name::POSITION );
 
 	positions->set(
-		containers::Array< crimild::Real32 > {
+		Array< crimild::Real32 > {
 			-0.5f, -0.5f, 0.0f,
 			0.5f, -0.5f, 0.0f,
 			0.0f, 0.5f, 0.0f,
@@ -124,7 +124,7 @@ TEST( VertexBuffer, setTexCoordsInterleaved )
     auto texCoords = vertices->get( VertexAttribute::Name::TEX_COORD );
 
 	texCoords->set(
-		containers::Array< crimild::Real32 > {
+		Array< crimild::Real32 > {
 			0.0, 0.0,
 			0.0, 1.0,
 			1.0, 1.0,
@@ -145,7 +145,7 @@ TEST( VertexBuffer, setInterleaved )
     auto positions = vertices->get( VertexAttribute::Name::POSITION );
 
 	positions->set(
-		containers::Array< crimild::Real32 > {
+		Array< crimild::Real32 > {
 			-0.5f, -0.5f, 0.0f,
 			0.5f, -0.5f, 0.0f,
 			0.0f, 0.5f, 0.0f,
@@ -155,7 +155,7 @@ TEST( VertexBuffer, setInterleaved )
     auto texCoords = vertices->get( VertexAttribute::Name::TEX_COORD );
 
 	texCoords->set(
-		containers::Array< crimild::Real32 > {
+		Array< crimild::Real32 > {
 			0.0, 0.0,
 			0.0, 1.0,
 			1.0, 1.0,
@@ -177,7 +177,7 @@ TEST( VertexBuffer, eachPosition )
 
 	ASSERT_EQ( 3, vertices->getVertexCount() );
 
-	auto data = containers::Array< float > {
+	auto data = Array< float > {
 		-0.5f, -0.5f, 0.0f,
 		0.5f, -0.5f, 0.0f,
 		0.0f, 0.5f, 0.0f,
@@ -202,7 +202,7 @@ TEST( VertexBuffer, eachTexCoord )
 
 	ASSERT_EQ( 3, vertices->getVertexCount() );
 
-	auto data = containers::Array< float > {
+	auto data = Array< float > {
 		0.0, 0.0,
 		0.0, 1.0,
 		1.0, 1.0,
@@ -239,7 +239,7 @@ TEST( VertexBuffer, sparseData )
 
 	auto vertices = crimild::alloc< VertexBuffer >(
 		layout,
-		containers::Array< VertexType > {
+		Array< VertexType > {
 
 		}
 	);

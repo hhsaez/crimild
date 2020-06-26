@@ -35,7 +35,7 @@ VertexBuffer::VertexBuffer( const VertexLayout &vertexLayout, crimild::Size coun
         [&] {
             return crimild::alloc< BufferView >(
                 BufferView::Target::VERTEX,
-                crimild::alloc< Buffer >( containers::Array< crimild::Byte >( count * vertexLayout.getSize() ) ),
+                crimild::alloc< Buffer >( Array< crimild::Byte >( count * vertexLayout.getSize() ) ),
                 0,
                 vertexLayout.getSize()
             );

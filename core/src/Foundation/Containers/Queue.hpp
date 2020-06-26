@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,154 +39,137 @@
 
 namespace crimild {
 
-	namespace containers {
+    /**
+       \brief A resizable queue implementation
 
-		/**
-		   \brief A resizable queue implementation
-		   
-		   \todo Implement index bound checking policy
-		   \todo Implement parallel policy
-		*/
-		template<
-		    typename T,
-		    class ThreadingPolicy = policies::SingleThreaded
-		>
-		class Queue : public ThreadingPolicy {
-		private:
-			using LockImpl = typename ThreadingPolicy::Lock;
-			
-		public:
-			using TraverseCallback = std::function< void( T &, crimild::Size ) >;
-			using ConstTraverseCallback = std::function< void( const T &, crimild::Size ) >;
-			
-		public:
-			Queue( void )
-			{
+       \todo Implement index bound checking policy
+       \todo Implement parallel policy
+    */
+    template<
+        typename T,
+        class ThreadingPolicy = policies::SingleThreaded
+    >
+    class Queue : public ThreadingPolicy {
+    private:
+        using LockImpl = typename ThreadingPolicy::Lock;
 
-			}
-			
-			Queue( const Queue &other )
-				: _impl( other._impl )
-			{
+    public:
+        Queue( void ) = default;
 
-			}
-			
-			virtual ~Queue( void )
-			{
+        Queue( const Queue &other ) noexcept
+            : _impl( other._impl )
+        {
 
-			}
-            
-            Queue &operator=( const Queue &other )
-            {
-                LockImpl lock( this );
-				_impl = other._impl;
-				return *this;
+        }
+
+        virtual ~Queue( void ) = default;
+
+        Queue &operator=( const Queue &other ) noexcept
+        {
+            LockImpl lock( this );
+            _impl = other._impl;
+            return *this;
+        }
+
+        /**
+           \brief Compare two stacks up to getSize() elements
+        */
+        bool operator==( const Queue &other ) const noexcept
+        {
+            LockImpl lock( this );
+            return _impl == other._impl;
+        }
+
+        inline bool empty( void ) noexcept
+        {
+            LockImpl lock( this );
+            return _impl.empty();
+        }
+
+        inline Size size( void ) noexcept
+        {
+            LockImpl lock( this );
+            return _impl.size();
+        }
+
+        inline void clear( void ) noexcept
+        {
+            LockImpl lock( this );
+            return _impl.clear();
+        }
+
+        void push( T const &elem ) noexcept
+        {
+            LockImpl lock( this );
+            _impl.push_back( elem );
+        }
+
+        T pop( void ) noexcept
+        {
+            LockImpl lock( this );
+
+            T front = _impl.front();
+            _impl.pop_front();
+            return front;
+        }
+
+        inline T &front( void ) noexcept
+        {
+            return _impl.front();
+        }
+
+        inline const T &top( void ) const noexcept
+        {
+            return _impl.front();
+        }
+
+        inline Bool contains( const T &e ) const noexcept
+        {
+            LockImpl lock( this );
+            return std::find( _impl.begin(), _impl.end(), e ) != _impl.end();
+        }
+
+        void remove( const T &elem ) noexcept
+        {
+            LockImpl lock( this );
+            _impl.erase( std::remove( _impl.begin(), _impl.end(), elem ), _impl.end() );
+        }
+
+        template< typename Callback >
+        void each( Callback callback ) noexcept
+        {
+            LockImpl lock( this );
+            Size i = 0;
+            for ( auto &e : _impl ) {
+                callback( e, i++ );
             }
+        }
 
-			/**
-			   \brief Compare two stacks up to getSize() elements
-			 */
-			bool operator==( const Queue &other ) const
-			{
-                LockImpl lock( this );
-                return _impl == other._impl;
-			}
-			
-			inline bool empty( void )
-			{
-				LockImpl lock( this );
-				return _impl.empty();
-			}
-			
-			inline crimild::Size size( void )
-			{
-				LockImpl lock( this );
-				return _impl.size();
-			}
-			
-            inline void clear( void )
-            {
-                LockImpl lock( this );
-				return _impl.clear();
+        template< typename Callback >
+        void each( Callback callback ) const noexcept
+        {
+            LockImpl lock( this );
+            Size i = 0;
+            for ( auto &e : _impl ) {
+                callback( e, i++ );
             }
-            
-			void push( T const &elem )
-			{
-				LockImpl lock( this );
-				_impl.push_back( elem );
-			}
-			
-			T pop( void )
-			{
-				LockImpl lock( this );
+        }
 
-				T front = _impl.front();
-				_impl.pop_front();
-				return front;
-			}
-            
-            T &front( void )
-            {
-                return _impl.front();
-            }
+    private:
+        std::deque< T > _impl;
 
-			const T &top( void ) const
-			{
-				return _impl.front();
-			}
-			
-			crimild::Bool contains( const T &e ) const
-			{
-				LockImpl lock( this );
-				return std::find( _impl.begin(), _impl.end(), e ) != _impl.end();
-			}
-
-			void remove( const T &elem )
-			{
-				LockImpl lock( this );
-				_impl.erase( std::remove( _impl.begin(), _impl.end(), elem ), _impl.end() );
-			}
-			
-			void each( TraverseCallback const &callback )
-			{
-				LockImpl lock( this );
-				crimild::Size i = 0;
-				for ( auto &e : _impl ) {
-					callback( e, i++ );
-				}
-			}
-
-			void each( ConstTraverseCallback const &callback ) const
-			{
-				LockImpl lock( this );
-				crimild::Size i = 0;
-				for ( auto &e : _impl ) {
-					callback( e, i++ );
-				}
-			}
-
-		private:
-			std::deque< T > _impl;
-		};
-		
-	}
+    public:
+        friend std::ostream& operator<<( std::ostream& os, const Queue &s ) noexcept
+        {
+            os << "[";
+            s.each( [ &os ]( const T &a, Size i ) {
+                os << ( i == 0 ? "" : ", " ) << a;
+            });
+            os << "]";
+            return os;
+        }
+    };
 
 }
 
-template<
-    typename T,
-    class TP
->
-std::ostream& operator<<( std::ostream& os, const crimild::containers::Queue< T, TP > &s )  
-{  
-	os << "[";
-	s.each( [ &os ]( const T &a, crimild::Size i ) {
-		os << ( i == 0 ? "" : ", " ) << a;
-	});
-	os << "]";
-	return os;
-}  
-	
 #endif
-	
-	

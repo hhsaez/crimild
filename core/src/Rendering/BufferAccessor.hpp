@@ -103,7 +103,7 @@ namespace crimild {
         }
 
         template< typename T >
-		void set( containers::Array< T > const &src ) noexcept
+		void set( Array< T > const &src ) noexcept
 		{
             auto data = getBufferView()->getData();
 			auto O = getOffset();

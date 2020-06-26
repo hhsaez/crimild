@@ -37,6 +37,8 @@
 
 using namespace crimild;
 
+#if 0
+
 SkinnedMeshComponent::SkinnedMeshComponent( void )
 {
 	setAnimationParams( 0.0f, -1.0f, true, 1.0f );
@@ -109,6 +111,7 @@ void SkinnedMeshComponent::update( const Clock &c )
 
 		Transformation modelTransform;
 
+        /*
 		if ( currentClip->getChannels().find( node->getName() ) ) {
 			auto channel = currentClip->getChannels()[ node->getName() ];
 
@@ -129,6 +132,7 @@ void SkinnedMeshComponent::update( const Clock &c )
 		else {
 			modelTransform = node->getLocal();
 		}
+        */
 		
 		auto joint = skeleton->getJoints()->find( node->getName() );
 		if ( joint != nullptr ) {
@@ -219,4 +223,6 @@ void SkinnedMeshComponent::load( Stream &s )
 
 	s.read( _skinnedMesh );
 }
+
+#endif
 

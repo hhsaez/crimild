@@ -41,8 +41,8 @@ namespace crimild {
         class CommandPool;
 
         struct IndexBufferBindInfo {
-            containers::Array< VkBuffer > bufferHandlers;
-            containers::Array< VkDeviceMemory > bufferMemories;
+            Array< VkBuffer > bufferHandlers;
+            Array< VkDeviceMemory > bufferMemories;
         };
 
         class IndexBufferManager : public BasicRenderResourceManagerImpl< IndexBuffer, IndexBufferBindInfo > {

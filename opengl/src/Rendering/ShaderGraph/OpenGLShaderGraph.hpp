@@ -47,17 +47,17 @@ namespace crimild {
 			virtual ~OpenGLShaderGraph( void );
 
 		protected:
-			virtual std::string generateShaderSource( containers::Array< ShaderGraphNode * > const &sortedNodes ) override;
+			virtual std::string generateShaderSource( Array< ShaderGraphNode * > const &sortedNodes ) override;
 
 		private:
 			std::string getVariableTypeString( Variable *outlet );
-			std::string writeOp( Variable *result, containers::Array< Variable * > const &inputs, std::string separator );
+			std::string writeOp( Variable *result, Array< Variable * > const &inputs, std::string separator );
 
 		private:
 			using Translator = std::function< void( ShaderGraphNode * ) >;
-			using CodeSection = containers::Array< std::string >;
+			using CodeSection = Array< std::string >;
 
-			containers::Map< std::string, Translator > _translators;
+			Map< std::string, Translator > _translators;
 
 			CodeSection _inputsSection;
 			CodeSection _uniformsSection;

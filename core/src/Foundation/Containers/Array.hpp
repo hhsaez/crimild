@@ -37,393 +37,364 @@
 
 namespace crimild {
 
-	namespace containers {
+    /**
+       \brief A resizable array implementation
 
-		/**
-		   \brief A resizable array implementation
-		   
-		   \todo Implement index bound checking policy
-		   \todo Implement parallel policy
-		*/
-		template<
-		    typename T,
-		    class ThreadingPolicy = policies::SingleThreaded
-		>
-		class Array : public ThreadingPolicy {
-		private:
-			using LockImpl = typename ThreadingPolicy::Lock;
-			
-		public:
-			using BasicTraverseCallback = std::function< void( T & ) >;
-			using ConstBasicTraverseCallback = std::function< void( const T & ) >;
-			using TraverseCallback = std::function< void( T &, crimild::Size ) >;
-			using ConstTraverseCallback = std::function< void( const T &, crimild::Size ) >;
-            using SortCallback = std::function< bool( const T &a, const T &b ) >;
-			
-		public:
-			Array( void )
-			{
-                resize_unsafe( 1 );
-			}
-			
-			explicit Array( crimild::Size size, T *data = nullptr )
-			{
-				resize_unsafe( size );
-				
-				_size = size;
+       \todo Implement index bound checking policy
+       \todo Implement parallel policy
+    */
+    template<
+        typename T,
+        class ThreadingPolicy = policies::SingleThreaded
+    >
+    class Array : public ThreadingPolicy {
+    private:
+        using LockImpl = typename ThreadingPolicy::Lock;
 
-                if ( data != nullptr ) {
-                    for ( crimild::Size i = 0; i < _size; i++ ) {
-                        _elems[ i ] = data[ i ];
-                    }
+    public:
+        Array( void ) noexcept
+        {
+            resize_unsafe( 1 );
+        }
+
+        explicit Array( Size size, T *data = nullptr ) noexcept
+        {
+            resize_unsafe( size );
+
+            _size = size;
+
+            if ( data != nullptr ) {
+                for ( Size i = 0; i < _size; i++ ) {
+                    _elems[ i ] = data[ i ];
                 }
-			}
+            }
+        }
 
-			Array( std::initializer_list< T > l )
-				: Array( l.size() )
-			{
-				_size = 0;
-				for ( auto e : l ) {
-					_elems[ _size++ ] = e;
-				}
-			}
+        Array( std::initializer_list< T > l ) noexcept
+            : Array( l.size() )
+        {
+            _size = 0;
+            for ( auto e : l ) {
+                _elems[ _size++ ] = e;
+            }
+        }
 
-			Array( const Array &other )
-				: Array( other._size )
-			{
-                for ( crimild::Size i = 0; i < _size; i++ ) {
-                    _elems[ i ] = other._elems[ i ];
+        Array( const Array &other ) noexcept
+            : Array( other._size )
+        {
+            for ( Size i = 0; i < _size; i++ ) {
+                _elems[ i ] = other._elems[ i ];
+            }
+        }
+
+        Array( Array &&other ) noexcept
+            : _elems( std::move( other._elems ) ),
+              _size( other._size ),
+              _capacity( other._capacity )
+        {
+            other._size = 0;
+            other._capacity = 0;
+        }
+
+        virtual ~Array( void ) noexcept
+        {
+            resize_unsafe( 0 );
+            _size = 0;
+        }
+
+        Array &operator=( const Array &other ) noexcept
+        {
+            LockImpl lock( this );
+
+            resize_unsafe( other._capacity );
+            _size = other._size;
+            for ( Size i = 0; i < _size; i++ ) {
+                _elems[ i ] = other._elems[ i ];
+            }
+
+            return *this;
+        }
+
+        Array &operator=( Array &&other ) noexcept
+        {
+            LockImpl lock( this );
+
+            _elems = std::move( other._elems );
+            _size = other._size;
+            _capacity = other._capacity;
+
+            other._size = 0;
+            other._capacity = 0;
+
+            return *this;
+        }
+
+        /**
+           \brief Compare two arrays up to getSize() elements
+        */
+        Bool operator==( const Array &other ) const noexcept
+        {
+            if ( _size != other._size ) {
+                return false;
+            }
+
+            for ( Size i = 0; i < _size; i++ ) {
+                if ( _elems[ i ] != other._elems[ i ] ) {
+                    return false;
                 }
-			}
+            }
 
-			Array( Array &&other )
-				: _elems( std::move( other._elems ) ),
-				  _size( other._size ),
-				  _capacity( other._capacity )
-			{
-				other._size = 0;
-				other._capacity = 0;
-			}
+            return true;
+        }
 
-			virtual ~Array( void )
-			{
-                resize_unsafe( 0 );
-                _size = 0;
-			}
-            
-            Array &operator=( const Array &other )
-            {
-                LockImpl lock( this );
-                
-                resize_unsafe( other._capacity );
-                _size = other._size;
-                for ( crimild::Size i = 0; i < _size; i++ ) {
-                    _elems[ i ] = other._elems[ i ];
+        inline Bool operator!=( const Array &other ) const noexcept
+        {
+            return !( *this == other );
+        }
+
+        inline bool empty( void ) const noexcept
+        {
+            LockImpl lock( this );
+            return size_unsafe() == 0;
+        }
+
+        inline Size size( void ) const noexcept
+        {
+            LockImpl lock( this );
+            return size_unsafe();
+        }
+
+        inline void clear( void ) noexcept
+        {
+            LockImpl lock( this );
+            resize_unsafe( 0 );
+            _size = 0;
+        }
+
+        inline T &operator[]( Size index ) noexcept
+        {
+            LockImpl lock( this );
+            return _elems[ index ];
+        }
+
+        inline const T &operator[]( Size index ) const noexcept
+        {
+            LockImpl lock( this );
+            return _elems[ index ];
+        }
+
+        inline T *getData( void ) noexcept
+        {
+            LockImpl lock( this );
+            return &_elems[ 0 ];
+        }
+
+        inline const T *getData( void ) const noexcept
+        {
+            LockImpl lock( this );
+            return &_elems[ 0 ];
+        }
+
+        inline T &first( void ) noexcept
+        {
+            LockImpl lock( this );
+            return _elems[ 0 ];
+        }
+
+        inline const T &first( void ) const noexcept
+        {
+            LockImpl lock( this );
+            return _elems[ 0 ];
+        }
+
+        inline T &last( void ) noexcept
+        {
+            LockImpl lock( this );
+            return _elems[ _size - 1 ];
+        }
+
+        inline const T &last( void ) const noexcept
+        {
+            LockImpl lock( this );
+            return _elems[ _size - 1 ];
+        }
+
+        void add( T const &elem ) noexcept
+        {
+            LockImpl lock( this );
+            if ( _size == _capacity ) {
+                resize_unsafe( 2 * _capacity );
+            }
+
+            _elems[ _size++ ] = elem;
+        }
+
+        void remove( const T &elem ) noexcept
+        {
+            LockImpl lock( this );
+
+            Size i = 0;
+
+            while ( i < _size && _elems[ i ] != elem ) {
+                i++;
+            }
+
+            if ( i < _size ) {
+                removeAt_unsafe( i );
+            }
+        }
+
+        void removeAt( Size index ) noexcept
+        {
+            LockImpl lock( this );
+            removeAt_unsafe( index );
+        }
+
+        void swap( Size i, Size j ) noexcept
+        {
+            LockImpl lock( this );
+            swap_unsafe( i, j );
+        }
+
+        void resize( Size capacity ) noexcept
+        {
+            LockImpl lock( this );
+            resize_unsafe( capacity );
+            _size = capacity;
+        }
+
+        Bool contains( const T &e ) const noexcept
+        {
+            LockImpl lock( this );
+            for ( Size i = 0; i < _size; i++ ) {
+                if ( _elems[ i ] == e ) {
+                    return true;
                 }
-                
+            }
+            return false;
+        }
+
+        template< typename Callback >
+        Array &sort( Callback callback ) noexcept
+        {
+            LockImpl lock( this );
+            if ( _size == 0 ) {
                 return *this;
             }
 
-			Array &operator=( Array &&other )
-			{
-				LockImpl lock( this );
+            std::sort( &_elems[ 0 ], &_elems[ _size ], callback );
+            return *this;
+        }
 
-				_elems = std::move( other._elems );
-				_size = other._size;
-				_capacity = other._capacity;
-				
-				other._size = 0;
-				other._capacity = 0;
-				
-				return *this;
-			}
+        template< typename Callback >
+        void each( Callback callback ) noexcept
+        {
+            LockImpl lock( this );
 
-			/**
-			   \brief Compare two arrays up to getSize() elements
-			 */
-			bool operator==( const Array &other ) const
-			{
-				if ( _size != other._size ) {
-					return false;
-				}
-                
-                for ( crimild::Size i = 0; i < _size; i++ ) {
-                    if ( _elems[ i ] != other._elems[ i ] ) {
-                        return false;
-                    }
+            // implement a policy to traverse the array by creating a copy if needed
+            for ( Size i = 0; i < _size; i++ ) {
+                callback( _elems[ i ] );
+            }
+        }
+
+        template< typename Callback >
+        void each( Callback callback ) const noexcept
+        {
+            LockImpl lock( this );
+
+            // implement a policy to traverse the array by creating a copy if needed
+            for ( Size i = 0; i < _size; i++ ) {
+                callback( _elems[ i ] );
+            }
+        }
+
+        template< typename Selector >
+        Array filter( Selector selector ) const noexcept
+        {
+            Array ret;
+            for ( Size i = 0; i < _size; ++i ) {
+                if ( selector( _elems[ i ] ) ) {
+                    ret.add( _elems[ i ] );
                 }
-                
-                return true;
-			}
-
-            bool operator!=( const Array &other ) const
-            {
-                return !( *this == other );
             }
-			
-			inline bool empty( void ) const
-			{
-				LockImpl lock( this );
-				return size_unsafe() == 0;
-			}
-			
-			inline crimild::Size size( void ) const
-			{
-				LockImpl lock( this );
-				return size_unsafe();
-			}
-            
-            inline void clear( void )
-            {
-                LockImpl lock( this );
-                resize_unsafe( 0 );
-                _size = 0;
+            return ret;
+        }
+
+        template< typename Mapper >
+        auto map( Mapper mapper ) const noexcept
+        {
+            Array< decltype( mapper( _elems[ 0 ] ) ) > ret( _size );
+            for ( auto i = 0l ; i < _size; i++ ) {
+                ret[ i ] = mapper( _elems[ i ] );
             }
-			
-			inline T &operator[]( crimild::Size index )
-			{
-				LockImpl lock( this );
-				return _elems[ index ];
-			}
-			
-			inline const T &operator[]( crimild::Size index ) const
-			{
-				LockImpl lock( this );
-				return _elems[ index ];
-			}
-            
-            T *getData( void )
-            {
-                LockImpl lock( this );
-                return &_elems[ 0 ];
+            return ret;
+        }
+
+    private:
+        inline Size size_unsafe( void ) const noexcept
+        {
+            return _size;
+        }
+
+        void resize_unsafe( Size capacity ) noexcept
+        {
+            capacity = Numeric< Size >::max( 1, capacity );
+            auto elems = std::unique_ptr< T[] >( new T[ capacity ] );
+            auto count = Numeric< Size >::min( capacity, _capacity );
+            for ( Size i = 0; i < count; i++ ) {
+                elems[ i ] = _elems[ i ];
             }
-            
-            const T *getData( void ) const
-            {
-                LockImpl lock( this );
-                return &_elems[ 0 ];
+            _capacity = capacity;
+            _elems = std::move( elems );
+        }
+
+        void swap_unsafe( Size i, Size j ) noexcept
+        {
+            auto t = _elems[ i ];
+            _elems[ i ] = _elems[ j ];
+            _elems[ j ] = t;
+        }
+
+        void removeAt_unsafe( Size index ) noexcept
+        {
+            for ( Size i = index; i < _size - 1; i++ ) {
+                _elems[ i ] = _elems[ i + 1 ];
             }
+            _elems[ _size - 1 ] = T(); // avoid loitering
+            --_size;
 
-			inline T &first( void )
-			{
-				LockImpl lock( this );
-				return _elems[ 0 ];
-			}
-
-			inline const T &first( void ) const
-			{
-				LockImpl lock( this );
-				return _elems[ 0 ];
-			}
-
-			inline T &last( void )
-			{
-				LockImpl lock( this );
-				return _elems[ _size - 1 ];
-			}
-
-			inline const T &last( void ) const
-			{
-				LockImpl lock( this );
-				return _elems[ _size - 1 ];
-			}
-			
-			void add( T const &elem )
-			{
-				LockImpl lock( this );
-				if ( _size == _capacity ) {
-					resize_unsafe( 2 * _capacity );
-				}
-
-				_elems[ _size++ ] = elem;
-			}
-			
-			void remove( const T &elem )
-			{
-				LockImpl lock( this );
-
-				crimild::Size i = 0;
-				
-				while ( i < _size && _elems[ i ] != elem ) {
-					i++;
-				}
-				
-				if ( i < _size ) {
-					removeAt_unsafe( i );
-				}
-			}
-			
-			void removeAt( crimild::Size index )
-			{
-				LockImpl lock( this );
-				removeAt_unsafe( index );
-			}
-			
-			void swap( crimild::Size i, crimild::Size j )
-			{
-				LockImpl lock( this );
-				swap_unsafe( i, j );
-			}
-			
-			void resize( crimild::Size capacity )
-			{
-				LockImpl lock( this );
-				resize_unsafe( capacity );
-                _size = capacity;
-			}
-
-			crimild::Bool contains( const T &e ) const
-			{
-				LockImpl lock( this );
-				for ( crimild::Size i = 0; i < _size; i++ ) {
-					if ( _elems[ i ] == e ) {
-						return true;
-					}
-				}
-				return false;
-			}
-
-            Array &sort( SortCallback const &callback )
-            {
-                LockImpl lock( this );
-                if ( _size == 0 ) {
-                    return *this;
-                }
-
-                std::sort( &_elems[ 0 ], &_elems[ _size ], callback );
-				return *this;
+            if ( _size > 0 && _size == _capacity / 4 ) {
+                // resize the array if needed
+                resize_unsafe( _capacity / 2 );
             }
+        }
 
-			void each( TraverseCallback const &callback )
-			{
-				LockImpl lock( this );
+    private:
+        std::unique_ptr< T[] > _elems;
+        Size _size = 0;
+        Size _capacity = 0;
 
-				// implement a policy to traverse the array by creating a copy if needed
-				for ( crimild::Size i = 0; i < _size; i++ ) {
-					callback( _elems[ i ], i );
-				}
-			}
+    public:
+        friend std::ostream& operator<<( std::ostream& os, const Array &array ) noexcept
+        {
+            os << "[";
+            array.each(
+                [
+                    &os,
+                    i = 0
+                ]( const T &a ) mutable {
+                os << ( i++ == 0 ? "" : ", " ) << a;
+            });
+            os << "]";
+            return os;
+        }
+    };
 
-			void each( ConstTraverseCallback const &callback ) const
-			{
-				LockImpl lock( this );
+    template< typename T >
+    using ThreadSafeArray = Array< T, policies::ObjectLevelLockable >;
 
-				// implement a policy to traverse the array by creating a copy if needed
-				for ( crimild::Size i = 0; i < _size; i++ ) {
-					callback( _elems[ i ], i );
-				}
-			}
-
-			void each( BasicTraverseCallback const &callback )
-			{
-				LockImpl lock( this );
-
-				// implement a policy to traverse the array by creating a copy if needed
-				for ( crimild::Size i = 0; i < _size; i++ ) {
-					callback( _elems[ i ] );
-				}
-			}
-
-			void each( ConstBasicTraverseCallback const &callback ) const
-			{
-				LockImpl lock( this );
-
-				// implement a policy to traverse the array by creating a copy if needed
-				for ( crimild::Size i = 0; i < _size; i++ ) {
-					callback( _elems[ i ] );
-				}
-			}
-
-			template< typename Fn >
-			Array filter( Fn selector ) const
-			{
-				Array ret;
-				for ( crimild::Size i = 0; i < _size; ++i ) {
-					if ( selector( _elems[ i ] ) ) {
-						ret.add( _elems[ i ] );
-					}
-				}
-				return ret;
-			}
-
-            template< typename Fn >
-            auto map( Fn fn ) const noexcept
-            {
-                Array< decltype( fn( _elems[ 0 ] ) ) > ret( _size );
-                for ( auto i = 0l ; i < _size; i++ ) {
-                    ret[ i ] = fn( _elems[ i ] );
-                }
-                return ret;
-            }
-
-		private:
-			crimild::Size size_unsafe( void ) const
-			{
-				return _size;
-			}
-			
-			void resize_unsafe( crimild::Size capacity )
-			{
-                capacity = Numeric< crimild::Size >::max( 1, capacity );
-				auto elems = std::unique_ptr< T[] >( new T[ capacity ] );
-                auto count = Numeric< crimild::Size >::min( capacity, _capacity );
-                for ( crimild::Size i = 0; i < count; i++ ) {
-                    elems[ i ] = _elems[ i ];
-                }
-                _capacity = capacity;
-				_elems = std::move( elems );
-			}
-
-			void swap_unsafe( crimild::Size i, crimild::Size j )
-			{
-				auto t = _elems[ i ];
-				_elems[ i ] = _elems[ j ];
-				_elems[ j ] = t;
-			}
-			
-			void removeAt_unsafe( crimild::Size index )
-			{
-				for ( crimild::Size i = index; i < _size - 1; i++ ) {
-					_elems[ i ] = _elems[ i + 1 ];
-				}
-				_elems[ _size - 1 ] = T(); // avoid loitering
-				--_size;
-				
-				if ( _size > 0 && _size == _capacity / 4 ) {
-					// resize the array if needed
-					resize_unsafe( _capacity / 2 );
-				}			
-			}
-
-		private:
-			std::unique_ptr< T[] > _elems;
-			crimild::Size _size = 0;
-			crimild::Size _capacity = 0;
-		};
-
-		template< typename T >
-		using ThreadSafeArray = Array< T, policies::ObjectLevelLockable >;
-
-		using ByteArray = Array< crimild::Byte >;
-		
-	}
+    using ByteArray = Array< Byte >;
 
 }
 
-template<
-    typename T,
-    class TP
->
-std::ostream& operator<<( std::ostream& os, const crimild::containers::Array< T, TP > &array )  
-{  
-	os << "[";
-	array.each( [&os]( const T &a, crimild::Size i ) {
-		os << ( i == 0 ? "" : ", " ) << a;
-	});
-	os << "]";
-	return os;
-}  
-	
 #endif
-	
-	

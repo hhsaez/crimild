@@ -65,8 +65,8 @@ namespace crimild {
         SharedPointer< Pipeline > pipeline;
         SharedPointer< VertexBuffer > vbo;
         SharedPointer< IndexBuffer > ibo;
-        containers::Array< SharedPointer< UniformBuffer >> uniforms;
-        containers::Array< SharedPointer< Texture >> textures;
+        Array< SharedPointer< UniformBuffer >> uniforms;
+        Array< SharedPointer< Texture >> textures;
         SharedPointer< DescriptorSetLayout > descriptorSetLayout;
         SharedPointer< DescriptorPool > descriptorPool;
         SharedPointer< DescriptorSet > descriptorSet;
@@ -101,8 +101,8 @@ namespace crimild {
 		void setRenderOnScreen( bool value ) { _renderOnScreen = value; }
 
 	private:
-		containers::Array< SharedPointer< Material >> _materials;
-		containers::Array< SharedPointer< Light >> _lights;
+		Array< SharedPointer< Material >> _materials;
+		Array< SharedPointer< Light >> _lights;
 
 		SharedPointer< animation::Skeleton > _skeleton;
 

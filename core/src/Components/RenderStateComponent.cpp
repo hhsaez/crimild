@@ -137,15 +137,19 @@ SharedPointer< DescriptorSet > RenderStateComponent::createDescriptorSet( Descri
 
 void RenderStateComponent::forEachMaterial( std::function< void( Material * ) > callback )
 {
+    /*
 	_materials.each( [ callback ]( SharedPointer< Material > &m ) {
 		callback( crimild::get_ptr( m ) );
 	});
+    */
 }
 
 void RenderStateComponent::forEachLight( std::function< void( Light * ) > callback )
 {
+    /*
 	_lights.each( [ callback ]( SharedPointer< Light > &l ) {
 		callback( crimild::get_ptr( l ) );
 	});
+    */
 }
 

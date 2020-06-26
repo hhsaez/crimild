@@ -66,13 +66,13 @@ namespace crimild {
             virtual crimild::Bool decode( std::string key, Transformation &value ) override { return decodeValue( key, value ); }
             virtual crimild::Bool decode( std::string key, VertexFormat &value ) override { /* no-op */ return true; }
 
-            virtual crimild::Bool decode( std::string key, containers::ByteArray &value ) override { /* no-op */ return true; }
-            virtual crimild::Bool decode( std::string key, containers::Array< crimild::Real32 > &value ) override { return true; };
-            virtual crimild::Bool decode( std::string key, containers::Array< Vector3f > &value ) override { return true; };
-            virtual crimild::Bool decode( std::string key, containers::Array< Vector4f > &value ) override { return true; };
-            virtual crimild::Bool decode( std::string key, containers::Array< Matrix3f > &value ) override { return true; };
-            virtual crimild::Bool decode( std::string key, containers::Array< Matrix4f > &value ) override { return true; };
-            virtual crimild::Bool decode( std::string key, containers::Array< Quaternion4f > &value ) override { return true; };
+            virtual crimild::Bool decode( std::string key, ByteArray &value ) override { /* no-op */ return true; }
+            virtual crimild::Bool decode( std::string key, Array< crimild::Real32 > &value ) override { return true; };
+            virtual crimild::Bool decode( std::string key, Array< Vector3f > &value ) override { return true; };
+            virtual crimild::Bool decode( std::string key, Array< Vector4f > &value ) override { return true; };
+            virtual crimild::Bool decode( std::string key, Array< Matrix3f > &value ) override { return true; };
+            virtual crimild::Bool decode( std::string key, Array< Matrix4f > &value ) override { return true; };
+            virtual crimild::Bool decode( std::string key, Array< Quaternion4f > &value ) override { return true; };
 
 			void parse( std::string str );
 			void parseFile( std::string filename );
@@ -97,7 +97,7 @@ namespace crimild {
 
 		private:
 			std::string _rootObjectName;
-            containers::Stack< scripting::ScriptEvaluator > _evals;
+            Stack< scripting::ScriptEvaluator > _evals;
         };
 
 	}

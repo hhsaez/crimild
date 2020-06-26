@@ -76,21 +76,21 @@ void ParticleSystemComponent::start( void )
 
 void ParticleSystemComponent::configureGenerators( Node *node, ParticleData *particles )
 {
-	_generators.each( [ node, particles ]( SharedPointer< ParticleGenerator > &g, crimild::Size ) {
+	_generators.each( [ node, particles ]( SharedPointer< ParticleGenerator > &g ) {
 		g->configure( node, particles );
 	});
 }
 
 void ParticleSystemComponent::configureUpdaters( Node *node, ParticleData *particles )
 {
-	_updaters.each( [ node, particles ]( SharedPointer< ParticleUpdater > &u, crimild::Size ) {
+	_updaters.each( [ node, particles ]( SharedPointer< ParticleUpdater > &u ) {
 		u->configure( node, particles );
 	});
 }
 
 void ParticleSystemComponent::configureRenderers( Node *node, ParticleData *particles )
 {
-	_renderers.each( [ node, particles ]( SharedPointer< ParticleRenderer > &r, crimild::Size ) {
+	_renderers.each( [ node, particles ]( SharedPointer< ParticleRenderer > &r ) {
 		if ( r != nullptr ) {
 			r->configure( node, particles );
 		}

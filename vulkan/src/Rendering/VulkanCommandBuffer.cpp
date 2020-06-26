@@ -65,7 +65,7 @@ crimild::Bool CommandBufferManager::bind( CommandBuffer *commandBuffer ) noexcep
         .commandBufferCount = static_cast< crimild::UInt32 >( imageCount ),
     };
 
-    containers::Array< VkCommandBuffer > handlers( imageCount );
+    Array< VkCommandBuffer > handlers( imageCount );
     CRIMILD_VULKAN_CHECK(
          vkAllocateCommandBuffers(
             renderDevice->handler,

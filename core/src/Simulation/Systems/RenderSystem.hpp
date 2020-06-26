@@ -58,7 +58,7 @@ namespace crimild {
 		void onRenderQueueAvailable( messaging::RenderQueueAvailable const &message );
 
 	private:
-		containers::Array< SharedPointer< RenderQueue >> _renderQueues;
+		Array< SharedPointer< RenderQueue >> _renderQueues;
 	};
     
 }

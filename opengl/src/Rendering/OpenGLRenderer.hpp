@@ -52,7 +52,7 @@ namespace crimild {
 
 		public:
 			virtual void bindUniform( ShaderLocation *location, int value ) override;
-            virtual void bindUniform( ShaderLocation *location, const containers::Array< crimild::Int32 > &value ) override;
+            virtual void bindUniform( ShaderLocation *location, const Array< crimild::Int32 > &value ) override;
 			virtual void bindUniform( ShaderLocation *location, float value ) override;
 			virtual void bindUniform( ShaderLocation *location, const Vector3f &vector ) override;
 			virtual void bindUniform( ShaderLocation *location, const Vector2f &vector ) override;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,215 +39,200 @@
 
 namespace crimild {
 
-	namespace containers {
+    /**
+       \brief A map implementation
 
-		/**
-		   \brief A map implementation
-		   
-		   \todo Implement index bound checking policy
-		   \todo Implement parallel policy
-		*/
-		template<
-		    typename KeyType,
-		    typename ValueType,
-		    class ThreadingPolicy = policies::SingleThreaded,
-		    class MapImpl = std::unordered_map< KeyType, ValueType >
-		>
-		class Map : public ThreadingPolicy {
-		private:
-			using LockImpl = typename ThreadingPolicy::Lock;
-			
-		public:
-			using TraverseCallback = std::function< void( const KeyType &, ValueType & ) >;
-			using ConstTraverseCallback = std::function< void( const KeyType &, const ValueType & ) >;
-			using KeyTraverseCallback = std::function< void( KeyType const & ) >;
-			using ConstKeyTraverseCallback = std::function< void( const KeyType & ) >;
-			using ValueTraverseCallback = std::function< void( ValueType & ) >;
-			using ConstValueTraverseCallback = std::function< void( const ValueType & ) >;
-			
-		public:
-			Map( void )
-			{
-				
-			}
-			
-			Map( std::initializer_list< std::pair< const KeyType, ValueType >> l )
-				: _map( l )
-			{
+       \todo Implement index bound checking policy
+       \todo Implement parallel policy
+    */
+    template<
+        typename KeyType,
+        typename ValueType,
+        class ThreadingPolicy = policies::SingleThreaded,
+        class MapImpl = std::unordered_map< KeyType, ValueType >
+    >
+    class Map : public ThreadingPolicy {
+    private:
+        using LockImpl = typename ThreadingPolicy::Lock;
 
-			}
+    public:
+        Map( void ) = default;
 
-			Map( const Map &other )
-				: _map( other._map )
-			{
+        Map( std::initializer_list< std::pair< const KeyType, ValueType >> l ) noexcept
+            : _map( l )
+        {
 
-			}
-			
-			virtual ~Map( void )
-			{
-                _map.clear();
-			}
-            
-            Map &operator=( const Map &other )
-            {
-                LockImpl lock( this );
-				_map = other._map;
-				return *this;
+        }
+
+        Map( const Map &other ) noexcept
+            : _map( other._map )
+        {
+
+        }
+
+        virtual ~Map( void ) noexcept
+        {
+            _map.clear();
+        }
+
+        Map &operator=( const Map &other ) noexcept
+        {
+            LockImpl lock( this );
+            _map = other._map;
+            return *this;
+        }
+
+        /**
+           \brief Compare two arrays up to getSize() elements
+        */
+        inline bool operator==( const Map &other ) const noexcept
+        {
+            LockImpl lock( this );
+            return _map == other._map;
+        }
+
+        inline bool empty( void ) const noexcept
+        {
+            LockImpl lock( this );
+            return _map.empty();
+        }
+
+        inline Size size( void ) const noexcept
+        {
+            LockImpl lock( this );
+            return _map.size();
+        }
+
+        inline void clear( void ) noexcept
+        {
+            LockImpl lock( this );
+            _map.clear();
+        }
+
+        inline bool contains( const KeyType &key ) const noexcept
+        {
+            LockImpl lock( this );
+            return _map.count( key ) > 0;
+        }
+
+        inline ValueType &operator[]( const KeyType &key ) noexcept
+        {
+            LockImpl lock( this );
+            return _map[ key ];
+        }
+
+        inline const ValueType &operator[]( const KeyType &key ) const noexcept
+        {
+            LockImpl lock( this );
+            return _map.at( key );
+        }
+
+        void insert( const KeyType &key, ValueType const &value ) noexcept
+        {
+            LockImpl lock( this );
+            _map[ key ] = value;
+        }
+
+        void remove( const KeyType &key ) noexcept
+        {
+            LockImpl lock( this );
+            _map.erase( key );
+        }
+
+        Array< KeyType > keys( void ) const noexcept
+        {
+            Array< KeyType > ret( size() );
+            Size i = 0;
+            for ( const auto &it : _map ) {
+                ret[ i++ ] = it.first;
             }
+            return ret;
+        }
 
-			/**
-			   \brief Compare two arrays up to getSize() elements
-			 */
-			bool operator==( const Map &other ) const
-			{
-				LockImpl lock( this );
-				return _map == other._map;
-			}
-			
-			inline bool empty( void ) const
-			{
-				LockImpl lock( this );
-				return _map.empty();
-			}
-			
-			inline crimild::Size size( void ) const
-			{
-				LockImpl lock( this );
-				return _map.size();
-			}
+        Array< ValueType > values( void ) const noexcept
+        {
+            Array< ValueType > ret( size() );
+            Size i = 0;
+            for ( const auto &it : _map ) {
+                ret[ i++ ] = it.second;
+				}
+            return ret;
+        }
 
-			inline void clear( void )
-			{
-				LockImpl lock( this );
-				_map.clear();
-			}
-
-			inline bool contains( const KeyType &key ) const
-			{
-				LockImpl lock( this );
-				return _map.count( key ) > 0;
-			}
-			
-			inline ValueType &operator[]( const KeyType &key )
-			{
-				LockImpl lock( this );
-                return _map[ key ];
-			}
-			
-            inline const ValueType &operator[]( const KeyType &key ) const
-            {
-                LockImpl lock( this );
-                return _map.at( key );
+        template< typename Callback >
+        void each( Callback callback ) noexcept
+        {
+            LockImpl lock( this );
+            for ( auto &it : _map ) {
+                callback( it.first, it.second );
             }
+        }
 
-			void insert( const KeyType &key, ValueType const &value )
-			{
-				LockImpl lock( this );
-				_map[ key ] = value;
-			}
-			
-			void remove( const KeyType &key )
-			{
-				LockImpl lock( this );
-				_map.erase( key );
-			}
+        template< typename Callback >
+        void each( Callback callback ) const noexcept
+        {
+            LockImpl lock( this );
+            for ( const auto &it : _map ) {
+                callback( it.first, it.second );
+            }
+        }
 
-			Array< KeyType > keys( void ) const
-			{
-				Array< KeyType > ret( size() );
-				crimild::Size i = 0;
-				for ( const auto &it : _map ) {
-					ret[ i++ ] = it.first;
-				}
-				return ret;
-			}
+        template< typename Callback >
+        void eachKey( Callback callback ) noexcept
+        {
+            LockImpl lock( this );
+            for ( auto &it : _map ) {
+                callback( it.first );
+            }
+        }
 
-			Array< ValueType > values( void ) const
-			{
-				Array< ValueType > ret( size() );
-				crimild::Size i = 0;
-				for ( const auto &it : _map ) {
-					ret[ i++ ] = it.second;
-				}
-				return ret;
-			}
-			
-			void each( TraverseCallback const &callback )
-			{
-				LockImpl lock( this );
-				for ( auto &it : _map ) {
-					callback( it.first, it.second );
-				}
-			}
+        template< typename Callback >
+        void eachKey( Callback callback ) const noexcept
+        {
+            LockImpl lock( this );
+            for ( const auto &it : _map ) {
+                callback( it.first );
+            }
+        }
 
-			void each( ConstTraverseCallback const &callback ) const
-			{
-				LockImpl lock( this );
-				for ( const auto &it : _map ) {
-					callback( it.first, it.second );
-				}
-			}
+        template< typename Callback >
+        void eachValue( Callback callback ) noexcept
+        {
+            LockImpl lock( this );
+            for ( auto &it : _map ) {
+                callback( it.second );
+            }
+        }
 
-			void eachKey( KeyTraverseCallback const &callback )
-			{
-				LockImpl lock( this );
-				for ( auto &it : _map ) {
-					callback( it.first );
-				}
-			}
+        template< typename Callback >
+        void eachValue( Callback callback ) const noexcept
+        {
+            LockImpl lock( this );
+            for ( const auto &it : _map ) {
+                callback( it.second );
+            }
+        }
 
-			void eachKey( ConstKeyTraverseCallback const &callback ) const
-			{
-				LockImpl lock( this );
-				for ( const auto &it : _map ) {
-					callback( it.first );
-				}
-			}
+    private:
+        MapImpl _map;
 
-			void eachValue( ValueTraverseCallback const &callback )
-			{
-				LockImpl lock( this );
-				for ( auto &it : _map ) {
-					callback( it.second );
-				}
-			}
+    public:
+        friend std::ostream& operator<<( std::ostream& os, const Map &map ) noexcept
+        {
+            os << "{";
+            Bool first = true;
+            map.each( [ &os, &first ]( const auto &k, const auto &v ) {
+                os << ( first == 0 ? "" : ", " ) << "[" << k << ": " << v << "]";
+                first = false;
+            });
+            os << "}";
+            return os;
+        }
+    };
 
-			void eachValue( ValueTraverseCallback const &callback ) const
-			{
-				LockImpl lock( this );
-				for ( const auto &it : _map ) {
-					callback( it.second );
-				}
-			}
-
-		private:
-			MapImpl _map;
-		};
-
-		template< typename KEY_TYPE, typename VALUE_TYPE >
-		using ThreadSafeMap = Map< KEY_TYPE, VALUE_TYPE, policies::ObjectLevelLockable >;
-		
-	}
+    template< typename KEY_TYPE, typename VALUE_TYPE >
+    using ThreadSafeMap = Map< KEY_TYPE, VALUE_TYPE, policies::ObjectLevelLockable >;
 
 }
 
-template<
-    typename KT,
-    typename VT,
-    class TP
->
-std::ostream& operator<<( std::ostream& os, const crimild::containers::Map< KT, VT, TP > &map )  
-{  
-	os << "{";
-	crimild::Bool first = true;
-	map.each( [ &os, &first ]( const KT &k, const VT &v ) {
-		os << ( first == 0 ? "" : ", " ) << "[" << k << ": " << v << "]";
-		first = false;
-	});
-	os << "}";
-	return os;
-}  
-	
 #endif
-	
-	

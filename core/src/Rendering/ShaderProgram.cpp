@@ -138,7 +138,7 @@ void ShaderProgram::bindUniform( std::string name, crimild::Int32 value )
 	}
 }
 
-void ShaderProgram::bindUniform( std::string name, const containers::Array< crimild::Int32 > &value )
+void ShaderProgram::bindUniform( std::string name, const Array< crimild::Int32 > &value )
 {
     if ( auto uniform = getUniform< Int32ArrayUniform >( name ) ) {
         uniform->setValue( value );

@@ -34,7 +34,7 @@ using namespace crimild;
 
 TEST( BufferView, constructionWithDefaults )
 {
-    auto data = containers::Array< crimild::Real32 > {
+    auto data = Array< crimild::Real32 > {
         -0.5f, -0.5f, 0.0f,
         0.5f, -0.5f, 0.0f,
         0.0f, 0.5f, 0.0f,
@@ -59,7 +59,7 @@ TEST( BufferView, constructionWithDefaults )
 
 TEST( BufferView, constructionWithLength )
 {
-    auto data = containers::Array< crimild::Real32 > {
+    auto data = Array< crimild::Real32 > {
         -0.5f, -0.5f, 0.0f,
         0.5f, -0.5f, 0.0f,
         0.0f, 0.5f, 0.0f,
@@ -87,7 +87,7 @@ TEST( BufferView, constructionWithLength )
 
 TEST( BufferView, constructionWithOffset )
 {
-    auto data = containers::Array< crimild::Real32 > {
+    auto data = Array< crimild::Real32 > {
         -0.5f, -0.5f, 0.0f,
         0.5f, -0.5f, 0.0f,
         0.0f, 0.5f, 0.0f,
@@ -113,7 +113,7 @@ TEST( BufferView, constructionWithOffset )
 
 TEST( BufferView, constructionWithOffsetAndLength )
 {
-    auto data = containers::Array< crimild::Real32 > {
+    auto data = Array< crimild::Real32 > {
         -0.5f, -0.5f, 0.0f,
         0.5f, -0.5f, 0.0f,
         0.0f, 0.5f, 0.0f,
@@ -141,7 +141,7 @@ TEST( BufferView, constructionWithOffsetAndLength )
 
 TEST( BufferView, constructionWithStride )
 {
-    auto data = containers::Array< crimild::Real32 > {
+    auto data = Array< crimild::Real32 > {
         -0.5f, -0.5f, 0.0f,
         0.5f, -0.5f, 0.0f,
         0.0f, 0.5f, 0.0f,
@@ -170,7 +170,7 @@ TEST( BufferView, withEmptyData )
 {
     auto bufferView = crimild::alloc< BufferView >(
         BufferView::Target::VERTEX,
-        crimild::alloc< Buffer >( containers::Array< crimild::Real32 >( 3 ) ),
+        crimild::alloc< Buffer >( Array< crimild::Real32 >( 3 ) ),
         0,
         sizeof( crimild::Real32 )
     );
@@ -189,7 +189,7 @@ TEST( BufferView, autoAddToFrameGraph )
 	{
         auto bufferView = crimild::alloc< BufferView >(
             BufferView::Target::VERTEX,
-            crimild::alloc< Buffer >( containers::Array< crimild::Real32 >( 3 ) ),
+            crimild::alloc< Buffer >( Array< crimild::Real32 >( 3 ) ),
             0,
             sizeof( crimild::Real32 )
         );

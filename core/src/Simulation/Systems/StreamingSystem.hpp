@@ -101,7 +101,7 @@ namespace crimild {
 		void onReloadScene( messaging::ReloadScene const &message );
         
 	private:
-		containers::Map< std::string, Builder > _builders;
+		Map< std::string, Builder > _builders;
 		std::string _lastSceneFileName;
 	};
 

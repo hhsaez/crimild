@@ -498,7 +498,7 @@ Variable *csl::add( Variable *a, Variable *b )
 	return ShaderGraph::getCurrent()->addNode< Add >( a, b )->getResult();
 }
 
-Variable *csl::add( containers::Array< Variable * > const &inputs )
+Variable *csl::add( Array< Variable * > const &inputs )
 {
 	return ShaderGraph::getCurrent()->addNode< Add >( inputs )->getResult();
 }
@@ -513,7 +513,7 @@ Variable *csl::mult( Variable *a, Variable *b )
 	return ShaderGraph::getCurrent()->addNode< Multiply >( a, b )->getResult();
 }
 
-Variable *csl::mult( containers::Array< Variable * > const &inputs )
+Variable *csl::mult( Array< Variable * > const &inputs )
 {
 	return ShaderGraph::getCurrent()->addNode< Multiply >( inputs )->getResult();
 }

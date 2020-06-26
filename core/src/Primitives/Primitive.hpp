@@ -63,11 +63,11 @@ namespace crimild {
 
 		Primitive::Type getType( void ) const { return _type; }
 
-		containers::Array< SharedPointer< VertexBuffer >> vertexBuffers;
+		Array< SharedPointer< VertexBuffer >> vertexBuffers;
 		SharedPointer< IndexBuffer > indexBuffer;
 
         //void setVertices( SharedPointer< VertexBuffer > &vertices ) noexcept { setVertices( { vertexData } ); }
-        //void setVertices( containers::Array< SharedPointer< VertexBuffer >> const &vertices ) noexcept { _vertices; }
+        //void setVertices( Array< SharedPointer< VertexBuffer >> const &vertices ) noexcept { _vertices; }
 
         //void setIndices( SharedPointer< IndexBuffer > const &indexData ) noexcept { _indexData = indexData; }
 

@@ -34,7 +34,6 @@
 
 using namespace crimild;
 using namespace crimild::shadergraph;
-using namespace crimild::containers;
 
 ShaderGraph *ShaderGraph::_currentShaderGraph = nullptr;
 
@@ -72,7 +71,7 @@ void ShaderGraph::eachNode( std::function< void( ShaderGraphNode * ) > const &ca
 	});
 }
 
-void ShaderGraph::read( Expression *node, containers::Array< Variable * > const &inputs )
+void ShaderGraph::read( Expression *node, Array< Variable * > const &inputs )
 {
 	inputs.each( [ this, node ]( ShaderGraphNode *in ) {
 		if ( in != nullptr ) {
@@ -81,7 +80,7 @@ void ShaderGraph::read( Expression *node, containers::Array< Variable * > const 
 	});
 }
 
-void ShaderGraph::write( Expression *node, containers::Array< Variable * > const &outputs )
+void ShaderGraph::write( Expression *node, Array< Variable * > const &outputs )
 {
 	outputs.each( [ this, node ]( ShaderGraphNode *out ) {
 		if ( out != nullptr ) {
@@ -90,7 +89,7 @@ void ShaderGraph::write( Expression *node, containers::Array< Variable * > const
 	});
 }
 
-ShaderGraphNode *ShaderGraph::getNode( containers::Array< ShaderGraphNode * > &ns, std::string name )
+ShaderGraphNode *ShaderGraph::getNode( Array< ShaderGraphNode * > &ns, std::string name )
 {
 	ShaderGraphNode *result = nullptr;
 	ns.each( [ name, &result ]( ShaderGraphNode *n ) {
@@ -131,7 +130,7 @@ std::string ShaderGraph::build( void )
 		});
 	});
 
-	containers::Array< ShaderGraphNode * > sorted;
+	Array< ShaderGraphNode * > sorted;
 	_graph.sort().each( [ this, &sorted ]( ShaderGraphNode *node ) {
 		if ( _connected.contains( node ) ) {
 			sorted.add( node );

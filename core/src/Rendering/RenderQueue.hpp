@@ -118,7 +118,7 @@ namespace crimild {
     namespace messaging {
         
         struct RenderQueueAvailable {
-			containers::Array< SharedPointer< RenderQueue >> renderQueues;
+			Array< SharedPointer< RenderQueue >> renderQueues;
         };
         
     }

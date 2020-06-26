@@ -56,8 +56,8 @@ namespace crimild {
 			};
 
 			crimild::UInt32 _ambientLightBlockId = 0;
-			containers::Array< crimild::Bool > _usedAmbientLightIds;
-			containers::Array< AmbientLightData > _ambientLights;
+			Array< crimild::Bool > _usedAmbientLightIds;
+			Array< AmbientLightData > _ambientLights;
 			
 			struct DirectionalLightData {
 				Vector4f ambient;
@@ -71,8 +71,8 @@ namespace crimild {
 			};
 
 			crimild::UInt32 _directionalLightBlockId = 0;
-			containers::Array< crimild::Bool > _usedDirectionalLightIds;
-			containers::Array< DirectionalLightData > _directionalLights;
+			Array< crimild::Bool > _usedDirectionalLightIds;
+			Array< DirectionalLightData > _directionalLights;
 
             struct PointLightData {
                 Vector4f ambient;
@@ -82,8 +82,8 @@ namespace crimild {
             };
 
             crimild::UInt32 _pointLightBlockId = 0;
-            containers::Array< crimild::Bool > _usedPointLightIds;
-            containers::Array< PointLightData > _pointLights;
+            Array< crimild::Bool > _usedPointLightIds;
+            Array< PointLightData > _pointLights;
 
             struct SpotLightData {
                 Vector4f ambient;
@@ -101,8 +101,8 @@ namespace crimild {
             };
 
             crimild::UInt32 _spotLightBlockId = 0;
-            containers::Array< crimild::Bool > _usedSpotLightIds;
-            containers::Array< SpotLightData > _spotLights;
+            Array< crimild::Bool > _usedSpotLightIds;
+            Array< SpotLightData > _spotLights;
 		};
 
 	}

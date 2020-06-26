@@ -75,7 +75,7 @@ namespace crimild {
 		inline void setUsedCount( crimild::Size count ) { m_data.resize( count * sizeof( T ) ); }
 
 	private:
-        containers::ByteArray m_data;
+        ByteArray m_data;
         
         /**
             name Coding
