@@ -41,8 +41,8 @@ namespace crimild {
 		template< typename T >
 		class ChannelImpl : public Channel {
 		private:
-			using TimeArray = containers::Array< crimild::Real32 >;
-			using KeyArray = containers::Array< T >;
+			using TimeArray = Array< crimild::Real32 >;
+			using KeyArray = Array< T >;
 			
 		public:
 			ChannelImpl( void ) { }
@@ -165,13 +165,13 @@ namespace crimild {
 		public:
 			Vector3fChannel( void ) { }
 			
-			Vector3fChannel( std::string name, const containers::Array< crimild::Real32 > &times, const containers::Array< Vector3f > &keys )
+			Vector3fChannel( std::string name, const Array< crimild::Real32 > &times, const Array< Vector3f > &keys )
 			    : ChannelImpl( name, times, keys )
 			{
 				
 			}
 
-			Vector3fChannel( std::string name, containers::Array< crimild::Real32 > &&times, containers::Array< Vector3f > &&keys )
+			Vector3fChannel( std::string name, Array< crimild::Real32 > &&times, Array< Vector3f > &&keys )
 			    : ChannelImpl( name, times, keys )
 			{
 				
@@ -189,13 +189,13 @@ namespace crimild {
 		public:
 			Quaternion4fChannel( void ) { }
 			
-			Quaternion4fChannel( std::string name, const containers::Array< crimild::Real32 > &times, const containers::Array< Quaternion4f > &keys )
+			Quaternion4fChannel( std::string name, const Array< crimild::Real32 > &times, const Array< Quaternion4f > &keys )
 			    : ChannelImpl( name, times, keys )
 			{
 				
 			}
 
-			Quaternion4fChannel( std::string name, containers::Array< crimild::Real32 > &&times, containers::Array< Quaternion4f > &&keys )
+			Quaternion4fChannel( std::string name, Array< crimild::Real32 > &&times, Array< Quaternion4f > &&keys )
 			    : ChannelImpl( name, times, keys )
 			{
 				
@@ -213,13 +213,13 @@ namespace crimild {
 		public:
 			Real32Channel( void ) { }
 			
-			Real32Channel( std::string name, const containers::Array< crimild::Real32 > &times, const containers::Array< Real32 > &keys )
+			Real32Channel( std::string name, const Array< crimild::Real32 > &times, const Array< Real32 > &keys )
 			    : ChannelImpl( name, times, keys )
 			{
 				
 			}
 
-			Real32Channel( std::string name, containers::Array< crimild::Real32 > &&times, containers::Array< Real32 > &&keys )
+			Real32Channel( std::string name, Array< crimild::Real32 > &&times, Array< Real32 > &&keys )
 			    : ChannelImpl( name, times, keys )
 			{
 				

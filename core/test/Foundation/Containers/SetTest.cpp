@@ -31,7 +31,6 @@
 #include "gtest/gtest.h"
 
 using namespace crimild;
-using namespace crimild::containers;
 
 TEST( Set, filter )
 {

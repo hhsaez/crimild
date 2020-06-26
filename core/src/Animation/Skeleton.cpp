@@ -134,7 +134,7 @@ void Skeleton::decode( coding::Decoder &decoder )
 {
 	NodeComponent::decode( decoder );
 
-	containers::Array< SharedPointer< Clip >> clips;
+	Array< SharedPointer< Clip >> clips;
 	decoder.decode( "clips", clips );
 	clips.each( [ this ]( SharedPointer< Clip > const &clip ) {
 		getClips()[ clip->getName() ] = clip;

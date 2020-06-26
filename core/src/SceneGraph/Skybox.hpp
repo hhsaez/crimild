@@ -39,7 +39,7 @@ namespace crimild {
 		CRIMILD_IMPLEMENT_RTTI( crimild::Skybox )
 
 	private:
-		using ImageArray = containers::Array< SharedPointer< Image >>;
+		using ImageArray = Array< SharedPointer< Image >>;
 		
 	public:
 		Skybox( void ) = default;

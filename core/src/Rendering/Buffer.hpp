@@ -117,7 +117,7 @@ namespace crimild {
            This is usually used for vertex or index buffers
          */
         template< typename DATA_TYPE >
-        explicit Buffer( containers::Array< DATA_TYPE > const &data )
+        explicit Buffer( Array< DATA_TYPE > const &data )
             : m_data( sizeof( DATA_TYPE ) * data.size() )
         {
             memcpy( &m_data[ 0 ], &data[ 0 ], m_data.size() );
@@ -153,7 +153,7 @@ namespace crimild {
         inline const crimild::Byte *getData( void ) const noexcept { return m_data.getData(); }
 
     private:
-        containers::ByteArray m_data;
+        ByteArray m_data;
     };
 
 }

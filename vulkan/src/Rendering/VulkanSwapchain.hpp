@@ -54,8 +54,8 @@ namespace crimild {
             };
 
 		private:
-			using ImageArray = containers::Array< SharedPointer< Image >>;
-			using ImageViewArray = containers::Array< SharedPointer< ImageView >>;
+			using ImageArray = Array< SharedPointer< Image >>;
+			using ImageViewArray = Array< SharedPointer< ImageView >>;
 			
 		public:
 			~Swapchain( void ) noexcept;

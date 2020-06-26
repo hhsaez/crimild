@@ -38,11 +38,11 @@ namespace crimild {
 			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::Multiply )
 
 		private:
-			static Variable *createResult( ShaderGraph *graph, const containers::Array< Variable * > &inputs );
+			static Variable *createResult( ShaderGraph *graph, const Array< Variable * > &inputs );
 			
 		public:
 			Multiply( ShaderGraph *, Variable *a, Variable *b );
-			Multiply( ShaderGraph *, containers::Array< Variable * > const &inputs );
+			Multiply( ShaderGraph *, Array< Variable * > const &inputs );
 			virtual ~Multiply( void );
 		};
 

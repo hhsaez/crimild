@@ -118,7 +118,7 @@ namespace crimild {
             }
 
         private:
-            containers::Map< ResourceType *, BindInfoType > m_infos;
+            Map< ResourceType *, BindInfoType > m_infos;
         };
 
 
@@ -156,12 +156,12 @@ namespace crimild {
             }
 
         private:
-            containers::Map< ResourceType *, HandlerType > m_handlers;
+            Map< ResourceType *, HandlerType > m_handlers;
         };
 
         template< typename ResourceType, typename HandlerType >
         class MultiHandlerRenderResourceManagerImpl : public VulkanRenderResourceManagerImpl< ResourceType, HandlerType > {
-            using HandlerArray = containers::Array< HandlerType >;
+            using HandlerArray = Array< HandlerType >;
 
         public:
             virtual ~MultiHandlerRenderResourceManagerImpl( void ) noexcept = default;
@@ -208,7 +208,7 @@ namespace crimild {
             }
 
         private:
-            containers::Map< ResourceType *, HandlerArray > m_handlers;
+            Map< ResourceType *, HandlerArray > m_handlers;
         };
 
     }

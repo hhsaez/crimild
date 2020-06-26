@@ -31,7 +31,6 @@
 #include "gtest/gtest.h"
 
 using namespace crimild;
-using namespace crimild::containers;
 
 TEST( ArrayTest, construction )
 {
@@ -64,7 +63,7 @@ TEST( ArrayTest, foreach )
 	}
 
 	auto sum = 10 * 11 / 2;
-	a.each( [&sum]( int &e, crimild::Size ) {
+	a.each( [&sum]( int &e ) {
 		sum -= e;
 	});
 

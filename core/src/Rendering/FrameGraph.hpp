@@ -118,7 +118,7 @@ namespace crimild {
             FrameGraphObject *obj = nullptr;
 		};
 
-        using CommandBufferArray = containers::Array< SharedPointer< CommandBuffer >>;
+        using CommandBufferArray = Array< SharedPointer< CommandBuffer >>;
 
 	public:
 		virtual ~FrameGraph( void ) = default;
@@ -203,7 +203,7 @@ namespace crimild {
 			return getNode( crimild::get_ptr( obj ) );
 		}
 
-        inline const containers::Array< Node * > &getSorted( void ) const
+        inline const Array< Node * > &getSorted( void ) const noexcept
         {
             return m_sorted;
         }
@@ -237,7 +237,7 @@ namespace crimild {
 		   \todo Should this be const'd?
 		 */
 		template< typename T, typename U >
-		containers::Set< T * > connected( U const &obj ) noexcept
+		Set< T * > connected( U const &obj ) noexcept
 		{
 			auto node = getNode( obj );
 			if ( node == nullptr ) {
@@ -311,13 +311,13 @@ namespace crimild {
 		const PresentationMaster *getPresentationMaster( void ) const noexcept;
 
 	private:
-		containers::Digraph< Node * > m_graph;
-		containers::Digraph< Node * > m_reversedGraph;
-		containers::Map< FrameGraphObject *, Node * > m_invertedIndex;
-        containers::Array< Node * > m_sorted;
-		containers::Map< Node::Type, containers::Array< Node * >> m_sortedByType;
-        containers::Set< SharedPointer< Node >> m_nodes;
-        containers::Map< Node::Type, containers::Array< Node * >> m_nodesByType;
+		Digraph< Node * > m_graph;
+		Digraph< Node * > m_reversedGraph;
+		Map< FrameGraphObject *, Node * > m_invertedIndex;
+        Array< Node * > m_sorted;
+		Map< Node::Type, Array< Node * >> m_sortedByType;
+        Set< SharedPointer< Node >> m_nodes;
+        Map< Node::Type, Array< Node * >> m_nodesByType;
 
 
 		/**

@@ -64,7 +64,7 @@ namespace crimild {
 			animation::Joint *getJoint( std::string name );
 
 		private:
-			containers::Map< std::string, SharedPointer< animation::Joint >> _joints;
+			Map< std::string, SharedPointer< animation::Joint >> _joints;
 			SharedPointer< animation::Skeleton > _skeleton;
 
 		private:

@@ -75,7 +75,7 @@ namespace crimild {
         }
 
 	private:
-        containers::Map< std::string, Builder > _builders;
+        Map< std::string, Builder > _builders;
 	};
 
 }

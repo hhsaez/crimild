@@ -81,17 +81,17 @@ namespace crimild {
             RenderGraphAttachment *createAttachment( std::string name, crimild::Int64 hints );
 			void eachAttachment( std::function< void( RenderGraphAttachment * ) > const &callback );
 
-			void read( RenderGraphPass *pass, containers::Array< RenderGraphAttachment * > const &attachments );
-			void write( RenderGraphPass *pass, containers::Array< RenderGraphAttachment * > const &attachments );			 
+			void read( RenderGraphPass *pass, Array< RenderGraphAttachment * > const &attachments );
+			void write( RenderGraphPass *pass, Array< RenderGraphAttachment * > const &attachments );			 
 
 		private:
-			containers::Digraph< Node * > _graph;
-            containers::Digraph< Node * > _reversedGraph;
-			containers::Array< SharedPointer< RenderGraphPass >> _passes;
-			containers::Array< SharedPointer< RenderGraphAttachment >> _attachments;
+			Digraph< Node * > _graph;
+            Digraph< Node * > _reversedGraph;
+			Array< SharedPointer< RenderGraphPass >> _passes;
+			Array< SharedPointer< RenderGraphAttachment >> _attachments;
 
 		public:
-			SharedPointer< FrameBufferObject > createFBO( containers::Array< RenderGraphAttachment * > const &attachments );
+			SharedPointer< FrameBufferObject > createFBO( Array< RenderGraphAttachment * > const &attachments );
 
 		private:
             SharedPointer< RenderTarget > getRenderTarget( crimild::Int64 hints, const Vector2i &screenSize );
@@ -100,14 +100,14 @@ namespace crimild {
             void releaseAttachment( RenderGraphAttachment *attachment );
 
         private:
-            containers::Map< crimild::Int64, containers::Stack< SharedPointer< RenderTarget >>> _renderTargetCache;
+            Map< crimild::Int64, Stack< SharedPointer< RenderTarget >>> _renderTargetCache;
 
 		public:
 			void compile( void );
 			void execute( Renderer *renderer, RenderQueue *renderQueue );
 
 		private:
-			containers::Array< RenderGraphPass * > _sortedPasses;
+			Array< RenderGraphPass * > _sortedPasses;
 
 		public:
 			void setOutput( RenderGraphAttachment *attachment );

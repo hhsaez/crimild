@@ -91,16 +91,16 @@ namespace crimild {
             virtual crimild::Bool decode( std::string key, Transformation &value ) = 0;
             virtual crimild::Bool decode( std::string key, VertexFormat &value ) = 0;
             
-            virtual crimild::Bool decode( std::string key, containers::ByteArray &value ) = 0;
-            virtual crimild::Bool decode( std::string key, containers::Array< crimild::Real32 > &value ) = 0;
-            virtual crimild::Bool decode( std::string key, containers::Array< Vector3f > &value ) = 0;
-            virtual crimild::Bool decode( std::string key, containers::Array< Vector4f > &value ) = 0;
-            virtual crimild::Bool decode( std::string key, containers::Array< Matrix3f > &value ) = 0;
-            virtual crimild::Bool decode( std::string key, containers::Array< Matrix4f > &value ) = 0;
-            virtual crimild::Bool decode( std::string key, containers::Array< Quaternion4f > &value ) = 0;
+            virtual crimild::Bool decode( std::string key, ByteArray &value ) = 0;
+            virtual crimild::Bool decode( std::string key, Array< crimild::Real32 > &value ) = 0;
+            virtual crimild::Bool decode( std::string key, Array< Vector3f > &value ) = 0;
+            virtual crimild::Bool decode( std::string key, Array< Vector4f > &value ) = 0;
+            virtual crimild::Bool decode( std::string key, Array< Matrix3f > &value ) = 0;
+            virtual crimild::Bool decode( std::string key, Array< Matrix4f > &value ) = 0;
+            virtual crimild::Bool decode( std::string key, Array< Quaternion4f > &value ) = 0;
 
             template< typename T >
-            crimild::Bool decode( std::string key, containers::Array< SharedPointer< T >> &value )
+            crimild::Bool decode( std::string key, Array< SharedPointer< T >> &value )
             {
                 auto count = beginDecodingArray( key );
                 
@@ -119,7 +119,7 @@ namespace crimild {
             }
             
 			template< typename T >
-			crimild::Bool decode( std::string key, containers::Array< T > &value )
+			crimild::Bool decode( std::string key, Array< T > &value )
 			{
 				auto count = beginDecodingArray( key );
 
@@ -158,7 +158,7 @@ namespace crimild {
 			void addRootObject( SharedPointer< SharedObject > const &obj );
 
 		private:
-			containers::Array< SharedPointer< SharedObject >> _roots;
+			Array< SharedPointer< SharedObject >> _roots;
         };
         
 	}

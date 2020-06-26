@@ -156,7 +156,7 @@ void Skybox::decode( coding::Decoder &decoder )
 {
 	Geometry::decode( decoder );
 
-    containers::Array< std::string > images;
+    Array< std::string > images;
 	decoder.decode( "images", images );
 
 	ImageArray faces;

@@ -90,8 +90,8 @@ namespace crimild {
 			CRIMILD_IMPLEMENT_RTTI( crimild::animation::Skeleton )
 
 		private:
-			using JointCatalog = containers::Map< std::string, SharedPointer< Joint >>;
-			using ClipCatalog = containers::Map< std::string, SharedPointer< Clip >>;
+			using JointCatalog = Map< std::string, SharedPointer< Joint >>;
+			using ClipCatalog = Map< std::string, SharedPointer< Clip >>;
 			
 		public:
 			Skeleton( void );

@@ -84,7 +84,7 @@ namespace crimild {
 	typedef ShaderUniformImpl< bool > BoolUniform;
 	typedef ShaderUniformImpl< int > IntUniform;
 	typedef ShaderUniformImpl< crimild::Int32 > Int32Uniform;
-    typedef ShaderUniformImpl< containers::Array< crimild::Int32 >> Int32ArrayUniform;
+    typedef ShaderUniformImpl< Array< crimild::Int32 >> Int32ArrayUniform;
 	typedef ShaderUniformImpl< float > FloatUniform;
 	typedef ShaderUniformImpl< Vector4f > Vector4fUniform;
 	typedef ShaderUniformImpl< Vector3f > Vector3fUniform;

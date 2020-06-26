@@ -33,6 +33,8 @@
 
 using namespace crimild;
 
+#if 0
+
 SkinnedMeshJoint::SkinnedMeshJoint( void )
 { 
 
@@ -113,22 +115,24 @@ SkinnedMeshJointCatalog::~SkinnedMeshJointCatalog( void )
 }
 
 SkinnedMeshJoint *SkinnedMeshJointCatalog::find( std::string name )
-{			
+{
+    /*
 	if ( !_joints.find( name ) ) {
 		return nullptr;
-	}
+        }*/
 
 	return crimild::get_ptr( _joints[ name ] );
 }
 
 SkinnedMeshJoint *SkinnedMeshJointCatalog::updateOrCreateJoint( std::string name, const Transformation &offset )
 {
+    /*
 	if ( _joints.find( name ) ) {
 		auto joint = _joints[ name ];
 		joint->setOffset( offset );
 		return crimild::get_ptr( joint );
 	}
-
+    */
 	unsigned int jointId = _joints.size();
 	auto joint = crimild::alloc< SkinnedMeshJoint >( jointId, offset, name );
 	_joints[ name ] = joint;
@@ -140,12 +144,14 @@ void SkinnedMeshJointCatalog::encode( coding::Encoder &encoder )
 {
 	Codable::encode( encoder );
 
-	containers::Array< SharedPointer< SkinnedMeshJoint >> js;
+	Array< SharedPointer< SkinnedMeshJoint >> js;
+    /*
 	_joints.foreach( [ &js ]( std::string const &, SharedPointer< SkinnedMeshJoint > &j, unsigned int ) {
 		if ( j != nullptr ) {
 			js.add( j );
 		}
 	});
+    */
 	encoder.encode( "joints", js );
 }
 
@@ -153,7 +159,7 @@ void SkinnedMeshJointCatalog::decode( coding::Decoder &decoder )
 {
 	Codable::decode( decoder );
 
-	containers::Array< SharedPointer< SkinnedMeshJoint >> js;
+	Array< SharedPointer< SkinnedMeshJoint >> js;
 	decoder.decode( "joints", js );
 	js.each( [ this ]( SharedPointer< SkinnedMeshJoint > &j, crimild::Size ) {
 		_joints[ j->getName() ] = j;
@@ -166,11 +172,13 @@ bool SkinnedMeshJointCatalog::registerInStream( Stream &s )
 		return false;
 	}
 
+    /*
 	_joints.foreach( [&s]( std::string const &, SharedPointer< SkinnedMeshJoint > &j, unsigned int ) {
 		if ( j != nullptr ) {
 			j->registerInStream( s );
 		}
 	});
+    */
 
 	return true;
 }
@@ -180,11 +188,13 @@ void SkinnedMeshJointCatalog::save( Stream &s )
 	StreamObject::save( s );
 
 	std::vector< SharedPointer< SkinnedMeshJoint >> os;
+    /*
 	_joints.foreach( [&os]( std::string const &, SharedPointer< SkinnedMeshJoint > &j, unsigned int ) {
 		if ( j != nullptr ) {
 			os.push_back( j );
 		}
 	});
+    */
 	s.write( os );
 }
 
@@ -290,30 +300,36 @@ void SkinnedMeshAnimationChannel::encode( coding::Encoder &encoder )
     
     encoder.encode( "name", getName() );
 
-	containers::Array< crimild::Real32 > pTimes;
-	containers::Array< Vector3f > pValues;
+	Array< crimild::Real32 > pTimes;
+	Array< Vector3f > pValues;
+    /*
 	_positionKeys.foreach( [ &pTimes, &pValues ]( PositionKey const &k, unsigned int ) {
 		pTimes.add( k.time );
 		pValues.add( k.value );
 	});
+    */
 	encoder.encode( "position_times", pTimes );
 	encoder.encode( "position_values", pValues );
 
-	containers::Array< crimild::Real32 > rTimes;
-	containers::Array< Quaternion4f > rValues;
+	Array< crimild::Real32 > rTimes;
+	Array< Quaternion4f > rValues;
+    /*
 	_rotationKeys.foreach( [ &rTimes, &rValues ]( RotationKey const &k, unsigned int ) {
 		rTimes.add( k.time );
 		rValues.add( k.value );
 	});
+    */
 	encoder.encode( "rotation_times", rTimes );
 	encoder.encode( "rotation_values", rValues );
 
-	containers::Array< crimild::Real32 > sTimes;
-	containers::Array< crimild::Real32 > sValues;
+	Array< crimild::Real32 > sTimes;
+	Array< crimild::Real32 > sValues;
+    /*
 	_scaleKeys.foreach( [ &sTimes, &sValues ]( ScaleKey const &k, unsigned int ) {
 		sTimes.add( k.time );
 		sValues.add( k.value );
 	});
+    */
 	encoder.encode( "scale_times", sTimes );
 	encoder.encode( "scale_values", sValues );
 }
@@ -326,8 +342,8 @@ void SkinnedMeshAnimationChannel::decode( coding::Decoder &decoder )
     decoder.decode( "name", name );
     setName( name );
 
-	containers::Array< crimild::Real32 > pTimes;
-	containers::Array< Vector3f > pValues;
+	Array< crimild::Real32 > pTimes;
+	Array< Vector3f > pValues;
 	decoder.decode( "position_times", pTimes );
 	decoder.decode( "position_values", pValues );
 	const auto pCount = pTimes.size();
@@ -336,8 +352,8 @@ void SkinnedMeshAnimationChannel::decode( coding::Decoder &decoder )
 		_positionKeys[ i ] = PositionKey { pTimes[ i ], pValues[ i ] };
 	}
 
-	containers::Array< crimild::Real32 > rTimes;
-	containers::Array< Quaternion4f > rValues;
+	Array< crimild::Real32 > rTimes;
+	Array< Quaternion4f > rValues;
 	decoder.decode( "rotation_times", rTimes );
 	decoder.decode( "rotation_values", rValues );
 	const auto rCount = rTimes.size();
@@ -346,8 +362,8 @@ void SkinnedMeshAnimationChannel::decode( coding::Decoder &decoder )
 		_rotationKeys[ i ] = RotationKey { rTimes[ i ], rValues[ i ] };
 	}
 
-	containers::Array< crimild::Real32 > sTimes;
-	containers::Array< crimild::Real32 > sValues;
+	Array< crimild::Real32 > sTimes;
+	Array< crimild::Real32 > sValues;
 	decoder.decode( "scale_times", sTimes );
 	decoder.decode( "scale_values", sValues );
 	const auto sCount = sTimes.size();
@@ -374,24 +390,30 @@ void SkinnedMeshAnimationChannel::save( Stream &s )
 
 	unsigned int positionKeyCount = _positionKeys.size();
 	s.write( positionKeyCount );
+    /*
 	_positionKeys.foreach( [&s]( PositionKey const &p, unsigned int ) {
 		s.write( p.time );
 		s.write( p.value );
 	});
+    */
 
 	unsigned int rotationKeyCount = _rotationKeys.size();
 	s.write( rotationKeyCount );
+    /*
 	_rotationKeys.foreach( [&s]( RotationKey const &p, unsigned int ) {
 		s.write( p.time );
 		s.write( p.value );
 	});
+    */
 
 	unsigned int scaleKeyCount = _scaleKeys.size();
 	s.write( scaleKeyCount );
+    /*
 	_scaleKeys.foreach( [&s]( ScaleKey const &p, unsigned int ) {
 		s.write( p.time );
 		s.write( p.value );
 	});
+    */
 }
 
 void SkinnedMeshAnimationChannel::load( Stream &s )
@@ -450,8 +472,8 @@ void SkinnedMeshAnimationClip::encode( coding::Encoder &encoder )
 	encoder.encode( "duration", _duration );
 	encoder.encode( "frame_rate", _frameRate );
 
-	containers::Array< SharedPointer< SkinnedMeshAnimationChannel >> cs;
-	_channels.foreach( [ &cs ]( std::string const &, SharedPointer< SkinnedMeshAnimationChannel > const &c, unsigned int ) {
+	Array< SharedPointer< SkinnedMeshAnimationChannel >> cs;
+	_channels.each( [ &cs ]( std::string const &, SharedPointer< SkinnedMeshAnimationChannel > const &c ) {
 		cs.add( c );
 	});
 	encoder.encode( "channels", cs );
@@ -464,10 +486,10 @@ void SkinnedMeshAnimationClip::decode( coding::Decoder &decoder )
 	decoder.decode( "duration", _duration );
 	decoder.decode( "frame_rate", _frameRate );
 
-	containers::Array< SharedPointer< SkinnedMeshAnimationChannel >> cs;
+	Array< SharedPointer< SkinnedMeshAnimationChannel >> cs;
 	decoder.decode( "channels", cs );
-	cs.each( [ this ]( SharedPointer< SkinnedMeshAnimationChannel > &c, crimild::Size ) {
-		getChannels().add( c->getName(), c);
+	cs.each( [ this ]( SharedPointer< SkinnedMeshAnimationChannel > &c ) {
+		//getChannels().add( c->getName(), c);
 	});
 }
 
@@ -477,9 +499,11 @@ bool SkinnedMeshAnimationClip::registerInStream( Stream &s )
 		return false;
 	}
 
+    /*
 	_channels.foreach( [&s]( std::string const &, SharedPointer< SkinnedMeshAnimationChannel > const &c, unsigned int ) {
 		c->registerInStream( s );
 	});
+    */
 
 	return true;
 }
@@ -492,9 +516,11 @@ void SkinnedMeshAnimationClip::save( Stream &s )
 	s.write( _frameRate );
 
 	std::vector< SharedPointer< StreamObject >> cs;
+    /*
 	_channels.foreach( [&cs]( std::string const &, SharedPointer< SkinnedMeshAnimationChannel > const &c, unsigned int ) {
 		cs.push_back( c );
 	});
+    */
 	s.write( cs );
 }
 
@@ -507,9 +533,11 @@ void SkinnedMeshAnimationClip::load( Stream &s )
 
 	std::vector< SharedPointer< SkinnedMeshAnimationChannel >> cs;
 	s.read( cs );
+    /*
 	for ( auto &c : cs ) {
 		getChannels().add( c->getName(), c );
 	}
+    */
 }
 
 SkinnedMeshSkeleton::SkinnedMeshSkeleton( void )
@@ -526,10 +554,12 @@ void SkinnedMeshSkeleton::encode( coding::Encoder &encoder )
 {
 	Codable::encode( encoder );
 
-	containers::Array< SharedPointer< SkinnedMeshAnimationClip >> clips;
+	Array< SharedPointer< SkinnedMeshAnimationClip >> clips;
+    /*
 	_clips.foreach( [ &clips ]( SharedPointer< SkinnedMeshAnimationClip > const &c, unsigned int ) {
 		clips.add( c );
 	});
+    */
 	encoder.encode( "clips", clips );
 
 	encoder.encode( "joints", _joints );
@@ -540,7 +570,7 @@ void SkinnedMeshSkeleton::decode( coding::Decoder &decoder )
 {
 	Codable::decode( decoder );
 	
-	containers::Array< SharedPointer< SkinnedMeshAnimationClip >> clips;
+	Array< SharedPointer< SkinnedMeshAnimationClip >> clips;
 	decoder.decode( "clips", clips );
 	clips.each( [ this ]( SharedPointer< SkinnedMeshAnimationClip > &c, crimild::Size ) {
 		_clips.add( c );
@@ -556,9 +586,11 @@ bool SkinnedMeshSkeleton::registerInStream( Stream &s )
 		return false;
 	}
 
+    /*
 	_clips.foreach( [&s]( SharedPointer< SkinnedMeshAnimationClip > const &c, unsigned int ) {
 		c->registerInStream( s );
 	});
+    */
 
 	if ( _joints != nullptr ) {
 		_joints->registerInStream( s );
@@ -609,7 +641,7 @@ void SkinnedMeshAnimationState::encode( coding::Encoder &encoder )
 {
 	Codable::encode( encoder );
 
-	containers::Array< Matrix4f > poses;
+	Array< Matrix4f > poses;
 	_jointPoses.foreach( [ &poses ]( Matrix4f &m, unsigned int ) {
 		poses.add( m );
 	});
@@ -620,7 +652,7 @@ void SkinnedMeshAnimationState::decode( coding::Decoder &decoder )
 {
 	Codable::decode( decoder );
 
-	containers::Array< Matrix4f > poses;
+	Array< Matrix4f > poses;
 	decoder.decode( "poses", poses );
 	poses.each( [ this ]( Matrix4f &m, crimild::Size ) {
 		_jointPoses.add( m );
@@ -762,4 +794,6 @@ void SkinnedMesh::debugDump( void )
 
 	Log::debug( CRIMILD_CURRENT_CLASS_NAME, ss.str() );
 }
+
+#endif
 

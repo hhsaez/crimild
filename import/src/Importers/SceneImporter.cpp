@@ -363,8 +363,8 @@ void SceneImporter::loadAnimations( const aiScene *scene, SharedPointer< Skinned
 			const aiNodeAnim *inChannel = inAnimation->mChannels[ cIdx ];
 
 			// Positions
-			containers::Array< crimild::Real32 > pChannelTimes( inChannel->mNumPositionKeys );
-			containers::Array< Vector3f > pChannelKeys( inChannel->mNumPositionKeys );
+			Array< crimild::Real32 > pChannelTimes( inChannel->mNumPositionKeys );
+			Array< Vector3f > pChannelKeys( inChannel->mNumPositionKeys );
 			for ( crimild::Size pIndex = 0; pIndex < inChannel->mNumPositionKeys; pIndex++ ) {
 				auto pKey = inChannel->mPositionKeys[ pIndex ];
 				pChannelKeys[ pIndex ] = Vector3f( pKey.mValue.x, pKey.mValue.y, pKey.mValue.z );
@@ -377,8 +377,8 @@ void SceneImporter::loadAnimations( const aiScene *scene, SharedPointer< Skinned
 			clip->addChannel( pChannel );
 
 			// Rotations
-			containers::Array< crimild::Real32 > rChannelTimes( inChannel->mNumRotationKeys );
-			containers::Array< Quaternion4f > rChannelKeys( inChannel->mNumRotationKeys );
+			Array< crimild::Real32 > rChannelTimes( inChannel->mNumRotationKeys );
+			Array< Quaternion4f > rChannelKeys( inChannel->mNumRotationKeys );
 			for ( crimild::Size rIndex = 0; rIndex < inChannel->mNumRotationKeys; rIndex++ ) {
 				auto rKey = inChannel->mRotationKeys[ rIndex ];
 				Quaternion4f q( rKey.mValue.x, rKey.mValue.y, rKey.mValue.z, rKey.mValue.w );
@@ -400,8 +400,8 @@ void SceneImporter::loadAnimations( const aiScene *scene, SharedPointer< Skinned
 			
 			// Scaling
 			const auto INV_3 = 1.0f / 3.0f;
-			containers::Array< crimild::Real32 > sChannelTimes( inChannel->mNumScalingKeys );
-			containers::Array< crimild::Real32 > sChannelKeys( inChannel->mNumScalingKeys );
+			Array< crimild::Real32 > sChannelTimes( inChannel->mNumScalingKeys );
+			Array< crimild::Real32 > sChannelKeys( inChannel->mNumScalingKeys );
 			for ( crimild::Size sIndex = 0; sIndex < inChannel->mNumScalingKeys; sIndex++ ) {
 				auto sKey = inChannel->mScalingKeys[ sIndex ];
 				// compute uniform scaling by averaging all values

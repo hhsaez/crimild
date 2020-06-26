@@ -41,19 +41,19 @@ PhongFragmentMaster::PhongFragmentMaster( ShaderGraph *graph )
 {
     graph->attachUniform( crimild::alloc< BlockUniform >( blocks::AMBIENT_LIGHT_UNIFORM_BLOCK, blocks::AMBIENT_LIGHT_UNIFORM_BLOCK_BINDING_POINT ) );
 	graph->attachUniform( crimild::alloc< Int32Uniform >( locations::AMBIENT_LIGHT_COUNT_UNIFORM, 0 ) );
-    graph->attachUniform( crimild::alloc< Int32ArrayUniform >( locations::AMBIENT_LIGHT_INDICES_UNIFORM, containers::Array< crimild::Int32 > {} ) );
+    graph->attachUniform( crimild::alloc< Int32ArrayUniform >( locations::AMBIENT_LIGHT_INDICES_UNIFORM, Array< crimild::Int32 > {} ) );
 	
     graph->attachUniform( crimild::alloc< BlockUniform >( blocks::DIRECTIONAL_LIGHT_UNIFORM_BLOCK, blocks::DIRECTIONAL_LIGHT_UNIFORM_BLOCK_BINDING_POINT ) );
 	graph->attachUniform( crimild::alloc< Int32Uniform >( locations::DIRECTIONAL_LIGHT_COUNT_UNIFORM, 0 ) );
-    graph->attachUniform( crimild::alloc< Int32ArrayUniform >( locations::DIRECTIONAL_LIGHT_INDICES_UNIFORM, containers::Array< crimild::Int32 > {} ) );
+    graph->attachUniform( crimild::alloc< Int32ArrayUniform >( locations::DIRECTIONAL_LIGHT_INDICES_UNIFORM, Array< crimild::Int32 > {} ) );
 	
     graph->attachUniform( crimild::alloc< BlockUniform >( blocks::POINT_LIGHT_UNIFORM_BLOCK, blocks::POINT_LIGHT_UNIFORM_BLOCK_BINDING_POINT ) );
     graph->attachUniform( crimild::alloc< Int32Uniform >( locations::POINT_LIGHT_COUNT_UNIFORM, 0 ) );
-    graph->attachUniform( crimild::alloc< Int32ArrayUniform >( locations::POINT_LIGHT_INDICES_UNIFORM, containers::Array< crimild::Int32 > {} ) );
+    graph->attachUniform( crimild::alloc< Int32ArrayUniform >( locations::POINT_LIGHT_INDICES_UNIFORM, Array< crimild::Int32 > {} ) );
 
     graph->attachUniform( crimild::alloc< BlockUniform >( blocks::SPOT_LIGHT_UNIFORM_BLOCK, blocks::SPOT_LIGHT_UNIFORM_BLOCK_BINDING_POINT ) );
     graph->attachUniform( crimild::alloc< Int32Uniform >( locations::SPOT_LIGHT_COUNT_UNIFORM, 0 ) );
-    graph->attachUniform( crimild::alloc< Int32ArrayUniform >( locations::SPOT_LIGHT_INDICES_UNIFORM, containers::Array< crimild::Int32 > {} ) );
+    graph->attachUniform( crimild::alloc< Int32ArrayUniform >( locations::SPOT_LIGHT_INDICES_UNIFORM, Array< crimild::Int32 > {} ) );
 
 	graph->attachUniform( crimild::alloc< TextureUniform >( locations::SHADOW_ATLAS_UNIFORM, Texture::ONE ) );
 }

@@ -191,7 +191,7 @@ PipelineManager::ShaderStageArray PipelineManager::createShaderStages( const Sha
     return shaderStages;
 }
 
-containers::Array< VkVertexInputBindingDescription > PipelineManager::getVertexInputBindingDescriptions( Pipeline *pipeline ) const noexcept
+Array< VkVertexInputBindingDescription > PipelineManager::getVertexInputBindingDescriptions( Pipeline *pipeline ) const noexcept
 {
     return pipeline->program->vertexLayouts.map(
         [&, binding = 0]( const auto &layout ) mutable {
@@ -204,11 +204,11 @@ containers::Array< VkVertexInputBindingDescription > PipelineManager::getVertexI
     );
 }
 
-containers::Array< VkVertexInputAttributeDescription > PipelineManager::getVertexInputAttributeDescriptions( RenderDevice *renderDevice, Pipeline *pipeline ) const noexcept
+Array< VkVertexInputAttributeDescription > PipelineManager::getVertexInputAttributeDescriptions( RenderDevice *renderDevice, Pipeline *pipeline ) const noexcept
 {
-    containers::Array< VkVertexInputAttributeDescription > attributeDescriptions;
+    Array< VkVertexInputAttributeDescription > attributeDescriptions;
     pipeline->program->vertexLayouts.each(
-        [&]( const auto &layout, auto binding ) {
+        [&, binding = 0 ]( const auto &layout ) mutable {
             layout.eachAttribute(
                 [&, location = 0]( const auto &attrib ) mutable {
                     attributeDescriptions.add(
@@ -221,12 +221,13 @@ containers::Array< VkVertexInputAttributeDescription > PipelineManager::getVerte
                     );
                 }
             );
+            binding++;
         }
     );
     return attributeDescriptions;
 }
 
-VkPipelineVertexInputStateCreateInfo PipelineManager::createVertexInput( const containers::Array< VkVertexInputBindingDescription > &bindingDescriptions, const containers::Array< VkVertexInputAttributeDescription > &attributeDescriptions ) const noexcept
+VkPipelineVertexInputStateCreateInfo PipelineManager::createVertexInput( const Array< VkVertexInputBindingDescription > &bindingDescriptions, const Array< VkVertexInputAttributeDescription > &attributeDescriptions ) const noexcept
 {
     return VkPipelineVertexInputStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,

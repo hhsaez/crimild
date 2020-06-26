@@ -72,7 +72,7 @@ void BlendPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *re
 	
     auto program = crimild::get_ptr( _program );
 
-	_inputs.each( [ this, renderer, program ]( RenderGraphAttachment *input, crimild::Size idx ) {
+	_inputs.each( [ this, renderer, program, idx = 0 ]( RenderGraphAttachment *input ) mutable {
 		auto texture = input->getTexture();
 
 		if ( idx > 0 ) {
@@ -92,6 +92,8 @@ void BlendPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *re
 			renderer->setAlphaState( AlphaState::DISABLED );
 			renderer->setDepthState( DepthState::ENABLED );
 		}
+
+        idx++;
 	});
 
 	renderer->unbindFrameBuffer( crimild::get_ptr( fbo ) );

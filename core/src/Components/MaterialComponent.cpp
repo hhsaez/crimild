@@ -54,7 +54,7 @@ void MaterialComponent::detachAllMaterials( void )
 
 void MaterialComponent::forEachMaterial( std::function< void( Material * ) > callback )
 {
-    _materials.each( [ callback ]( SharedPointer< Material > &m, crimild::Size ) {
+    _materials.each( [ callback ]( SharedPointer< Material > &m ) {
 		callback( crimild::get_ptr( m ) );
 	});
 }
@@ -72,7 +72,7 @@ void MaterialComponent::encode( coding::Encoder &encoder )
 {
 	NodeComponent::encode( encoder );
 
-	containers::Array< SharedPointer< Material >> ms;
+	Array< SharedPointer< Material >> ms;
 	forEachMaterial( [&ms]( Material *m ) {
 		ms.add( crimild::retain( m ) );
 	});
@@ -83,9 +83,9 @@ void MaterialComponent::decode( coding::Decoder &decoder )
 {
 	NodeComponent::decode( decoder );
 
-	containers::Array< SharedPointer< Material >> ms;
+	Array< SharedPointer< Material >> ms;
 	decoder.decode( "materials", ms );
-	ms.each( [ this ]( SharedPointer< Material > &m, crimild::Size ) {
+	ms.each( [ this ]( SharedPointer< Material > &m ) {
 		attachMaterial( m );
 	});
 }

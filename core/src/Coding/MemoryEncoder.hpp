@@ -69,15 +69,15 @@ namespace crimild {
             virtual crimild::Bool encode( std::string key, crimild::Bool value ) override { return encodeData( key, value ); }
             virtual crimild::Bool encode( std::string key, const crimild::VertexFormat &value ) override { return encodeData( key, value ); }
 
-			virtual crimild::Bool encode( std::string key, containers::ByteArray &value ) override { return encodeData( key, value ); }
-			virtual crimild::Bool encode( std::string key, containers::Array< crimild::Real32 > &value ) override { return encodeData( key, value ); }
-			virtual crimild::Bool encode( std::string key, containers::Array< Vector3f > &value ) override { return encodeData( key, value ); }
-			virtual crimild::Bool encode( std::string key, containers::Array< Vector4f > &value ) override { return encodeData( key, value ); }
-			virtual crimild::Bool encode( std::string key, containers::Array< Matrix3f > &value ) override { return encodeData( key, value ); }
-			virtual crimild::Bool encode( std::string key, containers::Array< Matrix4f > &value ) override { return encodeData( key, value ); }
-			virtual crimild::Bool encode( std::string key, containers::Array< Quaternion4f > &value ) override { return encodeData( key, value ); }
+			virtual crimild::Bool encode( std::string key, ByteArray &value ) override { return encodeData( key, value ); }
+			virtual crimild::Bool encode( std::string key, Array< crimild::Real32 > &value ) override { return encodeData( key, value ); }
+			virtual crimild::Bool encode( std::string key, Array< Vector3f > &value ) override { return encodeData( key, value ); }
+			virtual crimild::Bool encode( std::string key, Array< Vector4f > &value ) override { return encodeData( key, value ); }
+			virtual crimild::Bool encode( std::string key, Array< Matrix3f > &value ) override { return encodeData( key, value ); }
+			virtual crimild::Bool encode( std::string key, Array< Matrix4f > &value ) override { return encodeData( key, value ); }
+			virtual crimild::Bool encode( std::string key, Array< Quaternion4f > &value ) override { return encodeData( key, value ); }
             
-            containers::ByteArray getBytes( void ) const;
+            ByteArray getBytes( void ) const;
             
         protected:
 			virtual void encodeArrayBegin( std::string key, crimild::Size count ) override;
@@ -93,17 +93,17 @@ namespace crimild {
                 return encode( key, crimild::cast_ptr< EncodedData >( encoded ) );
             }
             
-            static void append( containers::ByteArray &out, crimild::Int8 value );
-            static void append( containers::ByteArray &out, std::string value );
-            static void append( containers::ByteArray &out, Codable::UniqueID value );
-            static void append( containers::ByteArray &out, const containers::ByteArray &data );
-            static void appendRawBytes( containers::ByteArray &out, crimild::Size count, const void *data );
+            static void append( ByteArray &out, crimild::Int8 value );
+            static void append( ByteArray &out, std::string value );
+            static void append( ByteArray &out, Codable::UniqueID value );
+            static void append( ByteArray &out, const ByteArray &data );
+            static void appendRawBytes( ByteArray &out, crimild::Size count, const void *data );
             
         private:
-            containers::Stack< SharedPointer< Codable >> _sortedObjects;
-            containers::Map< Codable::UniqueID, containers::Map< std::string, Codable::UniqueID >> _links;
+            Stack< SharedPointer< Codable >> _sortedObjects;
+            Map< Codable::UniqueID, Map< std::string, Codable::UniqueID >> _links;
             SharedPointer< Codable > _parent;
-            containers::Array< SharedPointer< Codable >> _roots;
+            Array< SharedPointer< Codable >> _roots;
             
         public:
             virtual std::string dump( void ) override;

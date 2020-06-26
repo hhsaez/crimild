@@ -54,7 +54,7 @@ namespace crimild {
     public:
         virtual ~DescriptorSetLayout( void ) = default;
 
-        containers::Array< Binding > bindings;
+        Array< Binding > bindings;
     };
 
     struct Descriptor {
@@ -62,7 +62,7 @@ namespace crimild {
 		SharedPointer< SharedObject > obj;
 
 		template< typename T >
-		T *get( void ) noexcept
+		inline T *get( void ) noexcept
 		{
 			return static_cast< T * >( crimild::get_ptr( obj ) );
 		}
@@ -75,7 +75,7 @@ namespace crimild {
 
     class DescriptorSet : public SharedObject, public RenderResourceImpl< DescriptorSet > {
 	private:
-		using DescriptorArray = containers::Array< Descriptor >;
+		using DescriptorArray = Array< Descriptor >;
 
     public:
         virtual ~DescriptorSet( void ) = default;

@@ -117,7 +117,7 @@ namespace crimild {
 		 */
 		Extent3D extent;
 
-		containers::ByteArray data;
+		ByteArray data;
 
         /**
          	\name Mipmapping
@@ -171,7 +171,7 @@ namespace crimild {
 		Image( void );
 		Image( int width, int height, int bpp, PixelFormat format, PixelType pixelType );
 		Image( int width, int height, int bpp, const unsigned char *data, PixelFormat format = PixelFormat::RGBA );
-		Image( int width, int height, int bpp, const containers::ByteArray &data, PixelFormat format = PixelFormat::RGBA );
+		Image( int width, int height, int bpp, const ByteArray &data, PixelFormat format = PixelFormat::RGBA );
 		virtual ~Image( void );
 
 		int getWidth( void ) const { return _width; }
@@ -195,7 +195,7 @@ namespace crimild {
 		int _bpp;
         PixelFormat _pixelFormat;
 		PixelType _pixelType;
-        containers::ByteArray _data;
+        ByteArray _data;
 
         /**
         	\name Streaming

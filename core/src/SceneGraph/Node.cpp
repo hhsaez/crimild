@@ -185,7 +185,7 @@ void Node::encode( coding::Encoder &encoder )
     encoder.encode( "worldTransformation", getWorld() );
     encoder.encode( "worldIsCurrent", worldIsCurrent() );
     
-    containers::Array< SharedPointer< NodeComponent >> cmps;
+    Array< SharedPointer< NodeComponent >> cmps;
     for ( auto &it : _components ) {
         if ( it.second != nullptr ) {
             cmps.add( it.second );
@@ -211,9 +211,9 @@ void Node::decode( coding::Decoder &decoder )
     decoder.decode( "worldIsCurrent", worldIsCurrent );
     setWorldIsCurrent( worldIsCurrent );
     
-    containers::Array< SharedPointer< NodeComponent >> cmps;
+    Array< SharedPointer< NodeComponent >> cmps;
     decoder.decode( "components", cmps );
-    cmps.each( [ this ]( SharedPointer< NodeComponent > &c, crimild::Size ) {
+    cmps.each( [ this ]( SharedPointer< NodeComponent > &c ) {
         attachComponent( c );
     });
 

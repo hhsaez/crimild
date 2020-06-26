@@ -74,7 +74,7 @@ VertexLayout::VertexLayout( std::initializer_list< VertexAttribute > attribs ) n
     }
 }
 
-VertexLayout::VertexLayout( const containers::Array< VertexAttribute > &attribs ) noexcept
+VertexLayout::VertexLayout( const Array< VertexAttribute > &attribs ) noexcept
     : m_size( 0 )
 {
     attribs.each(

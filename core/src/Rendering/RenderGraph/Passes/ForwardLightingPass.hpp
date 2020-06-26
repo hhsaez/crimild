@@ -52,7 +52,7 @@ namespace crimild {
 				CRIMILD_IMPLEMENT_RTTI( crimild::rendergraph::ForwardLightingPass )
 
 			private:
-				using RenderableTypeArray = containers::Array< RenderQueue::RenderableType >;
+				using RenderableTypeArray = Array< RenderQueue::RenderableType >;
 				
 			public:
 				ForwardLightingPass( RenderGraph *graph, crimild::Size maxLights = 10 );

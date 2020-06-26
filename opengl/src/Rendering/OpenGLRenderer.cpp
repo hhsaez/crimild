@@ -180,7 +180,7 @@ void OpenGLRenderer::bindUniform( ShaderLocation *location, int value )
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
-void OpenGLRenderer::bindUniform( ShaderLocation *location, const containers::Array< crimild::Int32 > &value )
+void OpenGLRenderer::bindUniform( ShaderLocation *location, const Array< crimild::Int32 > &value )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 

@@ -83,7 +83,7 @@ namespace crimild {
 			void setCurrentBehaviorTree( crimild::behaviors::BehaviorTree *behaviorTree ) { _currentBehaviorTree = behaviorTree; }
 
 		private:
-			containers::Map< std::string, SharedPointer< crimild::behaviors::BehaviorTree >> _behaviors;
+			Map< std::string, SharedPointer< crimild::behaviors::BehaviorTree >> _behaviors;
 			crimild::behaviors::BehaviorTree *_currentBehaviorTree = nullptr;
 			std::string _currentEvent;
 			SharedPointer< crimild::behaviors::BehaviorContext > _context;

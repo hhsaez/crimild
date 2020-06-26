@@ -39,7 +39,7 @@ namespace crimild {
 
 		public:
 			Add( ShaderGraph *graph, Variable *a, Variable *b );
-			Add( ShaderGraph *graph, containers::Array< Variable * > const &inputs );
+			Add( ShaderGraph *graph, Array< Variable * > const &inputs );
 			virtual ~Add( void );
 		};
 

@@ -45,12 +45,12 @@ namespace crimild {
 		explicit CodableNode( std::string name = "" ) : Node( name ) { }
         virtual ~CodableNode( void ) { }
 
-		containers::Array< int > &getValues( void ) { return _values; }
-		containers::Array< SharedPointer< CodableNode > > &getChildren( void ) { return _children; }
+		Array< int > &getValues( void ) { return _values; }
+		Array< SharedPointer< CodableNode > > &getChildren( void ) { return _children; }
         
     private:
-		containers::Array< int > _values;
-        containers::Array< SharedPointer< CodableNode >> _children;
+		Array< int > _values;
+        Array< SharedPointer< CodableNode >> _children;
         SharedPointer< Group > _aGroup;
         
     public:

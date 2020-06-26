@@ -63,7 +63,7 @@ namespace crimild {
 			void addChannel( SharedPointer< Channel > const &channel );
 
 		private:
-			containers::Array< SharedPointer< Channel >> _channels;
+			Array< SharedPointer< Channel >> _channels;
 
 		public:
 			void evaluate( crimild::Real32 t, Animation *animation );

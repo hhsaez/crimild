@@ -71,8 +71,8 @@ crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
         return imageView;
     };
 
-	auto colorReferences = containers::Array< VkAttachmentReference >();
-	auto depthStencilReferences = containers::Array< VkAttachmentReference >();
+	auto colorReferences = Array< VkAttachmentReference >();
+	auto depthStencilReferences = Array< VkAttachmentReference >();
 
     bool hasPresentation = false;
 

@@ -63,13 +63,13 @@ namespace crimild {
             virtual crimild::Bool encode( std::string key, const Transformation &value ) override;
             virtual crimild::Bool encode( std::string key, const VertexFormat &value ) override;
 
-            virtual crimild::Bool encode( std::string key, containers::ByteArray &value ) override { return false; }
-			virtual crimild::Bool encode( std::string key, containers::Array< crimild::Real32 > &value ) override { return false; }
-			virtual crimild::Bool encode( std::string key, containers::Array< Vector3f > &value ) override { return false; }
-			virtual crimild::Bool encode( std::string key, containers::Array< Vector4f > &value ) override { return false; }
-			virtual crimild::Bool encode( std::string key, containers::Array< Matrix3f > &value ) override { return false; }
-			virtual crimild::Bool encode( std::string key, containers::Array< Matrix4f > &value ) override { return false; }
-			virtual crimild::Bool encode( std::string key, containers::Array< Quaternion4f > &value ) override { return false; }
+            virtual crimild::Bool encode( std::string key, ByteArray &value ) override { return false; }
+			virtual crimild::Bool encode( std::string key, Array< crimild::Real32 > &value ) override { return false; }
+			virtual crimild::Bool encode( std::string key, Array< Vector3f > &value ) override { return false; }
+			virtual crimild::Bool encode( std::string key, Array< Vector4f > &value ) override { return false; }
+			virtual crimild::Bool encode( std::string key, Array< Matrix3f > &value ) override { return false; }
+			virtual crimild::Bool encode( std::string key, Array< Matrix4f > &value ) override { return false; }
+			virtual crimild::Bool encode( std::string key, Array< Quaternion4f > &value ) override { return false; }
 
 			inline std::string getEncodedString( void ) const
 			{
@@ -114,7 +114,7 @@ namespace crimild {
         private:
             std::stringstream _ss;
             crimild::Size _indentLevel = 0;
-            containers::Stack< std::string > _arrayKeys;
+            Stack< std::string > _arrayKeys;
 
         public:
             virtual std::string dump( void ) override;

@@ -193,7 +193,7 @@ namespace crimild {
 
 		   \remarks This member is NOT thread safe. 
 		 */
-        containers::Array< T > _data;
+        Array< T > _data;
     };
 
     using Vector3fParticleAttribArray = ParticleAttribArrayImpl< Vector3f >;

@@ -47,8 +47,8 @@ TEST( VertexLayout, P3_C3 )
 	ASSERT_EQ( sizeof( crimild::Real32 ) * 6, v.getSize() );
 	ASSERT_EQ( 0, v.getAttributeOffset( VertexAttribute::Name::POSITION ) );
 	ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::POSITION ) );
-	ASSERT_EQ( 3 * sizeof( crimild::Real32, v.getAttributeOffset( VertexAttribute::Name::COLOR ) );
-	ASSERT_EQ( Format::R32G32B32_UNORM, v.getAttributeFormat( VertexAttribute::Name::COLOR ) );
+	ASSERT_EQ( 3 * sizeof( crimild::Real32 ), v.getAttributeOffset( VertexAttribute::Name::COLOR ) );
+	ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::COLOR ) );
 }
 
 TEST( VertexLayout, positionsOnly )
@@ -135,7 +135,7 @@ TEST( VertexLayout, multipleAttributesDifferentOrder )
 
 TEST( VertexLayout, fromArray )
 {
-    auto attribs = containers::Array< VertexAttribute > {
+    auto attribs = Array< VertexAttribute > {
 		{ VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() },
 		{ VertexAttribute::Name::TEX_COORD, utils::getFormat< Vector2f >() },
 		{ VertexAttribute::Name::COLOR, utils::getFormat< RGBColorf >() },
@@ -165,7 +165,7 @@ TEST( VertexLayout, fromArray )
 
 TEST( VertexLayout, eachAttribute )
 {
-    auto attribs = containers::Array< VertexAttribute > {
+    auto attribs = Array< VertexAttribute > {
 		{ VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() },
 		{ VertexAttribute::Name::TEX_COORD, utils::getFormat< Vector2f >() },
 		{ VertexAttribute::Name::COLOR, utils::getFormat< RGBColorf >() },

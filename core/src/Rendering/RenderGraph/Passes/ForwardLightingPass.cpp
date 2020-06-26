@@ -120,10 +120,10 @@ void ForwardLightingPass::render( Renderer *renderer, RenderQueue *renderQueue, 
     const auto pMatrix = renderQueue->getProjectionMatrix();
     const auto vMatrix = renderQueue->getViewMatrix();
 
-    containers::Array< crimild::Int32 > ambientLightIndices;
-    containers::Array< crimild::Int32 > directionalLightIndices;
-    containers::Array< crimild::Int32 > pointLightIndices;
-    containers::Array< crimild::Int32 > spotLightIndices;
+    Array< crimild::Int32 > ambientLightIndices;
+    Array< crimild::Int32 > directionalLightIndices;
+    Array< crimild::Int32 > pointLightIndices;
+    Array< crimild::Int32 > spotLightIndices;
 	renderQueue->each( [ &ambientLightIndices, &directionalLightIndices, &pointLightIndices, &spotLightIndices ]( Light *light, crimild::Size ) {
         auto lightId = light->getCatalogId();
         switch ( light->getType() ) {

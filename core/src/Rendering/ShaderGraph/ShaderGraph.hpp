@@ -89,8 +89,8 @@ namespace crimild {
 
 			void eachNode( std::function< void( ShaderGraphNode * ) > const &callback );
 
-			void read( Expression *node, containers::Array< Variable * > const &inputs );
-			void write( Expression *node, containers::Array< Variable * > const &outputs );
+			void read( Expression *node, Array< Variable * > const &inputs );
+			void write( Expression *node, Array< Variable * > const &outputs );
 
 		public:
 			template< class NodeType >
@@ -106,13 +106,13 @@ namespace crimild {
 			}
 
 		private:
-			ShaderGraphNode *getNode( containers::Array< ShaderGraphNode * > &ns, std::string name );
+			ShaderGraphNode *getNode( Array< ShaderGraphNode * > &ns, std::string name );
 
 		private:
-			containers::Digraph< ShaderGraphNode * > _graph;
-			containers::Array< SharedPointer< ShaderGraphNode >> _nodes;
-			containers::Array< ShaderGraphNode * > _inputs;
-			containers::Array< ShaderGraphNode * > _outputs;
+			Digraph< ShaderGraphNode * > _graph;
+			Array< SharedPointer< ShaderGraphNode >> _nodes;
+			Array< ShaderGraphNode * > _inputs;
+			Array< ShaderGraphNode * > _outputs;
 
 		public:
 			void attachUniform( SharedPointer< ShaderUniform > const &uniform );
@@ -120,7 +120,7 @@ namespace crimild {
 			void eachUniform( std::function< void( ShaderUniform * ) > const &callback );
 
 		private:
-			using UniformMap = containers::Map< std::string, SharedPointer< ShaderUniform >>;
+			using UniformMap = Map< std::string, SharedPointer< ShaderUniform >>;
 			
 			UniformMap _uniforms;
 
@@ -137,10 +137,10 @@ namespace crimild {
 			crimild::Bool isConnected( ShaderGraphNode *node ) const;
 
 		private:
-			containers::Set< ShaderGraphNode * > _connected;
+			Set< ShaderGraphNode * > _connected;
 
 		protected:
-			virtual std::string generateShaderSource( containers::Array< ShaderGraphNode * > const &sortedNodes ) { return ""; }
+			virtual std::string generateShaderSource( Array< ShaderGraphNode * > const &sortedNodes ) { return ""; }
 		};
 
 	}

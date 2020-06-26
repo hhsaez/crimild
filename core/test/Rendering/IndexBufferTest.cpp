@@ -40,7 +40,7 @@ TEST( IndexBuffer, constructionUInt32 )
 {
     auto indices = crimild::alloc< IndexBuffer >(
         Format::INDEX_32_UINT,
-        containers::Array< crimild::UInt32 > {
+        Array< crimild::UInt32 > {
             0, 1, 2,
             0, 2, 3,
         }
@@ -61,7 +61,7 @@ TEST( IndexBuffer, constructionUInt16 )
 {
     auto indices = crimild::alloc< IndexBuffer >(
         Format::INDEX_16_UINT,
-        containers::Array< crimild::UInt16 > {
+        Array< crimild::UInt16 > {
             0, 1, 2,
             0, 2, 3,
         }
@@ -109,7 +109,7 @@ TEST( IndexBuffer, setIndices )
 	ASSERT_EQ( 6, indices->getIndexCount() );
 	ASSERT_EQ( Format::INDEX_32_UINT, indices->getFormat() );
 
-    auto data = containers::Array< crimild::UInt32 > {
+    auto data = Array< crimild::UInt32 > {
         0, 1, 2,
         0, 2, 3,
     };
@@ -132,7 +132,7 @@ TEST( IndexBuffer, eachIndex )
 	ASSERT_EQ( 6, indices->getIndexCount() );
 	ASSERT_EQ( Format::INDEX_32_UINT, indices->getFormat() );
 
-    auto data = containers::Array< crimild::UInt32 > {
+    auto data = Array< crimild::UInt32 > {
         0, 1, 2,
         0, 2, 3,
     };

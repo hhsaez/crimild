@@ -53,7 +53,7 @@ namespace crimild {
 			}
                 
 			template< typename T >
-			explicit EncodedData( const containers::Array< T > &data )
+			explicit EncodedData( const Array< T > &data )
 				: _bytes( data.size() * sizeof( T ) )
 			{
 				if ( _bytes.size() > 0 ) {
@@ -75,9 +75,9 @@ namespace crimild {
 				
 			}
 
-			inline void setBytes( const containers::ByteArray &bytes ) { _bytes = bytes; }
-			inline containers::ByteArray &getBytes( void ) { return _bytes; }
-			inline const containers::ByteArray &getBytes( void ) const { return _bytes; }
+			inline void setBytes( const ByteArray &bytes ) { _bytes = bytes; }
+			inline ByteArray &getBytes( void ) { return _bytes; }
+			inline const ByteArray &getBytes( void ) const { return _bytes; }
                 
             std::string getString( void ) const
             {
@@ -95,7 +95,7 @@ namespace crimild {
 			}
             
 		private:
-			containers::ByteArray _bytes;
+			ByteArray _bytes;
 		};
         
 	}

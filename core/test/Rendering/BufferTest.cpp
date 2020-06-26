@@ -37,7 +37,7 @@ using namespace crimild;
 
 TEST( Buffer, constructionWithValueArray )
 {
-    auto data = containers::Array< crimild::Real32 > {
+    auto data = Array< crimild::Real32 > {
         -0.5f, -0.5f, 0.0f,
         0.5f, -0.5f, 0.0f,
         0.0f, 0.5f, 0.0f,
@@ -51,7 +51,7 @@ TEST( Buffer, constructionWithValueArray )
 
 TEST( Buffer, withEmptyData )
 {
-    auto buffer = crimild::alloc< Buffer >( containers::Array< crimild::Real32 >( 3 ) );
+    auto buffer = crimild::alloc< Buffer >( Array< crimild::Real32 >( 3 ) );
 
     ASSERT_EQ( 3 * sizeof( crimild::Real32 ), buffer->getSize() );
 }
@@ -62,7 +62,7 @@ TEST( Buffer, constructionWithStructArray )
         Vector3f position;
     };
     
-    auto data = containers::Array< Vertex > {
+    auto data = Array< Vertex > {
         { .position = { -0.5f, -0.5f, 0.0f } },
         { .position = { 0.5f, -0.5f, 0.0f } },
         { .position = { 0.0f, 0.5f, 0.0f } },
@@ -106,7 +106,7 @@ TEST( Buffer, autoAddToFrameGraph )
 	ASSERT_FALSE( graph->hasNodes() );
 
 	{
-        auto buffer = crimild::alloc< Buffer >( containers::Array< crimild::Real32 >( 3 ) );
+        auto buffer = crimild::alloc< Buffer >( Array< crimild::Real32 >( 3 ) );
 
         ASSERT_TRUE( graph->contains( buffer ) );
 		ASSERT_TRUE( graph->hasNodes() );

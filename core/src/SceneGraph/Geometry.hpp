@@ -63,7 +63,7 @@ namespace crimild {
 		void updateModelBounds( void );
 
 	private:
-		containers::Array< SharedPointer< Primitive >> _primitives;
+		Array< SharedPointer< Primitive >> _primitives;
 
 	public:
 		virtual void accept( NodeVisitor &visitor ) override;

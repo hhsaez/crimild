@@ -55,7 +55,7 @@ namespace crimild {
 				Behavior *getBehaviorAt( size_t index );
 				
 			private:
-				containers::Array< BehaviorPtr > _behaviors;
+				Array< BehaviorPtr > _behaviors;
 
 				/**
 				   \name Coding support

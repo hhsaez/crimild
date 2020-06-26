@@ -45,7 +45,7 @@ namespace crimild {
 	public:
 		VertexLayout( void ) noexcept;
 		VertexLayout( std::initializer_list< VertexAttribute > attribs ) noexcept;
-		VertexLayout( const containers::Array< VertexAttribute > &attribs ) noexcept;
+		VertexLayout( const Array< VertexAttribute > &attribs ) noexcept;
 		~VertexLayout( void ) = default;
 
 		crimild::Bool operator==( const VertexLayout &other ) const noexcept;
@@ -109,8 +109,8 @@ namespace crimild {
 
 	private:
 		crimild::UInt32 m_size = 0;
-		containers::Map< VertexAttribute::Name, VertexAttribute > m_attributes;
-        containers::Array< VertexAttribute::Name > m_sorted;
+		Map< VertexAttribute::Name, VertexAttribute > m_attributes;
+        Array< VertexAttribute::Name > m_sorted;
 	};
 
 

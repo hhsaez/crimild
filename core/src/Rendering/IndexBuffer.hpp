@@ -111,7 +111,7 @@ namespace crimild {
         IndexBuffer( Format format, crimild::Size count ) noexcept;
 
         template< typename T >
-        IndexBuffer( Format format, containers::Array< T > const &data ) noexcept
+        IndexBuffer( Format format, Array< T > const &data ) noexcept
             : m_format( format )
         {
             auto stride = utils::getFormatSize( format );
@@ -175,7 +175,7 @@ namespace crimild {
         }
 
         template< typename T >
-        void setIndices( containers::Array< T > const &data ) noexcept
+        void setIndices( Array< T > const &data ) noexcept
         {
             m_accessor->set( data );
         }

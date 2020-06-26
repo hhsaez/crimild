@@ -116,9 +116,9 @@ void MemoryEncoder::encodeArrayEnd( std::string key )
 	// no-op
 }
 
-containers::ByteArray MemoryEncoder::getBytes( void ) const
+ByteArray MemoryEncoder::getBytes( void ) const
 {
-    containers::ByteArray result;
+    ByteArray result;
     
 	// TODO: reserve memory space beforehand in order to
 	// avoid resizing the resulting array
@@ -141,7 +141,7 @@ containers::ByteArray MemoryEncoder::getBytes( void ) const
         append( result, Tags::TAG_OBJECT_END );
     }
     
-    _links.each( [ &result ]( const Codable::UniqueID &key, const containers::Map< std::string, Codable::UniqueID > &ls ) {
+    _links.each( [ &result ]( const Codable::UniqueID &key, const Map< std::string, Codable::UniqueID > &ls ) {
         ls.each( [ &result, key ]( const std::string &name, const Codable::UniqueID &value ) {
             append( result, Tags::TAG_LINK_BEGIN );
             append( result, key );
@@ -151,7 +151,7 @@ containers::ByteArray MemoryEncoder::getBytes( void ) const
         });
     });
     
-    _roots.each( [ &result ]( const SharedPointer< Codable > &obj, crimild::Size ) {
+    _roots.each( [ &result ]( const SharedPointer< Codable > &obj ) {
         append( result, Tags::TAG_ROOT_OBJECT_BEGIN );
         append( result, obj->getUniqueID() );
         append( result, Tags::TAG_ROOT_OBJECT_END );
@@ -162,32 +162,32 @@ containers::ByteArray MemoryEncoder::getBytes( void ) const
     return result;
 }
 
-void MemoryEncoder::append( containers::ByteArray &out, crimild::Int8 value )
+void MemoryEncoder::append( ByteArray &out, crimild::Int8 value )
 {
     appendRawBytes( out, sizeof( crimild::Int8 ), &value );
 }
 
-void MemoryEncoder::append( containers::ByteArray &out, std::string value )
+void MemoryEncoder::append( ByteArray &out, std::string value )
 {
-    containers::ByteArray bytes( value.length() + 1 );
+    ByteArray bytes( value.length() + 1 );
     memcpy( &bytes.getData()[ 0 ], value.c_str(), sizeof( crimild::Char ) * value.length() );
     bytes[ value.length() ] = '\0';
     append( out, bytes );
 }
 
-void MemoryEncoder::append( containers::ByteArray &out, Codable::UniqueID value )
+void MemoryEncoder::append( ByteArray &out, Codable::UniqueID value )
 {
     appendRawBytes( out, sizeof( Codable::UniqueID ), &value );
 }
 
-void MemoryEncoder::append( containers::ByteArray &out, const containers::ByteArray &data )
+void MemoryEncoder::append( ByteArray &out, const ByteArray &data )
 {
     crimild::Size count = data.size();
     appendRawBytes( out, sizeof( crimild::Size ), &count );
     appendRawBytes( out, data.size(), data.getData() );
 }
 
-void MemoryEncoder::appendRawBytes( containers::ByteArray &out, crimild::Size count, const void *data )
+void MemoryEncoder::appendRawBytes( ByteArray &out, crimild::Size count, const void *data )
 {
     for ( crimild::Size i = 0; i < count; i++ ) {
         out.add( static_cast< const crimild::Byte * >( data )[ i ] );
@@ -199,19 +199,19 @@ std::string MemoryEncoder::dump( void )
     std::stringstream ss;
     
     ss << "Sorted Objects:\n";
-    _sortedObjects.each( [ &ss ]( SharedPointer< Codable > &codable, crimild::Size ) {
+    _sortedObjects.each( [ &ss ]( SharedPointer< Codable > &codable ) {
         ss << "\t" << codable->getUniqueID() << " " << codable->getClassName() << "\n";
     });
     
     ss << "Links:\n";
-    _links.each( [ &ss ]( const Codable::UniqueID &key, const containers::Map< std::string, Codable::UniqueID > &ls ) {
+    _links.each( [ &ss ]( const Codable::UniqueID &key, const Map< std::string, Codable::UniqueID > &ls ) {
         ls.each( [ &ss, key ]( const std::string &name, const Codable::UniqueID &value ) {
             ss << "\t" << key << " " << name << " " << value << "\n";
         });
     });
 
     ss << "Roots:\n";
-    _roots.each( [ &ss ]( const SharedPointer< Codable > &obj, crimild::Size ) {
+    _roots.each( [ &ss ]( const SharedPointer< Codable > &obj ) {
         ss << "\t" << obj->getUniqueID() << "\n";
     });
 

@@ -77,7 +77,7 @@ namespace crimild {
 		virtual void forEachNode( std::function< void( Node * ) > callback );
 
 	protected:
-		containers::Array< SharedPointer< Node >> _nodes;
+		Array< SharedPointer< Node >> _nodes;
 
 	public:
 		virtual void accept( NodeVisitor &visitor ) override;

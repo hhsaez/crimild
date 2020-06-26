@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,197 +38,160 @@
 
 namespace crimild {
 
-	namespace containers {
+    /**
+       \brief A list implementation
 
-		/**
-		   \brief A list implementation
-		   
-		   \todo Implement index bound checking policy
-		   \todo Implement parallel policy
-		   \todo Avoid using std::list
-		*/
-		template<
-		    typename T,
-		    class ThreadingPolicy = policies::SingleThreaded
-		>
-		class List : public ThreadingPolicy {
-		private:
-			using LockImpl = typename ThreadingPolicy::Lock;
-			
-		public:
-			using BasicTraverseCallback = std::function< void( T & ) >;
-			using ConstBasicTraverseCallback = std::function< void( const T & ) >;
-			using TraverseCallback = std::function< void( T &, crimild::Size ) >;
-			using ConstTraverseCallback = std::function< void( const T &, crimild::Size ) >;
-			
-		public:
-			List( void )
-			{
+       \todo Implement index bound checking policy
+       \todo Implement parallel policy
+       \todo Avoid using std::list
+    */
+    template<
+        typename T,
+        class ThreadingPolicy = policies::SingleThreaded
+    >
+    class List : public ThreadingPolicy {
+    private:
+        using LockImpl = typename ThreadingPolicy::Lock;
 
-			}
-			
-			List( std::initializer_list< T > l )
-				: _list( l )
-			{
+    public:
+        List( void ) = default;
 
-			}
+        List( std::initializer_list< T > l ) noexcept
+            : _list( l )
+        {
 
-			List( const List &other )
-				: _list( other._list )
-			{
+        }
 
-			}
+        List( const List &other ) noexcept
+            : _list( other._list )
+        {
 
-			List( List &&other )
-				: _list( std::move( other._list ) )
-			{
+        }
 
-			}
+        List( List &&other ) noexcept
+            : _list( std::move( other._list ) )
+        {
 
-			virtual ~List( void )
-			{
-                _list.clear();
-			}
-            
-            List &operator=( const List &other )
-            {
-                LockImpl lock( this );
+        }
 
-				_list = other._list;
-                
-                return *this;
+        virtual ~List( void ) noexcept
+        {
+            _list.clear();
+        }
+
+        List &operator=( const List &other ) noexcept
+        {
+            LockImpl lock( this );
+
+            _list = other._list;
+
+            return *this;
+        }
+
+        List &operator=( List &&other ) noexcept
+        {
+            LockImpl lock( this );
+
+            _list = std::move( other._list );
+
+            return *this;
+        }
+
+        /**
+           \brief Compare two arrays up to getSize() elements
+        */
+        inline bool operator==( const List &other ) const noexcept
+        {
+            return _list == other._list;
+        }
+
+        inline bool empty( void ) const noexcept
+        {
+            LockImpl lock( this );
+            return _list.size() == 0;
+        }
+
+        inline Size size( void ) const noexcept
+        {
+            LockImpl lock( this );
+            return _list.size();
+        }
+
+        inline void clear( void ) noexcept
+        {
+            LockImpl lock( this );
+            _list.clear();
+        }
+
+        inline T &first( void ) noexcept
+        {
+            LockImpl lock( this );
+
+            return _list.front();
+        }
+
+        void add( T const &elem ) noexcept
+        {
+            LockImpl lock( this );
+
+            _list.push_back( elem );
+        }
+
+        void remove( const T &elem ) noexcept
+        {
+            LockImpl lock( this );
+
+            _list.remove( elem );
+        }
+
+        Bool contains( const T &e ) const noexcept
+        {
+            LockImpl lock( this );
+
+            return std::find( std::begin( _list ), std::end( _list ), e ) != std::end( _list );
+        }
+
+        template< typename Callback >
+        void each( Callback callback ) noexcept
+        {
+            LockImpl lock( this );
+
+            // implement a policy to traverse the array by creating a copy if needed
+            for ( auto e : _list ) {
+                callback( e );
             }
+        }
 
-			List &operator=( List &&other )
-			{
-				LockImpl lock( this );
+        template< typename Callback >
+        void each( Callback callback ) const noexcept
+        {
+            LockImpl lock( this );
 
-				_list = std::move( other._list );
-				
-				return *this;
-			}
-
-			/**
-			   \brief Compare two arrays up to getSize() elements
-			 */
-			bool operator==( const List &other ) const
-			{
-				return _list == other._list;
-			}
-			
-			inline bool empty( void ) const
-			{
-				LockImpl lock( this );
-				return _list.size() == 0;
-			}
-			
-			inline crimild::Size size( void ) const
-			{
-				LockImpl lock( this );
-				return _list.size();
-			}
-            
-            inline void clear( void )
-            {
-                LockImpl lock( this );
-				_list.clear();
+            // implement a policy to traverse the array by creating a copy if needed
+            for ( auto e : _list ) {
+                callback( e );
             }
+        }
 
-			T &first( void )
-			{
-				LockImpl lock( this );
+    private:
+        std::list< T > _list;
 
-				return _list.front();
-			}
-			
-			void add( T const &elem )
-			{
-				LockImpl lock( this );
+    public:
+        friend std::ostream& operator<<( std::ostream& os, const List &list ) noexcept
+        {
+            os << "[";
+            list.each( [ &os, i = 0 ]( const T &a ) mutable {
+                os << ( i++ == 0 ? "" : ", " ) << a;
+            });
+            os << "]";
 
-				_list.push_back( elem );
-			}
-			
-			void remove( const T &elem )
-			{
-				LockImpl lock( this );
+            return os;
+        }
 
-				_list.remove( elem );
-			}
-			
-			crimild::Bool contains( const T &e ) const
-			{
-				LockImpl lock( this );
+    };
 
-				return std::find( std::begin( _list ), std::end( _list ), e ) != std::end( _list );
-			}
-
-			void each( TraverseCallback const &callback )
-			{
-				LockImpl lock( this );
-
-				// implement a policy to traverse the array by creating a copy if needed
-				crimild::Size i = 0;
-				for ( auto e : _list ) {
-					callback( e, i++ );
-				}
-			}
-
-			void each( ConstTraverseCallback const &callback ) const
-			{
-				LockImpl lock( this );
-
-				// implement a policy to traverse the array by creating a copy if needed
-				crimild::Size i = 0;
-				for ( auto e : _list ) {
-					callback( e, i++ );
-				}
-			}
-
-			void each( BasicTraverseCallback const &callback )
-			{
-				LockImpl lock( this );
-
-				// implement a policy to traverse the array by creating a copy if needed
-				for ( auto e : _list ) {
-					callback( e );
-				}
-			}
-
-			void each( ConstBasicTraverseCallback const &callback ) const
-			{
-				LockImpl lock( this );
-
-				// implement a policy to traverse the array by creating a copy if needed
-				for ( auto e : _list ) {
-					callback( e );
-				}
-			}
-
-		private:
-			std::list< T > _list;
-		};
-
-		template< typename T >
-		using ThreadSafeList = List< T, policies::ObjectLevelLockable >;
-	}
-
+    template< typename T >
+    using ThreadSafeList = List< T, policies::ObjectLevelLockable >;
 }
 
-template<
-    typename T,
-    class TP
->
-std::ostream& operator<<( std::ostream& os, const crimild::containers::List< T, TP > &list )  
-{  
-	os << "[";
-	list.each( [ &os ]( const T &a, crimild::Size i ) {
-		os << ( i == 0 ? "" : ", " ) << a;
-	});
-	os << "]";
-	
-	return os;
-}  
-	
 #endif
-	
-	
