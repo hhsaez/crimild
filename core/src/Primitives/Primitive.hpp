@@ -46,6 +46,10 @@ namespace crimild {
 		public StreamObject {
 		CRIMILD_IMPLEMENT_RTTI( crimild::Primitive )
 
+    private:
+        using VertexData = Array< SharedPointer< VertexBuffer >>;
+        using IndexData = SharedPointer< IndexBuffer >;
+
 	public:
 		enum class Type : uint8_t {
 			POINTS,
@@ -63,13 +67,13 @@ namespace crimild {
 
 		Primitive::Type getType( void ) const { return _type; }
 
-		Array< SharedPointer< VertexBuffer >> vertexBuffers;
-		SharedPointer< IndexBuffer > indexBuffer;
+        inline void setVertexData( VertexData const vertexData ) noexcept { m_vertexData = vertexData; }
+        inline VertexData &getVertexData( void ) noexcept { return m_vertexData; }
+        inline const VertexData &getVertexData( void ) const noexcept { return m_vertexData; }
 
-        //void setVertices( SharedPointer< VertexBuffer > &vertices ) noexcept { setVertices( { vertexData } ); }
-        //void setVertices( Array< SharedPointer< VertexBuffer >> const &vertices ) noexcept { _vertices; }
-
-        //void setIndices( SharedPointer< IndexBuffer > const &indexData ) noexcept { _indexData = indexData; }
+        inline void setIndices( SharedPointer< IndexBuffer > const &indices ) noexcept { m_indices = indices; }
+        inline IndexBuffer *getIndices( void ) noexcept { return get_ptr( m_indices ); }
+        inline const IndexBuffer *getIndices( void ) const noexcept { return get_ptr( m_indices ); }
 
         void setVertexBuffer( VertexBufferObject *vbo ) { _vertexBuffer = crimild::retain( vbo ) ; }
         void setVertexBuffer( SharedPointer< VertexBufferObject > const &vbo ) { _vertexBuffer = vbo; }
@@ -85,18 +89,20 @@ namespace crimild {
 
 	private:
 		Primitive::Type _type;
+        VertexData m_vertexData;
+        IndexData m_indices;
 		SharedPointer< VertexBufferObject > _vertexBuffer;
 		SharedPointer< IndexBufferObject > _indexBuffer;
 		SharedPointer< InstancedBufferObject > _instancedBuffer;
-        
+
         /**
          */
         //@{
-        
+
     public:
         virtual void encode( coding::Encoder &encoder ) override;
         virtual void decode( coding::Decoder &decoder ) override;
-        
+
         //@}
 
 		/**
@@ -117,4 +123,3 @@ namespace crimild {
 }
 
 #endif
-
