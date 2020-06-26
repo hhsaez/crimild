@@ -81,7 +81,7 @@ TEST( FrameGraph, compile )
 
     EXPECT_TRUE( graph->compile() );
 
-    auto expected = containers::Array< FrameGraph::Node * > {
+    auto expected = Array< FrameGraph::Node * > {
         graph->getNode( renderPass ),
         graph->getNode( color ),
         graph->getNode( present ),
@@ -204,25 +204,31 @@ TEST( FrameGraph, simpleFrameGraph )
 	EXPECT_TRUE( graph->compile() );
 
 	auto sorted = graph->getSorted();
-	EXPECT_EQ( 9, sorted.size() );
+	EXPECT_EQ( 15, sorted.size() );
 
 	// The first nodes contains basic resources in any order
-	auto resources = containers::Array< FrameGraphObject * > {
+	auto resources = Array< FrameGraphObject * > {
 		crimild::get_ptr( pipeline ),
 		crimild::get_ptr( vbo ),
+        vbo->getBufferView(),
+        vbo->getBufferView()->getBuffer(),
 		crimild::get_ptr( ibo ),
+        ibo->getBufferView(),
+        ibo->getBufferView()->getBuffer(),
 		crimild::get_ptr( ubo ),
+        ubo->getBufferView(),
+        ubo->getBufferView()->getBuffer(),
 	};
-	EXPECT_TRUE( resources.contains( sorted[ 0 ]->obj ) );
-	EXPECT_TRUE( resources.contains( sorted[ 1 ]->obj ) );
-	EXPECT_TRUE( resources.contains( sorted[ 2 ]->obj ) );
-	EXPECT_TRUE( resources.contains( sorted[ 3 ]->obj ) );
 
-	EXPECT_EQ( crimild::get_ptr( descriptorSet ), sorted[ 4 ]->obj );
-	EXPECT_EQ( crimild::get_ptr( renderPass->commands ), sorted[ 5 ]->obj );
-	EXPECT_EQ( crimild::get_ptr( renderPass ), sorted[ 6 ]->obj );
-	EXPECT_EQ( crimild::get_ptr( color ), sorted[ 7 ]->obj );
-	EXPECT_EQ( crimild::get_ptr( present ), sorted[ 8 ]->obj );
+    for ( auto i = 0; i < resources.size(); i++ ) {
+        ASSERT_TRUE( resources.contains( sorted[ i ]->obj ) );
+    }
+    
+	EXPECT_EQ( crimild::get_ptr( descriptorSet ), sorted[ resources.size() + 0 ]->obj );
+	EXPECT_EQ( crimild::get_ptr( renderPass->commands ), sorted[ resources.size() + 1 ]->obj );
+	EXPECT_EQ( crimild::get_ptr( renderPass ), sorted[ resources.size() + 2 ]->obj );
+	EXPECT_EQ( crimild::get_ptr( color ), sorted[ resources.size() + 3 ]->obj );
+	EXPECT_EQ( crimild::get_ptr( present ), sorted[ resources.size() + 4 ]->obj );
 }
 
 TEST( FrameGraph, simpleAutoAddNodes )
@@ -264,25 +270,31 @@ TEST( FrameGraph, simpleAutoAddNodes )
 	EXPECT_TRUE( graph->compile() );
 
 	auto sorted = graph->getSorted();
-	EXPECT_EQ( 9, sorted.size() );
+	EXPECT_EQ( 15, sorted.size() );
 
 	// The first nodes contains basic resources in any order
-	auto resources = containers::Array< FrameGraphObject * > {
+	auto resources = Array< FrameGraphObject * > {
 		crimild::get_ptr( pipeline ),
 		crimild::get_ptr( vbo ),
+        vbo->getBufferView(),
+        vbo->getBufferView()->getBuffer(),
 		crimild::get_ptr( ibo ),
+        ibo->getBufferView(),
+        ibo->getBufferView()->getBuffer(),
 		crimild::get_ptr( ubo ),
+        ubo->getBufferView(),
+        ubo->getBufferView()->getBuffer(),
 	};
-	EXPECT_TRUE( resources.contains( sorted[ 0 ]->obj ) );
-	EXPECT_TRUE( resources.contains( sorted[ 1 ]->obj ) );
-	EXPECT_TRUE( resources.contains( sorted[ 2 ]->obj ) );
-	EXPECT_TRUE( resources.contains( sorted[ 3 ]->obj ) );
 
-	EXPECT_EQ( crimild::get_ptr( descriptorSet ), sorted[ 4 ]->obj );
-	EXPECT_EQ( crimild::get_ptr( renderPass->commands ), sorted[ 5 ]->obj );
-	EXPECT_EQ( crimild::get_ptr( renderPass ), sorted[ 6 ]->obj );
-	EXPECT_EQ( crimild::get_ptr( color ), sorted[ 7 ]->obj );
-	EXPECT_EQ( crimild::get_ptr( present ), sorted[ 8 ]->obj );
+    for ( auto i = 0; i < resources.size(); i++ ) {
+        ASSERT_TRUE( resources.contains( sorted[ i ]->obj ) );
+    }
+    
+	EXPECT_EQ( crimild::get_ptr( descriptorSet ), sorted[ resources.size() + 0 ]->obj );
+	EXPECT_EQ( crimild::get_ptr( renderPass->commands ), sorted[ resources.size() + 1 ]->obj );
+	EXPECT_EQ( crimild::get_ptr( renderPass ), sorted[ resources.size() + 2 ]->obj );
+	EXPECT_EQ( crimild::get_ptr( color ), sorted[ resources.size() + 3 ]->obj );
+	EXPECT_EQ( crimild::get_ptr( present ), sorted[ resources.size() + 4 ]->obj );
 }
 
 TEST( FrameGraph, imageUsage )

@@ -143,7 +143,7 @@ namespace crimild {
         
 	public:
         template< typename DATA_TYPE >
-		VertexBuffer( const VertexLayout &vertexLayout, const containers::Array< DATA_TYPE > &data ) noexcept
+		VertexBuffer( const VertexLayout &vertexLayout, const Array< DATA_TYPE > &data ) noexcept
             : VertexBuffer(
                 vertexLayout,
                 [&] {
@@ -193,7 +193,7 @@ namespace crimild {
     private:
 		VertexLayout m_vertexLayout;
         SharedPointer< BufferView > m_bufferView;
-        containers::Map< VertexAttribute::Name, SharedPointer< BufferAccessor >> m_accessors;
+        Map< VertexAttribute::Name, SharedPointer< BufferAccessor >> m_accessors;
 	};
 
 }

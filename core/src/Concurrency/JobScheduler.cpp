@@ -219,12 +219,12 @@ void JobScheduler::yield( void )
 
 void JobScheduler::delaySync( JobPtr const &job )
 {
-    _delayedSyncJobs.push_back( job );
+    _delayedSyncJobs.add( job );
 }
 
 void JobScheduler::delayAsync( JobPtr const &job )
 {
-    _delayedAsyncJobs.push_back( job );
+    _delayedAsyncJobs.add( job );
 }
 
 void JobScheduler::executeDelayedJobs( void )
@@ -232,13 +232,17 @@ void JobScheduler::executeDelayedJobs( void )
     // Schedule async jobs first since we don't need to wait for them
     // Flush lists afterwards
 
-    _delayedAsyncJobs.each( [this]( JobPtr const &j ) {
-        schedule( j );
-    }, true );
+    _delayedAsyncJobs.each(
+        [&]( JobPtr const &j ) {
+            schedule( j );
+        }
+    );
     
-    _delayedSyncJobs.each( [this]( JobPtr const &j ) {
-        execute( j );
-    }, true );
+    _delayedSyncJobs.each(
+        [&]( JobPtr const &j ) {
+            execute( j );
+        }
+    );
 }
 
 void JobScheduler::eachWorkerStat( std::function< void( WorkerId, const WorkerStat & ) > const &callback ) const

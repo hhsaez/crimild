@@ -38,7 +38,7 @@ namespace crimild {
 	namespace vulkan {
 
         struct RenderPassBindInfo {
-            containers::Array< VkFramebuffer > framebuffers;
+            Array< VkFramebuffer > framebuffers;
             VkRenderPass handler;
         };
 

@@ -86,7 +86,7 @@ void ShadowPass::execute( RenderGraph *graph, Renderer *renderer, RenderQueue *r
 {
 	CRIMILD_PROFILE( getName() )
 
-	static const auto VIEWPORTS = containers::Array< Vector4f > {
+	static const auto VIEWPORTS = Array< Vector4f > {
 		Vector4f( 0.0f, 0.0f, 0.5f, 0.5f ),
 		Vector4f( 0.5f, 0.0f, 0.5f, 0.5f ),
 		Vector4f( 0.5f, 0.5f, 0.5f, 0.5f ),

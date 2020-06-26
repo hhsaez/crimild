@@ -139,9 +139,9 @@ void Geometry::decode( coding::Decoder &decoder )
 {
     Node::decode( decoder );
     
-    containers::Array< SharedPointer< Primitive >> ps;
+    Array< SharedPointer< Primitive >> ps;
     decoder.decode( "primitives", ps );
-    ps.each( [ this ]( SharedPointer< Primitive > &p, crimild::Size ) {
+    ps.each( [ this ]( SharedPointer< Primitive > &p ) {
         attachPrimitive( p );
     });
 }

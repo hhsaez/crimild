@@ -102,14 +102,14 @@ namespace crimild {
 			//@{
 			
 			Variable *add( Variable *a, Variable *b );
-			Variable *add( containers::Array< Variable * > const &inputs );
+			Variable *add( Array< Variable * > const &inputs );
 			template< class ... Args >
 			Variable *add( Args &&... args ) { return add( { args... } ); }
 
 			Variable *sub( Variable *a, Variable *b );
 
 			Variable *mult( Variable *a, Variable *b );
-			Variable *mult( containers::Array< Variable * > const &inputs );
+			Variable *mult( Array< Variable * > const &inputs );
 			template< class ... Args >
 			Variable *mult( Args &&... args ) { return mult( { args... } ); }
 

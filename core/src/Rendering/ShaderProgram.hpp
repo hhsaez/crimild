@@ -66,7 +66,7 @@ namespace crimild {
         CRIMILD_IMPLEMENT_RTTI( crimild::ShaderProgram )
 
 	public:
-		using ShaderArray = containers::Array< SharedPointer< Shader >>;
+		using ShaderArray = Array< SharedPointer< Shader >>;
 
 	public:
 		explicit ShaderProgram( const ShaderArray &shaders ) noexcept;
@@ -74,8 +74,8 @@ namespace crimild {
 
 		ShaderArray &getShaders( void ) noexcept { return m_shaders; }
 
-        containers::Array< VertexLayout > vertexLayouts;
-        containers::Array< SharedPointer< DescriptorSetLayout >> descriptorSetLayouts;
+        Array< VertexLayout > vertexLayouts;
+        Array< SharedPointer< DescriptorSetLayout >> descriptorSetLayouts;
 
     private:
 		ShaderArray m_shaders;
@@ -86,8 +86,8 @@ namespace crimild {
 		//@{
 
 	private:
-		using UniformArray = containers::Array< SharedPointer< ShaderUniform >>;
-		using UniformMap = containers::Map< std::string, SharedPointer< ShaderUniform >>;
+		using UniformArray = Array< SharedPointer< ShaderUniform >>;
+		using UniformMap = Map< std::string, SharedPointer< ShaderUniform >>;
 		
 	public:
 		class StandardLocation {
@@ -217,7 +217,7 @@ namespace crimild {
 		void forEachUniform( std::function< void( ShaderUniform * ) > callback );
 
 		void bindUniform( std::string name, crimild::Int32 value );
-        void bindUniform( std::string name, const containers::Array< crimild::Int32 > &value );
+        void bindUniform( std::string name, const Array< crimild::Int32 > &value );
 		void bindUniform( std::string name, crimild::Real32 value );
 		void bindUniform( std::string name, const Matrix3f &value );
 		void bindUniform( std::string name, const Matrix4f &value );

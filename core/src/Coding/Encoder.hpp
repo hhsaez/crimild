@@ -83,24 +83,25 @@ namespace crimild {
             virtual crimild::Bool encode( std::string key, const Transformation & ) = 0;
             virtual crimild::Bool encode( std::string key, const VertexFormat & ) = 0;
             
-            virtual crimild::Bool encode( std::string key, containers::ByteArray & ) = 0;
-			virtual crimild::Bool encode( std::string key, containers::Array< crimild::Real32 > & ) = 0;
-			virtual crimild::Bool encode( std::string key, containers::Array< Vector3f > & ) = 0;
-			virtual crimild::Bool encode( std::string key, containers::Array< Vector4f > & ) = 0;
-			virtual crimild::Bool encode( std::string key, containers::Array< Matrix3f > & ) = 0;
-			virtual crimild::Bool encode( std::string key, containers::Array< Matrix4f > & ) = 0;
-			virtual crimild::Bool encode( std::string key, containers::Array< Quaternion4f > & ) = 0;
+            virtual crimild::Bool encode( std::string key, ByteArray & ) = 0;
+			virtual crimild::Bool encode( std::string key, Array< crimild::Real32 > & ) = 0;
+			virtual crimild::Bool encode( std::string key, Array< Vector3f > & ) = 0;
+			virtual crimild::Bool encode( std::string key, Array< Vector4f > & ) = 0;
+			virtual crimild::Bool encode( std::string key, Array< Matrix3f > & ) = 0;
+			virtual crimild::Bool encode( std::string key, Array< Matrix4f > & ) = 0;
+			virtual crimild::Bool encode( std::string key, Array< Quaternion4f > & ) = 0;
             
             template< typename T, typename U >
-            crimild::Bool encode( std::string key, containers::Array< T, U > &a )
+            crimild::Bool encode( std::string key, Array< T, U > &a )
             {
                 crimild::Size N = a.size();
                 encodeArrayBegin( key, N );
                 
-                a.each( [ this, key ]( T &elem, crimild::Size i ) {
+                a.each( [ this, key, i = 0 ]( T &elem ) mutable {
 					auto itemKey = beginEncodingArrayElement( key, i );
                     encode( itemKey, elem );
 					endEncodingArrayElement( key, i );
+                    i++;
                 });
                 
                 encodeArrayEnd( key );

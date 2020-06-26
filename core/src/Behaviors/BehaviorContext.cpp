@@ -127,7 +127,7 @@ void BehaviorContext::encode( coding::Encoder &encoder )
 {
 	Codable::encode( encoder );
 
-	crimild::containers::Array< SharedPointer< BehaviorContextValue >> values;
+	crimild::Array< SharedPointer< BehaviorContextValue >> values;
 	_values.each( [ &values ]( std::string key, SharedPointer< BehaviorContextValue > &value ) {
 		values.add( value );
 	});
@@ -138,10 +138,10 @@ void BehaviorContext::decode( coding::Decoder &decoder )
 {
 	Codable::decode( decoder );
 
-	crimild::containers::Array< SharedPointer< BehaviorContextValue >> values;
+	crimild::Array< SharedPointer< BehaviorContextValue >> values;
 	decoder.decode( "values", values );
 	_values.clear();
-	values.each( [ this ]( SharedPointer< BehaviorContextValue > &value, crimild::Size ) {
+	values.each( [ this ]( SharedPointer< BehaviorContextValue > &value ) {
 		_values[ value->getKey() ] = value;
 	});
 }

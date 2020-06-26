@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,305 +37,295 @@
 
 namespace crimild {
 
-	namespace containers {
+    /**
+       \brief A priority queue
 
-		/**
-		   \brief A priority queue
+       This implementation is based on the one appearing in the
+       book Algorithms 4th Edition
 
-		   This implementation is based on the one appearing in the
-		   book Algorithms 4th Edition
-		   
-		   \todo Implement index bound checking policy
-		   \todo Implement parallel policy
-		*/
-		template<
-		    typename T,
-		    class ThreadingPolicy = policies::SingleThreaded
-		>
-		class PriorityQueue : public ThreadingPolicy {
-		private:
-			using LockImpl = typename ThreadingPolicy::Lock;
+       \todo Implement index bound checking policy
+       \todo Implement parallel policy
+    */
+    template<
+        typename T,
+        class ThreadingPolicy = policies::SingleThreaded
+    >
+    class PriorityQueue : public ThreadingPolicy {
+    private:
+        using LockImpl = typename ThreadingPolicy::Lock;
 
-		public:
-			using TraverseCallback = std::function< void( T &, crimild::Size ) >;
-			using ConstTraverseCallback = std::function< void( const T &, crimild::Size ) >;
-			using Comparator = std::function< crimild::Bool( const T& a, const T &b ) >;
-			
-		public:
-			PriorityQueue( void )
-				: PriorityQueue( 1 )
-			{
-				
-			}
-			
-			explicit PriorityQueue( crimild::Size capacity )
-			{
-				resize_unsafe( 1 + capacity );
-				
-				_comparator = []( const T &a, const T &b ) { return a > b; }; // greater
-			}
+        using Comparator = std::function< Bool( const T& a, const T &b ) >;
 
-			explicit PriorityQueue( crimild::Size capacity, Comparator comparator )
-				: PriorityQueue( capacity )
-			{
-				if ( comparator != nullptr ) {
-					_comparator = comparator;
-				}
-			}
+    public:
+        PriorityQueue( void ) noexcept
+            : PriorityQueue( 1 )
+        {
 
-			explicit PriorityQueue( Comparator comparator )
-				: PriorityQueue( 1, comparator )
-			{
+        }
 
-			}
+        explicit PriorityQueue( Size capacity ) noexcept
+        {
+            resize_unsafe( 1 + capacity );
 
-			PriorityQueue( std::initializer_list< T > keys )
-				: PriorityQueue( keys.size() )
-			{
-				crimild::Size i = 0;
-				for ( auto k : keys ) {
-					_elems[ i + 1 ] = k;
-				}
-				for ( crimild::Size k = _size / 2; k >= 1; k-- ) {
-					sink( k );
-				}
-			}
+            _comparator = []( const T &a, const T &b ) { return a > b; }; // greater
+        }
 
-			PriorityQueue( const PriorityQueue &other )
-			{
-				resize_unsafe( other._capacity );
-				_size = other._size;
-				_comparator = other._comparator;
+        explicit PriorityQueue( Size capacity, Comparator comparator ) noexcept
+            : PriorityQueue( capacity )
+        {
+            if ( comparator != nullptr ) {
+                _comparator = comparator;
+            }
+        }
 
-                // invoke operator= on all elements (required for smart pointers)
-                for ( crimild::Size i = 0; i <= _size; i++ ) {
-                    _elems[ i ] = other._elems[ i ];
-                }
-			}
-			
-			virtual ~PriorityQueue( void )
-			{
-                resize_unsafe( 2 );
-                _size = 0;
-			}
+        explicit PriorityQueue( Comparator comparator ) noexcept
+            : PriorityQueue( 1, comparator )
+        {
 
-			PriorityQueue &operator=( const PriorityQueue &other )
-			{
-				LockImpl lock( this );
+        }
 
-				resize_unsafe( other._capacity );
-				_size = other._size;
-				_comparator = other._comparator;
+        PriorityQueue( std::initializer_list< T > keys ) noexcept
+            : PriorityQueue( keys.size() )
+        {
+            Size i = 0;
+            for ( auto k : keys ) {
+                _elems[ i + 1 ] = k;
+            }
+            for ( Size k = _size / 2; k >= 1; k-- ) {
+                sink( k );
+            }
+        }
 
-                // invoke operator= on all elements (required for smart pointers)
-                for ( crimild::Size i = 0; i <= _size; i++ ) {
-                    _elems[ i ] = other._elems[ i ];
-                }
+        PriorityQueue( const PriorityQueue &other ) noexcept
+        {
+            resize_unsafe( other._capacity );
+            _size = other._size;
+            _comparator = other._comparator;
 
-				return *this;
-			}
+            // invoke operator= on all elements (required for smart pointers)
+            for ( Size i = 0; i <= _size; i++ ) {
+                _elems[ i ] = other._elems[ i ];
+            }
+        }
 
-			/**
-			   \brief Compare two priority queues up to size() elements
-			 */
-			bool operator==( const PriorityQueue &other ) const
-			{
-				LockImpl lock( this );
-				if ( _size != other._size ) {
-					return false;
-				}
-                
-                for ( crimild::Size i = 0; i <= _size; i++ ) {
-                    if ( _elems[ i ] != other._elems[ i ] ) {
-                        return false;
-                    }
-                }
+        virtual ~PriorityQueue( void ) noexcept
+        {
+            resize_unsafe( 2 );
+            _size = 0;
+        }
 
-                return true;
-			}
-			
-			inline bool empty( void )
-			{
-				LockImpl lock( this );
-				
-				return size_unsafe() == 0;
-			}
-			
-			inline crimild::Size size( void )
-			{
-				LockImpl lock( this );
-				
-				return size_unsafe();
-			}
+        PriorityQueue &operator=( const PriorityQueue &other ) noexcept
+        {
+            LockImpl lock( this );
 
-			T &front( void )
-			{
-				LockImpl lock( this );
+            resize_unsafe( other._capacity );
+            _size = other._size;
+            _comparator = other._comparator;
 
-				// TODO: index bound check				
-				return _elems[ 1 ];
-			}
-
-			const T &front( void ) const
-			{
-				LockImpl lock( this );
-				
-				// TODO: index bound check
-				return _elems[ 1 ];
-			}
-			
-			void enqueue( T const &elem )
-			{
-				LockImpl lock( this );
-
-				if ( _size == _capacity - 1 ) {
-					resize_unsafe( 2 * _capacity );
-				}
-
-				_elems[ ++_size ] = elem;
-				swim( _size );
-			}
-			
-			T dequeue( void )
-			{
-				LockImpl lock( this );
-
-				T x = _elems[ 1 ];
-				
-				swap_unsafe( 1, _size-- );
-				sink( 1 );
-
-				_elems[ _size + 1 ] = T(); // avoid loitering
-				
-				if ( _size > 0 && ( _size == ( _capacity - 1 ) / 4 ) ) {
-					resize_unsafe( _capacity / 2 );
-				}
-
-				return x;
-			}
-			
-			void swap( crimild::Size i, crimild::Size j )
-			{
-				LockImpl lock( this );
-
-				// todo check boundaries
-				swap_unsafe( i, j );
-			}
-			
-			void resize( crimild::Size capacity )
-			{
-				LockImpl lock( this );
-
-				resize_unsafe( capacity );
-			}
-            
-            void clear( void )
-            {
-                LockImpl lock( this );
-                
-                resize_unsafe( 2 );
-                _size = 0;
+            // invoke operator= on all elements (required for smart pointers)
+            for ( Size i = 0; i <= _size; i++ ) {
+                _elems[ i ] = other._elems[ i ];
             }
 
-			void each( TraverseCallback const &callback )
-			{
-				LockImpl lock( this );
+            return *this;
+        }
 
-				// implement a policy to traverse the array by creating a copy if needed
-				for ( crimild::Size i = 0; i < _size; i++ ) {
-					callback( _elems[ i + 1 ], i );
-				}
-			}
+        /**
+           \brief Compare two priority queues up to size() elements
+        */
+        Bool operator==( const PriorityQueue &other ) const noexcept
+        {
+            LockImpl lock( this );
+            if ( _size != other._size ) {
+                return false;
+            }
 
-			void each( ConstTraverseCallback const &callback ) const
-			{
-				LockImpl lock( this );
+            for ( Size i = 0; i <= _size; i++ ) {
+                if ( _elems[ i ] != other._elems[ i ] ) {
+                    return false;
+                }
+            }
 
-				// implement a policy to traverse the array by creating a copy if needed
-				for ( crimild::Size i = 0; i < _size; i++ ) {
-					callback( _elems[ i + 1 ], i );
-				}
-			}
+            return true;
+        }
 
-		private:
-			crimild::Size size_unsafe( void ) const
-			{
-				return _size;
-			}
-			
-			void swap_unsafe( crimild::Size i, crimild::Size j )
-			{
-				auto t = _elems[ i ];
-				_elems[ i ] = _elems[ j ];
-				_elems[ j ] = t;
-			}
+        inline bool empty( void ) noexcept
+        {
+            LockImpl lock( this );
 
-			void resize_unsafe( crimild::Size capacity )
-			{
-				auto elems = std::unique_ptr< T[] >( new T[ capacity ] );
-                for ( crimild::Size i = 0; i < std::min( _capacity, capacity ); i++ ) {
-					elems[ i ] = _elems[ i ];
-				}
-				_elems = std::move( elems );
-				_capacity = capacity;
-			}
+            return size_unsafe() == 0;
+        }
 
-			void swim( crimild::Size k )
-			{
-				while ( k > 1 && greater( k / 2, k ) ) {
-					swap_unsafe( k, k / 2 );
-					k = k / 2;
-				}
-			}
+        inline Size size( void ) noexcept
+        {
+            LockImpl lock( this );
 
-			void sink( crimild::Size k )
-			{
-				while ( 2 * k <= _size ) {
-					auto j = 2 * k;
-					if ( j < _size && greater( j, j + 1 ) ) {
-						j++;
-					}
-					if ( !greater( k, j ) ) {
-						break;
-					}
-					swap_unsafe( k, j );
-					k = j;
-				}
-			}
+            return size_unsafe();
+        }
 
-			bool greater( crimild::Size i, crimild::Size j )
-			{
-				if ( _comparator == nullptr ) {
-					return _elems[ i ] > _elems[ j ];
-				}
-				return _comparator( _elems[ i ], _elems[ j ] );
-			}
+        inline T &front( void ) noexcept
+        {
+            LockImpl lock( this );
 
-		private:
-			std::unique_ptr< T[] > _elems;
-			crimild::Size _size = 0;
-			crimild::Size _capacity = 0;
-			Comparator _comparator;
-		};
-		
-	}
+            // TODO: index bound check
+            return _elems[ 1 ];
+        }
+
+        inline const T &front( void ) const noexcept
+        {
+            LockImpl lock( this );
+
+            // TODO: index bound check
+            return _elems[ 1 ];
+        }
+
+        void enqueue( T const &elem ) noexcept
+        {
+            LockImpl lock( this );
+
+            if ( _size == _capacity - 1 ) {
+                resize_unsafe( 2 * _capacity );
+            }
+
+            _elems[ ++_size ] = elem;
+            swim( _size );
+        }
+
+        T dequeue( void ) noexcept
+        {
+            LockImpl lock( this );
+
+            T x = _elems[ 1 ];
+
+            swap_unsafe( 1, _size-- );
+            sink( 1 );
+
+            _elems[ _size + 1 ] = T(); // avoid loitering
+
+            if ( _size > 0 && ( _size == ( _capacity - 1 ) / 4 ) ) {
+                resize_unsafe( _capacity / 2 );
+            }
+
+            return x;
+        }
+
+        void swap( Size i, Size j ) noexcept
+        {
+            LockImpl lock( this );
+
+            // todo check boundaries
+            swap_unsafe( i, j );
+        }
+
+        void resize( Size capacity ) noexcept
+        {
+            LockImpl lock( this );
+
+            resize_unsafe( capacity );
+        }
+
+        void clear( void ) noexcept
+        {
+            LockImpl lock( this );
+
+            resize_unsafe( 2 );
+            _size = 0;
+        }
+
+        template< typename Callback >
+        void each( Callback callback ) noexcept
+        {
+            LockImpl lock( this );
+
+            // implement a policy to traverse the array by creating a copy if needed
+            for ( Size i = 0; i < _size; i++ ) {
+                callback( _elems[ i + 1 ], i );
+            }
+        }
+
+        template< typename Callback >
+        void each( Callback callback ) const noexcept
+        {
+            LockImpl lock( this );
+
+            // implement a policy to traverse the array by creating a copy if needed
+            for ( Size i = 0; i < _size; i++ ) {
+                callback( _elems[ i + 1 ], i );
+            }
+        }
+
+    private:
+        inline Size size_unsafe( void ) const noexcept
+        {
+            return _size;
+        }
+
+        void swap_unsafe( Size i, Size j ) noexcept
+        {
+            auto t = _elems[ i ];
+            _elems[ i ] = _elems[ j ];
+            _elems[ j ] = t;
+        }
+
+        void resize_unsafe( Size capacity ) noexcept
+        {
+            auto elems = std::unique_ptr< T[] >( new T[ capacity ] );
+            for ( Size i = 0; i < std::min( _capacity, capacity ); i++ ) {
+                elems[ i ] = _elems[ i ];
+            }
+            _elems = std::move( elems );
+            _capacity = capacity;
+        }
+
+        void swim( Size k ) noexcept
+        {
+            while ( k > 1 && greater( k / 2, k ) ) {
+                swap_unsafe( k, k / 2 );
+                k = k / 2;
+            }
+        }
+
+        void sink( Size k ) noexcept
+        {
+            while ( 2 * k <= _size ) {
+                auto j = 2 * k;
+                if ( j < _size && greater( j, j + 1 ) ) {
+                    j++;
+                }
+                if ( !greater( k, j ) ) {
+                    break;
+                }
+                swap_unsafe( k, j );
+                k = j;
+            }
+        }
+
+        bool greater( Size i, Size j ) noexcept
+        {
+            if ( _comparator == nullptr ) {
+                return _elems[ i ] > _elems[ j ];
+            }
+            return _comparator( _elems[ i ], _elems[ j ] );
+        }
+
+    private:
+        std::unique_ptr< T[] > _elems;
+        Size _size = 0;
+        Size _capacity = 0;
+        Comparator _comparator;
+
+    public:
+        friend std::ostream& operator<<( std::ostream& os, const PriorityQueue &pq ) noexcept
+        {
+            os << "[";
+            pq.each( [&os]( const T &a, Size i ) {
+                os << ( i == 0 ? "" : ", " ) << a;
+            });
+            os << "]";
+            return os;
+        }
+    };
 
 }
 
-template<
-    typename T,
-    class TP
->
-std::ostream& operator<<( std::ostream& os, const crimild::containers::PriorityQueue< T, TP > &pq )  
-{  
-	os << "[";
-	pq.each( [&os]( const T &a, crimild::Size i ) {
-		os << ( i == 0 ? "" : ", " ) << a;
-	});
-	os << "]";
-	return os;
-}  
-	
 #endif
-	
-	

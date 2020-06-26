@@ -34,6 +34,8 @@
 
 using namespace crimild;
 
+#if 0
+
 TEST( SkinnedMeshJoint, coding )
 {
 	Transformation offset;
@@ -527,4 +529,6 @@ TEST( SkinnedMesh, streamSkinnedMesh )
 		EXPECT_EQ( 3, skinnedMesh->getAnimationState()->getJointPoses().size() );
 	}
 }
+
+#endif
 

@@ -46,7 +46,7 @@ namespace crimild {
         public:
             struct Descriptor {
                 RenderDevice *renderDevice;
-                containers::Array< DescriptorSetLayout * > setLayouts;
+                Array< DescriptorSetLayout * > setLayouts;
             };
 
         public:

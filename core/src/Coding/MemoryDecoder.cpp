@@ -35,7 +35,6 @@
 #include <sstream>
 
 using namespace crimild;
-using namespace crimild::containers;
 using namespace crimild::coding;
 
 MemoryDecoder::MemoryDecoder( void )
@@ -76,7 +75,7 @@ crimild::Bool MemoryDecoder::decode( std::string key, std::string &value )
     if ( l > 0 ) {
         auto obj = crimild::cast_ptr< EncodedData >( _links[ _currentObj->getUniqueID() ][ key ] );
 
-        containers::ByteArray data( l + 1 );
+        ByteArray data( l + 1 );
         memcpy( &data[ 0 ], obj->getBytes().getData(), l );
         data[ l ] = '\0';
         value = std::string( ( char * ) data.getData() );
@@ -109,7 +108,7 @@ void MemoryDecoder::endDecodingArray( std::string key )
 	// no-op
 }
 
-crimild::Bool MemoryDecoder::fromBytes( const containers::ByteArray &bytes )
+crimild::Bool MemoryDecoder::fromBytes( const ByteArray &bytes )
 {
     crimild::Size offset = 0;
 
@@ -227,25 +226,25 @@ crimild::Bool MemoryDecoder::fromBytes( const containers::ByteArray &bytes )
 	return true;
 }
 
-crimild::Size MemoryDecoder::read( const containers::ByteArray &bytes, Codable::UniqueID &value, crimild::Size offset )
+crimild::Size MemoryDecoder::read( const ByteArray &bytes, Codable::UniqueID &value, crimild::Size offset )
 {
     return readRawBytes( bytes, &value, sizeof( Codable::UniqueID ), offset );
 }
 
-crimild::Size MemoryDecoder::read( const containers::ByteArray &bytes, crimild::Int8 &value, crimild::Size offset )
+crimild::Size MemoryDecoder::read( const ByteArray &bytes, crimild::Int8 &value, crimild::Size offset )
 {
     return readRawBytes( bytes, &value, sizeof( crimild::Int8 ), offset );
 }
 
-crimild::Size MemoryDecoder::read( const containers::ByteArray &bytes, std::string &value, crimild::Size offset )
+crimild::Size MemoryDecoder::read( const ByteArray &bytes, std::string &value, crimild::Size offset )
 {
-    containers::ByteArray buffer;
+    ByteArray buffer;
     auto readBytes = read( bytes, buffer, offset );
     value = std::string( ( const char * ) buffer.getData() );
     return readBytes;
 }
 
-crimild::Size MemoryDecoder::read( const containers::ByteArray &bytes, containers::ByteArray &value, crimild::Size offset )
+crimild::Size MemoryDecoder::read( const ByteArray &bytes, ByteArray &value, crimild::Size offset )
 {
     crimild::Size count;
     auto readBytes = readRawBytes( bytes, &count, sizeof( crimild::Size ), offset );
@@ -254,7 +253,7 @@ crimild::Size MemoryDecoder::read( const containers::ByteArray &bytes, container
     return readBytes;
 }
 
-crimild::Size MemoryDecoder::readRawBytes( const containers::ByteArray &bytes, void *data, crimild::Size count, crimild::Size offset )
+crimild::Size MemoryDecoder::readRawBytes( const ByteArray &bytes, void *data, crimild::Size count, crimild::Size offset )
 {
     memcpy( data, bytes.getData() + offset, sizeof( crimild::Byte ) * count );
     return count;

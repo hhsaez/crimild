@@ -133,7 +133,7 @@ namespace crimild {
     private:
         crimild::Real32 _emitRate;
 		crimild::Real32 _emitAccum = 1.0f;
-        containers::Array< ParticleGeneratorPtr > _generators;
+        Array< ParticleGeneratorPtr > _generators;
 		crimild::Bool _burst = false;
 		
 		//@}
@@ -166,7 +166,7 @@ namespace crimild {
 		void updateUpdaters( Node *node, crimild::Real64 dt, ParticleData *particles );
 		
     private:
-        containers::Array< ParticleUpdaterPtr > _updaters;
+        Array< ParticleUpdaterPtr > _updaters;
 
 		//@}
 
@@ -198,7 +198,7 @@ namespace crimild {
 		void updateRenderers( Node *node, crimild::Real64 dt, ParticleData *particles );
 		
     private:
-        containers::Array< ParticleRendererPtr > _renderers;
+        Array< ParticleRendererPtr > _renderers;
 
 		//@}
 

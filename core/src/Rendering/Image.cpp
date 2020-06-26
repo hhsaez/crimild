@@ -102,7 +102,7 @@ SharedPointer< Image > createCheckerBoardImage( crimild::Int32 size )
     crimild::Int32 height = size;
     crimild::Int32 bpp = 4;
 
-    auto data = containers::ByteArray( width * height * bpp );
+    auto data = ByteArray( width * height * bpp );
     for ( int y = 0; y < width; y++ ) {
         for ( int x = 0; x < width; x++ ) {
             auto colorIdx = ( y % 2 + x % 2 ) % 2;
@@ -155,7 +155,7 @@ Image::Image( int width, int height, int bpp, const unsigned char *data, PixelFo
 	setData( width, height, bpp, data, format );
 }
 
-Image::Image( int width, int height, int bpp, const containers::ByteArray &data, PixelFormat format )
+Image::Image( int width, int height, int bpp, const ByteArray &data, PixelFormat format )
 {
 	setData( width, height, bpp, data.size() > 0 ? &data[ 0 ] : nullptr, format );
 }

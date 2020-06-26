@@ -132,7 +132,7 @@ namespace crimild {
 			}
 
 		private:
-			containers::Map< std::string, SharedPointer< Accumulator >> _accumulators;
+			Map< std::string, SharedPointer< Accumulator >> _accumulators;
 			
 			/**
 			   \name Coding

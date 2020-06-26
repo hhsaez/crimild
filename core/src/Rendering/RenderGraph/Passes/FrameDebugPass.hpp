@@ -64,7 +64,7 @@ namespace crimild {
 				void render( Renderer *renderer, Texture *texture );
 
 			private:
-				containers::Array< RenderGraphAttachment * > _inputs;
+				Array< RenderGraphAttachment * > _inputs;
 				
 				RenderGraphAttachment *_output = nullptr;
 

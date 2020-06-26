@@ -56,7 +56,7 @@ namespace crimild {
 		void forEachMaterial( std::function< void( Material * ) > callback );
 
 	private:
-		containers::Array< SharedPointer< Material >> _materials;
+		Array< SharedPointer< Material >> _materials;
         
         /**
             \name Clonning

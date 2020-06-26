@@ -82,7 +82,7 @@ namespace crimild {
     public:
         virtual ~RenderPass( void ) = default;
 
-		containers::Array< SharedPointer< Attachment >> attachments;
+		Array< SharedPointer< Attachment >> attachments;
 		SharedPointer< CommandBuffer > commands;
         Extent2D extent = Extent2D {
             .scalingMode = ScalingMode::SWAPCHAIN_RELATIVE,
@@ -95,18 +95,44 @@ namespace crimild {
         ClearValue clearValue;
 
         /**
+           \name Pipeline
+        */
+        //@{
+        
+    public:
+        inline void setPipeline( Pipeline *pipeline ) noexcept;
+        inline void setPipeline( SharedPointer< Pipeline > const &pipeline ) noexcept { m_pipeline = pipeline; }
+        inline Pipeline *getPipeline( void ) noexcept { return get_ptr( m_pipeline ); }
+
+    private:
+        /**
            \brief Pipeline associated with this render pass, if any.
 
            This is optional.
          */
-        SharedPointer< Pipeline > pipeline;
+        SharedPointer< Pipeline > m_pipeline;
 
+        //@}
+
+        /**
+           \name Descriptor Set
+        */
+        //@{
+        
+    public:
+        inline void setDescriptors( DescriptorSet *descriptors ) noexcept;
+        inline void setDescriptors( SharedPointer< DescriptorSet > const &descriptors ) noexcept { m_descriptors = descriptors; }
+        inline DescriptorSet *getDescriptors( void ) noexcept { return get_ptr( m_descriptors ); }
+
+    private:
         /**
            \brief Descriptors associated with this render pass, if any.
 
            This is optional.
          */
-        SharedPointer< DescriptorSet > descriptors;
+        SharedPointer< DescriptorSet > m_descriptors;
+
+        //@}
         
     };
 

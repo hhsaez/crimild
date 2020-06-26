@@ -37,7 +37,7 @@ Add::Add( ShaderGraph *graph, Variable *a, Variable *b )
 
 }
 
-Add::Add( ShaderGraph *graph, containers::Array< Variable * > const &inputs )
+Add::Add( ShaderGraph *graph, Array< Variable * > const &inputs )
 	: MultiInputOp( graph, inputs )
 {
 

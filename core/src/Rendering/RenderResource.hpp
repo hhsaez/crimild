@@ -71,7 +71,7 @@ namespace crimild {
         inline RenderResourceType *first( void ) noexcept { return m_resources.first(); }
 
     private:
-        containers::Set< RenderResourceType * > m_resources;
+        Set< RenderResourceType * > m_resources;
     };
 
     template< typename T >
@@ -123,8 +123,8 @@ namespace crimild {
         }
 
     private:
-        containers::Map< std::string, SharedPointer< RenderResourceType >> m_resources;
-        containers::Map< std::string, Builder > m_builders;
+        Map< std::string, SharedPointer< RenderResourceType >> m_resources;
+        Map< std::string, Builder > m_builders;
     };
 
 }

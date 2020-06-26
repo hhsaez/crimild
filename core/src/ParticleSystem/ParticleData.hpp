@@ -48,7 +48,7 @@ namespace crimild {
 		CRIMILD_IMPLEMENT_RTTI( crimild::ParticleData )
 
     public:
-        using ParticleAttribs = containers::ThreadSafeMap< ParticleAttribType, ParticleAttribArrayPtr >;
+        using ParticleAttribs = ThreadSafeMap< ParticleAttribType, ParticleAttribArrayPtr >;
 
     public:
 		/**

@@ -115,7 +115,7 @@ void BehaviorController::encode( coding::Encoder &encoder )
 
 	encoder.encode( "context", _context );
 
-	crimild::containers::Array< SharedPointer< BehaviorTree >> behaviors;
+	crimild::Array< SharedPointer< BehaviorTree >> behaviors;
 	_behaviors.each( [ &behaviors ]( std::string, SharedPointer< BehaviorTree > &tree ) {
 		behaviors.add( tree );
 	});
@@ -128,9 +128,9 @@ void BehaviorController::decode( coding::Decoder &decoder)
 
 	decoder.decode( "context", _context );
 
-	crimild::containers::Array< SharedPointer< BehaviorTree >> behaviors;
+	Array< SharedPointer< BehaviorTree >> behaviors;
 	decoder.decode( "behaviors", behaviors );	
-	behaviors.each( [ this ]( SharedPointer< BehaviorTree > &tree, crimild::Size ) {
+	behaviors.each( [ this ]( SharedPointer< BehaviorTree > &tree ) {
 		attachBehaviorTree( tree );
 	});
 }

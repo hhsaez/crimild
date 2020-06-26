@@ -36,7 +36,6 @@
 #include "Rendering/FrameBufferObject.hpp"
 
 using namespace crimild;
-using namespace crimild::containers;
 using namespace crimild::rendergraph;
 
 RenderGraph::RenderGraph( void )
@@ -89,7 +88,7 @@ void RenderGraph::write( RenderGraphPass *pass, Array< RenderGraphAttachment * >
 	});
 }
 
-SharedPointer< FrameBufferObject > RenderGraph::createFBO( containers::Array< RenderGraphAttachment * > const &attachments )
+SharedPointer< FrameBufferObject > RenderGraph::createFBO( Array< RenderGraphAttachment * > const &attachments )
 {
 	auto renderer = Renderer::getInstance();
 	auto screenWidth = renderer->getScreenBuffer()->getWidth();
@@ -101,7 +100,7 @@ SharedPointer< FrameBufferObject > RenderGraph::createFBO( containers::Array< Re
 
 	Map< std::string, SharedPointer< RenderTarget >> targets;
 
-	attachments.each( [ this, &fboWidth, &fboHeight, &targets, screenSize ]( RenderGraphAttachment *att, crimild::Size index ) {
+	attachments.each( [ this, &fboWidth, &fboHeight, &targets, screenSize, index = 0 ]( RenderGraphAttachment *att ) mutable {
 		if ( att == nullptr ) {
 			return;
 		}

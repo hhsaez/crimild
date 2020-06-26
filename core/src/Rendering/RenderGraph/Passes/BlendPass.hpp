@@ -64,7 +64,7 @@ namespace crimild {
 				SharedPointer< AlphaState > _alphaState;
                 SharedPointer< ShaderProgram > _program;
 			
-				containers::Array< RenderGraphAttachment * > _inputs;
+				Array< RenderGraphAttachment * > _inputs;
 				
 				RenderGraphAttachment *_output = nullptr;
 			};

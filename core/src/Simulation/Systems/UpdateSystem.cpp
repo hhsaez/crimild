@@ -86,7 +86,7 @@ void UpdateSystem::updateBehaviors( Node *scene )
 
 void UpdateSystem::computeRenderQueues( Node *scene )
 {
-	containers::Array< SharedPointer< RenderQueue >> renderQueues;
+	Array< SharedPointer< RenderQueue >> renderQueues;
 
 	{
 		CRIMILD_PROFILE( "Compute Render Queue" )

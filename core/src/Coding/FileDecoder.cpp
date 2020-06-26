@@ -53,7 +53,7 @@ crimild::Bool FileDecoder::read( std::string filePath )
 	fread( &size, 1, sizeof( crimild::Size ), file );
 
 	if ( size > 0 ) {
-		containers::ByteArray bytes( size );
+		ByteArray bytes( size );
 		fread( &bytes[ 0 ], 1, size, file );
 		fromBytes( bytes );
 	}

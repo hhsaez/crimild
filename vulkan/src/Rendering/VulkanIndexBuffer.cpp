@@ -51,8 +51,8 @@ crimild::Bool IndexBufferManager::bind( IndexBuffer *indexBuffer ) noexcept
 
     VkBufferUsageFlags usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
 
-    containers::Array< VkBuffer > bufferHandlers( count );
-    containers::Array< VkDeviceMemory > bufferMemories( count );
+    Array< VkBuffer > bufferHandlers( count );
+    Array< VkDeviceMemory > bufferMemories( count );
 
     for ( auto i = 0l; i < count; i++ ) {
         VkBuffer bufferHandler;

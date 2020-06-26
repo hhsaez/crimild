@@ -41,7 +41,7 @@ namespace crimild {
 			CRIMILD_IMPLEMENT_RTTI( crimild::shadergraph::MultiInputOp )
 
 		private:
-			using VariableArray = containers::Array< Variable * >;
+			using VariableArray = Array< Variable * >;
 
 		protected:
 			MultiInputOp( ShaderGraph *graph, VariableArray const &inputs, Variable *result = nullptr );
