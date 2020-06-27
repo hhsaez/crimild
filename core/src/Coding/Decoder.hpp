@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -36,7 +36,6 @@
 #include "Foundation/Containers/Array.hpp"
 #include "Foundation/Containers/Map.hpp"
 #include "Foundation/Version.hpp"
-#include "Rendering/VertexFormat.hpp"
 #include "Mathematics/Transformation.hpp"
 
 namespace crimild {
@@ -46,7 +45,7 @@ namespace crimild {
         class Decoder : public SharedObject {
         protected:
             Decoder( void );
-        
+
         public:
             virtual ~Decoder( void );
 
@@ -67,11 +66,11 @@ namespace crimild {
 				if ( codable == nullptr ) {
 					return false;
 				}
-				
+
                 obj = crimild::cast_ptr< T >( codable );
 				return true;
             }
-            
+
             virtual crimild::Bool decode( std::string key, std::string &value ) = 0;
             virtual crimild::Bool decode( std::string key, crimild::Size &value ) = 0;
             virtual crimild::Bool decode( std::string key, crimild::UInt8 &value ) = 0;
@@ -89,8 +88,7 @@ namespace crimild {
             virtual crimild::Bool decode( std::string key, crimild::Matrix4f &value ) = 0;
             virtual crimild::Bool decode( std::string key, crimild::Quaternion4f &value ) = 0;
             virtual crimild::Bool decode( std::string key, Transformation &value ) = 0;
-            virtual crimild::Bool decode( std::string key, VertexFormat &value ) = 0;
-            
+
             virtual crimild::Bool decode( std::string key, ByteArray &value ) = 0;
             virtual crimild::Bool decode( std::string key, Array< crimild::Real32 > &value ) = 0;
             virtual crimild::Bool decode( std::string key, Array< Vector3f > &value ) = 0;
@@ -103,7 +101,7 @@ namespace crimild {
             crimild::Bool decode( std::string key, Array< SharedPointer< T >> &value )
             {
                 auto count = beginDecodingArray( key );
-                
+
                 value.resize( count );
                 for ( crimild::Size i = 0; i < count; i++ ) {
                     auto v = SharedPointer< Codable >();
@@ -112,12 +110,12 @@ namespace crimild {
                     endDecodingArrayElement( key, i );
                     value[ i ] = crimild::cast_ptr< T >( v );
                 }
-                
+
                 endDecodingArray( key );
 
 				return true;
             }
-            
+
 			template< typename T >
 			crimild::Bool decode( std::string key, Array< T > &value )
 			{
@@ -160,10 +158,9 @@ namespace crimild {
 		private:
 			Array< SharedPointer< SharedObject >> _roots;
         };
-        
+
 	}
-    
+
 }
 
 #endif
-

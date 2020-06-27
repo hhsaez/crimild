@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -33,19 +33,21 @@
 #include "Mathematics/Vector.hpp"
 
 namespace crimild {
-    
+
     class SpherePrimitive : public Primitive {
     public:
-        SpherePrimitive( float radius, 
-            const VertexFormat &format = VertexFormat::VF_P3_N3, 
+        SpherePrimitive(
+            float radius,
+            const VertexLayout &layout = VertexP3N3::getLayout(),
             Vector2i divisions = Vector2i( 30, 30 ),
-            Vector3f center = Vector3f( 0.0f, 0.0f, 0.0f ) );
+            Vector3f center = Vector3f( 0.0f, 0.0f, 0.0f )
+        ) noexcept;
 
-        virtual ~SpherePrimitive( void );
+        virtual ~SpherePrimitive( void ) = default;
     };
-    
+
     using SpherePrimitivePtr = SharedPointer< SpherePrimitive >;
-        
+
 }
 
 #endif

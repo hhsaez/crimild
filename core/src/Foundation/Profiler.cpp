@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -34,7 +34,6 @@
 #include "Debug/DebugRenderHelper.hpp"
 
 #include "Rendering/Renderer.hpp"
-#include "Rendering/FrameBufferObject.hpp"
 #include "Rendering/ShaderProgram.hpp"
 
 #include "Concurrency/JobScheduler.hpp"
@@ -63,25 +62,25 @@ void ProfilerOutputHandler::beginOutput( crimild::Size fps, crimild::Real64 avgF
             << "AVG: " << std::setw( 10 ) << avgFrameTime
             << "MAX: " << std::setw( 10 ) << maxFrameTime
             << "\n----------------------------------------------------------------------------------------\n";
-          
-    // Rendering  
+
+    // Rendering
     _output << std::setiosflags( std::ios::fixed )
             << std::setprecision( 3 )
-            << std::left 
+            << std::left
             << "Rendering"
-            << "\n   Textures:" 
+            << "\n   Textures:"
                 << " Loaded: " << Renderer::getInstance()->getTextureCatalog()->getResourceCount()
                 << " Active: " << Renderer::getInstance()->getTextureCatalog()->getActiveResourceCount()
-            << "\n   FBOs:" 
+            << "\n   FBOs:"
                 << " Loaded: " << Renderer::getInstance()->getFrameBufferObjectCatalog()->getResourceCount()
                 << " Active: " << Renderer::getInstance()->getFrameBufferObjectCatalog()->getActiveResourceCount()
-            << "\n   VBOs:" 
+            << "\n   VBOs:"
                 << " Loaded: " << Renderer::getInstance()->getVertexBufferObjectCatalog()->getResourceCount()
                 << " Active: " << Renderer::getInstance()->getVertexBufferObjectCatalog()->getActiveResourceCount()
-            << "\n   IBOs:" 
+            << "\n   IBOs:"
                 << " Loaded: " << Renderer::getInstance()->getIndexBufferObjectCatalog()->getResourceCount()
                 << " Active: " << Renderer::getInstance()->getIndexBufferObjectCatalog()->getActiveResourceCount()
-            << "\n   Programs:" 
+            << "\n   Programs:"
                 << " Loaded: " << Renderer::getInstance()->getShaderProgramCatalog()->getResourceCount()
                 << " Active: " << Renderer::getInstance()->getShaderProgramCatalog()->getActiveResourceCount()
             << "\n----------------------------------------------------------------------------------------\n";
@@ -92,7 +91,7 @@ void ProfilerOutputHandler::beginOutput( crimild::Size fps, crimild::Real64 avgF
         _output << std::setw( 5 ) << std::right << stat.jobCount;
     });
     JobScheduler::getInstance()->clearWorkerStats();
-    _output << std::left 
+    _output << std::left
             << "\n----------------------------------------------------------------------------------------\n";
 
     // profilers
@@ -144,22 +143,24 @@ void ProfilerConsoleOutputHandler::endOutput( void )
 
 ProfilerScreenOutputHandler::ProfilerScreenOutputHandler( void )
 {
-    
+
 }
 
 ProfilerScreenOutputHandler::~ProfilerScreenOutputHandler( void )
 {
-    
+
 }
 
 void ProfilerScreenOutputHandler::endOutput( void )
 {
     ProfilerOutputHandler::endOutput();
 
+    /*
     auto screen = Renderer::getInstance()->getScreenBuffer();
     auto aspect = ( crimild::Real32 ) screen->getWidth() / ( crimild::Real32 ) screen->getHeight();
 
     DebugRenderHelper::renderText( getOutput(), Vector3f( -aspect + 0.01f, 0.95f, 0.0f ), RGBAColorf( 1.0f, 1.0f, 0.0f, 1.0f ) );
+    */
 }
 
 ProfilerSample::ProfilerSample( std::string name )
@@ -303,12 +304,12 @@ void Profiler::resetAll( void )
 void Profiler::step( void )
 {
 	_frameCount++;
-	
+
 	const auto currentFrameTime = getTime();
 	const auto frameTime = currentFrameTime - _lastFrameTime;
-    
+
     // normalized frame time, clamped to [0, 2]
-    _frameTimeHistory.push_back( Numericd::min( 2.0, ( 0.001 * frameTime ) / Clock::DEFAULT_TICK_TIME ) ); 
+    _frameTimeHistory.push_back( Numericd::min( 2.0, ( 0.001 * frameTime ) / Clock::DEFAULT_TICK_TIME ) );
     while ( _frameTimeHistory.size() > 100 ) {
         _frameTimeHistory.pop_front();
     }
@@ -330,16 +331,16 @@ void Profiler::dump( void )
 
 	for ( int i = 0; i < MAX_SAMPLES; i++ ) {
 		auto &sample = _samples[ i ];
-		
+
 		if ( sample.isValid ) {
 			float accumTime = sample.avgTime * sample.dataCount + sample.totalTime;
 			sample.dataCount++;
 			sample.avgTime = accumTime / ( float ) sample.dataCount;
 			sample.minTime = sample.minTime < 0 ? sample.totalTime : Numericf::min( sample.minTime, sample.totalTime );
 			sample.maxTime = sample.maxTime < 0 ? sample.totalTime : Numericf::max( sample.maxTime, sample.totalTime );
-			
+
 			getOutputHandler()->sample( sample.minTime, sample.avgTime, sample.maxTime, sample.totalTime, sample.callCount, sample.name, sample.parentCount );
-			
+
 			sample.callCount = 0;
 			sample.totalTime = 0;
 			sample.childTime = 0;
@@ -385,4 +386,3 @@ void Profiler::dump( void )
     DebugRenderHelper::renderLines( &lines[ 0 ], frameTimeCount * 2, RGBAColorf( 1.0f, 0.0f, 0.0f, 1.0f ) );
 
 }
-

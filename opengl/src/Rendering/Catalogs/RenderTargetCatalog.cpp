@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013-2018, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -27,6 +27,8 @@
 
 #include "Rendering/Catalogs/RenderTargetCatalog.hpp"
 #include "Rendering/OpenGLUtils.hpp"
+
+#if 0
 
 #include <Rendering/Renderer.hpp>
 #include <Rendering/RenderTarget.hpp>
@@ -49,19 +51,19 @@ RenderTargetCatalog::~RenderTargetCatalog( void )
 int RenderTargetCatalog::getNextResourceId( RenderTarget * )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
-    
+
 	GLuint renderBufferId = 0;
 	glGenRenderbuffers( 1, &renderBufferId );
-	
+
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
-    
+
     return renderBufferId;
 }
 
 void RenderTargetCatalog::bind( RenderTarget *rt )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
-    
+
 	Catalog< RenderTarget >::bind( rt );
 
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
@@ -90,7 +92,7 @@ void RenderTargetCatalog::load( RenderTarget *target )
 
 	auto targetWidth = target->getWidth();
 	auto targetHeight = target->getHeight();
-    
+
 	GLenum internalFormat = GL_INVALID_ENUM;
 	GLenum textureFormat = GL_RGBA;
 
@@ -101,34 +103,34 @@ void RenderTargetCatalog::load( RenderTarget *target )
 			textureFormat = GL_DEPTH_COMPONENT;
 			break;
 #endif
-			
+
 		case RenderTarget::Type::DEPTH_24:
 #if defined( GL_DEPTH_COMPONENT24 ) && !defined( CRIMILD_PLATFORM_EMSCRIPTEN )
 			internalFormat = GL_DEPTH_COMPONENT24;
 			textureFormat = GL_DEPTH_COMPONENT;
 			break;
 #endif
-			
+
 		case RenderTarget::Type::DEPTH_16:
 			internalFormat = GL_DEPTH_COMPONENT16;
 			textureFormat = GL_DEPTH_COMPONENT16;
 			break;
-			
+
 		case RenderTarget::Type::COLOR_RGB:
 			internalFormat = target->useFloatTexture() ? GL_RGB16F : GL_RGB;
 			textureFormat = GL_RGB;
 			break;
-			
+
 		case RenderTarget::Type::COLOR_RGBA:
 			internalFormat = target->useFloatTexture() ? GL_RGBA16F : GL_RGBA;
 			textureFormat = GL_RGBA;
 			break;
-			
+
 		default:
 			Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid target type: ", ( int ) target->getType() );
 			break;
 	}
-    
+
 	if ( internalFormat != GL_INVALID_ENUM ) {
 		glBindRenderbuffer( GL_RENDERBUFFER, target->getCatalogId() );
 		glRenderbufferStorage( GL_RENDERBUFFER, internalFormat, targetWidth, targetHeight );
@@ -148,7 +150,7 @@ void RenderTargetCatalog::unload( RenderTarget *rt )
 	}
 
 	Catalog< RenderTarget >::unload( rt );
-	
+
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
@@ -163,7 +165,8 @@ void RenderTargetCatalog::cleanup( void )
     _renderbufferIdsToDelete.clear();
 
 	Catalog< RenderTarget >::cleanup();
-    
+
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
+#endif

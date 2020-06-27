@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,7 +28,6 @@
 #include "OrientedQuadParticleRenderer.hpp"
 
 #include "Rendering/Renderer.hpp"
-#include "Rendering/Programs/UnlitShaderProgram.hpp"
 #include "Components/MaterialComponent.hpp"
 
 #include "Simulation/AssetManager.hpp"
@@ -37,6 +36,9 @@
 
 #include "Concurrency/Async.hpp"
 
+#include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
+
 using namespace crimild;
 
 OrientedQuadParticleRenderer::OrientedQuadParticleRenderer( void )
@@ -44,7 +46,7 @@ OrientedQuadParticleRenderer::OrientedQuadParticleRenderer( void )
 	// create the material here so it can be modified later
 	_material = crimild::alloc< Material >();
 
-    _material->setProgram( crimild::alloc< UnlitShaderProgram >() );
+    //_material->setProgram( crimild::alloc< UnlitShaderProgram >() );
 }
 
 OrientedQuadParticleRenderer::~OrientedQuadParticleRenderer( void )
@@ -52,7 +54,7 @@ OrientedQuadParticleRenderer::~OrientedQuadParticleRenderer( void )
 
 }
 
-void OrientedQuadParticleRenderer::configure( Node *node, ParticleData *particles ) 
+void OrientedQuadParticleRenderer::configure( Node *node, ParticleData *particles )
 {
 	_geometry = crimild::alloc< Geometry >();
 	if ( _material != nullptr ) {
@@ -71,6 +73,8 @@ void OrientedQuadParticleRenderer::configure( Node *node, ParticleData *particle
 
 void OrientedQuadParticleRenderer::update( Node *node, crimild::Real64 dt, ParticleData *particles )
 {
+    assert( false );
+    /*
     const auto pCount = particles->getAliveCount();
     if ( pCount == 0 ) {
         return;
@@ -112,13 +116,13 @@ void OrientedQuadParticleRenderer::update( Node *node, crimild::Real64 dt, Parti
 			node->getWorld().applyInverseToPoint( pos, pos );
 		}
 		auto s = ss[ i ];
-		
+
 		vbo->setPositionAt( idx + 0, pos + s * offset0 );
 		vbo->setTextureCoordAt( idx + 0, uv0 );
-		
+
 		vbo->setPositionAt( idx + 1, pos + s * offset1 );
 		vbo->setTextureCoordAt( idx + 1, uv1 );
-		
+
 		vbo->setPositionAt( idx + 2, pos + s * offset2 );
 		vbo->setTextureCoordAt( idx + 2, uv2 );
 
@@ -142,9 +146,10 @@ void OrientedQuadParticleRenderer::update( Node *node, crimild::Real64 dt, Parti
         primitive->setVertexBuffer( vbo );
         primitive->setIndexBuffer( ibo );
     });
+    */
 }
 
-void OrientedQuadParticleRenderer::encode( coding::Encoder &encoder ) 
+void OrientedQuadParticleRenderer::encode( coding::Encoder &encoder )
 {
 	ParticleSystemComponent::ParticleRenderer::encode( encoder );
 
@@ -160,8 +165,8 @@ void OrientedQuadParticleRenderer::decode( coding::Decoder &decoder )
 	if ( _material == nullptr ) {
 		_material = crimild::alloc< Material >();
 	}
-	
-    _material->setProgram( crimild::alloc< UnlitShaderProgram >() );
+
+    //_material->setProgram( crimild::alloc< UnlitShaderProgram >() );
 
     std::string blendMode;
     decoder.decode( "blendMode", blendMode );
@@ -186,13 +191,12 @@ void OrientedQuadParticleRenderer::decode( coding::Decoder &decoder )
     else {
         _material->setAlphaState( AlphaState::DISABLED );
     }
-    
+
     crimild::Bool cullFaceEnabled = true;
     decoder.decode( "cullFaceEnabled", cullFaceEnabled );
     _material->getCullFaceState()->setEnabled( cullFaceEnabled );
-    
+
     crimild::Bool depthStateEnabled = true;
     decoder.decode( "depthStateEnabled", depthStateEnabled );
     _material->setDepthState( depthStateEnabled ? DepthState::ENABLED : DepthState::DISABLED );
 }
-

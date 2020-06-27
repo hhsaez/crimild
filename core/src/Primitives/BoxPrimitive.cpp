@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -31,9 +31,17 @@
 
 using namespace crimild;
 
-BoxPrimitive::BoxPrimitive( float width, float height, float depth, const VertexFormat &format )
+BoxPrimitive::BoxPrimitive( void ) noexcept
+    : BoxPrimitive( VertexP3N3TC2::getLayout(), Vector3f::ONE )
+{
+    // no-op
+}
+
+BoxPrimitive::BoxPrimitive( const VertexLayout &layout, const Vector3f &size ) noexcept
     : Primitive( Primitive::Type::TRIANGLES )
 {
+    assert( false && "TODO" );
+    /*
     VertexPrecision halfWidth = 0.5f * width;
     VertexPrecision halfHeight = 0.5f * height;
     VertexPrecision halfDepth = 0.5f * depth;
@@ -87,10 +95,5 @@ BoxPrimitive::BoxPrimitive( float width, float height, float depth, const Vertex
 
     setVertexBuffer( crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3_N3, 24, vertices ) );
     setIndexBuffer( crimild::alloc< IndexBufferObject >( 36, indices ) );
+    */
 }
-
-BoxPrimitive::~BoxPrimitive( void )
-{
-    
-}
-

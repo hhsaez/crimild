@@ -27,6 +27,8 @@
 
 #include "OpenGLShaderGraph.hpp"
 
+#if 0
+
 #include "Rendering/Renderer.hpp"
 #include "Rendering/ShaderGraph/ShaderGraph.hpp"
 #include "Rendering/ShaderGraph/Variable.hpp"
@@ -116,7 +118,7 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 		   << ";";
 		section->add( ss.str() );
 	};
-	
+
 	_translators[ VertexShaderInputs::__CLASS_NAME ] = []( ShaderGraphNode *node ) {
 		// no-op
 	};
@@ -305,7 +307,7 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 			case Variable::Type::VECTOR_4:
 				ss << "vec4( " << k.x() << ", " << k.y() << ", " << k.z() << ", " << k.w() << " );";
 				break;
-				
+
 			default:
 				break;
 		}
@@ -489,11 +491,11 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 	_translators[ MeshVertexMaster::__CLASS_NAME ] = []( ShaderGraphNode *node ) {
 		// no-op (avoid warnings)
 	};
-		
+
 	_translators[ UnlitFragmentMaster::__CLASS_NAME ] = []( ShaderGraphNode *node ) {
 		// no-op (avoid warnings)
 	};
-		
+
 	_translators[ PhongFragmentMaster::__CLASS_NAME ] = [ this ]( ShaderGraphNode *node ) {
 		auto master = static_cast< PhongFragmentMaster * >( node );
 
@@ -514,7 +516,7 @@ OpenGLShaderGraph::OpenGLShaderGraph( void )
 		ss.str( "" );
         ss << "#define MAX_LIGHTS " << Renderer::getInstance()->getMaxLights( Light::Type::DIRECTIONAL );
 		_globalsSection.add( ss.str() );
-		
+
 		_globalsSection.add(
 			#include "calcPhongLighting.glsl"
 		);
@@ -546,13 +548,13 @@ std::string OpenGLShaderGraph::generateShaderSource( Array< ShaderGraphNode * > 
 {
 	Array< ShaderGraphNode * > variables;
 	Array< ShaderGraphNode * > operations;
-	
+
 	_inputsSection.clear();
 	_uniformsSection.clear();
 	_outputsSection.clear();
 	_globalsSection.clear();
 	_mainSection.clear();
-	
+
 	sortedNodes.each( [ &variables, &operations ]( ShaderGraphNode *node ) {
 		if ( node->getNodeType() == ShaderGraphNode::NodeType::VARIABLE ) {
 			variables.add( node );
@@ -570,7 +572,7 @@ std::string OpenGLShaderGraph::generateShaderSource( Array< ShaderGraphNode * > 
 			CRIMILD_LOG_WARNING( "No valid translator for type ", node->getClassName() );
 		}
 	});
-	
+
 	operations.each( [ this ]( ShaderGraphNode *node ) {
 		if ( _translators.contains( node->getClassName() ) ) {
 			_translators[ node->getClassName() ]( node );
@@ -579,7 +581,7 @@ std::string OpenGLShaderGraph::generateShaderSource( Array< ShaderGraphNode * > 
 			CRIMILD_LOG_WARNING( "No valid translator for type ", node->getClassName() );
 		}
 	});
-	
+
 	std::stringstream ss;
 
 #ifdef CRIMILD_PLATFORM_DESKTOP
@@ -597,31 +599,31 @@ std::string OpenGLShaderGraph::generateShaderSource( Array< ShaderGraphNode * > 
 	ss << "\n#define CRIMILD_PACK_FLOAT_TO_RGBA 1";
 #endif
 	ss << "\n";
-	
+
 	ss << "\n// Inputs";
 	_inputsSection.each( [ &ss ]( std::string &line ) {
 		ss << "\n" << line;
 	});
 	ss << "\n";
-	
+
 	ss << "\n// Uniforms";
 	_uniformsSection.each( [ &ss ]( std::string &line ) {
 		ss << "\n" << line;
 	});
 	ss << "\n";
-	
+
 	ss << "\n// Outputs";
 	_outputsSection.each( [ &ss ]( std::string &line ) {
 		ss << "\n" << line;
 	});
 	ss << "\n";
-	
+
 	ss << "\n// Globals";
 	_globalsSection.each( [ &ss ]( std::string &line ) {
 		ss << "\n" << line;
 	});
 	ss << "\n";
-	
+
 	ss << "\nvoid main()\n{";
 	_variablesSection.each( [ &ss ]( std::string &line ) {
 		ss << "\n\t" << line;
@@ -638,29 +640,29 @@ std::string OpenGLShaderGraph::generateShaderSource( Array< ShaderGraphNode * > 
 std::string OpenGLShaderGraph::getVariableTypeString( Variable *var )
 {
 	auto type = var->getType();
-	
+
 	std::string typeStr;
 	switch ( type ) {
 		case Variable::Type::SCALAR:
 			typeStr = "float";
 			break;
-			
+
 		case Variable::Type::VECTOR_2:
 			typeStr = "vec2";
 			break;
-			
+
 		case Variable::Type::VECTOR_3:
 			typeStr = "vec3";
 			break;
-			
+
 		case Variable::Type::VECTOR_4:
 			typeStr = "vec4";
 			break;
-			
+
 		case Variable::Type::MATRIX_3:
 			typeStr = "mat3";
 			break;
-			
+
 		case Variable::Type::MATRIX_4:
 			typeStr = "mat4";
 			break;
@@ -668,11 +670,11 @@ std::string OpenGLShaderGraph::getVariableTypeString( Variable *var )
 		case Variable::Type::SAMPLER_2D:
 			typeStr = "sampler2D";
 			break;
-			
+
 		case Variable::Type::SAMPLER_CUBE_MAP:
 			typeStr = "samplerCube";
 			break;
-			
+
 		default:
 			typeStr = "unknown";
 			break;
@@ -695,3 +697,4 @@ std::string OpenGLShaderGraph::writeOp( Variable *result, Array< Variable * > co
 	return ss.str();
 }
 
+#endif

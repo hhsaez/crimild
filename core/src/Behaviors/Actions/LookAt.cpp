@@ -1,6 +1,8 @@
 #include "LookAt.hpp"
 
 #include "SceneGraph/Node.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 using namespace crimild;
 using namespace crimild::behaviors;
@@ -8,7 +10,7 @@ using namespace crimild::behaviors::actions;
 
 LookAt::LookAt( void )
 {
-	
+
 }
 
 LookAt::LookAt( const Vector3f &target, crimild::Real32 duration )
@@ -28,7 +30,7 @@ void LookAt::init( BehaviorContext *context )
 
 	_clock.reset();
 }
-		
+
 Behavior::State LookAt::step( BehaviorContext *context )
 {
 	auto agent = context->getAgent();
@@ -43,7 +45,7 @@ Behavior::State LookAt::step( BehaviorContext *context )
 	dir[ 1 ] = 0.0f;
 	dir.normalize();
 	agent->local().setRotate( Quaternion4f::createFromDirection( dir ) );
-	
+
 	return Behavior::State::SUCCESS;
 }
 

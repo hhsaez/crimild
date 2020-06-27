@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -27,12 +27,7 @@
 
 #include "Camera.hpp"
 
-#include "Rendering/RenderGraph/RenderGraph.hpp"
-#include "Rendering/RenderGraph/Passes/ForwardLightingPass.hpp"
-#include "Rendering/RenderGraph/Passes/DepthPass.hpp"
-
 using namespace crimild;
-using namespace crimild::rendergraph; 
 
 Camera *Camera::_mainCamera = nullptr;
 
@@ -47,13 +42,15 @@ Camera::Camera( float fov, float aspect, float near, float far )
 	  _viewport( 0.0f, 0.0f, 1.0f, 1.0f ),
       _viewMatrixIsCurrent( false )
 {
-    _renderGraph = crimild::alloc< RenderGraph >();
+    //_renderGraph = crimild::alloc< RenderGraph >();
+    /*
     auto scenePass = _renderGraph->createPass< passes::ForwardLightingPass >();
 #ifdef CRIMILD_PLATFORM_DESKTOP
 	auto depthPass = _renderGraph->createPass< passes::DepthPass >();
 	scenePass->setDepthInput( depthPass->getDepthOutput() );
 #endif
     _renderGraph->setOutput( scenePass->getColorOutput() );
+    */
 
 	_projectionMatrix = _frustum.computeProjectionMatrix();
 	_orthographicMatrix = _frustum.computeOrthographicMatrix();
@@ -79,8 +76,8 @@ void Camera::accept( NodeVisitor &visitor )
 	visitor.visitCamera( this );
 }
 
-void Camera::setViewMatrix( const Matrix4f &view ) 
-{ 
+void Camera::setViewMatrix( const Matrix4f &view )
+{
 	_viewMatrix = view;
     world().fromMatrix( view.getInverse() );
     setWorldIsCurrent( true );
@@ -92,7 +89,7 @@ const Matrix4f &Camera::getViewMatrix( void )
         _viewMatrix = getWorld().computeModelMatrix();
         _viewMatrix.makeInverse();
     }
-    
+
 	return _viewMatrix;
 }
 
@@ -169,7 +166,7 @@ bool Camera::culled( const BoundingVolume *volume ) const
     if ( !isCullingEnabled() ) {
         return false;
     }
-    
+
 	for ( auto &p : _cullingPlanes ) {
 		if ( volume->whichSide( p ) < 0 ) {
 			return true;
@@ -178,4 +175,3 @@ bool Camera::culled( const BoundingVolume *volume ) const
 
 	return false;
 }
-

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,6 +35,9 @@
 #include "SceneGraph/Node.hpp"
 
 #include "Simulation/FileSystem.hpp"
+
+#include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
 
 using namespace crimild;
 using namespace crimild::coding;
@@ -62,13 +65,14 @@ void NavigationMeshContainer::renderDebugInfo( Renderer *renderer, Camera *camer
 	std::vector< Vector3f > interiorEdges;
 	std::vector< Vector3f > normals;
 	std::vector< Vector3f > centers;
-	std::vector< Vector3f > cells;
+
+	Array< Vector3f > cells;
 
 	static const auto OFFSET = Vector3f( 0.0f, 0.0f, 0.0f );
 
 	getNavigationMesh()->foreachCell( [ &exteriorEdges, &interiorEdges, &cells, &normals, &centers ]( NavigationCellPtr const &cell ) {
 		for ( int i = 0; i < 3; i++ ) {
-			cells.push_back( cell->getVertex( 2 - i ) );
+			cells.add( cell->getVertex( 2 - i ) );
 		}
 
 		cell->foreachEdge( [&exteriorEdges, &interiorEdges]( NavigationCellEdgePtr const &e ) {
@@ -106,7 +110,7 @@ void NavigationMeshContainer::renderDebugInfo( Renderer *renderer, Camera *camer
 
 	if ( normals.size() > 0 ) {
 		DebugRenderHelper::renderLines( renderer, camera, &normals[ 0 ], normals.size(), RGBAColorf( 0.0f, 1.0f, 0.0f, 1.0f ) );
-	}		
+	}
 
 	if ( centers.size() > 0 ) {
 		DebugRenderHelper::renderLines( renderer, camera, &centers[ 0 ], centers.size(), RGBAColorf( 1.0f, 1.0f, 0.0f, 1.0f ) );
@@ -114,13 +118,21 @@ void NavigationMeshContainer::renderDebugInfo( Renderer *renderer, Camera *camer
 
 	if ( cells.size() > 0 ) {
 		auto primitive = crimild::alloc< Primitive >();
-		primitive->setVertexBuffer( crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3, cells.size(), ( float * ) &cells[ 0 ] ) );
+        primitive->setVertexData(
+            {
+                crimild::alloc< VertexBuffer >(
+                    VertexLayout::P3,
+                    cells
+                ),
+            }
+        );
 
-		auto ibo = crimild::alloc< IndexBufferObject >( cells.size(), nullptr );
-		for ( int i = 0; i < cells.size(); i++ ) {
-			ibo->setIndexAt( i, i );
-		}
-		primitive->setIndexBuffer( ibo );
+        primitive->setIndices(
+            [&] {
+                auto indices = cells.map( [ i = 0 ]( const auto & ) mutable { return i++; } );
+                return crimild::alloc< IndexBuffer >( Format::INDEX_32_UINT, indices );
+            }()
+        );
 
 		Transformation t = getNode()->getWorld();
 		t.translate() += OFFSET;
@@ -142,6 +154,5 @@ void NavigationMeshContainer::decode( Decoder &decoder )
 	std::string navMeshFile;
 	decoder.decode( "navMeshFile", navMeshFile );
 
-	_navigationMesh = crimild::alloc< NavigationMeshOBJ >( FileSystem::getInstance().pathForResource( navMeshFile ) );	
+	_navigationMesh = crimild::alloc< NavigationMeshOBJ >( FileSystem::getInstance().pathForResource( navMeshFile ) );
 }
-

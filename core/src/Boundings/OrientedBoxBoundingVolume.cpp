@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -44,7 +44,7 @@ OrientedBoxBoundingVolume::OrientedBoxBoundingVolume( const Vector3f &r, const V
 	setRAxis( r );
 	setSAxis( s );
 	setTAxis( t );
-	
+
 	_sphere.setCenter( Vector3f::ZERO );
 	//_sphere.setRadius( Numericf::max( _r.getMagnitude(), Numericf::max( _s.getMagnitude(), _t.getMagnitude() ) ) );
 }
@@ -96,7 +96,7 @@ void OrientedBoxBoundingVolume::computeFrom( const BoundingVolume *volume, const
 	setRAxis( r );
     setSAxis( s );
     setTAxis( t );
-	
+
 	/*
 	Vector3f p0, p1;
 	transformation.applyToPoint( volume->getCenter() + volume->getMin(), p0 );
@@ -135,7 +135,7 @@ void OrientedBoxBoundingVolume::computeFrom( const Vector3f *positions, unsigned
 	*/
 }
 
-void OrientedBoxBoundingVolume::computeFrom( const VertexBufferObject *vbo )
+void OrientedBoxBoundingVolume::computeFrom( const VertexBuffer *vbo )
 {
 	/*
 	if ( vbo->getVertexCount() == 0 || !vbo->getVertexFormat().hasPositions() ) {
@@ -160,7 +160,7 @@ void OrientedBoxBoundingVolume::computeFrom( const VertexBufferObject *vbo )
 	*/
 }
 
-void OrientedBoxBoundingVolume::computeFrom( const Vector3f &min, const Vector3f &max ) 
+void OrientedBoxBoundingVolume::computeFrom( const Vector3f &min, const Vector3f &max )
 {
 	/*
 	_sphere.setCenter( 0.5f * ( max + min ) );
@@ -211,7 +211,7 @@ void OrientedBoxBoundingVolume::expandToContain( const Vector3f *positions, unsi
 	*/
 }
 
-void OrientedBoxBoundingVolume::expandToContain( const VertexBufferObject *vbo )
+void OrientedBoxBoundingVolume::expandToContain( const VertexBuffer *vbo )
 {
 	/*
 	if ( vbo->getVertexCount() == 0 || !vbo->getVertexFormat().hasPositions() ) {
@@ -316,7 +316,7 @@ void OrientedBoxBoundingVolume::renderDebugInfo( Renderer *renderer, Camera *cam
 	const auto &R = getRAxis();
 	const auto &S = getSAxis();
 	const auto &T = getTAxis();
-	
+
 	Vector3f axes[] = {
 		C, C + R,
 		C, C + S,
@@ -355,4 +355,3 @@ void OrientedBoxBoundingVolume::renderDebugInfo( Renderer *renderer, Camera *cam
 	);
 
 }
-

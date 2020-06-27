@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -29,7 +29,6 @@
 #include "RenderSystem.hpp"
 
 #include "Rendering/Font.hpp"
-#include "Rendering/FrameBufferObject.hpp"
 #include "Components/MaterialComponent.hpp"
 #include "Primitives/BoxPrimitive.hpp"
 #include "Simulation/Simulation.hpp"
@@ -41,7 +40,7 @@
 using namespace crimild;
 
 bool ConsoleSystem::start( void )
-{	
+{
 	if ( !System::start() ) {
 		return false;
 	}
@@ -55,6 +54,7 @@ bool ConsoleSystem::start( void )
 
 void ConsoleSystem::update( void )
 {
+    /*
     auto console = getConsole();
     if ( console->isEnabled() && console->isActive() ) {
         auto screen = Renderer::getInstance()->getScreenBuffer();
@@ -76,10 +76,10 @@ void ConsoleSystem::update( void )
 
         DebugRenderHelper::renderText( output, Vector3f( -aspect + 0.01f, 0.95f, 0.0f ), RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ) );
     }
+    */
 }
 
 void ConsoleSystem::stop( void )
 {
 	System::stop();
 }
-

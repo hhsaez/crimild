@@ -26,8 +26,6 @@
  */
 
 #include "ShadowMap.hpp"
-#include "FrameBufferObject.hpp"
-#include "RenderTarget.hpp"
 #include "Texture.hpp"
 #include "CullFaceState.hpp"
 
@@ -38,11 +36,10 @@ using namespace crimild;
 ShadowMap::ShadowMap( void )
     : _cullFaceState( crimild::alloc< CullFaceState >( true, CullFaceState::CullFaceMode::FRONT ) )
 {
-    
+
 }
 
 ShadowMap::~ShadowMap( void )
 {
-    
-}
 
+}

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -29,6 +29,8 @@
 
 #include "Mathematics/Numeric.hpp"
 #include "SceneGraph/Node.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 using namespace crimild;
 
@@ -52,7 +54,7 @@ void OrbitComponent::update( const Clock &c )
 {
     getNode()->local().translate()[0] = _x0 + _major * std::cos( _t ) * std::cos( _gamma ) - _minor * std::sin( _t ) * std::sin( _gamma );
     getNode()->local().translate()[1] = _y0 + _major * std::cos( _t ) * std::sin( _gamma ) + _minor * std::sin( _t ) * std::cos( _gamma );
-	
+
 	_t += _speed * c.getDeltaTime();
 }
 
@@ -79,4 +81,3 @@ void OrbitComponent::decode( coding::Decoder &decoder )
 	decoder.decode( "speed", _speed );
 	decoder.decode( "gamma", _gamma );
 }
-

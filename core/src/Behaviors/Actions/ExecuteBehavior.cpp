@@ -2,6 +2,8 @@
 
 #include "SceneGraph/Node.hpp"
 #include "Behaviors/BehaviorController.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 using namespace crimild;
 using namespace crimild::behaviors;
@@ -9,7 +11,7 @@ using namespace crimild::behaviors::actions;
 
 ExecuteBehavior::ExecuteBehavior( void )
 {
-	
+
 }
 
 ExecuteBehavior::ExecuteBehavior( std::string behaviorName )

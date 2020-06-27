@@ -1,6 +1,8 @@
 #include "SetSettingValue.hpp"
 
 #include "Simulation/Simulation.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 using namespace crimild;
 using namespace crimild::behaviors;
@@ -8,7 +10,7 @@ using namespace crimild::behaviors::actions;
 
 SetSettingValue::SetSettingValue( void )
 {
-	
+
 }
 
 SetSettingValue::SetSettingValue( std::string key, std::string value )
@@ -44,4 +46,3 @@ void SetSettingValue::decode( coding::Decoder &decoder )
 	decoder.decode( "key", _key );
 	decoder.decode( "value", _value );
 }
-

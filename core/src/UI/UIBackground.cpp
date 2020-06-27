@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002-present, H. Hernán Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -32,10 +32,11 @@
 #include "Primitives/QuadPrimitive.hpp"
 #include "Rendering/DepthState.hpp"
 #include "Rendering/Material.hpp"
-#include "Rendering/Programs/UnlitShaderProgram.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Group.hpp"
 #include "Simulation/AssetManager.hpp"
+#include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
 
 using namespace crimild;
 using namespace crimild::ui;
@@ -45,11 +46,10 @@ UIBackground::UIBackground( const RGBAColorf &color )
 {
 	_geometry = crimild::alloc< Geometry >();
     _geometry->setCullMode( Node::CullMode::NEVER );
-	
+
 	_material = crimild::alloc< Material >();
 	_material->setDiffuse( color );
 	_material->setDepthState( DepthState::DISABLED );
-    _material->setProgram( crimild::alloc< UnlitShaderProgram >() );
 	_geometry->getComponent< MaterialComponent >()->attachMaterial( _material );
 }
 
@@ -68,11 +68,11 @@ void UIBackground::update( const Clock & )
 	auto frame = getComponent< UIFrame >()->getExtensions();
 	auto w = frame.getWidth();
 	auto h = frame.getHeight();
-	
+
 	if ( _knownExtensions.getWidth() != w || _knownExtensions.getHeight() != h ) {
 		_geometry->detachAllPrimitives();
-        _geometry->attachPrimitive( crimild::alloc< QuadPrimitive >( w, h, VertexFormat::VF_P3_UV2 ) );
-		
+        //_geometry->attachPrimitive( crimild::alloc< QuadPrimitive >( w, h, VertexFormat::VF_P3_UV2 ) );
+
 		_knownExtensions = frame;
 	}
 }
@@ -91,4 +91,3 @@ void UIBackground::decode( coding::Decoder &decoder )
 		_material->setColorMap( AssetManager::getInstance()->get< Texture >( image ) );
 	}
 }
-	

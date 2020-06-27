@@ -2,6 +2,8 @@
 
 #include "Simulation/Simulation.hpp"
 #include "Concurrency/Async.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 using namespace crimild;
 using namespace crimild::behaviors;
@@ -9,7 +11,7 @@ using namespace crimild::behaviors::actions;
 
 LoadScene::LoadScene( void )
 {
-	
+
 }
 
 LoadScene::LoadScene( std::string sceneFileName )
@@ -30,7 +32,7 @@ Behavior::State LoadScene::step( BehaviorContext *context )
         Simulation::getInstance()->setScene( nullptr );
         Simulation::getInstance()->loadScene( filename );
     });
-    
+
 	return Behavior::State::SUCCESS;
 }
 

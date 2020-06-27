@@ -5,6 +5,8 @@
 
 #include "Simulation/Simulation.hpp"
 #include "Concurrency/Async.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 using namespace crimild;
 using namespace crimild::messaging;
@@ -91,7 +93,7 @@ bool BehaviorController::executeBehaviorTree( std::string eventName )
 		// behavior already running
 		return true;
 	}
-	
+
 	auto tree = _behaviors[ eventName ];
 	if ( tree == nullptr ) {
 		//Log::warning( CRIMILD_CURRENT_CLASS_NAME, "No behavior found for event ", eventName );
@@ -103,9 +105,9 @@ bool BehaviorController::executeBehaviorTree( std::string eventName )
 	if ( auto behavior = tree->getRootBehavior() ) {
 		behavior->init( getContext() );
 	}
-	
+
 	_currentEvent = eventName;
-	
+
 	return true;
 }
 
@@ -119,7 +121,7 @@ void BehaviorController::encode( coding::Encoder &encoder )
 	_behaviors.each( [ &behaviors ]( std::string, SharedPointer< BehaviorTree > &tree ) {
 		behaviors.add( tree );
 	});
-	encoder.encode( "behaviors", behaviors );	
+	encoder.encode( "behaviors", behaviors );
 }
 
 void BehaviorController::decode( coding::Decoder &decoder)
@@ -129,9 +131,8 @@ void BehaviorController::decode( coding::Decoder &decoder)
 	decoder.decode( "context", _context );
 
 	Array< SharedPointer< BehaviorTree >> behaviors;
-	decoder.decode( "behaviors", behaviors );	
+	decoder.decode( "behaviors", behaviors );
 	behaviors.each( [ this ]( SharedPointer< BehaviorTree > &tree ) {
 		attachBehaviorTree( tree );
 	});
 }
-

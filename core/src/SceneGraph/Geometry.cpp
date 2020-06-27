@@ -92,6 +92,8 @@ void Geometry::accept( NodeVisitor &visitor )
 
 void Geometry::updateModelBounds( void )
 {
+    // TODO
+    /*
 	bool firstChild = true;
     auto bound = localBound();
 	forEachPrimitive( [&firstChild, bound]( Primitive *primitive ) {
@@ -105,7 +107,8 @@ void Geometry::updateModelBounds( void )
 				bound->expandToContain( vbo );
 			}
 		}
-	});	
+	});
+    */
 }
 
 DescriptorSet *Geometry::getDescriptors( void ) noexcept
@@ -131,14 +134,14 @@ DescriptorSet *Geometry::getDescriptors( void ) noexcept
 void Geometry::encode( coding::Encoder &encoder )
 {
     Node::encode( encoder );
-    
+
     encoder.encode( "primitives", _primitives );
 }
 
 void Geometry::decode( coding::Decoder &decoder )
 {
     Node::decode( decoder );
-    
+
     Array< SharedPointer< Primitive >> ps;
     decoder.decode( "primitives", ps );
     ps.each( [ this ]( SharedPointer< Primitive > &p ) {
@@ -180,4 +183,3 @@ void Geometry::load( Stream &s )
 		attachPrimitive( p );
 	}
 }
-

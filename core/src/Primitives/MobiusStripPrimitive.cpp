@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -29,19 +29,19 @@
 
 using namespace crimild;
 
-MobiusStripPrimitive::MobiusStripPrimitive( Primitive::Type type, float scale, const VertexFormat &format, Vector2i divisions )
-    : ParametricPrimitive( type, format )
+MobiusStripPrimitive::MobiusStripPrimitive(
+    Primitive::Type type,
+    float scale,
+    const VertexLayout &layout,
+    Vector2i divisions
+) noexcept
+    : ParametricPrimitive( type, layout )
 {
     _scale = scale;
-    
+
     ParametricInterval interval = { divisions, Vector2f( Numericf::TWO_PI, Numericf::TWO_PI ), Vector2f( 40, 15 ) };
     setInterval( interval );
     generate();
-}
-
-MobiusStripPrimitive::~MobiusStripPrimitive( void )
-{
-    
 }
 
 Vector3f MobiusStripPrimitive::evaluate( const Vector2f &domain ) const
@@ -52,12 +52,12 @@ Vector3f MobiusStripPrimitive::evaluate( const Vector2f &domain ) const
     float a = 0.125f;
     float b = 0.5f;
     float phi = u / 2.0f;
-    
+
     // general equation for an ellipse where phi is the angle
     // between the major axis and the x axis
     float x = a * cos( t ) * cos( phi ) - b * sin( t ) * sin( phi );
     float y = a * cos( t ) * sin( phi ) + b * sin( t ) * cos( phi );
-    
+
     // sweep the ellipse along a circle, like a torus
     Vector3f range;
     range[ 0 ] = ( major + x ) * cos( u );
@@ -65,4 +65,3 @@ Vector3f MobiusStripPrimitive::evaluate( const Vector2f &domain ) const
     range[ 2 ] = y;
     return range * _scale;
 }
-

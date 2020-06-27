@@ -28,6 +28,8 @@
 #ifndef CRIMILD_OPENGL_SHADER_GRAPH_SHADER_GRAPH_
 #define CRIMILD_OPENGL_SHADER_GRAPH_SHADER_GRAPH_
 
+#if 0
+
 #include <Rendering/ShaderGraph/ShaderGraph.hpp>
 
 #include <Foundation/Containers/Map.hpp>
@@ -68,8 +70,9 @@ namespace crimild {
 		};
 
 	}
-    
+
 }
 
 #endif
 
+#endif
