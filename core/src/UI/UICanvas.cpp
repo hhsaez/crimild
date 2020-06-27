@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002-present, H. Hernán Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -32,6 +32,8 @@
 #include "SceneGraph/Camera.hpp"
 #include "Simulation/Simulation.hpp"
 #include "Visitors/UpdateWorldState.hpp"
+#include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
 
 using namespace crimild;
 using namespace crimild::ui;
@@ -40,13 +42,13 @@ UICanvas::UICanvas( crimild::Int32 width, crimild::Int32 height )
 	: _size( width, height ),
       _safeArea( 0, 0 )
 {
-	
+
 }
 
 void UICanvas::onAttach( void )
 {
 	NodeComponent::onAttach();
-	
+
 	if ( getComponent< UIFrame >() == nullptr ) {
 		getNode()->attachComponent< UIFrame >( Rectf( 0, 0, _size.x() - _safeArea.x(), _size.y() - _safeArea.y() ) );
 	}
@@ -56,7 +58,7 @@ void UICanvas::update( const Clock & )
 {
 	auto node = getNode();
 	node->setWorldIsCurrent( false );
-	
+
 	if ( getRenderSpace() == RenderSpace::CAMERA ) {
         if ( auto camera = Camera::getMainCamera() ) {
             // Scale the UI so its height is 1.0
@@ -94,4 +96,3 @@ void UICanvas::decode( coding::Decoder &decoder )
 	decoder.decode( "renderSpace", renderSpace );
 	_renderSpace = static_cast< RenderSpace >( renderSpace );
 }
-

@@ -30,11 +30,9 @@
 
 #include "Coding/Codable.hpp"
 #include "Streaming/Stream.hpp"
+#include "Rendering/Catalog.hpp"
 #include "Rendering/IndexBuffer.hpp"
-#include "Rendering/IndexBufferObject.hpp"
-#include "Rendering/InstancedBufferObject.hpp"
 #include "Rendering/VertexBuffer.hpp"
-#include "Rendering/VertexBufferObject.hpp"
 
 #include <functional>
 
@@ -63,7 +61,7 @@ namespace crimild {
 
 	public:
 		explicit Primitive( Primitive::Type type = Primitive::Type::TRIANGLES );
-		virtual ~Primitive( void );
+		virtual ~Primitive( void ) = default;
 
 		Primitive::Type getType( void ) const { return _type; }
 
@@ -75,25 +73,10 @@ namespace crimild {
         inline IndexBuffer *getIndices( void ) noexcept { return get_ptr( m_indices ); }
         inline const IndexBuffer *getIndices( void ) const noexcept { return get_ptr( m_indices ); }
 
-        void setVertexBuffer( VertexBufferObject *vbo ) { _vertexBuffer = crimild::retain( vbo ) ; }
-        void setVertexBuffer( SharedPointer< VertexBufferObject > const &vbo ) { _vertexBuffer = vbo; }
-        VertexBufferObject *getVertexBuffer( void ) { return crimild::get_ptr( _vertexBuffer ); }
-
-        void setIndexBuffer( IndexBufferObject *ibo ) { _indexBuffer = crimild::retain( ibo ) ; }
-        void setIndexBuffer( SharedPointer< IndexBufferObject > const &ibo ) { _indexBuffer = ibo; }
-        IndexBufferObject *getIndexBuffer( void ) { return crimild::get_ptr( _indexBuffer ); }
-
-		void setInstancedBuffer( InstancedBufferObject *buffer ) { _instancedBuffer = crimild::retain( buffer ); }
-		void setInstancedBuffer( SharedPointer< InstancedBufferObject > const &buffer ) { _instancedBuffer = buffer; }
-		InstancedBufferObject *getInstancedBuffer( void ) { return crimild::get_ptr( _instancedBuffer ); }
-
 	private:
 		Primitive::Type _type;
         VertexData m_vertexData;
         IndexData m_indices;
-		SharedPointer< VertexBufferObject > _vertexBuffer;
-		SharedPointer< IndexBufferObject > _indexBuffer;
-		SharedPointer< InstancedBufferObject > _instancedBuffer;
 
         /**
          */

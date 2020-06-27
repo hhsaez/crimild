@@ -4,11 +4,7 @@
 #include "Rendering/AlphaState.hpp"
 #include "Rendering/DepthState.hpp"
 #include "Rendering/Renderer.hpp"
-#include "Rendering/FrameBufferObject.hpp"
-#include "Rendering/Programs/UnlitShaderProgram.hpp"
-#include "Rendering/Programs/VertexColorShaderProgram.hpp"
 #include "Rendering/Font.hpp"
-#include "Rendering/ShaderGraph/Constants.hpp"
 
 #include "Primitives/BoxPrimitive.hpp"
 #include "Primitives/SpherePrimitive.hpp"
@@ -27,7 +23,6 @@
 #include "Components/MaterialComponent.hpp"
 
 using namespace crimild;
-using namespace crimild::shadergraph::locations;
 
 #define CRIMILD_DEBUG_RENDER_HELPER_DEPTH_STATE "debug/render_helper/depth_state"
 #define CRIMILD_DEBUG_RENDER_HELPER_ALPHA_STATE "debug/render_helper/alpha_state"
@@ -40,6 +35,7 @@ using namespace crimild::shadergraph::locations;
 
 void DebugRenderHelper::init( void )
 {
+    /*
     AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_HELPER_DEPTH_STATE, crimild::alloc< DepthState >( false ), true );
     AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_HELPER_ALPHA_STATE, crimild::alloc< AlphaState >( false ), true );
     AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_HELPER_PRIMITIVE_BOX, crimild::alloc< BoxPrimitive >( 1.0f, 1.0f, 1.0f ), true );
@@ -49,6 +45,7 @@ void DebugRenderHelper::init( void )
 
     AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_UNLIT_SHADER_PROGRAM, crimild::alloc< UnlitShaderProgram >(), true );
     AssetManager::getInstance()->set( CRIMILD_DEBUG_RENDER_VERTEX_COLOR_SHADER_PROGRAM, crimild::alloc< VertexColorShaderProgram >(), true );
+    */
 }
 
 void DebugRenderHelper::renderLine( Renderer *renderer, Camera *camera, const Vector3f &from, const Vector3f &to, const RGBAColorf &color )
@@ -114,6 +111,7 @@ void DebugRenderHelper::renderLines( Renderer *renderer, Camera *camera, const V
 
 void DebugRenderHelper::renderLines( const Vector3f *data, unsigned int count, const RGBAColorf &color )
 {
+    /*
 	auto vbo = crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3, count );
 	auto ibo = crimild::alloc< IndexBufferObject >( count );
 	for ( int i = 0; i < count; i++ ) {
@@ -133,50 +131,60 @@ void DebugRenderHelper::renderLines( const Vector3f *data, unsigned int count, c
 	geometry->getComponent< MaterialComponent >()->attachMaterial( material );
 
 	render( crimild::get_ptr( geometry ) );
+    */
 }
 
 void DebugRenderHelper::renderBox( Renderer *renderer, Camera *camera, const Vector3f &position, float scale, const RGBAColorf &color )
 {
+    /*
 	Transformation model;
 	model.setTranslate( position );
 	model.setScale( scale );
 
     auto box = AssetManager::getInstance()->get< Primitive >( CRIMILD_DEBUG_RENDER_HELPER_PRIMITIVE_BOX );
 	render( renderer, camera, box, model, color );
+    */
 }
 
 void DebugRenderHelper::renderBox( Renderer *renderer, Camera *camera, const Vector3f &position, const Vector3f &size, const RGBAColorf &color )
 {
+    /*
 	Transformation model;
 	model.setTranslate( position );
 
 	auto box = crimild::alloc< BoxPrimitive >( size[ 0 ], size[ 1 ], size[ 2 ] );
 
 	render( renderer, camera, crimild::get_ptr( box ), model, color );
+    */
 }
 
 void DebugRenderHelper::renderSphere( Renderer *renderer, Camera *camera, const Vector3f &position, float scale, const RGBAColorf &color )
 {
+    /*
 	Transformation model;
 	model.setTranslate( position );
 	model.setScale( scale );
 
     auto sphere = AssetManager::getInstance()->get< Primitive >( CRIMILD_DEBUG_RENDER_HELPER_PRIMITIVE_SPHERE );
 	render( renderer, camera, sphere, model, color );
+    */
 }
 
 void DebugRenderHelper::renderWireframeSphere( Renderer *renderer, Camera *camera, const Vector3f &position, float scale, const RGBAColorf &color )
 {
+    /*
     Transformation model;
     model.setTranslate( position );
     model.setScale( scale );
 
     auto sphere = AssetManager::getInstance()->get< Primitive >( CRIMILD_DEBUG_RENDER_HELPER_PRIMITIVE_SPHERE );
     render( renderer, camera, sphere, model, color );
+    */
 }
 
 void DebugRenderHelper::render( Renderer *renderer, Camera *camera, Primitive *primitive, const Transformation &model, const RGBAColorf &color )
 {
+    /*
     auto program = AssetManager::getInstance()->get< ShaderProgram >( CRIMILD_DEBUG_RENDER_UNLIT_SHADER_PROGRAM );
 	if ( program == nullptr ) {
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "No program found for debug rendering" );
@@ -201,10 +209,12 @@ void DebugRenderHelper::render( Renderer *renderer, Camera *camera, Primitive *p
 
     renderer->setDepthState( DepthState::ENABLED );
     renderer->setAlphaState( AlphaState::DISABLED );
+    */
 }
 
 void DebugRenderHelper::render( const Transformation &transform, crimild::Real32 axisSize )
 {
+    /*
     auto p0 = transform.getTranslate();
     auto up = p0 + axisSize * transform.computeUp();
     auto direction = p0 + axisSize * transform.computeDirection();
@@ -260,10 +270,12 @@ void DebugRenderHelper::render( const Transformation &transform, crimild::Real32
 
     renderer->setDepthState( DepthState::ENABLED );
     renderer->setAlphaState( AlphaState::DISABLED );
+    */
 }
 
 void DebugRenderHelper::render( Geometry *geometry )
 {
+    /*
 	auto renderer = Simulation::getInstance()->getRenderer();
 	const auto SCREEN_WIDTH = renderer->getScreenBuffer()->getWidth();
 	const auto SCREEN_HEIGHT = renderer->getScreenBuffer()->getHeight();
@@ -313,10 +325,12 @@ void DebugRenderHelper::render( Geometry *geometry )
             renderer->setAlphaState( AlphaState::DISABLED );
 		});
 	}
+    */
 }
 
 void DebugRenderHelper::renderText( std::string str, const Vector3f &position, const RGBAColorf &color )
 {
+    /*
 	auto font = AssetManager::getInstance()->get< Font >( AssetManager::FONT_SYSTEM );
 	if ( font == nullptr ) {
 		Log::warning( CRIMILD_CURRENT_CLASS_NAME, "No available system font" );
@@ -337,4 +351,5 @@ void DebugRenderHelper::renderText( std::string str, const Vector3f &position, c
     text->perform( UpdateRenderState() );
 
 	render( text->getGeometry() );
+    */
 }

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -31,7 +31,6 @@
 #include "Foundation/Profiler.hpp"
 #include "Simulation/Simulation.hpp"
 #include "Simulation/Systems/RenderSystem.hpp"
-#include "Rendering/FrameBufferObject.hpp"
 
 using namespace crimild;
 using namespace crimild::glfw;
@@ -111,10 +110,10 @@ bool WindowSystem::start( void )
     }
 #endif
 #endif
-    
+
     crimild::concurrency::sync_frame( std::bind( &WindowSystem::update, this ) );
 
-#ifdef CRIMILD_PLATFORM_EMSCRIPTEN 
+#ifdef CRIMILD_PLATFORM_EMSCRIPTEN
 	emscripten_set_main_loop( simulation_step, 60, false );
 #endif
 	*/
@@ -126,14 +125,14 @@ void WindowSystem::update( void )
 {
 	/*
     CRIMILD_PROFILE( "Window System - Update" )
-    
+
 	static double accumTime = 0.0;
 	double currentTime = glfwGetTime();
 	double delta = currentTime - accumTime;
 	accumTime = currentTime;
 
 	glfwPollEvents();
-    
+
 	if ( glfwWindowShouldClose( m_window ) ) {
         crimild::concurrency::sync_frame( [] {
             Simulation::getInstance()->stop();
@@ -167,7 +166,7 @@ void WindowSystem::update( void )
 void WindowSystem::stop( void )
 {
 	System::stop();
-	
+
 	destroyWindow();
 }
 
@@ -229,7 +228,7 @@ bool WindowSystem::createWindow( void )
 			Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Framebuffer resized to ", width, "x", height );
 		}
 	);
-	
+
 	broadcastMessage( messages::WindowSystemDidCreateWindow { this } );
 
 #if !defined( CRIMILD_ENABLE_VULKAN )
@@ -256,4 +255,3 @@ void WindowSystem::destroyWindow( void )
 	// of triggering a termination by other means (i.e. pressing ESC).
 	//glfwDestroyWindow( m_window );
 }
-

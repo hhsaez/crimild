@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,13 +35,13 @@
 #include "Mathematics/Ray.hpp"
 #include "Mathematics/Sphere.hpp"
 #include "Mathematics/Plane.hpp"
-#include "Rendering/VertexBufferObject.hpp"
 
 namespace crimild {
 
 	class Renderer;
 	class Camera;
-    
+    class VertexBuffer;
+
 	class BoundingVolume : public SharedObject {
 	protected:
 		BoundingVolume( void );
@@ -51,7 +51,7 @@ namespace crimild {
 
 		virtual const Vector3f &getCenter( void ) const = 0;
 		virtual float getRadius( void ) const = 0;
-        
+
         virtual SharedPointer< BoundingVolume > clone( void ) const { return nullptr; }
 
 		const Vector3f &getMin( void ) const { return _min; }
@@ -84,13 +84,13 @@ namespace crimild {
 		virtual void computeFrom( const BoundingVolume *volume ) = 0;
 		virtual void computeFrom( const BoundingVolume *volume, const Transformation &transform ) = 0;
 		virtual void computeFrom( const Vector3f *positions, unsigned int positionCount ) = 0;
-		virtual void computeFrom( const VertexBufferObject *vbo ) = 0;
+		virtual void computeFrom( const VertexBuffer *vbo ) = 0;
 		virtual void computeFrom( const Vector3f &min, const Vector3f &max ) = 0;
 
 	public:
 		virtual void expandToContain( const Vector3f &point ) = 0;
 		virtual void expandToContain( const Vector3f *positions, unsigned int positionCount ) = 0;
-		virtual void expandToContain( const VertexBufferObject *vbo ) = 0;
+		virtual void expandToContain( const VertexBuffer *vbo ) = 0;
 		virtual void expandToContain( const BoundingVolume *other ) = 0;
 
 	public:
@@ -111,7 +111,7 @@ namespace crimild {
 		  \name Debug
 		 */
 		//@{
-		
+
 	public:
 		virtual void renderDebugInfo( Renderer *, Camera * );
 
@@ -121,4 +121,3 @@ namespace crimild {
 }
 
 #endif
-

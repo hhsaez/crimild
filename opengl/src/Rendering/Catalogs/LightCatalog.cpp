@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -34,7 +34,6 @@
 #include <Rendering/Renderer.hpp>
 #include <Rendering/ShadowMap.hpp>
 #include <Rendering/ShaderLocation.hpp>
-#include <Rendering/ShaderGraph/Constants.hpp>
 
 using namespace crimild;
 using namespace crimild::shadergraph;
@@ -51,7 +50,7 @@ LightCatalog::~LightCatalog( void )
 		glDeleteBuffers( 1, &_ambientLightBlockId );
 		_ambientLightBlockId = 0;
 	}
-	
+
 	if ( _directionalLightBlockId > 0 ) {
         glDeleteBuffers( 1, &_directionalLightBlockId );
 		_directionalLightBlockId = 0;
@@ -71,6 +70,8 @@ LightCatalog::~LightCatalog( void )
 void LightCatalog::configure( void )
 {
 	Catalog< Light >::configure();
+
+    /*
 
 	auto renderer = Renderer::getInstance();
 
@@ -121,6 +122,7 @@ void LightCatalog::configure( void )
     glBindBuffer( GL_UNIFORM_BUFFER, 0 );
 
     glBindBufferBase( GL_UNIFORM_BUFFER, blocks::SPOT_LIGHT_UNIFORM_BLOCK_BINDING_POINT, _spotLightBlockId );
+    */
 }
 
 int LightCatalog::getNextResourceId( Light *light )
@@ -169,9 +171,9 @@ int LightCatalog::getNextResourceId( Light *light )
     }
 
 	CRIMILD_LOG_WARNING( "No more lights avaiable" );
-    
+
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
-    
+
     return 0;
 }
 
@@ -185,7 +187,7 @@ void LightCatalog::bind( Light *light )
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
 	Catalog< Light >::bind( light );
-	
+
 	if ( light->getCatalog() == nullptr ) {
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "Could not bind light" );
 		return;
@@ -200,7 +202,7 @@ void LightCatalog::bind( Light *light )
 
 		glBindBuffer( GL_UNIFORM_BUFFER, _ambientLightBlockId );
 		glBufferSubData( GL_UNIFORM_BUFFER, lightId * sizeof( AmbientLightData ), sizeof( AmbientLightData ), &_ambientLights[ lightId ] );
-		glBindBuffer( GL_UNIFORM_BUFFER, 0 );		
+		glBindBuffer( GL_UNIFORM_BUFFER, 0 );
 	}
     else if ( light->getType() == Light::Type::DIRECTIONAL ) {
         auto &lightData = _directionalLights[ lightId ];
@@ -254,4 +256,3 @@ void LightCatalog::bind( Light *light )
 
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
-

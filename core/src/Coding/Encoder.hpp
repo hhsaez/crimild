@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -33,8 +33,7 @@
 #include "Foundation/Types.hpp"
 #include "Foundation/Containers/Array.hpp"
 #include "Foundation/Containers/Map.hpp"
-#include "Foundation/Version.hpp"            
-#include "Rendering/VertexFormat.hpp"
+#include "Foundation/Version.hpp"
 #include "Mathematics/Transformation.hpp"
 
 #include <sstream>
@@ -48,10 +47,10 @@ namespace crimild {
         class Encoder : public SharedObject {
         protected:
             Encoder( void );
-            
+
         public:
             virtual ~Encoder( void );
-            
+
 			const Version &getVersion( void ) const { return _version; }
 			void setVersion( const Version &version ) { _version = version; }
 
@@ -62,7 +61,7 @@ namespace crimild {
             // objects
             virtual crimild::Bool encode( SharedPointer< Codable > const &codable ) = 0;
             virtual crimild::Bool encode( std::string key, SharedPointer< Codable > const &codable ) = 0;
-            
+
             // values
             virtual crimild::Bool encode( std::string key, std::string str ) = 0;
             virtual crimild::Bool encode( std::string key, crimild::Size value ) = 0;
@@ -81,8 +80,7 @@ namespace crimild {
             virtual crimild::Bool encode( std::string key, const Matrix4f & ) = 0;
             virtual crimild::Bool encode( std::string key, const Quaternion4f & ) = 0;
             virtual crimild::Bool encode( std::string key, const Transformation & ) = 0;
-            virtual crimild::Bool encode( std::string key, const VertexFormat & ) = 0;
-            
+
             virtual crimild::Bool encode( std::string key, ByteArray & ) = 0;
 			virtual crimild::Bool encode( std::string key, Array< crimild::Real32 > & ) = 0;
 			virtual crimild::Bool encode( std::string key, Array< Vector3f > & ) = 0;
@@ -90,20 +88,20 @@ namespace crimild {
 			virtual crimild::Bool encode( std::string key, Array< Matrix3f > & ) = 0;
 			virtual crimild::Bool encode( std::string key, Array< Matrix4f > & ) = 0;
 			virtual crimild::Bool encode( std::string key, Array< Quaternion4f > & ) = 0;
-            
+
             template< typename T, typename U >
             crimild::Bool encode( std::string key, Array< T, U > &a )
             {
                 crimild::Size N = a.size();
                 encodeArrayBegin( key, N );
-                
+
                 a.each( [ this, key, i = 0 ]( T &elem ) mutable {
 					auto itemKey = beginEncodingArrayElement( key, i );
                     encode( itemKey, elem );
 					endEncodingArrayElement( key, i );
                     i++;
                 });
-                
+
                 encodeArrayEnd( key );
 
 				return true;
@@ -118,10 +116,9 @@ namespace crimild {
         public:
             virtual std::string dump( void );
         };
-        
+
 	}
-    
+
 }
 
 #endif
-

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -27,15 +27,13 @@
 
 #include "Simulation.hpp"
 #include "FileSystem.hpp"
- 
+
 #include "Foundation/Log.hpp"
 #include "Foundation/Version.hpp"
 
 #include "Concurrency/Async.hpp"
 
 #include "SceneGraph/Camera.hpp"
-
-#include "Rendering/FrameBufferObject.hpp"
 
 #include "Visitors/FetchCameras.hpp"
 #include "Visitors/UpdateWorldState.hpp"
@@ -74,7 +72,7 @@ Simulation::Simulation( std::string name, SettingsPtr const &settings )
       _settings( settings )
 {
 	CRIMILD_LOG_INFO( "Initializing simulation ", name );
-	
+
     Version version;
     Log::info( CRIMILD_CURRENT_CLASS_NAME, version.getDescription() );
 
@@ -173,15 +171,15 @@ bool Simulation::update( void )
 	_simulationClock.tick();
 
     _jobScheduler.executeDelayedJobs();
-	
+
     MessageQueue::getInstance()->dispatchDeferredMessages();
 
 	_sortedSystems.each( []( System *s ) {
 		s->update();
 	});
-    
+
     broadcastMessage( messaging::SimulationDidUpdate { scene } );
-    
+
     if ( !_jobScheduler.isRunning() ) {
         return false;
     }
@@ -206,9 +204,9 @@ void Simulation::stop( void )
 
     // clear all messages
     MessageQueue::getInstance()->clear();
-    
+
     setScene( nullptr );
-    
+
     _assetManager.clear( true );
 
 #ifdef CRIMILD_PLATFORM_EMSCRIPTEN
@@ -227,7 +225,7 @@ int Simulation::run( void )
         done = !update();
     }
 #endif
-    
+
 	return 0;
 }
 
@@ -243,7 +241,7 @@ void Simulation::addSystem( SystemPtr const &system )
 void Simulation::startSystems( void )
 {
 	SystemArray allSystems;
-	
+
     Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Starting systems" );
 
 	// Sort systems by priority order and start them
@@ -276,12 +274,13 @@ void Simulation::stopSystems( void )
 		.each( []( SystemPtr &s ) {
 			s->stop();
 		});
-    
+
     _systems.clear();
 }
 
 void Simulation::setScene( SharedPointer< Node > const &scene )
 {
+    /*
 	_scene = scene;
 	_cameras.clear();
 
@@ -296,7 +295,7 @@ void Simulation::setScene( SharedPointer< Node > const &scene )
 			if ( Camera::getMainCamera() == nullptr || camera->isMainCamera() ) {
 				Camera::setMainCamera( camera );
 			}
-			
+
             _cameras.push_back( camera );
         });
 
@@ -305,12 +304,12 @@ void Simulation::setScene( SharedPointer< Node > const &scene )
         if ( getMainCamera() != nullptr && renderer != nullptr && renderer->getScreenBuffer() != nullptr ) {
             auto screen = renderer->getScreenBuffer();
             auto aspect = ( float ) screen->getWidth() / ( float ) screen->getHeight();
-            
+
             if ( getMainCamera() != nullptr ) {
                 getMainCamera()->setAspectRatio( aspect );
             }
         }
-        
+
         // start all components
         _scene->perform( StartComponents() );
 
@@ -322,12 +321,13 @@ void Simulation::setScene( SharedPointer< Node > const &scene )
 		// invalid scene. reset camera
 		Camera::setMainCamera( nullptr );
 	}
-    
+
     MessageQueue::getInstance()->clear();
-    
+
     _simulationClock.reset();
 
     broadcastMessage( messaging::SceneChanged { crimild::get_ptr( _scene ) } );
+    */
 }
 
 void Simulation::loadScene( std::string filename )
@@ -341,4 +341,3 @@ void Simulation::forEachCamera( std::function< void ( Camera * ) > callback )
 		callback( camera );
 	}
 }
-

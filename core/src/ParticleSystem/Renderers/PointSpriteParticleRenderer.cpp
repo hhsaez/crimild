@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,9 +28,10 @@
 #include "PointSpriteParticleRenderer.hpp"
 #include "Simulation/AssetManager.hpp"
 #include "Rendering/Renderer.hpp"
-#include "Rendering/Programs/PointSpriteShaderProgram.hpp"
 #include "Components/MaterialComponent.hpp"
 #include "Concurrency/Async.hpp"
+#include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
 
 using namespace crimild;
 
@@ -39,7 +40,7 @@ PointSpriteParticleRenderer::PointSpriteParticleRenderer( void )
 	// create the material here so it can be modified later
 	_material = crimild::alloc< Material >();
 
-    _material->setProgram( AssetManager::getInstance()->get< PointSpriteShaderProgram >() );
+    //_material->setProgram( AssetManager::getInstance()->get< PointSpriteShaderProgram >() );
 }
 
 PointSpriteParticleRenderer::~PointSpriteParticleRenderer( void )
@@ -47,7 +48,7 @@ PointSpriteParticleRenderer::~PointSpriteParticleRenderer( void )
 
 }
 
-void PointSpriteParticleRenderer::configure( Node *node, ParticleData *particles ) 
+void PointSpriteParticleRenderer::configure( Node *node, ParticleData *particles )
 {
 	_geometry = crimild::alloc< Geometry >();
 	if ( _material != nullptr ) {
@@ -67,17 +68,19 @@ void PointSpriteParticleRenderer::configure( Node *node, ParticleData *particles
 
 void PointSpriteParticleRenderer::update( Node *node, crimild::Real64 dt, ParticleData *particles )
 {
+    assert( false );
+    /*
     const auto pCount = particles->getAliveCount();
     if ( pCount == 0 ) {
         return;
     }
-    
+
     auto vbo = crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3_C4_UV2, pCount );
 
 	const auto ps = _positions->getData< Vector3f >();
 	const auto ss = _sizes->getData< crimild::Real32 >();
 	const auto cs = _colors->getData< RGBAColorf >();
-    
+
     // TODO: should I traverse the arrays by grouping data in 4/8 byte touples?
 
 	if ( particles->shouldComputeInWorldSpace() ) {
@@ -104,14 +107,15 @@ void PointSpriteParticleRenderer::update( Node *node, crimild::Real64 dt, Partic
 
     auto ibo = crimild::alloc< IndexBufferObject >( pCount );
     ibo->generateIncrementalIndices();
-    
+
     crimild::concurrency::sync_frame( [this, vbo, ibo] {
         _primitive->setVertexBuffer( vbo );
         _primitive->setIndexBuffer( ibo );
     });
+    */
 }
 
-void PointSpriteParticleRenderer::encode( coding::Encoder &encoder ) 
+void PointSpriteParticleRenderer::encode( coding::Encoder &encoder )
 {
 	ParticleSystemComponent::ParticleRenderer::encode( encoder );
 
@@ -127,8 +131,8 @@ void PointSpriteParticleRenderer::decode( coding::Decoder &decoder )
 	if ( _material == nullptr ) {
 		_material = crimild::alloc< Material >();
 	}
-	
-    _material->setProgram( AssetManager::getInstance()->get< PointSpriteShaderProgram >() );
+
+    //_material->setProgram( AssetManager::getInstance()->get< PointSpriteShaderProgram >() );
 
     std::string blendMode;
     decoder.decode( "blendMode", blendMode );
@@ -153,13 +157,12 @@ void PointSpriteParticleRenderer::decode( coding::Decoder &decoder )
     else {
         _material->setAlphaState( AlphaState::DISABLED );
     }
-    
+
     crimild::Bool cullFaceEnabled = true;
     decoder.decode( "cullFaceEnabled", cullFaceEnabled );
     _material->getCullFaceState()->setEnabled( cullFaceEnabled );
-    
+
     crimild::Bool depthStateEnabled = true;
     decoder.decode( "depthStateEnabled", depthStateEnabled );
     _material->setDepthState( depthStateEnabled ? DepthState::ENABLED : DepthState::DISABLED );
 }
-

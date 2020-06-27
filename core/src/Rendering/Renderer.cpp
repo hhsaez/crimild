@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,12 +28,6 @@
 #include "Rendering/Renderer.hpp"
 #include "Rendering/Material.hpp"
 #include "Rendering/RenderQueue.hpp"
-#include "Rendering/FrameBufferObject.hpp"
-#include "Rendering/RenderTarget.hpp"
-#include "Rendering/RenderGraph/RenderGraph.hpp"
-#include "Rendering/RenderGraph/RenderGraphAttachment.hpp"
-#include "Rendering/ShaderGraph/Constants.hpp"
-#include "Rendering/Programs/ScreenTextureShaderProgram.hpp"
 #include "Foundation/Log.hpp"
 #include "Primitives/QuadPrimitive.hpp"
 #include "SceneGraph/Geometry.hpp"
@@ -45,11 +39,9 @@
 #include "Animation/Skeleton.hpp"
 
 using namespace crimild;
-using namespace crimild::rendergraph;
-using namespace crimild::shadergraph::locations;
 
 Renderer::Renderer( void )
-	: _screenPrimitive( crimild::alloc< QuadPrimitive >( 2.0f, 2.0f, VertexFormat::VF_P3_UV2 ) ),
+	: _screenPrimitive( crimild::alloc< QuadPrimitive >( 2.0f, 2.0f, VertexP3N3TC2::getLayout() ) ),
       _shaderProgramCatalog( crimild::alloc< Catalog< ShaderProgram >>() ),
 	  _textureCatalog( crimild::alloc< Catalog< Texture >>() ),
 	  _vertexBufferObjectCatalog( crimild::alloc< Catalog< VertexBufferObject >>() ),
@@ -60,14 +52,14 @@ Renderer::Renderer( void )
 	  _primitiveCatalog( crimild::alloc< Catalog< Primitive >>() ),
       _lightCatalog( crimild::alloc< Catalog< Light >>() )
 {
-	_screenBuffer = crimild::alloc< FrameBufferObject >( 800, 600 );
+	//_screenBuffer = crimild::alloc< FrameBufferObject >( 800, 600 );
 }
 
 Renderer::~Renderer( void )
 {
     _screenBuffer = nullptr;
     _screenPrimitive = nullptr;
-    
+
     getShaderProgramCatalog()->unloadAll();
     getTextureCatalog()->unloadAll();
     getLightCatalog()->unloadAll();
@@ -94,6 +86,7 @@ void Renderer::configure( void )
 
 void Renderer::setScreenViewport( const Rectf &viewport )
 {
+    /*
     auto screen = getScreenBuffer();
     auto w = screen->getWidth();
     auto h = screen->getHeight();
@@ -106,6 +99,7 @@ void Renderer::setScreenViewport( const Rectf &viewport )
             h * viewport.getHeight()
         )
     );
+    */
 }
 
 void Renderer::beginRender( void )
@@ -132,6 +126,7 @@ void Renderer::presentFrame( void )
 
 }
 
+/*
 void Renderer::render( RenderQueue *renderQueue, RenderGraph *renderGraph )
 {
     auto lightCatalog = getLightCatalog();
@@ -162,6 +157,7 @@ void Renderer::render( RenderQueue *renderQueue, RenderGraph *renderGraph )
     drawScreenPrimitive( program );
     unbindProgram( program );
 }
+*/
 
 void Renderer::bindRenderTarget( RenderTarget *target )
 {
@@ -207,25 +203,25 @@ void Renderer::bindMaterial( ShaderProgram *program, Material *material )
 		program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM ),
 		material->getColorMap()
 	);
-	
+
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_USE_NORMAL_MAP_UNIFORM ), material->getNormalMap() != nullptr );
 	if ( material->getNormalMap() != nullptr ) {
 		auto loc = program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_NORMAL_MAP_UNIFORM );
 		bindTexture( loc, material->getNormalMap() );
 	}
-	
+
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_USE_SPECULAR_MAP_UNIFORM ), material->getSpecularMap() != nullptr );
 	if ( material->getSpecularMap() != nullptr ) {
 		auto loc = program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_SPECULAR_MAP_UNIFORM );
 		bindTexture( loc, material->getSpecularMap() );
 	}
-	
+
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_USE_EMISSIVE_MAP_UNIFORM ), material->getEmissiveMap() != nullptr );
 	if ( material->getEmissiveMap() != nullptr ) {
 		auto loc = program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_EMISSIVE_MAP_UNIFORM );
 		bindTexture( loc, material->getEmissiveMap() );
 	}
-	
+
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_AMBIENT_UNIFORM ), material->getAmbient() );
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_DIFFUSE_UNIFORM ), material->getDiffuse() );
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_SPECULAR_UNIFORM ), material->getSpecular() );
@@ -244,7 +240,7 @@ void Renderer::unbindMaterial( ShaderProgram *program, Material *material )
 		program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_COLOR_MAP_UNIFORM ),
 		material->getColorMap()
 	);
-	
+
 	unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_NORMAL_MAP_UNIFORM ), material->getNormalMap() );
 	unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_SPECULAR_MAP_UNIFORM ), material->getSpecularMap() );
 	unbindTexture( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_EMISSIVE_MAP_UNIFORM ), material->getEmissiveMap() );
@@ -285,7 +281,7 @@ void Renderer::bindVertexBuffer( ShaderProgram *program, VertexBufferObject *vbo
 	if ( vbo == nullptr ) {
 		return;
 	}
-	
+
 	getVertexBufferObjectCatalog()->bind( program, vbo );
 }
 
@@ -323,7 +319,7 @@ void Renderer::applyTransformations( ShaderProgram *program, Geometry *geometry,
 	normal[ 12 ] = 0.0f;
 	normal[ 13 ] = 0.0f;
 	normal[ 14 ] = 0.0f;
-    
+
     applyTransformations( program, projection, view, model, normal );
 }
 
@@ -350,7 +346,7 @@ void Renderer::restoreTransformations( ShaderProgram *program, Geometry* geometr
 void Renderer::drawGeometry( Geometry *geometry, ShaderProgram *program, const Matrix4f &modelMatrix )
 {
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MODEL_MATRIX_UNIFORM ), modelMatrix );
-	
+
 	auto rc = geometry->getComponent< RenderStateComponent >();
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::SKINNED_MESH_JOINT_COUNT_UNIFORM ), 0 );
 	if ( auto skeleton = rc->getSkeleton() ) {
@@ -361,7 +357,7 @@ void Renderer::drawGeometry( Geometry *geometry, ShaderProgram *program, const M
 				joint->getPoseMatrix() );
 		});
 	}
-	
+
 	geometry->forEachPrimitive( [ this, program ]( Primitive *primitive ) {
 		bindPrimitive( program, primitive );
 		drawPrimitive( program, primitive );
@@ -377,4 +373,3 @@ void Renderer::drawScreenPrimitive( ShaderProgram *program )
     drawPrimitive( program, crimild::get_ptr( _screenPrimitive ) );
 	unbindPrimitive( program, primitive );
 }
-

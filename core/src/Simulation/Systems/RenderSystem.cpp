@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -27,26 +27,24 @@
 
 #include "RenderSystem.hpp"
 
-#include "Rendering/FrameBufferObject.hpp"
-
 #include "Simulation/Simulation.hpp"
 
 using namespace crimild;
 
 bool RenderSystem::start( void )
-{	
+{
 	if ( !System::start() ) {
 		return false;
 	}
-    
+
     registerMessageHandler< messaging::RenderQueueAvailable >( [this]( messaging::RenderQueueAvailable const &message ) {
         _renderQueues = message.renderQueues;
     });
-    
+
     registerMessageHandler< messaging::SceneChanged >( [this]( messaging::SceneChanged const &message ) {
         _renderQueues.clear();
     });
-    
+
 	return true;
 }
 
@@ -60,15 +58,15 @@ void RenderSystem::update( void )
 	}
 
 	auto renderQueues = _renderQueues;
-    
+
 	{
 		CRIMILD_PROFILE( "Begin Render" );
 		renderer->beginRender();
 		renderer->clearBuffers();
 	}
-    
+
     broadcastMessage( messaging::WillRenderScene {} );
-    
+
 	{
 		CRIMILD_PROFILE( "Render Scene" );
 
@@ -106,7 +104,6 @@ void RenderSystem::update( void )
 		CRIMILD_PROFILE( "Present Frame" );
 		renderer->presentFrame();
 	}
-	
+
     broadcastMessage( messaging::DidRenderScene {} );
 }
-

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -41,7 +41,6 @@
 #include "Rendering/ImageManager.hpp"
 #include "Rendering/ImageView.hpp"
 #include "Rendering/ShaderProgram.hpp"
-#include "Rendering/Programs/UnlitShaderProgram.hpp"
 #include "Rendering/VertexBuffer.hpp"
 #include "Rendering/IndexBuffer.hpp"
 #include "Rendering/Pipeline.hpp"
@@ -147,7 +146,7 @@ std::string OBJLoader::FileProcessor::getLine( std::ifstream &input )
 void OBJLoader::FileProcessor::processLine( std::ifstream &input )
 {
 	std::stringstream line( getLine( input ) );
-	
+
 	std::string what;
 	line >> what;
 
@@ -225,11 +224,11 @@ void OBJLoader::generateGeometry( void )
 		// anonymous object
         _objects.push_back( crimild::alloc< Group >() );
         _currentObject = crimild::get_ptr( _objects.back() );
-                           
+
 	}
 
 #if 0
-    
+
     std::vector< VertexP3N3TC2 > vertices;
     std::vector< crimild::UInt32 > indices;
     std::unordered_map< VertexP3N3TC2, crimild::UInt32 > uniqueVertices;
@@ -317,7 +316,7 @@ void OBJLoader::generateGeometry( void )
                 };
 				*/
 
-				
+
                 return descriptorSet;
             }();
             return renderState;
@@ -369,7 +368,7 @@ void OBJLoader::readObjectTextureCoords( std::stringstream &line )
 	_textureCoords.push_back( Vector2f( s, t ) );
 }
 
-void OBJLoader::readObjectNormals( std::stringstream &line ) 
+void OBJLoader::readObjectNormals( std::stringstream &line )
 {
 	float x, y, z;
 	line >> x >> y >> z;
@@ -459,11 +458,11 @@ void OBJLoader::readMaterialShaderProgram( std::stringstream &line )
 
 	switch ( illumLevel ) {
 	    case 0:
-            _currentMaterial->setProgram( crimild::alloc< UnlitShaderProgram >() );
+            //_currentMaterial->setProgram( crimild::alloc< UnlitShaderProgram >() );
 			break;
 
         case 1:
-            _currentMaterial->setProgram( crimild::alloc< UnlitShaderProgram >() );
+            //_currentMaterial->setProgram( crimild::alloc< UnlitShaderProgram >() );
             break;
 
         case 3:
@@ -471,7 +470,7 @@ void OBJLoader::readMaterialShaderProgram( std::stringstream &line )
             _currentMaterial->setCastShadows( false );
             _currentMaterial->setReceiveShadows( true );
             break;
-            
+
         case 4:
             // neither receive nor cast shadows
             _currentMaterial->setCastShadows( false );
@@ -484,7 +483,7 @@ void OBJLoader::readMaterialTranslucency( std::stringstream &line )
 {
     float translucency;
     line >> translucency;
-    
+
     if ( translucency < 1.0f ) {
         _currentMaterial->getAlphaState()->setEnabled( true );
         auto diffuse = _currentMaterial->getDiffuse();
@@ -519,4 +518,3 @@ SharedPointer< Texture > OBJLoader::loadTexture( std::string textureFileName )
     }();
     return texture;
 }
-

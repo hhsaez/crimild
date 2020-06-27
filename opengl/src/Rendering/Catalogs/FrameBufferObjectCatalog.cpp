@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2018, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -27,6 +27,8 @@
 
 #include "Rendering/Catalogs/FrameBufferObjectCatalog.hpp"
 #include "Rendering/OpenGLUtils.hpp"
+
+#if 0
 
 #include <Rendering/Renderer.hpp>
 #include <Rendering/FrameBufferObject.hpp>
@@ -49,26 +51,26 @@ FrameBufferObjectCatalog::~FrameBufferObjectCatalog( void )
 int FrameBufferObjectCatalog::getNextResourceId( FrameBufferObject * )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
-    
+
     GLuint framebufferId;
     glGenFramebuffers( 1, &framebufferId );
-    
+
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
-    
+
     return framebufferId;
 }
 
 void FrameBufferObjectCatalog::bind( FrameBufferObject *fbo )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
-    
+
 	Catalog< FrameBufferObject >::bind( fbo );
 
     glBindFramebuffer( GL_FRAMEBUFFER, fbo->getCatalogId() );
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
     glViewport( 0.0f, 0.0f, fbo->getWidth(), fbo->getHeight() );
     const RGBAColorf &clearColor = fbo->getClearColor();
-    
+
     glClearColor( clearColor.r(), clearColor.g(), clearColor.b(), clearColor.a() );
     crimild::Int32 clearFlags = fbo->getClearFlags();
 	if ( clearFlags != FrameBufferObject::ClearFlag::NONE ) {
@@ -77,7 +79,7 @@ void FrameBufferObjectCatalog::bind( FrameBufferObject *fbo )
         if ( clearFlags & FrameBufferObject::ClearFlag::DEPTH ) glClearFlags |= GL_DEPTH_BUFFER_BIT;
 		glClear( glClearFlags );
 	}
-    
+
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
@@ -89,7 +91,7 @@ void FrameBufferObjectCatalog::unbind( FrameBufferObject *fbo )
     if ( getRenderer()->getScreenBuffer() != nullptr ) {
         defaultFBO = getRenderer()->getScreenBuffer()->getCatalogId();
     }
-    
+
     glBindFramebuffer( GL_FRAMEBUFFER, defaultFBO );
 
 	Catalog< FrameBufferObject >::unbind( fbo );
@@ -118,12 +120,12 @@ void FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
 				case RenderTarget::Type::DEPTH_16:
 					attachment = GL_DEPTH_ATTACHMENT;
 					break;
-					
+
 				case RenderTarget::Type::COLOR_RGB:
 				case RenderTarget::Type::COLOR_RGBA:
 					attachment = GL_COLOR_ATTACHMENT0 + colorAttachmentOffset++;
 					break;
-					
+
 				default:
 					Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid target type: ", ( int ) target->getType() );
 					break;
@@ -133,7 +135,7 @@ void FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
 				if ( target->getCatalog() == nullptr ) {
 					getRenderer()->getRenderTargetCatalog()->load( crimild::get_ptr( target ) );
 				}
-				
+
 				glFramebufferRenderbuffer( GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, target->getCatalogId() );
 			}
 
@@ -150,14 +152,14 @@ void FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
         switch ( status ) {
             case GL_FRAMEBUFFER_COMPLETE:
                 break;
-				
+
 #ifdef GL_FRAMEBUFFER_UNDEFINED
             case GL_FRAMEBUFFER_UNDEFINED:
                 Log::fatal( CRIMILD_CURRENT_CLASS_NAME,  "Cannot setup FrameBuffer due to invalid window setup" );
                 exit( 1 );
                 break;
 #endif
-				
+
             case GL_FRAMEBUFFER_UNSUPPORTED:
                 Log::fatal( CRIMILD_CURRENT_CLASS_NAME, "Invalid FBO attachments format. Check configuration for each attachment" );
                 exit( 1 );
@@ -170,7 +172,7 @@ void FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
                 Log::fatal( CRIMILD_CURRENT_CLASS_NAME, "Cannot setup FrameBuffer. No attachments found" );
                 exit( 1 );
                 break;
-				
+
 #ifdef GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE
             case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
                 Log::fatal( CRIMILD_CURRENT_CLASS_NAME, "Cannot setup FrameBuffer. Multisample params don't match" );
@@ -215,7 +217,7 @@ void FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
 			GL_COLOR_ATTACHMENT6,
 			GL_COLOR_ATTACHMENT7,
 		};
-		
+
 		if ( colorAttachmentOffset > 0 ) {
 			glDrawBuffers( colorAttachmentOffset, fboBuffers );
 		}
@@ -229,7 +231,7 @@ void FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
         if ( getRenderer()->getScreenBuffer() != nullptr ) {
             defaultFBO = getRenderer()->getScreenBuffer()->getCatalogId();
         }
-        
+
         glBindFramebuffer( GL_FRAMEBUFFER, defaultFBO );
     }
     else {
@@ -243,7 +245,7 @@ void FrameBufferObjectCatalog::load( FrameBufferObject *fbo )
 void FrameBufferObjectCatalog::unload( FrameBufferObject *fbo )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
-    
+
     int framebufferId = fbo->getCatalogId();
     if ( framebufferId > 0 ) {
         _framebufferIdsToDelete.push_back( framebufferId );
@@ -262,7 +264,8 @@ void FrameBufferObjectCatalog::cleanup( void )
         glDeleteFramebuffers( 1, &framebufferId );
     }
     _framebufferIdsToDelete.clear();
-    
+
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
+#endif

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -64,12 +64,12 @@ void PlaneBoundingVolume::computeFrom( const Vector3f *positions, unsigned int p
 
 }
 
-void PlaneBoundingVolume::computeFrom( const VertexBufferObject *vbo )
+void PlaneBoundingVolume::computeFrom( const VertexBuffer *vbo )
 {
 
 }
 
-void PlaneBoundingVolume::computeFrom( const Vector3f &min, const Vector3f &max ) 
+void PlaneBoundingVolume::computeFrom( const Vector3f &min, const Vector3f &max )
 {
 
 }
@@ -84,14 +84,14 @@ void PlaneBoundingVolume::expandToContain( const Vector3f *positions, unsigned i
 
 }
 
-void PlaneBoundingVolume::expandToContain( const VertexBufferObject *vbo )
+void PlaneBoundingVolume::expandToContain( const VertexBuffer *vbo )
 {
 
 }
 
 void PlaneBoundingVolume::expandToContain( const BoundingVolume *input )
 {
-	
+
 }
 
 int PlaneBoundingVolume::whichSide( const Plane3f &plane ) const
@@ -144,4 +144,3 @@ void PlaneBoundingVolume::resolveIntersection( const Sphere3f &sphere, Transform
 void PlaneBoundingVolume::resolveIntersection( const Plane3f &plane, Transformation &result ) const
 {
 }
-

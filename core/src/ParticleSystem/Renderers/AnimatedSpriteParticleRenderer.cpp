@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,11 +28,12 @@
 #include "AnimatedSpriteParticleRenderer.hpp"
 
 #include "Rendering/Renderer.hpp"
-#include "Rendering/Programs/UnlitShaderProgram.hpp"
 #include "Components/MaterialComponent.hpp"
 #include "Simulation/AssetManager.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "Concurrency/Async.hpp"
+#include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
 
 using namespace crimild;
 
@@ -42,7 +43,7 @@ AnimatedSpriteParticleRenderer::AnimatedSpriteParticleRenderer( void )
 	// create the material here so it can be modified later
 	_material = crimild::alloc< Material >();
 
-    _material->setProgram( crimild::alloc< UnlitShaderProgram >() );
+    //_material->setProgram( crimild::alloc< UnlitShaderProgram >() );
 }
 
 AnimatedSpriteParticleRenderer::~AnimatedSpriteParticleRenderer( void )
@@ -50,7 +51,7 @@ AnimatedSpriteParticleRenderer::~AnimatedSpriteParticleRenderer( void )
 
 }
 
-void AnimatedSpriteParticleRenderer::configure( Node *node, ParticleData *particles ) 
+void AnimatedSpriteParticleRenderer::configure( Node *node, ParticleData *particles )
 {
 	_geometry = crimild::alloc< Geometry >();
 	if ( _material != nullptr ) {
@@ -71,11 +72,12 @@ void AnimatedSpriteParticleRenderer::configure( Node *node, ParticleData *partic
 
 void AnimatedSpriteParticleRenderer::update( Node *node, crimild::Real64 dt, ParticleData *particles )
 {
+    /*
     const auto pCount = particles->getAliveCount();
     if ( pCount == 0 ) {
         return;
     }
-    
+
     auto vbo = crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3_UV2, 4 * pCount );
 	auto ibo = crimild::alloc< IndexBufferObject >( 6 * pCount );
 
@@ -121,7 +123,7 @@ void AnimatedSpriteParticleRenderer::update( Node *node, crimild::Real64 dt, Par
 			node->getWorld().applyInverseToPoint( pos, pos );
 		}
 		auto s = ss[ i ];
-		
+
 		const auto t = 1.0f - ( timeData[ i ] / lifetimeData[ i ] );
 		const auto frame = ( crimild::UInt8 )( frameCount * t );
 		const auto fx = frame % ( ( crimild::UInt8 ) _spriteSheetSize.x() );
@@ -130,10 +132,10 @@ void AnimatedSpriteParticleRenderer::update( Node *node, crimild::Real64 dt, Par
 
 		vbo->setPositionAt( idx + 0, pos + s * offset0 );
 		vbo->setTextureCoordAt( idx + 0, frameOffset + uv0 );
-		
+
 		vbo->setPositionAt( idx + 1, pos + s * offset1 );
 		vbo->setTextureCoordAt( idx + 1, frameOffset + uv1 );
-		
+
 		vbo->setPositionAt( idx + 2, pos + s * offset2 );
 		vbo->setTextureCoordAt( idx + 2, frameOffset + uv2 );
 
@@ -156,9 +158,10 @@ void AnimatedSpriteParticleRenderer::update( Node *node, crimild::Real64 dt, Par
         _primitive->setVertexBuffer( vbo );
         _primitive->setIndexBuffer( ibo );
     });
+    */
 }
 
-void AnimatedSpriteParticleRenderer::encode( coding::Encoder &encoder ) 
+void AnimatedSpriteParticleRenderer::encode( coding::Encoder &encoder )
 {
 	ParticleSystemComponent::ParticleRenderer::encode( encoder );
 
@@ -178,8 +181,8 @@ void AnimatedSpriteParticleRenderer::decode( coding::Decoder &decoder )
 	if ( _material == nullptr ) {
 		_material = crimild::alloc< Material >();
 	}
-	
-    _material->setProgram( crimild::alloc< UnlitShaderProgram >() );
+
+    //_material->setProgram( crimild::alloc< UnlitShaderProgram >() );
 
     std::string blendMode;
     decoder.decode( "blendMode", blendMode );
@@ -204,13 +207,12 @@ void AnimatedSpriteParticleRenderer::decode( coding::Decoder &decoder )
     else {
         _material->setAlphaState( AlphaState::DISABLED );
     }
-    
+
     crimild::Bool cullFaceEnabled = true;
     decoder.decode( "cullFaceEnabled", cullFaceEnabled );
     _material->getCullFaceState()->setEnabled( cullFaceEnabled );
-    
+
     crimild::Bool depthStateEnabled = true;
     decoder.decode( "depthStateEnabled", depthStateEnabled );
     _material->setDepthState( depthStateEnabled ? DepthState::ENABLED : DepthState::DISABLED );
 }
-

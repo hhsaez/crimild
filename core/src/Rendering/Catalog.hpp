@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002 - present, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -39,7 +39,7 @@ namespace crimild {
 
 	class ShaderProgram;
 	class ShaderLocation;
-	
+
 	/*
 	  \brief Usage hint
 	  \todo Move to policy?
@@ -52,9 +52,11 @@ namespace crimild {
 	template< class RESOURCE_TYPE >
 	class Catalog : public SharedObject {
 	public:
-		
+
 		/**
 			RESOURCE_TYPE must be derived from SharedObject
+
+            \deprecated
 		*/
 		class Resource : public NonCopyable {
 		public:
@@ -78,7 +80,7 @@ namespace crimild {
 				_catalog = catalog;
 				_catalogId = id;
 			}
-            
+
             void unload( void )
             {
 				if ( _catalog != nullptr ) {
@@ -86,11 +88,11 @@ namespace crimild {
                     _catalog = nullptr;
 				}
             }
-            
+
             virtual void onBind( void ) { }
-            
+
             virtual void onUnbind( void ) { }
-            
+
 		private:
             Catalog< RESOURCE_TYPE > *_catalog = nullptr;
 			int _catalogId;
@@ -111,19 +113,19 @@ namespace crimild {
 		};
 
 	public:
-		Catalog( void ) 
+		Catalog( void )
 		{
 
 		}
 
-		virtual ~Catalog( void ) 
+		virtual ~Catalog( void )
 		{
 			unloadAll();
             cleanup();
 		}
 
 		crimild::Bool hasResources( void ) const
-		{ 
+		{
 			return _resources.size() > 0;
 		}
 
@@ -142,7 +144,7 @@ namespace crimild {
 			return _resources.size();
 		}
 
-		virtual int getDefaultIdValue( void ) 
+		virtual int getDefaultIdValue( void )
 		{
 			return -1;
 		}
@@ -184,18 +186,23 @@ namespace crimild {
 
         virtual void load( RESOURCE_TYPE *resource )
 		{
+            /*
 			resource->setCatalogInfo( this, getNextResourceId( resource ) );
 			_resources.push_back( resource );
+            */
 		}
 
         virtual void unload( RESOURCE_TYPE *resource )
 		{
+            /*
 			resource->setCatalogInfo( nullptr, getDefaultIdValue() );
             _resources.remove( resource );
+            */
 		}
 
 		virtual void unloadAll( void )
 		{
+            /*
             auto rs = _resources;
 			for ( auto resource : rs ) {
                 unload( resource );
@@ -204,8 +211,9 @@ namespace crimild {
             cleanup();
 
             _resources.clear();
+            */
 		}
-        
+
         virtual void cleanup( void )
         {
             // no-op
@@ -219,6 +227,7 @@ namespace crimild {
     private:
         void bindResource( RESOURCE_TYPE *resource )
         {
+            /*
             if ( resource->getCatalog() == nullptr ) {
                 load( resource );
             }
@@ -226,16 +235,19 @@ namespace crimild {
             resource->onBind();
 
             _activeResourceCount++;
+            */
         }
 
         void unbindResource( RESOURCE_TYPE *resource )
         {
+            /*
             if ( resource != nullptr ) {
                 resource->onUnbind();
                 if ( _activeResourceCount > 0 ) {
                     _activeResourceCount--;
                 }
             }
+            */
         }
 
 	private:
@@ -247,4 +259,3 @@ namespace crimild {
 }
 
 #endif
-

@@ -37,6 +37,8 @@
 #include "Rendering/ShaderProgramLibrary.hpp"
 #include "Rendering/Uniforms/ModelViewProjectionUniformBuffer.hpp"
 #include "Simulation/FileSystem.hpp"
+#include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
 
 using namespace crimild;
 
@@ -165,4 +167,3 @@ void Skybox::decode( coding::Decoder &decoder )
 	});
 	configure( faces );
 }
-

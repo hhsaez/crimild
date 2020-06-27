@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -61,7 +61,6 @@ namespace crimild {
             virtual crimild::Bool encode( std::string key, const Matrix4f &value ) override { return encodeValues( key, 16, value.getData() ); }
             virtual crimild::Bool encode( std::string key, const Quaternion4f &value ) override { return encodeValues( key, 4, value.getRawData().getData() ); }
             virtual crimild::Bool encode( std::string key, const Transformation &value ) override;
-            virtual crimild::Bool encode( std::string key, const VertexFormat &value ) override;
 
             virtual crimild::Bool encode( std::string key, ByteArray &value ) override { return false; }
 			virtual crimild::Bool encode( std::string key, Array< crimild::Real32 > &value ) override { return false; }
@@ -75,16 +74,16 @@ namespace crimild {
 			{
                 return _ss.str();
 			}
-            
+
         protected:
 			virtual void encodeArrayBegin( std::string key, crimild::Size count ) override;
 			virtual std::string beginEncodingArrayElement( std::string key, crimild::Size index ) override;
 			virtual void endEncodingArrayElement( std::string key, crimild::Size index ) override;
 			virtual void encodeArrayEnd( std::string key ) override;
-            
+
         private:
             template< typename T >
-            crimild::Bool encodeValue( std::string key, const T &value ) 
+            crimild::Bool encodeValue( std::string key, const T &value )
             {
 	            encodeKey( key );
 	            _ss << value << ", ";
@@ -106,11 +105,11 @@ namespace crimild {
                 _ss << "}, ";
 
 				return true;
-            }        
+            }
 
             crimild::Bool encodeKey( std::string key );
             std::string getIndentSpaces( void );
-            
+
         private:
             std::stringstream _ss;
             crimild::Size _indentLevel = 0;
@@ -125,4 +124,3 @@ namespace crimild {
 }
 
 #endif
-

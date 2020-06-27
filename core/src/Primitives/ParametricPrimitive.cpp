@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -29,15 +29,10 @@
 
 using namespace crimild;
 
-ParametricPrimitive::ParametricPrimitive( Primitive::Type type, const VertexFormat &format )
+ParametricPrimitive::ParametricPrimitive( Primitive::Type type, const VertexLayout &layout ) noexcept
     : Primitive( type ),
-      _format( format )
+      _layout( layout )
 {
-}
-
-ParametricPrimitive::~ParametricPrimitive( void )
-{
-    
 }
 
 void ParametricPrimitive::setInterval( const ParametricInterval &interval )
@@ -81,6 +76,9 @@ void ParametricPrimitive::generate( void )
 
 void ParametricPrimitive::generateVertexBuffer( void )
 {
+    assert( false );
+
+    /*
     auto vbo = crimild::alloc< VertexBufferObject >( _format, getVertexCount(), nullptr );
     VertexPrecision *vertex = vbo->data();
     for ( int i = 0; i < _divisions[ 1 ]; i++ ) {
@@ -91,18 +89,18 @@ void ParametricPrimitive::generateVertexBuffer( void )
             vertex[ _format.getPositionsOffset() + 0 ] = range[ 0 ];
             vertex[ _format.getPositionsOffset() + 1 ] = range[ 1 ];
             vertex[ _format.getPositionsOffset() + 2 ] = range[ 2 ];
-            
+
             // compute normal
             if ( _format.hasNormals() ) {
                 float s = j;
                 float t = i;
-                
+
                 // nudge the point if the normal is indeterminate
                 if ( j == 0 ) s += 0.01f;
                 if ( j == _divisions[ 0 ] - 1 ) s -= 0.01f;
                 if ( i == 0 ) t += 0.01f;
                 if ( i == _divisions[ 1 ] - 1 ) t -= 0.01f;
-                
+
                 // compute the tangents and their cross product
                 Vector3f p = evaluate( computeDomain( s, t ) );
                 Vector3f u = evaluate( computeDomain( s + 0.01f, t ) ) - p;
@@ -116,7 +114,7 @@ void ParametricPrimitive::generateVertexBuffer( void )
                 vertex[ _format.getNormalsOffset() + 1 ] = normal[ 1 ];
                 vertex[ _format.getNormalsOffset() + 2 ] = normal[ 2 ];
             }
-            
+
             // compute texture coordinates
             if ( _format.hasTextureCoords() ) {
                 float s = ( float ) _textureCount[ 0 ] * ( float ) j / ( float ) _slices[ 0 ];
@@ -128,10 +126,13 @@ void ParametricPrimitive::generateVertexBuffer( void )
         }
     }
     setVertexBuffer( vbo );
+    */
 }
 
 void ParametricPrimitive::generateLineIndexBuffer( void )
 {
+    assert( false );
+    /*
     auto ibo = crimild::alloc< IndexBufferObject >( getLineIndexCount(), nullptr );
     IndexPrecision *index = ibo->data();
     for ( int i = 0, vertex = 0; i < _slices[ 1 ]; i++ ) {
@@ -145,10 +146,13 @@ void ParametricPrimitive::generateLineIndexBuffer( void )
         vertex += _divisions[ 0 ];
     }
     setIndexBuffer( ibo );
+    */
 }
 
 void ParametricPrimitive::generateTriangleIndexBuffer( void )
 {
+    assert( false );
+    /*
     auto ibo = crimild::alloc< IndexBufferObject >( getTriangleIndexCount(), nullptr );
     IndexPrecision *index = ibo->data();
     for ( int i = 0, vertex = 0; i < _slices[ 1 ]; i++ ) {
@@ -163,7 +167,7 @@ void ParametricPrimitive::generateTriangleIndexBuffer( void )
         }
         vertex += _divisions[ 0 ];
     }
-    
-    setIndexBuffer( ibo );
-}
 
+    setIndexBuffer( ibo );
+    */
+}

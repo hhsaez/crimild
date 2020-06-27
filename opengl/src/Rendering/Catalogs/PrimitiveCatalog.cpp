@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -55,14 +55,15 @@ int PrimitiveCatalog::getNextResourceId( Primitive * )
 #ifndef CRIMILD_FORCE_OPENGL_COMPATIBILITY_MODE
 	glGenVertexArrays( 1, &primitiveId );
 #endif
-    
+
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
-    
+
     return primitiveId;
 }
 
 void PrimitiveCatalog::bind( Primitive *primitive )
 {
+    /*
 	if ( primitive == nullptr ) {
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid primitive pointer" );
 		return;
@@ -99,6 +100,7 @@ void PrimitiveCatalog::bind( Primitive *primitive )
 	}
 
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+    */
 }
 
 void PrimitiveCatalog::unbind( Primitive *primitive )
@@ -106,7 +108,7 @@ void PrimitiveCatalog::unbind( Primitive *primitive )
 	if ( primitive == nullptr ) {
 		return;
 	}
-	
+
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
 #ifndef CRIMILD_FORCE_OPENGL_COMPATIBILITY_MODE
@@ -117,7 +119,7 @@ void PrimitiveCatalog::unbind( Primitive *primitive )
 	renderer->getVertexBufferObjectCatalog()->unbind( primitive->getVertexBuffer() );
 	renderer->getIndexBufferObjectCatalog()->unbind( primitive->getIndexBuffer() );
 #endif
-	
+
 	Catalog< Primitive >::unbind( primitive );
 
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
@@ -125,14 +127,15 @@ void PrimitiveCatalog::unbind( Primitive *primitive )
 
 void PrimitiveCatalog::load( Primitive *primitive )
 {
+    /*
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
 	Catalog< Primitive >::load( primitive );
-    
+
 #ifndef CRIMILD_FORCE_OPENGL_COMPATIBILITY_MODE
 	glBindVertexArray( primitive->getCatalogId() );
 #endif
-	
+
 	auto renderer = Renderer::getInstance();
 	renderer->getVertexBufferObjectCatalog()->bind( primitive->getVertexBuffer() );
 	renderer->getIndexBufferObjectCatalog()->bind( primitive->getIndexBuffer() );
@@ -146,12 +149,14 @@ void PrimitiveCatalog::load( Primitive *primitive )
 #endif
 
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+    */
 }
 
 void PrimitiveCatalog::unload( Primitive *primitive )
 {
+    /*
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
-    
+
 	auto renderer = Renderer::getInstance();
 	renderer->getVertexBufferObjectCatalog()->unload( primitive->getVertexBuffer() );
 	renderer->getIndexBufferObjectCatalog()->unload( primitive->getIndexBuffer() );
@@ -159,29 +164,29 @@ void PrimitiveCatalog::unload( Primitive *primitive )
 	if ( auto instancedBO = primitive->getInstancedBuffer() ) {
 		renderer->getInstancedBufferObjectCatalog()->unbind( instancedBO );
 	}
-	
+
     if ( primitive->getCatalogId() > 0 ) {
         _primitiveIdsToDelete.push_back( primitive->getCatalogId() );
     }
-    
+
     Catalog< Primitive >::unload( primitive );
-    
+
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+    */
 }
 
 void PrimitiveCatalog::cleanup( void )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
-    
+
 #ifndef CRIMILD_FORCE_OPENGL_COMPATIBILITY_MODE
     for ( auto id : _primitiveIdsToDelete ) {
         GLuint primitiveId = id;
         glDeleteVertexArrays( 1, &primitiveId );
     }
 #endif
-    
+
     _primitiveIdsToDelete.clear();
-    
+
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION
 }
-

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -32,19 +32,26 @@
 #include "Mathematics/Vector.hpp"
 
 namespace crimild {
-    
+
     /**
         \brief A quad primitive
      */
     class QuadPrimitive : public Primitive {
     public:
-        QuadPrimitive( float width, float height, const VertexFormat &format = VertexFormat::VF_P3_N3, const Vector2f &textureOffset = Vector2f( 0.0f, 0.0f ), const Vector2f &textureScale = Vector2f( 1.0f, 1.0f ), bool wireframe = false );
-        
-        virtual ~QuadPrimitive( void );
+        QuadPrimitive(
+            float width,
+            float height,
+            const VertexLayout &layout = VertexP3N3::getLayout(),
+            const Vector2f &textureOffset = Vector2f( 0.0f, 0.0f ),
+            const Vector2f &textureScale = Vector2f( 1.0f, 1.0f ),
+            bool wireframe = false
+        ) noexcept;
+
+        virtual ~QuadPrimitive( void ) = default;
     };
-    
+
     using QuadPrimitivePtr = SharedPointer< QuadPrimitive >;
-        
+
 }
 
 #endif

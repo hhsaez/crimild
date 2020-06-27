@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -100,8 +100,10 @@ void SphereBoundingVolume::computeFrom( const Vector3f *positions, unsigned int 
 	setMax( +getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
 }
 
-void SphereBoundingVolume::computeFrom( const VertexBufferObject *vbo )
+void SphereBoundingVolume::computeFrom( const VertexBuffer *vbo )
 {
+    assert( false );
+    /*
 	if ( vbo->getVertexCount() == 0 || !vbo->getVertexFormat().hasPositions() ) {
 		_sphere.setCenter( Vector3f( 0.0f, 0.0f, 0.0f ) );
 		_sphere.setRadius( 0.5f );
@@ -138,9 +140,10 @@ void SphereBoundingVolume::computeFrom( const VertexBufferObject *vbo )
 
 	setMin( -getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
 	setMax( +getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
+    */
 }
 
-void SphereBoundingVolume::computeFrom( const Vector3f &min, const Vector3f &max ) 
+void SphereBoundingVolume::computeFrom( const Vector3f &min, const Vector3f &max )
 {
 	// TODO
 }
@@ -180,8 +183,10 @@ void SphereBoundingVolume::expandToContain( const Vector3f *positions, unsigned 
 	expandToContain( min );
 }
 
-void SphereBoundingVolume::expandToContain( const VertexBufferObject *vbo )
+void SphereBoundingVolume::expandToContain( const VertexBuffer *vbo )
 {
+    assert( false );
+    /*
 	if ( vbo->getVertexCount() == 0 || !vbo->getVertexFormat().hasPositions() ) {
 		_sphere.setCenter( Vector3f( 0.0f, 0.0f, 0.0f ) );
 		_sphere.setRadius( 1.0f );
@@ -205,6 +210,7 @@ void SphereBoundingVolume::expandToContain( const VertexBufferObject *vbo )
 
 	expandToContain( max );
 	expandToContain( min );
+    */
 }
 
 void SphereBoundingVolume::expandToContain( const BoundingVolume *input )
@@ -263,4 +269,3 @@ void SphereBoundingVolume::resolveIntersection( const Sphere3f &other, Transform
 void SphereBoundingVolume::resolveIntersection( const Plane3f &plane, Transformation &result ) const
 {
 }
-
