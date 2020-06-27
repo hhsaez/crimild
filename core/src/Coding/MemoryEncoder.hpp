@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -48,9 +48,9 @@ namespace crimild {
 		public:
             virtual crimild::Bool encode( SharedPointer< Codable > const &obj ) override;
             virtual crimild::Bool encode( std::string key, SharedPointer< Codable > const &obj ) override;
-            
+
             virtual crimild::Bool encode( std::string key, std::string value ) override;
-            
+
             virtual crimild::Bool encode( std::string key, const Transformation &value ) override { return encodeData( key, value ); }
             virtual crimild::Bool encode( std::string key, crimild::Size value ) override { return encodeData( key, value ); }
             virtual crimild::Bool encode( std::string key, crimild::UInt8 value ) override { return encodeData( key, value ); }
@@ -67,7 +67,6 @@ namespace crimild {
             virtual crimild::Bool encode( std::string key, const Matrix4f &value ) override { return encodeData( key, value ); }
             virtual crimild::Bool encode( std::string key, const Quaternion4f &value ) override { return encodeData( key, value ); }
             virtual crimild::Bool encode( std::string key, crimild::Bool value ) override { return encodeData( key, value ); }
-            virtual crimild::Bool encode( std::string key, const crimild::VertexFormat &value ) override { return encodeData( key, value ); }
 
 			virtual crimild::Bool encode( std::string key, ByteArray &value ) override { return encodeData( key, value ); }
 			virtual crimild::Bool encode( std::string key, Array< crimild::Real32 > &value ) override { return encodeData( key, value ); }
@@ -76,9 +75,9 @@ namespace crimild {
 			virtual crimild::Bool encode( std::string key, Array< Matrix3f > &value ) override { return encodeData( key, value ); }
 			virtual crimild::Bool encode( std::string key, Array< Matrix4f > &value ) override { return encodeData( key, value ); }
 			virtual crimild::Bool encode( std::string key, Array< Quaternion4f > &value ) override { return encodeData( key, value ); }
-            
+
             ByteArray getBytes( void ) const;
-            
+
         protected:
 			virtual void encodeArrayBegin( std::string key, crimild::Size count ) override;
 			virtual std::string beginEncodingArrayElement( std::string key, crimild::Size index ) override;
@@ -92,26 +91,25 @@ namespace crimild {
                 auto encoded = crimild::alloc< EncodedData >( value );
                 return encode( key, crimild::cast_ptr< EncodedData >( encoded ) );
             }
-            
+
             static void append( ByteArray &out, crimild::Int8 value );
             static void append( ByteArray &out, std::string value );
             static void append( ByteArray &out, Codable::UniqueID value );
             static void append( ByteArray &out, const ByteArray &data );
             static void appendRawBytes( ByteArray &out, crimild::Size count, const void *data );
-            
+
         private:
             Stack< SharedPointer< Codable >> _sortedObjects;
             Map< Codable::UniqueID, Map< std::string, Codable::UniqueID >> _links;
             SharedPointer< Codable > _parent;
             Array< SharedPointer< Codable >> _roots;
-            
+
         public:
             virtual std::string dump( void ) override;
         };
-        
+
 	}
-    
+
 }
 
 #endif
-

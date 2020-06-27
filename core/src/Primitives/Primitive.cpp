@@ -38,95 +38,90 @@ Primitive::Primitive( Primitive::Type type )
 	_type = type;
 }
 
-Primitive::~Primitive( void )
-{
-    _indexBuffer = nullptr;
-    _vertexBuffer = nullptr;
-}
-
 void Primitive::encode( coding::Encoder &encoder )
 {
     Codable::encode( encoder );
-    
+
     int type;
     switch ( _type ) {
         case Primitive::Type::POINTS:
             type = 0;
             break;
-            
+
         case Primitive::Type::LINES:
             type = 1;
             break;
-            
+
         case Primitive::Type::LINE_LOOP:
             type = 2;
             break;
-            
+
         case Primitive::Type::LINE_STRIP:
             type = 3;
             break;
-            
+
         case Primitive::Type::TRIANGLES:
             type = 4;
             break;
-            
+
         case Primitive::Type::TRIANGLE_STRIP:
             type = 5;
             break;
-            
+
         case Primitive::Type::TRIANGLE_FAN:
             type = 6;
             break;
     }
-    
+
     encoder.encode( "primitiveType", type );
-    
-    encoder.encode( "vertexBuffer", _vertexBuffer );
-    encoder.encode( "indexBuffer", _indexBuffer );
+    encoder.encode( "vertexData", m_vertexData );
+    encoder.encode( "indexData", m_indices );
 }
 
 void Primitive::decode( coding::Decoder &decoder )
 {
     Codable::decode( decoder );
-    
+
     int type;
     decoder.decode( "primitiveType", type );
     switch ( type ) {
         case 0:
             _type = Primitive::Type::POINTS;
             break;
-            
+
         case 1:
             _type = Primitive::Type::LINES;
             break;
-            
+
         case 2:
             _type = Primitive::Type::LINE_LOOP;
             break;
-            
+
         case 3:
             _type = Primitive::Type::LINE_STRIP;
             break;
-            
+
         case 4:
             _type = Primitive::Type::TRIANGLES;
             break;
-            
+
         case 5:
             _type = Primitive::Type::TRIANGLE_STRIP;
             break;
-            
+
         case 6:
             _type = Primitive::Type::TRIANGLE_FAN;
             break;
     }
 
-    decoder.decode( "vertexBuffer", _vertexBuffer );
-    decoder.decode( "indexBuffer", _indexBuffer );
+    decoder.decode( "vertexData", m_vertexData );
+    decoder.decode( "indices", m_indices );
 }
 
 bool Primitive::registerInStream( Stream &s )
 {
+    assert( false );
+    /*
 	if ( !StreamObject::registerInStream( s ) ) {
 		return false;
 	}
@@ -138,12 +133,14 @@ bool Primitive::registerInStream( Stream &s )
 	if ( getIndexBuffer() != nullptr ) {
 		getIndexBuffer()->registerInStream( s );
 	}
+    */
 
 	return true;
 }
 
 void Primitive::save( Stream &s )
 {
+    /*
 	StreamObject::save( s );
 
 	int type;
@@ -181,10 +178,12 @@ void Primitive::save( Stream &s )
 
 	s.write( _vertexBuffer );
 	s.write( _indexBuffer );
+    */
 }
 
 void Primitive::load( Stream &s )
 {
+    /*
 	StreamObject::load( s );
 
 	int type;
@@ -207,11 +206,11 @@ void Primitive::load( Stream &s )
 			_type = Primitive::Type::LINE_STRIP;
 			break;
 
-		case 4: 
+		case 4:
 			_type = Primitive::Type::TRIANGLES;
 			break;
 
-		case 5: 
+		case 5:
 			_type = Primitive::Type::TRIANGLE_STRIP;
 			break;
 
@@ -222,5 +221,5 @@ void Primitive::load( Stream &s )
 
 	s.read( _vertexBuffer );
 	s.read( _indexBuffer );
+    */
 }
-

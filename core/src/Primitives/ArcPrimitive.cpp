@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -31,9 +31,11 @@
 
 using namespace crimild;
 
-ArcPrimitive::ArcPrimitive( float radius, float angle, float thickness, int segments )
+ArcPrimitive::ArcPrimitive( float radius, float angle, float thickness, int segments ) noexcept
     : Primitive( Primitive::Type::TRIANGLES )
 {
+    assert( false );
+    /*
     float theta = angle / segments;
     float c = crimild::Numericf::cos( -theta );
     float s = crimild::Numericf::sin( -theta );
@@ -58,7 +60,7 @@ ArcPrimitive::ArcPrimitive( float radius, float angle, float thickness, int segm
         t = x0;
         x0 = c * x0 - s * y0;
         y0 = s * t + c * y0;
-    
+
         t = x1;
         x1 = c * x1 - s * y1;
         y1 = s * t + c * y1;
@@ -66,7 +68,7 @@ ArcPrimitive::ArcPrimitive( float radius, float angle, float thickness, int segm
 
     auto vbo = crimild::alloc< crimild::VertexBufferObject >( crimild::VertexFormat::VF_P3, positions.size() / 3, &positions[ 0 ] );
     setVertexBuffer( vbo );
-    
+
     std::vector< IndexPrecision > indices;
     for ( int i = 0; i < segments; i++ ) {
         auto i0 = i * 2;
@@ -84,10 +86,5 @@ ArcPrimitive::ArcPrimitive( float radius, float angle, float thickness, int segm
     }
     auto ibo = crimild::alloc< crimild::IndexBufferObject >( indices.size(), &indices[ 0 ] );
     setIndexBuffer( ibo );
+    */
 }
-
-ArcPrimitive::~ArcPrimitive( void )
-{
-
-}
-

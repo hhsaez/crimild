@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002-present, H. Hernán Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -31,6 +31,8 @@
 
 #include "SceneGraph/Node.hpp"
 #include "SceneGraph/Group.hpp"
+#include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
 
 using namespace crimild;
 using namespace crimild::ui;
@@ -72,7 +74,7 @@ void UIFrame::update( const Clock & )
     _constraints.each( [ this, parentFrame ]( SharedPointer< UIFrameConstraint > const &c ) {
 		c->apply( this, parentFrame );
 	});
-	
+
 	if ( parentFrame != nullptr ) {
 		const auto &frame = getExtensions();
 		auto w = frame.getWidth();
@@ -101,7 +103,7 @@ UIFrame *UIFrame::addConstraint( SharedPointer< UIFrameConstraint > const &const
 UIFrameConstraint *UIFrame::getConstraint( UIFrameConstraint::Type type )
 {
 	UIFrameConstraint *ret = nullptr;
-	
+
     _constraints.each( [ &ret, type ]( SharedPointer< UIFrameConstraint > const &c ) {
 		if ( c->getType() == type ) {
             ret = crimild::get_ptr( c );
@@ -127,4 +129,3 @@ void UIFrame::decode( coding::Decoder &decoder )
 
 	decoder.decode( "constraints", _constraints );
 }
-

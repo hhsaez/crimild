@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -43,7 +43,7 @@ Box2DBoundingVolume::Box2DBoundingVolume( crimild::Real32 halfWidth, crimild::Re
 	setRAxis( halfWidth * Vector3f::UNIT_X );
 	setSAxis( halfHeight * Vector3f::UNIT_Y );
 	setTAxis( Vector3f::UNIT_Z );
-	
+
 	_sphere.setCenter( Vector3f::ZERO );
 	_sphere.setRadius( Numericf::max( halfWidth, halfHeight ) );
 }
@@ -98,12 +98,12 @@ void Box2DBoundingVolume::computeFrom( const Vector3f *positions, unsigned int p
 	// TODO
 }
 
-void Box2DBoundingVolume::computeFrom( const VertexBufferObject *vbo )
+void Box2DBoundingVolume::computeFrom( const VertexBuffer *vbo )
 {
 	// TODO
 }
 
-void Box2DBoundingVolume::computeFrom( const Vector3f &min, const Vector3f &max ) 
+void Box2DBoundingVolume::computeFrom( const Vector3f &min, const Vector3f &max )
 {
 	// TODO
 }
@@ -118,7 +118,7 @@ void Box2DBoundingVolume::expandToContain( const Vector3f *positions, unsigned i
 	// TODO
 }
 
-void Box2DBoundingVolume::expandToContain( const VertexBufferObject *vbo )
+void Box2DBoundingVolume::expandToContain( const VertexBuffer *vbo )
 {
 	// TODO
 }
@@ -159,8 +159,8 @@ bool Box2DBoundingVolume::testIntersection( const Ray3f &ray ) const
 	if ( t < 0.0f ) {
 		return false;
 	}
-	
-	auto P = ray.getPointAt( t );	
+
+	auto P = ray.getPointAt( t );
 
 	auto test = []( const Vector3f &P, const Vector3f &A, const Vector3f &B, const Vector3f &C ) -> bool {
 		auto sameSide = []( const Vector3f &p1, const Vector3f &p2, const Vector3f &a, const Vector3f &b ) -> bool
@@ -169,7 +169,7 @@ bool Box2DBoundingVolume::testIntersection( const Ray3f &ray ) const
 			auto cp2 = ( b - a ) ^ ( p2 - a );
 			return ( cp1 * cp2 ) >= 0;
 		};
-		
+
 		return sameSide( P, A, B, C ) && sameSide( P, B, A, C ) && sameSide( P, C, A, B );
 	};
 
@@ -281,4 +281,3 @@ void Box2DBoundingVolume::renderDebugInfo( Renderer *renderer, Camera *camera )
 	);
 
 }
-

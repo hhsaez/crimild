@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -33,25 +33,25 @@
 #include "Mathematics/Vector.hpp"
 
 namespace crimild {
-    
+
     class ParametricInterval {
     public:
         Vector2i divisions;
         Vector2f upperBound;
         Vector2f textureCount;
     };
-    
+
     class ParametricPrimitive : public Primitive {
     public:
-        ParametricPrimitive( Primitive::Type type, const VertexFormat &format );
-        virtual ~ParametricPrimitive( void );
-        
+        ParametricPrimitive( Primitive::Type type, const VertexLayout &layout ) noexcept;
+        virtual ~ParametricPrimitive( void ) = default;
+
     protected:
         void setInterval( const ParametricInterval &interval );
         void generate( void );
         virtual Vector3f evaluate( const Vector2f &domain ) const = 0;
         virtual bool invertNormal( const Vector2f &domain ) const { return false; }
-        
+
     private:
         int getVertexCount( void ) const;
         int getLineIndexCount( void ) const;
@@ -60,17 +60,16 @@ namespace crimild {
         void generateVertexBuffer( void );
         void generateLineIndexBuffer( void );
         void generateTriangleIndexBuffer( void );
-        
-        VertexFormat _format;
+
+        VertexLayout _layout;
         Vector2f _upperBound;
         Vector2i _slices;
         Vector2i _divisions;
         Vector2i _textureCount;
     };
-    
+
     using ParametricPrimitivePtr = SharedPointer< ParametricPrimitive >;
-        
+
 }
 
 #endif
-

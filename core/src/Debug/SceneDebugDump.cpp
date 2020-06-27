@@ -18,12 +18,12 @@ using namespace crimild;
 SceneDebugDump::SceneDebugDump( std::string filename )
     : _output( FileSystem::getInstance().pathForResource( filename ), std::ios::out )
 {
-    
+
 }
 
 SceneDebugDump::~SceneDebugDump( void )
 {
-    
+
 }
 
 void SceneDebugDump::traverse( Node *node )
@@ -31,9 +31,9 @@ void SceneDebugDump::traverse( Node *node )
     _output << "\n*****************"
             << "\n* Traversing... *"
             << "\n*****************";
-    
+
     NodeVisitor::traverse( node );
-    
+
     _output << "\n********"
             << "\n* DONE *"
             << "\n********";
@@ -42,14 +42,14 @@ void SceneDebugDump::traverse( Node *node )
 void SceneDebugDump::visitNode( Node *node )
 {
     NodeVisitor::visitNode( node );
-    
+
     dumpNode( node, "Node" );
 }
 
 void SceneDebugDump::visitGroup( Group *group )
 {
     dumpNode( group, "Group" );
-    
+
     ++_parentLevel;
     NodeVisitor::visitGroup( group );
     --_parentLevel;
@@ -59,7 +59,7 @@ void SceneDebugDump::visitGeometry( Geometry *geometry )
 {
     dumpNode( geometry, "Geometry" );
 
-	
+
     std::stringstream indent;
     for ( int i = 0; i < _parentLevel + 1; i++ ) {
         indent << " ";
@@ -69,8 +69,8 @@ void SceneDebugDump::visitGeometry( Geometry *geometry )
 		_output << "\n";
 		_output << indent.str()
 				<< "(Primitive)" << " [" << &primitive << "]"
-				<< " Vertices: " << primitive->getVertexBuffer()->getVertexCount()
-				<< " Indices: " << primitive->getIndexBuffer()->getIndexCount();
+				<< " Vertices: " << primitive->getVertexData()[ 0 ]->getVertexCount()
+				<< " Indices: " << primitive->getIndices()->getIndexCount();
 	});
 }
 
@@ -100,9 +100,8 @@ void SceneDebugDump::dumpNode( Node *node, std::string type )
     for ( int i = 0; i < _parentLevel; i++ ) {
         indent << " ";
     }
-    
+
     _output << indent.str()
             << "(" + type + ") " << node->getName() << " [" << &node << "]"
             << "\t" << node->getWorld().getTranslate();
 }
-

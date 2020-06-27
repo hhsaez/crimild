@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -29,7 +29,6 @@
 
 #include "Foundation/Version.hpp"
 #include "Foundation/Log.hpp"
-#include "Rendering/VertexFormat.hpp"
 #include "Rendering/SkinnedMesh.hpp"
 #include "Components/SkinnedMeshComponent.hpp"
 
@@ -90,7 +89,7 @@ Stream::~Stream( void )
 
 }
 
-bool Stream::isTopLevel( SharedPointer< StreamObject > const &obj ) const 
+bool Stream::isTopLevel( SharedPointer< StreamObject > const &obj ) const
 {
 	for ( const auto &other : _topLevelObjects ) {
 		// double check
@@ -231,17 +230,6 @@ void Stream::write( const char *str )
 	writeRawBytes( str, strlen( str ) );
 }
 
-void Stream::write( const VertexFormat &vf )
-{
-	write( vf.getPositionComponents() );
-	write( vf.getColorComponents() );
-	write( vf.getNormalComponents() );
-	write( vf.getTangentComponents() );
-	write( vf.getTextureCoordComponents() );
-	write( vf.getBoneIdComponents() );
-	write( vf.getBoneWeightComponents() );
-}
-
 void Stream::write( const Quaternion4f &q )
 {
 	write( q.getRawData() );
@@ -315,32 +303,6 @@ void Stream::read( std::string &str )
 	str = std::string( ( const char * ) &buffer[ 0 ] );
 }
 
-void Stream::read( VertexFormat &vf )
-{
-	unsigned char positions;
-	read( positions );
-
-	unsigned char colors;
-	read( colors );
-
-	unsigned char normals;
-	read( normals );
-
-	unsigned char tangents;
-	read( tangents );
-
-	unsigned char textureCoords;
-	read( textureCoords );
-
-	unsigned char boneIds;
-	read( boneIds );
-
-	unsigned char boneWeights;
-	read( boneWeights );
-
-	vf = VertexFormat( positions, colors, normals, tangents, textureCoords, boneIds, boneWeights );
-}
-
 void Stream::read( Quaternion4f &q )
 {
 	Vector4f v;
@@ -399,4 +361,3 @@ void Stream::read( float &f )
 {
 	readRawBytes( &f, sizeof( float ) );
 }
-

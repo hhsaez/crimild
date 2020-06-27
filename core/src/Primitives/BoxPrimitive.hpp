@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -33,15 +33,26 @@
 #include "Mathematics/Vector.hpp"
 
 namespace crimild {
-    
+
+    /**
+       \brief Construct a Box
+     */
     class BoxPrimitive : public Primitive {
     public:
-        BoxPrimitive( float width, float height, float depth, const VertexFormat &format = VertexFormat::VF_P3_N3 );
-        virtual ~BoxPrimitive( void );
+        /**
+           \brief Construct a box with positions, normals and texture coordinates of size 1, 1, 1
+         */
+        BoxPrimitive( void ) noexcept;
+
+        /**
+           \brief Construct a box with user defined layout and size
+         */
+        BoxPrimitive( const VertexLayout &layout, const Vector3f &size ) noexcept;
+        virtual ~BoxPrimitive( void ) = default;
     };
-    
+
     using BoxPrimitivePtr = SharedPointer< BoxPrimitive >;
-        
+
 }
 
 #endif

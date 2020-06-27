@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,6 +28,8 @@
 #include "VertexBufferObjectCatalog.hpp"
 
 #include "Rendering/OpenGLUtils.hpp"
+
+#if 0
 
 #include <Rendering/ShaderProgram.hpp>
 #include <Rendering/VertexBufferObject.hpp>
@@ -48,10 +50,10 @@ VertexBufferObjectCatalog::~VertexBufferObjectCatalog( void )
 int VertexBufferObjectCatalog::getNextResourceId( VertexBufferObject * )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
-    
-	GLuint vboId;    
+
+	GLuint vboId;
     glGenBuffers( 1, &vboId );
-    
+
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 
     return vboId;
@@ -157,7 +159,7 @@ void VertexBufferObjectCatalog::bind( VertexBufferObject *vbo )
 void VertexBufferObjectCatalog::unbind( VertexBufferObject *vbo )
 {
 	if ( vbo == nullptr ) return;
-	
+
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
     const VertexFormat &format = vbo->getVertexFormat();
@@ -171,7 +173,7 @@ void VertexBufferObjectCatalog::unbind( VertexBufferObject *vbo )
 	if ( format.hasBoneWeights() ) glDisableVertexAttribArray( VertexFormat::LayoutLocation::BONE_WEIGHT );
 
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
-    
+
 	Catalog< VertexBufferObject >::unbind( vbo );
 
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
@@ -180,7 +182,7 @@ void VertexBufferObjectCatalog::unbind( VertexBufferObject *vbo )
 void VertexBufferObjectCatalog::load( VertexBufferObject *vbo )
 {
 	if ( vbo == nullptr ) return;
-	
+
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
 	Catalog< VertexBufferObject >::load( vbo );
@@ -199,29 +201,30 @@ void VertexBufferObjectCatalog::load( VertexBufferObject *vbo )
 void VertexBufferObjectCatalog::unload( VertexBufferObject *vbo )
 {
 	if ( vbo == nullptr ) return;
-	
+
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
-    
+
     if ( vbo->getCatalogId() > 0 ) {
       	_unusedVBOIds.push_back( vbo->getCatalogId() );
     }
 
     Catalog< VertexBufferObject >::unload( vbo );
-    
+
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
 void VertexBufferObjectCatalog::cleanup( void )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
-    
+
     for ( auto id : _unusedVBOIds ) {
         GLuint vboId = id;
         glDeleteBuffers( 1, &vboId );
     }
-    
+
     _unusedVBOIds.clear();
-    
+
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
+#endif

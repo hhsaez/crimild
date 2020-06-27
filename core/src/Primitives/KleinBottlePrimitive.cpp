@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -29,19 +29,19 @@
 
 using namespace crimild;
 
-KleinBottlePrimitive::KleinBottlePrimitive( Primitive::Type type, float scale, const VertexFormat &format, Vector2i divisions )
-    : ParametricPrimitive( type, format )
+KleinBottlePrimitive::KleinBottlePrimitive(
+    Primitive::Type type,
+    float scale,
+    const VertexLayout &layout,
+    Vector2i divisions
+) noexcept
+    : ParametricPrimitive( type, layout )
 {
     _scale = scale;
-    
+
     ParametricInterval interval = { divisions, Vector2f( Numericf::TWO_PI, Numericf::TWO_PI ), Vector2f( 15, 50 ) };
     setInterval( interval );
     generate();
-}
-
-KleinBottlePrimitive::~KleinBottlePrimitive( void )
-{
-    
 }
 
 Vector3f KleinBottlePrimitive::evaluate( const Vector2f &domain ) const
@@ -52,7 +52,7 @@ Vector3f KleinBottlePrimitive::evaluate( const Vector2f &domain ) const
     float y0 = 8 * sin( u ) + ( 2 * ( 1 - cos( u ) / 2 ) ) * sin( u ) * cos( v );
     float x1 = 3 * cos( u ) * ( 1 + sin( u ) ) + ( 2 * ( 1 - cos( u ) / 2 ) ) * cos( v + Numericf::PI );
     float y1 = 8 * sin( u );
-    
+
     Vector3f range;
     range[ 0 ] = u < Numericf::PI ? x0 : x1;
     range[ 1 ] = u < Numericf::PI ? -y0 : -y1;
@@ -64,4 +64,3 @@ bool KleinBottlePrimitive::InvertNormal( const Vector2f &domain ) const
 {
     return domain[ 1 ] > 3 * Numericf::PI / 2;
 }
-

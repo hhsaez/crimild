@@ -2,6 +2,8 @@
 
 #include "Simulation/Simulation.hpp"
 #include "Visitors/Apply.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 using namespace crimild;
 using namespace crimild::behaviors;
@@ -20,7 +22,7 @@ FindTarget::FindTarget( std::string targetName )
 
 FindTarget::~FindTarget( void )
 {
-	
+
 }
 
 Behavior::State FindTarget::step( BehaviorContext *context )

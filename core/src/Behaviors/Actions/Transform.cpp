@@ -2,6 +2,8 @@
 
 #include "SceneGraph/Node.hpp"
 #include "Mathematics/Interpolation.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 using namespace crimild;
 using namespace crimild::behaviors;
@@ -9,7 +11,7 @@ using namespace crimild::behaviors::actions;
 
 Transform::Transform( void )
 {
-	
+
 }
 
 Transform::Transform(
@@ -31,7 +33,7 @@ Transform::Transform(
 
 Transform::~Transform( void )
 {
-	
+
 }
 
 void Transform::init( BehaviorContext *context )
@@ -44,7 +46,7 @@ void Transform::init( BehaviorContext *context )
 
 	_end.setTranslate( _applyTranslation ? _targetTransformation.getTranslate() : _start.getTranslate() );
 	_end.setRotate( _applyRotation ? _targetTransformation.getRotate() : _start.getRotate() );
-	
+
 	if ( context->getTargetCount() > 0 ) {
 		auto firstTarget = context->getTargetAt( 0 );
 		if ( firstTarget != nullptr ) {
@@ -55,7 +57,7 @@ void Transform::init( BehaviorContext *context )
 				_end.translate() += firstTarget->getWorld().getTranslate();
 			}
 		}
-	}		
+	}
 }
 
 Behavior::State Transform::step( BehaviorContext *context )
@@ -113,4 +115,3 @@ void Transform::decode( coding::Decoder &decoder )
 	decoder.decode( "applyTranslation", _applyTranslation );
 	decoder.decode( "applyRotation", _applyRotation );
 }
-

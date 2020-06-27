@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -41,24 +41,24 @@ LuaEncoder::~LuaEncoder( void )
 {
 
 }
-            
-crimild::Bool LuaEncoder::encode( SharedPointer< Codable > const &codable ) 
+
+crimild::Bool LuaEncoder::encode( SharedPointer< Codable > const &codable )
 {
 	_ss << "{ ";
     _indentLevel++;
-    
+
     encodeKey( "type" );
 	_ss <<  "'" << codable->getClassName() << "', ";
-	
+
     encodeKey( "id" );
     _ss << codable->getUniqueID() << ", ";
-    
+
 	codable->encode( *this );
-    
+
     _indentLevel--;
-	
+
     _ss << getIndentSpaces() << "}";
-    
+
     if ( _arrayKeys.size() == 0 ) {
         _ss << "\n";
     }
@@ -66,12 +66,12 @@ crimild::Bool LuaEncoder::encode( SharedPointer< Codable > const &codable )
 	return true;
 }
 
-crimild::Bool LuaEncoder::encode( std::string key, SharedPointer< Codable > const &codable ) 
+crimild::Bool LuaEncoder::encode( std::string key, SharedPointer< Codable > const &codable )
 {
     if ( codable == nullptr ) {
         return false;
     }
-    
+
 	encodeKey( key );
 	encode( codable );
 	_ss << ", ";
@@ -79,7 +79,7 @@ crimild::Bool LuaEncoder::encode( std::string key, SharedPointer< Codable > cons
 	return true;
 }
 
-crimild::Bool LuaEncoder::encode( std::string key, std::string value ) 
+crimild::Bool LuaEncoder::encode( std::string key, std::string value )
 {
 	encodeKey( key );
 	_ss << "'" << value << "', ";
@@ -90,31 +90,26 @@ crimild::Bool LuaEncoder::encode( std::string key, std::string value )
 crimild::Bool LuaEncoder::encode( std::string key, const Transformation &value )
 {
 	encodeKey( key );
-	
+
     _ss << "{ ";
     _indentLevel++;
-    
-    encode( "translate", value.getTranslate() );    
-    encode( "rotate_q", value.getRotate() );    
+
+    encode( "translate", value.getTranslate() );
+    encode( "rotate_q", value.getRotate() );
     encode( "scale", value.getScale() );
-    
+
     _indentLevel--;
 	_ss << getIndentSpaces() << "}, ";
 
 	return true;
 }
 
-crimild::Bool LuaEncoder::encode( std::string key, const VertexFormat &value )
-{
-    return true;
-}
-
 void LuaEncoder::encodeArrayBegin( std::string key, crimild::Size count )
 {
 	_arrayKeys.push( key );
-    
+
     _ss << getIndentSpaces() << key << " = { ";
-    
+
     ++_indentLevel;
 }
 
@@ -128,10 +123,10 @@ void LuaEncoder::endEncodingArrayElement( std::string key, crimild::Size index )
 	// no-op
 }
 
-void LuaEncoder::encodeArrayEnd( std::string key ) 
+void LuaEncoder::encodeArrayEnd( std::string key )
 {
 	_arrayKeys.pop();
-    
+
     --_indentLevel;
 	_ss << getIndentSpaces() << "},";
 }
@@ -159,4 +154,3 @@ std::string LuaEncoder::dump( void )
 {
     return _ss.str();
 }
-

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -30,7 +30,7 @@
 void crimild::init( void )
 {
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::coding::EncodedData );
-    
+
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Node );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Group );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Geometry );
@@ -38,29 +38,19 @@ void crimild::init( void )
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Light );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Text );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Skybox );
-    
+
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Primitive );
-	
+
 	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Image );
 	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::ImageTGA );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Material );
-    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::IndexBufferObject );
-	//CRIMILD_REGISTER_OBJECT_BUILDER( crimild::SkinnedMeshJoint );
-	//CRIMILD_REGISTER_OBJECT_BUILDER( crimild::SkinnedMeshJointCatalog );
-	//CRIMILD_REGISTER_OBJECT_BUILDER( crimild::SkinnedMeshAnimationChannel );
-	//CRIMILD_REGISTER_OBJECT_BUILDER( crimild::SkinnedMeshAnimationClip );
-	//CRIMILD_REGISTER_OBJECT_BUILDER( crimild::SkinnedMeshSkeleton );
-	//CRIMILD_REGISTER_OBJECT_BUILDER( crimild::SkinnedMeshAnimationState );
-	//CRIMILD_REGISTER_OBJECT_BUILDER( crimild::SkinnedMesh );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Texture );
-    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::VertexBufferObject );
-    
+
 	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::FreeLookCameraComponent );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::MaterialComponent );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::RenderStateComponent );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::OrbitComponent );
 	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::RotationComponent );
-    //CRIMILD_REGISTER_OBJECT_BUILDER( crimild::SkinnedMeshComponent );
 
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::BehaviorController );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::BehaviorContext );
@@ -111,7 +101,7 @@ void crimild::init( void )
 
 	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::ParticleData );
 	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::ParticleSystemComponent );
-	
+
 	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::BoxPositionParticleGenerator );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::GridPositionParticleGenerator );
 	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::SpherePositionParticleGenerator );
@@ -141,7 +131,7 @@ void crimild::init( void )
 	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::animation::Animation );
 	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::animation::Clip );
 	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::animation::Joint );
-	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::animation::Quaternion4fChannel );	
+	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::animation::Quaternion4fChannel );
 	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::animation::Real32Channel );
 	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::animation::Skeleton );
 	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::animation::Vector3fChannel );
@@ -153,4 +143,3 @@ void crimild::init( void )
 	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::ui::UIFrameConstraint );
 	CRIMILD_REGISTER_OBJECT_BUILDER( crimild::ui::UILabel );
 }
-

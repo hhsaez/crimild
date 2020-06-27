@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002-present, H. Hernán Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -33,6 +33,8 @@
 #include "Concurrency/Async.hpp"
 #include "Simulation/Simulation.hpp"
 #include "Visitors/Apply.hpp"
+#include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
 
 using namespace crimild;
 using namespace ui;
@@ -41,14 +43,14 @@ UIFrameConstraint::UIFrameConstraint( Type type, crimild::Real32 value )
 	: _type( type ),
 	  _value( value )
 {
-	
+
 }
 
 UIFrameConstraint::UIFrameConstraint( Type type, UIFrame *referenceFrame )
 	: _type( type ),
 	  _referenceFrame( referenceFrame )
 {
-	
+
 }
 
 void UIFrameConstraint::apply( UIFrame *frame, UIFrame *parentFrame )
@@ -138,7 +140,7 @@ void UIFrameConstraint::apply( UIFrame *frame, UIFrame *parentFrame )
 
 		case Type::CENTER:
 			break;
-			
+
 		case Type::CENTER_X:
 			x = 0.5f * ( ref.getWidth() - w );
 			break;
@@ -209,4 +211,3 @@ void UIFrameConstraint::decode( coding::Decoder &decoder )
 	decoder.decode( "value", _value );
 	decoder.decode( "reference", _referenceFrameName );
 }
-

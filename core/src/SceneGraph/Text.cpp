@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002 - present, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -32,7 +32,6 @@
 #include "Rendering/Font.hpp"
 #include "Rendering/ImageTGA.hpp"
 #include "Rendering/Renderer.hpp"
-#include "Rendering/Programs/UnlitShaderProgram.hpp"
 
 #include "Foundation/Log.hpp"
 
@@ -53,7 +52,7 @@ Text::Text( void )
     _geometry = crimild::alloc< Geometry >();
     _primitive = crimild::alloc< Primitive >( Primitive::Type::TRIANGLES );
     _material = crimild::alloc< Material >();
-    
+
 	_text = "";
 	_size = 1.0f;
 	_geometry->attachPrimitive( _primitive );
@@ -114,10 +113,10 @@ void Text::setFont( SharedPointer< Font > const &font )
 //    }
 
     _material->setColorMap( _font->getTexture() );
-    _material->setProgram( crimild::alloc< UnlitShaderProgram >() );
+    //_material->setProgram( crimild::alloc< UnlitShaderProgram >() );
 
 	_material->getAlphaState()->setEnabled( true );
-    
+
 	updatePrimitive();
 }
 
@@ -129,6 +128,7 @@ void Text::setHorizontalAlignment( Text::HorizontalAlignment alignment )
 
 void Text::updatePrimitive( void )
 {
+    /*
 	std::vector< VertexPrecision > vertices;
 	std::vector< IndexPrecision > indices;
 
@@ -167,7 +167,7 @@ void Text::updatePrimitive( void )
 		float t0 = glyph.vOffset;
 		float t1 = t0 + glyph.v;
 
-		vertices.push_back( minX ); 
+		vertices.push_back( minX );
 		vertices.push_back( maxY );
 		vertices.push_back( 0.0f );
 		vertices.push_back( 0.0f );
@@ -177,7 +177,7 @@ void Text::updatePrimitive( void )
 		vertices.push_back( 1.0f - t0 );
 		indices.push_back( indices.size() );
 
-		vertices.push_back( minX ); 
+		vertices.push_back( minX );
 		vertices.push_back( minY );
 		vertices.push_back( 0.0f );
 		vertices.push_back( 0.0f );
@@ -187,7 +187,7 @@ void Text::updatePrimitive( void )
 		vertices.push_back( 1.0f - t1 );
 		indices.push_back( indices.size() );
 
-		vertices.push_back( maxX ); 
+		vertices.push_back( maxX );
 		vertices.push_back( minY );
 		vertices.push_back( 0.0f );
 		vertices.push_back( 0.0f );
@@ -197,7 +197,7 @@ void Text::updatePrimitive( void )
 		vertices.push_back( 1.0f - t1 );
 		indices.push_back( indices.size() );
 
-		vertices.push_back( minX ); 
+		vertices.push_back( minX );
 		vertices.push_back( maxY );
 		vertices.push_back( 0.0f );
 		vertices.push_back( 0.0f );
@@ -207,7 +207,7 @@ void Text::updatePrimitive( void )
 		vertices.push_back( 1.0f - t0 );
 		indices.push_back( indices.size() );
 
-		vertices.push_back( maxX ); 
+		vertices.push_back( maxX );
 		vertices.push_back( minY );
 		vertices.push_back( 0.0f );
 		vertices.push_back( 0.0f );
@@ -217,7 +217,7 @@ void Text::updatePrimitive( void )
 		vertices.push_back( 1.0f - t1 );
 		indices.push_back( indices.size() );
 
-		vertices.push_back( maxX ); 
+		vertices.push_back( maxX );
 		vertices.push_back( maxY );
 		vertices.push_back( 0.0f );
 		vertices.push_back( 0.0f );
@@ -237,18 +237,18 @@ void Text::updatePrimitive( void )
     auto format = VertexFormat::VF_P3_N3_UV2;
     auto vbo = crimild::alloc< VertexBufferObject >( format, vertices.size() / format.getVertexSize(), &vertices[ 0 ] );
     _primitive->setVertexBuffer( vbo );
-    
+
     auto ibo = crimild::alloc< IndexBufferObject >( indices.size(), &indices[ 0 ] );
 	_primitive->setIndexBuffer( ibo );
-	
+
 	_geometry->updateModelBounds();
-    
+
     if ( _horizontalAlignment != HorizontalAlignment::LEFT ) {
         auto bounds = _geometry->getLocalBound();
         auto min = bounds->getMin();
         auto max = bounds->getMax();
         auto diff = max - min;
-        
+
         if ( _horizontalAlignment == HorizontalAlignment::CENTER ) {
             _geometry->local().setTranslate( -0.5f * diff[ 0 ], 0.0f, 0.0f );
         }
@@ -259,6 +259,7 @@ void Text::updatePrimitive( void )
     else {
         _geometry->local().setTranslate( Vector3f::ZERO );
     }
+    */
 }
 
 void Text::encode( coding::Encoder &encoder )
@@ -302,4 +303,3 @@ void Text::decode( coding::Decoder &decoder )
 		setHorizontalAlignment( HorizontalAlignment::RIGHT );
 	}
 }
-

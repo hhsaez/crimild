@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,8 +28,6 @@
 #include "InstancedParticleRenderer.hpp"
 
 #include "Rendering/Renderer.hpp"
-#include "Rendering/Programs/UnlitShaderProgram.hpp"
-#include "Rendering/Programs/ForwardShadingShaderProgram.hpp"
 #include "Components/MaterialComponent.hpp"
 #include "Simulation/AssetManager.hpp"
 #include "SceneGraph/Camera.hpp"
@@ -38,12 +36,15 @@
 
 using namespace crimild;
 
-void InstancedParticleRenderer::configure( Node *node, ParticleData *particles ) 
+#if 0
+
+void InstancedParticleRenderer::configure( Node *node, ParticleData *particles )
 {
+    /*
 	auto count = particles->getParticleCount();
 	_modelBO = crimild::alloc< Matrix4fInstancedBufferObject >( count, nullptr );
 	_modelBO->setUsage( ResourceUsage::Dynamic );
-	
+
 	auto modelBO = _modelBO;
 	auto lit = true;
 	node->perform(
@@ -70,6 +71,7 @@ void InstancedParticleRenderer::configure( Node *node, ParticleData *particles )
 			}
 		)
 	);
+    */
 }
 
 void InstancedParticleRenderer::update( Node *node, crimild::Real64 dt, ParticleData *particles )
@@ -79,33 +81,34 @@ void InstancedParticleRenderer::update( Node *node, crimild::Real64 dt, Particle
 	if ( pCount == 0 ) {
 		return;
 	}
-	
+
 	auto ps = particles->getAttrib( ParticleAttrib::POSITION )->getData< Vector3f >();
 	auto ss = particles->getAttrib( ParticleAttrib::UNIFORM_SCALE )->getData< crimild::Real32 >();
 	auto as = particles->getAttrib( ParticleAttrib::EULER_ANGLES )->getData< Vector3f >();
 	auto msCount = _modelBO->getInstanceCount();
 	auto ms = _modelBO->values();
-    
+
 	crimild::Size i = 0;
-    
+
 	for ( ; i < pCount; ++i ) {
 		Transformation t;
-        
+
 		t.setTranslate( ps[ i ] );
 		t.setScale( ss[ i ] );
 		t.setRotate( Quaternion4f::createFromEulerAngles( as[ i ] ) );
-        
+
 		ms[ i ] = t.computeModelMatrix();
 	}
-    
+
 	const auto inf = [] {
 		Transformation t;
 		t.setTranslate( Vector3f::NEGATIVE_INFINITY );
 		return t.computeModelMatrix();
 	}();
-    
+
 	for ( ; i < msCount; ++i ) {
 		ms[ i ] = inf;
-	}            
+	}
 }
 
+#endif

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -29,6 +29,8 @@
 
 #include "Rendering/OpenGLUtils.hpp"
 
+#if 0
+
 #include <Rendering/ShaderProgram.hpp>
 #include <Rendering/InstancedBufferObject.hpp>
 
@@ -38,10 +40,10 @@ using namespace crimild::opengl;
 int InstancedBufferObjectCatalog::getNextResourceId( InstancedBufferObject * )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
-    
+
 	GLuint bufferId;
     glGenBuffers( 1, &bufferId );
-    
+
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 
     return bufferId;
@@ -95,7 +97,7 @@ void InstancedBufferObjectCatalog::unbind( InstancedBufferObject *buffer )
 	}
 
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
-    
+
 	Catalog< InstancedBufferObject >::unbind( buffer );
 
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
@@ -104,7 +106,7 @@ void InstancedBufferObjectCatalog::unbind( InstancedBufferObject *buffer )
 void InstancedBufferObjectCatalog::load( InstancedBufferObject *buffer )
 {
 	if ( buffer == nullptr ) return;
-	
+
 	CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
 
 	Catalog< InstancedBufferObject >::load( buffer );
@@ -131,35 +133,36 @@ void InstancedBufferObjectCatalog::update( InstancedBufferObject *buffer )
     glBindBuffer( GL_ARRAY_BUFFER, bufferId );
     glBufferData( GL_ARRAY_BUFFER, buffer->getSizeInBytes(), buffer->getData(), GL_DYNAMIC_DRAW );
 
-    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;	
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
 void InstancedBufferObjectCatalog::unload( InstancedBufferObject *buffer )
 {
 	if ( buffer == nullptr ) return;
-	
+
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
-    
+
     if ( buffer->getCatalogId() > 0 ) {
       	_unusedBufferIds.push_back( buffer->getCatalogId() );
     }
 
     Catalog< InstancedBufferObject >::unload( buffer );
-    
+
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
 void InstancedBufferObjectCatalog::cleanup( void )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
-    
+
     for ( auto id : _unusedBufferIds ) {
         GLuint bufferId = id;
         glDeleteBuffers( 1, &bufferId );
     }
-    
+
     _unusedBufferIds.clear();
-    
+
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
+#endif

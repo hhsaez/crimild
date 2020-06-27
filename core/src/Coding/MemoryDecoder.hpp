@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -46,7 +46,7 @@ namespace crimild {
             virtual crimild::Bool decode( std::string key, SharedPointer< coding::Codable > &codable ) override;
 
             virtual crimild::Bool decode( std::string key, std::string &value ) override;
-            
+
             virtual crimild::Bool decode( std::string key, crimild::Size &value ) override { return decodeData( key, value ); }
             virtual crimild::Bool decode( std::string key, crimild::UInt8 &value ) override { return decodeData( key, value ); }
             virtual crimild::Bool decode( std::string key, crimild::UInt16 &value ) override { return decodeData( key, value ); }
@@ -63,8 +63,7 @@ namespace crimild {
             virtual crimild::Bool decode( std::string key, crimild::Matrix4f &value ) override { return decodeData( key, value ); }
             virtual crimild::Bool decode( std::string key, crimild::Quaternion4f &value ) override { return decodeData( key, value ); }
             virtual crimild::Bool decode( std::string key, Transformation &value ) override { return decodeData( key, value ); }
-            virtual crimild::Bool decode( std::string key, VertexFormat &value ) override { return decodeData( key, value ); }
-            
+
             virtual crimild::Bool decode( std::string key, ByteArray &value ) override { return decodeDataArray( key, value ); }
             virtual crimild::Bool decode( std::string key, Array< crimild::Real32 > &value ) override { return decodeDataArray( key, value ); }
             virtual crimild::Bool decode( std::string key, Array< Vector3f > &value ) override { return decodeDataArray( key, value ); }
@@ -72,9 +71,9 @@ namespace crimild {
             virtual crimild::Bool decode( std::string key, Array< Matrix3f > &value ) override { return decodeDataArray( key, value ); }
             virtual crimild::Bool decode( std::string key, Array< Matrix4f > &value ) override { return decodeDataArray( key, value ); }
             virtual crimild::Bool decode( std::string key, Array< Quaternion4f > &value ) override { return decodeDataArray( key, value ); }
-            
+
             crimild::Bool fromBytes( const ByteArray &bytes );
-            
+
         private:
             template< typename T >
             crimild::Bool decodeData( std::string key, T &value )
@@ -84,7 +83,7 @@ namespace crimild {
                     value = T();
                     return false;
                 }
-                
+
                 value = obj->getValue< T >();
 
 				return true;
@@ -119,16 +118,15 @@ namespace crimild {
             static crimild::Size read( const ByteArray &bytes, std::string &value, crimild::Size offset );
             static crimild::Size read( const ByteArray &bytes, ByteArray &value, crimild::Size offset );
             static crimild::Size readRawBytes( const ByteArray &bytes, void *data, crimild::Size count, crimild::Size offset );
-            
+
         private:
             Map< Codable::UniqueID, Map< std::string, SharedPointer< Codable >>> _links;
             Map< Codable::UniqueID, SharedPointer< Codable >> _objects;
             SharedPointer< Codable > _currentObj;
         };
-        
+
 	}
-    
+
 }
 
 #endif
-

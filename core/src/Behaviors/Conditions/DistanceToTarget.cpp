@@ -2,6 +2,8 @@
 
 #include "Mathematics/Distance.hpp"
 #include "SceneGraph/Node.hpp"
+#include "Coding/Encoder.hpp"
+#include "Coding/Decoder.hpp"
 
 using namespace crimild;
 using namespace crimild::behaviors;
@@ -9,7 +11,7 @@ using namespace crimild::behaviors::conditions;
 
 DistanceToTarget::DistanceToTarget( void )
 {
-	
+
 }
 
 DistanceToTarget::DistanceToTarget( crimild::Real32 value, std::string comparator )
@@ -26,7 +28,7 @@ DistanceToTarget::~DistanceToTarget( void )
 void DistanceToTarget::setComparator( std::string comparator )
 {
 	_comparatorName = comparator;
-	
+
 	if ( comparator == "greater" ) {
 		_comparator = []( crimild::Real32 a, crimild::Real32 b ) -> crimild::Bool { return a > b; };
 	}
@@ -78,4 +80,3 @@ void DistanceToTarget::decode( coding::Decoder &decoder )
 	decoder.decode( "comparator", comparator );
 	setComparator( comparator );
 }
-

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,6 +26,8 @@
  */
 
 #include "OpenGLRenderer.hpp"
+
+#if 0
 
 #include "Catalogs/ShaderProgramCatalog.hpp"
 #include "Catalogs/VertexBufferObjectCatalog.hpp"
@@ -44,10 +46,8 @@
 #include <Rendering/DepthState.hpp>
 #include <Rendering/ColorMaskState.hpp>
 #include <Rendering/CullFaceState.hpp>
-#include <Rendering/FrameBufferObject.hpp>
 #include <Rendering/ShadowMap.hpp>
 #include <Rendering/ShaderProgram.hpp>
-#include <Rendering/ShaderGraph/ShaderGraph.hpp>
 
 #include <SceneGraph/Light.hpp>
 
@@ -58,7 +58,7 @@ using namespace crimild::opengl;
 OpenGLRenderer::OpenGLRenderer( void )
     : OpenGLRenderer( nullptr )
 {
-    
+
 }
 
 OpenGLRenderer::OpenGLRenderer( SharedPointer< FrameBufferObject > const &screenBuffer )
@@ -120,27 +120,27 @@ void OpenGLRenderer::configure( void )
 #ifdef CRIMILD_PLATFORM_DESKTOP
     glEnable( GL_PROGRAM_POINT_SIZE );
 #endif
-    
+
     if ( getScreenBuffer() != nullptr ) {
         // default FBO is not always 0
         int defaultFBO = 0;
         glGetIntegerv( GL_FRAMEBUFFER_BINDING, &defaultFBO );
         getScreenBuffer()->setCatalogInfo( getFrameBufferObjectCatalog(), defaultFBO );
     }
-    
+
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
 void OpenGLRenderer::setViewport( const Rectf &viewport )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
-    
+
     glViewport(
         viewport.getX(),
         viewport.getY(),
         viewport.getWidth(),
         viewport.getHeight() );
-    
+
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
@@ -161,11 +161,11 @@ void OpenGLRenderer::endRender( void )
 void OpenGLRenderer::clearBuffers( void )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
-    
+
 	const RGBAColorf &clearColor = getScreenBuffer()->getClearColor();
 	glClearColor( clearColor.r(), clearColor.g(), clearColor.b(), clearColor.a() );
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    
+
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
@@ -303,7 +303,7 @@ void OpenGLRenderer::drawBuffers( ShaderProgram *program, Primitive::Type buffer
 
 	glDrawArrays( type, 0, count );
 
-	unbindVertexBuffer( program, vbo );	
+	unbindVertexBuffer( program, vbo );
 
 	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
@@ -311,7 +311,7 @@ void OpenGLRenderer::drawBuffers( ShaderProgram *program, Primitive::Type buffer
 void OpenGLRenderer::setAlphaState( AlphaState *state )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
-    
+
 	if ( state->isEnabled() ) {
 		glEnable( GL_BLEND );
 
@@ -323,24 +323,24 @@ void OpenGLRenderer::setAlphaState( AlphaState *state )
 	else {
 		glDisable( GL_BLEND );
 	}
-    
+
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
 void OpenGLRenderer::setDepthState( DepthState *state )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
-    
+
 	if ( state->isEnabled() ) {
 		glEnable( GL_DEPTH_TEST );
 	}
 	else {
 		glDisable( GL_DEPTH_TEST );
 	}
-    
+
     GLenum compareFunc = OpenGLUtils::DEPTH_COMPARE_FUNC[ ( uint8_t ) state->getCompareFunc() ];
     glDepthFunc( compareFunc );
-    
+
     glDepthMask( state->isWritable() ? GL_TRUE : GL_FALSE );
 
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
@@ -349,7 +349,7 @@ void OpenGLRenderer::setDepthState( DepthState *state )
 void OpenGLRenderer::setCullFaceState( CullFaceState *state )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
-    
+
 	if ( state->isEnabled() ) {
 	    glEnable( GL_CULL_FACE );
 
@@ -360,16 +360,16 @@ void OpenGLRenderer::setCullFaceState( CullFaceState *state )
 	else {
 		glDisable( GL_CULL_FACE );
 	}
-    
+
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }
 
 void OpenGLRenderer::setColorMaskState( ColorMaskState *state )
 {
     CRIMILD_CHECK_GL_ERRORS_BEFORE_CURRENT_FUNCTION;
-    
+
 	if ( state->isEnabled() ) {
-		glColorMask( 
+		glColorMask(
 			state->getRMask() ? GL_TRUE : GL_FALSE,
 			state->getGMask() ? GL_TRUE : GL_FALSE,
 			state->getBMask() ? GL_TRUE : GL_FALSE,
@@ -387,3 +387,4 @@ SharedPointer< ShaderGraph > OpenGLRenderer::createShaderGraph( void )
 	return crimild::alloc< OpenGLShaderGraph >();
 }
 
+#endif
