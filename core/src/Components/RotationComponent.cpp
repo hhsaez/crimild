@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -37,11 +37,11 @@ using namespace crimild;
 
 RotationComponent::RotationComponent( void )
 {
-    
+
 }
 
 RotationComponent::RotationComponent( const Vector3f &axis, float speed )
-	: _axis( axis ),
+	: _axis( axis.getNormalized() ),
 	  _speed( speed ),
 	  _time( 0 )
 {
@@ -62,7 +62,7 @@ void RotationComponent::update( const Clock &c )
 void RotationComponent::encode( coding::Encoder &encoder )
 {
     NodeComponent::encode( encoder );
-    
+
     encoder.encode( "axis", _axis );
     encoder.encode( "speed", _speed );
 }
@@ -70,8 +70,7 @@ void RotationComponent::encode( coding::Encoder &encoder )
 void RotationComponent::decode( coding::Decoder &decoder )
 {
     NodeComponent::decode( decoder );
-    
+
     decoder.decode( "axis", _axis );
     decoder.decode( "speed", _speed );
 }
-
