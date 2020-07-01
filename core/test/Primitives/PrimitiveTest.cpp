@@ -29,6 +29,7 @@
 #include "Coding/MemoryEncoder.hpp"
 #include "Coding/MemoryDecoder.hpp"
 #include "Streaming/FileStream.hpp"
+#include "Rendering/Vertex.hpp"
 
 #include "gtest/gtest.h"
 

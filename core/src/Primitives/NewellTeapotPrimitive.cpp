@@ -26,6 +26,7 @@
  */
 
 #include "NewellTeapotPrimitive.hpp"
+#include "Rendering/Vertex.hpp"
 
 using namespace crimild;
 

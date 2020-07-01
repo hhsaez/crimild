@@ -77,6 +77,18 @@ TEST( VertexLayout, positionsAndNormals )
 	ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::NORMAL ) );
 }
 
+TEST( VertexLayout, hasAttribute )
+{
+	auto v = VertexLayout()
+	    .withAttribute< Vector3f >( VertexAttribute::Name::POSITION )
+	    .withAttribute< Vector3f >( VertexAttribute::Name::NORMAL );
+
+    ASSERT_TRUE( v.hasAttribute( VertexAttribute::Name::POSITION ) );
+    ASSERT_TRUE( v.hasAttribute( VertexAttribute::Name::NORMAL ) );
+    ASSERT_FALSE( v.hasAttribute( VertexAttribute::Name::TEX_COORD ) );
+    ASSERT_FALSE( v.hasAttribute( VertexAttribute::Name::COLOR ) );
+}
+
 TEST( VertexLayout, multipleAttributes )
 {
 	auto v = VertexLayout {
@@ -192,6 +204,15 @@ TEST( VertexLayout, withAttribute )
 	    .withAttribute< Vector2f >( VertexAttribute::Name::TEX_COORD )
 	    .withAttribute< RGBColorf >( VertexAttribute::Name::COLOR )
 	    .withAttribute< Vector3f >( VertexAttribute::Name::NORMAL );
+
+	auto expected = VertexLayout {
+		{ VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() },
+		{ VertexAttribute::Name::TEX_COORD, utils::getFormat< Vector2f >() },
+		{ VertexAttribute::Name::COLOR, utils::getFormat< RGBColorf >() },
+		{ VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() },
+	};
+
+    ASSERT_EQ( expected, v );
 
 	ASSERT_EQ( sizeof( crimild::Real32 ) * 11, v.getSize() );
 

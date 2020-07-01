@@ -39,7 +39,7 @@ SharedPointer< Image > crimild::stb::ImageManager::loadImage( ImageDescriptor co
     int width, height, channels;
 
     // Fix image orientation if needed
-    stbi_set_flip_vertically_on_load( 1 );
+    stbi_set_flip_vertically_on_load( 0 );
 
     stbi_uc *pixels = stbi_load(
     	descriptor.filePath.getAbsolutePath().c_str(),
@@ -61,7 +61,7 @@ SharedPointer< Image > crimild::stb::ImageManager::loadImage( ImageDescriptor co
 		.height = crimild::Real32( height ),
 		.depth = 1.0f,
 	};
-	
+
 	auto size = width * height * 4 * sizeof( stbi_uc );
 	image->data.resize( size );
 	memcpy( image->data.getData(), pixels, size );
@@ -70,4 +70,3 @@ SharedPointer< Image > crimild::stb::ImageManager::loadImage( ImageDescriptor co
 
     return image;
 }
-
