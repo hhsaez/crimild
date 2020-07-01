@@ -26,6 +26,7 @@
  */
 
 #include "BoxPrimitive.hpp"
+#include "Rendering/Vertex.hpp"
 
 #include <vector>
 

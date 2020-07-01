@@ -41,7 +41,7 @@ namespace crimild {
 		static const VertexLayout P3_N3;
 		static const VertexLayout P3_TC2;
 		static const VertexLayout P3_N3_TC2;
-		
+
 	public:
 		VertexLayout( void ) noexcept;
 		VertexLayout( std::initializer_list< VertexAttribute > attribs ) noexcept;
@@ -52,11 +52,16 @@ namespace crimild {
 
 		crimild::UInt32 getSize( void ) const noexcept { return m_size; }
 
+        inline Bool hasAttribute( VertexAttribute::Name name ) const noexcept
+        {
+            return m_attributes.contains( name );
+        }
+
 		inline crimild::UInt32 getAttributeOffset( VertexAttribute::Name name ) const noexcept
 		{
 			return m_attributes[ name ].offset;
 		}
-		
+
 		inline Format getAttributeFormat( VertexAttribute::Name attrib ) const noexcept
 		{
 			return m_attributes[ attrib ].format;
@@ -91,16 +96,17 @@ namespace crimild {
 		{
 			auto format = utils::getFormat< AttributeType >();
 			m_attributes[ attrib ] = {
+                .name = attrib,
 				.format = format,
 				.offset = m_size,
 			};
 
             m_sorted.add( attrib );
-			
+
 			// What if there is already another attrib with the same name?
 			// This will increase the final vector size, which is wrong.
 			// But recalculating the vector size every time might be too
-			// expensive. 
+			// expensive.
 			m_size += utils::getFormatSize( format );
 
 			// Return this pointer so we can keep adding attribs

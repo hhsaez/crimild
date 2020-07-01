@@ -31,6 +31,7 @@
 #include "Rendering/BufferAccessor.hpp"
 #include "Rendering/Format.hpp"
 #include "Rendering/FrameGraph.hpp"
+#include "Rendering/Vertex.hpp"
 #include "Coding/MemoryEncoder.hpp"
 #include "Coding/MemoryDecoder.hpp"
 
@@ -171,6 +172,54 @@ TEST( VertexBuffer, setInterleaved )
 	ASSERT_EQ( Vector2f( 1.0f, 1.0f ), texCoords->get< Vector2f >( 2 ) );
 }
 
+TEST( VertexBuffer, setInterleavedVertex )
+{
+	auto vertices = crimild::alloc< VertexBuffer >( VertexP3N3TC2::getLayout(), 3 );
+
+	ASSERT_EQ( 3, vertices->getVertexCount() );
+
+    auto positions = vertices->get( VertexAttribute::Name::POSITION );
+
+	positions->set(
+		Array< crimild::Real32 > {
+			-0.5f, -0.5f, 0.0f,
+			0.5f, -0.5f, 0.0f,
+			0.0f, 0.5f, 0.0f,
+		}
+	);
+
+    auto normals = vertices->get( VertexAttribute::Name::NORMAL );
+    normals->set(
+        Array< Vector3f > {
+            Vector3f::UNIT_Z,
+            Vector3f::UNIT_Z,
+            Vector3f::UNIT_Z,
+        }
+    );
+
+    auto texCoords = vertices->get( VertexAttribute::Name::TEX_COORD );
+
+	texCoords->set(
+		Array< crimild::Real32 > {
+			0.0, 0.0,
+			0.0, 1.0,
+			1.0, 1.0,
+		}
+	);
+
+	ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 0 ) );
+	ASSERT_EQ( Vector3f( 0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 1 ) );
+	ASSERT_EQ( Vector3f( 0.0f, 0.5f, 0.0f ), positions->get< Vector3f >( 2 ) );
+
+	ASSERT_EQ( Vector3f::UNIT_Z, normals->get< Vector3f >( 0 ) );
+	ASSERT_EQ( Vector3f::UNIT_Z, normals->get< Vector3f >( 1 ) );
+	ASSERT_EQ( Vector3f::UNIT_Z, normals->get< Vector3f >( 2 ) );
+
+	ASSERT_EQ( Vector2f( 0.0f, 0.0f ), texCoords->get< Vector2f >( 0 ) );
+	ASSERT_EQ( Vector2f( 0.f, 1.0f ), texCoords->get< Vector2f >( 1 ) );
+	ASSERT_EQ( Vector2f( 1.0f, 1.0f ), texCoords->get< Vector2f >( 2 ) );
+}
+
 TEST( VertexBuffer, eachPosition )
 {
 	auto vertices = crimild::alloc< VertexBuffer >( VertexLayout::P3_TC2, 3 );
@@ -263,4 +312,3 @@ TEST( VertexBuffer, autoAddToFrameGraph )
 
 	ASSERT_FALSE( graph->hasNodes() );
 }
-

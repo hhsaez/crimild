@@ -29,6 +29,7 @@
 #define CRIMILD_PRIMITIVES_TREFOIL_KNOT_
 
 #include "ParametricPrimitive.hpp"
+#include "Rendering/Vertex.hpp"
 
 namespace crimild {
 
