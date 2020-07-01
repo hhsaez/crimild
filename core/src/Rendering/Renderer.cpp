@@ -41,7 +41,7 @@
 using namespace crimild;
 
 Renderer::Renderer( void )
-	: _screenPrimitive( crimild::alloc< QuadPrimitive >( 2.0f, 2.0f, VertexP3N3TC2::getLayout() ) ),
+	: //_screenPrimitive( crimild::alloc< QuadPrimitive >( 2.0f, 2.0f, VertexP3N3TC2::getLayout() ) ),
       _shaderProgramCatalog( crimild::alloc< Catalog< ShaderProgram >>() ),
 	  _textureCatalog( crimild::alloc< Catalog< Texture >>() ),
 	  _vertexBufferObjectCatalog( crimild::alloc< Catalog< VertexBufferObject >>() ),

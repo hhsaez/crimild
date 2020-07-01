@@ -29,6 +29,7 @@
 #define CRIMILD_PRIMITIVES_CONE_
 
 #include "ParametricPrimitive.hpp"
+#include "Rendering/Vertex.hpp"
 
 namespace crimild {
 

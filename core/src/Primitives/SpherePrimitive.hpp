@@ -29,7 +29,7 @@
 #define CRIMILD_PRIMITIVES_SPHERE_
 
 #include "Primitive.hpp"
-
+#include "Rendering/Vertex.hpp"
 #include "Mathematics/Vector.hpp"
 
 namespace crimild {
