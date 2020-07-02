@@ -37,13 +37,16 @@ namespace crimild {
      */
     class KleinBottlePrimitive : public ParametricPrimitive {
     public:
-        KleinBottlePrimitive(
-            Primitive::Type type,
-            float scale,
-            const VertexLayout &layout = VertexP3N3::getLayout(),
-            Vector2i divisions = Vector2i( 20, 20 )
-        ) noexcept;
+        struct Params {
+            Primitive::Type type = Primitive::Type::TRIANGLES;
+            VertexLayout layout = VertexP3N3::getLayout();
+            Real32 scale = 1.0f;
+            Vector2i divisions = Vector2i( 20, 20 );
+            ParametricPrimitive::ColorMode colorMode;
+        };
 
+    public:
+        KleinBottlePrimitive( const Params &params ) noexcept;
         virtual ~KleinBottlePrimitive( void ) = default;
 
     protected:

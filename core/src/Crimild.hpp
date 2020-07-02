@@ -41,6 +41,7 @@
 #include "Mathematics/Ray.hpp"
 #include "Mathematics/Rect.hpp"
 #include "Mathematics/Root.hpp"
+#include "Mathematics/Series.hpp"
 #include "Mathematics/Sphere.hpp"
 #include "Mathematics/Transformation.hpp"
 #include "Mathematics/Vector.hpp"

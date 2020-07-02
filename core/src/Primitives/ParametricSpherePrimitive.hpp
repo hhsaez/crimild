@@ -42,17 +42,21 @@ namespace crimild {
      */
     class ParametricSpherePrimitive : public ParametricPrimitive {
     public:
-        ParametricSpherePrimitive(
-            Primitive::Type type,
-            float radius,
-            const VertexLayout &layout = VertexP3N3::getLayout(),
-            Vector2i divisions = Vector2i( 20, 20 )
-        ) noexcept;
+        struct Params {
+            Primitive::Type type = Primitive::Type::TRIANGLES;
+            VertexLayout layout = VertexP3N3::getLayout();
+            Real32 radius = 1.0f;
+            Vector2i divisions = Vector2i( 20, 20 );
+            ColorMode colorMode;
+        };
 
+    public:
+        ParametricSpherePrimitive( void ) noexcept;
+        explicit ParametricSpherePrimitive( const Params &params ) noexcept;
         virtual ~ParametricSpherePrimitive( void ) = default;
 
     protected:
-        virtual Vector3f evaluate( const Vector2f &domain ) const;
+        virtual Vector3f evaluate( const Vector2f &domain ) const override;
 
     private:
         float _radius;

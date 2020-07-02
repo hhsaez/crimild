@@ -37,14 +37,17 @@ namespace crimild {
      */
     class TorusPrimitive : public ParametricPrimitive {
     public:
-        TorusPrimitive(
-            Primitive::Type type,
-            float majorRadius,
-            float minorRadius,
-            const VertexLayout &layout = VertexP3N3::getLayout(),
-            Vector2i divisions = Vector2i( 20, 20 )
-        ) noexcept;
+        struct Params {
+            Primitive::Type type = Primitive::Type::TRIANGLES;
+            VertexLayout layout = VertexP3N3::getLayout();
+            ParametricPrimitive::ColorMode colorMode;
+            Real32 majorRadius = 0.5f;
+            Real32 minorRadius = 0.25f;
+            Vector2i divisions = Vector2i( 20, 20 );
+        };
 
+    public:
+        explicit TorusPrimitive( const Params &params ) noexcept;
         virtual ~TorusPrimitive( void ) = default;
 
     protected:
