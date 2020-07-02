@@ -29,8 +29,8 @@
 #define CRIMILD_PRIMITIVES_PARAMETRIC_
 
 #include "Primitive.hpp"
-
 #include "Mathematics/Vector.hpp"
+#include "Rendering/Vertex.hpp"
 
 namespace crimild {
 
@@ -43,7 +43,24 @@ namespace crimild {
 
     class ParametricPrimitive : public Primitive {
     public:
-        ParametricPrimitive( Primitive::Type type, const VertexLayout &layout ) noexcept;
+        struct ColorMode {
+            enum class Type {
+                CONSTANT,
+                POSITIONS,
+            };
+
+            Type type = Type::CONSTANT;
+            RGBColorf color = RGBColorf::ONE;
+        };
+
+        struct Params {
+            Primitive::Type type = Primitive::Type::TRIANGLES;
+            VertexLayout layout = VertexP3N3::getLayout();
+            ColorMode colorMode;
+        };
+
+    public:
+        ParametricPrimitive( const Params &params ) noexcept;
         virtual ~ParametricPrimitive( void ) = default;
 
     protected:
@@ -66,6 +83,7 @@ namespace crimild {
         Vector2i _slices;
         Vector2i _divisions;
         Vector2i _textureCount;
+        ColorMode _colorMode;
     };
 
     using ParametricPrimitivePtr = SharedPointer< ParametricPrimitive >;

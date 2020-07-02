@@ -29,17 +29,12 @@
 
 using namespace crimild;
 
-TrefoilKnotPrimitive::TrefoilKnotPrimitive(
-    Primitive::Type type,
-    float scale,
-    const VertexLayout &layout,
-    Vector2i divisions
-) noexcept
-    : ParametricPrimitive( type, layout )
+TrefoilKnotPrimitive::TrefoilKnotPrimitive( const Params &params ) noexcept
+    : ParametricPrimitive( { params.type, params.layout, params.colorMode } )
 {
-    _scale = scale;
+    _scale = params.scale;
 
-    ParametricInterval interval = { divisions, Vector2f( Numericf::TWO_PI, Numericf::TWO_PI ), Vector2f( 100, 8 ) };
+    ParametricInterval interval = { params.divisions, Vector2f( Numericf::TWO_PI, Numericf::TWO_PI ), Vector2f( 100, 8 ) };
     setInterval( interval );
     generate();
 }

@@ -42,14 +42,17 @@ namespace crimild {
      */
     class ConePrimitive : public ParametricPrimitive {
     public:
-        ConePrimitive(
-            Primitive::Type type,
-            float height,
-            float radius,
-            const VertexLayout &layout = VertexP3N3::getLayout(),
-            Vector2i divisions = Vector2i( 20, 20 )
-        ) noexcept;
+        struct Params {
+            Primitive::Type type = Primitive::Type::TRIANGLES;
+            VertexLayout layout = VertexP3N3::getLayout();
+            Real32 height = 1.0f;
+            Real32 radius = 0.5f;
+            Vector2i divisions = Vector2i( 20, 20 );
+            ParametricPrimitive::ColorMode colorMode;
+        };
 
+    public:
+        ConePrimitive( const Params &params ) noexcept;
         virtual ~ConePrimitive( void ) = default;
 
     protected:

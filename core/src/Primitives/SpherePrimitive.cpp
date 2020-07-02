@@ -31,69 +31,86 @@
 
 using namespace crimild;
 
-SpherePrimitive::SpherePrimitive(
-    float radius,
-    const VertexLayout &layout,
-    Vector2i divisions,
-    Vector3f center
-) noexcept
+SpherePrimitive::SpherePrimitive( void ) noexcept
+    : SpherePrimitive( Params { } )
+{
+
+}
+
+SpherePrimitive::SpherePrimitive( const Params &params ) noexcept
     : Primitive( Primitive::Type::TRIANGLES )
 {
-    assert( false );
-    /*
-    std::vector< float > vertices;
-    for ( float latitude = 0; latitude <= divisions[ 1 ]; latitude++ ) {
-        float theta = latitude * Numericf::PI / divisions[ 1 ];
-        float sinTheta = std::sin( theta );
-        float cosTheta = std::cos( theta );
+    auto layout = params.layout;
+    auto divisions = params.divisions;
+    auto radius = params.radius;
+    auto center = params.center;
 
-        for ( float longitude = 0; longitude <= divisions[ 0 ]; longitude++ ) {
-            float phi = longitude * Numericf::TWO_PI / divisions[ 0 ];
-            float sinPhi = std::sin( phi );
-            float cosPhi = std::cos( phi );
+    auto N = ( 1 + divisions[ 0 ] ) * ( 1 + divisions[ 1 ] );
 
-            float x = cosPhi * sinTheta;
-            float y = cosTheta;
-            float z = sinPhi * sinTheta;
+    auto vertices = crimild::alloc< VertexBuffer >( layout, N );
+    auto positions = vertices->get( VertexAttribute::Name::POSITION );
+    auto colors = layout.hasAttribute( VertexAttribute::Name::COLOR ) ? vertices->get( VertexAttribute::Name::COLOR ) : nullptr;
+    auto normals = layout.hasAttribute( VertexAttribute::Name::NORMAL ) ?  vertices->get( VertexAttribute::Name::NORMAL ) : nullptr;
+    auto texCoords = layout.hasAttribute( VertexAttribute::Name::TEX_COORD ) ? vertices->get( VertexAttribute::Name::TEX_COORD ) : nullptr;
 
-            vertices.push_back( center[ 0 ] + radius * x );
-            vertices.push_back( center[ 1 ] + radius * y );
-            vertices.push_back( center[ 2 ] + radius * z );
+    for ( auto latitude = 0.0f; latitude <= divisions[ 1 ]; latitude += 1.0f ) {
+        auto theta = latitude * Numericf::PI / divisions[ 1 ];
+        auto sinTheta = Numericf::sin( theta );
+        auto cosTheta = Numericf::cos( theta );
 
-            if ( format.hasNormals() ) {
-                vertices.push_back( x );
-                vertices.push_back( y );
-                vertices.push_back( z );
+        for ( auto longitude = 0.0f; longitude <= divisions[ 0 ]; longitude += 1.0f ) {
+            auto phi = longitude * Numericf::TWO_PI / divisions[ 0 ];
+            auto sinPhi = Numericf::sin( phi );
+            auto cosPhi = Numericf::cos( phi );
+
+            auto x = cosPhi * sinTheta;
+            auto y = cosTheta;
+            auto z = sinPhi * sinTheta;
+
+            auto vIdx = latitude * ( 1 + divisions[ 0 ] ) + longitude;
+
+            positions->set( vIdx, center + radius * Vector3f( x, y, z ) );
+
+            if ( colors != nullptr ) {
+                colors->set( vIdx, RGBColorf( 0.5f, 0.5f, 0.5f ) + 0.5f * RGBColorf( x, y, z ) );
             }
 
-            if ( format.hasTextureCoords() ) {
-                float u = 1.0f - ( longitude / divisions[ 0 ] );
-                float v = ( latitude / divisions[ 1 ] );
+            if ( normals != nullptr ) {
+                normals->set( vIdx, Vector3f( x, y, z ) );
+            }
 
-                vertices.push_back( u );
-                vertices.push_back( v );
+            if ( texCoords != nullptr ) {
+                auto u = 1.0f - ( longitude / divisions[ 0 ] );
+                auto v = ( latitude / divisions[ 1 ] );
+                texCoords->set( vIdx, Vector2f( u, v ) );
             }
         }
     }
+    setVertexData( { vertices } );
 
-    setVertexBuffer( crimild::alloc< VertexBufferObject >( format, vertices.size() / format.getVertexSize(), &vertices[ 0 ] ) );
-
-    std::vector< IndexPrecision > indices;
-    for ( IndexPrecision latitude = 0; latitude < divisions[ 1 ]; latitude++ ) {
-        for ( IndexPrecision longitude = 0; longitude < divisions[ 0 ]; longitude++ ) {
-            IndexPrecision first = ( latitude * ( divisions[ 1 ] + 1 ) ) + longitude;
-            IndexPrecision second = first + divisions[ 0 ] + 1;
-
-            indices.push_back( first );
-            indices.push_back( first + 1 );
-            indices.push_back( second );
-
-            indices.push_back( second );
-            indices.push_back( first + 1 );
-            indices.push_back( second + 1 );
-        }
+    if ( getType() == Primitive::Type::POINTS ) {
+        auto indices = crimild::alloc< IndexBuffer >(
+            Format::INDEX_32_UINT,
+            Array< Int32 >( divisions[ 1 ] * divisions[ 0 ] ).fill( []( auto i ) { return i; } )
+        );
+        setIndices( indices );
     }
+    else {
+        auto indices = crimild::alloc< IndexBuffer >( Format::INDEX_32_UINT, 6 * divisions[ 1 ] * divisions[ 0 ] );
+        for ( auto latitude = 0l; latitude < divisions[ 1 ]; latitude++ ) {
+            for ( auto longitude = 0l; longitude < divisions[ 0 ]; longitude++ ) {
+                UInt32 first = ( latitude * ( divisions[ 1 ] + 1 ) ) + longitude;
+                UInt32 second = first + divisions[ 0 ] + 1;
 
-    setIndexBuffer( crimild::alloc< IndexBufferObject >( indices.size(), &indices[ 0 ] ) );
-    */
+                auto index = latitude * divisions[ 0 ] + longitude;
+                indices->setIndex( index * 6 + 0, first );
+                indices->setIndex( index * 6 + 1, first + 1 );
+                indices->setIndex( index * 6 + 2, second );
+                indices->setIndex( index * 6 + 3, second );
+                indices->setIndex( index * 6 + 4, first + 1 );
+                indices->setIndex( index * 6 + 5, second + 1 );
+            }
+        }
+        setIndices( indices );
+    }
 }

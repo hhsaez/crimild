@@ -29,19 +29,13 @@
 
 using namespace crimild;
 
-TorusPrimitive::TorusPrimitive(
-    Primitive::Type type,
-    float majorRadius,
-    float minorRadius,
-    const VertexLayout &layout,
-    Vector2i divisions
-) noexcept
-    : ParametricPrimitive( type, layout )
+TorusPrimitive::TorusPrimitive( const Params &params ) noexcept
+    : ParametricPrimitive( { params.type, params.layout, params.colorMode } )
 {
-    _majorRadius = majorRadius;
-    _minorRadius = minorRadius;
+    _majorRadius = params.majorRadius;
+    _minorRadius = params.minorRadius;
 
-    ParametricInterval interval = { divisions, Vector2f( Numericf::TWO_PI, Numericf::TWO_PI ), Vector2f( 40, 10 ) };
+    ParametricInterval interval = { params.divisions, Vector2f( Numericf::TWO_PI, Numericf::TWO_PI ), Vector2f( 40, 10 ) };
     setInterval( interval );
     generate();
 }

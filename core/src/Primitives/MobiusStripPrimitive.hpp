@@ -37,13 +37,16 @@ namespace crimild {
      */
     class MobiusStripPrimitive : public ParametricPrimitive {
     public:
-        MobiusStripPrimitive(
-            Primitive::Type type,
-            float scale,
-            const VertexLayout &layout = VertexP3N3::getLayout(),
-            Vector2i divisions = Vector2i( 40, 20 )
-        ) noexcept;
+        struct Params {
+            Primitive::Type type = Primitive::Type::TRIANGLES;
+            VertexLayout layout = VertexP3N3::getLayout();
+            ParametricPrimitive::ColorMode colorMode;
+            Real32 scale = 1.0f;
+            Vector2i divisions = Vector2i( 40, 20 );
+        };
 
+    public:
+        MobiusStripPrimitive( const Params &params ) noexcept;
         virtual ~MobiusStripPrimitive( void ) = default;
 
     protected:

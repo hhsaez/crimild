@@ -29,17 +29,12 @@
 
 using namespace crimild;
 
-MobiusStripPrimitive::MobiusStripPrimitive(
-    Primitive::Type type,
-    float scale,
-    const VertexLayout &layout,
-    Vector2i divisions
-) noexcept
-    : ParametricPrimitive( type, layout )
+MobiusStripPrimitive::MobiusStripPrimitive( const Params &params ) noexcept
+    : ParametricPrimitive( { params.type, params.layout, params.colorMode } )
 {
-    _scale = scale;
+    _scale = params.scale;
 
-    ParametricInterval interval = { divisions, Vector2f( Numericf::TWO_PI, Numericf::TWO_PI ), Vector2f( 40, 15 ) };
+    ParametricInterval interval = { params.divisions, Vector2f( Numericf::TWO_PI, Numericf::TWO_PI ), Vector2f( 40, 15 ) };
     setInterval( interval );
     generate();
 }
@@ -63,5 +58,5 @@ Vector3f MobiusStripPrimitive::evaluate( const Vector2f &domain ) const
     range[ 0 ] = ( major + x ) * cos( u );
     range[ 1 ] = ( major + x ) * sin( u );
     range[ 2 ] = y;
-    return range * _scale;
+    return 0.5f * range * _scale;
 }

@@ -29,17 +29,28 @@
 
 using namespace crimild;
 
-ParametricSpherePrimitive::ParametricSpherePrimitive(
-    Primitive::Type type,
-    float radius,
-    const VertexLayout &layout,
-    Vector2i divisions
-) noexcept
-    : ParametricPrimitive( type, layout )
+ParametricSpherePrimitive::ParametricSpherePrimitive( void ) noexcept
+    : ParametricSpherePrimitive( Params { } )
 {
-    _radius = radius;
 
-    ParametricInterval interval = { divisions, Vector2f( Numericf::PI, Numericf::TWO_PI ), Vector2f( 20, 35 ) };
+}
+
+ParametricSpherePrimitive::ParametricSpherePrimitive( const Params &params ) noexcept
+    : ParametricPrimitive(
+        {
+            .type = params.type,
+            .layout = params.layout,
+            .colorMode = params.colorMode,
+        }
+    )
+{
+    _radius = params.radius;
+
+    ParametricInterval interval = {
+        .divisions = params.divisions,
+        .upperBound = Vector2f( Numericf::PI, Numericf::TWO_PI ),
+        .textureCount = Vector2f( 20, 35 ),
+    };
     setInterval( interval );
     generate();
 }

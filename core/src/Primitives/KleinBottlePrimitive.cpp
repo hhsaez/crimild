@@ -29,17 +29,12 @@
 
 using namespace crimild;
 
-KleinBottlePrimitive::KleinBottlePrimitive(
-    Primitive::Type type,
-    float scale,
-    const VertexLayout &layout,
-    Vector2i divisions
-) noexcept
-    : ParametricPrimitive( type, layout )
+KleinBottlePrimitive::KleinBottlePrimitive( const Params &params ) noexcept
+    : ParametricPrimitive( { params.type, params.layout, params.colorMode } )
 {
-    _scale = scale;
+    _scale = params.scale;
 
-    ParametricInterval interval = { divisions, Vector2f( Numericf::TWO_PI, Numericf::TWO_PI ), Vector2f( 15, 50 ) };
+    ParametricInterval interval = { params.divisions, Vector2f( Numericf::TWO_PI, Numericf::TWO_PI ), Vector2f( 15, 50 ) };
     setInterval( interval );
     generate();
 }
@@ -57,7 +52,7 @@ Vector3f KleinBottlePrimitive::evaluate( const Vector2f &domain ) const
     range[ 0 ] = u < Numericf::PI ? x0 : x1;
     range[ 1 ] = u < Numericf::PI ? -y0 : -y1;
     range[ 2 ] = ( -2 * ( 1 - cos( u ) / 2 ) ) * sin( v );
-    return range * _scale;
+    return .1f * range * _scale;
 }
 
 bool KleinBottlePrimitive::InvertNormal( const Vector2f &domain ) const

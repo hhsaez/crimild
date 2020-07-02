@@ -330,6 +330,24 @@ namespace crimild {
             return ret;
         }
 
+        template< typename Fn >
+        Array &fill( Fn fn ) noexcept
+        {
+            for ( auto i = 0l; i < _size; i++ ) {
+                _elems[ i ] = fn( i );
+            }
+            return *this;
+        }
+
+        Array reversed( void ) const noexcept
+        {
+            auto ret = Array( _size );
+            for ( auto i = 0l; i < _size; i++ ) {
+                ret[ _size - i - 1 ] = _elems[ i ];
+            }
+            return ret;
+        }
+
     private:
         inline Size size_unsafe( void ) const noexcept
         {
