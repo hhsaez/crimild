@@ -37,13 +37,16 @@ namespace crimild {
      */
     class TrefoilKnotPrimitive : public ParametricPrimitive {
     public:
-        TrefoilKnotPrimitive(
-            Primitive::Type type,
-            float scale,
-            const VertexLayout &layout = VertexP3N3::getLayout(),
-            Vector2i divisions = Vector2i( 60, 15 )
-        ) noexcept;
+        struct Params {
+            Primitive::Type type = Primitive::Type::TRIANGLES;
+            VertexLayout layout = VertexP3N3::getLayout();
+            ParametricPrimitive::ColorMode colorMode;
+            Real32 scale = 1.0f;
+            Vector2i divisions = Vector2i( 60, 15 );
+        };
 
+    public:
+        TrefoilKnotPrimitive( const Params &params ) noexcept;
         virtual ~TrefoilKnotPrimitive( void ) = default;
 
     protected:

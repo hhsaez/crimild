@@ -29,6 +29,7 @@
 #define CRIMILD_PRIMITIVES_SPHERE_
 
 #include "Primitive.hpp"
+#include "Foundation/Types.hpp"
 #include "Rendering/Vertex.hpp"
 #include "Mathematics/Vector.hpp"
 
@@ -36,13 +37,17 @@ namespace crimild {
 
     class SpherePrimitive : public Primitive {
     public:
-        SpherePrimitive(
-            float radius,
-            const VertexLayout &layout = VertexP3N3::getLayout(),
-            Vector2i divisions = Vector2i( 30, 30 ),
-            Vector3f center = Vector3f( 0.0f, 0.0f, 0.0f )
-        ) noexcept;
+        struct Params {
+            Primitive::Type type = Primitive::Type::TRIANGLES;
+            Real32 radius = 1.0f;
+            const VertexLayout &layout = VertexP3N3::getLayout();
+            Vector2i divisions = Vector2i( 30, 30 );
+            Vector3f center = Vector3f( 0.0f, 0.0f, 0.0f );
+        };
 
+    public:
+        SpherePrimitive( void ) noexcept;
+        explicit SpherePrimitive( const Params &params ) noexcept;
         virtual ~SpherePrimitive( void ) = default;
     };
 

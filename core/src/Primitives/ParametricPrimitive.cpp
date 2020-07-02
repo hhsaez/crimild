@@ -29,10 +29,12 @@
 
 using namespace crimild;
 
-ParametricPrimitive::ParametricPrimitive( Primitive::Type type, const VertexLayout &layout ) noexcept
-    : Primitive( type ),
-      _layout( layout )
+ParametricPrimitive::ParametricPrimitive( const Params &params ) noexcept
+    : Primitive( params.type ),
+      _layout( params.layout ),
+      _colorMode( params.colorMode )
 {
+
 }
 
 void ParametricPrimitive::setInterval( const ParametricInterval &interval )
@@ -76,22 +78,24 @@ void ParametricPrimitive::generate( void )
 
 void ParametricPrimitive::generateVertexBuffer( void )
 {
-    assert( false );
+    auto layout = _layout;
 
-    /*
-    auto vbo = crimild::alloc< VertexBufferObject >( _format, getVertexCount(), nullptr );
-    VertexPrecision *vertex = vbo->data();
-    for ( int i = 0; i < _divisions[ 1 ]; i++ ) {
-        for ( int j = 0; j < _divisions[ 0 ]; j++ ) {
-            // compute position
-            Vector2f domain = computeDomain( j, i );
-            Vector3f range = evaluate( domain );
-            vertex[ _format.getPositionsOffset() + 0 ] = range[ 0 ];
-            vertex[ _format.getPositionsOffset() + 1 ] = range[ 1 ];
-            vertex[ _format.getPositionsOffset() + 2 ] = range[ 2 ];
+    auto vertices = crimild::alloc< VertexBuffer >( layout, getVertexCount() );
+    auto positions = vertices->get( VertexAttribute::Name::POSITION );
+    auto colors = layout.hasAttribute( VertexAttribute::Name::COLOR ) ? vertices->get( VertexAttribute::Name::COLOR ) : nullptr;
+    auto normals = layout.hasAttribute( VertexAttribute::Name::NORMAL ) ?  vertices->get( VertexAttribute::Name::NORMAL ) : nullptr;
+    auto texCoords = layout.hasAttribute( VertexAttribute::Name::TEX_COORD ) ? vertices->get( VertexAttribute::Name::TEX_COORD ) : nullptr;
 
-            // compute normal
-            if ( _format.hasNormals() ) {
+    for ( auto i = 0l; i < _divisions[ 1 ]; i++ ) {
+        for ( auto j = 0l; j < _divisions[ 0 ]; j++ ) {
+            auto domain = computeDomain( j, i );
+            auto range = evaluate( domain );
+
+            auto vIdx = i * _divisions[ 0 ] + j;
+
+            positions->set( vIdx, range );
+
+            if ( normals != nullptr ) {
                 float s = j;
                 float t = i;
 
@@ -110,64 +114,67 @@ void ParametricPrimitive::generateVertexBuffer( void )
                 if ( invertNormal( domain ) ) {
                     normal -= normal;
                 }
-                vertex[ _format.getNormalsOffset() + 0 ] = normal[ 0 ];
-                vertex[ _format.getNormalsOffset() + 1 ] = normal[ 1 ];
-                vertex[ _format.getNormalsOffset() + 2 ] = normal[ 2 ];
+
+                normals->set( vIdx, normal );
             }
 
-            // compute texture coordinates
-            if ( _format.hasTextureCoords() ) {
-                float s = ( float ) _textureCount[ 0 ] * ( float ) j / ( float ) _slices[ 0 ];
-                float t = ( float ) _textureCount[ 1 ] * ( float ) i / ( float ) _slices[ 1 ];
-                vertex[ _format.getTextureCoordsOffset() + 0 ] = s;
-                vertex[ _format.getTextureCoordsOffset() + 1 ] = t;
+            if ( colors != nullptr ) {
+                auto color = RGBColorf::ONE;
+                if ( _colorMode.type == ColorMode::Type::CONSTANT ) {
+                    color = _colorMode.color;
+                }
+                else if ( _colorMode.type == ColorMode::Type::POSITIONS ) {
+                    color = 0.5f * ( Vector3f::ONE + range.getNormalized() );
+                }
+                colors->set( vIdx, color );
             }
-            vertex += _format.getVertexSize();
+
+            if ( texCoords != nullptr ) {
+                auto s = ( float ) _textureCount[ 0 ] * ( float ) j / ( float ) _slices[ 0 ];
+                auto t = ( float ) _textureCount[ 1 ] * ( float ) i / ( float ) _slices[ 1 ];
+                texCoords->set( vIdx, Vector2f( s, t ) );
+            }
         }
     }
-    setVertexBuffer( vbo );
-    */
+
+    setVertexData( { vertices } );
 }
 
 void ParametricPrimitive::generateLineIndexBuffer( void )
 {
-    assert( false );
-    /*
-    auto ibo = crimild::alloc< IndexBufferObject >( getLineIndexCount(), nullptr );
-    IndexPrecision *index = ibo->data();
-    for ( int i = 0, vertex = 0; i < _slices[ 1 ]; i++ ) {
-        for ( int j = 0; j < _slices[ 0 ]; j++ ) {
-            int next = ( j + 1 ) % _divisions[ 0 ];
-            *index++ = vertex + j;
-            *index++ = vertex + next;
-            *index++ = vertex + j;
-            *index++ = vertex + j + _divisions[ 0 ];
+    auto indices = crimild::alloc< IndexBuffer >( Format::INDEX_32_UINT, getLineIndexCount() );
+    UInt32 index = 0;
+    for ( UInt32 i = 0, vertex = 0l; i < _slices[ 1 ]; i++ ) {
+        for ( UInt32 j = 0; j < _slices[ 0 ]; j++ ) {
+            UInt32 next = ( j + 1 ) % _divisions[ 0 ];
+            indices->setIndex( index++, vertex + j );
+            indices->setIndex( index++, vertex + next );
+            indices->setIndex( index++, vertex + j );
+            indices->setIndex( index++, vertex + j + _divisions[ 0 ] );
         }
         vertex += _divisions[ 0 ];
     }
-    setIndexBuffer( ibo );
-    */
+
+    setIndices( indices );
 }
 
 void ParametricPrimitive::generateTriangleIndexBuffer( void )
 {
-    assert( false );
-    /*
-    auto ibo = crimild::alloc< IndexBufferObject >( getTriangleIndexCount(), nullptr );
-    IndexPrecision *index = ibo->data();
-    for ( int i = 0, vertex = 0; i < _slices[ 1 ]; i++ ) {
-        for ( int j = 0; j < _slices[ 0 ]; j++ ) {
-            int next = ( j + 1 ) % _divisions[ 0 ];
-            *index++ = vertex + j;
-            *index++ = vertex + next;
-            *index++ = vertex + j + _divisions[ 0 ];
-            *index++ = vertex + next;
-            *index++ = vertex + next + _divisions[ 0 ];
-            *index++ = vertex + j + _divisions[ 0 ];
+    auto indices = crimild::alloc< IndexBuffer >( Format::INDEX_32_UINT, getTriangleIndexCount() );
+    UInt32 index = 0;
+    for ( UInt32 i = 0, vertex = 0l; i < _slices[ 1 ]; i++ ) {
+        for ( UInt32 j = 0; j < _slices[ 0 ]; j++ ) {
+            UInt32 next = ( j + 1 ) % _divisions[ 0 ];
+            indices->setIndex( index++, vertex + j );
+            indices->setIndex( index++, vertex + next );
+            indices->setIndex( index++, vertex + j + _divisions[ 0 ] );
+
+            indices->setIndex( index++, vertex + next );
+            indices->setIndex( index++, vertex + next + _divisions[ 0 ] );
+            indices->setIndex( index++, vertex + j + _divisions[ 0 ] );
         }
         vertex += _divisions[ 0 ];
     }
 
-    setIndexBuffer( ibo );
-    */
+    setIndices( indices );
 }

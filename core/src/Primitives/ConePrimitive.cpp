@@ -29,19 +29,13 @@
 
 using namespace crimild;
 
-ConePrimitive::ConePrimitive(
-    Primitive::Type type,
-    float height,
-    float radius,
-    const VertexLayout &layout,
-    Vector2i divisions
-) noexcept
-    : ParametricPrimitive( type, layout )
+ConePrimitive::ConePrimitive( const Params &params ) noexcept
+    : ParametricPrimitive( { params.type, params.layout, params.colorMode } )
 {
-    _height = height;
-    _radius = radius;
+    _height = params.height;
+    _radius = params.radius;
 
-    ParametricInterval interval = { divisions, Vector2f( Numericf::TWO_PI, 1.0f ), Vector2f( 30, 20 ) };
+    ParametricInterval interval = { params.divisions, Vector2f( Numericf::TWO_PI, 1.0f ), Vector2f( 30, 20 ) };
     setInterval( interval );
     generate();
 }
