@@ -29,7 +29,7 @@
 #define CRIMILD_PRIMITIVES_BOX_
 
 #include "Primitive.hpp"
-
+#include "Rendering/Vertex.hpp"
 #include "Mathematics/Vector.hpp"
 
 namespace crimild {
@@ -39,6 +39,13 @@ namespace crimild {
      */
     class BoxPrimitive : public Primitive {
     public:
+        struct Params {
+            Primitive::Type type = Primitive::Type::TRIANGLES;
+            VertexLayout layout = VertexP3N3::getLayout();
+            Vector3f size = Vector3f::ONE;
+        };
+
+    public:
         /**
            \brief Construct a box with positions, normals and texture coordinates of size 1, 1, 1
          */
@@ -47,7 +54,7 @@ namespace crimild {
         /**
            \brief Construct a box with user defined layout and size
          */
-        BoxPrimitive( const VertexLayout &layout, const Vector3f &size ) noexcept;
+        explicit BoxPrimitive( const Params &params ) noexcept;
         virtual ~BoxPrimitive( void ) = default;
     };
 

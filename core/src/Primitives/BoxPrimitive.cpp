@@ -33,68 +33,168 @@
 using namespace crimild;
 
 BoxPrimitive::BoxPrimitive( void ) noexcept
-    : BoxPrimitive( VertexP3N3TC2::getLayout(), Vector3f::ONE )
+    : BoxPrimitive( Params { } )
 {
     // no-op
 }
 
-BoxPrimitive::BoxPrimitive( const VertexLayout &layout, const Vector3f &size ) noexcept
-    : Primitive( Primitive::Type::TRIANGLES )
+BoxPrimitive::BoxPrimitive( const Params &params ) noexcept
+    : Primitive( params.type )
 {
-    assert( false && "TODO" );
-    /*
-    VertexPrecision halfWidth = 0.5f * width;
-    VertexPrecision halfHeight = 0.5f * height;
-    VertexPrecision halfDepth = 0.5f * depth;
+    auto layout = params.layout;
 
-    VertexPrecision vertices[] = {
-        // top
-        -halfWidth, +halfHeight, -halfDepth, 0.0f, 1.0f, 0.0f,
-        -halfWidth, +halfHeight, +halfDepth, 0.0f, 1.0f, 0.0f,
-        +halfWidth, +halfHeight, +halfDepth, 0.0f, 1.0f, 0.0f,
-        +halfWidth, +halfHeight, -halfDepth, 0.0f, 1.0f, 0.0f,
+    auto vertices = crimild::alloc< VertexBuffer >( layout, 24 );
 
-        // front
-        -halfWidth, +halfHeight, +halfDepth, 0.0f, 0.0f, 1.0f,
-        -halfWidth, -halfHeight, +halfDepth, 0.0f, 0.0f, 1.0f,
-        +halfWidth, -halfHeight, +halfDepth, 0.0f, 0.0f, 1.0f,
-        +halfWidth, +halfHeight, +halfDepth, 0.0f, 0.0f, 1.0f,
+    auto w = params.size.x();
+    auto h = params.size.y();
+    auto d = params.size.z();
 
-        // back
-        +halfWidth, +halfHeight, -halfDepth, 0.0f, 0.0f, -1.0f,
-        +halfWidth, -halfHeight, -halfDepth, 0.0f, 0.0f, -1.0f,
-        -halfWidth, -halfHeight, -halfDepth, 0.0f, 0.0f, -1.0f,
-        -halfWidth, +halfHeight, -halfDepth, 0.0f, 0.0f, -1.0f,
+    auto positions = vertices->get( VertexAttribute::Name::POSITION );
+    positions->set(
+        Array< Vector3f > {
+            // top
+            Vector3f( -w, +h, -d ),
+            Vector3f( -w, +h, +d ),
+            Vector3f( +w, +h, +d ),
+            Vector3f( +w, +h, -d ),
 
-        // left
-        -halfWidth, +halfHeight, -halfDepth, -1.0f, 0.0f, 0.0f,
-        -halfWidth, -halfHeight, -halfDepth, -1.0f, 0.0f, 0.0f,
-        -halfWidth, -halfHeight, +halfDepth, -1.0f, 0.0f, 0.0f,
-        -halfWidth, +halfHeight, +halfDepth, -1.0f, 0.0f, 0.0f,
+            // front
+            Vector3f( -w, +h, +d ),
+            Vector3f( -w, -h, +d ),
+            Vector3f( +w, -h, +d ),
+            Vector3f( +w, +h, +d ),
 
-        // right
-        +halfWidth, +halfHeight, +halfDepth, 1.0f, 0.0f, 0.0f,
-        +halfWidth, -halfHeight, +halfDepth, 1.0f, 0.0f, 0.0f,
-        +halfWidth, -halfHeight, -halfDepth, 1.0f, 0.0f, 0.0f,
-        +halfWidth, +halfHeight, -halfDepth, 1.0f, 0.0f, 0.0f,
+            // back
+            Vector3f( +w, +h, -d ),
+            Vector3f( +w, -h, -d ),
+            Vector3f( -w, -h, -d ),
+            Vector3f( -w, +h, -d ),
 
-        // bottom
-        +halfWidth, -halfHeight, -halfDepth, 0.0f, -1.0f, 0.0f,
-        +halfWidth, -halfHeight, +halfDepth, 0.0f, -1.0f, 0.0f,
-        -halfWidth, -halfHeight, +halfDepth, 0.0f, -1.0f, 0.0f,
-        -halfWidth, -halfHeight, -halfDepth, 0.0f, -1.0f, 0.0f,
-    };
+            // left
+            Vector3f( -w, +h, -d ),
+            Vector3f( -w, -h, -d ),
+            Vector3f( -w, -h, +d ),
+            Vector3f( -w, +h, +d ),
 
-    IndexPrecision indices[] = {
-        0, 1, 2, 0, 2, 3,
-        4, 5, 6, 4, 6, 7,
-        8, 9, 10, 8, 10, 11,
-        12, 13, 14, 12, 14, 15,
-        16, 17, 18, 16, 18, 19,
-        20, 21, 22, 20, 22, 23
-    };
+            // right
+            Vector3f( +w, +h, +d ),
+            Vector3f( +w, -h, +d ),
+            Vector3f( +w, -h, -d ),
+            Vector3f( +w, +h, -d ),
 
-    setVertexBuffer( crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3_N3, 24, vertices ) );
-    setIndexBuffer( crimild::alloc< IndexBufferObject >( 36, indices ) );
-    */
+            // bottom
+            Vector3f( +w, -h, -d ),
+            Vector3f( +w, -h, +d ),
+            Vector3f( -w, -h, +d ),
+            Vector3f( -w, -h, -d ),
+        }
+    );
+
+    if ( layout.hasAttribute( VertexAttribute::Name::NORMAL ) ) {
+        auto normals = vertices->get( VertexAttribute::Name::NORMAL );
+        normals->set(
+            Array< Vector3f > {
+                // top
+                Vector3f::UNIT_Y,
+                Vector3f::UNIT_Y,
+                Vector3f::UNIT_Y,
+                Vector3f::UNIT_Y,
+
+                // front
+                Vector3f::UNIT_Z,
+                Vector3f::UNIT_Z,
+                Vector3f::UNIT_Z,
+                Vector3f::UNIT_Z,
+
+                // back
+                -Vector3f::UNIT_Z,
+                -Vector3f::UNIT_Z,
+                -Vector3f::UNIT_Z,
+                -Vector3f::UNIT_Z,
+
+                // left
+                -Vector3f::UNIT_X,
+                -Vector3f::UNIT_X,
+                -Vector3f::UNIT_X,
+                -Vector3f::UNIT_X,
+
+                // right
+                Vector3f::UNIT_X,
+                Vector3f::UNIT_X,
+                Vector3f::UNIT_X,
+                Vector3f::UNIT_X,
+
+                // bottom
+                -Vector3f::UNIT_Y,
+                -Vector3f::UNIT_Y,
+                -Vector3f::UNIT_Y,
+                -Vector3f::UNIT_Y,
+            }
+        );
+    }
+
+    if ( layout.hasAttribute( VertexAttribute::Name::COLOR ) ) {
+        auto colors = vertices->get( VertexAttribute::Name::COLOR );
+        auto r = RGBColorf( 1.0f, 0.0f, 0.0f );
+        auto g = RGBColorf( 0.0f, 1.0f, 0.0f );
+        auto b = RGBColorf( 0.0f, 0.0f, 1.0f );
+        auto c = RGBColorf( 0.0f, 1.0f, 1.0f );
+        auto m = RGBColorf( 1.0f, 0.0f, 1.0f );
+        auto y = RGBColorf( 1.0f, 1.0f, 0.0f );
+        colors->set(
+            Array< Vector3f > {
+                // top
+                g,
+                g,
+                g,
+                g,
+
+                // front
+                b,
+                b,
+                b,
+                b,
+
+                // back
+                c,
+                c,
+                c,
+                c,
+
+                // left
+                y,
+                y,
+                y,
+                y,
+
+                // right
+                r,
+                r,
+                r,
+                r,
+
+                // bottom
+                m,
+                m,
+                m,
+                m,
+            }
+        );
+    }
+
+    setVertexData( { vertices } );
+
+    setIndices(
+        crimild::alloc< IndexBuffer >(
+            Format::INDEX_32_UINT,
+            Array< UInt32 > {
+                0, 1, 2, 0, 2, 3,
+                4, 5, 6, 4, 6, 7,
+                8, 9, 10, 8, 10, 11,
+                12, 13, 14, 12, 14, 15,
+                16, 17, 18, 16, 18, 19,
+                20, 21, 22, 20, 22, 23,
+            }
+        )
+    );
 }
