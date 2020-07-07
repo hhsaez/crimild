@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -39,15 +39,36 @@
 
 namespace crimild {
 
+    class DescriptorSet;
+    class Pipeline;
+
 	class Light;
-    
+
     class Material : public coding::Codable, public StreamObject {
 		CRIMILD_IMPLEMENT_RTTI( crimild::Material )
 
 	public:
-		Material( void );
-		virtual ~Material( void );
+		Material( void ) noexcept;
+		virtual ~Material( void ) = default;
 
+        inline void setDescriptors( SharedPointer< DescriptorSet > const &descriptors ) noexcept { m_descriptors = descriptors; }
+        inline const DescriptorSet *getDescriptors( void ) const noexcept { return get_ptr( m_descriptors ); }
+        inline DescriptorSet *getDescriptors( void ) noexcept { return get_ptr( m_descriptors ); }
+
+        inline void setPipeline( SharedPointer< Pipeline > const &pipeline ) noexcept { m_pipeline = pipeline; }
+        inline const Pipeline *getPipeline( void ) const noexcept { return get_ptr( m_pipeline ); }
+        inline Pipeline *getPipeline( void ) noexcept { return get_ptr( m_pipeline ); }
+
+    private:
+        SharedPointer< DescriptorSet > m_descriptors;
+        SharedPointer< Pipeline > m_pipeline;
+
+        /**
+           \deprecated The following fields are no longer relevant
+        */
+        //@{
+
+    public:
         void setProgram( ShaderProgram *program ) { _program = crimild::retain( program ); }
 		void setProgram( SharedPointer< ShaderProgram > const &program ) { _program = program; }
         ShaderProgram *getProgram( void ) { return crimild::get_ptr( _program ); }
@@ -78,7 +99,7 @@ namespace crimild {
         void setSpecularMap( Texture *texture ) { _specularMap = crimild::retain( texture ); }
 		void setSpecularMap( SharedPointer< Texture > const &texture ) { _specularMap = texture; }
         Texture *getSpecularMap( void ) { return crimild::get_ptr( _specularMap ); }
-        
+
         void setEmissiveMap( Texture *texture ) { _emissiveMap = crimild::retain( texture ); }
         void setEmissiveMap( SharedPointer< Texture > const &texture ) { _emissiveMap = texture; }
         Texture *getEmissiveMap( void ) { return crimild::get_ptr( _emissiveMap ); }
@@ -94,10 +115,10 @@ namespace crimild {
 
         void setColorMaskState( SharedPointer< ColorMaskState > const &colorMaskState ) { _colorMaskState = colorMaskState; }
         ColorMaskState *getColorMaskState( void ) { return crimild::get_ptr( _colorMaskState ); }
-        
+
         bool castShadows( void ) const { return _castShadows; }
         void setCastShadows( bool value ) { _castShadows = value; }
-        
+
         bool receiveShadows( void ) const { return _receiveShadows; }
         void setReceiveShadows( bool value ) { _receiveShadows = value; }
 
@@ -119,17 +140,20 @@ namespace crimild {
 		SharedPointer< AlphaState > _alphaState;
 		SharedPointer< CullFaceState > _cullFaceState;
 		SharedPointer< ColorMaskState > _colorMaskState;
-        
+
         bool _castShadows = true;
         bool _receiveShadows = true;
 
+        //@}
+
 		/**
 		   \name Reflection
+           \deprectated
 
 		   In order for the reflection map to work, set reflection value to 1.0
 		*/
 		//@{
-		
+
 	public:
 		void setReflection( crimild::Real32 value ) { _reflection = value; }
 		crimild::Real32 getReflection( void ) const { return _reflection; }
@@ -140,16 +164,17 @@ namespace crimild {
 	private:
 		crimild::Real32 _reflection = 0.0f;
 		SharedPointer< Texture > _reflectionMap;
-		
+
 		//@}
 
 		/**
 		   \name Refraction
+           \deprectated
 
 		   In order for the refraction map to work, set refraction value to 1.0
 		*/
 		//@{
-		
+
 	public:
 		void setRefraction( crimild::Real32 value ) { _refraction = value; }
 		crimild::Real32 getRefraction( void ) const { return _refraction; }
@@ -160,20 +185,20 @@ namespace crimild {
 	private:
 		crimild::Real32 _refraction = 0.0f;
 		SharedPointer< Texture > _refractionMap;
-		
+
 		//@}
 
         /**
             \name Coding support
          */
         //@{
-        
+
     public:
         virtual void encode( coding::Encoder &encoder ) override;
         virtual void decode( coding::Decoder &decoder ) override;
-        
+
         //@}
-        
+
         /**
         	\name Streaming
             \deprectated see crimild::Coding
@@ -189,9 +214,7 @@ namespace crimild {
 	};
 
 	using MaterialPtr = SharedPointer< Material >;
-    
+
 }
 
 #endif
-
-	

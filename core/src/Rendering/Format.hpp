@@ -81,25 +81,27 @@ namespace crimild {
 		template< typename T >
 		static Format getFormat( void ) noexcept { return Format::UNDEFINED; }
 
-        template<> Format getFormat< crimild::UInt16 >( void ) noexcept { return Format::R16_UINT; }
-        template<> Format getFormat< crimild::UInt32 >( void ) noexcept { return Format::R32_UINT; }
-		template<> Format getFormat< crimild::Real32 >( void ) noexcept { return Format::R32_SFLOAT; }
+        template<> Format getFormat< UInt16 >( void ) noexcept { return Format::R16_UINT; }
+        template<> Format getFormat< UInt32 >( void ) noexcept { return Format::R32_UINT; }
+		template<> Format getFormat< Real32 >( void ) noexcept { return Format::R32_SFLOAT; }
 		template<> Format getFormat< Vector2f >( void ) noexcept { return Format::R32G32_SFLOAT; }
 		template<> Format getFormat< Vector3f >( void ) noexcept { return Format::R32G32B32_SFLOAT; }
-		
-		static crimild::UInt32 getFormatSize( Format format ) noexcept
+
+		static UInt32 getFormatSize( Format format ) noexcept
 		{
 			switch ( format ) {
+                case Format::R8G8B8A8_UINT:
+                    return 4 * sizeof( UInt8 );
                 case Format::R16_UINT:
-                    return 1 * sizeof( crimild::UInt16 );
+                    return 1 * sizeof( UInt16 );
                 case Format::R32_UINT:
-                    return 1 * sizeof( crimild::UInt32 );
+                    return 1 * sizeof( UInt32 );
 				case Format::R32_SFLOAT:
-					return 1 * sizeof( crimild::Real32 );
+					return 1 * sizeof( Real32 );
 				case Format::R32G32_SFLOAT:
-					return 2 * sizeof( crimild::Real32 );
+					return 2 * sizeof( Real32 );
 				case Format::R32G32B32_SFLOAT:
-					return 3 * sizeof( crimild::Real32 );
+					return 3 * sizeof( Real32 );
 				default:
 					return 0;
 			};
@@ -110,4 +112,3 @@ namespace crimild {
 }
 
 #endif
-

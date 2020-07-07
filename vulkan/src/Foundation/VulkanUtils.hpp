@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the copyright holder nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -90,6 +90,7 @@ namespace crimild {
             VkViewport getViewport( const ViewportDimensions *viewport, const RenderDevice *renderDevice ) noexcept;
             VkRect2D getScissor( const ViewportDimensions *scissor, const RenderDevice *renderDevice ) noexcept;
             VkIndexType getIndexType( const IndexBuffer *indexBuffer ) noexcept;
+            VkCompareOp getCompareOp( const CompareOp &compareOp ) noexcept;
             VkSamplerAddressMode getSamplerAddressMode( Texture::WrapMode wrapMode ) noexcept; //< Deprecated
             VkSamplerAddressMode getSamplerAddressMode( Sampler::WrapMode wrapMode ) noexcept;
             VkBorderColor getBorderColor( Texture::BorderColor borderColor ) noexcept; //< Deprecated
@@ -227,7 +228,7 @@ namespace crimild {
 
             void transitionImageLayout( RenderDevice *renderDevice, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, crimild::UInt32 mipLevels, crimild::UInt32 layerCount ) noexcept;
 
-            void copyBufferToImage( RenderDevice *renderDevice, VkBuffer buffer, VkImage image, crimild::UInt32 width, crimild::UInt32 height ) noexcept;
+            void copyBufferToImage( RenderDevice *renderDevice, VkBuffer buffer, VkImage image, crimild::UInt32 width, crimild::UInt32 height, UInt32 layerCount ) noexcept;
             void copyBufferToLayeredImage( RenderDevice *renderDevice, VkBuffer buffer, VkImage image, crimild::Size layerCount, crimild::Size layerSize, crimild::UInt32 layerWidth, crimild::UInt32 layerHeight ) noexcept;
 
             void generateMipmaps( RenderDevice *renderDevice, VkImage image, VkFormat format, crimild::Int32 width, crimild::Int32 height, crimild::UInt32 mipLevels ) noexcept;
@@ -241,7 +242,7 @@ namespace crimild {
 			   \name ImageView
 			*/
 			//@{
-			
+
 			VkImageViewType getImageViewType( ImageView *imageView ) noexcept;
 			VkFormat getImageViewFormat( RenderDevice *renderDevice, ImageView *imageView ) noexcept;
 			VkImageAspectFlags getImageViewAspectFlags( ImageView *imageView ) noexcept;

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,7 +25,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Texture.hpp"
+#include "Rendering/Texture.hpp"
+#include "Rendering/Image.hpp"
+#include "Rendering/ImageView.hpp"
+#include "Rendering/Sampler.hpp"
 #include "Coding/Encoder.hpp"
 #include "Coding/Decoder.hpp"
 
@@ -35,9 +38,21 @@ CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::Texture )
 
 using namespace crimild;
 
-SharedPointer< Texture > Texture::ONE = crimild::alloc< Texture >(
-	crimild::alloc< Image >( 1, 1, 4, ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA )
-);
+SharedPointer< Texture > Texture::ONE = [] {
+    auto texture = crimild::alloc< Texture >();
+    texture->imageView = [&] {
+        auto imageView = crimild::alloc< ImageView >();
+        imageView->image = Image::ONE;
+        return imageView;
+    }();
+    texture->sampler = [&] {
+        auto sampler = crimild::alloc< Sampler >();
+        sampler->setMinFilter( Sampler::Filter::NEAREST );
+        sampler->setMagFilter( Sampler::Filter::NEAREST );
+        return sampler;
+    }();
+    return texture;
+}();
 
 SharedPointer< Texture > Texture::ZERO = crimild::alloc< Texture >(
 	crimild::alloc< Image >( 1, 1, 4, ByteArray { 0x00, 0x00, 0x00, 0x00 }, Image::PixelFormat::RGBA )
@@ -147,4 +162,3 @@ void Texture::decode( coding::Decoder &decoder )
         _images.add( image );
     }
 }
-

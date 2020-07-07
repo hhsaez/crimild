@@ -42,3 +42,51 @@ SharedPointer< Image > ImageManager::loadImage( ImageDescriptor const &descripto
     return crimild::alloc< ImageTGA >( descriptor.filePath.getAbsolutePath() );
 }
 
+SharedPointer< Image > ImageManager::loadCubemap( CubemapDescriptor const &descriptor ) const noexcept
+{
+    // This is not ideal. We create several images just to delete them later and
+    // create a new one with the whole data... Maybe derived classes can handle
+    // this one in a better way
+
+    auto images = descriptor.filePaths.map(
+        [&] ( auto &path ) {
+            return loadImage(
+                ImageDescriptor {
+                    .filePath = path,
+                }
+            );
+        }
+    );
+
+    if ( images.empty() ) {
+        return nullptr;
+    }
+
+    auto layerCount = images.size();
+    auto firstImage = images[ 0 ];
+    auto format = firstImage->format;
+    auto w = firstImage->extent.width;
+    auto h = firstImage->extent.height;
+
+    auto image = crimild::alloc< Image >();
+    image->type = Image::Type::IMAGE_2D_CUBEMAP;
+    image->format = format;
+    image->setLayerCount( layerCount );
+    image->extent = {
+        .width = w,
+        .height = h,
+        .depth = 1,
+    };
+    image->data.resize( layerCount * firstImage->data.size() );
+
+    Byte *data = image->data.getData();
+    Size offset = 0;
+    images.each(
+        [ &, i = 0 ] ( auto &img ) mutable {
+            memcpy( data + offset, img->data.getData(), img->data.size() );
+            offset += img->data.size();
+        }
+    );
+
+    return image;
+}

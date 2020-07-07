@@ -43,7 +43,7 @@ namespace crimild {
     	public SharedObject,
     	public RTTI {
         CRIMILD_IMPLEMENT_RTTI( crimild::ImageView )
-		
+
 	public:
 		enum class Type {
 			UNDEFINED, //< Default.
@@ -59,10 +59,9 @@ namespace crimild {
         SharedPointer< Image > image;
         Format format = Format::UNDEFINED; //< Fallbacks to same format as image
         crimild::UInt32 mipLevels = 0; //< Fallbacks to same mipLevels as image
-        crimild::UInt32 layerCount = 1;
+        crimild::UInt32 layerCount = 0; //< Fallbacks to same layer count as image
     };
 
 }
 
 #endif
-

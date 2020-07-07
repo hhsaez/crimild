@@ -182,6 +182,48 @@ BoxPrimitive::BoxPrimitive( const Params &params ) noexcept
         );
     }
 
+    if ( layout.hasAttribute( VertexAttribute::Name::TEX_COORD ) ) {
+        auto texCoords = vertices->get( VertexAttribute::Name::TEX_COORD );
+        texCoords->set(
+            Array< Vector2f > {
+                // top
+                Vector2f( 0.0f, 0.0f ),
+                Vector2f( 0.0f, 1.0f ),
+                Vector2f( 1.0f, 1.0f ),
+                Vector2f( 1.0f, 0.0f ),
+
+                // front
+                Vector2f( 0.0f, 0.0f ),
+                Vector2f( 0.0f, 1.0f ),
+                Vector2f( 1.0f, 1.0f ),
+                Vector2f( 1.0f, 0.0f ),
+
+                // back
+                Vector2f( 0.0f, 0.0f ),
+                Vector2f( 0.0f, 1.0f ),
+                Vector2f( 1.0f, 1.0f ),
+                Vector2f( 1.0f, 0.0f ),
+
+                // left
+                Vector2f( 0.0f, 0.0f ),
+                Vector2f( 0.0f, 1.0f ),
+                Vector2f( 1.0f, 1.0f ),
+                Vector2f( 1.0f, 0.0f ),
+
+                // right
+                Vector2f( 0.0f, 0.0f ),
+                Vector2f( 0.0f, 1.0f ),
+                Vector2f( 1.0f, 1.0f ),
+                Vector2f( 1.0f, 0.0f ),
+
+                // bottom
+                Vector2f( 0.0f, 0.0f ),
+                Vector2f( 0.0f, 1.0f ),
+                Vector2f( 1.0f, 1.0f ),
+                Vector2f( 1.0f, 0.0f ),
+            }
+        );
+    }
     setVertexData( { vertices } );
 
     setIndices(
