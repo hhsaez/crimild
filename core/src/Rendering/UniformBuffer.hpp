@@ -71,7 +71,7 @@ namespace crimild {
         : public coding::Codable,
           public RenderResourceImpl< UniformBuffer > {
         CRIMILD_IMPLEMENT_RTTI( crimild::UniformBuffer )
-        
+
     public:
         template< typename T >
         UniformBuffer( const T &value ) noexcept
@@ -81,7 +81,7 @@ namespace crimild {
                 crimild::alloc< Buffer >( value )
             );
         }
-        
+
         virtual ~UniformBuffer( void ) = default;
 
         inline BufferView *getBufferView( void ) noexcept { return crimild::get_ptr( m_bufferView ); }
@@ -96,7 +96,7 @@ namespace crimild {
         template< typename T >
         const T &getValue( void ) const noexcept
         {
-            return *reinterpret_cast< T * >( getBufferView()->getData() );
+            return *reinterpret_cast< const T * >( getBufferView()->getData() );
         }
 
         template< typename T >
@@ -122,4 +122,3 @@ namespace crimild {
 }
 
 #endif
-

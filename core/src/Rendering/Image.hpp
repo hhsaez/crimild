@@ -38,7 +38,7 @@
 #include <vector>
 
 namespace crimild {
-    
+
     class Image :
     	public coding::Codable,
     	public StreamObject, //< Deprecated
@@ -61,47 +61,10 @@ namespace crimild {
         static SharedPointer< Image > INVALID;
 
     public:
-		/*
-        struct Usage {
-            enum {
-                TRANSFER_SRC = 1 << 0,
-                TRANSFER_DST = 1 << 1,
-                SAMPLED = 1 << 2, //< default
-                STORAGE = 1 << 3,
-                COLOR_ATTACHMENT = 1 << 4,
-                DEPTH_STENCIL_ATTACHMENT = 1 << 5,
-                TRANSIENT_ATTACHMENT = 1 << 6,
-                INPUT_ATTACHMENT = 1 << 7,
-            };
-
-            Usage( crimild::UInt32 v ) : m_value( v ) { }
-            operator crimild::UInt32( void ) { return m_value; }
-            crimild::Int32 operator&( crimild::Int32 other ) const { return m_value & other; }
-
-        private:
-            crimild::UInt32 m_value;
-        };
-
-        enum class Layout {
-			UNDEFINED,
-            GENERAL,
-            COLOR_ATTACHMENT_OPTIMAL,
-            DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-            DEPTH_STENCIL_READ_ONLY_OPTIMAL,
-            SHADER_READ_ONLY_OPTIMAL,
-            TRANSFER_SRC_OPTIMAL,
-            TRANSFER_DST_OPTIMAL,
-            PREINITIALIZED,
-            DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL,
-            DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL,
-            PRESENT_SRC,
-            SHARED_PRESENT,
-        };
-		*/
-
 		enum class Type {
 			IMAGE_1D,
 			IMAGE_2D,
+            IMAGE_2D_CUBEMAP,
 			IMAGE_3D,
 		};
 
@@ -117,7 +80,29 @@ namespace crimild {
 		 */
 		Extent3D extent;
 
+        /**
+           \brief Image raw data
+
+           The size of this array is equal to multiplying extent by the format size by the
+           number of layers:
+
+           size = ( w * h * d ) * ( channels ) * layers
+         */
 		ByteArray data;
+
+        /**
+           \name Layer count
+         */
+        //@{
+
+    public:
+        inline void setLayerCount( UInt32 layerCount ) noexcept { m_layerCount = layerCount; }
+        inline UInt32 getLayerCount( void ) const noexcept { return m_layerCount; }
+
+    private:
+        UInt32 m_layerCount = 1; //< at least 1 layer
+
+        //@}
 
         /**
          	\name Mipmapping
@@ -126,6 +111,7 @@ namespace crimild {
          */
         //@{
 
+    public:
         void setMipLevels( crimild::UInt32 mipLevels ) noexcept;
         crimild::UInt32 getMipLevels( void ) const noexcept;
 
@@ -166,7 +152,7 @@ namespace crimild {
 			UNSIGNED_BYTE,
 			FLOAT,
 		};
-        
+
 	public:
 		Image( void );
 		Image( int width, int height, int bpp, PixelFormat format, PixelType pixelType );
@@ -215,4 +201,3 @@ namespace crimild {
 }
 
 #endif
-

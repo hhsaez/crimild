@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the copyright holders nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -54,7 +54,8 @@ crimild::Bool vulkan::ImageManager::bind( Image *image ) noexcept
 
 	auto channels = crimild::UInt32( 4 ); //< TODO: Fetch channels from image format
 	auto mipLevels = image->getMipLevels();
-	auto layerCount = crimild::UInt32( 1 );
+	auto arrayLayers = image->getLayerCount();
+    auto type = image->type;
 
 	// TODO: use frame graph to set usage?
 	VkImageUsageFlags usage = VK_IMAGE_USAGE_SAMPLED_BIT;
@@ -84,6 +85,8 @@ crimild::Bool vulkan::ImageManager::bind( Image *image ) noexcept
             .properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
             .mipLevels = mipLevels,
 //            .numSamples = descriptor.numSamples,
+            .arrayLayers = arrayLayers,
+            .flags = ( type == Image::Type::IMAGE_2D_CUBEMAP ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0u ),
         },
        	bindInfo.imageHandler,
        	bindInfo.imageMemoryHandler
@@ -92,12 +95,9 @@ crimild::Bool vulkan::ImageManager::bind( Image *image ) noexcept
 	if ( image->data.size() > 0 ) {
 		// Image has pixel data. Upload it
 
-		// TODO: Cubemap
-
 		VkBuffer stagingBuffer;
 		VkDeviceMemory stagingBufferMemory;
-		VkDeviceSize layerSize = width * height * channels;
-		VkDeviceSize imageSize = layerSize * layerCount;
+		VkDeviceSize imageSize = image->data.size();
 
 		auto success = utils::createBuffer(
 			renderDevice,
@@ -114,18 +114,13 @@ crimild::Bool vulkan::ImageManager::bind( Image *image ) noexcept
 			return false;
 		}
 
-		std::vector< const void * > layers;
-		// TODO: cubemap
-		layers.push_back( image->data.getData() );
-
 		utils::copyToBuffer(
 			renderDevice->handler,
 			stagingBufferMemory,
-			layers.data(),
-			layers.size(),
-			layerSize
+			image->data.getData(),
+            imageSize
 		);
-		
+
 		utils::transitionImageLayout(
 			renderDevice,
 			bindInfo.imageHandler,
@@ -133,28 +128,41 @@ crimild::Bool vulkan::ImageManager::bind( Image *image ) noexcept
 			VK_IMAGE_LAYOUT_UNDEFINED,
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 			mipLevels,
-			layerCount
+			arrayLayers
 		);
-
-		// TODO: handle cubemaps
 
 		utils::copyBufferToImage(
 			renderDevice,
 			stagingBuffer,
 			bindInfo.imageHandler,
 			width,
-			height
+			height,
+            arrayLayers
 		);
 
-		// Automatically transitions to SHADER_READ_OPTIMAL layout
-		utils::generateMipmaps(
-			renderDevice,
-			bindInfo.imageHandler,
-			VK_FORMAT_R8G8B8A8_UNORM,
-			width,
-			height,
-			mipLevels
-		);
+        if ( type == Image::Type::IMAGE_2D_CUBEMAP ) {
+            // No mipmaps. Transition to SHADER_READ_OPTIMAL
+            utils::transitionImageLayout(
+                renderDevice,
+                bindInfo.imageHandler,
+                utils::getFormat( renderDevice, image->format ),
+                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                mipLevels,
+                arrayLayers
+            );
+        }
+        else {
+            // Automatically transitions to SHADER_READ_OPTIMAL layout
+            utils::generateMipmaps(
+                renderDevice,
+                bindInfo.imageHandler,
+                VK_FORMAT_R8G8B8A8_UNORM,
+                width,
+                height,
+                mipLevels
+            );
+        };
 
 		vkDestroyBuffer(
 			renderDevice->handler,
@@ -198,4 +206,3 @@ crimild::Bool vulkan::ImageManager::unbind( Image *image ) noexcept
 
     return ManagerImpl::unbind( image );
 }
-
