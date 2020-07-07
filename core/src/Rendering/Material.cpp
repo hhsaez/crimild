@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -33,7 +33,7 @@ CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::Material )
 
 using namespace crimild;
 
-Material::Material( void )
+Material::Material( void ) noexcept
 	: _ambient( 0.0f, 0.0f, 0.0f, 1.0f ),
 	  _diffuse( 1.0f, 1.0f, 1.0f, 1.0f ),
 	  _specular( 1.0f, 1.0f, 1.0f, 1.0f ),
@@ -43,11 +43,6 @@ Material::Material( void )
       _alphaState( crimild::alloc< AlphaState >( false ) ),
       _cullFaceState( crimild::alloc< CullFaceState >( true, CullFaceState::CullFaceMode::BACK ) ),
       _colorMaskState( crimild::alloc< ColorMaskState >( true, true, true, true, true ) )
-{
-
-}
-
-Material::~Material( void )
 {
 
 }
@@ -139,4 +134,3 @@ void Material::load( Stream &s )
 	s.read( _emissiveMap );
 
 }
-

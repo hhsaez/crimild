@@ -25,43 +25,25 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CRIMILD_CORE_RENDERING_IMAGE_MANAGER_
-#define CRIMILD_CORE_RENDERING_IMAGE_MANAGER_
+#ifndef CRIMILD_CORE_RENDERING_COMPARE_OP_
+#define CRIMILD_CORE_RENDERING_COMPARE_OP_
 
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/Singleton.hpp"
-#include "Foundation/FilePath.hpp"
-#include "Foundation/Policies/CachePolicy.hpp"
-#include "Foundation/Containers/Array.hpp"
+#include "Mathematics/Vector.hpp"
 
 namespace crimild {
 
-    class Image;
-
-	/**
-		\todo Enable cache using CachePolicy
+    /**
+       \brief Compare operator
      */
-    class ImageManager :
-    	public SharedObject,
-    	public DynamicSingleton< ImageManager > {
-
-    public:
-        struct ImageDescriptor {
-            FilePath filePath;
-            CachePolicy cachePolicy;
-        };
-
-        struct CubemapDescriptor {
-            Array< FilePath > filePaths;
-        };
-
-    public:
-        ImageManager( void ) = default;
-        virtual ~ImageManager( void ) = default;
-
-    public:
-        virtual SharedPointer< Image > loadImage( ImageDescriptor const &descriptor ) const noexcept;
-        virtual SharedPointer< Image > loadCubemap( CubemapDescriptor const &descriptor ) const noexcept;
+    enum class CompareOp {
+        NEVER = 0,
+        LESS = 1,
+        EQUAL = 2,
+        LESS_OR_EQUAL = 3,
+        GREATER = 4,
+        NOT_EQUAL = 5,
+        GREATER_OR_EQUAL = 6,
+        ALWAYS = 7,
     };
 
 }

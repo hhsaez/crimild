@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the copyright holder nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -58,7 +58,7 @@ namespace crimild {
 		class ShaderGraph;
 
 	}
-    
+
 	class ShaderProgram :
 		public SharedObject,
 		public RTTI,
@@ -72,6 +72,7 @@ namespace crimild {
 		explicit ShaderProgram( const ShaderArray &shaders ) noexcept;
 		virtual ~ShaderProgram( void ) = default;
 
+        inline void setShaders( ShaderArray const &shaders ) noexcept { m_shaders = shaders; }
 		ShaderArray &getShaders( void ) noexcept { return m_shaders; }
 
         Array< VertexLayout > vertexLayouts;
@@ -88,7 +89,7 @@ namespace crimild {
 	private:
 		using UniformArray = Array< SharedPointer< ShaderUniform >>;
 		using UniformMap = Map< std::string, SharedPointer< ShaderUniform >>;
-		
+
 	public:
 		class StandardLocation {
 		public:
@@ -121,7 +122,7 @@ namespace crimild {
 				MATERIAL_USE_NORMAL_MAP_UNIFORM,
 				MATERIAL_EMISSIVE_MAP_UNIFORM,
 				MATERIAL_USE_EMISSIVE_MAP_UNIFORM,
-                
+
                 USE_COLOR_MAP_UNIFORM = 2000,
                 COLOR_MAP_UNIFORM,
                 USE_DEPTH_MAP_UNIFORM,
@@ -156,15 +157,15 @@ namespace crimild {
 
                 SKINNED_MESH_JOINT_COUNT_UNIFORM = 6000,
                 SKINNED_MESH_JOINT_POSE_UNIFORM,
-                
+
                 LINEAR_DEPTH_CONSTANT_UNIFORM = 8000,
-                
+
                 G_BUFFER_COLOR_MAP_UNIFORM = 10000,
                 G_BUFFER_POSITION_MAP_UNIFORM,
                 G_BUFFER_NORMAL_MAP_UNIFORM,
                 G_BUFFER_EMISSIVE_MAP_UNIFORM,
                 G_BUFFER_DEPTH_MAP_UNIFORM,
-                
+
                 BLEND_SRC_MAP_UNIFORM = 20000,
                 BLEND_DST_MAP_UNIFORM,
                 BLEND_MODE_UNIFORM,
@@ -209,7 +210,7 @@ namespace crimild {
 			return static_cast< ShaderUniformType * >(
 				_uniforms.contains( name )
 				    ? crimild::get_ptr( _uniforms[ name ] )
-				    : nullptr 
+				    : nullptr
 			);
 		}
 
@@ -254,4 +255,3 @@ namespace crimild {
 }
 
 #endif
-

@@ -43,16 +43,10 @@ crimild::Bool SamplerManager::bind( Sampler *sampler ) noexcept
 
     // Assume no layers excepts in the case where we're dealing with cubemaps
     auto addressMode = utils::getSamplerAddressMode( sampler->getWrapMode() );
-    auto compareOp = VK_COMPARE_OP_ALWAYS;
+    auto compareOp = utils::getCompareOp( sampler->getCompareOp() );
     auto borderColor = utils::getBorderColor( sampler->getBorderColor() );
 	auto minLod = crimild::Real32( sampler->getMinLod() );
 	auto maxLod = crimild::Real32( sampler->getMaxLod() );
-
-    // overrides for cubemap
-//    if ( isCubemap ) {
-	//      addressMode = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-	//  compareOp = VK_COMPARE_OP_NEVER;
-    //}
 
     auto samplerInfo = VkSamplerCreateInfo {
 		.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
@@ -109,4 +103,3 @@ crimild::Bool SamplerManager::unbind( Sampler *sampler ) noexcept
 
     return ManagerImpl::unbind( sampler );
 }
-

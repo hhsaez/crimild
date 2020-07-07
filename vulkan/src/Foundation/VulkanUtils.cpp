@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the copyright holder nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -69,7 +69,7 @@ const char *utils::errorToString( VkResult result ) noexcept
 		CRIMILD_VULKAN_ERROR_STRING( VK_RESULT_BEGIN_RANGE );
 		CRIMILD_VULKAN_ERROR_STRING( VK_RESULT_RANGE_SIZE );
 		default: return "UNKNOWN";
-	};	
+	};
 }
 
 VkShaderStageFlagBits utils::getVulkanShaderStageFlag( Shader::Stage stage ) noexcept
@@ -235,6 +235,29 @@ VkIndexType utils::getIndexType( const IndexBuffer *indexBuffer ) noexcept
             return VK_INDEX_TYPE_UINT16;
         default:
             return VK_INDEX_TYPE_UINT32;
+    }
+}
+
+VkCompareOp utils::getCompareOp( const CompareOp &compareOp ) noexcept
+{
+    switch ( compareOp ) {
+        case CompareOp::NEVER:
+            return VK_COMPARE_OP_NEVER;
+        case CompareOp::LESS:
+            return VK_COMPARE_OP_LESS;
+        case CompareOp::EQUAL:
+            return VK_COMPARE_OP_EQUAL;
+        case CompareOp::LESS_OR_EQUAL:
+            return VK_COMPARE_OP_LESS_OR_EQUAL;
+        case CompareOp::GREATER:
+            return VK_COMPARE_OP_GREATER;
+        case CompareOp::NOT_EQUAL:
+            return VK_COMPARE_OP_NOT_EQUAL;
+        case CompareOp::GREATER_OR_EQUAL:
+            return VK_COMPARE_OP_GREATER_OR_EQUAL;
+        case CompareOp::ALWAYS:
+        default:
+            return VK_COMPARE_OP_ALWAYS;
     }
 }
 
@@ -1064,7 +1087,7 @@ void utils::transitionImageLayout( RenderDevice *renderDevice, VkImage image, Vk
     endSingleTimeCommands( renderDevice, commandBuffer );
 }
 
-void utils::copyBufferToImage( RenderDevice *renderDevice, VkBuffer buffer, VkImage image, crimild::UInt32 width, crimild::UInt32 height ) noexcept
+void utils::copyBufferToImage( RenderDevice *renderDevice, VkBuffer buffer, VkImage image, crimild::UInt32 width, crimild::UInt32 height, UInt32 layerCount ) noexcept
 {
     auto commandBuffer = beginSingleTimeCommands( renderDevice );
 
@@ -1075,7 +1098,7 @@ void utils::copyBufferToImage( RenderDevice *renderDevice, VkBuffer buffer, VkIm
         .imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
         .imageSubresource.mipLevel = 0,
         .imageSubresource.baseArrayLayer = 0,
-        .imageSubresource.layerCount = 1,
+        .imageSubresource.layerCount = layerCount,
         .imageOffset = { 0, 0 },
         .imageExtent = {
             .width = width,
@@ -1262,7 +1285,7 @@ VkImageType utils::getImageType( Image *image ) noexcept
 		case Image::Type::IMAGE_3D:
 			return VK_IMAGE_TYPE_3D;
 		default:
-			return VK_IMAGE_TYPE_2D;		
+			return VK_IMAGE_TYPE_2D;
 	}
 }
 
@@ -1285,7 +1308,7 @@ VkImageViewType utils::getImageViewType( ImageView *imageView ) noexcept
 			return VK_IMAGE_VIEW_TYPE_3D;
 		case ImageView::Type::IMAGE_VIEW_CUBE:
 			return VK_IMAGE_VIEW_TYPE_CUBE;
-		default: 
+		default:
 			break;
 	}
 
@@ -1295,10 +1318,12 @@ VkImageViewType utils::getImageViewType( ImageView *imageView ) noexcept
 			return VK_IMAGE_VIEW_TYPE_1D;
 		case Image::Type::IMAGE_2D:
 			return VK_IMAGE_VIEW_TYPE_2D;
+		case Image::Type::IMAGE_2D_CUBEMAP:
+			return VK_IMAGE_VIEW_TYPE_CUBE;
 		case Image::Type::IMAGE_3D:
 			return VK_IMAGE_VIEW_TYPE_3D;
 		default:
-			return VK_IMAGE_VIEW_TYPE_2D;		
+			return VK_IMAGE_VIEW_TYPE_2D;
 	}
 }
 
@@ -1317,7 +1342,7 @@ VkImageAspectFlags utils::getImageViewAspectFlags( ImageView *imageView ) noexce
 	if ( format == Format::UNDEFINED ) {
 		format = imageView->image->format;
 	}
-	
+
 	if ( utils::formatIsDepthStencil( format ) ) {
 		return VK_IMAGE_ASPECT_DEPTH_BIT;
 	}
@@ -1444,4 +1469,3 @@ void utils::endSingleTimeCommands( RenderDevice *renderDevice, VkCommandBuffer c
         &commandBuffer
     );
 }
-

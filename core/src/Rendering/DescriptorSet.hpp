@@ -66,6 +66,12 @@ namespace crimild {
 		{
 			return static_cast< T * >( crimild::get_ptr( obj ) );
 		}
+
+        template< typename T >
+		inline const T *get( void ) const noexcept
+		{
+			return static_cast< T * >( crimild::get_ptr( obj ) );
+		}
     };
 
     class DescriptorPool : public SharedObject, public RenderResourceImpl< DescriptorPool > {
