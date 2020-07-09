@@ -31,13 +31,14 @@
 #include "Rendering/IndexBuffer.hpp"
 #include "Rendering/RenderPass.hpp"
 #include "Rendering/VertexBuffer.hpp"
+#include "Primitives/Primitive.hpp"
 
 using namespace crimild;
 
 CommandBuffer::Command::Command( void ) noexcept
     : obj { }
 {
-    
+
 }
 
 CommandBuffer::Command::Command( const Command &other ) noexcept
@@ -254,6 +255,21 @@ void CommandBuffer::drawIndexed( crimild::UInt32 count, crimild::Size indexOffse
     cmd.type = Command::Type::DRAW_INDEXED;
     cmd.count = count;
     m_commands.push_back( cmd );
+}
+
+void CommandBuffer::drawPrimitive( Primitive *primitive ) noexcept
+{
+    auto vertices = primitive->getVertexData()[ 0 ];
+    bindVertexBuffer( get_ptr( vertices ) );
+
+    auto indices = primitive->getIndices();
+    if ( indices != nullptr ) {
+        bindIndexBuffer( indices );
+        drawIndexed( indices->getIndexCount() );
+    }
+    else {
+        draw( vertices->getVertexCount() );
+    }
 }
 
 void CommandBuffer::end( void ) noexcept
