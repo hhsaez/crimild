@@ -119,6 +119,7 @@ namespace crimild {
 		void draw( crimild::UInt32 count ) noexcept;
         void drawIndexed( crimild::UInt32 count ) noexcept;
         void drawIndexed( crimild::UInt32 count, crimild::Size indexOffset, crimild::Size vertexOffset ) noexcept;
+        void drawPrimitive( Primitive *primitive ) noexcept;
 
         void clear( void ) noexcept;
 
@@ -136,5 +137,3 @@ namespace crimild {
 }
 
 #endif
-
-
