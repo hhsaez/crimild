@@ -263,6 +263,11 @@
 #include "Rendering/UniformBuffer.hpp"
 #include "Rendering/VertexBuffer.hpp"
 
+#include "Rendering/Materials/SimpleLitMaterial.hpp"
+#include "Rendering/Materials/UnlitMaterial.hpp"
+
+#include "Rendering/Programs/PhongLitShaderProgram.hpp"
+
 #include "Rendering/Uniforms/CameraViewProjectionUniformBuffer.hpp"
 #include "Rendering/Uniforms/ModelUniformBuffer.hpp"
 #include "Rendering/Uniforms/ModelViewProjectionUniformBuffer.hpp"
