@@ -48,6 +48,9 @@ SharedPointer< ShaderModule > ShaderModuleManager::create( ShaderModule::Descrip
         renderDevice = descriptor.renderDevice;
     }
 
+    auto shader = descriptor.shader;
+    assert( shader != nullptr && "Shader instance is null" );
+
     const auto &code = descriptor.shader->getData();
 
     auto createInfo = VkShaderModuleCreateInfo {

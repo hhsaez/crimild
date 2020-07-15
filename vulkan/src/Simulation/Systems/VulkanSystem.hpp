@@ -123,6 +123,9 @@ namespace crimild {
             std::vector< SharedPointer< Semaphore >> m_renderFinishedSemaphores;
             std::vector< SharedPointer< Fence >> m_inFlightFences;
             crimild::UInt32 m_currentFrame = 0;
+
+        private:
+            void initShaders( void ) noexcept;
         };
 
     }

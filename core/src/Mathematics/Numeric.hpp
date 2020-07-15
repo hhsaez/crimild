@@ -35,7 +35,7 @@
 #include <limits>
 
 namespace crimild {
-    
+
     template< typename PRECISION >
     class Numeric {
     public:
@@ -45,89 +45,89 @@ namespace crimild {
         static const PRECISION TWO_PI;
         static const PRECISION SQRT_TWO;
         static const PRECISION SQRT_TWO_DIV_TWO;
-        
+
         static const PRECISION DEG_TO_RAD;
         static const PRECISION RAD_TO_DEG;
-        
+
         static const PRECISION COS_0;
         static const PRECISION COS_45;
         static const PRECISION COS_90;
         static const PRECISION COS_135;
         static const PRECISION COS_180;
-        
+
         static const PRECISION POSITIVE_INFINITY;
         static const PRECISION NEGATIVE_INFINITY;
-        
+
         static bool isZero( PRECISION number )
         {
             return ( std::fabs( number ) <= ZERO_TOLERANCE );
         }
-        
+
         static bool equals( PRECISION x, PRECISION y )
         {
             return ( std::fabs( x - y ) <= ZERO_TOLERANCE );
         }
-        
+
         static bool notEqual( PRECISION x, PRECISION y )
         {
             return !equal( x, y );
         }
-        
+
         static bool less( PRECISION x, PRECISION y )
         {
             return x < y;
         }
-        
+
         static bool lEqual( PRECISION x, PRECISION y )
         {
             return x <= y;
         }
-        
+
         static bool greater( PRECISION x, PRECISION y )
         {
             return x > y;
         }
-        
+
         static bool gEqual( PRECISION x, PRECISION y )
         {
             return x >= y;
         }
-        
+
         static PRECISION max( PRECISION x, PRECISION y )
         {
             return ( x > y ? x : y );
         }
-        
+
         static PRECISION min( PRECISION x, PRECISION y )
         {
             return ( x < y ? x : y );
         }
-        
+
         static PRECISION squared( PRECISION x )
         {
             return ( x * x );
         }
-        
+
         static PRECISION pow( PRECISION x, PRECISION e )
         {
             return std::pow( x, e );
         }
-        
+
         static PRECISION exp( PRECISION x )
         {
             return ::exp( x );
         }
-        
+
         static PRECISION noiseFunc( PRECISION reference )
         {
             return sqrt( -2 * log( ( PRECISION ) std::rand() / RAND_MAX ) ) * sin( 2 * PI * ( PRECISION ) std::rand() / RAND_MAX ) * reference;
         }
-        
+
         static PRECISION clamp( PRECISION input )
         {
             return clamp( input, 0, 1 );
         }
-        
+
         static PRECISION clamp( PRECISION input, PRECISION min, PRECISION max )
         {
             PRECISION result = input;
@@ -139,100 +139,119 @@ namespace crimild {
             }
             return result;
         }
-        
+
         static int sign( PRECISION input )
         {
             return input < 0 ? -1 : 1;
         }
-        
+
         static PRECISION fract( PRECISION x )
         {
             return x - ( long ) x;
         }
-        
+
         static PRECISION roundInc( PRECISION n, PRECISION max, PRECISION step = 1 )
         {
             return ( n + step ) % max;
         }
-        
+
         static PRECISION roundDec( PRECISION n, PRECISION max, PRECISION step = -1 )
         {
             return ( n + step + max ) % max;
         }
-        
+
         static PRECISION cos( double angle )
         {
             return static_cast< PRECISION >( std::cos( angle ) );
         }
-        
+
         static PRECISION acos( double value )
         {
             return static_cast< PRECISION >( std::acos( value ) );
         }
-        
+
         static PRECISION sin( double angle )
         {
             return static_cast< PRECISION >( std::sin( angle ) );
         }
-        
+
         static PRECISION tan( double angle )
         {
             return static_cast< PRECISION >( std::tan( angle ) );
         }
-        
+
         static PRECISION atan( double angle )
         {
             return static_cast< PRECISION >( std::atan( angle ) );
         }
-        
+
         static void swap( PRECISION &a, PRECISION &b )
         {
             PRECISION temp = a;
             a = b;
             b = temp;
         }
-        
+
         static PRECISION sqrt( double n )
         {
             return std::sqrt( n );
         }
-        
+
         static PRECISION fabs( PRECISION n )
         {
             return std::fabs( n );
         }
-        
+
         static PRECISION log( PRECISION n )
         {
             return ( PRECISION ) ::log( n );
         }
-        
+
         static PRECISION log2( PRECISION n )
         {
             return ( PRECISION ) ::log2( n );
         }
-        
+
         static PRECISION ceil( double n )
         {
             return ( PRECISION ) std::ceil( n );
         }
-        
+
         static PRECISION floor( double n )
         {
             return ( PRECISION ) std::floor( n );
         }
+
+        static PRECISION remap( PRECISION x0, PRECISION x1, PRECISION y0, PRECISION y1, PRECISION t )
+        {
+            // x0 -> y0
+            // x1 -> y1
+            // [x0, x1] -> [y0, y1]
+            return y0 + double( t - x0 ) / double( x1 - x0 ) * double( y1 - y0 );
+        };
+
+        static PRECISION remapCos( PRECISION y0, PRECISION y1, double t )
+        {
+            return remap( -1.0, 1.0, y0, y1, cos( t ) );
+        }
+
+        static PRECISION remapSin( PRECISION y0, PRECISION y1, double t )
+        {
+            return remap( -1.0, 1.0, y0, y1, sin( t ) );
+        }
+
     };
-    
+
     template< typename T > const T Numeric< T >::ZERO_TOLERANCE = static_cast< T >( 1e-06 );
     template< typename T > const T Numeric< T >::PI = static_cast< T >( 3.1415926535897932384626433832795 );
     template< typename T > const T Numeric< T >::HALF_PI = static_cast< T >( 3.1415926535897932384626433832795 / 2.0 );
     template< typename T > const T Numeric< T >::TWO_PI = static_cast< T >( 3.1415926535897932384626433832795 * 2 );
     template< typename T > const T Numeric< T >::SQRT_TWO = static_cast< T >( std::sqrt( 2 ) );
     template< typename T > const T Numeric< T >::SQRT_TWO_DIV_TWO = static_cast< T >( 0.5 * Numeric< double >::sqrt( 2 ) );
-    
+
     template< typename T > const T Numeric< T >::DEG_TO_RAD = static_cast< T >( 3.1415926535897932384626433832795 / 180.0 );
     template< typename T > const T Numeric< T >::RAD_TO_DEG = static_cast< T >( 180.0 / 3.1415926535897932384626433832795 );
-    
+
     template< typename T > const T Numeric< T >::COS_0 = static_cast< T >( 1.0 );
     template< typename T > const T Numeric< T >::COS_45 = static_cast< T >( 0.5 * Numeric< double >::sqrt( 2.0 ) );
     template< typename T > const T Numeric< T >::COS_90 = static_cast< T >( 0.0 );
@@ -241,12 +260,11 @@ namespace crimild {
 
 	template< typename T > const T Numeric< T >::POSITIVE_INFINITY = std::numeric_limits< T >::max();
 	template< typename T > const T Numeric< T >::NEGATIVE_INFINITY = std::numeric_limits< T >::min();
-    
+
     typedef Numeric< int > Numerici;
     typedef Numeric< float > Numericf;
     typedef Numeric< double > Numericd;
-    
+
 }
 
 #endif
-
