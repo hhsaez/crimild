@@ -22,10 +22,10 @@ CRIMILD_RESOURCE_ENCODER=$CRIMILD_HOME/tools/resourceEncoder/resourceEncoder
 WORK_DIR=$1
 pushd $WORK_DIR > /dev/null
 
-for file in `ls ./*.{vert,frag}`; do
+for file in `find . -type f \( -name "*.vert" -o -name "*.frag" \) -print`; do
 	echo "Compiling $file"
 	$VULKAN_COMPILER $file -o "$file.spv"
-	
+
 	echo "Encoding $file"
 	$CRIMILD_RESOURCE_ENCODER "$file.spv" "$file.inl"
 done

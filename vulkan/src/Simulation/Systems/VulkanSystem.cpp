@@ -33,7 +33,10 @@
 #include "Rendering/VulkanCommandBuffer.hpp"
 #include "Rendering/VulkanFence.hpp"
 #include "Rendering/VulkanBuffer.hpp"
+#include "Rendering/Programs/PhongLitShaderProgram.hpp"
+#include "Rendering/Programs/UnlitShaderProgram.hpp"
 #include "SceneGraph/Camera.hpp"
+#include "Simulation/AssetManager.hpp"
 
 #include "Foundation/Containers/Array.hpp"
 #include "Rendering/ShaderProgram.hpp"
@@ -46,6 +49,8 @@ using namespace crimild::vulkan;
 
 crimild::Bool VulkanSystem::start( void )
 {
+    initShaders();
+
     return System::start()
         && createInstance()
         && createDebugMessenger()
@@ -148,7 +153,7 @@ void VulkanSystem::stop( void )
     m_debugMessenger = nullptr;
     m_surface = nullptr;
     m_instance = nullptr;
-    
+
     RenderDeviceManager::cleanup();
     PhysicalDeviceManager::cleanup();
     VulkanDebugMessengerManager::cleanup();
@@ -310,3 +315,39 @@ void VulkanSystem::updateUniformBuffer( crimild::UInt32 currentImage ) noexcept
     getRenderDevice()->updateUniformBuffers( currentImage );
 }
 
+void VulkanSystem::initShaders( void ) noexcept
+{
+    auto createShader = []( Shader::Stage stage, const unsigned char *rawData, crimild::Size size ) {
+        std::vector< char > data( size + ( size % 4 ) );
+        memcpy( &data[ 0 ], rawData, size );
+        return crimild::alloc< Shader >( stage, data );
+    };
+
+    auto assets = AssetManager::getInstance();
+
+    assets->get< PhongLitShaderProgram >()->setShaders(
+        {
+            [&] {
+                #include "Rendering/Shaders/lit/phong.vert.inl"
+                return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
+            }(),
+            [&] {
+                #include "Rendering/Shaders/lit/phong.frag.inl"
+                return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
+            }(),
+        }
+    );
+
+    assets->get< UnlitShaderProgram >()->setShaders(
+        {
+            [&] {
+                #include "Rendering/Shaders/unlit/unlit.vert.inl"
+                return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
+            }(),
+            [&] {
+                #include "Rendering/Shaders/unlit/unlit.frag.inl"
+                return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
+            }(),
+        }
+    );
+}
