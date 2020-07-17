@@ -59,6 +59,16 @@ SimpleLitMaterial::SimpleLitMaterial( const Props &props ) noexcept
                     .descriptorType = DescriptorType::UNIFORM_BUFFER,
                     .obj = crimild::alloc< UniformBuffer >( props ),
                 },
+                {
+                    // Diffuse map
+                    .descriptorType = DescriptorType::TEXTURE,
+                    .obj = Texture::ONE,
+                },
+                {
+                    // Specular map
+                    .descriptorType = DescriptorType::TEXTURE,
+                    .obj = Texture::ONE,
+                },
             };
             return descriptors;
         }()
@@ -73,4 +83,34 @@ SimpleLitMaterial::Props &SimpleLitMaterial::getProps( void ) noexcept
 const SimpleLitMaterial::Props &SimpleLitMaterial::getProps( void ) const noexcept
 {
     return getDescriptors()->descriptors[ 0 ].get< UniformBuffer >()->getValue< Props >();
+}
+
+void SimpleLitMaterial::setDiffuseMap( SharedPointer< Texture > const &diffuseMap ) noexcept
+{
+    getDescriptors()->descriptors[ 1 ].obj = diffuseMap;
+}
+
+const Texture *SimpleLitMaterial::getDiffuseMap( void ) const noexcept
+{
+    return getDescriptors()->descriptors[ 1 ].get< Texture >();
+}
+
+Texture *SimpleLitMaterial::getDiffuseMap( void ) noexcept
+{
+    return getDescriptors()->descriptors[ 1 ].get< Texture >();
+}
+
+void SimpleLitMaterial::setSpecularMap( SharedPointer< Texture > const &specularMap ) noexcept
+{
+    getDescriptors()->descriptors[ 2 ].obj = specularMap;
+}
+
+const Texture *SimpleLitMaterial::getSpecularMap( void ) const noexcept
+{
+    return getDescriptors()->descriptors[ 2 ].get< Texture >();
+}
+
+Texture *SimpleLitMaterial::getSpecularMap( void ) noexcept
+{
+    return getDescriptors()->descriptors[ 2 ].get< Texture >();
 }

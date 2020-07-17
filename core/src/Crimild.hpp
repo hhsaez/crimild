@@ -266,7 +266,9 @@
 #include "Rendering/Materials/SimpleLitMaterial.hpp"
 #include "Rendering/Materials/UnlitMaterial.hpp"
 
+#include "Rendering/Programs/GouraudLitShaderProgram.hpp"
 #include "Rendering/Programs/PhongLitShaderProgram.hpp"
+#include "Rendering/Programs/UnlitShaderProgram.hpp"
 
 #include "Rendering/Uniforms/CameraViewProjectionUniformBuffer.hpp"
 #include "Rendering/Uniforms/ModelUniformBuffer.hpp"

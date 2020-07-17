@@ -160,6 +160,8 @@ PipelineManager::ShaderModuleArray PipelineManager::createShaderModules( RenderD
     CRIMILD_LOG_TRACE( "Creating shader modules" );
 
     ShaderModuleArray modules;
+    assert( program != nullptr && "Invalid shader program instance" );
+    assert( !program->getShaders().empty() && "Invalid shader program" );
     program->getShaders().each( [ &modules, renderDevice ]( SharedPointer< Shader > &shader ) {
         auto module = renderDevice->create(
             ShaderModule::Descriptor {
