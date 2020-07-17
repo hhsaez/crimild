@@ -43,7 +43,7 @@ namespace crimild {
             RGBAColorf ambient = RGBAColorf::ZERO;
             RGBAColorf diffuse = RGBAColorf::ONE;
             RGBAColorf specular = RGBAColorf::ONE;
-            Real32 shininess = 1.0f;
+            Real32 shininess = 32.0f;
             Real32 padding[ 3 ];
         };
 
@@ -58,8 +58,16 @@ namespace crimild {
         inline void setDiffuse( const RGBAColorf &diffuse ) noexcept { getProps().diffuse = diffuse; };
         inline const RGBAColorf &getDiffuse( void ) const noexcept { return getProps().diffuse; }
 
+        void setDiffuseMap( SharedPointer< Texture > const &diffuseMap ) noexcept;
+        const Texture *getDiffuseMap( void ) const noexcept;
+        Texture *getDiffuseMap( void ) noexcept;
+
         inline void setSpecular( const RGBAColorf &specular ) noexcept { getProps().specular = specular; };
         inline const RGBAColorf &getSpecular( void ) const noexcept { return getProps().specular; }
+
+        void setSpecularMap( SharedPointer< Texture > const &specularMap ) noexcept;
+        const Texture *getSpecularMap( void ) const noexcept;
+        Texture *getSpecularMap( void ) noexcept;
 
         inline void setShininess( Real32 shininess ) noexcept { getProps().shininess = shininess; }
         inline Real32 getShininess( void ) const noexcept { return getProps().shininess; }

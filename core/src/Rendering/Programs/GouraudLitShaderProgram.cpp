@@ -25,13 +25,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Rendering/Programs/PhongLitShaderProgram.hpp"
+#include "Rendering/Programs/GouraudLitShaderProgram.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Vertex.hpp"
 
 using namespace crimild;
 
-PhongLitShaderProgram::PhongLitShaderProgram( void ) noexcept
+GouraudLitShaderProgram::GouraudLitShaderProgram( void ) noexcept
 {
     vertexLayouts = { VertexP3N3TC2::getLayout() };
 
@@ -54,19 +54,8 @@ PhongLitShaderProgram::PhongLitShaderProgram( void ) noexcept
             auto layout = crimild::alloc< DescriptorSetLayout >();
             layout->bindings = {
                 {
-                    // Material properties
                     .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                    .stage = Shader::Stage::FRAGMENT,
-                },
-                {
-                    // Diffuse Map
-                    .descriptorType = DescriptorType::TEXTURE,
-                    .stage = Shader::Stage::FRAGMENT,
-                },
-                {
-                    // Specular Map
-                    .descriptorType = DescriptorType::TEXTURE,
-                    .stage = Shader::Stage::FRAGMENT,
+                    .stage = Shader::Stage::VERTEX,
                 },
             };
             return layout;
