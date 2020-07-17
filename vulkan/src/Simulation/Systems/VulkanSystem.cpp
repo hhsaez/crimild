@@ -34,6 +34,7 @@
 #include "Rendering/VulkanFence.hpp"
 #include "Rendering/VulkanBuffer.hpp"
 #include "Rendering/Programs/PhongLitShaderProgram.hpp"
+#include "Rendering/Programs/GouraudLitShaderProgram.hpp"
 #include "Rendering/Programs/UnlitShaderProgram.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "Simulation/AssetManager.hpp"
@@ -338,6 +339,19 @@ void VulkanSystem::initShaders( void ) noexcept
         }
     );
 
+    assets->get< GouraudLitShaderProgram >()->setShaders(
+        {
+            [&] {
+                #include "Rendering/Shaders/lit/gouraud.vert.inl"
+                return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
+            }(),
+            [&] {
+                #include "Rendering/Shaders/lit/gouraud.frag.inl"
+                return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
+            }(),
+        }
+    );
+
     assets->get< UnlitShaderProgram >()->setShaders(
         {
             [&] {
@@ -350,4 +364,5 @@ void VulkanSystem::initShaders( void ) noexcept
             }(),
         }
     );
+
 }
