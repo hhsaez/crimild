@@ -216,11 +216,13 @@
 #include "ParticleSystem/Renderers/AnimatedSpriteParticleRenderer.hpp"
 
 #include "Primitives/Primitive.hpp"
+#include "Primitives/ArrowPrimitive.hpp"
 #include "Primitives/ArcPrimitive.hpp"
 #include "Primitives/BoxPrimitive.hpp"
 #include "Primitives/ParametricPrimitive.hpp"
 #include "Primitives/ParametricSpherePrimitive.hpp"
 #include "Primitives/ConePrimitive.hpp"
+#include "Primitives/CylinderPrimitive.hpp"
 #include "Primitives/KleinBottlePrimitive.hpp"
 #include "Primitives/MobiusStripPrimitive.hpp"
 #include "Primitives/NewellTeapotPrimitive.hpp"
