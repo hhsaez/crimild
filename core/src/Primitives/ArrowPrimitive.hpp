@@ -25,27 +25,33 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ConePrimitive.hpp"
+#ifndef CRIMILD_PRIMITIVES_ARROW_
+#define CRIMILD_PRIMITIVES_ARROW_
 
-using namespace crimild;
+#include "Primitive.hpp"
+#include "Rendering/Vertex.hpp"
 
-ConePrimitive::ConePrimitive( const Params &params ) noexcept
-    : ParametricPrimitive( { params.type, params.layout, params.colorMode } )
-{
-    _height = params.height;
-    _radius = params.radius;
+namespace crimild {
 
-    ParametricInterval interval = { params.divisions, Vector2f( Numericf::TWO_PI, 1.0f ), Vector2f( 30, 20 ) };
-    setInterval( interval );
-    generate();
+    /**
+        \brief Creates an arrow
+     */
+    class ArrowPrimitive : public Primitive {
+    public:
+        struct Params {
+            Primitive::Type type = Primitive::Type::TRIANGLES;
+            VertexLayout layout = VertexP3N3::getLayout();
+            Real32 height = 1.0f;
+            Real32 radius = 0.5f;
+        };
+
+    public:
+        ArrowPrimitive( const Params &params ) noexcept;
+        virtual ~ArrowPrimitive( void ) = default;
+    };
+
+    using ArrowPrimitivePtr = SharedPointer< ArrowPrimitive >;
+
 }
 
-Vector3f ConePrimitive::evaluate( const Vector2f &domain ) const
-{
-    float u = domain[ 0 ];
-    float v = domain[ 1 ];
-    float x = _radius * ( 1.0f - v ) * std::cos( u );
-    float y = _height * v;
-    float z = _radius * ( 1.0f - v ) * -std::sin( u );
-    return Vector3f( x, y, z );
-}
+#endif

@@ -27,12 +27,12 @@ SET( CRIMILD_LIBRARY_LINK_LIBRARIES
 
 INCLUDE( ModuleBuildLibrary )
 
-ADD_CUSTOM_COMMAND(
-	TARGET crimild_vulkan
-	PRE_BUILD
-	COMMAND sh
-	ARGS ${CRIMILD_SOURCE_DIR}/vulkan/src/Rendering/Shaders/build_shaders.sh .
-	WORKING_DIRECTORY ${CRIMILD_SOURCE_DIR}/vulkan/src/Rendering/Shaders
-	COMMENT "Compiling Crimild::Vulkan built-in shaders"
-	VERBATIM
-)
+#ADD_CUSTOM_COMMAND(
+#	TARGET crimild_vulkan
+#	PRE_BUILD
+#	COMMAND sh
+#	ARGS ${CRIMILD_SOURCE_DIR}/vulkan/src/Rendering/Shaders/build_shaders.sh .
+#	WORKING_DIRECTORY ${CRIMILD_SOURCE_DIR}/vulkan/src/Rendering/Shaders
+#	COMMENT "Compiling Crimild::Vulkan built-in shaders"
+#	VERBATIM
+#)
