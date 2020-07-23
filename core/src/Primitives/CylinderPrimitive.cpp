@@ -25,11 +25,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ConePrimitive.hpp"
+#include "CylinderPrimitive.hpp"
 
 using namespace crimild;
 
-ConePrimitive::ConePrimitive( const Params &params ) noexcept
+CylinderPrimitive::CylinderPrimitive( const Params &params ) noexcept
     : ParametricPrimitive( { params.type, params.layout, params.colorMode } )
 {
     _height = params.height;
@@ -40,12 +40,12 @@ ConePrimitive::ConePrimitive( const Params &params ) noexcept
     generate();
 }
 
-Vector3f ConePrimitive::evaluate( const Vector2f &domain ) const
+Vector3f CylinderPrimitive::evaluate( const Vector2f &domain ) const
 {
     float u = domain[ 0 ];
     float v = domain[ 1 ];
-    float x = _radius * ( 1.0f - v ) * std::cos( u );
+    float x = _radius * std::cos( u );
     float y = _height * v;
-    float z = _radius * ( 1.0f - v ) * -std::sin( u );
+    float z = _radius * -std::sin( u );
     return Vector3f( x, y, z );
 }
