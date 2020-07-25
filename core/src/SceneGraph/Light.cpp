@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -42,7 +42,7 @@ Light::Light( Type type )
 	  _exponent( 0.0f ),
       _ambient( 0.0f, 0.0f, 0.0f, 0.0f )
 {
-    
+
 }
 
 Light::~Light( void )
@@ -74,15 +74,15 @@ void Light::encode( coding::Encoder &encoder )
 		case Light::Type::POINT:
 			lightType = "point";
 			break;
-			
+
 		case Light::Type::DIRECTIONAL:
 			lightType = "directional";
 			break;
-			
+
 		case Light::Type::SPOT:
 			lightType = "spot";
 			break;
-			
+
 		case Light::Type::AMBIENT:
 			lightType = "ambient";
 			break;
@@ -121,4 +121,3 @@ void Light::decode( coding::Decoder &decoder )
 	decoder.decode( "shadows", shadows );
 	setCastShadows( shadows );
 }
-

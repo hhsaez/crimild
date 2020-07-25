@@ -34,7 +34,7 @@
 
 namespace crimild {
 
-    /*
+    /**
 
     class UniformBuffer : public Buffer {
     public:
