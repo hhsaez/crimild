@@ -25,32 +25,34 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#version 450
+#include "Rendering/UniformBuffer.hpp"
 
-layout ( location = 0 ) in vec3 inPosition;
-layout ( location = 1 ) in vec3 inNormal;
-layout ( location = 2 ) in vec2 inTexCoord;
+namespace crimild {
 
-layout ( set = 0, binding = 0 ) uniform RenderPassUniforms {
-    mat4 view;
-	mat4 proj;
-};
+    /**
+       \brief A uniform that can be updated with a callback
+    */
+    template< typename T >
+    class CallbackUniformBuffer : public UniformBuffer {
+    private:
+        using PreRenderCallback = std::function< T( void ) >;
 
-layout ( set = 2, binding = 0 ) uniform GeometryUniforms {
-	mat4 model;
-};
+    public:
+        explicit CallbackUniformBuffer( const T &value ) noexcept : UniformBuffer( value ) { }
+        explicit CallbackUniformBuffer( PreRenderCallback callback ) noexcept : UniformBuffer( T() ) { onPreRender( callback ); }
+        virtual ~CallbackUniformBuffer( void ) = default;
 
-layout ( location = 0 ) out vec3 outNormal;
-layout ( location = 1 ) out vec3 outPosition;
-layout ( location = 2 ) out vec2 outTexCoord;
-layout ( location = 3 ) out vec3 outEyePosition;
+        inline void onPreRender( PreRenderCallback callback ) noexcept { m_callback = callback; }
 
-void main()
-{
-	gl_Position = proj * view * model * vec4( inPosition, 1.0 );
+        virtual void onPreRender( void ) noexcept override
+        {
+            if ( m_callback != nullptr ) {
+                setValue( m_callback() );
+            }
+        }
 
-    outNormal = normalize( mat3( transpose( inverse( model ) ) ) * inNormal );
-    outPosition = vec3( model * vec4( inPosition, 1.0 ) );
-	outEyePosition = inverse( view )[ 3 ].xyz;
-    outTexCoord = inTexCoord;
+    private:
+        std::function< T( void ) > m_callback;
+    };
+
 }

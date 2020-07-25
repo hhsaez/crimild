@@ -55,6 +55,11 @@ Camera::Camera( float fov, float aspect, float near, float far )
 	_projectionMatrix = _frustum.computeProjectionMatrix();
 	_orthographicMatrix = _frustum.computeOrthographicMatrix();
 	_viewMatrix.makeIdentity();
+
+    if ( getMainCamera() == nullptr ) {
+        // Set itself as the main camera if there isn't one already set
+        setMainCamera( this );
+    }
 }
 
 Camera::~Camera( void )
