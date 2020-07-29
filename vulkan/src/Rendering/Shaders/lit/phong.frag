@@ -80,8 +80,8 @@ vec3 diffuse( vec3 N, vec3 L )
 vec3 specular( vec3 N, vec3 L, vec3 E, vec3 P, vec3 S )
 {
     vec3 V = normalize( E - P );
-    vec3 R = reflect( -L, N );
-    float s = pow( max( dot( V, R ), 0.0 ), material.shininess );
+    vec3 H = normalize( L + V );
+    float s = pow( max( dot( N, H ), 0.0 ), material.shininess );
     return vec3( s ) * S;
 }
 
