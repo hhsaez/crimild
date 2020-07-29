@@ -57,6 +57,16 @@ GouraudLitShaderProgram::GouraudLitShaderProgram( void ) noexcept
                     .descriptorType = DescriptorType::UNIFORM_BUFFER,
                     .stage = Shader::Stage::VERTEX,
                 },
+                {
+                    // Diffuse Map
+                    .descriptorType = DescriptorType::TEXTURE,
+                    .stage = Shader::Stage::VERTEX,
+                },
+                {
+                    // Specular Map
+                    .descriptorType = DescriptorType::TEXTURE,
+                    .stage = Shader::Stage::VERTEX,
+                },
             };
             return layout;
         }(),
