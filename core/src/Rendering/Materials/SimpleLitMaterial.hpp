@@ -40,7 +40,7 @@ namespace crimild {
     class SimpleLitMaterial : public Material {
     public:
         struct Props {
-            RGBAColorf ambient = RGBAColorf::ZERO;
+            RGBAColorf ambient = RGBAColorf::ONE;
             RGBAColorf diffuse = RGBAColorf::ONE;
             RGBAColorf specular = RGBAColorf::ONE;
             Real32 shininess = 32.0f;
