@@ -29,6 +29,7 @@
 #define CRIMILD_RENDERING_UNIFORMS_LIGHT_
 
 #include "Rendering/UniformBuffer.hpp"
+#include "Foundation/Containers/Array.hpp"
 #include "Mathematics/Matrix.hpp"
 
 namespace crimild {
@@ -39,9 +40,14 @@ namespace crimild {
        \todo This should be part of the Light class. That way, we can have different
        uniforms for different types of lights (point, directional, PBR, etc.)
      */
-    class LightUniform : public UniformBuffer {
+    class LightingUniform : public UniformBuffer {
     private:
-        struct Props {
+        static constexpr const Size MAX_AMBIENT_LIGHTS = 1;
+        static constexpr const Size MAX_DIRECTIONAL_LIGHTS = 2;
+        static constexpr const Size MAX_POINT_LIGHTS = 10;
+        static constexpr const Size MAX_SPOTLIGHTS = 4;
+
+        struct LightProp {
             alignas( 16 ) UInt32 type;
             alignas( 16 ) Vector4f position;
             alignas( 16 ) Vector4f direction;
@@ -51,14 +57,28 @@ namespace crimild {
             alignas( 16 ) Vector4f cutoff;
         };
 
+        struct Lighting {
+            alignas( 16 ) LightProp ambientLights[ MAX_AMBIENT_LIGHTS ];
+            alignas( 16 ) UInt32 ambientLightCount = 0;
+            alignas( 16 ) LightProp directionalLights[ MAX_DIRECTIONAL_LIGHTS ];
+            alignas( 16 ) UInt32 directionalLightCount = 0;
+            alignas( 16 ) LightProp pointLights[ MAX_POINT_LIGHTS ];
+            alignas( 16 ) UInt32 pointLightCount = 0;
+            alignas( 16 ) LightProp spotlights[ MAX_SPOTLIGHTS ];
+            alignas( 16 ) UInt32 spotlightCount = 0;
+        };
+
     public:
-        explicit LightUniform( Light *light ) noexcept;
-        ~LightUniform( void ) = default;
+        explicit LightingUniform( const Array< Light * > &lights ) noexcept;
+        ~LightingUniform( void ) = default;
 
         void onPreRender( void ) noexcept override;
 
     private:
-        Light *m_light = nullptr;
+        Array< Light * > m_ambientLights;
+        Array< Light * > m_directionalLights;
+        Array< Light * > m_pointLights;
+        Array< Light * > m_spotlights;
     };
 
 }

@@ -33,7 +33,7 @@ layout ( location = 1 ) in vec3 inPosition;
 layout ( location = 2 ) in vec2 inTexCoord;
 layout ( location = 3 ) in vec3 inEyePosition;
 
-layout ( set = 0, binding = 1 ) uniform Light {
+struct LightProps {
     uint type;
     vec4 position;
     vec4 direction;
@@ -41,7 +41,18 @@ layout ( set = 0, binding = 1 ) uniform Light {
     vec4 color;
     vec4 attenuation;
     vec4 cutoff;
-} light;
+};
+
+layout ( set = 0, binding = 1 ) uniform Lighting {
+    LightProps ambientLights[ 1 ];
+    uint ambientLightCount;
+    LightProps directionalLights[ 2 ];
+    uint directionalLightCount;
+    LightProps pointLights[ 10 ];
+    uint pointLightCount;
+    LightProps spotLights[ 4 ];
+    uint spotLightCount;
+} lighting;
 
 layout ( set = 1, binding = 0 ) uniform Material {
     vec4 ambient;
@@ -66,12 +77,12 @@ vec3 diffuse( vec3 N, vec3 L )
     return vec3( d ) * material.diffuse.rgb;
 }
 
-vec3 specular( vec3 N, vec3 L, vec3 E, vec3 P )
+vec3 specular( vec3 N, vec3 L, vec3 E, vec3 P, vec3 S )
 {
     vec3 V = normalize( E - P );
     vec3 R = reflect( -L, N );
     float s = pow( max( dot( V, R ), 0.0 ), material.shininess );
-    return vec3( s ) * material.specular.rgb * texture( uSpecularMap, inTexCoord ).rgb;
+    return vec3( s ) * S;
 }
 
 float attenuation( float d, vec3 K )
@@ -84,46 +95,52 @@ void main()
     vec3 N = normalize( inNormal );
     vec3 P = inPosition;
     vec3 E = inEyePosition;
+    vec3 MS = material.specular.rgb * texture( uSpecularMap, inTexCoord ).rgb;
 
     vec3 lightContribution = vec3( 0 );
-    if ( light.type == 0 ) {
-        // ambient
-        vec3 A = ambient( light.ambient.rgb );
+
+    // ambient lights
+    for ( uint i = 0; i < lighting.ambientLightCount; ++i ) {
+        vec3 A = ambient( lighting.ambientLights[ i ].ambient.rgb );
         lightContribution += A;
     }
-    else if ( light.type == 1 ) {
-        // point
-        vec3 L = light.position.xyz - inPosition;
+
+    // point lights
+    for ( uint i = 0; i < lighting.pointLightCount; ++i ) {
+        vec3 L = lighting.pointLights[ i ].position.xyz - inPosition;
         float dist = length( L );
         L = normalize( L );
-        vec3 Lc = light.color.rgb;
-        vec3 A = ambient( light.ambient.rgb );
+        vec3 Lc = lighting.pointLights[ i ].color.rgb;
+        vec3 A = ambient( lighting.pointLights[ i ].ambient.rgb );
         vec3 D = diffuse( N, L );
-        vec3 S = specular( N, L, E, P );
-        float lAtt = attenuation( dist, light.attenuation.xyz );
+        vec3 S = specular( N, L, E, P, MS );
+        float lAtt = attenuation( dist, lighting.pointLights[ i ].attenuation.xyz );
         lightContribution += Lc * lAtt * ( A + D + S );
     }
-    else if ( light.type == 2 ) {
-        // directional
-        vec3 L = normalize( -light.direction.xyz );
-        vec3 Lc = light.color.rgb;
-        vec3 A = ambient( light.ambient.rgb );
+
+    // directional lights
+    for ( uint i = 0; i < lighting.directionalLightCount; ++i ) {
+        vec3 L = normalize( -lighting.directionalLights[ i ].direction.xyz );
+        vec3 Lc = lighting.directionalLights[ i ].color.rgb;
+        vec3 A = ambient( lighting.directionalLights[ i ].ambient.rgb );
         vec3 D = diffuse( N, L );
-        vec3 S = specular( N, L, E, P );
+        vec3 S = specular( N, L, E, P, MS );
         lightContribution += Lc * ( A + D + S );
     }
-    else if ( light.type == 3 ) {
-        vec3 L = light.position.xyz - inPosition;
+
+    // spot light
+    for ( uint i = 0; i < lighting.spotLightCount; ++i ) {
+        vec3 L = lighting.spotLights[ i ].position.xyz - inPosition;
         float dist = length( L );
         L = normalize( L );
-        float theta = dot( L, normalize( -light.direction.xyz ) );
-        float epsilon = light.cutoff.x - light.cutoff.y;
-        float intensity = clamp( ( theta - light.cutoff.y ) / epsilon, 0.0, 1.0 );
-        vec3 Lc = light.color.rgb;
-        vec3 A = ambient( light.ambient.rgb );
+        float theta = dot( L, normalize( -lighting.spotLights[ i ].direction.xyz ) );
+        float epsilon = lighting.spotLights[ i ].cutoff.x - lighting.spotLights[ i ].cutoff.y;
+        float intensity = clamp( ( theta - lighting.spotLights[ i ].cutoff.y ) / epsilon, 0.0, 1.0 );
+        vec3 Lc = lighting.spotLights[ i ].color.rgb;
+        vec3 A = ambient( lighting.spotLights[ i ].ambient.rgb );
         vec3 D = intensity * diffuse( N, L );
-        vec3 S = intensity * specular( N, L, E, P );
-        float lAtt = attenuation( dist, light.attenuation.xyz );
+        vec3 S = intensity * specular( N, L, E, P, MS );
+        float lAtt = attenuation( dist, lighting.spotLights[ i ].attenuation.xyz );
         lightContribution += Lc * lAtt * ( A + D + S );
     }
 

@@ -274,7 +274,7 @@
 
 #include "Rendering/Uniforms/CallbackUniformBuffer.hpp"
 #include "Rendering/Uniforms/CameraViewProjectionUniformBuffer.hpp"
-#include "Rendering/Uniforms/LightUniform.hpp"
+#include "Rendering/Uniforms/LightingUniform.hpp"
 #include "Rendering/Uniforms/ModelUniformBuffer.hpp"
 #include "Rendering/Uniforms/ModelViewProjectionUniformBuffer.hpp"
 
