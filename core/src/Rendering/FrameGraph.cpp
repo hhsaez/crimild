@@ -44,8 +44,10 @@ using namespace crimild;
 void FrameGraph::remove( FrameGraphObject *obj ) noexcept
 {
 	if ( auto node = getNode( obj ) ) {
-		auto nodePtr = crimild::retain( node );
-		m_nodes.remove( nodePtr );
+        // TODO: This needs to be resolved a in a better way
+        // For the moment, just invalidate the obj that is lined to the node
+        // Everything will work, but we'll end up with more nodes than actually needed.
+        node->obj = nullptr;
 
 		// Notify that the frame graph needs rebuilding
 		m_dirty = true;
@@ -217,7 +219,9 @@ void FrameGraph::verifyAllConnections( void ) noexcept
 
     m_nodesByType[ Node::Type::UNIFORM_BUFFER ].each(
         [&]( auto &node ) {
+        	if ( node == nullptr ) return;
             auto ubo = getNodeObject< UniformBuffer >( node );
+            if ( ubo == nullptr ) return;
             connect( ubo->getBufferView(), ubo );
         }
     );
@@ -232,6 +236,7 @@ void FrameGraph::verifyAllConnections( void ) noexcept
     m_nodesByType[ Node::Type::BUFFER_VIEW ].each(
         [&]( auto &node ) {
             auto view = getNodeObject< BufferView >( node );
+            if ( view == nullptr ) return;
             connect( view->getBuffer(), view );
         }
     );
@@ -240,6 +245,7 @@ void FrameGraph::verifyAllConnections( void ) noexcept
 	m_nodesByType[ Node::Type::DESCRIPTOR_SET ].each(
 		[&]( auto &node ) {
 			auto ds = getNodeObject< DescriptorSet >( node );
+            if ( ds == nullptr ) return;
 			ds->descriptors.each(
 				[&]( Descriptor &descriptor ) {
 					switch ( descriptor.descriptorType ) {
@@ -291,6 +297,7 @@ void FrameGraph::verifyAllConnections( void ) noexcept
 	m_nodesByType[ Node::Type::TEXTURE ].each(
 		[&]( auto &node ) {
 			auto texture = getNodeObject< Texture >( node );
+            if ( texture == nullptr ) return;
 			if ( auto imageView = crimild::get_ptr( texture->imageView ) ) {
 				connect(
 					imageView,
@@ -299,7 +306,7 @@ void FrameGraph::verifyAllConnections( void ) noexcept
 			}
 		}
 	);
-	
+
 }
 
 crimild::Bool FrameGraph::isPresentation( SharedPointer< Attachment > const &attachment ) const noexcept

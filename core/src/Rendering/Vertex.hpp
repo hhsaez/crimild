@@ -143,6 +143,22 @@ namespace crimild {
         crimild::Vector3f position;
         crimild::Vector3f normal;
         crimild::Vector2f texCoord;
+
+        // This is requried to be able to use this vertex type in some containers, like maps
+        // See OBJLoader.cpp for a use example
+        friend bool operator==( const VertexP3N3TC2 &lhs, const VertexP3N3TC2 &rhs ) noexcept
+        {
+            return lhs.position == rhs.position && lhs.normal == rhs.normal && lhs.texCoord == rhs.texCoord;
+        }
+
+        // This is requried to be able to use this vertex type in some containers, like maps
+        // See OBJLoader.cpp for a use example
+        friend bool operator<( const VertexP3N3TC2 &lhs, const VertexP3N3TC2 &rhs ) noexcept
+        {
+            return lhs.position.x() < rhs.position.x()
+                && lhs.position.y() < rhs.position.y()
+                && lhs.position.z() < rhs.position.z();
+        }
     };
 
     struct VertexP3TC2 {
