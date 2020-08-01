@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -31,7 +31,7 @@
 #include "SceneGraph/Group.hpp"
 #include "SceneGraph/Geometry.hpp"
 
-#include "Rendering/Material.hpp" 
+#include "Rendering/Material.hpp"
 #include "Rendering/Texture.hpp"
 #include "Rendering/AlphaState.hpp"
 #include "Rendering/DepthState.hpp"
@@ -43,7 +43,7 @@
 
 namespace crimild {
 
-    class Pipeline;
+    class SimpleLitMaterial;
 
 	class OBJLoader : public NonCopyable {
 	private:
@@ -52,9 +52,6 @@ namespace crimild {
 			using LineProcessor = std::function< void( std::stringstream &line ) >;
 
 		public:
-			FileProcessor( void );
-			~FileProcessor( void );
-
 			void readFile( std::string fileName );
 
 			void registerLineProcessor( std::string type, LineProcessor lineProcessor );
@@ -69,12 +66,12 @@ namespace crimild {
 
 	public:
 		explicit OBJLoader( std::string fileName );
-		~OBJLoader( void );
+		~OBJLoader( void ) = default;
 
 		SharedPointer< Group > load( void );
 
-        // Pipeline override point
-        SharedPointer< Pipeline > pipeline;
+        inline void setVerbose( Bool verbose ) noexcept { _verbose = verbose; }
+        Bool isVerbose( void ) const noexcept { return _verbose; }
 
 	private:
 		const std::string &getFileName( void ) const { return _fileName; }
@@ -105,11 +102,14 @@ namespace crimild {
 		void readMaterialEmissiveMap( std::stringstream &line );
 		void readMaterialShaderProgram( std::stringstream &line );
         void readMaterialTranslucency( std::stringstream &line );
-        
+
         SharedPointer< Texture > loadTexture( std::string fileName );
+
+        void printProgress( std::string text, Bool endLine = false ) noexcept;
 
 	private:
 		std::string _fileName;
+        Bool _verbose = true;
 
 		FileProcessor _objProcessor;
 		FileProcessor _mtlProcessor;
@@ -117,8 +117,8 @@ namespace crimild {
 		std::list< SharedPointer< Group > > _objects;
 		Group *_currentObject = nullptr;
 
-		std::map< std::string, SharedPointer< Material > > _materials;
-		Material *_currentMaterial = nullptr;
+		std::map< std::string, SharedPointer< SimpleLitMaterial >> _materials;
+		SimpleLitMaterial *_currentMaterial = nullptr;
 
 		std::vector< Vector3f > _positions;
 		std::vector< Vector2f > _textureCoords;
@@ -129,4 +129,3 @@ namespace crimild {
 }
 
 #endif
-

@@ -43,12 +43,16 @@ namespace crimild {
 		FreeLookCameraComponent( void );
 		virtual ~FreeLookCameraComponent( void );
 
+        inline Real32 getSpeed( void ) const noexcept { return _speed; }
+        inline void setSpeed( Real32 speed ) noexcept { _speed = speed; }
+
 		virtual void start( void ) override;
 		virtual void update( const Clock &c ) override;
 
 	private:
 		Vector2f _lastMousePos;
         crimild::Bool _initialized = false;
+        Real32 _speed = 1.0f;
 	};
 
 }
