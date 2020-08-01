@@ -27,28 +27,14 @@
 
 #include "OBJLoader.hpp"
 
-#include "Components/RenderStateComponent.hpp"
-#include "SceneGraph/Group.hpp"
-#include "SceneGraph/Geometry.hpp"
-#include "Foundation/StringUtils.hpp"
-#include "Foundation/Log.hpp"
-#include "Simulation/AssetManager.hpp"
-#include "Simulation/FileSystem.hpp"
+#include "Components/MaterialComponent.hpp"
 #include "Primitives/Primitive.hpp"
-#include "Rendering/DescriptorSet.hpp"
-#include "Rendering/Renderer.hpp"
-#include "Rendering/Material.hpp"
 #include "Rendering/ImageManager.hpp"
 #include "Rendering/ImageView.hpp"
-#include "Rendering/ShaderProgram.hpp"
-#include "Rendering/VertexBuffer.hpp"
-#include "Rendering/IndexBuffer.hpp"
-#include "Rendering/Pipeline.hpp"
 #include "Rendering/Sampler.hpp"
-#include "Rendering/ShaderLibrary.hpp"
-#include "Rendering/ShaderProgramLibrary.hpp"
-#include "Rendering/Uniforms/ModelUniformBuffer.hpp"
-#include "Components/MaterialComponent.hpp"
+#include "Rendering/Vertex.hpp"
+#include "Rendering/Materials/SimpleLitMaterial.hpp"
+#include "Simulation/FileSystem.hpp"
 
 namespace crimild {
 
@@ -91,7 +77,6 @@ namespace std {
         }
     };
 
-    /*
     template<> struct hash< crimild::VertexP3N3TC2 > {
         size_t operator()( crimild::VertexP3N3TC2 const &vertex ) const {
             size_t seed = 0;
@@ -101,21 +86,10 @@ namespace std {
             return seed;
         }
     };
-    */
 
 }
 
 using namespace crimild;
-
-OBJLoader::FileProcessor::FileProcessor( void )
-{
-
-}
-
-OBJLoader::FileProcessor::~FileProcessor( void )
-{
-
-}
 
 void OBJLoader::FileProcessor::readFile( std::string fileName )
 {
@@ -181,11 +155,6 @@ OBJLoader::OBJLoader( std::string fileName )
     getMTLProcessor().registerLineProcessor( "Tr", std::bind( &OBJLoader::readMaterialTranslucency, this, std::placeholders::_1 ) );
 }
 
-OBJLoader::~OBJLoader( void )
-{
-
-}
-
 void OBJLoader::reset( void )
 {
 	_currentObject = nullptr;
@@ -201,11 +170,6 @@ void OBJLoader::reset( void )
 
 SharedPointer< Group > OBJLoader::load( void )
 {
-    if ( pipeline == nullptr ) {
-        pipeline = crimild::alloc< Pipeline >();
-        pipeline->program = crimild::retain( ShaderProgramLibrary::getInstance()->get( constants::SHADER_PROGRAM_UNLIT_TEXTURE_P3N3TC2 ) );
-    }
-
 	reset();
 
 	getOBJProcessor().readFile( getFileName() );
@@ -227,105 +191,61 @@ void OBJLoader::generateGeometry( void )
 
 	}
 
-#if 0
+    auto progress = std::string( "Generating geometry" );
+    if ( _currentObject->getName() != "" ) {
+        progress += " " + _currentObject->getName();
+    }
 
-    std::vector< VertexP3N3TC2 > vertices;
-    std::vector< crimild::UInt32 > indices;
-    std::unordered_map< VertexP3N3TC2, crimild::UInt32 > uniqueVertices;
+    Array< VertexP3N3TC2 > vertices;
+    Array< UInt32 > indices;
+    Map< VertexP3N3TC2, UInt32 > uniqueVertices;
 
     for ( auto f = 0l; f < _faces.size(); f += 3 ) {
+        printProgress( StringUtils::toString( progress, "... ", f, "/", _faces.size() ) );
         for ( int i = 0; i < 3; i++ ) {
-            auto faceIndices = StringUtils::split< crimild::Int32 >( _faces[ f + i ], '/' );
+            auto faceIndices = StringUtils::split< Int32 >( _faces[ f + i ], '/' );
 
+            // TODO: generate normals automatically if not present?
+            // TODO: generate tex coords autoamtically if not present?
             auto v = VertexP3N3TC2 {
                 .position = _positions[ faceIndices[ 0 ] - 1 ],
                 .normal = !_normals.empty() ? _normals[ faceIndices[ 2 ] - 1 ] : Vector3f::ZERO,
                 .texCoord = !_textureCoords.empty() ? _textureCoords[ faceIndices[ 1 ] - 1 ] : Vector2f::ZERO,
             };
 
-            if ( uniqueVertices.count( v ) == 0 ) {
+            if ( !uniqueVertices.contains( v ) ) {
                 uniqueVertices[ v ] = vertices.size();
-                vertices.push_back( v );
+                vertices.add( v );
             }
 
-            indices.push_back( uniqueVertices[ v ] );
+            indices.add( uniqueVertices[ v ] );
         }
     }
+    printProgress( progress + " COMPLETED", true );
 
-    auto vbo = crimild::alloc< VertexP3N3TC2Buffer >( containers::Array< VertexP3N3TC2 >( vertices.size(), vertices.data() ) );
-    auto ibo = crimild::alloc< IndexUInt32Buffer >( containers::Array< crimild::UInt32 >( indices.size(), indices.data() ) );
-
-    _currentObject->attachNode( [&] {
-        auto geometry = crimild::alloc< Geometry >( "geometry" );
-        geometry->attachComponent( [&] {
-            auto renderState = crimild::alloc< RenderStateComponent >();
-            renderState->pipeline = pipeline;
-            renderState->vbo = vbo;
-            renderState->ibo = ibo;
-            renderState->uniforms = {
+    _currentObject->attachNode(
+        [&] {
+            auto geometry = crimild::alloc< Geometry >( "geometry" );
+            geometry->attachPrimitive(
                 [&] {
-                    auto ubo = crimild::alloc< ModelUniformBuffer >();
-                    ubo->node = crimild::get_ptr( geometry );
-                    return ubo;
-                }(),
-                [&] {
-                    auto color = RGBAColorf::ONE;
-                    if ( _currentMaterial != nullptr ) {
-                        color = _currentMaterial->getDiffuse();
-                    }
-                    auto ubo = crimild::alloc< UniformBufferImpl< RGBAColorf >>( color );
-                    return ubo;
-                }(),
-            };
-            renderState->textures = {
-                [&] {
-                    if ( _currentMaterial == nullptr || _currentMaterial->getColorMap() == nullptr ) {
-                        auto texture = crimild::alloc< Texture >();
-                        texture->imageView = crimild::alloc< ImageView >();
-                        texture->imageView->image = Image::ONE;
-                        texture->sampler = [] {
-                            auto sampler = crimild::alloc< Sampler >();
-                            sampler->setMinFilter( Sampler::Filter::NEAREST );
-                            sampler->setMagFilter( Sampler::Filter::NEAREST );
-                            return sampler;
-                        }();
-                        return texture;
-                    }
-                    return crimild::retain( _currentMaterial->getColorMap() );
-                }(),
-            };
-            renderState->descriptorSet = [&] {
-                auto descriptorSet = crimild::alloc< DescriptorSet >();
-                descriptorSet->descriptorSetLayout = pipeline->program->descriptorSetLayouts[ 1 ];
-                descriptorSet->descriptorPool = crimild::alloc< DescriptorPool >();
-                descriptorSet->descriptorPool->descriptorSetLayout = descriptorSet->descriptorSetLayout;
-				/*
-                descriptorSet->writes = {
-                    {
-                        .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                        .buffer = crimild::get_ptr( renderState->uniforms[ 0 ] ),
-                    },
-                    {
-                        .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                        .buffer = crimild::get_ptr( renderState->uniforms[ 1 ] ),
-                    },
-                    {
-                        .descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
-                        .texture = crimild::get_ptr( renderState->textures[ 0 ] ),
-                    },
-                };
-				*/
-
-
-                return descriptorSet;
-            }();
-            return renderState;
-        }());
-
-        return geometry;
-    }());
-
-#endif
+                    auto primitive = crimild::alloc< Primitive >( Primitive::Type::TRIANGLES );
+                    primitive->setVertexData(
+                        {
+                            crimild::alloc< VertexBuffer >( VertexP3N3TC2::getLayout(), vertices )
+                        }
+                    );
+                    primitive->setIndices(
+                        crimild::alloc< IndexBuffer >( Format::INDEX_32_UINT, indices )
+                    );
+                    return primitive;
+                }()
+            );
+            if ( _currentMaterial != nullptr ) {
+                geometry->attachComponent< MaterialComponent >()->attachMaterial( _currentMaterial );
+            }
+            return geometry;
+        }()
+    );
 
     _faces.clear();
 }
@@ -359,13 +279,15 @@ void OBJLoader::readObjectPositions( std::stringstream &line )
 	float x, y, z;
 	line >> x >> y >> z;
 	_positions.push_back( Vector3f( x, y, z ) );
+    printProgress( StringUtils::toString( "Reading positions... ", _positions.size() / 3 ) );
 }
 
 void OBJLoader::readObjectTextureCoords( std::stringstream &line )
 {
 	float s, t;
 	line >> s >> t;
-	_textureCoords.push_back( Vector2f( s, t ) );
+	_textureCoords.push_back( Vector2f( s, 1.0 - t ) );
+    printProgress( StringUtils::toString( "Reading texture coordinates... ", _textureCoords.size() / 3 ) );
 }
 
 void OBJLoader::readObjectNormals( std::stringstream &line )
@@ -373,6 +295,7 @@ void OBJLoader::readObjectNormals( std::stringstream &line )
 	float x, y, z;
 	line >> x >> y >> z;
 	_normals.push_back( Vector3f( x, y, z ) );
+    printProgress( StringUtils::toString( "Reading normals... ", ( _normals.size() / 3 ) ) );
 }
 
 void OBJLoader::readObjectFaces( std::stringstream &line )
@@ -382,6 +305,7 @@ void OBJLoader::readObjectFaces( std::stringstream &line )
 	_faces.push_back( f0 );
 	_faces.push_back( f1 );
 	_faces.push_back( f2 );
+    printProgress( StringUtils::toString( "Reading faces... ", ( _faces.size() / 3 ) ) );
 }
 
 void OBJLoader::readObjectMaterial( std::stringstream &line )
@@ -405,7 +329,7 @@ void OBJLoader::readMaterialName( std::stringstream &line )
 	std::string name;
 	line >> name;
 
-    auto tmp =  crimild::alloc< Material >() ;
+    auto tmp =  crimild::alloc< SimpleLitMaterial >() ;
     _materials[ name ] = tmp;
     _currentMaterial = crimild::get_ptr( tmp );
 }
@@ -433,7 +357,7 @@ void OBJLoader::readMaterialSpecular( std::stringstream &line )
 
 void OBJLoader::readMaterialColorMap( std::stringstream &line )
 {
-    _currentMaterial->setColorMap( loadTexture( StringUtils::readFullString( line ) ) );
+    _currentMaterial->setDiffuseMap( loadTexture( StringUtils::readFullString( line ) ) );
 }
 
 void OBJLoader::readMaterialNormalMap( std::stringstream &line )
@@ -507,14 +431,32 @@ SharedPointer< Texture > OBJLoader::loadTexture( std::string textureFileName )
     	}
     );
 
+    if ( image == nullptr ) {
+        CRIMILD_LOG_WARNING( "Failed to load image ", textureFileName );
+        image = Image::INVALID;
+    }
+
     auto texture = crimild::alloc< Texture >();
     texture->imageView = crimild::alloc< ImageView >();
     texture->imageView->image = image;
     texture->sampler = [] {
         auto sampler = crimild::alloc< Sampler >();
-        sampler->setMinFilter( Sampler::Filter::NEAREST );
-        sampler->setMagFilter( Sampler::Filter::NEAREST );
+        sampler->setMinFilter( Sampler::Filter::LINEAR );
+        sampler->setMagFilter( Sampler::Filter::LINEAR );
         return sampler;
     }();
     return texture;
+}
+
+void OBJLoader::printProgress( std::string text, bool endLine ) noexcept
+{
+    if ( !isVerbose() ) return;
+
+    std::cout << "\33[2K\r" << text;
+    if ( endLine ) {
+        std::cout << std::endl;
+    }
+    else {
+        std::cout << std::flush;
+    }
 }
