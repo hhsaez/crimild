@@ -28,8 +28,6 @@
 #ifndef CRIMILD_CORE_RENDERING_COMPARE_OP_
 #define CRIMILD_CORE_RENDERING_COMPARE_OP_
 
-#include "Mathematics/Vector.hpp"
-
 namespace crimild {
 
     /**
