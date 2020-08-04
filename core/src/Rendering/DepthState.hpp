@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -31,13 +31,13 @@
 #include "RenderState.hpp"
 
 namespace crimild {
-    
-	class DepthState : public RenderState {
+
+	class [[deprecated]] DepthState : public RenderState {
     public:
         // TODO: these should be 'const'
         static SharedPointer< DepthState > DISABLED;
         static SharedPointer< DepthState > ENABLED;
-        
+
     public:
         enum class CompareFunc : uint8_t {
             NEVER,
@@ -49,22 +49,22 @@ namespace crimild {
             GEQUAL,
             ALWAYS
         };
-        
+
 	public:
         explicit DepthState( bool enabled = true, CompareFunc compareFunc = CompareFunc::LESS, bool writable = true );
 		virtual ~DepthState( void );
-        
+
     public:
         void setCompareFunc( CompareFunc const &compareFunc ) { _compareFunc = compareFunc; }
         CompareFunc getCompareFunc( void ) const { return _compareFunc; }
-        
+
     private:
         CompareFunc _compareFunc = CompareFunc::LESS;
-        
+
     public:
         void setWritable( bool writable ) { _writable = writable; }
         bool isWritable( void ) const { return _writable; }
-        
+
     private:
         bool _writable = true;
 
@@ -80,7 +80,7 @@ namespace crimild {
 
 		inline void setBiasSlopeFactor( float factor ) noexcept { _biasSlopeFactor = factor; }
 		inline float getBiasSlopeFactor( void ) const noexcept { return _biasSlopeFactor; }
-		
+
 	private:
 		bool _biasEnabled = false;
 		float _biasConstantFactor = 0.0f;
@@ -91,4 +91,3 @@ namespace crimild {
 }
 
 #endif
-
