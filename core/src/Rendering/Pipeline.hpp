@@ -28,6 +28,8 @@
 #ifndef CRIMILD_RENDERING_PIPELINE_
 #define CRIMILD_RENDERING_PIPELINE_
 
+#include "Rendering/DepthStencilState.hpp"
+#include "Rendering/RasterizationState.hpp"
 #include "Rendering/RenderResource.hpp"
 #include "Rendering/VertexBuffer.hpp"
 #include "Rendering/ViewportDimensions.hpp"
@@ -39,7 +41,6 @@ namespace crimild {
 
     class AlphaState;
     class CullFaceState;
-    class DepthState;
     class DescriptorSetLayout;
     class PolygonState;
     class RenderPass;
@@ -54,14 +55,15 @@ namespace crimild {
         Primitive::Type primitiveType = Primitive::Type::TRIANGLES;
         ViewportDimensions viewport;
         ViewportDimensions scissor;
+        DepthStencilState depthStencilState;
+        RasterizationState rasterizationState;
+
+        // Deprecated
         SharedPointer< AlphaState > alphaState;
         SharedPointer< CullFaceState > cullFaceState;
-        SharedPointer< DepthState > depthState;
         SharedPointer< PolygonState > polygonState;
     };
 
 }
 
 #endif
-
-

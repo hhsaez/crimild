@@ -331,20 +331,20 @@ VkPipelineRasterizationStateCreateInfo PipelineManager::createRasterizer( Pipeli
         }
     }
 
-    auto depthState = pipeline->depthState;
+    auto &rasterizationState = pipeline->rasterizationState;
 
     return VkPipelineRasterizationStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
-        .depthClampEnable = VK_FALSE, // VK_TRUE might be required for shadow maps
-        .rasterizerDiscardEnable = VK_FALSE, // VK_TRUE disables output to the framebuffer
+        .depthClampEnable = rasterizationState.depthClampEnable,
+        .rasterizerDiscardEnable = rasterizationState.rasterizerDiscardEnable,
         .polygonMode = polygonMode,
         .lineWidth = lineWidth,
         .cullMode = cullMode,
         .frontFace = frontFace,
-        .depthBiasEnable = VkBool32( depthState != nullptr ? depthState->isBiasEnabled() : VK_FALSE ),
-        .depthBiasConstantFactor = depthState != nullptr ? depthState->getBiasConstantFactor() : 0,
-        .depthBiasClamp = depthState != nullptr ? depthState->getBiasClamp() : 0,
-        .depthBiasSlopeFactor = depthState != nullptr ? depthState->getBiasSlopeFactor() : 0,
+        .depthBiasEnable = rasterizationState.depthBiasEnable,
+        .depthBiasConstantFactor = rasterizationState.depthBiasConstantFactor,
+        .depthBiasClamp = rasterizationState.depthBiasClamp,
+        .depthBiasSlopeFactor = rasterizationState.depthBiasSlopeFactor,
     };
 }
 
@@ -367,19 +367,17 @@ VkPipelineMultisampleStateCreateInfo PipelineManager::createMultiplesampleState(
 
 VkPipelineDepthStencilStateCreateInfo PipelineManager::createDepthStencilState( Pipeline *pipeline ) const noexcept
 {
-    VkBool32 enabled = VK_TRUE;
-    if ( auto depthState = crimild::get_ptr( pipeline->depthState ) ) {
-        enabled = depthState->isEnabled() ? VK_TRUE : VK_FALSE;
-    }
+    auto &state = pipeline->depthStencilState;
+
     return VkPipelineDepthStencilStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
-        .depthTestEnable = enabled,
-        .depthWriteEnable = enabled,
-        .depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL,
+        .depthTestEnable = state.depthTestEnable,
+        .depthWriteEnable = state.depthWriteEnable,
+        .depthCompareOp = utils::getCompareOp( state.depthCompareOp ),
         .depthBoundsTestEnable = VK_FALSE,
         .minDepthBounds = 0.0f,
         .maxDepthBounds = 1.0f,
-        .stencilTestEnable = VK_FALSE,
+        .stencilTestEnable = state.stencilTestEnable,
         .front = {},
         .back = {
             .compareOp = VK_COMPARE_OP_ALWAYS
@@ -440,4 +438,3 @@ VkPipelineDynamicStateCreateInfo PipelineManager::createDynamicState( DynamicSta
         .flags = 0,
     };
 }
-
