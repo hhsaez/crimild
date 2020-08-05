@@ -1291,10 +1291,21 @@ VkImageType utils::getImageType( Image *image ) noexcept
 
 VkImageAspectFlags utils::getImageAspectFlags( Image *image ) noexcept
 {
+	VkImageAspectFlags aspect = VK_IMAGE_ASPECT_COLOR_BIT;
 	if ( utils::formatIsDepthStencil( image->format ) ) {
-		return VK_IMAGE_ASPECT_DEPTH_BIT;
+		aspect = VK_IMAGE_ASPECT_DEPTH_BIT;
+        switch ( image->format ) {
+            case Format::DEPTH_16_UNORM_STENCIL_8_UINT:
+            case Format::DEPTH_24_UNORM_STENCIL_8_UINT:
+            case Format::DEPTH_32_SFLOAT_STENCIL_8_UINT:
+            case Format::DEPTH_STENCIL_DEVICE_OPTIMAL:
+                aspect |= VK_IMAGE_ASPECT_STENCIL_BIT;
+                break;
+            default:
+                break;
+        }
 	}
-	return VK_IMAGE_ASPECT_COLOR_BIT;
+    return aspect;
 }
 
 VkImageViewType utils::getImageViewType( ImageView *imageView ) noexcept
@@ -1389,9 +1400,9 @@ VkFormat utils::findDepthFormat( RenderDevice *renderDevice ) noexcept
     return findSupportedFormat(
         renderDevice,
     	{
-        	VK_FORMAT_D32_SFLOAT,
         	VK_FORMAT_D32_SFLOAT_S8_UINT,
-        	VK_FORMAT_D24_UNORM_S8_UINT
+        	VK_FORMAT_D24_UNORM_S8_UINT,
+            VK_FORMAT_D32_SFLOAT,
     	},
        	VK_IMAGE_TILING_OPTIMAL,
        	VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT

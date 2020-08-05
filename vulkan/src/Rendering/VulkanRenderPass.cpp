@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the copyright holders nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -87,7 +87,7 @@ crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
 
 			auto initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 			auto finalLayout = VK_IMAGE_LAYOUT_GENERAL;
-			
+
 			if ( utils::formatIsDepthStencil( format ) ) {
 				depthStencilReferences.add(
 					VkAttachmentReference {
@@ -108,7 +108,7 @@ crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
                 hasPresentation |= isPresentation;
 				finalLayout = isPresentation ? VK_IMAGE_LAYOUT_PRESENT_SRC_KHR : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 			}
-			
+
             // 1. Write only: LoadOp::CLEAR or LoadOp::DONT_CARE
         	// 2. Read-Write: LoadOp::LOAD
         	// 3. Read only: LoadOp::LOAD?
@@ -118,7 +118,7 @@ crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
                 .samples = VK_SAMPLE_COUNT_1_BIT,
                 .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
                 .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-                .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+                .stencilLoadOp = utils::formatIsDepthStencil( attachment->format ) ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE,
                 .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
                 .initialLayout = initialLayout,
                 .finalLayout = finalLayout,
@@ -238,4 +238,3 @@ crimild::Bool vulkan::RenderPassManager::unbind( RenderPass *renderPass ) noexce
 
 	return ManagerImpl::unbind( renderPass );
 }
-

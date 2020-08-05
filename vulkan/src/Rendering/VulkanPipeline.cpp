@@ -369,19 +369,53 @@ VkPipelineDepthStencilStateCreateInfo PipelineManager::createDepthStencilState( 
 {
     auto &state = pipeline->depthStencilState;
 
+    static auto getStencilOp = []( auto in ) {
+        switch ( in ) {
+            case StencilOp::KEEP:
+                return VK_STENCIL_OP_KEEP;
+            case StencilOp::ZERO:
+                return VK_STENCIL_OP_ZERO;
+            case StencilOp::REPLACE:
+                return VK_STENCIL_OP_REPLACE;
+            case StencilOp::INCREMENT_AND_CLAMP:
+                return VK_STENCIL_OP_INCREMENT_AND_CLAMP;
+            case StencilOp::DECREMENT_AND_CLAMP:
+                return VK_STENCIL_OP_DECREMENT_AND_CLAMP;
+            case StencilOp::INVERT:
+                return VK_STENCIL_OP_INVERT;
+            case StencilOp::INCREMENT_AND_WRAP:
+                return VK_STENCIL_OP_INCREMENT_AND_WRAP;
+            case StencilOp::DECREMENT_AND_WRAP:
+                return VK_STENCIL_OP_DECREMENT_AND_WRAP;
+            default:
+                CRIMILD_LOG_ERROR( "Invalid StencilOp value: ", Int32( in ) );
+                return VK_STENCIL_OP_KEEP;
+        }
+    };
+
+    static auto getStencilOpState = []( auto &in ) {
+        return VkStencilOpState {
+            .failOp = getStencilOp( in.failOp ),
+            .passOp = getStencilOp( in.passOp ),
+            .depthFailOp = getStencilOp( in.depthFailOp ),
+            .compareOp = utils::getCompareOp( in.compareOp ),
+            .compareMask = in.compareMask,
+            .writeMask = in.writeMask,
+            .reference = in.reference,
+        };
+    };
+
     return VkPipelineDepthStencilStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
         .depthTestEnable = state.depthTestEnable,
         .depthWriteEnable = state.depthWriteEnable,
         .depthCompareOp = utils::getCompareOp( state.depthCompareOp ),
-        .depthBoundsTestEnable = VK_FALSE,
-        .minDepthBounds = 0.0f,
-        .maxDepthBounds = 1.0f,
+        .depthBoundsTestEnable = state.depthBoundsTestEnable,
+        .minDepthBounds = state.minDepthBounds,
+        .maxDepthBounds = state.maxDepthBounds,
         .stencilTestEnable = state.stencilTestEnable,
-        .front = {},
-        .back = {
-            .compareOp = VK_COMPARE_OP_ALWAYS
-        },
+        .front = getStencilOpState( state.front ),
+        .back = getStencilOpState( state.back ),
     };
 }
 
