@@ -193,7 +193,7 @@ bool WindowSystem::createWindow( void )
 	bool vsync = true;
 	int glMajor = 3;
 	int glMinor = 3;
-	int depthBits = 32;
+	int depthBits = 24;
 	int stencilBits = 8;
 	glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, glMajor );
 	glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, glMinor );

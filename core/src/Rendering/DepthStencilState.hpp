@@ -33,11 +33,37 @@
 
 namespace crimild {
 
+    enum class StencilOp {
+        KEEP = 0,
+        ZERO = 1,
+        REPLACE = 2,
+        INCREMENT_AND_CLAMP = 3,
+        DECREMENT_AND_CLAMP = 4,
+        INVERT = 5,
+        INCREMENT_AND_WRAP = 6,
+        DECREMENT_AND_WRAP = 7,
+    };
+
+    struct StencilOpState {
+        StencilOp failOp = StencilOp::KEEP; // action to take if stencil test fails
+        StencilOp passOp = StencilOp::KEEP; // action to take if both depth and stencil tests pass
+        StencilOp depthFailOp = StencilOp::KEEP; // action to take if stencil test passes but depth test fails
+        CompareOp compareOp; // comparison operator for stencil test
+        UInt32 compareMask;
+        UInt32 writeMask;
+        UInt32 reference;
+    };
+
     struct DepthStencilState {
         Bool depthTestEnable = true;
         Bool depthWriteEnable = true;
         CompareOp depthCompareOp = CompareOp::LESS_OR_EQUAL;
+        Bool depthBoundsTestEnable = false;
         Bool stencilTestEnable = false;
+        StencilOpState front = { };
+        StencilOpState back = { .compareOp = CompareOp::ALWAYS };
+        Real32 minDepthBounds = 0.0f;
+        Real32 maxDepthBounds = 1.0f;
     };
 
 }
