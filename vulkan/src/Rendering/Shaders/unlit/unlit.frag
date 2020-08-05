@@ -3,7 +3,7 @@
 
 layout ( location = 0 ) in vec2 inTexCoord;
 
-layout ( set = 1, binding = 0 ) uniform RenderPassUniforms {
+layout ( set = 1, binding = 0 ) uniform MaterialUniform {
     vec4 color;
 };
 
@@ -13,5 +13,8 @@ layout ( location = 0 ) out vec4 outColor;
 
 void main()
 {
-	outColor = vec4( color.rgb * texture( uSampler, inTexCoord ).rgb, 1.0 );
+	outColor = color * texture( uSampler, inTexCoord );
+    if ( outColor.a <= 0.01 ) {
+        discard;
+    }
 }
