@@ -144,7 +144,10 @@ void main()
         lightContribution += Lc * lAtt * ( A + D + S );
     }
 
-    vec3 color = texture( uDiffuseMap, inTexCoord ).rgb;
+    vec4 color = texture( uDiffuseMap, inTexCoord );
+    if ( color.a <= 0.01 ) {
+        discard;
+    }
 
-	outColor = vec4( color * lightContribution, 1.0 );
+	outColor = vec4( color.rgb * lightContribution, color.a );
 }

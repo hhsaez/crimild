@@ -69,7 +69,7 @@ crimild::Bool PipelineManager::bind( Pipeline *pipeline ) noexcept
     auto rasterizer = createRasterizer( pipeline );
     auto multisampleState = createMultiplesampleState();
     auto depthStencilState = createDepthStencilState( pipeline );
-    auto colorBlendAttachment = createColorBlendAttachment();
+    auto colorBlendAttachment = createColorBlendAttachment( pipeline );
     auto colorBlending = createColorBlending( colorBlendAttachment );
     auto dynamicStates = getDynamicStates( pipeline );
     auto dynamicState = createDynamicState( dynamicStates );
@@ -419,17 +419,82 @@ VkPipelineDepthStencilStateCreateInfo PipelineManager::createDepthStencilState( 
     };
 }
 
-VkPipelineColorBlendAttachmentState PipelineManager::createColorBlendAttachment( void ) const noexcept
+VkPipelineColorBlendAttachmentState PipelineManager::createColorBlendAttachment( Pipeline *pipeline ) const noexcept
 {
+    auto &state = pipeline->colorBlendState;
+
+    static auto getVkBlendFactor = []( auto input ) {
+        switch ( input ) {
+            case BlendFactor::ZERO:
+                return VK_BLEND_FACTOR_ZERO;
+            case BlendFactor::ONE:
+                return VK_BLEND_FACTOR_ONE;
+            case BlendFactor::SRC_COLOR:
+                return VK_BLEND_FACTOR_SRC_COLOR;
+            case BlendFactor::ONE_MINUS_SRC_COLOR:
+                return VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR;
+            case BlendFactor::DST_COLOR:
+                return VK_BLEND_FACTOR_DST_COLOR;
+            case BlendFactor::ONE_MINUS_DST_COLOR:
+                return VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR;
+            case BlendFactor::SRC_ALPHA:
+                return VK_BLEND_FACTOR_SRC_ALPHA;
+            case BlendFactor::ONE_MINUS_SRC_ALPHA:
+                return VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+            case BlendFactor::DST_ALPHA:
+                return VK_BLEND_FACTOR_DST_ALPHA;
+            case BlendFactor::ONE_MINUS_DST_ALPHA:
+                return VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA;
+            case BlendFactor::CONSTANT_COLOR:
+                return VK_BLEND_FACTOR_CONSTANT_COLOR;
+            case BlendFactor::ONE_MINUS_CONSTANT_COLOR:
+                return VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR;
+            case BlendFactor::CONSTANT_ALPHA:
+                return VK_BLEND_FACTOR_CONSTANT_ALPHA;
+            case BlendFactor::ONE_MINUS_CONSTANT_ALPHA:
+                return VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA;
+            case BlendFactor::SRC_ALPHA_SATURATE:
+                return VK_BLEND_FACTOR_SRC_ALPHA_SATURATE;
+            case BlendFactor::SRC1_COLOR:
+                return VK_BLEND_FACTOR_SRC1_COLOR;
+            case BlendFactor::ONE_MINUS_SRC1_COLOR:
+                return VK_BLEND_FACTOR_ONE_MINUS_SRC1_COLOR;
+            case BlendFactor::SRC1_ALPHA:
+                return VK_BLEND_FACTOR_SRC1_ALPHA;
+            case BlendFactor::ONE_MINUS_SRC1_ALPHA:
+                return VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA;
+            default:
+                return VK_BLEND_FACTOR_ZERO;
+        }
+    };
+
+    static auto getVkBlendOp = []( auto input ) {
+        switch ( input ) {
+            case BlendOp::ADD:
+                return VK_BLEND_OP_ADD;
+            case BlendOp::SUBTRACT:
+                return VK_BLEND_OP_SUBTRACT;
+            case BlendOp::REVERSE_SUBTRACT:
+                return VK_BLEND_OP_REVERSE_SUBTRACT;
+            case BlendOp::MIN:
+                return VK_BLEND_OP_MIN;
+            case BlendOp::MAX:
+                return VK_BLEND_OP_MAX;
+            default:
+                return VK_BLEND_OP_ADD;
+        }
+    };
+
     return VkPipelineColorBlendAttachmentState {
+        // TODO: Support color write mask in ColorBlendState
         .colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT,
-        .blendEnable = VK_FALSE,
-        .srcColorBlendFactor = VK_BLEND_FACTOR_ONE,
-        .dstColorBlendFactor = VK_BLEND_FACTOR_ZERO,
-        .colorBlendOp = VK_BLEND_OP_ADD,
-        .srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE,
-        .dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO,
-        .alphaBlendOp = VK_BLEND_OP_ADD,
+        .blendEnable = state.enable,
+        .srcColorBlendFactor = getVkBlendFactor( state.srcColorBlendFactor ),
+        .dstColorBlendFactor = getVkBlendFactor( state.dstColorBlendFactor ),
+        .colorBlendOp = getVkBlendOp( state.colorBlendOp ),
+        .srcAlphaBlendFactor = getVkBlendFactor( state.srcAlphaBlendFactor ),
+        .dstAlphaBlendFactor = getVkBlendFactor( state.dstAlphaBlendFactor ),
+        .alphaBlendOp = getVkBlendOp( state.alphaBlendOp ),
     };
 }
 

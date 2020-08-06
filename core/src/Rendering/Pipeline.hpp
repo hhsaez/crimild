@@ -28,6 +28,7 @@
 #ifndef CRIMILD_RENDERING_PIPELINE_
 #define CRIMILD_RENDERING_PIPELINE_
 
+#include "Rendering/ColorBlendState.hpp"
 #include "Rendering/DepthStencilState.hpp"
 #include "Rendering/RasterizationState.hpp"
 #include "Rendering/RenderResource.hpp"
@@ -57,9 +58,9 @@ namespace crimild {
         ViewportDimensions scissor;
         DepthStencilState depthStencilState;
         RasterizationState rasterizationState;
+        ColorBlendState colorBlendState;
 
         // Deprecated
-        SharedPointer< AlphaState > alphaState;
         SharedPointer< CullFaceState > cullFaceState;
         SharedPointer< PolygonState > polygonState;
     };
