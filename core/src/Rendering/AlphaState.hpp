@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -32,7 +32,7 @@
 
 namespace crimild {
 
-	class AlphaState : public RenderState {
+	class [[ deprecated ]] AlphaState : public RenderState {
     public:
         // TODO: these should be const
         static SharedPointer< AlphaState > DISABLED;
@@ -40,7 +40,7 @@ namespace crimild {
         static SharedPointer< AlphaState > ENABLED_SRC_COLOR_ONLY;
         static SharedPointer< AlphaState > ENABLED_ADDITIVE_BLEND;
 		static SharedPointer< AlphaState > ENABLED_MULTIPLY_BLEND;
-        
+
 	public:
 		enum class SrcBlendFunc : uint8_t {
 			ZERO,
@@ -68,8 +68,8 @@ namespace crimild {
 		};
 
 	public:
-		AlphaState( bool enabled = false, 
-					SrcBlendFunc srcBlendFunc = SrcBlendFunc::SRC_ALPHA, 
+		AlphaState( bool enabled = false,
+					SrcBlendFunc srcBlendFunc = SrcBlendFunc::SRC_ALPHA,
 					DstBlendFunc dstBlendFunct = DstBlendFunc::ONE_MINUS_SRC_ALPHA );
 
 		virtual ~AlphaState( void );
@@ -88,4 +88,3 @@ namespace crimild {
 }
 
 #endif
-
