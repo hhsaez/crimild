@@ -40,10 +40,7 @@
 
 namespace crimild {
 
-    class AlphaState;
-    class CullFaceState;
     class DescriptorSetLayout;
-    class PolygonState;
     class RenderPass;
     class ShaderProgram;
 
@@ -59,10 +56,6 @@ namespace crimild {
         DepthStencilState depthStencilState;
         RasterizationState rasterizationState;
         ColorBlendState colorBlendState;
-
-        // Deprecated
-        SharedPointer< CullFaceState > cullFaceState;
-        SharedPointer< PolygonState > polygonState;
     };
 
 }
