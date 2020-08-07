@@ -316,20 +316,44 @@ VkPipelineViewportStateCreateInfo PipelineManager::createDynamicViewportState( c
 
 VkPipelineRasterizationStateCreateInfo PipelineManager::createRasterizer( Pipeline *pipeline ) const noexcept
 {
-    auto polygonMode = VK_POLYGON_MODE_FILL;
-    auto lineWidth = 1.0f;
-    if ( auto polygonState = crimild::get_ptr( pipeline->polygonState ) ) {
-        polygonMode = utils::getPolygonMode( polygonState );
-        lineWidth = polygonState->lineWidth;
-    }
-
-    auto cullMode = VK_CULL_MODE_BACK_BIT;
-    auto frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-    if ( auto cullFaceState = crimild::get_ptr( pipeline->cullFaceState ) ) {
-        if ( !cullFaceState->isEnabled() ) {
-            cullMode = VK_CULL_MODE_NONE;
+    static auto getVkPolygonMode = []( auto input ) {
+        switch ( input ) {
+            case PolygonMode::FILL:
+                return VK_POLYGON_MODE_FILL;
+            case PolygonMode::LINE:
+                return VK_POLYGON_MODE_LINE;
+            case PolygonMode::POINT:
+                return VK_POLYGON_MODE_POINT;
+            default:
+                return VK_POLYGON_MODE_FILL;
         }
-    }
+    };
+
+    static auto getVkFrontFace = []( auto input ) {
+        switch ( input ) {
+            case FrontFace::COUNTER_CLOCKWISE:
+                return VK_FRONT_FACE_COUNTER_CLOCKWISE;
+            case FrontFace::CLOCKWISE:
+                return VK_FRONT_FACE_CLOCKWISE;
+            default:
+                return VK_FRONT_FACE_COUNTER_CLOCKWISE;
+        }
+    };
+
+    static auto getVkCullModeFlag = []( auto input ) {
+        switch ( input ) {
+            case CullMode::NONE:
+                return VK_CULL_MODE_NONE;
+            case CullMode::FRONT:
+                return VK_CULL_MODE_FRONT_BIT;
+            case CullMode::BACK:
+                return VK_CULL_MODE_BACK_BIT;
+            case CullMode::FRONT_AND_BACK:
+                return VK_CULL_MODE_FRONT_AND_BACK;
+            default:
+                return VK_CULL_MODE_FRONT_BIT;
+        }
+    };
 
     auto &rasterizationState = pipeline->rasterizationState;
 
@@ -337,10 +361,10 @@ VkPipelineRasterizationStateCreateInfo PipelineManager::createRasterizer( Pipeli
         .sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
         .depthClampEnable = rasterizationState.depthClampEnable,
         .rasterizerDiscardEnable = rasterizationState.rasterizerDiscardEnable,
-        .polygonMode = polygonMode,
-        .lineWidth = lineWidth,
-        .cullMode = cullMode,
-        .frontFace = frontFace,
+        .polygonMode = getVkPolygonMode( rasterizationState.polygonMode ),
+        .lineWidth = rasterizationState.lineWidth,
+        .cullMode = getVkCullModeFlag( rasterizationState.cullMode ),
+        .frontFace = getVkFrontFace( rasterizationState.frontFace ),
         .depthBiasEnable = rasterizationState.depthBiasEnable,
         .depthBiasConstantFactor = rasterizationState.depthBiasConstantFactor,
         .depthBiasClamp = rasterizationState.depthBiasClamp,

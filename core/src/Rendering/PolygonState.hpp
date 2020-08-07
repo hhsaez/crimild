@@ -32,7 +32,7 @@
 
 namespace crimild {
 
-    class PolygonState : public RenderState {
+    class [[ deprecated ]] PolygonState : public RenderState {
     public:
         // TODO: these should be const
         static SharedPointer< PolygonState > FILL;

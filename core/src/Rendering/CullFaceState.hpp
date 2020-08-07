@@ -32,7 +32,7 @@
 
 namespace crimild {
     
-	class CullFaceState : public RenderState {
+	class [[ deprecated ]] CullFaceState : public RenderState {
     public:
         // TODO: these should be 'const'
         static SharedPointer< CullFaceState > DISABLED;
