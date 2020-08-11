@@ -168,6 +168,7 @@ void OrientedQuadParticleRenderer::decode( coding::Decoder &decoder )
 
     //_material->setProgram( crimild::alloc< UnlitShaderProgram >() );
 
+    /*
     std::string blendMode;
     decoder.decode( "blendMode", blendMode );
     if ( blendMode == "additive" ) {
@@ -199,4 +200,5 @@ void OrientedQuadParticleRenderer::decode( coding::Decoder &decoder )
     crimild::Bool depthStateEnabled = true;
     decoder.decode( "depthStateEnabled", depthStateEnabled );
     _material->setDepthState( depthStateEnabled ? DepthState::ENABLED : DepthState::DISABLED );
+    */
 }

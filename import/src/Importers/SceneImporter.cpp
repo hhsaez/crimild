@@ -206,7 +206,7 @@ SharedPointer< Material > SceneImporter::buildMaterial( const aiMaterial *mtl, s
 	int two_sided;
 	max = 1;
 	if ( AI_SUCCESS == aiGetMaterialIntegerArray( mtl, AI_MATKEY_TWOSIDED, &two_sided, &max ) ) {
-		material->getCullFaceState()->setEnabled( two_sided );
+		//material->getCullFaceState()->setEnabled( two_sided );
 	}
 
 	crimild::Real32 opacity;
@@ -216,7 +216,7 @@ SharedPointer< Material > SceneImporter::buildMaterial( const aiMaterial *mtl, s
 			auto d = material->getDiffuse();
 			d[ 3 ] = opacity;
 			material->setDiffuse( d );
-			material->setAlphaState( crimild::alloc< AlphaState >( true ) );
+			//material->setAlphaState( crimild::alloc< AlphaState >( true ) );
 		}
 	}
 

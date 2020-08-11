@@ -1,8 +1,6 @@
 #include "DebugRenderHelper.hpp"
 
 #include "Rendering/ShaderProgram.hpp"
-#include "Rendering/AlphaState.hpp"
-#include "Rendering/DepthState.hpp"
 #include "Rendering/Renderer.hpp"
 #include "Rendering/Font.hpp"
 

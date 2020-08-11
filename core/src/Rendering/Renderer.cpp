@@ -228,9 +228,9 @@ void Renderer::bindMaterial( ShaderProgram *program, Material *material )
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_SHININESS_UNIFORM ), material->getShininess() );
 	bindUniform( program->getStandardLocation( ShaderProgram::StandardLocation::MATERIAL_EMISSIVE_UNIFORM ), material->getEmissive() );
 
-	setDepthState( material->getDepthState() );
-	setAlphaState( material->getAlphaState() );
-	setCullFaceState( material->getCullFaceState() );
+	//setDepthState( material->getDepthState() );
+	//setAlphaState( material->getAlphaState() );
+	//setCullFaceState( material->getCullFaceState() );
 	setColorMaskState( material->getColorMaskState() );
 }
 
