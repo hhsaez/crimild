@@ -45,7 +45,6 @@
 namespace crimild {
 
     class IndexBuffer;
-    class PolygonState;
     struct ViewportDimensions;
 
 	namespace vulkan {
@@ -85,7 +84,6 @@ namespace crimild {
             VkShaderStageFlagBits getVulkanShaderStageFlag( Shader::Stage stage ) noexcept;
             VkDescriptorType getVulkanDescriptorType( DescriptorType type ) noexcept;
             VkFilter getVulkanFilter( Texture::Filter filter ) noexcept; //< Deprecated
-            VkPolygonMode getPolygonMode( PolygonState *polygonState ) noexcept;
             VkRect2D getViewportRect( const ViewportDimensions *viewport, const RenderDevice *renderDevice ) noexcept;
             VkViewport getViewport( const ViewportDimensions *viewport, const RenderDevice *renderDevice ) noexcept;
             VkRect2D getScissor( const ViewportDimensions *scissor, const RenderDevice *renderDevice ) noexcept;

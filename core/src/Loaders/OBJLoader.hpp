@@ -33,9 +33,6 @@
 
 #include "Rendering/Material.hpp"
 #include "Rendering/Texture.hpp"
-#include "Rendering/AlphaState.hpp"
-#include "Rendering/DepthState.hpp"
-
 #include <map>
 #include <string>
 #include <vector>

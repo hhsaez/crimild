@@ -27,7 +27,6 @@
 
 #include "VulkanUtils.hpp"
 #include "Rendering/IndexBuffer.hpp"
-#include "Rendering/PolygonState.hpp"
 #include "Rendering/ViewportDimensions.hpp"
 #include "Rendering/VulkanPhysicalDevice.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
@@ -127,23 +126,6 @@ VkFilter utils::getSamplerFilter( Sampler::Filter filter ) noexcept
             return VK_FILTER_NEAREST;
         default:
             return VK_FILTER_LINEAR;
-    }
-}
-
-VkPolygonMode utils::getPolygonMode( PolygonState *polygonState ) noexcept
-{
-    if ( polygonState == nullptr ) {
-        return VK_POLYGON_MODE_FILL;
-    }
-
-    switch ( polygonState->polygonMode ) {
-        case PolygonState::PolygonMode::LINE:
-            return VK_POLYGON_MODE_LINE;
-        case PolygonState::PolygonMode::POINT:
-            return VK_POLYGON_MODE_POINT;
-        case PolygonState::PolygonMode::FILL:
-        default:
-            return VK_POLYGON_MODE_FILL;
     }
 }
 

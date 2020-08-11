@@ -28,7 +28,6 @@
 #include "Skybox.hpp"
 
 #include "Components/RenderStateComponent.hpp"
-#include "Rendering/DepthState.hpp"
 #include "Rendering/IndexBuffer.hpp"
 #include "Rendering/VertexBuffer.hpp"
 #include "Rendering/Texture.hpp"

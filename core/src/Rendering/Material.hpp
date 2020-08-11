@@ -28,9 +28,6 @@
 #ifndef CRIMILD_RENDERING_MATERIAL_
 #define CRIMILD_RENDERING_MATERIAL_
 
-#include "AlphaState.hpp"
-#include "CullFaceState.hpp"
-#include "DepthState.hpp"
 #include "ColorMaskState.hpp"
 #include "Texture.hpp"
 #include "ShaderProgram.hpp"
@@ -104,15 +101,6 @@ namespace crimild {
         void setEmissiveMap( SharedPointer< Texture > const &texture ) { _emissiveMap = texture; }
         Texture *getEmissiveMap( void ) { return crimild::get_ptr( _emissiveMap ); }
 
-		void setDepthState( SharedPointer< DepthState > const &state ) { _depthState = state; }
-        DepthState *getDepthState( void ) { return crimild::get_ptr( _depthState ); }
-
-		void setAlphaState( SharedPointer< AlphaState > const &alphaState ) { _alphaState = alphaState; }
-        AlphaState *getAlphaState( void ) { return crimild::get_ptr( _alphaState ); }
-
-        void setCullFaceState( SharedPointer< CullFaceState > const &cullFaceState ) { _cullFaceState = cullFaceState; }
-        CullFaceState *getCullFaceState( void ) { return crimild::get_ptr( _cullFaceState ); }
-
         void setColorMaskState( SharedPointer< ColorMaskState > const &colorMaskState ) { _colorMaskState = colorMaskState; }
         ColorMaskState *getColorMaskState( void ) { return crimild::get_ptr( _colorMaskState ); }
 
@@ -136,9 +124,6 @@ namespace crimild {
 		SharedPointer< Texture > _specularMap;
         SharedPointer< Texture > _emissiveMap;
 
-		SharedPointer< DepthState > _depthState;
-		SharedPointer< AlphaState > _alphaState;
-		SharedPointer< CullFaceState > _cullFaceState;
 		SharedPointer< ColorMaskState > _colorMaskState;
 
         bool _castShadows = true;

@@ -134,6 +134,7 @@ void PointSpriteParticleRenderer::decode( coding::Decoder &decoder )
 
     //_material->setProgram( AssetManager::getInstance()->get< PointSpriteShaderProgram >() );
 
+    /*
     std::string blendMode;
     decoder.decode( "blendMode", blendMode );
     if ( blendMode == "additive" ) {
@@ -165,4 +166,5 @@ void PointSpriteParticleRenderer::decode( coding::Decoder &decoder )
     crimild::Bool depthStateEnabled = true;
     decoder.decode( "depthStateEnabled", depthStateEnabled );
     _material->setDepthState( depthStateEnabled ? DepthState::ENABLED : DepthState::DISABLED );
+    */
 }

@@ -115,7 +115,7 @@ void Text::setFont( SharedPointer< Font > const &font )
     _material->setColorMap( _font->getTexture() );
     //_material->setProgram( crimild::alloc< UnlitShaderProgram >() );
 
-	_material->getAlphaState()->setEnabled( true );
+	//_material->getAlphaState()->setEnabled( true );
 
 	updatePrimitive();
 }
@@ -289,7 +289,7 @@ void Text::decode( coding::Decoder &decoder )
 
 	crimild::Bool enableDepthTest;
 	decoder.decode( "enableDepthTest", enableDepthTest );
-	setDepthTestEnabled( enableDepthTest );
+	//setDepthTestEnabled( enableDepthTest );
 
 	std::string anchor;
 	decoder.decode( "anchor", anchor );
