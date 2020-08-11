@@ -73,9 +73,9 @@ void RenderQueue::push( Geometry *geometry )
     if ( rs == nullptr ) {
         return;
     }
-    
+
     bool renderOnScreen = rs->renderOnScreen();
-    
+
     rs->forEachMaterial( [this, geometry, renderOnScreen]( Material *material ) {
         auto renderableType = RenderQueue::RenderableType::OPAQUE;
         bool castShadows = false;
@@ -96,6 +96,7 @@ void RenderQueue::push( Geometry *geometry )
             // the object is considered as an occluder
             renderableType = RenderQueue::RenderableType::OCCLUDER;
         }
+        /*
         else if ( material->getAlphaState()->isEnabled() ) {
 			if ( isInstanced ) {
 				renderableType = RenderQueue::RenderableType::TRANSLUCENT_INSTANCED;
@@ -107,6 +108,7 @@ void RenderQueue::push( Geometry *geometry )
 				renderableType = RenderQueue::RenderableType::TRANSLUCENT;
 			}
         }
+        */
         else {
             // only opaque objects cast shadows
             castShadows = material->castShadows();
@@ -120,19 +122,19 @@ void RenderQueue::push( Geometry *geometry )
 				renderableType = RenderQueue::RenderableType::OPAQUE;
 			}
         }
-        
+
         auto renderable = RenderQueue::Renderable {
             crimild::retain( geometry ),
             crimild::retain( material ),
-            
+
             geometry->getWorld().computeModelMatrix(),
-            
+
             // we use the squared distance to avoid performance penalties
             Distance::computeSquared( geometry->getWorld().getTranslate(), getCamera()->getWorld().getTranslate() ),
         };
-        
+
         auto queue = &_renderables[ renderableType ];
-        
+
         if ( renderableType == RenderQueue::RenderableType::TRANSLUCENT ||
 		    renderableType == RenderQueue::RenderableType::TRANSLUCENT_CUSTOM ) {
             // order BACK_TO_FRONT for translucent and screen objects
@@ -152,7 +154,7 @@ void RenderQueue::push( Geometry *geometry )
         } else {
 			queue->push_back( renderable );
 		}
-        
+
         if ( castShadows ) {
             // if the geometry is supposed to cast shadows, we also add it to that queue
             // order FRONT_TO_BACK
@@ -189,4 +191,3 @@ void RenderQueue::each( std::function< void ( Light *, int ) > callback )
         }
     }
 }
-

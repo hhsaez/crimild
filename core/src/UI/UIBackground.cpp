@@ -30,7 +30,6 @@
 
 #include "Components/MaterialComponent.hpp"
 #include "Primitives/QuadPrimitive.hpp"
-#include "Rendering/DepthState.hpp"
 #include "Rendering/Material.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Group.hpp"
@@ -49,7 +48,7 @@ UIBackground::UIBackground( const RGBAColorf &color )
 
 	_material = crimild::alloc< Material >();
 	_material->setDiffuse( color );
-	_material->setDepthState( DepthState::DISABLED );
+	//_material->setDepthState( DepthState::DISABLED );
 	_geometry->getComponent< MaterialComponent >()->attachMaterial( _material );
 }
 

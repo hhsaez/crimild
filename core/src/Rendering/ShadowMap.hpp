@@ -40,10 +40,10 @@ namespace crimild {
     public:
         ShadowMap( void );
         virtual ~ShadowMap( void );
-        
+
         const Matrix4f &getLightProjectionMatrix( void ) const { return _lightProjectionMatrix; }
         void setLightProjectionMatrix( const Matrix4f &m ) { _lightProjectionMatrix = m; }
-        
+
         const Matrix4f &getLightViewMatrix( void ) const { return _lightViewMatrix; }
         void setLightViewMatrix( const Matrix4f &m ) { _lightViewMatrix = m; }
 
@@ -56,8 +56,8 @@ namespace crimild {
 		void setMaxBias( crimild::Real32 maxBias ) { _maxBias = maxBias; }
 		crimild::Real32 getMaxBias( void ) const { return _maxBias; }
 
-        void setCullFaceState( SharedPointer< CullFaceState > const &cullFace ) { _cullFaceState = cullFace; }
-        CullFaceState *getCullFaceState( void ) { return crimild::get_ptr( _cullFaceState ); }
+        //void setCullFaceState( SharedPointer< CullFaceState > const &cullFace ) { _cullFaceState = cullFace; }
+        //CullFaceState *getCullFaceState( void ) { return crimild::get_ptr( _cullFaceState ); }
 
     private:
         Matrix4f _lightProjectionMatrix;
@@ -65,10 +65,9 @@ namespace crimild {
 		Vector4f _viewport;
 		crimild::Real32 _minBias = 0.0001f;
 		crimild::Real32 _maxBias = 0.001f;
-        SharedPointer< CullFaceState > _cullFaceState;
+        //SharedPointer< CullFaceState > _cullFaceState;
     };
-    
+
 }
 
 #endif
-

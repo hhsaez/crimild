@@ -162,12 +162,12 @@ using namespace crimild::scripting;
 
 LuaNodeBuilderRegistry::LuaNodeBuilderRegistry( void )
 {
-    
+
 }
 
 LuaNodeBuilderRegistry::~LuaNodeBuilderRegistry( void )
 {
-    
+
 }
 
 void LuaNodeBuilderRegistry::flush( void )
@@ -186,12 +186,12 @@ void LuaNodeBuilderRegistry::flush( void )
 
 LuaComponentBuilderRegistry::LuaComponentBuilderRegistry( void )
 {
-    
+
 }
 
 LuaComponentBuilderRegistry::~LuaComponentBuilderRegistry( void )
 {
-    
+
 }
 
 void LuaComponentBuilderRegistry::flush( void )
@@ -210,12 +210,12 @@ void LuaComponentBuilderRegistry::flush( void )
 
 LuaObjectBuilderRegistry::LuaObjectBuilderRegistry( void )
 {
-    
+
 }
 
 LuaObjectBuilderRegistry::~LuaObjectBuilderRegistry( void )
 {
-    
+
 }
 
 void LuaObjectBuilderRegistry::flush( void )
@@ -239,9 +239,9 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::FreeLookCameraComponent, LuaFreeLookCameraComponentBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::OrbitComponent, LuaOrbitComponentBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::BehaviorController, LuaBehaviorControllerBuilder::build );
-	
+
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::ParticleSystemComponent, LuaParticleSystemComponentBuilder::build );
-	
+
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::BoxPositionParticleGenerator, LuaBoxPositionParticleGeneratorBuilder::build );
     CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::GridPositionParticleGenerator, LuaGridPositionParticleGeneratorBuilder::build );
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::SpherePositionParticleGenerator, LuaSpherePositionParticleGeneratorBuilder::build );
@@ -316,7 +316,7 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
 	CRIMILD_SCRIPTING_REGISTER_CUSTOM_BUILDER( crimild::behaviors::decorators::Succeeder, LuaSucceederBuilder::build );
 
     auto self = this;
-    
+
     // TODO: Use RTTI for getting class type name
     LuaNodeBuilderRegistry::getInstance()->registerCustomNodeBuilder( GROUP_TYPE, [self]( ScriptEvaluator &eval ) -> SharedPointer< Node > {
         SharedPointer< Group > group;
@@ -326,7 +326,7 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
 #ifdef CRIMILD_SCRIPTING_LOG_VERBOSE
             Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Building node" );
 #endif
-            
+
             auto scene = AssetManager::getInstance()->get< Group >( filename );
             if ( scene == nullptr ) {
                 SharedPointer< Group > tmp;
@@ -368,37 +368,37 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
 			group->setLocalBound( crimild::alloc< SphereBoundingVolume >( Sphere3f( Vector3f::ZERO, radius ) ) );
 			group->setWorldBound( crimild::alloc< SphereBoundingVolume >( Sphere3f( Vector3f::ZERO, radius ) ) );
 		}
-        
+
         eval.foreach( GROUP_NODES, [&]( ScriptEvaluator &childEval, int ) {
             self->buildNode( childEval, crimild::get_ptr( group ) );
         });
-        
+
         return group;
     });
-    
+
     // TODO: Use RTTI for getting class type name
     LuaNodeBuilderRegistry::getInstance()->registerCustomNodeBuilder( CAMERA_TYPE, [self]( ScriptEvaluator &eval ) -> SharedPointer< Node > {
         auto camera = crimild::alloc< Camera >();
-        
+
 //        std::string renderPassType;
 //        eval.getPropValue( CAMERA_RENDER_PASS, renderPassType, "forward" );
 //        if ( renderPassType == "basic" ) {
 //            camera->setRenderPass( crimild::alloc< BasicRenderPass >() );
 //        }
-        
+
         float fov = 45.0f;
         float aspect = 4.0f / 3.0f;
         float near = 0.1f;
         float far = 1000.0f;
 		bool isMainCamera = false;
-        
+
         eval.getPropValue( CAMERA_FRUSTUM_FOV, fov );
         eval.getPropValue( CAMERA_FRUSTUM_ASPECT, aspect );
         eval.getPropValue( CAMERA_FRUSTUM_NEAR, near );
         eval.getPropValue( CAMERA_FRUSTUM_FAR, far );
 
         camera->setFrustum( Frustumf( fov, aspect, near, far ) );
-        
+
 		eval.getPropValue( CAMERA_MAIN_CAMERA, isMainCamera );
 		camera->setIsMainCamera( isMainCamera );
 
@@ -410,10 +410,10 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
         if ( eval.getPropValue( CAMERA_CULLING_ENABLED, cullingEnabled ) ) {
             camera->setCullingEnabled( cullingEnabled );
         }
-        
+
         return camera;
     });
-    
+
     // TODO: Use RTTI for getting class type name
     LuaNodeBuilderRegistry::getInstance()->registerCustomNodeBuilder( LIGHT_TYPE, []( ScriptEvaluator &eval ) -> SharedPointer< Node > {
         Light::Type lightType = Light::Type::POINT;
@@ -439,13 +439,13 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
         if ( eval.getPropValue( LIGHT_SHADOW_NEAR_COEFF, shadowNearCoeff ) ) {
             light->setShadowNearCoeff( shadowNearCoeff );
         }
-        
+
         float shadowFarCoeff;
         if ( eval.getPropValue( LIGHT_SHADOW_FAR_COEFF, shadowFarCoeff ) ) {
             light->setShadowFarCoeff( shadowFarCoeff );
         }
 		*/
-        
+
         Vector3f attenuation;
         if ( eval.getPropValue( LIGHT_ATTENUATION, attenuation ) ) {
             light->setAttenuation( attenuation );
@@ -453,7 +453,7 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
 
         RGBAColorf color;
         if ( eval.getPropValue( LIGHT_COLOR, color ) ) light->setColor( color );
-        
+
         RGBAColorf ambient;
         if ( eval.getPropValue( LIGHT_AMBIENT, ambient ) ) light->setAmbient( ambient );
 
@@ -463,39 +463,39 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
     // TODO: Use RTTI for getting class type name
     LuaNodeBuilderRegistry::getInstance()->registerCustomNodeBuilder( TEXT_TYPE, []( ScriptEvaluator &eval ) -> SharedPointer< Node > {
         auto text = crimild::alloc< Text >();
-        
+
         std::string fontName;
         eval.getPropValue( "font", fontName, "" );
-        
+
         float textSize;
         eval.getPropValue( "textSize", textSize );
-        
+
         std::string fontDefFileName = FileSystem::getInstance().pathForResource( fontName + ".txt" );
         auto font = crimild::alloc< Font >( fontDefFileName );
-        
+
         text->setFont( font );
         text->setSize( textSize );
-        
+
         std::string content;
         if ( eval.getPropValue( TEXT_TEXT, content ) ) {
             text->setText( content );
         }
-        
+
         bool renderOnScreen;
         if ( eval.getPropValue( "renderOnScreen", renderOnScreen ) ) {
             text->getComponent< RenderStateComponent >()->setRenderOnScreen( renderOnScreen );
         }
-        
+
         RGBAColorf textColor;
         if ( eval.getPropValue( "textColor", textColor ) ) {
             text->setTextColor( textColor );
         }
-        
+
         bool enableDepthTest;
         if ( eval.getPropValue( "enableDepthTest", enableDepthTest, true ) ) {
-            text->setDepthTestEnabled( enableDepthTest );
+            //text->setDepthTestEnabled( enableDepthTest );
         }
-        
+
         std::string anchor;
         if ( eval.getPropValue( "textAnchor", anchor, "left" ) ) {
             if ( anchor == "left" ) {
@@ -508,7 +508,7 @@ LuaSceneBuilder::LuaSceneBuilder( std::string rootNodeName )
                 text->setHorizontalAlignment( Text::HorizontalAlignment::RIGHT );
             }
         }
-        
+
         return text;
     });
 
@@ -724,7 +724,7 @@ SharedPointer< Node > LuaSceneBuilder::fromFile( const std::string &filename )
     Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Loading scene from ", filename );
 
     ScriptEvaluator eval( &getScriptContext(), _rootNodeName );
-    
+
 	return buildNode( eval, nullptr );
 }
 
@@ -732,13 +732,13 @@ SharedPointer< Node > LuaSceneBuilder::buildNode( ScriptEvaluator &eval, Group *
 {
     std::string type;
     eval.getPropValue( NODE_TYPE, type, "crimild::Group" ); // build Group instances by default
-    
+
     auto builder = LuaNodeBuilderRegistry::getInstance()->getBuilder( type );
     if ( builder == nullptr ) {
         Log::warning( CRIMILD_CURRENT_CLASS_NAME, "No registered builder for type '", type, "'" );
         return nullptr;
     }
-    
+
     Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Building node with type '", type, "'" );
     auto current = builder( eval );
     if ( current == nullptr ) {
@@ -750,7 +750,7 @@ SharedPointer< Node > LuaSceneBuilder::buildNode( ScriptEvaluator &eval, Group *
     if ( eval.getPropValue( "name", name ) ) {
         current->setName( name );
     }
-    
+
     setTransformation( eval, current );
     buildNodeComponents( eval, current );
 
@@ -782,7 +782,7 @@ void LuaSceneBuilder::buildNodeComponents( ScriptEvaluator &eval, SharedPointer<
 #endif
 
 			SharedPointer< NodeComponent > cmp;
-			
+
             auto builder = LuaComponentBuilderRegistry::getInstance()->getBuilder( type );
             if ( builder != nullptr ) {
 				cmp = builder( componentEval );
@@ -797,12 +797,12 @@ void LuaSceneBuilder::buildNodeComponents( ScriptEvaluator &eval, SharedPointer<
 					return;
 				}
             }
-            
+
             if ( cmp == nullptr ) {
                 Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot build component of type '", type, "'" );
                 return;
             }
-            
+
             node->attachComponent( cmp );
         }
         else {
@@ -810,4 +810,3 @@ void LuaSceneBuilder::buildNodeComponents( ScriptEvaluator &eval, SharedPointer<
         }
 	});
 }
-
