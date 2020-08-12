@@ -262,6 +262,14 @@
 #include "Rendering/UniformBuffer.hpp"
 #include "Rendering/VertexBuffer.hpp"
 
+#include "Rendering/Compositions/Composition.hpp"
+#include "Rendering/Compositions/ColorizeComposition.hpp"
+#include "Rendering/Compositions/ConvolutionComposition.hpp"
+#include "Rendering/Compositions/GrayscaleComposition.hpp"
+#include "Rendering/Compositions/InvertComposition.hpp"
+#include "Rendering/Compositions/PresentComposition.hpp"
+#include "Rendering/Compositions/RenderScene.hpp"
+
 #include "Rendering/Materials/SimpleLitMaterial.hpp"
 #include "Rendering/Materials/UnlitMaterial.hpp"
 
