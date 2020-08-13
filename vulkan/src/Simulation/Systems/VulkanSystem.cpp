@@ -33,8 +33,9 @@
 #include "Rendering/VulkanCommandBuffer.hpp"
 #include "Rendering/VulkanFence.hpp"
 #include "Rendering/VulkanBuffer.hpp"
-#include "Rendering/Programs/PhongLitShaderProgram.hpp"
 #include "Rendering/Programs/GouraudLitShaderProgram.hpp"
+#include "Rendering/Programs/PhongLitShaderProgram.hpp"
+#include "Rendering/Programs/SkyboxShaderProgram.hpp"
 #include "Rendering/Programs/UnlitShaderProgram.hpp"
 #include "Rendering/Programs/Compositions/ColorizeCompositionShaderProgram.hpp"
 #include "Rendering/Programs/Compositions/ConvolutionCompositionShaderProgram.hpp"
@@ -365,6 +366,19 @@ void VulkanSystem::initShaders( void ) noexcept
             }(),
             [&] {
                 #include "Rendering/Shaders/unlit/unlit.frag.inl"
+                return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
+            }(),
+        }
+    );
+
+    assets->get< SkyboxShaderProgram >()->setShaders(
+        {
+            [&] {
+                #include "Rendering/Shaders/unlit/skybox.vert.inl"
+                return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
+            }(),
+            [&] {
+                #include "Rendering/Shaders/unlit/skybox.frag.inl"
                 return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
             }(),
         }
