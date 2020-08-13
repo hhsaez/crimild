@@ -271,6 +271,7 @@
 #include "Rendering/Compositions/RenderScene.hpp"
 
 #include "Rendering/Materials/SimpleLitMaterial.hpp"
+#include "Rendering/Materials/SkyboxMaterial.hpp"
 #include "Rendering/Materials/UnlitMaterial.hpp"
 
 #include "Rendering/Programs/GouraudLitShaderProgram.hpp"
