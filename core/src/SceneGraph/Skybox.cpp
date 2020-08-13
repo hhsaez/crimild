@@ -25,127 +25,34 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Skybox.hpp"
-
-#include "Components/RenderStateComponent.hpp"
-#include "Rendering/IndexBuffer.hpp"
-#include "Rendering/VertexBuffer.hpp"
-#include "Rendering/Texture.hpp"
-#include "Rendering/ImageTGA.hpp"
-#include "Rendering/Pipeline.hpp"
-#include "Rendering/ShaderProgramLibrary.hpp"
-#include "Rendering/Uniforms/ModelViewProjectionUniformBuffer.hpp"
-#include "Simulation/FileSystem.hpp"
-#include "Coding/Decoder.hpp"
-#include "Coding/Encoder.hpp"
+#include "SceneGraph/Skybox.hpp"
+#include "Components/MaterialComponent.hpp"
+#include "Primitives/BoxPrimitive.hpp"
+#include "Rendering/Materials/SkyboxMaterial.hpp"
 
 using namespace crimild;
 
-Skybox::Skybox( ImageArray const &faces ) noexcept
+Skybox::Skybox( SharedPointer< Texture > const &cubemap ) noexcept
 {
-    configure( faces );
-}
+    setLayer( Node::Layer::SKYBOX );
 
-void Skybox::configure( Skybox::ImageArray const &images ) noexcept
-{
-#if 0
-	m_faces = images;
-
-    m_texture = crimild::alloc< Texture >( images );
-
-    auto const SKYBOX_SIZE = 10.0f;
-
-    auto vbo = crimild::alloc< VertexP3Buffer >(
-        containers::Array< VertexP3 > {
-            { .position = Vector3f( -SKYBOX_SIZE,  SKYBOX_SIZE, -SKYBOX_SIZE ) },
-            { .position = Vector3f( -SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE ) },
-            { .position = Vector3f( SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE ) },
-            { .position = Vector3f( SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE ) },
-            { .position = Vector3f( SKYBOX_SIZE,  SKYBOX_SIZE, -SKYBOX_SIZE ) },
-            { .position = Vector3f( -SKYBOX_SIZE,  SKYBOX_SIZE, -SKYBOX_SIZE ) },
-
-            { .position = Vector3f( -SKYBOX_SIZE, -SKYBOX_SIZE,  SKYBOX_SIZE ) },
-            { .position = Vector3f( -SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE ) },
-            { .position = Vector3f( -SKYBOX_SIZE,  SKYBOX_SIZE, -SKYBOX_SIZE ) },
-            { .position = Vector3f( -SKYBOX_SIZE,  SKYBOX_SIZE, -SKYBOX_SIZE ) },
-            { .position = Vector3f( -SKYBOX_SIZE,  SKYBOX_SIZE,  SKYBOX_SIZE ) },
-            { .position = Vector3f( -SKYBOX_SIZE, -SKYBOX_SIZE,  SKYBOX_SIZE ) },
-
-            { .position = Vector3f( SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE ) },
-            { .position = Vector3f( SKYBOX_SIZE, -SKYBOX_SIZE,  SKYBOX_SIZE ) },
-            { .position = Vector3f( SKYBOX_SIZE,  SKYBOX_SIZE,  SKYBOX_SIZE ) },
-            { .position = Vector3f( SKYBOX_SIZE,  SKYBOX_SIZE,  SKYBOX_SIZE ) },
-            { .position = Vector3f( SKYBOX_SIZE,  SKYBOX_SIZE, -SKYBOX_SIZE ) },
-            { .position = Vector3f( SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE ) },
-
-            { .position = Vector3f( -SKYBOX_SIZE, -SKYBOX_SIZE,  SKYBOX_SIZE ) },
-            { .position = Vector3f( -SKYBOX_SIZE,  SKYBOX_SIZE,  SKYBOX_SIZE ) },
-            { .position = Vector3f( SKYBOX_SIZE,  SKYBOX_SIZE,  SKYBOX_SIZE ) },
-            { .position = Vector3f( SKYBOX_SIZE,  SKYBOX_SIZE,  SKYBOX_SIZE ) },
-            { .position = Vector3f( SKYBOX_SIZE, -SKYBOX_SIZE,  SKYBOX_SIZE ) },
-            { .position = Vector3f( -SKYBOX_SIZE, -SKYBOX_SIZE,  SKYBOX_SIZE ) },
-
-            { .position = Vector3f( -SKYBOX_SIZE,  SKYBOX_SIZE, -SKYBOX_SIZE ) },
-            { .position = Vector3f( SKYBOX_SIZE,  SKYBOX_SIZE, -SKYBOX_SIZE ) },
-            { .position = Vector3f( SKYBOX_SIZE,  SKYBOX_SIZE,  SKYBOX_SIZE ) },
-            { .position = Vector3f( SKYBOX_SIZE,  SKYBOX_SIZE,  SKYBOX_SIZE ) },
-            { .position = Vector3f( -SKYBOX_SIZE,  SKYBOX_SIZE,  SKYBOX_SIZE ) },
-            { .position = Vector3f( -SKYBOX_SIZE,  SKYBOX_SIZE, -SKYBOX_SIZE ) },
-
-            { .position = Vector3f( -SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE ) },
-            { .position = Vector3f( -SKYBOX_SIZE, -SKYBOX_SIZE,  SKYBOX_SIZE ) },
-            { .position = Vector3f( SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE ) },
-            { .position = Vector3f( SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE ) },
-            { .position = Vector3f( -SKYBOX_SIZE, -SKYBOX_SIZE,  SKYBOX_SIZE ) },
-            { .position = Vector3f( SKYBOX_SIZE, -SKYBOX_SIZE,  SKYBOX_SIZE ) },
-        }
+    attachPrimitive(
+        crimild::alloc< BoxPrimitive >(
+            BoxPrimitive::Params {
+                .type = Primitive::Type::TRIANGLES,
+                .layout = VertexP3::getLayout(),
+                .size = Vector3f( 1.0f, 1.0f, 1.0f ),
+            }
+        )
     );
 
-    auto ibo = crimild::alloc< IndexUInt32Buffer >(
-        containers::Array< crimild::UInt32 > {
-        	0, 1, 2,
-        	3, 4, 5,
-        	6, 7, 8,
-            9, 10, 11,
-            12, 13, 14,
-            15, 16, 17,
-            18, 19, 20,
-            21, 22, 23,
-            24, 25, 26,
-            27, 28, 29,
-            30, 31, 32,
-            33, 34, 35,
-        }
+    attachComponent< MaterialComponent >()->attachMaterial(
+        [&] {
+            auto material = crimild::alloc< SkyboxMaterial >();
+            material->setTexture( cubemap );
+            return material;
+        }()
     );
-
-    auto program = ShaderProgramLibrary::getInstance()->get( constants::SHADER_PROGRAM_UNLIT_SKYBOX_P3 );
-    auto pipeline = [&] {
-        auto pipeline = crimild::alloc< Pipeline >();
-        pipeline->program = crimild::retain( program );
-        pipeline->depthState = DepthState::DISABLED;
-        pipeline->cullFaceState = CullFaceState::DISABLED;
-        return pipeline;
-    }();
-
-    attachComponent( [&] {
-        auto renderable = crimild::alloc< RenderStateComponent >();
-        renderable->pipeline = pipeline;
-        renderable->vbo = vbo;
-        renderable->ibo = ibo;
-        renderable->uniforms = {
-            [&] {
-                auto ubo = crimild::alloc< ModelViewProjectionUniformBuffer >();
-                ubo->node = this;
-                return ubo;
-            }(),
-        };
-        renderable->textures = { m_texture };
-        return renderable;
-    }());
-
-	setLayer( Node::Layer::SKYBOX );
-	setCullMode( Node::CullMode::NEVER );
-#endif
 }
 
 void Skybox::encode( coding::Encoder &encoder )
@@ -156,13 +63,4 @@ void Skybox::encode( coding::Encoder &encoder )
 void Skybox::decode( coding::Decoder &decoder )
 {
 	Geometry::decode( decoder );
-
-    Array< std::string > images;
-	decoder.decode( "images", images );
-
-	ImageArray faces;
-	images.each( [ &faces ]( std::string fileName ) {
-        faces.add( crimild::alloc< ImageTGA >( FileSystem::getInstance().pathForResource( fileName ) ) );
-	});
-	configure( faces );
 }

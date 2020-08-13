@@ -42,6 +42,11 @@
 using namespace crimild;
 using namespace crimild::compositions;
 
+Composition crimild::compositions::renderScene( SharedPointer< Node > const &scene ) noexcept
+{
+    return renderScene( crimild::get_ptr( scene ) );
+}
+
 Composition crimild::compositions::renderScene( Node *scene ) noexcept
 {
     Composition cmp;

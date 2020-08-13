@@ -25,22 +25,47 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_RENDERING_COMPOSITIONS_RENDER_SCENE_
-#define CRIMILD_CORE_RENDERING_COMPOSITIONS_RENDER_SCENE_
+#include "Rendering/Programs/SkyboxShaderProgram.hpp"
+#include "Rendering/DescriptorSet.hpp"
+#include "Rendering/Vertex.hpp"
+#include "Rendering/UniformBuffer.hpp"
 
-#include "Rendering/Compositions/Composition.hpp"
+using namespace crimild;
 
-namespace crimild {
+SkyboxShaderProgram::SkyboxShaderProgram( void ) noexcept
+{
+    vertexLayouts = { VertexP3::getLayout() };
 
-    class Node;
-
-    namespace compositions {
-
-        Composition renderScene( SharedPointer< Node > const &scene ) noexcept;
-        Composition renderScene( Node *scene ) noexcept;
-
-    }
-
+    descriptorSetLayouts = {
+        [] {
+            auto layout = crimild::alloc< DescriptorSetLayout >();
+            layout->bindings = {
+                {
+                    .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                    .stage = Shader::Stage::VERTEX,
+                },
+            };
+            return layout;
+        }(),
+        [] {
+            auto layout = crimild::alloc< DescriptorSetLayout >();
+            layout->bindings = {
+                {
+                    .descriptorType = DescriptorType::TEXTURE,
+                    .stage = Shader::Stage::FRAGMENT,
+                },
+            };
+            return layout;
+        }(),
+        [] {
+            auto layout = crimild::alloc< DescriptorSetLayout >();
+            layout->bindings = {
+                {
+                    .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                    .stage = Shader::Stage::VERTEX,
+                },
+            };
+            return layout;
+        }(),
+    };
 }
-
-#endif

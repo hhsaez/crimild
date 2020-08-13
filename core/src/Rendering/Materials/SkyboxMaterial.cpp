@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-present, H. Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -9,14 +9,14 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
+ *     * Neither the name of the copyright holder nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -25,35 +25,36 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SCENE_GRAPH_SKYBOX_NODE_
-#define CRIMILD_SCENE_GRAPH_SKYBOX_NODE_
+#include "Rendering/Materials/SkyboxMaterial.hpp"
+#include "Rendering/Pipeline.hpp"
+#include "Rendering/Texture.hpp"
+#include "Rendering/Programs/SkyboxShaderProgram.hpp"
+#include "Simulation/AssetManager.hpp"
 
-#include "SceneGraph/Geometry.hpp"
+using namespace crimild;
 
-namespace crimild {
+SkyboxMaterial::SkyboxMaterial( void ) noexcept
+{
+    setPipeline(
+        [] {
+            auto pipeline = crimild::alloc< Pipeline >();
+            pipeline->primitiveType = Primitive::Type::TRIANGLES;
+            pipeline->rasterizationState.cullMode = CullMode::NONE;
+            pipeline->program = crimild::retain( AssetManager::getInstance()->get< SkyboxShaderProgram >() );
+            return pipeline;
+        }()
+    );
 
-    class Texture;
-
-	class Skybox : public Geometry {
-		CRIMILD_IMPLEMENT_RTTI( crimild::Skybox )
-
-	public:
-		Skybox( void ) = default;
-        explicit Skybox( SharedPointer< Texture > const &cubemap ) noexcept;
-		virtual ~Skybox( void ) = default;
-
-        /**
-		   \name Coding
-		*/
-        //@{
-
-    public:
-        virtual void encode( coding::Encoder &encoder ) override;
-        virtual void decode( coding::Decoder &decoder ) override;
-
-        //@}
-	};
-
+    setDescriptors(
+        [&] {
+            auto descriptors = crimild::alloc< DescriptorSet >();
+            descriptors->descriptors = {
+                {
+                    .descriptorType = DescriptorType::TEXTURE,
+                    .obj = Texture::ONE,
+                },
+            };
+            return descriptors;
+        }()
+    );
 }
-
-#endif
