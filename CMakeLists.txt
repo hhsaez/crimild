@@ -110,8 +110,6 @@ IF ( CRIMILD_ENABLE_VULKAN )
    SET( BUILD_EXTERNAL OFF CACHE BOOL "Build external dependencies in /External" )
    SET( ENABLE_SPVREMAPPER OFF CACHE BOOL "Enables building of SPVRemapper" )
    SET( ENABLE_GLSLANG_BINARIES OFF CACHE BOOL "Builds glslangValidator and spirv-remap" )
-
-
    ADD_SUBDIRECTORY( ${CRIMILD_SOURCE_DIR}/third-party/glslang )
 
    ADD_DEFINITIONS( -DCRIMILD_ENABLE_VULKAN=1 )

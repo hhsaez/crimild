@@ -30,9 +30,13 @@
 #include "Rendering/Shader.hpp"
 #include "Foundation/Log.hpp"
 
+// TODO (hernan): In order for the Vulkan shader compiler to work correctly, make sure there
+// is no `glslang` directory in VULKAN_SDK/macOS/include
+// That way, the compiler uses the header files that are in `third-party` instead.
+// I definitely need to fix this
+
 #include <glslang/Public/ShaderLang.h>
 #include <SPIRV/GlslangToSpv.h>
-#include <StandAlone/DirStackFileIncluder.h>
 
 #include <iostream>
 #include <fstream>
@@ -199,7 +203,7 @@ bool vulkan::ShaderCompiler::compile( Shader::Stage shaderStage, const std::stri
     auto tShader = glslang::TShader( stage );
     tShader.setStrings( &data, 1 );
 
-    Int32 clientInputSematincsVersion = 110; // #define VULKAN 100
+    Int32 clientInputSematincsVersion = 100; // #define VULKAN 100
     glslang::EShTargetClientVersion vulkanClientVersion = glslang::EShTargetVulkan_1_0;
     glslang::EShTargetLanguageVersion targetVersion = glslang::EShTargetSpv_1_0;
 
@@ -207,14 +211,12 @@ bool vulkan::ShaderCompiler::compile( Shader::Stage shaderStage, const std::stri
     tShader.setEnvClient( glslang::EShClientVulkan, vulkanClientVersion );
     tShader.setEnvTarget( glslang::EShTargetSpv, targetVersion );
 
-    TBuiltInResource resources = DefaultTBuiltInResource;
+    auto &resources = DefaultTBuiltInResource;
     EShMessages messages = ( EShMessages )( EShMsgSpvRules | EShMsgVulkanRules );
 
-    const int defaultVersion = 100;
+    const int defaultVersion = 110;
 
-    DirStackFileIncluder includer;
-
-    std::string preprocessedGLSL;
+    glslang::TShader::ForbidIncluder includer;
 
     auto shaderLines = []( std::string input ) {
         std::stringstream out;
@@ -233,7 +235,12 @@ bool vulkan::ShaderCompiler::compile( Shader::Stage shaderStage, const std::stri
         return out.str();
     };
 
-    if ( !tShader.preprocess( &resources, defaultVersion, ENoProfile, false, false, messages, &preprocessedGLSL, includer ) ) {
+    std::string preprocessedGLSL;
+    if ( tShader.preprocess( &resources, defaultVersion, ENoProfile, false, false, messages, &preprocessedGLSL, includer ) ) {
+        auto preprocessedGLSLStr = preprocessedGLSL.c_str();
+        tShader.setStrings( &preprocessedGLSLStr, 1 );
+    }
+    else {
         CRIMILD_LOG_ERROR(
             "GLSL preprocessing failed for shader source:\n",
             shaderLines( src ),
@@ -245,10 +252,7 @@ bool vulkan::ShaderCompiler::compile( Shader::Stage shaderStage, const std::stri
         return false;
     }
 
-    auto preprocessedGLSLStr = preprocessedGLSL.c_str();
-    tShader.setStrings( &preprocessedGLSLStr, 1 );
-
-    if ( !tShader.parse( &resources, 110, false, messages ) ) {
+    if ( !tShader.parse( ( const TBuiltInResource* ) &resources, defaultVersion, ENoProfile, false, false, messages, includer ) ) {
         CRIMILD_LOG_ERROR(
             "GLSL parsing failed for shader source:\n",
             shaderLines( src ),
@@ -279,7 +283,6 @@ bool vulkan::ShaderCompiler::compile( Shader::Stage shaderStage, const std::stri
     glslang::SpvOptions spvOptions;
     glslang::GlslangToSpv( *program.getIntermediate( stage ), spirv, &logger, &spvOptions );
 
-    // return spirv
     out.resize( spirv.size() * sizeof( unsigned int ) );
     memcpy( out.data(), spirv.data(), out.size() );
 
