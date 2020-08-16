@@ -269,6 +269,7 @@
 #include "Rendering/Compositions/InvertComposition.hpp"
 #include "Rendering/Compositions/PresentComposition.hpp"
 #include "Rendering/Compositions/RenderScene.hpp"
+#include "Rendering/Compositions/ShaderComposition.hpp"
 
 #include "Rendering/Materials/SimpleLitMaterial.hpp"
 #include "Rendering/Materials/SkyboxMaterial.hpp"
