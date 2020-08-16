@@ -29,6 +29,7 @@
 #define CRIMILD_VULKAN_RENDERING_SHADER_MODULE_
 
 #include "Foundation/VulkanObject.hpp"
+#include "Rendering/VulkanShaderCompiler.hpp"
 
 namespace crimild {
 
@@ -66,8 +67,11 @@ namespace crimild {
             SharedPointer< ShaderModule > create( ShaderModule::Descriptor const &descriptor ) noexcept;
             void destroy( ShaderModule *shaderModule ) noexcept override;
 
+            ShaderCompiler &getShaderCompiler( void ) noexcept { return m_shaderCompiler; }
+
         private:
             RenderDevice *m_renderDevice = nullptr;
+            ShaderCompiler m_shaderCompiler;
         };
 
     }
@@ -75,4 +79,3 @@ namespace crimild {
 }
 
 #endif
-

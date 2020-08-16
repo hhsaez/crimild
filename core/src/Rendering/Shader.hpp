@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the copyright holder nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -52,11 +52,18 @@ namespace crimild {
 		};
 
 		static std::string getStageDescription( const Stage &stage ) noexcept;
-		
+
+        // TODO: Make this an Array< char >
 		using Data = std::vector< char >;
-		
+
+        enum class DataType {
+            INLINE,
+            BINARY,
+        };
+
 	public:
-		explicit Shader( Stage stage, const Data &data = Data(), std::string entryPointName = "main" );
+        explicit Shader( Stage stage, const std::string &source, const std::string &entryPointName = "main" ) noexcept;
+		explicit Shader( Stage stage, const Data &data = Data(), std::string entryPointName = "main" ) noexcept;
 		virtual ~Shader( void ) = default;
 
 		inline const Stage &getStage( void ) const noexcept { return m_stage; }
@@ -70,13 +77,15 @@ namespace crimild {
 		{
 			return getStageDescription( getStage() );
 		}
-		
+
+        inline DataType getDataType( void ) const noexcept { return m_dataType; }
 		inline const Data &getData( void ) const noexcept { return m_data; }
 
 		inline const std::string &getEntryPointName( void ) const noexcept { return m_entryPointName; }
 
 	private:
 		Stage m_stage;
+        DataType m_dataType;
 		Data m_data;
 		std::string m_entryPointName;
 
@@ -84,7 +93,7 @@ namespace crimild {
 		   \deprecated
 		 */
 		//@{
-		
+
 	public:
 		explicit Shader( std::string source );
 
@@ -96,11 +105,10 @@ namespace crimild {
 
 		//@}
 	};
-    
+
     using VertexShader = Shader;
     using FragmentShader = Shader;
 
 }
 
 #endif
-
