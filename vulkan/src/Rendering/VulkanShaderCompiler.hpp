@@ -9,7 +9,7 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the copuright holder nor the
+ *     * Neither the name of the copyright holder nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
@@ -25,57 +25,32 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Shader.hpp"
+#ifndef CRIMILD_VULKAN_RENDERING_SHADER_COMPILER_
+#define CRIMILD_VULKAN_RENDERING_SHADER_COMPILER_
 
-using namespace crimild;
+#include "Foundation/Types.hpp"
+#include "Rendering/Shader.hpp"
 
-std::string Shader::getStageDescription( const Stage &stage ) noexcept
-{
-	switch ( stage ) {
-		case Stage::VERTEX:
-			return "VERTEX";
-		case Stage::TESSELLATION_CONTROL:
-			return "TESSELLATION_CONTROL";
-		case Stage::TESSELLATION_EVALUATION:
-			return "TESSELLATION_EVALUATION";
-		case Stage::GEOMETRY:
-			return "GEOMETRY";
-		case Stage::FRAGMENT:
-			return "FRAGMENT";
-		case Stage::COMPUTE:
-			return "COMPUTE";
-		case Stage::ALL_GRAPHICS:
-			return "ALL_GRAPHICS";
-		case Stage::ALL:
-			return "ALL";
-		default:
-			break;
-	}
+#include <string>
 
-	// Should never happen. Thrown exception instead?
-	return "UNKNOWN";
-}
+namespace crimild {
 
-Shader::Shader( Stage stage, const std::string &source, const std::string &entryPointName ) noexcept
-    : m_stage( stage ),
-      m_dataType( DataType::INLINE ),
-      m_entryPointName( entryPointName )
-{
-    std::copy( std::begin( source ), std::end( source ), std::back_inserter( m_data ) );
-}
+    class Shader;
 
+    namespace vulkan {
 
-Shader::Shader( Stage stage, const Data &data, std::string entryPointName ) noexcept
-	: m_stage( stage ),
-	  m_data( data ),
-      m_dataType( DataType::BINARY ),
-	  m_entryPointName( entryPointName )
-{
+        class ShaderCompiler {
+        public:
+            Bool init( void ) noexcept;
+
+            Bool compile( Shader::Stage stage, const std::string &source, Shader::Data &out ) noexcept;
+
+        private:
+            Bool m_initialized = false;
+        };
+
+    }
 
 }
 
-Shader::Shader( std::string source )
-	: m_source( source )
-{
-
-}
+#endif

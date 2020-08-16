@@ -10,10 +10,14 @@
 	path = third-party/assimp
 	url = https://github.com/assimp/assimp.git
 	ignore = dirty
-	
+
 [submodule "third-party/stb"]
 	path = third-party/stb
 	url = https://github.com/nothings/stb.git
 [submodule "third-party/imgui"]
 	path = third-party/imgui
 	url = https://github.com/ocornut/imgui.git
+[submodule "third-party/glslang"]
+	path = third-party/glslang
+	url = git@github.com:KhronosGroup/glslang.git
+    ignore = dirty

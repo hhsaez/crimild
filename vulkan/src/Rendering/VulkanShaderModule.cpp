@@ -51,7 +51,14 @@ SharedPointer< ShaderModule > ShaderModuleManager::create( ShaderModule::Descrip
     auto shader = descriptor.shader;
     assert( shader != nullptr && "Shader instance is null" );
 
-    const auto &code = descriptor.shader->getData();
+    auto code = shader->getData();
+    if ( shader->getDataType() == Shader::DataType::INLINE ) {
+        auto source = std::string( code.data(), code.size() );
+        if ( !getShaderCompiler().compile( shader->getStage(), source, code ) ) {
+            CRIMILD_LOG_ERROR( "Failed to create shader module" );
+            return nullptr;
+        }
+    }
 
     auto createInfo = VkShaderModuleCreateInfo {
         .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
