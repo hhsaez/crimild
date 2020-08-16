@@ -29,6 +29,7 @@
 #define CRIMILD_VULKAN_RENDERING_PIPELINE_
 
 #include "Rendering/VulkanRenderResource.hpp"
+#include "Rendering/VulkanShaderCompiler.hpp"
 #include "Rendering/Pipeline.hpp"
 #include "Rendering/VulkanShaderModule.hpp"
 #include "Foundation/Containers/Map.hpp"
