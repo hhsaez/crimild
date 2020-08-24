@@ -26,6 +26,7 @@
 */
 
 #include "Rendering/Uniforms/LightingUniform.hpp"
+#include "Rendering/ShadowMap.hpp"
 #include "SceneGraph/Light.hpp"
 
 using namespace crimild;
@@ -79,6 +80,10 @@ void LightingUniform::onPreRender( void ) noexcept
                 0.0f,
                 0.0f
             );
+            dst[ i ].castShadows = light->castShadows();
+            if ( light->castShadows() ) {
+                dst[ i ].lightSpaceMatrix = light->getShadowMap()->getLightProjectionMatrix();
+            }
         }
         return count;
     };

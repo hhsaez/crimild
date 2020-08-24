@@ -25,58 +25,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_RENDERING_FRAME_COMPOSITION_
-#define CRIMILD_CORE_RENDERING_FRAME_COMPOSITION_
+#ifndef CRIMILD_CORE_RENDERING_COMPOSITIONS_DEBUG_
+#define CRIMILD_CORE_RENDERING_COMPOSITIONS_DEBUG_
 
-#include "Foundation/Containers/Map.hpp"
-#include "Foundation/Containers/List.hpp"
-#include "Foundation/SharedObject.hpp"
+#include "Rendering/Compositions/Composition.hpp"
 
 namespace crimild {
 
-    class Attachment;
-
     namespace compositions {
 
-        class Composition {
-        public:
-            Composition( void ) noexcept = default;
-            Composition( const Composition & ) noexcept;
-            Composition( Composition && ) noexcept;
-            ~Composition( void ) noexcept = default;
-
-            Composition &operator=( const Composition & ) noexcept;
-            Composition &operator=( Composition && ) noexcept;
-
-            template< typename T >
-            T *create( void ) noexcept
-            {
-                auto obj = crimild::alloc< T >();
-                m_objects.add( obj );
-                return crimild::get_ptr( obj );
-            }
-
-            Attachment *createAttachment( std::string name ) noexcept;
-
-            template< typename Fn >
-            void eachAttachment( Fn fn ) noexcept
-            {
-                m_attachments.eachValue( fn );
-            }
-
-            inline Composition &setOutput( Attachment *att ) noexcept
-            {
-                m_output = att;
-                return *this;
-            }
-
-            inline Attachment *getOutput( void ) noexcept { return m_output; }
-
-        private:
-            Attachment *m_output = nullptr;
-            Map< std::string, Attachment * > m_attachments;
-            List< SharedPointer< SharedObject >> m_objects;
-        };
+        Composition debug( Composition ) noexcept;
 
     }
 

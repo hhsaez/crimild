@@ -65,6 +65,38 @@ void Light::setCastShadows( crimild::Bool enabled )
 	}
 }
 
+Matrix4f Light::computeLightSpaceMatrix( void ) const noexcept
+{
+    Matrix4f proj;
+
+    if ( getType() == Type::DIRECTIONAL ) {
+        auto ortho = []( float left, float right, float bottom, float top, float near, float far ) {
+            return Matrix4f(
+                2.0f / ( right - left ), 0.0f, 0.0f, 0.0f,
+                0.0f, 2.0f / ( bottom - top ), 0.0f, 0.0f,
+                0.0f, 0.0f, 1.0f / ( near - far ), 0.0f,
+
+                -( right + left ) / ( right - left ),
+                -( bottom + top ) / ( bottom - top ),
+                near / ( near - far ),
+                1.0f
+            );
+        };
+        proj = ortho( -20.0f, 20.0f, -20.0f, 20.0f, 1.0f, 200.0f );
+    }
+    else {
+        proj = Frustumf( 45.0f, 1.0f, 1.0f, 200.0f ).computeProjectionMatrix();
+    }
+
+    Transformation lightTransform = getWorld();
+    //lightTransform.setRotate( getWorld().getRotate() );
+    //lightTransform.setTranslate( -50.0f * lightTransform.computeDirection() );
+    auto view = lightTransform.computeModelMatrix().getInverse();
+
+    // matrices are transposed in GLSL...
+    return view * proj;
+}
+
 void Light::encode( coding::Encoder &encoder )
 {
 	Node::encode( encoder );

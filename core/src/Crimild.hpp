@@ -266,6 +266,7 @@
 #include "Rendering/Compositions/ColorizeComposition.hpp"
 #include "Rendering/Compositions/ConvolutionComposition.hpp"
 #include "Rendering/Compositions/GrayscaleComposition.hpp"
+#include "Rendering/Compositions/DebugComposition.hpp"
 #include "Rendering/Compositions/InvertComposition.hpp"
 #include "Rendering/Compositions/PresentComposition.hpp"
 #include "Rendering/Compositions/RenderScene.hpp"
