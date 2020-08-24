@@ -26,11 +26,13 @@
  */
 
 #include "Rendering/Compositions/RenderScene.hpp"
+#include "Rendering/Compositions/ComputeShadowComposition.hpp"
 
 #include "Components/MaterialComponent.hpp"
 #include "Rendering/CommandBuffer.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/RenderPass.hpp"
+#include "Rendering/Sampler.hpp"
 #include "Rendering/Uniforms/CameraViewProjectionUniformBuffer.hpp"
 #include "Rendering/Uniforms/LightingUniform.hpp"
 #include "SceneGraph/Geometry.hpp"
@@ -50,6 +52,38 @@ Composition crimild::compositions::renderScene( SharedPointer< Node > const &sce
 Composition crimild::compositions::renderScene( Node *scene ) noexcept
 {
     Composition cmp;
+
+    cmp = computeShadow( cmp, scene );
+
+    auto shadowAtlas = [&] {
+        auto texture = cmp.create< Texture >();
+        texture->imageView = [&] {
+            auto att = cmp.getOutput();
+            if ( att == nullptr || att->imageView == nullptr ) {
+                auto imageView = crimild::alloc< ImageView >();
+                imageView->image = Image::ONE;
+                return imageView;
+            }
+            return att->imageView;
+        }();
+        texture->sampler = [] {
+            auto sampler = crimild::alloc< Sampler >();
+            // In order to avoid darking objects outside of the view frustum, we set
+            // the wrap mode to either CLAMP_TO_BORDER, with a WHITE border color
+            // (all ones). That way, any object outside the light's frustum will have
+            // a depth of 1.0. Then, when comparing that depth with the current
+            // fragment's one, the later one will never be in shadow.
+            // For some types of lights, we might want to use a different approach though.
+            // For example, point lights or spot lights should make objects outside of
+            // the view frustum to be in shadow.
+            // TODO (hernan): Maybe it will be best to split the shadow atlas into two after all
+            sampler->setWrapMode( Sampler::WrapMode::CLAMP_TO_BORDER );
+            sampler->setBorderColor( Sampler::BorderColor::INT_OPAQUE_WHITE );
+            return sampler;
+        }();
+        return texture;
+    }();
+
     auto renderPass = cmp.create< RenderPass >();
     renderPass->attachments = {
         [&] {
@@ -63,6 +97,8 @@ Composition crimild::compositions::renderScene( Node *scene ) noexcept
         [&] {
             auto att = cmp.createAttachment( "gBufferDepth" );
             att->format = Format::DEPTH_STENCIL_DEVICE_OPTIMAL;
+            //att->imageView = crimild::alloc< ImageView >();
+            //att->imageView->image = crimild::alloc< Image >();
             return crimild::retain( att );
         }()
     };
@@ -95,6 +131,10 @@ Composition crimild::compositions::renderScene( Node *scene ) noexcept
                             return lights;
                         }()
                     ),
+                },
+                Descriptor {
+                    .descriptorType = DescriptorType::TEXTURE,
+                    .obj = crimild::retain( shadowAtlas ),
                 },
             };
             return descriptorSet;
