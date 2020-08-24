@@ -332,6 +332,7 @@ void VulkanSystem::initShaders( void ) noexcept
 
     auto assets = AssetManager::getInstance();
 
+    /*
     assets->get< PhongLitShaderProgram >()->setShaders(
         {
             [&] {
@@ -344,6 +345,7 @@ void VulkanSystem::initShaders( void ) noexcept
             }(),
         }
     );
+    */
 
     assets->get< GouraudLitShaderProgram >()->setShaders(
         {

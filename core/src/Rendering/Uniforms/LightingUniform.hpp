@@ -55,6 +55,8 @@ namespace crimild {
             alignas( 16 ) Vector4f color;
             alignas( 16 ) Vector4f attenuation;
             alignas( 16 ) Vector4f cutoff;
+            alignas( 16 ) Bool castShadows;
+            alignas( 16 ) Matrix4f lightSpaceMatrix;
         };
 
         struct Lighting {

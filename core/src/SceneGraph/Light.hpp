@@ -66,7 +66,7 @@ namespace crimild {
 		Light( Type type = Type::POINT );
 		virtual ~Light( void );
 
-		const Type &getType( void ) { return _type; }
+		const Type &getType( void ) const noexcept { return _type; }
 
 		Vector3f getPosition( void ) const { return getWorld().getTranslate(); }
 		Vector3f getDirection( void ) const { return ( _type == Type::POINT ? Vector3f( 0.0f, 0.0f, 0.0f ) : getWorld().computeDirection() ); }
@@ -104,6 +104,8 @@ namespace crimild {
 	public:
 		void setCastShadows( crimild::Bool enabled );
 		inline crimild::Bool castShadows( void ) const { return _shadowMap != nullptr; }
+
+        Matrix4f computeLightSpaceMatrix( void ) const noexcept;
 
 		void setShadowMap( SharedPointer< ShadowMap > const &shadowMap ) { _shadowMap = shadowMap; }
 		inline ShadowMap *getShadowMap( void ) { return crimild::get_ptr( _shadowMap ); }
