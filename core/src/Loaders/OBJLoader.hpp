@@ -106,7 +106,7 @@ namespace crimild {
 
 	private:
 		std::string _fileName;
-        Bool _verbose = true;
+        Bool _verbose = false;
 
 		FileProcessor _objProcessor;
 		FileProcessor _mtlProcessor;
