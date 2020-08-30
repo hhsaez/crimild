@@ -170,6 +170,118 @@ PhongLitShaderProgram::PhongLitShaderProgram( void ) noexcept
                         return shadow;
                     }
 
+                    const float FACE_INVALID = -1.0;
+                    const float FACE_LEFT = 0.0;
+                    const float FACE_RIGHT = 1.0;
+                    const float FACE_FRONT = 2.0;
+                    const float FACE_BACK = 3.0;
+                    const float FACE_UP = 4.0;
+                    const float FACE_DOWN = 5.0;
+
+                    // Return the face in cubemap based on the principle component of the direction
+                    float getFace( vec3 direction )
+                    {
+                        vec3 absDirection = abs( direction );
+                        float face = -1.0;
+                        if ( absDirection.x > absDirection.z ) {
+                            if ( absDirection.x > absDirection.y ) {
+                                return direction.x > 0.0 ? FACE_RIGHT : FACE_LEFT;
+                            }
+                            else {
+                                return direction.y > 0.0 ? FACE_UP : FACE_DOWN;
+                            }
+                        }
+                        else {
+                            if ( absDirection.z > absDirection.y ) {
+                                return direction.z > 0.0 ? FACE_FRONT : FACE_BACK;
+                            }
+                            else {
+                                return direction.y > 0.0 ? FACE_UP : FACE_DOWN;
+                            }
+                        }
+                        return FACE_INVALID;
+                    }
+
+                    vec2 getUV( vec3 direction, float face )
+                    {
+                        vec2 uv;
+                        if ( face == FACE_LEFT ) {
+                            uv = vec2( -direction.z, direction.y ) / abs( direction.x );
+                        }
+                        else if ( face == FACE_RIGHT ) {
+                            uv = vec2( direction.z, direction.y ) / abs( direction.x );
+                        }
+                        else if ( face == FACE_FRONT ) {
+                            uv = vec2( -direction.x, direction.y ) / abs( direction.z );
+                        }
+                        else if ( face == FACE_BACK ) {
+                            uv = vec2( direction.x, direction.y ) / abs( direction.z );
+                        }
+                        else if ( face == FACE_UP ) {
+                            uv = vec2( direction.x, direction.z ) / abs( direction.y );
+                        }
+                        else if ( face == FACE_DOWN ) {
+                            uv = vec2( direction.x, -direction.z ) / abs( direction.y );
+                        }
+                        return 0.5 + 0.5 * uv;
+                    }
+
+                    vec2 getFaceOffsets( float face )
+                    {
+                        if ( face == FACE_LEFT ) {
+                            return vec2( 0.0, 0.5 );
+                        }
+                        else if ( face == FACE_RIGHT ) {
+                            return vec2( 0.5, 0.5 );
+                        }
+                        else if ( face == FACE_FRONT ) {
+                            return vec2( 0.25, 0.5 );
+                        }
+                        else if ( face == FACE_BACK ) {
+                            return vec2( 0.75, 0.5 );
+                        }
+                        else if ( face == FACE_UP ) {
+                            return vec2( 0.5, 0.25 );
+                        }
+                        else if ( face == FACE_DOWN ) {
+                            return vec2( 0.5, 0.75 );
+                        }
+                    }
+
+                    vec4 textureCubeUV( sampler2D envMap, vec3 direction )
+                    {
+                        float face = getFace( direction );
+                        vec2 uv = getUV( direction, face );
+                        uv.y = 1.0 - uv.y;
+                        uv = getFaceOffsets( face ) + 0.25 * uv;
+                        vec4 color = texture( envMap, uv );
+                        return color;
+                    }
+
+                    float calculatePointShadow( sampler2D shadowAtlas, float dist, vec3 D )
+                    {
+                        float depth = dist / 200.0;//length( D ) / 200.0;
+                        float shadow = textureCubeUV( shadowAtlas, D ).r;
+                        return depth - 0.05 > shadow ? 1.0 : 0.0;
+
+                        /*
+                        // Compute shadow PCF
+                        float bias = 0.05;
+                        float shadow = 0.0f;
+
+                        for ( int y = -1; y <= 1; ++y ) {
+                            for ( int x = -1; x <= 1; ++x ) {
+                                for ( int z = -1; z <= 1; ++z ) {
+                                    float pcfDepth = textureCubeUV( uShadowAtlas, normalize( D + 0.01 * vec3( x, y, z ) ) ).r;// + vec3( x, y, z ) ).r;
+                                    shadow += depth - bias > pcfDepth ? 1.0 : 0.0;
+                                }
+                            }
+                        }
+                        shadow /= 9.0;
+                        return shadow;
+                        */
+                    }
+
                     void main()
                     {
                         vec3 N = normalize( inNormal );
@@ -195,6 +307,15 @@ PhongLitShaderProgram::PhongLitShaderProgram( void ) noexcept
                             vec3 D = diffuse( N, L );
                             vec3 S = specular( N, L, E, P, MS );
                             float lAtt = attenuation( dist, lighting.pointLights[ i ].attenuation.xyz );
+
+                            if ( lighting.pointLights[ i ].castShadows ) {
+                                float shadow = calculatePointShadow( uShadowAtlas, dist, -L );
+                                //D = vec3( 1.0 );
+                                //S = vec3( 0.0 );
+                                D *= 1.0 - shadow;
+                                S *= 1.0 - shadow;
+                            }
+
                             lightContribution += Lc * lAtt * ( A + D + S );
                         }
 
