@@ -84,17 +84,19 @@ Matrix4f Light::computeLightSpaceMatrix( void ) const noexcept
         };
         proj = ortho( -20.0f, 20.0f, -20.0f, 20.0f, 1.0f, 200.0f );
     }
+    else if ( getType() == Type::POINT ) {
+        proj = Frustumf( 90.0f, 1.0f, 1.0f, 200.0f ).computeProjectionMatrix();
+    }
     else {
         proj = Frustumf( 45.0f, 1.0f, 1.0f, 200.0f ).computeProjectionMatrix();
     }
 
-    Transformation lightTransform = getWorld();
-    //lightTransform.setRotate( getWorld().getRotate() );
-    //lightTransform.setTranslate( -50.0f * lightTransform.computeDirection() );
-    auto view = lightTransform.computeModelMatrix().getInverse();
+    //Transformation lightTransform = getWorld();
+    //auto view = lightTransform.computeModelMatrix().getInverse();
 
     // matrices are transposed in GLSL...
-    return view * proj;
+    //return view * proj;
+    return proj;
 }
 
 void Light::encode( coding::Encoder &encoder )
