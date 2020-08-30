@@ -45,9 +45,9 @@ BoxPrimitive::BoxPrimitive( const Params &params ) noexcept
 
     auto vertices = crimild::alloc< VertexBuffer >( layout, 24 );
 
-    auto w = params.size.x();
-    auto h = params.size.y();
-    auto d = params.size.z();
+    auto w = ( params.invertFaces ? -1.0f : 1.0f ) * params.size.x();
+    auto h = ( params.invertFaces ? -1.0f : 1.0f ) * params.size.y();
+    auto d = ( params.invertFaces ? -1.0f : 1.0f ) * params.size.z();
 
     auto positions = vertices->get( VertexAttribute::Name::POSITION );
     positions->set(
@@ -92,43 +92,46 @@ BoxPrimitive::BoxPrimitive( const Params &params ) noexcept
 
     if ( layout.hasAttribute( VertexAttribute::Name::NORMAL ) ) {
         auto normals = vertices->get( VertexAttribute::Name::NORMAL );
+        auto R = Vector3f::UNIT_X;
+        auto U = Vector3f::UNIT_Y;
+        auto F = Vector3f::UNIT_Z;
         normals->set(
             Array< Vector3f > {
                 // top
-                Vector3f::UNIT_Y,
-                Vector3f::UNIT_Y,
-                Vector3f::UNIT_Y,
-                Vector3f::UNIT_Y,
+                U,
+                U,
+                U,
+                U,
 
                 // front
-                Vector3f::UNIT_Z,
-                Vector3f::UNIT_Z,
-                Vector3f::UNIT_Z,
-                Vector3f::UNIT_Z,
+                F,
+                F,
+                F,
+                F,
 
                 // back
-                -Vector3f::UNIT_Z,
-                -Vector3f::UNIT_Z,
-                -Vector3f::UNIT_Z,
-                -Vector3f::UNIT_Z,
+                -F,
+                -F,
+                -F,
+                -F,
 
                 // left
-                -Vector3f::UNIT_X,
-                -Vector3f::UNIT_X,
-                -Vector3f::UNIT_X,
-                -Vector3f::UNIT_X,
+                -R,
+                -R,
+                -R,
+                -R,
 
                 // right
-                Vector3f::UNIT_X,
-                Vector3f::UNIT_X,
-                Vector3f::UNIT_X,
-                Vector3f::UNIT_X,
+                R,
+                R,
+                R,
+                R,
 
                 // bottom
-                -Vector3f::UNIT_Y,
-                -Vector3f::UNIT_Y,
-                -Vector3f::UNIT_Y,
-                -Vector3f::UNIT_Y,
+                -U,
+                -U,
+                -U,
+                -U,
             }
         );
     }
@@ -184,43 +187,47 @@ BoxPrimitive::BoxPrimitive( const Params &params ) noexcept
 
     if ( layout.hasAttribute( VertexAttribute::Name::TEX_COORD ) ) {
         auto texCoords = vertices->get( VertexAttribute::Name::TEX_COORD );
+        auto s0 = params.invertFaces ? 1.0 : 0.0;
+        auto s1 = params.invertFaces ? 0.0 : 1.0;
+        auto t0 = params.invertFaces ? 1.0 : 0.0;
+        auto t1 = params.invertFaces ? 0.0 : 1.0;
         texCoords->set(
             Array< Vector2f > {
                 // top
-                Vector2f( 0.0f, 0.0f ),
-                Vector2f( 0.0f, 1.0f ),
-                Vector2f( 1.0f, 1.0f ),
-                Vector2f( 1.0f, 0.0f ),
+                Vector2f( s0, t0 ),
+                Vector2f( s0, t1 ),
+                Vector2f( s1, t1 ),
+                Vector2f( s1, t0 ),
 
                 // front
-                Vector2f( 0.0f, 0.0f ),
-                Vector2f( 0.0f, 1.0f ),
-                Vector2f( 1.0f, 1.0f ),
-                Vector2f( 1.0f, 0.0f ),
+                Vector2f( s0, t0 ),
+                Vector2f( s0, t1 ),
+                Vector2f( s1, t1 ),
+                Vector2f( s1, t0 ),
 
                 // back
-                Vector2f( 0.0f, 0.0f ),
-                Vector2f( 0.0f, 1.0f ),
-                Vector2f( 1.0f, 1.0f ),
-                Vector2f( 1.0f, 0.0f ),
+                Vector2f( s0, t0 ),
+                Vector2f( s0, t1 ),
+                Vector2f( s1, t1 ),
+                Vector2f( s1, t0 ),
 
                 // left
-                Vector2f( 0.0f, 0.0f ),
-                Vector2f( 0.0f, 1.0f ),
-                Vector2f( 1.0f, 1.0f ),
-                Vector2f( 1.0f, 0.0f ),
+                Vector2f( s0, t0 ),
+                Vector2f( s0, t1 ),
+                Vector2f( s1, t1 ),
+                Vector2f( s1, t0 ),
 
                 // right
-                Vector2f( 0.0f, 0.0f ),
-                Vector2f( 0.0f, 1.0f ),
-                Vector2f( 1.0f, 1.0f ),
-                Vector2f( 1.0f, 0.0f ),
+                Vector2f( s0, t0 ),
+                Vector2f( s0, t1 ),
+                Vector2f( s1, t1 ),
+                Vector2f( s1, t0 ),
 
                 // bottom
-                Vector2f( 0.0f, 0.0f ),
-                Vector2f( 0.0f, 1.0f ),
-                Vector2f( 1.0f, 1.0f ),
-                Vector2f( 1.0f, 0.0f ),
+                Vector2f( s0, t0 ),
+                Vector2f( s0, t1 ),
+                Vector2f( s1, t1 ),
+                Vector2f( s1, t0 ),
             }
         );
     }
