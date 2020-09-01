@@ -38,7 +38,6 @@ namespace crimild {
 
         Composition computeShadow( SharedPointer< Node > const &scene ) noexcept;
         Composition computeShadow( Composition cmp, Node *scene ) noexcept;
-        Composition computePointShadow( Composition cmp, Node *scene ) noexcept;
 
     }
 

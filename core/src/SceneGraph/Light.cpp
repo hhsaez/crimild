@@ -91,11 +91,6 @@ Matrix4f Light::computeLightSpaceMatrix( void ) const noexcept
         proj = Frustumf( 45.0f, 1.0f, 1.0f, 200.0f ).computeProjectionMatrix();
     }
 
-    //Transformation lightTransform = getWorld();
-    //auto view = lightTransform.computeModelMatrix().getInverse();
-
-    // matrices are transposed in GLSL...
-    //return view * proj;
     return proj;
 }
 

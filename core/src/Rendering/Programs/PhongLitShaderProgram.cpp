@@ -330,7 +330,7 @@ PhongLitShaderProgram::PhongLitShaderProgram( void ) noexcept
                             if ( lighting.directionalLights[ i ].castShadows ) {
                                 vec4 lightSpacePos = ( bias * lighting.directionalLights[ i ].lightSpaceMatrix * vec4( inPosition, 1.0 ) );
                                 if ( lightSpacePos.z >= -1.0 && lightSpacePos.z <= 1.0 ) {
-                                    float shadow = calculateShadow( lightSpacePos, N, L, 0.0 );
+                                    float shadow = calculateShadow( lightSpacePos, N, L, 0.005 );
                                     D *= 1.0 - shadow;
                                     S *= 1.0 - shadow;
                                 }
@@ -360,15 +360,8 @@ PhongLitShaderProgram::PhongLitShaderProgram( void ) noexcept
                             float lAtt = attenuation( dist, lighting.spotLights[ i ].attenuation.xyz );
 
                             if ( lighting.spotLights[ i ].castShadows ) {
-                                const mat4 biasSpot = mat4(
-                                    0.5, 0.0, 0.0, 0.0,
-                                    0.0, 0.5, 0.0, 0.0,
-                                    0.0, 0.0, 1.0, 0.0,
-                                    0.5, 0.5, 0.0, 1.0
-                                );
-
-                                vec4 lightSpacePos = ( biasSpot * lighting.spotLights[ i ].lightSpaceMatrix * vec4( inPosition, 1.0 ) );
-                                float shadow = calculateShadow( lightSpacePos, N, L, 0.0005 );
+                                vec4 lightSpacePos = ( bias * lighting.spotLights[ i ].lightSpaceMatrix * vec4( inPosition, 1.0 ) );
+                                float shadow = calculateShadow( lightSpacePos, N, L, 0.005 );
                                 D *= 1.0 - shadow;
                                 S *= 1.0 - shadow;
                             }
