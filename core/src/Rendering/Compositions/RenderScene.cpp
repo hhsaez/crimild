@@ -53,9 +53,7 @@ Composition crimild::compositions::renderScene( Node *scene ) noexcept
 {
     Composition cmp;
 
-    //cmp = computeShadow( cmp, scene );
-
-    cmp = computePointShadow( cmp, scene );
+    cmp = computeShadow( cmp, scene );
 
     auto shadowAtlas = [&] {
         auto texture = cmp.create< Texture >();
