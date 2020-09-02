@@ -85,6 +85,7 @@ PhongLitShaderProgram::PhongLitShaderProgram( void ) noexcept
                         vec4 cutoff;
                         bool castShadows;
                         mat4 lightSpaceMatrix;
+                        vec4 viewport;
                     };
 
                     layout ( set = 0, binding = 1 ) uniform Lighting {
@@ -149,7 +150,7 @@ PhongLitShaderProgram::PhongLitShaderProgram( void ) noexcept
                         return ( 2.0 * nearPlane * farPlane ) / ( farPlane + nearPlane - z * ( farPlane - nearPlane ) ) / farPlane;
                     }
 
-                    float calculateShadow( vec4 ligthSpacePosition, vec3 N, vec3 L, float bias )
+                    float calculateShadow( vec4 ligthSpacePosition, vec4 viewport, vec3 N, vec3 L, float bias )
                     {
                         // perform perspective divide
                         vec3 projCoords = ligthSpacePosition.xyz / ligthSpacePosition.w;
@@ -161,7 +162,10 @@ PhongLitShaderProgram::PhongLitShaderProgram( void ) noexcept
                         vec2 texelSize = 1.0 / textureSize( uShadowAtlas, 0 );
                         for ( int y = -1; y <= 1; ++y ) {
                             for ( int x = -1; x <= 1; ++x ) {
-                                float pcfDepth = texture( uShadowAtlas, projCoords.st + vec2( x, y ) * texelSize ).x;
+                                vec2 uv = projCoords.st + vec2( x, y ) * texelSize;
+                                uv.x = viewport.x + uv.x * viewport.z;
+                                uv.y = viewport.y + uv.y * viewport.w;
+                                float pcfDepth = texture( uShadowAtlas, uv ).x;
                                 shadow += depth - bias > pcfDepth ? 1.0 : 0.0;
                             }
                         }
@@ -248,20 +252,22 @@ PhongLitShaderProgram::PhongLitShaderProgram( void ) noexcept
                         }
                     }
 
-                    vec4 textureCubeUV( sampler2D envMap, vec3 direction )
+                    vec4 textureCubeUV( sampler2D envMap, vec3 direction, vec4 viewport )
                     {
                         float face = getFace( direction );
                         vec2 uv = getUV( direction, face );
                         uv.y = 1.0 - uv.y;
                         uv = getFaceOffsets( face ) + 0.25 * uv;
+                        uv.x = viewport.x + uv.x * viewport.z;
+                        uv.y = viewport.y + uv.y * viewport.w;
                         vec4 color = texture( envMap, uv );
                         return color;
                     }
 
-                    float calculatePointShadow( sampler2D shadowAtlas, float dist, vec3 D )
+                    float calculatePointShadow( sampler2D shadowAtlas, float dist, vec3 D, vec4 viewport )
                     {
                         float depth = dist / 200.0;//length( D ) / 200.0;
-                        float shadow = textureCubeUV( shadowAtlas, D ).r;
+                        float shadow = textureCubeUV( shadowAtlas, D, viewport ).r;
                         return depth - 0.05 > shadow ? 1.0 : 0.0;
 
                         /*
@@ -309,9 +315,7 @@ PhongLitShaderProgram::PhongLitShaderProgram( void ) noexcept
                             float lAtt = attenuation( dist, lighting.pointLights[ i ].attenuation.xyz );
 
                             if ( lighting.pointLights[ i ].castShadows ) {
-                                float shadow = calculatePointShadow( uShadowAtlas, dist, -L );
-                                //D = vec3( 1.0 );
-                                //S = vec3( 0.0 );
+                                float shadow = calculatePointShadow( uShadowAtlas, dist, -L, lighting.pointLights[ i ].viewport );
                                 D *= 1.0 - shadow;
                                 S *= 1.0 - shadow;
                             }
@@ -330,7 +334,7 @@ PhongLitShaderProgram::PhongLitShaderProgram( void ) noexcept
                             if ( lighting.directionalLights[ i ].castShadows ) {
                                 vec4 lightSpacePos = ( bias * lighting.directionalLights[ i ].lightSpaceMatrix * vec4( inPosition, 1.0 ) );
                                 if ( lightSpacePos.z >= -1.0 && lightSpacePos.z <= 1.0 ) {
-                                    float shadow = calculateShadow( lightSpacePos, N, L, 0.005 );
+                                    float shadow = calculateShadow( lightSpacePos, lighting.directionalLights[ i ].viewport, N, L, 0.005 );
                                     D *= 1.0 - shadow;
                                     S *= 1.0 - shadow;
                                 }
@@ -361,7 +365,7 @@ PhongLitShaderProgram::PhongLitShaderProgram( void ) noexcept
 
                             if ( lighting.spotLights[ i ].castShadows ) {
                                 vec4 lightSpacePos = ( bias * lighting.spotLights[ i ].lightSpaceMatrix * vec4( inPosition, 1.0 ) );
-                                float shadow = calculateShadow( lightSpacePos, N, L, 0.005 );
+                                float shadow = calculateShadow( lightSpacePos, lighting.spotLights[ i ].viewport, N, L, 0.005 );
                                 D *= 1.0 - shadow;
                                 S *= 1.0 - shadow;
                             }
