@@ -41,95 +41,74 @@
 using namespace crimild;
 using namespace crimild::compositions;
 
-Composition crimild::compositions::computeShadow( SharedPointer< Node > const &scene ) noexcept
+static Pipeline *createPipeline( Composition &cmp, Light::Type lightType ) noexcept
 {
-    return computeShadow( Composition { }, crimild::get_ptr( scene ) );
-}
-
-Composition crimild::compositions::computeShadow( Composition cmp, Node *scene ) noexcept
-{
-    FetchLights fetch;
-    scene->perform( fetch );
-    Light *light = nullptr;
-    fetch.forEachLight(
-        [&]( auto l ) {
-            if ( light == nullptr
-                  && l->castShadows() ) {
-                light = l;
-            }
-        }
-    );
-    if ( light == nullptr ) {
-        CRIMILD_LOG_WARNING( "ComputeShadow composition called with no lights" );
-        return cmp;
-    }
-
     auto pipeline = cmp.create< Pipeline >();
     pipeline->program = [&] {
         auto program = crimild::alloc< ShaderProgram >(
             Array< SharedPointer< Shader >> {
                 crimild::alloc< Shader >(
                     Shader::Stage::VERTEX,
-                    CRIMILD_TO_STRING(
-                        layout ( location = 0 ) in vec3 inPosition;
-                        layout ( location = 1 ) in vec3 inNormal;
-                        layout ( location = 2 ) in vec2 inTextureCoord;
+                    R"(
+                            layout ( location = 0 ) in vec3 inPosition;
+                            layout ( location = 1 ) in vec3 inNormal;
+                            layout ( location = 2 ) in vec2 inTextureCoord;
 
-                        layout ( set = 0, binding = 0 ) uniform LightUniforms {
-                            mat4 lightSpaceMatrix;
-                        };
+                            layout ( set = 0, binding = 0 ) uniform LightUniforms {
+                                mat4 lightSpaceMatrix;
+                            };
 
-                        layout ( set = 1, binding = 0 ) uniform GeometryUniforms {
-                            mat4 model;
-                        };
+                            layout ( set = 1, binding = 0 ) uniform GeometryUniforms {
+                                mat4 model;
+                            };
 
-                        layout ( location = 0 ) out vec3 outPosition;
-                        layout ( location = 1 ) out vec3 outLightPos;
+                            layout ( location = 0 ) out vec3 outPosition;
+                            layout ( location = 1 ) out vec3 outLightPos;
 
-                        void main()
-                        {
-                            gl_Position = lightSpaceMatrix * model * vec4( inPosition, 1.0 );
+                            void main()
+                            {
+                                gl_Position = lightSpaceMatrix * model * vec4( inPosition, 1.0 );
 
-                            outPosition = ( model * vec4( inPosition, 1.0 ) ).xyz;
+                                outPosition = ( model * vec4( inPosition, 1.0 ) ).xyz;
 
-                            mat4 invView = inverse( lightSpaceMatrix );
-                            outLightPos = vec3( invView[ 3 ].x, invView[ 3 ].y, invView[ 3 ].z );
-                        }
-                    )
+                                mat4 invView = inverse( lightSpaceMatrix );
+                                outLightPos = vec3( invView[ 3 ].x, invView[ 3 ].y, invView[ 3 ].z );
+                            }
+                        )"
                 ),
                 crimild::alloc< Shader >(
                     Shader::Stage::FRAGMENT,
-                    light->getType() == Light::Type::POINT
-                    ? CRIMILD_TO_STRING(
-                        layout ( location = 0 ) in vec3 inPosition;
-                        layout ( location = 1 ) in vec3 inLightPos;
+                    lightType == Light::Type::POINT
+                    ? R"(
+                            layout ( location = 0 ) in vec3 inPosition;
+                            layout ( location = 1 ) in vec3 inLightPos;
 
-                        layout ( location = 0 ) out vec4 fragColor;
+                            layout ( location = 0 ) out vec4 fragColor;
 
-                        void main()
-                        {
-                            float d = length( inPosition - inLightPos );
-                            d /= 200.0;
-                            fragColor = vec4( vec3( d ), 1.0 );
-                            gl_FragDepth = d;
-                        }
-                    )
-                    : CRIMILD_TO_STRING(
-                        layout ( location = 0 ) out vec4 fragColor;
+                            void main()
+                            {
+                                float d = length( inPosition - inLightPos );
+                                d /= 200.0;
+                                fragColor = vec4( vec3( d ), 1.0 );
+                                gl_FragDepth = d;
+                            }
+                        )"
+                    : R"(
+                            layout ( location = 0 ) out vec4 fragColor;
 
-                        float linearizeDepth(float depth, float nearPlane, float farPlane)
-                        {
-                            float z = depth * 2.0 - 1.0; // Back to NDC
-                            return ( 2.0 * nearPlane * farPlane ) / ( farPlane + nearPlane - z * ( farPlane - nearPlane ) ) / farPlane;
-                        }
+                            float linearizeDepth(float depth, float nearPlane, float farPlane)
+                            {
+                                float z = depth * 2.0 - 1.0; // Back to NDC
+                                return ( 2.0 * nearPlane * farPlane ) / ( farPlane + nearPlane - z * ( farPlane - nearPlane ) ) / farPlane;
+                            }
 
-                        void main()
-                        {
-                            float d = gl_FragCoord.z;
-                            d = linearizeDepth( d, 1.0, 200.0 );
-                            fragColor = vec4( vec3( d ), 1.0 );
-                        }
-                    )
+                            void main()
+                            {
+                                float d = gl_FragCoord.z;
+                                d = linearizeDepth( d, 1.0, 200.0 );
+                                fragColor = vec4( vec3( d ), 1.0 );
+                            }
+                        )"
                 ),
             }
         );
@@ -164,80 +143,89 @@ Composition crimild::compositions::computeShadow( Composition cmp, Node *scene )
         .cullMode = CullMode::FRONT,
     };
 
-    auto renderPass = cmp.create< RenderPass >();
-    renderPass->attachments = {
-        [&] {
-            auto att = cmp.createAttachment( "shadowColor" );
-            att->usage = Attachment::Usage::COLOR_ATTACHMENT;
-            att->format = Format::R8G8B8A8_UNORM;
-            att->imageView = crimild::alloc< ImageView >();
-            att->imageView->image = crimild::alloc< Image >();
-            return crimild::retain( att );
-        }(),
-        [&] {
-            auto att = cmp.createAttachment( "shadowDepth" );
-            att->format = Format::DEPTH_STENCIL_DEVICE_OPTIMAL;
-            att->imageView = crimild::alloc< ImageView >();
-            att->imageView->image = crimild::alloc< Image >();
-            return crimild::retain( att );
-        }()
-    };
-    renderPass->setDescriptors(
-        [&] {
-            auto descriptors = crimild::alloc< DescriptorSet >();
-            descriptors->descriptors = {
-                {
-                    .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                    .obj = [&] {
-                        return crimild::alloc< CallbackUniformBuffer< Matrix4f >>(
-                            [ light ] {
-                                auto shadowMap = light->getShadowMap();
-                                shadowMap->setLightProjectionMatrix( light->computeLightSpaceMatrix() );
-                                return shadowMap->getLightProjectionMatrix();
-                            }
-                        );
-                    }(),
-                },
+    return pipeline;
+}
+
+size_t recordPointLightCommands( Composition &cmp, CommandBuffer *commandBuffer, Pipeline *pipeline, Array< ViewportDimensions > &layout, size_t offset, Array< Light * > lights, Node *scene ) noexcept
+{
+    lights.each(
+        [ & ]( auto light ) {
+            if ( offset >= layout.size() ) {
+                CRIMILD_LOG_WARNING( "No available viewport in layout in shadow atlas for spot light" );
+                return;
+            }
+
+            auto layoutViewport = layout[ offset++ ];
+
+            light->getShadowMap()->setViewport(
+                [&] {
+                    auto rect = layoutViewport.dimensions;
+                    return Vector4f(
+                        rect.getX(),
+                        rect.getY(),
+                        rect.getWidth(),
+                        rect.getHeight()
+                    );
+                }()
+            );
+
+            auto transformViewport = []( auto layout, auto viewport ) {
+                auto ld = layout.dimensions;
+                auto vd = viewport.dimensions;
+                return ViewportDimensions {
+                    .scalingMode = ScalingMode::RELATIVE,
+                    .dimensions = Rectf(
+                        ld.getX() + vd.getX() * ld.getWidth(),
+                        ld.getY() + vd.getY() * ld.getHeight(),
+                        ld.getWidth() * vd.getWidth(),
+                        ld.getHeight() * vd.getHeight()
+                    ),
+                };
             };
-            return descriptors;
-        }()
-    );
-    renderPass->extent = {
-        .scalingMode = ScalingMode::FIXED,
-        .width = 4096.0f,
-        .height = 4096.0f,
-    };
-    renderPass->clearValue = {
-        .color = RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ),
-    };
-    renderPass->commands = [&] {
-        auto commandBuffer = crimild::alloc< CommandBuffer >();
-        if ( light->getType() == Light::Type::POINT ) {
+
             ViewportDimensions viewports[ 6 ] = {
-                {
-                    .scalingMode = ScalingMode::RELATIVE,
-                    .dimensions = Rectf( 0.0f, 0.5f, 0.25f, 0.25f ),
-                },
-                {
-                    .scalingMode = ScalingMode::RELATIVE,
-                    .dimensions = Rectf( 0.5f, 0.5f, 0.25f, 0.25f ),
-                },
-                {
-                    .scalingMode = ScalingMode::RELATIVE,
-                    .dimensions = Rectf( 0.5f, 0.25f, 0.25f, 0.25f ),
-                },
-                {
-                    .scalingMode = ScalingMode::RELATIVE,
-                    .dimensions = Rectf( 0.5f, 0.75f, 0.25f, 0.25f ),
-                },
-                {
-                    .scalingMode = ScalingMode::RELATIVE,
-                    .dimensions = Rectf( 0.25f, 0.5f, 0.25f, 0.25f ),
-                },
-                {
-                    .scalingMode = ScalingMode::RELATIVE,
-                    .dimensions = Rectf( 0.75f, 0.5f, 0.25f, 0.25f ),
-                },
+                transformViewport(
+                    layoutViewport,
+                    ViewportDimensions {
+                        .scalingMode = ScalingMode::RELATIVE,
+                        .dimensions = Rectf( 0.0f, 0.5f, 0.25f, 0.25f ),
+                    }
+                ),
+                transformViewport(
+                    layoutViewport,
+                    ViewportDimensions {
+                        .scalingMode = ScalingMode::RELATIVE,
+                        .dimensions = Rectf( 0.5f, 0.5f, 0.25f, 0.25f ),
+                    }
+                ),
+                transformViewport(
+                    layoutViewport,
+                    ViewportDimensions {
+                        .scalingMode = ScalingMode::RELATIVE,
+                        .dimensions = Rectf( 0.5f, 0.25f, 0.25f, 0.25f ),
+                    }
+                ),
+                transformViewport(
+                    layoutViewport,
+                    ViewportDimensions {
+                        .scalingMode = ScalingMode::RELATIVE,
+                        .dimensions = Rectf( 0.5f, 0.75f, 0.25f, 0.25f ),
+                    }
+                ),
+                transformViewport(
+                    layoutViewport,
+                    ViewportDimensions {
+                        .scalingMode = ScalingMode::RELATIVE,
+                        .dimensions = Rectf( 0.25f, 0.5f, 0.25f, 0.25f ),
+                    }
+                ),
+                transformViewport(
+                    layoutViewport,
+                    ViewportDimensions {
+                        .scalingMode = ScalingMode::RELATIVE,
+                        .dimensions = Rectf( 0.75f, 0.5f, 0.25f, 0.25f ),
+                    }
+                ),
             };
 
             for ( auto face = 0l; face < 6; ++face ) {
@@ -305,14 +293,40 @@ Composition crimild::compositions::computeShadow( Composition cmp, Node *scene )
                 );
             }
         }
-        else {
-            auto viewport = ViewportDimensions { .scalingMode = ScalingMode::RELATIVE };
+    );
+
+    return offset;
+}
+
+size_t recordSpotLightCommands( Composition &cmp, CommandBuffer *commandBuffer, Pipeline *pipeline, Array< ViewportDimensions > &viewports, size_t offset, Array< Light * > lights, Node *scene ) noexcept
+{
+    lights.each(
+        [ & ]( auto light ) {
+            if ( offset >= viewports.size() ) {
+                CRIMILD_LOG_WARNING( "No available viewport in layout in shadow atlas for spot light" );
+                return;
+            }
+
+            auto viewport = viewports[ offset++ ];
+
+            light->getShadowMap()->setViewport(
+                [&] {
+                    auto rect = viewport.dimensions;
+                    return Vector4f(
+                        rect.getX(),
+                        rect.getY(),
+                        rect.getWidth(),
+                        rect.getHeight()
+                    );
+                }()
+            );
+
             commandBuffer->setViewport( viewport );
             commandBuffer->setScissor( viewport );
             scene->perform(
                 ApplyToGeometries(
                     [&]( Geometry *geometry ) {
-                        commandBuffer->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
+                        commandBuffer->bindGraphicsPipeline( pipeline );
                         commandBuffer->bindDescriptorSet(
                             [&] {
                                 auto descriptors = cmp.create< DescriptorSet >();
@@ -341,6 +355,123 @@ Composition crimild::compositions::computeShadow( Composition cmp, Node *scene )
                 )
             );
         }
+    );
+
+    return offset;
+}
+
+Composition crimild::compositions::computeShadow( SharedPointer< Node > const &scene ) noexcept
+{
+    return computeShadow( Composition { }, crimild::get_ptr( scene ) );
+}
+
+Composition crimild::compositions::computeShadow( Composition cmp, Node *scene ) noexcept
+{
+    FetchLights fetch;
+    scene->perform( fetch );
+    Map< Light::Type, Array< Light * >> lights;
+    fetch.forEachLight(
+        [&]( auto l ) {
+            if ( l->castShadows() ) {
+                lights[ l->getType() ].add( l );
+            }
+        }
+    );
+
+    if ( lights.size() == 0 ) {
+        CRIMILD_LOG_WARNING( "ComputeShadow composition called with no lights" );
+        return cmp;
+    }
+
+    auto pipelines = Map< Light::Type, Pipeline * > {
+        { Light::Type::DIRECTIONAL, createPipeline( cmp, Light::Type::DIRECTIONAL ) },
+        { Light::Type::SPOT, createPipeline( cmp, Light::Type::SPOT ) },
+        { Light::Type::POINT, createPipeline( cmp, Light::Type::POINT ) },
+    };
+
+    auto viewportLayout = Array< ViewportDimensions > {
+        {
+            .scalingMode = ScalingMode::RELATIVE,
+            .dimensions = Rectf( 0.0f, 0.0f, 0.5f, 0.5f ),
+        },
+        {
+            .scalingMode = ScalingMode::RELATIVE,
+            .dimensions = Rectf( 0.0f, 0.5f, 0.5f, 0.5f ),
+        },
+        {
+            .scalingMode = ScalingMode::RELATIVE,
+            .dimensions = Rectf( 0.5f, 0.0f, 0.5f, 0.5f ),
+        },
+        {
+            .scalingMode = ScalingMode::RELATIVE,
+            .dimensions = Rectf( 0.5f, 0.5f, 0.5f, 0.5f ),
+        },
+    };
+
+    auto renderPass = cmp.create< RenderPass >();
+    renderPass->attachments = {
+        [&] {
+            auto att = cmp.createAttachment( "shadowColor" );
+            att->usage = Attachment::Usage::COLOR_ATTACHMENT;
+            att->format = Format::R8G8B8A8_UNORM;
+            att->imageView = crimild::alloc< ImageView >();
+            att->imageView->image = crimild::alloc< Image >();
+            return crimild::retain( att );
+        }(),
+        [&] {
+            auto att = cmp.createAttachment( "shadowDepth" );
+            att->format = Format::DEPTH_STENCIL_DEVICE_OPTIMAL;
+            att->imageView = crimild::alloc< ImageView >();
+            att->imageView->image = crimild::alloc< Image >();
+            return crimild::retain( att );
+        }()
+    };
+
+    renderPass->extent = {
+        .scalingMode = ScalingMode::FIXED,
+        .width = 4096.0f,
+        .height = 4096.0f,
+    };
+
+    renderPass->clearValue = {
+        .color = RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ),
+    };
+
+    renderPass->commands = [&] {
+        auto commandBuffer = crimild::alloc< CommandBuffer >();
+
+        auto offset = 0l;
+
+        offset = recordSpotLightCommands(
+            cmp,
+            crimild::get_ptr( commandBuffer ),
+            pipelines[ Light::Type::DIRECTIONAL ],
+            viewportLayout,
+            offset,
+            lights[ Light::Type::DIRECTIONAL ],
+            scene
+        );
+
+        offset = recordSpotLightCommands(
+            cmp,
+            crimild::get_ptr( commandBuffer ),
+            pipelines[ Light::Type::SPOT ],
+            viewportLayout,
+            offset,
+            lights[ Light::Type::SPOT ],
+            scene
+        );
+
+        offset = recordPointLightCommands(
+            cmp,
+            crimild::get_ptr( commandBuffer ),
+            pipelines[ Light::Type::POINT ],
+            viewportLayout,
+            offset,
+            lights[ Light::Type::POINT ],
+            scene
+        );
+
         return commandBuffer;
     }();
 

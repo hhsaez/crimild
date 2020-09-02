@@ -83,6 +83,7 @@ void LightingUniform::onPreRender( void ) noexcept
             dst[ i ].castShadows = light->castShadows();
             if ( light->castShadows() ) {
                 dst[ i ].lightSpaceMatrix = light->getShadowMap()->getLightProjectionMatrix();
+                dst[ i ].viewport = light->getShadowMap()->getViewport();
             }
         }
         return count;
