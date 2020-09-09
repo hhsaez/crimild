@@ -26,10 +26,10 @@
  */
 
 #include "Rendering/Compositions/RenderScene.hpp"
-#include "Rendering/Compositions/ComputeShadowComposition.hpp"
 
 #include "Components/MaterialComponent.hpp"
 #include "Rendering/CommandBuffer.hpp"
+#include "Rendering/Compositions/ComputeShadowComposition.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/RenderPass.hpp"
 #include "Rendering/Sampler.hpp"
@@ -55,9 +55,9 @@ Composition crimild::compositions::renderScene( Node *scene ) noexcept
 
     cmp = computeShadow( cmp, scene );
 
-    auto shadowAtlas = [&] {
+    auto shadowAtlas = [ & ] {
         auto texture = cmp.create< Texture >();
-        texture->imageView = [&] {
+        texture->imageView = [ & ] {
             auto att = cmp.getOutput();
             if ( att == nullptr || att->imageView == nullptr ) {
                 auto imageView = crimild::alloc< ImageView >();
@@ -73,10 +73,11 @@ Composition crimild::compositions::renderScene( Node *scene ) noexcept
             // (all ones). That way, any object outside the light's frustum will have
             // a depth of 1.0. Then, when comparing that depth with the current
             // fragment's one, the later one will never be in shadow.
-            // For some types of lights, we might want to use a different approach though.
-            // For example, point lights or spot lights should make objects outside of
-            // the view frustum to be in shadow.
-            // TODO (hernan): Maybe it will be best to split the shadow atlas into two after all
+            // For some types of lights, we might want to use a different approach
+            // though. For example, point lights or spot lights should make objects
+            // outside of the view frustum to be in shadow.
+            // TODO (hernan): Maybe it will be best to split the shadow atlas into two
+            // after all
             sampler->setWrapMode( Sampler::WrapMode::CLAMP_TO_BORDER );
             sampler->setBorderColor( Sampler::BorderColor::INT_OPAQUE_WHITE );
             return sampler;
@@ -86,7 +87,7 @@ Composition crimild::compositions::renderScene( Node *scene ) noexcept
 
     auto renderPass = cmp.create< RenderPass >();
     renderPass->attachments = {
-        [&] {
+        [ & ] {
             auto att = cmp.createAttachment( "gBufferColor" );
             att->usage = Attachment::Usage::COLOR_ATTACHMENT;
             att->format = Format::R8G8B8A8_UNORM;
@@ -94,22 +95,25 @@ Composition crimild::compositions::renderScene( Node *scene ) noexcept
             att->imageView->image = crimild::alloc< Image >();
             return crimild::retain( att );
         }(),
-        [&] {
+        [ & ] {
             auto att = cmp.createAttachment( "gBufferDepth" );
             att->format = Format::DEPTH_STENCIL_DEVICE_OPTIMAL;
-            //att->imageView = crimild::alloc< ImageView >();
-            //att->imageView->image = crimild::alloc< Image >();
+            // att->imageView = crimild::alloc< ImageView
+            // >(); att->imageView->image = crimild::alloc<
+            // Image >();
             return crimild::retain( att );
         }()
     };
 
     renderPass->setDescriptors(
-        [&] {
-            auto descriptorSet = crimild::alloc< DescriptorSet >();
+        [ & ] {
+            auto descriptorSet = crimild::alloc< DescriptorSet >(
+                a,
+                b );
             descriptorSet->descriptors = {
                 Descriptor {
                     .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                    .obj = [&] {
+                    .obj = [ & ] {
                         FetchCameras fetch;
                         scene->perform( fetch );
                         auto camera = fetch.anyCamera();
@@ -118,19 +122,15 @@ Composition crimild::compositions::renderScene( Node *scene ) noexcept
                 },
                 Descriptor {
                     .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                    .obj = crimild::alloc< LightingUniform >(
-                        [&] {
-                            FetchLights fetch;
-                            Array< Light * > lights;
-                            scene->perform( fetch );
-                            fetch.forEachLight(
-                                [&]( auto light ) {
-                                    lights.add( light );
-                                }
-                            );
-                            return lights;
-                        }()
-                    ),
+                    .obj = crimild::alloc< LightingUniform >( [ & ] {
+                        FetchLights fetch;
+                        Array< Light * > lights;
+                        scene->perform( fetch );
+                        fetch.forEachLight( [ & ]( auto light ) {
+                            lights.add( light );
+                        } );
+                        return lights;
+                    }() ),
                 },
                 Descriptor {
                     .descriptorType = DescriptorType::TEXTURE,
@@ -138,26 +138,21 @@ Composition crimild::compositions::renderScene( Node *scene ) noexcept
                 },
             };
             return descriptorSet;
-        }()
-    );
+        }() );
 
-    renderPass->commands = [&] {
+    renderPass->commands = [ & ] {
         auto commandBuffer = crimild::alloc< CommandBuffer >();
-        scene->perform(
-            ApplyToGeometries(
-                [&]( Geometry *g ) {
-                    if ( auto ms = g->getComponent< MaterialComponent >() ) {
-                        if ( auto material = ms->first() ) {
-                            commandBuffer->bindGraphicsPipeline( material->getPipeline() );
-                            commandBuffer->bindDescriptorSet( renderPass->getDescriptors() );
-                            commandBuffer->bindDescriptorSet( material->getDescriptors() );
-                            commandBuffer->bindDescriptorSet( g->getDescriptors() );
-                            commandBuffer->drawPrimitive( g->anyPrimitive() );
-                        }
-                    }
+        scene->perform( ApplyToGeometries( [ & ]( Geometry *g ) {
+            if ( auto ms = g->getComponent< MaterialComponent >() ) {
+                if ( auto material = ms->first() ) {
+                    commandBuffer->bindGraphicsPipeline( material->getPipeline() );
+                    commandBuffer->bindDescriptorSet( renderPass->getDescriptors() );
+                    commandBuffer->bindDescriptorSet( material->getDescriptors() );
+                    commandBuffer->bindDescriptorSet( g->getDescriptors() );
+                    commandBuffer->drawPrimitive( g->anyPrimitive() );
                 }
-            )
-        );
+            }
+        } ) );
         return commandBuffer;
     }();
 
