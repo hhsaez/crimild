@@ -107,9 +107,7 @@ Composition crimild::compositions::renderScene( Node *scene ) noexcept
 
     renderPass->setDescriptors(
         [ & ] {
-            auto descriptorSet = crimild::alloc< DescriptorSet >(
-                a,
-                b );
+            auto descriptorSet = crimild::alloc< DescriptorSet >();
             descriptorSet->descriptors = {
                 Descriptor {
                     .descriptorType = DescriptorType::UNIFORM_BUFFER,
