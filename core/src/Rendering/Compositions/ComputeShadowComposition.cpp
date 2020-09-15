@@ -322,8 +322,8 @@ size_t recordSpotLightCommands( Composition &cmp, CommandBuffer *commandBuffer, 
                                                     auto shadowMap = light->getShadowMap();
                                                     auto vMatrix = light->getWorld().computeModelMatrix().getInverse();
                                                     auto pMatrix = light->computeLightSpaceMatrix();
-                                                    shadowMap->setLightProjectionMatrix( vMatrix * pMatrix );
-                                                    return shadowMap->getLightProjectionMatrix();
+                                                    shadowMap->setLightProjectionMatrix( 0, vMatrix * pMatrix );
+                                                    return shadowMap->getLightProjectionMatrix( 0 );
                                                 } );
                                         }(),
                                     },
@@ -347,8 +347,7 @@ size_t recordDirectionalLightCommands(
     Array< Light * > lights,
     Node *scene ) noexcept
 {
-
-    static auto calculateLightProjection = []( const auto &lightViewMatrix ) {
+    static auto calculateLightProjection = []( const auto &lightViewMatrix, auto near, auto far ) {
         auto camera = Camera::getMainCamera();
         if ( camera == nullptr ) {
             CRIMILD_LOG_ERROR( "Cannot fetch camera from scene" );
@@ -356,30 +355,12 @@ size_t recordDirectionalLightCommands(
         }
 
         auto frustum = camera->getFrustum();
-#if 0
-        auto rMin = frustum.getRMin();
-        auto rMax = frustum.getRMax();
-        auto uMin = frustum.getUMin();
-        auto uMax = frustum.getUMax();
-        auto dMin = frustum.getDMin();
-        auto dMax = frustum.getDMax();
-        auto points = Array< Vector4f > {
-            Vector4f( rMin, uMin, dMin, 1.0f ),
-            Vector4f( rMin, uMin, dMax, 1.0f ),
-            Vector4f( rMin, uMax, dMin, 1.0f ),
-            Vector4f( rMin, uMax, dMax, 1.0f ),
-            Vector4f( rMax, uMin, dMin, 1.0f ),
-            Vector4f( rMax, uMin, dMax, 1.0f ),
-            Vector4f( rMax, uMax, dMin, 1.0f ),
-            Vector4f( rMax, uMax, dMax, 1.0f ),
-        };
-#else
         auto fov = 60.0f;
         auto aspect = 1.0f / frustum.computeAspect();
         auto tanHalfFOVH = std::tanf( Numericf::DEG_TO_RAD * fov / 2.0f );
         auto tanHalfFOVV = std::tanf( Numericf::DEG_TO_RAD * fov * aspect / 2.0f );
-        auto near = frustum.getDMin();
-        auto far = frustum.getDMax();
+        //auto near = nearMultiplier * frustum.getDMax();
+        //auto far = farMultiplier * frustum.getDMax();
         auto xn = near * tanHalfFOVH;
         auto xf = far * tanHalfFOVH;
         auto yn = near * tanHalfFOVV;
@@ -394,7 +375,7 @@ size_t recordDirectionalLightCommands(
             Vector4f( xf, -yf, far, 1.0f ),
             Vector4f( -xf, -yf, far, 1.0f ),
         };
-#endif
+
         auto invView = camera->getWorld().computeModelMatrix();
         auto invLightViewMatrix = lightViewMatrix.getInverse();
         auto m = invView * invLightViewMatrix;
@@ -424,7 +405,6 @@ size_t recordDirectionalLightCommands(
                 1.0f );
         };
 
-#if 1
         auto right = Numericf::max( Numericf::fabs( min.x() ), Numericf::fabs( max.x() ) );
         auto up = Numericf::max( Numericf::fabs( min.y() ), Numericf::fabs( max.y() ) );
         auto forward = Numericf::max( Numericf::fabs( min.z() ), Numericf::fabs( max.z() ) );
@@ -435,9 +415,54 @@ size_t recordDirectionalLightCommands(
         max.y() = +up;
         min.z() = -forward;
         max.z() = +forward;
-#endif
 
         return ortho( min.x(), max.x(), min.y(), max.y(), min.z(), max.z() );
+    };
+
+    // TODO: move this to ViewportDimensions
+    auto transformViewport = []( auto layout, auto viewport ) {
+        auto ld = layout.dimensions;
+        auto vd = viewport.dimensions;
+        return ViewportDimensions {
+            .scalingMode = ScalingMode::RELATIVE,
+            .dimensions = Rectf(
+                ld.getX() + vd.getX() * ld.getWidth(),
+                ld.getY() + vd.getY() * ld.getHeight(),
+                ld.getWidth() * vd.getWidth(),
+                ld.getHeight() * vd.getHeight() ),
+        };
+    };
+
+    auto recordCascadeCommands = [ & ]( auto light, auto cascadeId, auto viewport, auto near, auto far ) {
+        commandBuffer->setViewport( viewport );
+        commandBuffer->setScissor( viewport );
+        scene->perform(
+            ApplyToGeometries(
+                [ & ]( Geometry *geometry ) {
+                    commandBuffer->bindGraphicsPipeline( pipeline );
+                    commandBuffer->bindDescriptorSet(
+                        [ & ] {
+                            auto descriptors = cmp.create< DescriptorSet >();
+                            descriptors->descriptors = {
+                                {
+                                    .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                                    .obj = [ & ] {
+                                        return crimild::alloc< CallbackUniformBuffer< Matrix4f > >(
+                                            [ cascadeId, near, far, light ] {
+                                                auto shadowMap = light->getShadowMap();
+                                                auto vMatrix = light->getWorld().computeModelMatrix().getInverse();
+                                                auto pMatrix = calculateLightProjection( vMatrix, near, far );
+                                                shadowMap->setLightProjectionMatrix( cascadeId, vMatrix * pMatrix );
+                                                return shadowMap->getLightProjectionMatrix( cascadeId );
+                                            } );
+                                    }(),
+                                },
+                            };
+                            return descriptors;
+                        }() );
+                    commandBuffer->bindDescriptorSet( geometry->getDescriptors() );
+                    commandBuffer->drawPrimitive( geometry->anyPrimitive() );
+                } ) );
     };
 
     lights.each(
@@ -447,11 +472,29 @@ size_t recordDirectionalLightCommands(
                 return;
             }
 
-            auto viewport = viewports[ offset++ ];
+            auto camera = Camera::getMainCamera();
+            if ( camera == nullptr ) {
+                CRIMILD_LOG_WARNING( "No main camera available" );
+                return;
+            }
+            auto frustum = camera->getFrustum();
+            auto near = frustum.getDMin();
+            auto far = frustum.getDMax();
 
+            auto layoutViewport = viewports[ offset++ ];
+
+            // TODO: Make this a property of the light/shadow?
+            auto cascadeSplits = far * Vector4f( 0.1f, 0.25f, 0.6f, 1.0f );
+
+            // Save cascade splits in shadow map
+            light->getShadowMap()->setCascadeSplits( cascadeSplits );
+
+            // Assign a single viewport to the shadow map. Since each cascade viewport is hard-coded to
+            // take only a quarter of the available region, we can use that information to compute the
+            // actual viewport in the shader without having to pass this information explicitly.
             light->getShadowMap()->setViewport(
                 [ & ] {
-                    auto rect = viewport.dimensions;
+                    auto rect = layoutViewport.dimensions;
                     return Vector4f(
                         rect.getX(),
                         rect.getY(),
@@ -459,36 +502,41 @@ size_t recordDirectionalLightCommands(
                         rect.getHeight() );
                 }() );
 
-            commandBuffer->setViewport( viewport );
-            commandBuffer->setScissor( viewport );
-            scene->perform(
-                ApplyToGeometries(
-                    [ & ]( Geometry *geometry ) {
-                        commandBuffer->bindGraphicsPipeline( pipeline );
-                        commandBuffer->bindDescriptorSet(
-                            [ & ] {
-                                auto descriptors = cmp.create< DescriptorSet >();
-                                descriptors->descriptors = {
-                                    {
-                                        .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                                        .obj = [ & ] {
-                                            return crimild::alloc< CallbackUniformBuffer< Matrix4f > >(
-                                                [ &, light ] {
-                                                    auto shadowMap = light->getShadowMap();
-                                                    auto vMatrix = light->getWorld().computeModelMatrix().getInverse();
-                                                    //auto pMatrix = light->computeLightSpaceMatrix();
-                                                    auto pMatrix = calculateLightProjection( vMatrix );
-                                                    shadowMap->setLightProjectionMatrix( vMatrix * pMatrix );
-                                                    return shadowMap->getLightProjectionMatrix();
-                                                } );
-                                        }(),
-                                    },
-                                };
-                                return descriptors;
-                            }() );
-                        commandBuffer->bindDescriptorSet( geometry->getDescriptors() );
-                        commandBuffer->drawPrimitive( geometry->anyPrimitive() );
-                    } ) );
+            ViewportDimensions cascadeViewports[ 4 ] = {
+                transformViewport(
+                    layoutViewport,
+                    ViewportDimensions {
+                        .scalingMode = ScalingMode::RELATIVE,
+                        .dimensions = Rectf( 0.0f, 0.0f, 0.5f, 0.5f ),
+                    } ),
+                transformViewport(
+                    layoutViewport,
+                    ViewportDimensions {
+                        .scalingMode = ScalingMode::RELATIVE,
+                        .dimensions = Rectf( 0.5f, 0.0f, 0.5f, 0.5f ),
+                    } ),
+                transformViewport(
+                    layoutViewport,
+                    ViewportDimensions {
+                        .scalingMode = ScalingMode::RELATIVE,
+                        .dimensions = Rectf( 0.0f, 0.5f, 0.5f, 0.5f ),
+                    } ),
+                transformViewport(
+                    layoutViewport,
+                    ViewportDimensions {
+                        .scalingMode = ScalingMode::RELATIVE,
+                        .dimensions = Rectf( 0.5f, 0.5f, 0.5f, 0.5f ),
+                    } ),
+            };
+
+            for ( auto i = 0l; i < 4; ++i ) {
+                recordCascadeCommands(
+                    light,
+                    i,
+                    cascadeViewports[ i ],
+                    i > 0 ? cascadeSplits[ i - 1 ] : near,
+                    cascadeSplits[ i ] );
+            }
         } );
 
     return offset;
@@ -522,24 +570,32 @@ Composition crimild::compositions::computeShadow( Composition cmp, Node *scene )
         { Light::Type::POINT, createPipeline( cmp, Light::Type::POINT ) },
     };
 
-    auto viewportLayout = Array< ViewportDimensions > {
-        {
-            .scalingMode = ScalingMode::RELATIVE,
-            .dimensions = Rectf( 0.0f, 0.0f, 0.5f, 0.5f ),
-        },
-        {
-            .scalingMode = ScalingMode::RELATIVE,
-            .dimensions = Rectf( 0.0f, 0.5f, 0.5f, 0.5f ),
-        },
-        {
-            .scalingMode = ScalingMode::RELATIVE,
-            .dimensions = Rectf( 0.5f, 0.0f, 0.5f, 0.5f ),
-        },
-        {
-            .scalingMode = ScalingMode::RELATIVE,
-            .dimensions = Rectf( 0.5f, 0.5f, 0.5f, 0.5f ),
-        },
-    };
+    auto viewportLayout =
+        lights.size() == 1
+            ? Array< ViewportDimensions > {
+                  {
+                      .scalingMode = ScalingMode::RELATIVE,
+                      .dimensions = Rectf( 0.0f, 0.0f, 1.0f, 1.0f ),
+                  },
+              }
+            : Array< ViewportDimensions > {
+                  {
+                      .scalingMode = ScalingMode::RELATIVE,
+                      .dimensions = Rectf( 0.0f, 0.0f, 0.5f, 0.5f ),
+                  },
+                  {
+                      .scalingMode = ScalingMode::RELATIVE,
+                      .dimensions = Rectf( 0.0f, 0.5f, 0.5f, 0.5f ),
+                  },
+                  {
+                      .scalingMode = ScalingMode::RELATIVE,
+                      .dimensions = Rectf( 0.5f, 0.0f, 0.5f, 0.5f ),
+                  },
+                  {
+                      .scalingMode = ScalingMode::RELATIVE,
+                      .dimensions = Rectf( 0.5f, 0.5f, 0.5f, 0.5f ),
+                  },
+              };
 
     auto renderPass = cmp.create< RenderPass >();
     renderPass->attachments = {

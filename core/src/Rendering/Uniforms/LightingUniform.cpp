@@ -26,16 +26,17 @@
 */
 
 #include "Rendering/Uniforms/LightingUniform.hpp"
+
 #include "Rendering/ShadowMap.hpp"
 #include "SceneGraph/Light.hpp"
 
 using namespace crimild;
 
 LightingUniform::LightingUniform( const Array< Light * > &lights ) noexcept
-    : UniformBuffer( Lighting { } )
+    : UniformBuffer( Lighting {} )
 {
     lights.each(
-        [&]( auto light ) {
+        [ & ]( auto light ) {
             switch ( light->getType() ) {
                 case Light::Type::AMBIENT:
                     m_ambientLights.add( light );
@@ -56,8 +57,7 @@ LightingUniform::LightingUniform( const Array< Light * > &lights ) noexcept
                 default:
                     break;
             }
-        }
-    );
+        } );
 }
 
 void LightingUniform::onPreRender( void ) noexcept
@@ -78,11 +78,13 @@ void LightingUniform::onPreRender( void ) noexcept
                 Numericf::cos( light->getInnerCutoff() ),
                 Numericf::cos( light->getOuterCutoff() ),
                 0.0f,
-                0.0f
-            );
+                0.0f );
             dst[ i ].castShadows = light->castShadows();
             if ( light->castShadows() ) {
-                dst[ i ].lightSpaceMatrix = light->getShadowMap()->getLightProjectionMatrix();
+                dst[ i ].cascadeSplits = light->getShadowMap()->getCascadeSplits();
+                for ( auto split = 0; split < 4; ++split ) {
+                    dst[ i ].lightSpaceMatrix[ split ] = light->getShadowMap()->getLightProjectionMatrix( split );
+                }
                 dst[ i ].viewport = light->getShadowMap()->getViewport();
             }
         }
@@ -93,5 +95,4 @@ void LightingUniform::onPreRender( void ) noexcept
     lighting.directionalLightCount = copyLightInfo( m_directionalLights, lighting.directionalLights, MAX_DIRECTIONAL_LIGHTS );
     lighting.pointLightCount = copyLightInfo( m_pointLights, lighting.pointLights, MAX_POINT_LIGHTS );
     lighting.spotlightCount = copyLightInfo( m_spotlights, lighting.spotlights, MAX_SPOTLIGHTS );
-
 }
