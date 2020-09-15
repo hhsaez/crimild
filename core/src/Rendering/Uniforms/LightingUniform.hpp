@@ -28,9 +28,9 @@
 #ifndef CRIMILD_RENDERING_UNIFORMS_LIGHT_
 #define CRIMILD_RENDERING_UNIFORMS_LIGHT_
 
-#include "Rendering/UniformBuffer.hpp"
 #include "Foundation/Containers/Array.hpp"
 #include "Mathematics/Matrix.hpp"
+#include "Rendering/UniformBuffer.hpp"
 
 namespace crimild {
 
@@ -56,7 +56,8 @@ namespace crimild {
             alignas( 16 ) Vector4f attenuation;
             alignas( 16 ) Vector4f cutoff;
             alignas( 16 ) Bool castShadows;
-            alignas( 16 ) Matrix4f lightSpaceMatrix;
+            alignas( 16 ) Vector4f cascadeSplits;
+            alignas( 16 ) Matrix4f lightSpaceMatrix[ 4 ];
             alignas( 16 ) Vector4f viewport;
         };
 
