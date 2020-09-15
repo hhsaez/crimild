@@ -30,10 +30,10 @@
 #include "Rendering/OpenGLUtils.hpp"
 
 #include <Foundation/Log.hpp>
-#include <SceneGraph/Light.hpp>
 #include <Rendering/Renderer.hpp>
-#include <Rendering/ShadowMap.hpp>
 #include <Rendering/ShaderLocation.hpp>
+#include <Rendering/ShadowMap.hpp>
+#include <SceneGraph/Light.hpp>
 
 using namespace crimild;
 using namespace crimild::shadergraph;
@@ -41,35 +41,34 @@ using namespace crimild::opengl;
 
 LightCatalog::LightCatalog( void )
 {
-
 }
 
 LightCatalog::~LightCatalog( void )
 {
-	if ( _ambientLightBlockId > 0 ) {
-		glDeleteBuffers( 1, &_ambientLightBlockId );
-		_ambientLightBlockId = 0;
-	}
+    if ( _ambientLightBlockId > 0 ) {
+        glDeleteBuffers( 1, &_ambientLightBlockId );
+        _ambientLightBlockId = 0;
+    }
 
-	if ( _directionalLightBlockId > 0 ) {
+    if ( _directionalLightBlockId > 0 ) {
         glDeleteBuffers( 1, &_directionalLightBlockId );
-		_directionalLightBlockId = 0;
-	}
+        _directionalLightBlockId = 0;
+    }
 
-	if ( _pointLightBlockId > 0 ) {
+    if ( _pointLightBlockId > 0 ) {
         glDeleteBuffers( 1, &_pointLightBlockId );
-		_pointLightBlockId = 0;
-	}
+        _pointLightBlockId = 0;
+    }
 
-	if ( _spotLightBlockId > 0 ) {
+    if ( _spotLightBlockId > 0 ) {
         glDeleteBuffers( 1, &_spotLightBlockId );
-		_spotLightBlockId = 0;
-	}
+        _spotLightBlockId = 0;
+    }
 }
 
 void LightCatalog::configure( void )
 {
-	Catalog< Light >::configure();
+    Catalog< Light >::configure();
 
     /*
 
@@ -170,7 +169,7 @@ int LightCatalog::getNextResourceId( Light *light )
             break;
     }
 
-	CRIMILD_LOG_WARNING( "No more lights avaiable" );
+    CRIMILD_LOG_WARNING( "No more lights avaiable" );
 
     CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 
@@ -179,6 +178,8 @@ int LightCatalog::getNextResourceId( Light *light )
 
 void LightCatalog::bind( Light *light )
 {
+    assert( false );
+    /*
 	if ( light == nullptr ) {
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid light pointer" );
 		return;
@@ -253,6 +254,7 @@ void LightCatalog::bind( Light *light )
         glBufferSubData( GL_UNIFORM_BUFFER, lightId * sizeof( SpotLightData ), sizeof( SpotLightData ), &_spotLights[ lightId ] );
         glBindBuffer( GL_UNIFORM_BUFFER, 0 );
     }
+    */
 
-	CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
+    CRIMILD_CHECK_GL_ERRORS_AFTER_CURRENT_FUNCTION;
 }

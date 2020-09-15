@@ -29,7 +29,6 @@
 #define CRIMILD_CORE_RENDERING_SHADOW_MAP_
 
 #include "Foundation/SharedObject.hpp"
-
 #include "Mathematics/Matrix.hpp"
 
 namespace crimild {
@@ -41,31 +40,31 @@ namespace crimild {
         ShadowMap( void );
         virtual ~ShadowMap( void );
 
-        const Matrix4f &getLightProjectionMatrix( void ) const { return _lightProjectionMatrix; }
-        void setLightProjectionMatrix( const Matrix4f &m ) { _lightProjectionMatrix = m; }
+        const Vector4f &getCascadeSplits( void ) const { return _cascadeSplits; }
+        void setCascadeSplits( const Vector4f &splits ) noexcept { _cascadeSplits = splits; }
+
+        const Matrix4f &getLightProjectionMatrix( Size index ) const { return _lightProjectionMatrix[ index ]; }
+        void setLightProjectionMatrix( Size index, const Matrix4f &m ) { _lightProjectionMatrix[ index ] = m; }
 
         const Matrix4f &getLightViewMatrix( void ) const { return _lightViewMatrix; }
         void setLightViewMatrix( const Matrix4f &m ) { _lightViewMatrix = m; }
 
-		const Vector4f &getViewport( void ) const { return _viewport; }
-		void setViewport( const Vector4f &viewport ) { _viewport = viewport; }
+        const Vector4f &getViewport( void ) const { return _viewport; }
+        void setViewport( const Vector4f &viewport ) { _viewport = viewport; }
 
-		void setMinBias( crimild::Real32 minBias ) { _minBias = minBias; }
-		crimild::Real32 getMinBias( void ) const { return _minBias; }
+        void setMinBias( crimild::Real32 minBias ) { _minBias = minBias; }
+        crimild::Real32 getMinBias( void ) const { return _minBias; }
 
-		void setMaxBias( crimild::Real32 maxBias ) { _maxBias = maxBias; }
-		crimild::Real32 getMaxBias( void ) const { return _maxBias; }
-
-        //void setCullFaceState( SharedPointer< CullFaceState > const &cullFace ) { _cullFaceState = cullFace; }
-        //CullFaceState *getCullFaceState( void ) { return crimild::get_ptr( _cullFaceState ); }
+        void setMaxBias( crimild::Real32 maxBias ) { _maxBias = maxBias; }
+        crimild::Real32 getMaxBias( void ) const { return _maxBias; }
 
     private:
-        Matrix4f _lightProjectionMatrix;
+        Vector4f _cascadeSplits;
+        Matrix4f _lightProjectionMatrix[ 4 ];
         Matrix4f _lightViewMatrix;
-		Vector4f _viewport;
-		crimild::Real32 _minBias = 0.0001f;
-		crimild::Real32 _maxBias = 0.001f;
-        //SharedPointer< CullFaceState > _cullFaceState;
+        Vector4f _viewport;
+        crimild::Real32 _minBias = 0.0001f;
+        crimild::Real32 _maxBias = 0.001f;
     };
 
 }
