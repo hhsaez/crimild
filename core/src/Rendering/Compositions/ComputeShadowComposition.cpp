@@ -140,6 +140,10 @@ static Pipeline *createPipeline( Composition &cmp, Light::Type lightType ) noexc
     pipeline->scissor = { .scalingMode = ScalingMode::DYNAMIC };
     pipeline->rasterizationState = RasterizationState {
         .cullMode = CullMode::FRONT,
+
+        // It would be ideal to support this feature for directional lights
+        // but it seems it doesn't work...
+        //.depthClampEnable = true,
     };
 
     return pipeline;
@@ -347,80 +351,114 @@ size_t recordDirectionalLightCommands(
     Array< Light * > lights,
     Node *scene ) noexcept
 {
-    static auto calculateLightProjection = []( const auto &lightViewMatrix, auto near, auto far ) {
+    static auto ortho = []( float left, float right, float bottom, float top, float near, float far ) {
+        return Matrix4f(
+            2.0f / ( right - left ), 0.0f, 0.0f, 0.0f,
+            0.0f, 2.0f / ( bottom - top ), 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f / ( near - far ), 0.0f,
+
+            -( right + left ) / ( right - left ),
+            -( bottom + top ) / ( bottom - top ),
+            near / ( near - far ),
+            1.0f );
+    };
+
+    auto updateCascade = []( auto cascadeId, auto light ) {
         auto camera = Camera::getMainCamera();
         if ( camera == nullptr ) {
             CRIMILD_LOG_ERROR( "Cannot fetch camera from scene" );
-            return Matrix4f::IDENTITY;
+            return;
+        }
+        auto frustum = camera->getFrustum();
+
+        Vector4f cascadeSplits;
+        auto nearClip = frustum.getDMin();
+        auto farClip = frustum.getDMax();
+        auto clipRange = farClip - nearClip;
+        auto minZ = nearClip;
+        auto maxZ = nearClip + clipRange;
+        auto range = maxZ - minZ;
+        auto ratio = maxZ / minZ;
+
+        const auto CASCADE_SPLIT_LAMBDA = 0.95f;
+
+        // Calculate cascade split depths based on view camera frustum
+        // This is based on these presentations:
+        // https://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch10.html
+        // https://johanmedestrom.wordpress.com/2016/03/18/opengl-cascaded-shadow-maps/
+        // TODO (hernan): This might break if the camera frustum changes...
+        for ( auto i = 0; i < 4; ++i ) {
+            auto p = float( i + 1 ) / float( 4 );
+            auto log = minZ * std::pow( ratio, p );
+            auto uniform = minZ + range * p;
+            auto d = CASCADE_SPLIT_LAMBDA * ( log - uniform ) + uniform;
+            cascadeSplits[ i ] = ( d - nearClip ) / clipRange;
         }
 
-        auto frustum = camera->getFrustum();
-        auto fov = 60.0f;
-        auto aspect = 1.0f / frustum.computeAspect();
-        auto tanHalfFOVH = std::tanf( Numericf::DEG_TO_RAD * fov / 2.0f );
-        auto tanHalfFOVV = std::tanf( Numericf::DEG_TO_RAD * fov * aspect / 2.0f );
-        //auto near = nearMultiplier * frustum.getDMax();
-        //auto far = farMultiplier * frustum.getDMax();
-        auto xn = near * tanHalfFOVH;
-        auto xf = far * tanHalfFOVH;
-        auto yn = near * tanHalfFOVV;
-        auto yf = far * tanHalfFOVV;
-        auto points = Array< Vector4f > {
-            Vector4f( xn, yn, near, 1.0f ),
-            Vector4f( -xn, yn, near, 1.0f ),
-            Vector4f( xn, -yn, near, 1.0f ),
-            Vector4f( -xn, -yn, near, 1.0f ),
-            Vector4f( xf, yf, far, 1.0f ),
-            Vector4f( -xf, yf, far, 1.0f ),
-            Vector4f( xf, -yf, far, 1.0f ),
-            Vector4f( -xf, -yf, far, 1.0f ),
+        auto shadowMap = light->getShadowMap();
+        auto pMatrix = camera->getProjectionMatrix();
+        auto vMatrix = camera->getViewMatrix();
+        auto invCamera = ( vMatrix * pMatrix ).getInverse();
+
+        // Calculate orthographic projections matrices for each cascade
+        auto lastSplitDistance = cascadeId > 0 ? cascadeSplits[ cascadeId - 1 ] : 0.0f;
+        auto splitDistance = cascadeSplits[ cascadeId ];
+
+        auto frustumCorners = Array< Vector3f > {
+            Vector3f( -1.0f, +1.0f, -1.0f ),
+            Vector3f( +1.0f, +1.0f, -1.0f ),
+            Vector3f( +1.0f, -1.0f, -1.0f ),
+            Vector3f( -1.0f, -1.0f, -1.0f ),
+            Vector3f( -1.0f, +1.0f, +1.0f ),
+            Vector3f( +1.0f, +1.0f, +1.0f ),
+            Vector3f( +1.0f, -1.0f, +1.0f ),
+            Vector3f( -1.0f, -1.0f, +1.0f ),
         };
 
-        auto invView = camera->getWorld().computeModelMatrix();
-        auto invLightViewMatrix = lightViewMatrix.getInverse();
-        auto m = invView * invLightViewMatrix;
-        auto min = Vector3f::POSITIVE_INFINITY;
-        auto max = Vector3f::NEGATIVE_INFINITY;
-
-        points.each(
-            [ &m, &min, &max ]( const auto &p ) {
-                auto p4 = m.getTranspose() * p;
-                min.x() = Numericf::min( min.x(), p4.x() );
-                min.y() = Numericf::min( min.y(), p4.y() );
-                min.z() = Numericf::min( min.z(), p4.z() );
-                max.x() = Numericf::max( max.x(), p4.x() );
-                max.y() = Numericf::max( max.y(), p4.y() );
-                max.z() = Numericf::max( max.z(), p4.z() );
+        // project frustum corners into world space
+        frustumCorners = frustumCorners.map(
+            [ invCamera, camera ]( const auto &p ) {
+                // TODO (hernan): this is why I need to fix matrix multiplications...
+                auto invCorner = invCamera.getTranspose() * Vector4f( p.x(), p.y(), p.z(), 1.0f );
+                return invCorner.xyz() / invCorner.w();
             } );
 
-        auto ortho = []( float left, float right, float bottom, float top, float near, float far ) {
-            return Matrix4f(
-                2.0f / ( right - left ), 0.0f, 0.0f, 0.0f,
-                0.0f, 2.0f / ( bottom - top ), 0.0f, 0.0f,
-                0.0f, 0.0f, 1.0f / ( near - far ), 0.0f,
+        for ( auto i = 0; i < 4; ++i ) {
+            auto dist = frustumCorners[ i + 4 ] - frustumCorners[ i ];
+            frustumCorners[ i + 4 ] = frustumCorners[ i ] + ( dist * splitDistance );
+            frustumCorners[ i ] = frustumCorners[ i ] + ( dist * lastSplitDistance );
+        }
 
-                -( right + left ) / ( right - left ),
-                -( bottom + top ) / ( bottom - top ),
-                near / ( near - far ),
-                1.0f );
-        };
+        auto frustumCenter = Vector3f::ZERO;
+        frustumCorners.each(
+            [ &frustumCenter ]( const auto &p ) {
+                frustumCenter += p;
+            } );
+        frustumCenter /= frustumCorners.size();
 
-        auto right = Numericf::max( Numericf::fabs( min.x() ), Numericf::fabs( max.x() ) );
-        auto up = Numericf::max( Numericf::fabs( min.y() ), Numericf::fabs( max.y() ) );
-        auto forward = Numericf::max( Numericf::fabs( min.z() ), Numericf::fabs( max.z() ) );
+        auto radius = 0.0f;
+        frustumCorners.each(
+            [ &radius, frustumCenter ]( const auto &p ) {
+                auto distance = ( p - frustumCenter ).getMagnitude();
+                radius = Numericf::max( radius, distance );
+            } );
+        radius = std::ceil( radius * 16.0f ) / 16.0f;
 
-        min.x() = -right;
-        max.x() = +right;
-        min.y() = -up;
-        max.y() = +up;
-        min.z() = -forward;
-        max.z() = +forward;
+        auto maxExtents = Vector3f( radius, radius, radius );
+        auto minExtents = -maxExtents;
 
-        return ortho( min.x(), max.x(), min.y(), max.y(), min.z(), max.z() );
+        auto lightDirection = light->getDirection().getNormalized();
+        auto lightViewMatrix = Matrix4f::lookAt( frustumCenter - lightDirection * -minExtents.z(), frustumCenter, Vector3f::UNIT_Y );
+        // Swap Y-coordinate min/max because of Vulkan's inverted coordinate system...
+        auto lightProjectionMatrix = ortho( minExtents.x(), maxExtents.x(), maxExtents.y(), minExtents.y(), 0.0f, maxExtents.z() - minExtents.z() );
+
+        // store split distances and matrices
+        shadowMap->setCascadeSplit( cascadeId, -1.0f * ( nearClip + splitDistance * clipRange ) );
+        shadowMap->setLightProjectionMatrix( cascadeId, lightViewMatrix * lightProjectionMatrix );
     };
 
     // TODO: move this to ViewportDimensions
-    auto transformViewport = []( auto layout, auto viewport ) {
+    static auto transformViewport = []( auto layout, auto viewport ) {
         auto ld = layout.dimensions;
         auto vd = viewport.dimensions;
         return ViewportDimensions {
@@ -433,33 +471,32 @@ size_t recordDirectionalLightCommands(
         };
     };
 
-    auto recordCascadeCommands = [ & ]( auto light, auto cascadeId, auto viewport, auto near, auto far ) {
+    auto recordCascadeCommands = [ & ]( auto light, auto cascadeId, auto viewport ) {
+        auto descriptors = [ & ] {
+            auto descriptors = cmp.create< DescriptorSet >();
+            descriptors->descriptors = {
+                {
+                    .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                    .obj = [ & ] {
+                        return crimild::alloc< CallbackUniformBuffer< Matrix4f > >(
+                            [ &, cascadeId, light ] {
+                                updateCascade( cascadeId, light );
+                                auto shadowMap = light->getShadowMap();
+                                return shadowMap->getLightProjectionMatrix( cascadeId );
+                            } );
+                    }(),
+                },
+            };
+            return descriptors;
+        }();
+
         commandBuffer->setViewport( viewport );
         commandBuffer->setScissor( viewport );
         scene->perform(
             ApplyToGeometries(
                 [ & ]( Geometry *geometry ) {
                     commandBuffer->bindGraphicsPipeline( pipeline );
-                    commandBuffer->bindDescriptorSet(
-                        [ & ] {
-                            auto descriptors = cmp.create< DescriptorSet >();
-                            descriptors->descriptors = {
-                                {
-                                    .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                                    .obj = [ & ] {
-                                        return crimild::alloc< CallbackUniformBuffer< Matrix4f > >(
-                                            [ cascadeId, near, far, light ] {
-                                                auto shadowMap = light->getShadowMap();
-                                                auto vMatrix = light->getWorld().computeModelMatrix().getInverse();
-                                                auto pMatrix = calculateLightProjection( vMatrix, near, far );
-                                                shadowMap->setLightProjectionMatrix( cascadeId, vMatrix * pMatrix );
-                                                return shadowMap->getLightProjectionMatrix( cascadeId );
-                                            } );
-                                    }(),
-                                },
-                            };
-                            return descriptors;
-                        }() );
+                    commandBuffer->bindDescriptorSet( descriptors );
                     commandBuffer->bindDescriptorSet( geometry->getDescriptors() );
                     commandBuffer->drawPrimitive( geometry->anyPrimitive() );
                 } ) );
@@ -472,22 +509,7 @@ size_t recordDirectionalLightCommands(
                 return;
             }
 
-            auto camera = Camera::getMainCamera();
-            if ( camera == nullptr ) {
-                CRIMILD_LOG_WARNING( "No main camera available" );
-                return;
-            }
-            auto frustum = camera->getFrustum();
-            auto near = frustum.getDMin();
-            auto far = frustum.getDMax();
-
             auto layoutViewport = viewports[ offset++ ];
-
-            // TODO: Make this a property of the light/shadow?
-            auto cascadeSplits = far * Vector4f( 0.1f, 0.25f, 0.6f, 1.0f );
-
-            // Save cascade splits in shadow map
-            light->getShadowMap()->setCascadeSplits( cascadeSplits );
 
             // Assign a single viewport to the shadow map. Since each cascade viewport is hard-coded to
             // take only a quarter of the available region, we can use that information to compute the
@@ -533,9 +555,7 @@ size_t recordDirectionalLightCommands(
                 recordCascadeCommands(
                     light,
                     i,
-                    cascadeViewports[ i ],
-                    i > 0 ? cascadeSplits[ i - 1 ] : near,
-                    cascadeSplits[ i ] );
+                    cascadeViewports[ i ] );
             }
         } );
 
@@ -552,10 +572,12 @@ Composition crimild::compositions::computeShadow( Composition cmp, Node *scene )
     FetchLights fetch;
     scene->perform( fetch );
     Map< Light::Type, Array< Light * > > lights;
+    Size lightCount = 0;
     fetch.forEachLight(
         [ & ]( auto l ) {
             if ( l->castShadows() ) {
                 lights[ l->getType() ].add( l );
+                ++lightCount;
             }
         } );
 
@@ -571,7 +593,7 @@ Composition crimild::compositions::computeShadow( Composition cmp, Node *scene )
     };
 
     auto viewportLayout =
-        lights.size() == 1
+        lightCount == 1
             ? Array< ViewportDimensions > {
                   {
                       .scalingMode = ScalingMode::RELATIVE,
@@ -599,14 +621,6 @@ Composition crimild::compositions::computeShadow( Composition cmp, Node *scene )
 
     auto renderPass = cmp.create< RenderPass >();
     renderPass->attachments = {
-        [ & ] {
-            auto att = cmp.createAttachment( "shadowColor" );
-            att->usage = Attachment::Usage::COLOR_ATTACHMENT;
-            att->format = Format::R8G8B8A8_UNORM;
-            att->imageView = crimild::alloc< ImageView >();
-            att->imageView->image = crimild::alloc< Image >();
-            return crimild::retain( att );
-        }(),
         [ & ] {
             auto att = cmp.createAttachment( "shadowDepth" );
             att->format = Format::DEPTH_STENCIL_DEVICE_OPTIMAL;
@@ -661,7 +675,7 @@ Composition crimild::compositions::computeShadow( Composition cmp, Node *scene )
         return commandBuffer;
     }();
 
-    cmp.setOutput( crimild::get_ptr( renderPass->attachments[ 1 ] ) );
+    cmp.setOutput( crimild::get_ptr( renderPass->attachments[ 0 ] ) );
 
     return cmp;
 }
