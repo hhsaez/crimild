@@ -311,20 +311,22 @@ PhongLitShaderProgram::PhongLitShaderProgram( void ) noexcept
 
                                 if ( lighting.directionalLights[ i ].castShadows ) {
                                     vec4 cascadeSplits = lighting.directionalLights[ i ].cascadeSplits;
-                                    float depth = -inViewPosition.z;
+
+                                    // these are all negative values. Lower means farther away from the eye
+                                    float depth = inViewPosition.z;
                                     int cascadeId = 0;
+                                    cascadeColor = vec3( 0.0, 1.0, 1.0 );
                                     if ( depth < cascadeSplits[ 0 ] ) {
-                                        cascadeId = 0;
-                                        cascadeColor = vec3( 1.0, 0.0, 0.0 );
-                                    } else if ( depth < cascadeSplits[ 1 ] ) {
                                         cascadeId = 1;
-                                        cascadeColor = vec3( 1.0, 1.0, 0.0 );
-                                    } else if ( depth < cascadeSplits[ 2 ] ) {
+                                        cascadeColor = vec3( 1.0, 0.0, 0.0 );
+                                    }
+                                    if ( depth < cascadeSplits[ 1 ] ) {
                                         cascadeId = 2;
-                                        cascadeColor = vec3( 0.0, 1.0, 0.0 );
-                                    } else {
+                                        cascadeColor = vec3( 1.0, 1.0, 0.0 );
+                                    }
+                                    if ( depth < cascadeSplits[ 2 ] ) {
                                         cascadeId = 3;
-                                        cascadeColor = vec3( 0.0, 1.0, 1.0 );
+                                        cascadeColor = vec3( 0.0, 1.0, 0.0 );
                                     }
 
                                     mat4 lightSpaceMatrix = lighting.directionalLights[ i ].lightSpaceMatrix[ cascadeId ];
@@ -388,7 +390,7 @@ PhongLitShaderProgram::PhongLitShaderProgram( void ) noexcept
                                 discard;
                             }
 
-                            color.rgb *= cascadeColor;
+                            //color.rgb *= cascadeColor;
 
                             outColor = vec4( color.rgb * lightContribution, color.a );
                         } ) ),

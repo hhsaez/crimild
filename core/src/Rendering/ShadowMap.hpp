@@ -42,6 +42,7 @@ namespace crimild {
 
         const Vector4f &getCascadeSplits( void ) const { return _cascadeSplits; }
         void setCascadeSplits( const Vector4f &splits ) noexcept { _cascadeSplits = splits; }
+        void setCascadeSplit( Size splitIndex, Real32 depth ) noexcept { _cascadeSplits[ splitIndex ] = depth; }
 
         const Matrix4f &getLightProjectionMatrix( Size index ) const { return _lightProjectionMatrix[ index ]; }
         void setLightProjectionMatrix( Size index, const Matrix4f &m ) { _lightProjectionMatrix[ index ] = m; }
