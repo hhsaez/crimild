@@ -57,11 +57,15 @@ PhongLitShaderProgram::PhongLitShaderProgram( void ) noexcept
                     layout( location = 2 ) out vec3 outViewPosition;
                     layout( location = 3 ) out vec2 outTexCoord;
                     layout( location = 4 ) out vec3 outEyePosition;
+                    layout( location = 5 ) out mat3 outViewMatrix3;
 
                     void main() {
                         gl_Position = proj * view * model * vec4( inPosition, 1.0 );
 
-                        outNormal = normalize( mat3( transpose( inverse( model ) ) ) * inNormal );
+                        mat3 nMatrix = mat3( transpose( inverse( model ) ) );
+
+                        outViewMatrix3 = mat3( inverse( view ) );
+                        outNormal = normalize( nMatrix * inNormal );
                         outPosition = vec3( model * vec4( inPosition, 1.0 ) );
                         outViewPosition = ( view * model * vec4( inPosition, 1.0 ) ).xyz;
                         outEyePosition = inverse( view )[ 3 ].xyz;
@@ -75,6 +79,7 @@ PhongLitShaderProgram::PhongLitShaderProgram( void ) noexcept
                         layout( location = 2 ) in vec3 inViewPosition;
                         layout( location = 3 ) in vec2 inTexCoord;
                         layout( location = 4 ) in vec3 inEyePosition;
+                        layout( location = 5 ) in mat3 inViewMatrix3;
 
                         struct LightProps {
                             uint type;
@@ -112,6 +117,7 @@ PhongLitShaderProgram::PhongLitShaderProgram( void ) noexcept
 
                         layout( set = 1, binding = 1 ) uniform sampler2D uDiffuseMap;
                         layout( set = 1, binding = 2 ) uniform sampler2D uSpecularMap;
+                        layout( set = 1, binding = 3 ) uniform sampler2D uNormalMap;
 
                         layout( location = 0 ) out vec4 outColor;
 
@@ -265,8 +271,31 @@ PhongLitShaderProgram::PhongLitShaderProgram( void ) noexcept
                         */
                         }
 
+                        // Computes T, B and TBN matrix based on surface N
+                        // TODO (hernan): is this in view space? If so, we transform T and B to world space
+                        mat3 computeTBN( mat3 invView, vec3 N ) {
+                            vec3 q1 = dFdx( inPosition );
+                            vec3 q2 = dFdy( inPosition );
+                            vec2 st1 = dFdx( inTexCoord );
+                            vec2 st2 = dFdy( inTexCoord );
+                            vec3 T = normalize( invView * ( q1 * st2.t - q2 * st1.t ) );
+                            vec3 B = -normalize( invView * ( -q1 * st2.s + q2 * st1.s ) );
+                            return mat3( T, B, N );
+                        }
+
                         void main() {
-                            vec3 N = normalize( inNormal );
+                            // Load a normal from the Normal map.
+                            vec3 N = texture( uNormalMap, inTexCoord ).rgb;
+                            if ( N.x * N.y * N.z != 0 ) {
+                                // Transform normal to range [-1, 1]
+                                N = normalize( 2.0 * N - 1.0 );
+                                N = normalize( computeTBN( inViewMatrix3, inNormal ) * N );
+                            } else {
+                                // If no normal map is present, the normal vector will be zero
+                                // In this case, use the input normal from the vertex shader
+                                N = normalize( inNormal );
+                            }
+
                             vec3 P = inPosition;
                             vec3 E = inEyePosition;
                             vec3 MS = material.specular.rgb * texture( uSpecularMap, inTexCoord ).rgb;
@@ -432,6 +461,11 @@ PhongLitShaderProgram::PhongLitShaderProgram( void ) noexcept
                 },
                 {
                     // Specular Map
+                    .descriptorType = DescriptorType::TEXTURE,
+                    .stage = Shader::Stage::FRAGMENT,
+                },
+                {
+                    // Normal Map
                     .descriptorType = DescriptorType::TEXTURE,
                     .stage = Shader::Stage::FRAGMENT,
                 },

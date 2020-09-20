@@ -54,9 +54,21 @@ SharedPointer< Texture > Texture::ONE = [] {
     return texture;
 }();
 
-SharedPointer< Texture > Texture::ZERO = crimild::alloc< Texture >(
-	crimild::alloc< Image >( 1, 1, 4, ByteArray { 0x00, 0x00, 0x00, 0x00 }, Image::PixelFormat::RGBA )
-);
+SharedPointer< Texture > Texture::ZERO = [] {
+    auto texture = crimild::alloc< Texture >();
+    texture->imageView = [&] {
+        auto imageView = crimild::alloc< ImageView >();
+        imageView->image = Image::ZERO;
+        return imageView;
+    }();
+    texture->sampler = [&] {
+        auto sampler = crimild::alloc< Sampler >();
+        sampler->setMinFilter( Sampler::Filter::NEAREST );
+        sampler->setMagFilter( Sampler::Filter::NEAREST );
+        return sampler;
+    }();
+    return texture;
+}();
 
 SharedPointer< Texture > Texture::CUBE_ONE = [] {
     return crimild::alloc< Texture >(

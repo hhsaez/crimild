@@ -52,25 +52,29 @@ namespace crimild {
         explicit SimpleLitMaterial( const Props &props ) noexcept;
         virtual ~SimpleLitMaterial( void ) = default;
 
-        inline void setAmbient( const RGBAColorf &ambient ) noexcept { getProps().ambient = ambient; };
-        inline const RGBAColorf &getAmbient( void ) const noexcept { return getProps().ambient; }
+        inline void setAmbient( const RGBAColorf &ambient ) noexcept override { getProps().ambient = ambient; };
+        inline const RGBAColorf &getAmbient( void ) const noexcept override { return getProps().ambient; }
 
-        inline void setDiffuse( const RGBAColorf &diffuse ) noexcept { getProps().diffuse = diffuse; };
-        inline const RGBAColorf &getDiffuse( void ) const noexcept { return getProps().diffuse; }
+        inline void setDiffuse( const RGBAColorf &diffuse ) noexcept override { getProps().diffuse = diffuse; };
+        inline const RGBAColorf &getDiffuse( void ) const noexcept override { return getProps().diffuse; }
 
         void setDiffuseMap( SharedPointer< Texture > const &diffuseMap ) noexcept;
         const Texture *getDiffuseMap( void ) const noexcept;
         Texture *getDiffuseMap( void ) noexcept;
 
-        inline void setSpecular( const RGBAColorf &specular ) noexcept { getProps().specular = specular; };
-        inline const RGBAColorf &getSpecular( void ) const noexcept { return getProps().specular; }
+        inline void setSpecular( const RGBAColorf &specular ) noexcept override { getProps().specular = specular; };
+        inline const RGBAColorf &getSpecular( void ) const noexcept override { return getProps().specular; }
 
-        void setSpecularMap( SharedPointer< Texture > const &specularMap ) noexcept;
+        void setSpecularMap( SharedPointer< Texture > const &specularMap ) noexcept override;
         const Texture *getSpecularMap( void ) const noexcept;
-        Texture *getSpecularMap( void ) noexcept;
+        Texture *getSpecularMap( void ) noexcept override;
 
-        inline void setShininess( Real32 shininess ) noexcept { getProps().shininess = shininess; }
-        inline Real32 getShininess( void ) const noexcept { return getProps().shininess; }
+        inline void setShininess( Real32 shininess ) noexcept override { getProps().shininess = shininess; }
+        inline Real32 getShininess( void ) const noexcept override { return getProps().shininess; }
+
+        void setNormalMap( SharedPointer< Texture > const &normalMap ) noexcept override;
+        const Texture *getNormalMap( void ) const noexcept;
+        Texture *getNormalMap( void ) noexcept override;
 
     private:
         Props &getProps( void ) noexcept;
