@@ -66,49 +66,49 @@ namespace crimild {
         //@{
 
     public:
-        void setProgram( ShaderProgram *program ) { _program = crimild::retain( program ); }
-		void setProgram( SharedPointer< ShaderProgram > const &program ) { _program = program; }
-        ShaderProgram *getProgram( void ) { return crimild::get_ptr( _program ); }
+        virtual void setProgram( ShaderProgram *program ) { _program = crimild::retain( program ); }
+        virtual void setProgram( SharedPointer< ShaderProgram > const &program ) { _program = program; }
+        virtual ShaderProgram *getProgram( void ) { return crimild::get_ptr( _program ); }
 
-		void setAmbient( const RGBAColorf &ambient ) { _ambient = ambient; }
-		const RGBAColorf &getAmbient( void ) const { return _ambient; }
+        virtual void setAmbient( const RGBAColorf &ambient ) { _ambient = ambient; }
+        virtual const RGBAColorf &getAmbient( void ) const { return _ambient; }
 
-		void setDiffuse( const RGBAColorf &color ) { _diffuse = color; }
-		const RGBAColorf &getDiffuse( void ) const { return _diffuse; }
+        virtual void setDiffuse( const RGBAColorf &color ) { _diffuse = color; }
+        virtual const RGBAColorf &getDiffuse( void ) const { return _diffuse; }
 
-		void setSpecular( const RGBAColorf &color ) { _specular = color; }
-		const RGBAColorf &getSpecular( void ) const { return _specular; }
+        virtual void setSpecular( const RGBAColorf &color ) { _specular = color; }
+        virtual const RGBAColorf &getSpecular( void ) const { return _specular; }
 
-		void setEmissive( float value ) { _emissive = value; }
-		float getEmissive( void ) const { return _emissive; }
+        virtual void setEmissive( float value ) { _emissive = value; }
+        virtual float getEmissive( void ) const { return _emissive; }
 
-		void setShininess( float value ) { _shininess = value; }
-		float getShininess( void ) const { return _shininess; }
+        virtual void setShininess( float value ) { _shininess = value; }
+        virtual float getShininess( void ) const { return _shininess; }
 
-        void setColorMap( Texture *texture ) { _colorMap = crimild::retain( texture ); }
-		void setColorMap( SharedPointer< Texture > const &texture ) { _colorMap = texture; }
-        Texture *getColorMap( void ) { return crimild::get_ptr( _colorMap ); }
+        virtual void setColorMap( Texture *texture ) { _colorMap = crimild::retain( texture ); }
+        virtual void setColorMap( SharedPointer< Texture > const &texture ) { _colorMap = texture; }
+        virtual Texture *getColorMap( void ) { return crimild::get_ptr( _colorMap ); }
 
-        void setNormalMap( Texture *texture ) { _normalMap = crimild::retain( texture ); }
-		void setNormalMap( SharedPointer< Texture > const &texture ) { _normalMap = texture; }
-        Texture *getNormalMap( void ) { return crimild::get_ptr( _normalMap ); }
+        virtual void setNormalMap( Texture *texture ) { _normalMap = crimild::retain( texture ); }
+        virtual void setNormalMap( SharedPointer< Texture > const &texture ) { _normalMap = texture; }
+        virtual Texture *getNormalMap( void ) { return crimild::get_ptr( _normalMap ); }
 
-        void setSpecularMap( Texture *texture ) { _specularMap = crimild::retain( texture ); }
-		void setSpecularMap( SharedPointer< Texture > const &texture ) { _specularMap = texture; }
-        Texture *getSpecularMap( void ) { return crimild::get_ptr( _specularMap ); }
+        virtual void setSpecularMap( Texture *texture ) { _specularMap = crimild::retain( texture ); }
+        virtual void setSpecularMap( SharedPointer< Texture > const &texture ) { _specularMap = texture; }
+        virtual Texture *getSpecularMap( void ) { return crimild::get_ptr( _specularMap ); }
 
-        void setEmissiveMap( Texture *texture ) { _emissiveMap = crimild::retain( texture ); }
-        void setEmissiveMap( SharedPointer< Texture > const &texture ) { _emissiveMap = texture; }
-        Texture *getEmissiveMap( void ) { return crimild::get_ptr( _emissiveMap ); }
+        virtual void setEmissiveMap( Texture *texture ) { _emissiveMap = crimild::retain( texture ); }
+        virtual void setEmissiveMap( SharedPointer< Texture > const &texture ) { _emissiveMap = texture; }
+        virtual Texture *getEmissiveMap( void ) { return crimild::get_ptr( _emissiveMap ); }
 
-        void setColorMaskState( SharedPointer< ColorMaskState > const &colorMaskState ) { _colorMaskState = colorMaskState; }
-        ColorMaskState *getColorMaskState( void ) { return crimild::get_ptr( _colorMaskState ); }
+        virtual void setColorMaskState( SharedPointer< ColorMaskState > const &colorMaskState ) { _colorMaskState = colorMaskState; }
+        virtual ColorMaskState *getColorMaskState( void ) { return crimild::get_ptr( _colorMaskState ); }
 
-        bool castShadows( void ) const { return _castShadows; }
-        void setCastShadows( bool value ) { _castShadows = value; }
+        virtual bool castShadows( void ) const { return _castShadows; }
+        virtual void setCastShadows( bool value ) { _castShadows = value; }
 
-        bool receiveShadows( void ) const { return _receiveShadows; }
-        void setReceiveShadows( bool value ) { _receiveShadows = value; }
+        virtual bool receiveShadows( void ) const { return _receiveShadows; }
+        virtual void setReceiveShadows( bool value ) { _receiveShadows = value; }
 
 	private:
 		SharedPointer< ShaderProgram > _program;
