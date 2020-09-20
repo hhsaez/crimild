@@ -69,6 +69,11 @@ SimpleLitMaterial::SimpleLitMaterial( const Props &props ) noexcept
                     .descriptorType = DescriptorType::TEXTURE,
                     .obj = Texture::ONE,
                 },
+                {
+                    // Normal map
+                    .descriptorType = DescriptorType::TEXTURE,
+                    .obj = Texture::ZERO,
+                },
             };
             return descriptors;
         }()
@@ -113,4 +118,19 @@ const Texture *SimpleLitMaterial::getSpecularMap( void ) const noexcept
 Texture *SimpleLitMaterial::getSpecularMap( void ) noexcept
 {
     return getDescriptors()->descriptors[ 2 ].get< Texture >();
+}
+
+void SimpleLitMaterial::setNormalMap( SharedPointer< Texture > const &normalMap ) noexcept
+{
+    getDescriptors()->descriptors[ 3 ].obj = normalMap;
+}
+
+const Texture *SimpleLitMaterial::getNormalMap( void ) const noexcept
+{
+    return getDescriptors()->descriptors[ 3 ].get< Texture >();
+}
+
+Texture *SimpleLitMaterial::getNormalMap( void ) noexcept
+{
+    return getDescriptors()->descriptors[ 3 ].get< Texture >();
 }

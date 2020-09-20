@@ -41,7 +41,7 @@ namespace crimild {
     public:
         struct Params {
             Primitive::Type type = Primitive::Type::TRIANGLES;
-            VertexLayout layout = VertexP3N3::getLayout();
+            VertexLayout layout = VertexP3N3TC2::getLayout();
             Vector3f size = Vector3f::ONE;
 
             // When set to `true`, faces will be inverted generating a hollow box instead
