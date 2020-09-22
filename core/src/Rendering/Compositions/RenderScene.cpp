@@ -44,12 +44,12 @@
 using namespace crimild;
 using namespace crimild::compositions;
 
-Composition crimild::compositions::renderScene( SharedPointer< Node > const &scene ) noexcept
+Composition crimild::compositions::renderScene( SharedPointer< Node > const &scene, crimild::Bool useHDR ) noexcept
 {
-    return renderScene( crimild::get_ptr( scene ) );
+    return renderScene( crimild::get_ptr( scene ), useHDR );
 }
 
-Composition crimild::compositions::renderScene( Node *scene ) noexcept
+Composition crimild::compositions::renderScene( Node *scene, crimild::Bool useHDR ) noexcept
 {
     Composition cmp;
 
@@ -90,7 +90,11 @@ Composition crimild::compositions::renderScene( Node *scene ) noexcept
         [ & ] {
             auto att = cmp.createAttachment( "gBufferColor" );
             att->usage = Attachment::Usage::COLOR_ATTACHMENT;
-            att->format = Format::R8G8B8A8_UNORM;
+            if ( useHDR ) {
+                att->format = Format::R32G32B32A32_SFLOAT;
+            } else {
+                att->format = Format::R8G8B8A8_UNORM;
+            }
             att->imageView = crimild::alloc< ImageView >();
             att->imageView->image = crimild::alloc< Image >();
             return crimild::retain( att );

@@ -25,25 +25,17 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_RENDERING_COMPOSITIONS_RENDER_SCENE_
-#define CRIMILD_CORE_RENDERING_COMPOSITIONS_RENDER_SCENE_
+#ifndef CRIMILD_CORE_RENDERING_COMPOSITIONS_TONEMAPPING_
+#define CRIMILD_CORE_RENDERING_COMPOSITIONS_TONEMAPPING_
 
+#include "Mathematics/Vector.hpp"
 #include "Rendering/Compositions/Composition.hpp"
 
 namespace crimild {
 
-    class Node;
-
     namespace compositions {
 
-        Composition renderScene( SharedPointer< Node > const &scene, crimild::Bool hdr = false ) noexcept;
-        Composition renderScene( Node *scene, crimild::Bool hdr = false ) noexcept;
-
-        template< typename NodeType >
-        Composition renderSceneHDR( NodeType scene ) noexcept
-        {
-            return renderScene( scene, true );
-        }
+        Composition tonemapping( Composition, crimild::Real32 exposure = 1.0f ) noexcept;
 
     }
 
