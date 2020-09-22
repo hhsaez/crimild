@@ -26,6 +26,7 @@
  */
 
 #include "BoxPrimitive.hpp"
+
 #include "Rendering/Vertex.hpp"
 
 #include <vector>
@@ -33,7 +34,7 @@
 using namespace crimild;
 
 BoxPrimitive::BoxPrimitive( void ) noexcept
-    : BoxPrimitive( Params { } )
+    : BoxPrimitive( Params {} )
 {
     // no-op
 }
@@ -87,8 +88,7 @@ BoxPrimitive::BoxPrimitive( const Params &params ) noexcept
             Vector3f( +w, -h, +d ),
             Vector3f( -w, -h, +d ),
             Vector3f( -w, -h, -d ),
-        }
-    );
+        } );
 
     if ( layout.hasAttribute( VertexAttribute::Name::NORMAL ) ) {
         auto normals = vertices->get( VertexAttribute::Name::NORMAL );
@@ -132,8 +132,7 @@ BoxPrimitive::BoxPrimitive( const Params &params ) noexcept
                 -U,
                 -U,
                 -U,
-            }
-        );
+            } );
     }
 
     if ( layout.hasAttribute( VertexAttribute::Name::COLOR ) ) {
@@ -181,8 +180,7 @@ BoxPrimitive::BoxPrimitive( const Params &params ) noexcept
                 m,
                 m,
                 m,
-            }
-        );
+            } );
     }
 
     if ( layout.hasAttribute( VertexAttribute::Name::TEX_COORD ) ) {
@@ -228,8 +226,7 @@ BoxPrimitive::BoxPrimitive( const Params &params ) noexcept
                 Vector2f( s0, t1 ),
                 Vector2f( s1, t1 ),
                 Vector2f( s1, t0 ),
-            }
-        );
+            } );
     }
     setVertexData( { vertices } );
 
@@ -237,13 +234,41 @@ BoxPrimitive::BoxPrimitive( const Params &params ) noexcept
         crimild::alloc< IndexBuffer >(
             Format::INDEX_32_UINT,
             Array< UInt32 > {
-                0, 1, 2, 0, 2, 3,
-                4, 5, 6, 4, 6, 7,
-                8, 9, 10, 8, 10, 11,
-                12, 13, 14, 12, 14, 15,
-                16, 17, 18, 16, 18, 19,
-                20, 21, 22, 20, 22, 23,
-            }
-        )
-    );
+                0,
+                1,
+                2,
+                0,
+                2,
+                3,
+                4,
+                5,
+                6,
+                4,
+                6,
+                7,
+                8,
+                9,
+                10,
+                8,
+                10,
+                11,
+                12,
+                13,
+                14,
+                12,
+                14,
+                15,
+                16,
+                17,
+                18,
+                16,
+                18,
+                19,
+                20,
+                21,
+                22,
+                20,
+                22,
+                23,
+            } ) );
 }
