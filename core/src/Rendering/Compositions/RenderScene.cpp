@@ -52,6 +52,7 @@ Composition crimild::compositions::renderScene( SharedPointer< Node > const &sce
 Composition crimild::compositions::renderScene( Node *scene, crimild::Bool useHDR ) noexcept
 {
     Composition cmp;
+    cmp.enableHDR( useHDR );
 
     cmp = computeShadow( cmp, scene );
 

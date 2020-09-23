@@ -40,7 +40,7 @@
 using namespace crimild;
 using namespace crimild::compositions;
 
-Composition crimild::compositions::mix( Composition cmp1, Composition cmp2, bool useHDR ) noexcept
+Composition crimild::compositions::mix( Composition cmp1, Composition cmp2 ) noexcept
 {
     auto cmp = Composition( cmp1, cmp2 );
 
@@ -49,7 +49,7 @@ Composition crimild::compositions::mix( Composition cmp1, Composition cmp2, bool
         [ & ] {
             auto att = cmp.createAttachment( "mix" );
             att->usage = Attachment::Usage::COLOR_ATTACHMENT;
-            if ( useHDR ) {
+            if ( cmp.isHDREnabled() ) {
                 att->format = Format::R32G32B32A32_SFLOAT;
             } else {
                 att->format = Format::R8G8B8A8_UNORM;

@@ -40,14 +40,14 @@
 using namespace crimild;
 using namespace crimild::compositions;
 
-Composition crimild::compositions::brightPassFilter( Composition cmp, const Vector3f &filter, bool useHDR ) noexcept
+Composition crimild::compositions::brightPassFilter( Composition cmp, const Vector3f &filter ) noexcept
 {
     auto renderPass = cmp.create< RenderPass >();
     renderPass->attachments = {
         [ & ] {
             auto att = cmp.createAttachment( "brightPassFilter" );
             att->usage = Attachment::Usage::COLOR_ATTACHMENT;
-            if ( useHDR ) {
+            if ( cmp.isHDREnabled() ) {
                 att->format = Format::R32G32B32A32_SFLOAT;
             } else {
                 att->format = Format::R8G8B8A8_UNORM;

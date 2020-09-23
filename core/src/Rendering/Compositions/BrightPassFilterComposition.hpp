@@ -35,12 +35,7 @@ namespace crimild {
 
     namespace compositions {
 
-        Composition brightPassFilter( Composition, const Vector3f &filter, bool useHDR ) noexcept;
-
-        inline Composition brightPassFilterHDR( Composition cmp, const Vector3f &filter ) noexcept
-        {
-            return brightPassFilter( cmp, filter, true );
-        }
+        Composition brightPassFilter( Composition, const Vector3f &filter ) noexcept;
 
     }
 

@@ -34,12 +34,7 @@ namespace crimild {
 
     namespace compositions {
 
-        Composition gaussianBlur( Composition, bool useHDR = false ) noexcept;
-
-        inline Composition gaussianBlurHDR( Composition cmp ) noexcept
-        {
-            return gaussianBlur( cmp, true );
-        }
+        Composition gaussianBlur( Composition ) noexcept;
 
     }
 

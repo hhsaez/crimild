@@ -43,11 +43,11 @@
 using namespace crimild;
 using namespace crimild::compositions;
 
-Composition crimild::compositions::bloom( Composition cmp, bool useHDR ) noexcept
+Composition crimild::compositions::bloom( Composition cmp ) noexcept
 {
-    auto highlights = brightPassFilter( cmp, Vector3f( 0.2126f, 0.7152f, 0.0722f ), useHDR );
-    auto blurred = gaussianBlur( highlights, useHDR );
-    auto mixed = mix( cmp, blurred, useHDR );
+    auto highlights = brightPassFilter( cmp, Vector3f( 0.2126f, 0.7152f, 0.0722f ) );
+    auto blurred = gaussianBlur( highlights );
+    auto mixed = mix( cmp, blurred );
 
     return mixed;
 }
