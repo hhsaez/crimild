@@ -35,12 +35,7 @@ namespace crimild {
 
     namespace compositions {
 
-        Composition mix( Composition cmp1, Composition cmp2, bool useHDR ) noexcept;
-
-        inline Composition mixHDR( Composition cmp1, Composition cmp2 ) noexcept
-        {
-            return mix( cmp1, cmp2, true );
-        }
+        Composition mix( Composition cmp1, Composition cmp2 ) noexcept;
 
     }
 
