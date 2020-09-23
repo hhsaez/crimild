@@ -73,10 +73,14 @@ namespace crimild {
 
             inline Attachment *getOutput( void ) noexcept { return m_output; }
 
+            inline Bool isHDREnabled( void ) const { return m_useHDR; }
+            inline void enableHDR( bool enabled ) noexcept { m_useHDR = enabled; }
+
         private:
             Attachment *m_output = nullptr;
             Map< std::string, Attachment * > m_attachments;
             List< SharedPointer< SharedObject > > m_objects;
+            Bool m_useHDR = false;
         };
 
     }

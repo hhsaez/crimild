@@ -40,7 +40,7 @@
 using namespace crimild;
 using namespace crimild::compositions;
 
-Composition crimild::compositions::gaussianBlur( Composition cmp, bool useHDR ) noexcept
+Composition crimild::compositions::gaussianBlur( Composition cmp ) noexcept
 {
     auto createPipeline = [ & ]( bool horizontal ) {
         auto pipeline = cmp.create< Pipeline >();
@@ -135,13 +135,13 @@ Composition crimild::compositions::gaussianBlur( Composition cmp, bool useHDR ) 
     auto horizontalPipeline = createPipeline( true );
     auto verticalPipeline = createPipeline( false );
 
-    auto pass = [ useHDR ]( Composition cmp, auto pipeline ) {
+    auto pass = []( Composition cmp, auto pipeline ) {
         auto renderPass = cmp.create< RenderPass >();
         renderPass->attachments = {
             [ & ] {
                 auto att = cmp.createAttachment( "gaussianBlur" );
                 att->usage = Attachment::Usage::COLOR_ATTACHMENT;
-                if ( useHDR ) {
+                if ( cmp.isHDREnabled() ) {
                     att->format = Format::R32G32B32A32_SFLOAT;
                 } else {
                     att->format = Format::R8G8B8A8_UNORM;

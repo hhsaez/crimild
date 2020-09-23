@@ -39,19 +39,23 @@ Composition::Composition( const Composition &cmp1, const Composition &cmp2 ) noe
         [ this ]( auto &obj ) {
             m_objects.add( obj );
         } );
+
+    enableHDR( cmp1.isHDREnabled() || cmp2.isHDREnabled() );
 }
 
 Composition::Composition( const Composition &other ) noexcept
     : m_objects( other.m_objects ),
       m_attachments( other.m_attachments ),
-      m_output( other.m_output )
+      m_output( other.m_output ),
+      m_useHDR( other.m_useHDR )
 {
 }
 
 Composition::Composition( Composition &&other ) noexcept
     : m_objects( std::move( other.m_objects ) ),
       m_attachments( std::move( other.m_attachments ) ),
-      m_output( other.m_output )
+      m_output( other.m_output ),
+      m_useHDR( other.m_useHDR )
 {
     other.m_output = nullptr;
 }
@@ -61,6 +65,7 @@ Composition &Composition::operator=( const Composition &other ) noexcept
     m_objects = other.m_objects;
     m_attachments = other.m_attachments;
     m_output = other.m_output;
+    m_useHDR = other.m_useHDR;
     return *this;
 }
 
@@ -69,6 +74,7 @@ Composition &Composition::operator=( Composition &&other ) noexcept
     m_objects = std::move( other.m_objects );
     m_attachments = std::move( other.m_attachments );
     m_output = other.m_output;
+    m_useHDR = other.m_useHDR;
     other.m_output = nullptr;
     return *this;
 }

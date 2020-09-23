@@ -34,12 +34,7 @@ namespace crimild {
 
     namespace compositions {
 
-        Composition bloom( Composition, bool useHDR = false ) noexcept;
-
-        inline Composition bloomHDR( Composition cmp ) noexcept
-        {
-            return bloom( cmp, true );
-        }
+        Composition bloom( Composition ) noexcept;
 
     }
 
