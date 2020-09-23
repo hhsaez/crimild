@@ -42,55 +42,53 @@ namespace crimild {
     class DescriptorSet;
     class Pipeline;
 
-    class Attachment :
-		public SharedObject,
-		public FrameGraphObjectImpl< Attachment > {
-	public:
-		enum class Usage {
-			UNDEFINED,
+    class Attachment : public SharedObject,
+                       public FrameGraphObjectImpl< Attachment > {
+    public:
+        enum class Usage {
+            UNDEFINED,
             COLOR_ATTACHMENT,
             DEPTH_STENCIL_ATTACHMENT,
-		};
-		
-		enum class LoadOp {
-			LOAD,
-			CLEAR,
-			DONT_CARE,
-		};
+        };
 
-		enum class StoreOp {
-			STORE,
-			DONT_CARE,
-		};
-		
+        enum class LoadOp {
+            LOAD,
+            CLEAR,
+            DONT_CARE,
+        };
+
+        enum class StoreOp {
+            STORE,
+            DONT_CARE,
+        };
+
     public:
         Format format = Format::UNDEFINED;
         Usage usage = Usage::UNDEFINED;
-		LoadOp loadOp = LoadOp::DONT_CARE;
-		StoreOp storeOp = StoreOp::DONT_CARE;
-		LoadOp stencilLoadOp = LoadOp::DONT_CARE;
-		StoreOp stencilStoreOp = StoreOp::DONT_CARE;
+        LoadOp loadOp = LoadOp::DONT_CARE;
+        StoreOp storeOp = StoreOp::DONT_CARE;
+        LoadOp stencilLoadOp = LoadOp::DONT_CARE;
+        StoreOp stencilStoreOp = StoreOp::DONT_CARE;
 
         // TODO
         SharedPointer< ImageView > imageView;
     };
 
-    class RenderPass :
-    	public SharedObject,
-    	public RenderResourceImpl< RenderPass > {
+    class RenderPass : public SharedObject,
+                       public RenderResourceImpl< RenderPass > {
 
     public:
         virtual ~RenderPass( void ) = default;
 
-		Array< SharedPointer< Attachment >> attachments;
-		SharedPointer< CommandBuffer > commands;
+        Array< SharedPointer< Attachment > > attachments;
+        SharedPointer< CommandBuffer > commands;
         Extent2D extent = Extent2D {
             .scalingMode = ScalingMode::SWAPCHAIN_RELATIVE,
         };
 
         struct ClearValue {
-        	RGBAColorf color = RGBAColorf::ZERO;
-        	Vector2f depthStencil = Vector2f::UNIT_X;
+            RGBAColorf color = RGBAColorf::ZERO;
+            Vector2f depthStencil = Vector2f::UNIT_X;
         };
         ClearValue clearValue;
 
@@ -98,9 +96,9 @@ namespace crimild {
            \name Pipeline
         */
         //@{
-        
+
     public:
-        inline void setPipeline( Pipeline *pipeline ) noexcept;
+        void setPipeline( Pipeline *pipeline ) noexcept;
         inline void setPipeline( SharedPointer< Pipeline > const &pipeline ) noexcept { m_pipeline = pipeline; }
         inline Pipeline *getPipeline( void ) noexcept { return get_ptr( m_pipeline ); }
 
@@ -118,7 +116,7 @@ namespace crimild {
            \name Descriptor Set
         */
         //@{
-        
+
     public:
         inline void setDescriptors( DescriptorSet *descriptors ) noexcept;
         inline void setDescriptors( SharedPointer< DescriptorSet > const &descriptors ) noexcept { m_descriptors = descriptors; }
@@ -133,10 +131,8 @@ namespace crimild {
         SharedPointer< DescriptorSet > m_descriptors;
 
         //@}
-        
     };
 
 }
 
 #endif
-
