@@ -28,8 +28,8 @@
 #ifndef CRIMILD_CORE_RENDERING_FRAME_COMPOSITION_
 #define CRIMILD_CORE_RENDERING_FRAME_COMPOSITION_
 
-#include "Foundation/Containers/Map.hpp"
 #include "Foundation/Containers/List.hpp"
+#include "Foundation/Containers/Map.hpp"
 #include "Foundation/SharedObject.hpp"
 
 namespace crimild {
@@ -41,6 +41,7 @@ namespace crimild {
         class Composition {
         public:
             Composition( void ) noexcept = default;
+            Composition( const Composition &cmp1, const Composition &cmp2 ) noexcept;
             Composition( const Composition & ) noexcept;
             Composition( Composition && ) noexcept;
             ~Composition( void ) noexcept = default;
@@ -75,7 +76,7 @@ namespace crimild {
         private:
             Attachment *m_output = nullptr;
             Map< std::string, Attachment * > m_attachments;
-            List< SharedPointer< SharedObject >> m_objects;
+            List< SharedPointer< SharedObject > > m_objects;
         };
 
     }

@@ -25,58 +25,24 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef CRIMILD_CORE_RENDERING_COMPOSITIONS_BLOOM_
+#define CRIMILD_CORE_RENDERING_COMPOSITIONS_BLOOM_
+
 #include "Rendering/Compositions/Composition.hpp"
 
-#include "Rendering/RenderPass.hpp"
+namespace crimild {
 
-using namespace crimild;
-using namespace crimild::compositions;
+    namespace compositions {
 
-Composition::Composition( const Composition &cmp1, const Composition &cmp2 ) noexcept
-    : Composition( cmp1 )
-{
-    cmp2.m_objects.each(
-        [ this ]( auto &obj ) {
-            m_objects.add( obj );
-        } );
+        Composition bloom( Composition, bool useHDR = false ) noexcept;
+
+        inline Composition bloomHDR( Composition cmp ) noexcept
+        {
+            return bloom( cmp, true );
+        }
+
+    }
+
 }
 
-Composition::Composition( const Composition &other ) noexcept
-    : m_objects( other.m_objects ),
-      m_attachments( other.m_attachments ),
-      m_output( other.m_output )
-{
-}
-
-Composition::Composition( Composition &&other ) noexcept
-    : m_objects( std::move( other.m_objects ) ),
-      m_attachments( std::move( other.m_attachments ) ),
-      m_output( other.m_output )
-{
-    other.m_output = nullptr;
-}
-
-Composition &Composition::operator=( const Composition &other ) noexcept
-{
-    m_objects = other.m_objects;
-    m_attachments = other.m_attachments;
-    m_output = other.m_output;
-    return *this;
-}
-
-Composition &Composition::operator=( Composition &&other ) noexcept
-{
-    m_objects = std::move( other.m_objects );
-    m_attachments = std::move( other.m_attachments );
-    m_output = other.m_output;
-    other.m_output = nullptr;
-    return *this;
-}
-
-Attachment *Composition::createAttachment( std::string name ) noexcept
-{
-    auto att = crimild::alloc< Attachment >();
-    m_objects.add( att );
-    m_attachments[ name ] = crimild::get_ptr( att );
-    return crimild::get_ptr( att );
-}
+#endif
