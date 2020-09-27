@@ -232,6 +232,7 @@
 #include "Rendering/ImageTGA.hpp"
 #include "Rendering/IndexBuffer.hpp"
 #include "Rendering/Material.hpp"
+#include "Rendering/Materials/LitMaterial.hpp"
 #include "Rendering/Materials/SimpleLitMaterial.hpp"
 #include "Rendering/Materials/SkyboxMaterial.hpp"
 #include "Rendering/Materials/UnlitMaterial.hpp"

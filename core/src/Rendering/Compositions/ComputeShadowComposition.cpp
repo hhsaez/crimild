@@ -60,23 +60,23 @@ static Pipeline *createPipeline( Composition &cmp, Light::Type lightType ) noexc
                             mat4 lightSpaceMatrix;
                         };
 
-                            layout ( set = 1, binding = 0 ) uniform GeometryUniforms {
-                                mat4 model;
-                            };
+                        layout ( set = 1, binding = 0 ) uniform GeometryUniforms {
+                            mat4 model;
+                        };
 
-                            layout ( location = 0 ) out vec3 outPosition;
-                            layout ( location = 1 ) out vec3 outLightPos;
+                        layout ( location = 0 ) out vec3 outPosition;
+                        layout ( location = 1 ) out vec3 outLightPos;
 
-                            void main()
-                            {
-                                gl_Position = lightSpaceMatrix * model * vec4( inPosition, 1.0 );
+                        void main()
+                        {
+                            gl_Position = lightSpaceMatrix * model * vec4( inPosition, 1.0 );
 
-                                outPosition = ( model * vec4( inPosition, 1.0 ) ).xyz;
+                            outPosition = ( model * vec4( inPosition, 1.0 ) ).xyz;
 
-                                mat4 invView = inverse( lightSpaceMatrix );
-                                outLightPos = vec3( invView[ 3 ].x, invView[ 3 ].y, invView[ 3 ].z );
-                            }
-                        )" ),
+                            mat4 invView = inverse( lightSpaceMatrix );
+                            outLightPos = vec3( invView[ 3 ].x, invView[ 3 ].y, invView[ 3 ].z );
+                        }
+                    )" ),
                 crimild::alloc< Shader >(
                     Shader::Stage::FRAGMENT,
                     lightType == Light::Type::POINT
@@ -353,9 +353,18 @@ size_t recordDirectionalLightCommands(
 {
     static auto ortho = []( float left, float right, float bottom, float top, float near, float far ) {
         return Matrix4f(
-            2.0f / ( right - left ), 0.0f, 0.0f, 0.0f,
-            0.0f, 2.0f / ( bottom - top ), 0.0f, 0.0f,
-            0.0f, 0.0f, 1.0f / ( near - far ), 0.0f,
+            2.0f / ( right - left ),
+            0.0f,
+            0.0f,
+            0.0f,
+            0.0f,
+            2.0f / ( bottom - top ),
+            0.0f,
+            0.0f,
+            0.0f,
+            0.0f,
+            1.0f / ( near - far ),
+            0.0f,
 
             -( right + left ) / ( right - left ),
             -( bottom + top ) / ( bottom - top ),
