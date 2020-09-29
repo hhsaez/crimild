@@ -49,6 +49,7 @@ namespace crimild {
         struct ImageDescriptor {
             FilePath filePath;
             CachePolicy cachePolicy;
+            Bool hdr = false;
         };
 
         struct CubemapDescriptor {
