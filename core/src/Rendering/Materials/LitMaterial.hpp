@@ -41,9 +41,6 @@ namespace crimild {
     private:
         struct Props {
             alignas( 16 ) RGBAColorf albedo = RGBAColorf::ONE;
-            //alignas( 16 ) Real32 metallic = 0.0f;
-            //alignas( 16 ) Real32 roughness = 0.0f;
-            //alignas( 16 ) Real32 ambientOcclusion = 1.0f;
             alignas( 16 ) RGBAColorf ops = RGBAColorf( 0.0f, 0.0f, 1.0f, 0.0f );
         };
 
@@ -52,25 +49,25 @@ namespace crimild {
         virtual ~LitMaterial( void ) = default;
 
         inline void setAlbedo( const RGBColorf &albedo ) noexcept { getProps().albedo = albedo.xyzw(); };
-        inline const RGBColorf &getAlbedo( void ) const noexcept { return getProps().albedo.xyz(); }
+        inline RGBColorf getAlbedo( void ) const noexcept { return getProps().albedo.xyz(); }
         void setAlbedoMap( SharedPointer< Texture > const &albedoMap ) noexcept;
         const Texture *getAlbedoMap( void ) const noexcept;
         Texture *getAlbedoMap( void ) noexcept;
 
         inline void setMetallic( const Real32 &metallic ) noexcept { getProps().ops[ 0 ] = metallic; };
-        inline const Real32 &getMetallic( void ) const noexcept { return getProps().ops[ 0 ]; }
+        inline Real32 getMetallic( void ) const noexcept { return getProps().ops[ 0 ]; }
         void setMetallicMap( SharedPointer< Texture > const &metallicMap ) noexcept;
         const Texture *getMetallicMap( void ) const noexcept;
         Texture *getMetallicMap( void ) noexcept;
 
         inline void setRoughness( const Real32 &roughness ) noexcept { getProps().ops[ 1 ] = roughness; };
-        inline const Real32 &getRoughness( void ) const noexcept { return getProps().ops[ 1 ]; }
+        inline Real32 getRoughness( void ) const noexcept { return getProps().ops[ 1 ]; }
         void setRoughnessMap( SharedPointer< Texture > const &roughnessMap ) noexcept;
         const Texture *getRoughnessMap( void ) const noexcept;
         Texture *getRoughnessMap( void ) noexcept;
 
         inline void setAmbientOcclusion( const Real32 &ambientOcclusion ) noexcept { getProps().ops[ 2 ] = ambientOcclusion; };
-        inline const Real32 &getAmbientOcclusion( void ) const noexcept { return getProps().ops[ 2 ]; }
+        inline Real32 getAmbientOcclusion( void ) const noexcept { return getProps().ops[ 2 ]; }
         void setAmbientOcclusionMap( SharedPointer< Texture > const &ambientOcclusionMap ) noexcept;
         const Texture *getAmbientOcclusionMap( void ) const noexcept;
         Texture *getAmbientOcclusionMap( void ) noexcept;
