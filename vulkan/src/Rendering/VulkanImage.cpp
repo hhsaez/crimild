@@ -157,7 +157,7 @@ crimild::Bool vulkan::ImageManager::bind( Image *image ) noexcept
             utils::generateMipmaps(
                 renderDevice,
                 bindInfo.imageHandler,
-                VK_FORMAT_R8G8B8A8_UNORM,
+               	utils::getFormat( renderDevice, image->format ),
                 width,
                 height,
                 mipLevels
