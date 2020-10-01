@@ -83,6 +83,12 @@ Attachment *Composition::createAttachment( std::string name ) noexcept
 {
     auto att = crimild::alloc< Attachment >();
     m_objects.add( att );
+    if ( m_attachments.contains( name ) ) {
+    	// avoid name clashing
+        std::stringstream ss;
+		ss << name << "_" << m_attachments.size();
+  		name = ss.str();
+    }
     m_attachments[ name ] = crimild::get_ptr( att );
     return crimild::get_ptr( att );
 }

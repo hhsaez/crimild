@@ -55,31 +55,43 @@ using namespace crimild::compositions;
 
 Composition crimild::compositions::debug( Composition cmp ) noexcept
 {
+	static auto withDimensions = []( const Rectf &dimensions ) {
+		return ViewportDimensions {
+  			.scalingMode = ScalingMode::SWAPCHAIN_RELATIVE,
+     		.dimensions = dimensions,
+        };
+	};
+
+	static auto withPadding = []( const ViewportDimensions &viewport ) {
+		const auto padding = 0.0125f;
+		return ViewportDimensions {
+  			.scalingMode = viewport.scalingMode,
+     		.dimensions = Rectf(
+       			viewport.dimensions.getX() + padding,
+          		viewport.dimensions.getY() + padding,
+                viewport.dimensions.getWidth() - 2.0f * padding,
+                viewport.dimensions.getHeight() - 2.0f * padding
+            ),
+        };
+    };
+
     Array< ViewportDimensions > viewports = {
-        {
-            .scalingMode = ScalingMode::SWAPCHAIN_RELATIVE,
-            .dimensions = Rectf( 0.0f, 0.0f, 1.0f, 1.0f ),
-        },
-        {
-            .scalingMode = ScalingMode::SWAPCHAIN_RELATIVE,
-            .dimensions = Rectf( 0.8f, 0.8f, 0.175f, 0.175f ),
-        },
-        {
-            .scalingMode = ScalingMode::SWAPCHAIN_RELATIVE,
-            .dimensions = Rectf( 0.8f, 0.6f, 0.175f, 0.175f ),
-        },
-        {
-            .scalingMode = ScalingMode::SWAPCHAIN_RELATIVE,
-            .dimensions = Rectf( 0.8f, 0.4f, 0.175f, 0.175f ),
-        },
-        {
-            .scalingMode = ScalingMode::SWAPCHAIN_RELATIVE,
-            .dimensions = Rectf( 0.8f, 0.2f, 0.175f, 0.175f ),
-        },
-        {
-            .scalingMode = ScalingMode::SWAPCHAIN_RELATIVE,
-            .dimensions = Rectf( 0.8f, 0.0f, 0.175f, 0.175f ),
-        },
+    	// main attachment
+    	withDimensions( Rectf( 0.0f, 0.0f, 1.0f, 1.0f ) ),
+
+		// right column
+        withPadding( withDimensions( Rectf( 0.8f, 0.8f, 0.2f, 0.2f ) ) ),
+        withPadding( withDimensions( Rectf( 0.8f, 0.6f, 0.2f, 0.2f ) ) ),
+        withPadding( withDimensions( Rectf( 0.8f, 0.4f, 0.2f, 0.2f ) ) ),
+        withPadding( withDimensions( Rectf( 0.8f, 0.2f, 0.2f, 0.2f ) ) ),
+        withPadding( withDimensions( Rectf( 0.8f, 0.0f, 0.2f, 0.2f ) ) ),
+
+        // left column
+        withPadding( withDimensions( Rectf( 0.0f, 0.8f, 0.2f, 0.2f ) ) ),
+        withPadding( withDimensions( Rectf( 0.0f, 0.6f, 0.2f, 0.2f ) ) ),
+        withPadding( withDimensions( Rectf( 0.0f, 0.4f, 0.2f, 0.2f ) ) ),
+        withPadding( withDimensions( Rectf( 0.0f, 0.2f, 0.2f, 0.2f ) ) ),
+        withPadding( withDimensions( Rectf( 0.0f, 0.0f, 0.2f, 0.2f ) ) ),
     };
 
     /*
@@ -189,52 +201,66 @@ Composition crimild::compositions::debug( Composition cmp ) noexcept
     pipeline->viewport = { .scalingMode = ScalingMode::DYNAMIC };
     pipeline->scissor = { .scalingMode = ScalingMode::DYNAMIC };
 
+    auto mainAttachment = cmp.getOutput();
+
+    auto recordAttachmentCommands = [&, index = 0 ]( auto commandBuffer, auto att ) mutable {
+        if ( att == crimild::get_ptr( renderPass->attachments[ 0 ] ) ) {
+        	// Ignore attachments created in this composition
+            return;
+        }
+
+    	if ( index == viewports.size() ) {
+     		CRIMILD_LOG_WARNING( "Cannot record attachments. Insufficient viewports" );
+           	return;
+        }
+
+        auto imageView = att->imageView;
+        if ( imageView == nullptr ) {
+            return;
+        }
+
+        auto viewport = viewports[ index++ ];
+        commandBuffer->setViewport( viewport );
+        commandBuffer->setScissor( viewport );
+
+        auto descriptors = [&] {
+            auto descriptorSet = cmp.create< DescriptorSet >();
+            descriptorSet->descriptors = {
+                Descriptor {
+                    .descriptorType = DescriptorType::TEXTURE,
+                    .obj = [&] {
+                        auto texture = cmp.create< Texture >();
+                        texture->imageView = imageView;
+                        texture->sampler = [] {
+                            auto sampler = crimild::alloc< Sampler >();
+                            sampler->setMinFilter( Sampler::Filter::NEAREST );
+                            sampler->setMagFilter( Sampler::Filter::NEAREST );
+                            return sampler;
+                        }();
+                        return crimild::retain( texture );
+                    }()
+                },
+            };
+            return descriptorSet;
+        }();
+        commandBuffer->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
+        commandBuffer->bindDescriptorSet( crimild::get_ptr( descriptors ) );
+
+        commandBuffer->draw( 6 );
+    };
+
     renderPass->commands = [&] {
         auto commandBuffer = crimild::alloc< CommandBuffer >();
+        // Render main attachment first
+        recordAttachmentCommands( commandBuffer, cmp.getOutput() );
         cmp.eachAttachment(
-            [ &, index = 0 ]( auto att ) mutable {
-                if ( att == crimild::get_ptr( renderPass->attachments[ 0 ] ) ) {
-                    return;
+        	[ & ]( auto att ) mutable {
+         		if ( att != cmp.getOutput() ) {
+           			// Render additional attachments
+           			recordAttachmentCommands( commandBuffer, att );
                 }
-
-                auto imageView = att->imageView;
-                if ( imageView == nullptr ) {
-                    return;
-                }
-
-                auto viewport = viewports[ index++ % viewports.size() ];
-                commandBuffer->setViewport( viewport );
-                commandBuffer->setScissor( viewport );
-
-                auto descriptors = [&] {
-					auto descriptorSet = cmp.create< DescriptorSet >();
-					descriptorSet->descriptors = {
-						Descriptor {
-							.descriptorType = DescriptorType::TEXTURE,
-							.obj = [&] {
-                                auto texture = cmp.create< Texture >();
-                                texture->imageView = imageView;
-                                texture->sampler = [] {
-                                    auto sampler = crimild::alloc< Sampler >();
-                                    sampler->setMinFilter( Sampler::Filter::NEAREST );
-                                    sampler->setMagFilter( Sampler::Filter::NEAREST );
-                                    return sampler;
-                                }();
-                                return crimild::retain( texture );
-                            }()
-						},
-					};
-					return descriptorSet;
-                }();
-                commandBuffer->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
-                commandBuffer->bindDescriptorSet( crimild::get_ptr( descriptors ) );
-
-                commandBuffer->draw( 6 );
-            }
+        	}
         );
-            //commandBuffer->bindGraphicsPipeline( renderPass->getPipeline() );
-            //commandBuffer->bindDescriptorSet( renderPass->getDescriptors() );
-            //commandBuffer->draw( 6 );
         return commandBuffer;
     }();
 
