@@ -29,6 +29,8 @@
 
 #include "Components/MaterialComponent.hpp"
 #include "Rendering/CommandBuffer.hpp"
+#include "Rendering/Compositions/ComputeIrradianceMapComposition.hpp"
+#include "Rendering/Compositions/ComputeReflectionMapComposition.hpp"
 #include "Rendering/Compositions/ComputeShadowComposition.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/RenderPass.hpp"
@@ -86,6 +88,29 @@ Composition crimild::compositions::renderScene( Node *scene, crimild::Bool useHD
         return texture;
     }();
 
+    cmp = computeReflectionMap( cmp, scene );
+    cmp = computeIrradianceMap( cmp );
+
+    auto irradianceAtlas = [ & ] {
+        auto texture = cmp.create< Texture >();
+        texture->imageView = [ & ] {
+            auto att = cmp.getOutput();
+            if ( att == nullptr || att->imageView == nullptr ) {
+                auto imageView = crimild::alloc< ImageView >();
+                imageView->image = Image::ZERO;
+                return imageView;
+            }
+            return att->imageView;
+        }();
+        texture->sampler = [] {
+            auto sampler = crimild::alloc< Sampler >();
+            sampler->setWrapMode( Sampler::WrapMode::CLAMP_TO_BORDER );
+            sampler->setBorderColor( Sampler::BorderColor::INT_OPAQUE_WHITE );
+            return sampler;
+        }();
+        return texture;
+    }();
+
     auto renderPass = cmp.create< RenderPass >();
     renderPass->attachments = {
         [ & ] {
@@ -103,9 +128,8 @@ Composition crimild::compositions::renderScene( Node *scene, crimild::Bool useHD
         [ & ] {
             auto att = cmp.createAttachment( "gBufferDepth" );
             att->format = Format::DEPTH_STENCIL_DEVICE_OPTIMAL;
-            // att->imageView = crimild::alloc< ImageView
-            // >(); att->imageView->image = crimild::alloc<
-            // Image >();
+            att->imageView = crimild::alloc< ImageView >();
+            att->imageView->image = crimild::alloc< Image >();
             return crimild::retain( att );
         }()
     };
@@ -139,12 +163,23 @@ Composition crimild::compositions::renderScene( Node *scene, crimild::Bool useHD
                     .descriptorType = DescriptorType::TEXTURE,
                     .obj = crimild::retain( shadowAtlas ),
                 },
+                Descriptor {
+                    .descriptorType = DescriptorType::TEXTURE,
+                    .obj = crimild::retain( irradianceAtlas ),
+                },
             };
             return descriptorSet;
         }() );
 
+    auto viewport = ViewportDimensions {
+    	.scalingMode = ScalingMode::SWAPCHAIN_RELATIVE,
+     	.dimensions = Rectf( 0, 0, 1, 1 ),
+    };
+
     renderPass->commands = [ & ] {
         auto commandBuffer = crimild::alloc< CommandBuffer >();
+        commandBuffer->setViewport( viewport );
+        commandBuffer->setScissor( viewport );
         scene->perform( ApplyToGeometries( [ & ]( Geometry *g ) {
             if ( auto ms = g->getComponent< MaterialComponent >() ) {
                 if ( auto material = ms->first() ) {

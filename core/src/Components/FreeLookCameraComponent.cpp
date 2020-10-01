@@ -100,7 +100,7 @@ void FreeLookCameraComponent::start( void )
         _initialized = true;
         _lastMousePos = currentPos;
 
-        if ( Input::getInstance()->isMouseButtonDown( CRIMILD_INPUT_MOUSE_BUTTON_RIGHT ) ) {
+        if ( Input::getInstance()->isMouseButtonDown( CRIMILD_INPUT_MOUSE_BUTTON_LEFT ) ) {
             auto root = getNode();
 
             // apply pitch
@@ -115,7 +115,7 @@ void FreeLookCameraComponent::start( void )
 
 void FreeLookCameraComponent::update( const Clock &c )
 {
-    if ( Input::getInstance()->isMouseButtonDown( CRIMILD_INPUT_MOUSE_BUTTON_RIGHT ) ) {
+    if ( Input::getInstance()->isMouseButtonDown( CRIMILD_INPUT_MOUSE_BUTTON_LEFT ) ) {
         Input::getInstance()->setMouseCursorMode( Input::MouseCursorMode::GRAB );
     }
     else {

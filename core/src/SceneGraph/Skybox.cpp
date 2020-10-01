@@ -28,11 +28,14 @@
 #include "SceneGraph/Skybox.hpp"
 #include "Components/MaterialComponent.hpp"
 #include "Primitives/BoxPrimitive.hpp"
+#include "Rendering/Image.hpp"
+#include "Rendering/ImageView.hpp"
 #include "Rendering/Materials/SkyboxMaterial.hpp"
+#include "Rendering/Pipeline.hpp"
 
 using namespace crimild;
 
-Skybox::Skybox( SharedPointer< Texture > const &cubemap ) noexcept
+Skybox::Skybox( SharedPointer< Texture > const &texture ) noexcept
 {
     setLayer( Node::Layer::SKYBOX );
 
@@ -41,15 +44,133 @@ Skybox::Skybox( SharedPointer< Texture > const &cubemap ) noexcept
             BoxPrimitive::Params {
                 .type = Primitive::Type::TRIANGLES,
                 .layout = VertexP3::getLayout(),
-                .size = Vector3f( 1.0f, 1.0f, 1.0f ),
+                .size = Vector3f( 10.0f, 10.0f, 10.0f ),
+                .invertFaces = true,
             }
         )
     );
 
     attachComponent< MaterialComponent >()->attachMaterial(
-        [&] {
-            auto material = crimild::alloc< SkyboxMaterial >();
-            material->setTexture( cubemap );
+        [&] () -> SharedPointer< Material >{
+        	if ( texture->imageView->image->type == Image::Type::IMAGE_2D_CUBEMAP ) {
+            	auto material = crimild::alloc< SkyboxMaterial >();
+            	material->setTexture( texture );
+            	return material;
+         	}
+
+          	auto material = crimild::alloc< Material >();
+            material->setPipeline(
+                [] {
+                    auto pipeline = crimild::alloc< Pipeline >();
+                    pipeline->primitiveType = Primitive::Type::TRIANGLES;
+                    pipeline->program = [ & ] {
+                        auto program = crimild::alloc< ShaderProgram >(
+                            Array< SharedPointer< Shader > > {
+                                crimild::alloc< Shader >(
+                                    Shader::Stage::VERTEX,
+                                    R"(
+                                        layout ( location = 0 ) in vec3 inPosition;
+
+                                        layout ( set = 0, binding = 0 ) uniform RenderPassUniforms {
+                                            mat4 view;
+                                            mat4 proj;
+                                        };
+
+                                        layout ( set = 2, binding = 0 ) uniform GeometryUniforms {
+                                            mat4 model;
+                                        };
+
+                                        layout ( location = 0 ) out vec3 outPosition;
+
+                                        void main()
+                                        {
+                                            gl_Position = proj * mat4( mat3 ( view ) ) * model * vec4( inPosition, 1.0 );
+                                            gl_Position = gl_Position.xyww;
+                                            outPosition = inPosition;
+                                        }
+                                    )"
+                                ),
+                                crimild::alloc< Shader >(
+                                    Shader::Stage::FRAGMENT,
+                                    R"(
+                                        layout ( location = 0 ) in vec3 inPosition;
+
+                                        layout ( set = 1, binding = 0 ) uniform sampler2D uHDRMap;
+
+                                        layout ( location = 0 ) out vec4 outColor;
+
+                                        const vec2 invAtan = vec2( 0.1591, 0.3183 );
+
+                                        vec2 sampleSphericalMap( vec3 v )
+                                        {
+                                            vec2 uv = vec2( atan( v.z, v.x ), asin( v.y ) );
+                                            uv *= invAtan;
+                                            uv += 0.5;
+                                            uv.y = 1.0 - uv.y; // because of vulkan
+                                            return uv;
+                                        }
+
+                                        void main() {
+                                            vec2 uv = sampleSphericalMap( normalize( inPosition ) );
+                                            vec3 color = texture( uHDRMap, uv ).rgb;
+                                            outColor = vec4( color, 1.0 );
+                                        }
+                                    )"
+                                )
+                            }
+                        );
+                        program->vertexLayouts = { VertexP3::getLayout() };
+                        program->descriptorSetLayouts = {
+                            [] {
+                                auto layout = crimild::alloc< DescriptorSetLayout >();
+                                layout->bindings = {
+                                    {
+                                        .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                                        .stage = Shader::Stage::VERTEX,
+                                    },
+                                };
+                                return layout;
+                            }(),
+                            [] {
+                                auto layout = crimild::alloc< DescriptorSetLayout >();
+                                layout->bindings = {
+                                    {
+                                        .descriptorType = DescriptorType::TEXTURE,
+                                        .stage = Shader::Stage::FRAGMENT,
+                                    },
+                                };
+                                return layout;
+                            }(),
+                            [] {
+                                auto layout = crimild::alloc< DescriptorSetLayout >();
+                                layout->bindings = {
+                                    {
+                                        .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                                        .stage = Shader::Stage::VERTEX,
+                                    },
+                                };
+                                return layout;
+                            }(),
+                        };
+                        return program;
+                    }();
+                    pipeline->viewport = { .scalingMode = ScalingMode::DYNAMIC };
+                    pipeline->scissor = { .scalingMode = ScalingMode::DYNAMIC };
+                    return pipeline;
+                }()
+            );
+            material->setDescriptors(
+                [&] {
+                    auto descriptors = crimild::alloc< DescriptorSet >();
+                    descriptors->descriptors = {
+                        {
+                            .descriptorType = DescriptorType::TEXTURE,
+                            .obj = texture,
+                        },
+                    };
+                    return descriptors;
+                }()
+            );
             return material;
         }()
     );
