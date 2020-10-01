@@ -107,6 +107,7 @@ LitShaderProgram::LitShaderProgram( void ) noexcept
                         } lighting;
 
                         layout( set = 0, binding = 2 ) uniform sampler2D uShadowAtlas;
+                        layout( set = 0, binding = 3 ) uniform sampler2D uIrradianceAtlas;
 
                         layout( set = 1, binding = 0 ) uniform Material {
                             //vec3 albedo;
@@ -318,10 +319,16 @@ LitShaderProgram::LitShaderProgram( void ) noexcept
 							return F0 + ( 1.0 - F0 ) * pow( 1.0 - cosTheta, 5.0 );
                         }
 
+                        vec3 computeF0( vec3 albedo, float metallic )
+                        {
+                        	vec3 F0 = vec3( 0.04 );
+                            F0 = mix( F0, albedo, metallic );
+                            return F0;
+                        }
+
                         vec3 brdf( vec3 N, vec3 H, vec3 V, vec3 L, vec3 radiance, vec3 albedo, float metallic, float roughness )
                         {
-                            vec3 F0 = vec3( 0.04 );
-                            F0 = mix( F0, albedo, metallic );
+                            vec3 F0 = computeF0( albedo, metallic );
 
                             float NDF = distributionGGX( N, H, roughness );
                             float G = geometrySmith( N, V, L, roughness );
@@ -338,6 +345,15 @@ LitShaderProgram::LitShaderProgram( void ) noexcept
                             // add outgoing radiance
                             float NdotL = max( dot( N, L ), 0.0 );
                             return ( kD * albedo / PI + specular ) * radiance * NdotL;
+                        }
+
+                        vec3 irradiance( vec3 N, vec3 V, vec3 albedo, float metallic, float ao )
+                        {
+                            vec3 F0 = computeF0( albedo, metallic );
+                            vec3 kS = fresnelSchlick( max( dot( N, V ), 0.0 ), F0 );
+                            vec3 I = textureCubeUV( uIrradianceAtlas, N, vec4( 0, 0, 1, 1 ) ).rgb;
+                            vec3 kD = I * albedo;
+                            return kS * kD * ao;
                         }
 
                         void main() {
@@ -484,7 +500,7 @@ LitShaderProgram::LitShaderProgram( void ) noexcept
                             }
                             */
 
-                            vec3 ambient = vec3( 0.03 ) * albedo.rgb * ao;
+                            vec3 ambient = irradiance( N, V, albedo.rgb, metallic, ao );
 
                             //color.rgb *= cascadeColor;
 
@@ -508,6 +524,12 @@ LitShaderProgram::LitShaderProgram( void ) noexcept
                     .stage = Shader::Stage::ALL,
                 },
                 {
+                	// Shadow atlas
+                    .descriptorType = DescriptorType::TEXTURE,
+                    .stage = Shader::Stage::FRAGMENT,
+                },
+                {
+                	// Irradiance atlas
                     .descriptorType = DescriptorType::TEXTURE,
                     .stage = Shader::Stage::FRAGMENT,
                 },

@@ -30,6 +30,7 @@
 
 #include "Mathematics/Rect.hpp"
 #include "Rendering/ScalingMode.hpp"
+#include "Foundation/Containers/Array.hpp"
 
 namespace crimild {
 
@@ -38,6 +39,63 @@ namespace crimild {
         ScalingMode scalingMode = ScalingMode::SWAPCHAIN_RELATIVE;
         Rectf dimensions = Rectf( 0, 0, 1, 1 );
         Vector2f depthRange = Vector2f( 0.0f, 1.0f );
+
+        static ViewportDimensions viewportFrom( const ViewportDimensions &parent, const ViewportDimensions &child ) noexcept
+        {
+        	const auto &pd = parent.dimensions;
+         	const auto &cd = child.dimensions;
+          	return ViewportDimensions {
+           		.scalingMode = ScalingMode::RELATIVE,
+	         	.dimensions = Rectf(
+                    pd.getX() + cd.getX() * pd.getWidth(),
+                    pd.getY() + cd.getY() * pd.getHeight(),
+                    pd.getWidth() * cd.getWidth(),
+                    pd.getHeight() * cd.getHeight()
+                ),
+            };
+        }
+
+        static Array< ViewportDimensions > cubeViewportsFrom( const ViewportDimensions &parent ) noexcept
+        {
+            return Array< ViewportDimensions > {
+                viewportFrom(
+                    parent,
+                    {
+                        .dimensions = Rectf( 0.0f, 0.5f, 0.25f, 0.25f ),
+                    }
+            	),
+                viewportFrom(
+                    parent,
+                    {
+                        .dimensions = Rectf( 0.5f, 0.5f, 0.25f, 0.25f ),
+                    }
+                ),
+                viewportFrom(
+                    parent,
+                    {
+                        .dimensions = Rectf( 0.5f, 0.25f, 0.25f, 0.25f ),
+                    }
+                ),
+                viewportFrom(
+                    parent,
+                    {
+                        .dimensions = Rectf( 0.5f, 0.75f, 0.25f, 0.25f ),
+                    }
+            	),
+                viewportFrom(
+                    parent,
+                    {
+                        .dimensions = Rectf( 0.25f, 0.5f, 0.25f, 0.25f ),
+                    }
+                ),
+                viewportFrom(
+                    parent,
+                    {
+                        .dimensions = Rectf( 0.75f, 0.5f, 0.25f, 0.25f ),
+                    }
+                ),
+            };
+        }
     };
 
 }
