@@ -29,7 +29,9 @@
 
 #include "Components/MaterialComponent.hpp"
 #include "Rendering/CommandBuffer.hpp"
+#include "Rendering/Compositions/ComputeBRDFLUTComposition.hpp"
 #include "Rendering/Compositions/ComputeIrradianceMapComposition.hpp"
+#include "Rendering/Compositions/ComputePrefilterMapComposition.hpp"
 #include "Rendering/Compositions/ComputeReflectionMapComposition.hpp"
 #include "Rendering/Compositions/ComputeShadowComposition.hpp"
 #include "Rendering/DescriptorSet.hpp"
@@ -57,7 +59,6 @@ Composition crimild::compositions::renderScene( Node *scene, crimild::Bool useHD
     cmp.enableHDR( useHDR );
 
     cmp = computeShadow( cmp, scene );
-
     auto shadowAtlas = [ & ] {
         auto texture = cmp.create< Texture >();
         texture->imageView = [ & ] {
@@ -89,8 +90,8 @@ Composition crimild::compositions::renderScene( Node *scene, crimild::Bool useHD
     }();
 
     cmp = computeReflectionMap( cmp, scene );
-    cmp = computeIrradianceMap( cmp );
 
+    cmp = computeIrradianceMap( cmp );
     auto irradianceAtlas = [ & ] {
         auto texture = cmp.create< Texture >();
         texture->imageView = [ & ] {
@@ -104,6 +105,54 @@ Composition crimild::compositions::renderScene( Node *scene, crimild::Bool useHD
         }();
         texture->sampler = [] {
             auto sampler = crimild::alloc< Sampler >();
+            sampler->setMinFilter( Sampler::Filter::LINEAR );
+            sampler->setMagFilter( Sampler::Filter::LINEAR );
+            sampler->setWrapMode( Sampler::WrapMode::CLAMP_TO_BORDER );
+            sampler->setBorderColor( Sampler::BorderColor::INT_OPAQUE_WHITE );
+            return sampler;
+        }();
+        return texture;
+    }();
+
+    cmp = computePrefilterMap( cmp );
+    auto prefilterAtlas = [ & ] {
+        auto texture = cmp.create< Texture >();
+        texture->imageView = [ & ] {
+            auto att = cmp.getOutput();
+            if ( att == nullptr || att->imageView == nullptr ) {
+                auto imageView = crimild::alloc< ImageView >();
+                imageView->image = Image::ZERO;
+                return imageView;
+            }
+            return att->imageView;
+        }();
+        texture->sampler = [] {
+            auto sampler = crimild::alloc< Sampler >();
+            sampler->setMinFilter( Sampler::Filter::LINEAR );
+            sampler->setMagFilter( Sampler::Filter::LINEAR );
+            sampler->setWrapMode( Sampler::WrapMode::CLAMP_TO_BORDER );
+            sampler->setBorderColor( Sampler::BorderColor::INT_OPAQUE_WHITE );
+            return sampler;
+        }();
+        return texture;
+    }();
+
+    cmp = computeBRDFLUT( cmp );
+    auto BRDFLUT = [ & ] {
+        auto texture = cmp.create< Texture >();
+        texture->imageView = [ & ] {
+            auto att = cmp.getOutput();
+            if ( att == nullptr || att->imageView == nullptr ) {
+                auto imageView = crimild::alloc< ImageView >();
+                imageView->image = Image::ZERO;
+                return imageView;
+            }
+            return att->imageView;
+        }();
+        texture->sampler = [] {
+            auto sampler = crimild::alloc< Sampler >();
+            sampler->setMinFilter( Sampler::Filter::LINEAR );
+            sampler->setMagFilter( Sampler::Filter::LINEAR );
             sampler->setWrapMode( Sampler::WrapMode::CLAMP_TO_BORDER );
             sampler->setBorderColor( Sampler::BorderColor::INT_OPAQUE_WHITE );
             return sampler;
@@ -167,13 +216,21 @@ Composition crimild::compositions::renderScene( Node *scene, crimild::Bool useHD
                     .descriptorType = DescriptorType::TEXTURE,
                     .obj = crimild::retain( irradianceAtlas ),
                 },
+                Descriptor {
+                    .descriptorType = DescriptorType::TEXTURE,
+                    .obj = crimild::retain( prefilterAtlas ),
+                },
+                Descriptor {
+                    .descriptorType = DescriptorType::TEXTURE,
+                    .obj = crimild::retain( BRDFLUT ),
+                },
             };
             return descriptorSet;
         }() );
 
     auto viewport = ViewportDimensions {
-    	.scalingMode = ScalingMode::SWAPCHAIN_RELATIVE,
-     	.dimensions = Rectf( 0, 0, 1, 1 ),
+        .scalingMode = ScalingMode::SWAPCHAIN_RELATIVE,
+        .dimensions = Rectf( 0, 0, 1, 1 ),
     };
 
     renderPass->commands = [ & ] {

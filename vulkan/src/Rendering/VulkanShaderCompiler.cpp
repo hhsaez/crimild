@@ -27,19 +27,18 @@
 
 #include "Rendering/VulkanShaderCompiler.hpp"
 
-#include "Rendering/Shader.hpp"
 #include "Foundation/Log.hpp"
+#include "Rendering/Shader.hpp"
 
 // TODO (hernan): In order for the Vulkan shader compiler to work correctly, make sure there
 // is no `glslang` directory in VULKAN_SDK/macOS/include
 // That way, the compiler uses the header files that are in `third-party` instead.
 // I definitely need to fix this
 
-#include <glslang/Public/ShaderLang.h>
 #include <SPIRV/GlslangToSpv.h>
-
-#include <iostream>
 #include <fstream>
+#include <glslang/Public/ShaderLang.h>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -194,8 +193,7 @@ bool vulkan::ShaderCompiler::compile( Shader::Stage shaderStage, const std::stri
         R"(
             #version 450
             #extension GL_ARB_separate_shader_objects : enable
-        )"
-    );
+        )" );
 
     auto src = prefix + source;
     auto data = src.c_str();
@@ -239,28 +237,27 @@ bool vulkan::ShaderCompiler::compile( Shader::Stage shaderStage, const std::stri
     if ( tShader.preprocess( &resources, defaultVersion, ENoProfile, false, false, messages, &preprocessedGLSL, includer ) ) {
         auto preprocessedGLSLStr = preprocessedGLSL.c_str();
         tShader.setStrings( &preprocessedGLSLStr, 1 );
-    }
-    else {
+    } else {
         CRIMILD_LOG_ERROR(
             "GLSL preprocessing failed for shader source:\n",
             shaderLines( src ),
             "\n",
             tShader.getInfoLog(),
             "\n",
-            tShader.getInfoDebugLog()
-        );
+            tShader.getInfoDebugLog() );
+        exit( -1 );
         return false;
     }
 
-    if ( !tShader.parse( ( const TBuiltInResource* ) &resources, defaultVersion, ENoProfile, false, false, messages, includer ) ) {
+    if ( !tShader.parse( ( const TBuiltInResource * ) &resources, defaultVersion, ENoProfile, false, false, messages, includer ) ) {
         CRIMILD_LOG_ERROR(
             "GLSL parsing failed for shader source:\n",
             shaderLines( src ),
             "\n",
             tShader.getInfoLog(),
             "\n",
-            tShader.getInfoDebugLog()
-        );
+            tShader.getInfoDebugLog() );
+        exit( -1 );
         return false;
     }
 
@@ -273,8 +270,8 @@ bool vulkan::ShaderCompiler::compile( Shader::Stage shaderStage, const std::stri
             "\n",
             tShader.getInfoLog(),
             "\n",
-            tShader.getInfoDebugLog()
-        );
+            tShader.getInfoDebugLog() );
+        exit( -1 );
         return false;
     }
 

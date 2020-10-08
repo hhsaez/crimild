@@ -26,6 +26,7 @@
  */
 
 #include "Rendering/Compositions/DebugComposition.hpp"
+
 #include "Rendering/CommandBuffer.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Pipeline.hpp"
@@ -41,7 +42,6 @@ namespace crimild {
         namespace utils {
 
             class DebugInput : public SharedObject {
-
             };
 
         }
@@ -55,31 +55,30 @@ using namespace crimild::compositions;
 
 Composition crimild::compositions::debug( Composition cmp ) noexcept
 {
-	static auto withDimensions = []( const Rectf &dimensions ) {
-		return ViewportDimensions {
-  			.scalingMode = ScalingMode::SWAPCHAIN_RELATIVE,
-     		.dimensions = dimensions,
+    static auto withDimensions = []( const Rectf &dimensions ) {
+        return ViewportDimensions {
+            .scalingMode = ScalingMode::SWAPCHAIN_RELATIVE,
+            .dimensions = dimensions,
         };
-	};
+    };
 
-	static auto withPadding = []( const ViewportDimensions &viewport ) {
-		const auto padding = 0.0125f;
-		return ViewportDimensions {
-  			.scalingMode = viewport.scalingMode,
-     		.dimensions = Rectf(
-       			viewport.dimensions.getX() + padding,
-          		viewport.dimensions.getY() + padding,
+    static auto withPadding = []( const ViewportDimensions &viewport ) {
+        const auto padding = 0.0125f;
+        return ViewportDimensions {
+            .scalingMode = viewport.scalingMode,
+            .dimensions = Rectf(
+                viewport.dimensions.getX() + padding,
+                viewport.dimensions.getY() + padding,
                 viewport.dimensions.getWidth() - 2.0f * padding,
-                viewport.dimensions.getHeight() - 2.0f * padding
-            ),
+                viewport.dimensions.getHeight() - 2.0f * padding ),
         };
     };
 
     Array< ViewportDimensions > viewports = {
-    	// main attachment
-    	withDimensions( Rectf( 0.0f, 0.0f, 1.0f, 1.0f ) ),
+        // main attachment
+        withDimensions( Rectf( 0.0f, 0.0f, 1.0f, 1.0f ) ),
 
-		// right column
+        // right column
         withPadding( withDimensions( Rectf( 0.8f, 0.8f, 0.2f, 0.2f ) ) ),
         withPadding( withDimensions( Rectf( 0.8f, 0.6f, 0.2f, 0.2f ) ) ),
         withPadding( withDimensions( Rectf( 0.8f, 0.4f, 0.2f, 0.2f ) ) ),
@@ -119,7 +118,7 @@ Composition crimild::compositions::debug( Composition cmp ) noexcept
 
     auto renderPass = cmp.create< RenderPass >();
     renderPass->attachments = {
-        [&] {
+        [ & ] {
             auto att = cmp.createAttachment( "debug" );
             att->usage = Attachment::Usage::COLOR_ATTACHMENT;
             att->format = Format::R8G8B8A8_UNORM;
@@ -130,60 +129,51 @@ Composition crimild::compositions::debug( Composition cmp ) noexcept
     };
 
     auto pipeline = cmp.create< Pipeline >();
-    pipeline->program = [&] {
+    pipeline->program = [ & ] {
         auto program = crimild::alloc< ShaderProgram >();
         program->setShaders(
             {
                 crimild::alloc< Shader >(
                     Shader::Stage::VERTEX,
                     CRIMILD_TO_STRING(
-                        vec2 positions[6] = vec2[](
+                        vec2 positions[ 6 ] = vec2[](
                             vec2( -1.0, 1.0 ),
                             vec2( -1.0, -1.0 ),
                             vec2( 1.0, -1.0 ),
 
                             vec2( -1.0, 1.0 ),
                             vec2( 1.0, -1.0 ),
-                            vec2( 1.0, 1.0 )
-                        );
+                            vec2( 1.0, 1.0 ) );
 
-                        vec2 texCoords[6] = vec2[](
+                        vec2 texCoords[ 6 ] = vec2[](
                             vec2( 0.0, 0.0 ),
                             vec2( 0.0, 1.0 ),
                             vec2( 1.0, 1.0 ),
 
                             vec2( 0.0, 0.0 ),
                             vec2( 1.0, 1.0 ),
-                            vec2( 1.0, 0.0 )
-                        );
+                            vec2( 1.0, 0.0 ) );
 
-                        layout ( location = 0 ) out vec2 outTexCoord;
+                        layout( location = 0 ) out vec2 outTexCoord;
 
-                        void main()
-                        {
+                        void main() {
                             gl_Position = vec4( positions[ gl_VertexIndex ], 0.0, 1.0 );
                             outTexCoord = texCoords[ gl_VertexIndex ];
-                        }
-                    )
-                ),
-                crimild::alloc< Shader >(
-                    Shader::Stage::FRAGMENT,
-                    CRIMILD_TO_STRING(
-                        layout ( location = 0 ) in vec2 inTexCoord;
+                        } ) ),
+                    crimild::alloc< Shader >(
+                        Shader::Stage::FRAGMENT,
+                        CRIMILD_TO_STRING(
+                            layout( location = 0 ) in vec2 inTexCoord;
 
-                        layout ( set = 0, binding = 0 ) uniform sampler2D uColorMap;
+                            layout( set = 0, binding = 0 ) uniform sampler2D uColorMap;
 
-                        layout ( location = 0 ) out vec4 outColor;
+                            layout( location = 0 ) out vec4 outColor;
 
-                        void main()
-                        {
-                            vec4 color = texture( uColorMap, inTexCoord );
-                            outColor = vec4( color.rgb, 1.0 );
-                        }
-                    )
-                ),
-            }
-        );
+                            void main() {
+                                vec4 color = texture( uColorMap, inTexCoord );
+                                outColor = vec4( color.rgb, 1.0 );
+                            } ) ),
+            } );
         program->descriptorSetLayouts = {
             [] {
                 auto layout = crimild::alloc< DescriptorSetLayout >();
@@ -201,17 +191,15 @@ Composition crimild::compositions::debug( Composition cmp ) noexcept
     pipeline->viewport = { .scalingMode = ScalingMode::DYNAMIC };
     pipeline->scissor = { .scalingMode = ScalingMode::DYNAMIC };
 
-    auto mainAttachment = cmp.getOutput();
-
-    auto recordAttachmentCommands = [&, index = 0 ]( auto commandBuffer, auto att ) mutable {
+    auto recordAttachmentCommands = [ &, index = 0 ]( auto commandBuffer, auto att ) mutable {
         if ( att == crimild::get_ptr( renderPass->attachments[ 0 ] ) ) {
-        	// Ignore attachments created in this composition
+            // Ignore attachments created in this composition
             return;
         }
 
-    	if ( index == viewports.size() ) {
-     		CRIMILD_LOG_WARNING( "Cannot record attachments. Insufficient viewports" );
-           	return;
+        if ( index == viewports.size() ) {
+            CRIMILD_LOG_WARNING( "Cannot record attachments. Insufficient viewports" );
+            return;
         }
 
         auto imageView = att->imageView;
@@ -223,12 +211,12 @@ Composition crimild::compositions::debug( Composition cmp ) noexcept
         commandBuffer->setViewport( viewport );
         commandBuffer->setScissor( viewport );
 
-        auto descriptors = [&] {
+        auto descriptors = [ & ] {
             auto descriptorSet = cmp.create< DescriptorSet >();
             descriptorSet->descriptors = {
                 Descriptor {
                     .descriptorType = DescriptorType::TEXTURE,
-                    .obj = [&] {
+                    .obj = [ & ] {
                         auto texture = cmp.create< Texture >();
                         texture->imageView = imageView;
                         texture->sampler = [] {
@@ -238,8 +226,7 @@ Composition crimild::compositions::debug( Composition cmp ) noexcept
                             return sampler;
                         }();
                         return crimild::retain( texture );
-                    }()
-                },
+                    }() },
             };
             return descriptorSet;
         }();
@@ -249,18 +236,19 @@ Composition crimild::compositions::debug( Composition cmp ) noexcept
         commandBuffer->draw( 6 );
     };
 
-    renderPass->commands = [&] {
+    auto mainAttachment = cmp.getOutput();
+
+    renderPass->commands = [ & ] {
         auto commandBuffer = crimild::alloc< CommandBuffer >();
         // Render main attachment first
-        recordAttachmentCommands( commandBuffer, cmp.getOutput() );
+        recordAttachmentCommands( commandBuffer, mainAttachment );
         cmp.eachAttachment(
-        	[ & ]( auto att ) mutable {
-         		if ( att != cmp.getOutput() ) {
-           			// Render additional attachments
-           			recordAttachmentCommands( commandBuffer, att );
+            [ & ]( auto att ) mutable {
+                if ( att != mainAttachment ) {
+                    // Render additional attachments
+                    recordAttachmentCommands( commandBuffer, att );
                 }
-        	}
-        );
+            } );
         return commandBuffer;
     }();
 

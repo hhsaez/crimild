@@ -59,6 +59,15 @@ namespace crimild {
 
             Attachment *createAttachment( std::string name ) noexcept;
 
+            inline Attachment *getAttachment( std::string name ) noexcept
+            {
+                if ( !m_attachments.contains( name ) ) {
+                    return nullptr;
+                }
+
+                return m_attachments[ name ];
+            }
+
             template< typename Fn >
             void eachAttachment( Fn fn ) noexcept
             {
