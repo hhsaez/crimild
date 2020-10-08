@@ -108,6 +108,8 @@ LitShaderProgram::LitShaderProgram( void ) noexcept
 
                         layout( set = 0, binding = 2 ) uniform sampler2D uShadowAtlas;
                         layout( set = 0, binding = 3 ) uniform sampler2D uIrradianceAtlas;
+                        layout( set = 0, binding = 4 ) uniform sampler2D uPrefilterAtlas;
+                        layout( set = 0, binding = 5 ) uniform sampler2D uBRDFLUT;
 
                         layout( set = 1, binding = 0 ) uniform Material {
                             //vec3 albedo;
@@ -247,6 +249,27 @@ LitShaderProgram::LitShaderProgram( void ) noexcept
                             return color;
                         }
 
+                        vec4 textureCubeLOD( sampler2D atlas, vec3 D, int lod )
+                        {
+                            vec4 viewport;
+                            if ( lod == 0.0 ) {
+                                viewport = vec4( 0, 0, 0.6666666667, 1.0 );
+                            }
+                            else if ( lod == 1 ) {
+                                viewport = vec4( 0.6666666667, 0, 0.3333333333, 0.3333333333 );
+                            }
+                            else if ( lod == 2 ) {
+                                viewport = vec4( 0.6666666667, 0.3333333333, 0.1666666667, 0.1666666667 );
+                            }
+                            else if ( lod == 3 ) {
+                                viewport = vec4( 0.6666666667, 0.5, 0.08333333333, 0.08333333333 );
+                            }
+                            else {
+                                viewport = vec4( 0.6666666667, 0.5833333333, 0.04166666667, 0.04166666667 );
+                            }
+                            return textureCubeUV( atlas, D, viewport );
+                        }
+
                         float calculatePointShadow( sampler2D shadowAtlas, float dist, vec3 D, vec4 viewport ) {
                             float depth = dist / 200.0; //length( D ) / 200.0;
                             float shadow = textureCubeUV( shadowAtlas, D, viewport ).r;
@@ -319,6 +342,11 @@ LitShaderProgram::LitShaderProgram( void ) noexcept
 							return F0 + ( 1.0 - F0 ) * pow( 1.0 - cosTheta, 5.0 );
                         }
 
+                        vec3 fresnelSchlickRoughness( float cosTheta, vec3 F0, float roughness )
+                        {
+                            return F0 + ( max( vec3( 1.0 - roughness ), F0 ) - F0 ) * pow( 1.0 - cosTheta, 5.0 );
+                        }
+
                         vec3 computeF0( vec3 albedo, float metallic )
                         {
                         	vec3 F0 = vec3( 0.04 );
@@ -347,13 +375,26 @@ LitShaderProgram::LitShaderProgram( void ) noexcept
                             return ( kD * albedo / PI + specular ) * radiance * NdotL;
                         }
 
-                        vec3 irradiance( vec3 N, vec3 V, vec3 albedo, float metallic, float ao )
+                        vec3 irradiance( vec3 N, vec3 V, vec3 albedo, float metallic, float roughness, float ao )
                         {
+                            vec3 R = reflect( -V, N );
                             vec3 F0 = computeF0( albedo, metallic );
-                            vec3 kS = fresnelSchlick( max( dot( N, V ), 0.0 ), F0 );
+                            vec3 F = fresnelSchlickRoughness( max( dot( N, V ), 0.0 ), F0, roughness );
+
+                            vec3 kS = F;
+                            vec3 kD = 1.0 - kS;
+                            kD *= 1.0 - metallic;
+
                             vec3 I = textureCubeUV( uIrradianceAtlas, N, vec4( 0, 0, 1, 1 ) ).rgb;
-                            vec3 kD = I * albedo;
-                            return kS * kD * ao;
+                            vec3 diffuse = I * albedo;
+
+                            const float MAX_REFLECTION_LOD = 4.0;
+                            vec3 prefilteredColor = textureCubeLOD( uPrefilterAtlas, R, int( roughness * MAX_REFLECTION_LOD ) ).rgb;
+                            // TODO: should we invert y coordinate here?
+                            vec2 envBRDF = texture( uBRDFLUT, vec2( 0, 1 ) + vec2( 1, -1 ) * vec2( max( dot( N, V ), 0.0 ), roughness ) ).rg;
+                            vec3 specular = prefilteredColor * ( F * envBRDF.x + envBRDF.y );
+
+                            return ( kD * diffuse + specular ) * ao;
                         }
 
                         void main() {
@@ -500,7 +541,7 @@ LitShaderProgram::LitShaderProgram( void ) noexcept
                             }
                             */
 
-                            vec3 ambient = irradiance( N, V, albedo.rgb, metallic, ao );
+                            vec3 ambient = irradiance( N, V, albedo.rgb, metallic, roughness, ao );
 
                             //color.rgb *= cascadeColor;
 
@@ -524,12 +565,22 @@ LitShaderProgram::LitShaderProgram( void ) noexcept
                     .stage = Shader::Stage::ALL,
                 },
                 {
-                	// Shadow atlas
+                    // Shadow atlas
                     .descriptorType = DescriptorType::TEXTURE,
                     .stage = Shader::Stage::FRAGMENT,
                 },
                 {
-                	// Irradiance atlas
+                    // Irradiance atlas
+                    .descriptorType = DescriptorType::TEXTURE,
+                    .stage = Shader::Stage::FRAGMENT,
+                },
+                {
+                    // Prefilter atlas
+                    .descriptorType = DescriptorType::TEXTURE,
+                    .stage = Shader::Stage::FRAGMENT,
+                },
+                {
+                    // BRDF LUT
                     .descriptorType = DescriptorType::TEXTURE,
                     .stage = Shader::Stage::FRAGMENT,
                 },

@@ -40,6 +40,11 @@ Composition::Composition( const Composition &cmp1, const Composition &cmp2 ) noe
             m_objects.add( obj );
         } );
 
+    cmp2.m_attachments.each(
+        [ this ]( auto key, auto att ) {
+            m_attachments[ key ] = att;
+        } );
+
     enableHDR( cmp1.isHDREnabled() || cmp2.isHDREnabled() );
 }
 
@@ -84,10 +89,10 @@ Attachment *Composition::createAttachment( std::string name ) noexcept
     auto att = crimild::alloc< Attachment >();
     m_objects.add( att );
     if ( m_attachments.contains( name ) ) {
-    	// avoid name clashing
+        // avoid name clashing
         std::stringstream ss;
-		ss << name << "_" << m_attachments.size();
-  		name = ss.str();
+        ss << name << "_" << m_attachments.size();
+        name = ss.str();
     }
     m_attachments[ name ] = crimild::get_ptr( att );
     return crimild::get_ptr( att );
