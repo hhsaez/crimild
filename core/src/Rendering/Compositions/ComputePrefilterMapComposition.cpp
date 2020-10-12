@@ -165,16 +165,29 @@ Composition crimild::compositions::computePrefilterMap( Composition cmp ) noexce
                                 }
                             }
 
-                            vec4 textureCubeUV( sampler2D envMap, vec3 direction, vec4 viewport ) {
-                                float face = getFace( direction );
-                                vec2 uv = getUV( direction, face );
-                                uv.y = 1.0 - uv.y;
-                                uv = getFaceOffsets( face ) + 0.25 * uv;
-                                uv.x = viewport.x + uv.x * viewport.z;
-                                uv.y = viewport.y + uv.y * viewport.w;
-                                vec4 color = texture( envMap, uv );
-                                return color;
-                            }
+vec4 textureCubeUV( sampler2D envMap, vec3 direction, vec4 viewport, int mipLevel )
+{
+    const float faceSize = 0.25;
+    const vec2 texelSize = 1.0 / textureSize( envMap, mipLevel );
+
+    float face = getFace( direction );
+    vec2 faceOffsets = getFaceOffsets( face );
+
+    vec2 uv = getUV( direction, face );
+    uv.y = 1.0 - uv.y;
+    uv = faceOffsets + faceSize * uv;
+    uv = viewport.xy + uv * viewport.zw;
+
+	// make sure UV values are within the face to avoid most artifacts in the borders
+	// of the cube map. Some visual artifacts migth still appear, though, but they
+	// should be rare.
+    vec2 fBL = viewport.xy + ( faceOffsets ) * viewport.zw;
+    vec2 fTR = viewport.xy + ( faceOffsets + vec2( faceSize ) ) * viewport.zw;
+	uv = clamp( uv, fBL + texelSize, fTR - 2.0 * texelSize );
+
+    vec4 color = textureLod( envMap, uv, mipLevel );
+    return color;
+}
 
                             // Compute Van Der Corpus sequence
                             float radicalInverseVdC( uint bits )
@@ -214,6 +227,20 @@ Composition crimild::compositions::computePrefilterMap( Composition cmp ) noexce
                                 return normalize( sampleVec );
                             }
 
+                            float distributionGGX( vec3 N, vec3 H, float roughness )
+                            {
+                                float a = roughness * roughness;
+                                float a2 = a * a;
+                                float NdotH = max( dot( N, H ), 0.0 );
+                                float NdotH2 = NdotH * NdotH;
+
+                                float num = a2;
+                                float denom = ( NdotH2 * ( a2 - 1.0 ) + 1.0 );
+                                denom = PI * denom * denom;
+
+                                return num / denom;
+                            }
+
                             void main() {
                              	vec4 viewport = vec4( 0, 0, 1, 1 );
 
@@ -233,7 +260,19 @@ Composition crimild::compositions::computePrefilterMap( Composition cmp ) noexce
 
                                     float NdotL = max( dot( N, L ), 0.0 );
                                     if ( NdotL > 0.0 ) {
-                                        prefilteredColor += textureCubeUV( uHDRMap, L, viewport ).rgb * NdotL;
+            							// Sample from environment's mip level based on roughness/pdf
+                   						float D = distributionGGX( N, H, roughness );
+                        				float NdotH = max( dot( N, H ), 0.0 );
+                         				float HdotV = max( dot( H, V ), 0.0 );
+                         				float pdf = D * NdotH / ( 4.0 * HdotV ) + 0.0001;
+
+                         				float resolution = textureSize( uHDRMap, 0 ).r / 4.0; // Face resolution
+                         				float saTexel = 4.0 * PI / ( 6.0 * resolution * resolution );
+                         				float saSample = 1.0 / ( float( sampleCount ) * pdf + 0.0001 );
+
+                         				float mipLevel = roughness == 0.0 ? 0.0 : 0.5 * log2( saSample / saTexel );
+
+                                        prefilteredColor += textureCubeUV( uHDRMap, L, viewport, int( mipLevel ) ).rgb * NdotL;
                                         totalWeight += NdotL;
                                     }
                                 }
