@@ -90,6 +90,27 @@ Composition crimild::compositions::renderScene( Node *scene, crimild::Bool useHD
     }();
 
     cmp = computeReflectionMap( cmp, scene );
+    auto reflectionAtlas = [ & ] {
+        auto texture = cmp.create< Texture >();
+        texture->imageView = [ & ] {
+            auto att = cmp.getOutput();
+            if ( att == nullptr || att->imageView == nullptr ) {
+                auto imageView = crimild::alloc< ImageView >();
+                imageView->image = Image::ZERO;
+                return imageView;
+            }
+            return att->imageView;
+        }();
+        texture->sampler = [] {
+            auto sampler = crimild::alloc< Sampler >();
+            sampler->setMinFilter( Sampler::Filter::LINEAR );
+            sampler->setMagFilter( Sampler::Filter::LINEAR );
+            sampler->setWrapMode( Sampler::WrapMode::CLAMP_TO_BORDER );
+            sampler->setBorderColor( Sampler::BorderColor::INT_OPAQUE_WHITE );
+            return sampler;
+        }();
+        return texture;
+    }();
 
     cmp = computeIrradianceMap( cmp );
     auto irradianceAtlas = [ & ] {
@@ -211,6 +232,10 @@ Composition crimild::compositions::renderScene( Node *scene, crimild::Bool useHD
                 Descriptor {
                     .descriptorType = DescriptorType::TEXTURE,
                     .obj = crimild::retain( shadowAtlas ),
+                },
+                Descriptor {
+                    .descriptorType = DescriptorType::TEXTURE,
+                    .obj = crimild::retain( reflectionAtlas ),
                 },
                 Descriptor {
                     .descriptorType = DescriptorType::TEXTURE,

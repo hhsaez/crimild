@@ -194,9 +194,7 @@ Composition crimild::compositions::computeBRDFLUT( Composition cmp ) noexcept
                                 }
 
                                 void main() {
-                                    // y-coordinate should be inverted, but it ends up
-                                    // producing the wrong result
-                                    vec2 integratedBRDF = integrateBRDF( inTexCoord.x, inTexCoord.y );
+                                    vec2 integratedBRDF = integrateBRDF( inTexCoord.x, 1.0 - inTexCoord.y );
                                     outColor = vec4( integratedBRDF, 0, 1 );
                                 }
                             )" ),
