@@ -164,16 +164,30 @@ Composition crimild::compositions::computeIrradianceMap( Composition cmp ) noexc
                                 }
                             }
 
-                            vec4 textureCubeUV( sampler2D envMap, vec3 direction, vec4 viewport ) {
-                                float face = getFace( direction );
-                                vec2 uv = getUV( direction, face );
-                                uv.y = 1.0 - uv.y;
-                                uv = getFaceOffsets( face ) + 0.25 * uv;
-                                uv.x = viewport.x + uv.x * viewport.z;
-                                uv.y = viewport.y + uv.y * viewport.w;
-                                vec4 color = texture( envMap, uv );
-                                return color;
-                            }
+// Performs bilinear filtering
+vec4 textureCubeUV( sampler2D envMap, vec3 direction, vec4 viewport )
+{
+    const float faceSize = 0.25;
+    const vec2 texelSize = 1.0 / textureSize( envMap, 0 );
+
+    float face = getFace( direction );
+    vec2 faceOffsets = getFaceOffsets( face );
+
+
+    vec2 uv = getUV( direction, face );
+    vec2 f = fract( uv );
+    uv.y = 1.0 - uv.y;
+    uv = faceOffsets + faceSize * uv;
+    uv = viewport.xy + uv * viewport.zw;
+    vec2 fBL = faceOffsets * viewport.zw + texelSize;
+    vec2 fTR = fBL + faceSize * viewport.zw - 2.0 * texelSize;
+
+    uv = max( uv, fBL );
+    uv = min( uv, fTR );
+
+    vec4 color = texture( envMap, uv );
+    return color;
+}
 
                             void main() {
                              	vec4 viewport = vec4( 0, 0, 1, 1 );
