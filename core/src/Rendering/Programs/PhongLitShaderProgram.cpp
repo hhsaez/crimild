@@ -455,18 +455,15 @@ PhongLitShaderProgram::PhongLitShaderProgram( void ) noexcept
                     .stage = Shader::Stage::FRAGMENT,
                 },
                 {
-                    // Diffuse Map
-                    .descriptorType = DescriptorType::TEXTURE,
+                    .descriptorType = DescriptorType::DIFFUSE_MAP,
                     .stage = Shader::Stage::FRAGMENT,
                 },
                 {
-                    // Specular Map
-                    .descriptorType = DescriptorType::TEXTURE,
+                    .descriptorType = DescriptorType::SPECULAR_MAP,
                     .stage = Shader::Stage::FRAGMENT,
                 },
                 {
-                    // Normal Map
-                    .descriptorType = DescriptorType::TEXTURE,
+                    .descriptorType = DescriptorType::NORMAL_MAP,
                     .stage = Shader::Stage::FRAGMENT,
                 },
             };
