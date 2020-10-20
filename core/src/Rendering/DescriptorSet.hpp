@@ -39,8 +39,41 @@ namespace crimild {
     class Pipeline;
     class Texture;
 
+    /**
+        \brief Descriptor types
+     
+        The most common descriptor types are TEXTURE and UNFORM_BUFFER.
+        Special types are added for known descriptors, which can help to
+        better classify shaders, pipelines and materials when recording
+        render commands.
+
+        For example, if a descriptor set includes a descriptor of type METALLIC_MAP,
+        we can assume that object should use the PBR workflow. On the other hand, 
+        if no SHADOW_ATLAS descriptor is present, then we can safely assume the shader
+        won't compute shadows at all.
+
+        A render pass could use this information when rendering a scene to create
+        descriptor sets on-the-fly if needed too.
+     */ 
     enum class DescriptorType {
         TEXTURE,
+        
+        // Special per-material textures
+        DIFFUSE_MAP,
+        SPECULAR_MAP,
+        NORMAL_MAP,
+        ALBEDO_MAP,
+        METALLIC_MAP,
+        ROUGHNESS_MAP,
+        AMBIENT_OCCLUSION_MAP,
+        
+        // Special per-render pass textures
+        SHADOW_ATLAS,
+        REFLECTION_ATLAS,
+        IRRADIANCE_ATLAS,
+        PREFILTER_ATLAS,
+        BRDF_LUT,
+
 		UNIFORM_BUFFER,
     };
 

@@ -98,24 +98,41 @@ crimild::Bool DescriptorSetManager::bind( DescriptorSet *descriptorSet ) noexcep
                 .descriptorCount = 1,
             };
 
-            if ( descriptor.descriptorType == DescriptorType::UNIFORM_BUFFER ) {
-                auto ubo = descriptor.get< UniformBuffer >();
-                auto bufferView = ubo->getBufferView();
-                auto bindInfo = renderDevice->getBindInfo( ubo );
-                auto bufferHandler = bindInfo.bufferHandlers[ i ];
-                bufferInfo.buffer = bufferHandler;
-                bufferInfo.offset = bufferView->getOffset();
-                bufferInfo.range = bufferView->getLength();
-                writes[ j ].pBufferInfo = &bufferInfo;
-            }
-            else if ( descriptor.descriptorType == DescriptorType::TEXTURE ) {
-                auto texture = descriptor.get< Texture >();
-				auto imageView = crimild::get_ptr( texture->imageView );
-				auto sampler = crimild::get_ptr( texture->sampler );
-                imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                imageInfo.imageView = renderDevice->getBindInfo( imageView );
-                imageInfo.sampler = renderDevice->getBindInfo( sampler ).sampler;
-                writes[ j ].pImageInfo = &imageInfo;
+            switch ( descriptor.descriptorType ) {
+                case DescriptorType::UNIFORM_BUFFER: {
+                    auto ubo = descriptor.get< UniformBuffer >();
+                    auto bufferView = ubo->getBufferView();
+                    auto bindInfo = renderDevice->getBindInfo( ubo );
+                    auto bufferHandler = bindInfo.bufferHandlers[ i ];
+                    bufferInfo.buffer = bufferHandler;
+                    bufferInfo.offset = bufferView->getOffset();
+                    bufferInfo.range = bufferView->getLength();
+                    writes[ j ].pBufferInfo = &bufferInfo;
+                    break;
+                }
+
+                case DescriptorType::TEXTURE:
+                case DescriptorType::DIFFUSE_MAP:
+                case DescriptorType::SPECULAR_MAP:
+                case DescriptorType::NORMAL_MAP:
+                case DescriptorType::ALBEDO_MAP:
+                case DescriptorType::METALLIC_MAP:
+                case DescriptorType::ROUGHNESS_MAP:
+                case DescriptorType::AMBIENT_OCCLUSION_MAP:
+                case DescriptorType::SHADOW_ATLAS:
+                case DescriptorType::REFLECTION_ATLAS:
+                case DescriptorType::IRRADIANCE_ATLAS:
+                case DescriptorType::PREFILTER_ATLAS:
+                case DescriptorType::BRDF_LUT: {
+                    auto texture = descriptor.get< Texture >();
+                    auto imageView = crimild::get_ptr( texture->imageView );
+                    auto sampler = crimild::get_ptr( texture->sampler );
+                    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                    imageInfo.imageView = renderDevice->getBindInfo( imageView );
+                    imageInfo.sampler = renderDevice->getBindInfo( sampler ).sampler;
+                    writes[ j ].pImageInfo = &imageInfo;
+                    break;
+                }
             }
 
             vkUpdateDescriptorSets(

@@ -257,6 +257,18 @@ void FrameGraph::verifyAllConnections( void ) noexcept
 							break;
 
 						case DescriptorType::TEXTURE:
+						case DescriptorType::DIFFUSE_MAP:
+						case DescriptorType::SPECULAR_MAP:
+						case DescriptorType::NORMAL_MAP:
+						case DescriptorType::ALBEDO_MAP:
+						case DescriptorType::METALLIC_MAP:
+						case DescriptorType::ROUGHNESS_MAP:
+						case DescriptorType::AMBIENT_OCCLUSION_MAP:
+						case DescriptorType::SHADOW_ATLAS:
+						case DescriptorType::REFLECTION_ATLAS:
+						case DescriptorType::IRRADIANCE_ATLAS:
+						case DescriptorType::PREFILTER_ATLAS:
+						case DescriptorType::BRDF_LUT:
 							connect(
 								descriptor.get< Texture >(),
 								ds

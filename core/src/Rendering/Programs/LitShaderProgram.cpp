@@ -62,27 +62,27 @@ LitShaderProgram::LitShaderProgram( void ) noexcept
                 },
                 {
                     // Shadow atlas
-                    .descriptorType = DescriptorType::TEXTURE,
+                    .descriptorType = DescriptorType::SHADOW_ATLAS,
                     .stage = Shader::Stage::FRAGMENT,
                 },
                 {
                     // Reflection atlas
-                    .descriptorType = DescriptorType::TEXTURE,
+                    .descriptorType = DescriptorType::REFLECTION_ATLAS,
                     .stage = Shader::Stage::FRAGMENT,
                 },
                 {
                     // Irradiance atlas
-                    .descriptorType = DescriptorType::TEXTURE,
+                    .descriptorType = DescriptorType::IRRADIANCE_ATLAS,
                     .stage = Shader::Stage::FRAGMENT,
                 },
                 {
                     // Prefilter atlas
-                    .descriptorType = DescriptorType::TEXTURE,
+                    .descriptorType = DescriptorType::PREFILTER_ATLAS,
                     .stage = Shader::Stage::FRAGMENT,
                 },
                 {
                     // BRDF LUT
-                    .descriptorType = DescriptorType::TEXTURE,
+                    .descriptorType = DescriptorType::BRDF_LUT,
                     .stage = Shader::Stage::FRAGMENT,
                 },
             };
@@ -98,27 +98,27 @@ LitShaderProgram::LitShaderProgram( void ) noexcept
                 },
                 {
                     // Albedo Map
-                    .descriptorType = DescriptorType::TEXTURE,
+                    .descriptorType = DescriptorType::ALBEDO_MAP,
                     .stage = Shader::Stage::FRAGMENT,
                 },
                 {
                     // Metallic Map
-                    .descriptorType = DescriptorType::TEXTURE,
+                    .descriptorType = DescriptorType::METALLIC_MAP,
                     .stage = Shader::Stage::FRAGMENT,
                 },
                 {
                     // Roughness Map
-                    .descriptorType = DescriptorType::TEXTURE,
+                    .descriptorType = DescriptorType::ROUGHNESS_MAP,
                     .stage = Shader::Stage::FRAGMENT,
                 },
                 {
                     // Ambient Occlusion Map
-                    .descriptorType = DescriptorType::TEXTURE,
+                    .descriptorType = DescriptorType::AMBIENT_OCCLUSION_MAP,
                     .stage = Shader::Stage::FRAGMENT,
                 },
                 {
                     // Normal Map
-                    .descriptorType = DescriptorType::TEXTURE,
+                    .descriptorType = DescriptorType::NORMAL_MAP,
                     .stage = Shader::Stage::FRAGMENT,
                 },
             };

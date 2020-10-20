@@ -105,6 +105,18 @@ VkDescriptorType utils::getVulkanDescriptorType( DescriptorType type ) noexcept
         case DescriptorType::UNIFORM_BUFFER:
             return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         case DescriptorType::TEXTURE:
+        case DescriptorType::DIFFUSE_MAP:
+        case DescriptorType::SPECULAR_MAP:
+        case DescriptorType::NORMAL_MAP:
+        case DescriptorType::ALBEDO_MAP:
+        case DescriptorType::METALLIC_MAP:
+        case DescriptorType::ROUGHNESS_MAP:
+        case DescriptorType::AMBIENT_OCCLUSION_MAP:
+        case DescriptorType::SHADOW_ATLAS:
+        case DescriptorType::REFLECTION_ATLAS:
+        case DescriptorType::IRRADIANCE_ATLAS:
+        case DescriptorType::PREFILTER_ATLAS:
+        case DescriptorType::BRDF_LUT:
             return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         default:
             return VK_DESCRIPTOR_TYPE_MAX_ENUM;
