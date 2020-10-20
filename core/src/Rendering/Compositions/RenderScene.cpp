@@ -35,6 +35,7 @@
 #include "Rendering/Compositions/ComputeReflectionMapComposition.hpp"
 #include "Rendering/Compositions/ComputeShadowComposition.hpp"
 #include "Rendering/DescriptorSet.hpp"
+#include "Rendering/Pipeline.hpp"
 #include "Rendering/RenderPass.hpp"
 #include "Rendering/Sampler.hpp"
 #include "Rendering/Uniforms/CameraViewProjectionUniformBuffer.hpp"
@@ -48,6 +49,55 @@
 using namespace crimild;
 using namespace crimild::compositions;
 
+struct Renderables {
+    Array< Geometry * > environment;
+    Array< Geometry * > unlit;
+    Array< Geometry * > unlitTransparent;
+    Array< Geometry * > litBasic;
+    Array< Geometry * > litBasicTransparent;
+    Array< Geometry * > lit;
+    Array< Geometry * > litTransparent;
+};
+
+static Renderables sortRenderables( Node *scene ) noexcept
+{
+    Renderables ret;
+
+    scene->perform(
+        ApplyToGeometries(
+            [ &ret ]( Geometry *geometry ) {
+                if ( geometry->getLayer() == Node::Layer::SKYBOX ) {
+                    ret.environment.add( geometry );
+                } 
+                else if ( auto material = geometry->getComponent< MaterialComponent >()->first() ) {
+                    // TODO: What if there are multiple materials?
+                    // Can we add the same geometry to multiple lists? That will result
+                    // in multiple render passes for a single geometry, but I don't know
+                    // if that's ok. 
+                    if ( auto pipeline = material->getPipeline() ) {
+                        if ( auto program = crimild::get_ptr( pipeline->program ) ) {
+                            program->descriptorSetLayouts.each(
+                                [ &ret, geometry ]( auto layout ) {
+                                    if ( layout->bindings.filter( []( auto &binding ) { return binding.descriptorType == DescriptorType::ALBEDO_MAP; } ).size() > 0 ) {
+                                        // assume PBR
+                                        ret.lit.add( geometry );
+                                    }
+                                    else {
+                                        // assume phong lit
+                                        ret.litBasic.add( geometry );
+                                    }
+                                }
+                            );
+                        }
+                    }
+                }
+            }
+        )
+    );
+
+    return ret;
+}
+
 Composition crimild::compositions::renderScene( SharedPointer< Node > const &scene, crimild::Bool useHDR ) noexcept
 {
     return renderScene( crimild::get_ptr( scene ), useHDR );
@@ -55,6 +105,8 @@ Composition crimild::compositions::renderScene( SharedPointer< Node > const &sce
 
 Composition crimild::compositions::renderScene( Node *scene, crimild::Bool useHDR ) noexcept
 {
+    auto renderables = sortRenderables( scene );
+
     Composition cmp;
     cmp.enableHDR( useHDR );
 
@@ -89,11 +141,16 @@ Composition crimild::compositions::renderScene( Node *scene, crimild::Bool useHD
         return texture;
     }();
 
-    cmp = computeReflectionMap( cmp, scene );
     auto reflectionAtlas = [ & ] {
         auto texture = cmp.create< Texture >();
         texture->imageView = [ & ] {
-            auto att = cmp.getOutput();
+            auto att = [ & ]() -> Attachment * {
+                if ( renderables.environment.empty() ) {
+                    return nullptr;
+                }
+                cmp = computeReflectionMap( cmp, scene );
+                return cmp.getOutput();
+            }();
             if ( att == nullptr || att->imageView == nullptr ) {
                 auto imageView = crimild::alloc< ImageView >();
                 imageView->image = Image::ZERO;
@@ -112,11 +169,16 @@ Composition crimild::compositions::renderScene( Node *scene, crimild::Bool useHD
         return texture;
     }();
 
-    cmp = computeIrradianceMap( cmp );
     auto irradianceAtlas = [ & ] {
         auto texture = cmp.create< Texture >();
         texture->imageView = [ & ] {
-            auto att = cmp.getOutput();
+            auto att = [ & ]() -> Attachment * {
+                if ( renderables.environment.empty() ) {
+                    return nullptr;
+                }
+                cmp = computeIrradianceMap( cmp );
+                return cmp.getOutput();
+            }();
             if ( att == nullptr || att->imageView == nullptr ) {
                 auto imageView = crimild::alloc< ImageView >();
                 imageView->image = Image::ZERO;
@@ -135,11 +197,16 @@ Composition crimild::compositions::renderScene( Node *scene, crimild::Bool useHD
         return texture;
     }();
 
-    cmp = computePrefilterMap( cmp );
     auto prefilterAtlas = [ & ] {
         auto texture = cmp.create< Texture >();
         texture->imageView = [ & ] {
-            auto att = cmp.getOutput();
+            auto att = [ & ]() -> Attachment * {
+                if ( renderables.environment.empty() ) {
+                    return nullptr;
+                }
+                cmp = computePrefilterMap( cmp );
+                return cmp.getOutput();
+            }();
             if ( att == nullptr || att->imageView == nullptr ) {
                 auto imageView = crimild::alloc< ImageView >();
                 imageView->image = Image::ZERO;
@@ -158,11 +225,16 @@ Composition crimild::compositions::renderScene( Node *scene, crimild::Bool useHD
         return texture;
     }();
 
-    cmp = computeBRDFLUT( cmp );
     auto BRDFLUT = [ & ] {
         auto texture = cmp.create< Texture >();
         texture->imageView = [ & ] {
-            auto att = cmp.getOutput();
+            auto att = [ & ]() -> Attachment * {
+                if ( renderables.environment.empty() ) {
+                    return nullptr;
+                }
+                cmp = computeBRDFLUT( cmp );
+                return cmp.getOutput();
+            }();
             if ( att == nullptr || att->imageView == nullptr ) {
                 auto imageView = crimild::alloc< ImageView >();
                 imageView->image = Image::ZERO;
@@ -204,54 +276,101 @@ Composition crimild::compositions::renderScene( Node *scene, crimild::Bool useHD
         }()
     };
 
-    renderPass->setDescriptors(
-        [ & ] {
-            auto descriptorSet = crimild::alloc< DescriptorSet >();
-            descriptorSet->descriptors = {
-                Descriptor {
-                    .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                    .obj = [ & ] {
-                        FetchCameras fetch;
-                        scene->perform( fetch );
-                        auto camera = fetch.anyCamera();
-                        return crimild::alloc< CameraViewProjectionUniform >( camera );
-                    }(),
-                },
-                Descriptor {
-                    .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                    .obj = crimild::alloc< LightingUniform >( [ & ] {
-                        FetchLights fetch;
-                        Array< Light * > lights;
-                        scene->perform( fetch );
-                        fetch.forEachLight( [ & ]( auto light ) {
-                            lights.add( light );
-                        } );
-                        return lights;
-                    }() ),
-                },
-                Descriptor {
-                    .descriptorType = DescriptorType::TEXTURE,
-                    .obj = crimild::retain( shadowAtlas ),
-                },
-                Descriptor {
-                    .descriptorType = DescriptorType::TEXTURE,
-                    .obj = crimild::retain( reflectionAtlas ),
-                },
-                Descriptor {
-                    .descriptorType = DescriptorType::TEXTURE,
-                    .obj = crimild::retain( irradianceAtlas ),
-                },
-                Descriptor {
-                    .descriptorType = DescriptorType::TEXTURE,
-                    .obj = crimild::retain( prefilterAtlas ),
-                },
-                Descriptor {
-                    .descriptorType = DescriptorType::TEXTURE,
-                    .obj = crimild::retain( BRDFLUT ),
-                },
-            };
-            return descriptorSet;
-        }() );
+    auto environmentDescriptors = [ & ] {
+        auto descriptorSet = cmp.create< DescriptorSet >();
+        descriptorSet->descriptors = {
+            Descriptor {
+                .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                .obj = [ & ] {
+                    FetchCameras fetch;
+                    scene->perform( fetch );
+                    auto camera = fetch.anyCamera();
+                    return crimild::alloc< CameraViewProjectionUniform >( camera );
+                }(),
+            },
+        };
+        return descriptorSet;
+    }();
+
+    auto litBasicDescriptors = [ & ] {
+        auto descriptorSet = cmp.create< DescriptorSet >();
+        descriptorSet->descriptors = {
+            Descriptor {
+                .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                .obj = [ & ] {
+                    FetchCameras fetch;
+                    scene->perform( fetch );
+                    auto camera = fetch.anyCamera();
+                    return crimild::alloc< CameraViewProjectionUniform >( camera );
+                }(),
+            },
+            Descriptor {
+                .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                .obj = crimild::alloc< LightingUniform >( [ & ] {
+                    FetchLights fetch;
+                    Array< Light * > lights;
+                    scene->perform( fetch );
+                    fetch.forEachLight( [ & ]( auto light ) {
+                        lights.add( light );
+                    } );
+                    return lights;
+                }() ),
+            },
+            Descriptor {
+                .descriptorType = DescriptorType::SHADOW_ATLAS,
+                .obj = crimild::retain( shadowAtlas ),
+            },
+        };
+        return descriptorSet;
+    }();
+
+    auto litDescriptors = [ & ] {
+        auto descriptorSet = cmp.create< DescriptorSet >();
+        descriptorSet->descriptors = {
+            Descriptor {
+                .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                .obj = [ & ] {
+                    FetchCameras fetch;
+                    scene->perform( fetch );
+                    auto camera = fetch.anyCamera();
+                    return crimild::alloc< CameraViewProjectionUniform >( camera );
+                }(),
+            },
+            Descriptor {
+                .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                .obj = crimild::alloc< LightingUniform >( [ & ] {
+                    FetchLights fetch;
+                    Array< Light * > lights;
+                    scene->perform( fetch );
+                    fetch.forEachLight( [ & ]( auto light ) {
+                        lights.add( light );
+                    } );
+                    return lights;
+                }() ),
+            },
+            Descriptor {
+                .descriptorType = DescriptorType::SHADOW_ATLAS,
+                .obj = crimild::retain( shadowAtlas ),
+            },
+            Descriptor {
+                .descriptorType = DescriptorType::REFLECTION_ATLAS,
+                .obj = crimild::retain( reflectionAtlas ),
+            },
+            Descriptor {
+                .descriptorType = DescriptorType::IRRADIANCE_ATLAS,
+                .obj = crimild::retain( irradianceAtlas ),
+            },
+            Descriptor {
+                .descriptorType = DescriptorType::PREFILTER_ATLAS,
+                .obj = crimild::retain( prefilterAtlas ),
+            },
+            Descriptor {
+                .descriptorType = DescriptorType::BRDF_LUT,
+                .obj = crimild::retain( BRDFLUT ),
+            },
+        };
+        return descriptorSet;
+    }();
 
     auto viewport = ViewportDimensions {
         .scalingMode = ScalingMode::SWAPCHAIN_RELATIVE,
@@ -262,17 +381,45 @@ Composition crimild::compositions::renderScene( Node *scene, crimild::Bool useHD
         auto commandBuffer = crimild::alloc< CommandBuffer >();
         commandBuffer->setViewport( viewport );
         commandBuffer->setScissor( viewport );
-        scene->perform( ApplyToGeometries( [ & ]( Geometry *g ) {
-            if ( auto ms = g->getComponent< MaterialComponent >() ) {
-                if ( auto material = ms->first() ) {
-                    commandBuffer->bindGraphicsPipeline( material->getPipeline() );
-                    commandBuffer->bindDescriptorSet( renderPass->getDescriptors() );
-                    commandBuffer->bindDescriptorSet( material->getDescriptors() );
-                    commandBuffer->bindDescriptorSet( g->getDescriptors() );
-                    commandBuffer->drawPrimitive( g->anyPrimitive() );
+        renderables.litBasic.each(
+            [ & ]( Geometry *g ) {
+                if ( auto ms = g->getComponent< MaterialComponent >() ) {
+                    if ( auto material = ms->first() ) {
+                        commandBuffer->bindGraphicsPipeline( material->getPipeline() );
+                        commandBuffer->bindDescriptorSet( litBasicDescriptors );
+                        commandBuffer->bindDescriptorSet( material->getDescriptors() );
+                        commandBuffer->bindDescriptorSet( g->getDescriptors() );
+                        commandBuffer->drawPrimitive( g->anyPrimitive() );
+                    }
                 }
             }
-        } ) );
+        );
+        renderables.lit.each(
+            [ & ]( Geometry *g ) {
+                if ( auto ms = g->getComponent< MaterialComponent >() ) {
+                    if ( auto material = ms->first() ) {
+                        commandBuffer->bindGraphicsPipeline( material->getPipeline() );
+                        commandBuffer->bindDescriptorSet( litDescriptors );
+                        commandBuffer->bindDescriptorSet( material->getDescriptors() );
+                        commandBuffer->bindDescriptorSet( g->getDescriptors() );
+                        commandBuffer->drawPrimitive( g->anyPrimitive() );
+                    }
+                }
+            }
+        );
+        renderables.environment.each(
+            [ & ]( Geometry *g ) {
+                if ( auto ms = g->getComponent< MaterialComponent >() ) {
+                    if ( auto material = ms->first() ) {
+                        commandBuffer->bindGraphicsPipeline( material->getPipeline() );
+                        commandBuffer->bindDescriptorSet( environmentDescriptors );
+                        commandBuffer->bindDescriptorSet( material->getDescriptors() );
+                        commandBuffer->bindDescriptorSet( g->getDescriptors() );
+                        commandBuffer->drawPrimitive( g->anyPrimitive() );
+                    }
+                }
+            }
+        );
         return commandBuffer;
     }();
 
