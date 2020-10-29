@@ -26,16 +26,17 @@
  */
 
 #include "Rendering/Materials/SimpleLitMaterial.hpp"
-#include "Rendering/Programs/PhongLitShaderProgram.hpp"
+
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Pipeline.hpp"
+#include "Rendering/Programs/PhongLitShaderProgram.hpp"
 #include "Rendering/UniformBuffer.hpp"
 #include "Simulation/AssetManager.hpp"
 
 using namespace crimild;
 
 SimpleLitMaterial::SimpleLitMaterial( void ) noexcept
-    : SimpleLitMaterial( Props { } )
+    : SimpleLitMaterial( Props {} )
 {
     // no-op
 }
@@ -43,16 +44,15 @@ SimpleLitMaterial::SimpleLitMaterial( void ) noexcept
 SimpleLitMaterial::SimpleLitMaterial( const Props &props ) noexcept
 {
     // Use a default pipeline
-    setPipeline(
+    setGraphicsPipeline(
         [] {
-            auto pipeline = crimild::alloc< Pipeline >();
-            pipeline->program = crimild::retain( AssetManager::getInstance()->get< PhongLitShaderProgram >() );
+            auto pipeline = crimild::alloc< GraphicsPipeline >();
+            pipeline->setProgram( crimild::retain( AssetManager::getInstance()->get< PhongLitShaderProgram >() ) );
             return pipeline;
-        }()
-    );
+        }() );
 
     setDescriptors(
-        [&] {
+        [ & ] {
             auto descriptors = crimild::alloc< DescriptorSet >();
             descriptors->descriptors = {
                 Descriptor {
@@ -76,8 +76,7 @@ SimpleLitMaterial::SimpleLitMaterial( const Props &props ) noexcept
                 },
             };
             return descriptors;
-        }()
-    );
+        }() );
 }
 
 SimpleLitMaterial::Props &SimpleLitMaterial::getProps( void ) noexcept

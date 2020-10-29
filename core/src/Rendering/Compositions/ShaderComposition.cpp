@@ -26,6 +26,7 @@
  */
 
 #include "Rendering/Compositions/ShaderComposition.hpp"
+
 #include "Rendering/CommandBuffer.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Pipeline.hpp"
@@ -43,7 +44,7 @@ Composition crimild::compositions::shader( const std::string &source ) noexcept
     Composition cmp;
     auto renderPass = cmp.create< RenderPass >();
     renderPass->attachments = {
-        [&] {
+        [ & ] {
             auto att = cmp.createAttachment( "shader" );
             att->usage = Attachment::Usage::COLOR_ATTACHMENT;
             att->format = Format::R8G8B8A8_UNORM;
@@ -55,26 +56,25 @@ Composition crimild::compositions::shader( const std::string &source ) noexcept
 
     auto prefix = std::string(
         CRIMILD_TO_STRING(
-            layout ( location = 0 ) in vec2 inTexCoord;
+            layout( location = 0 ) in vec2 inTexCoord;
 
-            layout ( binding = 0 ) uniform Context {
+            layout( binding = 0 ) uniform Context {
                 vec4 dimensions;
             } context;
 
-            layout ( location = 0 ) out vec4 outColor;
-        )
-    );
+            layout( location = 0 ) out vec4 outColor; ) );
 
-    renderPass->setPipeline(
-        [&] {
-            auto pipeline = crimild::alloc< Pipeline >();
-            pipeline->program = [&] {
-                auto program = crimild::alloc< ShaderProgram >();
-                program->setShaders(
-                    Array< SharedPointer< Shader >> {
-                        crimild::alloc< Shader >(
-                            Shader::Stage::VERTEX,
-                            R"(
+    renderPass->setGraphicsPipeline(
+        [ & ] {
+            auto pipeline = crimild::alloc< GraphicsPipeline >();
+            pipeline->setProgram(
+                [ & ] {
+                    auto program = crimild::alloc< ShaderProgram >();
+                    program->setShaders(
+                        Array< SharedPointer< Shader > > {
+                            crimild::alloc< Shader >(
+                                Shader::Stage::VERTEX,
+                                R"(
                                 vec2 positions[6] = vec2[](
                                     vec2( -1.0, 1.0 ),
                                     vec2( -1.0, -1.0 ),
@@ -102,39 +102,35 @@ Composition crimild::compositions::shader( const std::string &source ) noexcept
                                     gl_Position = vec4( positions[ gl_VertexIndex ], 0.0, 1.0 );
                                     outTexCoord = texCoords[ gl_VertexIndex ];
                                 }
-                            )"
-                        ),
-                        crimild::alloc< Shader >(
-                            Shader::Stage::FRAGMENT,
-                            prefix + source
-                        ),
-                        }
-                );
-                program->descriptorSetLayouts = {
-                    [] {
-                        auto layout = crimild::alloc< DescriptorSetLayout >();
-                        layout->bindings = {
-                            {
-                                .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                                .stage = Shader::Stage::FRAGMENT,
-                            },
-                        };
-                        return layout;
-                    }(),
-                };
-                return program;
-            }();
+                            )" ),
+                            crimild::alloc< Shader >(
+                                Shader::Stage::FRAGMENT,
+                                prefix + source ),
+                        } );
+                    program->descriptorSetLayouts = {
+                        [] {
+                            auto layout = crimild::alloc< DescriptorSetLayout >();
+                            layout->bindings = {
+                                {
+                                    .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                                    .stage = Shader::Stage::FRAGMENT,
+                                },
+                            };
+                            return layout;
+                        }(),
+                    };
+                    return program;
+                }() );
             return pipeline;
-        }()
-    );
+        }() );
 
     renderPass->setDescriptors(
-        [&] {
+        [ & ] {
             auto descriptorSet = crimild::alloc< DescriptorSet >();
             descriptorSet->descriptors = {
                 {
                     .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                    .obj = [&] {
+                    .obj = [ & ] {
                         struct ContextDescriptor {
                             Vector4f dimensions;
                         };
@@ -145,18 +141,16 @@ Composition crimild::compositions::shader( const std::string &source ) noexcept
                         return crimild::alloc< UniformBuffer >(
                             ContextDescriptor {
                                 .dimensions = Vector4f( width, height, 0.0f, 0.0f ),
-                            }
-                        );
+                            } );
                     }(),
                 },
             };
             return descriptorSet;
-        }()
-    );
+        }() );
 
-    renderPass->commands = [&] {
+    renderPass->commands = [ & ] {
         auto commandBuffer = crimild::alloc< CommandBuffer >();
-        commandBuffer->bindGraphicsPipeline( renderPass->getPipeline() );
+        commandBuffer->bindGraphicsPipeline( renderPass->getGraphicsPipeline() );
         commandBuffer->bindDescriptorSet( renderPass->getDescriptors() );
         commandBuffer->draw( 6 );
         return commandBuffer;

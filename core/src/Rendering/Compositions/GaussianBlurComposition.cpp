@@ -43,89 +43,90 @@ using namespace crimild::compositions;
 Composition crimild::compositions::gaussianBlur( Composition cmp ) noexcept
 {
     auto createPipeline = [ & ]( bool horizontal ) {
-        auto pipeline = cmp.create< Pipeline >();
-        pipeline->program = [ & ] {
-            auto program = crimild::alloc< ShaderProgram >(
-                Array< SharedPointer< Shader > > {
-                    crimild::alloc< Shader >(
-                        Shader::Stage::VERTEX,
-                        CRIMILD_TO_STRING(
-                            vec2 positions[ 6 ] = vec2[](
-                                vec2( -1.0, 1.0 ),
-                                vec2( -1.0, -1.0 ),
-                                vec2( 1.0, -1.0 ),
-
-                                vec2( -1.0, 1.0 ),
-                                vec2( 1.0, -1.0 ),
-                                vec2( 1.0, 1.0 ) );
-
-                            vec2 texCoords[ 6 ] = vec2[](
-                                vec2( 0.0, 0.0 ),
-                                vec2( 0.0, 1.0 ),
-                                vec2( 1.0, 1.0 ),
-
-                                vec2( 0.0, 0.0 ),
-                                vec2( 1.0, 1.0 ),
-                                vec2( 1.0, 0.0 ) );
-
-                            layout( location = 0 ) out vec2 outTexCoord;
-
-                            void main() {
-                                gl_Position = vec4( positions[ gl_VertexIndex ], 0.0, 1.0 );
-                                outTexCoord = texCoords[ gl_VertexIndex ];
-                            } ) ),
+        auto pipeline = cmp.create< GraphicsPipeline >();
+        pipeline->setProgram(
+            [ & ] {
+                auto program = crimild::alloc< ShaderProgram >(
+                    Array< SharedPointer< Shader > > {
                         crimild::alloc< Shader >(
-                            Shader::Stage::FRAGMENT,
-                            horizontal
-                                ? CRIMILD_TO_STRING(
-                                    layout( location = 0 ) in vec2 inTexCoord;
+                            Shader::Stage::VERTEX,
+                            CRIMILD_TO_STRING(
+                                vec2 positions[ 6 ] = vec2[](
+                                    vec2( -1.0, 1.0 ),
+                                    vec2( -1.0, -1.0 ),
+                                    vec2( 1.0, -1.0 ),
 
-                                    layout( set = 0, binding = 0 ) uniform sampler2D uColorMap;
+                                    vec2( -1.0, 1.0 ),
+                                    vec2( 1.0, -1.0 ),
+                                    vec2( 1.0, 1.0 ) );
 
-                                    layout( location = 0 ) out vec4 outColor;
+                                vec2 texCoords[ 6 ] = vec2[](
+                                    vec2( 0.0, 0.0 ),
+                                    vec2( 0.0, 1.0 ),
+                                    vec2( 1.0, 1.0 ),
 
-                                    void main() {
-                                        const float weights[ 5 ] = float[]( 0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216 );
-                                        vec2 offset = 1.0 / textureSize( uColorMap, 0 );
-                                        vec3 result = texture( uColorMap, inTexCoord ).rgb;
-                                        for ( int i = 0; i < 5; ++i ) {
-                                            result += weights[ i ] * texture( uColorMap, inTexCoord + vec2( offset.x * i, 0.0 ) ).rgb;
-                                            result += weights[ i ] * texture( uColorMap, inTexCoord - vec2( offset.x * i, 0.0 ) ).rgb;
-                                        }
-                                        outColor = vec4( result, 1.0 );
-                                    } )
-                                : CRIMILD_TO_STRING(
-                                    layout( location = 0 ) in vec2 inTexCoord;
+                                    vec2( 0.0, 0.0 ),
+                                    vec2( 1.0, 1.0 ),
+                                    vec2( 1.0, 0.0 ) );
 
-                                    layout( set = 0, binding = 1 ) uniform sampler2D uColorMap;
+                                layout( location = 0 ) out vec2 outTexCoord;
 
-                                    layout( location = 0 ) out vec4 outColor;
+                                void main() {
+                                    gl_Position = vec4( positions[ gl_VertexIndex ], 0.0, 1.0 );
+                                    outTexCoord = texCoords[ gl_VertexIndex ];
+                                } ) ),
+                            crimild::alloc< Shader >(
+                                Shader::Stage::FRAGMENT,
+                                horizontal
+                                    ? CRIMILD_TO_STRING(
+                                        layout( location = 0 ) in vec2 inTexCoord;
 
-                                    void main() {
-                                        const float weights[ 5 ] = float[]( 0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216 );
-                                        vec2 offset = 1.0 / textureSize( uColorMap, 0 );
-                                        vec3 result = texture( uColorMap, inTexCoord ).rgb;
-                                        for ( int i = 0; i < 5; ++i ) {
-                                            result += weights[ i ] * texture( uColorMap, inTexCoord + vec2( 0.0, offset.y * i ) ).rgb;
-                                            result += weights[ i ] * texture( uColorMap, inTexCoord - vec2( 0.0, offset.y * i ) ).rgb;
-                                        }
-                                        outColor = vec4( result, 1.0 );
-                                    } ) ),
-                } );
-            program->descriptorSetLayouts = {
-                [] {
-                    auto layout = crimild::alloc< DescriptorSetLayout >();
-                    layout->bindings = {
-                        {
-                            .descriptorType = DescriptorType::TEXTURE,
-                            .stage = Shader::Stage::FRAGMENT,
-                        },
-                    };
-                    return layout;
-                }(),
-            };
-            return program;
-        }();
+                                        layout( set = 0, binding = 0 ) uniform sampler2D uColorMap;
+
+                                        layout( location = 0 ) out vec4 outColor;
+
+                                        void main() {
+                                            const float weights[ 5 ] = float[]( 0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216 );
+                                            vec2 offset = 1.0 / textureSize( uColorMap, 0 );
+                                            vec3 result = texture( uColorMap, inTexCoord ).rgb;
+                                            for ( int i = 0; i < 5; ++i ) {
+                                                result += weights[ i ] * texture( uColorMap, inTexCoord + vec2( offset.x * i, 0.0 ) ).rgb;
+                                                result += weights[ i ] * texture( uColorMap, inTexCoord - vec2( offset.x * i, 0.0 ) ).rgb;
+                                            }
+                                            outColor = vec4( result, 1.0 );
+                                        } )
+                                    : CRIMILD_TO_STRING(
+                                        layout( location = 0 ) in vec2 inTexCoord;
+
+                                        layout( set = 0, binding = 1 ) uniform sampler2D uColorMap;
+
+                                        layout( location = 0 ) out vec4 outColor;
+
+                                        void main() {
+                                            const float weights[ 5 ] = float[]( 0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216 );
+                                            vec2 offset = 1.0 / textureSize( uColorMap, 0 );
+                                            vec3 result = texture( uColorMap, inTexCoord ).rgb;
+                                            for ( int i = 0; i < 5; ++i ) {
+                                                result += weights[ i ] * texture( uColorMap, inTexCoord + vec2( 0.0, offset.y * i ) ).rgb;
+                                                result += weights[ i ] * texture( uColorMap, inTexCoord - vec2( 0.0, offset.y * i ) ).rgb;
+                                            }
+                                            outColor = vec4( result, 1.0 );
+                                        } ) ),
+                    } );
+                program->descriptorSetLayouts = {
+                    [] {
+                        auto layout = crimild::alloc< DescriptorSetLayout >();
+                        layout->bindings = {
+                            {
+                                .descriptorType = DescriptorType::TEXTURE,
+                                .stage = Shader::Stage::FRAGMENT,
+                            },
+                        };
+                        return layout;
+                    }(),
+                };
+                return program;
+            }() );
 
         pipeline->viewport = { .scalingMode = ScalingMode::DYNAMIC };
         pipeline->scissor = { .scalingMode = ScalingMode::DYNAMIC };

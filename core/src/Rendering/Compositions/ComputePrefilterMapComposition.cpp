@@ -66,13 +66,14 @@ Composition crimild::compositions::computePrefilterMap( Composition cmp ) noexce
             } ) );
 
     auto pipeline = [ & ] {
-        auto pipeline = cmp.create< Pipeline >();
-        pipeline->program = [ & ] {
-            auto program = crimild::alloc< ShaderProgram >(
-                Array< SharedPointer< Shader > > {
-                    crimild::alloc< Shader >(
-                        Shader::Stage::VERTEX,
-                        R"(
+        auto pipeline = cmp.create< GraphicsPipeline >();
+        pipeline->setProgram(
+            [ & ] {
+                auto program = crimild::alloc< ShaderProgram >(
+                    Array< SharedPointer< Shader > > {
+                        crimild::alloc< Shader >(
+                            Shader::Stage::VERTEX,
+                            R"(
                             layout ( location = 0 ) in vec3 inPosition;
 
                             layout ( set = 0, binding = 0 ) uniform Uniforms {
@@ -88,9 +89,9 @@ Composition crimild::compositions::computePrefilterMap( Composition cmp ) noexce
                                 outPosition = inPosition;
                             }
                         )" ),
-                    crimild::alloc< Shader >(
-                        Shader::Stage::FRAGMENT,
-                        R"(
+                        crimild::alloc< Shader >(
+                            Shader::Stage::FRAGMENT,
+                            R"(
                             layout ( location = 0 ) in vec3 inPosition;
 
                             layout ( set = 1, binding = 0 ) uniform sampler2D uHDRMap;
@@ -281,41 +282,41 @@ vec4 textureCubeUV( sampler2D envMap, vec3 direction, vec4 viewport, int mipLeve
                                 outColor = vec4( prefilteredColor, 1.0 );
                             }
                         )" ) } );
-            program->vertexLayouts = { VertexLayout::P3 };
-            program->descriptorSetLayouts = {
-                [] {
-                    auto layout = crimild::alloc< DescriptorSetLayout >();
-                    layout->bindings = {
-                        {
-                            .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                            .stage = Shader::Stage::VERTEX,
-                        },
-                    };
-                    return layout;
-                }(),
-                [] {
-                    auto layout = crimild::alloc< DescriptorSetLayout >();
-                    layout->bindings = {
-                        {
-                            .descriptorType = DescriptorType::TEXTURE,
-                            .stage = Shader::Stage::FRAGMENT,
-                        },
-                    };
-                    return layout;
-                }(),
-                [] {
-                    auto layout = crimild::alloc< DescriptorSetLayout >();
-                    layout->bindings = {
-                        {
-                            .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                            .stage = Shader::Stage::FRAGMENT,
-                        },
-                    };
-                    return layout;
-                }(),
-            };
-            return program;
-        }();
+                program->vertexLayouts = { VertexLayout::P3 };
+                program->descriptorSetLayouts = {
+                    [] {
+                        auto layout = crimild::alloc< DescriptorSetLayout >();
+                        layout->bindings = {
+                            {
+                                .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                                .stage = Shader::Stage::VERTEX,
+                            },
+                        };
+                        return layout;
+                    }(),
+                    [] {
+                        auto layout = crimild::alloc< DescriptorSetLayout >();
+                        layout->bindings = {
+                            {
+                                .descriptorType = DescriptorType::TEXTURE,
+                                .stage = Shader::Stage::FRAGMENT,
+                            },
+                        };
+                        return layout;
+                    }(),
+                    [] {
+                        auto layout = crimild::alloc< DescriptorSetLayout >();
+                        layout->bindings = {
+                            {
+                                .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                                .stage = Shader::Stage::FRAGMENT,
+                            },
+                        };
+                        return layout;
+                    }(),
+                };
+                return program;
+            }() );
         pipeline->viewport = { .scalingMode = ScalingMode::DYNAMIC };
         pipeline->scissor = { .scalingMode = ScalingMode::DYNAMIC };
         return pipeline;
@@ -344,7 +345,7 @@ vec4 textureCubeUV( sampler2D envMap, vec3 direction, vec4 viewport, int mipLeve
         return descriptors;
     }();
 
-    auto recordProbeCommands = []( compositions::Composition &cmp, CommandBuffer *commandBuffer, Pipeline *pipeline, Array< ViewportDimensions > &layout, Size offset, Real32 roughness, Primitive *primitive, DescriptorSet *environmentDescriptors ) {
+    auto recordProbeCommands = []( compositions::Composition &cmp, CommandBuffer *commandBuffer, GraphicsPipeline *pipeline, Array< ViewportDimensions > &layout, Size offset, Real32 roughness, Primitive *primitive, DescriptorSet *environmentDescriptors ) {
         auto viewports = ViewportDimensions::cubeViewportsFrom( layout[ offset++ ] );
 
         auto pMatrix = Frustumf( 90.0f, 1.0f, 0.1f, 200.0f ).computeProjectionMatrix();

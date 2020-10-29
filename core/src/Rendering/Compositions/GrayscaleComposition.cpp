@@ -26,14 +26,15 @@
  */
 
 #include "Rendering/Compositions/GrayscaleComposition.hpp"
+
 #include "Rendering/CommandBuffer.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Pipeline.hpp"
+#include "Rendering/Programs/Compositions/GrayscaleCompositionShaderProgram.hpp"
 #include "Rendering/RenderPass.hpp"
 #include "Rendering/Sampler.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/Texture.hpp"
-#include "Rendering/Programs/Compositions/GrayscaleCompositionShaderProgram.hpp"
 #include "Simulation/AssetManager.hpp"
 
 using namespace crimild;
@@ -43,7 +44,7 @@ Composition crimild::compositions::grayscale( Composition cmp ) noexcept
 {
     auto renderPass = cmp.create< RenderPass >();
     renderPass->attachments = {
-        [&] {
+        [ & ] {
             auto att = cmp.createAttachment( "grayscale" );
             att->usage = Attachment::Usage::COLOR_ATTACHMENT;
             att->format = Format::R8G8B8A8_UNORM;
@@ -54,12 +55,12 @@ Composition crimild::compositions::grayscale( Composition cmp ) noexcept
     };
 
     renderPass->setDescriptors(
-        [&] {
+        [ & ] {
             auto descriptorSet = crimild::alloc< DescriptorSet >();
             descriptorSet->descriptors = {
                 {
                     .descriptorType = DescriptorType::TEXTURE,
-                    .obj = [&] {
+                    .obj = [ & ] {
                         auto texture = crimild::alloc< Texture >();
                         texture->imageView = cmp.getOutput()->imageView;
                         texture->sampler = [] {
@@ -73,22 +74,20 @@ Composition crimild::compositions::grayscale( Composition cmp ) noexcept
                 },
             };
             return descriptorSet;
-        }()
-    );
+        }() );
 
-    renderPass->setPipeline(
+    renderPass->setGraphicsPipeline(
         [] {
-            auto pipeline = crimild::alloc< Pipeline >();
-            pipeline->program = crimild::retain(
-                AssetManager::getInstance()->get< GrayscaleCompositionShaderProgram >()
-            );
+            auto pipeline = crimild::alloc< GraphicsPipeline >();
+            pipeline->setProgram(
+                crimild::retain(
+                    AssetManager::getInstance()->get< GrayscaleCompositionShaderProgram >() ) );
             return pipeline;
-        }()
-    );
+        }() );
 
-    renderPass->commands = [&] {
+    renderPass->commands = [ & ] {
         auto commandBuffer = crimild::alloc< CommandBuffer >();
-        commandBuffer->bindGraphicsPipeline( renderPass->getPipeline() );
+        commandBuffer->bindGraphicsPipeline( renderPass->getGraphicsPipeline() );
         commandBuffer->bindDescriptorSet( renderPass->getDescriptors() );
         commandBuffer->draw( 6 );
         return commandBuffer;

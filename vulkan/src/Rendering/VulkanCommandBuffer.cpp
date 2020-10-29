@@ -26,17 +26,17 @@
  */
 
 #include "VulkanCommandBuffer.hpp"
-#include "VulkanRenderDevice.hpp"
-#include "VulkanCommandPool.hpp"
-#include "VulkanRenderPass.hpp"
-#include "VulkanFramebuffer.hpp"
-#include "VulkanPipeline.hpp"
 
 #include "Rendering/CommandBuffer.hpp"
 #include "Rendering/Framebuffer.hpp"
 #include "Rendering/IndexBuffer.hpp"
 #include "Rendering/RenderPass.hpp"
 #include "Rendering/ShaderProgram.hpp"
+#include "VulkanCommandPool.hpp"
+#include "VulkanFramebuffer.hpp"
+#include "VulkanGraphicsPipeline.hpp"
+#include "VulkanRenderDevice.hpp"
+#include "VulkanRenderPass.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;
@@ -67,12 +67,10 @@ crimild::Bool CommandBufferManager::bind( CommandBuffer *commandBuffer ) noexcep
 
     Array< VkCommandBuffer > handlers( imageCount );
     CRIMILD_VULKAN_CHECK(
-         vkAllocateCommandBuffers(
+        vkAllocateCommandBuffers(
             renderDevice->handler,
             &allocInfo,
-            &handlers[ 0 ]
-        )
-    );
+            &handlers[ 0 ] ) );
 
     setHandlers( commandBuffer, handlers );
 
@@ -110,9 +108,8 @@ crimild::Bool CommandBufferManager::unbind( CommandBuffer *commandBuffer ) noexc
             renderDevice->handler,
             commandPool->handler,
             1,
-            &handler
-        );
-    });
+            &handler );
+    } );
     removeHandlers( commandBuffer );
 
     return ManagerImpl::unbind( commandBuffer );
@@ -127,8 +124,8 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
     }
 
     commandBuffer->each(
-        [&]( CommandBuffer::Command &cmd ) {
-        	switch ( cmd.type ) {
+        [ & ]( CommandBuffer::Command &cmd ) {
+            switch ( cmd.type ) {
                 case CommandBuffer::Command::Type::BEGIN: {
                     auto beginInfo = VkCommandBufferBeginInfo {
                         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
@@ -139,9 +136,7 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                     CRIMILD_VULKAN_CHECK(
                         vkBeginCommandBuffer(
                             handler,
-                            &beginInfo
-                        )
-                    );
+                            &beginInfo ) );
                     break;
                 }
 
@@ -160,10 +155,10 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                         {
                             .color = {
                                 .float32 = {
-                                	clearColor.r(),
-                                	clearColor.g(),
-                                	clearColor.b(),
-                                	clearColor.a(),
+                                    clearColor.r(),
+                                    clearColor.g(),
+                                    clearColor.b(),
+                                    clearColor.a(),
                                 },
                             },
                         },
@@ -184,9 +179,8 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                             // the associated framebuffer
                             .offset = { 0, 0 },
                             .extent = utils::getExtent(
-                            	m_currentRenderPass->extent,
-                                renderDevice
-                            ),
+                                m_currentRenderPass->extent,
+                                renderDevice ),
                         },
                         .clearValueCount = static_cast< crimild::UInt32 >( clearValues.size() ),
                         .pClearValues = clearValues.data(),
@@ -197,7 +191,7 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                 }
 
                 case CommandBuffer::Command::Type::SET_VIEWPORT: {
-                    auto viewport = [&] {
+                    auto viewport = [ & ] {
                         auto viewport = cmd.viewportDimensions;
                         if ( viewport.scalingMode == ScalingMode::RELATIVE ) {
                             viewport.scalingMode = m_currentRenderPass->extent.scalingMode;
@@ -207,8 +201,7 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                                 viewport.dimensions.getX() * w,
                                 viewport.dimensions.getY() * h,
                                 viewport.dimensions.getWidth() * w,
-                                viewport.dimensions.getHeight() * h
-                            );
+                                viewport.dimensions.getHeight() * h );
                         }
                         return utils::getViewport( &viewport, renderDevice );
                     }();
@@ -217,7 +210,7 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                 }
 
                 case CommandBuffer::Command::Type::SET_SCISSOR: {
-                    auto scissor = [&] {
+                    auto scissor = [ & ] {
                         auto viewport = cmd.viewportDimensions;
                         if ( viewport.scalingMode == ScalingMode::RELATIVE ) {
                             viewport.scalingMode = m_currentRenderPass->extent.scalingMode;
@@ -227,8 +220,7 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                                 viewport.dimensions.getX() * w,
                                 viewport.dimensions.getY() * h,
                                 viewport.dimensions.getWidth() * w,
-                                viewport.dimensions.getHeight() * h
-                            );
+                                viewport.dimensions.getHeight() * h );
                         }
                         return utils::getScissor( &viewport, renderDevice );
                     }();
@@ -259,17 +251,30 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                 }
 
                 case CommandBuffer::Command::Type::BIND_GRAPHICS_PIPELINE: {
-                    auto pipeline = cmd.pipeline;
+                    auto pipeline = cmd.get< GraphicsPipeline >();
                     auto pipelineBindInfo = renderDevice->getBindInfo( pipeline );
 
-                    m_currentPipeline = pipeline;
+                    m_currentGraphicsPipeline = pipeline;
                     m_boundDescriptorSets = 0;
 
                     vkCmdBindPipeline(
                         handler,
                         VK_PIPELINE_BIND_POINT_GRAPHICS,
-                        pipelineBindInfo.pipelineHandler
-                    );
+                        pipelineBindInfo.pipelineHandler );
+                    break;
+                }
+
+                case CommandBuffer::Command::Type::BIND_COMPUTE_PIPELINE: {
+                    auto pipeline = cmd.get< ComputePipeline >();
+                    auto pipelineBindInfo = renderDevice->getBindInfo( pipeline );
+
+                    m_currentComputePipeline = pipeline;
+                    m_boundDescriptorSets = 0;
+
+                    vkCmdBindPipeline(
+                        handler,
+                        VK_PIPELINE_BIND_POINT_COMPUTE,
+                        pipelineBindInfo.pipelineHandler );
                     break;
                 }
 
@@ -291,8 +296,7 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                         0,
                         1,
                         vertexBuffers,
-                        offsets
-                    );
+                        offsets );
                     break;
                 }
 
@@ -307,21 +311,27 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                         handler,
                         bindInfo.bufferHandlers[ 0 ],
                         0,
-                        utils::getIndexType( crimild::get_ptr( ibo ) )
-                    );
+                        utils::getIndexType( crimild::get_ptr( ibo ) ) );
                     break;
                 }
 
                 case CommandBuffer::Command::Type::BIND_DESCRIPTOR_SET: {
-                    auto pipeline = m_currentPipeline;
-                    auto pipelineBindInfo = renderDevice->getBindInfo( pipeline );
+                    PipelineBase *pipeline = nullptr;
+                    PipelineLayout *pipelineLayout = nullptr;
+                    if ( m_currentGraphicsPipeline != nullptr ) {
+                        pipeline = m_currentGraphicsPipeline;
+                        pipelineLayout = crimild::get_ptr( renderDevice->getBindInfo( m_currentGraphicsPipeline ).pipelineLayout );
+                    } else if ( m_currentComputePipeline != nullptr ) {
+                        pipeline = m_currentComputePipeline;
+                        pipelineLayout = crimild::get_ptr( renderDevice->getBindInfo( m_currentComputePipeline ).pipelineLayout );
+                    }
 
                     auto descriptorSet = crimild::cast_ptr< DescriptorSet >( cmd.obj );
                     if ( descriptorSet->layout == nullptr ) {
                         // Get a layout corresponding to the same binding point
                         // If there's a mismatch, Vulkan validation layers will complain about it
                         // TODO: Maybe we can do this in an early stage, like the frame graph?
-                        descriptorSet->layout = pipeline->program->descriptorSetLayouts[ m_boundDescriptorSets ];
+                        descriptorSet->layout = pipeline->getProgram()->descriptorSetLayouts[ m_boundDescriptorSets ];
                     }
                     auto descriptorSetHandler = renderDevice->getHandler( crimild::get_ptr( descriptorSet ), index );
 
@@ -332,13 +342,12 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                     vkCmdBindDescriptorSets(
                         handler,
                         VK_PIPELINE_BIND_POINT_GRAPHICS,
-                        pipelineBindInfo.pipelineLayout->handler,
+                        pipelineLayout->handler,
                         m_boundDescriptorSets++,
                         1,
                         descriptorSets,
                         0,
-                        nullptr
-                    );
+                        nullptr );
                     break;
                 }
 
@@ -362,19 +371,22 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                     break;
                 }
 
-                case CommandBuffer::Command::Type::END: {
-                    CRIMILD_VULKAN_CHECK(
-                        vkEndCommandBuffer(
-                            handler
-                        )
-                    );
+                case CommandBuffer::Command::Type::DISPATCH: {
+                    auto workgroup = cmd.workgroup;
+                    vkCmdDispatch( handler, workgroup.x, workgroup.y, workgroup.z );
                     break;
                 }
 
-            	default:
-                	CRIMILD_LOG_DEBUG( "Ignoring command of type ", static_cast< uint32_t >( cmd.type ) );
+                case CommandBuffer::Command::Type::END: {
+                    CRIMILD_VULKAN_CHECK(
+                        vkEndCommandBuffer(
+                            handler ) );
                     break;
-        	}
-    	}
-    );
+                }
+
+                default:
+                    CRIMILD_LOG_DEBUG( "Ignoring command of type ", static_cast< uint32_t >( cmd.type ) );
+                    break;
+            }
+        } );
 }

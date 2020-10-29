@@ -26,28 +26,28 @@
 */
 
 #include "VulkanSystem.hpp"
-#include "Simulation/Simulation.hpp"
-#include "Rendering/VulkanRenderDevice.hpp"
-#include "Rendering/VulkanSwapchain.hpp"
-#include "Rendering/VulkanCommandPool.hpp"
-#include "Rendering/VulkanCommandBuffer.hpp"
-#include "Rendering/VulkanFence.hpp"
-#include "Rendering/VulkanBuffer.hpp"
-#include "Rendering/Programs/GouraudLitShaderProgram.hpp"
-#include "Rendering/Programs/PhongLitShaderProgram.hpp"
-#include "Rendering/Programs/SkyboxShaderProgram.hpp"
-#include "Rendering/Programs/UnlitShaderProgram.hpp"
+
+#include "Foundation/Containers/Array.hpp"
 #include "Rendering/Programs/Compositions/ColorizeCompositionShaderProgram.hpp"
 #include "Rendering/Programs/Compositions/ConvolutionCompositionShaderProgram.hpp"
 #include "Rendering/Programs/Compositions/GrayscaleCompositionShaderProgram.hpp"
 #include "Rendering/Programs/Compositions/InvertCompositionShaderProgram.hpp"
 #include "Rendering/Programs/Compositions/PresentCompositionShaderProgram.hpp"
+#include "Rendering/Programs/GouraudLitShaderProgram.hpp"
+#include "Rendering/Programs/PhongLitShaderProgram.hpp"
+#include "Rendering/Programs/SkyboxShaderProgram.hpp"
+#include "Rendering/Programs/UnlitShaderProgram.hpp"
+#include "Rendering/ShaderProgram.hpp"
+#include "Rendering/VulkanBuffer.hpp"
+#include "Rendering/VulkanCommandBuffer.hpp"
+#include "Rendering/VulkanCommandPool.hpp"
+#include "Rendering/VulkanFence.hpp"
+#include "Rendering/VulkanRenderDevice.hpp"
+#include "Rendering/VulkanSwapchain.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "Simulation/AssetManager.hpp"
-
-#include "Foundation/Containers/Array.hpp"
-#include "Rendering/ShaderProgram.hpp"
 #include "Simulation/FileSystem.hpp"
+#include "Simulation/Simulation.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;
@@ -59,13 +59,13 @@ crimild::Bool VulkanSystem::start( void )
     initShaders();
 
     return System::start()
-        && createInstance()
-        && createDebugMessenger()
-        && createSurface()
-        && createPhysicalDevice()
-        && createRenderDevice()
-        && createCommandPool()
-        && recreateSwapchain();
+           && createInstance()
+           && createDebugMessenger()
+           && createSurface()
+           && createPhysicalDevice()
+           && createRenderDevice()
+           && createCommandPool()
+           && recreateSwapchain();
 }
 
 /*
@@ -103,8 +103,7 @@ void VulkanSystem::update( void )
             cleanSwapchain();
             recreateSwapchain();
             return;
-        }
-        else {
+        } else {
             CRIMILD_LOG_ERROR( "No image available" );
             exit( -1 );
         }
@@ -124,10 +123,8 @@ void VulkanSystem::update( void )
             commandBuffer,
             imageIndex,
             signal,
-            fence
-        );
-    }
-    else {
+            fence );
+    } else {
         CRIMILD_LOG_DEBUG( "No command buffers provided" );
     }
 
@@ -138,8 +135,7 @@ void VulkanSystem::update( void )
             cleanSwapchain();
             recreateSwapchain();
             return;
-        }
-        else {
+        } else {
             CRIMILD_LOG_ERROR( "Failed to present image" );
             exit( -1 );
         }
@@ -181,9 +177,7 @@ crimild::Bool VulkanSystem::createInstance( void ) noexcept
             .appName = appName,
             .appVersionMajor = appVersionMajor,
             .appVersionMinor = appVersionMinor,
-            .appVersionPatch = appVersionPatch
-        }
-    );
+            .appVersionPatch = appVersionPatch } );
 
     return m_instance != nullptr;
 }
@@ -192,19 +186,15 @@ crimild::Bool VulkanSystem::createDebugMessenger( void ) noexcept
 {
     m_debugMessenger = create(
         VulkanDebugMessenger::Descriptor {
-            .instance = crimild::get_ptr( m_instance )
-        }
-       );
+            .instance = crimild::get_ptr( m_instance ) } );
     return m_debugMessenger != nullptr;
 }
 
 crimild::Bool VulkanSystem::createSurface( void ) noexcept
 {
     m_surface = create(
-		VulkanSurface::Descriptor {
-    		.instance = crimild::get_ptr( m_instance )
-    	}
-	);
+        VulkanSurface::Descriptor {
+            .instance = crimild::get_ptr( m_instance ) } );
     if ( m_surface == nullptr ) {
         return false;
     }
@@ -218,15 +208,13 @@ crimild::Bool VulkanSystem::createPhysicalDevice( void ) noexcept
     m_physicalDevice = create(
         PhysicalDevice::Descriptor {
             .instance = crimild::get_ptr( m_instance ),
-            .surface = crimild::get_ptr( m_surface )
-        }
-    );
+            .surface = crimild::get_ptr( m_surface ) } );
     return m_physicalDevice != nullptr;
 }
 
 crimild::Bool VulkanSystem::createRenderDevice( void ) noexcept
 {
-    m_renderDevice = m_physicalDevice->create( RenderDevice::Descriptor { } );
+    m_renderDevice = m_physicalDevice->create( RenderDevice::Descriptor {} );
     return m_renderDevice != nullptr;
 }
 
@@ -238,9 +226,7 @@ crimild::Bool VulkanSystem::createSwapchain( void ) noexcept
 
     m_swapchain = m_renderDevice->create(
         Swapchain::Descriptor {
-            .extent = Vector2i( width, height )
-        }
-    );
+            .extent = Vector2i( width, height ) } );
 
     if ( m_swapchain == nullptr ) {
         return false;
@@ -267,7 +253,8 @@ void VulkanSystem::cleanSwapchain( void ) noexcept
         static_cast< DescriptorPoolManager * >( renderDevice )->clear();
         static_cast< UniformBufferManager * >( renderDevice )->clear();
         static_cast< CommandBufferManager * >( renderDevice )->clear();
-        static_cast< PipelineManager * >( renderDevice )->clear();
+        static_cast< GraphicsPipelineManager * >( renderDevice )->clear();
+        static_cast< ComputePipelineManager * >( renderDevice )->clear();
         static_cast< FramebufferManager * >( renderDevice )->clear();
         static_cast< RenderPassManager * >( renderDevice )->clear();
         static_cast< ImageViewManager * >( renderDevice )->clear();
@@ -288,7 +275,7 @@ crimild::Bool VulkanSystem::recreateSwapchain( void ) noexcept
     cleanSwapchain();
 
     return createSwapchain()
-        && createSyncObjects();
+           && createSyncObjects();
 }
 
 crimild::Bool VulkanSystem::createSyncObjects( void ) noexcept
@@ -296,9 +283,9 @@ crimild::Bool VulkanSystem::createSyncObjects( void ) noexcept
     auto renderDevice = crimild::get_ptr( m_renderDevice );
 
     for ( auto i = 0l; i < CRIMILD_VULKAN_MAX_FRAMES_IN_FLIGHT; i++ ) {
-        m_imageAvailableSemaphores.push_back( renderDevice->create( Semaphore::Descriptor { } ) );
-        m_renderFinishedSemaphores.push_back( renderDevice->create( Semaphore::Descriptor { } ) );
-        m_inFlightFences.push_back( renderDevice->create( Fence::Descriptor { } ) );
+        m_imageAvailableSemaphores.push_back( renderDevice->create( Semaphore::Descriptor {} ) );
+        m_renderFinishedSemaphores.push_back( renderDevice->create( Semaphore::Descriptor {} ) );
+        m_inFlightFences.push_back( renderDevice->create( Fence::Descriptor {} ) );
     }
 
     return true;
@@ -311,8 +298,7 @@ crimild::Bool VulkanSystem::createCommandPool( void ) noexcept
     m_commandPool = renderDevice->create(
         CommandPool::Descriptor {
             .queueFamilyIndex = queueFamilyIndices.graphicsFamily[ 0 ],
-        }
-    );
+        } );
 
     return m_commandPool != nullptr;
 }
@@ -349,105 +335,97 @@ void VulkanSystem::initShaders( void ) noexcept
 
     assets->get< GouraudLitShaderProgram >()->setShaders(
         {
-            [&] {
-                #include "Rendering/Shaders/lit/gouraud.vert.inl"
+            [ & ] {
+#include "Rendering/Shaders/lit/gouraud.vert.inl"
                 return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
             }(),
-            [&] {
-                #include "Rendering/Shaders/lit/gouraud.frag.inl"
+            [ & ] {
+#include "Rendering/Shaders/lit/gouraud.frag.inl"
                 return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
             }(),
-        }
-    );
+        } );
 
     assets->get< UnlitShaderProgram >()->setShaders(
         {
-            [&] {
-                #include "Rendering/Shaders/unlit/unlit.vert.inl"
+            [ & ] {
+#include "Rendering/Shaders/unlit/unlit.vert.inl"
                 return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
             }(),
-            [&] {
-                #include "Rendering/Shaders/unlit/unlit.frag.inl"
+            [ & ] {
+#include "Rendering/Shaders/unlit/unlit.frag.inl"
                 return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
             }(),
-        }
-    );
+        } );
 
     assets->get< SkyboxShaderProgram >()->setShaders(
         {
-            [&] {
-                #include "Rendering/Shaders/unlit/skybox.vert.inl"
+            [ & ] {
+#include "Rendering/Shaders/unlit/skybox.vert.inl"
                 return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
             }(),
-            [&] {
-                #include "Rendering/Shaders/unlit/skybox.frag.inl"
+            [ & ] {
+#include "Rendering/Shaders/unlit/skybox.frag.inl"
                 return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
             }(),
-        }
-    );
+        } );
 
     assets->get< InvertCompositionShaderProgram >()->setShaders(
         {
-            [&] {
-                #include "Rendering/Shaders/Compositions/invert.vert.inl"
+            [ & ] {
+#include "Rendering/Shaders/Compositions/invert.vert.inl"
                 return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
             }(),
-            [&] {
-                #include "Rendering/Shaders/Compositions/invert.frag.inl"
+            [ & ] {
+#include "Rendering/Shaders/Compositions/invert.frag.inl"
                 return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
             }(),
-        }
-    );
+        } );
 
     assets->get< ColorizeCompositionShaderProgram >()->setShaders(
         {
-            [&] {
-                #include "Rendering/Shaders/Compositions/colorize.vert.inl"
+            [ & ] {
+#include "Rendering/Shaders/Compositions/colorize.vert.inl"
                 return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
             }(),
-            [&] {
-                #include "Rendering/Shaders/Compositions/colorize.frag.inl"
+            [ & ] {
+#include "Rendering/Shaders/Compositions/colorize.frag.inl"
                 return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
             }(),
-        }
-    );
+        } );
 
     assets->get< GrayscaleCompositionShaderProgram >()->setShaders(
         {
-            [&] {
-                #include "Rendering/Shaders/Compositions/grayscale.vert.inl"
+            [ & ] {
+#include "Rendering/Shaders/Compositions/grayscale.vert.inl"
                 return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
             }(),
-            [&] {
-                #include "Rendering/Shaders/Compositions/grayscale.frag.inl"
+            [ & ] {
+#include "Rendering/Shaders/Compositions/grayscale.frag.inl"
                 return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
             }(),
-        }
-    );
+        } );
 
     assets->get< ConvolutionCompositionShaderProgram >()->setShaders(
         {
-            [&] {
-                #include "Rendering/Shaders/Compositions/convolution.vert.inl"
+            [ & ] {
+#include "Rendering/Shaders/Compositions/convolution.vert.inl"
                 return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
             }(),
-            [&] {
-                #include "Rendering/Shaders/Compositions/convolution.frag.inl"
+            [ & ] {
+#include "Rendering/Shaders/Compositions/convolution.frag.inl"
                 return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
             }(),
-        }
-    );
+        } );
 
     assets->get< PresentCompositionShaderProgram >()->setShaders(
         {
-            [&] {
-                #include "Rendering/Shaders/Compositions/present.vert.inl"
+            [ & ] {
+#include "Rendering/Shaders/Compositions/present.vert.inl"
                 return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
             }(),
-            [&] {
-                #include "Rendering/Shaders/Compositions/present.frag.inl"
+            [ & ] {
+#include "Rendering/Shaders/Compositions/present.frag.inl"
                 return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
             }(),
-        }
-    );
+        } );
 }

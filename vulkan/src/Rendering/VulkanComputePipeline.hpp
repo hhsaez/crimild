@@ -25,45 +25,46 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_VULKAN_RENDERING_COMMAND_BUFFER_
-#define CRIMILD_VULKAN_RENDERING_COMMAND_BUFFER_
+#ifndef CRIMILD_VULKAN_RENDERING_COMPUTE_PIPELINE_
+#define CRIMILD_VULKAN_RENDERING_COMPUTE_PIPELINE_
 
-#include "Foundation/Containers/Array.hpp"
 #include "Foundation/Containers/Map.hpp"
-#include "Rendering/CommandBuffer.hpp"
+#include "Rendering/Pipeline.hpp"
 #include "Rendering/VulkanRenderResource.hpp"
+#include "Rendering/VulkanShaderCompiler.hpp"
+#include "Rendering/VulkanShaderModule.hpp"
 
 namespace crimild {
 
-    class Buffer;
-    class DescriptorSet;
-    class Framebuffer;
-    class GraphicsPipeline;
-    class ComputePipeline;
-    class RenderPass;
+    class DescriptorSetLayout;
+    class Shader;
+    class ShaderProgram;
 
     namespace vulkan {
 
-        class CommandBufferManager : public MultiHandlerRenderResourceManagerImpl< CommandBuffer, VkCommandBuffer > {
-            using ManagerImpl = MultiHandlerRenderResourceManagerImpl< CommandBuffer, VkCommandBuffer >;
+        class PipelineLayout;
+
+        struct ComputePipelineBindInfo {
+            VkPipeline pipelineHandler = VK_NULL_HANDLE;
+            SharedPointer< PipelineLayout > pipelineLayout;
+        };
+
+        class ComputePipelineManager : public BasicRenderResourceManagerImpl< ComputePipeline, ComputePipelineBindInfo > {
+            using ManagerImpl = BasicRenderResourceManagerImpl< ComputePipeline, ComputePipelineBindInfo >;
 
         public:
-            virtual ~CommandBufferManager( void ) noexcept = default;
+            virtual ~ComputePipelineManager( void ) noexcept = default;
 
-            crimild::Bool bind( CommandBuffer *commandBuffer ) noexcept override;
-            crimild::Bool unbind( CommandBuffer *commandBuffer ) noexcept override;
-
-        private:
-            void recordCommands( RenderDevice *renderDevice, CommandBuffer *parent, CommandBuffer *commandBuffer, crimild::Size index ) noexcept;
+            crimild::Bool bind( ComputePipeline *pipeline ) noexcept override;
+            crimild::Bool unbind( ComputePipeline *pipeline ) noexcept override;
 
         private:
-            GraphicsPipeline *m_currentGraphicsPipeline = nullptr;
-            ComputePipeline *m_currentComputePipeline = nullptr;
-            SharedPointer< Framebuffer > m_currentFramebuffer;
-            SharedPointer< RenderPass > m_currentRenderPass;
-            crimild::UInt32 m_boundDescriptorSets = 0;
-            crimild::Size m_vertexOffset = 0;
-            crimild::Size m_indexOffset = 0;
+            using ShaderModuleArray = std::vector< SharedPointer< ShaderModule > >;
+            using ShaderStageArray = std::vector< VkPipelineShaderStageCreateInfo >;
+
+            ShaderModuleArray createShaderModules( RenderDevice *renderDevice, ShaderProgram *program ) const noexcept;
+            ShaderStageArray createShaderStages( const ShaderModuleArray &modules ) const noexcept;
+            VkPipelineShaderStageCreateInfo createShaderStage( const ShaderModule &module ) const noexcept;
         };
 
     }

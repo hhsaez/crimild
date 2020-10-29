@@ -28,8 +28,8 @@
 #ifndef CRIMILD_RENDERING_BUFFER_VIEW_
 #define CRIMILD_RENDERING_BUFFER_VIEW_
 
-#include "Rendering/Buffer.hpp"
 #include "Mathematics/Numeric.hpp"
+#include "Rendering/Buffer.hpp"
 
 namespace crimild {
 
@@ -47,9 +47,10 @@ namespace crimild {
             VERTEX,
             INDEX,
             UNIFORM,
+            STORAGE,
             USER_DEFINED, //< custom target
         };
-        
+
     public:
         /**
            \brief Constructs a buffer view from an existing buffer
@@ -73,7 +74,7 @@ namespace crimild {
                 m_length = buffer->getSize() - m_offset;
             }
         }
-        
+
         virtual ~BufferView( void ) = default;
 
         inline Buffer *getBuffer( void ) noexcept { return crimild::get_ptr( m_buffer ); }

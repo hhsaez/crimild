@@ -26,6 +26,7 @@
  */
 
 #include "SceneGraph/Skybox.hpp"
+
 #include "Components/MaterialComponent.hpp"
 #include "Primitives/BoxPrimitive.hpp"
 #include "Rendering/Image.hpp"
@@ -46,29 +47,28 @@ Skybox::Skybox( SharedPointer< Texture > const &texture ) noexcept
                 .layout = VertexP3::getLayout(),
                 .size = Vector3f( 10.0f, 10.0f, 10.0f ),
                 .invertFaces = true,
-            }
-        )
-    );
+            } ) );
 
     attachComponent< MaterialComponent >()->attachMaterial(
-        [&] () -> SharedPointer< Material >{
-        	if ( texture->imageView->image->type == Image::Type::IMAGE_2D_CUBEMAP ) {
-            	auto material = crimild::alloc< SkyboxMaterial >();
-            	material->setTexture( texture );
-            	return material;
-         	}
+        [ & ]() -> SharedPointer< Material > {
+            if ( texture->imageView->image->type == Image::Type::IMAGE_2D_CUBEMAP ) {
+                auto material = crimild::alloc< SkyboxMaterial >();
+                material->setTexture( texture );
+                return material;
+            }
 
-          	auto material = crimild::alloc< Material >();
-            material->setPipeline(
+            auto material = crimild::alloc< Material >();
+            material->setGraphicsPipeline(
                 [] {
-                    auto pipeline = crimild::alloc< Pipeline >();
+                    auto pipeline = crimild::alloc< GraphicsPipeline >();
                     pipeline->primitiveType = Primitive::Type::TRIANGLES;
-                    pipeline->program = [ & ] {
-                        auto program = crimild::alloc< ShaderProgram >(
-                            Array< SharedPointer< Shader > > {
-                                crimild::alloc< Shader >(
-                                    Shader::Stage::VERTEX,
-                                    R"(
+                    pipeline->setProgram(
+                        [ & ] {
+                            auto program = crimild::alloc< ShaderProgram >(
+                                Array< SharedPointer< Shader > > {
+                                    crimild::alloc< Shader >(
+                                        Shader::Stage::VERTEX,
+                                        R"(
                                         layout ( location = 0 ) in vec3 inPosition;
 
                                         layout ( set = 0, binding = 0 ) uniform RenderPassUniforms {
@@ -88,11 +88,10 @@ Skybox::Skybox( SharedPointer< Texture > const &texture ) noexcept
                                             gl_Position = gl_Position.xyww;
                                             outPosition = inPosition;
                                         }
-                                    )"
-                                ),
-                                crimild::alloc< Shader >(
-                                    Shader::Stage::FRAGMENT,
-                                    R"(
+                                    )" ),
+                                    crimild::alloc< Shader >(
+                                        Shader::Stage::FRAGMENT,
+                                        R"(
                                         layout ( location = 0 ) in vec3 inPosition;
 
                                         layout ( set = 1, binding = 0 ) uniform sampler2D uHDRMap;
@@ -115,52 +114,48 @@ Skybox::Skybox( SharedPointer< Texture > const &texture ) noexcept
                                             vec3 color = texture( uHDRMap, uv ).rgb;
                                             outColor = vec4( color, 1.0 );
                                         }
-                                    )"
-                                )
-                            }
-                        );
-                        program->vertexLayouts = { VertexP3::getLayout() };
-                        program->descriptorSetLayouts = {
-                            [] {
-                                auto layout = crimild::alloc< DescriptorSetLayout >();
-                                layout->bindings = {
-                                    {
-                                        .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                                        .stage = Shader::Stage::VERTEX,
-                                    },
-                                };
-                                return layout;
-                            }(),
-                            [] {
-                                auto layout = crimild::alloc< DescriptorSetLayout >();
-                                layout->bindings = {
-                                    {
-                                        .descriptorType = DescriptorType::TEXTURE,
-                                        .stage = Shader::Stage::FRAGMENT,
-                                    },
-                                };
-                                return layout;
-                            }(),
-                            [] {
-                                auto layout = crimild::alloc< DescriptorSetLayout >();
-                                layout->bindings = {
-                                    {
-                                        .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                                        .stage = Shader::Stage::VERTEX,
-                                    },
-                                };
-                                return layout;
-                            }(),
-                        };
-                        return program;
-                    }();
+                                    )" ) } );
+                            program->vertexLayouts = { VertexP3::getLayout() };
+                            program->descriptorSetLayouts = {
+                                [] {
+                                    auto layout = crimild::alloc< DescriptorSetLayout >();
+                                    layout->bindings = {
+                                        {
+                                            .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                                            .stage = Shader::Stage::VERTEX,
+                                        },
+                                    };
+                                    return layout;
+                                }(),
+                                [] {
+                                    auto layout = crimild::alloc< DescriptorSetLayout >();
+                                    layout->bindings = {
+                                        {
+                                            .descriptorType = DescriptorType::TEXTURE,
+                                            .stage = Shader::Stage::FRAGMENT,
+                                        },
+                                    };
+                                    return layout;
+                                }(),
+                                [] {
+                                    auto layout = crimild::alloc< DescriptorSetLayout >();
+                                    layout->bindings = {
+                                        {
+                                            .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                                            .stage = Shader::Stage::VERTEX,
+                                        },
+                                    };
+                                    return layout;
+                                }(),
+                            };
+                            return program;
+                        }() );
                     pipeline->viewport = { .scalingMode = ScalingMode::DYNAMIC };
                     pipeline->scissor = { .scalingMode = ScalingMode::DYNAMIC };
                     return pipeline;
-                }()
-            );
+                }() );
             material->setDescriptors(
-                [&] {
+                [ & ] {
                     auto descriptors = crimild::alloc< DescriptorSet >();
                     descriptors->descriptors = {
                         {
@@ -169,19 +164,17 @@ Skybox::Skybox( SharedPointer< Texture > const &texture ) noexcept
                         },
                     };
                     return descriptors;
-                }()
-            );
+                }() );
             return material;
-        }()
-    );
+        }() );
 }
 
 void Skybox::encode( coding::Encoder &encoder )
 {
-	Geometry::encode( encoder );
+    Geometry::encode( encoder );
 }
 
 void Skybox::decode( coding::Decoder &decoder )
 {
-	Geometry::decode( decoder );
+    Geometry::decode( decoder );
 }

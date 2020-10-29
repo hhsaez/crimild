@@ -51,7 +51,7 @@ layout( location = 5 ) out mat3 outViewMatrix3;
 
 void main()
 {
-    gl_Position = proj * view * model * vec4( inPosition, 1.0 );    
+    gl_Position = proj * view * model * vec4( inPosition, 1.0 );
 
     mat3 nMatrix = mat3( transpose( inverse( model ) ) );
 
