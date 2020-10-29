@@ -26,15 +26,16 @@
  */
 
 #include "Rendering/Compositions/ConvolutionComposition.hpp"
+
 #include "Rendering/CommandBuffer.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Pipeline.hpp"
+#include "Rendering/Programs/Compositions/ConvolutionCompositionShaderProgram.hpp"
 #include "Rendering/RenderPass.hpp"
 #include "Rendering/Sampler.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/Texture.hpp"
 #include "Rendering/UniformBuffer.hpp"
-#include "Rendering/Programs/Compositions/ConvolutionCompositionShaderProgram.hpp"
 #include "Simulation/AssetManager.hpp"
 
 using namespace crimild;
@@ -44,7 +45,7 @@ Composition crimild::compositions::convolution( std::string name, Composition cm
 {
     auto renderPass = cmp.create< RenderPass >();
     renderPass->attachments = {
-        [&] {
+        [ & ] {
             auto att = cmp.createAttachment( name );
             att->usage = Attachment::Usage::COLOR_ATTACHMENT;
             att->format = Format::R8G8B8A8_UNORM;
@@ -55,24 +56,22 @@ Composition crimild::compositions::convolution( std::string name, Composition cm
     };
 
     renderPass->setDescriptors(
-        [&] {
+        [ & ] {
             auto descriptorSet = crimild::alloc< DescriptorSet >();
             descriptorSet->descriptors = {
-                {
-                    .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                    .obj = [&] {
-                        struct Uniforms {
-                            alignas( 16 ) Real32 kernel[ 9 ];
-                        };
+                { .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                  .obj = [ & ] {
+                      struct Uniforms {
+                          alignas( 16 ) Real32 kernel[ 9 ];
+                      };
 
-                        auto data = Uniforms { };
-                        memcpy( &data.kernel[ 0 ], kernel.getData(), 9 * sizeof( Real32 ) );
-                        return crimild::alloc< UniformBuffer >( data );
-                    }()
-                },
+                      auto data = Uniforms {};
+                      memcpy( &data.kernel[ 0 ], kernel.getData(), 9 * sizeof( Real32 ) );
+                      return crimild::alloc< UniformBuffer >( data );
+                  }() },
                 {
                     .descriptorType = DescriptorType::TEXTURE,
-                    .obj = [&] {
+                    .obj = [ & ] {
                         auto texture = crimild::alloc< Texture >();
                         texture->imageView = cmp.getOutput()->imageView;
                         texture->sampler = [] {
@@ -86,22 +85,19 @@ Composition crimild::compositions::convolution( std::string name, Composition cm
                 },
             };
             return descriptorSet;
-        }()
-    );
+        }() );
 
-    renderPass->setPipeline(
+    renderPass->setGraphicsPipeline(
         [] {
-            auto pipeline = crimild::alloc< Pipeline >();
-            pipeline->program = crimild::retain(
-                AssetManager::getInstance()->get< ConvolutionCompositionShaderProgram >()
-            );
-            return pipeline;
-        }()
-    );
+            auto graphicsPipeline = crimild::alloc< GraphicsPipeline >();
+            graphicsPipeline->setProgram( crimild::retain(
+                AssetManager::getInstance()->get< ConvolutionCompositionShaderProgram >() ) );
+            return graphicsPipeline;
+        }() );
 
-    renderPass->commands = [&] {
+    renderPass->commands = [ & ] {
         auto commandBuffer = crimild::alloc< CommandBuffer >();
-        commandBuffer->bindGraphicsPipeline( renderPass->getPipeline() );
+        commandBuffer->bindGraphicsPipeline( renderPass->getGraphicsPipeline() );
         commandBuffer->bindDescriptorSet( renderPass->getDescriptors() );
         commandBuffer->draw( 6 );
         return commandBuffer;
@@ -118,11 +114,15 @@ Composition crimild::compositions::blur( Composition cmp ) noexcept
         "blur",
         cmp,
         Matrix3f(
-            1.0f / 16.0f, 2.0f / 16.0f, 1.0f / 16.0f,
-            2.0f / 16.0f, 4.0f / 16.0f, 2.0f / 16.0f,
-            1.0f / 16.0f, 2.0f / 16.0f, 1.0f / 16.0f
-        )
-    );
+            1.0f / 16.0f,
+            2.0f / 16.0f,
+            1.0f / 16.0f,
+            2.0f / 16.0f,
+            4.0f / 16.0f,
+            2.0f / 16.0f,
+            1.0f / 16.0f,
+            2.0f / 16.0f,
+            1.0f / 16.0f ) );
 }
 
 Composition crimild::compositions::sharpen( Composition cmp ) noexcept
@@ -131,11 +131,15 @@ Composition crimild::compositions::sharpen( Composition cmp ) noexcept
         "edges",
         cmp,
         Matrix3f(
-            -1.0f, -1.0f, -1.0f,
-            -1.0f, +9.0f, -1.0f,
-            -1.0f, -1.0f, -1.0f
-        )
-    );
+            -1.0f,
+            -1.0f,
+            -1.0f,
+            -1.0f,
+            +9.0f,
+            -1.0f,
+            -1.0f,
+            -1.0f,
+            -1.0f ) );
 }
 
 Composition crimild::compositions::edges( Composition cmp ) noexcept
@@ -144,9 +148,13 @@ Composition crimild::compositions::edges( Composition cmp ) noexcept
         "edges",
         cmp,
         Matrix3f(
-            1.0f, 1.0f, 1.0f,
-            1.0f, -8.0f, 1.0f,
-            1.0f, 1.0f, 1.0f
-        )
-    );
+            1.0f,
+            1.0f,
+            1.0f,
+            1.0f,
+            -8.0f,
+            1.0f,
+            1.0f,
+            1.0f,
+            1.0f ) );
 }

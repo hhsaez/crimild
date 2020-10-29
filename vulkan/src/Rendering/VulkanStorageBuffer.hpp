@@ -9,7 +9,7 @@
 *     * Redistributions in binary form must reproduce the above copyright
 *       notice, this list of conditions and the following disclaimer in the
 *       documentation and/or other materials provided with the distribution.
-*     * Neither the name of the copyright holder nor the
+*     * Neither the name of the copyright holders nor the
 *       names of its contributors may be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
@@ -25,19 +25,40 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Rendering/RenderPass.hpp"
+#ifndef CRIMILD_VULKAN_RENDERING_STORAGE_BUFFER_
+#define CRIMILD_VULKAN_RENDERING_STORAGE_BUFFER_
 
-#include "Rendering/DescriptorSet.hpp"
-#include "Rendering/Pipeline.hpp"
+#include "Foundation/Containers/Array.hpp"
+#include "Foundation/Containers/Map.hpp"
+#include "Rendering/StorageBuffer.hpp"
+#include "Rendering/VulkanRenderResource.hpp"
 
-using namespace crimild;
+namespace crimild {
 
-void RenderPass::setGraphicsPipeline( GraphicsPipeline *pipeline ) noexcept
-{
-    m_graphicsPipeline = retain( pipeline );
+    namespace vulkan {
+
+        class RenderDevice;
+        class CommandPool;
+
+        struct StorageBufferBindInfo {
+            Array< VkBuffer > bufferHandlers;
+            Array< VkDeviceMemory > bufferMemories;
+        };
+
+        class StorageBufferManager : public BasicRenderResourceManagerImpl< StorageBuffer, StorageBufferBindInfo > {
+            using ManagerImpl = BasicRenderResourceManagerImpl< StorageBuffer, StorageBufferBindInfo >;
+
+        public:
+            virtual ~StorageBufferManager( void ) noexcept = default;
+
+            crimild::Bool bind( StorageBuffer *storageBuffer ) noexcept override;
+            crimild::Bool unbind( StorageBuffer *storageBuffer ) noexcept override;
+
+            Bool mapFromDevice( StorageBuffer *storageBuffer ) noexcept;
+        };
+
+    }
+
 }
 
-void RenderPass::setDescriptors( DescriptorSet *descriptors ) noexcept
-{
-    m_descriptors = retain( descriptors );
-}
+#endif

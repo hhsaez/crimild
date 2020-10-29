@@ -118,6 +118,8 @@ VkDescriptorType utils::getVulkanDescriptorType( DescriptorType type ) noexcept
         case DescriptorType::PREFILTER_ATLAS:
         case DescriptorType::BRDF_LUT:
             return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        case DescriptorType::STORAGE_BUFFER:
+            return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         default:
             return VK_DESCRIPTOR_TYPE_MAX_ENUM;
     }
@@ -747,6 +749,10 @@ utils::QueueFamilyIndices utils::findQueueFamilies( const VkPhysicalDevice &devi
             indices.graphicsFamily.push_back( i );
         }
 
+        if ( queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_COMPUTE_BIT ) {
+            indices.computeFamily.push_back( i );
+        }
+
         // Find a queue family that supports presenting to the VUlkan surface
         VkBool32 presentSupport = false;
         vkGetPhysicalDeviceSurfaceSupportKHR( device, i, surface, &presentSupport );
@@ -1054,10 +1060,13 @@ void utils::transitionImageLayout( RenderDevice *renderDevice, VkImage image, Vk
 
     vkCmdPipelineBarrier(
         commandBuffer,
-        sourceStage, destinationStage,
+        sourceStage,
+        destinationStage,
         0,
-        0, nullptr,
-        0, nullptr,
+        0,
+        nullptr,
+        0,
+        nullptr,
         1,
         &barrier );
 

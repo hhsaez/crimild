@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the copyright holder nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -31,97 +31,105 @@
 #include "Foundation/VulkanObject.hpp"
 #include "Rendering/VulkanCommandBuffer.hpp"
 #include "Rendering/VulkanCommandPool.hpp"
+#include "Rendering/VulkanComputePipeline.hpp"
 #include "Rendering/VulkanDescriptorPool.hpp"
 #include "Rendering/VulkanDescriptorSet.hpp"
 #include "Rendering/VulkanDescriptorSetLayout.hpp"
 #include "Rendering/VulkanFence.hpp"
 #include "Rendering/VulkanFramebuffer.hpp"
+#include "Rendering/VulkanGraphicsPipeline.hpp"
 #include "Rendering/VulkanImage.hpp"
 #include "Rendering/VulkanImageView.hpp"
 #include "Rendering/VulkanIndexBuffer.hpp"
-#include "Rendering/VulkanPipeline.hpp"
 #include "Rendering/VulkanPipelineLayout.hpp"
 #include "Rendering/VulkanRenderPass.hpp"
 #include "Rendering/VulkanSampler.hpp"
 #include "Rendering/VulkanSemaphore.hpp"
 #include "Rendering/VulkanShaderModule.hpp"
+#include "Rendering/VulkanStorageBuffer.hpp"
 #include "Rendering/VulkanSwapchain.hpp"
 #include "Rendering/VulkanTexture.hpp"
-#include "Rendering/VulkanVertexBuffer.hpp"
 #include "Rendering/VulkanUniformBuffer.hpp"
+#include "Rendering/VulkanVertexBuffer.hpp"
 
 #include <vector>
 
 namespace crimild {
 
-	namespace vulkan {
+    namespace vulkan {
 
         class PhysicalDevice;
         class RenderDeviceManager;
-		class VulkanInstance;
-		class VulkanSurface;
+        class VulkanInstance;
+        class VulkanSurface;
 
-        class RenderDevice :
-        	public VulkanObject,
-        	public CommandBufferManager,
-        	public CommandPoolManager,
-            public DescriptorPoolManager,
-            public DescriptorSetManager,
-            public DescriptorSetLayoutManager,
-        	public SwapchainManager,
-            public FenceManager,
-        	public FramebufferManager,
-            public ImageManager,
-        	public ImageViewManager,
-            public IndexBufferManager,
-        	public PipelineManager,
-        	public PipelineLayoutManager,
-            public RenderPassManager,
-			public SamplerManager,
-        	public SemaphoreManager,
-        	public ShaderModuleManager,
-            public TextureManager,
-            public UniformBufferManager,
-            public VertexBufferManager {
+        class RenderDevice
+            : public VulkanObject,
+              public CommandBufferManager,
+              public CommandPoolManager,
+              public DescriptorPoolManager,
+              public DescriptorSetManager,
+              public DescriptorSetLayoutManager,
+              public SwapchainManager,
+              public FenceManager,
+              public FramebufferManager,
+              public ImageManager,
+              public ImageViewManager,
+              public IndexBufferManager,
+              public GraphicsPipelineManager,
+              public ComputePipelineManager,
+              public PipelineLayoutManager,
+              public RenderPassManager,
+              public SamplerManager,
+              public SemaphoreManager,
+              public ShaderModuleManager,
+              public StorageBufferManager,
+              public TextureManager,
+              public UniformBufferManager,
+              public VertexBufferManager {
             CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::RenderDevice )
 
         public:
-            using CommandBufferManager::getHandler;
             using CommandBufferManager::bind;
+            using CommandBufferManager::getHandler;
             using CommandPoolManager::create;
+            using ComputePipelineManager::bind;
+            using ComputePipelineManager::getBindInfo;
             using DescriptorPoolManager::getHandler;
-            using DescriptorSetManager::getHandler;
-            using DescriptorSetManager::bind;
-            using DescriptorSetLayoutManager::getHandler;
             using DescriptorSetLayoutManager::bind;
-            using SwapchainManager::create;
+            using DescriptorSetLayoutManager::getHandler;
+            using DescriptorSetManager::bind;
+            using DescriptorSetManager::getHandler;
             using FenceManager::create;
-            using FramebufferManager::getHandler;
             using FramebufferManager::bind;
+            using FramebufferManager::getHandler;
+            using GraphicsPipelineManager::bind;
+            using GraphicsPipelineManager::getBindInfo;
             using ImageManager::bind;
             using ImageManager::getBindInfo;
             using ImageManager::setBindInfo;
             using ImageViewManager::bind;
             using ImageViewManager::getBindInfo;
-			using ImageViewManager::unbind;
-            using IndexBufferManager::getBindInfo;
+            using ImageViewManager::unbind;
             using IndexBufferManager::bind;
-            using PipelineManager::getBindInfo;
-            using PipelineManager::bind;
+            using IndexBufferManager::getBindInfo;
             using PipelineLayoutManager::create;
             using RenderPassManager::bind;
             using RenderPassManager::getBindInfo;
-			using SamplerManager::bind;
-			using SamplerManager::getBindInfo;
-			using SamplerManager::unbind;
+            using SamplerManager::bind;
+            using SamplerManager::getBindInfo;
+            using SamplerManager::unbind;
             using SemaphoreManager::create;
             using ShaderModuleManager::create;
+            using StorageBufferManager::bind;
+            using StorageBufferManager::getBindInfo;
+            using SwapchainManager::create;
             using TextureManager::bind;
             using TextureManager::getBindInfo;
-            using UniformBufferManager::getBindInfo;
             using UniformBufferManager::bind;
-            using VertexBufferManager::getBindInfo;
+            using UniformBufferManager::getBindInfo;
             using VertexBufferManager::bind;
+            using VertexBufferManager::getBindInfo;
 
             struct Descriptor {
                 PhysicalDevice *physicalDevice;
@@ -136,17 +144,20 @@ namespace crimild {
             VulkanSurface *surface = nullptr;
             RenderDeviceManager *manager = nullptr;
             VkQueue graphicsQueue;
+            VkQueue computeQueue;
             VkQueue presentQueue;
 
         public:
             void submitGraphicsCommands( const Semaphore *wait, CommandBuffer *commandBuffer, crimild::UInt32 imageIndex, const Semaphore *signal, const Fence *fence ) noexcept;
+            void submitComputeCommands( CommandBuffer *commands ) noexcept;
             void submit( CommandBuffer *commands, crimild::Bool wait ) noexcept;
             void waitIdle( void ) const noexcept;
         };
 
         class RenderDeviceManager : public VulkanObjectManager< RenderDevice > {
         public:
-            explicit RenderDeviceManager( PhysicalDevice *physicalDevice = nullptr ) noexcept : m_physicalDevice( physicalDevice ) { }
+            explicit RenderDeviceManager( PhysicalDevice *physicalDevice = nullptr ) noexcept
+                : m_physicalDevice( physicalDevice ) { }
             virtual ~RenderDeviceManager( void ) = default;
 
             SharedPointer< RenderDevice > create( RenderDevice::Descriptor const &descriptor ) noexcept;
@@ -156,9 +167,8 @@ namespace crimild {
             PhysicalDevice *m_physicalDevice = nullptr;
         };
 
-	}
+    }
 
 }
-	
+
 #endif
-	

@@ -25,21 +25,22 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "VulkanPipeline.hpp"
-#include "VulkanRenderDevice.hpp"
-#include "VulkanPhysicalDevice.hpp"
+#include "VulkanGraphicsPipeline.hpp"
+
+#include "Foundation/Log.hpp"
 #include "Rendering/RenderPass.hpp"
 #include "Rendering/Shader.hpp"
 #include "Rendering/ShaderProgram.hpp"
-#include "Foundation/Log.hpp"
+#include "VulkanPhysicalDevice.hpp"
+#include "VulkanRenderDevice.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;
 
-crimild::Bool PipelineManager::bind( Pipeline *pipeline ) noexcept
+crimild::Bool GraphicsPipelineManager::bind( GraphicsPipeline *graphicsPipeline ) noexcept
 {
-    if ( validate( pipeline ) ) {
-        // Pipeline already bound
+    if ( validate( graphicsPipeline ) ) {
+        // GraphicsPipeline already bound
         return true;
     }
 
@@ -50,36 +51,34 @@ crimild::Bool PipelineManager::bind( Pipeline *pipeline ) noexcept
         return false;
     }
 
-    // WARNING: all of these config params are used when creating the pipeline and
+    // WARNING: all of these config params are used when creating the graphicsPipeline and
     // they must be alive when vkCreatePipeline is called. Beware of scopes!
-    auto shaderModules = createShaderModules( renderDevice, crimild::get_ptr( pipeline->program ) );
+    auto shaderModules = createShaderModules( renderDevice, graphicsPipeline->getProgram() );
     auto shaderStages = createShaderStages( shaderModules );
-    auto vertexBindingDescriptions = getVertexInputBindingDescriptions( pipeline );
-    auto vertexAttributeDescriptions = getVertexInputAttributeDescriptions( renderDevice, pipeline );
+    auto vertexBindingDescriptions = getVertexInputBindingDescriptions( graphicsPipeline );
+    auto vertexAttributeDescriptions = getVertexInputAttributeDescriptions( renderDevice, graphicsPipeline );
     auto vertexInputInfo = createVertexInput( vertexBindingDescriptions, vertexAttributeDescriptions );
-    auto inputAssembly = createInputAssemby( pipeline->primitiveType );
-    auto viewport = createViewport( pipeline->viewport );
-    auto scissor = createScissor( pipeline->scissor );
-    auto viewportState = pipeline->viewport.scalingMode != ScalingMode::DYNAMIC
-    	? createViewportState( viewport, scissor )
-    	: createDynamicViewportState( true, true );
-    auto rasterizer = createRasterizer( pipeline );
+    auto inputAssembly = createInputAssemby( graphicsPipeline->primitiveType );
+    auto viewport = createViewport( graphicsPipeline->viewport );
+    auto scissor = createScissor( graphicsPipeline->scissor );
+    auto viewportState = graphicsPipeline->viewport.scalingMode != ScalingMode::DYNAMIC
+                             ? createViewportState( viewport, scissor )
+                             : createDynamicViewportState( true, true );
+    auto rasterizer = createRasterizer( graphicsPipeline );
     auto multisampleState = createMultiplesampleState();
-    auto depthStencilState = createDepthStencilState( pipeline );
-    auto colorBlendAttachment = createColorBlendAttachment( pipeline );
+    auto depthStencilState = createDepthStencilState( graphicsPipeline );
+    auto colorBlendAttachment = createColorBlendAttachment( graphicsPipeline );
     auto colorBlending = createColorBlending( colorBlendAttachment );
-    auto dynamicStates = getDynamicStates( pipeline );
+    auto dynamicStates = getDynamicStates( graphicsPipeline );
     auto dynamicState = createDynamicState( dynamicStates );
 
     auto pipelineLayout = renderDevice->create(
         PipelineLayout::Descriptor {
-            .setLayouts = pipeline->program->descriptorSetLayouts.map(
-            	[]( auto &layout ) {
-                	return crimild::get_ptr( layout );
-            	}
-            ),
-        }
-    );
+            .setLayouts = graphicsPipeline->getProgram()->descriptorSetLayouts.map(
+                []( auto &layout ) {
+                    return crimild::get_ptr( layout );
+                } ),
+        } );
 
     auto renderPass = renderDevice->getBindInfo( renderDevice->getCurrentRenderPass() );
 
@@ -99,39 +98,36 @@ crimild::Bool PipelineManager::bind( Pipeline *pipeline ) noexcept
         .renderPass = renderPass.handler,
         .subpass = 0,
         .basePipelineHandle = VK_NULL_HANDLE, // Optional
-        .basePipelineIndex = -1, // Optional
+        .basePipelineIndex = -1,              // Optional
     };
 
     VkPipeline pipelineHander;
     CRIMILD_VULKAN_CHECK(
-         vkCreateGraphicsPipelines(
+        vkCreateGraphicsPipelines(
             renderDevice->handler,
-               VK_NULL_HANDLE,
-               1,
-               &createInfo,
-               nullptr,
-               &pipelineHander
-           )
-    );
+            VK_NULL_HANDLE,
+            1,
+            &createInfo,
+            nullptr,
+            &pipelineHander ) );
 
     setBindInfo(
-        pipeline,
-           {
+        graphicsPipeline,
+        {
             .pipelineHandler = pipelineHander,
             .pipelineLayout = pipelineLayout,
-        }
-    );
+        } );
 
-    return ManagerImpl::bind( pipeline );
+    return ManagerImpl::bind( graphicsPipeline );
 }
 
-crimild::Bool PipelineManager::unbind( Pipeline *pipeline ) noexcept
+crimild::Bool GraphicsPipelineManager::unbind( GraphicsPipeline *graphicsPipeline ) noexcept
 {
-    if ( !validate( pipeline ) ) {
+    if ( !validate( graphicsPipeline ) ) {
         return false;
     }
 
-    CRIMILD_LOG_TRACE( "Unbind Vulkan pipeline" );
+    CRIMILD_LOG_TRACE( "Unbind Vulkan graphicsPipeline" );
 
     auto renderDevice = getRenderDevice();
     if ( renderDevice == nullptr ) {
@@ -139,20 +135,19 @@ crimild::Bool PipelineManager::unbind( Pipeline *pipeline ) noexcept
         return false;
     }
 
-    auto bindInfo = getBindInfo( pipeline );
+    auto bindInfo = getBindInfo( graphicsPipeline );
 
     vkDestroyPipeline(
         renderDevice->handler,
         bindInfo.pipelineHandler,
-        nullptr
-    );
+        nullptr );
 
-    removeBindInfo( pipeline );
+    removeBindInfo( graphicsPipeline );
 
-    return ManagerImpl::unbind( pipeline );
+    return ManagerImpl::unbind( graphicsPipeline );
 }
 
-PipelineManager::ShaderModuleArray PipelineManager::createShaderModules( RenderDevice *renderDevice, ShaderProgram *program ) const noexcept
+GraphicsPipelineManager::ShaderModuleArray GraphicsPipelineManager::createShaderModules( RenderDevice *renderDevice, ShaderProgram *program ) const noexcept
 {
     CRIMILD_LOG_TRACE( "Creating shader modules" );
 
@@ -162,18 +157,16 @@ PipelineManager::ShaderModuleArray PipelineManager::createShaderModules( RenderD
     program->getShaders().each( [ &modules, renderDevice ]( SharedPointer< Shader > &shader ) {
         auto module = renderDevice->create(
             ShaderModule::Descriptor {
-                .shader = crimild::get_ptr( shader )
-            }
-           );
+                .shader = crimild::get_ptr( shader ) } );
         if ( module != nullptr ) {
             modules.push_back( module );
         }
-    });
+    } );
 
     return modules;
 }
 
-PipelineManager::ShaderStageArray PipelineManager::createShaderStages( const ShaderModuleArray &modules ) const noexcept
+GraphicsPipelineManager::ShaderStageArray GraphicsPipelineManager::createShaderStages( const ShaderModuleArray &modules ) const noexcept
 {
     CRIMILD_LOG_TRACE( "Creating shader stages" );
 
@@ -190,43 +183,39 @@ PipelineManager::ShaderStageArray PipelineManager::createShaderStages( const Sha
     return shaderStages;
 }
 
-Array< VkVertexInputBindingDescription > PipelineManager::getVertexInputBindingDescriptions( Pipeline *pipeline ) const noexcept
+Array< VkVertexInputBindingDescription > GraphicsPipelineManager::getVertexInputBindingDescriptions( GraphicsPipeline *graphicsPipeline ) const noexcept
 {
-    return pipeline->program->vertexLayouts.map(
-        [&, binding = 0]( const auto &layout ) mutable {
+    return graphicsPipeline->getProgram()->vertexLayouts.map(
+        [ &, binding = 0 ]( const auto &layout ) mutable {
             return VkVertexInputBindingDescription {
                 .binding = uint32_t( binding++ ),
                 .stride = layout.getSize(),
                 .inputRate = VK_VERTEX_INPUT_RATE_VERTEX,
             };
-        }
-    );
+        } );
 }
 
-Array< VkVertexInputAttributeDescription > PipelineManager::getVertexInputAttributeDescriptions( RenderDevice *renderDevice, Pipeline *pipeline ) const noexcept
+Array< VkVertexInputAttributeDescription > GraphicsPipelineManager::getVertexInputAttributeDescriptions( RenderDevice *renderDevice, GraphicsPipeline *graphicsPipeline ) const noexcept
 {
     Array< VkVertexInputAttributeDescription > attributeDescriptions;
-    pipeline->program->vertexLayouts.each(
-        [&, binding = 0 ]( const auto &layout ) mutable {
+    graphicsPipeline->getProgram()->vertexLayouts.each(
+        [ &, binding = 0 ]( const auto &layout ) mutable {
             layout.eachAttribute(
-                [&, location = 0]( const auto &attrib ) mutable {
+                [ &, location = 0 ]( const auto &attrib ) mutable {
                     attributeDescriptions.add(
                         VkVertexInputAttributeDescription {
                             .binding = crimild::UInt32( binding ),
                             .location = crimild::UInt32( location++ ),
                             .format = utils::getFormat( renderDevice, attrib.format ),
                             .offset = attrib.offset,
-                        }
-                    );
-                }
-            );
+                        } );
+                } );
             binding++;
-        }
-    );
+        } );
     return attributeDescriptions;
 }
 
-VkPipelineVertexInputStateCreateInfo PipelineManager::createVertexInput( const Array< VkVertexInputBindingDescription > &bindingDescriptions, const Array< VkVertexInputAttributeDescription > &attributeDescriptions ) const noexcept
+VkPipelineVertexInputStateCreateInfo GraphicsPipelineManager::createVertexInput( const Array< VkVertexInputBindingDescription > &bindingDescriptions, const Array< VkVertexInputAttributeDescription > &attributeDescriptions ) const noexcept
 {
     return VkPipelineVertexInputStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
@@ -237,7 +226,7 @@ VkPipelineVertexInputStateCreateInfo PipelineManager::createVertexInput( const A
     };
 }
 
-VkPipelineInputAssemblyStateCreateInfo PipelineManager::createInputAssemby( Primitive::Type primitiveType ) const noexcept
+VkPipelineInputAssemblyStateCreateInfo GraphicsPipelineManager::createInputAssemby( Primitive::Type primitiveType ) const noexcept
 {
     VkPrimitiveTopology topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
     VkBool32 restartEnable = VK_FALSE;
@@ -277,17 +266,17 @@ VkPipelineInputAssemblyStateCreateInfo PipelineManager::createInputAssemby( Prim
     };
 }
 
-VkViewport PipelineManager::createViewport( const ViewportDimensions &viewport ) const noexcept
+VkViewport GraphicsPipelineManager::createViewport( const ViewportDimensions &viewport ) const noexcept
 {
     return utils::getViewport( &viewport, getRenderDevice() );
 }
 
-VkRect2D PipelineManager::createScissor( const ViewportDimensions &scissor ) const noexcept
+VkRect2D GraphicsPipelineManager::createScissor( const ViewportDimensions &scissor ) const noexcept
 {
     return utils::getScissor( &scissor, getRenderDevice() );
 }
 
-VkPipelineViewportStateCreateInfo PipelineManager::createViewportState( const VkViewport &viewport, const VkRect2D &scissor ) const noexcept
+VkPipelineViewportStateCreateInfo GraphicsPipelineManager::createViewportState( const VkViewport &viewport, const VkRect2D &scissor ) const noexcept
 {
     return VkPipelineViewportStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
@@ -299,7 +288,7 @@ VkPipelineViewportStateCreateInfo PipelineManager::createViewportState( const Vk
     };
 }
 
-VkPipelineViewportStateCreateInfo PipelineManager::createDynamicViewportState( crimild::Bool hasViewport, crimild::Bool hasScissor ) const noexcept
+VkPipelineViewportStateCreateInfo GraphicsPipelineManager::createDynamicViewportState( crimild::Bool hasViewport, crimild::Bool hasScissor ) const noexcept
 {
     return VkPipelineViewportStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
@@ -311,7 +300,7 @@ VkPipelineViewportStateCreateInfo PipelineManager::createDynamicViewportState( c
     };
 }
 
-VkPipelineRasterizationStateCreateInfo PipelineManager::createRasterizer( Pipeline *pipeline ) const noexcept
+VkPipelineRasterizationStateCreateInfo GraphicsPipelineManager::createRasterizer( GraphicsPipeline *graphicsPipeline ) const noexcept
 {
     static auto getVkPolygonMode = []( auto input ) {
         switch ( input ) {
@@ -352,7 +341,7 @@ VkPipelineRasterizationStateCreateInfo PipelineManager::createRasterizer( Pipeli
         }
     };
 
-    auto &rasterizationState = pipeline->rasterizationState;
+    auto &rasterizationState = graphicsPipeline->rasterizationState;
 
     return VkPipelineRasterizationStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
@@ -369,7 +358,7 @@ VkPipelineRasterizationStateCreateInfo PipelineManager::createRasterizer( Pipeli
     };
 }
 
-VkPipelineMultisampleStateCreateInfo PipelineManager::createMultiplesampleState( void ) const noexcept
+VkPipelineMultisampleStateCreateInfo GraphicsPipelineManager::createMultiplesampleState( void ) const noexcept
 {
     auto renderDevice = getRenderDevice();
     auto physicalDevice = renderDevice->physicalDevice;
@@ -386,9 +375,9 @@ VkPipelineMultisampleStateCreateInfo PipelineManager::createMultiplesampleState(
     };
 }
 
-VkPipelineDepthStencilStateCreateInfo PipelineManager::createDepthStencilState( Pipeline *pipeline ) const noexcept
+VkPipelineDepthStencilStateCreateInfo GraphicsPipelineManager::createDepthStencilState( GraphicsPipeline *graphicsPipeline ) const noexcept
 {
-    auto &state = pipeline->depthStencilState;
+    auto &state = graphicsPipeline->depthStencilState;
 
     static auto getStencilOp = []( auto in ) {
         switch ( in ) {
@@ -440,9 +429,9 @@ VkPipelineDepthStencilStateCreateInfo PipelineManager::createDepthStencilState( 
     };
 }
 
-VkPipelineColorBlendAttachmentState PipelineManager::createColorBlendAttachment( Pipeline *pipeline ) const noexcept
+VkPipelineColorBlendAttachmentState GraphicsPipelineManager::createColorBlendAttachment( GraphicsPipeline *graphicsPipeline ) const noexcept
 {
-    auto &state = pipeline->colorBlendState;
+    auto &state = graphicsPipeline->colorBlendState;
 
     static auto getVkBlendFactor = []( auto input ) {
         switch ( input ) {
@@ -519,7 +508,7 @@ VkPipelineColorBlendAttachmentState PipelineManager::createColorBlendAttachment(
     };
 }
 
-VkPipelineColorBlendStateCreateInfo PipelineManager::createColorBlending( const VkPipelineColorBlendAttachmentState &colorBlendAttachment ) const noexcept
+VkPipelineColorBlendStateCreateInfo GraphicsPipelineManager::createColorBlending( const VkPipelineColorBlendAttachmentState &colorBlendAttachment ) const noexcept
 {
     return VkPipelineColorBlendStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
@@ -534,22 +523,22 @@ VkPipelineColorBlendStateCreateInfo PipelineManager::createColorBlending( const 
     };
 }
 
-PipelineManager::DynamicStates PipelineManager::getDynamicStates( Pipeline *pipeline ) const noexcept
+GraphicsPipelineManager::DynamicStates GraphicsPipelineManager::getDynamicStates( GraphicsPipeline *graphicsPipeline ) const noexcept
 {
     std::vector< VkDynamicState > dynamicStates;
 
-    if ( pipeline->viewport.scalingMode == ScalingMode::DYNAMIC ) {
+    if ( graphicsPipeline->viewport.scalingMode == ScalingMode::DYNAMIC ) {
         dynamicStates.push_back( VK_DYNAMIC_STATE_VIEWPORT );
     }
 
-    if ( pipeline->scissor.scalingMode == ScalingMode::DYNAMIC ) {
+    if ( graphicsPipeline->scissor.scalingMode == ScalingMode::DYNAMIC ) {
         dynamicStates.push_back( VK_DYNAMIC_STATE_SCISSOR );
     }
 
     return dynamicStates;
 }
 
-VkPipelineDynamicStateCreateInfo PipelineManager::createDynamicState( DynamicStates &dynamicStates ) const noexcept
+VkPipelineDynamicStateCreateInfo GraphicsPipelineManager::createDynamicState( DynamicStates &dynamicStates ) const noexcept
 {
     return VkPipelineDynamicStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,

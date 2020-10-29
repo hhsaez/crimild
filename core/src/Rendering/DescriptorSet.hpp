@@ -28,9 +28,9 @@
 #ifndef CRIMILD_RENDERING_DESCRIPTOR_SET_
 #define CRIMILD_RENDERING_DESCRIPTOR_SET_
 
+#include "Foundation/SharedObject.hpp"
 #include "Rendering/RenderResource.hpp"
 #include "Rendering/Shader.hpp"
-#include "Foundation/SharedObject.hpp"
 
 namespace crimild {
 
@@ -41,23 +41,23 @@ namespace crimild {
 
     /**
         \brief Descriptor types
-     
+
         The most common descriptor types are TEXTURE and UNFORM_BUFFER.
         Special types are added for known descriptors, which can help to
         better classify shaders, pipelines and materials when recording
         render commands.
 
         For example, if a descriptor set includes a descriptor of type METALLIC_MAP,
-        we can assume that object should use the PBR workflow. On the other hand, 
+        we can assume that object should use the PBR workflow. On the other hand,
         if no SHADOW_ATLAS descriptor is present, then we can safely assume the shader
         won't compute shadows at all.
 
         A render pass could use this information when rendering a scene to create
         descriptor sets on-the-fly if needed too.
-     */ 
+     */
     enum class DescriptorType {
         TEXTURE,
-        
+
         // Special per-material textures
         DIFFUSE_MAP,
         SPECULAR_MAP,
@@ -66,7 +66,7 @@ namespace crimild {
         METALLIC_MAP,
         ROUGHNESS_MAP,
         AMBIENT_OCCLUSION_MAP,
-        
+
         // Special per-render pass textures
         SHADOW_ATLAS,
         REFLECTION_ATLAS,
@@ -74,7 +74,9 @@ namespace crimild {
         PREFILTER_ATLAS,
         BRDF_LUT,
 
-		UNIFORM_BUFFER,
+        UNIFORM_BUFFER,
+
+        STORAGE_BUFFER,
     };
 
     class DescriptorSetLayout : public SharedObject, public RenderResourceImpl< DescriptorSetLayout > {
@@ -92,19 +94,19 @@ namespace crimild {
 
     struct Descriptor {
         DescriptorType descriptorType;
-		SharedPointer< SharedObject > obj;
-
-		template< typename T >
-		inline T *get( void ) noexcept
-		{
-			return static_cast< T * >( crimild::get_ptr( obj ) );
-		}
+        SharedPointer< SharedObject > obj;
 
         template< typename T >
-		inline const T *get( void ) const noexcept
-		{
-			return static_cast< T * >( crimild::get_ptr( obj ) );
-		}
+        inline T *get( void ) noexcept
+        {
+            return static_cast< T * >( crimild::get_ptr( obj ) );
+        }
+
+        template< typename T >
+        inline const T *get( void ) const noexcept
+        {
+            return static_cast< T * >( crimild::get_ptr( obj ) );
+        }
     };
 
     class DescriptorPool : public SharedObject, public RenderResourceImpl< DescriptorPool > {
@@ -113,8 +115,8 @@ namespace crimild {
     };
 
     class DescriptorSet : public SharedObject, public RenderResourceImpl< DescriptorSet > {
-	private:
-		using DescriptorArray = Array< Descriptor >;
+    private:
+        using DescriptorArray = Array< Descriptor >;
 
     public:
         virtual ~DescriptorSet( void ) = default;
@@ -135,9 +137,8 @@ namespace crimild {
         */
         SharedPointer< DescriptorPool > pool;
 
-		DescriptorArray descriptors;
+        DescriptorArray descriptors;
     };
-
 
 }
 

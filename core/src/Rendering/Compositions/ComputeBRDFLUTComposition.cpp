@@ -54,10 +54,10 @@ Composition crimild::compositions::computeBRDFLUT( Composition cmp ) noexcept
         }(),
     };
 
-    renderPass->setPipeline(
+    renderPass->setGraphicsPipeline(
         [] {
-            auto pipeline = crimild::alloc< Pipeline >();
-            pipeline->program = [] {
+            auto pipeline = crimild::alloc< GraphicsPipeline >();
+            pipeline->setProgram( [] {
                 auto program = crimild::alloc< ShaderProgram >(
                     Array< SharedPointer< Shader > > {
                         crimild::alloc< Shader >(
@@ -207,7 +207,7 @@ Composition crimild::compositions::computeBRDFLUT( Composition cmp ) noexcept
                     }(),
                 };
                 return program;
-            }();
+            }() );
             return pipeline;
         }() );
 
@@ -219,7 +219,7 @@ Composition crimild::compositions::computeBRDFLUT( Composition cmp ) noexcept
 
     renderPass->commands = [ & ] {
         auto commandBuffer = crimild::alloc< CommandBuffer >();
-        commandBuffer->bindGraphicsPipeline( renderPass->getPipeline() );
+        commandBuffer->bindGraphicsPipeline( renderPass->getGraphicsPipeline() );
         commandBuffer->draw( 6 );
         return commandBuffer;
     }();

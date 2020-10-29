@@ -25,70 +25,61 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CRIMILD_RENDERING_BUFFER_
-#define CRIMILD_RENDERING_BUFFER_
+#ifndef CRIMILD_RENDERING_STORAGE_BUFFER_
+#define CRIMILD_RENDERING_STORAGE_BUFFER_
 
-#include "Coding/Codable.hpp"
-#include "Foundation/Containers/Array.hpp"
-#include "Foundation/RTTI.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/Types.hpp"
-#include "Rendering/RenderResource.hpp"
+#include "Mathematics/Matrix.hpp"
+#include "Rendering/Buffer.hpp"
+#include "Rendering/BufferAccessor.hpp"
+#include "Rendering/BufferView.hpp"
 
 namespace crimild {
 
-    /**
-       \brief A buffer of linear data
-     */
-    class Buffer
+    class StorageBuffer
         : public coding::Codable,
-          public RenderResourceImpl< Buffer > {
-        CRIMILD_IMPLEMENT_RTTI( crimild::Buffer )
+          public RenderResourceImpl< StorageBuffer > {
+        CRIMILD_IMPLEMENT_RTTI( crimild::StorageBuffer )
 
     public:
-        /**
-           \brief Initialize buffer with array of data
-
-           This is usually used for vertex or index buffers
-         */
-        template< typename DATA_TYPE >
-        explicit Buffer( Array< DATA_TYPE > const &data )
-            : m_data( sizeof( DATA_TYPE ) * data.size() )
+        template< typename T >
+        explicit StorageBuffer( Array< T > const &data ) noexcept
         {
-            memcpy( &m_data[ 0 ], &data[ 0 ], m_data.size() );
+            auto stride = sizeof( T );
+
+            auto buffer = crimild::alloc< Buffer >( data );
+
+            m_bufferView = crimild::alloc< BufferView >(
+                BufferView::Target::STORAGE,
+                buffer,
+                0,
+                stride );
+
+            m_accessor = crimild::alloc< BufferAccessor >(
+                m_bufferView,
+                0,
+                stride );
         }
 
-        /**
-           \brief Initialize buffer for a single value
+        virtual ~StorageBuffer( void ) = default;
 
-           This is usually used with uniform buffers
-         */
-        template< typename DATA_TYPE >
-        explicit Buffer( DATA_TYPE const &data )
-            : m_data( sizeof( DATA_TYPE ) )
+        inline Size getCount( void ) const noexcept
         {
-            memcpy( &m_data[ 0 ], &data, m_data.size() );
+            return m_bufferView->getCount();
         }
 
-        virtual ~Buffer( void ) = default;
+        inline BufferView *getBufferView( void ) noexcept { return crimild::get_ptr( m_bufferView ); }
 
-        /**
-           \brief Get size of buffer in bytes
-         */
-        inline crimild::Size getSize( void ) const noexcept { return m_data.size(); }
+        inline const BufferView *getBufferView( void ) const noexcept { return crimild::get_ptr( m_bufferView ); }
 
-        /**
-           \brief Get raw data
-         */
-        inline crimild::Byte *getData( void ) noexcept { return m_data.getData(); }
-
-        /**
-           \brief Get raw data
-         */
-        inline const crimild::Byte *getData( void ) const noexcept { return m_data.getData(); }
+        template< typename T, typename Fn >
+        void each( Fn fn ) const noexcept
+        {
+            m_accessor->each< T >( fn );
+        }
 
     private:
-        ByteArray m_data;
+        SharedPointer< BufferView > m_bufferView;
+        SharedPointer< BufferAccessor > m_accessor;
     };
 
 }

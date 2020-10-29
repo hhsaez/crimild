@@ -152,11 +152,13 @@ namespace crimild {
 
             struct QueueFamilyIndices {
                 std::vector< crimild::UInt32 > graphicsFamily;
+                std::vector< crimild::UInt32 > computeFamily;
                 std::vector< crimild::UInt32 > presentFamily;
 
                 bool isComplete( void ) const noexcept
                 {
                     return graphicsFamily.size() > 0
+                        && computeFamily.size() > 0
                         && presentFamily.size() > 0;
                 }
             };

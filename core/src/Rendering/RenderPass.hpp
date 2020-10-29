@@ -40,7 +40,7 @@ namespace crimild {
 
     class CommandBuffer;
     class DescriptorSet;
-    class Pipeline;
+    class GraphicsPipeline;
 
     class Attachment : public SharedObject,
                        public FrameGraphObjectImpl< Attachment > {
@@ -98,17 +98,17 @@ namespace crimild {
         //@{
 
     public:
-        void setPipeline( Pipeline *pipeline ) noexcept;
-        inline void setPipeline( SharedPointer< Pipeline > const &pipeline ) noexcept { m_pipeline = pipeline; }
-        inline Pipeline *getPipeline( void ) noexcept { return get_ptr( m_pipeline ); }
+        void setGraphicsPipeline( GraphicsPipeline *graphicsPipeline ) noexcept;
+        inline void setGraphicsPipeline( SharedPointer< GraphicsPipeline > const &graphicsPipeline ) noexcept { m_graphicsPipeline = graphicsPipeline; }
+        inline GraphicsPipeline *getGraphicsPipeline( void ) noexcept { return get_ptr( m_graphicsPipeline ); }
 
     private:
         /**
-           \brief Pipeline associated with this render pass, if any.
+           \brief GraphicsPipeline associated with this render pass, if any.
 
            This is optional.
          */
-        SharedPointer< Pipeline > m_pipeline;
+        SharedPointer< GraphicsPipeline > m_graphicsPipeline;
 
         //@}
 

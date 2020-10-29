@@ -68,32 +68,27 @@ static Renderables sortRenderables( Node *scene ) noexcept
             [ &ret ]( Geometry *geometry ) {
                 if ( geometry->getLayer() == Node::Layer::SKYBOX ) {
                     ret.environment.add( geometry );
-                } 
-                else if ( auto material = geometry->getComponent< MaterialComponent >()->first() ) {
+                } else if ( auto material = geometry->getComponent< MaterialComponent >()->first() ) {
                     // TODO: What if there are multiple materials?
                     // Can we add the same geometry to multiple lists? That will result
                     // in multiple render passes for a single geometry, but I don't know
-                    // if that's ok. 
-                    if ( auto pipeline = material->getPipeline() ) {
-                        if ( auto program = crimild::get_ptr( pipeline->program ) ) {
+                    // if that's ok.
+                    if ( auto pipeline = material->getGraphicsPipeline() ) {
+                        if ( auto program = crimild::get_ptr( pipeline->getProgram() ) ) {
                             program->descriptorSetLayouts.each(
                                 [ &ret, geometry ]( auto layout ) {
                                     if ( layout->bindings.filter( []( auto &binding ) { return binding.descriptorType == DescriptorType::ALBEDO_MAP; } ).size() > 0 ) {
                                         // assume PBR
                                         ret.lit.add( geometry );
-                                    }
-                                    else {
+                                    } else {
                                         // assume phong lit
                                         ret.litBasic.add( geometry );
                                     }
-                                }
-                            );
+                                } );
                         }
                     }
                 }
-            }
-        )
-    );
+            } ) );
 
     return ret;
 }
@@ -385,41 +380,38 @@ Composition crimild::compositions::renderScene( Node *scene, crimild::Bool useHD
             [ & ]( Geometry *g ) {
                 if ( auto ms = g->getComponent< MaterialComponent >() ) {
                     if ( auto material = ms->first() ) {
-                        commandBuffer->bindGraphicsPipeline( material->getPipeline() );
+                        commandBuffer->bindGraphicsPipeline( material->getGraphicsPipeline() );
                         commandBuffer->bindDescriptorSet( litBasicDescriptors );
                         commandBuffer->bindDescriptorSet( material->getDescriptors() );
                         commandBuffer->bindDescriptorSet( g->getDescriptors() );
                         commandBuffer->drawPrimitive( g->anyPrimitive() );
                     }
                 }
-            }
-        );
+            } );
         renderables.lit.each(
             [ & ]( Geometry *g ) {
                 if ( auto ms = g->getComponent< MaterialComponent >() ) {
                     if ( auto material = ms->first() ) {
-                        commandBuffer->bindGraphicsPipeline( material->getPipeline() );
+                        commandBuffer->bindGraphicsPipeline( material->getGraphicsPipeline() );
                         commandBuffer->bindDescriptorSet( litDescriptors );
                         commandBuffer->bindDescriptorSet( material->getDescriptors() );
                         commandBuffer->bindDescriptorSet( g->getDescriptors() );
                         commandBuffer->drawPrimitive( g->anyPrimitive() );
                     }
                 }
-            }
-        );
+            } );
         renderables.environment.each(
             [ & ]( Geometry *g ) {
                 if ( auto ms = g->getComponent< MaterialComponent >() ) {
                     if ( auto material = ms->first() ) {
-                        commandBuffer->bindGraphicsPipeline( material->getPipeline() );
+                        commandBuffer->bindGraphicsPipeline( material->getGraphicsPipeline() );
                         commandBuffer->bindDescriptorSet( environmentDescriptors );
                         commandBuffer->bindDescriptorSet( material->getDescriptors() );
                         commandBuffer->bindDescriptorSet( g->getDescriptors() );
                         commandBuffer->drawPrimitive( g->anyPrimitive() );
                     }
                 }
-            }
-        );
+            } );
         return commandBuffer;
     }();
 

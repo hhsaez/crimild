@@ -25,35 +25,33 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Rendering/Materials/SkyboxMaterial.hpp"
+#ifndef CRIMILD_CORE_RENDERING_COMPUTE_PASS_
+#define CRIMILD_CORE_RENDERING_COMPUTE_PASS_
 
-#include "Rendering/Pipeline.hpp"
-#include "Rendering/Programs/SkyboxShaderProgram.hpp"
-#include "Rendering/Texture.hpp"
-#include "Simulation/AssetManager.hpp"
+#include "Foundation/SharedObject.hpp"
+#include "Rendering/Format.hpp"
+#include "Rendering/FrameGraphObjectImpl.hpp"
+#include "Rendering/Image.hpp"
+#include "Rendering/ImageView.hpp"
+#include "Rendering/RenderResource.hpp"
+#include "Rendering/ViewportDimensions.hpp"
 
-using namespace crimild;
+namespace crimild {
 
-SkyboxMaterial::SkyboxMaterial( void ) noexcept
-{
-    setGraphicsPipeline(
-        [] {
-            auto pipeline = crimild::alloc< GraphicsPipeline >();
-            pipeline->primitiveType = Primitive::Type::TRIANGLES;
-            pipeline->rasterizationState.cullMode = CullMode::NONE;
-            pipeline->setProgram( crimild::retain( AssetManager::getInstance()->get< SkyboxShaderProgram >() ) );
-            return pipeline;
-        }() );
+    class CommandBuffer;
+    class DescriptorSet;
+    class Pipeline;
 
-    setDescriptors(
-        [ & ] {
-            auto descriptors = crimild::alloc< DescriptorSet >();
-            descriptors->descriptors = {
-                {
-                    .descriptorType = DescriptorType::TEXTURE,
-                    .obj = Texture::ONE,
-                },
-            };
-            return descriptors;
-        }() );
+    class ComputePass
+        : public SharedObject,
+          public RenderResourceImpl< ComputePass > {
+
+    public:
+        virtual ~ComputePass( void ) = default;
+
+        SharedPointer< CommandBuffer > commands;
+    };
+
 }
+
+#endif

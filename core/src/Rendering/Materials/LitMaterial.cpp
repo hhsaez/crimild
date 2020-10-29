@@ -38,10 +38,10 @@ using namespace crimild;
 LitMaterial::LitMaterial( void ) noexcept
 {
     // Use a default pipeline
-    setPipeline(
+    setGraphicsPipeline(
         [] {
-            auto pipeline = crimild::alloc< Pipeline >();
-            pipeline->program = crimild::retain( AssetManager::getInstance()->get< LitShaderProgram >() );
+            auto pipeline = crimild::alloc< GraphicsPipeline >();
+            pipeline->setProgram( crimild::retain( AssetManager::getInstance()->get< LitShaderProgram >() ) );
             return pipeline;
         }() );
 

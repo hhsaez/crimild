@@ -26,6 +26,7 @@
 */
 
 #include "Rendering/VulkanDescriptorSet.hpp"
+
 #include "Rendering/VulkanRenderDevice.hpp"
 
 using namespace crimild;
@@ -73,9 +74,7 @@ crimild::Bool DescriptorSetManager::bind( DescriptorSet *descriptorSet ) noexcep
             vkAllocateDescriptorSets(
                 renderDevice->handler,
                 &allocInfo,
-                &handler
-             )
-        );
+                &handler ) );
         handlers[ i ] = handler;
     }
 
@@ -133,6 +132,18 @@ crimild::Bool DescriptorSetManager::bind( DescriptorSet *descriptorSet ) noexcep
                     writes[ j ].pImageInfo = &imageInfo;
                     break;
                 }
+
+                case DescriptorType::STORAGE_BUFFER: {
+                    auto sbo = descriptor.get< StorageBuffer >();
+                    auto bufferView = sbo->getBufferView();
+                    auto bindInfo = renderDevice->getBindInfo( sbo );
+                    auto bufferHandler = bindInfo.bufferHandlers[ i ];
+                    bufferInfo.buffer = bufferHandler;
+                    bufferInfo.offset = bufferView->getOffset();
+                    bufferInfo.range = bufferView->getLength();
+                    writes[ j ].pBufferInfo = &bufferInfo;
+                    break;
+                }
             }
 
             vkUpdateDescriptorSets(
@@ -140,13 +151,11 @@ crimild::Bool DescriptorSetManager::bind( DescriptorSet *descriptorSet ) noexcep
                 1,
                 &writes[ j ],
                 0,
-                nullptr
-            );
+                nullptr );
         }
     }
 
     return ManagerImpl::bind( descriptorSet );
-
 }
 
 crimild::Bool DescriptorSetManager::unbind( DescriptorSet *descriptorSet ) noexcept
@@ -163,4 +172,3 @@ crimild::Bool DescriptorSetManager::unbind( DescriptorSet *descriptorSet ) noexc
 
     return ManagerImpl::unbind( descriptorSet );
 }
-

@@ -47,55 +47,52 @@ using namespace crimild::compositions;
 
 Composition crimild::compositions::computeReflectionMap( Composition cmp, SharedPointer< Node > const &scene ) noexcept
 {
-	return computeReflectionMap( cmp, crimild::get_ptr( scene ) );
+    return computeReflectionMap( cmp, crimild::get_ptr( scene ) );
 }
 
 Composition crimild::compositions::computeReflectionMap( Composition cmp, Node *scene ) noexcept
 {
-	auto useHDR = cmp.isHDREnabled();
+    auto useHDR = cmp.isHDREnabled();
 
-	// Computes a reflection map using only the skybox
-	Geometry *skybox = nullptr;
-	scene->perform(
-		ApplyToGeometries(
-  			[ &skybox ]( auto geometry ) {
-				if ( geometry->getLayer() == Node::Layer::SKYBOX ) {
-    				skybox = geometry;
+    // Computes a reflection map using only the skybox
+    Geometry *skybox = nullptr;
+    scene->perform(
+        ApplyToGeometries(
+            [ &skybox ]( auto geometry ) {
+                if ( geometry->getLayer() == Node::Layer::SKYBOX ) {
+                    skybox = geometry;
                 }
-    		}
-        )
-	);
+            } ) );
 
-	if ( skybox == nullptr ) {
-		CRIMILD_LOG_WARNING( "No skybox found. Reflection map cannot be computed" );
+    if ( skybox == nullptr ) {
+        CRIMILD_LOG_WARNING( "No skybox found. Reflection map cannot be computed" );
         return cmp;
     }
 
     auto recordProbeCommands = []( compositions::Composition &cmp, CommandBuffer *commandBuffer, Array< ViewportDimensions > &layout, Size offset, Geometry *skybox ) {
-
-     	auto viewports = ViewportDimensions::cubeViewportsFrom( layout[ offset++ ] );
+        auto viewports = ViewportDimensions::cubeViewportsFrom( layout[ offset++ ] );
 
         auto pMatrix = Frustumf( 90.0f, 1.0f, 0.1f, 200.0f ).computeProjectionMatrix();
         auto primitive = skybox->anyPrimitive();
         auto material = skybox->getComponent< MaterialComponent >()->first();
 
-      	for ( auto face = 0l; face < 6; ++face ) {
-       		auto viewport = viewports[ face ];
+        for ( auto face = 0l; face < 6; ++face ) {
+            auto viewport = viewports[ face ];
 
-         	commandBuffer->setViewport( viewport );
-          	commandBuffer->setScissor( viewport );
-           	commandBuffer->bindGraphicsPipeline( material->getPipeline() );
+            commandBuffer->setViewport( viewport );
+            commandBuffer->setScissor( viewport );
+            commandBuffer->bindGraphicsPipeline( material->getGraphicsPipeline() );
             commandBuffer->bindDescriptorSet(
-            	[ & ] {
-					auto ds = cmp.create< DescriptorSet >();
-     				ds->descriptors = {
+                [ & ] {
+                    auto ds = cmp.create< DescriptorSet >();
+                    ds->descriptors = {
                         {
                             .descriptorType = DescriptorType::UNIFORM_BUFFER,
                             .obj = [ & ] {
                                 struct Props {
-            						Matrix4f view;
-            						Matrix4f proj;
-        						};
+                                    Matrix4f view;
+                                    Matrix4f proj;
+                                };
 
                                 return crimild::alloc< CallbackUniformBuffer< Props > >(
                                     [ face, pMatrix ] {
@@ -129,23 +126,21 @@ Composition crimild::compositions::computeReflectionMap( Composition cmp, Node *
                                         t.setTranslate( Vector3f::ZERO ); // TODO (hernan): use probe's position
                                         auto vMatrix = t.computeModelMatrix().getInverse();
                                         return Props {
-                                        	.view = vMatrix,
-                                         	.proj = pMatrix,
+                                            .view = vMatrix,
+                                            .proj = pMatrix,
                                         };
-                                    }
-                                );
+                                    } );
                             }(),
                         },
                     };
                     return ds;
-            	}()
-            );
+                }() );
             commandBuffer->bindDescriptorSet( material->getDescriptors() );
             commandBuffer->bindDescriptorSet( skybox->getDescriptors() );
             commandBuffer->drawPrimitive( crimild::get_ptr( primitive ) );
         }
 
-		return offset;
+        return offset;
     };
 
     // TODO: when creating the probe atlas, we can compute
@@ -189,12 +184,11 @@ Composition crimild::compositions::computeReflectionMap( Composition cmp, Node *
 
         auto offset = 0l;
         offset = recordProbeCommands(
-        	cmp,
-         	crimild::get_ptr( commandBuffer ),
+            cmp,
+            crimild::get_ptr( commandBuffer ),
             viewportLayout,
             offset,
-            skybox
-        );
+            skybox );
 
         return commandBuffer;
     }();
@@ -203,4 +197,3 @@ Composition crimild::compositions::computeReflectionMap( Composition cmp, Node *
 
     return cmp;
 }
-
