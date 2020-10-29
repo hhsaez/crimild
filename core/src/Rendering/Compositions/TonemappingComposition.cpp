@@ -80,89 +80,90 @@ Composition crimild::compositions::tonemapping( Composition cmp, crimild::Real32
             return descriptorSet;
         }() );
 
-    renderPass->setPipeline(
+    renderPass->setGraphicsPipeline(
         [] {
-            auto pipeline = crimild::alloc< Pipeline >();
-            pipeline->program = [] {
-                auto program = crimild::alloc< ShaderProgram >(
-                    Array< SharedPointer< Shader > > {
-                        crimild::alloc< Shader >(
-                            Shader::Stage::VERTEX,
-                            CRIMILD_TO_STRING(
-                                vec2 positions[ 6 ] = vec2[](
-                                    vec2( -1.0, 1.0 ),
-                                    vec2( -1.0, -1.0 ),
-                                    vec2( 1.0, -1.0 ),
-
-                                    vec2( -1.0, 1.0 ),
-                                    vec2( 1.0, -1.0 ),
-                                    vec2( 1.0, 1.0 ) );
-
-                                vec2 texCoords[ 6 ] = vec2[](
-                                    vec2( 0.0, 0.0 ),
-                                    vec2( 0.0, 1.0 ),
-                                    vec2( 1.0, 1.0 ),
-
-                                    vec2( 0.0, 0.0 ),
-                                    vec2( 1.0, 1.0 ),
-                                    vec2( 1.0, 0.0 ) );
-
-                                layout( location = 0 ) out vec2 outTexCoord;
-
-                                void main() {
-                                    gl_Position = vec4( positions[ gl_VertexIndex ], 0.0, 1.0 );
-                                    outTexCoord = texCoords[ gl_VertexIndex ];
-                                } ) ),
+            auto pipeline = crimild::alloc< GraphicsPipeline >();
+            pipeline->setProgram(
+                [] {
+                    auto program = crimild::alloc< ShaderProgram >(
+                        Array< SharedPointer< Shader > > {
                             crimild::alloc< Shader >(
-                                Shader::Stage::FRAGMENT,
+                                Shader::Stage::VERTEX,
                                 CRIMILD_TO_STRING(
-                                    layout( location = 0 ) in vec2 inTexCoord;
+                                    vec2 positions[ 6 ] = vec2[](
+                                        vec2( -1.0, 1.0 ),
+                                        vec2( -1.0, -1.0 ),
+                                        vec2( 1.0, -1.0 ),
 
-                                    layout( set = 0, binding = 0 ) uniform Uniforms {
-                                        float exposure;
-                                    };
+                                        vec2( -1.0, 1.0 ),
+                                        vec2( 1.0, -1.0 ),
+                                        vec2( 1.0, 1.0 ) );
 
-                                    layout( set = 0, binding = 1 ) uniform sampler2D uHDRMap;
+                                    vec2 texCoords[ 6 ] = vec2[](
+                                        vec2( 0.0, 0.0 ),
+                                        vec2( 0.0, 1.0 ),
+                                        vec2( 1.0, 1.0 ),
 
-                                    layout( location = 0 ) out vec4 outColor;
+                                        vec2( 0.0, 0.0 ),
+                                        vec2( 1.0, 1.0 ),
+                                        vec2( 1.0, 0.0 ) );
+
+                                    layout( location = 0 ) out vec2 outTexCoord;
 
                                     void main() {
-                                        const float gamma = 2.2;
-
-                                        // Reinhard tone mapping
-                                        vec3 hdrColor = texture( uHDRMap, inTexCoord ).rgb;
-                                        vec3 mapped = vec3( 1.0 ) - exp( -hdrColor * exposure );
-
-                                        // Gamma correction
-                                        mapped = pow( mapped, vec3( 1.0 / gamma ) );
-
-                                        outColor = vec4( mapped, 1.0 );
+                                        gl_Position = vec4( positions[ gl_VertexIndex ], 0.0, 1.0 );
+                                        outTexCoord = texCoords[ gl_VertexIndex ];
                                     } ) ),
-                    } );
-                program->descriptorSetLayouts = {
-                    [] {
-                        auto layout = crimild::alloc< DescriptorSetLayout >();
-                        layout->bindings = {
-                            {
-                                .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                                .stage = Shader::Stage::FRAGMENT,
-                            },
-                            {
-                                .descriptorType = DescriptorType::TEXTURE,
-                                .stage = Shader::Stage::FRAGMENT,
-                            },
-                        };
-                        return layout;
-                    }(),
-                };
-                return program;
-            }();
+                                crimild::alloc< Shader >(
+                                    Shader::Stage::FRAGMENT,
+                                    CRIMILD_TO_STRING(
+                                        layout( location = 0 ) in vec2 inTexCoord;
+
+                                        layout( set = 0, binding = 0 ) uniform Uniforms {
+                                            float exposure;
+                                        };
+
+                                        layout( set = 0, binding = 1 ) uniform sampler2D uHDRMap;
+
+                                        layout( location = 0 ) out vec4 outColor;
+
+                                        void main() {
+                                            const float gamma = 2.2;
+
+                                            // Reinhard tone mapping
+                                            vec3 hdrColor = texture( uHDRMap, inTexCoord ).rgb;
+                                            vec3 mapped = vec3( 1.0 ) - exp( -hdrColor * exposure );
+
+                                            // Gamma correction
+                                            mapped = pow( mapped, vec3( 1.0 / gamma ) );
+
+                                            outColor = vec4( mapped, 1.0 );
+                                        } ) ),
+                        } );
+                    program->descriptorSetLayouts = {
+                        [] {
+                            auto layout = crimild::alloc< DescriptorSetLayout >();
+                            layout->bindings = {
+                                {
+                                    .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                                    .stage = Shader::Stage::FRAGMENT,
+                                },
+                                {
+                                    .descriptorType = DescriptorType::TEXTURE,
+                                    .stage = Shader::Stage::FRAGMENT,
+                                },
+                            };
+                            return layout;
+                        }(),
+                    };
+                    return program;
+                }() );
             return pipeline;
         }() );
 
     renderPass->commands = [ & ] {
         auto commandBuffer = crimild::alloc< CommandBuffer >();
-        commandBuffer->bindGraphicsPipeline( renderPass->getPipeline() );
+        commandBuffer->bindGraphicsPipeline( renderPass->getGraphicsPipeline() );
         commandBuffer->bindDescriptorSet( renderPass->getDescriptors() );
         commandBuffer->draw( 6 );
         return commandBuffer;

@@ -28,15 +28,15 @@
 #ifndef CRIMILD_RENDERING_PIPELINE_
 #define CRIMILD_RENDERING_PIPELINE_
 
+#include "Foundation/SharedObject.hpp"
+#include "Mathematics/Rect.hpp"
+#include "Primitives/Primitive.hpp"
 #include "Rendering/ColorBlendState.hpp"
 #include "Rendering/DepthStencilState.hpp"
 #include "Rendering/RasterizationState.hpp"
 #include "Rendering/RenderResource.hpp"
 #include "Rendering/VertexBuffer.hpp"
 #include "Rendering/ViewportDimensions.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Primitives/Primitive.hpp"
-#include "Mathematics/Rect.hpp"
 
 namespace crimild {
 
@@ -44,11 +44,25 @@ namespace crimild {
     class RenderPass;
     class ShaderProgram;
 
-    class Pipeline : public SharedObject, public RenderResourceImpl< Pipeline > {
-    public:
-        virtual ~Pipeline( void ) noexcept = default;
+    class PipelineBase : public SharedObject {
+    protected:
+        virtual ~PipelineBase( void ) noexcept = default;
 
-        SharedPointer< ShaderProgram > program;
+    public:
+        void setProgram( SharedPointer< ShaderProgram > const &program ) noexcept { m_program = program; }
+        ShaderProgram *getProgram( void ) noexcept { return crimild::get_ptr( m_program ); }
+
+    private:
+        SharedPointer< ShaderProgram > m_program;
+    };
+
+    class GraphicsPipeline
+        : public PipelineBase,
+          public RenderResourceImpl< GraphicsPipeline > {
+
+    public:
+        virtual ~GraphicsPipeline( void ) noexcept = default;
+
         RenderPass *renderPass = nullptr;
         Primitive::Type primitiveType = Primitive::Type::TRIANGLES;
         ViewportDimensions viewport;
@@ -56,6 +70,13 @@ namespace crimild {
         DepthStencilState depthStencilState;
         RasterizationState rasterizationState;
         ColorBlendState colorBlendState;
+    };
+
+    class ComputePipeline
+        : public PipelineBase,
+          public RenderResourceImpl< ComputePipeline > {
+    public:
+        virtual ~ComputePipeline( void ) noexcept = default;
     };
 
 }

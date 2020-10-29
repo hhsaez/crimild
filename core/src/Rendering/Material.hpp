@@ -29,36 +29,35 @@
 #define CRIMILD_RENDERING_MATERIAL_
 
 #include "ColorMaskState.hpp"
-#include "Texture.hpp"
-#include "ShaderProgram.hpp"
-
 #include "Mathematics/Vector.hpp"
+#include "ShaderProgram.hpp"
+#include "Texture.hpp"
 
 namespace crimild {
 
     class DescriptorSet;
-    class Pipeline;
+    class GraphicsPipeline;
 
-	class Light;
+    class Light;
 
     class Material : public coding::Codable, public StreamObject {
-		CRIMILD_IMPLEMENT_RTTI( crimild::Material )
+        CRIMILD_IMPLEMENT_RTTI( crimild::Material )
 
-	public:
-		Material( void ) noexcept;
-		virtual ~Material( void ) = default;
+    public:
+        Material( void ) noexcept;
+        virtual ~Material( void ) = default;
 
         inline void setDescriptors( SharedPointer< DescriptorSet > const &descriptors ) noexcept { m_descriptors = descriptors; }
         inline const DescriptorSet *getDescriptors( void ) const noexcept { return get_ptr( m_descriptors ); }
         inline DescriptorSet *getDescriptors( void ) noexcept { return get_ptr( m_descriptors ); }
 
-        inline void setPipeline( SharedPointer< Pipeline > const &pipeline ) noexcept { m_pipeline = pipeline; }
-        inline const Pipeline *getPipeline( void ) const noexcept { return get_ptr( m_pipeline ); }
-        inline Pipeline *getPipeline( void ) noexcept { return get_ptr( m_pipeline ); }
+        inline void setGraphicsPipeline( SharedPointer< GraphicsPipeline > const &graphicsPipeline ) noexcept { m_graphicsPipeline = graphicsPipeline; }
+        inline const GraphicsPipeline *getGraphicsPipeline( void ) const noexcept { return get_ptr( m_graphicsPipeline ); }
+        inline GraphicsPipeline *getGraphicsPipeline( void ) noexcept { return get_ptr( m_graphicsPipeline ); }
 
     private:
         SharedPointer< DescriptorSet > m_descriptors;
-        SharedPointer< Pipeline > m_pipeline;
+        SharedPointer< GraphicsPipeline > m_graphicsPipeline;
 
         /**
            \deprecated The following fields are no longer relevant
@@ -110,68 +109,68 @@ namespace crimild {
         virtual bool receiveShadows( void ) const { return _receiveShadows; }
         virtual void setReceiveShadows( bool value ) { _receiveShadows = value; }
 
-	private:
-		SharedPointer< ShaderProgram > _program;
+    private:
+        SharedPointer< ShaderProgram > _program;
 
-		RGBAColorf _ambient;
-		RGBAColorf _diffuse;
-		RGBAColorf _specular;
-		float _shininess;
-		float _emissive;
+        RGBAColorf _ambient;
+        RGBAColorf _diffuse;
+        RGBAColorf _specular;
+        float _shininess;
+        float _emissive;
 
-		SharedPointer< Texture > _colorMap;
-		SharedPointer< Texture > _normalMap;
-		SharedPointer< Texture > _specularMap;
+        SharedPointer< Texture > _colorMap;
+        SharedPointer< Texture > _normalMap;
+        SharedPointer< Texture > _specularMap;
         SharedPointer< Texture > _emissiveMap;
 
-		SharedPointer< ColorMaskState > _colorMaskState;
+        SharedPointer< ColorMaskState > _colorMaskState;
 
         bool _castShadows = true;
         bool _receiveShadows = true;
 
         //@}
 
-		/**
+        /**
 		   \name Reflection
            \deprectated
 
 		   In order for the reflection map to work, set reflection value to 1.0
 		*/
-		//@{
+        //@{
 
-	public:
-		void setReflection( crimild::Real32 value ) { _reflection = value; }
-		crimild::Real32 getReflection( void ) const { return _reflection; }
+    public:
+        void setReflection( crimild::Real32 value ) { _reflection = value; }
+        crimild::Real32 getReflection( void ) const { return _reflection; }
 
-		void setReflectionMap( SharedPointer< Texture > const &map ) { _reflectionMap = map; }
-		Texture *getReflectionMap( void ) { return crimild::get_ptr( _reflectionMap ); }
+        void setReflectionMap( SharedPointer< Texture > const &map ) { _reflectionMap = map; }
+        Texture *getReflectionMap( void ) { return crimild::get_ptr( _reflectionMap ); }
 
-	private:
-		crimild::Real32 _reflection = 0.0f;
-		SharedPointer< Texture > _reflectionMap;
+    private:
+        crimild::Real32 _reflection = 0.0f;
+        SharedPointer< Texture > _reflectionMap;
 
-		//@}
+        //@}
 
-		/**
+        /**
 		   \name Refraction
            \deprectated
 
 		   In order for the refraction map to work, set refraction value to 1.0
 		*/
-		//@{
+        //@{
 
-	public:
-		void setRefraction( crimild::Real32 value ) { _refraction = value; }
-		crimild::Real32 getRefraction( void ) const { return _refraction; }
+    public:
+        void setRefraction( crimild::Real32 value ) { _refraction = value; }
+        crimild::Real32 getRefraction( void ) const { return _refraction; }
 
-		void setRefractionMap( SharedPointer< Texture > const &map ) { _refractionMap = map; }
-		Texture *getRefractionMap( void ) { return crimild::get_ptr( _refractionMap ); }
+        void setRefractionMap( SharedPointer< Texture > const &map ) { _refractionMap = map; }
+        Texture *getRefractionMap( void ) { return crimild::get_ptr( _refractionMap ); }
 
-	private:
-		crimild::Real32 _refraction = 0.0f;
-		SharedPointer< Texture > _refractionMap;
+    private:
+        crimild::Real32 _refraction = 0.0f;
+        SharedPointer< Texture > _refractionMap;
 
-		//@}
+        //@}
 
         /**
             \name Coding support
@@ -191,14 +190,14 @@ namespace crimild {
         //@{
 
     public:
-    	virtual bool registerInStream( Stream &s ) override;
-    	virtual void save( Stream &s ) override;
-    	virtual void load( Stream &s ) override;
+        virtual bool registerInStream( Stream &s ) override;
+        virtual void save( Stream &s ) override;
+        virtual void load( Stream &s ) override;
 
-    	//@}
-	};
+        //@}
+    };
 
-	using MaterialPtr = SharedPointer< Material >;
+    using MaterialPtr = SharedPointer< Material >;
 
 }
 

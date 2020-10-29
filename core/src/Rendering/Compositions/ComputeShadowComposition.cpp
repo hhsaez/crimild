@@ -43,15 +43,16 @@
 using namespace crimild;
 using namespace crimild::compositions;
 
-static Pipeline *createPipeline( Composition &cmp, Light::Type lightType ) noexcept
+static GraphicsPipeline *createPipeline( Composition &cmp, Light::Type lightType ) noexcept
 {
-    auto pipeline = cmp.create< Pipeline >();
-    pipeline->program = [ & ] {
-        auto program = crimild::alloc< ShaderProgram >(
-            Array< SharedPointer< Shader > > {
-                crimild::alloc< Shader >(
-                    Shader::Stage::VERTEX,
-                    R"(
+    auto pipeline = cmp.create< GraphicsPipeline >();
+    pipeline->setProgram(
+        [ & ] {
+            auto program = crimild::alloc< ShaderProgram >(
+                Array< SharedPointer< Shader > > {
+                    crimild::alloc< Shader >(
+                        Shader::Stage::VERTEX,
+                        R"(
                         layout ( location = 0 ) in vec3 inPosition;
                         layout ( location = 1 ) in vec3 inNormal;
                         layout ( location = 2 ) in vec2 inTextureCoord;
@@ -77,10 +78,10 @@ static Pipeline *createPipeline( Composition &cmp, Light::Type lightType ) noexc
                             outLightPos = vec3( invView[ 3 ].x, invView[ 3 ].y, invView[ 3 ].z );
                         }
                     )" ),
-                crimild::alloc< Shader >(
-                    Shader::Stage::FRAGMENT,
-                    lightType == Light::Type::POINT
-                        ? R"(
+                    crimild::alloc< Shader >(
+                        Shader::Stage::FRAGMENT,
+                        lightType == Light::Type::POINT
+                            ? R"(
                             layout ( location = 0 ) in vec3 inPosition;
                             layout ( location = 1 ) in vec3 inLightPos;
 
@@ -94,7 +95,7 @@ static Pipeline *createPipeline( Composition &cmp, Light::Type lightType ) noexc
                                 gl_FragDepth = d;
                             }
                         )"
-                        : R"(
+                            : R"(
                             layout ( location = 0 ) out vec4 fragColor;
 
                             float linearizeDepth(float depth, float nearPlane, float farPlane)
@@ -110,32 +111,32 @@ static Pipeline *createPipeline( Composition &cmp, Light::Type lightType ) noexc
                                 fragColor = vec4( vec3( d ), 1.0 );
                             }
                         )" ),
-            } );
-        program->vertexLayouts = { VertexLayout::P3_N3_TC2 };
-        program->descriptorSetLayouts = {
-            [] {
-                auto layout = crimild::alloc< DescriptorSetLayout >();
-                layout->bindings = {
-                    {
-                        .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                        .stage = Shader::Stage::VERTEX,
-                    },
-                };
-                return layout;
-            }(),
-            [] {
-                auto layout = crimild::alloc< DescriptorSetLayout >();
-                layout->bindings = {
-                    {
-                        .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                        .stage = Shader::Stage::VERTEX,
-                    },
-                };
-                return layout;
-            }(),
-        };
-        return program;
-    }();
+                } );
+            program->vertexLayouts = { VertexLayout::P3_N3_TC2 };
+            program->descriptorSetLayouts = {
+                [] {
+                    auto layout = crimild::alloc< DescriptorSetLayout >();
+                    layout->bindings = {
+                        {
+                            .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                            .stage = Shader::Stage::VERTEX,
+                        },
+                    };
+                    return layout;
+                }(),
+                [] {
+                    auto layout = crimild::alloc< DescriptorSetLayout >();
+                    layout->bindings = {
+                        {
+                            .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                            .stage = Shader::Stage::VERTEX,
+                        },
+                    };
+                    return layout;
+                }(),
+            };
+            return program;
+        }() );
     pipeline->viewport = { .scalingMode = ScalingMode::DYNAMIC };
     pipeline->scissor = { .scalingMode = ScalingMode::DYNAMIC };
     pipeline->rasterizationState = RasterizationState {
@@ -149,7 +150,7 @@ static Pipeline *createPipeline( Composition &cmp, Light::Type lightType ) noexc
     return pipeline;
 }
 
-size_t recordPointLightCommands( Composition &cmp, CommandBuffer *commandBuffer, Pipeline *pipeline, Array< ViewportDimensions > &layout, size_t offset, Array< Light * > lights, Node *scene ) noexcept
+size_t recordPointLightCommands( Composition &cmp, CommandBuffer *commandBuffer, GraphicsPipeline *pipeline, Array< ViewportDimensions > &layout, size_t offset, Array< Light * > lights, Node *scene ) noexcept
 {
     lights.each(
         [ & ]( auto light ) {
@@ -287,7 +288,7 @@ size_t recordPointLightCommands( Composition &cmp, CommandBuffer *commandBuffer,
     return offset;
 }
 
-size_t recordSpotLightCommands( Composition &cmp, CommandBuffer *commandBuffer, Pipeline *pipeline, Array< ViewportDimensions > &viewports, size_t offset, Array< Light * > lights, Node *scene ) noexcept
+size_t recordSpotLightCommands( Composition &cmp, CommandBuffer *commandBuffer, GraphicsPipeline *pipeline, Array< ViewportDimensions > &viewports, size_t offset, Array< Light * > lights, Node *scene ) noexcept
 {
     lights.each(
         [ & ]( auto light ) {
@@ -345,7 +346,7 @@ size_t recordSpotLightCommands( Composition &cmp, CommandBuffer *commandBuffer, 
 size_t recordDirectionalLightCommands(
     Composition &cmp,
     CommandBuffer *commandBuffer,
-    Pipeline *pipeline,
+    GraphicsPipeline *pipeline,
     Array< ViewportDimensions > &viewports,
     size_t offset,
     Array< Light * > lights,
@@ -595,7 +596,7 @@ Composition crimild::compositions::computeShadow( Composition cmp, Node *scene )
         return cmp;
     }
 
-    auto pipelines = Map< Light::Type, Pipeline * > {
+    auto pipelines = Map< Light::Type, GraphicsPipeline * > {
         { Light::Type::DIRECTIONAL, createPipeline( cmp, Light::Type::DIRECTIONAL ) },
         { Light::Type::SPOT, createPipeline( cmp, Light::Type::SPOT ) },
         { Light::Type::POINT, createPipeline( cmp, Light::Type::POINT ) },

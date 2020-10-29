@@ -26,15 +26,16 @@
  */
 
 #include "Rendering/Compositions/ColorizeComposition.hpp"
+
 #include "Rendering/CommandBuffer.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Pipeline.hpp"
+#include "Rendering/Programs/Compositions/ColorizeCompositionShaderProgram.hpp"
 #include "Rendering/RenderPass.hpp"
 #include "Rendering/Sampler.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/Texture.hpp"
 #include "Rendering/UniformBuffer.hpp"
-#include "Rendering/Programs/Compositions/ColorizeCompositionShaderProgram.hpp"
 #include "Simulation/AssetManager.hpp"
 
 using namespace crimild;
@@ -44,7 +45,7 @@ Composition crimild::compositions::colorize( Composition cmp, const RGBAColorf &
 {
     auto renderPass = cmp.create< RenderPass >();
     renderPass->attachments = {
-        [&] {
+        [ & ] {
             auto att = cmp.createAttachment( "colorize" );
             att->usage = Attachment::Usage::COLOR_ATTACHMENT;
             att->format = Format::R8G8B8A8_UNORM;
@@ -55,7 +56,7 @@ Composition crimild::compositions::colorize( Composition cmp, const RGBAColorf &
     };
 
     renderPass->setDescriptors(
-        [&] {
+        [ & ] {
             auto descriptorSet = crimild::alloc< DescriptorSet >();
             descriptorSet->descriptors = {
                 {
@@ -64,7 +65,7 @@ Composition crimild::compositions::colorize( Composition cmp, const RGBAColorf &
                 },
                 {
                     .descriptorType = DescriptorType::TEXTURE,
-                    .obj = [&] {
+                    .obj = [ & ] {
                         auto texture = crimild::alloc< Texture >();
                         texture->imageView = cmp.getOutput()->imageView;
                         texture->sampler = [] {
@@ -78,22 +79,19 @@ Composition crimild::compositions::colorize( Composition cmp, const RGBAColorf &
                 },
             };
             return descriptorSet;
-        }()
-    );
+        }() );
 
-    renderPass->setPipeline(
+    renderPass->setGraphicsPipeline(
         [] {
-            auto pipeline = crimild::alloc< Pipeline >();
-            pipeline->program = crimild::retain(
-                AssetManager::getInstance()->get< ColorizeCompositionShaderProgram >()
-            );
+            auto pipeline = crimild::alloc< GraphicsPipeline >();
+            pipeline->setProgram( crimild::retain(
+                AssetManager::getInstance()->get< ColorizeCompositionShaderProgram >() ) );
             return pipeline;
-        }()
-    );
+        }() );
 
-    renderPass->commands = [&] {
+    renderPass->commands = [ & ] {
         auto commandBuffer = crimild::alloc< CommandBuffer >();
-        commandBuffer->bindGraphicsPipeline( renderPass->getPipeline() );
+        commandBuffer->bindGraphicsPipeline( renderPass->getGraphicsPipeline() );
         commandBuffer->bindDescriptorSet( renderPass->getDescriptors() );
         commandBuffer->draw( 6 );
         return commandBuffer;

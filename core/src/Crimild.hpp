@@ -224,6 +224,7 @@
 #include "Rendering/Compositions/RenderScene.hpp"
 #include "Rendering/Compositions/ShaderComposition.hpp"
 #include "Rendering/Compositions/TonemappingComposition.hpp"
+#include "Rendering/ComputePass.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Font.hpp"
 #include "Rendering/FrameGraph.hpp"

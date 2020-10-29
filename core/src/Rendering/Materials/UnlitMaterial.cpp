@@ -26,27 +26,27 @@
  */
 
 #include "Rendering/Materials/UnlitMaterial.hpp"
+
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Pipeline.hpp"
+#include "Rendering/Programs/UnlitShaderProgram.hpp"
 #include "Rendering/Texture.hpp"
 #include "Rendering/UniformBuffer.hpp"
-#include "Rendering/Programs/UnlitShaderProgram.hpp"
 #include "Simulation/AssetManager.hpp"
 
 using namespace crimild;
 
 UnlitMaterial::UnlitMaterial( void ) noexcept
 {
-    setPipeline(
+    setGraphicsPipeline(
         [] {
-            auto pipeline = crimild::alloc< Pipeline >();
-            pipeline->program = crimild::retain( AssetManager::getInstance()->get< UnlitShaderProgram >() );
+            auto pipeline = crimild::alloc< GraphicsPipeline >();
+            pipeline->setProgram( crimild::retain( AssetManager::getInstance()->get< UnlitShaderProgram >() ) );
             return pipeline;
-        }()
-    );
+        }() );
 
     setDescriptors(
-        [&] {
+        [ & ] {
             auto descriptors = crimild::alloc< DescriptorSet >();
             descriptors->descriptors = {
                 {
@@ -59,8 +59,7 @@ UnlitMaterial::UnlitMaterial( void ) noexcept
                 },
             };
             return descriptors;
-        }()
-    );
+        }() );
 }
 
 void UnlitMaterial::setColor( const RGBAColorf &color ) noexcept

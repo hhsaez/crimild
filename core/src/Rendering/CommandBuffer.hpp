@@ -28,25 +28,32 @@
 #ifndef CRIMILD_RENDERING_COMMAND_BUFFER_
 #define CRIMILD_RENDERING_COMMAND_BUFFER_
 
-#include "Rendering/RenderResource.hpp"
-#include "Rendering/ViewportDimensions.hpp"
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/Types.hpp"
+#include "Rendering/RenderResource.hpp"
+#include "Rendering/ViewportDimensions.hpp"
 
 namespace crimild {
 
     class DescriptorSet;
     class Framebuffer;
     class IndexBuffer;
-    class Pipeline;
+    class GraphicsPipeline;
+    class ComputePipeline;
     class Primitive;
     class RenderPass;
     class UniformBuffer;
     class VertexBuffer;
 
-    class CommandBuffer :
-    	public SharedObject,
-    	public RenderResourceImpl< CommandBuffer > {
+    struct DispatchWorkgroup {
+        UInt32 x;
+        UInt32 y;
+        UInt32 z;
+    };
+
+    class CommandBuffer
+        : public SharedObject,
+          public RenderResourceImpl< CommandBuffer > {
     public:
         enum class Usage {
             DEFAULT,
@@ -61,10 +68,11 @@ namespace crimild {
             ~Command( void ) noexcept;
 
             enum class Type {
-				BEGIN,
+                BEGIN,
                 BEGIN_RENDER_PASS,
                 END_RENDER_PASS,
                 BIND_GRAPHICS_PIPELINE,
+                BIND_COMPUTE_PIPELINE,
                 BIND_PRIMITIVE,
                 BIND_INDEX_BUFFER,
                 BIND_UNIFORM_BUFFER,
@@ -73,6 +81,7 @@ namespace crimild {
                 BIND_DESCRIPTOR_SET,
                 DRAW,
                 DRAW_INDEXED,
+                DISPATCH,
                 SET_FRAMEBUFFER,
                 SET_INDEX_OFFSET,
                 SET_SCISSOR,
@@ -87,13 +96,25 @@ namespace crimild {
                 Usage usage;
                 CommandBuffer *commandBuffer;
                 ViewportDimensions viewportDimensions;
-                Pipeline *pipeline;
                 Primitive *primitive;
                 UniformBuffer *uniformBuffer;
                 SharedPointer< SharedObject > obj;
                 crimild::UInt32 count;
                 crimild::Size size;
+                DispatchWorkgroup workgroup;
             };
+
+            template< typename T >
+            inline T *get( void ) noexcept
+            {
+                return static_cast< T * >( crimild::get_ptr( obj ) );
+            }
+
+            template< typename T >
+            inline const T *get( void ) const noexcept
+            {
+                return static_cast< T * >( crimild::get_ptr( obj ) );
+            }
         };
 
     public:
@@ -104,7 +125,8 @@ namespace crimild {
         void endRenderPass( RenderPass *renderPass ) noexcept;
 
         void bindCommandBuffer( CommandBuffer *commandBuffer ) noexcept;
-        void bindGraphicsPipeline( Pipeline *pipeline ) noexcept;
+        void bindGraphicsPipeline( GraphicsPipeline *pipeline ) noexcept;
+        void bindComputePipeline( ComputePipeline *pipeline ) noexcept;
         void bindPrimitive( Primitive *primitive ) noexcept;
         void bindIndexBuffer( IndexBuffer *indexBuffer ) noexcept;
         void bindVertexBuffer( VertexBuffer *vertexBuffer ) noexcept;
@@ -116,15 +138,18 @@ namespace crimild {
         void setVertexOffset( crimild::Size offset ) noexcept;
         void setViewport( const ViewportDimensions &viewport ) noexcept;
 
-		void draw( crimild::UInt32 count ) noexcept;
+        void draw( crimild::UInt32 count ) noexcept;
         void drawIndexed( crimild::UInt32 count ) noexcept;
         void drawIndexed( crimild::UInt32 count, crimild::Size indexOffset, crimild::Size vertexOffset ) noexcept;
         void drawPrimitive( Primitive *primitive ) noexcept;
 
+        void dispatch( const DispatchWorkgroup &workgroup ) noexcept;
+
         void clear( void ) noexcept;
 
         template< typename CallbackType >
-        void each( CallbackType &&callback ) noexcept {
+        void each( CallbackType &&callback ) noexcept
+        {
             for ( auto &cmd : m_commands ) {
                 callback( cmd );
             }

@@ -26,15 +26,16 @@
  */
 
 #include "Rendering/Compositions/PresentComposition.hpp"
+
 #include "Rendering/CommandBuffer.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Pipeline.hpp"
 #include "Rendering/PresentationMaster.hpp"
+#include "Rendering/Programs/Compositions/PresentCompositionShaderProgram.hpp"
 #include "Rendering/RenderPass.hpp"
 #include "Rendering/Sampler.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/Texture.hpp"
-#include "Rendering/Programs/Compositions/PresentCompositionShaderProgram.hpp"
 #include "Simulation/AssetManager.hpp"
 
 using namespace crimild;
@@ -44,7 +45,7 @@ Composition crimild::compositions::present( Composition cmp ) noexcept
 {
     auto renderPass = cmp.create< RenderPass >();
     renderPass->attachments = {
-        [&] {
+        [ & ] {
             auto att = cmp.createAttachment( "present" );
             att->format = Format::COLOR_SWAPCHAIN_OPTIMAL;
             return crimild::retain( att );
@@ -52,12 +53,12 @@ Composition crimild::compositions::present( Composition cmp ) noexcept
     };
 
     renderPass->setDescriptors(
-        [&] {
+        [ & ] {
             auto descriptorSet = crimild::alloc< DescriptorSet >();
             descriptorSet->descriptors = {
                 {
                     .descriptorType = DescriptorType::TEXTURE,
-                    .obj = [&] {
+                    .obj = [ & ] {
                         auto texture = crimild::alloc< Texture >();
                         texture->imageView = cmp.getOutput()->imageView;
                         texture->sampler = [] {
@@ -71,22 +72,20 @@ Composition crimild::compositions::present( Composition cmp ) noexcept
                 },
             };
             return descriptorSet;
-        }()
-    );
+        }() );
 
-    renderPass->setPipeline(
+    renderPass->setGraphicsPipeline(
         [] {
-            auto pipeline = crimild::alloc< Pipeline >();
-            pipeline->program = crimild::retain(
-                AssetManager::getInstance()->get< PresentCompositionShaderProgram >()
-            );
+            auto pipeline = crimild::alloc< GraphicsPipeline >();
+            pipeline->setProgram(
+                crimild::retain(
+                    AssetManager::getInstance()->get< PresentCompositionShaderProgram >() ) );
             return pipeline;
-        }()
-    );
+        }() );
 
-    renderPass->commands = [&] {
+    renderPass->commands = [ & ] {
         auto commandBuffer = crimild::alloc< CommandBuffer >();
-        commandBuffer->bindGraphicsPipeline( renderPass->getPipeline() );
+        commandBuffer->bindGraphicsPipeline( renderPass->getGraphicsPipeline() );
         commandBuffer->bindDescriptorSet( renderPass->getDescriptors() );
         commandBuffer->draw( 6 );
         return commandBuffer;

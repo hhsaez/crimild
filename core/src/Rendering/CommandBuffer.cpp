@@ -26,24 +26,25 @@
 */
 
 #include "Rendering/CommandBuffer.hpp"
+
+#include "Primitives/Primitive.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Framebuffer.hpp"
 #include "Rendering/IndexBuffer.hpp"
+#include "Rendering/Pipeline.hpp"
 #include "Rendering/RenderPass.hpp"
 #include "Rendering/VertexBuffer.hpp"
-#include "Primitives/Primitive.hpp"
 
 using namespace crimild;
 
 CommandBuffer::Command::Command( void ) noexcept
-    : obj { }
+    : obj {}
 {
-
 }
 
 CommandBuffer::Command::Command( const Command &other ) noexcept
     : type( other.type ),
-	  obj { }
+      obj {}
 {
     switch ( type ) {
         case Command::Type::BEGIN:
@@ -53,10 +54,6 @@ CommandBuffer::Command::Command( const Command &other ) noexcept
         case Command::Type::SET_VIEWPORT:
         case Command::Type::SET_SCISSOR:
             viewportDimensions = other.viewportDimensions;
-            break;
-
-        case Command::Type::BIND_GRAPHICS_PIPELINE:
-            pipeline = other.pipeline;
             break;
 
         case Command::Type::BIND_PRIMITIVE:
@@ -79,6 +76,10 @@ CommandBuffer::Command::Command( const Command &other ) noexcept
             count = other.count;
             break;
 
+        case Command::Type::DISPATCH:
+            workgroup = other.workgroup;
+            break;
+
         default:
             obj = other.obj;
             break;
@@ -91,10 +92,6 @@ CommandBuffer::Command::~Command( void ) noexcept
         case Command::Type::SET_VIEWPORT:
         case Command::Type::SET_SCISSOR:
             viewportDimensions.~ViewportDimensions();
-            break;
-
-        case Command::Type::BIND_GRAPHICS_PIPELINE:
-            pipeline = nullptr;
             break;
 
         default:
@@ -113,33 +110,30 @@ void CommandBuffer::begin( CommandBuffer::Usage usage ) noexcept
 void CommandBuffer::beginRenderPass( RenderPass *renderPass, Framebuffer *framebuffer ) noexcept
 {
     m_commands.push_back(
-        [&] {
-        	Command cmd;
-        	cmd.type = Command::Type::SET_FRAMEBUFFER;
-        	cmd.obj = crimild::retain( framebuffer );
+        [ & ] {
+            Command cmd;
+            cmd.type = Command::Type::SET_FRAMEBUFFER;
+            cmd.obj = crimild::retain( framebuffer );
             return cmd;
-        }()
-    );
+        }() );
     m_commands.push_back(
-		[&] {
+        [ & ] {
             Command cmd;
             cmd.type = Command::Type::BEGIN_RENDER_PASS;
             cmd.obj = crimild::retain( renderPass );
             return cmd;
-    	}()
-    );
+        }() );
 }
 
 void CommandBuffer::endRenderPass( RenderPass *renderPass ) noexcept
 {
     m_commands.push_back(
-        [&] {
+        [ & ] {
             Command cmd;
             cmd.type = Command::Type::END_RENDER_PASS;
             cmd.obj = crimild::retain( renderPass );
             return cmd;
-        }()
-    );
+        }() );
 }
 
 void CommandBuffer::setViewport( const ViewportDimensions &viewport ) noexcept
@@ -174,11 +168,19 @@ void CommandBuffer::setVertexOffset( crimild::Size offset ) noexcept
     m_commands.push_back( cmd );
 }
 
-void CommandBuffer::bindGraphicsPipeline( Pipeline *pipeline ) noexcept
+void CommandBuffer::bindGraphicsPipeline( GraphicsPipeline *pipeline ) noexcept
 {
     Command cmd;
     cmd.type = Command::Type::BIND_GRAPHICS_PIPELINE;
-    cmd.pipeline = pipeline;
+    cmd.obj = crimild::retain( pipeline );
+    m_commands.push_back( cmd );
+}
+
+void CommandBuffer::bindComputePipeline( ComputePipeline *pipeline ) noexcept
+{
+    Command cmd;
+    cmd.type = Command::Type::BIND_COMPUTE_PIPELINE;
+    cmd.obj = crimild::retain( pipeline );
     m_commands.push_back( cmd );
 }
 
@@ -266,10 +268,17 @@ void CommandBuffer::drawPrimitive( Primitive *primitive ) noexcept
     if ( indices != nullptr ) {
         bindIndexBuffer( indices );
         drawIndexed( indices->getIndexCount() );
-    }
-    else {
+    } else {
         draw( vertices->getVertexCount() );
     }
+}
+
+void CommandBuffer::dispatch( const DispatchWorkgroup &workgroup ) noexcept
+{
+    Command cmd;
+    cmd.type = Command::Type::DISPATCH;
+    cmd.workgroup = workgroup;
+    m_commands.push_back( cmd );
 }
 
 void CommandBuffer::end( void ) noexcept

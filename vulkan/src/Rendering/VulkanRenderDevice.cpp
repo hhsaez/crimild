@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the copyright holder nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,19 +26,20 @@
  */
 
 #include "VulkanRenderDevice.hpp"
-#include "VulkanInstance.hpp"
-#include "VulkanSurface.hpp"
-#include "VulkanSwapchain.hpp"
-#include "VulkanSemaphore.hpp"
+
+#include "Foundation/Log.hpp"
+#include "VulkanCommandBuffer.hpp"
+#include "VulkanCommandPool.hpp"
 #include "VulkanFence.hpp"
+#include "VulkanFramebuffer.hpp"
+#include "VulkanGraphicsPipeline.hpp"
 #include "VulkanImage.hpp"
 #include "VulkanImageView.hpp"
+#include "VulkanInstance.hpp"
 #include "VulkanRenderPass.hpp"
-#include "VulkanPipeline.hpp"
-#include "VulkanFramebuffer.hpp"
-#include "VulkanCommandPool.hpp"
-#include "VulkanCommandBuffer.hpp"
-#include "Foundation/Log.hpp"
+#include "VulkanSemaphore.hpp"
+#include "VulkanSurface.hpp"
+#include "VulkanSwapchain.hpp"
 
 #include <set>
 
@@ -47,13 +48,12 @@ using namespace crimild::vulkan;
 
 RenderDevice::RenderDevice( void )
     : CommandPoolManager( this ),
-	  SwapchainManager( this ),
+      SwapchainManager( this ),
       FenceManager( this ),
       PipelineLayoutManager( this ),
       SemaphoreManager( this ),
-	  ShaderModuleManager( this )
+      ShaderModuleManager( this )
 {
-
 }
 
 RenderDevice::~RenderDevice( void )
@@ -98,9 +98,27 @@ void RenderDevice::submitGraphicsCommands( const Semaphore *wait, CommandBuffer 
             graphicsQueue,
             1,
             &submitInfo,
-            fence != nullptr ? fence->handler : VK_NULL_HANDLE
-        )
-    );
+            fence != nullptr ? fence->handler : VK_NULL_HANDLE ) );
+}
+
+void RenderDevice::submitComputeCommands( CommandBuffer *commands ) noexcept
+{
+    VkCommandBuffer commandBuffers[] = {
+        getHandler( commands, 0 ),
+    };
+
+    auto submitInfo = VkSubmitInfo {
+        .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+        .commandBufferCount = 1,
+        .pCommandBuffers = commandBuffers,
+    };
+
+    CRIMILD_VULKAN_CHECK(
+        vkQueueSubmit(
+            computeQueue,
+            1,
+            &submitInfo,
+            VK_NULL_HANDLE ) );
 }
 
 void RenderDevice::submit( CommandBuffer *commands, crimild::Bool wait ) noexcept
@@ -118,16 +136,12 @@ void RenderDevice::submit( CommandBuffer *commands, crimild::Bool wait ) noexcep
             graphicsQueue,
             1,
             &submitInfo,
-            VK_NULL_HANDLE
-        )
-    );
+            VK_NULL_HANDLE ) );
 
     if ( wait ) {
-    	CRIMILD_VULKAN_CHECK(
-        	vkQueueWaitIdle(
-        		graphicsQueue
-        	)
-    	);
+        CRIMILD_VULKAN_CHECK(
+            vkQueueWaitIdle(
+                graphicsQueue ) );
     }
 }
 
@@ -139,6 +153,7 @@ void RenderDevice::waitIdle( void ) const noexcept
 
     vkDeviceWaitIdle( handler );
     vkQueueWaitIdle( graphicsQueue );
+    vkQueueWaitIdle( computeQueue );
 }
 
 SharedPointer< RenderDevice > RenderDeviceManager::create( RenderDevice::Descriptor const &descriptor ) noexcept
@@ -164,6 +179,7 @@ SharedPointer< RenderDevice > RenderDeviceManager::create( RenderDevice::Descrip
     // \see utils::findQueueFamilies()
     std::unordered_set< crimild::UInt32 > uniqueQueueFamilies = {
         indices.graphicsFamily[ 0 ],
+        indices.computeFamily[ 0 ],
         indices.presentFamily[ 0 ],
     };
 
@@ -209,17 +225,16 @@ SharedPointer< RenderDevice > RenderDeviceManager::create( RenderDevice::Descrip
 
     VkDevice deviceHandler;
     CRIMILD_VULKAN_CHECK(
-		vkCreateDevice(
-       		physicalDevice->handler,
-           	&createInfo,
-           	nullptr,
-           	&deviceHandler
-       	)
-	);
+        vkCreateDevice(
+            physicalDevice->handler,
+            &createInfo,
+            nullptr,
+            &deviceHandler ) );
 
     // Fetch device queues
-    VkQueue graphisQueueHandler, presentQueueHandler;
+    VkQueue graphisQueueHandler, computeQueueHandler, presentQueueHandler;
     vkGetDeviceQueue( deviceHandler, indices.graphicsFamily[ 0 ], 0, &graphisQueueHandler );
+    vkGetDeviceQueue( deviceHandler, indices.computeFamily[ 0 ], 0, &computeQueueHandler );
     vkGetDeviceQueue( deviceHandler, indices.presentFamily[ 0 ], 0, &presentQueueHandler );
 
     auto renderDevice = crimild::alloc< RenderDevice >();
@@ -228,6 +243,7 @@ SharedPointer< RenderDevice > RenderDeviceManager::create( RenderDevice::Descrip
     renderDevice->surface = surface;
     renderDevice->manager = this;
     renderDevice->graphicsQueue = graphisQueueHandler;
+    renderDevice->computeQueue = computeQueueHandler;
     renderDevice->presentQueue = presentQueueHandler;
     insert( crimild::get_ptr( renderDevice ) );
 
@@ -239,12 +255,13 @@ void RenderDeviceManager::destroy( RenderDevice *renderDevice ) noexcept
     CRIMILD_LOG_TRACE( "Destroying Vulkan logical device" );
 
     static_cast< TextureManager * >( renderDevice )->clear();
-	static_cast< SamplerManager * >( renderDevice )->clear();
+    static_cast< SamplerManager * >( renderDevice )->clear();
     static_cast< DescriptorPoolManager * >( renderDevice )->clear();
     static_cast< DescriptorSetManager * >( renderDevice )->clear();
     static_cast< DescriptorSetLayoutManager * >( renderDevice )->clear();
     static_cast< IndexBufferManager * >( renderDevice )->clear();
     static_cast< VertexBufferManager * >( renderDevice )->clear();
+    static_cast< StorageBufferManager * >( renderDevice )->clear();
     static_cast< UniformBufferManager * >( renderDevice )->clear();
     static_cast< FenceManager * >( renderDevice )->cleanup();
     static_cast< SemaphoreManager * >( renderDevice )->cleanup();
@@ -252,7 +269,8 @@ void RenderDeviceManager::destroy( RenderDevice *renderDevice ) noexcept
     static_cast< CommandPoolManager * >( renderDevice )->cleanup();
     static_cast< FramebufferManager * >( renderDevice )->clear();
     static_cast< ShaderModuleManager * >( renderDevice )->cleanup();
-    static_cast< PipelineManager * >( renderDevice )->clear();
+    static_cast< GraphicsPipelineManager * >( renderDevice )->clear();
+    static_cast< ComputePipelineManager * >( renderDevice )->clear();
     static_cast< PipelineLayoutManager * >( renderDevice )->cleanup();
     static_cast< RenderPassManager * >( renderDevice )->clear();
     static_cast< ImageViewManager * >( renderDevice )->clear();
@@ -271,29 +289,6 @@ void RenderDeviceManager::destroy( RenderDevice *renderDevice ) noexcept
     renderDevice->presentQueue = VK_NULL_HANDLE;
     erase( renderDevice );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /*
 
@@ -315,7 +310,7 @@ VulkanRenderDevice::VulkanRenderDevice( VulkanInstance *instance, VulkanSurface 
 VulkanRenderDevice::~VulkanRenderDevice( void )
 {
 	m_swapchain = nullptr;
-	
+
 	vkDestroyDevice( m_device, nullptr );
 	m_device = VK_NULL_HANDLE;
 }
@@ -324,12 +319,12 @@ VkSampleCountFlagBits VulkanRenderDevice::getMaxUsableSampleCount( void ) const 
 {
 	VkPhysicalDeviceProperties physicalDeviceProperties;
 	vkGetPhysicalDeviceProperties( m_physicalDevice, &physicalDeviceProperties );
-	
+
 	auto counts = std::min(
 		physicalDeviceProperties.limits.framebufferColorSampleCounts,
 		physicalDeviceProperties.limits.framebufferDepthSampleCounts
 	);
-	
+
 	if ( counts & VK_SAMPLE_COUNT_64_BIT ) return VK_SAMPLE_COUNT_64_BIT;
 	if ( counts & VK_SAMPLE_COUNT_32_BIT ) return VK_SAMPLE_COUNT_32_BIT;
 	if ( counts & VK_SAMPLE_COUNT_16_BIT ) return VK_SAMPLE_COUNT_16_BIT;
