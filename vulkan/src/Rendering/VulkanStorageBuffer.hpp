@@ -41,8 +41,8 @@ namespace crimild {
         class CommandPool;
 
         struct StorageBufferBindInfo {
-            Array< VkBuffer > bufferHandlers;
-            Array< VkDeviceMemory > bufferMemories;
+            VkBuffer bufferHandler;
+            VkDeviceMemory bufferMemory;
         };
 
         class StorageBufferManager : public BasicRenderResourceManagerImpl< StorageBuffer, StorageBufferBindInfo > {

@@ -26,9 +26,10 @@
 */
 
 #include "Rendering/VulkanUniformBuffer.hpp"
-#include "Rendering/VulkanRenderDevice.hpp"
-#include "Rendering/VulkanPhysicalDevice.hpp"
+
 #include "Rendering/UniformBuffer.hpp"
+#include "Rendering/VulkanPhysicalDevice.hpp"
+#include "Rendering/VulkanRenderDevice.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;
@@ -42,53 +43,40 @@ crimild::Bool UniformBufferManager::bind( UniformBuffer *uniformBuffer ) noexcep
     CRIMILD_LOG_TRACE( "Binding Vulkan UniformBuffer" );
 
     auto renderDevice = getRenderDevice();
-    auto swapchain = renderDevice->getSwapchain();
     auto bufferView = uniformBuffer->getBufferView();
     auto bufferSize = bufferView->getLength();
 
     VkDeviceSize uniformBufferSize = bufferView->getLength();
-    crimild::Size count = swapchain->images.size();
 
     VkBufferUsageFlags usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
 
-    Array< VkBuffer > bufferHandlers( count );
-    Array< VkDeviceMemory > bufferMemories( count );
+    VkBuffer bufferHandler;
+    VkDeviceMemory bufferMemory;
 
-    for ( auto i = 0l; i < count; i++ ) {
-        VkBuffer bufferHandler;
-        VkDeviceMemory bufferMemory;
+    utils::createBuffer(
+        renderDevice,
+        utils::BufferDescriptor {
+            .size = bufferSize,
+            .usage = usage,
+            .properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        },
+        bufferHandler,
+        bufferMemory );
 
-        utils::createBuffer(
-            renderDevice,
-            utils::BufferDescriptor {
-            	.size = bufferSize,
-            	.usage = usage,
-            	.properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-        	},
-            bufferHandler,
-            bufferMemory
-        );
-
-        if ( bufferView->getData() != nullptr ) {
-            utils::copyToBuffer(
-                renderDevice->handler,
-                bufferMemory,
-                bufferView->getData(),
-                bufferSize
-            );
-        }
-
-        bufferHandlers[ i ] = bufferHandler;
-        bufferMemories[ i ] = bufferMemory;
+    if ( bufferView->getData() != nullptr ) {
+        utils::copyToBuffer(
+            renderDevice->handler,
+            bufferMemory,
+            bufferView->getData(),
+            bufferSize );
     }
 
     setBindInfo(
-    	uniformBuffer,
+        uniformBuffer,
         {
-        	.bufferHandlers = bufferHandlers,
-        	.bufferMemories = bufferMemories,
-    	}
-    );
+            .bufferHandler = bufferHandler,
+            .bufferMemory = bufferMemory,
+        } );
 
     return ManagerImpl::bind( uniformBuffer );
 }
@@ -108,11 +96,8 @@ crimild::Bool UniformBufferManager::unbind( UniformBuffer *uniformBuffer ) noexc
     }
 
     auto bindInfo = getBindInfo( uniformBuffer );
-    auto N = bindInfo.bufferHandlers.size();
-    for ( int i = 0; i < N; i++ ) {
-        vkDestroyBuffer( renderDevice->handler, bindInfo.bufferHandlers[ i ], nullptr );
-        vkFreeMemory( renderDevice->handler, bindInfo.bufferMemories[ i ], nullptr );
-    }
+    vkDestroyBuffer( renderDevice->handler, bindInfo.bufferHandler, nullptr );
+    vkFreeMemory( renderDevice->handler, bindInfo.bufferMemory, nullptr );
 
     removeBindInfo( uniformBuffer );
 
@@ -122,16 +107,12 @@ crimild::Bool UniformBufferManager::unbind( UniformBuffer *uniformBuffer ) noexc
 void UniformBufferManager::updateUniformBuffers( crimild::Size index ) noexcept
 {
     auto renderDevice = getRenderDevice();
-    each( [ this, renderDevice, index ]( UniformBuffer *ubo, UniformBufferBindInfo &bindInfo ) {
+    each( [ this, renderDevice ]( UniformBuffer *ubo, UniformBufferBindInfo &bindInfo ) {
         ubo->onPreRender();
-        if ( bindInfo.bufferMemories.size() > index ) {
-            utils::copyToBuffer(
-                renderDevice->handler,
-                bindInfo.bufferMemories[ index ],
-                ubo->getBufferView()->getData(),
-                ubo->getBufferView()->getLength()
-            );
-        }
-    });
+        utils::copyToBuffer(
+            renderDevice->handler,
+            bindInfo.bufferMemory,
+            ubo->getBufferView()->getData(),
+            ubo->getBufferView()->getLength() );
+    } );
 }
-

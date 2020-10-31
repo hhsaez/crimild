@@ -286,7 +286,7 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                     m_vertexOffset = 0;
 
                     VkBuffer vertexBuffers[] = {
-                        bindInfo.bufferHandlers[ 0 ],
+                        bindInfo.bufferHandler,
                     };
                     VkDeviceSize offsets[] = {
                         0
@@ -309,7 +309,7 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
 
                     vkCmdBindIndexBuffer(
                         handler,
-                        bindInfo.bufferHandlers[ 0 ],
+                        bindInfo.bufferHandler,
                         0,
                         utils::getIndexType( crimild::get_ptr( ibo ) ) );
                     break;
@@ -333,7 +333,7 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                         // TODO: Maybe we can do this in an early stage, like the frame graph?
                         descriptorSet->layout = pipeline->getProgram()->descriptorSetLayouts[ m_boundDescriptorSets ];
                     }
-                    auto descriptorSetHandler = renderDevice->getHandler( crimild::get_ptr( descriptorSet ), index );
+                    auto descriptorSetHandler = renderDevice->getHandler( crimild::get_ptr( descriptorSet ) );
 
                     VkDescriptorSet descriptorSets[] = {
                         descriptorSetHandler,

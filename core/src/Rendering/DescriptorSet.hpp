@@ -34,11 +34,6 @@
 
 namespace crimild {
 
-    class Buffer;
-    class DescriptorSet;
-    class Pipeline;
-    class Texture;
-
     /**
         \brief Descriptor types
 
