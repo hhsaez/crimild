@@ -75,16 +75,19 @@ static Renderables sortRenderables( Node *scene ) noexcept
                     // if that's ok.
                     if ( auto pipeline = material->getGraphicsPipeline() ) {
                         if ( auto program = crimild::get_ptr( pipeline->getProgram() ) ) {
+                            auto supportsPBR = false;
                             program->descriptorSetLayouts.each(
-                                [ &ret, geometry ]( auto layout ) {
+                                [ &supportsPBR ]( auto layout ) {
                                     if ( layout->bindings.filter( []( auto &binding ) { return binding.descriptorType == DescriptorType::ALBEDO_MAP; } ).size() > 0 ) {
                                         // assume PBR
-                                        ret.lit.add( geometry );
-                                    } else {
-                                        // assume phong lit
-                                        ret.litBasic.add( geometry );
+                                        supportsPBR = true;
                                     }
                                 } );
+                            if ( supportsPBR ) {
+                                ret.lit.add( geometry );
+                            } else {
+                                ret.litBasic.add( geometry );
+                            }
                         }
                     }
                 }

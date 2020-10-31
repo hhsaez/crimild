@@ -45,7 +45,6 @@ crimild::Bool DescriptorSetManager::bind( DescriptorSet *descriptorSet ) noexcep
         return false;
     }
 
-    auto swapchain = renderDevice->getSwapchain();
     auto layout = descriptorSet->layout;
     auto descriptorPool = descriptorSet->pool;
     if ( descriptorPool == nullptr ) {
@@ -53,7 +52,6 @@ crimild::Bool DescriptorSetManager::bind( DescriptorSet *descriptorSet ) noexcep
         descriptorPool->layout = layout;
         descriptorSet->pool = descriptorPool;
     }
-    auto count = swapchain->images.size();
 
     VkDescriptorSetLayout layouts[] = {
         renderDevice->getHandler( crimild::get_ptr( layout ) ),
@@ -66,93 +64,86 @@ crimild::Bool DescriptorSetManager::bind( DescriptorSet *descriptorSet ) noexcep
         .pSetLayouts = layouts,
     };
 
-    Array< VkDescriptorSet > handlers( count );
+    VkDescriptorSet handler;
+    CRIMILD_VULKAN_CHECK(
+        vkAllocateDescriptorSets(
+            renderDevice->handler,
+            &allocInfo,
+            &handler ) );
 
-    for ( int i = 0; i < count; i++ ) {
-        VkDescriptorSet handler;
-        CRIMILD_VULKAN_CHECK(
-            vkAllocateDescriptorSets(
-                renderDevice->handler,
-                &allocInfo,
-                &handler ) );
-        handlers[ i ] = handler;
-    }
-
-    setHandlers( descriptorSet, handlers );
+    setHandler( descriptorSet, handler );
 
     // Keep these alive until all operations are completed
     VkDescriptorBufferInfo bufferInfo;
     VkDescriptorImageInfo imageInfo;
 
-    for ( auto i = 0l; i < count; ++i ) {
-        std::vector< VkWriteDescriptorSet > writes( descriptorSet->descriptors.size() );
-        for ( auto j = 0l; j < writes.size(); ++j ) {
-            auto &descriptor = descriptorSet->descriptors[ j ];
-            writes[ j ] = {
-                .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-                .dstSet = handlers[ i ],
-                .dstBinding = static_cast< crimild::UInt32 >( j ),
-                .dstArrayElement = 0,
-                .descriptorType = utils::getVulkanDescriptorType( descriptor.descriptorType ),
-                .descriptorCount = 1,
-            };
+    std::vector< VkWriteDescriptorSet > writes( descriptorSet->descriptors.size() );
+    for ( auto j = 0l; j < writes.size(); ++j ) {
+        auto &descriptor = descriptorSet->descriptors[ j ];
+        writes[ j ] = {
+            .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+            .dstSet = handler,
+            .dstBinding = static_cast< crimild::UInt32 >( j ),
+            .dstArrayElement = 0,
+            .descriptorType = utils::getVulkanDescriptorType( descriptor.descriptorType ),
+            .descriptorCount = 1,
+        };
 
-            switch ( descriptor.descriptorType ) {
-                case DescriptorType::UNIFORM_BUFFER: {
-                    auto ubo = descriptor.get< UniformBuffer >();
-                    auto bufferView = ubo->getBufferView();
-                    auto bindInfo = renderDevice->getBindInfo( ubo );
-                    auto bufferHandler = bindInfo.bufferHandlers[ i ];
-                    bufferInfo.buffer = bufferHandler;
-                    bufferInfo.offset = bufferView->getOffset();
-                    bufferInfo.range = bufferView->getLength();
-                    writes[ j ].pBufferInfo = &bufferInfo;
-                    break;
-                }
-
-                case DescriptorType::TEXTURE:
-                case DescriptorType::DIFFUSE_MAP:
-                case DescriptorType::SPECULAR_MAP:
-                case DescriptorType::NORMAL_MAP:
-                case DescriptorType::ALBEDO_MAP:
-                case DescriptorType::METALLIC_MAP:
-                case DescriptorType::ROUGHNESS_MAP:
-                case DescriptorType::AMBIENT_OCCLUSION_MAP:
-                case DescriptorType::SHADOW_ATLAS:
-                case DescriptorType::REFLECTION_ATLAS:
-                case DescriptorType::IRRADIANCE_ATLAS:
-                case DescriptorType::PREFILTER_ATLAS:
-                case DescriptorType::BRDF_LUT: {
-                    auto texture = descriptor.get< Texture >();
-                    auto imageView = crimild::get_ptr( texture->imageView );
-                    auto sampler = crimild::get_ptr( texture->sampler );
-                    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                    imageInfo.imageView = renderDevice->getBindInfo( imageView );
-                    imageInfo.sampler = renderDevice->getBindInfo( sampler ).sampler;
-                    writes[ j ].pImageInfo = &imageInfo;
-                    break;
-                }
-
-                case DescriptorType::STORAGE_BUFFER: {
-                    auto sbo = descriptor.get< StorageBuffer >();
-                    auto bufferView = sbo->getBufferView();
-                    auto bindInfo = renderDevice->getBindInfo( sbo );
-                    auto bufferHandler = bindInfo.bufferHandlers[ i ];
-                    bufferInfo.buffer = bufferHandler;
-                    bufferInfo.offset = bufferView->getOffset();
-                    bufferInfo.range = bufferView->getLength();
-                    writes[ j ].pBufferInfo = &bufferInfo;
-                    break;
-                }
+        switch ( descriptor.descriptorType ) {
+            case DescriptorType::UNIFORM_BUFFER: {
+                auto ubo = descriptor.get< UniformBuffer >();
+                auto bufferView = ubo->getBufferView();
+                auto bindInfo = renderDevice->getBindInfo( ubo );
+                auto bufferHandler = bindInfo.bufferHandler;
+                bufferInfo.buffer = bufferHandler;
+                bufferInfo.offset = bufferView->getOffset();
+                bufferInfo.range = bufferView->getLength();
+                writes[ j ].pBufferInfo = &bufferInfo;
+                break;
             }
 
-            vkUpdateDescriptorSets(
-                renderDevice->handler,
-                1,
-                &writes[ j ],
-                0,
-                nullptr );
+            case DescriptorType::TEXTURE:
+            case DescriptorType::DIFFUSE_MAP:
+            case DescriptorType::SPECULAR_MAP:
+            case DescriptorType::NORMAL_MAP:
+            case DescriptorType::ALBEDO_MAP:
+            case DescriptorType::METALLIC_MAP:
+            case DescriptorType::ROUGHNESS_MAP:
+            case DescriptorType::AMBIENT_OCCLUSION_MAP:
+            case DescriptorType::SHADOW_ATLAS:
+            case DescriptorType::REFLECTION_ATLAS:
+            case DescriptorType::IRRADIANCE_ATLAS:
+            case DescriptorType::PREFILTER_ATLAS:
+            case DescriptorType::BRDF_LUT: {
+                auto texture = descriptor.get< Texture >();
+                auto imageView = crimild::get_ptr( texture->imageView );
+                auto sampler = crimild::get_ptr( texture->sampler );
+                imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                imageInfo.imageView = renderDevice->getBindInfo( imageView );
+                imageInfo.sampler = renderDevice->getBindInfo( sampler ).sampler;
+                writes[ j ].pImageInfo = &imageInfo;
+                break;
+            }
+
+            case DescriptorType::STORAGE_BUFFER: {
+                auto sbo = descriptor.get< StorageBuffer >();
+                auto bufferView = sbo->getBufferView();
+                auto bindInfo = renderDevice->getBindInfo( sbo );
+                auto bufferHandler = bindInfo.bufferHandler;
+                bufferInfo.buffer = bufferHandler;
+                bufferInfo.offset = bufferView->getOffset();
+                bufferInfo.range = bufferView->getLength();
+                writes[ j ].pBufferInfo = &bufferInfo;
+                break;
+            }
         }
+
+        vkUpdateDescriptorSets(
+            renderDevice->handler,
+            1,
+            &writes[ j ],
+            0,
+            nullptr );
     }
 
     return ManagerImpl::bind( descriptorSet );

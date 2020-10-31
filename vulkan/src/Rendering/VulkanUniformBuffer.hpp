@@ -28,10 +28,10 @@
 #ifndef CRIMILD_VULKAN_RENDERING_UNIFORM_BUFFER_
 #define CRIMILD_VULKAN_RENDERING_UNIFORM_BUFFER_
 
-#include "Rendering/VulkanRenderResource.hpp"
-#include "Rendering/UniformBuffer.hpp"
-#include "Foundation/Containers/Map.hpp"
 #include "Foundation/Containers/Array.hpp"
+#include "Foundation/Containers/Map.hpp"
+#include "Rendering/UniformBuffer.hpp"
+#include "Rendering/VulkanRenderResource.hpp"
 
 namespace crimild {
 
@@ -41,8 +41,8 @@ namespace crimild {
         class CommandPool;
 
         struct UniformBufferBindInfo {
-            Array< VkBuffer > bufferHandlers;
-            Array< VkDeviceMemory > bufferMemories;
+            VkBuffer bufferHandler;
+            VkDeviceMemory bufferMemory;
         };
 
         class UniformBufferManager : public BasicRenderResourceManagerImpl< UniformBuffer, UniformBufferBindInfo > {
@@ -62,5 +62,3 @@ namespace crimild {
 }
 
 #endif
-
-
