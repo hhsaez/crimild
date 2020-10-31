@@ -29,18 +29,11 @@
 #define CRIMILD_CORE_RENDERING_COMPUTE_PASS_
 
 #include "Foundation/SharedObject.hpp"
-#include "Rendering/Format.hpp"
-#include "Rendering/FrameGraphObjectImpl.hpp"
-#include "Rendering/Image.hpp"
-#include "Rendering/ImageView.hpp"
 #include "Rendering/RenderResource.hpp"
-#include "Rendering/ViewportDimensions.hpp"
 
 namespace crimild {
 
     class CommandBuffer;
-    class DescriptorSet;
-    class Pipeline;
 
     class ComputePass
         : public SharedObject,

@@ -26,9 +26,10 @@
 */
 
 #include "Rendering/VulkanVertexBuffer.hpp"
-#include "Rendering/VulkanRenderDevice.hpp"
-#include "Rendering/VulkanPhysicalDevice.hpp"
+
 #include "Rendering/UniformBuffer.hpp"
+#include "Rendering/VulkanPhysicalDevice.hpp"
+#include "Rendering/VulkanRenderDevice.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;
@@ -42,53 +43,40 @@ crimild::Bool VertexBufferManager::bind( VertexBuffer *vertexBuffer ) noexcept
     CRIMILD_LOG_TRACE( "Binding Vulkan VertexBuffer" );
 
     auto renderDevice = getRenderDevice();
-    auto swapchain = renderDevice->getSwapchain();
     auto bufferView = vertexBuffer->getBufferView();
     auto bufferSize = bufferView->getLength();
 
     VkDeviceSize vertexBufferSize = bufferView->getLength();
-    crimild::Size count = 1;
 
     VkBufferUsageFlags usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
 
-    Array< VkBuffer > bufferHandlers( count );
-    Array< VkDeviceMemory > bufferMemories( count );
+    VkBuffer bufferHandler;
+    VkDeviceMemory bufferMemory;
 
-    for ( auto i = 0l; i < count; i++ ) {
-        VkBuffer bufferHandler;
-        VkDeviceMemory bufferMemory;
+    utils::createBuffer(
+        renderDevice,
+        utils::BufferDescriptor {
+            .size = bufferSize,
+            .usage = usage,
+            .properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        },
+        bufferHandler,
+        bufferMemory );
 
-        utils::createBuffer(
-            renderDevice,
-            utils::BufferDescriptor {
-            	.size = bufferSize,
-            	.usage = usage,
-            	.properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-        	},
-            bufferHandler,
-            bufferMemory
-        );
-
-        if ( bufferView->getData() != nullptr ) {
-            utils::copyToBuffer(
-                renderDevice->handler,
-                bufferMemory,
-                bufferView->getData(),
-                bufferSize
-            );
-        }
-
-        bufferHandlers[ i ] = bufferHandler;
-        bufferMemories[ i ] = bufferMemory;
+    if ( bufferView->getData() != nullptr ) {
+        utils::copyToBuffer(
+            renderDevice->handler,
+            bufferMemory,
+            bufferView->getData(),
+            bufferSize );
     }
 
     setBindInfo(
-    	vertexBuffer,
+        vertexBuffer,
         {
-        	.bufferHandlers = bufferHandlers,
-        	.bufferMemories = bufferMemories,
-    	}
-    );
+            .bufferHandler = bufferHandler,
+            .bufferMemory = bufferMemory,
+        } );
 
     return ManagerImpl::bind( vertexBuffer );
 }
@@ -108,14 +96,10 @@ crimild::Bool VertexBufferManager::unbind( VertexBuffer *vertexBuffer ) noexcept
     }
 
     auto bindInfo = getBindInfo( vertexBuffer );
-    auto N = bindInfo.bufferHandlers.size();
-    for ( int i = 0; i < N; i++ ) {
-        vkDestroyBuffer( renderDevice->handler, bindInfo.bufferHandlers[ i ], nullptr );
-        vkFreeMemory( renderDevice->handler, bindInfo.bufferMemories[ i ], nullptr );
-    }
+    vkDestroyBuffer( renderDevice->handler, bindInfo.bufferHandler, nullptr );
+    vkFreeMemory( renderDevice->handler, bindInfo.bufferMemory, nullptr );
 
     removeBindInfo( vertexBuffer );
 
     return ManagerImpl::unbind( vertexBuffer );
 }
-

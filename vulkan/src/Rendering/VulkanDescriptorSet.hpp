@@ -28,17 +28,17 @@
 #ifndef CRIMILD_VULKAN_RENDERING_DESCRIPTOR_SET_
 #define CRIMILD_VULKAN_RENDERING_DESCRIPTOR_SET_
 
-#include "Rendering/VulkanRenderResource.hpp"
-#include "Rendering/DescriptorSet.hpp"
-#include "Foundation/Containers/Map.hpp"
 #include "Foundation/Containers/Array.hpp"
+#include "Foundation/Containers/Map.hpp"
+#include "Rendering/DescriptorSet.hpp"
+#include "Rendering/VulkanRenderResource.hpp"
 
 namespace crimild {
 
     namespace vulkan {
 
-        class DescriptorSetManager : public MultiHandlerRenderResourceManagerImpl< DescriptorSet, VkDescriptorSet > {
-            using ManagerImpl = MultiHandlerRenderResourceManagerImpl< DescriptorSet, VkDescriptorSet >;
+        class DescriptorSetManager : public SingleHandlerRenderResourceManagerImpl< DescriptorSet, VkDescriptorSet > {
+            using ManagerImpl = SingleHandlerRenderResourceManagerImpl< DescriptorSet, VkDescriptorSet >;
 
         public:
             virtual ~DescriptorSetManager( void ) noexcept = default;

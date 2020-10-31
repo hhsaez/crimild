@@ -43,49 +43,39 @@ crimild::Bool StorageBufferManager::bind( StorageBuffer *storageBuffer ) noexcep
     CRIMILD_LOG_TRACE( "Binding Vulkan StorageBuffer" );
 
     auto renderDevice = getRenderDevice();
-    auto swapchain = renderDevice->getSwapchain();
     auto bufferView = storageBuffer->getBufferView();
     auto bufferSize = bufferView->getLength();
 
     VkDeviceSize storageBufferSize = bufferView->getLength();
-    crimild::Size count = swapchain->images.size();
 
     VkBufferUsageFlags usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
 
-    Array< VkBuffer > bufferHandlers( count );
-    Array< VkDeviceMemory > bufferMemories( count );
+    VkBuffer bufferHandler;
+    VkDeviceMemory bufferMemory;
 
-    for ( auto i = 0l; i < count; i++ ) {
-        VkBuffer bufferHandler;
-        VkDeviceMemory bufferMemory;
+    utils::createBuffer(
+        renderDevice,
+        utils::BufferDescriptor {
+            .size = bufferSize,
+            .usage = usage,
+            .properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        },
+        bufferHandler,
+        bufferMemory );
 
-        utils::createBuffer(
-            renderDevice,
-            utils::BufferDescriptor {
-                .size = bufferSize,
-                .usage = usage,
-                .properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-            },
-            bufferHandler,
-            bufferMemory );
-
-        if ( bufferView->getData() != nullptr ) {
-            utils::copyToBuffer(
-                renderDevice->handler,
-                bufferMemory,
-                bufferView->getData(),
-                bufferSize );
-        }
-
-        bufferHandlers[ i ] = bufferHandler;
-        bufferMemories[ i ] = bufferMemory;
+    if ( bufferView->getData() != nullptr ) {
+        utils::copyToBuffer(
+            renderDevice->handler,
+            bufferMemory,
+            bufferView->getData(),
+            bufferSize );
     }
 
     setBindInfo(
         storageBuffer,
         {
-            .bufferHandlers = bufferHandlers,
-            .bufferMemories = bufferMemories,
+            .bufferHandler = bufferHandler,
+            .bufferMemory = bufferMemory,
         } );
 
     return ManagerImpl::bind( storageBuffer );
@@ -106,11 +96,8 @@ crimild::Bool StorageBufferManager::unbind( StorageBuffer *storageBuffer ) noexc
     }
 
     auto bindInfo = getBindInfo( storageBuffer );
-    auto N = bindInfo.bufferHandlers.size();
-    for ( int i = 0; i < N; i++ ) {
-        vkDestroyBuffer( renderDevice->handler, bindInfo.bufferHandlers[ i ], nullptr );
-        vkFreeMemory( renderDevice->handler, bindInfo.bufferMemories[ i ], nullptr );
-    }
+    vkDestroyBuffer( renderDevice->handler, bindInfo.bufferHandler, nullptr );
+    vkFreeMemory( renderDevice->handler, bindInfo.bufferMemory, nullptr );
 
     removeBindInfo( storageBuffer );
 
@@ -132,7 +119,7 @@ Bool StorageBufferManager::mapFromDevice( StorageBuffer *storageBuffer ) noexcep
     CRIMILD_VULKAN_CHECK(
         vkMapMemory(
             renderDevice->handler,
-            bindInfo.bufferMemories[ 0 ],
+            bindInfo.bufferMemory,
             0,
             storageBuffer->getBufferView()->getLength(),
             0,
@@ -140,7 +127,7 @@ Bool StorageBufferManager::mapFromDevice( StorageBuffer *storageBuffer ) noexcep
 
     memcpy( storageBuffer->getBufferView()->getData(), srcData, storageBuffer->getBufferView()->getLength() );
 
-    vkUnmapMemory( renderDevice->handler, bindInfo.bufferMemories[ 0 ] );
+    vkUnmapMemory( renderDevice->handler, bindInfo.bufferMemory );
 
-	return true;
+    return true;
 }

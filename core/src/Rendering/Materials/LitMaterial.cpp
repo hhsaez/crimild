@@ -55,27 +55,27 @@ LitMaterial::LitMaterial( void ) noexcept
                 },
                 {
                     // Albedo map
-                    .descriptorType = DescriptorType::TEXTURE,
+                    .descriptorType = DescriptorType::ALBEDO_MAP,
                     .obj = Texture::ONE,
                 },
                 {
                     // Metallic map
-                    .descriptorType = DescriptorType::TEXTURE,
+                    .descriptorType = DescriptorType::METALLIC_MAP,
                     .obj = Texture::ONE,
                 },
                 {
                     // Roughness map
-                    .descriptorType = DescriptorType::TEXTURE,
+                    .descriptorType = DescriptorType::ROUGHNESS_MAP,
                     .obj = Texture::ONE,
                 },
                 {
                     // Ambient Occlusion map
-                    .descriptorType = DescriptorType::TEXTURE,
+                    .descriptorType = DescriptorType::AMBIENT_OCCLUSION_MAP,
                     .obj = Texture::ONE,
                 },
                 {
                     // Normal map
-                    .descriptorType = DescriptorType::TEXTURE,
+                    .descriptorType = DescriptorType::NORMAL_MAP,
                     .obj = Texture::ZERO,
                 },
             };

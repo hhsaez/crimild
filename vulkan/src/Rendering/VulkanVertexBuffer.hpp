@@ -28,10 +28,10 @@
 #ifndef CRIMILD_VULKAN_RENDERING_VERTEX_BUFFER_
 #define CRIMILD_VULKAN_RENDERING_VERTEX_BUFFER_
 
-#include "Rendering/VulkanRenderResource.hpp"
-#include "Rendering/VertexBuffer.hpp"
-#include "Foundation/Containers/Map.hpp"
 #include "Foundation/Containers/Array.hpp"
+#include "Foundation/Containers/Map.hpp"
+#include "Rendering/VertexBuffer.hpp"
+#include "Rendering/VulkanRenderResource.hpp"
 
 namespace crimild {
 
@@ -41,8 +41,8 @@ namespace crimild {
         class CommandPool;
 
         struct VertexBufferBindInfo {
-            Array< VkBuffer > bufferHandlers;
-            Array< VkDeviceMemory > bufferMemories;
+            VkBuffer bufferHandler;
+            VkDeviceMemory bufferMemory;
         };
 
         class VertexBufferManager : public BasicRenderResourceManagerImpl< VertexBuffer, VertexBufferBindInfo > {
@@ -60,5 +60,3 @@ namespace crimild {
 }
 
 #endif
-
-
