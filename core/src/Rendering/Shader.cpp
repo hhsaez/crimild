@@ -25,35 +25,53 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Shader.hpp"
+#include "Rendering/Shader.hpp"
+
+#include "Simulation/FileSystem.hpp"
 
 using namespace crimild;
 
 std::string Shader::getStageDescription( const Stage &stage ) noexcept
 {
-	switch ( stage ) {
-		case Stage::VERTEX:
-			return "VERTEX";
-		case Stage::TESSELLATION_CONTROL:
-			return "TESSELLATION_CONTROL";
-		case Stage::TESSELLATION_EVALUATION:
-			return "TESSELLATION_EVALUATION";
-		case Stage::GEOMETRY:
-			return "GEOMETRY";
-		case Stage::FRAGMENT:
-			return "FRAGMENT";
-		case Stage::COMPUTE:
-			return "COMPUTE";
-		case Stage::ALL_GRAPHICS:
-			return "ALL_GRAPHICS";
-		case Stage::ALL:
-			return "ALL";
-		default:
-			break;
-	}
+    switch ( stage ) {
+        case Stage::VERTEX:
+            return "VERTEX";
+        case Stage::TESSELLATION_CONTROL:
+            return "TESSELLATION_CONTROL";
+        case Stage::TESSELLATION_EVALUATION:
+            return "TESSELLATION_EVALUATION";
+        case Stage::GEOMETRY:
+            return "GEOMETRY";
+        case Stage::FRAGMENT:
+            return "FRAGMENT";
+        case Stage::COMPUTE:
+            return "COMPUTE";
+        case Stage::ALL_GRAPHICS:
+            return "ALL_GRAPHICS";
+        case Stage::ALL:
+            return "ALL";
+        default:
+            break;
+    }
 
-	// Should never happen. Thrown exception instead?
-	return "UNKNOWN";
+    // Should never happen. Thrown exception instead?
+    return "UNKNOWN";
+}
+
+SharedPointer< Shader > Shader::withSource( Stage stage, const FilePath &filePath ) noexcept
+{
+    return crimild::alloc< Shader >(
+        stage,
+        FileSystem::getInstance().readFile( filePath.getAbsolutePath() ),
+        DataType::INLINE );
+}
+
+SharedPointer< Shader > Shader::withBinary( Stage stage, const FilePath &filePath ) noexcept
+{
+    return crimild::alloc< Shader >(
+        stage,
+        FileSystem::getInstance().readFile( filePath.getAbsolutePath() ),
+        DataType::BINARY );
 }
 
 Shader::Shader( Stage stage, const std::string &source, const std::string &entryPointName ) noexcept
@@ -64,18 +82,15 @@ Shader::Shader( Stage stage, const std::string &source, const std::string &entry
     std::copy( std::begin( source ), std::end( source ), std::back_inserter( m_data ) );
 }
 
-
-Shader::Shader( Stage stage, const Data &data, std::string entryPointName ) noexcept
-	: m_stage( stage ),
-	  m_data( data ),
-      m_dataType( DataType::BINARY ),
-	  m_entryPointName( entryPointName )
+Shader::Shader( Stage stage, const Data &data, DataType dataType, std::string entryPointName ) noexcept
+    : m_stage( stage ),
+      m_data( data ),
+      m_dataType( dataType ),
+      m_entryPointName( entryPointName )
 {
-
 }
 
 Shader::Shader( std::string source )
-	: m_source( source )
+    : m_source( source )
 {
-
 }
