@@ -28,83 +28,87 @@
 #ifndef CRIMILD_RENDERING_SHADER_
 #define CRIMILD_RENDERING_SHADER_
 
+#include "Foundation/FilePath.hpp"
 #include "Foundation/SharedObject.hpp"
 
 #include <string>
 
 namespace crimild {
 
-	/**
+    /**
 	   \todo There's no point in keeping the data after the shader has been used
 	   in a rendering pipeline. We should clean it.
 	 */
-	class Shader : public SharedObject {
-	public:
-		enum class Stage {
-			VERTEX,
-			TESSELLATION_CONTROL,
-			TESSELLATION_EVALUATION,
-			GEOMETRY,
-			FRAGMENT,
-			COMPUTE,
-			ALL_GRAPHICS,
-			ALL,
-		};
+    class Shader : public SharedObject {
+    public:
+        enum class Stage {
+            VERTEX,
+            TESSELLATION_CONTROL,
+            TESSELLATION_EVALUATION,
+            GEOMETRY,
+            FRAGMENT,
+            COMPUTE,
+            ALL_GRAPHICS,
+            ALL,
+        };
 
-		static std::string getStageDescription( const Stage &stage ) noexcept;
+        static std::string getStageDescription( const Stage &stage ) noexcept;
 
         // TODO: Make this an Array< char >
-		using Data = std::vector< char >;
+        using Data = std::vector< char >;
 
         enum class DataType {
             INLINE,
             BINARY,
         };
 
-	public:
+        static SharedPointer< Shader > withSource( Stage stage, const FilePath &filePath ) noexcept;
+        static SharedPointer< Shader > withBinary( Stage stage, const FilePath &filePath ) noexcept;
+
+    public:
         explicit Shader( Stage stage, const std::string &source, const std::string &entryPointName = "main" ) noexcept;
-		explicit Shader( Stage stage, const Data &data = Data(), std::string entryPointName = "main" ) noexcept;
-		virtual ~Shader( void ) = default;
+        explicit Shader( Stage stage, const Data &data = Data(), DataType dataType = DataType::BINARY, std::string entryPointName = "main" ) noexcept;
+        virtual ~Shader( void ) = default;
 
-		inline const Stage &getStage( void ) const noexcept { return m_stage; }
+        inline const Stage &getStage( void ) const noexcept { return m_stage; }
 
-		/**
+        /**
 		   \brief Returns a printable version of the shader stage
 
 		   This is mostly for debugging purposes.
 		 */
-		inline std::string getStageDescription( void ) const noexcept
-		{
-			return getStageDescription( getStage() );
-		}
+        inline std::string getStageDescription( void ) const noexcept
+        {
+            return getStageDescription( getStage() );
+        }
 
         inline DataType getDataType( void ) const noexcept { return m_dataType; }
-		inline const Data &getData( void ) const noexcept { return m_data; }
+        inline const Data &getData( void ) const noexcept { return m_data; }
 
-		inline const std::string &getEntryPointName( void ) const noexcept { return m_entryPointName; }
+        inline const std::string &getEntryPointName( void ) const noexcept { return m_entryPointName; }
 
-	private:
-		Stage m_stage;
+    private:
+        Stage m_stage;
         DataType m_dataType;
-		Data m_data;
-		std::string m_entryPointName;
+        Data m_data;
+        std::string m_entryPointName;
 
-		/**
+        /**
 		   \deprecated
 		 */
-		//@{
+        //@{
 
-	public:
-		explicit Shader( std::string source );
+    public:
+        explicit Shader( std::string source );
 
-		inline void setSource( std::string source ) noexcept { m_source = source; }
+        inline void setSource( std::string source ) noexcept { m_source = source; }
         inline const std::string &getSource( void ) const noexcept { return m_source; }
 
-	private:
-		std::string m_source;
+    private:
+        std::string m_source;
 
-		//@}
-	};
+        //@}
+    };
 
     using VertexShader = Shader;
     using FragmentShader = Shader;
