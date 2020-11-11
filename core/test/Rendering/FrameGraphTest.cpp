@@ -25,16 +25,17 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include "Rendering/FrameGraph.hpp"
+
 #include "Rendering/CommandBuffer.hpp"
 #include "Rendering/DescriptorSet.hpp"
-#include "Rendering/FrameGraph.hpp"
 #include "Rendering/IndexBuffer.hpp"
 #include "Rendering/Pipeline.hpp"
 #include "Rendering/PresentationMaster.hpp"
 #include "Rendering/RenderPass.hpp"
 #include "Rendering/Texture.hpp"
-#include "Rendering/VertexBuffer.hpp"
 #include "Rendering/UniformBuffer.hpp"
+#include "Rendering/VertexBuffer.hpp"
 
 #include "gtest/gtest.h"
 
@@ -44,7 +45,7 @@ TEST( FrameGraph, simple )
 {
     auto graph = crimild::alloc< FrameGraph >();
 
-    auto color = [&] {
+    auto color = [ & ] {
         auto attachment = crimild::alloc< Attachment >();
         attachment->usage = Attachment::Usage::COLOR_ATTACHMENT;
         attachment->format = Format::R8G8B8A8_UNORM;
@@ -66,7 +67,7 @@ TEST( FrameGraph, compile )
 {
     auto graph = crimild::alloc< FrameGraph >();
 
-    auto color = [&] {
+    auto color = [ & ] {
         auto attachment = crimild::alloc< Attachment >();
         attachment->usage = Attachment::Usage::COLOR_ATTACHMENT;
         attachment->format = Format::R8G8B8A8_UNORM;
@@ -93,7 +94,7 @@ TEST( FrameGraph, compileFailNoPresent )
 {
     auto graph = crimild::alloc< FrameGraph >();
 
-    auto color = [&] {
+    auto color = [ & ] {
         auto attachment = crimild::alloc< Attachment >();
         attachment->usage = Attachment::Usage::COLOR_ATTACHMENT;
         attachment->format = Format::R8G8B8A8_UNORM;
@@ -114,34 +115,34 @@ TEST( FrameGraph, renderPassesNotConnected )
 {
     auto graph = crimild::alloc< FrameGraph >();
 
-    auto shadowDepth = [&] {
+    auto shadowDepth = [ & ] {
         auto attachment = crimild::alloc< Attachment >();
         attachment->usage = Attachment::Usage::DEPTH_STENCIL_ATTACHMENT;
         attachment->format = Format::DEPTH_STENCIL_DEVICE_OPTIMAL;
         return attachment;
     }();
 
-    auto shadowPass = [&] {
+    auto shadowPass = [ & ] {
         auto pass = crimild::alloc< RenderPass >();
         pass->attachments = { shadowDepth };
         return pass;
     }();
 
-    auto color = [&] {
+    auto color = [ & ] {
         auto attachment = crimild::alloc< Attachment >();
         attachment->usage = Attachment::Usage::COLOR_ATTACHMENT;
         attachment->format = Format::R8G8B8A8_UNORM;
         return attachment;
     }();
 
-    auto depth = [&] {
+    auto depth = [ & ] {
         auto attachment = crimild::alloc< Attachment >();
         attachment->usage = Attachment::Usage::DEPTH_STENCIL_ATTACHMENT;
         attachment->format = Format::DEPTH_STENCIL_DEVICE_OPTIMAL;
         return attachment;
     }();
 
-    auto resolve = [&] {
+    auto resolve = [ & ] {
         auto attachment = crimild::alloc< Attachment >();
         attachment->usage = Attachment::Usage::COLOR_ATTACHMENT;
         attachment->format = Format::COLOR_SWAPCHAIN_OPTIMAL;
@@ -156,8 +157,8 @@ TEST( FrameGraph, renderPassesNotConnected )
 
     EXPECT_TRUE( graph->compile() );
 
-	// Since renderPass is not really connected with shadowPass
-	// most nodes are discarded by the frame graph
+    // Since renderPass is not really connected with shadowPass
+    // most nodes are discarded by the frame graph
     auto &sorted = graph->getSorted();
     EXPECT_EQ( 3, sorted.size() );
     EXPECT_EQ( crimild::get_ptr( renderPass ), sorted[ 0 ]->obj );
@@ -167,276 +168,274 @@ TEST( FrameGraph, renderPassesNotConnected )
 
 TEST( FrameGraph, simpleFrameGraph )
 {
-	auto graph = crimild::alloc< FrameGraph >();
+    auto graph = crimild::alloc< FrameGraph >();
 
-	auto pipeline = crimild::alloc< Pipeline >();
-	auto vbo = crimild::alloc< VertexBuffer >( VertexLayout::P3, 0 );
-	auto ibo = crimild::alloc< IndexBuffer >( Format::INDEX_32_UINT, 0 );
-	auto ubo = crimild::alloc< UniformBuffer >( Vector4f() );
-	auto descriptorSet = [&] {
-		auto ds = crimild::alloc< DescriptorSet >();
-		ds->descriptors = {
-			{
-				.descriptorType = DescriptorType::UNIFORM_BUFFER,
-				.obj = ubo,
-			},
-		};
-		return ds;
-	}();
+    auto pipeline = crimild::alloc< GraphicsPipeline >();
+    auto vbo = crimild::alloc< VertexBuffer >( VertexLayout::P3, 0 );
+    auto ibo = crimild::alloc< IndexBuffer >( Format::INDEX_32_UINT, 0 );
+    auto ubo = crimild::alloc< UniformBuffer >( Vector4f() );
+    auto descriptorSet = [ & ] {
+        auto ds = crimild::alloc< DescriptorSet >();
+        ds->descriptors = {
+            {
+                .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                .obj = ubo,
+            },
+        };
+        return ds;
+    }();
 
-	auto color = crimild::alloc< Attachment >();
+    auto color = crimild::alloc< Attachment >();
 
-	auto renderPass = crimild::alloc< RenderPass >();
-	renderPass->attachments = { color };
-	renderPass->commands = [&] {
-		auto commands = crimild::alloc< CommandBuffer >();
-		commands->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
-		commands->bindVertexBuffer( crimild::get_ptr( vbo ) );
-		commands->bindIndexBuffer( crimild::get_ptr( ibo ) );
-		commands->bindDescriptorSet( crimild::get_ptr( descriptorSet ) );
-		commands->drawIndexed( ibo->getIndexCount() );
-		return commands;
-	}();
+    auto renderPass = crimild::alloc< RenderPass >();
+    renderPass->attachments = { color };
+    renderPass->commands = [ & ] {
+        auto commands = crimild::alloc< CommandBuffer >();
+        commands->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
+        commands->bindVertexBuffer( crimild::get_ptr( vbo ) );
+        commands->bindIndexBuffer( crimild::get_ptr( ibo ) );
+        commands->bindDescriptorSet( crimild::get_ptr( descriptorSet ) );
+        commands->drawIndexed( ibo->getIndexCount() );
+        return commands;
+    }();
 
-	auto present = crimild::alloc< PresentationMaster >();
-	present->colorAttachment = { color };
+    auto present = crimild::alloc< PresentationMaster >();
+    present->colorAttachment = { color };
 
-	EXPECT_TRUE( graph->compile() );
+    EXPECT_TRUE( graph->compile() );
 
-	auto sorted = graph->getSorted();
-	EXPECT_EQ( 15, sorted.size() );
+    auto sorted = graph->getSorted();
+    EXPECT_EQ( 15, sorted.size() );
 
-	// The first nodes contains basic resources in any order
-	auto resources = Array< FrameGraphObject * > {
-		crimild::get_ptr( pipeline ),
-		crimild::get_ptr( vbo ),
+    // The first nodes contains basic resources in any order
+    auto resources = Array< FrameGraphObject * > {
+        crimild::get_ptr( pipeline ),
+        crimild::get_ptr( vbo ),
         vbo->getBufferView(),
         vbo->getBufferView()->getBuffer(),
-		crimild::get_ptr( ibo ),
+        crimild::get_ptr( ibo ),
         ibo->getBufferView(),
         ibo->getBufferView()->getBuffer(),
-		crimild::get_ptr( ubo ),
+        crimild::get_ptr( ubo ),
         ubo->getBufferView(),
         ubo->getBufferView()->getBuffer(),
-	};
+    };
 
     for ( auto i = 0; i < resources.size(); i++ ) {
         ASSERT_TRUE( resources.contains( sorted[ i ]->obj ) );
     }
-    
-	EXPECT_EQ( crimild::get_ptr( descriptorSet ), sorted[ resources.size() + 0 ]->obj );
-	EXPECT_EQ( crimild::get_ptr( renderPass->commands ), sorted[ resources.size() + 1 ]->obj );
-	EXPECT_EQ( crimild::get_ptr( renderPass ), sorted[ resources.size() + 2 ]->obj );
-	EXPECT_EQ( crimild::get_ptr( color ), sorted[ resources.size() + 3 ]->obj );
-	EXPECT_EQ( crimild::get_ptr( present ), sorted[ resources.size() + 4 ]->obj );
+
+    EXPECT_EQ( crimild::get_ptr( descriptorSet ), sorted[ resources.size() + 0 ]->obj );
+    EXPECT_EQ( crimild::get_ptr( renderPass->commands ), sorted[ resources.size() + 1 ]->obj );
+    EXPECT_EQ( crimild::get_ptr( renderPass ), sorted[ resources.size() + 2 ]->obj );
+    EXPECT_EQ( crimild::get_ptr( color ), sorted[ resources.size() + 3 ]->obj );
+    EXPECT_EQ( crimild::get_ptr( present ), sorted[ resources.size() + 4 ]->obj );
 }
 
 TEST( FrameGraph, simpleAutoAddNodes )
 {
-	auto graph = crimild::alloc< FrameGraph >();
+    auto graph = crimild::alloc< FrameGraph >();
 
-	auto pipeline = crimild::alloc< Pipeline >();
-	auto vbo = crimild::alloc< VertexBuffer >( VertexLayout::P3, 0 );
-	auto ibo = crimild::alloc< IndexBuffer >( Format::INDEX_32_UINT, 0 );
-	auto ubo = crimild::alloc< UniformBuffer >( Vector4f() );
-	auto descriptorSet = [&] {
-		auto ds = crimild::alloc< DescriptorSet >();
-		ds->descriptors = {
-			{
-				.descriptorType = DescriptorType::UNIFORM_BUFFER,
-				.obj = ubo,
-			},
-		};
-		return ds;
-	}();
+    auto pipeline = crimild::alloc< GraphicsPipeline >();
+    auto vbo = crimild::alloc< VertexBuffer >( VertexLayout::P3, 0 );
+    auto ibo = crimild::alloc< IndexBuffer >( Format::INDEX_32_UINT, 0 );
+    auto ubo = crimild::alloc< UniformBuffer >( Vector4f() );
+    auto descriptorSet = [ & ] {
+        auto ds = crimild::alloc< DescriptorSet >();
+        ds->descriptors = {
+            {
+                .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                .obj = ubo,
+            },
+        };
+        return ds;
+    }();
 
-	auto color = crimild::alloc< Attachment >();
+    auto color = crimild::alloc< Attachment >();
 
-	auto renderPass = crimild::alloc< RenderPass >();
-	renderPass->attachments = { color };
-	renderPass->commands = [&] {
-		auto commands = crimild::alloc< CommandBuffer >();
-		commands->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
-		commands->bindVertexBuffer( crimild::get_ptr( vbo ) );
-		commands->bindIndexBuffer( crimild::get_ptr( ibo ) );
-		commands->bindDescriptorSet( crimild::get_ptr( descriptorSet ) );
-		commands->drawIndexed( ibo->getIndexCount() );
-		return commands;
-	}();
+    auto renderPass = crimild::alloc< RenderPass >();
+    renderPass->attachments = { color };
+    renderPass->commands = [ & ] {
+        auto commands = crimild::alloc< CommandBuffer >();
+        commands->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
+        commands->bindVertexBuffer( crimild::get_ptr( vbo ) );
+        commands->bindIndexBuffer( crimild::get_ptr( ibo ) );
+        commands->bindDescriptorSet( crimild::get_ptr( descriptorSet ) );
+        commands->drawIndexed( ibo->getIndexCount() );
+        return commands;
+    }();
 
-	auto present = crimild::alloc< PresentationMaster >();
-	present->colorAttachment = { color };
+    auto present = crimild::alloc< PresentationMaster >();
+    present->colorAttachment = { color };
 
-	EXPECT_TRUE( graph->compile() );
+    EXPECT_TRUE( graph->compile() );
 
-	auto sorted = graph->getSorted();
-	EXPECT_EQ( 15, sorted.size() );
+    auto sorted = graph->getSorted();
+    EXPECT_EQ( 15, sorted.size() );
 
-	// The first nodes contains basic resources in any order
-	auto resources = Array< FrameGraphObject * > {
-		crimild::get_ptr( pipeline ),
-		crimild::get_ptr( vbo ),
+    // The first nodes contains basic resources in any order
+    auto resources = Array< FrameGraphObject * > {
+        crimild::get_ptr( pipeline ),
+        crimild::get_ptr( vbo ),
         vbo->getBufferView(),
         vbo->getBufferView()->getBuffer(),
-		crimild::get_ptr( ibo ),
+        crimild::get_ptr( ibo ),
         ibo->getBufferView(),
         ibo->getBufferView()->getBuffer(),
-		crimild::get_ptr( ubo ),
+        crimild::get_ptr( ubo ),
         ubo->getBufferView(),
         ubo->getBufferView()->getBuffer(),
-	};
+    };
 
     for ( auto i = 0; i < resources.size(); i++ ) {
         ASSERT_TRUE( resources.contains( sorted[ i ]->obj ) );
     }
-    
-	EXPECT_EQ( crimild::get_ptr( descriptorSet ), sorted[ resources.size() + 0 ]->obj );
-	EXPECT_EQ( crimild::get_ptr( renderPass->commands ), sorted[ resources.size() + 1 ]->obj );
-	EXPECT_EQ( crimild::get_ptr( renderPass ), sorted[ resources.size() + 2 ]->obj );
-	EXPECT_EQ( crimild::get_ptr( color ), sorted[ resources.size() + 3 ]->obj );
-	EXPECT_EQ( crimild::get_ptr( present ), sorted[ resources.size() + 4 ]->obj );
+
+    EXPECT_EQ( crimild::get_ptr( descriptorSet ), sorted[ resources.size() + 0 ]->obj );
+    EXPECT_EQ( crimild::get_ptr( renderPass->commands ), sorted[ resources.size() + 1 ]->obj );
+    EXPECT_EQ( crimild::get_ptr( renderPass ), sorted[ resources.size() + 2 ]->obj );
+    EXPECT_EQ( crimild::get_ptr( color ), sorted[ resources.size() + 3 ]->obj );
+    EXPECT_EQ( crimild::get_ptr( present ), sorted[ resources.size() + 4 ]->obj );
 }
 
 TEST( FrameGraph, imageUsage )
 {
-	auto graph = crimild::alloc< FrameGraph >();
+    auto graph = crimild::alloc< FrameGraph >();
 
-	auto color = crimild::alloc< Attachment >();
-	color->usage = Attachment::Usage::COLOR_ATTACHMENT;
-	color->format = Format::COLOR_SWAPCHAIN_OPTIMAL;
-	color->imageView = [&] {
-		auto imageView = crimild::alloc< ImageView >();
-		imageView->image = [&] {
-			auto image = crimild::alloc< Image >();
-			return image;
-		}();
-		return imageView;
-	}();
+    auto color = crimild::alloc< Attachment >();
+    color->usage = Attachment::Usage::COLOR_ATTACHMENT;
+    color->format = Format::COLOR_SWAPCHAIN_OPTIMAL;
+    color->imageView = [ & ] {
+        auto imageView = crimild::alloc< ImageView >();
+        imageView->image = [ & ] {
+            auto image = crimild::alloc< Image >();
+            return image;
+        }();
+        return imageView;
+    }();
 
-	auto depth = crimild::alloc< Attachment >();
-	depth->usage = Attachment::Usage::DEPTH_STENCIL_ATTACHMENT;
-	depth->format = Format::DEPTH_STENCIL_DEVICE_OPTIMAL;
-	depth->imageView = [&] {
-		auto imageView = crimild::alloc< ImageView >();
-		imageView->image = [&] {
-			auto image = crimild::alloc< Image >();
-			return image;
-		}();
-		return imageView;
-	}();
+    auto depth = crimild::alloc< Attachment >();
+    depth->usage = Attachment::Usage::DEPTH_STENCIL_ATTACHMENT;
+    depth->format = Format::DEPTH_STENCIL_DEVICE_OPTIMAL;
+    depth->imageView = [ & ] {
+        auto imageView = crimild::alloc< ImageView >();
+        imageView->image = [ & ] {
+            auto image = crimild::alloc< Image >();
+            return image;
+        }();
+        return imageView;
+    }();
 
-	auto renderPass = crimild::alloc< RenderPass >();
-	renderPass->attachments = { color, depth };
+    auto renderPass = crimild::alloc< RenderPass >();
+    renderPass->attachments = { color, depth };
 
-	auto master = crimild::alloc< PresentationMaster >();
-	master->colorAttachment = color;
+    auto master = crimild::alloc< PresentationMaster >();
+    master->colorAttachment = color;
 
-	EXPECT_TRUE( graph->compile() );
+    EXPECT_TRUE( graph->compile() );
 
-	{
-		auto res = graph->connected< Attachment >( color->imageView->image );
-		EXPECT_EQ( 1, res.size() );
-		EXPECT_EQ( Attachment::Usage::COLOR_ATTACHMENT, res.first()->usage );
-	}
+    {
+        auto res = graph->connected< Attachment >( color->imageView->image );
+        EXPECT_EQ( 1, res.size() );
+        EXPECT_EQ( Attachment::Usage::COLOR_ATTACHMENT, res.first()->usage );
+    }
 
-	{
-		auto res = graph->connected< Attachment >( depth->imageView->image );
-		EXPECT_EQ( 1, res.size() );
-		EXPECT_EQ( Attachment::Usage::DEPTH_STENCIL_ATTACHMENT, res.first()->usage );
-	}
+    {
+        auto res = graph->connected< Attachment >( depth->imageView->image );
+        EXPECT_EQ( 1, res.size() );
+        EXPECT_EQ( Attachment::Usage::DEPTH_STENCIL_ATTACHMENT, res.first()->usage );
+    }
 }
 
 TEST( FrameGraph, offscreen )
 {
-	auto graph = crimild::alloc< FrameGraph >();
+    auto graph = crimild::alloc< FrameGraph >();
 
-	auto texture = [&] {
-		auto texture = crimild::alloc< Texture >();
-		texture->imageView = [&] {
-			auto imageView = crimild::alloc< ImageView >();
-			imageView->image = crimild::alloc< Image >();
-			return imageView;
-		}();
-		return texture;
-	}();
+    auto texture = [ & ] {
+        auto texture = crimild::alloc< Texture >();
+        texture->imageView = [ & ] {
+            auto imageView = crimild::alloc< ImageView >();
+            imageView->image = crimild::alloc< Image >();
+            return imageView;
+        }();
+        return texture;
+    }();
 
-	auto offPipeline = crimild::alloc< Pipeline >();
-	auto offVbo = crimild::alloc< VertexBuffer >( VertexLayout::P3, 0 );
-	auto offIbo = crimild::alloc< IndexBuffer >( Format::INDEX_32_UINT, 0 );
-	auto offUbo = crimild::alloc< UniformBuffer >( Vector4f() );
-	auto offDescriptorSet = [&] {
-		auto ds = crimild::alloc< DescriptorSet >();
-		ds->descriptors = {
-			{
-				.descriptorType = DescriptorType::UNIFORM_BUFFER,
-				.obj = offUbo,
-			},
-		};
-		return ds;
-	}();
-	
-	auto offColor = crimild::alloc< Attachment >();
-	offColor->imageView = texture->imageView;
-	
-	auto offRenderPass = [&] {
-		auto renderPass = crimild::alloc< RenderPass >();
-		renderPass->attachments = { offColor };
-		renderPass->commands = [&] {
-			auto commands = crimild::alloc< CommandBuffer >();
-			commands->bindGraphicsPipeline( crimild::get_ptr( offPipeline ) );
-			commands->bindVertexBuffer( crimild::get_ptr( offVbo ) );
-			commands->bindIndexBuffer( crimild::get_ptr( offIbo ) );
-			commands->bindDescriptorSet( crimild::get_ptr( offDescriptorSet ) );
-			commands->drawIndexed( offIbo->getIndexCount() );
-			return commands;
-		}();
-		return renderPass;
-	}();
-	
+    auto offPipeline = crimild::alloc< GraphicsPipeline >();
+    auto offVbo = crimild::alloc< VertexBuffer >( VertexLayout::P3, 0 );
+    auto offIbo = crimild::alloc< IndexBuffer >( Format::INDEX_32_UINT, 0 );
+    auto offUbo = crimild::alloc< UniformBuffer >( Vector4f() );
+    auto offDescriptorSet = [ & ] {
+        auto ds = crimild::alloc< DescriptorSet >();
+        ds->descriptors = {
+            {
+                .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                .obj = offUbo,
+            },
+        };
+        return ds;
+    }();
+
+    auto offColor = crimild::alloc< Attachment >();
+    offColor->imageView = texture->imageView;
+
+    auto offRenderPass = [ & ] {
+        auto renderPass = crimild::alloc< RenderPass >();
+        renderPass->attachments = { offColor };
+        renderPass->commands = [ & ] {
+            auto commands = crimild::alloc< CommandBuffer >();
+            commands->bindGraphicsPipeline( crimild::get_ptr( offPipeline ) );
+            commands->bindVertexBuffer( crimild::get_ptr( offVbo ) );
+            commands->bindIndexBuffer( crimild::get_ptr( offIbo ) );
+            commands->bindDescriptorSet( crimild::get_ptr( offDescriptorSet ) );
+            commands->drawIndexed( offIbo->getIndexCount() );
+            return commands;
+        }();
+        return renderPass;
+    }();
+
     // Screen
 
-	auto pipeline = crimild::alloc< Pipeline >();
-	auto vbo = crimild::alloc< VertexBuffer >( VertexLayout::P3, 0 );
-	auto ibo = crimild::alloc< IndexBuffer >( Format::INDEX_32_UINT, 0 );
-	auto ubo = crimild::alloc< UniformBuffer >( Vector4f() );
-	auto descriptorSet = [&] {
-		auto ds = crimild::alloc< DescriptorSet >();
-		ds->descriptors = {
-			{
-				.descriptorType = DescriptorType::UNIFORM_BUFFER,
-				.obj = ubo,
-			},
-			{
-				.descriptorType = DescriptorType::TEXTURE,
-				.obj = texture,
-			},
-		};
-		return ds;
-	}();
-	
-	auto color = crimild::alloc< Attachment >();
-	
-	auto renderPass = crimild::alloc< RenderPass >();
-	renderPass->attachments = { color };
-	renderPass->commands = [&] {
-		auto commands = crimild::alloc< CommandBuffer >();
-		commands->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
-		commands->bindVertexBuffer( crimild::get_ptr( vbo ) );
-		commands->bindIndexBuffer( crimild::get_ptr( ibo ) );
-		commands->bindDescriptorSet( crimild::get_ptr( descriptorSet ) );
-		commands->drawIndexed( ibo->getIndexCount() );
-		return commands;
-	}();
+    auto pipeline = crimild::alloc< GraphicsPipeline >();
+    auto vbo = crimild::alloc< VertexBuffer >( VertexLayout::P3, 0 );
+    auto ibo = crimild::alloc< IndexBuffer >( Format::INDEX_32_UINT, 0 );
+    auto ubo = crimild::alloc< UniformBuffer >( Vector4f() );
+    auto descriptorSet = [ & ] {
+        auto ds = crimild::alloc< DescriptorSet >();
+        ds->descriptors = {
+            {
+                .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                .obj = ubo,
+            },
+            {
+                .descriptorType = DescriptorType::TEXTURE,
+                .obj = texture,
+            },
+        };
+        return ds;
+    }();
 
-	auto master = crimild::alloc< PresentationMaster >();
-	master->colorAttachment = color;
+    auto color = crimild::alloc< Attachment >();
 
-	EXPECT_TRUE( graph->compile() );
+    auto renderPass = crimild::alloc< RenderPass >();
+    renderPass->attachments = { color };
+    renderPass->commands = [ & ] {
+        auto commands = crimild::alloc< CommandBuffer >();
+        commands->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
+        commands->bindVertexBuffer( crimild::get_ptr( vbo ) );
+        commands->bindIndexBuffer( crimild::get_ptr( ibo ) );
+        commands->bindDescriptorSet( crimild::get_ptr( descriptorSet ) );
+        commands->drawIndexed( ibo->getIndexCount() );
+        return commands;
+    }();
 
-	graph->getSorted().each(
-		[]( auto &node ) {
-			std::cout << node->type << std::endl;
-		}
-	);
+    auto master = crimild::alloc< PresentationMaster >();
+    master->colorAttachment = color;
+
+    EXPECT_TRUE( graph->compile() );
+
+    graph->getSorted().each(
+        []( auto &node ) {
+            std::cout << node->type << std::endl;
+        } );
 }
-

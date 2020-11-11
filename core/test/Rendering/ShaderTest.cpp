@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the copyright holder nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -33,29 +33,31 @@ using namespace crimild;
 
 TEST( Shader, basicConstruction )
 {
-	auto shader = crimild::alloc< Shader >(
-		Shader::Stage::FRAGMENT
-	);
+    auto shader = crimild::alloc< Shader >(
+        Shader::Stage::FRAGMENT );
 
-	EXPECT_EQ( Shader::Stage::FRAGMENT, shader->getStage() );
-	EXPECT_EQ( 0, shader->getData().size() );
-	EXPECT_EQ( "main", shader->getEntryPointName() );
+    EXPECT_EQ( Shader::Stage::FRAGMENT, shader->getStage() );
+    EXPECT_EQ( 0, shader->getData().size() );
+    EXPECT_EQ( "main", shader->getEntryPointName() );
 }
 
 TEST( Shader, explicitConstruction )
 {
-	auto data = Shader::Data {
-		0, 1, 2, 3, 4
-	};
+    auto data = Shader::Data {
+        0,
+        1,
+        2,
+        3,
+        4
+    };
 
-	auto shader = crimild::alloc< Shader >(
-		Shader::Stage::VERTEX,
-		data,
-		"entry"
-	);
+    auto shader = crimild::alloc< Shader >(
+        Shader::Stage::VERTEX,
+        data,
+        Shader::DataType::BINARY,
+        "entry" );
 
-	EXPECT_EQ( Shader::Stage::VERTEX, shader->getStage() );
-	EXPECT_EQ( data, shader->getData() );
-	EXPECT_EQ( "entry", shader->getEntryPointName() );
+    EXPECT_EQ( Shader::Stage::VERTEX, shader->getStage() );
+    EXPECT_EQ( data, shader->getData() );
+    EXPECT_EQ( "entry", shader->getEntryPointName() );
 }
-

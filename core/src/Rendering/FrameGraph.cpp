@@ -49,6 +49,8 @@ void FrameGraph::remove( FrameGraphObject *obj ) noexcept
         // Everything will work, but we'll end up with more nodes than actually needed.
         node->obj = nullptr;
 
+        m_nodes.remove( crimild::retain( node ) );
+
         // Notify that the frame graph needs rebuilding
         m_dirty = true;
     }
