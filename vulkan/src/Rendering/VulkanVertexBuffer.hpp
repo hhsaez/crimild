@@ -53,6 +53,8 @@ namespace crimild {
 
             crimild::Bool bind( VertexBuffer *verterBuffer ) noexcept override;
             crimild::Bool unbind( VertexBuffer *vertexBuffer ) noexcept override;
+
+            void updateVertexBuffers( void ) noexcept;
         };
 
     }

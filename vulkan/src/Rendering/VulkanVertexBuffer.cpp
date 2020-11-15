@@ -103,3 +103,20 @@ crimild::Bool VertexBufferManager::unbind( VertexBuffer *vertexBuffer ) noexcept
 
     return ManagerImpl::unbind( vertexBuffer );
 }
+
+void VertexBufferManager::updateVertexBuffers( void ) noexcept
+{
+    // TODO: This is a slow operation. Not only it needs to iterate over all
+    // available vertex buffer to get the ones that actually need updating, but
+    // also it's copying data to the device in a synchronous way.
+    auto renderDevice = getRenderDevice();
+    each( [ this, renderDevice ]( VertexBuffer *vbo, VertexBufferBindInfo &bindInfo ) {
+        if ( vbo->getBufferView()->getUsage() == BufferView::Usage::DYNAMIC ) {
+            utils::copyToBuffer(
+                renderDevice->handler,
+                bindInfo.bufferMemory,
+                vbo->getBufferView()->getData(),
+                vbo->getBufferView()->getLength() );
+        }
+    } );
+}

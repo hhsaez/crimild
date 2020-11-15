@@ -111,7 +111,9 @@ void VulkanSystem::update( void )
 
     auto imageIndex = result.imageIndex;
 
-    updateUniformBuffer( imageIndex );
+    // TODO: This migth be a bit slow...
+    updateVertexBuffers();
+    updateUniformBuffers();
 
     if ( m_commandBuffers.size() > 0 ) {
         auto commandBuffer = crimild::get_ptr( m_commandBuffers[ 0 ] );
@@ -303,9 +305,14 @@ crimild::Bool VulkanSystem::createCommandPool( void ) noexcept
     return m_commandPool != nullptr;
 }
 
-void VulkanSystem::updateUniformBuffer( crimild::UInt32 currentImage ) noexcept
+void VulkanSystem::updateVertexBuffers( void ) noexcept
 {
-    getRenderDevice()->updateUniformBuffers( currentImage );
+    getRenderDevice()->updateVertexBuffers();
+}
+
+void VulkanSystem::updateUniformBuffers( void ) noexcept
+{
+    getRenderDevice()->updateUniformBuffers( 0 );
 }
 
 void VulkanSystem::initShaders( void ) noexcept

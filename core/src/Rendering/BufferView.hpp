@@ -51,6 +51,13 @@ namespace crimild {
             USER_DEFINED, //< custom target
         };
 
+        // This is a hint to render devices so device memory
+        // is optimized accordingly
+        enum class Usage {
+            STATIC,
+            DYNAMIC,
+        };
+
     public:
         /**
            \brief Constructs a buffer view from an existing buffer
@@ -85,6 +92,9 @@ namespace crimild {
          */
         inline Target getTarget( void ) const noexcept { return m_target; }
 
+        inline void setUsage( Usage usage ) noexcept { m_usage = usage; }
+        inline Usage getUsage( void ) const noexcept { return m_usage; }
+
         /**
            \brief Get number of bytes to the first element in the data buffer
          */
@@ -115,6 +125,7 @@ namespace crimild {
         crimild::Size m_offset;
         crimild::Size m_stride;
         crimild::Size m_length;
+        Usage m_usage = Usage::STATIC;
     };
 
 }
