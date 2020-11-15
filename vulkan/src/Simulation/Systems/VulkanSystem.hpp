@@ -28,12 +28,12 @@
 #ifndef CRIMILD_VULKAN_SYSTEM_
 #define CRIMILD_VULKAN_SYSTEM_
 
-#include "Simulation/Systems/System.hpp"
+#include "Debug/VulkanDebugMessenger.hpp"
 #include "Rendering/VulkanInstance.hpp"
-#include "Rendering/VulkanSurface.hpp"
 #include "Rendering/VulkanPhysicalDevice.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
-#include "Debug/VulkanDebugMessenger.hpp"
+#include "Rendering/VulkanSurface.hpp"
+#include "Simulation/Systems/System.hpp"
 
 namespace crimild {
 
@@ -61,20 +61,19 @@ namespace crimild {
            9. Allocate and record a command buffer with the draw commands for every possible swapchain image
            10. Draw frames by acquiring images, submitting the right draw command buffer and returing the images back to the swapchain
          */
-        class VulkanSystem :
-        	public System,
-        	public VulkanInstanceManager,
-        	public VulkanSurfaceManager,
-        	public PhysicalDeviceManager,
-            public RenderDeviceManager,
-            public VulkanDebugMessengerManager {
+        class VulkanSystem : public System,
+                             public VulkanInstanceManager,
+                             public VulkanSurfaceManager,
+                             public PhysicalDeviceManager,
+                             public RenderDeviceManager,
+                             public VulkanDebugMessengerManager {
             CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::VulkanSystem )
 
         public:
-            using VulkanInstanceManager::create;
             using PhysicalDeviceManager::create;
             using RenderDeviceManager::create;
             using VulkanDebugMessengerManager::create;
+            using VulkanInstanceManager::create;
 
         public:
             virtual ~VulkanSystem( void ) = default;
@@ -90,7 +89,7 @@ namespace crimild {
             Swapchain *getSwapchain( void ) noexcept { return crimild::get_ptr( m_swapchain ); }
             CommandPool *getCommandPool( void ) noexcept { return crimild::get_ptr( m_commandPool ); }
 
-            void setCommandBuffers( Array< SharedPointer< CommandBuffer >> const &cmds ) noexcept { m_commandBuffers = cmds; }
+            void setCommandBuffers( Array< SharedPointer< CommandBuffer > > const &cmds ) noexcept { m_commandBuffers = cmds; }
 
         protected:
             virtual SharedPointer< VulkanSurface > create( VulkanSurface::Descriptor const &descriptor ) noexcept { return nullptr; }
@@ -106,7 +105,8 @@ namespace crimild {
             crimild::Bool createSyncObjects( void ) noexcept;
             crimild::Bool createCommandPool( void ) noexcept;
 
-            void updateUniformBuffer( crimild::UInt32 currentImage ) noexcept;
+            void updateVertexBuffers( void ) noexcept;
+            void updateUniformBuffers( void ) noexcept;
 
             void cleanSwapchain( void ) noexcept;
 
@@ -118,10 +118,10 @@ namespace crimild {
             SharedPointer< RenderDevice > m_renderDevice;
             SharedPointer< Swapchain > m_swapchain;
             SharedPointer< CommandPool > m_commandPool;
-            Array< SharedPointer< CommandBuffer >> m_commandBuffers;
-            std::vector< SharedPointer< Semaphore >> m_imageAvailableSemaphores;
-            std::vector< SharedPointer< Semaphore >> m_renderFinishedSemaphores;
-            std::vector< SharedPointer< Fence >> m_inFlightFences;
+            Array< SharedPointer< CommandBuffer > > m_commandBuffers;
+            std::vector< SharedPointer< Semaphore > > m_imageAvailableSemaphores;
+            std::vector< SharedPointer< Semaphore > > m_renderFinishedSemaphores;
+            std::vector< SharedPointer< Fence > > m_inFlightFences;
             crimild::UInt32 m_currentFrame = 0;
 
         private:

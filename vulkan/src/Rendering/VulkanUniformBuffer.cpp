@@ -106,6 +106,9 @@ crimild::Bool UniformBufferManager::unbind( UniformBuffer *uniformBuffer ) noexc
 
 void UniformBufferManager::updateUniformBuffers( crimild::Size index ) noexcept
 {
+    // This is a slow operation. It's copying data synchronously and also it's assuming
+    // all UBOs need updating. Instead, we could use BufferView::Usage to find out which
+    // ubos actually need updating.
     auto renderDevice = getRenderDevice();
     each( [ this, renderDevice ]( UniformBuffer *ubo, UniformBufferBindInfo &bindInfo ) {
         ubo->onPreRender();
