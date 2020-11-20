@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,37 +35,51 @@ namespace crimild {
     class BoxPositionParticleGenerator : public ParticleSystemComponent::ParticleGenerator {
         CRIMILD_IMPLEMENT_RTTI( crimild::BoxPositionParticleGenerator )
     public:
-        BoxPositionParticleGenerator( void );
-        virtual ~BoxPositionParticleGenerator( void );
+        struct Params {
+            Vector3f origin = Vector3f::ZERO;
+            Vector3f size = Vector3f::ONE;
+        };
 
-		inline void setOrigin( const Vector3f &origin ) { _origin = origin; }
-		inline const Vector3f &getOrigin( void ) const { return _origin; }
+    public:
+        BoxPositionParticleGenerator( void ) = default;
 
-		inline void setSize( const Vector3f &size ) { _size = size; }
-		inline const Vector3f &getSize( void ) const { return _size; }
+        explicit BoxPositionParticleGenerator( const Vector3f &origin, const Vector3f &size ) noexcept
+            : _origin( origin ),
+              _size( size )
+        {
+            // no-op
+        }
 
-		virtual void configure( Node *node, ParticleData *particles ) override;
+        virtual ~BoxPositionParticleGenerator( void ) = default;
+
+        inline void setOrigin( const Vector3f &origin ) { _origin = origin; }
+        inline const Vector3f &getOrigin( void ) const { return _origin; }
+
+        inline void setSize( const Vector3f &size ) { _size = size; }
+        inline const Vector3f &getSize( void ) const { return _size; }
+
+        virtual void configure( Node *node, ParticleData *particles ) override;
         virtual void generate( Node *node, crimild::Real64 dt, ParticleData *particles, ParticleId startId, ParticleId endId ) override;
 
     private:
+        Params m_params;
         Vector3f _origin;
         Vector3f _size;
 
-		ParticleAttribArray *_positions = nullptr;
-        
-		/** 
+        ParticleAttribArray *_positions = nullptr;
+
+        /**
 		 	\name Coding support
 		*/
-		//@{
+        //@{
 
-	public:
-		virtual void encode( coding::Encoder &encoder ) override;
-		virtual void decode( coding::Decoder &decoder ) override;
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
 
-		//@}
+        //@}
     };
 
 }
 
 #endif
-

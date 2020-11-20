@@ -90,6 +90,7 @@ PhongLitShaderProgram::PhongLitShaderProgram( void ) noexcept
                             vec4 attenuation;
                             vec4 cutoff;
                             bool castShadows;
+                            float shadowBias;
                             vec4 cascadeSplits;
                             mat4 lightSpaceMatrix[ 4 ];
                             vec4 viewport;
@@ -142,10 +143,22 @@ PhongLitShaderProgram::PhongLitShaderProgram( void ) noexcept
                         }
 
                         const mat4 bias = mat4(
-                            0.5, 0.0, 0.0, 0.0,
-                            0.0, 0.5, 0.0, 0.0,
-                            0.0, 0.0, 1.0, 0.0,
-                            0.5, 0.5, 0.0, 1.0 );
+                            0.5,
+                            0.0,
+                            0.0,
+                            0.0,
+                            0.0,
+                            0.5,
+                            0.0,
+                            0.0,
+                            0.0,
+                            0.0,
+                            1.0,
+                            0.0,
+                            0.5,
+                            0.5,
+                            0.0,
+                            1.0 );
 
                         float linearizeDepth( float depth, float nearPlane, float farPlane ) {
                             float z = depth * 2.0 - 1.0; // Back to NDC
@@ -248,10 +261,10 @@ PhongLitShaderProgram::PhongLitShaderProgram( void ) noexcept
                             return color;
                         }
 
-                        float calculatePointShadow( sampler2D shadowAtlas, float dist, vec3 D, vec4 viewport ) {
+                        float calculatePointShadow( sampler2D shadowAtlas, float dist, vec3 D, vec4 viewport, float bias ) {
                             float depth = dist / 200.0; //length( D ) / 200.0;
-                            float shadow = textureCubeUV( shadowAtlas, D, viewport ).r;
-                            return depth - 0.05 > shadow ? 1.0 : 0.0;
+                            float shadow = linearizeDepth( textureCubeUV( shadowAtlas, D, viewport ).r, 0.1, 200.0 );
+                            return depth - bias > shadow ? 1.0 : 0.0;
 
                             /*
                         // Compute shadow PCF
@@ -322,7 +335,12 @@ PhongLitShaderProgram::PhongLitShaderProgram( void ) noexcept
                                 float lAtt = attenuation( dist, lighting.pointLights[ i ].attenuation.xyz );
 
                                 if ( lighting.pointLights[ i ].castShadows ) {
-                                    float shadow = calculatePointShadow( uShadowAtlas, dist, -L, lighting.pointLights[ i ].viewport );
+                                    float shadow = calculatePointShadow(
+                                        uShadowAtlas,
+                                        dist,
+                                        -L,
+                                        lighting.pointLights[ i ].viewport,
+                                        lighting.pointLights[ i ].shadowBias );
                                     D *= 1.0 - shadow;
                                     S *= 1.0 - shadow;
                                 }

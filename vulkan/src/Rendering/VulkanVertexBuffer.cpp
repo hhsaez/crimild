@@ -44,7 +44,6 @@ crimild::Bool VertexBufferManager::bind( VertexBuffer *vertexBuffer ) noexcept
 
     auto renderDevice = getRenderDevice();
     auto bufferView = vertexBuffer->getBufferView();
-    auto bufferSize = bufferView->getLength();
 
     VkDeviceSize vertexBufferSize = bufferView->getLength();
 
@@ -56,7 +55,7 @@ crimild::Bool VertexBufferManager::bind( VertexBuffer *vertexBuffer ) noexcept
     utils::createBuffer(
         renderDevice,
         utils::BufferDescriptor {
-            .size = bufferSize,
+            .size = bufferView->getBuffer()->getSize(),
             .usage = usage,
             .properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
         },
@@ -68,7 +67,7 @@ crimild::Bool VertexBufferManager::bind( VertexBuffer *vertexBuffer ) noexcept
             renderDevice->handler,
             bufferMemory,
             bufferView->getData(),
-            bufferSize );
+            bufferView->getLength() );
     }
 
     setBindInfo(

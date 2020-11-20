@@ -26,19 +26,16 @@
  */
 
 #include "ShadowMap.hpp"
-#include "Texture.hpp"
 
 #include "Simulation/Simulation.hpp"
+#include "Texture.hpp"
 
 using namespace crimild;
 
 ShadowMap::ShadowMap( void )
-//: _cullFaceState( crimild::alloc< CullFaceState >( true, CullFaceState::CullFaceMode::FRONT ) )
 {
-
 }
 
 ShadowMap::~ShadowMap( void )
 {
-
 }
