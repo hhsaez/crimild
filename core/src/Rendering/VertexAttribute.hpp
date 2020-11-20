@@ -33,30 +33,31 @@
 
 namespace crimild {
 
-	struct VertexAttribute {
-		enum Name {
-			POSITION,
-			NORMAL,
-			TANGENT,
-			COLOR,
-			TEX_COORD,
-			TEX_COORD_1,
-			TEX_COORD_2,
-			TEX_COORD_3,
-			BLEND_INDICES,
-			BLEND_WEIGHT,
-			USER_ATTRIBUTE = 100,
-		};
+    struct VertexAttribute {
+        enum Name {
+            POSITION,
+            NORMAL,
+            TANGENT,
+            COLOR,
+            TEX_COORD,
+            TEX_COORD_1,
+            TEX_COORD_2,
+            TEX_COORD_3,
+            BLEND_INDICES,
+            BLEND_WEIGHT,
+            SIZE,
+            USER_ATTRIBUTE = 100,
+        };
 
-		Name name;
-		Format format;
-		crimild::UInt32 offset = 0;
+        Name name;
+        Format format;
+        crimild::UInt32 offset = 0;
 
-		crimild::Bool operator==( const VertexAttribute &other ) const noexcept
-		{
-			return name == other.name && format == other.format && offset == other.offset;
-		}
-	};
+        crimild::Bool operator==( const VertexAttribute &other ) const noexcept
+        {
+            return name == other.name && format == other.format && offset == other.offset;
+        }
+    };
 
 }
 

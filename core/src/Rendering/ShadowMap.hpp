@@ -53,19 +53,15 @@ namespace crimild {
         const Vector4f &getViewport( void ) const { return _viewport; }
         void setViewport( const Vector4f &viewport ) { _viewport = viewport; }
 
-        void setMinBias( crimild::Real32 minBias ) { _minBias = minBias; }
-        crimild::Real32 getMinBias( void ) const { return _minBias; }
-
-        void setMaxBias( crimild::Real32 maxBias ) { _maxBias = maxBias; }
-        crimild::Real32 getMaxBias( void ) const { return _maxBias; }
+        inline void setBias( Real32 bias ) noexcept { m_bias = bias; }
+        inline Real32 getBias( void ) const noexcept { return m_bias; }
 
     private:
         Vector4f _cascadeSplits;
         Matrix4f _lightProjectionMatrix[ 4 ];
         Matrix4f _lightViewMatrix;
         Vector4f _viewport;
-        crimild::Real32 _minBias = 0.0001f;
-        crimild::Real32 _maxBias = 0.001f;
+        crimild::Real32 m_bias = 0.1f;
     };
 
 }

@@ -33,8 +33,47 @@
 #include "Rendering/ImageView.hpp"
 #include "Rendering/Materials/SkyboxMaterial.hpp"
 #include "Rendering/Pipeline.hpp"
+#include "Rendering/Sampler.hpp"
+#include "Rendering/Texture.hpp"
 
 using namespace crimild;
+
+Skybox::Skybox( const RGBColorf &color ) noexcept
+    : Skybox(
+        [ color ] {
+            auto texture = crimild::alloc< Texture >();
+            texture->imageView = [ color ] {
+                auto imageView = crimild::alloc< ImageView >();
+                imageView->image = [ color ] {
+                    auto image = crimild::alloc< Image >();
+                    image->extent = {
+                        .width = 1,
+                        .height = 1,
+                        .depth = 1,
+                    };
+                    image->format = Format::R8G8B8A8_UNORM;
+                    image->data = {
+                        UInt8( color.r() * 255 ),
+                        UInt8( color.g() * 255 ),
+                        UInt8( color.b() * 255 ),
+                        0xFF
+                    };
+                    return image;
+                }();
+                return imageView;
+            }();
+            texture->sampler = [ & ] {
+                auto sampler = crimild::alloc< Sampler >();
+                sampler->setMinFilter( Sampler::Filter::LINEAR );
+                sampler->setMagFilter( Sampler::Filter::LINEAR );
+                sampler->setWrapMode( Sampler::WrapMode::CLAMP_TO_BORDER );
+                sampler->setCompareOp( CompareOp::NEVER );
+                return sampler;
+            }();
+            return texture;
+        }() )
+{
+}
 
 Skybox::Skybox( SharedPointer< Texture > const &texture ) noexcept
 {

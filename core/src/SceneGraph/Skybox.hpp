@@ -34,13 +34,14 @@ namespace crimild {
 
     class Texture;
 
-	class Skybox : public Geometry {
-		CRIMILD_IMPLEMENT_RTTI( crimild::Skybox )
+    class Skybox : public Geometry {
+        CRIMILD_IMPLEMENT_RTTI( crimild::Skybox )
 
-	public:
-		Skybox( void ) = default;
+    public:
+        Skybox( void ) = default;
+        explicit Skybox( const RGBColorf &color ) noexcept;
         explicit Skybox( SharedPointer< Texture > const &cubemap ) noexcept;
-		virtual ~Skybox( void ) = default;
+        virtual ~Skybox( void ) = default;
 
         /**
 		   \name Coding
@@ -52,7 +53,7 @@ namespace crimild {
         virtual void decode( coding::Decoder &decoder ) override;
 
         //@}
-	};
+    };
 
 }
 

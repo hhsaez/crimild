@@ -43,6 +43,7 @@ struct LightProps {
     vec4 attenuation;
     vec4 cutoff;
     bool castShadows;
+    float shadowBias;
     vec4 cascadeSplits;
     mat4 lightSpaceMatrix[ 4 ];
     vec4 viewport;
@@ -241,11 +242,11 @@ int roughnessToLOD( float roughness, float maxLOD )
 	return int( round( roughness * maxLOD ) );
 }
 
-float calculatePointShadow( sampler2D shadowAtlas, float dist, vec3 D, vec4 viewport )
+float calculatePointShadow( sampler2D shadowAtlas, float dist, vec3 D, vec4 viewport, float bias )
 {
     float depth = dist / 200.0; //length( D ) / 200.0;
-    float shadow = textureCubeUV( shadowAtlas, D, viewport ).r;
-    return depth - 0.05 > shadow ? 1.0 : 0.0;
+    float shadow = linearizeDepth( textureCubeUV( shadowAtlas, D, viewport ).r, 0.1, 200.0 );
+    return depth - bias > shadow ? 1.0 : 0.0;
 
     /*
                         // Compute shadow PCF
@@ -431,14 +432,6 @@ void main()
 
     vec3 Lo = vec3( 0 );
 
-    /*
-                            // ambient lights
-                            for ( uint i = 0; i < lighting.ambientLightCount; ++i ) {
-                                vec3 A = ambient( lighting.ambientLights[ i ].ambient.rgb );
-                                lightContribution += A;
-                            }
-                             */
-
     // point lights
     for ( uint i = 0; i < lighting.pointLightCount; ++i ) {
         vec3 L = lighting.pointLights[ i ].position.xyz - inPosition;
@@ -447,13 +440,19 @@ void main()
         vec3 H = normalize( V + L );
         float attenuation = 1.0 / ( dist * dist );
         vec3 radiance = lighting.pointLights[ i ].color.rgb * attenuation;
-        Lo += brdf( N, H, V, L, radiance, albedo.rgb, metallic, roughness );
+        vec3 irradiance = brdf( N, H, V, L, radiance, albedo.rgb, metallic, roughness );
 
-        //                                if ( light.castShadows ) {
-        //float shadow = calculatePointShadow( uShadowAtlas, dist, -L, light.viewport );
-        //D *= 1.0 - shadow;
-        //S *= 1.0 - shadow;
-        //                                }
+        if ( lighting.pointLights[ i ].castShadows ) {
+            float shadow = calculatePointShadow(
+                uShadowAtlas,
+                dist,
+                -L,
+                lighting.pointLights[ i ].viewport,
+                lighting.pointLights[ i ].shadowBias );
+            irradiance *= 1.0 - shadow;
+        }
+
+        Lo += irradiance;
     }
 
     // directional lights
