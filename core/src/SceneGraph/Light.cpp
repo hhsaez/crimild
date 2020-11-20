@@ -85,7 +85,7 @@ Matrix4f Light::computeLightSpaceMatrix( void ) const noexcept
         proj = ortho( -50.0f, 50.0f, -50.0f, 50.0f, 1.0f, 200.0f );
     }
     else if ( getType() == Type::POINT ) {
-        proj = Frustumf( 90.0f, 1.0f, 1.0f, 200.0f ).computeProjectionMatrix();
+        proj = Frustumf( 90.0f, 1.0f, 0.1f, 200.0f ).computeProjectionMatrix();
     }
     else {
         proj = Frustumf( 45.0f, 1.0f, 1.0f, 200.0f ).computeProjectionMatrix();

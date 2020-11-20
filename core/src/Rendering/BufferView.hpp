@@ -111,6 +111,13 @@ namespace crimild {
         inline crimild::Size getLength( void ) const noexcept { return m_length; }
 
         /**
+           \brief Set length of the view
+
+           The length value must be larger than the actual length of the buffer
+         */
+        inline void setLength( Size length ) noexcept { m_length = length; }
+
+        /**
            \brief Get count of elements
          */
         inline crimild::Size getCount( void ) const noexcept { return m_length / m_stride; }

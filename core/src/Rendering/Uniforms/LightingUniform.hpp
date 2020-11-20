@@ -48,14 +48,15 @@ namespace crimild {
         static constexpr const Size MAX_SPOTLIGHTS = 4;
 
         struct LightProp {
-            alignas( 16 ) UInt32 type;
+            alignas( 4 ) UInt32 type;
             alignas( 16 ) Vector4f position;
             alignas( 16 ) Vector4f direction;
             alignas( 16 ) Vector4f ambient;
             alignas( 16 ) Vector4f color;
             alignas( 16 ) Vector4f attenuation;
             alignas( 16 ) Vector4f cutoff;
-            alignas( 16 ) Bool castShadows;
+            alignas( 4 ) Bool castShadows;
+            alignas( 4 ) Real32 shadowBias;
             alignas( 16 ) Vector4f cascadeSplits;
             alignas( 16 ) Matrix4f lightSpaceMatrix[ 4 ];
             alignas( 16 ) Vector4f viewport;
@@ -63,13 +64,13 @@ namespace crimild {
 
         struct Lighting {
             alignas( 16 ) LightProp ambientLights[ MAX_AMBIENT_LIGHTS ];
-            alignas( 16 ) UInt32 ambientLightCount = 0;
+            alignas( 4 ) UInt32 ambientLightCount = 0;
             alignas( 16 ) LightProp directionalLights[ MAX_DIRECTIONAL_LIGHTS ];
-            alignas( 16 ) UInt32 directionalLightCount = 0;
+            alignas( 4 ) UInt32 directionalLightCount = 0;
             alignas( 16 ) LightProp pointLights[ MAX_POINT_LIGHTS ];
-            alignas( 16 ) UInt32 pointLightCount = 0;
+            alignas( 4 ) UInt32 pointLightCount = 0;
             alignas( 16 ) LightProp spotlights[ MAX_SPOTLIGHTS ];
-            alignas( 16 ) UInt32 spotlightCount = 0;
+            alignas( 4 ) UInt32 spotlightCount = 0;
         };
 
     public:

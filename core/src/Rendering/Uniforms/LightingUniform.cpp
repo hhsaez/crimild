@@ -81,6 +81,7 @@ void LightingUniform::onPreRender( void ) noexcept
                 0.0f );
             dst[ i ].castShadows = light->castShadows();
             if ( light->castShadows() ) {
+                dst[ i ].shadowBias = light->getShadowMap()->getBias();
                 dst[ i ].cascadeSplits = light->getShadowMap()->getCascadeSplits();
                 for ( auto split = 0; split < 4; ++split ) {
                     dst[ i ].lightSpaceMatrix[ split ] = light->getShadowMap()->getLightProjectionMatrix( split );
