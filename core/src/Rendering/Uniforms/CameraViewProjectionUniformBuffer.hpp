@@ -38,8 +38,9 @@ namespace crimild {
     class CameraViewProjectionUniform : public UniformBuffer {
     private:
         struct Props {
-            Matrix4f view;
-            Matrix4f proj;
+            alignas( 16 ) Matrix4f view;
+            alignas( 16 ) Matrix4f proj;
+            alignas( 8 ) Vector2f viewport;
         };
         
     public:
