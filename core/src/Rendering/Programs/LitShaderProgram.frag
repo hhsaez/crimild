@@ -244,9 +244,15 @@ int roughnessToLOD( float roughness, float maxLOD )
 
 float calculatePointShadow( sampler2D shadowAtlas, float dist, vec3 D, vec4 viewport, float bias )
 {
+#if 0
     float depth = dist / 200.0; //length( D ) / 200.0;
-    float shadow = linearizeDepth( textureCubeUV( shadowAtlas, D, viewport ).r, 0.1, 200.0 );
+    float shadow = linearizeDepth( textureCubeUV( shadowAtlas, D, viewport ).r, 0.01, 200.0 );
     return depth - bias > shadow ? 1.0 : 0.0;
+#else
+float depth = dist;
+float shadow = textureCubeUV( shadowAtlas, D, viewport ).r;
+return depth <= ( shadow + bias ) ? 0.0 : 1.0;
+#endif
 
     /*
                         // Compute shadow PCF

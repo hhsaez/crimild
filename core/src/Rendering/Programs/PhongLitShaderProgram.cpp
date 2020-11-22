@@ -262,10 +262,9 @@ PhongLitShaderProgram::PhongLitShaderProgram( void ) noexcept
                         }
 
                         float calculatePointShadow( sampler2D shadowAtlas, float dist, vec3 D, vec4 viewport, float bias ) {
-                            float depth = dist / 200.0; //length( D ) / 200.0;
-                            float shadow = linearizeDepth( textureCubeUV( shadowAtlas, D, viewport ).r, 0.1, 200.0 );
-                            return depth - bias > shadow ? 1.0 : 0.0;
-
+                            float depth = dist;
+                            float shadow = textureCubeUV( shadowAtlas, D, viewport ).r;
+                            return depth <= ( shadow + bias ) ? 0.0 : 1.0;
                             /*
                         // Compute shadow PCF
                         float bias = 0.05;

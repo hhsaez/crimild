@@ -161,6 +161,10 @@ namespace crimild {
 		virtual ~DefaultRGBAColorfParticleGenerator( void ) { }
 	};
 
+	class DefaultRGBColorfParticleGenerator : public DefaultValueParticleGenerator< RGBColorf > {
+		CRIMILD_IMPLEMENT_RTTI( crimild::DefaultRGBAColorfParticleGenerator )
+	};
+
 	class DefaultReal32ParticleGenerator : public DefaultValueParticleGenerator< crimild::Real32 > {
 		CRIMILD_IMPLEMENT_RTTI( crimild::DefaultReal32ParticleGenerator )
 

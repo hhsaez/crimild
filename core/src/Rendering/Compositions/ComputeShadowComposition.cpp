@@ -27,6 +27,7 @@
 
 #include "Rendering/Compositions/ComputeShadowComposition.hpp"
 
+#include "Components/MaterialComponent.hpp"
 #include "Rendering/CommandBuffer.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Pipeline.hpp"
@@ -58,7 +59,10 @@ static GraphicsPipeline *createPipeline( Composition &cmp, Light::Type lightType
                         layout ( location = 2 ) in vec2 inTextureCoord;
 
                         layout ( set = 0, binding = 0 ) uniform LightUniforms {
-                            mat4 lightSpaceMatrix;
+                            //mat4 lightSpaceMatrix;
+                            mat4 proj;
+                            mat4 view;
+                            vec3 lightPos;
                         };
 
                         layout ( set = 1, binding = 0 ) uniform GeometryUniforms {
@@ -70,12 +74,10 @@ static GraphicsPipeline *createPipeline( Composition &cmp, Light::Type lightType
 
                         void main()
                         {
-                            gl_Position = lightSpaceMatrix * model * vec4( inPosition, 1.0 );
+                            gl_Position = proj * view * model * vec4( inPosition, 1.0 );
 
                             outPosition = ( model * vec4( inPosition, 1.0 ) ).xyz;
-
-                            mat4 invView = inverse( lightSpaceMatrix );
-                            outLightPos = vec3( invView[ 3 ].x, invView[ 3 ].y, invView[ 3 ].z );
+                            outLightPos = lightPos;
                         }
                     )" ),
                     crimild::alloc< Shader >(
@@ -85,30 +87,21 @@ static GraphicsPipeline *createPipeline( Composition &cmp, Light::Type lightType
                             layout ( location = 0 ) in vec3 inPosition;
                             layout ( location = 1 ) in vec3 inLightPos;
 
-                            layout ( location = 0 ) out vec4 fragColor;
+                            layout ( location = 0 ) out float fragColor;
 
                             void main()
                             {
                                 float d = length( inPosition - inLightPos );
-                                d /= 200.0;
-                                fragColor = vec4( vec3( d ), 1.0 );
-                                gl_FragDepth = d;
+                                fragColor = d;
                             }
                         )"
                             : R"(
-                            layout ( location = 0 ) out vec4 fragColor;
-
-                            float linearizeDepth(float depth, float nearPlane, float farPlane)
-                            {
-                                float z = depth * 2.0 - 1.0; // Back to NDC
-                                return ( 2.0 * nearPlane * farPlane ) / ( farPlane + nearPlane - z * ( farPlane - nearPlane ) ) / farPlane;
-                            }
+                            layout ( location = 0 ) out float fragColor;
 
                             void main()
                             {
                                 float d = gl_FragCoord.z;
-                                d = linearizeDepth( d, 1.0, 200.0 );
-                                fragColor = vec4( vec3( d ), 1.0 );
+                                fragColor = d;
                             }
                         )" ),
                 } );
@@ -140,7 +133,7 @@ static GraphicsPipeline *createPipeline( Composition &cmp, Light::Type lightType
     pipeline->viewport = { .scalingMode = ScalingMode::DYNAMIC };
     pipeline->scissor = { .scalingMode = ScalingMode::DYNAMIC };
     pipeline->rasterizationState = RasterizationState {
-        .cullMode = CullMode::FRONT,
+        .cullMode = CullMode::FRONT_AND_BACK,
 
         // It would be ideal to support this feature for directional lights
         // but it seems it doesn't work...
@@ -149,6 +142,12 @@ static GraphicsPipeline *createPipeline( Composition &cmp, Light::Type lightType
 
     return pipeline;
 }
+
+struct LightUniforms {
+    alignas( 16 ) Matrix4f proj;
+    alignas( 16 ) Matrix4f view;
+    alignas( 16 ) Vector3f lightPos;
+};
 
 size_t recordPointLightCommands( Composition &cmp, CommandBuffer *commandBuffer, GraphicsPipeline *pipeline, Array< ViewportDimensions > &layout, size_t offset, Array< Light * > lights, Node *scene ) noexcept
 {
@@ -231,6 +230,17 @@ size_t recordPointLightCommands( Composition &cmp, CommandBuffer *commandBuffer,
                 scene->perform(
                     ApplyToGeometries(
                         [ & ]( Geometry *geometry ) {
+                            if ( geometry->getLayer() == Node::Layer::SKYBOX ) {
+                                // ignore skybox
+                                return;
+                            }
+                            if ( auto ms = geometry->getComponent< MaterialComponent >() ) {
+                                if ( auto m = ms->first() ) {
+                                    if ( !m->castShadows() ) {
+                                        return;
+                                    }
+                                }
+                            }
                             // TODO: binding pipeline and render pass descriptors should be done earlier, right?
                             commandBuffer->bindGraphicsPipeline( pipeline );
                             commandBuffer->bindDescriptorSet(
@@ -240,7 +250,7 @@ size_t recordPointLightCommands( Composition &cmp, CommandBuffer *commandBuffer,
                                         {
                                             .descriptorType = DescriptorType::UNIFORM_BUFFER,
                                             .obj = [ & ] {
-                                                return crimild::alloc< CallbackUniformBuffer< Matrix4f > >(
+                                                return crimild::alloc< CallbackUniformBuffer< LightUniforms > >(
                                                     [ light, face ] {
                                                         Transformation t;
                                                         switch ( face ) {
@@ -272,7 +282,12 @@ size_t recordPointLightCommands( Composition &cmp, CommandBuffer *commandBuffer,
                                                         t.setTranslate( light->getWorld().getTranslate() );
                                                         auto vMatrix = t.computeModelMatrix().getInverse();
                                                         auto pMatrix = light->computeLightSpaceMatrix();
-                                                        return vMatrix * pMatrix;
+                                                        //return vMatrix * pMatrix;
+                                                        return LightUniforms {
+                                                            .proj = pMatrix,
+                                                            .view = vMatrix,
+                                                            .lightPos = light->getWorld().getTranslate(),
+                                                        };
                                                     } );
                                             }(),
                                         },
@@ -322,13 +337,17 @@ size_t recordSpotLightCommands( Composition &cmp, CommandBuffer *commandBuffer, 
                                     {
                                         .descriptorType = DescriptorType::UNIFORM_BUFFER,
                                         .obj = [ & ] {
-                                            return crimild::alloc< CallbackUniformBuffer< Matrix4f > >(
+                                            return crimild::alloc< CallbackUniformBuffer< LightUniforms > >(
                                                 [ light ] {
                                                     auto shadowMap = light->getShadowMap();
                                                     auto vMatrix = light->getWorld().computeModelMatrix().getInverse();
                                                     auto pMatrix = light->computeLightSpaceMatrix();
                                                     shadowMap->setLightProjectionMatrix( 0, vMatrix * pMatrix );
-                                                    return shadowMap->getLightProjectionMatrix( 0 );
+                                                    return LightUniforms {
+                                                        .proj = pMatrix,
+                                                        .view = vMatrix,
+                                                        .lightPos = light->getWorld().getTranslate(),
+                                                    };
                                                 } );
                                         }(),
                                     },
@@ -488,11 +507,15 @@ size_t recordDirectionalLightCommands(
                 {
                     .descriptorType = DescriptorType::UNIFORM_BUFFER,
                     .obj = [ & ] {
-                        return crimild::alloc< CallbackUniformBuffer< Matrix4f > >(
+                        return crimild::alloc< CallbackUniformBuffer< LightUniforms > >(
                             [ &, cascadeId, light ] {
                                 updateCascade( cascadeId, light );
                                 auto shadowMap = light->getShadowMap();
-                                return shadowMap->getLightProjectionMatrix( cascadeId );
+                                return LightUniforms {
+                                    .proj = shadowMap->getLightProjectionMatrix( cascadeId ),
+                                    .view = Matrix4f::IDENTITY,
+                                    .lightPos = light->getWorld().getTranslate(),
+                                };
                             } );
                     }(),
                 },
@@ -633,11 +656,18 @@ Composition crimild::compositions::computeShadow( Composition cmp, Node *scene )
     renderPass->attachments = {
         [ & ] {
             auto att = cmp.createAttachment( "shadowDepth" );
+            att->format = Format::R32_SFLOAT;
+            att->imageView = crimild::alloc< ImageView >();
+            att->imageView->image = crimild::alloc< Image >();
+            return crimild::retain( att );
+        }(),
+        [ & ] {
+            auto att = cmp.createAttachment( "shadowDepth" );
             att->format = Format::DEPTH_STENCIL_DEVICE_OPTIMAL;
             att->imageView = crimild::alloc< ImageView >();
             att->imageView->image = crimild::alloc< Image >();
             return crimild::retain( att );
-        }()
+        }(),
     };
 
     renderPass->extent = {

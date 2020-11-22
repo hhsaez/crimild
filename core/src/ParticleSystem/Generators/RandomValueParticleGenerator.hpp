@@ -169,8 +169,14 @@ namespace crimild {
 		CRIMILD_IMPLEMENT_RTTI( crimild::RandomVector3fParticleGenerator )
 
 	public:
-		RandomVector3fParticleGenerator( void ) { }
-		virtual ~RandomVector3fParticleGenerator( void ) { }
+		RandomVector3fParticleGenerator( void ) = default;
+        RandomVector3fParticleGenerator( const ::crimild::ParticleAttribType &type, const Vector3f &min, const Vector3f &max )
+    		: RandomValueParticleGenerator( type, min, max )
+      	{
+
+      	}
+
+		virtual ~RandomVector3fParticleGenerator( void ) = default;
 	};
 
 	class RandomRGBAColorfParticleGenerator : public RandomValueParticleGenerator< RGBAColorf > {

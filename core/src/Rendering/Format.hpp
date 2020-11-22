@@ -95,6 +95,8 @@ namespace crimild {
         Format getFormat< Vector2f >( void ) noexcept { return Format::R32G32_SFLOAT; }
         template<>
         Format getFormat< Vector3f >( void ) noexcept { return Format::R32G32B32_SFLOAT; }
+        template<>
+        Format getFormat< Vector4f >( void ) noexcept { return Format::R32G32B32A32_SFLOAT; }
 
         static UInt32 getFormatSize( Format format ) noexcept
         {
@@ -111,6 +113,8 @@ namespace crimild {
                     return 2 * sizeof( Real32 );
                 case Format::R32G32B32_SFLOAT:
                     return 3 * sizeof( Real32 );
+                case Format::R32G32B32A32_SFLOAT:
+                    return 4 * sizeof( Real32 );
                 default:
                     return 0;
             };
