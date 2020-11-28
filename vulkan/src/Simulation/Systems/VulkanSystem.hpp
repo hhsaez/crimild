@@ -40,6 +40,7 @@ namespace crimild {
     class Buffer;
     class CommandBuffer;
     class DescriptorSetLayout;
+    class FrameGraph;
 
     namespace vulkan {
 
@@ -78,12 +79,9 @@ namespace crimild {
         public:
             virtual ~VulkanSystem( void ) = default;
 
-            System::Priority getInitPriority( void ) const noexcept override { return System::PriorityType::HIGH; }
-            System::Priority getPriority( void ) const noexcept override { return System::PriorityType::RENDER; }
-
-            crimild::Bool start( void ) override;
-            void update( void ) override;
-            void stop( void ) override;
+            void start( void ) noexcept override;
+            void update( void ) noexcept override;
+            void stop( void ) noexcept override;
 
             RenderDevice *getRenderDevice( void ) noexcept { return crimild::get_ptr( m_renderDevice ); }
             Swapchain *getSwapchain( void ) noexcept { return crimild::get_ptr( m_swapchain ); }
@@ -126,6 +124,9 @@ namespace crimild {
 
         private:
             void initShaders( void ) noexcept;
+
+        private:
+            SharedPointer< FrameGraph > m_frameGraph;
         };
 
     }

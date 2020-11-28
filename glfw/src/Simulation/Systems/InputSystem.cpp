@@ -1,9 +1,10 @@
 #include "InputSystem.hpp"
-#include "WindowSystem.hpp"
+
 #include "Concurrency/Async.hpp"
 #include "Foundation/Profiler.hpp"
-#include "Simulation/Input.hpp"
 #include "Simulation/Console/Console.hpp"
+#include "Simulation/Input.hpp"
+#include "WindowSystem.hpp"
 
 using namespace crimild;
 using namespace crimild::glfw;
@@ -13,15 +14,15 @@ InputSystem::InputSystem( void )
 {
     registerMessageHandler< WindowSystemDidCreateWindow >( [ this ]( WindowSystemDidCreateWindow const &message ) {
         _window = message.video->getWindowHandler();
-        
+
         Input::getInstance()->reset( GLFW_KEY_LAST, GLFW_MOUSE_BUTTON_LAST );
-        
-        glfwSetKeyCallback( _window, []( GLFWwindow* window, int key, int scancode, int action, int mods ) {
-			if ( key == GLFW_KEY_UNKNOWN ) {
-				return;
-			}
-			
-            if ( Console::getInstance()->isEnabled() ) {
+
+        glfwSetKeyCallback( _window, []( GLFWwindow *window, int key, int scancode, int action, int mods ) {
+            if ( key == GLFW_KEY_UNKNOWN ) {
+                return;
+            }
+
+            if ( Console::getInstance() && Console::getInstance()->isEnabled() ) {
                 if ( action == GLFW_PRESS ) {
                     switch ( key ) {
                         case CRIMILD_INPUT_KEY_BACKSPACE:
@@ -43,93 +44,89 @@ InputSystem::InputSystem( void )
 
             if ( action == GLFW_PRESS || action == GLFW_REPEAT ) {
                 MessageQueue::getInstance()->pushMessage( messaging::KeyPressed { key } );
-            }
-            else {
+            } else {
                 MessageQueue::getInstance()->pushMessage( messaging::KeyReleased { key } );
             }
-        });
+        } );
 
         glfwSetCharCallback( _window, []( GLFWwindow *window, unsigned int codepoint ) {
-            if ( Console::getInstance()->isEnabled() ) {
+            if ( Console::getInstance() && Console::getInstance()->isEnabled() ) {
                 Console::getInstance()->handleInput( codepoint, 0 );
             }
-        });
-        
-        glfwSetMouseButtonCallback( _window, []( GLFWwindow* window, int button, int action, int mods ) {
+        } );
+
+        glfwSetMouseButtonCallback( _window, []( GLFWwindow *window, int button, int action, int mods ) {
             double x, y;
             glfwGetCursorPos( window, &x, &y );
-            
+
             if ( action == GLFW_PRESS ) {
                 MessageQueue::getInstance()->pushMessage( messaging::MouseButtonDown { button } );
-            }
-            else {
+            } else {
                 MessageQueue::getInstance()->pushMessage( messaging::MouseButtonUp { button } );
             }
-        });
-        
-        glfwSetScrollCallback( _window, []( GLFWwindow* window, double xoffset, double yoffset ) {
+        } );
+
+        glfwSetScrollCallback( _window, []( GLFWwindow *window, double xoffset, double yoffset ) {
             MessageQueue::getInstance()->pushMessage( messaging::MouseScroll { ( float ) xoffset, ( float ) yoffset } );
-        });
-        
-//        crimild::concurrency::sync_frame( std::bind( &InputSystem::update, this ) );
-    });
-    
+        } );
+
+        //        crimild::concurrency::sync_frame( std::bind( &InputSystem::update, this ) );
+    } );
+
     registerMessageHandler< WindowSystemWillDestroyWindow >( [ this ]( WindowSystemWillDestroyWindow const &message ) {
         _window = nullptr;
-    });
+    } );
 }
 
-void InputSystem::update( void )
+void InputSystem::earlyUpdate( void ) noexcept
 {
     CRIMILD_PROFILE( "Update Input" )
-    
+
     if ( _window == nullptr ) {
         return;
     }
-    
+
     switch ( Input::getInstance()->getMouseCursorMode() ) {
         case Input::MouseCursorMode::NORMAL:
             glfwSetInputMode( _window, GLFW_CURSOR, GLFW_CURSOR_NORMAL );
             break;
-            
+
         case Input::MouseCursorMode::HIDDEN:
             glfwSetInputMode( _window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN );
             break;
-            
+
         case Input::MouseCursorMode::GRAB:
             glfwSetInputMode( _window, GLFW_CURSOR, GLFW_CURSOR_DISABLED );
             break;
-            
+
         default:
             break;
     }
 
     // trigger MouseMotion in every update to handle cases
     // when the mouse is not moving and the delta pos should
-    // be updated 
+    // be updated
     int windowWidth, windowHeight;
     double x, y;
     glfwGetWindowSize( _window, &windowWidth, &windowHeight );
     glfwGetCursorPos( _window, &x, &y );
-    
+
     MessageQueue::getInstance()->pushMessage( messaging::MouseMotion {
         ( float ) x,
         ( float ) y,
         ( float ) x / ( float ) windowWidth,
-        ( float ) y / ( float ) windowHeight
-    });
+        ( float ) y / ( float ) windowHeight } );
 
-	std::vector< float > axes;
-	auto joyPresent = glfwJoystickPresent(GLFW_JOYSTICK_1);
-	if (joyPresent == 1) {
-		int axesCount;
-		const float *axesData = glfwGetJoystickAxes( GLFW_JOYSTICK_1, &axesCount );
-		for ( int i = 0; i < axesCount; i++ ) {
-			axes.push_back( axesData[ i ] );
-		}
-	}
-	Input::getInstance()->resetJoystickAxes( axes );
-    
-//    crimild::concurrency::sync_frame( std::bind( &InputSystem::update, this ) );
+    std::vector< float > axes;
+    auto joyPresent = glfwJoystickPresent( GLFW_JOYSTICK_1 );
+    if ( joyPresent == 1 ) {
+        int axesCount;
+        const float *axesData = glfwGetJoystickAxes( GLFW_JOYSTICK_1, &axesCount );
+        for ( int i = 0; i < axesCount; i++ ) {
+            axes.push_back( axesData[ i ] );
+        }
+    }
+    Input::getInstance()->resetJoystickAxes( axes );
+
+    //    crimild::concurrency::sync_frame( std::bind( &InputSystem::update, this ) );
 }
-

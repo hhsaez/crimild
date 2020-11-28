@@ -1,22 +1,21 @@
 #include "UISystem.hpp"
 
+#include "Components/UIResponder.hpp"
 #include "Simulation/Input.hpp"
 #include "Simulation/Simulation.hpp"
-
 #include "Visitors/Apply.hpp"
-
-#include "Components/UIResponder.hpp"
 
 using namespace crimild;
 using namespace crimild::messaging;
 
-bool UISystem::start( void )
+void UISystem::start( void ) noexcept
 {
+    /*
     if ( !System::start() ) {
 		return false;
 	}
 
-    // TODO: This should be a click, not just a mouse button up   
+    // TODO: This should be a click, not just a mouse button up
     registerMessageHandler< MouseButtonUp >( []( MouseButtonUp const &msg ) {
         if ( msg.button == CRIMILD_INPUT_MOUSE_BUTTON_LEFT ) {
             Vector2f mousePos = Input::getInstance()->getNormalizedMousePosition();
@@ -29,13 +28,13 @@ bool UISystem::start( void )
 				Log::error( CRIMILD_CURRENT_CLASS_NAME, "No valid scene" );
 				return;
 			}
-			
+
             auto camera = Camera::getMainCamera();
 			if ( camera == nullptr ) {
 				Log::error( CRIMILD_CURRENT_CLASS_NAME, "Main camera is null" );
 				return;
 			}
-            
+
             Ray3f ray;
             if ( camera->getPickRay( mousePos[ 0 ], mousePos[ 1 ], ray ) ) {
 
@@ -46,7 +45,7 @@ bool UISystem::start( void )
                     if ( responder == nullptr ) {
                         return;
                     }
-                    
+
                     if ( !responder->isEnabled() ) {
                         return ;
                     }
@@ -59,7 +58,7 @@ bool UISystem::start( void )
                         }
                     }
                 }));
-                
+
                 if ( result != nullptr ) {
                     result->getComponent< UIResponder >()->invoke();
                 }
@@ -70,5 +69,5 @@ bool UISystem::start( void )
     });
 
 	return true;
+    */
 }
-

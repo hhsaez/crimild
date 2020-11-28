@@ -28,84 +28,81 @@
 #ifndef CRIMILD_SIMULATION_SYSTEMS_STREAMING_
 #define CRIMILD_SIMULATION_SYSTEMS_STREAMING_
 
-#include "System.hpp"
-
 #include "Foundation/Containers/Map.hpp"
+#include "System.hpp"
 
 namespace crimild {
 
-	class Node;
+    class Node;
     class Group;
 
-	namespace messaging {
+    namespace messaging {
 
-		struct LoadScene {
-			std::string fileName;
-		};
+        struct LoadScene {
+            std::string fileName;
+        };
 
-		struct AppendScene {
-			std::string fileName;
-			Group *parentNode;
+        struct AppendScene {
+            std::string fileName;
+            Group *parentNode;
 
-			/**
+            /**
 			   \remarks Called before starting components
 			 */
-			std::function< void( Node * ) > onLoadSceneCallback;
-		};
+            std::function< void( Node * ) > onLoadSceneCallback;
+        };
 
-		struct ReloadScene { };
+        struct ReloadScene {
+        };
 
-		struct SceneLoadFailed {
-			std::string fileName; 
-			std::string message;
-		};
-		
-	}
+        struct SceneLoadFailed {
+            std::string fileName;
+            std::string message;
+        };
 
-	class StreamingSystem : public System {
-		CRIMILD_IMPLEMENT_RTTI( crimild::StreamingSystem )
-		
-	public:
-		System::Priority getPriority( void ) const override { return System::PriorityType::NO_UPDATE; }
+    }
 
-		StreamingSystem( void );
-		~StreamingSystem( void ) = default;
+    class StreamingSystem : public System {
+        CRIMILD_IMPLEMENT_RTTI( crimild::StreamingSystem )
 
-	public:
-		using Builder = std::function< SharedPointer< Node >( std::string ) >;
+    public:
+        StreamingSystem( void );
+        ~StreamingSystem( void ) = default;
 
-		void registerBuilder( std::string extension, Builder const &builder ) { _builders.insert( extension, builder ); }
+    public:
+        using Builder = std::function< SharedPointer< Node >( std::string ) >;
 
-		template< class DECODER_CLASS >
-		void registerDecoder( std::string extension ) 
-		{
-			registerBuilder( extension, []( std::string filePath ) -> SharedPointer< Node > {
-				auto decoder = crimild::alloc< DECODER_CLASS >();
-				if ( !decoder->decodeFile( filePath ) ) {
-					crimild::Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot decode file ", filePath );
-					return nullptr;
-				}
+        void registerBuilder( std::string extension, Builder const &builder ) { _builders.insert( extension, builder ); }
 
-				if ( decoder->getObjectCount() == 0 ) {
-					crimild::Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot decode objects from file ", filePath );
-					return nullptr;
-				}
+        template< class DECODER_CLASS >
+        void registerDecoder( std::string extension )
+        {
+            registerBuilder( extension, []( std::string filePath ) -> SharedPointer< Node > {
+                auto decoder = crimild::alloc< DECODER_CLASS >();
+                if ( !decoder->decodeFile( filePath ) ) {
+                    crimild::Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot decode file ", filePath );
+                    return nullptr;
+                }
 
-				return decoder->template getObjectAt< crimild::Node >( 0 );
-			});
-		}
+                if ( decoder->getObjectCount() == 0 ) {
+                    crimild::Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot decode objects from file ", filePath );
+                    return nullptr;
+                }
 
-	private:
-		void onLoadScene( messaging::LoadScene const &message );
-		void onAppendScene( messaging::AppendScene const &message );
-		void onReloadScene( messaging::ReloadScene const &message );
-        
-	private:
-		Map< std::string, Builder > _builders;
-		std::string _lastSceneFileName;
-	};
+                return decoder->template getObjectAt< crimild::Node >( 0 );
+            } );
+        }
+
+    private:
+        void onLoadScene( messaging::LoadScene const &message );
+        void onAppendScene( messaging::AppendScene const &message );
+        void onReloadScene( messaging::ReloadScene const &message );
+
+    private:
+        Map< std::string, Builder > _builders;
+        std::string _lastSceneFileName;
+    };
 
 }
 
 #endif
-

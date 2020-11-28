@@ -37,23 +37,19 @@ using namespace crimild::glfw;
 
 #if defined( CRIMILD_ENABLE_VULKAN )
 
-#include "Rendering/VulkanInstance.hpp"
-#include "Rendering/VulkanSurface.hpp"
+    #include "Rendering/VulkanInstance.hpp"
+    #include "Rendering/VulkanSurface.hpp"
 
 using namespace crimild::vulkan;
 
 #endif
 
-bool WindowSystem::start( void )
+void WindowSystem::onInit( void ) noexcept
 {
-	if ( !System::start() ) {
-		return false;
-	}
-
-	if ( !createWindow() ) {
-		return false;
-	}
-	/*
+    if ( !createWindow() ) {
+        return;
+    }
+    /*
     Log::info( CRIMILD_CURRENT_CLASS_NAME, "Initialized GLFW ", versionMajor, ".", versionMinor, " rev. ", versionRevision );
 
 
@@ -117,13 +113,11 @@ bool WindowSystem::start( void )
 	emscripten_set_main_loop( simulation_step, 60, false );
 #endif
 	*/
-
-	return true;
 }
 
-void WindowSystem::update( void )
+void WindowSystem::update( void ) noexcept
 {
-	/*
+    /*
     CRIMILD_PROFILE( "Window System - Update" )
 
 	static double accumTime = 0.0;
@@ -163,95 +157,92 @@ void WindowSystem::update( void )
 	*/
 }
 
-void WindowSystem::stop( void )
+void WindowSystem::onTerminate( void ) noexcept
 {
-	System::stop();
-
-	destroyWindow();
+    destroyWindow();
 }
 
 bool WindowSystem::createWindow( void )
 {
-	auto settings = Simulation::getInstance()->getSettings();
+    auto settings = Simulation::getInstance()->getSettings();
 
-	auto width = settings->get< crimild::Int32 >( "video.width", 1024 );
-	auto height = settings->get< crimild::Int32 >( "video.height", 768 );
-	auto fullscreen = settings->get< crimild::Bool >( "video.fullscreen", false );
-	auto simName = Simulation::getInstance()->getName();
-	if ( simName == "" ) {
-		simName = "Crimild";
-	}
+    auto width = settings->get< crimild::Int32 >( "video.width", 1024 );
+    auto height = settings->get< crimild::Int32 >( "video.height", 768 );
+    auto fullscreen = settings->get< crimild::Bool >( "video.fullscreen", false );
+    auto simName = Simulation::getInstance()->getName();
+    if ( simName == "" ) {
+        simName = "Crimild";
+    }
+    auto vsync = settings->get< crimild::Bool >( "video.vsync", true );
 
-	CRIMILD_LOG_DEBUG( "Creating window of size (", width, "x", height, ")" );
+    CRIMILD_LOG_DEBUG( "Creating window of size (", width, "x", height, ")" );
 
 #if defined( CRIMILD_PLATFORM_EMSCRIPTEN )
-	glfwWindowHint( GLFW_RESIZABLE, GLFW_TRUE );
+    glfwWindowHint( GLFW_RESIZABLE, GLFW_TRUE );
 #elif defined( CRIMILD_ENABLE_VULKAN )
-	glfwWindowHint( GLFW_CLIENT_API, GLFW_NO_API );
-	glfwWindowHint( GLFW_RESIZABLE, GLFW_TRUE );
+    glfwWindowHint( GLFW_CLIENT_API, GLFW_NO_API );
+    glfwWindowHint( GLFW_RESIZABLE, GLFW_TRUE );
 #else
-	bool vsync = true;
-	int glMajor = 3;
-	int glMinor = 3;
-	int depthBits = 24;
-	int stencilBits = 8;
-	glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, glMajor );
-	glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, glMinor );
-	glfwWindowHint( GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE );
-	glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
+    int glMajor = 3;
+    int glMinor = 3;
+    int depthBits = 24;
+    int stencilBits = 8;
+    glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, glMajor );
+    glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, glMinor );
+    glfwWindowHint( GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE );
+    glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
     glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
     glfwWindowHint( GLFW_DEPTH_BITS, depthBits );
     glfwWindowHint( GLFW_STENCIL_BITS, stencilBits );
 #endif
 
-	m_window = glfwCreateWindow(
-		width,
-		height,
-		simName.c_str(),
-		fullscreen ? glfwGetPrimaryMonitor() : NULL, NULL
-	);
-	if ( m_window == nullptr ) {
+    m_window = glfwCreateWindow(
+        width,
+        height,
+        simName.c_str(),
+        fullscreen ? glfwGetPrimaryMonitor() : NULL,
+        NULL );
+    if ( m_window == nullptr ) {
         CRIMILD_LOG_FATAL( "Failed to create window" );
-		exit( 1 );
-	}
+        exit( 1 );
+    }
 
-	glfwSetWindowSizeCallback(
-		m_window,
-		[]( GLFWwindow *window, int width, int height ) {
-			Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Window resized to ", width, "x", height );
-		}
-	);
+    glfwSetWindowSizeCallback(
+        m_window,
+        []( GLFWwindow *window, int width, int height ) {
+            Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Window resized to ", width, "x", height );
+        } );
 
-	glfwSetFramebufferSizeCallback(
-		m_window,
-		[]( GLFWwindow *window, int width, int height ) {
-			Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Framebuffer resized to ", width, "x", height );
-		}
-	);
+    glfwSetFramebufferSizeCallback(
+        m_window,
+        []( GLFWwindow *window, int width, int height ) {
+            Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Framebuffer resized to ", width, "x", height );
+        } );
 
-	broadcastMessage( messages::WindowSystemDidCreateWindow { this } );
+    broadcastMessage( messages::WindowSystemDidCreateWindow { this } );
 
 #if !defined( CRIMILD_ENABLE_VULKAN )
-  	glfwMakeContextCurrent( _window );
+    glfwMakeContextCurrent( _window );
 
-	glfwSwapInterval( vsync ? 1 : 0 );
 #endif
+
+    glfwSwapInterval( vsync ? 1 : 0 );
 
     // Make sure we have proper windows settings defined
     settings->set( "video.width", width );
     settings->set( "video.height", height );
     settings->set( "video.fullscreen", fullscreen );
 
-	return true;
+    return true;
 }
 
 void WindowSystem::destroyWindow( void )
 {
-	broadcastMessage( messages::WindowSystemWillDestroyWindow { this } );
+    broadcastMessage( messages::WindowSystemWillDestroyWindow { this } );
 
-	// TODO: window is automatically destroyed when terminating simulator
-	// Calling this function here may result in an error if the window was
-	// already closed by the user (i.e. by pressing the "X" button) instead
-	// of triggering a termination by other means (i.e. pressing ESC).
-	//glfwDestroyWindow( m_window );
+    // TODO: window is automatically destroyed when terminating simulator
+    // Calling this function here may result in an error if the window was
+    // already closed by the user (i.e. by pressing the "X" button) instead
+    // of triggering a termination by other means (i.e. pressing ESC).
+    //glfwDestroyWindow( m_window );
 }

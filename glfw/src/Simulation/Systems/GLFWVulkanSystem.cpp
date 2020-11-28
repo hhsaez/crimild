@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the copyright holders nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,24 +26,32 @@
  */
 
 #include "GLFWVulkanSystem.hpp"
-#include "WindowSystem.hpp"
-#include "Simulation/Simulation.hpp"
-#include "Foundation/VulkanUtils.hpp"
-#include "Rendering/VulkanInstance.hpp"
-#include "Rendering/VulkanSurface.hpp"
-#include "Rendering/VulkanRenderDevice.hpp"
-#include "Rendering/VulkanSwapchain.hpp"
-#include "Rendering/VulkanCommandPool.hpp"
-#include "Rendering/VulkanCommandBuffer.hpp"
-#include "Rendering/VulkanFence.hpp"
 
 #include "Foundation/Containers/Array.hpp"
+#include "Foundation/VulkanUtils.hpp"
 #include "Rendering/ShaderProgram.hpp"
+#include "Rendering/VulkanCommandBuffer.hpp"
+#include "Rendering/VulkanCommandPool.hpp"
+#include "Rendering/VulkanFence.hpp"
+#include "Rendering/VulkanInstance.hpp"
+#include "Rendering/VulkanRenderDevice.hpp"
+#include "Rendering/VulkanSurface.hpp"
+#include "Rendering/VulkanSwapchain.hpp"
 #include "Simulation/FileSystem.hpp"
+#include "Simulation/Simulation.hpp"
+#include "Simulation/Systems/WindowSystem.hpp"
 
 using namespace crimild;
 using namespace crimild::glfw;
 using namespace crimild::vulkan;
+
+void GLFWVulkanSystem::onAttach( void ) noexcept
+{
+    registerMessageHandler< messages::WindowSystemDidCreateWindow >(
+        [ this ]( messages::WindowSystemDidCreateWindow const &msg ) {
+            m_window = msg.video->getWindowHandler();
+        } );
+}
 
 /*
 crimild::Bool GLFWVulkanSystem::start( void )
@@ -86,8 +94,8 @@ crimild::Bool GLFWVulkanSystem::start( void )
 
 	for ( auto i = 0l; i < imageCount; i++ ) {
 		auto imageView = swapchain->getImageViews()[ i ];
-		
-		auto framebuffer = renderDevice->createFramebuffer(				
+
+		auto framebuffer = renderDevice->createFramebuffer(
 			Framebuffer::Descriptor {
 				.attachments = {
 					crimild::get_ptr( imageView )
@@ -265,9 +273,11 @@ SharedPointer< VulkanSurface > GLFWVulkanSystem::create( VulkanSurface::Descript
 {
     CRIMILD_LOG_TRACE( "Creating GLFW Vulkan Surface" );
 
-    auto sim = Simulation::getInstance();
-    auto windowSystem = sim->getSystem< WindowSystem >();
-    auto window = windowSystem->getWindowHandler();
+    auto window = m_window;
+    if ( window == nullptr ) {
+        CRIMILD_LOG_ERROR( "No valid window handler" );
+        return nullptr;
+    }
 
     VkSurfaceKHR surfaceHandler;
 
@@ -275,8 +285,7 @@ SharedPointer< VulkanSurface > GLFWVulkanSystem::create( VulkanSurface::Descript
         descriptor.instance->handler,
         window,
         nullptr,
-        &surfaceHandler
-    );
+        &surfaceHandler );
     if ( result != VK_SUCCESS ) {
         CRIMILD_LOG_FATAL( "Failed to create window surface for Vulkan. Error: ", result );
         return nullptr;
@@ -287,4 +296,3 @@ SharedPointer< VulkanSurface > GLFWVulkanSystem::create( VulkanSurface::Descript
     surface->instance = descriptor.instance;
     return surface;
 }
-

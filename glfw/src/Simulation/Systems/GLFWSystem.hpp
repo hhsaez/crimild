@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,47 +25,24 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SIMULATION_SYSTEMS_UPDATE_
-#define CRIMILD_SIMULATION_SYSTEMS_UPDATE_
+#ifndef CRIMILD_GLFW_SIMULATION_SYSTEMS_GLFW_
+#define CRIMILD_GLFW_SIMULATION_SYSTEMS_GLFW_
 
-#include "SceneGraph/Camera.hpp"
-#include "SceneGraph/Node.hpp"
-#include "System.hpp"
+#include "Simulation/Systems/System.hpp"
 
 namespace crimild {
 
-    class UpdateSystem;
+    namespace glfw {
 
-    namespace messaging {
+        class GLFWSystem : public System {
+            CRIMILD_IMPLEMENT_RTTI( crimild::glfw::GLFWSystem )
 
-        struct WillUpdateScene {
-            Node *scene;
-            Camera *mainCamera;
-        };
-
-        struct DidUpdateScene {
-            Node *scene;
-            Camera *mainCamera;
+        public:
+            void onInit( void ) noexcept override;
+            void onTerminate( void ) noexcept override;
         };
 
     }
-
-    class UpdateSystem : public System {
-        CRIMILD_IMPLEMENT_RTTI( crimild::UpdateSystem )
-
-    public:
-        void start( void ) noexcept override;
-        void update( void ) noexcept override;
-
-    private:
-        void updateBehaviors( Node *scene );
-        void computeRenderQueues( Node *scene );
-
-    private:
-        double _targetFrameTime = 1.0 / 60.0;
-        double _accumulator = 0.0;
-        crimild::Int32 _skipFrames = 0;
-    };
 
 }
 
