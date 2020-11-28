@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,35 +28,30 @@
 #ifndef CRIMILD_GLFW_SIMULATION_SYSTEMS_EVENT_
 #define CRIMILD_GLFW_SIMULATION_SYSTEMS_EVENT_
 
-#include <Simulation/Systems/System.hpp>
-
 #include "Foundation/GLFWUtils.hpp"
+
+#include <Simulation/Systems/System.hpp>
 
 namespace crimild {
 
-	namespace glfw {
-    
-		/**
+    namespace glfw {
+
+        /**
 		   \brief Handle operative system events
 		 */
-		class EventSystem : public System {
-			CRIMILD_IMPLEMENT_RTTI( crimild::EventSystem )
-			
-		public:
-			EventSystem( void );
-			~EventSystem( void ) = default;
-			
-			System::Priority getPriority( void ) const noexcept override { return System::PriorityType::FRAME_BEGIN; }
-			
-			void update( void ) override;
-			
-		private:
-			GLFWwindow *m_window = nullptr;
-		};
-		
-	}
+        class EventSystem : public System {
+            CRIMILD_IMPLEMENT_RTTI( crimild::EventSystem )
+
+        public:
+            void onAttach( void ) noexcept override;
+            void earlyUpdate( void ) noexcept override;
+
+        private:
+            GLFWwindow *m_window = nullptr;
+        };
+
+    }
 
 }
-	
+
 #endif
-	

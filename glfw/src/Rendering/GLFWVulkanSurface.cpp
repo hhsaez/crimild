@@ -26,9 +26,10 @@
 */
 
 #include "GLFWVulkanSurface.hpp"
+
+#include "Rendering/VulkanInstance.hpp"
 #include "Simulation/Simulation.hpp"
 #include "Simulation/Systems/WindowSystem.hpp"
-#include "Rendering/VulkanInstance.hpp"
 
 using namespace crimild;
 using namespace crimild::glfw;
@@ -36,6 +37,9 @@ using namespace crimild::vulkan;
 
 SharedPointer< VulkanSurface > GLFWVulkanSurfaceManager::create( VulkanSurface::Descriptor const &descriptor ) noexcept
 {
+
+    assert( false );
+    /*
     CRIMILD_LOG_TRACE( "Creating GLFW Vulkan Surface" );
 
     auto sim = Simulation::getInstance();
@@ -61,4 +65,6 @@ SharedPointer< VulkanSurface > GLFWVulkanSurfaceManager::create( VulkanSurface::
     surface->manager = this;
     insert( crimild::get_ptr( surface ) );
     return surface;
+    */
+    return nullptr;
 }

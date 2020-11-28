@@ -27,83 +27,54 @@
 
 #include "RenderSystem.hpp"
 
+#include "Rendering/Compositions/BloomComposition.hpp"
+#include "Rendering/Compositions/DebugComposition.hpp"
+#include "Rendering/Compositions/PresentComposition.hpp"
+#include "Rendering/Compositions/RenderScene.hpp"
+#include "Rendering/Compositions/TonemappingComposition.hpp"
 #include "Simulation/Simulation.hpp"
 
 using namespace crimild;
 
-bool RenderSystem::start( void )
+void RenderSystem::lateStart( void ) noexcept
 {
-	if ( !System::start() ) {
-		return false;
-	}
-
-    registerMessageHandler< messaging::RenderQueueAvailable >( [this]( messaging::RenderQueueAvailable const &message ) {
-        _renderQueues = message.renderQueues;
-    });
-
-    registerMessageHandler< messaging::SceneChanged >( [this]( messaging::SceneChanged const &message ) {
-        _renderQueues.clear();
-    });
-
-	return true;
-}
-
-void RenderSystem::update( void )
-{
-	CRIMILD_PROFILE( "Render System" );
-
-    auto renderer = Simulation::getInstance()->getRenderer();
-	if ( renderer == nullptr ) {
-		return;
-	}
-
-	auto renderQueues = _renderQueues;
-
-	{
-		CRIMILD_PROFILE( "Begin Render" );
-		renderer->beginRender();
-		renderer->clearBuffers();
-	}
-
-    broadcastMessage( messaging::WillRenderScene {} );
-
-	{
-		CRIMILD_PROFILE( "Render Scene" );
-
-		if ( !_renderQueues.empty() ) {
-			RenderQueue *mainQueue = nullptr;
-			_renderQueues.each( [ &mainQueue, renderer ]( SharedPointer< RenderQueue > &renderQueue ) {
-                if ( auto queue = crimild::get_ptr( renderQueue ) ) {
-                    // main camera is rendered last
-                    auto camera = queue->getCamera();
-                    if ( camera != Camera::getMainCamera() ) {
-                        if ( auto renderGraph = camera->getRenderGraph() ) {
-                            renderer->render( queue, renderGraph );
-                        }
-                    }
-                    else {
-                        mainQueue = queue;
-                    }
-                }
-			});
-
-			if ( mainQueue != nullptr ) {
-                if ( auto renderGraph = mainQueue->getCamera()->getRenderGraph() ) {
-                    renderer->render( mainQueue, renderGraph );
-                }
-			}
-	    }
-	}
-
-    {
-        CRIMILD_PROFILE( "End Render" );
-        renderer->endRender();
+    auto sim = Simulation::getInstance();
+    if ( sim->getComposition().getOutput() != nullptr ) {
+        // Composition is valid. Nothing to do here
+        return;
     }
 
-	{
-		CRIMILD_PROFILE( "Present Frame" );
-		renderer->presentFrame();
-	}
+    auto scene = sim->getScene();
+    if ( scene == nullptr ) {
+        CRIMILD_LOG_WARNING( "No available scene and no composition defined by user" );
+        return;
+    }
 
-    broadcastMessage( messaging::DidRenderScene {} );
+    CRIMILD_LOG_DEBUG( "No composition provided. Using default one" );
+    sim->setComposition(
+        [ scene ] {
+            using namespace crimild::compositions;
+            auto settings = Simulation::getInstance()->getSettings();
+            auto enableTonemapping = settings->get< Bool >( "tonemapping", true );
+            auto enableBloom = settings->get< Bool >( "bloom", false );
+            auto enableDebug = settings->get< Bool >( "debug", false );
+
+            auto withTonemapping = [ enableTonemapping ]( auto cmp ) {
+                return enableTonemapping ? tonemapping( cmp, 1.0 ) : cmp;
+            };
+
+            auto withDebug = [ enableDebug ]( auto cmp ) {
+                return enableDebug ? debug( cmp ) : cmp;
+            };
+
+            auto withBloom = [ enableBloom ]( auto cmp ) {
+                return enableBloom ? bloom( cmp ) : cmp;
+            };
+
+            auto withHDR = [ enableHDR = settings->get< Bool >( "hdr", true ) ]( auto scene ) {
+                return enableHDR ? renderSceneHDR( scene ) : renderScene( scene );
+            };
+
+            return present( withDebug( withTonemapping( withBloom( withHDR( scene ) ) ) ) );
+        }() );
 }

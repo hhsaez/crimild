@@ -30,8 +30,8 @@
 
 using namespace crimild;
 
-template<>
-RenderResourceLibrary< Shader >::RenderResourceLibrary( void ) noexcept
-{
-    return nullptr;
-}
+// template<>
+// RenderResourceLibrary< Shader >::RenderResourceLibrary( void ) noexcept
+// {
+//     return nullptr;
+// }

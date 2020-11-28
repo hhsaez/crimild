@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,48 +25,36 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SIMULATION_SYSTEMS_UPDATE_
-#define CRIMILD_SIMULATION_SYSTEMS_UPDATE_
+#include "Simulation/Systems/GLFWSystem.hpp"
 
-#include "SceneGraph/Camera.hpp"
-#include "SceneGraph/Node.hpp"
-#include "System.hpp"
+#include "Foundation/GLFWUtils.hpp"
 
-namespace crimild {
+using namespace crimild;
+using namespace crimild::glfw;
 
-    class UpdateSystem;
-
-    namespace messaging {
-
-        struct WillUpdateScene {
-            Node *scene;
-            Camera *mainCamera;
-        };
-
-        struct DidUpdateScene {
-            Node *scene;
-            Camera *mainCamera;
-        };
-
-    }
-
-    class UpdateSystem : public System {
-        CRIMILD_IMPLEMENT_RTTI( crimild::UpdateSystem )
-
-    public:
-        void start( void ) noexcept override;
-        void update( void ) noexcept override;
-
-    private:
-        void updateBehaviors( Node *scene );
-        void computeRenderQueues( Node *scene );
-
-    private:
-        double _targetFrameTime = 1.0 / 60.0;
-        double _accumulator = 0.0;
-        crimild::Int32 _skipFrames = 0;
-    };
-
+void errorCallback( int error, const char *description )
+{
+    std::cerr << "GLFW Error: (" << error << ") " << description << std::endl;
 }
 
-#endif
+void GLFWSystem::onInit( void ) noexcept
+{
+    if ( !glfwInit() ) {
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot start GLFW: glfwInit failed" );
+        exit( 1 );
+    }
+
+    glfwSetErrorCallback( errorCallback );
+
+    int versionMajor;
+    int versionMinor;
+    int versionRevision;
+    glfwGetVersion( &versionMajor, &versionMinor, &versionRevision );
+    CRIMILD_LOG_INFO( "Initializing GLFW v", versionMajor, ".", versionMinor, " rev. ", versionRevision );
+}
+
+void GLFWSystem::onTerminate( void ) noexcept
+{
+    CRIMILD_LOG_INFO( "Terminating GLFW" );
+    glfwTerminate();
+}
