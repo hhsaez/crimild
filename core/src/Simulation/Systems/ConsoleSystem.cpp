@@ -26,21 +26,22 @@
  */
 
 #include "ConsoleSystem.hpp"
-#include "RenderSystem.hpp"
 
-#include "Rendering/Font.hpp"
 #include "Components/MaterialComponent.hpp"
+#include "Debug/DebugRenderHelper.hpp"
 #include "Primitives/BoxPrimitive.hpp"
-#include "Simulation/Simulation.hpp"
+#include "RenderSystem.hpp"
+#include "Rendering/Font.hpp"
 #include "Simulation/Settings.hpp"
+#include "Simulation/Simulation.hpp"
 #include "Visitors/UpdateRenderState.hpp"
 #include "Visitors/UpdateWorldState.hpp"
-#include "Debug/DebugRenderHelper.hpp"
 
 using namespace crimild;
 
-bool ConsoleSystem::start( void )
+void ConsoleSystem::start( void ) noexcept
 {
+    /*
 	if ( !System::start() ) {
 		return false;
 	}
@@ -50,9 +51,10 @@ bool ConsoleSystem::start( void )
     Console::getInstance()->setEnabled( font != nullptr );
 
 	return true;
+    */
 }
 
-void ConsoleSystem::update( void )
+void ConsoleSystem::update( void ) noexcept
 {
     /*
     auto console = getConsole();
@@ -79,7 +81,7 @@ void ConsoleSystem::update( void )
     */
 }
 
-void ConsoleSystem::stop( void )
+void ConsoleSystem::stop( void ) noexcept
 {
-	System::stop();
+    System::stop();
 }

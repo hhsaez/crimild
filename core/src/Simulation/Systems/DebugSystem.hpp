@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -31,41 +31,42 @@
 #include "RenderSystem.hpp"
 
 namespace crimild {
-    
-	class DebugSystem;
 
-	namespace messaging {
-     
-        struct ToggleDebugInfo { };
-        
-        struct DebugModeEnabled { };
-        
-        struct DebugModeDisabled { };
-        
-        struct ToggleProfilerInfo { };
+    class DebugSystem;
 
-	}
+    namespace messaging {
 
-	class DebugSystem : public System {
-		CRIMILD_IMPLEMENT_RTTI( crimild::DebugSystem )
-		
-	public:
-		System::Priority getPriority( void ) const override { return System::PriorityType::POST_RENDER; }
-		
-		virtual bool start( void ) override;
-		virtual void update( void ) override;
-		virtual void stop( void ) override;
-        
+        struct ToggleDebugInfo {
+        };
+
+        struct DebugModeEnabled {
+        };
+
+        struct DebugModeDisabled {
+        };
+
+        struct ToggleProfilerInfo {
+        };
+
+    }
+
+    class DebugSystem : public System {
+        CRIMILD_IMPLEMENT_RTTI( crimild::DebugSystem )
+
+    public:
+        virtual void start( void ) noexcept override;
+        virtual void update( void ) noexcept override;
+        virtual void stop( void ) noexcept override;
+
     private:
         void onToggleDebugInfo( messaging::ToggleDebugInfo const & );
         void onToggleProfilerInfo( messaging::ToggleProfilerInfo const & );
-        
+
     private:
         bool _debugInfoEnabled = false;
         bool _profilerInfoEnabled = false;
-	};
-    
+    };
+
 }
 
 #endif
-

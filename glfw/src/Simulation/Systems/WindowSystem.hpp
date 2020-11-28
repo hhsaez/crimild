@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,73 +28,68 @@
 #ifndef CRIMILD_GLFW_SIMULATION_SYSTEMS_WINDOW_
 #define CRIMILD_GLFW_SIMULATION_SYSTEMS_WINDOW_
 
-#include <Simulation/Systems/System.hpp>
-
 #include "Foundation/GLFWUtils.hpp"
 
+#include <Simulation/Systems/System.hpp>
 #include <string>
 
 namespace crimild {
 
-	namespace glfw {
-    
-		class WindowSystem;
-		
-		namespace messages {
-			
-			struct WindowSystemDidStart { 
-				WindowSystem *video;
-			};
-			
-			struct WindowSystemWillStop { 
-				WindowSystem *video;
-			};
-			
-			struct WindowSystemWillUpdate { 
-				WindowSystem *video;
-			};
-			
-			struct WindowSystemDidUpdate { 
-				WindowSystem *video;
-			};
-			
-			struct WindowSystemDidCreateWindow { 
-				WindowSystem *video;
-			};
-			
-			struct WindowSystemWillDestroyWindow { 
-				WindowSystem *video;
-			};
-		}
+    namespace glfw {
 
-		/**
+        class WindowSystem;
+
+        namespace messages {
+
+            struct WindowSystemDidStart {
+                WindowSystem *video;
+            };
+
+            struct WindowSystemWillStop {
+                WindowSystem *video;
+            };
+
+            struct WindowSystemWillUpdate {
+                WindowSystem *video;
+            };
+
+            struct WindowSystemDidUpdate {
+                WindowSystem *video;
+            };
+
+            struct WindowSystemDidCreateWindow {
+                WindowSystem *video;
+            };
+
+            struct WindowSystemWillDestroyWindow {
+                WindowSystem *video;
+            };
+        }
+
+        /**
 		   \brief Handle window creation
 		 */
-		class WindowSystem : public System {
-			CRIMILD_IMPLEMENT_RTTI( crimild::WindowSystem )
-			
-		public:
-			System::Priority getInitPriority( void ) const noexcept override { return System::PriorityType::HIGHEST; }
-			System::Priority getPriority( void ) const noexcept override { return System::PriorityType::NO_UPDATE; }
-			
-			bool start( void ) override;
-			void update( void ) override;
-			void stop( void ) override;
-			
-		public:
-			GLFWwindow *getWindowHandler( void ) { return m_window; }
-			
-		private:
-			bool createWindow( void );
-			void destroyWindow( void );
-			
-		private:
-			GLFWwindow *m_window = nullptr;
-		};
-		
-	}
+        class WindowSystem : public System {
+            CRIMILD_IMPLEMENT_RTTI( crimild::WindowSystem )
+
+        public:
+            void onInit( void ) noexcept override;
+            void update( void ) noexcept override;
+            void onTerminate( void ) noexcept override;
+
+        public:
+            GLFWwindow *getWindowHandler( void ) { return m_window; }
+
+        private:
+            bool createWindow( void );
+            void destroyWindow( void );
+
+        private:
+            GLFWwindow *m_window = nullptr;
+        };
+
+    }
 
 }
-	
+
 #endif
-	

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013 - 2018, Hugo Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of CRIMILD nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -34,172 +34,168 @@
 using namespace crimild;
 using namespace crimild::sdl;
 
-bool WindowSystem::start( void )
+void WindowSystem::start( void ) noexcept
 {
-	if ( !System::start() ) {
-		return false;
-	}
+    SDL_InitSubSystem( SDL_INIT_VIDEO );
 
-	SDL_InitSubSystem( SDL_INIT_VIDEO );
+    if ( !createWindow() || !configureRenderer() ) {
+        return;
+    }
 
-	if ( !createWindow() || !configureRenderer() ) {
-		return false;
-	}
-
-	broadcastMessage( messaging::WindowSystemDidStart { _window } );
-
-	return true;
+    broadcastMessage( messaging::WindowSystemDidStart { _window } );
 }
 
 crimild::Bool WindowSystem::createWindow( void )
 {
-	CRIMILD_LOG_TRACE( "Creating window" );
-	
-	auto settings = Simulation::getInstance()->getSettings();
+    CRIMILD_LOG_TRACE( "Creating window" );
 
-	crimild::Int32 width = settings->get( "video.width", 1024 );
-	crimild::Int32 height = settings->get( "video.height", 768 );
-	crimild::Bool vsync = settings->get( "video.vsync", true );
-	crimild::Bool highdpi = settings->get< crimild::Bool >( "video.highdpi", true );
-	crimild::Bool fullscreen = settings->get< crimild::Bool >( "video.fullscreen", false );
+    auto settings = Simulation::getInstance()->getSettings();
 
-	crimild::Int32 flags = SDL_WINDOW_OPENGL;
+    crimild::Int32 width = settings->get( "video.width", 1024 );
+    crimild::Int32 height = settings->get( "video.height", 768 );
+    crimild::Bool vsync = settings->get( "video.vsync", true );
+    crimild::Bool highdpi = settings->get< crimild::Bool >( "video.highdpi", true );
+    crimild::Bool fullscreen = settings->get< crimild::Bool >( "video.fullscreen", false );
 
-	if ( fullscreen ) flags |= SDL_WINDOW_FULLSCREEN;
-	if ( highdpi ) flags |= SDL_WINDOW_ALLOW_HIGHDPI;
+    crimild::Int32 flags = SDL_WINDOW_OPENGL;
 
-	if ( vsync ) SDL_GL_SetSwapInterval( 1 );
+    if ( fullscreen )
+        flags |= SDL_WINDOW_FULLSCREEN;
+    if ( highdpi )
+        flags |= SDL_WINDOW_ALLOW_HIGHDPI;
+
+    if ( vsync )
+        SDL_GL_SetSwapInterval( 1 );
 
 #ifdef CRIMILD_PLATFORM_EMSCRIPTEN
-	flags |= SDL_WINDOW_RESIZABLE;
+    flags |= SDL_WINDOW_RESIZABLE;
 #endif
 
-	_window = SDL_CreateWindow(
-		"Crimild SDL",
-		SDL_WINDOWPOS_UNDEFINED,
-		SDL_WINDOWPOS_UNDEFINED,
-		width,
-		height,
-		flags
-	);
-	
-	if ( _window == nullptr ) {
-		Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot create window: ", SDL_GetError() );
-		return false;
-	}
+    _window = SDL_CreateWindow(
+        "Crimild SDL",
+        SDL_WINDOWPOS_UNDEFINED,
+        SDL_WINDOWPOS_UNDEFINED,
+        width,
+        height,
+        flags );
 
-	Log::info( CRIMILD_CURRENT_CLASS_NAME, "Created SDL window with dimensions ", width, "x", height );
+    if ( _window == nullptr ) {
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot create window: ", SDL_GetError() );
+        return false;
+    }
 
-	SDL_SetWindowTitle( _window, Simulation::getInstance()->getName().c_str() );
+    Log::info( CRIMILD_CURRENT_CLASS_NAME, "Created SDL window with dimensions ", width, "x", height );
 
-	SDL_GL_SwapWindow( _window );
+    SDL_SetWindowTitle( _window, Simulation::getInstance()->getName().c_str() );
 
-	broadcastMessage( messaging::WindowSystemDidCreateWindow { _window } );
+    SDL_GL_SwapWindow( _window );
 
-	return true;
+    broadcastMessage( messaging::WindowSystemDidCreateWindow { _window } );
+
+    return true;
 }
 
 crimild::Bool WindowSystem::configureRenderer( void )
 {
 #if !defined( CRIMILD_PLATFORM_EMSCRIPTEN )
-	SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE );
-	SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 3 );
-	SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 3 );
-	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
-	SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, 8 );
+    SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE );
+    SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 3 );
+    SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 3 );
+    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+    SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, 8 );
 
-	crimild::Int32 glContextMajorVersion = 0;
-	crimild::Int32 glContextMinorVersion = 0;
-	
-	SDL_GL_GetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, &glContextMajorVersion );
-	SDL_GL_GetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, &glContextMinorVersion );
-	Log::info( CRIMILD_CURRENT_CLASS_NAME, "Creating GL Context with version ", glContextMajorVersion, ".", glContextMinorVersion );
+    crimild::Int32 glContextMajorVersion = 0;
+    crimild::Int32 glContextMinorVersion = 0;
+
+    SDL_GL_GetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, &glContextMajorVersion );
+    SDL_GL_GetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, &glContextMinorVersion );
+    Log::info( CRIMILD_CURRENT_CLASS_NAME, "Creating GL Context with version ", glContextMajorVersion, ".", glContextMinorVersion );
 #endif
 
-	_renderContext = SDL_GL_CreateContext( _window );
-	if ( _renderContext == nullptr ) {
-		Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot create render context: ", SDL_GetError() );
-		return false;
-	}
+    _renderContext = SDL_GL_CreateContext( _window );
+    if ( _renderContext == nullptr ) {
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot create render context: ", SDL_GetError() );
+        return false;
+    }
 
-	auto *renderer = Simulation::getInstance()->getRenderer();
-	if ( renderer == nullptr ) {
-		Log::error( CRIMILD_CURRENT_CLASS_NAME, "No valid renderer found" );
-		return false;
-	}
-	
-	int framebufferWidth = 0;
-	int framebufferHeight = 0;
-	SDL_GL_GetDrawableSize( _window, &framebufferWidth, &framebufferHeight );
-	renderer->getScreenBuffer()->resize( framebufferWidth, framebufferHeight );
-	renderer->configure();
-	if ( auto mainCamera = Simulation::getInstance()->getMainCamera() ) {
-		auto screen = renderer->getScreenBuffer();
-		auto aspect = ( float ) screen->getWidth() / ( float ) screen->getHeight();
+    auto *renderer = Simulation::getInstance()->getRenderer();
+    if ( renderer == nullptr ) {
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "No valid renderer found" );
+        return false;
+    }
+
+    int framebufferWidth = 0;
+    int framebufferHeight = 0;
+    SDL_GL_GetDrawableSize( _window, &framebufferWidth, &framebufferHeight );
+    renderer->getScreenBuffer()->resize( framebufferWidth, framebufferHeight );
+    renderer->configure();
+    if ( auto mainCamera = Simulation::getInstance()->getMainCamera() ) {
+        auto screen = renderer->getScreenBuffer();
+        auto aspect = ( float ) screen->getWidth() / ( float ) screen->getHeight();
         mainCamera->setAspectRatio( aspect );
-	}
+    }
 
-	Log::info( CRIMILD_CURRENT_CLASS_NAME, "Created screen buffer with dimensions ", framebufferWidth, "x", framebufferHeight );
+    Log::info( CRIMILD_CURRENT_CLASS_NAME, "Created screen buffer with dimensions ", framebufferWidth, "x", framebufferHeight );
 
-	return true;
+    return true;
 }
 
-void WindowSystem::update( void )
+void WindowSystem::update( void ) noexcept
 {
     CRIMILD_PROFILE( "Window System - Update" )
 
-	_clock.tick();
+    _clock.tick();
 
-	// Move to event handlers?
-	switch ( Input::getInstance()->getMouseCursorMode() ) {
-		case Input::MouseCursorMode::NORMAL:
-			SDL_CaptureMouse( SDL_FALSE );
-			SDL_ShowCursor( SDL_ENABLE );
-			break;
+    // Move to event handlers?
+    switch ( Input::getInstance()->getMouseCursorMode() ) {
+        case Input::MouseCursorMode::NORMAL:
+            SDL_CaptureMouse( SDL_FALSE );
+            SDL_ShowCursor( SDL_ENABLE );
+            break;
 
-		case Input::MouseCursorMode::HIDDEN:
-			SDL_CaptureMouse( SDL_TRUE );
-			SDL_ShowCursor( SDL_DISABLE );
-			break;			
+        case Input::MouseCursorMode::HIDDEN:
+            SDL_CaptureMouse( SDL_TRUE );
+            SDL_ShowCursor( SDL_DISABLE );
+            break;
 
-		case Input::MouseCursorMode::GRAB:
-			SDL_CaptureMouse( SDL_TRUE );
-			SDL_ShowCursor( SDL_DISABLE );
-			SDL_SetRelativeMouseMode( SDL_TRUE );
-			break;
-	}
+        case Input::MouseCursorMode::GRAB:
+            SDL_CaptureMouse( SDL_TRUE );
+            SDL_ShowCursor( SDL_DISABLE );
+            SDL_SetRelativeMouseMode( SDL_TRUE );
+            break;
+    }
 
-	SDL_GL_SwapWindow( _window );
+    SDL_GL_SwapWindow( _window );
 
-	if ( Simulation::getInstance()->getSettings()->get( "video.show_frame_time", false ) ) {
-		std::string name = Simulation::getInstance()->getName();
-		std::stringstream ss;
-		ss << name << " (" << _clock.getDeltaTime() << "ms)";
-		SDL_SetWindowTitle( _window, ss.str().c_str() );
-	}
+    if ( Simulation::getInstance()->getSettings()->get( "video.show_frame_time", false ) ) {
+        std::string name = Simulation::getInstance()->getName();
+        std::stringstream ss;
+        ss << name << " (" << _clock.getDeltaTime() << "ms)";
+        SDL_SetWindowTitle( _window, ss.str().c_str() );
+    }
 }
 
-void WindowSystem::stop( void )
+void WindowSystem::stop( void ) noexcept
 {
-	System::stop();
+    System::stop();
 
-	cleanupRenderer();
-	destroyWindow();
+    cleanupRenderer();
+    destroyWindow();
 }
 
 void WindowSystem::destroyWindow( void )
 {
-	CRIMILD_LOG_TRACE( "Destroying window" );
-	if ( _window != nullptr ) {
-		SDL_DestroyWindow( _window );
-		_window = nullptr;
-	}
+    CRIMILD_LOG_TRACE( "Destroying window" );
+    if ( _window != nullptr ) {
+        SDL_DestroyWindow( _window );
+        _window = nullptr;
+    }
 }
 
 void WindowSystem::cleanupRenderer( void )
 {
-	if ( _renderContext != nullptr ) {
-		SDL_GL_DeleteContext( _renderContext );
-		_renderContext = nullptr;
-	}
+    if ( _renderContext != nullptr ) {
+        SDL_GL_DeleteContext( _renderContext );
+        _renderContext = nullptr;
+    }
 }

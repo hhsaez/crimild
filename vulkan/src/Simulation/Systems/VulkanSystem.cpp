@@ -28,6 +28,7 @@
 #include "VulkanSystem.hpp"
 
 #include "Foundation/Containers/Array.hpp"
+#include "Rendering/FrameGraph.hpp"
 #include "Rendering/Programs/Compositions/ColorizeCompositionShaderProgram.hpp"
 #include "Rendering/Programs/Compositions/ConvolutionCompositionShaderProgram.hpp"
 #include "Rendering/Programs/Compositions/GrayscaleCompositionShaderProgram.hpp"
@@ -54,18 +55,19 @@ using namespace crimild::vulkan;
 
 #define CRIMILD_VULKAN_MAX_FRAMES_IN_FLIGHT 2
 
-crimild::Bool VulkanSystem::start( void )
+void VulkanSystem::start( void ) noexcept
 {
     initShaders();
 
-    return System::start()
-           && createInstance()
-           && createDebugMessenger()
-           && createSurface()
-           && createPhysicalDevice()
-           && createRenderDevice()
-           && createCommandPool()
-           && recreateSwapchain();
+    m_frameGraph = crimild::alloc< FrameGraph >();
+
+    createInstance()
+        && createDebugMessenger()
+        && createSurface()
+        && createPhysicalDevice()
+        && createRenderDevice()
+        && createCommandPool()
+        && recreateSwapchain();
 }
 
 /*
@@ -73,8 +75,22 @@ crimild::Bool VulkanSystem::start( void )
  2. Execute command buffer with that image as attachment in the framebuffer
  3. Return the image to the swapchain for presentation
 */
-void VulkanSystem::update( void )
+void VulkanSystem::update( void ) noexcept
 {
+    if ( m_commandBuffers.empty() ) {
+        if ( m_frameGraph->compile() ) {
+            auto commands = m_frameGraph->recordCommands();
+            setCommandBuffers( { commands } );
+        } else {
+            return;
+        }
+    }
+
+    if ( m_commandBuffers.empty() ) {
+        CRIMILD_LOG_WARNING( "No available command buffers to render" );
+        return;
+    }
+
     auto renderDevice = crimild::get_ptr( m_renderDevice );
     if ( renderDevice == nullptr ) {
         CRIMILD_LOG_ERROR( "No valid render device instance" );
@@ -146,7 +162,7 @@ void VulkanSystem::update( void )
     m_currentFrame = ( m_currentFrame + 1 ) % CRIMILD_VULKAN_MAX_FRAMES_IN_FLIGHT;
 }
 
-void VulkanSystem::stop( void )
+void VulkanSystem::stop( void ) noexcept
 {
     System::stop();
 

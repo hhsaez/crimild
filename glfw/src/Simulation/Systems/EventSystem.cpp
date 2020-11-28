@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,30 +26,29 @@
  */
 
 #include "EventSystem.hpp"
-#include "WindowSystem.hpp"
+
 #include "Concurrency/Async.hpp"
 #include "Simulation/Simulation.hpp"
+#include "WindowSystem.hpp"
 
 using namespace crimild;
 using namespace crimild::glfw;
 
-EventSystem::EventSystem( void )
+void EventSystem::onAttach( void ) noexcept
 {
-	registerMessageHandler< messages::WindowSystemDidCreateWindow >(
-		[ this ]( messages::WindowSystemDidCreateWindow const &msg ) {
-			m_window = msg.video->getWindowHandler();
-		}
-	);
+    registerMessageHandler< messages::WindowSystemDidCreateWindow >(
+        [ this ]( messages::WindowSystemDidCreateWindow const &msg ) {
+            m_window = msg.video->getWindowHandler();
+        } );
 }
 
-void EventSystem::update( void )
+void EventSystem::earlyUpdate( void ) noexcept
 {
-	glfwPollEvents();
-	if ( glfwWindowShouldClose( m_window ) ) {
+    glfwPollEvents();
+    if ( glfwWindowShouldClose( m_window ) ) {
         crimild::concurrency::sync_frame( [] {
             Simulation::getInstance()->stop();
-        });
-		return;
-	}
+        } );
+        return;
+    }
 }
-

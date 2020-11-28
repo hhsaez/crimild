@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,48 +25,38 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_SIMULATION_SYSTEMS_UPDATE_
-#define CRIMILD_SIMULATION_SYSTEMS_UPDATE_
+#include <Crimild.hpp>
+#include <Crimild_GLFW.hpp>
+#include <Crimild_STB.hpp>
+#include <Crimild_Vulkan.hpp>
 
-#include "SceneGraph/Camera.hpp"
-#include "SceneGraph/Node.hpp"
-#include "System.hpp"
+using namespace crimild;
+using namespace crimild::glfw;
 
-namespace crimild {
+int main( int argc, char **argv )
+{
+    crimild::init();
+    crimild::vulkan::init();
 
-    class UpdateSystem;
+    Log::setLevel( Log::Level::LOG_LEVEL_ALL );
 
-    namespace messaging {
+    CRIMILD_SIMULATION_LIFETIME auto sim = Simulation::create();
 
-        struct WillUpdateScene {
-            Node *scene;
-            Camera *mainCamera;
-        };
+    sim->setSettings( crimild::alloc< Settings >( argc, argv ) );
 
-        struct DidUpdateScene {
-            Node *scene;
-            Camera *mainCamera;
-        };
+    SharedPointer< ImageManager > imageManager = crimild::alloc< crimild::stb::ImageManager >();
 
-    }
-
-    class UpdateSystem : public System {
-        CRIMILD_IMPLEMENT_RTTI( crimild::UpdateSystem )
-
-    public:
-        void start( void ) noexcept override;
-        void update( void ) noexcept override;
-
-    private:
-        void updateBehaviors( Node *scene );
-        void computeRenderQueues( Node *scene );
-
-    private:
-        double _targetFrameTime = 1.0 / 60.0;
-        double _accumulator = 0.0;
-        crimild::Int32 _skipFrames = 0;
-    };
-
-}
-
+#ifdef CRIMILD_ENABLE_SFML
+    sim->setAudioManager( crimild::alloc< sfml::SFMLAudioManager >() );
 #endif
+
+    sim->attachSystem< GLFWSystem >();
+    sim->attachSystem< WindowSystem >();
+    sim->attachSystem< GLFWVulkanSystem >();
+    sim->attachSystem< EventSystem >();
+    sim->attachSystem< InputSystem >();
+    sim->attachSystem< UpdateSystem >();
+    sim->attachSystem< RenderSystem >();
+
+    return sim->run();
+}
