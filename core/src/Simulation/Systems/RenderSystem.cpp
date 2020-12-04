@@ -60,7 +60,7 @@ void RenderSystem::lateStart( void ) noexcept
             auto enableDebug = settings->get< Bool >( "debug", false );
 
             auto withTonemapping = [ enableTonemapping ]( auto cmp ) {
-                return enableTonemapping ? tonemapping( cmp, 1.0 ) : cmp;
+                return enableTonemapping ? tonemapping( cmp, 0.5 ) : cmp;
             };
 
             auto withDebug = [ enableDebug ]( auto cmp ) {

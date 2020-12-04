@@ -55,6 +55,10 @@ Composition crimild::compositions::computeIrradianceMap( Composition cmp ) noexc
 {
     auto useHDR = cmp.isHDREnabled();
 
+    if ( cmp.getOutput() == nullptr || !useHDR ) {
+        return cmp;
+    }
+
     auto geometry = cmp.create< Geometry >();
     geometry->attachPrimitive(
         crimild::alloc< BoxPrimitive >(

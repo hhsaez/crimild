@@ -42,6 +42,10 @@ using namespace crimild::compositions;
 
 Composition crimild::compositions::computeBRDFLUT( Composition cmp ) noexcept
 {
+    if ( cmp.getOutput() == nullptr ) {
+        return cmp;
+    }
+
     auto renderPass = cmp.create< RenderPass >();
     renderPass->attachments = {
         [ & ] {
