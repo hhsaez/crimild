@@ -53,6 +53,10 @@ using namespace crimild::compositions;
 // the moment
 Composition crimild::compositions::computePrefilterMap( Composition cmp ) noexcept
 {
+    if ( cmp.getOutput() == nullptr ) {
+        return cmp;
+    }
+
     auto useHDR = cmp.isHDREnabled();
 
     auto geometry = cmp.create< Geometry >();

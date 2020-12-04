@@ -246,6 +246,7 @@
 #include "Rendering/RenderResource.hpp"
 #include "Rendering/RenderState.hpp"
 #include "Rendering/Renderer.hpp"
+#include "Rendering/Sampler.hpp"
 #include "Rendering/Shader.hpp"
 #include "Rendering/ShaderLibrary.hpp"
 #include "Rendering/ShaderLocation.hpp"
