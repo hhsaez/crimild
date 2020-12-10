@@ -43,9 +43,11 @@ using namespace crimild;
 
 void FrameGraph::remove( FrameGraphObject *obj ) noexcept
 {
-    if ( obj == nullptr ) return;
+    if ( obj == nullptr )
+        return;
     if ( auto node = getNode( obj ) ) {
-        if ( node->obj == nullptr ) return;
+        if ( node->obj == nullptr )
+            return;
         // TODO: This needs to be resolved a in a better way
         // For the moment, just invalidate the obj that is lined to the node
         // Everything will work, but we'll end up with more nodes than actually needed.
@@ -173,6 +175,9 @@ void FrameGraph::verifyAllConnections( void ) noexcept
     m_nodesByType[ Node::Type::COMMAND_BUFFER ].each(
         [ & ]( auto &node ) {
             auto commands = getNodeObject< CommandBuffer >( node );
+            if ( commands == nullptr ) {
+            	return;
+            }
             commands->each(
                 [ & ]( auto &cmd ) {
                     switch ( cmd.type ) {

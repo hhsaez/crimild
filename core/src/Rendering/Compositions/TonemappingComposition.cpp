@@ -158,6 +158,8 @@ Composition crimild::compositions::tonemapping( Composition cmp, crimild::Real32
                     };
                     return program;
                 }() );
+            pipeline->viewport = { .scalingMode = ScalingMode::DYNAMIC };
+            pipeline->scissor = { .scalingMode = ScalingMode::DYNAMIC };
             return pipeline;
         }() );
 
