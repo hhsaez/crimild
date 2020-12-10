@@ -69,7 +69,7 @@ void UnlitMaterial::setColor( const RGBAColorf &color ) noexcept
 
 RGBAColorf UnlitMaterial::getColor( void ) const noexcept
 {
-    getDescriptors()->descriptors[ 0 ].get< UniformBuffer >()->getValue< RGBAColorf >();
+    return getDescriptors()->descriptors[ 0 ].get< UniformBuffer >()->getValue< RGBAColorf >();
 }
 
 void UnlitMaterial::setTexture( SharedPointer< Texture > const &texture ) noexcept
