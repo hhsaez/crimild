@@ -212,6 +212,8 @@ Composition crimild::compositions::computeBRDFLUT( Composition cmp ) noexcept
                 };
                 return program;
             }() );
+            pipeline->viewport = { .scalingMode = ScalingMode::DYNAMIC };
+            pipeline->scissor = { .scalingMode = ScalingMode::DYNAMIC };
             return pipeline;
         }() );
 
@@ -221,12 +223,20 @@ Composition crimild::compositions::computeBRDFLUT( Composition cmp ) noexcept
         .height = 512.0f,
     };
 
+    auto viewport = ViewportDimensions {
+        .scalingMode = ScalingMode::RELATIVE,
+    };
+
     renderPass->commands = [ & ] {
         auto commandBuffer = crimild::alloc< CommandBuffer >();
+        commandBuffer->setViewport( viewport );
+        commandBuffer->setScissor( viewport );
         commandBuffer->bindGraphicsPipeline( renderPass->getGraphicsPipeline() );
         commandBuffer->draw( 6 );
         return commandBuffer;
     }();
+
+    renderPass->setConditional( true );
 
     cmp.setOutput( crimild::get_ptr( renderPass->attachments[ 0 ] ) );
 

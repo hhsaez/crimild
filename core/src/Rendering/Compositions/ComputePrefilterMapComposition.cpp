@@ -367,39 +367,36 @@ vec4 textureCubeUV( sampler2D envMap, vec3 direction, vec4 viewport, int mipLeve
                         {
                             .descriptorType = DescriptorType::UNIFORM_BUFFER,
                             .obj = [ & ] {
-                                return crimild::alloc< CallbackUniformBuffer< Matrix4f > >(
-                                    [ face, pMatrix ] {
-                                        Transformation t;
-                                        switch ( face ) {
-                                            case 0: // positive x
-                                                t.rotate().fromAxisAngle( Vector3f::UNIT_Y, Numericf::HALF_PI );
-                                                break;
+                                Transformation t;
+                                switch ( face ) {
+                                    case 0: // positive x
+                                        t.rotate().fromAxisAngle( Vector3f::UNIT_Y, Numericf::HALF_PI );
+                                        break;
 
-                                            case 1: // negative x
-                                                t.rotate().fromAxisAngle( Vector3f::UNIT_Y, -Numericf::HALF_PI );
-                                                break;
+                                    case 1: // negative x
+                                        t.rotate().fromAxisAngle( Vector3f::UNIT_Y, -Numericf::HALF_PI );
+                                        break;
 
-                                            case 2: // positive y
-                                                t.rotate().fromAxisAngle( Vector3f::UNIT_X, Numericf::HALF_PI );
-                                                break;
+                                    case 2: // positive y
+                                        t.rotate().fromAxisAngle( Vector3f::UNIT_X, Numericf::HALF_PI );
+                                        break;
 
-                                            case 3: // negative y
-                                                t.rotate().fromAxisAngle( Vector3f::UNIT_X, -Numericf::HALF_PI );
-                                                break;
+                                    case 3: // negative y
+                                        t.rotate().fromAxisAngle( Vector3f::UNIT_X, -Numericf::HALF_PI );
+                                        break;
 
-                                            case 4: // positive z
-                                                t.rotate().fromAxisAngle( Vector3f::UNIT_Y, Numericf::PI );
-                                                break;
+                                    case 4: // positive z
+                                        t.rotate().fromAxisAngle( Vector3f::UNIT_Y, Numericf::PI );
+                                        break;
 
-                                            case 5: // negative z
-                                                t.rotate().fromAxisAngle( Vector3f::UNIT_Y, 0 );
-                                                break;
-                                        }
+                                    case 5: // negative z
+                                        t.rotate().fromAxisAngle( Vector3f::UNIT_Y, 0 );
+                                        break;
+                                }
 
-                                        t.setTranslate( Vector3f::ZERO ); // TODO (hernan): use probe's position
-                                        auto vMatrix = t.computeModelMatrix().getInverse();
-                                        return vMatrix * pMatrix;
-                                    } );
+                                t.setTranslate( Vector3f::ZERO ); // TODO (hernan): use probe's position
+                                auto vMatrix = t.computeModelMatrix().getInverse();
+                                return crimild::alloc< UniformBuffer >( vMatrix * pMatrix );
                             }(),
                         },
                     };
@@ -481,6 +478,8 @@ vec4 textureCubeUV( sampler2D envMap, vec3 direction, vec4 viewport, int mipLeve
 
         return commandBuffer;
     }();
+
+    renderPass->setConditional( true );
 
     cmp.setOutput( crimild::get_ptr( renderPass->attachments[ 0 ] ) );
 
