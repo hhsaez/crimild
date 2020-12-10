@@ -155,6 +155,15 @@ void WindowSystem::update( void ) noexcept
 
     crimild::concurrency::sync_frame( std::bind( &WindowSystem::update, this ) );
 	*/
+
+    if ( Simulation::getInstance()->getSettings()->get( "video.show_frame_time", true ) ) {
+        auto sim = Simulation::getInstance();
+        auto name = sim->getName();
+        auto clock = sim->getSimulationClock();
+        std::stringstream ss;
+        ss << name << " (" << clock.getDeltaTime() << "ms)";
+        glfwSetWindowTitle( m_window, ss.str().c_str() );
+    }
 }
 
 void WindowSystem::onTerminate( void ) noexcept
