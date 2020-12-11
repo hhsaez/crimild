@@ -235,7 +235,7 @@ namespace crimild {
 
         crimild::Bool compile( void ) noexcept;
 
-        CommandBufferArray recordCommands( void ) noexcept;
+        CommandBufferArray recordCommands( Bool fullBuild ) noexcept;
         CommandBufferArray recordComputeCommands( void ) noexcept;
 
         /**

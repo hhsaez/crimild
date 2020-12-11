@@ -51,7 +51,7 @@ crimild::Bool CommandBufferManager::bind( CommandBuffer *commandBuffer ) noexcep
 
     auto renderDevice = getRenderDevice();
     if ( renderDevice == nullptr ) {
-        return nullptr;
+        return false;
     }
 
     auto commandPool = renderDevice->getCommandPool();

@@ -88,6 +88,8 @@ crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
 			auto initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 			auto finalLayout = VK_IMAGE_LAYOUT_GENERAL;
 
+            auto isPresentation = attachment->getFrameGraph()->isPresentation( attachment );
+
 			if ( utils::formatIsDepthStencil( format ) ) {
 				depthStencilReferences.add(
 					VkAttachmentReference {
@@ -95,7 +97,7 @@ crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
 						.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
 					}
 				);
-				finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+				finalLayout = isPresentation ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			}
 			else {
 				colorReferences.add(
@@ -104,9 +106,8 @@ crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
 						.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
 					}
 				);
-				auto isPresentation = attachment->getFrameGraph()->isPresentation( attachment );
                 hasPresentation |= isPresentation;
-				finalLayout = isPresentation ? VK_IMAGE_LAYOUT_PRESENT_SRC_KHR : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+				finalLayout = isPresentation ? VK_IMAGE_LAYOUT_PRESENT_SRC_KHR : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			}
 
             // 1. Write only: LoadOp::CLEAR or LoadOp::DONT_CARE
@@ -142,19 +143,19 @@ crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
         {
             .srcSubpass = VK_SUBPASS_EXTERNAL,
             .dstSubpass = 0,
-            .srcStageMask = hasPresentation ? VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT : VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+            .srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,//hasPresentation ? VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT : VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
             .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-            .srcAccessMask = hasPresentation ? VK_ACCESS_MEMORY_READ_BIT : VK_ACCESS_SHADER_READ_BIT,
-            .dstAccessMask = hasPresentation ? VkAccessFlags( VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT ) : VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            .srcAccessMask = VK_ACCESS_MEMORY_READ_BIT,//hasPresentation ? VK_ACCESS_MEMORY_READ_BIT : VK_ACCESS_SHADER_READ_BIT,
+            .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,//hasPresentation ? VkAccessFlags( VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT ) : VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
             .dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT,
         },
         {
             .srcSubpass = 0,
             .dstSubpass = VK_SUBPASS_EXTERNAL,
             .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-            .dstStageMask = hasPresentation ? VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT : VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-            .srcAccessMask = hasPresentation ? VkAccessFlags( VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT ) : VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-            .dstAccessMask = hasPresentation ? VK_ACCESS_MEMORY_READ_BIT : VK_ACCESS_SHADER_READ_BIT,
+            .dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,//hasPresentation ? VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT : VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+            .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,//hasPresentation ? VkAccessFlags( VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT ) : VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            .dstAccessMask = VK_ACCESS_MEMORY_READ_BIT,//hasPresentation ? VK_ACCESS_MEMORY_READ_BIT : VK_ACCESS_SHADER_READ_BIT,
             .dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT,
         }
     };
