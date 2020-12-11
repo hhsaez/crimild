@@ -80,7 +80,7 @@ namespace crimild {
             virtual ~VulkanSystem( void ) = default;
 
             void start( void ) noexcept override;
-            void update( void ) noexcept override;
+            void onRender( void ) noexcept override;
             void stop( void ) noexcept override;
 
             RenderDevice *getRenderDevice( void ) noexcept { return crimild::get_ptr( m_renderDevice ); }
@@ -117,6 +117,7 @@ namespace crimild {
             SharedPointer< Swapchain > m_swapchain;
             SharedPointer< CommandPool > m_commandPool;
             Array< SharedPointer< CommandBuffer > > m_commandBuffers;
+            Array< SharedPointer< CommandBuffer > > m_conditionalCommandBuffers;
             std::vector< SharedPointer< Semaphore > > m_imageAvailableSemaphores;
             std::vector< SharedPointer< Semaphore > > m_renderFinishedSemaphores;
             std::vector< SharedPointer< Fence > > m_inFlightFences;
@@ -127,6 +128,7 @@ namespace crimild {
 
         private:
             SharedPointer< FrameGraph > m_frameGraph;
+            Bool m_recordWithNonConditionalPasses = false;
         };
 
     }

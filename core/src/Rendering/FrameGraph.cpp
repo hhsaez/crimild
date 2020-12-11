@@ -176,7 +176,7 @@ void FrameGraph::verifyAllConnections( void ) noexcept
         [ & ]( auto &node ) {
             auto commands = getNodeObject< CommandBuffer >( node );
             if ( commands == nullptr ) {
-            	return;
+                return;
             }
             commands->each(
                 [ & ]( auto &cmd ) {
@@ -334,7 +334,7 @@ crimild::Bool FrameGraph::isPresentation( SharedPointer< Attachment > const &att
     return master->colorAttachment == attachment;
 }
 
-FrameGraph::CommandBufferArray FrameGraph::recordCommands( void ) noexcept
+FrameGraph::CommandBufferArray FrameGraph::recordCommands( Bool includeConditionalPasses ) noexcept
 {
     CommandBufferArray ret;
 
@@ -345,6 +345,11 @@ FrameGraph::CommandBufferArray FrameGraph::recordCommands( void ) noexcept
 
             m_sortedByType[ Node::Type::RENDER_PASS ].each( [ & ]( auto node ) {
                 if ( auto renderPass = getNodeObject< RenderPass >( node ) ) {
+                    if ( renderPass->isConditional() ) {
+                        if ( !includeConditionalPasses ) {
+                            return;
+                        }
+                    }
                     commands->beginRenderPass( renderPass, nullptr );
                     if ( auto cmds = crimild::get_ptr( renderPass->commands ) ) {
                         commands->bindCommandBuffer( cmds );

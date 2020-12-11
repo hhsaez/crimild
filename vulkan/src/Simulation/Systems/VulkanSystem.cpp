@@ -75,25 +75,31 @@ void VulkanSystem::start( void ) noexcept
  2. Execute command buffer with that image as attachment in the framebuffer
  3. Return the image to the swapchain for presentation
 */
-void VulkanSystem::update( void ) noexcept
+void VulkanSystem::onRender( void ) noexcept
 {
+    auto renderDevice = crimild::get_ptr( m_renderDevice );
+    if ( renderDevice == nullptr ) {
+        CRIMILD_LOG_ERROR( "No valid render device instance" );
+        return;
+    }
+
     if ( m_commandBuffers.empty() ) {
         if ( m_frameGraph->compile() ) {
-            auto commands = m_frameGraph->recordCommands();
-            setCommandBuffers( { commands } );
+            // Record commands, including conditional passes
+            setCommandBuffers( m_frameGraph->recordCommands( true ) );
+
+            // Record commands again after first frames have been render
+            // without including conditional passes (see comments at the end
+            // of this function).
+            m_recordWithNonConditionalPasses = true;
         } else {
+            CRIMILD_LOG_ERROR( "Invalid frame graph" );
             return;
         }
     }
 
     if ( m_commandBuffers.empty() ) {
         CRIMILD_LOG_WARNING( "No available command buffers to render" );
-        return;
-    }
-
-    auto renderDevice = crimild::get_ptr( m_renderDevice );
-    if ( renderDevice == nullptr ) {
-        CRIMILD_LOG_ERROR( "No valid render device instance" );
         return;
     }
 
@@ -131,6 +137,7 @@ void VulkanSystem::update( void ) noexcept
     updateVertexBuffers();
     updateUniformBuffers();
 
+    // TODO: support multiple command buffers
     if ( m_commandBuffers.size() > 0 ) {
         auto commandBuffer = crimild::get_ptr( m_commandBuffers[ 0 ] );
 
@@ -160,6 +167,14 @@ void VulkanSystem::update( void ) noexcept
     }
 
     m_currentFrame = ( m_currentFrame + 1 ) % CRIMILD_VULKAN_MAX_FRAMES_IN_FLIGHT;
+
+    if ( m_recordWithNonConditionalPasses && m_currentFrame == 0 ) {
+        // We have been rendering using command buffers that included conditional render passes
+        // We need to record all commands again now, without the conditional passes.
+        // If m_currentFrame == 0, that means we have rendered all in-flight frames already
+        setCommandBuffers( m_frameGraph->recordCommands( false ) );
+        m_recordWithNonConditionalPasses = false;
+    }
 }
 
 void VulkanSystem::stop( void ) noexcept
@@ -256,6 +271,9 @@ crimild::Bool VulkanSystem::createSwapchain( void ) noexcept
     if ( auto mainCamera = Camera::getMainCamera() ) {
         mainCamera->setAspectRatio( ( crimild::Real32 ) m_swapchain->extent.width / ( crimild::Real32 ) m_swapchain->extent.height );
     }
+
+    // Reset existing command buffers
+    setCommandBuffers( {} );
 
     return true;
 }
