@@ -163,8 +163,14 @@ Composition crimild::compositions::tonemapping( Composition cmp, crimild::Real32
             return pipeline;
         }() );
 
+    auto viewport = ViewportDimensions {
+        .scalingMode = ScalingMode::RELATIVE,
+    };
+
     renderPass->commands = [ & ] {
         auto commandBuffer = crimild::alloc< CommandBuffer >();
+        commandBuffer->setViewport( viewport );
+        commandBuffer->setScissor( viewport );
         commandBuffer->bindGraphicsPipeline( renderPass->getGraphicsPipeline() );
         commandBuffer->bindDescriptorSet( renderPass->getDescriptors() );
         commandBuffer->draw( 6 );
