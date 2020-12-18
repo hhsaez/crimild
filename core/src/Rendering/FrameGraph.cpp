@@ -338,29 +338,22 @@ FrameGraph::CommandBufferArray FrameGraph::recordCommands( Bool includeCondition
 {
     CommandBufferArray ret;
 
-    ret.add(
-        [ & ] {
+    m_sortedByType[ Node::Type::RENDER_PASS ].each( [ & ]( auto node ) {
+        if ( auto renderPass = getNodeObject< RenderPass >( node ) ) {
+            if ( !includeConditionalPasses && renderPass->isConditional() ) {
+                return;
+            }
             auto commands = crimild::alloc< CommandBuffer >();
             commands->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
-
-            m_sortedByType[ Node::Type::RENDER_PASS ].each( [ & ]( auto node ) {
-                if ( auto renderPass = getNodeObject< RenderPass >( node ) ) {
-                    if ( renderPass->isConditional() ) {
-                        if ( !includeConditionalPasses ) {
-                            return;
-                        }
-                    }
-                    commands->beginRenderPass( renderPass, nullptr );
-                    if ( auto cmds = crimild::get_ptr( renderPass->commands ) ) {
-                        commands->bindCommandBuffer( cmds );
-                    }
-                    commands->endRenderPass( renderPass );
-                }
-            } );
-
+            commands->beginRenderPass( renderPass, nullptr );
+            if ( auto cmds = crimild::get_ptr( renderPass->commands ) ) {
+                commands->bindCommandBuffer( cmds );
+            }
+            commands->endRenderPass( renderPass );
             commands->end();
-            return commands;
-        }() );
+            ret.add( commands );
+        }
+    } );
 
     return ret;
 }

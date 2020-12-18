@@ -137,21 +137,14 @@ void VulkanSystem::onRender( void ) noexcept
     updateVertexBuffers();
     updateUniformBuffers();
 
-    // TODO: support multiple command buffers
-    if ( m_commandBuffers.size() > 0 ) {
-        auto commandBuffer = crimild::get_ptr( m_commandBuffers[ 0 ] );
-
-        // Submit graphic commands to the render device, with the selected
-        // image as attachment in the framebuffer
-        renderDevice->submitGraphicsCommands(
-            wait,
-            commandBuffer,
-            imageIndex,
-            signal,
-            fence );
-    } else {
-        CRIMILD_LOG_DEBUG( "No command buffers provided" );
-    }
+    // Submit graphic commands to the render device, with the selected
+    // image as attachment in the framebuffer
+    renderDevice->submitGraphicsCommands(
+        wait,
+        m_commandBuffers,
+        imageIndex,
+        signal,
+        fence );
 
     // Return the image to the swapchain so it can be presented
     auto presentationResult = swapchain->presentImage( imageIndex, signal );
