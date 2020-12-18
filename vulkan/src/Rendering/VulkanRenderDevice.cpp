@@ -63,7 +63,7 @@ RenderDevice::~RenderDevice( void )
     }
 }
 
-void RenderDevice::submitGraphicsCommands( const Semaphore *wait, CommandBuffer *commandBuffer, crimild::UInt32 imageIndex, const Semaphore *signal, const Fence *fence ) noexcept
+void RenderDevice::submitGraphicsCommands( const Semaphore *wait, Array< SharedPointer< CommandBuffer > > &commandBuffers, crimild::UInt32 imageIndex, const Semaphore *signal, const Fence *fence ) noexcept
 {
     VkSemaphore waitSemaphores[] = {
         wait->handler,
@@ -78,17 +78,18 @@ void RenderDevice::submitGraphicsCommands( const Semaphore *wait, CommandBuffer 
         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
     };
 
-    VkCommandBuffer commandBuffers[] = {
-        getHandler( commandBuffer, imageIndex ),
-    };
+    Array< VkCommandBuffer > commandBufferHandlers = commandBuffers.map(
+        [ & ]( auto commandBuffer ) {
+            return getHandler( crimild::get_ptr( commandBuffer ), imageIndex );
+        } );
 
     auto submitInfo = VkSubmitInfo {
         .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
         .waitSemaphoreCount = 1,
         .pWaitSemaphores = waitSemaphores,
         .pWaitDstStageMask = waitStages,
-        .commandBufferCount = 1,
-        .pCommandBuffers = commandBuffers,
+        .commandBufferCount = UInt32( commandBufferHandlers.size() ),
+        .pCommandBuffers = commandBufferHandlers.getData(),
         .signalSemaphoreCount = 1,
         .pSignalSemaphores = signalSemaphores,
     };
