@@ -46,6 +46,8 @@ namespace crimild {
     class VertexBuffer;
 
     struct DispatchWorkgroup {
+        static constexpr UInt32 DEFAULT_WORGROUP_SIZE = 32;
+
         UInt32 x;
         UInt32 y;
         UInt32 z;

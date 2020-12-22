@@ -88,6 +88,7 @@ namespace crimild {
             CommandPool *getCommandPool( void ) noexcept { return crimild::get_ptr( m_commandPool ); }
 
             void setCommandBuffers( Array< SharedPointer< CommandBuffer > > const &cmds ) noexcept { m_commandBuffers = cmds; }
+            void setComputeCommandBuffers( Array< SharedPointer< CommandBuffer > > const &cmds ) noexcept { m_computeCommandBuffers = cmds; }
 
         protected:
             virtual SharedPointer< VulkanSurface > create( VulkanSurface::Descriptor const &descriptor ) noexcept { return nullptr; }
@@ -118,6 +119,7 @@ namespace crimild {
             SharedPointer< CommandPool > m_commandPool;
             Array< SharedPointer< CommandBuffer > > m_commandBuffers;
             Array< SharedPointer< CommandBuffer > > m_conditionalCommandBuffers;
+            Array< SharedPointer< CommandBuffer > > m_computeCommandBuffers;
             std::vector< SharedPointer< Semaphore > > m_imageAvailableSemaphores;
             std::vector< SharedPointer< Semaphore > > m_renderFinishedSemaphores;
             std::vector< SharedPointer< Fence > > m_inFlightFences;

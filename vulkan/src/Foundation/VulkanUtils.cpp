@@ -120,6 +120,8 @@ VkDescriptorType utils::getVulkanDescriptorType( DescriptorType type ) noexcept
             return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         case DescriptorType::STORAGE_BUFFER:
             return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        case DescriptorType::STORAGE_IMAGE:
+            return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
         default:
             return VK_DESCRIPTOR_TYPE_MAX_ENUM;
     }
@@ -653,6 +655,7 @@ utils::ExtensionArray utils::getRequiredExtensions( void ) noexcept
 #endif
 
     if ( validationLayersEnabled ) {
+        extensions.push_back( VK_EXT_DEBUG_REPORT_EXTENSION_NAME );
         extensions.push_back( VK_EXT_DEBUG_UTILS_EXTENSION_NAME );
     }
 
@@ -683,6 +686,24 @@ void utils::populateDebugMessengerCreateInfo( VkDebugUtilsMessengerCreateInfoEXT
     createInfo.pUserData = nullptr;
 }
 
+void utils::setObjectName( VkDevice device, UInt64 object, VkDebugReportObjectTypeEXT objectType, const char *name ) noexcept
+{
+    static auto vkDebugMarkerSetObjectName = ( PFN_vkDebugMarkerSetObjectNameEXT ) vkGetDeviceProcAddr( device, "vkDebugMarkerSetObjectNameEXT" );
+    if ( vkDebugMarkerSetObjectName == VK_NULL_HANDLE ) {
+        CRIMILD_LOG_WARNING( "Cannot get procedure address for vkDebugMarkerSetObjectName" );
+        return;
+    }
+
+    VkDebugMarkerObjectNameInfoEXT nameInfo = {
+        .sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_OBJECT_NAME_INFO_EXT,
+        .objectType = objectType,
+        .object = object,
+        .pObjectName = name,
+    };
+
+    vkDebugMarkerSetObjectName( device, &nameInfo );
+}
+
 const utils::ExtensionArray &utils::getDeviceExtensions( void ) noexcept
 {
     static ExtensionArray deviceExtensions = {
@@ -690,6 +711,9 @@ const utils::ExtensionArray &utils::getDeviceExtensions( void ) noexcept
 
         // This is required to flip the viewport (see getViewport() above)
         VK_KHR_MAINTENANCE1_EXTENSION_NAME,
+
+        // Require to name objects for debug
+        VK_EXT_DEBUG_MARKER_EXTENSION_NAME,
     };
     return deviceExtensions;
 }
