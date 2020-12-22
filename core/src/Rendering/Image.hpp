@@ -28,22 +28,24 @@
 #ifndef CRIMILD_RENDERING_IMAGE_
 #define CRIMILD_RENDERING_IMAGE_
 
-#include "Foundation/Containers/Array.hpp"
-#include "Streaming/Stream.hpp"
 #include "Coding/Codable.hpp"
+#include "Foundation/Containers/Array.hpp"
+#include "Foundation/NamedObject.hpp"
 #include "Rendering/Extent.hpp"
 #include "Rendering/Format.hpp"
 #include "Rendering/RenderResource.hpp"
+#include "Streaming/Stream.hpp"
 
 #include <vector>
 
 namespace crimild {
 
-    class Image :
-    	public coding::Codable,
-    	public StreamObject, //< Deprecated
-        public RenderResourceImpl< Image > {
-		CRIMILD_IMPLEMENT_RTTI( crimild::Image )
+    class Image
+        : public coding::Codable,
+          public NamedObject,
+          public StreamObject, //< Deprecated
+          public RenderResourceImpl< Image > {
+        CRIMILD_IMPLEMENT_RTTI( crimild::Image )
 
     public:
         static SharedPointer< Image > ONE;
@@ -61,24 +63,24 @@ namespace crimild {
         static SharedPointer< Image > INVALID;
 
     public:
-		enum class Type {
-			IMAGE_1D,
-			IMAGE_2D,
+        enum class Type {
+            IMAGE_1D,
+            IMAGE_2D,
             IMAGE_2D_CUBEMAP,
-			IMAGE_3D,
-		};
+            IMAGE_3D,
+        };
 
     public:
         Format format = Format::UNDEFINED;
-		Type type = Type::IMAGE_2D;
+        Type type = Type::IMAGE_2D;
 
-		/**
+        /**
 		   \brief image size
 
 		   For 1D image, height and depth must be 1
 		   For 2D image, depth must be 1
 		 */
-		Extent3D extent;
+        Extent3D extent;
 
         /**
            \brief Image raw data
@@ -88,7 +90,7 @@ namespace crimild {
 
            size = ( w * h * d ) * ( channels ) * layers
          */
-		ByteArray data;
+        ByteArray data;
 
         /**
            \name Layer count
@@ -120,21 +122,21 @@ namespace crimild {
 
         //@}
 
-    /**
+        /**
         \name Coding support
      */
-    //@{
+        //@{
 
     public:
         virtual void encode( coding::Encoder &encoder ) override;
         virtual void decode( coding::Decoder &decoder ) override;
 
-    //@}
+        //@}
 
-    /**
+        /**
 		\name Deprecated
     */
-    //@{
+        //@{
 
     public:
         enum class PixelFormat {
@@ -142,45 +144,45 @@ namespace crimild {
             RGBA,
             BGR,
             BGRA,
-			RED,
-			DEPTH_16,
-			DEPTH_24,
-			DEPTH_32,
+            RED,
+            DEPTH_16,
+            DEPTH_24,
+            DEPTH_32,
         };
 
-		enum class PixelType {
-			UNSIGNED_BYTE,
-			FLOAT,
-		};
+        enum class PixelType {
+            UNSIGNED_BYTE,
+            FLOAT,
+        };
 
-	public:
-		Image( void );
-		Image( int width, int height, int bpp, PixelFormat format, PixelType pixelType );
-		Image( int width, int height, int bpp, const unsigned char *data, PixelFormat format = PixelFormat::RGBA );
-		Image( int width, int height, int bpp, const ByteArray &data, PixelFormat format = PixelFormat::RGBA );
-		virtual ~Image( void );
+    public:
+        Image( void );
+        Image( int width, int height, int bpp, PixelFormat format, PixelType pixelType );
+        Image( int width, int height, int bpp, const unsigned char *data, PixelFormat format = PixelFormat::RGBA );
+        Image( int width, int height, int bpp, const ByteArray &data, PixelFormat format = PixelFormat::RGBA );
+        virtual ~Image( void );
 
-		int getWidth( void ) const { return _width; }
-		int getHeight( void ) const { return _height; }
-		int getBpp( void ) const { return _bpp; }
+        int getWidth( void ) const { return _width; }
+        int getHeight( void ) const { return _height; }
+        int getBpp( void ) const { return _bpp; }
         PixelFormat getPixelFormat( void ) const { return _pixelFormat; }
-		PixelType getPixelType( void ) const { return _pixelType; }
+        PixelType getPixelType( void ) const { return _pixelType; }
 
-		crimild::Bool hasData( void ) const { return _data.size(); }
-		unsigned char *getData( void ) { return _data.getData(); }
-		const unsigned char *getData( void ) const { return _data.getData(); }
-		void setData( int width, int height, int bpp, const unsigned char *data, PixelFormat format = PixelFormat::RGBA, PixelType pixelType = PixelType::UNSIGNED_BYTE );
+        crimild::Bool hasData( void ) const { return _data.size(); }
+        unsigned char *getData( void ) { return _data.getData(); }
+        const unsigned char *getData( void ) const { return _data.getData(); }
+        void setData( int width, int height, int bpp, const unsigned char *data, PixelFormat format = PixelFormat::RGBA, PixelType pixelType = PixelType::UNSIGNED_BYTE );
 
-		bool isLoaded( void ) const { return _data.size() > 0; }
-		virtual void load( void );
-		virtual void unload( void );
+        bool isLoaded( void ) const { return _data.size() > 0; }
+        virtual void load( void );
+        virtual void unload( void );
 
-	private:
-		int _width;
-		int _height;
-		int _bpp;
+    private:
+        int _width;
+        int _height;
+        int _bpp;
         PixelFormat _pixelFormat;
-		PixelType _pixelType;
+        PixelType _pixelType;
         ByteArray _data;
 
         /**
@@ -189,14 +191,14 @@ namespace crimild {
         //@{
 
     public:
-    	virtual bool registerInStream( Stream &s ) override;
-    	virtual void save( Stream &s ) override;
-    	virtual void load( Stream &s ) override;
-
-    	//@}
+        virtual bool registerInStream( Stream &s ) override;
+        virtual void save( Stream &s ) override;
+        virtual void load( Stream &s ) override;
 
         //@}
-	};
+
+        //@}
+    };
 
 }
 

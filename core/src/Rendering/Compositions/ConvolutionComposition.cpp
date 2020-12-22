@@ -72,6 +72,9 @@ Composition crimild::compositions::convolution( std::string name, Composition cm
                 {
                     .descriptorType = DescriptorType::TEXTURE,
                     .obj = [ & ] {
+                        if ( cmp.getOutputTexture() != nullptr ) {
+                            return crimild::retain( cmp.getOutputTexture() );
+                        }
                         auto texture = crimild::alloc< Texture >();
                         texture->imageView = cmp.getOutput()->imageView;
                         texture->sampler = [] {

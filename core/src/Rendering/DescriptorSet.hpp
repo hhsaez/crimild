@@ -72,6 +72,7 @@ namespace crimild {
         UNIFORM_BUFFER,
 
         STORAGE_BUFFER,
+        STORAGE_IMAGE,
     };
 
     class DescriptorSetLayout : public SharedObject, public RenderResourceImpl< DescriptorSetLayout > {

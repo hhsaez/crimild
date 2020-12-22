@@ -28,6 +28,7 @@
 #ifndef CRIMILD_RENDERING_PIPELINE_
 #define CRIMILD_RENDERING_PIPELINE_
 
+#include "Foundation/NamedObject.hpp"
 #include "Foundation/SharedObject.hpp"
 #include "Mathematics/Rect.hpp"
 #include "Primitives/Primitive.hpp"
@@ -44,7 +45,9 @@ namespace crimild {
     class RenderPass;
     class ShaderProgram;
 
-    class PipelineBase : public SharedObject {
+    class PipelineBase
+        : public SharedObject,
+          public NamedObject {
     protected:
         virtual ~PipelineBase( void ) noexcept = default;
 

@@ -31,7 +31,6 @@
 #include "Exceptions/VulkanException.hpp"
 #include "Foundation/Log.hpp"
 #include "Foundation/Types.hpp"
-
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Format.hpp"
 #include "Rendering/Image.hpp"
@@ -47,34 +46,34 @@ namespace crimild {
     class IndexBuffer;
     struct ViewportDimensions;
 
-	namespace vulkan {
+    namespace vulkan {
 
         class RenderDevice;
 
-		namespace utils {
+        namespace utils {
 
-			static const VkPrimitiveTopology VULKAN_PRIMITIVE_TOPOLOGIES[] = {
-				VK_PRIMITIVE_TOPOLOGY_POINT_LIST,
-				VK_PRIMITIVE_TOPOLOGY_LINE_LIST,
-				VK_PRIMITIVE_TOPOLOGY_LINE_STRIP,
-				VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
-				VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP,
-				VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN,
-				VK_PRIMITIVE_TOPOLOGY_LINE_LIST_WITH_ADJACENCY,
-				VK_PRIMITIVE_TOPOLOGY_LINE_STRIP_WITH_ADJACENCY,
-				VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST_WITH_ADJACENCY,
-				VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP_WITH_ADJACENCY,
-				VK_PRIMITIVE_TOPOLOGY_PATCH_LIST,
-			};
+            static const VkPrimitiveTopology VULKAN_PRIMITIVE_TOPOLOGIES[] = {
+                VK_PRIMITIVE_TOPOLOGY_POINT_LIST,
+                VK_PRIMITIVE_TOPOLOGY_LINE_LIST,
+                VK_PRIMITIVE_TOPOLOGY_LINE_STRIP,
+                VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+                VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP,
+                VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN,
+                VK_PRIMITIVE_TOPOLOGY_LINE_LIST_WITH_ADJACENCY,
+                VK_PRIMITIVE_TOPOLOGY_LINE_STRIP_WITH_ADJACENCY,
+                VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST_WITH_ADJACENCY,
+                VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP_WITH_ADJACENCY,
+                VK_PRIMITIVE_TOPOLOGY_PATCH_LIST,
+            };
 
-			static const VkCommandBufferUsageFlagBits VULKAN_COMMAND_BUFFER_USAGE[] = {
-				VkCommandBufferUsageFlagBits(),
-				VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
-				VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT,
-				VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT,
-			};
+            static const VkCommandBufferUsageFlagBits VULKAN_COMMAND_BUFFER_USAGE[] = {
+                VkCommandBufferUsageFlagBits(),
+                VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
+                VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT,
+                VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT,
+            };
 
-			const char *errorToString( VkResult result ) noexcept;
+            const char *errorToString( VkResult result ) noexcept;
 
             /**
              	\name Translation
@@ -158,8 +157,8 @@ namespace crimild {
                 bool isComplete( void ) const noexcept
                 {
                     return graphicsFamily.size() > 0
-                        && computeFamily.size() > 0
-                        && presentFamily.size() > 0;
+                           && computeFamily.size() > 0
+                           && presentFamily.size() > 0;
                 }
             };
 
@@ -233,20 +232,19 @@ namespace crimild {
 
             void generateMipmaps( RenderDevice *renderDevice, VkImage image, VkFormat format, crimild::Int32 width, crimild::Int32 height, crimild::UInt32 mipLevels ) noexcept;
 
-			VkImageType getImageType( Image *image ) noexcept;
-			VkImageAspectFlags getImageAspectFlags( Image *image ) noexcept;
+            VkImageType getImageType( Image *image ) noexcept;
+            VkImageAspectFlags getImageAspectFlags( Image *image ) noexcept;
 
-			//@}
+            //@}
 
-			/**
+            /**
 			   \name ImageView
 			*/
-			//@{
+            //@{
 
-			VkImageViewType getImageViewType( ImageView *imageView ) noexcept;
-			VkFormat getImageViewFormat( RenderDevice *renderDevice, ImageView *imageView ) noexcept;
-			VkImageAspectFlags getImageViewAspectFlags( ImageView *imageView ) noexcept;
-
+            VkImageViewType getImageViewType( ImageView *imageView ) noexcept;
+            VkFormat getImageViewFormat( RenderDevice *renderDevice, ImageView *imageView ) noexcept;
+            VkImageAspectFlags getImageViewAspectFlags( ImageView *imageView ) noexcept;
 
             //@}
 
@@ -289,25 +287,28 @@ namespace crimild {
 
             void populateDebugMessengerCreateInfo( VkDebugUtilsMessengerCreateInfoEXT &createInfo ) noexcept;
 
+            void setObjectName( VkDevice device, UInt64 object, VkDebugReportObjectTypeEXT objectType, const char *name ) noexcept;
+
             //@}
 
-		}
+        }
 
-	}
+    }
 
 }
 
-#define CRIMILD_VULKAN_CHECK( x ) {\
-	VkResult ret = x; \
-	if ( ret != VK_SUCCESS ) {\
-	    auto errorStr = crimild::vulkan::utils::errorToString( ret ); \
-		std::cerr << "Vulkan Error:" \
-		   		  << "\n\tFile: " << __FILE__ \
-                  << "\n\tLine: " << __LINE__ \
-                  << "\n\tResult: " << errorStr \
-                  << "\n\tCaller: " << #x; \
-		exit( -1 ); \
-	}\
-}
+#define CRIMILD_VULKAN_CHECK( x )                                         \
+    {                                                                     \
+        VkResult ret = x;                                                 \
+        if ( ret != VK_SUCCESS ) {                                        \
+            auto errorStr = crimild::vulkan::utils::errorToString( ret ); \
+            std::cerr << "Vulkan Error:"                                  \
+                      << "\n\tFile: " << __FILE__                         \
+                      << "\n\tLine: " << __LINE__                         \
+                      << "\n\tResult: " << errorStr                       \
+                      << "\n\tCaller: " << #x;                            \
+            exit( -1 );                                                   \
+        }                                                                 \
+    }
 
 #endif
