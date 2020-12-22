@@ -35,6 +35,7 @@
 #include "Rendering/Pipeline.hpp"
 #include "Rendering/PresentationMaster.hpp"
 #include "Rendering/RenderPass.hpp"
+#include "Rendering/StorageBuffer.hpp"
 #include "Rendering/Texture.hpp"
 #include "Rendering/UniformBuffer.hpp"
 #include "Rendering/VertexBuffer.hpp"
@@ -89,7 +90,8 @@ crimild::Bool FrameGraph::compile( void ) noexcept
     m_sortedByType.clear();
     sorted.each(
         [ &, connected ]( auto node ) {
-            if ( !connected.contains( node ) ) {
+            // TODO: Fix connections for compute passes
+            if ( node->type != Node::Type::COMPUTE_PASS && !connected.contains( node ) ) {
                 // Discard the node since it's not connected with the
                 // final output for this render graph.
                 CRIMILD_LOG_DEBUG( "Discarding (", node->type, "): ", node->getName() );
@@ -285,6 +287,16 @@ void FrameGraph::verifyAllConnections( void ) noexcept
                                 descriptor.get< Texture >(),
                                 ds );
 
+                        case DescriptorType::STORAGE_BUFFER:
+                            connect(
+                                descriptor.get< StorageBuffer >(),
+                                ds );
+
+                        case DescriptorType::STORAGE_IMAGE:
+                            connect(
+                                descriptor.get< Texture >(),
+                                ds );
+
                         default:
                             // ignore
                             break;
@@ -336,50 +348,38 @@ crimild::Bool FrameGraph::isPresentation( SharedPointer< Attachment > const &att
 
 FrameGraph::CommandBufferArray FrameGraph::recordCommands( Bool includeConditionalPasses ) noexcept
 {
-    CommandBufferArray ret;
-
-    m_sortedByType[ Node::Type::RENDER_PASS ].each( [ & ]( auto node ) {
-        if ( auto renderPass = getNodeObject< RenderPass >( node ) ) {
-            if ( !includeConditionalPasses && renderPass->isConditional() ) {
-                return;
-            }
-            auto commands = crimild::alloc< CommandBuffer >();
-            commands->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
-            commands->beginRenderPass( renderPass, nullptr );
-            if ( auto cmds = crimild::get_ptr( renderPass->commands ) ) {
-                commands->bindCommandBuffer( cmds );
-            }
-            commands->endRenderPass( renderPass );
-            commands->end();
-            ret.add( commands );
-        }
-    } );
-
-    return ret;
+    return m_sortedByType[ Node::Type::RENDER_PASS ]
+        .filter(
+            [ & ]( auto node ) {
+                auto renderPass = getNodeObject< RenderPass >( node );
+                return renderPass != nullptr && ( !renderPass->isConditional() || includeConditionalPasses );
+            } )
+        .map(
+            [ & ]( auto node ) {
+                auto renderPass = getNodeObject< RenderPass >( node );
+                auto commands = crimild::alloc< CommandBuffer >();
+                commands->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
+                commands->beginRenderPass( renderPass, nullptr );
+                if ( auto cmds = crimild::get_ptr( renderPass->commands ) ) {
+                    commands->bindCommandBuffer( cmds );
+                }
+                commands->endRenderPass( renderPass );
+                commands->end();
+                return commands;
+            } );
 }
 
 FrameGraph::CommandBufferArray FrameGraph::recordComputeCommands( void ) noexcept
 {
-    CommandBufferArray ret;
-
-    ret.add(
-        [ & ] {
-            auto commands = crimild::alloc< CommandBuffer >();
-            commands->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
-
-            m_sortedByType[ Node::Type::COMPUTE_PASS ].each( [ & ]( auto node ) {
-                if ( auto pass = getNodeObject< ComputePass >( node ) ) {
-                    if ( auto cmds = crimild::get_ptr( pass->commands ) ) {
-                        commands->bindCommandBuffer( cmds );
-                    }
-                }
+    return m_sortedByType[ Node::Type::COMPUTE_PASS ]
+        .filter(
+            [ & ]( auto node ) {
+                return getNodeObject< ComputePass >( node ) != nullptr;
+            } )
+        .map(
+            [ & ]( auto node ) {
+                return getNodeObject< ComputePass >( node )->commands;
             } );
-
-            commands->end();
-            return commands;
-        }() );
-
-    return ret;
 }
 
 const PresentationMaster *FrameGraph::getPresentationMaster( void ) const noexcept

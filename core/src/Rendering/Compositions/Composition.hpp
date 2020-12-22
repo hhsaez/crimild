@@ -35,6 +35,7 @@
 namespace crimild {
 
     class Attachment;
+    class Texture;
 
     namespace compositions {
 
@@ -77,16 +78,27 @@ namespace crimild {
             inline Composition &setOutput( Attachment *att ) noexcept
             {
                 m_output = att;
+                m_outputTexture = nullptr;
                 return *this;
             }
 
             inline Attachment *getOutput( void ) noexcept { return m_output; }
+
+            inline Composition &setOutputTexture( Texture *texture ) noexcept
+            {
+                m_outputTexture = texture;
+                m_output = nullptr;
+                return *this;
+            }
+
+            inline Texture *getOutputTexture( void ) noexcept { return m_outputTexture; }
 
             inline Bool isHDREnabled( void ) const { return m_useHDR; }
             inline void enableHDR( bool enabled ) noexcept { m_useHDR = enabled; }
 
         private:
             Attachment *m_output = nullptr;
+            Texture *m_outputTexture = nullptr;
             Map< std::string, Attachment * > m_attachments;
             List< SharedPointer< SharedObject > > m_objects;
             Bool m_useHDR = false;

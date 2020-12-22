@@ -87,6 +87,7 @@ void VulkanSystem::onRender( void ) noexcept
         if ( m_frameGraph->compile() ) {
             // Record commands, including conditional passes
             setCommandBuffers( m_frameGraph->recordCommands( true ) );
+            setComputeCommandBuffers( m_frameGraph->recordComputeCommands() );
 
             // Record commands again after first frames have been render
             // without including conditional passes (see comments at the end
@@ -159,6 +160,12 @@ void VulkanSystem::onRender( void ) noexcept
         }
     }
 
+    m_computeCommandBuffers.each(
+        [ & ]( auto commandBuffer ) {
+            renderDevice->submitComputeCommands( crimild::get_ptr( commandBuffer ) );
+            renderDevice->waitIdle();
+        } );
+
     m_currentFrame = ( m_currentFrame + 1 ) % CRIMILD_VULKAN_MAX_FRAMES_IN_FLIGHT;
 
     if ( m_recordWithNonConditionalPasses && m_currentFrame == 0 ) {
@@ -166,6 +173,7 @@ void VulkanSystem::onRender( void ) noexcept
         // We need to record all commands again now, without the conditional passes.
         // If m_currentFrame == 0, that means we have rendered all in-flight frames already
         setCommandBuffers( m_frameGraph->recordCommands( false ) );
+        setComputeCommandBuffers( m_frameGraph->recordComputeCommands() );
         m_recordWithNonConditionalPasses = false;
     }
 }

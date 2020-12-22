@@ -26,8 +26,9 @@
  */
 
 #include "VulkanImage.hpp"
-#include "VulkanRenderDevice.hpp"
+
 #include "Foundation/Log.hpp"
+#include "VulkanRenderDevice.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;
@@ -52,26 +53,26 @@ crimild::Bool vulkan::ImageManager::bind( Image *image ) noexcept
 
     ImageBindInfo bindInfo;
 
-	auto channels = crimild::UInt32( 4 ); //< TODO: Fetch channels from image format
-	auto mipLevels = image->getMipLevels();
-	auto arrayLayers = image->getLayerCount();
+    auto channels = crimild::UInt32( 4 ); //< TODO: Fetch channels from image format
+    auto mipLevels = image->getMipLevels();
+    auto arrayLayers = image->getLayerCount();
     auto type = image->type;
 
-	// TODO: use frame graph to set usage?
-	VkImageUsageFlags usage = VK_IMAGE_USAGE_SAMPLED_BIT;
-	if ( image->data.size() > 0 ) {
-		// If image has data, it will be used for transfer operations
-		usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
-		usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-	}
-    else {
+    // TODO: use frame graph to set usage?
+    VkImageUsageFlags usage = VK_IMAGE_USAGE_SAMPLED_BIT;
+    if ( image->data.size() > 0 ) {
+        // If image has data, it will be used for transfer operations
+        usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+        usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+    } else {
         // If image has no data, then it's used as an attachment
         if ( utils::formatIsColor( image->format ) ) {
-        	usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+            usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+        } else if ( utils::formatIsDepthStencil( image->format ) ) {
+            usage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
         }
-        else if ( utils::formatIsDepthStencil( image->format ) ) {
-        	usage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-        }
+
+        usage |= VK_IMAGE_USAGE_STORAGE_BIT;
     }
 
     utils::createImage(
@@ -84,61 +85,55 @@ crimild::Bool vulkan::ImageManager::bind( Image *image ) noexcept
             .usage = usage,
             .properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
             .mipLevels = mipLevels,
-//            .numSamples = descriptor.numSamples,
+            //            .numSamples = descriptor.numSamples,
             .arrayLayers = arrayLayers,
             .flags = ( type == Image::Type::IMAGE_2D_CUBEMAP ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0u ),
         },
-       	bindInfo.imageHandler,
-       	bindInfo.imageMemoryHandler
-    );
+        bindInfo.imageHandler,
+        bindInfo.imageMemoryHandler );
 
-	if ( image->data.size() > 0 ) {
-		// Image has pixel data. Upload it
+    if ( image->data.size() > 0 ) {
+        // Image has pixel data. Upload it
 
-		VkBuffer stagingBuffer;
-		VkDeviceMemory stagingBufferMemory;
-		VkDeviceSize imageSize = image->data.size();
+        VkBuffer stagingBuffer;
+        VkDeviceMemory stagingBufferMemory;
+        VkDeviceSize imageSize = image->data.size();
 
-		auto success = utils::createBuffer(
-			renderDevice,
-			utils::BufferDescriptor {
-				.size = imageSize,
-				.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-				.properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-			},
-			stagingBuffer,
-			stagingBufferMemory
-		);
-		if ( !success ) {
-			CRIMILD_LOG_ERROR( "Failed to create image staging buffer" );
-			return false;
-		}
+        auto success = utils::createBuffer(
+            renderDevice,
+            utils::BufferDescriptor {
+                .size = imageSize,
+                .usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                .properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT },
+            stagingBuffer,
+            stagingBufferMemory );
+        if ( !success ) {
+            CRIMILD_LOG_ERROR( "Failed to create image staging buffer" );
+            return false;
+        }
 
-		utils::copyToBuffer(
-			renderDevice->handler,
-			stagingBufferMemory,
-			image->data.getData(),
-            imageSize
-		);
+        utils::copyToBuffer(
+            renderDevice->handler,
+            stagingBufferMemory,
+            image->data.getData(),
+            imageSize );
 
-		utils::transitionImageLayout(
-			renderDevice,
-			bindInfo.imageHandler,
-			utils::getFormat( renderDevice, image->format ),
-			VK_IMAGE_LAYOUT_UNDEFINED,
-			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-			mipLevels,
-			arrayLayers
-		);
+        utils::transitionImageLayout(
+            renderDevice,
+            bindInfo.imageHandler,
+            utils::getFormat( renderDevice, image->format ),
+            VK_IMAGE_LAYOUT_UNDEFINED,
+            VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+            mipLevels,
+            arrayLayers );
 
-		utils::copyBufferToImage(
-			renderDevice,
-			stagingBuffer,
-			bindInfo.imageHandler,
-			width,
-			height,
-            arrayLayers
-		);
+        utils::copyBufferToImage(
+            renderDevice,
+            stagingBuffer,
+            bindInfo.imageHandler,
+            width,
+            height,
+            arrayLayers );
 
         if ( type == Image::Type::IMAGE_2D_CUBEMAP ) {
             // No mipmaps. Transition to SHADER_READ_OPTIMAL
@@ -149,33 +144,36 @@ crimild::Bool vulkan::ImageManager::bind( Image *image ) noexcept
                 VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                 mipLevels,
-                arrayLayers
-            );
-        }
-        else {
+                arrayLayers );
+        } else {
             // Automatically transitions to SHADER_READ_OPTIMAL layout
             utils::generateMipmaps(
                 renderDevice,
                 bindInfo.imageHandler,
-               	utils::getFormat( renderDevice, image->format ),
+                utils::getFormat( renderDevice, image->format ),
                 width,
                 height,
-                mipLevels
-            );
+                mipLevels );
         };
 
-		vkDestroyBuffer(
-			renderDevice->handler,
-			stagingBuffer,
-			nullptr
-		);
+        vkDestroyBuffer(
+            renderDevice->handler,
+            stagingBuffer,
+            nullptr );
 
-		vkFreeMemory(
-			renderDevice->handler,
-			stagingBufferMemory,
-			nullptr
-		);
-	}
+        vkFreeMemory(
+            renderDevice->handler,
+            stagingBufferMemory,
+            nullptr );
+    }
+
+    if ( !image->getName().empty() ) {
+        utils::setObjectName(
+            renderDevice->handler,
+            UInt64( bindInfo.imageHandler ),
+            VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT,
+            image->getName().c_str() );
+    }
 
     setBindInfo( image, bindInfo );
 

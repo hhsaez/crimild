@@ -255,6 +255,7 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                     auto pipelineBindInfo = renderDevice->getBindInfo( pipeline );
 
                     m_currentGraphicsPipeline = pipeline;
+                    m_currentComputePipeline = nullptr;
                     m_boundDescriptorSets = 0;
 
                     vkCmdBindPipeline(
@@ -268,6 +269,7 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                     auto pipeline = cmd.get< ComputePipeline >();
                     auto pipelineBindInfo = renderDevice->getBindInfo( pipeline );
 
+                    m_currentGraphicsPipeline = nullptr;
                     m_currentComputePipeline = pipeline;
                     m_boundDescriptorSets = 0;
 

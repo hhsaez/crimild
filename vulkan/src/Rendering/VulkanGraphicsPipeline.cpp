@@ -118,6 +118,12 @@ crimild::Bool GraphicsPipelineManager::bind( GraphicsPipeline *graphicsPipeline 
             .pipelineLayout = pipelineLayout,
         } );
 
+    utils::setObjectName(
+        renderDevice->handler,
+        UInt64( pipelineHander ),
+        VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_EXT,
+        graphicsPipeline->getName().c_str() );
+
     return ManagerImpl::bind( graphicsPipeline );
 }
 

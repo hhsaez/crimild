@@ -136,6 +136,17 @@ crimild::Bool DescriptorSetManager::bind( DescriptorSet *descriptorSet ) noexcep
                 writes[ j ].pBufferInfo = &bufferInfo;
                 break;
             }
+
+            case DescriptorType::STORAGE_IMAGE: {
+                auto texture = descriptor.get< Texture >();
+                auto imageView = crimild::get_ptr( texture->imageView );
+                auto sampler = crimild::get_ptr( texture->sampler );
+                imageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+                imageInfo.imageView = renderDevice->getBindInfo( imageView );
+                imageInfo.sampler = renderDevice->getBindInfo( sampler ).sampler;
+                writes[ j ].pImageInfo = &imageInfo;
+                break;
+            }
         }
 
         vkUpdateDescriptorSets(
