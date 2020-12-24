@@ -87,7 +87,7 @@ void VulkanSystem::onRender( void ) noexcept
         if ( m_frameGraph->compile() ) {
             // Record commands, including conditional passes
             setCommandBuffers( m_frameGraph->recordCommands( true ) );
-            setComputeCommandBuffers( m_frameGraph->recordComputeCommands() );
+            setComputeCommandBuffers( m_frameGraph->recordComputeCommands( true ) );
 
             // Record commands again after first frames have been render
             // without including conditional passes (see comments at the end
@@ -173,7 +173,7 @@ void VulkanSystem::onRender( void ) noexcept
         // We need to record all commands again now, without the conditional passes.
         // If m_currentFrame == 0, that means we have rendered all in-flight frames already
         setCommandBuffers( m_frameGraph->recordCommands( false ) );
-        setComputeCommandBuffers( m_frameGraph->recordComputeCommands() );
+        setComputeCommandBuffers( m_frameGraph->recordComputeCommands( false ) );
         m_recordWithNonConditionalPasses = false;
     }
 }
