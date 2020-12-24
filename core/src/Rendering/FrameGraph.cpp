@@ -369,12 +369,13 @@ FrameGraph::CommandBufferArray FrameGraph::recordCommands( Bool includeCondition
             } );
 }
 
-FrameGraph::CommandBufferArray FrameGraph::recordComputeCommands( void ) noexcept
+FrameGraph::CommandBufferArray FrameGraph::recordComputeCommands( Bool includeConditionalPasses ) noexcept
 {
     return m_sortedByType[ Node::Type::COMPUTE_PASS ]
         .filter(
             [ & ]( auto node ) {
-                return getNodeObject< ComputePass >( node ) != nullptr;
+                auto computePass = getNodeObject< ComputePass >( node );
+                return computePass != nullptr && ( !computePass->isConditional() || includeConditionalPasses );
             } )
         .map(
             [ & ]( auto node ) {
