@@ -235,8 +235,8 @@ namespace crimild {
 
         crimild::Bool compile( void ) noexcept;
 
-        CommandBufferArray recordCommands( Bool fullBuild ) noexcept;
-        CommandBufferArray recordComputeCommands( void ) noexcept;
+        CommandBufferArray recordCommands( Bool includeConditionalPasses ) noexcept;
+        CommandBufferArray recordComputeCommands( Bool includeConditionalPasses ) noexcept;
 
         /**
 		   \brief Get all nodes connected to the current one matching the given type

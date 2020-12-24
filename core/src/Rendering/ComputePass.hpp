@@ -43,6 +43,13 @@ namespace crimild {
         virtual ~ComputePass( void ) = default;
 
         SharedPointer< CommandBuffer > commands;
+
+    public:
+        void setConditional( Bool conditional ) noexcept { m_conditional = conditional; }
+        Bool isConditional( void ) const noexcept { return m_conditional; }
+
+    private:
+        Bool m_conditional = false;
     };
 
 }
