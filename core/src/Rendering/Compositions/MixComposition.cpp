@@ -67,6 +67,9 @@ Composition crimild::compositions::mix( Composition cmp1, Composition cmp2 ) noe
                 {
                     .descriptorType = DescriptorType::TEXTURE,
                     .obj = [ & ] {
+                        if ( cmp1.getOutputTexture() != nullptr ) {
+                            return crimild::retain( cmp1.getOutputTexture() );
+                        }
                         auto texture = crimild::alloc< Texture >();
                         texture->imageView = cmp1.getOutput()->imageView;
                         texture->sampler = [] {
@@ -81,6 +84,9 @@ Composition crimild::compositions::mix( Composition cmp1, Composition cmp2 ) noe
                 {
                     .descriptorType = DescriptorType::TEXTURE,
                     .obj = [ & ] {
+                        if ( cmp2.getOutputTexture() != nullptr ) {
+                            return crimild::retain( cmp2.getOutputTexture() );
+                        }
                         auto texture = crimild::alloc< Texture >();
                         texture->imageView = cmp2.getOutput()->imageView;
                         texture->sampler = [] {
