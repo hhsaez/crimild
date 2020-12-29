@@ -27,74 +27,85 @@
 
 #include "FreeLookCameraComponent.hpp"
 
-#include "Simulation/Simulation.hpp"
 #include "Simulation/Input.hpp"
+#include "Simulation/Simulation.hpp"
 
 using namespace crimild;
 
 FreeLookCameraComponent::FreeLookCameraComponent( void )
 {
-
 }
 
 FreeLookCameraComponent::~FreeLookCameraComponent( void )
 {
-
 }
 
 void FreeLookCameraComponent::start( void )
 {
-	_lastMousePos = Vector2f::ZERO;
+    _lastMousePos = Vector2f::ZERO;
 
-	registerMessageHandler< crimild::messaging::KeyPressed >( []( crimild::messaging::KeyPressed const &msg ) {
-		float cameraAxisCoeff = 5.0f;
+    registerMessageHandler< crimild::messaging::KeyPressed >( []( crimild::messaging::KeyPressed const &msg ) {
+        float cameraAxisCoeff = 5.0f;
 
-		if ( Input::getInstance()->isKeyDown( CRIMILD_INPUT_KEY_LEFT_SHIFT ) || Input::getInstance()->isKeyDown( CRIMILD_INPUT_KEY_RIGHT_SHIFT ) ) {
-			cameraAxisCoeff = 20.0f;
-		}
+        if ( Input::getInstance()->isKeyDown( CRIMILD_INPUT_KEY_LEFT_SHIFT ) || Input::getInstance()->isKeyDown( CRIMILD_INPUT_KEY_RIGHT_SHIFT ) ) {
+            cameraAxisCoeff = 20.0f;
+        }
 
-		switch ( msg.key ) {
-		case 'A':
-		case CRIMILD_INPUT_KEY_LEFT:
-			Input::getInstance()->setAxis( Input::AXIS_HORIZONTAL, -cameraAxisCoeff );
-			break;
+        switch ( msg.key ) {
+            case 'A':
+            case CRIMILD_INPUT_KEY_LEFT:
+                Input::getInstance()->setAxis( Input::AXIS_HORIZONTAL, -cameraAxisCoeff );
+                break;
 
-		case 'D':
-		case CRIMILD_INPUT_KEY_RIGHT:
-			Input::getInstance()->setAxis( Input::AXIS_HORIZONTAL, +cameraAxisCoeff );
-			break;
+            case 'D':
+            case CRIMILD_INPUT_KEY_RIGHT:
+                Input::getInstance()->setAxis( Input::AXIS_HORIZONTAL, +cameraAxisCoeff );
+                break;
 
-		case 'W':
-		case CRIMILD_INPUT_KEY_UP:
-			Input::getInstance()->setAxis( Input::AXIS_VERTICAL, +cameraAxisCoeff );
-			break;
+            case 'W':
+            case CRIMILD_INPUT_KEY_UP:
+                Input::getInstance()->setAxis( Input::AXIS_VERTICAL, +cameraAxisCoeff );
+                break;
 
-		case 'S':
-		case CRIMILD_INPUT_KEY_DOWN:
-			Input::getInstance()->setAxis( Input::AXIS_VERTICAL, -cameraAxisCoeff );
-			break;
-		}
-	});
+            case 'S':
+            case CRIMILD_INPUT_KEY_DOWN:
+                Input::getInstance()->setAxis( Input::AXIS_VERTICAL, -cameraAxisCoeff );
+                break;
 
-	registerMessageHandler< crimild::messaging::KeyReleased >( []( crimild::messaging::KeyReleased const &msg ) {
-		switch ( msg.key ) {
-		case 'A':
-		case 'D':
-		case CRIMILD_INPUT_KEY_LEFT:
-		case CRIMILD_INPUT_KEY_RIGHT:
-			Input::getInstance()->setAxis( Input::AXIS_HORIZONTAL, 0.0f );
-			break;
+            case 'Q':
+                Input::getInstance()->setAxis( "CameraAxisRoll", -cameraAxisCoeff );
+                break;
 
-		case 'W':
-		case CRIMILD_INPUT_KEY_UP:
-		case 'S':
-		case CRIMILD_INPUT_KEY_DOWN:
-			Input::getInstance()->setAxis( Input::AXIS_VERTICAL, 0.0f );
-			break;
-		}
-	});
+            case 'E':
+                Input::getInstance()->setAxis( "CameraAxisRoll", +cameraAxisCoeff );
+                break;
+        }
+    } );
 
-	registerMessageHandler< crimild::messaging::MouseMotion >( [ this ]( crimild::messaging::MouseMotion const &msg ) {
+    registerMessageHandler< crimild::messaging::KeyReleased >( []( crimild::messaging::KeyReleased const &msg ) {
+        switch ( msg.key ) {
+            case 'A':
+            case 'D':
+            case CRIMILD_INPUT_KEY_LEFT:
+            case CRIMILD_INPUT_KEY_RIGHT:
+                Input::getInstance()->setAxis( Input::AXIS_HORIZONTAL, 0.0f );
+                break;
+
+            case 'W':
+            case CRIMILD_INPUT_KEY_UP:
+            case 'S':
+            case CRIMILD_INPUT_KEY_DOWN:
+                Input::getInstance()->setAxis( Input::AXIS_VERTICAL, 0.0f );
+                break;
+
+            case 'Q':
+            case 'E':
+                Input::getInstance()->setAxis( "CameraAxisRoll", 0.0f );
+                break;
+        }
+    } );
+
+    registerMessageHandler< crimild::messaging::MouseMotion >( [ this ]( crimild::messaging::MouseMotion const &msg ) {
         auto currentPos = Vector2f( msg.nx, msg.ny );
         auto mouseDelta = _initialized ? currentPos - _lastMousePos : Vector2f::ZERO;
         _initialized = true;
@@ -110,29 +121,28 @@ void FreeLookCameraComponent::start( void )
             auto up = root->getLocal().computeWorldUp();
             root->local().rotate() *= Quaternion4f::createFromAxisAngle( up.getNormalized(), -mouseDelta[ 0 ] );
         }
-	});
+    } );
 }
 
 void FreeLookCameraComponent::update( const Clock &c )
 {
     if ( Input::getInstance()->isMouseButtonDown( CRIMILD_INPUT_MOUSE_BUTTON_LEFT ) ) {
         Input::getInstance()->setMouseCursorMode( Input::MouseCursorMode::GRAB );
-    }
-    else {
+    } else {
         Input::getInstance()->setMouseCursorMode( Input::MouseCursorMode::NORMAL );
     }
 
-	float dSpeed = getSpeed() * Input::getInstance()->getAxis( Input::AXIS_VERTICAL );
-	float rSpeed = getSpeed() * Input::getInstance()->getAxis( Input::AXIS_HORIZONTAL );
-	float roll = 0.0f;//Input::getInstance()->getAxis( "CameraAxisRoll" );
+    float dSpeed = getSpeed() * Input::getInstance()->getAxis( Input::AXIS_VERTICAL );
+    float rSpeed = getSpeed() * Input::getInstance()->getAxis( Input::AXIS_HORIZONTAL );
+    float roll = getSpeed() * Input::getInstance()->getAxis( "CameraAxisRoll" );
 
-	auto root = getNode();
+    auto root = getNode();
 
-	// apply roll first
-	root->local().rotate() *= Quaternion4f::createFromAxisAngle( Vector3f::UNIT_Z, c.getDeltaTime() * roll );
+    // apply roll first
+    root->local().rotate() *= Quaternion4f::createFromAxisAngle( Vector3f::UNIT_Z, c.getDeltaTime() * roll );
 
-	auto direction = root->getLocal().computeDirection();
-	auto right = root->getLocal().computeRight();
+    auto direction = root->getLocal().computeDirection();
+    auto right = root->getLocal().computeRight();
 
-	root->local().translate() += c.getDeltaTime() * ( dSpeed * direction + rSpeed * right );
+    root->local().translate() += c.getDeltaTime() * ( dSpeed * direction + rSpeed * right );
 }
