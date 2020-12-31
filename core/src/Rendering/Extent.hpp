@@ -34,6 +34,15 @@
 namespace crimild {
 
     struct Extent2D {
+        static Extent2D fromSwapchain( Real32 scale = 1.0f ) noexcept
+        {
+            return {
+                .scalingMode = ScalingMode::SWAPCHAIN_RELATIVE,
+                .width = scale,
+                .height = scale,
+            };
+        }
+
         ScalingMode scalingMode = { ScalingMode::FIXED };
         crimild::Real32 width = 1.0f;
         crimild::Real32 height = 1.0f;
@@ -49,4 +58,3 @@ namespace crimild {
 }
 
 #endif
-
