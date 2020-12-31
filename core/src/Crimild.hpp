@@ -216,6 +216,7 @@
 #include "Rendering/Compositions/BrightPassFilterComposition.hpp"
 #include "Rendering/Compositions/ColorizeComposition.hpp"
 #include "Rendering/Compositions/Composition.hpp"
+#include "Rendering/Compositions/ComputeImageComposition.hpp"
 #include "Rendering/Compositions/ConvolutionComposition.hpp"
 #include "Rendering/Compositions/DebugComposition.hpp"
 #include "Rendering/Compositions/GrayscaleComposition.hpp"
