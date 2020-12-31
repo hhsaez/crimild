@@ -89,6 +89,22 @@ namespace crimild {
     };
 
     struct Descriptor {
+        static Descriptor withUniformBuffer( SharedPointer< SharedObject > const obj ) noexcept
+        {
+            return {
+                .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                .obj = obj,
+            };
+        }
+
+        static Descriptor withTexture( SharedPointer< SharedObject > const obj ) noexcept
+        {
+            return {
+                .descriptorType = DescriptorType::TEXTURE,
+                .obj = obj,
+            };
+        }
+
         DescriptorType descriptorType;
         SharedPointer< SharedObject > obj;
 

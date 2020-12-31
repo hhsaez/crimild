@@ -26,8 +26,9 @@
  */
 
 #include "Image.hpp"
-#include "Coding/Encoder.hpp"
+
 #include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
 
 #include <cstring>
 
@@ -44,7 +45,10 @@ SharedPointer< Image > Image::ONE = [] {
     };
     image->format = Format::R8G8B8A8_UNORM;
     image->data = {
-		0xFF, 0xFF, 0xFF, 0xFF
+        0xFF,
+        0xFF,
+        0xFF,
+        0xFF
     };
     return image;
 }();
@@ -58,7 +62,10 @@ SharedPointer< Image > Image::ZERO = [] {
     };
     image->format = Format::R8G8B8A8_UNORM;
     image->data = {
-        0x00, 0x00, 0x00, 0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
     };
     return image;
 }();
@@ -72,30 +79,39 @@ SharedPointer< Image > Image::INVALID = [] {
     };
     image->format = Format::R8G8B8A8_UNORM;
     image->data = {
-		0xFF, 0x00, 0xFF, 0xFF
+        0xFF,
+        0x00,
+        0xFF,
+        0xFF
     };
     return image;
 }();
 
 SharedPointer< Image > Image::CUBE_ONE = [] {
-//    return crimild::alloc< Image >(
-//        containers::Array< SharedPointer< Image >> {
-//        	ONE,
-//        	ONE,
-//        	ONE,
-//        	ONE,
-//        	ONE,
-//        	ONE,
-//        }
-//    );
+    //    return crimild::alloc< Image >(
+    //        containers::Array< SharedPointer< Image >> {
+    //        	ONE,
+    //        	ONE,
+    //        	ONE,
+    //        	ONE,
+    //        	ONE,
+    //        	ONE,
+    //        }
+    //    );
     return nullptr;
 }();
 
 SharedPointer< Image > createCheckerBoardImage( crimild::Int32 size )
 {
     crimild::Byte colors[] = {
-        0x00, 0x00, 0x00, 0xFF, // black
-        0xFF, 0xFF, 0xFF, 0xFF, // white
+        0x00,
+        0x00,
+        0x00,
+        0xFF, // black
+        0xFF,
+        0xFF,
+        0xFF,
+        0xFF, // white
     };
 
     crimild::Int32 width = size;
@@ -133,123 +149,157 @@ SharedPointer< Image > Image::CHECKERBOARD_128 = createCheckerBoardImage( 128 );
 SharedPointer< Image > Image::CHECKERBOARD_256 = createCheckerBoardImage( 256 );
 SharedPointer< Image > Image::CHECKERBOARD_512 = createCheckerBoardImage( 512 );
 
+SharedPointer< Image > Image::fromRGBANoise( UInt32 size ) noexcept
+{
+    auto image = crimild::alloc< Image >();
+    image->extent = {
+        .width = Real32( size ),
+        .height = Real32( size ),
+        .depth = 1,
+    };
+    image->format = Format::R8G8B8A8_UNORM;
+    image->data = [ & ] {
+        auto data = ByteArray( size * size * 4 );
+        for ( int i = 0; i < size; ++i ) {
+            for ( int j = 0; j < size; ++j ) {
+                auto idx = ( i * size + j ) * 4;
+
+                Vector2f uv( i, j );
+                uv += Vector2f( 223.35734, 550.56781 );
+                uv.times( uv );
+                float xy = uv.x() * uv.y();
+
+                Vector4f color(
+                    Numericf::fract( xy * 0.00000012 ),
+                    Numericf::fract( xy * 0.00000543 ),
+                    Numericf::fract( xy * 0.00000192 ),
+                    Numericf::fract( xy * 0.00000423 ) );
+
+                data[ idx + 0 ] = UInt8( color[ 0 ] * 255 );
+                data[ idx + 1 ] = UInt8( color[ 1 ] * 255 );
+                data[ idx + 2 ] = UInt8( color[ 2 ] * 255 );
+                data[ idx + 3 ] = UInt8( color[ 3 ] * 255 );
+            }
+        }
+        return data;
+    }();
+    return image;
+}
+
 Image::Image( void )
 {
-	_width = 0;
-	_height = 0;
-	_bpp = 0;
+    _width = 0;
+    _height = 0;
+    _bpp = 0;
 }
 
 Image::Image( int width, int height, int bpp, PixelFormat format, PixelType pixelType )
-	: _width( width ),
-	  _height( height ),
-	  _bpp( bpp ),
-	  _pixelFormat( format ),
-	  _pixelType( pixelType )
+    : _width( width ),
+      _height( height ),
+      _bpp( bpp ),
+      _pixelFormat( format ),
+      _pixelType( pixelType )
 {
-
 }
 
 Image::Image( int width, int height, int bpp, const unsigned char *data, PixelFormat format )
 {
-	setData( width, height, bpp, data, format );
+    setData( width, height, bpp, data, format );
 }
 
 Image::Image( int width, int height, int bpp, const ByteArray &data, PixelFormat format )
 {
-	setData( width, height, bpp, data.size() > 0 ? &data[ 0 ] : nullptr, format );
+    setData( width, height, bpp, data.size() > 0 ? &data[ 0 ] : nullptr, format );
 }
 
 Image::~Image( void )
 {
-	unload();
+    unload();
 }
 
 void Image::setData( int width, int height, int bpp, const unsigned char *data, PixelFormat format, PixelType pixelType )
 {
-	_width = width;
-	_height = height;
-	_bpp = bpp;
+    _width = width;
+    _height = height;
+    _bpp = bpp;
     _pixelFormat = format;
-	_pixelType = pixelType;
+    _pixelType = pixelType;
 
-	int size = _width * _height * _bpp;
-	if ( size > 0 ) {
-        if ( _data.size() != size ) _data.resize( size );
+    int size = _width * _height * _bpp;
+    if ( size > 0 ) {
+        if ( _data.size() != size )
+            _data.resize( size );
 
-		if ( data ) {
-			memcpy( &_data[ 0 ], data, size * sizeof( unsigned char ) );
-		}
-		else {
-			memset( &_data[ 0 ], 0, size * sizeof( unsigned char ) );
-		}
-	}
-    else {
+        if ( data ) {
+            memcpy( &_data[ 0 ], data, size * sizeof( unsigned char ) );
+        } else {
+            memset( &_data[ 0 ], 0, size * sizeof( unsigned char ) );
+        }
+    } else {
         _data.resize( 0 );
     }
 }
 
 void Image::load( void )
 {
-
 }
 
 void Image::unload( void )
 {
-	_width = 0;
-	_height = 0;
-	_bpp = 0;
+    _width = 0;
+    _height = 0;
+    _bpp = 0;
     _data.resize( 0 );
 }
 
 void Image::encode( coding::Encoder &encoder )
 {
-	Codable::encode( encoder );
+    Codable::encode( encoder );
 
-	encoder.encode( "width", _width );
-	encoder.encode( "height", _height );
-	encoder.encode( "bpp", _bpp );
+    encoder.encode( "width", _width );
+    encoder.encode( "height", _height );
+    encoder.encode( "bpp", _bpp );
     encoder.encode( "data", _data );
 }
 
 void Image::decode( coding::Decoder &decoder )
 {
-	Codable::decode( decoder );
+    Codable::decode( decoder );
 
-	decoder.decode( "width", _width );
-	decoder.decode( "height", _height );
-	decoder.decode( "bpp", _bpp );
-	decoder.decode( "data", _data );
+    decoder.decode( "width", _width );
+    decoder.decode( "height", _height );
+    decoder.decode( "bpp", _bpp );
+    decoder.decode( "data", _data );
 }
 
 bool Image::registerInStream( Stream &s )
 {
-	if ( !StreamObject::registerInStream( s ) ) {
-		return false;
-	}
+    if ( !StreamObject::registerInStream( s ) ) {
+        return false;
+    }
 
-	return true;
+    return true;
 }
 
 void Image::save( Stream &s )
 {
-	StreamObject::save( s );
+    StreamObject::save( s );
 
-	s.write( _width );
-	s.write( _height );
-	s.write( _bpp );
-	s.writeRawBytes( &_data[ 0 ], _width * _height * _bpp * sizeof( unsigned char ) );
+    s.write( _width );
+    s.write( _height );
+    s.write( _bpp );
+    s.writeRawBytes( &_data[ 0 ], _width * _height * _bpp * sizeof( unsigned char ) );
 }
 
 void Image::load( Stream &s )
 {
-	StreamObject::load( s );
+    StreamObject::load( s );
 
-	s.read( _width );
-	s.read( _height );
-	s.read( _bpp );
-	_data.resize( _width * _height * _bpp );
-	s.readRawBytes( &_data[ 0 ], _data.size() * sizeof( unsigned char ) );
+    s.read( _width );
+    s.read( _height );
+    s.read( _bpp );
+    _data.resize( _width * _height * _bpp );
+    s.readRawBytes( &_data[ 0 ], _data.size() * sizeof( unsigned char ) );
 }
 
 void Image::setMipLevels( crimild::UInt32 mipLevels ) noexcept
@@ -270,11 +320,5 @@ crimild::UInt32 Image::getMipLevels( void ) const noexcept
 
     // Each mipmap level is half the size of the previous one
     // At the very least, we'll have 1 mip level (the original size)
-    return 1 + static_cast< crimild::UInt32 >(
-		Numericf::floor(
-			Numericf::log2(
-				Numericf::max( extent.width, extent.height )
-			)
-		)
-	);
+    return 1 + static_cast< crimild::UInt32 >( Numericf::floor( Numericf::log2( Numericf::max( extent.width, extent.height ) ) ) );
 }
