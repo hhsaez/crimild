@@ -28,40 +28,42 @@
 #ifndef CRIMILD_RENDERING_TEXTURE_
 #define CRIMILD_RENDERING_TEXTURE_
 
-#include "Image.hpp"
 #include "Catalog.hpp"
-
 #include "Foundation/NamedObject.hpp"
+#include "Image.hpp"
 #include "Rendering/RenderResource.hpp"
 
 namespace crimild {
 
-	class ImageView;
-	class Sampler;
-    
-    class Texture :
-		public NamedObject,
-		public coding::Codable,
-    	public RenderResourceImpl< Texture >,
-		public StreamObject, // TODO: remove this
-		public Catalog< Texture >::Resource {
+    class ImageView;
+    class Sampler;
+
+    class Texture
+        : public NamedObject,
+          public coding::Codable,
+          public RenderResourceImpl< Texture >,
+          public StreamObject, // TODO: remove this
+          public Catalog< Texture >::Resource {
         CRIMILD_IMPLEMENT_RTTI( crimild::Texture )
 
-	public:
-		/**
+    public:
+        static SharedPointer< Texture > fromRGBANoise( UInt32 size = 256 ) noexcept;
+
+    public:
+        /**
 		   \brief Destructor
 		 */
-		virtual ~Texture( void );
+        virtual ~Texture( void );
 
-		SharedPointer< ImageView > imageView;
-		SharedPointer< Sampler > sampler;
+        SharedPointer< ImageView > imageView;
+        SharedPointer< Sampler > sampler;
 
-		// DEPRECATED FROM HERE?
+        // DEPRECATED FROM HERE?
 
-	public:
-		static SharedPointer< Texture > ONE;
-		static SharedPointer< Texture > CUBE_ONE;
-		static SharedPointer< Texture > ZERO;
+    public:
+        static SharedPointer< Texture > ONE;
+        static SharedPointer< Texture > CUBE_ONE;
+        static SharedPointer< Texture > ZERO;
         static SharedPointer< Texture > CHECKERBOARD;
         static SharedPointer< Texture > CHECKERBOARD_4;
         static SharedPointer< Texture > CHECKERBOARD_8;
@@ -73,94 +75,94 @@ namespace crimild {
         static SharedPointer< Texture > CHECKERBOARD_512;
         static SharedPointer< Texture > INVALID;
 
-		struct Target {
-			enum {
-				TEXTURE_2D,
-				CUBE_MAP,
-			};
+        struct Target {
+            enum {
+                TEXTURE_2D,
+                CUBE_MAP,
+            };
 
-			using Impl = crimild::UInt8;
-		};
+            using Impl = crimild::UInt8;
+        };
 
-		struct CubeMapFace {
-			enum {
-				RIGHT,
-				LEFT,
-				TOP,
-				BOTTOM,
-				BACK,
-				FRONT
-			};
+        struct CubeMapFace {
+            enum {
+                RIGHT,
+                LEFT,
+                TOP,
+                BOTTOM,
+                BACK,
+                FRONT
+            };
 
-			using Impl = crimild::UInt8;
-		};
+            using Impl = crimild::UInt8;
+        };
 
-	private:
-		using ImageArray = Array< SharedPointer< Image >>;
+    private:
+        using ImageArray = Array< SharedPointer< Image > >;
 
-	public:
-		/**
+    public:
+        /**
 		   \brief Construct an empty TEXTURE_2D texture
 		 */
         explicit Texture( std::string name = "ColorMap" );
 
-		/**
+        /**
 		   \brief Construct a TEXTURE_2D texture with an image
 		 */
-		explicit Texture( SharedPointer< Image > const &image, std::string name = "ColorMap" );
+        explicit Texture( SharedPointer< Image > const &image, std::string name = "ColorMap" );
 
-		/**
+        /**
 		   \brief Construct a CUBE_MAP texture
 
 		   \remarks Faces: Right, Left, Top, Bottom, Back, Front
 		 */
-		explicit Texture( ImageArray const &faces );
+        explicit Texture( ImageArray const &faces );
 
-		inline Target::Impl getTarget( void ) const { return _target; }
+        inline Target::Impl getTarget( void ) const { return _target; }
 
-	private:
-		Target::Impl _target = Target::TEXTURE_2D;
+    private:
+        Target::Impl _target = Target::TEXTURE_2D;
 
     public:
         inline Image *getImage( void )
-		{
-			if ( _images.empty() ) {
-				return nullptr;
-			}
-			
-			return crimild::get_ptr( _images[ 0 ] );
-		}
+        {
+            if ( _images.empty() ) {
+                return nullptr;
+            }
 
-		inline Image *getFace( CubeMapFace::Impl faceId )
-		{
-			if ( faceId >= _images.size() ) {
-				return nullptr;
-			}
+            return crimild::get_ptr( _images[ 0 ] );
+        }
 
-			return crimild::get_ptr( _images[ faceId ] );
-		}
-        
-	private:
-		ImageArray _images;
+        inline Image *getFace( CubeMapFace::Impl faceId )
+        {
+            if ( faceId >= _images.size() ) {
+                return nullptr;
+            }
+
+            return crimild::get_ptr( _images[ faceId ] );
+        }
+
+    private:
+        ImageArray _images;
 
     public:
         enum class WrapMode : uint8_t {
-            REPEAT,         //< Default
-			MIRRORED_REPEAT,
+            REPEAT, //< Default
+            MIRRORED_REPEAT,
             CLAMP_TO_EDGE,
-			CLAMP_TO_BORDER,
+            CLAMP_TO_BORDER,
         };
-        
+
         WrapMode getWrapMode( void ) const { return _wrapMode; }
         void setWrapMode( const WrapMode &mode ) { _wrapMode = mode; }
-        
+
     private:
         WrapMode _wrapMode = WrapMode::REPEAT;
 
     public:
         enum class Filter : uint8_t {
             NEAREST,
-            LINEAR,                     //< Default
+            LINEAR, //< Default
             NEAREST_MIPMAP_NEAREST,
             NEAREST_MIPMAP_LINEAR,
             LINEAR_MIPMAP_NEAREST,
@@ -184,7 +186,7 @@ namespace crimild {
 
     public:
         enum class BorderColor {
-			FLOAT_TRANSPARENT_BLACK,
+            FLOAT_TRANSPARENT_BLACK,
             INT_TRANSPARENT_BLACK,
             FLOAT_OPAQUE_BLACK,
             INT_OPAQUE_BLACK,
@@ -214,16 +216,14 @@ namespace crimild {
             \name Coding support
          */
         //@{
-        
+
     public:
         virtual void encode( coding::Encoder &encoder ) override;
         virtual void decode( coding::Decoder &decoder ) override;
-        
+
         //@}
-        
     };
-	
+
 }
 
 #endif
-

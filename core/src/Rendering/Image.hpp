@@ -62,6 +62,8 @@ namespace crimild {
         static SharedPointer< Image > CHECKERBOARD_512;
         static SharedPointer< Image > INVALID;
 
+        static SharedPointer< Image > fromRGBANoise( UInt32 size = 256 ) noexcept;
+
     public:
         enum class Type {
             IMAGE_1D,
