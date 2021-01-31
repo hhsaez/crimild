@@ -221,6 +221,7 @@
 #include "Rendering/Compositions/DebugComposition.hpp"
 #include "Rendering/Compositions/GrayscaleComposition.hpp"
 #include "Rendering/Compositions/InvertComposition.hpp"
+#include "Rendering/Compositions/MixComposition.hpp"
 #include "Rendering/Compositions/PresentComposition.hpp"
 #include "Rendering/Compositions/RenderScene.hpp"
 #include "Rendering/Compositions/ShaderComposition.hpp"
