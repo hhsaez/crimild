@@ -290,8 +290,11 @@ void CommandBuffer::end( void ) noexcept
 
 void CommandBuffer::clear( void ) noexcept
 {
-    if ( manager != nullptr ) {
-        manager->unbind( this );
-    }
     m_commands.clear();
+
+    m_cleared = true;
+
+    Command cmd;
+    cmd.type = Command::Type::RESET;
+    m_commands.push_back( cmd );
 }

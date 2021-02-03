@@ -71,6 +71,7 @@ namespace crimild {
 
             enum class Type {
                 BEGIN,
+                RESET,
                 BEGIN_RENDER_PASS,
                 END_RENDER_PASS,
                 BIND_GRAPHICS_PIPELINE,
@@ -149,6 +150,9 @@ namespace crimild {
 
         void clear( void ) noexcept;
 
+		inline Bool cleared( void ) const noexcept { return m_cleared; }
+  		inline void resetCleared( void ) noexcept { m_cleared = false; }
+
         template< typename CallbackType >
         void each( CallbackType &&callback ) noexcept
         {
@@ -159,6 +163,7 @@ namespace crimild {
 
     private:
         std::vector< Command > m_commands;
+        Bool m_cleared = false;
     };
 
 }

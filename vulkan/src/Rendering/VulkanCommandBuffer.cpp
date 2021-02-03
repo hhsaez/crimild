@@ -43,12 +43,6 @@ using namespace crimild::vulkan;
 
 crimild::Bool CommandBufferManager::bind( CommandBuffer *commandBuffer ) noexcept
 {
-    if ( validate( commandBuffer ) ) {
-        return true;
-    }
-
-    CRIMILD_LOG_TRACE( "Binding Vulkan Command Buffer" );
-
     auto renderDevice = getRenderDevice();
     if ( renderDevice == nullptr ) {
         return false;
@@ -57,6 +51,20 @@ crimild::Bool CommandBufferManager::bind( CommandBuffer *commandBuffer ) noexcep
     auto commandPool = renderDevice->getCommandPool();
     auto swapchain = renderDevice->getSwapchain();
     auto imageCount = swapchain->images.size();
+
+    if ( validate( commandBuffer ) ) {
+        // if ( commandBuffer->cleared() ) {
+        // 	// Command buffer was cleared
+        //     // Record commands again
+        //     for ( auto i = 0l; i < imageCount; i++ ) {
+        //         recordCommands( renderDevice, nullptr, commandBuffer, i );
+        //     }
+        //     commandBuffer->resetCleared();
+        // }
+        return true;
+    }
+
+    CRIMILD_LOG_TRACE( "Binding Vulkan Command Buffer" );
 
     auto allocInfo = VkCommandBufferAllocateInfo {
         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
@@ -137,6 +145,14 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                         vkBeginCommandBuffer(
                             handler,
                             &beginInfo ) );
+                    break;
+                }
+
+                case CommandBuffer::Command::Type::RESET: {
+                    // CRIMILD_VULKAN_CHECK(
+                    //     vkResetCommandBuffer(
+                    //         handler,
+                    //         VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT ) );
                     break;
                 }
 
