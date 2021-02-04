@@ -29,6 +29,7 @@
 #define CRIMILD_CORE_RENDERING_RENDER_PASS_
 
 #include "Foundation/SharedObject.hpp"
+#include "Rendering/CommandBuffer.hpp"
 #include "Rendering/Format.hpp"
 #include "Rendering/FrameGraphObjectImpl.hpp"
 #include "Rendering/Image.hpp"
@@ -38,7 +39,6 @@
 
 namespace crimild {
 
-    class CommandBuffer;
     class DescriptorSet;
     class GraphicsPipeline;
 
@@ -74,14 +74,15 @@ namespace crimild {
         SharedPointer< ImageView > imageView;
     };
 
-    class RenderPass : public SharedObject,
-                       public RenderResourceImpl< RenderPass > {
+    class RenderPass
+        : public SharedObject,
+          public NamedObject,
+          public RenderResourceImpl< RenderPass > {
 
     public:
         virtual ~RenderPass( void ) = default;
 
         Array< SharedPointer< Attachment > > attachments;
-        SharedPointer< CommandBuffer > commands;
         Extent2D extent = Extent2D {
             .scalingMode = ScalingMode::SWAPCHAIN_RELATIVE,
         };
@@ -91,6 +92,16 @@ namespace crimild {
             Vector2f depthStencil = Vector2f::UNIT_X;
         };
         ClearValue clearValue;
+
+        inline void setCommandRecorder( CommandRecorder commandRecorder ) noexcept { m_commandRecorder = commandRecorder; }
+
+        inline CommandBuffer *execute( void ) noexcept
+        {
+            return m_commandRecorder != nullptr ? m_commandRecorder() : nullptr;
+        }
+
+    private:
+        CommandRecorder m_commandRecorder;
 
         /**
            \name Pipeline

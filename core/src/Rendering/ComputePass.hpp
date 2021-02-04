@@ -29,11 +29,10 @@
 #define CRIMILD_CORE_RENDERING_COMPUTE_PASS_
 
 #include "Foundation/SharedObject.hpp"
+#include "Rendering/CommandBuffer.hpp"
 #include "Rendering/RenderResource.hpp"
 
 namespace crimild {
-
-    class CommandBuffer;
 
     class ComputePass
         : public SharedObject,
@@ -42,7 +41,15 @@ namespace crimild {
     public:
         virtual ~ComputePass( void ) = default;
 
-        SharedPointer< CommandBuffer > commands;
+        inline void setCommandRecorder( CommandRecorder commandRecorder ) noexcept { m_commandRecorder = commandRecorder; }
+
+        inline CommandBuffer *execute( void ) noexcept
+        {
+            return m_commandRecorder != nullptr ? m_commandRecorder() : nullptr;
+        }
+
+    private:
+        CommandRecorder m_commandRecorder;
 
     public:
         void setConditional( Bool conditional ) noexcept { m_conditional = conditional; }

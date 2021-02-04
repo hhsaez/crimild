@@ -53,6 +53,8 @@ namespace crimild {
             crimild::Bool bind( CommandBuffer *commandBuffer ) noexcept override;
             crimild::Bool unbind( CommandBuffer *commandBuffer ) noexcept override;
 
+            void updateCommandBuffer( CommandBuffer *commandBuffer, crimild::Size index ) noexcept;
+
         private:
             void recordCommands( RenderDevice *renderDevice, CommandBuffer *parent, CommandBuffer *commandBuffer, crimild::Size index ) noexcept;
 

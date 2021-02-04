@@ -63,13 +63,13 @@ void FrameGraph::remove( FrameGraphObject *obj ) noexcept
 
 crimild::Bool FrameGraph::compile( void ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Compiling frame graph" );
-
     if ( !isDirty() ) {
         // The frame graph did not change, so there's no need to recompile it
         // Returns true because this is not an error
         return true;
     }
+
+    CRIMILD_LOG_TRACE( "Compiling frame graph" );
 
     verifyAllConnections();
 
@@ -100,6 +100,8 @@ crimild::Bool FrameGraph::compile( void ) noexcept
             m_sorted.add( node );
             m_sortedByType[ node->type ].add( node );
         } );
+
+    m_dirty = false;
 
     return true;
 }
@@ -136,7 +138,8 @@ void FrameGraph::verifyAllConnections( void ) noexcept
 
             // A render pass depends on its command buffers, so add
             // an edge going from the command buffer to the render pass
-            if ( auto commands = crimild::get_ptr( renderPass->commands ) ) {
+            // TODO: this is not right, it might trigger a command recording
+            if ( auto commands = renderPass->execute() ) {
                 connect(
                     commands,
                     renderPass );
@@ -166,7 +169,8 @@ void FrameGraph::verifyAllConnections( void ) noexcept
 
             // A compute pass depends on its command buffers, so add
             // an edge going from the command buffer to the compute pass
-            if ( auto commands = crimild::get_ptr( computePass->commands ) ) {
+            // TODO: this is not right, it might trigger a command recording
+            if ( auto commands = computePass->execute() ) {
                 connect(
                     commands,
                     computePass );
@@ -346,8 +350,10 @@ crimild::Bool FrameGraph::isPresentation( SharedPointer< Attachment > const &att
     return master->colorAttachment == attachment;
 }
 
-FrameGraph::CommandBufferArray FrameGraph::recordCommands( Bool includeConditionalPasses ) noexcept
+FrameGraph::CommandBufferArray FrameGraph::recordGraphicsCommands( Bool includeConditionalPasses ) noexcept
 {
+    compile();
+
     return m_sortedByType[ Node::Type::RENDER_PASS ]
         .filter(
             [ & ]( auto node ) {
@@ -357,20 +363,14 @@ FrameGraph::CommandBufferArray FrameGraph::recordCommands( Bool includeCondition
         .map(
             [ & ]( auto node ) {
                 auto renderPass = getNodeObject< RenderPass >( node );
-                auto commands = crimild::alloc< CommandBuffer >();
-                commands->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
-                commands->beginRenderPass( renderPass, nullptr );
-                if ( auto cmds = crimild::get_ptr( renderPass->commands ) ) {
-                    commands->bindCommandBuffer( cmds );
-                }
-                commands->endRenderPass( renderPass );
-                commands->end();
-                return commands;
+                return renderPass->execute();
             } );
 }
 
 FrameGraph::CommandBufferArray FrameGraph::recordComputeCommands( Bool includeConditionalPasses ) noexcept
 {
+    compile();
+
     return m_sortedByType[ Node::Type::COMPUTE_PASS ]
         .filter(
             [ & ]( auto node ) {
@@ -379,7 +379,8 @@ FrameGraph::CommandBufferArray FrameGraph::recordComputeCommands( Bool includeCo
             } )
         .map(
             [ & ]( auto node ) {
-                return getNodeObject< ComputePass >( node )->commands;
+                auto computePass = getNodeObject< ComputePass >( node );
+                return computePass->execute();
             } );
 }
 

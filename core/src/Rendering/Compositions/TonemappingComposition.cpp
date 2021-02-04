@@ -170,15 +170,22 @@ Composition crimild::compositions::tonemapping( Composition cmp, crimild::Real32
         .scalingMode = ScalingMode::RELATIVE,
     };
 
-    renderPass->commands = [ & ] {
-        auto commandBuffer = crimild::alloc< CommandBuffer >();
-        commandBuffer->setViewport( viewport );
-        commandBuffer->setScissor( viewport );
-        commandBuffer->bindGraphicsPipeline( renderPass->getGraphicsPipeline() );
-        commandBuffer->bindDescriptorSet( renderPass->getDescriptors() );
-        commandBuffer->draw( 6 );
-        return commandBuffer;
-    }();
+    auto commandBuffer = cmp.create< CommandBuffer >();
+    commandBuffer->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
+    commandBuffer->beginRenderPass( renderPass, nullptr );
+    commandBuffer->setViewport( viewport );
+    commandBuffer->setScissor( viewport );
+    commandBuffer->bindGraphicsPipeline( renderPass->getGraphicsPipeline() );
+    commandBuffer->bindDescriptorSet( renderPass->getDescriptors() );
+    commandBuffer->draw( 6 );
+    commandBuffer->endRenderPass( renderPass );
+    commandBuffer->end();
+
+    renderPass->setCommandRecorder(
+        [ commandBuffer ]() {
+            return commandBuffer;
+        }
+    );
 
     cmp.setOutput( crimild::get_ptr( renderPass->attachments[ 0 ] ) );
 

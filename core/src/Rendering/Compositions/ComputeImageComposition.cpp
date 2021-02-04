@@ -121,18 +121,16 @@ Composition crimild::compositions::computeImage( ComputeImageProps props ) noexc
     }();
 
     auto computePass = cmp.create< ComputePass >();
-    computePass->commands = [ & ] {
-        auto commands = crimild::alloc< CommandBuffer >();
-        commands->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
-        commands->bindComputePipeline( pipeline );
-        commands->bindDescriptorSet( descriptors );
-        commands->dispatch( DispatchWorkgroup {
-            .x = UInt32( extent.width / DispatchWorkgroup::DEFAULT_WORGROUP_SIZE ),
-            .y = UInt32( extent.height / DispatchWorkgroup::DEFAULT_WORGROUP_SIZE ),
-            .z = 1 } );
-        commands->end();
-        return commands;
-    }();
+    auto commands = cmp.create< CommandBuffer >();
+    commands->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
+    commands->bindComputePipeline( pipeline );
+    commands->bindDescriptorSet( descriptors );
+    commands->dispatch( DispatchWorkgroup {
+        .x = UInt32( extent.width / DispatchWorkgroup::DEFAULT_WORGROUP_SIZE ),
+        .y = UInt32( extent.height / DispatchWorkgroup::DEFAULT_WORGROUP_SIZE ),
+        .z = 1 } );
+    commands->end();
+    computePass->setCommandRecorder( [ commands ] { return commands; } );
     computePass->setConditional( props.isConditional );
 
     cmp.setOutput( nullptr );

@@ -25,9 +25,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Rendering/Image.hpp"
-#include "Rendering/FrameGraph.hpp"
 #include "Rendering/VulkanRenderPass.hpp"
+
+#include "Rendering/FrameGraph.hpp"
+#include "Rendering/Image.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 
 using namespace crimild;
@@ -35,18 +36,18 @@ using namespace crimild::vulkan;
 
 crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
 {
-	if ( validate( renderPass ) ) {
-		return true;
-	}
+    if ( validate( renderPass ) ) {
+        return true;
+    }
 
-	CRIMILD_LOG_TRACE( "Binding Vulkan Render Pass" );
+    CRIMILD_LOG_TRACE( "Binding Vulkan Render Pass" );
 
-	auto renderDevice = getRenderDevice();
+    auto renderDevice = getRenderDevice();
     auto swapchain = renderDevice->getSwapchain();
     auto imageCount = swapchain->images.size();
     auto extent = utils::getExtent( renderPass->extent, renderDevice );
 
-    auto createAttachmentImage = [&]( Attachment *attachment ) {
+    auto createAttachmentImage = [ & ]( Attachment *attachment ) {
         auto image = crimild::alloc< Image >();
         if ( attachment->imageView != nullptr ) {
             if ( attachment->imageView->image != nullptr ) {
@@ -63,7 +64,7 @@ crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
         return image;
     };
 
-    auto createAttachmentImageView = [&]( Attachment *attachment ) {
+    auto createAttachmentImageView = [ & ]( Attachment *attachment ) {
         auto imageView = attachment->imageView != nullptr ? attachment->imageView : crimild::alloc< ImageView >();
         imageView->type = ImageView::Type::IMAGE_VIEW_2D;
         imageView->image = createAttachmentImage( attachment );
@@ -71,48 +72,45 @@ crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
         return imageView;
     };
 
-	auto colorReferences = Array< VkAttachmentReference >();
-	auto depthStencilReferences = Array< VkAttachmentReference >();
+    auto colorReferences = Array< VkAttachmentReference >();
+    auto depthStencilReferences = Array< VkAttachmentReference >();
 
     bool hasPresentation = false;
 
     auto attachments = renderPass->attachments.map(
-       	[ &, idx = 0u ]( auto const &attachment ) mutable {
+        [ &, idx = 0u ]( auto const &attachment ) mutable {
             auto format = attachment->format;
-        	if ( format != Format::COLOR_SWAPCHAIN_OPTIMAL ) {
-				// Create an image view for this attachemnt
+            if ( format != Format::COLOR_SWAPCHAIN_OPTIMAL ) {
+                // Create an image view for this attachemnt
                 // TODO: Have a pool of image views instead?
                 attachment->imageView = createAttachmentImageView( crimild::get_ptr( attachment ) );
-        	}
+            }
 
-			auto initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-			auto finalLayout = VK_IMAGE_LAYOUT_GENERAL;
+            auto initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+            auto finalLayout = VK_IMAGE_LAYOUT_GENERAL;
 
             auto isPresentation = attachment->getFrameGraph()->isPresentation( attachment );
 
-			if ( utils::formatIsDepthStencil( format ) ) {
-				depthStencilReferences.add(
-					VkAttachmentReference {
-						.attachment = idx++,
-						.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-					}
-				);
-				finalLayout = isPresentation ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			}
-			else {
-				colorReferences.add(
-					VkAttachmentReference {
-						.attachment = idx++,
-						.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-					}
-				);
+            if ( utils::formatIsDepthStencil( format ) ) {
+                depthStencilReferences.add(
+                    VkAttachmentReference {
+                        .attachment = idx++,
+                        .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+                    } );
+                finalLayout = isPresentation ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            } else {
+                colorReferences.add(
+                    VkAttachmentReference {
+                        .attachment = idx++,
+                        .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                    } );
                 hasPresentation |= isPresentation;
-				finalLayout = isPresentation ? VK_IMAGE_LAYOUT_PRESENT_SRC_KHR : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			}
+                finalLayout = isPresentation ? VK_IMAGE_LAYOUT_PRESENT_SRC_KHR : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            }
 
             // 1. Write only: LoadOp::CLEAR or LoadOp::DONT_CARE
-        	// 2. Read-Write: LoadOp::LOAD
-        	// 3. Read only: LoadOp::LOAD?
+            // 2. Read-Write: LoadOp::LOAD
+            // 3. Read only: LoadOp::LOAD?
 
             return VkAttachmentDescription {
                 .format = utils::getFormat( renderDevice, attachment->format ),
@@ -124,70 +122,67 @@ crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
                 .initialLayout = initialLayout,
                 .finalLayout = finalLayout,
             };
-    	}
-   	);
+        } );
 
-	auto subpass = VkSubpassDescription {
-		.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
-		.colorAttachmentCount = crimild::UInt32( colorReferences.size() ),
-		.pColorAttachments = colorReferences.getData(),
-		.pDepthStencilAttachment = !depthStencilReferences.empty() ? depthStencilReferences.getData() : nullptr,
-		.inputAttachmentCount = 0,
-		.pInputAttachments = nullptr,
-		.preserveAttachmentCount = 0,
-		.pPreserveAttachments = nullptr,
-		.pResolveAttachments = nullptr,
-	};
+    auto subpass = VkSubpassDescription {
+        .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
+        .colorAttachmentCount = crimild::UInt32( colorReferences.size() ),
+        .pColorAttachments = colorReferences.getData(),
+        .pDepthStencilAttachment = !depthStencilReferences.empty() ? depthStencilReferences.getData() : nullptr,
+        .inputAttachmentCount = 0,
+        .pInputAttachments = nullptr,
+        .preserveAttachmentCount = 0,
+        .pPreserveAttachments = nullptr,
+        .pResolveAttachments = nullptr,
+    };
 
     auto dependencies = std::vector< VkSubpassDependency > {
         {
             .srcSubpass = VK_SUBPASS_EXTERNAL,
             .dstSubpass = 0,
-            .srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,//hasPresentation ? VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT : VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+            .srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, //hasPresentation ? VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT : VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
             .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-            .srcAccessMask = VK_ACCESS_MEMORY_READ_BIT,//hasPresentation ? VK_ACCESS_MEMORY_READ_BIT : VK_ACCESS_SHADER_READ_BIT,
-            .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,//hasPresentation ? VkAccessFlags( VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT ) : VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            .srcAccessMask = VK_ACCESS_MEMORY_READ_BIT,                                                  //hasPresentation ? VK_ACCESS_MEMORY_READ_BIT : VK_ACCESS_SHADER_READ_BIT,
+            .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, //hasPresentation ? VkAccessFlags( VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT ) : VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
             .dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT,
         },
         {
             .srcSubpass = 0,
             .dstSubpass = VK_SUBPASS_EXTERNAL,
             .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-            .dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,//hasPresentation ? VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT : VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-            .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,//hasPresentation ? VkAccessFlags( VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT ) : VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-            .dstAccessMask = VK_ACCESS_MEMORY_READ_BIT,//hasPresentation ? VK_ACCESS_MEMORY_READ_BIT : VK_ACCESS_SHADER_READ_BIT,
+            .dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,                                        //hasPresentation ? VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT : VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+            .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, //hasPresentation ? VkAccessFlags( VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT ) : VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            .dstAccessMask = VK_ACCESS_MEMORY_READ_BIT,                                                  //hasPresentation ? VK_ACCESS_MEMORY_READ_BIT : VK_ACCESS_SHADER_READ_BIT,
             .dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT,
         }
     };
 
-	auto createInfo = VkRenderPassCreateInfo {
-		.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
-		.attachmentCount = static_cast< crimild::UInt32 >( attachments.size() ),
+    auto createInfo = VkRenderPassCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
+        .attachmentCount = static_cast< crimild::UInt32 >( attachments.size() ),
         .pAttachments = attachments.getData(),
-		.subpassCount = 1,
-		.pSubpasses = &subpass,
+        .subpassCount = 1,
+        .pSubpasses = &subpass,
         .dependencyCount = crimild::UInt32( dependencies.size() ),
         .pDependencies = dependencies.data(),
-	};
+    };
 
-	RenderPassBindInfo bindInfo;
-	CRIMILD_VULKAN_CHECK(
-		vkCreateRenderPass(
-			renderDevice->handler,
-			&createInfo,
-			nullptr,
-           	&bindInfo.handler
-		)
-	);
+    RenderPassBindInfo bindInfo;
+    CRIMILD_VULKAN_CHECK(
+        vkCreateRenderPass(
+            renderDevice->handler,
+            &createInfo,
+            nullptr,
+            &bindInfo.handler ) );
 
     bindInfo.framebuffers.resize( imageCount );
     for ( auto i = 0l; i < imageCount; i++ ) {
-        auto fbAttachments = renderPass->attachments.map( [&]( auto &att ) {
+        auto fbAttachments = renderPass->attachments.map( [ & ]( auto &att ) {
             if ( auto iv = crimild::get_ptr( att->imageView ) ) {
                 return renderDevice->getBindInfo( iv );
             }
             return renderDevice->getBindInfo( crimild::get_ptr( swapchain->imageViews[ i ] ) );
-        });
+        } );
 
         auto createInfo = VkFramebufferCreateInfo {
             .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
@@ -204,38 +199,44 @@ crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
                 renderDevice->handler,
                 &createInfo,
                 nullptr,
-                &bindInfo.framebuffers[ i ]
-        	)
-     	);
+                &bindInfo.framebuffers[ i ] ) );
+    }
+
+    if ( !renderPass->getName().empty() ) {
+        utils::setObjectName(
+            renderDevice->handler,
+            UInt64( bindInfo.handler ),
+            VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT,
+            renderPass->getName().c_str() );
     }
 
     setBindInfo( renderPass, bindInfo );
 
-	return ManagerImpl::bind( renderPass );
+    return ManagerImpl::bind( renderPass );
 }
 
 crimild::Bool vulkan::RenderPassManager::unbind( RenderPass *renderPass ) noexcept
 {
-	if ( !validate( renderPass ) ) {
-		return false;
-	}
+    if ( !validate( renderPass ) ) {
+        return false;
+    }
 
-	CRIMILD_LOG_TRACE( "Unbidn Vulkan Render Pass" );
+    CRIMILD_LOG_TRACE( "Unbidn Vulkan Render Pass" );
 
-	auto renderDevice = getRenderDevice();
+    auto renderDevice = getRenderDevice();
 
-	auto info = getBindInfo( renderPass );
+    auto info = getBindInfo( renderPass );
 
     if ( renderDevice != nullptr ) {
-        info.framebuffers.each( [&]( auto &fb ) {
+        info.framebuffers.each( [ & ]( auto &fb ) {
             vkDestroyFramebuffer( renderDevice->handler, fb, nullptr );
-        });
+        } );
         if ( info.handler != VK_NULL_HANDLE ) {
             vkDestroyRenderPass( renderDevice->handler, info.handler, nullptr );
         }
     }
 
-	removeBindInfo( renderPass );
+    removeBindInfo( renderPass );
 
-	return ManagerImpl::unbind( renderPass );
+    return ManagerImpl::unbind( renderPass );
 }
