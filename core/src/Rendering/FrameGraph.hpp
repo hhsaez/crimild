@@ -122,7 +122,7 @@ namespace crimild {
             FrameGraphObject *obj = nullptr;
         };
 
-        using CommandBufferArray = Array< SharedPointer< CommandBuffer > >;
+        using CommandBufferArray = Array< CommandBuffer * >;
 
     public:
         virtual ~FrameGraph( void ) = default;
@@ -235,7 +235,7 @@ namespace crimild {
 
         crimild::Bool compile( void ) noexcept;
 
-        CommandBufferArray recordCommands( Bool includeConditionalPasses ) noexcept;
+        CommandBufferArray recordGraphicsCommands( Bool includeConditionalPasses ) noexcept;
         CommandBufferArray recordComputeCommands( Bool includeConditionalPasses ) noexcept;
 
         /**
@@ -336,7 +336,7 @@ namespace crimild {
 		   other ones that were removed. That way we know for sure which connections
 		   have to be made and which passes need to recreate their command buffers.
 		 */
-        crimild::Bool m_dirty = false;
+        crimild::Bool m_dirty = true;
     };
 
     std::ostream &operator<<( std::ostream &out, FrameGraph::Node::Type node );

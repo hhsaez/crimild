@@ -88,13 +88,20 @@ Composition crimild::compositions::invert( Composition cmp ) noexcept
             return pipeline;
         }() );
 
-    renderPass->commands = [ & ] {
-        auto commandBuffer = crimild::alloc< CommandBuffer >();
-        commandBuffer->bindGraphicsPipeline( renderPass->getGraphicsPipeline() );
-        commandBuffer->bindDescriptorSet( renderPass->getDescriptors() );
-        commandBuffer->draw( 6 );
-        return commandBuffer;
-    }();
+    auto commandBuffer = cmp.create< CommandBuffer >();
+    commandBuffer->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
+    commandBuffer->beginRenderPass( renderPass, nullptr );
+    commandBuffer->bindGraphicsPipeline( renderPass->getGraphicsPipeline() );
+    commandBuffer->bindDescriptorSet( renderPass->getDescriptors() );
+    commandBuffer->draw( 6 );
+    commandBuffer->endRenderPass( renderPass );
+    commandBuffer->end();
+
+    renderPass->setCommandRecorder(
+        [ commandBuffer ]() {
+            return commandBuffer;
+        }
+    );
 
     cmp.setOutput( crimild::get_ptr( renderPass->attachments[ 0 ] ) );
 

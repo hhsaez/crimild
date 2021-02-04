@@ -53,14 +53,6 @@ crimild::Bool CommandBufferManager::bind( CommandBuffer *commandBuffer ) noexcep
     auto imageCount = swapchain->images.size();
 
     if ( validate( commandBuffer ) ) {
-        // if ( commandBuffer->cleared() ) {
-        // 	// Command buffer was cleared
-        //     // Record commands again
-        //     for ( auto i = 0l; i < imageCount; i++ ) {
-        //         recordCommands( renderDevice, nullptr, commandBuffer, i );
-        //     }
-        //     commandBuffer->resetCleared();
-        // }
         return true;
     }
 
@@ -149,10 +141,10 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                 }
 
                 case CommandBuffer::Command::Type::RESET: {
-                    // CRIMILD_VULKAN_CHECK(
-                    //     vkResetCommandBuffer(
-                    //         handler,
-                    //         VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT ) );
+                    CRIMILD_VULKAN_CHECK(
+                        vkResetCommandBuffer(
+                            handler,
+                            VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT ) );
                     break;
                 }
 
@@ -407,4 +399,22 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                     break;
             }
         } );
+}
+
+void CommandBufferManager::updateCommandBuffer( CommandBuffer *commandBuffer, crimild::Size index ) noexcept
+{
+    if ( !commandBuffer->cleared() ) {
+        return;
+    }
+
+    auto renderDevice = getRenderDevice();
+    auto commandPool = renderDevice->getCommandPool();
+    auto swapchain = renderDevice->getSwapchain();
+    auto imageCount = swapchain->images.size();
+
+    for ( auto i = 0l; i < imageCount; i++ ) {
+        recordCommands( renderDevice, nullptr, commandBuffer, i );
+    }
+
+    commandBuffer->resetCleared();
 }

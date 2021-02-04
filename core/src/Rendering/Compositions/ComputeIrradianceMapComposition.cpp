@@ -370,21 +370,26 @@ vec4 textureCubeUV( sampler2D envMap, vec3 direction, vec4 viewport )
         .height = 256.0f,
     };
 
-    renderPass->commands = [ & ] {
-        auto commandBuffer = crimild::alloc< CommandBuffer >();
+    auto commandBuffer = cmp.create< CommandBuffer >();
+    commandBuffer->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
+    commandBuffer->beginRenderPass( renderPass, nullptr );
+    auto offset = 0l;
+    offset = recordProbeCommands(
+        cmp,
+        crimild::get_ptr( commandBuffer ),
+        pipeline,
+        viewportLayout,
+        offset,
+        geometry->anyPrimitive(),
+        environmentDescriptors );
+    commandBuffer->endRenderPass( renderPass );
+    commandBuffer->end();
 
-        auto offset = 0l;
-        offset = recordProbeCommands(
-            cmp,
-            crimild::get_ptr( commandBuffer ),
-            pipeline,
-            viewportLayout,
-            offset,
-            geometry->anyPrimitive(),
-            environmentDescriptors );
-
-        return commandBuffer;
-    }();
+    renderPass->setCommandRecorder(
+        [ commandBuffer ]() {
+            return commandBuffer;
+        }
+    );
 
     renderPass->setConditional( true );
 
