@@ -148,7 +148,7 @@ namespace crimild {
             VkQueue presentQueue;
 
         public:
-            void submitGraphicsCommands( const Semaphore *wait, Array< SharedPointer< CommandBuffer > > &commandBuffer, crimild::UInt32 imageIndex, const Semaphore *signal, const Fence *fence ) noexcept;
+            void submitGraphicsCommands( const Semaphore *wait, Array< CommandBuffer * > &commandBuffer, crimild::UInt32 imageIndex, const Semaphore *signal, const Fence *fence ) noexcept;
             void submitComputeCommands( CommandBuffer *commands ) noexcept;
             void submit( CommandBuffer *commands, crimild::Bool wait ) noexcept;
             void waitIdle( void ) const noexcept;

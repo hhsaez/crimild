@@ -63,7 +63,7 @@ RenderDevice::~RenderDevice( void )
     }
 }
 
-void RenderDevice::submitGraphicsCommands( const Semaphore *wait, Array< SharedPointer< CommandBuffer > > &commandBuffers, crimild::UInt32 imageIndex, const Semaphore *signal, const Fence *fence ) noexcept
+void RenderDevice::submitGraphicsCommands( const Semaphore *wait, Array< CommandBuffer * > &commandBuffers, crimild::UInt32 imageIndex, const Semaphore *signal, const Fence *fence ) noexcept
 {
     VkSemaphore waitSemaphores[] = {
         wait->handler,
@@ -80,7 +80,8 @@ void RenderDevice::submitGraphicsCommands( const Semaphore *wait, Array< SharedP
 
     Array< VkCommandBuffer > commandBufferHandlers = commandBuffers.map(
         [ & ]( auto commandBuffer ) {
-            return getHandler( crimild::get_ptr( commandBuffer ), imageIndex );
+        	updateCommandBuffer( commandBuffer, imageIndex );
+            return getHandler( commandBuffer, imageIndex );
         } );
 
     auto submitInfo = VkSubmitInfo {

@@ -239,19 +239,24 @@ Composition crimild::compositions::debug( Composition cmp ) noexcept
 
     auto mainAttachment = cmp.getOutput();
 
-    renderPass->commands = [ & ] {
-        auto commandBuffer = crimild::alloc< CommandBuffer >();
-        // Render main attachment first
-        recordAttachmentCommands( commandBuffer, mainAttachment );
-        cmp.eachAttachment(
-            [ & ]( auto att ) mutable {
-                if ( att != mainAttachment ) {
-                    // Render additional attachments
-                    recordAttachmentCommands( commandBuffer, att );
-                }
-            } );
-        return commandBuffer;
-    }();
+    auto commands = cmp.create< CommandBuffer >();
+    commands->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
+    commands->beginRenderPass( renderPass, nullptr );
+    recordAttachmentCommands( commands, mainAttachment );
+    cmp.eachAttachment(
+        [ & ]( auto att ) mutable {
+            if ( att != mainAttachment ) {
+                // Render additional attachments
+                recordAttachmentCommands( commands, att );
+            }
+        } );
+    commands->endRenderPass( renderPass );
+    commands->end();
+
+    renderPass->setCommandRecorder(
+        [ commands ] {
+            return commands;
+        } );
 
     cmp.setOutput( crimild::get_ptr( renderPass->attachments[ 0 ] ) );
 

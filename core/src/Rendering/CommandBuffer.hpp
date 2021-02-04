@@ -150,8 +150,8 @@ namespace crimild {
 
         void clear( void ) noexcept;
 
-		inline Bool cleared( void ) const noexcept { return m_cleared; }
-  		inline void resetCleared( void ) noexcept { m_cleared = false; }
+        inline Bool cleared( void ) const noexcept { return m_cleared; }
+        inline void resetCleared( void ) noexcept { m_cleared = false; }
 
         template< typename CallbackType >
         void each( CallbackType &&callback ) noexcept
@@ -165,6 +165,8 @@ namespace crimild {
         std::vector< Command > m_commands;
         Bool m_cleared = false;
     };
+
+    using CommandRecorder = std::function< CommandBuffer *( void ) >;
 
 }
 

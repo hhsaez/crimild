@@ -83,26 +83,8 @@ void VulkanSystem::onRender( void ) noexcept
         return;
     }
 
-    if ( m_commandBuffers.empty() ) {
-        if ( m_frameGraph->compile() ) {
-            // Record commands, including conditional passes
-            setCommandBuffers( m_frameGraph->recordCommands( true ) );
-            setComputeCommandBuffers( m_frameGraph->recordComputeCommands( true ) );
-
-            // Record commands again after first frames have been render
-            // without including conditional passes (see comments at the end
-            // of this function).
-            m_recordWithNonConditionalPasses = true;
-        } else {
-            CRIMILD_LOG_ERROR( "Invalid frame graph" );
-            return;
-        }
-    }
-
-    if ( m_commandBuffers.empty() ) {
-        CRIMILD_LOG_WARNING( "No available command buffers to render" );
-        return;
-    }
+    auto graphicsCommandBuffers = m_frameGraph->recordGraphicsCommands( m_recordWithNonConditionalPasses );
+    auto computeCommandBuffers = m_frameGraph->recordComputeCommands( m_recordWithNonConditionalPasses );
 
     auto swapchain = crimild::get_ptr( m_swapchain );
 
@@ -142,7 +124,7 @@ void VulkanSystem::onRender( void ) noexcept
     // image as attachment in the framebuffer
     renderDevice->submitGraphicsCommands(
         wait,
-        m_commandBuffers,
+        graphicsCommandBuffers,
         imageIndex,
         signal,
         fence );
@@ -160,7 +142,7 @@ void VulkanSystem::onRender( void ) noexcept
         }
     }
 
-    m_computeCommandBuffers.each(
+    computeCommandBuffers.each(
         [ & ]( auto commandBuffer ) {
             renderDevice->submitComputeCommands( crimild::get_ptr( commandBuffer ) );
             renderDevice->waitIdle();
@@ -172,8 +154,6 @@ void VulkanSystem::onRender( void ) noexcept
         // We have been rendering using command buffers that included conditional render passes
         // We need to record all commands again now, without the conditional passes.
         // If m_currentFrame == 0, that means we have rendered all in-flight frames already
-        setCommandBuffers( m_frameGraph->recordCommands( false ) );
-        setComputeCommandBuffers( m_frameGraph->recordComputeCommands( false ) );
         m_recordWithNonConditionalPasses = false;
     }
 }
@@ -274,7 +254,7 @@ crimild::Bool VulkanSystem::createSwapchain( void ) noexcept
     }
 
     // Reset existing command buffers
-    setCommandBuffers( {} );
+    m_recordWithNonConditionalPasses = true;
 
     return true;
 }
