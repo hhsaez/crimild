@@ -178,21 +178,20 @@ Composition crimild::compositions::computeReflectionMap( Composition cmp, Node *
         .height = 256.0f,
     };
 
-    auto commandBuffer = cmp.create< CommandBuffer >();
-    commandBuffer->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
-    commandBuffer->beginRenderPass( renderPass, nullptr );
-    auto offset = 0l;
-    offset = recordProbeCommands(
-        cmp,
-        crimild::get_ptr( commandBuffer ),
-        viewportLayout,
-        offset,
-        skybox );
-    commandBuffer->endRenderPass( renderPass );
-    commandBuffer->end();
-
-    renderPass->setCommandRecorder(
-        [ commandBuffer ]() {
+    renderPass->createCommandRecorder(
+        [ & ] {
+            auto commandBuffer = cmp.create< CommandBuffer >();
+            commandBuffer->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
+            commandBuffer->beginRenderPass( renderPass, nullptr );
+            auto offset = 0l;
+            offset = recordProbeCommands(
+                cmp,
+                crimild::get_ptr( commandBuffer ),
+                viewportLayout,
+                offset,
+                skybox );
+            commandBuffer->endRenderPass( renderPass );
+            commandBuffer->end();
             return commandBuffer;
         } );
 

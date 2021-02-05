@@ -53,8 +53,6 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
-#define CRIMILD_VULKAN_MAX_FRAMES_IN_FLIGHT 2
-
 void VulkanSystem::start( void ) noexcept
 {
     initShaders();
@@ -83,8 +81,8 @@ void VulkanSystem::onRender( void ) noexcept
         return;
     }
 
-    auto graphicsCommandBuffers = m_frameGraph->recordGraphicsCommands( m_recordWithNonConditionalPasses );
-    auto computeCommandBuffers = m_frameGraph->recordComputeCommands( m_recordWithNonConditionalPasses );
+    auto graphicsCommandBuffers = m_frameGraph->recordGraphicsCommands( m_currentFrame, m_recordWithNonConditionalPasses );
+    auto computeCommandBuffers = m_frameGraph->recordComputeCommands( m_currentFrame, m_recordWithNonConditionalPasses );
 
     auto swapchain = crimild::get_ptr( m_swapchain );
 
@@ -148,7 +146,7 @@ void VulkanSystem::onRender( void ) noexcept
             renderDevice->waitIdle();
         } );
 
-    m_currentFrame = ( m_currentFrame + 1 ) % CRIMILD_VULKAN_MAX_FRAMES_IN_FLIGHT;
+    m_currentFrame = ( m_currentFrame + 1 ) % swapchain->getImages().size();
 
     if ( m_recordWithNonConditionalPasses && m_currentFrame == 0 ) {
         // We have been rendering using command buffers that included conditional render passes
@@ -299,7 +297,7 @@ crimild::Bool VulkanSystem::createSyncObjects( void ) noexcept
 {
     auto renderDevice = crimild::get_ptr( m_renderDevice );
 
-    for ( auto i = 0l; i < CRIMILD_VULKAN_MAX_FRAMES_IN_FLIGHT; i++ ) {
+    for ( auto i = 0l; i < m_swapchain->getImages().size(); i++ ) {
         m_imageAvailableSemaphores.push_back( renderDevice->create( Semaphore::Descriptor {} ) );
         m_renderFinishedSemaphores.push_back( renderDevice->create( Semaphore::Descriptor {} ) );
         m_inFlightFences.push_back( renderDevice->create( Fence::Descriptor {} ) );

@@ -121,6 +121,9 @@ namespace crimild {
         };
 
     public:
+        inline void setFrameIndex( Size frameIndex ) noexcept { m_frameIndex = frameIndex; }
+        inline Size getFrameIndex( void ) const noexcept { return m_frameIndex; }
+
         void begin( Usage usage ) noexcept;
         void end( void ) noexcept;
 
@@ -162,11 +165,12 @@ namespace crimild {
         }
 
     private:
+        Size m_frameIndex = 0;
         std::vector< Command > m_commands;
         Bool m_cleared = false;
     };
 
-    using CommandRecorder = std::function< CommandBuffer *( void ) >;
+    using CommandRecorder = std::function< CommandBuffer *( Size ) >;
 
 }
 

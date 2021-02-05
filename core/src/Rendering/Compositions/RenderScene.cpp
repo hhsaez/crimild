@@ -375,55 +375,53 @@ Composition crimild::compositions::renderScene( Node *scene, crimild::Bool useHD
         .dimensions = Rectf( 0, 0, 1, 1 ),
     };
 
-    auto commandBuffer = cmp.create< CommandBuffer >();
-    commandBuffer->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
-    commandBuffer->beginRenderPass( renderPass, nullptr );
-    commandBuffer->setViewport( viewport );
-    commandBuffer->setScissor( viewport );
-    renderables.litBasic.each(
-        [ & ]( Geometry *g ) {
-            if ( auto ms = g->getComponent< MaterialComponent >() ) {
-                if ( auto material = ms->first() ) {
-                    commandBuffer->bindGraphicsPipeline( material->getGraphicsPipeline() );
-                    commandBuffer->bindDescriptorSet( litBasicDescriptors );
-                    commandBuffer->bindDescriptorSet( material->getDescriptors() );
-                    commandBuffer->bindDescriptorSet( g->getDescriptors() );
-                    commandBuffer->drawPrimitive( g->anyPrimitive() );
-                }
-            }
-        } );
-    renderables.lit.each(
-        [ & ]( Geometry *g ) {
-            if ( auto ms = g->getComponent< MaterialComponent >() ) {
-                if ( auto material = ms->first() ) {
-                    commandBuffer->bindGraphicsPipeline( material->getGraphicsPipeline() );
-                    commandBuffer->bindDescriptorSet( litDescriptors );
-                    commandBuffer->bindDescriptorSet( material->getDescriptors() );
-                    commandBuffer->bindDescriptorSet( g->getDescriptors() );
-                    commandBuffer->drawPrimitive( g->anyPrimitive() );
-                }
-            }
-        } );
-    renderables.environment.each(
-        [ & ]( Geometry *g ) {
-            if ( auto ms = g->getComponent< MaterialComponent >() ) {
-                if ( auto material = ms->first() ) {
-                    commandBuffer->bindGraphicsPipeline( material->getGraphicsPipeline() );
-                    commandBuffer->bindDescriptorSet( environmentDescriptors );
-                    commandBuffer->bindDescriptorSet( material->getDescriptors() );
-                    commandBuffer->bindDescriptorSet( g->getDescriptors() );
-                    commandBuffer->drawPrimitive( g->anyPrimitive() );
-                }
-            }
-        } );
-    commandBuffer->endRenderPass( renderPass );
-    commandBuffer->end();
-
-    renderPass->setCommandRecorder(
-        [ commandBuffer ]() {
+    renderPass->createCommandRecorder(
+        [ & ] {
+            auto commandBuffer = cmp.create< CommandBuffer >();
+            commandBuffer->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
+            commandBuffer->beginRenderPass( renderPass, nullptr );
+            commandBuffer->setViewport( viewport );
+            commandBuffer->setScissor( viewport );
+            renderables.litBasic.each(
+                [ & ]( Geometry *g ) {
+                    if ( auto ms = g->getComponent< MaterialComponent >() ) {
+                        if ( auto material = ms->first() ) {
+                            commandBuffer->bindGraphicsPipeline( material->getGraphicsPipeline() );
+                            commandBuffer->bindDescriptorSet( litBasicDescriptors );
+                            commandBuffer->bindDescriptorSet( material->getDescriptors() );
+                            commandBuffer->bindDescriptorSet( g->getDescriptors() );
+                            commandBuffer->drawPrimitive( g->anyPrimitive() );
+                        }
+                    }
+                } );
+            renderables.lit.each(
+                [ & ]( Geometry *g ) {
+                    if ( auto ms = g->getComponent< MaterialComponent >() ) {
+                        if ( auto material = ms->first() ) {
+                            commandBuffer->bindGraphicsPipeline( material->getGraphicsPipeline() );
+                            commandBuffer->bindDescriptorSet( litDescriptors );
+                            commandBuffer->bindDescriptorSet( material->getDescriptors() );
+                            commandBuffer->bindDescriptorSet( g->getDescriptors() );
+                            commandBuffer->drawPrimitive( g->anyPrimitive() );
+                        }
+                    }
+                } );
+            renderables.environment.each(
+                [ & ]( Geometry *g ) {
+                    if ( auto ms = g->getComponent< MaterialComponent >() ) {
+                        if ( auto material = ms->first() ) {
+                            commandBuffer->bindGraphicsPipeline( material->getGraphicsPipeline() );
+                            commandBuffer->bindDescriptorSet( environmentDescriptors );
+                            commandBuffer->bindDescriptorSet( material->getDescriptors() );
+                            commandBuffer->bindDescriptorSet( g->getDescriptors() );
+                            commandBuffer->drawPrimitive( g->anyPrimitive() );
+                        }
+                    }
+                } );
+            commandBuffer->endRenderPass( renderPass );
+            commandBuffer->end();
             return commandBuffer;
-        }
-    );
+        } );
 
     cmp.setOutput( crimild::get_ptr( renderPass->attachments[ 0 ] ) );
 

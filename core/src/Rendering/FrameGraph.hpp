@@ -235,8 +235,8 @@ namespace crimild {
 
         crimild::Bool compile( void ) noexcept;
 
-        CommandBufferArray recordGraphicsCommands( Bool includeConditionalPasses ) noexcept;
-        CommandBufferArray recordComputeCommands( Bool includeConditionalPasses ) noexcept;
+        CommandBufferArray recordGraphicsCommands( Size imageIndex, Bool includeConditionalPasses ) noexcept;
+        CommandBufferArray recordComputeCommands( Size imageIndex, Bool includeConditionalPasses ) noexcept;
 
         /**
 		   \brief Get all nodes connected to the current one matching the given type

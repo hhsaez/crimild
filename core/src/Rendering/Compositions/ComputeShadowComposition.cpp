@@ -680,46 +680,44 @@ Composition crimild::compositions::computeShadow( Composition cmp, Node *scene )
         .color = RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ),
     };
 
-    auto commandBuffer = cmp.create< CommandBuffer >();
-    commandBuffer->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
-    commandBuffer->beginRenderPass( renderPass, nullptr );
-    auto offset = 0l;
+    renderPass->createCommandRecorder(
+        [ & ] {
+            auto commandBuffer = cmp.create< CommandBuffer >();
+            commandBuffer->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
+            commandBuffer->beginRenderPass( renderPass, nullptr );
+            auto offset = 0l;
 
-    offset = recordDirectionalLightCommands(
-        cmp,
-        crimild::get_ptr( commandBuffer ),
-        pipelines[ Light::Type::DIRECTIONAL ],
-        viewportLayout,
-        offset,
-        lights[ Light::Type::DIRECTIONAL ],
-        scene );
+            offset = recordDirectionalLightCommands(
+                cmp,
+                crimild::get_ptr( commandBuffer ),
+                pipelines[ Light::Type::DIRECTIONAL ],
+                viewportLayout,
+                offset,
+                lights[ Light::Type::DIRECTIONAL ],
+                scene );
 
-    offset = recordSpotLightCommands(
-        cmp,
-        crimild::get_ptr( commandBuffer ),
-        pipelines[ Light::Type::SPOT ],
-        viewportLayout,
-        offset,
-        lights[ Light::Type::SPOT ],
-        scene );
+            offset = recordSpotLightCommands(
+                cmp,
+                crimild::get_ptr( commandBuffer ),
+                pipelines[ Light::Type::SPOT ],
+                viewportLayout,
+                offset,
+                lights[ Light::Type::SPOT ],
+                scene );
 
-    offset = recordPointLightCommands(
-        cmp,
-        crimild::get_ptr( commandBuffer ),
-        pipelines[ Light::Type::POINT ],
-        viewportLayout,
-        offset,
-        lights[ Light::Type::POINT ],
-        scene );
+            offset = recordPointLightCommands(
+                cmp,
+                crimild::get_ptr( commandBuffer ),
+                pipelines[ Light::Type::POINT ],
+                viewportLayout,
+                offset,
+                lights[ Light::Type::POINT ],
+                scene );
 
-    commandBuffer->endRenderPass( renderPass );
-    commandBuffer->end();
-
-    renderPass->setCommandRecorder(
-        [ commandBuffer ]() {
+            commandBuffer->endRenderPass( renderPass );
+            commandBuffer->end();
             return commandBuffer;
-        }
-    );
+        } );
 
     cmp.setOutput( crimild::get_ptr( renderPass->attachments[ 0 ] ) );
 

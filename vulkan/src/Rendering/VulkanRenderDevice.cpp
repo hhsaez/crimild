@@ -80,8 +80,8 @@ void RenderDevice::submitGraphicsCommands( const Semaphore *wait, Array< Command
 
     Array< VkCommandBuffer > commandBufferHandlers = commandBuffers.map(
         [ & ]( auto commandBuffer ) {
-        	updateCommandBuffer( commandBuffer, imageIndex );
-            return getHandler( commandBuffer, imageIndex );
+        	updateCommandBuffer( commandBuffer );
+            return getBindInfo( commandBuffer ).handler;
         } );
 
     auto submitInfo = VkSubmitInfo {
@@ -106,7 +106,7 @@ void RenderDevice::submitGraphicsCommands( const Semaphore *wait, Array< Command
 void RenderDevice::submitComputeCommands( CommandBuffer *commands ) noexcept
 {
     VkCommandBuffer commandBuffers[] = {
-        getHandler( commands, 0 ),
+        getBindInfo( commands ).handler,
     };
 
     auto submitInfo = VkSubmitInfo {
@@ -125,7 +125,7 @@ void RenderDevice::submitComputeCommands( CommandBuffer *commands ) noexcept
 
 void RenderDevice::submit( CommandBuffer *commands, crimild::Bool wait ) noexcept
 {
-    auto commandBufferHandler = getHandler( commands, 0 );
+    auto commandBufferHandler = getBindInfo( commands ).handler;
 
     auto submitInfo = VkSubmitInfo {
         .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,

@@ -33,6 +33,7 @@
 #include "Rendering/RenderPass.hpp"
 #include "Rendering/Sampler.hpp"
 #include "Rendering/ShaderProgram.hpp"
+#include "Rendering/Swapchain.hpp"
 #include "Rendering/Texture.hpp"
 
 namespace crimild {
@@ -239,23 +240,29 @@ Composition crimild::compositions::debug( Composition cmp ) noexcept
 
     auto mainAttachment = cmp.getOutput();
 
-    auto commands = cmp.create< CommandBuffer >();
-    commands->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
-    commands->beginRenderPass( renderPass, nullptr );
-    recordAttachmentCommands( commands, mainAttachment );
-    cmp.eachAttachment(
-        [ & ]( auto att ) mutable {
-            if ( att != mainAttachment ) {
-                // Render additional attachments
-                recordAttachmentCommands( commands, att );
-            }
-        } );
-    commands->endRenderPass( renderPass );
-    commands->end();
+    auto commandBuffers = Array< CommandBuffer * >( Swapchain::getInstance()->getImages().size() ).fill(
+    	[ &, renderPass, mainAttachment ]( Size index ) {
+            auto commands = cmp.create< CommandBuffer >();
+            commands->setFrameIndex( index );
+            commands->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
+            commands->beginRenderPass( renderPass, nullptr );
+            recordAttachmentCommands( commands, mainAttachment );
+            cmp.eachAttachment(
+                [ & ]( auto att ) mutable {
+                    if ( att != mainAttachment ) {
+                        // Render additional attachments
+                        recordAttachmentCommands( commands, att );
+                    }
+                } );
+            commands->endRenderPass( renderPass );
+            commands->end();
+            return commands;
+        }
+    );
 
     renderPass->setCommandRecorder(
-        [ commands ] {
-            return commands;
+        [ commandBuffers ]( Size imageIndex ) {
+            return commandBuffers[ imageIndex ];
         } );
 
     cmp.setOutput( crimild::get_ptr( renderPass->attachments[ 0 ] ) );

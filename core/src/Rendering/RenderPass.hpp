@@ -35,6 +35,7 @@
 #include "Rendering/Image.hpp"
 #include "Rendering/ImageView.hpp"
 #include "Rendering/RenderResource.hpp"
+#include "Rendering/Swapchain.hpp"
 #include "Rendering/ViewportDimensions.hpp"
 
 namespace crimild {
@@ -95,9 +96,27 @@ namespace crimild {
 
         inline void setCommandRecorder( CommandRecorder commandRecorder ) noexcept { m_commandRecorder = commandRecorder; }
 
-        inline CommandBuffer *execute( void ) noexcept
+        template< typename BuilderFunction >
+        void createCommandRecorder( BuilderFunction builder ) noexcept
         {
-            return m_commandRecorder != nullptr ? m_commandRecorder() : nullptr;
+            // This is a helper function to create a basic command recorder
+            // for static rendering commands.
+            auto commandBuffers = Swapchain::getInstance()->getImages().map(
+                [ &, imageIndex = 0 ]( auto unused ) mutable {
+                    auto commandBuffer = builder();
+                    commandBuffer->setFrameIndex( imageIndex );
+                    return commandBuffer;
+                } );
+
+            setCommandRecorder(
+                [ commandBuffers ]( Size imageIndex ) {
+                    return commandBuffers[ imageIndex ];
+                } );
+        }
+
+        inline CommandBuffer *execute( Size imageIndex ) noexcept
+        {
+            return m_commandRecorder != nullptr ? m_commandRecorder( imageIndex ) : nullptr;
         }
 
     private:

@@ -51,7 +51,7 @@ crimild::Bool DescriptorPoolManager::bind( DescriptorPool *descriptorPool ) noex
         auto &binding = descriptorPool->layout->bindings[ i ];
         poolSizes[ i ] = {
             .type = utils::getVulkanDescriptorType( binding.descriptorType ),
-            .descriptorCount = static_cast< crimild::UInt32 >( swapchain->images.size() ),
+            .descriptorCount = static_cast< crimild::UInt32 >( swapchain->getImages().size() ),
         };
     }
 
@@ -59,7 +59,7 @@ crimild::Bool DescriptorPoolManager::bind( DescriptorPool *descriptorPool ) noex
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
         .poolSizeCount = static_cast< crimild::UInt32 >( poolSizes.size() ),
         .pPoolSizes = poolSizes.data(),
-        .maxSets = static_cast< crimild::UInt32 >( swapchain->images.size() ),
+        .maxSets = static_cast< crimild::UInt32 >( swapchain->getImages().size() ),
         .flags = 0,
     };
 

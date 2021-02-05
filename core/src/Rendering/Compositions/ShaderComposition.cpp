@@ -148,20 +148,18 @@ Composition crimild::compositions::shader( const std::string &source ) noexcept
             return descriptorSet;
         }() );
 
-    auto commandBuffer = cmp.create< CommandBuffer >();
-    commandBuffer->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
-    commandBuffer->beginRenderPass( renderPass, nullptr );
-    commandBuffer->bindGraphicsPipeline( renderPass->getGraphicsPipeline() );
-    commandBuffer->bindDescriptorSet( renderPass->getDescriptors() );
-    commandBuffer->draw( 6 );
-    commandBuffer->endRenderPass( renderPass );
-    commandBuffer->end();
-
-    renderPass->setCommandRecorder(
-        [ commandBuffer ]() {
+    renderPass->createCommandRecorder(
+        [ & ] {
+            auto commandBuffer = cmp.create< CommandBuffer >();
+            commandBuffer->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
+            commandBuffer->beginRenderPass( renderPass, nullptr );
+            commandBuffer->bindGraphicsPipeline( renderPass->getGraphicsPipeline() );
+            commandBuffer->bindDescriptorSet( renderPass->getDescriptors() );
+            commandBuffer->draw( 6 );
+            commandBuffer->endRenderPass( renderPass );
+            commandBuffer->end();
             return commandBuffer;
-        }
-    );
+        } );
 
     cmp.setOutput( crimild::get_ptr( renderPass->attachments[ 0 ] ) );
 
