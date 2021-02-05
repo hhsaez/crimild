@@ -43,9 +43,9 @@ namespace crimild {
 
         inline void setCommandRecorder( CommandRecorder commandRecorder ) noexcept { m_commandRecorder = commandRecorder; }
 
-        inline CommandBuffer *execute( void ) noexcept
+        inline CommandBuffer *execute( Size imageIndex ) noexcept
         {
-            return m_commandRecorder != nullptr ? m_commandRecorder() : nullptr;
+            return m_commandRecorder != nullptr ? m_commandRecorder( imageIndex ) : nullptr;
         }
 
     private:

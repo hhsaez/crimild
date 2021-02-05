@@ -91,7 +91,7 @@ namespace crimild {
 
         public:
             using CommandBufferManager::bind;
-            using CommandBufferManager::getHandler;
+            using CommandBufferManager::getBindInfo;
             using CommandPoolManager::create;
             using ComputePipelineManager::bind;
             using ComputePipelineManager::getBindInfo;

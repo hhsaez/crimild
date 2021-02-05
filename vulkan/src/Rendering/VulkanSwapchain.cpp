@@ -26,34 +26,34 @@
  */
 
 #include "VulkanSwapchain.hpp"
+
+#include "Simulation/Simulation.hpp"
+#include "VulkanImage.hpp"
 #include "VulkanPhysicalDevice.hpp"
 #include "VulkanRenderDevice.hpp"
-#include "VulkanSurface.hpp"
-#include "VulkanImage.hpp"
 #include "VulkanSemaphore.hpp"
-#include "Simulation/Simulation.hpp"
+#include "VulkanSurface.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;
 
-Swapchain::~Swapchain( void ) noexcept
+vulkan::Swapchain::~Swapchain( void ) noexcept
 {
     if ( manager != nullptr ) {
         manager->destroy( this );
     }
 }
 
-Swapchain::AcquireImageResult Swapchain::acquireNextImage( const Semaphore *imageAvailableSemaphore ) const noexcept
+vulkan::Swapchain::AcquireImageResult vulkan::Swapchain::acquireNextImage( const Semaphore *imageAvailableSemaphore ) const noexcept
 {
     crimild::UInt32 imageIndex;
-	auto ret = vkAcquireNextImageKHR(
-		renderDevice->handler,
-		handler,
-		std::numeric_limits< uint64_t >::max(), // disable timeout
-		imageAvailableSemaphore->handler,
-		VK_NULL_HANDLE,
-		&imageIndex
-	);
+    auto ret = vkAcquireNextImageKHR(
+        renderDevice->handler,
+        handler,
+        std::numeric_limits< uint64_t >::max(), // disable timeout
+        imageAvailableSemaphore->handler,
+        VK_NULL_HANDLE,
+        &imageIndex );
 
     return AcquireImageResult {
         .success = ( ret == VK_SUCCESS ),
@@ -62,30 +62,29 @@ Swapchain::AcquireImageResult Swapchain::acquireNextImage( const Semaphore *imag
     };
 }
 
-Swapchain::PresentImageResult Swapchain::presentImage( crimild::UInt32 imageIndex, const Semaphore *signal ) const noexcept
+vulkan::Swapchain::PresentImageResult vulkan::Swapchain::presentImage( crimild::UInt32 imageIndex, const Semaphore *signal ) const noexcept
 {
-	VkSemaphore signalSemaphores[] = {
-		signal->handler,
-	};
+    VkSemaphore signalSemaphores[] = {
+        signal->handler,
+    };
 
-	VkSwapchainKHR swapchains[] = {
-		handler,
-	};
-	
-	auto presentInfo = VkPresentInfoKHR {
-		.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
-		.waitSemaphoreCount = 1,
-		.pWaitSemaphores = signalSemaphores,
-		.swapchainCount = 1,
-		.pSwapchains = swapchains,
-		.pImageIndices = &imageIndex,
-		.pResults = nullptr,
-	};
+    VkSwapchainKHR swapchains[] = {
+        handler,
+    };
 
-	auto ret = vkQueuePresentKHR(
-		renderDevice->presentQueue,
-		&presentInfo
-	);
+    auto presentInfo = VkPresentInfoKHR {
+        .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+        .waitSemaphoreCount = 1,
+        .pWaitSemaphores = signalSemaphores,
+        .swapchainCount = 1,
+        .pSwapchains = swapchains,
+        .pImageIndices = &imageIndex,
+        .pResults = nullptr,
+    };
+
+    auto ret = vkQueuePresentKHR(
+        renderDevice->presentQueue,
+        &presentInfo );
 
     return PresentImageResult {
         .success = ( ret == VK_SUCCESS ),
@@ -93,57 +92,53 @@ Swapchain::PresentImageResult Swapchain::presentImage( crimild::UInt32 imageInde
     };
 }
 
-void Swapchain::retrieveSwapchainImages( void ) noexcept
+void vulkan::Swapchain::retrieveSwapchainImages( void ) noexcept
 {
-	CRIMILD_LOG_TRACE( "Retrieving swapchain images" );
+    CRIMILD_LOG_TRACE( "Retrieving swapchain images" );
 
-    images.clear();
-	
-	crimild::UInt32 imageCount;
-	vkGetSwapchainImagesKHR(
-		renderDevice->handler,
-		handler,
-		&imageCount,
-		nullptr
-	);
-	std::vector< VkImage > imagesHandlers( imageCount );
-	vkGetSwapchainImagesKHR(
-		renderDevice->handler,
-		handler,
-		&imageCount,
-		imagesHandlers.data()
-	);
+    getImages().clear();
 
-	for ( const auto &imageHandler : imagesHandlers ) {
+    crimild::UInt32 imageCount;
+    vkGetSwapchainImagesKHR(
+        renderDevice->handler,
+        handler,
+        &imageCount,
+        nullptr );
+    std::vector< VkImage > imagesHandlers( imageCount );
+    vkGetSwapchainImagesKHR(
+        renderDevice->handler,
+        handler,
+        &imageCount,
+        imagesHandlers.data() );
+
+    for ( const auto &imageHandler : imagesHandlers ) {
         auto image = crimild::alloc< Image >();
         image->format = utils::getFormat( format );
         image->extent.scalingMode = ScalingMode::SWAPCHAIN_RELATIVE;
         if ( auto img = crimild::get_ptr( image ) ) {
             renderDevice->setBindInfo( img, { .imageHandler = imageHandler } );
         }
-        images.add( image );
-	}
+        getImages().add( image );
+    }
 }
 
-void Swapchain::createImageViews( void ) noexcept
+void vulkan::Swapchain::createImageViews( void ) noexcept
 {
-	CRIMILD_LOG_TRACE( "Creating image views" );
+    CRIMILD_LOG_TRACE( "Creating image views" );
 
-    imageViews.clear();
-
-    images.each(
-        [&]( auto &image ) {
+    getImageViews().clear();
+    getImages().each(
+        [ & ]( auto &image ) {
             auto imageView = crimild::alloc< ImageView >();
             imageView->type = ImageView::Type::IMAGE_VIEW_SWAPCHAIN;
             imageView->image = image;
             imageView->format = image->format;
             renderDevice->bind( crimild::get_ptr( imageView ) );
-            imageViews.add( imageView );
-        }
-    );
+            getImageViews().add( imageView );
+        } );
 }
 
-SharedPointer< Swapchain > SwapchainManager::create( Swapchain::Descriptor const &descriptor ) noexcept
+SharedPointer< vulkan::Swapchain > SwapchainManager::create( Swapchain::Descriptor const &descriptor ) noexcept
 {
     CRIMILD_LOG_TRACE( "Creating Vulkan swapchain" );
 
@@ -167,8 +162,7 @@ SharedPointer< Swapchain > SwapchainManager::create( Swapchain::Descriptor const
     if ( swapchainSupport.capabilities.maxImageCount > 0 ) {
         imageCount = std::min(
             swapchainSupport.capabilities.maxImageCount,
-            imageCount
-        );
+            imageCount );
     }
 
     auto createInfo = VkSwapchainCreateInfoKHR {
@@ -199,8 +193,7 @@ SharedPointer< Swapchain > SwapchainManager::create( Swapchain::Descriptor const
         createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
         createInfo.queueFamilyIndexCount = 2;
         createInfo.pQueueFamilyIndices = queueFamilyIndices;
-    }
-    else {
+    } else {
         // If they are the same, the queue can have exclusive access to images
         createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
         createInfo.queueFamilyIndexCount = 0;
@@ -223,13 +216,11 @@ SharedPointer< Swapchain > SwapchainManager::create( Swapchain::Descriptor const
 
     VkSwapchainKHR swapchainHandler;
     CRIMILD_VULKAN_CHECK(
-     	vkCreateSwapchainKHR(
+        vkCreateSwapchainKHR(
             renderDevice->handler,
             &createInfo,
             nullptr,
-            &swapchainHandler
-     	)
-	);
+            &swapchainHandler ) );
 
     auto swapchain = crimild::alloc< Swapchain >();
     swapchain->handler = swapchainHandler;
@@ -247,8 +238,8 @@ void SwapchainManager::destroy( Swapchain *swapchain ) noexcept
 {
     CRIMILD_LOG_TRACE( "Destroying swapchain" );
 
-    swapchain->imageViews.clear();
-    swapchain->images.clear();
+    swapchain->getImageViews().clear();
+    swapchain->getImages().clear();
 
     if ( swapchain->handler != VK_NULL_HANDLE ) {
         vkDestroySwapchainKHR( swapchain->renderDevice->handler, swapchain->handler, nullptr );
@@ -295,8 +286,7 @@ VkPresentModeKHR SwapchainManager::choosePresentationMode( const std::vector< Vk
         if ( availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR ) {
             // Triple buffer
             return availablePresentMode;
-        }
-        else if ( availablePresentMode == VK_PRESENT_MODE_IMMEDIATE_KHR ) {
+        } else if ( availablePresentMode == VK_PRESENT_MODE_IMMEDIATE_KHR ) {
             // Double buffer. May produce tearing
             bestMode = availablePresentMode;
         }
@@ -317,13 +307,10 @@ VkExtent2D SwapchainManager::chooseExtent( const VkSurfaceCapabilitiesKHR &capab
     // Keep width/heigth values within the allowed ones, though.
     requestedExtent.width = std::max(
         capabilities.minImageExtent.width,
-        std::min( capabilities.maxImageExtent.width, requestedExtent.width )
-    );
+        std::min( capabilities.maxImageExtent.width, requestedExtent.width ) );
     requestedExtent.height = std::max(
         capabilities.minImageExtent.height,
-        std::min( capabilities.maxImageExtent.height, requestedExtent.height )
-    );
+        std::min( capabilities.maxImageExtent.height, requestedExtent.height ) );
 
     return requestedExtent;
 }
-

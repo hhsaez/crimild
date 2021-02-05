@@ -44,8 +44,12 @@ namespace crimild {
 
     namespace vulkan {
 
-        class CommandBufferManager : public MultiHandlerRenderResourceManagerImpl< CommandBuffer, VkCommandBuffer > {
-            using ManagerImpl = MultiHandlerRenderResourceManagerImpl< CommandBuffer, VkCommandBuffer >;
+        struct CommandBufferBindInfo {
+            VkCommandBuffer handler;
+        };
+
+        class CommandBufferManager : public BasicRenderResourceManagerImpl< CommandBuffer, CommandBufferBindInfo > {
+            using ManagerImpl = BasicRenderResourceManagerImpl< CommandBuffer, CommandBufferBindInfo >;
 
         public:
             virtual ~CommandBufferManager( void ) noexcept = default;
@@ -53,10 +57,10 @@ namespace crimild {
             crimild::Bool bind( CommandBuffer *commandBuffer ) noexcept override;
             crimild::Bool unbind( CommandBuffer *commandBuffer ) noexcept override;
 
-            void updateCommandBuffer( CommandBuffer *commandBuffer, crimild::Size index ) noexcept;
+            void updateCommandBuffer( CommandBuffer *commandBuffer ) noexcept;
 
         private:
-            void recordCommands( RenderDevice *renderDevice, CommandBuffer *parent, CommandBuffer *commandBuffer, crimild::Size index ) noexcept;
+            void recordCommands( RenderDevice *renderDevice, CommandBuffer *parent, CommandBuffer *commandBuffer ) noexcept;
 
         private:
             GraphicsPipeline *m_currentGraphicsPipeline = nullptr;

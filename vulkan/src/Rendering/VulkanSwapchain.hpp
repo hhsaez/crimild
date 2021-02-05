@@ -28,23 +28,24 @@
 #ifndef CRIMILD_VULKAN_RENDERING_SWAPCHAIN_
 #define CRIMILD_VULKAN_RENDERING_SWAPCHAIN_
 
+#include "Foundation/Containers/Array.hpp"
 #include "Foundation/VulkanObject.hpp"
 #include "Mathematics/Vector.hpp"
-#include "Foundation/Containers/Array.hpp"
+#include "Rendering/Swapchain.hpp"
 
 namespace crimild {
 
     class Image;
     class ImageView;
 
-	namespace vulkan {
+    namespace vulkan {
 
-		class RenderDevice;
-		class VulkanSurface;
-		class Semaphore;
+        class RenderDevice;
+        class VulkanSurface;
+        class Semaphore;
         class SwapchainManager;
 
-		class Swapchain : public VulkanObject {
+        class Swapchain : public crimild::Swapchain {
             CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::Swapchain )
 
         public:
@@ -53,43 +54,37 @@ namespace crimild {
                 crimild::Vector2ui extent;
             };
 
-		private:
-			using ImageArray = Array< SharedPointer< Image >>;
-			using ImageViewArray = Array< SharedPointer< ImageView >>;
-			
-		public:
-			~Swapchain( void ) noexcept;
+        public:
+            ~Swapchain( void ) noexcept;
 
             RenderDevice *renderDevice = nullptr;
             VulkanSurface *surface = nullptr;
             VkSwapchainKHR handler = VK_NULL_HANDLE;
             VkFormat format;
             VkExtent2D extent;
-            crimild::UInt32 maxFramesInFlight = 2;
             SwapchainManager *manager = nullptr;
-            ImageArray images;
-            ImageViewArray imageViews;
 
             struct AcquireImageResult {
                 crimild::UInt32 imageIndex;
                 crimild::Bool success;
                 crimild::Bool outOfDate;
             };
-			AcquireImageResult acquireNextImage( const Semaphore *imageAvailableSemaphore ) const noexcept;
+            AcquireImageResult acquireNextImage( const Semaphore *imageAvailableSemaphore ) const noexcept;
 
             struct PresentImageResult {
                 crimild::Bool success;
                 crimild::Bool outOfDate;
             };
-			PresentImageResult presentImage( crimild::UInt32 imageIndex, const Semaphore *signal ) const noexcept;
+            PresentImageResult presentImage( crimild::UInt32 imageIndex, const Semaphore *signal ) const noexcept;
 
             void retrieveSwapchainImages( void ) noexcept;
             void createImageViews( void ) noexcept;
-		};
+        };
 
         class SwapchainManager : public VulkanObjectManager< Swapchain > {
         public:
-            explicit SwapchainManager( RenderDevice *renderDevice ) noexcept : m_renderDevice( renderDevice ) { }
+            explicit SwapchainManager( RenderDevice *renderDevice ) noexcept
+                : m_renderDevice( renderDevice ) { }
             virtual ~SwapchainManager( void ) = default;
 
             Swapchain *getSwapchain( void ) noexcept { return VulkanObjectManager< Swapchain >::first(); }
@@ -107,9 +102,8 @@ namespace crimild {
             RenderDevice *m_renderDevice = nullptr;
         };
 
-	}
+    }
 
 }
-	
+
 #endif
-	

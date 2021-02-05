@@ -43,40 +43,35 @@ using namespace crimild::vulkan;
 
 crimild::Bool CommandBufferManager::bind( CommandBuffer *commandBuffer ) noexcept
 {
-    auto renderDevice = getRenderDevice();
-    if ( renderDevice == nullptr ) {
-        return false;
-    }
-
-    auto commandPool = renderDevice->getCommandPool();
-    auto swapchain = renderDevice->getSwapchain();
-    auto imageCount = swapchain->images.size();
-
     if ( validate( commandBuffer ) ) {
         return true;
     }
 
     CRIMILD_LOG_TRACE( "Binding Vulkan Command Buffer" );
 
+    auto renderDevice = getRenderDevice();
+    if ( renderDevice == nullptr ) {
+        return false;
+    }
+
+    auto commandPool = renderDevice->getCommandPool();
+
     auto allocInfo = VkCommandBufferAllocateInfo {
         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
         .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
         .commandPool = commandPool->handler,
-        .commandBufferCount = static_cast< crimild::UInt32 >( imageCount ),
+        .commandBufferCount = 1,
     };
 
-    Array< VkCommandBuffer > handlers( imageCount );
+    VkCommandBuffer handler;
     CRIMILD_VULKAN_CHECK(
         vkAllocateCommandBuffers(
             renderDevice->handler,
             &allocInfo,
-            &handlers[ 0 ] ) );
+            &handler ) );
 
-    setHandlers( commandBuffer, handlers );
-
-    for ( auto i = 0l; i < imageCount; i++ ) {
-        recordCommands( renderDevice, nullptr, commandBuffer, i );
-    }
+    setBindInfo( commandBuffer, CommandBufferBindInfo { .handler = handler } );
+    recordCommands( renderDevice, nullptr, commandBuffer );
 
     return ManagerImpl::bind( commandBuffer );
 }
@@ -103,21 +98,22 @@ crimild::Bool CommandBufferManager::unbind( CommandBuffer *commandBuffer ) noexc
 
     renderDevice->waitIdle();
 
-    eachHandler( commandBuffer, [ renderDevice, commandPool ]( VkCommandBuffer handler ) {
-        vkFreeCommandBuffers(
-            renderDevice->handler,
-            commandPool->handler,
-            1,
-            &handler );
-    } );
-    removeHandlers( commandBuffer );
+    auto bindInfo = getBindInfo( commandBuffer );
+    auto handler = bindInfo.handler;
+    vkFreeCommandBuffers(
+        renderDevice->handler,
+        commandPool->handler,
+        1,
+        &handler );
+
+    removeBindInfo( commandBuffer );
 
     return ManagerImpl::unbind( commandBuffer );
 }
 
-void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBuffer *parent, CommandBuffer *commandBuffer, crimild::Size index ) noexcept
+void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBuffer *parent, CommandBuffer *commandBuffer ) noexcept
 {
-    auto handler = renderDevice->getHandler( parent != nullptr ? parent : commandBuffer, index );
+    auto handler = getBindInfo( commandBuffer ).handler;
     if ( handler == VK_NULL_HANDLE ) {
         CRIMILD_LOG_ERROR( "Invalid command buffer" );
         return;
@@ -155,7 +151,7 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                     // Bind renderpass first
                     auto bindInfo = renderDevice->getBindInfo( crimild::get_ptr( m_currentRenderPass ) );
                     auto renderPass = bindInfo.handler;
-                    auto framebuffer = bindInfo.framebuffers[ index ];
+                    auto framebuffer = bindInfo.framebuffers[ commandBuffer->getFrameIndex() ];
 
                     auto clearColor = m_currentRenderPass->clearValue.color;
                     auto clearDepth = m_currentRenderPass->clearValue.depthStencil;
@@ -253,7 +249,7 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
 
                 case CommandBuffer::Command::Type::BIND_COMMAND_BUFFER: {
                     if ( auto child = cmd.commandBuffer ) {
-                        recordCommands( renderDevice, parent != nullptr ? parent : commandBuffer, child, index );
+                        recordCommands( renderDevice, parent != nullptr ? parent : commandBuffer, child );
                     }
                     break;
                 }
@@ -401,20 +397,15 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
         } );
 }
 
-void CommandBufferManager::updateCommandBuffer( CommandBuffer *commandBuffer, crimild::Size index ) noexcept
+void CommandBufferManager::updateCommandBuffer( CommandBuffer *commandBuffer ) noexcept
 {
     if ( !commandBuffer->cleared() ) {
         return;
     }
 
     auto renderDevice = getRenderDevice();
-    auto commandPool = renderDevice->getCommandPool();
-    auto swapchain = renderDevice->getSwapchain();
-    auto imageCount = swapchain->images.size();
 
-    for ( auto i = 0l; i < imageCount; i++ ) {
-        recordCommands( renderDevice, nullptr, commandBuffer, i );
-    }
+    recordCommands( renderDevice, nullptr, commandBuffer );
 
     commandBuffer->resetCleared();
 }

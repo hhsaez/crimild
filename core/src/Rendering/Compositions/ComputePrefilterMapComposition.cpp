@@ -461,28 +461,26 @@ vec4 textureCubeUV( sampler2D envMap, vec3 direction, vec4 viewport, int mipLeve
         .height = 512.0f,
     };
 
-    auto commandBuffer = cmp.create< CommandBuffer >();
-    commandBuffer->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
-    commandBuffer->beginRenderPass( renderPass, nullptr );
-    for ( auto offset = 0l; offset < 5; ++offset ) {
-        recordProbeCommands(
-            cmp,
-            crimild::get_ptr( commandBuffer ),
-            pipeline,
-            viewportLayout,
-            offset,
-            Real32( offset ) / 4.0,
-            geometry->anyPrimitive(),
-            environmentDescriptors );
-    }
-    commandBuffer->endRenderPass( renderPass );
-    commandBuffer->end();
-
-    renderPass->setCommandRecorder(
-        [ commandBuffer ]() {
+    renderPass->createCommandRecorder(
+        [ & ] {
+            auto commandBuffer = cmp.create< CommandBuffer >();
+            commandBuffer->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
+            commandBuffer->beginRenderPass( renderPass, nullptr );
+            for ( auto offset = 0l; offset < 5; ++offset ) {
+                recordProbeCommands(
+                    cmp,
+                    crimild::get_ptr( commandBuffer ),
+                    pipeline,
+                    viewportLayout,
+                    offset,
+                    Real32( offset ) / 4.0,
+                    geometry->anyPrimitive(),
+                    environmentDescriptors );
+            }
+            commandBuffer->endRenderPass( renderPass );
+            commandBuffer->end();
             return commandBuffer;
-        }
-    );
+        } );
 
     renderPass->setConditional( true );
 

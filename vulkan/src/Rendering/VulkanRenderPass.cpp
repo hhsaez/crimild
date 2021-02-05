@@ -44,7 +44,7 @@ crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
 
     auto renderDevice = getRenderDevice();
     auto swapchain = renderDevice->getSwapchain();
-    auto imageCount = swapchain->images.size();
+    auto imageCount = swapchain->getImages().size();
     auto extent = utils::getExtent( renderPass->extent, renderDevice );
 
     auto createAttachmentImage = [ & ]( Attachment *attachment ) {
@@ -181,7 +181,7 @@ crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
             if ( auto iv = crimild::get_ptr( att->imageView ) ) {
                 return renderDevice->getBindInfo( iv );
             }
-            return renderDevice->getBindInfo( crimild::get_ptr( swapchain->imageViews[ i ] ) );
+            return renderDevice->getBindInfo( crimild::get_ptr( swapchain->getImageViews()[ i ] ) );
         } );
 
         auto createInfo = VkFramebufferCreateInfo {

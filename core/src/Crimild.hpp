@@ -258,6 +258,7 @@
 #include "Rendering/ShaderUniformImpl.hpp"
 #include "Rendering/ShadowMap.hpp"
 #include "Rendering/SkinnedMesh.hpp"
+#include "Rendering/Swapchain.hpp"
 #include "Rendering/Texture.hpp"
 #include "Rendering/UniformBuffer.hpp"
 #include "Rendering/Uniforms/CallbackUniformBuffer.hpp"
