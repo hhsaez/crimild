@@ -38,6 +38,7 @@
 #include "Rendering/RenderPass.hpp"
 #include "Rendering/Sampler.hpp"
 #include "Rendering/ShaderProgram.hpp"
+#include "Rendering/Swapchain.hpp"
 #include "Rendering/Texture.hpp"
 #include "Rendering/Uniforms/CallbackUniformBuffer.hpp"
 #include "SceneGraph/Geometry.hpp"
@@ -370,26 +371,30 @@ vec4 textureCubeUV( sampler2D envMap, vec3 direction, vec4 viewport )
         .height = 256.0f,
     };
 
-    auto commandBuffer = cmp.create< CommandBuffer >();
-    commandBuffer->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
-    commandBuffer->beginRenderPass( renderPass, nullptr );
-    auto offset = 0l;
-    offset = recordProbeCommands(
-        cmp,
-        crimild::get_ptr( commandBuffer ),
-        pipeline,
-        viewportLayout,
-        offset,
-        geometry->anyPrimitive(),
-        environmentDescriptors );
-    commandBuffer->endRenderPass( renderPass );
-    commandBuffer->end();
+    auto commandBuffers = Swapchain::getInstance()->getImages().map(
+        [ &, renderPass, pipeline, viewportLayout, geometry, environmentDescriptors, imageIndex = 0 ]( auto ) mutable {
+            auto commandBuffer = cmp.create< CommandBuffer >();
+            commandBuffer->setFrameIndex( imageIndex++ );
+            commandBuffer->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
+            commandBuffer->beginRenderPass( renderPass, nullptr );
+            auto offset = 0l;
+            offset = recordProbeCommands(
+                cmp,
+                crimild::get_ptr( commandBuffer ),
+                pipeline,
+                viewportLayout,
+                offset,
+                geometry->anyPrimitive(),
+                environmentDescriptors );
+            commandBuffer->endRenderPass( renderPass );
+            commandBuffer->end();
+            return commandBuffer;
+        } );
 
     renderPass->setCommandRecorder(
-        [ commandBuffer ]() {
-            return commandBuffer;
-        }
-    );
+        [ commandBuffers ]( Size imageIndex ) {
+            return commandBuffers[ imageIndex ];
+        } );
 
     renderPass->setConditional( true );
 

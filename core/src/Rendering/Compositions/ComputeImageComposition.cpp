@@ -130,7 +130,7 @@ Composition crimild::compositions::computeImage( ComputeImageProps props ) noexc
         .y = UInt32( extent.height / DispatchWorkgroup::DEFAULT_WORGROUP_SIZE ),
         .z = 1 } );
     commands->end();
-    computePass->setCommandRecorder( [ commands ] { return commands; } );
+    computePass->setCommandRecorder( [ commands ]( Size ) { return commands; } );
     computePass->setConditional( props.isConditional );
 
     cmp.setOutput( nullptr );

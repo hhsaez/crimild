@@ -139,7 +139,7 @@ void FrameGraph::verifyAllConnections( void ) noexcept
             // A render pass depends on its command buffers, so add
             // an edge going from the command buffer to the render pass
             // TODO: this is not right, it might trigger a command recording
-            if ( auto commands = renderPass->execute() ) {
+            if ( auto commands = renderPass->execute( 0 ) ) {
                 connect(
                     commands,
                     renderPass );
@@ -170,7 +170,7 @@ void FrameGraph::verifyAllConnections( void ) noexcept
             // A compute pass depends on its command buffers, so add
             // an edge going from the command buffer to the compute pass
             // TODO: this is not right, it might trigger a command recording
-            if ( auto commands = computePass->execute() ) {
+            if ( auto commands = computePass->execute( 0 ) ) {
                 connect(
                     commands,
                     computePass );
@@ -350,7 +350,7 @@ crimild::Bool FrameGraph::isPresentation( SharedPointer< Attachment > const &att
     return master->colorAttachment == attachment;
 }
 
-FrameGraph::CommandBufferArray FrameGraph::recordGraphicsCommands( Bool includeConditionalPasses ) noexcept
+FrameGraph::CommandBufferArray FrameGraph::recordGraphicsCommands( Size imageIndex, Bool includeConditionalPasses ) noexcept
 {
     compile();
 
@@ -363,11 +363,11 @@ FrameGraph::CommandBufferArray FrameGraph::recordGraphicsCommands( Bool includeC
         .map(
             [ & ]( auto node ) {
                 auto renderPass = getNodeObject< RenderPass >( node );
-                return renderPass->execute();
+                return renderPass->execute( imageIndex );
             } );
 }
 
-FrameGraph::CommandBufferArray FrameGraph::recordComputeCommands( Bool includeConditionalPasses ) noexcept
+FrameGraph::CommandBufferArray FrameGraph::recordComputeCommands( Size imageIndex, Bool includeConditionalPasses ) noexcept
 {
     compile();
 
@@ -380,7 +380,7 @@ FrameGraph::CommandBufferArray FrameGraph::recordComputeCommands( Bool includeCo
         .map(
             [ & ]( auto node ) {
                 auto computePass = getNodeObject< ComputePass >( node );
-                return computePass->execute();
+                return computePass->execute( imageIndex );
             } );
 }
 

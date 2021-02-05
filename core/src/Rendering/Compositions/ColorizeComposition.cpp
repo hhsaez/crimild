@@ -34,6 +34,7 @@
 #include "Rendering/RenderPass.hpp"
 #include "Rendering/Sampler.hpp"
 #include "Rendering/ShaderProgram.hpp"
+#include "Rendering/Swapchain.hpp"
 #include "Rendering/Texture.hpp"
 #include "Rendering/UniformBuffer.hpp"
 #include "Simulation/AssetManager.hpp"
@@ -89,18 +90,23 @@ Composition crimild::compositions::colorize( Composition cmp, const RGBAColorf &
             return pipeline;
         }() );
 
-    auto commandBuffer = cmp.create< CommandBuffer >();
-    commandBuffer->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
-    commandBuffer->beginRenderPass( renderPass, nullptr );
-    commandBuffer->bindGraphicsPipeline( renderPass->getGraphicsPipeline() );
-    commandBuffer->bindDescriptorSet( renderPass->getDescriptors() );
-    commandBuffer->draw( 6 );
-    commandBuffer->endRenderPass( renderPass );
-    commandBuffer->end();
+    auto commandBuffers = Swapchain::getInstance()->getImages().map(
+        [ &cmp, renderPass, imageIndex = 0 ]( auto ) mutable {
+            auto commandBuffer = cmp.create< CommandBuffer >();
+            commandBuffer->setFrameIndex( imageIndex++ );
+            commandBuffer->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
+            commandBuffer->beginRenderPass( renderPass, nullptr );
+            commandBuffer->bindGraphicsPipeline( renderPass->getGraphicsPipeline() );
+            commandBuffer->bindDescriptorSet( renderPass->getDescriptors() );
+            commandBuffer->draw( 6 );
+            commandBuffer->endRenderPass( renderPass );
+            commandBuffer->end();
+            return commandBuffer;
+        } );
 
     renderPass->setCommandRecorder(
-        [ commandBuffer ]() {
-            return commandBuffer;
+        [ commandBuffers ]( Size imageIndex ) {
+            return commandBuffers[ imageIndex ];
         } );
 
     cmp.setOutput( crimild::get_ptr( renderPass->attachments[ 0 ] ) );

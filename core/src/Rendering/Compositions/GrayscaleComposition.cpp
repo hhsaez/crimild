@@ -85,17 +85,16 @@ Composition crimild::compositions::grayscale( Composition cmp ) noexcept
             return pipeline;
         }() );
 
-    auto commandBuffer = cmp.create< CommandBuffer >();
-    commandBuffer->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
-    commandBuffer->beginRenderPass( renderPass, nullptr );
-    commandBuffer->bindGraphicsPipeline( renderPass->getGraphicsPipeline() );
-    commandBuffer->bindDescriptorSet( renderPass->getDescriptors() );
-    commandBuffer->draw( 6 );
-    commandBuffer->endRenderPass( renderPass );
-    commandBuffer->end();
-
-    renderPass->setCommandRecorder(
-        [ commandBuffer ]() {
+    renderPass->createCommandRecorder(
+        [ & ] {
+            auto commandBuffer = cmp.create< CommandBuffer >();
+            commandBuffer->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
+            commandBuffer->beginRenderPass( renderPass, nullptr );
+            commandBuffer->bindGraphicsPipeline( renderPass->getGraphicsPipeline() );
+            commandBuffer->bindDescriptorSet( renderPass->getDescriptors() );
+            commandBuffer->draw( 6 );
+            commandBuffer->endRenderPass( renderPass );
+            commandBuffer->end();
             return commandBuffer;
         } );
 
