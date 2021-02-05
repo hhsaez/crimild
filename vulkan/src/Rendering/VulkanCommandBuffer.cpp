@@ -33,7 +33,6 @@
 #include "Rendering/RenderPass.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "VulkanCommandPool.hpp"
-#include "VulkanFramebuffer.hpp"
 #include "VulkanGraphicsPipeline.hpp"
 #include "VulkanRenderDevice.hpp"
 #include "VulkanRenderPass.hpp"

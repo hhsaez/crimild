@@ -36,7 +36,6 @@
 #include "Rendering/VulkanDescriptorSet.hpp"
 #include "Rendering/VulkanDescriptorSetLayout.hpp"
 #include "Rendering/VulkanFence.hpp"
-#include "Rendering/VulkanFramebuffer.hpp"
 #include "Rendering/VulkanGraphicsPipeline.hpp"
 #include "Rendering/VulkanImage.hpp"
 #include "Rendering/VulkanImageView.hpp"
@@ -72,7 +71,6 @@ namespace crimild {
               public DescriptorSetLayoutManager,
               public SwapchainManager,
               public FenceManager,
-              public FramebufferManager,
               public ImageManager,
               public ImageViewManager,
               public IndexBufferManager,
@@ -101,8 +99,6 @@ namespace crimild {
             using DescriptorSetManager::bind;
             using DescriptorSetManager::getHandler;
             using FenceManager::create;
-            using FramebufferManager::bind;
-            using FramebufferManager::getHandler;
             using GraphicsPipelineManager::bind;
             using GraphicsPipelineManager::getBindInfo;
             using ImageManager::bind;
