@@ -28,11 +28,11 @@
 #ifndef CRIMILD_VULKAN_RENDERING_RENDER_RESOURCE_
 #define CRIMILD_VULKAN_RENDERING_RENDER_RESOURCE_
 
-#include "Foundation/VulkanUtils.hpp"
-#include "Rendering/RenderResource.hpp"
 #include "Foundation/Containers/Array.hpp"
 #include "Foundation/Containers/Map.hpp"
+#include "Foundation/VulkanUtils.hpp"
 #include "Mathematics/Numeric.hpp"
+#include "Rendering/RenderResource.hpp"
 
 namespace crimild {
 
@@ -43,7 +43,9 @@ namespace crimild {
         template< typename T >
         class VulkanRenderResourceManager : public RenderResourceManager< T > {
         protected:
-            VulkanRenderResourceManager( RenderDevice *renderDevice = nullptr ) noexcept : m_renderDevice( renderDevice ) { }
+            VulkanRenderResourceManager( RenderDevice *renderDevice = nullptr ) noexcept
+                : m_renderDevice( renderDevice ) { }
+
         public:
             virtual ~VulkanRenderResourceManager( void ) noexcept = default;
 
@@ -55,13 +57,12 @@ namespace crimild {
         };
 
         template<
-        	typename RESOURCE_TYPE,
-        	typename HANDLER_TYPE
-        >
+            typename RESOURCE_TYPE,
+            typename HANDLER_TYPE >
         class VulkanRenderResourceManagerImpl : public RenderResourceManager< RESOURCE_TYPE > {
         protected:
             VulkanRenderResourceManagerImpl( RenderDevice *renderDevice = nullptr ) noexcept
-            	: m_renderDevice( renderDevice )
+                : m_renderDevice( renderDevice )
             {
                 if ( m_renderDevice == nullptr ) {
                     // If render device is null, assume that we're the render device
@@ -92,7 +93,7 @@ namespace crimild {
             BindInfoType getBindInfo( ResourceType *resource ) noexcept
             {
                 if ( !validate( resource ) && !this->bind( resource ) ) {
-                    return BindInfoType { };
+                    return BindInfoType {};
                 }
                 return m_infos[ resource ];
             }
@@ -120,8 +121,6 @@ namespace crimild {
         private:
             Map< ResourceType *, BindInfoType > m_infos;
         };
-
-
 
         template< typename ResourceType, typename HandlerType >
         class SingleHandlerRenderResourceManagerImpl : public VulkanRenderResourceManagerImpl< ResourceType, HandlerType > {
@@ -159,61 +158,8 @@ namespace crimild {
             Map< ResourceType *, HandlerType > m_handlers;
         };
 
-        template< typename ResourceType, typename HandlerType >
-        class MultiHandlerRenderResourceManagerImpl : public VulkanRenderResourceManagerImpl< ResourceType, HandlerType > {
-            using HandlerArray = Array< HandlerType >;
-
-        public:
-            virtual ~MultiHandlerRenderResourceManagerImpl( void ) noexcept = default;
-
-            crimild::Bool validate( ResourceType *resource ) const noexcept
-            {
-                return m_handlers.contains( resource ) && m_handlers[ resource ].size() > 0;
-            }
-
-            HandlerType getHandler( ResourceType *resource, crimild::Size index ) noexcept
-            {
-                if ( !validate( resource ) && !this->bind( resource ) ) {
-                    return VK_NULL_HANDLE;
-                }
-                // Handlers always have at least one element at this point
-                // (otherwise, validate() fails) and then there'll be no overflow
-                // when doing size() - 1
-                auto &handlers = m_handlers[ resource ];
-                if ( index >= handlers.size() ) {
-                    index = handlers.size() - 1;
-                }
-                return m_handlers[ resource ][ index ];
-            }
-
-        protected:
-            void setHandlers( ResourceType *resource, const HandlerArray &handlers ) noexcept
-            {
-                m_handlers[ resource ] = handlers;
-            }
-
-            template< typename Fn >
-            void eachHandler( ResourceType *resource, Fn const &fn )
-            {
-                m_handlers[ resource ].each( fn );
-            }
-
-            void removeHandlers( ResourceType *resource ) noexcept
-            {
-                if ( !validate( resource ) ) {
-                    return;
-                }
-                m_handlers[ resource ].clear();
-                m_handlers.remove( resource );
-            }
-
-        private:
-            Map< ResourceType *, HandlerArray > m_handlers;
-        };
-
     }
 
 }
 
 #endif
-

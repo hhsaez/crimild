@@ -39,7 +39,6 @@
 #include "Rendering/Programs/SkyboxShaderProgram.hpp"
 #include "Rendering/Programs/UnlitShaderProgram.hpp"
 #include "Rendering/ShaderProgram.hpp"
-#include "Rendering/VulkanBuffer.hpp"
 #include "Rendering/VulkanCommandBuffer.hpp"
 #include "Rendering/VulkanCommandPool.hpp"
 #include "Rendering/VulkanFence.hpp"
@@ -270,7 +269,6 @@ void VulkanSystem::cleanSwapchain( void ) noexcept
         static_cast< CommandBufferManager * >( renderDevice )->clear();
         static_cast< GraphicsPipelineManager * >( renderDevice )->clear();
         static_cast< ComputePipelineManager * >( renderDevice )->clear();
-        static_cast< FramebufferManager * >( renderDevice )->clear();
         static_cast< RenderPassManager * >( renderDevice )->clear();
         static_cast< ImageViewManager * >( renderDevice )->clear();
         static_cast< ImageManager * >( renderDevice )->clear();

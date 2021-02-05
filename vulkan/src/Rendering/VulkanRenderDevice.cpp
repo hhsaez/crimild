@@ -31,7 +31,6 @@
 #include "VulkanCommandBuffer.hpp"
 #include "VulkanCommandPool.hpp"
 #include "VulkanFence.hpp"
-#include "VulkanFramebuffer.hpp"
 #include "VulkanGraphicsPipeline.hpp"
 #include "VulkanImage.hpp"
 #include "VulkanImageView.hpp"
@@ -80,7 +79,7 @@ void RenderDevice::submitGraphicsCommands( const Semaphore *wait, Array< Command
 
     Array< VkCommandBuffer > commandBufferHandlers = commandBuffers.map(
         [ & ]( auto commandBuffer ) {
-        	updateCommandBuffer( commandBuffer );
+            updateCommandBuffer( commandBuffer );
             return getBindInfo( commandBuffer ).handler;
         } );
 
@@ -269,7 +268,6 @@ void RenderDeviceManager::destroy( RenderDevice *renderDevice ) noexcept
     static_cast< SemaphoreManager * >( renderDevice )->cleanup();
     static_cast< CommandBufferManager * >( renderDevice )->clear();
     static_cast< CommandPoolManager * >( renderDevice )->cleanup();
-    static_cast< FramebufferManager * >( renderDevice )->clear();
     static_cast< ShaderModuleManager * >( renderDevice )->cleanup();
     static_cast< GraphicsPipelineManager * >( renderDevice )->clear();
     static_cast< ComputePipelineManager * >( renderDevice )->clear();
