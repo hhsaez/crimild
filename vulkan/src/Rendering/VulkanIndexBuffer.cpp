@@ -103,3 +103,20 @@ crimild::Bool IndexBufferManager::unbind( IndexBuffer *indexBuffer ) noexcept
 
     return ManagerImpl::unbind( indexBuffer );
 }
+
+void IndexBufferManager::updateIndexBuffers( void ) noexcept
+{
+    // TODO: This is a slow operation. Not only it needs to iterate over all
+    // available index buffers to get the ones that actually need updating, but
+    // also it's copying data to the device in a synchronous way.
+    auto renderDevice = getRenderDevice();
+    each( [ this, renderDevice ]( IndexBuffer *ibo, IndexBufferBindInfo &bindInfo ) {
+        if ( ibo->getBufferView()->getUsage() == BufferView::Usage::DYNAMIC ) {
+            utils::copyToBuffer(
+                renderDevice->handler,
+                bindInfo.bufferMemory,
+                ibo->getBufferView()->getData(),
+                ibo->getBufferView()->getLength() );
+        }
+    } );
+}

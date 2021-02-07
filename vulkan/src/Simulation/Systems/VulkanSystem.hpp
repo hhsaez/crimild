@@ -103,6 +103,7 @@ namespace crimild {
             crimild::Bool createCommandPool( void ) noexcept;
 
             void updateVertexBuffers( void ) noexcept;
+            void updateIndexBuffers( void ) noexcept;
             void updateUniformBuffers( void ) noexcept;
 
             void cleanSwapchain( void ) noexcept;
