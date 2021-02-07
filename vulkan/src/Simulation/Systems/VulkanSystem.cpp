@@ -115,6 +115,7 @@ void VulkanSystem::onRender( void ) noexcept
 
     // TODO: This migth be a bit slow...
     updateVertexBuffers();
+    updateIndexBuffers();
     updateUniformBuffers();
 
     // Submit graphic commands to the render device, with the selected
@@ -319,6 +320,11 @@ crimild::Bool VulkanSystem::createCommandPool( void ) noexcept
 void VulkanSystem::updateVertexBuffers( void ) noexcept
 {
     getRenderDevice()->updateVertexBuffers();
+}
+
+void VulkanSystem::updateIndexBuffers( void ) noexcept
+{
+    getRenderDevice()->updateIndexBuffers();
 }
 
 void VulkanSystem::updateUniformBuffers( void ) noexcept
