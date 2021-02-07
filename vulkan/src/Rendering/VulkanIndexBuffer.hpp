@@ -53,6 +53,8 @@ namespace crimild {
 
             crimild::Bool bind( IndexBuffer *verterBuffer ) noexcept override;
             crimild::Bool unbind( IndexBuffer *indexBuffer ) noexcept override;
+
+            void updateIndexBuffers( void ) noexcept;
         };
 
     }
