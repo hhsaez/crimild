@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
- *
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,46 +25,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Crimild.hpp>
-#include <Crimild_GLFW.hpp>
-#include <Crimild_STB.hpp>
-#include <Crimild_Vulkan.hpp>
+#ifndef CRIMILD_IMGUI_
+#define CRIMILD_IMGUI_
 
-using namespace crimild;
-using namespace crimild::glfw;
+#include "Rendering/Compositions/ImGUIComposition.hpp"
+#include "Simulation/Systems/ImGUISystem.hpp"
+#include "imgui.h"
 
-#ifdef CRIMILD_ENABLE_IMGUI
-    #include <Crimild_ImGUI.hpp>
 #endif
-
-int main( int argc, char **argv )
-{
-    crimild::init();
-    crimild::vulkan::init();
-
-    Log::setLevel( Log::Level::LOG_LEVEL_ALL );
-
-    CRIMILD_SIMULATION_LIFETIME auto sim = Simulation::create();
-
-    sim->setSettings( crimild::alloc< Settings >( argc, argv ) );
-
-    SharedPointer< ImageManager > imageManager = crimild::alloc< crimild::stb::ImageManager >();
-
-#ifdef CRIMILD_ENABLE_SFML
-    sim->setAudioManager( crimild::alloc< sfml::SFMLAudioManager >() );
-#endif
-
-    sim->attachSystem< GLFWSystem >();
-    sim->attachSystem< WindowSystem >();
-    sim->attachSystem< GLFWVulkanSystem >();
-    sim->attachSystem< EventSystem >();
-    sim->attachSystem< InputSystem >();
-    sim->attachSystem< UpdateSystem >();
-    sim->attachSystem< RenderSystem >();
-
-#ifdef CRIMILD_ENABLE_IMGUI
-    sim->attachSystem< imgui::ImGUISystem >();
-#endif
-
-    return sim->run();
-}
