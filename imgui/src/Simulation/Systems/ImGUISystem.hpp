@@ -9,14 +9,14 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
+ *     * Neither the name of the copyright holder nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -25,46 +25,44 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Crimild.hpp>
-#include <Crimild_GLFW.hpp>
-#include <Crimild_STB.hpp>
-#include <Crimild_Vulkan.hpp>
+#ifndef CRIMILD_IMGUI_SIMULATION_SYSTEM_IMGUI_
+#define CRIMILD_IMGUI_SIMULATION_SYSTEM_IMGUI_
 
-using namespace crimild;
-using namespace crimild::glfw;
+#include "Foundation/Singleton.hpp"
+#include "Simulation/Systems/System.hpp"
 
-#ifdef CRIMILD_ENABLE_IMGUI
-    #include <Crimild_ImGUI.hpp>
-#endif
+namespace crimild {
 
-int main( int argc, char **argv )
-{
-    crimild::init();
-    crimild::vulkan::init();
+    class Texture;
 
-    Log::setLevel( Log::Level::LOG_LEVEL_ALL );
+    namespace imgui {
 
-    CRIMILD_SIMULATION_LIFETIME auto sim = Simulation::create();
+        class ImGUISystem
+            : public System,
+              public DynamicSingleton< ImGUISystem > {
+            CRIMILD_IMPLEMENT_RTTI( ImGUISystem )
 
-    sim->setSettings( crimild::alloc< Settings >( argc, argv ) );
+        public:
+            using FrameCallback = std::function< void( void ) >;
 
-    SharedPointer< ImageManager > imageManager = crimild::alloc< crimild::stb::ImageManager >();
+        public:
+            virtual void start( void ) noexcept override;
+            virtual void lateStart( void ) noexcept override;
+            virtual void onPreRender( void ) noexcept override;
+            virtual void onTerminate( void ) noexcept override;
 
-#ifdef CRIMILD_ENABLE_SFML
-    sim->setAudioManager( crimild::alloc< sfml::SFMLAudioManager >() );
-#endif
+            inline void setFrameCallback( FrameCallback frameCallback ) noexcept { m_frameCallback = frameCallback; }
+            inline FrameCallback getFrameCallback( void ) noexcept { return m_frameCallback; }
 
-    sim->attachSystem< GLFWSystem >();
-    sim->attachSystem< WindowSystem >();
-    sim->attachSystem< GLFWVulkanSystem >();
-    sim->attachSystem< EventSystem >();
-    sim->attachSystem< InputSystem >();
-    sim->attachSystem< UpdateSystem >();
-    sim->attachSystem< RenderSystem >();
+        private:
+            void updateDisplaySize( void ) noexcept;
 
-#ifdef CRIMILD_ENABLE_IMGUI
-    sim->attachSystem< imgui::ImGUISystem >();
-#endif
+        private:
+            FrameCallback m_frameCallback;
+        };
 
-    return sim->run();
+    }
+
 }
+
+#endif
