@@ -390,7 +390,7 @@ const PresentationMaster *FrameGraph::getPresentationMaster( void ) const noexce
     if ( masters.empty() ) {
         return nullptr;
     }
-    return getNodeObject< PresentationMaster >( masters.first() );
+    return getNodeObject< PresentationMaster >( masters.last() );
 }
 
 PresentationMaster *FrameGraph::getPresentationMaster( void ) noexcept
@@ -399,7 +399,7 @@ PresentationMaster *FrameGraph::getPresentationMaster( void ) noexcept
     if ( masters.empty() ) {
         return nullptr;
     }
-    return getNodeObject< PresentationMaster >( masters.first() );
+    return getNodeObject< PresentationMaster >( masters.last() );
 }
 
 std::ostream &crimild::operator<<( std::ostream &out, FrameGraph::Node::Type type )
