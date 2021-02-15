@@ -104,7 +104,7 @@ namespace crimild {
             auto commandBuffers = Swapchain::getInstance()->getImages().map(
                 [ &, imageIndex = 0 ]( auto unused ) mutable {
                     auto commandBuffer = builder();
-                    commandBuffer->setFrameIndex( imageIndex );
+                    commandBuffer->setFrameIndex( imageIndex++ );
                     return commandBuffer;
                 } );
 
