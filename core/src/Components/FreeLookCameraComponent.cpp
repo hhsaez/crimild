@@ -44,84 +44,99 @@ void FreeLookCameraComponent::start( void )
 {
     _lastMousePos = Vector2f::ZERO;
 
-    registerMessageHandler< crimild::messaging::KeyPressed >( []( crimild::messaging::KeyPressed const &msg ) {
-        float cameraAxisCoeff = 5.0f;
+    registerMessageHandler< crimild::messaging::KeyPressed >(
+        [ & ]( crimild::messaging::KeyPressed const &msg ) {
+            if ( !isEnabled() ) {
+                return;
+            }
 
-        if ( Input::getInstance()->isKeyDown( CRIMILD_INPUT_KEY_LEFT_SHIFT ) || Input::getInstance()->isKeyDown( CRIMILD_INPUT_KEY_RIGHT_SHIFT ) ) {
-            cameraAxisCoeff = 20.0f;
-        }
+            float cameraAxisCoeff = 5.0f;
 
-        switch ( msg.key ) {
-            case 'A':
-            case CRIMILD_INPUT_KEY_LEFT:
-                Input::getInstance()->setAxis( Input::AXIS_HORIZONTAL, -cameraAxisCoeff );
-                break;
+            if ( Input::getInstance()->isKeyDown( CRIMILD_INPUT_KEY_LEFT_SHIFT ) || Input::getInstance()->isKeyDown( CRIMILD_INPUT_KEY_RIGHT_SHIFT ) ) {
+                cameraAxisCoeff = 20.0f;
+            }
 
-            case 'D':
-            case CRIMILD_INPUT_KEY_RIGHT:
-                Input::getInstance()->setAxis( Input::AXIS_HORIZONTAL, +cameraAxisCoeff );
-                break;
+            switch ( msg.key ) {
+                case 'A':
+                case CRIMILD_INPUT_KEY_LEFT:
+                    Input::getInstance()->setAxis( Input::AXIS_HORIZONTAL, -cameraAxisCoeff );
+                    break;
 
-            case 'W':
-            case CRIMILD_INPUT_KEY_UP:
-                Input::getInstance()->setAxis( Input::AXIS_VERTICAL, +cameraAxisCoeff );
-                break;
+                case 'D':
+                case CRIMILD_INPUT_KEY_RIGHT:
+                    Input::getInstance()->setAxis( Input::AXIS_HORIZONTAL, +cameraAxisCoeff );
+                    break;
 
-            case 'S':
-            case CRIMILD_INPUT_KEY_DOWN:
-                Input::getInstance()->setAxis( Input::AXIS_VERTICAL, -cameraAxisCoeff );
-                break;
+                case 'W':
+                case CRIMILD_INPUT_KEY_UP:
+                    Input::getInstance()->setAxis( Input::AXIS_VERTICAL, +cameraAxisCoeff );
+                    break;
 
-            case 'Q':
-                Input::getInstance()->setAxis( "CameraAxisRoll", -cameraAxisCoeff );
-                break;
+                case 'S':
+                case CRIMILD_INPUT_KEY_DOWN:
+                    Input::getInstance()->setAxis( Input::AXIS_VERTICAL, -cameraAxisCoeff );
+                    break;
 
-            case 'E':
-                Input::getInstance()->setAxis( "CameraAxisRoll", +cameraAxisCoeff );
-                break;
-        }
-    } );
+                case 'Q':
+                    Input::getInstance()->setAxis( "CameraAxisRoll", -cameraAxisCoeff );
+                    break;
 
-    registerMessageHandler< crimild::messaging::KeyReleased >( []( crimild::messaging::KeyReleased const &msg ) {
-        switch ( msg.key ) {
-            case 'A':
-            case 'D':
-            case CRIMILD_INPUT_KEY_LEFT:
-            case CRIMILD_INPUT_KEY_RIGHT:
-                Input::getInstance()->setAxis( Input::AXIS_HORIZONTAL, 0.0f );
-                break;
+                case 'E':
+                    Input::getInstance()->setAxis( "CameraAxisRoll", +cameraAxisCoeff );
+                    break;
+            }
+        } );
 
-            case 'W':
-            case CRIMILD_INPUT_KEY_UP:
-            case 'S':
-            case CRIMILD_INPUT_KEY_DOWN:
-                Input::getInstance()->setAxis( Input::AXIS_VERTICAL, 0.0f );
-                break;
+    registerMessageHandler< crimild::messaging::KeyReleased >(
+        [ & ]( crimild::messaging::KeyReleased const &msg ) {
+            if ( !isEnabled() ) {
+                return;
+            }
 
-            case 'Q':
-            case 'E':
-                Input::getInstance()->setAxis( "CameraAxisRoll", 0.0f );
-                break;
-        }
-    } );
+            switch ( msg.key ) {
+                case 'A':
+                case 'D':
+                case CRIMILD_INPUT_KEY_LEFT:
+                case CRIMILD_INPUT_KEY_RIGHT:
+                    Input::getInstance()->setAxis( Input::AXIS_HORIZONTAL, 0.0f );
+                    break;
 
-    registerMessageHandler< crimild::messaging::MouseMotion >( [ this ]( crimild::messaging::MouseMotion const &msg ) {
-        auto currentPos = Vector2f( msg.nx, msg.ny );
-        auto mouseDelta = _initialized ? currentPos - _lastMousePos : Vector2f::ZERO;
-        _initialized = true;
-        _lastMousePos = currentPos;
+                case 'W':
+                case CRIMILD_INPUT_KEY_UP:
+                case 'S':
+                case CRIMILD_INPUT_KEY_DOWN:
+                    Input::getInstance()->setAxis( Input::AXIS_VERTICAL, 0.0f );
+                    break;
 
-        if ( Input::getInstance()->isMouseButtonDown( CRIMILD_INPUT_MOUSE_BUTTON_LEFT ) ) {
-            auto root = getNode();
+                case 'Q':
+                case 'E':
+                    Input::getInstance()->setAxis( "CameraAxisRoll", 0.0f );
+                    break;
+            }
+        } );
 
-            // apply pitch
-            root->local().rotate() *= Quaternion4f::createFromAxisAngle( Vector3f::UNIT_X, -mouseDelta[ 1 ] );
+    registerMessageHandler< crimild::messaging::MouseMotion >(
+        [ & ]( crimild::messaging::MouseMotion const &msg ) {
+            if ( !isEnabled() ) {
+                return;
+            }
 
-            // apply yaw
-            auto up = root->getLocal().computeWorldUp();
-            root->local().rotate() *= Quaternion4f::createFromAxisAngle( up.getNormalized(), -mouseDelta[ 0 ] );
-        }
-    } );
+            auto currentPos = Vector2f( msg.nx, msg.ny );
+            auto mouseDelta = _initialized ? currentPos - _lastMousePos : Vector2f::ZERO;
+            _initialized = true;
+            _lastMousePos = currentPos;
+
+            if ( Input::getInstance()->isMouseButtonDown( CRIMILD_INPUT_MOUSE_BUTTON_LEFT ) ) {
+                auto root = getNode();
+
+                // apply pitch
+                root->local().rotate() *= Quaternion4f::createFromAxisAngle( Vector3f::UNIT_X, -mouseDelta[ 1 ] );
+
+                // apply yaw
+                auto up = root->getLocal().computeWorldUp();
+                root->local().rotate() *= Quaternion4f::createFromAxisAngle( up.getNormalized(), -mouseDelta[ 0 ] );
+            }
+        } );
 }
 
 void FreeLookCameraComponent::update( const Clock &c )
