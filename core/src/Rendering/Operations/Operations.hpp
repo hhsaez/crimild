@@ -25,51 +25,28 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_RENDERING_IMAGE_VIEW_
-#define CRIMILD_CORE_RENDERING_IMAGE_VIEW_
+#ifndef CRIMILD_CORE_RENDERING_OPERATIONS_
+#define CRIMILD_CORE_RENDERING_OPERATIONS_
 
-#include "Foundation/NamedObject.hpp"
-#include "Foundation/RTTI.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/Types.hpp"
-#include "Rendering/Format.hpp"
-#include "Rendering/FrameGraphResource.hpp"
-#include "Rendering/RenderResource.hpp"
+#include "Foundation/Memory.hpp"
 
 namespace crimild {
 
-    class Image;
+    class FrameGraphOperation;
+    class FrameGraphResource;
 
-    class ImageView
-        : public RenderResourceImpl< ImageView >,
-          public SharedObject,
-          public RTTI,
-          public NamedObject,
-          public FrameGraphResource {
-        CRIMILD_IMPLEMENT_RTTI( crimild::ImageView )
+    namespace framegraph {
 
-    public:
-        enum class Type {
-            UNDEFINED, //< Default.
-            IMAGE_VIEW_1D,
-            IMAGE_VIEW_2D,
-            IMAGE_VIEW_3D,
-            IMAGE_VIEW_CUBE,
-            IMAGE_VIEW_SWAPCHAIN, //< An image from the swapchain
-        };
+        SharedPointer< FrameGraphOperation > present( SharedPointer< FrameGraphOperation > op ) noexcept;
+        SharedPointer< FrameGraphOperation > present( SharedPointer< FrameGraphResource > resource ) noexcept;
 
-    public:
-        inline FrameGraphResource::Type getType( void ) const noexcept override { return FrameGraphResource::Type::IMAGE_VIEW; }
+        SharedPointer< FrameGraphOperation > shader( std::string source ) noexcept;
 
-        Type type = Type::UNDEFINED; //< Default to same type as image
-        SharedPointer< Image > image;
-        Format format = Format::UNDEFINED; //< Fallbacks to same format as image
-        crimild::UInt32 mipLevels = 0;     //< Fallbacks to same mipLevels as image
-        crimild::UInt32 layerCount = 0;    //< Fallbacks to same layer count as image
+        SharedPointer< FrameGraphOperation > gBufferPass( void ) noexcept;
 
-        virtual void setWrittenBy( FrameGraphOperation *op ) noexcept override;
-        virtual void setReadBy( FrameGraphOperation *op ) noexcept override;
-    };
+        SharedPointer< FrameGraphOperation > forwardUnlitPass( SharedPointer< FrameGraphResource > const &input ) noexcept;
+
+    }
 
 }
 
