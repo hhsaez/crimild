@@ -77,19 +77,30 @@ crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
 
     bool hasPresentation = false;
 
+    // This render pass supports presentation if and only if there is AT MOST one color attachment.
+    // This might change in the future.
+    auto supportsPresentation =
+        renderPass->attachments
+            .filter(
+                []( auto att ) {
+                    return att->isPresentation() && !utils::formatIsDepthStencil( att->format );
+                } )
+            .size()
+        <= 1;
+
     auto attachments = renderPass->attachments.map(
         [ &, idx = 0u ]( auto const &attachment ) mutable {
-            auto format = attachment->format;
-            if ( format != Format::COLOR_SWAPCHAIN_OPTIMAL ) {
+            // This is a presentation attachment only if no other operation reads from it
+            auto isPresentation = supportsPresentation && attachment->isPresentation();
+            if ( !isPresentation ) {
                 // Create an image view for this attachemnt
                 // TODO: Have a pool of image views instead?
                 attachment->imageView = createAttachmentImageView( crimild::get_ptr( attachment ) );
             }
 
+            auto format = attachment->format;
             auto initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
             auto finalLayout = VK_IMAGE_LAYOUT_GENERAL;
-
-            auto isPresentation = attachment->getFrameGraph()->isPresentation( attachment );
 
             if ( utils::formatIsDepthStencil( format ) ) {
                 depthStencilReferences.add(
@@ -178,8 +189,8 @@ crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
     bindInfo.framebuffers.resize( imageCount );
     for ( auto i = 0l; i < imageCount; i++ ) {
         auto fbAttachments = renderPass->attachments.map( [ & ]( auto &att ) {
-            if ( auto iv = crimild::get_ptr( att->imageView ) ) {
-                return renderDevice->getBindInfo( iv );
+            if ( !supportsPresentation || !att->isPresentation() ) {
+                return renderDevice->getBindInfo( crimild::get_ptr( att->imageView ) );
             }
             return renderDevice->getBindInfo( crimild::get_ptr( swapchain->getImageViews()[ i ] ) );
         } );
@@ -206,7 +217,7 @@ crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
         utils::setObjectName(
             renderDevice->handler,
             UInt64( bindInfo.handler ),
-            VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT,
+            VK_DEBUG_REPORT_OBJECT_TYPE_RENDER_PASS_EXT,
             renderPass->getName().c_str() );
     }
 

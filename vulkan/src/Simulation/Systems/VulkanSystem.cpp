@@ -48,6 +48,7 @@
 #include "Simulation/AssetManager.hpp"
 #include "Simulation/FileSystem.hpp"
 #include "Simulation/Simulation.hpp"
+#include "Simulation/Systems/RenderSystem.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;
@@ -80,8 +81,12 @@ void VulkanSystem::onRender( void ) noexcept
         return;
     }
 
-    auto graphicsCommandBuffers = m_frameGraph->recordGraphicsCommands( m_currentFrame, m_recordWithNonConditionalPasses );
-    auto computeCommandBuffers = m_frameGraph->recordComputeCommands( m_currentFrame, m_recordWithNonConditionalPasses );
+    // auto graphicsCommandBuffers = m_frameGraph->recordGraphicsCommands( m_currentFrame, m_recordWithNonConditionalPasses );
+    // auto computeCommandBuffers = m_frameGraph->recordComputeCommands( m_currentFrame, m_recordWithNonConditionalPasses );
+
+    auto renderSystem = RenderSystem::getInstance();
+    auto &graphicsCommandBuffers = renderSystem->getGraphicsCommands( m_currentFrame, m_recordWithNonConditionalPasses );
+    auto &computeCommandBuffers = renderSystem->getComputeCommands( m_currentFrame, m_recordWithNonConditionalPasses );
 
     auto swapchain = crimild::get_ptr( m_swapchain );
 

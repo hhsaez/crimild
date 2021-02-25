@@ -28,8 +28,8 @@
 #ifndef CRIMILD_FOUNDATION_CONTAINERS_ARRAY_
 #define CRIMILD_FOUNDATION_CONTAINERS_ARRAY_
 
-#include "Foundation/Types.hpp"
 #include "Foundation/Policies/ThreadingPolicy.hpp"
+#include "Foundation/Types.hpp"
 #include "Mathematics/Numeric.hpp"
 
 #include <functional>
@@ -45,8 +45,7 @@ namespace crimild {
     */
     template<
         typename T,
-        class ThreadingPolicy = policies::SingleThreaded
-    >
+        class ThreadingPolicy = policies::SingleThreaded >
     class Array : public ThreadingPolicy {
     private:
         using LockImpl = typename ThreadingPolicy::Lock;
@@ -229,7 +228,7 @@ namespace crimild {
             _elems[ _size++ ] = elem;
         }
 
-        void remove( const T &elem ) noexcept
+        Array &remove( const T &elem ) noexcept
         {
             LockImpl lock( this );
 
@@ -242,25 +241,30 @@ namespace crimild {
             if ( i < _size ) {
                 removeAt_unsafe( i );
             }
+
+            return *this;
         }
 
-        void removeAt( Size index ) noexcept
+        Array &removeAt( Size index ) noexcept
         {
             LockImpl lock( this );
             removeAt_unsafe( index );
+            return *this;
         }
 
-        void swap( Size i, Size j ) noexcept
+        Array &swap( Size i, Size j ) noexcept
         {
             LockImpl lock( this );
             swap_unsafe( i, j );
+            return *this;
         }
 
-        void resize( Size capacity ) noexcept
+        Array &resize( Size capacity ) noexcept
         {
             LockImpl lock( this );
             resize_unsafe( capacity );
             _size = capacity;
+            return *this;
         }
 
         Bool contains( const T &e ) const noexcept
@@ -287,7 +291,7 @@ namespace crimild {
         }
 
         template< typename Callback >
-        void each( Callback callback ) noexcept
+        Array &each( Callback callback ) noexcept
         {
             LockImpl lock( this );
 
@@ -295,10 +299,12 @@ namespace crimild {
             for ( Size i = 0; i < _size; i++ ) {
                 callback( _elems[ i ] );
             }
+
+            return *this;
         }
 
         template< typename Callback >
-        void each( Callback callback ) const noexcept
+        const Array &each( Callback callback ) const noexcept
         {
             LockImpl lock( this );
 
@@ -306,6 +312,8 @@ namespace crimild {
             for ( Size i = 0; i < _size; i++ ) {
                 callback( _elems[ i ] );
             }
+
+            return *this;
         }
 
         template< typename Selector >
@@ -324,7 +332,7 @@ namespace crimild {
         auto map( Mapper mapper ) const noexcept
         {
             Array< decltype( mapper( _elems[ 0 ] ) ) > ret( _size );
-            for ( auto i = 0l ; i < _size; i++ ) {
+            for ( auto i = 0l; i < _size; i++ ) {
                 ret[ i ] = mapper( _elems[ i ] );
             }
             return ret;
@@ -393,16 +401,14 @@ namespace crimild {
         Size _capacity = 0;
 
     public:
-        friend std::ostream& operator<<( std::ostream& os, const Array &array ) noexcept
+        friend std::ostream &operator<<( std::ostream &os, const Array &array ) noexcept
         {
             os << "[";
             array.each(
-                [
-                    &os,
-                    i = 0
-                ]( const T &a ) mutable {
-                os << ( i++ == 0 ? "" : ", " ) << a;
-            });
+                [ &os,
+                  i = 0 ]( const T &a ) mutable {
+                    os << ( i++ == 0 ? "" : ", " ) << a;
+                } );
             os << "]";
             return os;
         }

@@ -31,15 +31,18 @@
 #include "Rendering/Compositions/OverlayComposition.hpp"
 #include "Rendering/Compositions/PresentComposition.hpp"
 #include "Rendering/ImageView.hpp"
+#include "Rendering/Operations/ImGUIOperations.hpp"
 #include "Rendering/RenderPass.hpp"
 #include "Rendering/Sampler.hpp"
 #include "Rendering/Texture.hpp"
 #include "Simulation/Input.hpp"
 #include "Simulation/Simulation.hpp"
+#include "Simulation/Systems/RenderSystem.hpp"
 #include "imgui.h"
 
 using namespace crimild;
 using namespace crimild::imgui;
+using namespace crimild::framegraph::imgui;
 
 void ImGUISystem::start( void ) noexcept
 {
@@ -117,29 +120,17 @@ void ImGUISystem::start( void ) noexcept
 
 void ImGUISystem::lateStart( void ) noexcept
 {
-    auto sim = Simulation::getInstance();
+    auto frameGraph = RenderSystem::getInstance()->getFrameGraph();
 
-    if ( auto prevOutput = sim->getComposition().getOutput() ) {
-        // Convert the existing present composition into a regular render one
-        prevOutput->usage = Attachment::Usage::COLOR_ATTACHMENT;
-        prevOutput->format = Format::R8G8B8A8_UNORM;
-        prevOutput->imageView = crimild::alloc< ImageView >();
-        prevOutput->imageView->image = crimild::alloc< Image >();
+    if ( frameGraph == nullptr ) {
+        // This should not happen, since we always have something to render
+        frameGraph = renderUI();
+    } else {
+        // We want to render the ImGUI layer on top of whatever we rendered before
+        frameGraph = overlayUI( renderUI(), frameGraph );
     }
 
-    // TODO: this is not ideal, but it's the cleanest way to to do it for now
-    // By overriding the default present pass, we're rendering the final image
-    // one more time than expected. I'll definitely need to fix this in the near
-    // future once the frame graph has been upgraded.
-    sim->setComposition(
-        [ sim ] {
-            using namespace crimild::compositions;
-            using namespace crimild::imgui::compositions;
-            return present(
-                overlay(
-                    sim->getComposition(),
-                    renderUI() ) );
-        }() );
+    RenderSystem::getInstance()->setFrameGraph( frameGraph );
 }
 
 void ImGUISystem::onPreRender( void ) noexcept

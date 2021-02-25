@@ -168,6 +168,22 @@ Texture::~Texture( void )
     unload();
 }
 
+void Texture::setWrittenBy( FrameGraphOperation *op ) noexcept
+{
+    FrameGraphResource::setWrittenBy( op );
+    if ( imageView != nullptr ) {
+        imageView->setWrittenBy( op );
+    }
+}
+
+void Texture::setReadBy( FrameGraphOperation *op ) noexcept
+{
+    FrameGraphResource::setReadBy( op );
+    if ( imageView != nullptr ) {
+        imageView->setReadBy( op );
+    }
+}
+
 void Texture::encode( coding::Encoder &encoder )
 {
     Codable::encode( encoder );
