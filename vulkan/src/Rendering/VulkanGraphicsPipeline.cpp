@@ -67,8 +67,18 @@ crimild::Bool GraphicsPipelineManager::bind( GraphicsPipeline *graphicsPipeline 
     auto rasterizer = createRasterizer( graphicsPipeline );
     auto multisampleState = createMultiplesampleState();
     auto depthStencilState = createDepthStencilState( graphicsPipeline );
-    auto colorBlendAttachment = createColorBlendAttachment( graphicsPipeline );
-    auto colorBlending = createColorBlending( colorBlendAttachment );
+    auto colorBlendAttachments = renderDevice->getCurrentRenderPass()
+                                     ->attachments
+                                     .filter(
+                                         []( auto att ) {
+                                             return !utils::formatIsDepthStencil( att->format );
+                                         } )
+                                     .map(
+                                         [ & ]( auto att ) {
+                                             return createColorBlendAttachment( graphicsPipeline );
+                                         } );
+    // auto colorBlendAttachment = createColorBlendAttachment( graphicsPipeline );
+    auto colorBlending = createColorBlending( colorBlendAttachments );
     auto dynamicStates = getDynamicStates( graphicsPipeline );
     auto dynamicState = createDynamicState( dynamicStates );
 
@@ -514,14 +524,14 @@ VkPipelineColorBlendAttachmentState GraphicsPipelineManager::createColorBlendAtt
     };
 }
 
-VkPipelineColorBlendStateCreateInfo GraphicsPipelineManager::createColorBlending( const VkPipelineColorBlendAttachmentState &colorBlendAttachment ) const noexcept
+VkPipelineColorBlendStateCreateInfo GraphicsPipelineManager::createColorBlending( const Array< VkPipelineColorBlendAttachmentState > &colorBlendAttachments ) const noexcept
 {
     return VkPipelineColorBlendStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
         .logicOpEnable = VK_FALSE,
         .logicOp = VK_LOGIC_OP_COPY,
-        .attachmentCount = 1,
-        .pAttachments = &colorBlendAttachment,
+        .attachmentCount = UInt32( colorBlendAttachments.size() ),
+        .pAttachments = colorBlendAttachments.getData(),
         .blendConstants[ 0 ] = 0.0f,
         .blendConstants[ 1 ] = 0.0f,
         .blendConstants[ 2 ] = 0.0f,

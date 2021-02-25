@@ -26,13 +26,14 @@
  */
 
 #include "Group.hpp"
+
+#include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
 #include "Exceptions/HasParentException.hpp"
 #include "Foundation/Containers/Array.hpp"
-#include "Coding/Encoder.hpp"
-#include "Coding/Decoder.hpp"
 
-#include <cassert>
 #include <algorithm>
+#include <cassert>
 #include <thread>
 
 CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::Group )
@@ -40,14 +41,13 @@ CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::Group )
 using namespace crimild;
 
 Group::Group( std::string name )
-	: Node( name )
+    : Node( name )
 {
-
 }
 
 Group::~Group( void )
 {
-	detachAllNodes();
+    detachAllNodes();
 }
 
 void Group::attachNode( Node *node )
@@ -57,18 +57,18 @@ void Group::attachNode( Node *node )
 
 void Group::attachNode( SharedPointer< Node > const &node )
 {
-	if ( node->getParent() == this ) {
-		// the node is already attach to this group
-		return;
-	}
+    if ( node->getParent() == this ) {
+        // the node is already attach to this group
+        return;
+    }
 
-	if ( node->getParent() != nullptr ) {
-		throw HasParentException( node->getName(), this->getName(), node->getParent()->getName() );
-	}
+    if ( node->getParent() != nullptr ) {
+        throw HasParentException( node->getName(), this->getName(), node->getParent()->getName() );
+    }
 
-	node->setParent( this );
+    node->setParent( this );
 
-	_nodes.add( node );
+    _nodes.add( node );
 }
 
 void Group::detachNode( Node *node )
@@ -86,47 +86,47 @@ void Group::detachNode( SharedPointer< Node > const &node )
 
 void Group::detachAllNodes( void )
 {
-	_nodes.each( []( SharedPointer< Node > &node ) { node->setParent( nullptr ); } );
-	_nodes.clear();
+    _nodes.each( []( SharedPointer< Node > &node ) { node->setParent( nullptr ); } );
+    _nodes.clear();
 }
 
 Node *Group::getNodeAt( unsigned int index )
 {
-	return crimild::get_ptr( _nodes[ index ] );
+    return crimild::get_ptr( _nodes[ index ] );
 }
 
 Node *Group::getNode( std::string name )
 {
     Node *result = nullptr;
-	bool found = false;
-	_nodes.each( [ &result, &found, name ]( SharedPointer< Node > &node ) {
-		if ( !found && node->getName() == name ) {
-			result = crimild::get_ptr( node );
-			found = true;
-		}
-	});
+    bool found = false;
+    _nodes.each( [ &result, &found, name ]( SharedPointer< Node > &node ) {
+        if ( !found && node->getName() == name ) {
+            result = crimild::get_ptr( node );
+            found = true;
+        }
+    } );
 
-	return result;
+    return result;
 }
 
 void Group::forEachNode( std::function< void( Node * ) > callback )
 {
-	return _nodes.each( [ &callback ]( SharedPointer< Node > &node ) {
-		if ( node != nullptr && node->isEnabled() ) {
-			callback( crimild::get_ptr( node ) );
-		}
-	});
+    _nodes.each( [ &callback ]( SharedPointer< Node > &node ) {
+        if ( node != nullptr && node->isEnabled() ) {
+            callback( crimild::get_ptr( node ) );
+        }
+    } );
 }
 
 void Group::accept( NodeVisitor &visitor )
 {
-	visitor.visitGroup( this );
+    visitor.visitGroup( this );
 }
 
 void Group::encode( coding::Encoder &encoder )
 {
     Node::encode( encoder );
-    
+
     encoder.encode( "nodes", _nodes );
 }
 
@@ -134,47 +134,46 @@ void Group::decode( coding::Decoder &decoder )
 {
     Node::decode( decoder );
 
-    Array< SharedPointer< Node >> nodes;
+    Array< SharedPointer< Node > > nodes;
     decoder.decode( "nodes", nodes );
     nodes.each( [ this ]( SharedPointer< Node > &n ) {
         attachNode( n );
-    });
+    } );
 }
 
 bool Group::registerInStream( Stream &s )
 {
-	if ( !Node::registerInStream( s ) ) {
-		return false;
-	}
+    if ( !Node::registerInStream( s ) ) {
+        return false;
+    }
 
-	forEachNode( [&s]( Node *node ) {
-		if ( node != nullptr ) {
-			node->registerInStream( s );
-		}
-	});
+    forEachNode( [ &s ]( Node *node ) {
+        if ( node != nullptr ) {
+            node->registerInStream( s );
+        }
+    } );
 
-	return true;
+    return true;
 }
 
 void Group::save( Stream &s )
 {
-	Node::save( s );
+    Node::save( s );
 
-	std::vector< SharedPointer< Node >> ns;
-	forEachNode( [&ns]( Node *n ) {
-		ns.push_back( crimild::retain( n ) );
-	});
-	s.write( ns );
+    std::vector< SharedPointer< Node > > ns;
+    forEachNode( [ &ns ]( Node *n ) {
+        ns.push_back( crimild::retain( n ) );
+    } );
+    s.write( ns );
 }
 
 void Group::load( Stream &s )
 {
-	Node::load( s );
+    Node::load( s );
 
-	std::vector< SharedPointer< Node >> nodes;
-	s.read( nodes );
-	for ( auto &n : nodes ) {
-		attachNode( n );
-	}
+    std::vector< SharedPointer< Node > > nodes;
+    s.read( nodes );
+    for ( auto &n : nodes ) {
+        attachNode( n );
+    }
 }
-

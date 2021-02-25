@@ -28,6 +28,7 @@
 #ifndef CRIMILD_RENDERING_COMMAND_BUFFER_
 #define CRIMILD_RENDERING_COMMAND_BUFFER_
 
+#include "Foundation/NamedObject.hpp"
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/Types.hpp"
 #include "Rendering/RenderResource.hpp"
@@ -55,6 +56,7 @@ namespace crimild {
 
     class CommandBuffer
         : public SharedObject,
+          public NamedObject,
           public RenderResourceImpl< CommandBuffer > {
     public:
         enum class Usage {

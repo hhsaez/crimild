@@ -25,11 +25,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Rendering/Compositions/ImGUIComposition.hpp"
-
-#include "Rendering/Compositions/OverlayComposition.hpp"
+#include "Rendering/CommandBuffer.hpp"
 #include "Rendering/DescriptorSet.hpp"
+#include "Rendering/Image.hpp"
 #include "Rendering/ImageView.hpp"
+#include "Rendering/Operations/ImGUIOperations.hpp"
+#include "Rendering/Operations/OperationUtils.hpp"
+#include "Rendering/Operations/Operations.hpp"
 #include "Rendering/Pipeline.hpp"
 #include "Rendering/RenderPass.hpp"
 #include "Rendering/Sampler.hpp"
@@ -43,30 +45,18 @@
 #define MAX_INDEX_COUNT 10000
 
 using namespace crimild;
-using namespace crimild::compositions;
-using namespace crimild::imgui;
 
-Composition imgui::compositions::renderUI( void ) noexcept
+SharedPointer< FrameGraphOperation > crimild::framegraph::imgui::renderUI( void ) noexcept
 {
-    Composition cmp;
-    auto renderPass = cmp.create< RenderPass >();
-    renderPass->setName( "imgui_render_pass" );
+    auto renderPass = crimild::alloc< RenderPass >();
+    renderPass->setName( "imgui_renderUI" );
 
-    renderPass->attachments = {
-        [ & ] {
-            auto att = cmp.createAttachment( "imgui_color_attachment" );
-            att->usage = Attachment::Usage::COLOR_ATTACHMENT;
-            att->format = Format::R8G8B8A8_UNORM;
-            att->imageView = crimild::alloc< ImageView >();
-            att->imageView->image = crimild::alloc< Image >();
-            att->imageView->image->format = Format::R8G8B8A8_UNORM;
-            att->imageView->image->setName( "imgui_color_attachment" );
-            return crimild::retain( att );
-        }(),
-    };
+    auto color = useColorAttachment( "imgui_renderUI/color" );
+
+    renderPass->attachments = { color };
 
     auto pipeline = [ & ] {
-        auto pipeline = cmp.create< GraphicsPipeline >();
+        auto pipeline = crimild::alloc< GraphicsPipeline >();
         pipeline->setProgram(
             [ & ] {
                 auto program = crimild::alloc< ShaderProgram >();
@@ -75,41 +65,41 @@ Composition imgui::compositions::renderUI( void ) noexcept
                         crimild::alloc< Shader >(
                             Shader::Stage::VERTEX,
                             R"(
-                                        layout ( location = 0 ) in vec2 aPosition;
-                                        layout ( location = 1 ) in vec2 aTexCoord;
-                                        layout ( location = 2 ) in vec4 aColor;
+                                layout ( location = 0 ) in vec2 aPosition;
+                                layout ( location = 1 ) in vec2 aTexCoord;
+                                layout ( location = 2 ) in vec4 aColor;
 
-                                        layout ( set = 0, binding = 0 ) uniform TransformBuffer {
-                                            vec4 scale;
-                                            vec4 translate;
-                                        } ubo;
+                                layout ( set = 0, binding = 0 ) uniform TransformBuffer {
+                                    vec4 scale;
+                                    vec4 translate;
+                                } ubo;
 
-                                        layout ( location = 0 ) out vec4 vColor;
-                                        layout ( location = 1 ) out vec2 vTexCoord;
+                                layout ( location = 0 ) out vec4 vColor;
+                                layout ( location = 1 ) out vec2 vTexCoord;
 
-                                        void main()
-                                        {
-                                            gl_Position = vec4( aPosition * ubo.scale.xy + ubo.translate.xy, 0.0, 1.0 );
-                                            vColor = aColor;
-                                            vTexCoord = aTexCoord;
-                                        }
-                                    )" ),
+                                void main()
+                                {
+                                    gl_Position = vec4( aPosition * ubo.scale.xy + ubo.translate.xy, 0.0, 1.0 );
+                                    vColor = aColor;
+                                    vTexCoord = aTexCoord;
+                                }
+                            )" ),
                         crimild::alloc< Shader >(
                             Shader::Stage::FRAGMENT,
                             R"(
-                                        layout ( location = 0 ) in vec4 vColor;
-                                        layout ( location = 1 ) in vec2 vTexCoord;
+                                layout ( location = 0 ) in vec4 vColor;
+                                layout ( location = 1 ) in vec2 vTexCoord;
 
-                                        layout ( set = 0, binding = 1 ) uniform sampler2D uTexture;
+                                layout ( set = 0, binding = 1 ) uniform sampler2D uTexture;
 
-                                        layout ( location = 0 ) out vec4 FragColor;
+                                layout ( location = 0 ) out vec4 FragColor;
 
-                                        void main()
-                                        {
-                                        	vec2 uv = vTexCoord;
-                                            FragColor = vColor * texture( uTexture, uv );
-                                        }
-                                    )" ),
+                                void main()
+                                {
+                                    vec2 uv = vTexCoord;
+                                    FragColor = vColor * texture( uTexture, uv );
+                                }
+                            )" ),
                     } );
                 program->vertexLayouts = { VertexP2TC2C4::getLayout() };
                 program->descriptorSetLayouts = {
@@ -145,9 +135,10 @@ Composition imgui::compositions::renderUI( void ) noexcept
         return pipeline;
     }();
 
-    static auto vbo = crimild::alloc< VertexBuffer >( VertexP2TC2C4::getLayout(), MAX_VERTEX_COUNT );
+    auto vbo = crimild::alloc< VertexBuffer >( VertexP2TC2C4::getLayout(), MAX_VERTEX_COUNT );
     vbo->getBufferView()->setUsage( BufferView::Usage::DYNAMIC );
-    static auto ibo = crimild::alloc< IndexBuffer >( Format::INDEX_16_UINT, MAX_INDEX_COUNT );
+
+    auto ibo = crimild::alloc< IndexBuffer >( Format::INDEX_16_UINT, MAX_INDEX_COUNT );
     ibo->getBufferView()->setUsage( BufferView::Usage::DYNAMIC );
 
     auto createFontAtlas = []( void ) -> SharedPointer< Texture > {
@@ -186,7 +177,7 @@ Composition imgui::compositions::renderUI( void ) noexcept
     };
 
     auto descriptors = [ & ] {
-        auto descriptorSet = cmp.create< DescriptorSet >();
+        auto descriptorSet = crimild::alloc< DescriptorSet >();
         descriptorSet->descriptors = {
             {
                 .descriptorType = DescriptorType::UNIFORM_BUFFER,
@@ -232,39 +223,23 @@ Composition imgui::compositions::renderUI( void ) noexcept
         return descriptorSet;
     }();
 
-    renderPass->setDescriptors( crimild::retain( descriptors ) );
-    renderPass->setGraphicsPipeline( pipeline );
+    renderPass->reads( {} );
+    renderPass->writes( { color } );
+    renderPass->produces( { color } );
 
-    auto commandBuffers = Swapchain::getInstance()->getImages().map(
-        [ &, i = 0 ]( auto ) mutable {
-            auto commandBuffer = cmp.create< CommandBuffer >();
-            commandBuffer->setFrameIndex( i++ );
-            return commandBuffer;
-        } );
-
-    renderPass->setCommandRecorder(
-        [ commandBuffers,
-          renderPass = crimild::retain( renderPass ),
-          pipeline = crimild::retain( pipeline ),
-          descriptors = crimild::retain( descriptors ) ]( Size imageIndex ) -> CommandBuffer * {
-            auto commandBuffer = commandBuffers[ imageIndex ];
-            commandBuffer->clear();
-            commandBuffer->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
-            commandBuffer->beginRenderPass( crimild::get_ptr( renderPass ), nullptr );
-
+    return withDynamicGraphicsCommands(
+        renderPass,
+        [ pipeline, descriptors, vbo, ibo ]( auto commandBuffer ) {
             auto drawData = ImGui::GetDrawData();
             if ( drawData == nullptr ) {
-                commandBuffer->endRenderPass( crimild::get_ptr( renderPass ) );
-                commandBuffer->end();
-                return commandBuffer;
+                return;
             }
+
             auto vertexCount = drawData->TotalVtxCount;
             auto indexCount = drawData->TotalIdxCount;
             if ( vertexCount == 0 || indexCount == 0 ) {
                 // No vertex data. Nothing to render
-                commandBuffer->endRenderPass( crimild::get_ptr( renderPass ) );
-                commandBuffer->end();
-                return commandBuffer;
+                return;
             }
 
             auto positions = vbo->get( VertexAttribute::Name::POSITION );
@@ -316,14 +291,5 @@ Composition imgui::compositions::renderUI( void ) noexcept
                 indexOffset += cmds->IdxBuffer.Size;
                 vertexOffset += cmds->VtxBuffer.Size;
             }
-
-            commandBuffer->endRenderPass( crimild::get_ptr( renderPass ) );
-            commandBuffer->end();
-
-            return commandBuffer;
         } );
-
-    cmp.setOutput( crimild::get_ptr( renderPass->attachments[ 0 ] ) );
-
-    return cmp;
 }

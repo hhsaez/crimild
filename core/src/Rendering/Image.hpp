@@ -33,6 +33,7 @@
 #include "Foundation/NamedObject.hpp"
 #include "Rendering/Extent.hpp"
 #include "Rendering/Format.hpp"
+#include "Rendering/FrameGraphResource.hpp"
 #include "Rendering/RenderResource.hpp"
 #include "Streaming/Stream.hpp"
 
@@ -44,7 +45,8 @@ namespace crimild {
         : public coding::Codable,
           public NamedObject,
           public StreamObject, //< Deprecated
-          public RenderResourceImpl< Image > {
+          public RenderResourceImpl< Image >,
+          public FrameGraphResource {
         CRIMILD_IMPLEMENT_RTTI( crimild::Image )
 
     public:
@@ -73,6 +75,8 @@ namespace crimild {
         };
 
     public:
+        inline FrameGraphResource::Type getType( void ) const noexcept override { return FrameGraphResource::Type::IMAGE; }
+
         Format format = Format::UNDEFINED;
         Type type = Type::IMAGE_2D;
 

@@ -32,6 +32,8 @@
 #include "Rendering/CommandBuffer.hpp"
 #include "Rendering/Format.hpp"
 #include "Rendering/FrameGraphObjectImpl.hpp"
+#include "Rendering/FrameGraphOperation.hpp"
+#include "Rendering/FrameGraphResource.hpp"
 #include "Rendering/Image.hpp"
 #include "Rendering/ImageView.hpp"
 #include "Rendering/RenderResource.hpp"
@@ -43,8 +45,11 @@ namespace crimild {
     class DescriptorSet;
     class GraphicsPipeline;
 
-    class Attachment : public SharedObject,
-                       public FrameGraphObjectImpl< Attachment > {
+    class Attachment
+        : public FrameGraphObjectImpl< Attachment >,
+          public SharedObject,
+          public NamedObject,
+          public FrameGraphResource {
     public:
         enum class Usage {
             UNDEFINED,
@@ -64,6 +69,8 @@ namespace crimild {
         };
 
     public:
+        inline FrameGraphResource::Type getType( void ) const noexcept override { return FrameGraphResource::Type::ATTACHMENT; }
+
         Format format = Format::UNDEFINED;
         Usage usage = Usage::UNDEFINED;
         LoadOp loadOp = LoadOp::DONT_CARE;
@@ -71,17 +78,48 @@ namespace crimild {
         LoadOp stencilLoadOp = LoadOp::DONT_CARE;
         StoreOp stencilStoreOp = StoreOp::DONT_CARE;
 
-        // TODO
-        SharedPointer< ImageView > imageView;
+        SharedPointer< ImageView > imageView = [] {
+            // Create an empty image that might be used to store the attachment's data
+            // Note: If the attachment is for presentation (see below), this image is not
+            // used. Instead, we use the one from the Swapchain.
+            auto imageView = crimild::alloc< ImageView >();
+            imageView->image = crimild::alloc< Image >();
+            return imageView;
+        }();
+
+        inline Bool isPresentation( void ) const noexcept
+        {
+            // This attachment is for presentation if and only if the format
+            // is the expected one and no operation reads its data. This usually
+            // happens only in the case of the root operation.
+            return !isRead() && format == Format::COLOR_SWAPCHAIN_OPTIMAL;
+        }
+
+        virtual void setWrittenBy( FrameGraphOperation *op ) noexcept override
+        {
+            FrameGraphResource::setWrittenBy( op );
+            if ( imageView != nullptr ) {
+                imageView->setWrittenBy( op );
+            }
+        }
+
+        virtual void setReadBy( FrameGraphOperation *op ) noexcept override
+        {
+            FrameGraphResource::setReadBy( op );
+            if ( imageView != nullptr ) {
+                imageView->setReadBy( op );
+            }
+        }
     };
 
     class RenderPass
-        : public SharedObject,
-          public NamedObject,
-          public RenderResourceImpl< RenderPass > {
+        : public RenderResourceImpl< RenderPass >,
+          public FrameGraphOperation {
 
     public:
         virtual ~RenderPass( void ) = default;
+
+        inline FrameGraphOperation::Type getType( void ) const noexcept override { return FrameGraphOperation::Type::RENDER_PASS; }
 
         Array< SharedPointer< Attachment > > attachments;
         Extent2D extent = Extent2D {
@@ -94,6 +132,13 @@ namespace crimild {
         };
         ClearValue clearValue;
 
+        inline void setCommandBuffers( Array< SharedPointer< CommandBuffer > > const &commands ) noexcept { m_commands = commands; }
+        inline Array< SharedPointer< CommandBuffer > > &getCommandBuffers( void ) noexcept { return m_commands; }
+
+    private:
+        Array< SharedPointer< CommandBuffer > > m_commands;
+
+    public:
         inline void setCommandRecorder( CommandRecorder commandRecorder ) noexcept { m_commandRecorder = commandRecorder; }
 
         template< typename BuilderFunction >

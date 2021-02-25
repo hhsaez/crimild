@@ -69,6 +69,14 @@ crimild::Bool CommandBufferManager::bind( CommandBuffer *commandBuffer ) noexcep
             &allocInfo,
             &handler ) );
 
+    if ( !commandBuffer->getName().empty() ) {
+        utils::setObjectName(
+            renderDevice->handler,
+            UInt64( handler ),
+            VK_DEBUG_REPORT_OBJECT_TYPE_COMMAND_BUFFER_EXT,
+            commandBuffer->getName().c_str() );
+    }
+
     setBindInfo( commandBuffer, CommandBufferBindInfo { .handler = handler } );
     recordCommands( renderDevice, nullptr, commandBuffer );
 
@@ -154,24 +162,32 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
 
                     auto clearColor = m_currentRenderPass->clearValue.color;
                     auto clearDepth = m_currentRenderPass->clearValue.depthStencil;
-                    auto clearValues = std::vector< VkClearValue > {
-                        {
-                            .color = {
-                                .float32 = {
-                                    clearColor.r(),
-                                    clearColor.g(),
-                                    clearColor.b(),
-                                    clearColor.a(),
-                                },
-                            },
-                        },
-                        {
-                            .depthStencil = {
-                                clearDepth.r(),
-                                static_cast< crimild::UInt32 >( clearDepth.g() ),
-                            },
-                        },
-                    };
+                    auto clearValues = std::vector< VkClearValue > {};
+                    m_currentRenderPass->attachments.each(
+                        [ & ]( auto attachment ) {
+                            auto format = attachment->format;
+                            if ( utils::formatIsDepthStencil( format ) ) {
+                                clearValues.push_back(
+                                    {
+                                        .depthStencil = {
+                                            clearDepth.r(),
+                                            static_cast< crimild::UInt32 >( clearDepth.g() ),
+                                        },
+                                    } );
+                            } else {
+                                clearValues.push_back(
+                                    {
+                                        .color = {
+                                            .float32 = {
+                                                clearColor.r(),
+                                                clearColor.g(),
+                                                clearColor.b(),
+                                                clearColor.a(),
+                                            },
+                                        },
+                                    } );
+                            }
+                        } );
 
                     auto renderPassInfo = VkRenderPassBeginInfo {
                         .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,

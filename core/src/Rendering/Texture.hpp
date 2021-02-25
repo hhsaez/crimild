@@ -32,6 +32,7 @@
 #include "Foundation/NamedObject.hpp"
 #include "Image.hpp"
 #include "Rendering/RenderResource.hpp"
+#include "Rendering/FrameGraphResource.hpp"
 
 namespace crimild {
 
@@ -43,7 +44,8 @@ namespace crimild {
           public coding::Codable,
           public RenderResourceImpl< Texture >,
           public StreamObject, // TODO: remove this
-          public Catalog< Texture >::Resource {
+          public Catalog< Texture >::Resource,
+          public FrameGraphResource {
         CRIMILD_IMPLEMENT_RTTI( crimild::Texture )
 
     public:
@@ -55,8 +57,13 @@ namespace crimild {
 		 */
         virtual ~Texture( void );
 
+        inline FrameGraphResource::Type getType( void ) const noexcept override { return FrameGraphResource::Type::TEXTURE; }
+
         SharedPointer< ImageView > imageView;
         SharedPointer< Sampler > sampler;
+
+        virtual void setWrittenBy( FrameGraphOperation *op ) noexcept override;
+        virtual void setReadBy( FrameGraphOperation *op ) noexcept override;
 
         // DEPRECATED FROM HERE?
 

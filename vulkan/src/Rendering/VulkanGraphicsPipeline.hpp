@@ -81,7 +81,7 @@ namespace crimild {
             VkPipelineMultisampleStateCreateInfo createMultiplesampleState( void ) const noexcept;
             VkPipelineDepthStencilStateCreateInfo createDepthStencilState( GraphicsPipeline *graphicsPipeline ) const noexcept;
             VkPipelineColorBlendAttachmentState createColorBlendAttachment( GraphicsPipeline *graphicsPipeline ) const noexcept;
-            VkPipelineColorBlendStateCreateInfo createColorBlending( const VkPipelineColorBlendAttachmentState &colorBlendAttachment ) const noexcept;
+            VkPipelineColorBlendStateCreateInfo createColorBlending( const Array< VkPipelineColorBlendAttachmentState > &colorBlendAttachments ) const noexcept;
 
             using DynamicStates = std::vector< VkDynamicState >;
             DynamicStates getDynamicStates( GraphicsPipeline *graphicsPipeline ) const noexcept;
