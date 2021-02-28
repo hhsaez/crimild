@@ -100,20 +100,25 @@ void RenderSystem::lateStart( void ) noexcept
             auto prefilterAtlas = Image::ZERO;
             auto brdfLUT = Image::ZERO;
 
+            auto lit = lightingPass(
+                albedo,
+                positions,
+                normals,
+                materials,
+                depth,
+                shadowAtlas,
+                reflectionAtlas,
+                irradianceAtlas,
+                prefilterAtlas,
+                brdfLUT );
+
+            auto unlit = forwardUnlitPass( nullptr );
+
             return present(
-                lightingPass(
-                    albedo,
-                    positions,
-                    normals,
-                    materials,
-                    depth,
-                    shadowAtlas,
-                    reflectionAtlas,
-                    irradianceAtlas,
-                    prefilterAtlas,
-                    brdfLUT ) );
-            // return present( forwardUnlitPass( nullptr ) );
-            // return present( gBufferPass()->getProduct( 2 ) );
+                blend(
+                    "compose",
+                    unlit,
+                    lit ) );
         }() );
 }
 

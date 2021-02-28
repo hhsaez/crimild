@@ -58,6 +58,15 @@ namespace crimild {
 
         SharedPointer< FrameGraphOperation > forwardUnlitPass( SharedPointer< FrameGraphResource > const &input ) noexcept;
 
+        SharedPointer< FrameGraphOperation > blend(
+            std::string name,
+            SharedPointer< FrameGraphOperation > const &src,
+            SharedPointer< FrameGraphOperation > const &dst ) noexcept;
+
+        SharedPointer< FrameGraphOperation > blend(
+            std::string name,
+            SharedPointer< FrameGraphResource > const &src,
+            SharedPointer< FrameGraphResource > const &dst ) noexcept;
     }
 
 }
