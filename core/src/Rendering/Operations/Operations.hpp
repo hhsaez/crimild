@@ -44,6 +44,18 @@ namespace crimild {
 
         SharedPointer< FrameGraphOperation > gBufferPass( void ) noexcept;
 
+        SharedPointer< FrameGraphOperation > lightingPass(
+            SharedPointer< FrameGraphResource > const &albedo,
+            SharedPointer< FrameGraphResource > const &positions,
+            SharedPointer< FrameGraphResource > const &normals,
+            SharedPointer< FrameGraphResource > const &materials,
+            SharedPointer< FrameGraphResource > const &depth,
+            SharedPointer< FrameGraphResource > const &shadowAtlas,
+            SharedPointer< FrameGraphResource > const &reflectionAtlas,
+            SharedPointer< FrameGraphResource > const &irradianceAtlas,
+            SharedPointer< FrameGraphResource > const &prefilterAtlas,
+            SharedPointer< FrameGraphResource > const &brdfLUT ) noexcept;
+
         SharedPointer< FrameGraphOperation > forwardUnlitPass( SharedPointer< FrameGraphResource > const &input ) noexcept;
 
     }

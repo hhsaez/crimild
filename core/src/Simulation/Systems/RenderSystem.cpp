@@ -86,8 +86,34 @@ void RenderSystem::lateStart( void ) noexcept
     setFrameGraph(
         [] {
             using namespace crimild::framegraph;
+            auto gBuffer = gBufferPass();
+            auto albedo = gBuffer->getProduct( 0 );
+            auto positions = gBuffer->getProduct( 1 );
+            auto normals = gBuffer->getProduct( 2 );
+            auto materials = gBuffer->getProduct( 3 );
+            auto depth = gBuffer->getProduct( 4 );
+
+            // TODO
+            auto shadowAtlas = Image::ONE;
+            auto reflectionAtlas = Image::ZERO;
+            auto irradianceAtlas = Image::ZERO;
+            auto prefilterAtlas = Image::ZERO;
+            auto brdfLUT = Image::ZERO;
+
+            return present(
+                lightingPass(
+                    albedo,
+                    positions,
+                    normals,
+                    materials,
+                    depth,
+                    shadowAtlas,
+                    reflectionAtlas,
+                    irradianceAtlas,
+                    prefilterAtlas,
+                    brdfLUT ) );
             // return present( forwardUnlitPass( nullptr ) );
-            return present( gBufferPass()->getProduct( 2 ) );
+            // return present( gBufferPass()->getProduct( 2 ) );
         }() );
 }
 
