@@ -112,7 +112,7 @@ void RenderSystem::lateStart( void ) noexcept
                 prefilterAtlas,
                 brdfLUT );
 
-            auto unlit = forwardUnlitPass( nullptr );
+            auto unlit = forwardUnlitPass( depth );
 
             return present(
                 blend(

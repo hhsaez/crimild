@@ -123,12 +123,14 @@ crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
             // 2. Read-Write: LoadOp::LOAD
             // 3. Read only: LoadOp::LOAD?
 
+            auto loadOp = attachment->isWrittenBefore( renderPass ) ? VK_ATTACHMENT_LOAD_OP_LOAD : VK_ATTACHMENT_LOAD_OP_CLEAR;
+
             return VkAttachmentDescription {
                 .format = utils::getFormat( renderDevice, attachment->format ),
                 .samples = VK_SAMPLE_COUNT_1_BIT,
-                .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+                .loadOp = loadOp,
                 .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-                .stencilLoadOp = utils::formatIsDepthStencil( attachment->format ) ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+                .stencilLoadOp = utils::formatIsDepthStencil( attachment->format ) ? loadOp : VK_ATTACHMENT_LOAD_OP_DONT_CARE,
                 .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
                 .initialLayout = initialLayout,
                 .finalLayout = finalLayout,

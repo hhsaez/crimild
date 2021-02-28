@@ -25,61 +25,20 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_RENDERING_FRAME_GRAPH_RESOURCE_
-#define CRIMILD_CORE_RENDERING_FRAME_GRAPH_RESOURCE_
+#include "Rendering/FrameGraphResource.hpp"
 
-#include "Foundation/Containers/Array.hpp"
+#include "Rendering/FrameGraphOperation.hpp"
 
-namespace crimild {
+using namespace crimild;
 
-    class FrameGraphOperation;
-
-    /**
-     * \brief A resource to be used by frame graph operations
-     */
-    class FrameGraphResource {
-    public:
-        enum class Type {
-            BUFFER,
-            BUFFER_VIEW,
-            IMAGE,
-            IMAGE_VIEW,
-            TEXTURE,
-            ATTACHMENT,
-        };
-
-    public:
-        virtual ~FrameGraphResource( void ) = default;
-
-        virtual Type getType( void ) const noexcept = 0;
-
-        virtual void setReadBy( FrameGraphOperation *op ) noexcept { m_readBy.add( op ); }
-
-        inline Bool isRead( void ) const noexcept { return !m_readBy.empty(); }
-
-        template< typename Fn >
-        void eachReadBy( Fn fn ) noexcept
-        {
-            m_readBy.each( fn );
-        }
-
-        virtual void setWrittenBy( FrameGraphOperation *op ) noexcept { m_writtenBy.add( op ); }
-
-        inline Bool isWritten( void ) const noexcept { return !m_writtenBy.empty(); }
-
-        Bool isWrittenBefore( FrameGraphOperation *op ) noexcept;
-
-        template< typename Fn >
-        void eachWrittenBy( Fn fn ) noexcept
-        {
-            m_writtenBy.each( fn );
-        }
-
-    private:
-        Array< FrameGraphOperation * > m_readBy;
-        Array< FrameGraphOperation * > m_writtenBy;
-    };
-
+Bool FrameGraphResource::isWrittenBefore( FrameGraphOperation *op ) noexcept
+{
+    auto ret = false;
+    eachWrittenBy(
+        [ op, &ret ]( auto other ) {
+            if ( other->getPriority() < op->getPriority() ) {
+                ret = true;
+            }
+        } );
+    return ret;
 }
-
-#endif
