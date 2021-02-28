@@ -39,15 +39,13 @@
 
 using namespace crimild;
 
-SharedPointer< FrameGraphOperation > crimild::framegraph::forwardUnlitPass( SharedPointer< FrameGraphResource > const &input ) noexcept
+SharedPointer< FrameGraphOperation > crimild::framegraph::forwardUnlitPass( SharedPointer< FrameGraphResource > const &depthInput ) noexcept
 {
-    // auto renderables = crimild::cast_ptr< Renderables >( input );
-    // auto camera = renderables->camera;
-
     auto renderPass = crimild::alloc< RenderPass >();
+    renderPass->setName( "forwardUnlit" );
 
     auto color = useColorAttachment( "scene/unlit/color" );
-    auto depth = useDepthAttachment( "scene/depth" );
+    auto depth = depthInput != nullptr ? crimild::cast_ptr< Attachment >( depthInput ) : useDepthAttachment( "scene/depth" );
 
     renderPass->attachments = { color, depth };
 
