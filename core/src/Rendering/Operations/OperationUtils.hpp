@@ -36,7 +36,7 @@ namespace crimild {
 
     namespace framegraph {
 
-        SharedPointer< Attachment > useColorAttachment( std::string name = "" ) noexcept;
+        SharedPointer< Attachment > useColorAttachment( std::string name = "", Format format = Format::COLOR_SWAPCHAIN_OPTIMAL ) noexcept;
         SharedPointer< Attachment > useDepthAttachment( std::string name = "" ) noexcept;
 
         SharedPointer< Texture > withResource( SharedPointer< Texture > const &texture, SharedPointer< FrameGraphResource > const &resource ) noexcept;

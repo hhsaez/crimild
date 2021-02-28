@@ -33,7 +33,8 @@
 
 namespace crimild {
 
-	class ShadowMap;
+    class ShadowMap;
+    class DescriptorSet;
 
     /**
        Attenuation values:
@@ -51,67 +52,70 @@ namespace crimild {
        | 600	  | 1.0      | 0.007  | 0.0002
        | 3250	  | 1.0      | 0.0014 | 0.000007
      */
-	class Light : public Node, public Catalog< Light >::Resource {
-		CRIMILD_IMPLEMENT_RTTI( crimild::Light )
+    class Light : public Node, public Catalog< Light >::Resource {
+        CRIMILD_IMPLEMENT_RTTI( crimild::Light )
 
-	public:
-		enum class Type {
-			AMBIENT,
-			POINT,
-			DIRECTIONAL,
-			SPOT,
-		};
+    public:
+        enum class Type {
+            AMBIENT,
+            POINT,
+            DIRECTIONAL,
+            SPOT,
+        };
 
-	public:
-		Light( Type type = Type::POINT );
-		virtual ~Light( void );
+    public:
+        Light( Type type = Type::POINT );
+        virtual ~Light( void );
 
-		const Type &getType( void ) const noexcept { return _type; }
+        const Type &getType( void ) const noexcept { return _type; }
 
-		Vector3f getPosition( void ) const { return getWorld().getTranslate(); }
-		Vector3f getDirection( void ) const { return ( _type == Type::POINT ? Vector3f( 0.0f, 0.0f, 0.0f ) : getWorld().computeDirection() ); }
+        Vector3f getPosition( void ) const { return getWorld().getTranslate(); }
+        Vector3f getDirection( void ) const { return ( _type == Type::POINT ? Vector3f( 0.0f, 0.0f, 0.0f ) : getWorld().computeDirection() ); }
 
-		void setAttenuation( const Vector3f &attenuation ) { _attenuation = attenuation; }
-		const Vector3f &getAttenuation( void ) const { return _attenuation; }
+        void setAttenuation( const Vector3f &attenuation ) { _attenuation = attenuation; }
+        const Vector3f &getAttenuation( void ) const { return _attenuation; }
 
-		void setColor( const RGBAColorf &color ) { _color = color; }
-		const RGBAColorf &getColor( void ) const { return _color; }
+        void setColor( const RGBAColorf &color ) { _color = color; }
+        const RGBAColorf &getColor( void ) const { return _color; }
 
-		void setOuterCutoff( float value ) { _outerCutoff = value; }
-		float getOuterCutoff( void ) const { return _outerCutoff; }
+        void setOuterCutoff( float value ) { _outerCutoff = value; }
+        float getOuterCutoff( void ) const { return _outerCutoff; }
 
-		void setInnerCutoff( float value ) { _innerCutoff = value; }
-		float getInnerCutoff( void ) const { return _innerCutoff; }
+        void setInnerCutoff( float value ) { _innerCutoff = value; }
+        float getInnerCutoff( void ) const { return _innerCutoff; }
 
-		void setExponent( float value ) { _exponent = value; }
-		float getExponent( void ) const { return _exponent; }
+        void setExponent( float value ) { _exponent = value; }
+        float getExponent( void ) const { return _exponent; }
 
         const RGBAColorf &getAmbient( void ) const { return _ambient; }
         void setAmbient( const RGBAColorf &ambient ) { _ambient = ambient; }
 
-	private:
-		Type _type;
-		Vector3f _attenuation;
-		RGBAColorf _color;
-		float _outerCutoff;
-		float _innerCutoff;
-		float _exponent;
+    private:
+        Type _type;
+        Vector3f _attenuation;
+        RGBAColorf _color;
+        float _outerCutoff;
+        float _innerCutoff;
+        float _exponent;
         RGBAColorf _ambient;
+        SharedPointer< DescriptorSet > m_descriptors;
 
-	public:
-		virtual void accept( NodeVisitor &visitor ) override;
+    public:
+        virtual void accept( NodeVisitor &visitor ) override;
 
-	public:
-		void setCastShadows( crimild::Bool enabled );
-		inline crimild::Bool castShadows( void ) const { return _shadowMap != nullptr; }
+    public:
+        void setCastShadows( crimild::Bool enabled );
+        inline crimild::Bool castShadows( void ) const { return _shadowMap != nullptr; }
 
         Matrix4f computeLightSpaceMatrix( void ) const noexcept;
 
-		void setShadowMap( SharedPointer< ShadowMap > const &shadowMap ) { _shadowMap = shadowMap; }
-		inline ShadowMap *getShadowMap( void ) { return crimild::get_ptr( _shadowMap ); }
+        void setShadowMap( SharedPointer< ShadowMap > const &shadowMap ) { _shadowMap = shadowMap; }
+        inline ShadowMap *getShadowMap( void ) { return crimild::get_ptr( _shadowMap ); }
 
-	private:
-		SharedPointer< ShadowMap > _shadowMap;
+        DescriptorSet *getDescriptors( void ) noexcept;
+
+    private:
+        SharedPointer< ShadowMap > _shadowMap;
 
         /**
             \name Coding
@@ -123,8 +127,7 @@ namespace crimild {
         virtual void decode( coding::Decoder &decoder ) override;
 
         //@}
-
-	};
+    };
 
 }
 

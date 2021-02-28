@@ -45,12 +45,13 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( void ) no
     auto renderPass = crimild::alloc< RenderPass >();
     renderPass->setName( "gBufferPass" );
 
-    auto albedo = useColorAttachment( "scene/unlit/albedo" );
-    auto position = useColorAttachment( "scene/unlit/position" );
-    auto normal = useColorAttachment( "scene/unlit/normal" );
-    auto depth = useDepthAttachment( "scene/depth" );
+    auto albedo = useColorAttachment( "gBuffer/albedo" );
+    auto position = useColorAttachment( "gBuffer/position", Format::R32G32B32A32_SFLOAT );
+    auto normal = useColorAttachment( "gBuffer/normal", Format::R32G32B32A32_SFLOAT );
+    auto material = useColorAttachment( "gBuffer/material", Format::R32G32B32A32_SFLOAT );
+    auto depth = useDepthAttachment( "gBuffer/depth" );
 
-    renderPass->attachments = { albedo, position, normal, depth };
+    renderPass->attachments = { albedo, position, normal, material, depth };
 
     auto descriptors = [ & ] {
         auto descriptorSet = crimild::alloc< DescriptorSet >();
@@ -119,14 +120,11 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( void ) no
 
                                 layout( set = 1, binding = 0 ) uniform Material
                                 {
-                                    //vec3 albedo;
-                                    //float metallic;
-                                    //float roughness;
-                                    //float ambientOcclusion;
                                     vec4 albedo;
-                                    vec4 ops;
-                                }
-                                uMaterial;
+                                    float metallic;
+                                    float roughness;
+                                    float ambientOcclusion;
+                                } uMaterial;
 
                                 layout( set = 1, binding = 1 ) uniform sampler2D uAlbedoMap;
                                 layout( set = 1, binding = 2 ) uniform sampler2D uMetallicMap;
@@ -137,6 +135,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( void ) no
                                 layout ( location = 0 ) out vec4 outAlbedo;
                                 layout ( location = 1 ) out vec4 outPosition;
                                 layout ( location = 2 ) out vec4 outNormal;
+                                layout ( location = 3 ) out vec4 outMaterial;
 
                                 // Computes T, B and TBN matrix based on surface N
                                 // TODO (hernan): is this in view space? If so, we transform T and B to world space
@@ -168,10 +167,17 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( void ) no
                                     vec3 P = inPosition;
 
                                     vec3 albedo = uMaterial.albedo.rgb * pow( texture( uAlbedoMap, inTexCoord ).rgb, vec3( 2.2 ) );
+                                    float metallic = uMaterial.metallic * texture( uMetallicMap, inTexCoord ).r;
+                                    float roughness = uMaterial.roughness * texture( uRoughnessMap, inTexCoord ).r;
+                                    float ambientOcclusion = uMaterial.ambientOcclusion * texture( uAmbientOcclusionMap, inTexCoord ).r;
+
+                                    metallic = clamp( metallic, 0.0, 1.0 );
+	                                roughness = clamp( roughness, 0.05, 0.999 );
 
                                     outAlbedo = vec4( albedo, 1.0 );
                                     outPosition = vec4( P, 1.0 );
                                     outNormal = vec4( N, 1.0 );
+                                    outMaterial = vec4( metallic, roughness, ambientOcclusion, 1.0 );
                                 }
                             )" ),
                     } );
@@ -245,8 +251,8 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( void ) no
     };
 
     renderPass->reads( {} );
-    renderPass->writes( { albedo, position, normal, depth } );
-    renderPass->produces( { albedo, position, normal, depth } );
+    renderPass->writes( { albedo, position, normal, material, depth } );
+    renderPass->produces( { albedo, position, normal, material, depth } );
 
     return withDynamicGraphicsCommands(
         renderPass,

@@ -32,14 +32,14 @@
 
 using namespace crimild;
 
-SharedPointer< Attachment > crimild::framegraph::useColorAttachment( std::string name ) noexcept
+SharedPointer< Attachment > crimild::framegraph::useColorAttachment( std::string name, Format format ) noexcept
 {
     name = name != "" ? name : "color";
 
     auto att = crimild::alloc< Attachment >();
     att->setName( name + "/attachment" );
     att->usage = Attachment::Usage::COLOR_ATTACHMENT;
-    att->format = Format::COLOR_SWAPCHAIN_OPTIMAL;
+    att->format = format;
     att->imageView->setName( att->getName() + "/imageView" );
     att->imageView->image->setName( att->getName() + "/image" );
     return att;
@@ -82,8 +82,8 @@ SharedPointer< Texture > crimild::framegraph::withResource( SharedPointer< Textu
     }
     texture->sampler = [] {
         auto sampler = crimild::alloc< Sampler >();
-        sampler->setMinFilter( Sampler::Filter::LINEAR );
-        sampler->setMagFilter( Sampler::Filter::LINEAR );
+        sampler->setMinFilter( Sampler::Filter::NEAREST );
+        sampler->setMagFilter( Sampler::Filter::NEAREST );
         return sampler;
     }();
 
