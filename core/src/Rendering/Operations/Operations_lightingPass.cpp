@@ -370,7 +370,13 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
 
                                 void main()
                                 {
-                                    vec3 albedo = texture( uAlbedo, inTexCoord ).rgb;
+                                    vec4 baseColor = texture( uAlbedo, inTexCoord );
+                                    if ( baseColor.a == 0 ) {
+                                        // nothing to render. discard and avoid complex calculations
+                                        discard;
+                                    }
+
+                                    vec3 albedo = baseColor.rgb;
                                     vec3 P = texture( uPositions, inTexCoord ).xyz;
                                     vec3 N = texture( uNormals, inTexCoord ).xyz;
                                     vec4 material = texture( uMaterials, inTexCoord );
