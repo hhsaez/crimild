@@ -51,6 +51,8 @@ namespace crimild {
             alignas( 16 ) Vector4f cascadeSplits;
             alignas( 16 ) Matrix4f lightSpaceMatrix[ 4 ];
             alignas( 16 ) Vector4f viewport;
+            alignas( 4 ) Real32 energy;
+            alignas( 4 ) Real32 radius;
         };
 
     public:
@@ -87,6 +89,8 @@ namespace crimild {
                 }
                 props.viewport = m_light->getShadowMap()->getViewport();
             }
+            props.energy = m_light->getEnergy();
+            props.radius = m_light->getRadius();
         }
 
     private:
@@ -179,6 +183,12 @@ DescriptorSet *Light::getDescriptors( void ) noexcept
     }();
 
     return crimild::get_ptr( m_descriptors );
+}
+
+Real32 Light::getRadius( void ) const noexcept
+{
+    const auto MIN_ATTENUATION = 5.0f / 256.0f;
+    return Numericf::sqrt( m_energy / MIN_ATTENUATION );
 }
 
 void Light::encode( coding::Encoder &encoder )

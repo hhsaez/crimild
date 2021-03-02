@@ -31,103 +31,101 @@
 #include "Foundation/Log.hpp"
 #include "Foundation/Memory.hpp"
 
-#include <string>
-#include <sstream>
 #include <map>
+#include <sstream>
+#include <string>
 
 namespace crimild {
 
     class Settings : public SharedObject {
     public:
-		static const char *SETTINGS_APP_NAME;
-		static const char *SETTINGS_APP_VERSION_MAJOR;
-		static const char *SETTINGS_APP_VERSION_MINOR;
-		static const char *SETTINGS_APP_VERSION_PATCH;
-    	static const char *SETTINGS_RENDERING_SHADOWS_ENABLED;
-    	static const char *SETTINGS_RENDERING_SHADOWS_RESOLUTION_WIDTH;
-    	static const char *SETTINGS_RENDERING_SHADOWS_RESOLUTION_HEIGHT;
+        static const char *SETTINGS_APP_NAME;
+        static const char *SETTINGS_APP_VERSION_MAJOR;
+        static const char *SETTINGS_APP_VERSION_MINOR;
+        static const char *SETTINGS_APP_VERSION_PATCH;
+        static const char *SETTINGS_RENDERING_SHADOWS_ENABLED;
+        static const char *SETTINGS_RENDERING_SHADOWS_RESOLUTION_WIDTH;
+        static const char *SETTINGS_RENDERING_SHADOWS_RESOLUTION_HEIGHT;
 
-	public:
-		Settings( void );
-        
+    public:
+        Settings( void );
+
         Settings( int argc, char **argv );
 
-		virtual ~Settings( void );
-        
+        virtual ~Settings( void );
+
         virtual void load( std::string filename ) { }
-        
+
         virtual void save( std::string filename ) { }
 
-		void set(std::string key, std::string value)
-		{
-			_settings[key] = value;
-		}
+        void set( std::string key, std::string value )
+        {
+            _settings[ key ] = value;
+        }
 
-		void set(std::string key, const char *value)
-		{
-			set(key, std::string(value));
-		}
+        void set( std::string key, const char *value )
+        {
+            set( key, std::string( value ) );
+        }
 
-		template< typename T >
-		void set( std::string key, T value )
-		{
-			std::stringstream str;
-			str << value;
-			_settings[ key ] = str.str();
-		}
-		
+        template< typename T >
+        void set( std::string key, T value )
+        {
+            std::stringstream str;
+            str << value;
+            _settings[ key ] = str.str();
+        }
+
         bool hasKey( std::string key )
         {
             return ( _settings.find( key ) != _settings.end() );
         }
 
-		std::string get(std::string key, const char *defaultValue)
-		{
-			if (_settings.find(key) == _settings.end()) {
-				// key not found
-				return defaultValue;
-			}
+        std::string get( std::string key, const char *defaultValue )
+        {
+            if ( _settings.find( key ) == _settings.end() ) {
+                // key not found
+                return defaultValue;
+            }
 
-			return _settings[key];
-		}
+            return _settings[ key ];
+        }
 
-		std::string get(std::string key, std::string defaultValue)
-		{
-			if (_settings.find(key) == _settings.end()) {
-				// key not found
-				return defaultValue;
-			}
+        std::string get( std::string key, std::string defaultValue )
+        {
+            if ( _settings.find( key ) == _settings.end() ) {
+                // key not found
+                return defaultValue;
+            }
 
-			return _settings[key];
-		}
+            return _settings[ key ];
+        }
 
-		template< typename T >
-		T get( std::string key, T defaultValue )
-		{
-			if ( !hasKey( key ) ) {
-				// key not found
-				return defaultValue;
-			}
-			
-			std::stringstream str;
-			str << _settings[ key ];
-			T value;
-			str >> value;
-			return value;
-		}
+        template< typename T >
+        T get( std::string key, T defaultValue = T() )
+        {
+            if ( !hasKey( key ) ) {
+                // key not found
+                return defaultValue;
+            }
 
-		void parseCommandLine( int argc, char **argv );
-        
+            std::stringstream str;
+            str << _settings[ key ];
+            T value;
+            str >> value;
+            return value;
+        }
+
+        void parseCommandLine( int argc, char **argv );
+
         void each( std::function< void( std::string, Settings * ) > callback );
 
-	private:
-		std::map< std::string, std::string > _settings;
-	};
+    private:
+        std::map< std::string, std::string > _settings;
+    };
 
     using SettingsPtr = SharedPointer< Settings >;
 
 }
 
 #endif
-
-
