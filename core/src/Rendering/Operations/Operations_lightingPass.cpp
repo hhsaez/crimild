@@ -26,6 +26,7 @@
  */
 
 #include "Components/MaterialComponent.hpp"
+#include "Primitives/SpherePrimitive.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Material.hpp"
 #include "Rendering/Operations/OperationUtils.hpp"
@@ -70,32 +71,38 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
                         crimild::alloc< Shader >(
                             Shader::Stage::VERTEX,
                             R"(
-                                vec2 positions[6] = vec2[](
-                                    vec2( -1.0, 1.0 ),
-                                    vec2( -1.0, -1.0 ),
-                                    vec2( 1.0, -1.0 ),
+                                layout ( location = 0 ) in vec3 inPosition;
+                                layout ( location = 1 ) in vec3 inNormal;
+                                layout ( location = 2 ) in vec2 inTexCoord;
 
-                                    vec2( -1.0, 1.0 ),
-                                    vec2( 1.0, -1.0 ),
-                                    vec2( 1.0, 1.0 )
-                                );
+                                layout( set = 0, binding = 0 ) uniform RenderPassUniforms {
+                                    mat4 view;
+                                    mat4 proj;
+                                };
 
-                                vec2 texCoords[6] = vec2[](
-                                    vec2( 0.0, 0.0 ),
-                                    vec2( 0.0, 1.0 ),
-                                    vec2( 1.0, 1.0 ),
-
-                                    vec2( 0.0, 0.0 ),
-                                    vec2( 1.0, 1.0 ),
-                                    vec2( 1.0, 0.0 )
-                                );
+                                layout ( set = 1, binding = 0 ) uniform LightProps {
+                                    uint type;
+                                    vec4 position;
+                                    vec4 direction;
+                                    vec4 ambient;
+                                    vec4 color;
+                                    vec4 attenuation;
+                                    vec4 cutoff;
+                                    bool castShadows;
+                                    float shadowBias;
+                                    vec4 cascadeSplitsd;
+                                    mat4 lightSpaceMatrix[ 4 ];
+                                    vec4 viewport;
+                                    float energy;
+                                    float radius;
+                                } uLight;
 
                                 layout ( location = 0 ) out vec2 outTexCoord;
 
                                 void main()
                                 {
-                                    gl_Position = vec4( positions[ gl_VertexIndex ], 0.0, 1.0 );
-                                    outTexCoord = texCoords[ gl_VertexIndex ];
+                                    gl_Position = proj * view * vec4( ( uLight.position.xyz + uLight.radius * inPosition ), 1.0 );
+                                    outTexCoord = inTexCoord;
                                 }
                             )" ),
                         crimild::alloc< Shader >(
@@ -106,6 +113,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
                                 layout( set = 0, binding = 0 ) uniform RenderPassUniforms {
                                     mat4 view;
                                     mat4 proj;
+                                    vec2 viewport;
                                 };
 
                                 layout ( set = 0, binding = 1 ) uniform sampler2D uAlbedo;
@@ -131,6 +139,8 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
                                     vec4 cascadeSplitsd;
                                     mat4 lightSpaceMatrix[ 4 ];
                                     vec4 viewport;
+                                    float energy;
+                                    float radius;
                                 } uLight;
 
                                 layout ( location = 0 ) out vec4 outColor;
@@ -370,16 +380,18 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
 
                                 void main()
                                 {
-                                    vec4 baseColor = texture( uAlbedo, inTexCoord );
+                                    vec2 uv = gl_FragCoord.st / viewport;
+
+                                    vec4 baseColor = texture( uAlbedo, uv );
                                     if ( baseColor.a == 0 ) {
                                         // nothing to render. discard and avoid complex calculations
                                         discard;
                                     }
 
                                     vec3 albedo = baseColor.rgb;
-                                    vec3 P = texture( uPositions, inTexCoord ).xyz;
-                                    vec3 N = texture( uNormals, inTexCoord ).xyz;
-                                    vec4 material = texture( uMaterials, inTexCoord );
+                                    vec3 P = texture( uPositions, uv ).xyz;
+                                    vec3 N = texture( uNormals, uv ).xyz;
+                                    vec4 material = texture( uMaterials, uv );
                                     float metallic = material.x;
                                     float roughness = material.y;
                                     float ambientOcclusion = material.z;
@@ -396,7 +408,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
 
                                     vec3 H = normalize( V + L );
                                     float attenuation = 1.0 / ( dist * dist );
-                                    vec3 radiance = uLight.color.rgb * attenuation;
+                                    vec3 radiance = uLight.color.rgb * uLight.energy * attenuation;
                                     vec3 L0 = brdf( N, H, V, L, radiance, albedo, metallic, roughness );
 
                                     vec3 ambient = irradiance( N, V, albedo, metallic, roughness, ambientOcclusion );
@@ -405,13 +417,14 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
                                 }
                             )" ),
                     } );
+                program->vertexLayouts = { VertexP3N3TC2::getLayout() };
                 program->descriptorSetLayouts = {
                     [] {
                         auto layout = crimild::alloc< DescriptorSetLayout >();
                         layout->bindings = {
                             {
                                 .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                                .stage = Shader::Stage::FRAGMENT,
+                                .stage = Shader::Stage::ALL,
                             },
                             {
                                 .descriptorType = DescriptorType::TEXTURE,
@@ -457,7 +470,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
                         layout->bindings = {
                             {
                                 .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                                .stage = Shader::Stage::FRAGMENT,
+                                .stage = Shader::Stage::ALL,
                             },
                         };
                         return layout;
@@ -471,8 +484,18 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
             .srcColorBlendFactor = BlendFactor::ONE, //DST_COLOR,
             .dstColorBlendFactor = BlendFactor::ONE, //ZERO,
         };
+        pipeline->rasterizationState = RasterizationState {
+            .cullMode = CullMode::FRONT, // Render back faces only
+        };
         return pipeline;
     }();
+
+    auto lightVolume = crimild::alloc< SpherePrimitive >(
+        SpherePrimitive::Params {
+            .type = Primitive::Type::TRIANGLES,
+            .layout = VertexP3N3TC2::getLayout(),
+            .radius = 1.0,
+        } );
 
     auto descriptors = [ & ] {
         auto descriptorSet = crimild::alloc< DescriptorSet >();
@@ -532,7 +555,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
 
     return withDynamicGraphicsCommands(
         renderPass,
-        [ pipeline, descriptors, viewport ]( auto commandBuffer ) {
+        [ lightVolume, pipeline, descriptors, viewport ]( auto commandBuffer ) {
             commandBuffer->setViewport( viewport );
             commandBuffer->setScissor( viewport );
 
@@ -547,7 +570,8 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
                     commandBuffer->bindDescriptorSet( light->getDescriptors() );
 
                     // TODO: Render light volume
-                    commandBuffer->draw( 6 );
+                    // commandBuffer->draw( 6 );
+                    commandBuffer->drawPrimitive( crimild::get_ptr( lightVolume ) );
                 } );
         } );
 }

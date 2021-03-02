@@ -90,6 +90,11 @@ namespace crimild {
         const RGBAColorf &getAmbient( void ) const { return _ambient; }
         void setAmbient( const RGBAColorf &ambient ) { _ambient = ambient; }
 
+        inline Real32 getEnergy( void ) const noexcept { return m_energy; }
+        inline void setEnergy( Real32 energy ) noexcept { m_energy = energy; }
+
+        Real32 getRadius( void ) const noexcept;
+
     private:
         Type _type;
         Vector3f _attenuation;
@@ -99,6 +104,7 @@ namespace crimild {
         float _exponent;
         RGBAColorf _ambient;
         SharedPointer< DescriptorSet > m_descriptors;
+        Real32 m_energy = 1.0f;
 
     public:
         virtual void accept( NodeVisitor &visitor ) override;
