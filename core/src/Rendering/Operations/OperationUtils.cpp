@@ -58,6 +58,11 @@ SharedPointer< Attachment > crimild::framegraph::useDepthAttachment( std::string
     return att;
 }
 
+SharedPointer< FrameGraphResource > crimild::framegraph::useResource( SharedPointer< FrameGraphOperation > const &op, Size index ) noexcept
+{
+    return op->getProduct( index );
+}
+
 SharedPointer< Texture > crimild::framegraph::withResource( SharedPointer< Texture > const &texture, SharedPointer< FrameGraphResource > const &resource ) noexcept
 {
     switch ( resource->getType() ) {

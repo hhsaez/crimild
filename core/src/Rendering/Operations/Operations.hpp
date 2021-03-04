@@ -37,12 +37,14 @@ namespace crimild {
 
     namespace framegraph {
 
+        SharedPointer< FrameGraphOperation > fetchRenderables( void ) noexcept;
+
         SharedPointer< FrameGraphOperation > present( SharedPointer< FrameGraphOperation > op ) noexcept;
         SharedPointer< FrameGraphOperation > present( SharedPointer< FrameGraphResource > resource ) noexcept;
 
         SharedPointer< FrameGraphOperation > shader( std::string source ) noexcept;
 
-        SharedPointer< FrameGraphOperation > gBufferPass( void ) noexcept;
+        SharedPointer< FrameGraphOperation > gBufferPass( SharedPointer< FrameGraphResource > const renderables ) noexcept;
 
         SharedPointer< FrameGraphOperation > lightingPass(
             SharedPointer< FrameGraphResource > const &albedo,
@@ -56,17 +58,12 @@ namespace crimild {
             SharedPointer< FrameGraphResource > const &prefilterAtlas,
             SharedPointer< FrameGraphResource > const &brdfLUT ) noexcept;
 
-        SharedPointer< FrameGraphOperation > forwardUnlitPass( SharedPointer< FrameGraphResource > const &input ) noexcept;
+        SharedPointer< FrameGraphOperation > forwardUnlitPass(
+            SharedPointer< FrameGraphResource > const &renderables,
+            SharedPointer< FrameGraphResource > const &colorAttachment = nullptr,
+            SharedPointer< FrameGraphResource > const &depthAttachment = nullptr ) noexcept;
 
-        SharedPointer< FrameGraphOperation > blend(
-            std::string name,
-            SharedPointer< FrameGraphOperation > const &src,
-            SharedPointer< FrameGraphOperation > const &dst ) noexcept;
-
-        SharedPointer< FrameGraphOperation > blend(
-            std::string name,
-            SharedPointer< FrameGraphResource > const &src,
-            SharedPointer< FrameGraphResource > const &dst ) noexcept;
+        SharedPointer< FrameGraphOperation > blend( Array< SharedPointer< FrameGraphResource > > const &resources ) noexcept;
     }
 
 }
