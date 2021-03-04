@@ -568,9 +568,6 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
                     commandBuffer->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
                     commandBuffer->bindDescriptorSet( crimild::get_ptr( descriptors ) );
                     commandBuffer->bindDescriptorSet( light->getDescriptors() );
-
-                    // TODO: Render light volume
-                    // commandBuffer->draw( 6 );
                     commandBuffer->drawPrimitive( crimild::get_ptr( lightVolume ) );
                 } );
         } );

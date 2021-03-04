@@ -32,15 +32,15 @@
 #include "Rendering/Operations/Operations.hpp"
 #include "Rendering/Pipeline.hpp"
 #include "Rendering/RenderPass.hpp"
+#include "Rendering/RenderableSet.hpp"
 #include "Rendering/Uniforms/CameraViewProjectionUniformBuffer.hpp"
 #include "Rendering/Vertex.hpp"
+#include "SceneGraph/Camera.hpp"
 #include "SceneGraph/Geometry.hpp"
-#include "Simulation/Simulation.hpp"
-#include "Visitors/ApplyToGeometries.hpp"
 
 using namespace crimild;
 
-SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( void ) noexcept
+SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( SharedPointer< FrameGraphResource > const renderables ) noexcept
 {
     auto renderPass = crimild::alloc< RenderPass >();
     renderPass->setName( "gBufferPass" );
@@ -250,52 +250,19 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( void ) no
         .dimensions = Rectf( 0, 0, 1, 1 ),
     };
 
-    renderPass->reads( {} );
+    renderPass->reads( { renderables } );
     renderPass->writes( { albedo, position, normal, material, depth } );
     renderPass->produces( { albedo, position, normal, material, depth } );
 
     return withDynamicGraphicsCommands(
         renderPass,
-        [ pipeline, descriptors, viewport ]( auto commandBuffer ) {
-            Array< Geometry * > renderables;
-
-            auto scene = Simulation::getInstance()->getScene();
-            scene->perform(
-                ApplyToGeometries(
-                    [ & ]( Geometry *geometry ) {
-                        if ( geometry->getLayer() == Node::Layer::SKYBOX ) {
-                            // ret.environment.add( geometry );
-                        } else if ( auto material = geometry->getComponent< MaterialComponent >()->first() ) {
-                            // TODO: What if there are multiple materials?
-                            // Can we add the same geometry to multiple lists? That will result
-                            // in multiple render passes for a single geometry, but I don't know
-                            // if that's ok.
-                            if ( auto pipeline = material->getGraphicsPipeline() ) {
-                                if ( auto program = crimild::get_ptr( pipeline->getProgram() ) ) {
-                                    auto supportsPBR = false;
-                                    program->descriptorSetLayouts.each(
-                                        [ &supportsPBR ]( auto layout ) {
-                                            if ( layout->bindings.filter( []( auto &binding ) { return binding.descriptorType == DescriptorType::ALBEDO_MAP; } ).size() > 0 ) {
-                                                // assume PBR
-                                                supportsPBR = true;
-                                            }
-                                        } );
-                                    if ( supportsPBR ) {
-                                        // ret.lit.add( geometry );
-                                        renderables.add( geometry );
-                                    } else {
-                                        // ret.litBasic.add( geometry );
-                                        //renderables.add( geometry );
-                                    }
-                                }
-                            }
-                        }
-                    } ) );
-
+        [ pipeline,
+          descriptors,
+          viewport,
+          renderables = crimild::cast_ptr< RenderableSet >( renderables ) ]( auto commandBuffer ) {
             commandBuffer->setViewport( viewport );
             commandBuffer->setScissor( viewport );
-
-            renderables.each(
+            renderables->eachGeometry(
                 [ & ]( Geometry *geometry ) {
                     if ( auto ms = geometry->getComponent< MaterialComponent >() ) {
                         if ( auto material = ms->first() ) {

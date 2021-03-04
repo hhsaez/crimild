@@ -28,8 +28,10 @@
 #include "RenderSystem.hpp"
 
 #include "Rendering/FrameGraphOperation.hpp"
+#include "Rendering/Operations/OperationUtils.hpp"
 #include "Rendering/Operations/Operations.hpp"
 #include "Rendering/RenderPass.hpp"
+#include "Rendering/ScenePass.hpp"
 #include "Simulation/Simulation.hpp"
 
 #include <queue>
@@ -86,7 +88,13 @@ void RenderSystem::lateStart( void ) noexcept
     setFrameGraph(
         [] {
             using namespace crimild::framegraph;
-            auto gBuffer = gBufferPass();
+
+            auto renderables = fetchRenderables();
+            auto litRenderables = renderables->getProduct( 0 );
+            auto unlitRenderables = renderables->getProduct( 1 );
+            auto envRenderables = renderables->getProduct( 2 );
+
+            auto gBuffer = gBufferPass( litRenderables );
             auto albedo = gBuffer->getProduct( 0 );
             auto positions = gBuffer->getProduct( 1 );
             auto normals = gBuffer->getProduct( 2 );
@@ -112,13 +120,15 @@ void RenderSystem::lateStart( void ) noexcept
                 prefilterAtlas,
                 brdfLUT );
 
-            auto unlit = forwardUnlitPass( depth );
+            auto unlit = forwardUnlitPass( unlitRenderables, nullptr, depth );
+            auto env = forwardUnlitPass( envRenderables, nullptr, depth );
 
-            return present(
-                blend(
-                    "compose",
-                    unlit,
-                    lit ) );
+            return blend(
+                {
+                    useResource( lit ),
+                    useResource( unlit ),
+                    useResource( env ),
+                } );
         }() );
 }
 
@@ -147,6 +157,8 @@ void traverse( SharedPointer< FrameGraphOperation > root, Fn fn ) noexcept
             [ & ]( auto passPtr ) {
                 auto pass = get_ptr( passPtr );
                 if ( blockCount.count( pass ) == 0 ) {
+                    // TODO: if passes are discarded because they don't really add up to the final image,
+                    // this number will not be correct, since it will show more blocks than actually are.
                     blockCount[ pass ] = pass->getBlockCount();
                 }
 
@@ -158,21 +170,21 @@ void traverse( SharedPointer< FrameGraphOperation > root, Fn fn ) noexcept
     }
 }
 
-using SortResult = std::pair<
-    Array< SharedPointer< RenderPass > >,
-    Array< SharedPointer< ComputePass > > >;
-
-SortResult sort( SharedPointer< FrameGraphOperation > const &root ) noexcept
+void RenderSystem::sort( SharedPointer< FrameGraphOperation > const &root ) noexcept
 {
-    auto ret = std::make_pair(
-        Array< SharedPointer< RenderPass > > {},
-        Array< SharedPointer< ComputePass > > {} );
+    m_scenePasses.clear();
+    m_renderPasses.clear();
+    m_computePasses.clear();
+
     std::list< SharedPointer< FrameGraphOperation > > sorted;
+
     traverse(
         root,
         [ & ]( auto pass ) {
-            if ( pass->getType() == FrameGraphOperation::Type::RENDER_PASS ) {
-                ret.first.add( cast_ptr< RenderPass >( pass ) );
+            if ( pass->getType() == FrameGraphOperation::Type::SCENE_PASS ) {
+                m_scenePasses.add( cast_ptr< ScenePass >( pass ) );
+            } else if ( pass->getType() == FrameGraphOperation::Type::RENDER_PASS ) {
+                m_renderPasses.add( cast_ptr< RenderPass >( pass ) );
             } else if ( pass->getType() == FrameGraphOperation::Type::COMPUTE_PASS ) {
                 // TODO:
                 // ret.second.add( cast_ptr< ComputePass >( pass ) );
@@ -185,9 +197,9 @@ SortResult sort( SharedPointer< FrameGraphOperation > const &root ) noexcept
         pass->setPriority( p++ );
     }
 
-    ret.first = ret.first.reversed();
-    ret.second = ret.second.reversed();
-    return ret;
+    m_scenePasses = m_scenePasses.reversed();
+    m_renderPasses = m_renderPasses.reversed();
+    m_computePasses = m_computePasses.reversed();
 }
 
 void RenderSystem::onPreRender( void ) noexcept
@@ -195,11 +207,14 @@ void RenderSystem::onPreRender( void ) noexcept
     System::onPreRender();
 
     if ( m_frameGraph != nullptr && m_renderPasses.empty() ) {
-        auto sorted = sort( m_frameGraph );
-
-        m_renderPasses = sorted.first;
-        m_computePasses = sorted.second;
+        sort( m_frameGraph );
     }
+
+    m_scenePasses.each(
+        []( auto pass ) {
+            // Scene passes are executed every frame with no image index
+            pass->apply( 0 );
+        } );
 }
 
 void RenderSystem::setFrameGraph( SharedPointer< FrameGraphOperation > const &frameGraph ) noexcept

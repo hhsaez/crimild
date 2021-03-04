@@ -34,27 +34,13 @@
 
 using namespace crimild;
 
-SharedPointer< FrameGraphOperation > crimild::framegraph::blend(
-    std::string name,
-    SharedPointer< FrameGraphOperation > const &src,
-    SharedPointer< FrameGraphOperation > const &dst ) noexcept
-{
-    return blend(
-        name,
-        src->getMainProduct(),
-        dst->getMainProduct() );
-}
-
-SharedPointer< FrameGraphOperation > crimild::framegraph::blend(
-    std::string name,
-    SharedPointer< FrameGraphResource > const &src,
-    SharedPointer< FrameGraphResource > const &dst ) noexcept
+SharedPointer< FrameGraphOperation > crimild::framegraph::blend( Array< SharedPointer< FrameGraphResource > > const &resources ) noexcept
 {
     // TODO: move this to a compute pass
     auto renderPass = crimild::alloc< RenderPass >();
-    renderPass->setName( name );
+    renderPass->setName( "blend" );
 
-    auto color = useColorAttachment( name + "/color" );
+    auto color = useColorAttachment( "blend/color" );
 
     renderPass->attachments = { color };
 
@@ -134,41 +120,30 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::blend(
         return pipeline;
     }();
 
-    auto srcDescriptors = [ & ] {
-        auto descriptorSet = crimild::alloc< DescriptorSet >();
-        descriptorSet->descriptors = {
-            Descriptor {
-                .descriptorType = DescriptorType::TEXTURE,
-                .obj = withResource( crimild::alloc< Texture >(), src ),
-            },
-        };
-        return descriptorSet;
-    }();
+    auto descriptors = resources.map(
+        []( auto resource ) {
+            auto descriptorSet = crimild::alloc< DescriptorSet >();
+            descriptorSet->descriptors = {
+                Descriptor {
+                    .descriptorType = DescriptorType::TEXTURE,
+                    .obj = withResource( crimild::alloc< Texture >(), resource ),
+                },
+            };
+            return descriptorSet;
+        } );
 
-    auto dstDescriptors = [ & ] {
-        auto descriptorSet = crimild::alloc< DescriptorSet >();
-        descriptorSet->descriptors = {
-            Descriptor {
-                .descriptorType = DescriptorType::TEXTURE,
-                .obj = withResource( crimild::alloc< Texture >(), dst ),
-            },
-        };
-        return descriptorSet;
-    }();
-
-    renderPass->reads( { src, dst } );
+    renderPass->reads( resources );
     renderPass->writes( { color } );
     renderPass->produces( { color } );
 
     return withGraphicsCommands(
         renderPass,
-        [ pipeline, srcDescriptors, dstDescriptors ]( auto commandBuffer ) {
-            commandBuffer->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
-            commandBuffer->bindDescriptorSet( crimild::get_ptr( dstDescriptors ) );
-            commandBuffer->draw( 6 );
-
-            commandBuffer->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
-            commandBuffer->bindDescriptorSet( crimild::get_ptr( srcDescriptors ) );
-            commandBuffer->draw( 6 );
+        [ pipeline, descriptors ]( auto commandBuffer ) {
+            descriptors.each(
+                [ & ]( auto descriptorSet ) {
+                    commandBuffer->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
+                    commandBuffer->bindDescriptorSet( crimild::get_ptr( descriptorSet ) );
+                    commandBuffer->draw( 6 );
+                } );
         } );
 }

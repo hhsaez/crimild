@@ -46,6 +46,7 @@ namespace crimild {
             IMAGE_VIEW,
             TEXTURE,
             ATTACHMENT,
+            RENDERABLE_SET,
         };
 
     public:

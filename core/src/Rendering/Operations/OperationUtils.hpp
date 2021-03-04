@@ -39,6 +39,7 @@ namespace crimild {
         SharedPointer< Attachment > useColorAttachment( std::string name = "", Format format = Format::COLOR_SWAPCHAIN_OPTIMAL ) noexcept;
         SharedPointer< Attachment > useDepthAttachment( std::string name = "" ) noexcept;
 
+        SharedPointer< FrameGraphResource > useResource( SharedPointer< FrameGraphOperation > const &op, Size index = 0 ) noexcept;
         SharedPointer< Texture > withResource( SharedPointer< Texture > const &texture, SharedPointer< FrameGraphResource > const &resource ) noexcept;
 
         template< typename CommandRecorder >
