@@ -38,6 +38,7 @@ namespace crimild {
     class CommandBuffer;
     class RenderPass;
     class ComputePass;
+    class ScenePass;
 
     class RenderSystem
         : public System,
@@ -58,9 +59,13 @@ namespace crimild {
         CommandBufferArray &getComputeCommands( Size imageIndex, Bool includeConditionalPasses ) noexcept;
 
     private:
+        void sort( SharedPointer< FrameGraphOperation > const &root ) noexcept;
+
+    private:
         SharedPointer< FrameGraphOperation > m_frameGraph;
         Array< SharedPointer< FrameGraphOperation > > m_sortedOperations;
 
+        Array< SharedPointer< ScenePass > > m_scenePasses;
         Array< SharedPointer< RenderPass > > m_renderPasses;
         Array< SharedPointer< ComputePass > > m_computePasses;
 

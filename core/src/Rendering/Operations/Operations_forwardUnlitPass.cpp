@@ -32,20 +32,23 @@
 #include "Rendering/Operations/Operations.hpp"
 #include "Rendering/Pipeline.hpp"
 #include "Rendering/RenderPass.hpp"
+#include "Rendering/RenderableSet.hpp"
 #include "Rendering/Uniforms/CameraViewProjectionUniformBuffer.hpp"
+#include "SceneGraph/Camera.hpp"
 #include "SceneGraph/Geometry.hpp"
-#include "Simulation/Simulation.hpp"
-#include "Visitors/ApplyToGeometries.hpp"
 
 using namespace crimild;
 
-SharedPointer< FrameGraphOperation > crimild::framegraph::forwardUnlitPass( SharedPointer< FrameGraphResource > const &depthInput ) noexcept
+SharedPointer< FrameGraphOperation > crimild::framegraph::forwardUnlitPass(
+    SharedPointer< FrameGraphResource > const &renderables,
+    SharedPointer< FrameGraphResource > const &colorInput,
+    SharedPointer< FrameGraphResource > const &depthInput ) noexcept
 {
     auto renderPass = crimild::alloc< RenderPass >();
     renderPass->setName( "forwardUnlit" );
 
-    auto color = useColorAttachment( "scene/unlit/color" );
-    auto depth = depthInput != nullptr ? crimild::cast_ptr< Attachment >( depthInput ) : useDepthAttachment( "scene/depth" );
+    auto color = colorInput != nullptr ? crimild::cast_ptr< Attachment >( colorInput ) : useColorAttachment( "scene/forward/color" );
+    auto depth = depthInput != nullptr ? crimild::cast_ptr< Attachment >( depthInput ) : useDepthAttachment( "scene/forward/depth" );
 
     renderPass->attachments = { color, depth };
 
@@ -65,51 +68,19 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::forwardUnlitPass( Shar
         .dimensions = Rectf( 0, 0, 1, 1 ),
     };
 
-    renderPass->reads( {} );
+    renderPass->reads( { renderables, colorInput, depthInput } );
     renderPass->writes( { color, depth } );
     renderPass->produces( { color, depth } );
 
     return withDynamicGraphicsCommands(
         renderPass,
-        [ descriptors, viewport ]( auto commandBuffer ) {
-            Array< Geometry * > renderables;
-
-            auto scene = Simulation::getInstance()->getScene();
-            scene->perform(
-                ApplyToGeometries(
-                    [ & ]( Geometry *geometry ) {
-                        if ( geometry->getLayer() == Node::Layer::SKYBOX ) {
-                            // ret.environment.add( geometry );
-                        } else if ( auto material = geometry->getComponent< MaterialComponent >()->first() ) {
-                            // TODO: What if there are multiple materials?
-                            // Can we add the same geometry to multiple lists? That will result
-                            // in multiple render passes for a single geometry, but I don't know
-                            // if that's ok.
-                            if ( auto pipeline = material->getGraphicsPipeline() ) {
-                                if ( auto program = crimild::get_ptr( pipeline->getProgram() ) ) {
-                                    auto supportsPBR = false;
-                                    program->descriptorSetLayouts.each(
-                                        [ &supportsPBR ]( auto layout ) {
-                                            if ( layout->bindings.filter( []( auto &binding ) { return binding.descriptorType == DescriptorType::ALBEDO_MAP; } ).size() > 0 ) {
-                                                // assume PBR
-                                                supportsPBR = true;
-                                            }
-                                        } );
-                                    if ( supportsPBR ) {
-                                        // ret.lit.add( geometry );
-                                    } else {
-                                        // ret.litBasic.add( geometry );
-                                        renderables.add( geometry );
-                                    }
-                                }
-                            }
-                        }
-                    } ) );
-
+        [ descriptors,
+          viewport,
+          renderables = crimild::cast_ptr< RenderableSet >( renderables ) ]( auto commandBuffer ) {
             commandBuffer->setViewport( viewport );
             commandBuffer->setScissor( viewport );
 
-            renderables.each(
+            renderables->eachGeometry(
                 [ & ]( Geometry *geometry ) {
                     if ( auto ms = geometry->getComponent< MaterialComponent >() ) {
                         if ( auto material = ms->first() ) {

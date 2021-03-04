@@ -45,6 +45,7 @@ namespace crimild {
           public NamedObject {
     public:
         enum class Type {
+            SCENE_PASS,
             RENDER_PASS,
             COMPUTE_PASS,
         };

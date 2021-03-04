@@ -40,7 +40,7 @@ crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
         return true;
     }
 
-    CRIMILD_LOG_TRACE( "Binding Vulkan Render Pass" );
+    CRIMILD_LOG_TRACE( "Binding Vulkan Render Pass: ", renderPass->getName() );
 
     auto renderDevice = getRenderDevice();
     auto swapchain = renderDevice->getSwapchain();
