@@ -376,7 +376,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
                                     vec3 specular = prefilteredColor * ( F * envBRDF.x + envBRDF.y );
 
                                     return ( kD * diffuse + specular ) * ao;
-                                }                                
+                                }
 
                                 void main()
                                 {
@@ -549,7 +549,17 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
         .dimensions = Rectf( 0, 0, 1, 1 ),
     };
 
-    renderPass->reads( { albedo, positions, normals, depth } );
+    renderPass->reads(
+        { albedo,
+          positions,
+          normals,
+          materials,
+          depth,
+          shadowAtlas,
+          reflectionAtlas,
+          irradianceAtlas,
+          prefilterAtlas,
+          brdfLUT } );
     renderPass->writes( { color } );
     renderPass->produces( { color } );
 

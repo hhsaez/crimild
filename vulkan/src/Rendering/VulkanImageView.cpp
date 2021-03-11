@@ -38,7 +38,7 @@ crimild::Bool vulkan::ImageViewManager::bind( ImageView *imageView ) noexcept
         return true;
     }
 
-    CRIMILD_LOG_TRACE( "Binding Vulkan Image View" );
+    CRIMILD_LOG_TRACE( "Binding Vulkan Image View: ", imageView->getName() );
 
     auto renderDevice = getRenderDevice();
 

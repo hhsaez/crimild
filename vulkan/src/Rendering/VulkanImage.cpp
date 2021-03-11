@@ -39,7 +39,7 @@ crimild::Bool vulkan::ImageManager::bind( Image *image ) noexcept
         return true;
     }
 
-    CRIMILD_LOG_TRACE( "Binding Vulkan Image" );
+    CRIMILD_LOG_TRACE( "Binding Vulkan Image: ", image->getName() );
 
     auto renderDevice = getRenderDevice();
 
