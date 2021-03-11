@@ -46,6 +46,8 @@ namespace crimild {
 
         SharedPointer< FrameGraphOperation > gBufferPass( SharedPointer< FrameGraphResource > const renderables ) noexcept;
 
+        SharedPointer< FrameGraphOperation > computeReflectionMap( SharedPointer< FrameGraphResource > const renderables ) noexcept;
+
         SharedPointer< FrameGraphOperation > lightingPass(
             SharedPointer< FrameGraphResource > const &albedo,
             SharedPointer< FrameGraphResource > const &positions,
@@ -64,6 +66,8 @@ namespace crimild {
             SharedPointer< FrameGraphResource > const &depthAttachment = nullptr ) noexcept;
 
         SharedPointer< FrameGraphOperation > blend( Array< SharedPointer< FrameGraphResource > > const &resources ) noexcept;
+
+        SharedPointer< FrameGraphOperation > debug( Array< SharedPointer< FrameGraphResource > > const &resources ) noexcept;
     }
 
 }

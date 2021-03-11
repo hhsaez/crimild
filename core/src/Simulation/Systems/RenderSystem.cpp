@@ -89,6 +89,8 @@ void RenderSystem::lateStart( void ) noexcept
         [] {
             using namespace crimild::framegraph;
 
+            auto settings = Simulation::getInstance()->getSettings();
+
             auto renderables = fetchRenderables();
             auto litRenderables = renderables->getProduct( 0 );
             auto unlitRenderables = renderables->getProduct( 1 );
@@ -101,9 +103,11 @@ void RenderSystem::lateStart( void ) noexcept
             auto materials = gBuffer->getProduct( 3 );
             auto depth = gBuffer->getProduct( 4 );
 
+            auto reflectionAtlasPass = computeReflectionMap( envRenderables );
+
             // TODO
             auto shadowAtlas = Image::ONE;
-            auto reflectionAtlas = Image::ZERO;
+            auto reflectionAtlas = useResource( reflectionAtlasPass );
             auto irradianceAtlas = Image::ZERO;
             auto prefilterAtlas = Image::ZERO;
             auto brdfLUT = Image::ZERO;
@@ -123,12 +127,34 @@ void RenderSystem::lateStart( void ) noexcept
             auto unlit = forwardUnlitPass( unlitRenderables, nullptr, depth );
             auto env = forwardUnlitPass( envRenderables, nullptr, depth );
 
-            return blend(
+            auto ret = blend(
                 {
                     useResource( lit ),
                     useResource( unlit ),
                     useResource( env ),
                 } );
+
+            if ( settings->get< Bool >( "debug.show_render_passes" ) ) {
+                ret = debug(
+                    {
+                        useResource( ret ),
+                        albedo,
+                        positions,
+                        normals,
+                        materials,
+                        depth,
+                        shadowAtlas,
+                        reflectionAtlas,
+                        irradianceAtlas,
+                        prefilterAtlas,
+                        brdfLUT,
+                        useResource( lit ),
+                        useResource( unlit ),
+                        useResource( env ),
+                    } );
+            }
+
+            return ret;
         }() );
 }
 
