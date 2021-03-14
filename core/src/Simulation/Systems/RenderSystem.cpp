@@ -138,9 +138,11 @@ void RenderSystem::lateStart( void ) noexcept
                 prefilterAtlas,
                 brdfLUT );
 
+            /*
             lit = blend(
                 { useResource( lit ),
                   useResource( ibl ) } );
+            */
 
             auto unlit = forwardUnlitPass( unlitRenderables, nullptr, depth );
 
@@ -150,11 +152,21 @@ void RenderSystem::lateStart( void ) noexcept
                 useColorAttachment( "envObjects/color", Format::R32G32B32A32_SFLOAT ),
                 depth );
 
+            auto tonemapped = tonemapping(
+                useResource(
+                    blend(
+                        {
+                            useResource( lit ),
+                            useResource( ibl ),
+                            useResource( env ),
+                        } ) ) );
+
             auto ret = blend(
                 {
-                    useResource( lit ),
+                    //useResource( lit ),
                     useResource( unlit ),
-                    useResource( env ),
+                    useResource( tonemapped ),
+                    //useResource( env ),
                 } );
 
             if ( settings->get< Bool >( "debug.show_render_passes" ) ) {
@@ -172,6 +184,8 @@ void RenderSystem::lateStart( void ) noexcept
                         prefilterAtlas,
                         brdfLUT,
                         useResource( lit ),
+                        useResource( ibl ),
+                        useResource( tonemapped ),
                         useResource( unlit ),
                         useResource( env ),
                     } );

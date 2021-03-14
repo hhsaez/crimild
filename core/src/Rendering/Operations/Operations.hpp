@@ -79,6 +79,8 @@ namespace crimild {
             SharedPointer< FrameGraphResource > const &colorAttachment = nullptr,
             SharedPointer< FrameGraphResource > const &depthAttachment = nullptr ) noexcept;
 
+        SharedPointer< FrameGraphOperation > tonemapping( SharedPointer< FrameGraphResource > const &image ) noexcept;
+
         SharedPointer< FrameGraphOperation > blend( Array< SharedPointer< FrameGraphResource > > const &resources ) noexcept;
 
         SharedPointer< FrameGraphOperation > debug( Array< SharedPointer< FrameGraphResource > > const &resources ) noexcept;
