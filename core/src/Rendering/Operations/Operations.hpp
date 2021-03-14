@@ -47,6 +47,9 @@ namespace crimild {
         SharedPointer< FrameGraphOperation > gBufferPass( SharedPointer< FrameGraphResource > const renderables ) noexcept;
 
         SharedPointer< FrameGraphOperation > computeReflectionMap( SharedPointer< FrameGraphResource > const renderables ) noexcept;
+        SharedPointer< FrameGraphOperation > computeIrradianceMap( SharedPointer< FrameGraphResource > const renderables ) noexcept;
+        SharedPointer< FrameGraphOperation > computePrefilterMap( SharedPointer< FrameGraphResource > const renderables ) noexcept;
+        SharedPointer< FrameGraphOperation > computeBRDFLUT( SharedPointer< FrameGraphResource > const renderables ) noexcept;
 
         SharedPointer< FrameGraphOperation > lightingPass(
             SharedPointer< FrameGraphResource > const &albedo,
@@ -55,6 +58,17 @@ namespace crimild {
             SharedPointer< FrameGraphResource > const &materials,
             SharedPointer< FrameGraphResource > const &depth,
             SharedPointer< FrameGraphResource > const &shadowAtlas,
+            SharedPointer< FrameGraphResource > const &reflectionAtlas,
+            SharedPointer< FrameGraphResource > const &irradianceAtlas,
+            SharedPointer< FrameGraphResource > const &prefilterAtlas,
+            SharedPointer< FrameGraphResource > const &brdfLUT ) noexcept;
+
+        SharedPointer< FrameGraphOperation > iblPass(
+            SharedPointer< FrameGraphResource > const &albedo,
+            SharedPointer< FrameGraphResource > const &positions,
+            SharedPointer< FrameGraphResource > const &normals,
+            SharedPointer< FrameGraphResource > const &materials,
+            SharedPointer< FrameGraphResource > const &depth,
             SharedPointer< FrameGraphResource > const &reflectionAtlas,
             SharedPointer< FrameGraphResource > const &irradianceAtlas,
             SharedPointer< FrameGraphResource > const &prefilterAtlas,

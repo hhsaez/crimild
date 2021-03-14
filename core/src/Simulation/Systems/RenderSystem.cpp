@@ -104,13 +104,16 @@ void RenderSystem::lateStart( void ) noexcept
             auto depth = gBuffer->getProduct( 4 );
 
             auto reflectionAtlasPass = computeReflectionMap( envRenderables );
+            auto irradianceMapPass = computeIrradianceMap( useResource( reflectionAtlasPass ) );
+            auto prefilterMapPass = computePrefilterMap( useResource( reflectionAtlasPass ) );
+            auto brdfLutPass = computeBRDFLUT( nullptr );
 
             // TODO
             auto shadowAtlas = Image::ONE;
             auto reflectionAtlas = useResource( reflectionAtlasPass );
-            auto irradianceAtlas = Image::ZERO;
-            auto prefilterAtlas = Image::ZERO;
-            auto brdfLUT = Image::ZERO;
+            auto irradianceAtlas = useResource( irradianceMapPass );
+            auto prefilterAtlas = useResource( prefilterMapPass );
+            auto brdfLUT = useResource( brdfLutPass );
 
             auto lit = lightingPass(
                 albedo,
@@ -124,8 +127,28 @@ void RenderSystem::lateStart( void ) noexcept
                 prefilterAtlas,
                 brdfLUT );
 
+            auto ibl = iblPass(
+                albedo,
+                positions,
+                normals,
+                materials,
+                depth,
+                reflectionAtlas,
+                irradianceAtlas,
+                prefilterAtlas,
+                brdfLUT );
+
+            lit = blend(
+                { useResource( lit ),
+                  useResource( ibl ) } );
+
             auto unlit = forwardUnlitPass( unlitRenderables, nullptr, depth );
-            auto env = forwardUnlitPass( envRenderables, nullptr, depth );
+
+            // Render environment objects in HDR
+            auto env = forwardUnlitPass(
+                envRenderables,
+                useColorAttachment( "envObjects/color", Format::R32G32B32A32_SFLOAT ),
+                depth );
 
             auto ret = blend(
                 {
