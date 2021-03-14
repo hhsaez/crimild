@@ -150,7 +150,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( SharedPoi
                                     return mat3( T, B, N );
                                 }
 
-                                void main() 
+                                void main()
                                 {
                                     // Load a normal from the Normal map.
                                     vec3 N = texture( uNormalMap, inTexCoord ).rgb;
@@ -169,7 +169,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( SharedPoi
                                     vec3 albedo = uMaterial.albedo.rgb * pow( texture( uAlbedoMap, inTexCoord ).rgb, vec3( 2.2 ) );
                                     float metallic = uMaterial.metallic * texture( uMetallicMap, inTexCoord ).r;
                                     float roughness = uMaterial.roughness * texture( uRoughnessMap, inTexCoord ).r;
-                                    float ambientOcclusion = uMaterial.ambientOcclusion * texture( uAmbientOcclusionMap, inTexCoord ).r;
+                                    float ambientOcclusion = 1.0;//uMaterial.ambientOcclusion * texture( uAmbientOcclusionMap, inTexCoord ).r;
 
                                     metallic = clamp( metallic, 0.0, 1.0 );
 	                                roughness = clamp( roughness, 0.05, 0.999 );
