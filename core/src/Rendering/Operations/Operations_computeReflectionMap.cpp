@@ -127,24 +127,24 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeReflectionMap( 
         [ descriptors,
           viewportLayout,
           renderables = crimild::cast_ptr< RenderableSet >( renderables ) ]( auto commandBuffer ) {
-            renderables->eachGeometry(
-                [ & ]( Geometry *geometry ) {
-                    auto primitive = geometry->anyPrimitive();
-                    auto material = geometry->getComponent< MaterialComponent >()->first();
+            auto viewports = ViewportDimensions::cubeViewportsFrom( viewportLayout[ 0 ] );
 
-                    auto viewports = ViewportDimensions::cubeViewportsFrom( viewportLayout[ 0 ] );
+            for ( auto face = 0l; face < 6; ++face ) {
+                auto viewport = viewports[ face ];
 
-                    for ( auto face = 0l; face < 6; ++face ) {
-                        auto viewport = viewports[ face ];
+                commandBuffer->setViewport( viewport );
+                commandBuffer->setScissor( viewport );
+                renderables->eachGeometry(
+                    [ & ]( Geometry *geometry ) {
+                        auto primitive = geometry->anyPrimitive();
+                        auto material = geometry->getComponent< MaterialComponent >()->first();
 
-                        commandBuffer->setViewport( viewport );
-                        commandBuffer->setScissor( viewport );
                         commandBuffer->bindGraphicsPipeline( material->getGraphicsPipeline() );
                         commandBuffer->bindDescriptorSet( crimild::get_ptr( descriptors[ face ] ) );
                         commandBuffer->bindDescriptorSet( material->getDescriptors() );
                         commandBuffer->bindDescriptorSet( geometry->getDescriptors() );
                         commandBuffer->drawPrimitive( crimild::get_ptr( primitive ) );
-                    }
-                } );
+                    } );
+            }
         } );
 }
