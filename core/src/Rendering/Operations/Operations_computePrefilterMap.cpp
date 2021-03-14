@@ -351,8 +351,8 @@ vec4 textureCubeUV( sampler2D envMap, vec3 direction, vec4 viewport, int mipLeve
                     auto texture = withResource( crimild::alloc< Texture >(), reflectionAtlas );
                     texture->sampler = [ & ] {
                         auto sampler = crimild::alloc< Sampler >();
-                        sampler->setMinFilter( Sampler::Filter::NEAREST );
-                        sampler->setMagFilter( Sampler::Filter::NEAREST );
+                        sampler->setMinFilter( Sampler::Filter::LINEAR );
+                        sampler->setMagFilter( Sampler::Filter::LINEAR );
                         sampler->setWrapMode( Sampler::WrapMode::CLAMP_TO_BORDER );
                         sampler->setCompareOp( CompareOp::NEVER );
                         return sampler;
