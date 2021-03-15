@@ -84,7 +84,7 @@ namespace crimild {
 
             renderPass->apply =
                 [ recorder,
-                  renderPass = crimild::get_ptr( renderPass ) ]( auto imageIndex ) {
+                  renderPass = crimild::get_ptr( renderPass ) ]( auto imageIndex, auto unused ) {
                     auto commandBuffer = renderPass->getCommandBuffers()[ imageIndex ];
 
                     commandBuffer->clear();
@@ -96,10 +96,54 @@ namespace crimild {
 
                     commandBuffer->endRenderPass( crimild::get_ptr( renderPass ) );
                     commandBuffer->end();
+                    return true;
                 };
 
             return renderPass;
         }
+
+        template< typename CommandRecorder, typename Predicate >
+        static SharedPointer< RenderPass > withConditionalGraphicsCommands( SharedPointer< RenderPass > const &renderPass, Predicate predicate, CommandRecorder recorder ) noexcept
+        {
+            renderPass->getCommandBuffers()
+                .resize( Swapchain::getInstance()->getImages().size() )
+                .fill(
+                    [ baseName = renderPass->getName() ]( auto frameIndex ) {
+                        std::stringstream ss;
+                        ss << baseName;
+                        ss << ( baseName != "" ? "/commandBuffer" : "commandBuffer" );
+                        ss << "/" << frameIndex;
+                        auto commandBuffer = crimild::alloc< CommandBuffer >();
+                        commandBuffer->setName( ss.str() );
+                        commandBuffer->setFrameIndex( frameIndex );
+                        return commandBuffer;
+                    } );
+
+            renderPass->apply =
+                [ recorder,
+                  predicate,
+                  renderPass = crimild::get_ptr( renderPass ) ]( auto imageIndex, auto force ) {
+                    if ( !force && !predicate() ) {
+                        return false;
+                    }
+
+                    auto commandBuffer = renderPass->getCommandBuffers()[ imageIndex ];
+
+                    commandBuffer->clear();
+
+                    commandBuffer->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
+                    commandBuffer->beginRenderPass( crimild::get_ptr( renderPass ), nullptr );
+
+                    recorder( commandBuffer );
+
+                    commandBuffer->endRenderPass( crimild::get_ptr( renderPass ) );
+                    commandBuffer->end();
+                    return true;
+                };
+
+            return renderPass;
+        }
+
     }
 }
 

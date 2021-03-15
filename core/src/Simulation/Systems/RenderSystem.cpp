@@ -115,18 +115,16 @@ void RenderSystem::lateStart( void ) noexcept
             auto prefilterAtlas = useResource( prefilterMapPass );
             auto brdfLUT = useResource( brdfLutPass );
 
+            // todo: rename to "localLightingPass"
             auto lit = lightingPass(
                 albedo,
                 positions,
                 normals,
                 materials,
                 depth,
-                shadowAtlas,
-                reflectionAtlas,
-                irradianceAtlas,
-                prefilterAtlas,
-                brdfLUT );
+                shadowAtlas );
 
+            // TODO: rename to "globalLightingPass"
             auto ibl = iblPass(
                 albedo,
                 positions,
@@ -137,12 +135,6 @@ void RenderSystem::lateStart( void ) noexcept
                 irradianceAtlas,
                 prefilterAtlas,
                 brdfLUT );
-
-            /*
-            lit = blend(
-                { useResource( lit ),
-                  useResource( ibl ) } );
-            */
 
             auto unlit = forwardUnlitPass( unlitRenderables, nullptr, depth );
 
@@ -276,7 +268,7 @@ void RenderSystem::onPreRender( void ) noexcept
     m_scenePasses.each(
         []( auto pass ) {
             // Scene passes are executed every frame with no image index
-            pass->apply( 0 );
+            pass->apply( 0, true );
         } );
 }
 
@@ -286,13 +278,14 @@ void RenderSystem::setFrameGraph( SharedPointer< FrameGraphOperation > const &fr
     m_sortedOperations.clear();
 }
 
-RenderSystem::CommandBufferArray &RenderSystem::getGraphicsCommands( Size imageIndex, Bool includeConditionalPasses ) noexcept
+RenderSystem::CommandBufferArray &RenderSystem::getGraphicsCommands( Size imageIndex, Bool forceAll ) noexcept
 {
-    m_renderPasses.each( [ imageIndex ]( auto pass ) { pass->apply( imageIndex ); } );
-
-    m_graphicsCommands = m_renderPasses.map(
-        [ imageIndex ]( auto pass ) {
-            return get_ptr( pass->getCommandBuffers()[ imageIndex ] );
+    m_graphicsCommands.clear();
+    m_renderPasses.each(
+        [ & ]( auto pass ) {
+            if ( pass->apply( imageIndex, forceAll ) ) {
+                m_graphicsCommands.add( get_ptr( pass->getCommandBuffers()[ imageIndex ] ) );
+            }
         } );
 
     return m_graphicsCommands;
