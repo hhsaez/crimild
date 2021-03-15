@@ -220,8 +220,12 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeBRDFLUT( Shared
         .scalingMode = ScalingMode::RELATIVE,
     };
 
-    return withDynamicGraphicsCommands(
+    return withConditionalGraphicsCommands(
         renderPass,
+        [] {
+            // only render once when forced by render system reset
+            return false;
+        },
         [ pipeline,
           viewport ]( auto commandBuffer ) {
             commandBuffer->setViewport( viewport );

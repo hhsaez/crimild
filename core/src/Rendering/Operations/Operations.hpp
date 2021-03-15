@@ -57,11 +57,7 @@ namespace crimild {
             SharedPointer< FrameGraphResource > const &normals,
             SharedPointer< FrameGraphResource > const &materials,
             SharedPointer< FrameGraphResource > const &depth,
-            SharedPointer< FrameGraphResource > const &shadowAtlas,
-            SharedPointer< FrameGraphResource > const &reflectionAtlas,
-            SharedPointer< FrameGraphResource > const &irradianceAtlas,
-            SharedPointer< FrameGraphResource > const &prefilterAtlas,
-            SharedPointer< FrameGraphResource > const &brdfLUT ) noexcept;
+            SharedPointer< FrameGraphResource > const &shadowAtlas ) noexcept;
 
         SharedPointer< FrameGraphOperation > iblPass(
             SharedPointer< FrameGraphResource > const &albedo,

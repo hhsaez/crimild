@@ -49,7 +49,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::fetchRenderables( void
     auto unlitRenderables = crimild::alloc< RenderableSet >();
     auto envRenderables = crimild::alloc< RenderableSet >();
 
-    fetch->apply = [ litRenderables, unlitRenderables, envRenderables ]( auto unused ) {
+    fetch->apply = [ litRenderables, unlitRenderables, envRenderables ]( auto, auto ) {
         envRenderables->reset();
         litRenderables->reset();
         unlitRenderables->reset();
@@ -60,7 +60,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::fetchRenderables( void
 
         auto scene = Simulation::getInstance()->getScene();
         if ( scene == nullptr ) {
-            return;
+            return false;
         }
 
         scene->perform(
@@ -91,6 +91,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::fetchRenderables( void
                         }
                     }
                 } ) );
+        return true;
     };
 
     fetch->writes( { litRenderables, unlitRenderables, envRenderables } );

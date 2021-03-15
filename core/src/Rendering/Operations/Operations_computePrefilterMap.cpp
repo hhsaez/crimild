@@ -431,8 +431,12 @@ vec4 textureCubeUV( sampler2D envMap, vec3 direction, vec4 viewport, int mipLeve
         levelDescriptors[ level ] = ds;
     }
 
-    return withDynamicGraphicsCommands(
+    return withConditionalGraphicsCommands(
         renderPass,
+        [] {
+            // only render once when forced by render system reset
+            return false;
+        },
         [ descriptors,
           levelDescriptors,
           environmentDescriptors,
