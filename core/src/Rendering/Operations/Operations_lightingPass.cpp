@@ -47,11 +47,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
     SharedPointer< FrameGraphResource > const &normals,
     SharedPointer< FrameGraphResource > const &materials,
     SharedPointer< FrameGraphResource > const &depth,
-    SharedPointer< FrameGraphResource > const &shadowAtlas,
-    SharedPointer< FrameGraphResource > const &reflectionAtlas,
-    SharedPointer< FrameGraphResource > const &irradianceAtlas,
-    SharedPointer< FrameGraphResource > const &prefilterAtlas,
-    SharedPointer< FrameGraphResource > const &brdfLUT ) noexcept
+    SharedPointer< FrameGraphResource > const &shadowAtlas ) noexcept
 {
     // TODO: move this to a compute pass
     auto renderPass = crimild::alloc< RenderPass >();
@@ -121,10 +117,6 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
                                 layout ( set = 0, binding = 3 ) uniform sampler2D uNormals;
                                 layout ( set = 0, binding = 4 ) uniform sampler2D uMaterials;
                                 layout ( set = 0, binding = 5 ) uniform sampler2D uShadowAtlas;
-                                layout ( set = 0, binding = 6 ) uniform sampler2D uReflectionAtlas;
-                                layout ( set = 0, binding = 7 ) uniform sampler2D uIrradianceAtlas;
-                                layout ( set = 0, binding = 8 ) uniform sampler2D uPrefilterAtlas;
-                                layout ( set = 0, binding = 9 ) uniform sampler2D uBRDFLUT;
 
                                 layout ( set = 1, binding = 0 ) uniform LightProps {
                                     uint type;
@@ -328,56 +320,6 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
                                     return ( kD * albedo / PI + specular ) * radiance * NdotL;
                                 }
 
-                                int roughnessToLOD( float roughness, float maxLOD )
-                                {
-                                    return int( round( roughness * maxLOD ) );
-                                }
-
-                                vec3 getPrefilteredColor( vec3 N, vec3 V, float roughness )
-                                {
-                                    const float MAX_REFLECTION_LOD = 4.0;
-                                    const int lod = roughnessToLOD( roughness, MAX_REFLECTION_LOD );
-                                    const vec2 texelSize = 1.0 / textureSize( uPrefilterAtlas, lod );
-                                    const vec3 R = reflect( -V, N );
-
-                                    vec3 forward = R;
-                                    vec3 up = V;
-                                    vec3 right = normalize( cross( up, forward ) );
-                                    up = normalize( cross( right, forward ) );
-
-                                    // compute a simple bilinear color by sampling using different vectors
-                                    // this is not ideal, but it helps reduce some visual artifacts
-                                    vec3 color = textureCubeLOD( uPrefilterAtlas, R, lod ).rgb;
-                                    color += textureCubeLOD( uPrefilterAtlas, normalize( R + texelSize.x * up + 0.0 * right ), lod ).rgb;
-                                    color += textureCubeLOD( uPrefilterAtlas, normalize( R + texelSize.x * up + texelSize.y * right ), lod ).rgb;
-                                    color += textureCubeLOD( uPrefilterAtlas, normalize( R + 0.0 * up + 0.0 * right ), lod ).rgb;
-                                    color += textureCubeLOD( uPrefilterAtlas, normalize( R + 0.0 * up + texelSize.y * right ), lod ).rgb;
-                                    color /= 5.0;
-
-                                    return color;
-                                }
-
-                                vec3 irradiance( vec3 N, vec3 V, vec3 albedo, float metallic, float roughness, float ao )
-                                {
-                                    vec3 F0 = computeF0( albedo, metallic );
-                                    vec3 F = fresnelSchlickRoughness( max( dot( N, V ), 0.0 ), F0, roughness );
-
-                                    vec3 kS = F;
-                                    vec3 kD = 1.0 - kS;
-                                    kD *= 1.0 - metallic;
-
-                                    vec3 I = textureCubeUV( uIrradianceAtlas, N, vec4( 0, 0, 1, 1 ) ).rgb;
-                                    vec3 diffuse = I * albedo;
-
-                                    const float MAX_REFLECTION_LOD = 4.0;
-
-                                    vec3 prefilteredColor = getPrefilteredColor( N, V, roughness );
-                                    vec2 envBRDF = texture( uBRDFLUT, vec2( max( dot( N, V ), 0.0 ), roughness ) ).rg;
-                                    vec3 specular = prefilteredColor * ( F * envBRDF.x + envBRDF.y );
-
-                                    return ( kD * diffuse + specular ) * ao;
-                                }
-
                                 void main()
                                 {
                                     vec2 uv = gl_FragCoord.st / viewport;
@@ -411,9 +353,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
                                     vec3 radiance = uLight.color.rgb * uLight.energy * attenuation;
                                     vec3 L0 = brdf( N, H, V, L, radiance, albedo, metallic, roughness );
 
-                                    vec3 ambient = irradiance( N, V, albedo, metallic, roughness, ambientOcclusion );
-
-                                    outColor = vec4( ambient + L0, 1.0 );
+                                    outColor = vec4( L0, 1.0 );
                                 }
                             )" ),
                     } );
@@ -425,22 +365,6 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
                             {
                                 .descriptorType = DescriptorType::UNIFORM_BUFFER,
                                 .stage = Shader::Stage::ALL,
-                            },
-                            {
-                                .descriptorType = DescriptorType::TEXTURE,
-                                .stage = Shader::Stage::FRAGMENT,
-                            },
-                            {
-                                .descriptorType = DescriptorType::TEXTURE,
-                                .stage = Shader::Stage::FRAGMENT,
-                            },
-                            {
-                                .descriptorType = DescriptorType::TEXTURE,
-                                .stage = Shader::Stage::FRAGMENT,
-                            },
-                            {
-                                .descriptorType = DescriptorType::TEXTURE,
-                                .stage = Shader::Stage::FRAGMENT,
                             },
                             {
                                 .descriptorType = DescriptorType::TEXTURE,
@@ -524,22 +448,6 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
                 .descriptorType = DescriptorType::TEXTURE,
                 .obj = withResource( crimild::alloc< Texture >(), shadowAtlas ),
             },
-            Descriptor {
-                .descriptorType = DescriptorType::TEXTURE,
-                .obj = withResource( crimild::alloc< Texture >(), reflectionAtlas ),
-            },
-            Descriptor {
-                .descriptorType = DescriptorType::TEXTURE,
-                .obj = withResource( crimild::alloc< Texture >(), irradianceAtlas ),
-            },
-            Descriptor {
-                .descriptorType = DescriptorType::TEXTURE,
-                .obj = withResource( crimild::alloc< Texture >(), prefilterAtlas ),
-            },
-            Descriptor {
-                .descriptorType = DescriptorType::TEXTURE,
-                .obj = withResource( crimild::alloc< Texture >(), brdfLUT ),
-            },
         };
         return descriptorSet;
     }();
@@ -550,16 +458,14 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
     };
 
     renderPass->reads(
-        { albedo,
-          positions,
-          normals,
-          materials,
-          depth,
-          shadowAtlas,
-          reflectionAtlas,
-          irradianceAtlas,
-          prefilterAtlas,
-          brdfLUT } );
+        {
+            albedo,
+            positions,
+            normals,
+            materials,
+            depth,
+            shadowAtlas,
+        } );
     renderPass->writes( { color } );
     renderPass->produces( { color } );
 

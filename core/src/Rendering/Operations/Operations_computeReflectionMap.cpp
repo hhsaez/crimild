@@ -122,8 +122,12 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeReflectionMap( 
         descriptors[ face ] = ds;
     }
 
-    return withDynamicGraphicsCommands(
+    return withConditionalGraphicsCommands(
         renderPass,
+        [] {
+            // only render once when forced by render system reset
+            return false;
+        },
         [ descriptors,
           viewportLayout,
           renderables = crimild::cast_ptr< RenderableSet >( renderables ) ]( auto commandBuffer ) {

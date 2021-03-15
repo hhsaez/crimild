@@ -338,8 +338,12 @@ vec4 textureCubeUV( sampler2D envMap, vec3 direction, vec4 viewport )
         descriptors[ face ] = ds;
     }
 
-    return withDynamicGraphicsCommands(
+    return withConditionalGraphicsCommands(
         renderPass,
+        [] {
+            // only render once when forced by render system reset
+            return false;
+        },
         [ descriptors,
           environmentDescriptors,
           primitive,
