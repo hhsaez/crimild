@@ -57,7 +57,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
 
     renderPass->attachments = { color };
 
-    auto pipeline = [ & ] {
+    auto createPipeline = [ & ]( auto lightType ) {
         auto pipeline = crimild::alloc< GraphicsPipeline >();
         pipeline->setProgram(
             [ & ] {
@@ -66,10 +66,35 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
                     Array< SharedPointer< Shader > > {
                         crimild::alloc< Shader >(
                             Shader::Stage::VERTEX,
-                            R"(
+                            lightType == Light::Type::DIRECTIONAL
+                                ? R"(
+                                vec2 positions[6] = vec2[](
+                                    vec2( -1.0, 1.0 ),
+                                    vec2( -1.0, -1.0 ),
+                                    vec2( 1.0, -1.0 ),
+
+                                    vec2( -1.0, 1.0 ),
+                                    vec2( 1.0, -1.0 ),
+                                    vec2( 1.0, 1.0 )
+                                );
+
+                                vec2 texCoords[6] = vec2[](
+                                    vec2( 0.0, 0.0 ),
+                                    vec2( 0.0, 1.0 ),
+                                    vec2( 1.0, 1.0 ),
+
+                                    vec2( 0.0, 0.0 ),
+                                    vec2( 1.0, 1.0 ),
+                                    vec2( 1.0, 0.0 )
+                                );
+
+                                void main()
+                                {
+                                    gl_Position = vec4( positions[ gl_VertexIndex ], 0.0, 1.0 );
+                                }
+                                  )"
+                                : R"(
                                 layout ( location = 0 ) in vec3 inPosition;
-                                layout ( location = 1 ) in vec3 inNormal;
-                                layout ( location = 2 ) in vec2 inTexCoord;
 
                                 layout( set = 0, binding = 0 ) uniform RenderPassUniforms {
                                     mat4 view;
@@ -93,19 +118,34 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
                                     float radius;
                                 } uLight;
 
-                                layout ( location = 0 ) out vec2 outTexCoord;
+                                vec2 positions[6] = vec2[](
+                                    vec2( -1.0, 1.0 ),
+                                    vec2( -1.0, -1.0 ),
+                                    vec2( 1.0, -1.0 ),
+
+                                    vec2( -1.0, 1.0 ),
+                                    vec2( 1.0, -1.0 ),
+                                    vec2( 1.0, 1.0 )
+                                );
+
+                                vec2 texCoords[6] = vec2[](
+                                    vec2( 0.0, 0.0 ),
+                                    vec2( 0.0, 1.0 ),
+                                    vec2( 1.0, 1.0 ),
+
+                                    vec2( 0.0, 0.0 ),
+                                    vec2( 1.0, 1.0 ),
+                                    vec2( 1.0, 0.0 )
+                                );
 
                                 void main()
                                 {
                                     gl_Position = proj * view * vec4( ( uLight.position.xyz + uLight.radius * inPosition ), 1.0 );
-                                    outTexCoord = inTexCoord;
                                 }
                             )" ),
                         crimild::alloc< Shader >(
                             Shader::Stage::FRAGMENT,
                             R"(
-                                layout ( location = 0 ) in vec2 inTexCoord;
-
                                 layout( set = 0, binding = 0 ) uniform RenderPassUniforms {
                                     mat4 view;
                                     mat4 proj;
@@ -344,20 +384,30 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
                                     vec3 F0 = vec3( 0.04 );
                                     F0 = mix( F0, albedo, metallic );
 
-                                    vec3 L = uLight.position.xyz - P;
-                                    float dist = length( L );
-                                    L = normalize( L );
+                                    vec3 L = vec3( 0 );
+                                    vec3 radiance = vec3( 0 );
+
+                                    if ( uLight.type == 2 ) { // directional
+                                        L = normalize( -uLight.direction.xyz );
+                                        radiance = uLight.energy * uLight.color.rgb;
+                                    } else {
+                                        L = uLight.position.xyz - P;
+                                        float dist = length( L );
+                                        L = normalize( L );
+                                        float attenuation = 1.0 / ( dist * dist );
+                                        radiance = uLight.color.rgb * uLight.energy * attenuation;
+                                    }
 
                                     vec3 H = normalize( V + L );
-                                    float attenuation = 1.0 / ( dist * dist );
-                                    vec3 radiance = uLight.color.rgb * uLight.energy * attenuation;
                                     vec3 L0 = brdf( N, H, V, L, radiance, albedo, metallic, roughness );
 
                                     outColor = vec4( L0, 1.0 );
                                 }
                             )" ),
                     } );
-                program->vertexLayouts = { VertexP3N3TC2::getLayout() };
+                if ( lightType != Light::Type::DIRECTIONAL ) {
+                    program->vertexLayouts = { VertexP3::getLayout() };
+                }
                 program->descriptorSetLayouts = {
                     [] {
                         auto layout = crimild::alloc< DescriptorSetLayout >();
@@ -409,15 +459,18 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
             .dstColorBlendFactor = BlendFactor::ONE, //ZERO,
         };
         pipeline->rasterizationState = RasterizationState {
-            .cullMode = CullMode::FRONT, // Render back faces only
+            .cullMode = lightType == Light::Type::DIRECTIONAL ? CullMode::BACK : CullMode::FRONT, // Render back faces only
         };
         return pipeline;
-    }();
+    };
+
+    auto pointLightPipeline = createPipeline( Light::Type::POINT );
+    auto directionalLightPipeline = createPipeline( Light::Type::DIRECTIONAL );
 
     auto lightVolume = crimild::alloc< SpherePrimitive >(
         SpherePrimitive::Params {
             .type = Primitive::Type::TRIANGLES,
-            .layout = VertexP3N3TC2::getLayout(),
+            .layout = VertexP3::getLayout(),
             .radius = 1.0,
         } );
 
@@ -471,7 +524,11 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
 
     return withDynamicGraphicsCommands(
         renderPass,
-        [ lightVolume, pipeline, descriptors, viewport ]( auto commandBuffer ) {
+        [ lightVolume,
+          pointLightPipeline,
+          directionalLightPipeline,
+          descriptors,
+          viewport ]( auto commandBuffer ) {
             commandBuffer->setViewport( viewport );
             commandBuffer->setScissor( viewport );
 
@@ -480,11 +537,18 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
             scene->perform( fetchLights );
             fetchLights.forEachLight(
                 [ & ]( auto light ) {
-                    // TODO: Use instancing to render all lights in one call
-                    commandBuffer->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
-                    commandBuffer->bindDescriptorSet( crimild::get_ptr( descriptors ) );
-                    commandBuffer->bindDescriptorSet( light->getDescriptors() );
-                    commandBuffer->drawPrimitive( crimild::get_ptr( lightVolume ) );
+                    if ( light->getType() == Light::Type::DIRECTIONAL ) {
+                        commandBuffer->bindGraphicsPipeline( crimild::get_ptr( directionalLightPipeline ) );
+                        commandBuffer->bindDescriptorSet( crimild::get_ptr( descriptors ) );
+                        commandBuffer->bindDescriptorSet( light->getDescriptors() );
+                        commandBuffer->draw( 6 );
+                    } else {
+                        // TODO: Use instancing to render all lights in one call
+                        commandBuffer->bindGraphicsPipeline( crimild::get_ptr( pointLightPipeline ) );
+                        commandBuffer->bindDescriptorSet( crimild::get_ptr( descriptors ) );
+                        commandBuffer->bindDescriptorSet( light->getDescriptors() );
+                        commandBuffer->drawPrimitive( crimild::get_ptr( lightVolume ) );
+                    }
                 } );
         } );
 }
