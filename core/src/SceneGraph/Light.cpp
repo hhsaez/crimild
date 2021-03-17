@@ -33,6 +33,7 @@
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/ShadowMap.hpp"
 #include "Rendering/UniformBuffer.hpp"
+#include "Rendering/Uniforms/CallbackUniformBuffer.hpp"
 
 namespace crimild {
 
@@ -185,10 +186,112 @@ DescriptorSet *Light::getDescriptors( void ) noexcept
     return crimild::get_ptr( m_descriptors );
 }
 
+void Light::setRadius( Real32 radius ) noexcept
+{
+    m_radius = radius;
+}
+
 Real32 Light::getRadius( void ) const noexcept
 {
+    if ( m_radius >= 0.0f ) {
+        return m_radius;
+    }
+
     const auto MIN_ATTENUATION = 5.0f / 256.0f;
     return Numericf::sqrt( m_energy / MIN_ATTENUATION );
+}
+
+struct ShadowAtlasLightUniform {
+    alignas( 16 ) Matrix4f proj;
+    alignas( 16 ) Matrix4f view;
+    alignas( 16 ) Vector3f lightPos;
+};
+
+Array< SharedPointer< DescriptorSet > > &Light::getShadowAtlasDescriptors( void ) noexcept
+{
+    if ( !m_shadowAtlasDescriptors.empty() ) {
+        return m_shadowAtlasDescriptors;
+    }
+
+    if ( getType() == Light::Type::POINT ) {
+        m_shadowAtlasDescriptors.resize( 6 );
+        for ( auto face = 0l; face < 6; ++face ) {
+            auto descriptors = crimild::alloc< DescriptorSet >();
+            descriptors->descriptors = {
+                {
+                    .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                    .obj = crimild::alloc< CallbackUniformBuffer< ShadowAtlasLightUniform > >(
+                        [ light = this, face ] {
+                            Transformation t;
+                            switch ( face ) {
+                                case 0: // positive x
+                                    t.rotate().fromAxisAngle( Vector3f::UNIT_Y, Numericf::HALF_PI );
+                                    break;
+
+                                case 1: // negative x
+                                    t.rotate().fromAxisAngle( Vector3f::UNIT_Y, -Numericf::HALF_PI );
+                                    break;
+
+                                case 2: // positive y
+                                    t.rotate().fromAxisAngle( Vector3f::UNIT_X, Numericf::HALF_PI );
+                                    break;
+
+                                case 3: // negative y
+                                    t.rotate().fromAxisAngle( Vector3f::UNIT_X, -Numericf::HALF_PI );
+                                    break;
+
+                                case 4: // positive z
+                                    t.rotate().fromAxisAngle( Vector3f::UNIT_Y, Numericf::PI );
+                                    break;
+
+                                case 5: // negative z
+                                    t.rotate().fromAxisAngle( Vector3f::UNIT_Y, 0 );
+                                    break;
+                            }
+
+                            t.setTranslate( light->getWorld().getTranslate() );
+                            auto vMatrix = t.computeModelMatrix().getInverse();
+                            auto pMatrix = light->computeLightSpaceMatrix();
+                            return ShadowAtlasLightUniform {
+                                .proj = pMatrix,
+                                .view = vMatrix,
+                                .lightPos = light->getWorld().getTranslate(),
+                            };
+                        } ),
+                },
+            };
+            m_shadowAtlasDescriptors[ face ] = descriptors;
+        }
+    } else if ( getType() == Light::Type::SPOT ) {
+        /*
+        m_shadowAtlasDescriptors = [ & ] {
+            auto descriptors = cmp.create< DescriptorSet >();
+            descriptors->descriptors = {
+                {
+                    .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                    .obj = [ & ] {
+                        return crimild::alloc< CallbackUniformBuffer< LightUniforms > >(
+                            [ light ] {
+                                auto shadowMap = light->getShadowMap();
+                                auto vMatrix = light->getWorld().computeModelMatrix().getInverse();
+                                auto pMatrix = light->computeLightSpaceMatrix();
+                                shadowMap->setLightProjectionMatrix( 0, vMatrix * pMatrix );
+                                return LightUniforms {
+                                    .proj = pMatrix,
+                                    .view = vMatrix,
+                                    .lightPos = light->getWorld().getTranslate(),
+                                };
+                            } );
+                    }(),
+                },
+            };
+            return descriptors;
+        }();
+        */
+    } else if ( getType() == Light::Type::DIRECTIONAL ) {
+    }
+
+    return m_shadowAtlasDescriptors;
 }
 
 void Light::encode( coding::Encoder &encoder )
