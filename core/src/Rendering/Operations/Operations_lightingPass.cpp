@@ -360,6 +360,13 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
                                     return ( kD * albedo / PI + specular ) * radiance * NdotL;
                                 }
 
+                                float calculatePointShadow( sampler2D shadowAtlas, float dist, vec3 D, vec4 viewport, float bias )
+                                {
+                                    float depth = dist;
+                                    float shadow = textureCubeUV( shadowAtlas, D, viewport ).r;
+                                    return depth <= ( shadow + bias ) ? 0.0 : 1.0;
+                                }
+
                                 void main()
                                 {
                                     vec2 uv = gl_FragCoord.st / viewport;
@@ -386,6 +393,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
 
                                     vec3 L = vec3( 0 );
                                     vec3 radiance = vec3( 0 );
+                                    float shadow = 0.0;
 
                                     if ( uLight.type == 2 ) { // directional
                                         L = normalize( -uLight.direction.xyz );
@@ -396,12 +404,24 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
                                         L = normalize( L );
                                         float attenuation = 1.0 / ( dist * dist );
                                         radiance = uLight.color.rgb * uLight.energy * attenuation;
+
+                                        if ( uLight.castShadows ) {
+                                            shadow = calculatePointShadow(
+                                                uShadowAtlas,
+                                                dist,
+                                                -L,
+                                                uLight.viewport,
+                                                uLight.shadowBias
+                                            );
+                                        }
                                     }
 
                                     vec3 H = normalize( V + L );
-                                    vec3 L0 = brdf( N, H, V, L, radiance, albedo, metallic, roughness );
+                                    vec3 Lo = brdf( N, H, V, L, radiance, albedo, metallic, roughness );
 
-                                    outColor = vec4( L0, 1.0 );
+                                    Lo *= 1.0 - shadow;
+
+                                    outColor = vec4( Lo, 1.0 );
                                 }
                             )" ),
                     } );

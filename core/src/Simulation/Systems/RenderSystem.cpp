@@ -108,8 +108,10 @@ void RenderSystem::lateStart( void ) noexcept
             auto prefilterMapPass = computePrefilterMap( useResource( reflectionAtlasPass ) );
             auto brdfLutPass = computeBRDFLUT( nullptr );
 
+            auto shadowAtlasPass = renderShadowAtlas( litRenderables );
+
             // TODO
-            auto shadowAtlas = Image::ONE;
+            auto shadowAtlas = useResource( shadowAtlasPass );
             auto reflectionAtlas = useResource( reflectionAtlasPass );
             auto irradianceAtlas = useResource( irradianceMapPass );
             auto prefilterAtlas = useResource( prefilterMapPass );
