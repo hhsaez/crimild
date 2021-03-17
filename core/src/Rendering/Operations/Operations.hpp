@@ -46,6 +46,8 @@ namespace crimild {
 
         SharedPointer< FrameGraphOperation > gBufferPass( SharedPointer< FrameGraphResource > const renderables ) noexcept;
 
+        SharedPointer< FrameGraphOperation > renderShadowAtlas( SharedPointer< FrameGraphResource > const renderables ) noexcept;
+
         SharedPointer< FrameGraphOperation > computeReflectionMap( SharedPointer< FrameGraphResource > const renderables ) noexcept;
         SharedPointer< FrameGraphOperation > computeIrradianceMap( SharedPointer< FrameGraphResource > const renderables ) noexcept;
         SharedPointer< FrameGraphOperation > computePrefilterMap( SharedPointer< FrameGraphResource > const renderables ) noexcept;

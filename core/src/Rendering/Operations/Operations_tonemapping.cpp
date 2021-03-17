@@ -128,7 +128,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::tonemapping( SharedPoi
         return pipeline;
     }();
 
-    Real32 exposure = Simulation::getInstance()->getSettings()->get< Real32 >( "video.exposure", 0.1 );
+    Real32 exposure = Simulation::getInstance()->getSettings()->get< Real32 >( "video.exposure", 1.0 );
 
     auto descriptors = [ & ] {
         auto descriptorSet = crimild::alloc< DescriptorSet >();

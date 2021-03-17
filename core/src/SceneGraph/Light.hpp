@@ -28,6 +28,7 @@
 #ifndef CRIMILD_SCENEGRAPH_LIGHT_
 #define CRIMILD_SCENEGRAPH_LIGHT_
 
+#include "Foundation/Containers/Array.hpp"
 #include "Node.hpp"
 #include "Rendering/Catalog.hpp"
 
@@ -93,7 +94,10 @@ namespace crimild {
         inline Real32 getEnergy( void ) const noexcept { return m_energy; }
         inline void setEnergy( Real32 energy ) noexcept { m_energy = energy; }
 
+        void setRadius( Real32 radius ) noexcept;
         Real32 getRadius( void ) const noexcept;
+
+        DescriptorSet *getDescriptors( void ) noexcept;
 
     private:
         Type _type;
@@ -105,6 +109,7 @@ namespace crimild {
         RGBAColorf _ambient;
         SharedPointer< DescriptorSet > m_descriptors;
         Real32 m_energy = 1.0f;
+        Real32 m_radius = -1.0f; // compute radius based on energy by default
 
     public:
         virtual void accept( NodeVisitor &visitor ) override;
@@ -118,10 +123,17 @@ namespace crimild {
         void setShadowMap( SharedPointer< ShadowMap > const &shadowMap ) { _shadowMap = shadowMap; }
         inline ShadowMap *getShadowMap( void ) { return crimild::get_ptr( _shadowMap ); }
 
-        DescriptorSet *getDescriptors( void ) noexcept;
+        /**
+           \brief Get descriptors used for computing the shadow atlas
+
+           For most lights, we will need only one. But point lights will require
+           up to six (one for each face of the cubemap)
+         */
+        Array< SharedPointer< DescriptorSet > > &getShadowAtlasDescriptors( void ) noexcept;
 
     private:
         SharedPointer< ShadowMap > _shadowMap;
+        Array< SharedPointer< DescriptorSet > > m_shadowAtlasDescriptors;
 
         /**
             \name Coding
