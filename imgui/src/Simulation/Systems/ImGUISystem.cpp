@@ -27,6 +27,7 @@
 
 #include "Simulation/Systems/ImGUISystem.hpp"
 
+#include "Foundation/Version.hpp"
 #include "Rendering/Compositions/ImGUIComposition.hpp"
 #include "Rendering/Compositions/OverlayComposition.hpp"
 #include "Rendering/Compositions/PresentComposition.hpp"
@@ -43,6 +44,82 @@
 using namespace crimild;
 using namespace crimild::imgui;
 using namespace crimild::framegraph::imgui;
+
+namespace crimild {
+
+    namespace imgui {
+
+        void showHelpAboutDialog( void ) noexcept
+        {
+            ImGui::SetNextWindowPos( ImVec2( 200, 200 ), ImGuiCond_Always );
+            ImGui::SetNextWindowSize( ImVec2( 350, 120 ), ImGuiCond_Always );
+
+            auto open = true;
+            if ( ImGui::Begin( "About", &open, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize ) ) {
+                Version version;
+                auto versionStr = version.getDescription();
+                ImGui::Text( "%s", versionStr.c_str() );
+                ImGui::Text( "http://crimild.hhsaez.com" );
+                ImGui::Text( "" );
+                ImGui::Text( "Copyright (c) 2002 - present, H. Hernan Saez" );
+                ImGui::Text( "All rights reserved." );
+            }
+
+            Simulation::getInstance()->getSettings()->set( "ui.help.about.show", open );
+
+            ImGui::End();
+        }
+
+        void showStats( void ) noexcept
+        {
+            auto frameTime = Simulation::getInstance()->getSimulationClock().getDeltaTime();
+            ImGui::Begin( "Stats" );
+            ImGui::Text( "Frame Time: %.2f ms", 1000.0f * frameTime );
+            ImGui::Text( "FPS: %d", frameTime > 0 ? int( 1.0 / frameTime ) : 0 );
+            ImGui::End();
+        }
+
+        void showMainMenu( Settings *settings ) noexcept
+        {
+            auto showAbout = false;
+            if ( ImGui::BeginMainMenuBar() ) {
+                if ( ImGui::BeginMenu( "File" ) ) {
+                    ImGui::EndMenu();
+                }
+
+                if ( ImGui::BeginMenu( "Edit" ) ) {
+                    if ( ImGui::MenuItem( "Undo", "CTRL+Z" ) ) {
+                        showStats();
+                    }
+                    if ( ImGui::MenuItem( "Redo", "CTRL+Y", false, false ) ) {
+                    } // Disabled item
+                    ImGui::Separator();
+                    if ( ImGui::MenuItem( "Cut", "CTRL+X" ) ) {
+                    }
+                    if ( ImGui::MenuItem( "Copy", "CTRL+C" ) ) {
+                    }
+                    if ( ImGui::MenuItem( "Paste", "CTRL+V" ) ) {
+                    }
+                    ImGui::EndMenu();
+                }
+
+                if ( ImGui::BeginMenu( "Help" ) ) {
+                    if ( ImGui::MenuItem( "About..." ) ) {
+                        settings->set( "ui.help.about.show", true );
+                    }
+                    ImGui::EndMenu();
+                }
+
+                ImGui::EndMainMenuBar();
+            }
+
+            if ( settings->get< Bool >( "ui.help.about.show" ) ) {
+                showHelpAboutDialog();
+            }
+        }
+
+    }
+}
 
 void ImGUISystem::start( void ) noexcept
 {
@@ -69,7 +146,12 @@ void ImGUISystem::start( void ) noexcept
     } );
 
     registerMessageHandler< messaging::KeyReleased >( [ this ]( messaging::KeyReleased const &msg ) {
-        // int key = msg.key;
+        int key = msg.key;
+        if ( key == CRIMILD_INPUT_KEY_F12 ) {
+            auto sim = Simulation::getInstance();
+            auto settings = sim->getSettings();
+            settings->set( "ui.show", !settings->get< Bool >( "ui.show" ) );
+        }
         // self->_keys[ key ] = false;
     } );
 
@@ -105,16 +187,17 @@ void ImGUISystem::start( void ) noexcept
         [] {
             auto sim = Simulation::getInstance();
             auto settings = sim->getSettings();
-            auto showDebug = settings->get< Bool >( "debug.show", false );
-            if ( !showDebug ) {
+
+            auto showUI = settings->get< Bool >( "ui.show", false );
+            if ( !showUI ) {
                 return;
             }
 
-            auto frameTime = sim->getSimulationClock().getDeltaTime();
-            ImGui::Begin( "Stats" );
-            ImGui::Text( "Frame Time: %.2f ms", 1000.0f * frameTime );
-            ImGui::Text( "FPS: %d", frameTime > 0 ? int( 1.0 / frameTime ) : 0 );
-            ImGui::End();
+            showMainMenu( settings );
+
+            // Overrides default UI. Just for demo purposes
+            //static bool open = true;
+            //ImGui::ShowDemoWindow( &open );
         } );
 }
 
