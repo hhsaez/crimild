@@ -168,7 +168,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
                                     vec4 cutoff;
                                     uint castShadows;
                                     float shadowBias;
-                                    vec4 cascadeSplitsd;
+                                    vec4 cascadeSplits;
                                     mat4 lightSpaceMatrix[ 4 ];
                                     vec4 viewport;
                                     float energy;
@@ -178,6 +178,13 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
                                 layout ( location = 0 ) out vec4 outColor;
 
                                 const float PI = 3.14159265359;
+
+                                const mat4 bias = mat4(
+                                    0.5, 0.0, 0.0, 0.0,
+                                    0.0, 0.5, 0.0, 0.0,
+                                    0.0, 0.0, 1.0, 0.0,
+                                    0.5, 0.5, 0.0, 1.0
+                                );
 
                                 const float FACE_INVALID = -1.0;
                                 const float FACE_LEFT = 0.0;
@@ -400,9 +407,12 @@ float calculateShadow( vec4 ligthSpacePosition, vec4 viewport, vec3 N, vec3 L, f
                                         // nothing to render. discard and avoid complex calculations
                                         discard;
                                     }
-
                                     vec3 albedo = baseColor.rgb;
-                                    vec3 P = texture( uPositions, uv ).xyz;
+
+                                    vec4 positionData = texture( uPositions, uv );
+
+                                    vec3 P = positionData.xyz;
+                                    float viewSpacePositionDepth = positionData.w;
                                     vec3 N = texture( uNormals, uv ).xyz;
                                     vec4 material = texture( uMaterials, uv );
                                     float metallic = material.x;
@@ -423,6 +433,50 @@ float calculateShadow( vec4 ligthSpacePosition, vec4 viewport, vec3 N, vec3 L, f
                                         // directional
                                         L = normalize( -uLight.direction.xyz );
                                         radiance = uLight.energy * uLight.color.rgb;
+
+                                        if ( uLight.castShadows == 1 ) {
+                                            vec4 cascadeSplits = uLight.cascadeSplits;
+
+                                            // these are all negative values. Lower means farther away from the eye
+                                            float depth = viewSpacePositionDepth;
+                                            int cascadeId = 0;
+                                            if ( depth < cascadeSplits[ 0 ] ) {
+                                                cascadeId = 1;
+                                            }
+                                            if ( depth < cascadeSplits[ 1 ] ) {
+                                                cascadeId = 2;
+                                            }
+                                            if ( depth < cascadeSplits[ 2 ] ) {
+                                                cascadeId = 3;
+                                            }
+
+                                            mat4 lightSpaceMatrix = uLight.lightSpaceMatrix[ cascadeId ];
+                                            vec4 viewport = uLight.viewport;
+                                            vec2 viewportSize = viewport.zw;
+                                            viewport.z = 0.5 * viewportSize.x;
+                                            viewport.w = 0.5 * viewportSize.y;
+                                            if ( cascadeId == 1 ) {
+                                                // top-right cascade
+                                                viewport.x += 0.5 * viewportSize.x;
+                                            } else if ( cascadeId == 2 ) {
+                                                // bottom-left cascade
+                                                viewport.y += 0.5 * viewportSize.y;
+                                            } else if ( cascadeId == 3 ) {
+                                                // bottom-rigth cascade
+                                                viewport.x += 0.5 * viewportSize.x;
+                                                viewport.y += 0.5 * viewportSize.y;
+                                            }
+
+                                            vec4 lightSpacePos = ( bias * lightSpaceMatrix * vec4( P, 1.0 ) );
+                                            if ( lightSpacePos.z >= -1.0 && lightSpacePos.z <= 1.0 ) {
+                                                shadow = calculateShadow( lightSpacePos, viewport, N, L, 0.005 );
+                                            } else {
+                                                // the projected position in light space is outside the light's view frustum.
+                                                // For directional lights, this means the object will be never in shadows
+                                                // This might not be true for other types of lights. For example, a spot light
+                                                // will produce shadows on objects outside its cone of influence
+                                            }
+                                        }
                                     } else if ( uLight.type == 3 ) {
                                         // spot
                                         L = uLight.position.xyz - P;
@@ -436,14 +490,6 @@ float calculateShadow( vec4 ligthSpacePosition, vec4 viewport, vec3 N, vec3 L, f
                                         radiance = attenuation * intensity * uLight.energy * uLight.color.rgb;
 
                                         if ( uLight.castShadows == 1 ) {
-const mat4 bias = mat4(
-    0.5, 0.0, 0.0, 0.0,
-    0.0, 0.5, 0.0, 0.0,
-    0.0, 0.0, 1.0, 0.0,
-    0.5, 0.5, 0.0, 1.0
-);
-
-
                                             vec4 lightSpacePos = ( bias * uLight.lightSpaceMatrix[ 0 ] * vec4( P, 1.0 ) );
                                             shadow = calculateShadow( lightSpacePos, uLight.viewport, N, L, 0.005 );
                                         }

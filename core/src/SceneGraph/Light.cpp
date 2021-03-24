@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -9,14 +9,14 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
+ *     * Neither the name of the copyright holder nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Light.hpp"
+#include "SceneGraph/Light.hpp"
 
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
@@ -34,6 +34,7 @@
 #include "Rendering/ShadowMap.hpp"
 #include "Rendering/UniformBuffer.hpp"
 #include "Rendering/Uniforms/CallbackUniformBuffer.hpp"
+#include "SceneGraph/Camera.hpp"
 
 namespace crimild {
 
@@ -207,6 +208,122 @@ struct ShadowAtlasLightUniform {
     alignas( 16 ) Vector3f lightPos;
 };
 
+// TODO: Move this to Matrix.hpp
+static auto ortho = []( float left, float right, float bottom, float top, float near, float far ) {
+    return Matrix4f(
+        2.0f / ( right - left ),
+        0.0f,
+        0.0f,
+        0.0f,
+        0.0f,
+        2.0f / ( bottom - top ),
+        0.0f,
+        0.0f,
+        0.0f,
+        0.0f,
+        1.0f / ( near - far ),
+        0.0f,
+
+        -( right + left ) / ( right - left ),
+        -( bottom + top ) / ( bottom - top ),
+        near / ( near - far ),
+        1.0f );
+};
+
+auto updateCascade = []( auto cascadeId, auto light ) {
+    auto camera = Camera::getMainCamera();
+    if ( camera == nullptr ) {
+        CRIMILD_LOG_ERROR( "Cannot fetch camera from scene" );
+        return;
+    }
+    auto frustum = camera->getFrustum();
+
+    Vector4f cascadeSplits;
+    auto nearClip = frustum.getDMin();
+    auto farClip = frustum.getDMax();
+    auto clipRange = farClip - nearClip;
+    auto minZ = nearClip;
+    auto maxZ = nearClip + clipRange;
+    auto range = maxZ - minZ;
+    auto ratio = maxZ / minZ;
+
+    const auto CASCADE_SPLIT_LAMBDA = 0.95f;
+
+    // Calculate cascade split depths based on view camera frustum
+    // This is based on these presentations:
+    // https://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch10.html
+    // https://johanmedestrom.wordpress.com/2016/03/18/opengl-cascaded-shadow-maps/
+    // TODO (hernan): This might break if the camera frustum changes...
+    for ( auto i = 0; i < 4; ++i ) {
+        auto p = float( i + 1 ) / float( 4 );
+        auto log = minZ * std::pow( ratio, p );
+        auto uniform = minZ + range * p;
+        auto d = CASCADE_SPLIT_LAMBDA * ( log - uniform ) + uniform;
+        cascadeSplits[ i ] = ( d - nearClip ) / clipRange;
+    }
+
+    auto shadowMap = light->getShadowMap();
+    auto pMatrix = camera->getProjectionMatrix();
+    auto vMatrix = camera->getViewMatrix();
+    auto invCamera = ( vMatrix * pMatrix ).getInverse();
+
+    // Calculate orthographic projections matrices for each cascade
+    auto lastSplitDistance = cascadeId > 0 ? cascadeSplits[ cascadeId - 1 ] : 0.0f;
+    auto splitDistance = cascadeSplits[ cascadeId ];
+
+    auto frustumCorners = Array< Vector3f > {
+        Vector3f( -1.0f, +1.0f, -1.0f ),
+        Vector3f( +1.0f, +1.0f, -1.0f ),
+        Vector3f( +1.0f, -1.0f, -1.0f ),
+        Vector3f( -1.0f, -1.0f, -1.0f ),
+        Vector3f( -1.0f, +1.0f, +1.0f ),
+        Vector3f( +1.0f, +1.0f, +1.0f ),
+        Vector3f( +1.0f, -1.0f, +1.0f ),
+        Vector3f( -1.0f, -1.0f, +1.0f ),
+    };
+
+    // project frustum corners into world space
+    frustumCorners = frustumCorners.map(
+        [ invCamera, camera ]( const auto &p ) {
+            // TODO (hernan): this is why I need to fix matrix multiplications...
+            auto invCorner = invCamera.getTranspose() * Vector4f( p.x(), p.y(), p.z(), 1.0f );
+            return invCorner.xyz() / invCorner.w();
+        } );
+
+    for ( auto i = 0; i < 4; ++i ) {
+        auto dist = frustumCorners[ i + 4 ] - frustumCorners[ i ];
+        frustumCorners[ i + 4 ] = frustumCorners[ i ] + ( dist * splitDistance );
+        frustumCorners[ i ] = frustumCorners[ i ] + ( dist * lastSplitDistance );
+    }
+
+    auto frustumCenter = Vector3f::ZERO;
+    frustumCorners.each(
+        [ &frustumCenter ]( const auto &p ) {
+            frustumCenter += p;
+        } );
+    frustumCenter /= frustumCorners.size();
+
+    auto radius = 0.0f;
+    frustumCorners.each(
+        [ &radius, frustumCenter ]( const auto &p ) {
+            auto distance = ( p - frustumCenter ).getMagnitude();
+            radius = Numericf::max( radius, distance );
+        } );
+    radius = std::ceil( radius * 16.0f ) / 16.0f;
+
+    auto maxExtents = Vector3f( radius, radius, radius );
+    auto minExtents = -maxExtents;
+
+    auto lightDirection = light->getDirection().getNormalized();
+    auto lightViewMatrix = Matrix4f::lookAt( frustumCenter - lightDirection * -minExtents.z(), frustumCenter, Vector3f::UNIT_Y );
+    // Swap Y-coordinate min/max because of Vulkan's inverted coordinate system...
+    auto lightProjectionMatrix = ortho( minExtents.x(), maxExtents.x(), maxExtents.y(), minExtents.y(), 0.0f, maxExtents.z() - minExtents.z() );
+
+    // store split distances and matrices
+    shadowMap->setCascadeSplit( cascadeId, -1.0f * ( nearClip + splitDistance * clipRange ) );
+    shadowMap->setLightProjectionMatrix( cascadeId, lightViewMatrix * lightProjectionMatrix );
+};
+
 Array< SharedPointer< DescriptorSet > > &Light::getShadowAtlasDescriptors( void ) noexcept
 {
     if ( !m_shadowAtlasDescriptors.empty() ) {
@@ -288,6 +405,31 @@ Array< SharedPointer< DescriptorSet > > &Light::getShadowAtlasDescriptors( void 
             return descriptors;
         }();
     } else if ( getType() == Light::Type::DIRECTIONAL ) {
+        const UInt32 MAX_CASCADES = 4;
+        m_shadowAtlasDescriptors.resize( MAX_CASCADES );
+        for ( UInt32 cascadeId = 0; cascadeId < MAX_CASCADES; ++cascadeId ) {
+            m_shadowAtlasDescriptors[ cascadeId ] = [ & ] {
+                auto descriptors = crimild::alloc< DescriptorSet >();
+                descriptors->descriptors = {
+                    {
+                        .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                        .obj = [ & ] {
+                            return crimild::alloc< CallbackUniformBuffer< ShadowAtlasLightUniform > >(
+                                [ &, cascadeId, light = this ] {
+                                    updateCascade( cascadeId, light );
+                                    auto shadowMap = light->getShadowMap();
+                                    return ShadowAtlasLightUniform {
+                                        .proj = shadowMap->getLightProjectionMatrix( cascadeId ),
+                                        .view = Matrix4f::IDENTITY,
+                                        .lightPos = light->getWorld().getTranslate(),
+                                    };
+                                } );
+                        }(),
+                    },
+                };
+                return descriptors;
+            }();
+        }
     }
 
     return m_shadowAtlasDescriptors;

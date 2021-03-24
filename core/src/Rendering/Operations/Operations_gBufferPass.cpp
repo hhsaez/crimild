@@ -180,7 +180,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( SharedPoi
 	                                roughness = clamp( roughness, 0.05, 0.999 );
 
                                     outAlbedo = vec4( albedo, 1.0 );
-                                    outPosition = vec4( P, 1.0 );
+                                    outPosition = vec4( P, inViewPosition.z );
                                     outNormal = vec4( N, 1.0 );
                                     outMaterial = vec4( metallic, roughness, ambientOcclusion, 1.0 );
                                 }
