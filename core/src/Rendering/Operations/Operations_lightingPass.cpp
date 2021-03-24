@@ -360,6 +360,30 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
                                     return ( kD * albedo / PI + specular ) * radiance * NdotL;
                                 }
 
+float calculateShadow( vec4 ligthSpacePosition, vec4 viewport, vec3 N, vec3 L, float bias )
+{
+    // perform perspective divide
+    vec3 projCoords = ligthSpacePosition.xyz / ligthSpacePosition.w;
+    projCoords.t = 1.0 - projCoords.t;
+
+    // Compute shadow PCF
+    float depth = projCoords.z;
+    float shadow = 0.0f;
+    vec2 texelSize = 1.0 / textureSize( uShadowAtlas, 0 );
+    for ( int y = -1; y <= 1; ++y ) {
+        for ( int x = -1; x <= 1; ++x ) {
+            vec2 uv = projCoords.st + vec2( x, y ) * texelSize;
+            uv.x = viewport.x + uv.x * viewport.z;
+            uv.y = viewport.y + uv.y * viewport.w;
+            float pcfDepth = texture( uShadowAtlas, uv ).x;
+            shadow += depth - bias > pcfDepth ? 1.0 : 0.0;
+        }
+    }
+    shadow /= 9.0;
+
+    return shadow;
+}
+
                                 float calculatePointShadow( sampler2D shadowAtlas, float dist, vec3 D, vec4 viewport, float bias )
                                 {
                                     float depth = dist;
@@ -412,8 +436,16 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
                                         radiance = attenuation * intensity * uLight.energy * uLight.color.rgb;
 
                                         if ( uLight.castShadows == 1 ) {
-                                            //vec4 lightSpacePos = ( bias * lighting.spotLights[ i ].lightSpaceMatrix[ 0 ] * vec4( inPosition, 1.0 ) );
-                                            // shadow = calculateShadow( lightSpacePos, lighting.spotLights[ i ].viewport, N, L, 0.005 );
+const mat4 bias = mat4(
+    0.5, 0.0, 0.0, 0.0,
+    0.0, 0.5, 0.0, 0.0,
+    0.0, 0.0, 1.0, 0.0,
+    0.5, 0.5, 0.0, 1.0
+);
+
+
+                                            vec4 lightSpacePos = ( bias * uLight.lightSpaceMatrix[ 0 ] * vec4( P, 1.0 ) );
+                                            shadow = calculateShadow( lightSpacePos, uLight.viewport, N, L, 0.005 );
                                         }
                                     } else {
                                         L = uLight.position.xyz - P;

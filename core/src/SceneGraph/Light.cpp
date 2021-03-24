@@ -263,20 +263,20 @@ Array< SharedPointer< DescriptorSet > > &Light::getShadowAtlasDescriptors( void 
             m_shadowAtlasDescriptors[ face ] = descriptors;
         }
     } else if ( getType() == Light::Type::SPOT ) {
-        /*
-        m_shadowAtlasDescriptors = [ & ] {
-            auto descriptors = cmp.create< DescriptorSet >();
+        m_shadowAtlasDescriptors.resize( 1 );
+        m_shadowAtlasDescriptors[ 0 ] = [ & ] {
+            auto descriptors = crimild::alloc< DescriptorSet >();
             descriptors->descriptors = {
                 {
                     .descriptorType = DescriptorType::UNIFORM_BUFFER,
                     .obj = [ & ] {
-                        return crimild::alloc< CallbackUniformBuffer< LightUniforms > >(
-                            [ light ] {
+                        return crimild::alloc< CallbackUniformBuffer< ShadowAtlasLightUniform > >(
+                            [ light = this ] {
                                 auto shadowMap = light->getShadowMap();
                                 auto vMatrix = light->getWorld().computeModelMatrix().getInverse();
                                 auto pMatrix = light->computeLightSpaceMatrix();
                                 shadowMap->setLightProjectionMatrix( 0, vMatrix * pMatrix );
-                                return LightUniforms {
+                                return ShadowAtlasLightUniform {
                                     .proj = pMatrix,
                                     .view = vMatrix,
                                     .lightPos = light->getWorld().getTranslate(),
@@ -287,7 +287,6 @@ Array< SharedPointer< DescriptorSet > > &Light::getShadowAtlasDescriptors( void 
             };
             return descriptors;
         }();
-        */
     } else if ( getType() == Light::Type::DIRECTIONAL ) {
     }
 
