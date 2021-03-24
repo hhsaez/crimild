@@ -148,7 +148,13 @@ struct LightUniforms {
     alignas( 16 ) Vector3f lightPos;
 };
 
-size_t recordPointLightCommands( CommandBuffer *commandBuffer, SharedPointer< GraphicsPipeline > pipeline, Array< ViewportDimensions > &layout, size_t offset, Array< Light * > lights, SharedPointer< RenderableSet > renderables ) noexcept
+size_t recordPointLightCommands(
+    CommandBuffer *commandBuffer,
+    SharedPointer< GraphicsPipeline > pipeline,
+    Array< ViewportDimensions > &layout,
+    size_t offset,
+    Array< Light * > lights,
+    SharedPointer< RenderableSet > renderables ) noexcept
 {
     lights.each(
         [ & ]( auto light ) {
@@ -251,16 +257,22 @@ size_t recordPointLightCommands( CommandBuffer *commandBuffer, SharedPointer< Gr
     return offset;
 }
 
-size_t recordSpotLightCommands( CommandBuffer *commandBuffer, GraphicsPipeline *pipeline, Array< ViewportDimensions > &viewports, size_t offset, Array< Light * > lights, SharedPointer< RenderableSet > const &renderables ) noexcept
+size_t recordSpotLightCommands(
+    CommandBuffer *commandBuffer,
+    SharedPointer< GraphicsPipeline > pipeline,
+    Array< ViewportDimensions > &layout,
+    size_t offset,
+    Array< Light * > lights,
+    SharedPointer< RenderableSet > renderables ) noexcept
 {
     lights.each(
         [ & ]( auto light ) {
-            if ( offset >= viewports.size() ) {
+            if ( offset >= layout.size() ) {
                 CRIMILD_LOG_WARNING( "No available viewport in layout in shadow atlas for spot light" );
                 return;
             }
 
-            auto viewport = viewports[ offset++ ];
+            auto viewport = layout[ offset++ ];
 
             light->getShadowMap()->setViewport(
                 [ & ] {
@@ -276,33 +288,7 @@ size_t recordSpotLightCommands( CommandBuffer *commandBuffer, GraphicsPipeline *
             commandBuffer->setScissor( viewport );
             renderables->eachGeometry(
                 [ & ]( Geometry *geometry ) {
-                    commandBuffer->bindGraphicsPipeline( pipeline );
-                    /*
-                    commandBuffer->bindDescriptorSet(
-                        [ & ] {
-                            auto descriptors = cmp.create< DescriptorSet >();
-                            descriptors->descriptors = {
-                                {
-                                    .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                                    .obj = [ & ] {
-                                        return crimild::alloc< CallbackUniformBuffer< LightUniforms > >(
-                                            [ light ] {
-                                                auto shadowMap = light->getShadowMap();
-                                                auto vMatrix = light->getWorld().computeModelMatrix().getInverse();
-                                                auto pMatrix = light->computeLightSpaceMatrix();
-                                                shadowMap->setLightProjectionMatrix( 0, vMatrix * pMatrix );
-                                                return LightUniforms {
-                                                    .proj = pMatrix,
-                                                    .view = vMatrix,
-                                                    .lightPos = light->getWorld().getTranslate(),
-                                                };
-                                            } );
-                                    }(),
-                                },
-                            };
-                            return descriptors;
-                        }() );
-                    */
+                    commandBuffer->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
                     commandBuffer->bindDescriptorSet( crimild::get_ptr( light->getShadowAtlasDescriptors()[ 0 ] ) );
                     commandBuffer->bindDescriptorSet( geometry->getDescriptors() );
                     commandBuffer->drawPrimitive( geometry->anyPrimitive() );
@@ -636,6 +622,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::renderShadowAtlas( Sha
                 lights[ Light::Type::DIRECTIONAL ],
                 renderables );
 
+            */
             offset = recordSpotLightCommands(
                 crimild::get_ptr( commandBuffer ),
                 pipelines[ Light::Type::SPOT ],
@@ -643,7 +630,6 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::renderShadowAtlas( Sha
                 offset,
                 lights[ Light::Type::SPOT ],
                 renderables );
-            */
 
             offset = recordPointLightCommands(
                 crimild::get_ptr( commandBuffer ),
