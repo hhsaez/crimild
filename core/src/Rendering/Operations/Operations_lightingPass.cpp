@@ -166,7 +166,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
                                     vec4 color;
                                     vec4 attenuation;
                                     vec4 cutoff;
-                                    bool castShadows;
+                                    uint castShadows;
                                     float shadowBias;
                                     vec4 cascadeSplitsd;
                                     mat4 lightSpaceMatrix[ 4 ];
@@ -395,9 +395,26 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
                                     vec3 radiance = vec3( 0 );
                                     float shadow = 0.0;
 
-                                    if ( uLight.type == 2 ) { // directional
+                                    if ( uLight.type == 2 ) {
+                                        // directional
                                         L = normalize( -uLight.direction.xyz );
                                         radiance = uLight.energy * uLight.color.rgb;
+                                    } else if ( uLight.type == 3 ) {
+                                        // spot
+                                        L = uLight.position.xyz - P;
+                                        float dist = length( L );
+                                        L = normalize( L );
+
+                                        float theta = dot( L, normalize( -uLight.direction.xyz ) );
+                                        float epsilon = uLight.cutoff.x - uLight.cutoff.y;
+                                        float intensity = clamp( ( theta - uLight.cutoff.y ) / epsilon, 0.0, 1.0 );
+                                        float attenuation = 1.0 / ( dist * dist );
+                                        radiance = attenuation * intensity * uLight.energy * uLight.color.rgb;
+
+                                        if ( uLight.castShadows == 1 ) {
+                                            //vec4 lightSpacePos = ( bias * lighting.spotLights[ i ].lightSpaceMatrix[ 0 ] * vec4( inPosition, 1.0 ) );
+                                            // shadow = calculateShadow( lightSpacePos, lighting.spotLights[ i ].viewport, N, L, 0.005 );
+                                        }
                                     } else {
                                         L = uLight.position.xyz - P;
                                         float dist = length( L );
@@ -405,7 +422,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
                                         float attenuation = 1.0 / ( dist * dist );
                                         radiance = uLight.color.rgb * uLight.energy * attenuation;
 
-                                        if ( uLight.castShadows ) {
+                                        if ( uLight.castShadows == 1 ) {
                                             shadow = calculatePointShadow(
                                                 uShadowAtlas,
                                                 dist,
