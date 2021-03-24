@@ -47,7 +47,7 @@ namespace crimild {
             alignas( 16 ) Vector4f color;
             alignas( 16 ) Vector4f attenuation;
             alignas( 16 ) Vector4f cutoff;
-            alignas( 4 ) Bool castShadows;
+            alignas( 4 ) UInt32 castShadows;
             alignas( 4 ) Real32 shadowBias;
             alignas( 16 ) Vector4f cascadeSplits;
             alignas( 16 ) Matrix4f lightSpaceMatrix[ 4 ];
@@ -81,7 +81,7 @@ namespace crimild {
                 Numericf::cos( m_light->getOuterCutoff() ),
                 0.0f,
                 0.0f );
-            props.castShadows = m_light->castShadows();
+            props.castShadows = m_light->castShadows() ? 1 : 0;
             if ( m_light->castShadows() ) {
                 props.shadowBias = m_light->getShadowMap()->getBias();
                 props.cascadeSplits = m_light->getShadowMap()->getCascadeSplits();

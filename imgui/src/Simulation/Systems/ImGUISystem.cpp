@@ -79,6 +79,72 @@ namespace crimild {
             ImGui::End();
         }
 
+        void showNodeInspector( Node *node ) noexcept
+        {
+            ImGui::SetNextWindowPos( ImVec2( 200, 200 ), ImGuiCond_FirstUseEver );
+            ImGui::SetNextWindowSize( ImVec2( 200, 300 ), ImGuiCond_FirstUseEver );
+
+            bool open = false;
+            if ( ImGui::Begin( "Node Inspector", &open, ImGuiWindowFlags_NoCollapse ) ) {
+                ImGui::Text( "Name: %s", !node->getName().empty() ? node->getName().c_str() : "<No Name>" );
+                ImGui::Text( "Class: %s", node->getClassName() );
+            }
+            ImGui::End();
+        }
+
+        void showToolsSceneTree( Settings *settings ) noexcept
+        {
+            class SceneTreeBuilder : public NodeVisitor {
+            public:
+                void visitNode( Node *node ) override
+                {
+                    if ( ImGui::TreeNode( getNodeName( node ).c_str() ) ) {
+                        showNodeInspector( node );
+                        ImGui::TreePop();
+                    }
+                }
+
+                void visitGroup( Group *group ) override
+                {
+                    if ( ImGui::TreeNode( getNodeName( group ).c_str() ) ) {
+                        showNodeInspector( group );
+                        NodeVisitor::visitGroup( group );
+                        ImGui::TreePop();
+                    }
+                }
+
+            private:
+                std::string getNodeName( Node *node ) noexcept
+                {
+                    return !node->getName().empty()
+                               ? node->getName()
+                               : node->getClassName();
+                }
+            };
+
+            if ( !settings->get< Bool >( "ui.tools.scene_tree.show" ) ) {
+                return;
+            }
+
+            ImGui::SetNextWindowPos( ImVec2( 200, 200 ), ImGuiCond_FirstUseEver );
+            ImGui::SetNextWindowSize( ImVec2( 200, 300 ), ImGuiCond_FirstUseEver );
+
+            auto open = true;
+            if ( ImGui::Begin( "Scene", &open, ImGuiWindowFlags_NoCollapse ) ) {
+                auto scene = Simulation::getInstance()->getScene();
+                if ( scene ) {
+                    scene->perform( SceneTreeBuilder() );
+                } else {
+                    ImGui::Text( "No valid scene" );
+                }
+                ImGui::Text( "" ); // padding
+            }
+
+            settings->set( "ui.tools.scene_tree.show", open );
+
+            ImGui::End();
+        }
+
         void showMainMenu( Settings *settings ) noexcept
         {
             auto showAbout = false;
@@ -103,6 +169,13 @@ namespace crimild {
                     ImGui::EndMenu();
                 }
 
+                if ( ImGui::BeginMenu( "Tools" ) ) {
+                    if ( ImGui::MenuItem( "Scene Tree..." ) ) {
+                        settings->set( "ui.tools.scene_tree.show", true );
+                    }
+                    ImGui::EndMenu();
+                }
+
                 if ( ImGui::BeginMenu( "Help" ) ) {
                     if ( ImGui::MenuItem( "About..." ) ) {
                         settings->set( "ui.help.about.show", true );
@@ -116,6 +189,8 @@ namespace crimild {
             if ( settings->get< Bool >( "ui.help.about.show" ) ) {
                 showHelpAboutDialog();
             }
+
+            showToolsSceneTree( settings );
         }
 
     }
@@ -195,9 +270,11 @@ void ImGUISystem::start( void ) noexcept
 
             showMainMenu( settings );
 
-            // Overrides default UI. Just for demo purposes
-            //static bool open = true;
-            //ImGui::ShowDemoWindow( &open );
+            if ( settings->get< Bool >( "ui.imgui_demo.show" ) ) {
+                // Overrides default UI. Just for demo purposes
+                static bool open = true;
+                ImGui::ShowDemoWindow( &open );
+            }
         } );
 }
 
