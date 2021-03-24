@@ -300,127 +300,12 @@ size_t recordSpotLightCommands(
 
 size_t recordDirectionalLightCommands(
     CommandBuffer *commandBuffer,
-    GraphicsPipeline *pipeline,
-    Array< ViewportDimensions > &viewports,
+    SharedPointer< GraphicsPipeline > pipeline,
+    Array< ViewportDimensions > &layout,
     size_t offset,
     Array< Light * > lights,
-    SharedPointer< RenderableSet > const &renderables ) noexcept
+    SharedPointer< RenderableSet > renderables ) noexcept
 {
-    static auto ortho = []( float left, float right, float bottom, float top, float near, float far ) {
-        return Matrix4f(
-            2.0f / ( right - left ),
-            0.0f,
-            0.0f,
-            0.0f,
-            0.0f,
-            2.0f / ( bottom - top ),
-            0.0f,
-            0.0f,
-            0.0f,
-            0.0f,
-            1.0f / ( near - far ),
-            0.0f,
-
-            -( right + left ) / ( right - left ),
-            -( bottom + top ) / ( bottom - top ),
-            near / ( near - far ),
-            1.0f );
-    };
-
-    auto updateCascade = []( auto cascadeId, auto light ) {
-        auto camera = Camera::getMainCamera();
-        if ( camera == nullptr ) {
-            CRIMILD_LOG_ERROR( "Cannot fetch camera from scene" );
-            return;
-        }
-        auto frustum = camera->getFrustum();
-
-        Vector4f cascadeSplits;
-        auto nearClip = frustum.getDMin();
-        auto farClip = frustum.getDMax();
-        auto clipRange = farClip - nearClip;
-        auto minZ = nearClip;
-        auto maxZ = nearClip + clipRange;
-        auto range = maxZ - minZ;
-        auto ratio = maxZ / minZ;
-
-        const auto CASCADE_SPLIT_LAMBDA = 0.95f;
-
-        // Calculate cascade split depths based on view camera frustum
-        // This is based on these presentations:
-        // https://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch10.html
-        // https://johanmedestrom.wordpress.com/2016/03/18/opengl-cascaded-shadow-maps/
-        // TODO (hernan): This might break if the camera frustum changes...
-        for ( auto i = 0; i < 4; ++i ) {
-            auto p = float( i + 1 ) / float( 4 );
-            auto log = minZ * std::pow( ratio, p );
-            auto uniform = minZ + range * p;
-            auto d = CASCADE_SPLIT_LAMBDA * ( log - uniform ) + uniform;
-            cascadeSplits[ i ] = ( d - nearClip ) / clipRange;
-        }
-
-        auto shadowMap = light->getShadowMap();
-        auto pMatrix = camera->getProjectionMatrix();
-        auto vMatrix = camera->getViewMatrix();
-        auto invCamera = ( vMatrix * pMatrix ).getInverse();
-
-        // Calculate orthographic projections matrices for each cascade
-        auto lastSplitDistance = cascadeId > 0 ? cascadeSplits[ cascadeId - 1 ] : 0.0f;
-        auto splitDistance = cascadeSplits[ cascadeId ];
-
-        auto frustumCorners = Array< Vector3f > {
-            Vector3f( -1.0f, +1.0f, -1.0f ),
-            Vector3f( +1.0f, +1.0f, -1.0f ),
-            Vector3f( +1.0f, -1.0f, -1.0f ),
-            Vector3f( -1.0f, -1.0f, -1.0f ),
-            Vector3f( -1.0f, +1.0f, +1.0f ),
-            Vector3f( +1.0f, +1.0f, +1.0f ),
-            Vector3f( +1.0f, -1.0f, +1.0f ),
-            Vector3f( -1.0f, -1.0f, +1.0f ),
-        };
-
-        // project frustum corners into world space
-        frustumCorners = frustumCorners.map(
-            [ invCamera, camera ]( const auto &p ) {
-                // TODO (hernan): this is why I need to fix matrix multiplications...
-                auto invCorner = invCamera.getTranspose() * Vector4f( p.x(), p.y(), p.z(), 1.0f );
-                return invCorner.xyz() / invCorner.w();
-            } );
-
-        for ( auto i = 0; i < 4; ++i ) {
-            auto dist = frustumCorners[ i + 4 ] - frustumCorners[ i ];
-            frustumCorners[ i + 4 ] = frustumCorners[ i ] + ( dist * splitDistance );
-            frustumCorners[ i ] = frustumCorners[ i ] + ( dist * lastSplitDistance );
-        }
-
-        auto frustumCenter = Vector3f::ZERO;
-        frustumCorners.each(
-            [ &frustumCenter ]( const auto &p ) {
-                frustumCenter += p;
-            } );
-        frustumCenter /= frustumCorners.size();
-
-        auto radius = 0.0f;
-        frustumCorners.each(
-            [ &radius, frustumCenter ]( const auto &p ) {
-                auto distance = ( p - frustumCenter ).getMagnitude();
-                radius = Numericf::max( radius, distance );
-            } );
-        radius = std::ceil( radius * 16.0f ) / 16.0f;
-
-        auto maxExtents = Vector3f( radius, radius, radius );
-        auto minExtents = -maxExtents;
-
-        auto lightDirection = light->getDirection().getNormalized();
-        auto lightViewMatrix = Matrix4f::lookAt( frustumCenter - lightDirection * -minExtents.z(), frustumCenter, Vector3f::UNIT_Y );
-        // Swap Y-coordinate min/max because of Vulkan's inverted coordinate system...
-        auto lightProjectionMatrix = ortho( minExtents.x(), maxExtents.x(), maxExtents.y(), minExtents.y(), 0.0f, maxExtents.z() - minExtents.z() );
-
-        // store split distances and matrices
-        shadowMap->setCascadeSplit( cascadeId, -1.0f * ( nearClip + splitDistance * clipRange ) );
-        shadowMap->setLightProjectionMatrix( cascadeId, lightViewMatrix * lightProjectionMatrix );
-    };
-
     // TODO: move this to ViewportDimensions
     static auto transformViewport = []( auto layout, auto viewport ) {
         auto ld = layout.dimensions;
@@ -436,50 +321,25 @@ size_t recordDirectionalLightCommands(
     };
 
     auto recordCascadeCommands = [ & ]( auto light, auto cascadeId, auto viewport ) {
-        /*
-        auto descriptors = [ & ] {
-            auto descriptors = cmp.create< DescriptorSet >();
-            descriptors->descriptors = {
-                {
-                    .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                    .obj = [ & ] {
-                        return crimild::alloc< CallbackUniformBuffer< LightUniforms > >(
-                            [ &, cascadeId, light ] {
-                                updateCascade( cascadeId, light );
-                                auto shadowMap = light->getShadowMap();
-                                return LightUniforms {
-                                    .proj = shadowMap->getLightProjectionMatrix( cascadeId ),
-                                    .view = Matrix4f::IDENTITY,
-                                    .lightPos = light->getWorld().getTranslate(),
-                                };
-                            } );
-                    }(),
-                },
-            };
-            return descriptors;
-        }();
-
         commandBuffer->setViewport( viewport );
         commandBuffer->setScissor( viewport );
-        scene->perform(
-            ApplyToGeometries(
-                [ & ]( Geometry *geometry ) {
-                    commandBuffer->bindGraphicsPipeline( pipeline );
-                    commandBuffer->bindDescriptorSet( descriptors );
-                    commandBuffer->bindDescriptorSet( geometry->getDescriptors() );
-                    commandBuffer->drawPrimitive( geometry->anyPrimitive() );
-                } ) );
-        */
+        renderables->eachGeometry(
+            [ & ]( Geometry *geometry ) {
+                commandBuffer->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
+                commandBuffer->bindDescriptorSet( crimild::get_ptr( light->getShadowAtlasDescriptors()[ cascadeId ] ) );
+                commandBuffer->bindDescriptorSet( geometry->getDescriptors() );
+                commandBuffer->drawPrimitive( geometry->anyPrimitive() );
+            } );
     };
 
     lights.each(
         [ & ]( auto light ) {
-            if ( offset >= viewports.size() ) {
+            if ( offset >= layout.size() ) {
                 CRIMILD_LOG_WARNING( "No available viewport in layout in shadow atlas for spot light" );
                 return;
             }
 
-            auto layoutViewport = viewports[ offset++ ];
+            auto layoutViewport = layout[ offset++ ];
 
             // Assign a single viewport to the shadow map. Since each cascade viewport is hard-coded to
             // take only a quarter of the available region, we can use that information to compute the
@@ -613,7 +473,6 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::renderShadowAtlas( Sha
 
             auto offset = 0l;
 
-            /*
             offset = recordDirectionalLightCommands(
                 crimild::get_ptr( commandBuffer ),
                 pipelines[ Light::Type::DIRECTIONAL ],
@@ -622,7 +481,6 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::renderShadowAtlas( Sha
                 lights[ Light::Type::DIRECTIONAL ],
                 renderables );
 
-            */
             offset = recordSpotLightCommands(
                 crimild::get_ptr( commandBuffer ),
                 pipelines[ Light::Type::SPOT ],
