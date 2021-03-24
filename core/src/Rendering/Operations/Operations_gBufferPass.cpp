@@ -166,7 +166,12 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( SharedPoi
 
                                     vec3 P = inPosition;
 
-                                    vec3 albedo = uMaterial.albedo.rgb * pow( texture( uAlbedoMap, inTexCoord ).rgb, vec3( 2.2 ) );
+                                    vec4 albedoMapColor = texture( uAlbedoMap, inTexCoord );
+                                    if ( albedoMapColor.a < 0.01 ) {
+                                        discard;
+                                    }
+
+                                    vec3 albedo = uMaterial.albedo.rgb * pow( albedoMapColor.rgb, vec3( 2.2 ) );
                                     float metallic = uMaterial.metallic * texture( uMetallicMap, inTexCoord ).r;
                                     float roughness = uMaterial.roughness * texture( uRoughnessMap, inTexCoord ).r;
                                     float ambientOcclusion = 1.0;//uMaterial.ambientOcclusion * texture( uAmbientOcclusionMap, inTexCoord ).r;
