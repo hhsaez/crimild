@@ -28,100 +28,100 @@
 #ifndef CRIMILD_LOADERS_OBJ_
 #define CRIMILD_LOADERS_OBJ_
 
-#include "SceneGraph/Group.hpp"
-#include "SceneGraph/Geometry.hpp"
-
 #include "Rendering/Material.hpp"
 #include "Rendering/Texture.hpp"
+#include "SceneGraph/Geometry.hpp"
+#include "SceneGraph/Group.hpp"
+
+#include <fstream>
 #include <map>
 #include <string>
 #include <vector>
-#include <fstream>
 
 namespace crimild {
 
-    class SimpleLitMaterial;
+    class LitMaterial;
 
-	class OBJLoader : public NonCopyable {
-	private:
-		class FileProcessor {
-		private:
-			using LineProcessor = std::function< void( std::stringstream &line ) >;
+    class OBJLoader : public NonCopyable {
+    private:
+        class FileProcessor {
+        private:
+            using LineProcessor = std::function< void( std::stringstream &line ) >;
 
-		public:
-			void readFile( std::string fileName );
+        public:
+            void readFile( std::string fileName );
 
-			void registerLineProcessor( std::string type, LineProcessor lineProcessor );
+            void registerLineProcessor( std::string type, LineProcessor lineProcessor );
 
-		private:
-			std::string getLine( std::ifstream &input );
-			void processLine( std::ifstream &input );
+        private:
+            std::string getLine( std::ifstream &input );
+            void processLine( std::ifstream &input );
 
-		private:
-			std::map< std::string, LineProcessor > _lineProcessors;
-		};
+        private:
+            std::map< std::string, LineProcessor > _lineProcessors;
+        };
 
-	public:
-		explicit OBJLoader( std::string fileName );
-		~OBJLoader( void ) = default;
+    public:
+        explicit OBJLoader( std::string fileName );
+        ~OBJLoader( void ) = default;
 
-		SharedPointer< Group > load( void );
+        SharedPointer< Group > load( void );
 
         inline void setVerbose( Bool verbose ) noexcept { _verbose = verbose; }
         Bool isVerbose( void ) const noexcept { return _verbose; }
 
-	private:
-		const std::string &getFileName( void ) const { return _fileName; }
+    private:
+        const std::string &getFileName( void ) const { return _fileName; }
 
-		FileProcessor &getOBJProcessor( void ) { return _objProcessor; }
-		FileProcessor &getMTLProcessor( void ) { return _mtlProcessor; }
+        FileProcessor &getOBJProcessor( void ) { return _objProcessor; }
+        FileProcessor &getMTLProcessor( void ) { return _mtlProcessor; }
 
-		void reset( void );
-		SharedPointer< Group > generateScene( void );
+        void reset( void );
+        SharedPointer< Group > generateScene( void );
 
-		void generateGeometry( void );
+        void generateGeometry( void );
 
         void readObject( std::stringstream &line );
-		void readObjectPositions( std::stringstream &line );
-		void readObjectNormals( std::stringstream &line );
-		void readObjectTextureCoords( std::stringstream &line );
-		void readObjectFaces( std::stringstream &line );
-		void readObjectMaterial( std::stringstream &line );
+        void readObjectPositions( std::stringstream &line );
+        void readObjectNormals( std::stringstream &line );
+        void readObjectTextureCoords( std::stringstream &line );
+        void readObjectFaces( std::stringstream &line );
+        void readObjectMaterial( std::stringstream &line );
 
-		void readMaterialFile( std::stringstream &line );
-		void readMaterialName( std::stringstream &line );
-		void readMaterialAmbient( std::stringstream &line );
-		void readMaterialDiffuse( std::stringstream &line );
-		void readMaterialSpecular( std::stringstream &line );
-		void readMaterialColorMap( std::stringstream &line );
-		void readMaterialNormalMap( std::stringstream &line );
-		void readMaterialSpecularMap( std::stringstream &line );
-		void readMaterialEmissiveMap( std::stringstream &line );
-		void readMaterialShaderProgram( std::stringstream &line );
+        void readMaterialFile( std::stringstream &line );
+        void readMaterialName( std::stringstream &line );
+        void readMaterialAmbient( std::stringstream &line );
+        void readMaterialDiffuse( std::stringstream &line );
+        void readMaterialSpecular( std::stringstream &line );
+        void readMaterialColorMap( std::stringstream &line );
+        void readMaterialNormalMap( std::stringstream &line );
+        void readMaterialSpecularMap( std::stringstream &line );
+        void readMaterialEmissiveMap( std::stringstream &line );
+        void readMaterialShaderProgram( std::stringstream &line );
         void readMaterialTranslucency( std::stringstream &line );
 
         SharedPointer< Texture > loadTexture( std::string fileName );
 
         void printProgress( std::string text, Bool endLine = false ) noexcept;
 
-	private:
-		std::string _fileName;
+    private:
+        std::string _fileName;
         Bool _verbose = false;
 
-		FileProcessor _objProcessor;
-		FileProcessor _mtlProcessor;
+        FileProcessor _objProcessor;
+        FileProcessor _mtlProcessor;
 
-		std::list< SharedPointer< Group > > _objects;
-		Group *_currentObject = nullptr;
+        std::list< SharedPointer< Group > > _objects;
+        Group *_currentObject = nullptr;
 
-		std::map< std::string, SharedPointer< SimpleLitMaterial >> _materials;
-		SimpleLitMaterial *_currentMaterial = nullptr;
+        std::map< std::string, SharedPointer< LitMaterial > > _materials;
+        LitMaterial *_currentMaterial = nullptr;
 
-		std::vector< Vector3f > _positions;
-		std::vector< Vector2f > _textureCoords;
-		std::vector< Vector3f > _normals;
+        std::vector< Vector3f > _positions;
+        std::vector< Vector2f > _textureCoords;
+        std::vector< Vector3f > _normals;
         std::vector< std::string > _faces;
-	};
+    };
 
 }
 
