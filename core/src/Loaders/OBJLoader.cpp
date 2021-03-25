@@ -329,6 +329,7 @@ void OBJLoader::readMaterialName( std::stringstream &line )
     line >> name;
 
     auto tmp = crimild::alloc< LitMaterial >();
+    tmp->setMetallic( 0.0f );
     _materials[ name ] = tmp;
     _currentMaterial = crimild::get_ptr( tmp );
 }
@@ -366,7 +367,7 @@ void OBJLoader::readMaterialNormalMap( std::stringstream &line )
 
 void OBJLoader::readMaterialSpecularMap( std::stringstream &line )
 {
-    _currentMaterial->setSpecularMap( loadTexture( StringUtils::readFullString( line ) ) );
+    _currentMaterial->setRoughnessMap( loadTexture( StringUtils::readFullString( line ) ) );
 }
 
 void OBJLoader::readMaterialEmissiveMap( std::stringstream &line )
