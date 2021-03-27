@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -9,14 +9,14 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
+ *     * Neither the name of the copyright holders nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -28,57 +28,54 @@
 #ifndef CRIMILD_IMPORT_SCENE_IMPORTER_
 #define CRIMILD_IMPORT_SCENE_IMPORTER_
 
-#include "Foundation/Memory.hpp"
 #include "Foundation/Containers/Map.hpp"
+#include "Foundation/Memory.hpp"
 #include "Mathematics/Transformation.hpp"
-
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"
 
 namespace crimild {
-    
+
     class Group;
-	class Material;
-	class SkinnedMesh;
+    class LitMaterial;
+    class SkinnedMesh;
 
-	namespace animation {
+    namespace animation {
 
-		class Joint;
-		class Skeleton;
+        class Joint;
+        class Skeleton;
 
-	}
+    }
 
-	namespace import {
+    namespace import {
 
-		class SceneImporter {
-		public:
-			static SharedPointer< Group > importScene( std::string filename );
-			
-		public:
-			SceneImporter( void );
-			virtual ~SceneImporter( void );
+        class SceneImporter {
+        public:
+            static SharedPointer< Group > importScene( std::string filename );
 
-			SharedPointer< Group > import( std::string filename );
+        public:
+            SceneImporter( void );
+            virtual ~SceneImporter( void );
 
-		private:
-			animation::Joint *getJoint( std::string name );
+            SharedPointer< Group > import( std::string filename );
 
-		private:
-			Map< std::string, SharedPointer< animation::Joint >> _joints;
-			SharedPointer< animation::Skeleton > _skeleton;
+        private:
+            animation::Joint *getJoint( std::string name );
 
-		private:
-			void computeTransform( const aiMatrix4x4 &m, Transformation &t );
-			void loadMaterialTexture( SharedPointer< Material > material, const aiMaterial *input, std::string basePath, aiTextureType texType, unsigned int texIndex = 0 );
-			SharedPointer< Material > buildMaterial( const aiMaterial *mtl, std::string basePath );
-			void recursiveSceneBuilder( SharedPointer< Group > parent, const struct aiScene *s, const struct aiNode *n, std::string basePath, SharedPointer< SkinnedMesh > &skinnedMesh );
-			void loadAnimations( const aiScene *scene, SharedPointer< SkinnedMesh > &skinnedMesh );
+        private:
+            Map< std::string, SharedPointer< animation::Joint > > _joints;
+            SharedPointer< animation::Skeleton > _skeleton;
 
-		};
+        private:
+            void computeTransform( const aiMatrix4x4 &m, Transformation &t );
+            void loadMaterialTexture( SharedPointer< LitMaterial > material, const aiMaterial *input, std::string basePath, aiTextureType texType, unsigned int texIndex = 0 );
+            SharedPointer< LitMaterial > buildMaterial( const aiMaterial *mtl, std::string basePath );
+            void recursiveSceneBuilder( SharedPointer< Group > parent, const struct aiScene *s, const struct aiNode *n, std::string basePath, SharedPointer< SkinnedMesh > &skinnedMesh );
+            void loadAnimations( const aiScene *scene, SharedPointer< SkinnedMesh > &skinnedMesh );
+        };
 
-	}
+    }
 
 }
 
 #endif
-
