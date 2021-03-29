@@ -130,7 +130,8 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( SharedPoi
                                 layout( set = 1, binding = 2 ) uniform sampler2D uMetallicMap;
                                 layout( set = 1, binding = 3 ) uniform sampler2D uRoughnessMap;
                                 layout( set = 1, binding = 4 ) uniform sampler2D uAmbientOcclusionMap;
-                                layout( set = 1, binding = 5 ) uniform sampler2D uNormalMap;
+                                layout( set = 1, binding = 5 ) uniform sampler2D uCombinedRoughnessMetallicMap;
+                                layout( set = 1, binding = 6 ) uniform sampler2D uNormalMap;
 
                                 layout ( location = 0 ) out vec4 outAlbedo;
                                 layout ( location = 1 ) out vec4 outPosition;
@@ -174,7 +175,11 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( SharedPoi
                                     vec3 albedo = uMaterial.albedo.rgb * pow( albedoMapColor.rgb, vec3( 2.2 ) );
                                     float metallic = uMaterial.metallic * texture( uMetallicMap, inTexCoord ).r;
                                     float roughness = uMaterial.roughness * texture( uRoughnessMap, inTexCoord ).r;
-                                    float ambientOcclusion = 1.0;//uMaterial.ambientOcclusion * texture( uAmbientOcclusionMap, inTexCoord ).r;
+                                    float ambientOcclusion = uMaterial.ambientOcclusion * texture( uAmbientOcclusionMap, inTexCoord ).r;
+
+                                    vec4 combinedPBR = texture( uCombinedRoughnessMetallicMap, inTexCoord );
+                                    roughness *= combinedPBR.g;
+                                    metallic *= combinedPBR.b;
 
                                     metallic = clamp( metallic, 0.0, 1.0 );
 	                                roughness = clamp( roughness, 0.05, 0.999 );
@@ -224,6 +229,11 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( SharedPoi
                             {
                                 // Ambient Occlusion Map
                                 .descriptorType = DescriptorType::AMBIENT_OCCLUSION_MAP,
+                                .stage = Shader::Stage::FRAGMENT,
+                            },
+                            {
+                                // Ambient Occlusion Map
+                                .descriptorType = DescriptorType::COMBINED_ROUGHNESS_METALLIC_MAP,
                                 .stage = Shader::Stage::FRAGMENT,
                             },
                             {

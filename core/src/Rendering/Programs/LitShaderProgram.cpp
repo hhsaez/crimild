@@ -117,6 +117,11 @@ LitShaderProgram::LitShaderProgram( void ) noexcept
                     .stage = Shader::Stage::FRAGMENT,
                 },
                 {
+                    // Ambient Occlusion Map
+                    .descriptorType = DescriptorType::COMBINED_ROUGHNESS_METALLIC_MAP,
+                    .stage = Shader::Stage::FRAGMENT,
+                },
+                {
                     // Normal Map
                     .descriptorType = DescriptorType::NORMAL_MAP,
                     .stage = Shader::Stage::FRAGMENT,

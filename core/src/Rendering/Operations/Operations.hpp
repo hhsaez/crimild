@@ -81,6 +81,8 @@ namespace crimild {
 
         SharedPointer< FrameGraphOperation > blend( Array< SharedPointer< FrameGraphResource > > const &resources ) noexcept;
 
+        SharedPointer< FrameGraphOperation > channel( std::string name, SharedPointer< FrameGraphResource > input, Size channelId ) noexcept;
+
         SharedPointer< FrameGraphOperation > debug( Array< SharedPointer< FrameGraphResource > > const &resources ) noexcept;
     }
 

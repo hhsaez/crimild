@@ -110,6 +110,7 @@ crimild::Bool DescriptorSetManager::bind( DescriptorSet *descriptorSet ) noexcep
             case DescriptorType::METALLIC_MAP:
             case DescriptorType::ROUGHNESS_MAP:
             case DescriptorType::AMBIENT_OCCLUSION_MAP:
+            case DescriptorType::COMBINED_ROUGHNESS_METALLIC_MAP:
             case DescriptorType::SHADOW_ATLAS:
             case DescriptorType::REFLECTION_ATLAS:
             case DescriptorType::IRRADIANCE_ATLAS:

@@ -103,6 +103,26 @@ void RenderSystem::lateStart( void ) noexcept
             auto materials = gBuffer->getProduct( 3 );
             auto depth = gBuffer->getProduct( 4 );
 
+            if ( settings->get< Bool >( "debug.show_albedo" ) ) {
+                return present( albedo );
+            }
+
+            if ( settings->get< Bool >( "debug.show_metallic" ) ) {
+                return channel( "metallic", materials, 0 );
+            }
+
+            if ( settings->get< Bool >( "debug.show_roughness" ) ) {
+                return channel( "roughness", materials, 1 );
+            }
+
+            if ( settings->get< Bool >( "debug.show_ambient_occlusion" ) ) {
+                return channel( "ambientOcclusion", materials, 2 );
+            }
+
+            if ( settings->get< Bool >( "debug.show_normals" ) ) {
+                return present( normals );
+            }
+
             auto reflectionAtlasPass = computeReflectionMap( envRenderables );
             auto irradianceMapPass = computeIrradianceMap( useResource( reflectionAtlasPass ) );
             auto prefilterMapPass = computePrefilterMap( useResource( reflectionAtlasPass ) );

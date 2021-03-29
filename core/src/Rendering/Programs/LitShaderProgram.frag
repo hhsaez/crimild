@@ -83,7 +83,8 @@ layout( set = 1, binding = 1 ) uniform sampler2D uAlbedoMap;
 layout( set = 1, binding = 2 ) uniform sampler2D uMetallicMap;
 layout( set = 1, binding = 3 ) uniform sampler2D uRoughnessMap;
 layout( set = 1, binding = 4 ) uniform sampler2D uAmbientOcclusionMap;
-layout( set = 1, binding = 5 ) uniform sampler2D uNormalMap;
+layout( set = 1, binding = 5 ) uniform sampler2D uOcclusionRoughnessMetallicMap;
+layout( set = 1, binding = 6 ) uniform sampler2D uNormalMap;
 
 layout( location = 0 ) out vec4 outColor;
 
