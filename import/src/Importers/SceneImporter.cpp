@@ -34,8 +34,12 @@
 #include "Components/SkinnedMeshComponent.hpp"
 #include "Exceptions/FileNotFoundException.hpp"
 #include "Primitives/Primitive.hpp"
+#include "Rendering/ImageManager.hpp"
+#include "Rendering/ImageView.hpp"
 #include "Rendering/Materials/LitMaterial.hpp"
+#include "Rendering/Sampler.hpp"
 #include "Rendering/SkinnedMesh.hpp"
+#include "Rendering/Texture.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Group.hpp"
 #include "Simulation/AssetManager.hpp"
@@ -128,34 +132,64 @@ void SceneImporter::computeTransform( const aiMatrix4x4 &m, Transformation &t )
 void SceneImporter::loadMaterialTexture( SharedPointer< LitMaterial > material, const aiMaterial *input, std::string basePath, aiTextureType texType, unsigned int texIndex )
 {
     if ( !input->GetTextureCount( texType ) ) {
-    	return;
+        return;
     }
 
     aiString texPath;
     if ( AI_SUCCESS == input->GetTexture( texType, texIndex, &texPath ) ) {
         // assume textures are in the same directory as model.
         auto fileName = FileSystem::getInstance().getFileName( texPath.data );
-        //fileName += ".tga";
         auto texturePath = basePath + fileName;
-        auto texture = crimild::retain( AssetManager::getInstance()->get< Texture >( texturePath ) );
+
+        auto image = ImageManager::getInstance()->loadImage(
+            { .filePath = {
+                  .path = texturePath,
+                  .pathType = FilePath::PathType::ABSOLUTE,
+              } } );
+
+        if ( image == nullptr ) {
+            CRIMILD_LOG_WARNING( "Failed to load image ", texturePath );
+            image = Image::INVALID;
+        }
+
+        auto texture = crimild::alloc< Texture >();
+        texture->imageView = crimild::alloc< ImageView >();
+        texture->imageView->image = image;
+        texture->sampler = [] {
+            auto sampler = crimild::alloc< Sampler >();
+            sampler->setMinFilter( Sampler::Filter::LINEAR );
+            sampler->setMagFilter( Sampler::Filter::LINEAR );
+            return sampler;
+        }();
+
         if ( texture != nullptr ) {
             switch ( texType ) {
                 case aiTextureType_DIFFUSE:
-                    //material->setColorMap( texture );
+                case aiTextureType_BASE_COLOR:
                     material->setAlbedoMap( texture );
                     break;
 
-                case aiTextureType_SPECULAR:
-                    //material->setSpecularMap( texture );
+                case aiTextureType_DIFFUSE_ROUGHNESS:
+                    material->setRoughnessMap( texture );
+                    break;
+
+                case aiTextureType_METALNESS:
+                    material->setMetallicMap( texture );
+                    break;
+
+                case aiTextureType_LIGHTMAP:
+					material->setAmbientOcclusionMap( texture );
                     break;
 
                 case aiTextureType_HEIGHT:
-                    material->setNormalMap( texture );
-                    break;
-
                 case aiTextureType_NORMALS:
                     material->setNormalMap( texture );
                     break;
+
+                case aiTextureType_UNKNOWN:
+                	// assume Matal/Roughness
+                    material->setCombinedRoughnessMetallicMap( texture );
+                	break;
 
                 default:
                     Log::warning( CRIMILD_CURRENT_CLASS_NAME, "Unsupported texture type ", texType );
@@ -173,10 +207,13 @@ SharedPointer< LitMaterial > SceneImporter::buildMaterial( const aiMaterial *mtl
 
     unsigned int max = 1;
 
-    loadMaterialTexture( material, mtl, basePath, aiTextureType_DIFFUSE, 0 );
-    loadMaterialTexture( material, mtl, basePath, aiTextureType_SPECULAR, 0 );
-    loadMaterialTexture( material, mtl, basePath, aiTextureType_HEIGHT, 0 );
-    loadMaterialTexture( material, mtl, basePath, aiTextureType_NORMALS, 0 );
+    for ( auto textureTypeIdx = UInt32( aiTextureType_DIFFUSE ); textureTypeIdx <= aiTextureType_UNKNOWN; ++textureTypeIdx ) {
+        const auto textureType = ( aiTextureType ) textureTypeIdx;
+        const auto maxTextures = mtl->GetTextureCount( textureType );
+        for ( auto textureCount = 0; textureCount < maxTextures; ++textureCount ) {
+            loadMaterialTexture( material, mtl, basePath, textureType, textureCount );
+        }
+    }
 
     aiColor4D color;
 
@@ -289,21 +326,6 @@ void SceneImporter::recursiveSceneBuilder( SharedPointer< Group > parent, const 
             }
         }();
 
-        // // assume all faces have the same topology
-        // auto primitiveType = Primitive::Type::TRIANGLES;
-        // switch ( face->mNumIndices ) {
-        //     case 1:
-        //         primitiveType = Primitive::Type::POINTS;
-        //         break;
-        //     case 2:
-        //         primitiveType = Primitive::Type::LINES;
-        //         break;
-        //     case 3:
-        //         primitiveType = Primitive::Type::TRIANGLES;
-        //         break;
-        //         // default: primitiveType = GL_POLYGON; break;
-        // }
-
         // load vertices
         auto vertexLayout = VertexLayout( vertexAttributes );
         const UInt32 VERTEX_COUNT = mesh->mNumVertices;
@@ -323,7 +345,9 @@ void SceneImporter::recursiveSceneBuilder( SharedPointer< Group > parent, const 
             }
 
             if ( texCoords != nullptr ) {
-                texCoords->set( v, Vector2f( &mesh->mTextureCoords[ 0 ][ v ].x ) );
+                auto uv = Vector2f( &mesh->mTextureCoords[ 0 ][ v ].x );
+                uv.y() = 1.0f - uv.y();
+                texCoords->set( v, uv );
             }
 
             // vbo->setPositionAt( v, Vector3f( &mesh->mVertices[ v ].x ) );

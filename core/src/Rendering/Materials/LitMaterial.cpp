@@ -74,6 +74,11 @@ LitMaterial::LitMaterial( void ) noexcept
                     .obj = Texture::ONE,
                 },
                 {
+                    // Ambient Roughness/Metallic map
+                    .descriptorType = DescriptorType::COMBINED_ROUGHNESS_METALLIC_MAP,
+                    .obj = Texture::ONE,
+                },
+                {
                     // Normal map
                     .descriptorType = DescriptorType::NORMAL_MAP,
                     .obj = Texture::ZERO,
@@ -153,17 +158,32 @@ Texture *LitMaterial::getAmbientOcclusionMap( void ) noexcept
     return getDescriptors()->descriptors[ 4 ].get< Texture >();
 }
 
+void LitMaterial::setCombinedRoughnessMetallicMap( SharedPointer< Texture > const &rm ) noexcept
+{
+    getDescriptors()->descriptors[ 5 ].obj = rm;
+}
+
+const Texture *LitMaterial::getCombinedRoughnessMetallicMap( void ) const noexcept
+{
+    return getDescriptors()->descriptors[ 5 ].get< Texture >();
+}
+
+Texture *LitMaterial::getCombinedRoughnessMetallicMap( void ) noexcept
+{
+    return getDescriptors()->descriptors[ 5 ].get< Texture >();
+}
+
 void LitMaterial::setNormalMap( SharedPointer< Texture > const &normalMap ) noexcept
 {
-    getDescriptors()->descriptors[ 5 ].obj = normalMap;
+    getDescriptors()->descriptors[ 6 ].obj = normalMap;
 }
 
 const Texture *LitMaterial::getNormalMap( void ) const noexcept
 {
-    return getDescriptors()->descriptors[ 5 ].get< Texture >();
+    return getDescriptors()->descriptors[ 6 ].get< Texture >();
 }
 
 Texture *LitMaterial::getNormalMap( void ) noexcept
 {
-    return getDescriptors()->descriptors[ 5 ].get< Texture >();
+    return getDescriptors()->descriptors[ 6 ].get< Texture >();
 }
