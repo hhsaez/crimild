@@ -61,6 +61,7 @@ namespace crimild {
         METALLIC_MAP,
         ROUGHNESS_MAP,
         AMBIENT_OCCLUSION_MAP,
+        COMBINED_ROUGHNESS_METALLIC_MAP, // Combined
 
         // Special per-render pass textures
         SHADOW_ATLAS,

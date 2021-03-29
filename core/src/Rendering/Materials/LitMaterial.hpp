@@ -41,9 +41,9 @@ namespace crimild {
     private:
         struct Props {
             alignas( 16 ) RGBAColorf albedo = RGBAColorf::ONE;
-            alignas( 4 ) Real32 metallic = 0;
-            alignas( 4 ) Real32 roughness = 0;
-            alignas( 4 ) Real32 ambientOcclusion = 0;
+            alignas( 4 ) Real32 metallic = 1;
+            alignas( 4 ) Real32 roughness = 1;
+            alignas( 4 ) Real32 ambientOcclusion = 1;
         };
 
     public:
@@ -73,6 +73,10 @@ namespace crimild {
         void setAmbientOcclusionMap( SharedPointer< Texture > const &ambientOcclusionMap ) noexcept;
         const Texture *getAmbientOcclusionMap( void ) const noexcept;
         Texture *getAmbientOcclusionMap( void ) noexcept;
+
+        void setCombinedRoughnessMetallicMap( SharedPointer< Texture > const &roughnessMetallicMap ) noexcept;
+        const Texture *getCombinedRoughnessMetallicMap( void ) const noexcept;
+        Texture *getCombinedRoughnessMetallicMap( void ) noexcept;
 
         void setNormalMap( SharedPointer< Texture > const &normalMap ) noexcept override;
         const Texture *getNormalMap( void ) const noexcept;
