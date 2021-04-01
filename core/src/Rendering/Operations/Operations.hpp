@@ -29,11 +29,13 @@
 #define CRIMILD_CORE_RENDERING_OPERATIONS_
 
 #include "Foundation/Memory.hpp"
+#include "Rendering/DescriptorSet.hpp"
 
 namespace crimild {
 
     class FrameGraphOperation;
     class FrameGraphResource;
+    class Shader;
 
     namespace framegraph {
 
@@ -76,6 +78,12 @@ namespace crimild {
             SharedPointer< FrameGraphResource > const &renderables,
             SharedPointer< FrameGraphResource > const &colorAttachment = nullptr,
             SharedPointer< FrameGraphResource > const &depthAttachment = nullptr ) noexcept;
+
+        SharedPointer< FrameGraphOperation > computeImage(
+            Extent2D extent,
+            SharedPointer< Shader > shader,
+            Format format = Format::R8G8B8A8_UNORM,
+            Array< Descriptor > descriptors = {} ) noexcept;
 
         SharedPointer< FrameGraphOperation > tonemapping( SharedPointer< FrameGraphResource > const &image ) noexcept;
 

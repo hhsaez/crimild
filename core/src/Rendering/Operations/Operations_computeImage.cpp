@@ -25,12 +25,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Rendering/Compositions/ComputeImageComposition.hpp"
-
 #include "Rendering/CommandBuffer.hpp"
 #include "Rendering/ComputePass.hpp"
 #include "Rendering/Image.hpp"
 #include "Rendering/ImageView.hpp"
+#include "Rendering/Operations/OperationUtils.hpp"
+#include "Rendering/Operations/Operations.hpp"
 #include "Rendering/Pipeline.hpp"
 #include "Rendering/Sampler.hpp"
 #include "Rendering/Texture.hpp"
@@ -38,13 +38,13 @@
 #include "Simulation/Simulation.hpp"
 
 using namespace crimild;
-using namespace crimild::compositions;
 
-Composition crimild::compositions::computeImage( ComputeImageProps props ) noexcept
+SharedPointer< FrameGraphOperation > crimild::framegraph::computeImage(
+    Extent2D extent,
+    SharedPointer< Shader > shader,
+    Format format,
+    Array< Descriptor > descriptors ) noexcept
 {
-    Composition cmp;
-
-    auto extent = props.extent;
     if ( extent.scalingMode == ScalingMode::SWAPCHAIN_RELATIVE ) {
         // convert to fixed extent
         auto settings = Simulation::getInstance()->getSettings();
@@ -53,12 +53,12 @@ Composition crimild::compositions::computeImage( ComputeImageProps props ) noexc
         extent.height *= settings->get< Int32 >( "video.height", 768 );
     }
 
-    auto texture = cmp.create< Texture >();
+    auto texture = crimild::alloc< Texture >();
     texture->imageView = [ & ] {
         auto imageView = crimild::alloc< ImageView >();
         imageView->image = [ & ] {
             auto image = crimild::alloc< Image >();
-            image->format = props.format;
+            image->format = format;
             image->extent = {
                 .width = Real32( extent.width ),
                 .height = Real32( extent.height ),
@@ -72,12 +72,12 @@ Composition crimild::compositions::computeImage( ComputeImageProps props ) noexc
     texture->sampler = crimild::alloc< Sampler >();
 
     auto pipeline = [ & ] {
-        auto pipeline = cmp.create< ComputePipeline >();
+        auto pipeline = crimild::alloc< ComputePipeline >();
         pipeline->setName( "Compute Pipeline" );
         pipeline->setProgram( [ & ] {
             auto program = crimild::alloc< ShaderProgram >(
                 Array< SharedPointer< Shader > > {
-                    props.shader,
+                    shader,
                 } );
             program->descriptorSetLayouts = {
                 [ & ] {
@@ -88,7 +88,7 @@ Composition crimild::compositions::computeImage( ComputeImageProps props ) noexc
                             .stage = Shader::Stage::COMPUTE,
                         },
                     };
-                    props.descriptors.each(
+                    descriptors.each(
                         [ & ]( auto descriptor ) {
                             layout->bindings.add(
                                 {
@@ -104,15 +104,15 @@ Composition crimild::compositions::computeImage( ComputeImageProps props ) noexc
         return pipeline;
     }();
 
-    auto descriptors = [ & ] {
-        auto ds = cmp.create< DescriptorSet >();
+    auto descriptorSet = [ & ] {
+        auto ds = crimild::alloc< DescriptorSet >();
         ds->descriptors = {
             Descriptor {
                 .descriptorType = DescriptorType::STORAGE_IMAGE,
                 .obj = crimild::retain( texture ),
             },
         };
-        props.descriptors.each(
+        descriptors.each(
             [ & ]( auto descriptor ) {
                 ds->descriptors.add( descriptor );
             } );
@@ -120,9 +120,23 @@ Composition crimild::compositions::computeImage( ComputeImageProps props ) noexc
         return ds;
     }();
 
-    auto computePass = cmp.create< ComputePass >();
-    computePass->setName( "compute" );
+    auto computePass = crimild::alloc< ComputePass >();
+    computePass->setName( "computeImage" );
+    computePass->writes( { texture } );
+    computePass->produces( { texture } );
 
+    return withComputeCommands(
+        computePass,
+        [ pipeline, descriptorSet, extent ]( auto commands ) {
+            commands->bindComputePipeline( crimild::get_ptr( pipeline ) );
+            commands->bindDescriptorSet( crimild::get_ptr( descriptorSet ) );
+            commands->dispatch( DispatchWorkgroup {
+                .x = UInt32( extent.width / DispatchWorkgroup::DEFAULT_WORGROUP_SIZE ),
+                .y = UInt32( extent.height / DispatchWorkgroup::DEFAULT_WORGROUP_SIZE ),
+                .z = 1 } );
+        } );
+
+    /*
     auto commands = cmp.create< CommandBuffer >();
     commands->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
     commands->bindComputePipeline( pipeline );
@@ -134,8 +148,7 @@ Composition crimild::compositions::computeImage( ComputeImageProps props ) noexc
     commands->end();
     computePass->setCommandRecorder( [ commands ]( Size ) { return commands; } );
     computePass->setConditional( props.isConditional );
+    */
 
-    cmp.setOutput( nullptr );
-    cmp.setOutputTexture( texture );
-    return cmp;
+    //computePass->reads( { } );
 }

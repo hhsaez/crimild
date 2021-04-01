@@ -80,6 +80,9 @@ SharedPointer< Texture > crimild::framegraph::withResource( SharedPointer< Textu
             texture->imageView = att->imageView;
             break;
         }
+        case FrameGraphResource::Type::TEXTURE: {
+            return crimild::cast_ptr< Texture >( resource );
+        }
         default: {
             CRIMILD_LOG_FATAL( "Invalid resource type" );
             exit( -1 );

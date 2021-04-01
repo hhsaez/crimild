@@ -30,17 +30,29 @@
 
 #include "Foundation/SharedObject.hpp"
 #include "Rendering/CommandBuffer.hpp"
+#include "Rendering/FrameGraphOperation.hpp"
 #include "Rendering/RenderResource.hpp"
 
 namespace crimild {
 
     class ComputePass
-        : public SharedObject,
+        : public FrameGraphOperation,
           public RenderResourceImpl< ComputePass > {
 
     public:
         virtual ~ComputePass( void ) = default;
 
+        inline FrameGraphOperation::Type getType( void ) const noexcept override { return FrameGraphOperation::Type::COMPUTE_PASS; }
+
+        inline void setCommandBuffers( Array< SharedPointer< CommandBuffer > > const &commands ) noexcept { m_commands = commands; }
+        inline Array< SharedPointer< CommandBuffer > > &getCommandBuffers( void ) noexcept { return m_commands; }
+
+    private:
+        Array< SharedPointer< CommandBuffer > > m_commands;
+
+        // DEPRECATED FROM HERE
+
+    public:
         inline void setCommandRecorder( CommandRecorder commandRecorder ) noexcept { m_commandRecorder = commandRecorder; }
 
         inline CommandBuffer *execute( Size imageIndex ) noexcept
