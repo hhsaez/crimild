@@ -27,6 +27,7 @@
 
 #include "RenderSystem.hpp"
 
+#include "Rendering/ComputePass.hpp"
 #include "Rendering/FrameGraphOperation.hpp"
 #include "Rendering/Operations/OperationUtils.hpp"
 #include "Rendering/Operations/Operations.hpp"
@@ -177,10 +178,8 @@ void RenderSystem::lateStart( void ) noexcept
 
             auto ret = blend(
                 {
-                    //useResource( lit ),
                     useResource( unlit ),
                     useResource( tonemapped ),
-                    //useResource( env ),
                 } );
 
             if ( settings->get< Bool >( "debug.show_render_passes" ) ) {
@@ -263,8 +262,7 @@ void RenderSystem::sort( SharedPointer< FrameGraphOperation > const &root ) noex
             } else if ( pass->getType() == FrameGraphOperation::Type::RENDER_PASS ) {
                 m_renderPasses.add( cast_ptr< RenderPass >( pass ) );
             } else if ( pass->getType() == FrameGraphOperation::Type::COMPUTE_PASS ) {
-                // TODO:
-                // ret.second.add( cast_ptr< ComputePass >( pass ) );
+                m_computePasses.add( cast_ptr< ComputePass >( pass ) );
             }
             sorted.push_front( pass );
         } );
@@ -313,15 +311,15 @@ RenderSystem::CommandBufferArray &RenderSystem::getGraphicsCommands( Size imageI
     return m_graphicsCommands;
 }
 
-RenderSystem::CommandBufferArray &RenderSystem::getComputeCommands( Size imageIndex, Bool includeConditionalPasses ) noexcept
+RenderSystem::CommandBufferArray &RenderSystem::getComputeCommands( Size imageIndex, Bool forceAll ) noexcept
 {
-    // m_commandPasses.each( [ imageIndex ]( auto pass ) { pass->apply( inageIndex ); } );
-
-    // TODO:
-    // m_computeCommands = m_computePasses.map(
-    //     [ imageIndex ]( auto pass ) {
-    //         return get_ptr( pass->getCommandBuffers()[ imageIndex ] );
-    //     } );
+    m_computeCommands.clear();
+    m_computePasses.each(
+        [ & ]( auto pass ) {
+            if ( pass->apply( imageIndex, forceAll ) ) {
+                m_computeCommands.add( get_ptr( pass->getCommandBuffers()[ imageIndex ] ) );
+            }
+        } );
 
     return m_computeCommands;
 }

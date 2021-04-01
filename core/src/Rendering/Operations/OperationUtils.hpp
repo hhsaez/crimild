@@ -29,6 +29,7 @@
 #define CRIMILD_CORE_RENDERING_OPERATIONS_UTILS_
 
 #include "Rendering/CommandBuffer.hpp"
+#include "Rendering/ComputePass.hpp"
 #include "Rendering/RenderPass.hpp"
 #include "Rendering/Swapchain.hpp"
 
@@ -142,6 +143,27 @@ namespace crimild {
                 };
 
             return renderPass;
+        }
+
+        template< typename CommandRecorder >
+        static SharedPointer< ComputePass > withComputeCommands( SharedPointer< ComputePass > const &computePass, CommandRecorder recorder ) noexcept
+        {
+            computePass->getCommandBuffers()
+                .resize( Swapchain::getInstance()->getImages().size() )
+                .fill(
+                    [ recorder,
+                      computePass = crimild::get_ptr( computePass ) ]( auto frameIndex ) {
+                        auto commandBuffer = crimild::alloc< CommandBuffer >();
+                        commandBuffer->setFrameIndex( frameIndex );
+                        commandBuffer->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
+
+                        recorder( commandBuffer );
+
+                        commandBuffer->end();
+                        return commandBuffer;
+                    } );
+
+            return computePass;
         }
 
     }
