@@ -87,6 +87,14 @@ namespace crimild {
 
         SharedPointer< FrameGraphOperation > tonemapping( SharedPointer< FrameGraphResource > const &image ) noexcept;
 
+        SharedPointer< FrameGraphOperation > invert( SharedPointer< FrameGraphResource > const &image ) noexcept;
+        SharedPointer< FrameGraphOperation > grayscale( SharedPointer< FrameGraphResource > const &image ) noexcept;
+
+        SharedPointer< FrameGraphOperation > convolution( std::string name, SharedPointer< FrameGraphResource > const &image, const Matrix3f &kernel ) noexcept;
+        SharedPointer< FrameGraphOperation > blur( SharedPointer< FrameGraphResource > const &image ) noexcept;
+        SharedPointer< FrameGraphOperation > sharpen( SharedPointer< FrameGraphResource > const &image ) noexcept;
+        SharedPointer< FrameGraphOperation > edges( SharedPointer< FrameGraphResource > const &image ) noexcept;
+
         SharedPointer< FrameGraphOperation > blend( Array< SharedPointer< FrameGraphResource > > const &resources ) noexcept;
 
         SharedPointer< FrameGraphOperation > channel( std::string name, SharedPointer< FrameGraphResource > input, Size channelId ) noexcept;
