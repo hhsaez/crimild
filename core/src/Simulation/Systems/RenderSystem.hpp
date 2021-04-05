@@ -46,7 +46,7 @@ namespace crimild {
         CRIMILD_IMPLEMENT_RTTI( crimild::RenderSystem )
 
     public:
-        void lateStart( void ) noexcept override;
+        void start( void ) noexcept override;
 
         void onPreRender( void ) noexcept override;
 
