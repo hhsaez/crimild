@@ -79,13 +79,8 @@ namespace crimild {
 
 using namespace crimild;
 
-void RenderSystem::lateStart( void ) noexcept
+void RenderSystem::start( void ) noexcept
 {
-    if ( getFrameGraph() != nullptr ) {
-        // Frame graph is valid. Nothing to do here
-        return;
-    }
-
     setFrameGraph(
         [] {
             using namespace crimild::framegraph;
@@ -165,7 +160,7 @@ void RenderSystem::lateStart( void ) noexcept
             auto env = forwardUnlitPass(
                 envRenderables,
                 useColorAttachment( "envObjects/color", Format::R32G32B32A32_SFLOAT ),
-                depth );
+                nullptr ); //depth );
 
             auto tonemapped = tonemapping(
                 useResource(
