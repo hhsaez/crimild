@@ -162,19 +162,32 @@ void RenderSystem::start( void ) noexcept
                 useColorAttachment( "envObjects/color", Format::R32G32B32A32_SFLOAT ),
                 depth );
 
+            auto composed = blend(
+                {
+                    useResource( lit ),
+                    useResource( ibl ),
+                    useResource( env ),
+                } );
+
+            auto bloom = brightPassFilter(
+                useResource( composed ),
+                Vector3f( 0.2126f, 0.7152f, 0.0722f ) );
+
+            bloom = gaussianBlur( useResource( bloom ) );
+
             auto tonemapped = tonemapping(
                 useResource(
-                    blend(
-                        {
-                            useResource( lit ),
-                            useResource( ibl ),
-                            useResource( env ),
-                        } ) ) );
+                    composed ) );
 
+            // apply bloom after tonemapping
             auto ret = blend(
+                { useResource( tonemapped ), // forces format to RGB8
+                  useResource( bloom ) } );
+
+            ret = blend(
                 {
                     useResource( unlit ),
-                    useResource( tonemapped ),
+                    useResource( ret ),
                 } );
 
             if ( settings->get< Bool >( "debug.show_render_passes" ) ) {
