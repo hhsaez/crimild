@@ -32,6 +32,27 @@
 
 using namespace crimild;
 
+Format crimild::framegraph::useFormat( SharedPointer< FrameGraphResource > const &resource ) noexcept
+{
+    switch ( resource->getType() ) {
+        case FrameGraphResource::Type::IMAGE_VIEW: {
+            return crimild::cast_ptr< ImageView >( resource )->format;
+        }
+        case FrameGraphResource::Type::IMAGE: {
+            return crimild::cast_ptr< Image >( resource )->format;
+        }
+        case FrameGraphResource::Type::ATTACHMENT: {
+            return crimild::cast_ptr< Attachment >( resource )->format;
+        }
+        case FrameGraphResource::Type::TEXTURE: {
+            return crimild::cast_ptr< Texture >( resource )->imageView->format;
+        }
+        default: {
+            return Format::R8G8B8A8_UNORM;
+        }
+    }
+}
+
 SharedPointer< Attachment > crimild::framegraph::useColorAttachment( std::string name, Format format ) noexcept
 {
     name = name != "" ? name : "color";
