@@ -160,7 +160,7 @@ void RenderSystem::start( void ) noexcept
             auto env = forwardUnlitPass(
                 envRenderables,
                 useColorAttachment( "envObjects/color", Format::R32G32B32A32_SFLOAT ),
-                nullptr ); //depth );
+                depth );
 
             auto tonemapped = tonemapping(
                 useResource(
