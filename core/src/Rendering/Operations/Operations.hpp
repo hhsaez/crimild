@@ -85,6 +85,10 @@ namespace crimild {
             Format format = Format::R8G8B8A8_UNORM,
             Array< Descriptor > descriptors = {} ) noexcept;
 
+        SharedPointer< FrameGraphOperation > brightPassFilter( SharedPointer< FrameGraphResource > const &image, const Vector3f &filter ) noexcept;
+
+        SharedPointer< FrameGraphOperation > gaussianBlur( SharedPointer< FrameGraphResource > const &image ) noexcept;
+
         SharedPointer< FrameGraphOperation > tonemapping( SharedPointer< FrameGraphResource > const &image ) noexcept;
 
         SharedPointer< FrameGraphOperation > invert( SharedPointer< FrameGraphResource > const &image ) noexcept;
@@ -95,7 +99,7 @@ namespace crimild {
         SharedPointer< FrameGraphOperation > sharpen( SharedPointer< FrameGraphResource > const &image ) noexcept;
         SharedPointer< FrameGraphOperation > edges( SharedPointer< FrameGraphResource > const &image ) noexcept;
 
-        SharedPointer< FrameGraphOperation > blend( Array< SharedPointer< FrameGraphResource > > const &resources ) noexcept;
+        SharedPointer< FrameGraphOperation > blend( Array< SharedPointer< FrameGraphResource > > const &resources, std::string mode = "additive" ) noexcept;
 
         SharedPointer< FrameGraphOperation > channel( std::string name, SharedPointer< FrameGraphResource > input, Size channelId ) noexcept;
 
