@@ -40,7 +40,12 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::blend( Array< SharedPo
     auto renderPass = crimild::alloc< RenderPass >();
     renderPass->setName( "blend" );
 
-    auto color = useColorAttachment( "blend/color" );
+    auto format = Format::R8G8B8A8_UNORM;
+    if ( !resources.empty() ) {
+        format = useFormat( resources[ 0 ] );
+    }
+
+    auto color = useColorAttachment( "blend/color", format );
 
     renderPass->attachments = { color };
 
