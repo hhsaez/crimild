@@ -29,84 +29,17 @@
 #define CRIMILD_RENDERING_INDEX_BUFFER_
 
 #include "Rendering/Buffer.hpp"
-#include "Rendering/BufferView.hpp"
 #include "Rendering/BufferAccessor.hpp"
+#include "Rendering/BufferView.hpp"
 #include "Rendering/Format.hpp"
 
 namespace crimild {
-
-#if 0
-    class IndexBuffer : public Buffer, public RTTI {
-    public:
-        enum class IndexType {
-            UINT_16,
-            UINT_32,
-        };
-
-    public:
-        virtual ~IndexBuffer( void ) noexcept = default;
-
-        Buffer::Usage getUsage( void ) const noexcept { return Buffer::Usage::INDEX_BUFFER; }
-
-        virtual crimild::Size getCount( void ) const noexcept = 0;
-
-        virtual IndexType getIndexType( void ) const noexcept = 0;
-    };
-
-    template< typename Index >
-    class IndexBufferImpl : public IndexBuffer {
-    public:
-        explicit IndexBufferImpl( crimild::Size count ) noexcept
-            : m_indices( count )
-        {
-            // nothing to do
-        }
-
-        explicit IndexBufferImpl( const containers::Array< Index > &indices ) noexcept
-            : m_indices( indices )
-        {
-            // nothing to do
-        }
-
-        /**
-            \remarks When implementing custom vertex formats, don't
-             forget to implement a scecialization for getClassName()
-             so RTTI works.
-         */
-        virtual const char *getClassName( void ) const override;
-
-        virtual ~IndexBufferImpl( void ) noexcept = default;
-
-        crimild::Size getSize( void ) const noexcept override { return m_indices.size() * sizeof( Index ); }
-        crimild::Size getStride( void ) const noexcept override { return sizeof( Index ); }
-
-        void *getRawData( void ) noexcept override { return ( void * ) m_indices.getData(); }
-        const void *getRawData( void ) const noexcept override { return ( void * ) m_indices.getData(); }
-
-        crimild::Size getCount( void ) const noexcept override { return getSize() / getStride(); }
-
-        Index *getData( void ) noexcept { return m_indices.getData(); }
-        const Index *getData( void ) const noexcept { return m_indices.getData(); }
-
-        IndexBuffer::IndexType getIndexType( void ) const noexcept override;
-
-    private:
-        containers::Array< Index > m_indices;
-    };
-
-    using IndexUInt16 = crimild::UInt16;
-    using IndexUInt16Buffer = IndexBufferImpl< crimild::UInt16 >;
-
-    using IndexUInt32 = crimild::UInt32;
-    using IndexUInt32Buffer = IndexBufferImpl< crimild::UInt32 >;
-
-#endif
 
     class IndexBuffer
         : public coding::Codable,
           public RenderResourceImpl< IndexBuffer > {
         CRIMILD_IMPLEMENT_RTTI( crimild::IndexBuffer )
-        
+
     public:
         IndexBuffer( Format format, crimild::Size count ) noexcept;
 
@@ -117,21 +50,19 @@ namespace crimild {
             auto stride = utils::getFormatSize( format );
 
             auto buffer = crimild::alloc< Buffer >( data );
-    
+
             m_bufferView = crimild::alloc< BufferView >(
                 BufferView::Target::INDEX,
                 buffer,
                 0,
-                stride
-            );
-            
+                stride );
+
             m_accessor = crimild::alloc< BufferAccessor >(
                 m_bufferView,
                 0,
-                stride
-            );
+                stride );
         }
-        
+
         virtual ~IndexBuffer( void ) = default;
 
         inline Format getFormat( void ) const noexcept
@@ -148,7 +79,7 @@ namespace crimild {
         {
             return crimild::get_ptr( m_bufferView );
         }
-        
+
         crimild::UInt32 getIndex( crimild::Size i ) const noexcept
         {
             if ( m_format == Format::INDEX_16_UINT ) {
@@ -162,8 +93,7 @@ namespace crimild {
         {
             if ( m_format == Format::INDEX_16_UINT ) {
                 m_accessor->each< crimild::UInt16 >( fn );
-            }
-            else {
+            } else {
                 m_accessor->each< crimild::UInt32 >( fn );
             }
         }
@@ -179,7 +109,7 @@ namespace crimild {
         {
             m_accessor->set( data );
         }
-        
+
     private:
         Format m_format;
         SharedPointer< BufferView > m_bufferView;
@@ -189,5 +119,3 @@ namespace crimild {
 }
 
 #endif
-
-

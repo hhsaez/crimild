@@ -12,7 +12,7 @@
  *     * Neither the name of the copyright holder nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- *																							
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,10 +26,9 @@
  */
 
 #include "Rendering/Buffer.hpp"
-#include "Rendering/FrameGraph.hpp"
 
-#include "Mathematics/Vector.hpp"
 #include "Mathematics/Matrix.hpp"
+#include "Mathematics/Vector.hpp"
 
 #include "gtest/gtest.h"
 
@@ -38,9 +37,15 @@ using namespace crimild;
 TEST( Buffer, constructionWithValueArray )
 {
     auto data = Array< crimild::Real32 > {
-        -0.5f, -0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        0.0f, 0.5f, 0.0f,
+        -0.5f,
+        -0.5f,
+        0.0f,
+        0.5f,
+        -0.5f,
+        0.0f,
+        0.0f,
+        0.5f,
+        0.0f,
     };
 
     auto buffer = crimild::alloc< Buffer >( data );
@@ -61,7 +66,7 @@ TEST( Buffer, constructionWithStructArray )
     struct Vertex {
         Vector3f position;
     };
-    
+
     auto data = Array< Vertex > {
         { .position = { -0.5f, -0.5f, 0.0f } },
         { .position = { 0.5f, -0.5f, 0.0f } },
@@ -90,29 +95,10 @@ TEST( Buffer, constructionWithStruct )
         Uniform {
             .color = RGBAColorf( 0.5f, 0.75f, 0.95f, 1.0f ),
             .metalness = 0.5f,
-        }
-    );
+        } );
 
     ASSERT_EQ( sizeof( Uniform ), buffer->getSize() );
     ASSERT_NE( nullptr, buffer->getData() );
     ASSERT_EQ( RGBAColorf( 0.5f, 0.75f, 0.95f, 1.0f ), static_cast< Uniform * >( static_cast< void * >( buffer->getData() ) )->color );
     ASSERT_EQ( 0.5f, static_cast< Uniform * >( static_cast< void * >( buffer->getData() ) )->metalness );
 }
-
-TEST( Buffer, autoAddToFrameGraph )
-{
-	auto graph = crimild::alloc< FrameGraph >();
-
-	ASSERT_FALSE( graph->hasNodes() );
-
-	{
-        auto buffer = crimild::alloc< Buffer >( Array< crimild::Real32 >( 3 ) );
-
-        ASSERT_TRUE( graph->contains( buffer ) );
-		ASSERT_TRUE( graph->hasNodes() );
-	}
-
-	ASSERT_FALSE( graph->hasNodes() );
-
-}
-

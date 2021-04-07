@@ -28,14 +28,6 @@
 #include "VulkanSystem.hpp"
 
 #include "Foundation/Containers/Array.hpp"
-#include "Rendering/FrameGraph.hpp"
-#include "Rendering/Programs/Compositions/ColorizeCompositionShaderProgram.hpp"
-#include "Rendering/Programs/Compositions/ConvolutionCompositionShaderProgram.hpp"
-#include "Rendering/Programs/Compositions/GrayscaleCompositionShaderProgram.hpp"
-#include "Rendering/Programs/Compositions/InvertCompositionShaderProgram.hpp"
-#include "Rendering/Programs/Compositions/PresentCompositionShaderProgram.hpp"
-#include "Rendering/Programs/GouraudLitShaderProgram.hpp"
-#include "Rendering/Programs/PhongLitShaderProgram.hpp"
 #include "Rendering/Programs/SkyboxShaderProgram.hpp"
 #include "Rendering/Programs/UnlitShaderProgram.hpp"
 #include "Rendering/ShaderProgram.hpp"
@@ -56,8 +48,6 @@ using namespace crimild::vulkan;
 void VulkanSystem::start( void ) noexcept
 {
     initShaders();
-
-    m_frameGraph = crimild::alloc< FrameGraph >();
 
     createInstance()
         && createDebugMessenger()
@@ -347,33 +337,6 @@ void VulkanSystem::initShaders( void ) noexcept
 
     auto assets = AssetManager::getInstance();
 
-    /*
-    assets->get< PhongLitShaderProgram >()->setShaders(
-        {
-            [&] {
-                #include "Rendering/Shaders/lit/phong.vert.inl"
-                return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
-            }(),
-            [&] {
-                #include "Rendering/Shaders/lit/phong.frag.inl"
-                return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
-            }(),
-        }
-    );
-    */
-
-    assets->get< GouraudLitShaderProgram >()->setShaders(
-        {
-            [ & ] {
-#include "Rendering/Shaders/lit/gouraud.vert.inl"
-                return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
-            }(),
-            [ & ] {
-#include "Rendering/Shaders/lit/gouraud.frag.inl"
-                return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
-            }(),
-        } );
-
     assets->get< UnlitShaderProgram >()->setShaders(
         {
             [ & ] {
@@ -394,66 +357,6 @@ void VulkanSystem::initShaders( void ) noexcept
             }(),
             [ & ] {
 #include "Rendering/Shaders/unlit/skybox.frag.inl"
-                return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
-            }(),
-        } );
-
-    assets->get< InvertCompositionShaderProgram >()->setShaders(
-        {
-            [ & ] {
-#include "Rendering/Shaders/Compositions/invert.vert.inl"
-                return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
-            }(),
-            [ & ] {
-#include "Rendering/Shaders/Compositions/invert.frag.inl"
-                return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
-            }(),
-        } );
-
-    assets->get< ColorizeCompositionShaderProgram >()->setShaders(
-        {
-            [ & ] {
-#include "Rendering/Shaders/Compositions/colorize.vert.inl"
-                return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
-            }(),
-            [ & ] {
-#include "Rendering/Shaders/Compositions/colorize.frag.inl"
-                return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
-            }(),
-        } );
-
-    assets->get< GrayscaleCompositionShaderProgram >()->setShaders(
-        {
-            [ & ] {
-#include "Rendering/Shaders/Compositions/grayscale.vert.inl"
-                return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
-            }(),
-            [ & ] {
-#include "Rendering/Shaders/Compositions/grayscale.frag.inl"
-                return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
-            }(),
-        } );
-
-    assets->get< ConvolutionCompositionShaderProgram >()->setShaders(
-        {
-            [ & ] {
-#include "Rendering/Shaders/Compositions/convolution.vert.inl"
-                return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
-            }(),
-            [ & ] {
-#include "Rendering/Shaders/Compositions/convolution.frag.inl"
-                return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
-            }(),
-        } );
-
-    assets->get< PresentCompositionShaderProgram >()->setShaders(
-        {
-            [ & ] {
-#include "Rendering/Shaders/Compositions/present.vert.inl"
-                return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
-            }(),
-            [ & ] {
-#include "Rendering/Shaders/Compositions/present.frag.inl"
                 return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
             }(),
         } );

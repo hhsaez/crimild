@@ -28,7 +28,6 @@
 #ifndef CRIMILD_IMGUI_RENDERING_OPERATIONS_
 #define CRIMILD_IMGUI_RENDERING_OPERATIONS_
 
-#include "Rendering/Compositions/Composition.hpp"
 #include "Simulation/Systems/ImGUISystem.hpp"
 
 namespace crimild {

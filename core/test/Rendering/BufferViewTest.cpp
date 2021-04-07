@@ -12,7 +12,7 @@
  *     * Neither the name of the copyright holder nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- *																							
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,7 +26,6 @@
  */
 
 #include "Rendering/BufferView.hpp"
-#include "Rendering/FrameGraph.hpp"
 
 #include "gtest/gtest.h"
 
@@ -35,24 +34,29 @@ using namespace crimild;
 TEST( BufferView, constructionWithDefaults )
 {
     auto data = Array< crimild::Real32 > {
-        -0.5f, -0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        0.0f, 0.5f, 0.0f,
+        -0.5f,
+        -0.5f,
+        0.0f,
+        0.5f,
+        -0.5f,
+        0.0f,
+        0.0f,
+        0.5f,
+        0.0f,
     };
 
     auto buffer = crimild::alloc< Buffer >( data );
 
     auto bufferView = crimild::alloc< BufferView >(
         BufferView::Target::VERTEX,
-        buffer
-    );
+        buffer );
 
     ASSERT_EQ( crimild::get_ptr( buffer ), bufferView->getBuffer() );
     ASSERT_EQ( 0, bufferView->getOffset() );
     ASSERT_EQ( buffer->getSize(), bufferView->getLength() );
     ASSERT_EQ( sizeof( crimild::Byte ), bufferView->getStride() );
     ASSERT_EQ( buffer->getSize(), bufferView->getCount() );
-    
+
     ASSERT_NE( nullptr, bufferView->getData() );
     ASSERT_EQ( buffer->getData(), bufferView->getData() );
 }
@@ -60,9 +64,15 @@ TEST( BufferView, constructionWithDefaults )
 TEST( BufferView, constructionWithLength )
 {
     auto data = Array< crimild::Real32 > {
-        -0.5f, -0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        0.0f, 0.5f, 0.0f,
+        -0.5f,
+        -0.5f,
+        0.0f,
+        0.5f,
+        -0.5f,
+        0.0f,
+        0.0f,
+        0.5f,
+        0.0f,
     };
 
     auto buffer = crimild::alloc< Buffer >( data );
@@ -80,7 +90,7 @@ TEST( BufferView, constructionWithLength )
     ASSERT_EQ( 12, bufferView->getLength() );
     ASSERT_EQ( sizeof( crimild::Byte ), bufferView->getStride() );
     ASSERT_EQ( 12, bufferView->getCount() );
-    
+
     ASSERT_NE( nullptr, bufferView->getData() );
     ASSERT_EQ( buffer->getData(), bufferView->getData() );
 }
@@ -88,9 +98,15 @@ TEST( BufferView, constructionWithLength )
 TEST( BufferView, constructionWithOffset )
 {
     auto data = Array< crimild::Real32 > {
-        -0.5f, -0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        0.0f, 0.5f, 0.0f,
+        -0.5f,
+        -0.5f,
+        0.0f,
+        0.5f,
+        -0.5f,
+        0.0f,
+        0.0f,
+        0.5f,
+        0.0f,
     };
 
     auto buffer = crimild::alloc< Buffer >( data );
@@ -98,15 +114,14 @@ TEST( BufferView, constructionWithOffset )
     auto bufferView = crimild::alloc< BufferView >(
         BufferView::Target::VERTEX,
         buffer,
-        12
-    );
+        12 );
 
     ASSERT_EQ( crimild::get_ptr( buffer ), bufferView->getBuffer() );
     ASSERT_EQ( 12, bufferView->getOffset() );
     ASSERT_EQ( 24, bufferView->getLength() );
     ASSERT_EQ( sizeof( crimild::Byte ), bufferView->getStride() );
     ASSERT_EQ( 24, bufferView->getCount() );
-    
+
     ASSERT_NE( nullptr, bufferView->getData() );
     ASSERT_EQ( static_cast< crimild::Byte * >( buffer->getData() ) + 12, bufferView->getData() );
 }
@@ -114,9 +129,15 @@ TEST( BufferView, constructionWithOffset )
 TEST( BufferView, constructionWithOffsetAndLength )
 {
     auto data = Array< crimild::Real32 > {
-        -0.5f, -0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        0.0f, 0.5f, 0.0f,
+        -0.5f,
+        -0.5f,
+        0.0f,
+        0.5f,
+        -0.5f,
+        0.0f,
+        0.0f,
+        0.5f,
+        0.0f,
     };
 
     auto buffer = crimild::alloc< Buffer >( data );
@@ -126,15 +147,14 @@ TEST( BufferView, constructionWithOffsetAndLength )
         buffer,
         12,
         0,
-        12
-    );
+        12 );
 
     ASSERT_EQ( crimild::get_ptr( buffer ), bufferView->getBuffer() );
     ASSERT_EQ( 12, bufferView->getOffset() );
     ASSERT_EQ( 12, bufferView->getLength() );
     ASSERT_EQ( sizeof( crimild::Byte ), bufferView->getStride() );
     ASSERT_EQ( 12, bufferView->getCount() );
-    
+
     ASSERT_NE( nullptr, bufferView->getData() );
     ASSERT_EQ( static_cast< crimild::Byte * >( buffer->getData() ) + 12, bufferView->getData() );
 }
@@ -142,9 +162,15 @@ TEST( BufferView, constructionWithOffsetAndLength )
 TEST( BufferView, constructionWithStride )
 {
     auto data = Array< crimild::Real32 > {
-        -0.5f, -0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        0.0f, 0.5f, 0.0f,
+        -0.5f,
+        -0.5f,
+        0.0f,
+        0.5f,
+        -0.5f,
+        0.0f,
+        0.0f,
+        0.5f,
+        0.0f,
     };
 
     auto buffer = crimild::alloc< Buffer >( data );
@@ -153,15 +179,14 @@ TEST( BufferView, constructionWithStride )
         BufferView::Target::VERTEX,
         buffer,
         0,
-        sizeof( crimild::Real32 )
-    );
+        sizeof( crimild::Real32 ) );
 
     ASSERT_EQ( crimild::get_ptr( buffer ), bufferView->getBuffer() );
     ASSERT_EQ( 0, bufferView->getOffset() );
     ASSERT_EQ( buffer->getSize(), bufferView->getLength() );
     ASSERT_EQ( sizeof( crimild::Real32 ), bufferView->getStride() );
     ASSERT_EQ( buffer->getSize() / sizeof( crimild::Real32 ), bufferView->getCount() );
-    
+
     ASSERT_NE( nullptr, bufferView->getData() );
     ASSERT_EQ( buffer->getData(), bufferView->getData() );
 }
@@ -172,34 +197,9 @@ TEST( BufferView, withEmptyData )
         BufferView::Target::VERTEX,
         crimild::alloc< Buffer >( Array< crimild::Real32 >( 3 ) ),
         0,
-        sizeof( crimild::Real32 )
-    );
+        sizeof( crimild::Real32 ) );
 
     ASSERT_EQ( 3 * sizeof( Real32 ), bufferView->getLength() );
     ASSERT_EQ( sizeof( Real32 ), bufferView->getStride() );
     ASSERT_EQ( 3, bufferView->getCount() );
 }
-
-TEST( BufferView, autoAddToFrameGraph )
-{
-	auto graph = crimild::alloc< FrameGraph >();
-
-	ASSERT_FALSE( graph->hasNodes() );
-
-	{
-        auto bufferView = crimild::alloc< BufferView >(
-            BufferView::Target::VERTEX,
-            crimild::alloc< Buffer >( Array< crimild::Real32 >( 3 ) ),
-            0,
-            sizeof( crimild::Real32 )
-        );
-
-        ASSERT_TRUE( graph->contains( bufferView ) );
-        ASSERT_TRUE( graph->contains( bufferView->getBuffer() ) );
-		ASSERT_TRUE( graph->hasNodes() );
-	}
-
-	ASSERT_FALSE( graph->hasNodes() );
-
-}
-

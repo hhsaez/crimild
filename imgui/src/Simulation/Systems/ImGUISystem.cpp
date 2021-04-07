@@ -28,9 +28,6 @@
 #include "Simulation/Systems/ImGUISystem.hpp"
 
 #include "Foundation/Version.hpp"
-#include "Rendering/Compositions/ImGUIComposition.hpp"
-#include "Rendering/Compositions/OverlayComposition.hpp"
-#include "Rendering/Compositions/PresentComposition.hpp"
 #include "Rendering/ImageView.hpp"
 #include "Rendering/Operations/ImGUIOperations.hpp"
 #include "Rendering/RenderPass.hpp"
