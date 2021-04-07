@@ -27,7 +27,6 @@
 
 #include "Rendering/VulkanRenderPass.hpp"
 
-#include "Rendering/FrameGraph.hpp"
 #include "Rendering/Image.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 

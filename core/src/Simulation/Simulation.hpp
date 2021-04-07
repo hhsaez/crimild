@@ -37,7 +37,6 @@
 #include "Input.hpp"
 #include "Mathematics/Clock.hpp"
 #include "Messaging/MessageQueue.hpp"
-#include "Rendering/Compositions/Composition.hpp"
 #include "Rendering/Renderer.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "SceneGraph/Node.hpp"
@@ -189,13 +188,6 @@ namespace crimild {
     private:
         SharedPointer< Node > _scene;
         std::list< Camera * > _cameras;
-
-    public:
-        inline void setComposition( compositions::Composition composition ) noexcept { m_composition = composition; }
-        inline compositions::Composition &getComposition( void ) noexcept { return m_composition; }
-
-    private:
-        compositions::Composition m_composition;
 
     public:
         audio::AudioManager *getAudioManager( void ) { return crimild::get_ptr( _audioManager ); }

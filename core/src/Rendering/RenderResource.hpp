@@ -28,11 +28,10 @@
 #ifndef CRIMILD_RENDERING_RENDER_RESOURCE_
 #define CRIMILD_RENDERING_RENDER_RESOURCE_
 
-#include "Rendering/FrameGraphObjectImpl.hpp"
-#include "Foundation/Containers/Set.hpp"
 #include "Foundation/Containers/Map.hpp"
-#include "Foundation/Singleton.hpp"
+#include "Foundation/Containers/Set.hpp"
 #include "Foundation/SharedObject.hpp"
+#include "Foundation/Singleton.hpp"
 
 namespace crimild {
 
@@ -62,9 +61,8 @@ namespace crimild {
         {
             m_resources.each(
                 [ this ]( RenderResourceType *resource ) {
-                	unbind( resource );
-            	}
-            );
+                    unbind( resource );
+                } );
             m_resources.clear();
         }
 
@@ -75,7 +73,7 @@ namespace crimild {
     };
 
     template< typename T >
-    class RenderResourceImpl : public FrameGraphObjectImpl< T > {
+    class RenderResourceImpl {
     public:
         virtual ~RenderResourceImpl( void ) noexcept
         {
@@ -88,7 +86,7 @@ namespace crimild {
     };
 
     template< typename RenderResourceType >
-    class RenderResourceLibrary : public StaticSingleton< RenderResourceLibrary< RenderResourceType >> {
+    class RenderResourceLibrary : public StaticSingleton< RenderResourceLibrary< RenderResourceType > > {
     private:
         using Builder = std::function< SharedPointer< RenderResourceType >( void ) >;
 
@@ -123,11 +121,10 @@ namespace crimild {
         }
 
     private:
-        Map< std::string, SharedPointer< RenderResourceType >> m_resources;
+        Map< std::string, SharedPointer< RenderResourceType > > m_resources;
         Map< std::string, Builder > m_builders;
     };
 
 }
 
 #endif
-

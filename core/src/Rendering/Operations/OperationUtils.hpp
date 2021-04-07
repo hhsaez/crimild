@@ -35,6 +35,8 @@
 
 namespace crimild {
 
+    class Texture;
+
     namespace framegraph {
 
         Format useFormat( SharedPointer< FrameGraphResource > const &resource ) noexcept;

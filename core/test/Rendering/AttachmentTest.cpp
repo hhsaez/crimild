@@ -26,26 +26,15 @@
  */
 
 #include "Rendering/RenderPass.hpp"
-#include "Rendering/FrameGraph.hpp"
 
 #include "gtest/gtest.h"
 
 using namespace crimild;
 
-TEST( Attachment, autoAddToFrameGraph )
+TEST( Attachment, construction )
 {
-	auto graph = crimild::alloc< FrameGraph >();
+    auto attachment = crimild::alloc< Attachment >();
 
-	EXPECT_FALSE( graph->hasNodes() );
-
-	{
-		auto attachment = crimild::alloc< Attachment >();
-
-		EXPECT_TRUE( graph->contains( attachment ) );
-		EXPECT_TRUE( graph->hasNodes() );
-	}
-
-	EXPECT_FALSE( graph->hasNodes() );
-	
+    EXPECT_TRUE( attachment->imageView != nullptr );
+    EXPECT_TRUE( attachment->imageView->image != nullptr );
 }
-

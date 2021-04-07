@@ -40,7 +40,6 @@ namespace crimild {
     class Buffer;
     class CommandBuffer;
     class DescriptorSetLayout;
-    class FrameGraph;
 
     namespace vulkan {
 
@@ -125,7 +124,6 @@ namespace crimild {
             void initShaders( void ) noexcept;
 
         private:
-            SharedPointer< FrameGraph > m_frameGraph;
             Bool m_recordWithNonConditionalPasses = false;
         };
 

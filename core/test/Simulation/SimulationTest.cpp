@@ -26,9 +26,10 @@
  */
 
 #include "Simulation/Simulation.hpp"
-#include "SceneGraph/Node.hpp"
-#include "SceneGraph/Group.hpp"
+
 #include "SceneGraph/Camera.hpp"
+#include "SceneGraph/Group.hpp"
+#include "SceneGraph/Node.hpp"
 
 #include "gtest/gtest.h"
 
@@ -36,7 +37,7 @@ using namespace crimild;
 
 TEST( SimulationTest, construction )
 {
-	/*
+    /*
 	EXPECT_EQ( Simulation::getInstance(), nullptr );
 
 	auto simulation = crimild::alloc< Simulation >( "a simulation", 0, nullptr );
@@ -118,6 +119,7 @@ TEST( SimulationTest, run )
 
 TEST( SimulationTest, attachSceneWithoutCamera )
 {
+    /*
     auto simulation = crimild::alloc< Simulation >( "a simulation", crimild::alloc< Settings >() );
 
 //	EXPECT_FALSE( simulation->getMainLoop()->hasActiveTasks() );
@@ -129,6 +131,7 @@ TEST( SimulationTest, attachSceneWithoutCamera )
 	EXPECT_EQ( nullptr, simulation->getMainCamera() );
 
 //	EXPECT_FALSE( simulation->getMainLoop()->hasActiveTasks() );
+*/
 }
 
 TEST( SimulationTest, attachSceneWithCamera )
