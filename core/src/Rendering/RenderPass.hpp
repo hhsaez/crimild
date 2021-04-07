@@ -31,7 +31,6 @@
 #include "Foundation/SharedObject.hpp"
 #include "Rendering/CommandBuffer.hpp"
 #include "Rendering/Format.hpp"
-#include "Rendering/FrameGraphObjectImpl.hpp"
 #include "Rendering/FrameGraphOperation.hpp"
 #include "Rendering/FrameGraphResource.hpp"
 #include "Rendering/Image.hpp"
@@ -46,8 +45,7 @@ namespace crimild {
     class GraphicsPipeline;
 
     class Attachment
-        : public FrameGraphObjectImpl< Attachment >,
-          public SharedObject,
+        : public SharedObject,
           public NamedObject,
           public FrameGraphResource {
     public:

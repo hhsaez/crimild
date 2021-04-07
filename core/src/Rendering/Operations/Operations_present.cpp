@@ -32,7 +32,6 @@
 #include "Rendering/Operations/OperationUtils.hpp"
 #include "Rendering/Operations/Operations.hpp"
 #include "Rendering/Pipeline.hpp"
-#include "Rendering/Programs/Compositions/PresentCompositionShaderProgram.hpp"
 #include "Rendering/RenderPass.hpp"
 #include "Rendering/Sampler.hpp"
 #include "Rendering/ShaderProgram.hpp"
@@ -69,8 +68,63 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::present( SharedPointer
     auto pipeline = [] {
         auto pipeline = crimild::alloc< GraphicsPipeline >();
         pipeline->setProgram(
-            crimild::retain(
-                AssetManager::getInstance()->get< PresentCompositionShaderProgram >() ) );
+            [] {
+                auto program = crimild::alloc< ShaderProgram >(
+                    Array< SharedPointer< Shader > > {
+                        crimild::alloc< Shader >(
+                            Shader::Stage::VERTEX,
+                            CRIMILD_TO_STRING(
+                                vec2 positions[ 6 ] = vec2[](
+                                    vec2( -1.0, 1.0 ),
+                                    vec2( -1.0, -1.0 ),
+                                    vec2( 1.0, -1.0 ),
+
+                                    vec2( -1.0, 1.0 ),
+                                    vec2( 1.0, -1.0 ),
+                                    vec2( 1.0, 1.0 ) );
+
+                                vec2 texCoords[ 6 ] = vec2[](
+                                    vec2( 0.0, 0.0 ),
+                                    vec2( 0.0, 1.0 ),
+                                    vec2( 1.0, 1.0 ),
+
+                                    vec2( 0.0, 0.0 ),
+                                    vec2( 1.0, 1.0 ),
+                                    vec2( 1.0, 0.0 ) );
+
+                                layout( location = 0 ) out vec2 outTexCoord;
+
+                                void main() {
+                                    gl_Position = vec4( positions[ gl_VertexIndex ], 0.0, 1.0 );
+                                    outTexCoord = texCoords[ gl_VertexIndex ];
+                                } ) ),
+                            crimild::alloc< Shader >(
+                                Shader::Stage::FRAGMENT,
+                                CRIMILD_TO_STRING(
+                                    layout( location = 0 ) in vec2 inTexCoord;
+
+                                    layout( set = 0, binding = 0 ) uniform sampler2D uColorMap;
+
+                                    layout( location = 0 ) out vec4 outColor;
+
+                                    void main() {
+                                        outColor = texture( uColorMap, inTexCoord );
+                                    } ) ),
+                    } );
+                program->descriptorSetLayouts = {
+                    [] {
+                        auto layout = crimild::alloc< DescriptorSetLayout >();
+                        layout->bindings = {
+                            {
+                                .descriptorType = DescriptorType::TEXTURE,
+                                .stage = Shader::Stage::FRAGMENT,
+                            },
+                        };
+                        return layout;
+                    }(),
+                };
+                return program;
+            }() );
         return pipeline;
     }();
 

@@ -108,6 +108,7 @@ ENDIF ()
 
 IF ( CRIMILD_ENABLE_VULKAN )
    SET( SKIP_GLSLANG_INSTALL ON CACHE BOOL "Skip installation" )
+   SET( ENABLE_CTEST OFF CACHE BOOL "Enables testing" )
    SET( BUILD_EXTERNAL OFF CACHE BOOL "Build external dependencies in /External" )
    SET( ENABLE_SPVREMAPPER OFF CACHE BOOL "Enables building of SPVRemapper" )
    SET( ENABLE_GLSLANG_BINARIES OFF CACHE BOOL "Builds glslangValidator and spirv-remap" )

@@ -27,24 +27,13 @@
 
 #include "Rendering/Pipeline.hpp"
 
-#include "Rendering/FrameGraph.hpp"
-
 #include "gtest/gtest.h"
 
 using namespace crimild;
 
-TEST( GraphicsPipeline, autoAddToFrameGraph )
+TEST( GraphicsPipeline, construction )
 {
-    auto graph = crimild::alloc< FrameGraph >();
+    auto pipeline = crimild::alloc< GraphicsPipeline >();
 
-    EXPECT_FALSE( graph->hasNodes() );
-
-    {
-        auto pipeline = crimild::alloc< GraphicsPipeline >();
-
-        EXPECT_TRUE( graph->contains( pipeline ) );
-        EXPECT_TRUE( graph->hasNodes() );
-    }
-
-    EXPECT_FALSE( graph->hasNodes() );
+    EXPECT_EQ( Primitive::Type::TRIANGLES, pipeline->primitiveType );
 }

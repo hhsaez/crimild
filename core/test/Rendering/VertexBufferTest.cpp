@@ -26,14 +26,14 @@
  */
 
 #include "Rendering/VertexBuffer.hpp"
-#include "Rendering/Buffer.hpp"
-#include "Rendering/BufferView.hpp"
-#include "Rendering/BufferAccessor.hpp"
-#include "Rendering/Format.hpp"
-#include "Rendering/FrameGraph.hpp"
-#include "Rendering/Vertex.hpp"
-#include "Coding/MemoryEncoder.hpp"
+
 #include "Coding/MemoryDecoder.hpp"
+#include "Coding/MemoryEncoder.hpp"
+#include "Rendering/Buffer.hpp"
+#include "Rendering/BufferAccessor.hpp"
+#include "Rendering/BufferView.hpp"
+#include "Rendering/Format.hpp"
+#include "Rendering/Vertex.hpp"
 
 #include "gtest/gtest.h"
 
@@ -41,152 +41,181 @@ using namespace crimild;
 
 TEST( VertexBuffer, construction )
 {
-	auto layout = VertexLayout {
-		{ VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() },
-	};
+    auto layout = VertexLayout {
+        { VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() },
+    };
 
-	auto vertices = crimild::alloc< VertexBuffer >(
-		layout,
-		Array< crimild::Real32 > {
-			-0.5f, -0.5f, 0.0f,
-			0.5f, -0.5f, 0.0f,
-			0.0f, 0.5f, 0.0f,
-		}
-	);
+    auto vertices = crimild::alloc< VertexBuffer >(
+        layout,
+        Array< crimild::Real32 > {
+            -0.5f,
+            -0.5f,
+            0.0f,
+            0.5f,
+            -0.5f,
+            0.0f,
+            0.0f,
+            0.5f,
+            0.0f,
+        } );
 
     auto positions = vertices->get( VertexAttribute::Name::POSITION );
 
-	ASSERT_EQ( 3, vertices->getVertexCount() );
-	ASSERT_EQ( layout, vertices->getVertexLayout() );
+    ASSERT_EQ( 3, vertices->getVertexCount() );
+    ASSERT_EQ( layout, vertices->getVertexLayout() );
     ASSERT_NE( nullptr, positions );
-	ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 0 ) );
+    ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 0 ) );
 }
 
 TEST( VertexBuffer, setSingleValue )
 {
-	auto vertices = crimild::alloc< VertexBuffer >( VertexLayout::P3, 3 );
+    auto vertices = crimild::alloc< VertexBuffer >( VertexLayout::P3, 3 );
 
-	ASSERT_EQ( 3, vertices->getVertexCount() );
+    ASSERT_EQ( 3, vertices->getVertexCount() );
 
     auto positions = vertices->get( VertexAttribute::Name::POSITION );
 
     positions->set( 0, Vector3f( -0.5f, -0.5f, 0.0f ) );
-	ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 0 ) );
+    ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 0 ) );
 }
 
 TEST( VertexBuffer, setMultipleValues )
 {
-	auto vertices = crimild::alloc< VertexBuffer >( VertexLayout::P3, 3 );
+    auto vertices = crimild::alloc< VertexBuffer >( VertexLayout::P3, 3 );
 
-	ASSERT_EQ( 3, vertices->getVertexCount() );
+    ASSERT_EQ( 3, vertices->getVertexCount() );
 
     auto positions = vertices->get( VertexAttribute::Name::POSITION );
 
-	positions->set(
-		Array< crimild::Real32 > {
-			-0.5f, -0.5f, 0.0f,
-			0.5f, -0.5f, 0.0f,
-			0.0f, 0.5f, 0.0f,
-		}
-	);
+    positions->set(
+        Array< crimild::Real32 > {
+            -0.5f,
+            -0.5f,
+            0.0f,
+            0.5f,
+            -0.5f,
+            0.0f,
+            0.0f,
+            0.5f,
+            0.0f,
+        } );
 
-	ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 0 ) );
-	ASSERT_EQ( Vector3f( 0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 1 ) );
-	ASSERT_EQ( Vector3f( 0.0f, 0.5f, 0.0f ), positions->get< Vector3f >( 2 ) );
+    ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 0 ) );
+    ASSERT_EQ( Vector3f( 0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 1 ) );
+    ASSERT_EQ( Vector3f( 0.0f, 0.5f, 0.0f ), positions->get< Vector3f >( 2 ) );
 }
 
 TEST( VertexBuffer, setPositionsInterleaved )
 {
-	auto vertices = crimild::alloc< VertexBuffer >( VertexLayout::P3_TC2, 3 );
+    auto vertices = crimild::alloc< VertexBuffer >( VertexLayout::P3_TC2, 3 );
 
-	ASSERT_EQ( 3, vertices->getVertexCount() );
+    ASSERT_EQ( 3, vertices->getVertexCount() );
 
     auto positions = vertices->get( VertexAttribute::Name::POSITION );
 
-	positions->set(
-		Array< crimild::Real32 > {
-			-0.5f, -0.5f, 0.0f,
-			0.5f, -0.5f, 0.0f,
-			0.0f, 0.5f, 0.0f,
-		}
-	);
+    positions->set(
+        Array< crimild::Real32 > {
+            -0.5f,
+            -0.5f,
+            0.0f,
+            0.5f,
+            -0.5f,
+            0.0f,
+            0.0f,
+            0.5f,
+            0.0f,
+        } );
 
-	ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 0 ) );
-	ASSERT_EQ( Vector3f( 0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 1 ) );
-	ASSERT_EQ( Vector3f( 0.0f, 0.5f, 0.0f ), positions->get< Vector3f >( 2 ) );
+    ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 0 ) );
+    ASSERT_EQ( Vector3f( 0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 1 ) );
+    ASSERT_EQ( Vector3f( 0.0f, 0.5f, 0.0f ), positions->get< Vector3f >( 2 ) );
 }
 
 TEST( VertexBuffer, setTexCoordsInterleaved )
 {
-	auto vertices = crimild::alloc< VertexBuffer >( VertexLayout::P3_TC2, 3 );
+    auto vertices = crimild::alloc< VertexBuffer >( VertexLayout::P3_TC2, 3 );
 
-	ASSERT_EQ( 3, vertices->getVertexCount() );
+    ASSERT_EQ( 3, vertices->getVertexCount() );
 
     auto texCoords = vertices->get( VertexAttribute::Name::TEX_COORD );
 
-	texCoords->set(
-		Array< crimild::Real32 > {
-			0.0, 0.0,
-			0.0, 1.0,
-			1.0, 1.0,
-		}
-	);
+    texCoords->set(
+        Array< crimild::Real32 > {
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            1.0,
+        } );
 
-	ASSERT_EQ( Vector2f( 0.0f, 0.0f ), texCoords->get< Vector2f >( 0 ) );
-	ASSERT_EQ( Vector2f( 0.f, 1.0f ), texCoords->get< Vector2f >( 1 ) );
-	ASSERT_EQ( Vector2f( 1.0f, 1.0f ), texCoords->get< Vector2f >( 2 ) );
+    ASSERT_EQ( Vector2f( 0.0f, 0.0f ), texCoords->get< Vector2f >( 0 ) );
+    ASSERT_EQ( Vector2f( 0.f, 1.0f ), texCoords->get< Vector2f >( 1 ) );
+    ASSERT_EQ( Vector2f( 1.0f, 1.0f ), texCoords->get< Vector2f >( 2 ) );
 }
 
 TEST( VertexBuffer, setInterleaved )
 {
-	auto vertices = crimild::alloc< VertexBuffer >( VertexLayout::P3_TC2, 3 );
+    auto vertices = crimild::alloc< VertexBuffer >( VertexLayout::P3_TC2, 3 );
 
-	ASSERT_EQ( 3, vertices->getVertexCount() );
+    ASSERT_EQ( 3, vertices->getVertexCount() );
 
     auto positions = vertices->get( VertexAttribute::Name::POSITION );
 
-	positions->set(
-		Array< crimild::Real32 > {
-			-0.5f, -0.5f, 0.0f,
-			0.5f, -0.5f, 0.0f,
-			0.0f, 0.5f, 0.0f,
-		}
-	);
+    positions->set(
+        Array< crimild::Real32 > {
+            -0.5f,
+            -0.5f,
+            0.0f,
+            0.5f,
+            -0.5f,
+            0.0f,
+            0.0f,
+            0.5f,
+            0.0f,
+        } );
 
     auto texCoords = vertices->get( VertexAttribute::Name::TEX_COORD );
 
-	texCoords->set(
-		Array< crimild::Real32 > {
-			0.0, 0.0,
-			0.0, 1.0,
-			1.0, 1.0,
-		}
-	);
+    texCoords->set(
+        Array< crimild::Real32 > {
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            1.0,
+        } );
 
-	ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 0 ) );
-	ASSERT_EQ( Vector3f( 0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 1 ) );
-	ASSERT_EQ( Vector3f( 0.0f, 0.5f, 0.0f ), positions->get< Vector3f >( 2 ) );
+    ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 0 ) );
+    ASSERT_EQ( Vector3f( 0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 1 ) );
+    ASSERT_EQ( Vector3f( 0.0f, 0.5f, 0.0f ), positions->get< Vector3f >( 2 ) );
 
-	ASSERT_EQ( Vector2f( 0.0f, 0.0f ), texCoords->get< Vector2f >( 0 ) );
-	ASSERT_EQ( Vector2f( 0.f, 1.0f ), texCoords->get< Vector2f >( 1 ) );
-	ASSERT_EQ( Vector2f( 1.0f, 1.0f ), texCoords->get< Vector2f >( 2 ) );
+    ASSERT_EQ( Vector2f( 0.0f, 0.0f ), texCoords->get< Vector2f >( 0 ) );
+    ASSERT_EQ( Vector2f( 0.f, 1.0f ), texCoords->get< Vector2f >( 1 ) );
+    ASSERT_EQ( Vector2f( 1.0f, 1.0f ), texCoords->get< Vector2f >( 2 ) );
 }
 
 TEST( VertexBuffer, setInterleavedVertex )
 {
-	auto vertices = crimild::alloc< VertexBuffer >( VertexP3N3TC2::getLayout(), 3 );
+    auto vertices = crimild::alloc< VertexBuffer >( VertexP3N3TC2::getLayout(), 3 );
 
-	ASSERT_EQ( 3, vertices->getVertexCount() );
+    ASSERT_EQ( 3, vertices->getVertexCount() );
 
     auto positions = vertices->get( VertexAttribute::Name::POSITION );
 
-	positions->set(
-		Array< crimild::Real32 > {
-			-0.5f, -0.5f, 0.0f,
-			0.5f, -0.5f, 0.0f,
-			0.0f, 0.5f, 0.0f,
-		}
-	);
+    positions->set(
+        Array< crimild::Real32 > {
+            -0.5f,
+            -0.5f,
+            0.0f,
+            0.5f,
+            -0.5f,
+            0.0f,
+            0.0f,
+            0.5f,
+            0.0f,
+        } );
 
     auto normals = vertices->get( VertexAttribute::Name::NORMAL );
     normals->set(
@@ -194,84 +223,92 @@ TEST( VertexBuffer, setInterleavedVertex )
             Vector3f::UNIT_Z,
             Vector3f::UNIT_Z,
             Vector3f::UNIT_Z,
-        }
-    );
+        } );
 
     auto texCoords = vertices->get( VertexAttribute::Name::TEX_COORD );
 
-	texCoords->set(
-		Array< crimild::Real32 > {
-			0.0, 0.0,
-			0.0, 1.0,
-			1.0, 1.0,
-		}
-	);
+    texCoords->set(
+        Array< crimild::Real32 > {
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            1.0,
+        } );
 
-	ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 0 ) );
-	ASSERT_EQ( Vector3f( 0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 1 ) );
-	ASSERT_EQ( Vector3f( 0.0f, 0.5f, 0.0f ), positions->get< Vector3f >( 2 ) );
+    ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 0 ) );
+    ASSERT_EQ( Vector3f( 0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 1 ) );
+    ASSERT_EQ( Vector3f( 0.0f, 0.5f, 0.0f ), positions->get< Vector3f >( 2 ) );
 
-	ASSERT_EQ( Vector3f::UNIT_Z, normals->get< Vector3f >( 0 ) );
-	ASSERT_EQ( Vector3f::UNIT_Z, normals->get< Vector3f >( 1 ) );
-	ASSERT_EQ( Vector3f::UNIT_Z, normals->get< Vector3f >( 2 ) );
+    ASSERT_EQ( Vector3f::UNIT_Z, normals->get< Vector3f >( 0 ) );
+    ASSERT_EQ( Vector3f::UNIT_Z, normals->get< Vector3f >( 1 ) );
+    ASSERT_EQ( Vector3f::UNIT_Z, normals->get< Vector3f >( 2 ) );
 
-	ASSERT_EQ( Vector2f( 0.0f, 0.0f ), texCoords->get< Vector2f >( 0 ) );
-	ASSERT_EQ( Vector2f( 0.f, 1.0f ), texCoords->get< Vector2f >( 1 ) );
-	ASSERT_EQ( Vector2f( 1.0f, 1.0f ), texCoords->get< Vector2f >( 2 ) );
+    ASSERT_EQ( Vector2f( 0.0f, 0.0f ), texCoords->get< Vector2f >( 0 ) );
+    ASSERT_EQ( Vector2f( 0.f, 1.0f ), texCoords->get< Vector2f >( 1 ) );
+    ASSERT_EQ( Vector2f( 1.0f, 1.0f ), texCoords->get< Vector2f >( 2 ) );
 }
 
 TEST( VertexBuffer, eachPosition )
 {
-	auto vertices = crimild::alloc< VertexBuffer >( VertexLayout::P3_TC2, 3 );
+    auto vertices = crimild::alloc< VertexBuffer >( VertexLayout::P3_TC2, 3 );
 
-	ASSERT_EQ( 3, vertices->getVertexCount() );
+    ASSERT_EQ( 3, vertices->getVertexCount() );
 
-	auto data = Array< float > {
-		-0.5f, -0.5f, 0.0f,
-		0.5f, -0.5f, 0.0f,
-		0.0f, 0.5f, 0.0f,
-	};
+    auto data = Array< float > {
+        -0.5f,
+        -0.5f,
+        0.0f,
+        0.5f,
+        -0.5f,
+        0.0f,
+        0.0f,
+        0.5f,
+        0.0f,
+    };
 
     auto positions = vertices->get( VertexAttribute::Name::POSITION );
 
-	positions->set( data );
+    positions->set( data );
 
-	positions->each< Vector3f >(
-		[&]( auto &v, auto i ) {
-			ASSERT_EQ( data[ i * 3 + 0 ], v[ 0 ] );
-			ASSERT_EQ( data[ i * 3 + 1 ], v[ 1 ] );
-			ASSERT_EQ( data[ i * 3 + 2 ], v[ 2 ] );
-		}
-	);
+    positions->each< Vector3f >(
+        [ & ]( auto &v, auto i ) {
+            ASSERT_EQ( data[ i * 3 + 0 ], v[ 0 ] );
+            ASSERT_EQ( data[ i * 3 + 1 ], v[ 1 ] );
+            ASSERT_EQ( data[ i * 3 + 2 ], v[ 2 ] );
+        } );
 }
 
 TEST( VertexBuffer, eachTexCoord )
 {
-	auto vertices = crimild::alloc< VertexBuffer >( VertexLayout::P3_TC2, 3 );
+    auto vertices = crimild::alloc< VertexBuffer >( VertexLayout::P3_TC2, 3 );
 
-	ASSERT_EQ( 3, vertices->getVertexCount() );
+    ASSERT_EQ( 3, vertices->getVertexCount() );
 
-	auto data = Array< float > {
-		0.0, 0.0,
-		0.0, 1.0,
-		1.0, 1.0,
-	};
+    auto data = Array< float > {
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+    };
 
     auto texCoords = vertices->get( VertexAttribute::Name::TEX_COORD );
 
-	texCoords->set( data );
+    texCoords->set( data );
 
-	texCoords->each< Vector2f >(
-		[&]( auto &v, auto i ) {
-			ASSERT_EQ( data[ i * 2 + 0 ], v[ 0 ] );
-			ASSERT_EQ( data[ i * 2 + 1 ], v[ 1 ] );
-		}
-	);
+    texCoords->each< Vector2f >(
+        [ & ]( auto &v, auto i ) {
+            ASSERT_EQ( data[ i * 2 + 0 ], v[ 0 ] );
+            ASSERT_EQ( data[ i * 2 + 1 ], v[ 1 ] );
+        } );
 }
 
 TEST( VertexBuffer, sparseData )
 {
-	/*
+    /*
 	struct VertexLayoutType {
 		Vector3f position;
 		Vector3f normal;
@@ -293,22 +330,4 @@ TEST( VertexBuffer, sparseData )
 		}
 	);
 	*/
-}
-
-TEST( VertexBuffer, autoAddToFrameGraph )
-{
-	auto graph = crimild::alloc< FrameGraph >();
-
-	ASSERT_FALSE( graph->hasNodes() );
-
-	{
-		auto vertexBuffer = crimild::alloc< VertexBuffer >( VertexLayout::P3, 0 );
-
-		ASSERT_TRUE( graph->contains( vertexBuffer ) );
-        ASSERT_TRUE( graph->contains( vertexBuffer->getBufferView() ) );
-        ASSERT_TRUE( graph->contains( vertexBuffer->getBufferView()->getBuffer() ) );
-		ASSERT_TRUE( graph->hasNodes() );
-	}
-
-	ASSERT_FALSE( graph->hasNodes() );
 }
