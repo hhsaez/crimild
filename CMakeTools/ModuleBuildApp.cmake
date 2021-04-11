@@ -191,36 +191,6 @@ IF ( CRIMILD_ENABLE_GLFW )
 	ENDIF ()
 ENDIF ()
 
-IF ( CRIMILD_ENABLE_SFML )
-	SET( CRIMILD_APP_DEPENDENCIES
-		 ${CRIMILD_APP_DEPENDENCIES}
-		 crimild_sfml
-		 sfml-audio
-		 sfml-graphics
-		 sfml-network
-		 sfml-system
-		 sfml-window
-	)
-	SET( CRIMILD_APP_LINK_LIBRARIES
-		 ${CRIMILD_APP_LINK_LIBRARIES}
-		 crimild_sfml
-		 sfml-audio
-		 sfml-graphics
-		 sfml-network
-		 sfml-system
-		 sfml-window
-	)
-	SET( CRIMILD_APP_INCLUDE_DIRECTORIES
-		 ${CRIMILD_APP_INCLUDE_DIRECTORIES}
-		 ${CRIMILD_SOURCE_DIR}/sfml/src
-		 ${CRIMILD_SOURCE_DIR}/third-party/sfml/include
- 	)
-	SET( CRIMILD_APP_LINK_DIRECTORIES
-		 ${CRIMILD_APP_LINK_DIRECTORIES}
-		 ${CRIMILD_SOURCE_DIR}/third-party/sfml/lib
-	)
-ENDIF ()
-
 IF ( CRIMILD_ENABLE_VULKAN )
 
    FIND_PACKAGE( Vulkan REQUIRED )
