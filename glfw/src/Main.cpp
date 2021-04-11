@@ -33,6 +33,10 @@
 using namespace crimild;
 using namespace crimild::glfw;
 
+#ifdef CRIMILD_ENABLE_OPENAL
+    #include <Crimild_OpenAL.hpp>
+#endif
+
 #ifdef CRIMILD_ENABLE_IMGUI
     #include <Crimild_ImGUI.hpp>
 #endif
@@ -50,10 +54,6 @@ int main( int argc, char **argv )
 
     SharedPointer< ImageManager > imageManager = crimild::alloc< crimild::stb::ImageManager >();
 
-#ifdef CRIMILD_ENABLE_SFML
-    sim->setAudioManager( crimild::alloc< sfml::SFMLAudioManager >() );
-#endif
-
     sim->attachSystem< GLFWSystem >();
     sim->attachSystem< WindowSystem >();
     sim->attachSystem< GLFWVulkanSystem >();
@@ -61,6 +61,10 @@ int main( int argc, char **argv )
     sim->attachSystem< InputSystem >();
     sim->attachSystem< UpdateSystem >();
     sim->attachSystem< RenderSystem >();
+
+#ifdef CRIMILD_ENABLE_OPENAL
+    sim->attachSystem< audio::OpenALAudioSystem >();
+#endif
 
 #ifdef CRIMILD_ENABLE_IMGUI
     sim->attachSystem< imgui::ImGUISystem >();

@@ -25,29 +25,33 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "AudioListenerComponent.hpp"
+#ifndef CRIMILD_OPENAL_UTILS_
+#define CRIMILD_OPENAL_UTILS_
 
-#include "SceneGraph/Node.hpp"
-#include "Simulation/Systems/AudioSystem.hpp"
+#ifdef __APPLE__
+    #import <OpenAL/al.h>
+    #import <OpenAL/alc.h>
+#else
+    #include <al.h>
+    #include <alc.h>
+#endif
 
-using namespace crimild;
-using namespace crimild::audio;
+#include <Foundation/Macros.hpp>
 
-AudioListenerComponent::AudioListenerComponent( void )
-    : _audioListener( crimild::retain( AudioSystem::getInstance()->getAudioListener() ) )
-{
+namespace crimild {
+
+    namespace openal {
+
+        class Utils {
+        public:
+            static void checkErrors( std::string prefix );
+        };
+
+    }
+
 }
 
-AudioListenerComponent::~AudioListenerComponent( void )
-{
-}
+#define CRIMILD_CHECK_AL_ERRORS_BEFORE_CURRENT_FUNCTION crimild::openal::Utils::checkErrors( std::string( "Before " ) + CRIMILD_CURRENT_FUNCTION );
+#define CRIMILD_CHECK_AL_ERRORS_AFTER_CURRENT_FUNCTION crimild::openal::Utils::checkErrors( std::string( "After " ) + CRIMILD_CURRENT_FUNCTION );
 
-void AudioListenerComponent::start( void )
-{
-    getAudioListener()->setTransformation( getNode()->getWorld() );
-}
-
-void AudioListenerComponent::update( const Clock &c )
-{
-    getAudioListener()->setTransformation( getNode()->getWorld() );
-}
+#endif

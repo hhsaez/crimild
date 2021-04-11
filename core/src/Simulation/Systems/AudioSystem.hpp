@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,18 +25,49 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "AudioManager.hpp"
+#ifndef CRIMILD_SIMULATION_SYSTEMS_AUDIO_
+#define CRIMILD_SIMULATION_SYSTEMS_AUDIO_
 
-using namespace crimild;
-using namespace crimild::audio;
+#include "Foundation/Singleton.hpp"
+#include "Simulation/Systems/System.hpp"
 
-AudioManager::AudioManager( void )
-{
+namespace crimild {
+
+    namespace audio {
+
+        class AudioListener;
+        class AudioSource;
+
+    }
+
+    class AudioSystem
+        : public System,
+          public DynamicSingleton< AudioSystem > {
+        CRIMILD_IMPLEMENT_RTTI( crimild::AudioSystem )
+
+    public:
+        virtual ~AudioSystem( void ) = default;
+
+    public:
+        /**
+           \brief Get the shared audio listener
+        */
+        virtual audio::AudioListener *getAudioListener( void ) noexcept = 0;
+
+    public:
+        /**
+           \brief Creates a new audio source from a file
+
+           \param asStream Indicates if the audio file should be streamed
+           instead of loaded completely into memory. Some implementations
+           may ignore this flag.
+
+           The actual implementation must be performed by subclasses
+           based on each platform requirements.
+        */
+        virtual SharedPointer< audio::AudioSource > createAudioSource( std::string filename, bool asStream ) noexcept = 0;
+    };
 
 }
 
-AudioManager::~AudioManager( void )
-{
-
-}
-
+#endif
