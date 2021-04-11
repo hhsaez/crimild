@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED( VERSION 2.8.10 FATAL_ERROR )
+CMAKE_MINIMUM_REQUIRED( VERSION 3.1.0 FATAL_ERROR )
 
 PROJECT( CRIMILD )
 
@@ -18,11 +18,14 @@ OPTION( CRIMILD_ENABLE_IMPORT "Build importers?" OFF )
 OPTION( CRIMILD_ENABLE_STB "Would you like to build the crimild-stb extension" OFF )
 OPTION( CRIMILD_ENABLE_PHYSICS "Would you like to build the crimild-physics extension?" OFF )
 OPTION( CRIMILD_ENABLE_SCRIPTING "Would you like to build the crimild-scripting extension?" OFF )
-OPTION( CRIMILD_ENABLE_SFML "Would you like to build the crimild-sfml extension" OFF )
+OPTION( CRIMILD_ENABLE_OPENAL "Would you like to build the crimild-openal extension" OFF )
 OPTION( CRIMILD_ENABLE_GLFW "Would you like to build the crimild-glfw extension?" OFF )
 OPTION( CRIMILD_ENABLE_VULKAN "Would you like to build the crimild-vulkan extension?" OFF )
 OPTION( CRIMILD_ENABLE_SDL "Would you like to build the crimild-sdl extension?" OFF )
 OPTION( CRIMILD_ENABLE_IMGUI "Would you like to build the crimild-imgui extension?" OFF )
+
+# DEPRECATED
+OPTION( CRIMILD_ENABLE_SFML "Would you like to build the crimild-sfml (DEPRECATED) extension" OFF )
 
 IF ( ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten" )
    SET( CRIMILD_ENABLE_EMSCRIPTEN ON )
@@ -83,6 +86,11 @@ iF ( CRIMILD_ENABLE_SCRIPTING )
 		ADD_DEFINITIONS( -DCRIMILD_SCRIPTING_LOG_VERBOSE=1 )
 	ENDIF ()
 	ADD_SUBDIRECTORY( scripting )
+ENDIF ()
+
+IF ( CRIMILD_ENABLE_OPENAL )
+   ADD_DEFINITIONS( -DCRIMILD_ENABLE_OPENAL=1 )
+   ADD_SUBDIRECTORY( openal )
 ENDIF ()
 
 IF ( CRIMILD_ENABLE_SFML )

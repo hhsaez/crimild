@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,29 +25,19 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "AudioListenerComponent.hpp"
+#ifndef CRIMILD_OPENAL_
+#define CRIMILD_OPENAL_
 
-#include "SceneGraph/Node.hpp"
-#include "Simulation/Systems/AudioSystem.hpp"
+#include "Simulation/Systems/OpenALAudioSystem.hpp"
 
-using namespace crimild;
-using namespace crimild::audio;
+namespace crimild {
 
-AudioListenerComponent::AudioListenerComponent( void )
-    : _audioListener( crimild::retain( AudioSystem::getInstance()->getAudioListener() ) )
-{
+    namespace openal {
+
+        void init( void );
+
+    }
+
 }
 
-AudioListenerComponent::~AudioListenerComponent( void )
-{
-}
-
-void AudioListenerComponent::start( void )
-{
-    getAudioListener()->setTransformation( getNode()->getWorld() );
-}
-
-void AudioListenerComponent::update( const Clock &c )
-{
-    getAudioListener()->setTransformation( getNode()->getWorld() );
-}
+#endif

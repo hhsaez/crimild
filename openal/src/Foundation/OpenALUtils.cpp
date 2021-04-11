@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,59 +25,47 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_AUDIO_MANAGER_
-#define CRIMILD_AUDIO_MANAGER_
+#include "Foundation/OpenALUtils.hpp"
 
-#include "AudioSource.hpp"
-#include "AudioListener.hpp"
+#include "Foundation/Log.hpp"
 
-#include "Foundation/Singleton.hpp"
-#include "Foundation/SharedObject.hpp"
+#include <sstream>
 
-namespace crimild {
+using namespace crimild;
 
-	namespace audio {
+void openal::Utils::checkErrors( std::string prefix )
+{
+    int error = alGetError();
+    if ( error != AL_NO_ERROR ) {
+        std::string errorDescription = "";
+        switch ( error ) {
+            case ALC_NO_ERROR:
+                errorDescription = "AL_NO_ERROR";
+                break;
+            case ALC_INVALID_DEVICE:
+                errorDescription = "ALC_INVALID_DEVICE";
+                break;
+            case ALC_INVALID_CONTEXT:
+                errorDescription = "ALC_INVALID_CONTEXT";
+                break;
+            case ALC_INVALID_ENUM:
+                errorDescription = "ALC_INVALID_ENUM";
+                break;
+            case ALC_INVALID_VALUE:
+                errorDescription = "ALC_INVALID_VALUE";
+                break;
+            case ALC_OUT_OF_MEMORY:
+                errorDescription = "ALC_OUT_OF_MEMORY";
+                break;
+            default:
+                errorDescription = "Invalid error code";
+                break;
+        }
 
-		/**
-		   \brief Global manager for audio
+        std::stringstream ss;
+        ss << prefix << ": "
+           << "(0x" << error << ") " << errorDescription;
 
-		   	This abstract class provides the entry point for all audio-related
-			functionalities. Subclasses must implement the pure virtual 
-			functions in order to provide the actual functionality for audio.
-		 */
-		class AudioManager : 
-			public SharedObject,
-			public DynamicSingleton< AudioManager > {
-
-		protected:
-			AudioManager( void );
-
-		public:
-	        virtual ~AudioManager( void );
-
-	    public:
-	    	/**
-	    		\brief Get the shared audio listener
-	    	*/
-	    	virtual AudioListener *getAudioListener( void ) = 0;
-
-	    public:
-	    	/**
-	    		\brief Creates a new audio source from a file
-
-	    		\param asStream Indicates if the audio file should be streamed
-	    		instead of loaded completely into memory. Some implementations
-	    		may ignore this flag.
-
-	    		The actual implementation must be performed by subclasses
-	    		based on each platform requirements. 
-	    	*/
-	    	virtual AudioSourcePtr createAudioSource( std::string filename, bool asStream ) = 0;
-		};
-
-	}
-
+        CRIMILD_LOG_ERROR( ss.str() );
+    }
 }
-
-#endif
-
