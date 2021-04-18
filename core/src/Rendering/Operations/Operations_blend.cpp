@@ -49,7 +49,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::blend( Array< SharedPo
 
     renderPass->attachments = { color };
 
-    auto pipeline = [ & ] {
+    auto createPipeline = [ & ]( std::string mode ) {
         auto pipeline = crimild::alloc< GraphicsPipeline >();
         pipeline->setProgram(
             [ & ] {
@@ -117,13 +117,25 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::blend( Array< SharedPo
                 return program;
             }() );
         pipeline->depthStencilState.depthTestEnable = false;
-        pipeline->colorBlendState = ColorBlendState {
-            .enable = true,
-            .srcColorBlendFactor = BlendFactor::ONE, //DST_COLOR,
-            .dstColorBlendFactor = BlendFactor::ONE, //ZERO,
-        };
+        if ( mode == "multiply" ) {
+            pipeline->colorBlendState = ColorBlendState {
+                .enable = true,
+                .srcColorBlendFactor = BlendFactor::DST_COLOR, //DST_COLOR,
+                .dstColorBlendFactor = BlendFactor::ZERO,
+            };
+        } else {
+            // additive
+            pipeline->colorBlendState = ColorBlendState {
+                .enable = true,
+                .srcColorBlendFactor = BlendFactor::ONE, //DST_COLOR,
+                .dstColorBlendFactor = BlendFactor::ONE, //ZERO,
+            };
+        }
         return pipeline;
-    }();
+    };
+
+    auto firstPipeline = createPipeline( "additive" );
+    auto pipeline = createPipeline( mode );
 
     auto descriptors = resources.map(
         []( auto resource ) {
@@ -143,10 +155,15 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::blend( Array< SharedPo
 
     return withGraphicsCommands(
         renderPass,
-        [ pipeline, descriptors ]( auto commandBuffer ) {
+        [ firstPipeline, pipeline, descriptors ]( auto commandBuffer ) {
             descriptors.each(
-                [ & ]( auto descriptorSet ) {
-                    commandBuffer->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
+                [ &, first = true ]( auto descriptorSet ) mutable {
+                    if ( first ) {
+                        commandBuffer->bindGraphicsPipeline( crimild::get_ptr( firstPipeline ) );
+                        first = false;
+                    } else {
+                        commandBuffer->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
+                    }
                     commandBuffer->bindDescriptorSet( crimild::get_ptr( descriptorSet ) );
                     commandBuffer->draw( 6 );
                 } );
