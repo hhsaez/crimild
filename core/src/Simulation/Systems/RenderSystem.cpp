@@ -31,6 +31,7 @@
 #include "Rendering/FrameGraphOperation.hpp"
 #include "Rendering/Operations/OperationUtils.hpp"
 #include "Rendering/Operations/Operations.hpp"
+#include "Rendering/Operations/Operations_ssao.hpp"
 #include "Rendering/RenderPass.hpp"
 #include "Rendering/ScenePass.hpp"
 #include "Simulation/Simulation.hpp"
@@ -169,20 +170,52 @@ void RenderSystem::start( void ) noexcept
                     useResource( env ),
                 } );
 
-            auto bloom = brightPassFilter(
-                useResource( composed ),
-                Vector3f( 0.2126f, 0.7152f, 0.0722f ) );
+            if ( settings->get< Bool >( "video.ssao.enabled", true ) ) {
+                auto withBlur = [ & ]( auto op ) {
+                    if ( settings->get< Bool >( "video.ssao.blur", true ) ) {
+                        return blur( useResource( op ) );
+                    } else {
+                        return op;
+                    }
+                };
 
-            bloom = gaussianBlur( useResource( bloom ) );
+                composed = blend(
+                    {
+                        useResource( composed ),
+                        useResource(
+                            withBlur(
+                                ssao(
+                                    positions,
+                                    normals ) ) ),
+                    },
+                    "multiply" );
+            }
 
-            auto tonemapped = tonemapping(
-                useResource(
-                    composed ) );
+            auto ret = composed;
+            auto tonemapped = composed;
 
-            // apply bloom after tonemapping
-            auto ret = blend(
-                { useResource( tonemapped ), // forces format to RGB8
-                  useResource( bloom ) } );
+            if ( settings->get< Bool >( "video.bloom.enabled", true ) ) {
+                auto bloom = brightPassFilter(
+                    useResource( composed ),
+                    Vector3f( 0.2126f, 0.7152f, 0.0722f ) );
+
+                bloom = gaussianBlur( useResource( bloom ) );
+
+                auto tonemapped = tonemapping(
+                    useResource(
+                        composed ) );
+
+                // apply bloom after tonemapping
+                ret = blend(
+                    { useResource( tonemapped ), // forces format to RGB8
+                      useResource( bloom ) } );
+
+            } else {
+                tonemapped = tonemapping(
+                    useResource(
+                        composed ) );
+                ret = tonemapped;
+            }
 
             ret = blend(
                 {
