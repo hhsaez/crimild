@@ -35,6 +35,7 @@
 #include "Rendering/RenderPass.hpp"
 #include "Rendering/Sampler.hpp"
 #include "Rendering/UniformBuffer.hpp"
+#include "Rendering/Uniforms/CallbackUniformBuffer.hpp"
 #include "Rendering/Uniforms/CameraViewProjectionUniformBuffer.hpp"
 #include "Simulation/Simulation.hpp"
 
@@ -241,7 +242,13 @@ vec3 color = vec3( occlusion );
                         sample *= scale;
                         data.samples[ i ] = sample;
                     }
-                    return crimild::alloc< UniformBuffer >( data );
+
+                    return crimild::alloc< CallbackUniformBuffer< Uniforms > >(
+                        [ data = data, settings ]() mutable {
+                            data.radius = settings->get< Real32 >( "video.ssao.radius", 5.0 );
+                            data.bias = settings->get< Real32 >( "video.ssao.bias", 0.05 );
+                            return data;
+                        } );
                 }(),
             },
             Descriptor {

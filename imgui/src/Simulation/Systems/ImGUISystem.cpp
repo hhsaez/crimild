@@ -142,6 +142,30 @@ namespace crimild {
             ImGui::End();
         }
 
+        void showEditRendering( Settings *settings ) noexcept
+        {
+            if ( !settings->get< Bool >( "ui.edit.rendering.show" ) ) {
+                return;
+            }
+
+            auto open = true;
+            if ( ImGui::Begin( "Rendering Options", &open, ImGuiWindowFlags_NoCollapse ) ) {
+                if ( ImGui::CollapsingHeader( "SSAO" ) ) {
+                    auto radius = settings->get< Real32 >( "video.ssao.radius", 5.0f );
+                    ImGui::InputFloat( "Radius", &radius, 0.01f, 100.0f, "%.3f" );
+                    settings->set( "video.ssao.radius", radius );
+
+                    auto bias = settings->get< Real32 >( "video.ssao.bias", 0.05f );
+                    ImGui::InputFloat( "bias", &bias, 0.01f, 100.0f, "%.3f" );
+                    settings->set( "video.ssao.bias", bias );
+                }
+            }
+
+            ImGui::End();
+
+            settings->set( "ui.edit.rendering.show", open );
+        }
+
         void showMainMenu( Settings *settings ) noexcept
         {
             auto showAbout = false;
@@ -151,17 +175,8 @@ namespace crimild {
                 }
 
                 if ( ImGui::BeginMenu( "Edit" ) ) {
-                    if ( ImGui::MenuItem( "Undo", "CTRL+Z" ) ) {
-                        showStats();
-                    }
-                    if ( ImGui::MenuItem( "Redo", "CTRL+Y", false, false ) ) {
-                    } // Disabled item
-                    ImGui::Separator();
-                    if ( ImGui::MenuItem( "Cut", "CTRL+X" ) ) {
-                    }
-                    if ( ImGui::MenuItem( "Copy", "CTRL+C" ) ) {
-                    }
-                    if ( ImGui::MenuItem( "Paste", "CTRL+V" ) ) {
+                    if ( ImGui::MenuItem( "Rendering..." ) ) {
+                        settings->set( "ui.edit.rendering.show", true );
                     }
                     ImGui::EndMenu();
                 }
@@ -174,6 +189,9 @@ namespace crimild {
                 }
 
                 if ( ImGui::BeginMenu( "Help" ) ) {
+                    if ( ImGui::MenuItem( "Stats..." ) ) {
+                        showStats();
+                    }
                     if ( ImGui::MenuItem( "About..." ) ) {
                         settings->set( "ui.help.about.show", true );
                     }
@@ -186,6 +204,8 @@ namespace crimild {
             if ( settings->get< Bool >( "ui.help.about.show" ) ) {
                 showHelpAboutDialog();
             }
+
+            showEditRendering( settings );
 
             showToolsSceneTree( settings );
         }
