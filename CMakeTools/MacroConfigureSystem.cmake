@@ -5,10 +5,10 @@ IF ( ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten" )
 ELSE ()
   	SET( CRIMILD_ENABLE_EMSCRIPTEN OFF )
 ENDIF ()
-  
+
 IF ( APPLE )
-  	 # Enable C++14 features
-	 SET( CMAKE_CXX_FLAGS "-std=c++14 -stdlib=libc++ -U__STRICT_ANSI__ -fvisibility=hidden -fvisibility-inlines-hidden" )
+  	 # Enable C++17 features
+	 SET( CMAKE_CXX_FLAGS "-std=c++17 -stdlib=libc++ -U__STRICT_ANSI__ -fvisibility=hidden -fvisibility-inlines-hidden" )
 
 	 SET( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++0x" )
 	 SET( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++" )
