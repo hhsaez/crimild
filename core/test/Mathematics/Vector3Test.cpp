@@ -30,11 +30,9 @@
 #include "gtest/gtest.h"
 #include <sstream>
 
-using namespace crimild;
-
 TEST( Vector3, construction )
 {
-    constexpr auto u = Vector3 {
+    constexpr auto u = crimild::Vector3 {
         .x = 10,
         .y = 20,
         .z = 30,
@@ -47,7 +45,7 @@ TEST( Vector3, construction )
 
 TEST( Vector3, index )
 {
-    constexpr auto u = Vector3f { 10, 20, 30 };
+    constexpr auto u = crimild::Vector3f { 10, 20, 30 };
 
     EXPECT_EQ( 10, u[ 0 ] );
     EXPECT_EQ( 20, u[ 1 ] );
@@ -56,9 +54,9 @@ TEST( Vector3, index )
 
 TEST( Vector3, equality )
 {
-    constexpr auto u = Vector3 { 10, 20, 30 };
-    constexpr auto v = Vector3 { 30, 40, 50 };
-    constexpr auto w = Vector3 { 10, 20, 30 };
+    constexpr auto u = crimild::Vector3 { 10, 20, 30 };
+    constexpr auto v = crimild::Vector3 { 30, 40, 50 };
+    constexpr auto w = crimild::Vector3 { 10, 20, 30 };
 
     EXPECT_EQ( u, w );
     EXPECT_NE( u, v );
@@ -67,27 +65,27 @@ TEST( Vector3, equality )
 
 TEST( Vector3, addition )
 {
-    constexpr auto u = Vector3 { 10, 20, 30 };
-    constexpr auto v = Vector3 { 30, 40, 50 };
-    constexpr auto res = Vector3 { 40, 60, 80 };
+    constexpr auto u = crimild::Vector3 { 10, 20, 30 };
+    constexpr auto v = crimild::Vector3 { 30, 40, 50 };
+    constexpr auto res = crimild::Vector3 { 40, 60, 80 };
 
     EXPECT_EQ( res, u + v );
 }
 
 TEST( Vector3, additionAssignment )
 {
-    auto u = Vector3 { 10, 20, 30 };
-    constexpr auto v = Vector3 { 30, 40, 50 };
+    auto u = crimild::Vector3 { 10, 20, 30 };
+    constexpr auto v = crimild::Vector3 { 30, 40, 50 };
     u += v;
-    constexpr auto res = Vector3 { 40, 60, 80 };
+    constexpr auto res = crimild::Vector3 { 40, 60, 80 };
 
     EXPECT_EQ( res, u );
 }
 
 TEST( Vector3, additionWithDifferentTypes )
 {
-    constexpr auto u = Vector3f { 10, 20, 30 };
-    constexpr auto v = Vector3i { 30, 40, 50 };
+    constexpr auto u = crimild::Vector3f { 10, 20, 30 };
+    constexpr auto v = crimild::Vector3i { 30, 40, 50 };
     constexpr auto w = u + v;
 
     EXPECT_EQ( 40, w.x );
@@ -97,18 +95,18 @@ TEST( Vector3, additionWithDifferentTypes )
 
 TEST( Vector3, subtraction )
 {
-    constexpr auto u = Vector3 { 10, 20, 30 };
-    constexpr auto v = Vector3 { 30, 40, 50 };
-    constexpr auto res = Vector3 { -20, -20, -20 };
+    constexpr auto u = crimild::Vector3 { 10, 20, 30 };
+    constexpr auto v = crimild::Vector3 { 30, 40, 50 };
+    constexpr auto res = crimild::Vector3 { -20, -20, -20 };
 
     EXPECT_EQ( res, u - v );
 }
 
 TEST( Vector3, subtractionAssignment )
 {
-    auto u = Vector3 { 10, 20, 30 };
-    constexpr auto v = Vector3 { 30, 40, 50 };
-    constexpr auto res = Vector3 { -20, -20, -20 };
+    auto u = crimild::Vector3 { 10, 20, 30 };
+    constexpr auto v = crimild::Vector3 { 30, 40, 50 };
+    constexpr auto res = crimild::Vector3 { -20, -20, -20 };
 
     u -= v;
 
@@ -117,9 +115,9 @@ TEST( Vector3, subtractionAssignment )
 
 TEST( Vector3, multiplication )
 {
-    constexpr auto u = Vector3 { 10, 20, 30 };
-    constexpr auto s = Real( 5 );
-    constexpr auto res = Vector3 { 50, 100, 150 };
+    constexpr auto u = crimild::Vector3 { 10, 20, 30 };
+    constexpr auto s = crimild::Real( 5 );
+    constexpr auto res = crimild::Vector3 { 50, 100, 150 };
 
     EXPECT_EQ( res, u * s );
     EXPECT_EQ( res, s * u );
@@ -127,9 +125,9 @@ TEST( Vector3, multiplication )
 
 TEST( Vector3, multiplicationAssignment )
 {
-    auto u = Vector3 { 10, 20, 30 };
-    constexpr auto s = Real( 5 );
-    constexpr auto res = Vector3 { 50, 100, 150 };
+    auto u = crimild::Vector3 { 10, 20, 30 };
+    constexpr auto s = crimild::Real( 5 );
+    constexpr auto res = crimild::Vector3 { 50, 100, 150 };
 
     u *= s;
 
@@ -138,27 +136,27 @@ TEST( Vector3, multiplicationAssignment )
 
 TEST( Vector3, vectorMultiplication )
 {
-    constexpr auto u = Vector3 { 10, 20, 30 };
-    constexpr auto v = Vector3 { 2, 3, 4 };
-    constexpr auto res = Vector3 { 20, 60, 120 };
+    constexpr auto u = crimild::Vector3 { 10, 20, 30 };
+    constexpr auto v = crimild::Vector3 { 2, 3, 4 };
+    constexpr auto res = crimild::Vector3 { 20, 60, 120 };
 
     EXPECT_EQ( res, u * v );
 }
 
 TEST( Vector3, division )
 {
-    constexpr auto u = Vector3 { 10, 20, 30 };
-    constexpr auto s = Real( 2 );
-    constexpr auto res = Vector3 { 5, 10, 15 };
+    constexpr auto u = crimild::Vector3 { 10, 20, 30 };
+    constexpr auto s = crimild::Real( 2 );
+    constexpr auto res = crimild::Vector3 { 5, 10, 15 };
 
     EXPECT_EQ( res, u / s );
 }
 
 TEST( Vector3, divisionAssignment )
 {
-    auto u = Vector3 { 10, 20, 30 };
-    constexpr auto s = Real( 2 );
-    constexpr auto res = Vector3 { 5, 10, 15 };
+    auto u = crimild::Vector3 { 10, 20, 30 };
+    constexpr auto s = crimild::Real( 2 );
+    constexpr auto res = crimild::Vector3 { 5, 10, 15 };
 
     u /= s;
 
@@ -167,123 +165,123 @@ TEST( Vector3, divisionAssignment )
 
 TEST( Vector3, negation )
 {
-    constexpr auto u = Vector3 { 10, 20, 30 };
-    constexpr auto res = Vector3 { -10, -20, -30 };
+    constexpr auto u = crimild::Vector3 { 10, 20, 30 };
+    constexpr auto res = crimild::Vector3 { -10, -20, -30 };
 
     EXPECT_EQ( res, -u );
 }
 
 TEST( Vector3, isNaN )
 {
-    constexpr auto u = Vector3 { 10, 20, 30 };
-    constexpr auto v = Vector3 { NAN, NAN, NAN };
-    constexpr auto w = Vector3 { NAN, NAN, 0 };
+    constexpr auto u = crimild::Vector3 { 10, 20, 30 };
+    constexpr auto v = crimild::Vector3 { NAN, NAN, NAN };
+    constexpr auto w = crimild::Vector3 { NAN, NAN, 0 };
 
-    EXPECT_TRUE( isNaN( v ) );
-    EXPECT_FALSE( isNaN( u ) );
-    EXPECT_TRUE( isNaN( w ) );
+    EXPECT_TRUE( crimild::isNaN( v ) );
+    EXPECT_FALSE( crimild::isNaN( u ) );
+    EXPECT_TRUE( crimild::isNaN( w ) );
 }
 
 TEST( Vector3, abs )
 {
-    constexpr auto u = Vector3 { -10, -20, -30 };
-    constexpr auto res = Vector3 { 10, 20, 30 };
+    constexpr auto u = crimild::Vector3 { -10, -20, -30 };
+    constexpr auto res = crimild::Vector3 { 10, 20, 30 };
 
-    EXPECT_EQ( res, abs( u ) );
+    EXPECT_EQ( res, crimild::abs( u ) );
 }
 
 TEST( Vector3, dot )
 {
-    constexpr auto u = Vector3 { 2, 3, 5 };
-    constexpr auto v = Vector3 { 8, 10, -2 };
+    constexpr auto u = crimild::Vector3 { 2, 3, 5 };
+    constexpr auto v = crimild::Vector3 { 8, 10, -2 };
 
-    EXPECT_EQ( 36, dot( u, v ) );
+    EXPECT_EQ( 36, crimild::dot( u, v ) );
 }
 
 TEST( Vector3, absDot )
 {
-    constexpr auto u = Vector3 { 2, 3, 5 };
-    constexpr auto v = Vector3 { -8, -10, -2 };
+    constexpr auto u = crimild::Vector3 { 2, 3, 5 };
+    constexpr auto v = crimild::Vector3 { -8, -10, -2 };
 
-    EXPECT_EQ( 56, absDot( u, v ) );
+    EXPECT_EQ( 56, crimild::absDot( u, v ) );
 }
 
 TEST( Vector3, cross )
 {
-    constexpr auto i = Vector3 { 1, 0, 0 };
-    constexpr auto j = Vector3 { 0, 1, 0 };
-    constexpr auto k = Vector3 { 0, 0, 1 };
+    constexpr auto i = crimild::Vector3 { 1, 0, 0 };
+    constexpr auto j = crimild::Vector3 { 0, 1, 0 };
+    constexpr auto k = crimild::Vector3 { 0, 0, 1 };
 
-    EXPECT_EQ( k, cross( i, j ) );
-    EXPECT_EQ( i, cross( j, k ) );
-    EXPECT_EQ( j, cross( k, i ) );
+    EXPECT_EQ( k, crimild::cross( i, j ) );
+    EXPECT_EQ( i, crimild::cross( j, k ) );
+    EXPECT_EQ( j, crimild::cross( k, i ) );
 }
 
 TEST( Vector3, length )
 {
-    constexpr auto u = Vector3 { 2, 3, 4 };
+    constexpr auto u = crimild::Vector3 { 2, 3, 4 };
 
-    EXPECT_EQ( Real( 29 ), lengthSquared( u ) );
-    EXPECT_EQ( Real( 5.3851648071 ), length( u ) );
+    EXPECT_EQ( crimild::Real( 29 ), crimild::lengthSquared( u ) );
+    EXPECT_EQ( crimild::Real( 5.3851648071 ), crimild::length( u ) );
 }
 
 TEST( Vector3, normalize )
 {
-    constexpr auto u = Vector3 { 2, 3, 4 };
-    constexpr auto v = Vector3 {
+    constexpr auto u = crimild::Vector3 { 2, 3, 4 };
+    constexpr auto v = crimild::Vector3 {
         .x = 0.3713906764,
         .y = 0.5570860145,
         .z = 0.7427813527,
     };
 
-    EXPECT_EQ( v, normalize( u ) );
-    EXPECT_TRUE( isEqual( Real( 1 ), lengthSquared( normalize( u ) ) ) );
-    EXPECT_TRUE( isEqual( Real( 1 ), length( normalize( u ) ) ) );
+    EXPECT_EQ( v, crimild::normalize( u ) );
+    EXPECT_TRUE( crimild::isEqual( crimild::Real( 1 ), crimild::lengthSquared( crimild::normalize( u ) ) ) );
+    EXPECT_TRUE( crimild::isEqual( crimild::Real( 1 ), crimild::length( crimild::normalize( u ) ) ) );
 }
 
 TEST( Vector3, normalizeNaN )
 {
-    EXPECT_TRUE( isNaN( normalize( Vector3 {} ) ) );
+    EXPECT_TRUE( crimild::isNaN( crimild::normalize( crimild::Vector3 {} ) ) );
 }
 
 TEST( Vector3, min )
 {
-    constexpr auto u = Vector3 { 2, 3, 4 };
-    constexpr auto v = Vector3 { 1, 5, 2 };
-    constexpr auto m = Vector3 { 1, 3, 2 };
+    constexpr auto u = crimild::Vector3 { 2, 3, 4 };
+    constexpr auto v = crimild::Vector3 { 1, 5, 2 };
+    constexpr auto m = crimild::Vector3 { 1, 3, 2 };
 
-    EXPECT_EQ( 2, min( u ) );
-    EXPECT_EQ( m, min( u, v ) );
+    EXPECT_EQ( 2, crimild::min( u ) );
+    EXPECT_EQ( m, crimild::min( u, v ) );
 }
 
 TEST( Vector3, max )
 {
-    constexpr auto u = Vector3 { 2, 3, 4 };
-    constexpr auto v = Vector3 { 1, 5, 2 };
-    constexpr auto m = Vector3 { 2, 5, 4 };
+    constexpr auto u = crimild::Vector3 { 2, 3, 4 };
+    constexpr auto v = crimild::Vector3 { 1, 5, 2 };
+    constexpr auto m = crimild::Vector3 { 2, 5, 4 };
 
-    EXPECT_EQ( 4, max( u ) );
-    EXPECT_EQ( m, max( u, v ) );
+    EXPECT_EQ( 4, crimild::max( u ) );
+    EXPECT_EQ( m, crimild::max( u, v ) );
 }
 
 TEST( Vector3, minDimension )
 {
-    constexpr auto u = Vector3 { 2, 3, 4 };
+    constexpr auto u = crimild::Vector3 { 2, 3, 4 };
 
-    EXPECT_EQ( 0, minDimension( u ) );
+    EXPECT_EQ( 0, crimild::minDimension( u ) );
 }
 
 TEST( Vector3, maxDimension )
 {
-    constexpr auto u = Vector3 { 2, 3, 4 };
+    constexpr auto u = crimild::Vector3 { 2, 3, 4 };
 
-    EXPECT_EQ( 2, maxDimension( u ) );
+    EXPECT_EQ( 2, crimild::maxDimension( u ) );
 }
 
 TEST( Vector3, ostream )
 {
     {
-        constexpr auto u = Vector3 { 2, 3, 4 };
+        constexpr auto u = crimild::Vector3 { 2, 3, 4 };
 
         std::stringstream ss;
         ss << u;
@@ -292,7 +290,7 @@ TEST( Vector3, ostream )
     }
 
     {
-        constexpr auto u = Vector3i { 2, 3, 4 };
+        constexpr auto u = crimild::Vector3i { 2, 3, 4 };
 
         std::stringstream ss;
         ss << u;
@@ -303,22 +301,30 @@ TEST( Vector3, ostream )
 
 TEST( Vector3, orthonormalBasis )
 {
-    constexpr auto v1 = Vector3 { 4, 5, 6 };
-    Vector3 v2, v3;
+    constexpr auto v1 = crimild::Vector3 { 4, 5, 6 };
+    crimild::Vector3 v2, v3;
 
-    orthonormalBasis( v1, v2, v3 );
+    crimild::orthonormalBasis( v1, v2, v3 );
 
-    EXPECT_TRUE( isZero( dot( v1, v2 ) ) );
-    EXPECT_TRUE( isZero( dot( v1, v3 ) ) );
-    EXPECT_TRUE( isZero( dot( v2, v3 ) ) );
+    EXPECT_TRUE( crimild::isZero( crimild::dot( v1, v2 ) ) );
+    EXPECT_TRUE( crimild::isZero( crimild::dot( v1, v3 ) ) );
+    EXPECT_TRUE( crimild::isZero( crimild::dot( v2, v3 ) ) );
+}
+
+TEST( Vector3, permute )
+{
+    constexpr auto u = crimild::Vector3 { 4, 5, 6 };
+    constexpr auto v = crimild::Vector3 { 6, 4, 5 };
+
+    EXPECT_EQ( v, crimild::permute( u, 2, 0, 1 ) );
 }
 
 TEST( Vector3, constexpr )
 {
-    constexpr auto u = Vector3 { 10, 20, 30 };
-    constexpr auto v = Vector3 { 30, 40, 50 };
-    constexpr auto w = Vector3 { 10, 20, 30 };
-    constexpr auto s = Real( 5 );
+    constexpr auto u = crimild::Vector3 { 10, 20, 30 };
+    constexpr auto v = crimild::Vector3 { 30, 40, 50 };
+    constexpr auto w = crimild::Vector3 { 10, 20, 30 };
+    constexpr auto s = crimild::Real( 5 );
 
     static_assert( u == w, "equality" );
     static_assert( u != v, "inequality" );
@@ -327,39 +333,39 @@ TEST( Vector3, constexpr )
     static_assert( 20 == u[ 1 ], "index" );
     static_assert( 30 == u[ 2 ], "index" );
 
-    static_assert( Vector3 { 40, 60, 80 } == ( u + v ), "addition" );
-    static_assert( Vector3 { -20, -20, -20 } == ( u - v ), "subtraction" );
+    static_assert( crimild::Vector3 { 40, 60, 80 } == ( u + v ), "addition" );
+    static_assert( crimild::Vector3 { -20, -20, -20 } == ( u - v ), "subtraction" );
 
-    static_assert( Vector3 { 50, 100, 150 } == ( u * s ), "multiplication" );
-    static_assert( Vector3 { 50, 100, 150 } == ( s * u ), "multiplication" );
-    static_assert( Vector3 { 300, 800, 1500 } == ( u * v ), "multiplication" );
-    static_assert( Vector3 { 2, 4, 6 } == ( u / s ), "division" );
+    static_assert( crimild::Vector3 { 50, 100, 150 } == ( u * s ), "multiplication" );
+    static_assert( crimild::Vector3 { 50, 100, 150 } == ( s * u ), "multiplication" );
+    static_assert( crimild::Vector3 { 300, 800, 1500 } == ( u * v ), "multiplication" );
+    static_assert( crimild::Vector3 { 2, 4, 6 } == ( u / s ), "division" );
 
-    static_assert( Vector3 { -10, -20, -30 } == -u, "negation" );
+    static_assert( crimild::Vector3 { -10, -20, -30 } == -u, "negation" );
 
-    static_assert( isNaN( u ) == false, "isNaN" );
-    static_assert( isNaN( Vector3 { .x = NAN, .y = NAN, .z = NAN } ) == true, "isNaN" );
+    static_assert( crimild::isNaN( u ) == false, "isNaN" );
+    static_assert( crimild::isNaN( crimild::Vector3 { .x = NAN, .y = NAN, .z = NAN } ) == true, "isNaN" );
 
-    static_assert( Vector3 { 10, 20, 30 } == abs( Vector3 { -10, -20, -30 } ), "abs" );
+    static_assert( crimild::Vector3 { 10, 20, 30 } == crimild::abs( crimild::Vector3 { -10, -20, -30 } ), "abs" );
 
-    static_assert( 36 == dot( Vector3 { 2, 3, 5 }, Vector3 { 8, 10, -2 } ), "dot" );
-    static_assert( 56 == absDot( Vector3 { 2, 3, 5 }, Vector3 { -8, -10, -2 } ), "absDot" );
+    static_assert( 36 == crimild::dot( crimild::Vector3 { 2, 3, 5 }, crimild::Vector3 { 8, 10, -2 } ), "dot" );
+    static_assert( 56 == crimild::absDot( crimild::Vector3 { 2, 3, 5 }, crimild::Vector3 { -8, -10, -2 } ), "absDot" );
 
-    static_assert( Vector3 { 0, 0, 1 } == cross( Vector3 { 1, 0, 0 }, Vector3 { 0, 1, 0 } ), "cross" );
+    static_assert( crimild::Vector3 { 0, 0, 1 } == crimild::cross( crimild::Vector3 { 1, 0, 0 }, crimild::Vector3 { 0, 1, 0 } ), "cross" );
 
-    static_assert( Real( 29 ) == lengthSquared( Vector3 { 2, 3, 4 } ), "lengthSquared" );
-    static_assert( Real( 5.3851648071 ) == length( Vector3 { 2, 3, 4 } ), "length" );
+    static_assert( crimild::Real( 29 ) == crimild::lengthSquared( crimild::Vector3 { 2, 3, 4 } ), "lengthSquared" );
+    static_assert( crimild::Real( 5.3851648071 ) == crimild::length( crimild::Vector3 { 2, 3, 4 } ), "length" );
 
-    static_assert( Vector3 { 0.3713906764, 0.5570860145, 0.7427813527 } == normalize( Vector3 { 2, 3, 4 } ), "normalize" );
-    static_assert( isEqual( Real( 1 ), length( normalize( Vector3 { 2, 3, 4 } ) ) ), "normalize" );
+    static_assert( crimild::Vector3 { 0.3713906764, 0.5570860145, 0.7427813527 } == crimild::normalize( crimild::Vector3 { 2, 3, 4 } ), "normalize" );
+    static_assert( crimild::isEqual( crimild::Real( 1 ), crimild::length( crimild::normalize( crimild::Vector3 { 2, 3, 4 } ) ) ), "normalize" );
 
-    static_assert( Vector3 { 1, 3, 2 } == min( Vector3 { 2, 3, 4 }, Vector3 { 1, 5, 2 } ), "min" );
-    static_assert( 2 == min( Vector3 { 2, 3, 4 } ), "min" );
-    static_assert( 0 == minDimension( Vector3 { 2, 3, 4 } ), "minDimension" );
+    static_assert( crimild::Vector3 { 1, 3, 2 } == crimild::min( crimild::Vector3 { 2, 3, 4 }, crimild::Vector3 { 1, 5, 2 } ), "min" );
+    static_assert( 2 == crimild::min( crimild::Vector3 { 2, 3, 4 } ), "min" );
+    static_assert( 0 == crimild::minDimension( crimild::Vector3 { 2, 3, 4 } ), "minDimension" );
 
-    static_assert( Vector3 { 2, 5, 4 } == max( Vector3 { 2, 3, 4 }, Vector3 { 1, 5, 2 } ), "max" );
-    static_assert( 4 == max( Vector3 { 2, 3, 4 } ), "max" );
-    static_assert( 2 == maxDimension( Vector3 { 2, 3, 4 } ), "maxDimension" );
+    static_assert( crimild::Vector3 { 2, 5, 4 } == crimild::max( crimild::Vector3 { 2, 3, 4 }, crimild::Vector3 { 1, 5, 2 } ), "max" );
+    static_assert( 4 == crimild::max( crimild::Vector3 { 2, 3, 4 } ), "max" );
+    static_assert( 2 == crimild::maxDimension( crimild::Vector3 { 2, 3, 4 } ), "maxDimension" );
 
     EXPECT_TRUE( true );
 }
