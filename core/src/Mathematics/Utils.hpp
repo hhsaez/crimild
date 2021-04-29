@@ -116,6 +116,24 @@ namespace crimild {
         }
     }
 
+    template< typename T >
+    [[nodiscard]] inline constexpr T floor( T x ) noexcept
+    {
+        return std::floor( x );
+    }
+
+    template< typename T >
+    [[nodiscard]] inline constexpr T ceil( T x ) noexcept
+    {
+        return std::ceil( x );
+    }
+
+    template< typename T >
+    [[nodiscard]] inline constexpr T lerp( T x, T y, Real t ) noexcept
+    {
+        return ( Real( 1 ) - t ) * x + t * y;
+    }
+
 }
 
 #endif

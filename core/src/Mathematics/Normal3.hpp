@@ -40,7 +40,7 @@ namespace crimild {
     namespace impl {
 
         template< typename T >
-        struct Vector3 {
+        struct Normal3 {
             T x = 0;
             T y = 0;
             T z = 0;
@@ -54,20 +54,20 @@ namespace crimild {
                 return z;
             }
 
-            [[nodiscard]] inline constexpr Bool operator==( const Vector3 &v ) const noexcept
+            [[nodiscard]] inline constexpr Bool operator==( const Normal3 &v ) const noexcept
             {
                 return isEqual( x, v.x ) && isEqual( y, v.y ) && isEqual( z, v.z );
             }
 
-            [[nodiscard]] inline constexpr Bool operator!=( const Vector3 &v ) const noexcept
+            [[nodiscard]] inline constexpr Bool operator!=( const Normal3 &v ) const noexcept
             {
                 return !isEqual( x, v.x ) || !isEqual( y, v.y ) || !isEqual( z, v.z );
             }
 
             template< typename U >
-            [[nodiscard]] inline constexpr Vector3 operator+( const Vector3< U > &v ) const noexcept
+            [[nodiscard]] inline constexpr Normal3 operator+( const Normal3< U > &v ) const noexcept
             {
-                return Vector3 {
+                return Normal3 {
                     .x = x + v.x,
                     .y = y + v.y,
                     .z = z + v.z,
@@ -75,7 +75,7 @@ namespace crimild {
             }
 
             template< typename U >
-            inline constexpr Vector3 &operator+=( const Vector3< U > &v ) noexcept
+            inline constexpr Normal3 &operator+=( const Normal3< U > &v ) noexcept
             {
                 x += v.x;
                 y += v.y;
@@ -84,9 +84,9 @@ namespace crimild {
             }
 
             template< typename U >
-            [[nodiscard]] inline constexpr Vector3 operator-( const Vector3< U > &v ) const noexcept
+            [[nodiscard]] inline constexpr Normal3 operator-( const Normal3< U > &v ) const noexcept
             {
-                return Vector3 {
+                return Normal3 {
                     .x = x - v.x,
                     .y = y - v.y,
                     .z = z - v.z,
@@ -94,7 +94,7 @@ namespace crimild {
             }
 
             template< typename U >
-            inline constexpr Vector3 &operator-=( const Vector3< U > &v ) noexcept
+            inline constexpr Normal3 &operator-=( const Normal3< U > &v ) noexcept
             {
                 x -= v.x;
                 y -= v.y;
@@ -103,25 +103,25 @@ namespace crimild {
             }
 
             template< typename U >
-            [[nodiscard]] inline constexpr Vector3 operator*( U scalar ) const noexcept
+            [[nodiscard]] inline constexpr Normal3 operator*( U scalar ) const noexcept
             {
-                return Vector3 {
+                return Normal3 {
                     .x = x * scalar,
                     .y = y * scalar,
                     .z = z * scalar,
                 };
             }
 
-            [[nodiscard]] friend inline constexpr Vector3 operator*( Real64 scalar, const Vector3 &u ) noexcept
+            [[nodiscard]] friend inline constexpr Normal3 operator*( Real64 scalar, const Normal3 &u ) noexcept
             {
-                return Vector3 {
+                return Normal3 {
                     .x = T( u.x * scalar ),
                     .y = T( u.y * scalar ),
                     .z = T( u.z * scalar ),
                 };
             }
 
-            inline constexpr Vector3 &operator*=( Real64 scalar ) noexcept
+            inline constexpr Normal3 &operator*=( Real64 scalar ) noexcept
             {
                 x *= scalar;
                 y *= scalar;
@@ -130,17 +130,7 @@ namespace crimild {
             }
 
             template< typename U >
-            [[nodiscard]] inline constexpr Vector3 operator*( const Vector3< U > &v ) const noexcept
-            {
-                return Vector3 {
-                    .x = x * v.x,
-                    .y = y * v.y,
-                    .z = z * v.z,
-                };
-            }
-
-            template< typename U >
-            inline constexpr Vector3 &operator*=( const Vector3< U > &v ) noexcept
+            inline constexpr Normal3 &operator*=( const Normal3< U > &v ) noexcept
             {
                 x *= v.x;
                 y *= v.y;
@@ -149,9 +139,9 @@ namespace crimild {
             }
 
             template< typename U >
-            [[nodiscard]] inline constexpr Vector3 operator/( U scalar ) const noexcept
+            [[nodiscard]] inline constexpr Normal3 operator/( U scalar ) const noexcept
             {
-                return Vector3 {
+                return Normal3 {
                     .x = x / scalar,
                     .y = y / scalar,
                     .z = z / scalar,
@@ -159,7 +149,7 @@ namespace crimild {
             }
 
             template< typename U >
-            inline constexpr Vector3 &operator/=( U scalar ) noexcept
+            inline constexpr Normal3 &operator/=( U scalar ) noexcept
             {
                 x /= scalar;
                 y /= scalar;
@@ -167,16 +157,16 @@ namespace crimild {
                 return *this;
             }
 
-            [[nodiscard]] inline constexpr Vector3 operator-( void ) const noexcept
+            [[nodiscard]] inline constexpr Normal3 operator-( void ) const noexcept
             {
-                return Vector3 {
+                return Normal3 {
                     .x = -x,
                     .y = -y,
                     .z = -z,
                 };
             }
 
-            friend inline std::ostream &operator<<( std::ostream &out, const Vector3 &u )
+            friend inline std::ostream &operator<<( std::ostream &out, const Normal3 &u )
             {
                 out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
                     << std::setprecision( 6 );
@@ -192,15 +182,15 @@ namespace crimild {
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Bool isNaN( const impl::Vector3< T > &u ) noexcept
+    [[nodiscard]] inline constexpr Bool isNaN( const impl::Normal3< T > &u ) noexcept
     {
         return isNaN( u.x ) || isNaN( u.y ) || isNaN( u.z );
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr impl::Vector3< T > abs( const impl::Vector3< T > &u ) noexcept
+    [[nodiscard]] inline constexpr impl::Normal3< T > abs( const impl::Normal3< T > &u ) noexcept
     {
-        return impl::Vector3< T > {
+        return impl::Normal3< T > {
             .x = abs( u.x ),
             .y = abs( u.y ),
             .z = abs( u.z ),
@@ -208,55 +198,45 @@ namespace crimild {
     }
 
     template< typename T, typename U >
-    [[nodiscard]] inline constexpr T dot( const impl::Vector3< T > &u, const impl::Vector3< U > &v ) noexcept
+    [[nodiscard]] inline constexpr T dot( const impl::Normal3< T > &u, const impl::Normal3< U > &v ) noexcept
     {
         return u.x * v.x + u.y * v.y + u.z * v.z;
     }
 
     template< typename T, typename U >
-    [[nodiscard]] inline constexpr T absDot( const impl::Vector3< T > &u, const impl::Vector3< U > &v ) noexcept
+    [[nodiscard]] inline constexpr T absDot( const impl::Normal3< T > &u, const impl::Normal3< U > &v ) noexcept
     {
         return abs( dot( u, v ) );
     }
 
-    template< typename T, typename U >
-    [[nodiscard]] inline constexpr impl::Vector3< T > cross( const impl::Vector3< T > &u, const impl::Vector3< U > &v ) noexcept
-    {
-        return impl::Vector3< T > {
-            .x = u.y * v.z - u.z * v.y,
-            .y = u.z * v.x - u.x * v.z,
-            .z = u.x * v.y - u.y * v.x,
-        };
-    }
-
     template< typename T >
-    [[nodiscard]] inline constexpr Real lengthSquared( const impl::Vector3< T > &u ) noexcept
+    [[nodiscard]] inline constexpr Real lengthSquared( const impl::Normal3< T > &u ) noexcept
     {
         return dot( u, u );
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Real length( const impl::Vector3< T > &u ) noexcept
+    [[nodiscard]] inline constexpr Real length( const impl::Normal3< T > &u ) noexcept
     {
         return sqrt( lengthSquared( u ) );
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr impl::Vector3< T > normalize( const impl::Vector3< T > &u ) noexcept
+    [[nodiscard]] inline constexpr impl::Normal3< T > normalize( const impl::Normal3< T > &u ) noexcept
     {
         return u / length( u );
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr T min( const impl::Vector3< T > &u ) noexcept
+    [[nodiscard]] inline constexpr T min( const impl::Normal3< T > &u ) noexcept
     {
         return min( u.x, min( u.y, u.z ) );
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr impl::Vector3< T > min( const impl::Vector3< T > &u, const impl::Vector3< T > &v ) noexcept
+    [[nodiscard]] inline constexpr impl::Normal3< T > min( const impl::Normal3< T > &u, const impl::Normal3< T > &v ) noexcept
     {
-        return impl::Vector3< T > {
+        return impl::Normal3< T > {
             .x = min( u.x, v.x ),
             .y = min( u.y, v.y ),
             .z = min( u.z, v.z ),
@@ -264,21 +244,21 @@ namespace crimild {
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr T minDimension( const impl::Vector3< T > &u ) noexcept
+    [[nodiscard]] inline constexpr T minDimension( const impl::Normal3< T > &u ) noexcept
     {
         return ( u.x < u.y ? ( u.x < u.z ? 0 : 2 ) : ( u.y > u.z ? 1 : 2 ) );
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr T max( const impl::Vector3< T > &u ) noexcept
+    [[nodiscard]] inline constexpr T max( const impl::Normal3< T > &u ) noexcept
     {
         return max( u.x, max( u.y, u.z ) );
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr impl::Vector3< T > max( const impl::Vector3< T > &u, const impl::Vector3< T > &v ) noexcept
+    [[nodiscard]] inline constexpr impl::Normal3< T > max( const impl::Normal3< T > &u, const impl::Normal3< T > &v ) noexcept
     {
-        return impl::Vector3< T > {
+        return impl::Normal3< T > {
             .x = max( u.x, v.x ),
             .y = max( u.y, v.y ),
             .z = max( u.z, v.z ),
@@ -286,42 +266,14 @@ namespace crimild {
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr T maxDimension( const impl::Vector3< T > &u ) noexcept
+    [[nodiscard]] inline constexpr T maxDimension( const impl::Normal3< T > &u ) noexcept
     {
         return ( u.x > u.y ? ( u.x > u.z ? 0 : 2 ) : ( u.y > u.z ? 1 : 2 ) );
     }
 
-    template< typename T >
-    [[nodiscard]] inline constexpr impl::Vector3< T > permute( const impl::Vector3< T > &u, Int x, Int y, Int z ) noexcept
-    {
-        return impl::Vector3< T > {
-            .x = u[ x ],
-            .y = u[ y ],
-            .z = u[ z ],
-        };
-    }
-
-    /**
-       \brief Creates a orthonormal coordinate system from a vector
-
-       \remarks The input vector v1 is assumed to be already normalized.
-     */
-    template< typename T >
-    void orthonormalBasis( const impl::Vector3< T > &v1, impl::Vector3< T > &v2, impl::Vector3< T > &v3 ) noexcept
-    {
-        if ( abs( v1.x ) > abs( v1.y ) ) {
-            v2 = normalize( impl::Vector3< T > { -v1.z, 0, v1.x } );
-        } else {
-            v2 = normalize( impl::Vector3< T > { 0, v1.z, -v1.y } );
-        }
-        v3 = cross( v1, v2 );
-    }
-
-    using Vector3 = impl::Vector3< Real >;
-    using Vector3f = impl::Vector3< Real32 >;
-    using Vector3d = impl::Vector3< Real64 >;
-    using Vector3i = impl::Vector3< Int32 >;
-    using Vector3ui = impl::Vector3< UInt32 >;
+    using Normal3 = impl::Normal3< Real >;
+    using Normal3f = impl::Normal3< Real32 >;
+    using Normal3d = impl::Normal3< Real64 >;
 
 }
 
