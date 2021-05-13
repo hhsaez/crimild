@@ -25,60 +25,41 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Mathematics/Ray3.hpp"
+#ifndef CRIMILD_MATHEMATICS_MATRIX_4_
+#define CRIMILD_MATHEMATICS_MATRIX_4_
 
-#include "gtest/gtest.h"
-#include <sstream>
+#include "Mathematics/MatrixImpl.hpp"
 
-TEST( Ray3, construction )
-{
-    constexpr auto r = crimild::Ray3 {
-        crimild::Point3 { 10, 20, 30 },
-        crimild::Vector3 { 0, 0, -1 },
-    };
+namespace crimild {
 
-    constexpr auto o = crimild::Point3 { 10, 20, 30 };
-    constexpr auto d = crimild::Vector3 { 0, 0, -1 };
+    using Matrix4 = impl::Matrix< Real, 4 >;
+    using Matrix4f = impl::Matrix< Real32, 4 >;
+    using Matrix4d = impl::Matrix< Real64, 4 >;
+    using Matrix4i = impl::Matrix< Int32, 4 >;
+    using Matrix4ui = impl::Matrix< UInt32, 4 >;
 
-    EXPECT_EQ( o, r.getOrigin() );
-    EXPECT_EQ( d, r.getDirection() );
+    [[nodiscard]] constexpr Matrix4 ortho( Real l, Real r, Real b, Real t, Real n, Real f ) noexcept
+    {
+        return Matrix4 {
+            Real( 2 ) / ( r - l ),
+            0,
+            0,
+            -( r + l ) / ( r - l ),
+            0,
+            Real( 2 ) / ( t - b ),
+            0,
+            -( t + b ) / ( t - b ),
+            0,
+            0,
+            Real( 2 ) / ( f - n ),
+            -( f + n ) / ( f - n ),
+            0,
+            0,
+            0,
+            1,
+        };
+    }
+
 }
 
-TEST( Ray3, apply )
-{
-    constexpr auto R = crimild::Ray3 {
-        crimild::Point3 { 10, 20, 30 },
-        crimild::Vector3 { 0, 0, -1 },
-    };
-
-    constexpr auto P = crimild::Point3 { 10, 20, 20 };
-
-    EXPECT_EQ( P, R( 10 ) );
-}
-
-TEST( Ray3, ostream )
-{
-    constexpr auto R = crimild::Ray3 {
-        crimild::Point3 { 10, 20, 30 },
-        crimild::Vector3 { 0, 0, -1 },
-    };
-
-    std::stringstream ss;
-    ss << R;
-
-    EXPECT_EQ( ss.str(), "[(10.000000, 20.000000, 30.000000), (0.000000, 0.000000, -1.000000)]" );
-}
-
-TEST( Ray3, constexpr )
-{
-    constexpr auto R = crimild::Ray3 {
-        crimild::Point3 { 10, 20, 30 },
-        crimild::Vector3 { 0, 0, -1 },
-    };
-
-    constexpr auto P = crimild::Point3 { 10, 20, 20 };
-
-    static_assert( P == R( 10 ), "apply" );
-
-    EXPECT_TRUE( true );
-}
+#endif

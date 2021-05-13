@@ -33,14 +33,14 @@
 TEST( Normal3, construction )
 {
     constexpr auto u = crimild::Normal3 {
-        .x = 10,
-        .y = 20,
-        .z = 30,
+        10,
+        20,
+        30,
     };
 
-    EXPECT_EQ( 10, u.x );
-    EXPECT_EQ( 20, u.y );
-    EXPECT_EQ( 30, u.z );
+    EXPECT_EQ( 10, u.x() );
+    EXPECT_EQ( 20, u.y() );
+    EXPECT_EQ( 30, u.z() );
 }
 
 TEST( Normal3, index )
@@ -72,16 +72,6 @@ TEST( Normal3, addition )
     EXPECT_EQ( res, u + v );
 }
 
-TEST( Normal3, additionAssignment )
-{
-    auto u = crimild::Normal3 { 10, 20, 30 };
-    constexpr auto v = crimild::Normal3 { 30, 40, 50 };
-    u += v;
-    constexpr auto res = crimild::Normal3 { 40, 60, 80 };
-
-    EXPECT_EQ( res, u );
-}
-
 TEST( Normal3, subtraction )
 {
     constexpr auto u = crimild::Normal3 { 10, 20, 30 };
@@ -89,17 +79,6 @@ TEST( Normal3, subtraction )
     constexpr auto res = crimild::Normal3 { -20, -20, -20 };
 
     EXPECT_EQ( res, u - v );
-}
-
-TEST( Normal3, subtractionAssignment )
-{
-    auto u = crimild::Normal3 { 10, 20, 30 };
-    constexpr auto v = crimild::Normal3 { 30, 40, 50 };
-    constexpr auto res = crimild::Normal3 { -20, -20, -20 };
-
-    u -= v;
-
-    EXPECT_EQ( res, u );
 }
 
 TEST( Normal3, multiplication )
@@ -112,17 +91,6 @@ TEST( Normal3, multiplication )
     EXPECT_EQ( res, s * u );
 }
 
-TEST( Normal3, multiplicationAssignment )
-{
-    auto u = crimild::Normal3 { 10, 20, 30 };
-    constexpr auto s = crimild::Real( 5 );
-    constexpr auto res = crimild::Normal3 { 50, 100, 150 };
-
-    u *= s;
-
-    EXPECT_EQ( res, u );
-}
-
 TEST( Normal3, division )
 {
     constexpr auto u = crimild::Normal3 { 10, 20, 30 };
@@ -130,17 +98,6 @@ TEST( Normal3, division )
     constexpr auto res = crimild::Normal3 { 5, 10, 15 };
 
     EXPECT_EQ( res, u / s );
-}
-
-TEST( Normal3, divisionAssignment )
-{
-    auto u = crimild::Normal3 { 10, 20, 30 };
-    constexpr auto s = crimild::Real( 2 );
-    constexpr auto res = crimild::Normal3 { 5, 10, 15 };
-
-    u /= s;
-
-    EXPECT_EQ( res, u );
 }
 
 TEST( Normal3, negation )
@@ -198,9 +155,9 @@ TEST( Normal3, normalize )
 {
     constexpr auto u = crimild::Normal3 { 2, 3, 4 };
     constexpr auto v = crimild::Normal3 {
-        .x = 0.3713906764,
-        .y = 0.5570860145,
-        .z = 0.7427813527,
+        0.3713906764,
+        0.5570860145,
+        0.7427813527,
     };
 
     EXPECT_EQ( v, crimild::normalize( u ) );
@@ -283,7 +240,7 @@ TEST( Normal3, constexpr )
     static_assert( crimild::Normal3 { -10, -20, -30 } == -u, "negation" );
 
     static_assert( crimild::isNaN( u ) == false, "isNaN" );
-    static_assert( crimild::isNaN( crimild::Normal3 { .x = NAN, .y = NAN, .z = NAN } ) == true, "isNaN" );
+    static_assert( crimild::isNaN( crimild::Normal3 { NAN, NAN, NAN } ) == true, "isNaN" );
 
     static_assert( crimild::Normal3 { 10, 20, 30 } == crimild::abs( crimild::Normal3 { -10, -20, -30 } ), "abs" );
 

@@ -134,6 +134,28 @@ namespace crimild {
         return ( Real( 1 ) - t ) * x + t * y;
     }
 
+    [[nodiscard]] inline constexpr Radians radians( Degrees deg ) noexcept
+    {
+        return deg * numbers::PI / 180.0;
+    }
+
+    [[nodiscard]] inline constexpr Degrees degrees( Radians rad ) noexcept
+    {
+        return rad * 180.0 / numbers::PI;
+    }
+
+    // TODO: Make this function constexpr
+    [[nodiscard]] inline Real cos( Radians rad ) noexcept
+    {
+        return std::cos( rad );
+    }
+
+    // TODO: Make this function constexpr
+    [[nodiscard]] inline Real sin( Radians rad ) noexcept
+    {
+        return std::sin( rad );
+    }
+
 }
 
 #endif
