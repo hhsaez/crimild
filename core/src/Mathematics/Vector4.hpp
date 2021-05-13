@@ -25,60 +25,29 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Mathematics/Ray3.hpp"
+#ifndef CRIMILD_MATHEMATICS_VECTOR_4_
+#define CRIMILD_MATHEMATICS_VECTOR_4_
 
-#include "gtest/gtest.h"
-#include <sstream>
+#include "VectorImpl.hpp"
 
-TEST( Ray3, construction )
-{
-    constexpr auto r = crimild::Ray3 {
-        crimild::Point3 { 10, 20, 30 },
-        crimild::Vector3 { 0, 0, -1 },
-    };
+namespace crimild {
 
-    constexpr auto o = crimild::Point3 { 10, 20, 30 };
-    constexpr auto d = crimild::Vector3 { 0, 0, -1 };
+    template< typename T >
+    [[nodiscard]] inline constexpr impl::Vector< T, 4 > permute( const impl::Vector< T, 4 > &u, Int x, Int y, Int z, Int w ) noexcept
+    {
+        return impl::Vector< T, 4 >(
+            u[ x ],
+            u[ y ],
+            u[ z ],
+            u[ w ] );
+    }
 
-    EXPECT_EQ( o, r.getOrigin() );
-    EXPECT_EQ( d, r.getDirection() );
+    using Vector4 = impl::Vector< Real, 4 >;
+    using Vector4f = impl::Vector< Real32, 4 >;
+    using Vector4d = impl::Vector< Real64, 4 >;
+    using Vector4i = impl::Vector< Int32, 4 >;
+    using Vector4ui = impl::Vector< UInt32, 4 >;
+
 }
 
-TEST( Ray3, apply )
-{
-    constexpr auto R = crimild::Ray3 {
-        crimild::Point3 { 10, 20, 30 },
-        crimild::Vector3 { 0, 0, -1 },
-    };
-
-    constexpr auto P = crimild::Point3 { 10, 20, 20 };
-
-    EXPECT_EQ( P, R( 10 ) );
-}
-
-TEST( Ray3, ostream )
-{
-    constexpr auto R = crimild::Ray3 {
-        crimild::Point3 { 10, 20, 30 },
-        crimild::Vector3 { 0, 0, -1 },
-    };
-
-    std::stringstream ss;
-    ss << R;
-
-    EXPECT_EQ( ss.str(), "[(10.000000, 20.000000, 30.000000), (0.000000, 0.000000, -1.000000)]" );
-}
-
-TEST( Ray3, constexpr )
-{
-    constexpr auto R = crimild::Ray3 {
-        crimild::Point3 { 10, 20, 30 },
-        crimild::Vector3 { 0, 0, -1 },
-    };
-
-    constexpr auto P = crimild::Point3 { 10, 20, 20 };
-
-    static_assert( P == R( 10 ), "apply" );
-
-    EXPECT_TRUE( true );
-}
+#endif

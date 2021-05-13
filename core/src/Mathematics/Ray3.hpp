@@ -33,19 +33,68 @@
 
 namespace crimild {
 
-    struct Ray3 {
-        Point3 origin;
-        Vector3 direction;
+    class Ray3 {
+    public:
+        constexpr explicit Ray3( const Point3 &origin, const Vector3 &direction ) noexcept
+            : m_origin( origin ),
+              m_direction( direction )
+        {
+        }
 
-        [[nodiscard]] inline constexpr Point3 operator()( Real t ) const noexcept { return origin + t * direction; }
+        constexpr Ray3( const Ray3 &other ) noexcept
+            : m_origin( other.m_origin ),
+              m_direction( other.m_direction )
+        {
+        }
+
+        constexpr Ray3( Ray3 &&other ) noexcept
+            : m_origin( std::move( other.m_origin ) ),
+              m_direction( std::move( other.m_direction ) )
+        {
+        }
+
+        ~Ray3( void ) = default;
+
+        constexpr inline Ray3 &operator=( const Ray3 &other ) noexcept
+        {
+            m_origin = other.m_origin;
+            m_direction = other.m_direction;
+            return *this;
+        }
+
+        constexpr inline Ray3 &operator=( Ray3 &&other ) noexcept
+        {
+            m_origin = std::move( other.m_origin );
+            m_direction = std::move( other.m_direction );
+            return *this;
+        }
+
+        [[nodiscard]] constexpr inline Bool operator==( const Ray3 &other ) const noexcept
+        {
+            return m_origin == other.m_origin && m_direction == other.m_direction;
+        }
+
+        [[nodiscard]] constexpr inline Bool operator!=( const Ray3 &other ) const noexcept
+        {
+            return m_origin != other.m_origin || m_direction != other.m_direction;
+        }
+
+        constexpr inline const Point3 &getOrigin( void ) const noexcept { return m_origin; }
+        constexpr inline const Vector3 &getDirection( void ) const noexcept { return m_direction; }
+
+        [[nodiscard]] inline constexpr Point3 operator()( Real t ) const noexcept { return m_origin + t * m_direction; }
 
         friend inline std::ostream &operator<<( std::ostream &out, const Ray3 &R )
         {
             out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
                 << std::setprecision( 6 );
-            out << "[" << R.origin << ", " << R.direction << "]";
+            out << "[" << R.m_origin << ", " << R.m_direction << "]";
             return out;
         }
+
+    private:
+        Point3 m_origin;
+        Vector3 m_direction;
     };
 
 }

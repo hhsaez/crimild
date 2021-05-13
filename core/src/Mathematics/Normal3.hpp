@@ -25,13 +25,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_VECTOR_3_
-#define CRIMILD_MATHEMATICS_VECTOR_3_
+#ifndef CRIMILD_MATHEMATICS_NORMAL_3_
+#define CRIMILD_MATHEMATICS_NORMAL_3_
 
 #include "Foundation/Types.hpp"
 #include "Mathematics/Numbers.hpp"
 #include "Mathematics/Utils.hpp"
 
+#include <array>
 #include <iomanip>
 #include <sstream>
 
@@ -40,129 +41,135 @@ namespace crimild {
     namespace impl {
 
         template< typename T >
-        struct Normal3 {
-            T x = 0;
-            T y = 0;
-            T z = 0;
+        class Normal3 {
+        public:
+            constexpr Normal3( void ) noexcept = default;
 
-            [[nodiscard]] inline constexpr const T &operator[]( Size index ) const noexcept
+            constexpr explicit Normal3( const T *tuple ) noexcept
+                : m_tuple()
             {
-                if ( index == 0 )
-                    return x;
-                if ( index == 1 )
-                    return y;
-                return z;
+                m_tuple[ 0 ] = tuple[ 0 ];
+                m_tuple[ 1 ] = tuple[ 1 ];
+                m_tuple[ 2 ] = tuple[ 2 ];
+            }
+
+            constexpr Normal3( T x, T y, T z ) noexcept
+                : m_tuple()
+            {
+                m_tuple[ 0 ] = x;
+                m_tuple[ 1 ] = y;
+                m_tuple[ 2 ] = z;
+            }
+
+            constexpr Normal3( const Normal3 &other ) noexcept
+                : m_tuple( other.m_tuple )
+            {
+            }
+
+            constexpr Normal3( const Normal3 &&other ) noexcept
+                : m_tuple( std::move( other.m_tuple ) )
+            {
+            }
+
+            ~Normal3( void ) noexcept = default;
+
+            constexpr Normal3 &operator=( const Normal3 &other ) noexcept
+            {
+                m_tuple = other.m_tuple;
+                return *this;
+            }
+
+            constexpr Normal3 &operator=( const Normal3 &&other ) noexcept
+            {
+                m_tuple = std::move( other.m_tuple );
+                return *this;
+            }
+
+            inline constexpr T x( void ) const noexcept
+            {
+                return m_tuple[ 0 ];
+            }
+
+            inline constexpr T y( void ) const noexcept
+            {
+                return m_tuple[ 1 ];
+            }
+
+            inline constexpr T z( void ) const noexcept
+            {
+                return m_tuple[ 2 ];
+            }
+
+            [[nodiscard]] inline constexpr T operator[]( Size index ) const noexcept
+            {
+                return m_tuple[ index ];
             }
 
             [[nodiscard]] inline constexpr Bool operator==( const Normal3 &v ) const noexcept
             {
-                return isEqual( x, v.x ) && isEqual( y, v.y ) && isEqual( z, v.z );
+                return isEqual( x(), v.x() ) && isEqual( y(), v.y() ) && isEqual( z(), v.z() );
             }
 
             [[nodiscard]] inline constexpr Bool operator!=( const Normal3 &v ) const noexcept
             {
-                return !isEqual( x, v.x ) || !isEqual( y, v.y ) || !isEqual( z, v.z );
+                return !isEqual( x(), v.x() ) || !isEqual( y(), v.y() ) || !isEqual( z(), v.z() );
             }
 
             template< typename U >
             [[nodiscard]] inline constexpr Normal3 operator+( const Normal3< U > &v ) const noexcept
             {
                 return Normal3 {
-                    .x = x + v.x,
-                    .y = y + v.y,
-                    .z = z + v.z,
+                    x() + v.x(),
+                    y() + v.y(),
+                    z() + v.z(),
                 };
-            }
-
-            template< typename U >
-            inline constexpr Normal3 &operator+=( const Normal3< U > &v ) noexcept
-            {
-                x += v.x;
-                y += v.y;
-                z += v.z;
-                return *this;
             }
 
             template< typename U >
             [[nodiscard]] inline constexpr Normal3 operator-( const Normal3< U > &v ) const noexcept
             {
                 return Normal3 {
-                    .x = x - v.x,
-                    .y = y - v.y,
-                    .z = z - v.z,
+                    x() - v.x(),
+                    y() - v.y(),
+                    z() - v.z(),
                 };
-            }
-
-            template< typename U >
-            inline constexpr Normal3 &operator-=( const Normal3< U > &v ) noexcept
-            {
-                x -= v.x;
-                y -= v.y;
-                z -= v.z;
-                return *this;
             }
 
             template< typename U >
             [[nodiscard]] inline constexpr Normal3 operator*( U scalar ) const noexcept
             {
                 return Normal3 {
-                    .x = x * scalar,
-                    .y = y * scalar,
-                    .z = z * scalar,
+                    x() * scalar,
+                    y() * scalar,
+                    z() * scalar,
                 };
             }
 
-            [[nodiscard]] friend inline constexpr Normal3 operator*( Real64 scalar, const Normal3 &u ) noexcept
+            [[nodiscard]] friend inline constexpr Normal3 operator*( Real scalar, const Normal3 &u ) noexcept
             {
                 return Normal3 {
-                    .x = T( u.x * scalar ),
-                    .y = T( u.y * scalar ),
-                    .z = T( u.z * scalar ),
+                    u.x() * scalar,
+                    u.y() * scalar,
+                    u.z() * scalar,
                 };
-            }
-
-            inline constexpr Normal3 &operator*=( Real64 scalar ) noexcept
-            {
-                x *= scalar;
-                y *= scalar;
-                z *= scalar;
-                return *this;
-            }
-
-            template< typename U >
-            inline constexpr Normal3 &operator*=( const Normal3< U > &v ) noexcept
-            {
-                x *= v.x;
-                y *= v.y;
-                z *= v.z;
-                return *this;
             }
 
             template< typename U >
             [[nodiscard]] inline constexpr Normal3 operator/( U scalar ) const noexcept
             {
                 return Normal3 {
-                    .x = x / scalar,
-                    .y = y / scalar,
-                    .z = z / scalar,
+                    x() / scalar,
+                    y() / scalar,
+                    z() / scalar,
                 };
-            }
-
-            template< typename U >
-            inline constexpr Normal3 &operator/=( U scalar ) noexcept
-            {
-                x /= scalar;
-                y /= scalar;
-                z /= scalar;
-                return *this;
             }
 
             [[nodiscard]] inline constexpr Normal3 operator-( void ) const noexcept
             {
                 return Normal3 {
-                    .x = -x,
-                    .y = -y,
-                    .z = -z,
+                    -x(),
+                    -y(),
+                    -z(),
                 };
             }
 
@@ -171,12 +178,15 @@ namespace crimild {
                 out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
                     << std::setprecision( 6 );
                 out << "("
-                    << u.x << ", "
-                    << u.y << ", "
-                    << u.z
+                    << u.x() << ", "
+                    << u.y() << ", "
+                    << u.z()
                     << ")";
                 return out;
             }
+
+        private:
+            std::array< T, 3 > m_tuple;
         };
 
     }
@@ -184,23 +194,23 @@ namespace crimild {
     template< typename T >
     [[nodiscard]] inline constexpr Bool isNaN( const impl::Normal3< T > &u ) noexcept
     {
-        return isNaN( u.x ) || isNaN( u.y ) || isNaN( u.z );
+        return isNaN( u.x() ) || isNaN( u.y() ) || isNaN( u.z() );
     }
 
     template< typename T >
     [[nodiscard]] inline constexpr impl::Normal3< T > abs( const impl::Normal3< T > &u ) noexcept
     {
         return impl::Normal3< T > {
-            .x = abs( u.x ),
-            .y = abs( u.y ),
-            .z = abs( u.z ),
+            abs( u.x() ),
+            abs( u.y() ),
+            abs( u.z() ),
         };
     }
 
     template< typename T, typename U >
     [[nodiscard]] inline constexpr T dot( const impl::Normal3< T > &u, const impl::Normal3< U > &v ) noexcept
     {
-        return u.x * v.x + u.y * v.y + u.z * v.z;
+        return u.x() * v.x() + u.y() * v.y() + u.z() * v.z();
     }
 
     template< typename T, typename U >
@@ -230,45 +240,45 @@ namespace crimild {
     template< typename T >
     [[nodiscard]] inline constexpr T min( const impl::Normal3< T > &u ) noexcept
     {
-        return min( u.x, min( u.y, u.z ) );
+        return min( u.x(), min( u.y(), u.z() ) );
     }
 
     template< typename T >
     [[nodiscard]] inline constexpr impl::Normal3< T > min( const impl::Normal3< T > &u, const impl::Normal3< T > &v ) noexcept
     {
         return impl::Normal3< T > {
-            .x = min( u.x, v.x ),
-            .y = min( u.y, v.y ),
-            .z = min( u.z, v.z ),
+            min( u.x(), v.x() ),
+            min( u.y(), v.y() ),
+            min( u.z(), v.z() ),
         };
     }
 
     template< typename T >
     [[nodiscard]] inline constexpr T minDimension( const impl::Normal3< T > &u ) noexcept
     {
-        return ( u.x < u.y ? ( u.x < u.z ? 0 : 2 ) : ( u.y > u.z ? 1 : 2 ) );
+        return ( u.x() < u.y() ? ( u.x() < u.z() ? 0 : 2 ) : ( u.y() > u.z() ? 1 : 2 ) );
     }
 
     template< typename T >
     [[nodiscard]] inline constexpr T max( const impl::Normal3< T > &u ) noexcept
     {
-        return max( u.x, max( u.y, u.z ) );
+        return max( u.x(), max( u.y(), u.z() ) );
     }
 
     template< typename T >
     [[nodiscard]] inline constexpr impl::Normal3< T > max( const impl::Normal3< T > &u, const impl::Normal3< T > &v ) noexcept
     {
         return impl::Normal3< T > {
-            .x = max( u.x, v.x ),
-            .y = max( u.y, v.y ),
-            .z = max( u.z, v.z ),
+            max( u.x(), v.x() ),
+            max( u.y(), v.y() ),
+            max( u.z(), v.z() ),
         };
     }
 
     template< typename T >
     [[nodiscard]] inline constexpr T maxDimension( const impl::Normal3< T > &u ) noexcept
     {
-        return ( u.x > u.y ? ( u.x > u.z ? 0 : 2 ) : ( u.y > u.z ? 1 : 2 ) );
+        return ( u.x() > u.y() ? ( u.x() > u.z() ? 0 : 2 ) : ( u.y() > u.z() ? 1 : 2 ) );
     }
 
     using Normal3 = impl::Normal3< Real >;

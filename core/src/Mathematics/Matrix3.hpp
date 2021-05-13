@@ -25,60 +25,19 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Mathematics/Ray3.hpp"
+#ifndef CRIMILD_MATHEMATICS_MATRIX_3_
+#define CRIMILD_MATHEMATICS_MATRIX_3_
 
-#include "gtest/gtest.h"
-#include <sstream>
+#include "Mathematics/MatrixImpl.hpp"
 
-TEST( Ray3, construction )
-{
-    constexpr auto r = crimild::Ray3 {
-        crimild::Point3 { 10, 20, 30 },
-        crimild::Vector3 { 0, 0, -1 },
-    };
+namespace crimild {
 
-    constexpr auto o = crimild::Point3 { 10, 20, 30 };
-    constexpr auto d = crimild::Vector3 { 0, 0, -1 };
+    using Matrix3 = impl::Matrix< Real, 3 >;
+    using Matrix3f = impl::Matrix< Real32, 3 >;
+    using Matrix3d = impl::Matrix< Real64, 3 >;
+    using Matrix3i = impl::Matrix< Int32, 3 >;
+    using Matrix3ui = impl::Matrix< UInt32, 3 >;
 
-    EXPECT_EQ( o, r.getOrigin() );
-    EXPECT_EQ( d, r.getDirection() );
 }
 
-TEST( Ray3, apply )
-{
-    constexpr auto R = crimild::Ray3 {
-        crimild::Point3 { 10, 20, 30 },
-        crimild::Vector3 { 0, 0, -1 },
-    };
-
-    constexpr auto P = crimild::Point3 { 10, 20, 20 };
-
-    EXPECT_EQ( P, R( 10 ) );
-}
-
-TEST( Ray3, ostream )
-{
-    constexpr auto R = crimild::Ray3 {
-        crimild::Point3 { 10, 20, 30 },
-        crimild::Vector3 { 0, 0, -1 },
-    };
-
-    std::stringstream ss;
-    ss << R;
-
-    EXPECT_EQ( ss.str(), "[(10.000000, 20.000000, 30.000000), (0.000000, 0.000000, -1.000000)]" );
-}
-
-TEST( Ray3, constexpr )
-{
-    constexpr auto R = crimild::Ray3 {
-        crimild::Point3 { 10, 20, 30 },
-        crimild::Vector3 { 0, 0, -1 },
-    };
-
-    constexpr auto P = crimild::Point3 { 10, 20, 20 };
-
-    static_assert( P == R( 10 ), "apply" );
-
-    EXPECT_TRUE( true );
-}
+#endif

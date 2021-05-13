@@ -28,170 +28,24 @@
 #ifndef CRIMILD_MATHEMATICS_VECTOR_2_
 #define CRIMILD_MATHEMATICS_VECTOR_2_
 
-#include "Foundation/Types.hpp"
-#include "Mathematics/Numbers.hpp"
-#include "Mathematics/Utils.hpp"
+#include "Mathematics/VectorImpl.hpp"
 
 namespace crimild {
 
     template< typename T >
-    struct Vector2Impl {
-        T x = 0;
-        T y = 0;
-
-        [[nodiscard]] inline constexpr const T &operator[]( Size index ) const noexcept
-        {
-            return index == 0 ? x : y;
-        }
-    };
-
-    template< typename T >
-    [[nodiscard]] inline constexpr Bool isNaN( const Vector2Impl< T > &u ) noexcept
+    [[nodiscard]] inline constexpr impl::Vector< T, 2 > permute( const impl::Vector< T, 2 > &u, Int x, Int y ) noexcept
     {
-        return isNaN( u.x ) || isNaN( u.y );
-    }
-
-    template< typename T >
-    [[nodiscard]] inline constexpr Bool operator==( const Vector2Impl< T > &u, const Vector2Impl< T > &v ) noexcept
-    {
-        return isEqual( u.x, v.x ) && isEqual( u.y, v.y );
-    }
-
-    template< typename T >
-    [[nodiscard]] inline constexpr Bool operator!=( const Vector2Impl< T > &u, const Vector2Impl< T > &v ) noexcept
-    {
-        return !isEqual( u.x, v.x ) || !isEqual( u.y, v.y );
-    }
-
-    template< typename T, typename U >
-    [[nodiscard]] inline constexpr Vector2Impl< T > operator+( const Vector2Impl< T > &u, const Vector2Impl< U > &v ) noexcept
-    {
-        return Vector2Impl< T > {
-            .x = u.x + v.x,
-            .y = u.y + v.y,
+        return impl::Vector< T, 2 > {
+            u[ x ],
+            u[ y ],
         };
     }
 
-    template< typename T, typename U >
-    inline constexpr Vector2Impl< T > &operator+=( Vector2Impl< T > &u, const Vector2Impl< U > &v ) noexcept
-    {
-        u.x += v.x;
-        u.y += v.y;
-        return u;
-    }
-
-    template< typename T, typename U >
-    [[nodiscard]] inline constexpr Vector2Impl< T > operator-( const Vector2Impl< T > &u, const Vector2Impl< U > &v ) noexcept
-    {
-        return Vector2Impl< T > {
-            .x = u.x - v.x,
-            .y = u.y - v.y,
-        };
-    }
-
-    template< typename T, typename U >
-    inline constexpr Vector2Impl< T > &operator-=( Vector2Impl< T > &u, const Vector2Impl< U > &v ) noexcept
-    {
-        u.x -= v.x;
-        u.y -= v.y;
-        return u;
-    }
-
-    template< typename T, typename U >
-    [[nodiscard]] inline constexpr Vector2Impl< T > operator*( const Vector2Impl< T > &u, U scalar ) noexcept
-    {
-        return Vector2Impl< T > {
-            .x = u.x * scalar,
-            .y = u.y * scalar,
-        };
-    }
-
-    template< typename T, typename U >
-    [[nodiscard]] inline constexpr Vector2Impl< T > operator*( U scalar, const Vector2Impl< T > &u ) noexcept
-    {
-        return Vector2Impl< T > {
-            .x = u.x * scalar,
-            .y = u.y * scalar,
-        };
-    }
-
-    template< typename T, typename U >
-    inline constexpr Vector2Impl< T > &operator*=( Vector2Impl< T > &u, U scalar ) noexcept
-    {
-        u.x *= scalar;
-        u.y *= scalar;
-        return u;
-    }
-
-    template< typename T, typename U >
-    [[nodiscard]] inline constexpr Vector2Impl< T > operator*( const Vector2Impl< T > &u, const Vector2Impl< U > &v ) noexcept
-    {
-        return Vector2Impl< T > {
-            .x = u.x * v.x,
-            .y = u.y * v.y,
-        };
-    }
-
-    template< typename T, typename U >
-    inline constexpr Vector2Impl< T > &operator*( Vector2Impl< T > &u, const Vector2Impl< U > &v ) noexcept
-    {
-        u.x *= v.x;
-        u.y *= v.y;
-        return u;
-    }
-
-    template< typename T, typename U >
-    [[nodiscard]] inline constexpr Vector2Impl< T > operator/( const Vector2Impl< T > &u, U scalar ) noexcept
-    {
-        return Vector2Impl< T > {
-            .x = u.x / scalar,
-            .y = u.y / scalar,
-        };
-    }
-
-    template< typename T, typename U >
-    inline constexpr Vector2Impl< T > &operator/=( Vector2Impl< T > &u, U scalar ) noexcept
-    {
-        u.x /= scalar;
-        u.y /= scalar;
-        return u;
-    }
-
-    template< typename T >
-    inline constexpr Vector2Impl< T > operator-( const Vector2Impl< T > &u ) noexcept
-    {
-        return Vector2Impl< T > {
-            .x = -u.x,
-            .y = -u.y,
-        };
-    }
-
-    template< typename T >
-    [[nodiscard]] inline constexpr Vector2Impl< T > abs( const Vector2Impl< T > &u ) noexcept
-    {
-        return Vector2Impl< T > {
-            .x = abs( u.x ),
-            .y = abs( u.y ),
-        };
-    }
-
-    template< typename T, typename U >
-    [[nodiscard]] inline constexpr T dot( const Vector2Impl< T > &u, const Vector2Impl< U > &v ) noexcept
-    {
-        return u.x * v.x + u.y * v.y;
-    }
-
-    template< typename T, typename U >
-    [[nodiscard]] inline constexpr T absDot( const Vector2Impl< T > &u, const Vector2Impl< U > &v ) noexcept
-    {
-        return abs( dot( u, v ) );
-    }
-
-    using Vector2 = Vector2Impl< Real >;
-    using Vector2f = Vector2Impl< Real32 >;
-    using Vector2d = Vector2Impl< Real64 >;
-    using Vector2i = Vector2Impl< Int32 >;
-    using Vector2ui = Vector2Impl< UInt32 >;
+    using Vector2 = impl::Vector< Real, 2 >;
+    using Vector2f = impl::Vector< Real32, 2 >;
+    using Vector2d = impl::Vector< Real64, 2 >;
+    using Vector2i = impl::Vector< Int32, 2 >;
+    using Vector2ui = impl::Vector< UInt32, 2 >;
 
 }
 

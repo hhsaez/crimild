@@ -75,6 +75,9 @@ namespace crimild {
 
     using Byte = UInt8;
 
+    using Radians = Real;
+    using Degrees = Real;
+
 }
 
 #endif

@@ -33,13 +33,10 @@ using namespace crimild;
 
 TEST( Vector2, construction )
 {
-    constexpr auto u = Vector2 {
-        .x = 10,
-        .y = 20,
-    };
+    constexpr auto u = Vector2 { 10, 20 };
 
-    EXPECT_EQ( 10, u.x );
-    EXPECT_EQ( 20, u.y );
+    EXPECT_EQ( 10, u.x() );
+    EXPECT_EQ( 20, u.y() );
 }
 
 TEST( Vector2, index )
@@ -70,24 +67,14 @@ TEST( Vector2, addition )
     EXPECT_EQ( res, u + v );
 }
 
-TEST( Vector2, additionAssignment )
-{
-    auto u = Vector2 { 10, 20 };
-    constexpr auto v = Vector2 { 30, 40 };
-    u += v;
-    constexpr auto res = Vector2 { 40, 60 };
-
-    EXPECT_EQ( res, u );
-}
-
 TEST( Vector2, additionWithDifferentTypes )
 {
     constexpr auto u = Vector2f { 10, 20 };
     constexpr auto v = Vector2i { 30, 40 };
     constexpr auto w = u + v;
 
-    EXPECT_EQ( 40, w.x );
-    EXPECT_EQ( 60, w.y );
+    EXPECT_EQ( 40, w.x() );
+    EXPECT_EQ( 60, w.y() );
 }
 
 TEST( Vector2, subtraction )
@@ -99,17 +86,6 @@ TEST( Vector2, subtraction )
     EXPECT_EQ( res, u - v );
 }
 
-TEST( Vector2, subtractionAssignment )
-{
-    auto u = Vector2 { 10, 20 };
-    constexpr auto v = Vector2 { 30, 40 };
-    constexpr auto res = Vector2 { -20, -20 };
-
-    u -= v;
-
-    EXPECT_EQ( res, u );
-}
-
 TEST( Vector2, multiplication )
 {
     constexpr auto u = Vector2 { 10, 20 };
@@ -118,17 +94,6 @@ TEST( Vector2, multiplication )
 
     EXPECT_EQ( res, u * s );
     EXPECT_EQ( res, s * u );
-}
-
-TEST( Vector2, multiplicationAssignment )
-{
-    auto u = Vector2 { 10, 20 };
-    constexpr auto s = Real( 5 );
-    constexpr auto res = Vector2 { 50, 100 };
-
-    u *= s;
-
-    EXPECT_EQ( res, u );
 }
 
 TEST( Vector2, vectorMultiplication )
@@ -147,17 +112,6 @@ TEST( Vector2, division )
     constexpr auto res = Vector2 { 5, 10 };
 
     EXPECT_EQ( res, u / s );
-}
-
-TEST( Vector2, divisionAssignment )
-{
-    auto u = Vector2 { 10, 20 };
-    constexpr auto s = Real( 2 );
-    constexpr auto res = Vector2 { 5, 10 };
-
-    u /= s;
-
-    EXPECT_EQ( res, u );
 }
 
 TEST( Vector2, negation )
@@ -225,7 +179,7 @@ TEST( Vector2, constexpr )
     static_assert( Vector2 { -10, -20 } == -u, "negation" );
 
     static_assert( isNaN( u ) == false, "isNaN" );
-    static_assert( isNaN( Vector2 { .x = NAN, .y = NAN } ) == true, "isNaN" );
+    static_assert( isNaN( Vector2 { NAN, NAN } ) == true, "isNaN" );
 
     static_assert( Vector2 { 10, 20 } == abs( Vector2 { -10, -20 } ), "abs" );
 

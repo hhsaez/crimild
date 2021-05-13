@@ -27,20 +27,18 @@
 
 #include "Mathematics/Point3.hpp"
 
+#include "Mathematics/Vector3.hpp"
+
 #include "gtest/gtest.h"
 #include <sstream>
 
 TEST( Point3, construction )
 {
-    constexpr auto u = crimild::Point3 {
-        .x = 10,
-        .y = 20,
-        .z = 30,
-    };
+    constexpr auto u = crimild::Point3 { 10, 20, 30 };
 
-    EXPECT_EQ( 10, u.x );
-    EXPECT_EQ( 20, u.y );
-    EXPECT_EQ( 30, u.z );
+    EXPECT_EQ( 10, u.x() );
+    EXPECT_EQ( 20, u.y() );
+    EXPECT_EQ( 30, u.z() );
 }
 
 TEST( Point3, index )
@@ -72,25 +70,15 @@ TEST( Point3, vectorAddition )
     EXPECT_EQ( res, p + v );
 }
 
-TEST( Point3, additionAssignment )
-{
-    auto p = crimild::Point3 { 10, 20, 30 };
-    constexpr auto v = crimild::Vector3 { 30, 40, 50 };
-    p += v;
-    constexpr auto res = crimild::Point3 { 40, 60, 80 };
-
-    EXPECT_EQ( res, p );
-}
-
 TEST( Point3, additionWithDifferentTypes )
 {
     constexpr auto u = crimild::Point3f { 10, 20, 30 };
     constexpr auto v = crimild::Vector3i { 30, 40, 50 };
     constexpr auto w = u + v;
 
-    EXPECT_EQ( 40, w.x );
-    EXPECT_EQ( 60, w.y );
-    EXPECT_EQ( 80, w.z );
+    EXPECT_EQ( 40, w.x() );
+    EXPECT_EQ( 60, w.y() );
+    EXPECT_EQ( 80, w.z() );
 }
 
 TEST( Point3, subtraction )
@@ -109,17 +97,6 @@ TEST( Point3, vectorSubtraction )
     constexpr auto res = crimild::Point3 { -20, -20, -20 };
 
     EXPECT_EQ( res, u - v );
-}
-
-TEST( Point3, vectorSubtractionAssignment )
-{
-    auto u = crimild::Point3 { 10, 20, 30 };
-    constexpr auto v = crimild::Vector3 { 30, 40, 50 };
-    constexpr auto res = crimild::Point3 { -20, -20, -20 };
-
-    u -= v;
-
-    EXPECT_EQ( res, u );
 }
 
 TEST( Point3, isNaN )
@@ -233,7 +210,7 @@ TEST( Point3, constexpr )
     static_assert( crimild::Vector3 { -20, -20, -20 } == ( crimild::Point3 { 20, 20, 20 } - crimild::Point3 { 40, 40, 40 } ), "subtraction" );
 
     static_assert( crimild::isNaN( crimild::Point3 { 10, 20, 30 } ) == false, "isNaN" );
-    static_assert( crimild::isNaN( crimild::Point3 { .x = NAN, .y = NAN, .z = NAN } ) == true, "isNaN" );
+    static_assert( crimild::isNaN( crimild::Point3 { NAN, NAN, NAN } ) == true, "isNaN" );
 
     static_assert( crimild::Point3 { 10, 20, 30 } == crimild::abs( crimild::Point3 { -10, -20, -30 } ), "abs" );
 
