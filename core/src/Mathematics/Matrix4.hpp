@@ -40,24 +40,43 @@ namespace crimild {
 
     [[nodiscard]] constexpr Matrix4 ortho( Real l, Real r, Real b, Real t, Real n, Real f ) noexcept
     {
+        // clang-format off
         return Matrix4 {
-            Real( 2 ) / ( r - l ),
-            0,
-            0,
-            -( r + l ) / ( r - l ),
-            0,
-            Real( 2 ) / ( t - b ),
-            0,
-            -( t + b ) / ( t - b ),
-            0,
-            0,
-            Real( 2 ) / ( f - n ),
-            -( f + n ) / ( f - n ),
-            0,
-            0,
-            0,
-            1,
+            Real( 2 ) / ( r - l ), 0, 0, -( r + l ) / ( r - l ),
+            0, Real( 2 ) / ( t - b ), 0, -( t + b ) / ( t - b ),
+            0, 0, Real( 2 ) / ( f - n ), -( f + n ) / ( f - n ) ,
+            0, 0, 0, 1,
         };
+        // clang-format on
+    }
+
+    [[nodiscard]] constexpr Matrix4 perspective( Real l, Real r, Real b, Real t, Real n, Real f ) noexcept
+    {
+        // clang-format off
+        return Matrix4 {
+            Real( 2 ) * n / ( r - l ), 0, ( r + l ) / ( r - l ), 0,
+            0, Real( 2 ) * n / ( t - b ), ( t + b ) / ( t - b ), 0,
+            0, 0, -( f + n ) / ( f - n ), - Real( 2 ) * f * n / ( f - n ),
+            0, 0, -1, 0,
+        };
+        // clang-format on
+    }
+
+    // TODO: make this function constexpr
+    [[nodiscard]] static Matrix4 perspective( Real fov, Real a, Real n, Real f ) noexcept
+    {
+        // fov: vertical field of view
+
+        const auto c = Real( 1 ) / tan( Real( 0.5 ) * fov );
+
+        // clang-format off
+        return Matrix4 {
+            c / a, 0, 0, 0,
+            0, c, 0, 0,
+            0, 0, ( f + n ) / ( f - n ), -Real( 2 ) * f * n / ( f - n ),
+            0, 0, -1, 0,
+        };
+        // clang-format on
     }
 
 }
