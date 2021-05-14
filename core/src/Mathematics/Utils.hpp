@@ -156,6 +156,12 @@ namespace crimild {
         return std::sin( rad );
     }
 
+    // TODO: Make this function constexpr
+    [[nodiscard]] inline Real tan( Radians rad ) noexcept
+    {
+        return std::tan( rad );
+    }
+
 }
 
 #endif
