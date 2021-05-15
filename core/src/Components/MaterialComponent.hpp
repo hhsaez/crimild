@@ -83,19 +83,6 @@ namespace crimild {
         virtual void decode( coding::Decoder &decoder ) override;
 
         //@}
-
-        /**
-			\name Streaming support
-			\deprecated see crimild::Coding
-		*/
-        //@{
-
-    public:
-        bool registerInStream( Stream &s ) override;
-        void save( Stream &s ) override;
-        void load( Stream &s ) override;
-
-        //@}
     };
 
 }

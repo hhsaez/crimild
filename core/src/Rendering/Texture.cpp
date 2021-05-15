@@ -34,8 +34,6 @@
 #include "Rendering/ImageView.hpp"
 #include "Rendering/Sampler.hpp"
 
-CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::Texture )
-
 using namespace crimild;
 
 SharedPointer< Texture > Texture::fromRGBANoise( UInt32 size ) noexcept

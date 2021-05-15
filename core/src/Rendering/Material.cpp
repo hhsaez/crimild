@@ -26,111 +26,51 @@
  */
 
 #include "Material.hpp"
-#include "Coding/Encoder.hpp"
-#include "Coding/Decoder.hpp"
 
-CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::Material )
+#include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
 
 using namespace crimild;
 
 Material::Material( void ) noexcept
-	: _ambient( 0.0f, 0.0f, 0.0f, 1.0f ),
-	  _diffuse( 1.0f, 1.0f, 1.0f, 1.0f ),
-	  _specular( 1.0f, 1.0f, 1.0f, 1.0f ),
-	  _shininess( 50.0f ),
-	  _emissive( 0.0f ),
+    : _ambient( 0.0f, 0.0f, 0.0f, 1.0f ),
+      _diffuse( 1.0f, 1.0f, 1.0f, 1.0f ),
+      _specular( 1.0f, 1.0f, 1.0f, 1.0f ),
+      _shininess( 50.0f ),
+      _emissive( 0.0f ),
       //_depthState( crimild::alloc< DepthState >( true ) ),
       //_alphaState( crimild::alloc< AlphaState >( false ) ),
       //_cullFaceState( crimild::alloc< CullFaceState >( true, CullFaceState::CullFaceMode::BACK ) ),
       _colorMaskState( crimild::alloc< ColorMaskState >( true, true, true, true, true ) )
 {
-
 }
 
 void Material::encode( coding::Encoder &encoder )
 {
-	Codable::encode( encoder );
+    Codable::encode( encoder );
 
-	encoder.encode( "ambient", _ambient );
-	encoder.encode( "diffuse", _diffuse );
-	encoder.encode( "specular", _specular );
-	encoder.encode( "emissive", _emissive );
-	encoder.encode( "shininess", _shininess );
-	encoder.encode( "colorMap", _colorMap );
-	encoder.encode( "normalMap", _normalMap );
-	encoder.encode( "specularMap", _specularMap );
-	encoder.encode( "emissiveMap", _emissiveMap );
+    encoder.encode( "ambient", _ambient );
+    encoder.encode( "diffuse", _diffuse );
+    encoder.encode( "specular", _specular );
+    encoder.encode( "emissive", _emissive );
+    encoder.encode( "shininess", _shininess );
+    encoder.encode( "colorMap", _colorMap );
+    encoder.encode( "normalMap", _normalMap );
+    encoder.encode( "specularMap", _specularMap );
+    encoder.encode( "emissiveMap", _emissiveMap );
 }
 
 void Material::decode( coding::Decoder &decoder )
 {
-	Codable::decode( decoder );
+    Codable::decode( decoder );
 
-	decoder.decode( "ambient", _ambient );
-	decoder.decode( "diffuse", _diffuse );
-	decoder.decode( "specular", _specular );
-	decoder.decode( "emissive", _emissive );
-	decoder.decode( "shininess", _shininess );
+    decoder.decode( "ambient", _ambient );
+    decoder.decode( "diffuse", _diffuse );
+    decoder.decode( "specular", _specular );
+    decoder.decode( "emissive", _emissive );
+    decoder.decode( "shininess", _shininess );
     decoder.decode( "colorMap", _colorMap );
-	decoder.decode( "normalMap", _normalMap );
-	decoder.decode( "specularMap", _specularMap );
-	decoder.decode( "emissiveMap", _emissiveMap );
-}
-
-bool Material::registerInStream( Stream &s )
-{
-	if ( !StreamObject::registerInStream( s ) ) {
-		return false;
-	}
-
-	if ( getColorMap() != nullptr ) {
-		getColorMap()->registerInStream( s );
-	}
-
-	if ( getNormalMap() != nullptr ) {
-		getNormalMap()->registerInStream( s );
-	}
-
-	if ( getSpecularMap() != nullptr ) {
-		getSpecularMap()->registerInStream( s );
-	}
-
-	if ( getEmissiveMap() != nullptr ) {
-		getEmissiveMap()->registerInStream( s );
-	}
-
-	return true;
-}
-
-void Material::save( Stream &s )
-{
-	StreamObject::save( s );
-
-	s.write( _ambient );
-	s.write( _diffuse );
-	s.write( _specular );
-	s.write( _emissive );
-	s.write( _shininess );
-
-	s.write( _colorMap );
-	s.write( _normalMap );
-	s.write( _specularMap );
-	s.write( _emissiveMap );
-}
-
-void Material::load( Stream &s )
-{
-	StreamObject::load( s );
-
-	s.read( _ambient );
-	s.read( _diffuse );
-	s.read( _specular );
-	s.read( _emissive );
-	s.read( _shininess );
-
-	s.read( _colorMap );
-	s.read( _normalMap );
-	s.read( _specularMap );
-	s.read( _emissiveMap );
-
+    decoder.decode( "normalMap", _normalMap );
+    decoder.decode( "specularMap", _specularMap );
+    decoder.decode( "emissiveMap", _emissiveMap );
 }

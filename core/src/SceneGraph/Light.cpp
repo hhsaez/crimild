@@ -29,6 +29,7 @@
 
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
+#include "Foundation/Log.hpp"
 #include "Mathematics/Frustum.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/ShadowMap.hpp"

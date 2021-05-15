@@ -33,6 +33,8 @@
 #include "Rendering/RenderPass.hpp"
 #include "Rendering/Swapchain.hpp"
 
+#include <sstream>
+
 namespace crimild {
 
     class Texture;

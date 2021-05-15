@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,8 +35,6 @@
 #include <algorithm>
 #include <cassert>
 #include <thread>
-
-CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::Group )
 
 using namespace crimild;
 
@@ -139,41 +137,4 @@ void Group::decode( coding::Decoder &decoder )
     nodes.each( [ this ]( SharedPointer< Node > &n ) {
         attachNode( n );
     } );
-}
-
-bool Group::registerInStream( Stream &s )
-{
-    if ( !Node::registerInStream( s ) ) {
-        return false;
-    }
-
-    forEachNode( [ &s ]( Node *node ) {
-        if ( node != nullptr ) {
-            node->registerInStream( s );
-        }
-    } );
-
-    return true;
-}
-
-void Group::save( Stream &s )
-{
-    Node::save( s );
-
-    std::vector< SharedPointer< Node > > ns;
-    forEachNode( [ &ns ]( Node *n ) {
-        ns.push_back( crimild::retain( n ) );
-    } );
-    s.write( ns );
-}
-
-void Group::load( Stream &s )
-{
-    Node::load( s );
-
-    std::vector< SharedPointer< Node > > nodes;
-    s.read( nodes );
-    for ( auto &n : nodes ) {
-        attachNode( n );
-    }
 }

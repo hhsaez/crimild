@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,45 +28,42 @@
 #ifndef CRIMILD_NAVIGATION_CELL_EDGE_
 #define CRIMILD_NAVIGATION_CELL_EDGE_
 
-#include "Foundation/Memory.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/RTTI.hpp"
 #include "Coding/Codable.hpp"
-#include "Streaming/Stream.hpp"
-
+#include "Foundation/Memory.hpp"
+#include "Foundation/RTTI.hpp"
+#include "Foundation/SharedObject.hpp"
 #include "Mathematics/LineSegment.hpp"
 
 namespace crimild {
 
-	namespace navigation {
+    namespace navigation {
 
-		class NavigationCell;
+        class NavigationCell;
 
-        class NavigationCellEdge : public coding::Codable, public StreamObject {
-			CRIMILD_IMPLEMENT_RTTI( crimild::navigation::NavigationCellEdge )
+        class NavigationCellEdge : public coding::Codable {
+            CRIMILD_IMPLEMENT_RTTI( crimild::navigation::NavigationCellEdge )
 
-		public:
-			NavigationCellEdge( const LineSegment3f &line );
-			virtual ~NavigationCellEdge( void );
+        public:
+            NavigationCellEdge( const LineSegment3f &line );
+            virtual ~NavigationCellEdge( void );
 
-			inline LineSegment3f &getLine( void ) { return _line; }
-			inline const LineSegment3f &getLine( void ) const { return _line; }
+            inline LineSegment3f &getLine( void ) { return _line; }
+            inline const LineSegment3f &getLine( void ) const { return _line; }
 
-			inline NavigationCell *getNeighbor( void ) { return _neighbor; }
-			void setNeighbor( NavigationCell *neighbor ) { _neighbor = neighbor; }
+            inline NavigationCell *getNeighbor( void ) { return _neighbor; }
+            void setNeighbor( NavigationCell *neighbor ) { _neighbor = neighbor; }
 
-			LineSegment3f projectPath( const LineSegment3f &path ) const;
+            LineSegment3f projectPath( const LineSegment3f &path ) const;
 
-		private:
-			LineSegment3f _line;
-			NavigationCell *_neighbor = nullptr;
-		};
+        private:
+            LineSegment3f _line;
+            NavigationCell *_neighbor = nullptr;
+        };
 
-		using NavigationCellEdgePtr = SharedPointer< NavigationCellEdge >;
+        using NavigationCellEdgePtr = SharedPointer< NavigationCellEdge >;
 
-	}
+    }
 
 }
 
 #endif
-

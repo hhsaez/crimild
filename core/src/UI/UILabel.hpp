@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002-present, H. Hernán Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -29,70 +29,69 @@
 #define CRIMILD_UI_LABEL_
 
 #include "Components/NodeComponent.hpp"
+#include "Mathematics/Vector.hpp"
 
 namespace crimild {
 
-	class Text;
-	
-	namespace ui {
+    class Text;
 
-		class UIFrame;
+    namespace ui {
 
-		class UILabel : public NodeComponent {
-			CRIMILD_IMPLEMENT_RTTI( crimild::ui::UILabel )
+        class UIFrame;
 
-		public:
-			enum class TextHorizontalAlignment {
-				Left,
-				Center,
-				Right,
-			};
+        class UILabel : public NodeComponent {
+            CRIMILD_IMPLEMENT_RTTI( crimild::ui::UILabel )
 
-			enum class TextVerticalAlignment {
-				Top,
-				Center,
-				Bottom,
-			};
+        public:
+            enum class TextHorizontalAlignment {
+                Left,
+                Center,
+                Right,
+            };
 
-		public:
-			UILabel( void );
-			UILabel( std::string text, const RGBAColorf &color = RGBAColorf::ONE );
-			~UILabel( void ) = default;
+            enum class TextVerticalAlignment {
+                Top,
+                Center,
+                Bottom,
+            };
 
-			virtual void onAttach( void ) override;
-			virtual void start( void ) override;
-			virtual void update( const Clock & ) override;
+        public:
+            UILabel( void );
+            UILabel( std::string text, const RGBAColorf &color = RGBAColorf::ONE );
+            ~UILabel( void ) = default;
 
-			void setText( std::string text );
+            virtual void onAttach( void ) override;
+            virtual void start( void ) override;
+            virtual void update( const Clock & ) override;
 
-			void setTextHorizontalAlignment( TextHorizontalAlignment value ) { _textHorizontalAlignment = value; }
-			TextHorizontalAlignment getTextHorizontalAlignment( void ) const { return _textHorizontalAlignment; }
+            void setText( std::string text );
 
-			void setTextVerticalAlignment( TextVerticalAlignment value ) { _textVerticalAlignment = value; }
-			TextVerticalAlignment getTextVerticalAlignment( void ) const { return _textVerticalAlignment; }
+            void setTextHorizontalAlignment( TextHorizontalAlignment value ) { _textHorizontalAlignment = value; }
+            TextHorizontalAlignment getTextHorizontalAlignment( void ) const { return _textHorizontalAlignment; }
 
-			void setTextColor( const RGBAColorf &value ) { _textColor = value; }
-			const RGBAColorf &getTextColor( void ) const { return _textColor; }
-			
-			void setTextSize( crimild::Real32 value ) { _textSize = value; }
-			crimild::Real32 getTextSize( void ) const { return _textSize; }
+            void setTextVerticalAlignment( TextVerticalAlignment value ) { _textVerticalAlignment = value; }
+            TextVerticalAlignment getTextVerticalAlignment( void ) const { return _textVerticalAlignment; }
 
-		private:
-			UIFrame *_frame = nullptr;
-			SharedPointer< Text > _text = nullptr;
-			TextHorizontalAlignment _textHorizontalAlignment = TextHorizontalAlignment::Left;
-			TextVerticalAlignment _textVerticalAlignment = TextVerticalAlignment::Center;
-			RGBAColorf _textColor;
-			crimild::Real32 _textSize = 10.0f;
+            void setTextColor( const RGBAColorf &value ) { _textColor = value; }
+            const RGBAColorf &getTextColor( void ) const { return _textColor; }
 
-		public:
-			void decode( coding::Decoder &decoder ) override;
-		};
+            void setTextSize( crimild::Real32 value ) { _textSize = value; }
+            crimild::Real32 getTextSize( void ) const { return _textSize; }
 
-	}
+        private:
+            UIFrame *_frame = nullptr;
+            SharedPointer< Text > _text = nullptr;
+            TextHorizontalAlignment _textHorizontalAlignment = TextHorizontalAlignment::Left;
+            TextVerticalAlignment _textVerticalAlignment = TextVerticalAlignment::Center;
+            RGBAColorf _textColor;
+            crimild::Real32 _textSize = 10.0f;
+
+        public:
+            void decode( coding::Decoder &decoder ) override;
+        };
+
+    }
 
 }
 
 #endif
-
-

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,10 +26,10 @@
  */
 
 #include "Rendering/SkinnedMesh.hpp"
-#include "Coding/MemoryEncoder.hpp"
+
 #include "Coding/MemoryDecoder.hpp"
-#include "Streaming/FileStream.hpp"
- 
+#include "Coding/MemoryEncoder.hpp"
+
 #include "gtest/gtest.h"
 
 using namespace crimild;
@@ -50,7 +50,7 @@ TEST( SkinnedMeshJoint, coding )
 
 	auto decodedJoint = decoder->getObjectAt< SkinnedMeshJoint >( 0 );
 	EXPECT_TRUE( decodedJoint != nullptr );
-		
+
 	EXPECT_EQ( joint->getId(), decodedJoint->getId() );
 	EXPECT_EQ( joint->getOffset().getTranslate(), decodedJoint->getOffset().getTranslate() );
 	EXPECT_EQ( joint->getName(), decodedJoint->getName() );
@@ -72,10 +72,10 @@ TEST( SkinnedMesh, streamSkinnedMeshJoint )
 		FileStream is( "skinnedMesh.crimild", FileStream::OpenMode::READ );
 		EXPECT_TRUE( is.load() );
 		EXPECT_EQ( 1, is.getObjectCount() );
-		
+
 		auto obj1 = is.getObjectAt< SkinnedMeshJoint >( 0 );
 		EXPECT_TRUE( joint != nullptr );
-		
+
 		EXPECT_EQ( 5, joint->getId() );
 		EXPECT_EQ( Vector3f( 1.0f, 2.0f, 3.0f ), joint->getOffset().getTranslate() );
 		EXPECT_EQ( "aJoint", joint->getName() );
@@ -99,10 +99,10 @@ TEST( SkinnedMeshJointCatalog, coding )
 	auto bytes = encoder->getBytes();
 	auto decoder = crimild::alloc< coding::MemoryDecoder >();
 	decoder->fromBytes( bytes );
-	
+
 	auto decodedCatalog = decoder->getObjectAt< SkinnedMeshJointCatalog >( 0 );
 	EXPECT_TRUE( decodedCatalog != nullptr );
-	
+
 	EXPECT_EQ( 7, decodedCatalog->getJointCount() );
 	EXPECT_EQ( 6, decodedCatalog->find( "joint1" )->getId() );
 	EXPECT_EQ( 0, decodedCatalog->find( "joint2" )->getId() );
@@ -135,10 +135,10 @@ TEST( SkinnedMesh, streamSkinnedMeshJointCatalog )
 		FileStream is( "skinnedMesh.crimild", FileStream::OpenMode::READ );
 		EXPECT_TRUE( is.load() );
 		EXPECT_EQ( 1, is.getObjectCount() );
-		
+
 		auto catalog = is.getObjectAt< SkinnedMeshJointCatalog >( 0 );
 		EXPECT_TRUE( catalog != nullptr );
-		
+
 		EXPECT_EQ( 7, catalog->getJointCount() );
 		EXPECT_EQ( 6, catalog->find( "joint1" )->getId() );
 		EXPECT_EQ( 0, catalog->find( "joint2" )->getId() );
@@ -178,13 +178,13 @@ TEST( SkinnedMeshAnimationChannel, coding )
 	channel->getScaleKeys()[ 1 ].value = 2;
 	channel->getScaleKeys()[ 2 ].time = 10;
 	channel->getScaleKeys()[ 2 ].value = 3;
-	
+
 	auto encoder = crimild::alloc< coding::MemoryEncoder >();
 	encoder->encode( channel );
 	auto bytes = encoder->getBytes();
 	auto decoder = crimild::alloc< coding::MemoryDecoder >();
 	decoder->fromBytes( bytes );
-	
+
 	auto decodedChannel = decoder->getObjectAt< SkinnedMeshAnimationChannel >( 0 );
 	EXPECT_TRUE( decodedChannel != nullptr );
 
@@ -205,7 +205,7 @@ TEST( SkinnedMeshAnimationChannel, coding )
 	EXPECT_EQ( Quaternion4f( 1.0f, 4.0f, 3.0f, 6.0f ), decodedChannel->getRotationKeys()[ 1 ].value );
 	EXPECT_EQ( 10, decodedChannel->getRotationKeys()[ 2 ].time );
 	EXPECT_EQ( Quaternion4f( 1.0f, 2.0f, 3.0f, 4.0f ), decodedChannel->getRotationKeys()[ 2 ].value );
-	
+
 	EXPECT_EQ( 3, decodedChannel->getScaleKeys().size() );
 	EXPECT_EQ( 0, decodedChannel->getScaleKeys()[ 0 ].time );
 	EXPECT_EQ( 1, decodedChannel->getScaleKeys()[ 0 ].value );
@@ -254,7 +254,7 @@ TEST( SkinnedMesh, streamSkinnedMeshAnimationChannel )
 		FileStream is( "skinnedMesh.crimild", FileStream::OpenMode::READ );
 		EXPECT_TRUE( is.load() );
 		EXPECT_EQ( 1, is.getObjectCount() );
-		
+
 		auto channel = is.getObjectAt< SkinnedMeshAnimationChannel >( 0 );
 		EXPECT_TRUE( channel != nullptr );
 
@@ -291,31 +291,31 @@ TEST( SkinnedMeshAnimationClip, coding )
 	auto clip = crimild::alloc< SkinnedMeshAnimationClip >();
 	clip->setDuration( 50.0f );
 	clip->setFrameRate( 24.0f );
-	
+
 	auto ankleChannel = crimild::alloc< SkinnedMeshAnimationChannel >();
 	ankleChannel->setName( "L_Ankle" );
 	clip->getChannels().add( ankleChannel->getName(), ankleChannel );
-	
+
 	auto armChannel = crimild::alloc< SkinnedMeshAnimationChannel >();
 	armChannel->setName( "R_Arm" );
 	clip->getChannels().add( armChannel->getName(), armChannel );
-	
+
 	auto bodyChannel = crimild::alloc< SkinnedMeshAnimationChannel >();
 	bodyChannel->setName( "Body" );
 	clip->getChannels().add( bodyChannel->getName(), bodyChannel );
-	
+
 	auto encoder = crimild::alloc< coding::MemoryEncoder >();
 	encoder->encode( clip );
 	auto bytes = encoder->getBytes();
 	auto decoder = crimild::alloc< coding::MemoryDecoder >();
 	decoder->fromBytes( bytes );
-	
+
 	auto decodedClip = decoder->getObjectAt< SkinnedMeshAnimationClip >( 0 );
 	EXPECT_TRUE( decodedClip != nullptr );
-	
+
 	EXPECT_EQ( 50.0f, decodedClip->getDuration() );
 	EXPECT_EQ( 24.0f, decodedClip->getFrameRate() );
-	
+
 	EXPECT_EQ( 3, decodedClip->getChannels().size() );
 	EXPECT_EQ( "L_Ankle", decodedClip->getChannels()[ "L_Ankle" ]->getName() );
 	EXPECT_EQ( "R_Arm", decodedClip->getChannels()[ "R_Arm" ]->getName() );
@@ -350,7 +350,7 @@ TEST( SkinnedMesh, streamSkinnedMeshAnimationClip )
 		FileStream is( "skinnedMesh.crimild", FileStream::OpenMode::READ );
 		EXPECT_TRUE( is.load() );
 		EXPECT_EQ( 1, is.getObjectCount() );
-		
+
 		auto clip = is.getObjectAt< SkinnedMeshAnimationClip >( 0 );
 		EXPECT_TRUE( clip != nullptr );
 
@@ -371,15 +371,15 @@ TEST( SkinnedMeshSkeleton, coding )
 	skeleton->getClips().add( crimild::alloc< SkinnedMeshAnimationClip >() );
 	skeleton->getClips().add( crimild::alloc< SkinnedMeshAnimationClip >() );
 	skeleton->getClips().add( crimild::alloc< SkinnedMeshAnimationClip >() );
-	
+
 	Transformation offset;
 	skeleton->getJoints()->updateOrCreateJoint( "joint2", offset );
 	skeleton->getJoints()->updateOrCreateJoint( "joint3", offset );
-	
+
 	Transformation t;
 	t.setTranslate( 0.0f, 1.0f, 3.0f );
 	skeleton->setGlobalInverseTransform( t );
-	
+
 	auto encoder = crimild::alloc< coding::MemoryEncoder >();
 	encoder->encode( skeleton );
 	auto bytes = encoder->getBytes();
@@ -423,7 +423,7 @@ TEST( SkinnedMesh, streamSkinnedMeshSkeleton )
 		FileStream is( "skinnedMesh.crimild", FileStream::OpenMode::READ );
 		EXPECT_TRUE( is.load() );
 		EXPECT_EQ( 1, is.getObjectCount() );
-		
+
 		auto skeleton = is.getObjectAt< SkinnedMeshSkeleton >( 0 );
 		EXPECT_TRUE( skeleton != nullptr );
 
@@ -442,7 +442,7 @@ TEST( SkinnedMeshAnimationState, coding )
 	state->getJointPoses().add( Matrix4f() );
 	state->getJointPoses().add( Matrix4f() );
 	state->getJointPoses().add( Matrix4f() );
-	
+
 	auto encoder = crimild::alloc< coding::MemoryEncoder >();
 	encoder->encode( state );
 	auto bytes = encoder->getBytes();
@@ -471,7 +471,7 @@ TEST( SkinnedMesh, streamSkinnedMeshAnimationState )
 		FileStream is( "skinnedMesh.crimild", FileStream::OpenMode::READ );
 		EXPECT_TRUE( is.load() );
 		EXPECT_EQ( 1, is.getObjectCount() );
-		
+
 		auto state = is.getObjectAt< SkinnedMeshAnimationState >( 0 );
 		EXPECT_TRUE( state != nullptr );
 
@@ -483,12 +483,12 @@ TEST( SkinnedMesh, coding )
 {
 	auto skinnedMesh = crimild::alloc< SkinnedMesh >();
 	skinnedMesh->setSkeleton( crimild::alloc< SkinnedMeshSkeleton >() );
-	
+
 	auto state = skinnedMesh->getAnimationState();
 	state->getJointPoses().add( Matrix4f() );
 	state->getJointPoses().add( Matrix4f() );
 	state->getJointPoses().add( Matrix4f() );
-	
+
 	auto encoder = crimild::alloc< coding::MemoryEncoder >();
 	encoder->encode( skinnedMesh );
 	auto bytes = encoder->getBytes();
@@ -521,7 +521,7 @@ TEST( SkinnedMesh, streamSkinnedMesh )
 		FileStream is( "skinnedMesh.crimild", FileStream::OpenMode::READ );
 		EXPECT_TRUE( is.load() );
 		EXPECT_EQ( 1, is.getObjectCount() );
-		
+
 		auto skinnedMesh = is.getObjectAt< SkinnedMesh >( 0 );
 		EXPECT_TRUE( skinnedMesh != nullptr );
 
@@ -531,4 +531,3 @@ TEST( SkinnedMesh, streamSkinnedMesh )
 }
 
 #endif
-

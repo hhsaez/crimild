@@ -26,16 +26,15 @@
  */
 
 #include "Primitive.hpp"
-#include "Coding/Encoder.hpp"
-#include "Coding/Decoder.hpp"
 
-CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::Primitive )
+#include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
 
 using namespace crimild;
 
 Primitive::Primitive( Primitive::Type type )
 {
-	_type = type;
+    _type = type;
 }
 
 void Primitive::encode( coding::Encoder &encoder )
@@ -116,110 +115,4 @@ void Primitive::decode( coding::Decoder &decoder )
 
     decoder.decode( "vertexData", m_vertexData );
     decoder.decode( "indices", m_indices );
-}
-
-bool Primitive::registerInStream( Stream &s )
-{
-    assert( false );
-    /*
-	if ( !StreamObject::registerInStream( s ) ) {
-		return false;
-	}
-
-	if ( getVertexBuffer() != nullptr ) {
-		getVertexBuffer()->registerInStream( s );
-	}
-
-	if ( getIndexBuffer() != nullptr ) {
-		getIndexBuffer()->registerInStream( s );
-	}
-    */
-
-	return true;
-}
-
-void Primitive::save( Stream &s )
-{
-    /*
-	StreamObject::save( s );
-
-	int type;
-	switch ( _type ) {
-		case Primitive::Type::POINTS:
-			type = 0;
-			break;
-
-		case Primitive::Type::LINES:
-			type = 1;
-			break;
-
-		case Primitive::Type::LINE_LOOP:
-			type = 2;
-			break;
-
-		case Primitive::Type::LINE_STRIP:
-			type = 3;
-			break;
-
-		case Primitive::Type::TRIANGLES:
-			type = 4;
-			break;
-
-		case Primitive::Type::TRIANGLE_STRIP:
-			type = 5;
-			break;
-
-		case Primitive::Type::TRIANGLE_FAN:
-			type = 6;
-			break;
-	}
-
-	s.write( type );
-
-	s.write( _vertexBuffer );
-	s.write( _indexBuffer );
-    */
-}
-
-void Primitive::load( Stream &s )
-{
-    /*
-	StreamObject::load( s );
-
-	int type;
-	s.read( type );
-
-	switch ( type ) {
-		case 0:
-			_type = Primitive::Type::POINTS;
-			break;
-
-		case 1:
-			_type = Primitive::Type::LINES;
-			break;
-
-		case 2:
-			_type = Primitive::Type::LINE_LOOP;
-			break;
-
-		case 3:
-			_type = Primitive::Type::LINE_STRIP;
-			break;
-
-		case 4:
-			_type = Primitive::Type::TRIANGLES;
-			break;
-
-		case 5:
-			_type = Primitive::Type::TRIANGLE_STRIP;
-			break;
-
-		case 6:
-			_type = Primitive::Type::TRIANGLE_FAN;
-			break;
-	}
-
-	s.read( _vertexBuffer );
-	s.read( _indexBuffer );
-    */
 }

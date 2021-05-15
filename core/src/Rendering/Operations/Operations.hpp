@@ -29,6 +29,7 @@
 #define CRIMILD_CORE_RENDERING_OPERATIONS_
 
 #include "Foundation/Memory.hpp"
+#include "Mathematics/Matrix.hpp"
 #include "Rendering/DescriptorSet.hpp"
 
 namespace crimild {

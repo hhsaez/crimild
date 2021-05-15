@@ -29,123 +29,120 @@
 #define CRIMILD_ANIMATION_SKELETON_
 
 #include "Components/NodeComponent.hpp"
-#include "Foundation/NamedObject.hpp"
 #include "Foundation/Containers/Map.hpp"
+#include "Foundation/NamedObject.hpp"
 #include "Mathematics/Matrix.hpp"
+#include "Mathematics/Transformation.hpp"
 
 namespace crimild {
 
-	namespace animation {
+    namespace animation {
 
-		class Clip;
-		class Animation;
+        class Clip;
+        class Animation;
 
-		class Joint :
-			public NamedObject,
-			public NodeComponent {
-			CRIMILD_IMPLEMENT_RTTI( crimild::animation::Joint )
-			
-		public:
-			Joint( void );
-			explicit Joint( std::string, crimild::UInt32 id );
-			virtual ~Joint( void );
+        class Joint : public NamedObject,
+                      public NodeComponent {
+            CRIMILD_IMPLEMENT_RTTI( crimild::animation::Joint )
 
-			crimild::UInt32 getId( void ) const { return _id; }
+        public:
+            Joint( void );
+            explicit Joint( std::string, crimild::UInt32 id );
+            virtual ~Joint( void );
 
-			void setOffset( const Transformation &transform ) { _offset = transform; }
-			const Transformation &getOffset( void ) const { return _offset; }
+            crimild::UInt32 getId( void ) const { return _id; }
 
-			void setPoseMatrix( const Matrix4f &matrix ) { _poseMatrix = matrix; }
-			const Matrix4f &getPoseMatrix( void ) const { return _poseMatrix; }
+            void setOffset( const Transformation &transform ) { _offset = transform; }
+            const Transformation &getOffset( void ) const { return _offset; }
 
-		private:
-			crimild::UInt32 _id;
-			Transformation _offset;
-			Matrix4f _poseMatrix;
+            void setPoseMatrix( const Matrix4f &matrix ) { _poseMatrix = matrix; }
+            const Matrix4f &getPoseMatrix( void ) const { return _poseMatrix; }
 
-			/**
+        private:
+            crimild::UInt32 _id;
+            Transformation _offset;
+            Matrix4f _poseMatrix;
+
+            /**
 			   \name Cloning
 			*/
-			//@{
-			
-		public:
-			virtual SharedPointer< NodeComponent > clone( void ) override;
+            //@{
 
-			//@}
+        public:
+            virtual SharedPointer< NodeComponent > clone( void ) override;
 
-			/**
+            //@}
+
+            /**
 			   \name Coding
 			*/
-			//@{
-			
-		public:
-			virtual void encode( coding::Encoder &encoder ) override;
-			virtual void decode( coding::Decoder &decoder ) override;
-			
-			//@}
-		};
-		
+            //@{
 
-		class Skeleton : public NodeComponent {
-			CRIMILD_IMPLEMENT_RTTI( crimild::animation::Skeleton )
+        public:
+            virtual void encode( coding::Encoder &encoder ) override;
+            virtual void decode( coding::Decoder &decoder ) override;
 
-		private:
-			using JointCatalog = Map< std::string, SharedPointer< Joint >>;
-			using ClipCatalog = Map< std::string, SharedPointer< Clip >>;
-			
-		public:
-			Skeleton( void );
-			virtual ~Skeleton( void );
+            //@}
+        };
 
-			void setJoints( const JointCatalog &joints ) { _joints = joints; }
-			JointCatalog &getJoints( void ) { return _joints; }
+        class Skeleton : public NodeComponent {
+            CRIMILD_IMPLEMENT_RTTI( crimild::animation::Skeleton )
 
-			void setGlobalInverseTransform( const Transformation &transform ) { _globalInverseTransform = transform; }
-			const Transformation &getGlobalInverseTransform( void ) const { return _globalInverseTransform; }
+        private:
+            using JointCatalog = Map< std::string, SharedPointer< Joint > >;
+            using ClipCatalog = Map< std::string, SharedPointer< Clip > >;
 
-			void setClips( const ClipCatalog &clips ) { _clips = clips; }
-			ClipCatalog &getClips( void ) { return _clips; }
+        public:
+            Skeleton( void );
+            virtual ~Skeleton( void );
 
-			virtual void start( void ) override;
+            void setJoints( const JointCatalog &joints ) { _joints = joints; }
+            JointCatalog &getJoints( void ) { return _joints; }
 
-		private:
-			JointCatalog _joints;
-			ClipCatalog _clips;
-			Transformation _globalInverseTransform;
+            void setGlobalInverseTransform( const Transformation &transform ) { _globalInverseTransform = transform; }
+            const Transformation &getGlobalInverseTransform( void ) const { return _globalInverseTransform; }
 
-		public:
-			void animate( SharedPointer< Animation > const &animation ) { animate( crimild::get_ptr( animation ) ); }
-			void animate( Animation *animation );
-			
-			/**
+            void setClips( const ClipCatalog &clips ) { _clips = clips; }
+            ClipCatalog &getClips( void ) { return _clips; }
+
+            virtual void start( void ) override;
+
+        private:
+            JointCatalog _joints;
+            ClipCatalog _clips;
+            Transformation _globalInverseTransform;
+
+        public:
+            void animate( SharedPointer< Animation > const &animation ) { animate( crimild::get_ptr( animation ) ); }
+            void animate( Animation *animation );
+
+            /**
 			   \name Cloning
 			*/
-			//@{
-			
-		public:
-			virtual SharedPointer< NodeComponent > clone( void ) override;
-			
-			//@}
+            //@{
 
-			/**
+        public:
+            virtual SharedPointer< NodeComponent > clone( void ) override;
+
+            //@}
+
+            /**
 			   \name Coding
 			*/
-			//@{
-			
-		public:
-			virtual void encode( coding::Encoder &encoder ) override;
-			virtual void decode( coding::Decoder &decoder ) override;
-			
-			//@}
+            //@{
 
-		public:
-			void renderDebugInfo( Renderer *renderer, Camera *camera ) override;
-		};
-		
-	}
+        public:
+            virtual void encode( coding::Encoder &encoder ) override;
+            virtual void decode( coding::Decoder &decoder ) override;
+
+            //@}
+
+        public:
+            void renderDebugInfo( Renderer *renderer, Camera *camera ) override;
+        };
+
+    }
 
 }
 
 #endif
-
-

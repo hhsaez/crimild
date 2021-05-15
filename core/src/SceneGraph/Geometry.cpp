@@ -37,8 +37,6 @@
 
 #include <algorithm>
 
-CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::Geometry )
-
 using namespace crimild;
 
 Geometry::Geometry( std::string name )
@@ -158,39 +156,4 @@ void Geometry::decode( coding::Decoder &decoder )
     ps.each( [ this ]( SharedPointer< Primitive > &p ) {
         attachPrimitive( p );
     } );
-}
-
-bool Geometry::registerInStream( Stream &s )
-{
-    if ( !Node::registerInStream( s ) ) {
-        return false;
-    }
-
-    forEachPrimitive( [ &s ]( Primitive *p ) {
-        p->registerInStream( s );
-    } );
-
-    return true;
-}
-
-void Geometry::save( Stream &s )
-{
-    Node::save( s );
-
-    std::vector< SharedPointer< Primitive > > ps;
-    forEachPrimitive( [ &ps ]( Primitive *p ) {
-        ps.push_back( crimild::retain( p ) );
-    } );
-    s.write( ps );
-}
-
-void Geometry::load( Stream &s )
-{
-    Node::load( s );
-
-    std::vector< SharedPointer< Primitive > > ps;
-    s.read( ps );
-    for ( auto &p : ps ) {
-        attachPrimitive( p );
-    }
 }

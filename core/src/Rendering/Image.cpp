@@ -32,8 +32,6 @@
 
 #include <cstring>
 
-CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::Image )
-
 using namespace crimild;
 
 SharedPointer< Image > Image::ONE = [] {
@@ -270,36 +268,6 @@ void Image::decode( coding::Decoder &decoder )
     decoder.decode( "height", _height );
     decoder.decode( "bpp", _bpp );
     decoder.decode( "data", _data );
-}
-
-bool Image::registerInStream( Stream &s )
-{
-    if ( !StreamObject::registerInStream( s ) ) {
-        return false;
-    }
-
-    return true;
-}
-
-void Image::save( Stream &s )
-{
-    StreamObject::save( s );
-
-    s.write( _width );
-    s.write( _height );
-    s.write( _bpp );
-    s.writeRawBytes( &_data[ 0 ], _width * _height * _bpp * sizeof( unsigned char ) );
-}
-
-void Image::load( Stream &s )
-{
-    StreamObject::load( s );
-
-    s.read( _width );
-    s.read( _height );
-    s.read( _bpp );
-    _data.resize( _width * _height * _bpp );
-    s.readRawBytes( &_data[ 0 ], _data.size() * sizeof( unsigned char ) );
 }
 
 void Image::setMipLevels( crimild::UInt32 mipLevels ) noexcept

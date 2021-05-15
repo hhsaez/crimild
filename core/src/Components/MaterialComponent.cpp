@@ -30,8 +30,6 @@
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
 
-CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::MaterialComponent )
-
 using namespace crimild;
 
 MaterialComponent::~MaterialComponent( void )
@@ -85,39 +83,4 @@ void MaterialComponent::decode( coding::Decoder &decoder )
     ms.each( [ this ]( SharedPointer< Material > &m ) {
         attachMaterial( m );
     } );
-}
-
-bool MaterialComponent::registerInStream( Stream &s )
-{
-    if ( !NodeComponent::registerInStream( s ) ) {
-        return false;
-    }
-
-    forEachMaterial( [ &s ]( Material *m ) {
-        m->registerInStream( s );
-    } );
-
-    return true;
-}
-
-void MaterialComponent::save( Stream &s )
-{
-    NodeComponent::save( s );
-
-    std::vector< SharedPointer< Material > > ms;
-    forEachMaterial( [ &ms ]( Material *m ) {
-        ms.push_back( crimild::retain( m ) );
-    } );
-    s.write( ms );
-}
-
-void MaterialComponent::load( Stream &s )
-{
-    NodeComponent::load( s );
-
-    std::vector< SharedPointer< Material > > ms;
-    s.read( ms );
-    for ( auto &m : ms ) {
-        attachMaterial( m );
-    }
 }

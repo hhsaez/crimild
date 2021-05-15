@@ -40,7 +40,7 @@ namespace crimild {
 
     class Light;
 
-    class Material : public coding::Codable, public StreamObject {
+    class Material : public coding::Codable {
         CRIMILD_IMPLEMENT_RTTI( crimild::Material )
 
     public:
@@ -180,19 +180,6 @@ namespace crimild {
     public:
         virtual void encode( coding::Encoder &encoder ) override;
         virtual void decode( coding::Decoder &decoder ) override;
-
-        //@}
-
-        /**
-        	\name Streaming
-            \deprectated see crimild::Coding
-        */
-        //@{
-
-    public:
-        virtual bool registerInStream( Stream &s ) override;
-        virtual void save( Stream &s ) override;
-        virtual void load( Stream &s ) override;
 
         //@}
     };

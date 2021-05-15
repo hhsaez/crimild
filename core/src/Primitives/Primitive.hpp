@@ -29,7 +29,6 @@
 #define CRIMILD_PRIMITIVES_PRIMITIVE_
 
 #include "Coding/Codable.hpp"
-#include "Streaming/Stream.hpp"
 #include "Rendering/Catalog.hpp"
 #include "Rendering/IndexBuffer.hpp"
 #include "Rendering/VertexBuffer.hpp"
@@ -38,32 +37,31 @@
 
 namespace crimild {
 
-    class Primitive :
-		public coding::Codable,
-		public Catalog< Primitive >::Resource,
-		public StreamObject {
-		CRIMILD_IMPLEMENT_RTTI( crimild::Primitive )
+    class Primitive
+        : public coding::Codable,
+          public Catalog< Primitive >::Resource {
+        CRIMILD_IMPLEMENT_RTTI( crimild::Primitive )
 
     private:
-        using VertexData = Array< SharedPointer< VertexBuffer >>;
+        using VertexData = Array< SharedPointer< VertexBuffer > >;
         using IndexData = SharedPointer< IndexBuffer >;
 
-	public:
-		enum class Type : uint8_t {
-			POINTS,
-			LINES,
-			LINE_LOOP,
-			LINE_STRIP,
-			TRIANGLES,
-			TRIANGLE_STRIP,
-			TRIANGLE_FAN
-		};
+    public:
+        enum class Type : uint8_t {
+            POINTS,
+            LINES,
+            LINE_LOOP,
+            LINE_STRIP,
+            TRIANGLES,
+            TRIANGLE_STRIP,
+            TRIANGLE_FAN
+        };
 
-	public:
-		explicit Primitive( Primitive::Type type = Primitive::Type::TRIANGLES );
-		virtual ~Primitive( void ) = default;
+    public:
+        explicit Primitive( Primitive::Type type = Primitive::Type::TRIANGLES );
+        virtual ~Primitive( void ) = default;
 
-		Primitive::Type getType( void ) const { return _type; }
+        Primitive::Type getType( void ) const { return _type; }
 
         inline void setVertexData( VertexData const vertexData ) noexcept { m_vertexData = vertexData; }
         inline VertexData &getVertexData( void ) noexcept { return m_vertexData; }
@@ -73,8 +71,8 @@ namespace crimild {
         inline IndexBuffer *getIndices( void ) noexcept { return get_ptr( m_indices ); }
         inline const IndexBuffer *getIndices( void ) const noexcept { return get_ptr( m_indices ); }
 
-	private:
-		Primitive::Type _type;
+    private:
+        Primitive::Type _type;
         VertexData m_vertexData;
         IndexData m_indices;
 
@@ -87,21 +85,9 @@ namespace crimild {
         virtual void decode( coding::Decoder &decoder ) override;
 
         //@}
+    };
 
-		/**
-			\name Streaming
-            \deprecated See crimild::coding
-		*/
-		//@{
-	public:
-		virtual bool registerInStream( Stream &s ) override;
-		virtual void save( Stream &s ) override;
-		virtual void load( Stream &s ) override;
-
-		//@}
-	};
-
-	using PrimitivePtr = SharedPointer< Primitive >;
+    using PrimitivePtr = SharedPointer< Primitive >;
 
 }
 
