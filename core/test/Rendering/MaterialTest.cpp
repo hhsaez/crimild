@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,9 +26,9 @@
  */
 
 #include "Rendering/Material.hpp"
-#include "Coding/MemoryEncoder.hpp"
+
 #include "Coding/MemoryDecoder.hpp"
-#include "Streaming/FileStream.hpp"
+#include "Coding/MemoryEncoder.hpp"
 
 #include "gtest/gtest.h"
 
@@ -36,97 +36,63 @@ using namespace crimild;
 
 TEST( MaterialTest, construction )
 {
-	auto material = crimild::alloc< Material >();
+    auto material = crimild::alloc< Material >();
 
-	EXPECT_EQ( RGBAColorf( 0.0f, 0.0f, 0.0f, 1.0f ), material->getAmbient() );
-	EXPECT_EQ( RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ), material->getDiffuse() );
-	EXPECT_EQ( RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ), material->getSpecular() );
-	EXPECT_EQ( 50.0f, material->getShininess() );
+    EXPECT_EQ( RGBAColorf( 0.0f, 0.0f, 0.0f, 1.0f ), material->getAmbient() );
+    EXPECT_EQ( RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ), material->getDiffuse() );
+    EXPECT_EQ( RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ), material->getSpecular() );
+    EXPECT_EQ( 50.0f, material->getShininess() );
 
-	EXPECT_EQ( nullptr, material->getColorMap() );
-	EXPECT_EQ( nullptr, material->getProgram() );
+    EXPECT_EQ( nullptr, material->getColorMap() );
+    EXPECT_EQ( nullptr, material->getProgram() );
 }
 
 TEST( MaterialTest, setProgram )
 {
-	auto material = crimild::alloc< Material >();
+    auto material = crimild::alloc< Material >();
 
-	auto vs = crimild::alloc< VertexShader >( "vs code" );
-	auto fs = crimild::alloc< FragmentShader >( "fs code" );
-	auto program = crimild::alloc< ShaderProgram >( vs, fs );
-	material->setProgram( program );
+    auto vs = crimild::alloc< VertexShader >( "vs code" );
+    auto fs = crimild::alloc< FragmentShader >( "fs code" );
+    auto program = crimild::alloc< ShaderProgram >( vs, fs );
+    material->setProgram( program );
 
-	ASSERT_EQ( crimild::get_ptr( program ), material->getProgram() );
+    ASSERT_EQ( crimild::get_ptr( program ), material->getProgram() );
 }
 
 TEST( MaterialTest, setColorMap )
 {
-	auto material = crimild::alloc< Material >();
+    auto material = crimild::alloc< Material >();
 
-	auto image = crimild::alloc< Image >( 0, 0, 0, nullptr );
-	auto texture = crimild::alloc< Texture >( image );
-	material->setColorMap( texture );
+    auto image = crimild::alloc< Image >( 0, 0, 0, nullptr );
+    auto texture = crimild::alloc< Texture >( image );
+    material->setColorMap( texture );
 
-	ASSERT_EQ( crimild::get_ptr( texture ), material->getColorMap() );
+    ASSERT_EQ( crimild::get_ptr( texture ), material->getColorMap() );
 }
 
 TEST( MaterialTest, coding )
 {
-	auto material = crimild::alloc< Material >();
-	material->setDiffuse( RGBAColorf( 0.9f, 0.9f, 0.9f, 1.0f ) );
-	material->setAmbient( RGBAColorf( 0.1f, 0.1f, 0.1f, 1.0f ) );
-	material->setSpecular( RGBAColorf( 0.5f, 0.5f, 0.5f, 1.0f ) );
-	material->setShininess( 25.0f );
-	
-	material->setColorMap( crimild::alloc< Texture >() );
-	
-	auto encoder = crimild::alloc< coding::MemoryEncoder >();
-	encoder->encode( material );
-	auto bytes = encoder->getBytes();
-	auto decoder = crimild::alloc< coding::MemoryDecoder >();
-	decoder->fromBytes( bytes );
-	
-	auto m = decoder->getObjectAt< Material >( 0 );
-	EXPECT_TRUE( material != nullptr );
-	
-	EXPECT_EQ( RGBAColorf( 0.9f, 0.9f, 0.9f, 1.0f ), m->getDiffuse() );
-	EXPECT_EQ( RGBAColorf( 0.1f, 0.1f, 0.1f, 1.0f ), m->getAmbient() );
-	EXPECT_EQ( RGBAColorf( 0.5f, 0.5f, 0.5f, 1.0f ), m->getSpecular() );
-	EXPECT_EQ( 25.0f, m->getShininess() );
-	
-	EXPECT_NE( nullptr, m->getColorMap() );
+    auto material = crimild::alloc< Material >();
+    material->setDiffuse( RGBAColorf( 0.9f, 0.9f, 0.9f, 1.0f ) );
+    material->setAmbient( RGBAColorf( 0.1f, 0.1f, 0.1f, 1.0f ) );
+    material->setSpecular( RGBAColorf( 0.5f, 0.5f, 0.5f, 1.0f ) );
+    material->setShininess( 25.0f );
+
+    material->setColorMap( crimild::alloc< Texture >() );
+
+    auto encoder = crimild::alloc< coding::MemoryEncoder >();
+    encoder->encode( material );
+    auto bytes = encoder->getBytes();
+    auto decoder = crimild::alloc< coding::MemoryDecoder >();
+    decoder->fromBytes( bytes );
+
+    auto m = decoder->getObjectAt< Material >( 0 );
+    EXPECT_TRUE( material != nullptr );
+
+    EXPECT_EQ( RGBAColorf( 0.9f, 0.9f, 0.9f, 1.0f ), m->getDiffuse() );
+    EXPECT_EQ( RGBAColorf( 0.1f, 0.1f, 0.1f, 1.0f ), m->getAmbient() );
+    EXPECT_EQ( RGBAColorf( 0.5f, 0.5f, 0.5f, 1.0f ), m->getSpecular() );
+    EXPECT_EQ( 25.0f, m->getShininess() );
+
+    EXPECT_NE( nullptr, m->getColorMap() );
 }
-
-TEST( Material, streaming )
-{
-	{
-		auto material = crimild::alloc< Material >();
-		material->setDiffuse( RGBAColorf( 0.9f, 0.9f, 0.9f, 1.0f ) );
-		material->setAmbient( RGBAColorf( 0.1f, 0.1f, 0.1f, 1.0f ) );
-		material->setSpecular( RGBAColorf( 0.5f, 0.5f, 0.5f, 1.0f ) );
-		material->setShininess( 25.0f );
-
-		material->setColorMap( crimild::alloc< Texture >() );
-
-		FileStream os( "material.crimild", FileStream::OpenMode::WRITE );
-		os.addObject( material );
-		EXPECT_TRUE( os.flush() );
-	}
-
-	{
-		FileStream is( "material.crimild", FileStream::OpenMode::READ );
-		EXPECT_TRUE( is.load() );
-		EXPECT_EQ( 1, is.getObjectCount() );
-		
-		auto material = is.getObjectAt< Material >( 0 );
-		EXPECT_TRUE( material != nullptr );
-
-		EXPECT_EQ( RGBAColorf( 0.9f, 0.9f, 0.9f, 1.0f ), material->getDiffuse() );
-		EXPECT_EQ( RGBAColorf( 0.1f, 0.1f, 0.1f, 1.0f ), material->getAmbient() );
-		EXPECT_EQ( RGBAColorf( 0.5f, 0.5f, 0.5f, 1.0f ), material->getSpecular() );
-		EXPECT_EQ( 25.0f, material->getShininess() );
-
-		EXPECT_NE( nullptr, material->getColorMap() );
-	}
-}
-

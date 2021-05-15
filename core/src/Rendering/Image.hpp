@@ -35,7 +35,6 @@
 #include "Rendering/Format.hpp"
 #include "Rendering/FrameGraphResource.hpp"
 #include "Rendering/RenderResource.hpp"
-#include "Streaming/Stream.hpp"
 
 #include <vector>
 
@@ -44,7 +43,6 @@ namespace crimild {
     class Image
         : public coding::Codable,
           public NamedObject,
-          public StreamObject, //< Deprecated
           public RenderResourceImpl< Image >,
           public FrameGraphResource {
         CRIMILD_IMPLEMENT_RTTI( crimild::Image )
@@ -190,18 +188,6 @@ namespace crimild {
         PixelFormat _pixelFormat;
         PixelType _pixelType;
         ByteArray _data;
-
-        /**
-        	\name Streaming
-        */
-        //@{
-
-    public:
-        virtual bool registerInStream( Stream &s ) override;
-        virtual void save( Stream &s ) override;
-        virtual void load( Stream &s ) override;
-
-        //@}
 
         //@}
     };

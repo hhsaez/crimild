@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,27 +26,25 @@
  */
 
 #include "Node.hpp"
-#include "Group.hpp"
-#include "Boundings/AABBBoundingVolume.hpp"
-#include "Coding/Encoder.hpp"
-#include "Coding/Decoder.hpp"
 
-CRIMILD_REGISTER_STREAM_OBJECT_BUILDER( crimild::Node )
+#include "Boundings/AABBBoundingVolume.hpp"
+#include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
+#include "Group.hpp"
 
 using namespace crimild;
 
 Node::Node( std::string name )
-	: NamedObject( name ),
-	  _worldIsCurrent( false ),
-	  _localBound( crimild::alloc< AABBBoundingVolume >( Vector3f( 0.0f, 0.0f, 0.0f ), 1.0f ) ),
-	  _worldBound( crimild::alloc< AABBBoundingVolume >( Vector3f( 0.0f, 0.0f, 0.0f ), 1.0f ) )
+    : NamedObject( name ),
+      _worldIsCurrent( false ),
+      _localBound( crimild::alloc< AABBBoundingVolume >( Vector3f( 0.0f, 0.0f, 0.0f ), 1.0f ) ),
+      _worldBound( crimild::alloc< AABBBoundingVolume >( Vector3f( 0.0f, 0.0f, 0.0f ), 1.0f ) )
 {
-
 }
 
 Node::~Node( void )
 {
-	detachAllComponents();
+    detachAllComponents();
 }
 
 Node *Node::getRootParent( void )
@@ -57,7 +55,7 @@ Node *Node::getRootParent( void )
             root = root->getParent();
         }
     }
-    
+
     return root;
 }
 
@@ -65,7 +63,7 @@ SharedPointer< Node > Node::detachFromParent( void )
 {
     // do this before detaching
     auto node = crimild::retain( this );
-    
+
     Group *parent = getParent< Group >();
     if ( parent != nullptr ) {
         parent->detachNode( node );
@@ -76,17 +74,17 @@ SharedPointer< Node > Node::detachFromParent( void )
 
 void Node::perform( NodeVisitor &visitor )
 {
-	visitor.traverse( this );
+    visitor.traverse( this );
 }
 
 void Node::perform( const NodeVisitor &visitor )
 {
-	const_cast< NodeVisitor & >( visitor ).traverse( this );
+    const_cast< NodeVisitor & >( visitor ).traverse( this );
 }
 
 void Node::accept( NodeVisitor &visitor )
 {
-	visitor.visitNode( this );
+    visitor.visitNode( this );
 }
 
 void Node::attachComponent( NodeComponent *component )
@@ -97,16 +95,16 @@ void Node::attachComponent( NodeComponent *component )
 void Node::attachComponent( SharedPointer< NodeComponent > const &component )
 {
     if ( hasComponent( component ) ) {
-		// the component is already attached to this node
-		return;
-	}
+        // the component is already attached to this node
+        return;
+    }
 
     // ignore return?
-	detachComponentWithName( component->getComponentName() );
-    
-	component->setNode( this );
-	_components[ component->getComponentName() ] = component;
-	component->onAttach();
+    detachComponentWithName( component->getComponentName() );
+
+    component->setNode( this );
+    _components[ component->getComponentName() ] = component;
+    component->onAttach();
 }
 
 void Node::detachComponent( NodeComponent *component )
@@ -115,7 +113,7 @@ void Node::detachComponent( NodeComponent *component )
         // the component is not attached to this node
         return;
     }
-    
+
     detachComponentWithName( component->getComponentName() );
 }
 
@@ -126,7 +124,7 @@ void Node::detachComponent( SharedPointer< NodeComponent > const &component )
 
 SharedPointer< NodeComponent > Node::detachComponentWithName( std::string name )
 {
-	if ( _components.find( name ) != _components.end() ) {
+    if ( _components.find( name ) != _components.end() ) {
         auto current = _components[ name ];
         if ( current != nullptr ) {
             current->onDetach();
@@ -134,11 +132,11 @@ SharedPointer< NodeComponent > Node::detachComponentWithName( std::string name )
         }
 
         _components[ name ] = nullptr;
-		_components.erase( name );
-        
+        _components.erase( name );
+
         return current;
-	}
-    
+    }
+
     return nullptr;
 }
 
@@ -147,45 +145,45 @@ void Node::detachAllComponents( void )
     forEachComponent( []( NodeComponent *cmp ) {
         cmp->onDetach();
         cmp->setNode( nullptr );
-    });
+    } );
 
-	_components.clear();
+    _components.clear();
 }
 
 void Node::startComponents( void )
 {
-	forEachComponent( []( NodeComponent *component ) { component->start(); } );
+    forEachComponent( []( NodeComponent *component ) { component->start(); } );
 }
 
 void Node::updateComponents( const Clock &clock )
 {
-    forEachComponent( [clock]( NodeComponent *component ) { if ( component->isEnabled() ) component->update( clock ); } );
+    forEachComponent( [ clock ]( NodeComponent *component ) { if ( component->isEnabled() ) component->update( clock ); } );
 }
 
-void Node::forEachComponent( std::function< void ( NodeComponent * ) > callback )
+void Node::forEachComponent( std::function< void( NodeComponent * ) > callback )
 {
-	// create a copy of the component's collection
-	// to prevent errors when attaching or detaching
-	// components during an update pass
+    // create a copy of the component's collection
+    // to prevent errors when attaching or detaching
+    // components during an update pass
     // TODO: should we lock this instead?
-	auto cs = _components;
-	for ( auto cmp : cs ) {
-		if ( cmp.second != nullptr ) {
+    auto cs = _components;
+    for ( auto cmp : cs ) {
+        if ( cmp.second != nullptr ) {
             callback( crimild::get_ptr( cmp.second ) );
-		}
-	}
+        }
+    }
 }
 
 void Node::encode( coding::Encoder &encoder )
 {
     Codable::encode( encoder );
-    
+
     encoder.encode( "name", getName() );
     encoder.encode( "transformation", getLocal() );
     encoder.encode( "worldTransformation", getWorld() );
     encoder.encode( "worldIsCurrent", worldIsCurrent() );
-    
-    Array< SharedPointer< NodeComponent >> cmps;
+
+    Array< SharedPointer< NodeComponent > > cmps;
     for ( auto &it : _components ) {
         if ( it.second != nullptr ) {
             cmps.add( it.second );
@@ -193,30 +191,29 @@ void Node::encode( coding::Encoder &encoder )
     }
     encoder.encode( "components", cmps );
 
-	encoder.encode( "layer", _layer );
+    encoder.encode( "layer", _layer );
 }
 
 void Node::decode( coding::Decoder &decoder )
 {
     Codable::decode( decoder );
-    
+
     std::string name;
     decoder.decode( "name", name );
     setName( name );
-    
+
     decoder.decode( "transformation", local() );
     decoder.decode( "worldTransformation", world() );
-    
+
     crimild::Bool worldIsCurrent = false;
     decoder.decode( "worldIsCurrent", worldIsCurrent );
     setWorldIsCurrent( worldIsCurrent );
-    
-    Array< SharedPointer< NodeComponent >> cmps;
+
+    Array< SharedPointer< NodeComponent > > cmps;
     decoder.decode( "components", cmps );
     cmps.each( [ this ]( SharedPointer< NodeComponent > &c ) {
         attachComponent( c );
-    });
+    } );
 
-	decoder.decode( "layer", _layer );
+    decoder.decode( "layer", _layer );
 }
-

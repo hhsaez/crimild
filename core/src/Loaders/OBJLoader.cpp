@@ -28,6 +28,7 @@
 #include "OBJLoader.hpp"
 
 #include "Components/MaterialComponent.hpp"
+#include "Foundation/Log.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Rendering/ImageManager.hpp"
 #include "Rendering/ImageView.hpp"

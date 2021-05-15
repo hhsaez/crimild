@@ -27,6 +27,7 @@
 
 #include "Components/MaterialComponent.hpp"
 #include "Mathematics/Frustum.hpp"
+#include "Mathematics/Transformation.hpp"
 #include "Primitives/BoxPrimitive.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Material.hpp"

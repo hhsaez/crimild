@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -34,12 +34,10 @@ using namespace crimild;
 NodeComponent::NodeComponent( void )
     : _node( nullptr )
 {
-
 }
 
 NodeComponent::~NodeComponent( void )
 {
-
 }
 
 NodeComponent *NodeComponent::getComponentWithName( std::string name )
@@ -47,33 +45,28 @@ NodeComponent *NodeComponent::getComponentWithName( std::string name )
     if ( getNode() == nullptr ) {
         return nullptr;
     }
-    
+
     return getNode()->getComponentWithName( name );
 }
 
 void NodeComponent::onAttach( void )
 {
-
 }
 
 void NodeComponent::onDetach( void )
 {
-	
 }
 
 void NodeComponent::start( void )
 {
-
 }
 
 void NodeComponent::update( const Clock & )
 {
-	
 }
 
 void NodeComponent::renderDebugInfo( Renderer *, Camera * )
 {
-
 }
 
 void NodeComponent::encode( coding::Encoder &encoder )
@@ -85,19 +78,3 @@ void NodeComponent::decode( coding::Decoder &decoder )
 {
     Codable::decode( decoder );
 }
-
-bool NodeComponent::registerInStream( Stream &s )
-{
-	return StreamObject::registerInStream( s );
-}
-
-void NodeComponent::save( Stream &s )
-{
-	StreamObject::save( s );
-}
-
-void NodeComponent::load( Stream &s )
-{
-	StreamObject::load( s );
-}
-

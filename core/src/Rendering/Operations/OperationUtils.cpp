@@ -27,6 +27,7 @@
 
 #include "Rendering/Operations/OperationUtils.hpp"
 
+#include "Foundation/Log.hpp"
 #include "Rendering/Sampler.hpp"
 #include "Rendering/Texture.hpp"
 

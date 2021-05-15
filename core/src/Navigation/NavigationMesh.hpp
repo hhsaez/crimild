@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -32,30 +32,29 @@
 
 namespace crimild {
 
-	namespace navigation {
+    namespace navigation {
 
-        class NavigationMesh : public coding::Codable, public StreamObject {
+        class NavigationMesh : public coding::Codable {
             CRIMILD_IMPLEMENT_RTTI( crimild::navigation::NavigationMesh )
 
         public:
             NavigationMesh( void );
             virtual ~NavigationMesh( void );
 
-			void addCell( NavigationCellPtr const &cell );
+            void addCell( NavigationCellPtr const &cell );
 
-			void foreachCell( std::function< void( NavigationCellPtr const & ) > const &callback );
+            void foreachCell( std::function< void( NavigationCellPtr const & ) > const &callback );
 
-			bool positionIsValid( const Vector3f &pos );
+            bool positionIsValid( const Vector3f &pos );
 
         private:
             std::vector< NavigationCellPtr > _cells;
         };
 
-		using NavigationMeshPtr = SharedPointer< NavigationMesh >;
+        using NavigationMeshPtr = SharedPointer< NavigationMesh >;
 
-	}
+    }
 
 }
 
 #endif
-

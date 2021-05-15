@@ -40,7 +40,6 @@
 #include "SceneGraph/Camera.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Settings.hpp"
-#include "Streaming/SceneBuilder.hpp"
 #include "Systems/System.hpp"
 
 #include <functional>

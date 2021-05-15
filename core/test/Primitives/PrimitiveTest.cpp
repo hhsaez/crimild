@@ -26,9 +26,9 @@
  */
 
 #include "Primitives/Primitive.hpp"
-#include "Coding/MemoryEncoder.hpp"
+
 #include "Coding/MemoryDecoder.hpp"
-#include "Streaming/FileStream.hpp"
+#include "Coding/MemoryEncoder.hpp"
 #include "Rendering/Vertex.hpp"
 
 #include "gtest/gtest.h"
@@ -37,21 +37,20 @@ using namespace crimild;
 
 TEST( PrimitiveTest, construction )
 {
-	auto p1 = crimild::alloc< Primitive >();
-	EXPECT_EQ( p1->getType(), Primitive::Type::TRIANGLES );
+    auto p1 = crimild::alloc< Primitive >();
+    EXPECT_EQ( p1->getType(), Primitive::Type::TRIANGLES );
 
-	auto p2 = crimild::alloc< Primitive >( Primitive::Type::LINES );
-	EXPECT_EQ( p2->getType(), Primitive::Type::LINES );
+    auto p2 = crimild::alloc< Primitive >( Primitive::Type::LINES );
+    EXPECT_EQ( p2->getType(), Primitive::Type::LINES );
 }
 
 TEST( PrimitiveTest, destruction )
 {
-
 }
 
 TEST( Primitive, vertexData )
 {
-	auto p = crimild::alloc< Primitive >();
+    auto p = crimild::alloc< Primitive >();
 
     auto vbo = [] {
         return crimild::alloc< VertexBuffer >(
@@ -60,31 +59,31 @@ TEST( Primitive, vertexData )
                 {
                     .position = Vector3f( 1.0f, 2.0f, 3.0f ),
                 },
-            }
-        );
+            } );
     }();
 
-	p->setVertexData( { vbo } );
+    p->setVertexData( { vbo } );
 
-	EXPECT_FALSE( p->getVertexData().empty() );
+    EXPECT_FALSE( p->getVertexData().empty() );
     EXPECT_EQ( vbo, p->getVertexData()[ 0 ] );
 }
 
 TEST( Primitive, indices )
 {
-	auto p = crimild::alloc< Primitive >();
+    auto p = crimild::alloc< Primitive >();
 
     auto indices = crimild::alloc< IndexBuffer >(
         Format::INDEX_32_UINT,
         Array< UInt32 > {
-            0, 1, 2,
-		}
-    );
+            0,
+            1,
+            2,
+        } );
 
-	p->setIndices( indices );
+    p->setIndices( indices );
 
     EXPECT_NE( nullptr, p->getIndices() );
-	EXPECT_EQ( 3, p->getIndices()->getIndexCount() );
+    EXPECT_EQ( 3, p->getIndices()->getIndexCount() );
 }
 
 TEST( PrimitiveTest, coding )
@@ -117,44 +116,5 @@ TEST( PrimitiveTest, coding )
 
 	EXPECT_TRUE( p->getIndexBuffer() != nullptr );
 	EXPECT_EQ( primitive->getIndexBuffer()->getIndexCount(), p->getIndexBuffer()->getIndexCount() );
-    */
-}
-
-TEST( PrimitiveTest, primitiveStream )
-{
-    /*
-	auto primitive = crimild::alloc< Primitive >( Primitive::Type::POINTS );
-
-	auto vbo = crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3, 3 );
-	vbo->setPositionAt( 0, Vector3f( -1.0f, 0.0f, 0.0f ) );
-	vbo->setPositionAt( 1, Vector3f( 1.0f, 0.0f, 0.0f ) );
-	vbo->setPositionAt( 1, Vector3f( 0.0f, 1.0f, 0.0f ) );
-	primitive->setVertexBuffer( vbo );
-
-	auto ibo = crimild::alloc< IndexBufferObject >( 3 );
-	ibo->generateIncrementalIndices();
-	primitive->setIndexBuffer( ibo );
-
-	{
-		FileStream os( "primitive.crimild", FileStream::OpenMode::WRITE );
-		os.addObject( primitive );
-		EXPECT_TRUE( os.flush() );
-	}
-
-	{
-		FileStream is( "primitive.crimild", FileStream::OpenMode::READ );
-		EXPECT_TRUE( is.load() );
-		EXPECT_EQ( 1, is.getObjectCount() );
-
-		auto p = is.getObjectAt< Primitive >( 0 );
-		EXPECT_TRUE( p != nullptr );
-		EXPECT_EQ( p->getType(), Primitive::Type::POINTS );
-
-		EXPECT_TRUE( p->getVertexBuffer() != nullptr );
-		EXPECT_EQ( primitive->getVertexBuffer()->getVertexCount(), p->getVertexBuffer()->getVertexCount() );
-
-		EXPECT_TRUE( p->getIndexBuffer() != nullptr );
-		EXPECT_EQ( primitive->getIndexBuffer()->getIndexCount(), p->getIndexBuffer()->getIndexCount() );
-	}
     */
 }
