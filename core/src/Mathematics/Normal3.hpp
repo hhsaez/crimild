@@ -31,6 +31,7 @@
 #include "Foundation/Types.hpp"
 #include "Mathematics/Numbers.hpp"
 #include "Mathematics/Utils.hpp"
+#include "Mathematics/VectorImpl.hpp"
 
 #include <array>
 #include <iomanip>
@@ -209,6 +210,12 @@ namespace crimild {
 
     template< typename T, typename U >
     [[nodiscard]] inline constexpr T dot( const impl::Normal3< T > &u, const impl::Normal3< U > &v ) noexcept
+    {
+        return u.x() * v.x() + u.y() * v.y() + u.z() * v.z();
+    }
+
+    template< typename T, typename U >
+    [[nodiscard]] inline constexpr T dot( const impl::Normal3< T > &u, const impl::Vector< U, 3 > &v ) noexcept
     {
         return u.x() * v.x() + u.y() * v.y() + u.z() * v.z();
     }

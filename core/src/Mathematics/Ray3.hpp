@@ -97,6 +97,18 @@ namespace crimild {
         Vector3 m_direction;
     };
 
+    [[nodiscard]] constexpr Real distanceSquared( const Ray3 &R, const Point3 &P ) noexcept
+    {
+        const auto V = P - R.getOrigin();
+        const auto d = dot( V, R.getDirection() );
+        return ( dot( V, V ) - d * d ) / lengthSquared( R.getDirection() );
+    }
+
+    [[nodiscard]] constexpr Real distance( const Ray3 &R, const Point3 &P ) noexcept
+    {
+        return sqrt( distanceSquared( R, P ) );
+    }
+
 }
 
 #endif
