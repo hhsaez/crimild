@@ -77,7 +77,6 @@ namespace crimild {
 
         inline constexpr auto POSITIVE_INFINITY = std::numeric_limits< Real >::max();
         inline constexpr auto NEGATIVE_INFINITY = std::numeric_limits< Real >::min();
-        inline constexpr auto INFINITY = POSITIVE_INFINITY;
 
     }
 
