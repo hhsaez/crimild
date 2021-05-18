@@ -28,6 +28,7 @@
 #include "Mathematics/Point3.hpp"
 
 #include "Mathematics/Vector3.hpp"
+#include "Mathematics/Vector4.hpp"
 
 #include "gtest/gtest.h"
 #include <sstream>
@@ -192,6 +193,17 @@ TEST( Point3, permute )
     constexpr auto v = crimild::Point3 { 4, 2, 3 };
 
     EXPECT_EQ( v, crimild::permute( u, 2, 0, 1 ) );
+}
+
+TEST( Point3, homogeneous )
+{
+    constexpr auto P = crimild::Point3 { 1, 2, 3 };
+
+    constexpr crimild::Vector4 V = P.xyzw();
+    static_assert( V == crimild::Vector4( 1, 2, 3, 1 ) );
+
+    constexpr auto Q = crimild::Point3( V.xyz() );
+    static_assert( P == Q );
 }
 
 TEST( Point3, constexpr )

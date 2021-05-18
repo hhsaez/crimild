@@ -111,7 +111,7 @@ namespace crimild {
 
             [[nodiscard]] inline constexpr Vector operator*( const Vector &v ) const noexcept
             {
-                T ret[ N ] = { 0 };
+                std::array< T, N > ret = { 0 };
                 for ( auto i = 0l; i < N; ++i ) {
                     for ( auto j = 0l; j < N; ++j ) {
                         ret[ i ] += m_table[ i * N + j ] * v[ j ];
