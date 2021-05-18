@@ -27,6 +27,8 @@
 
 #include "Mathematics/Vector4.hpp"
 
+#include "Mathematics/Vector3.hpp"
+
 #include "gtest/gtest.h"
 #include <sstream>
 
@@ -232,6 +234,13 @@ TEST( Vector4, permute )
 {
     static_assert( crimild::Vector4( 6, 4, 1, 5 ) == crimild::permute( crimild::Vector4( 4, 5, 6, 1 ), 2, 0, 3, 1 ) );
     EXPECT_TRUE( true );
+}
+
+TEST( Vector4, swizzle )
+{
+    constexpr auto V = crimild::Vector4 { 1, 2, 3, 4 };
+
+    static_assert( V.xyz() == crimild::Vector3( 1, 2, 3 ) );
 }
 
 TEST( Vector4, constexpr )

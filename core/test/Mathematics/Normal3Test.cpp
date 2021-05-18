@@ -27,6 +27,9 @@
 
 #include "Mathematics/Normal3.hpp"
 
+#include "Mathematics/Vector3.hpp"
+#include "Mathematics/Vector4.hpp"
+
 #include "gtest/gtest.h"
 #include <sstream>
 
@@ -216,6 +219,19 @@ TEST( Normal3, ostream )
     }
 }
 
+TEST( Normal3, conversion )
+{
+    constexpr auto N = crimild::Normal3 { 1, 2, 3 };
+    constexpr auto V = crimild::Vector3( N );
+    constexpr auto V4 = N.xyzw();
+
+    static_assert( V4 == crimild::Vector4( 1, 2, 3, 0 ) );
+
+    constexpr auto N3 = crimild::Normal3( crimild::normalize( V4.xyz() ) );
+
+    EXPECT_TRUE( true );
+}
+
 TEST( Normal3, constexpr )
 {
     constexpr auto u = crimild::Normal3 { 10, 20, 30 };
@@ -240,7 +256,7 @@ TEST( Normal3, constexpr )
     static_assert( crimild::Normal3 { -10, -20, -30 } == -u, "negation" );
 
     static_assert( crimild::isNaN( u ) == false, "isNaN" );
-    static_assert( crimild::isNaN( crimild::Normal3 { NAN, NAN, NAN } ) == true, "isNaN" );
+    static_assert( crimild::isNaN( crimild::Normal3( NAN, NAN, NAN ) ) == true, "isNaN" );
 
     static_assert( crimild::Normal3 { 10, 20, 30 } == crimild::abs( crimild::Normal3 { -10, -20, -30 } ), "abs" );
 

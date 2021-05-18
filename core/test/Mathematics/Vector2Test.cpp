@@ -67,16 +67,6 @@ TEST( Vector2, addition )
     EXPECT_EQ( res, u + v );
 }
 
-TEST( Vector2, additionWithDifferentTypes )
-{
-    constexpr auto u = Vector2f { 10, 20 };
-    constexpr auto v = Vector2i { 30, 40 };
-    constexpr auto w = u + v;
-
-    EXPECT_EQ( 40, w.x() );
-    EXPECT_EQ( 60, w.y() );
-}
-
 TEST( Vector2, subtraction )
 {
     constexpr auto u = Vector2 { 10, 20 };

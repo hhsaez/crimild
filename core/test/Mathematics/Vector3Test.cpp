@@ -68,17 +68,6 @@ TEST( Vector3, addition )
     EXPECT_EQ( res, u + v );
 }
 
-TEST( Vector3, additionWithDifferentTypes )
-{
-    constexpr auto u = crimild::Vector3f { 10, 20, 30 };
-    constexpr auto v = crimild::Vector3i { 30, 40, 50 };
-    constexpr auto w = u + v;
-
-    EXPECT_EQ( 40, w.x() );
-    EXPECT_EQ( 60, w.y() );
-    EXPECT_EQ( 80, w.z() );
-}
-
 TEST( Vector3, subtraction )
 {
     constexpr auto u = crimild::Vector3 { 10, 20, 30 };

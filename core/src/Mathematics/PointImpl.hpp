@@ -42,121 +42,74 @@ namespace crimild {
     namespace impl {
 
         template< typename T, Size N >
-        class Point {
+        class Point
+            : public Tuple< T, N >,
+              public TupleOps< Point< T, N >, T, N > {
+        private:
+            using Base = Tuple< T, N >;
+
         public:
             constexpr Point( void ) noexcept = default;
 
             constexpr explicit Point( const std::array< T, N > &tuple ) noexcept
-                : m_tuple( tuple )
+                : Base( tuple )
             {
             }
 
-            constexpr explicit Point( const T *tuple ) noexcept
-                : m_tuple()
+            constexpr Point( T x ) noexcept
+                : Base( x )
             {
-                for ( auto i = 0l; i < N; ++i ) {
-                    m_tuple[ i ] = tuple[ i ];
-                }
             }
 
             constexpr Point( T x, T y ) noexcept
-                : m_tuple()
+                : Base( x, y )
             {
-                static_assert( N == 2 );
-                m_tuple[ 0 ] = x;
-                m_tuple[ 1 ] = y;
             }
 
             constexpr Point( T x, T y, T z ) noexcept
-                : m_tuple()
+                : Base( x, y, z )
             {
-                static_assert( N == 3 );
-                m_tuple[ 0 ] = x;
-                m_tuple[ 1 ] = y;
-                m_tuple[ 2 ] = z;
-            }
-
-            constexpr Point( T x, T y, T z, T w ) noexcept
-                : m_tuple()
-            {
-                static_assert( N == 4 );
-                m_tuple[ 0 ] = x;
-                m_tuple[ 1 ] = y;
-                m_tuple[ 2 ] = z;
-                m_tuple[ 3 ] = w;
             }
 
             constexpr Point( const Point &other ) noexcept
-                : m_tuple( other.m_tuple )
+                : Base( other )
             {
             }
 
-            constexpr Point( const Point &&other ) noexcept
-                : m_tuple( std::move( other.m_tuple ) )
+            constexpr Point( Point &&other ) noexcept
+                : Base( other )
+            {
+            }
+
+            constexpr explicit Point( const Base &other ) noexcept
+                : Base( other )
             {
             }
 
             ~Point( void ) noexcept = default;
 
-            constexpr Point &operator=( const Point &other ) noexcept
+            inline constexpr Point &operator=( const Point &other ) noexcept
             {
-                m_tuple = other.m_tuple;
+                Tuple< T, N >::operator=( other );
                 return *this;
             }
 
-            constexpr Point &operator=( const Point &&other ) noexcept
+            inline constexpr Point &operator=( Point &&other ) noexcept
             {
-                m_tuple = std::move( other.m_tuple );
+                Tuple< T, N >::operator=( other );
                 return *this;
             }
 
-            inline constexpr T x( void ) const noexcept
+            [[nodiscard]] inline constexpr Vector< T, 4 > xyzw( void ) const noexcept
             {
-                static_assert( N >= 1 );
-                return m_tuple[ 0 ];
-            }
-
-            inline constexpr T y( void ) const noexcept
-            {
-                static_assert( N >= 2 );
-                return m_tuple[ 1 ];
-            }
-
-            inline constexpr T z( void ) const noexcept
-            {
-                static_assert( N >= 3 );
-                return m_tuple[ 2 ];
-            }
-
-            inline constexpr T w( void ) const noexcept
-            {
-                static_assert( N >= 4 );
-                return m_tuple[ 3 ];
-            }
-
-            [[nodiscard]] inline constexpr T operator[]( Size index ) const noexcept
-            {
-                return m_tuple[ index ];
-            }
-
-            [[nodiscard]] inline constexpr Bool operator==( const Point &v ) const noexcept
-            {
-                auto ret = true;
-                for ( auto i = 0l; i < N; ++i ) {
-                    ret = ret && isEqual( ( *this )[ i ], v[ i ] );
-                }
-                return ret;
-            }
-
-            [[nodiscard]] inline constexpr Bool operator!=( const Point &v ) const noexcept
-            {
-                return !( *this == v );
+                static_assert( N == 3 );
+                return Vector< T, 4 >( Point::x(), Point::y(), Point::z(), 1 );
             }
 
             template< typename U >
             [[nodiscard]] inline constexpr Point operator+( const Vector< U, N > &v ) const noexcept
             {
-                T tuple[ N ];
+                std::array< T, N > tuple = { 0 };
                 for ( auto i = 0l; i < N; ++i ) {
                     tuple[ i ] = ( *this )[ i ] + v[ i ];
                 }
@@ -166,7 +119,7 @@ namespace crimild {
             template< typename U >
             [[nodiscard]] inline constexpr Vector< T, N > operator-( const Point< U, N > &v ) const noexcept
             {
-                T tuple[ N ];
+                std::array< T, N > tuple = { 0 };
                 for ( auto i = 0l; i < N; ++i ) {
                     tuple[ i ] = ( *this )[ i ] - v[ i ];
                 }
@@ -176,30 +129,12 @@ namespace crimild {
             template< typename U >
             [[nodiscard]] inline constexpr Point operator-( const Vector< U, N > &v ) const noexcept
             {
-                T tuple[ N ];
+                std::array< T, N > tuple = { 0 };
                 for ( auto i = 0l; i < N; ++i ) {
                     tuple[ i ] = ( *this )[ i ] - v[ i ];
                 }
                 return Point( tuple );
             }
-
-            friend inline std::ostream &operator<<( std::ostream &out, const Point &u )
-            {
-                out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
-                    << std::setprecision( 6 );
-                out << "(";
-                for ( auto i = 0l; i < N; ++i ) {
-                    if ( i > 0 ) {
-                        out << ", ";
-                    }
-                    out << u[ i ];
-                }
-                out << ")";
-                return out;
-            }
-
-        private:
-            std::array< T, 4 > m_tuple;
         };
 
     }
@@ -217,7 +152,7 @@ namespace crimild {
     template< typename T, Size N >
     [[nodiscard]] inline constexpr impl::Point< T, N > abs( const impl::Point< T, N > &u ) noexcept
     {
-        T tuple[ N ];
+        std::array< T, N > tuple = { 0 };
         for ( auto i = 0l; i < N; ++i ) {
             tuple[ i ] = abs( u[ i ] );
         }
@@ -227,7 +162,7 @@ namespace crimild {
     template< typename T, Size N >
     [[nodiscard]] inline constexpr impl::Point< T, N > floor( const impl::Point< T, N > &u ) noexcept
     {
-        T tuple[ N ];
+        std::array< T, N > tuple = { 0 };
         for ( auto i = 0l; i < N; ++i ) {
             tuple[ i ] = floor( u[ i ] );
         }
@@ -237,7 +172,7 @@ namespace crimild {
     template< typename T, Size N >
     [[nodiscard]] inline constexpr impl::Point< T, N > ceil( const impl::Point< T, N > &u ) noexcept
     {
-        T tuple[ N ];
+        std::array< T, N > tuple = { 0 };
         for ( auto i = 0l; i < N; ++i ) {
             tuple[ i ] = ceil( u[ i ] );
         }
@@ -247,11 +182,7 @@ namespace crimild {
     template< typename T, Size N >
     [[nodiscard]] inline constexpr impl::Point< T, N > lerp( const impl::Point< T, N > &u, const impl::Point< T, N > &v, Real t ) noexcept
     {
-        T tuple[ N ];
-        for ( auto i = 0l; i < N; ++i ) {
-            tuple[ i ] = lerp( u[ i ], v[ i ], t );
-        }
-        return impl::Point< T, N >( tuple );
+        return ( Real( 1 ) - t ) * u + t * v;
     }
 
     template< typename T, Size N >
@@ -279,7 +210,7 @@ namespace crimild {
     template< typename T, Size N >
     [[nodiscard]] inline constexpr impl::Point< T, N > min( const impl::Point< T, N > &u, const impl::Point< T, N > &v ) noexcept
     {
-        T tuple[ N ];
+        std::array< T, N > tuple = { 0 };
         for ( auto i = 0l; i < N; ++i ) {
             tuple[ i ] = min( u[ i ], v[ i ] );
         }
@@ -311,7 +242,7 @@ namespace crimild {
     template< typename T, Size N >
     [[nodiscard]] inline constexpr impl::Point< T, N > max( const impl::Point< T, N > &u, const impl::Point< T, N > &v ) noexcept
     {
-        T tuple[ N ];
+        std::array< T, N > tuple = { 0 };
         for ( auto i = 0l; i < N; ++i ) {
             tuple[ i ] = max( u[ i ], v[ i ] );
         }

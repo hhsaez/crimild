@@ -41,50 +41,11 @@ namespace crimild {
 
     namespace impl {
 
+        /*
+
         template< typename T >
         class Normal3 {
         public:
-            constexpr Normal3( void ) noexcept = default;
-
-            constexpr explicit Normal3( const T *tuple ) noexcept
-                : m_tuple()
-            {
-                m_tuple[ 0 ] = tuple[ 0 ];
-                m_tuple[ 1 ] = tuple[ 1 ];
-                m_tuple[ 2 ] = tuple[ 2 ];
-            }
-
-            constexpr Normal3( T x, T y, T z ) noexcept
-                : m_tuple()
-            {
-                m_tuple[ 0 ] = x;
-                m_tuple[ 1 ] = y;
-                m_tuple[ 2 ] = z;
-            }
-
-            constexpr Normal3( const Normal3 &other ) noexcept
-                : m_tuple( other.m_tuple )
-            {
-            }
-
-            constexpr Normal3( const Normal3 &&other ) noexcept
-                : m_tuple( std::move( other.m_tuple ) )
-            {
-            }
-
-            ~Normal3( void ) noexcept = default;
-
-            constexpr Normal3 &operator=( const Normal3 &other ) noexcept
-            {
-                m_tuple = other.m_tuple;
-                return *this;
-            }
-
-            constexpr Normal3 &operator=( const Normal3 &&other ) noexcept
-            {
-                m_tuple = std::move( other.m_tuple );
-                return *this;
-            }
 
             inline constexpr T x( void ) const noexcept
             {
@@ -188,6 +149,96 @@ namespace crimild {
 
         private:
             std::array< T, 3 > m_tuple;
+        };
+
+        */
+
+        template< typename T >
+        class Normal3
+            : public Tuple< T, 3 >,
+              public TupleOps< Normal3< T >, T, 3 > {
+        private:
+            using Base = Tuple< T, 3 >;
+
+        public:
+            struct Constants;
+
+        public:
+            constexpr Normal3( void ) noexcept = default;
+
+            constexpr explicit Normal3( const std::array< T, 3 > &tuple ) noexcept
+                : Base( tuple )
+            {
+            }
+
+            constexpr Normal3( T x, T y, T z ) noexcept
+                : Base( x, y, z )
+            {
+            }
+
+            constexpr Normal3( const Normal3 &other ) noexcept
+                : Base( other )
+            {
+            }
+
+            constexpr Normal3( Normal3 &&other ) noexcept
+                : Base( other )
+            {
+            }
+
+            constexpr explicit Normal3( const Base &other ) noexcept
+                : Base( other )
+            {
+            }
+
+            ~Normal3( void ) noexcept = default;
+
+            inline constexpr Normal3 &operator=( const Normal3 &other ) noexcept
+            {
+                Tuple< T, 3 >::operator=( other );
+                return *this;
+            }
+
+            inline constexpr Normal3 &operator=( Normal3 &&other ) noexcept
+            {
+                Tuple< T, 3 >::operator=( other );
+                return *this;
+            }
+
+            [[nodiscard]] inline constexpr Vector< T, 4 > xyzw( void ) const noexcept
+            {
+                return Vector< T, 4 > {
+                    Normal3::x(),
+                    Normal3::y(),
+                    Normal3::z(),
+                    T( 0 ),
+                };
+            }
+
+            template< typename U >
+            [[nodiscard]] inline constexpr Normal3 operator-( const Normal3< U > &v ) const noexcept
+            {
+                return Normal3 {
+                    Normal3::x() - v.x(),
+                    Normal3::y() - v.y(),
+                    Normal3::z() - v.z(),
+                };
+            }
+
+            [[nodiscard]] inline constexpr Normal3 operator/( Real scalar ) const noexcept
+            {
+                const auto invScalar = Real( 1 ) / scalar;
+                return *this * invScalar;
+            }
+
+            [[nodiscard]] inline constexpr Normal3 operator-( void ) const noexcept
+            {
+                return Normal3 {
+                    -Normal3::x(),
+                    -Normal3::y(),
+                    -Normal3::z(),
+                };
+            }
         };
 
     }

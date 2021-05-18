@@ -28,166 +28,99 @@
 #ifndef CRIMILD_MATHEMATICS_VECTOR_IMPL_
 #define CRIMILD_MATHEMATICS_VECTOR_IMPL_
 
-#include "Foundation/Types.hpp"
-#include "Mathematics/Numbers.hpp"
-#include "Mathematics/Utils.hpp"
-
-#include <array>
-#include <iomanip>
-#include <sstream>
+#include "Mathematics/Tuple.hpp"
 
 namespace crimild {
 
     namespace impl {
 
         template< typename T, Size N >
-        class Vector {
+        class Vector
+            : public Tuple< T, N >,
+              public TupleOps< Vector< T, N >, T, N >,
+              public TupleSwizzle< Vector, T, N > {
+        private:
+            using Base = Tuple< T, N >;
+
         public:
             struct Constants;
 
         public:
             constexpr Vector( void ) noexcept = default;
 
-            constexpr explicit Vector( T x ) noexcept
-                : m_tuple()
-            {
-                for ( auto i = 0l; i < N; ++i ) {
-                    m_tuple[ i ] = x;
-                }
-            }
-
             constexpr explicit Vector( const std::array< T, N > &tuple ) noexcept
-                : m_tuple( tuple )
+                : Base( tuple )
             {
             }
 
-            constexpr explicit Vector( const T *tuple ) noexcept
-                : m_tuple()
+            constexpr Vector( T x ) noexcept
+                : Base( x )
             {
-                for ( auto i = 0l; i < N; ++i ) {
-                    m_tuple[ i ] = tuple[ i ];
-                }
             }
 
             constexpr Vector( T x, T y ) noexcept
-                : m_tuple()
+                : Base( x, y )
             {
-                static_assert( N == 2 );
-                m_tuple[ 0 ] = x;
-                m_tuple[ 1 ] = y;
             }
 
             constexpr Vector( T x, T y, T z ) noexcept
-                : m_tuple()
+                : Base( x, y, z )
             {
-                static_assert( N == 3 );
-                m_tuple[ 0 ] = x;
-                m_tuple[ 1 ] = y;
-                m_tuple[ 2 ] = z;
             }
 
             constexpr Vector( T x, T y, T z, T w ) noexcept
-                : m_tuple()
+                : Base( x, y, z, w )
             {
-                static_assert( N == 4 );
-                m_tuple[ 0 ] = x;
-                m_tuple[ 1 ] = y;
-                m_tuple[ 2 ] = z;
-                m_tuple[ 3 ] = w;
+            }
+
+            constexpr Vector( const Tuple< T, 2 > &t, T z )
+                : Base( t.x(), t.y(), z )
+            {
+            }
+
+            constexpr Vector( const Tuple< T, 2 > &t, T z, T w )
+                : Base( t.x(), t.y(), z, w )
+            {
+            }
+
+            constexpr Vector( const Tuple< T, 3 > &t, T w )
+                : Base( t.x(), t.y(), t.z(), w )
+            {
             }
 
             constexpr Vector( const Vector &other ) noexcept
-                : m_tuple( other.m_tuple )
+                : Base( other )
             {
             }
 
-            constexpr Vector( const Vector &&other ) noexcept
-                : m_tuple( std::move( other.m_tuple ) )
+            constexpr Vector( Vector &&other ) noexcept
+                : Base( other )
+            {
+            }
+
+            constexpr explicit Vector( const Base &other ) noexcept
+                : Base( other )
             {
             }
 
             ~Vector( void ) noexcept = default;
 
-            constexpr Vector &operator=( const Vector &other ) noexcept
+            inline constexpr Vector &operator=( const Vector &other ) noexcept
             {
-                m_tuple = other.m_tuple;
+                Tuple< T, N >::operator=( other );
                 return *this;
             }
 
-            constexpr Vector &operator=( const Vector &&other ) noexcept
+            inline constexpr Vector &operator=( Vector &&other ) noexcept
             {
-                m_tuple = std::move( other.m_tuple );
+                Tuple< T, N >::operator=( other );
                 return *this;
-            }
-
-            inline constexpr T x( void ) const noexcept
-            {
-                static_assert( N >= 1 );
-                return m_tuple[ 0 ];
-            }
-
-            inline constexpr T y( void ) const noexcept
-            {
-                static_assert( N >= 2 );
-                return m_tuple[ 1 ];
-            }
-
-            inline constexpr T z( void ) const noexcept
-            {
-                static_assert( N >= 3 );
-                return m_tuple[ 2 ];
-            }
-
-            inline constexpr T w( void ) const noexcept
-            {
-                static_assert( N >= 4 );
-                return m_tuple[ 3 ];
-            }
-
-            inline constexpr Vector< T, 2 > xy( void ) const noexcept { return Vector< T, 2 > { x(), y() }; }
-            inline constexpr Vector< T, 2 > yx( void ) const noexcept { return Vector< T, 2 > { y(), x() }; }
-
-            inline constexpr Vector< T, 3 > xyz( void ) const noexcept { return Vector< T, 3 > { x(), y(), z() }; }
-            inline constexpr Vector< T, 3 > xxx( void ) const noexcept { return Vector< T, 3 > { x(), x(), x() }; }
-            inline constexpr Vector< T, 3 > yyy( void ) const noexcept { return Vector< T, 3 > { y(), y(), y() }; }
-            inline constexpr Vector< T, 3 > zzz( void ) const noexcept { return Vector< T, 3 > { z(), z(), z() }; }
-
-            inline constexpr Vector< T, 4 > xyzw( void ) const noexcept { return Vector< T, 4 > { x(), y(), z(), w() }; }
-            inline constexpr Vector< T, 4 > xyzz( void ) const noexcept { return Vector< T, 4 > { x(), y(), z(), z() }; }
-
-            [[nodiscard]] inline constexpr T operator[]( Size index ) const noexcept
-            {
-                return m_tuple[ index ];
-            }
-
-            [[nodiscard]] inline constexpr Bool operator==( const Vector &v ) const noexcept
-            {
-                auto ret = true;
-                for ( auto i = 0l; i < N; ++i ) {
-                    ret = ret && isEqual( ( *this )[ i ], v[ i ] );
-                }
-                return ret;
-            }
-
-            [[nodiscard]] inline constexpr Bool operator!=( const Vector &v ) const noexcept
-            {
-                return !( *this == v );
-            }
-
-            template< typename U >
-            [[nodiscard]] inline constexpr Vector operator+( const Vector< U, N > &v ) const noexcept
-            {
-                T tuple[ N ];
-                for ( auto i = 0l; i < N; ++i ) {
-                    tuple[ i ] = ( *this )[ i ] + v[ i ];
-                }
-                return Vector( tuple );
             }
 
             template< typename U >
             [[nodiscard]] inline constexpr Vector operator-( const Vector< U, N > &v ) const noexcept
             {
-                T tuple[ N ];
+                std::array< T, N > tuple = { 0 };
                 for ( auto i = 0l; i < N; ++i ) {
                     tuple[ i ] = ( *this )[ i ] - v[ i ];
                 }
@@ -195,70 +128,33 @@ namespace crimild {
             }
 
             template< typename U >
-            [[nodiscard]] inline constexpr Vector operator*( U scalar ) const noexcept
-            {
-                T tuple[ N ];
-                for ( auto i = 0l; i < N; ++i ) {
-                    tuple[ i ] = ( *this )[ i ] * scalar;
-                }
-                return Vector( tuple );
-            }
-
-            [[nodiscard]] friend inline constexpr Vector operator*( Real64 scalar, const Vector &u ) noexcept
-            {
-                T tuple[ N ];
-                for ( auto i = 0l; i < N; ++i ) {
-                    tuple[ i ] = u[ i ] * scalar;
-                }
-                return Vector( tuple );
-            }
-
-            template< typename U >
             [[nodiscard]] inline constexpr Vector operator*( const Vector< U, N > &v ) const noexcept
             {
-                T tuple[ N ];
+                std::array< T, N > tuple = { 0 };
                 for ( auto i = 0l; i < N; ++i ) {
                     tuple[ i ] = ( *this )[ i ] * v[ i ];
                 }
                 return Vector( tuple );
             }
 
-            template< typename U >
-            [[nodiscard]] inline constexpr Vector operator/( U scalar ) const noexcept
+            [[nodiscard]] inline constexpr Vector operator/( Real scalar ) const noexcept
             {
-                T tuple[ N ];
+                std::array< T, N > tuple = { 0 };
+                const auto invScalar = Real( 1 ) / scalar;
                 for ( auto i = 0l; i < N; ++i ) {
-                    tuple[ i ] = ( *this )[ i ] / scalar;
+                    tuple[ i ] = ( *this )[ i ] * invScalar;
                 }
                 return Vector( tuple );
             }
 
             [[nodiscard]] inline constexpr Vector operator-( void ) const noexcept
             {
-                T tuple[ N ];
+                std::array< T, N > tuple = { 0 };
                 for ( auto i = 0l; i < N; ++i ) {
                     tuple[ i ] = -( *this )[ i ];
                 }
                 return Vector( tuple );
             }
-
-            friend inline std::ostream &operator<<( std::ostream &out, const Vector &u )
-            {
-                out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
-                    << std::setprecision( 6 );
-                out << "(";
-                for ( auto i = 0l; i < N; ++i ) {
-                    if ( i > 0 ) {
-                        out << ", ";
-                    }
-                    out << u[ i ];
-                }
-                out << ")";
-                return out;
-            }
-
-        private:
-            std::array< T, N > m_tuple;
         };
 
         template< typename T, Size N >
@@ -331,7 +227,7 @@ namespace crimild {
     template< typename T, Size N >
     [[nodiscard]] inline constexpr impl::Vector< T, N > abs( const impl::Vector< T, N > &u ) noexcept
     {
-        T tuple[ N ];
+        std::array< T, N > tuple = { 0 };
         for ( auto i = 0l; i < N; ++i ) {
             tuple[ i ] = abs( u[ i ] );
         }
@@ -385,7 +281,7 @@ namespace crimild {
     template< typename T, Size N >
     [[nodiscard]] inline constexpr impl::Vector< T, N > min( const impl::Vector< T, N > &u, const impl::Vector< T, N > &v ) noexcept
     {
-        T tuple[ N ];
+        std::array< T, N > tuple = { 0 };
         for ( auto i = 0l; i < N; ++i ) {
             tuple[ i ] = min( u[ i ], v[ i ] );
         }
@@ -417,7 +313,7 @@ namespace crimild {
     template< typename T, Size N >
     [[nodiscard]] inline constexpr impl::Vector< T, N > max( const impl::Vector< T, N > &u, const impl::Vector< T, N > &v ) noexcept
     {
-        T tuple[ N ];
+        std::array< T, N > tuple = { 0 };
         for ( auto i = 0l; i < N; ++i ) {
             tuple[ i ] = max( u[ i ], v[ i ] );
         }
