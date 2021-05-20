@@ -56,7 +56,7 @@ TEST( MaterialComponent, attachMaterial )
 TEST( MaterialComponent, coding )
 {
     auto material = crimild::alloc< Material >();
-    material->setDiffuse( RGBAColorf( 0.7f, 0.7f, 0.7f, 1.0f ) );
+    material->setDiffuse( ColorRGBA( 0.7f, 0.7f, 0.7f, 1.0f ) );
     material->setColorMap( crimild::alloc< Texture >() );
 
     auto materials = crimild::alloc< MaterialComponent >();
@@ -74,5 +74,5 @@ TEST( MaterialComponent, coding )
     EXPECT_TRUE( ms->hasMaterials() );
 
     EXPECT_NE( nullptr, ms->first() );
-    EXPECT_EQ( RGBAColorf( 0.7f, 0.7f, 0.7f, 1.0f ), ms->first()->getDiffuse() );
+    EXPECT_EQ( ColorRGBA( 0.7f, 0.7f, 0.7f, 1.0f ), ms->first()->getDiffuse() );
 }

@@ -162,10 +162,11 @@ SharedPointer< Image > Image::fromRGBANoise( UInt32 size ) noexcept
             for ( int j = 0; j < size; ++j ) {
                 auto idx = ( i * size + j ) * 4;
 
-                Vector2f uv( i, j );
-                uv += Vector2f( 223.35734, 550.56781 );
-                uv.times( uv );
-                float xy = uv.x() * uv.y();
+                const auto V0 = Vector2f { Real( i ), Real( j ) };
+                constexpr auto V1 = Vector2f { 223.35734, 550.56781 };
+                const auto V2 = V0 + V1;
+                const auto V3 = V2 * V2;
+                const Real xy = V3.x() * V3.y();
 
                 Vector4f color(
                     Numericf::fract( xy * 0.00000012 ),

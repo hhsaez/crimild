@@ -28,7 +28,9 @@
 #ifndef CRIMILD_CORE_RENDERING_FORMAT_
 #define CRIMILD_CORE_RENDERING_FORMAT_
 
-#include "Mathematics/Vector.hpp"
+#include "Mathematics/Vector2.hpp"
+#include "Mathematics/Vector3.hpp"
+#include "Mathematics/Vector4.hpp"
 
 namespace crimild {
 

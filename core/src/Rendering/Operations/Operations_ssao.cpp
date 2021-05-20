@@ -230,17 +230,15 @@ vec3 color = vec3( occlusion );
                     std::uniform_real_distribution< Real32 > distribution( 0.0f, 1.0f );
                     std::default_random_engine generator;
                     for ( auto i = 0l; i < 64; ++i ) {
-                        auto sample = Vector3f(
+                        auto sample = normalize( Vector3f {
                             distribution( generator ) * 2.0f - 1.0f,
                             distribution( generator ) * 2.0f - 1.0f,
-                            distribution( generator ) );
-                        sample.normalize();
+                            distribution( generator ) } );
                         //sample *= distribution( generator );
                         // Place larger weights on samples closer to the fragment
                         auto scale = Real32( i ) / 64.0f;
                         Interpolation::linear( 0.1f, 1.0f, scale * scale, scale );
-                        sample *= scale;
-                        data.samples[ i ] = sample;
+                        data.samples[ i ] = sample * scale;
                     }
 
                     return crimild::alloc< CallbackUniformBuffer< Uniforms > >(

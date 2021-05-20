@@ -27,6 +27,8 @@
 
 #include "Rendering/VertexLayout.hpp"
 
+#include "Mathematics/ColorRGB.hpp"
+
 using namespace crimild;
 
 const VertexLayout VertexLayout::P3 = {
@@ -35,7 +37,7 @@ const VertexLayout VertexLayout::P3 = {
 
 const VertexLayout VertexLayout::P3_C3 = {
     { VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() },
-    { VertexAttribute::Name::COLOR, utils::getFormat< RGBColorf >() },
+    { VertexAttribute::Name::COLOR, utils::getFormat< ColorRGB >() },
 };
 
 const VertexLayout VertexLayout::P3_N3 = {
@@ -57,7 +59,6 @@ const VertexLayout VertexLayout::P3_N3_TC2 = {
 VertexLayout::VertexLayout( void ) noexcept
     : m_size( 0 )
 {
-
 }
 
 VertexLayout::VertexLayout( std::initializer_list< VertexAttribute > attribs ) noexcept
@@ -78,7 +79,7 @@ VertexLayout::VertexLayout( const Array< VertexAttribute > &attribs ) noexcept
     : m_size( 0 )
 {
     attribs.each(
-        [&] ( const auto &attrib ) {
+        [ & ]( const auto &attrib ) {
             m_attributes[ attrib.name ] = {
                 .name = attrib.name,
                 .format = attrib.format,
@@ -86,13 +87,12 @@ VertexLayout::VertexLayout( const Array< VertexAttribute > &attribs ) noexcept
             };
             m_sorted.add( attrib.name );
             m_size += utils::getFormatSize( attrib.format );
-        }
-    );
+        } );
 }
 
 crimild::Bool VertexLayout::operator==( const VertexLayout &other ) const noexcept
 {
     return m_size == other.m_size
-        && m_attributes == other.m_attributes
-        && m_sorted == other.m_sorted;
+           && m_attributes == other.m_attributes
+           && m_sorted == other.m_sorted;
 }

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,53 +26,49 @@
  */
 
 #include "UpdateWorldState.hpp"
-#include "SceneGraph/Node.hpp"
+
 #include "SceneGraph/Group.hpp"
+#include "SceneGraph/Node.hpp"
 
 using namespace crimild;
 
 UpdateWorldState::UpdateWorldState( void )
 {
-
 }
 
 UpdateWorldState::~UpdateWorldState( void )
 {
-
 }
 
 void UpdateWorldState::visitNode( Node *node )
 {
-	if ( node->worldIsCurrent() ) {
-		return;
-	}
+    if ( node->worldIsCurrent() ) {
+        return;
+    }
 
-	if ( node->hasParent() ) {
-		node->world().computeFrom( node->getParent()->getWorld(), node->getLocal() );
-	}
-	else {
-		node->setWorld( node->getLocal() );
-	}
+    if ( node->hasParent() ) {
+        node->setWorld( node->getParent()->getWorld() * node->getLocal() );
+    } else {
+        node->setWorld( node->getLocal() );
+    }
 
-	node->worldBound()->computeFrom( node->getLocalBound(), node->getWorld() );
+    node->worldBound()->computeFrom( node->getLocalBound(), node->getWorld() );
 }
 
 void UpdateWorldState::visitGroup( Group *group )
 {
-	visitNode( group );
-	NodeVisitor::visitGroup( group );
+    visitNode( group );
+    NodeVisitor::visitGroup( group );
 
-	if ( group->hasNodes() ) {
-		bool firstChild = true;
-		group->forEachNode( [&]( Node *node ) {
-			if ( firstChild ) {
-				firstChild = false;
-				group->worldBound()->computeFrom( node->getWorldBound() );
-			}
-			else {
-		        group->worldBound()->expandToContain( node->getWorldBound() );
-			}
-		});
-	}
+    if ( group->hasNodes() ) {
+        bool firstChild = true;
+        group->forEachNode( [ & ]( Node *node ) {
+            if ( firstChild ) {
+                firstChild = false;
+                group->worldBound()->computeFrom( node->getWorldBound() );
+            } else {
+                group->worldBound()->expandToContain( node->getWorldBound() );
+            }
+        } );
+    }
 }
-

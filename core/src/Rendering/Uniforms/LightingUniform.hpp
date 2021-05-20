@@ -29,7 +29,9 @@
 #define CRIMILD_RENDERING_UNIFORMS_LIGHT_
 
 #include "Foundation/Containers/Array.hpp"
-#include "Mathematics/Matrix.hpp"
+#include "Mathematics/ColorRGBA.hpp"
+#include "Mathematics/Matrix4.hpp"
+#include "Mathematics/Vector4.hpp"
 #include "Rendering/UniformBuffer.hpp"
 
 namespace crimild {
@@ -51,8 +53,8 @@ namespace crimild {
             alignas( 4 ) UInt32 type;
             alignas( 16 ) Vector4f position;
             alignas( 16 ) Vector4f direction;
-            alignas( 16 ) Vector4f ambient;
-            alignas( 16 ) Vector4f color;
+            alignas( 16 ) ColorRGBA ambient;
+            alignas( 16 ) ColorRGBA color;
             alignas( 16 ) Vector4f attenuation;
             alignas( 16 ) Vector4f cutoff;
             alignas( 4 ) Bool castShadows;

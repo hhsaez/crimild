@@ -28,26 +28,26 @@
 #ifndef CRIMILD_RENDERING_UNIFORMS_MODEL_VIEW_PROJECTION_
 #define CRIMILD_RENDERING_UNIFORMS_MODEL_VIEW_PROJECTION_
 
+#include "Mathematics/Matrix4.hpp"
 #include "Rendering/UniformBuffer.hpp"
-#include "Mathematics/Matrix.hpp"
 
 namespace crimild {
 
     class Node;
     class Camera;
 
-    class ModelViewProjectionUniform : public UniformBuffer {
+    class [[deprecated]] ModelViewProjectionUniform : public UniformBuffer {
     public:
         struct Props {
             Matrix4f model;
             Matrix4f view;
             Matrix4f proj;
         };
-        
+
     public:
         ModelViewProjectionUniform( void ) noexcept;
         ~ModelViewProjectionUniform( void ) = default;
-        
+
         Node *node = nullptr;
         Camera *camera = nullptr;
 
@@ -57,4 +57,3 @@ namespace crimild {
 }
 
 #endif
-

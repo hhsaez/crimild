@@ -28,8 +28,8 @@
 #ifndef CRIMILD_RENDERING_UNIFORMS_MODEL_
 #define CRIMILD_RENDERING_UNIFORMS_MODEL_
 
+#include "Mathematics/Matrix4.hpp"
 #include "Rendering/UniformBuffer.hpp"
-#include "Mathematics/Matrix.hpp"
 
 namespace crimild {
 
@@ -40,13 +40,13 @@ namespace crimild {
         struct Props {
             Matrix4f model;
         };
-        
+
     public:
         explicit ModelUniform( Node *node ) noexcept;
         ~ModelUniform( void ) = default;
 
         void onPreRender( void ) noexcept override;
-        
+
     private:
         Node *m_node = nullptr;
     };
@@ -54,4 +54,3 @@ namespace crimild {
 }
 
 #endif
-

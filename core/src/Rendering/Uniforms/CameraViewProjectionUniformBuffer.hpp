@@ -28,8 +28,9 @@
 #ifndef CRIMILD_RENDERING_UNIFORMS_CAMERA_VIEW_PROJECTION_
 #define CRIMILD_RENDERING_UNIFORMS_CAMERA_VIEW_PROJECTION_
 
+#include "Mathematics/Matrix4.hpp"
+#include "Mathematics/Vector2.hpp"
 #include "Rendering/UniformBuffer.hpp"
-#include "Mathematics/Matrix.hpp"
 
 namespace crimild {
 
@@ -42,7 +43,7 @@ namespace crimild {
             alignas( 16 ) Matrix4f proj;
             alignas( 8 ) Vector2f viewport;
         };
-        
+
     public:
         explicit CameraViewProjectionUniform( Camera *camera ) noexcept;
         ~CameraViewProjectionUniform( void ) = default;
@@ -56,4 +57,3 @@ namespace crimild {
 }
 
 #endif
-

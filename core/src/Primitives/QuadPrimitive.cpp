@@ -30,9 +30,8 @@
 using namespace crimild;
 
 QuadPrimitive::QuadPrimitive( void ) noexcept
-    : QuadPrimitive( Params { } )
+    : QuadPrimitive( Params {} )
 {
-
 }
 
 QuadPrimitive::QuadPrimitive( const Params &params ) noexcept
@@ -53,31 +52,28 @@ QuadPrimitive::QuadPrimitive( const Params &params ) noexcept
             Vector3f( -w, -h, 0.0f ),
             Vector3f( w, -h, 0.0f ),
             Vector3f( w, h, 0.0f ),
-        }
-    );
+        } );
 
     if ( layout.hasAttribute( VertexAttribute::Name::NORMAL ) ) {
         auto normals = vertices->get( VertexAttribute::Name::NORMAL );
         normals->set(
             Array< Vector3f > {
-                Vector3f::UNIT_Z,
-                Vector3f::UNIT_Z,
-                Vector3f::UNIT_Z,
-                Vector3f::UNIT_Z,
-            }
-        );
+                Vector3f::Constants::UNIT_Z,
+                Vector3f::Constants::UNIT_Z,
+                Vector3f::Constants::UNIT_Z,
+                Vector3f::Constants::UNIT_Z,
+            } );
     }
 
     if ( layout.hasAttribute( VertexAttribute::Name::TEX_COORD ) ) {
         auto texCoords = vertices->get( VertexAttribute::Name::TEX_COORD );
         texCoords->set(
             Array< Vector2f > {
-                texCoordOffset + Vector2f( 0.0f, 0.0f ).times( texCoordScale ),
-                texCoordOffset + Vector2f( 0.0f, 1.0f ).times( texCoordScale ),
-                texCoordOffset + Vector2f( 1.0f, 1.0f ).times( texCoordScale ),
-                texCoordOffset + Vector2f( 1.0f, 0.0f ).times( texCoordScale ),
-            }
-        );
+                texCoordOffset + ( Vector2f( 0.0f, 0.0f ) * texCoordScale ),
+                texCoordOffset + ( Vector2f( 0.0f, 1.0f ) * texCoordScale ),
+                texCoordOffset + ( Vector2f( 1.0f, 1.0f ) * texCoordScale ),
+                texCoordOffset + ( Vector2f( 1.0f, 0.0f ) * texCoordScale ),
+            } );
     }
 
     setVertexData( { vertices } );
@@ -87,34 +83,37 @@ QuadPrimitive::QuadPrimitive( const Params &params ) noexcept
             crimild::alloc< IndexBuffer >(
                 Format::INDEX_32_UINT,
                 Array< UInt32 > {
-                    0, 1,
-                    1, 2,
-                    2, 3,
-                    3, 0,
-                }
-            )
-        );
-    }
-    else if ( getType() == Primitive::Type::TRIANGLE_STRIP ) {
+                    0,
+                    1,
+                    1,
+                    2,
+                    2,
+                    3,
+                    3,
+                    0,
+                } ) );
+    } else if ( getType() == Primitive::Type::TRIANGLE_STRIP ) {
         // make sure indices are in the right order
         setIndices(
             crimild::alloc< IndexBuffer >(
                 Format::INDEX_32_UINT,
                 Array< UInt32 > {
-                    1, 2, 0, 3,
-                }
-            )
-        );
-    }
-    else {
+                    1,
+                    2,
+                    0,
+                    3,
+                } ) );
+    } else {
         setIndices(
             crimild::alloc< IndexBuffer >(
                 Format::INDEX_32_UINT,
                 Array< UInt32 > {
-                    0, 1, 2,
-                    0, 2, 3,
-                }
-            )
-        );
+                    0,
+                    1,
+                    2,
+                    0,
+                    2,
+                    3,
+                } ) );
     }
 }

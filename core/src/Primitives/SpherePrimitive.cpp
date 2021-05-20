@@ -32,9 +32,8 @@
 using namespace crimild;
 
 SpherePrimitive::SpherePrimitive( void ) noexcept
-    : SpherePrimitive( Params { } )
+    : SpherePrimitive( Params {} )
 {
-
 }
 
 SpherePrimitive::SpherePrimitive( const Params &params ) noexcept
@@ -50,7 +49,7 @@ SpherePrimitive::SpherePrimitive( const Params &params ) noexcept
     auto vertices = crimild::alloc< VertexBuffer >( layout, N );
     auto positions = vertices->get( VertexAttribute::Name::POSITION );
     auto colors = layout.hasAttribute( VertexAttribute::Name::COLOR ) ? vertices->get( VertexAttribute::Name::COLOR ) : nullptr;
-    auto normals = layout.hasAttribute( VertexAttribute::Name::NORMAL ) ?  vertices->get( VertexAttribute::Name::NORMAL ) : nullptr;
+    auto normals = layout.hasAttribute( VertexAttribute::Name::NORMAL ) ? vertices->get( VertexAttribute::Name::NORMAL ) : nullptr;
     auto texCoords = layout.hasAttribute( VertexAttribute::Name::TEX_COORD ) ? vertices->get( VertexAttribute::Name::TEX_COORD ) : nullptr;
 
     for ( auto latitude = 0.0f; latitude <= divisions[ 1 ]; latitude += 1.0f ) {
@@ -72,7 +71,7 @@ SpherePrimitive::SpherePrimitive( const Params &params ) noexcept
             positions->set( vIdx, center + radius * Vector3f( x, y, z ) );
 
             if ( colors != nullptr ) {
-                colors->set( vIdx, RGBColorf( 0.5f, 0.5f, 0.5f ) + 0.5f * RGBColorf( x, y, z ) );
+                colors->set( vIdx, ColorRGB( 0.5f, 0.5f, 0.5f ) + 0.5f * ColorRGB( x, y, z ) );
             }
 
             if ( normals != nullptr ) {
@@ -91,11 +90,9 @@ SpherePrimitive::SpherePrimitive( const Params &params ) noexcept
     if ( getType() == Primitive::Type::POINTS ) {
         auto indices = crimild::alloc< IndexBuffer >(
             Format::INDEX_32_UINT,
-            Array< Int32 >( divisions[ 1 ] * divisions[ 0 ] ).fill( []( auto i ) { return i; } )
-        );
+            Array< Int32 >( divisions[ 1 ] * divisions[ 0 ] ).fill( []( auto i ) { return i; } ) );
         setIndices( indices );
-    }
-    else {
+    } else {
         auto indices = crimild::alloc< IndexBuffer >( Format::INDEX_32_UINT, 6 * divisions[ 1 ] * divisions[ 0 ] );
         for ( auto latitude = 0l; latitude < divisions[ 1 ]; latitude++ ) {
             for ( auto longitude = 0l; longitude < divisions[ 0 ]; longitude++ ) {

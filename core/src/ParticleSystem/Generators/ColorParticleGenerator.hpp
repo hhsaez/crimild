@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -33,50 +33,49 @@
 namespace crimild {
 
     class ColorParticleGenerator : public ParticleSystemComponent::ParticleGenerator {
-		CRIMILD_IMPLEMENT_RTTI( crimild::ColorParticleGenerator )
+        CRIMILD_IMPLEMENT_RTTI( crimild::ColorParticleGenerator )
 
     public:
         ColorParticleGenerator( void );
         virtual ~ColorParticleGenerator( void );
 
-		inline void setMinStartColor( const RGBAColorf &color ) { _minStartColor = color; }
-		inline const RGBAColorf getMinStartColor( void ) const { return _minStartColor; }
+        inline void setMinStartColor( const ColorRGBA &color ) { _minStartColor = color; }
+        inline const ColorRGBA getMinStartColor( void ) const { return _minStartColor; }
 
-		inline void setMaxStartColor( const RGBAColorf &color ) { _maxStartColor = color; }
-		inline const RGBAColorf getMaxStartColor( void ) const { return _maxStartColor; }
+        inline void setMaxStartColor( const ColorRGBA &color ) { _maxStartColor = color; }
+        inline const ColorRGBA getMaxStartColor( void ) const { return _maxStartColor; }
 
-		inline void setMinEndColor( const RGBAColorf &color ) { _minEndColor = color; }
-		inline const RGBAColorf getMinEndColor( void ) const { return _minEndColor; }
+        inline void setMinEndColor( const ColorRGBA &color ) { _minEndColor = color; }
+        inline const ColorRGBA getMinEndColor( void ) const { return _minEndColor; }
 
-		inline void setMaxEndColor( const RGBAColorf &color ) { _maxEndColor = color; }
-		inline const RGBAColorf getMaxEndColor( void ) const { return _maxEndColor; }
+        inline void setMaxEndColor( const ColorRGBA &color ) { _maxEndColor = color; }
+        inline const ColorRGBA getMaxEndColor( void ) const { return _maxEndColor; }
 
-		virtual void configure( Node *node, ParticleData *particles ) override;
+        virtual void configure( Node *node, ParticleData *particles ) override;
         virtual void generate( Node *node, crimild::Real64 dt, ParticleData *particles, ParticleId startId, ParticleId endId ) override;
 
     private:
-		RGBAColorf _minStartColor;
-		RGBAColorf _maxStartColor;
-		RGBAColorf _minEndColor;
-		RGBAColorf _maxEndColor;
+        ColorRGBA _minStartColor;
+        ColorRGBA _maxStartColor;
+        ColorRGBA _minEndColor;
+        ColorRGBA _maxEndColor;
 
         ParticleAttribArray *_colors = nullptr;
-		ParticleAttribArray *_startColors = nullptr;
-		ParticleAttribArray *_endColors = nullptr;
+        ParticleAttribArray *_startColors = nullptr;
+        ParticleAttribArray *_endColors = nullptr;
 
-		/** 
+        /**
 		 	\name Coding support
 		*/
-		//@{
+        //@{
 
-	public:
-		virtual void encode( coding::Encoder &encoder ) override;
-		virtual void decode( coding::Decoder &decoder ) override;
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
 
-		//@}
+        //@}
     };
 
 }
 
 #endif
-

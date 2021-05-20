@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -27,62 +27,59 @@
 
 #include "EulerAnglesParticleGenerator.hpp"
 
-#include "Mathematics/Random.hpp"
-#include "Coding/Encoder.hpp"
 #include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
+#include "Mathematics/Random.hpp"
 #include "SceneGraph/Node.hpp"
 
 using namespace crimild;
 
 EulerAnglesParticleGenerator::EulerAnglesParticleGenerator( void )
-	: EulerAnglesParticleGenerator( 0.0f, Numericf::TWO_PI, Vector3f::ONE )
+    : EulerAnglesParticleGenerator( 0.0f, Numericf::TWO_PI, Vector3f::Constants::ONE )
 {
-
 }
 
 EulerAnglesParticleGenerator::EulerAnglesParticleGenerator( crimild::Real32 min, crimild::Real32 max, const Vector3f &axis )
-	: m_min( min ),
-	  m_max( max ),
-	  m_axis( axis )
+    : m_min( min ),
+      m_max( max ),
+      m_axis( axis )
 {
-	
 }
 
 void EulerAnglesParticleGenerator::configure( Node *node, ParticleData *particles )
 {
-	m_angles = particles->createAttribArray< Vector3f >( ParticleAttrib::EULER_ANGLES );
-	assert( m_angles != nullptr );
+    m_angles = particles->createAttribArray< Vector3f >( ParticleAttrib::EULER_ANGLES );
+    assert( m_angles != nullptr );
 }
 
 void EulerAnglesParticleGenerator::generate( Node *node, crimild::Real64 dt, ParticleData *particles, ParticleId startId, ParticleId endId )
 {
-	auto count = endId - startId;
-	if ( count == 0 ) {
-		return;
-	}
-    
-	auto angles = m_angles->getData< Vector3f >();
-	for ( auto i = startId; i < endId; ++i ) {
-		auto angle = Random::generate< crimild::Real32 >( m_min, m_max );
-		angles[ i ] = angle * m_axis;
-	}
+    auto count = endId - startId;
+    if ( count == 0 ) {
+        return;
+    }
+
+    auto angles = m_angles->getData< Vector3f >();
+    for ( auto i = startId; i < endId; ++i ) {
+        auto angle = Random::generate< crimild::Real32 >( m_min, m_max );
+        angles[ i ] = angle * m_axis;
+    }
 }
 
-void EulerAnglesParticleGenerator::encode( coding::Encoder &encoder ) 
+void EulerAnglesParticleGenerator::encode( coding::Encoder &encoder )
 {
-	ParticleSystemComponent::ParticleGenerator::encode( encoder );
+    ParticleSystemComponent::ParticleGenerator::encode( encoder );
 
-	encoder.encode( "min", m_min );
-	encoder.encode( "max", m_max );
-	encoder.encode( "axis", m_axis );
+    encoder.encode( "min", m_min );
+    encoder.encode( "max", m_max );
+    encoder.encode( "axis", m_axis );
 }
 
 void EulerAnglesParticleGenerator::decode( coding::Decoder &decoder )
 {
-	ParticleSystemComponent::ParticleGenerator::decode( decoder );
+    ParticleSystemComponent::ParticleGenerator::decode( decoder );
 
-	decoder.decode( "min", m_min );
-	decoder.decode( "max", m_max );
-	decoder.decode( "axis", m_axis );
+    decoder.decode( "min", m_min );
+    decoder.decode( "max", m_max );
+    decoder.decode( "axis", m_axis );
 }
-

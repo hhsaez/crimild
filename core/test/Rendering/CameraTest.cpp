@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,6 +26,7 @@
  */
 
 #include "SceneGraph/Camera.hpp"
+
 #include "SceneGraph/Group.hpp"
 #include "Visitors/FetchCameras.hpp"
 #include "Visitors/SelectNodes.hpp"
@@ -42,6 +43,7 @@ TEST( CameraTest, construction )
 
 TEST( CameraTest, viewMatrix )
 {
+    /*
 	auto camera = crimild::alloc< Camera >();
 	camera->local().setTranslate( 0.0f, 1.0f, 5.0f );
 	camera->perform( UpdateWorldState() );
@@ -51,21 +53,23 @@ TEST( CameraTest, viewMatrix )
 	EXPECT_EQ( 0.0f, view[ 12 ] );
 	EXPECT_EQ( -1.0f, view[ 13 ] );
 	EXPECT_EQ( -5.0f, view[ 14 ] );
+    */
+
+    FAIL();
 }
 
 TEST( CameraTest, fetchCameras )
 {
-	auto scene = crimild::alloc< Group >();
-	auto camera = crimild::alloc< Camera >();
-	scene->attachNode( camera );
+    auto scene = crimild::alloc< Group >();
+    auto camera = crimild::alloc< Camera >();
+    scene->attachNode( camera );
 
-	FetchCameras fetchCameras;
-	scene->perform( fetchCameras );
-	int i = 0;
-	fetchCameras.forEachCamera( [&i, camera]( Camera *c ) {
+    FetchCameras fetchCameras;
+    scene->perform( fetchCameras );
+    int i = 0;
+    fetchCameras.forEachCamera( [ &i, camera ]( Camera *c ) {
         EXPECT_EQ( crimild::get_ptr( camera ), c );
-		i++;
-	});
-	EXPECT_EQ( 1, i );
+        i++;
+    } );
+    EXPECT_EQ( 1, i );
 }
-

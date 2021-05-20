@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -27,33 +27,31 @@
 
 #include "SpherePositionParticleGenerator.hpp"
 
-#include "Mathematics/Random.hpp"
-#include "Coding/Encoder.hpp"
 #include "Coding/Decoder.hpp"
-
+#include "Coding/Encoder.hpp"
+#include "Mathematics/Random.hpp"
 #include "SceneGraph/Node.hpp"
 
 using namespace crimild;
 
 SpherePositionParticleGenerator::SpherePositionParticleGenerator( void )
 {
-
 }
 
 SpherePositionParticleGenerator::~SpherePositionParticleGenerator( void )
 {
-
 }
 
 void SpherePositionParticleGenerator::configure( Node *node, ParticleData *particles )
 {
-	_positions = particles->createAttribArray< Vector3f >( ParticleAttrib::POSITION );
+    _positions = particles->createAttribArray< Vector3f >( ParticleAttrib::POSITION );
 }
 
 void SpherePositionParticleGenerator::generate( Node *node, crimild::Real64 dt, ParticleData *particles, ParticleId startId, ParticleId endId )
 {
+    /*
 	auto ps = _positions->getData< Vector3f >();
-	
+
     const auto posMin = -Vector3f::ONE;
     const auto posMax = Vector3f::ONE;
 
@@ -66,21 +64,21 @@ void SpherePositionParticleGenerator::generate( Node *node, crimild::Real64 dt, 
 			node->getWorld().applyToPoint( ps[ i ], ps[ i ] );
 		}
     }
+    */
 }
 
-void SpherePositionParticleGenerator::encode( coding::Encoder &encoder ) 
+void SpherePositionParticleGenerator::encode( coding::Encoder &encoder )
 {
-	ParticleSystemComponent::ParticleGenerator::encode( encoder );
+    ParticleSystemComponent::ParticleGenerator::encode( encoder );
 
-	encoder.encode( "origin", _origin );
-	encoder.encode( "size", _size );
+    encoder.encode( "origin", _origin );
+    encoder.encode( "size", _size );
 }
 
 void SpherePositionParticleGenerator::decode( coding::Decoder &decoder )
 {
-	ParticleSystemComponent::ParticleGenerator::decode( decoder );
+    ParticleSystemComponent::ParticleGenerator::decode( decoder );
 
-	decoder.decode( "origin", _origin );
-	decoder.decode( "size", _size );
+    decoder.decode( "origin", _origin );
+    decoder.decode( "size", _size );
 }
-

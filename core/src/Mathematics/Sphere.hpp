@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,127 +28,103 @@
 #ifndef CRIMILD_MATHEMATICS_SPHERE_
 #define CRIMILD_MATHEMATICS_SPHERE_
 
-#include "Vector.hpp"
-#include "Numeric.hpp"
 #include "Plane.hpp"
-#include "Distance.hpp"
+#include "Point3.hpp"
 
 namespace crimild {
 
-	template< typename T >
-	class Sphere {
-	public:
-		typedef Vector< 3, T > VectorImpl;
-		typedef Plane< 3, T > PlaneImpl;
+    class Sphere {
+    public:
+        constexpr Sphere( void ) noexcept = default;
 
-		Sphere( void )
-		{
-		}
+        constexpr Sphere( const Point3 &center, Real radius ) noexcept
+            : m_center( center ),
+              m_radius( radius )
+        {
+        }
 
-		Sphere( const VectorImpl &c, T r )
-			: _center( c ),
-			  _radius( r )
-		{
-		}
+        constexpr Sphere( const Sphere &other ) noexcept
+            : m_center( other.m_center ),
+              m_radius( other.m_radius )
+        {
+        }
 
-		Sphere( const Sphere &sphere )
-			: _center( sphere._center ),
-			  _radius( sphere._radius )
-		{
-		}
+        constexpr Sphere( Sphere &&other ) noexcept
+            : m_center( std::move( other.m_center ) ),
+              m_radius( std::move( other.m_radius ) )
+        {
+        }
 
-		~Sphere( void )
-		{
-		}
+        ~Sphere( void ) = default;
 
-		Sphere &operator=( const Sphere &sphere )
-		{
-			_center = sphere._center;
-			_radius = sphere._radius;
+        constexpr Sphere &operator=( const Sphere &other ) noexcept
+        {
+            m_center = other.m_center;
+            m_radius = other.m_radius;
             return *this;
-		}
+        }
 
-		void setCenter( const VectorImpl &c )
-		{
-			_center = c;
-		}
+        constexpr Sphere &operator=( Sphere &&other ) noexcept
+        {
+            m_center = std::move( other.m_center );
+            m_radius = std::move( other.m_radius );
+            return *this;
+        }
 
-		VectorImpl &getCenter( void )
-		{
-			return _center;
-		}
+        inline constexpr const Point3 &getCenter( void ) const noexcept { return m_center; }
+        inline constexpr Real getRadius( void ) const noexcept { return m_radius; }
 
-		const VectorImpl &getCenter( void ) const
-		{
-			return _center;
-		}
+    private:
+        Point3 m_center = Point3::Constants::ZERO;
+        Real m_radius = 1.0;
+    };
 
-		VectorImpl &center( void )
-		{
-			return _center;
-		}
+    [[nodiscard]] constexpr Sphere expandToContain( const Sphere &S0, const Sphere &S1 ) noexcept
+    {
+        const auto &C0 = S0.getCenter();
+        const auto R0 = S0.getRadius();
+        const auto &C1 = S1.getCenter();
+        const auto R1 = S1.getRadius();
 
-		void setRadius( T r )
-		{
-			_radius = r;
-		}
+        const auto centerDiff = C1 - C0;
+        const auto lengthSqr = lengthSquared( centerDiff );
+        const auto radiusDiff = R1 - R0;
+        const auto radiusDiffSqr = radiusDiff * radiusDiff;
 
-		T getRadius( void ) const
-		{
-			return _radius;
-		}
+        Point3 C;
+        auto R = Real( 0 );
+        if ( radiusDiffSqr >= lengthSqr ) {
+            if ( radiusDiff >= 0 ) {
+                C = C1;
+                R = R1;
+            }
+        } else {
+            const auto length = sqrt( lengthSqr );
+            if ( !isZero( length ) ) {
+                const auto coeff = ( length + radiusDiff ) / ( 2.0 * length );
+                C = C0 + coeff * centerDiff;
+            }
 
-		T &radius( void )
-		{
-			return _radius;
-		}
+            R = Real( 0.5 ) * ( length + R0 + R1 );
+        }
 
-		void expandToContain( const Sphere &sphere )
-		{
-			VectorImpl centerDiff = sphere._center - _center;
-		   	T lengthSqr = static_cast< T >( centerDiff.getSquaredMagnitude() );
-		   	T radiusDiff = sphere._radius - _radius;
-		   	T radiusDiffSqr = radiusDiff * radiusDiff;
+        return Sphere( C, R );
+    }
 
-		   	if ( radiusDiffSqr >= lengthSqr ) {
-		   		if ( radiusDiff >= 0 ) {
-		   			_center = sphere._center;
-		   			_radius = sphere._radius;
-		   		}
-		   	}
-		   	else {
-		   		T length = std::sqrt( lengthSqr );
-		   		if ( length > Numeric< T >::ZERO_TOLERANCE ) {
-		   			T coeff = static_cast< T >( ( length + radiusDiff ) / ( 2.0 * length ) );
-		   			_center = _center + coeff * centerDiff;
-		   		}
+    [[nodiscard]] constexpr char whichSide( const Plane3 &P, const Sphere &S ) noexcept
+    {
+        const auto &C = S.getCenter();
+        const auto R = S.getRadius();
+        const auto d = distance( P, C );
+        if ( d < -R ) {
+            return -1; // behind
+        } else if ( d > R ) {
+            return +1; // front
+        }
 
-		   		_radius = static_cast< T >( 0.5 * ( length + _radius + sphere._radius ) );
-		   	}
-		}
-
-		int whichSide( const PlaneImpl &plane ) const
-		{
-			double d = Distance::compute( plane, _center );
-			if ( d < -_radius ) {
-				return -1; // behind
-			}
-			else if ( d > _radius ) {
-				return 1; // front
-			}
-
-			return 0; // intersecting
-		}
-
-	private:
-		VectorImpl _center;
-		T _radius;
-	};
-
-	typedef Sphere< float > Sphere3f;
-	typedef Sphere< double > Sphere3d;
+        return 0; // intersecting
+    }
 
 }
 
 #endif
-

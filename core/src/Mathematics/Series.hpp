@@ -28,9 +28,9 @@
 #ifndef CRIMILD_MATHEMATICS_SERIES_
 #define CRIMILD_MATHEMATICS_SERIES_
 
-#include "Mathematics/Vector.hpp"
 #include "Foundation/Containers/Array.hpp"
 #include "Foundation/Types.hpp"
+#include "Mathematics/Vector3.hpp"
 
 namespace crimild {
 
@@ -40,40 +40,36 @@ namespace crimild {
         static Array< Number > fibonacci( Size N ) noexcept
         {
             return Array< Number >( N ).fill(
-                [
-                    a = Number( 0 ),
-                    b = Number( 1 )
-                ]( auto i ) mutable {
-                    if ( i < 2 ) { return Number( i ); }
+                [ a = Number( 0 ),
+                  b = Number( 1 ) ]( auto i ) mutable {
+                    if ( i < 2 ) {
+                        return Number( i );
+                    }
                     auto c = a + b;
                     auto ret = c;
                     a = b;
                     b = c;
                     return ret;
-                }
-            );
+                } );
         }
 
-        static Array< std::pair< Vector3f, Real32 >> fibonacciSquares( Size N ) noexcept
+        static Array< std::pair< Vector3f, Real32 > > fibonacciSquares( Size N ) noexcept
         {
-            return Array< std::pair< Vector3f, Real32 >>( N ).fill(
-                [
-                    s0 = 1.0f,
-                    s1 = 1.0f,
-                    c0 = Vector3f::ZERO,
-                    c1 = -Vector3f::UNIT_X
-                ]( auto i ) mutable -> std::pair< Vector3f, Real32 > {
+            return Array< std::pair< Vector3f, Real32 > >( N ).fill(
+                [ s0 = 1.0f,
+                  s1 = 1.0f,
+                  c0 = Vector3f::Constants::ZERO,
+                  c1 = -Vector3f::Constants::UNIT_X ]( auto i ) mutable -> std::pair< Vector3f, Real32 > {
                     const auto OFFSET = Array< Vector3f > {
-                        -Vector3f::UNIT_Y,
-                        -Vector3f::UNIT_X,
-                        Vector3f::UNIT_Y,
-                        Vector3f::UNIT_X,
+                        -Vector3f::Constants::UNIT_Y,
+                        -Vector3f::Constants::UNIT_X,
+                        Vector3f::Constants::UNIT_Y,
+                        Vector3f::Constants::UNIT_X,
                     };
 
                     if ( i == 0 ) {
                         return std::make_pair( c0, 1.0f );
-                    }
-                    else if ( i == 1 ) {
+                    } else if ( i == 1 ) {
                         return std::make_pair( c1, 1.0f );
                     }
 
@@ -85,9 +81,7 @@ namespace crimild {
                     c0 = c1;
                     c1 = c;
                     return std::make_pair( c, s );
-                }
-            );
-
+                } );
         }
 
     }

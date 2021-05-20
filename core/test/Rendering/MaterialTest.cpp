@@ -38,9 +38,9 @@ TEST( MaterialTest, construction )
 {
     auto material = crimild::alloc< Material >();
 
-    EXPECT_EQ( RGBAColorf( 0.0f, 0.0f, 0.0f, 1.0f ), material->getAmbient() );
-    EXPECT_EQ( RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ), material->getDiffuse() );
-    EXPECT_EQ( RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ), material->getSpecular() );
+    EXPECT_EQ( ColorRGBA( 0.0f, 0.0f, 0.0f, 1.0f ), material->getAmbient() );
+    EXPECT_EQ( ColorRGBA( 1.0f, 1.0f, 1.0f, 1.0f ), material->getDiffuse() );
+    EXPECT_EQ( ColorRGBA( 1.0f, 1.0f, 1.0f, 1.0f ), material->getSpecular() );
     EXPECT_EQ( 50.0f, material->getShininess() );
 
     EXPECT_EQ( nullptr, material->getColorMap() );
@@ -51,9 +51,7 @@ TEST( MaterialTest, setProgram )
 {
     auto material = crimild::alloc< Material >();
 
-    auto vs = crimild::alloc< VertexShader >( "vs code" );
-    auto fs = crimild::alloc< FragmentShader >( "fs code" );
-    auto program = crimild::alloc< ShaderProgram >( vs, fs );
+    auto program = crimild::alloc< ShaderProgram >();
     material->setProgram( program );
 
     ASSERT_EQ( crimild::get_ptr( program ), material->getProgram() );
@@ -73,9 +71,9 @@ TEST( MaterialTest, setColorMap )
 TEST( MaterialTest, coding )
 {
     auto material = crimild::alloc< Material >();
-    material->setDiffuse( RGBAColorf( 0.9f, 0.9f, 0.9f, 1.0f ) );
-    material->setAmbient( RGBAColorf( 0.1f, 0.1f, 0.1f, 1.0f ) );
-    material->setSpecular( RGBAColorf( 0.5f, 0.5f, 0.5f, 1.0f ) );
+    material->setDiffuse( ColorRGBA( 0.9f, 0.9f, 0.9f, 1.0f ) );
+    material->setAmbient( ColorRGBA( 0.1f, 0.1f, 0.1f, 1.0f ) );
+    material->setSpecular( ColorRGBA( 0.5f, 0.5f, 0.5f, 1.0f ) );
     material->setShininess( 25.0f );
 
     material->setColorMap( crimild::alloc< Texture >() );
@@ -89,9 +87,9 @@ TEST( MaterialTest, coding )
     auto m = decoder->getObjectAt< Material >( 0 );
     EXPECT_TRUE( material != nullptr );
 
-    EXPECT_EQ( RGBAColorf( 0.9f, 0.9f, 0.9f, 1.0f ), m->getDiffuse() );
-    EXPECT_EQ( RGBAColorf( 0.1f, 0.1f, 0.1f, 1.0f ), m->getAmbient() );
-    EXPECT_EQ( RGBAColorf( 0.5f, 0.5f, 0.5f, 1.0f ), m->getSpecular() );
+    EXPECT_EQ( ColorRGBA( 0.9f, 0.9f, 0.9f, 1.0f ), m->getDiffuse() );
+    EXPECT_EQ( ColorRGBA( 0.1f, 0.1f, 0.1f, 1.0f ), m->getAmbient() );
+    EXPECT_EQ( ColorRGBA( 0.5f, 0.5f, 0.5f, 1.0f ), m->getSpecular() );
     EXPECT_EQ( 25.0f, m->getShininess() );
 
     EXPECT_NE( nullptr, m->getColorMap() );

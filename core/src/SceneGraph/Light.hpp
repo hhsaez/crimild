@@ -29,6 +29,7 @@
 #define CRIMILD_SCENEGRAPH_LIGHT_
 
 #include "Foundation/Containers/Array.hpp"
+#include "Mathematics/ColorRGBA.hpp"
 #include "Node.hpp"
 #include "Rendering/Catalog.hpp"
 
@@ -70,14 +71,14 @@ namespace crimild {
 
         const Type &getType( void ) const noexcept { return _type; }
 
-        Vector3f getPosition( void ) const { return getWorld().getTranslate(); }
-        Vector3f getDirection( void ) const { return ( _type == Type::POINT ? Vector3f( 0.0f, 0.0f, 0.0f ) : getWorld().computeDirection() ); }
+        Point3 getPosition( void ) const { return getWorld()( Point3::Constants::ZERO ); }
+        Vector3f getDirection( void ) const { return ( _type == Type::POINT ? Vector3f( 0.0f, 0.0f, 0.0f ) : getWorld()( Vector3::Constants::UNIT_Z ) ); }
 
         void setAttenuation( const Vector3f &attenuation ) { _attenuation = attenuation; }
         const Vector3f &getAttenuation( void ) const { return _attenuation; }
 
-        void setColor( const RGBAColorf &color ) { _color = color; }
-        const RGBAColorf &getColor( void ) const { return _color; }
+        void setColor( const ColorRGBA &color ) { _color = color; }
+        const ColorRGBA &getColor( void ) const { return _color; }
 
         void setOuterCutoff( float value ) { _outerCutoff = value; }
         float getOuterCutoff( void ) const { return _outerCutoff; }
@@ -88,8 +89,8 @@ namespace crimild {
         void setExponent( float value ) { _exponent = value; }
         float getExponent( void ) const { return _exponent; }
 
-        const RGBAColorf &getAmbient( void ) const { return _ambient; }
-        void setAmbient( const RGBAColorf &ambient ) { _ambient = ambient; }
+        const ColorRGBA &getAmbient( void ) const { return _ambient; }
+        void setAmbient( const ColorRGBA &ambient ) { _ambient = ambient; }
 
         inline Real32 getEnergy( void ) const noexcept { return m_energy; }
         inline void setEnergy( Real32 energy ) noexcept { m_energy = energy; }
@@ -102,11 +103,11 @@ namespace crimild {
     private:
         Type _type;
         Vector3f _attenuation;
-        RGBAColorf _color;
+        ColorRGBA _color;
         float _outerCutoff;
         float _innerCutoff;
         float _exponent;
-        RGBAColorf _ambient;
+        ColorRGBA _ambient;
         SharedPointer< DescriptorSet > m_descriptors;
         Real32 m_energy = 1.0f;
         Real32 m_radius = -1.0f; // compute radius based on energy by default

@@ -29,7 +29,7 @@
 #define CRIMILD_UI_LABEL_
 
 #include "Components/NodeComponent.hpp"
-#include "Mathematics/Vector.hpp"
+#include "Mathematics/ColorRGBA.hpp"
 
 namespace crimild {
 
@@ -57,7 +57,7 @@ namespace crimild {
 
         public:
             UILabel( void );
-            UILabel( std::string text, const RGBAColorf &color = RGBAColorf::ONE );
+            UILabel( std::string text, const ColorRGBA &color = ColorRGBA::Constants::WHITE );
             ~UILabel( void ) = default;
 
             virtual void onAttach( void ) override;
@@ -72,8 +72,8 @@ namespace crimild {
             void setTextVerticalAlignment( TextVerticalAlignment value ) { _textVerticalAlignment = value; }
             TextVerticalAlignment getTextVerticalAlignment( void ) const { return _textVerticalAlignment; }
 
-            void setTextColor( const RGBAColorf &value ) { _textColor = value; }
-            const RGBAColorf &getTextColor( void ) const { return _textColor; }
+            void setTextColor( const ColorRGBA &value ) { _textColor = value; }
+            const ColorRGBA &getTextColor( void ) const { return _textColor; }
 
             void setTextSize( crimild::Real32 value ) { _textSize = value; }
             crimild::Real32 getTextSize( void ) const { return _textSize; }
@@ -83,7 +83,7 @@ namespace crimild {
             SharedPointer< Text > _text = nullptr;
             TextHorizontalAlignment _textHorizontalAlignment = TextHorizontalAlignment::Left;
             TextVerticalAlignment _textVerticalAlignment = TextVerticalAlignment::Center;
-            RGBAColorf _textColor;
+            ColorRGBA _textColor;
             crimild::Real32 _textSize = 10.0f;
 
         public:

@@ -41,7 +41,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::blur( SharedPointer< F
     return convolution(
         "blur",
         image,
-        Matrix3f(
+        Matrix3f {
             1.0f / 16.0f,
             2.0f / 16.0f,
             1.0f / 16.0f,
@@ -50,7 +50,8 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::blur( SharedPointer< F
             2.0f / 16.0f,
             1.0f / 16.0f,
             2.0f / 16.0f,
-            1.0f / 16.0f ) );
+            1.0f / 16.0f,
+        } );
 }
 
 SharedPointer< FrameGraphOperation > crimild::framegraph::sharpen( SharedPointer< FrameGraphResource > const &image ) noexcept
@@ -58,7 +59,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::sharpen( SharedPointer
     return convolution(
         "sharpen",
         image,
-        Matrix3f(
+        Matrix3f {
             -1.0f,
             -1.0f,
             -1.0f,
@@ -67,7 +68,8 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::sharpen( SharedPointer
             -1.0f,
             -1.0f,
             -1.0f,
-            -1.0f ) );
+            -1.0f,
+        } );
 }
 
 SharedPointer< FrameGraphOperation > crimild::framegraph::edges( SharedPointer< FrameGraphResource > const &image ) noexcept
@@ -75,7 +77,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::edges( SharedPointer< 
     return convolution(
         "edges",
         image,
-        Matrix3f(
+        Matrix3f {
             1.0f,
             1.0f,
             1.0f,
@@ -84,7 +86,8 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::edges( SharedPointer< 
             1.0f,
             1.0f,
             1.0f,
-            1.0f ) );
+            1.0f,
+        } );
 }
 
 SharedPointer< FrameGraphOperation > crimild::framegraph::convolution( std::string name, SharedPointer< FrameGraphResource > const &image, const Matrix3f &kernel ) noexcept
@@ -201,11 +204,12 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::convolution( std::stri
                 .descriptorType = DescriptorType::UNIFORM_BUFFER,
                 .obj = [ & ] {
                     struct Uniforms {
-                        alignas( 16 ) Real32 kernel[ 9 ];
+                        alignas( 16 ) Matrix3f kernel;
+                        //alignas( 16 ) Real32 kernel[ 9 ];
                     };
 
-                    auto data = Uniforms {};
-                    memcpy( &data.kernel[ 0 ], kernel.getData(), 9 * sizeof( Real32 ) );
+                    auto data = Uniforms { .kernel = kernel };
+                    //memcpy( &data.kernel[ 0 ], kernel.getData(), 9 * sizeof( Real32 ) );
                     return crimild::alloc< UniformBuffer >( data );
                 }(),
             },

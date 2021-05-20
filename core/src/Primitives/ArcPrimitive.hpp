@@ -30,8 +30,6 @@
 
 #include "Primitive.hpp"
 
-#include "Mathematics/Vector.hpp"
-
 namespace crimild {
 
     class ArcPrimitive : public Primitive {

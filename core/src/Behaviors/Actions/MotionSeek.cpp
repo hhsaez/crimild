@@ -8,16 +8,16 @@ using namespace crimild::behaviors::actions;
 
 MotionSeek::MotionSeek( void )
 {
-
 }
 
 MotionSeek::~MotionSeek( void )
 {
-
 }
 
 Behavior::State MotionSeek::step( BehaviorContext *context )
 {
+    assert( false && "TODO" );
+#if 0
 	auto velocity = context->getValue< Vector3f >( "motion.velocity" );
 	auto targetPosition = context->getValue< Vector3f >( "motion.target" );
 	auto position = context->getValue< Vector3f >( "motion.position" );
@@ -44,21 +44,21 @@ Behavior::State MotionSeek::step( BehaviorContext *context )
 	}
 
 	desiredVelocity = desiredVelocity.getNormalized() * arrivalCoeff * maxVelocity;
-	
+
     steering += desiredVelocity - velocity;
 
 	context->setValue( "motion.steering", steering );
-	
-	return Behavior::State::SUCCESS;
+#endif
+
+    return Behavior::State::SUCCESS;
 }
 
 void MotionSeek::encode( coding::Encoder &encoder )
 {
-	Behavior::encode( encoder );
+    Behavior::encode( encoder );
 }
 
 void MotionSeek::decode( coding::Decoder &decoder )
 {
-	Behavior::decode( decoder );
+    Behavior::decode( decoder );
 }
-

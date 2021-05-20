@@ -415,7 +415,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::renderShadowAtlas( Sha
     };
 
     renderPass->clearValue = {
-        .color = RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ),
+        .color = ColorRGBA( 1.0f, 1.0f, 1.0f, 1.0f ),
     };
 
     renderPass->reads( { renderables } );

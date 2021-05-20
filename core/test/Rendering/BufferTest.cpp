@@ -27,8 +27,9 @@
 
 #include "Rendering/Buffer.hpp"
 
-#include "Mathematics/Matrix.hpp"
-#include "Mathematics/Vector.hpp"
+#include "Mathematics/ColorRGBA.hpp"
+#include "Mathematics/Matrix4.hpp"
+#include "Mathematics/Vector3.hpp"
 
 #include "gtest/gtest.h"
 
@@ -87,18 +88,18 @@ TEST( Buffer, constructionWithStruct )
         Matrix4f proj;
         Matrix4f view;
         Matrix4f model;
-        RGBAColorf color;
+        ColorRGBA color;
         crimild::Real32 metalness;
     };
 
     auto buffer = crimild::alloc< Buffer >(
         Uniform {
-            .color = RGBAColorf( 0.5f, 0.75f, 0.95f, 1.0f ),
+            .color = ColorRGBA( 0.5f, 0.75f, 0.95f, 1.0f ),
             .metalness = 0.5f,
         } );
 
     ASSERT_EQ( sizeof( Uniform ), buffer->getSize() );
     ASSERT_NE( nullptr, buffer->getData() );
-    ASSERT_EQ( RGBAColorf( 0.5f, 0.75f, 0.95f, 1.0f ), static_cast< Uniform * >( static_cast< void * >( buffer->getData() ) )->color );
+    ASSERT_EQ( ColorRGBA( 0.5f, 0.75f, 0.95f, 1.0f ), static_cast< Uniform * >( static_cast< void * >( buffer->getData() ) )->color );
     ASSERT_EQ( 0.5f, static_cast< Uniform * >( static_cast< void * >( buffer->getData() ) )->metalness );
 }

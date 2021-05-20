@@ -29,7 +29,7 @@
 #define CRIMILD_RENDERING_MATERIAL_
 
 #include "ColorMaskState.hpp"
-#include "Mathematics/Vector.hpp"
+#include "Mathematics/ColorRGBA.hpp"
 #include "ShaderProgram.hpp"
 #include "Texture.hpp"
 
@@ -69,14 +69,14 @@ namespace crimild {
         virtual void setProgram( SharedPointer< ShaderProgram > const &program ) { _program = program; }
         virtual ShaderProgram *getProgram( void ) { return crimild::get_ptr( _program ); }
 
-        virtual void setAmbient( const RGBAColorf &ambient ) { _ambient = ambient; }
-        virtual const RGBAColorf &getAmbient( void ) const { return _ambient; }
+        virtual void setAmbient( const ColorRGBA &ambient ) { _ambient = ambient; }
+        virtual const ColorRGBA &getAmbient( void ) const { return _ambient; }
 
-        virtual void setDiffuse( const RGBAColorf &color ) { _diffuse = color; }
-        virtual const RGBAColorf &getDiffuse( void ) const { return _diffuse; }
+        virtual void setDiffuse( const ColorRGBA &color ) { _diffuse = color; }
+        virtual const ColorRGBA &getDiffuse( void ) const { return _diffuse; }
 
-        virtual void setSpecular( const RGBAColorf &color ) { _specular = color; }
-        virtual const RGBAColorf &getSpecular( void ) const { return _specular; }
+        virtual void setSpecular( const ColorRGBA &color ) { _specular = color; }
+        virtual const ColorRGBA &getSpecular( void ) const { return _specular; }
 
         virtual void setEmissive( float value ) { _emissive = value; }
         virtual float getEmissive( void ) const { return _emissive; }
@@ -112,9 +112,9 @@ namespace crimild {
     private:
         SharedPointer< ShaderProgram > _program;
 
-        RGBAColorf _ambient;
-        RGBAColorf _diffuse;
-        RGBAColorf _specular;
+        ColorRGBA _ambient;
+        ColorRGBA _diffuse;
+        ColorRGBA _specular;
         float _shininess;
         float _emissive;
 

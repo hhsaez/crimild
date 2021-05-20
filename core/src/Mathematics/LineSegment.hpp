@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,127 +28,163 @@
 #ifndef CRIMILD_CORE_MATHEMATICS_LINE_SEGMENT_
 #define CRIMILD_CORE_MATHEMATICS_LINE_SEGMENT_
 
-#include "Vector.hpp"
+#include "Normal3.hpp"
+#include "PointImpl.hpp"
 
 namespace crimild {
 
-	/**
-		\brief A segment between two points
-	 */
-	template< crimild::Size SIZE, typename PRECISION >
-	class LineSegment {
-	public:
-		using VectorImpl = Vector< SIZE, PRECISION >;
+    namespace impl {
 
-	public:
-		LineSegment( void )
-		{
+        /**
+           \brief A segment between two points
+        */
+        template< typename T, Size N >
+        class LineSegment {
+        private:
+            using PointImpl = Point< T, N >;
 
-		}
+        public:
+            constexpr LineSegment( void ) noexcept = default;
 
-		LineSegment( const VectorImpl &origin, const Vector3f &destination )
-			: _origin( origin ),
-			  _destination( destination )
-		{
+            constexpr LineSegment( const PointImpl &origin, const PointImpl &destination ) noexcept
+                : m_origin( origin ),
+                  m_destination( destination )
+            {
+            }
 
-		}
+            constexpr LineSegment( const LineSegment &other ) noexcept
+                : m_origin( other.m_origin ),
+                  m_destination( other.m_destination )
+            {
+            }
 
-		~LineSegment( void )
-		{
+            constexpr LineSegment( LineSegment &&other ) noexcept
+                : m_origin( std::move( other.m_origin ) ),
+                  m_destination( std::move( other.m_destination ) )
+            {
+            }
 
-		}
+            ~LineSegment( void ) = default;
 
-		void setOrigin( const VectorImpl &origin ) { _origin = origin; }
-		inline VectorImpl &getOrigin( void ) { return _origin; }
-		inline const VectorImpl &getOrigin( void ) const { return _origin; }
+            constexpr LineSegment &operator=( const LineSegment &other ) noexcept
+            {
+                m_origin = other.m_origin;
+                m_destination = other.m_destination;
+                return *this;
+            }
 
-		void setDestination( const VectorImpl &destination ) { _destination = destination; }
-		inline VectorImpl &getDestination( void ) { return _destination; }
-		inline const VectorImpl &getDestination( void ) const { return _destination; }
+            constexpr LineSegment &operator=( LineSegment &&other ) noexcept
+            {
+                m_origin = std::move( other.m_origin );
+                m_destination = std::move( other.m_destination );
+                return *this;
+            }
 
-		/**
-			\brief Classify a point
-		*/
-		char whichSide( const VectorImpl &p, const VectorImpl &normal ) const
-		{
-			// compute a plane of the half-space
-			const auto n = normal ^ ( _destination - _origin );
-			const auto c = -( n * _origin );
+            [[nodiscard]] constexpr Bool operator==( const LineSegment &other ) const noexcept
+            {
+                return m_origin == other.m_origin && m_destination == other.m_destination;
+            }
 
-			// compute signed distance to plane
-			const auto d = ( n * p ) + c;
+            [[nodiscard]] constexpr Bool operator!=( const LineSegment &other ) const noexcept
+            {
+                return m_origin != other.m_origin || m_destination != other.m_destination;
+            }
 
-			if ( d > 0 ) {
-				// right
-				return 1;
-			}
-			else if ( d < 0 ) {
-				// left
-				return -1;
-			}
+            inline constexpr const PointImpl &getOrigin( void ) const noexcept { return m_origin; }
+            inline constexpr const PointImpl &getDestination( void ) const noexcept { return m_destination; }
 
-			// the point is on the line
-			return 0;
-		}
+            friend std::ostream &operator<<( std::ostream &out, const LineSegment &l ) noexcept
+            {
+                out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
+                    << std::setprecision( 10 );
+                out << "[" << l.getOrigin() << ", " << l.getDestination() << "]";
+                return out;
+            }
 
-		// Projects a given point into the line segment
-		VectorImpl project( const VectorImpl &P ) const
-		{
-			const auto A = getOrigin();
-			const auto B = getDestination();
-			const auto AB = B - A;
-			const auto dAB = AB * AB;
-			
-			if ( Numericf::isZero( dAB ) ) {
-				// same point
-				return A;
-			}
-			
-			const auto AP = P - A;
-			
-			const auto t = ( AP * AB ) / dAB;
-			
-			if ( t < 0 ) {
-				return A;
-			}
-			
-			if ( t > 1 ) {
-				return B;
-			}
+        private:
+            PointImpl m_origin;
+            PointImpl m_destination;
+        };
 
-			return A + t * AB;
-		}
+    }
 
-		// Projects a given line segment into this one
-		LineSegment project( const LineSegment &l ) const
-		{
-			return LineSegment( project( l.getOrigin() ), project( l.getDestination() ) );
-		}
+    using LineSegment2 = impl::LineSegment< Real, 2 >;
 
-	private:
-		VectorImpl _origin;
-		VectorImpl _destination;
-	};
+    using LineSegment3 = impl::LineSegment< Real, 3 >;
 
-	template< crimild::Size SIZE, typename PRECISION >
-	std::ostream &operator<<( std::ostream &out, const LineSegment< SIZE, PRECISION > &l )
-	{
-		out << std::setiosflags( std::ios::fixed | std::ios::showpoint  )
-			<< std::setprecision( 10 );
-		out << "[" << l.getOrigin() << ", " << l.getDestination() << "]";
-		return out;
-	}
+    /**
+       \brief Classify a point
+    */
+    template< typename T, Size N >
+    [[nodiscard]] constexpr Char whichSide( const impl::LineSegment< T, N > &l, const impl::Point< T, N > &p, const Normal3 &normal ) noexcept
+    {
+        assert( false && "TODO" );
 
-	using LineSegment2i = LineSegment< 2, crimild::Int32 >;
-	using LineSegment3i = LineSegment< 3, crimild::Int32 >;
+#if 0
+        // compute a plane of the half-space
+        const auto n = normal ^ ( _destination - _origin );
+        const auto c = -( n * _origin );
 
-	using LineSegment2f = LineSegment< 2, crimild::Real32 >;
-	using LineSegment3f = LineSegment< 3, crimild::Real32 >;
+        // compute signed distance to plane
+        const auto d = ( n * p ) + c;
 
-	using LineSegment2d = LineSegment< 2, crimild::Real64 >;
-	using LineSegment3d = LineSegment< 3, crimild::Real64 >;
+        if ( d > 0 ) {
+            // right
+            return 1;
+        } else if ( d < 0 ) {
+            // left
+            return -1;
+        }
+#endif
+
+        // the point is on the line
+        return 0;
+    }
+
+    // Projects a given point into the line segment
+    template< typename T, Size N >
+    [[nodiscard]] constexpr impl::Point< T, N > project( const impl::LineSegment< T, N > &l, const impl::Point< T, N > &P ) noexcept
+    {
+        assert( false && "TODO" );
+
+#if 0
+        const auto A = getOrigin();
+        const auto B = getDestination();
+        const auto AB = B - A;
+        const auto dAB = AB * AB;
+
+        if ( Numericf::isZero( dAB ) ) {
+            // same point
+            return A;
+        }
+
+        const auto AP = P - A;
+
+        const auto t = ( AP * AB ) / dAB;
+
+        if ( t < 0 ) {
+            return A;
+        }
+
+        if ( t > 1 ) {
+            return B;
+        }
+
+        return A + t * AB;
+#endif
+
+        return impl::Point< T, N > {};
+    }
+
+    // Projects a given line segment into this one
+    template< typename T, Size N >
+    [[nodiscard]] constexpr impl::LineSegment< T, N > project( const impl::LineSegment< T, N > &l0, const impl::LineSegment< T, N > &l1 ) noexcept
+    {
+        assert( false && "TODO" );
+        return impl::LineSegment< T, N > {};
+        //return LineSegment( project( l.getOrigin() ), project( l.getDestination() ) );
+    }
 
 }
 
 #endif
-

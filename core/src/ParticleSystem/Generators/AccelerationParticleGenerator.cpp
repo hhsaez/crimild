@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -27,51 +27,48 @@
 
 #include "AccelerationParticleGenerator.hpp"
 
-#include "Mathematics/Random.hpp"
-#include "Coding/Encoder.hpp"
 #include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
+#include "Mathematics/Random.hpp"
 
 using namespace crimild;
 
 AccelerationParticleGenerator::AccelerationParticleGenerator( void )
-    : _minAcceleration( Vector3f::ZERO ),
-      _maxAcceleration( Vector3f::ZERO )
+    : _minAcceleration( Vector3f::Constants::ZERO ),
+      _maxAcceleration( Vector3f::Constants::ZERO )
 {
-
 }
 
 AccelerationParticleGenerator::~AccelerationParticleGenerator( void )
 {
-
 }
 
 void AccelerationParticleGenerator::configure( Node *node, ParticleData *particles )
 {
-	_accelerations = particles->createAttribArray< Vector3f >( ParticleAttrib::ACCELERATION );
+    _accelerations = particles->createAttribArray< Vector3f >( ParticleAttrib::ACCELERATION );
 }
 
 void AccelerationParticleGenerator::generate( Node *node, crimild::Real64 dt, ParticleData *particles, ParticleId startId, ParticleId endId )
 {
-	auto as = _accelerations->getData< Vector3f >();
+    auto as = _accelerations->getData< Vector3f >();
 
     for ( ParticleId i = startId; i < endId; i++ ) {
-		as[ i ] = Random::generate< Vector3f >( _minAcceleration, _maxAcceleration );
+        as[ i ] = Random::generate< Vector3f >( _minAcceleration, _maxAcceleration );
     }
 }
 
-void AccelerationParticleGenerator::encode( coding::Encoder &encoder ) 
+void AccelerationParticleGenerator::encode( coding::Encoder &encoder )
 {
-	ParticleSystemComponent::ParticleGenerator::encode( encoder );
+    ParticleSystemComponent::ParticleGenerator::encode( encoder );
 
-	encoder.encode( "minAcceleration", _minAcceleration );
-	encoder.encode( "maxAcceleration", _maxAcceleration );
+    encoder.encode( "minAcceleration", _minAcceleration );
+    encoder.encode( "maxAcceleration", _maxAcceleration );
 }
 
 void AccelerationParticleGenerator::decode( coding::Decoder &decoder )
 {
-	ParticleSystemComponent::ParticleGenerator::decode( decoder );
+    ParticleSystemComponent::ParticleGenerator::decode( decoder );
 
-	decoder.decode( "minAcceleration", _minAcceleration );
-	decoder.decode( "maxAcceleration", _maxAcceleration );
+    decoder.decode( "minAcceleration", _minAcceleration );
+    decoder.decode( "maxAcceleration", _maxAcceleration );
 }
-

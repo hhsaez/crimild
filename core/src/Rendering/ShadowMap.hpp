@@ -28,8 +28,10 @@
 #ifndef CRIMILD_CORE_RENDERING_SHADOW_MAP_
 #define CRIMILD_CORE_RENDERING_SHADOW_MAP_
 
+#include "Foundation/Containers/Array.hpp"
 #include "Foundation/SharedObject.hpp"
-#include "Mathematics/Matrix.hpp"
+#include "Mathematics/Matrix4.hpp"
+#include "Mathematics/Vector4.hpp"
 
 namespace crimild {
 
@@ -40,8 +42,21 @@ namespace crimild {
         ShadowMap( void );
         virtual ~ShadowMap( void );
 
-        const Vector4f &getCascadeSplits( void ) const { return _cascadeSplits; }
-        void setCascadeSplits( const Vector4f &splits ) noexcept { _cascadeSplits = splits; }
+        const Vector4f &getCascadeSplits( void ) const
+        {
+            return Vector4f {
+                _cascadeSplits[ 0 ],
+                _cascadeSplits[ 1 ],
+                _cascadeSplits[ 2 ],
+                _cascadeSplits[ 3 ]
+            };
+        }
+        void setCascadeSplits( const Vector4f &splits ) noexcept
+        {
+            for ( auto i = 0; i < 4; ++i ) {
+                _cascadeSplits[ i ] = splits[ i ];
+            }
+        }
         void setCascadeSplit( Size splitIndex, Real32 depth ) noexcept { _cascadeSplits[ splitIndex ] = depth; }
 
         const Matrix4f &getLightProjectionMatrix( Size index ) const { return _lightProjectionMatrix[ index ]; }
@@ -57,7 +72,7 @@ namespace crimild {
         inline Real32 getBias( void ) const noexcept { return m_bias; }
 
     private:
-        Vector4f _cascadeSplits;
+        Array< Real > _cascadeSplits = { 0, 0, 0, 0 };
         Matrix4f _lightProjectionMatrix[ 4 ];
         Matrix4f _lightViewMatrix;
         Vector4f _viewport;

@@ -26,12 +26,13 @@
 */
 
 #include "Rendering/Uniforms/ModelUniformBuffer.hpp"
+
 #include "SceneGraph/Node.hpp"
 
 using namespace crimild;
 
 ModelUniform::ModelUniform( Node *node ) noexcept
-    : UniformBuffer( Props { } ),
+    : UniformBuffer( Props {} ),
       m_node( node )
 {
     // no-op
@@ -41,10 +42,8 @@ void ModelUniform::onPreRender( void ) noexcept
 {
     setValue(
         Props {
-            .model = [&] {
-                return m_node != nullptr ? m_node->getWorld().computeModelMatrix() : Matrix4f::IDENTITY;
+            .model = [ & ] {
+                return m_node != nullptr ? m_node->getWorld().getMatrix() : Matrix4f::Constants::IDENTITY;
             }(),
-        }
-    );
+        } );
 }
-

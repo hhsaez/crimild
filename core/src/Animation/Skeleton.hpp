@@ -31,7 +31,7 @@
 #include "Components/NodeComponent.hpp"
 #include "Foundation/Containers/Map.hpp"
 #include "Foundation/NamedObject.hpp"
-#include "Mathematics/Matrix.hpp"
+#include "Mathematics/Matrix4.hpp"
 #include "Mathematics/Transformation.hpp"
 
 namespace crimild {

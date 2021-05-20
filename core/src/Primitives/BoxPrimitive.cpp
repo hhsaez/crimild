@@ -92,9 +92,9 @@ BoxPrimitive::BoxPrimitive( const Params &params ) noexcept
 
     if ( layout.hasAttribute( VertexAttribute::Name::NORMAL ) ) {
         auto normals = vertices->get( VertexAttribute::Name::NORMAL );
-        auto R = Vector3f::UNIT_X;
-        auto U = Vector3f::UNIT_Y;
-        auto F = Vector3f::UNIT_Z;
+        auto R = Vector3f::Constants::UNIT_X;
+        auto U = Vector3f::Constants::UNIT_Y;
+        auto F = Vector3f::Constants::UNIT_Z;
         normals->set(
             Array< Vector3f > {
                 // top
@@ -137,14 +137,14 @@ BoxPrimitive::BoxPrimitive( const Params &params ) noexcept
 
     if ( layout.hasAttribute( VertexAttribute::Name::COLOR ) ) {
         auto colors = vertices->get( VertexAttribute::Name::COLOR );
-        auto r = RGBColorf( 1.0f, 0.0f, 0.0f );
-        auto g = RGBColorf( 0.0f, 1.0f, 0.0f );
-        auto b = RGBColorf( 0.0f, 0.0f, 1.0f );
-        auto c = RGBColorf( 0.0f, 1.0f, 1.0f );
-        auto m = RGBColorf( 1.0f, 0.0f, 1.0f );
-        auto y = RGBColorf( 1.0f, 1.0f, 0.0f );
+        auto r = ColorRGB( 1.0f, 0.0f, 0.0f );
+        auto g = ColorRGB( 0.0f, 1.0f, 0.0f );
+        auto b = ColorRGB( 0.0f, 0.0f, 1.0f );
+        auto c = ColorRGB( 0.0f, 1.0f, 1.0f );
+        auto m = ColorRGB( 1.0f, 0.0f, 1.0f );
+        auto y = ColorRGB( 1.0f, 1.0f, 0.0f );
         colors->set(
-            Array< Vector3f > {
+            Array< ColorRGB > {
                 // top
                 g,
                 g,

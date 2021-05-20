@@ -215,8 +215,8 @@ void OBJLoader::generateGeometry( void )
             // TODO: generate tex coords autoamtically if not present?
             auto v = VertexP3N3TC2 {
                 .position = _positions[ faceIndices[ 0 ] - 1 ],
-                .normal = !_normals.empty() ? _normals[ faceIndices[ 2 ] - 1 ] : Vector3f::ZERO,
-                .texCoord = !_textureCoords.empty() ? _textureCoords[ faceIndices[ 1 ] - 1 ] : Vector2f::ZERO,
+                .normal = !_normals.empty() ? _normals[ faceIndices[ 2 ] - 1 ] : Vector3f::Constants::ZERO,
+                .texCoord = !_textureCoords.empty() ? _textureCoords[ faceIndices[ 1 ] - 1 ] : Vector2f::Constants::ZERO,
             };
 
             if ( !uniqueVertices.contains( v ) ) {
@@ -339,21 +339,21 @@ void OBJLoader::readMaterialAmbient( std::stringstream &line )
 {
     float r, g, b;
     line >> r >> g >> b;
-    _currentMaterial->setAmbient( RGBAColorf( r, g, b, 1.0f ) );
+    _currentMaterial->setAmbient( ColorRGBA( r, g, b, 1.0f ) );
 }
 
 void OBJLoader::readMaterialDiffuse( std::stringstream &line )
 {
     float r, g, b;
     line >> r >> g >> b;
-    _currentMaterial->setDiffuse( RGBAColorf( r, g, b, 1.0f ) );
+    _currentMaterial->setDiffuse( ColorRGBA( r, g, b, 1.0f ) );
 }
 
 void OBJLoader::readMaterialSpecular( std::stringstream &line )
 {
     float r, g, b;
     line >> r >> g >> b;
-    _currentMaterial->setSpecular( RGBAColorf( r, g, b, 1.0f ) );
+    _currentMaterial->setSpecular( ColorRGBA( r, g, b, 1.0f ) );
 }
 
 void OBJLoader::readMaterialColorMap( std::stringstream &line )
@@ -411,9 +411,12 @@ void OBJLoader::readMaterialTranslucency( std::stringstream &line )
 
     if ( translucency < 1.0f ) {
         //_currentMaterial->getAlphaState()->setEnabled( true );
+        assert( false );
+        /*
         auto diffuse = _currentMaterial->getDiffuse();
         diffuse[ 3 ] = translucency;
         _currentMaterial->setDiffuse( diffuse );
+        */
     }
 }
 

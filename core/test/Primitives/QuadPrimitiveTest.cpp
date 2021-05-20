@@ -38,22 +38,22 @@ TEST( QuadPrimitive, construction )
     auto expected = Array< VertexP3N3TC2 > {
         {
             .position = Vector3f( -1.0f, 1.0f, 0.0f ),
-            .normal = Vector3f::UNIT_Z,
+            .normal = Vector3f::Constants::UNIT_Z,
             .texCoord = Vector2f( 0.0f, 0.0f ),
         },
         {
             .position = Vector3f( -1.0f, -1.0f, 0.0f ),
-            .normal = Vector3f::UNIT_Z,
+            .normal = Vector3f::Constants::UNIT_Z,
             .texCoord = Vector2f( 0.0f, 1.0f ),
         },
         {
             .position = Vector3f( 1.0f, -1.0f, 0.0f ),
-            .normal = Vector3f::UNIT_Z,
+            .normal = Vector3f::Constants::UNIT_Z,
             .texCoord = Vector2f( 1.0f, 1.0f ),
         },
         {
             .position = Vector3f( 1.0f, 1.0f, 0.0f ),
-            .normal = Vector3f::UNIT_Z,
+            .normal = Vector3f::Constants::UNIT_Z,
             .texCoord = Vector2f( 1.0f, 0.0f ),
         },
     };
@@ -169,22 +169,22 @@ TEST( QuadPrimitive, customSize )
     auto expected = Array< VertexP3N3TC2 > {
         {
             .position = Vector3f( -4.0f, 2.0f, 0.0f ),
-            .normal = Vector3f::UNIT_Z,
+            .normal = Vector3f::Constants::UNIT_Z,
             .texCoord = Vector2f( 0.0f, 0.0f ),
         },
         {
             .position = Vector3f( -4.0f, -2.0f, 0.0f ),
-            .normal = Vector3f::UNIT_Z,
+            .normal = Vector3f::Constants::UNIT_Z,
             .texCoord = Vector2f( 0.0f, 1.0f ),
         },
         {
             .position = Vector3f( 4.0f, -2.0f, 0.0f ),
-            .normal = Vector3f::UNIT_Z,
+            .normal = Vector3f::Constants::UNIT_Z,
             .texCoord = Vector2f( 1.0f, 1.0f ),
         },
         {
             .position = Vector3f( 4.0f, 2.0f, 0.0f ),
-            .normal = Vector3f::UNIT_Z,
+            .normal = Vector3f::Constants::UNIT_Z,
             .texCoord = Vector2f( 1.0f, 0.0f ),
         },
     };
@@ -239,22 +239,22 @@ TEST( QuadPrimitive, withTriangleStrip )
     auto expected = Array< VertexP3N3TC2 > {
         {
             .position = Vector3f( -1.0f, 1.0f, 0.0f ),
-            .normal = Vector3f::UNIT_Z,
+            .normal = Vector3f::Constants::UNIT_Z,
             .texCoord = Vector2f( 0.0f, 0.0f ),
         },
         {
             .position = Vector3f( -1.0f, -1.0f, 0.0f ),
-            .normal = Vector3f::UNIT_Z,
+            .normal = Vector3f::Constants::UNIT_Z,
             .texCoord = Vector2f( 0.0f, 1.0f ),
         },
         {
             .position = Vector3f( 1.0f, -1.0f, 0.0f ),
-            .normal = Vector3f::UNIT_Z,
+            .normal = Vector3f::Constants::UNIT_Z,
             .texCoord = Vector2f( 1.0f, 1.0f ),
         },
         {
             .position = Vector3f( 1.0f, 1.0f, 0.0f ),
-            .normal = Vector3f::UNIT_Z,
+            .normal = Vector3f::Constants::UNIT_Z,
             .texCoord = Vector2f( 1.0f, 0.0f ),
         },
     };
@@ -307,22 +307,22 @@ TEST( QuadPrimitive, withLines )
     auto expected = Array< VertexP3N3TC2 > {
         {
             .position = Vector3f( -1.0f, 1.0f, 0.0f ),
-            .normal = Vector3f::UNIT_Z,
+            .normal = Vector3f::Constants::UNIT_Z,
             .texCoord = Vector2f( 0.0f, 0.0f ),
         },
         {
             .position = Vector3f( -1.0f, -1.0f, 0.0f ),
-            .normal = Vector3f::UNIT_Z,
+            .normal = Vector3f::Constants::UNIT_Z,
             .texCoord = Vector2f( 0.0f, 1.0f ),
         },
         {
             .position = Vector3f( 1.0f, -1.0f, 0.0f ),
-            .normal = Vector3f::UNIT_Z,
+            .normal = Vector3f::Constants::UNIT_Z,
             .texCoord = Vector2f( 1.0f, 1.0f ),
         },
         {
             .position = Vector3f( 1.0f, 1.0f, 0.0f ),
-            .normal = Vector3f::UNIT_Z,
+            .normal = Vector3f::Constants::UNIT_Z,
             .texCoord = Vector2f( 1.0f, 0.0f ),
         },
     };

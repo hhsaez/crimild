@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,64 +28,63 @@
 #ifndef CRIMILD_MATHEMATICS_RECT_
 #define CRIMILD_MATHEMATICS_RECT_
 
-#include "Vector.hpp"
+#include "VectorImpl.hpp"
 
 namespace crimild {
 
-	template< typename PRECISION >
-	class Rect {
-	public:
-		Rect( void )
-		{
-		}
-
-		Rect( PRECISION x, PRECISION y, PRECISION width, PRECISION height )
-		{
-			_data[ 0 ] = x;
-			_data[ 1 ] = y;
-			_data[ 2 ] = width;
-			_data[ 3 ] = height;
-		}
-
-		Rect( const Rect &rect )
-		{
-			*this = rect;
-		}
-
-		~Rect( void )
-		{
-		}
-
-		Rect &operator=( const Rect &rect )
-		{
-			memcpy( _data, rect._data, 4 * sizeof( PRECISION ) );
-			return *this;
-		}
-
-		PRECISION &x( void ) { return _data[ 0 ]; }
-		PRECISION &y( void ) { return _data[ 1 ]; }
-		PRECISION &width( void ) { return _data[ 2 ]; }
-		PRECISION &height( void ) { return _data[ 3 ]; }
-
-		PRECISION getX( void ) const { return _data[ 0 ]; }
-		PRECISION getY( void ) const { return _data[ 1 ]; }
-		PRECISION getWidth( void ) const { return _data[ 2 ]; }
-		PRECISION getHeight( void ) const { return _data[ 3 ]; }
-        
-        Vector< 2, PRECISION > getCenter( void ) const
+    template< typename PRECISION >
+    class Rect {
+    public:
+        Rect( void )
         {
-            return Vector< 2, PRECISION >( getX() + 0.5 * getWidth(), getY() + 0.5 * getHeight() );
         }
 
-	private:
-		PRECISION _data[ 4 ];
-	};
+        Rect( PRECISION x, PRECISION y, PRECISION width, PRECISION height )
+        {
+            _data[ 0 ] = x;
+            _data[ 1 ] = y;
+            _data[ 2 ] = width;
+            _data[ 3 ] = height;
+        }
 
-	typedef Rect< int > Recti;
-	typedef Rect< float > Rectf;
+        Rect( const Rect &rect )
+        {
+            *this = rect;
+        }
+
+        ~Rect( void )
+        {
+        }
+
+        Rect &operator=( const Rect &rect )
+        {
+            memcpy( _data, rect._data, 4 * sizeof( PRECISION ) );
+            return *this;
+        }
+
+        PRECISION &x( void ) { return _data[ 0 ]; }
+        PRECISION &y( void ) { return _data[ 1 ]; }
+        PRECISION &width( void ) { return _data[ 2 ]; }
+        PRECISION &height( void ) { return _data[ 3 ]; }
+
+        PRECISION getX( void ) const { return _data[ 0 ]; }
+        PRECISION getY( void ) const { return _data[ 1 ]; }
+        PRECISION getWidth( void ) const { return _data[ 2 ]; }
+        PRECISION getHeight( void ) const { return _data[ 3 ]; }
+
+        impl::Vector< PRECISION, 2 > getCenter( void ) const
+        {
+            return impl::Vector< PRECISION, 2 >( getX() + 0.5 * getWidth(), getY() + 0.5 * getHeight() );
+        }
+
+    private:
+        PRECISION _data[ 4 ];
+    };
+
+    typedef Rect< int > Recti;
+    typedef Rect< float > Rectf;
     typedef Rect< double > Rectd;
 
 }
 
 #endif
-

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,34 +28,30 @@
 #ifndef CRIMILD_COMPONENTS_FREE_LOOK_CAMERA_
 #define CRIMILD_COMPONENTS_FREE_LOOK_CAMERA_
 
-#include "NodeComponent.hpp"
-#include "Mathematics/Vector.hpp"
+#include "Mathematics/Vector2.hpp"
 #include "Messaging/MessageQueue.hpp"
+#include "NodeComponent.hpp"
 
 namespace crimild {
 
-	class FreeLookCameraComponent :
-		public NodeComponent,
-		public Messenger {
-		CRIMILD_IMPLEMENT_RTTI( crimild::FreeLookCameraComponent )
+    class FreeLookCameraComponent
+        : public NodeComponent,
+          public Messenger {
+        CRIMILD_IMPLEMENT_RTTI( crimild::FreeLookCameraComponent )
 
-	public:
-		FreeLookCameraComponent( void );
-		virtual ~FreeLookCameraComponent( void );
-
+    public:
         inline Real32 getSpeed( void ) const noexcept { return _speed; }
         inline void setSpeed( Real32 speed ) noexcept { _speed = speed; }
 
-		virtual void start( void ) override;
-		virtual void update( const Clock &c ) override;
+        virtual void start( void ) override;
+        virtual void update( const Clock &c ) override;
 
-	private:
-		Vector2f _lastMousePos;
+    private:
+        Vector2 _lastMousePos;
         crimild::Bool _initialized = false;
         Real32 _speed = 1.0f;
-	};
+    };
 
 }
 
 #endif
-

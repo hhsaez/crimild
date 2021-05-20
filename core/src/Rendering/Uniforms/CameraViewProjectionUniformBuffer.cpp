@@ -26,54 +26,50 @@
 */
 
 #include "Rendering/Uniforms/CameraViewProjectionUniformBuffer.hpp"
+
 #include "SceneGraph/Camera.hpp"
 #include "Simulation/Simulation.hpp"
 
 using namespace crimild;
 
 CameraViewProjectionUniform::CameraViewProjectionUniform( Camera *camera ) noexcept
-    : UniformBuffer( Props { } ),
+    : UniformBuffer( Props {} ),
       m_camera( camera )
 {
-    
 }
 
 void CameraViewProjectionUniform::onPreRender( void ) noexcept
 {
     setValue(
         Props {
-            .view = [&] {
+            .view = [ & ] {
                 if ( m_camera != nullptr ) {
                     // if a camera has been specified, we use that one to get the view matrix
                     return m_camera->getViewMatrix();
                 }
-                
+
                 if ( auto camera = Camera::getMainCamera() ) {
                     // if no camera has been set, let's use whatever's the main one
                     return camera->getViewMatrix();
                 }
-                
+
                 // no camera
-                return Matrix4f::IDENTITY;
+                return Matrix4f::Constants::IDENTITY;
             }(),
-            .proj = [&] {
-                auto proj = Matrix4f::IDENTITY;
+            .proj = [ & ] {
+                auto proj = Matrix4f::Constants::IDENTITY;
                 if ( m_camera != nullptr ) {
                     proj = m_camera->getProjectionMatrix();
-                }
-                else if ( auto camera = Camera::getMainCamera() ) {
+                } else if ( auto camera = Camera::getMainCamera() ) {
                     proj = camera->getProjectionMatrix();
                 }
                 return proj;
             }(),
             .viewport = [] {
-				auto settings = Simulation::getInstance()->getSettings();
+                auto settings = Simulation::getInstance()->getSettings();
                 auto w = settings->get< float >( "video.width", 1024 );
                 auto h = settings->get< float >( "video.height", 1024 );
                 return Vector2f( w, h );
             }(),
-        }
-    );
+        } );
 }
-
-

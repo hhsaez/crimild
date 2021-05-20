@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,7 +26,9 @@
  */
 
 #include "Mathematics/Quaternion.hpp"
+
 #include "Mathematics/Interpolation.hpp"
+#include "Mathematics/Matrix3.hpp"
 
 #include "gtest/gtest.h"
 
@@ -34,12 +36,12 @@ using namespace crimild;
 
 TEST( QuaternionTest, testBasicOperations )
 {
-	Quaternion4i q( 1, 2, 3, 4 );
+    Quaternion q( 1, 2, 3, 4 );
 
-	EXPECT_TRUE( q.getReal() == 4 );
-	EXPECT_TRUE( q.getImaginary()[ 0 ] == 1 );
-	EXPECT_TRUE( q.getImaginary()[ 1 ] == 2 );
-	EXPECT_TRUE( q.getImaginary()[ 2 ] == 3 );
+    EXPECT_TRUE( q.getReal() == 4 );
+    EXPECT_TRUE( q.getImaginary()[ 0 ] == 1 );
+    EXPECT_TRUE( q.getImaginary()[ 1 ] == 2 );
+    EXPECT_TRUE( q.getImaginary()[ 2 ] == 3 );
 }
 
 TEST( QuaternionTest, testProduct )
@@ -48,76 +50,79 @@ TEST( QuaternionTest, testProduct )
 
 TEST( QuaternionTest, testAddition )
 {
-	Quaternion4f q( 1, 2, 3, 4 );
-	Quaternion4f p( 5, 6, 7, 8 );
-	Quaternion4f result = q + p;
-	Quaternion4f expected( 6, 8, 10, 12 );
+    Quaternion q( 1, 2, 3, 4 );
+    Quaternion p( 5, 6, 7, 8 );
+    Quaternion result = q + p;
+    Quaternion expected( 6, 8, 10, 12 );
 
-	EXPECT_TRUE( result == expected );
+    EXPECT_TRUE( result == expected );
 }
 
 TEST( QuaternionTest, testConjugate )
 {
-	Quaternion4f q( 1, 2, 3, 4 );
-	Quaternion4f p( 5, 6, 7, 8 );
-	Quaternion4f r = q.getConjugate();
+    Quaternion q( 1, 2, 3, 4 );
+    Quaternion p( 5, 6, 7, 8 );
+    Quaternion r = q.getConjugate();
 
-	EXPECT_TRUE( r == Quaternion4f( -1, -2, -3, 4 ) );
-	EXPECT_TRUE( r.getConjugate() == q );
-	EXPECT_TRUE( ( q + p ).getConjugate() == ( q.getConjugate() + p.getConjugate() ) );
+    EXPECT_TRUE( r == Quaternion( -1, -2, -3, 4 ) );
+    EXPECT_TRUE( r.getConjugate() == q );
+    EXPECT_TRUE( ( q + p ).getConjugate() == ( q.getConjugate() + p.getConjugate() ) );
 
-	// TODO: fix this test
-	EXPECT_EQ( ( q * p ).getConjugate(), ( p.getConjugate() * q.getConjugate() ) );
+    // TODO: fix this test
+    EXPECT_EQ( ( q * p ).getConjugate(), ( p.getConjugate() * q.getConjugate() ) );
 }
 
 TEST( QuaternionTest, testNorm )
 {
-	Quaternion4f q( 1, 2, 3, 4 );
-	Quaternion4f p( 5, 6, 7, 8 );
+    Quaternion q( 1, 2, 3, 4 );
+    Quaternion p( 5, 6, 7, 8 );
 
-	EXPECT_TRUE( Numericf::equals( q.getSquaredNorm(), 30.0f ) );
-	EXPECT_TRUE( Numericf::equals( q.getNorm(), std::sqrt( 30.0f ) ) );
-	EXPECT_TRUE( Numericf::equals( q.getNorm(), q.getConjugate().getNorm() ) );
+    EXPECT_TRUE( Numericf::equals( q.getSquaredNorm(), 30.0f ) );
+    EXPECT_TRUE( Numericf::equals( q.getNorm(), std::sqrt( 30.0f ) ) );
+    EXPECT_TRUE( Numericf::equals( q.getNorm(), q.getConjugate().getNorm() ) );
 
-	q.normalize();
-	EXPECT_TRUE( Numericf::equals( 1, q.getNorm() ) );
+    q.normalize();
+    EXPECT_TRUE( Numericf::equals( 1, q.getNorm() ) );
 }
 
 TEST( QuaternionTest, testIdentity )
 {
-	Quaternion4f q( 1, 2, 3, 4 );
-	q.makeIdentity();
-	EXPECT_TRUE( q == Quaternion4f( 0.0f, 0.0f, 0.0f, 1.0f ) );
+    Quaternion q( 1, 2, 3, 4 );
+    q.makeIdentity();
+    EXPECT_TRUE( q == Quaternion( 0.0f, 0.0f, 0.0f, 1.0f ) );
 }
 
 TEST( QuaternionTest, testInverse )
 {
-	Quaternion4f q( 1, 2, 3, 4 );
-	Quaternion4f r = q.getInverse();
+    Quaternion q( 1, 2, 3, 4 );
+    Quaternion r = q.getInverse();
 
-	EXPECT_TRUE( ( q * r ) == Quaternion4f( 0.0f, 0.0f, 0.0f, 1.0f ) );
+    EXPECT_TRUE( ( q * r ) == Quaternion( 0.0f, 0.0f, 0.0f, 1.0f ) );
 }
 
 TEST( QuaternionTest, testRotationMatrix )
 {
-	Vector3f axis( 0.0f, 1.0f, 0.0f );
-	float angle = Numericf::PI;
+#if 0
+    Vector3f axis( 0.0f, 1.0f, 0.0f );
+    float angle = Numericf::PI;
 
-	Matrix3f rotMatrix( axis, angle );
+    Matrix3f rotMatrix( axis, angle );
 
-	Quaternion4f rot( std::cos( angle / 2.0f ), std::sin( angle / 2.0f ) * axis );
-	Matrix3f rotMatrixFromQ;
-	rot.getRotationMatrix( rotMatrixFromQ );
+    Quaternion rot( std::cos( angle / 2.0f ), std::sin( angle / 2.0f ) * axis );
+    Matrix3f rotMatrixFromQ;
+    rot.getRotationMatrix( rotMatrixFromQ );
 
-	for ( unsigned int i = 0; i < 9; i++ ) {
-		EXPECT_TRUE( Numericf::equals( rotMatrix[ i ], rotMatrixFromQ[ i ] ) );
-	}
+    for ( unsigned int i = 0; i < 9; i++ ) {
+        EXPECT_TRUE( Numericf::equals( rotMatrix[ i ], rotMatrixFromQ[ i ] ) );
+    }
+#endif
+
+    FAIL();
 }
 
 TEST( QuaternionTest, testSlerp )
 {
-	Quaternion4f q0;
-	Quaternion4f q1;
-	Quaternion4f result = Interpolation::slerp( q0, q1, 0.5 );
+    Quaternion q0;
+    Quaternion q1;
+    Quaternion result = Interpolation::slerp( q0, q1, 0.5 );
 }
-

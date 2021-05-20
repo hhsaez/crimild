@@ -39,8 +39,8 @@ namespace crimild {
         UnlitMaterial( void ) noexcept;
         virtual ~UnlitMaterial( void ) = default;
 
-        void setColor( const RGBAColorf &color ) noexcept;
-        RGBAColorf getColor( void ) const noexcept;
+        void setColor( const ColorRGBA &color ) noexcept;
+        ColorRGBA getColor( void ) const noexcept;
 
         void setTexture( SharedPointer< Texture > const &texture ) noexcept;
         const Texture *getTexture( void ) const noexcept;

@@ -54,9 +54,10 @@ Vector3f MobiusStripPrimitive::evaluate( const Vector2f &domain ) const
     float y = a * cos( t ) * sin( phi ) + b * sin( t ) * cos( phi );
 
     // sweep the ellipse along a circle, like a torus
-    Vector3f range;
-    range[ 0 ] = ( major + x ) * cos( u );
-    range[ 1 ] = ( major + x ) * sin( u );
-    range[ 2 ] = y;
+    Vector3f range = {
+        ( major + x ) * cos( u ),
+        ( major + x ) * sin( u ),
+        y,
+    };
     return 0.5f * range * _scale;
 }

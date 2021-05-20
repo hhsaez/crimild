@@ -27,36 +27,28 @@
 
 #include "RotationComponent.hpp"
 
+#include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
 #include "Mathematics/Numeric.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Visitors/UpdateWorldState.hpp"
-#include "Coding/Encoder.hpp"
-#include "Coding/Decoder.hpp"
 
 using namespace crimild;
 
-RotationComponent::RotationComponent( void )
+RotationComponent::RotationComponent( const Vector3 &axis, float speed )
+    : _axis( normalize( axis ) ),
+      _speed( speed ),
+      _time( 0 )
 {
-
-}
-
-RotationComponent::RotationComponent( const Vector3f &axis, float speed )
-	: _axis( axis.getNormalized() ),
-	  _speed( speed ),
-	  _time( 0 )
-{
-
-}
-
-RotationComponent::~RotationComponent( void )
-{
-
 }
 
 void RotationComponent::update( const Clock &c )
 {
-	getNode()->local().rotate().fromAxisAngle( _axis, _time * 2.0f * Numericf::PI );
-	_time += _speed * c.getDeltaTime();
+    /*
+    getNode()->local().rotate().fromAxisAngle( _axis, _time * 2.0f * Numericf::PI );
+    _time += _speed * c.getDeltaTime();
+    */
+    assert( false );
 }
 
 void RotationComponent::encode( coding::Encoder &encoder )

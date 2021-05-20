@@ -27,30 +27,30 @@
 
 #include "Box2DBoundingVolume.hpp"
 
-#include "Mathematics/Intersection.hpp"
 #include "Debug/DebugRenderHelper.hpp"
+#include "Mathematics/Intersection.hpp"
 
 using namespace crimild;
 
 Box2DBoundingVolume::Box2DBoundingVolume( void )
-	: _sphere( Vector3f::ZERO, 1.0f )
+    : _sphere( Point3::Constants::ZERO, 1.0f )
 {
-
 }
 
 Box2DBoundingVolume::Box2DBoundingVolume( crimild::Real32 halfWidth, crimild::Real32 halfHeight )
 {
-	setRAxis( halfWidth * Vector3f::UNIT_X );
-	setSAxis( halfHeight * Vector3f::UNIT_Y );
-	setTAxis( Vector3f::UNIT_Z );
+    setRAxis( halfWidth * Vector3::Constants::UNIT_X );
+    setSAxis( halfHeight * Vector3::Constants::UNIT_Y );
+    setTAxis( Vector3::Constants::UNIT_Z );
 
-	_sphere.setCenter( Vector3f::ZERO );
-	_sphere.setRadius( Numericf::max( halfWidth, halfHeight ) );
+    _sphere = Sphere {
+        Point3::Constants::ZERO,
+        crimild::max( halfWidth, halfHeight ),
+    };
 }
 
 Box2DBoundingVolume::~Box2DBoundingVolume( void )
 {
-
 }
 
 SharedPointer< BoundingVolume > Box2DBoundingVolume::clone( void ) const
@@ -64,96 +64,103 @@ SharedPointer< BoundingVolume > Box2DBoundingVolume::clone( void ) const
 
 void Box2DBoundingVolume::computeFrom( const BoundingVolume *volume )
 {
-	//computeFrom( volume->getCenter() + volume->getMin(), volume->getCenter() + volume->getMax() );
+    //computeFrom( volume->getCenter() + volume->getMin(), volume->getCenter() + volume->getMax() );
 }
 
 void Box2DBoundingVolume::computeFrom( const BoundingVolume *volume, const Transformation &transformation )
 {
+    /*
     Vector3f c, r, s, t;
 
     transformation.applyToPoint( volume->getCenter(), c );
     transformation.applyToVector( volume->getRAxis(), r );
     transformation.applyToVector( volume->getSAxis(), s );
-	transformation.applyToVector( volume->getTAxis(), t );
+    transformation.applyToVector( volume->getTAxis(), t );
 
-	_sphere.setCenter( c );
-	_sphere.setRadius( volume->getRadius() * transformation.getScale() );
+    _sphere.setCenter( c );
+    _sphere.setRadius( volume->getRadius() * transformation.getScale() );
 
-	setRAxis( r );
+    setRAxis( r );
     setSAxis( s );
-	setTAxis( t );
+    setTAxis( t );
 
-	Vector3f p0, p1;
-	transformation.applyToPoint( volume->getCenter() + volume->getMin(), p0 );
-	transformation.applyToPoint( volume->getCenter() + volume->getMax(), p1 );
+    Vector3f p0, p1;
+    transformation.applyToPoint( volume->getCenter() + volume->getMin(), p0 );
+    transformation.applyToPoint( volume->getCenter() + volume->getMax(), p1 );
 
-	Vector3f min( Numericf::min( p0[ 0 ], p1[ 0 ] ), Numericf::min( p0[ 1 ], p1[ 1 ] ), Numericf::min( p0[ 2 ], p1[ 2 ] ) );
-	Vector3f max( Numericf::max( p0[ 0 ], p1[ 0 ] ), Numericf::max( p0[ 1 ], p1[ 1 ] ), Numericf::max( p0[ 2 ], p1[ 2 ] ) );
+    Vector3f min( Numericf::min( p0[ 0 ], p1[ 0 ] ), Numericf::min( p0[ 1 ], p1[ 1 ] ), Numericf::min( p0[ 2 ], p1[ 2 ] ) );
+    Vector3f max( Numericf::max( p0[ 0 ], p1[ 0 ] ), Numericf::max( p0[ 1 ], p1[ 1 ] ), Numericf::max( p0[ 2 ], p1[ 2 ] ) );
 
-	computeFrom( min, max );
+    computeFrom( min, max );
+    */
 }
 
 void Box2DBoundingVolume::computeFrom( const Vector3f *positions, unsigned int positionCount )
 {
-	// TODO
+    // TODO
 }
 
 void Box2DBoundingVolume::computeFrom( const VertexBuffer *vbo )
 {
-	// TODO
+    // TODO
 }
 
 void Box2DBoundingVolume::computeFrom( const Vector3f &min, const Vector3f &max )
 {
-	// TODO
+    // TODO
 }
 
-void Box2DBoundingVolume::expandToContain( const Vector3f &p )
+void Box2DBoundingVolume::expandToContain( const Point3 &p )
 {
-	// TODO
+    // TODO
 }
 
 void Box2DBoundingVolume::expandToContain( const Vector3f *positions, unsigned int positionCount )
 {
-	// TODO
+    // TODO
 }
 
 void Box2DBoundingVolume::expandToContain( const VertexBuffer *vbo )
 {
-	// TODO
+    // TODO
 }
 
 void Box2DBoundingVolume::expandToContain( const BoundingVolume *input )
 {
-	// TODO
+    // TODO
 }
 
-int Box2DBoundingVolume::whichSide( const Plane3f &plane ) const
+int Box2DBoundingVolume::whichSide( const Plane3 &plane ) const
 {
-	// TODO
-	return _sphere.whichSide( plane );
+    // TODO
+    //return _sphere.whichSide( plane );
+    return 0;
 }
 
 bool Box2DBoundingVolume::contains( const Vector3f &point ) const
 {
-	float centerDiffSqr = ( _sphere.getCenter() - point ).getSquaredMagnitude();
-	float radiusSqr = _sphere.getRadius() * _sphere.getRadius();
-	return ( centerDiffSqr < radiusSqr );
+    /*
+    float centerDiffSqr = ( _sphere.getCenter() - point ).getSquaredMagnitude();
+    float radiusSqr = _sphere.getRadius() * _sphere.getRadius();
+    return ( centerDiffSqr < radiusSqr );
+    */
+    return false;
 }
 
-bool Box2DBoundingVolume::testIntersection( const Ray3f &ray ) const
+bool Box2DBoundingVolume::testIntersection( const Ray3 &ray ) const
 {
-	if ( !Intersection::test( _sphere, ray ) ) {
-		return false;
-	}
+#if 0
+    if ( !Intersection::test( _sphere, ray ) ) {
+        return false;
+    }
 
-	const auto &C = getCenter();
-	const auto &R = getRAxis();
-	const auto &S = getSAxis();
-	const auto &N = getTAxis();
+    const auto &C = getCenter();
+    const auto &R = getRAxis();
+    const auto &S = getSAxis();
+    const auto &N = getTAxis();
 
-	/*
-	auto plane = Plane3f( N, C );
+    /*
+	auto plane = Plane3( N, C );
 
 	auto t = Intersection::find( plane, ray );
 	if ( t < 0.0f ) {
@@ -181,103 +188,110 @@ bool Box2DBoundingVolume::testIntersection( const Ray3f &ray ) const
     return test( P, x, y, z );// || test( P, x, z, w );
 	*/
 
-	const auto &RO = ray.getOrigin();
-	const auto &RD = ray.getDirection();
+    const auto &RO = ray.getOrigin();
+    const auto &RD = ray.getDirection();
 
-	if ( Numericf::isZero( N * RD ) ) {
-		// ray is parallel to box
-		return false;
-	}
+    if ( Numericf::isZero( N * RD ) ) {
+        // ray is parallel to box
+        return false;
+    }
 
     auto P0 = C;
-	auto S1 = R;
-	auto S2 = S;
+    auto S1 = R;
+    auto S2 = S;
 
-	auto t = ( ( P0 - RO ) * N ) / ( N * RD );
-	auto P = ray.getPointAt( t );
+    auto t = ( ( P0 - RO ) * N ) / ( N * RD );
+    auto P = ray.getPointAt( t );
 
     auto P0P = P - P0;
 
     auto Q1 = P0P.project( S1 );
     auto Q2 = P0P.project( S2 );
 
-	auto dS1 = S1.getMagnitude();
-	auto dS2 = S2.getMagnitude();
+    auto dS1 = S1.getMagnitude();
+    auto dS2 = S2.getMagnitude();
     auto dQ1 = Q1.getMagnitude();
     auto dQ2 = Q2.getMagnitude();
 
-	return dQ1 >= 0.0f && dQ1 <= dS1 && dQ2 >= 0.0f && dQ2 <= dS2;
+    return dQ1 >= 0.0f && dQ1 <= dS1 && dQ2 >= 0.0f && dQ2 <= dS2;
+#endif
+    return false;
 }
 
 bool Box2DBoundingVolume::testIntersection( const BoundingVolume *other ) const
 {
-	return other->testIntersection( _sphere );
+    return other->testIntersection( _sphere );
 }
 
-bool Box2DBoundingVolume::testIntersection( const Sphere3f &sphere ) const
+bool Box2DBoundingVolume::testIntersection( const Sphere &sphere ) const
 {
-	return Intersection::test( _sphere, sphere );
+    //return Intersection::test( _sphere, sphere );
+    return false;
 }
 
-bool Box2DBoundingVolume::testIntersection( const Plane3f &plane ) const
+bool Box2DBoundingVolume::testIntersection( const Plane3 &plane ) const
 {
-	return whichSide( plane ) == 0;
+    return whichSide( plane ) == 0;
 }
 
 void Box2DBoundingVolume::resolveIntersection( const BoundingVolume *other, Transformation &result ) const
 {
-
 }
 
-void Box2DBoundingVolume::resolveIntersection( const Sphere3f &other, Transformation &result ) const
+void Box2DBoundingVolume::resolveIntersection( const Sphere &other, Transformation &result ) const
 {
-
 }
 
-void Box2DBoundingVolume::resolveIntersection( const Plane3f &plane, Transformation &result ) const
+void Box2DBoundingVolume::resolveIntersection( const Plane3 &plane, Transformation &result ) const
 {
-	// TODO
+    // TODO
 }
 
 void Box2DBoundingVolume::renderDebugInfo( Renderer *renderer, Camera *camera )
 {
-	const auto &C = getCenter();
-	const auto &R = getRAxis();
-	const auto &S = getSAxis();
-	const auto &T = getTAxis();
+    /*
+    const auto &C = getCenter();
+    const auto &R = getRAxis();
+    const auto &S = getSAxis();
+    const auto &T = getTAxis();
 
-	Vector3f axes[] = {
-		C, C + R,
-		C, C + S,
-		C, C + getRadius() * T,
-	};
+    Vector3f axes[] = {
+        C,
+        C + R,
+        C,
+        C + S,
+        C,
+        C + getRadius() * T,
+    };
 
-	DebugRenderHelper::renderLines(
-		renderer,
-		camera,
-		axes,
-		6,
-		RGBAColorf( 0.0f, 0.0f, 1.0f, 1.0f )
-	);
+    DebugRenderHelper::renderLines(
+        renderer,
+        camera,
+        axes,
+        6,
+        RGBAColorf( 0.0f, 0.0f, 1.0f, 1.0f ) );
 
     auto x = C - R + S;
     auto y = C - R - S;
     auto z = C + R - S;
     auto w = C + R + S;
 
-	Vector3f box[] = {
-        x, y,
-        y, z,
-        z, w,
-        w, x,
-	};
+    Vector3f box[] = {
+        x,
+        y,
+        y,
+        z,
+        z,
+        w,
+        w,
+        x,
+    };
 
-	DebugRenderHelper::renderLines(
-		renderer,
-		camera,
-		box,
-		8,
-		RGBAColorf( 0.0f, 1.0f, 1.0f, 1.0f )
-	);
-
+    DebugRenderHelper::renderLines(
+        renderer,
+        camera,
+        box,
+        8,
+        RGBAColorf( 0.0f, 1.0f, 1.0f, 1.0f ) );
+    */
 }

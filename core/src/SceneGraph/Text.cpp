@@ -27,21 +27,16 @@
 
 #include "Text.hpp"
 
+#include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
+#include "Components/MaterialComponent.hpp"
+#include "Foundation/Log.hpp"
 #include "Primitives/Primitive.hpp"
-
 #include "Rendering/Font.hpp"
 #include "Rendering/ImageTGA.hpp"
 #include "Rendering/Renderer.hpp"
-
-#include "Foundation/Log.hpp"
-
-#include "Components/MaterialComponent.hpp"
-
 #include "Simulation/AssetManager.hpp"
 #include "Simulation/FileSystem.hpp"
-
-#include "Coding/Encoder.hpp"
-#include "Coding/Decoder.hpp"
 
 #include <fstream>
 
@@ -53,10 +48,10 @@ Text::Text( void )
     _primitive = crimild::alloc< Primitive >( Primitive::Type::TRIANGLES );
     _material = crimild::alloc< Material >();
 
-	_text = "";
-	_size = 1.0f;
-	_geometry->attachPrimitive( _primitive );
-	_geometry->getComponent< MaterialComponent >()->attachMaterial( _material );
+    _text = "";
+    _size = 1.0f;
+    _geometry->attachPrimitive( _primitive );
+    _geometry->getComponent< MaterialComponent >()->attachMaterial( _material );
     attachNode( _geometry );
 
     setFont( AssetManager::getInstance()->get< Font >( AssetManager::FONT_SYSTEM ) );
@@ -64,7 +59,6 @@ Text::Text( void )
 
 Text::~Text( void )
 {
-
 }
 
 void Text::accept( NodeVisitor &visitor )
@@ -79,45 +73,45 @@ void Text::setFont( Font *font )
 
 void Text::setText( std::string text )
 {
-	_text = text;
-	if ( _text == "" ) {
-		_text = " ";
-	}
-	updatePrimitive();
+    _text = text;
+    if ( _text == "" ) {
+        _text = " ";
+    }
+    updatePrimitive();
 }
 
 void Text::setSize( float size )
 {
-	_size = size;
-	updatePrimitive();
+    _size = size;
+    updatePrimitive();
 }
 
 void Text::setFont( SharedPointer< Font > const &font )
 {
-	if ( _font == font ) {
-		return;
-	}
+    if ( _font == font ) {
+        return;
+    }
 
-	_font = font;
+    _font = font;
 
-//    auto sdfProgram = AssetManager::getInstance()->get< ShaderProgram >( Renderer::SHADER_PROGRAM_TEXT_SDF );
-//    if ( false && sdfProgram != nullptr ) {
-//        // SDF Supported
-//        _material->setColorMap( _font->getSDFTexture() );
-//        _material->setProgram( sdfProgram );
-//    }
-//    else {
-//        // SDF not supported by renderer
-//        _material->setColorMap( _font->getSDFTexture() );
-//        _material->setProgram( AssetManager::getInstance()->get< ShaderProgram >( Renderer::SHADER_PROGRAM_TEXT_BASIC ) );
-//    }
+    //    auto sdfProgram = AssetManager::getInstance()->get< ShaderProgram >( Renderer::SHADER_PROGRAM_TEXT_SDF );
+    //    if ( false && sdfProgram != nullptr ) {
+    //        // SDF Supported
+    //        _material->setColorMap( _font->getSDFTexture() );
+    //        _material->setProgram( sdfProgram );
+    //    }
+    //    else {
+    //        // SDF not supported by renderer
+    //        _material->setColorMap( _font->getSDFTexture() );
+    //        _material->setProgram( AssetManager::getInstance()->get< ShaderProgram >( Renderer::SHADER_PROGRAM_TEXT_BASIC ) );
+    //    }
 
     _material->setColorMap( _font->getTexture() );
     //_material->setProgram( crimild::alloc< UnlitShaderProgram >() );
 
-	//_material->getAlphaState()->setEnabled( true );
+    //_material->getAlphaState()->setEnabled( true );
 
-	updatePrimitive();
+    updatePrimitive();
 }
 
 void Text::setHorizontalAlignment( Text::HorizontalAlignment alignment )
@@ -264,42 +258,40 @@ void Text::updatePrimitive( void )
 
 void Text::encode( coding::Encoder &encoder )
 {
-	Group::encode( encoder );
+    Group::encode( encoder );
 
-	// TODO
+    // TODO
 }
 
 void Text::decode( coding::Decoder &decoder )
 {
-	Group::decode( decoder );
+    Group::decode( decoder );
 
-	std::string fontFileName;
-	decoder.decode( "font", fontFileName );
+    std::string fontFileName;
+    decoder.decode( "font", fontFileName );
 
-	std::string fontDefFileName = FileSystem::getInstance().pathForResource( fontFileName + ".txt" );
-	auto font = crimild::alloc< Font >( fontDefFileName );
-	setFont( font );
+    std::string fontDefFileName = FileSystem::getInstance().pathForResource( fontFileName + ".txt" );
+    auto font = crimild::alloc< Font >( fontDefFileName );
+    setFont( font );
 
-	decoder.decode( "textSize", _size );
-	decoder.decode( "text", _text );
+    decoder.decode( "textSize", _size );
+    decoder.decode( "text", _text );
 
-	RGBAColorf textColor;
-	decoder.decode( "textColor", textColor );
-	setTextColor( textColor );
+    ColorRGBA textColor;
+    decoder.decode( "textColor", textColor );
+    setTextColor( textColor );
 
-	crimild::Bool enableDepthTest;
-	decoder.decode( "enableDepthTest", enableDepthTest );
-	//setDepthTestEnabled( enableDepthTest );
+    crimild::Bool enableDepthTest;
+    decoder.decode( "enableDepthTest", enableDepthTest );
+    //setDepthTestEnabled( enableDepthTest );
 
-	std::string anchor;
-	decoder.decode( "anchor", anchor );
-	if ( anchor == "left" ) {
-		setHorizontalAlignment( HorizontalAlignment::LEFT );
-	}
-	else if ( anchor == "center" ) {
-		setHorizontalAlignment( HorizontalAlignment::CENTER );
-	}
-	else if ( anchor == "right" ) {
-		setHorizontalAlignment( HorizontalAlignment::RIGHT );
-	}
+    std::string anchor;
+    decoder.decode( "anchor", anchor );
+    if ( anchor == "left" ) {
+        setHorizontalAlignment( HorizontalAlignment::LEFT );
+    } else if ( anchor == "center" ) {
+        setHorizontalAlignment( HorizontalAlignment::CENTER );
+    } else if ( anchor == "right" ) {
+        setHorizontalAlignment( HorizontalAlignment::RIGHT );
+    }
 }

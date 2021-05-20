@@ -26,28 +26,24 @@
  */
 
 #include "Profiler.hpp"
-#include "Log.hpp"
 
-#include "Mathematics/Numeric.hpp"
-#include "Mathematics/Clock.hpp"
-
+#include "Concurrency/JobScheduler.hpp"
 #include "Debug/DebugRenderHelper.hpp"
-
+#include "Log.hpp"
+#include "Mathematics/Clock.hpp"
+#include "Mathematics/Numeric.hpp"
 #include "Rendering/Renderer.hpp"
 #include "Rendering/ShaderProgram.hpp"
 
-#include "Concurrency/JobScheduler.hpp"
-
 #include <chrono>
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 
 using namespace crimild;
 using namespace crimild::concurrency;
 
 ProfilerOutputHandler::~ProfilerOutputHandler( void )
 {
-
 }
 
 void ProfilerOutputHandler::beginOutput( crimild::Size fps, crimild::Real64 avgFrameTime, crimild::Real64 minFrameTime, crimild::Real64 maxFrameTime )
@@ -69,27 +65,27 @@ void ProfilerOutputHandler::beginOutput( crimild::Size fps, crimild::Real64 avgF
             << std::left
             << "Rendering"
             << "\n   Textures:"
-                << " Loaded: " << Renderer::getInstance()->getTextureCatalog()->getResourceCount()
-                << " Active: " << Renderer::getInstance()->getTextureCatalog()->getActiveResourceCount()
+            << " Loaded: " << Renderer::getInstance()->getTextureCatalog()->getResourceCount()
+            << " Active: " << Renderer::getInstance()->getTextureCatalog()->getActiveResourceCount()
             << "\n   FBOs:"
-                << " Loaded: " << Renderer::getInstance()->getFrameBufferObjectCatalog()->getResourceCount()
-                << " Active: " << Renderer::getInstance()->getFrameBufferObjectCatalog()->getActiveResourceCount()
+            << " Loaded: " << Renderer::getInstance()->getFrameBufferObjectCatalog()->getResourceCount()
+            << " Active: " << Renderer::getInstance()->getFrameBufferObjectCatalog()->getActiveResourceCount()
             << "\n   VBOs:"
-                << " Loaded: " << Renderer::getInstance()->getVertexBufferObjectCatalog()->getResourceCount()
-                << " Active: " << Renderer::getInstance()->getVertexBufferObjectCatalog()->getActiveResourceCount()
+            << " Loaded: " << Renderer::getInstance()->getVertexBufferObjectCatalog()->getResourceCount()
+            << " Active: " << Renderer::getInstance()->getVertexBufferObjectCatalog()->getActiveResourceCount()
             << "\n   IBOs:"
-                << " Loaded: " << Renderer::getInstance()->getIndexBufferObjectCatalog()->getResourceCount()
-                << " Active: " << Renderer::getInstance()->getIndexBufferObjectCatalog()->getActiveResourceCount()
+            << " Loaded: " << Renderer::getInstance()->getIndexBufferObjectCatalog()->getResourceCount()
+            << " Active: " << Renderer::getInstance()->getIndexBufferObjectCatalog()->getActiveResourceCount()
             << "\n   Programs:"
-                << " Loaded: " << Renderer::getInstance()->getShaderProgramCatalog()->getResourceCount()
-                << " Active: " << Renderer::getInstance()->getShaderProgramCatalog()->getActiveResourceCount()
+            << " Loaded: " << Renderer::getInstance()->getShaderProgramCatalog()->getResourceCount()
+            << " Active: " << Renderer::getInstance()->getShaderProgramCatalog()->getActiveResourceCount()
             << "\n----------------------------------------------------------------------------------------\n";
 
     // Job system
     _output << "Job count (" << ( JobScheduler::getInstance()->getNumWorkers() + 1 ) << " workers): ";
-    JobScheduler::getInstance()->eachWorkerStat( [this]( JobScheduler::WorkerId workerId, const JobScheduler::WorkerStat &stat ) {
+    JobScheduler::getInstance()->eachWorkerStat( [ this ]( JobScheduler::WorkerId workerId, const JobScheduler::WorkerStat &stat ) {
         _output << std::setw( 5 ) << std::right << stat.jobCount;
-    });
+    } );
     JobScheduler::getInstance()->clearWorkerStats();
     _output << std::left
             << "\n----------------------------------------------------------------------------------------\n";
@@ -108,15 +104,15 @@ void ProfilerOutputHandler::beginOutput( crimild::Size fps, crimild::Real64 avgF
 
 void ProfilerOutputHandler::sample( float minPc, float avgPc, float maxPc, unsigned int totalTime, unsigned int callCount, std::string name, unsigned int parentCount )
 {
-	_output << std::setiosflags( std::ios::fixed | std::ios::showpoint )
-			<< std::setprecision( 3 )
-			<< std::setw( 7 ) << std::right << minPc << " | "
-			<< std::setw( 7 ) << std::right << avgPc << " | "
-			<< std::setw( 7 ) << std::right << maxPc << " | "
-			<< std::setw( 7 ) << std::right << totalTime << " | "
-			<< std::setw( 7 ) << std::right << callCount << " | "
-			<< std::left << name
-			<< "\n";
+    _output << std::setiosflags( std::ios::fixed | std::ios::showpoint )
+            << std::setprecision( 3 )
+            << std::setw( 7 ) << std::right << minPc << " | "
+            << std::setw( 7 ) << std::right << avgPc << " | "
+            << std::setw( 7 ) << std::right << maxPc << " | "
+            << std::setw( 7 ) << std::right << totalTime << " | "
+            << std::setw( 7 ) << std::right << callCount << " | "
+            << std::left << name
+            << "\n";
 }
 
 void ProfilerOutputHandler::endOutput( void )
@@ -126,12 +122,10 @@ void ProfilerOutputHandler::endOutput( void )
 
 ProfilerConsoleOutputHandler::ProfilerConsoleOutputHandler( void )
 {
-
 }
 
 ProfilerConsoleOutputHandler::~ProfilerConsoleOutputHandler( void )
 {
-
 }
 
 void ProfilerConsoleOutputHandler::endOutput( void )
@@ -143,12 +137,10 @@ void ProfilerConsoleOutputHandler::endOutput( void )
 
 ProfilerScreenOutputHandler::ProfilerScreenOutputHandler( void )
 {
-
 }
 
 ProfilerScreenOutputHandler::~ProfilerScreenOutputHandler( void )
 {
-
 }
 
 void ProfilerScreenOutputHandler::endOutput( void )
@@ -159,7 +151,7 @@ void ProfilerScreenOutputHandler::endOutput( void )
     auto screen = Renderer::getInstance()->getScreenBuffer();
     auto aspect = ( crimild::Real32 ) screen->getWidth() / ( crimild::Real32 ) screen->getHeight();
 
-    DebugRenderHelper::renderText( getOutput(), Vector3f( -aspect + 0.01f, 0.95f, 0.0f ), RGBAColorf( 1.0f, 1.0f, 0.0f, 1.0f ) );
+    DebugRenderHelper::renderText( getOutput(), Vector3f( -aspect + 0.01f, 0.95f, 0.0f ), ColorRGBA( 1.0f, 1.0f, 0.0f, 1.0f ) );
     */
 }
 
@@ -177,17 +169,16 @@ ProfilerSample::~ProfilerSample( void )
 Profiler::Profiler( void )
 {
     setOutputHandler( crimild::alloc< ProfilerScreenOutputHandler >() );
-	resetAll();
+    resetAll();
 }
 
 Profiler::~Profiler( void )
 {
-
 }
 
 crimild::Real64 Profiler::getTime( void )
 {
-	auto now = std::chrono::high_resolution_clock::now().time_since_epoch();
+    auto now = std::chrono::high_resolution_clock::now().time_since_epoch();
     return 0.001 * std::chrono::duration_cast< std::chrono::microseconds >( now ).count();
 }
 
@@ -201,8 +192,7 @@ int Profiler::onSampleCreated( std::string name )
             if ( firstInvalidIndex < 0 ) {
                 firstInvalidIndex = i;
             }
-        }
-        else if ( sample.name == name ) {
+        } else if ( sample.name == name ) {
             assert( !sample.isOpened && "Tried to profile a sample that is already being profiled" );
 
             sample.parentIndex = _lastOpenedSample;
@@ -255,7 +245,6 @@ void Profiler::onSampleDestroyed( int sampleIndex )
         return;
     }
 
-
     auto endTime = getTime();
 
     auto &sample = _samples[ sampleIndex ];
@@ -266,8 +255,7 @@ void Profiler::onSampleDestroyed( int sampleIndex )
 
     if ( sample.parentIndex >= 0 ) {
         _samples[ sample.parentIndex ].childTime += deltaTime;
-    }
-    else {
+    } else {
         _rootEnd = endTime;
     }
 
@@ -280,33 +268,33 @@ void Profiler::onSampleDestroyed( int sampleIndex )
 
 void Profiler::resetAll( void )
 {
-	for ( int i = 0; i < MAX_SAMPLES; i++ ) {
-		auto &sample = _samples[ i ];
-		sample.avgTime = 0.0f;
-		sample.minTime = -1.0f;
-		sample.maxTime = -1.0f;
-		sample.dataCount = 0;
-	}
+    for ( int i = 0; i < MAX_SAMPLES; i++ ) {
+        auto &sample = _samples[ i ];
+        sample.avgTime = 0.0f;
+        sample.minTime = -1.0f;
+        sample.maxTime = -1.0f;
+        sample.dataCount = 0;
+    }
 
-	if ( _frameCount > 0 ) {
-		_fps = _frameCount;
-		_avgFrameTime = _totalFrameTime / _fps;
-	}
+    if ( _frameCount > 0 ) {
+        _fps = _frameCount;
+        _avgFrameTime = _totalFrameTime / _fps;
+    }
 
-	const auto t = _minFrameTime;
-	_minFrameTime = _maxFrameTime;
-	_maxFrameTime = t;
-	_frameCount = 0;
-	_totalFrameTime = 0;
-	_lastFrameTime = getTime();
+    const auto t = _minFrameTime;
+    _minFrameTime = _maxFrameTime;
+    _maxFrameTime = t;
+    _frameCount = 0;
+    _totalFrameTime = 0;
+    _lastFrameTime = getTime();
 }
 
 void Profiler::step( void )
 {
-	_frameCount++;
+    _frameCount++;
 
-	const auto currentFrameTime = getTime();
-	const auto frameTime = currentFrameTime - _lastFrameTime;
+    const auto currentFrameTime = getTime();
+    const auto frameTime = currentFrameTime - _lastFrameTime;
 
     // normalized frame time, clamped to [0, 2]
     _frameTimeHistory.push_back( Numericd::min( 2.0, ( 0.001 * frameTime ) / Clock::DEFAULT_TICK_TIME ) );
@@ -314,11 +302,11 @@ void Profiler::step( void )
         _frameTimeHistory.pop_front();
     }
 
-	_minFrameTime = Numeric< crimild::Real64 >::min( frameTime, _minFrameTime );
-	_maxFrameTime = Numeric< crimild::Real64 >::max( frameTime, _maxFrameTime );
+    _minFrameTime = Numeric< crimild::Real64 >::min( frameTime, _minFrameTime );
+    _maxFrameTime = Numeric< crimild::Real64 >::max( frameTime, _maxFrameTime );
 
-	_lastFrameTime = currentFrameTime;
-	_totalFrameTime += frameTime;
+    _lastFrameTime = currentFrameTime;
+    _totalFrameTime += frameTime;
 }
 
 void Profiler::dump( void )
@@ -329,23 +317,23 @@ void Profiler::dump( void )
 
     getOutputHandler()->beginOutput( _fps, _avgFrameTime, _minFrameTime, _maxFrameTime );
 
-	for ( int i = 0; i < MAX_SAMPLES; i++ ) {
-		auto &sample = _samples[ i ];
+    for ( int i = 0; i < MAX_SAMPLES; i++ ) {
+        auto &sample = _samples[ i ];
 
-		if ( sample.isValid ) {
-			float accumTime = sample.avgTime * sample.dataCount + sample.totalTime;
-			sample.dataCount++;
-			sample.avgTime = accumTime / ( float ) sample.dataCount;
-			sample.minTime = sample.minTime < 0 ? sample.totalTime : Numericf::min( sample.minTime, sample.totalTime );
-			sample.maxTime = sample.maxTime < 0 ? sample.totalTime : Numericf::max( sample.maxTime, sample.totalTime );
+        if ( sample.isValid ) {
+            float accumTime = sample.avgTime * sample.dataCount + sample.totalTime;
+            sample.dataCount++;
+            sample.avgTime = accumTime / ( float ) sample.dataCount;
+            sample.minTime = sample.minTime < 0 ? sample.totalTime : Numericf::min( sample.minTime, sample.totalTime );
+            sample.maxTime = sample.maxTime < 0 ? sample.totalTime : Numericf::max( sample.maxTime, sample.totalTime );
 
-			getOutputHandler()->sample( sample.minTime, sample.avgTime, sample.maxTime, sample.totalTime, sample.callCount, sample.name, sample.parentCount );
+            getOutputHandler()->sample( sample.minTime, sample.avgTime, sample.maxTime, sample.totalTime, sample.callCount, sample.name, sample.parentCount );
 
-			sample.callCount = 0;
-			sample.totalTime = 0;
-			sample.childTime = 0;
-		}
-	}
+            sample.callCount = 0;
+            sample.totalTime = 0;
+            sample.childTime = 0;
+        }
+    }
 
     getOutputHandler()->endOutput();
 
@@ -369,7 +357,7 @@ void Profiler::dump( void )
         Vector3f( +HISTOGRAM_WIDTH, -0.9f + 0.0f * HISTOGRAM_HEIGHT, 0.0f ),
     };
 
-    DebugRenderHelper::renderLines( &frame[ 0 ], 10, RGBAColorf( 1.0f, 1.0f, 1.0f, 0.5f ) );
+    DebugRenderHelper::renderLines( &frame[ 0 ], 10, ColorRGBA( 1.0f, 1.0f, 1.0f, 0.5f ) );
 
     const auto frameTimeCount = _frameTimeHistory.size();
 
@@ -380,9 +368,8 @@ void Profiler::dump( void )
         auto f1 = _frameTimeHistory[ i + 1 ];
 
         lines[ i * 2 + 0 ] = Vector3f( -HISTOGRAM_WIDTH + 2.0 * HISTOGRAM_WIDTH * ( i / ( crimild::Real32 ) frameTimeCount ), -0.9f + HISTOGRAM_HEIGHT * f0, 0.0f );
-        lines[ i * 2 + 1 ] = Vector3f( -HISTOGRAM_WIDTH + 2.0 * HISTOGRAM_WIDTH * ( ( i  + 1 ) / ( crimild::Real32 ) frameTimeCount ), -0.9f + HISTOGRAM_HEIGHT * f1, 0.0f );
+        lines[ i * 2 + 1 ] = Vector3f( -HISTOGRAM_WIDTH + 2.0 * HISTOGRAM_WIDTH * ( ( i + 1 ) / ( crimild::Real32 ) frameTimeCount ), -0.9f + HISTOGRAM_HEIGHT * f1, 0.0f );
     }
 
-    DebugRenderHelper::renderLines( &lines[ 0 ], frameTimeCount * 2, RGBAColorf( 1.0f, 0.0f, 0.0f, 1.0f ) );
-
+    DebugRenderHelper::renderLines( &lines[ 0 ], frameTimeCount * 2, ColorRGBA( 1.0f, 0.0f, 0.0f, 1.0f ) );
 }

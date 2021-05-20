@@ -30,6 +30,7 @@
 
 #include "Foundation/Types.hpp"
 #include "Mathematics/Numbers.hpp"
+#include "Mathematics/Tuple.hpp"
 #include "Mathematics/Utils.hpp"
 
 #include <array>
@@ -58,6 +59,22 @@ namespace crimild {
             {
                 for ( auto i = 0l; i < N; ++i ) {
                     m_tuple[ i ] = tuple[ i ];
+                }
+            }
+
+            constexpr explicit Color( const Tuple< T, N > &tuple ) noexcept
+                : m_tuple()
+            {
+                for ( auto i = 0l; i < N; ++i ) {
+                    m_tuple[ i ] = tuple[ i ];
+                }
+            }
+
+            constexpr Color( T r ) noexcept
+                : m_tuple()
+            {
+                for ( auto i = 0l; i < N; ++i ) {
+                    m_tuple[ i ] = r;
                 }
             }
 
@@ -124,9 +141,15 @@ namespace crimild {
 
             inline constexpr T a( void ) const noexcept
             {
-                static_assert( N == 4 );
-                return m_tuple[ 3 ];
+                if constexpr ( N == 4 ) {
+                    return m_tuple[ 3 ];
+                } else {
+                    return T( 1 );
+                }
             }
+
+            inline constexpr Color< T, 3 > rgb( void ) const noexcept { return Color< T, 3 > { r(), g(), b() }; }
+            inline constexpr Color< T, 4 > rgba( void ) const noexcept { return Color< T, 4 > { r(), g(), b(), a() }; }
 
             [[nodiscard]] inline constexpr T operator[]( Size index ) const noexcept
             {
@@ -227,11 +250,11 @@ namespace crimild {
         template< typename T, Size N >
         struct Color< T, N >::Constants {
             static constexpr auto BLACK = [] {
-                return Color< T, N >( 0 );
+                return Color< T, N >( T( 0 ) );
             }();
 
             static constexpr auto WHITE = [] {
-                return Color< T, N >( 1 );
+                return Color< T, N >( T( 1 ) );
             }();
 
             static constexpr auto RED = [] {

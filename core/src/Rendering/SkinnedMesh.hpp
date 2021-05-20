@@ -107,7 +107,7 @@ namespace crimild {
         using PositionKey = AnimationKey< Vector3f >;
         using PositionKeyArray = Array< PositionKey >;
 
-        using RotationKey = AnimationKey< Quaternion4f >;
+        using RotationKey = AnimationKey< Quaternion >;
         using RotationKeyArray = Array< RotationKey >;
 
         using ScaleKey = AnimationKey< float >;
@@ -130,7 +130,7 @@ namespace crimild {
         const ScaleKeyArray &getScaleKeys( void ) const { return _scaleKeys; }
 
         bool computePosition( float animationTime, Vector3f &result );
-        bool computeRotation( float animationTime, Quaternion4f &result );
+        bool computeRotation( float animationTime, Quaternion &result );
         bool computeScale( float animationTime, float &result );
 
     private:

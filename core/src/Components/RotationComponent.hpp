@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,29 +28,29 @@
 #ifndef CRIMILD_COMPONENTS_ROTATION_
 #define CRIMILD_COMPONENTS_ROTATION_
 
+#include "Mathematics/Vector3.hpp"
 #include "NodeComponent.hpp"
-#include "Mathematics/Vector.hpp"
 
 namespace crimild {
 
-	class RotationComponent : public NodeComponent {
-		CRIMILD_IMPLEMENT_RTTI( crimild::RotationComponent )
+    class RotationComponent : public NodeComponent {
+        CRIMILD_IMPLEMENT_RTTI( crimild::RotationComponent )
 
-	public:
-        RotationComponent( void );
-		RotationComponent( const Vector3f &axis, float speed );
-		virtual ~RotationComponent( void );
-        
+    public:
+        RotationComponent( void ) = default;
+        RotationComponent( const Vector3 &axis, float speed );
+        ~RotationComponent( void ) = default;
+
         inline const Vector3f &getAxis( void ) const { return _axis; }
         inline crimild::Real32 getSpeed( void ) const { return _speed; }
 
-		virtual void update( const Clock &c ) override;
+        virtual void update( const Clock &c ) override;
 
-	private:
-		Vector3f _axis;
+    private:
+        Vector3 _axis;
         crimild::Real32 _speed;
         crimild::Real32 _time;
-        
+
         /**
             \name Coding
          */
@@ -59,9 +59,8 @@ namespace crimild {
         virtual void encode( coding::Encoder &encoder ) override;
         virtual void decode( coding::Decoder &decoder ) override;
         //@}
-	};
+    };
 
 }
 
 #endif
-

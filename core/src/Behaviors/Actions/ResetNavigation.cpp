@@ -10,32 +10,31 @@ using namespace crimild::navigation;
 
 ResetNavigation::ResetNavigation( void )
 {
-
 }
 
 ResetNavigation::~ResetNavigation( void )
 {
-	
 }
 
 Behavior::State ResetNavigation::step( BehaviorContext *context )
 {
+    assert( false && "TODO" );
+#if 0
 	auto agent = context->getAgent();
 	auto nav = agent->getComponent< NavigationController >();
 	if ( nav != nullptr ) {
 		nav->teleport( agent->getLocal().getTranslate() );
 	}
-
-	return Behavior::State::SUCCESS;
+#endif
+    return Behavior::State::SUCCESS;
 }
 
 void ResetNavigation::encode( coding::Encoder &encoder )
 {
-	Behavior::encode( encoder );
+    Behavior::encode( encoder );
 }
 
 void ResetNavigation::decode( coding::Decoder &decoder )
 {
-	Behavior::decode( decoder );
+    Behavior::decode( decoder );
 }
-

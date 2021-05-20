@@ -27,45 +27,44 @@
 
 #include "OrientedBoxBoundingVolume.hpp"
 
-#include "Mathematics/Intersection.hpp"
 #include "Debug/DebugRenderHelper.hpp"
+#include "Mathematics/Intersection.hpp"
 
 using namespace crimild;
 
 OrientedBoxBoundingVolume::OrientedBoxBoundingVolume( void )
-	: _sphere( Vector3f( 0.0f, 0.0f, 0.0f ), 1.0f )
+    : _sphere( Point3( 0.0f, 0.0f, 0.0f ), 1.0f )
 {
-	setMin( -Numericf::COS_45 * getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
-	setMax( +Numericf::COS_45 * getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
+    setMin( -Numericf::COS_45 * getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
+    setMax( +Numericf::COS_45 * getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
 }
 
 OrientedBoxBoundingVolume::OrientedBoxBoundingVolume( const Vector3f &r, const Vector3f &s, const Vector3f &t )
 {
-	setRAxis( r );
-	setSAxis( s );
-	setTAxis( t );
+    setRAxis( r );
+    setSAxis( s );
+    setTAxis( t );
 
-	_sphere.setCenter( Vector3f::ZERO );
-	//_sphere.setRadius( Numericf::max( _r.getMagnitude(), Numericf::max( _s.getMagnitude(), _t.getMagnitude() ) ) );
+    //_sphere.setCenter( Vector3f::ZERO );
+    //_sphere.setRadius( Numericf::max( _r.getMagnitude(), Numericf::max( _s.getMagnitude(), _t.getMagnitude() ) ) );
 }
 
-OrientedBoxBoundingVolume::OrientedBoxBoundingVolume( const Vector3f &center, float radius )
-	: _sphere( center, radius )
+OrientedBoxBoundingVolume::OrientedBoxBoundingVolume( const Point3 &center, float radius )
+    : _sphere( center, radius )
 {
-	setMin( -Numericf::COS_45 * getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
-	setMax( +Numericf::COS_45 * getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
+    setMin( -Numericf::COS_45 * getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
+    setMax( +Numericf::COS_45 * getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
 }
 
-OrientedBoxBoundingVolume::OrientedBoxBoundingVolume( const Sphere3f &sphere )
-	: _sphere( sphere )
+OrientedBoxBoundingVolume::OrientedBoxBoundingVolume( const Sphere &sphere )
+    : _sphere( sphere )
 {
-	setMin( -Numericf::COS_45 * getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
-	setMax( +Numericf::COS_45 * getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
+    setMin( -Numericf::COS_45 * getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
+    setMax( +Numericf::COS_45 * getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
 }
 
 OrientedBoxBoundingVolume::~OrientedBoxBoundingVolume( void )
 {
-
 }
 
 SharedPointer< BoundingVolume > OrientedBoxBoundingVolume::clone( void ) const
@@ -79,11 +78,12 @@ SharedPointer< BoundingVolume > OrientedBoxBoundingVolume::clone( void ) const
 
 void OrientedBoxBoundingVolume::computeFrom( const BoundingVolume *volume )
 {
-	//computeFrom( volume->getCenter() + volume->getMin(), volume->getCenter() + volume->getMax() );
+    //computeFrom( volume->getCenter() + volume->getMin(), volume->getCenter() + volume->getMax() );
 }
 
 void OrientedBoxBoundingVolume::computeFrom( const BoundingVolume *volume, const Transformation &transformation )
 {
+    /*
     Vector3f c, r, s, t;
 
     transformation.applyToPoint( volume->getCenter(), c );
@@ -91,13 +91,14 @@ void OrientedBoxBoundingVolume::computeFrom( const BoundingVolume *volume, const
     transformation.applyToVector( volume->getSAxis(), s );
     transformation.applyToVector( volume->getTAxis(), t );
 
-	_sphere.setCenter( c );
+    _sphere.setCenter( c );
 
-	setRAxis( r );
+    setRAxis( r );
     setSAxis( s );
     setTAxis( t );
+    */
 
-	/*
+    /*
 	Vector3f p0, p1;
 	transformation.applyToPoint( volume->getCenter() + volume->getMin(), p0 );
 	transformation.applyToPoint( volume->getCenter() + volume->getMax(), p1 );
@@ -111,7 +112,7 @@ void OrientedBoxBoundingVolume::computeFrom( const BoundingVolume *volume, const
 
 void OrientedBoxBoundingVolume::computeFrom( const Vector3f *positions, unsigned int positionCount )
 {
-	/*
+    /*
 	if ( positionCount == 0 || positions == NULL ) {
 		return;
 	}
@@ -137,7 +138,7 @@ void OrientedBoxBoundingVolume::computeFrom( const Vector3f *positions, unsigned
 
 void OrientedBoxBoundingVolume::computeFrom( const VertexBuffer *vbo )
 {
-	/*
+    /*
 	if ( vbo->getVertexCount() == 0 || !vbo->getVertexFormat().hasPositions() ) {
 		return;
 	}
@@ -162,7 +163,7 @@ void OrientedBoxBoundingVolume::computeFrom( const VertexBuffer *vbo )
 
 void OrientedBoxBoundingVolume::computeFrom( const Vector3f &min, const Vector3f &max )
 {
-	/*
+    /*
 	_sphere.setCenter( 0.5f * ( max + min ) );
 	_sphere.setRadius( Numericf::max( 0.01f, ( max - _sphere.getCenter() ).getMagnitude() ) );
 
@@ -171,9 +172,9 @@ void OrientedBoxBoundingVolume::computeFrom( const Vector3f &min, const Vector3f
 	*/
 }
 
-void OrientedBoxBoundingVolume::expandToContain( const Vector3f &p )
+void OrientedBoxBoundingVolume::expandToContain( const Point3 &p )
 {
-	/*
+    /*
 	auto min = getCenter() + getMin();
 	auto max = getCenter() + getMax();
 
@@ -186,7 +187,7 @@ void OrientedBoxBoundingVolume::expandToContain( const Vector3f &p )
 
 void OrientedBoxBoundingVolume::expandToContain( const Vector3f *positions, unsigned int positionCount )
 {
-	/*
+    /*
 	if ( positionCount == 0 || positions == NULL ) {
 		return;
 	}
@@ -213,7 +214,7 @@ void OrientedBoxBoundingVolume::expandToContain( const Vector3f *positions, unsi
 
 void OrientedBoxBoundingVolume::expandToContain( const VertexBuffer *vbo )
 {
-	/*
+    /*
 	if ( vbo->getVertexCount() == 0 || !vbo->getVertexFormat().hasPositions() ) {
 		return;
 	}
@@ -240,31 +241,31 @@ void OrientedBoxBoundingVolume::expandToContain( const VertexBuffer *vbo )
 
 void OrientedBoxBoundingVolume::expandToContain( const BoundingVolume *input )
 {
-	/*
+    /*
 	expandToContain( input->getCenter() + input->getMin() );
 	expandToContain( input->getCenter() + input->getMax() );
 	*/
 }
 
-int OrientedBoxBoundingVolume::whichSide( const Plane3f &plane ) const
+int OrientedBoxBoundingVolume::whichSide( const Plane3 &plane ) const
 {
-	//return _sphere.whichSide( plane );
-	return 0;
+    //return _sphere.whichSide( plane );
+    return 0;
 }
 
 bool OrientedBoxBoundingVolume::contains( const Vector3f &point ) const
 {
-	/*
+    /*
 	float centerDiffSqr = ( _sphere.getCenter() - point ).getSquaredMagnitude();
 	float radiusSqr = _sphere.getRadius() * _sphere.getRadius();
 	return ( centerDiffSqr < radiusSqr );
 	*/
-	return false;
+    return false;
 }
 
-bool OrientedBoxBoundingVolume::testIntersection( const Ray3f &ray ) const
+bool OrientedBoxBoundingVolume::testIntersection( const Ray3 &ray ) const
 {
-	/*
+    /*
 	if ( !Intersection::test( _sphere, ray ) ) {
 		return false;
 	}
@@ -272,32 +273,32 @@ bool OrientedBoxBoundingVolume::testIntersection( const Ray3f &ray ) const
 	return Intersection::test( getCenter() + getMin(), getCenter() + getMax(), ray );
 	*/
 
-	return false;
+    return false;
 }
 
 bool OrientedBoxBoundingVolume::testIntersection( const BoundingVolume *other ) const
 {
-	return false;//other->testIntersection( _sphere );
+    return false; //other->testIntersection( _sphere );
 }
 
-bool OrientedBoxBoundingVolume::testIntersection( const Sphere3f &sphere ) const
+bool OrientedBoxBoundingVolume::testIntersection( const Sphere &sphere ) const
 {
-	return false;//Intersection::test( _sphere, sphere );
+    return false; //Intersection::test( _sphere, sphere );
 }
 
-bool OrientedBoxBoundingVolume::testIntersection( const Plane3f &plane ) const
+bool OrientedBoxBoundingVolume::testIntersection( const Plane3 &plane ) const
 {
-	return false;//whichSide( plane ) == 0;
+    return false; //whichSide( plane ) == 0;
 }
 
 void OrientedBoxBoundingVolume::resolveIntersection( const BoundingVolume *other, Transformation &result ) const
 {
-	//other->resolveIntersection( _sphere, result );
+    //other->resolveIntersection( _sphere, result );
 }
 
-void OrientedBoxBoundingVolume::resolveIntersection( const Sphere3f &other, Transformation &result ) const
+void OrientedBoxBoundingVolume::resolveIntersection( const Sphere &other, Transformation &result ) const
 {
-	/*
+    /*
 	Vector3f direction = other.getCenter() - _sphere.getCenter();
 	float d = direction.getMagnitude();
 	float diff = ( _sphere.getRadius() + other.getRadius() ) - d;
@@ -305,53 +306,67 @@ void OrientedBoxBoundingVolume::resolveIntersection( const Sphere3f &other, Tran
 	*/
 }
 
-void OrientedBoxBoundingVolume::resolveIntersection( const Plane3f &plane, Transformation &result ) const
+void OrientedBoxBoundingVolume::resolveIntersection( const Plane3 &plane, Transformation &result ) const
 {
-	// TODO
+    // TODO
 }
 
 void OrientedBoxBoundingVolume::renderDebugInfo( Renderer *renderer, Camera *camera )
 {
-	const auto &C = getCenter();
-	const auto &R = getRAxis();
-	const auto &S = getSAxis();
-	const auto &T = getTAxis();
+    /*
+    const auto &C = getCenter();
+    const auto &R = getRAxis();
+    const auto &S = getSAxis();
+    const auto &T = getTAxis();
 
-	Vector3f axes[] = {
-		C, C + R,
-		C, C + S,
-		C, C + T,
-	};
+    Vector3f axes[] = {
+        C,
+        C + R,
+        C,
+        C + S,
+        C,
+        C + T,
+    };
 
-	DebugRenderHelper::renderLines(
-		renderer,
-		camera,
-		axes,
-		6,
-		RGBAColorf( 0.0f, 0.0f, 1.0f, 1.0f )
-	);
+    DebugRenderHelper::renderLines(
+        renderer,
+        camera,
+        axes,
+        6,
+        RGBAColorf( 0.0f, 0.0f, 1.0f, 1.0f ) );
 
-	Vector3f box[] = {
-		C + R + S + T, C + R - S + T,
-		C + R - S + T, C - R - S + T,
-		C - R - S + T, C - R + S + T,
-		C - R + S + T, C + R + S + T,
-		C + R + S - T, C + R - S - T,
-		C + R - S - T, C - R - S - T,
-		C - R - S - T, C - R + S - T,
-		C - R + S - T, C + R + S - T,
-		C + R + S + T, C + R + S - T,
-		C + R - S + T, C + R - S - T,
-		C - R - S + T, C - R - S - T,
-		C - R + S + T, C - R + S - T,
-	};
+    Vector3f box[] = {
+        C + R + S + T,
+        C + R - S + T,
+        C + R - S + T,
+        C - R - S + T,
+        C - R - S + T,
+        C - R + S + T,
+        C - R + S + T,
+        C + R + S + T,
+        C + R + S - T,
+        C + R - S - T,
+        C + R - S - T,
+        C - R - S - T,
+        C - R - S - T,
+        C - R + S - T,
+        C - R + S - T,
+        C + R + S - T,
+        C + R + S + T,
+        C + R + S - T,
+        C + R - S + T,
+        C + R - S - T,
+        C - R - S + T,
+        C - R - S - T,
+        C - R + S + T,
+        C - R + S - T,
+    };
 
-	DebugRenderHelper::renderLines(
-		renderer,
-		camera,
-		box,
-		24,
-		RGBAColorf( 0.0f, 1.0f, 1.0f, 1.0f )
-	);
-
+    DebugRenderHelper::renderLines(
+        renderer,
+        camera,
+        box,
+        24,
+        RGBAColorf( 0.0f, 1.0f, 1.0f, 1.0f ) );
+    */
 }

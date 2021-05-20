@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -27,29 +27,29 @@
 
 #include "CameraSortParticleUpdater.hpp"
 
+#include "Mathematics/Vector2.hpp"
 #include "SceneGraph/Camera.hpp"
 
 using namespace crimild;
 
 CameraSortParticleUpdater::CameraSortParticleUpdater( void )
 {
-
 }
 
 CameraSortParticleUpdater::~CameraSortParticleUpdater( void )
 {
-
 }
 
 void CameraSortParticleUpdater::configure( Node *node, ParticleData *particles )
 {
-	_positions = particles->createAttribArray< Vector3f >( ParticleAttrib::POSITION );
+    _positions = particles->createAttribArray< Vector3f >( ParticleAttrib::POSITION );
     _distances = particles->createAttribArray< Vector2f >( ParticleAttrib::SORT_REFERENCE );
 }
 
 void CameraSortParticleUpdater::update( Node *node, double dt, ParticleData *particles )
 {
-	const auto camera = Camera::getMainCamera();	
+    /*
+	const auto camera = Camera::getMainCamera();
 	auto cameraPos = camera->getWorld().getTranslate();
 	auto cameraDirection = camera->getWorld().computeDirection();
 	if ( !particles->shouldComputeInWorldSpace() ) {
@@ -86,15 +86,15 @@ void CameraSortParticleUpdater::update( Node *node, double dt, ParticleData *par
             particles->swap( d, i );
         }
     }
+    */
 }
 
-void CameraSortParticleUpdater::encode( coding::Encoder &encoder ) 
+void CameraSortParticleUpdater::encode( coding::Encoder &encoder )
 {
-	ParticleSystemComponent::ParticleUpdater::encode( encoder );
+    ParticleSystemComponent::ParticleUpdater::encode( encoder );
 }
 
 void CameraSortParticleUpdater::decode( coding::Decoder &decoder )
 {
-	ParticleSystemComponent::ParticleUpdater::decode( decoder );
+    ParticleSystemComponent::ParticleUpdater::decode( decoder );
 }
-

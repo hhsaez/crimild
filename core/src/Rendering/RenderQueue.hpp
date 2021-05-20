@@ -28,26 +28,24 @@
 #ifndef CRIMILD_CORE_RENDERING_RENDER_QUEUE_
 #define CRIMILD_CORE_RENDERING_RENDER_QUEUE_
 
-#include "Foundation/SharedObject.hpp"
 #include "Foundation/Containers/Array.hpp"
-
-#include "SceneGraph/Geometry.hpp"
+#include "Foundation/SharedObject.hpp"
+#include "Material.hpp"
 #include "SceneGraph/Camera.hpp"
+#include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Light.hpp"
 
-#include "Material.hpp"
-
+#include <chrono>
 #include <functional>
 #include <vector>
-#include <chrono>
 
 namespace crimild {
-    
+
     class RenderQueue;
 
     using RenderQueuePtr = SharedPointer< RenderQueue >;
 
-    class RenderQueue : public SharedObject {
+    class [[deprecated]] RenderQueue : public SharedObject {
     public:
         struct Renderable {
             SharedPointer< Geometry > geometry;
@@ -55,23 +53,23 @@ namespace crimild {
             Matrix4f modelTransform;
             double distanceFromCamera;
         };
-        
+
         enum class RenderableType {
-			BACKGROUND,
+            BACKGROUND,
             OCCLUDER,
             SHADOW_CASTER,
             SHADOW_CASTER_INSTANCED,
             OPAQUE,
-			OPAQUE_CUSTOM,
-			OPAQUE_INSTANCED,
+            OPAQUE_CUSTOM,
+            OPAQUE_INSTANCED,
             TRANSLUCENT,
-			TRANSLUCENT_CUSTOM,
-			TRANSLUCENT_INSTANCED,
-			SKYBOX,
+            TRANSLUCENT_CUSTOM,
+            TRANSLUCENT_INSTANCED,
+            SKYBOX,
             SCREEN,
-//            DEBUG,
+            //            DEBUG,
         };
-        
+
         using Renderables = std::list< Renderable >;
 
     public:
@@ -80,50 +78,49 @@ namespace crimild {
 
     public:
         void reset( void );
-        
+
         void setCamera( Camera *camera );
         Camera *getCamera( void ) { return crimild::get_ptr( _camera ); }
-        
+
         const Matrix4f &getViewMatrix( void ) const { return _viewMatrix; }
         const Matrix4f &getProjectionMatrix( void ) const { return _projectionMatrix; }
-        
+
         void push( Geometry *geometry );
         void push( Light *light );
 
         Renderables *getRenderables( RenderableType type ) { return &_renderables[ type ]; }
-        
+
         void each( Renderables *renderables, std::function< void( Renderable * ) > callback );
 
-		crimild::Size getLightCount( void ) const { return _lights.size(); }
+        crimild::Size getLightCount( void ) const { return _lights.size(); }
         void each( std::function< void( Light *, int ) > callback );
 
     private:
         SharedPointer< Camera > _camera;
-        
+
         Matrix4f _viewMatrix;
         Matrix4f _projectionMatrix;
-        
-        std::vector< SharedPointer< Light >> _lights;
+
+        std::vector< SharedPointer< Light > > _lights;
 
         std::map< RenderableType, Renderables > _renderables;
-        
+
     public:
         unsigned long getTimestamp( void ) const { return _timestamp; }
         void setTimestamp( unsigned long value ) { _timestamp = value; }
-        
+
     private:
         std::chrono::microseconds::rep _timestamp;
     };
 
     namespace messaging {
-        
+
         struct RenderQueueAvailable {
-			Array< SharedPointer< RenderQueue >> renderQueues;
+            Array< SharedPointer< RenderQueue > > renderQueues;
         };
-        
+
     }
-    
+
 }
 
 #endif
-

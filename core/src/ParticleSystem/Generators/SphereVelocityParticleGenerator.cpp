@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -27,52 +27,50 @@
 
 #include "SphereVelocityParticleGenerator.hpp"
 
-#include "Mathematics/Random.hpp"
-#include "Coding/Encoder.hpp"
 #include "Coding/Decoder.hpp"
-
+#include "Coding/Encoder.hpp"
+#include "Mathematics/Random.hpp"
 #include "SceneGraph/Node.hpp"
 
 using namespace crimild;
 
 SphereVelocityParticleGenerator::SphereVelocityParticleGenerator( void )
 {
-
 }
 
 SphereVelocityParticleGenerator::~SphereVelocityParticleGenerator( void )
 {
-
 }
 
 void SphereVelocityParticleGenerator::configure( Node *node, ParticleData *particles )
 {
-	_velocities = particles->createAttribArray< Vector3f >( ParticleAttrib::VELOCITY );
+    _velocities = particles->createAttribArray< Vector3f >( ParticleAttrib::VELOCITY );
 }
 
 void SphereVelocityParticleGenerator::generate( Node *node, crimild::Real64 dt, ParticleData *particles, ParticleId startId, ParticleId endId )
 {
-	auto vs = _velocities->getData< Vector3f >();
-	
-    const auto posMin = -Vector3f::ONE;
-    const auto posMax = Vector3f::ONE;
+    /*
+    auto vs = _velocities->getData< Vector3f >();
+
+    const auto posMin = -Vector3f::Constants::ONE;
+    const auto posMax = Vector3f::Constants::ONE;
 
     for ( ParticleId i = startId; i < endId; i++ ) {
         vs[ i ] = Random::generate< Vector3f >( posMin, posMax ).getNormalized().times( _magnitude );
     }
+    */
 }
 
-void SphereVelocityParticleGenerator::encode( coding::Encoder &encoder ) 
+void SphereVelocityParticleGenerator::encode( coding::Encoder &encoder )
 {
-	ParticleSystemComponent::ParticleGenerator::encode( encoder );
+    ParticleSystemComponent::ParticleGenerator::encode( encoder );
 
-	encoder.encode( "magnitude", _magnitude );
+    encoder.encode( "magnitude", _magnitude );
 }
 
 void SphereVelocityParticleGenerator::decode( coding::Decoder &decoder )
 {
-	ParticleSystemComponent::ParticleGenerator::decode( decoder );
+    ParticleSystemComponent::ParticleGenerator::decode( decoder );
 
-	decoder.decode( "magnitude", _magnitude );
+    decoder.decode( "magnitude", _magnitude );
 }
-

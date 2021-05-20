@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -30,41 +30,38 @@
 
 #include "NodeComponent.hpp"
 
-#include "Mathematics/Vector.hpp"
-
 namespace crimild {
 
-	class OrbitComponent : public NodeComponent {
-		CRIMILD_IMPLEMENT_RTTI( crimild::OrbitComponent )
+    class OrbitComponent : public NodeComponent {
+        CRIMILD_IMPLEMENT_RTTI( crimild::OrbitComponent )
 
-	public:
-		explicit OrbitComponent( float x0 = 0.0f, float y0 = 0.0f, float major = 1.0f, float minor = 1.0f, float speed = 1.0f, float gamma = 0.0f );
-		virtual ~OrbitComponent( void );
+    public:
+        explicit OrbitComponent( float x0 = 0.0f, float y0 = 0.0f, float major = 1.0f, float minor = 1.0f, float speed = 1.0f, float gamma = 0.0f );
+        ~OrbitComponent( void ) = default;
 
-		virtual void update( const Clock &c ) override;
+        virtual void update( const Clock &c ) override;
 
-	private:
-		float _x0;
-		float _y0;
-		float _major;
-		float _minor;
-		float _t;
-		float _speed;
-		float _gamma;
+    private:
+        float _x0;
+        float _y0;
+        float _major;
+        float _minor;
+        float _t;
+        float _speed;
+        float _gamma;
 
-		/**
+        /**
 			\name Coding Support
 		*/
-		//@{
+        //@{
 
-	public:
-		virtual void encode( coding::Encoder &encoder ) override;
-		virtual void decode( coding::Decoder &decoder ) override;
-	};
-    
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+    };
+
     using OrbinComponentPtr = SharedPointer< OrbitComponent >;
 
 }
 
 #endif
-

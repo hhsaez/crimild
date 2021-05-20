@@ -162,6 +162,32 @@ namespace crimild {
         return std::tan( rad );
     }
 
+    [[nodiscard]] static constexpr UInt64 factorial( UInt64 N ) noexcept
+    {
+        if ( N == 0 ) {
+            return 1;
+        }
+
+        auto ret = UInt64( 1 );
+        for ( auto i = UInt64( 1 ); i <= N; ++i ) {
+            ret *= i;
+        }
+        return ret;
+    }
+
+    [[nodiscard]] static constexpr Real pow( Real base, Int exp ) noexcept
+    {
+        auto ret = Real( 1 );
+        for ( auto i = Int( 0 ); i < exp; ++i ) {
+            ret *= base;
+        }
+        return ret;
+    }
+
+    [[nodiscard]] inline Real pow( Real base, Real exp ) noexcept
+    {
+        return std::pow( base, exp );
+    }
 }
 
 #endif

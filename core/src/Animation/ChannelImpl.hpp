@@ -28,212 +28,195 @@
 #ifndef CRIMILD_ANIMATION_CHANNEL_IMPL_
 #define CRIMILD_ANIMATION_CHANNEL_IMPL_
 
-#include "Channel.hpp"
 #include "Animation.hpp"
-
-#include "Coding/Encoder.hpp"
+#include "Channel.hpp"
 #include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
 
 namespace crimild {
 
-	namespace animation {
+    namespace animation {
 
-		template< typename T >
-		class ChannelImpl : public Channel {
-		private:
-			using TimeArray = Array< crimild::Real32 >;
-			using KeyArray = Array< T >;
-			
-		public:
-			ChannelImpl( void ) { }
-			
-			ChannelImpl( std::string name, const TimeArray &times, const KeyArray &keys )
-				: Channel( name ),
-				  _times( times ),
-				  _keys( keys )
-			{
+        template< typename T >
+        class ChannelImpl : public Channel {
+        private:
+            using TimeArray = Array< crimild::Real32 >;
+            using KeyArray = Array< T >;
 
-			}
+        public:
+            ChannelImpl( void ) { }
 
-			ChannelImpl( std::string name, TimeArray &&times, KeyArray &&keys )
-				: Channel( name ),
-				  _times( times ),
-				  _keys( keys )
-			{
-				
-			}
+            ChannelImpl( std::string name, const TimeArray &times, const KeyArray &keys )
+                : Channel( name ),
+                  _times( times ),
+                  _keys( keys )
+            {
+            }
 
-			virtual ~ChannelImpl( void )
-			{
+            ChannelImpl( std::string name, TimeArray &&times, KeyArray &&keys )
+                : Channel( name ),
+                  _times( times ),
+                  _keys( keys )
+            {
+            }
 
-			}
+            virtual ~ChannelImpl( void )
+            {
+            }
 
-			virtual crimild::Real32 getDuration( void ) const override
-			{
-				if ( _times.size() == 0 ) {
-					return 0.0;
-				}
+            virtual crimild::Real32 getDuration( void ) const override
+            {
+                if ( _times.size() == 0 ) {
+                    return 0.0;
+                }
 
-				return _times.last();
-			}
+                return _times.last();
+            }
 
-			virtual void evaluate( crimild::Real32 t, Animation *animation ) override
-			{
-				if ( _keys.size() == 0 || _times.size() == 0 ) {
-					return;
-				}
-				
-				T result;
+            virtual void evaluate( crimild::Real32 t, Animation *animation ) override
+            {
+                if ( _keys.size() == 0 || _times.size() == 0 ) {
+                    return;
+                }
 
-				if ( _keys.size() == 1 || t <= _times.first() ) {
-					result = _keys.first();
-				}
-				else if ( t >= _times.last() ) {
-					result = _keys.last();
-				}
-				else {
-					// TODO: cache last index to avoid this loop
-					crimild::Size index = 0;
-					for ( ; index < _times.size() - 1; index++ ) {
-						if ( t < _times[ index + 1 ] ) {
-							break;
-						}
-					}
-					
-					const auto t0 = _times[ index ];
-					const auto t1 = _times[ index + 1 ];
+                T result;
 
-					const auto &v0 = _keys[ index ];
-					const auto &v1 = _keys[ index + 1 ];
+                if ( _keys.size() == 1 || t <= _times.first() ) {
+                    result = _keys.first();
+                } else if ( t >= _times.last() ) {
+                    result = _keys.last();
+                } else {
+                    // TODO: cache last index to avoid this loop
+                    crimild::Size index = 0;
+                    for ( ; index < _times.size() - 1; index++ ) {
+                        if ( t < _times[ index + 1 ] ) {
+                            break;
+                        }
+                    }
 
-					const auto u = ( t - t0 ) / ( t1 - t0 );
-					interpolate( v0, v1, u, result );
-				}
-				animation->setValue( getName(), result );
-			}
+                    const auto t0 = _times[ index ];
+                    const auto t1 = _times[ index + 1 ];
 
-		private:
-			template< typename U >
-			void interpolate( const U& start, const U& end, crimild::Real32 t, U &result )
-			{
-				Interpolation::linear( start, end, t, result );
-			}
+                    const auto &v0 = _keys[ index ];
+                    const auto &v1 = _keys[ index + 1 ];
 
-			void interpolate( const Quaternion4f &start, const Quaternion4f &end, crimild::Real32 t, Quaternion4f &result )
-			{
-				Interpolation::slerp( start, end, t, result );
-			}
+                    const auto u = ( t - t0 ) / ( t1 - t0 );
+                    interpolate( v0, v1, u, result );
+                }
+                animation->setValue( getName(), result );
+            }
 
-		private:
-			TimeArray _times;
-			KeyArray _keys;
+        private:
+            template< typename U >
+            void interpolate( const U &start, const U &end, crimild::Real32 t, U &result )
+            {
+                Interpolation::linear( start, end, t, result );
+            }
 
-			/**
+            void interpolate( const Quaternion &start, const Quaternion &end, crimild::Real32 t, Quaternion &result )
+            {
+                Interpolation::slerp( start, end, t, result );
+            }
+
+        private:
+            TimeArray _times;
+            KeyArray _keys;
+
+            /**
 			   \name Coding
 			*/
-			//@{
-			
-		public:
-			virtual void encode( coding::Encoder &encoder ) override
-			{
-				Codable::encode( encoder );
+            //@{
 
-				encoder.encode( "name", getName() );
-				encoder.encode( "times", _times );
-				encoder.encode( "keys", _keys );
-			}
-			
-			virtual void decode( coding::Decoder &decoder ) override
-			{
-				Codable::decode( decoder );
+        public:
+            virtual void encode( coding::Encoder &encoder ) override
+            {
+                Codable::encode( encoder );
 
-				std::string name;
-				decoder.decode( "name", name );
-				setName( name );
-				
-				decoder.decode( "times", _times );
-				decoder.decode( "keys", _keys );
-			}
-			
-			//@}
-			
-		};
+                encoder.encode( "name", getName() );
+                encoder.encode( "times", _times );
+                encoder.encode( "keys", _keys );
+            }
 
-		class Vector3fChannel : public ChannelImpl< Vector3f > {
-			CRIMILD_IMPLEMENT_RTTI( crimild::animation::Vector3fChannel )
+            virtual void decode( coding::Decoder &decoder ) override
+            {
+                Codable::decode( decoder );
 
-		public:
-			Vector3fChannel( void ) { }
-			
-			Vector3fChannel( std::string name, const Array< crimild::Real32 > &times, const Array< Vector3f > &keys )
-			    : ChannelImpl( name, times, keys )
-			{
-				
-			}
+                std::string name;
+                decoder.decode( "name", name );
+                setName( name );
 
-			Vector3fChannel( std::string name, Array< crimild::Real32 > &&times, Array< Vector3f > &&keys )
-			    : ChannelImpl( name, times, keys )
-			{
-				
-			}
+                decoder.decode( "times", _times );
+                decoder.decode( "keys", _keys );
+            }
 
-			virtual ~Vector3fChannel( void )
-			{
+            //@}
+        };
 
-			}
-		};
+        class Vector3fChannel : public ChannelImpl< Vector3f > {
+            CRIMILD_IMPLEMENT_RTTI( crimild::animation::Vector3fChannel )
 
-		class Quaternion4fChannel : public ChannelImpl< Quaternion4f > {
-			CRIMILD_IMPLEMENT_RTTI( crimild::animation::Quaternion4fChannel )
+        public:
+            Vector3fChannel( void ) { }
 
-		public:
-			Quaternion4fChannel( void ) { }
-			
-			Quaternion4fChannel( std::string name, const Array< crimild::Real32 > &times, const Array< Quaternion4f > &keys )
-			    : ChannelImpl( name, times, keys )
-			{
-				
-			}
+            Vector3fChannel( std::string name, const Array< crimild::Real32 > &times, const Array< Vector3f > &keys )
+                : ChannelImpl( name, times, keys )
+            {
+            }
 
-			Quaternion4fChannel( std::string name, Array< crimild::Real32 > &&times, Array< Quaternion4f > &&keys )
-			    : ChannelImpl( name, times, keys )
-			{
-				
-			}
+            Vector3fChannel( std::string name, Array< crimild::Real32 > &&times, Array< Vector3f > &&keys )
+                : ChannelImpl( name, times, keys )
+            {
+            }
 
-			virtual ~Quaternion4fChannel( void )
-			{
+            virtual ~Vector3fChannel( void )
+            {
+            }
+        };
 
-			}
-		};
+        class QuaternionChannel : public ChannelImpl< Quaternion > {
+            CRIMILD_IMPLEMENT_RTTI( crimild::animation::QuaternionChannel )
 
-		class Real32Channel : public ChannelImpl< Real32 > {
-			CRIMILD_IMPLEMENT_RTTI( crimild::animation::Real32Channel )
+        public:
+            QuaternionChannel( void ) { }
 
-		public:
-			Real32Channel( void ) { }
-			
-			Real32Channel( std::string name, const Array< crimild::Real32 > &times, const Array< Real32 > &keys )
-			    : ChannelImpl( name, times, keys )
-			{
-				
-			}
+            QuaternionChannel( std::string name, const Array< crimild::Real32 > &times, const Array< Quaternion > &keys )
+                : ChannelImpl( name, times, keys )
+            {
+            }
 
-			Real32Channel( std::string name, Array< crimild::Real32 > &&times, Array< Real32 > &&keys )
-			    : ChannelImpl( name, times, keys )
-			{
-				
-			}
+            QuaternionChannel( std::string name, Array< crimild::Real32 > &&times, Array< Quaternion > &&keys )
+                : ChannelImpl( name, times, keys )
+            {
+            }
 
-			virtual ~Real32Channel( void )
-			{
+            virtual ~QuaternionChannel( void )
+            {
+            }
+        };
 
-			}
-		};
+        class Real32Channel : public ChannelImpl< Real32 > {
+            CRIMILD_IMPLEMENT_RTTI( crimild::animation::Real32Channel )
 
-	}
+        public:
+            Real32Channel( void ) { }
+
+            Real32Channel( std::string name, const Array< crimild::Real32 > &times, const Array< Real32 > &keys )
+                : ChannelImpl( name, times, keys )
+            {
+            }
+
+            Real32Channel( std::string name, Array< crimild::Real32 > &&times, Array< Real32 > &&keys )
+                : ChannelImpl( name, times, keys )
+            {
+            }
+
+            virtual ~Real32Channel( void )
+            {
+            }
+        };
+
+    }
 
 }
 
 #endif
-
