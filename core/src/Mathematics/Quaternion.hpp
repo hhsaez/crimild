@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,13 +28,16 @@
 #ifndef CRIMILD_CORE_MATHEMATICS_QUATERNION_
 #define CRIMILD_CORE_MATHEMATICS_QUATERNION_
 
-#include "Vector.hpp"
+#include "MatrixImpl.hpp"
 #include "Numeric.hpp"
-#include "Matrix.hpp"
+#include "Utils.hpp"
+#include "Vector3.hpp"
 
 namespace crimild {
 
-	/**
+    namespace impl {
+
+        /**
 		 \brief Template-based implementation for Quaternions
 
 		 A Quaternion, as invented by Sir William Rowan Hamilton, is an
@@ -57,208 +60,206 @@ namespace crimild {
 		 - "Mathematics for 3D Game Programming and Computer Graphics", 2nd Edition
 		 - Wikipedia (http://en.wikipedia.org/wiki/Quaternion)
 	 */
-	template< typename PRECISION >
-	class Quaternion {
-	private:
-		typedef Vector< 3, PRECISION > Vector3Impl;
-		typedef Vector< 4, PRECISION > Vector4Impl;
+        template< typename PRECISION >
+        class [[deprecated]] Quaternion {
+        private:
+            using Vector3Impl = Vector< PRECISION, 3 >;
+            using Vector4Impl = Vector< PRECISION, 4 >;
 
-	public:
-		/**
+        public:
+            /**
 		 	\brief Creates a new quaternion representing a rotation
 		 */
-		static Quaternion createFromAxisAngle( const Vector3Impl &axis, PRECISION angle )
-		{
-			Quaternion q;
-			q.fromAxisAngle( axis, angle );
-			return q;
-		}
-        
-        /**
+            static Quaternion createFromAxisAngle( const Vector3Impl &axis, PRECISION angle )
+            {
+                Quaternion q;
+                q.fromAxisAngle( axis, angle );
+                return q;
+            }
+
+            /**
             \brief Computes the quaternion that rotates from a to b
-         
+
             This method was taken from "The Shortest Arc Quaternion" by Stan Melax
-            in "Game Programming Gems". It calculates a quaternion that 
+            in "Game Programming Gems". It calculates a quaternion that
             rotates from a to b, avoiding numerical instability.
          */
-        static Quaternion createFromVectors( const Vector3Impl &v0, const Vector3Impl &v1 )
-        {
-            if ( v0 == -v1 ) {
-                return Quaternion::createFromAxisAngle( Vector3Impl( 1, 0, 0 ), Numeric< PRECISION >::PI );
+            static Quaternion createFromVectors( const Vector3Impl &v0, const Vector3Impl &v1 )
+            {
+                if ( v0 == -v1 ) {
+                    return Quaternion::createFromAxisAngle( Vector3Impl( 1, 0, 0 ), Numeric< PRECISION >::PI );
+                }
+
+                Vector3Impl c = v0 ^ v1;
+                PRECISION d = v0 * v1;
+                PRECISION s = std::sqrt( ( 1.0 + d ) * 2.0 );
+
+                return Quaternion( s / 2.0, c[ 0 ] / s, c[ 1 ] / s, c[ 2 ] / s );
             }
-            
-            Vector3Impl c = v0 ^ v1;
-            PRECISION d = v0 * v1;
-            PRECISION s = std::sqrt( ( 1.0 + d ) * 2.0 );
-            
-            return Quaternion( s / 2.0, c[ 0 ] / s, c[ 1 ] / s, c[ 2 ] / s );
-        }
 
-        static Quaternion createFromDirection( const Vector3f &direction, const Vector3f &up = Vector3f( 0.0f, 1.0f, 0.0f ) )
-        {
-        	Quaternion q;
-        	q.lookAt( direction, up );
-        	return q;
-		}
+            static Quaternion createFromDirection( const Vector3Impl &direction, const Vector3Impl &up = Vector3Impl( 0, 1, 0 ) )
+            {
+                Quaternion q;
+                q.lookAt( direction, up );
+                return q;
+            }
 
-		static Quaternion createFromEulerAngles( const Vector3f &angles )
-		{
-			return createFromEulerAngles( angles[ 0 ], angles[ 1 ], angles[ 2 ] );
-		}
-        
-        static Quaternion createFromEulerAngles( PRECISION pitch, PRECISION yaw, PRECISION roll )
-        {
-            Quaternion q;
-            q.fromEulerAngles( pitch, yaw, roll );
-            return q;
-        }
+            static Quaternion createFromEulerAngles( const Vector3Impl &angles )
+            {
+                return createFromEulerAngles( angles[ 0 ], angles[ 1 ], angles[ 2 ] );
+            }
 
-	public:
-		/**
+            static Quaternion createFromEulerAngles( PRECISION pitch, PRECISION yaw, PRECISION roll )
+            {
+                Quaternion q;
+                q.fromEulerAngles( pitch, yaw, roll );
+                return q;
+            }
+
+        public:
+            /**
 			\brief Default constructor
 
 			The default constructor does not nothing. The user is responsible for
 			setting valid values for all quaternion components
 		 */
-		Quaternion( void )
-			: _data( 0, 0, 0, 1 )
-		{
-			
-		}
+            Quaternion( void )
+                : _data( 0, 0, 0, 1 )
+            {
+            }
 
-		/**
+            /**
 			\brief Explicit constructor
 
 			Constructs a quaternion by specifying both the real
 			and the imaginary parts of it as a scalar and a vector
 			respectively.
 		 */
-		Quaternion( PRECISION r, const Vector3Impl &i )
-			: _data( i[ 0 ], i[ 1 ], i[ 2 ], r )
-		{
-		}
+            Quaternion( PRECISION r, const Vector3Impl &i )
+                : _data( i[ 0 ], i[ 1 ], i[ 2 ], r )
+            {
+            }
 
-		/**
+            /**
 			\brief Explicit constructor
 		 */
-		Quaternion( PRECISION x, PRECISION y, PRECISION z, PRECISION w )
-			: _data( x, y, z, w )
-		{
-		}
+            Quaternion( PRECISION x, PRECISION y, PRECISION z, PRECISION w )
+                : _data( x, y, z, w )
+            {
+            }
 
-		explicit Quaternion( const Vector4Impl &data )
-			: _data( data )
-		{
+            explicit Quaternion( const Vector4Impl &data )
+                : _data( data )
+            {
+            }
 
-		}
-
-		/**
+            /**
 			\brief Copy constructor
 		 */
-		Quaternion( const Quaternion &q )
-			: _data( q._data )
-		{
-		}
+            Quaternion( const Quaternion &q )
+                : _data( q._data )
+            {
+            }
 
-		/**
+            /**
 			\brief Destructor
 		 */
-		~Quaternion( void )
-		{
-		}
+            ~Quaternion( void )
+            {
+            }
 
-		const Vector4Impl &getRawData( void ) const
-		{
-			return _data;
-		}
+            const Vector4Impl &getRawData( void ) const
+            {
+                return _data;
+            }
 
-		/**
+            /**
 			\brief Assignment operator
 		 */
-		Quaternion operator=( const Quaternion &q )
-		{
-			_data = q._data;
-			return *this;
-		}
+            Quaternion operator=( const Quaternion &q )
+            {
+                _data = q._data;
+                return *this;
+            }
 
-		bool operator==( const Quaternion &q ) const
-		{
-			return ( _data == q._data );
-		}
+            bool operator==( const Quaternion &q ) const
+            {
+                return ( _data == q._data );
+            }
 
-		bool operator!=( const Quaternion &q ) const
-		{
-			return ( _data != q._data );
-		}
+            bool operator!=( const Quaternion &q ) const
+            {
+                return ( _data != q._data );
+            }
 
-		Vector3Impl getImaginary( void ) const
-		{
-			return _data.xyz();
-		}
+            Vector3Impl getImaginary( void ) const
+            {
+                return _data.xyz();
+            }
 
-		void setImaginary( const Vector3Impl &value )
-		{
-			_data[ 0 ] = value[ 0 ];
-			_data[ 1 ] = value[ 1 ];
-			_data[ 2 ] = value[ 2 ];
-		}
+            void setImaginary( const Vector3Impl &value )
+            {
+                _data[ 0 ] = value[ 0 ];
+                _data[ 1 ] = value[ 1 ];
+                _data[ 2 ] = value[ 2 ];
+            }
 
-		PRECISION getReal( void ) const
-		{
-			return _data[ 3 ];
-		}
+            PRECISION getReal( void ) const
+            {
+                return _data[ 3 ];
+            }
 
-		void setReal( PRECISION value )
-		{
-			_data[ 3 ] = value;
-		}
+            void setReal( PRECISION value )
+            {
+                _data[ 3 ] = value;
+            }
 
-		template< typename U >
-		friend Quaternion< U > operator-( const Quaternion< U > &q );
+            template< typename U >
+            friend Quaternion< U > operator-( const Quaternion< U > &q );
 
-		template< typename U >
-		friend Quaternion< U > operator+( const Quaternion< U > &q, const Quaternion< U > &r );
+            template< typename U >
+            friend Quaternion< U > operator+( const Quaternion< U > &q, const Quaternion< U > &r );
 
-		template< typename U >
-		friend Quaternion< U > operator-( const Quaternion< U > &q, const Quaternion< U > &r );
+            template< typename U >
+            friend Quaternion< U > operator-( const Quaternion< U > &q, const Quaternion< U > &r );
 
-		template< typename U >
-		friend Quaternion< U > operator*( const Quaternion< U > &q, const Quaternion< U > &r );
+            template< typename U >
+            friend Quaternion< U > operator*( const Quaternion< U > &q, const Quaternion< U > &r );
 
-		template< typename U >
-		friend Vector< 3, U > operator*( const Quaternion< U > &q, const Vector< 3, U > &v );
+            template< typename U >
+            friend Vector< U, 3 > operator*( const Quaternion< U > &q, const Vector< U, 3 > &v );
 
-		template< typename U >
-		friend Vector< 3, U > operator*( const Vector< 3, U > &v, const Quaternion< U > &q );
+            template< typename U >
+            friend Vector< U, 3 > operator*( const Vector< U, 3 > &v, const Quaternion< U > &q );
 
-		template< typename U, typename V >
-		friend Quaternion< U > operator*( const Quaternion< U > &q, V s );
+            template< typename U, typename V >
+            friend Quaternion< U > operator*( const Quaternion< U > &q, V s );
 
-		template< typename U, typename V >
-		friend Quaternion< U > operator*( V s, const Quaternion< U > &q );
+            template< typename U, typename V >
+            friend Quaternion< U > operator*( V s, const Quaternion< U > &q );
 
-		template< typename U, typename V >
-		friend Quaternion< U > operator/( const Quaternion< U > &q, V s );
+            template< typename U, typename V >
+            friend Quaternion< U > operator/( const Quaternion< U > &q, V s );
 
-		template< typename U >
-		friend Quaternion< U > &operator+=( Quaternion< U > &q, const Quaternion< U > &r );
+            template< typename U >
+            friend Quaternion< U > &operator+=( Quaternion< U > &q, const Quaternion< U > &r );
 
-		template< typename U >
-		friend Quaternion< U > &operator-=( Quaternion< U > &q, const Quaternion< U > &r );
+            template< typename U >
+            friend Quaternion< U > &operator-=( Quaternion< U > &q, const Quaternion< U > &r );
 
-		template< typename U >
-		friend Quaternion< U > &operator*=( Quaternion< U > &q, const Quaternion< U > &r );
+            template< typename U >
+            friend Quaternion< U > &operator*=( Quaternion< U > &q, const Quaternion< U > &r );
 
-		template< typename U, typename V >
-		friend Quaternion< U > &operator*=( Quaternion< U > &q, V s );
+            template< typename U, typename V >
+            friend Quaternion< U > &operator*=( Quaternion< U > &q, V s );
 
-		template< typename U, typename V >
-		friend Quaternion< U > &operator/=( Quaternion< U > &q, V s );
+            template< typename U, typename V >
+            friend Quaternion< U > &operator/=( Quaternion< U > &q, V s );
 
-		template< typename U >
-		friend std::ostream &operator<<( std::ostream &output, const Quaternion &input );
+            template< typename U >
+            friend std::ostream &operator<<( std::ostream &output, const Quaternion &input );
 
-		/**
+            /**
 			\breif Calculates the conjugate for this quaternion
 
 			The conjugate is calculated as:
@@ -266,387 +267,384 @@ namespace crimild {
 			q* = (qv, qw)* = (-qv, qw)
 			\endcode
 		 */
-		Quaternion getConjugate( void ) const
-		{
-			return Quaternion( -_data[ 0 ], -_data[ 1 ], -_data[ 2 ], _data[ 3 ] );
-		}
+            Quaternion getConjugate( void ) const
+            {
+                return Quaternion( -_data[ 0 ], -_data[ 1 ], -_data[ 2 ], _data[ 3 ] );
+            }
 
-		Quaternion &makeIdentity( void )
-		{
-			_data[ 0 ] = 0;
-			_data[ 1 ] = 0;
-			_data[ 2 ] = 0;
-			_data[ 3 ] = 1;
-			return *this;
-		}
+            Quaternion &makeIdentity( void )
+            {
+                _data = Vector4Impl { 0, 0, 0, 1 };
+                return *this;
+            }
 
-		double getSquaredNorm( void ) const
-		{
-			return _data * _data;
-		}
+            double getSquaredNorm( void ) const
+            {
+                return dot( _data, _data );
+            }
 
-		double getNorm( void ) const
-		{
-			return std::sqrt( _data * _data );
-		}
+            double getNorm( void ) const
+            {
+                return std::sqrt( dot( _data, _data ) );
+            }
 
-		Quaternion getInverse( void ) const
-		{
-			double squaredN = getSquaredNorm();
-			Quaternion conjugate = getConjugate();
-			if ( Numeric< PRECISION >::equals( squaredN, 1 ) ) {
-				// avoid a division if the norm is 1
-				return conjugate;
-			}
+            Quaternion getInverse( void ) const
+            {
+                double squaredN = getSquaredNorm();
+                Quaternion conjugate = getConjugate();
+                if ( Numeric< PRECISION >::equals( squaredN, 1 ) ) {
+                    // avoid a division if the norm is 1
+                    return conjugate;
+                }
 
-			return conjugate / squaredN;
-		}
+                return conjugate / squaredN;
+            }
 
-		Quaternion &normalize( void )
-		{
-			double n = getNorm();
-			if ( n == 0 ) {
-				return *this;
-			}
-			*this = *this / n;
-			return *this;
-		}
+            Quaternion &normalize( void )
+            {
+                double n = getNorm();
+                if ( n == 0 ) {
+                    return *this;
+                }
+                *this = *this / n;
+                return *this;
+            }
 
-		Quaternion &fromAxisAngle( const Vector3Impl &axis, PRECISION angle )
-		{
-			double sinTheta = std::sin( 0.5 * angle );
-			double cosTheta = std::cos( 0.5 * angle );
+            Quaternion &fromAxisAngle( const Vector3Impl &axis, PRECISION angle )
+            {
+                /*
+                double sinTheta = std::sin( 0.5 * angle );
+                double cosTheta = std::cos( 0.5 * angle );
 
-			_data[ 0 ] = axis[ 0 ] * sinTheta;
-			_data[ 1 ] = axis[ 1 ] * sinTheta;
-			_data[ 2 ] = axis[ 2 ] * sinTheta;
-			_data[ 3 ] = cosTheta;
+                _data[ 0 ] = axis[ 0 ] * sinTheta;
+                _data[ 1 ] = axis[ 1 ] * sinTheta;
+                _data[ 2 ] = axis[ 2 ] * sinTheta;
+                _data[ 3 ] = cosTheta;
+                */
 
-			return *this;
-		}
+                return *this;
+            }
 
-		Quaternion &fromEulerAngles( PRECISION pitch, PRECISION yaw, PRECISION roll )
-		{
-			// from https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
-			
-			Quaternion q;
-			double t0 = std::cos( roll * 0.5 );
-			double t1 = std::sin( roll * 0.5 );
-			double t2 = std::cos( pitch * 0.5 );
-			double t3 = std::sin( pitch * 0.5 );
-			double t4 = std::cos( yaw * 0.5 );
-			double t5 = std::sin( yaw * 0.5 );
-			
-			auto w = t0 * t2 * t4 + t1 * t3 * t5;
-			auto x = t0 * t3 * t4 - t1 * t2 * t5;
-			auto y = t0 * t2 * t5 + t1 * t3 * t4;
-			auto z = t1 * t2 * t4 - t0 * t3 * t5;
+            Quaternion &fromEulerAngles( PRECISION pitch, PRECISION yaw, PRECISION roll )
+            {
+                /*
+                // from https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
 
-			_data[ 0 ] = ( PRECISION ) x;
-			_data[ 1 ] = ( PRECISION ) y;
-			_data[ 2 ] = ( PRECISION ) z;
-			_data[ 3 ] = ( PRECISION ) w;
+                Quaternion q;
+                double t0 = std::cos( roll * 0.5 );
+                double t1 = std::sin( roll * 0.5 );
+                double t2 = std::cos( pitch * 0.5 );
+                double t3 = std::sin( pitch * 0.5 );
+                double t4 = std::cos( yaw * 0.5 );
+                double t5 = std::sin( yaw * 0.5 );
 
-			return *this;
-		}
+                auto w = t0 * t2 * t4 + t1 * t3 * t5;
+                auto x = t0 * t3 * t4 - t1 * t2 * t5;
+                auto y = t0 * t2 * t5 + t1 * t3 * t4;
+                auto z = t1 * t2 * t4 - t0 * t3 * t5;
 
-		Vector3Impl toEulerAngles( void ) const
-		{
-			// from https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
-			
-			double x = getImaginary().z();
-			double y = getImaginary().x();
-			double z = getImaginary().y();
-			double w = getReal();
-			
-			double ysqr = y * y;
-			
-			// roll (x-axis rotation)
-			double t0 = +2.0f * ( w  * x + y * z );
-			double t1 = +1.0f - 2.0f * ( x * x + ysqr );
-			double roll = std::atan2( t0, t1 );
-			
-			// pitch (y-axis rotation)
-			double t2 = +2.0f * ( w * y - z * x );
-			t2 = t2 > 1.0f ? 1.0f : t2;
-			t2 = t2 < -1.0f ? -1.0f : t2;
-			double pitch = std::asin(t2);
-			
-			// yaw (z-axis rotation)
-			double t3 = +2.0f * ( w * z + x *y );
-			double t4 = +1.0f - 2.0f * (ysqr + z * z );  
-			double yaw = std::atan2(t3, t4);
-			
-			return Vector3Impl( ( PRECISION ) pitch, ( PRECISION ) yaw, ( PRECISION ) roll );
-		}
+                _data[ 0 ] = ( PRECISION ) x;
+                _data[ 1 ] = ( PRECISION ) y;
+                _data[ 2 ] = ( PRECISION ) z;
+                _data[ 3 ] = ( PRECISION ) w;
+                */
 
-		/**
+                return *this;
+            }
+
+            Vector3Impl toEulerAngles( void ) const
+            {
+                // from https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+
+                double x = getImaginary().z();
+                double y = getImaginary().x();
+                double z = getImaginary().y();
+                double w = getReal();
+
+                double ysqr = y * y;
+
+                // roll (x-axis rotation)
+                double t0 = +2.0f * ( w * x + y * z );
+                double t1 = +1.0f - 2.0f * ( x * x + ysqr );
+                double roll = std::atan2( t0, t1 );
+
+                // pitch (y-axis rotation)
+                double t2 = +2.0f * ( w * y - z * x );
+                t2 = t2 > 1.0f ? 1.0f : t2;
+                t2 = t2 < -1.0f ? -1.0f : t2;
+                double pitch = std::asin( t2 );
+
+                // yaw (z-axis rotation)
+                double t3 = +2.0f * ( w * z + x * y );
+                double t4 = +1.0f - 2.0f * ( ysqr + z * z );
+                double yaw = std::atan2( t3, t4 );
+
+                return Vector3Impl( ( PRECISION ) pitch, ( PRECISION ) yaw, ( PRECISION ) roll );
+            }
+
+            /**
 		 	\brief Computes the rotation from the compositions of two quaternions
 		 */
-		Quaternion rotate( Quaternion q1 ) const
-		{
-			PRECISION w0 = getReal();
-			PRECISION x0 = getImaginary()[ 0 ];
-			PRECISION y0 = getImaginary()[ 1 ];
-			PRECISION z0 = getImaginary()[ 2 ];
+            Quaternion rotate( Quaternion q1 ) const
+            {
+                PRECISION w0 = getReal();
+                PRECISION x0 = getImaginary()[ 0 ];
+                PRECISION y0 = getImaginary()[ 1 ];
+                PRECISION z0 = getImaginary()[ 2 ];
 
-			PRECISION w1 = q1.getReal();
-			PRECISION x1 = q1.getImaginary()[ 0 ];
-			PRECISION y1 = q1.getImaginary()[ 1 ];
-			PRECISION z1 = q1.getImaginary()[ 2 ];
-            
-            Quaternion q( w0 * w1 - x0 * x1 - y0 * y1 - z0 * z1,
-						  w0 * x1 + x0 * w1 + y0 * z1 - z0 * y1,
-						  w0 * y1 + y0 * w1 + z0 * x1 - x0 * z1,
-						  w0 * z1 + z0 * w1 + x0 * y1 - y0 * x1 );
-            return q.normalize();
-		}
+                PRECISION w1 = q1.getReal();
+                PRECISION x1 = q1.getImaginary()[ 0 ];
+                PRECISION y1 = q1.getImaginary()[ 1 ];
+                PRECISION z1 = q1.getImaginary()[ 2 ];
 
-		void getRotationMatrix( Matrix< 3, PRECISION > &output )
-		{
-			float x = _data[ 0 ];
-			float y = _data[ 1 ];
-			float z = _data[ 2 ];
-			float w = _data[ 3 ];
+                Quaternion q( w0 * w1 - x0 * x1 - y0 * y1 - z0 * z1,
+                              w0 * x1 + x0 * w1 + y0 * z1 - z0 * y1,
+                              w0 * y1 + y0 * w1 + z0 * x1 - x0 * z1,
+                              w0 * z1 + z0 * w1 + x0 * y1 - y0 * x1 );
+                return q.normalize();
+            }
 
-			float twoXX = 2 * x * x;
-			float twoXY = 2 * x * y;
-			float twoXZ = 2 * x * z;
-			float twoXW = 2 * x * w;
-			float twoYY = 2 * y * y;
-			float twoYZ = 2 * y * z;
-			float twoYW = 2 * y * w;
-			float twoZZ = 2 * z * z;
-			float twoZW = 2 * z * w;
+            void getRotationMatrix( Matrix< PRECISION, 3 > &output )
+            {
+                float x = _data[ 0 ];
+                float y = _data[ 1 ];
+                float z = _data[ 2 ];
+                float w = _data[ 3 ];
 
-			output[ 0 ] = 1 - twoYY - twoZZ;
-			output[ 1 ] = twoXY - twoZW;
-			output[ 2 ] = twoXZ + twoYW;
-			output[ 3 ] = twoXY + twoZW;
-			output[ 4 ] = 1 - twoXX - twoZZ;
-			output[ 5 ] = twoYZ - twoXW;
-			output[ 6 ] = twoXZ - twoYW;
-			output[ 7 ] = twoYZ + twoXW;
-			output[ 8 ] = 1 - twoXX - twoYY;
-		}
-        
-        /**
+                float twoXX = 2 * x * x;
+                float twoXY = 2 * x * y;
+                float twoXZ = 2 * x * z;
+                float twoXW = 2 * x * w;
+                float twoYY = 2 * y * y;
+                float twoYZ = 2 * y * z;
+                float twoYW = 2 * y * w;
+                float twoZZ = 2 * z * z;
+                float twoZW = 2 * z * w;
+
+                output[ 0 ] = 1 - twoYY - twoZZ;
+                output[ 1 ] = twoXY - twoZW;
+                output[ 2 ] = twoXZ + twoYW;
+                output[ 3 ] = twoXY + twoZW;
+                output[ 4 ] = 1 - twoXX - twoZZ;
+                output[ 5 ] = twoYZ - twoXW;
+                output[ 6 ] = twoXZ - twoYW;
+                output[ 7 ] = twoYZ + twoXW;
+                output[ 8 ] = 1 - twoXX - twoYY;
+            }
+
+            /**
             \brief Computes a quaterion from a rotation matrix
-         
+
             Algorithm in Ken Shoemake's article in 1987 SIGGRAPH course notes
             article "Quaternion Calculus and Fast Animation".
          */
-        Quaternion &fromRotationMatrix( const Matrix< 3, PRECISION > &m )
+            Quaternion &fromRotationMatrix( const Matrix< PRECISION, 3 > &m )
+            {
+                float trace = 1.0f + m[ 0 ] + m[ 4 ] + m[ 8 ];
+                float x, y, z, w;
+
+                if ( trace > 0.0 ) {
+                    float root = 2.0f * std::sqrt( trace );
+                    float invRoot = 1.0f / root;
+                    x = ( m[ 5 ] - m[ 7 ] ) * invRoot;
+                    y = ( m[ 6 ] - m[ 2 ] ) * invRoot;
+                    z = ( m[ 1 ] - m[ 3 ] ) * invRoot;
+                    w = 0.25f * root;
+                } else if ( m[ 0 ] > m[ 4 ] && m[ 0 ] > m[ 8 ] ) {
+                    float root = 2.0f * std::sqrt( 1.0f + m[ 0 ] - m[ 4 ] - m[ 8 ] );
+                    float invRoot = 1.0f / root;
+                    x = 0.25f * root;
+                    y = ( m[ 1 ] + m[ 3 ] ) * invRoot;
+                    z = ( m[ 6 ] + m[ 2 ] ) * invRoot;
+                    w = ( m[ 5 ] + m[ 7 ] ) * invRoot;
+                } else if ( m[ 4 ] > m[ 8 ] ) {
+                    float root = 2.0f * std::sqrt( 1.0f + m[ 4 ] - m[ 0 ] - m[ 8 ] );
+                    float invRoot = 1.0f / root;
+                    x = ( m[ 1 ] + m[ 3 ] ) * invRoot;
+                    y = 0.25f * root;
+                    z = ( m[ 5 ] + m[ 7 ] ) * invRoot;
+                    w = ( m[ 6 ] + m[ 2 ] ) * invRoot;
+                } else {
+                    float root = 2.0f * std::sqrt( 1.0f + m[ 8 ] - m[ 0 ] - m[ 4 ] );
+                    float invRoot = 1.0f / root;
+                    x = ( m[ 6 ] + m[ 2 ] ) * invRoot;
+                    y = ( m[ 5 ] + m[ 7 ] ) * invRoot;
+                    z = 0.25f * root;
+                    w = ( m[ 1 ] + m[ 3 ] ) * invRoot;
+                }
+
+                _data[ 0 ] = x;
+                _data[ 1 ] = y;
+                _data[ 2 ] = z;
+                _data[ 3 ] = w;
+
+                return *this;
+            }
+
+            Quaternion &lookAt( const Vector3Impl &direction, const Vector3Impl &up = Vector3Impl( 0, 1, 0 ) )
+            {
+                Vector3Impl forward( 0, 0, -1 );
+                Vector3Impl right( 1, 0, 0 );
+
+                Vector3Impl axis = up;
+
+                Vector3Impl u = forward ^ direction;
+                if ( Numeric< PRECISION >::isZero( u.getSquaredMagnitude() ) ) {
+                    u = right ^ direction;
+                }
+                u.normalize();
+
+                Vector3Impl v = u ^ up;
+                if ( Numeric< PRECISION >::isZero( v.getSquaredMagnitude() ) ) {
+                    axis = u;
+                } else {
+                    v.normalize();
+                    u = v ^ u;
+
+                    // Oh, Dark Lork, I summon thee!!!
+                    axis = Vector3Impl( -u[ 1 ], u[ 0 ], u[ 2 ] );
+                }
+
+                float angle = std::acos( forward * direction );
+
+                return fromAxisAngle( axis, angle );
+            }
+
+        private:
+            Vector4Impl _data;
+        };
+
+        template< typename U >
+        Quaternion< U > operator-( const Quaternion< U > &q )
         {
-            float trace = 1.0f + m[ 0 ] + m[ 4 ] + m[ 8 ];
-            float x, y, z, w;
-            
-            if ( trace > 0.0 ) {
-                float root = 2.0f * std::sqrt( trace );
-                float invRoot = 1.0f / root;
-                x = ( m[ 5 ] - m[ 7 ] ) * invRoot;
-                y = ( m[ 6 ] - m[ 2 ] ) * invRoot;
-                z = ( m[ 1 ] - m[ 3 ] ) * invRoot;
-                w = 0.25f * root;
-            }
-            else if ( m[ 0 ] > m[ 4 ] && m[ 0 ] > m[ 8 ] ) {
-                float root = 2.0f * std::sqrt( 1.0f + m[ 0 ] - m[ 4 ] - m[ 8 ] );
-                float invRoot = 1.0f / root;
-                x = 0.25f * root;
-                y = ( m[ 1 ] + m[ 3 ] ) * invRoot;
-                z = ( m[ 6 ] + m[ 2 ] ) * invRoot;
-                w = ( m[ 5 ] + m[ 7 ] ) * invRoot;
-            }
-            else if ( m[ 4 ] > m[ 8 ] ) {
-                float root = 2.0f * std::sqrt( 1.0f + m[ 4 ] - m[ 0 ] - m[ 8 ] );
-                float invRoot = 1.0f / root;
-                x = ( m[ 1 ] + m[ 3 ] ) * invRoot;
-                y = 0.25f * root;
-                z = ( m[ 5 ] + m[ 7 ] ) * invRoot;
-                w = ( m[ 6 ] + m[ 2 ] ) * invRoot;
-            }
-            else {
-                float root = 2.0f * std::sqrt( 1.0f + m[ 8 ] - m[ 0 ] - m[ 4 ] );
-                float invRoot = 1.0f / root;
-                x = ( m[ 6 ] + m[ 2 ] ) * invRoot;
-                y = ( m[ 5 ] + m[ 7 ] ) * invRoot;
-                z = 0.25f * root;
-                w = ( m[ 1 ] + m[ 3 ] ) * invRoot;
-            }
-            
-            _data[ 0 ] = x;
-            _data[ 1 ] = y;
-            _data[ 2 ] = z;
-            _data[ 3 ] = w;
-            
-            return *this;
+            return Quaternion< U >( -q._data );
         }
 
-        Quaternion &lookAt( const Vector3Impl &direction, const Vector3Impl &up = Vector3Impl( 0, 1, 0 ) )
+        template< typename U >
+        Quaternion< U > operator+( const Quaternion< U > &q, const Quaternion< U > &r )
         {
-			Vector3Impl forward( 0, 0, -1 );
-			Vector3Impl right( 1, 0, 0 );
+            return Quaternion< U >( q._data + r._data );
+        }
 
-			Vector3Impl axis = up;
+        template< typename U >
+        Quaternion< U > operator-( const Quaternion< U > &q, const Quaternion< U > &r )
+        {
+            return Quaternion< U >( q._data - r._data );
+        }
 
-			Vector3Impl u = forward ^ direction;
-			if ( Numeric< PRECISION >::isZero( u.getSquaredMagnitude() ) ) {
-				u = right ^ direction;
-			}
-			u.normalize();
+        template< typename U >
+        Quaternion< U > operator*( const Quaternion< U > &q, const Quaternion< U > &r )
+        {
+            Vector< U, 3 > qImaginary = q.getImaginary();
+            U qReal = q.getReal();
+            Vector< U, 3 > rImaginary = r.getImaginary();
+            U rReal = r.getReal();
 
-			Vector3Impl v = u ^ up;
-			if ( Numeric< PRECISION >::isZero( v.getSquaredMagnitude() ) ) {
-				axis = u;
-			}
-			else {
-				v.normalize();
-				u = v ^ u;
+            // TODO: this should be replaced by a faster method
+            return Quaternion< U >( qReal * rReal - dot( qImaginary, rImaginary ),
+                                    ( qReal * rImaginary ) + ( qImaginary * rReal ) + ( crimild::cross( qImaginary, rImaginary ) ) );
+        }
 
-				// Oh, Dark Lork, I summon thee!!!
-				axis = Vector3Impl( -u[ 1 ], u[ 0 ], u[ 2 ] );
-			}
+        template< typename U >
+        Vector< U, 3 > operator*( const Quaternion< U > &q, const Vector< U, 3 > &v )
+        {
+            U x = v[ 0 ];
+            U y = v[ 1 ];
+            U z = v[ 2 ];
+            U qx = q.getImaginary()[ 0 ];
+            U qy = q.getImaginary()[ 1 ];
+            U qz = q.getImaginary()[ 2 ];
+            U qw = q.getReal();
 
-			float angle = std::acos( forward * direction );
+            U ix = qw * x + qy * z - qz * y;
+            U iy = qw * y + qz * x - qx * z;
+            U iz = qw * z + qx * y - qy * x;
+            U iw = -qx * x - qy * y - qz * z;
 
-			return fromAxisAngle( axis, angle );
-		}
+            Vector< U, 3 > result = {
+                ix * qw + iw * -qx + iy * -qz - iz * -qy,
+                iy * qw + iw * -qy + iz * -qx - ix * -qz,
+                iz * qw + iw * -qz + ix * -qy - iy * -qx,
+            };
+            return result;
+        }
 
-	private:
-		Vector4Impl _data;
-	};
+        template< typename U >
+        Vector< U, 3 > operator*( const Vector< U, 3 > &v, const Quaternion< U > &q )
+        {
+            return q * v;
+        }
 
-	template< typename U >
-	Quaternion< U > operator-( const Quaternion< U > &q )
-	{
-		return Quaternion< U >( -q._data );
-	}
+        template< typename U, typename V >
+        Quaternion< U > operator*( const Quaternion< U > &q, V s )
+        {
+            return Quaternion< U >( q._data * s );
+        }
 
-	template< typename U >
-	Quaternion< U > operator+( const Quaternion< U > &q, const Quaternion< U > &r )
-	{
-		return Quaternion< U >( q._data + r._data );
-	}
+        template< typename U, typename V >
+        Quaternion< U > operator*( V s, const Quaternion< U > &q )
+        {
+            return Quaternion< U >( q._data * s );
+        }
 
-	template< typename U >
-	Quaternion< U > operator-( const Quaternion< U > &q, const Quaternion< U > &r )
-	{
-		return Quaternion< U >( q._data - r._data );
-	}
+        template< typename U, typename V >
+        Quaternion< U > operator/( const Quaternion< U > &q, V s )
+        {
+            if ( s == 0 ) {
+                s = Numeric< U >::ZERO_TOLERANCE;
+            }
 
-	template< typename U >
-	Quaternion< U > operator*( const Quaternion< U > &q, const Quaternion< U > &r )
-	{
-		Vector< 3, U > qImaginary = q.getImaginary();
-		U qReal = q.getReal();
-		Vector< 3, U > rImaginary = r.getImaginary();
-		U rReal = r.getReal();
+            return Quaternion< U >( q._data / s );
+        }
 
+        template< typename U >
+        Quaternion< U > &operator+=( Quaternion< U > &q, const Quaternion< U > &r )
+        {
+            q = q + r;
+            return q;
+        }
 
-		// TODO: this should be replaced by a faster method
-		return Quaternion< U >( qReal * rReal - qImaginary * rImaginary,
-								( qReal * rImaginary ) + ( qImaginary * rReal ) + ( qImaginary ^ rImaginary ) );
-	}
+        template< typename U >
+        Quaternion< U > &operator-=( Quaternion< U > &q, const Quaternion< U > &r )
+        {
+            q = q - r;
+            return q;
+        }
 
-	template< typename U >
-	Vector< 3, U > operator*( const Quaternion< U > &q, const Vector< 3, U > &v )
-	{
-        U x = v[ 0 ];
-        U y = v[ 1 ];
-        U z = v[ 2 ];
-        U qx = q.getImaginary()[ 0 ];
-        U qy = q.getImaginary()[ 1 ];
-        U qz = q.getImaginary()[ 2 ];
-        U qw = q.getReal();
+        template< typename U >
+        Quaternion< U > &operator*=( Quaternion< U > &q, const Quaternion< U > &r )
+        {
+            q = q * r;
+            return q;
+        }
 
-        U ix = qw * x + qy * z - qz * y;
-        U iy = qw * y + qz * x - qx * z;
-        U iz = qw * z + qx * y - qy * x;
-        U iw = -qx * x - qy * y - qz * z;
+        template< typename U, typename V >
+        Quaternion< U > &operator*=( Quaternion< U > &q, V s )
+        {
+            q = q * s;
+            return q;
+        }
 
-        Vector< 3, U > result;
-        result[ 0 ] = ix * qw + iw * -qx + iy * -qz - iz * -qy;
-        result[ 1 ] = iy * qw + iw * -qy + iz * -qx - ix * -qz;
-        result[ 2 ] = iz * qw + iw * -qz + ix * -qy - iy * -qx;
-        return result;
-	}
+        template< typename U, typename V >
+        Quaternion< U > *operator/=( Quaternion< U > &q, V s )
+        {
+            q = q / s;
+            return q;
+        }
 
-	template< typename U >
-	Vector< 3, U > operator*( const Vector< 3, U > &v, const Quaternion< U > &q )
-	{
-		return q * v;
-	}
+        template< typename U >
+        std::ostream &operator<<( std::ostream &out, const Quaternion< U > &q )
+        {
+            out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
+                << std::setprecision( 10 )
+                << "[r = " << q.getReal() << ", i = " << q.getImaginary() << "]";
+            return out;
+        }
 
-	template< typename U, typename V >
-	Quaternion< U > operator*( const Quaternion< U > &q, V s )
-	{
-		return Quaternion< U >( q._data * s );
-	}
+    }
 
-	template< typename U, typename V >
-	Quaternion< U > operator*( V s, const Quaternion< U > &q )
-	{
-		return Quaternion< U >( q._data * s );
-	}
-
-	template< typename U, typename V >
-	Quaternion< U > operator/( const Quaternion< U > &q, V s )
-	{
-		if ( s == 0 ) {
-			s = Numeric< U >::ZERO_TOLERANCE;
-		}
-		
-		return Quaternion< U >( q._data / s );
-	}
-
-	template< typename U >
-	Quaternion< U > &operator+=( Quaternion< U > &q, const Quaternion< U > &r )
-	{
-		q = q + r;
-		return q;
-	}
-
-	template< typename U >
-	Quaternion< U > &operator-=( Quaternion< U > &q, const Quaternion< U > &r )
-	{
-		q = q - r;
-		return q;
-	}
-
-	template< typename U >
-	Quaternion< U > &operator*=( Quaternion< U > &q, const Quaternion< U > &r )
-	{
-		q = q * r;
-		return q;
-	}
-
-	template< typename U, typename V >
-	Quaternion< U > &operator*=( Quaternion< U > &q, V s )
-	{
-		q = q * s;
-		return q;
-	}
-
-	template< typename U, typename V >
-	Quaternion< U > *operator/=( Quaternion< U > &q, V s )
-	{
-		q = q / s;
-		return q;
-	}
-
-	template< typename U >
-	std::ostream &operator<<( std::ostream &out, const Quaternion< U > &q )
-	{
-		out << std::setiosflags( std::ios::fixed | std::ios::showpoint  )
-			<< std::setprecision( 10 )
-		   	<< "[r = " << q.getReal() << ", i = " << q.getImaginary() << "]";
-		return out;
-	}
-
-	typedef Quaternion< int > Quaternion4i;
-	typedef Quaternion< float > Quaternion4f;
+    using Quaternion = impl::Quaternion< Real >;
 
 }
 
 #endif
-

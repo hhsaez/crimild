@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -27,42 +27,41 @@
 
 #include "ColorParticleGenerator.hpp"
 
-#include "Mathematics/Random.hpp"
-#include "Coding/Encoder.hpp"
 #include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
+#include "Mathematics/Random.hpp"
 #include "SceneGraph/Node.hpp"
 
 using namespace crimild;
 
 ColorParticleGenerator::ColorParticleGenerator( void )
 {
-
 }
 
 ColorParticleGenerator::~ColorParticleGenerator( void )
 {
-
 }
 
 void ColorParticleGenerator::configure( Node *node, ParticleData *particles )
 {
-	_colors = particles->createAttribArray< RGBAColorf >( ParticleAttrib::COLOR );
-	_startColors = particles->createAttribArray< RGBAColorf >( ParticleAttrib::START_COLOR );
-	_endColors = particles->createAttribArray< RGBAColorf >( ParticleAttrib::END_COLOR );
+    _colors = particles->createAttribArray< ColorRGBA >( ParticleAttrib::COLOR );
+    _startColors = particles->createAttribArray< ColorRGBA >( ParticleAttrib::START_COLOR );
+    _endColors = particles->createAttribArray< ColorRGBA >( ParticleAttrib::END_COLOR );
 }
 
 void ColorParticleGenerator::generate( Node *node, crimild::Real64 dt, ParticleData *particles, ParticleId startId, ParticleId endId )
 {
-	auto cs = _colors->getData< RGBAColorf >();
-	auto sc = _startColors->getData< RGBAColorf >();
-	auto ec = _endColors->getData< RGBAColorf >();
-	
+    /*
+	auto cs = _colors->getData< ColorRGBA >();
+	auto sc = _startColors->getData< ColorRGBA >();
+	auto ec = _endColors->getData< ColorRGBA >();
+
 	for ( ParticleId i = startId; i < endId; i++ ) {
 		auto r = Random::generate< Real32 >( _minStartColor.r(), _maxStartColor.r() );
 		auto g = Random::generate< Real32 >( _minStartColor.g(), _maxStartColor.g() );
 		auto b = Random::generate< Real32 >( _minStartColor.b(), _maxStartColor.b() );
 		auto a = Random::generate< Real32 >( _minStartColor.a(), _maxStartColor.a() );
-		sc[ i ] = RGBAColorf( r, g, b, a );
+		sc[ i ] = ColorRGBA( r, g, b, a );
 	}
 
 	for ( ParticleId i = startId; i < endId; i++ ) {
@@ -70,31 +69,35 @@ void ColorParticleGenerator::generate( Node *node, crimild::Real64 dt, ParticleD
 		auto g = Random::generate< Real32 >( _minEndColor.g(), _maxEndColor.g() );
 		auto b = Random::generate< Real32 >( _minEndColor.b(), _maxEndColor.b() );
 		auto a = Random::generate< Real32 >( _minEndColor.a(), _maxEndColor.a() );
-		ec[ i ] = RGBAColorf( r, g, b, a );
+		ec[ i ] = ColorRGBA( r, g, b, a );
 	}
 
     for ( ParticleId i = startId; i < endId; i++ ) {
         cs[ i ] = sc[ i ];
     }
+    */
 }
 
-void ColorParticleGenerator::encode( coding::Encoder &encoder ) 
+void ColorParticleGenerator::encode( coding::Encoder &encoder )
 {
-	ParticleSystemComponent::ParticleGenerator::encode( encoder );
+    ParticleSystemComponent::ParticleGenerator::encode( encoder );
 
-	encoder.encode( "minStartColor", _minStartColor );
-	encoder.encode( "maxStartColor", _maxStartColor );
-	encoder.encode( "minEndColor", _minEndColor );
-	encoder.encode( "maxEndColor", _maxEndColor );
+    /*
+    encoder.encode( "minStartColor", _minStartColor );
+    encoder.encode( "maxStartColor", _maxStartColor );
+    encoder.encode( "minEndColor", _minEndColor );
+    encoder.encode( "maxEndColor", _maxEndColor );
+    */
 }
 
 void ColorParticleGenerator::decode( coding::Decoder &decoder )
 {
-	ParticleSystemComponent::ParticleGenerator::decode( decoder );
+    ParticleSystemComponent::ParticleGenerator::decode( decoder );
 
-	decoder.decode( "minStartColor", _minStartColor );
-	decoder.decode( "maxStartColor", _maxStartColor );
-	decoder.decode( "minEndColor", _minEndColor );
-	decoder.decode( "maxEndColor", _maxEndColor );
+    /*
+    decoder.decode( "minStartColor", _minStartColor );
+    decoder.decode( "maxStartColor", _maxStartColor );
+    decoder.decode( "minEndColor", _minEndColor );
+    decoder.decode( "maxEndColor", _maxEndColor );
+    */
 }
-

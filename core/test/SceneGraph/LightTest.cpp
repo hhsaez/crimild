@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,6 +26,8 @@
  */
 
 #include "SceneGraph/Light.hpp"
+
+#include "Mathematics/ColorRGBA.hpp"
 #include "SceneGraph/Group.hpp"
 #include "Visitors/FetchLights.hpp"
 
@@ -35,42 +37,40 @@ using namespace crimild;
 
 TEST( LightTest, construction )
 {
-	auto light = crimild::alloc< Light >();
+    auto light = crimild::alloc< Light >();
 
-	EXPECT_EQ( Light::Type::POINT, light->getType() );
-	EXPECT_EQ( Vector3f( 0.0f, 0.0f, 0.0f ), light->getPosition() );
-	EXPECT_EQ( Vector3f( 1.0f, 0.0f, 0.0f ), light->getAttenuation() );
-	EXPECT_EQ( Vector3f( 0.0f, 0.0f, 0.0f ), light->getDirection() );
-	EXPECT_EQ( RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ), light->getColor() );
-	EXPECT_EQ( 0.0f, light->getOuterCutoff() );
-	EXPECT_EQ( 0.0f, light->getInnerCutoff() );
-	EXPECT_EQ( 0.0f, light->getExponent() );
+    EXPECT_EQ( Light::Type::POINT, light->getType() );
+    EXPECT_EQ( Point3( 0.0f, 0.0f, 0.0f ), light->getPosition() );
+    EXPECT_EQ( Vector3f( 1.0f, 0.0f, 0.0f ), light->getAttenuation() );
+    EXPECT_EQ( Vector3f( 0.0f, 0.0f, 0.0f ), light->getDirection() );
+    EXPECT_EQ( ColorRGBA( 1.0f, 1.0f, 1.0f, 1.0f ), light->getColor() );
+    EXPECT_EQ( 0.0f, light->getOuterCutoff() );
+    EXPECT_EQ( 0.0f, light->getInnerCutoff() );
+    EXPECT_EQ( 0.0f, light->getExponent() );
 }
 
 TEST( LightTest, fetchLights )
 {
-	auto group = crimild::alloc< Group >();
-	auto light1 = crimild::alloc< Light >();
-	auto light2 = crimild::alloc< Light >();
+    auto group = crimild::alloc< Group >();
+    auto light1 = crimild::alloc< Light >();
+    auto light2 = crimild::alloc< Light >();
 
-	group->attachNode( light1 );
-	group->attachNode( light2 );
+    group->attachNode( light1 );
+    group->attachNode( light2 );
 
-	FetchLights fetchLights;
-	group->perform( fetchLights );
-	
-	EXPECT_TRUE( fetchLights.hasLights() );
+    FetchLights fetchLights;
+    group->perform( fetchLights );
 
-	int i = 0; 
-	fetchLights.forEachLight( [&i, light1, light2]( Light *light ) {
-		if ( i == 0 ) {
-			EXPECT_EQ( crimild::get_ptr( light1 ), light );
-		}
-		else if ( i == 1 ) {
-			EXPECT_EQ( crimild::get_ptr( light2 ), light );
-		}
-		i++;
-	});
-	EXPECT_EQ( 2, i );
+    EXPECT_TRUE( fetchLights.hasLights() );
+
+    int i = 0;
+    fetchLights.forEachLight( [ &i, light1, light2 ]( Light *light ) {
+        if ( i == 0 ) {
+            EXPECT_EQ( crimild::get_ptr( light1 ), light );
+        } else if ( i == 1 ) {
+            EXPECT_EQ( crimild::get_ptr( light2 ), light );
+        }
+        i++;
+    } );
+    EXPECT_EQ( 2, i );
 }
-

@@ -36,8 +36,8 @@ namespace crimild {
         CRIMILD_IMPLEMENT_RTTI( crimild::BoxPositionParticleGenerator )
     public:
         struct Params {
-            Vector3f origin = Vector3f::ZERO;
-            Vector3f size = Vector3f::ONE;
+            Vector3f origin = Vector3f::Constants::ZERO;
+            Vector3f size = Vector3f::Constants::ONE;
         };
 
     public:

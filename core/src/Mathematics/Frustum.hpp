@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,96 +28,164 @@
 #ifndef CRIMILD_MATHEMATICS_FRUSTUM_
 #define CRIMILD_MATHEMATICS_FRUSTUM_
 
-#include "Numeric.hpp"
-#include "Matrix.hpp"
+#include "Matrix4.hpp"
 
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 
 namespace crimild {
 
-	template< typename PRECISION >
-	class Frustum {
-	private:
-		enum {
-			FRUSTUM_R_MIN = 0,
-			FRUSTUM_R_MAX = 1,
-			FRUSTUM_U_MIN = 2,
-			FRUSTUM_U_MAX = 3,
-			FRUSTUM_D_MIN = 4,
-			FRUSTUM_D_MAX = 5,
-		};
+    class Frustum {
+    private:
+        enum {
+            FRUSTUM_R_MIN = 0,
+            FRUSTUM_R_MAX = 1,
+            FRUSTUM_U_MIN = 2,
+            FRUSTUM_U_MAX = 3,
+            FRUSTUM_D_MIN = 4,
+            FRUSTUM_D_MAX = 5,
+        };
 
-	public:
-		Frustum( void )
-		{
-		}
+    public:
+        constexpr Frustum( void ) noexcept = default;
 
-		Frustum( PRECISION rMin, PRECISION rMax, PRECISION uMin, PRECISION uMax, PRECISION dMin, PRECISION dMax )
-		{
-			_data[ FRUSTUM_R_MIN ] = rMin;
-			_data[ FRUSTUM_R_MAX ] = rMax;
-			_data[ FRUSTUM_U_MIN ] = uMin;
-			_data[ FRUSTUM_U_MAX ] = uMax;
-			_data[ FRUSTUM_D_MIN ] = dMin;
-			_data[ FRUSTUM_D_MAX ] = dMax;
-		}
+        constexpr Frustum( Real rMin, Real rMax, Real uMin, Real uMax, Real dMin, Real dMax ) noexcept
+            : m_extents( { rMin, rMax, uMin, uMax, dMin, dMax } )
+        {
+        }
 
-		Frustum( PRECISION fov, PRECISION aspect, PRECISION near, PRECISION far )
-		{
-			float halfAngleRadians = 0.5f * fov * Numeric< PRECISION >::DEG_TO_RAD;
+        constexpr Frustum( Real verticalFoV, Real aspect, Real dMin, Real dMax ) noexcept
+        {
+        }
 
-			_data[ FRUSTUM_U_MAX ] = near * tan( halfAngleRadians );
-			_data[ FRUSTUM_R_MAX ] = aspect * _data[ FRUSTUM_U_MAX ];
-			_data[ FRUSTUM_U_MIN ] = -_data[ FRUSTUM_U_MAX ];
-			_data[ FRUSTUM_R_MIN ] = -_data[ FRUSTUM_R_MAX ];
-			_data[ FRUSTUM_D_MIN ] = near;
-			_data[ FRUSTUM_D_MAX ] = far;
-		}
+        constexpr Frustum( const Frustum &other ) noexcept
+            : m_extents( other.m_extents )
+        {
+        }
 
-		Frustum( const Frustum &frustum )
-		{
-			memcpy( _data, frustum._data, 6 * sizeof( PRECISION ) );
-		}
+        constexpr Frustum( Frustum &&other ) noexcept
+            : m_extents( std::move( other.m_extents ) )
+        {
+        }
 
-		~Frustum( void )
-		{
-		}
+        ~Frustum( void ) noexcept = default;
 
-		bool operator==( const Frustum &frustum ) const
-		{
-			return memcmp( _data, frustum._data, 6 * sizeof( PRECISION ) ) == 0;
-		}
+        constexpr Frustum &operator=( const Frustum &other ) noexcept
+        {
+            m_extents = other.m_extents;
+            return *this;
+        }
 
-		bool operator!=( const Frustum &frustum ) const
-		{
-			return memcmp( _data, frustum._data, 6 * sizeof( PRECISION ) ) != 0;
-		}
+        constexpr Frustum &operator=( Frustum &&other ) noexcept
+        {
+            m_extents = std::move( other.m_extents );
+            return *this;
+        }
 
-		PRECISION getRMin( void ) const { return _data[ FRUSTUM_R_MIN ]; }
-		PRECISION getRMax( void ) const { return _data[ FRUSTUM_R_MAX ]; }
-		PRECISION getUMin( void ) const { return _data[ FRUSTUM_U_MIN ]; }
-		PRECISION getUMax( void ) const { return _data[ FRUSTUM_U_MAX ]; }
-		PRECISION getDMin( void ) const { return _data[ FRUSTUM_D_MIN ]; }
-		PRECISION getDMax( void ) const { return _data[ FRUSTUM_D_MAX ]; }
-        
+        [[nodiscard]] inline constexpr Real getRMin( void ) const noexcept { return m_extents[ 0 ]; }
+        [[nodiscard]] inline constexpr Real getRMax( void ) const noexcept { return m_extents[ 1 ]; }
+        [[nodiscard]] inline constexpr Real getUMin( void ) const noexcept { return m_extents[ 2 ]; }
+        [[nodiscard]] inline constexpr Real getUMax( void ) const noexcept { return m_extents[ 3 ]; }
+        [[nodiscard]] inline constexpr Real getDMin( void ) const noexcept { return m_extents[ 4 ]; }
+        [[nodiscard]] inline constexpr Real getDMax( void ) const noexcept { return m_extents[ 5 ]; }
+
+        friend std::ostream &operator<<( std::ostream &out, const Frustum &f ) noexcept
+        {
+            out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
+                << std::setprecision( 10 )
+                << "[D = (" << f.getDMin() << ", " << f.getDMax() << "), "
+                << "R = (" << f.getRMin() << ", " << f.getRMax() << "), "
+                << "U = (" << f.getUMin() << ", " << f.getUMax() << ")]";
+            return out;
+        }
+
+    private:
+        std::array< Real, 6 > m_extents = { 0 };
+    };
+
+    /*
+    template< typename PRECISION >
+    class Frustum {
+    private:
+        enum {
+            FRUSTUM_R_MIN = 0,
+            FRUSTUM_R_MAX = 1,
+            FRUSTUM_U_MIN = 2,
+            FRUSTUM_U_MAX = 3,
+            FRUSTUM_D_MIN = 4,
+            FRUSTUM_D_MAX = 5,
+        };
+
+    public:
+        Frustum( void )
+        {
+        }
+
+        Frustum( PRECISION rMin, PRECISION rMax, PRECISION uMin, PRECISION uMax, PRECISION dMin, PRECISION dMax )
+        {
+            _data[ FRUSTUM_R_MIN ] = rMin;
+            _data[ FRUSTUM_R_MAX ] = rMax;
+            _data[ FRUSTUM_U_MIN ] = uMin;
+            _data[ FRUSTUM_U_MAX ] = uMax;
+            _data[ FRUSTUM_D_MIN ] = dMin;
+            _data[ FRUSTUM_D_MAX ] = dMax;
+        }
+
+        Frustum( PRECISION fov, PRECISION aspect, PRECISION near, PRECISION far )
+        {
+            float halfAngleRadians = 0.5f * fov * Numeric< PRECISION >::DEG_TO_RAD;
+
+            _data[ FRUSTUM_U_MAX ] = near * tan( halfAngleRadians );
+            _data[ FRUSTUM_R_MAX ] = aspect * _data[ FRUSTUM_U_MAX ];
+            _data[ FRUSTUM_U_MIN ] = -_data[ FRUSTUM_U_MAX ];
+            _data[ FRUSTUM_R_MIN ] = -_data[ FRUSTUM_R_MAX ];
+            _data[ FRUSTUM_D_MIN ] = near;
+            _data[ FRUSTUM_D_MAX ] = far;
+        }
+
+        Frustum( const Frustum &frustum )
+        {
+            memcpy( _data, frustum._data, 6 * sizeof( PRECISION ) );
+        }
+
+        ~Frustum( void )
+        {
+        }
+
+        bool operator==( const Frustum &frustum ) const
+        {
+            return memcmp( _data, frustum._data, 6 * sizeof( PRECISION ) ) == 0;
+        }
+
+        bool operator!=( const Frustum &frustum ) const
+        {
+            return memcmp( _data, frustum._data, 6 * sizeof( PRECISION ) ) != 0;
+        }
+
+        PRECISION getRMin( void ) const { return _data[ FRUSTUM_R_MIN ]; }
+        PRECISION getRMax( void ) const { return _data[ FRUSTUM_R_MAX ]; }
+        PRECISION getUMin( void ) const { return _data[ FRUSTUM_U_MIN ]; }
+        PRECISION getUMax( void ) const { return _data[ FRUSTUM_U_MAX ]; }
+        PRECISION getDMin( void ) const { return _data[ FRUSTUM_D_MIN ]; }
+        PRECISION getDMax( void ) const { return _data[ FRUSTUM_D_MAX ]; }
+
         PRECISION computeTanHalfFOV( void ) const
         {
             return getUMax() / getDMin();
         }
 
-		PRECISION computeAspect( void ) const
-		{
-			return getRMax() / getUMax();	
-		}
-        
+        PRECISION computeAspect( void ) const
+        {
+            return getRMax() / getUMax();
+        }
+
         PRECISION computeLinearDepth( void ) const
         {
             return getDMax() - getDMin();
         }
 
-		Matrix< 4, PRECISION > computeProjectionMatrix( void ) const
-		{
+        Matrix< 4, PRECISION > computeProjectionMatrix( void ) const
+        {
             float n = getDMin();
             float f = getDMax();
             float r = getRMax();
@@ -145,16 +213,16 @@ namespace crimild {
             projectionMatrix[ 13 ] = 0;
             projectionMatrix[ 14 ] = -( 2.0f * f * n ) / ( f - n );
             projectionMatrix[ 15 ] = 0.0f;
-            
-            return projectionMatrix;
-		}
 
-		Matrix< 4, PRECISION > computeOrthographicMatrix( void ) const
-		{
-			float left = getRMin();
-			float right = getRMax();
-			float bottom = getUMin();
-			float top = getUMax();
+            return projectionMatrix;
+        }
+
+        Matrix< 4, PRECISION > computeOrthographicMatrix( void ) const
+        {
+            float left = getRMin();
+            float right = getRMax();
+            float bottom = getUMin();
+            float top = getUMax();
             float near = getDMin();
             float far = getDMax();
 
@@ -167,7 +235,7 @@ namespace crimild {
             orthographicMatrix[ 4 ] = 0;
             orthographicMatrix[ 5 ] = ( 2.0f / ( top - bottom ) );
             orthographicMatrix[ 6 ] = 0;
-            orthographicMatrix[ 7 ] = - ( top + bottom ) / ( top - bottom );
+            orthographicMatrix[ 7 ] = -( top + bottom ) / ( top - bottom );
 
             orthographicMatrix[ 8 ] = 0;
             orthographicMatrix[ 9 ] = 0;
@@ -178,29 +246,30 @@ namespace crimild {
             orthographicMatrix[ 13 ] = 0;
             orthographicMatrix[ 14 ] = 0;
             orthographicMatrix[ 15 ] = 1;
-            
+
             return orthographicMatrix;
-		}
+        }
 
-	private:
-		PRECISION _data[ 6 ];
-	};
+    private:
+        PRECISION _data[ 6 ];
+    };
 
-	template< typename PRECISION >
-	std::ostream &operator<<( std::ostream &out, const Frustum< PRECISION > &f )
-	{
-		out << std::setiosflags( std::ios::fixed | std::ios::showpoint  )
-			<< std::setprecision( 10 )
-			<< "[D = (" << f.getDMin() << ", " << f.getDMax() << "), "
-			<< "R = (" << f.getRMin() << ", " << f.getRMax() << "), "
-			<< "U = (" << f.getUMin() << ", " << f.getUMax() << ")]";
-		return out;
-	}
+    template< typename PRECISION >
+    std::ostream &operator<<( std::ostream &out, const Frustum< PRECISION > &f )
+    {
+        out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
+            << std::setprecision( 10 )
+            << "[D = (" << f.getDMin() << ", " << f.getDMax() << "), "
+            << "R = (" << f.getRMin() << ", " << f.getRMax() << "), "
+            << "U = (" << f.getUMin() << ", " << f.getUMax() << ")]";
+        return out;
+    }
 
-	typedef Frustum< float > Frustumf;
-	typedef Frustum< double > Frustumd;
+    typedef Frustum< float > Frustumf;
+    typedef Frustum< double > Frustumd;
+
+    */
 
 }
 
 #endif
-

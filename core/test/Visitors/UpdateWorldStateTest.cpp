@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,9 +26,9 @@
  */
 
 #include "Visitors/UpdateWorldState.hpp"
-#include "SceneGraph/Group.hpp"
-#include "SceneGraph/Geometry.hpp"
 
+#include "SceneGraph/Geometry.hpp"
+#include "SceneGraph/Group.hpp"
 #include "Utils/MockVisitor.hpp"
 
 #include "gtest/gtest.h"
@@ -37,6 +37,7 @@ using namespace crimild;
 
 TEST( UpdateWorldStateTest, singleNode )
 {
+    /*
 	auto node = crimild::alloc< Node >();
 
 	EXPECT_TRUE( node->getLocal().isIdentity() );
@@ -54,11 +55,13 @@ TEST( UpdateWorldStateTest, singleNode )
 	EXPECT_EQ( Vector3f( 0, 0, -5 ), node->getLocal().getTranslate() );
 	EXPECT_FALSE( node->getWorld().isIdentity() );
 	EXPECT_EQ( Vector3f( 0, 0, -5 ), node->getWorld().getTranslate() );
+    */
+    FAIL();
 }
 
 TEST( UpdateWorldStateTest, hierarchy )
 {
-	
+    /*
 	auto group1 = crimild::alloc< Group >();
 	auto group2 = crimild::alloc< Group >();
 	auto geometry1 = crimild::alloc< Geometry >();
@@ -96,11 +99,14 @@ TEST( UpdateWorldStateTest, hierarchy )
 	EXPECT_TRUE( geometry3->getLocal().isIdentity() );
 	EXPECT_FALSE( geometry3->getWorld().isIdentity() );
 	EXPECT_EQ( Vector3f( 0, 0, -5 ), geometry3->getWorld().getTranslate() );
+    */
 
+    FAIL();
 }
 
 TEST( UpateWorldStateTest, scale )
 {
+    /*
 	auto n0 = crimild::alloc< Group >();
 	auto n1 = crimild::alloc< Group >();
 
@@ -114,5 +120,7 @@ TEST( UpateWorldStateTest, scale )
 
 	EXPECT_EQ( 0.5f, n0->getWorld().getScale() );
 	EXPECT_EQ( 0.5f, n1->getWorld().getScale() );
-}
+    */
 
+    FAIL();
+}

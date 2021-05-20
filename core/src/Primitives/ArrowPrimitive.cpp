@@ -26,6 +26,7 @@
  */
 
 #include "ArrowPrimitive.hpp"
+
 #include "ConePrimitive.hpp"
 #include "CylinderPrimitive.hpp"
 
@@ -40,7 +41,7 @@ namespace crimild {
             };
 
             Type type = Type::CONSTANT;
-            RGBColorf color = RGBColorf::ONE;
+            ColorRGB color = ColorRGB::Constants::WHITE;
         };
 
         struct Interval {
@@ -63,7 +64,7 @@ namespace crimild {
         struct Result {
             Array< Vector3f > positions;
             Array< Vector3f > normals;
-            Array< RGBColorf > colors;
+            Array< ColorRGB > colors;
             Array< Vector2f > texCoords;
             Array< UInt32 > indices;
         };
@@ -75,10 +76,9 @@ namespace crimild {
             auto interval = params.interval;
             auto divisions = interval.divisions;
             auto upperBound = interval.upperBound;
-            auto slices = divisions - Vector2i::ONE;
+            auto slices = divisions - Vector2i::Constants::ONE;
             auto textureCount = interval.textureCount;
             auto evaluator = params.evaluator;
-
 
             const auto X = divisions.x();
             const auto Y = divisions.y();
@@ -90,15 +90,17 @@ namespace crimild {
 
             Result ret;
             ret.positions.resize( N );
-            if ( hasNormals ) ret.normals.resize( N );
-            if ( hasColors ) ret.colors.resize( N );
-            if ( hasTexCoords ) ret.texCoords.resize( N );
+            if ( hasNormals )
+                ret.normals.resize( N );
+            if ( hasColors )
+                ret.colors.resize( N );
+            if ( hasTexCoords )
+                ret.texCoords.resize( N );
 
-            auto evaluate = [=]( auto x, auto y ) -> Vector3f {
+            auto evaluate = [ = ]( auto x, auto y ) -> Vector3f {
                 auto domain = Vector2f(
                     x * upperBound.x() / slices.x(),
-                    y * upperBound.y() / slices.y()
-                );
+                    y * upperBound.y() / slices.y() );
                 return evaluator( domain );
             };
 
@@ -115,17 +117,20 @@ namespace crimild {
                         float t = y;
 
                         // nudge the point if the normal is indeterminate
-                        if ( x == 0 ) s += 0.01f;
-                        if ( x == divisions.x() - 1 ) s -= 0.01f;
-                        if ( y == 0 ) t += 0.01f;
-                        if ( y == divisions.y() - 1 ) t -= 0.01f;
+                        if ( x == 0 )
+                            s += 0.01f;
+                        if ( x == divisions.x() - 1 )
+                            s -= 0.01f;
+                        if ( y == 0 )
+                            t += 0.01f;
+                        if ( y == divisions.y() - 1 )
+                            t -= 0.01f;
 
                         // compute the tangents and their cross product
                         Vector3f p = evaluate( s, t );
                         Vector3f u = evaluate( s + 0.01f, t ) - p;
                         Vector3f v = evaluate( s, t + 0.01f ) - p;
-                        Vector3f normal = u ^ v;
-                        normal.normalize();
+                        Vector3f normal = normalize( cross( u, v ) );
                         //if ( invertNormal( domain ) ) {
                         //  normal -= normal;
                         //}
@@ -133,7 +138,7 @@ namespace crimild {
                     }
 
                     if ( hasColors ) {
-                        auto color = RGBColorf::ONE;
+                        auto color = ColorRGB::Constants::WHITE;
                         /*
                         if ( _colorMode.type == ColorMode::Type::CONSTANT ) {
                             color = _colorMode.color;
@@ -190,7 +195,7 @@ ArrowPrimitive::ArrowPrimitive( const Params &params ) noexcept
 
     auto coneHeight = 0.3f * height;
     auto coneRadius = 0.25f * radius;
-    auto coneOffset = -( height - coneHeight ) * Vector3f::UNIT_Z;
+    auto coneOffset = -( height - coneHeight ) * Vector3f::Constants::UNIT_Z;
 
     auto cylinderHeight = height - coneHeight;
     auto cylinderRadius = 0.1 * radius;
@@ -204,7 +209,7 @@ ArrowPrimitive::ArrowPrimitive( const Params &params ) noexcept
                 .upperBound = Vector2f( Numericf::TWO_PI, 1.0f ),
                 .textureCount = Vector2f( 30, 20 ),
             },
-            .evaluator = [ R = coneRadius, H = coneHeight, O = coneOffset ] ( const Vector2f &domain ) -> Vector3f {
+            .evaluator = [ R = coneRadius, H = coneHeight, O = coneOffset ]( const Vector2f &domain ) -> Vector3f {
                 float u = domain[ 0 ];
                 float v = domain[ 1 ];
                 float x = v * R * std::cos( u );
@@ -212,14 +217,13 @@ ArrowPrimitive::ArrowPrimitive( const Params &params ) noexcept
                 float z = ( v - 1.0f ) * H;
                 return O + Vector3f( x, y, z );
             },
-        }
-    );
+        } );
 
     auto coneVertexCount = cone.positions.size();
 
     // Join the cone and the cylinder.
     // The last points in the cone will be joined with the first ones in the cylinder
-    auto slices = divisions - Vector2i::ONE;
+    auto slices = divisions - Vector2i::Constants::ONE;
     for ( auto x = 0l; x < slices.x(); ++x ) {
         auto next = ( x + 1 ) % divisions.x();
         cone.indices.add( coneVertexCount - divisions.x() + x );
@@ -240,7 +244,7 @@ ArrowPrimitive::ArrowPrimitive( const Params &params ) noexcept
                 .upperBound = Vector2f( Numericf::TWO_PI, 1.0f ),
                 .textureCount = Vector2f( 30, 20 ),
             },
-            .evaluator = [ R = cylinderRadius, H = cylinderHeight ] ( const Vector2f &domain ) -> Vector3f {
+            .evaluator = [ R = cylinderRadius, H = cylinderHeight ]( const Vector2f &domain ) -> Vector3f {
                 float u = domain[ 0 ];
                 float v = domain[ 1 ];
                 float x = R * std::cos( u );
@@ -248,8 +252,7 @@ ArrowPrimitive::ArrowPrimitive( const Params &params ) noexcept
                 float z = ( v - 1.0f ) * H;
                 return Vector3f( x, y, z );
             },
-        }
-    );
+        } );
 
     auto cylinderVertexCount = cylinder.positions.size();
 
@@ -264,9 +267,9 @@ ArrowPrimitive::ArrowPrimitive( const Params &params ) noexcept
         cylinder.indices.add( cylinderVertexCount + x );
     }
 
-    cylinder.positions.add( Vector3f::ZERO );
-    cylinder.normals.add( Vector3f::UNIT_Z );
-    cylinder.texCoords.add( Vector2f::ZERO );
+    cylinder.positions.add( Vector3f::Constants::ZERO );
+    cylinder.normals.add( Vector3f::Constants::UNIT_Z );
+    cylinder.texCoords.add( Vector2f::Constants::ZERO );
 
     auto vertexCount = coneVertexCount + cylinderVertexCount;
     auto vertices = crimild::alloc< VertexBuffer >( layout, vertexCount );

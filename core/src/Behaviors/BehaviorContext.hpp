@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,175 +28,174 @@
 #ifndef CRIMILD_CORE_BEHAVIORS_BEHAVIOR_CONTEXT_
 #define CRIMILD_CORE_BEHAVIORS_BEHAVIOR_CONTEXT_
 
-#include "Foundation/Types.hpp"
+#include "Coding/Codable.hpp"
+#include "Foundation/Containers/Map.hpp"
 #include "Foundation/Log.hpp"
 #include "Foundation/RTTI.hpp"
-#include "Foundation/Containers/Map.hpp"
-#include "Coding/Codable.hpp"
+#include "Foundation/Types.hpp"
 #include "Mathematics/Clock.hpp"
-#include "Mathematics/Vector.hpp"
+#include "Mathematics/Vector3.hpp"
+#include "Mathematics/Vector4.hpp"
 
 #include <functional>
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace crimild {
 
-	class Node;
+    class Node;
 
-	namespace behaviors {
+    namespace behaviors {
 
-		/**
+        /**
 			 \brief Stores an inmutable value for the context
 		*/
-		class BehaviorContextValue : public coding::Codable {
-			CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::BehaviorContextValue )
-		public:
-			BehaviorContextValue( void );
-			explicit BehaviorContextValue( std::string key, std::string value );
-			virtual ~BehaviorContextValue( void );
+        class BehaviorContextValue : public coding::Codable {
+            CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::BehaviorContextValue )
+        public:
+            BehaviorContextValue( void );
+            explicit BehaviorContextValue( std::string key, std::string value );
+            virtual ~BehaviorContextValue( void );
 
-			const std::string &getKey( void ) const { return _key; }
-			const std::string &getValue( void ) const { return _value; }
+            const std::string &getKey( void ) const { return _key; }
+            const std::string &getValue( void ) const { return _value; }
 
-		private:
-			std::string _key;
-			std::string _value;
+        private:
+            std::string _key;
+            std::string _value;
 
-			/**
-				\name Coding support 
+            /**
+				\name Coding support
 			*/
-			//@{
+            //@{
 
-		public:
-			virtual void encode( coding::Encoder &encoder ) override;
-			virtual void decode( coding::Decoder &decoder ) override;
+        public:
+            virtual void encode( coding::Encoder &encoder ) override;
+            virtual void decode( coding::Decoder &decoder ) override;
 
-			//@}
-		};
+            //@}
+        };
 
-		/**
+        /**
 		   \brief Execution context
-		   
+
 		   \todo Add support for value observers
 		*/
         class BehaviorContext : public coding::Codable {
-			CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::BehaviorContext )
+            CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::BehaviorContext )
 
-		public:
-			BehaviorContext( void );
-			virtual ~BehaviorContext( void );
+        public:
+            BehaviorContext( void );
+            virtual ~BehaviorContext( void );
 
-			void reset( void );
-			void update( const crimild::Clock &c );
+            void reset( void );
+            void update( const crimild::Clock &c );
 
-		public:
-			void setAgent( crimild::Node *agent ) { _agent = agent; }
-			crimild::Node *getAgent( void ) { return _agent; }
+        public:
+            void setAgent( crimild::Node *agent ) { _agent = agent; }
+            crimild::Node *getAgent( void ) { return _agent; }
 
-		private:
-			crimild::Node *_agent = nullptr;
+        private:
+            crimild::Node *_agent = nullptr;
 
-		public:
-			crimild::Bool hasTargets( void ) const { return getTargetCount() > 0; }			
-			crimild::Size getTargetCount( void ) const;
+        public:
+            crimild::Bool hasTargets( void ) const { return getTargetCount() > 0; }
+            crimild::Size getTargetCount( void ) const;
 
-			void addTarget( crimild::Node *target );
-			crimild::Node *getTargetAt( crimild::Size index );
-			void removeAllTargets( void );
+            void addTarget( crimild::Node *target );
+            crimild::Node *getTargetAt( crimild::Size index );
+            void removeAllTargets( void );
 
-			using TargetCallback = std::function< void( crimild::Node * ) >;
-			void foreachTarget( TargetCallback const &callback );
+            using TargetCallback = std::function< void( crimild::Node * ) >;
+            void foreachTarget( TargetCallback const &callback );
 
-		private:
-			std::vector< crimild::Node * > _targets;
-			crimild::Size _targetCount = 0;
+        private:
+            std::vector< crimild::Node * > _targets;
+            crimild::Size _targetCount = 0;
 
-		public:
-			const crimild::Clock &getClock( void ) const { return _clock; }
+        public:
+            const crimild::Clock &getClock( void ) const { return _clock; }
 
-		private:
-			crimild::Clock _clock;
+        private:
+            crimild::Clock _clock;
 
-		public:
-			bool hasValue( std::string key )
-			{
-				return _values.contains( key );
-			}
-			
-			template< typename T >
-			void setValue( std::string key, T value )
-			{
-				std::stringstream ss;
-				ss << value;
-				_values[ key ] = crimild::alloc< BehaviorContextValue >( key, ss.str() );
-			}
-			
-			template< typename T >
-			T getValue( std::string key )
-			{
-				if ( !hasValue( key ) ) {
-					crimild::Log::warning( CRIMILD_CURRENT_CLASS_NAME, "No context value set for key ", key );
+        public:
+            bool hasValue( std::string key )
+            {
+                return _values.contains( key );
+            }
+
+            template< typename T >
+            void setValue( std::string key, T value )
+            {
+                std::stringstream ss;
+                ss << value;
+                _values[ key ] = crimild::alloc< BehaviorContextValue >( key, ss.str() );
+            }
+
+            template< typename T >
+            T getValue( std::string key )
+            {
+                if ( !hasValue( key ) ) {
+                    crimild::Log::warning( CRIMILD_CURRENT_CLASS_NAME, "No context value set for key ", key );
                     return T();
-				}
+                }
 
                 T value;
-				std::stringstream ss;
-				ss << _values[ key ]->getValue();
-				ss >> value;
-				return value;
-			}
-			
-		private:
-			Map< std::string, SharedPointer< BehaviorContextValue >> _values;
+                std::stringstream ss;
+                ss << _values[ key ]->getValue();
+                ss >> value;
+                return value;
+            }
 
-			/**
+        private:
+            Map< std::string, SharedPointer< BehaviorContextValue > > _values;
+
+            /**
 			   \name Coding support
 			*/
-			//@{
-			
-		public:
-			virtual void encode( coding::Encoder &encoder ) override;
-			virtual void decode( coding::Decoder &decoder ) override;
-			
-			//@}
-			
-		public:
-			void dump( void ) const;
-		};
+            //@{
 
-		template<>
-		inline void BehaviorContext::setValue< Vector3f >( std::string key, Vector3f value )
-		{
-			setValue< crimild::Real32 >( key + ".x", value.x() );
-			setValue< crimild::Real32 >( key + ".y", value.y() );
-			setValue< crimild::Real32 >( key + ".z", value.z() );
-		}
+        public:
+            virtual void encode( coding::Encoder &encoder ) override;
+            virtual void decode( coding::Decoder &decoder ) override;
 
-		template<>
-		inline crimild::Vector3f BehaviorContext::getValue( std::string key )
-		{
-			return Vector3f(
-				getValue< crimild::Real32 >( key + ".x" ),
-				getValue< crimild::Real32 >( key + ".y" ),
-				getValue< crimild::Real32 >( key + ".z" )
-			);
-		}
-		
-		template<>
-		inline crimild::Vector4f BehaviorContext::getValue( std::string key )
-		{
-			std::stringstream ss;
-			ss << _values[ key ];
+            //@}
 
-			float x, y, z, w;
-			ss >> x >> y >> z >> w;
-			return crimild::Vector4f( x, y, z, w );
-		}
+        public:
+            void dump( void ) const;
+        };
 
-	}
-	
+        template<>
+        inline void BehaviorContext::setValue< Vector3f >( std::string key, Vector3f value )
+        {
+            setValue< crimild::Real32 >( key + ".x", value.x() );
+            setValue< crimild::Real32 >( key + ".y", value.y() );
+            setValue< crimild::Real32 >( key + ".z", value.z() );
+        }
+
+        template<>
+        inline crimild::Vector3f BehaviorContext::getValue( std::string key )
+        {
+            return Vector3f(
+                getValue< crimild::Real32 >( key + ".x" ),
+                getValue< crimild::Real32 >( key + ".y" ),
+                getValue< crimild::Real32 >( key + ".z" ) );
+        }
+
+        template<>
+        inline crimild::Vector4f BehaviorContext::getValue( std::string key )
+        {
+            std::stringstream ss;
+            ss << _values[ key ];
+
+            float x, y, z, w;
+            ss >> x >> y >> z >> w;
+            return crimild::Vector4f( x, y, z, w );
+        }
+
+    }
+
 }
 
 #endif
-

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,75 +26,73 @@
  */
 
 #include "AttractorParticleUpdater.hpp"
-#include "Coding/Encoder.hpp"
+
 #include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
 
 using namespace crimild;
 
 AttractorParticleUpdater::AttractorParticleUpdater( void )
-	: _attractor( Vector3f::ZERO, 1.0f ),
-	  _strength( 1.0f )
+    : _attractor( Point3::Constants::ZERO, 1.0f ),
+      _strength( 1.0f )
 {
-
 }
 
 AttractorParticleUpdater::~AttractorParticleUpdater( void )
 {
-
 }
 
 void AttractorParticleUpdater::configure( Node *node, ParticleData *particles )
 {
-	_positions = particles->createAttribArray< Vector3f >( ParticleAttrib::POSITION );
-	_accelerations = particles->createAttribArray< Vector3f >( ParticleAttrib::ACCELERATION );
+    _positions = particles->createAttribArray< Vector3f >( ParticleAttrib::POSITION );
+    _accelerations = particles->createAttribArray< Vector3f >( ParticleAttrib::ACCELERATION );
 }
 
 void AttractorParticleUpdater::update( Node *node, crimild::Real64 dt, ParticleData *particles )
 {
-	const auto center = _attractor.getCenter();
-	const auto radius = _attractor.getRadius();
-	const auto count = particles->getAliveCount();
+    const auto center = _attractor.getCenter();
+    const auto radius = _attractor.getRadius();
+    const auto count = particles->getAliveCount();
 
-	const auto ps = _positions->getData< Vector3f >();
-	auto as = _accelerations->getData< Vector3f >();
-	
-	for ( crimild::Size i = 0; i < count; i++ ) {
-		const auto p = ps[ i ];
+    const auto ps = _positions->getData< Vector3f >();
+    auto as = _accelerations->getData< Vector3f >();
 
-		auto direction = center - p;
-		auto d = direction.getMagnitude();
-		if ( d > 0.0 && d <= radius ) {
-			direction /= d;
-			const auto pct = 1.0 - ( d / radius );
-			
-			as[ i ] += dt * pct * _strength * direction;
-		}
-	}
+    for ( crimild::Size i = 0; i < count; i++ ) {
+        const auto p = ps[ i ];
+
+        auto direction = Vector3( center - p );
+        auto d = length( direction );
+        if ( d > 0.0 && d <= radius ) {
+            //direction /= d;
+            const auto pct = 1.0 - ( d / radius );
+
+            //as[ i ] += dt * pct * _strength * direction;
+        }
+    }
 }
 
-void AttractorParticleUpdater::encode( coding::Encoder &encoder ) 
+void AttractorParticleUpdater::encode( coding::Encoder &encoder )
 {
-	ParticleSystemComponent::ParticleUpdater::encode( encoder );
+    ParticleSystemComponent::ParticleUpdater::encode( encoder );
 
-	encoder.encode( "origin", _attractor.getCenter() );
-	encoder.encode( "radius", _attractor.getRadius() );
-	encoder.encode( "strengh", _strength );
+    //encoder.encode( "origin", _attractor.getCenter() );
+    //encoder.encode( "radius", _attractor.getRadius() );
+    //encoder.encode( "strengh", _strength );
 }
 
 void AttractorParticleUpdater::decode( coding::Decoder &decoder )
 {
-	ParticleSystemComponent::ParticleUpdater::decode( decoder );
+    ParticleSystemComponent::ParticleUpdater::decode( decoder );
 
-	Vector3f origin = Vector3f::ZERO;
-	decoder.decode( "origin", origin );
+    Vector3f origin = Vector3f::Constants::ZERO;
+    decoder.decode( "origin", origin );
 
-	crimild::Real32 radius = 1.0f;
-	decoder.decode( "radius", radius );
+    crimild::Real32 radius = 1.0f;
+    decoder.decode( "radius", radius );
 
-	crimild::Real32 strength = 1.0f;
-	decoder.decode( "strength", strength );
+    crimild::Real32 strength = 1.0f;
+    decoder.decode( "strength", strength );
 
-	setAttractor( Sphere3f( origin, radius ) );
-	setStrength( strength );
+    setAttractor( Sphere( Point3( origin ), radius ) );
+    setStrength( strength );
 }
-

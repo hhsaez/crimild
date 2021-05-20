@@ -29,7 +29,7 @@
 #define CRIMILD_UI_CANVAS_
 
 #include "Components/NodeComponent.hpp"
-#include "Mathematics/Vector.hpp"
+#include "Mathematics/Vector2.hpp"
 
 namespace crimild {
 

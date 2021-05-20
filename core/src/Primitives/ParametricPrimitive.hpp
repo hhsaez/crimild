@@ -28,8 +28,8 @@
 #ifndef CRIMILD_PRIMITIVES_PARAMETRIC_
 #define CRIMILD_PRIMITIVES_PARAMETRIC_
 
+#include "Mathematics/Vector3.hpp"
 #include "Primitive.hpp"
-#include "Mathematics/Vector.hpp"
 #include "Rendering/Vertex.hpp"
 
 namespace crimild {
@@ -50,7 +50,7 @@ namespace crimild {
             };
 
             Type type = Type::CONSTANT;
-            RGBColorf color = RGBColorf::ONE;
+            ColorRGB color = ColorRGB::Constants::WHITE;
         };
 
         struct Params {
@@ -82,7 +82,7 @@ namespace crimild {
         Vector2f _upperBound;
         Vector2i _slices;
         Vector2i _divisions;
-        Vector2i _textureCount;
+        Vector2f _textureCount;
         ColorMode _colorMode;
     };
 

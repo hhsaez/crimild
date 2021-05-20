@@ -183,7 +183,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::debug( Array< SharedPo
     renderPass->produces( { color } );
 
     renderPass->clearValue = {
-        .color = RGBAColorf( 0.5f, 0.5f, 0.5f, 1.0f ),
+        .color = ColorRGBA( 0.5f, 0.5f, 0.5f, 1.0f ),
     };
 
     return withGraphicsCommands(

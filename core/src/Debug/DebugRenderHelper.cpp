@@ -1,24 +1,18 @@
 #include "DebugRenderHelper.hpp"
 
-#include "Rendering/ShaderProgram.hpp"
-#include "Rendering/Renderer.hpp"
-#include "Rendering/Font.hpp"
-
+#include "Components/MaterialComponent.hpp"
+#include "Foundation/Log.hpp"
 #include "Primitives/BoxPrimitive.hpp"
-#include "Primitives/SpherePrimitive.hpp"
 #include "Primitives/ParametricSpherePrimitive.hpp"
-
+#include "Primitives/SpherePrimitive.hpp"
+#include "Rendering/Font.hpp"
+#include "Rendering/Renderer.hpp"
+#include "Rendering/ShaderProgram.hpp"
 #include "SceneGraph/Camera.hpp"
-
 #include "Simulation/AssetManager.hpp"
 #include "Simulation/Simulation.hpp"
-
-#include "Foundation/Log.hpp"
-
-#include "Visitors/UpdateWorldState.hpp"
 #include "Visitors/UpdateRenderState.hpp"
-
-#include "Components/MaterialComponent.hpp"
+#include "Visitors/UpdateWorldState.hpp"
 
 using namespace crimild;
 
@@ -46,17 +40,17 @@ void DebugRenderHelper::init( void )
     */
 }
 
-void DebugRenderHelper::renderLine( Renderer *renderer, Camera *camera, const Vector3f &from, const Vector3f &to, const RGBAColorf &color )
+void DebugRenderHelper::renderLine( Renderer *renderer, Camera *camera, const Vector3f &from, const Vector3f &to, const ColorRGBA &color )
 {
-	Vector3f data[] = {
-		from,
-		to
-	};
+    Vector3f data[] = {
+        from,
+        to
+    };
 
-	renderLines( renderer, camera, data, 2, color );
+    renderLines( renderer, camera, data, 2, color );
 }
 
-void DebugRenderHelper::renderLines( Renderer *renderer, Camera *camera, const Vector3f *data, unsigned int count, const RGBAColorf &color )
+void DebugRenderHelper::renderLines( Renderer *renderer, Camera *camera, const Vector3f *data, unsigned int count, const ColorRGBA &color )
 {
     /*
     auto depthState = AssetManager::getInstance()->get< DepthState >( CRIMILD_DEBUG_RENDER_HELPER_DEPTH_STATE );
@@ -107,7 +101,7 @@ void DebugRenderHelper::renderLines( Renderer *renderer, Camera *camera, const V
     */
 }
 
-void DebugRenderHelper::renderLines( const Vector3f *data, unsigned int count, const RGBAColorf &color )
+void DebugRenderHelper::renderLines( const Vector3f *data, unsigned int count, const ColorRGBA &color )
 {
     /*
 	auto vbo = crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3, count );
@@ -132,7 +126,7 @@ void DebugRenderHelper::renderLines( const Vector3f *data, unsigned int count, c
     */
 }
 
-void DebugRenderHelper::renderBox( Renderer *renderer, Camera *camera, const Vector3f &position, float scale, const RGBAColorf &color )
+void DebugRenderHelper::renderBox( Renderer *renderer, Camera *camera, const Vector3f &position, float scale, const ColorRGBA &color )
 {
     /*
 	Transformation model;
@@ -144,7 +138,7 @@ void DebugRenderHelper::renderBox( Renderer *renderer, Camera *camera, const Vec
     */
 }
 
-void DebugRenderHelper::renderBox( Renderer *renderer, Camera *camera, const Vector3f &position, const Vector3f &size, const RGBAColorf &color )
+void DebugRenderHelper::renderBox( Renderer *renderer, Camera *camera, const Vector3f &position, const Vector3f &size, const ColorRGBA &color )
 {
     /*
 	Transformation model;
@@ -156,7 +150,7 @@ void DebugRenderHelper::renderBox( Renderer *renderer, Camera *camera, const Vec
     */
 }
 
-void DebugRenderHelper::renderSphere( Renderer *renderer, Camera *camera, const Vector3f &position, float scale, const RGBAColorf &color )
+void DebugRenderHelper::renderSphere( Renderer *renderer, Camera *camera, const Vector3f &position, float scale, const ColorRGBA &color )
 {
     /*
 	Transformation model;
@@ -168,7 +162,7 @@ void DebugRenderHelper::renderSphere( Renderer *renderer, Camera *camera, const 
     */
 }
 
-void DebugRenderHelper::renderWireframeSphere( Renderer *renderer, Camera *camera, const Vector3f &position, float scale, const RGBAColorf &color )
+void DebugRenderHelper::renderWireframeSphere( Renderer *renderer, Camera *camera, const Vector3f &position, float scale, const ColorRGBA &color )
 {
     /*
     Transformation model;
@@ -180,7 +174,7 @@ void DebugRenderHelper::renderWireframeSphere( Renderer *renderer, Camera *camer
     */
 }
 
-void DebugRenderHelper::render( Renderer *renderer, Camera *camera, Primitive *primitive, const Transformation &model, const RGBAColorf &color )
+void DebugRenderHelper::render( Renderer *renderer, Camera *camera, Primitive *primitive, const Transformation &model, const ColorRGBA &color )
 {
     /*
     auto program = AssetManager::getInstance()->get< ShaderProgram >( CRIMILD_DEBUG_RENDER_UNLIT_SHADER_PROGRAM );
@@ -253,7 +247,7 @@ void DebugRenderHelper::render( const Transformation &transform, crimild::Real32
     program->bindUniform( PROJECTION_MATRIX_UNIFORM, camera->getProjectionMatrix() );
     program->bindUniform( VIEW_MATRIX_UNIFORM, camera->getViewMatrix() );
     program->bindUniform( MODEL_MATRIX_UNIFORM, mMatrix );
-    program->bindUniform( COLOR_UNIFORM, RGBAColorf::ONE );
+    program->bindUniform( COLOR_UNIFORM, ColorRGBA::ONE );
 
     renderer->bindProgram( program );
 
@@ -326,7 +320,7 @@ void DebugRenderHelper::render( Geometry *geometry )
     */
 }
 
-void DebugRenderHelper::renderText( std::string str, const Vector3f &position, const RGBAColorf &color )
+void DebugRenderHelper::renderText( std::string str, const Vector3f &position, const ColorRGBA &color )
 {
     /*
 	auto font = AssetManager::getInstance()->get< Font >( AssetManager::FONT_SYSTEM );

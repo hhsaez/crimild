@@ -28,13 +28,17 @@
 #ifndef CRIMILD_RENDERING_VERTEX_
 #define CRIMILD_RENDERING_VERTEX_
 
+#include "Mathematics/ColorRGB.hpp"
+#include "Mathematics/ColorRGBA.hpp"
+#include "Mathematics/Vector2.hpp"
+#include "Mathematics/Vector3.hpp"
 #include "Rendering/VertexLayout.hpp"
-#include "Mathematics/Vector.hpp"
 
 namespace crimild {
 
     struct VertexP2 {
-        static VertexLayout getLayout( void ) noexcept {
+        static VertexLayout getLayout( void ) noexcept
+        {
             return VertexLayout()
                 .withAttribute< Vector3f >( VertexAttribute::Name::POSITION );
         };
@@ -43,40 +47,43 @@ namespace crimild {
     };
 
     struct VertexP2C3 {
-        static VertexLayout getLayout( void ) noexcept {
+        static VertexLayout getLayout( void ) noexcept
+        {
             return VertexLayout()
                 .withAttribute< Vector2f >( VertexAttribute::Name::POSITION )
-                .withAttribute< RGBColorf >( VertexAttribute::Name::COLOR );
+                .withAttribute< ColorRGB >( VertexAttribute::Name::COLOR );
         };
 
         Vector2f position;
-        RGBColorf color;
+        ColorRGB color;
     };
 
     struct VertexP2C3TC2 {
-        static VertexLayout getLayout( void ) noexcept {
+        static VertexLayout getLayout( void ) noexcept
+        {
             return VertexLayout()
                 .withAttribute< Vector2f >( VertexAttribute::Name::POSITION )
-                .withAttribute< RGBColorf >( VertexAttribute::Name::COLOR )
+                .withAttribute< ColorRGB >( VertexAttribute::Name::COLOR )
                 .withAttribute< Vector2f >( VertexAttribute::Name::TEX_COORD );
         };
 
         crimild::Vector2f position;
-        crimild::RGBColorf color;
+        crimild::ColorRGB color;
         crimild::Vector2f texCoord;
     };
 
     struct VertexP2TC2C4 {
-        static VertexLayout getLayout( void ) noexcept {
+        static VertexLayout getLayout( void ) noexcept
+        {
             return VertexLayout()
                 .withAttribute< Vector2f >( VertexAttribute::Name::POSITION )
                 .withAttribute< Vector2f >( VertexAttribute::Name::TEX_COORD )
-                .withAttribute< RGBAColorf >( VertexAttribute::Name::COLOR );
+                .withAttribute< ColorRGBA >( VertexAttribute::Name::COLOR );
         };
 
         crimild::Vector2f position;
         crimild::Vector2f texCoord;
-        crimild::RGBAColorf color;
+        crimild::ColorRGBA color;
     };
 
     struct VertexP3 {
@@ -94,12 +101,11 @@ namespace crimild {
         {
             return VertexLayout()
                 .withAttribute< Vector3f >( VertexAttribute::Name::POSITION )
-                .withAttribute< RGBColorf >( VertexAttribute::Name::COLOR )
-            ;
+                .withAttribute< ColorRGB >( VertexAttribute::Name::COLOR );
         }
 
         Vector3f position;
-        RGBColorf color;
+        ColorRGB color;
     };
 
     struct VertexP3C3TC2 {
@@ -107,13 +113,12 @@ namespace crimild {
         {
             return VertexLayout()
                 .withAttribute< Vector3f >( VertexAttribute::Name::POSITION )
-                .withAttribute< RGBColorf >( VertexAttribute::Name::COLOR )
-                .withAttribute< Vector3f >( VertexAttribute::Name::TEX_COORD )
-            ;
+                .withAttribute< ColorRGB >( VertexAttribute::Name::COLOR )
+                .withAttribute< Vector3f >( VertexAttribute::Name::TEX_COORD );
         }
 
         crimild::Vector3f position;
-        crimild::RGBColorf color;
+        crimild::ColorRGB color;
         crimild::Vector2f texCoord;
     };
 
@@ -122,8 +127,7 @@ namespace crimild {
         {
             return VertexLayout()
                 .withAttribute< Vector3f >( VertexAttribute::Name::POSITION )
-                .withAttribute< Vector3f >( VertexAttribute::Name::NORMAL )
-            ;
+                .withAttribute< Vector3f >( VertexAttribute::Name::NORMAL );
         }
 
         crimild::Vector3f position;
@@ -136,8 +140,7 @@ namespace crimild {
             return VertexLayout()
                 .withAttribute< Vector3f >( VertexAttribute::Name::POSITION )
                 .withAttribute< Vector3f >( VertexAttribute::Name::NORMAL )
-                .withAttribute< Vector2f >( VertexAttribute::Name::TEX_COORD )
-            ;
+                .withAttribute< Vector2f >( VertexAttribute::Name::TEX_COORD );
         }
 
         crimild::Vector3f position;
@@ -156,8 +159,8 @@ namespace crimild {
         friend bool operator<( const VertexP3N3TC2 &lhs, const VertexP3N3TC2 &rhs ) noexcept
         {
             return lhs.position.x() < rhs.position.x()
-                && lhs.position.y() < rhs.position.y()
-                && lhs.position.z() < rhs.position.z();
+                   && lhs.position.y() < rhs.position.y()
+                   && lhs.position.z() < rhs.position.z();
         }
     };
 
@@ -166,8 +169,7 @@ namespace crimild {
         {
             return VertexLayout()
                 .withAttribute< Vector3f >( VertexAttribute::Name::POSITION )
-                .withAttribute< Vector2f >( VertexAttribute::Name::TEX_COORD )
-            ;
+                .withAttribute< Vector2f >( VertexAttribute::Name::TEX_COORD );
         }
 
         crimild::Vector3f position;

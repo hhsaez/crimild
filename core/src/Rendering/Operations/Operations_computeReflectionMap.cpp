@@ -68,7 +68,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeReflectionMap( 
     renderPass->writes( { color, depth } );
     renderPass->produces( { color, depth } );
 
-    auto pMatrix = Frustumf( 90.0f, 1.0f, 0.1f, 200.0f ).computeProjectionMatrix();
+    const auto pMatrix = perspective( 90.0f, 1.0f, 0.1f, 200.0f );
     auto descriptors = Array< SharedPointer< DescriptorSet > >( 6 );
     for ( auto face = 0l; face < 6; ++face ) {
         auto ds = crimild::alloc< DescriptorSet >();
@@ -84,32 +84,32 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeReflectionMap( 
                     Transformation t;
                     switch ( face ) {
                         case 0: // positive x
-                            t.rotate().fromAxisAngle( Vector3f::UNIT_Y, Numericf::HALF_PI );
+                            t = rotationY( numbers::PI_DIV_2 );
                             break;
 
                         case 1: // negative x
-                            t.rotate().fromAxisAngle( Vector3f::UNIT_Y, -Numericf::HALF_PI );
+                            t = rotationY( -numbers::PI_DIV_2 );
                             break;
 
                         case 2: // positive y
-                            t.rotate().fromAxisAngle( Vector3f::UNIT_X, Numericf::HALF_PI );
+                            t = rotationX( numbers::PI_DIV_2 );
                             break;
 
                         case 3: // negative y
-                            t.rotate().fromAxisAngle( Vector3f::UNIT_X, -Numericf::HALF_PI );
+                            t = rotationX( -numbers::PI_DIV_2 );
                             break;
 
                         case 4: // positive z
-                            t.rotate().fromAxisAngle( Vector3f::UNIT_Y, Numericf::PI );
+                            t = rotationY( numbers::PI );
                             break;
 
                         case 5: // negative z
-                            t.rotate().fromAxisAngle( Vector3f::UNIT_Y, 0 );
+                            t = rotationY( 0 );
                             break;
                     }
 
-                    t.setTranslate( Vector3f::ZERO ); // TODO (hernan): use probe's position
-                    auto vMatrix = t.computeModelMatrix().getInverse();
+                    //t.setTranslate( Vector3f::ZERO ); // TODO (hernan): use probe's position
+                    const auto vMatrix = t.getInverseMatrix(); //t.computeModelMatrix().getInverse();
 
                     return crimild::alloc< UniformBuffer >(
                         Props {

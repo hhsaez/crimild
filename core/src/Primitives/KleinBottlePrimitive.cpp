@@ -48,10 +48,11 @@ Vector3f KleinBottlePrimitive::evaluate( const Vector2f &domain ) const
     float x1 = 3 * cos( u ) * ( 1 + sin( u ) ) + ( 2 * ( 1 - cos( u ) / 2 ) ) * cos( v + Numericf::PI );
     float y1 = 8 * sin( u );
 
-    Vector3f range;
-    range[ 0 ] = u < Numericf::PI ? x0 : x1;
-    range[ 1 ] = u < Numericf::PI ? -y0 : -y1;
-    range[ 2 ] = ( -2 * ( 1 - cos( u ) / 2 ) ) * sin( v );
+    Vector3f range = {
+        u < Numericf::PI ? x0 : x1,
+        u < Numericf::PI ? -y0 : -y1,
+        ( -2 * ( 1 - cos( u ) / 2 ) ) * sin( v ),
+    };
     return .1f * range * _scale;
 }
 

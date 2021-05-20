@@ -220,9 +220,9 @@ TEST( VertexBuffer, setInterleavedVertex )
     auto normals = vertices->get( VertexAttribute::Name::NORMAL );
     normals->set(
         Array< Vector3f > {
-            Vector3f::UNIT_Z,
-            Vector3f::UNIT_Z,
-            Vector3f::UNIT_Z,
+            Vector3f::Constants::UNIT_Z,
+            Vector3f::Constants::UNIT_Z,
+            Vector3f::Constants::UNIT_Z,
         } );
 
     auto texCoords = vertices->get( VertexAttribute::Name::TEX_COORD );
@@ -241,9 +241,9 @@ TEST( VertexBuffer, setInterleavedVertex )
     ASSERT_EQ( Vector3f( 0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 1 ) );
     ASSERT_EQ( Vector3f( 0.0f, 0.5f, 0.0f ), positions->get< Vector3f >( 2 ) );
 
-    ASSERT_EQ( Vector3f::UNIT_Z, normals->get< Vector3f >( 0 ) );
-    ASSERT_EQ( Vector3f::UNIT_Z, normals->get< Vector3f >( 1 ) );
-    ASSERT_EQ( Vector3f::UNIT_Z, normals->get< Vector3f >( 2 ) );
+    ASSERT_EQ( Vector3f::Constants::UNIT_Z, normals->get< Vector3f >( 0 ) );
+    ASSERT_EQ( Vector3f::Constants::UNIT_Z, normals->get< Vector3f >( 1 ) );
+    ASSERT_EQ( Vector3f::Constants::UNIT_Z, normals->get< Vector3f >( 2 ) );
 
     ASSERT_EQ( Vector2f( 0.0f, 0.0f ), texCoords->get< Vector2f >( 0 ) );
     ASSERT_EQ( Vector2f( 0.f, 1.0f ), texCoords->get< Vector2f >( 1 ) );

@@ -32,16 +32,9 @@
 
 using namespace crimild;
 
-FreeLookCameraComponent::FreeLookCameraComponent( void )
-{
-}
-
-FreeLookCameraComponent::~FreeLookCameraComponent( void )
-{
-}
-
 void FreeLookCameraComponent::start( void )
 {
+    /*
     _lastMousePos = Vector2f::ZERO;
 
     registerMessageHandler< crimild::messaging::KeyPressed >(
@@ -137,10 +130,13 @@ void FreeLookCameraComponent::start( void )
                 root->local().rotate() *= Quaternion4f::createFromAxisAngle( up.getNormalized(), -mouseDelta[ 0 ] );
             }
         } );
+    */
 }
 
 void FreeLookCameraComponent::update( const Clock &c )
 {
+    assert( false );
+    /*
     if ( Input::getInstance()->isMouseButtonDown( CRIMILD_INPUT_MOUSE_BUTTON_LEFT ) ) {
         Input::getInstance()->setMouseCursorMode( Input::MouseCursorMode::GRAB );
     } else {
@@ -160,4 +156,5 @@ void FreeLookCameraComponent::update( const Clock &c )
     auto right = root->getLocal().computeRight();
 
     root->local().translate() += c.getDeltaTime() * ( dSpeed * direction + rSpeed * right );
+    */
 }

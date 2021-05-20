@@ -42,6 +42,7 @@ void BoxPositionParticleGenerator::configure( Node *node, ParticleData *particle
 
 void BoxPositionParticleGenerator::generate( Node *node, crimild::Real64 dt, ParticleData *particles, ParticleId startId, ParticleId endId )
 {
+    /*
     auto ps = _positions->getData< Vector3f >();
 
     const auto posMin = _origin - _size;
@@ -59,6 +60,7 @@ void BoxPositionParticleGenerator::generate( Node *node, crimild::Real64 dt, Par
             ps[ i ] = Vector3f( x, y, z );
         }
     }
+    */
 }
 
 void BoxPositionParticleGenerator::encode( coding::Encoder &encoder )

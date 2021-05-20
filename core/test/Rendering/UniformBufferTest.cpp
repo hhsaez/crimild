@@ -27,6 +27,10 @@
 
 #include "Rendering/UniformBuffer.hpp"
 
+#include "Mathematics/ColorRGBA.hpp"
+#include "Mathematics/Matrix4.hpp"
+#include "Mathematics/Vector2.hpp"
+#include "Mathematics/Vector3.hpp"
 #include "Rendering/BufferView.hpp"
 
 #include "gtest/gtest.h"
@@ -35,12 +39,12 @@ using namespace crimild;
 
 TEST( UniformBuffer, withSingleValue )
 {
-    auto uniform = crimild::alloc< UniformBuffer >( Vector3f::ZERO );
+    auto uniform = crimild::alloc< UniformBuffer >( Vector3f::Constants::ZERO );
 
     ASSERT_NE( nullptr, uniform->getBufferView() );
     ASSERT_EQ( 3 * sizeof( crimild::Real32 ), uniform->getBufferView()->getLength() );
 
-    ASSERT_EQ( Vector3f::ZERO, uniform->getValue< Vector3f >() );
+    ASSERT_EQ( Vector3f::Constants::ZERO, uniform->getValue< Vector3f >() );
 
     uniform->setValue( Vector3f( 1.0f, 2.0f, 3.0f ) );
 
@@ -52,7 +56,7 @@ TEST( UniformBuffer, withStruct )
     struct Data {
         Matrix4f proj;
         Matrix4f view;
-        RGBAColorf color;
+        ColorRGBA color;
         float weights;
         Vector2i indices;
     };
@@ -62,7 +66,7 @@ TEST( UniformBuffer, withStruct )
     ASSERT_NE( nullptr, uniform->getBufferView() );
     ASSERT_EQ( sizeof( Data ), uniform->getBufferView()->getLength() );
 
-    uniform->getValue< Data >().color = RGBAColorf( 1.0f, 0.0f, 1.0f, 0.5f );
+    uniform->getValue< Data >().color = ColorRGBA( 1.0f, 0.0f, 1.0f, 0.5f );
 
-    ASSERT_EQ( RGBAColorf( 1.0f, 0.0f, 1.0f, 0.5f ), uniform->getValue< Data >().color );
+    ASSERT_EQ( ColorRGBA( 1.0f, 0.0f, 1.0f, 0.5f ), uniform->getValue< Data >().color );
 }

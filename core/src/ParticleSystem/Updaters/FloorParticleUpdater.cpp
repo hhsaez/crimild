@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -31,21 +31,20 @@ using namespace crimild;
 
 FloorParticleUpdater::FloorParticleUpdater( void )
 {
-
 }
 
 FloorParticleUpdater::~FloorParticleUpdater( void )
 {
-
 }
 
 void FloorParticleUpdater::configure( Node *node, ParticleData *particles )
 {
-	_positions = particles->createAttribArray< Vector3f >( ParticleAttrib::POSITION );
+    _positions = particles->createAttribArray< Vector3f >( ParticleAttrib::POSITION );
 }
 
 void FloorParticleUpdater::update( Node *node, double dt, ParticleData *particles )
 {
+    /*
     const auto count = particles->getAliveCount();
 
 	auto ps = _positions->getData< Vector3f >();
@@ -55,15 +54,15 @@ void FloorParticleUpdater::update( Node *node, double dt, ParticleData *particle
             ps[ i ].y() = 0.0f;
         }
     }
+    */
 }
 
-void FloorParticleUpdater::encode( coding::Encoder &encoder ) 
+void FloorParticleUpdater::encode( coding::Encoder &encoder )
 {
-	ParticleSystemComponent::ParticleUpdater::encode( encoder );
+    ParticleSystemComponent::ParticleUpdater::encode( encoder );
 }
 
 void FloorParticleUpdater::decode( coding::Decoder &decoder )
 {
-	ParticleSystemComponent::ParticleUpdater::decode( decoder );
+    ParticleSystemComponent::ParticleUpdater::decode( decoder );
 }
-

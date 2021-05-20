@@ -80,32 +80,6 @@ namespace crimild {
         std::array< T, N > m_table;
     };
 
-    [[nodiscard]] constexpr UInt64 factorial( UInt64 N ) noexcept
-    {
-        if ( N == 0 ) {
-            return 1;
-        }
-
-        auto ret = UInt64( 1 );
-        for ( auto i = UInt64( 1 ); i <= N; ++i ) {
-            ret *= i;
-        }
-        return ret;
-    }
-
-    [[nodiscard]] constexpr Real pow( Real base, Int exp ) noexcept
-    {
-        auto ret = Real( 1 );
-        for ( auto i = Int( 0 ); i < exp; ++i ) {
-            ret *= base;
-        }
-        return ret;
-    }
-
-    [[nodiscard]] Real pow( Real base, Real exp ) noexcept
-    {
-        return std::pow( base, exp );
-    }
 }
 
 TEST( Utils, factorial )

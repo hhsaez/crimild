@@ -34,31 +34,31 @@ using namespace crimild::messaging;
 
 Input::Input( void )
 {
-	reset( CRIMILD_INPUT_KEY_LAST, CRIMILD_INPUT_MOUSE_BUTTON_LAST );
+    reset( CRIMILD_INPUT_KEY_LAST, CRIMILD_INPUT_MOUSE_BUTTON_LAST );
 
-	auto self = this;
+    auto self = this;
 
-	registerMessageHandler< KeyPressed >( [self]( KeyPressed const &msg ) {
-		int key = msg.key;
-		self->_keys[ key ] = true;
-	});
+    registerMessageHandler< KeyPressed >( [ self ]( KeyPressed const &msg ) {
+        int key = msg.key;
+        self->_keys[ key ] = true;
+    } );
 
-	registerMessageHandler< KeyReleased >( [self]( KeyReleased const &msg ) {
-		int key = msg.key;
-		self->_keys[ key ] = false;
-	});
+    registerMessageHandler< KeyReleased >( [ self ]( KeyReleased const &msg ) {
+        int key = msg.key;
+        self->_keys[ key ] = false;
+    } );
 
-	registerMessageHandler< MouseButtonDown >( [self]( MouseButtonDown const &msg ) {
-		int button = msg.button;
-		self->_mouseButtons[ button ] = true;
-	});
+    registerMessageHandler< MouseButtonDown >( [ self ]( MouseButtonDown const &msg ) {
+        int button = msg.button;
+        self->_mouseButtons[ button ] = true;
+    } );
 
-	registerMessageHandler< MouseButtonUp >( [self]( MouseButtonUp const &msg ) {
-		int button = msg.button;
-		self->_mouseButtons[ button ] = false;
-	});
+    registerMessageHandler< MouseButtonUp >( [ self ]( MouseButtonUp const &msg ) {
+        int button = msg.button;
+        self->_mouseButtons[ button ] = false;
+    } );
 
-	registerMessageHandler< MouseMotion >( [self]( MouseMotion const &msg ) {
+    registerMessageHandler< MouseMotion >( [ self ]( MouseMotion const &msg ) {
         Vector2f pos( msg.x, msg.y );
         self->_mouseDelta = pos - self->_mousePos;
         self->_mousePos = pos;
@@ -66,43 +66,42 @@ Input::Input( void )
         Vector2f npos( msg.nx, msg.ny );
         self->_normalizedMouseDelta = npos - self->_normalizedMousePos;
         self->_normalizedMousePos = npos;
-	});
+    } );
 
     registerMessageHandler< MouseScroll >( [ this ]( MouseScroll const &msg ) {
         _mouseScrollDelta = Vector2f( msg.dx, msg.dy );
-    });
+    } );
 
-	setAxis( AXIS_HORIZONTAL, 0.0f );
-	setAxis( AXIS_VERTICAL, 0.0f );
+    setAxis( AXIS_HORIZONTAL, 0.0f );
+    setAxis( AXIS_VERTICAL, 0.0f );
 }
 
 Input::~Input( void )
 {
-
 }
 
 void Input::reset( void )
 {
-	reset( _keys.size(), _mouseButtons.size() );
+    reset( _keys.size(), _mouseButtons.size() );
 }
 
 void Input::reset( int keyCount, int mouseButtonCount )
 {
-	_keys.resize( keyCount );
-	for ( int i = 0; i < keyCount; i++ ) {
-		_keys[ i ] = false;
-	}
+    _keys.resize( keyCount );
+    for ( int i = 0; i < keyCount; i++ ) {
+        _keys[ i ] = false;
+    }
 
-	_mousePos = Vector2f( 0.0f, 0.0f );
-	_mouseDelta = Vector2f( 0.0f, 0.0f );
-	_normalizedMousePos = Vector2f( 0.0f, 0.0f );
-	_normalizedMouseDelta = Vector2f( 0.0f, 0.0f );
-    _mouseScrollDelta = Vector2f::ZERO;
+    _mousePos = Vector2f( 0.0f, 0.0f );
+    _mouseDelta = Vector2f( 0.0f, 0.0f );
+    _normalizedMousePos = Vector2f( 0.0f, 0.0f );
+    _normalizedMouseDelta = Vector2f( 0.0f, 0.0f );
+    _mouseScrollDelta = Vector2f::Constants::ZERO;
 
-	_mouseButtons.resize( mouseButtonCount );
-	for ( int i = 0; i < mouseButtonCount; i++ ) {
-		_mouseButtons[ i ] = false;
-	}
+    _mouseButtons.resize( mouseButtonCount );
+    for ( int i = 0; i < mouseButtonCount; i++ ) {
+        _mouseButtons[ i ] = false;
+    }
 
     _mouseCursorMode = MouseCursorMode::NORMAL;
 }

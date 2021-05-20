@@ -51,7 +51,7 @@ UnlitMaterial::UnlitMaterial( void ) noexcept
             descriptors->descriptors = {
                 {
                     .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                    .obj = crimild::alloc< UniformBuffer >( RGBAColorf::ONE ),
+                    .obj = crimild::alloc< UniformBuffer >( ColorRGBA::Constants::WHITE ),
                 },
                 {
                     .descriptorType = DescriptorType::TEXTURE,
@@ -62,14 +62,14 @@ UnlitMaterial::UnlitMaterial( void ) noexcept
         }() );
 }
 
-void UnlitMaterial::setColor( const RGBAColorf &color ) noexcept
+void UnlitMaterial::setColor( const ColorRGBA &color ) noexcept
 {
     getDescriptors()->descriptors[ 0 ].get< UniformBuffer >()->setValue( color );
 }
 
-RGBAColorf UnlitMaterial::getColor( void ) const noexcept
+ColorRGBA UnlitMaterial::getColor( void ) const noexcept
 {
-    return getDescriptors()->descriptors[ 0 ].get< UniformBuffer >()->getValue< RGBAColorf >();
+    return getDescriptors()->descriptors[ 0 ].get< UniformBuffer >()->getValue< ColorRGBA >();
 }
 
 void UnlitMaterial::setTexture( SharedPointer< Texture > const &texture ) noexcept

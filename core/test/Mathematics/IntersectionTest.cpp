@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -33,6 +33,7 @@ using namespace crimild;
 
 TEST( IntersectionTest, testRaySphere )
 {
+#if 0
 	Sphere3f s0( Vector3f( 0.0f, 0.0f, 0.0f ), 2.0f );
 	Ray3f r0( Vector3f( 0.0f, 0.0f, -5.0f ), Vector3f( 0.0f, 0.0f, -1.0f ) );
 	Ray3f r1( Vector3f( 0.0f, 0.0f, -5.0f ), Vector3f( 0.0f, 0.0f, 1.0f ) );
@@ -46,10 +47,14 @@ TEST( IntersectionTest, testRaySphere )
 
 	EXPECT_TRUE( Intersection::test( sphere1, ray ) );
 	EXPECT_FALSE( Intersection::test( sphere2, ray ) );
+#endif
+
+    FAIL();
 }
 
 TEST( IntersectionTest, testRayPlane )
 {
+#if 0
 	Vector< 3, double > rayOrigin;
 	rayOrigin[ 0 ] = 0.0;
 	rayOrigin[ 1 ] = 0.0;
@@ -80,10 +85,15 @@ TEST( IntersectionTest, testRayPlane )
 
 	EXPECT_TRUE( Intersection::test( plane, ray ) == false );
 	EXPECT_TRUE( Intersection::find( plane, ray ) < 0 );
+
+#endif
+
+    FAIL();
 }
 
 TEST( IntersectionTest, testRayTriangle )
 {
+#if 0
 	// TODO
 	Vector< 3, double > p0, p1, p2;
 	Vector< 3, double > rOrigin, rDirection;
@@ -115,5 +125,8 @@ TEST( IntersectionTest, testRayTriangle )
 	ray.getOrigin()[ 2 ] = 5.0;
 
 	//EXPECT_TRUE( Intersection::test( ray, p0, p1, p2 ) == false );
-}
 
+#endif
+
+    FAIL();
+}

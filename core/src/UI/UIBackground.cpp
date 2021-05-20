@@ -26,67 +26,67 @@
  */
 
 #include "UIBackground.hpp"
-#include "UIFrame.hpp"
 
+#include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
 #include "Components/MaterialComponent.hpp"
 #include "Primitives/QuadPrimitive.hpp"
 #include "Rendering/Material.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Group.hpp"
 #include "Simulation/AssetManager.hpp"
-#include "Coding/Decoder.hpp"
-#include "Coding/Encoder.hpp"
+#include "UIFrame.hpp"
 
 using namespace crimild;
 using namespace crimild::ui;
 
-UIBackground::UIBackground( const RGBAColorf &color )
-	: _knownExtensions( 0, 0, 0, 0 )
+UIBackground::UIBackground( const ColorRGBA &color )
+    : _knownExtensions( 0, 0, 0, 0 )
 {
-	_geometry = crimild::alloc< Geometry >();
+    _geometry = crimild::alloc< Geometry >();
     _geometry->setCullMode( Node::CullMode::NEVER );
 
-	_material = crimild::alloc< Material >();
-	_material->setDiffuse( color );
-	//_material->setDepthState( DepthState::DISABLED );
-	_geometry->getComponent< MaterialComponent >()->attachMaterial( _material );
+    _material = crimild::alloc< Material >();
+    _material->setDiffuse( color );
+    //_material->setDepthState( DepthState::DISABLED );
+    _geometry->getComponent< MaterialComponent >()->attachMaterial( _material );
 }
 
 void UIBackground::setBackgroundImage( SharedPointer< Texture > const &texture )
 {
-	_material->setColorMap( texture );
+    _material->setColorMap( texture );
 }
 
 void UIBackground::onAttach( void )
 {
-	getNode< Group >()->attachNode( _geometry );
+    getNode< Group >()->attachNode( _geometry );
 }
 
 void UIBackground::update( const Clock & )
 {
-	auto frame = getComponent< UIFrame >()->getExtensions();
-	auto w = frame.getWidth();
-	auto h = frame.getHeight();
+    auto frame = getComponent< UIFrame >()->getExtensions();
+    auto w = frame.getWidth();
+    auto h = frame.getHeight();
 
-	if ( _knownExtensions.getWidth() != w || _knownExtensions.getHeight() != h ) {
-		_geometry->detachAllPrimitives();
+    if ( _knownExtensions.getWidth() != w || _knownExtensions.getHeight() != h ) {
+        _geometry->detachAllPrimitives();
         //_geometry->attachPrimitive( crimild::alloc< QuadPrimitive >( w, h, VertexFormat::VF_P3_UV2 ) );
 
-		_knownExtensions = frame;
-	}
+        _knownExtensions = frame;
+    }
 }
 
 void UIBackground::decode( coding::Decoder &decoder )
 {
-	NodeComponent::decode( decoder );
+    NodeComponent::decode( decoder );
 
-	auto color = RGBAColorf::ONE;
-	decoder.decode( "color", color );
-	_material->setDiffuse( color );
+    auto color = ColorRGBA::Constants::WHITE;
+    decoder.decode( "color", color );
+    _material->setDiffuse( color );
 
-	std::string image;
-	decoder.decode( "image", image );
-	if ( image.size() > 0 ) {
-		_material->setColorMap( AssetManager::getInstance()->get< Texture >( image ) );
-	}
+    std::string image;
+    decoder.decode( "image", image );
+    if ( image.size() > 0 ) {
+        _material->setColorMap( AssetManager::getInstance()->get< Texture >( image ) );
+    }
 }

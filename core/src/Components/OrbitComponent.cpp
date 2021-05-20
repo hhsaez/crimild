@@ -27,57 +27,55 @@
 
 #include "OrbitComponent.hpp"
 
+#include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
 #include "Mathematics/Numeric.hpp"
 #include "SceneGraph/Node.hpp"
-#include "Coding/Encoder.hpp"
-#include "Coding/Decoder.hpp"
 
 using namespace crimild;
 
 OrbitComponent::OrbitComponent( float x0, float y0, float major, float minor, float speed, float gamma )
 {
-	_t = 0.0f;
-	_x0 = x0;
-	_y0 = y0;
-	_major = major;
-	_minor = minor;
-	_speed = speed;
-	_gamma = gamma;
-}
-
-OrbitComponent::~OrbitComponent( void )
-{
-
+    _t = 0.0f;
+    _x0 = x0;
+    _y0 = y0;
+    _major = major;
+    _minor = minor;
+    _speed = speed;
+    _gamma = gamma;
 }
 
 void OrbitComponent::update( const Clock &c )
 {
-    getNode()->local().translate()[0] = _x0 + _major * std::cos( _t ) * std::cos( _gamma ) - _minor * std::sin( _t ) * std::sin( _gamma );
-    getNode()->local().translate()[1] = _y0 + _major * std::cos( _t ) * std::sin( _gamma ) + _minor * std::sin( _t ) * std::cos( _gamma );
+    /*
+    getNode()->local().translate()[ 0 ] = _x0 + _major * std::cos( _t ) * std::cos( _gamma ) - _minor * std::sin( _t ) * std::sin( _gamma );
+    getNode()->local().translate()[ 1 ] = _y0 + _major * std::cos( _t ) * std::sin( _gamma ) + _minor * std::sin( _t ) * std::cos( _gamma );
 
-	_t += _speed * c.getDeltaTime();
+    _t += _speed * c.getDeltaTime();
+    */
+    assert( false );
 }
 
 void OrbitComponent::encode( coding::Encoder &encoder )
 {
-	NodeComponent::encode( encoder );
+    NodeComponent::encode( encoder );
 
-	encoder.encode( "x0", _x0 );
-	encoder.encode( "y0", _y0 );
-	encoder.encode( "major", _major );
-	encoder.encode( "minor", _minor );
-	encoder.encode( "speed", _speed );
-	encoder.encode( "gamma", _gamma );
+    encoder.encode( "x0", _x0 );
+    encoder.encode( "y0", _y0 );
+    encoder.encode( "major", _major );
+    encoder.encode( "minor", _minor );
+    encoder.encode( "speed", _speed );
+    encoder.encode( "gamma", _gamma );
 }
 
 void OrbitComponent::decode( coding::Decoder &decoder )
 {
-	NodeComponent::decode( decoder );
+    NodeComponent::decode( decoder );
 
-	decoder.decode( "x0", _x0 );
-	decoder.decode( "y0", _y0 );
-	decoder.decode( "major", _major );
-	decoder.decode( "minor", _minor );
-	decoder.decode( "speed", _speed );
-	decoder.decode( "gamma", _gamma );
+    decoder.decode( "x0", _x0 );
+    decoder.decode( "y0", _y0 );
+    decoder.decode( "major", _major );
+    decoder.decode( "minor", _minor );
+    decoder.decode( "speed", _speed );
+    decoder.decode( "gamma", _gamma );
 }

@@ -28,11 +28,11 @@
 #ifndef CRIMILD_MATHEMATICS_NUMERIC_
 #define CRIMILD_MATHEMATICS_NUMERIC_
 
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
-#include <cmath>
-#include <random>
 #include <limits>
+#include <random>
 
 namespace crimild {
 
@@ -204,12 +204,12 @@ namespace crimild {
 
         static PRECISION log( PRECISION n )
         {
-            return ( PRECISION ) ::log( n );
+            return ( PRECISION )::log( n );
         }
 
         static PRECISION log2( PRECISION n )
         {
-            return ( PRECISION ) ::log2( n );
+            return ( PRECISION )::log2( n );
         }
 
         static PRECISION ceil( double n )
@@ -239,27 +239,41 @@ namespace crimild {
         {
             return remap( -1.0, 1.0, y0, y1, sin( t ) );
         }
-
     };
 
-    template< typename T > const T Numeric< T >::ZERO_TOLERANCE = static_cast< T >( 1e-06 );
-    template< typename T > const T Numeric< T >::PI = static_cast< T >( 3.1415926535897932384626433832795 );
-    template< typename T > const T Numeric< T >::HALF_PI = static_cast< T >( 3.1415926535897932384626433832795 / 2.0 );
-    template< typename T > const T Numeric< T >::TWO_PI = static_cast< T >( 3.1415926535897932384626433832795 * 2 );
-    template< typename T > const T Numeric< T >::SQRT_TWO = static_cast< T >( std::sqrt( 2 ) );
-    template< typename T > const T Numeric< T >::SQRT_TWO_DIV_TWO = static_cast< T >( 0.5 * Numeric< double >::sqrt( 2 ) );
+    template< typename T >
+    const T Numeric< T >::ZERO_TOLERANCE = static_cast< T >( 1e-06 );
+    template< typename T >
+    const T Numeric< T >::PI = static_cast< T >( 3.1415926535897932384626433832795 );
+    template< typename T >
+    const T Numeric< T >::HALF_PI = static_cast< T >( 3.1415926535897932384626433832795 / 2.0 );
+    template< typename T >
+    const T Numeric< T >::TWO_PI = static_cast< T >( 3.1415926535897932384626433832795 * 2 );
+    template< typename T >
+    const T Numeric< T >::SQRT_TWO = static_cast< T >( std::sqrt( 2 ) );
+    template< typename T >
+    const T Numeric< T >::SQRT_TWO_DIV_TWO = static_cast< T >( 0.5 * Numeric< double >::sqrt( 2 ) );
 
-    template< typename T > const T Numeric< T >::DEG_TO_RAD = static_cast< T >( 3.1415926535897932384626433832795 / 180.0 );
-    template< typename T > const T Numeric< T >::RAD_TO_DEG = static_cast< T >( 180.0 / 3.1415926535897932384626433832795 );
+    template< typename T >
+    const T Numeric< T >::DEG_TO_RAD = static_cast< T >( 3.1415926535897932384626433832795 / 180.0 );
+    template< typename T >
+    const T Numeric< T >::RAD_TO_DEG = static_cast< T >( 180.0 / 3.1415926535897932384626433832795 );
 
-    template< typename T > const T Numeric< T >::COS_0 = static_cast< T >( 1.0 );
-    template< typename T > const T Numeric< T >::COS_45 = static_cast< T >( 0.5 * Numeric< double >::sqrt( 2.0 ) );
-    template< typename T > const T Numeric< T >::COS_90 = static_cast< T >( 0.0 );
-    template< typename T > const T Numeric< T >::COS_135 = static_cast< T >( -0.5 * Numeric< double >::sqrt( 2.0 ) );
-    template< typename T > const T Numeric< T >::COS_180 = static_cast< T >( -1.0 );
+    template< typename T >
+    const T Numeric< T >::COS_0 = static_cast< T >( 1.0 );
+    template< typename T >
+    const T Numeric< T >::COS_45 = static_cast< T >( 0.5 * Numeric< double >::sqrt( 2.0 ) );
+    template< typename T >
+    const T Numeric< T >::COS_90 = static_cast< T >( 0.0 );
+    template< typename T >
+    const T Numeric< T >::COS_135 = static_cast< T >( -0.5 * Numeric< double >::sqrt( 2.0 ) );
+    template< typename T >
+    const T Numeric< T >::COS_180 = static_cast< T >( -1.0 );
 
-	template< typename T > const T Numeric< T >::POSITIVE_INFINITY = std::numeric_limits< T >::max();
-	template< typename T > const T Numeric< T >::NEGATIVE_INFINITY = std::numeric_limits< T >::min();
+    template< typename T >
+    const T Numeric< T >::POSITIVE_INFINITY = std::numeric_limits< T >::max();
+    template< typename T >
+    const T Numeric< T >::NEGATIVE_INFINITY = std::numeric_limits< T >::min();
 
     typedef Numeric< int > Numerici;
     typedef Numeric< float > Numericf;

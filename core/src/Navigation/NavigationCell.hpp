@@ -50,7 +50,7 @@ namespace crimild {
 
             inline const Vector3f getNormal( void ) const { return _normal; }
 
-            inline const Plane3f getPlane( void ) const { return _plane; }
+            inline const Plane3 getPlane( void ) const { return _plane; }
 
             void addEdge( NavigationCellEdgePtr const &e ) { _edges.push_back( e ); }
 
@@ -66,7 +66,7 @@ namespace crimild {
             Vector3f _vertices[ 3 ];
             Vector3f _normal;
             Vector3f _center;
-            Plane3f _plane;
+            Plane3 _plane;
 
             std::vector< NavigationCellEdgePtr > _edges;
 
@@ -77,7 +77,7 @@ namespace crimild {
                 NONE
             };
 
-            ClassificationResult classifyPath( const LineSegment3f &motionPath, Vector3f &intersectionPoint, NavigationCellEdge **intersectionEdge );
+            ClassificationResult classifyPath( const LineSegment3 &motionPath, Vector3f &intersectionPoint, NavigationCellEdge **intersectionEdge );
 
             Vector3f snapPoint( const Vector3f &point );
         };

@@ -53,18 +53,20 @@ Vector3f TrefoilKnotPrimitive::evaluate( const Vector2f &domain ) const
     float y = r * sin( u );
     float z = c * sin( 1.5f * u );
 
-    Vector3f dv;
-    dv[ 0 ] = -1.5f * b * sin( 1.5f * u ) * cos( u ) - ( a + b * cos( 1.5f * u ) ) * sin( u );
-    dv[ 1 ] = -1.5f * b * sin( 1.5f * u ) * sin( u ) + ( a + b * cos( 1.5f * u ) ) * cos( u );
-    dv[ 2 ] = 1.5f * c * cos( 1.5f * u );
+    Vector3f dv = {
+        -1.5f * b * sin( 1.5f * u ) * cos( u ) - ( a + b * cos( 1.5f * u ) ) * sin( u ),
+        -1.5f * b * sin( 1.5f * u ) * sin( u ) + ( a + b * cos( 1.5f * u ) ) * cos( u ),
+        1.5f * c * cos( 1.5f * u ),
+    };
 
-    Vector3f q = dv.getNormalized();
-    Vector3f qvn = Vector3f( q[ 1 ], -q[ 0 ], 0.0f).getNormalized();
-    Vector3f ww = q ^ qvn;
+    Vector3f q = normalize( dv );
+    Vector3f qvn = normalize( Vector3f( q[ 1 ], -q[ 0 ], 0.0f ) );
+    Vector3f ww = cross( q, qvn );
 
-    Vector3f range;
-    range[ 0 ] = x + d * ( qvn[ 0 ] * cos( v ) + ww[ 0 ] * sin( v ) );
-    range[ 1 ] = y + d * ( qvn[ 1 ] * cos( v ) + ww[ 1 ] * sin( v ) );
-    range[ 2 ] = z + d * ww[ 2 ] * sin( v );
+    Vector3f range = {
+        x + d * ( qvn[ 0 ] * cos( v ) + ww[ 0 ] * sin( v ) ),
+        y + d * ( qvn[ 1 ] * cos( v ) + ww[ 1 ] * sin( v ) ),
+        z + d * ww[ 2 ] * sin( v ),
+    };
     return range * _scale;
 }

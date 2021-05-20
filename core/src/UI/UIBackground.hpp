@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002-present, H. Hernán Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -29,41 +29,40 @@
 #define CRIMILD_UI_BACKGROUND_
 
 #include "Components/NodeComponent.hpp"
+#include "Mathematics/ColorRGBA.hpp"
 #include "Mathematics/Rect.hpp"
 
 namespace crimild {
 
-	class Geometry;
-	class Material;
-	class Texture;
+    class Geometry;
+    class Material;
+    class Texture;
 
-	namespace ui {
+    namespace ui {
 
-		class UIBackground : public NodeComponent {
-			CRIMILD_IMPLEMENT_RTTI( crimild::ui::UIBackground )
-		public:
-			UIBackground( const RGBAColorf &color = RGBAColorf( 1.0f, 1.0f, 1.0f, 1.0f ) );
-			~UIBackground( void ) = default;
+        class UIBackground : public NodeComponent {
+            CRIMILD_IMPLEMENT_RTTI( crimild::ui::UIBackground )
+        public:
+            UIBackground( const ColorRGBA &color = ColorRGBA( 1.0f, 1.0f, 1.0f, 1.0f ) );
+            ~UIBackground( void ) = default;
 
-			void onAttach( void ) override;
+            void onAttach( void ) override;
 
-			void update( const Clock & ) override;
+            void update( const Clock & ) override;
 
-			void setBackgroundImage( SharedPointer< Texture > const &texture );
+            void setBackgroundImage( SharedPointer< Texture > const &texture );
 
-		private:
-			SharedPointer< Geometry > _geometry;
-			SharedPointer< Material > _material;
-			Rectf _knownExtensions;
+        private:
+            SharedPointer< Geometry > _geometry;
+            SharedPointer< Material > _material;
+            Rectf _knownExtensions;
 
-		public:
-			void decode( coding::Decoder &decoder ) override;
-		};
+        public:
+            void decode( coding::Decoder &decoder ) override;
+        };
 
-	}
+    }
 
 }
 
 #endif
-
-

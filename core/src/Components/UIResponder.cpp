@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -27,42 +27,36 @@
 
 #include "UIResponder.hpp"
 
-#include "SceneGraph/Node.hpp"
-
 #include "Debug/DebugRenderHelper.hpp"
+#include "SceneGraph/Node.hpp"
 
 using namespace crimild;
 
 UIResponder::UIResponder( CallbackType callback )
-	: UIResponder( callback, nullptr )
+    : UIResponder( callback, nullptr )
 {
-
 }
 
 UIResponder::UIResponder( CallbackType callback, BoundingVolume *boundingVolume )
-	: _callback( callback )
+    : _callback( callback )
 {
     setBoundingVolume( boundingVolume );
 }
 
 UIResponder::~UIResponder( void )
 {
-
 }
 
 void UIResponder::onAttach( void )
 {
-
 }
 
 void UIResponder::onDetach( void )
 {
-
 }
 
 void UIResponder::start( void )
 {
-
 }
 
 crimild::BoundingVolume *UIResponder::getBoundingVolume( void )
@@ -70,7 +64,7 @@ crimild::BoundingVolume *UIResponder::getBoundingVolume( void )
     if ( _boundingVolume != nullptr ) {
         return crimild::get_ptr( _boundingVolume );
     }
-    
+
     return getNode()->worldBound();
 }
 
@@ -79,27 +73,27 @@ void UIResponder::setBoundingVolume( crimild::BoundingVolume *boundingVolume )
     _boundingVolume = crimild::retain( boundingVolume );
 }
 
-void UIResponder::setBoundingVolume( const SharedPointer<BoundingVolume> &volume )
+void UIResponder::setBoundingVolume( const SharedPointer< BoundingVolume > &volume )
 {
     _boundingVolume = volume;
 }
 
-bool UIResponder::testIntersection( const Ray3f &ray )
+bool UIResponder::testIntersection( const Ray3 &ray )
 {
-	if ( getBoundingVolume() != nullptr ) {
-		return getBoundingVolume()->testIntersection( ray );
-	}
+    if ( getBoundingVolume() != nullptr ) {
+        return getBoundingVolume()->testIntersection( ray );
+    }
 
-	return getNode()->getWorldBound()->testIntersection( ray );
+    return getNode()->getWorldBound()->testIntersection( ray );
 }
 
 bool UIResponder::invoke( void )
 {
-	if ( _callback != nullptr ) {
-		return _callback( getNode() );
-	}
+    if ( _callback != nullptr ) {
+        return _callback( getNode() );
+    }
 
-	return false;
+    return false;
 }
 
 void UIResponder::renderDebugInfo( Renderer *renderer, Camera *camera )
@@ -133,4 +127,3 @@ void UIResponder::renderDebugInfo( Renderer *renderer, Camera *camera )
 	DebugRenderHelper::renderLines( renderer, camera, lines, 12 * 2, RGBAColorf( 1.0f, 1.0f, 0.0f, 1.0f ) );
      */
 }
-

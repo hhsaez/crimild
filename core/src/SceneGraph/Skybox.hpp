@@ -28,6 +28,7 @@
 #ifndef CRIMILD_SCENE_GRAPH_SKYBOX_NODE_
 #define CRIMILD_SCENE_GRAPH_SKYBOX_NODE_
 
+#include "Mathematics/ColorRGB.hpp"
 #include "SceneGraph/Geometry.hpp"
 
 namespace crimild {
@@ -39,7 +40,7 @@ namespace crimild {
 
     public:
         Skybox( void ) = default;
-        explicit Skybox( const RGBColorf &color ) noexcept;
+        explicit Skybox( const ColorRGB &color ) noexcept;
         explicit Skybox( SharedPointer< Texture > const &cubemap ) noexcept;
         virtual ~Skybox( void ) = default;
 

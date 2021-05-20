@@ -34,7 +34,6 @@ ParametricPrimitive::ParametricPrimitive( const Params &params ) noexcept
       _layout( params.layout ),
       _colorMode( params.colorMode )
 {
-
 }
 
 void ParametricPrimitive::setInterval( const ParametricInterval &interval )
@@ -70,8 +69,7 @@ void ParametricPrimitive::generate( void )
     generateVertexBuffer();
     if ( getType() == Primitive::Type::LINES ) {
         generateLineIndexBuffer();
-    }
-    else {
+    } else {
         generateTriangleIndexBuffer();
     }
 }
@@ -83,7 +81,7 @@ void ParametricPrimitive::generateVertexBuffer( void )
     auto vertices = crimild::alloc< VertexBuffer >( layout, getVertexCount() );
     auto positions = vertices->get( VertexAttribute::Name::POSITION );
     auto colors = layout.hasAttribute( VertexAttribute::Name::COLOR ) ? vertices->get( VertexAttribute::Name::COLOR ) : nullptr;
-    auto normals = layout.hasAttribute( VertexAttribute::Name::NORMAL ) ?  vertices->get( VertexAttribute::Name::NORMAL ) : nullptr;
+    auto normals = layout.hasAttribute( VertexAttribute::Name::NORMAL ) ? vertices->get( VertexAttribute::Name::NORMAL ) : nullptr;
     auto texCoords = layout.hasAttribute( VertexAttribute::Name::TEX_COORD ) ? vertices->get( VertexAttribute::Name::TEX_COORD ) : nullptr;
 
     for ( auto i = 0l; i < _divisions[ 1 ]; i++ ) {
@@ -100,31 +98,33 @@ void ParametricPrimitive::generateVertexBuffer( void )
                 float t = i;
 
                 // nudge the point if the normal is indeterminate
-                if ( j == 0 ) s += 0.01f;
-                if ( j == _divisions[ 0 ] - 1 ) s -= 0.01f;
-                if ( i == 0 ) t += 0.01f;
-                if ( i == _divisions[ 1 ] - 1 ) t -= 0.01f;
+                if ( j == 0 )
+                    s += 0.01f;
+                if ( j == _divisions[ 0 ] - 1 )
+                    s -= 0.01f;
+                if ( i == 0 )
+                    t += 0.01f;
+                if ( i == _divisions[ 1 ] - 1 )
+                    t -= 0.01f;
 
                 // compute the tangents and their cross product
                 Vector3f p = evaluate( computeDomain( s, t ) );
                 Vector3f u = evaluate( computeDomain( s + 0.01f, t ) ) - p;
                 Vector3f v = evaluate( computeDomain( s, t + 0.01f ) ) - p;
-                Vector3f normal = u ^ v;
-                normal.normalize();
+                Vector3f normal = normalize( cross( u, v ) );
                 if ( invertNormal( domain ) ) {
-                    normal -= normal;
+                    normal = -normal;
                 }
 
                 normals->set( vIdx, normal );
             }
 
             if ( colors != nullptr ) {
-                auto color = RGBColorf::ONE;
+                auto color = ColorRGB::Constants::WHITE;
                 if ( _colorMode.type == ColorMode::Type::CONSTANT ) {
                     color = _colorMode.color;
-                }
-                else if ( _colorMode.type == ColorMode::Type::POSITIONS ) {
-                    color = 0.5f * ( Vector3f::ONE + range.getNormalized() );
+                } else if ( _colorMode.type == ColorMode::Type::POSITIONS ) {
+                    color = 0.5f * ( ColorRGB::Constants::WHITE + ColorRGB( normalize( range ) ) );
                 }
                 colors->set( vIdx, color );
             }

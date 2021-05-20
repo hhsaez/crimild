@@ -26,28 +26,26 @@
  */
 
 #include "UIFrame.hpp"
-#include "UIFrameConstraint.hpp"
-#include "UIFrameConstraintMaker.hpp"
 
-#include "SceneGraph/Node.hpp"
-#include "SceneGraph/Group.hpp"
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
+#include "SceneGraph/Group.hpp"
+#include "SceneGraph/Node.hpp"
+#include "UIFrameConstraint.hpp"
+#include "UIFrameConstraintMaker.hpp"
 
 using namespace crimild;
 using namespace crimild::ui;
 
 UIFrame::UIFrame( void )
-	: UIFrame( Rectf( 0.0f, 0.0f, 1.0f, 1.0f ) )
+    : UIFrame( Rectf( 0.0f, 0.0f, 1.0f, 1.0f ) )
 {
-
 }
 
 UIFrame::UIFrame( const Rectf &extensions )
-	: _extensions( extensions ),
-	  _constraintMaker( this )
+    : _extensions( extensions ),
+      _constraintMaker( this )
 {
-
 }
 
 void UIFrame::start( void )
@@ -57,25 +55,26 @@ void UIFrame::start( void )
     // sort constraints by priority/type
     _constraints.sort( []( const SharedPointer< UIFrameConstraint > &lhs, const SharedPointer< UIFrameConstraint > &rhs ) {
         return static_cast< int >( lhs->getType() ) < static_cast< int >( rhs->getType() );
-    });
+    } );
 }
 
 void UIFrame::update( const Clock & )
 {
-	UIFrame *parentFrame = nullptr;
-	if ( auto parent = getNode()->getParent() ) {
-		parentFrame = parent->getComponent< UIFrame >();
-	}
+    UIFrame *parentFrame = nullptr;
+    if ( auto parent = getNode()->getParent() ) {
+        parentFrame = parent->getComponent< UIFrame >();
+    }
 
     if ( auto pf = parentFrame ) {
         _extensions = Rectf( 0, 0, pf->getExtensions().getWidth(), pf->getExtensions().getHeight() );
     }
 
     _constraints.each( [ this, parentFrame ]( SharedPointer< UIFrameConstraint > const &c ) {
-		c->apply( this, parentFrame );
-	});
+        c->apply( this, parentFrame );
+    } );
 
-	if ( parentFrame != nullptr ) {
+    if ( parentFrame != nullptr ) {
+        /*
 		const auto &frame = getExtensions();
 		auto w = frame.getWidth();
 		auto h = frame.getHeight();
@@ -85,47 +84,48 @@ void UIFrame::update( const Clock & )
 		auto x = frame.getX() + 0.5f * ( -pW + w );
 		auto y = -frame.getY() + 0.5f * ( pH - h );
 		getNode()->local().setTranslate( Vector3f( x, y, 0.01f + _zIndex ) );
-	}
+        */
+    }
 }
 
 UIFrame *UIFrame::clearConstraints( void )
 {
-	_constraints.clear();
-	return this;
+    _constraints.clear();
+    return this;
 }
 
 UIFrame *UIFrame::addConstraint( SharedPointer< UIFrameConstraint > const &constraint )
 {
     _constraints.add( constraint );
-	return this;
+    return this;
 }
 
 UIFrameConstraint *UIFrame::getConstraint( UIFrameConstraint::Type type )
 {
-	UIFrameConstraint *ret = nullptr;
+    UIFrameConstraint *ret = nullptr;
 
     _constraints.each( [ &ret, type ]( SharedPointer< UIFrameConstraint > const &c ) {
-		if ( c->getType() == type ) {
+        if ( c->getType() == type ) {
             ret = crimild::get_ptr( c );
-		}
-	});
+        }
+    } );
 
-	return ret;
+    return ret;
 }
 
 UIFrameConstraintMaker *UIFrame::pin( void )
 {
-	clearConstraints();
-	return &_constraintMaker;
+    clearConstraints();
+    return &_constraintMaker;
 }
 
 void UIFrame::decode( coding::Decoder &decoder )
 {
-	NodeComponent::decode( decoder );
+    NodeComponent::decode( decoder );
 
-	auto frame = Vector4f::ZERO;
-	decoder.decode( "extensions", frame );
-	_extensions = Rectf { frame.x(), frame.y(), frame.z(), frame.w() };
+    auto frame = Vector4f::Constants::ZERO;
+    decoder.decode( "extensions", frame );
+    _extensions = Rectf { frame.x(), frame.y(), frame.z(), frame.w() };
 
-	decoder.decode( "constraints", _constraints );
+    decoder.decode( "constraints", _constraints );
 }

@@ -168,47 +168,53 @@ namespace crimild {
             }();
 
             static constexpr auto POSITIVE_INFINITY = [] {
-                return Vector< T, N >( numbers::POSITIVE_INFINITY );
+                return Vector< T, N >( std::numeric_limits< T >::max() );
             }();
 
             static constexpr auto NEGATIVE_INFINITY = [] {
-                return Vector< T, N >( numbers::NEGATIVE_INFINITY );
+                return Vector< T, N >( std::numeric_limits< T >::min() );
             }();
 
             static constexpr auto UNIT_X = [] {
-                static_assert( N >= 2 && N <= 4 );
                 if constexpr ( N == 2 ) {
                     return Vector< T, 2 >( 1, 0 );
                 } else if constexpr ( N == 3 ) {
                     return Vector< T, 3 >( 1, 0, 0 );
-                } else {
+                } else if constexpr ( N == 4 ) {
                     return Vector< T, 4 >( 1, 0, 0, 0 );
+                } else {
+                    return Vector< T, N > { 0 };
                 }
             }();
 
             static constexpr auto UNIT_Y = [] {
-                static_assert( N >= 2 && N <= 4 );
                 if constexpr ( N == 2 ) {
                     return Vector< T, 2 >( 0, 1 );
                 } else if constexpr ( N == 3 ) {
                     return Vector< T, 3 >( 0, 1, 0 );
-                } else {
+                } else if constexpr ( N == 4 ) {
                     return Vector< T, 4 >( 0, 1, 0, 0 );
+                } else {
+                    return Vector< T, N > { 0 };
                 }
             }();
 
             static constexpr auto UNIT_Z = [] {
-                static_assert( N == 3 || N == 4 );
                 if constexpr ( N == 3 ) {
                     return Vector< T, 3 >( 0, 0, 1 );
-                } else {
+                } else if constexpr ( N == 4 ) {
                     return Vector< T, 4 >( 0, 0, 1, 0 );
+                } else {
+                    return Vector< T, N > { 0 };
                 }
             }();
 
             static constexpr auto UNIT_W = [] {
-                static_assert( N == 4 );
-                return Vector< T, 4 >( 0, 0, 0, 1 );
+                if constexpr ( N == 4 ) {
+                    return Vector< T, 4 >( 0, 0, 0, 1 );
+                } else {
+                    return Vector< T, N > { 0 };
+                }
             }();
         };
 

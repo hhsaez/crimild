@@ -30,19 +30,13 @@
 
 #include "Group.hpp"
 #include "Mathematics/Frustum.hpp"
-#include "Mathematics/Matrix.hpp"
-#include "Mathematics/Ray.hpp"
+#include "Mathematics/Matrix4.hpp"
+#include "Mathematics/Ray3.hpp"
 #include "Mathematics/Rect.hpp"
 
 #include <memory>
 
 namespace crimild {
-
-    namespace rendergraph {
-
-        class RenderGraph;
-
-    }
 
     class Camera : public Group {
         CRIMILD_IMPLEMENT_RTTI( crimild::Camera )
@@ -75,8 +69,8 @@ namespace crimild {
         bool _isMainCamera = false;
 
     public:
-        void setFrustum( const Frustumf &f );
-        const Frustumf &getFrustum( void ) const { return _frustum; }
+        //void setFrustum( const Frustum &f );
+        //const Frustum &getFrustum( void ) const { return _frustum; }
 
         void setProjectionMatrix( const Matrix4f &projection ) { _projectionMatrix = projection; }
         const Matrix4f &getProjectionMatrix( void ) const { return _projectionMatrix; }
@@ -93,13 +87,13 @@ namespace crimild {
         void setViewport( const Rectf &rect ) { _viewport = rect; }
         const Rectf &getViewport( void ) const { return _viewport; }
 
-        virtual bool getPickRay( float normalizedX, float normalizedY, Ray3f &result ) const;
+        virtual bool getPickRay( float normalizedX, float normalizedY, Ray3 &result ) const;
 
         void setAspectRatio( float aspect );
         float computeAspect( void ) const;
 
     private:
-        Frustumf _frustum;
+        //Frustumf _frustum;
         Rectf _viewport;
         Matrix4f _projectionMatrix;
         Matrix4f _orthographicMatrix;
@@ -108,19 +102,6 @@ namespace crimild {
 
     public:
         virtual void accept( NodeVisitor &visitor ) override;
-
-        /**
-            \name Render graph
-         */
-        //@{
-    public:
-        void setRenderGraph( SharedPointer< rendergraph::RenderGraph > const &rg ) { _renderGraph = rg; }
-        rendergraph::RenderGraph *getRenderGraph( void ) { return crimild::get_ptr( _renderGraph ); }
-
-    private:
-        SharedPointer< rendergraph::RenderGraph > _renderGraph;
-
-        //@}
 
     public:
         void computeCullingPlanes( void );
@@ -132,7 +113,7 @@ namespace crimild {
 
     private:
         bool _cullingEnabled = true;
-        Plane3f _cullingPlanes[ 6 ];
+        Plane3 _cullingPlanes[ 6 ];
     };
 
 }

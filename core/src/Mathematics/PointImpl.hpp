@@ -49,6 +49,9 @@ namespace crimild {
             using Base = Tuple< T, N >;
 
         public:
+            struct Constants;
+
+        public:
             constexpr Point( void ) noexcept = default;
 
             constexpr explicit Point( const std::array< T, N > &tuple ) noexcept
@@ -137,6 +140,24 @@ namespace crimild {
             }
         };
 
+        template< typename T, Size N >
+        struct Point< T, N >::Constants {
+            static constexpr auto ZERO = [] {
+                return Point< T, N >( 0 );
+            }();
+
+            static constexpr auto ONE = [] {
+                return Point< T, N >( 1 );
+            }();
+
+            static constexpr auto POSITIVE_INFINITY = [] {
+                return Point< T, N >( numbers::POSITIVE_INFINITY );
+            }();
+
+            static constexpr auto NEGATIVE_INFINITY = [] {
+                return Point< T, N >( numbers::NEGATIVE_INFINITY );
+            }();
+        };
     }
 
     template< typename T, Size N >

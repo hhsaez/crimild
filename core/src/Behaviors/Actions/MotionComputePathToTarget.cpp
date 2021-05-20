@@ -1,7 +1,6 @@
 #include "MotionComputePathToTarget.hpp"
 
 #include "Navigation/NavigationController.hpp"
-
 #include "SceneGraph/Node.hpp"
 
 using namespace crimild;
@@ -11,22 +10,22 @@ using namespace crimild::navigation;
 
 MotionComputePathToTarget::MotionComputePathToTarget( void )
 {
-
 }
 
 MotionComputePathToTarget::~MotionComputePathToTarget( void )
 {
-
 }
 
 Behavior::State MotionComputePathToTarget::step( BehaviorContext *context )
 {
+    assert( false && "TODO" );
+#if 0
 	auto agent = context->getAgent();
 	if ( !context->hasTargets() ) {
 		Log::debug( CRIMILD_CURRENT_CLASS_NAME, "No target defined for behavior" );
 		return Behavior::State::FAILURE;
 	}
-	
+
 	auto target = context->getTargetAt( 0 );
 
 	auto nav = agent->getComponent< NavigationController >();
@@ -40,17 +39,17 @@ Behavior::State MotionComputePathToTarget::step( BehaviorContext *context )
 			context->setValue( "motion.target", path[ 0 ] );
 		}
 	}
+#endif
 
-	return Behavior::State::SUCCESS;
+    return Behavior::State::SUCCESS;
 }
 
 void MotionComputePathToTarget::encode( coding::Encoder &encoder )
 {
-	Behavior::encode( encoder );
+    Behavior::encode( encoder );
 }
 
 void MotionComputePathToTarget::decode( coding::Decoder &decoder )
 {
-	Behavior::decode( decoder );
+    Behavior::decode( decoder );
 }
-

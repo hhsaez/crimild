@@ -30,42 +30,8 @@
 
 #include "Rendering/Buffer.hpp"
 #include "Rendering/BufferView.hpp"
-#include "Mathematics/Matrix.hpp"
 
 namespace crimild {
-
-    /**
-
-    class UniformBuffer : public Buffer {
-    public:
-        virtual ~UniformBuffer( void ) noexcept = default;
-
-        virtual void updateIfNeeded( void ) noexcept { }
-    };
-
-    template< typename T >
-    class UniformBufferImpl : public UniformBuffer {
-    public:
-        explicit UniformBufferImpl( T const &data = T() ) noexcept { setData( data ); }
-        virtual ~UniformBufferImpl( void ) noexcept = default;
-
-        Usage getUsage( void ) const noexcept override { return Buffer::Usage::UNIFORM_BUFFER; }
-
-        crimild::Size getSize( void ) const noexcept override { return sizeof( T ); }
-        crimild::Size getStride( void ) const noexcept override { return sizeof( T ); }
-
-        void *getRawData( void ) noexcept override { return static_cast< void * >( &m_data ); }
-        const void *getRawData( void ) const noexcept override { return static_cast< const void * >( &m_data ); }
-
-        T &getData( void ) noexcept { return m_data; }
-        const T &getData( void ) const noexcept { return m_data; }
-        void setData( T const &data ) noexcept { m_data = data; }
-
-    private:
-        T m_data;
-    };
-
-    */
 
     class UniformBuffer
         : public coding::Codable,
@@ -78,8 +44,7 @@ namespace crimild {
         {
             m_bufferView = crimild::alloc< BufferView >(
                 BufferView::Target::UNIFORM,
-                crimild::alloc< Buffer >( value )
-            );
+                crimild::alloc< Buffer >( value ) );
         }
 
         virtual ~UniformBuffer( void ) = default;
@@ -116,8 +81,6 @@ namespace crimild {
     private:
         SharedPointer< BufferView > m_bufferView;
     };
-
-
 
 }
 

@@ -26,8 +26,9 @@
  */
 
 #include "Rendering/RenderQueue.hpp"
-#include "Primitives/Primitive.hpp"
+
 #include "Components/RenderStateComponent.hpp"
+#include "Primitives/Primitive.hpp"
 
 using namespace crimild;
 
@@ -43,6 +44,7 @@ RenderQueue::~RenderQueue( void )
 
 void RenderQueue::reset( void )
 {
+    /*
     setCamera( nullptr );
 
     _lights.clear();
@@ -51,24 +53,27 @@ void RenderQueue::reset( void )
         it.second.clear();
     }
     _renderables.clear();
+    */
 }
 
 void RenderQueue::setCamera( Camera *camera )
 {
+    /*
     if ( camera != nullptr ) {
         _camera = crimild::retain( camera );
         _viewMatrix = _camera->getViewMatrix();
         _projectionMatrix = _camera->getProjectionMatrix();
-    }
-    else {
+    } else {
         _camera = nullptr;
         _viewMatrix.makeIdentity();
         _projectionMatrix.makeIdentity();
     }
+    */
 }
 
 void RenderQueue::push( Geometry *geometry )
 {
+#if 0
     auto rs = geometry->getComponent< RenderStateComponent >();
     if ( rs == nullptr ) {
         return;
@@ -167,6 +172,8 @@ void RenderQueue::push( Geometry *geometry )
             casters->insert( it, renderable );
         }
     });
+
+#endif
 }
 
 void RenderQueue::push( Light *light )
@@ -181,7 +188,7 @@ void RenderQueue::each( Renderables *renderables, std::function< void( Renderabl
     }
 }
 
-void RenderQueue::each( std::function< void ( Light *, int ) > callback )
+void RenderQueue::each( std::function< void( Light *, int ) > callback )
 {
     auto lights = _lights;
     int i = 0;

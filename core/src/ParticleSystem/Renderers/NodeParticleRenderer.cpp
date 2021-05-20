@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,34 +28,32 @@
 #include "NodeParticleRenderer.hpp"
 
 #include "Mathematics/Random.hpp"
-
-#include "SceneGraph/Node.hpp"
 #include "SceneGraph/Group.hpp"
+#include "SceneGraph/Node.hpp"
 
 using namespace crimild;
 
 NodeParticleRenderer::NodeParticleRenderer( void )
 {
-
 }
 
 NodeParticleRenderer::~NodeParticleRenderer( void )
 {
-
 }
 
-void NodeParticleRenderer::configure( Node *node, ParticleData *particles ) 
+void NodeParticleRenderer::configure( Node *node, ParticleData *particles )
 {
-	_positions = particles->getAttrib( ParticleAttrib::POSITION );
+    _positions = particles->getAttrib( ParticleAttrib::POSITION );
 }
 
 void NodeParticleRenderer::update( Node *node, crimild::Real64 dt, ParticleData *particles )
 {
+    /*
     const auto pCount = particles->getAliveCount();
     if ( pCount == 0 ) {
         return;
     }
-    
+
 	auto group = static_cast< Group * >( node );
 
 	const auto ps = _positions->getData< Vector3f >();
@@ -63,15 +61,15 @@ void NodeParticleRenderer::update( Node *node, crimild::Real64 dt, ParticleData 
 	for ( int i = 0; i < pCount; i++ ) {
 		group->getNodeAt( i )->local().setTranslate( ps[ i ] );
 	}
+    */
 }
 
-void NodeParticleRenderer::encode( coding::Encoder &encoder ) 
+void NodeParticleRenderer::encode( coding::Encoder &encoder )
 {
-	ParticleSystemComponent::ParticleRenderer::encode( encoder );
+    ParticleSystemComponent::ParticleRenderer::encode( encoder );
 }
 
 void NodeParticleRenderer::decode( coding::Decoder &decoder )
 {
-	ParticleSystemComponent::ParticleRenderer::decode( decoder );
+    ParticleSystemComponent::ParticleRenderer::decode( decoder );
 }
-

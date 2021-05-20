@@ -32,14 +32,13 @@ using namespace crimild;
 Camera *Camera::_mainCamera = nullptr;
 
 Camera::Camera( void )
-	: Camera( 45.0, 4.0f / 3.0f, 0.1f, 1000.0f )
+    : Camera( 45.0, 4.0f / 3.0f, 0.1f, 1000.0f )
 {
-
 }
 
 Camera::Camera( float fov, float aspect, float near, float far )
-	: _frustum( fov, aspect, near, far ),
-	  _viewport( 0.0f, 0.0f, 1.0f, 1.0f ),
+    : //_frustum( fov, aspect, near, far ),
+      _viewport( 0.0f, 0.0f, 1.0f, 1.0f ),
       _viewMatrixIsCurrent( false )
 {
     //_renderGraph = crimild::alloc< RenderGraph >();
@@ -52,9 +51,12 @@ Camera::Camera( float fov, float aspect, float near, float far )
     _renderGraph->setOutput( scenePass->getColorOutput() );
     */
 
-	_projectionMatrix = _frustum.computeProjectionMatrix();
-	_orthographicMatrix = _frustum.computeOrthographicMatrix();
-	_viewMatrix.makeIdentity();
+    _projectionMatrix = perspective( fov, aspect, near, far );
+
+    //_projectionMatrix = _frustum.computeProjectionMatrix();
+    //_orthographicMatrix = _frustum.computeOrthographicMatrix();
+    //_viewMatrix.makeIdentity();
+    _viewMatrix = Matrix4f::Constants::IDENTITY;
 
     if ( getMainCamera() == nullptr ) {
         // Set itself as the main camera if there isn't one already set
@@ -64,106 +66,121 @@ Camera::Camera( float fov, float aspect, float near, float far )
 
 Camera::~Camera( void )
 {
-	if ( getMainCamera() == this ) {
-		setMainCamera( nullptr );
-	}
+    if ( getMainCamera() == this ) {
+        setMainCamera( nullptr );
+    }
 }
 
+/*
 void Camera::setFrustum( const Frustumf &f )
 {
     _frustum = f;
-	_projectionMatrix = _frustum.computeProjectionMatrix();
-	_orthographicMatrix = _frustum.computeOrthographicMatrix();
+    _projectionMatrix = _frustum.computeProjectionMatrix();
+    _orthographicMatrix = _frustum.computeOrthographicMatrix();
 }
+*/
 
 void Camera::accept( NodeVisitor &visitor )
 {
-	visitor.visitCamera( this );
+    visitor.visitCamera( this );
 }
 
 void Camera::setViewMatrix( const Matrix4f &view )
 {
-	_viewMatrix = view;
+    /*
+    _viewMatrix = view;
     world().fromMatrix( view.getInverse() );
     setWorldIsCurrent( true );
+    */
 }
 
 const Matrix4f &Camera::getViewMatrix( void )
 {
+    /*
     if ( !_viewMatrixIsCurrent ) {
         _viewMatrix = getWorld().computeModelMatrix();
         _viewMatrix.makeInverse();
     }
+    */
 
-	return _viewMatrix;
+    return _viewMatrix;
 }
 
-bool Camera::getPickRay( float portX, float portY, Ray3f &result ) const
+bool Camera::getPickRay( float portX, float portY, Ray3 &result ) const
 {
-	float x = 2.0f * portX - 1.0f;
-	float y = 1.0f - 2.0f * portY;
+    assert( false );
 
-	Vector4f rayClip( x, y, -1.0f, 1.0f );
+#if 0
+    float x = 2.0f * portX - 1.0f;
+    float y = 1.0f - 2.0f * portY;
 
-	Vector4f rayEye = getProjectionMatrix().getInverse().getTranspose() * rayClip;
-	rayEye = Vector4f( rayEye[ 0 ], rayEye[ 1 ], -1.0f, 0.0f );
+    Vector4f rayClip( x, y, -1.0f, 1.0f );
 
-	Vector4f rayWorld = getWorld().computeModelMatrix().getTranspose() * rayEye;
+    Vector4f rayEye = getProjectionMatrix().getInverse().getTranspose() * rayClip;
+    rayEye = Vector4f( rayEye[ 0 ], rayEye[ 1 ], -1.0f, 0.0f );
 
-	Vector3f rayDirection( rayWorld[ 0 ], rayWorld[ 1 ], rayWorld[ 2 ] );
-	rayDirection.normalize();
+    Vector4f rayWorld = getWorld().computeModelMatrix().getTranspose() * rayEye;
 
-	result.setOrigin( getWorld().getTranslate() );
-	result.setDirection( rayDirection );
+    Vector3f rayDirection( rayWorld[ 0 ], rayWorld[ 1 ], rayWorld[ 2 ] );
+    rayDirection.normalize();
 
-	return true;
+    result.setOrigin( getWorld().getTranslate() );
+    result.setDirection( rayDirection );
+#endif
+
+    return true;
 }
 
 float Camera::computeAspect( void ) const
 {
-	return getFrustum().computeAspect();
+    //return getFrustum().computeAspect();
+    return 1;
 }
 
 void Camera::setAspectRatio( float aspect )
 {
-	auto &f = getFrustum();
-	setFrustum( Frustumf( -aspect * f.getUMax(), aspect * f.getUMax(), f.getUMin(), f.getUMax(), f.getDMin(), f.getDMax() ) );
+    /*
+    auto &f = getFrustum();
+    setFrustum( Frustumf( -aspect * f.getUMax(), aspect * f.getUMax(), f.getUMin(), f.getUMax(), f.getDMin(), f.getDMax() ) );
+    */
 }
 
 void Camera::computeCullingPlanes( void )
 {
-	Vector3f normal;
+    /*
+    Vector3f normal;
 
-	Vector3f position = getWorld().getTranslate();
-	Vector3f direction = getWorld().computeDirection().getNormalized();
-	Vector3f up = getWorld().computeUp().getNormalized();
-	Vector3f right = getWorld().computeRight().getNormalized();
+    Vector3f position = getWorld().getTranslate();
+    Vector3f direction = getWorld().computeDirection().getNormalized();
+    Vector3f up = getWorld().computeUp().getNormalized();
+    Vector3f right = getWorld().computeRight().getNormalized();
 
-	// near plane
-	_cullingPlanes[ 0 ] = Plane3f( direction, position + getFrustum().getDMin() * direction );
+    // near plane
+    _cullingPlanes[ 0 ] = Plane3f( direction, position + getFrustum().getDMin() * direction );
 
-	// far plane
-	_cullingPlanes[ 1 ] = Plane3f( -direction, position + getFrustum().getDMax() * direction );
+    // far plane
+    _cullingPlanes[ 1 ] = Plane3f( -direction, position + getFrustum().getDMax() * direction );
 
-	// top plane
-	float invLengthTop = 1.0f / sqrtf( getFrustum().getDMin() * getFrustum().getDMin() + getFrustum().getUMax() * getFrustum().getUMax() );
-	normal = ( -getFrustum().getDMin() * up + getFrustum().getUMax() * direction  ) * invLengthTop;
-	_cullingPlanes[ 2 ] = Plane3f( normal, position );
+    // top plane
+    float invLengthTop = 1.0f / sqrtf( getFrustum().getDMin() * getFrustum().getDMin() + getFrustum().getUMax() * getFrustum().getUMax() );
+    normal = ( -getFrustum().getDMin() * up + getFrustum().getUMax() * direction ) * invLengthTop;
+    _cullingPlanes[ 2 ] = Plane3f( normal, position );
 
-	// bottom plane
-	float invLengthBottom = 1.0f / sqrtf( getFrustum().getDMin() * getFrustum().getDMin() + getFrustum().getUMin() * getFrustum().getUMin() );
-	normal = ( getFrustum().getDMin() * up - getFrustum().getUMin() * direction ) * invLengthBottom;
-	_cullingPlanes[ 3 ] = Plane3f( normal, position );
+    // bottom plane
+    float invLengthBottom = 1.0f / sqrtf( getFrustum().getDMin() * getFrustum().getDMin() + getFrustum().getUMin() * getFrustum().getUMin() );
+    normal = ( getFrustum().getDMin() * up - getFrustum().getUMin() * direction ) * invLengthBottom;
+    _cullingPlanes[ 3 ] = Plane3f( normal, position );
 
-	// left plane
-	float invLengthLeft = 1.0f / sqrtf( getFrustum().getDMin() * getFrustum().getDMin() + getFrustum().getRMin() * getFrustum().getRMin() );
-	normal = ( getFrustum().getDMin() * right - getFrustum().getRMin() * direction ) * invLengthLeft;
-	_cullingPlanes[ 4 ] = Plane3f( normal, position );
+    // left plane
+    float invLengthLeft = 1.0f / sqrtf( getFrustum().getDMin() * getFrustum().getDMin() + getFrustum().getRMin() * getFrustum().getRMin() );
+    normal = ( getFrustum().getDMin() * right - getFrustum().getRMin() * direction ) * invLengthLeft;
+    _cullingPlanes[ 4 ] = Plane3f( normal, position );
 
-	// right plane
-	float invLengthRight = 1.0f / sqrtf( getFrustum().getDMin() * getFrustum().getDMin() + getFrustum().getRMax() * getFrustum().getRMax() );
-	normal = ( -getFrustum().getDMin() * right + getFrustum().getRMax() * direction ) * invLengthRight;
-	_cullingPlanes[ 5 ] = Plane3f( normal, position );
+    // right plane
+    float invLengthRight = 1.0f / sqrtf( getFrustum().getDMin() * getFrustum().getDMin() + getFrustum().getRMax() * getFrustum().getRMax() );
+    normal = ( -getFrustum().getDMin() * right + getFrustum().getRMax() * direction ) * invLengthRight;
+    _cullingPlanes[ 5 ] = Plane3f( normal, position );
+    */
 }
 
 bool Camera::culled( const BoundingVolume *volume ) const
@@ -172,11 +189,11 @@ bool Camera::culled( const BoundingVolume *volume ) const
         return false;
     }
 
-	for ( auto &p : _cullingPlanes ) {
-		if ( volume->whichSide( p ) < 0 ) {
-			return true;
-		}
-	}
+    for ( auto &p : _cullingPlanes ) {
+        if ( volume->whichSide( p ) < 0 ) {
+            return true;
+        }
+    }
 
-	return false;
+    return false;
 }

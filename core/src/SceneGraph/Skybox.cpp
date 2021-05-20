@@ -40,7 +40,7 @@
 
 using namespace crimild;
 
-Skybox::Skybox( const RGBColorf &color ) noexcept
+Skybox::Skybox( const ColorRGB &color ) noexcept
 {
     setLayer( Node::Layer::SKYBOX );
 
@@ -147,12 +147,7 @@ Skybox::Skybox( const RGBColorf &color ) noexcept
                     descriptors->descriptors = {
                         {
                             .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                            .obj = crimild::alloc< UniformBuffer >(
-                                RGBAColorf(
-                                    color.r(),
-                                    color.g(),
-                                    color.b(),
-                                    1.0 ) ),
+                            .obj = crimild::alloc< UniformBuffer >( color.rgba() ),
                         },
                     };
                     return descriptors;

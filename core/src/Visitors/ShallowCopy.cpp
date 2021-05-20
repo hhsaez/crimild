@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -30,28 +30,25 @@
 #include "Components/MaterialComponent.hpp"
 #include "Components/RenderStateComponent.hpp"
 #include "Components/SkinnedMeshComponent.hpp"
-
 #include "Rendering/SkinnedMesh.hpp"
 
 using namespace crimild;
 
 ShallowCopy::ShallowCopy( void )
 {
-
 }
 
 ShallowCopy::~ShallowCopy( void )
 {
-
 }
 
 void ShallowCopy::traverse( Node *node )
 {
-	NodeVisitor::traverse( node );
-    
+    NodeVisitor::traverse( node );
+
     if ( _result != nullptr ) {
         // make sure the result is not transformed
-        _result->local().makeIdentity();
+        _result->setLocal( Transformation {} );
     }
 }
 
@@ -68,9 +65,9 @@ void ShallowCopy::visitGroup( Group *group )
 
     _parent = crimild::get_ptr( copy );
 
-	NodeVisitor::visitGroup( group );
+    NodeVisitor::visitGroup( group );
 
-	_parent = copy->getParent< Group >();
+    _parent = copy->getParent< Group >();
 }
 
 void ShallowCopy::visitGeometry( Geometry *geometry )
@@ -78,9 +75,9 @@ void ShallowCopy::visitGeometry( Geometry *geometry )
     auto copy = crimild::alloc< Geometry >();
     copyNode( geometry, crimild::get_ptr( copy ) );
 
-	geometry->forEachPrimitive( [&]( Primitive *primitive ) {
-		copy->attachPrimitive( primitive );
-	});
+    geometry->forEachPrimitive( [ & ]( Primitive *primitive ) {
+        copy->attachPrimitive( primitive );
+    } );
 }
 
 void ShallowCopy::visitText( Text *input )
@@ -94,15 +91,15 @@ void ShallowCopy::visitText( Text *input )
 
 void ShallowCopy::copyNode( Node *src, Node *dst )
 {
-	if ( _result == nullptr ) {
-        _result = crimild::retain( dst ) ;
-	}
+    if ( _result == nullptr ) {
+        _result = crimild::retain( dst );
+    }
 
-	if ( _parent != nullptr ) {
-		_parent->attachNode( dst );
-	}
+    if ( _parent != nullptr ) {
+        _parent->attachNode( dst );
+    }
 
-	dst->setName( src->getName() );
+    dst->setName( src->getName() );
     dst->setLocal( src->getLocal() );
 
     src->forEachComponent( [ dst ]( NodeComponent *srcCmp ) {
@@ -111,7 +108,5 @@ void ShallowCopy::copyNode( Node *src, Node *dst )
                 dst->attachComponent( cmp );
             }
         }
-    });
-    
+    } );
 }
-

@@ -28,9 +28,10 @@
 #ifndef CRIMILD_RENDERING_VIEWPORT_DIMENSIONS_
 #define CRIMILD_RENDERING_VIEWPORT_DIMENSIONS_
 
-#include "Mathematics/Rect.hpp"
-#include "Rendering/ScalingMode.hpp"
 #include "Foundation/Containers/Array.hpp"
+#include "Mathematics/Rect.hpp"
+#include "Mathematics/Vector2.hpp"
+#include "Rendering/ScalingMode.hpp"
 
 namespace crimild {
 
@@ -42,16 +43,15 @@ namespace crimild {
 
         static ViewportDimensions viewportFrom( const ViewportDimensions &parent, const ViewportDimensions &child ) noexcept
         {
-        	const auto &pd = parent.dimensions;
-         	const auto &cd = child.dimensions;
-          	return ViewportDimensions {
-           		.scalingMode = ScalingMode::RELATIVE,
-	         	.dimensions = Rectf(
+            const auto &pd = parent.dimensions;
+            const auto &cd = child.dimensions;
+            return ViewportDimensions {
+                .scalingMode = ScalingMode::RELATIVE,
+                .dimensions = Rectf(
                     pd.getX() + cd.getX() * pd.getWidth(),
                     pd.getY() + cd.getY() * pd.getHeight(),
                     pd.getWidth() * cd.getWidth(),
-                    pd.getHeight() * cd.getHeight()
-                ),
+                    pd.getHeight() * cd.getHeight() ),
             };
         }
 
@@ -62,38 +62,32 @@ namespace crimild {
                     parent,
                     {
                         .dimensions = Rectf( 0.0f, 0.5f, 0.25f, 0.25f ),
-                    }
-            	),
+                    } ),
                 viewportFrom(
                     parent,
                     {
                         .dimensions = Rectf( 0.5f, 0.5f, 0.25f, 0.25f ),
-                    }
-                ),
+                    } ),
                 viewportFrom(
                     parent,
                     {
                         .dimensions = Rectf( 0.5f, 0.25f, 0.25f, 0.25f ),
-                    }
-                ),
+                    } ),
                 viewportFrom(
                     parent,
                     {
                         .dimensions = Rectf( 0.5f, 0.75f, 0.25f, 0.25f ),
-                    }
-            	),
+                    } ),
                 viewportFrom(
                     parent,
                     {
                         .dimensions = Rectf( 0.25f, 0.5f, 0.25f, 0.25f ),
-                    }
-                ),
+                    } ),
                 viewportFrom(
                     parent,
                     {
                         .dimensions = Rectf( 0.75f, 0.5f, 0.25f, 0.25f ),
-                    }
-                ),
+                    } ),
             };
         }
     };
@@ -101,6 +95,3 @@ namespace crimild {
 }
 
 #endif
-
-
-

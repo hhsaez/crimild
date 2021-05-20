@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,144 +28,121 @@
 #ifndef CRIMILD_CORE_MATHEMATICS_PLANE_
 #define CRIMILD_CORE_MATHEMATICS_PLANE_
 
-#include "Vector.hpp"
+#include "Normal3.hpp"
+#include "Point3.hpp"
+#include "Vector3.hpp"
 
 namespace crimild {
 
-	/**
-		\brief Defines a plane in any dimensional space
+    /**
+		\brief Defines a plane in three-dimensional space
 
 		A plane is represented by a normal vector and a constant
 	 */
-	template< crimild::Size SIZE, typename PRECISION >
-	class Plane {
-	public:
-		typedef Vector< SIZE, PRECISION > VectorImpl;
+    class Plane3 {
+    public:
+        Plane3( void ) noexcept = default;
 
-		Plane( void )
-		{
-		}
+        constexpr Plane3( const Normal3 &normal, Real constant ) noexcept
+            : m_normal( normal ),
+              m_constant( constant )
+        {
+        }
 
-		Plane( const VectorImpl &normal, PRECISION constant, bool forceNormalize = true )
-		{
-			setNormal( normal, forceNormalize );
-			setConstant( constant );
-		}
+        constexpr Plane3( const Normal3 &normal, const Point3 &point ) noexcept
+            : m_normal( normal ),
+              m_constant( -dot( normal, Vector3( point ) ) )
+        {
+        }
 
-		Plane( const VectorImpl &normal, const VectorImpl &point, bool forceNormalize = true )
-		{
-			setNormal( normal, forceNormalize );
-			setConstant( -( _normal * point ) );
-		}
+        constexpr Plane3( const Point3 &p0, const Point3 &p1, const Point3 &p2 ) noexcept
+            : m_normal( normalize( cross( p2 - p1, p0 - p1 ) ) ),
+              m_constant( -dot( m_normal, Vector3 { p0.x(), p0.y(), p0.z() } ) )
+        {
+        }
 
-		Plane( const VectorImpl &p0, const VectorImpl &p1, const VectorImpl p2 )
-		{
-			setNormal( ( p2 - p1 ) ^ ( p0 - p1 ) );
-			setConstant( -( _normal * p0 ) );
-		}
+        constexpr Plane3( const Plane3 &other ) noexcept
+            : m_normal( other.m_normal ),
+              m_constant( other.m_constant )
+        {
+        }
 
-		Plane( const Plane &plane )
-			: _normal( plane._normal ),
-			  _constant( plane._constant )
-		{
-		}
+        constexpr Plane3( Plane3 &&other ) noexcept
+            : m_normal( other.m_normal ),
+              m_constant( other.m_constant )
+        {
+        }
 
-		~Plane( void )
-		{
-		}
+        ~Plane3( void ) = default;
 
-		Plane &operator=( const Plane &plane )
-		{
-			_normal = plane._normal;
-			_constant = plane._constant;
-			return *this;
-		}
+        constexpr Plane3 &operator=( const Plane3 &other ) noexcept
+        {
+            m_normal = other.m_normal;
+            m_constant = other.m_constant;
+            return *this;
+        }
 
-		bool operator==( const Plane &plane )
-		{
-			return ( _normal == plane._normal && _constant == plane._constant );
-		}
+        constexpr Plane3 &operator=( Plane3 &&other ) noexcept
+        {
+            m_normal = std::move( other.m_normal );
+            m_constant = std::move( other.m_constant );
+            return *this;
+        }
 
-		bool operator!=( const Plane &plane )
-		{
-			return !( *this == plane );
-		}
+        [[nodiscard]] constexpr Bool operator==( const Plane3 &other ) const noexcept
+        {
+            return m_normal == other.m_normal && m_constant == other.m_constant;
+        }
 
-		void setNormal( const VectorImpl &normal, bool forceNormalize = true )
-		{
-			_normal = normal;
-			if ( forceNormalize ) {
-				_normal.normalize();
-			}
-		}
+        [[nodiscard]] constexpr Bool operator!=( const Plane3 &other ) const noexcept
+        {
+            return m_normal != other.m_normal || m_constant != other.m_constant;
+        }
 
-		VectorImpl &getNormal( void )
-		{
-			return _normal;
-		}
+        inline constexpr const Normal3 &getNormal( void ) const noexcept { return m_normal; }
+        inline constexpr Real getConstant( void ) const noexcept { return m_constant; }
 
-		const VectorImpl &getNormal( void ) const
-		{
-			return _normal;
-		}
+        friend std::ostream &operator<<( std::ostream &out, const Plane3 &p ) noexcept
+        {
+            out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
+                << std::setprecision( 10 )
+                << "[" << p.getNormal() << ", " << p.getConstant() << "]";
+            return out;
+        }
 
-		void setConstant( PRECISION constant )
-		{
-			_constant = constant;
-		}
+    private:
+        Normal3 m_normal;
+        Real m_constant;
+    };
 
-		PRECISION getConstant( void ) const
-		{
-			return _constant;
-		}
+    [[nodiscard]] constexpr Real distanceSigned( const Plane3 &A, const Point3 &P ) noexcept
+    {
+        return dot( A.getNormal(), Vector3 { P.x(), P.y(), P.z() } ) + A.getConstant();
+    }
 
-		PRECISION signedDistanceToPoint( const VectorImpl &point ) const
-		{
-			return getNormal() * point + getConstant();
-		}
+    [[nodiscard]] constexpr Real distance( const Plane3 &A, const Point3 &P ) noexcept
+    {
+        return abs( distanceSigned( A, P ) );
+    }
 
-		PRECISION distanceToPoint( const VectorImpl &point ) const
-		{
-			return Numeric< PRECISION >::fabs( signedDistanceToPoint( point ) );
-		}
+    [[nodiscard]] constexpr Char whichSide( const Plane3 &A, const Point3 &P ) noexcept
+    {
+        const auto d = distanceSigned( A, P );
+        if ( d > 0 ) {
+            return +1;
+        } else if ( d < 0 ) {
+            return -1;
+        }
+        return 0;
+    }
 
-		char whichSide( const VectorImpl &point ) const 
-		{
-			auto d = signedDistanceToPoint( point );
-			if ( d > 0 ) {
-				return +1;
-			}
-			else if ( d < 0 ) {
-				return -1;
-			}
-
-			return 0;
-		}
-
-		VectorImpl project( const VectorImpl &point ) const
-		{
-			return point - signedDistanceToPoint( point ) * getNormal();
-		}
-
-	private:
-		VectorImpl _normal;
-		PRECISION _constant;
-	};
-
-	template< crimild::Size SIZE, typename PRECISION >
-	std::ostream &operator<<( std::ostream &out, const Plane< SIZE, PRECISION > &p )
-	{
-		out << std::setiosflags( std::ios::fixed | std::ios::showpoint  )
-			<< std::setprecision( 10 )
-			<< "[" << p.getNormal() << ", " << p.getConstant() << "]";
-		return out;
-	}
-
-	typedef Plane< 3, int > Plane3i;
-	typedef Plane< 3, float > Plane3f;
-	typedef Plane< 3, double > Plane3d;
+    [[nodiscard]] constexpr Point3 project( const Plane3 &A, const Point3 &P ) noexcept
+    {
+        const auto d = distanceSigned( A, P );
+        const auto V = Vector3( d * A.getNormal() );
+        return P - V;
+    }
 
 }
 
 #endif
-

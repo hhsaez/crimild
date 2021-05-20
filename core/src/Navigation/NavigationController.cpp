@@ -30,7 +30,7 @@
 #include "Foundation/Log.hpp"
 #include "Mathematics/Intersection.hpp"
 #include "Mathematics/LineSegment.hpp"
-#include "Mathematics/Ray.hpp"
+#include "Mathematics/Ray3.hpp"
 #include "NavigationMeshContainer.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Visitors/Apply.hpp"
@@ -68,6 +68,7 @@ void NavigationController::start( void )
 
 Vector3f NavigationController::move( const Vector3f &from, const Vector3f &to )
 {
+    /*
     if ( _navigationMesh == nullptr ) {
         Log::warning( CRIMILD_CURRENT_CLASS_NAME, "No navigation mesh found" );
         return from;
@@ -84,7 +85,7 @@ Vector3f NavigationController::move( const Vector3f &from, const Vector3f &to )
         return from;
     }
 
-    auto r = Ray3f( to, -Vector3f::UNIT_Y );
+    auto r = Ray3( Point3( to ), -Vector3f::Constants::UNIT_Y );
     const auto p = cell->getPlane();
 
     float t = Intersection::find( p, r );
@@ -97,6 +98,8 @@ Vector3f NavigationController::move( const Vector3f &from, const Vector3f &to )
     }
 
     return r.getPointAt( t );
+    */
+    assert( true );
 }
 
 bool NavigationController::snap( void )
@@ -108,16 +111,20 @@ bool NavigationController::snap( void )
 
 bool NavigationController::teleport( const Vector3f &target )
 {
+    /*
     auto cell = findCellForPoint( target );
 
     setCurrentCell( cell );
     getNode()->local().setTranslate( target );
 
     return cell != nullptr;
+    */
+    assert( true );
 }
 
 bool NavigationController::move( const Vector3f &target )
 {
+#if 0
     // TODO: what about local/world conversion?
 
     auto currentCell = getCurrentCell();
@@ -192,18 +199,20 @@ bool NavigationController::move( const Vector3f &target )
     setCurrentCell( testCell );
 
     getNode()->local().setTranslate( motionPath.getDestination() );
-
+#endif
     return true;
 }
 
 bool NavigationController::findCurrentCell( void )
 {
+#if 0
     auto cell = NavigationController::findCellForPoint( getNode()->getLocal().getTranslate() );
     if ( cell != nullptr ) {
         setCurrentCell( cell );
     }
 
     return getCurrentCell();
+#endif
 }
 
 NavigationCell *NavigationController::findCellForPoint( const Vector3f &point )
@@ -220,6 +229,7 @@ NavigationCell *NavigationController::findCellForPoint( const Vector3f &point )
 
 std::vector< Vector3f > NavigationController::computePathToTarget( const Vector3f &target )
 {
+#if 0
     std::vector< Vector3f > result;
 
     auto start = getCurrentCell();
@@ -299,4 +309,5 @@ std::vector< Vector3f > NavigationController::computePathToTarget( const Vector3
     }
 
     return result;
+#endif
 }

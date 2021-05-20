@@ -69,11 +69,11 @@ void LightingUniform::onPreRender( void ) noexcept
         for ( auto i = 0l; i < count; ++i ) {
             auto &light = lights[ i ];
             dst[ i ].type = static_cast< UInt32 >( light->getType() );
-            dst[ i ].position = light->getPosition().xyzw();
-            dst[ i ].direction = light->getDirection().xyzw();
-            dst[ i ].color = light->getColor().xyzw();
-            dst[ i ].attenuation = light->getAttenuation().xyzw();
-            dst[ i ].ambient = light->getAmbient().xyzw();
+            dst[ i ].position = Vector4( light->getPosition(), 1 );
+            dst[ i ].direction = Vector4( light->getDirection(), 0 );
+            dst[ i ].color = light->getColor().rgba();
+            dst[ i ].attenuation = Vector4( light->getAttenuation(), 0 );
+            dst[ i ].ambient = light->getAmbient().rgba();
             dst[ i ].cutoff = Vector4f(
                 Numericf::cos( light->getInnerCutoff() ),
                 Numericf::cos( light->getOuterCutoff() ),

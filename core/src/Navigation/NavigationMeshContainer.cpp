@@ -26,18 +26,14 @@
  */
 
 #include "NavigationMeshContainer.hpp"
-#include "Navigation/NavigationMeshOBJ.hpp"
-
-#include "Debug/DebugRenderHelper.hpp"
-
-#include "Primitives/Primitive.hpp"
-
-#include "SceneGraph/Node.hpp"
-
-#include "Simulation/FileSystem.hpp"
 
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
+#include "Debug/DebugRenderHelper.hpp"
+#include "Navigation/NavigationMeshOBJ.hpp"
+#include "Primitives/Primitive.hpp"
+#include "SceneGraph/Node.hpp"
+#include "Simulation/FileSystem.hpp"
 
 using namespace crimild;
 using namespace crimild::coding;
@@ -45,22 +41,20 @@ using namespace crimild::navigation;
 
 NavigationMeshContainer::NavigationMeshContainer( void )
 {
-
 }
 
 NavigationMeshContainer::NavigationMeshContainer( NavigationMeshPtr const &mesh )
-	: _navigationMesh( mesh )
+    : _navigationMesh( mesh )
 {
-
 }
 
 NavigationMeshContainer::~NavigationMeshContainer( void )
 {
-
 }
 
 void NavigationMeshContainer::renderDebugInfo( Renderer *renderer, Camera *camera )
 {
+#if 0
 	std::vector< Vector3f > exteriorEdges;
 	std::vector< Vector3f > interiorEdges;
 	std::vector< Vector3f > normals;
@@ -138,21 +132,22 @@ void NavigationMeshContainer::renderDebugInfo( Renderer *renderer, Camera *camer
 		t.translate() += OFFSET;
 		DebugRenderHelper::render( renderer, camera, crimild::get_ptr( primitive ), t, RGBAColorf( 0.5f, 0.5f, 1.0f, 0.5f ) );
 	}
+#endif
 }
 
 void NavigationMeshContainer::encode( Encoder &encoder )
 {
-	NodeComponent::encode( encoder );
+    NodeComponent::encode( encoder );
 
-	// TODO
+    // TODO
 }
 
 void NavigationMeshContainer::decode( Decoder &decoder )
 {
-	NodeComponent::decode( decoder );
+    NodeComponent::decode( decoder );
 
-	std::string navMeshFile;
-	decoder.decode( "navMeshFile", navMeshFile );
+    std::string navMeshFile;
+    decoder.decode( "navMeshFile", navMeshFile );
 
-	_navigationMesh = crimild::alloc< NavigationMeshOBJ >( FileSystem::getInstance().pathForResource( navMeshFile ) );
+    _navigationMesh = crimild::alloc< NavigationMeshOBJ >( FileSystem::getInstance().pathForResource( navMeshFile ) );
 }

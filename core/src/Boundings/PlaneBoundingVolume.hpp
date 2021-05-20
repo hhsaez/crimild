@@ -32,46 +32,46 @@
 
 namespace crimild {
 
-	class PlaneBoundingVolume : public BoundingVolume {
-	public:
-		PlaneBoundingVolume( void );
-		explicit PlaneBoundingVolume( const Plane3f &plane );
-		virtual ~PlaneBoundingVolume( void );
+    class PlaneBoundingVolume : public BoundingVolume {
+    public:
+        PlaneBoundingVolume( void );
+        explicit PlaneBoundingVolume( const Plane3 &plane );
+        virtual ~PlaneBoundingVolume( void );
 
-		virtual const Vector3f &getCenter( void ) const override { return _center; }
-		virtual float getRadius( void ) const override { return 0.0f; }
+        virtual const Point3 &getCenter( void ) const override { return _center; }
+        virtual float getRadius( void ) const override { return 0.0f; }
 
-	private:
-		Vector3f _center;
-		Plane3f _plane;
+    private:
+        Point3 _center;
+        Plane3 _plane;
 
-	public:
-		virtual void computeFrom( const BoundingVolume *volume ) override;
-		virtual void computeFrom( const BoundingVolume *volume, const Transformation &transform ) override;
-		virtual void computeFrom( const Vector3f *positions, unsigned int positionCount ) override;
-		virtual void computeFrom( const VertexBuffer *vbo ) override;
-		virtual void computeFrom( const Vector3f &min, const Vector3f &max ) override;
+    public:
+        virtual void computeFrom( const BoundingVolume *volume ) override;
+        virtual void computeFrom( const BoundingVolume *volume, const Transformation &transform ) override;
+        virtual void computeFrom( const Vector3f *positions, unsigned int positionCount ) override;
+        virtual void computeFrom( const VertexBuffer *vbo ) override;
+        virtual void computeFrom( const Vector3f &min, const Vector3f &max ) override;
 
-	public:
-		virtual void expandToContain( const Vector3f &point ) override;
-		virtual void expandToContain( const Vector3f *positions, unsigned int positionCount ) override;
-		virtual void expandToContain( const VertexBuffer *vbo ) override;
-		virtual void expandToContain( const BoundingVolume *input ) override;
+    public:
+        virtual void expandToContain( const Point3 &point ) override;
+        virtual void expandToContain( const Vector3f *positions, unsigned int positionCount ) override;
+        virtual void expandToContain( const VertexBuffer *vbo ) override;
+        virtual void expandToContain( const BoundingVolume *input ) override;
 
-	public:
-		virtual int whichSide( const Plane3f &plane ) const override;
-		virtual bool contains( const Vector3f &point ) const override;
+    public:
+        virtual int whichSide( const Plane3 &plane ) const override;
+        virtual bool contains( const Vector3f &point ) const override;
 
-	public:
-		virtual bool testIntersection( const Ray3f &ray ) const override;
-		virtual bool testIntersection( const BoundingVolume *input ) const override;
-		virtual bool testIntersection( const Sphere3f &sphere ) const override;
-		virtual bool testIntersection( const Plane3f &plane ) const override;
+    public:
+        virtual bool testIntersection( const Ray3 &ray ) const override;
+        virtual bool testIntersection( const BoundingVolume *input ) const override;
+        virtual bool testIntersection( const Sphere &sphere ) const override;
+        virtual bool testIntersection( const Plane3 &plane ) const override;
 
-		virtual void resolveIntersection( const BoundingVolume *other, Transformation &result ) const override;
-		virtual void resolveIntersection( const Sphere3f &sphere, Transformation &result ) const override;
-		virtual void resolveIntersection( const Plane3f &plane, Transformation &result ) const override;
-	};
+        virtual void resolveIntersection( const BoundingVolume *other, Transformation &result ) const override;
+        virtual void resolveIntersection( const Sphere &sphere, Transformation &result ) const override;
+        virtual void resolveIntersection( const Plane3 &plane, Transformation &result ) const override;
+    };
 
     using PlaneBoundingVolumePtr = SharedPointer< PlaneBoundingVolume >;
 

@@ -28,6 +28,7 @@
 #ifndef CRIMILD_CORE_RENDERING_MATERIALS_LIT_
 #define CRIMILD_CORE_RENDERING_MATERIALS_LIT_
 
+#include "Mathematics/ColorRGB.hpp"
 #include "Rendering/Material.hpp"
 
 namespace crimild {
@@ -40,7 +41,7 @@ namespace crimild {
     class LitMaterial : public Material {
     private:
         struct Props {
-            alignas( 16 ) RGBAColorf albedo = RGBAColorf::ONE;
+            alignas( 16 ) ColorRGBA albedo = ColorRGBA::Constants::WHITE;
             alignas( 4 ) Real32 metallic = 1;
             alignas( 4 ) Real32 roughness = 1;
             alignas( 4 ) Real32 ambientOcclusion = 1;
@@ -50,8 +51,8 @@ namespace crimild {
         LitMaterial( void ) noexcept;
         virtual ~LitMaterial( void ) = default;
 
-        inline void setAlbedo( const RGBColorf &albedo ) noexcept { getProps().albedo = albedo.xyzw(); };
-        inline RGBColorf getAlbedo( void ) const noexcept { return getProps().albedo.xyz(); }
+        inline void setAlbedo( const ColorRGB &albedo ) noexcept { getProps().albedo = albedo.rgba(); };
+        inline ColorRGB getAlbedo( void ) const noexcept { return getProps().albedo.rgb(); }
         void setAlbedoMap( SharedPointer< Texture > const &albedoMap ) noexcept;
         const Texture *getAlbedoMap( void ) const noexcept;
         Texture *getAlbedoMap( void ) noexcept;

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -27,51 +27,48 @@
 
 #include "Picking.hpp"
 
-#include "SceneGraph/Node.hpp"
 #include "SceneGraph/Group.hpp"
+#include "SceneGraph/Node.hpp"
 
 using namespace crimild;
 
-Picking::Picking( const Ray3f &tester, Picking::Results &results, FilterType filter )
-	: _tester( tester ),
-	  _results( results ),
-	  _filter( filter )
+Picking::Picking( const Ray3 &tester, Picking::Results &results, FilterType filter )
+    : _tester( tester ),
+      _results( results ),
+      _filter( filter )
 {
-
 }
 
 Picking::~Picking( void )
 {
-
 }
 
 void Picking::traverse( Node *node )
 {
-	_results.reset();
+    _results.reset();
 
-	NodeVisitor::traverse( node );
+    NodeVisitor::traverse( node );
 
-	// sort nodes based on how close the ray is to
-	// intersecting the scene of each bounding volume
-	_results.sortCandidates( [&]( Node *first, Node *second ) -> bool {
-        return Distance::compute( _tester, first->getWorldBound()->getCenter() ) <
-            Distance::compute( _tester, second->getWorldBound()->getCenter() );
-    });
+    // sort nodes based on how close the ray is to
+    // intersecting the scene of each bounding volume
+    _results.sortCandidates( [ & ]( Node *first, Node *second ) -> bool {
+        return distance( _tester, first->getWorldBound()->getCenter() ) < distance( _tester, second->getWorldBound()->getCenter() );
+    } );
 }
 
 void Picking::visitNode( Node *node )
 {
-	if ( _filter == nullptr || _filter( node ) ) {
-		_results.pushCandidate( node );				
-	}
+    if ( _filter == nullptr || _filter( node ) ) {
+        _results.pushCandidate( node );
+    }
 }
 
 void Picking::visitGroup( Group *group )
 {
-	visitNode( group );
-	group->forEachNode( [&]( Node *node ) {
+    visitNode( group );
+    group->forEachNode( [ & ]( Node *node ) {
         if ( node->getWorldBound()->testIntersection( _tester ) ) {
             node->accept( *this );
         }
-    });
+    } );
 }
