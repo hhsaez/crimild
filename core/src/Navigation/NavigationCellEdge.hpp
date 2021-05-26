@@ -32,7 +32,7 @@
 #include "Foundation/Memory.hpp"
 #include "Foundation/RTTI.hpp"
 #include "Foundation/SharedObject.hpp"
-#include "Mathematics/LineSegment.hpp"
+#include "Mathematics/LineSegment3.hpp"
 
 namespace crimild {
 

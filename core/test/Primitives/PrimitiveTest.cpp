@@ -57,7 +57,7 @@ TEST( Primitive, vertexData )
             VertexP3::getLayout(),
             Array< VertexP3 > {
                 {
-                    .position = Vector3f( 1.0f, 2.0f, 3.0f ),
+                    .position = Vector3f { 1.0f, 2.0f, 3.0f },
                 },
             } );
     }();

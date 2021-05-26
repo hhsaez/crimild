@@ -28,16 +28,17 @@
 #include "SphereBoundingVolume.hpp"
 
 #include "Mathematics/Intersection.hpp"
+#include "Mathematics/Vector3Ops.hpp"
 
 using namespace crimild;
 
 SphereBoundingVolume::SphereBoundingVolume( void )
-    : _sphere( Point3( 0.0f, 0.0f, 0.0f ), 1.0f )
+    : _sphere { Point3 { 0.0f, 0.0f, 0.0f }, 1.0f }
 {
 }
 
 SphereBoundingVolume::SphereBoundingVolume( const Point3 &center, float radius )
-    : _sphere( center, radius )
+    : _sphere { center, radius }
 {
 }
 
@@ -158,8 +159,8 @@ void SphereBoundingVolume::expandToContain( const Point3 &point )
 {
     //    _sphere.expandToContain( Sphere( point, 0.0f ) );
 
-    setMin( -getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
-    setMax( +getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
+    setMin( -getRadius() * Vector3f { 1.0f, 1.0f, 1.0f } );
+    setMax( +getRadius() * Vector3f { 1.0f, 1.0f, 1.0f } );
 }
 
 void SphereBoundingVolume::expandToContain( const Vector3f *positions, unsigned int positionCount )

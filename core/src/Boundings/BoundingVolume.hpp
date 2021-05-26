@@ -30,7 +30,7 @@
 
 #include "Foundation/Macros.hpp"
 #include "Foundation/SharedObject.hpp"
-#include "Mathematics/Plane.hpp"
+#include "Mathematics/Plane3.hpp"
 #include "Mathematics/Ray3.hpp"
 #include "Mathematics/Sphere.hpp"
 #include "Mathematics/Transformation.hpp"

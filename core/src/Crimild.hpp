@@ -144,7 +144,7 @@
 #include "Mathematics/Matrix3.hpp"
 #include "Mathematics/Matrix4.hpp"
 #include "Mathematics/Numeric.hpp"
-#include "Mathematics/Plane.hpp"
+#include "Mathematics/Plane3.hpp"
 #include "Mathematics/Quaternion.hpp"
 #include "Mathematics/Random.hpp"
 #include "Mathematics/Ray3.hpp"

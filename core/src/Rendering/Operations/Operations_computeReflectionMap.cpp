@@ -26,6 +26,9 @@
  */
 
 #include "Components/MaterialComponent.hpp"
+#include "Mathematics/Numbers.hpp"
+#include "Mathematics/TransformationOps.hpp"
+#include "Mathematics/perspective.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Material.hpp"
 #include "Rendering/Operations/OperationUtils.hpp"
@@ -54,7 +57,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeReflectionMap( 
     auto viewportLayout = Array< ViewportDimensions > {
         {
             .scalingMode = ScalingMode::RELATIVE,
-            .dimensions = Rectf( 0, 0, 1, 1 ),
+            .dimensions = Rectf { { 0, 0 }, { 1, 1 } },
         },
     };
 
@@ -109,7 +112,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeReflectionMap( 
                     }
 
                     //t.setTranslate( Vector3f::ZERO ); // TODO (hernan): use probe's position
-                    const auto vMatrix = t.getInverseMatrix(); //t.computeModelMatrix().getInverse();
+                    const auto vMatrix = t.invMat; //t.computeModelMatrix().getInverse();
 
                     return crimild::alloc< UniformBuffer >(
                         Props {

@@ -27,29 +27,36 @@
 
 #include "AABBBoundingVolume.hpp"
 
+#include "Mathematics/Point3Ops.hpp"
+#include "Mathematics/Vector3Ops.hpp"
+#include "Mathematics/length.hpp"
+#include "Mathematics/max.hpp"
+#include "Mathematics/min.hpp"
+#include "Mathematics/swizzle.hpp"
+#include "Mathematics/whichSide.hpp"
 #include "Rendering/VertexBuffer.hpp"
 
 using namespace crimild;
 
 AABBBoundingVolume::AABBBoundingVolume( void )
-    : _sphere( Point3::Constants::ZERO, Real( 1 ) )
+    : _sphere { Point3::Constants::ZERO, Real( 1 ) }
 {
-    setMin( -Numericf::COS_45 * getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
-    setMax( +Numericf::COS_45 * getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
+    setMin( -Numericf::COS_45 * getRadius() * Vector3::Constants::ONE );
+    setMax( +Numericf::COS_45 * getRadius() * Vector3::Constants::ONE );
 }
 
 AABBBoundingVolume::AABBBoundingVolume( const Point3 &center, float radius )
-    : _sphere( center, radius )
+    : _sphere { center, radius }
 {
-    setMin( -Numericf::COS_45 * getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
-    setMax( +Numericf::COS_45 * getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
+    setMin( -Numericf::COS_45 * getRadius() * Vector3::Constants::ONE );
+    setMax( +Numericf::COS_45 * getRadius() * Vector3::Constants::ONE );
 }
 
 AABBBoundingVolume::AABBBoundingVolume( const Sphere &sphere )
     : _sphere( sphere )
 {
-    setMin( -Numericf::COS_45 * getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
-    setMax( +Numericf::COS_45 * getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
+    setMin( -Numericf::COS_45 * getRadius() * Vector3::Constants::ONE );
+    setMax( +Numericf::COS_45 * getRadius() * Vector3::Constants::ONE );
 }
 
 AABBBoundingVolume::~AABBBoundingVolume( void )
@@ -75,8 +82,8 @@ void AABBBoundingVolume::computeFrom( const BoundingVolume *volume, const Transf
     const auto p0 = transformation( volume->getCenter() + volume->getMin() );
     const auto p1 = transformation( volume->getCenter() + volume->getMax() );
 
-    Vector3f min( Numericf::min( p0[ 0 ], p1[ 0 ] ), Numericf::min( p0[ 1 ], p1[ 1 ] ), Numericf::min( p0[ 2 ], p1[ 2 ] ) );
-    Vector3f max( Numericf::max( p0[ 0 ], p1[ 0 ] ), Numericf::max( p0[ 1 ], p1[ 1 ] ), Numericf::max( p0[ 2 ], p1[ 2 ] ) );
+    const auto min = Vector3 { Numericf::min( p0[ 0 ], p1[ 0 ] ), Numericf::min( p0[ 1 ], p1[ 1 ] ), Numericf::min( p0[ 2 ], p1[ 2 ] ) };
+    const auto max = Vector3 { Numericf::max( p0[ 0 ], p1[ 0 ] ), Numericf::max( p0[ 1 ], p1[ 1 ] ), Numericf::max( p0[ 2 ], p1[ 2 ] ) };
 
     computeFrom( min, max );
 }
@@ -130,12 +137,12 @@ void AABBBoundingVolume::computeFrom( const VertexBuffer *vbo )
 void AABBBoundingVolume::computeFrom( const Vector3f &min, const Vector3f &max )
 {
     _sphere = Sphere {
-        Point3( Real( 0.5 ) * ( max + min ) ),
-        crimild::max( Real( 0.01 ), length( max - Vector3( _sphere.getCenter() ) ) ),
+        point3( Real( 0.5 ) * ( max + min ) ),
+        crimild::max( Real( 0.01 ), length( max - vector3( center( _sphere ) ) ) ),
     };
 
-    setMin( min - Vector3( getCenter() ) );
-    setMax( max - Vector3( getCenter() ) );
+    setMin( min - vector3( getCenter() ) );
+    setMax( max - vector3( getCenter() ) );
 }
 
 void AABBBoundingVolume::expandToContain( const Point3 &p )
@@ -169,8 +176,8 @@ void AABBBoundingVolume::expandToContain( const Vector3f *positions, unsigned in
         min = crimild::min( min, pos );
     }
 
-    expandToContain( Point3( max ) );
-    expandToContain( Point3( min ) );
+    expandToContain( point3( max ) );
+    expandToContain( point3( min ) );
 }
 
 void AABBBoundingVolume::expandToContain( const VertexBuffer *vbo )
@@ -189,7 +196,7 @@ void AABBBoundingVolume::expandToContain( const VertexBuffer *vbo )
 
     positions->each< Vector3f >(
         [ & ]( auto &pos, auto i ) {
-            const auto P = Point3( pos );
+            const auto P = point3( pos );
             if ( i == 0 ) {
                 max = P;
                 min = P;
@@ -216,8 +223,8 @@ int AABBBoundingVolume::whichSide( const Plane3 &plane ) const
 
 bool AABBBoundingVolume::contains( const Vector3f &point ) const
 {
-    const auto centerDiffSqr = distanceSquared( getCenter(), Point3( point ) );
-    float radiusSqr = _sphere.getRadius() * _sphere.getRadius();
+    const auto centerDiffSqr = distanceSquared( getCenter(), point3( point ) );
+    float radiusSqr = radius( _sphere ) * radius( _sphere );
     return ( centerDiffSqr < radiusSqr );
 }
 

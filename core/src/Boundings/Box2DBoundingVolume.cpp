@@ -29,11 +29,13 @@
 
 #include "Debug/DebugRenderHelper.hpp"
 #include "Mathematics/Intersection.hpp"
+#include "Mathematics/Vector3Ops.hpp"
+#include "Mathematics/max.hpp"
 
 using namespace crimild;
 
 Box2DBoundingVolume::Box2DBoundingVolume( void )
-    : _sphere( Point3::Constants::ZERO, 1.0f )
+    : _sphere { Point3::Constants::ZERO, 1.0f }
 {
 }
 

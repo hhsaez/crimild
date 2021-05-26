@@ -30,7 +30,8 @@
 
 #include "Foundation/Macros.hpp"
 #include "Foundation/Types.hpp"
-#include "VectorImpl.hpp"
+#include "Mathematics/ColorRGBAOps.hpp"
+#include "Mathematics/Vector3.hpp"
 
 #include <algorithm>
 #include <cfloat>
@@ -84,14 +85,14 @@ namespace crimild {
         }
 
     private:
-        template< crimild::Size SIZE, typename PRECISION >
-        inline static void generateImpl( impl::Vector< PRECISION, SIZE > &result, const impl::Vector< PRECISION, SIZE > &min, const impl::Vector< PRECISION, SIZE > &max )
+        template< typename T >
+        [[nodiscard]] inline static void generateImpl( impl::Vector3< T > &result, const impl::Vector3< T > &min, const impl::Vector3< T > &max ) noexcept
         {
-            std::array< PRECISION, SIZE > tuple = { 0 };
-            for ( crimild::Size i = 0; i < SIZE; i++ ) {
-                tuple[ i ] = Random::generate< PRECISION >( min[ i ], max[ i ] );
-            }
-            result = impl::Vector< PRECISION, SIZE >( tuple );
+            result = impl::Vector3< T > {
+                Random::generate< T >( min[ 0 ], max[ 0 ] ),
+                Random::generate< T >( min[ 1 ], max[ 1 ] ),
+                Random::generate< T >( min[ 2 ], max[ 2 ] ),
+            };
         }
 
         template< typename PRECISION >

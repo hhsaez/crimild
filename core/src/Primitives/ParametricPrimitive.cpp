@@ -27,6 +27,13 @@
 
 #include "ParametricPrimitive.hpp"
 
+#include "Mathematics/ColorRGBOps.hpp"
+#include "Mathematics/Vector2Ops.hpp"
+#include "Mathematics/Vector3Ops.hpp"
+#include "Mathematics/cross.hpp"
+#include "Mathematics/normalize.hpp"
+#include "Mathematics/swizzle.hpp"
+
 using namespace crimild;
 
 ParametricPrimitive::ParametricPrimitive( const Params &params ) noexcept
@@ -40,7 +47,7 @@ void ParametricPrimitive::setInterval( const ParametricInterval &interval )
 {
     _upperBound = interval.upperBound;
     _divisions = interval.divisions;
-    _slices = _divisions - Vector2i( 1, 1 );
+    _slices = _divisions - Vector2i { 1, 1 };
     _textureCount = interval.textureCount;
 }
 
@@ -61,7 +68,10 @@ int ParametricPrimitive::getTriangleIndexCount( void ) const
 
 Vector2f ParametricPrimitive::computeDomain( float x, float y ) const
 {
-    return Vector2f( x * _upperBound[ 0 ] / _slices[ 0 ], y * _upperBound[ 1 ] / _slices[ 1 ] );
+    return Vector2f {
+        x * _upperBound[ 0 ] / _slices[ 0 ],
+        y * _upperBound[ 1 ] / _slices[ 1 ],
+    };
 }
 
 void ParametricPrimitive::generate( void )
@@ -124,7 +134,7 @@ void ParametricPrimitive::generateVertexBuffer( void )
                 if ( _colorMode.type == ColorMode::Type::CONSTANT ) {
                     color = _colorMode.color;
                 } else if ( _colorMode.type == ColorMode::Type::POSITIONS ) {
-                    color = 0.5f * ( ColorRGB::Constants::WHITE + ColorRGB( normalize( range ) ) );
+                    color = 0.5f * ( ColorRGB::Constants::WHITE + rgb( normalize( range ) ) );
                 }
                 colors->set( vIdx, color );
             }
@@ -132,7 +142,7 @@ void ParametricPrimitive::generateVertexBuffer( void )
             if ( texCoords != nullptr ) {
                 auto s = ( float ) _textureCount[ 0 ] * ( float ) j / ( float ) _slices[ 0 ];
                 auto t = ( float ) _textureCount[ 1 ] * ( float ) i / ( float ) _slices[ 1 ];
-                texCoords->set( vIdx, Vector2f( s, t ) );
+                texCoords->set( vIdx, Vector2f { s, t } );
             }
         }
     }

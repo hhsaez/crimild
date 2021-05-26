@@ -40,8 +40,8 @@ namespace crimild {
         explicit SphereBoundingVolume( const Sphere &sphere );
         virtual ~SphereBoundingVolume( void );
 
-        virtual const Point3 &getCenter( void ) const override { return _sphere.getCenter(); }
-        virtual float getRadius( void ) const override { return _sphere.getRadius(); }
+        virtual const Point3 &getCenter( void ) const override { return center( _sphere ); }
+        virtual float getRadius( void ) const override { return radius( _sphere ); }
 
     private:
         Sphere _sphere;

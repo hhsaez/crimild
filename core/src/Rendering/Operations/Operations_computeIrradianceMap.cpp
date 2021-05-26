@@ -28,6 +28,8 @@
 #include "Components/MaterialComponent.hpp"
 #include "Mathematics/Frustum.hpp"
 #include "Mathematics/Transformation.hpp"
+#include "Mathematics/TransformationOps.hpp"
+#include "Mathematics/perspective.hpp"
 #include "Primitives/BoxPrimitive.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Material.hpp"
@@ -54,7 +56,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeIrradianceMap( 
     auto viewportLayout = Array< ViewportDimensions > {
         {
             .scalingMode = ScalingMode::RELATIVE,
-            .dimensions = Rectf( 0, 0, 1, 1 ),
+            .dimensions = Rectf { { 0, 0 }, { 1, 1 } },
         },
     };
 
@@ -72,7 +74,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeIrradianceMap( 
         BoxPrimitive::Params {
             .type = Primitive::Type::TRIANGLES,
             .layout = VertexP3::getLayout(),
-            .size = Vector3f( 10.0f, 10.0f, 10.0f ),
+            .size = Vector3f { 10.0f, 10.0f, 10.0f },
             .invertFaces = true,
         } );
 
@@ -327,7 +329,7 @@ vec4 textureCubeUV( sampler2D envMap, vec3 direction, vec4 viewport )
                     }
 
                     //t.setTranslate( Vector3f::ZERO ); // TODO (hernan): use probe's position
-                    const auto vMatrix = t.getInverseMatrix(); //t.computeModelMatrix().getInverse();
+                    const auto vMatrix = t.invMat; //t.computeModelMatrix().getInverse();
 
                     return crimild::alloc< UniformBuffer >(
                         Props {

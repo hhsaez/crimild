@@ -262,7 +262,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( SharedPoi
 
     auto viewport = ViewportDimensions {
         .scalingMode = ScalingMode::SWAPCHAIN_RELATIVE,
-        .dimensions = Rectf( 0, 0, 1, 1 ),
+        .dimensions = Rectf { { 0, 0 }, { 1, 1 } },
     };
 
     renderPass->reads( { renderables } );

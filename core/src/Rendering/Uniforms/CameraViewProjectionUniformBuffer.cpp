@@ -69,7 +69,7 @@ void CameraViewProjectionUniform::onPreRender( void ) noexcept
                 auto settings = Simulation::getInstance()->getSettings();
                 auto w = settings->get< float >( "video.width", 1024 );
                 auto h = settings->get< float >( "video.height", 1024 );
-                return Vector2f( w, h );
+                return Vector2f { w, h };
             }(),
         } );
 }

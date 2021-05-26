@@ -28,6 +28,7 @@
 #include "SceneGraph/Skybox.hpp"
 
 #include "Components/MaterialComponent.hpp"
+#include "Mathematics/swizzle.hpp"
 #include "Primitives/BoxPrimitive.hpp"
 #include "Rendering/Image.hpp"
 #include "Rendering/ImageView.hpp"
@@ -49,7 +50,7 @@ Skybox::Skybox( const ColorRGB &color ) noexcept
             BoxPrimitive::Params {
                 .type = Primitive::Type::TRIANGLES,
                 .layout = VertexP3::getLayout(),
-                .size = Vector3f( 10.0f, 10.0f, 10.0f ),
+                .size = Vector3f { 10.0f, 10.0f, 10.0f },
                 .invertFaces = true,
             } ) );
 
@@ -147,7 +148,7 @@ Skybox::Skybox( const ColorRGB &color ) noexcept
                     descriptors->descriptors = {
                         {
                             .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                            .obj = crimild::alloc< UniformBuffer >( color.rgba() ),
+                            .obj = crimild::alloc< UniformBuffer >( rgba( color ) ),
                         },
                     };
                     return descriptors;
@@ -165,7 +166,7 @@ Skybox::Skybox( SharedPointer< Texture > const &texture ) noexcept
             BoxPrimitive::Params {
                 .type = Primitive::Type::TRIANGLES,
                 .layout = VertexP3::getLayout(),
-                .size = Vector3f( 10.0f, 10.0f, 10.0f ),
+                .size = Vector3f { 10.0f, 10.0f, 10.0f },
                 .invertFaces = true,
             } ) );
 

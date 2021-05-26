@@ -28,25 +28,38 @@
 #ifndef CRIMILD_MATHEMATICS_VECTOR_4_
 #define CRIMILD_MATHEMATICS_VECTOR_4_
 
-#include "VectorImpl.hpp"
+#include "Mathematics/Tuple4.hpp"
+
+#include <limits>
 
 namespace crimild {
 
-    template< typename T >
-    [[nodiscard]] inline constexpr impl::Vector< T, 4 > permute( const impl::Vector< T, 4 > &u, Int x, Int y, Int z, Int w ) noexcept
-    {
-        return impl::Vector< T, 4 >(
-            u[ x ],
-            u[ y ],
-            u[ z ],
-            u[ w ] );
+    namespace impl {
+
+        template< typename T >
+        struct Vector4 : public Tuple4< T > {
+            struct Constants;
+        };
+
+        template< typename T >
+        struct Vector4< T >::Constants {
+            static constexpr auto ZERO = Vector4< T > { 0, 0, 0, 0 };
+            static constexpr auto ONE = Vector4< T > { 1, 1, 1, 0 };
+            static constexpr auto POSITIVE_INFINITY = Vector4< T > { std::numeric_limits< T >::max(), std::numeric_limits< T >::max(), std::numeric_limits< T >::max(), std::numeric_limits< T >::max() };
+            static constexpr auto NEGATIVE_INFINITY = Vector4< T > { std::numeric_limits< T >::min(), std::numeric_limits< T >::min(), std::numeric_limits< T >::min(), std::numeric_limits< T >::min() };
+            static constexpr auto UNIT_X = Vector4< T > { 1, 0, 0, 0 };
+            static constexpr auto UNIT_Y = Vector4< T > { 0, 1, 0, 0 };
+            static constexpr auto UNIT_Z = Vector4< T > { 0, 0, 1, 0 };
+            static constexpr auto UNIT_W = Vector4< T > { 0, 0, 0, 1 };
+        };
+
     }
 
-    using Vector4 = impl::Vector< Real, 4 >;
-    using Vector4f = impl::Vector< Real32, 4 >;
-    using Vector4d = impl::Vector< Real64, 4 >;
-    using Vector4i = impl::Vector< Int32, 4 >;
-    using Vector4ui = impl::Vector< UInt32, 4 >;
+    using Vector4 = impl::Vector4< Real >;
+    using Vector4f = impl::Vector4< Real32 >;
+    using Vector4d = impl::Vector4< Real64 >;
+    using Vector4i = impl::Vector4< Int32 >;
+    using Vector4ui = impl::Vector4< UInt32 >;
 
 }
 

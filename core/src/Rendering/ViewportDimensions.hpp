@@ -38,8 +38,8 @@ namespace crimild {
     struct ViewportDimensions {
 
         ScalingMode scalingMode = ScalingMode::SWAPCHAIN_RELATIVE;
-        Rectf dimensions = Rectf( 0, 0, 1, 1 );
-        Vector2f depthRange = Vector2f( 0.0f, 1.0f );
+        Rectf dimensions = Rectf { { 0, 0 }, { 1, 1 } };
+        Vector2f depthRange = Vector2f { 0.0f, 1.0f };
 
         static ViewportDimensions viewportFrom( const ViewportDimensions &parent, const ViewportDimensions &child ) noexcept
         {
@@ -47,11 +47,16 @@ namespace crimild {
             const auto &cd = child.dimensions;
             return ViewportDimensions {
                 .scalingMode = ScalingMode::RELATIVE,
-                .dimensions = Rectf(
-                    pd.getX() + cd.getX() * pd.getWidth(),
-                    pd.getY() + cd.getY() * pd.getHeight(),
-                    pd.getWidth() * cd.getWidth(),
-                    pd.getHeight() * cd.getHeight() ),
+                .dimensions = Rectf {
+                    {
+                        pd.origin.x + cd.origin.x * pd.size.width,
+                        pd.origin.y + cd.origin.y * pd.size.height,
+                    },
+                    {
+                        pd.size.width * cd.size.width,
+                        pd.size.height * cd.size.height,
+                    },
+                },
             };
         }
 
@@ -61,32 +66,32 @@ namespace crimild {
                 viewportFrom(
                     parent,
                     {
-                        .dimensions = Rectf( 0.0f, 0.5f, 0.25f, 0.25f ),
+                        .dimensions = Rectf { { 0.0f, 0.5f }, { 0.25f, 0.25f } },
                     } ),
                 viewportFrom(
                     parent,
                     {
-                        .dimensions = Rectf( 0.5f, 0.5f, 0.25f, 0.25f ),
+                        .dimensions = Rectf { { 0.5f, 0.5f }, { 0.25f, 0.25f } },
                     } ),
                 viewportFrom(
                     parent,
                     {
-                        .dimensions = Rectf( 0.5f, 0.25f, 0.25f, 0.25f ),
+                        .dimensions = Rectf { { 0.5f, 0.25f }, { 0.25f, 0.25f } },
                     } ),
                 viewportFrom(
                     parent,
                     {
-                        .dimensions = Rectf( 0.5f, 0.75f, 0.25f, 0.25f ),
+                        .dimensions = Rectf { { 0.5f, 0.75f }, { 0.25f, 0.25f } },
                     } ),
                 viewportFrom(
                     parent,
                     {
-                        .dimensions = Rectf( 0.25f, 0.5f, 0.25f, 0.25f ),
+                        .dimensions = Rectf { { 0.25f, 0.5f }, { 0.25f, 0.25f } },
                     } ),
                 viewportFrom(
                     parent,
                     {
-                        .dimensions = Rectf( 0.75f, 0.5f, 0.25f, 0.25f ),
+                        .dimensions = Rectf { { 0.75f, 0.5f }, { 0.25f, 0.25f } },
                     } ),
             };
         }

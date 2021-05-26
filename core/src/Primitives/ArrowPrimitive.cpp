@@ -29,6 +29,10 @@
 
 #include "ConePrimitive.hpp"
 #include "CylinderPrimitive.hpp"
+#include "Mathematics/Vector2Ops.hpp"
+#include "Mathematics/Vector3Ops.hpp"
+#include "Mathematics/cross.hpp"
+#include "Mathematics/normalize.hpp"
 
 namespace crimild {
 
@@ -80,8 +84,8 @@ namespace crimild {
             auto textureCount = interval.textureCount;
             auto evaluator = params.evaluator;
 
-            const auto X = divisions.x();
-            const auto Y = divisions.y();
+            const auto X = divisions.x;
+            const auto Y = divisions.y;
             const auto N = X * Y;
 
             auto hasNormals = layout.hasAttribute( VertexAttribute::Name::NORMAL );
@@ -98,9 +102,10 @@ namespace crimild {
                 ret.texCoords.resize( N );
 
             auto evaluate = [ = ]( auto x, auto y ) -> Vector3f {
-                auto domain = Vector2f(
-                    x * upperBound.x() / slices.x(),
-                    y * upperBound.y() / slices.y() );
+                auto domain = Vector2f {
+                    x * upperBound.x / slices.x,
+                    y * upperBound.y / slices.y,
+                };
                 return evaluator( domain );
             };
 
@@ -119,11 +124,11 @@ namespace crimild {
                         // nudge the point if the normal is indeterminate
                         if ( x == 0 )
                             s += 0.01f;
-                        if ( x == divisions.x() - 1 )
+                        if ( x == divisions.x - 1 )
                             s -= 0.01f;
                         if ( y == 0 )
                             t += 0.01f;
-                        if ( y == divisions.y() - 1 )
+                        if ( y == divisions.y - 1 )
                             t -= 0.01f;
 
                         // compute the tangents and their cross product
@@ -151,28 +156,28 @@ namespace crimild {
                     }
 
                     if ( hasTexCoords ) {
-                        auto s = ( float ) textureCount.x() * ( float ) x / ( float ) slices[ 0 ];
-                        auto t = ( float ) textureCount.y() * ( float ) y / ( float ) slices[ 1 ];
-                        ret.texCoords[ vertex ] = Vector2f( s, t );
+                        auto s = ( float ) textureCount.x * ( float ) x / ( float ) slices[ 0 ];
+                        auto t = ( float ) textureCount.y * ( float ) y / ( float ) slices[ 1 ];
+                        ret.texCoords[ vertex ] = Vector2f { s, t };
                     }
                 }
             }
 
-            ret.indices.resize( 6 * slices.x() * slices.y() );
+            ret.indices.resize( 6 * slices.x * slices.y );
             auto index = 0l;
             auto vertex = 0l;
-            for ( auto y = 0l; y < slices.y(); ++y ) {
-                for ( auto x = 0l; x < slices.x(); ++x ) {
-                    auto next = ( x + 1 ) % divisions.x();
+            for ( auto y = 0l; y < slices.y; ++y ) {
+                for ( auto x = 0l; x < slices.x; ++x ) {
+                    auto next = ( x + 1 ) % divisions.x;
                     ret.indices[ index++ ] = vertex + x;
                     ret.indices[ index++ ] = vertex + next;
-                    ret.indices[ index++ ] = vertex + x + divisions.x();
+                    ret.indices[ index++ ] = vertex + x + divisions.x;
 
                     ret.indices[ index++ ] = vertex + next;
-                    ret.indices[ index++ ] = vertex + next + divisions.x();
-                    ret.indices[ index++ ] = vertex + x + divisions.x();
+                    ret.indices[ index++ ] = vertex + next + divisions.x;
+                    ret.indices[ index++ ] = vertex + x + divisions.x;
                 }
-                vertex += divisions.x();
+                vertex += divisions.x;
             }
 
             return ret;
@@ -191,7 +196,7 @@ ArrowPrimitive::ArrowPrimitive( const Params &params ) noexcept
 
     auto height = 1.0f;
     auto radius = 1.0f;
-    auto divisions = Vector2i( 9, 4 );
+    auto divisions = Vector2i { 9, 4 };
 
     auto coneHeight = 0.3f * height;
     auto coneRadius = 0.25f * radius;
@@ -206,8 +211,8 @@ ArrowPrimitive::ArrowPrimitive( const Params &params ) noexcept
             .layout = layout,
             .interval = {
                 .divisions = divisions,
-                .upperBound = Vector2f( Numericf::TWO_PI, 1.0f ),
-                .textureCount = Vector2f( 30, 20 ),
+                .upperBound = Vector2f { Numericf::TWO_PI, 1.0f },
+                .textureCount = Vector2 { 30, 20 },
             },
             .evaluator = [ R = coneRadius, H = coneHeight, O = coneOffset ]( const Vector2f &domain ) -> Vector3f {
                 float u = domain[ 0 ];
@@ -215,7 +220,7 @@ ArrowPrimitive::ArrowPrimitive( const Params &params ) noexcept
                 float x = v * R * std::cos( u );
                 float y = v * R * std::sin( u );
                 float z = ( v - 1.0f ) * H;
-                return O + Vector3f( x, y, z );
+                return O + Vector3 { x, y, z };
             },
         } );
 
@@ -224,13 +229,13 @@ ArrowPrimitive::ArrowPrimitive( const Params &params ) noexcept
     // Join the cone and the cylinder.
     // The last points in the cone will be joined with the first ones in the cylinder
     auto slices = divisions - Vector2i::Constants::ONE;
-    for ( auto x = 0l; x < slices.x(); ++x ) {
-        auto next = ( x + 1 ) % divisions.x();
-        cone.indices.add( coneVertexCount - divisions.x() + x );
-        cone.indices.add( coneVertexCount - divisions.x() + next );
+    for ( auto x = 0l; x < slices.x; ++x ) {
+        auto next = ( x + 1 ) % divisions.x;
+        cone.indices.add( coneVertexCount - divisions.x + x );
+        cone.indices.add( coneVertexCount - divisions.x + next );
         cone.indices.add( coneVertexCount + x );
 
-        cone.indices.add( coneVertexCount - divisions.x() + next );
+        cone.indices.add( coneVertexCount - divisions.x + next );
         cone.indices.add( coneVertexCount + next );
         cone.indices.add( coneVertexCount + x );
     }
@@ -241,8 +246,8 @@ ArrowPrimitive::ArrowPrimitive( const Params &params ) noexcept
             .layout = layout,
             .interval = {
                 .divisions = divisions,
-                .upperBound = Vector2f( Numericf::TWO_PI, 1.0f ),
-                .textureCount = Vector2f( 30, 20 ),
+                .upperBound = Vector2f { Numericf::TWO_PI, 1.0f },
+                .textureCount = Vector2f { 30, 20 },
             },
             .evaluator = [ R = cylinderRadius, H = cylinderHeight ]( const Vector2f &domain ) -> Vector3f {
                 float u = domain[ 0 ];
@@ -250,19 +255,19 @@ ArrowPrimitive::ArrowPrimitive( const Params &params ) noexcept
                 float x = R * std::cos( u );
                 float y = R * std::sin( u );
                 float z = ( v - 1.0f ) * H;
-                return Vector3f( x, y, z );
+                return Vector3f { x, y, z };
             },
         } );
 
     auto cylinderVertexCount = cylinder.positions.size();
 
-    for ( auto x = 0l; x < slices.x(); ++x ) {
-        auto next = ( x + 1 ) % divisions.x();
-        cylinder.indices.add( cylinderVertexCount - divisions.x() + x );
-        cylinder.indices.add( cylinderVertexCount - divisions.x() + next );
+    for ( auto x = 0l; x < slices.x; ++x ) {
+        auto next = ( x + 1 ) % divisions.x;
+        cylinder.indices.add( cylinderVertexCount - divisions.x + x );
+        cylinder.indices.add( cylinderVertexCount - divisions.x + next );
         cylinder.indices.add( cylinderVertexCount + x );
 
-        cylinder.indices.add( cylinderVertexCount - divisions.x() + next );
+        cylinder.indices.add( cylinderVertexCount - divisions.x + next );
         cylinder.indices.add( cylinderVertexCount + next );
         cylinder.indices.add( cylinderVertexCount + x );
     }

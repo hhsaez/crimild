@@ -27,6 +27,7 @@
 
 #include "Input.hpp"
 
+#include "Mathematics/Vector2Ops.hpp"
 #include "Rendering/Renderer.hpp"
 
 using namespace crimild;
@@ -59,17 +60,17 @@ Input::Input( void )
     } );
 
     registerMessageHandler< MouseMotion >( [ self ]( MouseMotion const &msg ) {
-        Vector2f pos( msg.x, msg.y );
+        Vector2f pos { msg.x, msg.y };
         self->_mouseDelta = pos - self->_mousePos;
         self->_mousePos = pos;
 
-        Vector2f npos( msg.nx, msg.ny );
+        Vector2f npos { msg.nx, msg.ny };
         self->_normalizedMouseDelta = npos - self->_normalizedMousePos;
         self->_normalizedMousePos = npos;
     } );
 
     registerMessageHandler< MouseScroll >( [ this ]( MouseScroll const &msg ) {
-        _mouseScrollDelta = Vector2f( msg.dx, msg.dy );
+        _mouseScrollDelta = Vector2f { msg.dx, msg.dy };
     } );
 
     setAxis( AXIS_HORIZONTAL, 0.0f );
@@ -92,10 +93,10 @@ void Input::reset( int keyCount, int mouseButtonCount )
         _keys[ i ] = false;
     }
 
-    _mousePos = Vector2f( 0.0f, 0.0f );
-    _mouseDelta = Vector2f( 0.0f, 0.0f );
-    _normalizedMousePos = Vector2f( 0.0f, 0.0f );
-    _normalizedMouseDelta = Vector2f( 0.0f, 0.0f );
+    _mousePos = Vector2f { 0.0f, 0.0f };
+    _mouseDelta = Vector2f { 0.0f, 0.0f };
+    _normalizedMousePos = Vector2f { 0.0f, 0.0f };
+    _normalizedMouseDelta = Vector2f { 0.0f, 0.0f };
     _mouseScrollDelta = Vector2f::Constants::ZERO;
 
     _mouseButtons.resize( mouseButtonCount );

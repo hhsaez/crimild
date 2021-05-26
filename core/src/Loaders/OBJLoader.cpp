@@ -63,9 +63,9 @@ namespace std {
         {
             size_t seed = 0;
             std::hash< float > hasher;
-            crimild::utils::hash_combine( seed, hasher( v.x() ) );
-            crimild::utils::hash_combine( seed, hasher( v.y() ) );
-            crimild::utils::hash_combine( seed, hasher( v.z() ) );
+            crimild::utils::hash_combine( seed, hasher( v.x ) );
+            crimild::utils::hash_combine( seed, hasher( v.y ) );
+            crimild::utils::hash_combine( seed, hasher( v.z ) );
             return seed;
         }
     };
@@ -76,8 +76,8 @@ namespace std {
         {
             size_t seed = 0;
             std::hash< float > hasher;
-            crimild::utils::hash_combine( seed, hasher( v.x() ) );
-            crimild::utils::hash_combine( seed, hasher( v.y() ) );
+            crimild::utils::hash_combine( seed, hasher( v.x ) );
+            crimild::utils::hash_combine( seed, hasher( v.y ) );
             return seed;
         }
     };
@@ -278,7 +278,7 @@ void OBJLoader::readObjectPositions( std::stringstream &line )
 {
     float x, y, z;
     line >> x >> y >> z;
-    _positions.push_back( Vector3f( x, y, z ) );
+    _positions.push_back( Vector3f { x, y, z } );
     printProgress( StringUtils::toString( "Reading positions... ", _positions.size() / 3 ) );
 }
 
@@ -286,7 +286,7 @@ void OBJLoader::readObjectTextureCoords( std::stringstream &line )
 {
     float s, t;
     line >> s >> t;
-    _textureCoords.push_back( Vector2f( s, 1.0 - t ) );
+    _textureCoords.push_back( Vector2f { s, Real( 1 ) - t } );
     printProgress( StringUtils::toString( "Reading texture coordinates... ", _textureCoords.size() / 3 ) );
 }
 
@@ -294,7 +294,7 @@ void OBJLoader::readObjectNormals( std::stringstream &line )
 {
     float x, y, z;
     line >> x >> y >> z;
-    _normals.push_back( Vector3f( x, y, z ) );
+    _normals.push_back( Vector3f { x, y, z } );
     printProgress( StringUtils::toString( "Reading normals... ", ( _normals.size() / 3 ) ) );
 }
 
@@ -339,21 +339,21 @@ void OBJLoader::readMaterialAmbient( std::stringstream &line )
 {
     float r, g, b;
     line >> r >> g >> b;
-    _currentMaterial->setAmbient( ColorRGBA( r, g, b, 1.0f ) );
+    _currentMaterial->setAmbient( ColorRGBA { r, g, b, 1.0f } );
 }
 
 void OBJLoader::readMaterialDiffuse( std::stringstream &line )
 {
     float r, g, b;
     line >> r >> g >> b;
-    _currentMaterial->setDiffuse( ColorRGBA( r, g, b, 1.0f ) );
+    _currentMaterial->setDiffuse( ColorRGBA { r, g, b, 1.0f } );
 }
 
 void OBJLoader::readMaterialSpecular( std::stringstream &line )
 {
     float r, g, b;
     line >> r >> g >> b;
-    _currentMaterial->setSpecular( ColorRGBA( r, g, b, 1.0f ) );
+    _currentMaterial->setSpecular( ColorRGBA { r, g, b, 1.0f } );
 }
 
 void OBJLoader::readMaterialColorMap( std::stringstream &line )

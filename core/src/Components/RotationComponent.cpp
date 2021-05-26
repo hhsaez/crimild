@@ -30,6 +30,7 @@
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
 #include "Mathematics/Numeric.hpp"
+#include "Mathematics/normalize.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Visitors/UpdateWorldState.hpp"
 

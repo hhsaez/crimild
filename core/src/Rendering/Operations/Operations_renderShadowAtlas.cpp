@@ -168,11 +168,12 @@ size_t recordPointLightCommands(
             light->getShadowMap()->setViewport(
                 [ & ] {
                     auto rect = layoutViewport.dimensions;
-                    return Vector4f(
-                        rect.getX(),
-                        rect.getY(),
-                        rect.getWidth(),
-                        rect.getHeight() );
+                    return Vector4f {
+                        rect.origin.x,
+                        rect.origin.y,
+                        rect.size.width,
+                        rect.size.height,
+                    };
                 }() );
 
             auto transformViewport = []( auto layout, auto viewport ) {
@@ -180,11 +181,16 @@ size_t recordPointLightCommands(
                 auto vd = viewport.dimensions;
                 return ViewportDimensions {
                     .scalingMode = ScalingMode::RELATIVE,
-                    .dimensions = Rectf(
-                        ld.getX() + vd.getX() * ld.getWidth(),
-                        ld.getY() + vd.getY() * ld.getHeight(),
-                        ld.getWidth() * vd.getWidth(),
-                        ld.getHeight() * vd.getHeight() ),
+                    .dimensions = Rectf {
+                        {
+                            ld.origin.x + vd.origin.x * ld.size.width,
+                            ld.origin.y + vd.origin.y * ld.size.height,
+                        },
+                        {
+                            ld.size.width * vd.size.width,
+                            ld.size.height * vd.size.height,
+                        },
+                    },
                 };
             };
 
@@ -193,37 +199,37 @@ size_t recordPointLightCommands(
                     layoutViewport,
                     ViewportDimensions {
                         .scalingMode = ScalingMode::RELATIVE,
-                        .dimensions = Rectf( 0.0f, 0.5f, 0.25f, 0.25f ),
+                        .dimensions = Rectf { { 0.0f, 0.5f }, { 0.25f, 0.25f } },
                     } ),
                 transformViewport(
                     layoutViewport,
                     ViewportDimensions {
                         .scalingMode = ScalingMode::RELATIVE,
-                        .dimensions = Rectf( 0.5f, 0.5f, 0.25f, 0.25f ),
+                        .dimensions = Rectf { { 0.5f, 0.5f }, { 0.25f, 0.25f } },
                     } ),
                 transformViewport(
                     layoutViewport,
                     ViewportDimensions {
                         .scalingMode = ScalingMode::RELATIVE,
-                        .dimensions = Rectf( 0.5f, 0.25f, 0.25f, 0.25f ),
+                        .dimensions = Rectf { { 0.5f, 0.25f }, { 0.25f, 0.25f } },
                     } ),
                 transformViewport(
                     layoutViewport,
                     ViewportDimensions {
                         .scalingMode = ScalingMode::RELATIVE,
-                        .dimensions = Rectf( 0.5f, 0.75f, 0.25f, 0.25f ),
+                        .dimensions = Rectf { { 0.5f, 0.75f }, { 0.25f, 0.25f } },
                     } ),
                 transformViewport(
                     layoutViewport,
                     ViewportDimensions {
                         .scalingMode = ScalingMode::RELATIVE,
-                        .dimensions = Rectf( 0.25f, 0.5f, 0.25f, 0.25f ),
+                        .dimensions = Rectf { { 0.25f, 0.5f }, { 0.25f, 0.25f } },
                     } ),
                 transformViewport(
                     layoutViewport,
                     ViewportDimensions {
                         .scalingMode = ScalingMode::RELATIVE,
-                        .dimensions = Rectf( 0.75f, 0.5f, 0.25f, 0.25f ),
+                        .dimensions = Rectf { { 0.75f, 0.5f }, { 0.25f, 0.25f } },
                     } ),
             };
 
@@ -277,11 +283,12 @@ size_t recordSpotLightCommands(
             light->getShadowMap()->setViewport(
                 [ & ] {
                     auto rect = viewport.dimensions;
-                    return Vector4f(
-                        rect.getX(),
-                        rect.getY(),
-                        rect.getWidth(),
-                        rect.getHeight() );
+                    return Vector4f {
+                        rect.origin.x,
+                        rect.origin.y,
+                        rect.size.width,
+                        rect.size.height,
+                    };
                 }() );
 
             commandBuffer->setViewport( viewport );
@@ -312,11 +319,16 @@ size_t recordDirectionalLightCommands(
         auto vd = viewport.dimensions;
         return ViewportDimensions {
             .scalingMode = ScalingMode::RELATIVE,
-            .dimensions = Rectf(
-                ld.getX() + vd.getX() * ld.getWidth(),
-                ld.getY() + vd.getY() * ld.getHeight(),
-                ld.getWidth() * vd.getWidth(),
-                ld.getHeight() * vd.getHeight() ),
+            .dimensions = Rectf {
+                {
+                    ld.origin.x + vd.origin.x * ld.size.width,
+                    ld.origin.y + vd.origin.y * ld.size.height,
+                },
+                {
+                    ld.size.width * vd.size.width,
+                    ld.size.height * vd.size.height,
+                },
+            },
         };
     };
 
@@ -347,11 +359,12 @@ size_t recordDirectionalLightCommands(
             light->getShadowMap()->setViewport(
                 [ & ] {
                     auto rect = layoutViewport.dimensions;
-                    return Vector4f(
-                        rect.getX(),
-                        rect.getY(),
-                        rect.getWidth(),
-                        rect.getHeight() );
+                    return Vector4f {
+                        rect.origin.x,
+                        rect.origin.y,
+                        rect.size.width,
+                        rect.size.height,
+                    };
                 }() );
 
             ViewportDimensions cascadeViewports[ 4 ] = {
@@ -359,25 +372,25 @@ size_t recordDirectionalLightCommands(
                     layoutViewport,
                     ViewportDimensions {
                         .scalingMode = ScalingMode::RELATIVE,
-                        .dimensions = Rectf( 0.0f, 0.0f, 0.5f, 0.5f ),
+                        .dimensions = Rectf { { 0.0f, 0.0f }, { 0.5f, 0.5f } },
                     } ),
                 transformViewport(
                     layoutViewport,
                     ViewportDimensions {
                         .scalingMode = ScalingMode::RELATIVE,
-                        .dimensions = Rectf( 0.5f, 0.0f, 0.5f, 0.5f ),
+                        .dimensions = Rectf { { 0.5f, 0.0f }, { 0.5f, 0.5f } },
                     } ),
                 transformViewport(
                     layoutViewport,
                     ViewportDimensions {
                         .scalingMode = ScalingMode::RELATIVE,
-                        .dimensions = Rectf( 0.0f, 0.5f, 0.5f, 0.5f ),
+                        .dimensions = Rectf { { 0.0f, 0.5f }, { 0.5f, 0.5f } },
                     } ),
                 transformViewport(
                     layoutViewport,
                     ViewportDimensions {
                         .scalingMode = ScalingMode::RELATIVE,
-                        .dimensions = Rectf( 0.5f, 0.5f, 0.5f, 0.5f ),
+                        .dimensions = Rectf { { 0.5f, 0.5f }, { 0.5f, 0.5f } },
                     } ),
             };
 
@@ -415,7 +428,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::renderShadowAtlas( Sha
     };
 
     renderPass->clearValue = {
-        .color = ColorRGBA( 1.0f, 1.0f, 1.0f, 1.0f ),
+        .color = ColorRGBA { 1.0f, 1.0f, 1.0f, 1.0f },
     };
 
     renderPass->reads( { renderables } );
@@ -449,25 +462,25 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::renderShadowAtlas( Sha
                     ? Array< ViewportDimensions > {
                           {
                               .scalingMode = ScalingMode::RELATIVE,
-                              .dimensions = Rectf( 0.0f, 0.0f, 1.0f, 1.0f ),
+                              .dimensions = Rectf { { 0.0f, 0.0f }, { 1.0f, 1.0f } },
                           },
                       }
                     : Array< ViewportDimensions > {
                           {
                               .scalingMode = ScalingMode::RELATIVE,
-                              .dimensions = Rectf( 0.0f, 0.0f, 0.5f, 0.5f ),
+                              .dimensions = Rectf { { 0.0f, 0.0f }, { 0.5f, 0.5f } },
                           },
                           {
                               .scalingMode = ScalingMode::RELATIVE,
-                              .dimensions = Rectf( 0.0f, 0.5f, 0.5f, 0.5f ),
+                              .dimensions = Rectf { { 0.0f, 0.5f }, { 0.5f, 0.5f } },
                           },
                           {
                               .scalingMode = ScalingMode::RELATIVE,
-                              .dimensions = Rectf( 0.5f, 0.0f, 0.5f, 0.5f ),
+                              .dimensions = Rectf { { 0.5f, 0.0f }, { 0.5f, 0.5f } },
                           },
                           {
                               .scalingMode = ScalingMode::RELATIVE,
-                              .dimensions = Rectf( 0.5f, 0.5f, 0.5f, 0.5f ),
+                              .dimensions = Rectf { { 0.5f, 0.5f }, { 0.5f, 0.5f } },
                           },
                       };
 

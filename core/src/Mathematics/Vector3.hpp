@@ -28,51 +28,37 @@
 #ifndef CRIMILD_MATHEMATICS_VECTOR_3_
 #define CRIMILD_MATHEMATICS_VECTOR_3_
 
-#include "Mathematics/VectorImpl.hpp"
+#include "Mathematics/Tuple3.hpp"
+
+#include <limits>
 
 namespace crimild {
 
-    template< typename T, typename U >
-    [[nodiscard]] inline constexpr impl::Vector< T, 3 > cross( const impl::Vector< T, 3 > &u, const impl::Vector< U, 3 > &v ) noexcept
-    {
-        return impl::Vector< T, 3 > {
-            u.y() * v.z() - u.z() * v.y(),
-            u.z() * v.x() - u.x() * v.z(),
-            u.x() * v.y() - u.y() * v.x(),
+    namespace impl {
+
+        template< typename T >
+        struct Vector3 : public Tuple3< T > {
+            struct Constants;
         };
-    }
 
-    template< typename T >
-    [[nodiscard]] inline constexpr impl::Vector< T, 3 > permute( const impl::Vector< T, 3 > &u, Int x, Int y, Int z ) noexcept
-    {
-        return impl::Vector< T, 3 > {
-            u[ x ],
-            u[ y ],
-            u[ z ],
+        template< typename T >
+        struct Vector3< T >::Constants {
+            static constexpr auto ZERO = Vector3< T > { 0, 0, 0 };
+            static constexpr auto ONE = Vector3< T > { 1, 1, 1 };
+            static constexpr auto POSITIVE_INFINITY = Vector3< T > { std::numeric_limits< T >::max(), std::numeric_limits< T >::max(), std::numeric_limits< T >::max() };
+            static constexpr auto NEGATIVE_INFINITY = Vector3< T > { std::numeric_limits< T >::min(), std::numeric_limits< T >::min(), std::numeric_limits< T >::min() };
+            static constexpr auto UNIT_X = Vector3< T > { 1, 0, 0 };
+            static constexpr auto UNIT_Y = Vector3< T > { 0, 1, 0 };
+            static constexpr auto UNIT_Z = Vector3< T > { 0, 0, 1 };
         };
+
     }
 
-    /**
-       \brief Creates a orthonormal coordinate system from a vector
-
-       \remarks The input vector v1 is assumed to be already normalized.
-     */
-    template< typename T >
-    void orthonormalBasis( const impl::Vector< T, 3 > &v1, impl::Vector< T, 3 > &v2, impl::Vector< T, 3 > &v3 ) noexcept
-    {
-        if ( abs( v1.x() ) > abs( v1.y() ) ) {
-            v2 = normalize( impl::Vector< T, 3 > { -v1.z(), 0, v1.x() } );
-        } else {
-            v2 = normalize( impl::Vector< T, 3 > { 0, v1.z(), -v1.y() } );
-        }
-        v3 = cross( v1, v2 );
-    }
-
-    using Vector3 = impl::Vector< Real, 3 >;
-    using Vector3f = impl::Vector< Real32, 3 >;
-    using Vector3d = impl::Vector< Real64, 3 >;
-    using Vector3i = impl::Vector< Int32, 3 >;
-    using Vector3ui = impl::Vector< UInt32, 3 >;
+    using Vector3 = impl::Vector3< Real >;
+    using Vector3f = impl::Vector3< Real32 >;
+    using Vector3d = impl::Vector3< Real64 >;
+    using Vector3i = impl::Vector3< Int32 >;
+    using Vector3ui = impl::Vector3< UInt32 >;
 
 }
 

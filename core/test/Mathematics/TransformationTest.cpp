@@ -27,39 +27,55 @@
 
 #include "Mathematics/Transformation.hpp"
 
+#include "Mathematics/Ray_isEqual.hpp"
+#include "Mathematics/TransformationOps.hpp"
+#include "Mathematics/Transformation_apply.hpp"
+#include "Mathematics/Transformation_isEqual.hpp"
+
 #include "gtest/gtest.h"
 
-TEST( Transformation, identity )
+TEST( Transformation, defaultNotdentity )
 {
     constexpr auto T = crimild::Transformation {};
-
-    static_assert( crimild::isIdentity( T ) );
-
-    EXPECT_TRUE( true );
-}
-
-TEST( Transformation, notIdentity )
-{
-    constexpr auto T = crimild::Transformation( crimild::Matrix4::Constants::IDENTITY, crimild::Matrix4::Constants::IDENTITY );
 
     static_assert( !crimild::isIdentity( T ) );
 
     EXPECT_TRUE( true );
 }
 
+TEST( Transformation, userDefinedNotIdentity )
+{
+    constexpr auto T = crimild::Transformation { crimild::Matrix4::Constants::IDENTITY, crimild::Matrix4::Constants::IDENTITY };
+
+    static_assert( !crimild::isIdentity( T ) );
+
+    EXPECT_TRUE( true );
+}
+
+TEST( Transformation, identity )
+{
+    constexpr auto T = crimild::Transformation::Constants::IDENTITY;
+
+    static_assert( crimild::isIdentity( T ) );
+
+    EXPECT_TRUE( true );
+}
+
 TEST( Transformation, translation )
 {
-    constexpr auto I = crimild::Transformation();
+    constexpr auto I = crimild::Transformation::Constants::IDENTITY;
     constexpr auto T0 = crimild::translation( 0, 0, 0 );
     constexpr auto T1 = crimild::translation( 1, 2, 3 );
     constexpr auto T2 = crimild::translation( 4, 5, 6 );
     constexpr auto T3 = crimild::translation( 5, 7, 9 );
     constexpr auto T4 = crimild::translation( -1, -2, -3 );
 
-    static_assert( I == T0 );
-    static_assert( ( T1 * T2 ) == T3 );
-    static_assert( ( T1 * T2 ) == ( T2 * T1 ) );
-    static_assert( inverse( T1 ) == T4 );
+    static_assert( crimild::hasTranslation( T0 ) );
+
+    static_assert( !crimild::isEqual( I, T0 ) );
+    static_assert( crimild::isEqual( ( T1 * T2 ), T3 ) );
+    static_assert( crimild::isEqual( ( T1 * T2 ), ( T2 * T1 ) ) );
+    static_assert( crimild::isEqual( crimild::inverse( T1 ), T4 ) );
 
     EXPECT_TRUE( true );
 }
@@ -69,7 +85,7 @@ TEST( Transformation, translatePoint )
     constexpr auto P = crimild::Point3 { 10, 20, 30 };
     constexpr auto T = crimild::translation( 5, 12, 134 );
 
-    static_assert( crimild::Point3 { 15, 32, 164 } == T( P ) );
+    static_assert( crimild::isEqual( crimild::Point3 { 15, 32, 164 }, T( P ) ) );
 
     EXPECT_TRUE( true );
 }
@@ -79,7 +95,7 @@ TEST( Transformation, translateVector )
     constexpr auto V = crimild::Vector3 { 10, 20, 30 };
     constexpr auto T = crimild::translation( 5, 12, 134 );
 
-    static_assert( V == T( V ) );
+    static_assert( crimild::isEqual( V, T( V ) ) );
 
     EXPECT_TRUE( true );
 }
@@ -89,7 +105,7 @@ TEST( Transformation, translateNormal )
     constexpr auto N = crimild::Normal3 { 1, 2, 3 };
     constexpr auto T = crimild::translation( 5, 10, 20 );
 
-    static_assert( N == T( N ) );
+    static_assert( crimild::isEqual( N, T( N ) ) );
 
     EXPECT_TRUE( true );
 }
@@ -108,24 +124,26 @@ TEST( Transformation, translateRay3 )
         crimild::Vector3 { 0, 0, 1 },
     };
 
-    static_assert( R1 == T( R ) );
+    static_assert( crimild::isEqual( R1, T( R ) ) );
 
     EXPECT_TRUE( true );
 }
 
 TEST( Transformation, scaleProperties )
 {
-    constexpr auto I = crimild::Transformation();
+    constexpr auto I = crimild::Transformation::Constants::IDENTITY;
     constexpr auto S = crimild::scale( 1, 1, 1 );
     constexpr auto S1 = crimild::scale( 1, 2, 3 );
     constexpr auto S2 = crimild::scale( 4, 5, 6 );
     constexpr auto S3 = crimild::scale( 4, 10, 18 );
     constexpr auto S4 = crimild::scale( 1.0, 1.0 / 2.0, 1.0 / 3.0 );
 
-    static_assert( I == S );
-    static_assert( ( S1 * S2 ) == S3 );
-    static_assert( ( S1 * S2 ) == ( S2 * S1 ) );
-    static_assert( inverse( S1 ) == S4 );
+    static_assert( crimild::hasScale( S ) );
+
+    static_assert( !crimild::isEqual( I, S ) );
+    static_assert( crimild::isEqual( ( S1 * S2 ), S3 ) );
+    static_assert( crimild::isEqual( ( S1 * S2 ), ( S2 * S1 ) ) );
+    static_assert( crimild::isEqual( crimild::inverse( S1 ), S4 ) );
 
     EXPECT_TRUE( true );
 }
@@ -135,7 +153,7 @@ TEST( Transformation, scalePoint )
     constexpr auto P = crimild::Point3 { 10, 20, 30 };
     constexpr auto S = crimild::scale( 5, 10, 2 );
 
-    static_assert( crimild::Point3 { 50, 200, 60 } == S( P ) );
+    static_assert( crimild::isEqual( crimild::Point3 { 50, 200, 60 }, S( P ) ) );
 
     EXPECT_TRUE( true );
 }
@@ -145,7 +163,7 @@ TEST( Transformation, uniformScalePoint )
     constexpr auto P = crimild::Point3 { 10, 20, 30 };
     constexpr auto S = crimild::scale( 5 );
 
-    static_assert( crimild::Point3 { 50, 100, 150 } == S( P ) );
+    static_assert( crimild::isEqual( crimild::Point3 { 50, 100, 150 }, S( P ) ) );
 
     EXPECT_TRUE( true );
 }
@@ -155,39 +173,43 @@ TEST( Transformation, scaleVector )
     constexpr auto V = crimild::Vector3 { 10, 20, 30 };
     constexpr auto S = crimild::scale( 5, 10, 2 );
 
-    static_assert( crimild::Vector3 { 50, 200, 60 } == S( V ) );
+    static_assert( crimild::isEqual( crimild::Vector3 { 50, 200, 60 }, S( V ) ) );
 
     EXPECT_TRUE( true );
 }
 
 TEST( Transformation, rotationXProperties )
 {
-    const auto I = crimild::Transformation {};
+    constexpr auto I = crimild::Transformation::Constants::IDENTITY;
     const auto Rx0 = crimild::rotationX( 0 );
     const auto Rx1 = crimild::rotationX( 0.1 );
     const auto Rx2 = crimild::rotationX( 0.2 );
     const auto Rx3 = crimild::rotationX( 0.3 );
     const auto Rx4 = crimild::rotationX( -0.1 );
 
-    EXPECT_EQ( I, Rx0 );
-    EXPECT_EQ( Rx1 * Rx2, Rx3 );
-    EXPECT_EQ( Rx1 * Rx2, Rx2 * Rx1 );
-    EXPECT_EQ( inverse( Rx1 ), Rx4 );
+    EXPECT_TRUE( crimild::hasRotation( Rx0 ) );
+
+    EXPECT_TRUE( !crimild::isEqual( I, Rx0 ) );
+    EXPECT_TRUE( crimild::isEqual( Rx1 * Rx2, Rx3 ) );
+    EXPECT_TRUE( crimild::isEqual( Rx1 * Rx2, Rx2 * Rx1 ) );
+    EXPECT_TRUE( crimild::isEqual( inverse( Rx1 ), Rx4 ) );
 }
 
 TEST( Transformation, rotationYProperties )
 {
-    const auto I = crimild::Transformation {};
+    constexpr auto I = crimild::Transformation::Constants::IDENTITY;
     const auto Ry0 = crimild::rotationY( 0 );
     const auto Ry1 = crimild::rotationY( 0.1 );
     const auto Ry2 = crimild::rotationY( 0.2 );
     const auto Ry3 = crimild::rotationY( 0.3 );
     const auto Ry4 = crimild::rotationY( -0.1 );
 
-    EXPECT_EQ( I, Ry0 );
-    EXPECT_EQ( Ry1 * Ry2, Ry3 );
-    EXPECT_EQ( Ry1 * Ry2, Ry2 * Ry1 );
-    EXPECT_EQ( inverse( Ry1 ), Ry4 );
+    EXPECT_TRUE( crimild::hasRotation( Ry0 ) );
+
+    EXPECT_TRUE( !crimild::isEqual( I, Ry0 ) );
+    EXPECT_TRUE( crimild::isEqual( Ry1 * Ry2, Ry3 ) );
+    EXPECT_TRUE( crimild::isEqual( Ry1 * Ry2, Ry2 * Ry1 ) );
+    EXPECT_TRUE( crimild::isEqual( inverse( Ry1 ), Ry4 ) );
 }
 
 TEST( Transformation, rotationZProperties )
@@ -199,10 +221,12 @@ TEST( Transformation, rotationZProperties )
     const auto Rz3 = crimild::rotationZ( 0.3 );
     const auto Rz4 = crimild::rotationZ( -0.1 );
 
-    EXPECT_EQ( I, Rz0 );
-    EXPECT_EQ( Rz1 * Rz2, Rz3 );
-    EXPECT_EQ( Rz1 * Rz2, Rz2 * Rz1 );
-    EXPECT_EQ( inverse( Rz1 ), Rz4 );
+    EXPECT_TRUE( crimild::hasRotation( Rz0 ) );
+
+    EXPECT_TRUE( crimild::isEqual( I, Rz0 ) );
+    EXPECT_TRUE( crimild::isEqual( Rz1 * Rz2, Rz3 ) );
+    EXPECT_TRUE( crimild::isEqual( Rz1 * Rz2, Rz2 * Rz1 ) );
+    EXPECT_TRUE( crimild::isEqual( inverse( Rz1 ), Rz4 ) );
 }
 
 TEST( Transformation, rotationProperties )
@@ -214,10 +238,12 @@ TEST( Transformation, rotationProperties )
     const auto R3 = crimild::rotation( crimild::normalize( crimild::Vector3 { 1, 2, 3 } ), 0.3 );
     const auto R4 = crimild::rotation( crimild::normalize( crimild::Vector3 { 1, 2, 3 } ), -0.1 );
 
-    EXPECT_EQ( I, R0 );
-    EXPECT_EQ( R1 * R2, R3 );
-    EXPECT_EQ( R1 * R2, R2 * R1 );
-    EXPECT_EQ( inverse( R1 ), R4 );
+    EXPECT_TRUE( crimild::hasRotation( R0 ) );
+
+    EXPECT_TRUE( crimild::isEqual( I, R0 ) );
+    EXPECT_TRUE( crimild::isEqual( R1 * R2, R3 ) );
+    EXPECT_TRUE( crimild::isEqual( R1 * R2, R2 * R1 ) );
+    EXPECT_TRUE( crimild::isEqual( crimild::inverse( R1 ), R4 ) );
 }
 
 TEST( Transformation, lookAt )
@@ -228,7 +254,11 @@ TEST( Transformation, lookAt )
         crimild::Point3 { 0, 1, 0 },
         crimild::Vector3 { 0, 1, 0 } );
 
-    static_assert( I != T );
+    static_assert( !crimild::isEqual( I, T ) );
+
+    static_assert( crimild::hasTranslation( T ) );
+    static_assert( crimild::hasRotation( T ) );
+    static_assert( !crimild::hasScale( T ) );
 
     EXPECT_TRUE( true );
 }

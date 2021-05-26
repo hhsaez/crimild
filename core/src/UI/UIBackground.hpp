@@ -43,7 +43,7 @@ namespace crimild {
         class UIBackground : public NodeComponent {
             CRIMILD_IMPLEMENT_RTTI( crimild::ui::UIBackground )
         public:
-            UIBackground( const ColorRGBA &color = ColorRGBA( 1.0f, 1.0f, 1.0f, 1.0f ) );
+            UIBackground( const ColorRGBA &color = ColorRGBA::Constants::WHITE );
             ~UIBackground( void ) = default;
 
             void onAttach( void ) override;

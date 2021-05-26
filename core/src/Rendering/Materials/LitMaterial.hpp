@@ -29,6 +29,7 @@
 #define CRIMILD_CORE_RENDERING_MATERIALS_LIT_
 
 #include "Mathematics/ColorRGB.hpp"
+#include "Mathematics/swizzle.hpp"
 #include "Rendering/Material.hpp"
 
 namespace crimild {
@@ -51,8 +52,8 @@ namespace crimild {
         LitMaterial( void ) noexcept;
         virtual ~LitMaterial( void ) = default;
 
-        inline void setAlbedo( const ColorRGB &albedo ) noexcept { getProps().albedo = albedo.rgba(); };
-        inline ColorRGB getAlbedo( void ) const noexcept { return getProps().albedo.rgb(); }
+        inline void setAlbedo( const ColorRGB &albedo ) noexcept { getProps().albedo = rgba( albedo ); };
+        inline ColorRGB getAlbedo( void ) const noexcept { return rgb( getProps().albedo ); }
         void setAlbedoMap( SharedPointer< Texture > const &albedoMap ) noexcept;
         const Texture *getAlbedoMap( void ) const noexcept;
         Texture *getAlbedoMap( void ) noexcept;

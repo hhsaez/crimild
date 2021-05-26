@@ -32,6 +32,7 @@
 #include "Mathematics/ColorRGBA.hpp"
 #include "Mathematics/Vector2.hpp"
 #include "Mathematics/Vector3.hpp"
+#include "Mathematics/isEqual.hpp"
 #include "Rendering/VertexLayout.hpp"
 
 namespace crimild {
@@ -151,16 +152,16 @@ namespace crimild {
         // See OBJLoader.cpp for a use example
         friend bool operator==( const VertexP3N3TC2 &lhs, const VertexP3N3TC2 &rhs ) noexcept
         {
-            return lhs.position == rhs.position && lhs.normal == rhs.normal && lhs.texCoord == rhs.texCoord;
+            return isEqual( lhs.position, rhs.position ) && isEqual( lhs.normal, rhs.normal ) && isEqual( lhs.texCoord, rhs.texCoord );
         }
 
         // This is requried to be able to use this vertex type in some containers, like maps
         // See OBJLoader.cpp for a use example
         friend bool operator<( const VertexP3N3TC2 &lhs, const VertexP3N3TC2 &rhs ) noexcept
         {
-            return lhs.position.x() < rhs.position.x()
-                   && lhs.position.y() < rhs.position.y()
-                   && lhs.position.z() < rhs.position.z();
+            return lhs.position.x < rhs.position.x
+                   && lhs.position.y < rhs.position.y
+                   && lhs.position.z < rhs.position.z;
         }
     };
 

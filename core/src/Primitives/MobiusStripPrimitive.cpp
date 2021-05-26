@@ -27,6 +27,8 @@
 
 #include "MobiusStripPrimitive.hpp"
 
+#include "Mathematics/Vector3Ops.hpp"
+
 using namespace crimild;
 
 MobiusStripPrimitive::MobiusStripPrimitive( const Params &params ) noexcept
@@ -34,7 +36,7 @@ MobiusStripPrimitive::MobiusStripPrimitive( const Params &params ) noexcept
 {
     _scale = params.scale;
 
-    ParametricInterval interval = { params.divisions, Vector2f( Numericf::TWO_PI, Numericf::TWO_PI ), Vector2f( 40, 15 ) };
+    ParametricInterval interval = { params.divisions, Vector2f { Numericf::TWO_PI, Numericf::TWO_PI }, Vector2f { 40, 15 } };
     setInterval( interval );
     generate();
 }

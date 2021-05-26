@@ -94,7 +94,7 @@ namespace crimild {
             \brief Set the rendering viewport relative to the
              screen buffer's resolution
          */
-        virtual void setScreenViewport( const Rectf &viewport = Rectf( 0.0f, 0.0f, 1.0f, 1.0f ) );
+        virtual void setScreenViewport( const Rectf &viewport = Rectf { { 0.0f, 0.0f }, { 1.0f, 1.0f } } );
 
         virtual void beginRender( void );
 

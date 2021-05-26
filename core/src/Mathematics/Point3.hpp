@@ -28,25 +28,34 @@
 #ifndef CRIMILD_MATHEMATICS_POINT_3_
 #define CRIMILD_MATHEMATICS_POINT_3_
 
-#include "Mathematics/PointImpl.hpp"
+#include "Mathematics/Tuple3.hpp"
+
+#include <limits>
 
 namespace crimild {
 
-    template< typename T >
-    [[nodiscard]] inline constexpr impl::Point< T, 3 > permute( const impl::Point< T, 3 > &u, Int x, Int y, Int z ) noexcept
-    {
-        return impl::Point< T, 3 > {
-            u[ x ],
-            u[ y ],
-            u[ z ],
+    namespace impl {
+
+        template< typename T >
+        struct Point3 : public Tuple3< T > {
+            struct Constants;
         };
+
+        template< typename T >
+        struct Point3< T >::Constants {
+            static constexpr auto ZERO = Point3< T > { 0, 0, 0 };
+            static constexpr auto ONE = Point3< T > { 1, 1, 1 };
+            static constexpr auto POSITIVE_INFINITY = Point3< T > { std::numeric_limits< T >::max(), std::numeric_limits< T >::max(), std::numeric_limits< T >::max() };
+            static constexpr auto NEGATIVE_INFINITY = Point3< T > { std::numeric_limits< T >::min(), std::numeric_limits< T >::min(), std::numeric_limits< T >::min() };
+        };
+
     }
 
-    using Point3 = impl::Point< Real, 3 >;
-    using Point3f = impl::Point< Real32, 3 >;
-    using Point3d = impl::Point< Real64, 3 >;
-    using Point3i = impl::Point< Int32, 3 >;
-    using Point3ui = impl::Point< UInt32, 3 >;
+    using Point3 = impl::Point3< Real >;
+    using Point3f = impl::Point3< Real32 >;
+    using Point3d = impl::Point3< Real64 >;
+    using Point3i = impl::Point3< Int32 >;
+    using Point3ui = impl::Point3< UInt32 >;
 
 }
 

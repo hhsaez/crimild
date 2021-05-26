@@ -28,15 +28,62 @@
 #ifndef CRIMILD_MATHEMATICS_MATRIX_3_
 #define CRIMILD_MATHEMATICS_MATRIX_3_
 
-#include "Mathematics/MatrixImpl.hpp"
+#include "Foundation/Types.hpp"
+
+#include <cmath>
 
 namespace crimild {
 
-    using Matrix3 = impl::Matrix< Real, 3 >;
-    using Matrix3f = impl::Matrix< Real32, 3 >;
-    using Matrix3d = impl::Matrix< Real64, 3 >;
-    using Matrix3i = impl::Matrix< Int32, 3 >;
-    using Matrix3ui = impl::Matrix< UInt32, 3 >;
+    namespace impl {
+
+        template< typename T >
+        struct Matrix3 {
+            struct Constants;
+
+            T m00, m01, m02;
+            T m10, m11, m12;
+            T m20, m21, m22;
+
+            [[nodiscard]] inline constexpr T operator[]( Size index ) const noexcept
+            {
+                switch ( index ) {
+                    case 0:
+                        return m00;
+                    case 1:
+                        return m01;
+                    case 2:
+                        return m02;
+                    case 3:
+                        return m10;
+                    case 4:
+                        return m11;
+                    case 5:
+                        return m12;
+                    case 6:
+                        return m20;
+                    case 7:
+                        return m21;
+                    case 8:
+                        return m22;
+                    default:
+                        return NAN;
+                }
+            }
+        };
+
+        template< typename T >
+        struct Matrix3< T >::Constants {
+            static constexpr auto ZERO = Matrix3< T > { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            static constexpr auto IDENTITY = Matrix3< T > { 1, 0, 0, 0, 1, 0, 0, 0, 1 };
+        };
+
+    }
+
+    using Matrix3 = impl::Matrix3< Real >;
+    using Matrix3f = impl::Matrix3< Real32 >;
+    using Matrix3d = impl::Matrix3< Real64 >;
+    using Matrix3i = impl::Matrix3< Int32 >;
+    using Matrix3ui = impl::Matrix3< UInt32 >;
 
 }
 

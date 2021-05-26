@@ -33,9 +33,9 @@
 using namespace crimild;
 
 Material::Material( void ) noexcept
-    : _ambient( 0.0f, 0.0f, 0.0f, 1.0f ),
-      _diffuse( 1.0f, 1.0f, 1.0f, 1.0f ),
-      _specular( 1.0f, 1.0f, 1.0f, 1.0f ),
+    : _ambient { 0.0f, 0.0f, 0.0f, 1.0f },
+      _diffuse { 1.0f, 1.0f, 1.0f, 1.0f },
+      _specular { 1.0f, 1.0f, 1.0f, 1.0f },
       _shininess( 50.0f ),
       _emissive( 0.0f ),
       //_depthState( crimild::alloc< DepthState >( true ) ),

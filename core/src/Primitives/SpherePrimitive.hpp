@@ -42,8 +42,8 @@ namespace crimild {
             Primitive::Type type = Primitive::Type::TRIANGLES;
             Real32 radius = 1.0f;
             const VertexLayout &layout = VertexP3N3TC2::getLayout();
-            Vector2i divisions = Vector2i( 30, 30 );
-            Vector3f center = Vector3f( 0.0f, 0.0f, 0.0f );
+            Vector2i divisions = Vector2i { 30, 30 };
+            Vector3f center = Vector3f { 0.0f, 0.0f, 0.0f };
         };
 
     public:

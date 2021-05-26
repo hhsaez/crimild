@@ -30,9 +30,8 @@
 using namespace crimild;
 
 ParametricSpherePrimitive::ParametricSpherePrimitive( void ) noexcept
-    : ParametricSpherePrimitive( Params { } )
+    : ParametricSpherePrimitive( Params {} )
 {
-
 }
 
 ParametricSpherePrimitive::ParametricSpherePrimitive( const Params &params ) noexcept
@@ -41,15 +40,14 @@ ParametricSpherePrimitive::ParametricSpherePrimitive( const Params &params ) noe
             .type = params.type,
             .layout = params.layout,
             .colorMode = params.colorMode,
-        }
-    )
+        } )
 {
     _radius = params.radius;
 
     ParametricInterval interval = {
         .divisions = params.divisions,
-        .upperBound = Vector2f( Numericf::PI, Numericf::TWO_PI ),
-        .textureCount = Vector2f( 20, 35 ),
+        .upperBound = Vector2f { Numericf::PI, Numericf::TWO_PI },
+        .textureCount = Vector2 { 20, 35 },
     };
     setInterval( interval );
     generate();
@@ -62,5 +60,5 @@ Vector3f ParametricSpherePrimitive::evaluate( const Vector2f &domain ) const
     float x = _radius * std::sin( u ) * std::cos( v );
     float y = _radius * std::cos( u );
     float z = _radius * -std::sin( u ) * std::sin( v );
-    return Vector3f( x, y, z );
+    return Vector3f { x, y, z };
 }

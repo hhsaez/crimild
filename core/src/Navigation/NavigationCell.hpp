@@ -29,8 +29,9 @@
 #define CRIMILD_NAVIGATION_CELL
 
 #include "Coding/Codable.hpp"
-#include "Mathematics/LineSegment.hpp"
-#include "Mathematics/Plane.hpp"
+#include "Mathematics/LineSegment3.hpp"
+#include "Mathematics/Plane3.hpp"
+#include "Mathematics/Vector3.hpp"
 #include "NavigationCellEdge.hpp"
 
 namespace crimild {

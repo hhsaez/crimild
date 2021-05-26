@@ -27,47 +27,46 @@
 
 #include "AnimatedSpriteParticleRenderer.hpp"
 
-#include "Rendering/Renderer.hpp"
-#include "Components/MaterialComponent.hpp"
-#include "Simulation/AssetManager.hpp"
-#include "SceneGraph/Camera.hpp"
-#include "Concurrency/Async.hpp"
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
+#include "Components/MaterialComponent.hpp"
+#include "Concurrency/Async.hpp"
+#include "Rendering/Renderer.hpp"
+#include "SceneGraph/Camera.hpp"
+#include "Simulation/AssetManager.hpp"
 
 using namespace crimild;
 
 AnimatedSpriteParticleRenderer::AnimatedSpriteParticleRenderer( void )
-	: _spriteSheetSize( 4.0f, 4.0f )
+    : _spriteSheetSize { 4.0f, 4.0f }
 {
-	// create the material here so it can be modified later
-	_material = crimild::alloc< Material >();
+    // create the material here so it can be modified later
+    _material = crimild::alloc< Material >();
 
     //_material->setProgram( crimild::alloc< UnlitShaderProgram >() );
 }
 
 AnimatedSpriteParticleRenderer::~AnimatedSpriteParticleRenderer( void )
 {
-
 }
 
 void AnimatedSpriteParticleRenderer::configure( Node *node, ParticleData *particles )
 {
-	_geometry = crimild::alloc< Geometry >();
-	if ( _material != nullptr ) {
-		_geometry->getComponent< MaterialComponent >()->attachMaterial( _material );
-	}
+    _geometry = crimild::alloc< Geometry >();
+    if ( _material != nullptr ) {
+        _geometry->getComponent< MaterialComponent >()->attachMaterial( _material );
+    }
 
-	static_cast< Group * >( node )->attachNode( _geometry );
+    static_cast< Group * >( node )->attachNode( _geometry );
 
-	_positions = particles->getAttrib( ParticleAttrib::POSITION );
-	_sizes = particles->getAttrib( ParticleAttrib::UNIFORM_SCALE );
-	_times = particles->getAttrib( ParticleAttrib::TIME );
-	_lifetimes = particles->getAttrib( ParticleAttrib::LIFE_TIME );
+    _positions = particles->getAttrib( ParticleAttrib::POSITION );
+    _sizes = particles->getAttrib( ParticleAttrib::UNIFORM_SCALE );
+    _times = particles->getAttrib( ParticleAttrib::TIME );
+    _lifetimes = particles->getAttrib( ParticleAttrib::LIFE_TIME );
 
     _primitive = crimild::alloc< Primitive >( Primitive::Type::TRIANGLES );
 
-	_geometry->attachPrimitive( _primitive );
+    _geometry->attachPrimitive( _primitive );
 }
 
 void AnimatedSpriteParticleRenderer::update( Node *node, crimild::Real64 dt, ParticleData *particles )
@@ -163,24 +162,24 @@ void AnimatedSpriteParticleRenderer::update( Node *node, crimild::Real64 dt, Par
 
 void AnimatedSpriteParticleRenderer::encode( coding::Encoder &encoder )
 {
-	ParticleSystemComponent::ParticleRenderer::encode( encoder );
+    ParticleSystemComponent::ParticleRenderer::encode( encoder );
 
-	encoder.encode( "material", _material );
-	encoder.encode( "spriteSheetSize", _spriteSheetSize );
-	encoder.encode( "useOrientedQuads", _useOrientedQuads );
+    encoder.encode( "material", _material );
+    encoder.encode( "spriteSheetSize", _spriteSheetSize );
+    encoder.encode( "useOrientedQuads", _useOrientedQuads );
 }
 
 void AnimatedSpriteParticleRenderer::decode( coding::Decoder &decoder )
 {
-	ParticleSystemComponent::ParticleRenderer::decode( decoder );
+    ParticleSystemComponent::ParticleRenderer::decode( decoder );
 
-	decoder.decode( "material", _material );
-	decoder.decode( "spriteSheetSize", _spriteSheetSize );
-	decoder.decode( "useOrientedQuads", _useOrientedQuads );
+    decoder.decode( "material", _material );
+    decoder.decode( "spriteSheetSize", _spriteSheetSize );
+    decoder.decode( "useOrientedQuads", _useOrientedQuads );
 
-	if ( _material == nullptr ) {
-		_material = crimild::alloc< Material >();
-	}
+    if ( _material == nullptr ) {
+        _material = crimild::alloc< Material >();
+    }
 
     //_material->setProgram( crimild::alloc< UnlitShaderProgram >() );
 

@@ -27,6 +27,8 @@
 
 #include "QuadPrimitive.hpp"
 
+#include "Mathematics/Vector2Ops.hpp"
+
 using namespace crimild;
 
 QuadPrimitive::QuadPrimitive( void ) noexcept
@@ -37,8 +39,8 @@ QuadPrimitive::QuadPrimitive( void ) noexcept
 QuadPrimitive::QuadPrimitive( const Params &params ) noexcept
     : Primitive( params.type )
 {
-    auto w = params.size.x();
-    auto h = params.size.y();
+    auto w = params.size.x;
+    auto h = params.size.y;
     auto layout = params.layout;
     auto texCoordOffset = params.texCoordOffset;
     auto texCoordScale = params.texCoordScale;
@@ -48,10 +50,10 @@ QuadPrimitive::QuadPrimitive( const Params &params ) noexcept
     auto positions = vertices->get( VertexAttribute::Name::POSITION );
     positions->set(
         Array< Vector3f > {
-            Vector3f( -w, h, 0.0f ),
-            Vector3f( -w, -h, 0.0f ),
-            Vector3f( w, -h, 0.0f ),
-            Vector3f( w, h, 0.0f ),
+            Vector3f { -w, h, 0.0f },
+            Vector3f { -w, -h, 0.0f },
+            Vector3f { w, -h, 0.0f },
+            Vector3f { w, h, 0.0f },
         } );
 
     if ( layout.hasAttribute( VertexAttribute::Name::NORMAL ) ) {
@@ -69,10 +71,10 @@ QuadPrimitive::QuadPrimitive( const Params &params ) noexcept
         auto texCoords = vertices->get( VertexAttribute::Name::TEX_COORD );
         texCoords->set(
             Array< Vector2f > {
-                texCoordOffset + ( Vector2f( 0.0f, 0.0f ) * texCoordScale ),
-                texCoordOffset + ( Vector2f( 0.0f, 1.0f ) * texCoordScale ),
-                texCoordOffset + ( Vector2f( 1.0f, 1.0f ) * texCoordScale ),
-                texCoordOffset + ( Vector2f( 1.0f, 0.0f ) * texCoordScale ),
+                texCoordOffset + ( Vector2 { 0.0f, 0.0f } * texCoordScale ),
+                texCoordOffset + ( Vector2 { 0.0f, 1.0f } * texCoordScale ),
+                texCoordOffset + ( Vector2 { 1.0f, 1.0f } * texCoordScale ),
+                texCoordOffset + ( Vector2 { 1.0f, 0.0f } * texCoordScale ),
             } );
     }
 

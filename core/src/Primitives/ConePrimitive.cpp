@@ -35,7 +35,7 @@ ConePrimitive::ConePrimitive( const Params &params ) noexcept
     _height = params.height;
     _radius = params.radius;
 
-    ParametricInterval interval = { params.divisions, Vector2f( Numericf::TWO_PI, 1.0f ), Vector2f( 30, 20 ) };
+    ParametricInterval interval = { params.divisions, Vector2f { Numericf::TWO_PI, 1.0f }, Vector2f { 30, 20 } };
     setInterval( interval );
     generate();
 }
@@ -47,5 +47,5 @@ Vector3f ConePrimitive::evaluate( const Vector2f &domain ) const
     float x = _radius * ( 1.0f - v ) * std::cos( u );
     float y = _height * v;
     float z = _radius * ( 1.0f - v ) * -std::sin( u );
-    return Vector3f( x, y, z );
+    return Vector3f { x, y, z };
 }

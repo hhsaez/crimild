@@ -29,6 +29,7 @@
 
 #include "Coding/MemoryDecoder.hpp"
 #include "Coding/MemoryEncoder.hpp"
+#include "Mathematics/isEqual.hpp"
 
 #include "gtest/gtest.h"
 
@@ -56,7 +57,7 @@ TEST( MaterialComponent, attachMaterial )
 TEST( MaterialComponent, coding )
 {
     auto material = crimild::alloc< Material >();
-    material->setDiffuse( ColorRGBA( 0.7f, 0.7f, 0.7f, 1.0f ) );
+    material->setDiffuse( ColorRGBA { 0.7f, 0.7f, 0.7f, 1.0f } );
     material->setColorMap( crimild::alloc< Texture >() );
 
     auto materials = crimild::alloc< MaterialComponent >();
@@ -74,5 +75,5 @@ TEST( MaterialComponent, coding )
     EXPECT_TRUE( ms->hasMaterials() );
 
     EXPECT_NE( nullptr, ms->first() );
-    EXPECT_EQ( ColorRGBA( 0.7f, 0.7f, 0.7f, 1.0f ), ms->first()->getDiffuse() );
+    EXPECT_TRUE( isEqual( ColorRGBA { 0.7f, 0.7f, 0.7f, 1.0f }, ms->first()->getDiffuse() ) );
 }

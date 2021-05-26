@@ -622,7 +622,7 @@ float calculateShadow( vec4 ligthSpacePosition, vec4 viewport, vec3 N, vec3 L, f
 
     auto viewport = ViewportDimensions {
         .scalingMode = ScalingMode::SWAPCHAIN_RELATIVE,
-        .dimensions = Rectf( 0, 0, 1, 1 ),
+        .dimensions = Rectf { { 0, 0 }, { 1, 1 } },
     };
 
     renderPass->reads(

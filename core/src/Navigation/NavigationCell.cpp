@@ -34,6 +34,8 @@ using namespace crimild::navigation;
 
 NavigationCell::NavigationCell( const Vector3f &v0, const Vector3f &v1, const Vector3f &v2 )
 {
+    assert( false );
+    /*
     _vertices[ 0 ] = v0;
     _vertices[ 1 ] = v1;
     _vertices[ 2 ] = v2;
@@ -43,6 +45,7 @@ NavigationCell::NavigationCell( const Vector3f &v0, const Vector3f &v1, const Ve
     _normal = normalize( cross( ( v2 - v0 ), ( v1 - v0 ) ) );
 
     _plane = Plane3( Point3( v0 ), Point3( v1 ), Point3( v2 ) );
+    */
 }
 
 NavigationCell::~NavigationCell( void )

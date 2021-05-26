@@ -39,8 +39,8 @@ using namespace crimild;
 using namespace crimild::ui;
 
 UICanvas::UICanvas( crimild::Int32 width, crimild::Int32 height )
-    : _size( width, height ),
-      _safeArea( 0, 0 )
+    : _size { width, height },
+      _safeArea { 0, 0 }
 {
 }
 
@@ -49,7 +49,7 @@ void UICanvas::onAttach( void )
     NodeComponent::onAttach();
 
     if ( getComponent< UIFrame >() == nullptr ) {
-        getNode()->attachComponent< UIFrame >( Rectf( 0, 0, _size.x() - _safeArea.x(), _size.y() - _safeArea.y() ) );
+        getNode()->attachComponent< UIFrame >( Rectf { { 0, 0 }, { Real( _size.x - _safeArea.x ), Real( _size.y - _safeArea.y ) } } );
     }
 }
 

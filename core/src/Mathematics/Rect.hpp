@@ -28,62 +28,34 @@
 #ifndef CRIMILD_MATHEMATICS_RECT_
 #define CRIMILD_MATHEMATICS_RECT_
 
-#include "VectorImpl.hpp"
+#include "Point2.hpp"
+#include "Size2D.hpp"
 
 namespace crimild {
 
-    template< typename PRECISION >
-    class Rect {
-    public:
-        Rect( void )
-        {
-        }
+    namespace impl {
 
-        Rect( PRECISION x, PRECISION y, PRECISION width, PRECISION height )
-        {
-            _data[ 0 ] = x;
-            _data[ 1 ] = y;
-            _data[ 2 ] = width;
-            _data[ 3 ] = height;
-        }
+        template< typename T >
+        struct Rect {
+            Point2< T > origin;
+            Size2D< T > size;
+        };
 
-        Rect( const Rect &rect )
-        {
-            *this = rect;
-        }
+    }
 
-        ~Rect( void )
-        {
-        }
+    template< typename T >
+    [[nodiscard]] inline constexpr impl::Point2< T > center( const impl::Rect< T > &rect ) noexcept
+    {
+        return impl::Point2< T > {
+            rect.origin.x + rect.size.width / T( 2 ),
+            rect.origin.y + rect.size.height / T( 2 ),
+        };
+    }
 
-        Rect &operator=( const Rect &rect )
-        {
-            memcpy( _data, rect._data, 4 * sizeof( PRECISION ) );
-            return *this;
-        }
-
-        PRECISION &x( void ) { return _data[ 0 ]; }
-        PRECISION &y( void ) { return _data[ 1 ]; }
-        PRECISION &width( void ) { return _data[ 2 ]; }
-        PRECISION &height( void ) { return _data[ 3 ]; }
-
-        PRECISION getX( void ) const { return _data[ 0 ]; }
-        PRECISION getY( void ) const { return _data[ 1 ]; }
-        PRECISION getWidth( void ) const { return _data[ 2 ]; }
-        PRECISION getHeight( void ) const { return _data[ 3 ]; }
-
-        impl::Vector< PRECISION, 2 > getCenter( void ) const
-        {
-            return impl::Vector< PRECISION, 2 >( getX() + 0.5 * getWidth(), getY() + 0.5 * getHeight() );
-        }
-
-    private:
-        PRECISION _data[ 4 ];
-    };
-
-    typedef Rect< int > Recti;
-    typedef Rect< float > Rectf;
-    typedef Rect< double > Rectd;
+    using Rect = impl::Rect< Real >;
+    using Rectf = impl::Rect< Real32 >;
+    using Rectd = impl::Rect< Real64 >;
+    using Recti = impl::Rect< Int >;
 
 }
 

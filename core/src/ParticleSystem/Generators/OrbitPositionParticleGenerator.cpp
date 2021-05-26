@@ -30,6 +30,7 @@
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
 #include "Mathematics/Random.hpp"
+#include "Mathematics/Vector3Ops.hpp"
 #include "SceneGraph/Node.hpp"
 
 using namespace crimild;
@@ -66,19 +67,21 @@ void OrbitPositionParticleGenerator::generate( Node *node, crimild::Real64 dt, P
     }
 
     auto randomOffset = []( crimild::Real32 offset, crimild::Real32 height ) {
-        return Vector3f(
+        return Vector3f {
             Random::generate< crimild::Real32 >( -offset, offset ),
             height * Random::generate< crimild::Real32 >( -offset, offset ),
-            Random::generate< crimild::Real32 >( -offset, offset ) );
+            Random::generate< crimild::Real32 >( -offset, offset ),
+        };
     };
 
     for ( auto i = startId; i < endId; ++i ) {
         const auto theta = ( crimild::Real32 )( i - startId ) / ( crimild::Real32 ) count * Numericf::TWO_PI;
         const auto r = randomOffset( offset, height );
-        const auto p = Vector3f(
-            m_scale.x() * Numericf::sin( theta ) * radius,
+        const auto p = Vector3f {
+            m_scale.x * Numericf::sin( theta ) * radius,
             0.0f,
-            m_scale.z() * Numericf::cos( theta ) * radius );
+            m_scale.z * Numericf::cos( theta ) * radius,
+        };
         ps[ i ] = p + r;
     }
 }

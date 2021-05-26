@@ -46,7 +46,7 @@ namespace crimild {
             Primitive::Type type = Primitive::Type::TRIANGLES;
             VertexLayout layout = VertexP3N3::getLayout();
             Real32 radius = 1.0f;
-            Vector2i divisions = Vector2i( 20, 20 );
+            Vector2i divisions = Vector2i { 20, 20 };
             ColorMode colorMode;
         };
 
