@@ -66,7 +66,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::shader( std::string so
                     auto height = settings->get< float >( "video.height", 768 );
                     return crimild::alloc< UniformBuffer >(
                         ContextDescriptor {
-                            .dimensions = Vector4f( width, height, 0.0f, 0.0f ),
+                            .dimensions = Vector4f { width, height, 0.0f, 0.0f },
                         } );
                 }(),
             },

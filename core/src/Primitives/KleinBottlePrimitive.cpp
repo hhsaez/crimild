@@ -27,6 +27,8 @@
 
 #include "KleinBottlePrimitive.hpp"
 
+#include "Mathematics/Vector3Ops.hpp"
+
 using namespace crimild;
 
 KleinBottlePrimitive::KleinBottlePrimitive( const Params &params ) noexcept
@@ -34,7 +36,7 @@ KleinBottlePrimitive::KleinBottlePrimitive( const Params &params ) noexcept
 {
     _scale = params.scale;
 
-    ParametricInterval interval = { params.divisions, Vector2f( Numericf::TWO_PI, Numericf::TWO_PI ), Vector2f( 15, 50 ) };
+    ParametricInterval interval = { params.divisions, Vector2f { Numericf::TWO_PI, Numericf::TWO_PI }, Vector2f { 15, 50 } };
     setInterval( interval );
     generate();
 }

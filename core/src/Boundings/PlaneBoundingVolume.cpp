@@ -32,13 +32,13 @@
 using namespace crimild;
 
 PlaneBoundingVolume::PlaneBoundingVolume( void )
-    : _center( 0.0f, 0.0f, 0.0f ),
-      _plane( Plane3( Normal3( 0.0f, 1.0f, 0.0f ), 0.0f ) )
+    : _center { 0.0f, 0.0f, 0.0f },
+      _plane { Normal3 { 0.0f, 1.0f, 0.0f }, 0.0f }
 {
 }
 
 PlaneBoundingVolume::PlaneBoundingVolume( const Plane3 &plane )
-    : _center( 0.0f, 0.0f, 0.0f ),
+    : _center { 0.0f, 0.0f, 0.0f },
       _plane( plane )
 {
 }

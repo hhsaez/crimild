@@ -42,7 +42,7 @@ namespace crimild {
             VertexLayout layout = VertexP3N3::getLayout();
             ParametricPrimitive::ColorMode colorMode;
             Real32 scale = 1.0f;
-            Vector2i divisions = Vector2i( 60, 15 );
+            Vector2i divisions = Vector2i { 60, 15 };
         };
 
     public:

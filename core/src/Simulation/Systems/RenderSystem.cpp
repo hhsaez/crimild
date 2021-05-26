@@ -197,7 +197,7 @@ void RenderSystem::start( void ) noexcept
             if ( settings->get< Bool >( "video.bloom.enabled", true ) ) {
                 auto bloom = brightPassFilter(
                     useResource( composed ),
-                    Vector3f( 0.2126f, 0.7152f, 0.0722f ) );
+                    Vector3f { 0.2126f, 0.7152f, 0.0722f } );
 
                 bloom = gaussianBlur( useResource( bloom ) );
 

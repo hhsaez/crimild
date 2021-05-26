@@ -28,6 +28,8 @@
 #ifndef CRIMILD_MATHEMATICS_INTERPOLATION_
 #define CRIMILD_MATHEMATICS_INTERPOLATION_
 
+#include "Mathematics/Vector3Ops.hpp"
+#include "Mathematics/dot.hpp"
 #include "Numeric.hpp"
 #include "Quaternion.hpp"
 
@@ -43,7 +45,7 @@ namespace crimild {
 		easing functions:
 		http://www.timotheegroleau.com/Flash/experiments/easing_function_generator.htm
 	 */
-    class Interpolation {
+    class [[deprecated]] Interpolation {
     public:
         /**
 		 	\brief assign the to value to the result

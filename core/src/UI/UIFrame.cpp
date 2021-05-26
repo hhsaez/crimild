@@ -38,7 +38,7 @@ using namespace crimild;
 using namespace crimild::ui;
 
 UIFrame::UIFrame( void )
-    : UIFrame( Rectf( 0.0f, 0.0f, 1.0f, 1.0f ) )
+    : UIFrame( Rectf { { 0.0f, 0.0f }, { 1.0f, 1.0f } } )
 {
 }
 
@@ -66,7 +66,7 @@ void UIFrame::update( const Clock & )
     }
 
     if ( auto pf = parentFrame ) {
-        _extensions = Rectf( 0, 0, pf->getExtensions().getWidth(), pf->getExtensions().getHeight() );
+        _extensions = Rectf { { 0, 0 }, { pf->getExtensions().size.width, pf->getExtensions().size.height } };
     }
 
     _constraints.each( [ this, parentFrame ]( SharedPointer< UIFrameConstraint > const &c ) {
@@ -125,7 +125,7 @@ void UIFrame::decode( coding::Decoder &decoder )
 
     auto frame = Vector4f::Constants::ZERO;
     decoder.decode( "extensions", frame );
-    _extensions = Rectf { frame.x(), frame.y(), frame.z(), frame.w() };
+    _extensions = Rectf { frame.x, frame.y, frame.z, frame.w };
 
     decoder.decode( "constraints", _constraints );
 }

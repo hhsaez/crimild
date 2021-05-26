@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -33,19 +33,18 @@ using namespace crimild;
 
 TEST( RectTest, testConstruction )
 {
-	Recti rect1( 10, 50, 100, 25 );
-	EXPECT_TRUE( rect1.getX() == 10 );
-	EXPECT_TRUE( rect1.getY() == 50 );
-	EXPECT_TRUE( rect1.getWidth() == 100 );
-	EXPECT_TRUE( rect1.getHeight() == 25 );
+    Recti rect1 { { 10, 50 }, { 100, 25 } };
+    EXPECT_TRUE( rect1.origin.x == 10 );
+    EXPECT_TRUE( rect1.origin.y == 50 );
+    EXPECT_TRUE( rect1.size.width == 100 );
+    EXPECT_TRUE( rect1.size.height == 25 );
 
-	Recti rect2( rect1 );
-	EXPECT_TRUE( rect2.getX() == 10 );
-	EXPECT_TRUE( rect2.getY() == 50 );
-	EXPECT_TRUE( rect2.getWidth() == 100 );
-	EXPECT_TRUE( rect2.getHeight() == 25 );
+    Recti rect2 = rect1;
+    EXPECT_TRUE( rect2.origin.x == 10 );
+    EXPECT_TRUE( rect2.origin.y == 50 );
+    EXPECT_TRUE( rect2.size.width == 100 );
+    EXPECT_TRUE( rect2.size.height == 25 );
 
-	rect2.x() = 20;
-	EXPECT_TRUE( rect2.getX() == 20 );
+    rect2.origin.x = 20;
+    EXPECT_TRUE( rect2.origin.x == 20 );
 }
-

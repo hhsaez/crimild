@@ -27,6 +27,7 @@
 
 #include "Rendering/Uniforms/LightingUniform.hpp"
 
+#include "Mathematics/swizzle.hpp"
 #include "Rendering/ShadowMap.hpp"
 #include "SceneGraph/Light.hpp"
 
@@ -69,16 +70,17 @@ void LightingUniform::onPreRender( void ) noexcept
         for ( auto i = 0l; i < count; ++i ) {
             auto &light = lights[ i ];
             dst[ i ].type = static_cast< UInt32 >( light->getType() );
-            dst[ i ].position = Vector4( light->getPosition(), 1 );
-            dst[ i ].direction = Vector4( light->getDirection(), 0 );
-            dst[ i ].color = light->getColor().rgba();
-            dst[ i ].attenuation = Vector4( light->getAttenuation(), 0 );
-            dst[ i ].ambient = light->getAmbient().rgba();
-            dst[ i ].cutoff = Vector4f(
+            dst[ i ].position = vector4( light->getPosition(), Real( 1 ) );
+            dst[ i ].direction = vector4( light->getDirection(), Real( 0 ) );
+            dst[ i ].color = light->getColor();
+            dst[ i ].attenuation = vector4( light->getAttenuation(), Real( 0 ) );
+            dst[ i ].ambient = light->getAmbient();
+            dst[ i ].cutoff = Vector4f {
                 Numericf::cos( light->getInnerCutoff() ),
                 Numericf::cos( light->getOuterCutoff() ),
                 0.0f,
-                0.0f );
+                0.0f,
+            };
             dst[ i ].castShadows = light->castShadows();
             if ( light->castShadows() ) {
                 dst[ i ].shadowBias = light->getShadowMap()->getBias();

@@ -27,6 +27,7 @@
 
 #include "Picking.hpp"
 
+#include "Mathematics/distance.hpp"
 #include "SceneGraph/Group.hpp"
 #include "SceneGraph/Node.hpp"
 

@@ -27,6 +27,9 @@
 
 #include "Mathematics/Ray3.hpp"
 
+#include "Mathematics/io.hpp"
+#include "Mathematics/isEqual.hpp"
+
 #include "gtest/gtest.h"
 #include <sstream>
 
@@ -40,8 +43,10 @@ TEST( Ray3, construction )
     constexpr auto o = crimild::Point3 { 10, 20, 30 };
     constexpr auto d = crimild::Vector3 { 0, 0, -1 };
 
-    EXPECT_EQ( o, r.getOrigin() );
-    EXPECT_EQ( d, r.getDirection() );
+    static_assert( crimild::isEqual( o, crimild::origin( r ) ) );
+    static_assert( crimild::isEqual( d, crimild::direction( r ) ) );
+
+    EXPECT_TRUE( true );
 }
 
 TEST( Ray3, apply )
@@ -52,8 +57,11 @@ TEST( Ray3, apply )
     };
 
     constexpr auto P = crimild::Point3 { 10, 20, 20 };
+    constexpr auto res = R( 10 );
 
-    EXPECT_EQ( P, R( 10 ) );
+    static_assert( crimild::isEqual( P, res ) );
+
+    EXPECT_TRUE( true );
 }
 
 TEST( Ray3, ostream )
@@ -67,18 +75,4 @@ TEST( Ray3, ostream )
     ss << R;
 
     EXPECT_EQ( ss.str(), "[(10.000000, 20.000000, 30.000000), (0.000000, 0.000000, -1.000000)]" );
-}
-
-TEST( Ray3, constexpr )
-{
-    constexpr auto R = crimild::Ray3 {
-        crimild::Point3 { 10, 20, 30 },
-        crimild::Vector3 { 0, 0, -1 },
-    };
-
-    constexpr auto P = crimild::Point3 { 10, 20, 20 };
-
-    static_assert( P == R( 10 ), "apply" );
-
-    EXPECT_TRUE( true );
 }

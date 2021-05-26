@@ -28,56 +28,81 @@
 #ifndef CRIMILD_MATHEMATICS_MATRIX_4_
 #define CRIMILD_MATHEMATICS_MATRIX_4_
 
-#include "Mathematics/MatrixImpl.hpp"
+#include "Foundation/Types.hpp"
+
+#include <cmath>
 
 namespace crimild {
 
-    using Matrix4 = impl::Matrix< Real, 4 >;
-    using Matrix4f = impl::Matrix< Real32, 4 >;
-    using Matrix4d = impl::Matrix< Real64, 4 >;
-    using Matrix4i = impl::Matrix< Int32, 4 >;
-    using Matrix4ui = impl::Matrix< UInt32, 4 >;
+    namespace impl {
 
-    [[nodiscard]] constexpr Matrix4 ortho( Real l, Real r, Real b, Real t, Real n, Real f ) noexcept
-    {
-        // clang-format off
-        return Matrix4 {
-            Real( 2 ) / ( r - l ), 0, 0, -( r + l ) / ( r - l ),
-            0, Real( 2 ) / ( t - b ), 0, -( t + b ) / ( t - b ),
-            0, 0, Real( 2 ) / ( f - n ), -( f + n ) / ( f - n ) ,
-            0, 0, 0, 1,
+        template< typename T >
+        struct Matrix4 {
+            struct Constants;
+
+            T m00, m01, m02, m03;
+            T m10, m11, m12, m13;
+            T m20, m21, m22, m23;
+            T m30, m31, m32, m33;
+
+            [[nodiscard]] inline constexpr T operator[]( Size index ) const noexcept
+            {
+                switch ( index ) {
+                    case 0:
+                        return m00;
+                    case 1:
+                        return m01;
+                    case 2:
+                        return m02;
+                    case 3:
+                        return m03;
+
+                    case 4:
+                        return m10;
+                    case 5:
+                        return m11;
+                    case 6:
+                        return m12;
+                    case 7:
+                        return m13;
+
+                    case 8:
+                        return m20;
+                    case 9:
+                        return m21;
+                    case 10:
+                        return m22;
+                    case 11:
+                        return m23;
+
+                    case 12:
+                        return m30;
+                    case 13:
+                        return m31;
+                    case 14:
+                        return m32;
+                    case 15:
+                        return m33;
+
+                    default:
+                        return NAN;
+                }
+            }
         };
-        // clang-format on
+
+        template< typename T >
+        struct Matrix4< T >::Constants {
+            static constexpr auto ZERO = Matrix4< T > { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            static constexpr auto IDENTITY = Matrix4< T > { 1, 0, 0, 0, 1, 0, 0, 0, 1 };
+        };
+
     }
 
-    [[nodiscard]] constexpr Matrix4 perspective( Real l, Real r, Real b, Real t, Real n, Real f ) noexcept
-    {
-        // clang-format off
-        return Matrix4 {
-            Real( 2 ) * n / ( r - l ), 0, ( r + l ) / ( r - l ), 0,
-            0, Real( 2 ) * n / ( t - b ), ( t + b ) / ( t - b ), 0,
-            0, 0, -( f + n ) / ( f - n ), - Real( 2 ) * f * n / ( f - n ),
-            0, 0, -1, 0,
-        };
-        // clang-format on
-    }
-
-    // TODO: make this function constexpr
-    [[nodiscard]] static Matrix4 perspective( Real fov, Real a, Real n, Real f ) noexcept
-    {
-        // fov: vertical field of view
-
-        const auto c = Real( 1 ) / tan( Real( 0.5 ) * fov );
-
-        // clang-format off
-        return Matrix4 {
-            c / a, 0, 0, 0,
-            0, c, 0, 0,
-            0, 0, ( f + n ) / ( f - n ), -Real( 2 ) * f * n / ( f - n ),
-            0, 0, -1, 0,
-        };
-        // clang-format on
-    }
+    using Matrix4 = impl::Matrix4< Real >;
+    using Matrix4f = impl::Matrix4< Real32 >;
+    using Matrix4d = impl::Matrix4< Real64 >;
+    using Matrix4i = impl::Matrix4< Int32 >;
+    using Matrix4ui = impl::Matrix4< UInt32 >;
 
 }
 

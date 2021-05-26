@@ -27,6 +27,7 @@
 
 #include "BoxPrimitive.hpp"
 
+#include "Mathematics/Vector3Ops.hpp"
 #include "Rendering/Vertex.hpp"
 
 #include <vector>
@@ -46,48 +47,48 @@ BoxPrimitive::BoxPrimitive( const Params &params ) noexcept
 
     auto vertices = crimild::alloc< VertexBuffer >( layout, 24 );
 
-    auto w = ( params.invertFaces ? -1.0f : 1.0f ) * params.size.x();
-    auto h = ( params.invertFaces ? -1.0f : 1.0f ) * params.size.y();
-    auto d = ( params.invertFaces ? -1.0f : 1.0f ) * params.size.z();
+    auto w = ( params.invertFaces ? -1.0f : 1.0f ) * params.size.x;
+    auto h = ( params.invertFaces ? -1.0f : 1.0f ) * params.size.y;
+    auto d = ( params.invertFaces ? -1.0f : 1.0f ) * params.size.z;
 
     auto positions = vertices->get( VertexAttribute::Name::POSITION );
     positions->set(
         Array< Vector3f > {
             // top
-            Vector3f( -w, +h, -d ),
-            Vector3f( -w, +h, +d ),
-            Vector3f( +w, +h, +d ),
-            Vector3f( +w, +h, -d ),
+            Vector3f { -w, +h, -d },
+            Vector3f { -w, +h, +d },
+            Vector3f { +w, +h, +d },
+            Vector3f { +w, +h, -d },
 
             // front
-            Vector3f( -w, +h, +d ),
-            Vector3f( -w, -h, +d ),
-            Vector3f( +w, -h, +d ),
-            Vector3f( +w, +h, +d ),
+            Vector3f { -w, +h, +d },
+            Vector3f { -w, -h, +d },
+            Vector3f { +w, -h, +d },
+            Vector3f { +w, +h, +d },
 
             // back
-            Vector3f( +w, +h, -d ),
-            Vector3f( +w, -h, -d ),
-            Vector3f( -w, -h, -d ),
-            Vector3f( -w, +h, -d ),
+            Vector3f { +w, +h, -d },
+            Vector3f { +w, -h, -d },
+            Vector3f { -w, -h, -d },
+            Vector3f { -w, +h, -d },
 
             // left
-            Vector3f( -w, +h, -d ),
-            Vector3f( -w, -h, -d ),
-            Vector3f( -w, -h, +d ),
-            Vector3f( -w, +h, +d ),
+            Vector3f { -w, +h, -d },
+            Vector3f { -w, -h, -d },
+            Vector3f { -w, -h, +d },
+            Vector3f { -w, +h, +d },
 
             // right
-            Vector3f( +w, +h, +d ),
-            Vector3f( +w, -h, +d ),
-            Vector3f( +w, -h, -d ),
-            Vector3f( +w, +h, -d ),
+            Vector3f { +w, +h, +d },
+            Vector3f { +w, -h, +d },
+            Vector3f { +w, -h, -d },
+            Vector3f { +w, +h, -d },
 
             // bottom
-            Vector3f( +w, -h, -d ),
-            Vector3f( +w, -h, +d ),
-            Vector3f( -w, -h, +d ),
-            Vector3f( -w, -h, -d ),
+            Vector3f { +w, -h, -d },
+            Vector3f { +w, -h, +d },
+            Vector3f { -w, -h, +d },
+            Vector3f { -w, -h, -d },
         } );
 
     if ( layout.hasAttribute( VertexAttribute::Name::NORMAL ) ) {
@@ -137,12 +138,12 @@ BoxPrimitive::BoxPrimitive( const Params &params ) noexcept
 
     if ( layout.hasAttribute( VertexAttribute::Name::COLOR ) ) {
         auto colors = vertices->get( VertexAttribute::Name::COLOR );
-        auto r = ColorRGB( 1.0f, 0.0f, 0.0f );
-        auto g = ColorRGB( 0.0f, 1.0f, 0.0f );
-        auto b = ColorRGB( 0.0f, 0.0f, 1.0f );
-        auto c = ColorRGB( 0.0f, 1.0f, 1.0f );
-        auto m = ColorRGB( 1.0f, 0.0f, 1.0f );
-        auto y = ColorRGB( 1.0f, 1.0f, 0.0f );
+        auto r = ColorRGB { 1.0f, 0.0f, 0.0f };
+        auto g = ColorRGB { 0.0f, 1.0f, 0.0f };
+        auto b = ColorRGB { 0.0f, 0.0f, 1.0f };
+        auto c = ColorRGB { 0.0f, 1.0f, 1.0f };
+        auto m = ColorRGB { 1.0f, 0.0f, 1.0f };
+        auto y = ColorRGB { 1.0f, 1.0f, 0.0f };
         colors->set(
             Array< ColorRGB > {
                 // top
@@ -185,47 +186,47 @@ BoxPrimitive::BoxPrimitive( const Params &params ) noexcept
 
     if ( layout.hasAttribute( VertexAttribute::Name::TEX_COORD ) ) {
         auto texCoords = vertices->get( VertexAttribute::Name::TEX_COORD );
-        auto s0 = params.invertFaces ? 1.0 : 0.0;
-        auto s1 = params.invertFaces ? 0.0 : 1.0;
-        auto t0 = params.invertFaces ? 1.0 : 0.0;
-        auto t1 = params.invertFaces ? 0.0 : 1.0;
+        Real s0 = params.invertFaces ? 1.0 : 0.0;
+        Real s1 = params.invertFaces ? 0.0 : 1.0;
+        Real t0 = params.invertFaces ? 1.0 : 0.0;
+        Real t1 = params.invertFaces ? 0.0 : 1.0;
         texCoords->set(
             Array< Vector2f > {
                 // top
-                Vector2f( s0, t0 ),
-                Vector2f( s0, t1 ),
-                Vector2f( s1, t1 ),
-                Vector2f( s1, t0 ),
+                Vector2f { s0, t0 },
+                Vector2f { s0, t1 },
+                Vector2f { s1, t1 },
+                Vector2f { s1, t0 },
 
                 // front
-                Vector2f( s0, t0 ),
-                Vector2f( s0, t1 ),
-                Vector2f( s1, t1 ),
-                Vector2f( s1, t0 ),
+                Vector2f { s0, t0 },
+                Vector2f { s0, t1 },
+                Vector2f { s1, t1 },
+                Vector2f { s1, t0 },
 
                 // back
-                Vector2f( s0, t0 ),
-                Vector2f( s0, t1 ),
-                Vector2f( s1, t1 ),
-                Vector2f( s1, t0 ),
+                Vector2f { s0, t0 },
+                Vector2f { s0, t1 },
+                Vector2f { s1, t1 },
+                Vector2f { s1, t0 },
 
                 // left
-                Vector2f( s0, t0 ),
-                Vector2f( s0, t1 ),
-                Vector2f( s1, t1 ),
-                Vector2f( s1, t0 ),
+                Vector2f { s0, t0 },
+                Vector2f { s0, t1 },
+                Vector2f { s1, t1 },
+                Vector2f { s1, t0 },
 
                 // right
-                Vector2f( s0, t0 ),
-                Vector2f( s0, t1 ),
-                Vector2f( s1, t1 ),
-                Vector2f( s1, t0 ),
+                Vector2f { s0, t0 },
+                Vector2f { s0, t1 },
+                Vector2f { s1, t1 },
+                Vector2f { s1, t0 },
 
                 // bottom
-                Vector2f( s0, t0 ),
-                Vector2f( s0, t1 ),
-                Vector2f( s1, t1 ),
-                Vector2f( s1, t0 ),
+                Vector2f { s0, t0 },
+                Vector2f { s0, t1 },
+                Vector2f { s1, t1 },
+                Vector2f { s1, t0 },
             } );
     }
     setVertexData( { vertices } );

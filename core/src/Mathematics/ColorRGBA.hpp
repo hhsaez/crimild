@@ -28,24 +28,54 @@
 #ifndef CRIMILD_MATHEMATICS_COLOR_RGBA_
 #define CRIMILD_MATHEMATICS_COLOR_RGBA_
 
-#include "Mathematics/Color.hpp"
+#include "Foundation/Types.hpp"
+
+#include <cmath>
 
 namespace crimild {
 
-    template< typename T >
-    [[nodiscard]] inline constexpr impl::Color< T, 4 > permute( const impl::Color< T, 4 > &u, Int r, Int g, Int b, Int a ) noexcept
-    {
-        return impl::Color< T, 4 > {
-            u[ r ],
-            u[ g ],
-            u[ b ],
-            u[ a ],
+    namespace impl {
+
+        template< typename T >
+        struct ColorRGBA {
+            struct Constants;
+
+            T r;
+            T g;
+            T b;
+            T a;
+
+            [[nodiscard]] inline constexpr T operator[]( Size index ) const noexcept
+            {
+                switch ( index ) {
+                    case 0:
+                        return r;
+                    case 1:
+                        return g;
+                    case 2:
+                        return b;
+                    case 3:
+                        return a;
+                    default:
+                        return NAN;
+                }
+            }
         };
+
+        template< typename T >
+        struct ColorRGBA< T >::Constants {
+            static constexpr auto BLACK = ColorRGBA< T > { 0, 0, 0, 1 };
+            static constexpr auto WHITE = ColorRGBA< T > { 1, 1, 1, 1 };
+            static constexpr auto RED = ColorRGBA< T > { 1, 0, 0, 1 };
+            static constexpr auto GREEN = ColorRGBA< T > { 0, 1, 0, 1 };
+            static constexpr auto BLUE = ColorRGBA< T > { 0, 0, 1, 1 };
+        };
+
     }
 
-    using ColorRGBA = impl::Color< Real, 4 >;
-    using ColorRGBAf = impl::Color< Real32, 4 >;
-    using ColorRGBAd = impl::Color< Real64, 4 >;
+    using ColorRGBA = impl::ColorRGBA< Real >;
+    using ColorRGBAf = impl::ColorRGBA< Real32 >;
+    using ColorRGBAd = impl::ColorRGBA< Real64 >;
 
 }
 

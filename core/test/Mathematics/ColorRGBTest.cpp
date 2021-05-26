@@ -27,16 +27,25 @@
 
 #include "Mathematics/ColorRGB.hpp"
 
+#include "Mathematics/ColorRGBOps.hpp"
+#include "Mathematics/dot.hpp"
+#include "Mathematics/io.hpp"
+#include "Mathematics/isEqual.hpp"
+#include "Mathematics/isNaN.hpp"
+#include "Mathematics/max.hpp"
+#include "Mathematics/min.hpp"
+#include "Mathematics/permutation.hpp"
+
 #include "gtest/gtest.h"
 #include <sstream>
 
 TEST( ColorRGB, construction )
 {
-    constexpr auto u = crimild::ColorRGB( 10, 20, 30 );
+    constexpr auto u = crimild::ColorRGB { 10, 20, 30 };
 
-    EXPECT_EQ( 10, u.r() );
-    EXPECT_EQ( 20, u.g() );
-    EXPECT_EQ( 30, u.b() );
+    EXPECT_EQ( 10, u.r );
+    EXPECT_EQ( 20, u.g );
+    EXPECT_EQ( 30, u.b );
 }
 
 TEST( ColorRGB, index )
@@ -54,55 +63,61 @@ TEST( ColorRGB, equality )
     constexpr auto v = crimild::ColorRGB { 30, 40, 50 };
     constexpr auto w = crimild::ColorRGB { 10, 20, 30 };
 
-    EXPECT_EQ( u, w );
-    EXPECT_NE( u, v );
-    EXPECT_NE( v, w );
+    static_assert( crimild::isEqual( u, w ), "equality" );
+    static_assert( !crimild::isEqual( u, v ), "inequality" );
+
+    EXPECT_TRUE( true );
 }
 
 TEST( ColorRGB, addition )
 {
     constexpr auto u = crimild::ColorRGB { 10, 20, 30 };
     constexpr auto v = crimild::ColorRGB { 30, 40, 50 };
-    constexpr auto res = crimild::ColorRGB { 40, 60, 80 };
 
-    EXPECT_EQ( res, u + v );
+    static_assert( crimild::isEqual( crimild::ColorRGB { 40, 60, 80 }, ( u + v ) ), "addition" );
+
+    EXPECT_TRUE( true );
 }
 
 TEST( ColorRGB, subtraction )
 {
     constexpr auto u = crimild::ColorRGB { 10, 20, 30 };
     constexpr auto v = crimild::ColorRGB { 30, 40, 50 };
-    constexpr auto res = crimild::ColorRGB { -20, -20, -20 };
 
-    EXPECT_EQ( res, u - v );
+    static_assert( crimild::isEqual( crimild::ColorRGB { -20, -20, -20 }, ( u - v ) ), "addition" );
+
+    EXPECT_TRUE( true );
 }
 
 TEST( ColorRGB, multiplication )
 {
     constexpr auto u = crimild::ColorRGB { 10, 20, 30 };
     constexpr auto s = crimild::Real( 5 );
-    constexpr auto res = crimild::ColorRGB { 50, 100, 150 };
 
-    EXPECT_EQ( res, u * s );
-    EXPECT_EQ( res, s * u );
+    static_assert( crimild::isEqual( crimild::ColorRGB { 50, 100, 150 }, ( u * s ) ), "multiplication" );
+    static_assert( crimild::isEqual( crimild::ColorRGB { 50, 100, 150 }, ( s * u ) ), "multiplication" );
+
+    EXPECT_TRUE( true );
 }
 
 TEST( ColorRGB, vectorMultiplication )
 {
     constexpr auto u = crimild::ColorRGB { 10, 20, 30 };
     constexpr auto v = crimild::ColorRGB { 2, 3, 4 };
-    constexpr auto res = crimild::ColorRGB { 20, 60, 120 };
 
-    EXPECT_EQ( res, u * v );
+    static_assert( crimild::isEqual( crimild::ColorRGB { 20, 60, 120 }, ( u * v ) ), "multiplication" );
+
+    EXPECT_TRUE( true );
 }
 
 TEST( ColorRGB, division )
 {
     constexpr auto u = crimild::ColorRGB { 10, 20, 30 };
     constexpr auto s = crimild::Real( 2 );
-    constexpr auto res = crimild::ColorRGB { 5, 10, 15 };
 
-    EXPECT_EQ( res, u / s );
+    static_assert( crimild::isEqual( crimild::ColorRGB { 5, 10, 15 }, ( u / s ) ), "division" );
+
+    EXPECT_TRUE( true );
 }
 
 TEST( ColorRGB, isNaN )
@@ -128,20 +143,22 @@ TEST( ColorRGB, min )
 {
     constexpr auto u = crimild::ColorRGB { 2, 3, 4 };
     constexpr auto v = crimild::ColorRGB { 1, 5, 2 };
-    constexpr auto m = crimild::ColorRGB { 1, 3, 2 };
 
-    EXPECT_EQ( 2, crimild::min( u ) );
-    EXPECT_EQ( m, crimild::min( u, v ) );
+    static_assert( crimild::isEqual( crimild::ColorRGB { 1, 3, 2 }, crimild::min( crimild::ColorRGB { 2, 3, 4 }, crimild::ColorRGB { 1, 5, 2 } ) ), "min" );
+    static_assert( 2 == crimild::min( crimild::ColorRGB { 2, 3, 4 } ), "min" );
+
+    EXPECT_TRUE( true );
 }
 
 TEST( ColorRGB, max )
 {
     constexpr auto u = crimild::ColorRGB { 2, 3, 4 };
     constexpr auto v = crimild::ColorRGB { 1, 5, 2 };
-    constexpr auto m = crimild::ColorRGB { 2, 5, 4 };
 
-    EXPECT_EQ( 4, crimild::max( u ) );
-    EXPECT_EQ( m, crimild::max( u, v ) );
+    static_assert( crimild::isEqual( crimild::ColorRGB { 2, 5, 4 }, crimild::max( crimild::ColorRGB { 2, 3, 4 }, crimild::ColorRGB { 1, 5, 2 } ) ), "max" );
+    static_assert( 4 == crimild::max( crimild::ColorRGB { 2, 3, 4 } ), "max" );
+
+    EXPECT_TRUE( true );
 }
 
 TEST( ColorRGB, minDimension )
@@ -173,7 +190,9 @@ TEST( ColorRGB, permute )
     constexpr auto u = crimild::ColorRGB { 4, 5, 6 };
     constexpr auto v = crimild::ColorRGB { 6, 4, 5 };
 
-    EXPECT_EQ( v, crimild::permute( u, 2, 0, 1 ) );
+    static_assert( crimild::isEqual( v, crimild::permute( u, 2, 0, 1 ) ) );
+
+    EXPECT_TRUE( true );
 }
 
 TEST( ColorRGB, constexpr )
@@ -183,32 +202,17 @@ TEST( ColorRGB, constexpr )
     constexpr auto w = crimild::ColorRGB { 10, 20, 30 };
     constexpr auto s = crimild::Real( 5 );
 
-    static_assert( u == w, "equality" );
-    static_assert( u != v, "inequality" );
-
     static_assert( 10 == u[ 0 ], "index" );
     static_assert( 20 == u[ 1 ], "index" );
     static_assert( 30 == u[ 2 ], "index" );
-
-    static_assert( crimild::ColorRGB { 40, 60, 80 } == ( u + v ), "addition" );
-    static_assert( crimild::ColorRGB { -20, -20, -20 } == ( u - v ), "subtraction" );
-
-    static_assert( crimild::ColorRGB { 50, 100, 150 } == ( u * s ), "multiplication" );
-    static_assert( crimild::ColorRGB { 50, 100, 150 } == ( s * u ), "multiplication" );
-    static_assert( crimild::ColorRGB { 300, 800, 1500 } == ( u * v ), "multiplication" );
-    static_assert( crimild::ColorRGB { 2, 4, 6 } == ( u / s ), "division" );
 
     static_assert( crimild::isNaN( u ) == false, "isNaN" );
     static_assert( crimild::isNaN( crimild::ColorRGB { NAN, NAN, NAN } ) == true, "isNaN" );
 
     static_assert( 36 == crimild::dot( crimild::ColorRGB { 2, 3, 5 }, crimild::ColorRGB { 8, 10, -2 } ), "dot" );
 
-    static_assert( crimild::ColorRGB { 1, 3, 2 } == crimild::min( crimild::ColorRGB { 2, 3, 4 }, crimild::ColorRGB { 1, 5, 2 } ), "min" );
-    static_assert( 2 == crimild::min( crimild::ColorRGB { 2, 3, 4 } ), "min" );
     static_assert( 0 == crimild::minDimension( crimild::ColorRGB { 2, 3, 4 } ), "minDimension" );
 
-    static_assert( crimild::ColorRGB { 2, 5, 4 } == crimild::max( crimild::ColorRGB { 2, 3, 4 }, crimild::ColorRGB { 1, 5, 2 } ), "max" );
-    static_assert( 4 == crimild::max( crimild::ColorRGB { 2, 3, 4 } ), "max" );
     static_assert( 2 == crimild::maxDimension( crimild::ColorRGB { 2, 3, 4 } ), "maxDimension" );
 
     EXPECT_TRUE( true );

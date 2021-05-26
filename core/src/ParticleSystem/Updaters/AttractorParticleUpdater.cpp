@@ -33,7 +33,7 @@
 using namespace crimild;
 
 AttractorParticleUpdater::AttractorParticleUpdater( void )
-    : _attractor( Point3::Constants::ZERO, 1.0f ),
+    : _attractor { Point3::Constants::ZERO, 1.0f },
       _strength( 1.0f )
 {
 }
@@ -50,8 +50,9 @@ void AttractorParticleUpdater::configure( Node *node, ParticleData *particles )
 
 void AttractorParticleUpdater::update( Node *node, crimild::Real64 dt, ParticleData *particles )
 {
-    const auto center = _attractor.getCenter();
-    const auto radius = _attractor.getRadius();
+    /*
+    const auto center = crimild::center( _attractor );
+    const auto radius = crimild::radius( _attractor );
     const auto count = particles->getAliveCount();
 
     const auto ps = _positions->getData< Vector3f >();
@@ -69,6 +70,8 @@ void AttractorParticleUpdater::update( Node *node, crimild::Real64 dt, ParticleD
             //as[ i ] += dt * pct * _strength * direction;
         }
     }
+    */
+    assert( false );
 }
 
 void AttractorParticleUpdater::encode( coding::Encoder &encoder )
@@ -93,6 +96,6 @@ void AttractorParticleUpdater::decode( coding::Decoder &decoder )
     crimild::Real32 strength = 1.0f;
     decoder.decode( "strength", strength );
 
-    setAttractor( Sphere( Point3( origin ), radius ) );
+    setAttractor( Sphere { point3( origin ), radius } );
     setStrength( strength );
 }

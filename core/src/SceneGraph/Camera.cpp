@@ -27,6 +27,8 @@
 
 #include "Camera.hpp"
 
+#include "Mathematics/perspective.hpp"
+
 using namespace crimild;
 
 Camera *Camera::_mainCamera = nullptr;
@@ -38,7 +40,7 @@ Camera::Camera( void )
 
 Camera::Camera( float fov, float aspect, float near, float far )
     : //_frustum( fov, aspect, near, far ),
-      _viewport( 0.0f, 0.0f, 1.0f, 1.0f ),
+      _viewport { { 0.0f, 0.0f }, { 1.0f, 1.0f } },
       _viewMatrixIsCurrent( false )
 {
     //_renderGraph = crimild::alloc< RenderGraph >();

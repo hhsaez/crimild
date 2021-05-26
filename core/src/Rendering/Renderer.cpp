@@ -105,7 +105,7 @@ void Renderer::setScreenViewport( const Rectf &viewport )
 
 void Renderer::beginRender( void )
 {
-    static const Rectf VIEWPORT( 0.0f, 0.0f, 1.0f, 1.0f );
+    static const Rectf VIEWPORT { { 0.0f, 0.0f }, { 1.0f, 1.0f } };
     setScreenViewport( VIEWPORT );
 }
 

@@ -160,5 +160,5 @@ void Skeleton::renderDebugInfo( Renderer *renderer, Camera *camera )
         }
     } ) );
 
-    DebugRenderHelper::renderLines( renderer, camera, &lines[ 0 ], lines.size(), ColorRGBA( 1.0f, 0.0f, 0.0f, 1.0f ) );
+    DebugRenderHelper::renderLines( renderer, camera, &lines[ 0 ], lines.size(), ColorRGBA { 1.0f, 0.0f, 0.0f, 1.0f } );
 }

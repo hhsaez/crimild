@@ -1,0 +1,68 @@
+/*
+ * Copyright (c) 2013, Hernan Saez
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the <organization> nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#ifndef CRIMILD_CORE_MATHEMATICS_LINE_SEGMENT_3_
+#define CRIMILD_CORE_MATHEMATICS_LINE_SEGMENT_3_
+
+#include "Mathematics/Point3.hpp"
+
+namespace crimild {
+
+    namespace impl {
+
+        /**
+           \brief A segment between two points
+        */
+        template< typename T >
+        struct LineSegment3 {
+            Point3< T > p0;
+            Point3< T > p1;
+
+            [[nodiscard]] constexpr Bool operator==( const LineSegment3 &other ) const noexcept
+            {
+                return p0 == other.p0 && p1 == other.p1;
+            }
+
+            [[nodiscard]] constexpr Bool operator!=( const LineSegment3 &other ) const noexcept
+            {
+                return p0 != other.p1 || p0 != other.p1;
+            }
+        };
+
+    };
+
+    template< typename T >
+    [[nodiscard]] inline constexpr const impl::Point3< T > &origin( const impl::LineSegment3< T > &l ) noexcept { return l.p0; }
+
+    template< typename T >
+    [[nodiscard]] inline constexpr const impl::Point3< T > &destination( const impl::LineSegment3< T > &l ) noexcept { return l.p1; }
+
+    using LineSegment3 = impl::LineSegment3< Real >;
+
+}
+
+#endif

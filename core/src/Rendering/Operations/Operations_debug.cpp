@@ -47,41 +47,42 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::debug( Array< SharedPo
         const auto padding = 0.0125f;
         return ViewportDimensions {
             .scalingMode = viewport.scalingMode,
-            .dimensions = Rectf(
-                viewport.dimensions.getX() + padding,
-                viewport.dimensions.getY() + padding,
-                viewport.dimensions.getWidth() - 2.0f * padding,
-                viewport.dimensions.getHeight() - 2.0f * padding ),
+            .dimensions = Rectf {
+                viewport.dimensions.origin.x + padding,
+                viewport.dimensions.origin.y + padding,
+                viewport.dimensions.size.width - 2.0f * padding,
+                viewport.dimensions.size.height - 2.0f * padding,
+            },
         };
     };
 
     Array< ViewportDimensions > viewports = {
         // main attachment
-        withDimensions( Rectf( 0.2f, 0.2f, 0.6f, 0.6f ) ),
+        withDimensions( Rectf { { 0.2f, 0.2f }, { 0.6f, 0.6f } } ),
 
         // right column
-        withPadding( withDimensions( Rectf( 0.8f, 0.8f, 0.2f, 0.2f ) ) ),
-        withPadding( withDimensions( Rectf( 0.8f, 0.6f, 0.2f, 0.2f ) ) ),
-        withPadding( withDimensions( Rectf( 0.8f, 0.4f, 0.2f, 0.2f ) ) ),
-        withPadding( withDimensions( Rectf( 0.8f, 0.2f, 0.2f, 0.2f ) ) ),
-        withPadding( withDimensions( Rectf( 0.8f, 0.0f, 0.2f, 0.2f ) ) ),
+        withPadding( withDimensions( Rectf { { 0.8f, 0.8f }, { 0.2f, 0.2f } } ) ),
+        withPadding( withDimensions( Rectf { { 0.8f, 0.6f }, { 0.2f, 0.2f } } ) ),
+        withPadding( withDimensions( Rectf { { 0.8f, 0.4f }, { 0.2f, 0.2f } } ) ),
+        withPadding( withDimensions( Rectf { { 0.8f, 0.2f }, { 0.2f, 0.2f } } ) ),
+        withPadding( withDimensions( Rectf { { 0.8f, 0.0f }, { 0.2f, 0.2f } } ) ),
 
         // left column
-        withPadding( withDimensions( Rectf( 0.0f, 0.8f, 0.2f, 0.2f ) ) ),
-        withPadding( withDimensions( Rectf( 0.0f, 0.6f, 0.2f, 0.2f ) ) ),
-        withPadding( withDimensions( Rectf( 0.0f, 0.4f, 0.2f, 0.2f ) ) ),
-        withPadding( withDimensions( Rectf( 0.0f, 0.2f, 0.2f, 0.2f ) ) ),
-        withPadding( withDimensions( Rectf( 0.0f, 0.0f, 0.2f, 0.2f ) ) ),
+        withPadding( withDimensions( Rectf { { 0.0f, 0.8f }, { 0.2f, 0.2f } } ) ),
+        withPadding( withDimensions( Rectf { { 0.0f, 0.6f }, { 0.2f, 0.2f } } ) ),
+        withPadding( withDimensions( Rectf { { 0.0f, 0.4f }, { 0.2f, 0.2f } } ) ),
+        withPadding( withDimensions( Rectf { { 0.0f, 0.2f }, { 0.2f, 0.2f } } ) ),
+        withPadding( withDimensions( Rectf { { 0.0f, 0.0f }, { 0.2f, 0.2f } } ) ),
 
         // bottom row
-        withPadding( withDimensions( Rectf( 0.2f, 0.8f, 0.2f, 0.2f ) ) ),
-        withPadding( withDimensions( Rectf( 0.4f, 0.8f, 0.2f, 0.2f ) ) ),
-        withPadding( withDimensions( Rectf( 0.6f, 0.8f, 0.2f, 0.2f ) ) ),
+        withPadding( withDimensions( Rectf { { 0.2f, 0.8f }, { 0.2f, 0.2f } } ) ),
+        withPadding( withDimensions( Rectf { { 0.4f, 0.8f }, { 0.2f, 0.2f } } ) ),
+        withPadding( withDimensions( Rectf { { 0.6f, 0.8f }, { 0.2f, 0.2f } } ) ),
 
         // top row
-        withPadding( withDimensions( Rectf( 0.2f, 0.0f, 0.2f, 0.2f ) ) ),
-        withPadding( withDimensions( Rectf( 0.4f, 0.0f, 0.2f, 0.2f ) ) ),
-        withPadding( withDimensions( Rectf( 0.6f, 0.0f, 0.2f, 0.2f ) ) ),
+        withPadding( withDimensions( Rectf { { 0.2f, 0.0f }, { 0.2f, 0.2f } } ) ),
+        withPadding( withDimensions( Rectf { { 0.4f, 0.0f }, { 0.2f, 0.2f } } ) ),
+        withPadding( withDimensions( Rectf { { 0.6f, 0.0f }, { 0.2f, 0.2f } } ) ),
     };
 
     // TODO: move this to a compute pass?
@@ -183,7 +184,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::debug( Array< SharedPo
     renderPass->produces( { color } );
 
     renderPass->clearValue = {
-        .color = ColorRGBA( 0.5f, 0.5f, 0.5f, 1.0f ),
+        .color = ColorRGBA { 0.5f, 0.5f, 0.5f, 1.0f },
     };
 
     return withGraphicsCommands(

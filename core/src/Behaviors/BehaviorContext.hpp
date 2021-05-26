@@ -169,18 +169,19 @@ namespace crimild {
         template<>
         inline void BehaviorContext::setValue< Vector3f >( std::string key, Vector3f value )
         {
-            setValue< crimild::Real32 >( key + ".x", value.x() );
-            setValue< crimild::Real32 >( key + ".y", value.y() );
-            setValue< crimild::Real32 >( key + ".z", value.z() );
+            setValue< crimild::Real32 >( key + ".x", value.x );
+            setValue< crimild::Real32 >( key + ".y", value.y );
+            setValue< crimild::Real32 >( key + ".z", value.z );
         }
 
         template<>
         inline crimild::Vector3f BehaviorContext::getValue( std::string key )
         {
-            return Vector3f(
+            return Vector3f {
                 getValue< crimild::Real32 >( key + ".x" ),
                 getValue< crimild::Real32 >( key + ".y" ),
-                getValue< crimild::Real32 >( key + ".z" ) );
+                getValue< crimild::Real32 >( key + ".z" ),
+            };
         }
 
         template<>
@@ -191,7 +192,7 @@ namespace crimild {
 
             float x, y, z, w;
             ss >> x >> y >> z >> w;
-            return crimild::Vector4f( x, y, z, w );
+            return crimild::Vector4f { x, y, z, w };
         }
 
     }

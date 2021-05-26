@@ -28,23 +28,51 @@
 #ifndef CRIMILD_MATHEMATICS_COLOR_RGB_
 #define CRIMILD_MATHEMATICS_COLOR_RGB_
 
-#include "Mathematics/Color.hpp"
+#include "Foundation/Types.hpp"
+
+#include <cmath>
 
 namespace crimild {
 
-    template< typename T >
-    [[nodiscard]] inline constexpr impl::Color< T, 3 > permute( const impl::Color< T, 3 > &u, Int x, Int y, Int z ) noexcept
-    {
-        return impl::Color< T, 3 > {
-            u[ x ],
-            u[ y ],
-            u[ z ],
+    namespace impl {
+
+        template< typename T >
+        struct ColorRGB {
+            struct Constants;
+
+            T r;
+            T g;
+            T b;
+
+            [[nodiscard]] inline constexpr T operator[]( Size index ) const noexcept
+            {
+                switch ( index ) {
+                    case 0:
+                        return r;
+                    case 1:
+                        return g;
+                    case 2:
+                        return b;
+                    default:
+                        return NAN;
+                }
+            }
         };
+
+        template< typename T >
+        struct ColorRGB< T >::Constants {
+            static constexpr auto BLACK = ColorRGB< T > { 0, 0, 0 };
+            static constexpr auto WHITE = ColorRGB< T > { 1, 1, 1 };
+            static constexpr auto RED = ColorRGB< T > { 1, 0, 0 };
+            static constexpr auto GREEN = ColorRGB< T > { 0, 1, 0 };
+            static constexpr auto BLUE = ColorRGB< T > { 0, 0, 1 };
+        };
+
     }
 
-    using ColorRGB = impl::Color< Real, 3 >;
-    using ColorRGBf = impl::Color< Real32, 3 >;
-    using ColorRGBd = impl::Color< Real64, 3 >;
+    using ColorRGB = impl::ColorRGB< Real >;
+    using ColorRGBf = impl::ColorRGB< Real32 >;
+    using ColorRGBd = impl::ColorRGB< Real64 >;
 
 }
 

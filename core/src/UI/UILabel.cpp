@@ -70,7 +70,7 @@ void UILabel::start( void )
 void UILabel::update( const Clock & )
 {
     const auto &rect = _frame->getExtensions();
-    auto scale = rect.getHeight();
+    auto scale = rect.size.height;
     auto geo = _text->getNodeAt( 0 );
     auto bounds = geo->getLocalBound();
     auto center = bounds->getCenter();
@@ -80,29 +80,29 @@ void UILabel::update( const Clock & )
 
     switch ( _textHorizontalAlignment ) {
         case TextHorizontalAlignment::Left:
-            x = -0.5f * rect.getWidth();
+            x = -0.5f * rect.size.width;
             break;
 
         case TextHorizontalAlignment::Center:
-            x = -_textSize * center.x();
+            x = -_textSize * center.x;
             break;
 
         case TextHorizontalAlignment::Right:
-            x = 0.5f * rect.getWidth() - _textSize * ( bounds->getMax().x() - bounds->getMin().x() );
+            x = 0.5f * rect.size.width - _textSize * ( bounds->getMax().x - bounds->getMin().x );
             break;
     }
 
     switch ( _textVerticalAlignment ) {
         case TextVerticalAlignment::Top:
-            y = 0.5f * rect.getHeight() - _textSize * ( bounds->getMax().y() - bounds->getMin().y() );
+            y = 0.5f * rect.size.height - _textSize * ( bounds->getMax().y - bounds->getMin().y );
             break;
 
         case TextVerticalAlignment::Center:
-            y = -_textSize * center.y();
+            y = -_textSize * center.y;
             break;
 
         case TextVerticalAlignment::Bottom:
-            y = -0.5f * rect.getHeight() - _textSize * bounds->getMin().y();
+            y = -0.5f * rect.size.height - _textSize * bounds->getMin().y;
             break;
     }
 

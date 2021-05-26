@@ -29,7 +29,7 @@
 
 #include "Foundation/Log.hpp"
 #include "Mathematics/Intersection.hpp"
-#include "Mathematics/LineSegment.hpp"
+#include "Mathematics/LineSegment3.hpp"
 #include "Mathematics/Ray3.hpp"
 #include "NavigationMeshContainer.hpp"
 #include "SceneGraph/Node.hpp"

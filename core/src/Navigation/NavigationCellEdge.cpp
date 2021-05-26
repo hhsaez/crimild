@@ -41,5 +41,6 @@ NavigationCellEdge::~NavigationCellEdge( void )
 
 LineSegment3 NavigationCellEdge::projectPath( const LineSegment3 &path ) const
 {
-    return project( getLine(), path );
+    assert( false );
+    return path; //project( getLine(), path );
 }

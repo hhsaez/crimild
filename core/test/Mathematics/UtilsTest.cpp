@@ -25,7 +25,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Mathematics/Utils.hpp"
+#include "Mathematics/factorial.hpp"
+#include "Mathematics/pow.hpp"
+#include "Mathematics/sqrt.hpp"
 
 #include "gtest/gtest.h"
 #include <array>

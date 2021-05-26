@@ -27,6 +27,9 @@
 
 #include "SpherePrimitive.hpp"
 
+#include "Mathematics/ColorRGBOps.hpp"
+#include "Mathematics/Vector3Ops.hpp"
+
 #include <vector>
 
 using namespace crimild;
@@ -68,20 +71,20 @@ SpherePrimitive::SpherePrimitive( const Params &params ) noexcept
 
             auto vIdx = latitude * ( 1 + divisions[ 0 ] ) + longitude;
 
-            positions->set( vIdx, center + radius * Vector3f( x, y, z ) );
+            positions->set( vIdx, center + radius * Vector3f { x, y, z } );
 
             if ( colors != nullptr ) {
-                colors->set( vIdx, ColorRGB( 0.5f, 0.5f, 0.5f ) + 0.5f * ColorRGB( x, y, z ) );
+                colors->set( vIdx, ColorRGB { 0.5f, 0.5f, 0.5f } + 0.5f * ColorRGB { x, y, z } );
             }
 
             if ( normals != nullptr ) {
-                normals->set( vIdx, Vector3f( x, y, z ) );
+                normals->set( vIdx, Vector3f { x, y, z } );
             }
 
             if ( texCoords != nullptr ) {
                 auto u = 1.0f - ( longitude / divisions[ 0 ] );
                 auto v = ( latitude / divisions[ 1 ] );
-                texCoords->set( vIdx, Vector2f( u, v ) );
+                texCoords->set( vIdx, Vector2f { u, v } );
             }
         }
     }

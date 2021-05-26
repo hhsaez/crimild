@@ -35,7 +35,7 @@ TorusPrimitive::TorusPrimitive( const Params &params ) noexcept
     _majorRadius = params.majorRadius;
     _minorRadius = params.minorRadius;
 
-    ParametricInterval interval = { params.divisions, Vector2f( Numericf::TWO_PI, Numericf::TWO_PI ), Vector2f( 40, 10 ) };
+    ParametricInterval interval = { params.divisions, Vector2f { Numericf::TWO_PI, Numericf::TWO_PI }, Vector2f { 40, 10 } };
     setInterval( interval );
     generate();
 }
@@ -49,5 +49,5 @@ Vector3f TorusPrimitive::evaluate( const Vector2f &domain ) const
     float x = ( major + minor * cos( v ) ) * cos( u );
     float y = ( major + minor * cos( v ) ) * sin( u );
     float z = minor * sin( v );
-    return Vector3f( x, y, z );
+    return Vector3f { x, y, z };
 }

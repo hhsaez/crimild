@@ -28,10 +28,18 @@
 #ifndef CRIMILD_CORE_MATHEMATICS_QUATERNION_
 #define CRIMILD_CORE_MATHEMATICS_QUATERNION_
 
-#include "MatrixImpl.hpp"
+#include "Mathematics/Matrix3.hpp"
+#include "Mathematics/Matrix4.hpp"
+#include "Mathematics/Vector3.hpp"
+#include "Mathematics/Vector4.hpp"
+#include "Mathematics/Vector4Ops.hpp"
+#include "Mathematics/cross.hpp"
+#include "Mathematics/dot.hpp"
+#include "Mathematics/swizzle.hpp"
 #include "Numeric.hpp"
-#include "Utils.hpp"
-#include "Vector3.hpp"
+
+#include <iomanip>
+#include <iostream>
 
 namespace crimild {
 
@@ -63,8 +71,7 @@ namespace crimild {
         template< typename PRECISION >
         class [[deprecated]] Quaternion {
         private:
-            using Vector3Impl = Vector< PRECISION, 3 >;
-            using Vector4Impl = Vector< PRECISION, 4 >;
+            using Vector3Impl = Vector3< PRECISION >;
 
         public:
             /**
@@ -124,7 +131,7 @@ namespace crimild {
 			setting valid values for all quaternion components
 		 */
             Quaternion( void )
-                : _data( 0, 0, 0, 1 )
+                : _data { 0, 0, 0, 1 }
             {
             }
 
@@ -144,11 +151,11 @@ namespace crimild {
 			\brief Explicit constructor
 		 */
             Quaternion( PRECISION x, PRECISION y, PRECISION z, PRECISION w )
-                : _data( x, y, z, w )
+                : _data { x, y, z, w }
             {
             }
 
-            explicit Quaternion( const Vector4Impl &data )
+            explicit Quaternion( const Vector4< PRECISION > &data )
                 : _data( data )
             {
             }
@@ -168,7 +175,7 @@ namespace crimild {
             {
             }
 
-            const Vector4Impl &getRawData( void ) const
+            const Vector4< PRECISION > &getRawData( void ) const
             {
                 return _data;
             }
@@ -184,17 +191,17 @@ namespace crimild {
 
             bool operator==( const Quaternion &q ) const
             {
-                return ( _data == q._data );
+                return false; //( _data == q._data );
             }
 
             bool operator!=( const Quaternion &q ) const
             {
-                return ( _data != q._data );
+                return false; //( _data != q._data );
             }
 
             Vector3Impl getImaginary( void ) const
             {
-                return _data.xyz();
+                return xyz( _data );
             }
 
             void setImaginary( const Vector3Impl &value )
@@ -227,10 +234,10 @@ namespace crimild {
             friend Quaternion< U > operator*( const Quaternion< U > &q, const Quaternion< U > &r );
 
             template< typename U >
-            friend Vector< U, 3 > operator*( const Quaternion< U > &q, const Vector< U, 3 > &v );
+            friend Vector3< U > operator*( const Quaternion< U > &q, const Vector3< U > &v );
 
             template< typename U >
-            friend Vector< U, 3 > operator*( const Vector< U, 3 > &v, const Quaternion< U > &q );
+            friend Vector3< U > operator*( const Vector3< U > &v, const Quaternion< U > &q );
 
             template< typename U, typename V >
             friend Quaternion< U > operator*( const Quaternion< U > &q, V s );
@@ -269,12 +276,12 @@ namespace crimild {
 		 */
             Quaternion getConjugate( void ) const
             {
-                return Quaternion( -_data[ 0 ], -_data[ 1 ], -_data[ 2 ], _data[ 3 ] );
+                return *this; //Quaternion( -_data[ 0 ], -_data[ 1 ], -_data[ 2 ], _data[ 3 ] );
             }
 
             Quaternion &makeIdentity( void )
             {
-                _data = Vector4Impl { 0, 0, 0, 1 };
+                _data = Vector4< PRECISION > { 0, 0, 0, 1 };
                 return *this;
             }
 
@@ -404,7 +411,7 @@ namespace crimild {
                 return q.normalize();
             }
 
-            void getRotationMatrix( Matrix< PRECISION, 3 > &output )
+            void getRotationMatrix( Matrix3< PRECISION > &output )
             {
                 float x = _data[ 0 ];
                 float y = _data[ 1 ];
@@ -438,7 +445,7 @@ namespace crimild {
             Algorithm in Ken Shoemake's article in 1987 SIGGRAPH course notes
             article "Quaternion Calculus and Fast Animation".
          */
-            Quaternion &fromRotationMatrix( const Matrix< PRECISION, 3 > &m )
+            Quaternion &fromRotationMatrix( const Matrix3< PRECISION > &m )
             {
                 float trace = 1.0f + m[ 0 ] + m[ 4 ] + m[ 8 ];
                 float x, y, z, w;
@@ -511,19 +518,19 @@ namespace crimild {
             }
 
         private:
-            Vector4Impl _data;
+            Vector4< PRECISION > _data;
         };
 
         template< typename U >
         Quaternion< U > operator-( const Quaternion< U > &q )
         {
-            return Quaternion< U >( -q._data );
+            return q; //Quaternion< U >( -q._data );
         }
 
         template< typename U >
         Quaternion< U > operator+( const Quaternion< U > &q, const Quaternion< U > &r )
         {
-            return Quaternion< U >( q._data + r._data );
+            return q; //Quaternion< U >( q._data + r._data );
         }
 
         template< typename U >
@@ -535,18 +542,21 @@ namespace crimild {
         template< typename U >
         Quaternion< U > operator*( const Quaternion< U > &q, const Quaternion< U > &r )
         {
-            Vector< U, 3 > qImaginary = q.getImaginary();
+            return q;
+            /*
+            impl::Vector3< U > qImaginary = q.getImaginary();
             U qReal = q.getReal();
-            Vector< U, 3 > rImaginary = r.getImaginary();
+            impl::Vector3< U > rImaginary = r.getImaginary();
             U rReal = r.getReal();
 
             // TODO: this should be replaced by a faster method
             return Quaternion< U >( qReal * rReal - dot( qImaginary, rImaginary ),
                                     ( qReal * rImaginary ) + ( qImaginary * rReal ) + ( crimild::cross( qImaginary, rImaginary ) ) );
+            */
         }
 
         template< typename U >
-        Vector< U, 3 > operator*( const Quaternion< U > &q, const Vector< U, 3 > &v )
+        Vector3< U > operator*( const Quaternion< U > &q, const Vector3< U > &v )
         {
             U x = v[ 0 ];
             U y = v[ 1 ];
@@ -561,7 +571,7 @@ namespace crimild {
             U iz = qw * z + qx * y - qy * x;
             U iw = -qx * x - qy * y - qz * z;
 
-            Vector< U, 3 > result = {
+            Vector3< U > result = {
                 ix * qw + iw * -qx + iy * -qz - iz * -qy,
                 iy * qw + iw * -qy + iz * -qx - ix * -qz,
                 iz * qw + iw * -qz + ix * -qy - iy * -qx,
@@ -570,7 +580,7 @@ namespace crimild {
         }
 
         template< typename U >
-        Vector< U, 3 > operator*( const Vector< U, 3 > &v, const Quaternion< U > &q )
+        Vector3< U > operator*( const Vector3< U > &v, const Quaternion< U > &q )
         {
             return q * v;
         }
@@ -578,7 +588,7 @@ namespace crimild {
         template< typename U, typename V >
         Quaternion< U > operator*( const Quaternion< U > &q, V s )
         {
-            return Quaternion< U >( q._data * s );
+            return q; //Quaternion< U >( q._data * s );
         }
 
         template< typename U, typename V >
@@ -590,11 +600,14 @@ namespace crimild {
         template< typename U, typename V >
         Quaternion< U > operator/( const Quaternion< U > &q, V s )
         {
+            return q;
+            /*
             if ( s == 0 ) {
                 s = Numeric< U >::ZERO_TOLERANCE;
             }
 
             return Quaternion< U >( q._data / s );
+            */
         }
 
         template< typename U >
@@ -635,9 +648,11 @@ namespace crimild {
         template< typename U >
         std::ostream &operator<<( std::ostream &out, const Quaternion< U > &q )
         {
+            /*
             out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
                 << std::setprecision( 10 )
                 << "[r = " << q.getReal() << ", i = " << q.getImaginary() << "]";
+            */
             return out;
         }
 

@@ -42,7 +42,7 @@ namespace crimild {
         ShadowMap( void );
         virtual ~ShadowMap( void );
 
-        const Vector4f &getCascadeSplits( void ) const
+        inline Vector4f getCascadeSplits( void ) const
         {
             return Vector4f {
                 _cascadeSplits[ 0 ],

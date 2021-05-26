@@ -41,7 +41,7 @@ using namespace crimild;
 using namespace crimild::ui;
 
 UIBackground::UIBackground( const ColorRGBA &color )
-    : _knownExtensions( 0, 0, 0, 0 )
+    : _knownExtensions { { 0, 0 }, { 0, 0 } }
 {
     _geometry = crimild::alloc< Geometry >();
     _geometry->setCullMode( Node::CullMode::NEVER );
@@ -65,10 +65,10 @@ void UIBackground::onAttach( void )
 void UIBackground::update( const Clock & )
 {
     auto frame = getComponent< UIFrame >()->getExtensions();
-    auto w = frame.getWidth();
-    auto h = frame.getHeight();
+    auto w = frame.size.width;
+    auto h = frame.size.height;
 
-    if ( _knownExtensions.getWidth() != w || _knownExtensions.getHeight() != h ) {
+    if ( _knownExtensions.size.width != w || _knownExtensions.size.height != h ) {
         _geometry->detachAllPrimitives();
         //_geometry->attachPrimitive( crimild::alloc< QuadPrimitive >( w, h, VertexFormat::VF_P3_UV2 ) );
 

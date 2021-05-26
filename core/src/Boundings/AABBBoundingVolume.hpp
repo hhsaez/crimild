@@ -39,8 +39,8 @@ namespace crimild {
         explicit AABBBoundingVolume( const Sphere &sphere );
         virtual ~AABBBoundingVolume( void );
 
-        virtual const Point3 &getCenter( void ) const override { return _sphere.getCenter(); }
-        virtual Real getRadius( void ) const override { return _sphere.getRadius(); }
+        virtual const Point3 &getCenter( void ) const override { return center( _sphere ); }
+        virtual Real getRadius( void ) const override { return radius( _sphere ); }
 
         virtual SharedPointer< BoundingVolume > clone( void ) const override;
 

@@ -38,8 +38,8 @@ namespace crimild {
         Box2DBoundingVolume( crimild::Real32 halfWidth, crimild::Real32 halfHeight );
         virtual ~Box2DBoundingVolume( void );
 
-        virtual const Point3 &getCenter( void ) const override { return _sphere.getCenter(); }
-        virtual float getRadius( void ) const override { return _sphere.getRadius(); }
+        virtual const Point3 &getCenter( void ) const override { return center( _sphere ); }
+        virtual float getRadius( void ) const override { return radius( _sphere ); }
 
         virtual SharedPointer< BoundingVolume > clone( void ) const override;
 

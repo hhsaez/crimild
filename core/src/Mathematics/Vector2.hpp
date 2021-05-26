@@ -28,24 +28,36 @@
 #ifndef CRIMILD_MATHEMATICS_VECTOR_2_
 #define CRIMILD_MATHEMATICS_VECTOR_2_
 
-#include "Mathematics/VectorImpl.hpp"
+#include "Mathematics/Tuple2.hpp"
+
+#include <limits>
 
 namespace crimild {
 
-    template< typename T >
-    [[nodiscard]] inline constexpr impl::Vector< T, 2 > permute( const impl::Vector< T, 2 > &u, Int x, Int y ) noexcept
-    {
-        return impl::Vector< T, 2 > {
-            u[ x ],
-            u[ y ],
+    namespace impl {
+
+        template< typename T >
+        struct Vector2 : public Tuple2< T > {
+            struct Constants;
         };
+
+        template< typename T >
+        struct Vector2< T >::Constants {
+            static constexpr auto ZERO = Vector2< T > { 0, 0 };
+            static constexpr auto ONE = Vector2< T > { 1, 1 };
+            static constexpr auto POSITIVE_INFINITY = Vector2< T > { std::numeric_limits< T >::max(), std::numeric_limits< T >::max() };
+            static constexpr auto NEGATIVE_INFINITY = Vector2< T > { std::numeric_limits< T >::min(), std::numeric_limits< T >::min() };
+            static constexpr auto UNIT_X = Vector2< T > { 1, 0 };
+            static constexpr auto UNIT_Y = Vector2< T > { 0, 1 };
+        };
+
     }
 
-    using Vector2 = impl::Vector< Real, 2 >;
-    using Vector2f = impl::Vector< Real32, 2 >;
-    using Vector2d = impl::Vector< Real64, 2 >;
-    using Vector2i = impl::Vector< Int32, 2 >;
-    using Vector2ui = impl::Vector< UInt32, 2 >;
+    using Vector2 = impl::Vector2< Real >;
+    using Vector2f = impl::Vector2< Real32 >;
+    using Vector2d = impl::Vector2< Real64 >;
+    using Vector2i = impl::Vector2< Int32 >;
+    using Vector2ui = impl::Vector2< UInt32 >;
 
 }
 

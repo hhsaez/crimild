@@ -29,6 +29,7 @@
 
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
+#include "Mathematics/Vector2Ops.hpp"
 
 #include <cstring>
 
@@ -166,13 +167,14 @@ SharedPointer< Image > Image::fromRGBANoise( UInt32 size ) noexcept
                 constexpr auto V1 = Vector2f { 223.35734, 550.56781 };
                 const auto V2 = V0 + V1;
                 const auto V3 = V2 * V2;
-                const Real xy = V3.x() * V3.y();
+                const Real xy = V3.x * V3.y;
 
-                Vector4f color(
+                Vector4f color {
                     Numericf::fract( xy * 0.00000012 ),
                     Numericf::fract( xy * 0.00000543 ),
                     Numericf::fract( xy * 0.00000192 ),
-                    Numericf::fract( xy * 0.00000423 ) );
+                    Numericf::fract( xy * 0.00000423 ),
+                };
 
                 data[ idx + 0 ] = UInt8( color[ 0 ] * 255 );
                 data[ idx + 1 ] = UInt8( color[ 1 ] * 255 );

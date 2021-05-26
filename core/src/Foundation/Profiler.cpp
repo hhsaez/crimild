@@ -341,35 +341,35 @@ void Profiler::dump( void )
     const auto HISTOGRAM_HEIGHT = 0.15f;
 
     Vector3f frame[] = {
-        Vector3f( -HISTOGRAM_WIDTH, -0.9f + 2.0f * HISTOGRAM_HEIGHT, 0.0f ),
-        Vector3f( +HISTOGRAM_WIDTH, -0.9f + 2.0f * HISTOGRAM_HEIGHT, 0.0f ),
+        Vector3f { -HISTOGRAM_WIDTH, -0.9f + 2.0f * HISTOGRAM_HEIGHT, 0.0f },
+        Vector3f { +HISTOGRAM_WIDTH, -0.9f + 2.0f * HISTOGRAM_HEIGHT, 0.0f },
 
-        Vector3f( -HISTOGRAM_WIDTH, -0.9f + 2.0f * HISTOGRAM_HEIGHT, 0.0f ),
-        Vector3f( -HISTOGRAM_WIDTH, -0.9f + 0.0f * HISTOGRAM_HEIGHT, 0.0f ),
+        Vector3f { -HISTOGRAM_WIDTH, -0.9f + 2.0f * HISTOGRAM_HEIGHT, 0.0f },
+        Vector3f { -HISTOGRAM_WIDTH, -0.9f + 0.0f * HISTOGRAM_HEIGHT, 0.0f },
 
-        Vector3f( -HISTOGRAM_WIDTH, -0.9f + HISTOGRAM_HEIGHT, 0.0f ),
-        Vector3f( +HISTOGRAM_WIDTH, -0.9f + HISTOGRAM_HEIGHT, 0.0f ),
+        Vector3f { -HISTOGRAM_WIDTH, -0.9f + HISTOGRAM_HEIGHT, 0.0f },
+        Vector3f { +HISTOGRAM_WIDTH, -0.9f + HISTOGRAM_HEIGHT, 0.0f },
 
-        Vector3f( -HISTOGRAM_WIDTH, -0.9f + 0.0f * HISTOGRAM_HEIGHT, 0.0f ),
-        Vector3f( +HISTOGRAM_WIDTH, -0.9f + 0.0f * HISTOGRAM_HEIGHT, 0.0f ),
+        Vector3f { -HISTOGRAM_WIDTH, -0.9f + 0.0f * HISTOGRAM_HEIGHT, 0.0f },
+        Vector3f { +HISTOGRAM_WIDTH, -0.9f + 0.0f * HISTOGRAM_HEIGHT, 0.0f },
 
-        Vector3f( +HISTOGRAM_WIDTH, -0.9f + 2.0f * HISTOGRAM_HEIGHT, 0.0f ),
-        Vector3f( +HISTOGRAM_WIDTH, -0.9f + 0.0f * HISTOGRAM_HEIGHT, 0.0f ),
+        Vector3f { +HISTOGRAM_WIDTH, -0.9f + 2.0f * HISTOGRAM_HEIGHT, 0.0f },
+        Vector3f { +HISTOGRAM_WIDTH, -0.9f + 0.0f * HISTOGRAM_HEIGHT, 0.0f },
     };
 
-    DebugRenderHelper::renderLines( &frame[ 0 ], 10, ColorRGBA( 1.0f, 1.0f, 1.0f, 0.5f ) );
+    DebugRenderHelper::renderLines( &frame[ 0 ], 10, ColorRGBA { 1.0f, 1.0f, 1.0f, 0.5f } );
 
     const auto frameTimeCount = _frameTimeHistory.size();
 
     std::vector< Vector3f > lines( frameTimeCount * 2 );
 
     for ( int i = 0; i < frameTimeCount - 1; i++ ) {
-        auto f0 = _frameTimeHistory[ i ];
-        auto f1 = _frameTimeHistory[ i + 1 ];
+        Real f0 = _frameTimeHistory[ i ];
+        Real f1 = _frameTimeHistory[ i + 1 ];
 
-        lines[ i * 2 + 0 ] = Vector3f( -HISTOGRAM_WIDTH + 2.0 * HISTOGRAM_WIDTH * ( i / ( crimild::Real32 ) frameTimeCount ), -0.9f + HISTOGRAM_HEIGHT * f0, 0.0f );
-        lines[ i * 2 + 1 ] = Vector3f( -HISTOGRAM_WIDTH + 2.0 * HISTOGRAM_WIDTH * ( ( i + 1 ) / ( crimild::Real32 ) frameTimeCount ), -0.9f + HISTOGRAM_HEIGHT * f1, 0.0f );
+        lines[ i * 2 + 0 ] = Vector3f { -HISTOGRAM_WIDTH + Real( 2 ) * HISTOGRAM_WIDTH * ( i / ( crimild::Real32 ) frameTimeCount ), -0.9f + HISTOGRAM_HEIGHT * f0, 0.0f };
+        lines[ i * 2 + 1 ] = Vector3f { -HISTOGRAM_WIDTH + Real( 2 ) * HISTOGRAM_WIDTH * ( ( i + 1 ) / ( crimild::Real32 ) frameTimeCount ), -0.9f + HISTOGRAM_HEIGHT * f1, 0.0f };
     }
 
-    DebugRenderHelper::renderLines( &lines[ 0 ], frameTimeCount * 2, ColorRGBA( 1.0f, 0.0f, 0.0f, 1.0f ) );
+    DebugRenderHelper::renderLines( &lines[ 0 ], frameTimeCount * 2, ColorRGBA { 1.0f, 0.0f, 0.0f, 1.0f } );
 }

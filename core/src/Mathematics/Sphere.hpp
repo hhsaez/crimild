@@ -28,102 +28,19 @@
 #ifndef CRIMILD_MATHEMATICS_SPHERE_
 #define CRIMILD_MATHEMATICS_SPHERE_
 
-#include "Plane.hpp"
+#include "Plane3.hpp"
 #include "Point3.hpp"
 
 namespace crimild {
 
-    class Sphere {
-    public:
-        constexpr Sphere( void ) noexcept = default;
-
-        constexpr Sphere( const Point3 &center, Real radius ) noexcept
-            : m_center( center ),
-              m_radius( radius )
-        {
-        }
-
-        constexpr Sphere( const Sphere &other ) noexcept
-            : m_center( other.m_center ),
-              m_radius( other.m_radius )
-        {
-        }
-
-        constexpr Sphere( Sphere &&other ) noexcept
-            : m_center( std::move( other.m_center ) ),
-              m_radius( std::move( other.m_radius ) )
-        {
-        }
-
-        ~Sphere( void ) = default;
-
-        constexpr Sphere &operator=( const Sphere &other ) noexcept
-        {
-            m_center = other.m_center;
-            m_radius = other.m_radius;
-            return *this;
-        }
-
-        constexpr Sphere &operator=( Sphere &&other ) noexcept
-        {
-            m_center = std::move( other.m_center );
-            m_radius = std::move( other.m_radius );
-            return *this;
-        }
-
-        inline constexpr const Point3 &getCenter( void ) const noexcept { return m_center; }
-        inline constexpr Real getRadius( void ) const noexcept { return m_radius; }
-
-    private:
-        Point3 m_center = Point3::Constants::ZERO;
-        Real m_radius = 1.0;
+    struct Sphere {
+        Point3 c;
+        Real r;
     };
 
-    [[nodiscard]] constexpr Sphere expandToContain( const Sphere &S0, const Sphere &S1 ) noexcept
-    {
-        const auto &C0 = S0.getCenter();
-        const auto R0 = S0.getRadius();
-        const auto &C1 = S1.getCenter();
-        const auto R1 = S1.getRadius();
+    [[nodiscard]] inline constexpr const Point3 &center( const Sphere &s ) noexcept { return s.c; }
 
-        const auto centerDiff = C1 - C0;
-        const auto lengthSqr = lengthSquared( centerDiff );
-        const auto radiusDiff = R1 - R0;
-        const auto radiusDiffSqr = radiusDiff * radiusDiff;
-
-        Point3 C;
-        auto R = Real( 0 );
-        if ( radiusDiffSqr >= lengthSqr ) {
-            if ( radiusDiff >= 0 ) {
-                C = C1;
-                R = R1;
-            }
-        } else {
-            const auto length = sqrt( lengthSqr );
-            if ( !isZero( length ) ) {
-                const auto coeff = ( length + radiusDiff ) / ( 2.0 * length );
-                C = C0 + coeff * centerDiff;
-            }
-
-            R = Real( 0.5 ) * ( length + R0 + R1 );
-        }
-
-        return Sphere( C, R );
-    }
-
-    [[nodiscard]] constexpr char whichSide( const Plane3 &P, const Sphere &S ) noexcept
-    {
-        const auto &C = S.getCenter();
-        const auto R = S.getRadius();
-        const auto d = distance( P, C );
-        if ( d < -R ) {
-            return -1; // behind
-        } else if ( d > R ) {
-            return +1; // front
-        }
-
-        return 0; // intersecting
-    }
+    [[nodiscard]] inline constexpr Real radius( const Sphere &s ) noexcept { return s.r; }
 
 }
 

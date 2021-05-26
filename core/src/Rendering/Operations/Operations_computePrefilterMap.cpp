@@ -28,6 +28,8 @@
 #include "Components/MaterialComponent.hpp"
 #include "Mathematics/Frustum.hpp"
 #include "Mathematics/Transformation.hpp"
+#include "Mathematics/TransformationOps.hpp"
+#include "Mathematics/perspective.hpp"
 #include "Primitives/BoxPrimitive.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Material.hpp"
@@ -49,10 +51,10 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computePrefilterMap( S
 
     renderPass->attachments = { color };
 
-    auto withRelativeDimensions = []( auto x, auto y, auto w, auto h ) {
+    auto withRelativeDimensions = []( Real x, Real y, Real w, Real h ) {
         return ViewportDimensions {
             .scalingMode = ScalingMode::RELATIVE,
-            .dimensions = Rectf( x, y, w, h ),
+            .dimensions = Rectf { { x, y }, { w, h } },
         };
     };
 
@@ -82,7 +84,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computePrefilterMap( S
         BoxPrimitive::Params {
             .type = Primitive::Type::TRIANGLES,
             .layout = VertexP3::getLayout(),
-            .size = Vector3f( 10.0f, 10.0f, 10.0f ),
+            .size = Vector3f { 10.0f, 10.0f, 10.0f },
             .invertFaces = true,
         } );
 
@@ -406,7 +408,7 @@ vec4 textureCubeUV( sampler2D envMap, vec3 direction, vec4 viewport, int mipLeve
                     }
 
                     //t.setTranslate( Vector3f::ZERO ); // TODO (hernan): use probe's position
-                    const auto vMatrix = t.getInverseMatrix(); //t.computeModelMatrix().getInverse();
+                    const auto vMatrix = t.invMat; //t.computeModelMatrix().getInverse();
 
                     return crimild::alloc< UniformBuffer >(
                         Props {
@@ -426,7 +428,7 @@ vec4 textureCubeUV( sampler2D envMap, vec3 direction, vec4 viewport, int mipLeve
         ds->descriptors = {
             {
                 .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                .obj = crimild::alloc< UniformBuffer >( Vector4f( roughness, 0, 0, 0 ) ),
+                .obj = crimild::alloc< UniformBuffer >( Vector4f { roughness, 0, 0, 0 } ),
             },
         };
         levelDescriptors[ level ] = ds;

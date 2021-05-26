@@ -43,7 +43,7 @@ void ModelUniform::onPreRender( void ) noexcept
     setValue(
         Props {
             .model = [ & ] {
-                return m_node != nullptr ? m_node->getWorld().getMatrix() : Matrix4f::Constants::IDENTITY;
+                return m_node != nullptr ? m_node->getWorld().mat : Matrix4f::Constants::IDENTITY;
             }(),
         } );
 }

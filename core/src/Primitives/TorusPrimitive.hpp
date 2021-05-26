@@ -43,7 +43,7 @@ namespace crimild {
             ParametricPrimitive::ColorMode colorMode;
             Real32 majorRadius = 0.5f;
             Real32 minorRadius = 0.25f;
-            Vector2i divisions = Vector2i( 20, 20 );
+            Vector2i divisions = Vector2i { 20, 20 };
         };
 
     public:

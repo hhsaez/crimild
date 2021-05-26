@@ -30,6 +30,7 @@
 
 #include "Matrix4.hpp"
 
+#include <array>
 #include <iomanip>
 #include <iostream>
 

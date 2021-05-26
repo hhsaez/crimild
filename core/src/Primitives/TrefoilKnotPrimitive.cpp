@@ -27,6 +27,11 @@
 
 #include "TrefoilKnotPrimitive.hpp"
 
+#include "Mathematics/Vector2Ops.hpp"
+#include "Mathematics/Vector3Ops.hpp"
+#include "Mathematics/cross.hpp"
+#include "Mathematics/normalize.hpp"
+
 using namespace crimild;
 
 TrefoilKnotPrimitive::TrefoilKnotPrimitive( const Params &params ) noexcept
@@ -34,7 +39,7 @@ TrefoilKnotPrimitive::TrefoilKnotPrimitive( const Params &params ) noexcept
 {
     _scale = params.scale;
 
-    ParametricInterval interval = { params.divisions, Vector2f( Numericf::TWO_PI, Numericf::TWO_PI ), Vector2f( 100, 8 ) };
+    ParametricInterval interval = { params.divisions, Vector2f { Numericf::TWO_PI, Numericf::TWO_PI }, Vector2f { 100, 8 } };
     setInterval( interval );
     generate();
 }
@@ -60,7 +65,7 @@ Vector3f TrefoilKnotPrimitive::evaluate( const Vector2f &domain ) const
     };
 
     Vector3f q = normalize( dv );
-    Vector3f qvn = normalize( Vector3f( q[ 1 ], -q[ 0 ], 0.0f ) );
+    Vector3f qvn = normalize( Vector3f { q[ 1 ], -q[ 0 ], 0.0f } );
     Vector3f ww = cross( q, qvn );
 
     Vector3f range = {

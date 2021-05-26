@@ -28,9 +28,13 @@
 #ifndef CRIMILD_MATHEMATICS_INTERSECTION_
 #define CRIMILD_MATHEMATICS_INTERSECTION_
 
-#include "LineSegment.hpp"
+#include "Mathematics/LineSegment3.hpp"
+#include "Mathematics/Numbers.hpp"
+#include "Mathematics/Plane3.hpp"
+#include "Mathematics/Point3Ops.hpp"
+#include "Mathematics/distance.hpp"
+#include "Mathematics/pow.hpp"
 #include "Numeric.hpp"
-#include "Plane.hpp"
 #include "Ray3.hpp"
 #include "Root.hpp"
 #include "Sphere.hpp"
@@ -40,11 +44,11 @@ namespace crimild {
 
     [[nodiscard]] static constexpr Real findIntersection( const Sphere &S, const Ray3 &R, Real lowerBound = numbers::EPSILON, Real upperBound = numbers::POSITIVE_INFINITY ) noexcept
     {
-        const auto centerDiff = R.getOrigin() - S.getCenter();
+        const auto centerDiff = origin( R ) - center( S );
 
-        const auto a = lengthSquared( R.getDirection() );
-        const auto b = Real( 2 ) * dot( centerDiff, R.getDirection() );
-        const auto c = lengthSquared( centerDiff ) - pow( S.getRadius(), 2 );
+        const auto a = lengthSquared( direction( R ) );
+        const auto b = Real( 2 ) * dot( centerDiff, direction( R ) );
+        const auto c = lengthSquared( centerDiff ) - pow( radius( S ), 2 );
 
         Real t0 = 0;
         Real t1 = 0;
