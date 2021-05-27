@@ -33,6 +33,7 @@
 #include "Mathematics/Frustum.hpp"
 #include "Mathematics/Numbers.hpp"
 #include "Mathematics/TransformationOps.hpp"
+#include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/ortho.hpp"
 #include "Mathematics/perspective.hpp"
 #include "Mathematics/swizzle.hpp"

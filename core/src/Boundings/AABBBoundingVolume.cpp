@@ -28,6 +28,7 @@
 #include "AABBBoundingVolume.hpp"
 
 #include "Mathematics/Point3Ops.hpp"
+#include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/Vector3Ops.hpp"
 #include "Mathematics/length.hpp"
 #include "Mathematics/max.hpp"

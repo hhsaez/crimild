@@ -46,9 +46,9 @@ TEST( UniformBuffer, withSingleValue )
 
     ASSERT_EQ( Vector3f::Constants::ZERO, uniform->getValue< Vector3f >() );
 
-    uniform->setValue( Vector3f( 1.0f, 2.0f, 3.0f ) );
+    uniform->setValue( Vector3f { 1.0f, 2.0f, 3.0f } );
 
-    ASSERT_EQ( Vector3f( 1.0f, 2.0f, 3.0f ), uniform->getValue< Vector3f >() );
+    ASSERT_EQ( ( Vector3f { 1.0f, 2.0f, 3.0f } ), uniform->getValue< Vector3f >() );
 }
 
 TEST( UniformBuffer, withStruct )
@@ -66,7 +66,7 @@ TEST( UniformBuffer, withStruct )
     ASSERT_NE( nullptr, uniform->getBufferView() );
     ASSERT_EQ( sizeof( Data ), uniform->getBufferView()->getLength() );
 
-    uniform->getValue< Data >().color = ColorRGBA( 1.0f, 0.0f, 1.0f, 0.5f );
+    uniform->getValue< Data >().color = ColorRGBA { 1.0f, 0.0f, 1.0f, 0.5f };
 
-    ASSERT_EQ( ColorRGBA( 1.0f, 0.0f, 1.0f, 0.5f ), uniform->getValue< Data >().color );
+    ASSERT_EQ( ( ColorRGBA { 1.0f, 0.0f, 1.0f, 0.5f } ), uniform->getValue< Data >().color );
 }

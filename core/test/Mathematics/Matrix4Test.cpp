@@ -77,22 +77,9 @@ TEST( Matrix4, IDENTITY )
 {
     constexpr auto I = crimild::Matrix4::Constants::IDENTITY;
 
-    EXPECT_EQ( 1, I[ 0 ] );
-    EXPECT_EQ( 0, I[ 1 ] );
-    EXPECT_EQ( 0, I[ 2 ] );
-    EXPECT_EQ( 0, I[ 3 ] );
-    EXPECT_EQ( 0, I[ 4 ] );
-    EXPECT_EQ( 1, I[ 5 ] );
-    EXPECT_EQ( 0, I[ 6 ] );
-    EXPECT_EQ( 0, I[ 7 ] );
-    EXPECT_EQ( 0, I[ 8 ] );
-    EXPECT_EQ( 0, I[ 9 ] );
-    EXPECT_EQ( 1, I[ 10 ] );
-    EXPECT_EQ( 0, I[ 11 ] );
-    EXPECT_EQ( 0, I[ 12 ] );
-    EXPECT_EQ( 0, I[ 13 ] );
-    EXPECT_EQ( 0, I[ 14 ] );
-    EXPECT_EQ( 1, I[ 15 ] );
+    static_assert( I == crimild::Matrix4 { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 } );
+
+    EXPECT_TRUE( true );
 }
 
 TEST( Matrix4, ZERO )

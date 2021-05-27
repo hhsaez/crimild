@@ -28,6 +28,7 @@
 #include "Mathematics/Vector2.hpp"
 
 #include "Mathematics/Vector2Ops.hpp"
+#include "Mathematics/Vector_equality.hpp"
 #include "Mathematics/abs.hpp"
 #include "Mathematics/dot.hpp"
 #include "Mathematics/isEqual.hpp"

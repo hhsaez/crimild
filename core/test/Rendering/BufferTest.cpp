@@ -94,12 +94,12 @@ TEST( Buffer, constructionWithStruct )
 
     auto buffer = crimild::alloc< Buffer >(
         Uniform {
-            .color = ColorRGBA( 0.5f, 0.75f, 0.95f, 1.0f ),
+            .color = ColorRGBA { 0.5f, 0.75f, 0.95f, 1.0f },
             .metalness = 0.5f,
         } );
 
     ASSERT_EQ( sizeof( Uniform ), buffer->getSize() );
     ASSERT_NE( nullptr, buffer->getData() );
-    ASSERT_EQ( ColorRGBA( 0.5f, 0.75f, 0.95f, 1.0f ), static_cast< Uniform * >( static_cast< void * >( buffer->getData() ) )->color );
+    ASSERT_EQ( ( ColorRGBA { 0.5f, 0.75f, 0.95f, 1.0f } ), static_cast< Uniform * >( static_cast< void * >( buffer->getData() ) )->color );
     ASSERT_EQ( 0.5f, static_cast< Uniform * >( static_cast< void * >( buffer->getData() ) )->metalness );
 }

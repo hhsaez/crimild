@@ -28,18 +28,6 @@
 #ifndef CRIMILD_MATHEMATICS_IS_EQUAL_
 #define CRIMILD_MATHEMATICS_IS_EQUAL_
 
-#include "Mathematics/ColorRGB.hpp"
-#include "Mathematics/ColorRGBA.hpp"
-#include "Mathematics/Matrix3.hpp"
-#include "Mathematics/Matrix4.hpp"
-#include "Mathematics/Normal3.hpp"
-#include "Mathematics/Point3.hpp"
-#include "Mathematics/Tuple2.hpp"
-#include "Mathematics/Tuple3.hpp"
-#include "Mathematics/Tuple4.hpp"
-#include "Mathematics/Vector2.hpp"
-#include "Mathematics/Vector3.hpp"
-#include "Mathematics/Vector4.hpp"
 #include "Mathematics/isZero.hpp"
 
 namespace crimild {
@@ -52,86 +40,6 @@ namespace crimild {
         } else {
             return x == y;
         }
-    }
-
-    template< typename T >
-    [[nodiscard]] inline constexpr Bool isEqual( const impl::Tuple2< T > &t, const impl::Tuple2< T > &u ) noexcept
-    {
-        return isEqual( t.x, u.x ) && isEqual( t.y, u.y );
-    }
-
-    template< typename T >
-    [[nodiscard]] inline constexpr Bool isEqual( const impl::Tuple3< T > &t, const impl::Tuple3< T > &u ) noexcept
-    {
-        return isEqual( t.x, u.x ) && isEqual( t.y, u.y ) && isEqual( t.z, u.z );
-    }
-
-    template< typename T >
-    [[nodiscard]] inline constexpr Bool isEqual( const impl::Tuple4< T > &t, const impl::Tuple4< T > &u ) noexcept
-    {
-        return isEqual( t.x, u.x ) && isEqual( t.y, u.y ) && isEqual( t.z, u.z ) && isEqual( t.w, u.w );
-    }
-
-    template< typename T >
-    [[nodiscard]] inline constexpr Bool isEqual( const impl::Vector2< T > &t, const impl::Vector2< T > &u ) noexcept
-    {
-        return isEqual( t.x, u.x ) && isEqual( t.y, u.y );
-    }
-
-    template< typename T >
-    [[nodiscard]] inline constexpr Bool isEqual( const impl::Vector3< T > &t, const impl::Vector3< T > &u ) noexcept
-    {
-        return isEqual( t.x, u.x ) && isEqual( t.y, u.y ) && isEqual( t.z, u.z );
-    }
-
-    template< typename T >
-    [[nodiscard]] inline constexpr Bool isEqual( const impl::Vector4< T > &t, const impl::Vector4< T > &u ) noexcept
-    {
-        return isEqual( t.x, u.x ) && isEqual( t.y, u.y ) && isEqual( t.z, u.z ) && isEqual( t.w, u.w );
-    }
-
-    template< typename T >
-    [[nodiscard]] inline constexpr Bool isEqual( const impl::Point3< T > &t, const impl::Point3< T > &u ) noexcept
-    {
-        return isEqual( t.x, u.x ) && isEqual( t.y, u.y ) && isEqual( t.z, u.z );
-    }
-
-    template< typename T >
-    [[nodiscard]] inline constexpr Bool isEqual( const impl::Normal3< T > &t, const impl::Normal3< T > &u ) noexcept
-    {
-        return isEqual( t.x, u.x ) && isEqual( t.y, u.y ) && isEqual( t.z, u.z );
-    }
-
-    template< typename T >
-    [[nodiscard]] inline constexpr Bool isEqual( const impl::ColorRGB< T > &a, const impl::ColorRGB< T > &b ) noexcept
-    {
-        return isEqual( a.r, b.r ) && isEqual( a.g, b.g ) && isEqual( a.b, b.b );
-    }
-
-    template< typename T >
-    [[nodiscard]] inline constexpr Bool isEqual( const impl::ColorRGBA< T > &a, const impl::ColorRGBA< T > &b ) noexcept
-    {
-        return isEqual( a.r, b.r ) && isEqual( a.g, b.g ) && isEqual( a.b, b.b ) && isEqual( a.a, b.a );
-    }
-
-    template< typename T >
-    [[nodiscard]] inline constexpr Bool isEqual( const impl::Matrix3< T > &a, const impl::Matrix3< T > &b ) noexcept
-    {
-        Bool ret = true;
-        for ( auto i = 0l; i < 9; ++i ) {
-            ret = ret && isEqual( a[ i ], b[ i ] );
-        }
-        return ret;
-    }
-
-    template< typename T >
-    [[nodiscard]] inline constexpr Bool isEqual( const impl::Matrix4< T > &a, const impl::Matrix4< T > &b ) noexcept
-    {
-        Bool ret = true;
-        for ( auto i = 0l; i < 16; ++i ) {
-            ret = ret && isEqual( a[ i ], b[ i ] );
-        }
-        return ret;
     }
 
 }

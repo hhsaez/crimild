@@ -28,8 +28,8 @@
 #ifndef CRIMILD_MATHEMATICS_RAY_3_
 #define CRIMILD_MATHEMATICS_RAY_3_
 
-#include "Mathematics/Point3Ops.hpp"
-#include "Mathematics/Vector3Ops.hpp"
+#include "Mathematics/Point3.hpp"
+#include "Mathematics/Vector3.hpp"
 
 namespace crimild {
 
@@ -37,10 +37,10 @@ namespace crimild {
         Point3 o;
         Vector3 d;
 
-        [[nodiscard]] inline constexpr Point3 operator()( Real t ) const noexcept
-        {
-            return o + t * d;
-        }
+        [[nodiscard]] inline constexpr Point3 operator()( Real t ) const noexcept;
+
+        [[nodiscard]] inline constexpr Bool operator==( const Ray3 &other ) const noexcept;
+        [[nodiscard]] inline constexpr Bool operator!=( const Ray3 &other ) const noexcept;
     };
 
     [[nodiscard]] inline constexpr const Point3 &origin( const Ray3 &r ) noexcept { return r.o; }

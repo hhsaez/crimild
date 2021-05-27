@@ -27,10 +27,10 @@
 
 #include "Mathematics/Transformation.hpp"
 
-#include "Mathematics/Ray_isEqual.hpp"
+#include "Mathematics/Normal_equality.hpp"
+#include "Mathematics/Ray_equality.hpp"
 #include "Mathematics/TransformationOps.hpp"
 #include "Mathematics/Transformation_apply.hpp"
-#include "Mathematics/Transformation_isEqual.hpp"
 
 #include "gtest/gtest.h"
 
@@ -223,7 +223,7 @@ TEST( Transformation, rotationZProperties )
 
     EXPECT_TRUE( crimild::hasRotation( Rz0 ) );
 
-    EXPECT_TRUE( crimild::isEqual( I, Rz0 ) );
+    EXPECT_TRUE( !crimild::isEqual( I, Rz0 ) );
     EXPECT_TRUE( crimild::isEqual( Rz1 * Rz2, Rz3 ) );
     EXPECT_TRUE( crimild::isEqual( Rz1 * Rz2, Rz2 * Rz1 ) );
     EXPECT_TRUE( crimild::isEqual( inverse( Rz1 ), Rz4 ) );
@@ -240,7 +240,7 @@ TEST( Transformation, rotationProperties )
 
     EXPECT_TRUE( crimild::hasRotation( R0 ) );
 
-    EXPECT_TRUE( crimild::isEqual( I, R0 ) );
+    EXPECT_TRUE( !crimild::isEqual( I, R0 ) );
     EXPECT_TRUE( crimild::isEqual( R1 * R2, R3 ) );
     EXPECT_TRUE( crimild::isEqual( R1 * R2, R2 * R1 ) );
     EXPECT_TRUE( crimild::isEqual( crimild::inverse( R1 ), R4 ) );

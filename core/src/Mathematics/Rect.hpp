@@ -39,6 +39,16 @@ namespace crimild {
         struct Rect {
             Point2< T > origin;
             Size2D< T > size;
+
+            [[nodiscard]] inline constexpr Bool operator==( const Rect &other ) const noexcept
+            {
+                return isEqual( this->origin, other.origin ) && isEqual( this->size, other.size );
+            }
+
+            [[nodiscard]] inline constexpr Bool operator!=( const Rect &other ) const noexcept
+            {
+                return !isEqual( this->origin, other.origin ) || !isEqual( this->size, other.size );
+            }
         };
 
     }

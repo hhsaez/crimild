@@ -38,9 +38,9 @@ TEST( MaterialTest, construction )
 {
     auto material = crimild::alloc< Material >();
 
-    EXPECT_EQ( ColorRGBA( 0.0f, 0.0f, 0.0f, 1.0f ), material->getAmbient() );
-    EXPECT_EQ( ColorRGBA( 1.0f, 1.0f, 1.0f, 1.0f ), material->getDiffuse() );
-    EXPECT_EQ( ColorRGBA( 1.0f, 1.0f, 1.0f, 1.0f ), material->getSpecular() );
+    EXPECT_EQ( ( ColorRGBA { 0.0f, 0.0f, 0.0f, 1.0f } ), material->getAmbient() );
+    EXPECT_EQ( ( ColorRGBA { 1.0f, 1.0f, 1.0f, 1.0f } ), material->getDiffuse() );
+    EXPECT_EQ( ( ColorRGBA { 1.0f, 1.0f, 1.0f, 1.0f } ), material->getSpecular() );
     EXPECT_EQ( 50.0f, material->getShininess() );
 
     EXPECT_EQ( nullptr, material->getColorMap() );
@@ -71,9 +71,9 @@ TEST( MaterialTest, setColorMap )
 TEST( MaterialTest, coding )
 {
     auto material = crimild::alloc< Material >();
-    material->setDiffuse( ColorRGBA( 0.9f, 0.9f, 0.9f, 1.0f ) );
-    material->setAmbient( ColorRGBA( 0.1f, 0.1f, 0.1f, 1.0f ) );
-    material->setSpecular( ColorRGBA( 0.5f, 0.5f, 0.5f, 1.0f ) );
+    material->setDiffuse( ColorRGBA { 0.9f, 0.9f, 0.9f, 1.0f } );
+    material->setAmbient( ColorRGBA { 0.1f, 0.1f, 0.1f, 1.0f } );
+    material->setSpecular( ColorRGBA { 0.5f, 0.5f, 0.5f, 1.0f } );
     material->setShininess( 25.0f );
 
     material->setColorMap( crimild::alloc< Texture >() );
@@ -87,9 +87,9 @@ TEST( MaterialTest, coding )
     auto m = decoder->getObjectAt< Material >( 0 );
     EXPECT_TRUE( material != nullptr );
 
-    EXPECT_EQ( ColorRGBA( 0.9f, 0.9f, 0.9f, 1.0f ), m->getDiffuse() );
-    EXPECT_EQ( ColorRGBA( 0.1f, 0.1f, 0.1f, 1.0f ), m->getAmbient() );
-    EXPECT_EQ( ColorRGBA( 0.5f, 0.5f, 0.5f, 1.0f ), m->getSpecular() );
+    EXPECT_EQ( ( ColorRGBA { 0.9f, 0.9f, 0.9f, 1.0f } ), m->getDiffuse() );
+    EXPECT_EQ( ( ColorRGBA { 0.1f, 0.1f, 0.1f, 1.0f } ), m->getAmbient() );
+    EXPECT_EQ( ( ColorRGBA { 0.5f, 0.5f, 0.5f, 1.0f } ), m->getSpecular() );
     EXPECT_EQ( 25.0f, m->getShininess() );
 
     EXPECT_NE( nullptr, m->getColorMap() );

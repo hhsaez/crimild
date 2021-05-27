@@ -27,8 +27,10 @@
 
 #include "Mathematics/Ray3.hpp"
 
+#include "Mathematics/Point_equality.hpp"
+#include "Mathematics/Ray_apply.hpp"
+#include "Mathematics/Ray_equality.hpp"
 #include "Mathematics/io.hpp"
-#include "Mathematics/isEqual.hpp"
 
 #include "gtest/gtest.h"
 #include <sstream>
