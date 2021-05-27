@@ -28,8 +28,10 @@
 #include "Mathematics/Point3.hpp"
 
 #include "Mathematics/Point3Ops.hpp"
+#include "Mathematics/Point_equality.hpp"
 #include "Mathematics/Vector3.hpp"
 #include "Mathematics/Vector4.hpp"
+#include "Mathematics/Vector_equality.hpp"
 #include "Mathematics/ceil.hpp"
 #include "Mathematics/distance.hpp"
 #include "Mathematics/easing.hpp"

@@ -28,6 +28,7 @@
 #include "Mathematics/Vector3.hpp"
 
 #include "Mathematics/Vector3Ops.hpp"
+#include "Mathematics/Vector_equality.hpp"
 #include "Mathematics/abs.hpp"
 #include "Mathematics/cross.hpp"
 #include "Mathematics/dot.hpp"
@@ -50,6 +51,14 @@ TEST( Vector3, construction )
     EXPECT_EQ( 10, u.x );
     EXPECT_EQ( 20, u.y );
     EXPECT_EQ( 30, u.z );
+}
+
+TEST( Vector3, size )
+{
+    constexpr auto u = crimild::Vector3 { 10, 20, 30 };
+
+    static_assert( 3 * sizeof( crimild::Real ) == sizeof( u ) );
+    EXPECT_TRUE( true );
 }
 
 TEST( Vector3, index )

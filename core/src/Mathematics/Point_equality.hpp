@@ -25,18 +25,40 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_RAY_IS_EQUAL_
-#define CRIMILD_MATHEMATICS_RAY_IS_EQUAL_
+#ifndef CRIMILD_MATHEMATICS_POINT_EQUALITY_
+#define CRIMILD_MATHEMATICS_POINT_EQUALITY_
 
-#include "Mathematics/Ray3.hpp"
+#include "Mathematics/Point3.hpp"
 #include "Mathematics/isEqual.hpp"
 
 namespace crimild {
 
-    [[nodiscard]] inline constexpr Bool isEqual( const Ray3 &a, const Ray3 &b ) noexcept
-    {
-        return isEqual( a.o, b.o ) && isEqual( a.d, b.d );
-    }
+    namespace impl {
+
+        template< typename T >
+        [[nodiscard]] inline constexpr Bool Point2< T >::operator==( const Point2< T > &other ) const noexcept
+        {
+            return isEqual( this->x, other.x ) && isEqual( this->y, other.y );
+        }
+
+        template< typename T >
+        [[nodiscard]] inline constexpr Bool Point2< T >::operator!=( const Point2< T > &other ) const noexcept
+        {
+            return !isEqual( this->x, other.x ) || !isEqual( this->y, other.y );
+        }
+
+        template< typename T >
+        [[nodiscard]] inline constexpr Bool Point3< T >::operator==( const Point3< T > &other ) const noexcept
+        {
+            return isEqual( this->x, other.x ) && isEqual( this->y, other.y ) && isEqual( this->z, other.z );
+        }
+
+        template< typename T >
+        [[nodiscard]] inline constexpr Bool Point3< T >::operator!=( const Point3< T > &other ) const noexcept
+        {
+            return !isEqual( this->x, other.x ) || !isEqual( this->y, other.y ) || !isEqual( this->z, other.z );
+        }
+    };
 
 }
 

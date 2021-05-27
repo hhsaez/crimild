@@ -28,6 +28,8 @@
 #ifndef CRIMILD_CORE_RENDERING_FORMAT_
 #define CRIMILD_CORE_RENDERING_FORMAT_
 
+#include "Mathematics/ColorRGB.hpp"
+#include "Mathematics/ColorRGBA.hpp"
 #include "Mathematics/Vector2.hpp"
 #include "Mathematics/Vector3.hpp"
 #include "Mathematics/Vector4.hpp"
@@ -99,6 +101,10 @@ namespace crimild {
         Format getFormat< Vector3f >( void ) noexcept { return Format::R32G32B32_SFLOAT; }
         template<>
         Format getFormat< Vector4f >( void ) noexcept { return Format::R32G32B32A32_SFLOAT; }
+        template<>
+        Format getFormat< ColorRGB >( void ) noexcept { return Format::R32G32B32_SFLOAT; }
+        template<>
+        Format getFormat< ColorRGBA >( void ) noexcept { return Format::R32G32B32A32_SFLOAT; }
 
         static UInt32 getFormatSize( Format format ) noexcept
         {

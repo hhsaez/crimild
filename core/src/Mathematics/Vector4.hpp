@@ -39,6 +39,9 @@ namespace crimild {
         template< typename T >
         struct Vector4 : public Tuple4< T > {
             struct Constants;
+
+            [[nodiscard]] inline constexpr Bool operator==( const Vector4 &other ) const noexcept;
+            [[nodiscard]] inline constexpr Bool operator!=( const Vector4 &other ) const noexcept;
         };
 
         template< typename T >

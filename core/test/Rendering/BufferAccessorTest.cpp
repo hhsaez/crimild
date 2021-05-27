@@ -32,6 +32,7 @@
 #include "Mathematics/Matrix4.hpp"
 #include "Mathematics/Vector2.hpp"
 #include "Mathematics/Vector3.hpp"
+#include "Mathematics/Vector_equality.hpp"
 
 #include "gtest/gtest.h"
 
@@ -68,18 +69,18 @@ TEST( BufferAccessor, vertexData )
     auto positions = crimild::alloc< BufferAccessor >( view, 0, 3 * sizeof( crimild::Real32 ) );
     ASSERT_EQ( 0, positions->getOffset() );
     ASSERT_EQ( 3 * sizeof( crimild::Real32 ), positions->getSize() );
-    ASSERT_EQ( Vector3f( -0.5f, 0.5f, 0.0f ), positions->get< Vector3f >( 0 ) );
-    ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 1 ) );
-    ASSERT_EQ( Vector3f( 0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 2 ) );
-    ASSERT_EQ( Vector3f( 0.5f, 0.5f, 0.0f ), positions->get< Vector3f >( 3 ) );
+    ASSERT_EQ( ( Vector3f { -0.5f, 0.5f, 0.0f } ), positions->get< Vector3f >( 0 ) );
+    ASSERT_EQ( ( Vector3f { -0.5f, -0.5f, 0.0f } ), positions->get< Vector3f >( 1 ) );
+    ASSERT_EQ( ( Vector3f { 0.5f, -0.5f, 0.0f } ), positions->get< Vector3f >( 2 ) );
+    ASSERT_EQ( ( Vector3f { 0.5f, 0.5f, 0.0f } ), positions->get< Vector3f >( 3 ) );
 
     auto texCoords = crimild::alloc< BufferAccessor >( view, 3 * sizeof( crimild::Real32 ), 2 * sizeof( crimild::Real32 ) );
     ASSERT_EQ( 3 * sizeof( crimild::Real32 ), texCoords->getOffset() );
     ASSERT_EQ( 2 * sizeof( crimild::Real32 ), texCoords->getSize() );
-    ASSERT_EQ( Vector2f( 0.0f, 0.0f ), texCoords->get< Vector2f >( 0 ) );
-    ASSERT_EQ( Vector2f( 0.0f, 1.0f ), texCoords->get< Vector2f >( 1 ) );
-    ASSERT_EQ( Vector2f( 1.0f, 1.0f ), texCoords->get< Vector2f >( 2 ) );
-    ASSERT_EQ( Vector2f( 1.0f, 0.0f ), texCoords->get< Vector2f >( 3 ) );
+    ASSERT_EQ( ( Vector2f { 0.0f, 0.0f } ), texCoords->get< Vector2f >( 0 ) );
+    ASSERT_EQ( ( Vector2f { 0.0f, 1.0f } ), texCoords->get< Vector2f >( 1 ) );
+    ASSERT_EQ( ( Vector2f { 1.0f, 1.0f } ), texCoords->get< Vector2f >( 2 ) );
+    ASSERT_EQ( ( Vector2f { 1.0f, 0.0f } ), texCoords->get< Vector2f >( 3 ) );
 }
 
 TEST( BufferAccessor, vertexFromStruct )
@@ -101,22 +102,22 @@ TEST( BufferAccessor, vertexFromStruct )
 
     auto data = Array< Vertex > {
         {
-            .position = Vector3f( -0.5f, -0.5f, 0.0f ),
+            .position = Vector3f { -0.5f, -0.5f, 0.0f },
             .normal = Vector3f::Constants::UNIT_Z,
-            .texCoord = Vector2f( 0.0f, 1.0f ),
-            .indices = Vector2i( 0, 1 ),
+            .texCoord = Vector2f { 0.0f, 1.0f },
+            .indices = Vector2i { 0, 1 },
         },
         {
-            .position = Vector3f( 0.5f, -0.5f, 0.0f ),
+            .position = Vector3f { 0.5f, -0.5f, 0.0f },
             .normal = Vector3f::Constants::UNIT_Z,
-            .texCoord = Vector2f( 1.0f, 1.0f ),
-            .indices = Vector2i( 1, 1 ),
+            .texCoord = Vector2f { 1.0f, 1.0f },
+            .indices = Vector2i { 1, 1 },
         },
         {
-            .position = Vector3f( 0.0f, 0.5f, 0.0f ),
+            .position = Vector3f { 0.0f, 0.5f, 0.0f },
             .normal = Vector3f::Constants::UNIT_Z,
-            .texCoord = Vector2f( 0.5f, 0.0f ),
-            .indices = Vector2i( 2, 1 ),
+            .texCoord = Vector2f { 0.5f, 0.0f },
+            .indices = Vector2i { 2, 1 },
         },
     };
 
@@ -174,8 +175,8 @@ TEST( BufferAccessor, setSingleValue )
 
     ASSERT_EQ( 3, view->getCount() );
 
-    positions->set( 0, Vector3f( -0.5f, -0.5f, 0.0f ) );
-    ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 0 ) );
+    positions->set( 0, Vector3f { -0.5f, -0.5f, 0.0f } );
+    ASSERT_EQ( ( Vector3f { -0.5f, -0.5f, 0.0f } ), positions->get< Vector3f >( 0 ) );
 }
 
 TEST( BufferAccessor, setMultipleValues )
@@ -199,9 +200,9 @@ TEST( BufferAccessor, setMultipleValues )
             0.0f,
         } );
 
-    ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 0 ) );
-    ASSERT_EQ( Vector3f( 0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 1 ) );
-    ASSERT_EQ( Vector3f( 0.0f, 0.5f, 0.0f ), positions->get< Vector3f >( 2 ) );
+    ASSERT_EQ( ( Vector3f { -0.5f, -0.5f, 0.0f } ), positions->get< Vector3f >( 0 ) );
+    ASSERT_EQ( ( Vector3f { 0.5f, -0.5f, 0.0f } ), positions->get< Vector3f >( 1 ) );
+    ASSERT_EQ( ( Vector3f { 0.0f, 0.5f, 0.0f } ), positions->get< Vector3f >( 2 ) );
 }
 
 TEST( BufferAccessor, setInterleavedMultipleValues )
@@ -241,13 +242,13 @@ TEST( BufferAccessor, setInterleavedMultipleValues )
             1.0,
         } );
 
-    ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 0 ) );
-    ASSERT_EQ( Vector3f( 0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 1 ) );
-    ASSERT_EQ( Vector3f( 0.0f, 0.5f, 0.0f ), positions->get< Vector3f >( 2 ) );
+    ASSERT_EQ( ( Vector3f { -0.5f, -0.5f, 0.0f } ), positions->get< Vector3f >( 0 ) );
+    ASSERT_EQ( ( Vector3f { 0.5f, -0.5f, 0.0f } ), positions->get< Vector3f >( 1 ) );
+    ASSERT_EQ( ( Vector3f { 0.0f, 0.5f, 0.0f } ), positions->get< Vector3f >( 2 ) );
 
-    ASSERT_EQ( Vector2f( 0.0f, 0.0f ), texCoords->get< Vector2f >( 0 ) );
-    ASSERT_EQ( Vector2f( 0.f, 1.0f ), texCoords->get< Vector2f >( 1 ) );
-    ASSERT_EQ( Vector2f( 1.0f, 1.0f ), texCoords->get< Vector2f >( 2 ) );
+    ASSERT_EQ( ( Vector2f { 0.0f, 0.0f } ), texCoords->get< Vector2f >( 0 ) );
+    ASSERT_EQ( ( Vector2f { 0.f, 1.0f } ), texCoords->get< Vector2f >( 1 ) );
+    ASSERT_EQ( ( Vector2f { 1.0f, 1.0f } ), texCoords->get< Vector2f >( 2 ) );
 }
 
 TEST( BufferAccessor, eachPosition )
@@ -265,9 +266,9 @@ TEST( BufferAccessor, eachPosition )
     ASSERT_EQ( 3, view->getCount() );
 
     auto positionData = Array< Vector3f > {
-        Vector3f( -0.5f, -0.5f, 0.0f ),
-        Vector3f( 0.5f, -0.5f, 0.0f ),
-        Vector3f( 0.0f, 0.5f, 0.0f ),
+        Vector3f { -0.5f, -0.5f, 0.0f },
+        Vector3f { 0.5f, -0.5f, 0.0f },
+        Vector3f { 0.0f, 0.5f, 0.0f },
     };
 
     positions->set( positionData );
@@ -281,9 +282,9 @@ TEST( BufferAccessor, eachPosition )
     ASSERT_EQ( 3, callCount );
 
     auto texCoordData = Array< Vector2f > {
-        Vector2f( 0.0, 0.0 ),
-        Vector2f( 0.0, 1.0 ),
-        Vector2f( 1.0, 1.0 ),
+        Vector2f { 0.0, 0.0 },
+        Vector2f { 0.0, 1.0 },
+        Vector2f { 1.0, 1.0 },
     };
 
     texCoords->set( texCoordData );

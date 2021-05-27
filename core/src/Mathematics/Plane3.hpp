@@ -29,7 +29,9 @@
 #define CRIMILD_CORE_MATHEMATICS_PLANE_
 
 #include "Normal3.hpp"
+#include "Normal_equality.hpp"
 #include "Point3.hpp"
+#include "Point_equality.hpp"
 
 namespace crimild {
 
@@ -41,6 +43,16 @@ namespace crimild {
     struct Plane3 {
         Normal3 n;
         Real d;
+
+        [[nodiscard]] inline constexpr Bool operator==( const Plane3 &other ) const noexcept
+        {
+            return isEqual( this->n, other.n ) && isEqual( this->d, other.d );
+        }
+
+        [[nodiscard]] inline constexpr Bool operator!=( const Plane3 &other ) const noexcept
+        {
+            return !isEqual( this->n, other.n ) || !isEqual( this->d, other.d );
+        }
     };
 
     [[nodiscard]] inline constexpr const Normal3 &normal( const Plane3 &p ) noexcept { return p.n; }

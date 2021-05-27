@@ -25,65 +25,52 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_COLOR_RGB_
-#define CRIMILD_MATHEMATICS_COLOR_RGB_
+#ifndef CRIMILD_MATHEMATICS_VECTOR_EQUALITY_
+#define CRIMILD_MATHEMATICS_VECTOR_EQUALITY_
 
-#include "Foundation/Types.hpp"
+#include "Mathematics/Vector3.hpp"
 #include "Mathematics/isEqual.hpp"
-
-#include <cmath>
 
 namespace crimild {
 
     namespace impl {
 
         template< typename T >
-        struct ColorRGB {
-            struct Constants;
-
-            T r;
-            T g;
-            T b;
-
-            [[nodiscard]] inline constexpr T operator[]( Size index ) const noexcept
-            {
-                switch ( index ) {
-                    case 0:
-                        return r;
-                    case 1:
-                        return g;
-                    case 2:
-                        return b;
-                    default:
-                        return NAN;
-                }
-            }
-
-            [[nodiscard]] inline constexpr Bool operator==( const ColorRGB &other ) const noexcept
-            {
-                return isEqual( this->r, other.r ) && isEqual( this->g, other.g ) && isEqual( this->b, other.b );
-            }
-
-            [[nodiscard]] inline constexpr Bool operator!=( const ColorRGB &other ) const noexcept
-            {
-                return !isEqual( this->r, other.r ) || !isEqual( this->g, other.g ) || !isEqual( this->b, other.b );
-            }
-        };
+        [[nodiscard]] inline constexpr Bool Vector2< T >::operator==( const Vector2< T > &other ) const noexcept
+        {
+            return isEqual( this->x, other.x ) && isEqual( this->y, other.y );
+        }
 
         template< typename T >
-        struct ColorRGB< T >::Constants {
-            static constexpr auto BLACK = ColorRGB< T > { 0, 0, 0 };
-            static constexpr auto WHITE = ColorRGB< T > { 1, 1, 1 };
-            static constexpr auto RED = ColorRGB< T > { 1, 0, 0 };
-            static constexpr auto GREEN = ColorRGB< T > { 0, 1, 0 };
-            static constexpr auto BLUE = ColorRGB< T > { 0, 0, 1 };
-        };
+        [[nodiscard]] inline constexpr Bool Vector2< T >::operator!=( const Vector2< T > &other ) const noexcept
+        {
+            return !isEqual( this->x, other.x ) || !isEqual( this->y, other.y );
+        }
 
-    }
+        template< typename T >
+        [[nodiscard]] inline constexpr Bool Vector3< T >::operator==( const Vector3< T > &other ) const noexcept
+        {
+            return isEqual( this->x, other.x ) && isEqual( this->y, other.y ) && isEqual( this->z, other.z );
+        }
 
-    using ColorRGB = impl::ColorRGB< Real >;
-    using ColorRGBf = impl::ColorRGB< Real32 >;
-    using ColorRGBd = impl::ColorRGB< Real64 >;
+        template< typename T >
+        [[nodiscard]] inline constexpr Bool Vector3< T >::operator!=( const Vector3< T > &other ) const noexcept
+        {
+            return !isEqual( this->x, other.x ) || !isEqual( this->y, other.y ) || !isEqual( this->z, other.z );
+        }
+
+        template< typename T >
+        [[nodiscard]] inline constexpr Bool Vector4< T >::operator==( const Vector4< T > &other ) const noexcept
+        {
+            return isEqual( this->x, other.x ) && isEqual( this->y, other.y ) && isEqual( this->z, other.z ) && isEqual( this->w, other.w );
+        }
+
+        template< typename T >
+        [[nodiscard]] inline constexpr Bool Vector4< T >::operator!=( const Vector4< T > &other ) const noexcept
+        {
+            return !isEqual( this->x, other.x ) || !isEqual( this->y, other.y ) || !isEqual( this->z, other.z ) || !isEqual( this->w, other.w );
+        }
+    };
 
 }
 

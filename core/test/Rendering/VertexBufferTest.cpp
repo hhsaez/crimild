@@ -64,7 +64,7 @@ TEST( VertexBuffer, construction )
     ASSERT_EQ( 3, vertices->getVertexCount() );
     ASSERT_EQ( layout, vertices->getVertexLayout() );
     ASSERT_NE( nullptr, positions );
-    ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 0 ) );
+    ASSERT_EQ( ( Vector3f { -0.5f, -0.5f, 0.0f } ), positions->get< Vector3f >( 0 ) );
 }
 
 TEST( VertexBuffer, setSingleValue )
@@ -75,8 +75,8 @@ TEST( VertexBuffer, setSingleValue )
 
     auto positions = vertices->get( VertexAttribute::Name::POSITION );
 
-    positions->set( 0, Vector3f( -0.5f, -0.5f, 0.0f ) );
-    ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 0 ) );
+    positions->set( 0, Vector3f { -0.5f, -0.5f, 0.0f } );
+    ASSERT_EQ( ( Vector3f { -0.5f, -0.5f, 0.0f } ), positions->get< Vector3f >( 0 ) );
 }
 
 TEST( VertexBuffer, setMultipleValues )
@@ -100,9 +100,9 @@ TEST( VertexBuffer, setMultipleValues )
             0.0f,
         } );
 
-    ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 0 ) );
-    ASSERT_EQ( Vector3f( 0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 1 ) );
-    ASSERT_EQ( Vector3f( 0.0f, 0.5f, 0.0f ), positions->get< Vector3f >( 2 ) );
+    ASSERT_EQ( ( Vector3f { -0.5f, -0.5f, 0.0f } ), positions->get< Vector3f >( 0 ) );
+    ASSERT_EQ( ( Vector3f { 0.5f, -0.5f, 0.0f } ), positions->get< Vector3f >( 1 ) );
+    ASSERT_EQ( ( Vector3f { 0.0f, 0.5f, 0.0f } ), positions->get< Vector3f >( 2 ) );
 }
 
 TEST( VertexBuffer, setPositionsInterleaved )
@@ -126,9 +126,9 @@ TEST( VertexBuffer, setPositionsInterleaved )
             0.0f,
         } );
 
-    ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 0 ) );
-    ASSERT_EQ( Vector3f( 0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 1 ) );
-    ASSERT_EQ( Vector3f( 0.0f, 0.5f, 0.0f ), positions->get< Vector3f >( 2 ) );
+    ASSERT_EQ( ( Vector3f { -0.5f, -0.5f, 0.0f } ), positions->get< Vector3f >( 0 ) );
+    ASSERT_EQ( ( Vector3f { 0.5f, -0.5f, 0.0f } ), positions->get< Vector3f >( 1 ) );
+    ASSERT_EQ( ( Vector3f { 0.0f, 0.5f, 0.0f } ), positions->get< Vector3f >( 2 ) );
 }
 
 TEST( VertexBuffer, setTexCoordsInterleaved )
@@ -149,9 +149,9 @@ TEST( VertexBuffer, setTexCoordsInterleaved )
             1.0,
         } );
 
-    ASSERT_EQ( Vector2f( 0.0f, 0.0f ), texCoords->get< Vector2f >( 0 ) );
-    ASSERT_EQ( Vector2f( 0.f, 1.0f ), texCoords->get< Vector2f >( 1 ) );
-    ASSERT_EQ( Vector2f( 1.0f, 1.0f ), texCoords->get< Vector2f >( 2 ) );
+    ASSERT_EQ( ( Vector2f { 0.0f, 0.0f } ), texCoords->get< Vector2f >( 0 ) );
+    ASSERT_EQ( ( Vector2f { 0.f, 1.0f } ), texCoords->get< Vector2f >( 1 ) );
+    ASSERT_EQ( ( Vector2f { 1.0f, 1.0f } ), texCoords->get< Vector2f >( 2 ) );
 }
 
 TEST( VertexBuffer, setInterleaved )
@@ -187,13 +187,13 @@ TEST( VertexBuffer, setInterleaved )
             1.0,
         } );
 
-    ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 0 ) );
-    ASSERT_EQ( Vector3f( 0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 1 ) );
-    ASSERT_EQ( Vector3f( 0.0f, 0.5f, 0.0f ), positions->get< Vector3f >( 2 ) );
+    ASSERT_EQ( ( Vector3f { -0.5f, -0.5f, 0.0f } ), positions->get< Vector3f >( 0 ) );
+    ASSERT_EQ( ( Vector3f { 0.5f, -0.5f, 0.0f } ), positions->get< Vector3f >( 1 ) );
+    ASSERT_EQ( ( Vector3f { 0.0f, 0.5f, 0.0f } ), positions->get< Vector3f >( 2 ) );
 
-    ASSERT_EQ( Vector2f( 0.0f, 0.0f ), texCoords->get< Vector2f >( 0 ) );
-    ASSERT_EQ( Vector2f( 0.f, 1.0f ), texCoords->get< Vector2f >( 1 ) );
-    ASSERT_EQ( Vector2f( 1.0f, 1.0f ), texCoords->get< Vector2f >( 2 ) );
+    ASSERT_EQ( ( Vector2f { 0.0f, 0.0f } ), texCoords->get< Vector2f >( 0 ) );
+    ASSERT_EQ( ( Vector2f { 0.f, 1.0f } ), texCoords->get< Vector2f >( 1 ) );
+    ASSERT_EQ( ( Vector2f { 1.0f, 1.0f } ), texCoords->get< Vector2f >( 2 ) );
 }
 
 TEST( VertexBuffer, setInterleavedVertex )
@@ -237,17 +237,17 @@ TEST( VertexBuffer, setInterleavedVertex )
             1.0,
         } );
 
-    ASSERT_EQ( Vector3f( -0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 0 ) );
-    ASSERT_EQ( Vector3f( 0.5f, -0.5f, 0.0f ), positions->get< Vector3f >( 1 ) );
-    ASSERT_EQ( Vector3f( 0.0f, 0.5f, 0.0f ), positions->get< Vector3f >( 2 ) );
+    ASSERT_EQ( ( Vector3f { -0.5f, -0.5f, 0.0f } ), positions->get< Vector3f >( 0 ) );
+    ASSERT_EQ( ( Vector3f { 0.5f, -0.5f, 0.0f } ), positions->get< Vector3f >( 1 ) );
+    ASSERT_EQ( ( Vector3f { 0.0f, 0.5f, 0.0f } ), positions->get< Vector3f >( 2 ) );
 
     ASSERT_EQ( Vector3f::Constants::UNIT_Z, normals->get< Vector3f >( 0 ) );
     ASSERT_EQ( Vector3f::Constants::UNIT_Z, normals->get< Vector3f >( 1 ) );
     ASSERT_EQ( Vector3f::Constants::UNIT_Z, normals->get< Vector3f >( 2 ) );
 
-    ASSERT_EQ( Vector2f( 0.0f, 0.0f ), texCoords->get< Vector2f >( 0 ) );
-    ASSERT_EQ( Vector2f( 0.f, 1.0f ), texCoords->get< Vector2f >( 1 ) );
-    ASSERT_EQ( Vector2f( 1.0f, 1.0f ), texCoords->get< Vector2f >( 2 ) );
+    ASSERT_EQ( ( Vector2f { 0.0f, 0.0f } ), texCoords->get< Vector2f >( 0 ) );
+    ASSERT_EQ( ( Vector2f { 0.f, 1.0f } ), texCoords->get< Vector2f >( 1 ) );
+    ASSERT_EQ( ( Vector2f { 1.0f, 1.0f } ), texCoords->get< Vector2f >( 2 ) );
 }
 
 TEST( VertexBuffer, eachPosition )

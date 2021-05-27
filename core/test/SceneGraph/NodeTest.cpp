@@ -359,7 +359,7 @@ TEST( NodeTest, codingTransformation )
 TEST( NodeTest, codingComponents )
 {
     auto n1 = crimild::alloc< Node >( "Some Node" );
-    n1->attachComponent< RotationComponent >( Vector3f( 1.0, 2.0, 3.0 ), 3.14159f );
+    n1->attachComponent< RotationComponent >( Vector3f { 1.0, 2.0, 3.0 }, 3.14159f );
 
     auto encoder = crimild::alloc< coding::MemoryEncoder >();
     encoder->encode( n1 );

@@ -29,6 +29,7 @@
 #define CRIMILD_MATHEMATICS_MATRIX_3_
 
 #include "Foundation/Types.hpp"
+#include "Mathematics/isEqual.hpp"
 
 #include <cmath>
 
@@ -68,6 +69,24 @@ namespace crimild {
                     default:
                         return NAN;
                 }
+            }
+
+            [[nodiscard]] inline constexpr Bool operator==( const Matrix3 &other ) const noexcept
+            {
+                auto ret = true;
+                for ( auto i = 0l; i < 9; ++i ) {
+                    ret = ret && isEqual( ( *this )[ i ], other[ i ] );
+                }
+                return ret;
+            }
+
+            [[nodiscard]] inline constexpr Bool operator!=( const Matrix3 &other ) const noexcept
+            {
+                auto ret = false;
+                for ( auto i = 0l; i < 9; ++i ) {
+                    ret = ret || !isEqual( ( *this )[ i ], other[ i ] );
+                }
+                return ret;
             }
         };
 

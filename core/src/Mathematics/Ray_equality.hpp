@@ -25,42 +25,23 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_VECTOR_2_
-#define CRIMILD_MATHEMATICS_VECTOR_2_
+#ifndef CRIMILD_MATHEMATICS_RAY_EQUALITY_
+#define CRIMILD_MATHEMATICS_RAY_EQUALITY_
 
-#include "Mathematics/Tuple2.hpp"
-
-#include <limits>
+#include "Mathematics/Point_equality.hpp"
+#include "Mathematics/Vector_equality.hpp"
 
 namespace crimild {
 
-    namespace impl {
-
-        template< typename T >
-        struct Vector2 : public Tuple2< T > {
-            struct Constants;
-
-            [[nodiscard]] inline constexpr Bool operator==( const Vector2 &other ) const noexcept;
-            [[nodiscard]] inline constexpr Bool operator!=( const Vector2 &other ) const noexcept;
-        };
-
-        template< typename T >
-        struct Vector2< T >::Constants {
-            static constexpr auto ZERO = Vector2< T > { 0, 0 };
-            static constexpr auto ONE = Vector2< T > { 1, 1 };
-            static constexpr auto POSITIVE_INFINITY = Vector2< T > { std::numeric_limits< T >::max(), std::numeric_limits< T >::max() };
-            static constexpr auto NEGATIVE_INFINITY = Vector2< T > { std::numeric_limits< T >::min(), std::numeric_limits< T >::min() };
-            static constexpr auto UNIT_X = Vector2< T > { 1, 0 };
-            static constexpr auto UNIT_Y = Vector2< T > { 0, 1 };
-        };
-
+    [[nodiscard]] inline constexpr Bool Ray3::operator==( const Ray3 &other ) const noexcept
+    {
+        return isEqual( this->o, other.o ) && isEqual( this->d, other.d );
     }
 
-    using Vector2 = impl::Vector2< Real >;
-    using Vector2f = impl::Vector2< Real32 >;
-    using Vector2d = impl::Vector2< Real64 >;
-    using Vector2i = impl::Vector2< Int32 >;
-    using Vector2ui = impl::Vector2< UInt32 >;
+    [[nodiscard]] inline constexpr Bool Ray3::operator!=( const Ray3 &other ) const noexcept
+    {
+        return !isEqual( this->o, other.o ) || !isEqual( this->d, other.d );
+    }
 
 }
 

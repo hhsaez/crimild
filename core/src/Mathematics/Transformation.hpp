@@ -68,6 +68,18 @@ namespace crimild {
          */
         UInt32 contents = Contents::USER_DEFINED;
 
+        [[nodiscard]] inline constexpr Bool operator==( const Transformation &other ) const noexcept
+        {
+            // Check for contents first, since it should be faster
+            // TODO: checking for `invMat` should not be necessary
+            return isEqual( this->contents, other.contents ) && isEqual( this->mat, other.mat ) && isEqual( this->invMat, other.invMat );
+        }
+
+        [[nodiscard]] inline constexpr Bool operator!=( const Transformation &other ) const noexcept
+        {
+            return !isEqual( this->contents, other.contents ) || !isEqual( this->mat, other.mat ) || !isEqual( this->invMat, other.invMat );
+        }
+
         [[nodiscard]] constexpr Point3 operator()( const Point3 &p ) const noexcept;
         [[nodiscard]] constexpr Vector3 operator()( const Vector3 &v ) const noexcept;
         [[nodiscard]] constexpr Normal3 operator()( const Normal3 &N ) const noexcept;
