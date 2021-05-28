@@ -262,3 +262,41 @@ TEST( Transformation, lookAt )
 
     EXPECT_TRUE( true );
 }
+
+TEST( Transfromation, location )
+{
+    constexpr auto I = crimild::Transformation::Constants::IDENTITY;
+    static_assert( crimild::location( I ) == crimild::Point3::Constants::ZERO );
+
+    constexpr auto T = crimild::translation( 5, 12, 134 );
+    static_assert( crimild::Point3 { 5, 12, 134 } == crimild::location( T ) );
+
+    EXPECT_TRUE( true );
+}
+
+TEST( Transfromation, right )
+{
+    constexpr auto I = crimild::Transformation::Constants::IDENTITY;
+    static_assert( crimild::right( I ) == crimild::Vector3::Constants::RIGHT );
+
+    const auto R = crimild::rotationZ( crimild::numbers::PI_DIV_2 );
+    EXPECT_EQ( ( crimild::Vector3::Constants::RIGHT ), crimild::up( R ) );
+}
+
+TEST( Transfromation, up )
+{
+    constexpr auto I = crimild::Transformation::Constants::IDENTITY;
+    static_assert( crimild::up( I ) == crimild::Vector3::Constants::UP );
+
+    const auto R = crimild::rotationX( crimild::numbers::PI_DIV_2 );
+    EXPECT_EQ( ( crimild::Vector3::Constants::FORWARD ), crimild::up( R ) );
+}
+
+TEST( Transfromation, forward )
+{
+    constexpr auto I = crimild::Transformation::Constants::IDENTITY;
+    static_assert( crimild::forward( I ) == crimild::Vector3::Constants::FORWARD );
+
+    const auto R = crimild::rotationY( crimild::numbers::PI_DIV_2 );
+    EXPECT_EQ( ( crimild::Vector3::Constants::RIGHT ), crimild::forward( R ) );
+}

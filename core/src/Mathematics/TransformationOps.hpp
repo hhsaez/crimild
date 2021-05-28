@@ -280,6 +280,27 @@ namespace crimild {
 
         return Transformation { cameraToWorld, inverse( cameraToWorld ), Transformation::Contents::ROTATION | Transformation::Contents::TRANSLATION };
     }
+
+    [[nodiscard]] inline constexpr Point3 location( const Transformation &t ) noexcept
+    {
+        return t( Point3::Constants::ZERO );
+    }
+
+    [[nodiscard]] inline constexpr Vector3 right( const Transformation &t ) noexcept
+    {
+        return t( Vector3::Constants::RIGHT );
+    }
+
+    [[nodiscard]] inline constexpr Vector3 up( const Transformation &t ) noexcept
+    {
+        return t( Vector3::Constants::UP );
+    }
+
+    [[nodiscard]] inline constexpr Vector3 forward( const Transformation &t ) noexcept
+    {
+        return t( Vector3::Constants::FORWARD );
+    }
+
 }
 
 #endif

@@ -53,6 +53,9 @@ namespace crimild {
             static constexpr auto UNIT_X = Vector3< T > { 1, 0, 0 };
             static constexpr auto UNIT_Y = Vector3< T > { 0, 1, 0 };
             static constexpr auto UNIT_Z = Vector3< T > { 0, 0, 1 };
+            static constexpr auto RIGHT = Vector3< T > { 1, 0, 0 };
+            static constexpr auto UP = Vector3< T > { 0, 1, 0 };
+            static constexpr auto FORWARD = Vector3< T > { 0, 0, 1 };
         };
 
     }
