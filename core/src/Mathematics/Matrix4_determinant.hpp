@@ -25,60 +25,41 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_MATRIX_3_
-#define CRIMILD_MATHEMATICS_MATRIX_3_
+#ifndef CRIMILD_MATHEMATICS_MATRIX_4_DETERMINANT_
+#define CRIMILD_MATHEMATICS_MATRIX_4_DETERMINANT_
 
-#include "Mathematics/Vector3.hpp"
+#include "Mathematics/Matrix4.hpp"
 
 namespace crimild {
 
-    namespace impl {
+    template< typename T >
+    [[nodiscard]] constexpr Real determinant( const impl::Matrix4< T > &a ) noexcept
+    {
+        const auto m11 = a[ 0 ][ 0 ];
+        const auto m12 = a[ 1 ][ 0 ];
+        const auto m13 = a[ 2 ][ 0 ];
+        const auto m14 = a[ 3 ][ 0 ];
 
-        template< typename T >
-        struct Matrix3 {
-            struct Constants;
+        const auto m21 = a[ 0 ][ 1 ];
+        const auto m22 = a[ 1 ][ 1 ];
+        const auto m23 = a[ 2 ][ 1 ];
+        const auto m24 = a[ 3 ][ 1 ];
 
-            Vector3< T > c0;
-            Vector3< T > c1;
-            Vector3< T > c2;
+        const auto m31 = a[ 0 ][ 2 ];
+        const auto m32 = a[ 1 ][ 2 ];
+        const auto m33 = a[ 2 ][ 2 ];
+        const auto m34 = a[ 3 ][ 2 ];
 
-            [[nodiscard]] inline constexpr const Vector3< T > &operator[]( Index index ) const noexcept
-            {
-                switch ( index ) {
-                    case 0:
-                        return c0;
-                    case 1:
-                        return c1;
-                    case 2:
-                    default:
-                        return c2;
-                };
-            }
+        const auto m41 = a[ 0 ][ 3 ];
+        const auto m42 = a[ 1 ][ 3 ];
+        const auto m43 = a[ 2 ][ 3 ];
+        const auto m44 = a[ 3 ][ 3 ];
 
-            [[nodiscard]] inline Vector3< T > &operator[]( Index index ) noexcept
-            {
-                switch ( index ) {
-                    case 0:
-                        return c0;
-                    case 1:
-                        return c1;
-                    case 2:
-                    default:
-                        return c2;
-                };
-            }
-
-            [[nodiscard]] inline constexpr Bool operator==( const Matrix3 &other ) const noexcept;
-            [[nodiscard]] inline constexpr Bool operator!=( const Matrix3 &other ) const noexcept;
-        };
-
+        return m11 * ( m22 * ( m33 * m44 - m34 * m43 ) + m23 * ( m34 * m42 - m32 * m44 ) + m24 * ( m32 * m43 - m33 * m42 ) )
+               - m12 * ( m21 * ( m33 * m44 - m34 * m43 ) + m23 * ( m34 * m41 - m31 * m44 ) + m24 * ( m31 * m43 - m33 * m41 ) )
+               + m13 * ( m21 * ( m32 * m44 - m34 * m42 ) + m22 * ( m34 * m41 - m31 * m44 ) + m24 * ( m31 * m42 - m32 * m41 ) )
+               - m14 * ( m21 * ( m32 * m43 - m33 * m42 ) + m22 * ( m33 * m41 - m31 * m43 ) + m23 * ( m31 * m42 - m32 * m41 ) );
     }
-
-    using Matrix3 = impl::Matrix3< Real >;
-    using Matrix3f = impl::Matrix3< Real32 >;
-    using Matrix3d = impl::Matrix3< Real64 >;
-    using Matrix3i = impl::Matrix3< Int32 >;
-    using Matrix3ui = impl::Matrix3< UInt32 >;
 
 }
 

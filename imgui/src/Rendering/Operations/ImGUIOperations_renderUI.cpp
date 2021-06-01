@@ -192,22 +192,24 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::imgui::renderUI( void 
                             auto drawData = ImGui::GetDrawData();
                             if ( drawData == nullptr ) {
                                 return UITransformBuffer {
-                                    Vector4f::ONE,
-                                    Vector4f::ZERO,
+                                    Vector4f::Constants::ONE,
+                                    Vector4f::Constants::ZERO,
                                 };
                             }
 
                             // TODO: this scale value seems wrongs. It probably works only on Retina displays
-                            auto scale = Vector4f(
+                            auto scale = Vector4f {
                                 4.0f / drawData->DisplaySize.x,
                                 -4.0f / drawData->DisplaySize.y,
                                 0,
-                                0 );
-                            auto translate = Vector4f(
+                                0,
+                            };
+                            auto translate = Vector4f {
                                 -1.0,
                                 1.0,
                                 0,
-                                0 );
+                                0,
+                            };
                             return UITransformBuffer {
                                 .scale = scale,
                                 .translate = translate,
@@ -253,9 +255,14 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::imgui::renderUI( void 
                 const auto cmdList = drawData->CmdLists[ i ];
                 for ( auto j = 0l; j < cmdList->VtxBuffer.Size; j++ ) {
                     auto vertex = cmdList->VtxBuffer[ j ];
-                    positions->set( vertexId + j, Vector2f( vertex.pos.x, vertex.pos.y ) );
-                    texCoords->set( vertexId + j, Vector2f( vertex.uv.x, vertex.uv.y ) );
-                    colors->set( vertexId + j, RGBAColorf( ( ( vertex.col >> 0 ) & 0xFF ) / 255.0f, ( ( vertex.col >> 8 ) & 0xFF ) / 255.0f, ( ( vertex.col >> 16 ) & 0xFF ) / 255.0f, ( ( vertex.col >> 24 ) & 0xFF ) / 255.0f ) );
+                    positions->set( vertexId + j, Vector2f { vertex.pos.x, vertex.pos.y } );
+                    texCoords->set( vertexId + j, Vector2f { vertex.uv.x, vertex.uv.y } );
+                    colors->set( vertexId + j, ColorRGBA {
+                                                   ( ( vertex.col >> 0 ) & 0xFF ) / 255.0f,
+                                                   ( ( vertex.col >> 8 ) & 0xFF ) / 255.0f,
+                                                   ( ( vertex.col >> 16 ) & 0xFF ) / 255.0f,
+                                                   ( ( vertex.col >> 24 ) & 0xFF ) / 255.0f,
+                                               } );
                 }
                 for ( auto j = 0l; j < cmdList->IdxBuffer.Size; j++ ) {
                     ibo->setIndex( indexId + j, cmdList->IdxBuffer[ j ] );

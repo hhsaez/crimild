@@ -27,7 +27,11 @@
 
 #include "Camera.hpp"
 
+#include "Mathematics/Matrix4_operators.hpp"
+#include "Mathematics/Matrix4_transpose.hpp"
+#include "Mathematics/ortho.hpp"
 #include "Mathematics/perspective.hpp"
+#include "Mathematics/trigonometry.hpp"
 
 using namespace crimild;
 
@@ -43,22 +47,92 @@ Camera::Camera( float fov, float aspect, float near, float far )
       _viewport { { 0.0f, 0.0f }, { 1.0f, 1.0f } },
       _viewMatrixIsCurrent( false )
 {
-    //_renderGraph = crimild::alloc< RenderGraph >();
-    /*
-    auto scenePass = _renderGraph->createPass< passes::ForwardLightingPass >();
-#ifdef CRIMILD_PLATFORM_DESKTOP
-	auto depthPass = _renderGraph->createPass< passes::DepthPass >();
-	scenePass->setDepthInput( depthPass->getDepthOutput() );
-#endif
-    _renderGraph->setOutput( scenePass->getColorOutput() );
-    */
-
     _projectionMatrix = perspective( fov, aspect, near, far );
+    //    _projectionMatrix = transpose( perspective( -1, 1, -1, 1, 0.1f, 100.0f ) );
+
+    _projectionMatrix = transpose( [] {
+        const auto n = 0.01f;
+        const auto f = 100.0f;
+        const auto r = Real( 1 );
+        const auto l = Real( -1 );
+        const auto t = Real( 1 );
+        const auto b = Real( -1 );
+
+        return Matrix4 {
+            2 * n / ( r - l ),
+            0,
+            0,
+            0,
+            0,
+            2 * n / ( t - b ),
+            0,
+            0,
+            ( r + l ) / ( r - l ),
+            ( t + b ) / ( t - b ),
+            -( f + n ) / ( f - n ),
+            -1.0f,
+            0,
+            0,
+            -( 2.0f * f * n ) / ( f - n ),
+            0.0f,
+        };
+    }() );
+
+    //    _projectionMatrix = perspective( radians( fov ), aspect, near, far );
+
+    _projectionMatrix = []( Radians fovY, Real aspect, Real near, Real far ) {
+        // Computes projection matrix for a right handed coordinate system,
+        // which a depth range of [0, 1]
+        const auto halfAngle = 0.5f * fovY;
+        const auto tanHalfAngle = tan( halfAngle );
+
+        const auto a = tanHalfAngle / aspect;
+        const auto b = tanHalfAngle;
+        const auto c = far / ( near - far );
+        const auto d = -( far * near ) / ( far - near );
+        const auto e = Real( -1 );
+
+        return Matrix4 {
+            { a, 0, 0, 0 },
+            { 0, b, 0, 0 },
+            { 0, 0, c, e },
+            { 0, 0, d, 0 },
+        };
+    }( radians( fov ), 4.0 / 3.0, near, far );
+
+    //    _projectionMatrix = perspective( -1, 1, -1, 1, 0.1f, 100.0f );
+
+    //	_projectionMatrix = Matrix4 {
+    //		0, 1, 2, 3,
+    //  		4, 5, 6, 7,
+    //    	8, 9, 10, 11,
+    //     	12, 13, 14, 15,
+    //    };
+
+    //    _projectionMatrix = transpose( perspective( fov, aspect, near, far ) );
+    //_projectionMatrix = Matrix4::Constants::IDENTITY;
+
+    //	_projectionMatrix = []( Real left, Real right, Real bottom, Real top, Real near, Real far ) {
+    //		const auto a = Real( 2 ) / ( right - left );
+    //  		const auto b = Real( 2 ) / ( top - bottom );
+    //    	const auto c = -Real( 1 ) / ( far - near );
+    //     	const auto d = -( right + left ) / ( right - left );
+    //      	const auto e = -( top + bottom ) / ( top - bottom );
+    //       	const auto f = -near / ( far - near );
+    //		return Matrix4 {
+    //  			a, 0, 0, d,
+    //     		0, b, 0, e,
+    //            0, 0, c, f,
+    //            0, 0, 0, 1,
+    //        };
+    //    }( -1, 1, -1, 1, 0.01, 100 );
+
+    //    _projectionMatrix = transpose( _projectionMatrix );
+
+//    _projectionMatrix = ortho( -1, 1, -1, 1, 0.001, 1024.0 );
 
     //_projectionMatrix = _frustum.computeProjectionMatrix();
     //_orthographicMatrix = _frustum.computeOrthographicMatrix();
-    //_viewMatrix.makeIdentity();
-    _viewMatrix = Matrix4f::Constants::IDENTITY;
 
     if ( getMainCamera() == nullptr ) {
         // Set itself as the main camera if there isn't one already set
@@ -72,15 +146,6 @@ Camera::~Camera( void )
         setMainCamera( nullptr );
     }
 }
-
-/*
-void Camera::setFrustum( const Frustumf &f )
-{
-    _frustum = f;
-    _projectionMatrix = _frustum.computeProjectionMatrix();
-    _orthographicMatrix = _frustum.computeOrthographicMatrix();
-}
-*/
 
 void Camera::accept( NodeVisitor &visitor )
 {
@@ -98,14 +163,7 @@ void Camera::setViewMatrix( const Matrix4f &view )
 
 const Matrix4f &Camera::getViewMatrix( void )
 {
-    /*
-    if ( !_viewMatrixIsCurrent ) {
-        _viewMatrix = getWorld().computeModelMatrix();
-        _viewMatrix.makeInverse();
-    }
-    */
-
-    return _viewMatrix;
+    return getWorld().invMat;
 }
 
 bool Camera::getPickRay( float portX, float portY, Ray3 &result ) const

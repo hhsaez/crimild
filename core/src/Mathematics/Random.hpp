@@ -86,7 +86,7 @@ namespace crimild {
 
     private:
         template< typename T >
-        [[nodiscard]] inline static void generateImpl( impl::Vector3< T > &result, const impl::Vector3< T > &min, const impl::Vector3< T > &max ) noexcept
+        inline static void generateImpl( impl::Vector3< T > &result, const impl::Vector3< T > &min, const impl::Vector3< T > &max ) noexcept
         {
             result = impl::Vector3< T > {
                 Random::generate< T >( min[ 0 ], max[ 0 ] ),

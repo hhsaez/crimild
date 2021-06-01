@@ -34,6 +34,7 @@
 #include "Foundation/NamedObject.hpp"
 #include "Foundation/SharedObject.hpp"
 #include "Mathematics/Transformation.hpp"
+#include "Mathematics/Transformation_constants.hpp"
 #include "Visitors/NodeVisitor.hpp"
 
 #include <map>
@@ -153,8 +154,8 @@ namespace crimild {
         void setWorldIsCurrent( bool isCurrent ) { _worldIsCurrent = isCurrent; }
 
     private:
-        Transformation _local;
-        Transformation _world;
+        Transformation _local = Transformation::Constants::IDENTITY;
+        Transformation _world = Transformation::Constants::IDENTITY;
 
         /**
 			\brief Indicates if the world transformation needs to be updated automatically

@@ -25,60 +25,17 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_FOUNDATION_TYPES_
-#define CRIMILD_FOUNDATION_TYPES_
+#ifndef CRIMILD_MATHEMATICS_TRANSFORMATION_IS_IDENTITY_
+#define CRIMILD_MATHEMATICS_TRANSFORMATION_IS_IDENTITY_
 
-#include <cstdint>
+#include "Mathematics/Transformation.hpp"
 
 namespace crimild {
 
-    using Char = char;
-    using UChar = unsigned char;
-
-    using Int8 = int8_t;
-    using Int16 = int16_t;
-    using Int32 = int32_t;
-    using Int64 = int64_t;
-
-    /**
-       \brief Default integer type
-
-       This can change in the future in order to provide a higher precision
-    */
-    using Int = Int32;
-
-    using UInt8 = uint8_t;
-    using UInt16 = uint16_t;
-    using UInt32 = uint32_t;
-    using UInt64 = uint64_t;
-
-    /**
-       \brief Default unsigned integer type
-
-       This can change in the future in order to provide a higher precision
-    */
-    using UInt = UInt32;
-
-    using Real32 = float;
-    using Real64 = double;
-
-    /**
-       \brief Default real type
-
-       This can change in the future in order to provide a higher precision
-    */
-    using Real = Real32;
-
-    using Bool = bool;
-
-    using Size = UInt64;
-
-    using Byte = UInt8;
-
-    using Radians = Real;
-    using Degrees = Real;
-
-    using Index = Size;
+    [[nodiscard]] inline constexpr Bool isIdentity( const Transformation &t ) noexcept
+    {
+        return t.contents == Transformation::Contents::IDENTITY;
+    }
 
 }
 

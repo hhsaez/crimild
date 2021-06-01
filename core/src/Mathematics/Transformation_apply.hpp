@@ -28,8 +28,10 @@
 #ifndef CRIMILD_MATHEMATICS_TRANSFORMATION_APPLY_
 #define CRIMILD_MATHEMATICS_TRANSFORMATION_APPLY_
 
+#include "Mathematics/Matrix4_transpose.hpp"
 #include "Mathematics/Transformation.hpp"
-#include "Mathematics/TransformationOps.hpp"
+#include "Mathematics/Transformation_isIdentity.hpp"
+#include "Mathematics/Transformation_operators.hpp"
 #include "Mathematics/swizzle.hpp"
 
 namespace crimild {
@@ -84,6 +86,26 @@ namespace crimild {
             ( *this )( origin( R ) ),
             ( *this )( direction( R ) ),
         };
+    }
+
+    [[nodiscard]] inline constexpr Point3 location( const Transformation &t ) noexcept
+    {
+        return t( Point3::Constants::ZERO );
+    }
+
+    [[nodiscard]] inline constexpr Vector3 right( const Transformation &t ) noexcept
+    {
+        return t( Vector3::Constants::RIGHT );
+    }
+
+    [[nodiscard]] inline constexpr Vector3 up( const Transformation &t ) noexcept
+    {
+        return t( Vector3::Constants::UP );
+    }
+
+    [[nodiscard]] inline constexpr Vector3 forward( const Transformation &t ) noexcept
+    {
+        return t( Vector3::Constants::FORWARD );
     }
 
 }

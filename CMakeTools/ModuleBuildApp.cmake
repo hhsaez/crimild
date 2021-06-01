@@ -26,12 +26,12 @@ ENDFOREACH ( ITR )
 
 SET( CRIMILD_APP_DEPENDENCIES
 	crimild_core
-	crimild_raytracing
+    #crimild_raytracing
 )
 
 SET( CRIMILD_APP_LINK_LIBRARIES
 	crimild_core
-	crimild_raytracing
+	#crimild_raytracing
 )
 
 SET( CRIMILD_APP_INCLUDE_DIRECTORIES

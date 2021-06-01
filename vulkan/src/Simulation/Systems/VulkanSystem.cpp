@@ -228,12 +228,12 @@ crimild::Bool VulkanSystem::createRenderDevice( void ) noexcept
 crimild::Bool VulkanSystem::createSwapchain( void ) noexcept
 {
     auto settings = Simulation::getInstance()->getSettings();
-    auto width = settings->get< crimild::Int32 >( "video.width", 0 );
-    auto height = settings->get< crimild::Int32 >( "video.height", 0 );
+    auto width = settings->get< crimild::UInt >( "video.width", 0 );
+    auto height = settings->get< crimild::UInt >( "video.height", 0 );
 
     m_swapchain = m_renderDevice->create(
         Swapchain::Descriptor {
-            .extent = Vector2i( width, height ) } );
+            .extent = Vector2ui { width, height } } );
 
     if ( m_swapchain == nullptr ) {
         return false;

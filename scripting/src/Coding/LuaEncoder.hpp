@@ -33,14 +33,14 @@
 
 namespace crimild {
 
-	namespace coding {
+    namespace coding {
 
         class LuaEncoder : public coding::Encoder {
         public:
             LuaEncoder( void );
             virtual ~LuaEncoder( void );
 
-		public:
+        public:
             virtual crimild::Bool encode( SharedPointer< coding::Codable > const &codable ) override;
             virtual crimild::Bool encode( std::string key, SharedPointer< coding::Codable > const &codable ) override;
 
@@ -54,41 +54,41 @@ namespace crimild {
             virtual crimild::Bool encode( std::string key, crimild::Bool value ) override { return encodeValue( key, value ); }
             virtual crimild::Bool encode( std::string key, crimild::Real32 value ) override { return encodeValue( key, value ); }
             virtual crimild::Bool encode( std::string key, crimild::Real64 value ) override { return encodeValue( key, value ); }
-            virtual crimild::Bool encode( std::string key, const Vector2f &value ) override { return encodeValues( key, 3, value.getData() ); }
-            virtual crimild::Bool encode( std::string key, const Vector3f &value ) override { return encodeValues( key, 3, value.getData() ); }
-            virtual crimild::Bool encode( std::string key, const Vector4f &value ) override { return encodeValues( key, 4, value.getData() ); }
-            virtual crimild::Bool encode( std::string key, const Matrix3f &value ) override { return encodeValues( key, 9, value.getData() ); }
-            virtual crimild::Bool encode( std::string key, const Matrix4f &value ) override { return encodeValues( key, 16, value.getData() ); }
-            virtual crimild::Bool encode( std::string key, const Quaternion4f &value ) override { return encodeValues( key, 4, value.getRawData().getData() ); }
+            virtual crimild::Bool encode( std::string key, const Vector2f &value ) override { return encodeValues( key, 3, static_cast< const float * >( &value.x ) ); }
+            virtual crimild::Bool encode( std::string key, const Vector3f &value ) override { return encodeValues( key, 3, static_cast< const float * >( &value.x ) ); }
+            virtual crimild::Bool encode( std::string key, const Vector4f &value ) override { return encodeValues( key, 4, static_cast< const float * >( &value.x ) ); }
+            virtual crimild::Bool encode( std::string key, const Matrix3f &value ) override { return encodeValues( key, 9, static_cast< const float * >( &value.m00 ) ); }
+            virtual crimild::Bool encode( std::string key, const Matrix4f &value ) override { return encodeValues( key, 16, static_cast< const float * >( &value[ 0 ].x ) ); }
+            virtual crimild::Bool encode( std::string key, const Quaternion &value ) override { return encodeValues( key, 4, static_cast< const float * >( &value.getRawData().x ) ); }
             virtual crimild::Bool encode( std::string key, const Transformation &value ) override;
 
             virtual crimild::Bool encode( std::string key, ByteArray &value ) override { return false; }
-			virtual crimild::Bool encode( std::string key, Array< crimild::Real32 > &value ) override { return false; }
-			virtual crimild::Bool encode( std::string key, Array< Vector3f > &value ) override { return false; }
-			virtual crimild::Bool encode( std::string key, Array< Vector4f > &value ) override { return false; }
-			virtual crimild::Bool encode( std::string key, Array< Matrix3f > &value ) override { return false; }
-			virtual crimild::Bool encode( std::string key, Array< Matrix4f > &value ) override { return false; }
-			virtual crimild::Bool encode( std::string key, Array< Quaternion4f > &value ) override { return false; }
+            virtual crimild::Bool encode( std::string key, Array< crimild::Real32 > &value ) override { return false; }
+            virtual crimild::Bool encode( std::string key, Array< Vector3f > &value ) override { return false; }
+            virtual crimild::Bool encode( std::string key, Array< Vector4f > &value ) override { return false; }
+            virtual crimild::Bool encode( std::string key, Array< Matrix3f > &value ) override { return false; }
+            virtual crimild::Bool encode( std::string key, Array< Matrix4f > &value ) override { return false; }
+            virtual crimild::Bool encode( std::string key, Array< Quaternion > &value ) override { return false; }
 
-			inline std::string getEncodedString( void ) const
-			{
+            inline std::string getEncodedString( void ) const
+            {
                 return _ss.str();
-			}
+            }
 
         protected:
-			virtual void encodeArrayBegin( std::string key, crimild::Size count ) override;
-			virtual std::string beginEncodingArrayElement( std::string key, crimild::Size index ) override;
-			virtual void endEncodingArrayElement( std::string key, crimild::Size index ) override;
-			virtual void encodeArrayEnd( std::string key ) override;
+            virtual void encodeArrayBegin( std::string key, crimild::Size count ) override;
+            virtual std::string beginEncodingArrayElement( std::string key, crimild::Size index ) override;
+            virtual void endEncodingArrayElement( std::string key, crimild::Size index ) override;
+            virtual void encodeArrayEnd( std::string key ) override;
 
         private:
             template< typename T >
             crimild::Bool encodeValue( std::string key, const T &value )
             {
-	            encodeKey( key );
-	            _ss << value << ", ";
+                encodeKey( key );
+                _ss << value << ", ";
 
-				return true;
+                return true;
             }
 
             template< typename T >
@@ -104,7 +104,7 @@ namespace crimild {
                 }
                 _ss << "}, ";
 
-				return true;
+                return true;
             }
 
             crimild::Bool encodeKey( std::string key );
@@ -119,7 +119,7 @@ namespace crimild {
             virtual std::string dump( void ) override;
         };
 
-	}
+    }
 
 }
 

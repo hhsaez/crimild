@@ -113,6 +113,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::imgui::overlayUI( Shar
                                         vec4 dst = texture( uColorMap1, inTexCoord );
                                         vec4 src = texture( uColorMap2, inTexCoord );
                                         outColor = dot( src, src ) > 0 ? src : dst;
+                                        outColor.a = dst.a;
                                     } ) ),
                     } );
                 program->descriptorSetLayouts = {

@@ -31,9 +31,14 @@
 #include "Coding/Encoder.hpp"
 #include "Foundation/Log.hpp"
 #include "Mathematics/Frustum.hpp"
+#include "Mathematics/Matrix4_inverse.hpp"
 #include "Mathematics/Numbers.hpp"
-#include "Mathematics/TransformationOps.hpp"
 #include "Mathematics/Transformation_apply.hpp"
+#include "Mathematics/Transformation_lookAt.hpp"
+#include "Mathematics/Transformation_rotation.hpp"
+#include "Mathematics/Transformation_translation.hpp"
+#include "Mathematics/Vector3Ops.hpp"
+#include "Mathematics/length.hpp"
 #include "Mathematics/ortho.hpp"
 #include "Mathematics/perspective.hpp"
 #include "Mathematics/swizzle.hpp"
@@ -126,6 +131,16 @@ Light::~Light( void )
     unload();
 }
 
+[[nodiscard]] Point3 Light::getPosition( void ) const noexcept
+{
+    return location( getWorld() );
+}
+
+[[nodiscard]] Vector3 Light::getDirection( void ) const noexcept
+{
+    return ( _type == Type::POINT ? Vector3::Constants::ZERO : forward( getWorld() ) );
+}
+
 void Light::accept( NodeVisitor &visitor )
 {
     visitor.visitLight( this );
@@ -191,30 +206,6 @@ struct ShadowAtlasLightUniform {
     alignas( 16 ) Matrix4f view;
     alignas( 16 ) Vector3f lightPos;
 };
-
-/*
-// TODO: Move this to Matrix.hpp
-static auto ortho = []( float left, float right, float bottom, float top, float near, float far ) {
-    return Matrix4f(
-        2.0f / ( right - left ),
-        0.0f,
-        0.0f,
-        0.0f,
-        0.0f,
-        2.0f / ( bottom - top ),
-        0.0f,
-        0.0f,
-        0.0f,
-        0.0f,
-        1.0f / ( near - far ),
-        0.0f,
-
-        -( right + left ) / ( right - left ),
-        -( bottom + top ) / ( bottom - top ),
-        near / ( near - far ),
-        1.0f );
-};
-*/
 
 auto updateCascade = []( auto cascadeId, auto light ) {
     auto camera = Camera::getMainCamera();
@@ -352,7 +343,7 @@ Array< SharedPointer< DescriptorSet > > &Light::getShadowAtlasDescriptors( void 
                             }( face );
 
                             //t.setTranslate( Vector3f::ZERO ); // TODO (hernan): use probe's position
-                            const auto t1 = translation( light->getWorld()( Vector3::Constants::ZERO ) );
+                            const auto t1 = translation( vector3( location( light->getWorld() ) ) );
                             const auto vMatrix = ( t1 * t0 ).invMat; //t.getInverseMatrix(); //t.computeModelMatrix().getInverse();
 
                             //t.setTranslate( light->getWorld().getTranslate() );

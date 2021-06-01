@@ -25,60 +25,48 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_FOUNDATION_TYPES_
-#define CRIMILD_FOUNDATION_TYPES_
+#ifndef CRIMILD_MATHEMATICS_TRANSFORMATION_SCALE_
+#define CRIMILD_MATHEMATICS_TRANSFORMATION_SCALE_
 
-#include <cstdint>
+#include "Mathematics/Transformation.hpp"
 
 namespace crimild {
 
-    using Char = char;
-    using UChar = unsigned char;
+    [[nodiscard]] static constexpr Transformation scale( const Vector3 &scale ) noexcept
+    {
+        // clang-format off
+        const auto m = Matrix4 {
+            scale.x, 0, 0, 0,
+            0, scale.y, 0, 0,
+            0, 0, scale.z, 0,
+            0, 0, 0, 1,
+        };
 
-    using Int8 = int8_t;
-    using Int16 = int16_t;
-    using Int32 = int32_t;
-    using Int64 = int64_t;
+        const auto inv = Matrix4 {
+            Real( 1 ) / scale.x , 0, 0, 0,
+            0, Real( 1 ) / scale.y, 0, 0,
+            0, 0, Real( 1 ) / scale.z, 0,
+            0, 0, 0, 1,
+        };
+        // clang-format on
 
-    /**
-       \brief Default integer type
+        return Transformation { m, inv, Transformation::Contents::SCALING };
+    }
 
-       This can change in the future in order to provide a higher precision
-    */
-    using Int = Int32;
+    [[nodiscard]] inline constexpr Transformation scale( Real x, Real y, Real z ) noexcept
+    {
+        return scale( Vector3 { x, y, z } );
+    }
 
-    using UInt8 = uint8_t;
-    using UInt16 = uint16_t;
-    using UInt32 = uint32_t;
-    using UInt64 = uint64_t;
+    [[nodiscard]] inline constexpr Transformation scale( Real x ) noexcept
+    {
+        return scale( Vector3 { x, x, x } );
+    }
 
-    /**
-       \brief Default unsigned integer type
-
-       This can change in the future in order to provide a higher precision
-    */
-    using UInt = UInt32;
-
-    using Real32 = float;
-    using Real64 = double;
-
-    /**
-       \brief Default real type
-
-       This can change in the future in order to provide a higher precision
-    */
-    using Real = Real32;
-
-    using Bool = bool;
-
-    using Size = UInt64;
-
-    using Byte = UInt8;
-
-    using Radians = Real;
-    using Degrees = Real;
-
-    using Index = Size;
+    [[nodiscard]] inline constexpr Bool hasScale( const Transformation &t ) noexcept
+    {
+        return t.contents & Transformation::Contents::SCALING;
+    }
 
 }
 

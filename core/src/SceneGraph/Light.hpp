@@ -71,8 +71,8 @@ namespace crimild {
 
         const Type &getType( void ) const noexcept { return _type; }
 
-        Point3 getPosition( void ) const { return getWorld()( Point3::Constants::ZERO ); }
-        Vector3 getDirection( void ) const { return ( _type == Type::POINT ? Vector3::Constants::ZERO : getWorld()( Vector3::Constants::UNIT_Z ) ); }
+        [[nodiscard]] inline Point3 getPosition( void ) const noexcept;
+        [[nodiscard]] inline Vector3 getDirection( void ) const noexcept;
 
         void setAttenuation( const Vector3f &attenuation ) { _attenuation = attenuation; }
         const Vector3f &getAttenuation( void ) const { return _attenuation; }

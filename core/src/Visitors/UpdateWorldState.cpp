@@ -27,7 +27,7 @@
 
 #include "UpdateWorldState.hpp"
 
-#include "Mathematics/TransformationOps.hpp"
+#include "Mathematics/Transformation_operators.hpp"
 #include "SceneGraph/Group.hpp"
 #include "SceneGraph/Node.hpp"
 

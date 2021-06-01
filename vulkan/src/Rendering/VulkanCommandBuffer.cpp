@@ -170,8 +170,8 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                                 clearValues.push_back(
                                     {
                                         .depthStencil = {
-                                            clearDepth.r(),
-                                            static_cast< crimild::UInt32 >( clearDepth.g() ),
+                                            clearDepth.x,
+                                            static_cast< crimild::UInt32 >( clearDepth.y ),
                                         },
                                     } );
                             } else {
@@ -179,10 +179,10 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                                     {
                                         .color = {
                                             .float32 = {
-                                                clearColor.r(),
-                                                clearColor.g(),
-                                                clearColor.b(),
-                                                clearColor.a(),
+                                                clearColor.r,
+                                                clearColor.g,
+                                                clearColor.b,
+                                                clearColor.a,
                                             },
                                         },
                                     } );
@@ -216,11 +216,12 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                             viewport.scalingMode = m_currentRenderPass->extent.scalingMode;
                             auto w = m_currentRenderPass->extent.width;
                             auto h = m_currentRenderPass->extent.height;
-                            viewport.dimensions = Rectf(
-                                viewport.dimensions.getX() * w,
-                                viewport.dimensions.getY() * h,
-                                viewport.dimensions.getWidth() * w,
-                                viewport.dimensions.getHeight() * h );
+                            viewport.dimensions = Rectf {
+                                viewport.dimensions.origin.x * w,
+                                viewport.dimensions.origin.y * h,
+                                viewport.dimensions.size.width * w,
+                                viewport.dimensions.size.height * h,
+                            };
                         }
                         return utils::getViewport( &viewport, renderDevice );
                     }();
@@ -235,11 +236,12 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                             viewport.scalingMode = m_currentRenderPass->extent.scalingMode;
                             auto w = m_currentRenderPass->extent.width;
                             auto h = m_currentRenderPass->extent.height;
-                            viewport.dimensions = Rectf(
-                                viewport.dimensions.getX() * w,
-                                viewport.dimensions.getY() * h,
-                                viewport.dimensions.getWidth() * w,
-                                viewport.dimensions.getHeight() * h );
+                            viewport.dimensions = Rectf {
+                                viewport.dimensions.origin.x * w,
+                                viewport.dimensions.origin.y * h,
+                                viewport.dimensions.size.width * w,
+                                viewport.dimensions.size.height * h,
+                            };
                         }
                         return utils::getScissor( &viewport, renderDevice );
                     }();

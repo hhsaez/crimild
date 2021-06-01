@@ -43,7 +43,7 @@ ENDIF ( CRIMILD_ENABLE_TESTS )
 
 # Add core sources
 ADD_SUBDIRECTORY( core )
-ADD_SUBDIRECTORY( raytracing )
+#ADD_SUBDIRECTORY( raytracing )
 
 IF ( CRIMILD_ENABLE_STB )
    ADD_SUBDIRECTORY( stb )

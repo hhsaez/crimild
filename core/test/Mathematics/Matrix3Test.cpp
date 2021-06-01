@@ -27,58 +27,49 @@
 
 #include "Mathematics/Matrix3.hpp"
 
+#include "Mathematics/Matrix3_constants.hpp"
+#include "Mathematics/Matrix3_equality.hpp"
 #include "Mathematics/Vector3.hpp"
+#include "Mathematics/Vector_equality.hpp"
 
 #include "gtest/gtest.h"
 #include <sstream>
 
 TEST( Matrix3, construction )
 {
-    // clang-format off
     constexpr auto M = crimild::Matrix3 {
-        1, 0, 0,
-        0, 1, 0,
-        0, 0, 1
+        { 1, 2, 3 },
+        { 4, 5, 6 },
+        { 7, 8, 9 },
     };
-    // clang-format on
 
-    EXPECT_EQ( 1, M[ 0 ] );
-    EXPECT_EQ( 0, M[ 1 ] );
-    EXPECT_EQ( 0, M[ 2 ] );
-    EXPECT_EQ( 0, M[ 3 ] );
-    EXPECT_EQ( 1, M[ 4 ] );
-    EXPECT_EQ( 0, M[ 5 ] );
-    EXPECT_EQ( 0, M[ 6 ] );
-    EXPECT_EQ( 0, M[ 7 ] );
-    EXPECT_EQ( 1, M[ 8 ] );
+    static_assert( M[ 0 ] == crimild::Vector3 { 1, 2, 3 } );
+    static_assert( M[ 1 ] == crimild::Vector3 { 4, 5, 6 } );
+    static_assert( M[ 2 ] == crimild::Vector3 { 7, 8, 9 } );
+
+    EXPECT_TRUE( true );
 }
 
 TEST( Matrix3, IDENTITY )
 {
-    constexpr auto I = crimild::Matrix3::Constants::IDENTITY;
+    static_assert(
+        crimild::Matrix3::Constants::IDENTITY == crimild::Matrix3 {
+            { 1, 0, 0 },
+            { 0, 1, 0 },
+            { 0, 0, 1 },
+        } );
 
-    EXPECT_EQ( 1, I[ 0 ] );
-    EXPECT_EQ( 0, I[ 1 ] );
-    EXPECT_EQ( 0, I[ 2 ] );
-    EXPECT_EQ( 0, I[ 3 ] );
-    EXPECT_EQ( 1, I[ 4 ] );
-    EXPECT_EQ( 0, I[ 5 ] );
-    EXPECT_EQ( 0, I[ 6 ] );
-    EXPECT_EQ( 0, I[ 7 ] );
-    EXPECT_EQ( 1, I[ 8 ] );
+    EXPECT_TRUE( true );
 }
 
 TEST( Matrix3, ZERO )
 {
-    constexpr auto Z = crimild::Matrix3::Constants::ZERO;
+    static_assert(
+        crimild::Matrix3::Constants::ZERO == crimild::Matrix3 {
+            { 0, 0, 0 },
+            { 0, 0, 0 },
+            { 0, 0, 0 },
+        } );
 
-    EXPECT_EQ( 0, Z[ 0 ] );
-    EXPECT_EQ( 0, Z[ 1 ] );
-    EXPECT_EQ( 0, Z[ 2 ] );
-    EXPECT_EQ( 0, Z[ 3 ] );
-    EXPECT_EQ( 0, Z[ 4 ] );
-    EXPECT_EQ( 0, Z[ 5 ] );
-    EXPECT_EQ( 0, Z[ 6 ] );
-    EXPECT_EQ( 0, Z[ 7 ] );
-    EXPECT_EQ( 0, Z[ 8 ] );
+    EXPECT_TRUE( true );
 }
