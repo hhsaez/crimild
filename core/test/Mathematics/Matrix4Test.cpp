@@ -27,8 +27,15 @@
 
 #include "Mathematics/Matrix4.hpp"
 
-#include "Mathematics/Matrix4Ops.hpp"
+#include "Mathematics/Matrix4_constants.hpp"
+#include "Mathematics/Matrix4_determinant.hpp"
+#include "Mathematics/Matrix4_equality.hpp"
+#include "Mathematics/Matrix4_inverse.hpp"
+#include "Mathematics/Matrix4_operators.hpp"
+#include "Mathematics/Matrix4_transpose.hpp"
 #include "Mathematics/Vector4.hpp"
+#include "Mathematics/Vector4Ops.hpp"
+#include "Mathematics/Vector_equality.hpp"
 #include "Mathematics/isEqual.hpp"
 
 #include "gtest/gtest.h"
@@ -37,71 +44,57 @@
 TEST( Matrix4, construction )
 {
     constexpr auto M = crimild::Matrix4 {
-        1,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0,
-        0,
-        0,
-        0,
-        1,
+        { 0, 1, 2, 3 },
+        { 4, 5, 6, 7 },
+        { 8, 9, 10, 11 },
+        { 12, 13, 14, 15 },
     };
 
-    EXPECT_EQ( 1, M[ 0 ] );
-    EXPECT_EQ( 0, M[ 1 ] );
-    EXPECT_EQ( 0, M[ 2 ] );
-    EXPECT_EQ( 0, M[ 3 ] );
-    EXPECT_EQ( 0, M[ 4 ] );
-    EXPECT_EQ( 1, M[ 5 ] );
-    EXPECT_EQ( 0, M[ 6 ] );
-    EXPECT_EQ( 0, M[ 7 ] );
-    EXPECT_EQ( 0, M[ 8 ] );
-    EXPECT_EQ( 0, M[ 9 ] );
-    EXPECT_EQ( 1, M[ 10 ] );
-    EXPECT_EQ( 0, M[ 11 ] );
-    EXPECT_EQ( 0, M[ 12 ] );
-    EXPECT_EQ( 0, M[ 13 ] );
-    EXPECT_EQ( 0, M[ 14 ] );
-    EXPECT_EQ( 1, M[ 15 ] );
+    static_assert( M[ 0 ] == crimild::Vector4 { 0, 1, 2, 3 } );
+    static_assert( M[ 1 ] == crimild::Vector4 { 4, 5, 6, 7 } );
+    static_assert( M[ 2 ] == crimild::Vector4 { 8, 9, 10, 11 } );
+    static_assert( M[ 3 ] == crimild::Vector4 { 12, 13, 14, 15 } );
+
+    EXPECT_TRUE( true );
 }
 
 TEST( Matrix4, IDENTITY )
 {
-    constexpr auto I = crimild::Matrix4::Constants::IDENTITY;
-
-    static_assert( I == crimild::Matrix4 { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 } );
+    static_assert(
+        crimild::Matrix4::Constants::IDENTITY == crimild::Matrix4 {
+            { 1, 0, 0, 0 },
+            { 0, 1, 0, 0 },
+            { 0, 0, 1, 0 },
+            { 0, 0, 0, 1 },
+        } );
 
     EXPECT_TRUE( true );
 }
 
 TEST( Matrix4, ZERO )
 {
-    constexpr auto Z = crimild::Matrix4::Constants::ZERO;
+    static_assert(
+        crimild::Matrix4::Constants::ZERO == crimild::Matrix4 {
+            { 0, 0, 0, 0 },
+            { 0, 0, 0, 0 },
+            { 0, 0, 0, 0 },
+            { 0, 0, 0, 0 },
+        } );
 
-    EXPECT_EQ( 0, Z[ 0 ] );
-    EXPECT_EQ( 0, Z[ 1 ] );
-    EXPECT_EQ( 0, Z[ 2 ] );
-    EXPECT_EQ( 0, Z[ 3 ] );
-    EXPECT_EQ( 0, Z[ 4 ] );
-    EXPECT_EQ( 0, Z[ 5 ] );
-    EXPECT_EQ( 0, Z[ 6 ] );
-    EXPECT_EQ( 0, Z[ 7 ] );
-    EXPECT_EQ( 0, Z[ 8 ] );
-    EXPECT_EQ( 0, Z[ 9 ] );
-    EXPECT_EQ( 0, Z[ 10 ] );
-    EXPECT_EQ( 0, Z[ 11 ] );
-    EXPECT_EQ( 0, Z[ 12 ] );
-    EXPECT_EQ( 0, Z[ 13 ] );
-    EXPECT_EQ( 0, Z[ 14 ] );
-    EXPECT_EQ( 0, Z[ 15 ] );
+    EXPECT_TRUE( true );
+}
+
+TEST( Matrix4, ONE )
+{
+    static_assert(
+        crimild::Matrix4::Constants::ONE == crimild::Matrix4 {
+            { 1, 1, 1, 1 },
+            { 1, 1, 1, 1 },
+            { 1, 1, 1, 1 },
+            { 1, 1, 1, 1 },
+        } );
+
+    EXPECT_TRUE( true );
 }
 
 TEST( Matrix4, transpose )
@@ -127,16 +120,119 @@ TEST( Matrix4, transpose )
     EXPECT_TRUE( true );
 }
 
+TEST( Matrix4, matrixProduct )
+{
+    constexpr auto a = crimild::Real( 1 );
+    constexpr auto b = crimild::Real( 2 );
+    constexpr auto c = crimild::Real( 3 );
+    constexpr auto d = crimild::Real( 4 );
+    constexpr auto e = crimild::Real( 5 );
+    constexpr auto f = crimild::Real( 6 );
+    constexpr auto g = crimild::Real( 7 );
+    constexpr auto h = crimild::Real( 8 );
+    constexpr auto i = crimild::Real( 9 );
+    constexpr auto j = crimild::Real( 10 );
+    constexpr auto k = crimild::Real( 11 );
+    constexpr auto l = crimild::Real( 12 );
+    constexpr auto m = crimild::Real( 13 );
+    constexpr auto n = crimild::Real( 14 );
+    constexpr auto o = crimild::Real( 15 );
+    constexpr auto p = crimild::Real( 16 );
+
+    constexpr auto A = crimild::Matrix4 {
+        { a, b, c, d },
+        { e, f, g, h },
+        { i, j, k, l },
+        { m, n, o, p },
+    };
+
+    constexpr auto B = crimild::Matrix4 {
+        { a, b, c, d },
+        { e, f, g, h },
+        { i, j, k, l },
+        { m, n, o, p },
+    };
+
+    static_assert(
+        ( A * B ) == crimild::Matrix4 {
+            {
+                a * a + e * b + i * c + m * d,
+                b * a + f * b + j * c + n * d,
+                c * a + g * b + k * c + o * d,
+                d * a + h * b + l * c + p * d,
+            },
+            {
+                a * e + e * f + i * g + m * h,
+                b * e + f * f + j * g + n * h,
+                c * e + g * f + k * g + o * h,
+                d * e + h * f + l * g + p * h,
+            },
+            {
+                a * i + e * j + i * k + m * l,
+                b * i + f * j + j * k + n * l,
+                c * i + g * j + k * k + o * l,
+                d * i + h * j + l * k + p * l,
+            },
+            {
+                a * m + e * n + i * o + m * p,
+                b * m + f * n + j * o + n * p,
+                c * m + g * n + k * o + o * p,
+                d * m + h * n + l * o + p * p,
+            },
+        } );
+
+    static_assert( ( A * crimild::Matrix4::Constants::IDENTITY ) == A );
+
+    EXPECT_TRUE( true );
+}
+
+TEST( Matrix4, vectorProduct )
+{
+    constexpr auto A = crimild::Matrix4 {
+        { 0, 1, 2, 3 },
+        { 4, 5, 6, 7 },
+        { 8, 9, 10, 11 },
+        { 12, 13, 14, 15 },
+    };
+
+    constexpr auto V = crimild::Vector4 {
+        0,
+        1,
+        2,
+        3,
+    };
+
+    static_assert(
+        ( A * V ) == crimild::Vector4 {
+            0 * 0 + 4 * 1 + 8 * 2 + 12 * 3,
+            1 * 0 + 5 * 1 + 9 * 2 + 13 * 3,
+            2 * 0 + 6 * 1 + 10 * 2 + 14 * 3,
+            3 * 0 + 7 * 1 + 11 * 2 + 15 * 3,
+        } );
+
+    static_assert( ( crimild::Matrix4::Constants::IDENTITY * V ) == V );
+
+    static_assert( ( A * crimild::Vector4::Constants::ZERO ) == crimild::Vector4::Constants::ZERO );
+
+    static_assert(
+        ( A * crimild::Vector4::Constants::ONE ) == crimild::Vector4 {
+            0 * 1 + 4 * 1 + 8 * 1 + 12 * 1,
+            1 * 1 + 5 * 1 + 9 * 1 + 13 * 1,
+            2 * 1 + 6 * 1 + 10 * 1 + 14 * 1,
+            3 * 1 + 7 * 1 + 11 * 1 + 15 * 1,
+        } );
+
+    EXPECT_TRUE( true );
+}
+
 TEST( Matrix4, determinant )
 {
-    // clang-format off
     constexpr auto M = crimild::Matrix4 {
-        10, 1, 2, 3,
-        4, 5, 6, 7,
-        8, 19, 10, 11,
-        121, 13, 14, 15,
+        { 10, 1, 2, 3 },
+        { 4, 5, 6, 7 },
+        { 8, 19, 10, 11 },
+        { 121, 13, 14, 15 },
     };
-    // clang-format on
 
     constexpr auto d = crimild::determinant( M );
 
@@ -147,18 +243,16 @@ TEST( Matrix4, determinant )
 
 TEST( Matrix4, inverse )
 {
-    // clang-format off
     constexpr auto M = crimild::Matrix4 {
-        10, 1, 2, 3,
-        4, 5, 6, 7,
-        8, 19, 10, 11,
-        121, 13, 14, 15,
+        { 10, 1, 2, 3 },
+        { 4, 5, 6, 7 },
+        { 8, 19, 10, 11 },
+        { 121, 13, 14, 15 },
     };
-    // clang-format on
 
     constexpr auto MI = crimild::inverse( M );
 
-    EXPECT_TRUE( crimild::isEqual( crimild::Matrix4::Constants::IDENTITY, M * MI ) );
+    static_assert( crimild::Matrix4::Constants::IDENTITY == M * MI );
 
     EXPECT_TRUE( true );
 }

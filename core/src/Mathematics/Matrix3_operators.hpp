@@ -29,7 +29,6 @@
 #define CRIMILD_MATHEMATICS_MATRIX_3_OPS_
 
 #include "Mathematics/Matrix3.hpp"
-#include "Mathematics/Vector3.hpp"
 
 template< typename T >
 [[nodiscard]] inline constexpr crimild::impl::Matrix3< T > operator+( const crimild::impl::Matrix3< T > &a, const crimild::impl::Matrix3< T > &b ) noexcept
@@ -126,53 +125,6 @@ template< typename T >
         a[ 3 ] * u[ 0 ] + a[ 4 ] * u[ 1 ] + a[ 5 ] * u[ 2 ],
         a[ 6 ] * u[ 0 ] + a[ 7 ] * u[ 1 ] + a[ 8 ] * u[ 2 ],
     };
-}
-
-namespace crimild {
-
-    template< typename T >
-    [[nodiscard]] constexpr impl::Matrix3< T > transpose( const impl::Matrix3< T > &a ) noexcept
-    {
-        return impl::Matrix3< T > {
-            a[ 0 ],
-            a[ 3 ],
-            a[ 6 ],
-            a[ 1 ],
-            a[ 4 ],
-            a[ 7 ],
-            a[ 2 ],
-            a[ 5 ],
-            a[ 8 ],
-        };
-    }
-
-    template< typename T >
-    [[nodiscard]] constexpr Real determinant( const impl::Matrix3< T > &a ) noexcept
-    {
-        return a[ 0 ] * ( a[ 4 ] * a[ 8 ] - a[ 5 ] * a[ 7 ] )
-               - a[ 1 ] * ( a[ 3 ] * a[ 8 ] - a[ 5 ] * a[ 6 ] )
-               + a[ 2 ] * ( a[ 3 ] * a[ 7 ] - a[ 4 ] * a[ 6 ] );
-    }
-
-    template< typename T >
-    [[nodiscard]] constexpr impl::Matrix3< T > inverse( const impl::Matrix3< T > &a ) noexcept
-    {
-        const auto det = determinant( a );
-        assert( det != 0 );
-        const auto invDet = Real( 1.0 ) / det;
-        return impl::Matrix3< T > {
-            ( a[ 4 ] * a[ 8 ] - a[ 5 ] * a[ 7 ] ) * invDet,
-            ( a[ 2 ] * a[ 7 ] - a[ 1 ] * a[ 8 ] ) * invDet,
-            ( a[ 1 ] * a[ 5 ] - a[ 2 ] * a[ 4 ] ) * invDet,
-            ( a[ 5 ] * a[ 6 ] - a[ 3 ] * a[ 8 ] ) * invDet,
-            ( a[ 0 ] * a[ 8 ] - a[ 2 ] * a[ 6 ] ) * invDet,
-            ( a[ 2 ] * a[ 3 ] - a[ 0 ] * a[ 5 ] ) * invDet,
-            ( a[ 3 ] * a[ 7 ] - a[ 4 ] * a[ 6 ] ) * invDet,
-            ( a[ 1 ] * a[ 6 ] - a[ 0 ] * a[ 7 ] ) * invDet,
-            ( a[ 0 ] * a[ 4 ] - a[ 1 ] * a[ 3 ] ) * invDet,
-        };
-    }
-
 }
 
 #endif

@@ -28,7 +28,6 @@
 #ifndef CRIMILD_RENDERING_STORAGE_BUFFER_
 #define CRIMILD_RENDERING_STORAGE_BUFFER_
 
-#include "Mathematics/Matrix.hpp"
 #include "Rendering/Buffer.hpp"
 #include "Rendering/BufferAccessor.hpp"
 #include "Rendering/BufferView.hpp"

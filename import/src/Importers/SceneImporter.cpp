@@ -124,9 +124,13 @@ void SceneImporter::computeTransform( const aiMatrix4x4 &m, Transformation &t )
     aiQuaternion rotation;
     m.Decompose( scaling, rotation, position );
 
+    /*
     t.setTranslate( position.x, position.y, position.z );
     t.setScale( ( scaling.x + scaling.y + scaling.z ) / 3.0f );
     t.setRotate( Quaternion4f( rotation.x, rotation.y, rotation.z, rotation.w ) );
+    */
+
+    assert( false );
 }
 
 void SceneImporter::loadMaterialTexture( SharedPointer< LitMaterial > material, const aiMaterial *input, std::string basePath, aiTextureType texType, unsigned int texIndex )
@@ -178,7 +182,7 @@ void SceneImporter::loadMaterialTexture( SharedPointer< LitMaterial > material, 
                     break;
 
                 case aiTextureType_LIGHTMAP:
-					material->setAmbientOcclusionMap( texture );
+                    material->setAmbientOcclusionMap( texture );
                     break;
 
                 case aiTextureType_HEIGHT:
@@ -187,9 +191,9 @@ void SceneImporter::loadMaterialTexture( SharedPointer< LitMaterial > material, 
                     break;
 
                 case aiTextureType_UNKNOWN:
-                	// assume Matal/Roughness
+                    // assume Matal/Roughness
                     material->setCombinedRoughnessMetallicMap( texture );
-                	break;
+                    break;
 
                 default:
                     Log::warning( CRIMILD_CURRENT_CLASS_NAME, "Unsupported texture type ", texType );
@@ -223,7 +227,7 @@ SharedPointer< LitMaterial > SceneImporter::buildMaterial( const aiMaterial *mtl
 
     if ( AI_SUCCESS == aiGetMaterialColor( mtl, AI_MATKEY_COLOR_DIFFUSE, &color ) ) {
         //material->setDiffuse( RGBAColorf( color.r, color.g, color.b, color.a ) );
-        material->setAlbedo( RGBColorf( color.r, color.g, color.b ) );
+        material->setAlbedo( ColorRGB { color.r, color.g, color.b } );
     }
 
     if ( AI_SUCCESS == aiGetMaterialColor( mtl, AI_MATKEY_COLOR_SPECULAR, &color ) ) {
@@ -338,15 +342,15 @@ void SceneImporter::recursiveSceneBuilder( SharedPointer< Group > parent, const 
         // use buffer accessors to set buffer data directly like this:
         // positions->set( Array( mesh->mVertices ) );
         for ( auto v = 0l; v < VERTEX_COUNT; v++ ) {
-            positions->set( v, Vector3f( &mesh->mVertices[ v ].x ) );
+            positions->set( v, Vector3f { mesh->mVertices[ v ].x, mesh->mVertices[ v ].y, mesh->mVertices[ v ].z } );
 
             if ( normals != nullptr ) {
-                normals->set( v, Vector3f( &mesh->mNormals[ v ].x ) );
+                normals->set( v, Vector3f { mesh->mNormals[ v ].x, mesh->mNormals[ v ].y, mesh->mNormals[ v ].z } );
             }
 
             if ( texCoords != nullptr ) {
-                auto uv = Vector2f( &mesh->mTextureCoords[ 0 ][ v ].x );
-                uv.y() = 1.0f - uv.y();
+                auto uv = Vector2f { mesh->mTextureCoords[ 0 ][ v ].x, mesh->mTextureCoords[ 0 ][ v ].y };
+                uv.y = 1.0f - uv.y;
                 texCoords->set( v, uv );
             }
 
@@ -453,7 +457,7 @@ void SceneImporter::loadAnimations( const aiScene *scene, SharedPointer< Skinned
             Array< Vector3f > pChannelKeys( inChannel->mNumPositionKeys );
             for ( crimild::Size pIndex = 0; pIndex < inChannel->mNumPositionKeys; pIndex++ ) {
                 auto pKey = inChannel->mPositionKeys[ pIndex ];
-                pChannelKeys[ pIndex ] = Vector3f( pKey.mValue.x, pKey.mValue.y, pKey.mValue.z );
+                pChannelKeys[ pIndex ] = Vector3f { pKey.mValue.x, pKey.mValue.y, pKey.mValue.z };
                 pChannelTimes[ pIndex ] = pKey.mTime;
             }
             auto pChannel = crimild::alloc< animation::Vector3fChannel >(
@@ -464,21 +468,21 @@ void SceneImporter::loadAnimations( const aiScene *scene, SharedPointer< Skinned
 
             // Rotations
             Array< crimild::Real32 > rChannelTimes( inChannel->mNumRotationKeys );
-            Array< Quaternion4f > rChannelKeys( inChannel->mNumRotationKeys );
+            Array< Quaternion > rChannelKeys( inChannel->mNumRotationKeys );
             for ( crimild::Size rIndex = 0; rIndex < inChannel->mNumRotationKeys; rIndex++ ) {
                 auto rKey = inChannel->mRotationKeys[ rIndex ];
-                Quaternion4f q( rKey.mValue.x, rKey.mValue.y, rKey.mValue.z, rKey.mValue.w );
+                Quaternion q( rKey.mValue.x, rKey.mValue.y, rKey.mValue.z, rKey.mValue.w );
                 if ( false && rIndex > 0 ) {
                     // fix orientation
                     auto &q0 = rChannelKeys[ rIndex - 1 ];
-                    if ( q.getRawData() * q0.getRawData() < 0 ) {
+                    if ( dot( q.getRawData(), q0.getRawData() ) < 0 ) {
                         q = -q;
                     }
                 }
                 rChannelKeys[ rIndex ] = q;
                 rChannelTimes[ rIndex ] = rKey.mTime;
             }
-            auto rChannel = crimild::alloc< animation::Quaternion4fChannel >(
+            auto rChannel = crimild::alloc< animation::QuaternionChannel >(
                 std::string( inChannel->mNodeName.data ) + "[r]",
                 std::move( rChannelTimes ),
                 std::move( rChannelKeys ) );

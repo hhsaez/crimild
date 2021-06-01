@@ -38,7 +38,7 @@ namespace crimild {
         return Matrix4 {
             Real( 2 ) * n / ( r - l ), 0, ( r + l ) / ( r - l ), 0,
             0, Real( 2 ) * n / ( t - b ), ( t + b ) / ( t - b ), 0,
-            0, 0, -( f + n ) / ( f - n ), - Real( 2 ) * f * n / ( f - n ),
+            0, 0, n / ( f - n ), f * n / ( f - n ),
             0, 0, -1, 0,
         };
         // clang-format on
@@ -54,8 +54,8 @@ namespace crimild {
         // clang-format off
         return Matrix4 {
             c / a, 0, 0, 0,
-            0, c, 0, 0,
-            0, 0, ( f + n ) / ( f - n ), -Real( 2 ) * f * n / ( f - n ),
+            0, -c, 0, 0,
+            0, 0, n / ( f - n ), f * n / ( f - n ),
             0, 0, -1, 0,
         };
         // clang-format on

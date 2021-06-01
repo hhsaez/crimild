@@ -137,6 +137,7 @@ void AABBBoundingVolume::computeFrom( const VertexBuffer *vbo )
 
 void AABBBoundingVolume::computeFrom( const Vector3f &min, const Vector3f &max )
 {
+/*
     _sphere = Sphere {
         point3( Real( 0.5 ) * ( max + min ) ),
         crimild::max( Real( 0.01 ), length( max - vector3( center( _sphere ) ) ) ),
@@ -144,21 +145,18 @@ void AABBBoundingVolume::computeFrom( const Vector3f &min, const Vector3f &max )
 
     setMin( min - vector3( getCenter() ) );
     setMax( max - vector3( getCenter() ) );
+    */
 }
 
 void AABBBoundingVolume::expandToContain( const Point3 &p )
 {
-    /*
     auto min = getCenter() + getMin();
     auto max = getCenter() + getMax();
 
-    min = Vector3f( Numericf::min( p[ 0 ], min[ 0 ] ), Numericf::min( p[ 1 ], min[ 1 ] ), Numericf::min( p[ 2 ], min[ 2 ] ) );
-    max = Vector3f( Numericf::max( p[ 0 ], max[ 0 ] ), Numericf::max( p[ 1 ], max[ 1 ] ), Numericf::max( p[ 2 ], max[ 2 ] ) );
+    min = crimild::min( min, p );
+    max = crimild::max( max, p );
 
-    computeFrom( min, max );
-    */
-
-    assert( false && "TODO" );
+    computeFrom( vector3( min ), vector3( max ) );
 }
 
 void AABBBoundingVolume::expandToContain( const Vector3f *positions, unsigned int positionCount )

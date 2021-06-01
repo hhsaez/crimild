@@ -75,6 +75,7 @@ namespace crimild {
 
         template< typename T >
         struct ColorRGBA< T >::Constants {
+            static constexpr auto CLEAR = ColorRGBA< T > { 0, 0, 0, 0 };
             static constexpr auto BLACK = ColorRGBA< T > { 0, 0, 0, 1 };
             static constexpr auto WHITE = ColorRGBA< T > { 1, 1, 1, 1 };
             static constexpr auto RED = ColorRGBA< T > { 1, 0, 0, 1 };

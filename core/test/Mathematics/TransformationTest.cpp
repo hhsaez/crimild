@@ -27,10 +27,19 @@
 
 #include "Mathematics/Transformation.hpp"
 
+#include "Mathematics/Matrix4_constants.hpp"
+#include "Mathematics/Normal3.hpp"
 #include "Mathematics/Normal_equality.hpp"
 #include "Mathematics/Ray_equality.hpp"
-#include "Mathematics/TransformationOps.hpp"
 #include "Mathematics/Transformation_apply.hpp"
+#include "Mathematics/Transformation_constants.hpp"
+#include "Mathematics/Transformation_equality.hpp"
+#include "Mathematics/Transformation_inverse.hpp"
+#include "Mathematics/Transformation_operators.hpp"
+#include "Mathematics/Transformation_rotation.hpp"
+#include "Mathematics/Transformation_scale.hpp"
+#include "Mathematics/Transformation_translation.hpp"
+#include "Mathematics/normalize.hpp"
 
 #include "gtest/gtest.h"
 
@@ -248,6 +257,7 @@ TEST( Transformation, rotationProperties )
 
 TEST( Transformation, lookAt )
 {
+    /*
     constexpr auto I = crimild::Transformation {};
     constexpr auto T = crimild::lookAt(
         crimild::Point3 { 5, 5, 5 },
@@ -259,8 +269,11 @@ TEST( Transformation, lookAt )
     static_assert( crimild::hasTranslation( T ) );
     static_assert( crimild::hasRotation( T ) );
     static_assert( !crimild::hasScale( T ) );
+    */
 
     EXPECT_TRUE( true );
+
+    FAIL();
 }
 
 TEST( Transfromation, location )
@@ -280,7 +293,7 @@ TEST( Transfromation, right )
     static_assert( crimild::right( I ) == crimild::Vector3::Constants::RIGHT );
 
     const auto R = crimild::rotationZ( crimild::numbers::PI_DIV_2 );
-    EXPECT_EQ( ( crimild::Vector3::Constants::RIGHT ), crimild::up( R ) );
+    EXPECT_EQ( ( crimild::Vector3::Constants::UP ), crimild::right( R ) );
 }
 
 TEST( Transfromation, up )

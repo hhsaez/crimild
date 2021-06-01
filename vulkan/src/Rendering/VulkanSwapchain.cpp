@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the copyright holders nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -153,7 +153,7 @@ SharedPointer< vulkan::Swapchain > SwapchainManager::create( Swapchain::Descript
     auto swapchainSupport = utils::querySwapchainSupportDetails( physicalDevice->handler, surface->handler );
     auto surfaceFormat = chooseSurfaceFormat( swapchainSupport.formats );
     auto presentMode = choosePresentationMode( swapchainSupport.presentModes );
-    auto extent = chooseExtent( swapchainSupport.capabilities, VkExtent2D { descriptor.extent.x(), descriptor.extent.y() } );
+    auto extent = chooseExtent( swapchainSupport.capabilities, VkExtent2D { descriptor.extent.x, descriptor.extent.y } );
 
     // The Vulkan implementation defines a minimum number of images to work with.
     // We request one more image than the minimum. Also, make sure not to exceed the

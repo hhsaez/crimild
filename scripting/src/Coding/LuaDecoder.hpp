@@ -29,22 +29,22 @@
 #define CRIMILD_SCRIPTING_CODING_LUA_DECODER_
 
 #include "Foundation/Scripted.hpp"
+#include "Mathematics/Quaternion.hpp"
 
 #include <Coding/Decoder.hpp>
 #include <Foundation/Containers/Stack.hpp>
 
 namespace crimild {
 
-	namespace coding {
+    namespace coding {
 
-        class LuaDecoder :
-			public coding::Decoder,
-			public scripting::Scripted {
+        class LuaDecoder : public coding::Decoder,
+                           public scripting::Scripted {
         public:
             explicit LuaDecoder( std::string rootObjectName = "scene" );
             virtual ~LuaDecoder( void );
 
-		public:
+        public:
             virtual crimild::Bool decode( std::string key, SharedPointer< coding::Codable > &codable ) override;
 
             virtual crimild::Bool decode( std::string key, std::string &value ) override { return decodeValue( key, value ); }
@@ -62,44 +62,47 @@ namespace crimild {
             virtual crimild::Bool decode( std::string key, crimild::Vector4f &value ) override { return decodeValue( key, value ); }
             virtual crimild::Bool decode( std::string key, crimild::Matrix3f &value ) override { return decodeValue( key, value ); }
             virtual crimild::Bool decode( std::string key, crimild::Matrix4f &value ) override { return decodeValue( key, value ); }
-            virtual crimild::Bool decode( std::string key, crimild::Quaternion4f &value ) override { return decodeValue( key, value ); }
+            virtual crimild::Bool decode( std::string key, crimild::Quaternion &value ) override { return decodeValue( key, value ); }
             virtual crimild::Bool decode( std::string key, Transformation &value ) override { return decodeValue( key, value ); }
 
-            virtual crimild::Bool decode( std::string key, ByteArray &value ) override { /* no-op */ return true; }
+            virtual crimild::Bool decode( std::string key, ByteArray &value ) override
+            { /* no-op */
+                return true;
+            }
             virtual crimild::Bool decode( std::string key, Array< crimild::Real32 > &value ) override { return true; };
             virtual crimild::Bool decode( std::string key, Array< Vector3f > &value ) override { return true; };
             virtual crimild::Bool decode( std::string key, Array< Vector4f > &value ) override { return true; };
             virtual crimild::Bool decode( std::string key, Array< Matrix3f > &value ) override { return true; };
             virtual crimild::Bool decode( std::string key, Array< Matrix4f > &value ) override { return true; };
-            virtual crimild::Bool decode( std::string key, Array< Quaternion4f > &value ) override { return true; };
+            virtual crimild::Bool decode( std::string key, Array< Quaternion > &value ) override { return true; };
 
-			void parse( std::string str );
-			void parseFile( std::string filename );
+            void parse( std::string str );
+            void parseFile( std::string filename );
 
             bool decodeFile( std::string fileName );
 
-		protected:
-			virtual crimild::Size beginDecodingArray( std::string key ) override;
-			virtual std::string beginDecodingArrayElement( std::string key, crimild::Size index ) override;
-			virtual void endDecodingArrayElement( std::string key, crimild::Size index ) override;
-			virtual void endDecodingArray( std::string key ) override;
+        protected:
+            virtual crimild::Size beginDecodingArray( std::string key ) override;
+            virtual std::string beginDecodingArrayElement( std::string key, crimild::Size index ) override;
+            virtual void endDecodingArrayElement( std::string key, crimild::Size index ) override;
+            virtual void endDecodingArray( std::string key ) override;
 
         private:
             template< typename T >
             crimild::Bool decodeValue( std::string key, T &value )
             {
-	            return _evals.top().getPropValue( key, value );
+                return _evals.top().getPropValue( key, value );
             }
 
-		private:
-			SharedPointer< SharedObject > buildObject( void );
+        private:
+            SharedPointer< SharedObject > buildObject( void );
 
-		private:
-			std::string _rootObjectName;
+        private:
+            std::string _rootObjectName;
             Stack< scripting::ScriptEvaluator > _evals;
         };
 
-	}
+    }
 
 }
 

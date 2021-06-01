@@ -58,7 +58,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::shader( std::string so
                 .descriptorType = DescriptorType::UNIFORM_BUFFER,
                 .obj = [ & ] {
                     struct ContextDescriptor {
-                        Vector4f dimensions;
+                        alignas( 16 ) Vector4f dimensions;
                     };
 
                     auto settings = Simulation::getInstance()->getSettings();

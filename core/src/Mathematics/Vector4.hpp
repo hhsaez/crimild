@@ -47,7 +47,7 @@ namespace crimild {
         template< typename T >
         struct Vector4< T >::Constants {
             static constexpr auto ZERO = Vector4< T > { 0, 0, 0, 0 };
-            static constexpr auto ONE = Vector4< T > { 1, 1, 1, 0 };
+            static constexpr auto ONE = Vector4< T > { 1, 1, 1, 1 };
             static constexpr auto POSITIVE_INFINITY = Vector4< T > { std::numeric_limits< T >::max(), std::numeric_limits< T >::max(), std::numeric_limits< T >::max(), std::numeric_limits< T >::max() };
             static constexpr auto NEGATIVE_INFINITY = Vector4< T > { std::numeric_limits< T >::min(), std::numeric_limits< T >::min(), std::numeric_limits< T >::min(), std::numeric_limits< T >::min() };
             static constexpr auto UNIT_X = Vector4< T > { 1, 0, 0, 0 };

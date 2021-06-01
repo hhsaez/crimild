@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -36,75 +36,72 @@ LuaSerializer::LuaSerializer( std::ostream &output )
     : _depth( 0 ),
       _output( output )
 {
-
 }
 
 LuaSerializer::~LuaSerializer( void )
 {
-
 }
 
 void LuaSerializer::pushObject( std::string name )
 {
-	pushLine( name != "" ? ( name + " = {" ) : "{" );
-	++_depth;
+    pushLine( name != "" ? ( name + " = {" ) : "{" );
+    ++_depth;
 }
 
 void LuaSerializer::popObject( void )
 {
-	--_depth;
-	pushLine( _depth > 0 ? "}," : "}" );
+    --_depth;
+    pushLine( _depth > 0 ? "}," : "}" );
 }
 
-void LuaSerializer::pushProperty( std::string name, const char *value ) 
+void LuaSerializer::pushProperty( std::string name, const char *value )
 {
-	pushLine( name + " = '" + StringUtils::replaceAll( value, "\n", "\\n" ) + "', " );
+    pushLine( name + " = '" + StringUtils::replaceAll( value, "\n", "\\n" ) + "', " );
 }
 
-void LuaSerializer::pushProperty( std::string name, std::string value ) 
+void LuaSerializer::pushProperty( std::string name, std::string value )
 {
-	pushProperty( name, value.c_str() );
+    pushProperty( name, value.c_str() );
 }
 
 void LuaSerializer::pushProperty( std::string name, bool value )
 {
-	pushLine( name + " = " + ( value ? "true" : "false" ) + ", " );
+    pushLine( name + " = " + ( value ? "true" : "false" ) + ", " );
 }
 
 void LuaSerializer::pushProperty( std::string name, const Vector3f &v )
 {
-	std::stringstream str;
-	str << name << " = { "
-		<< v[ 0 ] << ", " 
-		<< v[ 1 ] << ", " 
-		<< v[ 2 ] 
-		<< " }, ";
-	pushLine( str.str() );
+    std::stringstream str;
+    str << name << " = { "
+        << v[ 0 ] << ", "
+        << v[ 1 ] << ", "
+        << v[ 2 ]
+        << " }, ";
+    pushLine( str.str() );
 }
 
-void LuaSerializer::pushProperty( std::string name, const Quaternion4f &q )
+void LuaSerializer::pushProperty( std::string name, const Quaternion &q )
 {
-	std::stringstream str;
-	str << name << " = { "
-		<< q.getImaginary()[ 0 ] << ", "
-		<< q.getImaginary()[ 1 ] << ", "
-		<< q.getImaginary()[ 2 ] << ", "
-		<< q.getReal()
-		<< " }, ";
-	pushLine( str.str() );
+    std::stringstream str;
+    str << name << " = { "
+        << q.getImaginary()[ 0 ] << ", "
+        << q.getImaginary()[ 1 ] << ", "
+        << q.getImaginary()[ 2 ] << ", "
+        << q.getReal()
+        << " }, ";
+    pushLine( str.str() );
 }
 
 void LuaSerializer::pushText( std::string text )
 {
-	_output << text;
+    _output << text;
 }
 
 void LuaSerializer::pushLine( std::string line )
 {
-	for ( int i = 0; i < 4 * _depth; i++ ) {
-		_output << " ";
-	}
+    for ( int i = 0; i < 4 * _depth; i++ ) {
+        _output << " ";
+    }
 
-	_output << line << "\n";
+    _output << line << "\n";
 }
-

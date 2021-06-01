@@ -34,26 +34,24 @@ using namespace crimild::coding;
 
 LuaEncoder::LuaEncoder( void )
 {
-
 }
 
 LuaEncoder::~LuaEncoder( void )
 {
-
 }
 
 crimild::Bool LuaEncoder::encode( SharedPointer< Codable > const &codable )
 {
-	_ss << "{ ";
+    _ss << "{ ";
     _indentLevel++;
 
     encodeKey( "type" );
-	_ss <<  "'" << codable->getClassName() << "', ";
+    _ss << "'" << codable->getClassName() << "', ";
 
     encodeKey( "id" );
     _ss << codable->getUniqueID() << ", ";
 
-	codable->encode( *this );
+    codable->encode( *this );
 
     _indentLevel--;
 
@@ -63,7 +61,7 @@ crimild::Bool LuaEncoder::encode( SharedPointer< Codable > const &codable )
         _ss << "\n";
     }
 
-	return true;
+    return true;
 }
 
 crimild::Bool LuaEncoder::encode( std::string key, SharedPointer< Codable > const &codable )
@@ -72,23 +70,24 @@ crimild::Bool LuaEncoder::encode( std::string key, SharedPointer< Codable > cons
         return false;
     }
 
-	encodeKey( key );
-	encode( codable );
-	_ss << ", ";
+    encodeKey( key );
+    encode( codable );
+    _ss << ", ";
 
-	return true;
+    return true;
 }
 
 crimild::Bool LuaEncoder::encode( std::string key, std::string value )
 {
-	encodeKey( key );
-	_ss << "'" << value << "', ";
+    encodeKey( key );
+    _ss << "'" << value << "', ";
 
-	return true;
+    return true;
 }
 
 crimild::Bool LuaEncoder::encode( std::string key, const Transformation &value )
 {
+    /*
 	encodeKey( key );
 
     _ss << "{ ";
@@ -100,13 +99,16 @@ crimild::Bool LuaEncoder::encode( std::string key, const Transformation &value )
 
     _indentLevel--;
 	_ss << getIndentSpaces() << "}, ";
+    */
 
-	return true;
+    assert( false );
+
+    return true;
 }
 
 void LuaEncoder::encodeArrayBegin( std::string key, crimild::Size count )
 {
-	_arrayKeys.push( key );
+    _arrayKeys.push( key );
 
     _ss << getIndentSpaces() << key << " = { ";
 
@@ -120,25 +122,25 @@ std::string LuaEncoder::beginEncodingArrayElement( std::string key, crimild::Siz
 
 void LuaEncoder::endEncodingArrayElement( std::string key, crimild::Size index )
 {
-	// no-op
+    // no-op
 }
 
 void LuaEncoder::encodeArrayEnd( std::string key )
 {
-	_arrayKeys.pop();
+    _arrayKeys.pop();
 
     --_indentLevel;
-	_ss << getIndentSpaces() << "},";
+    _ss << getIndentSpaces() << "},";
 }
 
 crimild::Bool LuaEncoder::encodeKey( std::string key )
 {
     _ss << getIndentSpaces();
-	if ( _arrayKeys.empty() || key.find( _arrayKeys.top() ) != 0 ) {
-		_ss << key << " = ";
-	}
+    if ( _arrayKeys.empty() || key.find( _arrayKeys.top() ) != 0 ) {
+        _ss << key << " = ";
+    }
 
-	return true;
+    return true;
 }
 
 std::string LuaEncoder::getIndentSpaces( void )

@@ -152,12 +152,12 @@ VkFilter utils::getSamplerFilter( Sampler::Filter filter ) noexcept
 
 VkViewport utils::getViewport( const ViewportDimensions *viewport, const RenderDevice *renderDevice ) noexcept
 {
-    auto x = viewport->dimensions.getX();
-    auto y = viewport->dimensions.getY();
-    auto w = viewport->dimensions.getWidth();
-    auto h = viewport->dimensions.getHeight();
-    auto minD = viewport->depthRange.x();
-    auto maxD = viewport->depthRange.y();
+    auto x = viewport->dimensions.origin.x;
+    auto y = viewport->dimensions.origin.y;
+    auto w = viewport->dimensions.size.width;
+    auto h = viewport->dimensions.size.height;
+    auto minD = viewport->depthRange.x;
+    auto maxD = viewport->depthRange.y;
 
     if ( viewport->scalingMode == ScalingMode::SWAPCHAIN_RELATIVE ) {
         if ( renderDevice != nullptr ) {
@@ -197,10 +197,10 @@ VkViewport utils::getViewport( const ViewportDimensions *viewport, const RenderD
 
 VkRect2D utils::getViewportRect( const ViewportDimensions *viewport, const RenderDevice *renderDevice ) noexcept
 {
-    auto x = viewport->dimensions.getX();
-    auto y = viewport->dimensions.getY();
-    auto w = viewport->dimensions.getWidth();
-    auto h = viewport->dimensions.getHeight();
+    auto x = viewport->dimensions.origin.x;
+    auto y = viewport->dimensions.origin.y;
+    auto w = viewport->dimensions.size.width;
+    auto h = viewport->dimensions.size.height;
 
     if ( viewport->scalingMode == ScalingMode::SWAPCHAIN_RELATIVE ) {
         if ( renderDevice != nullptr ) {
