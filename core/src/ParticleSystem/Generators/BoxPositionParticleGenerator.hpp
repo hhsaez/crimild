@@ -28,6 +28,7 @@
 #ifndef CRIMILD_PARTICLE_GENERATOR_POSITION_BOX_
 #define CRIMILD_PARTICLE_GENERATOR_POSITION_BOX_
 
+#include "Mathematics/Vector3_constants.hpp"
 #include "ParticleSystem/ParticleSystemComponent.hpp"
 
 namespace crimild {

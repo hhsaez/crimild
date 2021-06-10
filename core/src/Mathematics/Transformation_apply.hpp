@@ -32,6 +32,7 @@
 #include "Mathematics/Transformation.hpp"
 #include "Mathematics/Transformation_isIdentity.hpp"
 #include "Mathematics/Transformation_operators.hpp"
+#include "Mathematics/Vector3_constants.hpp"
 #include "Mathematics/swizzle.hpp"
 
 namespace crimild {

@@ -46,14 +46,12 @@ namespace crimild {
         virtual crimild::Bool bind( RenderResourceType *resource ) noexcept
         {
             m_resources.insert( resource );
-            resource->manager = this;
             return true;
         }
 
         virtual crimild::Bool unbind( RenderResourceType *resource ) noexcept
         {
             m_resources.remove( resource );
-            resource->manager = nullptr;
             return true;
         }
 
@@ -66,7 +64,10 @@ namespace crimild {
             m_resources.clear();
         }
 
-        inline RenderResourceType *first( void ) noexcept { return m_resources.first(); }
+        inline RenderResourceType *first( void ) noexcept
+        {
+            return m_resources.first();
+        }
 
     private:
         Set< RenderResourceType * > m_resources;

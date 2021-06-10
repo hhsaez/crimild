@@ -31,6 +31,7 @@
 #include "Mathematics/ColorRGB.hpp"
 #include "Mathematics/ColorRGBA.hpp"
 #include "Mathematics/LineSegment3.hpp"
+#include "Mathematics/Matrix4.hpp"
 #include "Mathematics/Plane3.hpp"
 #include "Mathematics/Ray3.hpp"
 #include "Mathematics/Tuple2.hpp"
@@ -106,6 +107,15 @@ static std::ostream &operator<<( std::ostream &out, const crimild::Plane3 &p ) n
     out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
         << std::setprecision( 10 )
         << "[" << crimild::normal( p ) << ", " << crimild::distance( p ) << "]";
+    return out;
+}
+
+template< typename T >
+static std::ostream &operator<<( std::ostream &out, const crimild::impl::Matrix4< T > &a ) noexcept
+{
+    out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
+        << std::setprecision( 6 );
+    out << "[" << a[ 0 ] << ", " << a[ 1 ] << ", " << a[ 2 ] << ", " << a[ 3 ] << "]";
     return out;
 }
 

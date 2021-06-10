@@ -29,6 +29,7 @@
 
 #include "Coding/MemoryDecoder.hpp"
 #include "Coding/MemoryEncoder.hpp"
+#include "Mathematics/Vector3_constants.hpp"
 #include "Rendering/Buffer.hpp"
 #include "Rendering/BufferAccessor.hpp"
 #include "Rendering/BufferView.hpp"

@@ -28,6 +28,7 @@
 #include "QuadPrimitive.hpp"
 
 #include "Mathematics/Vector2Ops.hpp"
+#include "Mathematics/Vector3_constants.hpp"
 
 using namespace crimild;
 
