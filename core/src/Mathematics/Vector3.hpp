@@ -30,8 +30,6 @@
 
 #include "Mathematics/Tuple3.hpp"
 
-#include <limits>
-
 namespace crimild {
 
     namespace impl {
@@ -42,20 +40,6 @@ namespace crimild {
 
             [[nodiscard]] inline constexpr Bool operator==( const Vector3 &other ) const noexcept;
             [[nodiscard]] inline constexpr Bool operator!=( const Vector3 &other ) const noexcept;
-        };
-
-        template< typename T >
-        struct Vector3< T >::Constants {
-            static constexpr auto ZERO = Vector3< T > { 0, 0, 0 };
-            static constexpr auto ONE = Vector3< T > { 1, 1, 1 };
-            static constexpr auto POSITIVE_INFINITY = Vector3< T > { std::numeric_limits< T >::max(), std::numeric_limits< T >::max(), std::numeric_limits< T >::max() };
-            static constexpr auto NEGATIVE_INFINITY = Vector3< T > { std::numeric_limits< T >::min(), std::numeric_limits< T >::min(), std::numeric_limits< T >::min() };
-            static constexpr auto UNIT_X = Vector3< T > { 1, 0, 0 };
-            static constexpr auto UNIT_Y = Vector3< T > { 0, 1, 0 };
-            static constexpr auto UNIT_Z = Vector3< T > { 0, 0, 1 };
-            static constexpr auto RIGHT = Vector3< T > { 1, 0, 0 };
-            static constexpr auto UP = Vector3< T > { 0, 1, 0 };
-            static constexpr auto FORWARD = Vector3< T > { 0, 0, 1 };
         };
 
     }

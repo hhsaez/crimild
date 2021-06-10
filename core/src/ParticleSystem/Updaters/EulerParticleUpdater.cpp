@@ -29,6 +29,7 @@
 
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
+#include "Mathematics/Vector3_constants.hpp"
 
 using namespace crimild;
 

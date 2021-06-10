@@ -31,6 +31,7 @@
 #include "Foundation/Containers/Array.hpp"
 #include "Foundation/Types.hpp"
 #include "Mathematics/Vector3.hpp"
+#include "Mathematics/Vector3_constants.hpp"
 
 namespace crimild {
 

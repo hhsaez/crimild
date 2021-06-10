@@ -31,6 +31,7 @@
 #include "Coding/Encoder.hpp"
 #include "Mathematics/Random.hpp"
 #include "Mathematics/Vector3Ops.hpp"
+#include "Mathematics/Vector3_constants.hpp"
 #include "SceneGraph/Node.hpp"
 
 using namespace crimild;

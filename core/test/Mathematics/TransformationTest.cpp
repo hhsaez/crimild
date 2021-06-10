@@ -35,10 +35,12 @@
 #include "Mathematics/Transformation_constants.hpp"
 #include "Mathematics/Transformation_equality.hpp"
 #include "Mathematics/Transformation_inverse.hpp"
+#include "Mathematics/Transformation_lookAt.hpp"
 #include "Mathematics/Transformation_operators.hpp"
 #include "Mathematics/Transformation_rotation.hpp"
 #include "Mathematics/Transformation_scale.hpp"
 #include "Mathematics/Transformation_translation.hpp"
+#include "Mathematics/io.hpp"
 #include "Mathematics/normalize.hpp"
 
 #include "gtest/gtest.h"
@@ -253,27 +255,28 @@ TEST( Transformation, rotationProperties )
     EXPECT_TRUE( crimild::isEqual( R1 * R2, R3 ) );
     EXPECT_TRUE( crimild::isEqual( R1 * R2, R2 * R1 ) );
     EXPECT_TRUE( crimild::isEqual( crimild::inverse( R1 ), R4 ) );
+
+    EXPECT_EQ( crimild::rotationX( 1.234 ), crimild::rotation( crimild::Vector3::Constants::UNIT_X, 1.234 ) );
+    EXPECT_EQ( crimild::rotationY( 1.234 ), crimild::rotation( crimild::Vector3::Constants::UNIT_Y, 1.234 ) );
+    EXPECT_EQ( crimild::rotationZ( 1.234 ), crimild::rotation( crimild::Vector3::Constants::UNIT_Z, 1.234 ) );
 }
 
 TEST( Transformation, lookAt )
 {
-    /*
     constexpr auto I = crimild::Transformation {};
     constexpr auto T = crimild::lookAt(
         crimild::Point3 { 5, 5, 5 },
         crimild::Point3 { 0, 1, 0 },
         crimild::Vector3 { 0, 1, 0 } );
 
-    static_assert( !crimild::isEqual( I, T ) );
+    EXPECT_EQ( crimild::location( T ), ( crimild::Point3 { 5, 5, 5 } ) );
+    EXPECT_EQ( crimild::forward( T ), crimild::normalize( crimild::Vector3 { 0, 1, 0 } - crimild::Vector3 { 5, 5, 5 } ) );
 
     static_assert( crimild::hasTranslation( T ) );
     static_assert( crimild::hasRotation( T ) );
     static_assert( !crimild::hasScale( T ) );
-    */
 
     EXPECT_TRUE( true );
-
-    FAIL();
 }
 
 TEST( Transfromation, location )
@@ -301,7 +304,7 @@ TEST( Transfromation, up )
     constexpr auto I = crimild::Transformation::Constants::IDENTITY;
     static_assert( crimild::up( I ) == crimild::Vector3::Constants::UP );
 
-    const auto R = crimild::rotationX( crimild::numbers::PI_DIV_2 );
+    const auto R = crimild::rotationX( -crimild::numbers::PI_DIV_2 );
     EXPECT_EQ( ( crimild::Vector3::Constants::FORWARD ), crimild::up( R ) );
 }
 
@@ -310,6 +313,6 @@ TEST( Transfromation, forward )
     constexpr auto I = crimild::Transformation::Constants::IDENTITY;
     static_assert( crimild::forward( I ) == crimild::Vector3::Constants::FORWARD );
 
-    const auto R = crimild::rotationY( crimild::numbers::PI_DIV_2 );
+    const auto R = crimild::rotationY( -crimild::numbers::PI_DIV_2 );
     EXPECT_EQ( ( crimild::Vector3::Constants::RIGHT ), crimild::forward( R ) );
 }

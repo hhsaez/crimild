@@ -30,6 +30,7 @@
 #include "Mathematics/Point3Ops.hpp"
 #include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/Vector3Ops.hpp"
+#include "Mathematics/Vector3_constants.hpp"
 #include "Mathematics/length.hpp"
 #include "Mathematics/max.hpp"
 #include "Mathematics/min.hpp"
@@ -137,7 +138,7 @@ void AABBBoundingVolume::computeFrom( const VertexBuffer *vbo )
 
 void AABBBoundingVolume::computeFrom( const Vector3f &min, const Vector3f &max )
 {
-/*
+    /*
     _sphere = Sphere {
         point3( Real( 0.5 ) * ( max + min ) ),
         crimild::max( Real( 0.01 ), length( max - vector3( center( _sphere ) ) ) ),

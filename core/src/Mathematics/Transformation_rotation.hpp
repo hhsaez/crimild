@@ -32,6 +32,8 @@
 
 namespace crimild {
 
+    // \remarks All rotation matrices are calculated based on right-handed coordinate systems
+
     // TODO: make this function constexpr
     [[nodiscard]] static Transformation rotationX( Radians angle ) noexcept
     {
@@ -109,6 +111,7 @@ namespace crimild {
         const auto oneMinusCosTheta = Real( 1 ) - cosTheta;
         const auto oneMinusSinTheta = Real( 1 ) - sinTheta;
 
+        // TODO: I think I need to transpose this matrix in order to make it work with right-hand coordinate systems
         const auto m = Matrix4 {
             {
                 xx * oneMinusCosTheta + cosTheta,

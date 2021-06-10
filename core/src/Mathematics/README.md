@@ -16,3 +16,6 @@ v=|3|
   |4|
 
 ```
+
+## The Foward Vector
+Defined for Vector3, the Forward vector points to -Z

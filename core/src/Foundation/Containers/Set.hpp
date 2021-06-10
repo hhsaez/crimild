@@ -29,9 +29,8 @@
 #define CRIMILD_FOUNDATION_CONTAINERS_SET_
 
 #include "Array.hpp"
-
-#include "Foundation/Types.hpp"
 #include "Foundation/Policies/ThreadingPolicy.hpp"
+#include "Foundation/Types.hpp"
 
 #include <functional>
 #include <iostream>
@@ -48,8 +47,7 @@ namespace crimild {
     template<
         typename ValueType,
         class ThreadingPolicy = policies::SingleThreaded,
-        class SetImpl = std::unordered_set< ValueType >
-    >
+        class SetImpl = std::unordered_set< ValueType > >
     class Set : public ThreadingPolicy {
     private:
         using LockImpl = typename ThreadingPolicy::Lock;
@@ -60,13 +58,11 @@ namespace crimild {
         Set( std::initializer_list< ValueType > l ) noexcept
             : _set( l )
         {
-
         }
 
         Set( const Set &other ) noexcept
             : _set( other._set )
         {
-
         }
 
         virtual ~Set( void ) noexcept
@@ -153,12 +149,11 @@ namespace crimild {
         {
             Set ret;
             each(
-                [&]( const auto &elem ) {
+                [ & ]( const auto &elem ) {
                     if ( selector( elem ) ) {
                         ret.insert( elem );
                     }
-                }
-            );
+                } );
             return ret;
         }
 
@@ -166,12 +161,11 @@ namespace crimild {
         auto map( Fn fn ) const noexcept
         {
             ValueType dummy;
-            Set< decltype( fn( dummy ) ) > ret { };
+            Set< decltype( fn( dummy ) ) > ret {};
             each(
-                [&]( const auto &elem ) {
+                [ & ]( const auto &elem ) {
                     ret.insert( fn( elem ) );
-                }
-            );
+                } );
             return ret;
         }
 
@@ -179,18 +173,14 @@ namespace crimild {
         SetImpl _set;
 
     public:
-        template<
-            typename VT,
-            class TP
-        >
-        friend std::ostream& operator<<( std::ostream& os, const Set< VT, TP > &set ) noexcept
+        std::ostream &operator<<( std::ostream &os ) const noexcept
         {
             os << "[";
             Bool first = true;
-            set.each( [ &os, &first ]( const VT &v ) {
+            each( [ &os, &first ]( const auto &v ) {
                 os << ( first == 0 ? "" : ", " ) << v;
                 first = false;
-            });
+            } );
             os << "]";
             return os;
         }
