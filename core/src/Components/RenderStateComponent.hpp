@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,22 +28,21 @@
 #ifndef CRIMILD_COMPONENTS_RENDER_STATE_
 #define CRIMILD_COMPONENTS_RENDER_STATE_
 
+#include "Foundation/Containers/Array.hpp"
 #include "NodeComponent.hpp"
-
 #include "Rendering/Material.hpp"
 #include "SceneGraph/Light.hpp"
-#include "Foundation/Containers/Array.hpp"
 
 #include <functional>
 #include <list>
 
 namespace crimild {
 
-	namespace animation {
-		
-		class Skeleton;
+    namespace animation {
 
-	}
+        class Skeleton;
+
+    }
 
     class CommandBuffer;
     class DescriptorPool;
@@ -55,18 +54,18 @@ namespace crimild {
     class UniformBuffer;
     class VertexBuffer;
 
-	class RenderStateComponent : public NodeComponent {
-		CRIMILD_IMPLEMENT_RTTI( crimild::RenderStateComponent )
+    class [[deprecated]] RenderStateComponent : public NodeComponent {
+        CRIMILD_IMPLEMENT_RTTI( crimild::RenderStateComponent )
 
-	public:
-		RenderStateComponent( void );
-		virtual ~RenderStateComponent( void );
+    public:
+        RenderStateComponent( void );
+        virtual ~RenderStateComponent( void );
 
         SharedPointer< Pipeline > pipeline;
         SharedPointer< VertexBuffer > vbo;
         SharedPointer< IndexBuffer > ibo;
-        Array< SharedPointer< UniformBuffer >> uniforms;
-        Array< SharedPointer< Texture >> textures;
+        Array< SharedPointer< UniformBuffer > > uniforms;
+        Array< SharedPointer< Texture > > textures;
         SharedPointer< DescriptorSetLayout > descriptorSetLayout;
         SharedPointer< DescriptorPool > descriptorPool;
         SharedPointer< DescriptorSet > descriptorSet;
@@ -76,40 +75,38 @@ namespace crimild {
         void prepare( void ) noexcept;
 
         SharedPointer< DescriptorSet > createDescriptorSet( DescriptorSetLayout *descriptorSetLayout ) noexcept;
-        
+
         // Deprecated
     public:
+        void reset( void );
 
-		void reset( void );
-
-		bool hasMaterials( void ) const { return _materials.size() > 0; }
+        bool hasMaterials( void ) const { return _materials.size() > 0; }
         void attachMaterial( Material *material ) { _materials.add( crimild::retain( material ) ); }
         void attachMaterial( SharedPointer< Material > const &material ) { _materials.add( material ); }
         void detachAllMaterials( void ) { _materials.clear(); }
         void forEachMaterial( std::function< void( Material * ) > callback );
 
-		bool hasLights( void ) const { return _lights.size() > 0; }
+        bool hasLights( void ) const { return _lights.size() > 0; }
         void attachLight( Light *light ) { _lights.add( crimild::retain( light ) ); }
         void attachLight( SharedPointer< Light > const &light ) { _lights.add( light ); }
         void detachAllLights( void ) { _lights.clear(); }
         void forEachLight( std::function< void( Light * ) > callback );
 
         void setSkeleton( SharedPointer< animation::Skeleton > const &skeleton ) { _skeleton = skeleton; }
-		animation::Skeleton *getSkeleton( void ) { return crimild::get_ptr( _skeleton ); }
+        animation::Skeleton *getSkeleton( void ) { return crimild::get_ptr( _skeleton ); }
 
-		bool renderOnScreen( void ) const { return _renderOnScreen; }
-		void setRenderOnScreen( bool value ) { _renderOnScreen = value; }
+        bool renderOnScreen( void ) const { return _renderOnScreen; }
+        void setRenderOnScreen( bool value ) { _renderOnScreen = value; }
 
-	private:
-		Array< SharedPointer< Material >> _materials;
-		Array< SharedPointer< Light >> _lights;
+    private:
+        Array< SharedPointer< Material > > _materials;
+        Array< SharedPointer< Light > > _lights;
 
-		SharedPointer< animation::Skeleton > _skeleton;
+        SharedPointer< animation::Skeleton > _skeleton;
 
-		bool _renderOnScreen;
-	};
+        bool _renderOnScreen;
+    };
 
 }
 
 #endif
-

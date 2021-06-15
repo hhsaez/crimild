@@ -30,18 +30,29 @@
 
 #include "Mathematics/Matrix4.hpp"
 
+#ifndef CRIMILD_FORCE_DEPTH_RANGE_ZERO_TO_ONE
+    #define CRIMILD_FORCE_DEPTH_RANGE_ZERO_TO_ONE 1
+#endif
+
 namespace crimild {
 
     [[nodiscard]] constexpr Matrix4 ortho( Real l, Real r, Real b, Real t, Real n, Real f ) noexcept
     {
-        // clang-format off
+#if CRIMILD_FORCE_DEPTH_RANGE_ZERO_TO_ONE
         return Matrix4 {
-            Real( 2 ) / ( r - l ), 0, 0, -( r + l ) / ( r - l ),
-            0, Real( 2 ) / ( t - b ), 0, -( t + b ) / ( t - b ),
-            0, 0, Real( 2 ) / ( f - n ), -( f + n ) / ( f - n ) ,
-            0, 0, 0, 1,
+            { Real( 2 ) / ( r - l ), 0, 0, 0 },
+            { 0, Real( 2 ) / ( t - b ), 0, 0 },
+            { 0, 0, Real( 1 ) / ( f - n ), 0 },
+            { -( r + l ) / ( r - l ), -( t + b ) / ( t - b ), -n / ( f - n ), 1 },
         };
-        // clang-format on
+#else
+        return Matrix4 {
+            { Real( 2 ) / ( r - l ), 0, 0, 0 },
+            { 0, Real( 2 ) / ( t - b ), 0, 0 },
+            { 0, 0, Real( 2 ) / ( f - n ), 0 },
+            { -( r + l ) / ( r - l ), -( t + b ) / ( t - b ), -( f + n ) / ( f - n ), 1 },
+        };
+#endif
     }
 
 }

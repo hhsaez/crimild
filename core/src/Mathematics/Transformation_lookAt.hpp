@@ -37,11 +37,18 @@
 
 namespace crimild {
 
+    /**
+       \brief Creates a transformation oriented in the direction of the center and located in the given eye position
+
+       \remarks Crimild uses a right-handed coordinate system, but the forward vector is always pointing
+       in the -Z direction.
+     */
     [[nodiscard]] static constexpr Transformation lookAt( const Point3 &eye, const Point3 &center, const Vector3 &up ) noexcept
     {
         const auto E = Vector3 { eye.x, eye.y, eye.z };
         const auto C = Vector3 { center.x, center.y, center.z };
 
+        // Compute the view vector. Keep in mind that Forward always point towards the -Z axis.
         const auto V = normalize( E - C );
         const auto R = -normalize( cross( V, up ) );
         const auto U = cross( V, R );
