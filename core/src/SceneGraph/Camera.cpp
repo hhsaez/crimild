@@ -129,7 +129,8 @@ Camera::Camera( float fov, float aspect, float near, float far )
 
     //    _projectionMatrix = transpose( _projectionMatrix );
 
-//    _projectionMatrix = ortho( -1, 1, -1, 1, 0.001, 1024.0 );
+    const auto s = Real( 3 );
+    _projectionMatrix = ortho( -s, s, -s, s, -s, s );
 
     //_projectionMatrix = _frustum.computeProjectionMatrix();
     //_orthographicMatrix = _frustum.computeOrthographicMatrix();

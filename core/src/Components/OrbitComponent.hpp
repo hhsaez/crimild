@@ -32,7 +32,7 @@
 
 namespace crimild {
 
-    class OrbitComponent : public NodeComponent {
+    class [[deprecated]] OrbitComponent : public NodeComponent {
         CRIMILD_IMPLEMENT_RTTI( crimild::OrbitComponent )
 
     public:

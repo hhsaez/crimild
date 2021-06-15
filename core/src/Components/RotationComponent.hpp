@@ -33,7 +33,7 @@
 
 namespace crimild {
 
-    class RotationComponent : public NodeComponent {
+    class [[deprecated]] RotationComponent : public NodeComponent {
         CRIMILD_IMPLEMENT_RTTI( crimild::RotationComponent )
 
     public:
