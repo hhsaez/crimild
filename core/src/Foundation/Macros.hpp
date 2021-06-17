@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -31,7 +31,7 @@
 #include <string>
 
 #if !defined( NDEBUG )
-#define CRIMILD_DEBUG 1
+    #define CRIMILD_DEBUG 1
 #endif
 
 // Identify known platforms
@@ -47,7 +47,7 @@
 #elif defined( __ANDROID__ )
     #define CRIMILD_PLATFORM_ANDROID
 #elif defined( __CYGWIN__ ) || defined( __MINGW32__ ) || defined( _WIN32 ) || defined( __WIN32__ ) || defined( WIN32 )
- 	#define CRIMILD_PLATFORM_WIN32
+    #define CRIMILD_PLATFORM_WIN32
 #endif
 
 #if defined( CRIMILD_PLATFORM_OSX ) || defined( CRIMILD_PLATFORM_WIN32 )
@@ -59,28 +59,28 @@
 #endif
 
 #ifdef __GNUC__
-	#define CRIMILD_CURRENT_FUNCTION __PRETTY_FUNCTION__
+    #define CRIMILD_CURRENT_FUNCTION __PRETTY_FUNCTION__
 #else
-	#define CRIMILD_CURRENT_FUNCTION __FUNCTION__
+    #define CRIMILD_CURRENT_FUNCTION __FUNCTION__
 #endif
 
 namespace crimild {
-    
+
     inline std::string getClassName( const std::string &funcName )
     {
         auto parentesis = funcName.find( "(" );
         if ( parentesis == std::string::npos ) {
             return "::";
         }
-        
+
         auto colons = funcName.substr( 0, parentesis ).rfind( "::" );
         if ( colons == std::string::npos ) {
             return "::";
         }
-        
+
         auto begin = funcName.substr( 0, colons ).rfind( " " ) + 1;
         auto end = colons - begin;
-        
+
         return funcName.substr( begin, end );
     }
 }
@@ -95,5 +95,8 @@ namespace crimild {
 #define CRIMILD_RANDOM_VARIABLE_NAME( PREFIX ) \
     CRIMILD_CONCAT( PREFIX, __LINE__ )
 
+#ifndef CRIMILD_USE_DEPTH_RANGE_ZERO_TO_ONE
+    #define CRIMILD_USE_DEPTH_RANGE_ZERO_TO_ONE 1
 #endif
 
+#endif

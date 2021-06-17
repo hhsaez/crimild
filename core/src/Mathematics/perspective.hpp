@@ -28,37 +28,63 @@
 #ifndef CRIMILD_MATHEMATICS_PERSPECTIVE_
 #define CRIMILD_MATHEMATICS_PERSPECTIVE_
 
+#include "Foundation/Macros.hpp"
 #include "Mathematics/Matrix4.hpp"
+#include "Mathematics/trigonometry.hpp"
 
 namespace crimild {
 
     [[nodiscard]] constexpr Matrix4 perspective( Real l, Real r, Real b, Real t, Real n, Real f ) noexcept
     {
-        // clang-format off
+#if CRIMILD_USE_DEPTH_RANGE_ZERO_TO_ONE
         return Matrix4 {
-            Real( 2 ) * n / ( r - l ), 0, ( r + l ) / ( r - l ), 0,
-            0, Real( 2 ) * n / ( t - b ), ( t + b ) / ( t - b ), 0,
-            0, 0, n / ( f - n ), f * n / ( f - n ),
-            0, 0, -1, 0,
+            { 2 * n / ( r - l ), 0, 0, 0 },
+            { 0, 2 * n / ( t - b ), 0, 0 },
+            { ( r + l ) / ( r - l ), ( t + b ) / ( t - b ), f / ( n - f ), -1 },
+            { 0, 0, -f * n / ( f - n ), 0 },
         };
-        // clang-format on
+#else
+        return Matrix4 {
+            { 2 * n / ( r - l ), 0, 0, 0 },
+            { 0, 2 * n / ( t - b ), 0, 0 },
+            { ( r + l ) / ( r - l ), ( t + b ) / ( t - b ), -( f + n ) / ( f - n ), -1 },
+            { 0, 0, -2 * f * n / ( f - n ), 0 },
+        };
+#endif
     }
 
-    // TODO: make this function constexpr
-    [[nodiscard]] static Matrix4 perspective( Real fov, Real a, Real n, Real f ) noexcept
+    /**
+       \brief Computes a perspective projecting using vertical FoV and aspect
+
+       \param fov Vertical field of view, in degrees
+       \param aspect Aspect ratio
+       \param near Near clipping plane
+       \param far Far clipping plane
+
+       \todo Make this function constexpr
+     */
+    [[nodiscard]] static Matrix4 perspective( Degrees fov, Real aspect, Real near, Real far ) noexcept
     {
-        // fov: vertical field of view
+        const auto c = Real( 1 ) / tan( Real( 0.5 ) * radians( fov ) );
+        const auto a = aspect;
+        const auto n = near;
+        const auto f = far;
 
-        const auto c = Real( 1 ) / tan( Real( 0.5 ) * fov );
-
-        // clang-format off
+#if CRIMILD_USE_DEPTH_RANGE_ZERO_TO_ONE
         return Matrix4 {
-            c / a, 0, 0, 0,
-            0, -c, 0, 0,
-            0, 0, n / ( f - n ), f * n / ( f - n ),
-            0, 0, -1, 0,
+            { c / a, 0, 0, 0 },
+            { 0, c, 0, 0 },
+            { 0, 0, f / ( n - f ), -1 },
+            { 0, 0, -f * n / ( f - n ), 0 },
         };
-        // clang-format on
+#else
+        return Matrix4 {
+            { c / a, 0, 0, 0 },
+            { 0, c, 0, 0 },
+            { 0, 0, -( f + n ) / ( f - n ), -1 },
+            { 0, 0, Real( -2 ) * f * n / ( f - n ), 0 },
+        };
+#endif
     }
 
 }
