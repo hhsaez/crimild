@@ -29,7 +29,6 @@
 
 #include "Mathematics/Matrix4_operators.hpp"
 #include "Mathematics/Matrix4_transpose.hpp"
-#include "Mathematics/ortho.hpp"
 #include "Mathematics/perspective.hpp"
 #include "Mathematics/trigonometry.hpp"
 
@@ -48,92 +47,6 @@ Camera::Camera( float fov, float aspect, float near, float far )
       _viewMatrixIsCurrent( false )
 {
     _projectionMatrix = perspective( fov, aspect, near, far );
-    //    _projectionMatrix = transpose( perspective( -1, 1, -1, 1, 0.1f, 100.0f ) );
-
-    _projectionMatrix = transpose( [] {
-        const auto n = 0.01f;
-        const auto f = 100.0f;
-        const auto r = Real( 1 );
-        const auto l = Real( -1 );
-        const auto t = Real( 1 );
-        const auto b = Real( -1 );
-
-        return Matrix4 {
-            2 * n / ( r - l ),
-            0,
-            0,
-            0,
-            0,
-            2 * n / ( t - b ),
-            0,
-            0,
-            ( r + l ) / ( r - l ),
-            ( t + b ) / ( t - b ),
-            -( f + n ) / ( f - n ),
-            -1.0f,
-            0,
-            0,
-            -( 2.0f * f * n ) / ( f - n ),
-            0.0f,
-        };
-    }() );
-
-    //    _projectionMatrix = perspective( radians( fov ), aspect, near, far );
-
-    _projectionMatrix = []( Radians fovY, Real aspect, Real near, Real far ) {
-        // Computes projection matrix for a right handed coordinate system,
-        // which a depth range of [0, 1]
-        const auto halfAngle = 0.5f * fovY;
-        const auto tanHalfAngle = tan( halfAngle );
-
-        const auto a = tanHalfAngle / aspect;
-        const auto b = tanHalfAngle;
-        const auto c = far / ( near - far );
-        const auto d = -( far * near ) / ( far - near );
-        const auto e = Real( -1 );
-
-        return Matrix4 {
-            { a, 0, 0, 0 },
-            { 0, b, 0, 0 },
-            { 0, 0, c, e },
-            { 0, 0, d, 0 },
-        };
-    }( radians( fov ), 4.0 / 3.0, near, far );
-
-    //    _projectionMatrix = perspective( -1, 1, -1, 1, 0.1f, 100.0f );
-
-    //	_projectionMatrix = Matrix4 {
-    //		0, 1, 2, 3,
-    //  		4, 5, 6, 7,
-    //    	8, 9, 10, 11,
-    //     	12, 13, 14, 15,
-    //    };
-
-    //    _projectionMatrix = transpose( perspective( fov, aspect, near, far ) );
-    //_projectionMatrix = Matrix4::Constants::IDENTITY;
-
-    //	_projectionMatrix = []( Real left, Real right, Real bottom, Real top, Real near, Real far ) {
-    //		const auto a = Real( 2 ) / ( right - left );
-    //  		const auto b = Real( 2 ) / ( top - bottom );
-    //    	const auto c = -Real( 1 ) / ( far - near );
-    //     	const auto d = -( right + left ) / ( right - left );
-    //      	const auto e = -( top + bottom ) / ( top - bottom );
-    //       	const auto f = -near / ( far - near );
-    //		return Matrix4 {
-    //  			a, 0, 0, d,
-    //     		0, b, 0, e,
-    //            0, 0, c, f,
-    //            0, 0, 0, 1,
-    //        };
-    //    }( -1, 1, -1, 1, 0.01, 100 );
-
-    //    _projectionMatrix = transpose( _projectionMatrix );
-
-    const auto s = Real( 3 );
-    _projectionMatrix = ortho( -s, s, -s, s, -s, s );
-
-    //_projectionMatrix = _frustum.computeProjectionMatrix();
-    //_orthographicMatrix = _frustum.computeOrthographicMatrix();
 
     if ( getMainCamera() == nullptr ) {
         // Set itself as the main camera if there isn't one already set

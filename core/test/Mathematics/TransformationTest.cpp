@@ -276,6 +276,8 @@ TEST( Transformation, lookAt )
     static_assert( crimild::hasRotation( T ) );
     static_assert( !crimild::hasScale( T ) );
 
+    EXPECT_EQ( crimild::Matrix4::Constants::IDENTITY, T.mat * T.invMat );
+
     EXPECT_TRUE( true );
 }
 

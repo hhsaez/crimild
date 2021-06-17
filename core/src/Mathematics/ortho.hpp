@@ -28,17 +28,14 @@
 #ifndef CRIMILD_MATHEMATICS_ORTHO_
 #define CRIMILD_MATHEMATICS_ORTHO_
 
+#include "Foundation/Macros.hpp"
 #include "Mathematics/Matrix4.hpp"
-
-#ifndef CRIMILD_FORCE_DEPTH_RANGE_ZERO_TO_ONE
-    #define CRIMILD_FORCE_DEPTH_RANGE_ZERO_TO_ONE 1
-#endif
 
 namespace crimild {
 
     [[nodiscard]] constexpr Matrix4 ortho( Real l, Real r, Real b, Real t, Real n, Real f ) noexcept
     {
-#if CRIMILD_FORCE_DEPTH_RANGE_ZERO_TO_ONE
+#if CRIMILD_USE_DEPTH_RANGE_ZERO_TO_ONE
         return Matrix4 {
             { Real( 2 ) / ( r - l ), 0, 0, 0 },
             { 0, Real( 2 ) / ( t - b ), 0, 0 },
