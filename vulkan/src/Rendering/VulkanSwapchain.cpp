@@ -231,6 +231,8 @@ SharedPointer< vulkan::Swapchain > SwapchainManager::create( Swapchain::Descript
     insert( crimild::get_ptr( swapchain ) );
     swapchain->retrieveSwapchainImages();
     swapchain->createImageViews();
+
+    CRIMILD_LOG_INFO( "Created Vulkan Swapchain with extents ", extent.width, "x", extent.height );
     return swapchain;
 }
 

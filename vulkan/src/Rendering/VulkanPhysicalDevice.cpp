@@ -98,7 +98,9 @@ VkPhysicalDevice PhysicalDeviceManager::pickPhysicalDevice( const VkInstance &in
     vkEnumeratePhysicalDevices( instance, &deviceCount, devices.data() );
     for ( const auto &device : devices ) {
         if ( isDeviceSuitable( device, surface ) ) {
-            CRIMILD_LOG_INFO( "Vulkan physical device found" );
+        	VkPhysicalDeviceProperties physicalDeviceProperties;
+            vkGetPhysicalDeviceProperties( device, &physicalDeviceProperties );
+            CRIMILD_LOG_INFO( "Vulkan physical device found: ", physicalDeviceProperties.deviceName );
             return device;
         }
     }

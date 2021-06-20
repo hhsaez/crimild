@@ -178,6 +178,13 @@ bool WindowSystem::createWindow( void )
     auto width = settings->get< crimild::Int32 >( "video.width", 1024 );
     auto height = settings->get< crimild::Int32 >( "video.height", 768 );
     auto fullscreen = settings->get< crimild::Bool >( "video.fullscreen", false );
+
+    // disable Retina by default
+    const auto enableHDPI = settings->get< crimild::Bool >( "video.hdpi", false );
+
+	// use discrete GPU by default, by disabling automatic graphics switching
+    const auto enableGraphicsSwitching = settings->get< crimild::Bool >( "video.graphicsSwitching", false );
+
     auto simName = Simulation::getInstance()->getName();
     if ( simName == "" ) {
         simName = "Crimild";
@@ -204,6 +211,9 @@ bool WindowSystem::createWindow( void )
     glfwWindowHint( GLFW_DEPTH_BITS, depthBits );
     glfwWindowHint( GLFW_STENCIL_BITS, stencilBits );
 #endif
+
+    glfwWindowHint( GLFW_COCOA_RETINA_FRAMEBUFFER, enableHDPI ? GLFW_TRUE : GLFW_FALSE );
+    glfwWindowHint( GLFW_COCOA_GRAPHICS_SWITCHING, enableGraphicsSwitching ? GLFW_TRUE : GLFW_FALSE );
 
     m_window = glfwCreateWindow(
         width,
@@ -232,10 +242,8 @@ bool WindowSystem::createWindow( void )
 
 #if !defined( CRIMILD_ENABLE_VULKAN )
     glfwMakeContextCurrent( _window );
-
-#endif
-
     glfwSwapInterval( vsync ? 1 : 0 );
+#endif
 
     // Make sure we have proper windows settings defined
     settings->set( "video.width", width );
