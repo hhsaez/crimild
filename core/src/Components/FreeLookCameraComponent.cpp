@@ -27,6 +27,12 @@
 
 #include "FreeLookCameraComponent.hpp"
 
+#include "Mathematics/Transformation_apply.hpp"
+#include "Mathematics/Transformation_operators.hpp"
+#include "Mathematics/Transformation_rotation.hpp"
+#include "Mathematics/Transformation_translation.hpp"
+#include "Mathematics/Vector2Ops.hpp"
+#include "Mathematics/Vector3Ops.hpp"
 #include "Simulation/Input.hpp"
 #include "Simulation/Simulation.hpp"
 
@@ -34,8 +40,7 @@ using namespace crimild;
 
 void FreeLookCameraComponent::start( void )
 {
-    /*
-    _lastMousePos = Vector2f::ZERO;
+    _lastMousePos = Vector2::Constants::ZERO;
 
     registerMessageHandler< crimild::messaging::KeyPressed >(
         [ & ]( crimild::messaging::KeyPressed const &msg ) {
@@ -114,29 +119,28 @@ void FreeLookCameraComponent::start( void )
                 return;
             }
 
-            auto currentPos = Vector2f( msg.nx, msg.ny );
-            auto mouseDelta = _initialized ? currentPos - _lastMousePos : Vector2f::ZERO;
+            auto currentPos = Vector2 { msg.nx, msg.ny };
+            auto mouseDelta = _initialized ? currentPos - _lastMousePos : Vector2f::Constants::ZERO;
             _initialized = true;
             _lastMousePos = currentPos;
 
             if ( Input::getInstance()->isMouseButtonDown( CRIMILD_INPUT_MOUSE_BUTTON_LEFT ) ) {
                 auto root = getNode();
 
-                // apply pitch
-                root->local().rotate() *= Quaternion4f::createFromAxisAngle( Vector3f::UNIT_X, -mouseDelta[ 1 ] );
+                auto T = root->getLocal();
+                const auto pitch = rotationX( -mouseDelta[ 1 ] );
+                const auto U = up( pitch );
+                const auto yaw = rotation( U, -mouseDelta[ 0 ] );
 
-                // apply yaw
-                auto up = root->getLocal().computeWorldUp();
-                root->local().rotate() *= Quaternion4f::createFromAxisAngle( up.getNormalized(), -mouseDelta[ 0 ] );
+                T = pitch * yaw * T;
+
+                root->setLocal( T );
             }
         } );
-    */
 }
 
 void FreeLookCameraComponent::update( const Clock &c )
 {
-    assert( false );
-    /*
     if ( Input::getInstance()->isMouseButtonDown( CRIMILD_INPUT_MOUSE_BUTTON_LEFT ) ) {
         Input::getInstance()->setMouseCursorMode( Input::MouseCursorMode::GRAB );
     } else {
@@ -145,16 +149,17 @@ void FreeLookCameraComponent::update( const Clock &c )
 
     float dSpeed = getSpeed() * Input::getInstance()->getAxis( Input::AXIS_VERTICAL );
     float rSpeed = getSpeed() * Input::getInstance()->getAxis( Input::AXIS_HORIZONTAL );
-    float roll = getSpeed() * Input::getInstance()->getAxis( "CameraAxisRoll" );
+    float zSpeed = getSpeed() * Input::getInstance()->getAxis( "CameraAxisRoll" );
 
     auto root = getNode();
 
-    // apply roll first
-    root->local().rotate() *= Quaternion4f::createFromAxisAngle( Vector3f::UNIT_Z, c.getDeltaTime() * roll );
+    auto T = root->getLocal();
 
-    auto direction = root->getLocal().computeDirection();
-    auto right = root->getLocal().computeRight();
+    // Apply roll first
+    //T = rotationZ( c.getDeltaTime() * zSpeed ) * T;
 
-    root->local().translate() += c.getDeltaTime() * ( dSpeed * direction + rSpeed * right );
-    */
+    const auto F = forward( T );
+    const auto R = right( T );
+
+    root->setLocal( translation( c.getDeltaTime() * ( dSpeed * F + rSpeed * R ) ) * T );
 }

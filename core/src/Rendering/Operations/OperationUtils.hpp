@@ -52,8 +52,14 @@ namespace crimild {
         template< typename CommandRecorder >
         static SharedPointer< RenderPass > withGraphicsCommands( SharedPointer< RenderPass > const &renderPass, CommandRecorder recorder ) noexcept
         {
+            auto swapchain = Swapchain::getInstance();
+            if ( swapchain == nullptr ) {
+            	CRIMILD_LOG_ERROR( "Failed to obtain swapchain" );
+             	return renderPass;
+            }
+
             renderPass->getCommandBuffers()
-                .resize( Swapchain::getInstance()->getImages().size() )
+                .resize( swapchain->getImages().size() )
                 .fill(
                     [ recorder,
                       renderPass = crimild::get_ptr( renderPass ) ]( auto frameIndex ) {
@@ -75,8 +81,14 @@ namespace crimild {
         template< typename CommandRecorder >
         static SharedPointer< RenderPass > withDynamicGraphicsCommands( SharedPointer< RenderPass > const &renderPass, CommandRecorder recorder ) noexcept
         {
+            auto swapchain = Swapchain::getInstance();
+            if ( swapchain == nullptr ) {
+            	CRIMILD_LOG_ERROR( "Failed to obtain swapchain" );
+             	return renderPass;
+            }
+
             renderPass->getCommandBuffers()
-                .resize( Swapchain::getInstance()->getImages().size() )
+                .resize( swapchain->getImages().size() )
                 .fill(
                     [ baseName = renderPass->getName() ]( auto frameIndex ) {
                         std::stringstream ss;
@@ -112,8 +124,14 @@ namespace crimild {
         template< typename CommandRecorder, typename Predicate >
         static SharedPointer< RenderPass > withConditionalGraphicsCommands( SharedPointer< RenderPass > const &renderPass, Predicate predicate, CommandRecorder recorder ) noexcept
         {
+            auto swapchain = Swapchain::getInstance();
+            if ( swapchain == nullptr ) {
+            	CRIMILD_LOG_ERROR( "Failed to obtain swapchain" );
+             	return renderPass;
+            }
+
             renderPass->getCommandBuffers()
-                .resize( Swapchain::getInstance()->getImages().size() )
+                .resize( swapchain->getImages().size() )
                 .fill(
                     [ baseName = renderPass->getName() ]( auto frameIndex ) {
                         std::stringstream ss;
@@ -154,8 +172,14 @@ namespace crimild {
         template< typename CommandRecorder >
         static SharedPointer< ComputePass > withComputeCommands( SharedPointer< ComputePass > const &computePass, CommandRecorder recorder ) noexcept
         {
+            auto swapchain = Swapchain::getInstance();
+            if ( swapchain == nullptr ) {
+            	CRIMILD_LOG_ERROR( "Failed to obtain swapchain" );
+             	return computePass;
+            }
+
             computePass->getCommandBuffers()
-                .resize( Swapchain::getInstance()->getImages().size() )
+                .resize( swapchain->getImages().size() )
                 .fill(
                     [ recorder,
                       computePass = crimild::get_ptr( computePass ) ]( auto frameIndex ) {
