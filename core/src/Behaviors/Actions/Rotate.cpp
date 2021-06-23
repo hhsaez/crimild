@@ -25,28 +25,34 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_TRANSFORMATION_OPERATORS_
-#define CRIMILD_MATHEMATICS_TRANSFORMATION_OPERATORS_
+#include "Behaviors/Actions/Rotate.hpp"
 
-#include "Mathematics/Matrix4_operators.hpp"
-#include "Mathematics/Transformation.hpp"
-#include "Mathematics/Transformation_isIdentity.hpp"
+#include "Mathematics/Transformation_operators.hpp"
+#include "Mathematics/Transformation_rotation.hpp"
+#include "SceneGraph/Node.hpp"
 
-[[nodiscard]] constexpr crimild::Transformation operator*( const crimild::Transformation &t0, const crimild::Transformation &t1 ) noexcept
+using namespace crimild;
+using namespace crimild::behaviors;
+using namespace crimild::behaviors::actions;
+
+Rotate::Rotate( const Vector3 &axis, Radians angle ) noexcept
+    : m_axis( axis ),
+      m_angle( angle )
 {
-    if ( isIdentity( t1 ) ) {
-        return t0;
-    }
-
-    if ( isIdentity( t0 ) ) {
-        return t1;
-    }
-
-    return crimild::Transformation {
-        .mat = t0.mat * t1.mat,
-        .invMat = t0.invMat * t1.invMat,
-        .contents = t0.contents | t1.contents,
-    };
 }
 
-#endif
+void Rotate::init( BehaviorContext *context ) noexcept
+{
+    Behavior::init( context );
+}
+
+Behavior::State Rotate::step( BehaviorContext *context ) noexcept
+{
+    m_clock.tick();
+    const auto dt = m_clock.getDeltaTime();
+
+    auto agent = context->getAgent();
+    agent->setLocal( agent->getLocal() * rotation( m_axis, dt * m_angle ) );
+
+    return Behavior::State::RUNNING;
+}

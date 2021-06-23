@@ -29,6 +29,7 @@
 #define CRIMILD_CORE_RENDERING_RENDER_PASS_
 
 #include "Foundation/SharedObject.hpp"
+#include "Foundation/Log.hpp"
 #include "Mathematics/ColorRGBA.hpp"
 #include "Rendering/CommandBuffer.hpp"
 #include "Rendering/Format.hpp"
@@ -143,9 +144,15 @@ namespace crimild {
         template< typename BuilderFunction >
         void createCommandRecorder( BuilderFunction builder ) noexcept
         {
+            auto swapchain = Swapchain::getInstance();
+            if ( swapchain == nullptr ) {
+                CRIMILD_LOG_ERROR( "Failed to obtain swapchain" );
+                return;
+            }
+
             // This is a helper function to create a basic command recorder
             // for static rendering commands.
-            auto commandBuffers = Swapchain::getInstance()->getImages().map(
+            auto commandBuffers = swapchain->getImages().map(
                 [ &, imageIndex = 0 ]( auto unused ) mutable {
                     auto commandBuffer = builder();
                     commandBuffer->setFrameIndex( imageIndex++ );

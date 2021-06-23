@@ -25,28 +25,26 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_TRANSFORMATION_OPERATORS_
-#define CRIMILD_MATHEMATICS_TRANSFORMATION_OPERATORS_
+#ifndef CRIMILD_CORE_BEHAVIORS_WITH_BEHAVIOR_
+#define CRIMILD_CORE_BEHAVIORS_WITH_BEHAVIOR_
 
-#include "Mathematics/Matrix4_operators.hpp"
-#include "Mathematics/Transformation.hpp"
-#include "Mathematics/Transformation_isIdentity.hpp"
+#include "Behaviors/BehaviorController.hpp"
+#include "Behaviors/BehaviorTree.hpp"
+#include "SceneGraph/Node.hpp"
 
-[[nodiscard]] constexpr crimild::Transformation operator*( const crimild::Transformation &t0, const crimild::Transformation &t1 ) noexcept
-{
-    if ( isIdentity( t1 ) ) {
-        return t0;
+namespace crimild {
+
+    namespace behaviors {
+
+        [[nodiscard]] inline SharedPointer< Node > withBehavior( SharedPointer< Node > const &node, SharedPointer< Behavior > const &behavior ) noexcept
+        {
+            auto behaviorTree = crimild::alloc< BehaviorTree >( BehaviorController::DEFAULT_BEHAVIOR_NAME, behavior );
+            node->attachComponent< BehaviorController >()->attachBehaviorTree( behaviorTree );
+            return node;
+        }
+
     }
 
-    if ( isIdentity( t0 ) ) {
-        return t1;
-    }
-
-    return crimild::Transformation {
-        .mat = t0.mat * t1.mat,
-        .invMat = t0.invMat * t1.invMat,
-        .contents = t0.contents | t1.contents,
-    };
 }
 
 #endif

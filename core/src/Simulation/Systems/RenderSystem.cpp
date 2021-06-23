@@ -100,6 +100,7 @@ void RenderSystem::start( void ) noexcept
             auto materials = gBuffer->getProduct( 3 );
             auto depth = gBuffer->getProduct( 4 );
 
+/*
             if ( settings->get< Bool >( "debug.show_albedo" ) ) {
                 return present( albedo );
             }
@@ -154,6 +155,7 @@ void RenderSystem::start( void ) noexcept
                 irradianceAtlas,
                 prefilterAtlas,
                 brdfLUT );
+                */
 
             auto unlit = forwardUnlitPass( unlitRenderables, nullptr, depth );
 
@@ -165,11 +167,12 @@ void RenderSystem::start( void ) noexcept
 
             auto composed = blend(
                 {
-                    useResource( lit ),
-                    useResource( ibl ),
+//                    useResource( lit ),
+//                    useResource( ibl ),
                     useResource( env ),
                 } );
 
+/*
             if ( settings->get< Bool >( "video.ssao.enabled", true ) ) {
                 auto withBlur = [ & ]( auto op ) {
                     if ( settings->get< Bool >( "video.ssao.blur", true ) ) {
@@ -190,8 +193,10 @@ void RenderSystem::start( void ) noexcept
                     },
                     "multiply" );
             }
+            */
 
             auto ret = composed;
+            /*
             auto tonemapped = composed;
 
             if ( settings->get< Bool >( "video.bloom.enabled", true ) ) {
@@ -216,6 +221,7 @@ void RenderSystem::start( void ) noexcept
                         composed ) );
                 ret = tonemapped;
             }
+            */
 
             ret = blend(
                 {
@@ -232,14 +238,14 @@ void RenderSystem::start( void ) noexcept
                         normals,
                         materials,
                         depth,
-                        shadowAtlas,
-                        reflectionAtlas,
-                        irradianceAtlas,
-                        prefilterAtlas,
-                        brdfLUT,
-                        useResource( lit ),
-                        useResource( ibl ),
-                        useResource( tonemapped ),
+//                        shadowAtlas,
+//                        reflectionAtlas,
+//                        irradianceAtlas,
+//                        prefilterAtlas,
+//                        brdfLUT,
+//                        useResource( lit ),
+//                        useResource( ibl ),
+//                        useResource( tonemapped ),
                         useResource( unlit ),
                         useResource( env ),
                     } );
