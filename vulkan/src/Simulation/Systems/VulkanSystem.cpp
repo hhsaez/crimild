@@ -194,19 +194,24 @@ crimild::Bool VulkanSystem::createDebugMessenger( void ) noexcept
     m_debugMessenger = create(
         VulkanDebugMessenger::Descriptor {
             .instance = crimild::get_ptr( m_instance ) } );
-    return m_debugMessenger != nullptr;
+
+    // Never fails (Debug messenger is disabled for Release builds)
+	return true;
 }
 
 crimild::Bool VulkanSystem::createSurface( void ) noexcept
 {
+    CRIMILD_LOG_TRACE( "Creating Vulkan surface" );
     m_surface = create(
         VulkanSurface::Descriptor {
             .instance = crimild::get_ptr( m_instance ) } );
     if ( m_surface == nullptr ) {
+        CRIMILD_LOG_ERROR( "Failed to create Vulkan surface" );
         return false;
     }
 
     attach( crimild::get_ptr( m_surface ) );
+    CRIMILD_LOG_ERROR( "Vulkan Surface created" );
     return true;
 }
 
