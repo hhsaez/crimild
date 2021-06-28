@@ -345,7 +345,8 @@ void ImGUISystem::updateDisplaySize( void ) noexcept
     auto &io = ImGui::GetIO();
     auto width = Simulation::getInstance()->getSettings()->get< float >( "video.width", 0 );
     auto height = Simulation::getInstance()->getSettings()->get< float >( "video.height", 1 );
-    auto scale = 1.0f;
-    io.DisplaySize = ImVec2( scale * width, scale * height );
-    io.DisplayFramebufferScale = ImVec2( 1.0f, 1.0f );
+    auto framebufferScale = Simulation::getInstance()->getSettings()->get< float >( "video.framebufferScale", 1 );
+    auto displaySizeScale = 2.0f / framebufferScale;
+    io.DisplaySize = ImVec2( width * displaySizeScale, height * displaySizeScale );
+    io.DisplayFramebufferScale = ImVec2( 1, 1 );
 }

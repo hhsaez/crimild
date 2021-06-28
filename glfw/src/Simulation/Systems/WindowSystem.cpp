@@ -245,10 +245,20 @@ bool WindowSystem::createWindow( void )
     glfwSwapInterval( vsync ? 1 : 0 );
 #endif
 
+	Real framebufferScale = 1.0f;
+    Int32 framebufferWidth = 0;
+    Int32 framebufferHeight = 0;
+	glfwGetFramebufferSize( m_window, &framebufferWidth, &framebufferHeight);
+	if ( enableHDPI && framebufferWidth > 0 ) {
+		framebufferScale = Real( framebufferWidth ) / Real( width );
+    }
+
+
     // Make sure we have proper windows settings defined
     settings->set( "video.width", width );
     settings->set( "video.height", height );
     settings->set( "video.fullscreen", fullscreen );
+    settings->set( "video.framebufferScale", framebufferScale );
 
     return true;
 }
