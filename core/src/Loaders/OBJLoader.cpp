@@ -30,6 +30,7 @@
 #include "Components/MaterialComponent.hpp"
 #include "Foundation/Log.hpp"
 #include "Mathematics/Vector3_constants.hpp"
+#include "Mathematics/Vector_equality.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Rendering/ImageManager.hpp"
 #include "Rendering/ImageView.hpp"
