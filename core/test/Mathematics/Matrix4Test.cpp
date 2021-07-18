@@ -36,7 +36,9 @@
 #include "Mathematics/Vector4.hpp"
 #include "Mathematics/Vector4Ops.hpp"
 #include "Mathematics/Vector_equality.hpp"
+#include "Mathematics/io.hpp"
 #include "Mathematics/isEqual.hpp"
+#include "Mathematics/isZero.hpp"
 
 #include "gtest/gtest.h"
 #include <sstream>
@@ -54,6 +56,35 @@ TEST( Matrix4, construction )
     static_assert( M[ 1 ] == crimild::Vector4 { 4, 5, 6, 7 } );
     static_assert( M[ 2 ] == crimild::Vector4 { 8, 9, 10, 11 } );
     static_assert( M[ 3 ] == crimild::Vector4 { 12, 13, 14, 15 } );
+
+    EXPECT_TRUE( true );
+}
+
+TEST( Matrix4, equality )
+{
+    constexpr auto A = crimild::Matrix4 {
+        { 1, 2, 3, 4 },
+        { 5, 6, 7, 8 },
+        { 9, 8, 7, 6 },
+        { 5, 4, 3, 2 },
+    };
+
+    constexpr auto B = crimild::Matrix4 {
+        { 1, 2, 3, 4 },
+        { 5, 6, 7, 8 },
+        { 9, 8, 7, 6 },
+        { 5, 4, 3, 2 },
+    };
+
+    constexpr auto C = crimild::Matrix4 {
+        { 2, 3, 4, 5 },
+        { 6, 7, 8, 9 },
+        { 9, 8, 7, 6 },
+        { 5, 4, 3, 2 },
+    };
+
+    static_assert( A == B );
+    static_assert( A != C );
 
     EXPECT_TRUE( true );
 }
@@ -99,87 +130,51 @@ TEST( Matrix4, ONE )
 
 TEST( Matrix4, transpose )
 {
-    // clang-format off
     constexpr auto M = crimild::Matrix4 {
-        0, 1, 2, 3,
-        4, 5, 6, 7,
-        8, 9, 10, 11,
-        12, 13, 14, 15,
+        { 0, 1, 2, 3 },
+        { 4, 5, 6, 7 },
+        { 8, 9, 10, 11 },
+        { 12, 13, 14, 15 },
     };
 
     constexpr auto MT = crimild::Matrix4 {
-        0, 4, 8, 12,
-        1, 5, 9, 13,
-        2, 6, 10, 14,
-        3, 7, 11, 15,
+        { 0, 4, 8, 12 },
+        { 1, 5, 9, 13 },
+        { 2, 6, 10, 14 },
+        { 3, 7, 11, 15 },
     };
-    // clang-format on
 
     static_assert( crimild::isEqual( MT, crimild::transpose( M ) ) );
+
+    static_assert( crimild::transpose( crimild::Matrix4::Constants::IDENTITY ) == crimild::Matrix4::Constants::IDENTITY );
 
     EXPECT_TRUE( true );
 }
 
 TEST( Matrix4, matrixProduct )
 {
-    constexpr auto a = crimild::Real( 1 );
-    constexpr auto b = crimild::Real( 2 );
-    constexpr auto c = crimild::Real( 3 );
-    constexpr auto d = crimild::Real( 4 );
-    constexpr auto e = crimild::Real( 5 );
-    constexpr auto f = crimild::Real( 6 );
-    constexpr auto g = crimild::Real( 7 );
-    constexpr auto h = crimild::Real( 8 );
-    constexpr auto i = crimild::Real( 9 );
-    constexpr auto j = crimild::Real( 10 );
-    constexpr auto k = crimild::Real( 11 );
-    constexpr auto l = crimild::Real( 12 );
-    constexpr auto m = crimild::Real( 13 );
-    constexpr auto n = crimild::Real( 14 );
-    constexpr auto o = crimild::Real( 15 );
-    constexpr auto p = crimild::Real( 16 );
-
     constexpr auto A = crimild::Matrix4 {
-        { a, b, c, d },
-        { e, f, g, h },
-        { i, j, k, l },
-        { m, n, o, p },
+        { 1, 5, 9, 5 },
+        { 2, 6, 8, 4 },
+        { 3, 7, 7, 3 },
+        { 4, 8, 6, 2 },
     };
 
     constexpr auto B = crimild::Matrix4 {
-        { a, b, c, d },
-        { e, f, g, h },
-        { i, j, k, l },
-        { m, n, o, p },
+        { -2, 3, 4, 1 },
+        { 1, 2, 3, 2 },
+        { 2, 1, 6, 7 },
+        { 3, -1, 5, 8 },
     };
 
-    static_assert(
-        ( A * B ) == crimild::Matrix4 {
-            {
-                a * a + e * b + i * c + m * d,
-                b * a + f * b + j * c + n * d,
-                c * a + g * b + k * c + o * d,
-                d * a + h * b + l * c + p * d,
-            },
-            {
-                a * e + e * f + i * g + m * h,
-                b * e + f * f + j * g + n * h,
-                c * e + g * f + k * g + o * h,
-                d * e + h * f + l * g + p * h,
-            },
-            {
-                a * i + e * j + i * k + m * l,
-                b * i + f * j + j * k + n * l,
-                c * i + g * j + k * k + o * l,
-                d * i + h * j + l * k + p * l,
-            },
-            {
-                a * m + e * n + i * o + m * p,
-                b * m + f * n + j * o + n * p,
-                c * m + g * n + k * o + o * p,
-                d * m + h * n + l * o + p * p,
-            },
-        } );
+    constexpr auto C = crimild::Matrix4 {
+        { 20, 44, 40, 16 },
+        { 22, 54, 58, 26 },
+        { 50, 114, 110, 46 },
+        { 48, 108, 102, 42 },
+    };
+
+    static_assert( A * B == C );
 
     static_assert( ( A * crimild::Matrix4::Constants::IDENTITY ) == A );
 
@@ -189,70 +184,104 @@ TEST( Matrix4, matrixProduct )
 TEST( Matrix4, vectorProduct )
 {
     constexpr auto A = crimild::Matrix4 {
-        { 0, 1, 2, 3 },
-        { 4, 5, 6, 7 },
-        { 8, 9, 10, 11 },
-        { 12, 13, 14, 15 },
+        { 1, 2, 8, 0 },
+        { 2, 4, 6, 0 },
+        { 3, 4, 4, 0 },
+        { 4, 2, 1, 1 },
     };
 
     constexpr auto V = crimild::Vector4 {
-        0,
         1,
         2,
         3,
+        1,
     };
 
-    static_assert(
-        ( A * V ) == crimild::Vector4 {
-            0 * 0 + 4 * 1 + 8 * 2 + 12 * 3,
-            1 * 0 + 5 * 1 + 9 * 2 + 13 * 3,
-            2 * 0 + 6 * 1 + 10 * 2 + 14 * 3,
-            3 * 0 + 7 * 1 + 11 * 2 + 15 * 3,
-        } );
+    static_assert( A * V == crimild::Vector4 { 18, 24, 33, 1 } );
 
     static_assert( ( crimild::Matrix4::Constants::IDENTITY * V ) == V );
 
     static_assert( ( A * crimild::Vector4::Constants::ZERO ) == crimild::Vector4::Constants::ZERO );
-
-    static_assert(
-        ( A * crimild::Vector4::Constants::ONE ) == crimild::Vector4 {
-            0 * 1 + 4 * 1 + 8 * 1 + 12 * 1,
-            1 * 1 + 5 * 1 + 9 * 1 + 13 * 1,
-            2 * 1 + 6 * 1 + 10 * 1 + 14 * 1,
-            3 * 1 + 7 * 1 + 11 * 1 + 15 * 1,
-        } );
 
     EXPECT_TRUE( true );
 }
 
 TEST( Matrix4, determinant )
 {
-    constexpr auto M = crimild::Matrix4 {
-        { 10, 1, 2, 3 },
-        { 4, 5, 6, 7 },
-        { 8, 19, 10, 11 },
-        { 121, 13, 14, 15 },
+    constexpr auto A = crimild::Matrix4 {
+        { -2, -3, 1, -6 },
+        { -8, 1, 2, 7 },
+        { 3, 7, -9, 7 },
+        { 5, 3, 6, -9 },
     };
 
-    constexpr auto d = crimild::determinant( M );
+    static_assert( crimild::determinant( A ) == -4071 );
 
-    static_assert( d == 5160 );
+    constexpr auto B = crimild::Matrix4 {
+        { 6, 5, 4, 9 },
+        { 4, 5, -9, 1 },
+        { 4, 7, 3, 7 },
+        { 4, 6, -7, -6 },
+    };
+
+    static_assert( crimild::determinant( B ) == -2120 );
+
+    constexpr auto C = crimild::Matrix4 {
+        { -4, 9, 0, 0 },
+        { 2, 6, -5, 0 },
+        { -2, 2, 1, 0 },
+        { -3, 6, -5, 0 },
+    };
+
+    static_assert( crimild::isZero( crimild::determinant( C ) ) );
 
     EXPECT_TRUE( true );
 }
 
 TEST( Matrix4, inverse )
 {
-    constexpr auto M = crimild::Matrix4 {
-        { 10, 1, 2, 3 },
-        { 4, 5, 6, 7 },
-        { 8, 19, 10, 11 },
-        { 121, 13, 14, 15 },
+    constexpr auto A = crimild::Matrix4 {
+        { -5, 1, 7, 1 },
+        { 2, -5, 7, -3 },
+        { 6, 1, -6, 7 },
+        { -8, 8, -7, 4 },
     };
 
-    constexpr auto MI = crimild::inverse( M );
+    static_assert( crimild::determinant( A ) == 532 );
 
-    static_assert( crimild::Matrix4::Constants::IDENTITY == M * MI );
+    constexpr auto B = crimild::Matrix4 {
+        { 0.21805, -0.80827, -0.07895, -0.52256 },
+        { 0.45113, -1.45677, -0.22368, -0.81391 },
+        { 0.24060, -0.44361, -0.05263, -0.30075 },
+        { -0.04511, 0.52068, 0.19737, 0.30639 },
+    };
 
-    EXPECT_TRUE( true );
+    static_assert( crimild::Matrix4::Constants::IDENTITY == A * B );
+    static_assert( crimild::Matrix4::Constants::IDENTITY == B * A );
+
+    EXPECT_EQ( B, crimild::inverse( A ) );
+
+    EXPECT_EQ( crimild::Matrix4::Constants::IDENTITY, A * crimild::inverse( A ) );
+    EXPECT_EQ( crimild::Matrix4::Constants::IDENTITY, crimild::inverse( A ) * A );
+}
+
+TEST( Matrix4, inverseProduct )
+{
+    constexpr auto A = crimild::Matrix4 {
+        { 3, 3, -4, -6 },
+        { -9, -8, 4, 5 },
+        { 7, 2, 4, -1 },
+        { 3, -9, 1, 1 },
+    };
+
+    constexpr auto B = crimild::Matrix4 {
+        { 8, 3, 7, 6 },
+        { 2, -1, 0, -2 },
+        { 2, 7, 5, 0 },
+        { 2, 0, 4, 5 },
+    };
+
+    constexpr auto C = A * B;
+
+    EXPECT_EQ( A, C * crimild::inverse( B ) );
 }
