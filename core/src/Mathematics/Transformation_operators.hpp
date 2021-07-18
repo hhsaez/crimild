@@ -43,8 +43,10 @@
     }
 
     return crimild::Transformation {
+    	// Matrices are multiplied as usual...
         .mat = t0.mat * t1.mat,
-        .invMat = t0.invMat * t1.invMat,
+        // ... but inverses must be multiplied in reverse order since `inv(A * B) = inv(B) * inv(A)`
+        .invMat = t1.invMat * t0.invMat,
         .contents = t0.contents | t1.contents,
     };
 }
