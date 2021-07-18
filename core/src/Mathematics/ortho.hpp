@@ -39,14 +39,14 @@ namespace crimild {
         return Matrix4 {
             { Real( 2 ) / ( r - l ), 0, 0, 0 },
             { 0, Real( 2 ) / ( t - b ), 0, 0 },
-            { 0, 0, Real( 1 ) / ( f - n ), 0 },
+            { 0, 0, -Real( 1 ) / ( f - n ), 0 },
             { -( r + l ) / ( r - l ), -( t + b ) / ( t - b ), -n / ( f - n ), 1 },
         };
 #else
         return Matrix4 {
             { Real( 2 ) / ( r - l ), 0, 0, 0 },
             { 0, Real( 2 ) / ( t - b ), 0, 0 },
-            { 0, 0, Real( 2 ) / ( f - n ), 0 },
+            { 0, 0, -Real( 2 ) / ( f - n ), 0 },
             { -( r + l ) / ( r - l ), -( t + b ) / ( t - b ), -( f + n ) / ( f - n ), 1 },
         };
 #endif
