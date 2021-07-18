@@ -160,6 +160,7 @@
 #include "Mathematics/Series.hpp"
 #include "Mathematics/Sphere.hpp"
 #include "Mathematics/Transformation.hpp"
+#include "Mathematics/Transformation_inverse.hpp"
 #include "Mathematics/Transformation_lookAt.hpp"
 #include "Mathematics/Transformation_operators.hpp"
 #include "Mathematics/Transformation_rotation.hpp"
