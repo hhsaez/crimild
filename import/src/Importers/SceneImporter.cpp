@@ -33,6 +33,7 @@
 #include "Components/MaterialComponent.hpp"
 #include "Components/SkinnedMeshComponent.hpp"
 #include "Exceptions/FileNotFoundException.hpp"
+#include "Mathematics/Matrix4_inverse.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Rendering/ImageManager.hpp"
 #include "Rendering/ImageView.hpp"
@@ -120,17 +121,18 @@ animation::Joint *SceneImporter::getJoint( std::string name )
 
 void SceneImporter::computeTransform( const aiMatrix4x4 &m, Transformation &t )
 {
-    aiVector3D position, scaling;
-    aiQuaternion rotation;
-    m.Decompose( scaling, rotation, position );
+    // Assimp matrices are row-mayor
+    const auto mat = Matrix4 {
+        { m.a1, m.b1, m.c1, m.d1 },
+        { m.a2, m.b2, m.c2, m.d2 },
+        { m.a3, m.b3, m.c3, m.d3 },
+        { m.a4, m.b4, m.c4, m.d4 },
+    };
 
-    /*
-    t.setTranslate( position.x, position.y, position.z );
-    t.setScale( ( scaling.x + scaling.y + scaling.z ) / 3.0f );
-    t.setRotate( Quaternion4f( rotation.x, rotation.y, rotation.z, rotation.w ) );
-    */
-
-    assert( false );
+    t = Transformation {
+        .mat = mat,
+        .invMat = inverse( mat ),
+    };
 }
 
 void SceneImporter::loadMaterialTexture( SharedPointer< LitMaterial > material, const aiMaterial *input, std::string basePath, aiTextureType texType, unsigned int texIndex )
