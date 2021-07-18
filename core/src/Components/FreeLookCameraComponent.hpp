@@ -29,6 +29,7 @@
 #define CRIMILD_COMPONENTS_FREE_LOOK_CAMERA_
 
 #include "Mathematics/Vector2.hpp"
+#include "Mathematics/Point3.hpp"
 #include "Messaging/MessageQueue.hpp"
 #include "NodeComponent.hpp"
 
@@ -50,6 +51,11 @@ namespace crimild {
         Vector2 _lastMousePos;
         crimild::Bool _initialized = false;
         Real32 _speed = 1.0f;
+
+        Point3 m_position = Point3 { 0, 0, 0 };
+        Real m_pitch = 0;
+        Real m_yaw = 0;
+        Real m_roll = 0;
     };
 
 }

@@ -30,9 +30,12 @@
 #include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/Transformation_operators.hpp"
 #include "Mathematics/Transformation_rotation.hpp"
+#include "Mathematics/Transformation_inverse.hpp"
 #include "Mathematics/Transformation_translation.hpp"
 #include "Mathematics/Vector2Ops.hpp"
 #include "Mathematics/Vector3Ops.hpp"
+#include "Mathematics/Point3Ops.hpp"
+#include "Mathematics/normalize.hpp"
 #include "Simulation/Input.hpp"
 #include "Simulation/Simulation.hpp"
 
@@ -125,18 +128,12 @@ void FreeLookCameraComponent::start( void )
             _lastMousePos = currentPos;
 
             if ( Input::getInstance()->isMouseButtonDown( CRIMILD_INPUT_MOUSE_BUTTON_LEFT ) ) {
-                auto root = getNode();
-
-                auto T = root->getLocal();
-                const auto pitch = rotationX( -mouseDelta[ 1 ] );
-                const auto U = up( pitch );
-                const auto yaw = rotation( U, -mouseDelta[ 0 ] );
-
-                T = pitch * yaw * T;
-
-                root->setLocal( T );
+            	m_pitch -= mouseDelta[ 1 ];
+             	m_yaw -= mouseDelta[ 0 ];
             }
         } );
+
+    m_position = location( getNode()->getLocal() );
 }
 
 void FreeLookCameraComponent::update( const Clock &c )
@@ -151,15 +148,21 @@ void FreeLookCameraComponent::update( const Clock &c )
     float rSpeed = getSpeed() * Input::getInstance()->getAxis( Input::AXIS_HORIZONTAL );
     float zSpeed = getSpeed() * Input::getInstance()->getAxis( "CameraAxisRoll" );
 
+    m_roll += 0.005f * zSpeed;
+
     auto root = getNode();
 
-    auto T = root->getLocal();
+    const auto pitch = rotationX( m_pitch );
+    const auto yaw = rotationY( m_yaw );
+    const auto roll = rotationZ( m_roll );
 
-    // Apply roll first
-    //T = rotationZ( c.getDeltaTime() * zSpeed ) * T;
+    const auto E = yaw * pitch * roll;
 
-    const auto F = forward( T );
-    const auto R = right( T );
+    const auto F = forward( E );
+    const auto R = right( E );
 
-    root->setLocal( translation( c.getDeltaTime() * ( dSpeed * F + rSpeed * R ) ) * T );
+	m_position = m_position + c.getDeltaTime() * ( dSpeed * F + rSpeed * R );
+	const auto T = translation( vector3( m_position ) );
+
+	root->setLocal( T * E );
 }
