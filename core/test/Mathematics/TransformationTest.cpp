@@ -125,14 +125,14 @@ TEST( Transformation, translateRay3 )
 {
     constexpr auto R = crimild::Ray3 {
         crimild::Point3 { 1, 2, 3 },
-        crimild::Vector3 { 0, 0, 1 },
+        crimild::Vector3 { 0, 1, 0 },
     };
 
-    constexpr auto T = crimild::translation( 5, 10, 20 );
+    constexpr auto T = crimild::translation( 3, 4, 5 );
 
     constexpr auto R1 = crimild::Ray3 {
-        crimild::Point3 { 6, 12, 23 },
-        crimild::Vector3 { 0, 0, 1 },
+        crimild::Point3 { 4, 6, 8 },
+        crimild::Vector3 { 0, 1, 0 },
     };
 
     static_assert( crimild::isEqual( R1, T( R ) ) );
@@ -185,6 +185,20 @@ TEST( Transformation, scaleVector )
     constexpr auto S = crimild::scale( 5, 10, 2 );
 
     static_assert( crimild::isEqual( crimild::Vector3 { 50, 200, 60 }, S( V ) ) );
+
+    EXPECT_TRUE( true );
+}
+
+TEST( Transformation, scaleRay3 )
+{
+    constexpr auto R = crimild::Ray3 {
+        crimild::Point3 { 1, 2, 3 },
+        crimild::Vector3 { 0, 1, 0 },
+    };
+
+    constexpr auto S = crimild::scale( 2, 3, 4 );
+
+    static_assert( S( R ) == crimild::Ray3 { crimild::Point3 { 2, 6, 12 }, crimild::Vector3 { 0, 3, 0 } } );
 
     EXPECT_TRUE( true );
 }
