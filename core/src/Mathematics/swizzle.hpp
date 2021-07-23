@@ -58,6 +58,12 @@ namespace crimild {
         return impl::Vector3< T > { t.x, t.y, t.z };
     }
 
+    template< typename T >
+    [[nodiscard]] inline constexpr impl::Vector3< T > vector3( const impl::Tuple4< T > &t ) noexcept
+    {
+        return impl::Vector3< T > { t.x, t.y, t.z };
+    }
+
     template< typename T, typename U >
     [[nodiscard]] inline constexpr impl::Vector4< T > vector4( const impl::Tuple3< T > &t, U w ) noexcept
     {
