@@ -25,55 +25,41 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef CRIMILD_MATHEMATICS_INTERSECT_
+#define CRIMILD_MATHEMATICS_INTERSECT_
+
+#include "Mathematics/Point3Ops.hpp"
 #include "Mathematics/Ray3.hpp"
+#include "Mathematics/Sphere.hpp"
+#include "Mathematics/dot.hpp"
+#include "Mathematics/pow.hpp"
+#include "Mathematics/sqrt.hpp"
 
-#include "Mathematics/Point_equality.hpp"
-#include "Mathematics/Ray_apply.hpp"
-#include "Mathematics/Ray_equality.hpp"
-#include "Mathematics/io.hpp"
+#include <limits>
 
-#include "gtest/gtest.h"
-#include <sstream>
+namespace crimild {
 
-TEST( Ray3, construction )
-{
-    constexpr auto r = crimild::Ray3 {
-        crimild::Point3 { 10, 20, 30 },
-        crimild::Vector3 { 0, 0, -1 },
-    };
+    [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Sphere &S, Real &t0, Real &t1 ) noexcept
+    {
+        const auto CO = origin( R ) - center( S );
+        const auto a = dot( direction( R ), direction( R ) );
+        const auto b = Real( 2 ) * dot( direction( R ), CO );
+        const auto c = dot( CO, CO ) - pow( radius( S ), 2 );
 
-    constexpr auto o = crimild::Point3 { 10, 20, 30 };
-    constexpr auto d = crimild::Vector3 { 0, 0, -1 };
+        const auto d = b * b - Real( 4 ) * a * c;
 
-    static_assert( crimild::isEqual( o, crimild::origin( r ) ) );
-    static_assert( crimild::isEqual( d, crimild::direction( r ) ) );
+        if ( d < 0 ) {
+            return false;
+        }
 
-    EXPECT_TRUE( true );
+        const auto sqrtD = sqrt( d );
+
+        t0 = ( -b - sqrtD ) / ( 2 * a );
+        t1 = ( -b + sqrtD ) / ( 2 * a );
+
+        return true;
+    }
+
 }
 
-TEST( Ray3, apply )
-{
-    constexpr auto R = crimild::Ray3 {
-        crimild::Point3 { 2, 3, 4 },
-        crimild::Vector3 { 1, 0, 0 },
-    };
-
-    static_assert( R( 0 ) == crimild::Point3 { 2, 3, 4 } );
-    static_assert( R( 1 ) == crimild::Point3 { 3, 3, 4 } );
-    static_assert( R( -1 ) == crimild::Point3 { 1, 3, 4 } );
-
-    EXPECT_TRUE( true );
-}
-
-TEST( Ray3, ostream )
-{
-    constexpr auto R = crimild::Ray3 {
-        crimild::Point3 { 10, 20, 30 },
-        crimild::Vector3 { 0, 0, -1 },
-    };
-
-    std::stringstream ss;
-    ss << R;
-
-    EXPECT_EQ( ss.str(), "[(10.000000, 20.000000, 30.000000), (0.000000, 0.000000, -1.000000)]" );
-}
+#endif

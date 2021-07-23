@@ -25,55 +25,22 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Mathematics/Ray3.hpp"
-
-#include "Mathematics/Point_equality.hpp"
-#include "Mathematics/Ray_apply.hpp"
-#include "Mathematics/Ray_equality.hpp"
-#include "Mathematics/io.hpp"
+#include "Mathematics/Sphere.hpp"
 
 #include "gtest/gtest.h"
 #include <sstream>
 
-TEST( Ray3, construction )
+using namespace crimild;
+
+TEST( Sphere, construction )
 {
-    constexpr auto r = crimild::Ray3 {
-        crimild::Point3 { 10, 20, 30 },
-        crimild::Vector3 { 0, 0, -1 },
+    constexpr auto S = Sphere {
+        Point3::Constants::ZERO,
+        Real( 1 ),
     };
 
-    constexpr auto o = crimild::Point3 { 10, 20, 30 };
-    constexpr auto d = crimild::Vector3 { 0, 0, -1 };
-
-    static_assert( crimild::isEqual( o, crimild::origin( r ) ) );
-    static_assert( crimild::isEqual( d, crimild::direction( r ) ) );
+    static_assert( center( S ) == Point3::Constants::ZERO );
+    static_assert( radius( S ) == Real( 1 ) );
 
     EXPECT_TRUE( true );
-}
-
-TEST( Ray3, apply )
-{
-    constexpr auto R = crimild::Ray3 {
-        crimild::Point3 { 2, 3, 4 },
-        crimild::Vector3 { 1, 0, 0 },
-    };
-
-    static_assert( R( 0 ) == crimild::Point3 { 2, 3, 4 } );
-    static_assert( R( 1 ) == crimild::Point3 { 3, 3, 4 } );
-    static_assert( R( -1 ) == crimild::Point3 { 1, 3, 4 } );
-
-    EXPECT_TRUE( true );
-}
-
-TEST( Ray3, ostream )
-{
-    constexpr auto R = crimild::Ray3 {
-        crimild::Point3 { 10, 20, 30 },
-        crimild::Vector3 { 0, 0, -1 },
-    };
-
-    std::stringstream ss;
-    ss << R;
-
-    EXPECT_EQ( ss.str(), "[(10.000000, 20.000000, 30.000000), (0.000000, 0.000000, -1.000000)]" );
 }
