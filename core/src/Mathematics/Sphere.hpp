@@ -34,13 +34,13 @@
 namespace crimild {
 
     struct Sphere {
-        Point3 c;
-        Real r;
+        Point3 center = Point3 { 0, 0, 0 };
+        Real radius = Real( 1 );
     };
 
-    [[nodiscard]] inline constexpr const Point3 &center( const Sphere &s ) noexcept { return s.c; }
+    [[nodiscard]] inline constexpr const Point3 &center( const Sphere &s ) noexcept { return s.center; }
 
-    [[nodiscard]] inline constexpr Real radius( const Sphere &s ) noexcept { return s.r; }
+    [[nodiscard]] inline constexpr Real radius( const Sphere &s ) noexcept { return s.radius; }
 
 }
 
