@@ -31,6 +31,9 @@
 #include "Mathematics/Point3Ops.hpp"
 #include "Mathematics/Ray3.hpp"
 #include "Mathematics/Sphere.hpp"
+#include "Mathematics/Transformation.hpp"
+#include "Mathematics/Transformation_apply.hpp"
+#include "Mathematics/Transformation_inverse.hpp"
 #include "Mathematics/dot.hpp"
 #include "Mathematics/pow.hpp"
 #include "Mathematics/sqrt.hpp"
@@ -58,6 +61,12 @@ namespace crimild {
         t1 = ( -b + sqrtD ) / ( 2 * a );
 
         return true;
+    }
+
+    [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Sphere &S, const Transformation &sphereWorld, Real &t0, Real &t1 ) noexcept
+    {
+        // For better performance, use the inverse matrix
+        return intersect( inverse( sphereWorld )( R ), S, t0, t1 );
     }
 
 }
