@@ -249,6 +249,7 @@
 #include "Rendering/Materials/UnlitMaterial.hpp"
 #include "Rendering/Operations/OperationUtils.hpp"
 #include "Rendering/Operations/Operations.hpp"
+#include "Rendering/Operations/Operations_softRT.hpp"
 #include "Rendering/Pipeline.hpp"
 #include "Rendering/Programs/UnlitShaderProgram.hpp"
 #include "Rendering/RenderPass.hpp"
