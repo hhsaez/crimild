@@ -111,9 +111,10 @@ namespace crimild {
         return ColorRGB { c.r, c.g, c.b };
     }
 
-    [[nodiscard]] inline constexpr auto rgb( const Vector3 &v ) noexcept
+	template< typename T >
+    [[nodiscard]] inline constexpr auto rgb( const impl::Tuple3< T > &t ) noexcept
     {
-        return ColorRGB { v.x, v.y, v.z };
+        return ColorRGB { t.x, t.y, t.z };
     }
 
     [[nodiscard]] inline constexpr auto rgba( const ColorRGB &c ) noexcept
@@ -121,9 +122,16 @@ namespace crimild {
         return ColorRGBA { c.r, c.g, c.b, 1.0 };
     }
 
-    [[nodiscard]] inline constexpr auto rgb( const Vector4 &v ) noexcept
+	template< typename T >
+    [[nodiscard]] inline constexpr auto rgba( const impl::Tuple4< T > &t ) noexcept
     {
-        return ColorRGBA { v.x, v.y, v.z, v.w };
+        return ColorRGB { t.x, t.y, t.z, t.w };
+    }
+
+	template< typename T >
+    [[nodiscard]] inline constexpr auto rgba( const impl::Tuple3< T > &t, Real a ) noexcept
+    {
+        return ColorRGBA { t.x, t.y, t.z, a };
     }
 
 }
